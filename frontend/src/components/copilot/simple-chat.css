@@ -2179,7 +2179,61 @@
   color: var(--biof3-text-secondary);
 }
 
+/* ============================================================
+   Conversation Footer — 创建分支按钮
+   ============================================================ */
+
+.sc-conversation-footer {
+  display: flex;
+  justify-content: center;
+  padding: 16px 24px 8px;
+  border-top: 1px solid var(--biof3-border);
+  margin-top: auto;
+}
+
+.sc-fork-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 999px;
+  background: var(--biof3-bg-elevated);
+  color: var(--biof3-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sc-fork-btn:hover:not(:disabled) {
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text-primary);
+  border-color: var(--biof3-accent);
+}
+
+.sc-fork-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.sc-fork-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Dark mode */
+[data-theme='dark'] .sc-fork-btn {
+  background: var(--biof3-bg-surface);
+  border-color: var(--biof3-border);
+  color: var(--biof3-text-secondary);
+}
+
+[data-theme='dark'] .sc-fork-btn:hover:not(:disabled) {
+  background: var(--biof3-bg-elevated);
+  color: var(--biof3-text-primary);
+  border-color: var(--biof3-accent);
+}
+
 [data-theme='dark'] .cp-panel {
   background: var(--biof3-bg-elevated);
   border-color: var(--biof3-border);
@@ -2214,5 +2268,337 @@
 
   .cp-footer {
     padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ============================================================
+   Drag & Drop + Attachments
+   ============================================================ */
+
+.sc-composer-dragging {
+  border-color: var(--biof3-accent) !important;
+  border-style: dashed !important;
+  border-width: 2px !important;
+  background: color-mix(in srgb, var(--biof3-accent-bg) 30%, transparent) !important;
+}
+
+.sc-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 12px 4px;
+  border-top: 1px solid var(--biof3-border);
+  background: color-mix(in srgb, var(--biof3-bg-subtle) 50%, transparent);
+}
+
+.sc-attachment {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 4px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 8px;
+  background: var(--biof3-bg-surface);
+  max-width: 200px;
+}
+
+.sc-attachment-preview-btn {
+  position: relative;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--biof3-bg-subtle);
+}
+
+.sc-attachment-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sc-attachment-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.sc-attachment-preview-btn:hover .sc-attachment-overlay {
+  opacity: 1;
+}
+
+.sc-attachment-file {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text-tertiary);
+}
+
+.sc-attachment-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--biof3-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sc-attachment-remove {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--biof3-text-muted);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.sc-attachment-remove:hover {
+  background: var(--biof3-status-error-bg, rgba(239, 68, 68, 0.12));
+  color: var(--biof3-status-error-fg, #ef4444);
+}
+
+/* ============================================================
+   Image Preview Modal
+   ============================================================ */
+
+.sc-preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  animation: sc-preview-fade-in 0.18s ease;
+}
+
+@keyframes sc-preview-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.sc-preview-container {
+  display: flex;
+  flex-direction: column;
+  width: min(90vw, 1200px);
+  max-height: 90vh;
+  border-radius: 12px;
+  background: var(--biof3-bg-elevated);
+  border: 1px solid var(--biof3-border);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  animation: sc-preview-slide-up 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes sc-preview-slide-up {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.sc-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--biof3-border);
+  background: var(--biof3-bg-surface);
+  flex-shrink: 0;
+}
+
+.sc-preview-filename {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--biof3-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sc-preview-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.sc-preview-control-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.sc-preview-control-btn:hover {
+  background: var(--biof3-hover);
+  color: var(--biof3-text);
+  border-color: var(--biof3-accent-border);
+}
+
+.sc-preview-zoom-label {
+  min-width: 44px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--biof3-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.sc-preview-sep {
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--biof3-border);
+}
+
+.sc-preview-close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.sc-preview-close-btn:hover {
+  background: var(--biof3-status-error-bg, rgba(239, 68, 68, 0.12));
+  color: var(--biof3-status-error-fg, #ef4444);
+}
+
+.sc-preview-image-area {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: color-mix(in srgb, var(--biof3-bg-canvas) 50%, rgba(0, 0, 0, 0.2));
+}
+
+.sc-preview-image {
+  max-width: 100%;
+  max-height: calc(90vh - 100px);
+  object-fit: contain;
+  transition: transform 0.2s ease;
+  cursor: grab;
+}
+
+.sc-preview-image:active {
+  cursor: grabbing;
+}
+
+.sc-preview-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-top: 1px solid var(--biof3-border);
+  background: var(--biof3-bg-surface);
+  flex-shrink: 0;
+}
+
+.sc-preview-info {
+  font-size: 11px;
+  color: var(--biof3-text-tertiary);
+}
+
+.sc-preview-hint {
+  font-size: 11px;
+  color: var(--biof3-text-muted);
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .sc-preview-overlay {
+  background: rgba(0, 0, 0, 0.92);
+}
+
+[data-theme='dark'] .sc-preview-image-area {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .sc-preview-control-btn {
+  background: var(--biof3-bg-elevated);
+  border-color: var(--biof3-border);
+}
+
+[data-theme='dark'] .sc-preview-control-btn:hover {
+  background: var(--biof3-bg-subtle);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .sc-preview-container {
+    width: 95vw;
+    max-height: 95vh;
+    border-radius: 10px;
+  }
+
+  .sc-preview-header {
+    padding: 8px 12px;
+  }
+
+  .sc-preview-filename {
+    max-width: 120px;
+  }
+
+  .sc-preview-controls {
+    gap: 2px;
+  }
+
+  .sc-preview-zoom-label {
+    display: none;
+  }
+
+  .sc-preview-footer {
+    padding: 6px 12px;
   }
 }

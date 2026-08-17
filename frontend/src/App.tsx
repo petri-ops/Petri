@@ -14,6 +14,7 @@ import HomePage from '@/pages/home';
 // NOTE: Legacy pages (tools, admin, docs, figcode, single-cell, spatial) have been removed
 // as the desktop application now uses the Agent-based workflow through ProjectWorkspace.
 import { ProjectWorkspace } from '@/pages/project-workspace';
+import { ResultStudioPage } from '@/pages/result-studio/ResultStudioPage';
 import SkillsPage from '@/pages/skills';
 import '@/components/desktop/desktop.css';
 // 断点6：注入平台 API 给 @biof3/shared 渲染层组件（如 ActResultCard）
@@ -76,6 +77,9 @@ export default function App(): React.ReactElement {
               <Route path="/" element={<HomePage />} />
               {/* Skills management page */}
               <Route path="/skills" element={<SkillsPage />} />
+              {/* Result Studio — standalone results view with branch tabs in TitleBar */}
+              {/* MUST come before the wildcard /* route, otherwise it never matches */}
+              <Route path="/project/:projectId/results" element={<ResultStudioPage />} />
               {/* T85: `*` splat lets `/project/:projectId/<mode>` resolve to the
                   same workspace; mode is read from the sub-path, not `?mode=`. */}
               <Route path="/project/:projectId/*" element={<ProjectWorkspace />} />

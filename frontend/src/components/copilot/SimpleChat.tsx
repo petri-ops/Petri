@@ -158,6 +158,15 @@ type ApprovalRepairState =
 // ./SimpleChat/{types,helpers}.ts (BLOCK-9.2 PHASE 4).
 // SimpleChatHandle + SimpleChatProps moved to ./SimpleChat/types.ts (BLOCK-9.2 PHASE 4).
 
+type AttachmentFile = {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  dataUrl?: string;
+  previewUrl?: string;
+};
+
 export function SimpleChat({
   projectId,
   conversationId,
@@ -170,6 +179,9 @@ export function SimpleChat({
   const [input, setInput] = useState('');
   const [starting, setStarting] = useState(false);
   const [queuedPrompts, setQueuedPrompts] = useState<string[]>([]);
+  const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [previewImage, setPreviewImage] = useState<AttachmentFile | null>(null);
   const MAX_SUMMARY_RETRIES = 3;
   const RETRY_BACKOFF_MS = [2000, 4000, 8000];
   const [summaryRetryState, setSummaryRetryState] = useState<Record<string, 'running' | 'done'>>({});
@@ -188,6 +200,8 @@ export function SimpleChat({
   const [accessMenuOpen, setAccessMenuOpen] = useState(false);
   const [accessMode, setAccessMode] = useState<'full' | 'read'>('full');
   const [forking, setForking] = useState(false);
+  // Per-message index for "fork at this message" action
+  const [forkingAtIndex, setForkingAtIndex] = useState<number | null>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   // Slash command state
@@ -599,6 +613,101 @@ export function SimpleChat({
     }
   };
 
+  // Drag/drop handlers for file attachments
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.types.includes('Files')) {
+      setIsDraggingOver(true);
+    }
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only hide if leaving the composer area entirely
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setIsDraggingOver(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length === 0) return;
+
+    const newAttachments: AttachmentFile[] = files.map((file) => ({
+      id: `att-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
+    }));
+
+    setAttachments((prev) => [...prev, ...newAttachments]);
+  }, []);
+
+  // Paste handler for clipboard images
+  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    const imageItems = Array.from(items).filter(
+      (item) => item.type.startsWith('image/')
+    );
+
+    if (imageItems.length === 0) return;
+
+    e.preventDefault();
+
+    imageItems.forEach((item) => {
+      const file = item.getAsFile();
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string;
+        const newAttachment: AttachmentFile = {
+          id: `paste-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+          name: `pasted-image-${Date.now()}.png`,
+          type: file.type || 'image/png',
+          size: file.size,
+          dataUrl,
+          previewUrl: dataUrl,
+        };
+        setAttachments((prev) => [...prev, newAttachment]);
+      };
+      reader.readAsDataURL(file);
+    });
+  }, []);
+
+  // Remove attachment
+  const removeAttachment = useCallback((id: string) => {
+    setAttachments((prev) => {
+      const att = prev.find((a) => a.id === id);
+      if (att?.previewUrl && !att.dataUrl) {
+        URL.revokeObjectURL(att.previewUrl);
+      }
+      return prev.filter((a) => a.id !== id);
+    });
+  }, []);
+
+  // Open image preview
+  const openPreview = useCallback((attachment: AttachmentFile) => {
+    setPreviewImage(attachment);
+  }, []);
+
+  // Close preview
+  const closePreview = useCallback(() => {
+    setPreviewImage(null);
+  }, []);
+
   // 自动聚焦输入框：新加载/刷新后无需先点一下才能打字。macOS 上窗口被程序化
   // 激活后 webview 常拿不到键盘焦点，挂载时主动聚焦一次即可立即可输入。
   // 仅 copilotAsk 的拥有者（中央会话）执行：两个实例可能同时挂载（中央会话 +
@@ -771,6 +880,26 @@ export function SimpleChat({
       setForking(false);
     }
   }, [conversationId, forking, refreshConversations, onConversationChange]);
+
+  // Fork at a specific message index — creates a branch that includes all messages up to and including that index.
+  const handleForkAt = useCallback(async (messageIndex: number) => {
+    if (!conversationId || forkingAtIndex !== null) return;
+    setForkingAtIndex(messageIndex);
+    try {
+      const forked = await forkConversation(conversationId, undefined, messageIndex);
+      if (forked) {
+        await refreshConversations();
+        onConversationChange(forked.id);
+        // Broadcast so LeftPanel (via project-workspace) refreshes the conversation list
+        dispatchBioF3Event(biof3Events.conversationForked, {
+          newConversationId: forked.id,
+          projectId: projectId || '',
+        });
+      }
+    } finally {
+      setForkingAtIndex(null);
+    }
+  }, [conversationId, forkingAtIndex, projectId, refreshConversations, onConversationChange]);
 
   // AGENT-CONCURRENCY: run the current prompt as an independent sub-agent task
   // while the primary conversation loop is busy — the user is never blocked.
@@ -1258,6 +1387,18 @@ export function SimpleChat({
                           <Icon name="repeat" size={14} />
                           重新生成
                         </button>
+                        <span className="sc-msg-action-divider" aria-hidden="true" />
+                        <button
+                          type="button"
+                          className="sc-msg-action"
+                          onClick={() => void handleForkAt(i)}
+                          disabled={forkingAtIndex !== null}
+                          title={`以此消息为终点创建分支（新分支将包含从开始到这条回复的所有消息）`}
+                          aria-label="创建分支"
+                        >
+                          <Icon name="git-branch" size={14} />
+                          {forkingAtIndex === i ? '创建中…' : '创建分支'}
+                        </button>
                       </div>
                     )}
                   </div>
@@ -1320,7 +1461,56 @@ export function SimpleChat({
               )}
             </div>
           )}
-          <div className="sc-composer">
+          <div
+            className={`sc-composer${isDraggingOver ? ' sc-composer-dragging' : ''}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onPaste={handlePaste}
+          >
+            {/* Attachments preview */}
+            {attachments.length > 0 && (
+              <div className="sc-attachments">
+                {attachments.map((att) => (
+                  <div key={att.id} className="sc-attachment">
+                    {att.previewUrl ? (
+                      <button
+                        type="button"
+                        className="sc-attachment-preview-btn"
+                        onClick={() => openPreview(att)}
+                        title={`预览 ${att.name}`}
+                        aria-label={`预览 ${att.name}`}
+                      >
+                        <img
+                          src={att.previewUrl}
+                          alt={att.name}
+                          className="sc-attachment-thumb"
+                        />
+                        <span className="sc-attachment-overlay">
+                          <Icon name="eye" size={16} />
+                        </span>
+                      </button>
+                    ) : (
+                      <div className="sc-attachment-file">
+                        <Icon name="file" size={20} />
+                      </div>
+                    )}
+                    <span className="sc-attachment-name" title={att.name}>
+                      {att.name}
+                    </span>
+                    <button
+                      type="button"
+                      className="sc-attachment-remove"
+                      onClick={() => removeAttachment(att.id)}
+                      title="移除"
+                      aria-label="移除"
+                    >
+                      <Icon name="x" size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="sc-composer-body">
               <textarea
                 ref={taRef}
@@ -1353,18 +1543,6 @@ export function SimpleChat({
                 >
                   <Icon name="refresh" size={16} className={refreshing ? 'sc-icon-spin' : undefined} />
                 </button>
-                {conversationId && (
-                  <button
-                    type="button"
-                    className="sc-composer-icon-btn"
-                    title="创建分支（复制当前对话到新会话）"
-                    aria-label="创建分支"
-                    disabled={forking}
-                    onClick={() => void handleFork()}
-                  >
-                    <Icon name="git-branch" size={16} />
-                  </button>
-                )}
                 <div className="sc-access-picker">
                   <button
                     type="button"
@@ -1539,6 +1717,127 @@ export function SimpleChat({
               ))}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <ImagePreviewModal
+          attachment={previewImage}
+          onClose={closePreview}
+        />
+      )}
+    </div>
+  );
+}
+
+interface ImagePreviewModalProps {
+  attachment: AttachmentFile;
+  onClose: () => void;
+}
+
+function ImagePreviewModal({ attachment, onClose }: ImagePreviewModalProps): React.ReactElement {
+  const [zoom, setZoom] = useState(1);
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 3));
+  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.5));
+  const handleResetZoom = () => setZoom(1);
+
+  const imageSrc = attachment.dataUrl || attachment.previewUrl || '';
+
+  return (
+    <div
+      className="sc-preview-overlay"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="图片预览"
+    >
+      <div
+        className="sc-preview-container"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="sc-preview-header">
+          <span className="sc-preview-filename" title={attachment.name}>
+            {attachment.name}
+          </span>
+          <div className="sc-preview-controls">
+            <button
+              type="button"
+              className="sc-preview-control-btn"
+              onClick={handleZoomOut}
+              title="缩小"
+              aria-label="缩小"
+            >
+              <Icon name="minus" size={14} />
+            </button>
+            <span className="sc-preview-zoom-label">{Math.round(zoom * 100)}%</span>
+            <button
+              type="button"
+              className="sc-preview-control-btn"
+              onClick={handleZoomIn}
+              title="放大"
+              aria-label="放大"
+            >
+              <Icon name="plus" size={14} />
+            </button>
+            <button
+              type="button"
+              className="sc-preview-control-btn"
+              onClick={handleResetZoom}
+              title="重置缩放"
+              aria-label="重置缩放"
+            >
+              1:1
+            </button>
+            <span className="sc-preview-sep" aria-hidden />
+            <button
+              type="button"
+              className="sc-preview-close-btn"
+              onClick={onClose}
+              title="关闭 (Esc)"
+              aria-label="关闭"
+            >
+              <Icon name="x" size={16} />
+            </button>
+          </div>
+        </div>
+
+        {/* Image */}
+        <div className="sc-preview-image-area">
+          <img
+            ref={imageRef}
+            src={imageSrc}
+            alt={attachment.name}
+            className="sc-preview-image"
+            style={{ transform: `scale(${zoom})` }}
+          />
+        </div>
+
+        {/* Footer */}
+        <div className="sc-preview-footer">
+          <span className="sc-preview-info">
+            {formatFileSize(attachment.size)} · {attachment.type || '未知类型'}
+          </span>
+          <span className="sc-preview-hint">ESC 或点击背景关闭</span>
         </div>
       </div>
     </div>

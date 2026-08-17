@@ -90,6 +90,7 @@ export interface CenterPanelContext {
   openRightPanel: (tab: 'home' | 'results' | 'files' | 'terminal' | 'browser' | 'chat' | 'analyze') => void;
   switchToProject: (id: string) => void;
   navigate: (to: string) => void;
+  handleSwitchConversation: (convId: string) => void;
   setActiveConvId: (id: string | null) => void;
   setActiveJobId: (id: string | null) => void;
   setActiveArtifact: (a: ActiveArtifact | null) => void;
@@ -359,6 +360,7 @@ function SessionFrameView({
     ctx.activeConvId,
     activeRun?.loop
   );
+
   return (
     <div
       className={`${styles.workspaceSessionFrame} ${

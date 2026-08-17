@@ -49,6 +49,9 @@ export interface LeftPanelContext {
   toggleProjectExpand: (id: string) => void;
   handleOpenWorkspacePath: () => void | Promise<void>;
   handleChangeWorkspacePath: () => void | Promise<void>;
+
+  // Desktop mode: hide conversations in sidebar (use TitleBar selector instead)
+  showConversations?: boolean;
 }
 
 export interface LeftPanelProps {

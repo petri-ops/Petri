@@ -894,7 +894,35 @@
 }
 
 /* ============================================================
-   响应式
+   返回按钮
+   ============================================================ */
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--biof3-bg-canvas);
+  border: 1px solid var(--biof3-border);
+  border-radius: 8px;
+  color: var(--biof3-text-secondary);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.backBtn:hover {
+  background: var(--biof3-hover);
+  color: var(--biof3-accent);
+  border-color: var(--biof3-accent);
+}
+
+/* ============================================================
+   重试按钮
    ============================================================ */
 
 @media (max-width: 768px) {
