@@ -3,10 +3,12 @@
 // Replaces the complex CopilotChat for the desktop workspace.
 // Pure message list + input, driven by projectId/conversationId.
 //
-// BLOCK-9.2 PHASE 4: types + helpers extracted to ./SimpleChat/{types.ts,helpers.ts}.
+// BLOCK-9.2 PHASE 4: extracted to ./SimpleChat/{types.ts,helpers.ts,attachments.ts,ImagePreviewModal.tsx}.
 //   • 189-line types.ts holds 14 type/const declarations.
 //   • 108-line helpers.ts holds MessageMeta + ExamplePrompts + compactStageConclusion.
-//   • The ~1387-line SimpleChat main component stays intact — too much
+//   • attachments.ts holds AttachmentFile type + drag/drop/paste/remove/open/close helpers.
+//   • ImagePreviewModal.tsx holds the image preview modal component (~110 lines).
+//   • The ~1657-line SimpleChat main component stays intact — too much
 //     shared local state to safely split without rewriting the rendering pipeline.
 //
 // Pure code organization change; 0 behavior difference. All public exports
@@ -15,7 +17,7 @@
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 
-// ── BLOCK-9.2 PHASE 4: types + helpers re-exports for backward compat ──
+// ── BLOCK-9.2 PHASE 4: types + helpers + attachments re-exports for backward compat ──
 import {
   SLASH_COMMANDS,
   shouldOpenWithSystemApp,
@@ -37,6 +39,17 @@ import {
   ExamplePrompts,
   compactStageConclusion,
 } from './SimpleChat/helpers';
+import {
+  type AttachmentFile,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  onPaste,
+  removeAttachmentById,
+  openImagePreview,
+  closeImagePreview,
+} from './SimpleChat/attachments';
+import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
 
 // Re-export helpers (so `import { restoreSimpleMessage } from './SimpleChat'` keeps working)
 export {
@@ -47,6 +60,7 @@ export {
   DEFAULT_EXAMPLE_PROMPTS,
   MessageMeta,
   ExamplePrompts,
+  ImagePreviewModal,
 };
 export type {
   SlashCommand,
@@ -57,6 +71,8 @@ export type {
   SimpleChatHandle,
   SimpleChatProps,
   ErrorBannerProps,
+  PendingApproval,
+  AttachmentFile,
 };
 
 import {
@@ -158,14 +174,10 @@ type ApprovalRepairState =
 // ./SimpleChat/{types,helpers}.ts (BLOCK-9.2 PHASE 4).
 // SimpleChatHandle + SimpleChatProps moved to ./SimpleChat/types.ts (BLOCK-9.2 PHASE 4).
 
-type AttachmentFile = {
-  id: string;
-  name: string;
-  type: string;
-  size: number;
-  dataUrl?: string;
-  previewUrl?: string;
-};
+// AttachmentFile type moved to ./SimpleChat/attachments.ts (BLOCK-9.2 PHASE 4).
+// The type is imported at the top of the file alongside the handler helpers
+// and re-exported from this file's header for any consumer that previously
+// reached for AttachmentFile via the SimpleChat path.
 
 export function SimpleChat({
   projectId,
@@ -613,99 +625,34 @@ export function SimpleChat({
     }
   };
 
-  // Drag/drop handlers for file attachments
+  // Drag/drop handlers for file attachments (logic lives in ./SimpleChat/attachments.ts;
+  // these wrappers just bind the host component's setters per React's stable-identity rules).
   const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.dataTransfer.types.includes('Files')) {
-      setIsDraggingOver(true);
-    }
+    onDragOver(e, setIsDraggingOver);
   }, []);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // Only hide if leaving the composer area entirely
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = e.clientX;
-    const y = e.clientY;
-    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
-      setIsDraggingOver(false);
-    }
+    onDragLeave(e, setIsDraggingOver);
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDraggingOver(false);
-
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length === 0) return;
-
-    const newAttachments: AttachmentFile[] = files.map((file) => ({
-      id: `att-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-      name: file.name,
-      type: file.type,
-      size: file.size,
-      previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
-    }));
-
-    setAttachments((prev) => [...prev, ...newAttachments]);
+    onDrop(e, setAttachments, setIsDraggingOver);
   }, []);
 
-  // Paste handler for clipboard images
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
-    const items = e.clipboardData?.items;
-    if (!items) return;
-
-    const imageItems = Array.from(items).filter(
-      (item) => item.type.startsWith('image/')
-    );
-
-    if (imageItems.length === 0) return;
-
-    e.preventDefault();
-
-    imageItems.forEach((item) => {
-      const file = item.getAsFile();
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const dataUrl = event.target?.result as string;
-        const newAttachment: AttachmentFile = {
-          id: `paste-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-          name: `pasted-image-${Date.now()}.png`,
-          type: file.type || 'image/png',
-          size: file.size,
-          dataUrl,
-          previewUrl: dataUrl,
-        };
-        setAttachments((prev) => [...prev, newAttachment]);
-      };
-      reader.readAsDataURL(file);
-    });
+    onPaste(e, setAttachments);
   }, []);
 
-  // Remove attachment
   const removeAttachment = useCallback((id: string) => {
-    setAttachments((prev) => {
-      const att = prev.find((a) => a.id === id);
-      if (att?.previewUrl && !att.dataUrl) {
-        URL.revokeObjectURL(att.previewUrl);
-      }
-      return prev.filter((a) => a.id !== id);
-    });
+    removeAttachmentById(id, setAttachments);
   }, []);
 
-  // Open image preview
   const openPreview = useCallback((attachment: AttachmentFile) => {
-    setPreviewImage(attachment);
+    openImagePreview(attachment, setPreviewImage);
   }, []);
 
-  // Close preview
   const closePreview = useCallback(() => {
-    setPreviewImage(null);
+    closeImagePreview(setPreviewImage);
   }, []);
 
   // 自动聚焦输入框：新加载/刷新后无需先点一下才能打字。macOS 上窗口被程序化
@@ -1731,118 +1678,9 @@ export function SimpleChat({
   );
 }
 
-interface ImagePreviewModalProps {
-  attachment: AttachmentFile;
-  onClose: () => void;
-}
-
-function ImagePreviewModal({ attachment, onClose }: ImagePreviewModalProps): React.ReactElement {
-  const [zoom, setZoom] = useState(1);
-  const imageRef = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 3));
-  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.5));
-  const handleResetZoom = () => setZoom(1);
-
-  const imageSrc = attachment.dataUrl || attachment.previewUrl || '';
-
-  return (
-    <div
-      className="sc-preview-overlay"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label="图片预览"
-    >
-      <div
-        className="sc-preview-container"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="sc-preview-header">
-          <span className="sc-preview-filename" title={attachment.name}>
-            {attachment.name}
-          </span>
-          <div className="sc-preview-controls">
-            <button
-              type="button"
-              className="sc-preview-control-btn"
-              onClick={handleZoomOut}
-              title="缩小"
-              aria-label="缩小"
-            >
-              <Icon name="minus" size={14} />
-            </button>
-            <span className="sc-preview-zoom-label">{Math.round(zoom * 100)}%</span>
-            <button
-              type="button"
-              className="sc-preview-control-btn"
-              onClick={handleZoomIn}
-              title="放大"
-              aria-label="放大"
-            >
-              <Icon name="plus" size={14} />
-            </button>
-            <button
-              type="button"
-              className="sc-preview-control-btn"
-              onClick={handleResetZoom}
-              title="重置缩放"
-              aria-label="重置缩放"
-            >
-              1:1
-            </button>
-            <span className="sc-preview-sep" aria-hidden />
-            <button
-              type="button"
-              className="sc-preview-close-btn"
-              onClick={onClose}
-              title="关闭 (Esc)"
-              aria-label="关闭"
-            >
-              <Icon name="x" size={16} />
-            </button>
-          </div>
-        </div>
-
-        {/* Image */}
-        <div className="sc-preview-image-area">
-          <img
-            ref={imageRef}
-            src={imageSrc}
-            alt={attachment.name}
-            className="sc-preview-image"
-            style={{ transform: `scale(${zoom})` }}
-          />
-        </div>
-
-        {/* Footer */}
-        <div className="sc-preview-footer">
-          <span className="sc-preview-info">
-            {formatFileSize(attachment.size)} · {attachment.type || '未知类型'}
-          </span>
-          <span className="sc-preview-hint">ESC 或点击背景关闭</span>
-        </div>
-      </div>
-    </div>
-  );
-}
+// ImagePreviewModal (and ImagePreviewModalProps) moved to ./SimpleChat/ImagePreviewModal.tsx (BLOCK-9.2 PHASE 4).
+// The canonical component is imported at the top of this file and re-exported from
+// the header for any consumer reaching it via the SimpleChat path.
 
 function LoopStatusPanel({
   loop,
