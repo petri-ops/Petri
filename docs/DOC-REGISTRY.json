@@ -1030,7 +1030,14 @@
       "canonical": true,
       "truthDomain": "block-9-2-mega-file-refactor",
       "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
+      "archivePolicy": "retain_stable_path",
+      "linkedCommits": [
+        "1ddd61d",
+        "45448a8",
+        "d06b66e",
+        "014ad0d",
+        "49652f3"
+      ]
     },
     {
       "id": "BLOCK-9.2-SURVEY",
