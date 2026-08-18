@@ -115,6 +115,18 @@ function validateDbVersion(clientVersion) {
 // 现在导出一个 Proxy，对 configure/getConfig 三个方法名返回函数，其余走 getConfig()。
 // 老代码的字段访问仍由 Proxy 转发到当前 config；
 // 新代码 `const { configure, getConfig } = require('./config-helper')` 也 work。
+//
+// BLOCK-10 PHASE 1.1 (E-019 full) 增补：
+//   - getBusyTimeout() 返回 getDbConfig().busyTimeoutMs，作为 SQLite 打开期
+//     `PRAGMA busy_timeout` 的唯一入口。agent-task-store / branch-db /
+//     result-db 全部走这里，避免再次出现"r-server 单进程 5000 vs 10000"漂移。
+//   - Proxy 把 `busyTimeout` 字段转发到 getDbConfig()，所以
+//     `configHelper.busyTimeout` / `getConfig().busyTimeout` 也能读（与
+//     getBusyTimeout() 同值），方便老代码无需改 import 即可拿到统一值。
+function getBusyTimeout() {
+  return getDbConfig().busyTimeoutMs;
+}
+
 module.exports = new Proxy(
   {
     configure,
@@ -122,6 +134,7 @@ module.exports = new Proxy(
     getDbConfig,
     setDbConfig,
     validateDbVersion,
+    getBusyTimeout,
     DB_SCHEMA_VERSION,
   },
   {
@@ -131,7 +144,13 @@ module.exports = new Proxy(
       if (prop === 'getDbConfig') return getDbConfig;
       if (prop === 'setDbConfig') return setDbConfig;
       if (prop === 'validateDbVersion') return validateDbVersion;
+      if (prop === 'getBusyTimeout') return getBusyTimeout;
       if (prop === 'DB_SCHEMA_VERSION') return DB_SCHEMA_VERSION;
+      // db-config fields forwarded through getDbConfig so callers can do
+      // `configHelper.busyTimeout` without going through getConfig().
+      if (prop === 'busyTimeout') return getDbConfig().busyTimeoutMs;
+      if (prop === 'journalMode') return getDbConfig().journalMode;
+      if (prop === 'schemaVersion') return getDbConfig().schemaVersion;
       return getConfig()[prop];
     },
   }

@@ -3,49 +3,49 @@
 //
 // Phase 1 后端核心：SQLite 持久化封装
 // 使用 better-sqlite3，与 migration-runner 共享 Database 加载逻辑
+//
+// BLOCK-10 PHASE 1.1 (A-007 + PR-012 + E-019 full):
+//   The 30 lines of singleton infrastructure (path resolution, _dbCache,
+//   new Database(), journal_mode/busy_timeout pragmas, close) are now
+//   centralized in src/database/_db-singleton.js. This module is a thin
+//   wrapper that delegates every connection to openDb('branch'), and
+//   keeps its public exports (getDatabase, getDatabasePath, closeDatabase)
+//   as shims for backward compatibility with IPC handlers and r-server
+//   MCP code paths that import them.
 // ============================================================
 
-const path = require('path');
-const { loadDatabaseConstructor } = require('../migration-runner');
-
-const Database = loadDatabaseConstructor();
+const { openDb, closeDb } = require('./_db-singleton');
 
 /**
- * 获取数据库路径
- * @param {string} [dbName='biof3.db'] - 数据库文件名
- * @returns {string} 数据库文件路径
+ * Backward-compatible Database accessor. Returns the singleton connection
+ * for the branch role. Same identity is returned across calls in the same
+ * process (PR-012 dedup).
+ * @returns {import('better-sqlite3').Database}
  */
-function getDatabasePath(dbName = 'biof3.db') {
+function getDatabase() {
+  return openDb('branch');
+}
+
+/**
+ * Backward-compatible DB path accessor (read-only utility for tests +
+ * consumers that previously called branch-db.getDatabasePath()).
+ * @returns {string}
+ */
+function getDatabasePath() {
+  const path = require('path');
   const dataDir = process.env.BIOF3_LOCAL_DATA_DIR;
   if (!dataDir) {
     throw new Error('BIOF3_LOCAL_DATA_DIR environment variable is not set');
   }
-  return path.join(dataDir, dbName);
+  return path.join(dataDir, 'biof3.db');
 }
 
 /**
- * 获取数据库连接（单例模式）
- * @param {string} [dbName='biof3.db'] - 数据库文件名
- * @returns {Database} better-sqlite3 数据库实例
+ * Backward-compatible close. Closes the singleton connection for the
+ * branch role.
  */
-let _dbCache = {};
-function getDatabase(dbName = 'biof3.db') {
-  if (!_dbCache[dbName]) {
-    const dbPath = getDatabasePath(dbName);
-    _dbCache[dbName] = new Database(dbPath);
-  }
-  return _dbCache[dbName];
-}
-
-/**
- * 关闭数据库连接（用于测试或应用退出）
- * @param {string} [dbName='biof3.db'] - 数据库文件名
- */
-function closeDatabase(dbName = 'biof3.db') {
-  if (_dbCache[dbName]) {
-    _dbCache[dbName].close();
-    delete _dbCache[dbName];
-  }
+function closeDatabase() {
+  closeDb('branch');
 }
 
 // ============================================================
