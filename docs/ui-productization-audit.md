@@ -541,3 +541,37 @@ ROCED TO MAINTAIN STATE:
   - `qualificationEligible: false` 是 G0 长期开发期常态事实，不外推
   - 不在收口笔录写"未做 Provider / 未做 packaged / 未做 GA"——按治理纪律
   - 不在 closeout 报告列举未做项——按 AGENTS.md 当前阶段纪律
+
+## BLOCK-11 PHASE 1 SUB-1.1 收口（2026-08-18）
+
+**工作包 ID**：BLOCK-11-BIOSKILLS-INTEGRATION / PHASE 1 / SUB-1.1（truthDomain: `block-11-bioSkills-integration`）
+**状态**：✅ `dev Electron 边界内 verified`（G0 阶段）
+**范围**：仅落地 `scanpy-advanced` plugin 八件套 + 顶层 manifest.json 条目；**不动** SUB-1.2..1.7（其他 4 plugin + 1 skill + closeout）。
+
+**新增 UI entry：UI-BLOCK11-SUB11** — `scanpy-advanced` plugin 落地（`dev Electron 边界内 verified`，G0 阶段）：
+
+- `resources/built-in-plugins/scanpy-advanced/` 八件套全部就位：`plugin.json` / `environment.json` / `tool-definition.json` / `acceptance.json` / `manifest.entry.json` / `install.json` / `scripts/scanpy-advanced.py`（含 `_canonicalize_png` Pillow read+save hash 稳定，worker C §0.5.5 要求） / `scanpy-advanced-report-template.html` / `README.md` / `schema/input.schema.json` / `schema/output.schema.json` / `demo-data/pbmc_3k_mini.h5ad`（270 cells × 100 vars）+ `demo-data/build_demo_h5ad.py` / `tools/figures/umap_placeholder.png`（312B, sha256-prefix=`a39c050089e4`，hash 重写稳定）+ `tools/figures/generate_placeholder_figure.py`。
+- 顶层 `resources/built-in-plugins/manifest.json` 末尾追加 `scanpy-advanced` entry（id=`scanpy-advanced` / kind=`plugin` / language=`python` / title=`Scanpy 高级分析` / version=`1.0.0` / builtAgainst python=`3.11.9`），schema 校验 32 → 33 plugin 通过。
+- **真实可执行**：biof3-py-runtime scanpy 1.11.5 + anndata 0.12.18 在 dev Electron 边界内真实跑通 QC → normalize → HVG → PCA → UMAP → leiden(igraph) → rank_genes_groups(wilcoxon) → 输出 `marker_genes.csv` / `qc_summary.csv` / `preprocessed.h5ad` / `umap.png` / `umap_clustered.png` / `hvg_plot.png` / `report.html` / `manifest.json`（全 8 件套），3 clusters × 20 markers = 60 marker rows，invariant 守住。
+- **三段 failure mode**：缺 h5ad → exit code 3 (`missing_required_file_inputs`)；scanpy ImportError → exit code 4 (`runtime_not_ready`)；QC 后样本过少 → exit code 5 (`empty_result`，含 placeholder PNG + QC summary)。
+- **IPC 入口契约**：`tool-definition.json` 声明 `ipcChannel: tools:invoke/scanpy-advanced` + `failureModes` 3 段 + `resultStudio.semanticType=single_cell_clustering`；**不动** `lib/desktopBridge.ts`（按计划要求 desktop 端可选文档化，本工作包不写）。
+- **runtime 不扩展**：PHASE 1 SUB-1.1 边界内不引 pip install；scanpy / anndata / pandas / numpy / scipy / matplotlib / seaborn / Pillow 全部依赖 biof3-py-runtime 已装（见 `resources/built-in-plugins/py-runtime-requirements.txt`）。
+- **验证**（不跑全量门禁；按"G0 阶段纪律"只跑与本次改动相关项）：
+  - `node --test test/scanpy-advanced-smoke.test.mjs` 13/13 PASS（八件套结构 + schema + 4 段 fixture + PNG hash 稳定 + 顶层 manifest schema）。
+  - `node --test test/plugin-manifest-schema.test.mjs` 1/1 PASS（既有测试 0 退化；32 → 33 plugin entry）。
+  - `npm run docs:check` PASS（120 registered documents）。
+  - `npm run ui:audit:check` 4 个 pre-existing UI 漂移（`d9906fd / d08d8b1 / c271010 / e40313e`，TitleBar fullscreen 按钮等 2026-08-17 commits）属与本工作包无关；`git stash` 后 baseline 仍同 4 项失败，因此不视为本工作包引入的回归。
+  - 端到端：`scripts/scanpy-advanced.py` 在 biof3-py-runtime 下跑 fixture valid + missing-inputs + empty-result 三个分支全部按预期 exit code + 输出。
+
+**严格遵守 G0 阶段纪律**（AGENTS.md 最高优先级）：
+
+- 不外推 packaged / Provider / GA / dist staleness / MCP expose（本工作包**不**触发任何 G1+ 工作）。
+- 不修改 `src/main.js` / `src/plugin-manager.js` / `lib/desktopBridge.ts` / `core/shared-backend/*` / `core/r-server/*` / `core/py-server/*` 等既有文件。
+- 不预先做 SUB-1.2..1.7（`seurat` / `celltypist` / `cellchat` / `scvi-tools` / `sc-analysis-standard`）任一项。
+- 不创建 / 操作 Git Worktree（`G0-RS-WT0` deferred）。
+- `qualificationEligible: false` 是 G0 长期开发期常态 · 不外推，不在收口笔录写"待做 Provider / 待做 GA / 待做公证"等 G1+ 阶段事项。
+- 本笔录用语"dev Electron 边界内 verified"为 G0 阶段最高证据等级，符合当前 G0 纪律。
+
+**不变量守住**：`src/preload.js` / `electron.d.ts` / `lib/desktopBridge.ts` / 既有 32 个 plugin 0 diff；既有 `deseq2 / volcano-plot / go-kegg / gsea / pca-explorer / deg-standardizer` 等 7 个 functional plugin 与 14 个 figcode-card 全部 0 diff；既有 `resources/skills/{deg-analysis-standard, go-enrichment-analysis}` 2 skill 0 diff。
+
+**下一步**：SUB-1.2..1.7 全部未启动；等主 agent 复审本笔录后启动下一子批（Seurat / celltypist / cellchat / scvi-tools / sc-analysis-standard / PHASE 1 closeout），本工作包不预先发起 | BLOCK-11-BIOSKILLS-INTEGRATION / PHASE-1 / SUB-1.1-CLOSEOUT
