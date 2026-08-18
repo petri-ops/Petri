@@ -58,6 +58,12 @@ const { v4: uuidv4 } = require('uuid');
 // Loop orchestrator (pure state machine)
 const { runLoop } = require('./loop-orchestrator');
 
+// A-003: inject projectHarnessWorkflowJob into shared-backend
+// This breaks the shared-backend → r-server reverse require chain.
+const harnessWorkflowState = require('./helpers/harness-workflow-state');
+const sharedBackend = require('../shared-backend');
+sharedBackend.configure({ projectHarnessWorkflowJob: harnessWorkflowState.projectHarnessWorkflowJob });
+
 // Conversation adapter (message/conversation helpers)
 const {
   appendAssistantMessage,

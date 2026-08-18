@@ -4,15 +4,8 @@
 const dbMod = require('../db');
 const sqlite = dbMod.getDatabase();
 
-// Resolve these shared helpers at call time. act-tools imports this module's UI
-// handlers, so a top-level destructure would capture partial CommonJS exports.
-function testFilterExpr(...args) {
-  return require('./act-tools').testFilterExpr(...args);
-}
-
-function setImpliedPage(...args) {
-  return require('./act-tools')._setImpliedPage(...args);
-}
+// A-008: static require breaks act-tools ↔ plan-ui-tools cycle
+const { testFilterExpr, _setImpliedPage } = require('./act-tool-core');
 
 // --------------------------------------------------------------
 // PLAN_TOOL_v1 — persistent plan management
@@ -481,7 +474,7 @@ async function actOpenFigcodePlot(args, ctx) {
     message: '已打开 FigCode ' + id + ' 的在线绘图，可以直接开始定制。',
   };
   // FIGCODE_PAGE_RACE_FIX_v1: mark implied page so subsequent update_figcode_editor passes
-  setImpliedPage(ctx, 'figcode');
+  _setImpliedPage(ctx, 'figcode');
   return result;
 }
 

@@ -16,11 +16,18 @@ const configHelper = require('./config-helper');
 const aiUsageHelper = require('./ai-usage-helper');
 const init = require('./init');
 
-// configure 聚合：转发给 config-helper + ai-usage-helper
+// configure 聚合：转发给 config-helper + ai-usage-helper + agent-workflow
 function configure(provider) {
   if (!provider) return;
   if (provider.getConfig) configHelper.configure({ getConfig: provider.getConfig });
   if (provider.recordAiUsage) aiUsageHelper.configure({ recordAiUsage: provider.recordAiUsage });
+  // A-003: inject projectHarnessWorkflowJob into agent-workflow (breaks shared-backend → r-server reverse require)
+  if (provider.projectHarnessWorkflowJob) {
+    const { agentWorkflow } = module.exports;
+    if (agentWorkflow && typeof agentWorkflow.configure === 'function') {
+      agentWorkflow.configure({ projectHarnessWorkflowJob: provider.projectHarnessWorkflowJob });
+    }
+  }
 }
 
 module.exports = {

@@ -18,6 +18,8 @@ const {
   actOpenFigcodePlot,
 } = require('./plan-ui-tools');
 const { v4: uuidv4 } = require('uuid');
+// A-008: Pure utility functions extracted to break act-tools ↔ plan-ui-tools cycle
+const _core = require('./act-tool-core');
 
 // --------------------------------------------------------------
 // ACT_TOOL_v1 — write operations (with audit + undo)
@@ -65,53 +67,7 @@ function recordAudit(userId, action, args, result) {
   return undoToken;
 }
 
-// FILTER_AND_OR_v1 — single-cell filter expression evaluator (mirrors CsvTable)
-function testFilterOne(cellRaw, expr) {
-  const trimmed = String(expr).trim();
-  if (!trimmed) return true;
-  const cmp = trimmed.match(/^(>=|<=|>|<|=|!=)\s*(-?\d+(?:\.\d+)?)\s*$/);
-  const between = trimmed.match(/^(-?\d+(?:\.\d+)?)\s*-\s*(-?\d+(?:\.\d+)?)\s*$/);
-  const num = parseFloat(cellRaw);
-  if (cmp && !isNaN(num)) {
-    const op = cmp[1];
-    const v = parseFloat(cmp[2]);
-    if (op === '>') return num > v;
-    if (op === '>=') return num >= v;
-    if (op === '<') return num < v;
-    if (op === '<=') return num <= v;
-    if (op === '=') return num === v;
-    if (op === '!=') return num !== v;
-  } else if (between && !isNaN(num)) {
-    return num >= parseFloat(between[1]) && num <= parseFloat(between[2]);
-  }
-  return String(cellRaw).toLowerCase().includes(trimmed.toLowerCase());
-}
-
-function testFilterExpr(cellRaw, searchStr) {
-  if (!searchStr) return true;
-  if (/\s+AND\s+/i.test(searchStr)) {
-    const parts = searchStr
-      .split(/\s+AND\s+/i)
-      .map((s) => s.trim())
-      .filter(Boolean);
-    return parts.every((p) => testFilterOne(cellRaw, p));
-  }
-  if (/\s+OR\s+/i.test(searchStr)) {
-    const parts = searchStr
-      .split(/\s+OR\s+/i)
-      .map((s) => s.trim())
-      .filter(Boolean);
-    return parts.some((p) => testFilterOne(cellRaw, p));
-  }
-  if (/[,;:/|]/.test(searchStr) && !/^[><=!]/.test(searchStr)) {
-    const terms = searchStr
-      .split(/[,;:/|]+/)
-      .map((t) => t.trim())
-      .filter(Boolean);
-    if (terms.length > 0) return terms.some((t) => testFilterOne(cellRaw, t));
-  }
-  return testFilterOne(cellRaw, searchStr);
-}
+// FILTER_AND_OR_v1 — single-cell filter expression evaluator (delegated to act-tool-core)
 
 // ACT_ACK_v1 — ACK + page-requirement checks for frontend-side acts
 const ACT_PAGE_REQUIREMENTS = {
@@ -140,29 +96,7 @@ const ACT_PAGE_LABELS = {
   home: '主页',
 };
 
-// FIGCODE_PAGE_RACE_FIX_v1
-// Track implied page transitions within a single agent loop.
-// Key: ctx requestId or visitorId+timestamp combo; Value: implied page string.
-const _impliedPageByRequest = new Map();
-
-function _setImpliedPage(ctx, page) {
-  const key = _getRequestKey(ctx);
-  if (key) _impliedPageByRequest.set(key, page);
-  // Auto-cleanup after 30s (one agent loop never lasts that long)
-  setTimeout(() => _impliedPageByRequest.delete(key), 30000);
-}
-
-function _getImpliedPage(ctx) {
-  const key = _getRequestKey(ctx);
-  return key ? _impliedPageByRequest.get(key) || null : null;
-}
-
-function _getRequestKey(ctx) {
-  // Use conversationId + the message timestamp as a unique key per agent turn
-  if (ctx && ctx.conversationId) return ctx.conversationId + ':' + (ctx._turnTs || '0');
-  if (ctx && ctx.userId) return ctx.userId + ':' + (ctx._turnTs || '0');
-  return null;
-}
+// FIGCODE_PAGE_RACE_FIX_v1 — delegated to act-tool-core
 
 function _checkActPage(actType, currentPage, ctx) {
   const req = ACT_PAGE_REQUIREMENTS[actType];
@@ -391,6 +325,7 @@ async function actUpdateAnalysisParams(args, ctx) {
 }
 
 module.exports = {
+  ..._core,
   tool_act,
   actRenameProject,
   actRenameDataset,
@@ -401,6 +336,4 @@ module.exports = {
   _registerActAck,
   isAgentPaused,
   recordAudit,
-  _setImpliedPage,
-  testFilterExpr,
 };
