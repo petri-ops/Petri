@@ -83,8 +83,11 @@ test('P7 explicit Git attachment persists consent and binding only after inspect
 });
 
 test('P7 production Git callers derive existing-repository access instead of hard-coding it', () => {
+  // PHASE 2.1b: routes/result-studio.js is a thin facade (no app code), so the
+  // production Git callers now live in result-studio/index.js (projectContext
+  // closure) and the result-edit/result-selection agent-tools files.
   for (const relative of [
-    '../core/r-server/routes/result-studio.js',
+    '../core/r-server/routes/result-studio/index.js',
     '../core/shared-backend/result-studio-background-child.js',
     '../core/r-server/agent-tools/result-edit-tools.js',
     '../core/r-server/agent-tools/result-selection-tools.js',
@@ -102,9 +105,10 @@ test.after(() => {
 });
 
 test('P6 Revision table-page route passes the persisted output hash to the bounded reader', () => {
+  // PHASE 2.1b: the readTablePage call moved to the revisions subdomain module.
   const source = readFileSync(path.join(
     path.dirname(fileURLToPath(import.meta.url)),
-    '../core/r-server/routes/result-studio.js',
+    '../core/r-server/routes/result-studio/revisions.js',
   ), 'utf8');
   assert.match(
     source,
