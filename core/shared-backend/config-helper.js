@@ -127,6 +127,87 @@ function getBusyTimeout() {
   return getDbConfig().busyTimeoutMs;
 }
 
+// ============================================================
+// A-010 central env reads (PHASE 1.2).
+//
+// The 6 core desktop path / port / runtime env keys used to be read
+// from process.env directly in every consumer (config.js, db.js,
+// backend-proc-manager.js, content-plugins.js, r-libs-resolver.js,
+// query-tools.js, py-pool.js, …). When env-coordinator injects a
+// value at desktop startup, consumers must still pick it up — and
+// today they each have their own `process.env.X || default` block,
+// which is fine but makes a single mutation point impossible.
+//
+// PHASE 1.2 only centralises the *reading* path. Two helpers:
+//
+//   getEnv(key, fallback)
+//     — equivalent to `process.env[key] || fallback` with one twist:
+//       empty string is treated as unset so a stub env injection
+//       (`process.env.BIOF3_DB_PATH = ''`) does not silently win
+//       against the documented fallback.
+//
+//   getCoreEnv()
+//     — returns the 6 core desktop env keys (busyTimeout + 5 path /
+//       port fields) as a frozen snapshot. The keys match
+//       `core/r-server/config.js` consumers (config.rHome,
+//       config.localResultsDir, config.localUploadsDir,
+//       config.tempDir, config.dbPath, config.port).
+//
+// Consumers that want the snapshot should call getCoreEnv() at
+// module load time. The behaviour is identical to the previous
+// `process.env.X || default` reads — PHASE 1.2 invariant is "100%
+// backward compatible". ============================================================
+
+/**
+ * Read a single env var with a fallback. Empty string is treated as
+ * unset so callers can clear an env var by assigning ''.
+ *
+ * @param {string} key
+ * @param {string|number|boolean} fallback
+ * @returns {string|number|boolean}
+ */
+function getEnv(key, fallback) {
+  const value = process.env[key];
+  if (value === undefined || value === null || value === '') return fallback;
+  return value;
+}
+
+/**
+ * Snapshot of the 6 core desktop env keys. Returned object is frozen
+ * so consumers cannot mutate the cache by accident.
+ *
+ * Keys:
+ *   busyTimeoutMs  — PRAGMA busy_timeout; default 10000 (matches
+ *                    E-019 full which routes through getBusyTimeout()).
+ *   rHome          — process.env.BIOF3_R_HOME || ''
+ *   localResultsDir — process.env.BIOF3_LOCAL_RESULTS_DIR || ''
+ *   localUploadsDir — process.env.BIOF3_LOCAL_UPLOADS_DIR || ''
+ *   tempDir        — process.env.BIOF3_TEMP_DIR || '/tmp/biof3-tmp'
+ *   dbPath         — process.env.BIOF3_DB_PATH || ''
+ *
+ * (port is *not* included here — ports live in env-coordinator
+ *  because Electron owns port allocation. See getBackendPort().)
+ *
+ * @returns {Readonly<{
+ *   busyTimeoutMs: number,
+ *   rHome: string,
+ *   localResultsDir: string,
+ *   localUploadsDir: string,
+ *   tempDir: string,
+ *   dbPath: string,
+ * }>}
+ */
+function getCoreEnv() {
+  return Object.freeze({
+    busyTimeoutMs: getBusyTimeout(),
+    rHome: getEnv('BIOF3_R_HOME', ''),
+    localResultsDir: getEnv('BIOF3_LOCAL_RESULTS_DIR', ''),
+    localUploadsDir: getEnv('BIOF3_LOCAL_UPLOADS_DIR', ''),
+    tempDir: getEnv('BIOF3_TEMP_DIR', '/tmp/biof3-tmp'),
+    dbPath: getEnv('BIOF3_DB_PATH', ''),
+  });
+}
+
 module.exports = new Proxy(
   {
     configure,
@@ -135,6 +216,8 @@ module.exports = new Proxy(
     setDbConfig,
     validateDbVersion,
     getBusyTimeout,
+    getEnv,
+    getCoreEnv,
     DB_SCHEMA_VERSION,
   },
   {
@@ -145,6 +228,8 @@ module.exports = new Proxy(
       if (prop === 'setDbConfig') return setDbConfig;
       if (prop === 'validateDbVersion') return validateDbVersion;
       if (prop === 'getBusyTimeout') return getBusyTimeout;
+      if (prop === 'getEnv') return getEnv;
+      if (prop === 'getCoreEnv') return getCoreEnv;
       if (prop === 'DB_SCHEMA_VERSION') return DB_SCHEMA_VERSION;
       // db-config fields forwarded through getDbConfig so callers can do
       // `configHelper.busyTimeout` without going through getConfig().

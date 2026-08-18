@@ -10,6 +10,14 @@
 
 const { contextBridge, ipcRenderer } = require('electron');
 
+// A-009: pull the r-server / py-server port fallbacks from env-coordinator
+// instead of duplicating the per-port fallback defaults here. The
+// Electron main process sets R_SERVER_PORT / PY_SERVER_PORT on
+// process.env before preload.js runs, so the helper defaults
+// (3001 / 3004) are only consulted in the rare standalone-render
+// fallback path.
+const { getBackendPort } = require('./main/env-coordinator');
+
 const AGENT_WORKBENCH_FLAG_CHANNEL = 'biof3:agent-workbench-flags';
 const AGENT_WORKBENCH_FLAGS = { extraRenderers: false };
 
@@ -64,8 +72,8 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
   platform: process.platform,
   arch: process.arch,
   backendConfig: Object.freeze({
-    rApiBase: `http://localhost:${process.env.R_SERVER_PORT || 3001}/api`,
-    pythonApiBase: `http://localhost:${process.env.PY_SERVER_PORT || 3004}/api`,
+    rApiBase: `http://localhost:${getBackendPort('r')}/api`,
+    pythonApiBase: `http://localhost:${getBackendPort('python')}/api`,
   }),
 
   // 窗口控制（配合 frame:false 自定义标题栏）

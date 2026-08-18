@@ -10,10 +10,17 @@
 //
 // isReady 最低要求 = rServerUp（r-server 是硬底座，py/plumber 按需）。
 
-const R_SERVER_HEALTH = `http://localhost:${process.env.R_SERVER_PORT || 3001}/api/health`;
-const PY_SERVER_HEALTH = `http://localhost:${process.env.PY_SERVER_PORT || 3004}/api/health`;
-const PLUMBER_HEALTH = `http://localhost:${process.env.PLUMBER_PORT || 8787}/health`;
-const GATEWAY_HEALTH = `http://localhost:${process.env.GATEWAY_PORT || 3005}/health`;
+// A-009: pull every backend port from env-coordinator instead of each
+// file duplicating the per-port fallback literal here. The Electron
+// main process sets R_SERVER_PORT / PY_SERVER_PORT / PLUMBER_PORT /
+// GATEWAY_PORT before this module is required, so the helper defaults
+// are only hit in the standalone fallback path.
+const { getBackendPort } = require('./main/env-coordinator');
+
+const R_SERVER_HEALTH = `http://localhost:${getBackendPort('r')}/api/health`;
+const PY_SERVER_HEALTH = `http://localhost:${getBackendPort('python')}/api/health`;
+const PLUMBER_HEALTH = `http://localhost:${getBackendPort('plumber')}/health`;
+const GATEWAY_HEALTH = `http://localhost:${getBackendPort('gateway')}/health`;
 
 /**
  * 探测一个 URL 是否可达且返回 2xx。1.5s 超时，失败返回 false（不抛）。

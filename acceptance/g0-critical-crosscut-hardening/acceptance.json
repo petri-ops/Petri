@@ -1,12 +1,12 @@
 {
   "schemaVersion": 2,
   "acceptanceId": "G0-CHF0-7",
-  "generatedAt": "2026-07-27T14:42:06.793Z",
-  "sourceCommit": "41a365f18738f6183ec8b355d295f9c5ee6735b9",
+  "generatedAt": "2026-08-18T01:10:44.224Z",
+  "sourceCommit": "a4f8bcb940909902533c0742ee4bf6f73fdf74f9",
   "sourceCommitReachable": true,
   "sourceCommitMatchesSourceHashes": true,
   "sourceCommitMismatches": [],
-  "sourceTreeDigest": "5540e500455fee3442120dfec63ea26c45b2c1fc313ad98b1caa3481f6415379",
+  "sourceTreeDigest": "b8e9c78f61cc6c84e90b8b609ee277405af98108cb69f23e806ef2f85e6fc202",
   "qualificationEligible": false,
   "passed": true,
   "checks": [
@@ -19,7 +19,7 @@
       "testNamePattern": "CHF0 SEC-1",
       "testCount": 2,
       "exitCode": 0,
-      "outputTail": "✔ CHF0 SEC-1 trusts only declared BioF3 renderer origins (0.524875ms)\n✔ CHF0 SEC-1 R and Python raw execution routes fail closed (0.278125ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 234.206083"
+      "outputTail": "✔ CHF0 SEC-1 trusts only declared BioF3 renderer origins (0.847209ms)\n✔ CHF0 SEC-1 R and Python raw execution routes fail closed (0.291166ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 254.6235"
     },
     {
       "id": "CHF0-SEC-2",
@@ -30,7 +30,7 @@
       "testNamePattern": "CHF0 SEC-2",
       "testCount": 1,
       "exitCode": 0,
-      "outputTail": "✅ [2026-07-27T14:41:52.107Z] [storage] registered: local\n🔍 [2026-07-27T14:41:52.109Z] [local-storage] uploaded: results/job-1/plot.txt\n✔ CHF0 SEC-2 real /api/files route rejects origins and traversal while serving valid nested keys (36.548959ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 254.585709"
+      "outputTail": "✅ [2026-08-18T01:10:31.175Z] [storage] registered: local\n🔍 [2026-08-18T01:10:31.177Z] [local-storage] uploaded: results/job-1/plot.txt\n✔ CHF0 SEC-2 real /api/files route rejects origins and traversal while serving valid nested keys (52.671209ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 232.749333"
     },
     {
       "id": "CHF0-SCI-1",
@@ -41,7 +41,7 @@
       "testNamePattern": "CHF0 SCI-1",
       "testCount": 4,
       "exitCode": 0,
-      "outputTail": "✔ CHF0 SCI-1 default and explicit padj agree without overwriting raw pvalue (2517.870709ms)\n✔ CHF0 SCI-1 explicit raw pvalue is a working, honestly labelled scientific change (1012.024167ms)\n✔ CHF0 SCI-1 selected adjusted column is sufficient and invalid values fail closed (2833.852ms)\n✔ CHF0 SCI-1 descriptor and report bind the selected significance field (0.35075ms)\nℹ tests 4\nℹ suites 0\nℹ pass 4\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 6489.327458"
+      "outputTail": "✔ CHF0 SCI-1 default and explicit padj agree without overwriting raw pvalue (3353.793625ms)\n✔ CHF0 SCI-1 explicit raw pvalue is a working, honestly labelled scientific change (1294.797208ms)\n✔ CHF0 SCI-1 selected adjusted column is sufficient and invalid values fail closed (2729.552ms)\n✔ CHF0 SCI-1 descriptor and report bind the selected significance field (1.02975ms)\nℹ tests 4\nℹ suites 0\nℹ pass 4\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 7469.1835"
     },
     {
       "id": "CHF0-SCI-2-3",
@@ -52,7 +52,7 @@
       "testNamePattern": "CHF0 SCI-(2|3)",
       "testCount": 3,
       "exitCode": 0,
-      "outputTail": "✔ CHF0 SCI-2 PCA without metadata remains explicitly unassigned (2004.56525ms)\n✔ CHF0 SCI-3 PCA aligns scrambled metadata by ID (1987.94775ms)\n✔ CHF0 SCI-3 PCA rejects missing, blank, duplicate, missing-set and extra sample IDs (220.969083ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4257.761042"
+      "outputTail": "✔ CHF0 SCI-2 PCA without metadata remains explicitly unassigned (2739.4485ms)\n✔ CHF0 SCI-3 PCA aligns scrambled metadata by ID (1894.319875ms)\n✔ CHF0 SCI-3 PCA rejects missing, blank, duplicate, missing-set and extra sample IDs (23.76175ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4739.113583"
     },
     {
       "id": "CHF0-BE-5",
@@ -61,40 +61,40 @@
       "command": "node --test --test-name-pattern=CHF0 BE-5 test/g0-chf0-lifecycle.test.mjs",
       "testFile": "test/g0-chf0-lifecycle.test.mjs",
       "testNamePattern": "CHF0 BE-5",
-      "testCount": 12,
+      "testCount": 11,
       "exitCode": 0,
-      "outputTail": "✔ CHF0 BE-5 termination confirms TERM exit and does not escalate (0.816416ms)\n✔ CHF0 BE-5 termination observes a real child process exit (3.346417ms)\n✔ CHF0 BE-5 termination reports false when SIGKILL is refused (1.098292ms)\n✔ CHF0 BE-5 termination does not claim success until SIGKILL exit is observed (2.506708ms)\n✔ CHF0 BE-5 heartbeat liveness is gated by the child PID, not the Node event loop (0.086625ms)\n✔ CHF0 BE-5 verified heartbeat persists only after child liveness succeeds (0.165458ms)\n✔ CHF0 BE-5 hard timeout is separate from heartbeat and records unconfirmed termination (0.215875ms)\n✔ CHF0 BE-5 healthy work is not scheduled for the obsolete five-minute wall (0.076583ms)\n✔ CHF0 BE-5 zombie recovery terminates owned stale children and records the observed result (0.303292ms)\n✔ CHF0 BE-5 unowned restart recovery marks DB truth without signalling an unproven PID (0.254334ms)\n✔ CHF0 BE-5 cancel writes cancelled only after termination is confirmed (0.466ms)\n✔ CHF0 BE-5 cancel keeps the job retryable when termination is unconfirmed (0.082709ms)\nℹ tests 12\nℹ suites 0\nℹ pass 12\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 87.15125"
+      "outputTail": "✔ CHF0 BE-5 termination confirms TERM exit and does not escalate (1.882167ms)\n✔ CHF0 BE-5 termination observes a real child process exit (3.4285ms)\n✔ CHF0 BE-5 termination reports false when SIGKILL is refused (0.419042ms)\n✔ CHF0 BE-5 termination does not claim success until SIGKILL exit is observed (3.636334ms)\n✔ CHF0 BE-5 heartbeat liveness is gated by the child PID, not the Node event loop (0.084959ms)\n✔ CHF0 BE-5 verified heartbeat persists only after child liveness succeeds (0.105791ms)\n✔ CHF0 BE-5 healthy work is not scheduled for the obsolete five-minute wall (0.091042ms)\n✔ CHF0 BE-5 zombie recovery terminates owned stale children and records the observed result (0.226208ms)\n✔ CHF0 BE-5 unowned restart recovery marks DB truth without signalling an unproven PID (0.133209ms)\n✔ CHF0 BE-5 cancel writes cancelled only after termination is confirmed (0.618917ms)\n✔ CHF0 BE-5 cancel keeps the job retryable when termination is unconfirmed (0.117792ms)\nℹ tests 11\nℹ suites 0\nℹ pass 11\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 180.463583"
     }
   ],
   "sourceHashes": {
-    "package.json": "c5d7f5bc07c1822dfc3d38115d98ba9c4afa83d6a6c288c95886a9daf4324623",
-    "src/main.js": "21890b1ad5f132ca48b0791f84b94bbcdf0a6d7c9ec860585e8d756e6f94e799",
+    "package.json": "e30fa0bbfdc526e7dff40f1a08325285add424dc68ab7e56c6f6664910942a98",
+    "src/main.js": "b745077b54c7a7c3e33c440ed10b3e5e44206fb75d44fd08c88481b4945272e4",
     "core/py-server/server.js": "e71dba53d09dcabf581aecf66ebf457cca0cfc67292d968c94528e34a60d87bf",
     "core/py-server/routes/raw-execution.js": "a2d846ba2885ab7d16a39f8a0b03385156aa9de3b0272992c09e2ecb4454ea2f",
     "core/r-server/bootstrap.js": "618ce06f1b90a7fb4e6de9ca6f983c9c1805b4d59dd13846f98ecb008728b69c",
-    "core/r-server/db.js": "0cc7fbca2bdb12221555c5a4e467cdc65f8ae8366608009f97db1f7a0761364c",
+    "core/r-server/db.js": "990aa90dfa9c77fcb576aa8b3964cc46461ce49b7543f46aa4cbdc819c6b8555",
     "core/r-server/helpers/local-request-boundary.js": "20ae30a4b8805a474700fd82b30f61342878531bc239098714e27698e174b7d1",
-    "core/r-server/helpers/process-lifecycle.js": "2bed22fee142ba2ac4126b465ef8c74455064d23d17071305461bf2ff0e8b0e0",
-    "core/r-server/helpers/tools-executor.js": "af6b1d6d0bf03929431fd37e3422f79e9e57224bfde27d39d636b378d71d81fb",
-    "core/r-server/routes/files.js": "b6bf3efeefd314cc43c13c8f3769c986f7d3fb0fdc97a228323da7ea21441a07",
+    "core/r-server/helpers/process-lifecycle.js": "080fa1c2561a974e0700ea5641b5cd9b020319054670c18e0125ea78033167e3",
+    "core/r-server/helpers/tools-executor.js": "0908432b649da6b23c0d1f128b8531ed0c41f54691829e68ed0cede13ef956f7",
+    "core/r-server/routes/files.js": "17191be4cde2dbd167ab2837a78f035b8e94fa9e2be437ae0385a32deef00003",
     "core/r-server/routes/r-compute.js": "0829b40931e0b1a8b8a23e66ca36a580792669871e60a9ae3002264337a08e7b",
-    "core/r-server/routes/tools-platform.js": "23751798fd47a9970007c18c6afb2842b10c2d336c84ae76c188d96da5fde60b",
+    "core/r-server/routes/tools-platform.js": "cdce4456d71b47348f0174d7c06e37b693b3c9f29291907143028c159a7a6792",
     "core/shared-backend/local-request-boundary.js": "f72b27719576f65b63f347dbb5149da9456dec0e5ed2f6201d75d86cfd998bc1",
     "core/shared-backend/storage/local-storage.js": "e5a62abed382e5f941a8818f468881e91ae1876e25ae7141b75ae0beef20b182",
     "resources/built-in-plugins/pca-explorer/scripts/pca-explorer.py": "12eb6548bf85a9f91c3c45caf58de03984d617d369f6d985e6aa5f0da77449de",
     "resources/built-in-plugins/pca-explorer/tool-definition.json": "ac57883de918e17788108245ba81556bb42b50e00655a56c50520bdd76e1264e",
-    "resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R": "f80012c9b61351ee783ee9a5b85c6c6b14fbcabe35e0c44629a9e7681cab81fd",
+    "resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R": "ed50739c762e9fc8d4ae4d1532aa0e52a9af6e98cbcc1514fe29d4f8d5ba2c29",
     "resources/built-in-plugins/volcano-plot/README.md": "bba4efbaef1b03510ae8ed38f1c265f3869fc7981d72d6ef4bc7b4a7a4e1bc05",
     "resources/built-in-plugins/volcano-plot/acceptance.json": "59b12653dcc63eb8459802dbf42bd8d6ba85e473d844d13f28d2406e133a686e",
-    "resources/built-in-plugins/volcano-plot/golden-revisions/result-studio-v1.json": "142c7947b4b1127a74692e6a149e91dee844755c25eb0df1aa01f56d308dd3f0",
-    "resources/built-in-plugins/volcano-plot/plugin.json": "83f08a92918ec3493262086110f356ba613f44d4afb47a238a25e96c8afdac40",
-    "resources/built-in-plugins/volcano-plot/tool-definition.json": "66604b604c81e053ede710dec9db3e124a12800563d9c66746767bdd7b36585b",
+    "resources/built-in-plugins/volcano-plot/golden-revisions/result-studio-v1.json": "05cf879f6a5f1978ac2cab6f526f16fdbb1c6f5184df348a28637e30b01334c6",
+    "resources/built-in-plugins/volcano-plot/plugin.json": "1cbef16701bf7dc6e739abc25b4c77e77e061c6509344569eea13112f8ebe6f2",
+    "resources/built-in-plugins/volcano-plot/tool-definition.json": "7bed4bca98b614540f39fb8ffe5a6f2ef15eee7554e7b0acf95c03a5f0c9f97b",
     "resources/built-in-plugins/volcano-plot/volcano-plot-report-template.html": "814441aaee649f28069bc83b92a8f73c72d3460cb19f776d44a3b622f2b20d03",
     "resources/built-in-plugins/volcano-plot/demo-data/demo_deg.csv": "b3a87c163cbf83e6a0cea27ea9aa056ba8b48fbcf4db3b431604ae3d8fd5ce6a",
     "test/g0-chf0-http.test.mjs": "1479e3af3d5b53d0f5dd0b01ac912a8af7cf65ce1e73ea1b8735ca7e2f758294",
     "test/g0-chf0-science.test.mjs": "84b35cc6426cd4175726114c4d9a554a800f2e66231238ed98d2fe548c37f358",
-    "test/g0-chf0-lifecycle.test.mjs": "69d8c9408082a96db799b2dcef013cba584fc49594250bb96932a2c7765e61a7",
-    "test/impact-map.json": "466d64db3f4e902ff81d94fadc4d8271bc87168b37739060df57452166c4e26d",
+    "test/g0-chf0-lifecycle.test.mjs": "37855b31fc776d5c220f75d70544dbe80ee4892d28db6d10eba2bd9177e1486a",
+    "test/impact-map.json": "0e2c0d0d32ecc95de7e4b26542c15e7c10e20443f4cec309ba45a9d0e02cd2bd",
     "scripts/g0-chf0-acceptance.mjs": "7c92dbf4834cdeb4959621b20d44a963830e0828fbd3a95547ad6006751bacfb"
   }
 }

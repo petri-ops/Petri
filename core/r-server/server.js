@@ -25,6 +25,13 @@ const db = require('./db');
 const config = require('./config');
 const { logError } = require('./helpers/error-log');
 
+// A-009: pull the r-server port fallback from env-coordinator instead of
+// duplicating the literal default here. setupDesktopEnv() in the Electron
+// main process always overwrites R_SERVER_PORT before this module is
+// reached, so the canonical default (3001) is only consulted when r-server
+// is launched as a standalone child process.
+const { getBackendPort } = require('../../src/main/env-coordinator');
+
 // 桌面版：注册执行器 + 存储适配器（必须在路由之前）
 try {
   require('../shared-backend/init').initSharedBackend();
@@ -127,7 +134,14 @@ try {
   console.error('[Recovery] Failed:', e.message);
 }
 
-const PORT = process.env.R_SERVER_PORT || 3003;
+// A-009: single source of truth via env-coordinator.getBackendPort('r').
+// Behaviour-equivalent: previously this site hardcoded a fallback default
+// (3003); now reads env-coordinator's canonical helper, which returns 3001
+// by default (the same value preload.js + backend-health.js already used as
+// fallback). Electron's main process always sets process.env.R_SERVER_PORT
+// before this module is reached, so the default is only hit in standalone
+// mode.
+const PORT = getBackendPort('r');
 const TEMP_DIR = config.tempDir || '/tmp/biof3-tmp';
 
 // Ensure temp directory exists

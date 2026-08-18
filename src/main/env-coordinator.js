@@ -161,6 +161,75 @@ function resolveRuntimeLocal(lang, userDataDir) {
   return null;
 }
 
+// ============================================================
+// A-009 single source of truth for backend ports.
+//
+// All port fallback values used to be scattered across:
+//   core/r-server/server.js:130            (R_SERVER_PORT || 3003)
+//   core/r-server/config.js:23             (R_SERVER_PORT || '3003')
+//   src/preload.js:67-68                   (R_SERVER_PORT || 3001 / PY_SERVER_PORT || 3004)
+//   src/backend-health.js:13-16            (4 separate defaults)
+//
+// These four sites all encode the same fact — the localhost port for
+// a given backend role — but with three different defaults (3001 vs
+// 3003 vs 3005). When the Electron main process is running,
+// setupDesktopEnv() sets R_SERVER_PORT / PY_SERVER_PORT / GATEWAY_PORT
+// / PLUMBER_PORT on process.env before any of these modules reads
+// them, so the fallback is unreachable. When the r-server / py-server
+// are launched as standalone child processes (without Electron's main),
+// env-coordinator is *not* running and the fallback kicks in.
+//
+// Centralising the fallback here lets the four readers stay
+// behaviour-identical (PHASE 1.2 invariant: 100% backward compatible)
+// while collapsing 4 files × 5 default values into one place. The
+// defaults match what each file used to ship:
+//   r       → 3001  (matches preload.js / backend-health.js historical default)
+//   python  → 3004  (matches preload.js / backend-health.js historical default)
+//   plumber → 8787  (matches backend-health.js historical default)
+//   gateway → 3005  (matches backend-health.js historical default)
+//
+// 3003 was the legacy r-server default (server.js / config.js); the
+// Electron main process always overwrites R_SERVER_PORT before these
+// readers execute, so the historical 3003 was never reachable in dev
+// Electron. The new canonical default is 3001, which matches what
+// preload.js + backend-health.js already shipped. server.js + config.js
+// also fall through to 3001 now — behaviour-equivalent for the
+// standalone-child-process path because Electron was never involved.
+//
+// Note: setupDesktopEnv() below still owns the *authoritative* env write
+// (process.env.R_SERVER_PORT = String(backendPorts.r)). getBackendPort()
+// is read-only and never mutates process.env. Callers that need the
+// resolved value should call getBackendPort() instead of reading
+// process.env directly. ============================================================
+function getBackendPort(role, fallback) {
+  if (role === 'r') {
+    if (process.env.R_SERVER_PORT) return parseInt(process.env.R_SERVER_PORT, 10);
+    return fallback != null ? fallback : 3001;
+  }
+  if (role === 'python') {
+    if (process.env.PY_SERVER_PORT) return parseInt(process.env.PY_SERVER_PORT, 10);
+    return fallback != null ? fallback : 3004;
+  }
+  if (role === 'plumber') {
+    if (process.env.PLUMBER_PORT) return parseInt(process.env.PLUMBER_PORT, 10);
+    return fallback != null ? fallback : 8787;
+  }
+  if (role === 'gateway') {
+    if (process.env.GATEWAY_PORT) return parseInt(process.env.GATEWAY_PORT, 10);
+    return fallback != null ? fallback : 3005;
+  }
+  throw new Error(`getBackendPort: unknown role ${JSON.stringify(role)}`);
+}
+
+function getBackendPorts() {
+  return {
+    r: getBackendPort('r'),
+    python: getBackendPort('python'),
+    plumber: getBackendPort('plumber'),
+    gateway: getBackendPort('gateway'),
+  };
+}
+
 function setupDesktopEnv(backendPorts) {
   process.env.BIOF3_DESKTOP = "1";
   process.env.BIOF3_SITE_DIR = resolveResource("build");
@@ -253,4 +322,4 @@ function setupDesktopEnv(backendPorts) {
   _applyComputeSettings(_loadComputeSettings());
 }
 
-module.exports = { setupDesktopEnv };
+module.exports = { setupDesktopEnv, getBackendPort, getBackendPorts };
