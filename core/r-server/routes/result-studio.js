@@ -92,79 +92,23 @@ const {
   PUBLIC_EDIT_PHASES,
 } = require('../../shared-backend/result-studio-context');
 
-function attachExistingRepositoryWithExplicitConsent(input, dependencies = {}) {
-  const projectId = String(input?.projectId || '').trim();
-  const workspaceRoot = String(input?.workspaceRoot || '').trim();
-  const allowExistingRepository = input?.allowExistingRepository === true;
-  if (!projectId || !workspaceRoot) {
-    return { ok: false, status: 400, code: 'project_context_required' };
-  }
-  if (!allowExistingRepository) {
-    return { ok: false, status: 400, code: 'explicit_existing_repository_consent_required' };
-  }
-  const repository = dependencies.repository;
-  const binder = dependencies.bindProjectRepository || bindProjectRepository;
-  if (!repository?.saveExistingRepositoryConsent || !repository?.saveRepositoryBinding) {
-    return { ok: false, status: 500, code: 'repository_consent_store_unavailable' };
-  }
-  const binding = binder({
-    workspaceRoot,
-    projectId,
-    preferManaged: false,
-    allowExistingRepository,
-    createManagedIfMissing: false,
-  });
-  if (binding?.mode !== 'existing') {
-    return {
-      ok: false,
-      status: 409,
-      code: binding?.inspection?.managed?.exists
-        ? 'managed_repository_already_initialized'
-        : 'existing_repository_not_found',
-    };
-  }
-  if (!binding.adapter) {
-    return {
-      ok: false,
-      status: 409,
-      code: binding.reason || binding.status || 'repository_binding_failed',
-      bindingStatus: binding.status || null,
-    };
-  }
-  const consent = repository.saveExistingRepositoryConsent({
-    projectId,
-    allowExistingRepository,
-    decisionSource: 'explicit_api',
-  });
-  const savedBinding = repository.saveRepositoryBinding({
-    projectId,
-    mode: binding.mode,
-    workspaceRoot: binding.workspaceRoot,
-    gitDir: binding.adapter.gitDir,
-    workTree: binding.adapter.workTree,
-    managedPaths: binding.managedPaths,
-    status: binding.status,
-    reason: binding.reason,
-    gitVersion: binding.inspection?.runtime?.versionRaw || null,
-  });
-  return {
-    ok: binding.status === 'ready',
-    status: binding.status === 'ready' ? 200 : 409,
-    code: binding.status === 'ready' ? null : binding.reason || binding.status,
-    bindingStatus: binding.status,
-    mode: savedBinding.mode,
-    consent: {
-      allowExistingRepository: consent.allowExistingRepository,
-      decisionSource: consent.decisionSource,
-    },
-  };
-}
+// PHASE 2.1a — 共享 helpers（已抽到 _helpers/ 子目录）
+// 主文件仍保留所有端点定义；本 commit 仅做工具侧重构，行为 100% 兼容。
+const validateHelpers = require('./_helpers/validate');
+const repositoryHelpers = require('./_helpers/repository');
+const formatHelpers = require('./_helpers/format');
+const contextHelpers = require('./_helpers/context');
+const storageHelpers = require('./_helpers/storage');
+const workflowHelpers = require('./_helpers/workflow');
 
-function persistedToolJobConversation(job) {
-  if (!job) return null;
-  const value = job.conversation_id ?? job.conversationId ?? null;
-  return typeof value === 'string' && value.trim() ? value.trim() : null;
-}
+// 子域注册中心（PHASE 2.1a 占位；PHASE 2.1b 才会下沉端点）
+const resultStudioIndex = require('./result-studio/index');
+
+const attachExistingRepositoryWithExplicitConsent = workflowHelpers.attachExistingRepositoryWithExplicitConsent;
+
+
+const persistedToolJobConversation = repositoryHelpers.persistedToolJobConversation;
+
 const {
   guardContextOperation,
   resolveResultStudioContext,
@@ -189,210 +133,41 @@ const TABLE_EXTENSIONS = /\.(csv|tsv)$/i;
 const PLOT_EXTENSIONS = /\.(png|jpe?g|gif|svg|webp)$/i;
 const PRIVATE_ERROR_COORDINATE = /(?:file:\/\/|[a-z]:[\\/]|\\\\|(?:^|[\s"'(:=])\/(?!api\/)[^\s"'<>]+)/i;
 
-function publicResultStudioErrorMessage(error, fallback) {
-  const message = String(error?.message || '').trim();
-  if (!message || PRIVATE_ERROR_COORDINATE.test(message) || /[\r\n\0]/.test(message)) return fallback;
-  return message.slice(0, 500);
-}
+const publicResultStudioErrorMessage = formatHelpers.publicResultStudioErrorMessage;
 
-function buildContextBoundPreviewBudget({ disk = null, activePreviewJobs = 0 } = {}, dependencies = {}) {
-  const snapshotFactory = dependencies.createRuntimeResourceSnapshot || createRuntimeResourceSnapshot;
-  const budgetEvaluator = dependencies.evaluatePreviewResourceBudget || evaluatePreviewResourceBudget;
-  const active = Math.max(0, Math.floor(Number(activePreviewJobs) || 0));
-  const snapshot = snapshotFactory({
-    disk,
-    activeJobs: active,
-    estimatedMemoryBytes: null,
-  });
-  return {
-    snapshot,
-    budget: {
-      ...budgetEvaluator({
-        resourceSnapshot: snapshot,
-        estimatedMemoryBytes: null,
-        estimatedDiskBytes: null,
-        activePreviewJobs: active,
-      }),
-      resourceEstimate: {
-        estimateVersion: 1,
-        available: false,
-        source: 'context_bound_edit_required',
-        reason: 'trusted_edit_context_unavailable',
-      },
-    },
-  };
-}
 
-function hashFile(filePath) {
-  const hash = crypto.createHash('sha256');
-  const handle = fs.openSync(filePath, 'r');
-  try {
-    const buffer = Buffer.alloc(1024 * 1024);
-    let bytesRead;
-    do {
-      bytesRead = fs.readSync(handle, buffer, 0, buffer.length, null);
-      if (bytesRead > 0) hash.update(buffer.subarray(0, bytesRead));
-    } while (bytesRead > 0);
-  } finally {
-    fs.closeSync(handle);
-  }
-  return hash.digest('hex');
-}
+const buildContextBoundPreviewBudget = contextHelpers.buildContextBoundPreviewBudget;
 
-function resolveInteractionBaselineRevision({
-  repository,
-  projectId,
-  sourceJob,
-  artifactId,
-  pluginDescriptor,
-} = {}, dependencies = {}) {
-  const existing = repository.findRevisionByJobArtifact({
-    projectId,
-    toolJobId: sourceJob.id,
-    artifactId,
-  });
-  if (!pluginDescriptor) {
-    return {
-      revision: existing,
-      requiresEnsure: !existing,
-      qualification: null,
-    };
-  }
-  const inspectPersisted = dependencies.inspectPersistedArtifactCohort || inspectPersistedArtifactCohort;
-  const persisted = inspectPersisted({
-    projectId,
-    sourceJob,
-    artifactId,
-    pluginId: sourceJob.tool_id,
-    pluginDescriptor,
-  }, { repository });
-  if (persisted.qualified) {
-    return {
-      revision: persisted.revision,
-      requiresEnsure: false,
-      qualification: persisted,
-    };
-  }
-  const inspect = dependencies.inspectBaselineArtifactCohort || inspectBaselineArtifactCohort;
-  const qualification = inspect({
-    projectId,
-    sourceJob,
-    artifactId,
-    pluginId: sourceJob.tool_id,
-    pluginDescriptor,
-  }, { repository });
-  return {
-    revision: qualification.qualified ? qualification.revision : null,
-    requiresEnsure: !qualification.qualified,
-    qualification,
-  };
-}
 
-function baselineFailureDiagnostic(error) {
-  const diagnostic = {
-    code: error && error.code || 'baseline_revision_unavailable',
-    message: error && error.message || 'Baseline revision could not be registered.',
-  };
-  if (!String(diagnostic.code).startsWith('git_') || !error?.detail || typeof error.detail !== 'object') {
-    return diagnostic;
-  }
-  const detail = error.detail;
-  const technical = {};
-  if (/^[a-z][a-z0-9-]*$/.test(String(detail.command || ''))) technical.command = detail.command;
-  if (Number.isInteger(detail.status)) technical.status = detail.status;
-  if (/^[A-Z][A-Z0-9_]*$/.test(String(detail.systemCode || ''))) technical.systemCode = detail.systemCode;
-  if (/^SIG[A-Z0-9]+$/.test(String(detail.signal || ''))) technical.signal = detail.signal;
-  if (detail.killed === true) technical.killed = true;
-  if (Number.isInteger(detail.attempts) && detail.attempts > 0) technical.attempts = detail.attempts;
-  if (Object.keys(technical).length > 0) diagnostic.technical = technical;
-  return diagnostic;
-}
+const hashFile = storageHelpers.hashFile;
 
-function resolveWorkspaceFileForRevision(workspaceRoot, revision) {
-  const workspace = fs.realpathSync(workspaceRoot);
-  const target = fs.realpathSync(path.join(workspace, revision.outputPath));
-  if (!isPathContained(workspace, target)) throw Object.assign(new Error('Revision output escaped the project.'), { code: 'revision_output_escape' });
-  return target;
-}
 
-async function openVerifiedRevisionArtifact(workspaceRoot, revision) {
-  let fd = null;
-  try {
-    const workspace = fs.realpathSync(workspaceRoot);
-    const artifactPath = fs.realpathSync(path.join(workspace, revision.outputPath));
-    if (!isPathContained(workspace, artifactPath)) throw new Error('artifact_path_escape');
-    const noFollow = Number.isInteger(fs.constants.O_NOFOLLOW) ? fs.constants.O_NOFOLLOW : 0;
-    fd = fs.openSync(artifactPath, fs.constants.O_RDONLY | noFollow);
-    const stat = fs.fstatSync(fd);
-    if (!stat.isFile()) throw new Error('artifact_not_file');
-    if (!revision.outputHash) throw new Error('artifact_hash_mismatch');
-    const sourceFd = fd;
-    fd = null;
-    const snapshot = await createVerifiedFileSnapshot(sourceFd, {
-      expectedIdentity: {
-        dev: stat.dev,
-        ino: stat.ino,
-        size: stat.size,
-        mtimeMs: stat.mtimeMs,
-        ctimeMs: stat.ctimeMs,
-      },
-      expectedSha256: revision.outputHash,
-    });
-    return {
-      fd: snapshot.fd,
-      stat: snapshot.stat,
-      verification: snapshot.verification,
-      artifactPath,
-    };
-  } catch (error) {
-    if (fd !== null) {
-      try { fs.closeSync(fd); } catch {}
-    }
-    if (error?.code === 'verified_snapshot_hash_mismatch') throw new Error('artifact_hash_mismatch');
-    throw error;
-  }
-}
+const resolveInteractionBaselineRevision = workflowHelpers.resolveInteractionBaselineRevision;
 
-function userId(req) {
-  return (req.user && (req.user.id || req.user.userId)) || null;
-}
 
-function isAdminOrInternal(req) {
-  return req.isInternal || (req.user && req.user.role === 'admin');
-}
+const baselineFailureDiagnostic = workflowHelpers.baselineFailureDiagnostic;
 
-function canAccessProject(req, project) {
-  if (!project) return false;
-  if (isAdminOrInternal(req)) return true;
-  const uid = userId(req);
-  return !!(project.is_public || !project.user_id || project.user_id === uid);
-}
 
-function detectDelimiter(headerLine, fileName) {
-  if (/\.tsv$/i.test(fileName)) return '\t';
-  const tabs = (headerLine.match(/\t/g) || []).length;
-  const commas = (headerLine.match(/,/g) || []).length;
-  return tabs > commas ? '\t' : ',';
-}
+const resolveWorkspaceFileForRevision = storageHelpers.resolveWorkspaceFileForRevision;
 
-function splitCsvLine(line, delimiter) {
-  const cells = [];
-  let current = '';
-  let quoted = false;
-  for (let index = 0; index < line.length; index += 1) {
-    const char = line[index];
-    if (char === '"') {
-      // 连续两个引号是转义的字面引号
-      if (quoted && line[index + 1] === '"') { current += '"'; index += 1; continue; }
-      quoted = !quoted;
-      continue;
-    }
-    if (char === delimiter && !quoted) { cells.push(current.trim()); current = ''; continue; }
-    current += char;
-  }
-  cells.push(current.trim());
-  return cells;
-}
+
+const openVerifiedRevisionArtifact = storageHelpers.openVerifiedRevisionArtifact;
+
+
+const userId = validateHelpers.userId;
+
+
+const isAdminOrInternal = validateHelpers.isAdminOrInternal;
+
+
+const canAccessProject = validateHelpers.canAccessProject;
+
+
+const detectDelimiter = storageHelpers.detectDelimiter;
+
+
+const splitCsvLine = storageHelpers.splitCsvLine;
+
 
 /**
  * 读取表格 artifact 并抽样。
@@ -400,291 +175,43 @@ function splitCsvLine(line, delimiter) {
  * 返回真实总行数（在读全的前提下）与抽样行对象；文件被截断时明确标记，
  * 避免把"前缀里唯一"当成"整表唯一"。
  */
-function readTableSample(absolutePath, fileName) {
-  const stat = fs.statSync(absolutePath);
-  const truncated = stat.size > MAX_READ_BYTES;
-  let raw;
-  if (truncated) {
-    const handle = fs.openSync(absolutePath, 'r');
-    try {
-      const buffer = Buffer.alloc(MAX_READ_BYTES);
-      const read = fs.readSync(handle, buffer, 0, MAX_READ_BYTES, 0);
-      raw = buffer.slice(0, read).toString('utf8');
-    } finally {
-      fs.closeSync(handle);
-    }
-    // 丢弃末尾可能被截断的半行
-    const lastBreak = raw.lastIndexOf('\n');
-    if (lastBreak > 0) raw = raw.slice(0, lastBreak);
-  } else {
-    raw = fs.readFileSync(absolutePath, 'utf8');
-  }
+const readTableSample = storageHelpers.readTableSample;
 
-  const lines = raw.split(/\r?\n/).filter((line) => line.trim() !== '');
-  if (lines.length === 0) return { columns: [], rows: [], rowCount: 0, truncated };
 
-  const delimiter = detectDelimiter(lines[0], fileName);
-  const columns = splitCsvLine(lines[0], delimiter);
-  const dataLines = lines.slice(1);
-  const rows = dataLines.slice(0, ID_INFERENCE_SAMPLE_ROWS).map((line) => {
-    const cells = splitCsvLine(line, delimiter);
-    const row = {};
-    columns.forEach((column, index) => { row[column] = cells[index]; });
-    return row;
-  });
+const loadJobAndProject = repositoryHelpers.loadJobAndProject;
 
-  return {
-    columns,
-    rows,
-    // 文件被截断时行数只是下界，不能当权威总数。
-    rowCount: truncated ? null : dataLines.length,
-    truncated,
-  };
-}
 
-function loadJobAndProject(req, jobId) {
-  const job = db.getToolJob(jobId);
-  if (!job) return { error: { status: 404, code: 'job_not_found' } };
-  const project = job.project_id
-    ? sqlite.prepare('SELECT * FROM projects WHERE id = ?').get(job.project_id)
-    : null;
-  if (!project) return { error: { status: 404, code: 'project_not_found' } };
-  if (!canAccessProject(req, project)) return { error: { status: 403, code: 'forbidden' } };
-  return { job, project };
-}
+const artifactTruthError = repositoryHelpers.artifactTruthError;
 
-function artifactTruthError(reason, message, code = 'artifact_truth_unavailable') {
-  return { error: { status: 409, code, reason, message } };
-}
 
-function artifactTruthAvailability(result) {
-  const truth = result?.artifactTruth;
-  if (!truth || truth.blocking === true || !['valid', 'degraded'].includes(truth.status)) {
-    return artifactTruthError(
-      'job_artifact_truth_unavailable',
-      'The completed Job does not have usable Artifact Truth.',
-    );
-  }
-  return null;
-}
+const artifactTruthAvailability = repositoryHelpers.artifactTruthAvailability;
 
-function verifyArtifactRecordBytes(artifactRecord, absolutePath) {
-  const expectedSha256 = String(artifactRecord?.sha256 || '').trim().toLowerCase();
-  if (!/^[a-f0-9]{64}$/.test(expectedSha256)) {
-    return artifactTruthError(
-      'artifact_sha256_unavailable',
-      'The selected Artifact has no trusted SHA-256 in Job Artifact Truth.',
-    );
-  }
-  let actualSha256;
-  try {
-    actualSha256 = hashFile(absolutePath);
-  } catch {
-    return artifactTruthError(
-      'artifact_file_unavailable',
-      'The selected Artifact file is unavailable.',
-    );
-  }
-  if (actualSha256 !== expectedSha256) {
-    return artifactTruthError(
-      'artifact_hash_drift',
-      'The selected Artifact bytes no longer match Job Artifact Truth.',
-      'artifact_truth_drift',
-    );
-  }
-  return { artifactRecord, expectedSha256, actualSha256 };
-}
 
-function findArtifactRecord(result, absolutePath, artifactName) {
-  const unavailable = artifactTruthAvailability(result);
-  if (unavailable) return unavailable;
-  const artifacts = Array.isArray(result.artifacts) ? result.artifacts : [];
-  let realTarget;
-  try {
-    realTarget = fs.realpathSync(absolutePath);
-    if (!fs.statSync(realTarget).isFile()) throw new Error('artifact_not_file');
-  } catch {
-    return artifactTruthError(
-      'artifact_file_unavailable',
-      'The selected Artifact file is unavailable.',
-    );
-  }
-  const matches = artifacts.filter((artifact) => {
-    if (!artifact || !artifact.id) return false;
-    if (artifact.id === artifactName || artifact.name === artifactName || artifact.filename === artifactName) return true;
-    if (!artifact.path) return false;
-    try { return fs.realpathSync(artifact.path) === realTarget; } catch { return false; }
-  });
-  if (matches.length === 0) {
-    return artifactTruthError(
-      'artifact_record_missing',
-      'The selected file is not present in Job Artifact Truth.',
-    );
-  }
-  if (matches.length > 1) {
-    return artifactTruthError(
-      'artifact_identity_ambiguous',
-      'The selected file does not resolve to one unique Artifact Truth record.',
-    );
-  }
-  return verifyArtifactRecordBytes(matches[0], realTarget);
-}
+const verifyArtifactRecordBytes = repositoryHelpers.verifyArtifactRecordBytes;
 
-function sendArtifactResolutionError(res, error) {
-  const body = { error: error.code };
-  if (error.reason) body.reason = error.reason;
-  if (error.message) body.message = error.message;
-  return res.status(error.status).json(body);
-}
 
-function resolveInteractionDescriptor(toolId, artifactRecord, artifactName, dependencies = {}) {
-  const getPluginManifest = dependencies.getPluginManifest || pluginLoader.getPluginManifest;
-  const plugin = getPluginManifest(toolId);
-  const descriptor = plugin?.resultStudio || null;
-  if (!descriptor) return { descriptor: null, artifactDescriptor: null, mapping: null };
-  const artifactDescriptor = descriptor.artifacts.find((artifact) =>
-    artifact.id === artifactRecord?.id || artifact.filename === artifactName) || null;
-  const mapping = artifactDescriptor
-    ? descriptor.interactionMappings.find((item) => item.artifactId === artifactDescriptor.id) || null
-    : null;
-  return { descriptor, artifactDescriptor, mapping };
-}
+const findArtifactRecord = repositoryHelpers.findArtifactRecord;
 
-function backingArtifactName(interaction) {
-  const { descriptor, mapping, artifactDescriptor } = interaction;
-  if (!mapping) return null;
-  if (mapping.dataFile) return mapping.dataFile;
-  if (mapping.dataArtifactId) {
-    return descriptor?.artifacts.find((artifact) => artifact.id === mapping.dataArtifactId)?.filename || null;
-  }
-  return artifactDescriptor?.filename || null;
-}
 
-function parseToolJobResult(job) {
-  if (job?.result && typeof job.result === 'object') return job.result;
-  try { return JSON.parse(job?.result_json || '{}'); } catch { return {}; }
-}
+const sendArtifactResolutionError = formatHelpers.sendArtifactResolutionError;
+
+
+const resolveInteractionDescriptor = workflowHelpers.resolveInteractionDescriptor;
+
+
+const backingArtifactName = workflowHelpers.backingArtifactName;
+
+
+const parseToolJobResult = repositoryHelpers.parseToolJobResult;
+
 
 /**
  * Recompute a query-backed Selection from immutable Revision + Job Artifact
  * Truth. Browser-supplied count/hash/sample values are comparison inputs only;
  * none of them can become persisted Agent context without this exact read.
  */
-function bindAuthoritativeQuerySelection({ req, project, selection, repository }, dependencies = {}) {
-  if (!selection?.entityIdsTruncated || !selection.filterExpression) {
-    return { selection, authoritative: false };
-  }
-  const reject = (code, message, status = 409) => ({ error: { status, code, message } });
-  if (!selection.revisionId) {
-    return reject('selection_revision_required', 'A query-backed selection requires one persisted Revision.');
-  }
-  const revision = repository.getRevision(selection.revisionId);
-  if (!revision
-      || revision.projectId !== project.id
-      || revision.artifactId !== selection.artifactId
-      || !revision.toolJobId) {
-    return reject('selection_revision_mismatch', 'Selection coordinates do not match persisted Revision truth.');
-  }
+const bindAuthoritativeQuerySelection = workflowHelpers.bindAuthoritativeQuerySelection;
 
-  const getToolJob = dependencies.getToolJob || db.getToolJob;
-  const storedJob = getToolJob(revision.toolJobId);
-  if (!storedJob || storedJob.project_id !== project.id || storedJob.id !== revision.toolJobId) {
-    return reject('selection_job_mismatch', 'Selection Revision has no matching source Job truth.');
-  }
-  const job = { ...storedJob, result: parseToolJobResult(storedJob) };
-  const resolveArtifact = dependencies.resolveArtifactPath || resolveArtifactPath;
-  const selected = resolveArtifact({
-    req,
-    job,
-    project,
-    artifactName: revision.artifactId,
-  });
-  if (selected.error) return selected;
-  if (selected.expectedSha256 !== revision.outputHash) {
-    return reject('selection_revision_artifact_drift', 'Revision bytes do not match source Job Artifact Truth.');
-  }
-
-  const interaction = resolveInteractionDescriptor(
-    job.tool_id,
-    selected.artifactRecord,
-    revision.artifactId,
-    { getPluginManifest: dependencies.getPluginManifest },
-  );
-  const mapping = interaction.mapping;
-  const idField = mapping?.idField || mapping?.rowIdField || null;
-  if (!idField || !mapping?.entityType) {
-    return reject('selection_mapping_unavailable', 'Source plugin has no stable entity mapping for this selection.');
-  }
-  if (selection.entityType !== mapping.entityType) {
-    return reject('selection_entity_type_mismatch', 'Selection entity type does not match source plugin truth.');
-  }
-
-  const queryName = backingArtifactName(interaction) || revision.artifactId;
-  const backing = queryName === revision.artifactId
-    ? selected
-    : resolveArtifact({ req, job, project, artifactName: queryName });
-  if (backing.error) return backing;
-
-  let query;
-  try {
-    query = (dependencies.queryResultTable || queryResultTable)({
-      filePath: backing.absolutePath,
-      expectedSha256: backing.expectedSha256,
-      idField,
-      filterExpression: selection.filterExpression,
-      sort: selection.sort,
-      offset: 0,
-      limit: 1,
-    });
-  } catch (error) {
-    return reject(error?.code || 'selection_query_recompute_failed', 'Selection query could not be recomputed from Artifact Truth.');
-  }
-  const afterRead = (dependencies.verifyArtifactRecordBytes || verifyArtifactRecordBytes)(
-    backing.artifactRecord,
-    backing.absolutePath,
-  );
-  if (afterRead.error) return afterRead;
-
-  const evidence = query?.selectionEvidence;
-  const authoritativeSample = Array.isArray(evidence?.sampleEntityIds)
-    ? [...new Set(evidence.sampleEntityIds.map((value) => String(value).trim()).filter(Boolean))]
-    : [];
-  const suppliedSample = [...new Set((selection.entityIds || []).map((value) => String(value).trim()).filter(Boolean))];
-  const sameSample = JSON.stringify([...suppliedSample].sort())
-    === JSON.stringify([...authoritativeSample].sort());
-  if (!evidence
-      || evidence.idField !== idField
-      || !Number.isInteger(evidence.entityIdCount)
-      || evidence.entityIdCount < 1
-      || !/^[a-f0-9]{64}$/.test(String(evidence.entityIdsHash || ''))
-      || selection.entityIdCount !== evidence.entityIdCount
-      || selection.entityIdsHash !== evidence.entityIdsHash
-      || selection.filterHash !== query.filterHash
-      || !sameSample) {
-    return reject(
-      'selection_query_evidence_mismatch',
-      'Browser selection evidence does not match the authoritative Artifact query.',
-    );
-  }
-
-  return {
-    authoritative: true,
-    selection: {
-      ...selection,
-      entityIds: authoritativeSample,
-      entityIdCount: evidence.entityIdCount,
-      entityIdsTruncated: evidence.entityIdCount > authoritativeSample.length,
-      entityIdsHash: evidence.entityIdsHash,
-      filterHash: query.filterHash,
-      filterExpression: query.filterExpression,
-      sort: query.sort,
-      displayState: {
-        ...(selection.displayState || {}),
-        evidenceAuthority: 'server_artifact_truth',
-      },
-    },
-  };
-}
 
 /**
  * 把 artifact 名解析为工作区内的真实路径。
@@ -692,89 +219,8 @@ function bindAuthoritativeQuerySelection({ req, project, selection, repository }
  * 只允许 output/ 下的文件名，不接受路径分隔符或 `..`，
  * 再用 layout 派生的绝对路径做包含性复核。
  */
-function resolveArtifactPath({ req, job, project, artifactName }, dependencies = {}) {
-  if (typeof artifactName !== 'string' || artifactName.trim() === '') {
-    return { error: { status: 400, code: 'artifact_required' } };
-  }
-  const name = artifactName.trim();
-  if (name.includes('\0') || name.includes('/') || name.includes('\\') || name.includes('..')) {
-    return { error: { status: 400, code: 'artifact_name_invalid' } };
-  }
-  const unavailable = artifactTruthAvailability(job?.result);
-  if (unavailable) return unavailable;
-  const resolveLayout = dependencies.resolveProjectRunLayout || resolveProjectRunLayout;
-  let layout;
-  try {
-    layout = resolveLayout({
-      projectId: project.id,
-      toolJobId: job.id,
-      db,
-      userId: userId(req),
-      skipPermissionCheck: isAdminOrInternal(req),
-      ensureDirs: false,
-    });
-  } catch (error) {
-    return { error: { status: 409, code: 'layout_unavailable', message: error && error.message } };
-  }
-  const outputDir = layout.outputDir || path.join(layout.jobDir, 'output');
-  // Some canonical plugins predate the unified output/ layout and persist
-  // their declared artifacts directly under the Job directory.  The Job's
-  // Artifact Truth already contains the authoritative path; derive from that
-  // record first instead of pretending every valid artifact lives in output/.
-  // The caller still supplies only an id/name (never a path), and the resolved
-  // target must remain inside the canonical Job directory.
-  const declared = Array.isArray(job?.result?.artifacts) ? job.result.artifacts : [];
-  const declaredMatches = declared.filter((artifact) => artifact && (
-    artifact.id === name
-    || artifact.name === name
-    || artifact.filename === name
-    || path.basename(String(artifact.path || '')) === name
-  ));
-  if (declaredMatches.length === 0) return artifactTruthError(
-    'artifact_record_missing',
-    'The selected file is not present in Job Artifact Truth.',
-  );
-  if (declaredMatches.length > 1) return artifactTruthError(
-    'artifact_identity_ambiguous',
-    'The selected file does not resolve to one unique Artifact Truth record.',
-  );
-  let absolutePath;
-  if (declaredMatches.length === 1 && declaredMatches[0].path) {
-    try {
-      const jobRoot = fs.realpathSync(layout.jobRoot || layout.jobDir);
-      const declaredPath = fs.realpathSync(declaredMatches[0].path);
-      if (!isPathContained(jobRoot, declaredPath) || !fs.statSync(declaredPath).isFile()) {
-        return { error: { status: 400, code: 'artifact_outside_job' } };
-      }
-      absolutePath = declaredPath;
-    } catch {
-      return artifactTruthError(
-        'artifact_file_unavailable',
-        'The selected Artifact file is unavailable.',
-      );
-    }
-  }
-  if (!absolutePath) {
-    const absolute = path.resolve(outputDir, name);
-    const resolvedOutput = path.resolve(outputDir);
-    if (absolute !== resolvedOutput && !absolute.startsWith(resolvedOutput + path.sep)) {
-      return { error: { status: 400, code: 'artifact_outside_output' } };
-    }
-    if (!fs.existsSync(absolute)) return artifactTruthError(
-      'artifact_file_unavailable',
-      'The selected Artifact file is unavailable.',
-    );
-    absolutePath = absolute;
-  }
-  const binding = findArtifactRecord(job.result, absolutePath, name);
-  if (binding.error) return binding;
-  return {
-    absolutePath,
-    layout,
-    artifactRecord: binding.artifactRecord,
-    expectedSha256: binding.expectedSha256,
-  };
-}
+const resolveArtifactPath = workflowHelpers.resolveArtifactPath;
+
 
 module.exports = function registerResultStudioRoutes(app) {
   // 鉴权说明：BioF3 Desktop 是 loopback-only 单本地管理员应用，
