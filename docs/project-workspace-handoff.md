@@ -2,6 +2,9 @@
 
 最后更新：2026-08-16 20:45（BLOCK-5-IPC-BRIDGE-FINALIZE 工作包启动 —— 按用户裁决"1-4 搞完"启动 4 候选中的 1（E1 poller 性能）+ 4（H1/H2 BLOCK-2 文档修订）；E1-b execute 立即 publish pending + E1-c 终态立即停 poller + H1 plan §3.1.A 修订 + H2 closeout R8/R9/R10 补充 = 4 项微调；候选 2/3 dev Electron 实机留 BLOCK-6+；DOC-REGISTRY 新增 BLOCK-5-IPC-BRIDGE-FINALIZE status=active）
 
+
+- **BLOCK-11-BIOSKILLS-INTEGRATION 工作包启动（PHASE 0 commit 02ea7bd）**：2026-08-18 用户裁决 "block-11-bioSkills" 启动。GPTomics/bioSkills.git 32 categories × ~170 SKILL.md → BioF3 plugin/skill 映射。Top 5 priority single-cell (P0 95) / variant-calling (P0 92) / pathway-analysis (P1 85) / methylation-analysis (P1 82) / read-qc (P2 78)。plan v1.0 / 14 § / 6 PHASE 落地 `docs/block-11-bioSkills-integration-plan-v1.0.md`（278 行）。**3 个并行 WS** 收口：WS-A commit `b5e37a8` 提交 2 真 untracked (block-11 v0.1 DRAFT + diagnose-traffic-lights 报告) / WS-B chf0-critical 5 步定向测试全绿 39+23+19=81 tests pass + 0 TS errors + 0 fail / WS-D commit `02ea7bd` 提升 PLAN v0.1 → v1.0 canonical + DOC-REGISTRY active 登记 + README 同步。4 治理门 GREEN（docs:check 115 / docs:reconcile 0 / tsc 0 / ui:audit:check 4 pre-existing drift）。WS-C (CDP-wrap 实机 UI-157/158/159/161 验证) 取消，留 BLOCK-12+ 单独工作包。**当前 active 工作包**：BLOCK-11-BIOSKILLS-INTEGRATION（PHASE 0 调研 + 5 PHASE 收口）。**不外推** packaged / Provider / GA / P7 / notarization / dist staleness G1+ / marketplace 真实后端 / packaged artifact / Provider 矩阵 / OSS 远程分发 / GA 公证流水线 / MCP 暴露 / 32 category 全实现 / 不重新激活 BLOCK-2/3/4/5/6/7/8/9/9.1/9.2/10 系列 / 不动 agent-tools/* / agent-transcripts/*。**Push 故障恢复**：2 次 github.com:443 timeout（75s + 60s）通过 gh CLI Diandian-ops token 推送成功 | BLOCK-11-BIOSKILLS-INTEGRATION / PHASE-0-LAUNCH |
+
 ## 1. 恢复顺序
 
 新的 Agent 不应通读历史计划猜测主线。按以下顺序恢复：
