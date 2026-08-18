@@ -531,3 +531,12 @@ UI Stage 1：
 **§3 当前 active 工作包**：NONE（BLOCK-10-AUDIT-CLOSEOUT 已 completed / 4 PHASE 全部收口）。
 
 **§下一工作包候选**（按 G0 阶段纪律不主动推荐，需用户显式裁决）：observability-work-package（OB-001 console→logger 全量替换 / OB-003 metrics 端点 / OB-007 跨进程 unhandledRejection）/ SSE 治理（Mi-002 / Mi-003 / Mi-004 三处协议细节统一 + PR-004 SSE keepalive）/ RetryClassifier / RetryBudget / RetryExecutor 三套重试策略合并 + 错误处理体系化重设计 / Agent Loop 事件类型命名规范化（C-012 8+ 种 event 类型与 Result Studio 体系耦合）。
+
+### 3.1 已完成工作包：BLOCK-11-PRELOAD-SANDBOX-FIX（2026-08-18 用户裁决修同日收口）
+
+- 状态：`completed`（用户裁决启动同日收口）；closeout 报告 `docs/block-11-preload-sandbox-fix-closeout.md`（115 行 / 11 节）。
+- 范围：`src/preload.js` 单文件 line-level 修复；A-009 引入的 traffic lights 消失回归。
+- 验证（CDP 实机 dev Electron）：`window.biof3Desktop` undefined→object / `[class*="traffic"]` 0→4 / header button 6→9 / IPC click 成功。
+- 治理门：`docs:check` PASS / `tsc --noEmit` 0 错 / `ui:audit:check` 4 项 pre-existing drift（与本工作包无关）/`node --check src/preload.js` 0 错。
+- 不变量守住：sandbox: true 保持 / 8 IPC 通道签名 0 diff / electron.d.ts + desktopBridge.ts + env-coordinator.js 0 diff。
+- **当前无 active 工作包**。
