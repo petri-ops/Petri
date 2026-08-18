@@ -1,12 +1,21 @@
 # BLOCK-10-ARCHITECTURE 工作包计划
 
-**版本**：v0.1（PHASE 0 架构调研后，主 agent 起草 active 工作包计划）
-**起草时间**：2026-08-18
-**PHASE 0 调研 4 份**：
+**版本**：v0.2（PHASE 2 调研落地 / active 工作包）
+**升级时间**：2026-08-18
+**v0.1 → v0.2 变更**：
+- 新增 `docs/block-10-arch-ph2-routes-mapping.md`（1215 行 / 85 KB）调研报告
+- §PHASE 2 拆分由 v0.1 假设 2-3 commit 细化为 **5 commit**（PHASE-2.1a + 2.1b + 2.2a + 2.2b + 2.2c），基于调研报告 §8
+- 端点总数从 v0.1 假设"26+"（仅 A-002）修正为 **49 端点**（result-studio 27 + harness 19 + ai-agent 3）
+- 子模块从 v0.1 假设 9 个 result-studio 子域 + 3 + 4 子域修正为 **22 子文件 + 6 `_helpers/`**（基于调研报告 §4）
+- §8 风险矩阵新增 3 项红旗（LEGACY SSE 786 行单端点 / 共享闭包变量跨子文件传递 / 主文件 facade `_test` 字段延后赋值避免循环）
+- §PHASE 2 验证门随 5 commit 调整新增 3 个测试（routes-result-studio-split / routes-harness-split / routes-ai-agent-split）
+
+**PHASE 0 调研 4 份 + PHASE 2 调研 1 份**：
 - [`docs/block-10-arch-ph0-survey.md`](./block-10-arch-ph0-survey.md) — 19 项修复单元详细清单 + 同根组合 + 跨包边界 + 阶段归属 + 工作量估算
 - [`docs/block-10-arch-ph0-fix-order.md`](./block-10-arch-ph0-fix-order.md) — 依赖 DAG + commit 拆分 + PHASE 划分 + 关键路径 + 可并行 ID
 - [`docs/block-10-arch-ph0-test-matrix.md`](./block-10-arch-ph0-test-matrix.md) — 19 项测试需求 + 新增/复用/不需要分类 + 验证门限
 - [`docs/block-10-arch-ph0-risks.md`](./block-10-arch-ph0-risks.md) — 19 项风险矩阵 + 跨包冲突 + 性能/兼容性/r-server 大文件拆分特别风险 + G1+ 不外推
+- [`docs/block-10-arch-ph2-routes-mapping.md`](./block-10-arch-ph2-routes-mapping.md) — PHASE 2 调研：**49 端点完整清单**（27+19+3）+ **22 子模块 + 6 `_helpers/`** 拆分范式 + **5 commit 拆分建议**（2.1a facade / 2.1b 9 子域 15 端点 / 2.2a / 2.2b / 2.2c）+ 0 循环依赖 + 3 红旗（LEGACY SSE 单端点 / 共享闭包变量 / 主文件 facade `_test` 延后赋值）
 
 **基线 audit 报告**（已收口，只读引用）：
 - [`docs/agent-harness-architecture-audit-2026-08-17.md`](./agent-harness-architecture-audit-2026-08-17.md)（805 行 / 12 项 A-001..A-012）
@@ -53,7 +62,7 @@
 |-------|------|------|-------------|
 | **PHASE 0** | 架构调研 4 份 + plan v0.1 起草 | ✅ **本任务收口**（0 代码改动） | 0（只新建 5 文件） |
 | **PHASE 1** | DB 体系化（P1 快赢）：A-007 DB singleton 抽 `_db-singleton.js` + A-009 端口统一 + A-010 移除 jspdf dead dep | ⏳ 待启动 | 1-2 |
-| **PHASE 2** | r-server 大文件拆分（A-002 routes/result-studio.js 1800 行 / 26+ 端点 + A-005 routes/harness.js 1366 行 + A-005b routes/ai-agent.js 1222 行） | ⏳ 待启动 | 2-3 |
+| **PHASE 2** | r-server 大文件拆分（**49 端点**：A-002 routes/result-studio.js 1800 行 / 27 端点 + A-005 routes/harness.js 1366 行 / 19 端点 + A-005b routes/ai-agent.js 1222 行 / 3 端点含 legacy SSE 786 行）→ **22 子文件 + 6 `_helpers/` + 5 commit** | ⏳ 待启动 | **5** |
 | **PHASE 3** | agent-runner.js 拆分（A-001 1799 行 → LoopOrchestrator + ConversationAdapter）+ 跨层反向依赖修复（A-003）+ 56+ singleton 收敛（A-006 部分） | ⏳ 待启动 | 1-2 |
 | **PHASE 4** | audit + closeout（4 canonical 文档同步 + DOC-REGISTRY active → completed + ui-productization-audit ledger + closeout 报告 v1.0） | ⏳ 待启动 | 2-3 |
 
@@ -161,7 +170,7 @@
 | **A-009** | dev 模式手动启动 r-server 不带 env，端口 fallback 在 3003 / 3001 之间漂移 | dev Electron 边界内 verified | PHASE 1.2 |
 | **A-010（仅 jspdf）** | frontend/package.json 装 jspdf 但 0 import；214 处 process.env.* 散落 | dev Electron + packaged 边界内 verified | PHASE 1.2（仅移除 jspdf + 6 处 process.env.* 集中） |
 
-### §3.2 P1 r-server 大文件拆分（PHASE 2 — 2-3 commit）
+### §3.2 P1 r-server 大文件拆分（PHASE 2 — 5 commit，基于 `docs/block-10-arch-ph2-routes-mapping.md` 调研）
 
 | ID | 用户可见症状 | 当前阶段边界 | commit |
 |----|--------------|--------------|--------|
@@ -190,16 +199,17 @@
 
 ## §4 PHASE 划分（基于依赖 DAG）
 
-### §4.1 PHASE 0 — 架构调研 + plan v0.1 起草（**当前**）
+### §4.1 PHASE 0 — 架构调研 + plan v0.1 → v0.2 起草（**当前**）
 
 - **范围**：5 audit 报告全部读完 / 提取 19 项 BLOCK-10 §10.3 BLOCK-10-ARCHITECTURE 候选 ID / 锚定代码位置 / 识别 6 组同根关联 / 列出 3-4 PHASE 划分
-- **PHASE 0 调研 4 份 + 1 份 active plan 输出**：
+- **PHASE 0 调研 4 份 + PHASE 2 调研 1 份 + 1 份 active plan 输出**：
   - `docs/block-10-arch-ph0-survey.md` — 19 项修复单元详细清单 + 同根组合 + 跨包边界 + 阶段归属 + 工作量估算 + 修复顺序
   - `docs/block-10-arch-ph0-fix-order.md` — 依赖 DAG + commit 拆分 + PHASE 划分 + 关键路径 + 可并行 ID
   - `docs/block-10-arch-ph0-test-matrix.md` — 19 项测试需求 + 新增/复用/不需要分类 + 验证门限
   - `docs/block-10-arch-ph0-risks.md` — 19 项风险矩阵 + 跨包冲突 + 性能 + r-server 大文件拆分特别风险 + G1+ 不外推
-  - **`docs/block-10-architecture-plan.md`**（本文件）— active 工作包计划 v0.1
-- **commit 边界**：本任务范围仅新建 5 文件，**不修改任何现有源文件 / 测试 / canonical doc**，不 commit / push
+  - `docs/block-10-arch-ph2-routes-mapping.md` — **PHASE 2 调研**（v0.2 升级新增）：49 端点完整清单 + 22 子模块 + 6 `_helpers/` 拆分范式 + 5 commit 拆分建议 + 0 循环依赖 + 3 红旗
+  - **`docs/block-10-architecture-plan.md`**（本文件）— active 工作包计划 **v0.2**（v0.1 → v0.2 升级：PHASE 2 5 commit 细化 + 3 项红旗新增）
+- **commit 边界**：本任务范围仅新建 1 调研文件 + 修改 1 plan，**不修改任何现有源文件 / 测试 / canonical doc**，不 commit / push
 
 ### §4.2 PHASE 1 — DB 体系化 + 配置快赢（A-007 + PR-012 + E-019 full + A-009 + A-010）— 2 commit
 
@@ -221,30 +231,48 @@
 - 4 治理门 GREEN
 - 不变量守住（preload.js 18 namespace / electron.d.ts / desktopBridge.ts / 4 page / core/shared-backend/* 0 diff）
 
-### §4.3 PHASE 2 — r-server 大文件拆分（A-002 + A-005）— 2-3 commit
+### §4.3 PHASE 2 — r-server 大文件拆分（A-002 + A-005）— 5 commit（基于调研报告细化）
 
-**目标**：拆 `routes/result-studio.js` 1800 行 26+ 端点到 9 个 sub-domain 文件；拆 `routes/harness.js` 1366 + `routes/ai-agent.js` 1222 到各自子域文件；http 契约 100% 不变。
+**目标**：拆 `routes/result-studio.js` 1800 行 27 端点到 9 个 sub-domain 文件；拆 `routes/harness.js` 1366 行 19 端点到 8 个 sub-domain 文件；拆 `routes/ai-agent.js` 1222 行 3 端点（其中 legacy SSE 单端点 786 行）到 5 个 sub-domain 文件。**49 端点（27 + 19 + 3）全部拆分 / 22 子文件 + 6 `_helpers/` 共享 helper**。http 契约 100% 不变。
+
+**调研依据**：[`docs/block-10-arch-ph2-routes-mapping.md`](./block-10-arch-ph2-routes-mapping.md) §3（49 端点清单）+ §4（22 子模块 + 6 `_helpers/`）+ §8（5 commit 拆分）+ §9（拆分范式 facade + `_helpers/` + register 签名）。
 
 **涉及文件**：
 
-| commit | 范围 | 涉及文件 |
-|--------|------|----------|
-| **PHASE-2.1** | A-002 routes/result-studio 拆分 | `core/r-server/routes/result-studio.js` 1800 → ~400 + 9 个新子文件（repository / interaction / selection / context / changesets / revisions / storage / workspace / preview-budget） + `routes/result-studio/index.js` 注册中心 |
-| **PHASE-2.2** | A-005 routes/harness + routes/ai-agent 拆分 | `core/r-server/routes/harness.js` 1366 → ~400 + 3 个子文件（workflow / context / repair）+ `core/r-server/routes/ai-agent.js` 1222 → ~400 + 4 个子文件（chat / loop / context / tools） |
+| commit | 范围 | 涉及文件 | 端点数 | 预估 net +/- |
+|--------|------|----------|--------|-------------|
+| **PHASE-2.1a** | A-002 prep — facade + `_helpers/` prep | `routes/result-studio.js` 1800 → ~50（仅 facade）+ `_helpers/auth.js`（新 ~80）+ `_helpers/project-context.js`（新 ~60）+ `_helpers/result-studio-shared.js`（新 ~260） | 0（pure refactor / 不涉及端点拆分） | result-studio.js +50/-1800；_helpers/* 共 +400 |
+| **PHASE-2.1b** | A-002 落地 — 9 个子域文件 | `routes/result-studio/repository.js`（2 端点）+ `interaction.js`（2 端点）+ `selection.js`（6 端点）+ `context.js`（1 端点）+ `changesets.js`（4 端点）+ `revisions.js`（5 端点）+ `storage.js`（4 端点）+ `workspace.js`（2 端点）+ `preview-budget.js`（1 端点）+ `routes/result-studio/index.js`（注册中心）+ `test/routes-result-studio-split.test.mjs`（新 ~200） | 27 | 9 子文件合计 +1100；index.js +60；test 新 +200 |
+| **PHASE-2.2a** | A-005 harness prep — facade + `_helpers/` prep | `routes/harness.js` 1366 → ~50（仅 facade）+ `_helpers/harness-shared.js`（新 ~200）+ `_helpers/workspace-file-index.js`（新 ~100） | 0（pure refactor） | harness.js +50/-1366；_helpers/* 共 +300 |
+| **PHASE-2.2b** | A-005 harness 落地 — 8 个子域文件 | `routes/harness/scientific-task.js`（8 端点）+ `workflow.js`（2 端点）+ `recovery.js`（1 端点）+ `file-references.js`（2 端点）+ `tools.js`（2 端点）+ `feedback.js`（1 端点）+ `health.js`（1 端点）+ `events.js`（2 端点）+ `routes/harness/index.js`（注册中心）+ `test/routes-harness-split.test.mjs`（新 ~200） | 19 | 8 子文件合计 +1230；index.js +50；test 新 +200 |
+| **PHASE-2.2c** | A-005 ai-agent 落地 — 5 个子域文件 | `routes/ai-agent/chat.js`（1 端点含 legacy SSE 786 行）+ `context.js`（1 端点）+ `events.js`（1 端点）+ `tools.js`（1 端点）+ `routes/ai-agent/index.js`（注册中心）+ `test/routes-ai-agent-split.test.mjs`（新 ~150） | 3 | ai-agent.js +20/-1222；5 子文件合计 +1440；test 新 +150 |
 
-**commit 边界**：2 commit（PHASE-2.1 / PHASE-2.2）；如 PHASE-2.1 拆分过程中需要中间稳定性 commit，可加 PHASE-2.1a / 2.1b 拆为 2 commit（**最大 3 commit**）
+**commit 边界**：**5 commit**（PHASE-2.1a / PHASE-2.1b / PHASE-2.2a / PHASE-2.2b / PHASE-2.2c）。如 PHASE-2.1b 端点拆分遇 partial-export 雷区（与 A-008 act-tools 循环同源），降级为 6 commit 拆法（调研 §8.3）：2.1b-i repository + interaction（4 端点 P0）/ 2.1b-ii selection + context（7）/ 2.1b-iii changesets + revisions（9）/ 2.1b-iv storage + workspace + preview-budget（7）/ 2.2b harness 19 / 2.2c ai-agent 3。
+
+**共享 helper 落地**：`routes/_helpers/` 下 6 个文件 — `auth.js`（canAccessProject / canAccessJob，跨 3 大文件复用，唯一真正"跨文件共享 helper"）/ `project-context.js`（projectContext）/ `result-studio-shared.js`（attachExistingRepositoryWithExplicitConsent 等）/ `harness-shared.js`（workspaceFileNameIndex 构建等）/ `workspace-file-index.js`（为 harness 预留未来扩展）/ `ai-agent-shared.js`（_buildResultCardFromRunTool / _pushUniqueResultCard）。主文件 facade + 子文件 `register(app, options)` 签名 + 子文件 `_test` 字段全部统一。
 
 **验证矩阵**：
 - `node --check` 全部 OK
-- 既有 chf0-http / route-level 测试 0 退化
+- 既有 chf0-http / chf0-critical / route-level 测试 0 退化
 - vitest 75/630 0 退化
-- 4 治理门 GREEN
-- 不变量守住（http 契约 100% 不变；端点 channel 名 / payload shape 100% 一致）
+- 4 治理门 GREEN（docs:check / ui:audit:check / tsc --noEmit / docs:reconcile）
+- 不变量守住（http 契约 100% 不变；端点 channel 名 / payload shape 100% 一致；preload.js / electron.d.ts / desktopBridge.ts / 4 page / core/shared-backend/* 0 diff）
 
-**r-server 大文件拆分特别风险**：
-- routes/result-studio.js 是 26+ 端点 HTTP 边界，http 契约 100% 不变是硬约束
+**PHASE-2.1a 专项验证**（commit 1 最小验证）：
+- `result-studio-route-baseline.test.mjs` 既有 9 helper 通过 `route._test` 引用 0 diff（主文件 facade re-export）
+- 既有 chf0-http / result-studio / harness / loop / ai-agent 测试 0 退化
+- 0 行为变化（pure refactor）
+
+**r-server 大文件拆分特别风险**（基于调研 §10）：
+- routes/result-studio.js 是 27 端点 HTTP 边界，http 契约 100% 不变是硬约束
 - 既有 route-level 测试是契约边界证据；PHASE 2 拆分后必须确保所有 chf0-http + result-studio 测试 0 退化
 - 拆分过程中如遇 partial-export 现象（与 A-008 act-tools 循环同源），优先用提取独立模块策略（参考 BLOCK-3 `_mapSkillRuntimeStatus.js` 范式）
+- **🔴 LEGACY SSE 786 行单端点**（ai-agent.js 第 311-1097 行）几乎不可拆，**保留在 routes/ai-agent/chat.js 单文件内**（PHASE 2 最大风险点）
+- **🟠 共享闭包变量跨子文件传递**：`repositoryInstance` / `replayService` / `baselineWork` / `workspaceInspectionWork` / `databasePath`（result-studio 闭包）必须通过 `options` 传给子文件；`recoveryConfirmations` Map（harness.js TTL 5min）保留在 workflow 子文件内部闭包
+- **🟠 主文件 facade `_test` 字段延后赋值**避免子文件 require 主文件导致初始化循环
+- **🟠 路由顺序敏感**：`routes/index.js` 中 Harness 注册位置（第 39 行）必须在 Tools 前、Feedback 后；`/api/result-studio/revisions/:revisionId/...` 13/14/23/26/27 端点按声明顺序匹配；`/api/harness/scientific-task/*` 7/8/9/10/13/14 按声明顺序
+- **🟢 0 循环依赖**：调研 §12.2 验证 result-studio 内部 / ai-agent 内部 / 主文件 ↔ 子文件均无循环依赖
+- **🟢 3 文件无直接路由间调用**（grep 0 匹配 routes/result-studio.js ↔ routes/harness.js 等），共享仅通过 `core/r-server/db.js` / `plugin-loader.js` / `cache-manager.js` 全局模块（调研 §12.1 #4）
 
 ### §4.4 PHASE 3 — agent-runner 拆分 + 跨层反向 + 循环解环（A-001 + A-003 + A-008 + A-006 部分）— 1-2 commit
 
@@ -536,6 +564,14 @@ node --test \
 
 详见 `docs/block-10-arch-ph0-risks.md` §6。
 
+### §8.8 PHASE 2 调研新增 3 项红旗（基于 `docs/block-10-arch-ph2-routes-mapping.md` §10 / §12.3）
+
+| # | 红旗 | 等级 | 触发原因 | 缓解 |
+|---|------|------|----------|------|
+| **🚩-1** | LEGACY SSE 单端点 786 行（`POST /api/ai/agent`，`routes/ai-agent.js` 第 311-1097 行）几乎不可拆 | 🔴 高 | ai-agent.js 仅 3 端点但单端点 786 行 + 30+ helper 调用 + SSE 流式输出 + 多阶段编排 | **不拆端点**，保留在 `routes/ai-agent/chat.js` 单文件内；仅将 `_buildResultCardFromRunTool` + `_pushUniqueResultCard` 抽到 `_helpers/ai-agent-shared.js`；其余 helper 留 `chat.js` 闭包。既有 `g0-chf0-*` + loop-api-route 测试 0 退化是契约边界证据。 |
+| **🚩-2** | 共享闭包变量跨子文件传递 | 🟠 中 | `repositoryInstance` / `replayService` / `baselineWork` / `workspaceInspectionWork` / `databasePath`（result-studio 闭包）跨 9 个子文件共享；`recoveryConfirmations` Map（harness.js TTL 5min）跨 workflow/action + workflow/status 两端点 | 通过 `options` 闭包变量传递（`routes/<domain>/index.js` 注册中心闭包持有 + 子文件 `register(app, options)` 接收）；`recoveryConfirmations` 保留在 `routes/harness/workflow.js` 闭包内部 |
+| **🚩-3** | 主文件 facade `_test` 字段延后赋值避免初始化循环 | 🟠 中 | `routes/<domain>.js` 主文件 facade `_test` 字段 require 所有子文件 → 子文件 `_test` 字段 require 主文件 → 初始化时循环 | 主文件 facade `_test` 字段**延后赋值**（在所有子文件 require 完成后再填充）；子文件 `_test` 字段直接 export 本文件函数，**不反向 require 主文件**；既有 `result-studio-route-baseline.test.mjs` 9 helper 0 diff |
+
 ---
 
 ## §9 验收门
@@ -555,7 +591,9 @@ node --test \
 | 既有 vitest 0 退化 | 75 文件 630 tests PASS | `npm run test:changed` |
 | 不变量守住 | preload.js / electron.d.ts / desktopBridge.ts 0 diff | `git diff --name-only` |
 
-### §9.2 PHASE 2 验收门（A-002 + A-005）
+### §9.2 PHASE 2 验收门（A-002 + A-005 — 5 commit）
+
+**总目标**：49 端点（27 + 19 + 3）拆分落地；22 子文件 + 6 `_helpers/`；http 契约 100% 不变；既有 chf0-http + route-level 测试 0 退化。
 
 | 验收项 | 期望 | 命令 |
 |--------|------|------|
@@ -563,13 +601,43 @@ node --test \
 | docs:check PASS | 注册文档数 PASS | `npm run docs:check` |
 | ui:audit:check PASS | UI ID 数 PASS | `npm run ui:audit:check` |
 | docs:reconcile 0 drift | 0 drift | `npm run docs:reconcile` |
-| 既有 chf0-http 33/33 | 0 退化 | `node scripts/g0-chf0-acceptance.mjs` |
-| 既有 result-studio 测试 0 退化 | 全部 PASS | `npm run test:changed` |
+| 既有 chf0-critical / chf0-http 33/33 | 0 退化 | `node scripts/g0-chf0-acceptance.mjs` |
+| 既有 result-studio + harness + loop + ai-agent 测试 0 退化 | 全部 PASS | `npm run test:changed` |
 | 新增 routes-result-studio-split.test | 5+/5+ PASS | `node --test test/routes-result-studio-split.test.mjs` |
 | 新增 routes-harness-split.test | 5+/5+ PASS | `node --test test/routes-harness-split.test.mjs` |
 | 新增 routes-ai-agent-split.test | 5+/5+ PASS | `node --test test/routes-ai-agent-split.test.mjs` |
 | http 契约 100% 不变 | 端点 channel 名 + payload shape 完全一致 | `git diff --stat` + manual grep |
+| 49 端点全部落地 | 27 + 19 + 3 | `grep -c "app\." core/r-server/routes/{result-studio,harness,ai-agent}/{*/}*.js` |
+| 22 子文件 + 6 `_helpers/` 落地 | 文件数一致 | `ls core/r-server/routes/{result-studio,harness,ai-agent,_helpers}` |
+| 0 循环依赖 | require 方向无环 | `node --check` + `test/routes-*-split.test.mjs` |
 | 不变量守住 | preload.js / electron.d.ts / desktopBridge.ts 0 diff | `git diff --name-only` |
+
+**PHASE-2.1a 专项验证**（commit 1 / facade + `_helpers/` prep）：
+- `result-studio-route-baseline.test.mjs` 既有 9 helper 通过 `route._test` 引用 0 diff（主文件 facade re-export）
+- `node --check` 全部 OK
+- 既有 chf0-http + result-studio + harness + loop + ai-agent 测试 0 退化
+- 0 行为变化（pure refactor）
+
+**PHASE-2.1b 专项验证**（commit 2 / 9 子域文件落地）：
+- 27 端点全部落地（repository 2 / interaction 2 / selection 6 / context 1 / changesets 4 / revisions 5 / storage 4 / workspace 2 / preview-budget 1）
+- 端点声明顺序与原文件 856-1786 范围一致
+- `node --check` + `test/routes-result-studio-split.test.mjs` 全 PASS
+- 既有测试 0 退化
+
+**PHASE-2.2a 专项验证**（commit 3 / harness facade + `_helpers/` prep）：
+- 同 PHASE-2.1a 模式 + 既有 `chat-file-references-route.cjs` / `loop-api-route.test.mjs` / `loop-iterate-route.test.mjs` 0 退化
+
+**PHASE-2.2b 专项验证**（commit 4 / 8 子域文件落地）：
+- 19 端点全部落地（scientific-task 8 / workflow 2 / recovery 1 / file-references 2 / tools 2 / feedback 1 / health 1 / events 2）
+- `recoveryConfirmations` Map 保留在 `routes/harness/workflow.js` 闭包内部
+- `test/routes-harness-split.test.mjs` 全 PASS
+
+**PHASE-2.2c 专项验证**（commit 5 / ai-agent 子域文件落地）：
+- 3 端点全部落地（chat 1 含 legacy SSE 786 行 / context 1 / events 1 / tools 1 — ai-agent index 注册 4 个子文件）
+- LEGACY SSE 786 行完整保留在 `routes/ai-agent/chat.js` 单文件内（PHASE 2 最大风险点）
+- 仅 `_buildResultCardFromRunTool` + `_pushUniqueResultCard` 抽到 `_helpers/ai-agent-shared.js`
+- `test/routes-ai-agent-split.test.mjs` 全 PASS
+- 既有 `g0-chf0-*` + loop-api-route 测试 0 退化是契约边界证据
 
 ### §9.3 PHASE 3 验收门（A-001 + A-003 + A-008 + A-006 部分）
 
@@ -601,14 +669,14 @@ node --test \
 | vitest 75/630 | 0 退化 | `npm run test:changed` |
 | 19 项 ID 处理完整 | 12 项主范围落地 + 7 项关联登记 | `cat docs/block-10-architecture-closeout.md` |
 
-### §9.5 v0.1 active 工作包收口（最终验收）
+### §9.5 v0.2 active 工作包收口（最终验收）
 
-- ✅ PHASE 0 架构调研 5 文件产出（本任务）
+- ✅ PHASE 0 架构调研 4 文件 + PHASE 2 调研 1 文件产出（v0.1 → v0.2 升级）
 - ⏳ PHASE 1 DB 体系化 + 配置快赢（2 commit）
-- ⏳ PHASE 2 r-server 大文件拆分（2-3 commit）
+- ⏳ PHASE 2 r-server 大文件拆分（**5 commit**：2.1a / 2.1b / 2.2a / 2.2b / 2.2c）
 - ⏳ PHASE 3 agent-runner + 跨层反向 + 循环解环（1-2 commit）
 - ⏳ PHASE 4 audit + closeout（2-3 commit）
-- ✅ 5 audit 报告 + 本计划 v0.1 + 4 份 PHASE 0 调研 = 完整证据链
+- ✅ 5 audit 报告 + 本计划 v0.2 + 4 份 PHASE 0 调研 + 1 份 PHASE 2 调研 = 完整证据链
 
 ---
 
