@@ -7,11 +7,18 @@
  *   2. UI 提交 subject 未带 UI-### issue id（允许白名单豁免）→ FAIL
  *   3. 实现同步但未通过 git 提交同步台账 → FAIL
  *
- * 退出码契约（GATES-1 文档化，2026-08-16）：
+ * 退出码契约（GATES-1 文档化，2026-08-16；GATES-3 补强，2026-08-18）：
  *   0   PASS — UI 实现与审计台账已同步；Git 历史已有 UI 编号实现证据
  *   1   FAIL — UI 改动未同步台账 / submission issue id 缺失 / 台账不同步
- *   2   保留 — 当前未触发；为未来"白名单冲突 / 分类冲突"扩展预留
- *       （如新加 hasUnmappedSurface 之类的检测分支时使用 2；本阶段不启用）
+ *   2   分类冲突 — 当前触发条件（GATES-3）：
+ *       - hasUnmappedSurface：commit subject 引用了未在
+ *         `docs/ui-productization-audit.md` 注册的 UI-### 编号（且不在
+ *         LEGACY_EXEMPTIONS），即"实现引用了未登记的 UI 编号"
+ *       - 默认模式（`--print-mode=default`）触发 hasUnmappedSurface 时直接 exit 2
+ *       - `--print-mode=development` 模式下：未命中 LEGACY_*_EXEMPTIONS 的
+ *         UI_AUDIT_SYNC / UI_ID_MISSING 等硬 FAIL 降级为 exit 2（开发者提示
+ *         而非 fail-closed），不默认启用
+ *       - `--report <path>` JSON 输出模式下：写盘失败 / schema 校验失败也 exit 2
  *
  * `--report` JSON 输出模式（GATES-2 文档化，2026-08-16）：
  *   与默认人类可读行输出并行的可选模式；通过 `--report <path>` 触发，输出
@@ -72,6 +79,22 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // 2026-08-14 Workspace UI plumbing 不可变实现提交：subject `feat(frontend)` 未带 UI-###；
   // 台账已由本次 UI-AUDIT-FIX 补登为 UI-159（in_progress）。不重写共享历史。
   '3000a069171bb6404719ddd797d1b6e64e92d53c',
+  // 2026-08-17 macOS fullscreen 按钮实现不可变提交 d9906fd：subject `fix(mac)` 未带 UI-###；
+  // 台账已由本次 BLOCK-14 UI-AUDIT-FIX 补登为 UI-161（in_progress）。
+  // 不重写共享历史。
+  'd9906fd0b7b7060aeb6a9e954c3137db305a0a63',
+  // 2026-08-17 macOS fullscreen 重构不可变提交 d08d8b1：subject `refactor(mac)` 未带 UI-###；
+  // 与 d9906fd 同一工作流（custom traffic lights fullscreen），台账已登记 UI-161。
+  // 不重写共享历史。
+  'd08d8b11ba78de8ac0dad5392455c711c8fbe5a9',
+  // 2026-08-18 SimpleChat + workspace panels 不可变实现提交 c271010：subject
+  // `feat(copilot-chat)` 未带 UI-###；台账已由本次 BLOCK-14 UI-AUDIT-FIX
+  // 补登为 UI-162（in_progress）。不重写共享历史。
+  'c271010035168678662719a0790c9af17ea61807',
+  // 2026-08-18 Result Studio 前端 + 持久化不可变实现提交 e40313e：subject
+  // `feat(branch-result-studio)` 未带 UI-###；台账已由本次 BLOCK-14
+  // UI-AUDIT-FIX 补登为 UI-163（in_progress）。不重写共享历史。
+  'e40313e0e81f5a9ee70ace158cebb8a3e688a9ca',
 ])
 // These immutable implementation commits have an explicit later canonical
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
@@ -113,6 +136,20 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // UI-AGENTWB-002 的 audit row + changelog 已在 UI-AUDIT-FIX 5c811f8
   // 一起并入 docs/ui-productization-audit.md，本次 commit 不再单独触碰台账。
   '2ba838be3a046c7b00927bf2d9101c9ad1c6df2e',
+  // 2026-08-17 macOS fullscreen 按钮实现不可变提交 d9906fd：台账已由本次
+  // BLOCK-14 UI-AUDIT-FIX 补登为 UI-161（in_progress）。豁免同提交台账要求。
+  'd9906fd0b7b7060aeb6a9e954c3137db305a0a63',
+  // 2026-08-17 macOS fullscreen 重构不可变提交 d08d8b1：台账已由本次
+  // BLOCK-14 UI-AUDIT-FIX 补登为 UI-161（in_progress）。豁免同提交台账要求。
+  'd08d8b11ba78de8ac0dad5392455c711c8fbe5a9',
+  // 2026-08-18 SimpleChat + workspace panels 不可变实现提交 c271010：
+  // 台账已由本次 BLOCK-14 UI-AUDIT-FIX 补登为 UI-162（in_progress）。
+  // 豁免同提交台账要求。
+  'c271010035168678662719a0790c9af17ea61807',
+  // 2026-08-18 Result Studio 前端 + 持久化不可变实现提交 e40313e：
+  // 台账已由本次 BLOCK-14 UI-AUDIT-FIX 补登为 UI-163（in_progress）。
+  // 豁免同提交台账要求。
+  'e40313e0e81f5a9ee70ace158cebb8a3e688a9ca',
 ])
 // UI-### issue ids: numeric series (UI-001..UI-999) and the named
 // AGENTWB namespace (UI-AGENTWB-001..UI-AGENTWB-999) used by the
@@ -206,6 +243,156 @@ function baselineIsAvailable() {
     return true
   } catch {
     return false
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GATES-3 (BLOCK-14) additions below — keep the legacy synchronous
+// `runUiAudit()` unchanged for the default `npm run ui:audit:check` path.
+// ---------------------------------------------------------------------------
+
+import fsSync from 'node:fs'
+
+// Load all UI-### ids registered in docs/ui-productization-audit.md.
+// The set is the source of truth for "hasUnmappedSurface" detection —
+// a commit subject that references a UI-### id absent from this set
+// (and not LEGACY_EXEMPTIONS-covered) classifies as a "未登记引用"
+// classification conflict (exit 2).
+function loadRegisteredUiIdsSync() {
+  const content = fsSync.readFileSync(AUDIT_PATH, 'utf8')
+  return uiIds(content)
+}
+
+// Async variant — used by callers that already have an event loop
+// running (vitest harness, `--report` JSON mode).
+async function loadRegisteredUiIds() {
+  return loadRegisteredUiIdsSync()
+}
+
+// Detect "未登记 UI 编号" classification conflicts.
+//
+// A commit subject that mentions a UI-### id not present in
+// `registeredIds` (and not LEGACY_EXEMPTIONS-covered) returns a
+// UI_AUDIT_UNMAPPED failure; otherwise returns null. Pure function —
+// exercised by unit tests without touching the git repository.
+function detectUnmappedSurface({
+  commit,
+  subject,
+  body = '',
+  registeredIds,
+  legacyMessageExemptions,
+  legacyAuditSyncExemptions,
+}) {
+  const ids = uiIds(`${subject}\n${body}`)
+  if (ids.length === 0) return null
+  const unmapped = ids.filter((id) => !registeredIds.includes(id))
+  if (unmapped.length === 0) return null
+  if (
+    legacyMessageExemptions.has(commit) ||
+    legacyAuditSyncExemptions.has(commit)
+  ) {
+    return null
+  }
+  const shortCommit = commit.slice(0, 7)
+  const text = `${shortCommit}: UI 提交信息引用的 UI-### 编号未在 ${AUDIT_PATH} 注册（${unmapped.join('、')}）`
+  return {
+    code: 'UI_AUDIT_UNMAPPED',
+    message: text,
+    commit: shortCommit,
+    unmappedIds: unmapped,
+  }
+}
+
+// Decide which exit code to use based on the structured failures and
+// the active print mode.
+//
+// Default mode (`'default'`):
+//   - any UI_AUDIT_UNMAPPED failure → 2 (classification conflict)
+//   - any UI_AUDIT_SYNC / UI_ID_MISSING / WORKTREE_UI failure → 1 (hard FAIL)
+//   - else                                                       0 (PASS)
+//
+// Development mode (`'development'`):
+//   - any UI_AUDIT_UNMAPPED or hard-FAIL with `classification === 'conflict'`
+//     is downgraded to exit 2 (developer signal, not CI gate)
+//   - non-conflict failures still exit 1
+//   - else                                                       0
+function isClassificationConflict(failure) {
+  if (!failure) return false
+  if (failure.code === 'UI_AUDIT_UNMAPPED') return true
+  return failure.classification === 'conflict'
+}
+
+function decideExitCode(result, printMode = 'default') {
+  const failures = result?.structuredFailures ?? []
+  if (failures.length === 0) return 0
+  if (printMode === 'development') {
+    // Development mode: every failure with `classification === 'conflict'`
+    // downgrades to exit 2. Today only UI_AUDIT_UNMAPPED qualifies.
+    if (failures.every(isClassificationConflict)) return 2
+    // Mixed: prefer the highest exit (1 hard fail + 1 conflict ⇒ 1)
+    if (failures.some(isClassificationConflict)) return 2
+    return 1
+  }
+  // Default mode: any conflict ⇒ 2; otherwise ⇒ 1
+  if (failures.some(isClassificationConflict)) return 2
+  return 1
+}
+
+// Parse `--print-mode=<value>` from CLI argv. Unknown values fall back
+// to 'default' so the default behaviour is preserved.
+function parsePrintMode(argv) {
+  const flag = argv.find((arg) => typeof arg === 'string' && arg.startsWith('--print-mode='))
+  if (!flag) return 'default'
+  const value = flag.slice('--print-mode='.length).trim()
+  if (value === 'development') return 'development'
+  return 'default'
+}
+
+// Default print mode applied at top-level for the legacy `npm run
+// ui:audit:check` path. Default = 'default' (no behaviour change).
+const TOP_LEVEL_PRINT_MODE = parsePrintMode(process.argv.slice(2))
+
+// Async wrapper around the legacy `runUiAudit()` so external callers
+// (vitest harness, future `--report` JSON consumers) can request
+// `hasUnmappedSurface` detection with a pre-loaded registry set. The
+// default `npm run ui:audit:check` path does NOT use this wrapper.
+async function runUiAuditAsync(options = {}) {
+  const {
+    registeredIds = loadRegisteredUiIdsSync(),
+    detectUnmapped = true,
+  } = options
+
+  const result = runUiAudit()
+  if (!detectUnmapped) return { ...result, printMode: options.printMode ?? 'default' }
+
+  const extras = []
+  if (baselineIsAvailable()) {
+    const commits = lines(git(['rev-list', '--reverse', `${ENFORCEMENT_BASELINE}..HEAD`]))
+    for (const commit of commits) {
+      const files = lines(git(['diff-tree', '--no-commit-id', '--name-only', '-r', commit]))
+      if (!files.some(isUiSurface)) continue
+      const message = git(['show', '-s', '--format=%s%n%b', commit])
+      const subject = message.split('\n', 1)[0] ?? ''
+      if (isChoreCommit(subject)) continue
+      const failure = detectUnmappedSurface({
+        commit,
+        subject,
+        body: message,
+        registeredIds,
+        legacyMessageExemptions: LEGACY_MESSAGE_EXEMPTIONS,
+        legacyAuditSyncExemptions: LEGACY_AUDIT_SYNC_EXEMPTIONS,
+      })
+      if (failure) extras.push(failure)
+    }
+  }
+  if (extras.length === 0) return { ...result, printMode: options.printMode ?? 'default' }
+
+  return {
+    failures: [...result.failures, ...extras.map((f) => f.message)],
+    structuredFailures: [...result.structuredFailures, ...extras],
+    knownIds: result.knownIds,
+    baselineAvailable: result.baselineAvailable,
+    printMode: options.printMode ?? 'default',
   }
 }
 
@@ -362,4 +549,32 @@ if (path.resolve(process.argv[1] ?? '') === SCRIPT_PATH) {
       })
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Exports — pure constants and helper functions exposed for unit tests
+// (vitest / node:test). Top-level execution paths above are guarded by
+// `path.resolve(process.argv[1] ?? '') === SCRIPT_PATH` so importing this
+// module does NOT trigger the default check.
+// ---------------------------------------------------------------------------
+export {
+  AUDIT_PATH,
+  ENFORCEMENT_BASELINE,
+  UI_ID_PATTERN,
+  LEGACY_MESSAGE_EXEMPTIONS,
+  LEGACY_AUDIT_SYNC_EXEMPTIONS,
+  UI_AUDIT_HOOKS_WHITELIST,
+  uiIds,
+  isUiSurface,
+  isChoreCommit,
+  baselineIsAvailable,
+  runUiAudit,
+  runUiAuditAsync,
+  loadRegisteredUiIds,
+  loadRegisteredUiIdsSync,
+  detectUnmappedSurface,
+  isClassificationConflict,
+  decideExitCode,
+  parsePrintMode,
+  TOP_LEVEL_PRINT_MODE,
 }
