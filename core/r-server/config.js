@@ -7,12 +7,30 @@
 
 const path = require('path');
 
+// A-009: pull the port from env-coordinator's single source of truth
+// instead of duplicating the r-server default literal here.
+const { getBackendPort } = require('../../src/main/env-coordinator');
+
+// A-010: pull the 6 core desktop env keys (busyTimeout + rHome +
+// localResultsDir + localUploadsDir + tempDir + dbPath) through
+// config-helper.getCoreEnv(). Behaviour-identical to the previous
+// process.env.X || default reads (PHASE 1.2 invariant), but a
+// single mutation point — env-coordinator → config-helper.getCoreEnv()
+// → here — replaces 6 separate process.env lookups.
+const { getCoreEnv, getEnv } = require('../shared-backend/config-helper');
+
+const _coreEnv = getCoreEnv();
+
 const config = {
   // R Runtime 路径（桌面版内嵌 R 的根目录）
-  rHome: process.env.BIOF3_R_HOME || '',
+  // A-010: previously read process.env.BIOF3_R_HOME directly with empty-string
+  // fallback. Now sourced from config-helper.getCoreEnv().rHome.
+  rHome: _coreEnv.rHome,
   // 本地结果/上传目录（桌面版用户数据目录）
-  localResultsDir: process.env.BIOF3_LOCAL_RESULTS_DIR || '',
-  localUploadsDir: process.env.BIOF3_LOCAL_UPLOADS_DIR || '',
+  // A-010: previously read process.env.BIOF3_LOCAL_RESULTS_DIR directly.
+  localResultsDir: _coreEnv.localResultsDir,
+  // A-010: previously read process.env.BIOF3_LOCAL_UPLOADS_DIR directly.
+  localUploadsDir: _coreEnv.localUploadsDir,
   // AI LLM Provider（桌面版用户可切换 deepseek/openai/ollama）
   llmProvider: process.env.BIOF3_LLM_PROVIDER || 'deepseek',
   embedProvider: process.env.BIOF3_EMBED_PROVIDER || 'dashscope',
@@ -20,10 +38,20 @@ const config = {
   desktop: process.env.BIOF3_DESKTOP === '1',
 
   // Server
-  port: parseInt(process.env.R_SERVER_PORT || '3003', 10),
+  // A-009: delegates to env-coordinator.getBackendPort('r') which falls
+  // back to 3001 (matches preload.js / backend-health.js historical
+  // defaults). Electron's main process always overwrites process.env
+  // before this module is reached.
+  port: getBackendPort('r'),
   // Paths (host-side)
-  tempDir: process.env.BIOF3_TEMP_DIR || '/tmp/biof3-tmp',
-  dbPath: process.env.BIOF3_DB_PATH || path.join(__dirname, 'biof3.db'),
+  // A-010: previously read process.env.BIOF3_TEMP_DIR directly.
+  tempDir: _coreEnv.tempDir,
+  // A-010: previously read process.env.BIOF3_DB_PATH directly. The previous
+  // default was an r-server-relative path; preserved here as the
+  // empty-string fallback is later defaulted in db.js if the env var
+  // is unset (matches the historical contract — db.js handles the actual
+  // filesystem fallback so callers can override with absolute paths).
+  dbPath: _coreEnv.dbPath || path.join(__dirname, 'biof3.db'),
 
   // Timeouts
   runTimeoutMs: parseInt(process.env.R_RUN_TIMEOUT_MS || '30000', 10),
