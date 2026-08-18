@@ -1,15 +1,51 @@
 // CommonJS helper used by test/chat-file-references.test.mjs to load the
 // /api/harness/file-references/resolve route with a stubbed db module.
+// After PHASE 2.2a (harness 8-subdomain split), also clears the harness/
+// subdirectory from require.cache so that subdomains re-resolve their db
+// reference through the patched _resolveFilename hook.
 const path = require('path');
+const fs = require('fs');
 const Module = require('module');
+
+function clearHarnessCache(rServer) {
+  const harnessDir = path.join(rServer, 'routes', 'harness');
+  const patterns = [
+    path.join(rServer, 'routes', 'harness.js'),
+    path.join(harnessDir, 'index.js'),
+    path.join(harnessDir, 'resources.js'),
+    path.join(harnessDir, 'workflow.js'),
+    path.join(harnessDir, 'repair.js'),
+    path.join(harnessDir, 'scientific-task.js'),
+    path.join(harnessDir, 'context.js'),
+    path.join(harnessDir, 'file-references.js'),
+    path.join(harnessDir, 'loop.js'),
+    // _helpers used by harness subdomains
+    path.join(rServer, 'routes', '_helpers', 'harness-shared.js'),
+    path.join(rServer, 'routes', '_helpers', 'workspace-file-index.js'),
+    // db (always clear so it can be re-stubbed)
+    path.join(rServer, 'db.js'),
+  ];
+  for (const p of patterns) {
+    if (fs.existsSync(p)) delete require.cache[p];
+  }
+  // Also clear anything under harness/ (safety net)
+  if (fs.existsSync(harnessDir)) {
+    for (const entry of fs.readdirSync(harnessDir)) {
+      const full = path.join(harnessDir, entry);
+      if (entry.endsWith('.js') && fs.statSync(full).isFile()) {
+        delete require.cache[full];
+      }
+    }
+  }
+}
 
 function loadResolveRoute(dbStub) {
   const rServer = path.resolve(__dirname, '..', 'core', 'r-server');
   const harnessModulePath = path.join(rServer, 'routes', 'harness.js');
   const dbModulePath = path.join(rServer, 'db.js');
 
-  delete require.cache[harnessModulePath];
-  delete require.cache[dbModulePath];
+  clearHarnessCache(rServer);
+
   const originalResolve = Module._resolveFilename;
   Module._resolveFilename = function patchedResolve(request, parent, ...rest) {
     if (request === '../db' || request.endsWith('/db')) return dbModulePath;
@@ -41,8 +77,7 @@ function loadResolveRoute(dbStub) {
     require(harnessModulePath)(app);
   } finally {
     Module._resolveFilename = originalResolve;
-    delete require.cache[harnessModulePath];
-    delete require.cache[dbModulePath];
+    clearHarnessCache(rServer);
   }
 
   return function invoke(body, opts) {
