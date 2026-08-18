@@ -874,6 +874,41 @@
         "lego-plot"
       ],
       "optional": true
+    },
+    "scanpy-advanced": {
+      "id": "scanpy-advanced",
+      "status": "canonical",
+      "title": "Scanpy 高级分析",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "python",
+      "description": "Scanpy 1.9+ 单细胞标准高级流程: QC / normalize / HVG / PCA / UMAP / Leiden / marker genes。运行于 biof3-py-runtime (dev Electron 边界内)，不触发 packaged / Provider / GA（G0 阶段纪律）。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://scanpy-advanced",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "python": {
+          "scanpy": ">=1.9",
+          "anndata": ">=0.9",
+          "numpy": ">=1.24",
+          "pandas": ">=2.0",
+          "scipy": ">=1.10",
+          "matplotlib": ">=3.7",
+          "seaborn": ">=0.12",
+          "Pillow": ">=9.0"
+        }
+      },
+      "runtime": {
+        "python": ">=3.10.0"
+      },
+      "builtAgainst": {
+        "python": "3.11.9"
+      }
     }
   }
 }
