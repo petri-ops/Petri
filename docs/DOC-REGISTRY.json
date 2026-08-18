@@ -417,6 +417,25 @@
       "registeredAt": "2026-08-18"
     },
     {
+      "id": "BLOCK-10-ARCHITECTURE-PHASE2-ROUTES-MAPPING",
+      "path": "docs/block-10-arch-ph2-routes-mapping.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "agent-harness-architecture-refactor",
+      "archivePolicy": "retain_stable_path",
+      "owner": "block-10-architecture",
+      "notes": "PHASE 2 调研报告（v0.2 升级新增）：49 端点完整清单（result-studio 27 + harness 19 + ai-agent 3）+ 22 子模块 + 6 `_helpers/` 拆分范式 + 5 commit 拆分建议（2.1a facade / 2.1b 9 子域 / 2.2a / 2.2b 8 子域 / 2.2c 5 子文件）+ 0 循环依赖 + 3 红旗。被 block-10-architecture-plan.md §PHASE 2 / §8.8 引用作为 PHASE 2 commit 拆分依据。",
+      "entrypoint": "docs/block-10-architecture-plan.md",
+      "tags": [
+        "block-10-architecture",
+        "phase-2",
+        "research-report",
+        "G0"
+      ],
+      "registeredAt": "2026-08-18"
+    },
+    {
       "id": "BLOCK-10-AUDIT-CLOSEOUT",
       "path": "docs/code-audit-closeout-plan.md",
       "kind": "work-package",
