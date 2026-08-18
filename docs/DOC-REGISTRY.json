@@ -1586,6 +1586,26 @@
       ],
       "notes": "2026-08-18 BLOCK-11 single-commit fix: src/preload.js L19 require in sandbox:true → traffic lights 消失。Commit d73bea8。引入 = 48e19e2（A-009）。CDP 实机验证。11 节。",
       "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-11-BIOSKILLS-INTEGRATION",
+      "path": "docs/block-11-bioSkills-integration-plan-v1.0.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-11-bioSkills-integration",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-11",
+        "bioSkills",
+        "G0",
+        "ecosystem",
+        "plugin",
+        "skill"
+      ],
+      "notes": "2026-08-18 BLOCK-11 bioSkills 生态集成（GPTomics/bioSkills.git → BioF3 plugin/skill 映射）active 启动。Top 5 priority categories: single-cell (P0) / variant-calling (P0) / pathway-analysis (P1) / methylation-analysis (P1) / read-qc (P2)。6 PHASE：PHASE 0 调研 + PHASE 1 single-cell plugin/skill + PHASE 2 variant-calling + PHASE 3 pathway+methylation + PHASE 4 read-qc + PHASE 5 收口。用户 2026-08-18 显式裁决启动。",
+      "registeredAt": "2026-08-18"
     }
   ]
 }
