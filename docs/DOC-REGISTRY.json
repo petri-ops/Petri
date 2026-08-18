@@ -1566,6 +1566,26 @@
       "truthDomain": "recoverable-workspace-state",
       "entrypoint": "docs/README.md",
       "archivePolicy": "never_archive"
+    },
+    {
+      "id": "BLOCK-11-PRELOAD-SANDBOX-FIX-CLOSEOUT",
+      "path": "docs/block-11-preload-sandbox-fix-closeout.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "preload-sandbox-fix",
+      "entrypoint": "docs/AUDIT-LOG.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-11",
+        "closeout",
+        "G0",
+        "preload",
+        "sandbox",
+        "traffic-lights"
+      ],
+      "notes": "2026-08-18 BLOCK-11 single-commit fix: src/preload.js L19 require in sandbox:true → traffic lights 消失。Commit d73bea8。引入 = 48e19e2（A-009）。CDP 实机验证。11 节。",
+      "registeredAt": "2026-08-18"
     }
   ]
 }
