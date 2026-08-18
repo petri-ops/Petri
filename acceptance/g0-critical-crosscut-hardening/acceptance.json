@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
   "acceptanceId": "G0-CHF0-7",
-  "generatedAt": "2026-08-18T01:10:44.224Z",
-  "sourceCommit": "a4f8bcb940909902533c0742ee4bf6f73fdf74f9",
+  "generatedAt": "2026-08-18T02:37:20.819Z",
+  "sourceCommit": "101dcfc455b1f7aba93c76e48879419d4d9ba128",
   "sourceCommitReachable": true,
   "sourceCommitMatchesSourceHashes": true,
   "sourceCommitMismatches": [],
@@ -19,7 +19,7 @@
       "testNamePattern": "CHF0 SEC-1",
       "testCount": 2,
       "exitCode": 0,
-      "outputTail": "✔ CHF0 SEC-1 trusts only declared BioF3 renderer origins (0.847209ms)\n✔ CHF0 SEC-1 R and Python raw execution routes fail closed (0.291166ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 254.6235"
+      "outputTail": "✔ CHF0 SEC-1 trusts only declared BioF3 renderer origins (0.877708ms)\n✔ CHF0 SEC-1 R and Python raw execution routes fail closed (0.294875ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 223.547125"
     },
     {
       "id": "CHF0-SEC-2",
@@ -30,7 +30,7 @@
       "testNamePattern": "CHF0 SEC-2",
       "testCount": 1,
       "exitCode": 0,
-      "outputTail": "✅ [2026-08-18T01:10:31.175Z] [storage] registered: local\n🔍 [2026-08-18T01:10:31.177Z] [local-storage] uploaded: results/job-1/plot.txt\n✔ CHF0 SEC-2 real /api/files route rejects origins and traversal while serving valid nested keys (52.671209ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 232.749333"
+      "outputTail": "✅ [2026-08-18T02:37:09.322Z] [storage] registered: local\n🔍 [2026-08-18T02:37:09.323Z] [local-storage] uploaded: results/job-1/plot.txt\n✔ CHF0 SEC-2 real /api/files route rejects origins and traversal while serving valid nested keys (46.145459ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 222.731875"
     },
     {
       "id": "CHF0-SCI-1",
@@ -41,7 +41,7 @@
       "testNamePattern": "CHF0 SCI-1",
       "testCount": 4,
       "exitCode": 0,
-      "outputTail": "✔ CHF0 SCI-1 default and explicit padj agree without overwriting raw pvalue (3353.793625ms)\n✔ CHF0 SCI-1 explicit raw pvalue is a working, honestly labelled scientific change (1294.797208ms)\n✔ CHF0 SCI-1 selected adjusted column is sufficient and invalid values fail closed (2729.552ms)\n✔ CHF0 SCI-1 descriptor and report bind the selected significance field (1.02975ms)\nℹ tests 4\nℹ suites 0\nℹ pass 4\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 7469.1835"
+      "outputTail": "✔ CHF0 SCI-1 default and explicit padj agree without overwriting raw pvalue (2705.328333ms)\n✔ CHF0 SCI-1 explicit raw pvalue is a working, honestly labelled scientific change (1213.7445ms)\n✔ CHF0 SCI-1 selected adjusted column is sufficient and invalid values fail closed (2741.453833ms)\n✔ CHF0 SCI-1 descriptor and report bind the selected significance field (0.360042ms)\nℹ tests 4\nℹ suites 0\nℹ pass 4\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 6747.2095"
     },
     {
       "id": "CHF0-SCI-2-3",
@@ -52,7 +52,7 @@
       "testNamePattern": "CHF0 SCI-(2|3)",
       "testCount": 3,
       "exitCode": 0,
-      "outputTail": "✔ CHF0 SCI-2 PCA without metadata remains explicitly unassigned (2739.4485ms)\n✔ CHF0 SCI-3 PCA aligns scrambled metadata by ID (1894.319875ms)\n✔ CHF0 SCI-3 PCA rejects missing, blank, duplicate, missing-set and extra sample IDs (23.76175ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4739.113583"
+      "outputTail": "✔ CHF0 SCI-2 PCA without metadata remains explicitly unassigned (2064.502917ms)\n✔ CHF0 SCI-3 PCA aligns scrambled metadata by ID (1803.310625ms)\n✔ CHF0 SCI-3 PCA rejects missing, blank, duplicate, missing-set and extra sample IDs (22.340625ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 3971.155083"
     },
     {
       "id": "CHF0-BE-5",
@@ -63,7 +63,7 @@
       "testNamePattern": "CHF0 BE-5",
       "testCount": 11,
       "exitCode": 0,
-      "outputTail": "✔ CHF0 BE-5 termination confirms TERM exit and does not escalate (1.882167ms)\n✔ CHF0 BE-5 termination observes a real child process exit (3.4285ms)\n✔ CHF0 BE-5 termination reports false when SIGKILL is refused (0.419042ms)\n✔ CHF0 BE-5 termination does not claim success until SIGKILL exit is observed (3.636334ms)\n✔ CHF0 BE-5 heartbeat liveness is gated by the child PID, not the Node event loop (0.084959ms)\n✔ CHF0 BE-5 verified heartbeat persists only after child liveness succeeds (0.105791ms)\n✔ CHF0 BE-5 healthy work is not scheduled for the obsolete five-minute wall (0.091042ms)\n✔ CHF0 BE-5 zombie recovery terminates owned stale children and records the observed result (0.226208ms)\n✔ CHF0 BE-5 unowned restart recovery marks DB truth without signalling an unproven PID (0.133209ms)\n✔ CHF0 BE-5 cancel writes cancelled only after termination is confirmed (0.618917ms)\n✔ CHF0 BE-5 cancel keeps the job retryable when termination is unconfirmed (0.117792ms)\nℹ tests 11\nℹ suites 0\nℹ pass 11\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 180.463583"
+      "outputTail": "✔ CHF0 BE-5 termination confirms TERM exit and does not escalate (1.770708ms)\n✔ CHF0 BE-5 termination observes a real child process exit (3.068208ms)\n✔ CHF0 BE-5 termination reports false when SIGKILL is refused (1.1045ms)\n✔ CHF0 BE-5 termination does not claim success until SIGKILL exit is observed (3.175791ms)\n✔ CHF0 BE-5 heartbeat liveness is gated by the child PID, not the Node event loop (0.108708ms)\n✔ CHF0 BE-5 verified heartbeat persists only after child liveness succeeds (0.113333ms)\n✔ CHF0 BE-5 healthy work is not scheduled for the obsolete five-minute wall (0.09375ms)\n✔ CHF0 BE-5 zombie recovery terminates owned stale children and records the observed result (0.305416ms)\n✔ CHF0 BE-5 unowned restart recovery marks DB truth without signalling an unproven PID (0.110375ms)\n✔ CHF0 BE-5 cancel writes cancelled only after termination is confirmed (0.52975ms)\n✔ CHF0 BE-5 cancel keeps the job retryable when termination is unconfirmed (0.107292ms)\nℹ tests 11\nℹ suites 0\nℹ pass 11\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 171.355666"
     }
   ],
   "sourceHashes": {
