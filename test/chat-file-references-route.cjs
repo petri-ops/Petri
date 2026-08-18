@@ -19,16 +19,13 @@ function clearHarnessCache(rServer) {
     path.join(harnessDir, 'context.js'),
     path.join(harnessDir, 'file-references.js'),
     path.join(harnessDir, 'loop.js'),
-    // _helpers used by harness subdomains
     path.join(rServer, 'routes', '_helpers', 'harness-shared.js'),
     path.join(rServer, 'routes', '_helpers', 'workspace-file-index.js'),
-    // db (always clear so it can be re-stubbed)
     path.join(rServer, 'db.js'),
   ];
   for (const p of patterns) {
     if (fs.existsSync(p)) delete require.cache[p];
   }
-  // Also clear anything under harness/ (safety net)
   if (fs.existsSync(harnessDir)) {
     for (const entry of fs.readdirSync(harnessDir)) {
       const full = path.join(harnessDir, entry);
@@ -47,9 +44,9 @@ function loadResolveRoute(dbStub) {
   clearHarnessCache(rServer);
 
   const originalResolve = Module._resolveFilename;
-  Module._resolveFilename = function patchedResolve(request, parent, ...rest) {
-    if (request === '../db' || request.endsWith('/db')) return dbModulePath;
-    return originalResolve.call(this, request, parent, ...rest);
+  Module._resolveFilename = function patchedResolve(request, isMain, options) {
+    if (/\/db$/.test(request)) return dbModulePath;
+    return originalResolve(request, isMain, options);
   };
 
   const handlers = {};
@@ -77,7 +74,6 @@ function loadResolveRoute(dbStub) {
     require(harnessModulePath)(app);
   } finally {
     Module._resolveFilename = originalResolve;
-    clearHarnessCache(rServer);
   }
 
   return function invoke(body, opts) {
