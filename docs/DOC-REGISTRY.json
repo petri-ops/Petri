@@ -12,480 +12,6 @@
   },
   "documents": [
     {
-      "id": "AUDIT-LOG",
-      "path": "docs/AUDIT-LOG.md",
-      "kind": "audit",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "project-audit-broadcast",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "never_archive"
-    },
-    {
-      "id": "DOC-GOVERNANCE-GATES",
-      "path": "docs/doc-governance-gates-plan.md",
-      "kind": "work-package",
-      "status": "completed",
-      "canonical": true,
-      "truthDomain": "docs-governance-gates",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "docs",
-        "governance",
-        "gates",
-        "scripts"
-      ],
-      "notes": "用户裁决 2026-08-16 启动；同日 GATES-0~GATES-4 五阶段全部完成并收口。canonical 收口记录：docs/doc-governance-gates-closeout.md。Single work package serial 下首个 active 工作包演示（启动 + 收口同日）。详见 plan §1-§9 + closeout §1-§8。",
-      "registeredAt": "2026-08-16",
-      "linkedCommits": [
-        "a363105",
-        "aea70a6",
-        "c552100",
-        "1b7ce3e",
-        "76e0f75",
-        "c1ce38c",
-        "1049ac5",
-        "d4822ea"
-      ]
-    },
-    {
-      "id": "DOC-GOVERNANCE-GATES-CLOSEOUT",
-      "path": "docs/doc-governance-gates-closeout.md",
-      "kind": "reference",
-      "status": "reference",
-      "canonical": true,
-      "truthDomain": "docs-governance-gates-closeout",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path",
-      "registeredAt": "2026-08-16",
-      "linkedCommits": [
-        "a363105",
-        "aea70a6",
-        "c552100",
-        "1b7ce3e",
-        "76e0f75",
-        "c1ce38c",
-        "1049ac5",
-        "d4822ea"
-      ],
-      "tags": [
-        "docs",
-        "governance",
-        "gates",
-        "closeout",
-        "implemented"
-      ],
-      "notes": "DOC-GOVERNANCE-GATES 工作包（2026-08-16 启动同日收口）canonical 收口记录；GATES-0~GATES-4 五阶段全部完成；docs:check 63 / ui:audit:check 131 / docs:reconcile 0 issues。详见 closeout §1-§8。"
-    },
-    {
-      "id": "BLOCK-2-UI-157-REVIEW",
-      "path": "docs/block-2-ui-157-review-plan.md",
-      "kind": "work-package",
-      "status": "completed",
-      "canonical": true,
-      "truthDomain": "block-2-ui-157-review",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "ui",
-        "skills",
-        "ipc",
-        "verified-target"
-      ],
-      "notes": "用户裁决 2026-08-16 启动。专为收口 ui-productization-audit.md 中 UI-157 (Skills UI 页面 P1/W-04) 的 in_progress 状态：① 接通 useSkillStore ↔ core/shared-backend/workflow-engine.js 之间的 IPC 桥（UI-161 显式留白的跨包接桥工作）；② 核对 UI-161 既有清理（commit 01c5e0b）未回退；③ 真实 dev Electron 实机启动 + 走查 /skills 路由；④ UI-157 in_progress → verified。6 个 PHASE（0 摸底 / 1 IPC 桥 / 2 UI-161 核对 / 3 实机 / 4 audit 更新 / 5 closeout）。不外推 Provider/packaged/GA/Chart a11y P2/Worktree。Single work package serial 纪律：当前 active 工作包。详见 plan §1-§9。",
-      "registeredAt": "2026-08-16",
-      "linkedCommits": [
-        "e6bf72f",
-        "01c5e0b",
-        "2d81377",
-        "0be5483",
-        "7e010a4",
-        "5c98ca8"
-      ]
-    },
-    {
-      "id": "DOC-INDEX",
-      "path": "docs/README.md",
-      "kind": "governance",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "project-document-index",
-      "entrypoint": "AGENTS.md",
-      "archivePolicy": "never_archive"
-    },
-    {
-      "id": "AGENT-HANDOFF-PROMPT",
-      "path": "docs/archive/checkpoints/agent-handoff-prompt.md",
-      "kind": "reference",
-      "status": "archived",
-      "canonical": false,
-      "archivePolicy": "archive_after_completion"
-    },
-    {
-      "id": "UI-WORKBENCH-DIRECTION",
-      "path": "docs/codex-style-workbench-direction.md",
-      "kind": "vision",
-      "status": "reference",
-      "canonical": true,
-      "truthDomain": "workbench-ui-direction",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "DEPENDENCY-DECOUPLING",
-      "path": "docs/dependency-decoupling-checkpoint.md",
-      "kind": "reference",
-      "status": "completed",
-      "canonical": false,
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "MODULE-MAP",
-      "path": "docs/development-module-map.md",
-      "kind": "governance",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "module-responsibility-map",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "never_archive"
-    },
-    {
-      "id": "GOV-DOC-1",
-      "path": "docs/document-governance.md",
-      "kind": "governance",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "project-document-lifecycle",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "never_archive"
-    },
-    {
-      "id": "FIRST-SUCCESS-PATH",
-      "path": "docs/first-success-path.md",
-      "kind": "reference",
-      "status": "reference",
-      "canonical": false,
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "G0-LF12",
-      "path": "docs/g0-lf12-baseline-qualification-plan.md",
-      "kind": "work-package",
-      "status": "completed",
-      "canonical": false,
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "G0-LF",
-      "path": "docs/g0-living-foundation-plan.md",
-      "kind": "living-plan",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "g0-living-foundation",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "never_archive"
-    },
-    {
-      "id": "G0-RS",
-      "path": "docs/g0-result-studio-plan.md",
-      "kind": "work-package",
-      "status": "planned",
-      "canonical": false,
-      "truthDomain": "g0-result-studio",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "G0-CHF0",
-      "path": "docs/g0-critical-crosscut-hardening-plan.md",
-      "kind": "work-package",
-      "status": "completed",
-      "canonical": false,
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "G0-RS0",
-      "path": "docs/g0-rs0-result-studio-audit.md",
-      "kind": "audit",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "result-studio-architecture",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "G0-SDC",
-      "path": "docs/g0-scientific-data-contract-plan.md",
-      "kind": "living-plan",
-      "status": "planned",
-      "canonical": true,
-      "truthDomain": "g0-scientific-data-contract",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "HARNESS-ENGINE-V1",
-      "path": "docs/harness-engine-spec.md",
-      "kind": "reference",
-      "status": "reference",
-      "canonical": true,
-      "truthDomain": "harness-engine-contract",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "HLE-V1",
-      "path": "docs/harness-loop-engineering-plan.md",
-      "kind": "work-package",
-      "status": "completed",
-      "canonical": false,
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "HLE-PRODUCTION-CLOSURE",
-      "path": "docs/harness-loop-production-closure-plan.md",
-      "kind": "work-package",
-      "status": "completed",
-      "canonical": false,
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "HARNESS-PHASE7",
-      "path": "docs/harness-phase7-completion-plan.md",
-      "kind": "work-package",
-      "status": "completed",
-      "canonical": false,
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "HARNESS-ROADMAP",
-      "path": "docs/harness-roadmap.md",
-      "kind": "roadmap",
-      "status": "reference",
-      "canonical": false,
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "HRT-V1",
-      "path": "docs/harness-scientific-task-contract-plan.md",
-      "kind": "work-package",
-      "status": "completed",
-      "canonical": false,
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "HARNESS-TOOL-TEMPLATE",
-      "path": "docs/harness-tool-template.md",
-      "kind": "reference",
-      "status": "reference",
-      "canonical": true,
-      "truthDomain": "harness-tool-template",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "MACOS-OSS-UPDATE",
-      "path": "docs/macos-oss-auto-update.md",
-      "kind": "reference",
-      "status": "reference",
-      "canonical": true,
-      "truthDomain": "macos-oss-update",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "MODEL-PROVIDER-AUDIT",
-      "path": "docs/archive/checkpoints/model-provider-audit.md",
-      "kind": "audit",
-      "status": "archived",
-      "canonical": false,
-      "archivePolicy": "archive_after_completion"
-    },
-    {
-      "id": "ROADMAP-NEXT",
-      "path": "docs/next-steps-roadmap.md",
-      "kind": "roadmap",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "current-priorities",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "never_archive"
-    },
-    {
-      "id": "PLUGIN-ARTIFACT-SCHEMA",
-      "path": "docs/plugin-artifact-schema.md",
-      "kind": "reference",
-      "status": "reference",
-      "canonical": true,
-      "truthDomain": "plugin-artifact-contract",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "WORKSPACE-HANDOFF",
-      "path": "docs/project-workspace-handoff.md",
-      "kind": "handoff",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "recoverable-workspace-state",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "never_archive"
-    },
-    {
-      "id": "RELEASE-RC2",
-      "path": "docs/releases/v0.0.1-rc.2.md",
-      "kind": "release",
-      "status": "reference",
-      "canonical": false,
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "RELEASE-RC6",
-      "path": "docs/releases/v0.0.1-rc.6.md",
-      "kind": "release",
-      "status": "reference",
-      "canonical": false,
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "RELEASE-RC7",
-      "path": "docs/releases/v0.0.1-rc.7.md",
-      "kind": "release",
-      "status": "reference",
-      "canonical": false,
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "VISION-SCIENTIFIC-OS",
-      "path": "docs/scientific-intelligence-os-vision.md",
-      "kind": "vision",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "long-term-product-direction",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "never_archive"
-    },
-    {
-      "id": "STAGE2-ACCEPTANCE-AUDIT",
-      "path": "docs/archive/checkpoints/stage2-acceptance-audit.md",
-      "kind": "audit",
-      "status": "archived",
-      "canonical": false,
-      "archivePolicy": "archive_after_completion"
-    },
-    {
-      "id": "STAGE3-M1-AUDIT",
-      "path": "docs/archive/checkpoints/stage3-m1-audit.md",
-      "kind": "audit",
-      "status": "archived",
-      "canonical": false,
-      "archivePolicy": "archive_after_completion"
-    },
-    {
-      "id": "STAGE3-WORKFLOWS-DESIGN",
-      "path": "docs/stage3-standard-workflows-design.md",
-      "kind": "reference",
-      "status": "reference",
-      "canonical": false,
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "STAGE4-STABLE-RELEASE",
-      "path": "docs/stage4-stable-release-checklist.md",
-      "kind": "release",
-      "status": "completed",
-      "canonical": false,
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "PLUGIN-THIRD-PARTY-GUIDE",
-      "path": "docs/third-party-plugin-guide.md",
-      "kind": "reference",
-      "status": "reference",
-      "canonical": true,
-      "truthDomain": "third-party-plugin-development",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "RUNTIME-VERSION-BASELINE",
-      "path": "docs/runtime-version-baseline.md",
-      "kind": "reference",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "runtime-version-contract",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "UI-035-064-ACCEPTANCE",
-      "path": "docs/archive/checkpoints/ui-035-064-real-acceptance.md",
-      "kind": "audit",
-      "status": "archived",
-      "canonical": false,
-      "archivePolicy": "archive_after_completion"
-    },
-    {
-      "id": "UI-PRODUCTIZATION-AUDIT",
-      "path": "docs/ui-productization-audit.md",
-      "kind": "audit",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "ui-productization-status",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "never_archive"
-    },
-    {
-      "id": "ROADMAP-V1",
-      "path": "docs/v1-productization-roadmap.md",
-      "kind": "roadmap",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "product-stage-sequence",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "never_archive"
-    },
-    {
-      "id": "GOV-WT-1",
-      "path": "docs/worktree-governance.md",
-      "kind": "governance",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "git-worktree-lifecycle",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "never_archive"
-    },
-    {
-      "id": "AUDIT-PROJECT-WIDE-2026-07",
-      "path": "docs/project-wide-audit-2026-07.md",
-      "kind": "audit",
-      "status": "reference",
-      "canonical": false,
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "G0-RS-UX1H",
-      "path": "docs/g0-rs-ux1h-async-tool-surface.md",
-      "kind": "work-package",
-      "status": "completed",
-      "canonical": true,
-      "truthDomain": "g0-current-work-package",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "COLLABORATION",
-      "path": "docs/COLLABORATION.md",
-      "kind": "governance",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "team-collaboration-convention",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "never_archive"
-    },
-    {
       "id": "AGENT-CONCURRENCY",
       "path": "docs/agent-concurrency-design.md",
       "kind": "work-package",
@@ -496,165 +22,197 @@
       "archivePolicy": "retain_stable_path"
     },
     {
-      "id": "DESKTOP-EVAL-20260814",
-      "path": "docs/BioF3-Desktop-Evaluation-Report-2026-08-14.md",
-      "kind": "audit",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "desktop-evaluation",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "GATEWAY-DESIGN",
-      "path": "docs/architecture/gateway-design.md",
+      "id": "AGENT-HANDOFF-PROMPT",
+      "path": "docs/archive/checkpoints/agent-handoff-prompt.md",
       "kind": "reference",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "backend-gateway-architecture",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
+      "status": "archived",
+      "canonical": false,
+      "archivePolicy": "archive_after_completion"
     },
     {
-      "id": "PIPELINE-API",
-      "path": "docs/architecture/pipeline-api.md",
+      "id": "AGENT-HARNESS-ARCHITECTURE-AUDIT-2026-08-17",
+      "path": "docs/agent-harness-architecture-audit-2026-08-17.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-batches-2026-08-17",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "audit",
+        "agent-harness",
+        "G0",
+        "code-quality"
+      ],
+      "notes": "2026-08-17 独立只读审计；收录于 BLOCK-10-AUDIT-CLOSEOUT 工作包第 1/2/3 PHASE 修复入口",
+      "registeredAt": "2026-08-17"
+    },
+    {
+      "id": "AGENT-HARNESS-ARCHITECTURE-SURVEY-2026-08-17",
+      "path": "docs/agent-harness-architecture-survey-2026-08-17.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-batches-2026-08-17",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "audit",
+        "agent-harness",
+        "G0",
+        "architecture-survey"
+      ],
+      "notes": "2026-08-17 Agent Harness 后端架构调研报告（非前端 UI）；与 AGENT-HARNESS-ARCHITECTURE-AUDIT-2026-08-17 配套 — survey 含后端 14 sub-process / IPC 链路 / shared-backend 拓扑详细分析",
+      "registeredAt": "2026-08-17"
+    },
+    {
+      "id": "AGENT-HARNESS-CONTRACT-AUDIT-2026-08-17",
+      "path": "docs/agent-harness-contract-audit-2026-08-17.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-batches-2026-08-17",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "audit",
+        "agent-harness",
+        "G0",
+        "code-quality"
+      ],
+      "notes": "2026-08-17 独立只读审计；收录于 BLOCK-10-AUDIT-CLOSEOUT 工作包第 1/2/3 PHASE 修复入口",
+      "registeredAt": "2026-08-17"
+    },
+    {
+      "id": "AGENT-HARNESS-ERROR-HANDLING-AUDIT-2026-08-17",
+      "path": "docs/agent-harness-error-handling-audit-2026-08-17.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-batches-2026-08-17",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "audit",
+        "agent-harness",
+        "G0",
+        "code-quality"
+      ],
+      "notes": "2026-08-17 独立只读审计；收录于 BLOCK-10-AUDIT-CLOSEOUT 工作包第 1/2/3 PHASE 修复入口",
+      "registeredAt": "2026-08-17"
+    },
+    {
+      "id": "AGENT-HARNESS-OBSERVABILITY-AUDIT-2026-08-17",
+      "path": "docs/agent-harness-observability-audit-2026-08-17.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-batches-2026-08-17",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "audit",
+        "agent-harness",
+        "G0",
+        "code-quality"
+      ],
+      "notes": "2026-08-17 独立只读审计；收录于 BLOCK-10-AUDIT-CLOSEOUT 工作包第 1/2/3 PHASE 修复入口",
+      "registeredAt": "2026-08-17"
+    },
+    {
+      "id": "AGENT-HARNESS-PERFORMANCE-RESOURCE-AUDIT-2026-08-17",
+      "path": "docs/agent-harness-performance-resource-audit-2026-08-17.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-batches-2026-08-17",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "audit",
+        "agent-harness",
+        "G0",
+        "code-quality"
+      ],
+      "notes": "2026-08-17 独立只读审计；收录于 BLOCK-10-AUDIT-CLOSEOUT 工作包第 1/2/3 PHASE 修复入口",
+      "registeredAt": "2026-08-17"
+    },
+    {
+      "id": "AGENT-HARNESS-PLUGIN-SCHEMA-AUDIT-2026-08-17",
+      "path": "docs/agent-harness-plugin-schema-audit-2026-08-17.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-batches-2026-08-17",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "audit",
+        "agent-harness",
+        "G0",
+        "code-quality"
+      ],
+      "notes": "2026-08-17 独立只读审计；收录于 BLOCK-10-AUDIT-CLOSEOUT 工作包第 1/2/3 PHASE 修复入口",
+      "registeredAt": "2026-08-17"
+    },
+    {
+      "id": "AGENT-HARNESS-RSERVER-HTTP-CONTRACT-AUDIT-2026-08-17",
+      "path": "docs/agent-harness-rserver-http-contract-audit-2026-08-17.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-batches-2026-08-17",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "audit",
+        "agent-harness",
+        "G0",
+        "code-quality"
+      ],
+      "notes": "2026-08-17 独立只读审计；收录于 BLOCK-10-AUDIT-CLOSEOUT 工作包第 1/2/3 PHASE 修复入口",
+      "registeredAt": "2026-08-17"
+    },
+    {
+      "id": "AGENT-HARNESS-SECURITY-AUDIT-2026-08-17",
+      "path": "docs/agent-harness-security-audit-2026-08-17.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-batches-2026-08-17",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "audit",
+        "agent-harness",
+        "G0",
+        "code-quality"
+      ],
+      "notes": "2026-08-17 独立只读审计；收录于 BLOCK-10-AUDIT-CLOSEOUT 工作包第 1/2/3 PHASE 修复入口",
+      "registeredAt": "2026-08-17"
+    },
+    {
+      "id": "AGENT-INTERACTION-EVAL-20260814",
+      "path": "docs/planning/agent-interaction-evaluation.md",
       "kind": "reference",
       "status": "reference",
       "canonical": false,
-      "truthDomain": "pipeline-orchestration-design",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "IDE-MCP-TOOLS-DESIGN",
-      "path": "docs/archive/ide-transformation-retired/ide-research/mcp-ide-tools-design.md",
-      "kind": "reference",
-      "status": "archived",
-      "canonical": false,
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "archive_after_completion",
-      "supersededBy": [
-        "G0-IDE-MCP-TOOLS"
-      ]
-    },
-    {
-      "id": "IDE-MONACO-RESEARCH",
-      "path": "docs/archive/ide-transformation-retired/ide-research/monaco-integration-research.md",
-      "kind": "reference",
-      "status": "archived",
-      "canonical": false,
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "archive_after_completion",
-      "supersededBy": [
-        "G0-IDE-MCP-TOOLS"
-      ]
-    },
-    {
-      "id": "G0-IDE-MCP-TOOLS",
-      "path": "docs/g0-ide-mcp-tools-plan.md",
-      "kind": "work-package",
-      "status": "completed",
-      "canonical": true,
-      "truthDomain": "agent-ide-mcp-tools",
-      "entrypoint": "docs/README.md",
+      "truthDomain": "agent-interaction-evaluation",
+      "entrypoint": "docs/DOC-REGISTRY.json",
       "archivePolicy": "retain_stable_path",
+      "title": "Agent interaction evaluation — AI Agent 交互评估（5cafe0a）",
+      "owner": "agent",
+      "registeredAt": "2026-08-16",
+      "linkedCommits": [
+        "5cafe0a"
+      ],
+      "notes": "从仓库根迁移到 docs/planning/；修复 managedRoots=['docs'] 登记违反。",
       "tags": [
         "agent",
-        "mcp",
-        "ide",
-        "tools"
-      ]
-    },
-    {
-      "id": "IDE-TRANSFORMATION",
-      "path": "docs/archive/ide-transformation-retired/ide-transformation-plan.md",
-      "kind": "roadmap",
-      "status": "archived",
-      "canonical": false,
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "archive_after_completion",
-      "tags": [
-        "ide",
-        "monaco",
-        "editor",
-        "transformation"
-      ],
-      "supersededBy": [
-        "G0-IDE-MCP-TOOLS"
-      ]
-    },
-    {
-      "id": "PARALLEL-DEVELOPMENT",
-      "path": "docs/parallel-development-guide.md",
-      "kind": "governance",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "parallel-development-strategy",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "never_archive"
-    },
-    {
-      "id": "SKILLS-ARCHITECTURE",
-      "path": "docs/architecture/skills-architecture.md",
-      "kind": "reference",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "skills-layer-architecture",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "skills",
-        "architecture",
-        "layer",
-        "plugin"
-      ]
-    },
-    {
-      "id": "SKILLS-REGISTRY",
-      "path": "docs/skills-registry.md",
-      "kind": "reference",
-      "status": "active",
-      "canonical": false,
-      "truthDomain": "skills-registry-discovery",
-      "entrypoint": null,
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "skills",
-        "registry",
-        "discovery",
-        "marketplace"
-      ]
-    },
-    {
-      "id": "SKILLS-SCHEMA",
-      "path": "docs/skills-schema.md",
-      "kind": "reference",
-      "status": "active",
-      "canonical": false,
-      "truthDomain": "skills-schema-definition",
-      "entrypoint": null,
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "skills",
-        "schema",
-        "manifest",
-        "definition"
-      ]
-    },
-    {
-      "id": "SKILLS-WORKFLOW-INTEGRATION",
-      "path": "docs/skills-workflow-integration.md",
-      "kind": "reference",
-      "status": "active",
-      "canonical": false,
-      "truthDomain": "skills-workflow-integration",
-      "entrypoint": null,
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "skills",
-        "workflow",
-        "integration",
-        "agent-workflow"
+        "interaction",
+        "evaluation",
+        "5cafe0a",
+        "relocated-from-root"
       ]
     },
     {
@@ -751,50 +309,256 @@
       "id": "AUDIT-AGENT-WB-DEV-ELECTRON-VERIFICATION-2026-08-15"
     },
     {
-      "id": "AGENT-INTERACTION-EVAL-20260814",
-      "path": "docs/planning/agent-interaction-evaluation.md",
-      "kind": "reference",
+      "id": "AUDIT-LOG",
+      "path": "docs/AUDIT-LOG.md",
+      "kind": "audit",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "project-audit-broadcast",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "AUDIT-PROJECT-WIDE-2026-07",
+      "path": "docs/project-wide-audit-2026-07.md",
+      "kind": "audit",
       "status": "reference",
       "canonical": false,
-      "truthDomain": "agent-interaction-evaluation",
-      "entrypoint": "docs/DOC-REGISTRY.json",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "BLOCK-10-ARCHITECTURE",
+      "path": "docs/block-10-architecture-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "agent-harness-architecture-refactor",
+      "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "title": "Agent interaction evaluation — AI Agent 交互评估（5cafe0a）",
-      "owner": "agent",
-      "registeredAt": "2026-08-16",
-      "linkedCommits": [
-        "5cafe0a"
-      ],
-      "notes": "从仓库根迁移到 docs/planning/；修复 managedRoots=['docs'] 登记违反。",
       "tags": [
-        "agent",
-        "interaction",
-        "evaluation",
-        "5cafe0a",
-        "relocated-from-root"
+        "block-10-architecture",
+        "work-package",
+        "active",
+        "G0"
+      ],
+      "notes": "用户裁决 2026-08-18 启动 BLOCK-10-ARCHITECTURE 工作包 PHASE 0 调研 + plan v0.1 落地（只读调研 + 4 PHASE 0 报告 + plan v0.1 active 工作包，0 代码改动 / 0 commit）。收口 BLOCK-10-AUDIT-CLOSEOUT §10.3 候选清单 19 项（10 A-* + 5 lifecycle/DB + 4 rserver-http），其中 12 项主范围 + 7 项关联候选（observability-work-package / rserver-http-debt-pack / type-drift-pack / fixture-manifest-pack）。计划 4 PHASE 落地（PHASE 1 DB 体系化 / PHASE 2 r-server 大文件拆分 / PHASE 3 agent-runner 拆分 / PHASE 4 audit + closeout）。不外推 packaged / Provider / GA / P7 / notarization / dist staleness。Single work package serial 纪律：当前 PHASE 0 调研已收口，待用户显式裁决启动 PHASE 1。详见 plan §0-§11。",
+      "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-10-ARCHITECTURE-PHASE0-FIX-ORDER",
+      "path": "docs/block-10-arch-ph0-fix-order.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "agent-harness-architecture-refactor",
+      "entrypoint": "docs/block-10-architecture-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-10-architecture",
+        "phase-0",
+        "research-report",
+        "G0"
+      ],
+      "notes": "BLOCK-10-ARCHITECTURE PHASE 0 修复顺序 DAG + commit 拆分（7 commit 主收口 + 2-3 commit closeout）+ PHASE 划分 + 关键路径 + 可并行 ID。被 block-10-architecture-plan.md §4 / §5 引用作为 PHASE 0 commit 拆分依据。",
+      "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-10-ARCHITECTURE-PHASE0-RISKS",
+      "path": "docs/block-10-arch-ph0-risks.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "agent-harness-architecture-refactor",
+      "entrypoint": "docs/block-10-architecture-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-10-architecture",
+        "phase-0",
+        "research-report",
+        "G0"
+      ],
+      "notes": "BLOCK-10-ARCHITECTURE PHASE 0 风险登记表：19 项风险矩阵 / 跨包冲突（BLOCK-3/4/5/9/9.1/9.2/10 边界）/ 性能 / 兼容性（preload.js / electron.d.ts / desktopBridge.ts 不动）/ r-server 大文件拆分特别风险 / G1+ 不外推清单。被 block-10-architecture-plan.md §7 引用作为 PHASE 0 风险登记依据。",
+      "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-10-ARCHITECTURE-PHASE0-SURVEY",
+      "path": "docs/block-10-arch-ph0-survey.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "agent-harness-architecture-refactor",
+      "entrypoint": "docs/block-10-architecture-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-10-architecture",
+        "phase-0",
+        "research-report",
+        "G0"
+      ],
+      "notes": "BLOCK-10-ARCHITECTURE PHASE 0 调研报告：19 项修复单元详细清单 + 同根组合（BLOCK-10 partial 重叠 A-007 / E-019 full / PR-012）+ 跨包边界 + 阶段归属（12 主范围 + 7 关联候选）+ 工作量估算。被 block-10-architecture-plan.md §2 / §3 / §4 引用作为 PHASE 0 修复基线。",
+      "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-10-ARCHITECTURE-PHASE0-TEST-MATRIX",
+      "path": "docs/block-10-arch-ph0-test-matrix.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "agent-harness-architecture-refactor",
+      "entrypoint": "docs/block-10-architecture-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-10-architecture",
+        "phase-0",
+        "research-report",
+        "G0"
+      ],
+      "notes": "BLOCK-10-ARCHITECTURE PHASE 0 测试覆盖矩阵：现有测试 / 19 项测试需求 / 新测试文件建议（11 files / 50+ tests）/ 验证门限。被 block-10-architecture-plan.md §6 引用作为 PHASE 0 测试需求基线。",
+      "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-10-AUDIT-CLOSEOUT",
+      "path": "docs/code-audit-closeout-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "agent-harness-audit-closeout",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "audit",
+        "agent-harness",
+        "block-10",
+        "code-quality",
+        "G0"
+      ],
+      "notes": "用户裁决 2026-08-17 启动。收口 8 份 2026-08-17 Agent Harness 独立只读审计报告（archived in DOC-REGISTRY as 9 audit references）：error-handling / security / contract / architecture / observability / plugin-schema / rserver-http / perf-resource；共 90+ finding ID 收口 25 个修复单元（11C + 5H + 9 最高 ROI Major）。4 PHASE：P0 用户可见（C-001 branch/result IPC bridge + C-002 result:create conversation_export）→ P1 安全/资源（S-001..S-007 + PR-001 + PR-006 + E-017 + E-018 + E-019 + OB-004 + OB-005）→ P2 契约（PL-001 MCP inputSchema 极简 validator 不引入 ajv）→ P4 audit + closeout。7 组同根修复统一（E-017/PR-006/OB-005 + E-018/PR-005 + E-019/PR-011 + S-004 + C-001 + OB-004 + result-studio interaction）。不外推 packaged/Provider/GA/P7/notarization/dist staleness G1+；不重启 BLOCK-2..9.2；不引入新 npm 依赖；不破坏 preload.js 顶层 16 个 namespace / electron.d.ts / desktopBridge.ts。详见 plan §1-§9。",
+      "registeredAt": "2026-08-17",
+      "linkedCommits": [
+        "1c0ebf0",
+        "128b3d4",
+        "4f9a10f",
+        "a09f706",
+        "1fedf9c",
+        "36c2789",
+        "32ed9e9",
+        "b79c472"
       ]
     },
     {
-      "id": "GATE-REPORT-SCHEMAS",
-      "path": "docs/schemas/README.md",
+      "id": "BLOCK-10-AUDIT-CLOSEOUT-CLOSEOUT",
+      "path": "docs/block-10-audit-closeout.md",
       "kind": "reference",
-      "status": "reference",
-      "canonical": true,
-      "truthDomain": "gate-report-json-schemas",
-      "entrypoint": "docs/document-governance.md",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-closeout",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
       "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-10",
+        "closeout",
+        "G0"
+      ],
+      "notes": "2026-08-18 BLOCK-10-AUDIT-CLOSEOUT 工作包综合收口报告 v1.0 / 11 节；8 主 commits + 3 PHASE 4 closeout commits；13 项已修复（11 Critical + 2 High）+ 12 项不外推；4 治理门 GREEN；31 tests / 0 新依赖 / ~740 行 net +。详见报告 §1-§11。",
+      "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-10-PHASE0-FIX-ORDER",
+      "path": "docs/block-10-ph0-fix-order.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-closeout",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-10",
+        "phase-0",
+        "research-report",
+        "G0"
+      ],
+      "notes": "PHASE 0 修复顺序 DAG + commit 拆分 + PHASE 划分 + 关键路径 + 可并行 ID。被 code-audit-closeout-plan.md §4 / §14 引用作为 PHASE 0 commit 拆分依据。",
+      "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-10-PHASE0-RISKS",
+      "path": "docs/block-10-ph0-risks.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-closeout",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-10",
+        "phase-0",
+        "research-report",
+        "G0"
+      ],
+      "notes": "PHASE 0 风险登记表：风险矩阵 / 跨包冲突 / 性能 / 安全 / 兼容性 / 不外推 G1+。被 code-audit-closeout-plan.md §6 / §14 引用作为 PHASE 0 风险登记依据。",
+      "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-10-PHASE0-SURVEY",
+      "path": "docs/block-10-ph0-survey.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-closeout",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-10",
+        "phase-0",
+        "research-report",
+        "G0"
+      ],
+      "notes": "PHASE 0 调研报告：25 项修复单元详细清单 / 同根组合 / 跨包边界 / 阶段归属 / 工作量估算 / 修复顺序建议。被 code-audit-closeout-plan.md §1-§3 / §10 / §14 引用作为 PHASE 0 修复基线。",
+      "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-10-PHASE0-TEST-MATRIX",
+      "path": "docs/block-10-ph0-test-matrix.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-closeout",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-10",
+        "phase-0",
+        "research-report",
+        "G0"
+      ],
+      "notes": "PHASE 0 测试覆盖矩阵：现有测试 / 25 项测试需求 / 新测试文件建议 / 验证门限。被 code-audit-closeout-plan.md §5 引用作为 PHASE 0 测试需求基线。",
+      "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-2-UI-157-REVIEW",
+      "path": "docs/block-2-ui-157-review-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-2-ui-157-review",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "ui",
+        "skills",
+        "ipc",
+        "verified-target"
+      ],
+      "notes": "用户裁决 2026-08-16 启动。专为收口 ui-productization-audit.md 中 UI-157 (Skills UI 页面 P1/W-04) 的 in_progress 状态：① 接通 useSkillStore ↔ core/shared-backend/workflow-engine.js 之间的 IPC 桥（UI-161 显式留白的跨包接桥工作）；② 核对 UI-161 既有清理（commit 01c5e0b）未回退；③ 真实 dev Electron 实机启动 + 走查 /skills 路由；④ UI-157 in_progress → verified。6 个 PHASE（0 摸底 / 1 IPC 桥 / 2 UI-161 核对 / 3 实机 / 4 audit 更新 / 5 closeout）。不外推 Provider/packaged/GA/Chart a11y P2/Worktree。Single work package serial 纪律：当前 active 工作包。详见 plan §1-§9。",
       "registeredAt": "2026-08-16",
       "linkedCommits": [
-        "1049ac5"
-      ],
-      "tags": [
-        "schema",
-        "gates-2",
-        "json-output",
-        "machine-readable",
-        "validation"
-      ],
-      "notes": "DOC-GOVERNANCE-GATES / GATES-2 (2026-08-16) 阶段产物。3 个 JSON Schema (docs-governance-report / ui-audit-report / test-affected-report) 的 markdown 索引；actual .schema.json 文件不登记 (path 有效性约束仍为 docs/*.md)。schemaVersion=1 由 scripts/lib/gate-report-schema.mjs 守门 (Ajv 6.x 优先，缺失时降级 draft-07 子集)。"
+        "e6bf72f",
+        "01c5e0b",
+        "2d81377",
+        "0be5483",
+        "7e010a4",
+        "5c98ca8"
+      ]
     },
     {
       "id": "BLOCK-2-UI-157-REVIEW-CLOSEOUT",
@@ -976,16 +740,6 @@
       "cancelledReason": null
     },
     {
-      "id": "SENIOR-ENGINEER-REVIEW-2026-08-16",
-      "path": "docs/senior-engineer-review-2026-08-16.md",
-      "kind": "reference",
-      "status": "completed",
-      "canonical": false,
-      "truthDomain": "biof3-code-quality",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
-    },
-    {
       "id": "BLOCK-9-MEGA-FILE-REFACTOR-CLOSEOUT",
       "path": "docs/block-9-mega-file-refactor-closeout.md",
       "kind": "reference",
@@ -1023,6 +777,16 @@
       "archivePolicy": "retain_stable_path"
     },
     {
+      "id": "BLOCK-9.2-CLOSEOUT",
+      "path": "docs/block-9-2-mega-file-refactor-closeout.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "block-9-2-mega-file-refactor",
+      "entrypoint": "docs/block-9-2-mega-file-refactor-plan.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
       "id": "BLOCK-9.2-MEGA-FILE-REFACTOR",
       "path": "docs/block-9-2-mega-file-refactor-plan.md",
       "kind": "work-package",
@@ -1046,8 +810,8 @@
       ]
     },
     {
-      "id": "BLOCK-9.2-SURVEY",
-      "path": "docs/block-9-2-mega-file-split-survey.md",
+      "id": "BLOCK-9.2-PHASE-4-SIMPLECHAT-SURVEY",
+      "path": "docs/block-9-2-simplechat-survey.md",
       "kind": "reference",
       "status": "completed",
       "canonical": false,
@@ -1066,18 +830,8 @@
       "archivePolicy": "retain_stable_path"
     },
     {
-      "id": "BLOCK-9.2-PHASE-4-SIMPLECHAT-SURVEY",
-      "path": "docs/block-9-2-simplechat-survey.md",
-      "kind": "reference",
-      "status": "completed",
-      "canonical": false,
-      "truthDomain": "block-9-2-mega-file-refactor",
-      "entrypoint": "docs/block-9-2-mega-file-refactor-plan.md",
-      "archivePolicy": "retain_stable_path"
-    },
-    {
-      "id": "BLOCK-9.2-CLOSEOUT",
-      "path": "docs/block-9-2-mega-file-refactor-closeout.md",
+      "id": "BLOCK-9.2-SURVEY",
+      "path": "docs/block-9-2-mega-file-split-survey.md",
       "kind": "reference",
       "status": "completed",
       "canonical": false,
@@ -1115,284 +869,620 @@
       "registeredAt": "2026-08-17"
     },
     {
-      "id": "AGENT-HARNESS-ERROR-HANDLING-AUDIT-2026-08-17",
-      "path": "docs/agent-harness-error-handling-audit-2026-08-17.md",
-      "kind": "audit",
-      "status": "completed",
-      "canonical": false,
-      "truthDomain": "agent-harness-audit-batches-2026-08-17",
-      "entrypoint": "docs/code-audit-closeout-plan.md",
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "audit",
-        "agent-harness",
-        "G0",
-        "code-quality"
-      ],
-      "notes": "2026-08-17 独立只读审计；收录于 BLOCK-10-AUDIT-CLOSEOUT 工作包第 1/2/3 PHASE 修复入口",
-      "registeredAt": "2026-08-17"
+      "id": "COLLABORATION",
+      "path": "docs/COLLABORATION.md",
+      "kind": "governance",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "team-collaboration-convention",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
     },
     {
-      "id": "AGENT-HARNESS-SECURITY-AUDIT-2026-08-17",
-      "path": "docs/agent-harness-security-audit-2026-08-17.md",
-      "kind": "audit",
+      "id": "DEPENDENCY-DECOUPLING",
+      "path": "docs/dependency-decoupling-checkpoint.md",
+      "kind": "reference",
       "status": "completed",
       "canonical": false,
-      "truthDomain": "agent-harness-audit-batches-2026-08-17",
-      "entrypoint": "docs/code-audit-closeout-plan.md",
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "audit",
-        "agent-harness",
-        "G0",
-        "code-quality"
-      ],
-      "notes": "2026-08-17 独立只读审计；收录于 BLOCK-10-AUDIT-CLOSEOUT 工作包第 1/2/3 PHASE 修复入口",
-      "registeredAt": "2026-08-17"
+      "archivePolicy": "retain_stable_path"
     },
     {
-      "id": "AGENT-HARNESS-CONTRACT-AUDIT-2026-08-17",
-      "path": "docs/agent-harness-contract-audit-2026-08-17.md",
+      "id": "DESKTOP-EVAL-20260814",
+      "path": "docs/BioF3-Desktop-Evaluation-Report-2026-08-14.md",
       "kind": "audit",
-      "status": "completed",
-      "canonical": false,
-      "truthDomain": "agent-harness-audit-batches-2026-08-17",
-      "entrypoint": "docs/code-audit-closeout-plan.md",
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "audit",
-        "agent-harness",
-        "G0",
-        "code-quality"
-      ],
-      "notes": "2026-08-17 独立只读审计；收录于 BLOCK-10-AUDIT-CLOSEOUT 工作包第 1/2/3 PHASE 修复入口",
-      "registeredAt": "2026-08-17"
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "desktop-evaluation",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
     },
     {
-      "id": "AGENT-HARNESS-ARCHITECTURE-AUDIT-2026-08-17",
-      "path": "docs/agent-harness-architecture-audit-2026-08-17.md",
-      "kind": "audit",
-      "status": "completed",
-      "canonical": false,
-      "truthDomain": "agent-harness-audit-batches-2026-08-17",
-      "entrypoint": "docs/code-audit-closeout-plan.md",
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "audit",
-        "agent-harness",
-        "G0",
-        "code-quality"
-      ],
-      "notes": "2026-08-17 独立只读审计；收录于 BLOCK-10-AUDIT-CLOSEOUT 工作包第 1/2/3 PHASE 修复入口",
-      "registeredAt": "2026-08-17"
-    },
-    {
-      "id": "AGENT-HARNESS-OBSERVABILITY-AUDIT-2026-08-17",
-      "path": "docs/agent-harness-observability-audit-2026-08-17.md",
-      "kind": "audit",
-      "status": "completed",
-      "canonical": false,
-      "truthDomain": "agent-harness-audit-batches-2026-08-17",
-      "entrypoint": "docs/code-audit-closeout-plan.md",
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "audit",
-        "agent-harness",
-        "G0",
-        "code-quality"
-      ],
-      "notes": "2026-08-17 独立只读审计；收录于 BLOCK-10-AUDIT-CLOSEOUT 工作包第 1/2/3 PHASE 修复入口",
-      "registeredAt": "2026-08-17"
-    },
-    {
-      "id": "AGENT-HARNESS-PLUGIN-SCHEMA-AUDIT-2026-08-17",
-      "path": "docs/agent-harness-plugin-schema-audit-2026-08-17.md",
-      "kind": "audit",
-      "status": "completed",
-      "canonical": false,
-      "truthDomain": "agent-harness-audit-batches-2026-08-17",
-      "entrypoint": "docs/code-audit-closeout-plan.md",
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "audit",
-        "agent-harness",
-        "G0",
-        "code-quality"
-      ],
-      "notes": "2026-08-17 独立只读审计；收录于 BLOCK-10-AUDIT-CLOSEOUT 工作包第 1/2/3 PHASE 修复入口",
-      "registeredAt": "2026-08-17"
-    },
-    {
-      "id": "AGENT-HARNESS-RSERVER-HTTP-CONTRACT-AUDIT-2026-08-17",
-      "path": "docs/agent-harness-rserver-http-contract-audit-2026-08-17.md",
-      "kind": "audit",
-      "status": "completed",
-      "canonical": false,
-      "truthDomain": "agent-harness-audit-batches-2026-08-17",
-      "entrypoint": "docs/code-audit-closeout-plan.md",
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "audit",
-        "agent-harness",
-        "G0",
-        "code-quality"
-      ],
-      "notes": "2026-08-17 独立只读审计；收录于 BLOCK-10-AUDIT-CLOSEOUT 工作包第 1/2/3 PHASE 修复入口",
-      "registeredAt": "2026-08-17"
-    },
-    {
-      "id": "AGENT-HARNESS-PERFORMANCE-RESOURCE-AUDIT-2026-08-17",
-      "path": "docs/agent-harness-performance-resource-audit-2026-08-17.md",
-      "kind": "audit",
-      "status": "completed",
-      "canonical": false,
-      "truthDomain": "agent-harness-audit-batches-2026-08-17",
-      "entrypoint": "docs/code-audit-closeout-plan.md",
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "audit",
-        "agent-harness",
-        "G0",
-        "code-quality"
-      ],
-      "notes": "2026-08-17 独立只读审计；收录于 BLOCK-10-AUDIT-CLOSEOUT 工作包第 1/2/3 PHASE 修复入口",
-      "registeredAt": "2026-08-17"
-    },
-    {
-      "id": "BLOCK-10-AUDIT-CLOSEOUT",
-      "path": "docs/code-audit-closeout-plan.md",
+      "id": "DOC-GOVERNANCE-GATES",
+      "path": "docs/doc-governance-gates-plan.md",
       "kind": "work-package",
       "status": "completed",
       "canonical": true,
-      "truthDomain": "agent-harness-audit-closeout",
+      "truthDomain": "docs-governance-gates",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
-        "audit",
-        "agent-harness",
-        "block-10",
-        "code-quality",
-        "G0"
+        "docs",
+        "governance",
+        "gates",
+        "scripts"
       ],
-      "notes": "用户裁决 2026-08-17 启动。收口 8 份 2026-08-17 Agent Harness 独立只读审计报告（archived in DOC-REGISTRY as 9 audit references）：error-handling / security / contract / architecture / observability / plugin-schema / rserver-http / perf-resource；共 90+ finding ID 收口 25 个修复单元（11C + 5H + 9 最高 ROI Major）。4 PHASE：P0 用户可见（C-001 branch/result IPC bridge + C-002 result:create conversation_export）→ P1 安全/资源（S-001..S-007 + PR-001 + PR-006 + E-017 + E-018 + E-019 + OB-004 + OB-005）→ P2 契约（PL-001 MCP inputSchema 极简 validator 不引入 ajv）→ P4 audit + closeout。7 组同根修复统一（E-017/PR-006/OB-005 + E-018/PR-005 + E-019/PR-011 + S-004 + C-001 + OB-004 + result-studio interaction）。不外推 packaged/Provider/GA/P7/notarization/dist staleness G1+；不重启 BLOCK-2..9.2；不引入新 npm 依赖；不破坏 preload.js 顶层 16 个 namespace / electron.d.ts / desktopBridge.ts。详见 plan §1-§9。",
-      "registeredAt": "2026-08-17",
+      "notes": "用户裁决 2026-08-16 启动；同日 GATES-0~GATES-4 五阶段全部完成并收口。canonical 收口记录：docs/doc-governance-gates-closeout.md。Single work package serial 下首个 active 工作包演示（启动 + 收口同日）。详见 plan §1-§9 + closeout §1-§8。",
+      "registeredAt": "2026-08-16",
       "linkedCommits": [
-        "1c0ebf0",
-        "128b3d4",
-        "4f9a10f",
-        "a09f706",
-        "1fedf9c",
-        "36c2789",
-        "32ed9e9",
-        "b79c472"
+        "a363105",
+        "aea70a6",
+        "c552100",
+        "1b7ce3e",
+        "76e0f75",
+        "c1ce38c",
+        "1049ac5",
+        "d4822ea"
       ]
     },
     {
-      "id": "AGENT-HARNESS-ARCHITECTURE-SURVEY-2026-08-17",
-      "path": "docs/agent-harness-architecture-survey-2026-08-17.md",
-      "kind": "audit",
-      "status": "completed",
-      "canonical": false,
-      "truthDomain": "agent-harness-audit-batches-2026-08-17",
-      "entrypoint": "docs/code-audit-closeout-plan.md",
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "audit",
-        "agent-harness",
-        "G0",
-        "architecture-survey"
-      ],
-      "notes": "2026-08-17 Agent Harness 后端架构调研报告（非前端 UI）；与 AGENT-HARNESS-ARCHITECTURE-AUDIT-2026-08-17 配套 — survey 含后端 14 sub-process / IPC 链路 / shared-backend 拓扑详细分析",
-      "registeredAt": "2026-08-17"
-    },
-    {
-      "id": "BLOCK-10-PHASE0-SURVEY",
-      "path": "docs/block-10-ph0-survey.md",
+      "id": "DOC-GOVERNANCE-GATES-CLOSEOUT",
+      "path": "docs/doc-governance-gates-closeout.md",
       "kind": "reference",
-      "status": "active",
-      "canonical": false,
-      "truthDomain": "agent-harness-audit-closeout",
-      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "docs-governance-gates-closeout",
+      "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "tags": [
-        "block-10",
-        "phase-0",
-        "research-report",
-        "G0"
+      "registeredAt": "2026-08-16",
+      "linkedCommits": [
+        "a363105",
+        "aea70a6",
+        "c552100",
+        "1b7ce3e",
+        "76e0f75",
+        "c1ce38c",
+        "1049ac5",
+        "d4822ea"
       ],
-      "notes": "PHASE 0 调研报告：25 项修复单元详细清单 / 同根组合 / 跨包边界 / 阶段归属 / 工作量估算 / 修复顺序建议。被 code-audit-closeout-plan.md §1-§3 / §10 / §14 引用作为 PHASE 0 修复基线。",
-      "registeredAt": "2026-08-18"
-    },
-    {
-      "id": "BLOCK-10-PHASE0-FIX-ORDER",
-      "path": "docs/block-10-ph0-fix-order.md",
-      "kind": "reference",
-      "status": "active",
-      "canonical": false,
-      "truthDomain": "agent-harness-audit-closeout",
-      "entrypoint": "docs/code-audit-closeout-plan.md",
-      "archivePolicy": "retain_stable_path",
       "tags": [
-        "block-10",
-        "phase-0",
-        "research-report",
-        "G0"
-      ],
-      "notes": "PHASE 0 修复顺序 DAG + commit 拆分 + PHASE 划分 + 关键路径 + 可并行 ID。被 code-audit-closeout-plan.md §4 / §14 引用作为 PHASE 0 commit 拆分依据。",
-      "registeredAt": "2026-08-18"
-    },
-    {
-      "id": "BLOCK-10-PHASE0-TEST-MATRIX",
-      "path": "docs/block-10-ph0-test-matrix.md",
-      "kind": "reference",
-      "status": "active",
-      "canonical": false,
-      "truthDomain": "agent-harness-audit-closeout",
-      "entrypoint": "docs/code-audit-closeout-plan.md",
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "block-10",
-        "phase-0",
-        "research-report",
-        "G0"
-      ],
-      "notes": "PHASE 0 测试覆盖矩阵：现有测试 / 25 项测试需求 / 新测试文件建议 / 验证门限。被 code-audit-closeout-plan.md §5 引用作为 PHASE 0 测试需求基线。",
-      "registeredAt": "2026-08-18"
-    },
-    {
-      "id": "BLOCK-10-PHASE0-RISKS",
-      "path": "docs/block-10-ph0-risks.md",
-      "kind": "reference",
-      "status": "active",
-      "canonical": false,
-      "truthDomain": "agent-harness-audit-closeout",
-      "entrypoint": "docs/code-audit-closeout-plan.md",
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "block-10",
-        "phase-0",
-        "research-report",
-        "G0"
-      ],
-      "notes": "PHASE 0 风险登记表：风险矩阵 / 跨包冲突 / 性能 / 安全 / 兼容性 / 不外推 G1+。被 code-audit-closeout-plan.md §6 / §14 引用作为 PHASE 0 风险登记依据。",
-      "registeredAt": "2026-08-18"
-    },
-    {
-      "id": "BLOCK-10-AUDIT-CLOSEOUT-CLOSEOUT",
-      "path": "docs/block-10-audit-closeout.md",
-      "kind": "reference",
-      "status": "completed",
-      "canonical": false,
-      "truthDomain": "agent-harness-audit-closeout",
-      "entrypoint": "docs/code-audit-closeout-plan.md",
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "block-10",
+        "docs",
+        "governance",
+        "gates",
         "closeout",
-        "G0"
+        "implemented"
       ],
-      "notes": "2026-08-18 BLOCK-10-AUDIT-CLOSEOUT 工作包综合收口报告 v1.0 / 11 节；8 主 commits + 3 PHASE 4 closeout commits；13 项已修复（11 Critical + 2 High）+ 12 项不外推；4 治理门 GREEN；31 tests / 0 新依赖 / ~740 行 net +。详见报告 §1-§11。",
-      "registeredAt": "2026-08-18"
+      "notes": "DOC-GOVERNANCE-GATES 工作包（2026-08-16 启动同日收口）canonical 收口记录；GATES-0~GATES-4 五阶段全部完成；docs:check 63 / ui:audit:check 131 / docs:reconcile 0 issues。详见 closeout §1-§8。"
+    },
+    {
+      "id": "DOC-INDEX",
+      "path": "docs/README.md",
+      "kind": "governance",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "project-document-index",
+      "entrypoint": "AGENTS.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "FIRST-SUCCESS-PATH",
+      "path": "docs/first-success-path.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "G0-CHF0",
+      "path": "docs/g0-critical-crosscut-hardening-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "G0-IDE-MCP-TOOLS",
+      "path": "docs/g0-ide-mcp-tools-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "agent-ide-mcp-tools",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "agent",
+        "mcp",
+        "ide",
+        "tools"
+      ]
+    },
+    {
+      "id": "G0-LF",
+      "path": "docs/g0-living-foundation-plan.md",
+      "kind": "living-plan",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "g0-living-foundation",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "G0-LF12",
+      "path": "docs/g0-lf12-baseline-qualification-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "G0-RS",
+      "path": "docs/g0-result-studio-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": false,
+      "truthDomain": "g0-result-studio",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "G0-RS-UX1H",
+      "path": "docs/g0-rs-ux1h-async-tool-surface.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "g0-current-work-package",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "G0-RS0",
+      "path": "docs/g0-rs0-result-studio-audit.md",
+      "kind": "audit",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "result-studio-architecture",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "G0-SDC",
+      "path": "docs/g0-scientific-data-contract-plan.md",
+      "kind": "living-plan",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "g0-scientific-data-contract",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "GATE-REPORT-SCHEMAS",
+      "path": "docs/schemas/README.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "gate-report-json-schemas",
+      "entrypoint": "docs/document-governance.md",
+      "archivePolicy": "retain_stable_path",
+      "registeredAt": "2026-08-16",
+      "linkedCommits": [
+        "1049ac5"
+      ],
+      "tags": [
+        "schema",
+        "gates-2",
+        "json-output",
+        "machine-readable",
+        "validation"
+      ],
+      "notes": "DOC-GOVERNANCE-GATES / GATES-2 (2026-08-16) 阶段产物。3 个 JSON Schema (docs-governance-report / ui-audit-report / test-affected-report) 的 markdown 索引；actual .schema.json 文件不登记 (path 有效性约束仍为 docs/*.md)。schemaVersion=1 由 scripts/lib/gate-report-schema.mjs 守门 (Ajv 6.x 优先，缺失时降级 draft-07 子集)。"
+    },
+    {
+      "id": "GATEWAY-DESIGN",
+      "path": "docs/architecture/gateway-design.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "backend-gateway-architecture",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "GOV-DOC-1",
+      "path": "docs/document-governance.md",
+      "kind": "governance",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "project-document-lifecycle",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "GOV-WT-1",
+      "path": "docs/worktree-governance.md",
+      "kind": "governance",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "git-worktree-lifecycle",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "HARNESS-ENGINE-V1",
+      "path": "docs/harness-engine-spec.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "harness-engine-contract",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "HARNESS-PHASE7",
+      "path": "docs/harness-phase7-completion-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "HARNESS-ROADMAP",
+      "path": "docs/harness-roadmap.md",
+      "kind": "roadmap",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "HARNESS-TOOL-TEMPLATE",
+      "path": "docs/harness-tool-template.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "harness-tool-template",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "HLE-PRODUCTION-CLOSURE",
+      "path": "docs/harness-loop-production-closure-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "HLE-V1",
+      "path": "docs/harness-loop-engineering-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "HRT-V1",
+      "path": "docs/harness-scientific-task-contract-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "IDE-MCP-TOOLS-DESIGN",
+      "path": "docs/archive/ide-transformation-retired/ide-research/mcp-ide-tools-design.md",
+      "kind": "reference",
+      "status": "archived",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "archive_after_completion",
+      "supersededBy": [
+        "G0-IDE-MCP-TOOLS"
+      ]
+    },
+    {
+      "id": "IDE-MONACO-RESEARCH",
+      "path": "docs/archive/ide-transformation-retired/ide-research/monaco-integration-research.md",
+      "kind": "reference",
+      "status": "archived",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "archive_after_completion",
+      "supersededBy": [
+        "G0-IDE-MCP-TOOLS"
+      ]
+    },
+    {
+      "id": "IDE-TRANSFORMATION",
+      "path": "docs/archive/ide-transformation-retired/ide-transformation-plan.md",
+      "kind": "roadmap",
+      "status": "archived",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "archive_after_completion",
+      "tags": [
+        "ide",
+        "monaco",
+        "editor",
+        "transformation"
+      ],
+      "supersededBy": [
+        "G0-IDE-MCP-TOOLS"
+      ]
+    },
+    {
+      "id": "MACOS-OSS-UPDATE",
+      "path": "docs/macos-oss-auto-update.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "macos-oss-update",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "MODEL-PROVIDER-AUDIT",
+      "path": "docs/archive/checkpoints/model-provider-audit.md",
+      "kind": "audit",
+      "status": "archived",
+      "canonical": false,
+      "archivePolicy": "archive_after_completion"
+    },
+    {
+      "id": "MODULE-MAP",
+      "path": "docs/development-module-map.md",
+      "kind": "governance",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "module-responsibility-map",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "PARALLEL-DEVELOPMENT",
+      "path": "docs/parallel-development-guide.md",
+      "kind": "governance",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "parallel-development-strategy",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "PIPELINE-API",
+      "path": "docs/architecture/pipeline-api.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "truthDomain": "pipeline-orchestration-design",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "PLUGIN-ARTIFACT-SCHEMA",
+      "path": "docs/plugin-artifact-schema.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "plugin-artifact-contract",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "PLUGIN-THIRD-PARTY-GUIDE",
+      "path": "docs/third-party-plugin-guide.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "third-party-plugin-development",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "RELEASE-RC2",
+      "path": "docs/releases/v0.0.1-rc.2.md",
+      "kind": "release",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "RELEASE-RC6",
+      "path": "docs/releases/v0.0.1-rc.6.md",
+      "kind": "release",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "RELEASE-RC7",
+      "path": "docs/releases/v0.0.1-rc.7.md",
+      "kind": "release",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "ROADMAP-NEXT",
+      "path": "docs/next-steps-roadmap.md",
+      "kind": "roadmap",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "current-priorities",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "ROADMAP-V1",
+      "path": "docs/v1-productization-roadmap.md",
+      "kind": "roadmap",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "product-stage-sequence",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "RUNTIME-VERSION-BASELINE",
+      "path": "docs/runtime-version-baseline.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "runtime-version-contract",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "SENIOR-ENGINEER-REVIEW-2026-08-16",
+      "path": "docs/senior-engineer-review-2026-08-16.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "biof3-code-quality",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "SKILLS-ARCHITECTURE",
+      "path": "docs/architecture/skills-architecture.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "skills-layer-architecture",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "skills",
+        "architecture",
+        "layer",
+        "plugin"
+      ]
+    },
+    {
+      "id": "SKILLS-REGISTRY",
+      "path": "docs/skills-registry.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "skills-registry-discovery",
+      "entrypoint": null,
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "skills",
+        "registry",
+        "discovery",
+        "marketplace"
+      ]
+    },
+    {
+      "id": "SKILLS-SCHEMA",
+      "path": "docs/skills-schema.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "skills-schema-definition",
+      "entrypoint": null,
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "skills",
+        "schema",
+        "manifest",
+        "definition"
+      ]
+    },
+    {
+      "id": "SKILLS-WORKFLOW-INTEGRATION",
+      "path": "docs/skills-workflow-integration.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "skills-workflow-integration",
+      "entrypoint": null,
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "skills",
+        "workflow",
+        "integration",
+        "agent-workflow"
+      ]
+    },
+    {
+      "id": "STAGE2-ACCEPTANCE-AUDIT",
+      "path": "docs/archive/checkpoints/stage2-acceptance-audit.md",
+      "kind": "audit",
+      "status": "archived",
+      "canonical": false,
+      "archivePolicy": "archive_after_completion"
+    },
+    {
+      "id": "STAGE3-M1-AUDIT",
+      "path": "docs/archive/checkpoints/stage3-m1-audit.md",
+      "kind": "audit",
+      "status": "archived",
+      "canonical": false,
+      "archivePolicy": "archive_after_completion"
+    },
+    {
+      "id": "STAGE3-WORKFLOWS-DESIGN",
+      "path": "docs/stage3-standard-workflows-design.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "STAGE4-STABLE-RELEASE",
+      "path": "docs/stage4-stable-release-checklist.md",
+      "kind": "release",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "UI-035-064-ACCEPTANCE",
+      "path": "docs/archive/checkpoints/ui-035-064-real-acceptance.md",
+      "kind": "audit",
+      "status": "archived",
+      "canonical": false,
+      "archivePolicy": "archive_after_completion"
+    },
+    {
+      "id": "UI-PRODUCTIZATION-AUDIT",
+      "path": "docs/ui-productization-audit.md",
+      "kind": "audit",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "ui-productization-status",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "UI-WORKBENCH-DIRECTION",
+      "path": "docs/codex-style-workbench-direction.md",
+      "kind": "vision",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "workbench-ui-direction",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "VISION-SCIENTIFIC-OS",
+      "path": "docs/scientific-intelligence-os-vision.md",
+      "kind": "vision",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "long-term-product-direction",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "WORKSPACE-HANDOFF",
+      "path": "docs/project-workspace-handoff.md",
+      "kind": "handoff",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "recoverable-workspace-state",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
     }
   ]
 }
