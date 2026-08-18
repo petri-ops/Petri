@@ -4,7 +4,9 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-16 23:38（BLOCK-9-MEGA-FILE-REFACTOR 工作包收口登记 —— 4 PHASE 全部完成 + UI-162/163/164 全部 verified + 4 commit 落地 + 6 个 consumer 0 改动 + 不外推 BLOCK-9.1~9.6 6 项 + 当前无 active 工作包）
+最后更新：2026-08-18（远程分支清理 39 条 → 仅剩 main；Wave 0 台账 16 项全 verified 早已由 PR #30~44 合入——更正此前"未合并"误判，根因是本机 git fetch 假同步只写 FETCH_HEAD）
+
+- ✅ 2026-08-18 20:50 远程分支清理收口：39 条远程分支全部删除（remote 现仅剩 main），本地同步清 24 条分支 + 移除 wave1 陈旧 worktree。构成：① 20 条 ahead=0（Wave 0 验收 codex/ui-*-verified 14 条经 PR #31~44 合入、fix/ui-038-042 经 PR #30、feat/ui-wave0 经 PR #10、fix/wave1-ledger-verify 经 PR #14、feat/agent-concurrency、wb/* 5 条 0-commit 同步分支）；② 19 条 diverged 中间态（codex/ui-*-verify/-regression/-partial、codex/ui-settings-regressions、docs/ui-verify-checklist、feat/result-studio-p0、feat/ui-wave1）唯一独有提交均为 de76e55（SummaryRetryActions 重构，已被 main 的 toolSummaryPresentation.ts 方案取代）。全部提交作者核验为 Diandian-ops（用户本人账号，非第三方）。wb/* 删除经用户裁决，取代 2026-08-16 WB-NAMESPACE-PUSH 登记项（内容早以 fast-forward 在 main）。删除不丢内容：main 含全部合入提交，de76e55 可经 SHA 访问。
 
 - ✅ 2026-08-16 23:38 BLOCK-9-MEGA-FILE-REFACTOR 工作包收口（用户裁决"按照你的建议来"启动当日 4 PHASE 全部完成）。4 commit 落地：d87a0f8 PHASE 0 启动 + 评审报告永久化 / e78567c PHASE 1 _data.ts 2157 → 3 文件 / 1c14f49 PHASE 2 buildPreviewTable 抽 lib/file-preview/ / c1e2bd5 PHASE 3 project-workspace.tsx 3213 → 3114 + 8 helpers + types 抽离。3 项重构（基于 senior-engineer-review-2026-08-16.md P0/P1 5 项中的 3 项）：① 拆 _data.ts 2157 → 3 文件（registry/categories/inventory + 兼容；实际无 demo 字段） / ② 抽 buildPreviewTable 解决 ResultView + project-workspace 重复 / ③ 拆 project-workspace.tsx 保守拆分（types + helpers；组件链依赖复杂未拆子组件）。UI-162/163/164 全部 verified。验证：tsc 0 / vitest 75 文件 630 tests PASS / 4 治理门 GREEN / 6 个 consumer 0 改动 / 不变量守住。不外推：BLOCK-9.1 main.js 2450 / BLOCK-9.2 SimpleChat 2153 / BLOCK-9.3 plugin-manager 1457 / BLOCK-9.4 DesktopSettingsPanel 1515 / BLOCK-9.5 useSkillStore 743 / BLOCK-9.6 IPC channel 常量集中 6 项 + packaged / dist / Provider / P7 / GA / E1-d/E1-e G1+ / dist staleness G1+ / i18n / 不重新激活 BLOCK-2/3/4/5/6/7/8。当前无 active 工作包。细节见 docs/block-9-mega-file-refactor-closeout.md。
 
