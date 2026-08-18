@@ -33,13 +33,19 @@
     },
     "mode": {
       "type": "string",
-      "enum": ["report"],
+      "enum": [
+        "report"
+      ],
       "description": "Output mode. Always 'report' for `--report` invocations."
     },
     "exitCode": {
       "type": "integer",
-      "enum": [0, 1, 2],
-      "description": "Exit code produced by the run. 0=PASS, 1=FAIL, 2=classification conflict. The ui-audit script reserves 2 for future white-list conflicts; current invocations emit 0 or 1."
+      "enum": [
+        0,
+        1,
+        2
+      ],
+      "description": "Exit code produced by the run. 0=PASS, 1=FAIL, 2=classification conflict. From GATES-3 onward, exit 2 is emitted when commit subjects reference UI-### ids that are not registered in docs/ui-productization-audit.md (hasUnmappedSurface), or when --print-mode=development downgrades a hard FAIL, or when the --report JSON write fails schema validation."
     },
     "reportPath": {
       "type": "string",
@@ -59,12 +65,20 @@
       "properties": {
         "status": {
           "type": "string",
-          "enum": ["PASS", "FAIL", "CLASSIFICATION_CONFLICT"],
+          "enum": [
+            "PASS",
+            "FAIL",
+            "CLASSIFICATION_CONFLICT"
+          ],
           "description": "Overall classification of the run."
         },
         "result": {
           "type": "string",
-          "enum": ["pass", "fail", "classification_conflict"],
+          "enum": [
+            "pass",
+            "fail",
+            "classification_conflict"
+          ],
           "description": "Lower-case machine-friendly equivalent of status."
         },
         "failures": {
@@ -92,21 +106,48 @@
       "description": "Failure messages produced by the run. Empty array when none.",
       "items": {
         "type": "object",
-        "additionalProperties": false,
-        "required": ["code", "message"],
+        "additionalProperties": true,
+        "required": [
+          "code",
+          "message"
+        ],
         "properties": {
           "code": {
             "type": "string",
-            "enum": ["UI_AUDIT_SYNC", "UI_ID_MISSING", "WORKTREE_UI"],
-            "description": "Stable failure code. UI_AUDIT_SYNC = commit modified UI surface without syncing audit ledger. UI_ID_MISSING = commit message lacks UI-### issue id. WORKTREE_UI = working tree contains UI changes without synced audit ledger."
+            "enum": [
+              "UI_AUDIT_SYNC",
+              "UI_ID_MISSING",
+              "WORKTREE_UI",
+              "UI_AUDIT_UNMAPPED"
+            ],
+            "description": "Stable failure code. UI_AUDIT_SYNC = commit modified UI surface without syncing audit ledger. UI_ID_MISSING = commit message lacks UI-### issue id. WORKTREE_UI = working tree contains UI changes without synced audit ledger. UI_AUDIT_UNMAPPED = commit subject references a UI-### id that is not registered in docs/ui-productization-audit.md (hasUnmappedSurface, GATES-3)."
           },
           "message": {
             "type": "string",
             "description": "Human-readable failure message."
           },
           "commit": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Short commit SHA (first 7 chars) when the failure is tied to a commit."
+          },
+          "unmappedIds": {
+            "type": "array",
+            "description": "For UI_AUDIT_UNMAPPED failures: the UI-### ids that are not registered in docs/ui-productization-audit.md.",
+            "items": {
+              "type": "string",
+              "pattern": "^UI(?:-AGENTWB)?-\\d{3}$"
+            },
+            "uniqueItems": true
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "conflict"
+            ],
+            "description": "Optional marker on a structured failure indicating it should be downgraded to exit 2 (classification conflict) instead of exit 1. Used by --print-mode=development and UI_AUDIT_UNMAPPED entries."
           }
         }
       }

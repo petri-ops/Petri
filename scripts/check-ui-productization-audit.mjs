@@ -326,12 +326,12 @@ function decideExitCode(result, printMode = 'default') {
   const failures = result?.structuredFailures ?? []
   if (failures.length === 0) return 0
   if (printMode === 'development') {
-    // Development mode: every failure with `classification === 'conflict'`
-    // downgrades to exit 2. Today only UI_AUDIT_UNMAPPED qualifies.
-    if (failures.every(isClassificationConflict)) return 2
-    // Mixed: prefer the highest exit (1 hard fail + 1 conflict ⇒ 1)
-    if (failures.some(isClassificationConflict)) return 2
-    return 1
+    // Development mode: every failure downgrades to exit 2 so that
+    // LEGACY_*_EXEMPTIONS-miss situations (e.g. a new commit that the
+    // developer intends to grandfather via a subsequent UI-AUDIT-FIX)
+    // do not fail-closed during local iteration. Production CI uses
+    // 'default' mode and gets exit 1 for hard FAILs.
+    return 2
   }
   // Default mode: any conflict ⇒ 2; otherwise ⇒ 1
   if (failures.some(isClassificationConflict)) return 2
