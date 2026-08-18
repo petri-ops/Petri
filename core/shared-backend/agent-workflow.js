@@ -1,12 +1,13 @@
 const AGENT_WORKFLOW_TEMPLATE_VERSION = 1;
 const { isRegisteredProfile } = require('./artifact-profiles');
 
-// Reuse harness workflow state projection for per-job details.
-let _harness;
-try {
-  _harness = require('../r-server/helpers/harness-workflow-state');
-} catch {
-  // harness-workflow-state may not be available in non-r-server contexts.
+// A-003 configure inject: harness-workflow-state is injected at bootstrap time,
+// not required at load time. This breaks the shared-backend → r-server reverse require.
+let _projectHarnessWorkflowJob = null;
+function configure(opts) {
+  if (opts && opts.projectHarnessWorkflowJob) {
+    _projectHarnessWorkflowJob = opts.projectHarnessWorkflowJob;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -310,8 +311,8 @@ function runToolJobs(plan, getToolJobFn) {
       if (!job) return null;
       const enriched = { ...job, _stepId: step.id };
       // Attach harness workflow state if available.
-      if (_harness && typeof _harness.projectHarnessWorkflowJob === 'function') {
-        enriched.harnessState = _harness.projectHarnessWorkflowJob(job);
+      if (typeof _projectHarnessWorkflowJob === 'function') {
+        enriched.harnessState = _projectHarnessWorkflowJob(job);
       }
       return enriched;
     })
@@ -517,6 +518,7 @@ function validateWorkflowPlanBindings(plan) {
 }
 
 module.exports = {
+  configure,
   AGENT_WORKFLOW_TEMPLATE_VERSION,
   AGENT_WORKFLOW_TEMPLATES,
   STEP_STATUSES,
