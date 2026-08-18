@@ -330,7 +330,7 @@
       "id": "BLOCK-10-ARCHITECTURE",
       "path": "docs/block-10-architecture-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "agent-harness-architecture-refactor",
       "entrypoint": "docs/README.md",
@@ -338,11 +338,75 @@
       "tags": [
         "block-10-architecture",
         "work-package",
-        "active",
+        "completed",
         "G0"
       ],
-      "notes": "用户裁决 2026-08-18 启动 BLOCK-10-ARCHITECTURE 工作包 PHASE 0 调研 + plan v0.1 落地（只读调研 + 4 PHASE 0 报告 + plan v0.1 active 工作包，0 代码改动 / 0 commit）。收口 BLOCK-10-AUDIT-CLOSEOUT §10.3 候选清单 19 项（10 A-* + 5 lifecycle/DB + 4 rserver-http），其中 12 项主范围 + 7 项关联候选（observability-work-package / rserver-http-debt-pack / type-drift-pack / fixture-manifest-pack）。计划 4 PHASE 落地（PHASE 1 DB 体系化 / PHASE 2 r-server 大文件拆分 / PHASE 3 agent-runner 拆分 / PHASE 4 audit + closeout）。不外推 packaged / Provider / GA / P7 / notarization / dist staleness。Single work package serial 纪律：当前 PHASE 0 调研已收口，待用户显式裁决启动 PHASE 1。详见 plan §0-§11。",
-      "registeredAt": "2026-08-18"
+      "notes": "BLOCK-10-ARCHITECTURE 工作包全部完成（2026-08-18 PHASE 4 closeout）。12 主范围全部落地（A-001/2/3/5/7/8/9/10 + PR-012 + E-019 full + A-006 部分）；5 commits PHASE 2（result-studio/harness/ai-agent 各子域拆分）；2 commits PHASE 3（agent-runner 拆分 + configure/act-tools）；7 关联候选不外推（observability-work-package / rserver-http-debt-pack / type-drift-pack 等）。详见 docs/block-10-architecture-closeout.md。",
+      "registeredAt": "2026-08-18",
+      "completedAt": "2026-08-18",
+      "phasesCompleted": [
+        "0",
+        "1.1",
+        "1.2",
+        "2.0",
+        "2.1a",
+        "2.1b",
+        "2.2a",
+        "2.2b",
+        "3.0",
+        "3.1",
+        "3.2"
+      ],
+      "linkedCommits": [
+        "cf70c85",
+        "a4f8bcb",
+        "48e19e2",
+        "427cf07",
+        "e832e2d",
+        "101dcfc",
+        "cd287f5",
+        "d620aa3",
+        "9bfa01e",
+        "5f6c2de",
+        "3635e7e",
+        "3fc712a"
+      ]
+    },
+    {
+      "id": "BLOCK-10-ARCHITECTURE-PHASE3-AGENT-RUNNER-MAPPING",
+      "path": "docs/block-10-arch-ph3-agent-runner-mapping.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "agent-harness-architecture-refactor",
+      "entrypoint": "docs/block-10-architecture-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "owner": "block-10-architecture",
+      "notes": "PHASE 3 调研报告：agent-runner.js 1799 行分析 + A-001 3 子模块拆分方案（loop-orchestrator + conversation-adapter + 主文件 facade）+ A-003 configure 注入 shared-backend 方案 + A-008 解环方案（act-tools 循环解环）+ A-006 部分（_pendingActAcks 到 SQLite 候选）。被 block-10-architecture-plan.md PHASE 3 / 9 引用。",
+      "registeredAt": "2026-08-18",
+      "tags": [
+        "block-10-architecture",
+        "phase-3",
+        "research-report",
+        "G0"
+      ]
+    },
+    {
+      "id": "BLOCK-10-ARCHITECTURE-CLOSEOUT",
+      "path": "docs/block-10-architecture-closeout.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-10-architecture",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "notes": "BLOCK-10-ARCHITECTURE 工作包 PHASE 4 closeout 报告 v1.0（2026-08-18）。12 主范围全部落地（A-001/2/3/5/7/8/9/10 + PR-012 + E-019 full + A-006 部分）。详见 docs/block-10-architecture-closeout.md §1-§10。",
+      "registeredAt": "2026-08-18",
+      "tags": [
+        "block-10-architecture",
+        "closeout",
+        "G0"
+      ]
     },
     {
       "id": "BLOCK-10-ARCHITECTURE-PHASE0-FIX-ORDER",

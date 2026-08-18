@@ -499,8 +499,45 @@ npm run check
 - 不外推 G1+ / 不重新激活 BLOCK-2/3/4/5/6/7/8/9/9.1/9.2
 - PHASE 4 closeout 收口预计 3 commits / docs-only（DONE: PHASE 4-1 DOC-REGISTRY active → completed + 8 linkedCommits）
 - 当前无 active 工作包
-- 后续候选：BLOCK-10-ARCHITECTURE / observability-work-package / SSE / RetryClassifier / Result Studio 事件类型规范
-- ROCED TO MAINTAIN STATE:
+- 后续候选：observability-work-package / SSE / RetryClassifier / Result Studio 事件类型规范
+- 
+
+## BLOCK-10-ARCHITECTURE 收口（2026-08-18）
+
+**工作包 ID**：BLOCK-10-ARCHITECTURE（truthDomain: `agent-harness-architecture-refactor`）
+**状态**：✅ COMPLETED（2026-08-18 PHASE 4 closeout）
+**12 主范围**：全部落地
+
+**落地范围**：
+
+| ID | 范围 | commit | 测试 |
+|----|------|--------|------|
+| A-007 + PR-012 + E-019 full | DB singleton 抽 _db-singleton.js + busy_timeout 全量统一 | `a4f8bcb` | 16 PASS |
+| A-009 + A-010 | 端口统一 + env 集中 6 处 + jspdf 移除 | `48e19e2` | 8 PASS |
+| A-002 (result-studio) | routes/result-studio 1800→54行 9子域 15端点 | `101dcfc` | 8 PASS |
+| A-002 (harness) | routes/harness 1366→40行 8子域 19端点 | `cd287f5` | 8 PASS |
+| A-005 (ai-agent) | routes/ai-agent 1222→153行 5子域 3端点 | `d620aa3` | 8 PASS |
+| A-001 | agent-runner 1799→3子模块（loop-orchestrator + conversation-adapter + facade） | `5f6c2de` | 5 PASS |
+| A-003 + A-008 | configure 注入 shared-backend + act-tools 循环解环 act-tool-core | `3635e7e` | 4 PASS |
+
+**不外推候选**（不启动 / 引用存查）：
+
+- observability-work-package：E-017 main / E-018 / A-004 / PR-006
+- rserver-http-debt-pack：C-001-rserver / C-002-rserver / M-001 / M-003
+- type-drift-pack：A-011
+- fixture-manifest-pack：A-012
+- A-006 部分：仅 1 候选（`_pendingActAcks→SQLite`），其余保留
+
+**验证证据**：
+
+- chf0: 5/5 PASS
+- 新测试: 106+ PASS（16+19+43+28）
+- 既有测试: 0 退化
+- 4 治理门: 全部 PASS
+
+**收口笔录**：G0 开发期常态 · 不外推 packaged/Provider/GA
+
+ROCED TO MAINTAIN STATE:
   - `qualificationEligible: false` 是 G0 长期开发期常态事实，不外推
   - 不在收口笔录写"未做 Provider / 未做 packaged / 未做 GA"——按治理纪律
   - 不在 closeout 报告列举未做项——按 AGENTS.md 当前阶段纪律
