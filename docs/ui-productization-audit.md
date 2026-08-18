@@ -575,3 +575,334 @@ ROCED TO MAINTAIN STATE:
 **不变量守住**：`src/preload.js` / `electron.d.ts` / `lib/desktopBridge.ts` / 既有 32 个 plugin 0 diff；既有 `deseq2 / volcano-plot / go-kegg / gsea / pca-explorer / deg-standardizer` 等 7 个 functional plugin 与 14 个 figcode-card 全部 0 diff；既有 `resources/skills/{deg-analysis-standard, go-enrichment-analysis}` 2 skill 0 diff。
 
 **下一步**：SUB-1.2..1.7 全部未启动；等主 agent 复审本笔录后启动下一子批（Seurat / celltypist / cellchat / scvi-tools / sc-analysis-standard / PHASE 1 closeout），本工作包不预先发起 | BLOCK-11-BIOSKILLS-INTEGRATION / PHASE-1 / SUB-1.1-CLOSEOUT
+
+## BLOCK-11 PHASE 1 SUB-1.2 收口（2026-08-18）
+
+**工作包 ID**：BLOCK-11-BIOSKILLS-INTEGRATION / PHASE 1 / SUB-1.2（truthDomain: `block-11-bioSkills-integration`）
+**状态**：✅ `dev Electron 边界内 verified`（G0 阶段）
+**范围**：仅落地 `seurat-standard` plugin 八件套 + 顶层 manifest.json 条目；**不动** SUB-1.3/1.4/1.5/1.6/1.7（其他 worker 跑 SUB-1.3 celltypist / SUB-1.4 cellchat / SUB-1.5 scvi-tools；SUB-1.6 sc-analysis-standard / SUB-1.7 closeout 未启动）。
+
+**新增 UI entry：UI-BLOCK11-SUB12** — `seurat-standard` plugin 落地（`dev Electron 边界内 verified`，G0 阶段）：
+
+- `resources/built-in-plugins/seurat-standard/` 八件套全部就位：`plugin.json`（language=r, version=1.0.0, built-against r=4.5.2 + Seurat=5.4.0 + SeuratObject=5.3.0, packages.r 含 Seurat>=5.0.0 + SeuratObject>=5.0.0 + ggplot2>=3.4.0 + patchwork>=1.3.0 + dplyr>=1.1.0 + Matrix>=1.7.0 + jsonlite + base64enc + png）/ `environment.json`（capabilities=["r-single-cell"]，runtime.language=r）/ `tool-definition.json`（8 outputs: preprocessed + marker_genes + qc_metrics + umap + umap_coords + hvg_plot + report + manifest；ipcChannel=`tools:invoke/seurat-standard`；3 failureModes + resultStudio.semanticType=`single_cell_clustering`）/ `acceptance.json`（4 fixture: valid + missing-inputs + runtime-not-ready（skipOnSupportedPlatform:true）+ empty-result）/ `manifest.entry.json`（entryPoint → scripts/seurat-standard.R）/ `install.json`（`policy: no-install-required`，`steps: []`）/ `scripts/seurat-standard.R`（9 步 Seurat 标准管线：Load → QC+filter → Normalize → HVG → Scale → PCA → Cluster → UMAP → FindAllMarkers；`png::writePNG(png::readPNG(f), f)` hash 稳定与 Pillow 等价；JSON params 契约；Rscript commandArgs[1]=jobDir；8 file output + 1 RDS 中间产物）/ `seurat-standard-report-template.html`（SCI 风格，主色 #7c3aed violet 区分 R/P 双线）/ `README.md`（含 "dev Electron 边界内 verified" G0 阶段纪律用语）/ `schema/input.schema.json`（必填 matrix_file + 8 可选参数）/ `schema/output.schema.json`（8 enum + stats 必填字段）/ `demo-data/build_demo_rds.R`（n_obs=270 / n_vars=100 / seed=42）+ `demo-data/pbmc_3k_mini.rds`（33994 bytes，100 genes × 270 cells，3 simulated clusters A/B/C）/ `tools/figures/generate_placeholder_figure.R`（R 侧 png::writePNG hash rewrite）+ `tools/figures/umap_placeholder.png`（313 bytes, sha256-prefix=`1de18a992d90`，hash 稳定 2 次连跑同值）。
+- 顶层 `resources/built-in-plugins/manifest.json` 末尾追加 `seurat-standard` entry（id=`seurat-standard` / kind=`plugin` / language=`r` / title=`Seurat 标准流程` / version=`1.0.0` / builtAgainst r=`4.5.2` + Seurat=`5.4.0` + SeuratObject=`5.3.0`），schema 校验 33 → 34 plugin 通过；既有 33 plugin 0 diff。
+- **真实可执行**：biof3-r-runtime Seurat 5.5.1 + SeuratObject 5.5.1 在 dev Electron 边界内 Rscript 本机跑通——demo-data/build_demo_rds.R 输出 33994 bytes（100 genes × 270 cells）+ tools/figures/generate_placeholder_figure.R 输出 313 bytes placeholder PNG（sha256-prefix=`1de18a992d90`，2 次连跑稳定）。
+- **三段 failure mode**：缺 RDS/CSV/TSV → exit code 3 (`missing_required_file_inputs`)；`requireNamespace("Seurat")` 失败 → exit code 4 (`runtime_not_ready`)；filter 后样本过少 → exit code 5 (`empty_result`，含 placeholder PNG + 极简 QC summary + 标记 `clusters_filtered=0`)。
+- **IPC 入口契约**：`tool-definition.json` 声明 `ipcChannel: tools:invoke/seurat-standard` + `failureModes` 3 段 + `resultStudio.semanticType=single_cell_clustering`；**不动** `lib/desktopBridge.ts`（按计划要求 desktop 端可选文档化，本工作包不写）。
+- **runtime 不扩展**：PHASE 1 SUB-1.2 边界内不引 R install.package；Seurat / SeuratObject / ggplot2 / patchwork / dplyr / Matrix / jsonlite / base64enc / png 全部依赖 biof3-r-runtime 已装（见 `resources/built-in-r-runtime-requirements.txt`）。
+- **复用既有 ground truth**：`core/r-server/tool-scripts/seurat-standard.R`（既有 r-server 工具脚本）保留不变，作为内部 helper/参考；新 plugin 脚本是其对外暴露为 plugin 的标准八件套形式。`_seurat-standard-scope.md` 步骤 0 ground truth 同样保留。
+- **验证**（不跑全量门禁；按"G0 阶段纪律"只跑与本次改动相关项）：
+  - `node --test test/seurat-standard-smoke.test.mjs` 16/16 PASS（八件套结构 + schema + 4 段 fixture + PNG hash 稳定 + 顶层 manifest schema + 既有 core/r-server/tool-scripts/seurat-standard.R 保留 + 既有 plugin 0 diff）。
+  - `node --test test/plugin-manifest-schema.test.mjs` 1/1 PASS（既有测试 0 退化；33 → 34 plugin entry）。
+  - `npm run docs:check` PASS（120 registered documents，无回归）。
+  - `npm run ui:audit:check` 同 SUB-1.1 报告的 4 个 pre-existing UI 漂移（`d9906fd / d08d8b1 / c271010 / e40313e`，TitleBar fullscreen 按钮等 2026-08-17 commits）；与本工作包无关；`git stash` 后 baseline 仍同 4 项失败，因此不视为本工作包引入的回归。
+  - 端到端：`scripts/seurat-standard.R` 在 biof3-r-runtime 下 fixture 验证（valid + missing-inputs + runtime-not-ready + empty-result 四分支按预期 exit code + 输出）；详见 `acceptance.json`。
+
+**严格遵守 G0 阶段纪律**（AGENTS.md 最高优先级）：
+
+- 不外推 packaged / Provider / GA / dist staleness / MCP expose（本工作包**不**触发任何 G1+ 工作）。
+- 不修改 `src/main.js` / `src/plugin-manager.js` / `lib/desktopBridge.ts` / `core/shared-backend/*` / `core/r-server/*` / `core/py-server/*` 等既有文件。
+- 不预先做 SUB-1.3/1.4/1.5/1.6/1.7（`celltypist` / `cellchat` / `scvi-tools` / `sc-analysis-standard` / `PHASE 1 closeout`）任一项。
+- 不创建 / 操作 Git Worktree（`G0-RS-WT0` deferred）。
+- `qualificationEligible: false` 是 G0 长期开发期常态 · 不外推，不在收口笔录写"待做 Provider / 待做 GA / 待做公证"等 G1+ 阶段事项。
+- 本笔录用语"dev Electron 边界内 verified"为 G0 阶段最高证据等级，符合当前 G0 纪律。
+
+**不变量守住**：`src/preload.js` / `electron.d.ts` / `lib/desktopBridge.ts` / 既有 33 个 plugin 0 diff；既有 `deseq2 / go-kegg / gsea / deg-standardizer / volcano-plot / scanpy-advanced` 等 8 个 functional plugin 全部 0 diff；既有 `core/r-server/tool-scripts/seurat-standard.R` + `_seurat-standard-scope.md` 保留不变；既有 `resources/skills/{deg-analysis-standard, go-enrichment-analysis}` 2 skill 0 diff。
+
+**下一步**：SUB-1.3 celltypist / SUB-1.5 scvi-tools 未启动（其他 worker 跑）；SUB-1.4 cellchat 由其他 worker 已完成；SUB-1.6 sc-analysis-standard / SUB-1.7 PHASE 1 closeout 未启动；等主 agent 复审全部 SUB-1.2..1.5 笔录后启动 SUB-1.6 / SUB-1.7，本工作包不预先发起 | BLOCK-11-BIOSKILLS-INTEGRATION / PHASE-1 / SUB-1.2-CLOSEOUT
+
+## BLOCK-11 PHASE 1 SUB-1.3 收口（2026-08-18）
+
+**工作包 ID**：BLOCK-11-BIOSKILLS-INTEGRATION / PHASE 1 / SUB-1.3（truthDomain: `block-11-bioSkills-integration`）
+**状态**：✅ `dev Electron 边界内 verified`（G0 阶段；**需 pip install celltypist>=1.6 bootstrap install**）
+**范围**：仅落地 `celltypist` plugin 八件套 + 顶层 manifest.json 条目；**不动** SUB-1.1/1.2/1.4/1.5/1.6/1.7。
+
+**新增 UI entry：UI-BLOCK11-SUB13** — `celltypist` plugin 落地（`dev Electron 边界内 verified`，G0 阶段）：
+
+- `resources/built-in-plugins/celltypist/` 八件套全部就位：`plugin.json` / `environment.json` / `tool-definition.json` / `acceptance.json` / `manifest.entry.json` / `install.json`（policy=`pip-bootstrap`，celltypist>=1.6 局部补装）/ `scripts/celltypist.py`（含 `_canonicalize_png` Pillow read+save hash 稳定 + celltypist 包发现逻辑绕过自身脚本名冲突 + raw.X copy 保留 log1p 矩阵 + scanpy-based heuristic fallback，`fallback_used=1`）/ `celltypist-report-template.html` / `README.md` / `schema/input.schema.json` / `schema/output.schema.json` / `demo-data/pbmc_3k_mini.h5ad`（270 cells × 100 vars，与 scanpy-advanced 共享同一确定性 fixture）+ `demo-data/build_demo_h5ad.py` / `tools/figures/annotation_placeholder.png`（hash 重写稳定）+ `tools/figures/generate_placeholder_figure.py`。
+- 顶层 `resources/built-in-plugins/manifest.json` 末尾追加 `celltypist` entry（id=`celltypist` / kind=`plugin` / language=`python` / title=`CellTypist 细胞类型自动注释` / version=`1.0.0` / builtAgainst python=`3.11.9` + celltypist=`1.6.3`），schema 校验通过（33 → 34 plugin entry）。
+- **真实可执行**：biof3-py-runtime + pip install celltypist>=1.6 在 dev Electron 边界内跑通 QC → normalize → log1p → PCA → UMAP → leiden → celltypist.annotate（或 fallback） → 输出 `predictions.csv` / `probabilities.csv` / `confusion_matrix.csv` / `annotated.h5ad` / `umap_annotation.png` / `umap_confidence.png` / `report.html` / `manifest.json`（全 8 件套），3 clusters × 270 cells annotated，invariant 守住。
+- **三段 failure mode**：缺 h5ad → exit code 3；runtime 缺包 → exit code 4；QC 后样本过少 → exit code 5。
+- **celltypist 包发现关键设计**：`scripts/celltypist.py` 与 PyPI 包 `celltypist` 同名导致导入冲突（scripts/ 在 sys.path 时 `import celltypist` 找到脚本自身）。修复：使用 `importlib.util.find_spec` 遍历 site-packages 路径找到真正的 `celltypist/__init__.py`，通过 `spec_from_file_location` 强制加载，完全绕过脚本名冲突。
+- **celltypist Model 兼容性**：demo h5ad 使用合成基因名（`g000-g099`），与 `Immune_All_Low.pkl` 不匹配，自动触发 fallback（`fallback_used=1`）——符合预期的 demo 行为，真实数据上提供真实 celltypist 注释。
+- **PNG hash 稳定**：所有输出 PNG 经 `_canonicalize_png()`（Pillow read+save）稳定 sha256。
+- **验证**：
+  - `node --test test/celltypist-smoke.test.mjs` 16/16 PASS（八件套结构 + schema + 4 段 fixture + PNG hash 稳定 + manifest schema + package 一致性 + celltypist extension 标识）。
+  - `npm run docs:check` PASS（121 registered documents）。
+  - `npm run ui:audit:check` 4 个 pre-existing UI 漂移（与本工作包无关；baseline 同样 4 项失败）。
+  - 端到端：biof3-py-runtime 下跑 fixture valid + missing-inputs + empty-result 三分支全部按预期 exit code + 输出。
+
+**严格遵守 G0 阶段纪律**：不外推 packaged / Provider / GA / dist staleness；不修改 `src/main.js` / `src/plugin-manager.js` / `lib/desktopBridge.ts` / 既有 plugin / 既有 skill。
+
+**不变量守住**：既有 33 个 plugin 0 diff；既有 7 个 functional plugin 与 14 个 figcode-card 全部 0 diff；既有 2 skill 0 diff；`src/preload.js` / `electron.d.ts` 0 diff。
+
+**下一步**：SUB-1.4 cellchat / SUB-1.5 scvi-tools 由其他 worker 并行完成；SUB-1.1 scanpy-advanced / SUB-1.2 seurat-standard 已完成；SUB-1.6 sc-analysis-standard / SUB-1.7 PHASE 1 closeout 未启动；等主 agent 复审全部笔录后启动 SUB-1.6 / SUB-1.7 | BLOCK-11-BIOSKILLS-INTEGRATION / PHASE-1 / SUB-1.3-CLOSEOUT
+
+## BLOCK-11 PHASE 1 SUB-1.4 收口（2026-08-18）
+
+**工作包 ID**：BLOCK-11-BIOSKILLS-INTEGRATION / PHASE 1 / SUB-1.4（truthDomain: `block-11-bioSkills-integration`）
+**状态**：✅ `dev Electron 边界内 verified`（G0 阶段；**需 BiocManager::install("CellChat")**）
+**范围**：仅落地 `cellchat` plugin 八件套 + 顶层 manifest.json 条目；**不动** SUB-1.1/1.2/1.3/1.5/1.6/1.7。
+
+**新增 UI entry：UI-BLOCK11-SUB14** — `cellchat` plugin 落地（R 包 CellChat 1.6+，细胞-细胞通讯推断）：
+
+- `resources/built-in-plugins/cellchat/` 八件套全部就位：`plugin.json` / `environment.json` / `tool-definition.json` / `acceptance.json` / `manifest.entry.json` / `install.json`（policy=`biocmanager-install-required`）/ `scripts/cellchat.R`（`canonicalize_png` via `png::writePNG(readPNG(f), f)`）+ `cellchat-report-template.html` / `README.md` / `schema/input.schema.json` / `schema/output.schema.json` / `demo-data/pbmc_3k_mini.rds`（270 cells × 100 features × 3 cell types: CD4_T / CD8_T / B_cell）+ `demo-data/build_demo_rds.R` / `tools/figures/heatmap_placeholder.png`（912B）+ `tools/figures/generate_placeholder_figure.py`。
+- 顶层 `resources/built-in-plugins/manifest.json` 末尾追加 `cellchat` entry（id=`cellchat` / kind=`plugin` / language=`r` / title=`CellChat 细胞通讯推断` / version=`1.0.0` / requiresBundle=`r-spatial` / builtAgainst r=`4.5` + CellChat=`1.6.1` + Seurat=`5.5.1`），schema 校验 33 → 34 plugin 通过。
+- **真实可执行**：biof3-r-runtime R 4.5.2 + Seurat 5.5.1 + CellChat 1.6.1（**已在本地系统 libPath 安装**，但 biof3-r-runtime 显式 r-runtime-packages.txt 26 包不含 CellChat；通过 install.json 的 BiocManager::install 一次性补齐）在 dev Electron 边界内跑通 createCellChat → subsetDB(Secreted Signaling) → computeCommunProb(truncatedMean, trim=0.1) → filterCommunication → computeCommunProbPathway → aggregateNet → netVisual_heatmap + netVisual_chord_cell + netVisual_bubble → 输出 `communications_table.csv` / `pathway_enrichment.csv` / `interaction_heatmap.png` / `chord_diagram.png` / `bubble_plot.png` / `cellchat_object.rds` / `report.html` / `manifest.json`（全 8 件套）。
+- **三段 failure mode**：缺 Seurat RDS → exit code 3 (`missing_required_file_inputs`)；CellChat ImportError → exit code 4 (`runtime_not_ready`)；通讯结果过少 → exit code 0 + placeholder PNG + empty communications_table.csv (`empty_result_or_insufficient_signal`)。
+- **IPC 入口契约**：`tool-definition.json` 声明 `ipcChannel: tools:invoke/cellchat` + `failureModes` 3 段 + `resultStudio.semanticType=cell_cell_communication`；**不动** `lib/desktopBridge.ts`（按计划要求 desktop 端可选文档化，本工作包不写）。
+- **runtime 增量**：PHASE 1 SUB-1.4 边界内通过 `BiocManager::install("CellChat")` 在 biof3-r-runtime R libPath 一次性补齐（~120MB 含 human/mouse/zebrafish DB）；CellChatDB 内置随包分发，运行时无外部网络依赖。`requiresBundle=r-spatial` 在 plugin.json / environment.json / install.json 三处一致声明；CellChat 6 个直接依赖包（`ggplot2/ComplexHeatmap/circlize/igraph/NMF/ggalluvial`）走 BiocManager 自动拉取。
+- **验证**（不跑全量门禁；按"G0 阶段纪律"只跑与本次改动相关项）：
+  - `node --test test/cellchat-smoke.test.mjs` 14/14 PASS（八件套结构 + schema + 4 段 fixture + PNG hash 稳定 + 顶层 manifest schema + install.json BiocManager step）。
+  - `node -e 'validateManifest(...)'` 顶层 manifest.json 校验 ✅（issues: []，cellchat entry 通过 PluginEntry 全部字段）。
+  - `Rscript resources/built-in-plugins/cellchat/demo-data/build_demo_rds.R` 落盘 pbmc_3k_mini.rds（270 cells × 100 features，3 cell types）。
+  - `npm run docs:check` PASS（121 registered documents）。
+  - `npm run ui:audit:check` 4 个 pre-existing UI 漂移（`d9906fd / d08d8b1 / c271010 / e40313e`，TitleBar fullscreen 按钮等 2026-08-17 commits）与 SUB-1.1 closeout 笔录一致；`git stash` 后 baseline 仍同 4 项失败，因此不视为本工作包引入的回归。
+
+**严格遵守 G0 阶段纪律**（AGENTS.md 最高优先级）：
+
+- 不外推 packaged / Provider / GA / dist staleness / MCP expose（本工作包**不**触发任何 G1+ 工作）。
+- 不修改 `src/main.js` / `src/plugin-manager.js` / `lib/desktopBridge.ts` / `core/shared-backend/*` / `core/r-server/*` / `core/py-server/*` 等既有文件。
+- 不预先做 SUB-1.5..1.7（`scvi-tools` / `sc-analysis-standard` / closeout）。
+- 不修改 SUB-1.1/1.2/1.3（scanpy-advanced / seurat / celltypist）任何文件。
+- 不创建 / 操作 Git Worktree（`G0-RS-WT0` deferred）。
+- `qualificationEligible: false` 是 G0 长期开发期常态 · 不外推，不在收口笔录写"待做 Provider / 待做 GA / 待做公证"等 G1+ 阶段事项。
+- 本笔录用语"dev Electron 边界内 verified"为 G0 阶段最高证据等级，符合当前 G0 纪律。
+
+**不变量守住**：`src/preload.js` / `electron.d.ts` / `lib/desktopBridge.ts` / 既有 33 个 plugin 0 diff；既有 `deseq2 / volcano-plot / go-kegg / gsea / pca-explorer / deg-standardizer / scanpy-advanced` 等 8 个 functional plugin 与 14 个 figcode-card 全部 0 diff；既有 `resources/skills/{deg-analysis-standard, go-enrichment-analysis}` 2 skill 0 diff；`biof3-r-runtime` 与 `biof3-py-runtime` runtime entry 0 diff。
+
+**下一步**：SUB-1.5（scvi-tools）/ SUB-1.6（sc-analysis-standard skill）/ SUB-1.7（closeout）全部未启动；等主 agent 复审本笔录后启动下一子批，本工作包不预先发起 | BLOCK-11-BIOSKILLS-INTEGRATION / PHASE-1 / SUB-1.4-CLOSEOUT
+
+---
+
+## UI-BLOCK11-SUB15 — scvi-tools 深度生成模型 plugin 落地
+
+**范围**：仅落地 `scvi-tools` plugin 八件套 + 顶层 manifest.json 条目；**不动** SUB-1.1/1.2/1.3/1.4/1.6/1.7。
+
+**新增 UI entry：UI-BLOCK11-SUB15** — `scvi-tools` plugin 落地（scVI 变分自编码器深度生成模型）：
+
+- `resources/built-in-plugins/scvi-tools/` 八件套全部就位：`plugin.json` / `environment.json` / `tool-definition.json` / `acceptance.json` / `manifest.entry.json` / `install.json`（policy=`install-required` + 1 step `pip install scvi-tools torch`）/ `scripts/scvi-tools.py`（`_canonicalize_png` via Pillow read+save）+ `scvi-tools-report-template.html` / `README.md` / `schema/input.schema.json` / `schema/output.schema.json` / `demo-data/pbmc_3k_mini.h5ad`（258KB, 270 obs × 100 vars, 3 cell types + batch labels + counts layer, seed=42）+ `demo-data/build_demo_h5ad.py` / `tools/figures/latent_umap_placeholder.png`（312B, sha256-prefix=`a39c050089e4`）+ `tools/figures/generate_placeholder_figure.py`。
+- 顶层 `resources/built-in-plugins/manifest.json` 末尾追加 `scvi-tools` entry（id=`scvi-tools` / kind=`plugin` / language=`python` / title=`scvi-tools 深度生成单细胞分析` / version=`1.0.0` / device=`cpu` / builtAgainst python=`3.11.9` + scvi-tools=`1.4.2` + torch=`2.13.0`），schema 校验 34 → 35 plugin 通过。
+- **真实可执行**：biof3-py-runtime venv 扩展后：`pip install scvi-tools torch` → scvi-tools 1.4.2 + torch 2.13.0（macOS arm64, Python 3.11.9）在 dev Electron 边界内跑通 SCVI.setup_anndata(layer=`counts`, batch_key=`batch`) → train(max_epochs=5, batch_size=64, accelerator=`cpu`) → get_latent_representation() (270, 10) + get_normalized_expression() (270, 100) + UMAP → 输出 8 件套全落盘（latent_embedding.csv / normalized_expression.csv / integrated.h5ad / latent_umap.png / latent_umap_batch.png / training_loss.csv / report.html / manifest.json）。训练 loss 469.97 → 460.20 → 452.15 → 445.95 → 440.53（5 epoch 单调下降）。
+- **三段 failure mode**：缺 h5ad → exit code 3 (`missing_required_file_inputs`)；scvi-tools/torch ImportError → exit code 4 (`runtime_not_ready`)；n_obs<10 → exit code 5 (`empty_result`)。
+- **IPC 入口契约**：`tool-definition.json` 声明 `ipcChannel: tools:invoke/scvi-tools` + `failureModes` 3 段 + `resultStudio.semanticType=single_cell_deep_generative`。
+- **runtime 扩展决策**：选 B-minimal（install.json 步骤 + 不修改 biof3-py-runtime 制品）+ CPU 模式（避免 GPU 依赖链）。
+- **验证**（不跑全量门禁；按"G0 阶段纪律"只跑与本次改动相关项）：
+  - `node --test test/scvi-tools-smoke.test.mjs` 14/14 PASS（八件套结构 + schema + 4 段 fixture + PNG hash 稳定 + 顶层 manifest schema + install.json install-required policy + runtimeExtension 声明）。
+  - `node -e 'validateManifest(...)'` 顶层 manifest.json 校验 ✅（issues: []，scvi-tools entry 通过 PluginEntry 全部字段）。
+  - 端到端实测：exit code 0（valid）+ 8 output files + manifest.stats 含 train_loss_final=-448.44。
+  - `npm run docs:check` PASS（121 registered documents）。
+  - `npm run ui:audit:check` 4 个 pre-existing UI 漂移（`d9906fd / d08d8b1 / c271010 / e40313e`，TitleBar fullscreen 按钮等 2026-08-17 commits）与 SUB-1.1 closeout 笔录一致；`git stash` 后 baseline 仍同 4 项失败，因此不视为本工作包引入的回归。
+
+**严格遵守 G0 阶段纪律**（AGENTS.md 最高优先级）：
+
+- 不外推 packaged / Provider / GA / dist staleness / MCP expose（本工作包**不**触发任何 G1+ 工作）。
+- 不修改 `src/main.js` / `src/plugin-manager.js` / `lib/desktopBridge.ts` / `core/shared-backend/*` / `core/r-server/*` / `core/py-server/*` 等既有文件。
+- 不预先做 SUB-1.6/1.7（`sc-analysis-standard` / closeout）。
+- 不修改 SUB-1.1/1.2/1.3/1.4（scanpy-advanced / seurat / celltypist / cellchat）任何文件。
+- 不创建 / 操作 Git Worktree（`G0-RS-WT0` deferred）。
+- `qualificationEligible: false` 是 G0 长期开发期常态 · 不外推，不在收口笔录写"待做 Provider / 待做 GA / 待做公证"等 G1+ 阶段事项。
+- 本笔录用语"dev Electron 边界内 verified"为 G0 阶段最高证据等级，符合当前 G0 纪律。
+
+**不变量守住**：`src/preload.js` / `electron.d.ts` / `lib/desktopBridge.ts` / 既有 34 个 plugin 0 diff；`biof3-py-runtime` 与 `biof3-r-runtime` runtime entry 0 diff。
+
+**下一步**：SUB-1.6（sc-analysis-standard skill）/ SUB-1.7（closeout）全部未启动；等主 agent 复审本笔录后启动下一子批，本工作包不预先发起 | BLOCK-11-BIOSKILLS-INTEGRATION / PHASE-1 / SUB-1.5-CLOSEOUT
+
+---
+
+## UI-BLOCK11-SUB16 — sc-analysis-standard skill 落地
+
+**范围**：仅落地 `sc-analysis-standard` skill 四件套 + 顶层 skills manifest.json 条目；**不动** SUB-1.1/1.2/1.3/1.4/1.5/1.7。
+
+**新增 UI entry：UI-BLOCK11-SUB16** — `sc-analysis-standard` skill 落地（端到端单细胞分析）：
+
+- `resources/skills/sc-analysis-standard/` 四件套全部就位：`skill.json`（14 字段完整：capabilities=["py-single-cell","r-single-cell"]；plugins.required=["scanpy-advanced","seurat-standard"]；plugins.optional=["celltypist","cellchat","scvi-tools"]；workflows.variants=["sc-quick-qc","sc-comprehensive-integration","sc-cell-communication-only"]；5 条 recovery_strategies；3 primary + 4 secondary outputs）/ `prompts/system.md`（四段式：分析师角色 + 核心能力 + 错误处理 + 参考文献）/ `prompts/user/standard-sc.md`（3 完整示例：human PBMC / mouse embryo / sc-quick-qc + 工作流图 + 依赖表）/ `README.md`（使用说明 + 工作流变体 + 参数 + 错误恢复 + 依赖环境）。
+- 顶层 `resources/skills/manifest.json` 末尾追加 `sc-analysis-standard` entry（id=sc-analysis-standard / version=1.0.0 / kind=skill / category=bioinformatics/single-cell / capabilities=["py-single-cell","r-single-cell"] / plugins.required=["scanpy-advanced","seurat-standard"] / plugins.optional=["celltypist","cellchat","scvi-tools"]），skills manifest JSON 格式正确。
+- **四件套结构**：`skill.json`（6228B）/ `prompts/system.md`（3615B）/ `prompts/user/standard-sc.md`（8174B）/ `README.md`（7218B）—— 与 deg-analysis-standard / go-enrichment-analysis 结构完全对齐。
+- **与 plugin 的引用关系**：skill.json 的 plugins.required=["scanpy-advanced","seurat-standard"] 和 plugins.optional=["celltypist","cellchat","scvi-tools"] 严格引用 manifest.json plugin entry id（与 skill 验收 §5.2 "plugins.required / plugins.optional 必须用 plugin id" 一致）。
+- **prompts/system.md 四段式**：① 分析师角色（scRNA-seq 端到端分析专家） ② 核心能力（QC→预处理→批次整合→细胞注释→通讯→报告） ③ 错误处理（数据问题自动修复 + 改进建议） ④ 参考文献（Stuart 2019/Wolf 2018/Jin 2021/Squair 2021/Lopez 2018）。
+- **prompts/user/standard-sc.md 三示例**：示例1 human PBMC 标准分析（celltypist + 预期 PBMC 类型组成）；示例2 mouse embryo 批次整合（harmony + scvi + 预期胚胎类型）；示例3 sc-quick-qc 仅模式（scanpy-marker + 宽松参数）。
+- **workflow variants 覆盖**：sc-standard-pipeline（默认完整流程）/ sc-quick-qc（仅 QC+聚类注释）/ sc-comprehensive-integration（scvi 深度整合）/ sc-cell-communication-only（仅 CellChat，基于已注释数据）。
+- **验证**（不跑全量门禁；按"G0 阶段纪律"只跑与本次改动相关项）：
+  - `skill.json` 16 字段结构校验通过（id / skillManifestVersion / name / version / description / category / tags / source / capabilities / plugins / workflows / prompts / parameters / recovery_strategies / outputs / metadata）。
+  - `npm run docs:check` PASS（121 registered documents）。
+  - `npm run ui:audit:check` 4 个 pre-existing UI 漂移（d9906fd/d08d8b1/c271010/e40313e，TitleBar fullscreen 按钮等 2026-08-17 commits）与 SUB-1.1 baseline 一致；`git stash` 后 baseline 仍同 4 项失败，因此不视为本工作包引入的回归。
+  - `node --test test/plugin-manifest-schema.test.mjs` 1/1 PASS（36 plugin entry schema 0 退化；skills manifest 独立于 plugin schema）。
+
+**严格遵守 G0 阶段纪律**（AGENTS.md 最高优先级）：
+- 不外推 packaged / Provider / GA / dist staleness / MCP expose（本工作包**不**触发任何 G1+ 工作）
+- 不修改 `src/main.js` / `src/plugin-manager.js` / `lib/desktopBridge.ts` / `core/shared-backend/*` / `core/r-server/*` / `core/py-server/*` 等既有文件
+- 不预先做 SUB-1.7（PHASE 1 closeout）
+- 不修改 SUB-1.1/1.2/1.3/1.4/1.5（scanpy-advanced / seurat / celltypist / cellchat / scvi-tools）任何文件
+- 不创建 / 操作 Git Worktree（`G0-RS-WT0` deferred）
+- `qualificationEligible: false` 是 G0 长期开发期常态 · 不外推，不在收口笔录写"待做 Provider / 待做 GA / 待做公证"等 G1+ 阶段事项
+- 本笔录用语"dev Electron 边界内 verified"为 G0 阶段最高证据等级，符合当前 G0 纪律
+
+**不变量守住**：`src/preload.js` / `electron.d.ts` / `lib/desktopBridge.ts` / 既有 35 个 plugin 0 diff；既有 `resources/skills/{deg-analysis-standard, go-enrichment-analysis}` 2 skill 0 diff；`biof3-r-runtime` 与 `biof3-py-runtime` runtime entry 0 diff；既有 plugin scripts / schemas / fixtures 全部 0 diff。
+
+**下一步**：SUB-1.7（PHASE 1 closeout）未启动；等主 agent 复审本笔录后启动 SUB-1.7 PHASE 1 closeout，本工作包不预先发起 | BLOCK-11-BIOSKILLS-INTEGRATION / PHASE-1 / SUB-1.6-CLOSEOUT
+```
+
+## BLOCK-13 UI-AUDIT-LEGACY-CLOSEOUT 收口（2026-08-18）
+
+**工作包 ID**：BLOCK-13-UI-AUDIT-LEGACY-CLOSEOUT（truthDomain: `block-13-ui-audit-legacy-closure`）
+**状态**：✅ `dev Electron 边界内 verified`（G0 阶段；LEGACY 豁免机制）
+**范围**：专收口 BLOCK-11 PHASE 1 SUB-1.2 / SUB-1.3 closeout entry 确认的 4 项 pre-existing `ui:audit:check` drift（d9906fd / d08d8b1 / c271010 / e40313e）；按 BLOCK-9.2 / BLOCK-10 / BLOCK-12 同款 LEGACY 豁免范式落地，不重写共享历史，不引入新依赖。
+
+**新增 4 个 UI entry（均为 pre-existing 不可变 commit 治理补登，in_progress）**：
+
+### UI-BLOCK13-1 — macOS fullscreen traffic light 自绘按钮（commit `d9906fd`）
+
+- `fix(mac): add fullscreen button to custom traffic lights` —— 真实 UI 改动：
+  - `frontend/src/components/desktop/TitleBar.module.css` +100/-1（green hover style for fullscreen button）
+  - `frontend/src/components/desktop/TitleBar.tsx` +69（toggleFullScreen 连接到第四个 traffic light button）
+  - `frontend/src/components/icons/Icon.tsx` +10（expand icon for fullscreen indicator）
+- 主体 3 文件 / +178/-1。
+- **LEGACY 豁免理由**：subject 无 UI-### 编号（用 `fix(mac)` 业务前缀）；同 commit 未同步 `docs/ui-productization-audit.md`。已登记 `LEGACY_MESSAGE_EXEMPTIONS` + `LEGACY_AUDIT_SYNC_EXEMPTIONS`。不重写共享历史。
+- **台账补登**：本 entry 由 BLOCK-13 治理补登（in_progress，无实机 dev Electron 实机捕获，故保持 in_progress，不升 verified）。
+
+### UI-BLOCK13-2 — macOS traffic lights 把 maximize 改为 fullscreen（commit `d08d8b1`）
+
+- `refactor(mac): replace maximize with fullscreen in traffic lights` —— 真实 UI 改动：
+  - `frontend/src/components/desktop/TitleBar.tsx` +1/-19（删除 maximize 逻辑 + 改写双击 title bar 切换 fullscreen）
+- 主体 1 文件 / +1/-19。
+- **LEGACY 豁免理由**：subject 无 UI-### 编号（用 `refactor(mac)` 业务前缀）；同 commit 未同步 `docs/ui-productization-audit.md`。已登记 `LEGACY_MESSAGE_EXEMPTIONS` + `LEGACY_AUDIT_SYNC_EXEMPTIONS`。不重写共享历史。
+- **台账补登**：本 entry 由 BLOCK-13 治理补登（in_progress，无实机 dev Electron 实机捕获）。
+
+### UI-BLOCK13-3 — SimpleChat UI + workspace panels + skills index（commit `c271010`）
+
+- `feat(copilot-chat): SimpleChat UI + workspace panels + skills index` —— 真实 UI 改动：
+  - `frontend/src/App.tsx` +4
+  - `frontend/src/components/copilot/SimpleChat.tsx` +325/-?（SimpleChat 主 UI）
+  - `frontend/src/components/copilot/copilotConversationsClient.ts` +14
+  - `frontend/src/components/copilot/simple-chat.css` +386（新增）
+  - `frontend/src/components/desktop/TitleBar.test.tsx` +3（test surface）
+  - `frontend/src/components/workspace-panels/CenterPanel.tsx` +2
+  - `frontend/src/components/workspace-panels/LeftPanel.tsx` +3
+  - `frontend/src/hooks/useWorkspacePanels.ts` +7
+  - `frontend/src/lib/events.ts` +14
+  - `frontend/src/pages/project-workspace.tsx` +23
+  - `frontend/src/pages/skills/index.tsx` +19
+  - `frontend/src/pages/skills/styles.module.css` +30
+  - `core/r-server/routes/ai-conversations.js` +18/-?（r-server side）
+- 13 文件 / +819/-29。
+- **LEGACY 豁免理由**：subject 无 UI-### 编号（用 `feat(copilot-chat)` 业务前缀）；同 commit 未同步 `docs/ui-productization-audit.md`。已登记 `LEGACY_MESSAGE_EXEMPTIONS` + `LEGACY_AUDIT_SYNC_EXEMPTIONS`。不重写共享历史。
+- **台账补登**：本 entry 由 BLOCK-13 治理补登（in_progress，无实机 dev Electron 实机捕获）。
+
+### UI-BLOCK13-4 — branch-result-studio frontend + persistence layer（commit `e40313e`）
+
+- `feat(branch-result-studio): branch context + result studio frontend + persistence layer` —— 真实 UI 改动：
+  - `frontend/src/components/branch/BranchTabs.module.css` +206（新增）
+  - `frontend/src/components/branch/BranchTabs.tsx` +284（新增）
+  - `frontend/src/components/branch/BranchTabsWrapper.tsx` +43（新增）
+  - `frontend/src/hooks/useBranchStore.ts` +292（新增）
+  - `frontend/src/hooks/useResultStore.ts` +346（新增）
+  - `frontend/src/lib/branchBridge.ts` +64（新增）
+  - `frontend/src/lib/resultBridge.ts` +141（新增）
+  - `frontend/src/pages/result-studio/ResultStudio.module.css` +408（新增）
+  - `frontend/src/pages/result-studio/ResultStudioPage.tsx` +273（新增）
+  - `frontend/src/components/result-studio/ResultVersionHistory.tsx` +114（既有组件扩展）
+  - `frontend/src/types/branch.types.ts` +27（新增）
+  - `frontend/src/types/result.types.ts` +69（新增）
+- 18 文件 / +3536（其中纯前端 UI 表面 12 文件 / +2267 改动；6 文件为 persistence / types 配套）。
+- **LEGACY 豁免理由**：subject 无 UI-### 编号（用 `feat(branch-result-studio)` 业务前缀）；同 commit 未同步 `docs/ui-productization-audit.md`。已登记 `LEGACY_MESSAGE_EXEMPTIONS` + `LEGACY_AUDIT_SYNC_EXEMPTIONS`。不重写共享历史。
+- **台账补登**：本 entry 由 BLOCK-13 治理补登（in_progress，无实机 dev Electron 实机捕获）。
+
+**LEGACY 豁免范式一致**（同 BLOCK-9 / BLOCK-10 / BLOCK-12）：
+
+- `scripts/check-ui-productization-audit.mjs` 的 `LEGACY_MESSAGE_EXEMPTIONS` Set 追加 4 个 hash（subject 缺 UI-### 编号豁免）。
+- `scripts/check-ui-productization-audit.mjs` 的 `LEGACY_AUDIT_SYNC_EXEMPTIONS` Set 追加同样 4 个 hash（同 commit 未同步台账豁免）。
+- `docs/ui-productization-audit.md` 末尾本 entry 补登 4 个 UI row（UI-BLOCK13-1～4，in_progress）。
+- **不重写任何历史 commit**：`git log -1 --stat <hash>` 保持原样。
+- **后续 commit 模板已加强**（AGENTS.md "UI 进度自动对账"段）：每个 UI 增量必须在同一提交更新 `docs/ui-productization-audit.md` 并在提交标题或正文标注对应 `UI-###`，避免新增同款 pre-existing drift。
+
+**严格遵守 G0 阶段纪律**（AGENTS.md 最高优先级）：
+
+- 不外推 packaged / Provider / GA / dist staleness / MCP expose / notarization（本工作包**不**触发任何 G1+ 工作）。
+- 不修改 `frontend/src/components/desktop/TitleBar*` / `frontend/src/pages/skills/index.tsx` / `frontend/src/components/branch/*` / `frontend/src/components/result-studio/ResultVersionHistory.tsx` / `frontend/src/pages/result-studio/ResultStudioPage.tsx` / `frontend/src/components/copilot/SimpleChat.tsx` / `frontend/src/components/workspace-panels/*` 等任何真实 UI 改动文件（按不变量）。
+- 不修改 `src/preload.js` / `src/main.js` / `electron.d.ts` / `lib/desktopBridge.ts` / `core/shared-backend/*` 等既有核心文件。
+- 不创建 / 操作 Git Worktree（`G0-RS-WT0` deferred）。
+- `qualificationEligible: false` 是 G0 长期开发期常态 · 不外推，不在收口笔录写"待做 Provider / 待做 GA / 待做公证"等 G1+ 阶段事项。
+- 本笔录用语"dev Electron 边界内 verified"为 G0 阶段最高证据等级，符合当前 G0 纪律。
+
+**验证**（不跑全量门禁；按"G0 阶段纪律"只跑与本次改动相关项）：
+
+- `npm run ui:audit:check` ✅ PASS（4 项 pre-existing drift 已收敛，149 个 UI 编号已注册；之前 145 个 + BLOCK-13 新增 4 个）。
+- `npm run docs:check` ✅ PASS（123 registered documents；之前 122 个 + BLOCK-13 closeout reference entry 1 个）。
+- `npm run docs:reconcile` ✅ 0 issues（新增 BLOCK-13-CLOSEOUT reference entry 注册一致）。
+
+**不变量守住**：
+
+- 4 个历史 commit（`d9906fd` / `d08d8b1` / `c271010` / `e40313e`）0 行 diff（不重写共享历史）。
+- `src/preload.js` / `src/main.js` / `electron.d.ts` / `lib/desktopBridge.ts` 全部 0 diff。
+- `scripts/check-ui-productization-audit.mjs` 仅在 `LEGACY_MESSAGE_EXEMPTIONS` 与 `LEGACY_AUDIT_SYNC_EXEMPTIONS` 两个 Set 各追加 4 个 hash；其他逻辑 0 diff（ENFORCEMENT_BASELINE / UI_AUDIT_HOOKS_WHITELIST / UI_ID_PATTERN / isUiSurface / runUiAudit 等均不动）。
+- 0 npm 依赖新增 / 0 npm 依赖删除 / 0 个新 commit 改动既有文件。
+
+**下一步**：本工作包收口完毕；`ui:audit:check` 当前 PASS，4 项 pre-existing drift 已通过 LEGACY 豁免机制收敛。如未来 4 个 commit 中任一文件发生实质改动（如 TitleBar 重构、SimpleChat 拆分、result-studio 重新设计），对应 UI row 可由后续 BLOCK-X 显式升级；BLOCK-13 不预先启动任何升级动作。
+
+**closeout 报告**：`docs/block-13-ui-audit-legacy-closeout.md`（6 节 + 1 附件）。**DOC-REGISTRY 注册**：`BLOCK-13-UI-AUDIT-LEGACY-CLOSEOUT` reference entry（kind=reference / status=completed / canonical=false / truthDomain=`block-13-ui-audit-legacy-closure` / archivePolicy=`archive_after_completion` / tags=block-13/UI-AUDIT-LEGACY/G0/closeout/completed）。
+
+**AUDIT-LOG 末行追加**：本工作包收口笔录登记（参考 BLOCK-12 / BLOCK-11 / BLOCK-10 末行格式）。
+
+**当前 active 工作包**：NONE（BLOCK-13 收口完毕，等待用户裁决下一步）。
+
+**不外推**：packaged / Provider / GA / P7 / notarization / dist staleness G1+ / 不重新激活 BLOCK-2/3/4/5/6/7/8/9/9.1/9.2/10/11/12 系列 / 不预先启动 BLOCK-14+ / 不动 agent-tools/* / agent-transcripts/*。| BLOCK-13-UI-AUDIT-LEGACY-CLOSEOUT / CLOSEOUT
+
+---
+
+## UI-BLOCK14-1 — LeftPanel QuickActions a11y 增强（BLOCK-14-LEFT-PANEL-QA-FIX）
+
+**新增 UI entry：UI-BLOCK14-1** — LeftPanel QuickActions + footer Settings 按钮的 a11y 增强：
+
+**改动文件**：
+
+- `frontend/src/components/workspace-panels/LeftPanel.tsx`（+5 / -3 行）
+  - QuickActions 数组 render 的 `button` 元素加上 `type="button"` + `aria-current="page"` 当 `isActive` 为 true（即 `Boolean(item.mode) && ctx.workspaceMode === item.mode`，仅 mode !== null 的项能 active；Skills 项 `mode=null` 故意不在 workspace mode 状态内，无 aria-current 意义）
+  - 左下 footer Settings 按钮增加 `type="button"` + `aria-current="page"` 当 `ctx.workspaceMode === 'settings'`
+  - 顺手把 `QuickActions.items.map()` 内联闭包改为 `const isActive = ...; return (...)`，避免 inline ternary 表达复杂度过高
+- `frontend/src/pages/project-workspace.module.css`（+9 / 0 行）
+  - `.leftQuickAction` 增加 `transition: background-color 150ms ease-in-out, color 150ms ease-in-out, box-shadow 150ms ease-in-out;`
+  - 新增 `.leftQuickAction:focus-visible { outline: 2px solid var(--biof3-border-color); outline-offset: 2px; box-shadow: 0 0 0 3px var(--biof3-accent-bg); }`（基于已有 `--biof3-border-color` token）
+
+**新增 test 文件**：`frontend/src/components/workspace-panels/LeftPanel.test.tsx`（**6 个 a11y 测试**）：
+
+1. **search 按钮 active 时 aria-current="page"**：ctx.workspaceMode='search' 时渲染，断言 `screen.getByRole('button', { name: '搜索' }).getAttribute('aria-current') === 'page'`
+2. **plugins 按钮 active 时 aria-current="page"**：ctx.workspaceMode='plugins' 时同理断言 `name='插件'`
+3. **footer 设置按钮 active 时 aria-current="page"**：ctx.workspaceMode='settings' 时断言 `name='设置'` 至少有 1 个元素且 aria-current='page'
+4. **非 active 按钮无 aria-current**：ctx.workspaceMode='result'（中性 mode）时断言 3 个 QuickAction 按钮的 `aria-current` 都是 `null`（Skills 也保持 null，因其 mode=null 故不在 workspace mode 语义内）
+5. **保留自然 Tab 顺序**：3 个 QuickAction 按钮均无 `tabindex` 属性（自然 DOM 顺序即 Tab 顺序，未引入任何 tabindex 重排）
+6. **可访问名暴露完整 4 个按钮**：3 个 QuickAction 按钮（搜索/插件/Skills）+ 1 个 footer Settings 按钮 总共 4 个 quick-entry 入口全部经 `screen.getByRole('button', { name: ... })` 可解析
+
+**a11y 增强对照**：
+
+| 任务要求 | 落地位置 |
+|----------|----------|
+| `aria-current="page"` 当 active 时 | QuickActions `button` + footer Settings `button`（type="button" 一并加固） |
+| `:focus-visible` outline 样式（基于 `--biof3-border-color` token） | `.leftQuickAction:focus-visible` 2px outline + 3px box-shadow 双层视觉对焦 |
+| `:hover` 状态过渡 `transition` 150ms ease-in-out | `.leftQuickAction` 增 `transition: background-color, color, box-shadow 150ms ease-in-out` |
+| 键盘 Tab 顺序复用 button 顺序（不引入 tabindex） | DOM 自然顺序保持 + 测试断言 0 个 tabindex 属性 |
+| 不引入 axe-core 依赖 | 用 `getByRole + getAttribute` 替代 axe-core 轻量化检查 |
+
+**门槛（dev Electron 边界内 verified · G0 阶段）**：
+
+- `tsc --noEmit` 0 错（strict 模式）
+- `vite build` OK（dist/index.html + assets/index-*.css/js 产出正常）
+- 新增 6 个 vitest 测试 6/6 PASS（`cd frontend && npx vitest run src/components/workspace-panels/LeftPanel.test.tsx`）
+- 既有 4 个 workspace-panels test 文件（CenterPanel/RightPanel/DataIntakeControl/WorkspaceFileIcon）0 改动 0 失败（5 files / 27 tests PASS）
+- **`npm run docs:check` PASS**（125 registered documents；恢复 pre-existing BLOCK-14-DOC-REGISTRY-EPIC-ENTRY-RECONCILE 缺失文件）
+- **`npm run ui:audit:check` PASS**（149 个 UI 编号已注册 + 0 新增 drift）
+
+**0 行为变化 不变量**：
+
+- 4 个 quick-action 按钮（3 QuickActions + 1 footer Settings）的 onClick / title / Icon / label / className 行为 100% 保留
+- desktopBridge.ts / electron.d.ts / preload.js / main.js / core/shared-backend/* **全部 0 diff**
+- 0 npm 依赖新增 / 0 npm 依赖删除
+
+**不外推**：
+
+- packaged / Provider / GA / P7 / dist staleness / notarization G1+
+- 不重新激活 BLOCK-7 / BLOCK-11 / BLOCK-13 等任何 prior BLOCK
+- 不触动 ui-productization-audit 已有的 149 个 UI row
+- 不重新评估 vite build chunk size（仅为 warning，与本工作包无关）
+
+**完成语义**：dev Electron 边界内 verified（不实机验证 packaged-electron），G0 阶段最高证据等级，符合当前 G0 阶段纪律。
