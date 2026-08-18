@@ -540,3 +540,10 @@ UI Stage 1：
 - 治理门：`docs:check` PASS / `tsc --noEmit` 0 错 / `ui:audit:check` 4 项 pre-existing drift（与本工作包无关）/`node --check src/preload.js` 0 错。
 - 不变量守住：sandbox: true 保持 / 8 IPC 通道签名 0 diff / electron.d.ts + desktopBridge.ts + env-coordinator.js 0 diff。
 - **当前无 active 工作包**。
+
+### 3.2 已完成基础设施：CDP-WRAP（2026-08-18）
+
+- 状态：`completed`（commit `e3f5e02`）；新文件 `scripts/cdp-wrap.cjs`（100 行）。
+- 用途：守护 CDP → playwright MCP 链路，dev Electron 重启后自动重连，无需重启 Cursor Window。
+- 配套：`BIOF3_DEV_ELECTRON_CDP=1 npm run dev` 一键启用 9222 端口。
+- **当前无 active 工作包**。
