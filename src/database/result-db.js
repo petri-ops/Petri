@@ -8,49 +8,48 @@
 //   - Branch switching does not affect results
 //   - Each result tracks which branch created it (sourceBranchId)
 //   - Result versions track historical snapshots for reproducibility
+//
+// BLOCK-10 PHASE 1.1 (A-007 + PR-012 + E-019 full):
+//   The 30 lines of singleton infrastructure (path resolution, _dbCache,
+//   new Database(), journal_mode/busy_timeout pragmas, close) are now
+//   centralized in src/database/_db-singleton.js. This module is a thin
+//   wrapper that delegates every connection to openDb('result'), and
+//   keeps its public exports (getDatabase, getDatabasePath, closeDatabase)
+//   as shims for backward compatibility. branch-db.js + result-db.js
+//   resolve to the same connection for the same file path (PR-012).
 // ============================================================
 
-const path = require('path');
-const { loadDatabaseConstructor } = require('../migration-runner');
-
-const Database = loadDatabaseConstructor();
+const { openDb, closeDb } = require('./_db-singleton');
 
 /**
- * Get database path
- * @param {string} [dbName='biof3.db']
+ * Backward-compatible Database accessor. Returns the singleton connection
+ * for the result role. Same identity as branch-db.getDatabase() because
+ * both roles share the same biof3.db file (PR-012 dedup).
+ * @returns {import('better-sqlite3').Database}
+ */
+function getDatabase() {
+  return openDb('result');
+}
+
+/**
+ * Backward-compatible DB path accessor.
  * @returns {string}
  */
-function getDatabasePath(dbName = 'biof3.db') {
+function getDatabasePath() {
+  const path = require('path');
   const dataDir = process.env.BIOF3_LOCAL_DATA_DIR;
   if (!dataDir) {
     throw new Error('BIOF3_LOCAL_DATA_DIR environment variable is not set');
   }
-  return path.join(dataDir, dbName);
+  return path.join(dataDir, 'biof3.db');
 }
 
 /**
- * Get database connection (singleton)
- * @param {string} [dbName='biof3.db']
- * @returns {Database}
+ * Backward-compatible close. Closes the singleton connection for the
+ * result role (same connection as branch-db.closeDatabase()).
  */
-let _dbCache = {};
-function getDatabase(dbName = 'biof3.db') {
-  if (!_dbCache[dbName]) {
-    const dbPath = getDatabasePath(dbName);
-    _dbCache[dbName] = new Database(dbPath);
-  }
-  return _dbCache[dbName];
-}
-
-/**
- * Close database connection
- * @param {string} [dbName='biof3.db']
- */
-function closeDatabase(dbName = 'biof3.db') {
-  if (_dbCache[dbName]) {
-    _dbCache[dbName].close();
-    delete _dbCache[dbName];
-  }
+function closeDatabase() {
+  closeDb('result');
 }
 
 // ============================================================

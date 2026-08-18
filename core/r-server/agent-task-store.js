@@ -9,6 +9,11 @@
 const Database = require('better-sqlite3');
 const config = require('./config');
 const logger = require('./logger');
+// BLOCK-10 PHASE 1.1 (E-019 full): busy_timeout is centralized in
+// shared-backend/config-helper so db.js + agent-task-store.js +
+// branch-db.js + result-db.js can never drift. Defaults to 10000ms;
+// core/r-server boot can override via setDbConfig({ busyTimeoutMs }).
+const { getBusyTimeout } = require('../shared-backend/config-helper');
 
 // Retry policy configuration by error type
 const RETRY_POLICY = {
@@ -238,7 +243,10 @@ function resetRetryStats(taskId) {
 
 const db = new Database(config.dbPath);
 db.pragma('journal_mode = WAL');
-db.pragma('busy_timeout = 5000');
+// BLOCK-10 PHASE 1.1 (E-019 full): use the shared config-helper busy_timeout
+// (default 10000ms) instead of the legacy hard-coded 5000ms so this handle
+// matches core/r-server/db.js and src/database/{branch,result}-db.js.
+db.pragma(`busy_timeout = ${getBusyTimeout()}`);
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS tasks (
