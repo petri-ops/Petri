@@ -1,6 +1,6 @@
 # BioF3 Desktop 文档入口
 
-最后更新：2026-08-17（BLOCK-10-AUDIT-CLOSEOUT 启动：当前唯一 active 工作包；收口 9 份 2026-08-17 Agent Harness 独立只读审计报告共 90+ finding、25 个修复单元（11C + 5H + 9 最高 ROI Major）；4 PHASE：P0 用户可见 C-001 IPC bridge + C-002 result:create → P1 安全/资源 S-001..S-007 + PR/E/OB 系列 14 项 → P2 契约 PL-001 MCP inputSchema（不引入 ajv）→ P4 audit + closeout；7 组同根修复统一；plan v1.0 / 511 行 / 9 §）
+最后更新：2026-08-18（BLOCK-10-AUDIT-CLOSEOUT COMPLETED · active → completed：8 主 commits + 3 PHASE 4 closeout commits；**13 项已修复**（C-001/C-002/S-001~S-007/PR-001/OB-004/OB-005 partial/PL-001）+ **12 项不外推**；4 PHASE 全部落地；plan v0.2 active / 收口报告 `docs/block-10-audit-closeout.md` v1.0 / 11 节；当前无 active 工作包，等待用户裁决下个工作包）
 
 ## 项目治理入口
 
@@ -42,6 +42,7 @@
 14. [`agent-workbench-p1-a5-verification-2026-08-15.md`](./agent-workbench-p1-a5-verification-2026-08-15.md) 
 13. [`block-9-2-mega-file-refactor-plan.md`](./block-9-2-mega-file-refactor-plan.md) — 2026-08-17 BLOCK-9.1 收口后用户裁决"可以开搞了"启动的非文件级巨型文件拆分重构工作包；基于 [`senior-engineer-review-2026-08-16.md`](./senior-engineer-review-2026-08-16.md) §3 5 项；拆 5 个文件 plugin-manager 1457 + SimpleChat 2153 + ResultView 1662 + DesktopSettingsPanel 1515 + useSkillStore 743；纯代码组织变更 0 业务逻辑差异；PHASE 0 是架构调研 worker 委派；不外推 G1+— 2026-08-15 已按开发态 Electron 边界完成的 A5 验证与收口报告；UI-AGENTWB-003 / UI-AGENTWB-004 转 `verified`，双 flag（on/off）链 + §X.2 兼容性测试矩阵 5 项 PASS；不外推 packaged / Provider / P7 / GA。
 14. [`code-audit-closeout-plan.md`](./code-audit-closeout-plan.md) — 2026-08-17 用户裁决「开搞」启动的 Agent Harness 8 份独立只读审计报告收口工作包；4 PHASE 25 修复单元（11C + 5H + 9 Major）；plan v1.0 / 511 行 / 9 §
+    - [`block-10-audit-closeout.md`](./block-10-audit-closeout.md) — 2026-08-18 BLOCK-10-AUDIT-CLOSEOUT 收口报告 v1.0 / 11 节；8 主 commits + 3 PHASE 4 closeout commits；13 项已修复（C-001/C-002/S-001~S-007/PR-001/OB-004/OB-005 partial/PL-001）+ 12 项不外推；4 治理门 GREEN / 31 tests / 0 新依赖；DOC-REGISTRY `active → completed` + 8 linkedCommits
 15. [`t-aw-013-packaged-verification-2026-08-15.md`](./t-aw-013-packaged-verification-2026-08-15.md) — 2026-08-15 已按 packaged Electron 边界完成的 T-AW-013 实机核对；6/6 步骤（CDP attach + bridge 同步方法 + 4 renderer + CSV BOM `EF BB BF` 字节级 + Markdown `| --- |` 分隔 + fallback 0 下载按钮）通过；A4 / P2 / P1.5 / UI-AGENTWB-007 证据等级升级为「前端 + dev Electron + packaged Electron 三轴」；4 处契约偏差已在 `ui-productization-audit.md` 行 244 CONTRACT-DRIFT-001 脚注登记；`qualificationEligible` 维持 false（Provider / GA 链路未覆盖）。
 16. [`agent-workbench-dev-electron-verification-2026-08-15.md`](./agent-workbench-dev-electron-verification-2026-08-15.md) — 2026-08-15 T-AW-014 dev Electron 边界内 4 工作包二次实机核对收口；UI-AGENTWB-005/006/007 由 `in_progress` 升 `dev Electron 边界内 verified`，UI-AGENTWB-004 由 A5 verified 扩展 dev 实机覆盖；三路径核对 6/6 步骤（CLI flag + Settings toggle + bridge.set off → reload DOM=0）通过；A4 5 路径 + P1.5 CSV/MD BOM 字节级 + P2 chart 8 rect a11y 全 PASS；target-file 7 文件 95/95 测试通过；`qualificationEligible` 维持 false（dev Electron 不外推 Provider / GA）。
 ## 当前开发必读

@@ -1376,6 +1376,23 @@
       ],
       "notes": "PHASE 0 风险登记表：风险矩阵 / 跨包冲突 / 性能 / 安全 / 兼容性 / 不外推 G1+。被 code-audit-closeout-plan.md §6 / §14 引用作为 PHASE 0 风险登记依据。",
       "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-10-AUDIT-CLOSEOUT-CLOSEOUT",
+      "path": "docs/block-10-audit-closeout.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-closeout",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-10",
+        "closeout",
+        "G0"
+      ],
+      "notes": "2026-08-18 BLOCK-10-AUDIT-CLOSEOUT 工作包综合收口报告 v1.0 / 11 节；8 主 commits + 3 PHASE 4 closeout commits；13 项已修复（11 Critical + 2 High）+ 12 项不外推；4 治理门 GREEN；31 tests / 0 新依赖 / ~740 行 net +。详见报告 §1-§11。",
+      "registeredAt": "2026-08-18"
     }
   ]
 }
