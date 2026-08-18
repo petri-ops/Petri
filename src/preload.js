@@ -16,7 +16,24 @@ const { contextBridge, ipcRenderer } = require('electron');
 // process.env before preload.js runs, so the helper defaults
 // (3001 / 3004) are only consulted in the rare standalone-render
 // fallback path.
-const { getBackendPort } = require('./main/env-coordinator');
+// A-009: getBackendPort() defaults were 3001 (r) / 3004 (python).
+// Electron main process's setupDesktopEnv() injects the resolved ports
+// into process.env.R_SERVER_PORT / PY_SERVER_PORT *before* preload.js
+// runs (env-coordinator.js writes them at lines 285-286). Reading from
+// process.env directly is therefore equivalent to calling the helper,
+// and avoids the cross-file require which is forbidden when
+// BrowserWindow is launched with sandbox: true (the require here
+// otherwise throws "module not found" and aborts the entire preload,
+// which silently strips window.biof3Desktop and disables the custom
+// traffic-light buttons in the title bar).
+function _readPort(envName, defaultPort) {
+  const raw = process.env[envName];
+  if (raw == null || raw === '') return defaultPort;
+  const parsed = parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : defaultPort;
+}
+const _rPort = _readPort('R_SERVER_PORT', 3001);
+const _pyPort = _readPort('PY_SERVER_PORT', 3004);
 
 const AGENT_WORKBENCH_FLAG_CHANNEL = 'biof3:agent-workbench-flags';
 const AGENT_WORKBENCH_FLAGS = { extraRenderers: false };
@@ -72,8 +89,8 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
   platform: process.platform,
   arch: process.arch,
   backendConfig: Object.freeze({
-    rApiBase: `http://localhost:${getBackendPort('r')}/api`,
-    pythonApiBase: `http://localhost:${getBackendPort('python')}/api`,
+    rApiBase: `http://localhost:${_rPort}/api`,
+    pythonApiBase: `http://localhost:${_pyPort}/api`,
   }),
 
   // 窗口控制（配合 frame:false 自定义标题栏）
