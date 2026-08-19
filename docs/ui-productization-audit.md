@@ -1078,6 +1078,47 @@ main.js 从 ~1201 行减少到 1001 行（-200 行）。IPC handler channel 名�
 
 **不外推**：packaged / Provider / GA / P7 / dist staleness / notarization G1+；不动 Electron 应用业务逻辑。
 
+
+## UI-B15-7: SUB-15.2 PHASE 2 — IPC catalog 扩展 plugin manifest schema + payload shape 校验
+
+| 属性 | 值 |
+|------|-----|
+| 状态 | `verified` |
+| 阶段 | dev Electron 边界内 |
+| 证据 | `node scripts/validate-ipc-catalog.mjs` PASS；`node scripts/validate-ipc-catalog.mjs --manifest-only` PASS；`node --test test/plugin-schema-strict.test.mjs` 28/28 PASS；`npm run docs:check` PASS；`npm run ui:audit:check` PASS |
+
+**说明**：SUB-15.2 PHASE 2 扩展 IPC catalog 门禁脚本，添加 plugin manifest schema 校验 + payload shape 基本类型检查，遵循 BLOCK-10-AUDIT PL-001 风格（自写 validator / 不引入 ajv/zod）。
+
+**PHASE 2 交付范围**：
+
+1. `scripts/validate-ipc-catalog.mjs`（~970 行，版本升至 2.0）：
+   - `validatePluginManifest()`：校验 plugin manifest schema（id / pluginManifestVersion / title / version / language / status / sourcePolicy / packages / runtime / builtAgainst / platform / supportedPlatforms / platformSupport / requiresBundle + requiresBundleVersion 配对）
+   - `scanPluginManifests()`：遍历 `resources/built-in-plugins/` + `acceptance/harness-plugin-prototype/` 扫描 `plugin.json`
+   - `checkPayloadShape()`：payload 基本类型检查（type / minimum / maximum / enum / nested properties / required fields）
+   - `getPayloadHint()` + `PAYLOAD_HINTS`：channel prefix → payload type 注册表
+   - 新增 `--manifest-only` 模式：仅校验 plugin manifest
+   - JSON 输出新增 `pluginManifests[]` 字段（16 个 plugin manifest）
+
+2. `scripts/generate-ipc-catalog-md.mjs`（~180 行）：输出 `## Plugin Manifest Schema Validation` 表格
+
+3. `test/plugin-schema-strict.test.mjs`（28 tests）：
+   - S.1~S.11：schema 校验
+   - P.1~P.8：payload shape 检查
+   - H.1~H.4：channel prefix hint 匹配
+   - I.1~I.5：集成测试
+
+**门禁结果**：
+- `node scripts/validate-ipc-catalog.mjs` — **PASS**
+- `node scripts/validate-ipc-catalog.mjs --manifest-only` — **PASS**
+- `node --test test/plugin-schema-strict.test.mjs` — **28/28 PASS**
+
+**已知 real plugin schema drift**（信息性）：
+- 9 个 real plugin manifests 有 schema 问题（status "incubating" / missing pluginManifestVersion 等），非阻塞
+
+**不变量守住**：IPC channel 契约 100% 不变；preload.js / electron.d.ts / desktopBridge.ts 0 diff
+
+**不外推**：SUB-15.1 / SUB-15.3 / SUB-15.4 / packaged / Provider / GA G1+
+
 ## UI-B15-6: SUB-15.1 PHASE 3 — createWindow 拆分（高风险）
 
 | 属性 | 值 |

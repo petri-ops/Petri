@@ -435,3 +435,5 @@ docs(block-15): plan §2 replaced with empirical data (17 vars + 22 functions + 
 | SUB-15.1 / PHASE-3-CLOSEOUT |
 
 | BLOCK-15 / STAGE-1-CLOSEOUT |
+
+| ✅ 已收口 | 2026-08-19 | **SUB-15.2 PHASE 2 完成**：IPC catalog 扩展 plugin manifest schema 校验 + payload shape 基本类型检查。`scripts/validate-ipc-catalog.mjs`（~970 行）：新增 `validatePluginManifest` (PL-001 风格，自写 validator / 无 ajv/zod)、`scanPluginManifests` 遍历 `resources/built-in-plugins/` + `acceptance/harness-plugin-prototype/`、payload shape `checkPayloadShape` + `getPayloadHint` + `PAYLOAD_HINTS` 注册表。`scripts/generate-ipc-catalog-md.mjs`（~180 行）：输出 `## Plugin Manifest Schema Validation` 表格 + 详情段。门禁结果：默认 gate（`node scripts/validate-ipc-catalog.mjs`）**PASS** / `--manifest-only` **PASS**（harness plugin） / `node --test test/plugin-schema-strict.test.mjs` **28/28 PASS**（S.1~S.11 schema / P.1~P.8 payload shape / H.1~H.4 hints / I.1~I.5 integration）。catalog 版本升至 2.0，新增 `pluginManifests` JSON 字段。**不外推**：SUB-15.1 / SUB-15.3 / SUB-15.4 / packaged / Provider / GA G1+ | SUB-15.2 / PHASE-2-CLOSEOUT |
