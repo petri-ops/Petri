@@ -10,7 +10,6 @@
 // mainWindow is managed via getter/setter to avoid top-level shared state.
 // ============================================================
 
-const path = require("path");
 const fs = require("fs");
 
 /**
@@ -74,7 +73,7 @@ async function createWindow({
     fullscreen: false,
     simpleFullScreen: false,
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+      preload: resolveResource("preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
       webviewTag: true,
