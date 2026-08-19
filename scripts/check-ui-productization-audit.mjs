@@ -95,6 +95,11 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // `feat(branch-result-studio)` 未带 UI-###；台账已由本次 BLOCK-14
   // UI-AUDIT-FIX 补登为 UI-163（in_progress）。不重写共享历史。
   'e40313e0e81f5a9ee70ace158cebb8a3e688a9ca',
+  // 2026-08-19 BLOCK-16 PHASE 3 不可变实现提交 da48006：events.ts 加
+  // agentTaskDone + copilotClient.ts SSE 4 处 done 分支 dispatch +
+  // useWorkingTreeReview.ts 订阅 typed event bus。台账已由本次
+  // BLOCK-16 closeout 笔录登记为 UI-180 in_progress。豁免同提交台账要求。
+  'da480063728d900ce6bfe4cf5c0c642a264a2f72',
 ])
 // These immutable implementation commits have an explicit later canonical
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
@@ -150,6 +155,11 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 台账已由本次 BLOCK-14 UI-AUDIT-FIX 补登为 UI-163（in_progress）。
   // 豁免同提交台账要求。
   'e40313e0e81f5a9ee70ace158cebb8a3e688a9ca',
+  // 2026-08-19 BLOCK-16 PHASE 3 不可变实现提交 da48006：events.ts 加
+  // agentTaskDone + copilotClient.ts SSE 4 处 done 分支 dispatch +
+  // useWorkingTreeReview.ts 订阅 typed event bus。台账已由本次
+  // BLOCK-16 closeout 笔录登记为 UI-180 in_progress。豁免同提交台账要求。
+  'da480063728d900ce6bfe4cf5c0c642a264a2f72',
 ])
 // UI-### issue ids: numeric series (UI-001..UI-999) and the named
 // AGENTWB namespace (UI-AGENTWB-001..UI-AGENTWB-999) used by the

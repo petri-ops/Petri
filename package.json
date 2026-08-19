@@ -164,6 +164,7 @@
     "docs:reconcile": "node scripts/docs-governance.mjs --reconcile",
     "ui:audit:check": "node scripts/check-ui-productization-audit.mjs",
     "g0:start:check": "node scripts/g0-start-audit.mjs",
+    "block:working-tree-review": "node scripts/block-16-working-tree-review.mjs",
     "g0:lf0:test": "node --test test/g0-baseline.test.mjs test/g0-project-baseline.test.mjs test/g0-api-route.test.mjs",
     "g0:lf0": "npm run g0:lf0:test && npm run g0:start:check && node scripts/g0-lf0-acceptance.mjs",
     "g0:lf0:update": "node scripts/g0-lf0-acceptance.mjs --write-evidence",
