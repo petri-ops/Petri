@@ -1921,6 +1921,9 @@
       ],
       "notes": "2026-08-19 第一阶段收口。SUB-15.1 PHASE 2 (ffa5bfc): main.js 1001→770行, 9函数→7模块。 SUB-15.2 PHASE 1 (ccd4457): IPC catalog validator 108 channels/50 pairs/0 orphans。 SUB-15.3 PHASE 1 (同ccd4457): dev-electron-profile --cdp T0→T4。 SUB-15.4 PHASE 0 (87bd0f6): IPC backpressure fixture 1/10/100MB。 SUB-15.1: PHASE 0✅/1✅/2✅/3待续/4待续。 SUB-15.2: PHASE 0✅/1✅/2待启动。 SUB-15.3: PHASE 0✅/1✅。 SUB-15.4: PHASE 0✅/1待续。 G0 dev Electron边界内合规。不外推 packaged/Provider/GA/P7。",
       "linkedCommits": [
+        "7a50ffd",
+        "a253bc9",
+        "d69c3dd",
         "ffa5bfc",
         "ccd4457",
         "87bd0f6",

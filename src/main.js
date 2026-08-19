@@ -49,6 +49,8 @@ const { startContentSync } = require("./main/_content-sync.js");
 const { publishAgentWorkbenchFlags } = require("./main/_agent-flags.js");
 const { setupWindowIpc } = require("./main/_window-ipc.js");
 const { setupAppMenu } = require("./main/_app-menu.js");
+const { startSpaServer } = require("./main/_spa-server.js");
+const { createWindow } = require("./main/_window-create.js");
 
 // Guard: core-utils.js requires Electron app; skip if not in Electron env
 let agentWorkbenchFlags = { extraRenderers: false };
@@ -125,8 +127,13 @@ process.stderr?.on?.("error", (err) => {
 
 // publishAgentWorkbenchFlags moved to src/main/_agent-flags.js (SUB-15.1 PHASE 2)
 
-// ── 主窗口 ─────────────────────────────────────────────────────
-let mainWindow = null;
+// ── 主窗口（shared ref via getter/setter）──────────────────────────
+let _mainWindow = null;
+const getMainWindow = () => _mainWindow;
+const setMainWindow = (w) => { _mainWindow = w; };
+// mainWindow stays as a compatibility alias for the single-instance handler
+// (PHASE 4 will handle the hasSingleInstanceLock + second-instance handler extraction)
+const mainWindow = { get isDestroyed() { return _mainWindow == null || _mainWindow.isDestroyed(); }, get webContents() { return _mainWindow?.webContents; }, get isMinimized() { return _mainWindow?.isMinimized(); }, get isFocused() { return _mainWindow?.isFocused(); }, restore() { _mainWindow?.restore(); }, show() { _mainWindow?.show(); }, focus() { _mainWindow?.focus(); } };
 
 // BioF3 owns local backend ports and must run as a single application
 // instance. A repeated launch focuses the existing window instead of starting
@@ -136,274 +143,16 @@ if (!hasSingleInstanceLock) {
   app.quit();
 } else {
   app.on("second-instance", () => {
-    if (!mainWindow) return;
-    if (mainWindow.isMinimized()) mainWindow.restore();
-    mainWindow.show();
-    mainWindow.focus();
+    const win = getMainWindow();
+    if (!win) return;
+    if (win.isMinimized()) win.restore();
+    win.show();
+    win.focus();
   });
 }
 
-async function createWindow() {
-  // 阶段 3（desktop-spa）：主窗口加载 Vite SPA build 产物
-  // Vite SPA 在 frontend/dist，base '/'，无 baseUrl 前缀
-  const spaBuildDir = resolveResource("frontend", "dist");
-  const spaIndexPath = path.join(spaBuildDir, "index.html");
-  let spaServerUrl = isDevMode ? rendererDevUrl : null;
-
-  // Docusaurus build 产物（docs/blog iframe 过渡用）
-  // 桌面端已移除教程入口，docs-server 不再启动。
-  // 原生渲染组件（pages/docs.tsx 等）保留在代码库中，如需恢复取消下面注释即可。
-  // const docusaurusBuildDir = resolveResource('build');
-  // const docusaurusServerUrl = 'http://localhost:3003/BioF3/';
-
-  if (!isDevMode) {
-    // 启动 Vite SPA 静态服务器。若默认端口已被占用，回退到系统分配的
-    // 空闲端口，并在服务真正开始监听后再加载窗口。
-    try {
-      const { startStaticServer } = require("./static-server");
-      const spaServer = await startStaticServer(spaBuildDir, {
-        port: Number(process.env.BIOF3_RENDERER_PORT || 3002),
-        baseUrl: "/",
-        label: "spa-server",
-        spaFallback: true,
-        fallbackToRandomPort: false,
-      });
-      const address = spaServer?.address();
-      if (typeof address === "object" && address) {
-        spaServerUrl = `http://localhost:${address.port}/`;
-      }
-    } catch (e) {
-      console.warn("[desktop] SPA static server failed:", e.message);
-    }
-  }
-
-  // 启动 Docusaurus 静态服务器（:3003，baseUrl=/BioF3/，供 docs/blog iframe）
-  // 桌面端已移除教程入口，docs-server 不再启动。如需恢复取消下面注释即可。
-  /*
-  if (fs.existsSync(docusaurusBuildDir)) {
-    try {
-      const { startStaticServer } = require('./static-server');
-      startStaticServer(docusaurusBuildDir, {
-        port: 3003,
-        baseUrl: '/BioF3/',
-        label: 'docs-server',
-        spaFallback: true,
-      });
-    } catch (e) {
-      console.warn('[desktop] docs static server failed:', e.message);
-    }
-  }
-  */
-
-  mainWindow = new BrowserWindow({
-    width: 1600,
-    height: 1000,
-    minWidth: 720,
-    minHeight: 520,
-    title: "BioF3",
-    // Self-drawn traffic-light buttons in TitleBar.tsx — see src/main.js comments
-    // around setupWindowIpc() for the IPC contract (window:minimize/maximize/close).
-    // Frameless on every platform so the renderer owns the window controls; on macOS
-    // TitleBar draws the Cursor-style grey circular capsule (not the native OS lights),
-    // on Windows/Linux it draws the square WindowControls.
-    frame: false,
-    backgroundColor: "#1f2330",
-    // Mac fullscreen support: enable native fullscreen behavior
-    // fullscreenable: true allows the green button and Cmd+Ctrl+F to enter true fullscreen
-    // simpleFullScreen: false uses the native macOS fullscreen transition (hides menu bar)
-    fullscreenable: true,
-    fullscreen: false,
-    simpleFullScreen: false,
-    webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-      contextIsolation: true,
-      nodeIntegration: false,
-      webviewTag: true,
-      sandbox: true,
-      webSecurity: true,
-    },
-  });
-
-  // 开发模式优先加载 Vite dev server，启用 React/Vite HMR；
-  // 生产/普通启动加载本地静态构建产物。
-  if (isDevMode) {
-    mainWindow.loadURL(spaServerUrl);
-  } else if (fs.existsSync(spaIndexPath) && spaServerUrl) {
-    mainWindow.loadURL(spaServerUrl);
-  } else {
-    // 开发模式：加载 Vite dev server
-    mainWindow.loadURL(rendererDevUrl);
-  }
-
-  // 外部链接走系统浏览器；所有 window.open 一律 deny，避免 Electron 创建
-  // 新原生窗口（非 http URL 用 allow 会导致弹窗风暴：新窗口不继承 handler，
-  // 加载失败后 SPA fallback 又加载完整应用，级联弹窗直到卡死）。
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      shell.openExternal(url);
-    }
-    // 非 http URL（相对路径、blob:、about:blank 等）全部 deny
-    return { action: "deny" };
-  });
-
-  // 拦截主窗口导航：只允许在本地服务器范围内跳转，防止意外导航到
-  // 外部 URL 或 file:// 导致白屏/弹窗
-  mainWindow.webContents.on("will-navigate", (event, url) => {
-    const allowed = [
-      spaServerUrl?.replace(/\/$/, ""),
-      rendererDevUrl.replace(/\/$/, ""),
-    ].filter(Boolean);
-    if (!allowed.some((a) => url.startsWith(a))) {
-      event.preventDefault();
-      if (url.startsWith("http://") || url.startsWith("https://")) {
-        shell.openExternal(url);
-      }
-    }
-  });
-
-  // 桌面稳定性：拦截 Cmd/Ctrl+R，避免 Electron 硬 reload 断开 SSE、丢失
-  // renderer 内存状态，并造成"前端刷新后后端像断开"的体感。
-  // Cmd/Ctrl+R 改为应用内软刷新；Cmd/Ctrl+Shift+R 保留为开发者硬刷新。
-  mainWindow.webContents.on("before-input-event", (event, input) => {
-    const key = typeof input.key === "string" ? input.key.toLowerCase() : "";
-    const isMacWindowShortcut =
-      process.platform === "darwin" &&
-      input.meta &&
-      !input.control &&
-      !input.alt &&
-      !input.shift;
-
-    if (isMacWindowShortcut && key === "w") {
-      event.preventDefault();
-      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.close();
-      return;
-    }
-    if (isMacWindowShortcut && key === "m") {
-      event.preventDefault();
-      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.minimize();
-      return;
-    }
-
-    const isReloadKey =
-      key === "r" &&
-      (input.meta || input.control) &&
-      !input.alt;
-    if (!isReloadKey) return;
-    event.preventDefault();
-    if (input.shift) {
-      console.log("[desktop] hard reload requested");
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.reloadIgnoringCache();
-      }
-      return;
-    }
-    console.log("[desktop] soft refresh requested");
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send("app:soft-refresh");
-    }
-  });
-
-  // DevTools 仅在显式需要时打开，避免日常启动打断工作台。
-  if (process.env.BIOF3_OPEN_DEVTOOLS === "1") {
-    mainWindow.webContents.openDevTools();
-  }
-
-  // 捕获渲染进程 console 消息（调试用）
-  mainWindow.webContents.on(
-    "console-message",
-    (event, level, message, line, sourceId) => {
-      const tag = ["LOG", "WARN", "ERROR"][level] || "LOG";
-      console.log(`[renderer:${tag}] ${message}`);
-    },
-  );
-
-  // 捕获页面加载失败
-  mainWindow.webContents.on(
-    "did-fail-load",
-    (event, errorCode, errorDescription, validatedURL) => {
-      console.error(
-        `[renderer] load failed: ${errorCode} ${errorDescription} url=${validatedURL}`,
-      );
-    },
-  );
-
-  // 页面加载完成
-  mainWindow.webContents.on("did-finish-load", () => {
-    console.log("[renderer] page loaded");
-    publishAgentWorkbenchFlags({ getMainWindow: () => mainWindow, getAgentWorkbenchFlags: () => agentWorkbenchFlags });
-  });
-
-  // macOS 焦点诊断。开发启动器通过 LaunchServices 获取 GUI 会话；这里只
-  // 记录窗口状态，不能延迟抢焦点，否则用户已切到其他应用时会被强制拉回。
-  if (process.platform === "darwin") {
-    const windowForFocusDiagnostics = mainWindow;
-    windowForFocusDiagnostics.webContents.once("did-finish-load", () => {
-      setTimeout(() => {
-        if (!windowForFocusDiagnostics.isDestroyed()) {
-          console.log(
-            "[focus] isKeyWindow after load:",
-            typeof windowForFocusDiagnostics.isKeyWindow === "function"
-              ? windowForFocusDiagnostics.isKeyWindow()
-              : "n/a",
-            "isFocused:",
-            windowForFocusDiagnostics.isFocused(),
-          );
-        }
-      }, 500);
-    });
-  }
-
-  const windowForEvents = mainWindow;
-  mainWindow.on("closed", () => {
-    mainWindow = null;
-  });
-
-  // Forward maximize/unmaximize state to the renderer so the self-drawn
-  // window control buttons can swap their glyph (single square ↔ double square).
-  const publishMaximizedState = (isMaximized) => {
-    if (
-      (typeof windowForEvents.isDestroyed === "function" &&
-        windowForEvents.isDestroyed()) ||
-      (typeof windowForEvents.webContents?.isDestroyed === "function" &&
-        windowForEvents.webContents.isDestroyed())
-    ) {
-      return;
-    }
-    windowForEvents.webContents.send(
-      "window:maximize-changed",
-      isMaximized,
-    );
-  };
-  windowForEvents.on("maximize", () => publishMaximizedState(true));
-  windowForEvents.on("unmaximize", () => publishMaximizedState(false));
-
-  // Mac fullscreen event handlers — sync state to renderer for UI consistency
-  // On macOS frameless windows, use simpleFullScreen mode which automatically
-  // hides the Dock and menu bar for true fullscreen behavior.
-  if (process.platform === "darwin") {
-    windowForEvents.on("enter-simple-full-screen", () => {
-      if (!windowForEvents.isDestroyed() && windowForEvents.webContents && !windowForEvents.webContents.isDestroyed()) {
-        windowForEvents.webContents.send("window:fullscreen-changed", true);
-      }
-    });
-    windowForEvents.on("leave-simple-full-screen", () => {
-      if (!windowForEvents.isDestroyed() && windowForEvents.webContents && !windowForEvents.webContents.isDestroyed()) {
-        windowForEvents.webContents.send("window:fullscreen-changed", false);
-      }
-    });
-  } else {
-    windowForEvents.on("enter-full-screen", () => {
-      if (!windowForEvents.isDestroyed() && windowForEvents.webContents && !windowForEvents.webContents.isDestroyed()) {
-        windowForEvents.webContents.send("window:fullscreen-changed", true);
-      }
-    });
-    windowForEvents.on("leave-full-screen", () => {
-      if (!windowForEvents.isDestroyed() && windowForEvents.webContents && !windowForEvents.webContents.isDestroyed()) {
-        windowForEvents.webContents.send("window:fullscreen-changed", false);
-      }
-    });
-  }
-}
+// createWindow extracted to src/main/_window-create.js (SUB-15.1 PHASE 3)
+// createWindow remains as the async entry point, delegating to the extracted module.
 
 // setupWindowIpc moved to src/main/_window-ipc.js (SUB-15.1 PHASE 2)
 
@@ -727,7 +476,21 @@ async function main() {
   setupCsp({ isDevMode });
 
   // 7. 创建窗口
-  await createWindow();
+  // createWindow extracted to src/main/_window-create.js (SUB-15.1 PHASE 3)
+  await createWindow({
+    BrowserWindow,
+    shell,
+    session,
+    resolveResource,
+    isDevMode,
+    rendererDevUrl,
+    process,
+    getMainWindow,
+    setMainWindow,
+    publishAgentWorkbenchFlags,
+    getAgentWorkbenchFlags: () => agentWorkbenchFlags,
+    startSpaServer,
+  });
 }
 
 app.whenReady().then(main);
@@ -739,8 +502,21 @@ app.on("window-all-closed", () => {
 });
 
 app.on("activate", () => {
-  if (mainWindow === null) {
-    createWindow().catch((err) => {
+  if (!getMainWindow()) {
+    createWindow({
+      BrowserWindow,
+      shell,
+      session,
+      resolveResource,
+      isDevMode,
+      rendererDevUrl,
+      process,
+      getMainWindow,
+      setMainWindow,
+      publishAgentWorkbenchFlags,
+      getAgentWorkbenchFlags: () => agentWorkbenchFlags,
+      startSpaServer,
+    }).catch((err) => {
       console.error("[desktop] window recreation failed:", err);
     });
   }
