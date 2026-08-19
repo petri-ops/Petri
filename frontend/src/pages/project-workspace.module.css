@@ -798,11 +798,18 @@
   font-weight: 500;
   text-align: left;
   cursor: pointer;
+  transition: background-color 150ms ease-in-out, color 150ms ease-in-out, box-shadow 150ms ease-in-out;
 }
 
 .leftQuickAction:hover {
   background: var(--biof3-hover);
   color: var(--biof3-text);
+}
+
+.leftQuickAction:focus-visible {
+  outline: 2px solid var(--biof3-border-color, var(--biof3-text-secondary));
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--biof3-accent-bg, transparent);
 }
 
 .leftQuickActionActive {

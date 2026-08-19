@@ -86,6 +86,7 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
             className={`${styles.leftQuickAction} ${ctx.workspaceMode === 'settings' ? styles.leftQuickActionActive : ''}`}
             onClick={ctx.handleShowSettings}
             title="设置"
+            aria-current={ctx.workspaceMode === 'settings' ? 'page' : undefined}
           >
             <Icon name="settings" size={15} />
             <span>设置</span>
@@ -138,17 +139,22 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   return (
     <div className={styles.leftQuickActions}>
       <div className={styles.leftQuickSectionLabel}>工作台</div>
-      {items.map((item) => (
-        <button
-          key={item.key}
-          className={`${styles.leftQuickAction} ${item.mode && ctx.workspaceMode === item.mode ? styles.leftQuickActionActive : ''}`}
-          onClick={item.onClick}
-          title={item.title}
-        >
-          <Icon name={item.icon} size={15} />
-          <span>{item.label}</span>
-        </button>
-      ))}
+      {items.map((item) => {
+        const isActive = Boolean(item.mode) && ctx.workspaceMode === item.mode;
+        return (
+          <button
+            key={item.key}
+            type="button"
+            className={`${styles.leftQuickAction} ${isActive ? styles.leftQuickActionActive : ''}`}
+            onClick={item.onClick}
+            title={item.title}
+            aria-current={isActive ? 'page' : undefined}
+          >
+            <Icon name={item.icon} size={15} />
+            <span>{item.label}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }
