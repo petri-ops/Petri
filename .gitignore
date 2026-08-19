@@ -62,5 +62,11 @@ core/r-server/tool-demo-data/
 core/r-server/tool-demo-results/
 core/**/.DS_Store
 
+# Built-in plugins' Python bytecode (mirrors core pattern; SUB-1.3 celltypist
+# worker tested locally and left scripts/__pycache__/ behind — exclude from
+# repo; runtime plugins run from local working copy, no source impact)
+resources/built-in-plugins/**/__pycache__/
+resources/built-in-plugins/**/*.pyc
+
 # WorkBuddy agent 工作区记忆（本地工具产物，非项目源码）
 .workbuddy/
