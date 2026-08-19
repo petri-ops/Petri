@@ -923,3 +923,43 @@ ROCED TO MAINTAIN STATE:
 - `src/ipc/skills-window.js` — `_resolveSkillsIpcWindow` 窗口解析
 
 main.js 从 ~1201 行减少到 1001 行（-200 行）。IPC handler channel 名和函数签名 100% 不变。不外推 PHASE 2/3 工作。
+
+## UI-B15-4: SUB-15.4 PHASE 0 — IPC 序列化 backpressure 测量 fixture
+
+| 属性 | 值 |
+|------|-----|
+| 状态 | `verified` |
+| 阶段 | dev Electron 边界内 |
+| 证据 | 12 tests PASS |
+
+**说明**：SUB-15.4 PHASE 0 创建 IPC 序列化 backpressure 测量 fixture，用于验证 IPC 序列化在不同负载下的行为。
+
+**新增文件**：
+- `scripts/ipc-backpressure-profile.mjs`（359 行）— IPC backpressure 测量 fixture
+  - 支持三种 payload size：1MB / 10MB / 100MB
+  - 支持 `--iterations=N` 和 `--warmup=N` 参数
+  - 输出 human 和 CSV 两种格式
+  - 阈值报警（默认 stringify > 5000ms 报警）
+  - G0 合规：不引入 Worker / MessageChannel / SharedArrayBuffer
+- `test/ipc-backpressure-profile.test.mjs`（169 行）— 12 个测试
+  - 1MB / 10MB / 100MB 模式测试
+  - warmup / iterations flag 测试
+  - CSV 格式解析测试
+  - 阈值报警测试
+  - --size 参数必填校验
+  - 非法 size 值校验
+  - Memory section 测试
+  - G0 合规注释测试
+
+**门槛（dev Electron 边界内 verified · G0 阶段）**：
+- 12 个测试全 PASS（`node --test test/ipc-backpressure-profile.test.mjs`）
+- `npm run docs:check` PASS（130 registered documents）
+- `npm run ui:audit:check` PASS（149 个 UI 编号已注册）
+
+**0 行为变化 不变量**：
+- `src/main.js` / `src/preload.js` / `electron.d.ts` / `desktopBridge.ts` 全部 0 diff
+- 0 npm 依赖新增 / 0 npm 依赖删除
+
+**不外推**：packaged / Provider / GA / P7 / dist staleness / notarization G1+；不动 Electron 应用代码。
+
+**完成语义**：dev Electron 边界内 verified（fixture 仅测量脚本，不修改应用），G0 阶段最高证据等级，符合当前 G0 阶段纪律。
