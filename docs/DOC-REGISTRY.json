@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 129,
+    "documentCount": 130,
     "lastUpdated": "2026-08-19",
-    "managedMarkdown": 129
+    "managedMarkdown": 130
   },
   "documents": [
     {
@@ -1900,6 +1900,29 @@
       "notes": "2026-08-19 BLOCK-14-LEFT-PANEL-QA-FIX 收口：LeftPanel.tsx QuickActions 4 个按钮（3 QuickActions mode + 1 footer Settings）补 a11y 增强（aria-current=page + :focus-visible outline + 150ms ease-in-out transition），0 行为变化 / 0 npm 依赖变动 / 4 个 workspace-panels test 文件 0 改动 / desktopBridge.ts+electron.d.ts+preload.js 0 diff。新增 test 文件 LeftPanel.test.tsx 6/6 PASS。tsc 0 错 / vite build OK / docs:check PASS + ui:audit:check PASS + docs:reconcile 0 issues。不外推 packaged/Provider/GA/P7 G1+，不重新激活 BLOCK-7/11。closeout 报告 6 节。",
       "linkedCommits": [],
       "registeredAt": "2026-08-19"
+    },
+    {
+      "id": "BLOCK-15-ARCHITECTURE-PERF-PLAN",
+      "path": "docs/block-15-architecture-perf-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-15-architecture-perf",
+      "entrypoint": "docs/AUDIT-LOG.md",
+      "archivePolicy": "archive_after_completion",
+      "tags": [
+        "block-15",
+        "main-js",
+        "ipc-catalog",
+        "schema",
+        "perf-probe",
+        "G0",
+        "planned"
+      ],
+      "notes": "2026-08-19 BLOCK-15 plan v0.1 DRAFT 创建。用户裁决：main.js 全面重拆（选项B）+ IPC catalog+schema 合并+自写validator + IPC backpressure 仅测量（G0）+ gates命名block-15-gates + baseline归档在plan内联记录。SUB-15.1: main.js 全面重拆（PHASE 0-4, 5 commits, 4.0人天）。SUB-15.2: IPC catalog+schema（PHASE 0-2, 4 commits, 2.5人天）。SUB-15.3: dev Electron profile（PHASE 0-1, 2 commits, 1.0人天）。SUB-15.4: IPC backpressure（PHASE 0-1, 2 commits, 1.0人天）。总计 13 commits / 8.5 人天。G0 dev Electron边界内合规。",
+      "linkedCommits": [],
+      "registeredAt": "2026-08-19"
     }
-  ]
+  ],
+  "lastUpdated": "2026-08-19"
 }

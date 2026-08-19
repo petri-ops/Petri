@@ -906,3 +906,20 @@ ROCED TO MAINTAIN STATE:
 - 不重新评估 vite build chunk size（仅为 warning，与本工作包无关）
 
 **完成语义**：dev Electron 边界内 verified（不实机验证 packaged-electron），G0 阶段最高证据等级，符合当前 G0 阶段纪律。
+
+
+## UI-B15-1: SUB-15.1 PHASE 1 拆分（低风险 9 函数 → 4 新文件）
+
+| 属性 | 值 |
+|------|-----|
+| 状态 | `verified` |
+| 阶段 | dev Electron 边界内 |
+| 证据 | `node --check` × 5 文件全绿 |
+
+**说明**：SUB-15.1 PHASE 1 提取 main.js 中 9 个低风险函数到独立子模块：
+- `src/ipc/workbench-flags.js` — `parseAgentWorkbenchFlags` + IPC 注册
+- `src/main/core-utils.js` — 路径解析 + Node bin + 端口预留 + 包集合常量
+- `src/main/csp-config.js` — `setupCsp` CSP 配置
+- `src/ipc/skills-window.js` — `_resolveSkillsIpcWindow` 窗口解析
+
+main.js 从 ~1201 行减少到 1001 行（-200 行）。IPC handler channel 名和函数签名 100% 不变。不外推 PHASE 2/3 工作。

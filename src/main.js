@@ -26,29 +26,6 @@ const fs = require("fs");
 const nodeNet = require("net");
 const { spawn, spawnSync } = require("child_process");
 
-const AGENT_WORKBENCH_FLAG_CHANNEL = "biof3:agent-workbench-flags";
-const AGENT_WORKBENCH_FLAG_NAME = "extraRenderers";
-
-function parseAgentWorkbenchFlags(argv = process.argv, env = process.env) {
-  const cliValue = argv.find((arg) => arg.startsWith("--agent-workbench-flags="));
-  const raw = cliValue
-    ? cliValue.slice("--agent-workbench-flags=".length)
-    : String(env.BIOF3_AGENT_WORKBENCH_FLAGS || "");
-  const enabled = raw
-    .split(",")
-    .map((value) => value.trim())
-    .includes(AGENT_WORKBENCH_FLAG_NAME);
-  return { extraRenderers: enabled };
-}
-
-const agentWorkbenchFlags = parseAgentWorkbenchFlags();
-const { createOwnedBackendSupervisor } = require("./owned-backend-supervisor");
-const { createMacOssUpdater } = require("./macos-oss-updater");
-const { redactSensitiveText } = require("./diagnostic-redaction");
-// BLOCK-3 PHASE 2 G6: _mapSkillRuntimeStatus 提取到独立模块以便单测
-// （main.js 在 module-eval 阶段读 app.isPackaged 等 Electron-only 状态，
-//  无法被 plain Node 干净 require）。共享实现见 src/_mapSkillRuntimeStatus.js。
-const { _mapSkillRuntimeStatus } = require("./_mapSkillRuntimeStatus");
 const {
   getNodeLocator,
   getRuntimeBinCandidates,
@@ -57,20 +34,23 @@ const {
   getSessionShellSpec,
   getBuiltInPluginsDir,
 } = require("./platform-compat");
-const runtimePathsModule = app.isPackaged
-  ? path.join(process.resourcesPath, "core", "shared-backend", "runtime-paths.js")
-  : path.join(__dirname, "..", "core", "shared-backend", "runtime-paths.js");
-const {
-  getPythonRuntimeExecutable,
-} = require(runtimePathsModule);
 
-const isDevMode =
-  process.argv.includes("--dev") ||
-  process.env.ELECTRON_IS_DEV === "1" ||
-  process.env.NODE_ENV === "development";
+// SUB-15.1 PHASE 1 imports (BLOCK-9.1 style)
+const { parseAgentWorkbenchFlags, AGENT_WORKBENCH_FLAG_CHANNEL, setupAgentWorkbenchFlagsIpc } = require("./ipc/workbench-flags.js");
+const { resolveCoreRoot, resolveResource, resolveCore, reserveAvailablePort, isDevMode, rendererDevUrl, BASE_R_PACKAGES, BASE_PY_PACKAGES, NODE_BIN, IS_DEV, PROJECT_ROOT } = require("./main/core-utils.js");
+const { setupCsp } = require("./main/csp-config.js");
+const { _resolveSkillsIpcWindow } = require("./ipc/skills-window.js");
 
-const rendererDevUrl =
-  process.env.BIOF3_RENDERER_DEV_URL || "http://localhost:3000";
+
+// Guard: core-utils.js requires Electron app; skip if not in Electron env
+let agentWorkbenchFlags = { extraRenderers: false };
+try {
+  agentWorkbenchFlags = parseAgentWorkbenchFlags();
+} catch { /* ignore during --check */ }
+
+// runtimePathsModule 已不再需要（原 consumer 已移除）
+
+// ── Path resolution helpers (re-exported from core-utils.js for local use) ──
 
 if (process.env.BIOF3_ELECTRON_USER_DATA_DIR) {
   try {
@@ -104,129 +84,15 @@ process.stderr?.on?.("error", (err) => {
 //   - desktop 自己的资源（frontend/dist, build, resources/）在 desktop 仓根
 //   - core 资源（r-server, py-server, shared-backend）内嵌在 desktop 仓根 core/ 下
 // 开发模式：PROJECT_ROOT = desktop 仓根（src/..），CORE_ROOT = PROJECT_ROOT/core
-// 打包模式：desktop 资源在 process.resourcesPath，core 资源在 process.resourcesPath/core（electron-builder extraResources）
-const IS_DEV = !app.isPackaged;
-const PROJECT_ROOT = IS_DEV ? path.join(__dirname, "..") : process.resourcesPath;
-
-// core 根（去 submodule 后内嵌在 desktop 仓根）。dev: core/；pack: resourcesPath/core
-function resolveCoreRoot() {
-  if (IS_DEV) {
-    return path.join(PROJECT_ROOT, "core");
-  }
-  return path.join(process.resourcesPath, "core");
-}
-
-// desktop 自己的资源（frontend/dist 等）
-function resolveResource(...parts) {
-  if (IS_DEV) {
-    return path.join(PROJECT_ROOT, ...parts);
-  }
-  return path.join(process.resourcesPath, ...parts);
-}
-
-// core 仓的资源（r-server/py-server/shared-backend）
-function resolveCore(...parts) {
-  return path.join(resolveCoreRoot(), ...parts);
-}
+// 打包模式：desktop 资源在 process.resourcesPath，core 资源在 process.resourcesPath/core
+// IS_DEV / PROJECT_ROOT / resolveCoreRoot / resolveResource / resolveCore
+// 已提取到 src/main/core-utils.js
 
 // ── 解析用来跑 r-server/py-server 的 node 可执行文件 ────────────
-// 开发模式：用系统 Node，并让各子进程从 Core 的独立 node_modules
-// 加载原生依赖，避免与 electron-builder 重建后的根 ABI 混用。
-// PATH 查找不可靠（Electron 子进程 PATH 不含用户自定义 node 路径），
-// 所以用 execFileSync('which node') 拿绝对路径。
-// 打包模式：macOS 必须使用 Helper 可执行文件。直接 spawn 主应用可执行文件会
-// 再次加载 app.asar，递归启动整套桌面进程，而不是进入 Node 子进程模式。
-function resolveNodeBin() {
-  if (!IS_DEV) {
-    if (process.platform === "darwin") {
-      const helperName = `${path.basename(process.execPath)} Helper`;
-      const helperBin = path.join(
-        path.dirname(process.execPath),
-        "..",
-        "Frameworks",
-        `${helperName}.app`,
-        "Contents",
-        "MacOS",
-        helperName,
-      );
-      if (fs.existsSync(helperBin)) return helperBin;
-    }
-    return process.execPath;
-  }
-  try {
-    const { execFileSync } = require("child_process");
-    const locator = getNodeLocator(process.platform);
-    const bin = execFileSync(locator, ["node"], {
-      encoding: "utf-8",
-      timeout: 3000,
-    })
-      .toString()
-      .trim()
-      .split(/\r?\n/)[0];
-    if (bin && fs.existsSync(bin)) return bin;
-  } catch {
-    /* fallback */
-  }
-  return "node"; // 兜底走 PATH（可能命中 Electron node，但至少不崩 spawn）
-}
-const NODE_BIN = resolveNodeBin();
+// resolveNodeBin / NODE_BIN 已提取到 src/main/core-utils.js
 
 // ── 基础 Runtime 自带包集合 ─────────────────────────────────────
-const BASE_R_PACKAGES = new Set([
-  "ggplot2",
-  "dplyr",
-  "tidyr",
-  "reshape2",
-  "data.table",
-  "pheatmap",
-  "ggrepel",
-  "RColorBrewer",
-  "patchwork",
-  "cowplot",
-  "plotly",
-  "igraph",
-  "ggraph",
-  "tidygraph",
-  "circlize",
-  "ComplexHeatmap",
-  "UpSetR",
-  "ggalluvial",
-  "treemap",
-  "networkD3",
-  "Seurat",
-  "SingleCellExperiment",
-  "MOFA2",
-  "CellChat",
-  "WGCNA",
-  "maftools",
-  "clusterProfiler",
-  "enrichplot",
-  "DOSE",
-  "org.Hs.eg.db",
-  "survival",
-  "survminer",
-  "rms",
-  "pROC",
-  "glmnet",
-  "caret",
-  "timeROC",
-  "PRROC",
-  "dcurves",
-  "scatterpie",
-  "Rtsne",
-  "STRINGdb",
-  "gganimate",
-]);
-const BASE_PY_PACKAGES = new Set([
-  "matplotlib",
-  "numpy",
-  "pandas",
-  "scanpy",
-  "anndata",
-  "scikit-learn",
-  "seaborn",
-  "scipy",
-]);
+// BASE_R_PACKAGES / BASE_PY_PACKAGES 已提取到 src/main/core-utils.js
 
 // ── 系统检测：开发模式下找系统安装的 R / Python ────────────────
 // _detectSystemR / _detectSystemPython / resolveRuntime were
@@ -235,34 +101,13 @@ const BASE_PY_PACKAGES = new Set([
 // (Intentionally not re-exported from main.js — there's no
 // other consumer in src/main.js after the extraction.)
 
-
 // ── 环境变量（桌面版模式）──────────────────────────────────────
 
 // Runtime 解析两级优先：
 //   1. 用户安装的独立 Runtime（~/Documents/BioF3-Local/runtimes/{R|Python}）— 最高优先
 //   2. 开发模式：检测系统 R/Python（仅 dev，打包模式不检测，保持独立）
 //   3. 都没有 → 返回 null，R/Python 功能不可用，提示从插件商店安装
-function reserveAvailablePort(preferredPort) {
-  return new Promise((resolve, reject) => {
-    const tryListen = (port) => {
-      const server = nodeNet.createServer();
-      server.unref();
-      server.once("error", (error) => {
-        if (port === preferredPort && error.code === "EADDRINUSE") {
-          tryListen(0);
-          return;
-        }
-        reject(error);
-      });
-      server.listen({ host: "127.0.0.1", port, exclusive: true }, () => {
-        const address = server.address();
-        const selectedPort = typeof address === "object" && address ? address.port : port;
-        server.close((error) => (error ? reject(error) : resolve(selectedPort)));
-      });
-    };
-    tryListen(preferredPort);
-  });
-}
+// reserveAvailablePort 已提取到 src/main/core-utils.js
 
 async function selectBackendPorts() {
   const gateway = await reserveAvailablePort(3005);
@@ -600,14 +445,7 @@ async function createWindow() {
   }
 }
 
-function setupAgentWorkbenchFlagsIpc() {
-  ipcMain.handle(AGENT_WORKBENCH_FLAG_CHANNEL, (event, value) => {
-    if (event?.sender !== mainWindow?.webContents) return { ok: false, extraRenderers: agentWorkbenchFlags.extraRenderers, error: 'unauthorized' };
-    agentWorkbenchFlags.extraRenderers = value === true;
-    publishAgentWorkbenchFlags();
-    return { ok: true, extraRenderers: agentWorkbenchFlags.extraRenderers };
-  });
-}
+// setupAgentWorkbenchFlagsIpc 已提取到 src/ipc/workbench-flags.js
 
 // ── IPC：窗口控制（配合 frame:false 自定义标题栏）──────────────
 function setupWindowIpc() {
@@ -676,44 +514,7 @@ function setupWindowIpc() {
 
 
 // ── M1-2：CSP 加固 ─────────────────────────────────────────────
-// 禁用 unsafe-eval，限制资源来源。connect-src 放开 localhost:* 覆盖
-// r-server(3001)/py-server(3004)/plumber(8787)/dev server(3000)/SSE。
-// frame-src 放开 localhost:* 供本地可视化嵌入用。
-// 不回退 unsafe-eval——Vite 生产构建已无 eval 需求。
-function setupCsp() {
-  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    const scriptSrc = isDevMode
-      ? "script-src 'self' 'unsafe-inline'; "
-      : "script-src 'self'; ";
-    // dev mode also allows 127.0.0.1:* so renderer health probes to
-    // gateway(:3005) / py-server(:3004) / r-server(:3001) hit BOTH
-    // `localhost` and `127.0.0.1` forms without CSP violations.
-    const localNet = isDevMode
-      ? "http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* "
-      : "http://localhost:* ws://localhost:* ";
-    callback({
-      responseHeaders: {
-        ...details.responseHeaders,
-        "Content-Security-Policy": [
-          "default-src 'self'; " +
-            scriptSrc +
-            "style-src 'self' 'unsafe-inline'; " +
-            "img-src 'self' data: blob: http://localhost:* ; " +
-            "connect-src 'self' " + localNet + "; " +
-            "frame-src 'self' " + localNet + "; " +
-            "font-src 'self' data: ; " +
-            "worker-src 'self' blob: ; " +
-            "object-src 'none';",
-        ],
-      },
-    });
-  });
-  console.log(
-    isDevMode
-      ? "[desktop] CSP dev mode (Vite React refresh inline preamble allowed; 127.0.0.1:* whitelisted)"
-      : "[desktop] CSP hardened (unsafe-eval disabled)",
-  );
-}
+// setupCsp 已提取到 src/main/csp-config.js
 
 // ── IPC：Runtime 状态查询 ──────────────────────────────────────
 // ── IPC：M2-7 按需启停 py-server / plumber ──────────────────────
@@ -818,16 +619,12 @@ function _startSkillsProgressPoller() {
   }, 1000);
 }
 
-function _resolveSkillsIpcWindow(event) {
-  // BLOCK-3 P1 B1/F1: 守 sender，对齐 setupAgentWorkbenchFlagsIpc L1162 模式
-  if (!mainWindow || mainWindow.isDestroyed()) return null;
-  return event?.sender === mainWindow.webContents ? mainWindow : null;
-}
+// _resolveSkillsIpcWindow 已提取到 src/ipc/skills-window.js
 
 function setupSkillsIpc() {
   // 规整化 bridge 返回值，保证前端 contract 严格 `{ ok, ... }`
   ipcMain.handle("skills:discover", async (event) => {
-    if (!_resolveSkillsIpcWindow(event)) return { ok: false, error: "unauthorized" };
+    if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
     try {
       const sdk = _getSkillsSDK();
       if (!sdk) return { ok: false, error: "skills SDK unavailable" };
@@ -839,7 +636,7 @@ function setupSkillsIpc() {
   });
 
   ipcMain.handle("skills:execute", async (event, skillId, params) => {
-    if (!_resolveSkillsIpcWindow(event)) return { ok: false, error: "unauthorized" };
+    if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
     try {
       const sdk = _getSkillsSDK();
       if (!sdk) return { ok: false, error: "skills SDK unavailable" };
@@ -904,7 +701,7 @@ function setupSkillsIpc() {
   });
 
   ipcMain.handle("skills:getExecution", async (event, executionId) => {
-    if (!_resolveSkillsIpcWindow(event)) return { ok: false, error: "unauthorized" };
+    if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
     try {
       if (!executionId) return { ok: false, error: "executionId required" };
       const runtime = _activeSkillRuntimes.get(executionId);
@@ -935,7 +732,7 @@ function setupSkillsIpc() {
   });
 
   ipcMain.handle("skills:cancel", async (event, executionId) => {
-    if (!_resolveSkillsIpcWindow(event)) return { ok: false, cancelled: false, error: "unauthorized" };
+    if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, cancelled: false, error: "unauthorized" };
     try {
       if (!executionId) return { ok: false, cancelled: false, error: "executionId required" };
       const runtime = _activeSkillRuntimes.get(executionId);
@@ -1034,7 +831,11 @@ async function main() {
 
   // 5. 设置 IPC
   setupWindowIpc();
-  setupAgentWorkbenchFlagsIpc();
+  setupAgentWorkbenchFlagsIpc({
+    getMainWindow: () => mainWindow,
+    getAgentWorkbenchFlags: () => agentWorkbenchFlags,
+    publishAgentWorkbenchFlags,
+  });
   // BLOCK-9.1 PHASE 1: low-risk setup functions moved to src/ipc/*.js
   const { setupTelemetryIpc } = require("./ipc/telemetry");
   const { setupHarnessCapabilitiesIpc } = require("./ipc/harness-capabilities");
@@ -1081,7 +882,7 @@ async function main() {
 
   // 6. 创建窗口
   // M1-2：CSP 加固——禁用 unsafe-eval，限制资源来源到 self + localhost（后端/SSE/dev server）
-  setupCsp();
+  setupCsp({ isDevMode });
 
   // 7. 创建窗口
   await createWindow();
