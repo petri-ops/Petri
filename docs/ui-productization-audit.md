@@ -1027,3 +1027,53 @@ main.js 从 ~1201 行减少到 1001 行（-200 行）。IPC handler channel 名�
 - `hasSingleInstanceLock` 保留在 main.js（setupAppMenu 引用）
 
 **不外推**：packaged / Provider / GA / P7 / dist staleness / notarization G1+；不动 preload.js / electron.d.ts / desktopBridge.ts / frontend/src/ / core/shared-backend/*。
+
+## UI-B15-5: SUB-15.2 PHASE 1 — IPC channel catalog 自动校验门禁
+
+| 属性 | 值 |
+|------|-----|
+| 状态 | `verified` |
+| 阶段 | dev Electron 边界内 |
+| 证据 | `node scripts/validate-ipc-catalog.mjs` PASS；`docs:check` PASS；`ui:audit:check` PASS |
+
+**说明**：SUB-15.2 PHASE 1 创建 IPC Channel Catalog 自动校验门禁脚本，静态扫描全代码库 IPC channel 注册，对比 main/preload 端一致性。
+
+**新增文件**：
+- `scripts/validate-ipc-catalog.mjs`（517 行）— IPC channel catalog 校验门禁
+  - 静态扫描 `src/main.js` + `src/main/*.js` + `src/ipc/*.js` 的 `ipcMain.handle` / `ipcMain.on` / `webContents.send`
+  - 静态扫描 `src/preload.js` 的 `ipcRenderer.invoke` / `ipcRenderer.on`
+  - 支持 named send-helper 包装函数（如 `sendTerminalEvent`）
+  - 支持 ternary 表达式中的 channel 名（如 `updater:update-available` / `updater:update-not-available`）
+  - 检测三类 channel：consistent（双向配对）、shadow（main-only，OK）、orphan（preload 无 main，ERROR）
+  - 自写 validator，UR-4 合规：不引入 ajv / zod / 任何第三方 schema 库
+  - exit code 0 = PASS，non-zero = FAIL
+- `scripts/generate-ipc-catalog-md.mjs`（45 行）— 生成 Markdown catalog
+- `docs/ipc-catalog.md`（自动生成）— 机器可读 catalog，包含 JSON block
+
+**catalog 实测结果**：
+
+| 指标 | 数量 |
+|------|------|
+| 总 main-side 注册 | 108 |
+| Consistent pairs（双向配对） | 50 |
+| Shadow channels（main-only，OK） | 42 |
+| Orphan channels（ERROR） | 0 |
+| `ipcMain.handle` | 80 |
+| `ipcMain.on` | 4 |
+| `webContents.send` | 24 |
+| `ipcRenderer.invoke` | 40 |
+| `ipcRenderer.on` | 11 |
+
+**Shadow channels 分类**：
+- **Shadow handle（38）**：main 注册了 `ipcMain.handle`，preload 无 `ipcRenderer.invoke`（如 `skills:discover` 等纯后端 handler）
+- **Shadow on（4）**：`window:minimize` / `window:maximize` / `window:close` / `window:toggleFullScreen`（窗口控件，renderer 直接调用 Electron）
+
+**Bug 修复**：`src/preload.js` 中 `plugin:install` 使用了 `ipcRenderer.on('plugin:install-progress')` 监听，但 main 端无对应 `webContents.send` 调用。已移除该 orphaned listener。
+
+**不变量守住**：
+- `src/main.js` / `src/preload.js` / `electron.d.ts` / `desktopBridge.ts` 0 diff（除 preload.js 移除 orphaned listener）
+- IPC channel 契约 100% 不变（108 个注册 channel 名一致）
+
+**DOC-REGISTRY**：`IPC-CATALOG` 注册为 `kind=reference / canonical=false`。
+
+**不外推**：packaged / Provider / GA / P7 / dist staleness / notarization G1+；不动 Electron 应用业务逻辑。
