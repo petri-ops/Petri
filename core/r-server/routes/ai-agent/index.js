@@ -22,7 +22,7 @@ const USE_AGENT_TASK_MODE = (process.env.BIOF3_AGENT_TASK_MODE || 'task') !== 'l
 
 module.exports = {
   register(app) {
-    if (typeof app !== 'object' || typeof app.post !== 'function') {
+    if (typeof app.post !== 'function') {
       throw new Error('routes/ai-agent/index register requires an Express app');
     }
     // 端点声明顺序与原 routes/ai-agent.js 完全一致（chat → context → events）

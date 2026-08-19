@@ -40,7 +40,7 @@ const { bindAuthoritativeQuerySelection } = require('../_helpers/workflow');
 
 module.exports = {
   register(app, options) {
-    if (typeof app !== 'object' || typeof app.get !== 'function') {
+    if (typeof app.get !== 'function') {
       throw new Error('result-studio/selection register requires an Express app');
     }
     if (!options || typeof options.repo !== 'function') {
