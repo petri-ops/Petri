@@ -814,6 +814,43 @@ function createGitAdapter(options = {}) {
       }
     },
 
+    applyPatch({ patch, dryRun = false } = {}) {
+      if (typeof patch !== 'string' || patch.length === 0) {
+        throw new GitAdapterError('patch_required', 'patch text is required.');
+      }
+      const args = ['apply'];
+      if (dryRun) args.push('--check');
+      args.push('--whitespace=nowarn');
+      const result = run(args, {
+        allowFailure: true,
+        input: patch,
+      });
+      if (!result.ok) {
+        throw new GitAdapterError(
+          'git_apply_failed',
+          'git apply rejected the patch.',
+          { stderr: result.stderr, code: result.code, dryRun }
+        );
+      }
+      return { ok: true, dryRun };
+    },
+
+    revertPaths({ paths } = {}) {
+      const safe = assertSafePathspecs(paths, scope);
+      if (safe.length === 0) {
+        throw new GitAdapterError('paths_required', 'paths is required and must not be empty.');
+      }
+      const result = run(['checkout', 'HEAD', '--', ...safe], { allowFailure: true });
+      if (!result.ok) {
+        throw new GitAdapterError(
+          'git_checkout_failed',
+          'git checkout HEAD failed for the requested paths.',
+          { stderr: result.stderr, code: result.code, paths: safe }
+        );
+      }
+      return { ok: true, reverted: safe };
+    },
+
     listTrackedFiles({ paths } = {}) {
       const safe = assertSafePathspecs(paths, scope);
       const output = run(['ls-files', '-z', '--', ...safe], { allowFailure: true, readOnly: true });
