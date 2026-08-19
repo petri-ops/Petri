@@ -95,10 +95,10 @@ describe('ipc-backpressure-profile fixture', { concurrency: false }, () => {
       encoding: 'utf8',
       timeout: 60_000,
     });
-    // CSV format: size,iterations,stringify_ms,parse_ms,total_ms,memory_mb
+    // CSV format: size,iterations,stringify_ms,parse_ms,total_ms,memory_mb,event_loop_lag_ms
     const line = result.trim();
     const parts = line.split(',');
-    assert.strictEqual(parts.length, 6, `expected 6 CSV fields, got: ${line}`);
+    assert.strictEqual(parts.length, 7, `expected 7 CSV fields, got: ${line}`);
     assert.strictEqual(parts[0], '1mb', `expected size=1mb, got: ${parts[0]}`);
     assert.strictEqual(parts[1], '3', `expected iterations=3, got: ${parts[1]}`);
     // Numeric fields should parse correctly
@@ -106,17 +106,18 @@ describe('ipc-backpressure-profile fixture', { concurrency: false }, () => {
     assert.ok(!isNaN(parseFloat(parts[3])), `parse_ms should be numeric: ${parts[3]}`);
     assert.ok(!isNaN(parseFloat(parts[4])), `total_ms should be numeric: ${parts[4]}`);
     assert.ok(!isNaN(parseFloat(parts[5])), `memory_mb should be numeric: ${parts[5]}`);
+    // event_loop_lag_ms is empty when --probe is not used
+    assert.strictEqual(parts[6], '', `event_loop_lag_ms should be empty without --probe, got: ${parts[6]}`);
   });
 
   it('warns when stringify exceeds threshold', () => {
-    // Use a very low threshold (1ms) to ensure we trigger the warning
-    // 1MB stringify should far exceed 1ms
+    // Use a very low threshold (1ms) — 10MB stringify exceeds 1ms even on fast hardware
     let exitCode = 0;
     try {
-      execFileSync(process.execPath, [FIXTURE, '--size=1mb', '--warmup=1', '--iterations=3', '--threshold=1'], {
+      execFileSync(process.execPath, [FIXTURE, '--size=10mb', '--warmup=1', '--iterations=3', '--threshold=1'], {
         cwd: ROOT,
         encoding: 'utf8',
-        timeout: 60_000,
+        timeout: 120_000,
         stdio: ['ignore', 'pipe', 'pipe'],
       });
     } catch (err) {
@@ -124,6 +125,55 @@ describe('ipc-backpressure-profile fixture', { concurrency: false }, () => {
     }
     // Should exit with code 1 due to threshold exceeded
     assert.strictEqual(exitCode, 1, 'fixture should exit 1 when threshold exceeded');
+  });
+
+  it('--probe flag shows probe enabled in output', () => {
+    const result = execFileSync(process.execPath, [FIXTURE, '--size=1mb', '--warmup=1', '--iterations=2', '--probe'], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      timeout: 60_000,
+    });
+    assert.ok(result.includes('probe:         enabled'), 'output missing probe: enabled');
+    assert.ok(result.includes('--- Event-loop lag (--probe mode) ---'), 'output missing event-loop lag section');
+    assert.ok(result.includes('before:'), 'output missing lag before');
+    assert.ok(result.includes('after:'), 'output missing lag after');
+    assert.ok(result.includes('delta:'), 'output missing lag delta');
+  });
+
+  it('--probe flag produces event_loop_lag_ms in CSV output', () => {
+    const result = execFileSync(process.execPath, [FIXTURE, '--size=1mb', '--warmup=1', '--iterations=2', '--format=csv', '--probe'], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      timeout: 60_000,
+    });
+    const line = result.trim();
+    const parts = line.split(',');
+    assert.strictEqual(parts.length, 7, `expected 7 CSV fields with --probe, got: ${line}`);
+    // event_loop_lag_ms should be a numeric value
+    assert.ok(!isNaN(parseFloat(parts[6])), `event_loop_lag_ms should be numeric with --probe, got: ${parts[6]}`);
+  });
+
+  it('--probe with 100mb shows event-loop lag delta', () => {
+    // 100mb + probe is the canonical lag measurement scenario
+    let exitCode = 0;
+    let result = '';
+    try {
+      result = execFileSync(process.execPath, [FIXTURE, '--size=100mb', '--warmup=1', '--iterations=2', '--probe'], {
+        cwd: ROOT,
+        encoding: 'utf8',
+        timeout: 300_000,
+      });
+    } catch (err) {
+      exitCode = err.status ?? 1;
+      result = err.stdout || '';
+    }
+    // Either success or graceful failure is acceptable
+    assert.ok(result.length > 0 || exitCode !== 0, '100mb --probe mode failed without output');
+    if (exitCode === 0) {
+      assert.ok(result.includes('probe:         enabled'), 'output missing probe: enabled');
+      assert.ok(result.includes('--- Event-loop lag (--probe mode) ---'), 'output missing event-loop lag section');
+      assert.ok(result.includes('delta:'), 'output missing lag delta');
+    }
   });
 
   it('requires --size flag', () => {

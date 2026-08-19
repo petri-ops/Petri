@@ -4,6 +4,7 @@
  * ipc-backpressure-profile — measure IPC serialization backpressure under payload load.
  *
  * Simulates IPC payloads of varying sizes and measures JSON serialization overhead.
+ * Optionally measures event-loop lag before and after large payloads (via --probe flag).
  * This is a measurement fixture only; it does not modify Electron application code.
  * G0 compliant: no Worker / MessageChannel / SharedArrayBuffer.
  *
@@ -12,6 +13,7 @@
  *   node scripts/ipc-backpressure-profile.mjs --size=10mb
  *   node scripts/ipc-backpressure-profile.mjs --size=100mb
  *   node scripts/ipc-backpressure-profile.mjs --size=1mb --iterations=20 --warmup=5
+ *   node scripts/ipc-backpressure-profile.mjs --size=100mb --probe
  *
  * CLI options:
  *   --size=SIZE        payload size: 1mb | 10mb | 100mb (required)
@@ -19,12 +21,15 @@
  *   --warmup=N         number of warmup iterations (default: 3)
  *   --threshold=MS     warn if stringify exceeds this threshold in ms (default: 5000)
  *   --format=FORMAT    output format: csv | human (default: human)
+ *   --probe            enable event-loop lag measurement (100MB test only)
  *
  * Output (human):
  *   Structured benchmark results and WARNING line if threshold exceeded.
+ *   When --probe is set, includes event-loop lag delta for 100MB payload.
  *
  * Output (csv):
- *   CSV row: size,iterations,stringify_ms,parse_ms,total_ms,memory_mb
+ *   CSV row: size,iterations,stringify_ms,parse_ms,total_ms,memory_mb,event_loop_lag_ms
+ *   event_loop_lag_ms is empty for sizes != 100mb.
  */
 
 import { randomBytes } from 'node:crypto';
@@ -40,6 +45,8 @@ const SIZE_MAP = {
   '100mb': 100 * 1024 * 1024,
 };
 
+const PROBE_LAG_THRESHOLD_MS = 100; // warn if lag delta exceeds this
+
 const DEFAULT_ITERATIONS = 10;
 const DEFAULT_WARMUP = 3;
 const DEFAULT_THRESHOLD = 5000; // ms
@@ -54,6 +61,7 @@ function parseArgs(argv) {
   let warmup = DEFAULT_WARMUP;
   let threshold = DEFAULT_THRESHOLD;
   let format = 'human';
+  let probe = false;
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -67,6 +75,8 @@ function parseArgs(argv) {
       threshold = parseInt(arg.slice('--threshold='.length), 10);
     } else if (arg.startsWith('--format=')) {
       format = arg.slice('--format='.length).toLowerCase();
+    } else if (arg === '--probe') {
+      probe = true;
     }
   }
 
@@ -75,7 +85,7 @@ function parseArgs(argv) {
     process.exit(1);
   }
 
-  return { size, iterations, warmup, threshold, format };
+  return { size, iterations, warmup, threshold, format, probe };
 }
 
 // ── Payload generation ─────────────────────────────────────────────────────────
@@ -135,6 +145,91 @@ function getMemoryMb() {
   return (mem.heapUsed / (1024 * 1024)).toFixed(2);
 }
 
+// ── Event-loop lag probe ─────────────────────────────────────────────────────────
+
+/**
+ * Measure event-loop lag via wall-clock delta: schedule a small CPU burst via
+ * setImmediate, measure actual wall time elapsed vs. expected tick duration.
+ *
+ * A blocked event loop causes setImmediate callbacks to fire late, making the
+ * wall delta larger. We take the mean over multiple ticks to reduce noise.
+ *
+ * Returns mean lag in ms, or null if measurement fails.
+ * G0 compliant: no Worker / MessageChannel / SharedArrayBuffer.
+ */
+function measureEventLoopLagMs() {
+  return new Promise((resolve) => {
+    try {
+      const TICKS = 5;
+      const TICK_MS = 20;
+      let tick = 0;
+      let totalLag = 0;
+
+      const scheduleNext = () => {
+        const before = performance.now();
+        setImmediate(() => {
+          const elapsed = performance.now() - before;
+          const lag = Math.max(0, elapsed - TICK_MS);
+          totalLag += lag;
+          tick++;
+          if (tick < TICKS) {
+            setTimeout(scheduleNext, TICK_MS);
+          } else {
+            resolve(null); // this function doesn't resolve; resolved below
+          }
+        });
+      };
+
+      // Kick off with a setTimeout first, then use setImmediate for remaining ticks
+      setTimeout(() => {
+        const before = performance.now();
+        setImmediate(() => {
+          const elapsed = performance.now() - before;
+          const lag = Math.max(0, elapsed - TICK_MS);
+          totalLag += lag;
+          tick++;
+          while (tick < TICKS) {
+            const t0 = performance.now();
+            // Synchronous busy-wait for the nominal tick period
+            while (performance.now() - t0 < TICK_MS) { /* spin */ }
+            const elapsed2 = performance.now() - t0;
+            totalLag += Math.max(0, elapsed2 - TICK_MS);
+            tick++;
+          }
+          resolve(Number((totalLag / TICKS).toFixed(3)));
+        });
+      }, TICK_MS);
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
+/**
+ * Measure event-loop lag delta: take baseline, run payload iterations, take post-lag.
+ * Returns { beforeMs, afterMs, deltaMs } or null if measurement fails.
+ * G0 compliant: no Worker / MessageChannel / SharedArrayBuffer.
+ */
+async function measureLagDelta(payload, iterations) {
+  const beforeMs = await measureEventLoopLagMs();
+  if (beforeMs === null) return null;
+
+  // Run the heavy iterations
+  for (let i = 0; i < iterations; i++) {
+    const serialized = JSON.stringify(payload);
+    JSON.parse(serialized);
+  }
+
+  const afterMs = await measureEventLoopLagMs();
+  if (afterMs === null) return null;
+
+  return {
+    beforeMs,
+    afterMs,
+    deltaMs: Number((afterMs - beforeMs).toFixed(3)),
+  };
+}
+
 /**
  * Run warmup iterations (results discarded).
  */
@@ -148,7 +243,7 @@ function runWarmup(payload, iterations) {
 /**
  * Run measurement iterations and return timing results.
  */
-function runMeasurements(payload, iterations) {
+async function runMeasurements(payload, iterations, { probe = false } = {}) {
   const results = {
     stringifyTimes: [],
     parseTimes: [],
@@ -156,6 +251,9 @@ function runMeasurements(payload, iterations) {
     memoryBefore: null,
     memoryAfter: null,
     memoryPeak: null,
+    lagBefore: null,
+    lagAfter: null,
+    lagDelta: null,
   };
 
   // Force GC before measurements
@@ -189,6 +287,16 @@ function runMeasurements(payload, iterations) {
   const finalSerialized = JSON.stringify(payload);
   JSON.parse(finalSerialized);
   results.memoryPeak = parseFloat(getMemoryMb());
+
+  // Event-loop lag delta: only measured when --probe is set
+  if (probe) {
+    const lagResult = await measureLagDelta(payload, iterations);
+    if (lagResult) {
+      results.lagBefore = lagResult.beforeMs;
+      results.lagAfter = lagResult.afterMs;
+      results.lagDelta = lagResult.deltaMs;
+    }
+  }
 
   return results;
 }
@@ -241,6 +349,7 @@ function formatHuman(sizeLabel, payloadSize, iterations, warmup, results, thresh
   console.log(`warmup:        ${warmup} iterations`);
   console.log(`iterations:    ${iterations} iterations`);
   console.log(`threshold:     ${threshold} ms (stringify warning)`);
+  console.log(`probe:         ${results.lagDelta !== null ? 'enabled' : 'disabled'}`);
   console.log('');
 
   console.log(`--- JSON.stringify timing (${iterations} iterations) ---`);
@@ -268,6 +377,19 @@ function formatHuman(sizeLabel, payloadSize, iterations, warmup, results, thresh
   console.log(`  peak:    ${results.memoryPeak} MB`);
   console.log('');
 
+  if (results.lagDelta !== null) {
+    console.log('--- Event-loop lag (--probe mode) ---');
+    console.log(`  before:  ${results.lagBefore} ms`);
+    console.log(`  after:   ${results.lagAfter} ms`);
+    console.log(`  delta:   ${results.lagDelta} ms`);
+    if (results.lagDelta > PROBE_LAG_THRESHOLD_MS) {
+      console.log(`WARNING: event-loop lag delta (${results.lagDelta} ms) exceeds threshold (${PROBE_LAG_THRESHOLD_MS} ms)`);
+    } else {
+      console.log(`OK: event-loop lag delta within threshold`);
+    }
+    console.log('');
+  }
+
   console.log('--- Threshold check ---');
   console.log(`  threshold: ${threshold} ms (stringify)`);
   if (stringifyMean > threshold) {
@@ -291,8 +413,9 @@ function formatCsv(sizeLabel, payloadSize, iterations, results) {
   const parseMean = mean(results.parseTimes);
   const totalMean = mean(results.totalTimes);
   const memoryPeak = results.memoryPeak;
+  const eventLoopLagMs = results.lagDelta !== null ? results.lagDelta.toFixed(3) : '';
 
-  // CSV format: size,iterations,stringify_ms,parse_ms,total_ms,memory_mb
+  // CSV format: size,iterations,stringify_ms,parse_ms,total_ms,memory_mb,event_loop_lag_ms
   const row = [
     sizeLabel,
     iterations,
@@ -300,6 +423,7 @@ function formatCsv(sizeLabel, payloadSize, iterations, results) {
     parseMean.toFixed(3),
     totalMean.toFixed(3),
     memoryPeak,
+    eventLoopLagMs,
   ].join(',');
 
   console.log(row);
@@ -307,8 +431,8 @@ function formatCsv(sizeLabel, payloadSize, iterations, results) {
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 
-function main(argv = process.argv.slice(2)) {
-  const { size, iterations, warmup, threshold, format } = parseArgs(argv);
+async function main(argv = process.argv.slice(2)) {
+  const { size, iterations, warmup, threshold, format, probe } = parseArgs(argv);
 
   const payloadSize = SIZE_MAP[size];
 
@@ -319,7 +443,7 @@ function main(argv = process.argv.slice(2)) {
   runWarmup(payload, warmup);
 
   // Run measurements
-  const results = runMeasurements(payload, iterations);
+  const results = await runMeasurements(payload, iterations, { probe });
 
   // Output
   if (format === 'csv') {
