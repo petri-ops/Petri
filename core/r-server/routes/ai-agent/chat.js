@@ -196,6 +196,13 @@ module.exports = {
 
         let taskId;
         try {
+          // BLOCK-10-audit-closeout: createAgentTask returns the FULL inserted
+          // task snapshot (object) — not just the generated UUID. chat.js
+          // previously captured this as `taskId`, which then propagated to
+          // runAgentLoop + appendAgentTaskEvent as a non-string. SQLite TEXT
+          // column silently coerces objects to '[object Object]' via toString,
+          // so events were written under the wrong key while getAgentTask(taskId)
+          // also missed the row. Fix: pull `.taskId` out before using.
           taskId = agentTaskStore.createAgentTask({
             status: 'running',
             agentStatus: 'running',
@@ -210,7 +217,7 @@ module.exports = {
               kind: wantKind,
               parentTaskId: parentTaskId || null,
             },
-          });
+          }).taskId;
         } catch (e) {
           return res.status(500).json({ status: 'error', error: '创建 agent task 失败: ' + e.message });
         }
