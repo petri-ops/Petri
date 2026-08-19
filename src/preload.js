@@ -340,4 +340,18 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
       return () => ipcRenderer.removeListener('updater:error', handler);
     },
   },
+
+  // BLOCK-16 — Working Tree Review Mode
+  workingTreeReview: {
+    status: () => ipcRenderer.invoke('git:working-tree-status'),
+    diff: (params) => ipcRenderer.invoke('git:working-tree-diff', params || {}),
+    fileContent: (params) => ipcRenderer.invoke('git:working-tree-file-content', params || {}),
+    applyHunk: (params) => ipcRenderer.invoke('git:hunk-apply', params || {}),
+    revert: (params) => ipcRenderer.invoke('git:working-tree-revert', params || {}),
+    onTaskDone: (cb) => {
+      const handler = (_e, info) => cb(info);
+      ipcRenderer.on('agent:task-done', handler);
+      return () => ipcRenderer.removeListener('agent:task-done', handler);
+    },
+  },
 });
