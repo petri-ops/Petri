@@ -1,0 +1,196 @@
+{
+  "id": "sc-analysis-standard",
+  "skillManifestVersion": 1,
+  "name": "标准单细胞分析",
+  "version": "1.0.0",
+  "description": "端到端 single-cell RNA-seq 分析：QC → 整合 → 细胞类型注释 → 细胞通讯 → 报告",
+  "category": "bioinformatics/single-cell",
+  "tags": ["single-cell", "scrnaseq", "scanpy", "seurat", "scvi", "celltypist", "cellchat", "anndata", "seuratobject"],
+  "source": "built-in",
+  "capabilities": ["py-single-cell", "r-single-cell"],
+  "plugins": {
+    "required": ["scanpy-advanced", "seurat-standard"],
+    "optional": ["celltypist", "cellchat", "scvi-tools"]
+  },
+  "workflows": {
+    "default": "sc-standard-pipeline",
+    "variants": ["sc-quick-qc", "sc-comprehensive-integration", "sc-cell-communication-only"]
+  },
+  "prompts": {
+    "system": "prompts/system.md",
+    "user_templates": [
+      "prompts/user/standard-sc.md"
+    ]
+  },
+  "parameters": {
+    "required": ["anndata_file", "species", "cell_type_column"],
+    "optional": {
+      "qc_method": {
+        "type": "select",
+        "options": ["scanpy", "seurat"],
+        "default": "scanpy",
+        "description": "QC 与预处理使用的方法"
+      },
+      "integration_method": {
+        "type": "select",
+        "options": ["none", "harmony", "scvi", "seurat-cca"],
+        "default": "seurat-cca",
+        "description": "批次整合方法（none=不做整合）"
+      },
+      "annotation_method": {
+        "type": "select",
+        "options": ["scanpy-marker", "celltypist", "manual"],
+        "default": "celltypist",
+        "description": "细胞类型注释方法"
+      },
+      "run_cell_cell_communication": {
+        "type": "boolean",
+        "default": true,
+        "description": "是否运行细胞通讯分析"
+      },
+      "species": {
+        "type": "select",
+        "options": ["human", "mouse"],
+        "default": "human",
+        "description": "物种（影响 CellChat / CellTypist 数据库选择）"
+      },
+      "min_genes": {
+        "type": "number",
+        "default": 200,
+        "min": 0,
+        "max": 1000,
+        "step": 50,
+        "description": "每个细胞最少检测到的基因数（QC 过滤）"
+      },
+      "min_cells": {
+        "type": "number",
+        "default": 3,
+        "min": 1,
+        "max": 50,
+        "step": 1,
+        "description": "基因必须被检测到的最少细胞数（QC 过滤）"
+      },
+      "n_hvg": {
+        "type": "number",
+        "default": 2000,
+        "min": 500,
+        "max": 5000,
+        "step": 500,
+        "description": "高变异基因数量（用于降维和聚类）"
+      },
+      "resolution": {
+        "type": "number",
+        "default": 0.5,
+        "min": 0.1,
+        "max": 2.0,
+        "step": 0.1,
+        "description": "聚类分辨率（值越大聚类越细）"
+      }
+    }
+  },
+  "recovery_strategies": [
+    {
+      "when": "insufficient_cells",
+      "description": "过滤后细胞数过少",
+      "do": "警告用户并降低 min_genes / min_cells 阈值后重试",
+      "fallback": "跳过整合步骤，仅做基本 QC",
+      "recoverable": true
+    },
+    {
+      "when": "missing_required_file_inputs",
+      "description": "AnnData / RDS 文件缺失",
+      "do": "提示用户提供 .h5ad（scanpy） 或 .rds（Seurat） 文件",
+      "fallback": "请求用户从上游 QC plugin 输出",
+      "recoverable": true
+    },
+    {
+      "when": "batch_effect_undetectable",
+      "description": "无法检测到明显的批次效应",
+      "do": "跳过整合步骤，直接进行下游注释",
+      "fallback": "用 harmony 宽松参数重试",
+      "recoverable": true
+    },
+    {
+      "when": "annotation_model_mismatch",
+      "description": "CellTypist 模型与输入基因名不匹配",
+      "do": "自动降级到 scanpy-marker 方法进行注释",
+      "fallback": "提示用户提供手动注释或使用 scanpy 差异表达标记",
+      "recoverable": true
+    },
+    {
+      "when": "no_significant_interactions",
+      "description": "细胞通讯未检测到显著配体-受体对",
+      "do": "放宽 CellChat 通讯概率阈值并重试",
+      "fallback": "输出空结果表 + placeholder 图，在报告中注明",
+      "recoverable": true
+    }
+  ],
+  "outputs": {
+    "primary": [
+      {
+        "id": "qc_report",
+        "type": "html",
+        "label": "QC 报告",
+        "description": "细胞/基因过滤统计、样本相关性、批次效应评估"
+      },
+      {
+        "id": "umap_plot",
+        "type": "plot",
+        "label": "UMAP 可视化",
+        "description": "整合后的 UMAP 降维图（细胞按聚类着色）",
+        "format": "png",
+        "dpi": 300
+      },
+      {
+        "id": "annotated_table",
+        "type": "table",
+        "label": "细胞类型注释表",
+        "description": "每个细胞的注释结果",
+        "format": "csv",
+        "columns": ["cell_id", "leiden", "cell_type", "score", "annotation_method"]
+      }
+    ],
+    "secondary": [
+      {
+        "id": "cell_cell_communication_result",
+        "type": "table",
+        "requires_plugin": "cellchat",
+        "label": "细胞通讯结果表",
+        "description": "配体-受体对通讯强度表（CellChat 输出）"
+      },
+      {
+        "id": "scvi_latent",
+        "type": "table",
+        "requires_plugin": "scvi-tools",
+        "label": "scVI 隐空间",
+        "description": "SCVI 变分自编码器隐空间嵌入（CSV）"
+      },
+      {
+        "id": "marker_genes",
+        "type": "table",
+        "label": "标记基因表",
+        "description": "每个聚类的差异表达标记基因"
+      },
+      {
+        "id": "integrated_anndata",
+        "type": "file",
+        "label": "整合后 AnnData",
+        "description": "整合后的 .h5ad 文件（含 UMAP / leiden / cell_type 列）",
+        "format": "h5ad"
+      }
+    ]
+  },
+  "metadata": {
+    "author": "BioF3 Team",
+    "license": "MIT",
+    "source": "built-in",
+    "created": "2026-08-18",
+    "updated": "2026-08-18",
+    "compatibility": {
+      "min_app_version": "0.1.0",
+      "platform": ["macos-arm64", "windows-x64"],
+      "r_version": ">=4.4.0",
+      "python_version": ">=3.10.0"
+    }
+  }
+}
