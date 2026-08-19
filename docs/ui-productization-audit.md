@@ -963,3 +963,67 @@ main.js 从 ~1201 行减少到 1001 行（-200 行）。IPC handler channel 名�
 **不外推**：packaged / Provider / GA / P7 / dist staleness / notarization G1+；不动 Electron 应用代码。
 
 **完成语义**：dev Electron 边界内 verified（fixture 仅测量脚本，不修改应用），G0 阶段最高证据等级，符合当前 G0 阶段纪律。
+
+## UI-B15-3: SUB-15.3 PHASE 1 CDP T0→T4 测量（dev Electron 边界内）
+
+| 属性 | 值 |
+|------|-----|
+| 状态 | `verified` |
+| 阶段 | dev Electron 边界内 |
+| 证据 | 现有 11 测试 PASS；docs:check PASS；ui:audit:check PASS |
+
+**说明**：扩展 `scripts/dev-electron-profile.mjs` 添加 CDP 测量模式（+270 行），不修改 Electron 应用本身。
+
+**功能**：
+- `--cdp` flag：spawn Electron + CDP WebSocket，测量 T0→T4
+- T0 spawn → T1 appReady → T2 firstPaint → T3 DOMLoaded → T4 load
+- `--port`（默认 9222）/ `--timeout`（默认 30000ms）/ `--output json|csv|text`
+
+**技术**：
+- Electron `--remote-debugging-port` 暴露 CDP 端口
+- `http://localhost:port/json/version` + `http://localhost:port/json/list` polling（无额外依赖）
+- `node:ws` WebSocket（Node.js >= 21 内置；Node < 21 给出明确错误指引）
+- `Page.lifecycleEvent` CDP 事件监听
+- 不引入 ws npm 依赖（用内置 WebSocket）
+
+**不外推**：dev Electron 边界内 verified，G0 阶段最高证据等级，符合当前 G0 阶段纪律。
+
+## UI-B15-2: SUB-15.1 PHASE 2 拆分（中风险 9 函数 → 6 新模块）
+
+| 属性 | 值 |
+|------|-----|
+| 状态 | `verified` |
+| 阶段 | dev Electron 边界内 |
+| 证据 | `node --check` × 8 文件全绿；`docs:check` PASS；`ui:audit:check` PASS |
+
+**说明**：SUB-15.1 PHASE 2 提取 main.js 中 9 个中风险函数到 6 个独立子模块，main.js 从 ~1001 行减少到 ~718 行（-283 行）。
+
+**提取清单**：
+
+| 函数 | 目标文件 | 原始位置 |
+|------|---------|---------|
+| `_getSkillsSDK` + `_publishSkillProgress` + `_stopSkillsProgressPollerIfIdle` + `_startSkillsProgressPoller` | `src/main/_skills-runtime.js` | L547-620 |
+| `selectBackendPorts` | `src/main/_backend-ports.js` | L112-124 |
+| `loadInstalledPlugins` | `src/main/_plugin-loader.js` | L127-135 |
+| `startContentSync` | `src/main/_content-sync.js` | L138-159 |
+| `publishAgentWorkbenchFlags` | `src/main/_agent-flags.js` | L164-169 |
+| `setupWindowIpc` | `src/main/_window-ipc.js` | L451-507 |
+| `setupAppMenu` | `src/main/_app-menu.js` | L926-998 |
+
+**架构设计**：
+- Electron API（BrowserWindow / ipcMain / app / Menu）全部通过参数注入，不顶层 import
+- `_skills-runtime.js`：4 个函数合并，共享可变状态（`_skillsRefs`）通过 `refs` 参数对象注入
+- `setupWindowIpc` / `setupAppMenu`：facade 模式，Electron 对象全注入
+- BLOCK-9.1 风格一致：主文件顶部 require，被提取函数末尾 `module.exports`
+
+**不变量守住**：
+- preload.js 0 diff
+- electron.d.ts 0 diff
+- desktopBridge.ts 0 diff
+- IPC channel 名 100% 不变
+- 函数签名 100% 不变
+- `src/core/shared-backend/*` 0 修改
+- `mainWindow` 模块级变量保留在 main.js（PHASE 3 才处理 createWindow）
+- `hasSingleInstanceLock` 保留在 main.js（setupAppMenu 引用）
+
+**不外推**：packaged / Provider / GA / P7 / dist staleness / notarization G1+；不动 preload.js / electron.d.ts / desktopBridge.ts / frontend/src/ / core/shared-backend/*。

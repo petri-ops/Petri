@@ -347,3 +347,16 @@ docs(block-15): plan §2 replaced with empirical data (17 vars + 22 functions + 
 **当前 active 工作包**：BLOCK-15（plan v1.0 ACTIVE；PHASE 0 调研完成；PHASE 1 SUB-15.1 落地；SUB-15.2/15.3 已完成；SUB-15.4 PHASE 0 本次完成）。
 
 **不外推**：packaged / Provider / GA / P7 / notarization / dist staleness G1+；不动 preload.js / electron.d.ts / desktopBridge.ts / core/shared-backend/* / agent-tools/* / agent-transcripts/*；保持 `qualificationEligible: false` G0 长期开发期常态。
+
+| 2026-08-19 | **SUB-15.3 PHASE 1 落地（CDP T0→T4 测量模式）**：扩展 `scripts/dev-electron-profile.mjs` CDP 模式（+270 行）：
+- `--cdp` flag：spawn Electron + CDP WebSocket 连接，测量 T0→T4
+- T0 spawn → T1 appReady → T2 firstPaint → T3 DOMLoaded → T4 load
+- `--port`（默认 9222）/ `--timeout`（默认 30s）/ `--output json|csv|text` 可选参数
+- 技术：Electron `--remote-debugging-port` + `http://localhost:port/json/version` polling + `node:ws` WebSocket（Node >= 21 内置）+ `Page.lifecycleEvent` 监听
+- 不修改 main.js / preload.js / desktopBridge.ts / electron.d.ts / package.json
+- 现有 11 测试不退化（11/11 PASS）；docs:check PASS / ui:audit:check PASS
+- UI-B15-3 已追加到 `docs/ui-productization-audit.md`
+- **ws 依赖说明**：`node:ws` 使用 Node.js >= 21 内置 WebSocket（无需 npm install ws）；若 Node < 21，动态 import 失败时给出明确错误指引
+| BLOCK-15 / SUB-15.3-PHASE-1-CLOSEOUT |
+
+| 2026-08-19 | **SUB-15.1 PHASE 2 落地（9 中风险函数 → 6 新模块；main.js 1001→718 行）**：提取 main.js 中 9 个中风险函数到 6 个独立模块：① `src/main/_skills-runtime.js`（4 函数合并：`_getSkillsSDK` + `_publishSkillProgress` + `_stopSkillsProgressPollerIfIdle` + `_startSkillsProgressPoller`）；② `src/main/_backend-ports.js`（`selectBackendPorts`）；③ `src/main/_plugin-loader.js`（`loadInstalledPlugins`）；④ `src/main/_content-sync.js`（`startContentSync`）；⑤ `src/main/_agent-flags.js`（`publishAgentWorkbenchFlags`）；⑥ `src/main/_window-ipc.js`（`setupWindowIpc` facade）；⑦ `src/main/_app-menu.js`（`setupAppMenu`）。**架构**：Electron API（BrowserWindow / ipcMain / app / Menu）全参数注入，BLOCK-9.1 风格一致；`_skillsRefs` 可变状态通过 `refs` 参数对象注入。**验证**：`node --check` × 8 文件全绿（7 新模块 + main.js）；`npm run docs:check` PASS（130 documents）；`npm run ui:audit:check` PASS（149 UI 编号）；**不变量守住**：preload.js 0 diff / electron.d.ts 0 diff / desktopBridge.ts 0 diff / IPC channel 名 100% 不变 / 函数签名 100% 不变 / core/shared-backend/* 0 修改；`mainWindow` 和 `hasSingleInstanceLock` 保留在 main.js。**文档**：`docs/ui-productization-audit.md` 追加 UI-B15-2 entry；AUDIT-LOG 本 entry。**SUB-15.1 剩余**：PHASE 3（createWindow 拆分）+ PHASE 4（整体 closeout + 文档）。| BLOCK-15 / SUB-15.1-PHASE-2-CLOSEOUT |
