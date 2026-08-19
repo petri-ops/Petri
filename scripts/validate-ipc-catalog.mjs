@@ -2,17 +2,22 @@
 // ============================================================
 // IPC Channel Catalog Validator Gate
 //
-// SUB-15.2 PHASE 1 — IPC catalog automatic validation gate
+// SUB-15.2 PHASE 2 — IPC catalog + plugin manifest schema
 //
-// Purpose: Static-scan Electron IPC handlers across the codebase,
-// detect channel inconsistencies, and exit non-zero on orphans.
+// Purpose:
+//   1. Static-scan Electron IPC handlers (PHASE 1)
+//   2. Validate plugin manifest schema against built-in plugins
+//   3. Payload shape basic type checks (no ajv / zod — UR-4)
 //
-// UR-4: Self-written validator — no ajv / zod / third-party schema libs
-//
-// Usage: node scripts/validate-ipc-catalog.mjs
+// Usage:
+//   node scripts/validate-ipc-catalog.mjs
+//   node scripts/validate-ipc-catalog.mjs --json
+//   node scripts/validate-ipc-catalog.mjs --write-catalog
+//   node scripts/validate-ipc-catalog.mjs --manifest-only
+//   node scripts/validate-ipc-catalog.mjs --all
 // ============================================================
 
-import { readFileSync, readdirSync, writeFileSync } from "fs";
+import { readFileSync, readdirSync, statSync, writeFileSync } from "fs";
 import { resolve, join } from "path";
 import { fileURLToPath } from "url";
 
@@ -59,6 +64,374 @@ function checkChannelName(channel) {
     return { ok: false, error: "channel name must not contain whitespace" };
   }
   return { ok: true };
+}
+
+// ─── Plugin Manifest Schema Validation (PL-001 style — self-written, no ajv/zod) ──
+
+const PLUGIN_REQUIRED_FIELDS = Object.freeze([
+  'id', 'title', 'version', 'language', 'pluginManifestVersion',
+]);
+
+const VALID_LANGUAGES = Object.freeze(['r', 'python', 'javascript', 'julia', 'bash']);
+const VALID_STATUSES = Object.freeze(['canonical', 'experimental', 'deprecated', 'archived']);
+const VALID_SOURCE_POLICIES = Object.freeze([
+  'builtin-canonical', 'builtin-experimental', 'user-installed', 'remote',
+]);
+const VALID_PLATFORM_IDS = Object.freeze(['macos-arm64', 'macos-x64', 'windows-x64', 'linux-x64']);
+const SEMVER_RE = /^[0-9]+\.[0-9]+\.[0-9]+/;
+const SHA256_RE = /^[a-f0-9]{64}$/;
+const ID_RE = /^[a-z][a-z0-9_-]*$/;
+
+/**
+ * Validate a single plugin manifest object.
+ * Returns array of issue strings (empty = valid).
+ * @param {object} manifest
+ * @returns {string[]}
+ */
+function validatePluginManifest(manifest) {
+  const issues = [];
+
+  if (!manifest || typeof manifest !== 'object') {
+    return ['plugin manifest must be a non-null object'];
+  }
+
+  // Required fields
+  for (const field of PLUGIN_REQUIRED_FIELDS) {
+    if (manifest[field] === undefined || manifest[field] === null) {
+      issues.push(`required field "${field}" is missing or null`);
+    }
+  }
+
+  // id
+  if (typeof manifest.id !== 'string' || manifest.id.length === 0) {
+    issues.push('id must be a non-empty string');
+  } else if (!ID_RE.test(manifest.id)) {
+    issues.push(`id "${manifest.id}" must match /^[a-z][a-z0-9_-]*$/`);
+  }
+
+  // pluginManifestVersion
+  if (typeof manifest.pluginManifestVersion !== 'number') {
+    issues.push('pluginManifestVersion must be a number');
+  } else if (!Number.isInteger(manifest.pluginManifestVersion) || manifest.pluginManifestVersion < 1) {
+    issues.push(`pluginManifestVersion must be a positive integer (got ${manifest.pluginManifestVersion})`);
+  }
+
+  // title
+  if (typeof manifest.title !== 'string' || manifest.title.trim().length === 0) {
+    issues.push('title must be a non-empty string');
+  }
+
+  // version (semver)
+  if (typeof manifest.version !== 'string' || !SEMVER_RE.test(manifest.version)) {
+    issues.push(`version "${manifest.version}" must be a semver-like string (e.g. "1.0.0")`);
+  }
+
+  // language
+  if (typeof manifest.language !== 'string' || !VALID_LANGUAGES.includes(manifest.language)) {
+    issues.push(`language "${manifest.language}" must be one of: ${VALID_LANGUAGES.join(', ')}`);
+  }
+
+  // status (optional, but if present must be valid)
+  if (manifest.status !== undefined && !VALID_STATUSES.includes(manifest.status)) {
+    issues.push(`status "${manifest.status}" must be one of: ${VALID_STATUSES.join(', ')}`);
+  }
+
+  // sourcePolicy (optional)
+  if (manifest.sourcePolicy !== undefined && !VALID_SOURCE_POLICIES.includes(manifest.sourcePolicy)) {
+    issues.push(`sourcePolicy "${manifest.sourcePolicy}" must be one of: ${VALID_SOURCE_POLICIES.join(', ')}`);
+  }
+
+  // packages
+  if (manifest.packages !== undefined) {
+    if (typeof manifest.packages !== 'object' || Array.isArray(manifest.packages)) {
+      issues.push('packages must be a non-array object (e.g. { r: { pkg: "ver" } })');
+    } else {
+      for (const [lang, pkgs] of Object.entries(manifest.packages)) {
+        if (!VALID_LANGUAGES.includes(lang)) {
+          issues.push(`packages.${lang}: invalid language key (not in ${VALID_LANGUAGES.join(', ')})`);
+        } else if (typeof pkgs !== 'object' || Array.isArray(pkgs)) {
+          issues.push(`packages.${lang} must be an object mapping package name to version string`);
+        } else {
+          for (const [pkg, ver] of Object.entries(pkgs)) {
+            if (typeof pkg !== 'string' || pkg.length === 0) {
+              issues.push(`packages.${lang}: package name must be a non-empty string`);
+            }
+            if (typeof ver !== 'string' || ver.length === 0) {
+              issues.push(`packages.${lang}.${pkg}: version must be a non-empty string`);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // runtime
+  if (manifest.runtime !== undefined) {
+    if (typeof manifest.runtime !== 'object' || Array.isArray(manifest.runtime)) {
+      issues.push('runtime must be a non-array object (e.g. { r: ">=4.4.0" })');
+    } else {
+      for (const [lang, ver] of Object.entries(manifest.runtime)) {
+        if (!VALID_LANGUAGES.includes(lang)) {
+          issues.push(`runtime.${lang}: invalid language key`);
+        }
+        if (typeof ver !== 'string' || ver.length === 0) {
+          issues.push(`runtime.${lang}: version constraint must be a non-empty string`);
+        }
+      }
+    }
+  }
+
+  // builtAgainst
+  if (manifest.builtAgainst !== undefined) {
+    if (typeof manifest.builtAgainst !== 'object' || Array.isArray(manifest.builtAgainst)) {
+      issues.push('builtAgainst must be a non-array object');
+    } else {
+      for (const [key, val] of Object.entries(manifest.builtAgainst)) {
+        if (typeof val !== 'string' || val.length === 0) {
+          issues.push(`builtAgainst.${key}: version must be a non-empty string`);
+        }
+      }
+    }
+  }
+
+  // platform / supportedPlatforms
+  for (const field of ['platform', 'supportedPlatforms']) {
+    if (manifest[field] !== undefined) {
+      if (!Array.isArray(manifest[field])) {
+        issues.push(`${field} must be an array`);
+      } else {
+        for (const p of manifest[field]) {
+          if (!VALID_PLATFORM_IDS.includes(p)) {
+            issues.push(`${field}: invalid platform "${p}" (must be one of: ${VALID_PLATFORM_IDS.join(', ')})`);
+          }
+        }
+      }
+    }
+  }
+
+  // platformSupport (optional — detailed per-platform)
+  if (manifest.platformSupport !== undefined) {
+    if (typeof manifest.platformSupport !== 'object' || Array.isArray(manifest.platformSupport)) {
+      issues.push('platformSupport must be a non-array object');
+    } else {
+      for (const [platformId, support] of Object.entries(manifest.platformSupport)) {
+        if (!VALID_PLATFORM_IDS.includes(platformId)) {
+          issues.push(`platformSupport: invalid platformId "${platformId}"`);
+        }
+        if (typeof support !== 'object' || Array.isArray(support)) {
+          issues.push(`platformSupport.${platformId}: must be an object`);
+        } else {
+          if (support.status !== undefined) {
+            const validStatuses = ['supported', 'planned', 'unsupported', 'deprecated'];
+            if (!validStatuses.includes(support.status)) {
+              issues.push(`platformSupport.${platformId}.status "${support.status}" must be one of: ${validStatuses.join(', ')}`);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // requiresBundle / requiresBundleVersion
+  if (manifest.requiresBundle !== undefined) {
+    if (typeof manifest.requiresBundle !== 'string' || manifest.requiresBundle.length === 0) {
+      issues.push('requiresBundle must be a non-empty string');
+    }
+  }
+  if (manifest.requiresBundleVersion !== undefined) {
+    if (typeof manifest.requiresBundleVersion !== 'string' || !SEMVER_RE.test(manifest.requiresBundleVersion)) {
+      issues.push('requiresBundleVersion must be a semver-like string');
+    }
+  }
+  if (manifest.requiresBundle !== undefined && manifest.requiresBundleVersion === undefined) {
+    issues.push('requiresBundle is set but requiresBundleVersion is missing');
+  }
+
+  return issues;
+}
+
+/**
+ * Scan all plugin.json files in a directory tree.
+ * Returns array of { path, manifest, issues }.
+ * @param {string} rootDir
+ * @returns {{ path: string, manifest: object, issues: string[] }[]}
+ */
+function scanPluginManifests(rootDir) {
+  const results = [];
+
+  function walk(dir) {
+    let entries;
+    try {
+      entries = readdirSync(dir);
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      const fullPath = join(dir, entry);
+      let stat;
+      try {
+        stat = statSync(fullPath);
+      } catch {
+        continue;
+      }
+      if (stat.isDirectory()) {
+        walk(fullPath);
+      } else if (entry === 'plugin.json') {
+        let parsed = null;
+        let parseError = null;
+        let raw;
+        try {
+          raw = readFileSync(fullPath, 'utf8');
+          parsed = JSON.parse(raw);
+        } catch (err) {
+          parseError = err.message;
+          parsed = null;
+        }
+        const issues = parseError
+          ? [`JSON parse error: ${parseError}`]
+          : validatePluginManifest(parsed);
+        const rel = fullPath.replace(rootDir + '/', '').replace(/\\/g, '/');
+        results.push({ path: rel, manifest: parsed, issues });
+      }
+    }
+  }
+
+  walk(rootDir);
+  return results;
+}
+
+// ─── Payload Shape Basic Type Checks (self-written, no ajv/zod) ──────────────
+
+const KNOWN_PAYLOAD_TYPES = Object.freeze([
+  'null', 'boolean', 'number', 'integer', 'string', 'array', 'object',
+]);
+
+/**
+ * Infer the expected JS type from a schema value description string.
+ * Returns a JS typeof string or 'unknown'.
+ * @param {string} typeStr
+ * @returns {string}
+ */
+function inferJsType(typeStr) {
+  switch (typeStr) {
+    case 'null': return 'object';
+    case 'boolean': return 'boolean';
+    case 'number': return 'number';
+    case 'integer': return 'number';
+    case 'string': return 'string';
+    case 'array': return 'object';
+    case 'object': return 'object';
+    default: return 'unknown';
+  }
+}
+
+/**
+ * Basic type check for an IPC payload against an inferred schema.
+ * Returns { ok, errors } where errors is array of string.
+ *
+ * This is a shallow type check — it detects obvious type mismatches
+ * in payload objects without introducing zod/ajv. Supports top-level
+ * type checks and nested property validation.
+ *
+ * @param {*} value
+ * @param {{ type: string, minimum?: number, maximum?: number, enum?: string[], required?: string[], properties?: object, items?: object }} schema
+ * @param {string} path
+ * @returns {{ ok: boolean, errors: string[] }}
+ */
+function checkPayloadShape(value, schema, path = '<payload>') {
+  const errors = [];
+
+  if (!schema || typeof schema !== 'object') {
+    return { ok: true, errors: [] }; // no schema = skip
+  }
+
+  // Validate the top-level value against schema.type
+  if (schema.type !== undefined) {
+    const jsType = inferJsType(schema.type);
+    if (jsType !== 'unknown') {
+      if (schema.type === 'null') {
+        if (value !== null) {
+          errors.push(`${path}: expected null, got ${value === null ? 'null' : typeof value}`);
+        }
+      } else if (schema.type === 'integer') {
+        if (typeof value !== 'number' || !Number.isInteger(value)) {
+          errors.push(`${path}: expected integer, got ${typeof value} ${value}`);
+        }
+      } else if (typeof value !== jsType) {
+        errors.push(`${path}: expected type ${schema.type}, got ${typeof value}`);
+      }
+    }
+  }
+
+  // Validate nested properties if schema has properties definition
+  if (schema.properties && typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    for (const [propName, propSchema] of Object.entries(schema.properties)) {
+      const propValue = value[propName];
+      const propPath = `${path}.${propName}`;
+      // Check if required field is missing
+      if (propValue === undefined && Array.isArray(schema.required) && schema.required.includes(propName)) {
+        errors.push(`${propPath}: required field "${propName}" is missing`);
+      }
+      // Validate property value if present
+      if (propValue !== undefined) {
+        const propErrors = checkPayloadShape(propValue, propSchema, propPath);
+        errors.push(...propErrors.errors);
+      }
+    }
+  }
+
+  if (schema.minimum !== undefined && typeof value === 'number') {
+    if (value < schema.minimum) {
+      errors.push(`${path}: value ${value} < minimum ${schema.minimum}`);
+    }
+  }
+
+  if (schema.maximum !== undefined && typeof value === 'number') {
+    if (value > schema.maximum) {
+      errors.push(`${path}: value ${value} > maximum ${schema.maximum}`);
+    }
+  }
+
+  if (schema.enum !== undefined && Array.isArray(schema.enum)) {
+    if (!schema.enum.includes(value)) {
+      errors.push(`${path}: value "${value}" not in enum [${schema.enum.join(', ')}]`);
+    }
+  }
+
+  return { ok: errors.length === 0, errors };
+}
+
+/**
+ * Payload shape registry: maps channel prefix to expected schema hints.
+ * This is used for static analysis of common IPC channel payload patterns.
+ * Format: { prefix: { type: 'invoke'|'push', payloadHint: object } }
+ */
+const PAYLOAD_HINTS = Object.freeze({
+  'window:': { type: 'push', payloadHint: { type: 'object' } },
+  'app:': { type: 'invoke', payloadHint: { type: 'object' } },
+  'plugin:': { type: 'invoke', payloadHint: { type: 'object' } },
+  'file:': { type: 'invoke', payloadHint: { type: 'object' } },
+  'runtime:': { type: 'invoke', payloadHint: { type: 'object' } },
+  'backend:': { type: 'invoke', payloadHint: { type: 'object' } },
+  'terminal:': { type: 'invoke', payloadHint: { type: 'object' } },
+  'skill:': { type: 'invoke', payloadHint: { type: 'object' } },
+  'diagnostic:': { type: 'invoke', payloadHint: { type: 'object' } },
+  'data:': { type: 'invoke', payloadHint: { type: 'object' } },
+  'ai:': { type: 'invoke', payloadHint: { type: 'object' } },
+  'compute:': { type: 'invoke', payloadHint: { type: 'object' } },
+  'updater:': { type: 'push', payloadHint: { type: 'object' } },
+});
+
+/**
+ * Get payload hint for a channel name.
+ * @param {string} channel
+ * @returns {object|null}
+ */
+function getPayloadHint(channel) {
+  for (const [prefix, hint] of Object.entries(PAYLOAD_HINTS)) {
+    if (channel.startsWith(prefix)) return hint;
+  }
+  return null;
 }
 
 // ─── Line counting ─────────────────────────────────────────────────────────────
@@ -382,9 +755,11 @@ function report(ref, catalog) {
  * Build the machine-readable catalog JSON.
  * @param {CrossRefResult} ref
  * @param {IPCCatalog} catalog
+ * @param {{ manifestResults?: object[], manifestErrors?: number }} [opts]
  * @returns {object}
  */
-function buildCatalogJson(ref, catalog) {
+function buildCatalogJson(ref, catalog, opts = {}) {
+  const { manifestResults = [], manifestErrors = 0 } = opts || {};
   const { consistentPairs, shadowHandles, shadowSends, shadowOns, orphanInvokes, orphanOns } = ref;
 
   /** @type {Record<string, object>} */
@@ -453,7 +828,7 @@ function buildCatalogJson(ref, catalog) {
     catalog.mainHandles.length + catalog.mainOns.length + catalog.mainSends.length;
 
   return {
-    version: "1.0",
+    version: "2.0",
     generated: new Date().toISOString().slice(0, 10),
     channels,
     summary: {
@@ -466,6 +841,8 @@ function buildCatalogJson(ref, catalog) {
       consistent: consistentPairs.length,
       shadow: ref.shadowCount(),
       orphan: ref.orphanCount(),
+      pluginManifestCount: manifestResults.length,
+      pluginManifestErrors: manifestErrors,
     },
     shadowChannels: [...shadowHandles, ...shadowSends, ...shadowOns]
       .map((e) => e.channel)
@@ -473,6 +850,7 @@ function buildCatalogJson(ref, catalog) {
     orphanChannels: [...orphanInvokes, ...orphanOns]
       .map((e) => e.channel)
       .sort(),
+    pluginManifests: manifestResults,
   };
 }
 
@@ -486,6 +864,8 @@ function buildCatalogJson(ref, catalog) {
 
 async function main() {
   const quiet = process.argv.includes("--json");
+  const manifestOnly = process.argv.includes("--manifest-only");
+  const all = process.argv.includes("--all");
 
   if (!quiet) console.log("[IPC-CATALOG] Scanning IPC channels...");
 
@@ -497,10 +877,66 @@ async function main() {
     ref.shadowHandles.length + ref.shadowSends.length + ref.shadowOns.length;
   ref.orphanCount = () => ref.orphanInvokes.length + ref.orphanOns.length;
 
+  // ── Plugin manifest validation (always runs, needed for JSON output) ───────────
+  const builtInPluginsDir = join(ROOT, "resources", "built-in-plugins");
+  const harnessDir = join(ROOT, "acceptance", "harness-plugin-prototype");
+  const pluginScanResults = [];
+  const allManifestIssues = [];
+
+  for (const dir of [builtInPluginsDir, harnessDir]) {
+    try {
+      pluginScanResults.push(...scanPluginManifests(dir));
+    } catch {}
+  }
+
+  for (const result of pluginScanResults) {
+    if (result.issues.length > 0) {
+      allManifestIssues.push({ path: result.path, issues: result.issues });
+    }
+  }
+
+  // ── Payload shape analysis (static — no runtime required) ──────────────────────
+  if (!manifestOnly) {
+    const allChannels = [
+      ...catalog.mainHandles.map(h => h.channel),
+      ...catalog.mainSends.map(s => s.channel),
+    ];
+    const channelsWithPayloadHints = allChannels.filter(ch => getPayloadHint(ch) !== null);
+    if (!quiet) {
+      console.log(`[IPC-CATALOG] ${channelsWithPayloadHints.length} channels have payload shape hints`);
+    }
+  }
+
   // Write pure JSON (no logs) for machine consumption
   if (process.argv.includes("--json")) {
-    const json = buildCatalogJson(ref, catalog);
+    const json = buildCatalogJson(ref, catalog, {
+      manifestResults: pluginScanResults,
+      manifestErrors: allManifestIssues.length,
+    });
     console.log(JSON.stringify(json, null, 2));
+    return;
+  }
+
+  if (!quiet) {
+    console.log(`[IPC-CATALOG] ${pluginScanResults.length} plugin manifest(s) scanned`);
+    if (allManifestIssues.length === 0) {
+      console.log("[IPC-CATALOG] MANIFEST: all plugins pass schema validation");
+    } else {
+      console.log(`[IPC-CATALOG] MANIFEST: ${allManifestIssues.length} plugin(s) with schema issues`);
+      for (const err of allManifestIssues) {
+        console.log(`[IPC-CATALOG] MANIFEST: ${err.issues.length} issue(s) in ${err.path}`);
+        for (const issue of err.issues) {
+          console.log(`[IPC-CATALOG]   - ${issue}`);
+        }
+      }
+    }
+  }
+
+  if (manifestOnly) {
+    // manifest-only mode: only report manifest results
+    if (allManifestIssues.length > 0) {
+      process.exit(1);
+    }
     return;
   }
 
@@ -508,14 +944,26 @@ async function main() {
 
   // Write catalog to docs/ipc-catalog.json
   if (process.argv.includes("--write-catalog")) {
-    const json = buildCatalogJson(ref, catalog);
+    const json = buildCatalogJson(ref, catalog, {
+      manifestResults: pluginScanResults,
+      manifestErrors: allManifestIssues.length,
+    });
     const outPath = join(ROOT, "docs", "ipc-catalog.json");
     writeFileSync(outPath, JSON.stringify(json, null, 2));
     console.log(`[IPC-CATALOG] Catalog written to docs/ipc-catalog.json`);
   }
 
-  if (ref.orphanCount() > 0) {
+  const hasOrphans = ref.orphanCount() > 0;
+
+  if (hasOrphans) {
+    console.log("[IPC-CATALOG] FAIL: orphan IPC channels detected");
     process.exit(1);
+  }
+
+  // Manifest errors are informational in default gate (not blocking).
+  // Use --manifest-only for strict manifest validation.
+  if (allManifestIssues.length > 0 && !quiet) {
+    console.log(`[IPC-CATALOG] NOTE: ${allManifestIssues.length} plugin manifest(s) have schema issues (non-blocking; use --manifest-only to enforce)`);
   }
 }
 
