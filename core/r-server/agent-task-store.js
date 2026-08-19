@@ -377,6 +377,24 @@ function insertAgentTask({ taskId, userId, params }) {
   return getAgentTask(taskId);
 }
 
+// PHASE 2.2b-compatible friendly alias: auto-generates taskId (uuid v4),
+// accepts the looser shape used by routes/ai-agent/chat.js
+// ({ status, agentStatus, userId, params }). Returns the inserted task
+// snapshot so callers can grab the generated taskId without a follow-up read.
+function createAgentTask(opts = {}) {
+  const { userId, params, status, agentStatus } = opts;
+  const taskId = require('crypto').randomUUID();
+  const result = insertAgentTask({ taskId, userId, params });
+  if (result && (status || agentStatus)) {
+    // insertAgentTask already wrote status='running' / agent_status='running'
+    // via the prepared statement defaults; if a caller passes different
+    // status fields we surface them on the returned snapshot so the caller
+    // can decide what to do (most callers ignore — kept lean by default).
+    return { ...result, requestedStatus: status, requestedAgentStatus: agentStatus };
+  }
+  return result;
+}
+
 function getAgentTask(taskId) {
   const row = stmts.get.get(taskId);
   if (!row) return null;
@@ -622,6 +640,7 @@ function tryParse(value) {
 
 module.exports = {
   insertAgentTask,
+  createAgentTask,
   getAgentTask,
   appendAgentTaskEvent,
   getAgentTaskEventsSince,
