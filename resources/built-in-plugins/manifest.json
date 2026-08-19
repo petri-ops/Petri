@@ -909,6 +909,162 @@
       "builtAgainst": {
         "python": "3.11.9"
       }
+    },
+    "seurat-standard": {
+      "id": "seurat-standard",
+      "status": "canonical",
+      "title": "Seurat 标准流程",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "Seurat 5.x 标准 single-cell RNA-seq 分析管线: QC → Normalize → HVG → Scale → PCA → Cluster → UMAP → Markers。完全运行于 biof3-r-runtime (dev Electron 边界内), 复用既有 core/r-server/tool-scripts/seurat-standard.R 步骤 0 ground truth。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://seurat-standard",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "Seurat": ">=5.0.0",
+          "SeuratObject": ">=5.0.0",
+          "ggplot2": ">=3.4.0",
+          "patchwork": ">=1.3.0",
+          "dplyr": ">=1.1.0",
+          "Matrix": ">=1.7.0",
+          "jsonlite": ">=1.8.0",
+          "base64enc": ">=0.1-3",
+          "png": ">=0.1-8"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5.2",
+        "Seurat": "5.4.0",
+        "SeuratObject": "5.3.0"
+      }
+    },
+    "celltypist": {
+      "id": "celltypist",
+      "status": "canonical",
+      "title": "CellTypist 细胞类型自动注释",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "python",
+      "description": "Celltypist 1.6+ 自动 + 手动 cell type annotation: Model.predict + over_clustering 多数投票。运行于 biof3-py-runtime (dev Electron 边界内)，celltypist 本体 PyPI 未装，需 install.json 触发 bootstrap。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://celltypist",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "python": {
+          "scanpy": ">=1.9",
+          "anndata": ">=0.9",
+          "numpy": ">=1.24",
+          "pandas": ">=2.0",
+          "scipy": ">=1.10",
+          "matplotlib": ">=3.7",
+          "seaborn": ">=0.12",
+          "Pillow": ">=9.0",
+          "celltypist": ">=1.6"
+        }
+      },
+      "runtime": {
+        "python": ">=3.10.0"
+      },
+      "builtAgainst": {
+        "python": "3.11.9",
+        "celltypist": "1.6.3"
+      }
+    },
+    "cellchat": {
+      "id": "cellchat",
+      "status": "incubating",
+      "title": "CellChat 细胞通讯推断",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "单细胞细胞-细胞通讯推断（R 包 CellChat 1.6+）：从 Seurat 对象出发做 CellChatDB 配体-受体库构建、通讯概率推断（computeCommunProb）、通路级通讯推断（computeCommunProbPathway），输出热图、弦图、气泡图与通路富集表。运行于 biof3-r-runtime (dev Electron 边界内)，CellChat 通过 BiocManager::install 在 biof3-r-runtime libPath 一次性安装（runtime 增量记录在 install.json）。",
+      "requiresBundle": "r-spatial",
+      "requiresBundleVersion": "1.0.0",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://cellchat",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "Seurat": ">=5.0.0",
+          "CellChat": ">=1.6.0",
+          "ggplot2": ">=4.0.0",
+          "ggalluvial": ">=0.12.3",
+          "ComplexHeatmap": ">=2.16.0",
+          "circlize": ">=0.4.15",
+          "igraph": ">=2.0.0",
+          "NMF": ">=0.27",
+          "BiocManager": ">=1.30.0",
+          "jsonlite": ">=1.8.0",
+          "base64enc": ">=0.1-3",
+          "png": ">=0.1-8"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5"
+      }
+    },
+    "scvi-tools": {
+      "id": "scvi-tools",
+      "status": "canonical",
+      "title": "scvi-tools 深度生成单细胞分析",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "python",
+      "description": "scvi-tools (scVI) 深度生成模型 单细胞分析与批次整合：基于 AnnData (.h5ad) 训练 SCVI 变分自编码器 → 隐空间嵌入 / 标准化表达 / 批次整合。biof3-py-runtime 基础栈 + scvi-tools>=1.0 + pytorch (CPU 默认)。dev Electron 边界内 verified（G0 阶段）。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://scvi-tools",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "python": {
+          "scanpy": ">=1.9",
+          "anndata": ">=0.9",
+          "numpy": ">=1.24",
+          "pandas": ">=2.0",
+          "scipy": ">=1.10",
+          "matplotlib": ">=3.7",
+          "seaborn": ">=0.12",
+          "Pillow": ">=9.0",
+          "scvi-tools": ">=1.0",
+          "torch": ">=2.0"
+        }
+      },
+      "runtime": {
+        "python": ">=3.10.0"
+      },
+      "builtAgainst": {
+        "python": "3.11.9",
+        "scvi-tools": "1.4.2",
+        "torch": "2.13.0"
+      },
+      "device": "cpu"
     }
   }
 }
