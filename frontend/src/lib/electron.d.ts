@@ -315,6 +315,61 @@ declare global {
         onUpdateDownloaded: (cb: () => void) => () => void;
         onError: (cb: (msg: string) => void) => () => void;
       };
+      // BLOCK-16 — Working Tree Review Mode (PR-style diff viewer)
+      workingTreeReview: {
+        status: () => Promise<{
+          ok: boolean;
+          data?: {
+            files: Array<{ path: string; oldPath: string | null; status: string; untracked: boolean; conflicted: boolean }>;
+            totalFiles: number;
+            hasUntracked: boolean;
+            hasConflict: boolean;
+          };
+          error?: string;
+          message?: string;
+        }>;
+        diff: (params?: { paths?: string[]; staged?: boolean }) => Promise<{
+          ok: boolean;
+          data?: {
+            files: Array<{
+              path: string;
+              oldPath: string | null;
+              binary: boolean;
+              hunks: Array<{ oldStart: number; newStart: number; lines: Array<{ type: 'add' | 'del' | 'ctx'; text: string }>; truncated?: boolean }>;
+            }>;
+            truncated: boolean;
+            summary: { added: number; removed: number };
+          };
+          error?: string;
+          message?: string;
+        }>;
+        fileContent: (params: { path: string; ref?: 'HEAD' | 'WORKTREE' }) => Promise<{
+          ok: boolean;
+          data?: { content: string; encoding: 'utf-8' | 'base64'; size: number; truncated?: boolean; message?: string };
+          error?: string;
+          message?: string;
+        }>;
+        applyHunk: (params: {
+          file: string;
+          hunkIndex: number;
+          action: 'accept' | 'reject';
+          hunk?: { oldStart: number; newStart: number; lines: Array<{ type: 'add' | 'del' | 'ctx'; text: string }> };
+          feedback?: string;
+          taskId?: string;
+        }) => Promise<{
+          ok: boolean;
+          data?: { action: 'accept' | 'reject'; file: string; hunkIndex: number };
+          error?: string;
+          message?: string;
+        }>;
+        revert: (params?: { paths?: string[] }) => Promise<{
+          ok: boolean;
+          data?: { reverted: string[] };
+          error?: string;
+          message?: string;
+        }>;
+        onTaskDone: (cb: (info: { taskId: string | null; filesChanged: string[]; notifiedAt: string }) => void) => () => void;
+      };
       // Phase 1: Branch Tab UI - conversation branch management
       branch: {
         create: (params: { projectId: string; name: string; parentBranchId?: string }) => Promise<{

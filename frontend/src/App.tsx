@@ -10,6 +10,9 @@ import { BackendStatusProvider } from '@/components/backend/BackendStatusProvide
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import { CommandPalette, useCommandPalette } from '@/components/copilot/CommandPalette';
+import { WorkingTreeReviewMount } from '@/components/desktop/WorkingTreeReview/WorkingTreeReviewMount';
+import { WorkingTreeReviewButton } from '@/components/desktop/WorkingTreeReview/WorkingTreeReviewButton';
+import '@/components/desktop/WorkingTreeReview/WorkingTreeReview.module.css';
 import HomePage from '@/pages/home';
 // NOTE: Legacy pages (tools, admin, docs, figcode, single-cell, spatial) have been removed
 // as the desktop application now uses the Agent-based workflow through ProjectWorkspace.
@@ -94,6 +97,9 @@ export default function App(): React.ReactElement {
             commands={[]}
             recentConversations={[]}
           />
+          <WorkingTreeReviewMount>
+            <WorkingTreeReviewButton />
+          </WorkingTreeReviewMount>
         </CopilotContextProvider>
       </WorkspacePanelsProvider>
     </BackendStatusProvider>
