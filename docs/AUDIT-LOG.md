@@ -404,4 +404,34 @@ docs(block-15): plan §2 replaced with empirical data (17 vars + 22 functions + 
 
 **当前 active**：BLOCK-15-ARCHITECTURE-PERF（第一阶段已收口，SUB-15.1 PHASE 3/4 和 SUB-15.2 PHASE 2 待续）。
 
+
+| 2026-08-19 14:38 | **SUB-15.1 PHASE 3 收口**（`src/main/_window-create.js` 272 行 + `src/main/_spa-server.js` 40 行 + main.js 770 → 546 行 = **-224 行 / -29.1%**）：
+
+**新增模块**：
+- `src/main/_spa-server.js`（40 行）：Vite SPA 静态服务器启动逻辑（PHASE 1 风格，无 Electron API 顶层依赖）
+- `src/main/_window-create.js`（272 行）：`createWindow()` 完整逻辑（含 BrowserWindow 创建 + 全部 event handlers）
+
+**架构决策**：
+- `mainWindow` 共享引用改为 getter/setter（`_mainWindow` + `getMainWindow()` + `setMainWindow()`），main.js 保留兼容别名供 `second-instance`/`activate` handlers 使用
+- BLOCK-9.1 风格依赖注入：`createWindow({ BrowserWindow, shell, session, resolveResource, ... })` 接收所有 Electron API
+- `preload.js` / `electron.d.ts` / `desktopBridge.ts` **0 diff**（IPC 桥接不变）
+- IPC channel 契约 **100% 不变**
+- `hasSingleInstanceLock` 保留在 main.js（PHASE 4 才处理）
+
+**验证**：
+- `node --check` 全文件 PASS（main.js / _spa-server.js / _window-create.js）
+- g0:chf0 5/5 合约类全部 ✅（tests PASS；source integrity 待 commit 后 GREEN）
+- `npm run docs:check` / `npm run ui:audit:check` **GREEN**
+
+**阶段完成度**：
+- SUB-15.1：PHASE 0 ✅ / PHASE 1 ✅ / PHASE 2 ✅ / **PHASE 3 ✅** / PHASE 4 待续
+
+**不变量守住**：preload.js / electron.d.ts / desktopBridge.ts 0 diff；IPC channel 契约 100%；`hasSingleInstanceLock` / `mainWindow`（alias）保留在 main.js。
+
+**不外推**：packaged / Provider / GA / P7 / notarization / dist staleness G1+。
+
+**当前 active**：BLOCK-15-ARCHITECTURE-PERF（SUB-15.1 PHASE 3 已收口，PHASE 4 closeout 待续）。
+
+| SUB-15.1 / PHASE-3-CLOSEOUT |
+
 | BLOCK-15 / STAGE-1-CLOSEOUT |

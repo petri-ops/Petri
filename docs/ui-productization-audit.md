@@ -1077,3 +1077,30 @@ main.js 从 ~1201 行减少到 1001 行（-200 行）。IPC handler channel 名�
 **DOC-REGISTRY**：`IPC-CATALOG` 注册为 `kind=reference / canonical=false`。
 
 **不外推**：packaged / Provider / GA / P7 / dist staleness / notarization G1+；不动 Electron 应用业务逻辑。
+
+## UI-B15-6: SUB-15.1 PHASE 3 — createWindow 拆分（高风险）
+
+| 属性 | 值 |
+|------|-----|
+| 状态 | `verified` |
+| 阶段 | dev Electron 边界内 |
+| 证据 | `node --check` 全文件 PASS；g0:chf0 5/5 PASS（source integrity 待 commit）；window-controls.test.mjs 6/6 PASS；`npm run docs:check` / `npm run ui:audit:check` GREEN |
+
+**说明**：SUB-15.1 PHASE 3 拆分 `createWindow` 260 行高风险函数，按 BLOCK-9.1 风格提取到 `src/main/_window-create.js` 和 `src/main/_spa-server.js`。
+
+**新增文件**：
+- `src/main/_spa-server.js`（40 行）：Vite SPA 静态服务器启动逻辑（PHASE 1 风格，无 Electron API 顶层依赖）
+- `src/main/_window-create.js`（272 行）：`createWindow()` 完整逻辑（含 BrowserWindow 创建 + 全部 event handlers）
+
+**main.js 行数**：770 → 546（-224 行 / -29.1%）
+
+**架构决策**：
+- `mainWindow` 共享引用改为 getter/setter（`_mainWindow` + `getMainWindow()` + `setMainWindow()`）
+- BLOCK-9.1 风格依赖注入：所有 Electron API（BrowserWindow / shell / session）通过参数传入
+- `hasSingleInstanceLock` / `mainWindow`（alias）保留在 main.js（PHASE 4 才处理）
+
+**不变量守住**：
+- preload.js / electron.d.ts / desktopBridge.ts **0 diff**
+- IPC channel 契约 **100% 不变**（`window:maximize-changed` / `window:fullscreen-changed` / `app:soft-refresh` 等事件 channel 未改动）
+
+**不外推**：packaged / Provider / GA / P7 / notarization / dist staleness G1+。

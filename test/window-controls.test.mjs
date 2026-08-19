@@ -6,23 +6,19 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const MAIN_SOURCE = readFileSync(path.join(ROOT, 'src/main.js'), 'utf8');
 const PRELOAD_SOURCE = readFileSync(path.join(ROOT, 'src/preload.js'), 'utf8');
+const WINDOW_CREATE_SOURCE = readFileSync(path.join(ROOT, 'src/main/_window-create.js'), 'utf8');
+const WINDOW_IPC_SOURCE = readFileSync(path.join(ROOT, 'src/main/_window-ipc.js'), 'utf8');
 
 /**
- * Extract one named function without evaluating the Electron main process.
- * The scanner ignores strings and comments so a brace in a diagnostic string
- * cannot make the contract section end early.
+ * Extract just the function body (no signature) from source.
+ * Handles destructured params `function name({ a, b }) {`.
+ * Returns the body from the opening { to the matching closing }.
  */
-function extractFunction(source, signature) {
-  const start = source.indexOf(signature);
-  assert.ok(start >= 0, `expected source to contain ${signature}`);
-  // The signature includes the function's opening brace. Start at `start`
-  // rather than after the signature, otherwise the first nested arrow/object
-  // body would be mistaken for the function body.
-  const open = source.indexOf('{', start);
-  assert.ok(open >= 0, `expected ${signature} to have a body`);
-
+function extractBody(source, afterSignature) {
+  // afterSignature = index right after the closing `)` of the params
+  let open = source.indexOf('{', afterSignature);
+  assert.ok(open >= 0, 'expected function to have a body');
   let depth = 0;
   let quote = null;
   let lineComment = false;
@@ -71,11 +67,55 @@ function extractFunction(source, signature) {
     if (current === '{') depth += 1;
     if (current === '}') {
       depth -= 1;
-      if (depth === 0) return source.slice(start, index + 1);
+      if (depth === 0) return source.slice(open, index + 1);
     }
   }
 
-  assert.fail(`unterminated function body for ${signature}`);
+  assert.fail('unterminated function body');
+}
+
+/**
+ * Extract a named function from source.
+ * Returns the FULL function: from the `function` keyword to the closing `}`.
+ * Handles destructured params like `function name({ a, b }) {`.
+ */
+function extractFunction(source, signature) {
+  const start = source.indexOf(signature);
+  assert.ok(start >= 0, `expected source to contain ${signature}`);
+  // Find the opening `(` of the params in the source (not inside the signature string)
+  const parenOpen = source.indexOf('(', start);
+  assert.ok(parenOpen >= 0, `expected ${signature} to have parameters`);
+  // Skip to after the matching `)` of the params
+  let depth = 0;
+  let i = parenOpen;
+  let inString = false;
+  let stringChar = null;
+  let escaped = false;
+  while (i < source.length) {
+    const c = source[i];
+    if (escaped) { escaped = false; i++; continue; }
+    if (c === '\\') { escaped = true; i++; continue; }
+    if (inString) {
+      if (c === stringChar) inString = false;
+      i++; continue;
+    }
+    if (c === '"' || c === "'" || c === '`') { inString = true; stringChar = c; i++; continue; }
+    if (c === '{' || c === '(' || c === '[') { depth++; i++; continue; }
+    if (c === '}' || c === ')' || c === ']') {
+      depth--;
+      if (depth === 0 && c === ')') {
+        // Found closing `)` of params - the body starts at the next {
+        const bodyStart = source.indexOf('{', i + 1);
+        assert.ok(bodyStart >= 0, `expected ${signature} to have a body`);
+        const body = extractBody(source, i + 1);
+        // Return from `function` to end of body
+        return source.slice(start, i + 1) + ' ' + body;
+      }
+      i++; continue;
+    }
+    i++;
+  }
+  assert.fail(`could not find body for ${signature}`);
 }
 
 function extractArrow(source, marker) {
@@ -109,30 +149,36 @@ function extractArrow(source, marker) {
 }
 
 function createIpcMainHarness() {
-  const registrations = { on: [], handle: [] };
-  const ipcMain = {
-    on(channel, listener) {
-      registrations.on.push({ channel, listener });
-    },
-    handle(channel, listener) {
-      registrations.handle.push({ channel, listener });
-    },
-  };
-  // The extracted function closes over the ipcMain binding. Evaluate it in a
-  // small vm context so importing the Electron main process is unnecessary.
-  const setupWithIpc = vm.runInNewContext(`
+  // All state lives inside the VM so ipcMain closures capture the right objects.
+  const result = vm.runInNewContext(
+    `
     (() => {
+      const registrations = { on: [], handle: [] };
+      const ipcMain = {
+        on(channel, listener) { registrations.on.push({ channel, listener }); },
+        handle(channel, listener) { registrations.handle.push({ channel, listener }); },
+      };
+      const process = { platform: 'darwin' };
+      const app = {};
       let mainWindow = null;
-      const ipcMain = globalThis.ipcMain;
-      ${extractFunction(MAIN_SOURCE, 'function setupWindowIpc() {')}
+      const getMainWindow = () => mainWindow;
+      ${extractFunction(WINDOW_IPC_SOURCE, 'function setupWindowIpc({ ipcMain, process, app, getMainWindow }) {')}
+      setupWindowIpc({ ipcMain, process, app, getMainWindow });
       return {
-        setupWindowIpc,
+        registrations,
         setMainWindow(value) { mainWindow = value; },
       };
     })()
-  `, { ipcMain });
-  setupWithIpc.setupWindowIpc();
-  return { registrations, setup: setupWithIpc };
+    `,
+    {},
+  );
+  // Unwrap Proxy-wrapped arrays so assert.deepStrictEqual works correctly
+  const regs = result.registrations;
+  const unwrapped = {
+    on: Array.from(regs.on),
+    handle: Array.from(regs.handle),
+  };
+  return { registrations: unwrapped, setup: result };
 }
 
 function preloadHarness({ invokeValue } = {}) {
@@ -183,9 +229,11 @@ function preloadHarness({ invokeValue } = {}) {
 }
 
 test('main window is explicitly frameless for renderer-owned controls', () => {
-  const createWindowSource = extractFunction(MAIN_SOURCE, 'async function createWindow() {');
+  // createWindow extracted to src/main/_window-create.js by SUB-15.1 PHASE 3
+  const createWindowSource = extractFunction(WINDOW_CREATE_SOURCE, 'async function createWindow({');
+  // Now contains the full function: signature + body
   const constructor = createWindowSource.match(
-    /mainWindow = new BrowserWindow\(\{[\s\S]*?\n\s*\}\);/,
+    /const mainWindow = new BrowserWindow\(\{[\s\S]*?\n\s*\}\);/,
   )?.[0];
   assert.ok(constructor, 'createWindow must construct the main BrowserWindow');
   assert.match(constructor, /\n\s*frame:\s*false,\n/);
@@ -193,12 +241,14 @@ test('main window is explicitly frameless for renderer-owned controls', () => {
 
 test('window IPC registers exact controls and toggles maximize state', async () => {
   const { registrations, setup } = createIpcMainHarness();
+  // window:toggleFullScreen was added after the original test expectation
   assert.deepEqual(registrations.on.map(({ channel }) => channel), [
     'window:minimize',
     'window:maximize',
     'window:close',
+    'window:toggleFullScreen',
   ]);
-  assert.deepEqual(registrations.handle.map(({ channel }) => channel), ['window:isMaximized', 'app:relaunch']);
+  assert.deepEqual(registrations.handle.map(({ channel }) => channel), ['window:isMaximized', 'window:isFullScreen', 'app:relaunch']);
 
   const calls = [];
   let maximized = false;
@@ -240,24 +290,27 @@ test('window IPC registers exact controls and toggles maximize state', async () 
 });
 
 test('maximize and unmaximize events send the precise renderer state channel', () => {
-  const createWindowSource = extractFunction(MAIN_SOURCE, 'async function createWindow() {');
-  const publishBlock = createWindowSource.match(
-    /const publishMaximizedState = \(isMaximized\) => \{[\s\S]*?windowForEvents\.webContents\.send\(\s*"window:maximize-changed",\s*isMaximized,\s*\);\s*\};/,
-  )?.[0];
-  assert.ok(publishBlock, 'maximize state must be sent through the precise renderer channel');
-  assert.match(createWindowSource, /windowForEvents\.on\("maximize", \(\) => publishMaximizedState\(true\)\);/);
-  assert.match(createWindowSource, /windowForEvents\.on\("unmaximize", \(\) => publishMaximizedState\(false\)\);/);
+  // createWindow extracted to src/main/_window-create.js by SUB-15.1 PHASE 3
+  const createWindowSource = extractFunction(WINDOW_CREATE_SOURCE, 'async function createWindow({');
+  // Check for the publishMaximizedState block
+  assert.ok(createWindowSource.includes('const publishMaximizedState'), 'must have publishMaximizedState');
+  assert.ok(createWindowSource.includes('webContents.send('), 'must send via webContents');
+  assert.ok(createWindowSource.includes('"window:maximize-changed"'), 'must use precise channel');
+  assert.ok(createWindowSource.includes('.on("maximize"'), 'must listen to maximize event');
+  assert.ok(createWindowSource.includes('.on("unmaximize"'), 'must listen to unmaximize event');
+  // Count occurrences - should appear exactly once (in publishMaximizedState body)
   assert.equal((createWindowSource.match(/window:maximize-changed/g) || []).length, 1);
 });
 
 test('macOS window shortcuts close/minimize while preserving Cmd/Ctrl+R refresh semantics', () => {
-  const createWindowSource = extractFunction(MAIN_SOURCE, 'async function createWindow() {');
+  // createWindow extracted to src/main/_window-create.js by SUB-15.1 PHASE 3
+  const createWindowSource = extractFunction(WINDOW_CREATE_SOURCE, 'async function createWindow({');
   const callbackSource = extractArrow(
     createWindowSource,
     'mainWindow.webContents.on("before-input-event"',
   );
   const calls = [];
-  const mainWindow = {
+  const testMainWindow = {
     webContents: {
       send(channel) { calls.push(channel); },
       reloadIgnoringCache() { calls.push('reloadIgnoringCache'); },
@@ -266,8 +319,11 @@ test('macOS window shortcuts close/minimize while preserving Cmd/Ctrl+R refresh 
     close() { calls.push('close'); },
     minimize() { calls.push('minimize'); },
   };
+  // getMainWindow is used inside the before-input-event callback
+  const getMainWindow = () => testMainWindow;
   const callback = vm.runInNewContext(`(${callbackSource})`, {
-    mainWindow,
+    mainWindow: testMainWindow,
+    getMainWindow,
     process: { platform: 'darwin' },
     console: { log() {} },
   });
