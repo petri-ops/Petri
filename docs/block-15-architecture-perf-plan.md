@@ -1,7 +1,7 @@
 # BLOCK-15 架构重构 + 性能基准 工作包计划
 
 **版本**：v1.0
-**状态**：ACTIVE（plan worker 输出，不实施代码）
+**状态**：active（plan worker 输出，不实施代码）
 **起草日期**：2026-08-19
 **Truth Domain**：`block-15-architecture-perf`
 **User Rulings（已由用户裁决，必须遵守）**：
@@ -453,6 +453,16 @@ const THRESHOLDS = {
 | PHASE 1（test/dev-electron-profile.test.mjs） | 0.5 | 低 |
 | **合计** | **1.0 人天** | |
 
+**PHASE 0 落地（2026-08-19，commit `60ccef3`）**：
+- `--cdp` flag：启用 CDP 模式，通过 Chrome DevTools Protocol 测量 T0→T4
+- `--port N`：remote-debugging-port（默认 9222）
+- `--timeout MS`：最大等待时间（默认 30s）
+- `--output json|csv|text`：输出格式（默认 text）
+- T0 spawn / T1 appReady / T2 windowShown / T3 DOMContentLoaded / T4 load
+- 技术：Electron `--remote-debugging-port` + HTTP polling + Node.js 内置 WebSocket（Node ≥ 21）
+- 11 现有测试 PASS；docs:check / ui:audit:check 均 PASS
+- UI-B15-3 已追加到 `docs/ui-productization-audit.md`
+
 **⚠️ 基线记录**（待 PHASE 0 实测后填写）：
 
 | 指标 | Baseline（待实测）ms | 阈值 ms |
@@ -519,6 +529,16 @@ const THRESHOLDS = {
 | PHASE 0（fixture 开发 + 基线测量） | 0.5 | 中（需实机 Electron 环境） |
 | PHASE 1（event-loop lag 探针集成） | 0.5 | 中 |
 | **合计** | **1.0 人天** | |
+
+**PHASE 0 落地（2026-08-19，commit `60ccef3`）**：
+- `--cdp` flag：启用 CDP 模式，通过 Chrome DevTools Protocol 测量 T0→T4
+- `--port N`：remote-debugging-port（默认 9222）
+- `--timeout MS`：最大等待时间（默认 30s）
+- `--output json|csv|text`：输出格式（默认 text）
+- T0 spawn / T1 appReady / T2 windowShown / T3 DOMContentLoaded / T4 load
+- 技术：Electron `--remote-debugging-port` + HTTP polling + Node.js 内置 WebSocket（Node ≥ 21）
+- 11 现有测试 PASS；docs:check / ui:audit:check 均 PASS
+- UI-B15-3 已追加到 `docs/ui-productization-audit.md`
 
 **⚠️ 基线记录**（待 PHASE 0 实测后填写）：
 

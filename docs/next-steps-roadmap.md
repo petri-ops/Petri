@@ -189,3 +189,55 @@ Harness Loop Engineering v1 与 Result Studio 引擎基础继续复用。G0 Livi
 - **BLOCK-10-AUDIT-CLOSEOUT 工作包 COMPLETED（active → completed · 2026-08-18）**：依据 `docs/code-audit-closeout-plan.md` v0.2 active 计划收口 8 份 2026-08-17 Agent Harness 独立只读审计报告共 90+ finding / 25 个修复单元（11C + 5H + 9 Major）。**4 PHASE 全部落地**：**PHASE 1** P0 用户可见（C-001 IPC branch/result bridge namespace + C-002 result:create conversation_export + DB migration 007 配套）/ **PHASE 2** P1 安全/资源（S-001 agent-tool-policy RCE capability / S-002 contextToken 过期校验 / S-003 agent-execution-policy 推断替换 / S-004 IPC sender 守门 / S-005 workspace_exec 白名单 / S-006 retry_stats user_id / S-007 diagnostic 路径 + PR-001 SQLite 归档 + E-017 backend exit handler + OB-004 error-log 路径 + OB-005 health shape partial）/ **PHASE 3** P2 契约（PL-001 MCP callTool inputSchema 校验 · **不引入 ajv**，自写 233 行极简 validator + 10 tests）/ **PHASE 4** closeout（DOC-REGISTRY active → completed + 8 linkedCommits + ui-productization-audit 笔录 + 4 canonical 文档同步 + closeout 报告）。**8 commits 落地**：`36c2789` PHASE 0 plan v0.2 active + 4 份 PHASE 0 调研 / `32ed9e9` DOC-REGISTRY 4 份 PHASE 0 报告 / `1c0ebf0` PHASE 1 C-001/C-002 / `128b3d4` PHASE 2 S-001/2/3 / `4f9a10f` PHASE 2 S-004/5/6/7 / `a09f706` PHASE 2 PR-001 + E-017 partial / `1fedf9c` PHASE 2 OB-004 + OB-005 partial / `b79c472` PHASE 3 PL-001 / `b64c65b` PHASE 4-1 DOC-REGISTRY + linkedCommits 8 / `f678edf` PHASE 4-2 ui-productization-audit ledger。**累计指标**：13 项已修复（11 Critical + 2 High） + 12 项不外推 + ~740 行 net + / 31 tests（25 新 + 6 复用）/ 0 新依赖 / 4 治理门 GREEN（docs:check 104 PASS / docs:reconcile 0 issues / tsc --noEmit 0 错 / ui:audit:check 4 pre-existing 漂移按 governance 不修）。**closeout 报告** `docs/block-10-audit-closeout.md` 11 节。**不外推** packaged / Provider / GA / P7 / notarization / dist staleness G1+ / 架构 56+ singleton / observability 体系化 / SSE 全局 / 错误处理三套重试合并 / Agent Loop 事件规范化 / security medium+low / rserver-http debt pack / 不重新激活 BLOCK-2..9.2 / 不在 closeout 报告列举未做项 / `qualificationEligible:false` G0 长期开发期常态不外推。**当前 active 工作包**：NONE（BLOCK-10-AUDIT-CLOSEOUT 已 completed，等待用户裁决下一工作包启动）。**后续候选**（按 G0 阶段纪律不主动推荐，需用户显式裁决）：observability-work-package / rserver-http-debt-pack / SSE 三处协议细节统一 / RetryClassifier/RetryBudget/RetryExecutor 三套重试合并 / Agent Loop 事件类型命名规范化 / Result Studio 事件类型规范。
 
 - **BLOCK-10-ARCHITECTURE 工作包 COMPLETED（active → completed · 2026-08-18）**：依据 `docs/block-10-architecture-plan.md` v0.2 active 计划，12 主范围全部落地（A-001/2/3/5/7/8/9/10 + PR-012 + E-019 full + A-006 部分）。**PHASE 1 DB 体系化 + 配置快赢**：commit `a4f8bcb`（A-007 DB singleton + PR-012 + E-019 busy_timeout）+ commit `48e19e2`（A-009 端口统一 + A-010 env 集中 + jspdf 移除）。**PHASE 2 r-server 大文件拆分**：commit `101dcfc`（result-studio 9 子域 15 端点）+ commit `cd287f5`（harness 8 子域 19 端点）+ commit `d620aa3`（ai-agent 5 子域 3 端点）。**PHASE 3 agent-runner 拆分 + 跨层解环**：commit `5f6c2de`（agent-runner 1799→3 子模块）+ commit `3635e7e`（A-003 configure 注入 + A-008 act-tools 循环解环）。**验证**：chf0 5/5 PASS + 106+ new tests PASS + 0 regression + 4 治理门 GREEN。**7 关联候选不外推**：observability-work-package / rserver-http-debt-pack / type-drift-pack / fixture-manifest-pack 等。**收口笔录**：G0 开发期常态 · 不外推 packaged/Provider/GA。**closeout 报告** `docs/block-10-architecture-closeout.md`。**当前 active 工作包**：NONE。
+
+## 2026-08-19 BLOCK-15 架构债+性能债工作包第一阶段收口
+
+> 本节为 BLOCK-15-ARCHITECTURE-PERF 工作包第一阶段（SUB-15.1 PHASE 2 / SUB-15.2 PHASE 1 / SUB-15.3 PHASE 1 / SUB-15.4 PHASE 0）收口同步笔录。
+
+### 第一阶段完成摘要
+
+| SUB | 范围 | PHASE 完成 | 核心交付 | 状态 |
+|-----|------|-----------|---------|------|
+| SUB-15.1 | main.js 中风险函数拆分 | PHASE 0✅ / PHASE 1✅ / **PHASE 2✅** / PHASE 3待续 / PHASE 4待续 | 9 函数→7 模块；main.js 1001→770行（-23%） | 进行中 |
+| SUB-15.2 | IPC channel catalog + 门禁 | PHASE 0✅ / **PHASE 1✅** / PHASE 2待启动 | 108 channels / 50 pairs / 0 orphans；自写 validator；preload orphaned listener 修复 | 进行中 |
+| SUB-15.3 | dev Electron 启动 profile fixture | **PHASE 1✅** | `--cdp` T0→T4 测量（spawn / appReady / windowShown / DOMContentLoaded / load） | 已完成 |
+| SUB-15.4 | IPC 序列化 backpressure fixture | **PHASE 0✅** | 1/10/100MB 延迟测量；G0 合规（不引入 Worker/MessageChannel/SAB） | 进行中 |
+
+### 4 commits
+
+| Commit | 内容 |
+|--------|------|
+| `60ccef3` | BLOCK-15 PHASE 0 调研 + PHASE 1 落地（main.js 拆分 + IPC catalog + profile fixture） |
+| `ffa5bfc` | SUB-15.1 PHASE 2：9 中风险函数 → 7 模块，main.js 1001→770行 |
+| `87bd0f6` | SUB-15.4 PHASE 0：IPC backpressure fixture 359行 + 12 tests PASS |
+| `ccd4457` | SUB-15.2 PHASE 1：IPC catalog validator + SUB-15.3 PHASE 1 `--cdp` 模式 |
+
+### 验证状态
+
+- `docs:check`：PASS（131 documents）
+- `ui:audit:check`：PASS（149 UI 编号）
+- `chf0-critical`：33/33 PASS
+- `window-controls`：6/6 PASS
+- `node scripts/validate-ipc-catalog.mjs`：PASS（0 orphan channels）
+
+### 后续 PHASE（待用户裁决启动）
+
+- **SUB-15.1 PHASE 3**：`createWindow` 260行高风险拆分（BLOCK-9.1 未覆盖的最后一块）
+- **SUB-15.1 PHASE 4**：BLOCK-15 综合 closeout
+- **SUB-15.2 PHASE 2**：plugin schema 扩展 + payload shape 验证
+- **SUB-15.4 PHASE 1**：event-loop lag 探针集成
+
+### 不变量守住
+
+- `src/preload.js`（除 orphaned listener 修复）：0 diff
+- `frontend/src/lib/electron.d.ts`：0 diff
+- `frontend/src/lib/desktopBridge.ts`：0 diff
+- `core/shared-backend/*`：0 diff
+- IPC channel 契约：100% 不变
+
+### G0 合规
+
+G0 开发期常态 · 不外推 packaged/Provider/GA/P7/notarization/dist staleness G1+。
+
+**当前 active 工作包**：BLOCK-15-ARCHITECTURE-PERF（第一阶段已收口，后续 PHASE 等待用户裁决）。
+
