@@ -5,9 +5,28 @@
 import type { CopilotContext } from '@/lib/copilotContext';
 
 import { getPlatformApiPrefix } from '@/lib/authClient';
+import { biof3Events, dispatchBioF3Event } from '@/lib/events';
+import type { AgentTaskDoneDetail } from '@/lib/events';
 
 export function getApiPrefix(): string {
   return getPlatformApiPrefix();
+}
+
+/**
+ * BLOCK-16 PHASE 3：在 primary agent task 收尾时派发 biof3:agent-task-done，
+ * 触发 useWorkingTreeReview 自动弹出浮层。仅 kind === 'primary' 触发；
+ * subagent 收尾不广播（避免淹没）。filesChanged 默认空数组 —— 后端 SSE
+ * 当前不带改动清单，renderer 走 useWorkingTreeReview 自刷兜底。
+ */
+function emitAgentTaskDone(taskId: string, optsKind?: string): void {
+  if (!taskId) return;
+  if (optsKind === 'subagent') return;
+  try {
+    const detail: AgentTaskDoneDetail = { taskId, filesChanged: [] };
+    dispatchBioF3Event(biof3Events.agentTaskDone, detail);
+  } catch {
+    // 事件总线失败不应阻塞 SSE 收口路径
+  }
 }
 
 function getAuthHeader(): Record<string, string> {
@@ -512,7 +531,7 @@ export async function subscribeAgentTask(
   opts: StreamChatOptions,
   afterSeq = 0
 ): Promise<void> {
-  const { signal, onDone } = opts;
+  const { signal, onDone, kind } = opts;
   // token 放 query（fetch 也能带 header，但 query 兼容 EventSource 未来切换）
   const authHeader = getAuthHeader();
   const token = authHeader.Authorization?.replace('Bearer ', '');
@@ -544,6 +563,7 @@ export async function subscribeAgentTask(
         const data = m[1];
         if (data === '[DONE]') {
           onDone?.();
+          emitAgentTaskDone(taskId, kind);
           try {
             localStorage.removeItem('biof3_agent_task_' + taskId);
           } catch {}
@@ -562,6 +582,7 @@ export async function subscribeAgentTask(
     }
   }
   onDone?.();
+  emitAgentTaskDone(taskId, kind);
 }
 
 /** 处理单个 SSE 事件对象（原 streamChat 的解析逻辑，task/legacy 共用） */
@@ -580,6 +601,7 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
     onTopicShift,
     onLoopPhase,
     onLoopIteration,
+    kind,
   } = opts;
   if (obj.error) {
     onError?.(new Error(obj.error));
@@ -658,6 +680,9 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
     return;
   }
   if (obj.event === 'done') {
+    const doneTaskId =
+      (typeof obj.taskId === 'string' && obj.taskId) || 'legacy';
+    emitAgentTaskDone(doneTaskId, kind);
     return;
   }
   const delta = obj?.choices?.[0]?.delta?.content;
@@ -712,6 +737,7 @@ async function streamChatLegacy(opts: StreamChatOptions): Promise<void> {
           const data = m[1];
           if (data === '[DONE]') {
             onDone?.();
+            emitAgentTaskDone('legacy', kind);
             return;
           }
           try {
@@ -724,6 +750,7 @@ async function streamChatLegacy(opts: StreamChatOptions): Promise<void> {
       }
     }
     onDone?.();
+    emitAgentTaskDone('legacy', kind);
   } catch (err: unknown) {
     if ((err as Error)?.name === 'AbortError') return;
     onError?.(err instanceof Error ? err : new Error(String(err)));

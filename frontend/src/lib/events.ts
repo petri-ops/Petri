@@ -56,6 +56,13 @@ export const biof3Events = {
    * project-workspace subscribes and refreshes the conversation list + other projects.
    */
   conversationForked: 'biof3:conversation-forked',
+
+  /**
+   * BLOCK-16 PHASE 3：agent task 收尾时由 SSE parser 派发。
+   * useWorkingTreeReview 订阅：自动弹出浮层，避免用户手动点 Review 按钮。
+   * payload 含 taskId（agent task identifier）+ filesChanged（若后端在 done 时附了改动清单）。
+   */
+  agentTaskDone: 'biof3:agent-task-done',
 } as const;
 
 export interface ConversationForkedDetail {
@@ -63,6 +70,16 @@ export interface ConversationForkedDetail {
   newConversationId: string;
   /** Project ID of the forked conversation */
   projectId: string;
+}
+
+/**
+ * BLOCK-16 PHASE 3：agent task 完成事件 payload。
+ * taskId 必填；filesChanged 由后端 SSE done 事件可选附带（v1 thin-slice 默认空数组，renderer
+ * 走 useWorkingTreeReview 自刷 status 兜底——避免 chat 协议层协议变更）。
+ */
+export interface AgentTaskDoneDetail {
+  taskId: string;
+  filesChanged?: Array<{ path: string; status: string }>;
 }
 
 // ---------------------------------------------------------------------------
@@ -128,6 +145,7 @@ export type BioF3EventMap = {
   [biof3Events.browserBack]: undefined;
   [biof3Events.browserForward]: undefined;
   [biof3Events.conversationForked]: ConversationForkedDetail;
+  [biof3Events.agentTaskDone]: AgentTaskDoneDetail;
 };
 
 /** Dispatch a typed event on window */

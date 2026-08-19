@@ -14,7 +14,7 @@
  * runAgentLoop function signature: 100% unchanged from before refactor.
  */
 
-const { buildSystemPrompt, localizeToolResult } = require('./helpers/system-prompt');
+const { buildSystemPrompt, localizeToolResult, loadWorkingTreeRejectEntries } = require('./helpers/system-prompt');
 const { appendDesktopAgentInstructions } = require('./helpers/desktop-agent-prompt');
 const { renderPluginDemoPathsForPrompt } = require('./helpers/plugin-demo-prompt');
 const llmClient = require('./helpers/llm-client');
@@ -328,6 +328,22 @@ async function runAgentLoop({
     context && typeof context === 'object'
       ? { ...context, audience: isGuest ? 'guest' : 'user' }
       : { audience: isGuest ? 'guest' : 'user' };
+
+  // BLOCK-16 PHASE 3：把 working-tree-review 拒绝清单注入 ctxForPrompt。
+  // system-prompt.js 检测到 workingTreeRejects（已构造好的 entries）就直接渲染；
+  // 否则用 workingTreeRejectsUserDataDir 自动从磁盘读。两条入口互斥：
+  // ctxForPrompt 优先，磁盘读是兜底。
+  if (typeof process !== 'undefined' && process.env && process.env.BIOF3_USER_DATA_DIR) {
+    const userDataDir = process.env.BIOF3_USER_DATA_DIR;
+    try {
+      const entries = loadWorkingTreeRejectEntries(userDataDir, { limit: 10 });
+      if (entries.length > 0) {
+        ctxForPrompt.workingTreeRejects = entries;
+      }
+    } catch {
+      // 拒绝清单读取失败不阻塞 prompt 构建
+    }
+  }
 
   // ---------- Event emitter: onEvent + task_events persistence ----------
   let _seq = 0;
