@@ -30,6 +30,21 @@
       "artifacts": {
         "macos-arm64": { "url": "built-in://skills/go-enrichment-analysis", "sha256": null }
       }
+    },
+    "sc-analysis-standard": {
+      "id": "sc-analysis-standard",
+      "version": "1.0.0",
+      "source": "built-in",
+      "kind": "skill",
+      "category": "bioinformatics/single-cell",
+      "capabilities": ["py-single-cell", "r-single-cell"],
+      "plugins": {
+        "required": ["scanpy-advanced", "seurat-standard"],
+        "optional": ["celltypist", "cellchat", "scvi-tools"]
+      },
+      "artifacts": {
+        "macos-arm64": { "url": "built-in://skills/sc-analysis-standard", "sha256": null }
+      }
     }
   }
 }
