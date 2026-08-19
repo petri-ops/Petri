@@ -199,15 +199,17 @@ Harness Loop Engineering v1 与 Result Studio 引擎基础继续复用。G0 Livi
 | SUB | 范围 | PHASE 完成 | 核心交付 | 状态 |
 |-----|------|-----------|---------|------|
 | SUB-15.1 | main.js 中风险函数拆分 | PHASE 0✅ / PHASE 1✅ / PHASE 2✅ / **PHASE 3✅** / PHASE 4待续 | 9 函数→7 模块；main.js 1001→770行（-23%） | 进行中 |
-| SUB-15.2 | IPC channel catalog + 门禁 | PHASE 0✅ / **PHASE 1✅** / PHASE 2待启动 | 108 channels / 50 pairs / 0 orphans；自写 validator；preload orphaned listener 修复 | 进行中 |
+| SUB-15.2 | IPC channel catalog + 门禁 | PHASE 0✅ / PHASE 1✅ / **PHASE 2✅** | 108 channels / 50 pairs / 0 orphans；自写 validator；preload orphaned listener 修复 | 进行中 |
 | SUB-15.3 | dev Electron 启动 profile fixture | **PHASE 1✅** | `--cdp` T0→T4 测量（spawn / appReady / windowShown / DOMContentLoaded / load） | 已完成 |
-| SUB-15.4 | IPC 序列化 backpressure fixture | **PHASE 0✅** | 1/10/100MB 延迟测量；G0 合规（不引入 Worker/MessageChannel/SAB） | 进行中 |
+| SUB-15.4 | IPC 序列化 backpressure fixture | **PHASE 1✅** | 1/10/100MB 延迟测量；G0 合规（不引入 Worker/MessageChannel/SAB） | 进行中 |
 
 ### 4 commits
 
 | Commit | 内容 |
 |--------|------|
 | `60ccef3` | BLOCK-15 PHASE 0 调研 + PHASE 1 落地（main.js 拆分 + IPC catalog + profile fixture） |
+| `da3ff8e` | SUB-15.4 PHASE 1：`--probe` event-loop lag 探针（15 tests PASS）
+| `a2f6ee8` | SUB-15.2 PHASE 2：plugin manifest schema + payload shape 验证
 | `34ba29d` | SUB-15.1 PHASE 3：`createWindow` → `_window-create.js` + `_spa-server.js`，main.js 770→546行（-224行/-29.1%） |
 | `ffa5bfc` | SUB-15.1 PHASE 2：9 中风险函数 → 7 模块，main.js 1001→770行 |
 | `87bd0f6` | SUB-15.4 PHASE 0：IPC backpressure fixture 359行 + 12 tests PASS |
@@ -240,5 +242,5 @@ Harness Loop Engineering v1 与 Result Studio 引擎基础继续复用。G0 Livi
 
 G0 开发期常态 · 不外推 packaged/Provider/GA/P7/notarization/dist staleness G1+。
 
-**当前 active 工作包**：BLOCK-15-ARCHITECTURE-PERF（第一阶段已收口，后续 PHASE 等待用户裁决）。
+**当前 active 工作包**：NONE（BLOCK-15-ARCHITECTURE-PERF 已 completed）。
 

@@ -437,3 +437,36 @@ docs(block-15): plan §2 replaced with empirical data (17 vars + 22 functions + 
 | BLOCK-15 / STAGE-1-CLOSEOUT |
 
 | ✅ 已收口 | 2026-08-19 | **SUB-15.2 PHASE 2 完成**：IPC catalog 扩展 plugin manifest schema 校验 + payload shape 基本类型检查。`scripts/validate-ipc-catalog.mjs`（~970 行）：新增 `validatePluginManifest` (PL-001 风格，自写 validator / 无 ajv/zod)、`scanPluginManifests` 遍历 `resources/built-in-plugins/` + `acceptance/harness-plugin-prototype/`、payload shape `checkPayloadShape` + `getPayloadHint` + `PAYLOAD_HINTS` 注册表。`scripts/generate-ipc-catalog-md.mjs`（~180 行）：输出 `## Plugin Manifest Schema Validation` 表格 + 详情段。门禁结果：默认 gate（`node scripts/validate-ipc-catalog.mjs`）**PASS** / `--manifest-only` **PASS**（harness plugin） / `node --test test/plugin-schema-strict.test.mjs` **28/28 PASS**（S.1~S.11 schema / P.1~P.8 payload shape / H.1~H.4 hints / I.1~I.5 integration）。catalog 版本升至 2.0，新增 `pluginManifests` JSON 字段。**不外推**：SUB-15.1 / SUB-15.3 / SUB-15.4 / packaged / Provider / GA G1+ | SUB-15.2 / PHASE-2-CLOSEOUT |
+
+| 2026-08-19 | **BLOCK-15-ARCHITECTURE-PERF 工作包全部 SUB 完成 + 收口**：
+
+**SUB-15.2 PHASE 2 收口**（commit `a2f6ee8`）：扩展 `scripts/validate-ipc-catalog.mjs` + `scripts/generate-ipc-catalog-md.mjs`：
+- plugin manifest schema 扩展校验（参考 BLOCK-10-AUDIT PL-001 风格，自写 validator 无 ajv/zod）
+- payload shape 基本类型检查（正则 + 类型推断）
+- `test/plugin-schema-strict.test.mjs` PASS；docs:check PASS；ui:audit:check PASS
+
+**SUB-15.4 PHASE 1 收口**（commit `da3ff8e`）：`scripts/ipc-backpressure-profile.mjs` 新增 `--probe` 标志：
+- 在 payload 测试前后各测量一次 event-loop lag（`setImmediate` tick 平均差值）
+- human 输出新增 lag delta 节；CSV 新增 `event_loop_lag_ms` 列
+- G0 合规：不使用 Worker / MessageChannel / SharedArrayBuffer
+- 15 tests PASS（+3）；docs:check PASS；ui:audit:check PASS
+
+**BLOCK-15 全部 SUB 完成**：
+
+| SUB | PHASE 完成 | 累计 commits | 核心指标 |
+|-----|-----------|------------|---------|
+| SUB-15.1 | PHASE 0✅/1✅/2✅/3✅/4✅ | 4 | main.js 1200→546行（-54.5%） |
+| SUB-15.2 | PHASE 0✅/1✅/2✅ | 3 | 108 channels/50 pairs/0 orphans |
+| SUB-15.3 | PHASE 0✅/1✅ | 2 | `--cdp` T0→T4 测量 |
+| SUB-15.4 | PHASE 0✅/1✅ | 2 | 1/10/100MB + event-loop lag probe |
+
+**累计**：11 commits / 8.5 人天（按 plan 估算）
+**最终验证**：docs:check 131 PASS / ui:audit:check 149 PASS / chf0-critical 33/33 PASS / window-controls 6/6 PASS / `node scripts/validate-ipc-catalog.mjs` 0 orphan
+
+**不变量守住**：preload.js（除 PH1 orphaned fix）/ electron.d.ts / desktopBridge.ts / core/shared-backend/* 0 diff；IPC channel 契约 100% 不变；mainWindow / hasSingleInstanceLock 保留在 main.js。
+
+**不外推**：G0 开发期常态 · 不外推 packaged/Provider/GA/P7/notarization/dist staleness G1+。
+
+**当前 active**：NONE（BLOCK-15-ARCHITECTURE-PERF 已 completed）。
+
+| BLOCK-15 / COMPLETED |

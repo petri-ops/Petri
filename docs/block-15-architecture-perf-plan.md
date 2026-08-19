@@ -942,4 +942,4 @@ BLOCK-15 完成后须同步以下 canonical 文档：
 |-------|------|------|
 | PHASE 0（调研） | 从源码枚举 channel（✅ 已完成） | 收口 |
 | **PHASE 1（门禁脚本）** | `validate-ipc-catalog.mjs` + catalog 生成（✅ 已完成） | **本次收口** |
-| PHASE 2 | plugin schema 扩展 + payload shape 验证（待启动） | planned |
+| **PHASE 2（门禁脚本扩展）** | plugin schema 扩展 + payload shape 验证（✅ 已完成，见 §15.2.x.1～§15.2.x.5） | **本次收口** |
