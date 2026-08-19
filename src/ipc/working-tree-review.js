@@ -19,8 +19,8 @@
 const path = require('path');
 const fs = require('fs');
 const { ipcMain, app } = require('electron');
-const { createGitAdapter, GitAdapterError } = require('../core/shared-backend/git-adapter');
-const { parseUnifiedHunks } = require('../core/r-server/mcp/ide-tools/diff-helpers');
+const { createGitAdapter, GitAdapterError } = require('../../core/shared-backend/git-adapter');
+const { parseUnifiedHunks } = require('../../core/r-server/mcp/ide-tools/diff-helpers');
 const { createSenderGuard } = require('./_sender-guard');
 
 const MAX_HUNK_LINES_HARD_CAP = 5000;

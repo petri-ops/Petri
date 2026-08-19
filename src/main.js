@@ -422,9 +422,9 @@ async function main() {
   startContentSync({ require });
 
   // 5. 设置 IPC
-  setupWindowIpc({ ipcMain, process, app, getMainWindow: () => mainWindow });
+  setupWindowIpc({ ipcMain, process, app, getMainWindow });
   setupAgentWorkbenchFlagsIpc({
-    getMainWindow: () => mainWindow,
+    getMainWindow,
     getAgentWorkbenchFlags: () => agentWorkbenchFlags,
     publishAgentWorkbenchFlags,
   });
