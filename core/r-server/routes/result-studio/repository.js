@@ -25,7 +25,7 @@ module.exports = {
    * PHASE 2.1b 注册函数。`options.repo()` 是共享闭包工厂，首次请求时创建。
    */
   register(app, options) {
-    if (typeof app !== 'object' || typeof app.get !== 'function') {
+    if (typeof app.get !== 'function') {
       throw new Error('result-studio/repository register requires an Express app');
     }
     if (!options || typeof options.repo !== 'function') {

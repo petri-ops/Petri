@@ -46,7 +46,7 @@ const sqlite = db.db;
  */
 module.exports = {
   register(app) {
-    if (typeof app !== 'object' || typeof app.get !== 'function') {
+    if (typeof app.get !== 'function') {
       throw new Error('result-studio/index register requires an Express app');
     }
 

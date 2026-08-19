@@ -51,7 +51,7 @@ const TABLE_EXTENSIONS = /\.(csv|tsv)$/i;
 
 module.exports = {
   register(app, options) {
-    if (typeof app !== 'object' || typeof app.get !== 'function') {
+    if (typeof app.get !== 'function') {
       throw new Error('result-studio/revisions register requires an Express app');
     }
     if (!options || typeof options.repo !== 'function'

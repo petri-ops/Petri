@@ -17,7 +17,7 @@ const { buildContextBoundPreviewBudget } = require('../_helpers/context');
 
 module.exports = {
   register(app, options) {
-    if (typeof app !== 'object' || typeof app.get !== 'function') {
+    if (typeof app.get !== 'function') {
       throw new Error('result-studio/preview-budget register requires an Express app');
     }
     if (!options || typeof options.projectContext !== 'function' || typeof options.repo !== 'function') {

@@ -28,7 +28,7 @@ const loop = require('./loop');
 
 module.exports = {
   register(app) {
-    if (typeof app !== 'object' || typeof app.get !== 'function') {
+    if (typeof app.get !== 'function') {
       throw new Error('routes/harness/index register requires an Express app');
     }
     // 端点声明顺序与原 routes/harness.js 完全一致（resources → workflow → repair →
