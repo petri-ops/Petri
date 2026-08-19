@@ -4,8 +4,9 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-18（远程分支清理 39 条 → 仅剩 main；Wave 0 台账 16 项全 verified 早已由 PR #30~44 合入——更正此前"未合并"误判，根因是本机 git fetch 假同步只写 FETCH_HEAD）
+最后更新：2026-08-19（BLOCK-15 架构债+性能债调研+plan v0.1 DRAFT 创建；AUDIT-LOG entry 已追加）（远程分支清理 39 条 → 仅剩 main；Wave 0 台账 16 项全 verified 早已由 PR #30~44 合入——更正此前"未合并"误判，根因是本机 git fetch 假同步只写 FETCH_HEAD）
 
+| 2026-08-19 | **BLOCK-15-ARCHITECTURE-PERF 工作包启动（PHASE 0 调研 + plan v0.1 DRAFT）**：基于 BLOCK-10-ARCHITECTURE closeout 审计发现 Tier 1（main.js 全面重拆 + IPC catalog 自动校验门禁 + plugin manifest schema strict）与 Tier 4（dev Electron 启动 profile fixture + IPC 序列化 backpressure 测量 fixture）共 5 项完全未被 BLOCK-10 覆盖。**用户 4 项决策**：① BLOCK-11 已完成 / ② main.js 全面重拆（选项B）/ ③ IPC backpressure 仅测量 fixture / ④ IPC catalog + plugin schema 合并 + 自写 validator。**plan** [block-15-architecture-perf-plan.md](block-15-architecture-perf-plan.md)（734 行 / v0.1 DRAFT）：SUB-15.1（main.js 重拆 PHASE 0-4 / 5 commits / 4.0人天）+ SUB-15.2（IPC catalog+schema PHASE 0-2 / 4 commits / 2.5人天）+ SUB-15.3（dev Electron profile PHASE 0-1 / 2 commits / 1.0人天）+ SUB-15.4（IPC backpressure PHASE 0-1 / 2 commits / 1.0人天）= 总计 13 commits / 8.5 人天。**DOC-REGISTRY**：BLOCK-15-ARCHITECTURE-PERF-PLAN planned/canonical。**当前 active**：BLOCK-15（v0.1 DRAFT，用户 2026-08-19 裁决激活 v1.0 ACTIVE）。**不外推**：packaged/Provider/GA/P7/notarization G1+。| BLOCK-15-ARCHITECTURE-PERF / PLAN-V1.0-ACTIVE |
 - ✅ 2026-08-18 20:50 远程分支清理收口：39 条远程分支全部删除（remote 现仅剩 main），本地同步清 24 条分支 + 移除 wave1 陈旧 worktree。构成：① 20 条 ahead=0（Wave 0 验收 codex/ui-*-verified 14 条经 PR #31~44 合入、fix/ui-038-042 经 PR #30、feat/ui-wave0 经 PR #10、fix/wave1-ledger-verify 经 PR #14、feat/agent-concurrency、wb/* 5 条 0-commit 同步分支）；② 19 条 diverged 中间态（codex/ui-*-verify/-regression/-partial、codex/ui-settings-regressions、docs/ui-verify-checklist、feat/result-studio-p0、feat/ui-wave1）唯一独有提交均为 de76e55（SummaryRetryActions 重构，已被 main 的 toolSummaryPresentation.ts 方案取代）。全部提交作者核验为 Diandian-ops（用户本人账号，非第三方）。wb/* 删除经用户裁决，取代 2026-08-16 WB-NAMESPACE-PUSH 登记项（内容早以 fast-forward 在 main）。删除不丢内容：main 含全部合入提交，de76e55 可经 SHA 访问。
 
 - ✅ 2026-08-16 23:38 BLOCK-9-MEGA-FILE-REFACTOR 工作包收口（用户裁决"按照你的建议来"启动当日 4 PHASE 全部完成）。4 commit 落地：d87a0f8 PHASE 0 启动 + 评审报告永久化 / e78567c PHASE 1 _data.ts 2157 → 3 文件 / 1c14f49 PHASE 2 buildPreviewTable 抽 lib/file-preview/ / c1e2bd5 PHASE 3 project-workspace.tsx 3213 → 3114 + 8 helpers + types 抽离。3 项重构（基于 senior-engineer-review-2026-08-16.md P0/P1 5 项中的 3 项）：① 拆 _data.ts 2157 → 3 文件（registry/categories/inventory + 兼容；实际无 demo 字段） / ② 抽 buildPreviewTable 解决 ResultView + project-workspace 重复 / ③ 拆 project-workspace.tsx 保守拆分（types + helpers；组件链依赖复杂未拆子组件）。UI-162/163/164 全部 verified。验证：tsc 0 / vitest 75 文件 630 tests PASS / 4 治理门 GREEN / 6 个 consumer 0 改动 / 不变量守住。不外推：BLOCK-9.1 main.js 2450 / BLOCK-9.2 SimpleChat 2153 / BLOCK-9.3 plugin-manager 1457 / BLOCK-9.4 DesktopSettingsPanel 1515 / BLOCK-9.5 useSkillStore 743 / BLOCK-9.6 IPC channel 常量集中 6 项 + packaged / dist / Provider / P7 / GA / E1-d/E1-e G1+ / dist staleness G1+ / i18n / 不重新激活 BLOCK-2/3/4/5/6/7/8。当前无 active 工作包。细节见 docs/block-9-mega-file-refactor-closeout.md。
@@ -281,3 +282,45 @@
 - **PHASE 2 启动条件**：本修复仅恢复 PHASE 1 closeout 与代码实际状态的一致性，**不构成 PHASE 2 启动授权**。PHASE 2 仍需用户显式裁决进入 G1+ 阶段才能启动（参见 `docs/block-11-phase-1-closeout.md` §7）。
 - **状态变更**：原 🔴 PHASE 1 manifest 不一致 audit findings（5 项）→ ✅ 已收口。处理记录与本节同步登记到上方"当前待处理项"表。
 - **commit（已落盘）**：subject = `fix(block-11): restore PHASE 1 manifest.json entries per closeout audit findings`，3 files changed / 184 insertions(+)，已 commit 到 main 分支；未 push 到 remote，按用户要求。**注**：commit hash 未单独引用，因 amend 操作（仅追加 AUDIT-LOG commit hash 备注行）会改变 hash；以 `git log --oneline -1 main` 当前 HEAD 为准。
+
+## 2026-08-19 BLOCK-15 PHASE 0 调研 + PHASE 1 落地收口
+
+### BLOCK-15 PHASE 0 — 调研成果（4 worker 全部完成）
+
+**SUB-15.1 plan §2 更新**（worker `c874fada`）：原 §2 lines 55–137（84 行）替换为新 §2.1 实测数据 + §2.2 + §2.3 + §2.4（151 行 → 801 行总长）。新增：17 个模块级变量实测表、22 个函数真实行号偏差表、BLOCK-9.1 import 状态（16 个）、12 个 IPC handler 清单、4/4 不变量 PASS、范围差异说明（UR-VAR / UR-SC-1 / UR-FIGCODE）、SUB-15.2/15.3/15.4 依赖声明。
+
+**SUB-15.2 IPC Catalog**（worker `12adb78e`）：main.js 原生 handler 22 个（8 handle/invoke + 7 send + 4 on + 3 updater send） + src/ipc/*.js 37 个 + branch-handlers.js 18 个 + result-handlers.js 12 个 = **86 个总 handler**。Preload：51 invoke + 21 on + 4 send = ~76 调用/监听。**一致 channel 对：51 对**。**Shadow channel（main-only，无 preload 暴露）：13 个**（branch:project:* × 4 / message:* × 6 / branch:get / branch:children / result:createWithBranch）。**Catalog 缺口：0 个**（无 preload 有 invoke 但 main 无 handle）。Catalog 预估 ~200 行。
+
+**SUB-15.3 Profile Fixture**（worker `3263d12a`）：`scripts/dev-electron-profile.mjs`（248 行）+ `test/dev-electron-profile.test.mjs`（157 行）= **11/11 测试全 PASS**。Baseline：main.js 1032 行 / preload.js 348 行 / 11 channels / file-read median 0.1ms。发现生产代码预存问题：main.js L14 和 L39 重复 `const { ipcMain } = require("electron")` 声明（L39 的 ipcMain 被 L14 遮蔽）。
+
+**预存问题升级为 AUDIT-LOG 广播**：main.js L14/L39 重复 ipcMain 声明——L14 是原始正确声明，L39 被遮蔽，实际无运行时错误（遮蔽层从未被执行），但代码质量风险：若未来 refactor 移除 L14，L39 静默变为孤岛。建议 SUB-15.1 PHASE 2+ 清理。**当前 BLOCK-15 active，不外推**。
+
+### BLOCK-15 PHASE 1 — SUB-15.1 PHASE 1 落地（worker `0cb2271a`）
+
+**4 新文件 / 352 行**：`src/ipc/workbench-flags.js`（47）+ `src/main/core-utils.js`（243）+ `src/main/csp-config.js`（45）+ `src/ipc/skills-window.js`（17）。
+
+**9 个函数提取**：parseAgentWorkbenchFlags / setupAgentWorkbenchFlagsIpc / resolveCoreRoot / resolveResource / resolveCore / resolveNodeBin / reserveAvailablePort / setupCsp / _resolveSkillsIpcWindow。
+
+**main.js**：1201 → 1001 行（−200 行，git diff +34 import / −233 提取代码）。
+
+**不变量 100% 守住**：preload.js 0 修改 / electron.d.ts 0 修改 / desktopBridge.ts 0 修改 / IPC channel 名 100% 不变 / 函数签名 100% 不变 / src/core/shared-backend/* 0 修改。
+
+**5 文件 `node --check` 全部 OK**。
+
+**治理门**：docs:check PASS（130）/ ui:audit:check PASS（149 UI issues with evidence）。
+
+**UI-B15-1** 已追加到 `docs/ui-productization-audit.md`。
+
+### commit 建议
+
+```
+feat(main): SUB-15.1 PHASE 1 — extract 9 low-risk functions to 4 modules
+feat(IPC): SUB-15.2 PHASE 0 — IPC channel catalog (86 handlers, 13 shadow, 51 consistent pairs)
+test(profile): SUB-15.3 PHASE 0 — dev Electron profile fixture (11/11 PASS)
+docs(block-15): plan §2 replaced with empirical data (17 vars + 22 functions + IPC catalog)
+```
+
+**当前 active 工作包**：BLOCK-15（plan v1.0 ACTIVE；PHASE 0 调研完成；PHASE 1 SUB-15.1 落地；SUB-15.2/15.3/15.4 待启动）。
+
+**不外推**：packaged / Provider / GA / P7 / notarization / dist staleness G1+；不动 preload.js / electron.d.ts / desktopBridge.ts / core/shared-backend/* / agent-tools/* / agent-transcripts/*；保持 `qualificationEligible: false` G0 长期开发期常态。
+
