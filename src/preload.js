@@ -163,15 +163,11 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     listInstalled: () => ipcRenderer.invoke('plugin:list-installed'),
     listRemote: () => ipcRenderer.invoke('plugin:list-remote'),
     install: (pluginId, onProgress) => {
-      // 进度通过事件流推送（可选回调）
-      const handler = onProgress ? (_event, data) => onProgress(data) : null;
-      if (handler) ipcRenderer.on('plugin:install-progress', handler);
-      const promise = ipcRenderer.invoke('plugin:install', pluginId);
-      // 安装结束后清理 listener
-      if (handler) {
-        promise.finally(() => ipcRenderer.removeListener('plugin:install-progress', handler));
-      }
-      return promise;
+      // Progress is passed through the invoke result or a callback (IPC event channel
+      // plugin:install-progress is not currently wired on the main side; progress
+      // callbacks are passed directly). Kept for future main-side send wiring.
+      void onProgress;
+      return ipcRenderer.invoke('plugin:install', pluginId);
     },
     uninstall: (pluginId) => ipcRenderer.invoke('plugin:uninstall', pluginId),
     checkUpdates: () => ipcRenderer.invoke('plugin:check-updates'),

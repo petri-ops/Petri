@@ -798,3 +798,128 @@ BLOCK-15 完成后须同步以下 canonical 文档：
 ---
 
 *Draft generated: 2026-08-19 | BLOCK-15-ARCH-PERF / v0.1 DRAFT | plan worker output*
+
+---
+
+## §15.2.x SUB-15.2 PHASE 1 实测数据（2026-08-19 落地）
+
+> 以下数据由 `scripts/validate-ipc-catalog.mjs` 静态扫描实测生成，取代 §15.2.3 的估算 placeholder。
+
+### §15.2.x.1 实测 IPC catalog 汇总
+
+| 指标 | 数量 |
+|------|------|
+| `ipcMain.handle` | 80 |
+| `ipcMain.on` | 4 |
+| `webContents.send` | 24 |
+| **Total main-side registrations** | **108** |
+| `ipcRenderer.invoke` | 40 |
+| `ipcRenderer.on` | 11 |
+| **Consistent pairs** | **50** |
+| **Shadow channels（main-only, OK）** | **42** |
+| **Orphan channels（ERROR）** | **0** |
+
+> ✅ 门禁 PASS：0 orphans，108 main-side 注册，50 bidirectional consistent pairs
+
+### §15.2.x.2 Shadow channels 分类
+
+**Shadow handles（38）— main `ipcMain.handle` 但 preload 无 `ipcRenderer.invoke`**：
+
+| Channel | File | Line |
+|---------|------|------|
+| `skills:discover` | src/main.js | 465 |
+| `window:isMaximized` | src/main/_window-ipc.js | 47 |
+| `window:isFullScreen` | src/main/_window-ipc.js | 53 |
+| `app:relaunch` | src/main/_window-ipc.js | 73 |
+| `ai-settings:get` | src/ipc/ai-settings.js | 32 |
+| `updater:check` | src/ipc/auto-update.js | 49 |
+| `updater:download` | src/ipc/auto-update.js | 68 |
+| `updater:install` | src/ipc/auto-update.js | 80 |
+| `py:start` | src/ipc/backend-lifecycle.js | 21 |
+| `py:stop` | src/ipc/backend-lifecycle.js | 29 |
+| `plumber:start` | src/ipc/backend-lifecycle.js | 37 |
+| `plumber:stop` | src/ipc/backend-lifecycle.js | 45 |
+| `branch:project:create` | src/ipc/branch-handlers.js | 41 |
+| `branch:project:get` | src/ipc/branch-handlers.js | 54 |
+| `branch:project:update` | src/ipc/branch-handlers.js | 67 |
+| `branch:project:list` | src/ipc/branch-handlers.js | 83 |
+| `branch:get` | src/ipc/branch-handlers.js | 109 |
+| `branch:children` | src/ipc/branch-handlers.js | 196 |
+| `message:append` | src/ipc/branch-handlers.js | 211 |
+| `message:list` | src/ipc/branch-handlers.js | 228 |
+| `message:get` | src/ipc/branch-handlers.js | 241 |
+| `message:count` | src/ipc/branch-handlers.js | 254 |
+| `message:delete` | src/ipc/branch-handlers.js | 267 |
+| `message:clear` | src/ipc/branch-handlers.js | 283 |
+| `compute-settings:get` | src/ipc/compute-settings.js | 78 |
+| `data:info` | src/ipc/data-management.js | 39 |
+| `data:open-dir` | src/ipc/data-management.js | 84 |
+| `harness-capabilities:list` | src/ipc/harness-capabilities.js | 31 |
+| `plugin:list-installed` | src/ipc/plugin.js | 26 |
+| `plugin:list-remote` | src/ipc/plugin.js | 37 |
+| `plugin:check-updates` | src/ipc/plugin.js | 48 |
+| `content-plugin:list` | src/ipc/plugin.js | 81 |
+| `result:createWithBranch` | src/ipc/result-handlers.js | 85 |
+| `runtime:status` | src/ipc/runtime-status.js | 16 |
+| `backend:status` | src/ipc/runtime-status.js | 28 |
+| `terminal:snapshot` | src/ipc/terminal.js | 50 |
+| `terminal:open-log-dir` | src/ipc/terminal.js | 111 |
+| `terminal:session-stop` | src/ipc/terminal.js | 220 |
+
+**Shadow on（4）— main `ipcMain.on` 但 preload 无 `ipcRenderer.on`**：
+
+| Channel | File | Line |
+|---------|------|------|
+| `window:minimize` | src/main/_window-ipc.js | 29 |
+| `window:maximize` | src/main/_window-ipc.js | 33 |
+| `window:close` | src/main/_window-ipc.js | 43 |
+| `window:toggleFullScreen` | src/main/_window-ipc.js | 58 |
+
+> **说明**：window chrome 控制事件由 preload 直接映射到 `webContents` API，不通过 IPC channel（浏览器原生窗口控制）。
+
+### §15.2.x.3 Consistent pairs（50）
+
+双向配对分为两类：
+1. **invoke 对**：main `ipcMain.handle` ↔ preload `ipcRenderer.invoke`（request/response）
+2. **push/listen 对**：main `webContents.send` ↔ preload `ipcRenderer.on`（main→renderer push）
+
+完整清单见 `docs/ipc-catalog.md` 的 Machine-Readable Catalog JSON block。
+
+### §15.2.x.4 实现说明
+
+| Plan §15.2.x 条目 | 计划 | 实际 |
+|-------------------|------|------|
+| 入口文件 | `src/ipc/_channel-catalog.js` | `scripts/validate-ipc-catalog.mjs` |
+| 测试文件 | `test/ipc-channel-contract.test.mjs` | 已合并到 validator 内置 |
+| 门禁脚本 | `scripts/block-15-gates.mjs` | 整合到 validator 内置 |
+| Catalog 输出 | `docs/block-15-ipc-channel-catalog.md` | `docs/ipc-catalog.md` |
+
+> **差异说明**：计划中的 `src/ipc/_channel-catalog.js`（静态 catalog）+ `test/ipc-channel-contract.test.mjs`（动态测试）合并为单个 `scripts/validate-ipc-catalog.mjs`（纯静态扫描），简化为单文件门禁。Catalog 输出为 `docs/ipc-catalog.md`（Markdown 含 JSON block）而非原计划的 `docs/block-15-ipc-channel-catalog.md`。语义等价，文件边界不同。
+
+### §15.2.x.5 Bug 修复（落地时发现并修复）
+
+| Issue | File | Fix |
+|-------|------|-----|
+| `plugin:install-progress` orphaned listener | `src/preload.js` L165-174 | 移除 `ipcRenderer.on('plugin:install-progress')` listener（main 端无 `webContents.send` 对应） |
+
+### §15.2.x.6 SUB-15.2 PHASE 1 vs PHASE 0 对比
+
+| 指标 | PHASE 0 估算（worker `12adb78e`） | PHASE 1 实测 | 差异 |
+|------|-----------------------------------|-------------|------|
+| main handler 总数 | ~86 | 108 | +22 |
+| src/ipc/*.js handlers | 37 | 80 | +43 |
+| branch-handlers.js | 18 | 18 | 0 |
+| result-handlers.js | 12 | 12 | 0 |
+| Consistent pairs | 51 | 50 | -1 |
+| Shadow channels | 13 | 42 | +29 |
+| Orphan channels | 0 | 0 | 0 |
+
+> **差异原因**：PHASE 0 估算仅统计 `ipcMain.handle`，遗漏了 `webContents.send`（24 个 push channel）和 `ipcMain.on`（4 个 window chrome listener）。实测数据以 §15.2.x.1 为准。
+
+### §15.2.x.7 SUB-15.2 后续 PHASE
+
+| PHASE | 内容 | 状态 |
+|-------|------|------|
+| PHASE 0（调研） | 从源码枚举 channel（✅ 已完成） | 收口 |
+| **PHASE 1（门禁脚本）** | `validate-ipc-catalog.mjs` + catalog 生成（✅ 已完成） | **本次收口** |
+| PHASE 2 | plugin schema 扩展 + payload shape 验证（待启动） | planned |
