@@ -21,7 +21,11 @@ const path = require('path');
 
 // Scientific analysis runs through the tools routes and tool_job persistence.
 const cacheManager = require('./cache-manager');
-const db = require('./db');
+// BLOCK-10 retention + lifecycle 闭包期望 better-sqlite3 实例（.prepare / .close），
+// 而 db.js 默认导出是 wrapper 对象（{...exports, db, getDatabase}）。两者解构出来
+// 不一致会让 retention-purge 全部失败 + lifecycle.db.close silently no-op。
+// 统一通过 destructure 取底层 better-sqlite3 实例。
+const { db } = require('./db');
 const config = require('./config');
 const { logError } = require('./helpers/error-log');
 
