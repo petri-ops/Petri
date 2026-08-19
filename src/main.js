@@ -41,6 +41,14 @@ const { resolveCoreRoot, resolveResource, resolveCore, reserveAvailablePort, isD
 const { setupCsp } = require("./main/csp-config.js");
 const { _resolveSkillsIpcWindow } = require("./ipc/skills-window.js");
 
+// SUB-15.1 PHASE 2 imports — medium-risk functions extracted to src/main/_*.js
+const { _getSkillsSDK, _publishSkillProgress, _stopSkillsProgressPollerIfIdle, _startSkillsProgressPoller } = require("./main/_skills-runtime.js");
+const { selectBackendPorts } = require("./main/_backend-ports.js");
+const { loadInstalledPlugins } = require("./main/_plugin-loader.js");
+const { startContentSync } = require("./main/_content-sync.js");
+const { publishAgentWorkbenchFlags } = require("./main/_agent-flags.js");
+const { setupWindowIpc } = require("./main/_window-ipc.js");
+const { setupAppMenu } = require("./main/_app-menu.js");
 
 // Guard: core-utils.js requires Electron app; skip if not in Electron env
 let agentWorkbenchFlags = { extraRenderers: false };
@@ -109,64 +117,16 @@ process.stderr?.on?.("error", (err) => {
 //   3. 都没有 → 返回 null，R/Python 功能不可用，提示从插件商店安装
 // reserveAvailablePort 已提取到 src/main/core-utils.js
 
-async function selectBackendPorts() {
-  const gateway = await reserveAvailablePort(3005);
-  const r = await reserveAvailablePort(3001);
-  const python = await reserveAvailablePort(3004);
-  const plumber = await reserveAvailablePort(8787);
-  const renderer = isDevMode ? null : await reserveAvailablePort(3002);
-  if (gateway !== 3005) console.warn(`[desktop] port 3005 occupied; using ${gateway} for gateway`);
-  if (r !== 3001) console.warn(`[desktop] port 3001 occupied; using ${r} for r-server`);
-  if (python !== 3004) console.warn(`[desktop] port 3004 occupied; using ${python} for py-server`);
-  if (plumber !== 8787) console.warn(`[desktop] port 8787 occupied; using ${plumber} for plumber`);
-  if (renderer && renderer !== 3002) console.warn(`[desktop] port 3002 occupied; using ${renderer} for renderer`);
-  return { gateway, r, python, plumber, renderer };
-}
+// selectBackendPorts moved to src/main/_backend-ports.js (SUB-15.1 PHASE 2)
 
-// ── 加载已安装插件 ─────────────────────────────────────────────
-async function loadInstalledPlugins() {
-  try {
-    const { loadAllPlugins } = require("./plugin-manager");
-    await loadAllPlugins();
-    console.log("[desktop] plugins loaded");
-  } catch (e) {
-    console.warn("[desktop] plugin load failed:", e.message);
-  }
-}
+// loadInstalledPlugins moved to src/main/_plugin-loader.js (SUB-15.1 PHASE 2)
 
-// ── 内容增量同步（后台，不阻塞启动）────────────────────────────
-function startContentSync() {
-  try {
-    const { syncContent } = require("./content-sync");
-    // 启动后 5 秒开始首次同步
-    setTimeout(() => {
-      syncContent().catch((e) =>
-        console.warn("[desktop] content sync failed:", e.message),
-      );
-    }, 5000);
-    // 每 4 小时同步一次
-    setInterval(
-      () => {
-        syncContent().catch((e) =>
-          console.warn("[desktop] content sync failed:", e.message),
-        );
-      },
-      4 * 60 * 60 * 1000,
-    );
-  } catch (e) {
-    console.warn("[desktop] content sync module not available:", e.message);
-  }
-}
+// startContentSync moved to src/main/_content-sync.js (SUB-15.1 PHASE 2)
+
+// publishAgentWorkbenchFlags moved to src/main/_agent-flags.js (SUB-15.1 PHASE 2)
 
 // ── 主窗口 ─────────────────────────────────────────────────────
 let mainWindow = null;
-
-function publishAgentWorkbenchFlags() {
-  if (!mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isDestroyed()) return;
-  mainWindow.webContents.send(AGENT_WORKBENCH_FLAG_CHANNEL, {
-    extraRenderers: agentWorkbenchFlags.extraRenderers === true,
-  });
-}
 
 // BioF3 owns local backend ports and must run as a single application
 // instance. A repeated launch focuses the existing window instead of starting
@@ -302,7 +262,7 @@ async function createWindow() {
   });
 
   // 桌面稳定性：拦截 Cmd/Ctrl+R，避免 Electron 硬 reload 断开 SSE、丢失
-  // renderer 内存状态，并造成“前端刷新后后端像断开”的体感。
+  // renderer 内存状态，并造成"前端刷新后后端像断开"的体感。
   // Cmd/Ctrl+R 改为应用内软刷新；Cmd/Ctrl+Shift+R 保留为开发者硬刷新。
   mainWindow.webContents.on("before-input-event", (event, input) => {
     const key = typeof input.key === "string" ? input.key.toLowerCase() : "";
@@ -370,7 +330,7 @@ async function createWindow() {
   // 页面加载完成
   mainWindow.webContents.on("did-finish-load", () => {
     console.log("[renderer] page loaded");
-    publishAgentWorkbenchFlags();
+    publishAgentWorkbenchFlags({ getMainWindow: () => mainWindow, getAgentWorkbenchFlags: () => agentWorkbenchFlags });
   });
 
   // macOS 焦点诊断。开发启动器通过 LaunchServices 获取 GUI 会话；这里只
@@ -445,66 +405,7 @@ async function createWindow() {
   }
 }
 
-// setupAgentWorkbenchFlagsIpc 已提取到 src/ipc/workbench-flags.js
-
-// ── IPC：窗口控制（配合 frame:false 自定义标题栏）──────────────
-function setupWindowIpc() {
-  const resolveWindowForSender = (event) => {
-    if (!mainWindow || mainWindow.isDestroyed()) return null;
-    return event?.sender === mainWindow.webContents ? mainWindow : null;
-  };
-
-  ipcMain.on("window:minimize", (event) => {
-    resolveWindowForSender(event)?.minimize();
-  });
-  ipcMain.on("window:maximize", (event) => {
-    const targetWindow = resolveWindowForSender(event);
-    if (!targetWindow) return;
-    if (targetWindow.isMaximized()) {
-      targetWindow.unmaximize();
-    } else {
-      targetWindow.maximize();
-    }
-  });
-  ipcMain.on("window:close", (event) => {
-    resolveWindowForSender(event)?.close();
-  });
-  ipcMain.handle("window:isMaximized", (event) => {
-    const targetWindow = resolveWindowForSender(event);
-    return targetWindow ? targetWindow.isMaximized() === true : false;
-  });
-
-  // Fullscreen IPC (Mac fullscreen support)
-  ipcMain.handle("window:isFullScreen", (event) => {
-    const targetWindow = resolveWindowForSender(event);
-    return targetWindow ? targetWindow.isFullScreen() : false;
-  });
-  ipcMain.on("window:toggleFullScreen", (event) => {
-    const targetWindow = resolveWindowForSender(event);
-    if (targetWindow) {
-      // For frameless windows on macOS, use simpleFullScreen mode which
-      // automatically hides the Dock and menu bar
-      if (process.platform === "darwin") {
-        targetWindow.setSimpleFullScreen(!targetWindow.isSimpleFullScreen());
-      } else {
-        targetWindow.setFullScreen(!targetWindow.isFullScreen());
-      }
-    }
-  });
-
-  // 重启应用 —— 装完 R/Python 运行时后必须整体重启才生效：
-  // BIOF3_R_HOME 等 env 在启动阶段（resolveRuntime）就固化了，
-  // 单独重启 r-server 子进程仍会读到旧的空值。
-  ipcMain.handle("app:relaunch", async () => {
-    try {
-      app.relaunch();
-      app.exit(0);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
-}
+// setupWindowIpc moved to src/main/_window-ipc.js (SUB-15.1 PHASE 2)
 
 // ── IPC：AI 设置 ───────────────────────────────────────────────
 // ── IPC：计算执行配置 ─────────────────────────────────────────
@@ -539,94 +440,32 @@ function setupWindowIpc() {
 //   状态映射表见 src/_mapSkillRuntimeStatus.js（独立模块，便于 plain Node 单测）；
 //   cancelled 简化为 failed（4 状态枚举硬约束）；UI 区分"取消"vs"失败"由
 //   下游组件按 status + cancelledFlag 渲染。
-let skillsSDK = null;
-const _activeSkillRuntimes = new Map(); // executionId → SkillRuntime
-const _lastCheckpointCount = new Map(); // executionId → number
-let _skillsProgressTimer = null;
 
-function _getSkillsSDK() {
-  if (skillsSDK) return skillsSDK;
-  try {
-    const sdkMod = require(resolveCore("shared-backend", "skills-sdk.js"));
-    const engineMod = require(resolveCore("shared-backend", "workflow-engine.js"));
-    // BLOCK-4 C2 注释：createDefaultSDK 是 skills-sdk.js 顶层高层封装（可能含发现 +
-    // registry 默认植入），createSkillsSDK 是低层工厂（纯 construct 不预填）。
-    // 当前优先用 createDefaultSDK（已在 v1.0 PHASE 1 验证）；createSkillsSDK 是 fallback。
-    // 两个函数的最终"基线 SDK 实例"都基于 CoreSDK；但 pluginManager / workflowEngine
-    // 等扩展字段由本函数手工注入（见下文 `sdk.workflowEngine = ...`），与 core 内部
-    // 工件无关。
-    const { createSkillsSDK, createDefaultSDK } = sdkMod;
-    const { createWorkflowEngine } = engineMod;
-    const base = createDefaultSDK ? createDefaultSDK() : createSkillsSDK();
-    const sdk = base;
-    sdk.workflowEngine = createWorkflowEngine({ sdk: base });
-    skillsSDK = sdk;
-    console.log("[desktop] skills SDK initialized");
-    return skillsSDK;
-  } catch (e) {
-    console.warn("[desktop] skills SDK init failed:", e.message);
-    return null;
-  }
-}
+// Skills runtime state (SUB-15.1 PHASE 2: stays here as shared mutable refs)
+const _skillsRefs = {
+  skillsSDKRef: { current: null },
+  activeRuntimesRef: { current: new Map() }, // executionId → SkillRuntime
+  lastCheckpointCountRef: { current: new Map() }, // executionId → number
+  skillsProgressTimerRef: { current: null },
+};
 
-function _publishSkillProgress(executionId, payload) {
-  if (!mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isDestroyed()) return;
-  try {
-    mainWindow.webContents.send("skills:progress", { executionId, ...payload });
-  } catch (e) {
-    // BLOCK-3 P2 B2: webContents.send 抛错（如主窗口正关闭）不应冒泡到 poller tick
-    if (typeof console !== "undefined" && console.warn) {
-      console.warn(`[desktop] skills progress publish failed for ${executionId}:`, e && e.message);
-    }
-  }
-}
+// _getSkillsSDK / _publishSkillProgress / _stopSkillsProgressPollerIfIdle /
+// _startSkillsProgressPoller moved to src/main/_skills-runtime.js (SUB-15.1 PHASE 2)
 
-function _stopSkillsProgressPollerIfIdle() {
-  // BLOCK-3 P2 A2: 最后一个 execution 终止后停止 poller，避免空转
-  if (_skillsProgressTimer && _activeSkillRuntimes.size === 0) {
-    clearInterval(_skillsProgressTimer);
-    _skillsProgressTimer = null;
-  }
-}
-
-function _startSkillsProgressPoller() {
-  if (_skillsProgressTimer) return;
-  _skillsProgressTimer = setInterval(() => {
-    for (const [executionId, runtime] of _activeSkillRuntimes.entries()) {
-      try {
-        const execCtx = typeof runtime.getExecutionStatus === "function"
-          ? runtime.getExecutionStatus(executionId)
-          : null;
-        if (!execCtx) continue;
-        const checkpoints = Array.isArray(execCtx.checkpoints) ? execCtx.checkpoints : [];
-        const lastCount = _lastCheckpointCount.get(executionId) || 0;
-        if (checkpoints.length !== lastCount) {
-          _lastCheckpointCount.set(executionId, checkpoints.length);
-          _publishSkillProgress(executionId, {
-            status: _mapSkillRuntimeStatus(execCtx.status),
-            checkpoints: checkpoints.slice(),
-          });
-        }
-        // 终态自清
-        if (["complete", "failed", "cancelled"].includes(execCtx.status)) {
-          _activeSkillRuntimes.delete(executionId);
-          _lastCheckpointCount.delete(executionId);
-        }
-      } catch {}
-    }
-    // BLOCK-3 P2 A2: 每 tick 检查是否需要停止
-    _stopSkillsProgressPollerIfIdle();
-  }, 1000);
-}
-
-// _resolveSkillsIpcWindow 已提取到 src/ipc/skills-window.js
+// _resolveSkillsIpcWindow already imported from src/ipc/skills-window.js (SUB-15.1 PHASE 1)
 
 function setupSkillsIpc() {
+  // Skills runtime context passed to all helpers in _skills-runtime.js
+  const _skillsCtx = {
+    resolveCore,
+    refs: _skillsRefs,
+  };
+
   // 规整化 bridge 返回值，保证前端 contract 严格 `{ ok, ... }`
   ipcMain.handle("skills:discover", async (event) => {
     if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
     try {
-      const sdk = _getSkillsSDK();
+      const sdk = _getSkillsSDK({ ..._skillsCtx, getMainWindow: () => mainWindow });
       if (!sdk) return { ok: false, error: "skills SDK unavailable" };
       const skills = sdk.listSkills();
       return { ok: true, skills };
@@ -638,7 +477,7 @@ function setupSkillsIpc() {
   ipcMain.handle("skills:execute", async (event, skillId, params) => {
     if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
     try {
-      const sdk = _getSkillsSDK();
+      const sdk = _getSkillsSDK({ ..._skillsCtx, getMainWindow: () => mainWindow });
       if (!sdk) return { ok: false, error: "skills SDK unavailable" };
       const runtimeMod = require(resolveCore("shared-backend", "skill-runtime.js"));
       const { createSkillRuntime } = runtimeMod;
@@ -655,11 +494,14 @@ function setupSkillsIpc() {
       // 让 poller 能通过 getExecutionStatus 拉快照
       const executionId = `sre_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       const paramsObj = (params && typeof params === "object") ? params : {};
+      const { _mapSkillRuntimeStatus } = require("../_mapSkillRuntimeStatus");
+      const _publish = (execId, payload) =>
+        _publishSkillProgress({ getMainWindow: () => mainWindow }, execId, payload);
       const promise = runtime.execute(paramsObj, { executionId })
         .then((result) => {
           // 终态时显式 publish 一次最终快照
           const status = result && result.success ? "complete" : "failed";
-          _publishSkillProgress(executionId, {
+          _publish(executionId, {
             status,
             checkpoints: [],
             result: result ? result.result : null,
@@ -667,30 +509,30 @@ function setupSkillsIpc() {
           });
           // BLOCK-3 P2 A3: 终态 publish 后立即清理 activeRuntimes，
           // 不再等下个 poller tick（最坏情况节省 1s）
-          _activeSkillRuntimes.delete(executionId);
-          _lastCheckpointCount.delete(executionId);
-          _stopSkillsProgressPollerIfIdle();
+          _skillsRefs.activeRuntimesRef.current.delete(executionId);
+          _skillsRefs.lastCheckpointCountRef.current.delete(executionId);
+          _stopSkillsProgressPollerIfIdle({ refs: _skillsRefs });
           return result;
         })
         .catch((err) => {
-          _publishSkillProgress(executionId, {
+          _publish(executionId, {
             status: "failed",
             checkpoints: [],
             error: err && err.message ? err.message : String(err),
           });
           // BLOCK-3 P2 A3: 失败终态同样立即清理
-          _activeSkillRuntimes.delete(executionId);
-          _lastCheckpointCount.delete(executionId);
-          _stopSkillsProgressPollerIfIdle();
+          _skillsRefs.activeRuntimesRef.current.delete(executionId);
+          _skillsRefs.lastCheckpointCountRef.current.delete(executionId);
+          _stopSkillsProgressPollerIfIdle({ refs: _skillsRefs });
           throw err;
         });
       promise.catch(() => {}); // 阻止未捕获 rejection
-      _activeSkillRuntimes.set(executionId, runtime);
-      _lastCheckpointCount.set(executionId, 0);
-      _startSkillsProgressPoller();
+      _skillsRefs.activeRuntimesRef.current.set(executionId, runtime);
+      _skillsRefs.lastCheckpointCountRef.current.set(executionId, 0);
+      _startSkillsProgressPoller({ getMainWindow: () => mainWindow, refs: _skillsRefs });
       // BLOCK-5 E1-b: 立即 publish 初始 status: 'pending'（避免 poller 首次 tick
       //  1s 延迟；前端可立即在 store 标记为 running 状态）
-      _publishSkillProgress(executionId, {
+      _publish(executionId, {
         status: 'pending',
         checkpoints: [],
       });
@@ -704,10 +546,11 @@ function setupSkillsIpc() {
     if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
     try {
       if (!executionId) return { ok: false, error: "executionId required" };
-      const runtime = _activeSkillRuntimes.get(executionId);
+      const runtime = _skillsRefs.activeRuntimesRef.current.get(executionId);
       if (!runtime) {
         return { ok: false, error: `Unknown execution: ${executionId}` };
       }
+      const { _mapSkillRuntimeStatus } = require("../_mapSkillRuntimeStatus");
       const execCtx = runtime.getExecutionStatus(executionId);
       if (!execCtx) {
         return { ok: false, error: `Execution not found: ${executionId}` };
@@ -735,7 +578,7 @@ function setupSkillsIpc() {
     if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, cancelled: false, error: "unauthorized" };
     try {
       if (!executionId) return { ok: false, cancelled: false, error: "executionId required" };
-      const runtime = _activeSkillRuntimes.get(executionId);
+      const runtime = _skillsRefs.activeRuntimesRef.current.get(executionId);
       if (!runtime) {
         return { ok: false, cancelled: false, error: `Unknown execution: ${executionId}` };
       }
@@ -748,7 +591,7 @@ function setupSkillsIpc() {
   });
 }
 
-// _mapSkillRuntimeStatus 已提取到 src/_mapSkillRuntimeStatus.js（G6 单测需要）。
+// _mapSkillRuntimeStatus already extracted to src/_mapSkillRuntimeStatus.js
 
 // ── IPC：Harness Capability Provisioning — Stage 3 M1 ─────────
 // 只读：让设置页"计算与数据"分类展示 Harness 自备了哪些运行时/包。
@@ -756,7 +599,7 @@ function setupSkillsIpc() {
 // 直接触发，以保持 D8 透明进度和 C-03 安全确认边界。
 // ── 应用生命周期 ───────────────────────────────────────────────
 async function main() {
-  const backendPorts = await selectBackendPorts();
+  const backendPorts = await selectBackendPorts({ reserveAvailablePort, isDevMode });
   // BLOCK-9.1 PHASE 3: setupDesktopEnv moved to src/main/env-coordinator.js
   const { setupDesktopEnv } = require("./main/env-coordinator");
   setupDesktopEnv(backendPorts);
@@ -821,16 +664,16 @@ async function main() {
   // plumber 仍按需启停 - 只在 FigCode 重绘时通过 IPC plumber:start 触发
 
   // 2. 加载已安装插件
-  await loadInstalledPlugins();
+  await loadInstalledPlugins({ require });
 
   // 3. 启动 Python 后端（热启动）
   await startPyServer("boot");
 
   // 4. 内容增量同步（后台）
-  startContentSync();
+  startContentSync({ require });
 
   // 5. 设置 IPC
-  setupWindowIpc();
+  setupWindowIpc({ ipcMain, process, app, getMainWindow: () => mainWindow });
   setupAgentWorkbenchFlagsIpc({
     getMainWindow: () => mainWindow,
     getAgentWorkbenchFlags: () => agentWorkbenchFlags,
@@ -880,8 +723,7 @@ async function main() {
   }
   setupSkillsIpc();
 
-  // 6. 创建窗口
-  // M1-2：CSP 加固——禁用 unsafe-eval，限制资源来源到 self + localhost（后端/SSE/dev server）
+  // 6. CSP 加固——禁用 unsafe-eval，限制资源来源到 self + localhost（后端/SSE/dev server）
   setupCsp({ isDevMode });
 
   // 7. 创建窗口
@@ -922,80 +764,7 @@ app.on("before-quit", () => {
   }
 });
 
-// ── Application Menu with Fullscreen Support ──────────────────
-function setupAppMenu() {
-  if (process.platform !== "darwin") return;
-
-  const template = [
-    {
-      label: app.name,
-      submenu: [
-        { role: "about" },
-        { type: "separator" },
-        {
-          label: "Enter Full Screen",
-          accelerator: "Cmd+Ctrl+F",
-          click: () => {
-            const win = BrowserWindow.getFocusedWindow();
-            if (win) {
-              if (process.platform === "darwin") {
-                win.setSimpleFullScreen(!win.isSimpleFullScreen());
-              } else {
-                win.setFullScreen(!win.isFullScreen());
-              }
-            }
-          },
-        },
-        { type: "separator" },
-        { role: "services" },
-        { type: "separator" },
-        { role: "hide" },
-        { role: "hideOthers" },
-        { role: "unhide" },
-        { type: "separator" },
-        { role: "quit" },
-      ],
-    },
-    {
-      label: "Edit",
-      submenu: [
-        { role: "undo" },
-        { role: "redo" },
-        { type: "separator" },
-        { role: "cut" },
-        { role: "copy" },
-        { role: "paste" },
-        { role: "selectAll" },
-      ],
-    },
-    {
-      label: "View",
-      submenu: [
-        { role: "reload" },
-        { role: "forceReload" },
-        { role: "toggleDevTools" },
-        { type: "separator" },
-        { role: "resetZoom" },
-        { role: "zoomIn" },
-        { role: "zoomOut" },
-        { type: "separator" },
-        { role: "togglefullscreen" },
-      ],
-    },
-    {
-      label: "Window",
-      submenu: [
-        { role: "minimize" },
-        { role: "zoom" },
-        { type: "separator" },
-        { role: "front" },
-      ],
-    },
-  ];
-
-  const menu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(menu);
-}
+// setupAppMenu moved to src/main/_app-menu.js (SUB-15.1 PHASE 2)
 
 // Initialize application menu
-setupAppMenu();
+setupAppMenu({ app, BrowserWindow, Menu, process });
