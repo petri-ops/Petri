@@ -324,3 +324,26 @@ docs(block-15): plan §2 replaced with empirical data (17 vars + 22 functions + 
 
 **不外推**：packaged / Provider / GA / P7 / notarization / dist staleness G1+；不动 preload.js / electron.d.ts / desktopBridge.ts / core/shared-backend/* / agent-tools/* / agent-transcripts/*；保持 `qualificationEligible: false` G0 长期开发期常态。
 
+
+### 2026-08-19 SUB-15.4 PHASE 0 落地
+
+**SUB-15.4 PHASE 0 落地**：
+- `scripts/ipc-backpressure-profile.mjs`（359 行）— IPC backpressure 测量 fixture
+  - 支持 1MB / 10MB / 100MB payload
+  - JSON.stringify / JSON.parse 时间测量
+  - 内存峰值测量
+  - human 和 CSV 两种输出格式
+  - 阈值报警（默认 stringify > 5000ms）
+  - G0 合规：不引入 Worker / MessageChannel / SharedArrayBuffer
+- `test/ipc-backpressure-profile.test.mjs`（169 行）— 12 tests PASS
+  - 1MB / 10MB / 100MB 模式测试
+  - warmup / iterations / threshold / format flag 测试
+  - CSV 格式解析测试
+  - --size 必填和非法值校验
+  - Memory section 和 G0 合规注释测试
+- 治理门：docs:check PASS / ui:audit:check PASS
+- UI-B15-4 已追加到 `docs/ui-productization-audit.md`
+
+**当前 active 工作包**：BLOCK-15（plan v1.0 ACTIVE；PHASE 0 调研完成；PHASE 1 SUB-15.1 落地；SUB-15.2/15.3 已完成；SUB-15.4 PHASE 0 本次完成）。
+
+**不外推**：packaged / Provider / GA / P7 / notarization / dist staleness G1+；不动 preload.js / electron.d.ts / desktopBridge.ts / core/shared-backend/* / agent-tools/* / agent-transcripts/*；保持 `qualificationEligible: false` G0 长期开发期常态。
