@@ -234,7 +234,13 @@ const rServerSupervisor = createOwnedBackendSupervisor({
   spawnProcess: () => {
     const rServerPath = resolveCore("r-server", "server.js");
     const child = spawn(NODE_BIN, [rServerPath], {
-      env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
+      // BLOCK-16 PHASE 3: 把 Electron userData 路径显式注入给 r-server subprocess，
+      // 让 system-prompt 能读 working-tree-review/rejects/（30 天 TTL 拒绝清单）。
+      env: {
+        ...process.env,
+        ELECTRON_RUN_AS_NODE: "1",
+        BIOF3_USER_DATA_DIR: app.getPath("userData"),
+      },
       stdio: ["ignore", "pipe", "pipe"],
     });
 

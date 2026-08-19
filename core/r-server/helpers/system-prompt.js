@@ -252,6 +252,116 @@ function renderResultStudioContextForPrompt(context) {
   return block;
 }
 
+// BLOCK-16 PHASE 3 — 系统 prompt 注入段：把 working tree review 的 hunk 拒绝清单
+// （30 天 TTL，写在 app.getPath('userData')/working-tree-review/rejects/）注入到
+// 当前轮 prompt，让下一次 agent 重新生成时看到用户的拒绝反馈。v1 thin-slice：
+// 取最近 N=10 条、按 rejectedAt 倒序；每条只输出 taskId/file/hunkIndex/feedback
+// + 单行 oldText/newText 摘要（避免 prompt 爆炸）。
+const WORKING_TREE_REJECT_BLOCK_TAG = '=== 工作树 hunk 拒绝记录 (WORKING_TREE_REJECTS_v1) ===';
+const WORKING_TREE_REJECT_LIMIT = 10;
+const WORKING_TREE_REJECT_TEXT_LINE_LIMIT = 80;
+const WORKING_TREE_REJECT_TOTAL_CHAR_BUDGET = 4096;
+
+function _loadWorkingTreeRejectEntries() {
+  // 故意不引 electron /app.getPath 在 helpers 中（保持 pure helper 可测）；
+  // 调用方在主进程 buildSystemPrompt 注入 entries。
+  return null;
+}
+
+/**
+ * BLOCK-16 PHASE 3：从 userData/working-tree-review/rejects/*.json 读最近拒绝记录。
+ * 调用方（agent-runner.js）传入 userData 绝对路径；本函数只负责排序 + 截断 + 容错。
+ * 单文件读取失败不抛错（避免阻塞 prompt 构建）。
+ */
+function loadWorkingTreeRejectEntries(userDataDir, options = {}) {
+  if (!userDataDir || typeof userDataDir !== 'string') return [];
+  const limit = Number.isFinite(options.limit) ? options.limit : WORKING_TREE_REJECT_LIMIT;
+  const ttlMs = Number.isFinite(options.ttlMs)
+    ? options.ttlMs
+    : 30 * 24 * 60 * 60 * 1000;
+  const fs = require('fs');
+  const path = require('path');
+  const dir = path.join(userDataDir, 'working-tree-review', 'rejects');
+  let stat;
+  try {
+    stat = fs.statSync(dir);
+  } catch {
+    return [];
+  }
+  if (!stat.isDirectory()) return [];
+  const now = Date.now();
+  const out = [];
+  let names;
+  try {
+    names = fs.readdirSync(dir);
+  } catch {
+    return [];
+  }
+  for (const name of names) {
+    if (!name.endsWith('.json')) continue;
+    const full = path.join(dir, name);
+    let raw;
+    try {
+      raw = fs.readFileSync(full, 'utf-8');
+    } catch {
+      continue;
+    }
+    let obj;
+    try {
+      obj = JSON.parse(raw);
+    } catch {
+      continue;
+    }
+    if (!obj || typeof obj !== 'object') continue;
+    const ts = obj.rejectedAt ? Date.parse(obj.rejectedAt) : NaN;
+    if (Number.isFinite(ts) && now - ts > ttlMs) {
+      try { fs.unlinkSync(full); } catch { /* prune best-effort */ }
+      continue;
+    }
+    out.push(obj);
+  }
+  out.sort((a, b) => {
+    const ta = a && a.rejectedAt ? Date.parse(a.rejectedAt) : 0;
+    const tb = b && b.rejectedAt ? Date.parse(b.rejectedAt) : 0;
+    return tb - ta;
+  });
+  return out.slice(0, limit);
+}
+
+function renderWorkingTreeRejectsForPrompt(rejectEntries) {
+  if (!Array.isArray(rejectEntries) || rejectEntries.length === 0) return '';
+  const entries = rejectEntries
+    .slice(0, WORKING_TREE_REJECT_LIMIT)
+    .filter((e) => e && typeof e.file === 'string');
+  if (entries.length === 0) return '';
+  let block = '\n\n' + WORKING_TREE_REJECT_BLOCK_TAG;
+  block += '\n- 用户曾在 Working Tree Review 中拒绝以下 hunk。请在重新生成/重新提议修改时参考其反馈；';
+  block += '如果意图仍成立但实现需要调整，请改写具体行而不是再次生成同样的 patch。';
+  let budget = WORKING_TREE_REJECT_TOTAL_CHAR_BUDGET;
+  for (const e of entries) {
+    if (budget <= 0) break;
+    const taskId = (typeof e.taskId === 'string' && e.taskId) || '?';
+    const file = String(e.file);
+    const hunkIndex = Number.isFinite(e.hunkIndex) ? e.hunkIndex : '?';
+    const feedback = (typeof e.feedback === 'string' && e.feedback.trim())
+      ? e.feedback.trim().replace(/\s+/g, ' ')
+      : '(无反馈)';
+    let entry = `\n- task=${taskId}, file=${file}, hunk#${hunkIndex}, feedback=${feedback}`;
+    if (typeof e.oldText === 'string' && e.oldText.trim()) {
+      const tail = e.oldText.split('\n').slice(0, 1).join('').slice(0, WORKING_TREE_REJECT_TEXT_LINE_LIMIT);
+      if (tail) entry += `\n  - 原内容：${tail}`;
+    }
+    if (typeof e.newText === 'string' && e.newText.trim()) {
+      const tail = e.newText.split('\n').slice(0, 1).join('').slice(0, WORKING_TREE_REJECT_TEXT_LINE_LIMIT);
+      if (tail) entry += `\n  - 改写为：${tail}`;
+    }
+    if (entry.length > budget) entry = entry.slice(0, Math.max(0, budget - 4)) + ' …';
+    block += entry;
+    budget -= entry.length;
+  }
+  return block;
+}
+
 function renderFileReferenceHints(context) {
   let block = '\n\n=== 文件引用格式 (CHAT_FILE_REF_URI_v1) ===';
   block += '\n- 工具产物使用 [名称](biof3://artifact/<toolJobId>/<文件名>)。';
@@ -354,6 +464,15 @@ function buildSystemPrompt(context, runtimeIdentity = {}) {
     prompt += renderResultStudioContextForPrompt(context);
   }
 
+  // BLOCK-16 PHASE 3：工作树 hunk 拒绝记录。所有页面都注入（不只是 desktop-project）；
+  // 用户在任意 session 拒绝过的 hunk 都应该影响下次 agent 提议。
+  if (context && Array.isArray(context.workingTreeRejects)) {
+    prompt += renderWorkingTreeRejectsForPrompt(context.workingTreeRejects);
+  } else if (context && typeof context.workingTreeRejectsUserDataDir === 'string' && context.workingTreeRejectsUserDataDir) {
+    const entries = loadWorkingTreeRejectEntries(context.workingTreeRejectsUserDataDir);
+    if (entries.length > 0) prompt += renderWorkingTreeRejectsForPrompt(entries);
+  }
+
   if (typeof context.pageContent === 'string' && context.pageContent.length > 0) {
     prompt += '\n\n【当前界面正文】\n' + context.pageContent;
   }
@@ -366,6 +485,8 @@ module.exports = {
   localizeToolResult,
   renderFileReferenceHints,
   renderResultStudioContextForPrompt,
+  renderWorkingTreeRejectsForPrompt,
+  loadWorkingTreeRejectEntries,
   ERROR_I18N,
   getCacheMetrics,
   resetCacheMetrics,
