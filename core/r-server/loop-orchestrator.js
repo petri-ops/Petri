@@ -67,11 +67,14 @@ const {
   createModelResultState,
   executeToolCall,
   createRejectedToolResult,
-  localizeToolResult,
   createCallId,
   createTraceId,
   createResultEditCompletionGuard,
 } = require('./agent-tools');
+// localizeToolResult 定义在 helpers/system-prompt（agent-tools 不导出它）。
+// 此处曾错误地从 ./agent-tools 解构，得到 undefined，导致任何工具调用
+// 在 localizeToolResult(envelope.data) 处抛 "not a function"，agent task 整体 failed。
+const { localizeToolResult } = require('./helpers/system-prompt');
 const {
   createResultEditProgressRecorder,
   finalizeResultEditProgress,
