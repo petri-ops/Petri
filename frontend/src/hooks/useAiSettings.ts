@@ -58,8 +58,12 @@ export interface ChatModelPreset {
   endpointProfileId?: string;
 }
 
+// 注意：id 必须与后端 model_profiles / model_role_bindings 的权威 id
+// ('deepseek-chat'，见 core/shared-backend/llm-providers/model-profile.js)
+// 保持一致——前端此处的 preset 只是冷启动种子，真实选择由后端 profile 驱动。
+// label 仅作展示，可自由精简。
 export const DEFAULT_CHAT_MODEL_PRESETS: ChatModelPreset[] = [
-  { id: 'deepseek-chat', label: 'DeepSeek Chat', provider: 'deepseek', model: 'deepseek-chat' },
+  { id: 'deepseek-chat', label: 'DeepSeek', provider: 'deepseek', model: 'deepseek-chat' },
 ];
 
 export function preferredModelPreset(

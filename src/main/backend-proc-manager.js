@@ -192,8 +192,14 @@ function startGateway(reason = "boot") {
   }
 
   try {
+    // gateway 内部 rServerUrl 默认指向 :3003，但 r-server 实际监听
+    // R_SERVER_PORT（dev/桌面默认 3001）。不显式注入 R_SERVER_URL 会导致
+    // gateway /health 聚合误报 503、/r-server 代理打到死端口。
+    const rServerUrl =
+      process.env.R_SERVER_URL ||
+      `http://127.0.0.1:${process.env.R_SERVER_PORT || 3001}`;
     gatewayProc = spawn(NODE_BIN, [gatewayPath], {
-      env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
+      env: { ...process.env, ELECTRON_RUN_AS_NODE: "1", R_SERVER_URL: rServerUrl },
       stdio: ["ignore", "pipe", "pipe"],
     });
   } catch (e) {
