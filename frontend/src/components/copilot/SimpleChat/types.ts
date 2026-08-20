@@ -75,6 +75,22 @@ export interface SimpleMessage {
   /** T83: model used to produce this assistant message (per-message). */
   modelName?: string;
   /**
+   * UI-AGENTWB-### / chat-error-rendering: when assistantContent comes from a
+   * backend error (tool exec failure / Python worker crash / harness
+   * validation issue / harness repair failure), conversationRunStore keeps the
+   * raw stack trace in this field so the ErrorBanner can show a "查看详情"
+   * disclosure — without it the user only ever sees "发生未知错误" even when
+   * the root cause is `ModuleNotFoundError: No module named 'numpy'`.
+   */
+  technicalDetails?: string;
+  /**
+   * UI-AGENTWB-### / chat-error-rendering: classifier code emitted by
+   * classifyError (e.g. UNKNOWN / TOOL_ERROR / INTERNAL_ERROR). Lets
+   * downstream consumers surface a stable error category without re-running
+   * the classifier on every render.
+   */
+  errorCode?: string;
+  /**
    * UI-AGENTWB-004: A4 bridge — typed list of ResultNodes parsed from
    * `meta.resultNodes`. Populated only when the optional payload is a
    * well-formed array of well-formed nodes; otherwise left undefined so

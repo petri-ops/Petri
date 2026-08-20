@@ -575,6 +575,12 @@ export function SimpleChat({
         progressUpdates: activeRun.progressUpdates,
         resultEditProgress: activeRun.resultEditProgress,
         loop: durableLoop.loop || activeRun.loop,
+        // UI-AGENTWB-### / chat-error-rendering: forward the raw stack
+        // + error code stored by conversationRunStore.finish so the
+        // ErrorBanner "查看详情" disclosure becomes reachable. Without
+        // these the user only ever sees the humanised "发生未知错误".
+        technicalDetails: activeRun.technicalDetails,
+        errorCode: activeRun.errorCode,
       });
     }
     return next;
@@ -1167,8 +1173,13 @@ export function SimpleChat({
                       )) : undefined}
                     />
                     {m.error && m.role === 'assistant' && (() => {
+                      // UI-AGENTWB-### / chat-error-rendering: prefer the
+                      // raw stack captured by conversationRunStore.finish;
+                      // fall back to m.content (legacy: Error instance
+                      // passed through). formatError still classifies for
+                      // userMessage + severity.
                       const formatted = formatError(m.content);
-                      const techDetails = getTechnicalDetails(m.content);
+                      const techDetails = m.technicalDetails || getTechnicalDetails(m.content);
                       return (
                         <ErrorBanner
                           message={formatted.userMessage}
