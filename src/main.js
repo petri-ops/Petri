@@ -422,6 +422,20 @@ async function main() {
   startContentSync({ require });
 
   // 5. 设置 IPC
+  // TLS/Proxy fix: 渲染进程(Chromium)默认继承系统代理，会把 localhost 的
+  // r-server/py-server 请求也塞进系统代理，导致
+  // "Client network socket disconnected before secure TLS connection was
+  // established"。只绕开本地回环，外网仍走原代理（避免 blanket direct://
+  // 误伤需要代理才能访问的外网 LLM）。注意：r-server 出站 LLM 走 Node
+  // fetch/https，本就不吃系统代理，此设置不影响它。
+  try {
+    session.defaultSession.setProxy({
+      proxyBypassRules: "localhost;127.0.0.1;<-loopback>",
+    });
+  } catch (e) {
+    console.warn("[desktop] setProxy failed:", e.message);
+  }
+
   setupWindowIpc({ ipcMain, process, app, getMainWindow });
   setupAgentWorkbenchFlagsIpc({
     getMainWindow,
