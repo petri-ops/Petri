@@ -198,11 +198,73 @@ function waitForUrl(url, timeoutMs = 30000) {
 process.on('SIGINT', () => void shutdown(0));
 process.on('SIGTERM', () => void shutdown(0));
 
+async function getPortOwnerPids(port) {
+  if (process.platform === 'win32') {
+    // netstat -ano | findstr :PORT then FOR /F tokens=5 to extract PID — kept
+    // out of the dev loop's hot path because devs almost never run on Windows.
+    return [];
+  }
+  // `lsof -ti :PORT` returns PIDs listening on PORT, one per line. Exit code 1
+  // means "no matches" which is the steady state we want, not an error.
+  const result = spawnSync('lsof', ['-ti', `:${port}`], { encoding: 'utf8' });
+  if (result.status !== 0) return [];
+  return result.stdout
+    .trim()
+    .split(/\s+/)
+    .map(Number)
+    .filter((pid) => Number.isInteger(pid) && pid > 0);
+}
+
+async function stopPidsByPort(port, label) {
+  const pids = await getPortOwnerPids(port);
+  if (pids.length === 0) return 0;
+  console.log(`[dev] clearing ${pids.length} stale ${label} process(es) holding :${port} (pids: ${pids.join(', ')})`);
+  signalPids(pids, 'SIGTERM');
+  const remaining = await waitForPidsToExit(pids, 3000);
+  if (remaining.length > 0) {
+    signalPids(remaining, 'SIGKILL');
+    const survivors = await waitForPidsToExit(remaining, 2000);
+    if (survivors.length > 0) {
+      console.warn(`[dev] ${label} pid(s) still alive after SIGKILL: ${survivors.join(', ')}`);
+    }
+  }
+  // Final settle — give the kernel a beat to release the listening socket.
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  return pids.length;
+}
+
+async function stopWorkspaceDevProcesses() {
+  // macOS-launched Electron is detached from our process group and survives
+  // shell exits; kill it before touching the backend ports so it doesn't
+  // immediately re-bind them via its child process manager.
+  if (process.platform === 'darwin') {
+    try {
+      await stopWorkspaceElectron();
+    } catch (error) {
+      console.warn(`[dev] ${error.message}`);
+    }
+  }
+  // Always sweep vite / r-server / py-server regardless of OS — these are the
+    // three ports the dev loop actually waits on. The order matches the boot
+    // sequence so an older stack drops in reverse.
+  const rendererPort = Number(new URL(rendererUrl).port) || 3000;
+  await stopPidsByPort(rendererPort, 'vite renderer');
+  await stopPidsByPort(3001, 'r-server');
+  await stopPidsByPort(3004, 'py-server');
+}
+
 async function main() {
+  // Auto-clear any BioF3 dev process from a previous session that still owns
+  // the dev ports, then verify the renderer port is actually free. Doing both
+  // means a hot-reload dev loop can re-run `npm run dev` without first having
+  // to manually `lsof -ti :3000 | xargs kill`.
+  await stopWorkspaceDevProcesses();
   if (await urlIsAvailable(rendererUrl)) {
+    // A foreign server (not BioF3) is holding the port — refuse rather than
+    // kill something we don't own.
     throw new Error(
-      `${rendererUrl} is already serving a page. Close the previous BioF3 dev process ` +
-        `before running npm run dev again.`
+      `${rendererUrl} is already serving a page by a non-BioF3 process. ` +
+        `Stop it manually before running npm run dev again.`
     );
   }
 
@@ -225,7 +287,6 @@ async function main() {
     // through LaunchServices, which attaches a proper window-server connection.
     // `open -a` otherwise focuses an existing instance. Only stop the Electron
     // binary from this workspace; never match generic Electron Helper processes.
-    await stopWorkspaceElectron();
     fs.mkdirSync(electronUserDataDir, { recursive: true });
     fs.mkdirSync(electronLocalDataDir, { recursive: true });
     fs.writeFileSync(electronLogPath, '');
