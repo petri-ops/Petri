@@ -183,52 +183,16 @@ try { db.exec('ALTER TABLE loop_runs ADD COLUMN task_id TEXT'); } catch {}
 // ============================================================
 // Schema
 // ============================================================
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS projects (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    description TEXT DEFAULT '',
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS datasets (
-    id TEXT PRIMARY KEY,
-    project_id TEXT NOT NULL,
-    name TEXT NOT NULL,
-    oss_url TEXT NOT NULL,
-    size INTEGER DEFAULT 0,
-    description TEXT DEFAULT '',
-    n_cells INTEGER,
-    n_genes INTEGER,
-    source_dataset_ids TEXT NOT NULL DEFAULT '[]',
-    uploaded_at TEXT NOT NULL,
-    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
-  );
-
-  CREATE TABLE IF NOT EXISTS analyses (
-    id TEXT PRIMARY KEY,
-    dataset_id TEXT NOT NULL,
-    task_id TEXT,
-    type TEXT NOT NULL,
-    name TEXT NOT NULL,
-    parent_analysis_id TEXT,
-    params TEXT DEFAULT '{}',
-    status TEXT DEFAULT 'pending',
-    summary TEXT,
-    error TEXT,
-    created_at TEXT NOT NULL,
-    finished_at TEXT,
-    FOREIGN KEY (dataset_id) REFERENCES datasets(id) ON DELETE CASCADE
-  );
-
-  CREATE INDEX IF NOT EXISTS idx_datasets_project ON datasets(project_id);
-
-
-  CREATE INDEX IF NOT EXISTS idx_analyses_dataset ON analyses(dataset_id);
-  CREATE INDEX IF NOT EXISTS idx_analyses_task ON analyses(task_id);
-`);
+//
+// Schema 定义由 src/migrations/*.sql 管理（唯一 source of truth）。
+// 本文件只连接已就绪的数据库，不定义表结构。
+//
+// 启动时 src/main.js 先执行 migration-runner，确保 schema 最新后本模块才使用。
+// 任何 schema 变更必须且只能通过新增 migration 文件实现。
+//
+// 历史遗留：下方 project_g0_baselines 等表由 G0-LF0 特性引入，
+// 未迁移到 migration 是因为它们是运行时元数据（非用户数据持久化）。
+// 未来若需统一管理，应创建对应 migration 并删除此处内联定义。
 
 // G0-LF0: every project records the baseline that created it (or an explicit
 // legacy marker), the baseline that most recently opened it, and the current
