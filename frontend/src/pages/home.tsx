@@ -298,9 +298,19 @@ export default function Home(): React.ReactElement {
 
   if (targetProjectId) {
     if (targetJobId) {
+      // BLOCK-10-audit-closeout: home.tsx 的 auto-navigate 之前用 `?mode=scheduled`，
+      // 但 'scheduled' 是只用作「显示 pinned summary」的 mode 标记，**不在 MODE_LABELS**，
+      // T85 redirect 会保留它进 URL；ProjectWorkspace.handleOpenResult 的
+      // `preserveWorkspaceMode: workspaceMode === 'chat'` 判定只认 'chat'，
+      // scheduled 模式下会被强制改 mode 到 'result'，TitleBar 因此显示
+      // '样本对齐详情·结果' 而不是项目名/最近 job（HomePage 的设计意图是
+      // 「进 chat 模式 + 右栏 results tab 显示该 job」）。
+      // 改为 `?mode=chat`：T85 redirect 会删掉默认 mode 段，URL 变成
+      // `/project/${id}?job=...`，workspaceMode='chat'，preserveWorkspaceMode=true，
+      // 右栏 results 自动打开但主视图仍是 chat（TitleBar 显示项目名）。
       return (
         <Navigate
-          to={`/project/${targetProjectId}?mode=scheduled&job=${encodeURIComponent(targetJobId)}`}
+          to={`/project/${targetProjectId}?mode=chat&job=${encodeURIComponent(targetJobId)}`}
           replace
         />
       );

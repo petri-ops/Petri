@@ -14,6 +14,12 @@ export function buildResultTitleBarTitle(
 ): string {
   const project = projectTitle || '梳理开发进展';
   const modeLabel = MODE_LABELS[mode];
+  // chat mode (or any unrecognized mode) keeps project identity front-and-center
+  // so the user always sees WHICH project they're in. handleOpenResult preserves
+  // 'chat' on auto-open from HomePage; 'scheduled' / 'search' / 'plugins' / null
+  // never end up here because ProjectWorkspace normalizes to 'chat' via T85.
   if (!modeLabel) return project;
-  return artifactTitle ? `${artifactTitle} · ${modeLabel}` : modeLabel;
+  // Result/code/compare/history mode: artifact name dominates, project name
+  // remains visible as the secondary context marker.
+  return artifactTitle ? `${artifactTitle} · ${modeLabel} · ${project}` : `${modeLabel} · ${project}`;
 }
