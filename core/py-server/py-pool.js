@@ -112,7 +112,18 @@ for line in sys.stdin:
       }
     });
 
-    this.proc.stderr.on('data', (data) => { this._stderr += data.toString(); });
+    this.proc.stderr.on('data', (data) => {
+      const text = data.toString();
+      this._stderr += text;
+      // Report fatal early-stage failures (no __READY__ yet) so the main log
+      // surfaces the actual Python error instead of repeating "exited (code=1)
+      // restarting" indefinitely. Without this, an environment without
+      // numpy/scanpy crashes in <1s, drops stderr to /dev/null, and the user
+      // sees only silent agent chat failures downstream.
+      if (!this.ready) {
+        logger.warn(`PyWorker ${this.id} startup stderr: ${text.trim()}`);
+      }
+    });
 
     this.proc.on('exit', (code) => {
       this.ready = false;

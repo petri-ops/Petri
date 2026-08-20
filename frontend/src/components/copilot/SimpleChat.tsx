@@ -226,6 +226,13 @@ export function SimpleChat({
   const [forking, setForking] = useState(false);
   // Per-message index for "fork at this message" action
   const [forkingAtIndex, setForkingAtIndex] = useState<number | null>(null);
+  // Note: backend runtime flags (rRuntime / pyRuntime) are diagnostic
+  // channels for the desktop bridge and MUST stay invisible to the chat
+  // surface. Surfacing them here mixes IPC-failure null cases with genuine
+  // runtime-missing cases (see lib/electron.d.ts L7-9 "must use === false")
+  // and also mis-promotes a backend flag into a user-facing product signal.
+  // Tool-level Python runtime issues (e.g. scanpy missing) are surfaced by
+  // the tool-execution error path inside conversationRunStore, not here.
   const taRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   // Slash command state
