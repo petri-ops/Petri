@@ -241,6 +241,41 @@ export const ERROR_MESSAGES: Record<string, ErrorMessageConfig> = {
     severity: 'error',
     showDetails: true,
   },
+  HARNESS_ERROR: {
+    userMessage: '工具调用失败 —— 请检查参数或稍后重试',
+    severity: 'error',
+    showDetails: true,
+  },
+  HARNESS_PARAM_INVALID: {
+    userMessage: '工具参数校验未通过 —— 请检查输入参数',
+    severity: 'error',
+    showDetails: true,
+  },
+  HARNESS_REPAIR_FAILED: {
+    userMessage: '工具修复建议生成失败 —— 请改写请求后重试',
+    severity: 'warning',
+    showDetails: true,
+  },
+  PYTHON_WORKER_DOWN: {
+    userMessage: 'Python 工作进程未就绪 —— 请打开「插件商店」安装 Python 运行时',
+    severity: 'error',
+    showDetails: true,
+  },
+  PYTHON_MODULE_MISSING: {
+    userMessage: 'Python 依赖模块缺失 —— 请打开「插件商店」安装 Python 运行时',
+    severity: 'error',
+    showDetails: true,
+  },
+  PYTHON_EXECUTION_FAILED: {
+    userMessage: 'Python 脚本执行失败 —— 请查看详情定位问题',
+    severity: 'error',
+    showDetails: true,
+  },
+  WORKER_CRASHED: {
+    userMessage: '分析工作进程异常退出 —— 请重试或稍后重试',
+    severity: 'error',
+    showDetails: true,
+  },
 };
 
 /**
@@ -292,6 +327,18 @@ const ERROR_PATTERNS: Array<{ pattern: RegExp; code: string }> = [
   { pattern: /tool.*error|工具.*错误/i, code: 'TOOL_ERROR' },
   { pattern: /tool.*not\s*found|工具.*不存在/i, code: 'TOOL_NOT_FOUND' },
   { pattern: /tool.*permission|工具.*权限/i, code: 'TOOL_PERMISSION_DENIED' },
+
+  // Harness / tool execution
+  { pattern: /harness|tool.*execution|tool.*exec|execute.*tool/i, code: 'HARNESS_ERROR' },
+  { pattern: /参数.*校验|invalid.*param|param.*validation|param.*check/i, code: 'HARNESS_PARAM_INVALID' },
+  { pattern: /修复建议|repair|harness.*repair/i, code: 'HARNESS_REPAIR_FAILED' },
+
+  // Python runtime / worker (so users can see why scanpy / numpy failed
+  // instead of a flat "发生未知错误")
+  { pattern: /pyworker|python.*worker/i, code: 'PYTHON_WORKER_DOWN' },
+  { pattern: /module.*not.*found|modulenotfounderror|模块.*不存在|没有.*模块/i, code: 'PYTHON_MODULE_MISSING' },
+  { pattern: /python.*exec.*fail|python.*run.*fail|python.*runtime.*fail/i, code: 'PYTHON_EXECUTION_FAILED' },
+  { pattern: /worker.*exited.*code|worker.*crash|worker.*restart/i, code: 'WORKER_CRASHED' },
 
   // Subscription errors
   { pattern: /subscription|会员.*需要|订阅/i, code: 'SUBSCRIPTION_REQUIRED' },

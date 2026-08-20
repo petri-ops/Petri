@@ -65,6 +65,20 @@ export interface ConversationRunSnapshot {
   assistantPending: boolean;
   assistantError: boolean;
   statusMessage?: string;
+  /** UI-AGENTWB-### / chat-error-rendering: raw stack trace of the last
+   *  assistant error (tool / harness / Python worker crash). The chat
+   *  surface forwards this to ErrorBanner's `technicalDetails` slot so the
+   *  "查看详情" disclosure becomes available — without it the user only
+   *  sees the humanised userMessage ("发生未知错误") and has no way to
+   *  reach the underlying `ModuleNotFoundError` / worker exit code / SSE
+   *  failure that triggered it.
+   */
+  technicalDetails?: string;
+  /** UI-AGENTWB-### / chat-error-rendering: classifier code for the last
+   *  assistant error (UNKNOWN / TOOL_ERROR / INTERNAL_ERROR / etc). Lets
+   *  the UI show a stable category without re-classifying on every render.
+   */
+  errorCode?: string;
   progressUpdates: Array<{ iteration: number; content: string }>;
   resultEditProgress: ResultEditProgressEvent[];
   /** Opaque click-time scope used only to prevent progress crossing results. */
@@ -252,6 +266,13 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     if (runs.get(conversationId)?.status !== 'running') return;
     const completedAt = Date.now();
     const formattedError = error ? formatErrorForUser(error) : null;
+    // UI-AGENTWB-### / chat-error-rendering: persist the raw stack + error
+    // code alongside the humanised userMessage. Without this, the user only
+    // ever sees "发生未知错误" with no way to reach the underlying
+    // ModuleNotFoundError / worker exit code / harness validation failure
+    // that triggered it. ErrorBanner reads these via SimpleMessage.
+    const rawStack = error?.stack || (error ? String(error) : undefined);
+    const errorCode = formattedError?.code;
     replaceRun(conversationId, (current) => ({
       ...current,
       status,
@@ -261,6 +282,8 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       assistantPending: false,
       assistantError: status === 'error',
       statusMessage: undefined,
+      technicalDetails: status === 'error' ? rawStack : undefined,
+      errorCode: status === 'error' ? errorCode : undefined,
       processingDurationMs: Math.max(0, completedAt - current.startedAt),
       completedAt,
     }));
