@@ -587,6 +587,23 @@ export async function subscribeAgentTask(
 
 /** 处理单个 SSE 事件对象（原 streamChat 的解析逻辑，task/legacy 共用） */
 function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
+  // UI-AGENTWB-###: SSE dispatch used to inline helpers (e.g.
+  // localizeToolResult for backend tool-result envelopes). When those
+  // helpers got refactored out of this module the call site silently
+  // turned into `localizeToolResult is not a function` and bubbled up as
+  // a flat "发生未知错误". Wrap the entire dispatch in a single typed
+  // error guard so any dropped helper / type-coercion blow-up surfaces as
+  // a friendly onError with the real message instead of swallowing the
+  // whole stream.
+  try {
+    _dispatchSseEvent(obj, opts);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    opts.onError?.(new Error(`SSE dispatch failed: ${message}`));
+  }
+}
+
+function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
   const {
     onDelta,
     onDone,
