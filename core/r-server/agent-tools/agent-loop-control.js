@@ -12,6 +12,14 @@ const MAX_IDENTICAL_TOOL_CALLS = 3;
 // conversation metadata bounded against runaway provider chatter.
 const MAX_AGENT_PROGRESS_UPDATES = 50;
 const MAX_FINALIZATION_ATTEMPTS = 2;
+// 方案 B complete：截断自动续写时的硬保护。
+// 任务自描述由模型的 finish_reason 决定，但必须给"无法收敛"一个硬上限：
+//   MAX_CONTINUATION_CHAINS 防止单任务内连续续写链无限拉长；
+//   MAX_CONTINUATION_TOKENS 防止累计请求 token 把上下文或成本打爆。
+// 这两个上限是"防失控"，不是"限制任务完整性"——只有连续截断到顶时才会触发，
+// 此时主动收尾 + 提示用户继续，比让模型无限续写更可靠。
+const MAX_CONTINUATION_CHAINS = 4;
+const MAX_CONTINUATION_TOKENS = 65536;
 const FINALIZATION_RETRY_PROMPT =
   '上一次最终整理没有返回可展示的正文。不要调用工具，不要输出思考过程；只输出面向用户的完整最终答复，说明已完成的工作、结果、需要注意的事项和下一步。';
 
@@ -133,7 +141,21 @@ function assessFinalizationResult(result, streamedText = '') {
   const choice = result && Array.isArray(result.choices) ? result.choices[0] : null;
   const message = choice && choice.message && typeof choice.message === 'object' ? choice.message : {};
   const content = String(streamedText || message.content || '').trim();
-  if (content) return { usable: true, retryable: false, reason: null, content };
+  
+  // 方案 B：识别 finish_reason === 'length'（被 token 上限截断）
+  // 虽然被截断，但内容仍可用；标记为 truncated 而不是 empty
+  const finishReason = choice && choice.finish_reason;
+  const truncatedByLimit = finishReason === 'length';
+  
+  if (content) {
+    return {
+      usable: true,
+      retryable: false,
+      reason: truncatedByLimit ? 'truncated_at_limit' : null,
+      content,
+      truncated: truncatedByLimit,
+    };
+  }
 
   if (result && result.error) {
     const { isRetryableProviderError } = require('../../shared-backend/llm-providers/model-gateway');
@@ -235,6 +257,33 @@ function buildFinalizationRetryRequest(requestBody) {
     temperature: 0.2,
     tools: undefined,
     tool_choice: undefined,
+  };
+}
+
+// 方案 B complete：跟踪单任务内的截断自动续写，提供硬上限。
+// 计数维度：
+//   chains        — 连续续写段数（每次自然停止 finish_reason=stop 重置）
+//   totalTokens   — 累计请求 token（截断时按 max_tokens 估算，停止时不计）
+// 一旦命中上限，capHit() → true，配合 shouldFinalizeAgentIteration 触发收尾。
+function createContinuationGuard(options = {}) {
+  const maxChains = Math.max(1, Number(options.maxChains) || MAX_CONTINUATION_CHAINS);
+  const maxTokens = Math.max(1, Number(options.maxTokens) || MAX_CONTINUATION_TOKENS);
+  let chains = 0;
+  let totalTokens = 0;
+  return {
+    recordTruncation(approxTokens = 0) {
+      chains += 1;
+      totalTokens += Math.max(0, Number(approxTokens) || 0);
+    },
+    recordStop() {
+      chains = 0;
+    },
+    capHit() {
+      return chains >= maxChains || totalTokens >= maxTokens;
+    },
+    snapshot() {
+      return { chains, totalTokens, maxChains, maxTokens };
+    },
   };
 }
 
@@ -506,6 +555,8 @@ module.exports = {
   MAX_AGENT_TOOL_CALLS,
   MAX_IDENTICAL_TOOL_CALLS,
   MAX_FINALIZATION_ATTEMPTS,
+  MAX_CONTINUATION_CHAINS,
+  MAX_CONTINUATION_TOKENS,
   FINALIZATION_RETRY_PROMPT,
   shouldFinalizeAgentIteration,
   assessFinalizationResult,
@@ -513,6 +564,7 @@ module.exports = {
   buildFinalizationFallbackMessage,
   finalizationFallbackReason,
   createAgentProgressRecorder,
+  createContinuationGuard,
   createResultEditCompletionGuard,
   createAgentToolCallController,
   runAgentToolCallBatch,

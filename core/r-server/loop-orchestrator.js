@@ -54,10 +54,13 @@ const {
 const {
   MAX_AGENT_ITERS,
   MAX_FINALIZATION_ATTEMPTS,
+  MAX_CONTINUATION_CHAINS,
+  MAX_CONTINUATION_TOKENS,
   shouldFinalizeAgentIteration,
   assessFinalizationResult,
   buildFinalizationRetryRequest,
   createAgentProgressRecorder,
+  createContinuationGuard,
   runAgentToolCallBatch,
   buildToolCallEvent,
   buildToolResultEvent,
@@ -502,6 +505,10 @@ async function runLoop({
   let fatalAgentError = null;
   const assistantResultCards = [];
   const assistantToolActivities = require('./agent-tools').createToolActivityRecorder();
+  const continuationGuard = createContinuationGuard({
+    maxChains: MAX_CONTINUATION_CHAINS,
+    maxTokens: MAX_CONTINUATION_TOKENS,
+  });
 
   // ---------- Loop body ----------
   try {
@@ -538,7 +545,7 @@ async function runLoop({
         ...(modelName ? { model: modelName } : {}),
         messages,
         temperature: 0.4,
-        max_tokens: 1500,
+        max_tokens: 16384, // 方案 B：用足够大的值让模型自然停止，而不是物理截断
         tools: finalizing ? undefined : config.tools,
         tool_choice: finalizing
           ? undefined
@@ -619,6 +626,36 @@ async function runLoop({
 
       if (toolCalls.length === 0) {
         let assessment = assessFinalizationResult(upJson, streamedText);
+        
+        // 方案 B complete：截断自动续写时受 continuationGuard 硬保护。
+        // 任务完整性仍由模型自描述（finish_reason）决定；但若同一任务内
+        // 连续截断到上限，主动收尾 + 提示用户继续，避免无限续写。
+        if (assessment.usable && assessment.truncated && !finalizing) {
+          continuationGuard.recordTruncation(reqBody && reqBody.max_tokens);
+          if (continuationGuard.capHit()) {
+            _emit({
+              event: 'agent_status',
+              phase: 'continuation_cap_hit',
+              reason: 'continuation_cap',
+              snapshot: continuationGuard.snapshot(),
+              message: '检测到连续多次回答被截断，已自动收尾当前任务。请基于以上内容继续追问，或在模型设置中调整单次输出上限。',
+            });
+            assistantAcc = assessment.content;
+            modelFinalized = true;
+            break;
+          }
+          messages.push({ role: 'assistant', content: assessment.content });
+          messages.push({ role: 'user', content: '继续' });
+          _emit({
+            event: 'agent_status',
+            phase: 'continuation',
+            reason: 'truncated_at_limit',
+            message: '检测到回答被截断，正在自动续写…',
+          });
+          continue;
+        }
+        if (assessment.usable && !assessment.truncated) continuationGuard.recordStop();
+        
         const editCompletion = resultEditCompletionGuard.assessTerminal();
         if (editCompletion.action === 'retry') {
           messages.push({ role: 'assistant', content: assessment.content || msg.content || '' });

@@ -365,7 +365,7 @@ module.exports = function registerAiChatRoute(app) {
       body: {
         messages: fullMessages,
         temperature: 0.5,
-        max_tokens: 1500,
+        max_tokens: 16384, // 方案 B：用足够大的值让模型自然停止，而不是物理截断
       },
       telemetry: {
         userId: req.user && req.user.id,

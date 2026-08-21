@@ -15,6 +15,7 @@ const {
   buildFinalizationFallbackMessage,
   finalizationFallbackReason,
   createAgentProgressRecorder,
+  createContinuationGuard,
   createResultEditCompletionGuard,
   createAgentToolCallController,
   runAgentToolCallBatch,
@@ -196,8 +197,52 @@ test('finalization recovery retries empty or tool-only output but never duplicat
   );
   assert.deepEqual(
     assessFinalizationResult({ choices: [{ message: { content: '' } }] }, 'visible answer'),
-    { usable: true, retryable: false, reason: null, content: 'visible answer' }
+    { usable: true, retryable: false, reason: null, content: 'visible answer', truncated: false }
   );
+});
+
+test('finalization recovery treats finish_reason length as usable-but-truncated, not a failure', () => {
+  // 方案 B：任务是否完成由模型自描述（finish_reason）决定，不是物理 token 上限直接判失败。
+  assert.deepEqual(
+    assessFinalizationResult({ choices: [{ finish_reason: 'length', message: { content: '' } }] }, 'partial answer'),
+    { usable: true, retryable: false, reason: 'truncated_at_limit', content: 'partial answer', truncated: true }
+  );
+  assert.deepEqual(
+    assessFinalizationResult({ choices: [{ finish_reason: 'stop', message: { content: 'full answer' } }] }),
+    { usable: true, retryable: false, reason: null, content: 'full answer', truncated: false }
+  );
+});
+
+test('continuation guard caps repeated truncation to prevent infinite chains', () => {
+  // 方案 B complete：截断自动续写必须有硬上限，避免模型无法收敛时无限循环。
+  const guard = createContinuationGuard({ maxChains: 3, maxTokens: 40000 });
+  assert.equal(guard.capHit(), false);
+  guard.recordTruncation(10000);
+  guard.recordTruncation(10000);
+  assert.equal(guard.capHit(), false);
+  guard.recordTruncation(10000);
+  assert.equal(guard.capHit(), false);
+  guard.recordTruncation(10000);
+  assert.equal(guard.capHit(), true, '4 chains should hit chain cap at 3');
+
+  const tokenGuard = createContinuationGuard({ maxChains: 999, maxTokens: 40000 });
+  tokenGuard.recordTruncation(20000);
+  tokenGuard.recordTruncation(20000);
+  assert.equal(tokenGuard.capHit(), true, '40000 tokens should hit token cap');
+});
+
+test('continuation guard resets chains on natural stop but still accumulates tokens', () => {
+  // 一次任务内的总 token 仍需计入，防止"每次只续写一点点"的缓慢 token 增长。
+  const guard = createContinuationGuard({ maxChains: 2, maxTokens: 50000 });
+  guard.recordTruncation(10000);
+  guard.recordStop();
+  guard.recordTruncation(10000);
+  guard.recordStop();
+  guard.recordTruncation(10000);
+  guard.recordStop();
+  assert.equal(guard.capHit(), false, 'chains reset on stop');
+  guard.recordTruncation(10000);
+  assert.equal(guard.capHit(), true, 'chains re-arm and reach cap on next burst');
 });
 
 test('finalization recovery only retries transient Provider errors', () => {
