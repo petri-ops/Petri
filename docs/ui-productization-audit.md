@@ -1219,6 +1219,81 @@ PHASE 2 落地 (仍 in_progress 待实机过目): 把 BLOCK-16 WorkingTreeReview
 - 删除 (3 文件, 0 引用): WorkingTreeReview.module.css (rename .css) /
   WorkingTreeReviewMount.tsx / WorkingTreeReviewButton.tsx
 
+PHASE 2 session UX 增量 (in_progress 待实机过目): 文件列表决策徽章
+(accept/reject 计数) + 键盘快捷键 (A/Y accept, R reject, ↑↓/J/K 导航) +
+focusedHunk 蓝边高亮 + toolbar 快捷键提示条 + reject dialog ⌘+Enter 确认 / Esc
+取消. 改动 DiffFileView 受控 prop `focusedHunk` + `onFocusedHunkChange` +
+`onRejectConfirm` (BLOCK-16 核心逻辑零改动, 仅扩接口).
+
+## UI-185: BLOCK-20 — Code Review Panel — PHASE 3 inline-edit drawer + workspace.writeTextFile (UI-185)
+
+PHASE 3 落地 (仍 in_progress 待实机过目): workspace:write-text-file IPC + 项目文件 inline-edit.
+
+- src/ipc/file-dialog.js: 新增 `workspace:write-text-file` IPC, realpathSync 双向校验
+  workspace boundary, 必须是已存在 file, fs.writeFileSync UTF-8 覆盖.
+- src/main.js (PHASE 1 已带): 注册 setupAgentDocReviewIpc, 与 workingTreeReview 同范式.
+- frontend/src/lib/desktopBridge.ts: 加 agentDocReview mapped type 注释 (无功能变更).
+- frontend/src/pages/project-workspace/types.ts: ActiveWorkspaceFile 加 workspaceDir 字段.
+- frontend/src/pages/project-workspace.tsx (379 行): workspaceDir 透传 (FileTree 透到
+  ActiveWorkspaceFile), inline-edit <textarea> 二分支:
+    * workspaceDir 存在 (项目文件) → workspace.writeTextFile
+    * workspaceDir 不存在 (沙盒文件) → agentDocReview.saveCurrent
+- frontend/src/pages/project-workspace.module.css (199 行): workspaceMarkdownDiff
+  toolbar / tabs / actions / hint / action 样式 (markdown 工具栏).
+- frontend/src/components/desktop/WorkingTreeReview/CodeReviewDrawer.tsx (246 行,
+  新增): 滑出抽屉 — 左 = HEAD 只读 textarea / 右 = working tree 可编辑 textarea;
+  binary file 显示 "Binary file — cannot edit inline"; ESC 关闭; 保存后 parent
+  review.refresh(). 复用 BLOCK-19 `workspace.writeTextFile` IPC (0 改动).
+- frontend/src/components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css
+  (277 行, 新增): CSS Module, right 640px slide-in panel + dark backdrop + 全高
+  textarea, 不污染 .wt-* 全局.
+- WorkingTreeReview.tsx: 加 isEditDrawerOpen state + Edit file 按钮 + ESC 优先级
+  (drawer → commit dialog → panel close) + drawer mount at bottom.
+- WorkingTreeReview.css: 加 .wt-edit-btn 蓝色 tinted 按钮 (沿用现有 color tokens).
+
+PHASE 3 验收: tsc --noEmit 0 错 / docs:check 137 PASS / DiffHunkView 0 diff /
+DiffFileView 仅 3 受控 prop 扩展 (BLOCK-16 核心逻辑零改动).
+
+PHASE 4 落地 (in_progress 待实机过目): per-hunk reject inverse + system-prompt 集成.
+
+- src/ipc/working-tree-review.js (+158/-7): 提取 `_writeRejectEntry(userDataDir, args)`
+  私有 helper (镜像 BLOCK-16 reject 写入 schema, 同 try/catch); 既有 `git:hunk-apply`
+  reject path 重构为 helper 调用 (0 行为变更); 新增 `git:hunk-reject-inverse` IPC,
+  调 `adapter.applyInverseHunk({ patch })` + helper 写 reject entry, 返回
+  `{ ok: true, action: 'reject', file, hunkIndex }`.
+- src/preload.js (+5): workingTreeReview 命名空间加 `rejectHunkByInverseHunk` 薄包装.
+- frontend/src/lib/electron.d.ts (+32): 声明 rejectHunkByInverseHunk 完整类型.
+- useWorkingTreeReview.ts (+90/-17): 加 `buildForwardPatchForReject({file, hunk})`
+  把 Hunk → 单 hunk unified diff 文本 (与主进程 buildReversePatchForReject 互逆);
+  加 `rejectHunkByInverseHunk(file, hunkIndex, patch, feedback?)` 方法 — 镜像
+  decideHunk 的乐观更新 + 错误回滚; caller 没传 patch 时从 cached diff.hunks 自动
+  构建; BLOCK-16 decideHunk 0 改动.
+- 系统提示集成: 拒绝信号经 `<working-tree-rejects>` 注入段 (BLOCK-16 PHASE 3
+  已有, 0 改动). core/r-server/helpers/system-prompt.js 0 diff.
+
+PHASE 4 验收: tsc --noEmit 0 错 / git-adapter 38 tests PASS (含 8 BLOCK-20 tests:
+listModified / fileHeadContent / splitSideDiff / revertFile / applyInverseHunk /
+applyInverseHunk validates input + 真实撤回) / git-adapter-block20-per-hunk 12 tests
+PASS (新) / docs:check 137 PASS / DiffHunkView 0 diff / DiffFileView 仅 3 受控 prop
+扩展 (BLOCK-16 核心逻辑零改动) / git-adapter.js 0 diff / system-prompt.js 0 diff /
+BLOCK-16 `git:hunk-apply` reject path 0 行为变更 (仅 inline 写入替换为 helper).
+
+PHASE 4 测试增量 (test/git-adapter-block20-per-hunk.test.mjs, 436 行, 12 tests):
+- Part 1 (7 tests, invertUnifiedDiff 纯函数, 通过 public applyInverseHunk 观察
+  working-tree state + GitAdapterError.code 间接验证 — 生产代码 0 改动):
+  * 只 + 行 (纯增) → git_apply_inverse_failed
+  * 只 - 行 (纯删) → 同样边界
+  * 混合 + / - / context → 平衡 hunk 完整撤回
+  * 空 / null / 缺失 patch → patch_required
+  * 无 header patch → git_apply_inverse_failed (确认 invertUnifiedDiff pass-through
+    不损坏 body)
+  * 多 hunk forward patch → 一次 applyInverseHunk 处理整 patch (per-hunk 粒度需
+    前端循环单 hunk)
+  * 字面 ++foo 行 → 首字符 + → -，其余保留 (平衡 hunk)
+- Part 2 (5 tests, 真实 per-hunk reject 场景): 3-hunk 撤回中间 hunk / 邻近 hunks
+  (U1 context) / 单行变更 hunk / 未变更文件空 diff → patch_required / 整 patch ≡
+  顺序 per-hunk ≡ HEAD baseline (parity).
+
 ## UI-185: BLOCK-20 — Code Review Panel — PHASE 3 inline-edit drawer + workspace.writeTextFile (UI-185)
 
 PHASE 3 落地 (仍 in_progress 待实机过目): workspace:write-text-file IPC + 项目文件 inline-edit.

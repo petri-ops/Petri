@@ -14,9 +14,14 @@ export interface DiffFileViewProps {
   decisions: Record<string, HunkDecision>;
   onAccept: (hunkIndex: number) => void;
   onReject: (hunkIndex: number, feedback?: string) => void;
+  /** BLOCK-20: which hunk index currently has keyboard focus */
+  focusedHunk?: number;
+  onFocusedHunkChange?: (idx: number) => void;
+  /** BLOCK-20: confirm reject from parent (enables ⌘-Enter shortcut) */
+  onRejectConfirm?: (hunkIndex: number, feedback: string) => void;
 }
 
-export function DiffFileView({ file, decisions, onAccept, onReject }: DiffFileViewProps) {
+export function DiffFileView({ file, decisions, onAccept, onReject, focusedHunk = 0, onRejectConfirm }: DiffFileViewProps) {
   const [rejectTarget, setRejectTarget] = useState<number | null>(null);
   const [feedback, setFeedback] = useState('');
 
@@ -36,7 +41,11 @@ export function DiffFileView({ file, decisions, onAccept, onReject }: DiffFileVi
 
   const handleRejectConfirm = () => {
     if (rejectTarget !== null) {
-      onReject(rejectTarget, feedback || undefined);
+      if (onRejectConfirm) {
+        onRejectConfirm(rejectTarget, feedback);
+      } else {
+        onReject(rejectTarget, feedback || undefined);
+      }
       setRejectTarget(null);
       setFeedback('');
     }
@@ -56,14 +65,15 @@ export function DiffFileView({ file, decisions, onAccept, onReject }: DiffFileVi
           const key = `${file.path}#${idx}`;
           const decision = decisions[key];
           return (
-            <DiffHunkView
-              key={idx}
-              hunk={hunk}
-              hunkIndex={idx}
-              decision={decision}
-              onAccept={() => onAccept(idx)}
-              onReject={() => handleRejectClick(idx)}
-            />
+            <div key={idx} className={focusedHunk === idx ? 'wt-hunk-focused' : ''}>
+              <DiffHunkView
+                hunk={hunk}
+                hunkIndex={idx}
+                decision={decision}
+                onAccept={() => onAccept(idx)}
+                onReject={() => handleRejectClick(idx)}
+              />
+            </div>
           );
         })}
       </div>
@@ -72,6 +82,13 @@ export function DiffFileView({ file, decisions, onAccept, onReject }: DiffFileVi
           <textarea
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey && !e.altKey && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                handleRejectConfirm();
+              }
+              if (e.key === 'Escape') { e.preventDefault(); setRejectTarget(null); setFeedback(''); }
+            }}
             placeholder="(optional) feedback for the AI agent on why this hunk was rejected..."
             className="wt-reject-textarea"
             rows={4}

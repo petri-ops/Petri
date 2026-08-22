@@ -175,6 +175,45 @@ function pruneRejectFiles(rejectDir) {
 }
 
 /**
+ * 把 reject 决策写到 userData/working-tree-review/rejects/<taskId>-<fileSafe>-<hunkIndex>.json。
+ * 镜像 BLOCK-16 L277-299 的 schema：{ taskId, file, hunkIndex, oldText, newText, feedback, rejectedAt }。
+ * fs 失败由 try/catch 吞掉 —— reject 清单写入失败不影响 git apply / inverse 结果。
+ * @param {string} userDataDir
+ * @param {{
+ *   file: string,
+ *   hunkIndex: number,
+ *   taskId?: string|null,
+ *   feedback?: string|null,
+ *   hunk?: { lines?: Array<{ type: string, text: string }> }|null,
+ * }} args
+ */
+function _writeRejectEntry(userDataDir, args) {
+  try {
+    const rejectDir = path.join(userDataDir, 'working-tree-review', 'rejects');
+    fs.mkdirSync(rejectDir, { recursive: true });
+    pruneRejectFiles(rejectDir);
+    const id = (args.taskId || 'anonymous').replace(/[^a-zA-Z0-9_.-]/g, '_');
+    const fileSafe = args.file.replace(/[^a-zA-Z0-9_.-]/g, '_').replace(/\//g, '__');
+    const filename = `${id}-${fileSafe}-${args.hunkIndex}.json`;
+    fs.writeFileSync(path.join(rejectDir, filename), JSON.stringify({
+      taskId: args.taskId || null,
+      file: args.file,
+      hunkIndex: args.hunkIndex,
+      oldText: args.hunk && Array.isArray(args.hunk.lines)
+        ? args.hunk.lines.filter((l) => l.type !== 'add').map((l) => l.text).join('\n')
+        : null,
+      newText: args.hunk && Array.isArray(args.hunk.lines)
+        ? args.hunk.lines.filter((l) => l.type !== 'del').map((l) => l.text).join('\n')
+        : null,
+      feedback: typeof args.feedback === 'string' ? args.feedback : null,
+      rejectedAt: new Date().toISOString(),
+    }, null, 2));
+  } catch (e) {
+    // reject 清单写入失败不影响 git apply / inverse 结果
+  }
+}
+
+/**
  * 装配所有 BLOCK-16 IPC handlers。
  * @param {{mainWindow?: Electron.BrowserWindow|null}} [options]
  */
@@ -274,29 +313,13 @@ function setupWorkingTreeReviewIpc(options = {}) {
       }
       adapter.applyPatch({ patch: reversePatch });
       // 写入 reject 清单（30 天 TTL）
-      const rejectDir = path.join(app.getPath('userData'), 'working-tree-review', 'rejects');
-      try {
-        fs.mkdirSync(rejectDir, { recursive: true });
-        pruneRejectFiles(rejectDir);
-        const id = (args.taskId || 'anonymous').replace(/[^a-zA-Z0-9_.-]/g, '_');
-        const fileSafe = args.file.replace(/[^a-zA-Z0-9_.-]/g, '_').replace(/\//g, '__');
-        const filename = `${id}-${fileSafe}-${args.hunkIndex}.json`;
-        fs.writeFileSync(path.join(rejectDir, filename), JSON.stringify({
-          taskId: args.taskId || null,
-          file: args.file,
-          hunkIndex: args.hunkIndex,
-          oldText: args.hunk && Array.isArray(args.hunk.lines)
-            ? args.hunk.lines.filter((l) => l.type !== 'add').map((l) => l.text).join('\n')
-            : null,
-          newText: args.hunk && Array.isArray(args.hunk.lines)
-            ? args.hunk.lines.filter((l) => l.type !== 'del').map((l) => l.text).join('\n')
-            : null,
-          feedback: typeof args.feedback === 'string' ? args.feedback : null,
-          rejectedAt: new Date().toISOString(),
-        }, null, 2));
-      } catch (e) {
-        // reject 清单写入失败不影响 git apply 结果
-      }
+      _writeRejectEntry(app.getPath('userData'), {
+        file: args.file,
+        hunkIndex: args.hunkIndex,
+        taskId: args.taskId,
+        feedback: args.feedback,
+        hunk: args.hunk || null,
+      });
       return { action: 'reject', file: args.file, hunkIndex: args.hunkIndex };
     });
   });
@@ -381,6 +404,102 @@ function setupWorkingTreeReviewIpc(options = {}) {
       }
       adapter.applyInverseHunk({ patch: args.patch });
       return { ok: true };
+    });
+  });
+
+  // ============================================================
+  // BLOCK-20 — per-hunk reject via applyInverseHunk
+  // 与 `git:hunk-apply(action='reject')` 并列：保留 BLOCK-16 的 reject 路径不动，
+  // 新路径接受前端组装好的正向 unified diff patch（含 ---/+++ 与 @@ header），
+  // 由 applyInverseHunk 内部 invert 后回退 working tree。
+  // reject 清单写入走 _writeRejectEntry 共享 helper（与 BLOCK-16 一致 schema）。
+  // ============================================================
+  ipcMain.handle('git:hunk-reject-inverse', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      if (!args || typeof args.file !== 'string' || typeof args.hunkIndex !== 'number') {
+        throw new GitAdapterError('args_required', 'file and hunkIndex are required.');
+      }
+      if (typeof args.patch !== 'string' || args.patch.length === 0) {
+        throw new GitAdapterError('patch_required', 'patch text is required.');
+      }
+      adapter.applyInverseHunk({ patch: args.patch });
+      _writeRejectEntry(app.getPath('userData'), {
+        file: args.file,
+        hunkIndex: args.hunkIndex,
+        taskId: args.taskId,
+        feedback: args.feedback,
+        hunk: args.hunk || null,
+      });
+      return { ok: true, action: 'reject', file: args.file, hunkIndex: args.hunkIndex };
+    });
+  });
+
+  // ============================================================
+  // BLOCK-20 — Commit Review：收集审阅结果并提交
+  //
+  // 语义：用户逐 hunk 审阅后，点 "Commit Review" 将所有 accepted hunks
+  // stage 并 commit。commit message 由用户在 dialog 中填写。
+  //
+  // decisions 格式：Record<`${file}#${hunkIndex}`, 'accept'|'reject'|'pending'>
+  // 提交时只 stage accepted 文件；rejected 文件保持 working tree 不变。
+  // 返回 { ok, commit, files, message, stats }。
+  // ============================================================
+  ipcMain.handle('git:commit-review', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+
+      if (!args || !args.decisions || typeof args.decisions !== 'object') {
+        throw new GitAdapterError('decisions_required', 'decisions map is required.');
+      }
+      if (typeof args.message !== 'string' || args.message.trim() === '') {
+        throw new GitAdapterError('commit_message_required', 'Commit message is required.');
+      }
+
+      const decisions = args.decisions; // Record<`${path}#${hunkIndex}`, 'accept'|'reject'|'pending'>
+      const message = args.message.trim();
+
+      // 收集 accepted 文件列表（去重）
+      const acceptedFiles = new Set();
+      const rejectedFiles = new Set();
+      for (const [key, decision] of Object.entries(decisions)) {
+        if (decision !== 'accept' && decision !== 'reject') continue;
+        const hashIdx = key.lastIndexOf('#');
+        if (hashIdx < 0) continue;
+        const file = key.slice(0, hashIdx);
+        if (decision === 'accept') acceptedFiles.add(file);
+        else rejectedFiles.add(file);
+      }
+
+      if (acceptedFiles.size === 0) {
+        throw new GitAdapterError('no_files_to_commit', 'No accepted files to commit.');
+      }
+
+      const filesToStage = [...acceptedFiles];
+
+      // stage accepted 文件
+      adapter.stage({ paths: filesToStage });
+
+      // 路径受限提交（--only 保证不带入其他内容）
+      const commitResult = adapter.commit({ message, paths: filesToStage });
+
+      // 刷新工作区状态
+      const newStatus = adapter.status({ untracked: 'all' });
+
+      return {
+        ok: true,
+        commit: commitResult.commit,
+        files: filesToStage,
+        message,
+        rejectedFiles: [...rejectedFiles],
+        stats: {
+          acceptedFiles: acceptedFiles.size,
+          rejectedFiles: rejectedFiles.size,
+          totalWorkingTree: newStatus.entries.length,
+        },
+      };
     });
   });
 

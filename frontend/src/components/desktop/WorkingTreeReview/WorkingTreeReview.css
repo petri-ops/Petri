@@ -97,6 +97,16 @@
   border-color: rgba(220, 80, 80, 0.5);
 }
 
+/* BLOCK-20 PHASE 3 — Edit file button (inline-edit drawer trigger) */
+.wt-edit-btn {
+  background: rgba(80, 130, 200, 0.18);
+  border-color: rgba(80, 130, 200, 0.45);
+}
+
+.wt-edit-btn:hover:not(:disabled) {
+  background: rgba(80, 130, 200, 0.32);
+}
+
 .wt-error {
   padding: 8px 16px;
   background: rgba(220, 80, 80, 0.18);
@@ -154,6 +164,42 @@
   background: rgba(80, 130, 200, 0.18);
   border-left: 3px solid rgba(80, 130, 200, 0.7);
   padding-left: 9px;
+}
+
+.wt-file-list-item-decided {
+  background: rgba(60, 180, 100, 0.06);
+}
+
+.wt-file-list-badge {
+  margin-left: auto;
+  display: flex;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.wt-badge-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0 3px;
+  line-height: 1;
+}
+
+.wt-badge-accept-mini {
+  background: rgba(60, 180, 100, 0.3);
+  color: #80e898;
+  border: 1px solid rgba(60, 180, 100, 0.5);
+}
+
+.wt-badge-reject-mini {
+  background: rgba(220, 80, 80, 0.3);
+  color: #f08080;
+  border: 1px solid rgba(220, 80, 80, 0.5);
 }
 
 .wt-file-status {
@@ -220,6 +266,22 @@
   font-size: 11px;
 }
 
+.wt-shortcut-hint {
+  margin-right: 10px;
+  font-size: 10px;
+  color: var(--biof3-fg-muted, #666);
+  font-family: var(--biof3-mono, monospace);
+  white-space: nowrap;
+}
+
+.wt-shortcut-hint kbd {
+  display: inline-block;
+  padding: 0 3px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  font-family: var(--biof3-mono, monospace);
+  font-size: 10px;
 .wt-file-hunk-count {
   margin-left: auto;
   font-size: 11px;
@@ -239,6 +301,13 @@
 
 .wt-hunk {
   border-bottom: 1px solid var(--biof3-border, #404040);
+}
+
+.wt-hunk-focused > .wt-hunk,
+.wt-hunk-focused .wt-hunk {
+  outline: 2px solid rgba(60, 130, 220, 0.4);
+  outline-offset: -2px;
+  border-radius: 2px;
 }
 
 .wt-hunk:last-child {
@@ -365,4 +434,207 @@
 
 .wt-warning {
   color: #e0a040;
+}
+
+/* ============================================================
+ * Commit Review button
+ * ============================================================ */
+
+.wt-btn-commit {
+  background: rgba(60, 130, 220, 0.22);
+  border-color: rgba(60, 130, 220, 0.55);
+  color: #80b8f0;
+}
+
+.wt-btn-commit:hover:not(:disabled) {
+  background: rgba(60, 130, 220, 0.38);
+}
+
+.wt-btn-disabled,
+.wt-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+ * Commit success toast
+ * ============================================================ */
+
+.wt-commit-success {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(60, 180, 100, 0.18);
+  border-bottom: 1px solid rgba(60, 180, 100, 0.4);
+  color: #a8f0b8;
+  font-size: 12px;
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.wt-commit-hash {
+  font-family: var(--biof3-mono, monospace);
+  color: #80d888;
+}
+
+.wt-commit-success-close {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.wt-commit-success-close:hover {
+  opacity: 1;
+}
+
+/* ============================================================
+ * Commit message dialog (modal overlay)
+ * ============================================================ */
+
+.wt-dialog-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.wt-dialog {
+  background: var(--biof3-bg-elev, #2a2a2a);
+  border: 1px solid var(--biof3-border, #404040);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.wt-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--biof3-border, #404040);
+}
+
+.wt-dialog-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.wt-dialog-close {
+  background: none;
+  border: none;
+  color: var(--biof3-fg-muted, #888);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  line-height: 1;
+}
+
+.wt-dialog-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+}
+
+.wt-dialog-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.wt-dialog-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.wt-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.wt-badge-accept {
+  background: rgba(60, 180, 100, 0.2);
+  color: #80e898;
+  border: 1px solid rgba(60, 180, 100, 0.4);
+}
+
+.wt-badge-reject {
+  background: rgba(220, 80, 80, 0.2);
+  color: #f08080;
+  border: 1px solid rgba(220, 80, 80, 0.4);
+}
+
+.wt-dialog-files {
+  color: var(--biof3-fg-muted, #888);
+}
+
+.wt-dialog-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--biof3-fg-muted, #888);
+}
+
+.wt-dialog-textarea {
+  width: 100%;
+  background: var(--biof3-bg, #1e1e1e);
+  color: inherit;
+  border: 1px solid var(--biof3-border, #404040);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-family: var(--biof3-mono, monospace);
+  font-size: 12px;
+  resize: vertical;
+  box-sizing: border-box;
+  line-height: 1.5;
+}
+
+.wt-dialog-textarea:focus {
+  outline: none;
+  border-color: rgba(60, 130, 220, 0.6);
+  box-shadow: 0 0 0 2px rgba(60, 130, 220, 0.15);
+}
+
+.wt-dialog-error {
+  padding: 8px 10px;
+  background: rgba(220, 80, 80, 0.15);
+  border: 1px solid rgba(220, 80, 80, 0.4);
+  border-radius: 4px;
+  color: #f08080;
+  font-size: 12px;
+}
+
+.wt-dialog-hint {
+  font-size: 11px;
+  color: var(--biof3-fg-muted, #888);
+  line-height: 1.5;
+}
+
+.wt-dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 16px 14px;
+  border-top: 1px solid var(--biof3-border, #404040);
 }

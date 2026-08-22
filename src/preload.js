@@ -349,11 +349,14 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
 
   // BLOCK-16 — Working Tree Review Mode
   // BLOCK-20 — Code Review Panel: add listModified / fileHeadContent / splitSideDiff / revertFile / applyInverseHunk
+  // BLOCK-20 — per-hunk reject via applyInverseHunk: 前端组装正向 unified diff patch,
+  // 主进程内部 invert + apply 回退 working tree；reject 清单写入与 BLOCK-16 schema 对齐。
   workingTreeReview: {
     status: () => ipcRenderer.invoke('git:working-tree-status'),
     diff: (params) => ipcRenderer.invoke('git:working-tree-diff', params || {}),
     fileContent: (params) => ipcRenderer.invoke('git:working-tree-file-content', params || {}),
     applyHunk: (params) => ipcRenderer.invoke('git:hunk-apply', params || {}),
+    rejectHunkByInverseHunk: (params) => ipcRenderer.invoke('git:hunk-reject-inverse', params || {}),
     revert: (params) => ipcRenderer.invoke('git:working-tree-revert', params || {}),
     onTaskDone: (cb) => {
       const handler = (_e, info) => cb(info);
@@ -366,6 +369,8 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     splitSideDiff: (params) => ipcRenderer.invoke('git:split-side-diff', params || {}),
     revertFile: (params) => ipcRenderer.invoke('git:revert-file', params || {}),
     applyInverseHunk: (params) => ipcRenderer.invoke('git:apply-inverse-hunk', params || {}),
+    // BLOCK-20 — Commit Review
+    commitReview: (params) => ipcRenderer.invoke('git:commit-review', params || {}),
   },
 
   // BLOCK-17 — Agent Doc Review Mode

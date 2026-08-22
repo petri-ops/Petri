@@ -166,6 +166,7 @@
     "schema:verify": "node scripts/verify-schema.js",
     "g0:start:check": "node scripts/g0-start-audit.mjs",
     "block:working-tree-review": "node scripts/block-16-working-tree-review.mjs",
+    "block:code-review": "node scripts/block-20-code-review-panel.mjs",
     "g0:lf0:test": "node --test test/g0-baseline.test.mjs test/g0-project-baseline.test.mjs test/g0-api-route.test.mjs",
     "g0:lf0": "npm run g0:lf0:test && npm run g0:start:check && node scripts/g0-lf0-acceptance.mjs",
     "g0:lf0:update": "node scripts/g0-lf0-acceptance.mjs --write-evidence",

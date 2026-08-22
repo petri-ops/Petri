@@ -370,6 +370,22 @@ declare global {
           error?: string;
           message?: string;
         }>;
+        // BLOCK-20 — per-hunk reject via applyInverseHunk.
+        // `patch` 是正向 unified diff（带 ---/+++ 与 @@ header），由主进程内部 invert + apply。
+        // `hunk` 可选，传了则写入 reject 清单时填充 oldText/newText。
+        rejectHunkByInverseHunk: (params: {
+          file: string;
+          hunkIndex: number;
+          patch: string;
+          hunk?: { oldStart: number; newStart: number; lines: Array<{ type: 'add' | 'del' | 'ctx'; text: string }> };
+          feedback?: string;
+          taskId?: string;
+        }) => Promise<{
+          ok: boolean;
+          data?: { ok: true; action: 'reject'; file: string; hunkIndex: number };
+          error?: string;
+          message?: string;
+        }>;
         revert: (params?: { paths?: string[] }) => Promise<{
           ok: boolean;
           data?: { reverted: string[] };
@@ -415,6 +431,22 @@ declare global {
         applyInverseHunk: (params: { patch: string }) => Promise<{
           ok: boolean;
           data?: { ok: true };
+          error?: string;
+          message?: string;
+        }>;
+        // BLOCK-20 — Commit Review
+        commitReview: (params: {
+          decisions: Record<string, 'accept' | 'reject' | 'pending'>;
+          message: string;
+        }) => Promise<{
+          ok: boolean;
+          data?: {
+            commit: string | null;
+            files: string[];
+            message: string;
+            rejectedFiles: string[];
+            stats: { acceptedFiles: number; rejectedFiles: number; totalWorkingTree: number };
+          };
           error?: string;
           message?: string;
         }>;

@@ -511,6 +511,14 @@ async function main() {
   });
 }
 
+// Dev-only: enable Chrome DevTools remote debugging on port 9222 so the main
+// agent (and humans) can inspect the renderer via /json/list while developing.
+// Guarded by the --dev flag dev-electron.js always passes; production builds
+// never set this flag and the switch is a no-op for end users.
+if (process.argv.includes("--dev")) {
+  app.commandLine.appendSwitch("remote-debugging-port", "9222");
+}
+
 app.whenReady().then(main);
 
 app.on("window-all-closed", () => {
