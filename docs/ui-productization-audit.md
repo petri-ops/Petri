@@ -1152,3 +1152,56 @@ main.js 从 ~1201 行减少到 1001 行（-200 行）。IPC handler channel 名�
 - IPC channel 契约 **100% 不变**（`window:maximize-changed` / `window:fullscreen-changed` / `app:soft-refresh` 等事件 channel 未改动）
 
 **不外推**：packaged / Provider / GA / P7 / notarization / dist staleness G1+。
+
+
+## UI-###: BLOCK-18 — Workspace MD Diff（2026-08-22 → superseded 2026-08-22）
+
+| 属性 | 值 |
+|------|-----|
+| 状态 | `superseded` |
+| 阶段 | （未到 verified；UI 入口由 BLOCK-20 替代） |
+| 证据 | 仅保留 IPC + 工具函数 + 测试；inline-edit 资产由 BLOCK-20 合并进 PHASE 3 drawer |
+
+**说明**：把"前后差异"直接搬到文件页面（`files` tab 的 `WorkspaceFilePreview` 内 `预览/对比` toggle）；2026-08-22 用户裁决"代码审阅模式"应是**系统级常驻面板 + 全文本覆盖**，BLOCK-18 仅 markdown 文件页内 toggle 不够；由 BLOCK-20-CODE-REVIEW-PANEL 接管 active 槽位。BLOCK-18 已实现的 `markdownDiff.ts` / `agentDocReview:saveCurrent` / `workspace.writeTextFile` / `<textarea>` 资产由 BLOCK-20 复用。
+
+_BLOCK-18 plan 已 superseded by BLOCK-20；原交付范围见 [`docs/block-18-workspace-md-diff-plan.md`](./block-18-workspace-md-diff-plan.md)（已 superseded 2026-08-22）。_
+
+**不变量守住**：BLOCK-17 已实现的 IPC / preload / bridge / 类型 / `.wt-*` 样式骨架 / IPC 测试全部复用；不修改 `working-tree-review.js` / `core/r-server/*` / `core/shared-backend/*` / `copilot/*` / workspace 文件树 + 多 tab 打开能力。
+
+**不外推**：packaged / Provider / GA G1+
+
+---
+
+## UI-###: BLOCK-17 — Agent 文档审阅面板（superseded 2026-08-22）
+
+| 属性 | 值 |
+|------|-----|
+| 状态 | `superseded` |
+| 阶段 | （未到 verified；UI 入口由 BLOCK-18 → BLOCK-20 替代） |
+| 证据 | 仅保留 IPC + 组件代码 + 测试；独立面板被 BLOCK-18 → BLOCK-20 删完 |
+
+**说明**：原计划为 BioF3 Desktop 添加独立的「Agent 文档审阅」侧边栏面板，复用 WorkingTreeReview `.wt-*` 样式。2026-08-22 用户裁决"多一个审阅界面没有意义"，UI 入口改为文件页面内 diff toggle（BLOCK-18 接管），再升级为常驻审阅面板（BLOCK-20 接管）。已实现的 IPC handlers / preload namespace / bridge / 类型 / `.wt-*` 样式 / IPC 测试由 BLOCK-20 复用；独立面板 / 菜单项 / 状态槽被 BLOCK-18 → BLOCK-20 删完。详见 [`docs/block-17-agent-doc-review-panel-plan.md`](./block-17-agent-doc-review-panel-plan.md) §收口。
+
+## UI-185: BLOCK-20 — Code Review Panel（2026-08-22 active）
+
+| 属性 | 值 |
+|------|-----|
+| 状态 | `in_progress` |
+| 阶段 | dev Electron 边界内 |
+| 证据 | 38/38 git-adapter 单元测试 + 66/66 node --test 全量 + 4 治理门 GREEN + commits f974076 + 9c303d6 |
+
+**说明**：系统级代码审阅体验 — 常驻右侧审阅面板，覆盖项目所有 git 跟踪的修改文本文件（不限 markdown），基准 vs git HEAD，unified / split 双视图，hunk 级别 Accept / Reject + reject signal 注入 BLOCK-16 `<working-tree-rejects>` system-prompt。inline-edit drawer 承载 BLOCK-19 `<textarea>` 资产。详见 [`docs/block-20-code-review-panel-plan.md`](./block-20-code-review-panel-plan.md)。
+
+**复用资产**：BLOCK-16 `DiffFileView / DiffHunkView / applyPatch / revertPaths / <working-tree-rejects>` 0 改动；BLOCK-19 inline-edit + `workspace.writeTextFile` 0 改动。
+
+**不外推**：packaged / Provider / GA / P7 / notarization G1+ / 引入 monaco-editor / react-diff-viewer / react-split-pane / n-way merge / 跨项目 working tree 审阅。
+
+---
+
+## UI-185: BLOCK-20 — Code Review Panel — PHASE 1 git-adapter + IPC + 测试 (UI-185)
+
+PHASE 1 (commit b2c4edf, 仍 in_progress 待实机过目): 5 新 git-adapter 方法
+(listModified / fileHeadContent / fileWorkTreeContent / splitSideDiff / revertFile /
+applyInverseHunk) + 5 IPC 通道 + 38 单元测试 + 0 前端改动 + 0 npm 依赖新增.
+PHASE 2/3/4/5 进度在 docs/ui-productization-audit.md 主笔录段同步.
+
