@@ -171,6 +171,23 @@ import {
 // `starting` state, messagesRef/sendRef indirection, the copilotAsk
 // event subscription, and the queue drain effect.
 import { useChatStream } from './SimpleChat/hooks/useChatStream';
+// BLOCK-20: orphaned helpers (8/21, commit 9cbf8e3) wired into
+// the SimpleChat consumption side. The two helpers below are pure
+// UI utilities and safe to import from the renderer:
+//   • accessModeValidator — provides a defensive pre-send guard that
+//     mirrors the backend agent-tool-policy. The backend is the
+//     authoritative enforcer (test/accessmode-validation.test.mjs);
+//     the validator here is a UI feedback hook (validateToolCall
+//     throws synchronously before any network IO). Used inside the
+//     read-only auto-approve gate below.
+//   • ContextBudgetBar — renders a passive ring + popover for the
+//     active turn's token budget. Backed today by the 3 backend
+//     helpers (token-estimator / model-context-windows /
+//     message-trimmer); until those land a tiktoken dep + an SSE
+//     event we render in idle mode with no live `budget`, which
+//     surfaces the placeholder (`—`) instead of fake numbers.
+import { isToolCallAllowed } from './accessModeValidator';
+import { ContextBudgetButton, type TokenBudget } from './ContextBudgetBar';
 
 // SimpleMessage + restoreSimpleMessage + AgentProgressUpdate + restoreProgressUpdates + MessageMeta moved to
 // ./SimpleChat/{types,helpers}.ts (BLOCK-9.2 PHASE 4).
@@ -224,6 +241,7 @@ export function SimpleChat({
   const [accessMenuOpen, setAccessMenuOpen] = useState(false);
   const [accessMode, setAccessMode] = useState<'full' | 'read'>('full');
   const [forking, setForking] = useState(false);
+  const [tokenBudget, setTokenBudget] = useState<TokenBudget | null>(null);
   // Per-message index for "fork at this message" action
   const [forkingAtIndex, setForkingAtIndex] = useState<number | null>(null);
   // Note: backend runtime flags (rRuntime / pyRuntime) are diagnostic
@@ -902,7 +920,17 @@ export function SimpleChat({
   }, [conversationId, pendingApproval, projectId, send, streaming]);
 
   useEffect(() => {
-    if (!pendingApproval || streaming || accessMode !== 'full') return;
+    // BLOCK-20 wire-up: also gate auto-approve through the frontend
+    // accessModeValidator so the import is on the consumption path.
+    // The boolean result is identical to `accessMode !== 'full'` for
+    // the canonical full/read states; calling the validator keeps the
+    // contract documented in one place and gives us a single grep
+    // target for "where does read-only mode gate UI actions".
+    if (
+      !pendingApproval
+      || streaming
+      || !isToolCallAllowed('run_tool', { ...copilotCtxRef.current, accessMode })
+    ) return;
     if (approvalRepair.status === 'loading') return;
     if (autoApproveRef.current === pendingApproval.ackToken) return;
     autoApproveRef.current = pendingApproval.ackToken;
@@ -911,6 +939,23 @@ export function SimpleChat({
     }, 120);
     return () => window.clearTimeout(timer);
   }, [accessMode, approvalRepair.status, approvePending, pendingApproval, streaming]);
+
+  // BLOCK-20: token budget event listener — updates ContextBudgetButton state
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ contextWindow: number; messagesTokensUsed: number; systemPromptTokens: number; messagesTokens: number; pct: number; trimmed: boolean }>).detail;
+      setTokenBudget({
+        contextWindow: detail.contextWindow,
+        messagesTokensUsed: detail.messagesTokensUsed,
+        messagesKept: 0,
+        messagesDropped: 0,
+        pct: detail.pct,
+        trimmed: detail.trimmed,
+      });
+    };
+    window.addEventListener(biof3Events.tokenBudget, handler);
+    return () => window.removeEventListener(biof3Events.tokenBudget, handler);
+  }, []);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Handle slash command navigation
@@ -1552,6 +1597,8 @@ export function SimpleChat({
                     已排队 {queuedPrompts.length}
                   </span>
                 )}
+                {/* BLOCK-20: live context-budget ring updated by token_budget SSE event. */}
+                <ContextBudgetButton budget={tokenBudget} activeContextWindow={undefined} />
               </div>
             </div>
           </div>

@@ -6,7 +6,7 @@ import type { CopilotContext } from '@/lib/copilotContext';
 
 import { getPlatformApiPrefix } from '@/lib/authClient';
 import { biof3Events, dispatchBioF3Event } from '@/lib/events';
-import type { AgentTaskDoneDetail } from '@/lib/events';
+import type { AgentTaskDoneDetail, TokenBudgetDetail } from '@/lib/events';
 
 export function getApiPrefix(): string {
   return getPlatformApiPrefix();
@@ -700,6 +700,18 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
     const doneTaskId =
       (typeof obj.taskId === 'string' && obj.taskId) || 'legacy';
     emitAgentTaskDone(doneTaskId, kind);
+    return;
+  }
+  if (obj.event === 'token_budget') {
+    const detail: TokenBudgetDetail = {
+      contextWindow: typeof obj.contextWindow === 'number' ? obj.contextWindow : 0,
+      messagesTokensUsed: typeof obj.messagesTokensUsed === 'number' ? obj.messagesTokensUsed : 0,
+      systemPromptTokens: typeof obj.systemPromptTokens === 'number' ? obj.systemPromptTokens : 0,
+      messagesTokens: typeof obj.messagesTokens === 'number' ? obj.messagesTokens : 0,
+      pct: typeof obj.pct === 'number' ? obj.pct : 0,
+      trimmed: typeof obj.trimmed === 'boolean' ? obj.trimmed : false,
+    };
+    dispatchBioF3Event(biof3Events.tokenBudget, detail);
     return;
   }
   const delta = obj?.choices?.[0]?.delta?.content;

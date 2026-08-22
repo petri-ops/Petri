@@ -7,33 +7,41 @@
 import type { CopilotContext } from '@/lib/copilotContext';
 
 /**
- * Destructive tools that should be blocked in read-only mode.
- * These tools can modify files, execute commands, or alter system state.
+ * Destructive tools (backend registry names) that should be blocked in
+ * read-only mode.  The backend decideAgentToolCall() is the authoritative
+ * enforcer (core/r-server/agent-tools/agent-tool-policy.js); this set
+ * mirrors its MUTATING_SIDE_EFFECTS = { 'workspace-write', 'execution' }
+ * so the frontend can surface a synchronous UI hint before network IO.
+ *
+ * Tool-name mapping (frontend alias → backend registry name):
+ *   fs_write / Write / StrReplace / Delete / EditNotebook → workspace_write
+ *   Shell / workspace_exec                          → workspace_exec
+ *   GitCommit / GitPush / GitBranch / GitMerge / GitRebase → git_*
+ *   InstallPackage / UninstallPackage               → npm / pip tools
+ *
+ * For `run_tool` (plugin delegation), the backend resolves `args.op`
+ * against READ_ONLY_RUN_TOOL_OPS at decision time; the frontend cannot
+ * know the op before network IO, so run_tool is treated as a passthrough
+ * in 'full' mode and as potentially destructive in 'read' mode.
  */
 const DESTRUCTIVE_TOOLS = new Set([
-  // File modifications
-  'fs_write',
-  'StrReplace',
-  'Delete',
-  'EditNotebook',
-  'Write',
-  
-  // Command execution
-  'Shell',
-  
-  // Version control write operations
-  'GitCommit',
-  'GitPush',
-  'GitBranch',
-  'GitMerge',
-  'GitRebase',
-  
-  // Package/dependency management
-  'InstallPackage',
-  'UninstallPackage',
-  
-  // Other destructive operations
-  'Task', // Tasks may contain destructive operations
+  // Workspace write / replace — matches backend sideEffect: 'workspace-write'
+  'workspace_write',
+  'workspace_replace',
+  // Shell / execution — matches backend sideEffect: 'execution'
+  'workspace_exec',
+  'shell_exec',
+  // Git write operations
+  'git_commit',
+  'git_push',
+  'git_branch',
+  'git_merge',
+  'git_rebase',
+  // Package management
+  'npm_install',
+  'npm_uninstall',
+  'pip_install',
+  'pip_uninstall',
 ]);
 
 /**

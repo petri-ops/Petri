@@ -83,6 +83,7 @@ Stage 1 出口要求 P0/P1 清零；P2 可以延期，但必须写明原因与�
 | UI-029 | verified | P1 | W-05 | C-02 | 浏览器面板 | 浏览器 tab 内容（rightPanelBrowserTab）的布局可能与其他 tab 不一致 | 2026-07-17：普通/窄窗口下浏览器工具栏、报告内容与结果 tab 布局一致；`/tmp/biof3-ui-acceptance-narrow-browser.jpeg` | UI-5 |
 | UI-030 | verified | P1 | W-02 | C-02 | 面板折叠 | 右侧面板完全收起时，仍然占用少量宽度（约 64px），影响中间工作区空间 | `475a2cf` 将收起宽度降至 56px；折叠/展开实机通过，见 `/tmp/biof3-ui-acceptance-right-collapsed.jpeg` | UI-2 |
 | UI-031 | verified | P1 | P-07 | C-03, C-04 | 设置 / AI 模型 | 旧设置页只支持 DeepSeek/DashScope 固定入口，无法管理多模型、任务角色能力绑定、显式 fallback 和自定义 Endpoint | 2026-07-17 打包态 `dist/mac-arm64/BioF3.app`(arm64/rc.5) 实机验收通过：模型 CRUD、8 类角色绑定与能力过滤、显式 fallback、Keychain 凭据（无明文回显）、保存重开、聊天选择器同步、窄窗均由用户实测确认；真实 Provider 由 `acceptance/stage2/live-provider-check.mjs` 真机验证（DeepSeek + xunfei-astron + api.xcdw.us opus-4-8，chat/streaming/tool calling 全绿，PASS） | MODEL-5 |
+| UI-183 | in_progress | P0 | W-02 | C-02 | WorkingTreeReview 抽屉 hooks-order 错误 | BLOCK-20 提交后 WorkingTreeReview.tsx:121 `useState(focusedHunk)` + 2 个 `useEffect` 排在 `if (!isOpen) return null;` 之后；初次 isOpen=false 渲染时 React 仅看到 7 个 hook，`isOpen` 翻转后变成 10 个，触发 React 19 `Rendered more hooks than during the previous render` 导致 Electron 黑屏。修复：把这 3 个 hook 全部上移到 early-return 之前，`selectedFile` 派生提前到 hook 注册区，使每次渲染的 hook 顺序恒等。`npx tsc --noEmit` 0 错误 / `npm run block:code-review` 7/8 PASS（含 frontend-tsc / docs-check / system-prompt-rejects / frontend-code-review / git-adapter-block20 ×2 + BLOCK-20 closeout 自身，ui-audit-check 在本 commit 内随 UI-183 登记后转 PASS）；dev Electron 边界内实机复核待办，按本台账行 402 治理纪律 `verified` 升级需真实实机过目 | BLOCK-20-HOOKS-FIX |
 
 | UI-131 | verified | P3 | W-01 | C-01 | 全局样式 / 设计系统卫生 | 删除已退役页面的死 CSS：single-cell.css 仍被 global.css @import 但对应页面已删除（grep 确认其 sc-* 类无任何组件引用）；docs.css、figcode.module.css、index.module.css 零引用。降低包体与维护认知负担 | 代码完成；@import 已移除、4 文件已删；待实机验证全局样式无回归 | UI-卫生 |
 | UI-132 | verified | P2 | W-01 | C-01 | 全局样式 / 设计系统卫生 | 令牌消费一致性：simple-chat.css 与 project-workspace.module.css 中硬编码的 hex/rgba 改为引用 --biof3-* 语义令牌；新增 --biof3-on-solid 令牌修复暗色下 send-cta 白字糊字问题 | 代码完成；新增 --biof3-on-solid（亮 #fff / 暗 #0b1220）；simple-chat.css 6 处实心按钮白字 + loop 状态色、project-workspace.module.css 状态/品牌色光晕及两处失效 fallback（--biof3-warning/--biof3-success）已收敛；code-highlight.css 本就令牌驱动未动；纯黑投影与实心按钮白字留待 P5 按钮基元统一 | UI-卫生 |
@@ -1331,4 +1332,42 @@ BLOCK-19 inline-edit + workspace.writeTextFile 0 改动.
   - PHASE 5: reject signal → <working-tree-rejects> system-prompt 注入
 
 **保留**: BLOCK-17 / BLOCK-18 已 superseded 笔录 + 资产 (markdownDiff / agentDocReview IPC / workspace.writeTextFile / <textarea>) 由本工作包复用.
+
+
+## UI-189: BLOCK-20-WIRE-UP — ContextBudgetButton + accessModeValidator mount (UI-189) (2026-08-22 active)
+
+BLOCK-20-WIRE-UP 落地: 把 8/21 (commit 9cbf8e3) 创建的 5 个孤儿 UI/helpers 中可在 dev Electron 边界内接入消费侧的部分挂到 SimpleChat 主结构上.
+
+**接入** (commit feat(block-20-wire-up)):
+  - frontend/src/components/copilot/SimpleChat.tsx: 顶部加 2 个 import (`isToolCallAllowed` from './accessModeValidator', `ContextBudgetButton` from './ContextBudgetBar') + 1 行 JSX 挂 `<ContextBudgetButton budget={null} activeContextWindow={undefined} />` 到 `sc-composer-right` 末尾 + auto-approve gate 把 `accessMode !== 'full'` 改成 `!isToolCallAllowed('run_tool', { ...copilotCtxRef.current, accessMode })` 让 accessModeValidator 真正落到消费侧.
+
+**不接入** (按 AGENTS.md G0 阶段纪律 · 不外推 + 现状不符):
+  - core/r-server/helpers/{token-estimator,message-trimmer,model-context-windows}.js:
+    package.json 0 处 tiktoken 依赖 (`tiktoken` 不在 deps/devDeps) → 直接 require 会崩 runtime;
+    节点是 backend CommonJS, 不可被 frontend Vite 打包 → 接入前端不可能;
+    接入 backend (agent-runner.js) 需要先加 tiktoken 依赖 + 完成 tiktoken native build (postinstall hook), 属 G1+ provider/runtime 工作, 按当前阶段纪律不外推. 留作孤儿等下次有人推进 tiktoken 依赖时再接.
+  - accessModeValidator.ts 的 DESTRUCTIVE_TOOLS 列表 (`fs_write`/`StrReplace`/`Write`/`Shell`/`GitCommit`/...) 与 backend agent-tool-policy.js 实际 deny 的工具集 (`workspace_write`/`workspace_replace`/`workspace_exec`) 不一致 → 这是 9cbf8e3 创建时的 API 形状漂移, 当前只挂 `isToolCallAllowed('run_tool', ...)` 让 import 真生效 + 暴露漂移, 完整校对留给后续审计; backend agent-tool-policy.js (test/accessmode-validation.test.mjs 4/4 PASS) 仍是权威 enforcer.
+
+**状态**: in_progress (按 audit 行 402 治理纪律: 仅当真实 dev Electron 实机过目后才可考虑 verified; 当前 ContextBudgetButton 挂上去是 idle `—` 占位, 等 backend 接入 3 helpers + tiktoken 后再升 verified).
+
+## UI-190: BLOCK-20-WIRE-UP — live token budget via SSE + ContextBudgetBar 替换占位符 (UI-190) (2026-08-22 active)
+
+BLOCK-20-WIRE-UP token budget 落地: ContextBudgetButton 从 idle 占位符 `—` → live token 预算环。
+
+**接入** (commits 8d08f0e feat(block-20) + 7cf0725 fix(block-20)):
+  - core/r-server/routes/ai-chat.js (8d08f0e): `estimateRequestTokens` + `countTokens` from `token-estimator`；`fullMessages` 组装完毕后、`res.flushHeaders()` 前注入 token 估算；发 SSE `token_budget` 事件（contextWindow / messagesTokensUsed / pct / trimmed）。
+  - frontend/src/lib/events.ts (8d08f0e): `biof3Events.tokenBudget` 事件键 + `TokenBudgetDetail` 接口 + `BioF3EventMap` 条目。
+  - frontend/src/components/copilot/copilotClient.ts (8d08f0e): SSE 解析 `_dispatchSseEvent` 路由 `obj.event === 'token_budget'` → 类型安全 `dispatchBioF3Event`。
+  - frontend/src/components/copilot/SimpleChat.tsx (8d08f0e + 7cf0725): `tokenBudget` state + `biof3Events.tokenBudget` useEffect 监听 + `ContextBudgetButton budget={tokenBudget}` 替换 `budget={null}`。
+  - frontend/src/components/copilot/accessModeValidator.ts (6748602): DESTRUCTIVE_TOOLS 改用 backend registry 名（`workspace_write`/`workspace_exec`），镜像 backend `MUTATING_SIDE_EFFECTS` 契约，修复 read 模式死代码。
+
+**API 形状修正** (worker 发现后主 agent 确认):
+  - `token-estimator.js` `estimateRequestTokens` 返回 `{ systemPromptTokens, messagesTokens, maxTokens, total }`；用 `total` 作为 `messagesTokensUsed`（而非误传的顶层字段）。
+  - `model-context-windows.js` 只导出一个具名函数 `getContextWindow`，直接调用而非解构。
+  - `tiktoken` 在 `core/r-server/node_modules/tiktoken` ✅，HARDCODED 表含 `deepseek-chat: 64000` ✅。
+
+**不接入** (按 G0 阶段纪律 · 不外推):
+  - message-trimmer.js（`trimMessages`）：需 backend agent-runner.js 在循环迭代后调用 + 传递 trimmed 结果给 SSE；属 G1+ 工作。
+
+**状态**: in_progress (按 audit 行 402 治理纪律: 仅当真实 dev Electron 实机过目后才可考虑 verified).
 

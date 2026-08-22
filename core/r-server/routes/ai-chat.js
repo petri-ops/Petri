@@ -31,6 +31,10 @@ const {
   saveMemoryVector,
   MAX_CONTENT_LEN,
 } = require('../helpers/memory-vectors');
+const {
+  estimateRequestTokens,
+  countTokens,
+} = require('../helpers/token-estimator');
 
 const TOOL_SUMMARY_PRIVATE_KEYS = new Set([
   'jobDir', 'outputDir', 'resultDir', 'workDir', 'stdout', 'stderr', 'script',
@@ -260,6 +264,31 @@ module.exports = function registerAiChatRoute(app) {
         ? messages.slice(-SUMMARY_KEEP_RECENT)
         : messages;
     const fullMessages = [{ role: 'system', content: systemPrompt }, ...trimmedMessages];
+
+    // BLOCK-20: token budget estimation + SSE event — fires before stream starts
+    try {
+      const { getContextWindow } = require('../helpers/model-context-windows');
+      const activeModel = identityProfile && identityProfile.model || 'deepseek-chat';
+      const activeProvider = identityProvider || 'deepseek';
+      const { systemPromptTokens, messagesTokens, total } = estimateRequestTokens({
+        systemPrompt,
+        messages: trimmedMessages,
+        maxTokens: 8192,
+      });
+      const ctxWindow = await getContextWindow(activeModel, activeProvider).catch(() => 0) || 0;
+      const pct = ctxWindow > 0 ? Math.min(100, Math.round((total / ctxWindow) * 100)) : 0;
+      res.write('data: ' + JSON.stringify({
+        event: 'token_budget',
+        contextWindow: ctxWindow || 64000,
+        messagesTokensUsed: total,
+        systemPromptTokens,
+        messagesTokens,
+        pct,
+        trimmed: total > (ctxWindow || 64000),
+      }) + '\n\n');
+    } catch (e) {
+      console.log('[token-budget-estimation-error]', e && e.message);
+    }
 
     // SSE response headers
     res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');

@@ -63,6 +63,9 @@ export const biof3Events = {
    * payload 含 taskId（agent task identifier）+ filesChanged（若后端在 done 时附了改动清单）。
    */
   agentTaskDone: 'biof3:agent-task-done',
+
+  /** BLOCK-20: fired by backend SSE once per agent run with live token budget. */
+  tokenBudget: 'biof3:token-budget',
 } as const;
 
 export interface ConversationForkedDetail {
@@ -80,6 +83,16 @@ export interface ConversationForkedDetail {
 export interface AgentTaskDoneDetail {
   taskId: string;
   filesChanged?: Array<{ path: string; status: string }>;
+}
+
+/** BLOCK-20: fired by backend SSE once per agent run with live token budget. */
+export interface TokenBudgetDetail {
+  contextWindow: number;
+  messagesTokensUsed: number;
+  systemPromptTokens: number;
+  messagesTokens: number;
+  pct: number;
+  trimmed: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -146,6 +159,7 @@ export type BioF3EventMap = {
   [biof3Events.browserForward]: undefined;
   [biof3Events.conversationForked]: ConversationForkedDetail;
   [biof3Events.agentTaskDone]: AgentTaskDoneDetail;
+  [biof3Events.tokenBudget]: TokenBudgetDetail;
 };
 
 /** Dispatch a typed event on window */
