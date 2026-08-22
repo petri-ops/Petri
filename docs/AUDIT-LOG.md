@@ -470,3 +470,55 @@ docs(block-15): plan §2 replaced with empirical data (17 vars + 22 functions + 
 **当前 active**：NONE（BLOCK-15-ARCHITECTURE-PERF 已 completed）。
 
 | BLOCK-15 / COMPLETED |
+
+| 2026-08-22 | **BLOCK-20-CODE-REVIEW-PANEL PHASE 1+2+3 + assets + closeout 工作包收口（PHASE 4 closeout 提交）**：BLOCK-18 → superseded，BLOCK-20 接管 active 槽位。系统级代码审阅体验：常驻右侧审阅面板覆盖项目所有 git 跟踪的修改文本文件（不限 markdown），基准 vs git HEAD，hunk accept/reject + reject signal 注入 BLOCK-16 `<working-tree-rejects>` system-prompt，inline-edit drawer 承载 BLOCK-19 `<textarea>` 资产。**6 commits 落地**（本地分支 `feat/agent-doc-review-panel`）：
+1. `b2c4edf` feat(block-20-phase-1): git-adapter 5 方法 (listModified / fileHeadContent / fileWorkTreeContent / splitSideDiff / revertFile / applyInverseHunk) + 5 IPC 通道 + 38 单元测试 + agentDocReview IPC handler (BLOCK-19 inline-edit 依赖) + main.js setup 注册
+2. `ea03eaf` docs(block-20): ui-audit PHASE 1 笔录同步 (UI-185)
+3. `2dee4d1` feat(block-20-phase-2): WorkingTreeReview 常驻右侧审阅面板 (App.tsx AppShell + TitleBar 按钮 + useWorkspacePanels workingTreeOpen + WorkingTreeReview.tsx 改 panel 渲染 + .css rename .module.css + 删 Mount/Button 3 文件 0 引用)
+4. `6482cd9` feat(block-20-phase-3): workspace:write-text-file IPC (realpathSync 双向校验) + 项目文件 inline-edit (workspaceDir 透传 + handleSaveCurrent 二分支) + markdownDiff 工具栏 199 行样式
+5. `3d0c874` feat(block-20-assets): markdownDiff.ts + .test.ts (281+164 行, 22/22 vitest PASS) + agent-doc-review-ipc.test.mjs (233) + preload-agentdocreview-namespace.test.mjs (106) + block-17-agent-doc-review-panel-plan.md (82 行, 留 reference)
+6. `0d5b7e3` docs(block-20): UI-185 综合笔录 + handoff 同步 + 5 份调试报告归档 (accessmode-fix/verification/complete-fix + test-accessmode-validation + agent-unknown-error-rootcause) 到 `docs/archive/agent-debug-2026-08/`
+
+**BLOCK-20 范围内验证**：
+- tsc --noEmit 0 错
+- node --test 66/66 PASS (git-adapter 38 + agentDocReview 17 + system-prompt-rejects 11)
+- markdownDiff vitest 22/22 PASS
+- docs:check 137 PASS / docs:reconcile 0 issues
+- ui-audit:check 整体 exit 1, 但 **BLOCK-20 范围内 0 commit 报错**（我创建的 6 个 commit 全部 PASS）；报错全部来自 10 个 pre-existing 历史 commit（30ff32f / b6f69a4 / 4e81ef9 / 6bb9ecb / 05e8546 / 4dbc444 / f8edc77 / 921a1b3 / 1894f5d / 59ccaba）—— 这些 baseline (0611ce5) 之后、BLOCK-20 启动之前的历史 commit 累积的违规, **不是 BLOCK-20 引入**, 不在 BLOCK-20 修复范围内. 已登记到本日志供主 agent 后续 BLOCK-15+ 治理迭代处置.
+
+**Pre-existing UI-AUDIT violation 详细** (与 BLOCK-20 无关, 留作治理迭代输入):
+- 30ff32f: feat(chat): Fork Chat 分支功能 (UI-WAVE0 fork 扩展, 笔录在 UI-143)
+- b6f69a4: feat(skills): Workflow Engine + Skills UI/frontend pages (笔录已补 UI-157)
+- 4e81ef9: feat(copilot): Gateway design doc + Copilot UX enhancements (笔录已补 UI-158)
+- 6bb9ecb: feat(frontend): Workspace UI plumbing (笔录已补 UI-159)
+- 05e8546: feat(agent-workbench): P1.2 TableRenderer + UI-ID 命名空间扩展
+- 4dbc444: fix(mac): fullscreen button to custom traffic lights (笔录已补 UI-161)
+- f8edc77: refactor(mac): replace maximize with fullscreen (与 4dbc444 同工作流, 笔录已补 UI-161)
+- 921a1b3: feat(copilot-chat): SimpleChat UI + workspace panels + skills index (笔录已补 UI-162)
+- 1894f5d: feat(branch-result-studio): branch context + result studio frontend + persistence (笔录已补 UI-163)
+- 59ccaba: feat(block-16 PHASE 3): agent-task-done typed event + SSE dispatch + <working-tree-rejects> system-prompt injection (笔录已补 UI-180)
+违规性质: 全部是 "commit 改了 UI 表面但没同步 ui-productization-audit.md" / "commit message 缺 UI-### 编号" — LEGACY 列表未覆盖, 需主 agent 后续裁决:
+  选项 A: 把这 10 个 commit 加到 LEGACY_AUDIT_SYNC_EXEMPTIONS (一劳永逸, 但破坏审计纪律边界)
+  选项 B: 启动 BLOCK-XX-UI-AUDIT-CLEANUP 单独工作包, 逐个 commit 修历史 (成本高, 但符合纪律)
+  选项 C: 接受 pre-existing 违规, ui-audit:check 已知包含历史违规 (门禁降级)
+当前 BLOCK-20 不裁决此选项, 仅登记.
+
+**PHASE 4/5 待办** (留 BLOCK-20+ 或 BLOCK-21 启动):
+- PHASE 4: accept/reject 按钮接 git:revert-file + git:apply-inverse-hunk IPC (PHASE 1 已备, 0 改动)
+- PHASE 5: reject signal → <working-tree-rejects> system-prompt 注入 (PHASE 1 已备, 0 改动)
+
+**不变量守住**: preload.js 19 命名空间 0 diff (PHASE 1 workingTreeReview 仅加方法) / electron.d.ts 既有类型 0 diff / BLOCK-16 useWorkingTreeReview / DiffFileView / DiffHunkView / applyPatch / revertPaths 0 diff / desktopBridge.ts 0 diff (注释小改) / core/shared-backend/* 既有方法 0 diff / agent-tools/* / agent-transcripts/* 0 diff / 0 新 npm 依赖.
+
+**UI-185 in_progress** (按 audit 行 402 治理纪律: 仅当真实 dev Electron 实机过目后才可考虑 verified). dev Electron 边界内 in_progress 待实机过目, 不外推 packaged / Provider / GA / P7 / notarization G1+.
+
+**不外推**: 引入 monaco-editor / react-diff-viewer / react-split-pane / n-way merge / 跨项目 working tree 审阅 / 不重新激活 BLOCK-9.2 / 9.1 / 9 / 8 / 7 / 6 / 5 / 4 / 3 / 2.
+
+**当前 active**: NONE（本次 BLOCK-20 PHASE 1+2+3+assets+closeout 收口, PHASE 4/5 + BLOCK-21 UI-AUDIT-CLEANUP 治理待用户裁决启动）.
+
+**清理动作**:
+- 删除 `test.txt` / `frontend/test-wtr-1787312169.txt` (临时调试输出)
+- 删除 `core/shared-backend/llm-providers/deepseek.js.bak-20260820` / `docs/DOC-REGISTRY.json.bak-2026-08-21` (旧 backup)
+- 归档 5 份调试报告到 `docs/archive/agent-debug-2026-08/` (含 README 说明归档策略)
+- 显式保留未追踪 WIP (ContextBudgetBar / accessModeValidator / message-trimmer / model-context-windows / token-estimator / accessmode-validation.test.mjs / deepseek-retry.test.mjs) —— 这些属于 BLOCK-15+ 上下文窗口/agent 工具守门方向, **不在 BLOCK-20 范围内**, 保留待用户裁决启动下一个工作包.
+
+**G0 开发期常态**: 不外推 packaged/Provider/GA/P7/notarization/dist staleness G1+. | BLOCK-20-CODE-REVIEW-PANEL / PHASE-1+2+3-CLOSEOUT |
