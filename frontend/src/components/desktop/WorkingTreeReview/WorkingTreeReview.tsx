@@ -1,9 +1,13 @@
 // ============================================================
-// WorkingTreeReview — BLOCK-16 thin-slice 模态浮层入口
+// WorkingTreeReview — BLOCK-20 thin-slice 常驻右侧审阅面板
 //
-// 顶部工具栏：关闭 / 任务 ID / 文件数 / 计数 / Revert All
+// 顶部工具栏：刷新 / Revert all
 // 中部 file list（左侧） + 选中文件的 hunk 视图（右侧）
 // 底部状态栏：pending / applied / rejected 计数
+// 由 useWorkspacePanels.workingTreeOpen 控制显隐（见 TitleBar 按钮）。
+// 复用 BLOCK-16 useWorkingTreeReview + DiffFileView / DiffHunkView；新增按钮接
+// BLOCK-20 IPC: listModified / fileHeadContent / splitSideDiff /
+// revertFile / applyInverseHunk。
 // ============================================================
 
 import { useEffect } from 'react';
@@ -39,73 +43,68 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
   const selectedFile = review.diff?.files.find((f) => f.path === review.selectedFilePath) || null;
 
   return (
-    <div className="wt-overlay" role="dialog" aria-modal="true" aria-label="working tree review">
-      <div className="wt-container">
-        <div className="wt-toolbar">
-          <div className="wt-toolbar-left">
-            <span className="wt-title">Working Tree Review</span>
-            {review.taskId && <span className="wt-task-id">task: {review.taskId}</span>}
+    <div className="wt-container" role="region" aria-label="code review panel">
+      <div className="wt-toolbar">
+        <div className="wt-toolbar-left">
+          <span className="wt-title">Code Review</span>
+          {review.taskId && <span className="wt-task-id">task: {review.taskId}</span>}
+        </div>
+        <div className="wt-toolbar-right">
+          <button type="button" className="wt-btn" onClick={() => void review.refresh()}>
+            Refresh
+          </button>
+          <button type="button" className="wt-btn wt-btn-danger" onClick={() => void review.revertAll()}>
+            Revert all
+          </button>
+        </div>
+      </div>
+
+      {review.error && (
+        <div className="wt-error" role="alert">{review.error}</div>
+      )}
+
+      <div className="wt-body">
+        <aside className="wt-file-list">
+          <div className="wt-file-list-title">
+            Files ({review.status?.totalFiles ?? 0})
           </div>
-          <div className="wt-toolbar-right">
-            <button type="button" className="wt-btn" onClick={() => void review.refresh()}>
-              Refresh
+          {review.status?.files.length === 0 && (
+            <div className="wt-empty">No working tree changes.</div>
+          )}
+          {review.status?.files.map((f) => (
+            <button
+              key={f.path}
+              type="button"
+              className={`wt-file-list-item ${review.selectedFilePath === f.path ? 'active' : ''}`}
+              onClick={() => review.setSelectedFilePath(f.path)}
+            >
+              <span className={`wt-file-status wt-file-status-${f.status}`}>{f.status}</span>
+              <span className="wt-file-list-path">{f.path}</span>
             </button>
-            <button type="button" className="wt-btn wt-btn-danger" onClick={() => void review.revertAll()}>
-              Revert all
-            </button>
-            <button type="button" className="wt-btn wt-btn-close" onClick={onClose} aria-label="close">
-              ✕
-            </button>
-          </div>
-        </div>
+          ))}
+        </aside>
 
-        {review.error && (
-          <div className="wt-error" role="alert">{review.error}</div>
-        )}
+        <main className="wt-main">
+          {!selectedFile && (
+            <div className="wt-empty">Select a file on the left to view hunks.</div>
+          )}
+          {selectedFile && (
+            <DiffFileView
+              file={selectedFile}
+              decisions={review.decisions}
+              onAccept={(hunkIndex) => void review.decideHunk(selectedFile.path, hunkIndex, 'accept')}
+              onReject={(hunkIndex, feedback) => void review.decideHunk(selectedFile.path, hunkIndex, 'reject', feedback)}
+            />
+          )}
+        </main>
+      </div>
 
-        <div className="wt-body">
-          <aside className="wt-file-list">
-            <div className="wt-file-list-title">
-              Files ({review.status?.totalFiles ?? 0})
-            </div>
-            {review.status?.files.length === 0 && (
-              <div className="wt-empty">No working tree changes.</div>
-            )}
-            {review.status?.files.map((f) => (
-              <button
-                key={f.path}
-                type="button"
-                className={`wt-file-list-item ${review.selectedFilePath === f.path ? 'active' : ''}`}
-                onClick={() => review.setSelectedFilePath(f.path)}
-              >
-                <span className={`wt-file-status wt-file-status-${f.status}`}>{f.status}</span>
-                <span className="wt-file-list-path">{f.path}</span>
-              </button>
-            ))}
-          </aside>
-
-          <main className="wt-main">
-            {!selectedFile && (
-              <div className="wt-empty">Select a file on the left to view hunks.</div>
-            )}
-            {selectedFile && (
-              <DiffFileView
-                file={selectedFile}
-                decisions={review.decisions}
-                onAccept={(hunkIndex) => void review.decideHunk(selectedFile.path, hunkIndex, 'accept')}
-                onReject={(hunkIndex, feedback) => void review.decideHunk(selectedFile.path, hunkIndex, 'reject', feedback)}
-              />
-            )}
-          </main>
-        </div>
-
-        <div className="wt-statusbar">
-          <span>pending: {review.pendingCount}</span>
-          <span>accepted: {review.appliedCount}</span>
-          <span>rejected: {review.rejectedCount}</span>
-          {review.diff?.truncated && <span className="wt-warning">output truncated</span>}
-          {review.loading && <span>loading...</span>}
-        </div>
+      <div className="wt-statusbar">
+        <span>pending: {review.pendingCount}</span>
+        <span>accepted: {review.appliedCount}</span>
+        <span>rejected: {review.rejectedCount}</span>
+        {review.diff?.truncated && <span className="wt-warning">output truncated</span>}
+        {review.loading && <span>loading...</span>}
       </div>
     </div>
   );

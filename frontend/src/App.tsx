@@ -5,14 +5,13 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
 import { TitleBar } from '@/components/desktop/TitleBar';
-import { WorkspacePanelsProvider } from '@/components/desktop/WorkspacePanelsContext';
+import { WorkspacePanelsProvider, useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import { CommandPalette, useCommandPalette } from '@/components/copilot/CommandPalette';
-import { WorkingTreeReviewMount } from '@/components/desktop/WorkingTreeReview/WorkingTreeReviewMount';
-import { WorkingTreeReviewButton } from '@/components/desktop/WorkingTreeReview/WorkingTreeReviewButton';
-import '@/components/desktop/WorkingTreeReview/WorkingTreeReview.module.css';
+import { WorkingTreeReview } from '@/components/desktop/WorkingTreeReview/WorkingTreeReview';
+import '@/components/desktop/WorkingTreeReview/WorkingTreeReview.css';
 import HomePage from '@/pages/home';
 // NOTE: Legacy pages (tools, admin, docs, figcode, single-cell, spatial) have been removed
 // as the desktop application now uses the Agent-based workflow through ProjectWorkspace.
@@ -46,6 +45,57 @@ function DesktopOnboardingMount(): React.ReactElement | null {
   return <DesktopOnboarding />;
 }
 
+/** Lives inside WorkspacePanelsProvider — can access panel state. */
+function AppShell(): React.ReactElement {
+  const panels = useWorkspacePanelsContext();
+  const { isOpen, open, close } = useCommandPalette();
+
+  return (
+    <>
+      <TitleBar />
+      <CopilotContextProvider>
+        <main
+          className="biof3-spa-main"
+          style={{
+            marginTop: 0,
+            paddingTop: 'var(--biof3-titlebar-height)',
+            transition: 'margin-left 0.25s ease',
+          }}
+        >
+          {/* dev mode passes through here just like production: deep-linkable
+              /project/:id/<mode> and /skills routes are intentionally reachable.
+              Only the dev-home skip-auto-navigate logic lives in pages/home.tsx. */}
+          <Routes>
+            {/* Desktop Agent-based workflow */}
+            <Route path="/" element={<HomePage />} />
+            {/* Skills management page */}
+            <Route path="/skills" element={<SkillsPage />} />
+            {/* Result Studio — standalone results view with branch tabs in TitleBar */}
+            {/* MUST come before the wildcard /* route, otherwise it never matches */}
+            <Route path="/project/:projectId/results" element={<ResultStudioPage />} />
+            {/* T85: `*` splat lets `/project/:projectId/<mode>` resolve to the
+                same workspace; mode is read from the sub-path, not `?mode=`. */}
+            <Route path="/project/:projectId/*" element={<ProjectWorkspace />} />
+            {/* Legacy pages (tools, admin, docs, figcode) removed - all workflows now use Agent */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+        <DesktopOnboardingMount />
+        <CommandPalette
+          open={isOpen}
+          onClose={close}
+          commands={[]}
+          recentConversations={[]}
+        />
+        <WorkingTreeReview
+          isOpen={panels.workingTreeOpen}
+          onClose={panels.toggleWorkingTree}
+        />
+      </CopilotContextProvider>
+    </>
+  );
+}
+
 export default function App(): React.ReactElement {
   useEffect(() => {
     const html = document.documentElement;
@@ -53,54 +103,12 @@ export default function App(): React.ReactElement {
     html.classList.remove('biof3-desktop-dock-collapsed');
     document.body.style.paddingLeft = '0';
     document.body.style.boxSizing = 'border-box';
-
   }, []);
-
-  // Command palette state and controls
-  const { isOpen, open, close } = useCommandPalette();
 
   return (
     <BackendStatusProvider>
       <WorkspacePanelsProvider>
-        <TitleBar />
-        <CopilotContextProvider>
-          <main
-            className="biof3-spa-main"
-            style={{
-              marginTop: 0,
-              paddingTop: 'var(--biof3-titlebar-height)',
-              transition: 'margin-left 0.25s ease',
-            }}
-          >
-            {/* dev mode passes through here just like production: deep-linkable
-                /project/:id/<mode> and /skills routes are intentionally reachable.
-                Only the dev-home skip-auto-navigate logic lives in pages/home.tsx. */}
-            <Routes>
-              {/* Desktop Agent-based workflow */}
-              <Route path="/" element={<HomePage />} />
-              {/* Skills management page */}
-              <Route path="/skills" element={<SkillsPage />} />
-              {/* Result Studio — standalone results view with branch tabs in TitleBar */}
-              {/* MUST come before the wildcard /* route, otherwise it never matches */}
-              <Route path="/project/:projectId/results" element={<ResultStudioPage />} />
-              {/* T85: `*` splat lets `/project/:projectId/<mode>` resolve to the
-                  same workspace; mode is read from the sub-path, not `?mode=`. */}
-              <Route path="/project/:projectId/*" element={<ProjectWorkspace />} />
-              {/* Legacy pages (tools, admin, docs, figcode) removed - all workflows now use Agent */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
-          <DesktopOnboardingMount />
-          <CommandPalette
-            open={isOpen}
-            onClose={close}
-            commands={[]}
-            recentConversations={[]}
-          />
-          <WorkingTreeReviewMount>
-            <WorkingTreeReviewButton />
-          </WorkingTreeReviewMount>
-        </CopilotContextProvider>
+        <AppShell />
       </WorkspacePanelsProvider>
     </BackendStatusProvider>
   );

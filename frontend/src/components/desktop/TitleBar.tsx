@@ -24,6 +24,32 @@ function getIsDesktop(): boolean {
 }
 
 /**
+ * Working Tree Review toggle button integrated into TitleBar.
+ * Toggles `panels.workingTreeOpen` from WorkspacePanelsContext; the side panel
+ * opens / closes via the same mechanism as LeftPanel / RightPanel / BottomTerminal.
+ * Desktop-only: in browser dev (no biof3Desktop.isDesktop) the button is hidden.
+ */
+function WorkingTreeReviewTitleBarButton(): React.ReactElement | null {
+  const panels = useWorkspacePanelsContext();
+  const isDesktop = getIsDesktop();
+  if (!isDesktop) return null;
+  const isOpen = panels.workingTreeOpen;
+  const handleClick = () => panels.toggleWorkingTree();
+  return (
+    <button
+      type="button"
+      className={`${styles.iconBtn} ${isOpen ? '' : styles.iconBtnInactive}`}
+      onClick={handleClick}
+      title={isOpen ? '收起 Working Tree Review' : '展开 Working Tree Review'}
+      aria-label={isOpen ? '收起 Working Tree Review' : '展开 Working Tree Review'}
+      aria-pressed={isOpen}
+    >
+      <Icon name="git-branch" size={15} />
+    </button>
+  );
+}
+
+/**
  * Custom frameless window controls (minimize / maximize-restore / close).
  * Rendered ONLY on non-macOS. Calls the existing `window` IPC bridge that
  * the preload already exposes (`minimize`, `maximize` [toggles], `close`,
@@ -563,6 +589,7 @@ export function TitleBar(): React.ReactElement {
         )}
 
         <div className={styles.windowTools}>
+          <WorkingTreeReviewTitleBarButton />
           <button
             type="button"
             className={`${styles.iconBtn} ${!panels.bottomTerminalOpen ? styles.iconBtnInactive : ''}`}

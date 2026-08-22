@@ -1205,3 +1205,17 @@ PHASE 1 (commit b2c4edf, 仍 in_progress 待实机过目): 5 新 git-adapter 方
 applyInverseHunk) + 5 IPC 通道 + 38 单元测试 + 0 前端改动 + 0 npm 依赖新增.
 PHASE 2/3/4/5 进度在 docs/ui-productization-audit.md 主笔录段同步.
 
+## UI-185: BLOCK-20 — Code Review Panel — PHASE 2 常驻右侧审阅面板 (UI-185)
+
+PHASE 2 落地 (仍 in_progress 待实机过目): 把 BLOCK-16 WorkingTreeReview 浮层
+改造成常驻右侧审阅面板, 与 RightPanel / BottomTerminal 共享 chrome.
+
+- App.tsx: 拆出 AppShell 内部组件, 把 WorkingTreeReviewMount + WorkingTreeReviewButton
+  替换为 <WorkingTreeReview isOpen={panels.workingTreeOpen} onClose={panels.toggleWorkingTree} />
+- TitleBar.tsx: 加 WorkingTreeReviewTitleBarButton (git-branch icon, 仅 desktop 显示)
+- useWorkspacePanels.ts: 加 workingTreeOpen state + toggleWorkingTree
+- WorkingTreeReview.tsx: 改 panel 渲染, 去掉 wt-overlay 浮层外框 + close button
+- WorkingTreeReview.css: 注释更新 BLOCK-16 → BLOCK-20, 删 wt-btn-close
+- 删除 (3 文件, 0 引用): WorkingTreeReview.module.css (rename .css) /
+  WorkingTreeReviewMount.tsx / WorkingTreeReviewButton.tsx
+
