@@ -248,3 +248,60 @@ G0 开发期常态 · 不外推 packaged/Provider/GA/P7/notarization/dist stalen
 
 **当前 active 工作包**：NONE（BLOCK-15-ARCHITECTURE-PERF 已 completed）。
 
+## BLOCK-18 — Workspace MD Diff（2026-08-22 启动）
+
+`docs/block-18-workspace-md-diff-plan.md`
+
+- 状态：`active`（BLOCK-17 标 `superseded` 后接管 active 槽位）
+- 目标：把"前后差异"直接搬到文件页面（`files` tab 的 `WorkspaceFilePreview`）内
+- 数据路径：沿用 BLOCK-17 的 `userData/agent-doc-snapshots/` + `.snapshots/`
+- 入口：`WorkspaceFilePreview` toolbar 顶部"预览 / 对比"toggle
+- 样式：复用 BLOCK-17 的 `.wt-hunk-table` + `.wt-*` 主题变量
+- 不外推：packaged / Provider / GA
+
+### BLOCK-17 → superseded（2026-08-22）
+
+用户裁决"多一个审阅界面没有意义"。BLOCK-17 已实现的 IPC（`src/ipc/agent-doc-review.js`）、preload namespace、bridge 类型、`.wt-*` 样式骨架与 `computeSimpleDiff` 算法由 BLOCK-18 复用；独立面板（4 文件）、TitleBar `+` 菜单项、`useWorkspacePanels.docReviewOpen` 状态槽由 BLOCK-18 删除。
+
+
+## BLOCK-20 — Code Review Panel（2026-08-22 启动）
+
+`docs/block-20-code-review-panel-plan.md`
+
+- 状态：`active`（BLOCK-18 标 `superseded` 后接管 active 槽位）
+- 目标：补齐"系统级代码审阅体验"——**常驻右侧审阅面板**，覆盖项目里所有被 git 跟踪的修改文本文件（不限 markdown），基准 vs git HEAD，支持 unified / split 两种视图，hunk 级别 Accept / Reject（reject 信号经 BLOCK-16 `<working-tree-rejects>` system-prompt 注入复用），inline-edit 抽屉承载 BLOCK-19 的 `<textarea>` 资产
+- 入口：右侧 tab + TitleBar 手动按钮（BLOCK-16 浮层保留为 agent task done 触发）
+- 复用：BLOCK-16 `DiffFileView / DiffHunkView / git-adapter.applyPatch / revertPaths / <working-tree-rejects>` 全部 0 改动复用；BLOCK-19 inline-edit + `workspace.writeTextFile` IPC 0 改动复用
+- 决策摘要：
+
+| 维度 | 决策 |
+|---|---|
+| 范围 | 项目级所有 git 状态 `?? / M / A / D` 文本文件 |
+| 基准 | `git diff HEAD`（左栏 HEAD 内容 / 右栏 working tree） |
+| 渲染 | 复用 BLOCK-16 手写 React diff（0 新依赖） |
+| hunk 接受 | `git-adapter.applyPatch`（已有） |
+| hunk 拒绝 | `git-adapter.applyInverseHunk`（新增：算 inverse 后 `git apply --reverse`） |
+| inline edit | drawer 抽屉 + `<textarea>` + `workspace.writeTextFile`（已有） |
+| 拒绝清单注入 | 复用 BLOCK-16 `<working-tree-rejects>` 段（已有） |
+| BLOCK-18 plan | superseded（inline-edit 资产合并进 BLOCK-20 PHASE 3 drawer） |
+| BLOCK-19 thin-slice | 不登记新 ID（合并进 BLOCK-20） |
+| BLOCK-16 浮层 | 保留（agent task done 触发 vs 日常审阅面板，两条触发流并存） |
+| 真实 OSS / Provider / packaged | 不外推（G0 开发期常态） |
+
+- v1 thin-slice 范围（5 新 IPC + 2 新前端组件）：
+  - `git:list-modified`（`git status --porcelain --untracked-files=all` → [{path, status}]）
+  - `git:file-head-content`（HEAD 文件内容，split view 左栏）
+  - `git:split-side-diff`（HEAD + working tree → structured hunks，复用 BLOCK-16 `parseUnifiedHunks`）
+  - `git:revert-file`（`git checkout -- <path>`）
+  - `git:apply-inverse-hunk`（per-hunk 拒绝 inverse patch）
+  - `<CodeReviewPanel />`（常驻右侧 panel）
+  - `<CodeReviewDrawer />`（右侧滑出抽屉）
+- **5 PHASE**：PHASE 0 治理登记（主 agent 直做）/ PHASE 1 IPC 5 通道（主 agent 直做）/ PHASE 2 CodeReviewPanel + Drawer 组件（主 agent 直做）/ PHASE 3 inline-edit 抽屉合并（主 agent 直做）/ PHASE 4 per-hunk reject inverse + system-prompt 注入复用（主 agent 直做）/ PHASE 5 专项门禁 `npm run block:code-review` + closeout 笔录
+- 完成语义：5 IPC + 1 panel + 1 drawer + 4 治理门 GREEN + BLOCK-16 / BLOCK-19 资产 0 改动复用 + 不变量守住（preload.js 既有 19 命名空间 / electron.d.ts 既有类型 / desktopBridge.ts 既有 API / BLOCK-16 既有组件 / core/shared-backend 既有方法 0 diff）+ 0 新 npm 依赖
+- 不在范围：packaged / Provider / GA / P7 / notarization / dist staleness G1+ / 引入 monaco-editor / react-diff-viewer / react-split-pane / n-way merge / 跨项目 working tree 审阅 / 不重新激活 BLOCK-2/3/4/5/6/7/8/9/9.1/9.2/15/16/17/18 / 不动 Result Studio 既有 diff 组件 / 不动 core/shared-backend 既有方法（仅新增）/ 不动 agent-tools/* / agent-transcripts/*
+
+**当前 active 工作包**：BLOCK-20。
+
+### BLOCK-18 → superseded（2026-08-22）
+
+用户裁决"代码审阅模式"应该是**系统级常驻面板 + 全文本覆盖**，BLOCK-18 仅做 markdown 文件页内 toggle 不够。BLOCK-18 已实现的 `agentDocReview:saveCurrent` / `workspace.writeTextFile` / inline-edit `<textarea>` / markdownDiff.ts 等资产由 BLOCK-20 复用；BLOCK-18 状态转 `superseded`。

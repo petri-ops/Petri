@@ -1631,9 +1631,8 @@
       "id": "BLOCK-11-BIOSKILLS-INTEGRATION",
       "path": "docs/block-11-bioSkills-integration-plan-v1.0.md",
       "kind": "work-package",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "block-11-bioSkills-integration",
+      "status": "superseded",
+      "canonical": false,
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
@@ -1644,8 +1643,27 @@
         "plugin",
         "skill"
       ],
-      "notes": "2026-08-18 BLOCK-11 bioSkills 生态集成（GPTomics/bioSkills.git → BioF3 plugin/skill 映射）active 启动。Top 5 priority categories: single-cell (P0) / variant-calling (P0) / pathway-analysis (P1) / methylation-analysis (P1) / read-qc (P2)。6 PHASE：PHASE 0 调研 + PHASE 1 single-cell plugin/skill + PHASE 2 variant-calling + PHASE 3 pathway+methylation + PHASE 4 read-qc + PHASE 5 收口。用户 2026-08-18 显式裁决启动。",
+      "notes": "2026-08-18 BLOCK-11 bioSkills 生态集成（GPTomics/bioSkills.git → BioF3 plugin/skill 映射）active 启动。Top 5 priority categories: single-cell (P0) / variant-calling (P0) / pathway-analysis (P1) / methylation-analysis (P1) / read-qc (P2)。6 PHASE：PHASE 0 调研 + PHASE 1 single-cell plugin/skill + PHASE 2 variant-calling + PHASE 3 pathway+methylation + PHASE 4 read-qc + PHASE 5 收口。用户 2026-08-18 显式裁决启动。 2026-08-21 用户裁决 G-1：冻结为 paused，BLOCK-17 接管 active 槽位。 2026-08-21 G-1 裁决：superseded by BLOCK-17 active. 冻结为 paused 语义对应 superseded。",
       "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-17-AGENT-DOC-REVIEW-PANEL",
+      "path": "docs/block-17-agent-doc-review-panel-plan.md",
+      "kind": "work-package",
+      "status": "superseded",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-17",
+        "ui-panel",
+        "agent-doc-review",
+        "G0"
+      ],
+      "notes": "2026-08-21 BLOCK-17 Agent 文档审阅侧边栏面板（BLOCK-11 冻结为 paused 后接管 active 槽位）。2026-08-22 用户裁决'多一个审阅界面没有意义'，UI 入口改为文件页面内 diff toggle（BLOCK-18 接管 active 槽位）。已实现资产（IPC / preload / bridge / 类型 / .wt-* 样式 / IPC 测试）由 BLOCK-18 复用；独立面板（4 文件）、TitleBar + 菜单项、useWorkspacePanels.docReviewOpen 状态槽由 BLOCK-18 删除。",
+      "registeredAt": "2026-08-21",
+      "supersededById": "BLOCK-18-WORKSPACE-MD-DIFF",
+      "supersededAt": "2026-08-22"
     },
     {
       "id": "BLOCK-11-BIOSKILLS-INTEGRATION-BATCH-PHASE-1",
@@ -1986,8 +2004,52 @@
       "title": "BLOCK-16 Working Tree Review Mode",
       "path": "docs/block-16-working-tree-review-mode-plan.md",
       "entrypoint": "docs/README.md"
+    },
+    {
+      "id": "BLOCK-18-WORKSPACE-MD-DIFF",
+      "path": "docs/block-18-workspace-md-diff-plan.md",
+      "kind": "work-package",
+      "status": "superseded",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-18",
+        "ui-diff",
+        "workspace-md",
+        "G0",
+        "superseded-2026-08-22"
+      ],
+      "notes": "2026-08-22 BLOCK-18 接管 BLOCK-17 active 槽位。用户裁决'多一个审阅界面没有意义'，把'前后差异'直接搬到 WorkspaceFilePreview 内：toolbar 加'预览 / 对比' toggle，diff 视图复用 BLOCK-17 computeSimpleDiff + .wt-* 样式 + agentDocReview IPC。PHASE 1 提取 markdownDiff.ts / PHASE 2 WorkspaceFilePreview 加 mode 状态机 / PHASE 3 删除 BLOCK-17 独立面板 / PHASE 4 验收门禁 + 收口。\n2026-08-22 BLOCK-20-CODE-REVIEW-PANEL 接管 active 槽位；BLOCK-18 转 superseded。",
+      "owners": [
+        "main-agent"
+      ],
+      "supersededById": "BLOCK-20-CODE-REVIEW-PANEL",
+      "supersededAt": "2026-08-22"
+    },
+    {
+      "id": "BLOCK-20-CODE-REVIEW-PANEL",
+      "path": "docs/block-20-code-review-panel-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-20-code-review",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-20",
+        "code-review",
+        "git-diff",
+        "G0",
+        "ui-panel"
+      ],
+      "notes": "2026-08-22 用户裁决：'代码审阅模式' = 系统级常驻右侧面板，覆盖所有文本文件（不限 markdown），基准 vs git HEAD，hunk accept/reject + 左右双栏 split view + inline-edit 抽屉。接管 BLOCK-18 active 槽位；BLOCK-19 thin-slice 资产合并进 PHASE 3 drawer。PHASE 0 治理登记 → PHASE 1 IPC 5 通道 → PHASE 2 CodeReviewPanel + Drawer 组件 → PHASE 3 inline-edit → PHASE 4 per-hunk reject inverse + system-prompt 注入复用 BLOCK-16 → PHASE 5 专项门禁 + closeout。",
+      "owners": [
+        "main-agent"
+      ],
+      "registeredAt": "2026-08-22"
     }
   ],
-  "lastUpdated": "2026-08-19",
-  "documentCount": 134
+  "lastUpdated": "2026-08-22",
+  "documentCount": 137
 }
