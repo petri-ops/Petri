@@ -14,6 +14,8 @@
  * runAgentLoop function signature: 100% unchanged from before refactor.
  */
 
+const { estimateRequestTokens } = require('./helpers/token-estimator');
+const { getContextWindow } = require('./helpers/model-context-windows');
 const { buildSystemPrompt, localizeToolResult, loadWorkingTreeRejectEntries } = require('./helpers/system-prompt');
 const { appendDesktopAgentInstructions } = require('./helpers/desktop-agent-prompt');
 const { renderPluginDemoPathsForPrompt } = require('./helpers/plugin-demo-prompt');
@@ -535,6 +537,30 @@ async function runAgentLoop({
       '\n用户明确要求只检查、识别、评估或规划。本轮禁止调用 run_tool(op="run")，禁止创建任务或请求执行确认。' +
       '\n优先直接依据上方 Harness 项目文件摘要回答候选文件、关键列、数据质量和后续分析；允许使用 run_tool 的 list/plan/status/next 等只读操作。' +
       '\n只陈述建议，不要用"要开干吗""是否立即开始"等措辞主动邀请执行。';
+  }
+
+  // BLOCK-20: emit token_budget event for ContextBudgetBar (UI-190)
+  // 必须在 _emit 已定义后、首次 iteration 前；systemPrompt 已拼完才能算真实 token。
+  try {
+    const { systemPromptTokens, messagesTokens, total } = estimateRequestTokens({
+      systemPrompt: systemPrompt || '',
+      messages: Array.isArray(messages) ? messages : [],
+      maxTokens: 8192,
+    });
+    const ctxWindow = (await Promise.resolve(getContextWindow(modelName, providerName).catch(() => 0))) || 0;
+    const safeCtx = ctxWindow > 0 ? ctxWindow : 64000;
+    const pct = Math.min(100, Math.round((total / safeCtx) * 100));
+    _emit({
+      event: 'token_budget',
+      contextWindow: safeCtx,
+      messagesTokensUsed: total,
+      systemPromptTokens,
+      messagesTokens,
+      pct,
+      trimmed: total > safeCtx,
+    });
+  } catch (e) {
+    console.log('[token-budget-estimation-error]', e && e.message);
   }
 
   // Build full messages array with system prompt
