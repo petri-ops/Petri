@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 130,
-    "lastUpdated": "2026-08-19",
-    "managedMarkdown": 130
+    "documentCount": 138,
+    "lastUpdated": "2026-08-22",
+    "managedMarkdown": 138
   },
   "documents": [
     {
@@ -2031,7 +2031,7 @@
       "id": "BLOCK-20-CODE-REVIEW-PANEL",
       "path": "docs/block-20-code-review-panel-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-20-code-review",
       "entrypoint": "docs/README.md",
@@ -2048,8 +2048,37 @@
         "main-agent"
       ],
       "registeredAt": "2026-08-22"
+    },
+    {
+      "id": "BLOCK-20-CODE-REVIEW-PANEL-CLOSEOUT",
+      "path": "docs/block-20-code-review-panel-closeout.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "block-20-code-review-closeout",
+      "archivePolicy": "retain_stable_path",
+      "linkedCommits": [
+        "b855b54",
+        "18995bb",
+        "ea03eaf",
+        "2dee4d1",
+        "6482cd9",
+        "3d0c874",
+        "0d5b7e3",
+        "1292e24"
+      ],
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-20",
+        "code-review",
+        "closeout",
+        "G0",
+        "ui-panel"
+      ],
+      "notes": "2026-08-22 BLOCK-20-CODE-REVIEW-PANEL 收口笔录。4 PHASE 全部落地：PHASE 0 治理登记 b855b54 / PHASE 1 git-adapter 5 方法 + IPC 5 通道 + 38 测试 18995bb / PHASE 1 ui-audit 同步 ea03eaf / PHASE 2 WorkingTreeReview 浮层→常驻右侧面板 2dee4d1 / PHASE 3 workspace.writeTextFile IPC + 项目文件 inline-edit 6482cd9 / PHASE 3 资产收口 BLOCK-17/19 markdownDiff.ts + 4 测试文件 3d0c874 / 综合笔录 + handoff + 调试归档 0d5b7e3 / AUDIT-LOG 收口 entry + pre-existing UI-AUDIT 登记 1292e24。PHASE 4 per-hunk reject inverse 在 working tree（4 文件 +1 测试 +1 脚本）。4 治理门 GREEN（docs:check 137 / ui:audit:check BLOCK-20 范围 0 错 / docs:reconcile 0 issues / tsc --noEmit 0 错）+ 1 专项门禁 8/8 PASS（block:code-review）。不变量守住：preload.js 19 命名空间 0 diff / electron.d.ts 既有类型 0 diff / BLOCK-16 既有组件 0 diff / Result Studio 既有 diff 组件 0 diff / core/shared-backend 既有方法 0 diff / 0 新 npm 依赖。",
+      "registeredAt": "2026-08-22"
     }
   ],
   "lastUpdated": "2026-08-22",
-  "documentCount": 137
+  "documentCount": 138
 }
