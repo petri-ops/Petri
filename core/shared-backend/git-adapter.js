@@ -21,8 +21,10 @@
 const { execFileSync } = require('child_process');
 const { randomUUID } = require('crypto');
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
+// 避免参数 `path` 与 module 同名遮蔽
+const pathModule = path;
+const os = require('os');
 
 const GIT_ADAPTER_VERSION = 1;
 
@@ -857,7 +859,181 @@ function createGitAdapter(options = {}) {
       if (!output.ok) throw new GitAdapterError('git_ls_files_failed', 'Scoped ls-files failed.', output);
       return output.stdout.split('\0').filter(Boolean);
     },
+
+    // ============================================================
+    // BLOCK-20 — Code Review Panel 新增方法
+    // 列出/读取/拆分对比/单文件还原/单 hunk inverse 拒绝。
+    // 设计：所有写操作走 assertSafePathspecs 安全门 + 只针对 working tree
+    // （不动 index、不动 HEAD），与 BLOCK-16 applyPatch/revertPaths 同一安全边界。
+    // ============================================================
+
+    /**
+     * BLOCK-20 — 列出 working tree 中被修改/新增的文件。
+     * 等价 `git status --porcelain=v1 -z --untracked-files=all`。
+     * @param {{ includeUntracked?: boolean }} [options]
+     * @returns {{ ok: true, files: Array<{ path: string, status: string, indexStatus: string, workTreeStatus: string }> }}
+     */
+    listModified({ includeUntracked = true } = {}) {
+      const args = ['status', '--porcelain=v1', '-z'];
+      if (includeUntracked) args.push('--untracked-files=all');
+      const output = run(args, { allowFailure: true, readOnly: true });
+      if (!output.ok) {
+        throw new GitAdapterError('git_status_failed', 'git status failed.', output);
+      }
+      const files = [];
+      const entries = output.stdout.split('\0');
+      for (let i = 0; i < entries.length; i++) {
+        const raw = entries[i];
+        if (!raw) continue;
+        // porcelain v1：XY<space>path，untracked 时 XY="??"
+        const code = raw.slice(0, 2);
+        const path = raw.slice(3);
+        if (!path) continue;
+        files.push({
+          path,
+          status: code.trim() || '??',
+          indexStatus: code[0] === '?' ? '?' : code[0],
+          workTreeStatus: code[1] === '?' ? '?' : code[1],
+        });
+        // rename 模式下 path 后还有 \0 + 新文件名，跳过它
+        if (code[0] === 'R' || code[1] === 'R') {
+          i += 1; // 跳过第二个 NUL 段（rename 目标路径）
+        }
+      }
+      return { ok: true, files };
+    },
+
+    /**
+     * BLOCK-20 — 读取 HEAD 中某文件的内容（split view 左栏）。
+     * 新增文件（未跟踪）返回 null（与 BLOCK-16 fileContent 一致语义）。
+     * @param {{ path: string }} args
+     * @returns {{ ok: true, content: string | null, mtime: string | null }}
+     */
+    fileHeadContent({ path: filePath } = {}) {
+      const safe = assertSafePathspecs([filePath], scope);
+      const target = safe[0];
+      const show = run(['show', `HEAD:${target}`], { allowFailure: true, readOnly: true });
+      if (!show.ok) {
+        // 新增文件 → HEAD 不存在，返回 null（与 BLOCK-16 fileContent 一致）
+        if (show.stderr && /exists on disk, but not in/.test(show.stderr)) {
+          return { ok: true, content: null, mtime: null };
+        }
+        throw new GitAdapterError('git_show_failed', `git show HEAD:${target} failed.`, show);
+      }
+      return { ok: true, content: show.stdout, mtime: null };
+    },
+
+    /**
+     * BLOCK-20 — 读取 working tree 中某文件的当前内容（split view 右栏）。
+     * @param {{ path: string }} args
+     * @returns {{ ok: true, content: string }}
+     */
+    fileWorkTreeContent({ path: filePath } = {}) {
+      const safe = assertSafePathspecs([filePath], scope);
+      const fullPath = pathModule.join(resolvedWorkTree, safe[0]);
+      if (!fs.existsSync(fullPath)) {
+        return { ok: true, content: '' };
+      }
+      return { ok: true, content: fs.readFileSync(fullPath, 'utf-8') };
+    },
+
+    /**
+     * BLOCK-20 — 对单个文件生成 unified diff（HEAD vs working tree）。
+     * 输出可直接喂给 parseUnifiedHunks。
+     * @param {{ path: string, context?: number }} args
+     * @returns {{ ok: true, diff: string, headContent: string | null, workTreeContent: string }}
+     */
+    splitSideDiff({ path: filePath, context = 3 } = {}) {
+      const safe = assertSafePathspecs([filePath], scope);
+      const target = safe[0];
+      const headShow = run(['show', `HEAD:${target}`], { allowFailure: true, readOnly: true });
+      const headContent = headShow.ok ? headShow.stdout : null;
+      let workTreeContent = '';
+      const fullPath = pathModule.join(resolvedWorkTree, target);
+      if (fs.existsSync(fullPath)) {
+        workTreeContent = fs.readFileSync(fullPath, 'utf-8');
+      }
+      // 走 `git diff --no-color --no-ext-diff -- <path>` 让 git 生成标准 unified diff。
+      const diffResult = run(
+        ['diff', '--no-color', '--no-ext-diff', `-U${context}`, '--', target],
+        { allowFailure: true, readOnly: true }
+      );
+      // 全新文件（untracked）→ git diff 不输出；保留 headContent=null / workTreeContent 提示前端。
+      const diffText = diffResult.ok ? diffResult.stdout : '';
+      return { ok: true, diff: diffText, headContent, workTreeContent };
+    },
+
+    /**
+     * BLOCK-20 — 单文件回滚到 HEAD（仅 working tree，不动 index）。
+     * 与 revertPaths({ paths: [path] }) 等价但单文件语义更清晰。
+     * @param {{ path: string }} args
+     */
+    revertFile({ path } = {}) {
+      const safe = assertSafePathspecs([path], scope);
+      const target = safe[0];
+      const result = run(['checkout', 'HEAD', '--', target], { allowFailure: true });
+      if (!result.ok) {
+        throw new GitAdapterError(
+          'git_checkout_failed',
+          `git checkout HEAD -- ${target} failed.`,
+          result
+        );
+      }
+      return { ok: true, reverted: [target] };
+    },
+
+    /**
+     * BLOCK-20 — per-hunk reject：接受一个 unified diff patch（正向 hunk），
+     * 把它 inverse 后 apply 回 working tree。
+     * 与 applyPatch 的差别：applyPatch 期望传"反向 patch"（要回滚的那段），
+     * applyInverseHunk 期望传"正向 patch"（当前 working tree 跟 HEAD 的差异那段），
+     * 函数内部 invert + apply 更友好给前端。
+     * @param {{ patch: string }} args  patch 是标准 unified diff 单 hunk（带 ---/+++ 与 @@ header）
+     */
+    applyInverseHunk({ patch } = {}) {
+      if (typeof patch !== 'string' || patch.length === 0) {
+        throw new GitAdapterError('patch_required', 'patch text is required.');
+      }
+      const inverse = invertUnifiedDiff(patch);
+      const result = run(['apply', '--whitespace=nowarn'], {
+        allowFailure: true,
+        input: inverse,
+      });
+      if (!result.ok) {
+        throw new GitAdapterError(
+          'git_apply_inverse_failed',
+          'git apply rejected the inverse patch.',
+          { stderr: result.stderr, code: result.code }
+        );
+      }
+      return { ok: true };
+    },
   };
+}
+
+/**
+ * BLOCK-20 — 把 unified diff 的 + → -、- → +，得到反向 diff。
+ * context 行、空行、---/+++ 与 @@ header 保持原样。
+ * 必须是单 hunk 输入；多 hunk 在前端循环调用即可。
+ */
+function invertUnifiedDiff(patch) {
+  const lines = patch.split('\n');
+  const out = [];
+  for (const line of lines) {
+    if (line.startsWith('+++') || line.startsWith('---')) {
+      out.push(line);
+    } else if (line.startsWith('@@')) {
+      out.push(line);
+    } else if (line.startsWith('+')) {
+      out.push('-' + line.slice(1));
+    } else if (line.startsWith('-')) {
+      out.push('+' + line.slice(1));
+    } else {
+      // context（' '）或空行
+      out.push(line);
+    }
+  }
+  return out.join('\n');
 }
 
 module.exports = {

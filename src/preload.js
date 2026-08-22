@@ -211,6 +211,12 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
       ipcRenderer.invoke('file:open-workspace-file', workspacePath, relativePath),
   },
 
+  // BLOCK-19 — workspace 文件写（仅限当前项目的 workspaceDir 边界内文本覆盖）
+  workspace: {
+    writeTextFile: (workspacePath, relativePath, content) =>
+      ipcRenderer.invoke('workspace:write-text-file', workspacePath, relativePath, content),
+  },
+
   // 诊断日志导出
   diagnostic: {
     export: (targetPath) => ipcRenderer.invoke('diagnostic:export', targetPath),
@@ -342,6 +348,7 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
   },
 
   // BLOCK-16 — Working Tree Review Mode
+  // BLOCK-20 — Code Review Panel: add listModified / fileHeadContent / splitSideDiff / revertFile / applyInverseHunk
   workingTreeReview: {
     status: () => ipcRenderer.invoke('git:working-tree-status'),
     diff: (params) => ipcRenderer.invoke('git:working-tree-diff', params || {}),
@@ -353,5 +360,21 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
       ipcRenderer.on('agent:task-done', handler);
       return () => ipcRenderer.removeListener('agent:task-done', handler);
     },
+    // BLOCK-20 — 新增 5 方法
+    listModified: (params) => ipcRenderer.invoke('git:list-modified', params || {}),
+    fileHeadContent: (params) => ipcRenderer.invoke('git:file-head-content', params || {}),
+    splitSideDiff: (params) => ipcRenderer.invoke('git:split-side-diff', params || {}),
+    revertFile: (params) => ipcRenderer.invoke('git:revert-file', params || {}),
+    applyInverseHunk: (params) => ipcRenderer.invoke('git:apply-inverse-hunk', params || {}),
+  },
+
+  // BLOCK-17 — Agent Doc Review Mode
+  // BLOCK-19 — Agent Doc Review: add saveCurrent (inline edit)
+  agentDocReview: {
+    list: () => ipcRenderer.invoke('agentDocReview:list'),
+    loadPair: (filePath) => ipcRenderer.invoke('agentDocReview:loadPair', filePath),
+    commitSnapshot: (filePath) => ipcRenderer.invoke('agentDocReview:commitSnapshot', filePath),
+    saveCurrent: (filePath, content) =>
+      ipcRenderer.invoke('agentDocReview:saveCurrent', filePath, content),
   },
 });

@@ -310,6 +310,80 @@ function setupWorkingTreeReviewIpc(options = {}) {
     });
   });
 
+  // ============================================================
+  // BLOCK-20 — Code Review Panel 新增 IPC
+  // 与 BLOCK-16 5 通道并列；同一 sender guard + 同 safeInvoke 错误契约。
+  // ============================================================
+
+  ipcMain.handle('git:list-modified', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      const includeUntracked = args.includeUntracked !== false; // default true
+      const result = adapter.listModified({ includeUntracked });
+      return { files: result.files, count: result.files.length };
+    });
+  });
+
+  ipcMain.handle('git:file-head-content', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      if (!args || !args.path || typeof args.path !== 'string') {
+        throw new GitAdapterError('path_required', 'path is required.');
+      }
+      const result = adapter.fileHeadContent({ path: args.path });
+      return { content: result.content, mtime: result.mtime };
+    });
+  });
+
+  ipcMain.handle('git:split-side-diff', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      if (!args || !args.path || typeof args.path !== 'string') {
+        throw new GitAdapterError('path_required', 'path is required.');
+      }
+      const context = typeof args.context === 'number' && args.context >= 0 && args.context <= 20
+        ? args.context
+        : 3;
+      const result = adapter.splitSideDiff({ path: args.path, context });
+      const parsed = parseDiffFiles(result.diff || '');
+      return {
+        diff: result.diff,
+        headContent: result.headContent,
+        workTreeContent: result.workTreeContent,
+        hunks: parsed.files.length > 0 ? parsed.files[0].hunks : [],
+        summary: parsed.summary,
+        truncated: parsed.truncated,
+      };
+    });
+  });
+
+  ipcMain.handle('git:revert-file', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      if (!args || !args.path || typeof args.path !== 'string') {
+        throw new GitAdapterError('path_required', 'path is required.');
+      }
+      const result = adapter.revertFile({ path: args.path });
+      return { ok: true, reverted: result.reverted };
+    });
+  });
+
+  ipcMain.handle('git:apply-inverse-hunk', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      if (!args || typeof args.patch !== 'string' || args.patch.length === 0) {
+        throw new GitAdapterError('patch_required', 'patch text is required.');
+      }
+      adapter.applyInverseHunk({ patch: args.patch });
+      return { ok: true };
+    });
+  });
+
   /**
    * 暴露 main→renderer 通知触发器，供主进程其他模块（如 agent runner / SSE listener）
    * 在任务完成时调用。BLOCK-16 PHASE 3 接入。
