@@ -1235,3 +1235,25 @@ PHASE 3 落地 (仍 in_progress 待实机过目): workspace:write-text-file IPC 
 - frontend/src/pages/project-workspace.module.css (199 行): workspaceMarkdownDiff
   toolbar / tabs / actions / hint / action 样式 (markdown 工具栏).
 
+## UI-185: BLOCK-20 — Code Review Panel — 综合笔录 (UI-185)
+
+BLOCK-20-CODE-REVIEW-PANEL active 综合 ledger (PHASE 1/2/3 + assets 全部落地).
+最终状态: in_progress (按 audit 行 402 治理纪律, 仅当真实 dev Electron 实机过目后才可考虑 verified).
+
+**不外推**：packaged / Provider / GA / P7 / notarization G1+ / 引入 monaco-editor / react-diff-viewer / react-split-pane / n-way merge / 跨项目 working tree 审阅.
+
+**PHASE 累计** (commit b2c4edf + ea03eaf + ? + 6482cd9 + ?):
+  - PHASE 1: 5 新 git-adapter 方法 + 5 IPC 通道 + 38 单元测试
+  - PHASE 2: WorkingTreeReview 常驻右侧审阅面板 (替代 BLOCK-16 浮层)
+  - PHASE 3: workspace:write-text-file IPC + inline-edit 项目文件覆盖
+  - assets: markdownDiff.ts + .test.ts + agent-doc-review IPC tests + block-17 plan 收口
+
+**复用资产**: BLOCK-16 DiffFileView / DiffHunkView / applyPatch / revertPaths / <working-tree-rejects> 0 改动;
+BLOCK-19 inline-edit + workspace.writeTextFile 0 改动.
+
+**PHASE 4/5 待办**:
+  - PHASE 4: accept/reject 按钮接 git:revert-file + git:apply-inverse-hunk IPC (PHASE 1 已备)
+  - PHASE 5: reject signal → <working-tree-rejects> system-prompt 注入
+
+**保留**: BLOCK-17 / BLOCK-18 已 superseded 笔录 + 资产 (markdownDiff / agentDocReview IPC / workspace.writeTextFile / <textarea>) 由本工作包复用.
+
