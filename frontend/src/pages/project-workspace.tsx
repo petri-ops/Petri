@@ -132,6 +132,7 @@ import {
 } from '@/components/result-studio/resultSurface';
 import type { BackendStatus } from '@/lib/electron';
 import { getBridge } from '@/lib/desktopBridge';
+import { classifyDiffLine, computeUnifiedDiff } from '@/lib/markdownDiff';
 import {
   describeOfficeKind,
   loadOfficePreview,
@@ -990,7 +991,7 @@ export function ProjectWorkspace(): React.ReactElement {
         label: item.label,
         icon: item.icon,
         isOpen: openRightTabs.includes(item.id),
-      })),
+      })).concat([]),
       onSelectToolItem: (tabId) => {
         if (tabId === 'results') {
           handleOpenRightResults();
@@ -1464,6 +1465,7 @@ export function ProjectWorkspace(): React.ReactElement {
       path: requestedFilePath,
       name: requestedFilePath.split('/').pop() || requestedFilePath,
       url: workspaceFileUrlFor(projectId, requestedFilePath),
+      workspaceDir: project?.workspacePath,
     };
     handleOpenWorkspaceFile(file);
     openRightPanel('files');
@@ -1518,6 +1520,7 @@ export function ProjectWorkspace(): React.ReactElement {
         path: detail.relativePath,
         name: detail.name || detail.relativePath.split('/').pop() || detail.relativePath,
         url: workspaceFileUrlFor(projectId || '', detail.relativePath),
+        workspaceDir: project?.workspacePath,
       };
       handleOpenWorkspaceFile(file);
       openRightPanel('files');
@@ -1879,6 +1882,7 @@ function FileTreeList({
   activePath,
   refreshVersion,
   depth = 0,
+  workspaceDir,
 }: {
   entries: FileEntry[];
   prefix: string;
@@ -1890,6 +1894,7 @@ function FileTreeList({
   activePath?: string | null;
   refreshVersion: number;
   depth?: number;
+  workspaceDir?: string;
 }): React.ReactElement {
   const orderedEntries = useMemo(
     () => [...entries].sort((left, right) => {
@@ -1918,6 +1923,7 @@ function FileTreeList({
             onOpenFile={onOpenFile}
             activePath={activePath}
             refreshVersion={refreshVersion}
+            workspaceDir={workspaceDir}
           />
         );
       })}
@@ -1937,6 +1943,7 @@ function FileTreeItem({
   onOpenFile,
   activePath,
   refreshVersion,
+  workspaceDir,
 }: {
   entry: FileEntry;
   fullPath: string;
@@ -1949,6 +1956,7 @@ function FileTreeItem({
   onOpenFile: (file: ActiveWorkspaceFile) => void;
   activePath?: string | null;
   refreshVersion: number;
+  workspaceDir?: string;
 }): React.ReactElement {
   const [children, setChildren] = useState<FileEntry[]>([]);
 
@@ -1977,6 +1985,7 @@ function FileTreeItem({
             name: entry.name,
             url: fileUrl,
             size: entry.size,
+            workspaceDir,
           });
         }}
         role="treeitem"
@@ -2015,6 +2024,7 @@ function FileTreeItem({
           activePath={activePath}
           refreshVersion={refreshVersion}
           depth={depth + 1}
+          workspaceDir={workspaceDir}
         />
       )}
     </li>
@@ -2308,6 +2318,7 @@ export function RightFileTree({
                   activePath={activeFile?.path || null}
                   refreshVersion={refreshVersion}
                   depth={0}
+                  workspaceDir={project.workspacePath}
                 />
               )}
             </div>
@@ -2340,6 +2351,14 @@ function WorkspaceFilePreview({
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [officePreview, setOfficePreview] = useState<OfficePreviewModel | null>(null);
   const [officeStatus, setOfficeStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  // BLOCK-18 — markdown diff toggle state.
+  // BLOCK-19 — markdown inline edit mode (preview | edit | diff).
+  // Only meaningful when fallbackKind === 'markdown'. Initialized to 'preview'.
+  const [diffMode, setDiffMode] = useState<'preview' | 'edit' | 'diff'>('preview');
+  const [snapshotText, setSnapshotText] = useState<string | null>(null);
+  const [diffLoading, setDiffLoading] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [diffError, setDiffError] = useState<string | null>(null);
+  const [diffBusy, setDiffBusy] = useState(false);
 
   const isImage = isImageFile(file?.name);
   const isText = isTextFile(file?.name);
@@ -2420,6 +2439,230 @@ function WorkspaceFilePreview({
     return () => { cancelled = true; };
   }, [file, isCsv, isHtml, isImage, isJson, isPdf, isText, officeKind, previewUrl]);
 
+  // BLOCK-18 — 文件切换时重置 diff 状态；进入 diff mode 时拉 snapshot pair。
+  useEffect(() => {
+    setDiffMode('preview');
+    setSnapshotText(null);
+    setDiffError(null);
+    setDiffLoading('idle');
+  }, [file?.path]);
+
+  useEffect(() => {
+    if (!file || !isMarkdown || diffMode === 'preview') return;
+    // BLOCK-19 — baseline 锁定：
+    //   真实项目文件没有独立 snapshot 概念；
+    //   但要在用户**第一次**切到 diff/edit 时拍下 text 作为 baseline，
+    //   之后编辑期间 text 变化不应重置 baseline，
+    //   否则 isDirty 永远是 false，红绿 diff 看不到。
+    //   锁定条件：diffLoading === 'idle'（刚切换文件 / 刚初始化）
+    if (file.workspaceDir) {
+      if (diffLoading === 'idle') {
+        setSnapshotText(text);
+        setDiffLoading('ready');
+      }
+      return;
+    }
+    let cancelled = false;
+    setDiffLoading('loading');
+    setDiffError(null);
+    const bridge = getBridge('agentDocReview');
+    if (!bridge) {
+      setDiffError('agentDocReview bridge unavailable');
+      setDiffLoading('error');
+      return () => { cancelled = true; };
+    }
+    bridge
+      .loadPair(file.path)
+      .then((resp) => {
+        if (cancelled) return;
+        if (!resp.ok || !resp.data) {
+          setDiffError(resp.message ?? 'loadPair failed');
+          setDiffLoading('error');
+          return;
+        }
+        setSnapshotText(resp.data.snapshot);
+        setDiffLoading('ready');
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setDiffError(err instanceof Error ? err.message : String(err));
+        setDiffLoading('error');
+      });
+    return () => { cancelled = true; };
+  }, [file, isMarkdown, diffMode]);
+
+  const diffLines = useMemo(() => {
+    if (diffMode !== 'diff' || diffLoading !== 'ready') return null;
+    // git-style unified diff: 单列 + hunk header @@...@@ + 上下文折叠 '… N unchanged lines'
+    return computeUnifiedDiff(snapshotText ?? '', text, 3);
+  }, [diffMode, diffLoading, snapshotText, text]);
+
+  // 解析 hunk header 计算每行对应的 left/right 行号
+  const diffRows = useMemo(() => {
+    if (!diffLines) return null;
+    // fallback: 当 snapshot === text 时 computeUnifiedDiff 输出 []，hunkApplied=false，
+    // 给所有 ctx 1-based 行号，UI 渲染纯上下文不变
+    if (diffLines.length === 0) {
+      return text
+        .split('\n')
+        .map((line, idx) => ({
+          kind: 'ctx' as const,
+          text: ` ${line}`,
+          left: idx + 1,
+          right: idx + 1,
+        }));
+    }
+    const rows: Array<{ kind: ReturnType<typeof classifyDiffLine>; text: string; left: number | null; right: number | null }> = [];
+    let leftLine = 0;
+    let rightLine = 0;
+    let hunkApplied = false;
+    for (const line of diffLines) {
+      const kind = classifyDiffLine(line);
+      if (kind === 'hunk') {
+        // 形如 '@@ -1,7 +1,7 @@'
+        const m = line.match(/^@@ -(\d+),(\d+) \+(\d+),(\d+) @@/);
+        if (m) {
+          leftLine = parseInt(m[1], 10);
+          rightLine = parseInt(m[3], 10);
+          hunkApplied = true;
+        }
+        rows.push({ kind, text: line, left: null, right: null });
+        continue;
+      }
+      if (kind === 'ctx') {
+        rows.push({ kind, text: line, left: leftLine, right: rightLine });
+        leftLine++;
+        rightLine++;
+      } else if (kind === 'del') {
+        rows.push({ kind, text: line, left: leftLine, right: null });
+        leftLine++;
+      } else if (kind === 'add') {
+        rows.push({ kind, text: line, left: null, right: rightLine });
+        rightLine++;
+      } else {
+        // fold 或其他占位
+        rows.push({ kind, text: line, left: null, right: null });
+      }
+    }
+    // 如果整个文件完全没 hunk（首尾折后无改动），hunkApplied=false，给所有 ctx 一致行号
+    if (!hunkApplied) {
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].kind === 'ctx') {
+          rows[i].left = i + 1;
+          rows[i].right = i + 1;
+        }
+      }
+    }
+    return rows;
+  }, [diffLines]);
+
+  const isDirty = diffMode === 'diff' && diffLoading === 'ready' && text !== (snapshotText ?? '');
+  const canCommit = !!file && isDirty && !diffBusy;
+
+  const handleCommit = useCallback(async () => {
+    if (!file || !canCommit) return;
+    setDiffBusy(true);
+    setDiffError(null);
+    try {
+      // BLOCK-19 — 真实项目文件没有 snapshot 概念：commit = 保存到文件
+      if (file.workspaceDir) {
+        const wbridge = getBridge('workspace');
+        if (!wbridge) {
+          setDiffError('workspace bridge unavailable');
+          return;
+        }
+        const resp = await wbridge.writeTextFile(file.workspaceDir, file.path, text);
+        if (!resp.ok) {
+          setDiffError(resp.error ?? 'commit failed');
+          return;
+        }
+        setSnapshotText(text);
+      } else {
+        const bridge = getBridge('agentDocReview');
+        if (!bridge) {
+          setDiffError('agentDocReview bridge unavailable');
+          return;
+        }
+        const resp = await bridge.commitSnapshot(file.path);
+        if (!resp.ok) {
+          setDiffError(resp.message ?? 'commit failed');
+          return;
+        }
+        const pairResp = await bridge.loadPair(file.path);
+        if (pairResp.ok && pairResp.data) {
+          setSnapshotText(pairResp.data.snapshot);
+        }
+      }
+    } finally {
+      setDiffBusy(false);
+    }
+  }, [file, canCommit, text]);
+
+  const handleSaveCurrent = useCallback(async () => {
+    if (!file) return;
+    setDiffBusy(true);
+    setDiffError(null);
+    try {
+      // BLOCK-19 — 真实项目文件走 workspace.writeTextFile（沙盒检查是 workspaceDir 边界）；
+      // 沙盒文件保留走 agentDocReview.saveCurrent。
+      if (file.workspaceDir) {
+        const wbridge = getBridge('workspace');
+        if (!wbridge) {
+          setDiffError('workspace bridge unavailable');
+          return;
+        }
+        const resp = await wbridge.writeTextFile(file.workspaceDir, file.path, text);
+        if (!resp.ok) {
+          setDiffError(resp.error ?? 'save failed');
+          return;
+        }
+        // 真实项目文件没有 snapshot 概念：保存后清空 diff（已是干净基线）
+        setSnapshotText(text);
+      } else {
+        const bridge = getBridge('agentDocReview');
+        if (!bridge) {
+          setDiffError('agentDocReview bridge unavailable');
+          return;
+        }
+        const resp = await bridge.saveCurrent(file.path, text);
+        if (!resp.ok) {
+          setDiffError(resp.message ?? 'save failed');
+          return;
+        }
+        const pairResp = await bridge.loadPair(file.path);
+        if (pairResp.ok && pairResp.data) {
+          setSnapshotText(pairResp.data.snapshot);
+        }
+      }
+    } finally {
+      setDiffBusy(false);
+    }
+  }, [file, text]);
+
+  const handleDiscard = useCallback(async () => {
+    if (!file) return;
+    setDiffBusy(true);
+    setDiffError(null);
+    try {
+      if (file.workspaceDir) {
+        // 真实项目文件：把 text 恢复为 snapshot（首次进入 diff 时 snapshot=text，所以无变化）
+        setText(snapshotText ?? text);
+      } else {
+        const bridge = getBridge('agentDocReview');
+        if (!bridge) {
+          setDiffError('agentDocReview bridge unavailable');
+          return;
+        }
+        const pairResp = await bridge.loadPair(file.path);
+        if (pairResp.ok && pairResp.data) {
+          setSnapshotText(pairResp.data.snapshot);
+        }
+      }
+    } finally {
+      setDiffBusy(false);
+    }
+  }, [file, snapshotText, text]);
+
   if (!file) {
     return (
       <div className={styles.workspacePreviewEmpty}>
@@ -2442,6 +2685,90 @@ function WorkspaceFilePreview({
   return (
     <div className={styles.workspacePreview}>
       {openError && <div className={styles.workspacePreviewError}>{openError}</div>}
+      {/* BLOCK-18 — markdown 文件专属的"预览 / 对比"toggle + Commit/Discard */}
+      {isMarkdown && (
+        <div className={styles.workspaceMarkdownDiffToolbar}>
+          <div className={styles.workspaceMarkdownDiffTabs}>
+            <button
+              type="button"
+              className={`${styles.workspaceMarkdownDiffTab} ${diffMode === 'edit' ? styles.workspaceMarkdownDiffTabActive : ''}`}
+              onClick={() => setDiffMode('edit')}
+              aria-pressed={diffMode === 'edit'}
+              title="在编辑器中直接修改当前文件"
+            >
+              编辑
+            </button>
+            <button
+              type="button"
+              className={`${styles.workspaceMarkdownDiffTab} ${diffMode === 'preview' ? styles.workspaceMarkdownDiffTabActive : ''}`}
+              onClick={() => setDiffMode('preview')}
+              aria-pressed={diffMode === 'preview'}
+            >
+              预览
+            </button>
+            <button
+              type="button"
+              className={`${styles.workspaceMarkdownDiffTab} ${diffMode === 'diff' ? styles.workspaceMarkdownDiffTabActive : ''}`}
+              onClick={() => setDiffMode('diff')}
+              aria-pressed={diffMode === 'diff'}
+            >
+              对比
+            </button>
+          </div>
+          {diffMode === 'edit' && (
+            <div className={styles.workspaceMarkdownDiffActions}>
+              {isDirty && (
+                <span className={styles.workspaceMarkdownDiffHint}>有未保存修改</span>
+              )}
+              <button
+                type="button"
+                className={styles.workspaceMarkdownSave}
+                disabled={!isDirty || diffBusy}
+                onClick={() => void handleSaveCurrent()}
+                title="把当前编辑器内容写入文件（同时刷新 snapshot）"
+              >
+                {diffBusy ? '保存中' : '保存到文件'}
+              </button>
+              <button
+                type="button"
+                className={styles.workspaceMarkdownSave}
+                disabled={!isDirty || diffBusy}
+                onClick={() => void handleDiscard()}
+                title="放弃本次编辑，恢复到 snapshot 状态"
+              >
+                恢复
+              </button>
+            </div>
+          )}
+          {diffMode === 'diff' && (
+            <div className={styles.workspaceMarkdownDiffActions}>
+              {snapshotText === null && diffLoading === 'ready' && (
+                <span className={styles.workspaceMarkdownDiffHint}>无 snapshot · 全量展示为新增</span>
+              )}
+              {isDirty && (
+                <span className={styles.workspaceMarkdownDiffHint}>有未保存修改</span>
+              )}
+              <button
+                type="button"
+                className={styles.workspaceMarkdownDiffAction}
+                disabled={!canCommit}
+                onClick={() => void handleCommit()}
+              >
+                Commit
+              </button>
+              <button
+                type="button"
+                className={styles.workspaceMarkdownDiffAction}
+                disabled={!isDirty || diffBusy}
+                onClick={() => void handleDiscard()}
+              >
+                Discard
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+      {diffError && <div className={styles.workspacePreviewError}>{diffError}</div>}
       <div className={styles.workspacePreviewBody}>
         {status === 'loading' && <p className={styles.panelEmpty}>加载预览…</p>}
         {status === 'error' && <p className={styles.panelEmpty}>预览失败</p>}
@@ -2522,7 +2849,16 @@ function WorkspaceFilePreview({
             )}
           </div>
         )}
-        {status === 'ready' && fallbackKind === 'markdown' && (
+        {status === 'ready' && fallbackKind === 'markdown' && diffMode === 'edit' && (
+          <textarea
+            className={styles.workspaceMarkdownEditor}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            spellCheck={false}
+            aria-label="markdown 编辑器"
+          />
+        )}
+        {status === 'ready' && fallbackKind === 'markdown' && diffMode === 'preview' && (
           <div className={styles.workspaceMarkdownPreview}>
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
@@ -2530,6 +2866,45 @@ function WorkspaceFilePreview({
             >
               {text}
             </ReactMarkdown>
+          </div>
+        )}
+        {status === 'ready' && fallbackKind === 'markdown' && diffMode === 'diff' && diffLoading === 'loading' && (
+          <p className={styles.panelEmpty}>加载 snapshot…</p>
+        )}
+        {status === 'ready' && fallbackKind === 'markdown' && diffMode === 'diff' && diffLoading === 'ready' && diffRows && (
+          <div className={styles.workspaceMarkdownDiff}>
+            <table className={styles.workspaceMarkdownDiffTable}>
+              <tbody>
+                {diffRows.map((row, idx) => {
+                  if (row.kind === 'hunk') {
+                    return (
+                      <tr key={idx} className={styles.workspaceMarkdownDiffRow_hunk}>
+                        <td className={styles.workspaceMarkdownDiffHunk} colSpan={4}>{row.text}</td>
+                      </tr>
+                    );
+                  }
+                  if (row.kind === 'fold') {
+                    return (
+                      <tr key={idx} className={styles.workspaceMarkdownDiffRow_fold}>
+                        <td className={styles.workspaceMarkdownDiffGutter} />
+                        <td className={styles.workspaceMarkdownDiffMarker} />
+                        <td className={styles.workspaceMarkdownDiffContent} colSpan={2}>{row.text}</td>
+                      </tr>
+                    );
+                  }
+                  const marker = row.text[0] === '+' ? '+' : row.text[0] === '-' ? '-' : ' ';
+                  const content = row.text.slice(1);
+                  return (
+                    <tr key={idx} className={styles[`workspaceMarkdownDiffRow_${row.kind}`]}>
+                      <td className={styles.workspaceMarkdownDiffGutter}>{row.left ?? ''}</td>
+                      <td className={styles.workspaceMarkdownDiffGutter}>{row.right ?? ''}</td>
+                      <td className={styles.workspaceMarkdownDiffMarker}>{marker}</td>
+                      <td className={styles.workspaceMarkdownDiffContent}>{content || '\u00A0'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
         {status === 'ready' && fallbackKind === 'text' && codeLanguage && (

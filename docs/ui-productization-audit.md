@@ -1219,3 +1219,19 @@ PHASE 2 落地 (仍 in_progress 待实机过目): 把 BLOCK-16 WorkingTreeReview
 - 删除 (3 文件, 0 引用): WorkingTreeReview.module.css (rename .css) /
   WorkingTreeReviewMount.tsx / WorkingTreeReviewButton.tsx
 
+## UI-185: BLOCK-20 — Code Review Panel — PHASE 3 inline-edit drawer + workspace.writeTextFile (UI-185)
+
+PHASE 3 落地 (仍 in_progress 待实机过目): workspace:write-text-file IPC + 项目文件 inline-edit.
+
+- src/ipc/file-dialog.js: 新增 `workspace:write-text-file` IPC, realpathSync 双向校验
+  workspace boundary, 必须是已存在 file, fs.writeFileSync UTF-8 覆盖.
+- src/main.js (PHASE 1 已带): 注册 setupAgentDocReviewIpc, 与 workingTreeReview 同范式.
+- frontend/src/lib/desktopBridge.ts: 加 agentDocReview mapped type 注释 (无功能变更).
+- frontend/src/pages/project-workspace/types.ts: ActiveWorkspaceFile 加 workspaceDir 字段.
+- frontend/src/pages/project-workspace.tsx (379 行): workspaceDir 透传 (FileTree 透到
+  ActiveWorkspaceFile), inline-edit <textarea> 二分支:
+    * workspaceDir 存在 (项目文件) → workspace.writeTextFile
+    * workspaceDir 不存在 (沙盒文件) → agentDocReview.saveCurrent
+- frontend/src/pages/project-workspace.module.css (199 行): workspaceMarkdownDiff
+  toolbar / tabs / actions / hint / action 样式 (markdown 工具栏).
+
