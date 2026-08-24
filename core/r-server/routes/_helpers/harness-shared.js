@@ -53,8 +53,10 @@ function jobsDir() {
 }
 
 function desktopRootFromHere() {
-  // 去 submodule 后：desktop/core/r-server/routes/harness.js → 上 3 层到 desktop 仓根
-  return path.resolve(__dirname, '../../..');
+  // helper 在 routes/_helpers/（从原 routes/harness.js 下沉一层），
+  // 需上 4 层才到 desktop 仓根：_helpers -> routes -> r-server -> core -> desktop。
+  // 上 3 层会错落到 desktop/core，导致 scripts/harness-file-index.mjs 等模块解析失败。
+  return path.resolve(__dirname, '../../../..');
 }
 
 async function loadHarnessModule() {

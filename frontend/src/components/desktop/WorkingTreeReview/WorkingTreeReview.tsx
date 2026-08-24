@@ -63,9 +63,54 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
     }
   }, [showCommitDialog]);
 
+  // BLOCK-20 keyboard navigation state
+  const [focusedHunk, setFocusedHunk] = useState(0);
+
+  // Reset focus when switching files
+  useEffect(() => { setFocusedHunk(0); }, [review.selectedFilePath]);
+
+  // Keyboard shortcuts: A/Y accept, R reject, ↑↓ navigate hunks
+  useEffect(() => {
+    if (!isOpen) return;
+    const file = review.diff?.files.find((f) => f.path === review.selectedFilePath) || null;
+    if (!file) return;
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') return;
+      const hunks = file.hunks;
+      if (e.key === 'ArrowDown' || e.key === 'j') {
+        e.preventDefault();
+        setFocusedHunk((prev) => Math.min(prev + 1, hunks.length - 1));
+      } else if (e.key === 'ArrowUp' || e.key === 'k') {
+        e.preventDefault();
+        setFocusedHunk((prev) => Math.max(prev - 1, 0));
+      } else if (e.key === 'a' || e.key === 'A' || e.key === 'y' || e.key === 'Y') {
+        e.preventDefault();
+        const key = `${file.path}#${focusedHunk}`;
+        if (review.decisions[key] !== 'accept') void review.decideHunk(file.path, focusedHunk, 'accept');
+      } else if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        void review.decideHunk(file.path, focusedHunk, 'reject');
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [review, focusedHunk, review.decisions, review.selectedFilePath, isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!isOpen) return null;
 
+  const selectedFile = review.diff?.files.find((f) => f.path === review.selectedFilePath) || null;
+
+  const fileDecisionSummary = (path: string) => {
+    const keys = Object.entries(review.decisions).filter(([k]) => k.startsWith(`${path}#`));
+    if (keys.length === 0) return null;
+    const accepted = keys.filter(([, v]) => v === 'accept').length;
+    const rejected = keys.filter(([, v]) => v === 'reject').length;
+    return { accepted, rejected, total: keys.length };
+  };
+
   const hasDecisions = Object.keys(review.decisions).length > 0;
+
   const decisionCount = Object.keys(review.decisions).length;
   const acceptedCount = review.appliedCount;
   const rejectedCount = review.rejectedCount;
@@ -105,49 +150,6 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
     setShowCommitDialog(false);
     setCommitError(null);
   };
-
-  const selectedFile = review.diff?.files.find((f) => f.path === review.selectedFilePath) || null;
-
-  // Per-file decision summary for the file list
-  const fileDecisionSummary = (path: string) => {
-    const keys = Object.entries(review.decisions).filter(([k]) => k.startsWith(`${path}#`));
-    if (keys.length === 0) return null;
-    const accepted = keys.filter(([, v]) => v === 'accept').length;
-    const rejected = keys.filter(([, v]) => v === 'reject').length;
-    return { accepted, rejected, total: keys.length };
-  };
-
-  // BLOCK-20 keyboard navigation state
-  const [focusedHunk, setFocusedHunk] = useState(0);
-
-  // Reset focus when switching files
-  useEffect(() => { setFocusedHunk(0); }, [review.selectedFilePath]);
-
-  // Keyboard shortcuts: A/Y accept, R reject, ↑↓ navigate hunks
-  useEffect(() => {
-    if (!selectedFile) return;
-    const onKey = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') return;
-      const hunks = selectedFile.hunks;
-      if (e.key === 'ArrowDown' || e.key === 'j') {
-        e.preventDefault();
-        setFocusedHunk((prev) => Math.min(prev + 1, hunks.length - 1));
-      } else if (e.key === 'ArrowUp' || e.key === 'k') {
-        e.preventDefault();
-        setFocusedHunk((prev) => Math.max(prev - 1, 0));
-      } else if (e.key === 'a' || e.key === 'A' || e.key === 'y' || e.key === 'Y') {
-        e.preventDefault();
-        const key = `${selectedFile.path}#${focusedHunk}`;
-        if (review.decisions[key] !== 'accept') void review.decideHunk(selectedFile.path, focusedHunk, 'accept');
-      } else if (e.key === 'r' || e.key === 'R') {
-        e.preventDefault();
-        void review.decideHunk(selectedFile.path, focusedHunk, 'reject');
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [selectedFile, focusedHunk, review.decisions, review.selectedFilePath]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="wt-container" role="region" aria-label="code review panel">

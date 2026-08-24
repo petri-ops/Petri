@@ -282,6 +282,8 @@
   background: rgba(255, 255, 255, 0.06);
   font-family: var(--biof3-mono, monospace);
   font-size: 10px;
+}
+
 .wt-file-hunk-count {
   margin-left: auto;
   font-size: 11px;
