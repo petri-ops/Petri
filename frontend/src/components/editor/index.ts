@@ -6,7 +6,24 @@
  *
  * P0 只暴露 CodeMirrorEditor + 必要类型。
  * P1 才会扩 unifiedDiffExtension / DiffRevision / EditorMode 联合类型。
+ * P3 新增 integration 层桥接组件（WorkspaceFilePreviewBridge / AppLevelBridge）。
  */
 
 export { CodeMirrorEditor } from './CodeMirror/CodeMirrorEditor';
-export type { CodeMirrorEditorProps, EditorApi, EditorMode } from './CodeMirror/types';
+export type {
+  CodeMirrorEditorProps,
+  EditorApi,
+  EditorMode,
+  DiffRevision,
+  DiffHunk,
+  ScrollTarget,
+  AcceptRejectEvent,
+} from './CodeMirror/types';
+
+// ===== P3 桥接层 (UI-194) =====
+export { WorkspaceFilePreviewBridge } from './integration/WorkspaceFilePreviewBridge';
+export type {
+  WorkspaceFilePreviewBridgeProps,
+} from './integration/WorkspaceFilePreviewBridge';
+export { AppLevelBridge } from './integration/AppLevelBridge';
+export type { DispatchOpenFileFn } from './integration/AppLevelBridge';

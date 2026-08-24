@@ -1,0 +1,63 @@
+/* BLOCK-22 P3 桥接层 (UI-194) — integration.module.css
+ *
+ * 仅供 integration/ 目录下的桥接组件使用：
+ * - .chatCardLink          ：ChatCardLinkBridge variant='inline'
+ * - .chatCardLinkFloating  ：ChatCardLinkBridge variant='floating'
+ *
+ * 设计原则：
+ * - 不依赖 CodeMirrorEditor 的样式（仅基础按钮外观）
+ * - 颜色用 CSS 变量，fallback 友好（任意主题都能渲染）
+ */
+
+.chatCardLink {
+  display: inline;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: var(--color-link, #0066cc);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 120ms ease;
+}
+
+.chatCardLink:hover {
+  color: var(--color-link-hover, #0052a3);
+}
+
+.chatCardLink:focus {
+  outline: 2px solid var(--color-link, #0066cc);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.chatCardLinkFloating {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--biof3-bg-elevated, rgba(255, 255, 255, 0.95));
+  border: 1px solid var(--biof3-border, rgba(0, 0, 0, 0.12));
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: var(--color-link, #0066cc);
+  cursor: pointer;
+  text-decoration: none;
+  font: inherit;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+  transition: background-color 120ms ease;
+}
+
+.chatCardLinkFloating:hover {
+  background-color: var(--biof3-bg-hover, rgba(0, 0, 0, 0.04));
+}
+
+.chatCardLinkFloating:focus {
+  outline: 2px solid var(--color-link, #0066cc);
+  outline-offset: 2px;
+}
