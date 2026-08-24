@@ -2119,8 +2119,30 @@
         "TBD"
       ],
       "notes": "2026-08-24 BLOCK-21 收口笔录。路径深度 3→4 层修 + 2 端到端回归测试 PASS。同 bug 影响所有调 loadHarnessModule() 的端点。"
+    },
+    {
+      "id": "BLOCK-22-CODEMIRROR-INLINE-DIFF-PLAN",
+      "path": "docs/block-22-codemirror-inline-diff-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "workspace-file-preview-engine",
+      "entrypoint": "docs/AUDIT-LOG.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-22",
+        "codemirror",
+        "inline-diff",
+        "G0",
+        "phase=P0",
+        "active=BLOCK-22",
+        "gates=docs:check/ui:audit:check/vitest",
+        "untracked-wip-disposition=unknown-agent"
+      ],
+      "linkedCommits": [],
+      "notes": "2026-08-24 用户裁决启动当前唯一 active 工作包（BLOCK-15/20 已收口）；BLOCK-22 4 PHASE 串行（P0 基础脚手架+只读渲染 / P1 unified diff / P2 accept/reject / P3 聊天卡片跳转），2.5 人天 / 9~14 commits。truthDomain = workspace-file-preview-engine。复用 BLOCK-20 PHASE 1+4 已备 git-adapter 6 方法 + workspace.writeTextFile + reject 清单 30 天 TTL（不新增 IPC）。不外推 monaco-editor / react-diff-viewer / react-split-pane / n-way merge / packaged / Provider / GA / P7 / notarization / dist staleness / Block-3 Monaco Phase 2。24 个 WIP 文件保留决策：见 AUDIT-LOG 2026-08-24 BLOCK-22 launch entry。"
     }
   ],
-  "lastUpdated": "2026-08-24",
-  "documentCount": 140
+  "lastUpdated": "2026-08-24 (BLOCK-22 active)",
+  "documentCount": 142
 }
