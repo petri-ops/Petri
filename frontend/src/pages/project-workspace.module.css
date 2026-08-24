@@ -5907,6 +5907,8 @@ body.biof3-resizing-columns * {
 .workspacePreviewBody {
   flex: 1;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow: auto;
   background: var(--biof3-bg);
 }
@@ -6120,12 +6122,16 @@ body.biof3-resizing-columns * {
 }
 
 .workspaceMarkdownPreview {
-  min-height: 100%;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
   padding: 18px;
   background: var(--biof3-bg-surface);
   color: var(--biof3-text);
   font-size: 13px;
   line-height: 1.65;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .workspaceMarkdownPreview h1,
@@ -6201,10 +6207,13 @@ body.biof3-resizing-columns * {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
   gap: 8px;
   padding: 8px 18px;
   border-bottom: 1px solid var(--biof3-border);
   background: var(--biof3-bg-subtle);
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .workspaceMarkdownDiffTabs {
@@ -6358,9 +6367,10 @@ body.biof3-resizing-columns * {
 
 /* BLOCK-19 — markdown 内联编辑器 */
 .workspaceMarkdownEditor {
-  display: block;
-  width: 100%;
-  min-height: calc(100% - 80px);
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
   padding: 14px 18px;
   border: none;
   outline: none;
@@ -6715,4 +6725,75 @@ body.biof3-resizing-columns * {
   text-align: center;
   transform: translateX(-50%);
   pointer-events: none;
+}
+
+/* AGENT-CONCURRENCY: global task monitor panel — LeftPanel quick-actions area */
+
+.taskMonitor {
+  padding: 8px 12px;
+  border-top: 1px solid var(--biof3-border);
+}
+
+.taskMonitorHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--biof3-text-secondary);
+  margin-bottom: 6px;
+}
+
+.taskMonitorItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  font-size: 12px;
+}
+
+.taskDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.taskDot_running {
+  background: var(--biof3-accent, #3b82f6);
+  animation: taskDotPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes taskDotPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.taskDot_done { background: var(--biof3-status-success, #22c55e); }
+.taskDot_error { background: var(--biof3-status-error, #ef4444); }
+.taskDot_stopped { background: var(--biof3-status-warning, #f59e0b); }
+
+.taskText {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--biof3-text);
+}
+
+.taskStopBtn {
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: var(--biof3-text-secondary);
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.taskStopBtn:hover {
+  color: var(--biof3-status-error, #ef4444);
+  background: var(--biof3-bg-elevated);
 }
