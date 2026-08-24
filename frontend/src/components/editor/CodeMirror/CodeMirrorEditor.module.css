@@ -1,4 +1,6 @@
-/* BLOCK-22-CODEMIRROR-INLINE-DIFF — CodeMirror 主题（P0 占位） */
+/* BLOCK-22-CODEMIRROR-INLINE-DIFF — CodeMirror 主题（P0 基础 + P1 diff 主题） */
+
+/* ===== P0 基础（保留不动） ===== */
 
 .cmEditor {
   width: 100%;
@@ -20,4 +22,52 @@
 .cmEditor :global(.cm-gutters) {
   background-color: var(--biof3-bg-elevated, transparent);
   border-right: 1px solid var(--biof3-border, rgba(0, 0, 0, 0.08));
+}
+
+/* ===== P1 unified diff 主题 ===== */
+
+/*
+ * CM6 unifiedMergeView 会向 inserted / deleted chunk 容器注入这些 class：
+ *  - .cm-deletedChunk  整行删除的 chunk 容器
+ *  - .cm-insertedChunk 整行插入的 chunk 容器
+ *  - .cm-deletedChar   字符级 inline diff 中"被删除"字符的内联 mark
+ *  - .cm-insertedChar  字符级 inline diff 中"被插入"字符的内联 mark
+ *
+ * 颜色变量 fallback 与既有 hljs 风格保持视觉一致。
+ */
+
+.cmEditor :global(.cm-deletedChunk) {
+  background-color: var(--hljs-deletion-bg, rgba(255, 0, 0, 0.1));
+}
+
+.cmEditor :global(.cm-insertedChunk) {
+  background-color: var(--hljs-addition-bg, rgba(0, 128, 0, 0.1));
+}
+
+.cmEditor :global(.cm-deletedChar) {
+  background-color: var(--hljs-deletion-bg, rgba(255, 0, 0, 0.2));
+  text-decoration: line-through;
+}
+
+.cmEditor :global(.cm-insertedChar) {
+  background-color: var(--hljs-addition-bg, rgba(0, 128, 0, 0.2));
+}
+
+/*
+ * 脉冲高亮（scrollToLine + highlight / pulseMs 触发）：
+ * - StateField 提供 DecorationSet，class = 'cm-pulse-highlight'
+ * - 3s ease-in-out：起始透明 → 50% 时高亮 → 结束透明
+ */
+.cmEditor :global(.cm-pulse-highlight) {
+  animation: cm-pulse 3s ease-in-out;
+}
+
+@keyframes cm-pulse {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(255, 200, 0, 0.3);
+  }
 }
