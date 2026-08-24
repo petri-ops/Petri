@@ -302,6 +302,19 @@ G0 开发期常态 · 不外推 packaged/Provider/GA/P7/notarization/dist stalen
 
 **当前 active 工作包**：BLOCK-20。
 
+### BLOCK-22 — CodeMirror Inline Diff COMPLETED（active → completed · 2026-08-24）
+
+- **状态**：`active → completed`（用户裁决启动同日收口）；DOC-REGISTRY `BLOCK-22-CODEMIRROR-INLINE-DIFF-PLAN` `status=completed / linkedCommits=[b9e697f, 3745bd5, 0436be2, 0e28498, b1f4453]`；新增 `BLOCK-22-CODEMIRROR-INLINE-DIFF-CLOSEOUT` `kind=reference / status=reference / canonical=true / truthDomain=block-22-codemirror-inline-diff-closeout` 登记项；closeout 报告 `docs/block-22-codemirror-inline-diff-closeout.md`（285 行 / 10 节）。
+- **5 commit 落地** `feat/block-22-codemirror-inline-diff` 分支 HEAD `b1f4453`：`b9e697f` P0-LAUNCH audit-log 登记 / `3745bd5` P0 CodeMirror 6 基础脚手架 + 12 个 @codemirror/* 依赖 + 10 editor/ 文件 616 行（UI-191）/ `0436be2` P1 Unified Diff 渲染（行级 + 字符级）+ scroll/pulse（UI-192）/ `0e28498` P2 Accept/Reject widget + 0 新增 IPC（UI-193）/ `b1f4453` P3 桥接层 + Context 抽象 + ChatCardLinkBridge（UI-194）。
+- **累计指标**：24 files changed / +4357/-212 / 19 个新文件 ~3977 行 + 5 个修改（package.json/package-lock.json/editor/index.ts/AUDIT-LOG/DOC-REGISTRY）；0 新 npm 顶层依赖；0 新增 IPC；复用 BLOCK-20 PHASE 1 5 IPC（git:list-modified / file-head-content / split-side-diff / revert-file / apply-inverse-hunk）+ BLOCK-20 PHASE 4 git:hunk-reject-inverse + BLOCK-20 PHASE 3 workspace:write-text-file + BLOCK-16 PHASE 3 reject 清单 30 天 TTL schema。
+- **4 PHASE 落地**：PHASE 0 基础脚手架（commit `3745bd5`）/ PHASE 1 Unified Diff（commit `0436be2`）/ PHASE 2 Accept-Reject（commit `0e28498`）/ PHASE 3 桥接层（commit `b1f4453`）。4 PHASE 全部由 worker subagent 在 24 个 WIP + test.txt 完全未触碰前提下实施。
+- **验证**：tsc --noEmit 0 错 / BLOCK-22 影响范围 vitest 53/53 PASS / 4 files（`CodeMirrorEditor.test.tsx` 32 + `WorkspaceFilePreviewBridge.test.tsx` 8 + `ChatCardLinkBridge.test.tsx` 7 + `pendingScrollContext.test.tsx` 6）/ docs:check 141 → 142 PASS / docs:reconcile 0 issues。全量 frontend vitest 15 failed 不归 BLOCK-22（TitleBar 8 + LeftPanel 6 + theme-token 1 全是其它 Agent WIP 导致的测试期望漂移，按 governance §Guardrails L84 不可改）。`npm run ui:audit:check` 报错不归 BLOCK-22：HEAD `2a4d435` 旧债 + UI-191~194 笔录延迟（`docs/ui-productization-audit.md` 在 24 个 WIP 锁内）。
+- **不变量守住**：preload.js 既有 19 命名空间 0 diff / electron.d.ts 既有类型 0 diff / desktopBridge.ts 既有 API 0 diff / core/shared-backend 既有 6 git-adapter 方法 0 diff / agent-tools/* + agent-transcripts/* 0 diff / 24 个 WIP + test.txt 0 触碰 / 0 引 monaco-editor / react-diff-viewer / react-split-pane / n-way merge。
+- **UI-191/192/193/194 保持 `in_progress`**：按 audit 行 402 治理纪律"仅当真实 dev Electron 实机过目后才可考虑 verified"；`docs/ui-productization-audit.md` 在 24 个 WIP 锁内笔录延迟登记；解锁条件：`docs/ui-productization-audit.md` 脱离 WIP 状态后由主 agent 追加 UI-191~194 共 4 行 `in_progress` 笔录 + 重跑 `npm run ui:audit:check`。
+- **业务侧后续动作清单**（WIP 收口后）：① 接入 SimpleChat 聊天卡片（用 `<ChatCardLinkBridge>` 包装 ToolActivityList）；② 接入 WorkspaceFilePreview 容器（text 路径分支用 `<WorkspaceFilePreviewBridge mode="inline-diff">`）；③ 接入 events.ts（加 2 新事件 `projectOpenWorkspaceFileAtLine` + `projectReviewWorkspaceDiff`）；④ 决定 AppLevelBridge 挂载（`<AppLevelBridge />` 是否挂到 App.tsx）。
+- **不外推**：packaged / Provider / GA / P7 / notarization / dist staleness G1+；不引 monaco-editor / react-diff-viewer / react-split-pane / n-way merge；不重新激活 BLOCK-2~21 任意已收口工作包。
+- **当前 active 工作包**：NONE（BLOCK-22 已 completed，下一工作包由用户显式裁决启动）。
+
 ### BLOCK-18 → superseded（2026-08-22）
 
 用户裁决"代码审阅模式"应该是**系统级常驻面板 + 全文本覆盖**，BLOCK-18 仅做 markdown 文件页内 toggle 不够。BLOCK-18 已实现的 `agentDocReview:saveCurrent` / `workspace.writeTextFile` / inline-edit `<textarea>` / markdownDiff.ts 等资产由 BLOCK-20 复用；BLOCK-18 状态转 `superseded`。

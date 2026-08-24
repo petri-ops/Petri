@@ -2124,7 +2124,7 @@
       "id": "BLOCK-22-CODEMIRROR-INLINE-DIFF-PLAN",
       "path": "docs/block-22-codemirror-inline-diff-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "workspace-file-preview-engine",
       "entrypoint": "docs/AUDIT-LOG.md",
@@ -2134,15 +2134,47 @@
         "codemirror",
         "inline-diff",
         "G0",
-        "phase=P0",
-        "active=BLOCK-22",
         "gates=docs:check/ui:audit:check/vitest",
-        "untracked-wip-disposition=unknown-agent"
+        "untracked-wip-disposition=unknown-agent",
+        "completed",
+        "phase=P0-P3-COMPLETED"
       ],
-      "linkedCommits": [],
-      "notes": "2026-08-24 用户裁决启动当前唯一 active 工作包（BLOCK-15/20 已收口）；BLOCK-22 4 PHASE 串行（P0 基础脚手架+只读渲染 / P1 unified diff / P2 accept/reject / P3 聊天卡片跳转），2.5 人天 / 9~14 commits。truthDomain = workspace-file-preview-engine。复用 BLOCK-20 PHASE 1+4 已备 git-adapter 6 方法 + workspace.writeTextFile + reject 清单 30 天 TTL（不新增 IPC）。不外推 monaco-editor / react-diff-viewer / react-split-pane / n-way merge / packaged / Provider / GA / P7 / notarization / dist staleness / Block-3 Monaco Phase 2。24 个 WIP 文件保留决策：见 AUDIT-LOG 2026-08-24 BLOCK-22 launch entry。"
+      "linkedCommits": [
+        "b9e697f",
+        "3745bd5",
+        "0436be2",
+        "0e28498",
+        "b1f4453"
+      ],
+      "notes": "2026-08-24 用户裁决启动当前唯一 active 工作包（BLOCK-15/20 已收口）；BLOCK-22 4 PHASE 串行（P0 基础脚手架+只读渲染 / P1 unified diff / P2 accept/reject / P3 聊天卡片跳转），2.5 人天 / 9~14 commits。truthDomain = workspace-file-preview-engine。复用 BLOCK-20 PHASE 1+4 已备 git-adapter 6 方法 + workspace.writeTextFile + reject 清单 30 天 TTL（不新增 IPC）。不外推 monaco-editor / react-diff-viewer / react-split-pane / n-way merge / packaged / Provider / GA / P7 / notarization / dist staleness / Block-3 Monaco Phase 2。24 个 WIP 文件保留决策：见 AUDIT-LOG 2026-08-24 BLOCK-22 launch entry。 | 2026-08-24 收口笔录见 docs/block-22-codemirror-inline-diff-closeout.md。4 PHASE 全部落地：P0 基础脚手架 + 12 个 @codemirror/* 依赖 + 10 editor/ 文件 616 行 / P1 unified diff + scroll/pulse + 6 文件 ~750 行 / P2 Accept/Reject widget + 复用 BLOCK-20 PHASE 1+4 5 IPC 0 新增 / P3 桥接层 9 文件 1260 行。验证矩阵：tsc 0 / BLOCK-22 影响范围 vitest 53/53 / docs:check 141 / docs:reconcile 0。UI-191/192/193/194 in_progress（WIP 锁延迟登记，docs/ui-productization-audit.md 脱离 WIP 后补登）。"
+    },
+    {
+      "id": "BLOCK-22-CODEMIRROR-INLINE-DIFF-CLOSEOUT",
+      "path": "docs/block-22-codemirror-inline-diff-closeout.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "block-22-codemirror-inline-diff-closeout",
+      "archivePolicy": "retain_stable_path",
+      "linkedCommits": [
+        "b9e697f",
+        "3745bd5",
+        "0436be2",
+        "0e28498",
+        "b1f4453"
+      ],
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-22",
+        "codemirror",
+        "inline-diff",
+        "closeout",
+        "G0"
+      ],
+      "notes": "2026-08-24 BLOCK-22-CODEMIRROR-INLINE-DIFF 收口笔录。5 commits 全落 feat/block-22-codemirror-inline-diff HEAD b1f4453。24 files / +4357/-212。19 个新文件 (~3977 行) + 5 个修改（package.json/package-lock.json/editor/index.ts/AUDIT-LOG/DOC-REGISTRY）。4 PHASE 全部落地：PHASE 0 脚手架 3745bd5 / PHASE 1 unified diff 0436be2 / PHASE 2 Accept-Reject widget 0e28498 / PHASE 3 桥接层 b1f4453。验证：tsc --noEmit 0 错 / BLOCK-22 影响范围 vitest 53/53 PASS（4 files）/ docs:check 141 PASS / docs:reconcile 0 issues。0 新增 IPC（复用 BLOCK-20 PHASE 1 5 IPC + PHASE 4 git:hunk-reject-inverse + PHASE 3 workspace:write-text-file）。不变量守住：preload.js / electron.d.ts / desktopBridge.ts / core/shared-backend/* / agent-tools/* / agent-transcripts/* 0 diff；24 个 WIP + test.txt 0 触碰。UI-191/192/193/194 in_progress（WIP 锁延迟登记，docs/ui-productization-audit.md 脱离 WIP 后补登）。不外推 packaged / Provider / GA / P7 / notarization / dist staleness G1+；不引 monaco-editor / react-diff-viewer / react-split-pane / n-way merge；不重新激活 BLOCK-2~21 任意已收口工作包。",
+      "registeredAt": "2026-08-24"
     }
   ],
-  "lastUpdated": "2026-08-24 (BLOCK-22 active)",
+  "lastUpdated": "2026-08-24 (BLOCK-22 completed)",
   "documentCount": 142
 }
