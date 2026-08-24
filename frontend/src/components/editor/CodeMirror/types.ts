@@ -39,6 +39,14 @@ export interface DiffHunk {
   endLine: number;
   /** hunk 性质：纯插入 / 纯删除 / 修改（含字符级 inline diff）。 */
   kind: DiffHunkKind;
+  /**
+   * 旧文本（baseline 侧该 hunk 覆盖的行内容）。P2 acceptHunk 走 IPC 时
+   * 用此生成正向 patch（由 `apply-inverse-hunk` 内部 invert 后应用）。
+   * 缺省视为空串。
+   */
+  oldText?: string;
+  /** 新文本（modifiedText 侧该 hunk 覆盖的行内容）。 */
+  newText?: string;
 }
 
 /**
@@ -77,12 +85,26 @@ export interface ScrollTarget {
 }
 
 /**
- * CodeMirror EditorView 的最小命令面（P0 + P1）。
+ * AcceptRejectEvent：accept / reject 操作产生的事件载荷。
+ *
+ * P2 不接 events.ts（事件总线 P3 才接），所以这里只是 UI 回调的载荷定义；
+ * 业务侧按需订阅，事件总线不会自动 dispatch。
+ */
+export interface AcceptRejectEvent {
+  /** 操作类型。 */
+  type: 'accept' | 'reject';
+  /** 关联的 hunk id（与 `DiffHunk.id` 对齐）。 */
+  hunkId: string;
+  /** 操作发生的 epoch ms。 */
+  timestamp: number;
+}
+
+/**
+ * CodeMirror EditorView 的命令面（P0 + P1 + P2）。
  *
  * P0：getValue / setValue / destroy
  * P1：setMode / setDiffRevision / scrollToLine / getDiffRevision / getMode
- *
- * P2 才扩：acceptHunk / rejectHunk / acceptAll / rejectAll
+ * P2：acceptHunk / rejectHunk / acceptAll / rejectAll / getHunk
  */
 export interface EditorApi {
   /** 同步读出当前编辑器文档（normal 模式 = 文档全文；inline-diff 模式 = modifiedText）。 */
@@ -101,6 +123,39 @@ export interface EditorApi {
   getDiffRevision(): DiffRevision | null;
   /** 滚动到目标行 + 可选 pulse。P1 落地。 */
   scrollToLine(target: ScrollTarget): void;
+  /**
+   * Accept 单 hunk：通过 IPC `git:apply-inverse-hunk` 把 hunk 的反向 patch 应用到工作区。
+   *
+   * P2 实现：通过 `desktopBridge` 调 `biof3Desktop.workingTreeReview.applyInverseHunk`，
+   * 不接业务侧 dispatch（事件总线 P3 才接）。
+   *
+   * @param hunkId `DiffHunk.id`；编辑器不持有 IPC patch 文本，所以 P2 只在
+   *               已知 `DiffHunk` 含 `oldText`/`newText` 等可生成 patch 的元数据时使用。
+   * @returns IPC 调用结果；任何 throw 走 `onError`（P2 prop）。
+   */
+  acceptHunk(hunkId: string): Promise<void>;
+  /**
+   * Reject 单 hunk：当前实现等价于整文件 revert（P2 不单做"按 hunk revert"）。
+   * 真正的"按 hunk revert"路径走 `git:hunk-reject-inverse`，由 BLOCK-20 PHASE 4
+   * 落地；P3 业务侧接入后才需要。
+   *
+   * P2 实现：调 `biof3Desktop.workingTreeReview.revertFile({ path })`。
+   */
+  rejectHunk(hunkId: string): Promise<void>;
+  /**
+   * Accept 所有 hunks：遍历当前 diffRevision.hunks，逐一 accept。
+   * 单 hunk 失败不影响其他 hunk；最终整体结果通过返回值聚合（allOk 字段）。
+   */
+  acceptAll(): Promise<{ allOk: boolean; succeeded: string[]; failed: Array<{ hunkId: string; error: string }> }>;
+  /**
+   * Reject 整文件：等价单次 `git:revert-file`。
+   */
+  rejectAll(): Promise<void>;
+  /**
+   * 取当前 hunk 详情（用于 P2 内部生成 patch / IPC 序列化）。
+   * 找不到返回 null。
+   */
+  getHunk(hunkId: string): DiffHunk | null;
 }
 
 export interface CodeMirrorEditorProps {
@@ -122,4 +177,24 @@ export interface CodeMirrorEditorProps {
    */
   diffRevision?: DiffRevision | null;
   className?: string;
+  /**
+   * Accept hunk 回调。P2 落地：
+   * - 走 `view.contentDOM` click 拦截（按 data-accept-hunk 匹配）
+   * - 真正接事件总线（dispatch events）由 P3 完成
+   */
+  onAcceptHunk?: (hunkId: string) => void;
+  /**
+   * Reject hunk 回调。P2 落地（语义同上）。
+   */
+  onRejectHunk?: (hunkId: string) => void;
+  /**
+   * IPC 失败回调：accept / reject IPC 抛出时调用。
+   * P2 用于承载业务侧 toast / fallback；不接事件总线。
+   */
+  onError?: (err: unknown) => void;
+  /**
+   * 子节点：挂在编辑器 DOM 容器内，可在 P3 由业务侧用于额外 UI 叠层
+   * （例如 HunkHUD、跳转锚点）。P2 不消费。
+   */
+  children?: React.ReactNode;
 }
