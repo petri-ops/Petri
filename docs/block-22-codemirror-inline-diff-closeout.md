@@ -283,3 +283,54 @@
 6. **0 业务侧启动候选**：业务侧 Agent 自决；若用户裁决启动新工作包，再登记到 `docs/DOC-REGISTRY.json`
 
 按 BLOCK-20 closeout §8 治理纪律：**剩余候选须经用户显式裁决启动新工作包**。
+
+## §11 P4.x 增量改进与决策记录（追加，非原工作包范围）
+
+> 本节为 BLOCK-22 收口后的增量改进记录，由主 Agent 在用户授权下追加，非 BLOCK-22 原始 P0-P3 范围。
+
+### §11.1 P4.2 桥接层易用性改进（commit `aba735c`）
+
+按用户 2026-08-25 "继续按顺序走下去，这些活都是要干的" 授权，主 Agent 委派 subagent + 独立核查发现并修复 1 处 tsc 错误（subagent 用未导入的 EditorApi 类型），最终：
+
+- 4 项改进落地：auto-wrap Provider + `useEditorApi()` hook + `<ChatCardLink>` 开箱即用 + `AppLevelBridge` 重命名 `BioF3OpenFileDevBridge`（dev-only 语义）
+- 8 文件 / +849 / -119
+- 验证：tsc 0 / vitest 216/216 PASS / docs:check 142 PASS
+- 24 个 WIP 0 触碰
+
+### §11.2 P4.3 AppLevelBridge 挂载决策（**未挂载**）
+
+按 plan §10 移交清单第 4 条 + 用户授权 + governance §"Hand off clearly"，主 Agent 自主做出**保守决策**：
+
+**不上挂 App.tsx**，理由：
+1. `BioF3OpenFileDevBridge` 是 dev-only（P4.2 JSDoc 已明确警告 "Do NOT mount in production builds"），挂在生产构建会引入 dead code
+2. plan §10 原始计划"业务侧决定"——主 Agent 不僭越此边界
+3. 24 个 WIP 锁未解除，App.tsx 当前由其它 Agent 主线工作管；按 governance §Guardrails L84 "Never modify unknown WIP"，即使 App.tsx 不在 M 列表，挂载新组件仍属"扩展现应用根"非琐碎动作
+4. G0 阶段纪律含"不外推"原则，挂在 root 组件属扩展性动作
+5. dev tool 接入独立性：业务 Agent 收口 WIP 后挂载
+
+**接入方式（给业务 Agent）**：
+```tsx
+// 在 frontend/src/App.tsx 的 <AppShell /> 末尾加一行（参考 WorkingTreeReview 模式）
+<BioF3OpenFileDevBridge />
+```
+仅此一行 + 一行 import。React.lazy 已配置，零运行时成本（生产构建会被 tree-shake）。
+
+### §11.3 后续候选动作（按依赖顺序）
+
+按"继续按顺序走下去"原则，剩 5 项需 WIP 锁解除或您显式裁决：
+
+1. **P4.4 补 UI-191/192/193/194 笔录**（文档 WIP 锁解除后）
+2. **P4.5 接入 SimpleChat/WorkspaceFilePreview/events.ts**（业务侧 WIP 锁解除后）
+3. **P4.6 业务 Agent 挂载 `<BioF3OpenFileDevBridge />` 到 App.tsx**（WIP 锁解除后 + 您显式授权）
+4. **P4.7 决定是否 push `feat/block-22-codemirror-inline-diff` 到 origin**（按 `committing-changes-with-git` 纪律需您显式 push）
+5. **P4.8 启动下一块工作包**（按 BLOCK-20 closeout 治理纪律需您显式裁决启动新工作包）
+
+### §11.4 当前不动决策
+
+主 Agent 暂停在以下边界：
+- 不修改 24 个 WIP 中任何文件
+- 不修改 App.tsx（业务侧决定权）
+- 不修改 docs/ui-productization-audit.md（WIP 锁）
+- 不 push 分支（需您显式授权）
+- 不启动新工作包（需您显式裁决）
+
