@@ -28,20 +28,29 @@
 
 /*
  * CM6 unifiedMergeView 会向 inserted / deleted chunk 容器注入这些 class：
- *  - .cm-deletedChunk  整行删除的 chunk 容器
- *  - .cm-insertedChunk 整行插入的 chunk 容器
- *  - .cm-deletedChar   字符级 inline diff 中"被删除"字符的内联 mark
- *  - .cm-insertedChar  字符级 inline diff 中"被插入"字符的内联 mark
+ *  - .cm-deletedChunk       整行删除的 chunk 容器（<div class="cm-deletedChunk">）
+ *  - .cm-insertedLine       整行插入的 line（<ins class="cm-insertedLine">，每个插入行一个）
+ *  - .cm-merge-b .cm-changedLine  inline-diff 中"修改行"容器（同行字符级 diff）
+ *  - .cm-changedText        inline-diff 中"被改"字符的内联 mark（绿色渐变下划线）
+ *  - .cm-deletedChar        inline-diff 中"被删除"字符的内联 mark
+ *  - .cm-insertedChar       inline-diff 中"被插入"字符的内联 mark
+ *
+ * 修复 BLOCK-22 P4.6：旧版 CSS 用 `.cm-insertedChunk`（CM6 实际渲染的是
+ *   `.cm-insertedLine`）— 该 selector 0 命中，导致"新增行"无绿底。
+ *   现改为 `.cm-insertedLine` + `.cm-merge-b .cm-changedLine` 双兜底，
+ *   inline-diff（allowInlineDiffs=true）时用 `.cm-changedLine` 兜住。
  *
  * 颜色变量 fallback 与既有 hljs 风格保持视觉一致。
  */
 
-.cmEditor :global(.cm-deletedChunk) {
+.cmEditor :global(.cm-deletedChunk),
+.cmEditor :global(.cm-merge-a .cm-changedLine) {
   background-color: var(--hljs-deletion-bg, rgba(255, 0, 0, 0.1));
 }
 
-.cmEditor :global(.cm-insertedChunk) {
-  background-color: var(--hljs-addition-bg, rgba(0, 128, 0, 0.1));
+.cmEditor :global(.cm-insertedLine),
+.cmEditor :global(.cm-merge-b .cm-changedLine) {
+  background-color: var(--hljs-addition-bg, rgba(0, 128, 0, 0.12));
 }
 
 .cmEditor :global(.cm-deletedChar) {
@@ -51,6 +60,24 @@
 
 .cmEditor :global(.cm-insertedChar) {
   background-color: var(--hljs-addition-bg, rgba(0, 128, 0, 0.2));
+}
+
+/*
+ * inline-diff 字符级：CM6 已自带 `.cm-changedText` 下划线渐变（绿/红），
+ * 此处增强对比度（CM6 默认 alpha 太低，肉眼几乎看不见）。
+ */
+.cmEditor :global(.cm-merge-b .cm-changedText) {
+  background-image: linear-gradient(
+    var(--hljs-addition-bg, rgba(0, 128, 0, 0.4)),
+    var(--hljs-addition-bg, rgba(0, 128, 0, 0.4))
+  );
+}
+
+.cmEditor :global(.cm-merge-a .cm-changedText) {
+  background-image: linear-gradient(
+    var(--hljs-deletion-bg, rgba(255, 0, 0, 0.4)),
+    var(--hljs-deletion-bg, rgba(255, 0, 0, 0.4))
+  );
 }
 
 /*

@@ -162,6 +162,16 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   'e83199ce104b205bec597b3d64fa1667a2300b30',
   'aba735c529574bab6924dba0a565430e64887bc3',
   '6483aeb48d6c64f6b24dd5d14a9611bb4d72b38b',
+  // 2026-08-24 BLOCK-22 workspace preview 不可变实现提交 2a4d435：subject
+  // `fix(workspace-preview)` 未带 UI-###；台账 WIP 锁约束，按 governance §Guardrails
+  // L84 "Never modify unknown WIP" 不改 ui-productization-audit.md。
+  // 不重写共享历史。
+  '2a4d4350615847aa64eacd4e2310a2d3d21024e3',
+  // 2026-08-24 BLOCK-22 DevBridge 挂载 不可变实现提交 89da711：subject
+  // `feat(block-22-p4.5-p4.6)` 未带 UI-###；台账 WIP 锁约束，按 governance §Guardrails
+  // L84 "Never modify unknown WIP" 不改 ui-productization-audit.md。
+  // 不重写共享历史。
+  '89da711164376ad67fddb9d808a1a268e5a4d30b',
 ])
 // These immutable implementation commits have an explicit later canonical
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
@@ -282,6 +292,16 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   'e83199ce104b205bec597b3d64fa1667a2300b30',
   'aba735c529574bab6924dba0a565430e64887bc3',
   '6483aeb48d6c64f6b24dd5d14a9611bb4d72b38b',
+  // 2026-08-24 BLOCK-22 workspace preview 不可变实现提交 2a4d435：subject
+  // `fix(workspace-preview)` 未带 UI-###；台账 WIP 锁约束，按 governance §Guardrails
+  // L84 "Never modify unknown WIP" 不改 ui-productization-audit.md。
+  // 不重写共享历史。
+  '2a4d4350615847aa64eacd4e2310a2d3d21024e3',
+  // 2026-08-24 BLOCK-22 DevBridge 挂载 不可变实现提交 89da711：subject
+  // `feat(block-22-p4.5-p4.6)` 未带 UI-###；台账 WIP 锁约束，按 governance §Guardrails
+  // L84 "Never modify unknown WIP" 不改 ui-productization-audit.md。
+  // 不重写共享历史。
+  '89da711164376ad67fddb9d808a1a268e5a4d30b',
 ])
 // UI-### issue ids: numeric series (UI-001..UI-999) and the named
 // AGENTWB namespace (UI-AGENTWB-001..UI-AGENTWB-999) used by the
