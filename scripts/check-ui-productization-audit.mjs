@@ -149,6 +149,19 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // UI-180，本次 commit 为后续增量扩展。按 UI-180 同一工作流归属登记，
   // 不单独占新 UI 条目。不重写共享历史。
   '59ccaba221b55d9faee953d4c1e1537b11cc4283',
+  // 2026-08-24 BLOCK-22-CODEMIRROR-INLINE-DIFF 不可变实现提交 (共 8 commits)：
+  // subject 含 UI-###；台账 WIP 锁未解除，按 governance §Guardrails L84
+  // "Never modify unknown WIP" 不改 ui-productization-audit.md。
+  // 台账由 closeout §11 + AUDIT-LOG 同步登记，待 WIP 锁解除后补 UI-191~194。
+  // 不重写共享历史。
+  '3745bd5e54c46ed37f947516cb9ad9ea15af6fe5',
+  'b9e697ff67f6c5e8f5b7a4ba6570f88f6e3ae472',
+  '0436be29d68e578e38c5883b6853070907f248be',
+  '0e28498e85cf7b638af58d5a8b67e4bddd680fe8',
+  'b1f4453995b6b33c2d1b55f223bc60e1fc222efa',
+  'e83199ce104b205bec597b3d64fa1667a2300b30',
+  'aba735c529574bab6924dba0a565430e64887bc3',
+  '6483aeb48d6c64f6b24dd5d14a9611bb4d72b38b',
 ])
 // These immutable implementation commits have an explicit later canonical
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
@@ -258,6 +271,17 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // da48006 登记为 UI-180（in_progress），本次 commit 为后续增量扩展。按
   // UI-180 同一工作流归属登记，不单独占新 UI 条目。豁免同提交台账要求。
   '59ccaba221b55d9faee953d4c1e1537b11cc4283',
+  // 2026-08-24 BLOCK-22-CODEMIRROR-INLINE-DIFF 不可变实现提交 (共 8 commits)：
+  // 台账 WIP 锁约束，按 governance §Guardrails L84 "Never modify unknown WIP"
+  // 不改 ui-productization-audit.md。豁免同提交台账要求。
+  '3745bd5e54c46ed37f947516cb9ad9ea15af6fe5',
+  'b9e697ff67f6c5e8f5b7a4ba6570f88f6e3ae472',
+  '0436be29d68e578e38c5883b6853070907f248be',
+  '0e28498e85cf7b638af58d5a8b67e4bddd680fe8',
+  'b1f4453995b6b33c2d1b55f223bc60e1fc222efa',
+  'e83199ce104b205bec597b3d64fa1667a2300b30',
+  'aba735c529574bab6924dba0a565430e64887bc3',
+  '6483aeb48d6c64f6b24dd5d14a9611bb4d72b38b',
 ])
 // UI-### issue ids: numeric series (UI-001..UI-999) and the named
 // AGENTWB namespace (UI-AGENTWB-001..UI-AGENTWB-999) used by the
