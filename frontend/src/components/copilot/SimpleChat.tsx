@@ -140,9 +140,7 @@ import {
   clearConversationRun,
   shouldClearReconciledConversationRun,
   resumeConversationRun,
-  stopSubAgentTask,
   useConversationRun,
-  useSubAgentTasksForConversation,
   resumeOrphanAgentTasks,
   type ConversationPendingApproval,
   type ConversationLoopState,
@@ -270,7 +268,6 @@ export function SimpleChat({
   // 输入框 ↑/↓ 历史回溯的导航态（null = 未进入导航，输入框即实时草稿）。
   const historyNavRef = useRef<typeof INITIAL_NAV_STATE>(INITIAL_NAV_STATE);
   const activeRun = useConversationRun(conversationId);
-  const subAgentTasks = useSubAgentTasksForConversation(conversationId);
   // AGENT-CONCURRENCY A-5: 会话挂载/切换时恢复崩溃或刷新前仍在跑的后台任务
   // （sub-agent 走后端 loop_runs，主 agent 走 localStorage resumable task）。
   // 幂等：已追踪的 sub-agent 会被跳过，已有活跃主 run 时不重复恢复。
@@ -346,6 +343,9 @@ export function SimpleChat({
     setSettledContext({ projectId });
   }, [loading, projectId]);
 
+  // BLOCK-22 P4.5: line/column forwarding note.
+  // FileReferenceClickDetail currently carries no line/column — we default to 1.
+  // Future enhancement: extract from the raw URI if it contains a line anchor (e.g. /path#L10).
   const handleFileReferenceClick = useCallback((detail: FileReferenceClickDetail) => {
     const resolved = detail.resolved;
     if (!resolved || resolved.projectId !== projectId) return;
@@ -362,6 +362,9 @@ export function SimpleChat({
       relativePath: resolved.relativePath,
       name: resolved.name,
       openWithSystemApp: shouldOpenWithSystemApp(resolved.name || resolved.relativePath),
+      // BLOCK-22 P4.5: default line/column — future: parse from raw URI anchor
+      line: 1,
+      column: 0,
     });
   }, [projectId]);
 
@@ -947,8 +950,6 @@ export function SimpleChat({
       setTokenBudget({
         contextWindow: detail.contextWindow,
         messagesTokensUsed: detail.messagesTokensUsed,
-        messagesKept: 0,
-        messagesDropped: 0,
         pct: detail.pct,
         trimmed: detail.trimmed,
       });
@@ -1568,16 +1569,6 @@ export function SimpleChat({
                     >
                       <Icon name="arrow-up" size={12} />
                     </button>
-                    <button
-                      type="button"
-                      className="sc-send-cta sc-send-cta-bg"
-                      onClick={() => runInBackground(input.trim())}
-                      disabled={!input.trim() || !activeRun?.taskId}
-                      title="后台运行（作为独立子任务并行处理，不打断当前对话）"
-                      aria-label="后台运行"
-                    >
-                      后台运行
-                    </button>
                     <button className="sc-send-cta sc-send-cta-stop" onClick={stop} title="停止生成">
                       <Icon name="square" size={14} />
                     </button>
@@ -1602,30 +1593,6 @@ export function SimpleChat({
               </div>
             </div>
           </div>
-          {subAgentTasks.length > 0 && (
-            <div className="sc-subtasks" role="list" aria-label="后台子任务">
-              {subAgentTasks.map((task) => (
-                <div key={task.taskId} className="sc-subtask" role="listitem">
-                  <span className={`sc-subtask-dot sc-subtask-${task.status}`} aria-hidden />
-                  <span className="sc-subtask-text" title={task.userContent}>
-                    {task.status === 'running'
-                      ? (task.assistantContent || task.statusMessage || '后台处理中…')
-                      : (task.assistantContent || '后台任务已结束')}
-                  </span>
-                  {task.status === 'running' && task.taskId && (
-                    <button
-                      type="button"
-                      className="sc-subtask-stop"
-                      onClick={() => stopSubAgentTask(task.taskId)}
-                      title="停止后台任务"
-                    >
-                      停止
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 

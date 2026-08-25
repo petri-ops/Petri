@@ -1,7 +1,12 @@
 // BioF3 桌面版原生 shell — App 根组件
 // 路由出口 + 首次启动引导
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+// BLOCK-22 P4.6: DEV ONLY — manual file-open testing entry via window.__biof3DispatchOpenFile
+// Production build: React.lazy + NODE_ENV=production → tree-shakeable, zero runtime cost
+const BioF3OpenFileDevBridge = lazy(() =>
+  import('./components/editor/integration/BioF3OpenFileDevBridge')
+);
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
 import { TitleBar } from '@/components/desktop/TitleBar';
@@ -91,6 +96,10 @@ function AppShell(): React.ReactElement {
           isOpen={panels.workingTreeOpen}
           onClose={panels.toggleWorkingTree}
         />
+        {/* BLOCK-22 P4.6: DEV ONLY — do NOT use in production */}
+        <Suspense fallback={null}>
+          <BioF3OpenFileDevBridge />
+        </Suspense>
       </CopilotContextProvider>
     </>
   );

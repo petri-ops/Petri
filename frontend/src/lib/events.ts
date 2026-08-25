@@ -104,8 +104,13 @@ export type BioF3EventName = (typeof biof3Events)[keyof typeof biof3Events];
 export interface CopilotAskDetail {
   prompt: string;
   /**
-   * P4R-3：结果 Composer 的原子上下文快照。token 不写入 prompt；
-   * SimpleChat 将该快照覆盖到本轮请求 context，避免异步建会话期间漂移。
+   * When true, the prompt is dispatched from the AnalysisLaunchPanel and should
+   * run as a background sub-agent task rather than the primary stream.
+   */
+  analysisMode?: boolean;
+  /**
+   * P4R-3: 结果 Composer 的原子上下文快照。token 不写入 prompt;
+   * SimpleChat 将该快照覆盖到本轮请求 context,避免异步建会话期间漂移。
    */
   resultContext?: {
     contextToken: string;
@@ -134,12 +139,30 @@ export interface ProjectOpenArtifactDetail {
  * Payload for `projectOpenWorkspaceFile`. `projectId` is required and must
  * be validated by the host before opening — the resolver never trusts
  * user-supplied cross-project paths.
+ *
+ * BLOCK-22 P4.5: 扩展支持行号、列号和 inline-diff revision 触发。
  */
 export interface ProjectOpenWorkspaceFileDetail {
   projectId: string;
   relativePath: string;
   name?: string;
   openWithSystemApp?: boolean;
+  /** BLOCK-22 P4.5: 行号，0=文件开头（1-based，与 EditorApi.scrollToLine 一致） */
+  line?: number;
+  /** BLOCK-22 P4.5: 列号（0-based 列偏移） */
+  column?: number;
+  /**
+   * BLOCK-22 P4.5: 若设置，project-workspace 将通过 pendingRequest 触发
+   * WorkspaceFilePreviewBridge 进入 inline-diff 模式并应用此 revision。
+   */
+  diffRevision?: DiffRevisionPayload;
+}
+
+/** BLOCK-22 P4.5: diffRevision 载荷，透传给 WorkspaceFilePreviewBridge */
+export interface DiffRevisionPayload {
+  filePath: string;
+  originalText: string;
+  modifiedText: string;
 }
 
 export interface ProjectWorkspaceChangedDetail {

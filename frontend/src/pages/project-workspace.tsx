@@ -50,6 +50,8 @@ import { isDirectRecoveryAction, useHarnessWorkflowStatus } from '@/hooks/useHar
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import type { CopilotContext, HarnessContextSummary } from '@/lib/copilotContext';
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
+import { usePendingScroll } from '@/lib/pendingScrollContext';
+import type { DiffRevision } from '@/components/editor/CodeMirror/types';
 import { getBrowserViewportSize, isBioF3LocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { useTheme } from '@/themes/ThemeProvider';
@@ -461,6 +463,10 @@ export function ProjectWorkspace(): React.ReactElement {
   // Every right-side tool shares one width. Switching to Results must not
   // jump to a separately constrained layout or change the drag feel.
   const effectiveRightWidth = rightWidth;
+
+  // BLOCK-22 P4.5: Access PendingScrollContext so we can dispatch pending scroll
+  // requests (line scroll + inline-diff) to WorkspaceFilePreviewBridge.
+  const { setPendingRequest } = usePendingScroll();
 
   useEffect(() => {
     if (!rightOpen) setRightToolMenuOpen(false);
@@ -1506,6 +1512,9 @@ export function ProjectWorkspace(): React.ReactElement {
       relativePath: string;
       name?: string;
       openWithSystemApp?: boolean;
+      line?: number;
+      column?: number;
+      diffRevision?: { filePath: string; originalText: string; modifiedText: string };
     }) => {
       if (!detail?.projectId || !detail?.relativePath) return;
       if (detail.projectId !== projectId) {
@@ -1523,13 +1532,31 @@ export function ProjectWorkspace(): React.ReactElement {
       };
       handleOpenWorkspaceFile(file);
       openRightPanel('files');
+      // BLOCK-22 P4.5: Dispatch pending scroll request so WorkspaceFilePreviewBridge
+      // can scroll to the target line and/or enter inline-diff mode.
+      if (detail.line !== undefined) {
+        const diffRevision: DiffRevision | undefined = detail.diffRevision
+          ? {
+              filePath: detail.diffRevision.filePath,
+              originalText: detail.diffRevision.originalText,
+              modifiedText: detail.diffRevision.modifiedText,
+            }
+          : undefined;
+        setPendingRequest({
+          filePath: detail.relativePath,
+          line: detail.line,
+          column: detail.column,
+          diffRevision,
+          timestamp: Date.now(),
+        });
+      }
       if (detail.openWithSystemApp && workspacePath) {
         void getBridge('files')?.openWorkspaceFile(workspacePath, detail.relativePath);
       }
     };
     const unsub = subscribeBioF3Event(biof3Events.projectOpenWorkspaceFile, handler);
     return unsub;
-  }, [handleOpenWorkspaceFile, navigate, openRightPanel, projectId, workspacePath]);
+  }, [handleOpenWorkspaceFile, navigate, openRightPanel, projectId, workspacePath, setPendingRequest]);
 
   /** Dispatch a copilot-ask event so the embedded SimpleChat picks it up */
   const handleAskAgent = useCallback((prompt: string, options?: { analysisMode?: boolean }) => {
