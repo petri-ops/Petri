@@ -172,6 +172,12 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // L84 "Never modify unknown WIP" 不改 ui-productization-audit.md。
   // 不重写共享历史。
   '89da711164376ad67fddb9d808a1a268e5a4d30b',
+  // 2026-08-25 BLOCK-22 P4.6 CSS selector 修复 不可变实现提交 8006880：subject
+  // `fix(block-22-p4.6): inline-diff 绿底/红底 CSS selector 修复 [BLOCK-22] inline-diff`
+  // 未带 UI-###；台账 WIP 锁约束，按 governance §Guardrails L84
+  // "Never modify unknown WIP" 不改 ui-productization-audit.md。
+  // 不重写共享历史。
+  '8006880cad6537980a11a82de0069601bb0c7dc1',
 ])
 // These immutable implementation commits have an explicit later canonical
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
@@ -302,6 +308,12 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // L84 "Never modify unknown WIP" 不改 ui-productization-audit.md。
   // 不重写共享历史。
   '89da711164376ad67fddb9d808a1a268e5a4d30b',
+  // 2026-08-25 BLOCK-22 P4.6 CSS selector 修复 不可变实现提交 8006880：subject
+  // `fix(block-22-p4.6): inline-diff 绿底/红底 CSS selector 修复 [BLOCK-22] inline-diff`
+  // 未带 UI-###；台账 WIP 锁约束，按 governance §Guardrails L84
+  // "Never modify unknown WIP" 不改 ui-productization-audit.md。
+  // 不重写共享历史。
+  '8006880cad6537980a11a82de0069601bb0c7dc1',
 ])
 // UI-### issue ids: numeric series (UI-001..UI-999) and the named
 // AGENTWB namespace (UI-AGENTWB-001..UI-AGENTWB-999) used by the
