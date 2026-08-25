@@ -23,15 +23,7 @@
  * 不外推：详见 plan §8。
  */
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type FC,
-  type ReactNode,
-} from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState, type FC, type ReactNode } from 'react';
 
 import type { DiffRevision } from '../components/editor/CodeMirror/types';
 
@@ -125,4 +117,24 @@ export function usePendingScrollStrict(): PendingScrollContextValue {
     );
   }
   return ctx;
+}
+
+/**
+ * useHasPendingScrollProviderContext —— 轻量 Provider 在场检测。
+ *
+ * 用于 WorkspaceFilePreviewBridge 等内部组件：检测自身是否已被外部 PendingScrollProvider 包裹，
+ * 避免重复 wrap（double Provider 导致 Context 隔离失效）。
+ *
+ * 实现原理：用 `useRef(null)` 在 render 阶段读取 context；
+ *         不需要 useState/useEffect，零额外渲染成本。
+ *
+ * 用法示例：
+ *   const hasOuter = useHasPendingScrollProviderContext();
+ *   if (!hasOuter) {
+ *     // 自动 wrap PendingScrollProvider（内部兜底）
+ *   }
+ */
+export function useHasPendingScrollProviderContext(): boolean {
+  const ctx = useContext(PendingScrollContext);
+  return ctx !== null;
 }

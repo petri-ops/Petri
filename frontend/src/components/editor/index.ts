@@ -7,6 +7,7 @@
  * P0 只暴露 CodeMirrorEditor + 必要类型。
  * P1 才会扩 unifiedDiffExtension / DiffRevision / EditorMode 联合类型。
  * P3 新增 integration 层桥接组件（WorkspaceFilePreviewBridge / AppLevelBridge）。
+ * P4.2 新增 useEditorApi hook + BioF3OpenFileDevBridge 重命名。
  */
 
 export { CodeMirrorEditor } from './CodeMirror/CodeMirrorEditor';
@@ -25,5 +26,11 @@ export { WorkspaceFilePreviewBridge } from './integration/WorkspaceFilePreviewBr
 export type {
   WorkspaceFilePreviewBridgeProps,
 } from './integration/WorkspaceFilePreviewBridge';
+
+// P4.2 新增：useEditorApi hook
+export { useEditorApi } from './integration/WorkspaceFilePreviewBridge';
+
+// P4.2 重命名：AppLevelBridge → BioF3OpenFileDevBridge
+export { BioF3OpenFileDevBridge } from './integration/BioF3OpenFileDevBridge';
 export { AppLevelBridge } from './integration/AppLevelBridge';
-export type { DispatchOpenFileFn } from './integration/AppLevelBridge';
+export type { DispatchOpenFileFn } from './integration/BioF3OpenFileDevBridge';

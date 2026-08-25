@@ -1,94 +1,27 @@
 /**
- * BLOCK-22 P3 桥接层 (UI-194) — AppLevelBridge
+ * BLOCK-22 P3 桥接层 (UI-194) — AppLevelBridge (DEPRECATED)
  *
- * 用途：建立"事件 → context → CodeMirrorEditor"的抽象桥接层
+ * ⚠️ DEPRECATED — 已在 P4.2 重命名为 `BioF3OpenFileDevBridge`。
  *
- * 本文件**不**直接消费 SimpleChat.tsx / events.ts / WorkspaceFilePreview。
- * 按 biof3-project-governance §Guardrails "Never modify unknown WIP"，
- * 业务侧入口（SimpleChat 聊天卡片 / WorkspaceFilePreview 容器）的具体
- * 接入动作**不在 P3 范围**，留给 WIP 收口后由业务侧 Agent 负责。
+ * 本文件保留以避免破坏已有 import。请在新代码中使用：
  *
- * AppLevelBridge —— 全局监听桥：
- * 1. **不**订阅 events.ts（保持桥接层纯净，不依赖事件总线）
- * 2. **不**挂载到 App.tsx（P3 不动 App.tsx 也不在 WIP 锁外决定）
- * 3. 仅在 dev 模式（process.env.NODE_ENV === 'development'）下
- *    暴露一个 window.__biof3DispatchOpenFile 全局函数（dev tool 入口）
+ *   import { BioF3OpenFileDevBridge } from './BioF3OpenFileDevBridge';
  *
- * 用法（业务侧 / 主 Agent 决定后）：
+ * 或懒加载：
+ *   import React from 'react';
+ *   const BioF3OpenFileDevBridge = React.lazy(() => import('./BioF3OpenFileDevBridge'));
+ *   <React.Suspense fallback={null}><BioF3OpenFileDevBridge /></React.Suspense>
  *
- *   // src/App.tsx（或业务侧入口）加一行：
- *   import { AppLevelBridge } from 'frontend/src/components/editor/integration/AppLevelBridge';
- *   <AppLevelBridge />
- *
- * 注意：本组件**不**消费 SimpleChat / events.ts / WorkspaceFilePreview。
- *       是否挂载由主 Agent 收口时统一决策，**P3 不挂载**。
- *
- * 不外推：详见 plan §8。
+ * @see BioF3OpenFileDevBridge
  */
 
-import React, { useEffect } from 'react';
-
-import { usePendingScroll } from '../../../lib/pendingScrollContext';
-import type { DiffRevision } from '../CodeMirror/types';
+// Re-export from new location for backward compatibility
+export {
+  BioF3OpenFileDevBridge,
+  type DispatchOpenFileFn,
+} from './BioF3OpenFileDevBridge';
 
 /**
- * window.__biof3DispatchOpenFile 全局函数签名。
- *
- * 业务侧 / DevTools 控制台可直接调：
- *   window.__biof3DispatchOpenFile('/workspace/foo.py', 12, 4)
- *
- * DevTools 用法：
- *   - line 可选（默认 1）
- *   - column 可选
- *   - diffRevision 可选（传入时编辑器会切到 inline-diff 模式）
+ * @deprecated Use `BioF3OpenFileDevBridge` instead. This alias will be removed in a future release.
  */
-export interface DispatchOpenFileFn {
-  (filePath: string, line?: number, column?: number, diffRevision?: DiffRevision): void;
-}
-
-declare global {
-  interface Window {
-    __biof3DispatchOpenFile?: DispatchOpenFileFn;
-  }
-}
-
-/**
- * AppLevelBridge —— 预留入口组件。
- *
- * 行为：
- * - 挂载时，若 process.env.NODE_ENV === 'development'，挂一个
- *   window.__biof3DispatchOpenFile 全局函数。
- * - 该函数通过 usePendingScroll().setPendingRequest 触发滚动请求；
- *   需要与 WorkspaceFilePreviewBridge 在**同一个** PendingScrollProvider 下才会生效。
- * - 卸载时清空 window.__biof3DispatchOpenFile。
- *
- * **业务侧**后续可以把它挂到 App.tsx（不在 WIP 锁外），但**P3 不挂载**，
- *   留待主 Agent 收口时决策。
- */
-export function AppLevelBridge(): React.ReactElement | null {
-  const { setPendingRequest } = usePendingScroll();
-
-  useEffect(() => {
-    // P3 仅在 dev 模式暴露全局函数；prod 模式不挂。
-    if (process.env.NODE_ENV !== 'development') return undefined;
-
-    const fn: DispatchOpenFileFn = (filePath, line = 1, column, diffRevision) => {
-      setPendingRequest({
-        filePath,
-        line,
-        column,
-        diffRevision,
-        timestamp: Date.now(),
-      });
-    };
-
-    window.__biof3DispatchOpenFile = fn;
-    return () => {
-      if (window.__biof3DispatchOpenFile === fn) {
-        delete window.__biof3DispatchOpenFile;
-      }
-    };
-  }, [setPendingRequest]);
-
-  return null;
-}
+export { BioF3OpenFileDevBridge as AppLevelBridge } from './BioF3OpenFileDevBridge';

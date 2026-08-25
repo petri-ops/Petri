@@ -14,6 +14,10 @@
  * 3. 当 pendingRequest.diffRevision 存在时切到 inline-diff 模式并应用 revision
  * 4. 处理完一次后清空 pendingRequest
  *
+ * P4.2 改进：
+ * - 改进 1：自动检测外部 Provider，避免 double wrap
+ * - 改进 2：导出 `useEditorApi()` hook，业务侧可直接调用 EditorApi
+ *
  * 设计要点：
  * - 不直接读取文件、不直接调 IPC、不调 git-adapter（业务侧负责提供 content）
  * - 不消费 SimpleChat / events.ts（保持桥接层纯净）
@@ -22,7 +26,7 @@
  * 不外推：详见 plan §8。
  */
 
-import React, { useCallback, useEffect, useRef, type ReactNode } from 'react';
+import React, { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { CodeMirrorEditor } from '../CodeMirror/CodeMirrorEditor';
 import type {
@@ -34,7 +38,47 @@ import type {
 import {
   PendingScrollProvider,
   usePendingScroll,
+  useHasPendingScrollProviderContext,
 } from '../../../lib/pendingScrollContext';
+
+// ===== EditorApiContext =====
+
+/**
+ * EditorApiContext —— 跨组件共享 EditorApi 实例的 Context。
+ *
+ * 用途：BridgeInner 内部通过 callback ref 填充 api，
+ *       供 `useEditorApi()` hook 读取（业务侧无需通过 prop drilling 传 ref）。
+ *
+ * 不直接订阅 PendingScrollContext，仅作为 EditorApi 的"读端"；
+ * 业务侧拿到 EditorApi 后可直接调 scrollToLine / setMode / setDiffRevision。
+ *
+ * P4.2 实现细节：context value 是稳定的 `{ api: EditorApi | null }` 对象引用，
+ *               通过 mutation 更新 api 字段，避免触发 context consumer 重新渲染。
+ */
+const EditorApiContext = React.createContext<{ api: EditorApi | null }>({ api: null });
+
+/**
+ * useEditorApi —— P4.2 便利 hook。
+ *
+ * 在 WorkspaceFilePreviewBridge 子树内调用，返回 EditorApi 实例。
+ * 返回 `{ api: null }`（非 null 对象）表示 EditorApi 尚未就绪；
+ * 在 Bridge 外调用时也返回 `{ api: null }`（graceful fallback）。
+ *
+ * 特点：
+ * - **不会**在 null 时 throw（业务侧可能在 Provider 外使用，需 graceful fallback）
+ * - 零额外渲染成本（context 只存稳定引用，内部通过 mutation 更新）
+ *
+ * 用法：
+ *   const { api } = useEditorApi();
+ *   api?.scrollToLine({ line: 5 });
+ *
+ *   // 或直接用 editorRef prop（原有方式，仍有效）
+ *   const editorRef = useRef<EditorApi | null>(null);
+ *   <WorkspaceFilePreviewBridge editorRef={editorRef} ... />
+ */
+export function useEditorApi(): { api: EditorApi | null } {
+  return React.useContext(EditorApiContext);
+}
 
 export interface WorkspaceFilePreviewBridgeProps
   extends Omit<CodeMirrorEditorProps, 'mode' | 'diffRevision'> {
@@ -59,7 +103,7 @@ export interface WorkspaceFilePreviewBridgeProps
 /**
  * WorkspaceFilePreviewBridge —— 公开 API。
  *
- * 用法：
+ * 用法（业务侧一行接入）：
  *   <WorkspaceFilePreviewBridge
  *     filePath="/workspace/foo.py"
  *     value={content}
@@ -68,12 +112,15 @@ export interface WorkspaceFilePreviewBridgeProps
  *
  * 默认 mode = 'normal'；业务侧显式传 mode='inline-diff' 才进 diff 模式。
  *
- * 内部已经包了 PendingScrollProvider，**业务侧**无需再次 wrap；
- * 业务侧只需要调 `usePendingScroll().setPendingRequest({...})` 即可触发滚动。
+ * P4.2 改进：内部已自动检测外部 Provider，**业务侧无需再次 wrap PendingScrollProvider**。
+ *            若外部已 wrap，内部不会 double wrap（React Context 隔离规则导致 double wrap
+ *            会让 Context 失效）。
  *
- * 通过 `editorRef` prop 透传 EditorApi：
+ * 通过 `editorRef` prop 透传 EditorApi（原有方式，仍有效）：
  *   const editorRef = useRef<EditorApi | null>(null);
  *   <WorkspaceFilePreviewBridge editorRef={editorRef} ... />
+ *   // 或直接用 useEditorApi() hook
+ *
  * 父组件可拿到 CodeMirrorEditor 的命令面。
  */
 export function WorkspaceFilePreviewBridge({
@@ -85,27 +132,73 @@ export function WorkspaceFilePreviewBridge({
   ...rest
 }: WorkspaceFilePreviewBridgeProps & { editorRef?: React.MutableRefObject<EditorApi | null> }): React.ReactElement {
   return (
+    <BridgeRoot
+      filePath={filePath}
+      mode={mode}
+      diffRevision={diffRevision}
+      editorRef={editorRef}
+      {...rest}
+    >
+      {children}
+    </BridgeRoot>
+  );
+}
+
+/**
+ * BridgeRoot —— 自动 wrap PendingScrollProvider 的根组件。
+ *
+ * P4.2 改进：
+ * - 用 `useHasPendingScrollProviderContext()` 检测是否已有外部 Provider
+ * - 若无外部 Provider，内部自动 wrap（业务侧无需关心）
+ * - 若已有外部 Provider，直接 render BridgeInner（避免 double wrap）
+ *
+ * 不使用 `React.memo`，因为 BridgeInner 需要无条件接收外部 context 变化。
+ */
+function BridgeRoot({
+  filePath,
+  mode,
+  diffRevision,
+  children,
+  editorRef,
+  ...rest
+}: WorkspaceFilePreviewBridgeProps & { editorRef?: React.MutableRefObject<EditorApi | null> }): React.ReactElement {
+  // P4.2 改进 1：检测外部是否已有 Provider
+  const hasOuter = useHasPendingScrollProviderContext();
+
+  const inner = (
+    <BridgeInner
+      filePath={filePath}
+      mode={mode}
+      diffRevision={diffRevision}
+      editorRef={editorRef}
+      {...rest}
+    >
+      {children}
+    </BridgeInner>
+  );
+
+  if (hasOuter) {
+    // 已有外部 Provider，直接 render
+    return inner;
+  }
+
+  // 无外部 Provider，内部自动 wrap
+  return (
     <PendingScrollProvider>
-      <BridgeInner
-        filePath={filePath}
-        mode={mode}
-        diffRevision={diffRevision}
-        editorRef={editorRef}
-        {...rest}
-      >
-        {children}
-      </BridgeInner>
+      {inner}
     </PendingScrollProvider>
   );
 }
 
 /**
  * 内部桥接消费者：
- * - 必须挂在 PendingScrollProvider 内
+ * - 必须挂在 PendingScrollProvider 内（由 BridgeRoot 保证）
  * - 通过 usePendingScroll() 订阅 + 调用 editorApi
  *
  * 注意：使用 callback ref 把 CodeMirrorEditor 暴露的 api 同步到本地 ref，
  *       避免 `useImperativeHandle` 的"调用工厂时 ref 未填"的时序问题。
+ *
+ * P4.2 改进：通过 EditorApiContext + BridgeInner 内联填充，使 useEditorApi() 可用。
  */
 function BridgeInner({
   filePath,
@@ -117,6 +210,12 @@ function BridgeInner({
 }: WorkspaceFilePreviewBridgeProps & { editorRef?: React.MutableRefObject<EditorApi | null> }): React.ReactElement {
   const { pendingRequest, setPendingRequest } = usePendingScroll();
   const editorApiRef = useRef<EditorApi | null>(null);
+  // P4.2：稳定对象引用，context value 永不重新创建
+  const ctxValueRef = useRef<{ api: EditorApi | null }>({ api: null });
+  // P4.2：re-render trigger — 仅在 api 填充后触发一次（非 render-phase call，无限循环风险）
+  const [reloadKey, setReloadKey] = useState(0);
+  // P4.2：guard 确保只触发一次
+  const didReloadRef = useRef(false);
   // 保存业务侧传入的"基础" mode / diffRevision，用于 pending 处理完后恢复
   const baseModeRef = useRef<EditorMode>(mode);
   const baseDiffRevisionRef = useRef<DiffRevision | null>(diffRevision);
@@ -127,6 +226,14 @@ function BridgeInner({
   const handleEditorRef = useCallback(
     (api: EditorApi | null) => {
       editorApiRef.current = api;
+      if (api !== null) {
+        ctxValueRef.current.api = api;
+        // P4.2：在 commit phase 触发一次 re-render，让 context consumer 读到新 api
+        if (!didReloadRef.current) {
+          didReloadRef.current = true;
+          setReloadKey(k => k + 1);
+        }
+      }
       if (editorRef) {
         editorRef.current = api;
       }
@@ -164,14 +271,20 @@ function BridgeInner({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingRequest, filePath]);
 
+  // P4.2：EditorApiContext 消费者需要 EditorApi 实例（通过稳定引用 + reloadKey 触发重渲染）
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const ctxValue = React.useMemo(() => ctxValueRef.current, [reloadKey]);
+
   return (
-    <CodeMirrorEditor
-      {...rest}
-      ref={handleEditorRef}
-      mode={mode}
-      diffRevision={diffRevision}
-    >
-      {children}
-    </CodeMirrorEditor>
+    <EditorApiContext.Provider value={ctxValue}>
+      <CodeMirrorEditor
+        {...rest}
+        ref={handleEditorRef}
+        mode={mode}
+        diffRevision={diffRevision}
+      >
+        {children}
+      </CodeMirrorEditor>
+    </EditorApiContext.Provider>
   );
 }
