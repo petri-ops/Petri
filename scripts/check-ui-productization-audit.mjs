@@ -178,6 +178,11 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // "Never modify unknown WIP" 不改 ui-productization-audit.md。
   // 不重写共享历史。
   '8006880cad6537980a11a82de0069601bb0c7dc1',
+  // 2026-08-26 BLOCK-22 P4.7 accept/reject widget 注入 不可变实现提交 9cb6e96：subject
+  // `feat(block-22-p4.7): inject accept/reject widgets into hunk lines + dismissHunk with fade transition [BLOCK-22]`
+  // 未带 UI-###；台账已由本 commit 补登为 UI-195（in_progress）。
+  // 不重写共享历史。
+  '9cb6e9624bea9d33c5e9fd08cf52c7137d722893',
 ])
 // These immutable implementation commits have an explicit later canonical
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
@@ -314,6 +319,11 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // "Never modify unknown WIP" 不改 ui-productization-audit.md。
   // 不重写共享历史。
   '8006880cad6537980a11a82de0069601bb0c7dc1',
+  // 2026-08-26 BLOCK-22 P4.7 accept/reject widget 注入 不可变实现提交 9cb6e96：subject
+  // `feat(block-22-p4.7): inject accept/reject widgets into hunk lines + dismissHunk with fade transition [BLOCK-22]`
+  // 未带 UI-###；台账已由本 commit 补登为 UI-195（in_progress）。
+  // 不重写共享历史。
+  '9cb6e9624bea9d33c5e9fd08cf52c7137d722893',
 ])
 // UI-### issue ids: numeric series (UI-001..UI-999) and the named
 // AGENTWB namespace (UI-AGENTWB-001..UI-AGENTWB-999) used by the

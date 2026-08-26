@@ -53,6 +53,7 @@ vi.mock('../../CodeMirror/CodeMirrorEditor', () => ({
         acceptAll: vi.fn(async () => ({ allOk: true, succeeded: [], failed: [] })),
         rejectAll: vi.fn(async () => undefined),
         getHunk: vi.fn(() => null),
+        dismissHunk: vi.fn(),
       }));
       return <div data-testid="mock-codemirror">{children}</div>;
     },
