@@ -156,6 +156,19 @@ export interface EditorApi {
    * 找不到返回 null。
    */
   getHunk(hunkId: string): DiffHunk | null;
+  /**
+   * 从本地数据结构中移除 hunk（CSS 淡出 + diffCompartment reconfigure）。
+   *
+   * Task 2 实现：
+   * 1. 给该 hunk 的所有 `[data-hunk-id]` DOM 元素加 `dismissing` class，
+   *    触发 200ms CSS transition 淡出背景色
+   * 2. 200ms 后从 `currentDiffRevisionRef.current.hunks` 过滤掉该 hunk，
+   *    触发 `diffCompartment.reconfigure` 重建 unifiedMergeView
+   *
+   * 纯本地数据结构操作（不调 IPC）。IPC 完成后由 `acceptHunk` / `rejectHunk`
+   * 调用方负责调用本方法。
+   */
+  dismissHunk(hunkId: string): void;
 }
 
 export interface CodeMirrorEditorProps {

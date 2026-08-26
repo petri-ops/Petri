@@ -181,3 +181,17 @@
   outline: 2px solid var(--color-danger, #dc3545);
   outline-offset: 1px;
 }
+
+/* ===== Task 2: dismissHunk fade transition ===== */
+
+/*
+ * 接受 / 拒绝 hunk 后，先给该 hunk 的所有 chunk 行加 `dismissing` class，
+ * 触发 200ms 淡出 transition；200ms 后 unifiedMergeView 重建，hunk 从 DOM 消失。
+ *
+ * 触发方式：`dismissHunk(hunkId)` — 在 useCodeMirrorEditor.ts 中实现。
+ */
+.cmEditor :global(.cm-insertedLine.dismissing),
+.cmEditor :global(.cm-deletedChunk.dismissing) {
+  transition: background-color 200ms ease-out;
+  background-color: transparent;
+}

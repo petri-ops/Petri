@@ -37,6 +37,7 @@ import { createScrollToLineApi, scrollToLineExtension } from './extensions/scrol
 import {
   createAcceptRejectWidgetExtension,
   type AcceptRejectWidgetCallbacks,
+  cssEscape,
 } from './extensions/acceptRejectWidget';
 import type {
   DiffHunk,
@@ -209,6 +210,29 @@ export function useCodeMirrorEditor(
       const isInlineDiff = (): boolean => currentModeRef.current === 'inline-diff';
       const ensureView = (): EditorView | null => viewRef.current;
 
+      // Task 2: 本地 dismissHunk 实现（由 acceptHunk / rejectHunk / api.dismissHunk 共用）
+      const dismissHunkImpl = (hunkId: string): void => {
+        const v = ensureView();
+        if (!v) return;
+        // 阶段 1：给 DOM 元素加 dismissing class，触发 CSS transition 淡出
+        v.contentDOM
+          .querySelectorAll<HTMLElement>(`[data-hunk-id="${cssEscape(hunkId)}"]`)
+          .forEach((el) => el.classList.add('dismissing'));
+        // 阶段 2：200ms 后从 hunks 数组移除该 hunk，reconfigure diff compartment
+        setTimeout(() => {
+          const v2 = ensureView();
+          if (!v2) return;
+          const rev = currentDiffRevisionRef.current;
+          if (!rev || !rev.hunks) return;
+          const diffCompartment = diffCompartmentRef.current;
+          if (!diffCompartment) return;
+          const updatedHunks = rev.hunks.filter((h) => h.id !== hunkId);
+          const updatedRevision: DiffRevision = { ...rev, hunks: updatedHunks };
+          currentDiffRevisionRef.current = updatedRevision;
+          v2.dispatch({ effects: diffCompartment.reconfigure(createUnifiedDiffExtension(updatedRevision)) });
+        }, 200);
+      };
+
       return {
         getValue: (): string => {
           const v = ensureView();
@@ -279,6 +303,7 @@ export function useCodeMirrorEditor(
           if (!rev || !rev.hunks) return null;
           return rev.hunks.find((h) => h.id === hunkId) ?? null;
         },
+        dismissHunk: dismissHunkImpl,
         acceptHunk: async (hunkId: string): Promise<void> => {
           if (!isInlineDiff()) return;
           const rev = currentDiffRevisionRef.current;
@@ -293,6 +318,8 @@ export function useCodeMirrorEditor(
           }
           // 触发业务侧回调（事件总线接入由 P3 完成）
           onAcceptHunkRef.current?.(hunkId);
+          // Task 2: IPC 成功后触发 dismissHunk（CSS 淡出 + diff 重建）
+          dismissHunkImpl(hunkId);
         },
         rejectHunk: async (hunkId: string): Promise<void> => {
           // P2 实现：等价整文件 revert（per-hunk reject 路径走 git:hunk-reject-inverse，
