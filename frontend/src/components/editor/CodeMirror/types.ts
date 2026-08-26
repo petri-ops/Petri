@@ -210,4 +210,14 @@ export interface CodeMirrorEditorProps {
    * （例如 HunkHUD、跳转锚点）。P2 不消费。
    */
   children?: React.ReactNode;
+  /**
+   * 是否在编辑器上方挂载 DiffActionBar（Accept All / Reject All / Review）。
+   *
+   * 默认 false（向后兼容：现有调用方 0 改动）。仅当业务侧希望暴露
+   * "整文件决策"快捷入口时才打开；与 `mode === 'inline-diff'` 配套使用，
+   * 其它 mode 下 bar 自动隐藏。
+   *
+   * P3 落地：业务侧 WorkspaceFilePreview 入口按 prop 打开。
+   */
+  showDiffActionBar?: boolean;
 }

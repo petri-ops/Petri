@@ -1,0 +1,98 @@
+/* BLOCK-22-CODEMIRROR-INLINE-DIFF — DiffActionBar 样式
+ *
+ * 顶部水平 flex 容器：
+ * - 右对齐（justify-content: flex-end）
+ * - 按钮间距 8px
+ * - 暗色主题友好（用 `--biof3-*` token，含 fallback）
+ * - 不引入新依赖；颜色与现有 CodeMirrorEditor.module.css 的 widget 配色对齐
+ */
+
+.bar {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: var(--biof3-bg-elevated, rgba(255, 255, 255, 0.95));
+  border-bottom: 1px solid var(--biof3-border, rgba(0, 0, 0, 0.12));
+}
+
+.button {
+  /* 共用：紧凑字号 + 圆角 + focus 描边 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  padding: 4px 12px;
+  font-size: var(--biof3-font-size-body-sm, 13px);
+  font-weight: 600;
+  line-height: 1.2;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease,
+    box-shadow 120ms ease;
+  font-family: inherit;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--biof3-accent, #4ec9b0);
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.accept {
+  background: var(--color-success, #28a745);
+  color: #ffffff;
+  border-color: var(--color-success, #28a745);
+}
+
+.accept:hover:not(:disabled) {
+  background: var(--color-success-hover, #218838);
+  border-color: var(--color-success-hover, #218838);
+}
+
+.accept:active:not(:disabled) {
+  background: var(--color-success-hover, #1e7e34);
+  border-color: var(--color-success-hover, #1e7e34);
+}
+
+.reject {
+  background: var(--color-danger, #dc3545);
+  color: #ffffff;
+  border-color: var(--color-danger, #dc3545);
+}
+
+.reject:hover:not(:disabled) {
+  background: var(--color-danger-hover, #c82333);
+  border-color: var(--color-danger-hover, #c82333);
+}
+
+.reject:active:not(:disabled) {
+  background: var(--color-danger-hover, #bd2130);
+  border-color: var(--color-danger-hover, #bd2130);
+}
+
+.review {
+  /* neutral：暗色主题下走 --biof3-* token，避免亮色主题下硬编码 */
+  background: var(--biof3-bg-subtle, rgba(0, 0, 0, 0.04));
+  color: var(--biof3-text-secondary, rgba(0, 0, 0, 0.85));
+  border-color: var(--biof3-border, rgba(0, 0, 0, 0.18));
+}
+
+.review:hover:not(:disabled) {
+  background: var(--biof3-bg-elevated, rgba(0, 0, 0, 0.08));
+  border-color: var(--biof3-border-strong, rgba(0, 0, 0, 0.32));
+}
+
+.review:active:not(:disabled) {
+  background: var(--biof3-border-subtle, rgba(0, 0, 0, 0.12));
+}

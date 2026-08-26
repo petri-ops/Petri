@@ -21,11 +21,17 @@
  * 不接：
  * - 事件总线 events.ts（P3 才接）
  * - WorkspaceFilePreview 容器入口（P3 才接）
+ *
+ * P3 增量（Task 3）：
+ * - 新增 `showDiffActionBar?: boolean` prop（默认 false 向后兼容）
+ * - 打开后挂 `<DiffActionBar>` 在 parentRef DOM 内最前（视觉位于编辑器上方）
+ * - 不接管 CodeMirror 的 contentDOM；CM6 EditorView 仍按既有路径 append 到 parent
  */
 
 import React, { createContext, forwardRef, useContext, useRef } from 'react';
 
 import { useCodeMirrorEditor } from './useCodeMirrorEditor';
+import { DiffActionBar } from './DiffActionBar';
 import type {
   CodeMirrorEditorProps,
   EditorApi,
@@ -60,6 +66,7 @@ export const CodeMirrorEditor = forwardRef<EditorApi, CodeMirrorEditorProps>(fun
     onAcceptHunk,
     onRejectHunk,
     onError,
+    showDiffActionBar = false,
     children,
   },
   ref,
@@ -115,7 +122,11 @@ export const CodeMirrorEditor = forwardRef<EditorApi, CodeMirrorEditorProps>(fun
         data-readonly={readonly ? 'true' : 'false'}
         data-cm6-mode={(mode as EditorMode) ?? 'normal'}
         aria-readonly={readonly}
+        data-show-diff-action-bar={showDiffActionBar ? 'true' : 'false'}
       >
+        {showDiffActionBar ? (
+          <DiffActionBar apiRef={apiRef} onError={onError} />
+        ) : null}
         {children}
       </div>
     </EditorApiContext.Provider>
