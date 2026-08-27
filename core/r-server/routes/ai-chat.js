@@ -267,7 +267,7 @@ module.exports = function registerAiChatRoute(app) {
 
     // BLOCK-20: token budget estimation + SSE event — fires before stream starts
     try {
-      const { getContextWindow } = require('../helpers/model-context-windows');
+      const { getContextWindow } = require('../helpers/token-estimator');
       const activeModel = identityProfile && identityProfile.model || 'deepseek-chat';
       const activeProvider = identityProvider || 'deepseek';
       const { systemPromptTokens, messagesTokens, total } = estimateRequestTokens({
@@ -275,7 +275,13 @@ module.exports = function registerAiChatRoute(app) {
         messages: trimmedMessages,
         maxTokens: 8192,
       });
-      const ctxWindow = await getContextWindow(activeModel, activeProvider).catch(() => 0) || 0;
+      const ctxWindow = await getContextWindow(
+        activeModel,
+        activeProvider,
+        identityProfile && identityProfile.baseUrl,
+        null,
+        identityProfile && identityProfile.contextWindow,
+      ).catch(() => 0) || 0;
       const pct = ctxWindow > 0 ? Math.min(100, Math.round((total / ctxWindow) * 100)) : 0;
       res.write('data: ' + JSON.stringify({
         event: 'token_budget',

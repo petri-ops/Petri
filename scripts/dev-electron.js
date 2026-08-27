@@ -271,6 +271,36 @@ async function main() {
   spawnChild(npmCmd, ['--prefix', 'frontend', 'run', 'dev']);
   await waitForUrl(rendererUrl);
 
+  // r-server (and later Electron) both need the same DB. The Electron main
+  // process stores it in ~/Library/Application Support/biof3-local/ (see
+  // env-coordinator.js). We mirror that path here so r-server opens the already-
+  // migrated DB instead of its own empty core/r-server/bioF3.db.
+  const rServerUserDataDir = process.env.BIOF3_ELECTRON_USER_DATA_DIR ||
+    path.join(os.homedir(), 'Library', 'Application Support', 'biof3-local');
+  process.env.BIOF3_DB_PATH = path.join(rServerUserDataDir, 'bioF3.db');
+
+  // Run pending DB migrations against the shared DB before r-server starts.
+  // Uses the same BIOF3_BETTER_SQLITE3_ROOT root as main.js:367 so the
+  // better-sqlite3 native addon ABI matches.
+  const migrationEnv = { ...process.env, ELECTRON_RUN_AS_NODE: '1', BIOF3_BETTER_SQLITE3_ROOT: path.join(projectRoot, 'core/r-server') };
+  const migrationResult = spawnSync(
+    process.execPath,
+    [path.join(projectRoot, 'src', 'migration-runner.js'), process.env.BIOF3_DB_PATH, path.join(projectRoot, 'src', 'migrations')],
+    { cwd: projectRoot, encoding: 'utf8', env: migrationEnv },
+  );
+  if (migrationResult.error) throw migrationResult.error;
+  if (migrationResult.status !== 0) {
+    throw new Error((migrationResult.stderr || migrationResult.stdout || 'migration child failed').trim());
+  }
+  const migrationOutput = String(migrationResult.stdout || '').trim();
+  if (migrationOutput) console.log('[dev-electron] ' + migrationOutput.replace(/\n/g, '\n[dev-electron] '));
+
+  // Start r-server on :3001 so /api/ai/chat (and other /api/* routes used by
+  // the renderer) are reachable from the dev shell. Without this the copilot
+  // context-budget ring (UI-190) and other live SSE features stay empty.
+  spawnChild(npmCmd, ['--prefix', 'core/r-server', 'start'], { env: { ...process.env } });
+  await waitForUrl('http://127.0.0.1:3001/api/health');
+
   // Optional extra Electron CLI args for local debugging, e.g.
   //   BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev
   // Empty by default so normal dev runs are unchanged.

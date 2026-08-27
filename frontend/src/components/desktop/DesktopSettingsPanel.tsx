@@ -32,6 +32,7 @@ import {
   type UserModelProvider,
   validateUserModelProfile,
 } from '@/lib/model-provider-options';
+import { parseContextWindow, formatContextWindow } from '@/lib/format-context-window';
 import {
   exportEndpointProfilesCsv,
   exportEndpointProfilesJson,
@@ -86,6 +87,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
   const [credentialBackend, setCredentialBackend] = useState('local');
   const [endpointTransferMessage, setEndpointTransferMessage] = useState<string | null>(null);
+  const [contextWindowDrafts, setContextWindowDrafts] = useState<Record<string, string>>({});
   const endpointImportRef = useRef<HTMLInputElement>(null);
   const modelDiscoveryGeneration = useRef<Record<string, number>>({});
   const modelProfilesRef = useRef<ChatModelPreset[]>([]);
@@ -163,7 +165,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
       credential_updates: Object.fromEntries(Object.entries(credentialInputs).filter(([, value]) => value.trim())),
       // Compatibility snapshot for older renderer builds. The Gateway only
       // reads ModelProfiles and role bindings.
-      chat_model_presets: profiles.filter((profile) => profile.capabilities?.includes('chat')).map(({ id, label, provider, model, defaultModel, baseUrl }) => ({ id, label, provider, model, defaultModel, baseUrl })),
+      chat_model_presets: profiles.filter((profile) => profile.capabilities?.includes('chat')).map(({ id, label, provider, model, defaultModel, baseUrl, contextWindow }) => ({ id, label, provider, model, defaultModel, baseUrl, contextWindow })),
       active_chat_model_id: roleBindings.chat,
       llm_provider: chatProfile?.provider,
       embed_provider: embedProfile?.provider,
@@ -547,6 +549,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                   <span>Base URL</span>
                   <span>Key</span>
                   <span>默认模型</span>
+                  <span>上下文</span>
                   <span>连通性</span>
                   <span />
                 </div>
@@ -655,6 +658,36 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       )}
                       {modelOptions.map((model) => <option key={model} value={model}>{model}</option>)}
                     </select>
+                    <input
+                      type="text"
+                      className="biof3-input biof3-input--sm"
+                      // Render the user's literal text during editing so the
+                      // cursor doesn't jump mid-typing; only format on blur
+                      // and when state has a numeric value.
+                      value={contextWindowDrafts[profile.id] ?? formatContextWindow(profile.contextWindow)}
+                      onChange={(e) => {
+                        const text = e.target.value;
+                        setContextWindowDrafts((current) => ({ ...current, [profile.id]: text }));
+                        const parsed = parseContextWindow(text);
+                        updateProfile(profile.id, { contextWindow: parsed });
+                      }}
+                      onBlur={(e) => {
+                        // Drop the draft so subsequent renders show the
+                        // canonical formatted value (e.g. "128K" instead of
+                        // any partial state).
+                        setContextWindowDrafts((current) => {
+                          if (!(profile.id in current)) return current;
+                          const next = { ...current };
+                          delete next[profile.id];
+                          return next;
+                        });
+                        const parsed = parseContextWindow(e.target.value);
+                        updateProfile(profile.id, { contextWindow: parsed });
+                      }}
+                      placeholder="64K / 1M"
+                      aria-label="上下文窗口"
+                      title="模型上下文窗口，如 64K、128K、1M；留空则使用默认值"
+                    />
                     <button
                       type="button"
                       className={`biof3-btn biof3-btn--ghost biof3-btn--sm biof3-endpoint-card__test${connectionResult?.ok ? ' is-ok' : connectionResult || profileError ? ' is-error' : ''}`}

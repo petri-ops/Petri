@@ -139,6 +139,10 @@ function normalizeModelProfile(input, index = 0) {
   };
   const baseUrl = _cleanString(input.baseUrl);
   if (baseUrl) normalized.baseUrl = baseUrl.replace(/\/$/, '');
+  const contextWindow = typeof input.contextWindow === 'number' && input.contextWindow > 0
+    ? Math.round(input.contextWindow)
+    : undefined;
+  if (contextWindow !== undefined) normalized.contextWindow = contextWindow;
   return normalized;
 }
 

@@ -15,7 +15,7 @@
  */
 
 const { estimateRequestTokens } = require('./helpers/token-estimator');
-const { getContextWindow } = require('./helpers/model-context-windows');
+const { getAiSettings } = require('./helpers/ai-settings');
 const { buildSystemPrompt, localizeToolResult, loadWorkingTreeRejectEntries } = require('./helpers/system-prompt');
 const { appendDesktopAgentInstructions } = require('./helpers/desktop-agent-prompt');
 const { renderPluginDemoPathsForPrompt } = require('./helpers/plugin-demo-prompt');
@@ -547,7 +547,15 @@ async function runAgentLoop({
       messages: Array.isArray(messages) ? messages : [],
       maxTokens: 8192,
     });
-    const ctxWindow = (await Promise.resolve(getContextWindow(modelName, providerName).catch(() => 0))) || 0;
+    const presetCtx = (() => {
+      try {
+        const settings = getAiSettings();
+        const profile = (settings.model_profiles || []).find((p) => p.id === profileId);
+        return profile && profile.contextWindow;
+      } catch { return undefined; }
+    })();
+    const { getContextWindow } = require('./helpers/token-estimator');
+    const ctxWindow = (await Promise.resolve(getContextWindow(modelName, providerName, baseUrl, null, presetCtx).catch(() => 0))) || 0;
     const safeCtx = ctxWindow > 0 ? ctxWindow : 64000;
     const pct = Math.min(100, Math.round((total / safeCtx) * 100));
     _emit({

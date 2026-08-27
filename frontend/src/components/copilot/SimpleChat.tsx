@@ -950,6 +950,8 @@ export function SimpleChat({
       setTokenBudget({
         contextWindow: detail.contextWindow,
         messagesTokensUsed: detail.messagesTokensUsed,
+        messagesKept: 0,
+        messagesDropped: 0,
         pct: detail.pct,
         trimmed: detail.trimmed,
       });
