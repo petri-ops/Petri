@@ -1,0 +1,44 @@
+{
+  "ui": "UI-199",
+  "title": "模型渠道 Endpoint 设置加上下文窗口配置（contextWindow，单位 K/M）",
+  "verified_at": "2026-08-27T21:55:00+08:00",
+  "environment": {
+    "type": "dev Electron (macOS arm64)",
+    "electron": "30.5.1",
+    "device": "Mac development machine",
+    "window": "dev 实例（18:54 启动）经 CDP 9222 实地驱动",
+    "note": "r-server 内存代码为 18:54 版本，但本项验证面为 UI parse/format + 桥接读写 + normalize 链路；token budget 的 ctxWindow 接线（agent-runner/ai-chat）属后端单测覆盖范围，重启实例后自然生效，不在本 evidence 断言范围"
+  },
+  "source": {
+    "commit": "4f5e7c9 (UI-199 implementation, merged to main via PR #45 ded4f80)",
+    "files": [
+      "frontend/src/hooks/useAiSettings.ts",
+      "frontend/src/lib/format-context-window.ts",
+      "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+      "core/shared-backend/llm-providers/model-profile.js",
+      "core/r-server/helpers/ai-settings.js"
+    ]
+  },
+  "steps_executed": [
+    "1. CDP 直连 dev Electron page target（非 agent-browser 自开 Chrome），Runtime.evaluate 通道验证 navigator.userAgent 含 Electron + window.biof3Desktop 27 个命名空间",
+    "2. 点击左栏 [title=设置] 打开设置面板 → 导航「模型接口」→ 渠道表表头含「上下文」列（协议/供应商/Base URL/Key/默认模型/上下文/连通性）",
+    "3. 实机输入验证：DeepSeek 渠道上下文输入框输入 '256K'（native setter + input/change 事件）→ blur 提交 → 点保存",
+    "4. 桥接回读：window.biof3Desktop.aiSettings.get() → chat_model_presets[0].contextWindow === 256000（parse '256K' → 256000 正确）",
+    "5. 持久化验证：关闭面板（biof3-desktop-panel__close）→ 重开设置 → 模型接口区 → 输入框显示 '256K'（persisted_ok: true）",
+    "6. 格式变体验证：输入 '1.5M' → blur 不跳光标（contextWindowDrafts 草稿态生效）→ 保存 → contextWindow === 1500000",
+    "7. 非法输入验证：输入 '垃圾输入abc' → 保存 → contextWindow === undefined（fail-closed 清除，不写脏数据）",
+    "8. 恢复 '256K' 并保存（final_value 256000），截取实机证据截图"
+  ],
+  "results": {
+    "context_column_visible": true,
+    "parse_256K": 256000,
+    "parse_1_5M": 1500000,
+    "persist_after_close_reopen": true,
+    "blur_no_cursor_jump": true,
+    "garbage_input_fail_closed": true,
+    "screenshot": "acceptance/ui-199/electron-context-window-column.png"
+  },
+  "qualificationEligible": false,
+  "g0_note": "G0 开发期常态 · dev Electron 边界内 verified · 不外推 packaged/Provider/GA/P7/notarization/dist staleness G1+",
+  "passed": true
+}

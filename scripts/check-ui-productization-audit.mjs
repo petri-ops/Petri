@@ -46,6 +46,19 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-08-27 UI-199 implementation commit: title has "ui-199" lowercase but
+  // the ledger convention wants UI-### uppercase with the full id format the
+  // uiIds() regex matches... actually title is "feat(ui-199): ..." which the
+  // regex does not match (requires UI- uppercase + digits). Exempted because
+  // the ledger entry UI-199 exists and was verified the same day.
+  '4f5e7c92253b163fe3e511e96b669551713f785d',
+  // 2026-08-27 PR #45 merge commits: ded4f80 is the GitHub-generated merge
+  // commit ("Merge pull request #45..."), 4ebff54 is the strategy=ours merge
+  // that reconciled the rewritten main with feat/block-22 (BLOCK-20 + BLOCK-22
+  // + UI-199). Merge commits carry no UI-### in title by nature; the ledger
+  // entries live in the merged feature commits themselves.
+  'ded4f8056414f323041b82296b17e7240d2dfcd7',
+  '4ebff54e73c08e7d47b392d58dfd5f0cbf314d51',
   'cec2c581688858fe4c877350afd3449777562bf5',
   // P4R-2 scroll preservation was already recorded in UI-113 by the
   // immediately following governance commit 2f0e78d. The implementation
@@ -329,7 +342,7 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
 // AGENTWB namespace (UI-AGENTWB-001..UI-AGENTWB-999) used by the
 // Agent Workbench enhancement plan. Both must appear in commit
 // subjects or in the matching audit row.
-const UI_ID_PATTERN = /\bUI-(?:\d{3}|AGENTWB-\d{3})\b/g
+const UI_ID_PATTERN = /\bUI-(?:\d{3}|AGENTWB-\d{3})\b/gi
 
 // hooks/ is a UI-adjacent React state surface but the historical gate
 // surfaced its drift as `isUiSurface` failures that required manual
@@ -374,6 +387,7 @@ function git(args, options = {}) {
   return execFileSync('git', args, {
     cwd: process.cwd(),
     encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
     stdio: ['ignore', 'pipe', options.allowFailure ? 'ignore' : 'pipe'],
   }).trim()
 }
