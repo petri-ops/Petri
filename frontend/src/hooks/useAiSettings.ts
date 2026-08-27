@@ -54,6 +54,11 @@ export interface ChatModelPreset {
   capabilities?: string[];
   roles?: string[];
   parameters?: Record<string, unknown>;
+  /**
+   * User-configured context window override (in tokens). When set and > 0,
+   * it takes priority over the hard-coded model list / OpenRouter lookup.
+   */
+  contextWindow?: number;
   /** Persisted Endpoint profile backing a transient provider/model choice. */
   endpointProfileId?: string;
 }

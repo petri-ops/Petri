@@ -248,3 +248,73 @@ G0 开发期常态 · 不外推 packaged/Provider/GA/P7/notarization/dist stalen
 
 **当前 active 工作包**：NONE（BLOCK-15-ARCHITECTURE-PERF 已 completed）。
 
+## BLOCK-18 — Workspace MD Diff（2026-08-22 启动）
+
+`docs/block-18-workspace-md-diff-plan.md`
+
+- 状态：`active`（BLOCK-17 标 `superseded` 后接管 active 槽位）
+- 目标：把"前后差异"直接搬到文件页面（`files` tab 的 `WorkspaceFilePreview`）内
+- 数据路径：沿用 BLOCK-17 的 `userData/agent-doc-snapshots/` + `.snapshots/`
+- 入口：`WorkspaceFilePreview` toolbar 顶部"预览 / 对比"toggle
+- 样式：复用 BLOCK-17 的 `.wt-hunk-table` + `.wt-*` 主题变量
+- 不外推：packaged / Provider / GA
+
+### BLOCK-17 → superseded（2026-08-22）
+
+用户裁决"多一个审阅界面没有意义"。BLOCK-17 已实现的 IPC（`src/ipc/agent-doc-review.js`）、preload namespace、bridge 类型、`.wt-*` 样式骨架与 `computeSimpleDiff` 算法由 BLOCK-18 复用；独立面板（4 文件）、TitleBar `+` 菜单项、`useWorkspacePanels.docReviewOpen` 状态槽由 BLOCK-18 删除。
+
+
+## BLOCK-20 — Code Review Panel（2026-08-22 启动）
+
+`docs/block-20-code-review-panel-plan.md`
+
+- 状态：`active`（BLOCK-18 标 `superseded` 后接管 active 槽位）
+- 目标：补齐"系统级代码审阅体验"——**常驻右侧审阅面板**，覆盖项目里所有被 git 跟踪的修改文本文件（不限 markdown），基准 vs git HEAD，支持 unified / split 两种视图，hunk 级别 Accept / Reject（reject 信号经 BLOCK-16 `<working-tree-rejects>` system-prompt 注入复用），inline-edit 抽屉承载 BLOCK-19 的 `<textarea>` 资产
+- 入口：右侧 tab + TitleBar 手动按钮（BLOCK-16 浮层保留为 agent task done 触发）
+- 复用：BLOCK-16 `DiffFileView / DiffHunkView / git-adapter.applyPatch / revertPaths / <working-tree-rejects>` 全部 0 改动复用；BLOCK-19 inline-edit + `workspace.writeTextFile` IPC 0 改动复用
+- 决策摘要：
+
+| 维度 | 决策 |
+|---|---|
+| 范围 | 项目级所有 git 状态 `?? / M / A / D` 文本文件 |
+| 基准 | `git diff HEAD`（左栏 HEAD 内容 / 右栏 working tree） |
+| 渲染 | 复用 BLOCK-16 手写 React diff（0 新依赖） |
+| hunk 接受 | `git-adapter.applyPatch`（已有） |
+| hunk 拒绝 | `git-adapter.applyInverseHunk`（新增：算 inverse 后 `git apply --reverse`） |
+| inline edit | drawer 抽屉 + `<textarea>` + `workspace.writeTextFile`（已有） |
+| 拒绝清单注入 | 复用 BLOCK-16 `<working-tree-rejects>` 段（已有） |
+| BLOCK-18 plan | superseded（inline-edit 资产合并进 BLOCK-20 PHASE 3 drawer） |
+| BLOCK-19 thin-slice | 不登记新 ID（合并进 BLOCK-20） |
+| BLOCK-16 浮层 | 保留（agent task done 触发 vs 日常审阅面板，两条触发流并存） |
+| 真实 OSS / Provider / packaged | 不外推（G0 开发期常态） |
+
+- v1 thin-slice 范围（5 新 IPC + 2 新前端组件）：
+  - `git:list-modified`（`git status --porcelain --untracked-files=all` → [{path, status}]）
+  - `git:file-head-content`（HEAD 文件内容，split view 左栏）
+  - `git:split-side-diff`（HEAD + working tree → structured hunks，复用 BLOCK-16 `parseUnifiedHunks`）
+  - `git:revert-file`（`git checkout -- <path>`）
+  - `git:apply-inverse-hunk`（per-hunk 拒绝 inverse patch）
+  - `<CodeReviewPanel />`（常驻右侧 panel）
+  - `<CodeReviewDrawer />`（右侧滑出抽屉）
+- **5 PHASE**：PHASE 0 治理登记（主 agent 直做）/ PHASE 1 IPC 5 通道（主 agent 直做）/ PHASE 2 CodeReviewPanel + Drawer 组件（主 agent 直做）/ PHASE 3 inline-edit 抽屉合并（主 agent 直做）/ PHASE 4 per-hunk reject inverse + system-prompt 注入复用（主 agent 直做）/ PHASE 5 专项门禁 `npm run block:code-review` + closeout 笔录
+- 完成语义：5 IPC + 1 panel + 1 drawer + 4 治理门 GREEN + BLOCK-16 / BLOCK-19 资产 0 改动复用 + 不变量守住（preload.js 既有 19 命名空间 / electron.d.ts 既有类型 / desktopBridge.ts 既有 API / BLOCK-16 既有组件 / core/shared-backend 既有方法 0 diff）+ 0 新 npm 依赖
+- 不在范围：packaged / Provider / GA / P7 / notarization / dist staleness G1+ / 引入 monaco-editor / react-diff-viewer / react-split-pane / n-way merge / 跨项目 working tree 审阅 / 不重新激活 BLOCK-2/3/4/5/6/7/8/9/9.1/9.2/15/16/17/18 / 不动 Result Studio 既有 diff 组件 / 不动 core/shared-backend 既有方法（仅新增）/ 不动 agent-tools/* / agent-transcripts/*
+
+**当前 active 工作包**：BLOCK-20。
+
+### BLOCK-22 — CodeMirror Inline Diff COMPLETED（active → completed · 2026-08-24）
+
+- **状态**：`active → completed`（用户裁决启动同日收口）；DOC-REGISTRY `BLOCK-22-CODEMIRROR-INLINE-DIFF-PLAN` `status=completed / linkedCommits=[b9e697f, 3745bd5, 0436be2, 0e28498, b1f4453]`；新增 `BLOCK-22-CODEMIRROR-INLINE-DIFF-CLOSEOUT` `kind=reference / status=reference / canonical=true / truthDomain=block-22-codemirror-inline-diff-closeout` 登记项；closeout 报告 `docs/block-22-codemirror-inline-diff-closeout.md`（285 行 / 10 节）。
+- **5 commit 落地** `feat/block-22-codemirror-inline-diff` 分支 HEAD `b1f4453`：`b9e697f` P0-LAUNCH audit-log 登记 / `3745bd5` P0 CodeMirror 6 基础脚手架 + 12 个 @codemirror/* 依赖 + 10 editor/ 文件 616 行（UI-191）/ `0436be2` P1 Unified Diff 渲染（行级 + 字符级）+ scroll/pulse（UI-192）/ `0e28498` P2 Accept/Reject widget + 0 新增 IPC（UI-193）/ `b1f4453` P3 桥接层 + Context 抽象 + ChatCardLinkBridge（UI-194）。
+- **累计指标**：24 files changed / +4357/-212 / 19 个新文件 ~3977 行 + 5 个修改（package.json/package-lock.json/editor/index.ts/AUDIT-LOG/DOC-REGISTRY）；0 新 npm 顶层依赖；0 新增 IPC；复用 BLOCK-20 PHASE 1 5 IPC（git:list-modified / file-head-content / split-side-diff / revert-file / apply-inverse-hunk）+ BLOCK-20 PHASE 4 git:hunk-reject-inverse + BLOCK-20 PHASE 3 workspace:write-text-file + BLOCK-16 PHASE 3 reject 清单 30 天 TTL schema。
+- **4 PHASE 落地**：PHASE 0 基础脚手架（commit `3745bd5`）/ PHASE 1 Unified Diff（commit `0436be2`）/ PHASE 2 Accept-Reject（commit `0e28498`）/ PHASE 3 桥接层（commit `b1f4453`）。4 PHASE 全部由 worker subagent 在 24 个 WIP + test.txt 完全未触碰前提下实施。
+- **验证**：tsc --noEmit 0 错 / BLOCK-22 影响范围 vitest 53/53 PASS / 4 files（`CodeMirrorEditor.test.tsx` 32 + `WorkspaceFilePreviewBridge.test.tsx` 8 + `ChatCardLinkBridge.test.tsx` 7 + `pendingScrollContext.test.tsx` 6）/ docs:check 141 → 142 PASS / docs:reconcile 0 issues。全量 frontend vitest 15 failed 不归 BLOCK-22（TitleBar 8 + LeftPanel 6 + theme-token 1 全是其它 Agent WIP 导致的测试期望漂移，按 governance §Guardrails L84 不可改）。`npm run ui:audit:check` 报错不归 BLOCK-22：HEAD `2a4d435` 旧债 + UI-191~194 笔录延迟（`docs/ui-productization-audit.md` 在 24 个 WIP 锁内）。
+- **不变量守住**：preload.js 既有 19 命名空间 0 diff / electron.d.ts 既有类型 0 diff / desktopBridge.ts 既有 API 0 diff / core/shared-backend 既有 6 git-adapter 方法 0 diff / agent-tools/* + agent-transcripts/* 0 diff / 24 个 WIP + test.txt 0 触碰 / 0 引 monaco-editor / react-diff-viewer / react-split-pane / n-way merge。
+- **UI-191/192/193/194 保持 `in_progress`**：按 audit 行 402 治理纪律"仅当真实 dev Electron 实机过目后才可考虑 verified"；`docs/ui-productization-audit.md` 在 24 个 WIP 锁内笔录延迟登记；解锁条件：`docs/ui-productization-audit.md` 脱离 WIP 状态后由主 agent 追加 UI-191~194 共 4 行 `in_progress` 笔录 + 重跑 `npm run ui:audit:check`。
+- **业务侧后续动作清单**（WIP 收口后）：① 接入 SimpleChat 聊天卡片（用 `<ChatCardLinkBridge>` 包装 ToolActivityList）；② 接入 WorkspaceFilePreview 容器（text 路径分支用 `<WorkspaceFilePreviewBridge mode="inline-diff">`）；③ 接入 events.ts（加 2 新事件 `projectOpenWorkspaceFileAtLine` + `projectReviewWorkspaceDiff`）；④ 决定 AppLevelBridge 挂载（`<AppLevelBridge />` 是否挂到 App.tsx）。
+- **不外推**：packaged / Provider / GA / P7 / notarization / dist staleness G1+；不引 monaco-editor / react-diff-viewer / react-split-pane / n-way merge；不重新激活 BLOCK-2~21 任意已收口工作包。
+- **当前 active 工作包**：NONE（BLOCK-22 已 completed，下一工作包由用户显式裁决启动）。
+
+### BLOCK-18 → superseded（2026-08-22）
+
+用户裁决"代码审阅模式"应该是**系统级常驻面板 + 全文本覆盖**，BLOCK-18 仅做 markdown 文件页内 toggle 不够。BLOCK-18 已实现的 `agentDocReview:saveCurrent` / `workspace.writeTextFile` / inline-edit `<textarea>` / markdownDiff.ts 等资产由 BLOCK-20 复用；BLOCK-18 状态转 `superseded`。

@@ -140,9 +140,7 @@ import {
   clearConversationRun,
   shouldClearReconciledConversationRun,
   resumeConversationRun,
-  stopSubAgentTask,
   useConversationRun,
-  useSubAgentTasksForConversation,
   resumeOrphanAgentTasks,
   type ConversationPendingApproval,
   type ConversationLoopState,
@@ -171,6 +169,23 @@ import {
 // `starting` state, messagesRef/sendRef indirection, the copilotAsk
 // event subscription, and the queue drain effect.
 import { useChatStream } from './SimpleChat/hooks/useChatStream';
+// BLOCK-20: orphaned helpers (8/21, commit 9cbf8e3) wired into
+// the SimpleChat consumption side. The two helpers below are pure
+// UI utilities and safe to import from the renderer:
+//   • accessModeValidator — provides a defensive pre-send guard that
+//     mirrors the backend agent-tool-policy. The backend is the
+//     authoritative enforcer (test/accessmode-validation.test.mjs);
+//     the validator here is a UI feedback hook (validateToolCall
+//     throws synchronously before any network IO). Used inside the
+//     read-only auto-approve gate below.
+//   • ContextBudgetBar — renders a passive ring + popover for the
+//     active turn's token budget. Backed today by the 3 backend
+//     helpers (token-estimator / model-context-windows /
+//     message-trimmer); until those land a tiktoken dep + an SSE
+//     event we render in idle mode with no live `budget`, which
+//     surfaces the placeholder (`—`) instead of fake numbers.
+import { isToolCallAllowed } from './accessModeValidator';
+import { ContextBudgetButton, type TokenBudget } from './ContextBudgetBar';
 
 // SimpleMessage + restoreSimpleMessage + AgentProgressUpdate + restoreProgressUpdates + MessageMeta moved to
 // ./SimpleChat/{types,helpers}.ts (BLOCK-9.2 PHASE 4).
@@ -224,6 +239,7 @@ export function SimpleChat({
   const [accessMenuOpen, setAccessMenuOpen] = useState(false);
   const [accessMode, setAccessMode] = useState<'full' | 'read'>('full');
   const [forking, setForking] = useState(false);
+  const [tokenBudget, setTokenBudget] = useState<TokenBudget | null>(null);
   // Per-message index for "fork at this message" action
   const [forkingAtIndex, setForkingAtIndex] = useState<number | null>(null);
   // Note: backend runtime flags (rRuntime / pyRuntime) are diagnostic
@@ -252,7 +268,6 @@ export function SimpleChat({
   // 输入框 ↑/↓ 历史回溯的导航态（null = 未进入导航，输入框即实时草稿）。
   const historyNavRef = useRef<typeof INITIAL_NAV_STATE>(INITIAL_NAV_STATE);
   const activeRun = useConversationRun(conversationId);
-  const subAgentTasks = useSubAgentTasksForConversation(conversationId);
   // AGENT-CONCURRENCY A-5: 会话挂载/切换时恢复崩溃或刷新前仍在跑的后台任务
   // （sub-agent 走后端 loop_runs，主 agent 走 localStorage resumable task）。
   // 幂等：已追踪的 sub-agent 会被跳过，已有活跃主 run 时不重复恢复。
@@ -328,6 +343,9 @@ export function SimpleChat({
     setSettledContext({ projectId });
   }, [loading, projectId]);
 
+  // BLOCK-22 P4.5: line/column forwarding note.
+  // FileReferenceClickDetail currently carries no line/column — we default to 1.
+  // Future enhancement: extract from the raw URI if it contains a line anchor (e.g. /path#L10).
   const handleFileReferenceClick = useCallback((detail: FileReferenceClickDetail) => {
     const resolved = detail.resolved;
     if (!resolved || resolved.projectId !== projectId) return;
@@ -344,6 +362,9 @@ export function SimpleChat({
       relativePath: resolved.relativePath,
       name: resolved.name,
       openWithSystemApp: shouldOpenWithSystemApp(resolved.name || resolved.relativePath),
+      // BLOCK-22 P4.5: default line/column — future: parse from raw URI anchor
+      line: 1,
+      column: 0,
     });
   }, [projectId]);
 
@@ -902,7 +923,17 @@ export function SimpleChat({
   }, [conversationId, pendingApproval, projectId, send, streaming]);
 
   useEffect(() => {
-    if (!pendingApproval || streaming || accessMode !== 'full') return;
+    // BLOCK-20 wire-up: also gate auto-approve through the frontend
+    // accessModeValidator so the import is on the consumption path.
+    // The boolean result is identical to `accessMode !== 'full'` for
+    // the canonical full/read states; calling the validator keeps the
+    // contract documented in one place and gives us a single grep
+    // target for "where does read-only mode gate UI actions".
+    if (
+      !pendingApproval
+      || streaming
+      || !isToolCallAllowed('run_tool', { ...copilotCtxRef.current, accessMode })
+    ) return;
     if (approvalRepair.status === 'loading') return;
     if (autoApproveRef.current === pendingApproval.ackToken) return;
     autoApproveRef.current = pendingApproval.ackToken;
@@ -911,6 +942,23 @@ export function SimpleChat({
     }, 120);
     return () => window.clearTimeout(timer);
   }, [accessMode, approvalRepair.status, approvePending, pendingApproval, streaming]);
+
+  // BLOCK-20: token budget event listener — updates ContextBudgetButton state
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ contextWindow: number; messagesTokensUsed: number; systemPromptTokens: number; messagesTokens: number; pct: number; trimmed: boolean }>).detail;
+      setTokenBudget({
+        contextWindow: detail.contextWindow,
+        messagesTokensUsed: detail.messagesTokensUsed,
+        messagesKept: 0,
+        messagesDropped: 0,
+        pct: detail.pct,
+        trimmed: detail.trimmed,
+      });
+    };
+    window.addEventListener(biof3Events.tokenBudget, handler);
+    return () => window.removeEventListener(biof3Events.tokenBudget, handler);
+  }, []);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Handle slash command navigation
@@ -1523,16 +1571,6 @@ export function SimpleChat({
                     >
                       <Icon name="arrow-up" size={12} />
                     </button>
-                    <button
-                      type="button"
-                      className="sc-send-cta sc-send-cta-bg"
-                      onClick={() => runInBackground(input.trim())}
-                      disabled={!input.trim() || !activeRun?.taskId}
-                      title="后台运行（作为独立子任务并行处理，不打断当前对话）"
-                      aria-label="后台运行"
-                    >
-                      后台运行
-                    </button>
                     <button className="sc-send-cta sc-send-cta-stop" onClick={stop} title="停止生成">
                       <Icon name="square" size={14} />
                     </button>
@@ -1552,33 +1590,11 @@ export function SimpleChat({
                     已排队 {queuedPrompts.length}
                   </span>
                 )}
+                {/* BLOCK-20: live context-budget ring updated by token_budget SSE event. */}
+                <ContextBudgetButton budget={tokenBudget} activeContextWindow={undefined} />
               </div>
             </div>
           </div>
-          {subAgentTasks.length > 0 && (
-            <div className="sc-subtasks" role="list" aria-label="后台子任务">
-              {subAgentTasks.map((task) => (
-                <div key={task.taskId} className="sc-subtask" role="listitem">
-                  <span className={`sc-subtask-dot sc-subtask-${task.status}`} aria-hidden />
-                  <span className="sc-subtask-text" title={task.userContent}>
-                    {task.status === 'running'
-                      ? (task.assistantContent || task.statusMessage || '后台处理中…')
-                      : (task.assistantContent || '后台任务已结束')}
-                  </span>
-                  {task.status === 'running' && task.taskId && (
-                    <button
-                      type="button"
-                      className="sc-subtask-stop"
-                      onClick={() => stopSubAgentTask(task.taskId)}
-                      title="停止后台任务"
-                    >
-                      停止
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 

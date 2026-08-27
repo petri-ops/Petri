@@ -216,9 +216,14 @@ export function useChatStream({
   useEffect(() => {
     if (!ownsCopilotAsk) return undefined;
     const unsub = subscribeBioF3Event(biof3Events.copilotAsk, (detail) => {
-      const { prompt } = detail;
+      const { prompt, analysisMode } = detail;
       const p = typeof prompt === 'string' ? prompt.trim() : '';
-      if (p) void sendRef.current(p, copilotContextOverrideForAsk(detail));
+      if (!p) return;
+      if (analysisMode) {
+        void runInBackground(p);
+      } else {
+        void sendRef.current(p, copilotContextOverrideForAsk(detail));
+      }
     });
     return unsub;
   }, [ownsCopilotAsk]);

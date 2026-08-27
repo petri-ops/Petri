@@ -105,7 +105,10 @@ export function getBridge<K extends DesktopBridgeName>(
  *  Use this for hot-path IPC where the surrounding UI only
  *  mounts inside the desktop context — there's no graceful
  *  fallback, but the error tells the user (and the dev
- *  console) exactly which bridge is missing. */
+ *  console) exactly which bridge is missing.
+ *
+ *  NOTE: agentDocReview is automatically typed via the
+ *  DesktopBridgeName mapped type — no manual interface needed. */
 export function requireBridge<K extends DesktopBridgeName>(
   name: K
 ): DesktopBridgeHandle<K> {

@@ -50,6 +50,8 @@ import { isDirectRecoveryAction, useHarnessWorkflowStatus } from '@/hooks/useHar
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import type { CopilotContext, HarnessContextSummary } from '@/lib/copilotContext';
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
+import { usePendingScroll } from '@/lib/pendingScrollContext';
+import type { DiffRevision } from '@/components/editor/CodeMirror/types';
 import { getBrowserViewportSize, isBioF3LocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { useTheme } from '@/themes/ThemeProvider';
@@ -461,6 +463,10 @@ export function ProjectWorkspace(): React.ReactElement {
   // Every right-side tool shares one width. Switching to Results must not
   // jump to a separately constrained layout or change the drag feel.
   const effectiveRightWidth = rightWidth;
+
+  // BLOCK-22 P4.5: Access PendingScrollContext so we can dispatch pending scroll
+  // requests (line scroll + inline-diff) to WorkspaceFilePreviewBridge.
+  const { setPendingRequest } = usePendingScroll();
 
   useEffect(() => {
     if (!rightOpen) setRightToolMenuOpen(false);
@@ -990,7 +996,7 @@ export function ProjectWorkspace(): React.ReactElement {
         label: item.label,
         icon: item.icon,
         isOpen: openRightTabs.includes(item.id),
-      })),
+      })).concat([]),
       onSelectToolItem: (tabId) => {
         if (tabId === 'results') {
           handleOpenRightResults();
@@ -1464,6 +1470,7 @@ export function ProjectWorkspace(): React.ReactElement {
       path: requestedFilePath,
       name: requestedFilePath.split('/').pop() || requestedFilePath,
       url: workspaceFileUrlFor(projectId, requestedFilePath),
+      workspaceDir: project?.workspacePath,
     };
     handleOpenWorkspaceFile(file);
     openRightPanel('files');
@@ -1505,6 +1512,9 @@ export function ProjectWorkspace(): React.ReactElement {
       relativePath: string;
       name?: string;
       openWithSystemApp?: boolean;
+      line?: number;
+      column?: number;
+      diffRevision?: { filePath: string; originalText: string; modifiedText: string };
     }) => {
       if (!detail?.projectId || !detail?.relativePath) return;
       if (detail.projectId !== projectId) {
@@ -1518,25 +1528,44 @@ export function ProjectWorkspace(): React.ReactElement {
         path: detail.relativePath,
         name: detail.name || detail.relativePath.split('/').pop() || detail.relativePath,
         url: workspaceFileUrlFor(projectId || '', detail.relativePath),
+        workspaceDir: project?.workspacePath,
       };
       handleOpenWorkspaceFile(file);
       openRightPanel('files');
+      // BLOCK-22 P4.5: Dispatch pending scroll request so WorkspaceFilePreviewBridge
+      // can scroll to the target line and/or enter inline-diff mode.
+      if (detail.line !== undefined) {
+        const diffRevision: DiffRevision | undefined = detail.diffRevision
+          ? {
+              filePath: detail.diffRevision.filePath,
+              originalText: detail.diffRevision.originalText,
+              modifiedText: detail.diffRevision.modifiedText,
+            }
+          : undefined;
+        setPendingRequest({
+          filePath: detail.relativePath,
+          line: detail.line,
+          column: detail.column,
+          diffRevision,
+          timestamp: Date.now(),
+        });
+      }
       if (detail.openWithSystemApp && workspacePath) {
         void getBridge('files')?.openWorkspaceFile(workspacePath, detail.relativePath);
       }
     };
     const unsub = subscribeBioF3Event(biof3Events.projectOpenWorkspaceFile, handler);
     return unsub;
-  }, [handleOpenWorkspaceFile, navigate, openRightPanel, projectId, workspacePath]);
+  }, [handleOpenWorkspaceFile, navigate, openRightPanel, projectId, workspacePath, setPendingRequest]);
 
   /** Dispatch a copilot-ask event so the embedded SimpleChat picks it up */
-  const handleAskAgent = useCallback((prompt: string) => {
+  const handleAskAgent = useCallback((prompt: string, options?: { analysisMode?: boolean }) => {
     if (activeConvId && isConversationRunning(activeConvId)) {
       setWorkspaceNotice('当前 Agent 仍在处理上一个请求；完成或停止后再开始新分析。');
       return false;
     }
     setWorkspaceNotice('');
-    dispatchBioF3Event(biof3Events.copilotAsk, { prompt });
+    dispatchBioF3Event(biof3Events.copilotAsk, { prompt, analysisMode: options?.analysisMode });
     return true;
   }, [activeConvId]);
 
@@ -1879,6 +1908,7 @@ function FileTreeList({
   activePath,
   refreshVersion,
   depth = 0,
+  workspaceDir,
 }: {
   entries: FileEntry[];
   prefix: string;
@@ -1890,6 +1920,7 @@ function FileTreeList({
   activePath?: string | null;
   refreshVersion: number;
   depth?: number;
+  workspaceDir?: string;
 }): React.ReactElement {
   const orderedEntries = useMemo(
     () => [...entries].sort((left, right) => {
@@ -1918,6 +1949,7 @@ function FileTreeList({
             onOpenFile={onOpenFile}
             activePath={activePath}
             refreshVersion={refreshVersion}
+            workspaceDir={workspaceDir}
           />
         );
       })}
@@ -1937,6 +1969,7 @@ function FileTreeItem({
   onOpenFile,
   activePath,
   refreshVersion,
+  workspaceDir,
 }: {
   entry: FileEntry;
   fullPath: string;
@@ -1949,6 +1982,7 @@ function FileTreeItem({
   onOpenFile: (file: ActiveWorkspaceFile) => void;
   activePath?: string | null;
   refreshVersion: number;
+  workspaceDir?: string;
 }): React.ReactElement {
   const [children, setChildren] = useState<FileEntry[]>([]);
 
@@ -1977,6 +2011,7 @@ function FileTreeItem({
             name: entry.name,
             url: fileUrl,
             size: entry.size,
+            workspaceDir,
           });
         }}
         role="treeitem"
@@ -2015,6 +2050,7 @@ function FileTreeItem({
           activePath={activePath}
           refreshVersion={refreshVersion}
           depth={depth + 1}
+          workspaceDir={workspaceDir}
         />
       )}
     </li>
@@ -2277,6 +2313,8 @@ export function RightFileTree({
             opening={opening}
             onOpen={openWithSystemApp}
             onDownload={downloadActiveFile}
+            onOpenFile={handleOpenFile}
+            projectId={project.id}
           />
         </div>
         {treeOpen && (
@@ -2308,6 +2346,7 @@ export function RightFileTree({
                   activePath={activeFile?.path || null}
                   refreshVersion={refreshVersion}
                   depth={0}
+                  workspaceDir={project.workspacePath}
                 />
               )}
             </div>
@@ -2325,6 +2364,8 @@ function WorkspaceFilePreview({
   opening,
   onOpen,
   onDownload,
+  onOpenFile,
+  projectId,
 }: {
   file: ActiveWorkspaceFile | null;
   refreshVersion: number;
@@ -2332,6 +2373,8 @@ function WorkspaceFilePreview({
   opening: boolean;
   onOpen: () => void | Promise<void>;
   onDownload: () => void;
+  onOpenFile?: (file: ActiveWorkspaceFile) => void;
+  projectId?: string;
 }): React.ReactElement {
   const { resolvedTheme } = useTheme();
   const [text, setText] = useState('');
@@ -2340,6 +2383,10 @@ function WorkspaceFilePreview({
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [officePreview, setOfficePreview] = useState<OfficePreviewModel | null>(null);
   const [officeStatus, setOfficeStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  // BLOCK-20 — tracks the last-saved text so isDirty can compare against it
+  const [textSaved, setTextSaved] = useState<string>('');
+  // BLOCK-21 — Markdown view toggle: 'edit' | 'preview'; resets on file switch
+  const [mdView, setMdView] = useState<'edit' | 'preview'>('preview');
 
   const isImage = isImageFile(file?.name);
   const isText = isTextFile(file?.name);
@@ -2420,6 +2467,36 @@ function WorkspaceFilePreview({
     return () => { cancelled = true; };
   }, [file, isCsv, isHtml, isImage, isJson, isPdf, isText, officeKind, previewUrl]);
 
+  // BLOCK-20 — 文件切换时重置保存基准线和 Markdown 视图
+  useEffect(() => {
+    setTextSaved('');
+    setMdView('preview');
+  }, [file?.path]);
+
+  const handleSaveCurrent = useCallback(async () => {
+    if (!file) return;
+    try {
+      if (file.workspaceDir) {
+        const wbridge = getBridge('workspace');
+        if (!wbridge) return;
+        const resp = await wbridge.writeTextFile(file.workspaceDir, file.path, text);
+        if (!resp.ok) return;
+      } else {
+        const bridge = getBridge('agentDocReview');
+        if (!bridge) return;
+        await bridge.saveCurrent(file.path, text);
+      }
+      setTextSaved(text);
+    } catch {
+      // silent
+    }
+  }, [file, text]);
+
+  const handleDiscard = useCallback(() => {
+    if (!file) return;
+    setText(textSaved);
+  }, [file, textSaved]);
+
   if (!file) {
     return (
       <div className={styles.workspacePreviewEmpty}>
@@ -2443,6 +2520,53 @@ function WorkspaceFilePreview({
     <div className={styles.workspacePreview}>
       {openError && <div className={styles.workspacePreviewError}>{openError}</div>}
       <div className={styles.workspacePreviewBody}>
+        {(isMarkdown || fallbackKind === 'text' || fallbackKind === 'json') && (
+          <div className={styles.workspaceMarkdownDiffToolbar}>
+            {isMarkdown && (
+              <div className={styles.workspaceMarkdownDiffTabs}>
+                <button
+                  type="button"
+                  className={`${styles.workspaceMarkdownDiffTab} ${mdView === 'edit' ? styles.workspaceMarkdownDiffTabActive : ''}`}
+                  onClick={() => setMdView('edit')}
+                  aria-pressed={mdView === 'edit'}
+                >
+                  编辑
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.workspaceMarkdownDiffTab} ${mdView === 'preview' ? styles.workspaceMarkdownDiffTabActive : ''}`}
+                  onClick={() => setMdView('preview')}
+                  aria-pressed={mdView === 'preview'}
+                >
+                  预览
+                </button>
+              </div>
+            )}
+            <div className={styles.workspaceMarkdownDiffActions}>
+              {text !== textSaved && (
+                <span className={styles.workspaceMarkdownDiffHint}>有未保存修改</span>
+              )}
+              <button
+                type="button"
+                className={styles.workspaceMarkdownSave}
+                disabled={text === textSaved}
+                onClick={() => void handleSaveCurrent()}
+                title="保存到文件"
+              >
+                保存
+              </button>
+              <button
+                type="button"
+                className={styles.workspaceMarkdownSave}
+                disabled={text === textSaved}
+                onClick={() => void handleDiscard()}
+                title="放弃修改"
+              >
+                恢复
+              </button>
+            </div>
+          </div>
+        )}
         {status === 'loading' && <p className={styles.panelEmpty}>加载预览…</p>}
         {status === 'error' && <p className={styles.panelEmpty}>预览失败</p>}
         {status === 'unsupported' && !officePreview && (
@@ -2522,28 +2646,73 @@ function WorkspaceFilePreview({
             )}
           </div>
         )}
-        {status === 'ready' && fallbackKind === 'markdown' && (
+        {status === 'ready' && fallbackKind === 'markdown' && mdView === 'preview' && (
           <div className={styles.workspaceMarkdownPreview}>
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeHighlight, [rehypeSanitize, markdownSanitizeSchema]]}
+              components={{
+                a: ({ href, children, ...props }) => {
+                  if (!href || !onOpenFile || !file) return <a {...props} href={href}>{children}</a>;
+                  // Skip external links and anchors
+                  if (href.startsWith('http') || href.startsWith('mailto') || href.startsWith('#')) {
+                    return <a {...props} href={href} target="_blank" rel="noopener noreferrer">{children}</a>;
+                  }
+                  // Resolve relative path against current file's directory
+                  const fileDir = file.path.split('/').slice(0, -1).join('/');
+                  const resolvedPath = fileDir ? `${fileDir}/${href}` : href;
+                  const normalizedPath = resolvedPath.replace(/\/+/g, '/').replace(/\/\.\//g, '/');
+                  const linkedFile: ActiveWorkspaceFile = {
+                    path: normalizedPath,
+                    name: normalizedPath.split('/').pop() || normalizedPath,
+                    url: getApiPrefix() + `/workspaces/${encodeURIComponent(projectId || '')}/file?path=${encodeURIComponent(normalizedPath)}`,
+                  };
+                  return (
+                    <a
+                      {...props}
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onOpenFile(linkedFile);
+                      }}
+                      style={{ color: 'var(--biof3-accent, #4f86ff)', textDecoration: 'underline', cursor: 'pointer' }}
+                    >
+                      {children}
+                    </a>
+                  );
+                },
+              }}
             >
               {text}
             </ReactMarkdown>
           </div>
         )}
-        {status === 'ready' && fallbackKind === 'text' && codeLanguage && (
-          <pre className={styles.workspaceCodePreview}>
-            <HighlightedCode code={text} language={codeLanguage} />
-          </pre>
+        {status === 'ready' && fallbackKind === 'markdown' && mdView === 'edit' && (
+          <textarea
+            className={styles.workspaceMarkdownEditor}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            spellCheck={false}
+            aria-label="markdown 编辑器"
+          />
         )}
-        {status === 'ready' && fallbackKind === 'text' && !codeLanguage && (
-          <pre className={styles.workspaceTextPreview}>{text}</pre>
+        {status === 'ready' && fallbackKind === 'text' && (
+          <textarea
+            className={styles.workspaceMarkdownEditor}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            spellCheck={false}
+            aria-label={codeLanguage ? '代码编辑器' : '文本编辑器'}
+          />
         )}
         {status === 'ready' && fallbackKind === 'json' && (
-          <pre className={styles.workspaceCodePreview}>
-            <HighlightedCode code={text} language="json" />
-          </pre>
+          <textarea
+            className={styles.workspaceMarkdownEditor}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            spellCheck={false}
+            aria-label="JSON 编辑器"
+          />
         )}
       </div>
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}

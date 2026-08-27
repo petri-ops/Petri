@@ -452,6 +452,7 @@ async function main() {
   const { setupBranchIpc } = require("./ipc/branch-handlers");
   const { setupWorkingTreeReviewIpc } = require("./ipc/working-tree-review");
   const { setupResultIpc } = require("./ipc/result-handlers");
+  const { setupAgentDocReviewIpc } = require("./ipc/agent-doc-review");
   setupAiSettingsIpc({ mainWindow: () => mainWindow });
   setupComputeSettingsIpc();
   setupTelemetryIpc();
@@ -460,6 +461,7 @@ async function main() {
   setupDataManagementIpc();
   setupBranchIpc({ mainWindow: () => mainWindow });
   setupWorkingTreeReviewIpc({ mainWindow: () => mainWindow });
+  setupAgentDocReviewIpc({ mainWindow: () => mainWindow });
   setupResultIpc({ mainWindow: () => mainWindow });
   // BLOCK-9.1 PHASE 2: mid-risk setup functions with dependency injection
   const { setupRuntimeIpc } = require("./ipc/runtime-status");
@@ -507,6 +509,14 @@ async function main() {
     getAgentWorkbenchFlags: () => agentWorkbenchFlags,
     startSpaServer,
   });
+}
+
+// Dev-only: enable Chrome DevTools remote debugging on port 9222 so the main
+// agent (and humans) can inspect the renderer via /json/list while developing.
+// Guarded by the --dev flag dev-electron.js always passes; production builds
+// never set this flag and the switch is a no-op for end users.
+if (process.argv.includes("--dev")) {
+  app.commandLine.appendSwitch("remote-debugging-port", "9222");
 }
 
 app.whenReady().then(main);

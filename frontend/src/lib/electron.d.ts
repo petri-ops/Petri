@@ -247,6 +247,14 @@ declare global {
           relativePath: string
         ) => Promise<{ ok: boolean; error?: string }>;
       };
+      // BLOCK-19 — workspace 边界内文本覆盖
+      workspace: {
+        writeTextFile: (
+          workspacePath: string,
+          relativePath: string,
+          content: string
+        ) => Promise<{ ok: boolean; data?: { savedAt: string }; error?: string }>;
+      };
       diagnostic: {
         export: (targetPath?: string) => Promise<{ ok: boolean; path?: string; error?: string }>;
       };
@@ -362,6 +370,22 @@ declare global {
           error?: string;
           message?: string;
         }>;
+        // BLOCK-20 — per-hunk reject via applyInverseHunk.
+        // `patch` 是正向 unified diff（带 ---/+++ 与 @@ header），由主进程内部 invert + apply。
+        // `hunk` 可选，传了则写入 reject 清单时填充 oldText/newText。
+        rejectHunkByInverseHunk: (params: {
+          file: string;
+          hunkIndex: number;
+          patch: string;
+          hunk?: { oldStart: number; newStart: number; lines: Array<{ type: 'add' | 'del' | 'ctx'; text: string }> };
+          feedback?: string;
+          taskId?: string;
+        }) => Promise<{
+          ok: boolean;
+          data?: { ok: true; action: 'reject'; file: string; hunkIndex: number };
+          error?: string;
+          message?: string;
+        }>;
         revert: (params?: { paths?: string[] }) => Promise<{
           ok: boolean;
           data?: { reverted: string[] };
@@ -369,6 +393,70 @@ declare global {
           message?: string;
         }>;
         onTaskDone: (cb: (info: { taskId: string | null; filesChanged: string[]; notifiedAt: string }) => void) => () => void;
+        // BLOCK-20 — Code Review Panel 新增 5 方法
+        listModified: (params?: { includeUntracked?: boolean }) => Promise<{
+          ok: boolean;
+          data?: {
+            files: Array<{ path: string; status: string; indexStatus: string; workTreeStatus: string }>;
+            count: number;
+          };
+          error?: string;
+          message?: string;
+        }>;
+        fileHeadContent: (params: { path: string }) => Promise<{
+          ok: boolean;
+          data?: { content: string | null; mtime: string | null };
+          error?: string;
+          message?: string;
+        }>;
+        splitSideDiff: (params: { path: string; context?: number }) => Promise<{
+          ok: boolean;
+          data?: {
+            diff: string;
+            headContent: string | null;
+            workTreeContent: string;
+            hunks: Array<{ oldStart: number; newStart: number; lines: Array<{ type: 'add' | 'del' | 'ctx'; text: string }> }>;
+            summary: { added: number; removed: number };
+            truncated: boolean;
+          };
+          error?: string;
+          message?: string;
+        }>;
+        revertFile: (params: { path: string }) => Promise<{
+          ok: boolean;
+          data?: { reverted: string[] };
+          error?: string;
+          message?: string;
+        }>;
+        applyInverseHunk: (params: { patch: string }) => Promise<{
+          ok: boolean;
+          data?: { ok: true };
+          error?: string;
+          message?: string;
+        }>;
+        // BLOCK-20 — Commit Review
+        commitReview: (params: {
+          decisions: Record<string, 'accept' | 'reject' | 'pending'>;
+          message: string;
+        }) => Promise<{
+          ok: boolean;
+          data?: {
+            commit: string | null;
+            files: string[];
+            message: string;
+            rejectedFiles: string[];
+            stats: { acceptedFiles: number; rejectedFiles: number; totalWorkingTree: number };
+          };
+          error?: string;
+          message?: string;
+        }>;
+      };
+      // BLOCK-17 — Agent Doc Review Mode
+      agentDocReview: {
+        list(): Promise<{ ok: boolean; data?: { files: AgentDocFileEntry[] }; error?: string; message?: string }>;
+        loadPair(filePath: string): Promise<{ ok: boolean; data?: { snapshot: string | null; current: string }; error?: string; message?: string }>;
+        commitSnapshot(filePath: string): Promise<{ ok: boolean; data?: { savedAt: string }; error?: string; message?: string }>;
+        saveCurrent(filePath: string, content: string): Promise<{ ok: boolean; data?: { savedAt: string }; error?: string; message?: string }>;
       };
       // Phase 1: Branch Tab UI - conversation branch management
       branch: {
@@ -573,6 +661,14 @@ declare global {
       };
     };
   }
+}
+
+/** One entry returned by agentDocReview:list */
+export interface AgentDocFileEntry {
+  path: string;
+  label: string;
+  lastSnapshotAt: string | null;
+  currentMtime: string;
 }
 
 export {};

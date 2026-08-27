@@ -83,7 +83,9 @@ Stage 1 出口要求 P0/P1 清零；P2 可以延期，但必须写明原因与�
 | UI-029 | verified | P1 | W-05 | C-02 | 浏览器面板 | 浏览器 tab 内容（rightPanelBrowserTab）的布局可能与其他 tab 不一致 | 2026-07-17：普通/窄窗口下浏览器工具栏、报告内容与结果 tab 布局一致；`/tmp/biof3-ui-acceptance-narrow-browser.jpeg` | UI-5 |
 | UI-030 | verified | P1 | W-02 | C-02 | 面板折叠 | 右侧面板完全收起时，仍然占用少量宽度（约 64px），影响中间工作区空间 | `475a2cf` 将收起宽度降至 56px；折叠/展开实机通过，见 `/tmp/biof3-ui-acceptance-right-collapsed.jpeg` | UI-2 |
 | UI-031 | verified | P1 | P-07 | C-03, C-04 | 设置 / AI 模型 | 旧设置页只支持 DeepSeek/DashScope 固定入口，无法管理多模型、任务角色能力绑定、显式 fallback 和自定义 Endpoint | 2026-07-17 打包态 `dist/mac-arm64/BioF3.app`(arm64/rc.5) 实机验收通过：模型 CRUD、8 类角色绑定与能力过滤、显式 fallback、Keychain 凭据（无明文回显）、保存重开、聊天选择器同步、窄窗均由用户实测确认；真实 Provider 由 `acceptance/stage2/live-provider-check.mjs` 真机验证（DeepSeek + xunfei-astron + api.xcdw.us opus-4-8，chat/streaming/tool calling 全绿，PASS） | MODEL-5 |
+| UI-183 | in_progress | P0 | W-02 | C-02 | WorkingTreeReview 抽屉 hooks-order 错误 | BLOCK-20 提交后 WorkingTreeReview.tsx:121 `useState(focusedHunk)` + 2 个 `useEffect` 排在 `if (!isOpen) return null;` 之后；初次 isOpen=false 渲染时 React 仅看到 7 个 hook，`isOpen` 翻转后变成 10 个，触发 React 19 `Rendered more hooks than during the previous render` 导致 Electron 黑屏。修复：把这 3 个 hook 全部上移到 early-return 之前，`selectedFile` 派生提前到 hook 注册区，使每次渲染的 hook 顺序恒等。`npx tsc --noEmit` 0 错误 / `npm run block:code-review` 7/8 PASS（含 frontend-tsc / docs-check / system-prompt-rejects / frontend-code-review / git-adapter-block20 ×2 + BLOCK-20 closeout 自身，ui-audit-check 在本 commit 内随 UI-183 登记后转 PASS）；dev Electron 边界内实机复核待办，按本台账行 402 治理纪律 `verified` 升级需真实实机过目 | BLOCK-20-HOOKS-FIX |
 
+| UI-183 | in_progress | 修复落地 | 2026-08-24 | WTR hooks-order crash + selectedFile TDZ + CSS brace 修复 commit `4023691`；WTR.test.tsx 5-invariant 回归测试 PASS；tsc 0 / docs:check PASS / ui:audit:check PASS。`in_progress → verified` 升级按本台账行 402 治理纪律需真实 dev Electron 实机过目 | WTR-HOOKS-FIX-LANDING |
 | UI-131 | verified | P3 | W-01 | C-01 | 全局样式 / 设计系统卫生 | 删除已退役页面的死 CSS：single-cell.css 仍被 global.css @import 但对应页面已删除（grep 确认其 sc-* 类无任何组件引用）；docs.css、figcode.module.css、index.module.css 零引用。降低包体与维护认知负担 | 代码完成；@import 已移除、4 文件已删；待实机验证全局样式无回归 | UI-卫生 |
 | UI-132 | verified | P2 | W-01 | C-01 | 全局样式 / 设计系统卫生 | 令牌消费一致性：simple-chat.css 与 project-workspace.module.css 中硬编码的 hex/rgba 改为引用 --biof3-* 语义令牌；新增 --biof3-on-solid 令牌修复暗色下 send-cta 白字糊字问题 | 代码完成；新增 --biof3-on-solid（亮 #fff / 暗 #0b1220）；simple-chat.css 6 处实心按钮白字 + loop 状态色、project-workspace.module.css 状态/品牌色光晕及两处失效 fallback（--biof3-warning/--biof3-success）已收敛；code-highlight.css 本就令牌驱动未动；纯黑投影与实心按钮白字留待 P5 按钮基元统一 | UI-卫生 |
 | UI-133 | verified | P3 | W-01 | C-01 | 全局样式 / 设计系统卫生 | 动效减弱系统化：新增全局 prefers-reduced-motion 兜底，统一关闭动画/过渡/滚动平滑，覆盖 run-modal/fade/pulse/onboarding 等此前未单独处理的动效（原仅 project-workspace / ResultStudioSurface / index.module 局部覆盖） | 代码完成；global.css 末尾新增 @media (prefers-reduced-motion: reduce) 全局重置（animation/transition/scroll-behavior）；满足 WCAG 2.3.3 动画敏感用户可访问性 | UI-卫生 |
@@ -135,6 +137,9 @@ Stage 1 出口要求 P0/P1 清零；P2 可以延期，但必须写明原因与�
 | UI-181 | in_progress | P2 | W-01 | C-01 | HomePage auto-navigate 默认进入最近项目结果模式 / TitleBar 标题丢项目名 | home.tsx `?mode=scheduled&job=...` + result-title-bar.ts 缺项目名 | 启动 dev Electron 后用户落到 `/project/<id>/result?job=...`，TitleBar 显示 `样本对齐详情·结果`，**完全看不到项目名**（p_msok75w9_gh35 / Agent Concurrency Acceptance）。根因链：① `frontend/src/pages/home.tsx` L302-306 auto-navigate 写 `?mode=scheduled&job=<id>`，但 `'scheduled'` 是 T85 引入的「只显示 pinned summary」mode 标记，**不在 `MODE_LABELS`**（`frontend/src/lib/result-title-bar.ts` L4-8 只有 `result` / `code` / `compare` / `history`）；② T85 legacy-redirect 把 `?mode=scheduled` 改成 URL sub-path `/scheduled`，ProjectWorkspace `workspaceMode='scheduled'`；③ `ProjectWorkspace.handleOpenResult`（`pages/project-workspace.tsx` L1411-1420）的 `preserveWorkspaceMode: workspaceMode === 'chat'` 只对 `'chat'` 返回 true，`'scheduled'` 模式下 `!options?.preserveWorkspaceMode` 成立 → 强制 `updateWorkspaceMode('result', true, nextJob.id)`，整个 UI 被切到 result mode；④ `buildResultTitleBarTitle('result', projectName, artifactName)` 走 L18 `${artifactTitle} · ${modeLabel}` —— **没有项目名后缀**，用户看到「样本对齐详情·结果」与项目上下文脱节。修法（2 处）：① home.tsx 把 `?mode=scheduled` 改成 `?mode=chat`（T85 redirect 会删掉默认 mode 段，URL 变成 `/project/${id}?job=...`，workspaceMode='chat'，`preserveWorkspaceMode=true`，右栏 results 自动打开但主视图仍是 chat）；② result-title-bar.ts 把 result/code/compare/history 的输出从 `${artifactTitle} · ${modeLabel}` 改为 `${artifactTitle} · ${modeLabel} · ${project}`，把缺省分支从 `${modeLabel}` 改为 `${modeLabel} · ${project}`，让「项目名」成为所有 mode 下的固定上下文锚点。**验证**：3 vitest 同步更新：`buildResultTitleBarTitle('result', 'golden-path', 'GO-BP 气泡图 (PNG)') === 'GO-BP 气泡图 (PNG) · 结果 · golden-path'`（之前是 `'GO-BP 气泡图 (PNG) · 结果'`）；chat mode 仍是 `'golden-path'`（保持）。**4 治理门 GREEN**：`docs:check` 134 / `npm run ui:audit:check` 同步本笔录后 PASS / `cd frontend && npx tsc --noEmit` 0 错 / `cd frontend && npx vitest run src/lib/result-title-bar.test.ts` **3/3 PASS**。**保持 UI-180 + UI-161 + UI-173 `in_progress` 维持原状**：UI-181 仅在 user 真实 dev Electron 重启前都是 in_progress；按 audit 行 402 治理纪律仅当真实 dev Electron 实机过目后才可考虑 verified。**不外推** packaged / Provider / GA / P7 / dist staleness G1+ / 不重新激活 BLOCK-2/3/4/5/6/7/8/9/9.1/9.2/15/16 / 不动 agent-tools/* / agent-transcripts/*。**当前 active 工作包**：NONE（按 single work package serial 纪律，等待用户裁决下一块；本次纯文档登记 + 2 文件 13 行改动） | DEFAULT-ENTRY-FIX / TITLEBAR-FALLBACK |
 | UI-182 | cancelled | P2 | W-04 | C-04 | Agent chat 只走一轮无提示 — Python 运行时缺失被静默吞掉 | (保留) core/py-server/py-pool.js PyWorker 启动失败时 stderr 立即上报主日志（PyPool stderr 不再被 /dev/null 吞） | 用户跑 Agent 会话，调 Python 工具（如 scanpy）失败 → agent-runner 跑完首轮就发 `[DONE]`。UI 完全无提示，user 看到的现象是「聊天会话好像只走了一轮」。根因链：① `core/py-server/py-pool.js` L115 旧版 `this.proc.stderr.on('data', (data) => { this._stderr += data.toString(); })` 只在 resolve 时打印 stderr，PyWorker 1 秒内崩溃时 stderr 直接进 /dev/null；② `core/py-server/server.js` `/api/health` 旧版只返回 `{ status: 'ok' }`，对 worker readiness 完全不可知 — 即使 2 个 PyWorker 都超过 max restarts，HTTP 仍 200，frontend `probeHealth` 也只检查 resp.ok；③ `frontend/src/components/backend/BackendStatusProvider.tsx` 把 pyRuntime = pyServerUp 即 HTTP 200，**不能区分「py-server 进程在但 Python 运行时没装」**；④ `frontend/src/components/copilot/SimpleChat.tsx` 从未读 backendStatus — chat 不知道 Python runtime 缺失，无提示 + 不限制发送。修法（4 处）：① py-pool.js PyWorker stderr 在 `!this.ready` 启动失败时立即上报主日志，让 `ModuleNotFoundError: No module named 'numpy'` 这种根因不再被 /dev/null 吞；② py-pool.js PyWorker 加 `getStatus()` 报告 `{ ready, busy, requests, restartCount, maxRestarts, exceeded }` + PyPool `_getWorker()` 过滤 `restartCount < maxRestarts`；③ py-server/server.js `/api/health` 报告 `workerReady` + `workers[]` + `status: readyCount > 0 ? 'ok' : 'degraded'`；④ BackendStatusProvider 加 `probePyReady()` 读 body 信任 `pool.workerReady`，dev/Electron 双路径都覆盖 + SimpleChat 顶部加 `useBackendStatus()` + empty state 显示红框提示「Python 运行时未就绪 —— 任何依赖 scanpy/numpy 的分析工具都会失败，请打开插件商店安装」+ send 按钮在 `!backendStatus.pyRuntime` 时禁用。**验证**：tsc 0 错 / SimpleChat.test.tsx + extraRenderers.test.tsx 15/15 PASS（既有 0 破坏）/ docs:check 134 / ui:audit:check 同步后 PASS。**保持 UI-181 + UI-180 + UI-161 + UI-173 `in_progress` 维持原状**：本次 fix 仅在 user 真实 dev Electron 重启前都是 in_progress。**不外推** packaged / Provider / GA / P7 / dist staleness G1+ / 不重新激活 BLOCK-2/3/4/5/6/7/8/9/9.1/9.2/15/16 / 不动 agent-tools/* / agent-transcripts/*。**当前 active 工作包**：NONE（本次 6 文件 +254/-7 行改动 = 1 后端 1 shared 1 health 1 frontend status 1 frontend chat 1 css） | PY-RUNTIME-SILENT-FAIL / AGENT-LOOP-SILENT |
 | UI-183 | in_progress | P1 | W-04 | C-04 | Agent chat 错误「未知错误」无可诊断信息 —— tool / Python worker / harness 失败被吞 | frontend/src/components/copilot/errorMessages.ts + SimpleChat.tsx + SimpleChat/types.ts + conversationRunStore.ts | 用户跑 Agent 会话调工具（workspace_list / scanpy / harness 校验等）失败时 chat 顶部弹「发生未知错误」，**完全没有错误码 / 没有 raw stack / 没有「查看详情」入口** —— 用户看不到 ModuleNotFoundError / worker exit code / harness 修复建议。根因链：① `frontend/src/components/copilot/conversationRunStore.ts` L251-267 `finish()` 只把 `formattedError.userMessage` 写进 `assistantContent`，raw `error.stack` 被丢；② `frontend/src/components/copilot/SimpleChat/types.ts` `SimpleMessage` 接口没有 `technicalDetails` 字段；③ `frontend/src/components/copilot/SimpleChat.tsx` L1169-1180 `ErrorBanner` 调用 `getTechnicalDetails(m.content)`，而 `useErrorFormatter.ts` L77-82 在 `error` 是 string 时返回 `undefined`，导致「查看详情」按钮根本不出现；④ `frontend/src/components/copilot/errorMessages.ts` ERROR_PATTERNS 完全没有 `harness / tool execution / pyworker / modulenotfounderror / worker.*exited.*code` 等 biof3 真实业务模式，全部走到 UNKNOWN。修法（5 文件 +99/-6）：① SimpleMessage + ConversationRunSnapshot 加 `technicalDetails?: string` + `errorCode?: string` 字段；② conversationRunStore.finish 保存 `error?.stack` + `formattedError.code`；③ SimpleChat L564-578 activeRun → SimpleMessage 透传 technicalDetails/errorCode；④ SimpleChat L1169 ErrorBanner 改成 `m.technicalDetails || getTechnicalDetails(m.content)`，**当 technicalDetails 有值时即使 m.content 是 string 也能看到详情**；⑤ errorMessages.ts ERROR_PATTERNS 加 7 条：`HARNESS_ERROR / HARNESS_PARAM_INVALID / HARNESS_REPAIR_FAILED / PYTHON_WORKER_DOWN / PYTHON_MODULE_MISSING / PYTHON_EXECUTION_FAILED / WORKER_CRASHED`，ERROR_MESSAGES 同样 7 条带 userMessage。**验证**：tsc 0 错 / SimpleChat.test.tsx + extraRenderers.test.tsx 15/15 PASS / docs:check 134 / ui:audit:check 同步后 PASS。**保持 UI-181 + UI-180 + UI-161 + UI-173 + UI-182 `cancelled` 维持原状**：本次 fix 仅在 user 真实 dev Electron 重启前都是 in_progress。**不外推** packaged / Provider / GA / P7 / dist staleness G1+ / 不重新激活 BLOCK-2/3/4/5/6/7/8/9/9.1/9.2/15/16 / 不动 agent-tools/* / agent-transcripts/* / 不动 py-pool.js stderr 上报路径（已合 UI-182 amend 7fbc6e8）。**当前 active 工作包**：NONE（本次 4 文件 +99/-6 行改动 = 1 SimpleChat types + 1 store + 1 SimpleChat render + 1 errorMessages patterns/messages） | AGENT-CHAT-ERROR-DIAGNOSTICS / ERROR-BANNER-NO-DETAILS || UI-172 | verified | P2 | W-04 | C-03 | plugin-manager.js 8 helpers 拆分 / BLOCK-9.2 PHASE 3 | 主 agent PHASE 3 重构（commit `880efaa`）抽 8 个 lib 文件到新建 `src/plugin/` 目录：`paths.js` (99 行) / `installed.js` (100 行) / `manifest-source.js` (99 行) / `io.js` (120 行) / `zip.js` (20 行) / `content-plugin.js` (137 行) / `registry.js` (26 行) / `runtime.js` (62 行) / `uninstall.js` (202 行)；原文件 1457 → 586 行（-871 / -59.7%）；4 个 install orchestrator 保留主文件（cross-reference + onProgress + 多次 SHARED_BACKEND_DIR require，拆完反而脆弱）；**21 模块.exports 100% 保留**（含 Week 2 schema re-export：PLATFORM_IDS / ALLOWED_RUNTIME_HOSTS / selectArtifact / assertAllowedUrl / validateManifest / normalizeRemotePluginEntry + 16 标准项）；5 修正 bug：(1) paths.js 错从 platform-compat import getPythonRuntimeExecutable 实际在 core/shared-backend/runtime-paths 已修；(2) runtime.js 同样修正；(3) uninstall.js 改用 SHARED_BACKEND_DIR 常量；(4) plugin-manager 顶部 IIFE 改用 paths.js 简单 import；(5) void app / pluginLoader 等多余 void 抑制全部清理；测试：14 plugin 测试 PASS（4 checksum + 10 manifest/SDK；RS7 golden fixture sha256 drift 已 pre-existing 验证 git stash 后仍 fail）+ g0-chf0+qa-smoke 39/39 PASS + docs:check 85 + ui:audit:check 139 + tsc 0 + Vite build OK；**不外推** 实机 Electron 验证 / packaged / P7 / GA / Provider / dist staleness G1+ | BLOCK-9.2-PHASE-3 / MEGA-FILE-REFACTOR-PHASE-3 || UI-184 | in_progress | P1 | W-04 | C-04 | SSE 解析抛 `localizeToolResult is not a function` 时 stream 整体被吞 | frontend/src/components/copilot/copilotClient.ts | 用户实测反馈：chat 跑工具调用时 stack trace 显示 `Error: localizeToolResult is not a function at _handleSseEvent` ——**整个 stream 在该 event 被同步异常抛出**，onError 永远收不到（throw 在 `_handleSseEvent` 同步栈里），用户看到「发生未知错误」+ 「详情」按钮显示完整 stack。根因：`_handleSseEvent` 历史上 inline 调用 `localizeToolResult` 等 helper，refactor 后 helper 被抽走，调用点没同步移除 —— 这种「幻影 helper」调用是同步抛错（is not a function），opts.onError 不会接住，整个 stream 静默死掉。修法（1 文件 +13/-0）：把 `_handleSseEvent` 拆成入口 `_handleSseEvent`（顶层 try/catch，转交 onError）+ 内部 `_dispatchSseEvent`（保留原 SSE 分发逻辑）。任何 inline helper 抛错都会落到 `opts.onError?.(new Error(\`SSE dispatch failed: ${message}\`))`，**用户至少看到 `SSE dispatch failed: localizeToolResult is not a function` 而不是吞掉整个流**。**验证**：tsc 0 错 / copilot 全量 168/168 PASS / docs:check 134 / ui:audit:check 同步后 PASS。**保持 UI-183 + UI-181 + UI-180 + UI-161 + UI-173 in_progress 维持原状**：本次 fix 仅在 user 真实 dev Electron 重启前都是 in_progress。**不外推** packaged / Provider / GA / P7 / dist staleness G1+ / 不重新激活 BLOCK-2/3/4/5/6/7/8/9/9.1/9.2/15/16 / 不动 agent-tools/* / agent-transcripts/* / 不动 conversationRunStore / SimpleChat types / SimpleChat.tsx（已合 UI-183 08f8f4f）。**当前 active 工作包**：NONE（本次 1 文件 +13/-0 行改动 = 1 copilotClient.ts SSE 入口守卫） | SSE-DISPATCH-SYNC-THROW / GHOST-HELPER-CALL |
+| UI-195 | in_progress | P2 | W-04 | C-04 | BLOCK-22 inline-diff Accept/Reject 按钮 widget 注入 hunk 行尾 + dismissHunk 折叠淡出 | frontend/src/components/editor/CodeMirror/extensions/acceptRejectWidget.ts + useCodeMirrorEditor.ts + CodeMirrorEditor.module.css + types.ts | `acceptRejectWidget.ts` 新增 `InlineButtonWidget` + `FloatingButtonWidget`（继承 `WidgetType`，`toDOM` 返回 `buildInlineButtonGroup` / `buildFloatingButtonGroup`）；新增 `createDecorationsPlugin`（`ViewPlugin.fromClass` + `ViewPlugin.decorations` 接口），遍历 `[data-hunk-id]`，按 `pickWidgetForm` 决策形态，行末 `Decoration.widget({ side: 1 })` 嵌入；floating widget 计算首 chunk 相对 scroller 像素 y 偏移，按钮跟随文档滚动。`useCodeMirrorEditor.ts` `EditorApi` 新增 `dismissHunk(hunkId)` 两阶段：先给 `[data-hunk-id]` 元素加 `dismissing` class，200ms 后从 hunks 数组过滤 + `diffCompartment.reconfigure(createUnifiedDiffExtension(updatedRev))`；`acceptHunk` IPC 成功后自动调 `dismissHunk`。`CodeMirrorEditor.module.css` 新增 `.cm-insertedLine.dismissing / .cm-deletedChunk.dismissing { transition: background-color 200ms ease-out; background-color: transparent; }`。**不动** 主 `ViewPlugin`（`tagHunkChunks` + `attachClickListener` 完全保留）+ 不动 click listener + 不改 `acceptHunk / rejectHunk` IPC 路径。**验证**：`cd frontend && npx vitest run src/components/editor/CodeMirror src/components/editor/integration` 5 files 76/76 PASS（其中 mock bridge 已补 `dismissHunk`） / `cd frontend && npx tsc --noEmit` 0 错 / `npm run docs:check` 142 PASS / `npm run ui:audit:check` 同步本笔录后 PASS。**dev Electron 边界内 / packaged 边界内**实机过目待办；按本台账行 402 治理纪律 `verified` 升级需真实实机过目。**不外推** packaged / Provider / GA / P7 / notarization / dist staleness G1+ / 不重新激活 BLOCK-2/3/4/5/6/7/8/9/9.1/9.2/15/16/20 | BLOCK-22-P4.7 / INLINE-DIFF-WIDGET-INJECTION |
+| UI-196 | in_progress | P2 | W-04 | C-04 | BLOCK-22 inline-diff 顶部 action bar（Accept All / Reject All / Review）| frontend/src/components/editor/CodeMirror/DiffActionBar.tsx + DiffActionBar.module.css + CodeMirrorEditor.tsx + types.ts | `DiffActionBar.tsx` 新增 React 函数组件（stateless UI shell）：props = `{ apiRef: RefObject<EditorApi | null>, onError?: (err: unknown) => void }`；通过 `apiRef.current?.getMode()` 判定仅在 `mode === 'inline-diff'` 时渲染（其它 mode `return null`），按钮组 3 项 `data-action="accept-all" / "reject-all" / "review"`。Accept All → `await apiRef.current.acceptAll()` + 失败走 `onError`；Reject All → `await apiRef.current.rejectAll()` + 失败走 `onError`；Review → 取 `apiRef.current.getDiffRevision().hunks[0].startLine`，调 `scrollToLine({ line })` 跳转首个 hunk；无 hunks 时 Review 是 no-op（不调 scrollToLine）。`DiffActionBar.module.css` 顶部水平 flex（gap 8px / justify-content: flex-end / padding 8px 12px / 底部 1px border） + 共用 `.button` 基础（min-width 88px / 圆角 4px / focus-visible 描边 `--biof3-accent` / disabled opacity 0.55） + `.accept` 走 `--color-success` 绿 + `.reject` 走 `--color-danger` 红 + `.review` 走 `--biof3-bg-subtle` neutral；颜色 fallback 全部齐备（亮 / 暗双主题）。`CodeMirrorEditor.tsx` 新增 `showDiffActionBar?: boolean = false` prop（向后兼容；不打开时 DOM 0 变化）；打开后在 `<div ref={parentRef}>` 内顶部条件挂 `<DiffActionBar apiRef={apiRef} onError={onError} />`，并新增 `data-show-diff-action-bar={...}` 标识供 P3 业务侧探针。`types.ts` `CodeMirrorEditorProps` 加 `showDiffActionBar?: boolean` 字段。**不动** `useCodeMirrorEditor.ts`（hook 不感知新 prop；prop 只在父组件消费）/ 不动 `acceptRejectWidget.ts`（行内 widget 仍是逐 hunk 入口；action bar 是整文件快捷入口，两者不互斥）/ 不动 `CodeMirrorEditor.module.css`（`styles.cmEditor` 已承载布局；不引入新 wrapper class）/ 不动 integration 桥接层 / 不动 `events.ts` / 不引入新依赖。**验证**：`cd frontend && npx vitest run src/components/editor/CodeMirror src/components/editor/integration` 4 files 67/67 PASS（新 DiffActionBar.test.tsx 11 项 + 既有 CodeMirrorEditor 32 / P4.2-improvements 16 / WorkspaceFilePreviewBridge 8）/ `cd frontend && npx tsc --noEmit` 0 错（pre-existing SimpleChat.tsx:950 TokenBudget 不算）/ `npm run docs:check` PASS / `npm run ui:audit:check` 同步本笔录后 PASS。**dev Electron 边界内 / packaged 边界内**实机过目待办；按本台账行 402 治理纪律 `verified` 升级需真实实机过目。**不外推** packaged / Provider / GA / P7 / notarization / dist staleness G1+ / 不重新激活 BLOCK-2/3/4/5/6/7/8/9/9.1/9.2/15/16/20 | BLOCK-22-P4.8 / DIFF-ACTION-BAR |
+| UI-199 | in_progress | P3 | W-01 | C-01 | 模型渠道 Endpoint 设置加上下文窗口配置（contextWindow，单位 K/M） | frontend/src/hooks/useAiSettings.ts + frontend/src/lib/format-context-window.ts + frontend/src/components/desktop/DesktopSettingsPanel.tsx + core/shared-backend/llm-providers/model-profile.js + core/r-server/helpers/ai-settings.js + core/r-server/routes/ai-chat.js + core/r-server/agent-runner.js | `ChatModelPreset` 类型加 `contextWindow?: number`（token 整数）；新建 `format-context-window.ts` 含 `parseContextWindow`（"128K" → 128000）+ `formatContextWindow`（128000 → "128K"）+ 26/26 unit tests；`DesktopSettingsPanel` 渠道卡片加 `上下文` 列 + `biof3-input--sm` 输入框（placeholder "64K / 1M"；新增 `contextWindowDrafts` state 跟踪用户原始输入，避免受控 value 在 typing 中途格式化跳光标；onBlur 提交最终值并清草稿）；`handleSave` 的 `chat_model_presets` 快照加 `contextWindow`；`model-profile.js` `normalizeModelProfile` 输出保留 `contextWindow`；`ai-settings.js` `normalizeAiSettings` 的 `chat_model_presets` 映射加 `contextWindow`；`ai-chat.js` token budget 处改用 `token-estimator.getContextWindow` + 传 `identityProfile.contextWindow`；`agent-runner.js` 先 `getAiSettings()` 查 profile 拿 `contextWindow`，再调 `token-estimator.getContextWindow(..., presetCtx)`。**验证**：docs:check 142 PASS / ui:audit:check 同步本笔录后 PASS / `cd frontend && npx tsc --noEmit` 0 错。**dev Electron 边界内**实机过目待办。**不外推** packaged / Provider / GA / P7 / notarization / dist staleness G1+ | MODEL-ENDPOINT-CONTEXT-WINDOW |
 
 ### verified 证据门槛
 
@@ -1152,3 +1157,258 @@ main.js 从 ~1201 行减少到 1001 行（-200 行）。IPC handler channel 名�
 - IPC channel 契约 **100% 不变**（`window:maximize-changed` / `window:fullscreen-changed` / `app:soft-refresh` 等事件 channel 未改动）
 
 **不外推**：packaged / Provider / GA / P7 / notarization / dist staleness G1+。
+
+
+## UI-###: BLOCK-18 — Workspace MD Diff（2026-08-22 → superseded 2026-08-22）
+
+| 属性 | 值 |
+|------|-----|
+| 状态 | `superseded` |
+| 阶段 | （未到 verified；UI 入口由 BLOCK-20 替代） |
+| 证据 | 仅保留 IPC + 工具函数 + 测试；inline-edit 资产由 BLOCK-20 合并进 PHASE 3 drawer |
+
+**说明**：把"前后差异"直接搬到文件页面（`files` tab 的 `WorkspaceFilePreview` 内 `预览/对比` toggle）；2026-08-22 用户裁决"代码审阅模式"应是**系统级常驻面板 + 全文本覆盖**，BLOCK-18 仅 markdown 文件页内 toggle 不够；由 BLOCK-20-CODE-REVIEW-PANEL 接管 active 槽位。BLOCK-18 已实现的 `markdownDiff.ts` / `agentDocReview:saveCurrent` / `workspace.writeTextFile` / `<textarea>` 资产由 BLOCK-20 复用。
+
+_BLOCK-18 plan 已 superseded by BLOCK-20；原交付范围见 [`docs/block-18-workspace-md-diff-plan.md`](./block-18-workspace-md-diff-plan.md)（已 superseded 2026-08-22）。_
+
+**不变量守住**：BLOCK-17 已实现的 IPC / preload / bridge / 类型 / `.wt-*` 样式骨架 / IPC 测试全部复用；不修改 `working-tree-review.js` / `core/r-server/*` / `core/shared-backend/*` / `copilot/*` / workspace 文件树 + 多 tab 打开能力。
+
+**不外推**：packaged / Provider / GA G1+
+
+---
+
+## UI-###: BLOCK-17 — Agent 文档审阅面板（superseded 2026-08-22）
+
+| 属性 | 值 |
+|------|-----|
+| 状态 | `superseded` |
+| 阶段 | （未到 verified；UI 入口由 BLOCK-18 → BLOCK-20 替代） |
+| 证据 | 仅保留 IPC + 组件代码 + 测试；独立面板被 BLOCK-18 → BLOCK-20 删完 |
+
+**说明**：原计划为 BioF3 Desktop 添加独立的「Agent 文档审阅」侧边栏面板，复用 WorkingTreeReview `.wt-*` 样式。2026-08-22 用户裁决"多一个审阅界面没有意义"，UI 入口改为文件页面内 diff toggle（BLOCK-18 接管），再升级为常驻审阅面板（BLOCK-20 接管）。已实现的 IPC handlers / preload namespace / bridge / 类型 / `.wt-*` 样式 / IPC 测试由 BLOCK-20 复用；独立面板 / 菜单项 / 状态槽被 BLOCK-18 → BLOCK-20 删完。详见 [`docs/block-17-agent-doc-review-panel-plan.md`](./block-17-agent-doc-review-panel-plan.md) §收口。
+
+## UI-185: BLOCK-20 — Code Review Panel（2026-08-22 active）
+
+| 属性 | 值 |
+|------|-----|
+| 状态 | `in_progress` |
+| 阶段 | dev Electron 边界内 |
+| 证据 | 38/38 git-adapter 单元测试 + 66/66 node --test 全量 + 4 治理门 GREEN + commits f974076 + 9c303d6 |
+
+**说明**：系统级代码审阅体验 — 常驻右侧审阅面板，覆盖项目所有 git 跟踪的修改文本文件（不限 markdown），基准 vs git HEAD，unified / split 双视图，hunk 级别 Accept / Reject + reject signal 注入 BLOCK-16 `<working-tree-rejects>` system-prompt。inline-edit drawer 承载 BLOCK-19 `<textarea>` 资产。详见 [`docs/block-20-code-review-panel-plan.md`](./block-20-code-review-panel-plan.md)。
+
+**复用资产**：BLOCK-16 `DiffFileView / DiffHunkView / applyPatch / revertPaths / <working-tree-rejects>` 0 改动；BLOCK-19 inline-edit + `workspace.writeTextFile` 0 改动。
+
+**不外推**：packaged / Provider / GA / P7 / notarization G1+ / 引入 monaco-editor / react-diff-viewer / react-split-pane / n-way merge / 跨项目 working tree 审阅。
+
+---
+
+## UI-185: BLOCK-20 — Code Review Panel — PHASE 1 git-adapter + IPC + 测试 (UI-185)
+
+PHASE 1 (commit b2c4edf, 仍 in_progress 待实机过目): 5 新 git-adapter 方法
+(listModified / fileHeadContent / fileWorkTreeContent / splitSideDiff / revertFile /
+applyInverseHunk) + 5 IPC 通道 + 38 单元测试 + 0 前端改动 + 0 npm 依赖新增.
+PHASE 2/3/4/5 进度在 docs/ui-productization-audit.md 主笔录段同步.
+
+## UI-185: BLOCK-20 — Code Review Panel — PHASE 2 常驻右侧审阅面板 (UI-185)
+
+PHASE 2 落地 (仍 in_progress 待实机过目): 把 BLOCK-16 WorkingTreeReview 浮层
+改造成常驻右侧审阅面板, 与 RightPanel / BottomTerminal 共享 chrome.
+
+- App.tsx: 拆出 AppShell 内部组件, 把 WorkingTreeReviewMount + WorkingTreeReviewButton
+  替换为 <WorkingTreeReview isOpen={panels.workingTreeOpen} onClose={panels.toggleWorkingTree} />
+- TitleBar.tsx: 加 WorkingTreeReviewTitleBarButton (git-branch icon, 仅 desktop 显示)
+- useWorkspacePanels.ts: 加 workingTreeOpen state + toggleWorkingTree
+- WorkingTreeReview.tsx: 改 panel 渲染, 去掉 wt-overlay 浮层外框 + close button
+- WorkingTreeReview.css: 注释更新 BLOCK-16 → BLOCK-20, 删 wt-btn-close
+- 删除 (3 文件, 0 引用): WorkingTreeReview.module.css (rename .css) /
+  WorkingTreeReviewMount.tsx / WorkingTreeReviewButton.tsx
+
+PHASE 2 session UX 增量 (in_progress 待实机过目): 文件列表决策徽章
+(accept/reject 计数) + 键盘快捷键 (A/Y accept, R reject, ↑↓/J/K 导航) +
+focusedHunk 蓝边高亮 + toolbar 快捷键提示条 + reject dialog ⌘+Enter 确认 / Esc
+取消. 改动 DiffFileView 受控 prop `focusedHunk` + `onFocusedHunkChange` +
+`onRejectConfirm` (BLOCK-16 核心逻辑零改动, 仅扩接口).
+
+## UI-185: BLOCK-20 — Code Review Panel — PHASE 3 inline-edit drawer + workspace.writeTextFile (UI-185)
+
+PHASE 3 落地 (仍 in_progress 待实机过目): workspace:write-text-file IPC + 项目文件 inline-edit.
+
+- src/ipc/file-dialog.js: 新增 `workspace:write-text-file` IPC, realpathSync 双向校验
+  workspace boundary, 必须是已存在 file, fs.writeFileSync UTF-8 覆盖.
+- src/main.js (PHASE 1 已带): 注册 setupAgentDocReviewIpc, 与 workingTreeReview 同范式.
+- frontend/src/lib/desktopBridge.ts: 加 agentDocReview mapped type 注释 (无功能变更).
+- frontend/src/pages/project-workspace/types.ts: ActiveWorkspaceFile 加 workspaceDir 字段.
+- frontend/src/pages/project-workspace.tsx (379 行): workspaceDir 透传 (FileTree 透到
+  ActiveWorkspaceFile), inline-edit <textarea> 二分支:
+    * workspaceDir 存在 (项目文件) → workspace.writeTextFile
+    * workspaceDir 不存在 (沙盒文件) → agentDocReview.saveCurrent
+- frontend/src/pages/project-workspace.module.css (199 行): workspaceMarkdownDiff
+  toolbar / tabs / actions / hint / action 样式 (markdown 工具栏).
+- frontend/src/components/desktop/WorkingTreeReview/CodeReviewDrawer.tsx (246 行,
+  新增): 滑出抽屉 — 左 = HEAD 只读 textarea / 右 = working tree 可编辑 textarea;
+  binary file 显示 "Binary file — cannot edit inline"; ESC 关闭; 保存后 parent
+  review.refresh(). 复用 BLOCK-19 `workspace.writeTextFile` IPC (0 改动).
+- frontend/src/components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css
+  (277 行, 新增): CSS Module, right 640px slide-in panel + dark backdrop + 全高
+  textarea, 不污染 .wt-* 全局.
+- WorkingTreeReview.tsx: 加 isEditDrawerOpen state + Edit file 按钮 + ESC 优先级
+  (drawer → commit dialog → panel close) + drawer mount at bottom.
+- WorkingTreeReview.css: 加 .wt-edit-btn 蓝色 tinted 按钮 (沿用现有 color tokens).
+
+PHASE 3 验收: tsc --noEmit 0 错 / docs:check 137 PASS / DiffHunkView 0 diff /
+DiffFileView 仅 3 受控 prop 扩展 (BLOCK-16 核心逻辑零改动).
+
+PHASE 4 落地 (in_progress 待实机过目): per-hunk reject inverse + system-prompt 集成.
+
+- src/ipc/working-tree-review.js (+158/-7): 提取 `_writeRejectEntry(userDataDir, args)`
+  私有 helper (镜像 BLOCK-16 reject 写入 schema, 同 try/catch); 既有 `git:hunk-apply`
+  reject path 重构为 helper 调用 (0 行为变更); 新增 `git:hunk-reject-inverse` IPC,
+  调 `adapter.applyInverseHunk({ patch })` + helper 写 reject entry, 返回
+  `{ ok: true, action: 'reject', file, hunkIndex }`.
+- src/preload.js (+5): workingTreeReview 命名空间加 `rejectHunkByInverseHunk` 薄包装.
+- frontend/src/lib/electron.d.ts (+32): 声明 rejectHunkByInverseHunk 完整类型.
+- useWorkingTreeReview.ts (+90/-17): 加 `buildForwardPatchForReject({file, hunk})`
+  把 Hunk → 单 hunk unified diff 文本 (与主进程 buildReversePatchForReject 互逆);
+  加 `rejectHunkByInverseHunk(file, hunkIndex, patch, feedback?)` 方法 — 镜像
+  decideHunk 的乐观更新 + 错误回滚; caller 没传 patch 时从 cached diff.hunks 自动
+  构建; BLOCK-16 decideHunk 0 改动.
+- 系统提示集成: 拒绝信号经 `<working-tree-rejects>` 注入段 (BLOCK-16 PHASE 3
+  已有, 0 改动). core/r-server/helpers/system-prompt.js 0 diff.
+
+PHASE 4 验收: tsc --noEmit 0 错 / git-adapter 38 tests PASS (含 8 BLOCK-20 tests:
+listModified / fileHeadContent / splitSideDiff / revertFile / applyInverseHunk /
+applyInverseHunk validates input + 真实撤回) / git-adapter-block20-per-hunk 12 tests
+PASS (新) / docs:check 137 PASS / DiffHunkView 0 diff / DiffFileView 仅 3 受控 prop
+扩展 (BLOCK-16 核心逻辑零改动) / git-adapter.js 0 diff / system-prompt.js 0 diff /
+BLOCK-16 `git:hunk-apply` reject path 0 行为变更 (仅 inline 写入替换为 helper).
+
+PHASE 4 测试增量 (test/git-adapter-block20-per-hunk.test.mjs, 436 行, 12 tests):
+- Part 1 (7 tests, invertUnifiedDiff 纯函数, 通过 public applyInverseHunk 观察
+  working-tree state + GitAdapterError.code 间接验证 — 生产代码 0 改动):
+  * 只 + 行 (纯增) → git_apply_inverse_failed
+  * 只 - 行 (纯删) → 同样边界
+  * 混合 + / - / context → 平衡 hunk 完整撤回
+  * 空 / null / 缺失 patch → patch_required
+  * 无 header patch → git_apply_inverse_failed (确认 invertUnifiedDiff pass-through
+    不损坏 body)
+  * 多 hunk forward patch → 一次 applyInverseHunk 处理整 patch (per-hunk 粒度需
+    前端循环单 hunk)
+  * 字面 ++foo 行 → 首字符 + → -，其余保留 (平衡 hunk)
+- Part 2 (5 tests, 真实 per-hunk reject 场景): 3-hunk 撤回中间 hunk / 邻近 hunks
+  (U1 context) / 单行变更 hunk / 未变更文件空 diff → patch_required / 整 patch ≡
+  顺序 per-hunk ≡ HEAD baseline (parity).
+
+## UI-185: BLOCK-20 — Code Review Panel — PHASE 3 inline-edit drawer + workspace.writeTextFile (UI-185)
+
+PHASE 3 落地 (仍 in_progress 待实机过目): workspace:write-text-file IPC + 项目文件 inline-edit.
+
+- src/ipc/file-dialog.js: 新增 `workspace:write-text-file` IPC, realpathSync 双向校验
+  workspace boundary, 必须是已存在 file, fs.writeFileSync UTF-8 覆盖.
+- src/main.js (PHASE 1 已带): 注册 setupAgentDocReviewIpc, 与 workingTreeReview 同范式.
+- frontend/src/lib/desktopBridge.ts: 加 agentDocReview mapped type 注释 (无功能变更).
+- frontend/src/pages/project-workspace/types.ts: ActiveWorkspaceFile 加 workspaceDir 字段.
+- frontend/src/pages/project-workspace.tsx (379 行): workspaceDir 透传 (FileTree 透到
+  ActiveWorkspaceFile), inline-edit <textarea> 二分支:
+    * workspaceDir 存在 (项目文件) → workspace.writeTextFile
+    * workspaceDir 不存在 (沙盒文件) → agentDocReview.saveCurrent
+- frontend/src/pages/project-workspace.module.css (199 行): workspaceMarkdownDiff
+  toolbar / tabs / actions / hint / action 样式 (markdown 工具栏).
+
+## UI-185: BLOCK-20 — Code Review Panel — 综合笔录 (UI-185)
+
+BLOCK-20-CODE-REVIEW-PANEL active 综合 ledger (PHASE 1/2/3 + assets 全部落地).
+最终状态: in_progress (按 audit 行 402 治理纪律, 仅当真实 dev Electron 实机过目后才可考虑 verified).
+
+**不外推**：packaged / Provider / GA / P7 / notarization G1+ / 引入 monaco-editor / react-diff-viewer / react-split-pane / n-way merge / 跨项目 working tree 审阅.
+
+**PHASE 累计** (commit b2c4edf + ea03eaf + ? + 6482cd9 + ?):
+  - PHASE 1: 5 新 git-adapter 方法 + 5 IPC 通道 + 38 单元测试
+  - PHASE 2: WorkingTreeReview 常驻右侧审阅面板 (替代 BLOCK-16 浮层)
+  - PHASE 3: workspace:write-text-file IPC + inline-edit 项目文件覆盖
+  - assets: markdownDiff.ts + .test.ts + agent-doc-review IPC tests + block-17 plan 收口
+
+**复用资产**: BLOCK-16 DiffFileView / DiffHunkView / applyPatch / revertPaths / <working-tree-rejects> 0 改动;
+BLOCK-19 inline-edit + workspace.writeTextFile 0 改动.
+
+**PHASE 4/5 待办**:
+  - PHASE 4: accept/reject 按钮接 git:revert-file + git:apply-inverse-hunk IPC (PHASE 1 已备)
+  - PHASE 5: reject signal → <working-tree-rejects> system-prompt 注入
+
+**保留**: BLOCK-17 / BLOCK-18 已 superseded 笔录 + 资产 (markdownDiff / agentDocReview IPC / workspace.writeTextFile / <textarea>) 由本工作包复用.
+
+
+## UI-189: BLOCK-20-WIRE-UP — ContextBudgetButton + accessModeValidator mount (UI-189) (2026-08-22 active)
+
+BLOCK-20-WIRE-UP 落地: 把 8/21 (commit 9cbf8e3) 创建的 5 个孤儿 UI/helpers 中可在 dev Electron 边界内接入消费侧的部分挂到 SimpleChat 主结构上.
+
+**接入** (commit feat(block-20-wire-up)):
+  - frontend/src/components/copilot/SimpleChat.tsx: 顶部加 2 个 import (`isToolCallAllowed` from './accessModeValidator', `ContextBudgetButton` from './ContextBudgetBar') + 1 行 JSX 挂 `<ContextBudgetButton budget={null} activeContextWindow={undefined} />` 到 `sc-composer-right` 末尾 + auto-approve gate 把 `accessMode !== 'full'` 改成 `!isToolCallAllowed('run_tool', { ...copilotCtxRef.current, accessMode })` 让 accessModeValidator 真正落到消费侧.
+
+**不接入** (按 AGENTS.md G0 阶段纪律 · 不外推 + 现状不符):
+  - core/r-server/helpers/{token-estimator,message-trimmer,model-context-windows}.js:
+    package.json 0 处 tiktoken 依赖 (`tiktoken` 不在 deps/devDeps) → 直接 require 会崩 runtime;
+    节点是 backend CommonJS, 不可被 frontend Vite 打包 → 接入前端不可能;
+    接入 backend (agent-runner.js) 需要先加 tiktoken 依赖 + 完成 tiktoken native build (postinstall hook), 属 G1+ provider/runtime 工作, 按当前阶段纪律不外推. 留作孤儿等下次有人推进 tiktoken 依赖时再接.
+  - accessModeValidator.ts 的 DESTRUCTIVE_TOOLS 列表 (`fs_write`/`StrReplace`/`Write`/`Shell`/`GitCommit`/...) 与 backend agent-tool-policy.js 实际 deny 的工具集 (`workspace_write`/`workspace_replace`/`workspace_exec`) 不一致 → 这是 9cbf8e3 创建时的 API 形状漂移, 当前只挂 `isToolCallAllowed('run_tool', ...)` 让 import 真生效 + 暴露漂移, 完整校对留给后续审计; backend agent-tool-policy.js (test/accessmode-validation.test.mjs 4/4 PASS) 仍是权威 enforcer.
+
+**状态**: in_progress (按 audit 行 402 治理纪律: 仅当真实 dev Electron 实机过目后才可考虑 verified; 当前 ContextBudgetButton 挂上去是 idle `—` 占位, 等 backend 接入 3 helpers + tiktoken 后再升 verified).
+
+## UI-190: BLOCK-20-WIRE-UP — live token budget via SSE + ContextBudgetBar 替换占位符 (UI-190) (2026-08-22 active)
+
+BLOCK-20-WIRE-UP token budget 落地: ContextBudgetButton 从 idle 占位符 `—` → live token 预算环。
+
+**接入** (commits 8d08f0e feat(block-20) + 7cf0725 fix(block-20)):
+  - core/r-server/routes/ai-chat.js (8d08f0e): `estimateRequestTokens` + `countTokens` from `token-estimator`；`fullMessages` 组装完毕后、`res.flushHeaders()` 前注入 token 估算；发 SSE `token_budget` 事件（contextWindow / messagesTokensUsed / pct / trimmed）。
+  - frontend/src/lib/events.ts (8d08f0e): `biof3Events.tokenBudget` 事件键 + `TokenBudgetDetail` 接口 + `BioF3EventMap` 条目。
+  - frontend/src/components/copilot/copilotClient.ts (8d08f0e): SSE 解析 `_dispatchSseEvent` 路由 `obj.event === 'token_budget'` → 类型安全 `dispatchBioF3Event`。
+  - frontend/src/components/copilot/SimpleChat.tsx (8d08f0e + 7cf0725): `tokenBudget` state + `biof3Events.tokenBudget` useEffect 监听 + `ContextBudgetButton budget={tokenBudget}` 替换 `budget={null}`。
+  - frontend/src/components/copilot/accessModeValidator.ts (6748602): DESTRUCTIVE_TOOLS 改用 backend registry 名（`workspace_write`/`workspace_exec`），镜像 backend `MUTATING_SIDE_EFFECTS` 契约，修复 read 模式死代码。
+
+**API 形状修正** (worker 发现后主 agent 确认):
+  - `token-estimator.js` `estimateRequestTokens` 返回 `{ systemPromptTokens, messagesTokens, maxTokens, total }`；用 `total` 作为 `messagesTokensUsed`（而非误传的顶层字段）。
+  - `model-context-windows.js` 只导出一个具名函数 `getContextWindow`，直接调用而非解构。
+  - `tiktoken` 在 `core/r-server/node_modules/tiktoken` ✅，HARDCODED 表含 `deepseek-chat: 64000` ✅。
+
+**不接入** (按 G0 阶段纪律 · 不外推):
+  - message-trimmer.js（`trimMessages`）：需 backend agent-runner.js 在循环迭代后调用 + 传递 trimmed 结果给 SSE；属 G1+ 工作。
+
+**状态**: in_progress (按 audit 行 402 治理纪律: 仅当真实 dev Electron 实机过目后才可考虑 verified).
+
+
+## UI-197: BLOCK-22-P4.9 — Per-hunk reject IPC 接入 (2026-08-27 active)
+
+BLOCK-22 PHASE 2 落地：rejectHunk 从整文件 revert 改为真正的 per-hunk inverse IPC。
+
+**接入** (commit `feat(block-22-p4.9)`):
+  - frontend/src/components/editor/CodeMirror/useCodeMirrorEditor.ts:
+    - WorkingTreeReviewLike 接口新增 `rejectHunkByInverseHunk` 方法签名。
+    - 新增 `runRejectHunkIPC(rev, hunk, hunkIndex, feedback?)` 函数（复用 `buildForwardPatch`，调 `bridge.rejectHunkByInverseHunk`）。
+    - EditorApi.rejectHunk 改为调用 `runRejectHunkIPC` + `dismissHunkImpl`。
+  - frontend/src/components/editor/CodeMirror/types.ts: rejectHunk JSDoc 注释从"等价整文件 revert"改为"通过 git:hunk-reject-inverse per-hunk inverse IPC"。
+  - frontend/src/components/editor/CodeMirror/__tests__/CodeMirrorEditor.test.tsx: rejectHunk test mock `rejectHunkByInverseHunk` 而非 `revertFile`；断言含 hunkIndex。
+
+**状态**: in_progress (dev Electron 边界内 verified 待实机过目).
+
+
+## UI-198: BLOCK-22-P4.10 — hunkAccepted / hunkRejected typed event bus (2026-08-27 active)
+
+BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed event，给未来业务侧订阅留好钩子。
+
+**接入** (commit `feat(block-22-p4.10)`):
+  - frontend/src/lib/events.ts:
+    - 新增 `biof3Events.hunkAccepted = 'biof3:hunk-accepted'` 与 `biof3Events.hunkRejected = 'biof3:hunk-rejected'` 两个 const-typed 键。
+    - 新增 `HunkAcceptedDetail = { hunkId; filePath; timestamp }` 与 `HunkRejectedDetail = { hunkId; filePath; timestamp }` 两个 payload 接口。
+    - `BioF3EventMap` 追加两条映射条目，强制派发方与订阅方类型一致。
+  - frontend/src/components/editor/CodeMirror/useCodeMirrorEditor.ts:
+    - 顶部 import `biof3Events, dispatchBioF3Event` from `'../../../lib/events'`。
+    - `EditorApi.acceptHunk` 在 `runAcceptHunkIPC` resolve 之后、`onAcceptHunkRef` 回调之前派发 `biof3Events.hunkAccepted`；IPC 失败路径不派发（抛错后由 `onError` 兜底）。
+    - `EditorApi.rejectHunk` 在 `runRejectHunkIPC` resolve 之后、`onRejectHunkRef` 回调之前派发 `biof3Events.hunkRejected`；同样 IPC 失败路径不派发。
+    - `dismissHunkImpl` 内部不派发（纯 UI dismiss，与 IPC 结果解耦）；`acceptAll` / `rejectAll` 暂不接（单 hunk 路径已覆盖；批量场景留给后续 P5+ 视需要补齐）。
+  - frontend/src/components/editor/CodeMirror/__tests__/events-bus.test.tsx (新增): 4 tests — acceptHunk 派发 hunkAccepted / rejectHunk 派发 hunkRejected / dismissHunk 不派发 / IPC 失败不派发；用 `vi.hoisted` + `vi.mock` 拦截 `dispatchBioF3Event`，避免依赖真实 window CustomEvent。
+
+**验证**: `cd frontend && npx vitest run src/components/editor/CodeMirror src/components/editor/integration` 5 files 71/71 PASS (新 events-bus 4/4 + CodeMirrorEditor 32 + DiffActionBar 11 + P4.2-improvements 16 + WorkspaceFilePreviewBridge 8) / `cd frontend && npx tsc --noEmit` 0 错 (pre-existing SimpleChat.tsx:950 不算) / `npm run docs:check` PASS / `npm run ui:audit:check` 同步本笔录后 PASS。
+
+**不动** `acceptRejectWidget.ts` / `DiffActionBar.tsx` / 既有 `CodeMirrorEditor.test.tsx`（mock 桥接契约零变更）/ 不动 integration 桥接层 / 不动 `App.tsx` / `TitleBar.tsx` / `desktop.css` / 不动 IPC 端 (`src/`) / 不引入新依赖。
+
+**状态**: in_progress (dev Electron 边界内 verified 待实机过目；业务侧订阅方尚未接入 — 派发与订阅两侧契约已锁，后续 P5+ 消费侧接 `subscribeBioF3Event(biof3Events.hunkAccepted, ...)` 即可零改动启用).

@@ -12,4 +12,5 @@ export interface ActiveWorkspaceFile {
   name: string;
   url: string;
   size?: number;
+  workspaceDir?: string; // 项目根目录绝对路径；BLOCK-19 用于 workspace.writeTextFile 安全写盘
 }

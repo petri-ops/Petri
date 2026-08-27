@@ -123,6 +123,42 @@ function setupFileDialogIpc({ mainWindow } = {}) {
       return { ok: false, error: e.message };
     }
   });
+
+  /**
+   * BLOCK-19 — workspace:write-text-file
+   * 覆盖项目 workspace 内的文本文件；与 file:open-workspace-file 共用同一安全边界
+   * (realpathSync + startsWith + 必须是已存在的 file)。不创建新文件、不允许跳出 workspace。
+   * @param {string} workspacePath
+   * @param {string} relativePath  必须相对路径（path.isAbsolute 校验）
+   * @param {string} content       必须 string
+   */
+  ipcMain.handle("workspace:write-text-file", async (_event, workspacePath, relativePath, content) => {
+    try {
+      if (
+        typeof workspacePath !== "string" ||
+        typeof relativePath !== "string" ||
+        typeof content !== "string" ||
+        !workspacePath ||
+        !relativePath ||
+        path.isAbsolute(relativePath)
+      ) {
+        return { ok: false, error: "invalid args" };
+      }
+      const realRoot = fs.realpathSync(workspacePath);
+      const realTarget = fs.realpathSync(path.resolve(realRoot, relativePath));
+      if (realTarget !== realRoot && !realTarget.startsWith(realRoot + path.sep)) {
+        return { ok: false, error: "file is outside the project workspace" };
+      }
+      if (!fs.statSync(realTarget).isFile()) {
+        return { ok: false, error: "target is not a file" };
+      }
+      fs.writeFileSync(realTarget, content, "utf-8");
+      return { ok: true, data: { savedAt: new Date().toISOString() } };
+    } catch (e) {
+      console.error("[desktop] write workspace file failed:", e.message);
+      return { ok: false, error: e.message };
+    }
+  });
 }
 
 module.exports = { setupFileDialogIpc, ALLOWED_OPEN_EXTENSIONS };

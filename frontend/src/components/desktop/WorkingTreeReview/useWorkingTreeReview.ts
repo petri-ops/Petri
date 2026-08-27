@@ -25,6 +25,26 @@ export interface Hunk {
   truncated?: boolean;
 }
 
+/**
+ * BLOCK-20 — 把单个 hunk 转换为标准 unified diff 单 hunk 文本（带 ---/+++ 与 @@ header）。
+ * 与 src/ipc/working-tree-review.js 里 `buildReversePatchForReject` 互为反向；
+ * 本函数输出"正向 patch"（add → `+`、`del` → `-`），由 `applyInverseHunk` 内部 invert。
+ */
+function buildForwardPatchForReject({ file, hunk }: { file: string; hunk: Hunk }): string {
+  const oldStart = hunk.oldStart || 0;
+  const newStart = hunk.newStart || 0;
+  const oldCount = hunk.lines.filter((l) => l.type !== 'add').length;
+  const newCount = hunk.lines.filter((l) => l.type !== 'del').length;
+  const header = `diff --git a/${file} b/${file}\n--- a/${file}\n+++ b/${file}\n@@ -${oldStart},${oldCount} +${newStart},${newCount} @@\n`;
+  let body = '';
+  for (const line of hunk.lines) {
+    if (line.type === 'add') body += `+${line.text}\n`;
+    else if (line.type === 'del') body += `-${line.text}\n`;
+    else body += ` ${line.text}\n`;
+  }
+  return header + body;
+}
+
 export interface DiffFile {
   path: string;
   oldPath: string | null;
@@ -67,7 +87,22 @@ export interface UseWorkingTreeReviewReturn {
   error: string | null;
   refresh: () => Promise<void>;
   decideHunk: (file: string, hunkIndex: number, action: 'accept' | 'reject', feedback?: string) => Promise<void>;
+  /**
+   * BLOCK-20 — per-hunk reject via applyInverseHunk 通道。
+   * 与 `decideHunk(file, hunkIndex, 'reject')` 行为等价，但走的是 BLOCK-20 的 `git:hunk-reject-inverse` IPC：
+   *   1) 前端把 hunk 拼成正向 unified diff patch（带 ---/+++ 与 @@ header）
+   *   2) 主进程 `applyInverseHunk` 内部 invert + 回退 working tree
+   *   3) reject 清单写入走与 BLOCK-16 一致的 _writeRejectEntry 共享 helper
+   * BLOCK-16 的 `decideHunk('reject')` 路径保留不动，本方法是 additive 替代入口。
+   */
+  rejectHunkByInverseHunk: (file: string, hunkIndex: number, patch: string, feedback?: string) => Promise<void>;
   revertAll: () => Promise<void>;
+  commitReview: (message: string) => Promise<{
+    commit: string | null;
+    files: string[];
+    rejectedFiles: string[];
+    stats: { acceptedFiles: number; rejectedFiles: number; totalWorkingTree: number };
+  }>;
   isDialogOpen: boolean;
   setDialogOpen: (open: boolean) => void;
 }
@@ -136,13 +171,57 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
         taskId: taskIdRef.current || undefined,
       });
       if (!res.ok) {
-        // Rollback decision on failure
         setDecisions((prev) => {
           const next = { ...prev };
           delete next[key];
           return next;
         });
         setError(res.message || res.error || 'apply hunk failed');
+      }
+    } catch (e) {
+      setDecisions((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  }, [diff]);
+
+  // BLOCK-20 — per-hunk reject via applyInverseHunk.
+  // Mirror decideHunk 的乐观更新 + 失败回滚模式：先标 'reject'，失败再 delete。
+  // 前端持有 diff.hunks 时优先拼 patch；没有时由调用方传入（splitSideDiff.diff 单 hunk 段）。
+  const rejectHunkByInverseHunk = useCallback(async (file: string, hunkIndex: number, patch: string, feedback?: string) => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) return;
+    const hunk = diff?.files.find((f) => f.path === file)?.hunks[hunkIndex];
+    const key = `${file}#${hunkIndex}`;
+    setDecisions((prev) => ({ ...prev, [key]: 'reject' }));
+    try {
+      // 若调用方未传 patch 但 hunk 存在，前端兜底拼一份（与 splitSideDiff 输出兼容）
+      const effectivePatch = patch && patch.length > 0
+        ? patch
+        : hunk
+          ? buildForwardPatchForReject({ file, hunk })
+          : '';
+      if (!effectivePatch) {
+        throw new Error('patch text is required for inverse-hunk reject.');
+      }
+      const res = await bridge.rejectHunkByInverseHunk({
+        file,
+        hunkIndex,
+        patch: effectivePatch,
+        hunk: hunk || undefined,
+        feedback: feedback || undefined,
+        taskId: taskIdRef.current || undefined,
+      });
+      if (!res.ok) {
+        setDecisions((prev) => {
+          const next = { ...prev };
+          delete next[key];
+          return next;
+        });
+        setError(res.message || res.error || 'reject-by-inverse-hunk failed');
       }
     } catch (e) {
       setDecisions((prev) => {
@@ -173,6 +252,30 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
       setLoading(false);
     }
   }, [status, refresh]);
+
+  const commitReview = useCallback(async (message: string) => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) throw new Error('bridge unavailable');
+    if (Object.keys(decisions).length === 0) throw new Error('no decisions to commit');
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await bridge.commitReview({ decisions, message });
+      if (!res.ok) {
+        throw new Error(res.message || res.error || 'commit failed');
+      }
+      setDecisions({});
+      await refresh();
+      return {
+        commit: res.data?.commit ?? null,
+        files: res.data?.files ?? [],
+        rejectedFiles: res.data?.rejectedFiles ?? [],
+        stats: res.data?.stats ?? { acceptedFiles: 0, rejectedFiles: 0, totalWorkingTree: 0 },
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, [decisions, refresh]);
 
   // 订阅 agent:task-done（renderer 侧主路径）—— SSE done 派发的 biof3:agent-task-done
   // 会自动弹出浮层。preload 的 bridge.onTaskDone（main→renderer webContents.send）
@@ -232,7 +335,9 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     error,
     refresh,
     decideHunk,
+    rejectHunkByInverseHunk,
     revertAll,
+    commitReview,
     isDialogOpen,
     setDialogOpen,
   };

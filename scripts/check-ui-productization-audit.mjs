@@ -100,6 +100,89 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // useWorkingTreeReview.ts 订阅 typed event bus。台账已由本次
   // BLOCK-16 closeout 笔录登记为 UI-180 in_progress。豁免同提交台账要求。
   'da480063728d900ce6bfe4cf5c0c642a264a2f72',
+  // 2026-08-21 Fork Chat 演进不可变提交 30ff32f：subject `feat(chat)` 未带 UI-###；
+  // 与 289101e 同一 UI-143 Fork Chat 工作流（feat/ui-wave0 之后的增量扩展）。
+  // 不重写共享历史。
+  '30ff32f1e3f27fd53d2b51d36332aab93d12c985',
+  // 2026-08-21 Skills UI/frontend pages 演进不可变提交 b6f69a4：subject
+  // `feat(skills)` 未带 UI-###；台账已由 earlier e6bf72f 登记为 UI-157，
+  // 本次 commit 为后续增量扩展。按 UI-157 同一工作流归属登记，不单独占新 UI 条目。
+  // 不重写共享历史。
+  'b6f69a4573e83cb9d6451a6c65004dca8a06bb36',
+  // 2026-08-21 Copilot UX 演进不可变提交 4e81ef9：subject `feat(copilot)`
+  // 未带 UI-###；台账已由 earlier 446bfa8 登记为 UI-158，本次 commit 为后续
+  // 增量扩展。按 UI-158 同一工作流归属登记，不单独占新 UI 条目。
+  // 不重写共享历史。
+  '4e81ef92946ff905b3f55806eefac3139296653e',
+  // 2026-08-21 Workspace UI plumbing 演进不可变提交 6bb9ecb：subject
+  // `feat(frontend)` 未带 UI-###；台账已由 earlier 3000a06 登记为 UI-159，
+  // 本次 commit 为后续增量扩展。按 UI-159 同一工作流归属登记，不单独占新 UI 条目。
+  // 不重写共享历史。
+  '6bb9ecbacf2f2cf7bb023dd5bc4d9852cfb951b8',
+  // 2026-08-21 Agent Workbench P1.2 TableRenderer 演进不可变提交 05e8546：
+  // subject `feat(agent-workbench)` 未带 UI-###；台账已由 earlier 2ba838b
+  // 登记为 UI-AGENTWB-002，本次 commit 为后续增量扩展。按 UI-AGENTWB-002
+  // 同一工作流归属登记，不单独占新 UI 条目。不重写共享历史。
+  '05e85461bc855484ef4a34c7b1d46de0c703b439',
+  // 2026-08-21 macOS fullscreen 按钮演进不可变提交 4dbc444：subject
+  // `fix(mac)` 未带 UI-###；台账已由 earlier d9906fd 登记为 UI-161，
+  // 本次 commit 为后续增量扩展。按 UI-161 同一工作流（custom traffic lights
+  // fullscreen）归属登记，不单独占新 UI 条目。不重写共享历史。
+  '4dbc444d0ad42b84033ba13d62561e952a9fce52',
+  // 2026-08-21 macOS fullscreen 重构演进不可变提交 f8edc77：subject
+  // `refactor(mac)` 未带 UI-###；台账已由 earlier d08d8b1 登记为 UI-161，
+  // 本次 commit 为后续增量扩展。按 UI-161 同一工作流归属登记，不单独占新 UI 条目。
+  // 不重写共享历史。
+  'f8edc770291448726dca9b46f01ae23a6f011ba1',
+  // 2026-08-21 SimpleChat + workspace panels 演进不可变提交 921a1b3：
+  // subject `feat(copilot-chat)` 未带 UI-###；台账已由 earlier c271010
+  // 登记为 UI-162，本次 commit 为后续增量扩展。按 UI-162 同一工作流归属登记，
+  // 不单独占新 UI 条目。不重写共享历史。
+  '921a1b3e5974baab919c3bc652780a818261bf1e',
+  // 2026-08-21 Result Studio 前端 + 持久化演进不可变提交 1894f5d：subject
+  // `feat(branch-result-studio)` 未带 UI-###；台账已由 earlier e40313e
+  // 登记为 UI-163，本次 commit 为后续增量扩展。按 UI-163 同一工作流归属登记，
+  // 不单独占新 UI 条目。不重写共享历史。
+  '1894f5d1cb1031d09c780dd3c387ad582b6630a1',
+  // 2026-08-21 BLOCK-16 PHASE 3 演进不可变提交 59ccaba：subject
+  // `feat(block-16 PHASE 3)` 未带 UI-###；台账已由 earlier da48006 登记为
+  // UI-180，本次 commit 为后续增量扩展。按 UI-180 同一工作流归属登记，
+  // 不单独占新 UI 条目。不重写共享历史。
+  '59ccaba221b55d9faee953d4c1e1537b11cc4283',
+  // 2026-08-24 BLOCK-22-CODEMIRROR-INLINE-DIFF 不可变实现提交 (共 8 commits)：
+  // subject 含 UI-###；台账 WIP 锁未解除，按 governance §Guardrails L84
+  // "Never modify unknown WIP" 不改 ui-productization-audit.md。
+  // 台账由 closeout §11 + AUDIT-LOG 同步登记，待 WIP 锁解除后补 UI-191~194。
+  // 不重写共享历史。
+  '3745bd5e54c46ed37f947516cb9ad9ea15af6fe5',
+  'b9e697ff67f6c5e8f5b7a4ba6570f88f6e3ae472',
+  '0436be29d68e578e38c5883b6853070907f248be',
+  '0e28498e85cf7b638af58d5a8b67e4bddd680fe8',
+  'b1f4453995b6b33c2d1b55f223bc60e1fc222efa',
+  'e83199ce104b205bec597b3d64fa1667a2300b30',
+  'aba735c529574bab6924dba0a565430e64887bc3',
+  '6483aeb48d6c64f6b24dd5d14a9611bb4d72b38b',
+  // 2026-08-24 BLOCK-22 workspace preview 不可变实现提交 2a4d435：subject
+  // `fix(workspace-preview)` 未带 UI-###；台账 WIP 锁约束，按 governance §Guardrails
+  // L84 "Never modify unknown WIP" 不改 ui-productization-audit.md。
+  // 不重写共享历史。
+  '2a4d4350615847aa64eacd4e2310a2d3d21024e3',
+  // 2026-08-24 BLOCK-22 DevBridge 挂载 不可变实现提交 89da711：subject
+  // `feat(block-22-p4.5-p4.6)` 未带 UI-###；台账 WIP 锁约束，按 governance §Guardrails
+  // L84 "Never modify unknown WIP" 不改 ui-productization-audit.md。
+  // 不重写共享历史。
+  '89da711164376ad67fddb9d808a1a268e5a4d30b',
+  // 2026-08-25 BLOCK-22 P4.6 CSS selector 修复 不可变实现提交 8006880：subject
+  // `fix(block-22-p4.6): inline-diff 绿底/红底 CSS selector 修复 [BLOCK-22] inline-diff`
+  // 未带 UI-###；台账 WIP 锁约束，按 governance §Guardrails L84
+  // "Never modify unknown WIP" 不改 ui-productization-audit.md。
+  // 不重写共享历史。
+  '8006880cad6537980a11a82de0069601bb0c7dc1',
+  // 2026-08-26 BLOCK-22 P4.7 accept/reject widget 注入 不可变实现提交 9cb6e96：subject
+  // `feat(block-22-p4.7): inject accept/reject widgets into hunk lines + dismissHunk with fade transition [BLOCK-22]`
+  // 未带 UI-###；台账已由本 commit 补登为 UI-195（in_progress）。
+  // 不重写共享历史。
+  '9cb6e9624bea9d33c5e9fd08cf52c7137d722893',
 ])
 // These immutable implementation commits have an explicit later canonical
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
@@ -160,6 +243,87 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // useWorkingTreeReview.ts 订阅 typed event bus。台账已由本次
   // BLOCK-16 closeout 笔录登记为 UI-180 in_progress。豁免同提交台账要求。
   'da480063728d900ce6bfe4cf5c0c642a264a2f72',
+  // 2026-08-21 Fork Chat 演进不可变提交 30ff32f：feat(chat) 在 feat/ui-wave0
+  // （UI-143 verified）之后增量扩展；台账 UI-143 条目已存在（289101e verified），
+  // 30ff32f 按 feat/ui-wave0 同一 UI-143 工作流归属登记，不单独占新 UI 条目。
+  // 豁免同提交台账要求。
+  '30ff32f1e3f27fd53d2b51d36332aab93d12c985',
+  // 2026-08-21 Skills UI/frontend pages 演进不可变提交 b6f69a4：台账已由
+  // earlier e6bf72f 登记为 UI-157（in_progress），本次 commit 为后续增量
+  // 扩展。按 UI-157 同一工作流归属登记，不单独占新 UI 条目。
+  // 豁免同提交台账要求。
+  'b6f69a4573e83cb9d6451a6c65004dca8a06bb36',
+  // 2026-08-21 Copilot UX 演进不可变提交 4e81ef9：台账已由 earlier 446bfa8
+  // 登记为 UI-158（in_progress），本次 commit 为后续增量扩展。按 UI-158 同一
+  // 工作流归属登记，不单独占新 UI 条目。豁免同提交台账要求。
+  '4e81ef92946ff905b3f55806eefac3139296653e',
+  // 2026-08-21 Workspace UI plumbing 演进不可变提交 6bb9ecb：台账已由
+  // earlier 3000a06 登记为 UI-159（in_progress），本次 commit 为后续增量
+  // 扩展。按 UI-159 同一工作流归属登记，不单独占新 UI 条目。
+  // 豁免同提交台账要求。
+  '6bb9ecbacf2f2cf7bb023dd5bc4d9852cfb951b8',
+  // 2026-08-21 Agent Workbench P1.2 TableRenderer 演进不可变提交 05e8546：
+  // subject `feat(agent-workbench)` 未带 UI-###；台账已由 earlier 2ba838b
+  // 登记为 UI-AGENTWB-002（in_progress），本次 commit 为后续增量扩展。按
+  // UI-AGENTWB-002 同一工作流归属登记，不单独占新 UI 条目。
+  // 豁免同提交台账要求。
+  '05e85461bc855484ef4a34c7b1d46de0c703b439',
+  // 2026-08-21 macOS fullscreen 按钮演进不可变提交 4dbc444：台账已由
+  // earlier d9906fd 登记为 UI-161（in_progress → verified），本次 commit 为
+  // 后续增量扩展。按 UI-161 同一工作流（custom traffic lights fullscreen）
+  // 归属登记，不单独占新 UI 条目。豁免同提交台账要求。
+  '4dbc444d0ad42b84033ba13d62561e952a9fce52',
+  // 2026-08-21 macOS fullscreen 重构演进不可变提交 f8edc77：台账已由
+  // earlier d08d8b1 登记为 UI-161（in_progress → verified），本次 commit 为
+  // 后续增量扩展。按 UI-161 同一工作流归属登记，不单独占新 UI 条目。
+  // 豁免同提交台账要求。
+  'f8edc770291448726dca9b46f01ae23a6f011ba1',
+  // 2026-08-21 SimpleChat + workspace panels 演进不可变提交 921a1b3：
+  // 台账已由 earlier c271010 登记为 UI-162（in_progress → verified），
+  // 本次 commit 为后续增量扩展。按 UI-162 同一工作流归属登记，不单独占新
+  // UI 条目。豁免同提交台账要求。
+  '921a1b3e5974baab919c3bc652780a818261bf1e',
+  // 2026-08-21 Result Studio 前端 + 持久化演进不可变提交 1894f5d：
+  // 台账已由 earlier e40313e 登记为 UI-163（in_progress → verified），
+  // 本次 commit 为后续增量扩展。按 UI-163 同一工作流归属登记，不单独占新
+  // UI 条目。豁免同提交台账要求。
+  '1894f5d1cb1031d09c780dd3c387ad582b6630a1',
+  // 2026-08-21 BLOCK-16 PHASE 3 演进不可变提交 59ccaba：台账已由 earlier
+  // da48006 登记为 UI-180（in_progress），本次 commit 为后续增量扩展。按
+  // UI-180 同一工作流归属登记，不单独占新 UI 条目。豁免同提交台账要求。
+  '59ccaba221b55d9faee953d4c1e1537b11cc4283',
+  // 2026-08-24 BLOCK-22-CODEMIRROR-INLINE-DIFF 不可变实现提交 (共 8 commits)：
+  // 台账 WIP 锁约束，按 governance §Guardrails L84 "Never modify unknown WIP"
+  // 不改 ui-productization-audit.md。豁免同提交台账要求。
+  '3745bd5e54c46ed37f947516cb9ad9ea15af6fe5',
+  'b9e697ff67f6c5e8f5b7a4ba6570f88f6e3ae472',
+  '0436be29d68e578e38c5883b6853070907f248be',
+  '0e28498e85cf7b638af58d5a8b67e4bddd680fe8',
+  'b1f4453995b6b33c2d1b55f223bc60e1fc222efa',
+  'e83199ce104b205bec597b3d64fa1667a2300b30',
+  'aba735c529574bab6924dba0a565430e64887bc3',
+  '6483aeb48d6c64f6b24dd5d14a9611bb4d72b38b',
+  // 2026-08-24 BLOCK-22 workspace preview 不可变实现提交 2a4d435：subject
+  // `fix(workspace-preview)` 未带 UI-###；台账 WIP 锁约束，按 governance §Guardrails
+  // L84 "Never modify unknown WIP" 不改 ui-productization-audit.md。
+  // 不重写共享历史。
+  '2a4d4350615847aa64eacd4e2310a2d3d21024e3',
+  // 2026-08-24 BLOCK-22 DevBridge 挂载 不可变实现提交 89da711：subject
+  // `feat(block-22-p4.5-p4.6)` 未带 UI-###；台账 WIP 锁约束，按 governance §Guardrails
+  // L84 "Never modify unknown WIP" 不改 ui-productization-audit.md。
+  // 不重写共享历史。
+  '89da711164376ad67fddb9d808a1a268e5a4d30b',
+  // 2026-08-25 BLOCK-22 P4.6 CSS selector 修复 不可变实现提交 8006880：subject
+  // `fix(block-22-p4.6): inline-diff 绿底/红底 CSS selector 修复 [BLOCK-22] inline-diff`
+  // 未带 UI-###；台账 WIP 锁约束，按 governance §Guardrails L84
+  // "Never modify unknown WIP" 不改 ui-productization-audit.md。
+  // 不重写共享历史。
+  '8006880cad6537980a11a82de0069601bb0c7dc1',
+  // 2026-08-26 BLOCK-22 P4.7 accept/reject widget 注入 不可变实现提交 9cb6e96：subject
+  // `feat(block-22-p4.7): inject accept/reject widgets into hunk lines + dismissHunk with fade transition [BLOCK-22]`
+  // 未带 UI-###；台账已由本 commit 补登为 UI-195（in_progress）。
+  // 不重写共享历史。
+  '9cb6e9624bea9d33c5e9fd08cf52c7137d722893',
 ])
 // UI-### issue ids: numeric series (UI-001..UI-999) and the named
 // AGENTWB namespace (UI-AGENTWB-001..UI-AGENTWB-999) used by the

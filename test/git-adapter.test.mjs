@@ -592,3 +592,112 @@ test('RS1 managed repository disables hooks', { skip: !gitReady }, (context) => 
   assert.equal(configured === '' || configured.includes('biof3-disabled-hooks'), true);
   assert.equal(existsSync(join(root, BIOF3_DIR, 'git', 'biof3-disabled-hooks')), false);
 });
+
+// ---------------------------------------------------------------------------
+// BLOCK-20 — Code Review Panel 新增方法
+// listModified / fileHeadContent / fileWorkTreeContent / splitSideDiff /
+// revertFile / applyInverseHunk
+// ---------------------------------------------------------------------------
+
+test('BLOCK-20 listModified returns tracked and untracked entries', { skip: !gitReady }, (context) => {
+  const root = makeWorkspace(context, 'biof3-b20-');
+  initUserRepository(root);
+  writeFileSync(join(root, 'new-file.txt'), 'untracked\n');
+  writeFileSync(join(root, 'README.md'), '# user project v2\n');
+  const adapter = createGitAdapter({
+    gitDir: join(root, '.git'),
+    workTree: root,
+  });
+  const result = adapter.listModified();
+  assert.equal(result.ok, true);
+  const paths = result.files.map((f) => f.path).sort();
+  assert.deepEqual(paths, ['README.md', 'new-file.txt']);
+  const readme = result.files.find((f) => f.path === 'README.md');
+  assert.equal(readme.workTreeStatus, 'M'); // modified
+  const newFile = result.files.find((f) => f.path === 'new-file.txt');
+  assert.equal(newFile.status, '??');
+});
+
+test('BLOCK-20 fileHeadContent returns HEAD content for tracked files', { skip: !gitReady }, (context) => {
+  const root = makeWorkspace(context, 'biof3-b20-');
+  initUserRepository(root);
+  const adapter = createGitAdapter({ gitDir: join(root, '.git'), workTree: root });
+  const result = adapter.fileHeadContent({ path: 'README.md' });
+  assert.equal(result.ok, true);
+  assert.equal(result.content, '# user project\n');
+});
+
+test('BLOCK-20 fileHeadContent returns null for untracked files', { skip: !gitReady }, (context) => {
+  const root = makeWorkspace(context, 'biof3-b20-');
+  initUserRepository(root);
+  writeFileSync(join(root, 'fresh.txt'), 'fresh\n');
+  const adapter = createGitAdapter({ gitDir: join(root, '.git'), workTree: root });
+  const result = adapter.fileHeadContent({ path: 'fresh.txt' });
+  assert.equal(result.ok, true);
+  assert.equal(result.content, null);
+});
+
+test('BLOCK-20 splitSideDiff returns unified diff + both contents', { skip: !gitReady }, (context) => {
+  const root = makeWorkspace(context, 'biof3-b20-');
+  initUserRepository(root);
+  writeFileSync(join(root, 'README.md'), '# user project v2\n- new line\n');
+  const adapter = createGitAdapter({ gitDir: join(root, '.git'), workTree: root });
+  const result = adapter.splitSideDiff({ path: 'README.md' });
+  assert.equal(result.ok, true);
+  assert.equal(result.headContent, '# user project\n');
+  assert.equal(result.workTreeContent, '# user project v2\n- new line\n');
+  assert.ok(result.diff.startsWith('diff --git'), `expected unified diff header, got: ${result.diff.slice(0, 60)}`);
+  assert.ok(result.diff.includes('-# user project'));
+  assert.ok(result.diff.includes('+# user project v2'));
+});
+
+test('BLOCK-20 revertFile rolls back working tree to HEAD', { skip: !gitReady }, (context) => {
+  const root = makeWorkspace(context, 'biof3-b20-');
+  initUserRepository(root);
+  writeFileSync(join(root, 'README.md'), '# MUTATED\n');
+  const adapter = createGitAdapter({ gitDir: join(root, '.git'), workTree: root });
+  const result = adapter.revertFile({ path: 'README.md' });
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.reverted, ['README.md']);
+  assert.equal(readFileSync(join(root, 'README.md'), 'utf-8'), '# user project\n');
+});
+
+test('BLOCK-20 applyInverseHunk validates input', () => {
+  const adapter = createGitAdapter({
+    gitDir: join(tmpdir(), '.git-empty'),
+    workTree: tmpdir(),
+  });
+  throwsWithCode(() => adapter.applyInverseHunk({ patch: '' }), 'patch_required');
+  throwsWithCode(() => adapter.applyInverseHunk({ patch: null }), 'patch_required');
+});
+
+test('BLOCK-20 applyInverseHunk rejects a real working-tree change', { skip: !gitReady }, (context) => {
+  const root = makeWorkspace(context, 'biof3-b20-');
+  initUserRepository(root);
+  // 修改 README 的 line 1（让 git diff 输出 -old / +new hunk）
+  writeFileSync(join(root, 'README.md'), '# user project MUTATED\n');
+  const adapter = createGitAdapter({ gitDir: join(root, '.git'), workTree: root });
+  const side = adapter.splitSideDiff({ path: 'README.md' });
+  assert.ok(side.diff.length > 0, 'expected non-empty diff');
+  assert.ok(side.diff.includes('-# user project'), `expected -line, diff was: ${side.diff}`);
+  assert.ok(side.diff.includes('+# user project MUTATED'));
+  // working tree 仍是修改后的状态
+  assert.equal(readFileSync(join(root, 'README.md'), 'utf-8'), '# user project MUTATED\n');
+  // 应用 inverse 把它撤回
+  adapter.applyInverseHunk({ patch: side.diff });
+  assert.equal(readFileSync(join(root, 'README.md'), 'utf-8'), '# user project\n');
+});
+
+test('BLOCK-20 listModified validates paths are safe', { skip: !gitReady }, (context) => {
+  const root = makeWorkspace(context, 'biof3-b20-');
+  initUserRepository(root);
+  const adapter = createGitAdapter({ gitDir: join(root, '.git'), workTree: root });
+  throwsWithCode(
+    () => adapter.splitSideDiff({ path: '../escape.txt' }),
+    'pathspec_traversal'
+  );
+  throwsWithCode(
+    () => adapter.revertFile({ path: '' }),
+    'pathspec_invalid'
+  );
+});

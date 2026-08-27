@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 130,
-    "lastUpdated": "2026-08-19",
-    "managedMarkdown": 130
+    "documentCount": 138,
+    "lastUpdated": "2026-08-22",
+    "managedMarkdown": 138
   },
   "documents": [
     {
@@ -1631,9 +1631,8 @@
       "id": "BLOCK-11-BIOSKILLS-INTEGRATION",
       "path": "docs/block-11-bioSkills-integration-plan-v1.0.md",
       "kind": "work-package",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "block-11-bioSkills-integration",
+      "status": "superseded",
+      "canonical": false,
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
@@ -1644,8 +1643,27 @@
         "plugin",
         "skill"
       ],
-      "notes": "2026-08-18 BLOCK-11 bioSkills 生态集成（GPTomics/bioSkills.git → BioF3 plugin/skill 映射）active 启动。Top 5 priority categories: single-cell (P0) / variant-calling (P0) / pathway-analysis (P1) / methylation-analysis (P1) / read-qc (P2)。6 PHASE：PHASE 0 调研 + PHASE 1 single-cell plugin/skill + PHASE 2 variant-calling + PHASE 3 pathway+methylation + PHASE 4 read-qc + PHASE 5 收口。用户 2026-08-18 显式裁决启动。",
+      "notes": "2026-08-18 BLOCK-11 bioSkills 生态集成（GPTomics/bioSkills.git → BioF3 plugin/skill 映射）active 启动。Top 5 priority categories: single-cell (P0) / variant-calling (P0) / pathway-analysis (P1) / methylation-analysis (P1) / read-qc (P2)。6 PHASE：PHASE 0 调研 + PHASE 1 single-cell plugin/skill + PHASE 2 variant-calling + PHASE 3 pathway+methylation + PHASE 4 read-qc + PHASE 5 收口。用户 2026-08-18 显式裁决启动。 2026-08-21 用户裁决 G-1：冻结为 paused，BLOCK-17 接管 active 槽位。 2026-08-21 G-1 裁决：superseded by BLOCK-17 active. 冻结为 paused 语义对应 superseded。",
       "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-17-AGENT-DOC-REVIEW-PANEL",
+      "path": "docs/block-17-agent-doc-review-panel-plan.md",
+      "kind": "work-package",
+      "status": "superseded",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-17",
+        "ui-panel",
+        "agent-doc-review",
+        "G0"
+      ],
+      "notes": "2026-08-21 BLOCK-17 Agent 文档审阅侧边栏面板（BLOCK-11 冻结为 paused 后接管 active 槽位）。2026-08-22 用户裁决'多一个审阅界面没有意义'，UI 入口改为文件页面内 diff toggle（BLOCK-18 接管 active 槽位）。已实现资产（IPC / preload / bridge / 类型 / .wt-* 样式 / IPC 测试）由 BLOCK-18 复用；独立面板（4 文件）、TitleBar + 菜单项、useWorkspacePanels.docReviewOpen 状态槽由 BLOCK-18 删除。",
+      "registeredAt": "2026-08-21",
+      "supersededById": "BLOCK-18-WORKSPACE-MD-DIFF",
+      "supersededAt": "2026-08-22"
     },
     {
       "id": "BLOCK-11-BIOSKILLS-INTEGRATION-BATCH-PHASE-1",
@@ -1986,8 +2004,177 @@
       "title": "BLOCK-16 Working Tree Review Mode",
       "path": "docs/block-16-working-tree-review-mode-plan.md",
       "entrypoint": "docs/README.md"
+    },
+    {
+      "id": "BLOCK-18-WORKSPACE-MD-DIFF",
+      "path": "docs/block-18-workspace-md-diff-plan.md",
+      "kind": "work-package",
+      "status": "superseded",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-18",
+        "ui-diff",
+        "workspace-md",
+        "G0",
+        "superseded-2026-08-22"
+      ],
+      "notes": "2026-08-22 BLOCK-18 接管 BLOCK-17 active 槽位。用户裁决'多一个审阅界面没有意义'，把'前后差异'直接搬到 WorkspaceFilePreview 内：toolbar 加'预览 / 对比' toggle，diff 视图复用 BLOCK-17 computeSimpleDiff + .wt-* 样式 + agentDocReview IPC。PHASE 1 提取 markdownDiff.ts / PHASE 2 WorkspaceFilePreview 加 mode 状态机 / PHASE 3 删除 BLOCK-17 独立面板 / PHASE 4 验收门禁 + 收口。\n2026-08-22 BLOCK-20-CODE-REVIEW-PANEL 接管 active 槽位；BLOCK-18 转 superseded。",
+      "owners": [
+        "main-agent"
+      ],
+      "supersededById": "BLOCK-20-CODE-REVIEW-PANEL",
+      "supersededAt": "2026-08-22"
+    },
+    {
+      "id": "BLOCK-20-CODE-REVIEW-PANEL",
+      "path": "docs/block-20-code-review-panel-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-20-code-review",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-20",
+        "code-review",
+        "git-diff",
+        "G0",
+        "ui-panel"
+      ],
+      "notes": "2026-08-22 用户裁决：'代码审阅模式' = 系统级常驻右侧面板，覆盖所有文本文件（不限 markdown），基准 vs git HEAD，hunk accept/reject + 左右双栏 split view + inline-edit 抽屉。接管 BLOCK-18 active 槽位；BLOCK-19 thin-slice 资产合并进 PHASE 3 drawer。PHASE 0 治理登记 → PHASE 1 IPC 5 通道 → PHASE 2 CodeReviewPanel + Drawer 组件 → PHASE 3 inline-edit → PHASE 4 per-hunk reject inverse + system-prompt 注入复用 BLOCK-16 → PHASE 5 专项门禁 + closeout。",
+      "owners": [
+        "main-agent"
+      ],
+      "registeredAt": "2026-08-22"
+    },
+    {
+      "id": "BLOCK-20-CODE-REVIEW-PANEL-CLOSEOUT",
+      "path": "docs/block-20-code-review-panel-closeout.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "block-20-code-review-closeout",
+      "archivePolicy": "retain_stable_path",
+      "linkedCommits": [
+        "b855b54",
+        "18995bb",
+        "ea03eaf",
+        "2dee4d1",
+        "6482cd9",
+        "3d0c874",
+        "0d5b7e3",
+        "1292e24"
+      ],
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-20",
+        "code-review",
+        "closeout",
+        "G0",
+        "ui-panel"
+      ],
+      "notes": "2026-08-22 BLOCK-20-CODE-REVIEW-PANEL 收口笔录。4 PHASE 全部落地：PHASE 0 治理登记 b855b54 / PHASE 1 git-adapter 5 方法 + IPC 5 通道 + 38 测试 18995bb / PHASE 1 ui-audit 同步 ea03eaf / PHASE 2 WorkingTreeReview 浮层→常驻右侧面板 2dee4d1 / PHASE 3 workspace.writeTextFile IPC + 项目文件 inline-edit 6482cd9 / PHASE 3 资产收口 BLOCK-17/19 markdownDiff.ts + 4 测试文件 3d0c874 / 综合笔录 + handoff + 调试归档 0d5b7e3 / AUDIT-LOG 收口 entry + pre-existing UI-AUDIT 登记 1292e24。PHASE 4 per-hunk reject inverse 在 working tree（4 文件 +1 测试 +1 脚本）。4 治理门 GREEN（docs:check 137 / ui:audit:check BLOCK-20 范围 0 错 / docs:reconcile 0 issues / tsc --noEmit 0 错）+ 1 专项门禁 8/8 PASS（block:code-review）。不变量守住：preload.js 19 命名空间 0 diff / electron.d.ts 既有类型 0 diff / BLOCK-16 既有组件 0 diff / Result Studio 既有 diff 组件 0 diff / core/shared-backend 既有方法 0 diff / 0 新 npm 依赖。",
+      "registeredAt": "2026-08-22"
+    },
+    {
+      "id": "BLOCK-21-HARNESS-INDEX-500",
+      "path": "docs/block-21-harness-index-500-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-21-harness-index-500",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-21",
+        "harness",
+        "path-bug",
+        "G0"
+      ],
+      "linkedCommits": [
+        "TBD"
+      ],
+      "qualificationEligible": false,
+      "cancelledReason": null,
+      "notes": "2026-08-24 /api/harness/index?scope=project 抛 500 修复。根因：routes/_helpers/harness-shared.js 的 desktopRootFromHere() 3层，应4层。0 新依赖。"
+    },
+    {
+      "id": "BLOCK-21-HARNESS-INDEX-500-CLOSEOUT",
+      "path": "docs/block-21-harness-index-500-closeout.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "block-21-harness-index-500-closeout",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-21",
+        "harness",
+        "closeout",
+        "G0"
+      ],
+      "linkedCommits": [
+        "TBD"
+      ],
+      "notes": "2026-08-24 BLOCK-21 收口笔录。路径深度 3→4 层修 + 2 端到端回归测试 PASS。同 bug 影响所有调 loadHarnessModule() 的端点。"
+    },
+    {
+      "id": "BLOCK-22-CODEMIRROR-INLINE-DIFF-PLAN",
+      "path": "docs/block-22-codemirror-inline-diff-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "workspace-file-preview-engine",
+      "entrypoint": "docs/AUDIT-LOG.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-22",
+        "codemirror",
+        "inline-diff",
+        "G0",
+        "gates=docs:check/ui:audit:check/vitest",
+        "untracked-wip-disposition=unknown-agent",
+        "completed",
+        "phase=P0-P3-COMPLETED"
+      ],
+      "linkedCommits": [
+        "b9e697f",
+        "3745bd5",
+        "0436be2",
+        "0e28498",
+        "b1f4453"
+      ],
+      "notes": "2026-08-24 用户裁决启动当前唯一 active 工作包（BLOCK-15/20 已收口）；BLOCK-22 4 PHASE 串行（P0 基础脚手架+只读渲染 / P1 unified diff / P2 accept/reject / P3 聊天卡片跳转），2.5 人天 / 9~14 commits。truthDomain = workspace-file-preview-engine。复用 BLOCK-20 PHASE 1+4 已备 git-adapter 6 方法 + workspace.writeTextFile + reject 清单 30 天 TTL（不新增 IPC）。不外推 monaco-editor / react-diff-viewer / react-split-pane / n-way merge / packaged / Provider / GA / P7 / notarization / dist staleness / Block-3 Monaco Phase 2。24 个 WIP 文件保留决策：见 AUDIT-LOG 2026-08-24 BLOCK-22 launch entry。 | 2026-08-24 收口笔录见 docs/block-22-codemirror-inline-diff-closeout.md。4 PHASE 全部落地：P0 基础脚手架 + 12 个 @codemirror/* 依赖 + 10 editor/ 文件 616 行 / P1 unified diff + scroll/pulse + 6 文件 ~750 行 / P2 Accept/Reject widget + 复用 BLOCK-20 PHASE 1+4 5 IPC 0 新增 / P3 桥接层 9 文件 1260 行。验证矩阵：tsc 0 / BLOCK-22 影响范围 vitest 53/53 / docs:check 141 / docs:reconcile 0。UI-191/192/193/194 in_progress（WIP 锁延迟登记，docs/ui-productization-audit.md 脱离 WIP 后补登）。"
+    },
+    {
+      "id": "BLOCK-22-CODEMIRROR-INLINE-DIFF-CLOSEOUT",
+      "path": "docs/block-22-codemirror-inline-diff-closeout.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "block-22-codemirror-inline-diff-closeout",
+      "archivePolicy": "retain_stable_path",
+      "linkedCommits": [
+        "b9e697f",
+        "3745bd5",
+        "0436be2",
+        "0e28498",
+        "b1f4453"
+      ],
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-22",
+        "codemirror",
+        "inline-diff",
+        "closeout",
+        "G0"
+      ],
+      "notes": "2026-08-24 BLOCK-22-CODEMIRROR-INLINE-DIFF 收口笔录。5 commits 全落 feat/block-22-codemirror-inline-diff HEAD b1f4453。24 files / +4357/-212。19 个新文件 (~3977 行) + 5 个修改（package.json/package-lock.json/editor/index.ts/AUDIT-LOG/DOC-REGISTRY）。4 PHASE 全部落地：PHASE 0 脚手架 3745bd5 / PHASE 1 unified diff 0436be2 / PHASE 2 Accept-Reject widget 0e28498 / PHASE 3 桥接层 b1f4453。验证：tsc --noEmit 0 错 / BLOCK-22 影响范围 vitest 53/53 PASS（4 files）/ docs:check 141 PASS / docs:reconcile 0 issues。0 新增 IPC（复用 BLOCK-20 PHASE 1 5 IPC + PHASE 4 git:hunk-reject-inverse + PHASE 3 workspace:write-text-file）。不变量守住：preload.js / electron.d.ts / desktopBridge.ts / core/shared-backend/* / agent-tools/* / agent-transcripts/* 0 diff；24 个 WIP + test.txt 0 触碰。UI-191/192/193/194 in_progress（WIP 锁延迟登记，docs/ui-productization-audit.md 脱离 WIP 后补登）。不外推 packaged / Provider / GA / P7 / notarization / dist staleness G1+；不引 monaco-editor / react-diff-viewer / react-split-pane / n-way merge；不重新激活 BLOCK-2~21 任意已收口工作包。",
+      "registeredAt": "2026-08-24"
     }
   ],
-  "lastUpdated": "2026-08-19",
-  "documentCount": 134
+  "lastUpdated": "2026-08-24 (BLOCK-22 completed)",
+  "documentCount": 142
 }

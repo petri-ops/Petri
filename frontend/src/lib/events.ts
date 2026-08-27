@@ -63,6 +63,15 @@ export const biof3Events = {
    * payload 含 taskId（agent task identifier）+ filesChanged（若后端在 done 时附了改动清单）。
    */
   agentTaskDone: 'biof3:agent-task-done',
+
+  /** BLOCK-20: fired by backend SSE once per agent run with live token budget. */
+  tokenBudget: 'biof3:token-budget',
+
+  /** BLOCK-22 P4.10: fired by useCodeMirrorEditor after acceptHunk IPC succeeds. */
+  hunkAccepted: 'biof3:hunk-accepted',
+
+  /** BLOCK-22 P4.10: fired by useCodeMirrorEditor after rejectHunk IPC succeeds. */
+  hunkRejected: 'biof3:hunk-rejected',
 } as const;
 
 export interface ConversationForkedDetail {
@@ -82,6 +91,30 @@ export interface AgentTaskDoneDetail {
   filesChanged?: Array<{ path: string; status: string }>;
 }
 
+/** BLOCK-20: fired by backend SSE once per agent run with live token budget. */
+export interface TokenBudgetDetail {
+  contextWindow: number;
+  messagesTokensUsed: number;
+  systemPromptTokens: number;
+  messagesTokens: number;
+  pct: number;
+  trimmed: boolean;
+}
+
+/** BLOCK-22 P4.10: fired by useCodeMirrorEditor after acceptHunk IPC succeeds. */
+export interface HunkAcceptedDetail {
+  hunkId: string;
+  filePath: string;
+  timestamp: number;
+}
+
+/** BLOCK-22 P4.10: fired by useCodeMirrorEditor after rejectHunk IPC succeeds. */
+export interface HunkRejectedDetail {
+  hunkId: string;
+  filePath: string;
+  timestamp: number;
+}
+
 // ---------------------------------------------------------------------------
 // Typed helpers
 // ---------------------------------------------------------------------------
@@ -91,8 +124,13 @@ export type BioF3EventName = (typeof biof3Events)[keyof typeof biof3Events];
 export interface CopilotAskDetail {
   prompt: string;
   /**
-   * P4R-3：结果 Composer 的原子上下文快照。token 不写入 prompt；
-   * SimpleChat 将该快照覆盖到本轮请求 context，避免异步建会话期间漂移。
+   * When true, the prompt is dispatched from the AnalysisLaunchPanel and should
+   * run as a background sub-agent task rather than the primary stream.
+   */
+  analysisMode?: boolean;
+  /**
+   * P4R-3: 结果 Composer 的原子上下文快照。token 不写入 prompt;
+   * SimpleChat 将该快照覆盖到本轮请求 context,避免异步建会话期间漂移。
    */
   resultContext?: {
     contextToken: string;
@@ -121,12 +159,30 @@ export interface ProjectOpenArtifactDetail {
  * Payload for `projectOpenWorkspaceFile`. `projectId` is required and must
  * be validated by the host before opening — the resolver never trusts
  * user-supplied cross-project paths.
+ *
+ * BLOCK-22 P4.5: 扩展支持行号、列号和 inline-diff revision 触发。
  */
 export interface ProjectOpenWorkspaceFileDetail {
   projectId: string;
   relativePath: string;
   name?: string;
   openWithSystemApp?: boolean;
+  /** BLOCK-22 P4.5: 行号，0=文件开头（1-based，与 EditorApi.scrollToLine 一致） */
+  line?: number;
+  /** BLOCK-22 P4.5: 列号（0-based 列偏移） */
+  column?: number;
+  /**
+   * BLOCK-22 P4.5: 若设置，project-workspace 将通过 pendingRequest 触发
+   * WorkspaceFilePreviewBridge 进入 inline-diff 模式并应用此 revision。
+   */
+  diffRevision?: DiffRevisionPayload;
+}
+
+/** BLOCK-22 P4.5: diffRevision 载荷，透传给 WorkspaceFilePreviewBridge */
+export interface DiffRevisionPayload {
+  filePath: string;
+  originalText: string;
+  modifiedText: string;
 }
 
 export interface ProjectWorkspaceChangedDetail {
@@ -146,6 +202,9 @@ export type BioF3EventMap = {
   [biof3Events.browserForward]: undefined;
   [biof3Events.conversationForked]: ConversationForkedDetail;
   [biof3Events.agentTaskDone]: AgentTaskDoneDetail;
+  [biof3Events.tokenBudget]: TokenBudgetDetail;
+  [biof3Events.hunkAccepted]: HunkAcceptedDetail;
+  [biof3Events.hunkRejected]: HunkRejectedDetail;
 };
 
 /** Dispatch a typed event on window */

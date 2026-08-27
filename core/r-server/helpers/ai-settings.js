@@ -89,6 +89,7 @@ function normalizeAiSettings(settings) {
           provider: String(p.provider || 'deepseek').trim(),
           model: String(p.model || 'deepseek-chat').trim(),
           baseUrl: p.baseUrl ? String(p.baseUrl).trim() : undefined,
+          contextWindow: typeof p.contextWindow === 'number' && p.contextWindow > 0 ? Math.round(p.contextWindow) : undefined,
         }))
         .filter((p) => p.id && p.label && p.provider && p.model)
     : [];
