@@ -1,6 +1,16 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-24 22:50（BLOCK-22-CODEMIRROR-INLINE-DIFF 已收口 —— 4 PHASE 全部落地：P0 CodeMirror 6 基础脚手架 + 12 个 @codemirror/* 依赖 / P1 Unified Diff 行级 + 字符级 / P2 Accept/Reject widget 0 新增 IPC / P3 桥接层 + Context 抽象 + 跳转触发器 + 全局监听桥；5 commits 全落 `feat/block-22-codemirror-inline-diff` HEAD `b1f4453`；24 files / +4357/-212 / 19 个新文件 ~3977 行；4 治理门 GREEN：tsc 0 / BLOCK-22 影响范围 vitest 53/53 / docs:check 141 → 142 / docs:reconcile 0；不变量守住：preload.js / electron.d.ts / desktopBridge.ts / core/shared-backend/* / agent-tools/* / agent-transcripts/* 0 diff；24 个 WIP + test.txt 0 触碰；UI-191/192/193/194 保持 in_progress 待 docs/ui-productization-audit.md 脱离 WIP 后补登；DOC-REGISTRY `BLOCK-22-CODEMIRROR-INLINE-DIFF-PLAN` active → completed + 新增 `BLOCK-22-CODEMIRROR-INLINE-DIFF-CLOSEOUT` reference + 5 linkedCommits + lastUpdated "2026-08-24 (BLOCK-22 completed)"；G0 开发期常态 · 不外推 packaged/Provider/GA/P7/notarization/dist staleness G1+；当前 active 工作包 NONE）
+最后更新：2026-08-28（Session Snapshot 建立为低成本恢复入口）
+
+## Session Snapshot
+
+- **Active work package**: NONE；下一工作包必须由用户显式裁决。
+- **Current branch**: `main`；HEAD、dirty state 与 `origin/main` 同步状态以运行时 Git 为准。
+- **Last completed boundary**: BLOCK-22 已完成并合流；UI-199 模型渠道上下文窗口配置已由 dev Electron 实机证据转为 `verified`；2026-08-28 完成 6 个零引用历史 closeout 的归档清理。
+- **Waiting decision**: 用户选择并启动下一工作包。
+- **Minimum recovery**: 先读 `AUDIT-LOG.md` 当前待处理项，再核对 Git，然后用 `DOC-REGISTRY.json` 定位 active 工作包；无 active 包时停止，不通读历史文档。
+- **Last recorded gates**: `docs:check` 142 PASS / `docs:reconcile` 0 validation issues（2 个仍被引用的保留候选）/ `ui:audit:check` PASS（191 个 UI 编号）。
+- **G0 discipline**: G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 
 - **BLOCK-17-AGENT-DOC-REVIEW-PANEL（2026-08-21 → 2026-08-22 superseded）**：BLOCK-11 → paused。2026-08-22 用户裁决'多一个审阅界面没有意义'，UI 入口改为文件页面内 diff toggle，由 BLOCK-18 接管 active 槽位。
@@ -9,14 +19,13 @@
 
 ## 1. 恢复顺序
 
-新的 Agent 不应通读历史计划猜测主线。按以下顺序恢复：
+新的 Agent 不应通读历史计划猜测主线。按以下最小顺序恢复：
 
-1. `git status --short` 与 `git log -5 --oneline --decorate`
-2. [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)
-3. [`next-steps-roadmap.md`](./next-steps-roadmap.md)
-4. [`ui-productization-audit.md`](./ui-productization-audit.md)
-5. [`development-module-map.md`](./development-module-map.md)
-6. 当前任务涉及的专项规范
+1. 上方 Session Snapshot 与 [`AUDIT-LOG.md`](./AUDIT-LOG.md) 的当前待处理项
+2. `git status --short --branch`、`git log -8 --oneline --decorate`、`git worktree list`
+3. `DOC-REGISTRY.json` 中 active 工作包与 canonical 冲突检查
+4. 仅当存在 active 工作包时读取其 canonical plan；否则等待用户裁决
+5. 当前任务涉及的源码、类型、测试、影响范围与专项规范
 
 历史审计与阶段验收位于 [`archive/`](./archive/README.md)，只用于追溯，不决定当前顺序。
 
@@ -564,4 +573,3 @@ UI Stage 1：
 - **UI-191/192/193/194 保持 `in_progress`**：按 audit 行 402 治理纪律"仅当真实 dev Electron 实机过目后才可考虑 verified"；`docs/ui-productization-audit.md` 在 24 个 WIP 锁内笔录延迟登记；解锁条件：`docs/ui-productization-audit.md` 脱离 WIP 状态后由主 agent 追加 UI-191~194 共 4 行 `in_progress` 笔录 + 重跑 `npm run ui:audit:check`。
 - **业务侧后续动作清单**（WIP 收口后）：① 接入 SimpleChat 聊天卡片（用 `<ChatCardLinkBridge>` 包装 ToolActivityList）；② 接入 WorkspaceFilePreview 容器（text 路径分支用 `<WorkspaceFilePreviewBridge mode="inline-diff">`）；③ 接入 events.ts（加 2 新事件 `projectOpenWorkspaceFileAtLine` + `projectReviewWorkspaceDiff`）；④ 决定 AppLevelBridge 挂载（`<AppLevelBridge />` 是否挂到 App.tsx）。
 - **当前 active 工作包**：NONE（BLOCK-22 已 completed，下一工作包由用户显式裁决启动）。
-

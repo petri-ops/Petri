@@ -187,6 +187,7 @@ JSON 输出模式，与既有 `--status` / `--check` / `--reconcile` / `--json` 
 
 - 进展回写原工作包，不按日期创建重复状态文档。
 - 只有当前事实变化才更新 handoff；长篇证据进入 acceptance 或专项记录。
+- handoff 顶部的 Session Snapshot 保持紧凑：记录 active 工作包、当前分支、最近完成边界、等待裁决者、最小恢复顺序、最近门禁和 G0 纪律；详细叙事留在正文或专项文档。
 - 工作包状态由门禁和证据决定，不由任务耗时、提交数量或 Agent 自述决定。
 - 发现 canonical 冲突时停止宣称完成，先执行 reconcile。
 
@@ -197,9 +198,10 @@ JSON 输出模式，与既有 `--status` / `--check` / `--reconcile` / `--json` 
 1. 计划内验收项有对应的当前证据。
 2. 工作包正文写明最终状态、范围和遗留边界。
 3. 当前 roadmap、next steps、handoff 与审计/UI 台账按责任同步。
-4. 注册表状态和归档策略准确。
-5. `npm run docs:reconcile` 已复核。
-6. `npm run docs:check` 通过。
+4. handoff 顶部的 Session Snapshot 与当前事实同步，不保留过期 active 包、完成边界或门禁结论。
+5. 注册表状态和归档策略准确。
+6. `npm run docs:reconcile` 已复核。
+7. `npm run docs:check` 通过。
 
 科学、Provider、packaged-app、视觉和长时间运行证据不能被普通单元测试或文档勾选替代。
 
