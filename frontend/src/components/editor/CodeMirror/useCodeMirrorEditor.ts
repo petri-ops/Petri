@@ -31,6 +31,7 @@ import {
 import { tags as t } from '@lezer/highlight';
 
 import { getBridge } from '../../../lib/desktopBridge';
+import { biof3Events, dispatchBioF3Event } from '../../../lib/events';
 import { loadLanguage } from './extensions/languageLoader';
 import { createUnifiedDiffExtension } from './extensions/unifiedDiff';
 import { createScrollToLineApi, scrollToLineExtension } from './extensions/scrollToLine';
@@ -101,6 +102,17 @@ interface WorkingTreeReviewLike {
     error?: string;
     message?: string;
   }>;
+  rejectHunkByInverseHunk: (params: {
+    file: string;
+    hunkIndex: number;
+    patch: string;
+    feedback?: string;
+  }) => Promise<{
+    ok: boolean;
+    data?: unknown;
+    error?: string;
+    message?: string;
+  }>;
 }
 
 /**
@@ -142,6 +154,28 @@ async function runAcceptHunkIPC(rev: DiffRevision, hunk: DiffHunk): Promise<void
   const result = await bridge.applyInverseHunk({ patch });
   if (!result.ok) {
     throw new Error(result.error || result.message || 'applyInverseHunk failed.');
+  }
+}
+
+async function runRejectHunkIPC(
+  rev: DiffRevision,
+  hunk: DiffHunk,
+  hunkIndex: number,
+  feedback?: string,
+): Promise<void> {
+  const bridge = getBridge('workingTreeReview') as WorkingTreeReviewLike | null;
+  if (!bridge) {
+    throw new Error('Desktop IPC bridge "workingTreeReview" is not available.');
+  }
+  const patch = buildForwardPatch(rev, hunk);
+  const result = await bridge.rejectHunkByInverseHunk({
+    file: rev.filePath,
+    hunkIndex,
+    patch,
+    feedback,
+  });
+  if (!result.ok) {
+    throw new Error(result.error || result.message || 'rejectHunkByInverseHunk failed.');
   }
 }
 
@@ -316,24 +350,38 @@ export function useCodeMirrorEditor(
             onErrorRef.current?.(err);
             throw err;
           }
+          // Task 5: IPC 成功后派发 typed event
+          dispatchBioF3Event(biof3Events.hunkAccepted, {
+            hunkId,
+            filePath: rev.filePath,
+            timestamp: Date.now(),
+          });
           // 触发业务侧回调（事件总线接入由 P3 完成）
           onAcceptHunkRef.current?.(hunkId);
           // Task 2: IPC 成功后触发 dismissHunk（CSS 淡出 + diff 重建）
           dismissHunkImpl(hunkId);
         },
         rejectHunk: async (hunkId: string): Promise<void> => {
-          // P2 实现：等价整文件 revert（per-hunk reject 路径走 git:hunk-reject-inverse，
-          // 由 BLOCK-20 PHASE 4 落地；P3 业务侧接入后才启用）。
           if (!isInlineDiff()) return;
           const rev = currentDiffRevisionRef.current;
           if (!rev) return;
+          const hunk = (rev.hunks ?? []).find((h) => h.id === hunkId);
+          if (!hunk) return;
+          const hunkIndex = (rev.hunks ?? []).findIndex((h) => h.id === hunkId);
           try {
-            await runRejectFileIPC(rev);
+            await runRejectHunkIPC(rev, hunk, hunkIndex);
           } catch (err) {
             onErrorRef.current?.(err);
             throw err;
           }
+          // Task 5: IPC 成功后派发 typed event
+          dispatchBioF3Event(biof3Events.hunkRejected, {
+            hunkId,
+            filePath: rev.filePath,
+            timestamp: Date.now(),
+          });
           onRejectHunkRef.current?.(hunkId);
+          dismissHunkImpl(hunkId);
         },
         acceptAll: async () => {
           if (!isInlineDiff()) {

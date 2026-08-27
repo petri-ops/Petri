@@ -135,11 +135,14 @@ export interface EditorApi {
    */
   acceptHunk(hunkId: string): Promise<void>;
   /**
-   * Reject 单 hunk：当前实现等价于整文件 revert（P2 不单做"按 hunk revert"）。
-   * 真正的"按 hunk revert"路径走 `git:hunk-reject-inverse`，由 BLOCK-20 PHASE 4
-   * 落地；P3 业务侧接入后才需要。
+   * Reject 单 hunk：通过 IPC `git:hunk-reject-inverse` 把 hunk 的正向 patch 反向应用，
+   * 恢复该 hunk 的旧文本。
    *
-   * P2 实现：调 `biof3Desktop.workingTreeReview.revertFile({ path })`。
+   * P2 实现：调 `biof3Desktop.workingTreeReview.rejectHunkByInverseHunk`，
+   * 不接业务侧 dispatch（事件总线 P3 才接）。
+   *
+   * @param hunkId `DiffHunk.id`。
+   * @returns IPC 调用结果；任何 throw 走 `onError`（P2 prop）。
    */
   rejectHunk(hunkId: string): Promise<void>;
   /**

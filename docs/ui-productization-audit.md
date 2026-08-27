@@ -1374,3 +1374,17 @@ BLOCK-20-WIRE-UP token budget 落地: ContextBudgetButton 从 idle 占位符 `�
 
 **状态**: in_progress (按 audit 行 402 治理纪律: 仅当真实 dev Electron 实机过目后才可考虑 verified).
 
+
+## UI-197: BLOCK-22-P4.9 — Per-hunk reject IPC 接入 (2026-08-27 active)
+
+BLOCK-22 PHASE 2 落地：rejectHunk 从整文件 revert 改为真正的 per-hunk inverse IPC。
+
+**接入** (commit `feat(block-22-p4.9)`):
+  - frontend/src/components/editor/CodeMirror/useCodeMirrorEditor.ts:
+    - WorkingTreeReviewLike 接口新增 `rejectHunkByInverseHunk` 方法签名。
+    - 新增 `runRejectHunkIPC(rev, hunk, hunkIndex, feedback?)` 函数（复用 `buildForwardPatch`，调 `bridge.rejectHunkByInverseHunk`）。
+    - EditorApi.rejectHunk 改为调用 `runRejectHunkIPC` + `dismissHunkImpl`。
+  - frontend/src/components/editor/CodeMirror/types.ts: rejectHunk JSDoc 注释从"等价整文件 revert"改为"通过 git:hunk-reject-inverse per-hunk inverse IPC"。
+  - frontend/src/components/editor/CodeMirror/__tests__/CodeMirrorEditor.test.tsx: rejectHunk test mock `rejectHunkByInverseHunk` 而非 `revertFile`；断言含 hunkIndex。
+
+**状态**: in_progress (dev Electron 边界内 verified 待实机过目).

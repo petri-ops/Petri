@@ -30,6 +30,12 @@ import type { DiffHunk, DiffRevision, EditorApi } from '../types';
 // (applyInverseHunk / revertFile) without standing up Electron.
 const mockApplyInverseHunk = vi.fn(async (_params: { patch: string }) => ({ ok: true, data: { ok: true } }));
 const mockRevertFile = vi.fn(async (_params: { path: string }) => ({ ok: true, data: { reverted: [] } }));
+const mockRejectHunkByInverseHunk = vi.fn(async (_params: {
+  file: string;
+  hunkIndex: number;
+  patch: string;
+  feedback?: string;
+}) => ({ ok: true }));
 
 vi.mock('../../../../lib/desktopBridge', () => ({
   getBridge: vi.fn((name: string) => {
@@ -37,6 +43,8 @@ vi.mock('../../../../lib/desktopBridge', () => ({
       return {
         applyInverseHunk: (params: { patch: string }) => mockApplyInverseHunk(params),
         revertFile: (params: { path: string }) => mockRevertFile(params),
+        rejectHunkByInverseHunk: (params: { file: string; hunkIndex: number; patch: string; feedback?: string }) =>
+          mockRejectHunkByInverseHunk(params),
       };
     }
     return null;
@@ -346,6 +354,7 @@ describe('CodeMirrorEditor (P2 accept / reject)', () => {
   beforeEach(() => {
     mockApplyInverseHunk.mockClear();
     mockRevertFile.mockClear();
+    mockRejectHunkByInverseHunk.mockClear();
   });
 
   it('acceptHunk("h1") calls applyInverseHunk IPC and triggers onAcceptHunk', async () => {
@@ -371,7 +380,7 @@ describe('CodeMirrorEditor (P2 accept / reject)', () => {
     expect(onAcceptHunk).toHaveBeenCalledWith('h1');
   });
 
-  it('rejectHunk("h2") calls revertFile IPC and triggers onRejectHunk', async () => {
+  it('rejectHunk("h2") calls rejectHunkByInverseHunk IPC and triggers onRejectHunk', async () => {
     const ref = createRef<EditorApi>();
     const onRejectHunk = vi.fn();
     render(
@@ -387,8 +396,10 @@ describe('CodeMirrorEditor (P2 accept / reject)', () => {
     await act(async () => {
       await ref.current?.rejectHunk('h2');
     });
-    expect(mockRevertFile).toHaveBeenCalledTimes(1);
-    expect(mockRevertFile.mock.calls[0][0]).toEqual({ path: '/workspace/sample.py' });
+    expect(mockRejectHunkByInverseHunk).toHaveBeenCalledTimes(1);
+    expect(mockRejectHunkByInverseHunk).toHaveBeenCalledWith(
+      expect.objectContaining({ file: '/workspace/sample.py', hunkIndex: 1, patch: expect.any(String) }),
+    );
     expect(onRejectHunk).toHaveBeenCalledWith('h2');
   });
 
@@ -474,7 +485,7 @@ describe('CodeMirrorEditor (P2 accept / reject)', () => {
       expect(result?.allOk).toBe(true);
     });
     expect(mockApplyInverseHunk).not.toHaveBeenCalled();
-    expect(mockRevertFile).not.toHaveBeenCalled();
+    expect(mockRejectHunkByInverseHunk).not.toHaveBeenCalled();
   });
 
   it('clicking the inline Accept button triggers onAcceptHunk via data-accept-hunk', async () => {
@@ -508,7 +519,7 @@ describe('CodeMirrorEditor (P2 accept / reject)', () => {
     expect(onAcceptHunk).toHaveBeenCalledWith('h1');
   });
 
-  it('clicking the Reject button routes through revertFile IPC + onRejectHunk', async () => {
+  it('clicking the Reject button routes through rejectHunkByInverseHunk IPC + onRejectHunk', async () => {
     const ref = createRef<EditorApi>();
     const onRejectHunk = vi.fn();
     const { container } = render(
@@ -532,7 +543,7 @@ describe('CodeMirrorEditor (P2 accept / reject)', () => {
       fireEvent.click(btn);
       await Promise.resolve();
     });
-    expect(mockRevertFile).toHaveBeenCalledTimes(1);
+    expect(mockRejectHunkByInverseHunk).toHaveBeenCalledTimes(1);
     expect(onRejectHunk).toHaveBeenCalledWith('h2');
   });
 
