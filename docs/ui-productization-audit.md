@@ -1388,3 +1388,26 @@ BLOCK-22 PHASE 2 落地：rejectHunk 从整文件 revert 改为真正的 per-hun
   - frontend/src/components/editor/CodeMirror/__tests__/CodeMirrorEditor.test.tsx: rejectHunk test mock `rejectHunkByInverseHunk` 而非 `revertFile`；断言含 hunkIndex。
 
 **状态**: in_progress (dev Electron 边界内 verified 待实机过目).
+
+
+## UI-198: BLOCK-22-P4.10 — hunkAccepted / hunkRejected typed event bus (2026-08-27 active)
+
+BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed event，给未来业务侧订阅留好钩子。
+
+**接入** (commit `feat(block-22-p4.10)`):
+  - frontend/src/lib/events.ts:
+    - 新增 `biof3Events.hunkAccepted = 'biof3:hunk-accepted'` 与 `biof3Events.hunkRejected = 'biof3:hunk-rejected'` 两个 const-typed 键。
+    - 新增 `HunkAcceptedDetail = { hunkId; filePath; timestamp }` 与 `HunkRejectedDetail = { hunkId; filePath; timestamp }` 两个 payload 接口。
+    - `BioF3EventMap` 追加两条映射条目，强制派发方与订阅方类型一致。
+  - frontend/src/components/editor/CodeMirror/useCodeMirrorEditor.ts:
+    - 顶部 import `biof3Events, dispatchBioF3Event` from `'../../../lib/events'`。
+    - `EditorApi.acceptHunk` 在 `runAcceptHunkIPC` resolve 之后、`onAcceptHunkRef` 回调之前派发 `biof3Events.hunkAccepted`；IPC 失败路径不派发（抛错后由 `onError` 兜底）。
+    - `EditorApi.rejectHunk` 在 `runRejectHunkIPC` resolve 之后、`onRejectHunkRef` 回调之前派发 `biof3Events.hunkRejected`；同样 IPC 失败路径不派发。
+    - `dismissHunkImpl` 内部不派发（纯 UI dismiss，与 IPC 结果解耦）；`acceptAll` / `rejectAll` 暂不接（单 hunk 路径已覆盖；批量场景留给后续 P5+ 视需要补齐）。
+  - frontend/src/components/editor/CodeMirror/__tests__/events-bus.test.tsx (新增): 4 tests — acceptHunk 派发 hunkAccepted / rejectHunk 派发 hunkRejected / dismissHunk 不派发 / IPC 失败不派发；用 `vi.hoisted` + `vi.mock` 拦截 `dispatchBioF3Event`，避免依赖真实 window CustomEvent。
+
+**验证**: `cd frontend && npx vitest run src/components/editor/CodeMirror src/components/editor/integration` 5 files 71/71 PASS (新 events-bus 4/4 + CodeMirrorEditor 32 + DiffActionBar 11 + P4.2-improvements 16 + WorkspaceFilePreviewBridge 8) / `cd frontend && npx tsc --noEmit` 0 错 (pre-existing SimpleChat.tsx:950 不算) / `npm run docs:check` PASS / `npm run ui:audit:check` 同步本笔录后 PASS。
+
+**不动** `acceptRejectWidget.ts` / `DiffActionBar.tsx` / 既有 `CodeMirrorEditor.test.tsx`（mock 桥接契约零变更）/ 不动 integration 桥接层 / 不动 `App.tsx` / `TitleBar.tsx` / `desktop.css` / 不动 IPC 端 (`src/`) / 不引入新依赖。
+
+**状态**: in_progress (dev Electron 边界内 verified 待实机过目；业务侧订阅方尚未接入 — 派发与订阅两侧契约已锁，后续 P5+ 消费侧接 `subscribeBioF3Event(biof3Events.hunkAccepted, ...)` 即可零改动启用).

@@ -66,6 +66,12 @@ export const biof3Events = {
 
   /** BLOCK-20: fired by backend SSE once per agent run with live token budget. */
   tokenBudget: 'biof3:token-budget',
+
+  /** BLOCK-22 P4.10: fired by useCodeMirrorEditor after acceptHunk IPC succeeds. */
+  hunkAccepted: 'biof3:hunk-accepted',
+
+  /** BLOCK-22 P4.10: fired by useCodeMirrorEditor after rejectHunk IPC succeeds. */
+  hunkRejected: 'biof3:hunk-rejected',
 } as const;
 
 export interface ConversationForkedDetail {
@@ -93,6 +99,20 @@ export interface TokenBudgetDetail {
   messagesTokens: number;
   pct: number;
   trimmed: boolean;
+}
+
+/** BLOCK-22 P4.10: fired by useCodeMirrorEditor after acceptHunk IPC succeeds. */
+export interface HunkAcceptedDetail {
+  hunkId: string;
+  filePath: string;
+  timestamp: number;
+}
+
+/** BLOCK-22 P4.10: fired by useCodeMirrorEditor after rejectHunk IPC succeeds. */
+export interface HunkRejectedDetail {
+  hunkId: string;
+  filePath: string;
+  timestamp: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -183,6 +203,8 @@ export type BioF3EventMap = {
   [biof3Events.conversationForked]: ConversationForkedDetail;
   [biof3Events.agentTaskDone]: AgentTaskDoneDetail;
   [biof3Events.tokenBudget]: TokenBudgetDetail;
+  [biof3Events.hunkAccepted]: HunkAcceptedDetail;
+  [biof3Events.hunkRejected]: HunkRejectedDetail;
 };
 
 /** Dispatch a typed event on window */
