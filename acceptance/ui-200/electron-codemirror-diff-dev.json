@@ -1,0 +1,23 @@
+{
+  "capturedAt": "2026-08-28T09:49:14.393Z",
+  "boundary": "dev Electron",
+  "url": "http://localhost:3000/project/p_mt15b0aw_f0xa",
+  "commit": "71d4f78",
+  "passed": true,
+  "qualificationEligible": false,
+  "checks": {
+    "selectedPath": "ui200-codemirror-review.tmp.txt",
+    "cmRendered": true,
+    "inlineClasses": [
+      "cm-merge-b",
+      "cm-changedLine",
+      "cm-insertedLine",
+      "cm-changedText"
+    ],
+    "fixtureLines": [
+      "This line exists only to exercise CodeMirror inline diff rendering."
+    ],
+    "legacyRendered": false,
+    "filesText": "Files (1)"
+  }
+}

@@ -63,7 +63,12 @@ CodeMirror 6 unified diff extension already delivered by BLOCK-22.
   `src/preload.js` all pass `node --check`.
 - Governance: `docs:reconcile` 0 validation issues, `docs:check` PASS with 143
   registered documents, and `ui:audit:check` PASS.
-- UI-200 remains `in_progress` until dev Electron review is observed.
+- UI-200 dev Electron acceptance: PASS. CDP evidence at
+  `acceptance/ui-200/electron-codemirror-diff-dev.json` and
+  `acceptance/ui-200/electron-codemirror-diff-dev.png` verifies the selected
+  fixture path, readonly `CodeMirrorEditor`, `cm-merge-b` inline-diff classes,
+  inserted fixture text, and absence of the legacy hunk view. The intent-to-add
+  fixture was deleted after evidence capture.
 - Test isolation commit: `e5c2ca5` — injected evidence paths are isolated from
   the canonical evidence target. Focused P6 acceptance is now 12/13; the sole
   remaining failure is the stale 204-file stored source map against the
@@ -77,8 +82,8 @@ CodeMirror 6 unified diff extension already delivered by BLOCK-22.
 
 ## 6 Closeout semantics
 
-BLOCK-23 is committed but not completed: the implementation still needs dev
-Electron UI-200 review and a truthful canonical P6 source-bound evidence
-refresh. The P6 blocker belongs to Result Studio and must be resolved in a
-separately governed work package after explicit user approval.
+BLOCK-23 is accepted at the UI boundary but remains not completed: the sole
+remaining gate is a truthful canonical P6 source-bound evidence refresh. The
+P6 blocker belongs to Result Studio and must be resolved in a separately
+governed work package after explicit user approval.
 G0 开发期常态 · 不外推 packaged/Provider/GA。
