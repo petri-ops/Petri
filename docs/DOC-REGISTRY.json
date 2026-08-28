@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 128,
+    "documentCount": 129,
     "lastUpdated": "2026-08-28",
-    "managedMarkdown": 128
+    "managedMarkdown": 129
   },
   "documents": [
     {
@@ -2248,8 +2248,27 @@
         "339506a",
         "be9e1f8"
       ]
+    },
+    {
+      "id": "BLOCK-25-CODEX-PARITY-REVIEW",
+      "path": "docs/block-25-codex-parity-review-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-25-codex-parity-review",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-25",
+        "code-review",
+        "codex-parity",
+        "G0"
+      ],
+      "notes": "2026-08-28 用户裁决（'实现和 codex 一样的代码审阅效果'）启动的唯一 active 工作包。参考实现为本地检出 desktop/codex/（openai/codex）：ReviewTarget 四目标 + rubric 系统提示 + 只读评审子会话 + ReviewOutputEvent 结构化 findings（P0-P3/置信度/file:line）+ 勾选回传修复。落地在既有资产上：BLOCK-20 diff IPC + BLOCK-22/23 CodeMirror diff + UI-140 sub-agent 运行时。范围：协议与 TS 类型、只读 review 子任务 runner（工具白名单=只读 git/shell，禁写）、三级容错解析、WTR 抽屉 findings UI（跳转 diff 行 = UI-194 缺失的消费者 + 勾选回主聊天修复）。0 新增 MCP 工具；IPC 新增仅限 review 启动/状态通道。不外推：写侧自动化 / guardian 自动审 / packaged / Provider / GA / P7。",
+      "registeredAt": "2026-08-28",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-REGISTERED"
     }
   ],
   "lastUpdated": "2026-08-28",
-  "documentCount": 145
+  "documentCount": 146
 }
