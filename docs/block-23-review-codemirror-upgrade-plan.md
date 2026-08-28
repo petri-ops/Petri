@@ -55,6 +55,7 @@ CodeMirror 6 unified diff extension already delivered by BLOCK-22.
 
 ## 5 Closeout evidence
 
+- Implementation commit: `71d4f78` — 22 files changed, +354/−463.
 - Focused frontend: 59/59 PASS across `CodeMirrorDiffView`,
   `CodeMirrorEditor`, event bus, `DiffActionBar`, and `desktopBridge`.
 - TypeScript: `tsc --noEmit` 0 errors.
@@ -63,11 +64,17 @@ CodeMirror 6 unified diff extension already delivered by BLOCK-22.
 - Governance: `docs:reconcile` 0 validation issues, `docs:check` PASS with 143
   registered documents, and `ui:audit:check` PASS.
 - UI-200 remains `in_progress` until dev Electron review is observed.
+- The committed-source P6 refresh remains blocked by a separate Result Studio
+  issue. The canonical updater fail-closed on the pre-existing SQLite,
+  migration-version, and affected-evidence mapping debts; direct capture
+  reported `p6_recovery_active_electron_persisted_driver_failure`. No P6
+  evidence was written. The existing P6 evidence remains honestly bound to
+  `ad1e2ce`.
 
 ## 6 Closeout semantics
 
-BLOCK-23 is closeout-ready, not completed: the verified changeset has user commit
-approval and still needs dev Electron UI-200 review plus the canonical P6
-source-bound evidence refresh. P6 requires committed source bytes, so its live
-update runs only after the implementation commit exists.
+BLOCK-23 is committed but not completed: the implementation still needs dev
+Electron UI-200 review and a truthful canonical P6 source-bound evidence
+refresh. The P6 blocker belongs to Result Studio and must be resolved in a
+separately governed work package after explicit user approval.
 G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -1,11 +1,12 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-28（BLOCK-23 closeout-ready —— Working Tree Review 渲染层已替换为 CodeMirror readonly inline-diff，BLOCK-17 agentDocReview 死代码已清理；focused frontend 59/59、tsc 0、Electron 三文件语法 0、docs:reconcile 0、docs:check 143 PASS、ui:audit:check PASS。下一步按用户批准 commit、dev Electron 过目 UI-200、commit 后刷新 P6 source-bound evidence；UI-200 保持 in_progress。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-08-28（BLOCK-23 实现已提交 `71d4f78` —— Working Tree Review 渲染层已替换为 CodeMirror readonly inline-diff，BLOCK-17 agentDocReview 死代码已清理；实现验证为 focused frontend 59/59、tsc 0、Electron 三文件语法 0、docs:reconcile 0、docs:check 143 PASS、ui:audit:check PASS。P6 refresh 因既有 Result Studio issue fail-closed 且未写入 evidence；先由用户裁决独立修复，再 dev Electron 过目 UI-200 和诚实刷新 P6。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
 - **BLOCK-23-REVIEW-CODEMIRROR-UPGRADE** 处于 closeout-ready：`docs/block-23-review-codemirror-upgrade-plan.md` 是唯一 active 工作包。
-- 收口顺序：用户批准 commit → dev Electron 实机过目 UI-200 → commit 后运行 canonical P6 evidence refresh → BLOCK-23 才可转 completed。
+- 实现已提交为 `71d4f78`，但 canonical P6 refresh 因既有 Result Studio 持久化/迁移/测试映射债 fail-closed；不要在 BLOCK-23 内修复，也不要写入任何替代 P6 evidence。
+- 收口顺序：用户裁决独立 Result Studio P6 blocker 工作包并修复 → dev Electron 实机过目 UI-200 → 以 `71d4f78` 源字节诚实刷新 P6 evidence → BLOCK-23 才可转 completed。
 - UI-200 保持 `in_progress`；`src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 
 ## 当前结论

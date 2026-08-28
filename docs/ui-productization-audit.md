@@ -1427,6 +1427,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - `working-tree-review` 0 新增 IPC；仓库级 status/diff 采集和 commit 后状态刷新统一用 `repositoryStatus`，移除未使用的 `parseUnifiedHunks` 依赖。
 - `CodeMirrorDiffView.test.tsx` 覆盖 binary 不加载、HEAD/WORKTREE 双版本加载、readonly inline diff、WORKTREE 错误 alert。
 
-**验证**：focused frontend 59/59 PASS（CodeMirrorDiffView 3 + CodeMirrorEditor 32 + events-bus 4 + DiffActionBar 11 + desktopBridge 9）；`cd frontend && npx tsc --noEmit` 0 错；`node --check` 覆盖 `working-tree-review.js` / `main.js` / `preload.js`；`docs:reconcile` 0 validation issues；`docs:check` 143 PASS；`ui:audit:check` PASS。BLOCK-23 closeout-ready；用户已批准 commit，实现 commit 后刷新 P6 source-bound evidence。
+**验证**：focused frontend 59/59 PASS（CodeMirrorDiffView 3 + CodeMirrorEditor 32 + events-bus 4 + DiffActionBar 11 + desktopBridge 9）；`cd frontend && npx tsc --noEmit` 0 错；`node --check` 覆盖 `working-tree-review.js` / `main.js` / `preload.js`；`docs:reconcile` 0 validation issues；`docs:check` 143 PASS；`ui:audit:check` PASS。实现 commit 为 `71d4f78`；canonical P6 refresh 因既有 Result Studio issue fail-closed，未写入 evidence。
 
 **状态**: in_progress (dev Electron 边界内 verified 待实机过目)。G0 开发期常态 · 不外推 packaged / Provider / GA。
