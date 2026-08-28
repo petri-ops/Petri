@@ -1,11 +1,11 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-28（UI-201 已收口：canonical P6 evidence 从干净提交树 `1f276de` 重采，10/10 canonical checks recomputed，206-file source binding 含 `src/preload.js`；BLOCK-23 回写 completed。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-08-28（BLOCK-24 已收口：UI-191~194 台账补登完成（UI-191/192 verified；UI-193/194 实机取证后保持 in_progress，两处集成缺口留用户裁决）；`test:changed:list` 确认已被 `852f4b4` 修复。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- 无 active 工作包。`UI-201-RESULT-STUDIO-P6-EVIDENCE-REPAIR` 已于 2026-08-28 收口（`docs/ui-201-result-studio-p6-evidence-repair-plan.md` §6 收口记录），BLOCK-23 已回写 completed。
-- canonical P6 evidence `acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json` 绑定 `1f276de`（含 verifier 过期 `EVIDENCE_PATH` 引用修复），`npm run g0:result-studio:p6` PASS 10/10 recomputed；未放宽 source-map / sanitization / artifact-truth verifier。
+- 无 active 工作包。`BLOCK-24-UI-LEDGER-BACKFILL` 已于 2026-08-28 收口（`docs/block-24-ui-ledger-backfill-plan.md` §6 收口记录）；UI-201 / BLOCK-23 均已 completed，canonical P6 evidence 绑定 `1f276de`。
+- 留给用户裁决的后续候选（均已台账取证，未启动）：UI-193 accept/reject widget 上业务路径（需填充 `DiffRevision.hunks` 或路由决策）；UI-194 pending-scroll 消费侧挂载（`WorkspaceFilePreviewBridge` / `ChatCardLinkBridge`）。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 
 ## 当前结论

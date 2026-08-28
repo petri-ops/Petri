@@ -1,15 +1,15 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-28（UI-201 与 BLOCK-23 均已 completed；当前无 active 工作包）
+最后更新：2026-08-28（UI-201 / BLOCK-23 / BLOCK-24 均已 completed；当前无 active 工作包）
 
 ## Session Snapshot
 
-- **Active work package**: 无。`UI-201-RESULT-STUDIO-P6-EVIDENCE-REPAIR` 已于 2026-08-28 收口（plan `docs/ui-201-result-studio-p6-evidence-repair-plan.md` §6），BLOCK-23 已回写 completed；下一工作包由用户显式裁决启动。
+- **Active work package**: 无。`BLOCK-24-UI-LEDGER-BACKFILL` 已于 2026-08-28 收口（plan `docs/block-24-ui-ledger-backfill-plan.md` §6）；下一工作包由用户显式裁决启动。
 - **Current branch**: `main`；HEAD、dirty state 与 `origin/main` 同步状态以运行时 Git 为准。
-- **Working tree boundary**: Working Tree Review 已切换到 `CodeMirrorDiffView` readonly inline-diff；`DiffFileView` / `DiffHunkView` 与 BLOCK-17 `agentDocReview` 全链路死代码已删除。实现检查点为 `71d4f78`。
-- **P6 evidence boundary**: canonical `acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json` 绑定 `1f276de`（206-file source binding 含 `src/preload.js`，10/10 canonical checks recomputed，capturedAt 2026-08-28T14:11:01Z）；`1f276de` 同时修复 verifier 过期 `EVIDENCE_PATH` 引用。未放宽 source-map / sanitization / artifact-truth verifier。
+- **Working tree boundary**: Working Tree Review 使用 `CodeMirrorDiffView` readonly inline-diff（BLOCK-23，`71d4f78`）；BLOCK-24 实机确认 inline diff 渲染正常，但 UI-193 accept/reject widget 未上业务路径（`DiffRevision.hunks` 未填充，WTR 交互由 BLOCK-20 抽屉动作条承担）、UI-194 pending-scroll 消费侧（`WorkspaceFilePreviewBridge`/`ChatCardLinkBridge`）未挂载——两处缺口已实机取证（`acceptance/ui-193/`、`acceptance/ui-194/`）并留用户裁决。
+- **P6 evidence boundary**: canonical `acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json` 绑定 `1f276de`（206-file source binding 含 `src/preload.js`，10/10 canonical checks recomputed）；`1f276de` 同时修复 verifier 过期 `EVIDENCE_PATH` 引用。未放宽 source-map / sanitization / artifact-truth verifier。
 - **Minimum recovery**: 先读 `AUDIT-LOG.md` 当前待处理项，再核对 Git，然后用 `DOC-REGISTRY.json` 定位 active 工作包；无 active 包时停止，不通读历史文档。
-- **Last recorded gates**: `node --test test/test-affected.test.mjs` 0 fail / `npm run g0:result-studio:p6` PASS 10/10 recomputed / `docs:reconcile` 0 validation issues / `docs:check` PASS / `ui:audit:check` PASS / `git diff --check` clean。UI-200 dev Electron CDP/DOM/截图验收为 `verified`，证据 `acceptance/ui-200/`。
+- **Last recorded gates**: `npm run test:changed:list` PASS（852f4b4 修复后复核，114 scripts 0 违例）/ `npm run g0:result-studio:p6` PASS 10/10 recomputed / `docs:reconcile` 0 / `docs:check` PASS / `ui:audit:check` PASS / `git diff --check` clean。UI-191~194 台账已补登（191/192 verified，193/194 in_progress + 证据）。
 - **G0 discipline**: G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 

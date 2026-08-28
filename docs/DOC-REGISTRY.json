@@ -2228,7 +2228,7 @@
       "id": "BLOCK-24-UI-LEDGER-BACKFILL",
       "path": "docs/block-24-ui-ledger-backfill-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-24-ui-ledger-backfill",
       "entrypoint": "docs/README.md",
@@ -2236,12 +2236,18 @@
         "block-24",
         "ui-ledger",
         "impact-map",
-        "G0"
+        "G0",
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-28 用户裁决（'按照你的建议来'）启动的唯一 active 工作包。范围：①补登 BLOCK-22 遗留的 UI-191~194 台账（WIP 锁解除后一直未登记）并对 UI-193 accept/reject widget 与 UI-194 pending-scroll 联动做 dev Electron 实机过目；②修复 test/impact-map.json 分类规则重叠，恢复 npm run test:changed:list。不外推：ChatCardLinkBridge 聊天 UI 挂载（业务侧决策）/ 新功能 / 新 IPC / 新依赖 / packaged / Provider / GA / P7。0 新增 IPC / 0 新增依赖。",
+      "notes": "2026-08-28 用户裁决启动（\"按照你的建议来\"），同日收口 completed。成果：①UI-191~194 台账补登——UI-191/192 verified（UI-200 dev Electron 证据 + focused 单测 + P1 复核 diff 渲染正常）；UI-193/194 dev Electron 实机过目完成但如实发现集成缺口并保持 in_progress：UI-193 accept/reject widget 因 CodeMirrorDiffView 不填 DiffRevision.hunks 从不在业务路径渲染（WTR 交互由 BLOCK-20 抽屉动作条承担），UI-194 pending-scroll 生产侧已接（BioF3OpenFileDevBridge 挂 App.tsx）但消费侧（WorkspaceFilePreviewBridge/ChatCardLinkBridge）全仓无 JSX 挂载；证据 acceptance/ui-193/ + acceptance/ui-194/（passed:false + 代码级根因），scratch 修改已还原。②test:changed:list 恢复确认：规则重叠已被 852f4b4 修复，114 scripts 0 违例，原始故障文件显式验证通过，fail-closed 语义未放宽。commits 339506a + be9e1f8。两处集成缺口修复留用户裁决。0 新增 IPC / 0 新增依赖 / 0 产品代码改动。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "registeredAt": "2026-08-28",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-REGISTERED"
+      "phase": "COMPLETED",
+      "linkedCommits": [
+        "339506a",
+        "be9e1f8"
+      ]
     }
   ],
   "lastUpdated": "2026-08-28",
