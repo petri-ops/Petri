@@ -1,15 +1,15 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-28（Session Snapshot 建立为低成本恢复入口）
+最后更新：2026-08-28（BLOCK-23 closeout-ready）
 
 ## Session Snapshot
 
-- **Active work package**: NONE；下一工作包必须由用户显式裁决。
+- **Active work package**: `BLOCK-23-REVIEW-CODEMIRROR-UPGRADE`，状态 closeout-ready；用户已批准实现 commit；BLOCK-24 不得启动。
 - **Current branch**: `main`；HEAD、dirty state 与 `origin/main` 同步状态以运行时 Git 为准。
-- **Last completed boundary**: BLOCK-22 已完成并合流；UI-199 模型渠道上下文窗口配置已由 dev Electron 实机证据转为 `verified`；2026-08-28 完成 6 个零引用历史 closeout 的归档清理。
-- **Waiting decision**: 用户选择并启动下一工作包。
+- **Working tree boundary**: Working Tree Review 已切换到 `CodeMirrorDiffView` readonly inline-diff；`DiffFileView` / `DiffHunkView` 与 BLOCK-17 `agentDocReview` 全链路死代码已删除。当前变更待提交为 BLOCK-23 实现检查点。
+- **Next steps**: 提交 BLOCK-23 实现检查点 → dev Electron 实机过目 UI-200 → commit 后刷新 P6 source-bound evidence → BLOCK-23 才可转 completed。
 - **Minimum recovery**: 先读 `AUDIT-LOG.md` 当前待处理项，再核对 Git，然后用 `DOC-REGISTRY.json` 定位 active 工作包；无 active 包时停止，不通读历史文档。
-- **Last recorded gates**: `docs:check` 142 PASS / `docs:reconcile` 0 validation issues（2 个仍被引用的保留候选）/ `ui:audit:check` PASS（191 个 UI 编号）。
+- **Last recorded gates**: focused frontend 59/59 PASS / `tsc --noEmit` 0 errors / Electron 三文件 `node --check` PASS / `docs:check` 143 PASS / `docs:reconcile` 0 validation issues / `ui:audit:check` PASS。UI-200 保持 `in_progress`。
 - **G0 discipline**: G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 

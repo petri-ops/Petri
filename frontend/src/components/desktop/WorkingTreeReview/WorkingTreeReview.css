@@ -640,3 +640,25 @@
   padding: 10px 16px 14px;
   border-top: 1px solid var(--biof3-border, #404040);
 }
+
+/* BLOCK-23 — CodeMirror diff view container */
+.wt-cm-diff {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.wt-diff-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: var(--biof3-fg-muted, #888);
+  font-size: 13px;
+}
+
+.wt-diff-error {
+  padding: 12px 16px;
+  color: var(--biof3-status-danger, #f08080);
+  font-size: 12px;
+}

@@ -70,3 +70,5 @@ resources/built-in-plugins/**/*.pyc
 
 # WorkBuddy agent 工作区记忆（本地工具产物，非项目源码）
 .workbuddy/
+# Local third-party source mirror used for read-only reference.
+/codex/

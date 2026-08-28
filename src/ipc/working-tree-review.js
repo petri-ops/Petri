@@ -7,7 +7,7 @@
 //
 // 通道清单（与 plan §4.1 严格一致）：
 //   git:working-tree-status      → git-adapter.status
-//   git:working-tree-diff        → git-adapter.diff + parseUnifiedHunks
+//   git:working-tree-diff        → git-adapter.diff + 本地 unified diff 解析
 //   git:working-tree-file-content→ git-adapter.showFile
 //   git:hunk-apply               → git-adapter.applyPatch（accept/reject）
 //   git:working-tree-revert      → git-adapter.revertPaths
@@ -20,7 +20,6 @@ const path = require('path');
 const fs = require('fs');
 const { ipcMain, app } = require('electron');
 const { createGitAdapter, GitAdapterError } = require('../../core/shared-backend/git-adapter');
-const { parseUnifiedHunks } = require('../../core/r-server/mcp/ide-tools/diff-helpers');
 const { createSenderGuard } = require('./_sender-guard');
 
 const MAX_HUNK_LINES_HARD_CAP = 5000;
@@ -50,8 +49,8 @@ async function safeInvoke(body) {
 function resolveGitAdapter() {
   const userData = app.getPath('userData');
   const candidates = [
+    app.getAppPath(),
     path.join(userData, 'workspace'),
-    process.cwd(),
   ];
   for (const workTree of candidates) {
     const gitDir = path.join(workTree, '.git');
@@ -224,7 +223,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
       const adapter = resolveGitAdapter();
-      const status = adapter.status({ untracked: 'all' });
+      const status = adapter.repositoryStatus({ untracked: 'all' });
       return {
         files: status.entries.map((e) => ({
           path: e.path,
@@ -245,12 +244,19 @@ function setupWorkingTreeReviewIpc(options = {}) {
     return safeInvoke(async () => {
       const adapter = resolveGitAdapter();
       const paths = Array.isArray(args.paths) && args.paths.length > 0 ? args.paths : null;
-      const raw = adapter.diff({ paths, staged: !!args.staged });
-      const parsed = parseDiffFiles(raw.stdout || '');
-      // 触发 parseUnifiedHunks 一次确保 diff-helpers 的语法契约未漂移（不消费结果）
-      if (parsed.files.length > 0 && parsed.files[0].hunks.length > 0) {
-        try { parseUnifiedHunks(raw.stdout || ''); } catch { /* parseUnifiedHunks is best-effort sanity check */ }
+      const effectivePaths = paths;
+      if (!effectivePaths) {
+        const repoStatus = adapter.repositoryStatus({ untracked: 'all' });
+        const changedPaths = repoStatus.entries.map((e) => e.path);
+        if (changedPaths.length === 0) {
+          return { files: [], truncated: false, summary: { added: 0, removed: 0 } };
+        }
+        const rawAll = adapter.diff({ paths: changedPaths, staged: !!args.staged });
+        const parsedAll = parseDiffFiles(rawAll.patch || '');
+        return parsedAll;
       }
+      const raw = adapter.diff({ paths: effectivePaths, staged: !!args.staged });
+      const parsed = parseDiffFiles(raw.patch || '');
       return parsed;
     });
   });
@@ -486,7 +492,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
       const commitResult = adapter.commit({ message, paths: filesToStage });
 
       // 刷新工作区状态
-      const newStatus = adapter.status({ untracked: 'all' });
+      const newStatus = adapter.repositoryStatus({ untracked: 'all' });
 
       return {
         ok: true,

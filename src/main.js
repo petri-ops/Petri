@@ -452,7 +452,6 @@ async function main() {
   const { setupBranchIpc } = require("./ipc/branch-handlers");
   const { setupWorkingTreeReviewIpc } = require("./ipc/working-tree-review");
   const { setupResultIpc } = require("./ipc/result-handlers");
-  const { setupAgentDocReviewIpc } = require("./ipc/agent-doc-review");
   setupAiSettingsIpc({ mainWindow: () => mainWindow });
   setupComputeSettingsIpc();
   setupTelemetryIpc();
@@ -461,7 +460,6 @@ async function main() {
   setupDataManagementIpc();
   setupBranchIpc({ mainWindow: () => mainWindow });
   setupWorkingTreeReviewIpc({ mainWindow: () => mainWindow });
-  setupAgentDocReviewIpc({ mainWindow: () => mainWindow });
   setupResultIpc({ mainWindow: () => mainWindow });
   // BLOCK-9.1 PHASE 2: mid-risk setup functions with dependency injection
   const { setupRuntimeIpc } = require("./ipc/runtime-status");

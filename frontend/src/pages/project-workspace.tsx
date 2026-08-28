@@ -2481,10 +2481,6 @@ function WorkspaceFilePreview({
         if (!wbridge) return;
         const resp = await wbridge.writeTextFile(file.workspaceDir, file.path, text);
         if (!resp.ok) return;
-      } else {
-        const bridge = getBridge('agentDocReview');
-        if (!bridge) return;
-        await bridge.saveCurrent(file.path, text);
       }
       setTextSaved(text);
     } catch {
@@ -3303,5 +3299,4 @@ export function EmptyResult({
     </div>
   );
 }
-
 

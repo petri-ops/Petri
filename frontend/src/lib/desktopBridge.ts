@@ -107,7 +107,7 @@ export function getBridge<K extends DesktopBridgeName>(
  *  fallback, but the error tells the user (and the dev
  *  console) exactly which bridge is missing.
  *
- *  NOTE: agentDocReview is automatically typed via the
+ *  NOTE: bridges are automatically typed via the
  *  DesktopBridgeName mapped type — no manual interface needed. */
 export function requireBridge<K extends DesktopBridgeName>(
   name: K

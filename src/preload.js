@@ -373,13 +373,4 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     commitReview: (params) => ipcRenderer.invoke('git:commit-review', params || {}),
   },
 
-  // BLOCK-17 — Agent Doc Review Mode
-  // BLOCK-19 — Agent Doc Review: add saveCurrent (inline edit)
-  agentDocReview: {
-    list: () => ipcRenderer.invoke('agentDocReview:list'),
-    loadPair: (filePath) => ipcRenderer.invoke('agentDocReview:loadPair', filePath),
-    commitSnapshot: (filePath) => ipcRenderer.invoke('agentDocReview:commitSnapshot', filePath),
-    saveCurrent: (filePath, content) =>
-      ipcRenderer.invoke('agentDocReview:saveCurrent', filePath, content),
-  },
 });

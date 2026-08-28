@@ -10,7 +10,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useWorkingTreeReview } from './useWorkingTreeReview';
-import { DiffFileView } from './DiffFileView';
+import { CodeMirrorDiffView } from './CodeMirrorDiffView';
 import { CodeReviewDrawer } from './CodeReviewDrawer';
 
 export interface WorkingTreeReviewProps {
@@ -276,13 +276,16 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
             <div className="wt-empty">Select a file on the left to view hunks.</div>
           )}
           {selectedFile && (
-            <DiffFileView
-              file={selectedFile}
-              decisions={review.decisions}
-              focusedHunk={focusedHunk}
-              onAccept={(hunkIndex) => void review.decideHunk(selectedFile.path, hunkIndex, 'accept')}
-              onReject={(hunkIndex, feedback) => void review.decideHunk(selectedFile.path, hunkIndex, 'reject', feedback)}
-            />
+            <div className="wt-file">
+              <div className="wt-file-header">
+                <span className="wt-file-path">{selectedFile.path}</span>
+                {selectedFile.oldPath && selectedFile.oldPath !== selectedFile.path && (
+                  <span className="wt-file-old-path">← {selectedFile.oldPath}</span>
+                )}
+                <span className="wt-file-hunk-count">{selectedFile.hunks.length} hunk(s)</span>
+              </div>
+              <CodeMirrorDiffView filePath={selectedFile.path} isBinary={selectedFile.binary} />
+            </div>
           )}
         </main>
       </div>

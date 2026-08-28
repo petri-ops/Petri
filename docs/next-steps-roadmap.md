@@ -1,6 +1,12 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-16 21:15（BLOCK-6-UI-158-UI-159-VERIFICATION 工作包启动 —— 按用户裁决"可以继续"启动 UI-158 + UI-159 dev Electron 实机复核；推翻 P1-T-A 跳过决策；4 PHASE：PHASE 1 dev Electron 启动 + playwright MCP CDP attach / PHASE 2 UI-158 CommandPalette 实机验证 / PHASE 3 UI-159 Workspace UI plumbing 实机验证 / PHASE 4 evidence 收集 + 收口；UI-158 / UI-159 仅当实机充分才 `in_progress → verified`）
+最后更新：2026-08-28（BLOCK-23 closeout-ready —— Working Tree Review 渲染层已替换为 CodeMirror readonly inline-diff，BLOCK-17 agentDocReview 死代码已清理；focused frontend 59/59、tsc 0、Electron 三文件语法 0、docs:reconcile 0、docs:check 143 PASS、ui:audit:check PASS。下一步按用户批准 commit、dev Electron 过目 UI-200、commit 后刷新 P6 source-bound evidence；UI-200 保持 in_progress。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+## 立即任务
+
+- **BLOCK-23-REVIEW-CODEMIRROR-UPGRADE** 处于 closeout-ready：`docs/block-23-review-codemirror-upgrade-plan.md` 是唯一 active 工作包。
+- 收口顺序：用户批准 commit → dev Electron 实机过目 UI-200 → commit 后运行 canonical P6 evidence refresh → BLOCK-23 才可转 completed。
+- UI-200 保持 `in_progress`；`src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 
 ## 当前结论
 

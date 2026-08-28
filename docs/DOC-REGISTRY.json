@@ -2167,8 +2167,28 @@
       ],
       "notes": "2026-08-24 BLOCK-22-CODEMIRROR-INLINE-DIFF 收口笔录。5 commits 全落 feat/block-22-codemirror-inline-diff HEAD b1f4453。24 files / +4357/-212。19 个新文件 (~3977 行) + 5 个修改（package.json/package-lock.json/editor/index.ts/AUDIT-LOG/DOC-REGISTRY）。4 PHASE 全部落地：PHASE 0 脚手架 3745bd5 / PHASE 1 unified diff 0436be2 / PHASE 2 Accept-Reject widget 0e28498 / PHASE 3 桥接层 b1f4453。验证：tsc --noEmit 0 错 / BLOCK-22 影响范围 vitest 53/53 PASS（4 files）/ docs:check 141 PASS / docs:reconcile 0 issues。0 新增 IPC（复用 BLOCK-20 PHASE 1 5 IPC + PHASE 4 git:hunk-reject-inverse + PHASE 3 workspace:write-text-file）。不变量守住：preload.js / electron.d.ts / desktopBridge.ts / core/shared-backend/* / agent-tools/* / agent-transcripts/* 0 diff；24 个 WIP + test.txt 0 触碰。UI-191/192/193/194 in_progress（WIP 锁延迟登记，docs/ui-productization-audit.md 脱离 WIP 后补登）。不外推 packaged / Provider / GA / P7 / notarization / dist staleness G1+；不引 monaco-editor / react-diff-viewer / react-split-pane / n-way merge；不重新激活 BLOCK-2~21 任意已收口工作包。",
       "registeredAt": "2026-08-24"
+    },
+    {
+      "id": "BLOCK-23-REVIEW-CODEMIRROR-UPGRADE",
+      "path": "docs/block-23-review-codemirror-upgrade-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-23-review-codemirror-upgrade",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-23",
+        "review",
+        "codemirror",
+        "inline-diff",
+        "G0"
+      ],
+  "notes": "2026-08-28 BLOCK-23 closeout-ready：CodeMirrorDiffView 以 readonly inline-diff 替换 DiffFileView/DiffHunkView；删除 agent-doc-review BLOCK-17 全链路死代码；working-tree-review 统一 repositoryStatus。验证：focused frontend 59/59、tsc 0、Electron 三文件语法 0、docs:reconcile 0、docs:check 143 PASS、ui:audit:check PASS。UI-200 保持 in_progress 待 dev Electron 过目；用户已批准实现 commit，commit 后刷新 P6 source-bound evidence。0 新增 IPC / 0 新增依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "registeredAt": "2026-08-28",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-CLOSEOUT-READY"
     }
   ],
-  "lastUpdated": "2026-08-28 (archival cleanup)",
-  "documentCount": 142
+      "lastUpdated": "2026-08-28 (BLOCK-23 closeout-ready)",
+      "documentCount": 143
 }

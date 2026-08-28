@@ -451,13 +451,6 @@ declare global {
           message?: string;
         }>;
       };
-      // BLOCK-17 — Agent Doc Review Mode
-      agentDocReview: {
-        list(): Promise<{ ok: boolean; data?: { files: AgentDocFileEntry[] }; error?: string; message?: string }>;
-        loadPair(filePath: string): Promise<{ ok: boolean; data?: { snapshot: string | null; current: string }; error?: string; message?: string }>;
-        commitSnapshot(filePath: string): Promise<{ ok: boolean; data?: { savedAt: string }; error?: string; message?: string }>;
-        saveCurrent(filePath: string, content: string): Promise<{ ok: boolean; data?: { savedAt: string }; error?: string; message?: string }>;
-      };
       // Phase 1: Branch Tab UI - conversation branch management
       branch: {
         create: (params: { projectId: string; name: string; parentBranchId?: string }) => Promise<{
@@ -661,14 +654,6 @@ declare global {
       };
     };
   }
-}
-
-/** One entry returned by agentDocReview:list */
-export interface AgentDocFileEntry {
-  path: string;
-  label: string;
-  lastSnapshotAt: string | null;
-  currentMtime: string;
 }
 
 export {};
