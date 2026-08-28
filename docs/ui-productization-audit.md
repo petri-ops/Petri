@@ -1460,7 +1460,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **改动范围**：`extensions/unifiedDiff.ts`（`createUnifiedDiffExtension`，行级 + 字符级 `cm-changedLine/cm-insertedLine/cm-deletedLine/cm-changedText`）；`extensions/scrollToLine.ts`（滚动定位 + pulse）。
 
-**验证**：BLOCK-22 focused vitest 53/53；**2026-08-28 UI-200 dev Electron 实机 DOM 证据**（`cm-merge-b`/`cm-changedLine`/`cm-insertedLine`/`cm-changedText` 类与新增行可见，旧 `.wt-diff-hunk` 不存在，证据 `acceptance/ui-200/`）；scrollToLine 由 UI-194 pending-scroll 实机链行使（见 UI-194）。
+**验证**：BLOCK-22 focused vitest 53/53；**2026-08-28 UI-200 dev Electron 实机 DOM 证据**（`cm-merge-b`/`cm-changedLine`/`cm-insertedLine`/`cm-changedText` 类与新增行可见，旧 `.wt-diff-hunk` 不存在，证据 `acceptance/ui-200/`）；**2026-08-28 BLOCK-24 P1 复核**：scratch 单行修改在 Working Tree Review inline diff 中正常渲染（changed ×2 / inserted ×1，行 226 可见）。scrollToLine 保持单元验证；其实机行使依赖 UI-194 pending-scroll 消费侧挂载（当前未接，见 UI-194）。
 
 **状态**: verified (dev Electron 边界内；UI-200 证据 + focused 单测)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
@@ -1470,9 +1470,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **改动范围**：`extensions/acceptRejectWidget.ts`（inline / floating 两形态，`INLINE_THRESHOLD_LINES` 分界，host data attribute）；`useCodeMirrorEditor.ts` 暴露 `acceptHunk/rejectHunk/acceptAll/rejectAll`；accept 走 `runAcceptHunkIPC`、reject 走 `bridge.rejectHunkByInverseHunk`（BLOCK-20 IPC）；成功后派发 `hunkAccepted` typed event + dismissHunk CSS 淡出 + diff 重建。extension 在 inline-diff 模式无条件挂载。
 
-**验证**：BLOCK-22 focused vitest 53/53（widget 形态/回调/IPC mock 用例）。实机验证由 BLOCK-24 P1 承接：scratch 工作树修改 → widget 可见 → 经 widget reject 一个 hunk → 文件还原、仓库干净，证据 `acceptance/ui-193/`。
+**验证**：BLOCK-22 focused vitest 53/53（widget 形态/回调/IPC mock 用例）。**2026-08-28 dev Electron 实机过目（BLOCK-24 P1）**：scratch 修改 CHANGELOG.md 后，`listModified` 正确看到修改、inline diff 正常渲染（changed ×2 / inserted ×1，scratch 行可见），但 accept/reject widget 未渲染（widget host / accept / reject 按钮均为 0）。**根因（代码级确认）**：BLOCK-23 `CodeMirrorDiffView` 构造的 `DiffRevision` 不含 `hunks` 字段，widget extension 的 `getHunks()` 恒为空；Working Tree Review 的 accept/reject 交互实际由 BLOCK-20 抽屉动作条承担（头部 A accept / R reject + pending/accepted/rejected 计数）。证据 `acceptance/ui-193/electron-accept-reject-widget-dev.{json,png}`（passed:false，含根因）。widget 上业务路径（填充 hunks 或把 accept/reject 路由到 widget）属产品决策，不在 BLOCK-24 台账范围。
 
-**状态**: in_progress (单元验证完成，dev Electron 实机过目待 BLOCK-24 P1)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**状态**: in_progress (extension 已实现 + 单元验证；业务路径未呈现 widget，集成缺口已实机取证并登记)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-194: BLOCK-22 — 聊天卡片跳转联动与 pending-scroll 桥接层 (2026-08-24 → 2026-08-28 in_progress)
 
@@ -1480,8 +1480,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **改动范围**：`lib/pendingScrollContext.tsx`（provider + `setPendingRequest`）；`copilot/integration/ChatCardLinkBridge.tsx`（聊天卡片包装器 + 测试）；`editor/integration/WorkspaceFilePreviewBridge.tsx`（CodeMirrorEditor 预览桥，消费 pending request）；`editor/integration/BioF3OpenFileDevBridge.tsx`（dev-only `window.__biof3DispatchOpenFile`，P4.2 挂 App.tsx）；`project-workspace.tsx` P4.5 dispatch 接线。
 
-**边界（诚实声明）**：`ChatCardLinkBridge` 未挂载到聊天 UI —— 按 BLOCK-22 收口决策，业务侧入口的具体接入动作不在 P3 范围，属业务侧后续决策。实机验证经已挂载的 dev bridge 触发 pending-scroll 全链（dispatch → context → 预览 CodeMirror 打开文件并滚动到目标行），由 BLOCK-24 P2 承接，证据 `acceptance/ui-194/`。
+**边界（诚实声明）**：`ChatCardLinkBridge` 未挂载到聊天 UI —— 按 BLOCK-22 收口决策，业务侧入口的具体接入动作不在 P3 范围，属业务侧后续决策。**2026-08-28 dev Electron 实机过目（BLOCK-24 P2）**：经已挂载的 dev bridge 调用 `window.__biof3DispatchOpenFile('frontend/src/lib/desktopBridge.ts', 40)` 被接受，但预览未打开、无 pulse 高亮——**消费侧未挂载**：`WorkspaceFilePreviewBridge` 与 `ChatCardLinkBridge` 仅 barrel 导出，全仓无 JSX 挂载点，dispatch 的 pending request 无消费者。证据 `acceptance/ui-194/electron-pending-scroll-dev.{json,png}`（passed:false，含根因）。
 
-**验证**：BLOCK-22 focused vitest 53/53（ChatCardLinkBridge 7 + pendingScrollContext 6 + WorkspaceFilePreviewBridge 8 用例）。实机验证由 BLOCK-24 P2 承接。
+**验证**：BLOCK-22 focused vitest 53/53（ChatCardLinkBridge 7 + pendingScrollContext 6 + WorkspaceFilePreviewBridge 8 用例）。实机验证已于 BLOCK-24 P2 完成，结论为"生产侧已接、消费侧未挂载"。
 
-**状态**: in_progress (单元验证完成，dev Electron 实机过目待 BLOCK-24 P2；聊天卡片挂载为业务侧决策)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**状态**: in_progress (链路组件已实现 + 单元验证；生产侧已接、消费侧未挂载已实机取证；挂载属业务侧决策)。G0 开发期常态 · 不外推 packaged / Provider / GA。

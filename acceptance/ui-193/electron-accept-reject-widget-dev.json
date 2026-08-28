@@ -1,0 +1,24 @@
+{
+  "capturedAt": "2026-08-28T15:22:23.000Z",
+  "boundary": "dev Electron",
+  "url": "http://localhost:3000/project/p_mt15b0aw_f0xa",
+  "commit": "339506a",
+  "passed": false,
+  "qualificationEligible": false,
+  "purpose": "BLOCK-24 P1 dev Electron observation of the UI-193 accept/reject widget on the Working Tree Review inline diff (scratch modification to CHANGELOG.md).",
+  "checks": {
+    "listModifiedSeesModification": true,
+    "fileContentWorktreeIncludesScratch": true,
+    "inlineDiffRendered": true,
+    "changedLineDecorationsVisible": 2,
+    "insertedLineDecorationsVisible": 1,
+    "scratchLineVisibleInDiff": true,
+    "acceptRejectWidgetHostsPresent": 0,
+    "acceptButtonsPresent": 0,
+    "rejectButtonsPresent": 0,
+    "drawerCounters": "pending: 0, accepted: 0, rejected: 0",
+    "unitTests": "BLOCK-22 focused vitest 53/53 (widget morphology/callback/IPC mock cases)"
+  },
+  "rootCause": "CodeMirrorDiffView builds DiffRevision { filePath, originalText, modifiedText } without a hunks field; the acceptRejectWidget extension's getHunks() therefore returns [] and mounts no widget decorations. The Working Tree Review accept/reject UX is the BLOCK-20 drawer action bar (header A accept / R reject + pending/accepted/rejected counters), not the BLOCK-22 CodeMirror widget.",
+  "disposition": "UI-193 remains in_progress: extension implemented and unit-verified; business-path surfacing (populating DiffRevision.hunks or routing accept/reject through the widget) is a product decision outside BLOCK-24's registered ledger/observation scope."
+}
