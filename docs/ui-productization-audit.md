@@ -1431,7 +1431,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified (dev Electron 边界内实机过目)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-201: Result Studio P6 evidence diagnostics repair (2026-08-28 active)
+## UI-201: Result Studio P6 evidence diagnostics repair (2026-08-28 verified)
 
 **目标**：修复 P6 recovery/pressure driver 与当前 Result Studio UI 契约之间的采集断层，并为失败诊断提供可观察数据；这是 P6 evidence chain repair 的一部分，不是新的用户功能。
 
@@ -1440,6 +1440,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - `project-workspace.tsx`：deep-link 支持显式 workspace mode，history mode 保留打开语义，并在 URL 已携带 mode 时避免二次改写 mode。
 - 0 新增 IPC / 0 新增依赖。
 
-**验证边界**：`44a4b7e` 是不可变实现提交，本次为后续 canonical 台账补登。该提交的 P6 完整刷新仍 fail-closed（当前 canonical stored source map 为 `p6_stored_source_map_invalid`，live updater 为既有 Result Studio 债务阻断），因此 UI-201 保持 `in_progress`，不得标记 `verified`。
+**验证边界**：`44a4b7e` 是不可变实现提交。**2026-08-28 收口 verified**：canonical P6 evidence 已从干净提交树 `1f276de` 重采（`1f276de` 修复 verifier 过期 `EVIDENCE_PATH` 引用），10/10 canonical checks recomputed，206-file source binding 含 `src/preload.js`，`sourceCommitMatchesSourceHashes=true`、`sourceBindingStableDuringCapture=true`；`npm run g0:result-studio:p6` PASS 10/10 recomputed，`node --test test/test-affected.test.mjs` 0 fail。driver 可观察诊断与 deep-link 路由已由通过的 P6 全矩阵真实采集行使。采集期 1 次 recovery cold-boot fetch 失败与 2 次负载敏感 P6-06 压力预算失败均为环境负载，安静环境全量通过；未放宽 verifier/budget/sanitizer/Artifact Truth，未手改 evidence。
 
-**状态**: in_progress (driver-observable diagnostics and deep-link routing implemented_unverified)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**状态**: verified (dev 边界内：诊断实现 + canonical P6 evidence 重采通过)。G0 开发期常态 · 不外推 packaged / Provider / GA。

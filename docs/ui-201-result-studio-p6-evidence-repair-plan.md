@@ -56,4 +56,32 @@ package because canonical P6 is the sole remaining gate.
 UI-201 is complete only when the canonical P6 evidence is regenerated from a
 real local development-boundary capture, its 205-file source binding verifies,
 all P6 gates pass, and BLOCK-23 is updated from `P6-blocked` to `completed`.
+
+## 6 Closeout record (2026-08-28)
+
+- Earlier package phases landed on `main` as `852f4b4` (SQLite init,
+  migration count, impact-map coverage), `44a4b7e` (driver-observable
+  diagnostics + deep-link routing), `e5c2ca5` (evidence write-gate
+  isolation), and `def5fdf` (renderer warmup + canonical route repair).
+- P3 canonical refresh: `node scripts/g0-rs-p6-product-acceptance.mjs
+  --write-evidence --verbose` captured from the clean committed tree
+  `1f276de`, which also repairs the verifier's stale `EVIDENCE_PATH`
+  reference left by the write-gate isolation (focused scope, 1 line).
+- Canonical evidence
+  `acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json`:
+  capturedAt 2026-08-28T14:11:01Z, 10/10 canonical checks recomputed, 206-file
+  source binding including `src/preload.js`,
+  `sourceCommitMatchesSourceHashes: true`,
+  `sourceBindingStableDuringCapture: true`, `qualificationEligible: false`.
+- Failure history kept honest: one recovery cold-boot fetch failure and two
+  load-sensitive Electron pressure (P6-06) budget failures occurred under
+  residual machine load; the standalone recovery slice and the quiet-machine
+  full captures passed without any change to verifier, budget, sanitizer, or
+  Artifact Truth rules. No evidence was hand-edited or backfilled.
+- Acceptance gates: `node --test test/test-affected.test.mjs` 0 fail;
+  `npm run g0:result-studio:p6` PASS with 10/10 canonical checks recomputed;
+  `npm run docs:reconcile`, `npm run docs:check`, `npm run ui:audit:check`,
+  and `git diff --check` clean at closeout commit time.
+- UI-201 completed / verified; BLOCK-23 completed; no active work package
+  remains.
 G0 开发期常态 · 不外推 packaged/Provider/GA。

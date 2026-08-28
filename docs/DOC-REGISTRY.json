@@ -2172,7 +2172,7 @@
       "id": "BLOCK-23-REVIEW-CODEMIRROR-UPGRADE",
       "path": "docs/block-23-review-codemirror-upgrade-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-23-review-codemirror-upgrade",
       "entrypoint": "docs/README.md",
@@ -2181,18 +2181,25 @@
         "review",
         "codemirror",
         "inline-diff",
-        "G0"
+        "G0",
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-28 BLOCK-23 UI checkpoint / P6 dependency blocked：实现 commit 为 71d4f78，P6 测试隔离 commit 为 e5c2ca5；CodeMirrorDiffView 以 readonly inline-diff 替换 DiffFileView/DiffHunkView，删除 agent-doc-review BLOCK-17 全链路死代码，working-tree-review 统一 repositoryStatus。实现验证：focused frontend 59/59、tsc 0、Electron 三文件语法 0、docs:reconcile 0、docs:check 143 PASS、ui:audit:check PASS。UI-200 已通过 dev Electron CDP/DOM/截图验收并转 verified，fixture 已删除。canonical P6 refresh 已移交 UI-201 独立工作包；BLOCK-23 planned 挂起，等待证据刷新后 completed。0 新增 IPC / 0 新增依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "notes": "2026-08-28 BLOCK-23 completed：Working Tree Review 渲染层升级 CodeMirror readonly inline-diff（实现 71d4f78，UI-200 dev Electron verified），删除 BLOCK-17 agent-doc-review 死代码全链路，working-tree-review 统一 repositoryStatus，0 新增 IPC / 0 新增依赖。唯一剩余门（canonical P6 source-bound refresh）已由 UI-201 于同日交付：canonical evidence 从 1f276de 重采，10/10 checks recomputed，206-file binding 含 src/preload.js；1f276de 同时修复 verifier 过期 EVIDENCE_PATH 引用。未放宽 verifier/budget/sanitizer/Artifact Truth。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "registeredAt": "2026-08-28",
       "archivePolicy": "archive_when_superseded",
-      "phase": "UI-CHECKPOINT-P6-DEPENDENCY-BLOCKED"
+      "phase": "COMPLETED",
+      "linkedCommits": [
+        "71d4f78",
+        "e5c2ca5",
+        "1f276de"
+      ]
     },
     {
       "id": "UI-201-RESULT-STUDIO-P6-EVIDENCE-REPAIR",
       "path": "docs/ui-201-result-studio-p6-evidence-repair-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "ui-201-result-studio-p6-evidence-repair",
       "entrypoint": "docs/README.md",
@@ -2201,14 +2208,23 @@
         "result-studio",
         "p6",
         "evidence-chain",
-        "G0"
+        "G0",
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-28 用户裁决启动的唯一 active 工作包。范围限于修复 P6 evidence chain、登记 UI-200 evidence ownership、按需修复 capture defects，并以干净提交源树诚实刷新 205-file canonical P6 source-bound evidence；完成后回写 BLOCK-23 completed。0 新增 IPC / 0 新增依赖。G0 开发期常态 · 不外推 packaged/Provider/GA/P7。",
+      "notes": "2026-08-28 用户裁决启动的唯一 active 工作包，现已收口 completed。范围：修复 P6 evidence chain（SQLite init / migration 计数 / impact-map 覆盖 / capture 链 / renderer 预热 / driver 可观察诊断 / deep-link），并以干净提交源树诚实刷新 canonical P6 evidence。收口：852f4b4 + 44a4b7e + e5c2ca5 + def5fdf + 1f276de（verifier 过期 EVIDENCE_PATH 引用修复）；canonical evidence rs-p6-durability-recovery-performance.json 于 2026-08-28T14:11:01Z 从 1f276de 采集，10/10 canonical checks recomputed，206-file source binding 含 src/preload.js，sourceCommitMatchesSourceHashes=true，sourceBindingStableDuringCapture=true，qualificationEligible=false。门禁：test-affected 0 fail；g0:result-studio:p6 PASS 10/10；docs:reconcile / docs:check / ui:audit:check / git diff --check clean。采集失败史：1 次 recovery cold-boot fetch + 2 次负载敏感 P6-06 压力预算失败，均属环境负载；安静环境全量通过；未放宽 verifier/budget/sanitizer/Artifact Truth，未手改或回填 evidence。BLOCK-23 已回写 completed，无 active 工作包。0 新增 IPC / 0 新增依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "registeredAt": "2026-08-28",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-DIAGNOSED-P1-ACTIVE"
+      "phase": "COMPLETED",
+      "linkedCommits": [
+        "852f4b4",
+        "44a4b7e",
+        "e5c2ca5",
+        "def5fdf",
+        "1f276de"
+      ]
     }
   ],
-      "lastUpdated": "2026-08-28 (UI-201 active; BLOCK-23 dependency blocked)",
-      "documentCount": 144
+  "lastUpdated": "2026-08-28",
+  "documentCount": 144
 }

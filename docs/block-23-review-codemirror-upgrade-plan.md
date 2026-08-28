@@ -73,17 +73,21 @@ CodeMirror 6 unified diff extension already delivered by BLOCK-22.
   the canonical evidence target. Focused P6 acceptance is now 12/13; the sole
   remaining failure is the stale 204-file stored source map against the
   current 205-file binding (`p6_stored_source_map_invalid`).
-- The committed-source P6 refresh remains blocked by a separate Result Studio
-  issue. The canonical updater fail-closed on the pre-existing SQLite,
-  migration-version, and affected-evidence mapping debts; direct capture
-  reported `p6_recovery_active_electron_persisted_driver_failure`. No P6
-  evidence was written. The existing P6 evidence remains honestly bound to
-  `ad1e2ce`.
+- The committed-source P6 refresh was completed by UI-201 on 2026-08-28:
+  canonical evidence
+  `acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json`
+  was regenerated from the clean committed tree `1f276de` (which also repairs
+  the verifier's stale `EVIDENCE_PATH` reference) with 10/10 canonical checks
+  recomputed and the current 206-file source binding including
+  `src/preload.js`. The earlier Result Studio debts (SQLite init, migration
+  count, impact-map coverage, renderer warmup, diagnostics, deep-link) were
+  repaired under UI-201 commits `852f4b4` / `44a4b7e` / `e5c2ca5` / `def5fdf`.
 
 ## 6 Closeout semantics
 
-BLOCK-23 is accepted at the UI boundary but remains not completed: the sole
-remaining gate is a truthful canonical P6 source-bound evidence refresh. The
-P6 blocker belongs to Result Studio and must be resolved in a separately
-governed work package after explicit user approval.
+BLOCK-23 is completed on 2026-08-28: the UI boundary evidence (focused
+frontend 59/59, `tsc --noEmit` 0 errors, dev Electron UI-200 verified) and
+the sole remaining gate (truthful canonical P6 source-bound evidence refresh,
+delivered by UI-201) are both satisfied. No verifier, budget, sanitizer, or
+Artifact Truth rule was relaxed.
 G0 开发期常态 · 不外推 packaged/Provider/GA。
