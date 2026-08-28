@@ -664,7 +664,7 @@ async function main() {
   const args = new Set(process.argv.slice(2));
   if (!args.has('--write-evidence') && !args.has('--live')) {
     verifyStoredP6ProductAcceptanceEvidence();
-    const stored = JSON.parse(readFileSync(EVIDENCE_PATH, 'utf8'));
+    const stored = JSON.parse(readFileSync(getP6ProductAcceptanceEvidencePath(), 'utf8'));
     console.log(`[G0-RS-P6] PASS - ${stored.checks.length}/${stored.checks.length} canonical checks recomputed`);
     return;
   }
