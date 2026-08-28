@@ -1354,14 +1354,14 @@ export function ProjectWorkspace(): React.ReactElement {
   const handleOpenResult = useCallback(async (
     jobId: string,
     targetProjectId?: string | null,
-    options?: { preserveWorkspaceMode?: boolean },
+    options?: { preserveWorkspaceMode?: boolean; workspaceMode?: WorkspaceMode },
   ) => {
+    const targetMode = options?.workspaceMode ?? (options?.preserveWorkspaceMode ? 'chat' : 'result');
     const openRequestId = ++openResultRequestSequenceRef.current;
     const currentProjectId = projectId || null;
     const resolvedTargetProjectId = targetProjectId ?? currentProjectId;
     if (resolvedTargetProjectId && currentProjectId && resolvedTargetProjectId !== currentProjectId) {
-      const mode = options?.preserveWorkspaceMode ? 'chat' : 'result';
-      navigate(`/project/${resolvedTargetProjectId}?mode=${mode}&job=${encodeURIComponent(jobId)}`);
+      navigate(`/project/${resolvedTargetProjectId}?mode=${targetMode}&job=${encodeURIComponent(jobId)}`);
       return;
     }
 
@@ -1391,8 +1391,7 @@ export function ProjectWorkspace(): React.ReactElement {
           };
           nextProjectId = nextJob.project_id || nextProjectId;
           if (nextProjectId && currentProjectId && nextProjectId !== currentProjectId) {
-            const mode = options?.preserveWorkspaceMode ? 'chat' : 'result';
-            navigate(`/project/${nextProjectId}?mode=${mode}&job=${encodeURIComponent(nextJob.id)}`);
+            navigate(`/project/${nextProjectId}?mode=${targetMode}&job=${encodeURIComponent(nextJob.id)}`);
             return;
           }
           setJobs((prev) => (prev.some((j) => j.id === nextJob!.id) ? prev : [nextJob!, ...prev]));
@@ -1433,6 +1432,7 @@ export function ProjectWorkspace(): React.ReactElement {
 
   useEffect(() => {
     if (loading || !projectId) return;
+    if (searchParams.get('mode')) return;
 
     if (requestedJobId) {
       const requestKey = requestedArtifactRequestKey({
@@ -1454,7 +1454,8 @@ export function ProjectWorkspace(): React.ReactElement {
       if (autoOpenedJobRef.current === requestedJobId) return;
       autoOpenedJobRef.current = requestedJobId;
       void handleOpenResult(requestedJobId, projectId, {
-        preserveWorkspaceMode: workspaceMode === 'chat',
+        preserveWorkspaceMode: workspaceMode === 'chat' || workspaceMode === 'history',
+        workspaceMode,
       });
       return;
     }
@@ -3299,4 +3300,3 @@ export function EmptyResult({
     </div>
   );
 }
-

@@ -575,7 +575,9 @@ function ResultArtifactShell({
     : selectedArtifact
       ? resolveResultArtifactUrl(selectedArtifact.url, buildUrl(selectedArtifact.name))
       : '';
-  const selectedArtifactKind = selectedArtifact ? classifyArtifact(selectedArtifact) : 'file';
+  const selectedArtifactKind = selectedArtifact
+    ? classifyArtifact(selectedArtifact)
+    : classifyArtifact({ name: selectedArtifactName, type: '' } as ResultArtifactRecord);
   const selectedArtifactLabel = selectedArtifact
     ? selectedArtifact.label || selectedArtifact.title || selectedArtifact.name
     : '';
@@ -823,7 +825,7 @@ function ResultArtifactShell({
   }, [conversationId, lang, project.id]);
 
   useEffect(() => {
-    if (!job || effectiveJobStatus !== 'done' || !selectedArtifact) {
+    if (!job || effectiveJobStatus !== 'done' || (!selectedArtifact && !viewedRevision)) {
       onActiveArtifactChange(null);
       return;
     }
@@ -831,8 +833,8 @@ function ResultArtifactShell({
       jobId: viewedRevision?.toolJobId || job.id,
       toolId: job.tool_id,
       name: selectedArtifactName,
-      type: selectedArtifact.type || selectedArtifactKind,
-      label: selectedArtifact.label || selectedArtifact.title,
+      type: selectedArtifact?.type || selectedArtifactKind,
+      label: selectedArtifact?.label || selectedArtifact?.title || selectedArtifactName,
       url: selectedArtifactUrl,
       // RS3 semantic 维度：来自后端基于完整文件产出的交互清单。
       // 清单还没到（或该类型不支持交互）时保持 null，不猜测。
@@ -848,8 +850,8 @@ function ResultArtifactShell({
       selectionId: boundArtifactSelection?.selectionId || null,
       truthStatus: viewedRevision?.validationStatus ?? result?.deliveryManifest?.status ?? null,
       conclusion: viewedRevision && !viewedRevision.isCurrent ? null : result?.deliveryManifest?.summary?.conclusion ?? null,
-      availabilityStatus: effectivePreviewAvailability.status,
-      availabilityReason: effectivePreviewAvailability.reason,
+      availabilityStatus: selectedArtifact ? effectivePreviewAvailability.status : 'available',
+      availabilityReason: selectedArtifact ? effectivePreviewAvailability.reason : null,
     };
     // The interaction manifest arrives after the file body. Compare the full
     // projection so late revision/family/semantic hydration reaches the header.
@@ -868,7 +870,7 @@ function ResultArtifactShell({
     onActiveArtifactChange,
     result?.deliveryManifest?.status,
     result?.deliveryManifest?.summary?.conclusion,
-    selectedArtifact,
+    selectedArtifact ?? null,
     selectedArtifactKind,
     selectedArtifactUrl,
     viewedRevision,
@@ -1467,6 +1469,11 @@ function ResultArtifactShell({
       ref={resultViewRef}
       onScroll={(e) => setResultScrollPosition(job?.id, e.currentTarget.scrollTop)}
       data-artifact-switch-ms={artifactSwitchMs === null ? undefined : artifactSwitchMs.toFixed(2)}
+      data-debug-selected-name={selectedArtifactName || null}
+      data-debug-artifact-count={artifacts.length}
+      data-debug-job-status={effectiveJobStatus}
+      data-debug-viewer={viewerAdapter}
+      data-debug-revision={viewedRevision?.revisionId || null}
     >
       {mode === 'result' && resultToolbar}
       {shellBody}

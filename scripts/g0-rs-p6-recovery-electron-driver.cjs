@@ -208,6 +208,67 @@ function lifecycleExpression(expectedState = null) {
   `;
 }
 
+function rendererStateExpression() {
+  return `
+    (() => {
+      const text = document.body?.innerText || '';
+      const projection = document.querySelector('[data-projection]');
+      const location = window.location;
+      const projections = Array.from(document.querySelectorAll('[data-projection]')).map((node) => ({
+        mode: node.getAttribute('data-projection'),
+        hidden: node.getAttribute('aria-hidden') === 'true',
+      }));
+      const resultCanvas = document.querySelector('[aria-label="结果主画布"]');
+      const changeSetPanel = document.querySelector('[aria-label="Result Studio 版本与变更"]');
+      return {
+        location: location.pathname + location.search,
+        legacyMode: new URLSearchParams(location.search).get('mode'),
+        requestedJob: new URLSearchParams(location.search).get('job'),
+        projectionMode: projection?.getAttribute('data-projection') || null,
+        projections,
+        resultCanvasPresent: Boolean(resultCanvas),
+        resultCanvasMode: resultCanvas?.getAttribute('data-mode') || null,
+        canvasChildCount: resultCanvas
+          ? (resultCanvas.querySelector('.canvasBody, [class*="canvasBody"]')?.children.length ?? -1)
+          : -1,
+        canvasTextSample: resultCanvas
+          ? (resultCanvas.innerText || '').slice(0, 400)
+          : null,
+        debugArtifactShellPresent: Boolean(document.querySelector('[data-debug-artifact-count]')),
+        debugArtifactCount: document.querySelector('[data-debug-artifact-count]')?.getAttribute('data-debug-artifact-count') ?? null,
+        debugJobStatus: document.querySelector('[data-debug-job-status]')?.getAttribute('data-debug-job-status') ?? null,
+        debugSelectedName: document.querySelector('[data-debug-selected-name]')?.getAttribute('data-debug-selected-name') ?? null,
+        debugRevision: document.querySelector('[data-debug-revision]')?.getAttribute('data-debug-revision') ?? null,
+        resultView: (() => {
+          const node = document.querySelector('[data-debug-viewer]');
+          if (!node) return null;
+          return {
+            selectedName: node.getAttribute('data-debug-selected-name'),
+            artifactCount: node.getAttribute('data-debug-artifact-count'),
+            jobStatus: node.getAttribute('data-debug-job-status'),
+            viewer: node.getAttribute('data-debug-viewer'),
+            revision: node.getAttribute('data-debug-revision'),
+          };
+        })(),
+        resultStudioPanelPresent: Boolean(
+          document.querySelector('[aria-label="Result Studio 版本与变更"]')
+        ),
+        changeSetPanelMode: changeSetPanel?.getAttribute('data-mode') || null,
+        changeSetHeaderText: Boolean(changeSetPanel?.textContent?.includes('结果版本')),
+        onboardingPresent: Boolean(document.querySelector('[role="dialog"][aria-label="首次启动引导"]')),
+        resultsLibraryPresent: text.includes('结果库'),
+        resultLoading: text.includes('加载结果中…'),
+        resultMissing: text.includes('未生成可视化结果文件'),
+        resultLoadFailed: text.includes('结果加载失败'),
+        jobMissing: text.includes('找不到这个结果'),
+        conversationBindingMissing: text.includes('没有可信的会话归属'),
+        truthProjected: ['可信结果', '需要复核', '结果已阻断', '尚未核验'].some((item) => text.includes(item)),
+        projectErrorBoundaryPresent: Boolean(document.querySelector('[data-projection="error"]')),
+      };
+    })()
+  `;
+}
+
 async function readLifecycle(webContents, expectedState) {
   const raw = await waitFor(
     webContents,
@@ -256,6 +317,7 @@ async function run() {
   let stage = 'window_create';
   const rendererGone = [];
   const recoveryRequests = [];
+  const interactionRequests = [];
   const blockedNavigations = [];
   const window = new BrowserWindow({
     width: 1280,
@@ -287,8 +349,17 @@ async function run() {
   });
   window.webContents.session.webRequest.onCompleted((details) => {
     try {
+      const pathname = new URL(details.url).pathname;
+      if (pathname.endsWith('/result-studio/interaction')
+        || pathname.endsWith('/result-studio/selection/current')) {
+        interactionRequests.push({
+          kind: pathname.endsWith('/interaction') ? 'interaction' : 'selection',
+          method: details.method,
+          status: details.statusCode,
+        });
+      }
       if (details.method === 'POST'
-          && new URL(details.url).pathname === '/api/result-studio/workspace/recover') {
+          && pathname === '/api/result-studio/workspace/recover') {
         recoveryRequests.push(details.statusCode);
       }
     } catch {}
@@ -382,6 +453,7 @@ async function run() {
       after,
       recoveryRequestCount: recoveryRequests.length,
       recoveryRequestStatuses: recoveryRequests,
+      interactionRequests,
       blockedNavigationCount: blockedNavigations.length,
       renderProcessGoneCount: rendererGone.length,
       publicProjectionClean,
@@ -398,9 +470,13 @@ async function run() {
     }
   } catch (error) {
     let lifecycle = null;
+    let rendererState = null;
     try {
       lifecycle = await window.webContents.executeJavaScript(lifecycleExpression(), true);
       if (lifecycle && typeof lifecycle === 'object') delete lifecycle.text;
+    } catch {}
+    try {
+      rendererState = await window.webContents.executeJavaScript(rendererStateExpression(), true);
     } catch {}
     writeFileSync(config.resultPath, `${JSON.stringify({
       schemaVersion: 1,
@@ -408,10 +484,14 @@ async function run() {
       failedStage: stage,
       errorCode: String(error?.message || 'unknown').split(':', 1)[0],
       lifecycle,
+      rendererState,
+      interactionRequests,
       backendStatus: backendStatusObservation(),
       isolatedCompatibility: compatibilityObservation(),
       passed: false,
     }, null, 2)}\n`, { mode: 0o600 });
+    if (rendererState) console.error(`renderer-state:${JSON.stringify(rendererState)}`);
+    console.error(`interaction-requests:${JSON.stringify(interactionRequests)}`);
     console.error(error?.stack || error);
     process.exitCode = 1;
   } finally {

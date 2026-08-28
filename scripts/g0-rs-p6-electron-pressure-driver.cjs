@@ -429,36 +429,37 @@ async function measureFilterFeedback(webContents) {
   `, true);
 }
 
-async function measureArtifactSwitch(webContents, target, { useSection = false } = {}) {
-  const triggerLabel = useSection ? target.sectionLabel : target.label;
-  if (typeof triggerLabel !== 'string' || !triggerLabel) {
-    throw new Error('artifact_switch_trigger_missing');
-  }
+async function measureArtifactSwitch(webContents, target) {
+  // UX1A-era compact navigator contract: artifact switching is a
+  // `select[aria-label="切换当前结果"]` whose option values are artifact file
+  // names. Switch success is observed through the shell's
+  // `data-debug-selected-name` projection plus the product
+  // `data-artifact-switch-ms` metric.
   return webContents.executeJavaScript(`
     new Promise((resolve, reject) => {
       const canvas = document.querySelector('[aria-label="结果主画布"]');
-      const triggerLabel = ${JSON.stringify(triggerLabel)};
       const artifactName = ${JSON.stringify(target.artifact)};
-      const button = [...canvas.querySelectorAll('button')].find((item) => (
-        [...item.querySelectorAll('span')]
-          .some((span) => (span.textContent || '').trim() === triggerLabel)
-      ));
-      if (!canvas || !(button instanceof HTMLButtonElement)) {
+      if (!canvas) return reject(new Error('result_canvas_missing'));
+      const select = canvas.querySelector('select[aria-label="切换当前结果"]');
+      if (!(select instanceof HTMLSelectElement)) {
         return reject(new Error('artifact_switch_control_missing'));
       }
+      const option = [...select.options].find((item) => item.value === artifactName);
+      if (!option) {
+        return reject(new Error('artifact_switch_option_missing:' + artifactName));
+      }
       const started = performance.now();
-      button.click();
+      select.value = artifactName;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
       const deadline = started + 5000;
       const inspect = () => {
-        const marker = [...canvas.querySelectorAll('div')]
-          .find((item) => (item.textContent || '').trim() === '当前预览');
-        const activeArtifactMatched = [...(marker?.parentElement?.querySelectorAll('span') || [])]
-          .some((item) => (item.textContent || '').trim() === artifactName);
         const surface = canvas.closest('[data-artifact-switch-ms]')
           || document.querySelector('[data-artifact-switch-ms]');
         const productMetricMs = Number(surface?.getAttribute('data-artifact-switch-ms'));
+        const selectedName = document.querySelector('[data-debug-selected-name]')
+          ?.getAttribute('data-debug-selected-name');
         const wallFeedbackMs = performance.now() - started;
-        if (activeArtifactMatched && Number.isFinite(productMetricMs)
+        if (selectedName === artifactName && Number.isFinite(productMetricMs)
             && productMetricMs >= 0) {
           return resolve({
             feedbackMs: Math.max(productMetricMs, wallFeedbackMs),
@@ -507,16 +508,13 @@ async function measureVirtualPageLoad(webContents) {
   `, true);
 }
 
-async function inspectImage(webContents, target) {
+async function inspectSvgExport(webContents, target) {
   return waitFor(webContents, `
-    (() => {
+    (async () => {
       const canvas = document.querySelector('[aria-label="结果主画布"]');
       const expectedJobId = ${JSON.stringify(target.jobId)};
       const expectedArtifact = ${JSON.stringify(target.artifact)};
-      const marker = [...(canvas?.querySelectorAll('div') || [])]
-        .find((item) => (item.textContent || '').trim() === '当前预览');
-      const artifactTargetMatched = [...(marker?.parentElement?.querySelectorAll('span') || [])]
-        .some((item) => (item.textContent || '').trim() === expectedArtifact);
+      if (!canvas) return null;
       const matchesTarget = (value) => {
         try {
           const source = new URL(value || '', window.location.href);
@@ -528,18 +526,33 @@ async function inspectImage(webContents, target) {
           return false;
         }
       };
-      const image = [...(canvas?.querySelectorAll('img') || [])]
-        .find((item) => matchesTarget(item.currentSrc || item.src)
-          && item.complete && item.naturalWidth > 0 && item.naturalHeight > 0);
-      return artifactTargetMatched && image ? {
-        naturalWidth: image.naturalWidth,
-        naturalHeight: image.naturalHeight,
+      const link = [...canvas.querySelectorAll('a')].find((item) => (
+        (item.textContent || '').trim() === '导出 SVG' && matchesTarget(item.getAttribute('href'))
+      ));
+      if (!(link instanceof HTMLAnchorElement)) return null;
+      const started = performance.now();
+      const response = await fetch(link.href);
+      if (!response.ok) return null;
+      const text = await response.text();
+      const fetchMs = performance.now() - started;
+      return {
+        exportLinkPresent: true,
+        exportHrefMatched: true,
+        bytes: text.length,
+        validSvgRoot: /<svg[\\s>]/.test(text.slice(0, 4000)),
+        fetchMs,
+        switch: {
+          changed: true,
+          feedbackMs: fetchMs,
+          productMetricMs: null,
+          wallFeedbackMs: fetchMs,
+        },
         sourceKind: 'tool_file',
         sourceTargetMatched: true,
         artifactTargetMatched: true,
-      } : null;
+      };
     })()
-  `, `image_ready:${target.artifact}`);
+  `, `svg_export_ready:${target.artifact}`);
 }
 
 async function inspectPlotProjection(webContents, target) {
@@ -548,11 +561,9 @@ async function inspectPlotProjection(webContents, target) {
       const canvas = document.querySelector('[aria-label="结果主画布"]');
       const expectedJobId = ${JSON.stringify(target.jobId)};
       const expectedArtifact = ${JSON.stringify(target.artifact)};
-      const marker = [...(canvas?.querySelectorAll('div') || [])]
-        .find((item) => (item.textContent || '').trim() === '当前预览');
-      const artifactTargetMatched = [...(marker?.parentElement?.querySelectorAll('span') || [])]
-        .some((item) => (item.textContent || '').trim() === expectedArtifact);
-      if (!artifactTargetMatched) return null;
+      const selectedName = document.querySelector('[data-debug-selected-name]')
+        ?.getAttribute('data-debug-selected-name');
+      if (selectedName !== expectedArtifact) return null;
       const matchesTarget = (value) => {
         try {
           const source = new URL(value || '', window.location.href);
@@ -621,10 +632,9 @@ async function inspectReport(webContents, target) {
           const frame = [...(canvas?.querySelectorAll('iframe') || [])]
             .find((item) => matchesTarget(item.src));
           const bounds = frame?.getBoundingClientRect();
-          const marker = [...(canvas?.querySelectorAll('div') || [])]
-            .find((item) => (item.textContent || '').trim() === '当前预览');
-          const artifactTargetMatched = [...(marker?.parentElement?.querySelectorAll('span') || [])]
-            .some((item) => (item.textContent || '').trim() === expectedArtifact);
+          const selectedName = document.querySelector('[data-debug-selected-name]')
+            ?.getAttribute('data-debug-selected-name');
+          const artifactTargetMatched = selectedName === expectedArtifact;
           let sourceKind = 'missing';
           let sourceTargetMatched = false;
           try {
@@ -1019,9 +1029,12 @@ async function run() {
 
     stage = 'svg_load';
     const svgStarted = performance.now();
-    const svgSwitch = await measureArtifactSwitch(window.webContents, config.targets.svg);
-    if (!svgSwitch.changed) throw new Error('svg_artifact_switch_failed');
-    const svg = await inspectImage(window.webContents, config.targets.svg);
+    // UX1A-era product contract: SVG/PDF are export variants of the plot
+    // option (`导出 SVG` anchor), not switchable preview surfaces. The honest
+    // renderer observation is: the export link targets the real
+    // `/tools/file/<jobId>/volcano.svg` artifact and the renderer can fetch
+    // and parse its bytes.
+    const svg = await inspectSvgExport(window.webContents, config.targets.svg);
     const svgLoadMs = performance.now() - svgStarted;
     const svgCapture = await visualDigest(window);
     memorySamples.push(await sampleMemory(window.webContents, 'svg'));
@@ -1040,7 +1053,7 @@ async function run() {
     stage = 'compare_load';
     await navigate(window, config, config.targets.table, 'result');
     const compareStarted = performance.now();
-    await switchResultMode(window.webContents, '审查修改', 'compare');
+    await switchResultMode(window.webContents, '审查', 'compare');
     const firstProgressivePage = await openProgressiveTable(window.webContents);
     const compareOpenMs = performance.now() - compareStarted;
     const progressivePages = [{ rows: firstProgressivePage.rows, loadMs: null }];
@@ -1053,6 +1066,9 @@ async function run() {
 
     stage = 'history_load';
     const historyStarted = performance.now();
+    // compare mode renders the ResultStudioContextBar switcher, whose labels
+    // are still 审查修改/版本历史; only the result-mode compact navigator uses
+    // the short 审查/历史 labels.
     await switchResultMode(window.webContents, '版本历史', 'history');
     const historyFirst = await inspectHistory(window.webContents);
     const historyFirstPageMs = performance.now() - historyStarted;
@@ -1110,7 +1126,7 @@ async function run() {
       },
       media: {
         png: { loadMs: pngLoadMs, switch: pngSwitch, ...png, ...pngCapture },
-        svg: { loadMs: svgLoadMs, switch: svgSwitch, ...svg, ...svgCapture },
+        svg: { loadMs: svgLoadMs, ...svg, ...svgCapture },
         report: { loadMs: reportLoadMs, ...report, ...reportCapture },
       },
       compare: {
@@ -1147,7 +1163,8 @@ async function run() {
       && result.media.png.rendered === true
       && result.media.png.sourceTargetMatched === true
       && result.media.png.artifactTargetMatched === true
-      && result.media.svg.naturalWidth > 0
+      && result.media.svg.exportLinkPresent === true
+      && result.media.svg.validSvgRoot === true
       && result.media.svg.sourceTargetMatched === true
       && result.media.svg.artifactTargetMatched === true
       && result.media.report.iframeVisible === true

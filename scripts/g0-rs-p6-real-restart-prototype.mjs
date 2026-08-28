@@ -335,6 +335,23 @@ export async function createRealVolcanoBaseline(runtime, rowCount = 240) {
   invariant(submitted.data?.ok === true && submitted.data?.jobId,
     'p6_restart_baseline_submission_failed', submitted.data);
   const job = await waitForCompletedJob(runtime.baseUrl, submitted.data.jobId);
+  // UX1G-1 contract: every openable product job carries a conversation
+  // ownership. The direct `/api/tools/run` path deliberately inserts without
+  // conversation_id, so the P6 fixture binds the baseline to the live trace
+  // conversation here — otherwise the renderer's fail-closed guard
+  // (「这个旧结果没有可信的会话归属」) refuses the deep link and the fallback
+  // binds the running candidate job instead, which hides the version panel.
+  {
+    const bind = openLedger(runtime.env.BIOF3_DB_PATH, { readonly: false });
+    try {
+      const bound = bind.prepare(
+        'UPDATE tool_jobs SET conversation_id=? WHERE id=? AND conversation_id IS NULL'
+      ).run(runtime.conversation.id, job.id);
+      invariant(bound.changes === 1, 'p6_restart_baseline_conversation_bind_failed');
+    } finally {
+      bind.close();
+    }
+  }
   const artifact = (job.result?.artifacts || []).find((item) => item?.id === 'volcano');
   const provenanceArtifact = (job.result?.executionProvenance?.artifacts || [])
     .find((item) => item?.id === 'volcano');

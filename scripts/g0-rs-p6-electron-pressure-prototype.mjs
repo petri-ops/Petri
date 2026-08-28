@@ -308,7 +308,20 @@ async function runHttpTool(runtime, { toolId, params, files }) {
   assert(job && job.status === 'completed', 'p6_pressure_tool_job_failed');
   assert(job.result?.artifactTruth?.status === 'valid'
     && job.result.artifactTruth.blocking !== true, 'p6_pressure_artifact_truth_invalid');
-  return { ...job, id: job.id || submitted.jobId };
+  const boundJob = { ...job, id: job.id || submitted.jobId };
+  // UX1G-1 contract: the renderer's fail-closed conversation-ownership guard
+  // refuses deep links for conversation-less jobs, so the pressure fixture
+  // binds every target job to the live trace conversation after completion.
+  {
+    const bind = new Database(runtime.env.BIOF3_DB_PATH);
+    try {
+      bind.prepare('UPDATE tool_jobs SET conversation_id=? WHERE id=? AND conversation_id IS NULL')
+        .run(runtime.conversation.id, boundJob.id);
+    } finally {
+      bind.close();
+    }
+  }
+  return boundJob;
 }
 
 function artifactRecord(job, artifactId) {
@@ -955,9 +968,11 @@ export function buildP6ElectronPressureVerdict(observation) {
         || renderer.table?.filterFirstVisibleRowChanged === true),
     virtualPage: renderer.table?.virtualPageChanged === true,
     pngSwitch: renderer.media?.png?.switch?.changed === true,
-    svgSwitch: renderer.media?.svg?.switch?.changed === true,
+    svgExport: renderer.media?.svg?.exportLinkPresent === true
+      && renderer.media?.svg?.validSvgRoot === true,
     png: pngReady,
-    svg: renderer.media?.svg?.naturalWidth > 0 && renderer.media?.svg?.naturalHeight > 0
+    svg: renderer.media?.svg?.exportLinkPresent === true
+      && renderer.media?.svg?.validSvgRoot === true
       && renderer.media?.svg?.sourceTargetMatched === true
       && renderer.media?.svg?.artifactTargetMatched === true,
     report: renderer.media?.report?.iframeVisible === true
@@ -987,7 +1002,7 @@ export function buildP6ElectronPressureVerdict(observation) {
   };
   const artifactSwitchSamples = [
     renderer.media?.png?.switch?.feedbackMs,
-    renderer.media?.svg?.switch?.feedbackMs,
+    renderer.media?.svg?.fetchMs,
   ];
   const progressivePageSamples = Array.isArray(renderer.compare?.progressivePages)
     ? renderer.compare.progressivePages.slice(1).map((entry) => entry?.loadMs)

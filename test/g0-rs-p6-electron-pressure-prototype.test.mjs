@@ -82,8 +82,11 @@ function passingObservation(overrides = {}) {
         svg: {
           loadMs: 4_000,
           switch: { feedbackMs: 30, changed: true },
-          naturalWidth: 672,
-          naturalHeight: 480,
+          exportLinkPresent: true,
+          exportHrefMatched: true,
+          bytes: 1_200_000,
+          validSvgRoot: true,
+          fetchMs: 30,
           sourceTargetMatched: true,
           artifactTargetMatched: true,
         },
@@ -317,7 +320,7 @@ test('P6 pressure verdict independently enforces every frozen renderer budget', 
     { table: { virtualPageChanged: false } },
     { media: { png: { rendered: false } } },
     { media: { png: { sourceTargetMatched: false } } },
-    { media: { svg: { naturalWidth: 0 } } },
+    { media: { svg: { validSvgRoot: false } } },
     { media: { svg: { artifactTargetMatched: false } } },
     { media: { report: { embeddedImageCount: 0 } } },
     { media: { report: { sourceTargetMatched: false } } },
@@ -434,12 +437,15 @@ test('P6 Electron driver uses one hardened BrowserWindow and direct Chromium hea
   assert.match(driver, /result\.artifactNetwork\.errorCount === 0/);
   assert.match(driver, /event\.artifactName === config\.targets\.svg\.artifact/);
   assert.doesNotMatch(driver, /events\.push\(\{[^}]*\burl\b/s);
-  assert.match(driver, /canvas\.querySelectorAll\('button'\)/);
+  assert.match(driver, /canvas\.querySelector\('select\[aria-label="切换当前结果"\]'\)/);
   assert.doesNotMatch(driver, /\[\.\.\.document\.querySelectorAll\('button'\)\]\.find/);
   assert.match(driver, /if \(!pngSwitch\.changed\) throw new Error\('png_artifact_switch_failed'\)/);
-  assert.match(driver, /if \(!svgSwitch\.changed\) throw new Error\('svg_artifact_switch_failed'\)/);
+  assert.match(driver, /inspectSvgExport\(window\.webContents, config\.targets\.svg\)/);
+  assert.match(driver, /exportLinkPresent: true/);
+  assert.match(driver, /validSvgRoot:/);
   assert.match(driver, /inspectPlotProjection\(window\.webContents, config\.targets\.png\)/);
-  assert.match(driver, /inspectImage\(window\.webContents, config\.targets\.svg\)/);
+  assert.doesNotMatch(driver, /inspectImage\(window\.webContents, config\.targets\.svg\)/);
+  assert.doesNotMatch(driver, /当前预览/);
   assert.match(driver, /inspectReport\(window\.webContents, config\.targets\.report\)/);
   assert.match(driver, /ipcMain\.handle\('ai-settings:get', async \(\) => \{/);
   assert.match(driver, /terminal_not_exercised_by_pressure_trace/);
@@ -466,7 +472,7 @@ test('P6 Electron driver uses one hardened BrowserWindow and direct Chromium hea
   assert.match(driver, /canvasFirstVisibleMs: tableNavigationMs/);
   assert.match(driver, /result\.media\.report\.iframeVisible === true/);
   assert.match(driver, /nav\[aria-label="结果视图"\]/);
-  assert.match(driver, /switchResultMode\(window\.webContents, '审查修改', 'compare'\)/);
+  assert.match(driver, /switchResultMode\(window\.webContents, '审查', 'compare'\)/);
   assert.match(driver, /switchResultMode\(window\.webContents, '版本历史', 'history'\)/);
   assert.match(driver, /publicProjectionSampleCount >= 7/);
   assert.doesNotMatch(driver, /const publicProjectionAudit = await publicProjectionAudit/);
