@@ -1443,3 +1443,45 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证边界**：`44a4b7e` 是不可变实现提交。**2026-08-28 收口 verified**：canonical P6 evidence 已从干净提交树 `1f276de` 重采（`1f276de` 修复 verifier 过期 `EVIDENCE_PATH` 引用），10/10 canonical checks recomputed，206-file source binding 含 `src/preload.js`，`sourceCommitMatchesSourceHashes=true`、`sourceBindingStableDuringCapture=true`；`npm run g0:result-studio:p6` PASS 10/10 recomputed，`node --test test/test-affected.test.mjs` 0 fail。driver 可观察诊断与 deep-link 路由已由通过的 P6 全矩阵真实采集行使。采集期 1 次 recovery cold-boot fetch 失败与 2 次负载敏感 P6-06 压力预算失败均为环境负载，安静环境全量通过；未放宽 verifier/budget/sanitizer/Artifact Truth，未手改 evidence。
 
 **状态**: verified (dev 边界内：诊断实现 + canonical P6 evidence 重采通过)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-191: BLOCK-22 — CodeMirror 6 基础脚手架与只读渲染 (2026-08-24 → 2026-08-28 verified)
+
+**目标**：为 BLOCK-22 引入 CodeMirror 6 编辑器基础（依赖、组件族、语言加载、桶导出边界），提供可复用的只读渲染能力。
+
+**改动范围**：12 个 `@codemirror/*` + `@lezer/highlight` + 6 个 lang-* 依赖；`frontend/src/components/editor/CodeMirror/` 组件族（`CodeMirrorEditor.tsx` forwardRef 受控 value + Compartment、`useCodeMirrorEditor.ts` 单例 EditorView + 严格模式双 mount 守护、`types.ts`、`extensions/languageLoader.ts` 6 语言懒加载 + 缓存、`index.ts` 桶导出边界）。
+
+**验证**：BLOCK-22 focused vitest 53/53（CodeMirrorEditor 32 用例：mount/readonly aria/ref/setValue/destroy/释放 DOM 等）；**2026-08-28 UI-200 dev Electron 实机覆盖只读渲染路径**（Working Tree Review 中 `.wt-cm-diff .cm-editor` readonly CodeMirrorEditor，证据 `acceptance/ui-200/`）。台账补登自 BLOCK-22 收口（WIP 锁延迟登记），BLOCK-24 完成补登。
+
+**状态**: verified (dev Electron 边界内；UI-200 证据 + focused 单测)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-192: BLOCK-22 — Unified diff 行级 + 字符级高亮 + scrollToLine (2026-08-24 → 2026-08-28 verified)
+
+**目标**：在 CodeMirrorEditor 上以 `@codemirror/merge` 提供行级 unified diff + 字符级高亮与滚动定位扩展。
+
+**改动范围**：`extensions/unifiedDiff.ts`（`createUnifiedDiffExtension`，行级 + 字符级 `cm-changedLine/cm-insertedLine/cm-deletedLine/cm-changedText`）；`extensions/scrollToLine.ts`（滚动定位 + pulse）。
+
+**验证**：BLOCK-22 focused vitest 53/53；**2026-08-28 UI-200 dev Electron 实机 DOM 证据**（`cm-merge-b`/`cm-changedLine`/`cm-insertedLine`/`cm-changedText` 类与新增行可见，旧 `.wt-diff-hunk` 不存在，证据 `acceptance/ui-200/`）；scrollToLine 由 UI-194 pending-scroll 实机链行使（见 UI-194）。
+
+**状态**: verified (dev Electron 边界内；UI-200 证据 + focused 单测)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-193: BLOCK-22 — Accept/Reject widget 与 hunk IPC (2026-08-24 → 2026-08-28 in_progress)
+
+**目标**：在 inline-diff 视图内提供按 hunk 的 Accept/Reject widget，接入 BLOCK-20 既有 git IPC（0 新增 IPC）。
+
+**改动范围**：`extensions/acceptRejectWidget.ts`（inline / floating 两形态，`INLINE_THRESHOLD_LINES` 分界，host data attribute）；`useCodeMirrorEditor.ts` 暴露 `acceptHunk/rejectHunk/acceptAll/rejectAll`；accept 走 `runAcceptHunkIPC`、reject 走 `bridge.rejectHunkByInverseHunk`（BLOCK-20 IPC）；成功后派发 `hunkAccepted` typed event + dismissHunk CSS 淡出 + diff 重建。extension 在 inline-diff 模式无条件挂载。
+
+**验证**：BLOCK-22 focused vitest 53/53（widget 形态/回调/IPC mock 用例）。实机验证由 BLOCK-24 P1 承接：scratch 工作树修改 → widget 可见 → 经 widget reject 一个 hunk → 文件还原、仓库干净，证据 `acceptance/ui-193/`。
+
+**状态**: in_progress (单元验证完成，dev Electron 实机过目待 BLOCK-24 P1)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-194: BLOCK-22 — 聊天卡片跳转联动与 pending-scroll 桥接层 (2026-08-24 → 2026-08-28 in_progress)
+
+**目标**：建立"事件 → PendingScrollContext → CodeMirrorEditor 滚动定位"的桥接层，支撑聊天卡片跳转到文件预览指定行。
+
+**改动范围**：`lib/pendingScrollContext.tsx`（provider + `setPendingRequest`）；`copilot/integration/ChatCardLinkBridge.tsx`（聊天卡片包装器 + 测试）；`editor/integration/WorkspaceFilePreviewBridge.tsx`（CodeMirrorEditor 预览桥，消费 pending request）；`editor/integration/BioF3OpenFileDevBridge.tsx`（dev-only `window.__biof3DispatchOpenFile`，P4.2 挂 App.tsx）；`project-workspace.tsx` P4.5 dispatch 接线。
+
+**边界（诚实声明）**：`ChatCardLinkBridge` 未挂载到聊天 UI —— 按 BLOCK-22 收口决策，业务侧入口的具体接入动作不在 P3 范围，属业务侧后续决策。实机验证经已挂载的 dev bridge 触发 pending-scroll 全链（dispatch → context → 预览 CodeMirror 打开文件并滚动到目标行），由 BLOCK-24 P2 承接，证据 `acceptance/ui-194/`。
+
+**验证**：BLOCK-22 focused vitest 53/53（ChatCardLinkBridge 7 + pendingScrollContext 6 + WorkspaceFilePreviewBridge 8 用例）。实机验证由 BLOCK-24 P2 承接。
+
+**状态**: in_progress (单元验证完成，dev Electron 实机过目待 BLOCK-24 P2；聊天卡片挂载为业务侧决策)。G0 开发期常态 · 不外推 packaged / Provider / GA。

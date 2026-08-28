@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 127,
+    "documentCount": 128,
     "lastUpdated": "2026-08-28",
-    "managedMarkdown": 127
+    "managedMarkdown": 128
   },
   "documents": [
     {
@@ -2223,8 +2223,27 @@
         "def5fdf",
         "1f276de"
       ]
+    },
+    {
+      "id": "BLOCK-24-UI-LEDGER-BACKFILL",
+      "path": "docs/block-24-ui-ledger-backfill-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-24-ui-ledger-backfill",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-24",
+        "ui-ledger",
+        "impact-map",
+        "G0"
+      ],
+      "notes": "2026-08-28 用户裁决（'按照你的建议来'）启动的唯一 active 工作包。范围：①补登 BLOCK-22 遗留的 UI-191~194 台账（WIP 锁解除后一直未登记）并对 UI-193 accept/reject widget 与 UI-194 pending-scroll 联动做 dev Electron 实机过目；②修复 test/impact-map.json 分类规则重叠，恢复 npm run test:changed:list。不外推：ChatCardLinkBridge 聊天 UI 挂载（业务侧决策）/ 新功能 / 新 IPC / 新依赖 / packaged / Provider / GA / P7。0 新增 IPC / 0 新增依赖。",
+      "registeredAt": "2026-08-28",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-REGISTERED"
     }
   ],
   "lastUpdated": "2026-08-28",
-  "documentCount": 144
+  "documentCount": 145
 }
