@@ -78,7 +78,7 @@ function readConfig() {
 
 function targetUrl(config, target, mode = 'result') {
   return `${config.uiBaseUrl}/project/${encodeURIComponent(config.projectId)}`
-    + `?mode=${encodeURIComponent(mode)}&job=${encodeURIComponent(target.jobId)}`
+    + `/${encodeURIComponent(mode)}?job=${encodeURIComponent(target.jobId)}`
     + `&artifact=${encodeURIComponent(target.artifact)}`;
 }
 

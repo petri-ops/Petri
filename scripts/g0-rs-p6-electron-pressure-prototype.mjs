@@ -109,6 +109,7 @@ const EXTRA_SOURCE_PATHS = Object.freeze([
   'frontend/src/components/result-studio/ScientificInteractionViewer.tsx',
   'frontend/src/components/result-studio/resultSurface.ts',
   'frontend/src/components/result-studio/resultStudioClient.ts',
+  'frontend/vite.config.ts',
   'frontend/src/pages/project-workspace.tsx',
 ]);
 
@@ -1188,14 +1189,6 @@ export async function observeP6ElectronPressure({
         env.BIOF3_TRUSTED_DESKTOP_ORIGINS = rendererOrigin;
       },
     });
-    const real = await prepareRealPressureJobs(runtime);
-    const pressure = stagePressureHistory(runtime, real);
-    const truth = inspectPhysicalTruth(runtime, real, pressure);
-    const revisionDigestBeforeElectron = readProjectRevisionDigest(
-      runtime.env.BIOF3_DB_PATH,
-      runtime.project.id,
-    );
-
     vite = spawn(process.execPath, [
       VITE_PATH,
       '--host', '127.0.0.1',
@@ -1207,6 +1200,14 @@ export async function observeP6ElectronPressure({
       stdio: ['ignore', 'ignore', 'ignore'],
     });
     await waitForUrl(`http://127.0.0.1:${uiPort}`, vite);
+    const real = await prepareRealPressureJobs(runtime);
+    const pressure = stagePressureHistory(runtime, real);
+    const truth = inspectPhysicalTruth(runtime, real, pressure);
+    const revisionDigestBeforeElectron = readProjectRevisionDigest(
+      runtime.env.BIOF3_DB_PATH,
+      runtime.project.id,
+    );
+
     writeFileSync(configPath, `${JSON.stringify({
       uiBaseUrl: `http://127.0.0.1:${uiPort}`,
       backendBaseUrl: `http://127.0.0.1:${backendPort}`,
