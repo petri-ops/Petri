@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -16,8 +16,11 @@ import {
   assertP6ProductAcceptanceEvidenceWritable,
   assertSanitizedP6ProductAcceptanceEvidence,
   evaluateP6ProductAcceptanceObservations,
+  getP6ProductAcceptanceEvidencePath,
   getP6ProductAcceptanceSourceBinding,
   projectP6ComponentObservation,
+  resetP6ProductAcceptanceEvidencePath,
+  setP6ProductAcceptanceEvidencePath,
   verifyStoredP6ProductAcceptanceSourceBinding,
   verifyStoredP6ProductAcceptanceEvidence,
   writeP6ProductAcceptanceEvidence,
@@ -270,8 +273,9 @@ function electronPressure() {
           sourceTargetMatched: true, artifactTargetMatched: true,
         },
         svg: {
-          loadMs: 4_000, switch: { feedbackMs: 30, changed: true }, naturalWidth: 672,
-          naturalHeight: 480, sourceTargetMatched: true, artifactTargetMatched: true,
+          loadMs: 4_000, fetchMs: 400, exportLinkPresent: true, validSvgRoot: true,
+          naturalWidth: 672, naturalHeight: 480,
+          sourceTargetMatched: true, artifactTargetMatched: true,
         },
         report: {
           loadMs: 3_000, iframeVisible: true, iframeWidth: 582, iframeHeight: 520,
@@ -673,6 +677,28 @@ test('P6 package gate owns syntax, focused tests, stored verification and eviden
   }
   assert.match(scripts['g0:result-studio:p6'], /g0-rs-p6-product-acceptance\.mjs/);
   assert.match(scripts['g0:result-studio:p6:update'], /--write-evidence/);
+});
+
+test('P6 stored verification and write gate target an injected evidence path', () => {
+  const storagePath = path.join(ROOT, 'acceptance', 'g0-result-studio', 'injected-p6-evidence.json');
+  const relativeStoragePath = path.relative(ROOT, storagePath);
+  setP6ProductAcceptanceEvidencePath(relativeStoragePath);
+  try {
+    const guard = P6_PRODUCT_ACCEPTANCE_TEST_HOOKS.createLiveCaptureGuard();
+    const evidence = guard.remember({ ...writableEvidence(), dryRunPassed: true });
+    P6_PRODUCT_ACCEPTANCE_TEST_HOOKS.rememberLiveCapture(evidence);
+    assert.equal(getP6ProductAcceptanceEvidencePath(), storagePath);
+    assert.equal(guard.assertUnchanged(evidence), true);
+    writeP6ProductAcceptanceEvidence(evidence);
+    assert.equal(verifyStoredP6ProductAcceptanceEvidence(), true);
+    const stored = JSON.parse(readFileSync(storagePath, 'utf8'));
+    stored.observations.electronRecovery.processBoundaries.electronActuallySigkilled = false;
+    assert.throws(() => verifyStoredP6ProductAcceptanceEvidence(stored),
+      /p6_evidence_checks_not_recomputed/);
+  } finally {
+    if (existsSync(storagePath)) unlinkSync(storagePath);
+    resetP6ProductAcceptanceEvidencePath();
+  }
 });
 
 test('stored P6 evidence remains source-bound and recomputable', {

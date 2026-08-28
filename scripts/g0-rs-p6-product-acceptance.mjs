@@ -52,10 +52,21 @@ import {
 } from './g0-rs-p6-product-scenarios.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const EVIDENCE_PATH = path.join(
+const DEFAULT_EVIDENCE_RELATIVE_PATH = 'acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json';
+let evidencePath = path.join(
   ROOT,
-  'acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json',
+  DEFAULT_EVIDENCE_RELATIVE_PATH,
 );
+export function getP6ProductAcceptanceEvidencePath() {
+  return evidencePath;
+}
+export function setP6ProductAcceptanceEvidencePath(relativePath) {
+  const target = path.resolve(ROOT, relativePath);
+  if (target !== ROOT && target.startsWith(ROOT + path.sep)) evidencePath = target;
+}
+export function resetP6ProductAcceptanceEvidencePath() {
+  evidencePath = path.join(ROOT, DEFAULT_EVIDENCE_RELATIVE_PATH);
+}
 const COMMIT = /^[a-f0-9]{40}$/;
 const SHA256 = /^[a-f0-9]{64}$/;
 
@@ -101,10 +112,10 @@ const P6_PRESSURE_BOUNDARY = Object.freeze({
 export const P6_PRODUCT_ACCEPTANCE_TEST_FILES = Object.freeze([
   'test/g0-chf0-lifecycle.test.mjs',
   'test/g0-rs-p6-product-acceptance.test.mjs',
-  'test/g0-rs-p6-real-restart-prototype.test.mjs',
   'test/g0-rs-p6-electron-pressure-prototype.test.mjs',
-  'test/g0-rs-p6-recovery-electron-prototype.test.mjs',
   'test/g0-rs-p6-product-scenarios.test.mjs',
+  'test/g0-rs-p6-recovery-electron-prototype.test.mjs',
+  'test/g0-rs-p6-real-restart-prototype.test.mjs',
   'test/g0-rs-p6-recovery-acceptance.test.mjs',
   'test/result-changeset-service.test.mjs',
   'test/result-studio-lifecycle.test.mjs',
@@ -233,6 +244,7 @@ const p6LiveCaptureGuard = createP6LiveCaptureGuard();
 
 export const P6_PRODUCT_ACCEPTANCE_TEST_HOOKS = Object.freeze({
   createLiveCaptureGuard: createP6LiveCaptureGuard,
+  rememberLiveCapture: p6LiveCaptureGuard.remember,
 });
 
 function git(args, options = {}) {
@@ -570,13 +582,13 @@ export function writeP6ProductAcceptanceEvidence(evidence, io = {}) {
   assertP6ProductAcceptanceEvidenceWritable(canonicalEvidence);
   assertCurrentP6ProductAcceptanceSourceBinding(canonicalEvidence);
   const serialized = `${JSON.stringify(canonicalEvidence, null, 2)}\n`;
-  (io.makeDirectory || mkdirSync)(path.dirname(EVIDENCE_PATH), { recursive: true });
-  (io.write || writeFileSync)(EVIDENCE_PATH, serialized);
+  (io.makeDirectory || mkdirSync)(path.dirname(evidencePath), { recursive: true });
+  (io.write || writeFileSync)(evidencePath, serialized);
   return { bytes: Buffer.byteLength(serialized), digest: sha256(serialized) };
 }
 
 export function verifyStoredP6ProductAcceptanceEvidence(evidence = null) {
-  const stored = evidence || JSON.parse(readFileSync(EVIDENCE_PATH, 'utf8'));
+  const stored = evidence || JSON.parse(readFileSync(evidencePath, 'utf8'));
   verifyStoredP6ProductAcceptanceSourceBinding(stored);
   assertP6ProductAcceptanceEvidenceWritable(stored);
   invariant(stored?.sourceBindingStableDuringCapture === true,
