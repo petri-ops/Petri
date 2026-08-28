@@ -1,12 +1,12 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-28（BLOCK-23 UI-200 已通过 dev Electron 实机验收并转 `verified`，证据位于 `acceptance/ui-200/`。实现仍绑定 `71d4f78`；唯一剩余收口门是 Result Studio 侧 canonical P6 source-bound evidence refresh，既有 fail-closed blocker 未写入 evidence，需用户裁决独立工作包修复。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-08-28（用户已裁决启动 UI-201 独立修复包；BLOCK-23 UI-200 保持 dev Electron verified，BLOCK-23 转为 P6 dependency 挂起检查点。唯一 active 工作包是 `UI-201-RESULT-STUDIO-P6-EVIDENCE-REPAIR`。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- **BLOCK-23-REVIEW-CODEMIRROR-UPGRADE** 处于 P6-blocked：`docs/block-23-review-codemirror-upgrade-plan.md` 是唯一 active 工作包，UI-200 已 verified。
-- 实现已提交为 `71d4f78`，但 canonical P6 refresh 因既有 Result Studio 持久化/迁移/测试映射债 fail-closed；不要在 BLOCK-23 内修复，也不要写入任何替代 P6 evidence。
-- 收口顺序：用户裁决独立 Result Studio P6 blocker 工作包并修复 → 以 `71d4f78` 源字节诚实刷新 P6 evidence → BLOCK-23 才可转 completed。
+- **UI-201-RESULT-STUDIO-P6-EVIDENCE-REPAIR** 是唯一 active 工作包：`docs/ui-201-result-studio-p6-evidence-repair-plan.md` 登记证据链修复、UI-200 evidence ownership 与 canonical P6 refresh。
+- BLOCK-23 实现已提交为 `71d4f78`，UI-200 已 verified；canonical P6 仍绑定旧 204-file source map，由 UI-201 诚实刷新为当前 205-file binding。
+- 收口顺序：UI-201 修复并刷新 canonical P6 evidence → 回写 BLOCK-23 completed；不得放宽 source-map / sanitization / artifact-truth verifier。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 
 ## 当前结论

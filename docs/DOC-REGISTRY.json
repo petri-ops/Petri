@@ -2172,7 +2172,7 @@
       "id": "BLOCK-23-REVIEW-CODEMIRROR-UPGRADE",
       "path": "docs/block-23-review-codemirror-upgrade-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "planned",
       "canonical": true,
       "truthDomain": "block-23-review-codemirror-upgrade",
       "entrypoint": "docs/README.md",
@@ -2183,12 +2183,32 @@
         "inline-diff",
         "G0"
       ],
-    "notes": "2026-08-28 BLOCK-23 UI-accepted / P6-blocked：实现 commit 为 71d4f78，P6 测试隔离 commit 为 e5c2ca5；CodeMirrorDiffView 以 readonly inline-diff 替换 DiffFileView/DiffHunkView，删除 agent-doc-review BLOCK-17 全链路死代码，working-tree-review 统一 repositoryStatus。实现验证：focused frontend 59/59、tsc 0、Electron 三文件语法 0、docs:reconcile 0、docs:check 143 PASS、ui:audit:check PASS。UI-200 已通过 dev Electron CDP/DOM/截图验收并转 verified，fixture 已删除。P6 acceptance 12/13，剩余 canonical stored evidence 源映射过期；canonical P6 refresh 因既有 Result Studio issue fail-closed，未写入 evidence。0 新增 IPC / 0 新增依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "notes": "2026-08-28 BLOCK-23 UI checkpoint / P6 dependency blocked：实现 commit 为 71d4f78，P6 测试隔离 commit 为 e5c2ca5；CodeMirrorDiffView 以 readonly inline-diff 替换 DiffFileView/DiffHunkView，删除 agent-doc-review BLOCK-17 全链路死代码，working-tree-review 统一 repositoryStatus。实现验证：focused frontend 59/59、tsc 0、Electron 三文件语法 0、docs:reconcile 0、docs:check 143 PASS、ui:audit:check PASS。UI-200 已通过 dev Electron CDP/DOM/截图验收并转 verified，fixture 已删除。canonical P6 refresh 已移交 UI-201 独立工作包；BLOCK-23 planned 挂起，等待证据刷新后 completed。0 新增 IPC / 0 新增依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "registeredAt": "2026-08-28",
       "archivePolicy": "archive_when_superseded",
-    "phase": "P0-UI-ACCEPTED-P6-BLOCKED"
+      "phase": "UI-CHECKPOINT-P6-DEPENDENCY-BLOCKED"
+    },
+    {
+      "id": "UI-201-RESULT-STUDIO-P6-EVIDENCE-REPAIR",
+      "path": "docs/ui-201-result-studio-p6-evidence-repair-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "ui-201-result-studio-p6-evidence-repair",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "ui-201",
+        "result-studio",
+        "p6",
+        "evidence-chain",
+        "G0"
+      ],
+      "notes": "2026-08-28 用户裁决启动的唯一 active 工作包。范围限于修复 P6 evidence chain、登记 UI-200 evidence ownership、按需修复 capture defects，并以干净提交源树诚实刷新 205-file canonical P6 source-bound evidence；完成后回写 BLOCK-23 completed。0 新增 IPC / 0 新增依赖。G0 开发期常态 · 不外推 packaged/Provider/GA/P7。",
+      "registeredAt": "2026-08-28",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-DIAGNOSED-P1-ACTIVE"
     }
   ],
-      "lastUpdated": "2026-08-28 (BLOCK-23 UI accepted; P6 blocked)",
-      "documentCount": 143
+      "lastUpdated": "2026-08-28 (UI-201 active; BLOCK-23 dependency blocked)",
+      "documentCount": 144
 }

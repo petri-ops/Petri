@@ -1,13 +1,13 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-28（BLOCK-23 UI-200 已 verified；P6 refresh 仍被 Result Studio blocker 阻断）
+最后更新：2026-08-28（UI-201 是唯一 active 工作包；BLOCK-23 UI checkpoint 挂起等待 P6 refresh）
 
 ## Session Snapshot
 
-- **Active work package**: `BLOCK-23-REVIEW-CODEMIRROR-UPGRADE`，状态 UI-accepted / P6-blocked；BLOCK-24 不得启动。
+- **Active work package**: `UI-201-RESULT-STUDIO-P6-EVIDENCE-REPAIR`，计划位于 `docs/ui-201-result-studio-p6-evidence-repair-plan.md`；其他新工作包不得启动。
 - **Current branch**: `main`；HEAD、dirty state 与 `origin/main` 同步状态以运行时 Git 为准。
 - **Working tree boundary**: Working Tree Review 已切换到 `CodeMirrorDiffView` readonly inline-diff；`DiffFileView` / `DiffHunkView` 与 BLOCK-17 `agentDocReview` 全链路死代码已删除。实现检查点为 `71d4f78`。
-- **Next steps**: 先由用户裁决独立 Result Studio P6 blocker 工作包；修复后以 `71d4f78` 源字节诚实刷新 P6 evidence。BLOCK-23 才可转 completed。
+- **Next steps**: 修复 P6 evidence chain 与 UI-200 evidence ownership；从干净提交源树以当前 205-file source map 诚实刷新 canonical P6 evidence，再回写 BLOCK-23 completed。
 - **Minimum recovery**: 先读 `AUDIT-LOG.md` 当前待处理项，再核对 Git，然后用 `DOC-REGISTRY.json` 定位 active 工作包；无 active 包时停止，不通读历史文档。
 - **Last recorded gates**: focused frontend 59/59 PASS / `tsc --noEmit` 0 errors / Electron 三文件 `node --check` PASS / `docs:check` 143 PASS / `docs:reconcile` 0 validation issues / `ui:audit:check` PASS。UI-200 dev Electron CDP/DOM/截图验收为 `verified`，证据 `acceptance/ui-200/`。
 - **G0 discipline**: G0 开发期常态 · 不外推 packaged/Provider/GA。
