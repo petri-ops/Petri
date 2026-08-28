@@ -2183,7 +2183,7 @@
         "inline-diff",
         "G0"
       ],
-    "notes": "2026-08-28 BLOCK-23 implementation-committed / P6-blocked：实现 commit 为 71d4f78；CodeMirrorDiffView 以 readonly inline-diff 替换 DiffFileView/DiffHunkView，删除 agent-doc-review BLOCK-17 全链路死代码，working-tree-review 统一 repositoryStatus。实现验证：focused frontend 59/59、tsc 0、Electron 三文件语法 0、docs:reconcile 0、docs:check 143 PASS、ui:audit:check PASS。canonical P6 refresh 因既有 Result Studio issue fail-closed，未写入 evidence；UI-200 保持 in_progress。0 新增 IPC / 0 新增依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+    "notes": "2026-08-28 BLOCK-23 implementation-committed / P6-blocked：实现 commit 为 71d4f78，P6 测试隔离 commit 为 e5c2ca5；CodeMirrorDiffView 以 readonly inline-diff 替换 DiffFileView/DiffHunkView，删除 agent-doc-review BLOCK-17 全链路死代码，working-tree-review 统一 repositoryStatus。实现验证：focused frontend 59/59、tsc 0、Electron 三文件语法 0、docs:reconcile 0、docs:check 143 PASS、ui:audit:check PASS。P6 acceptance 12/13，注入 evidence 路径通过，剩余 canonical stored evidence 源映射过期。canonical P6 refresh 因既有 Result Studio issue fail-closed，未写入 evidence；UI-200 保持 in_progress。0 新增 IPC / 0 新增依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "registeredAt": "2026-08-28",
       "archivePolicy": "archive_when_superseded",
     "phase": "P0-IMPLEMENTATION-COMMITTED-P6-BLOCKED"

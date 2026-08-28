@@ -64,6 +64,10 @@ CodeMirror 6 unified diff extension already delivered by BLOCK-22.
 - Governance: `docs:reconcile` 0 validation issues, `docs:check` PASS with 143
   registered documents, and `ui:audit:check` PASS.
 - UI-200 remains `in_progress` until dev Electron review is observed.
+- Test isolation commit: `e5c2ca5` — injected evidence paths are isolated from
+  the canonical evidence target. Focused P6 acceptance is now 12/13; the sole
+  remaining failure is the stale 204-file stored source map against the
+  current 205-file binding (`p6_stored_source_map_invalid`).
 - The committed-source P6 refresh remains blocked by a separate Result Studio
   issue. The canonical updater fail-closed on the pre-existing SQLite,
   migration-version, and affected-evidence mapping debts; direct capture

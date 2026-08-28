@@ -1430,3 +1430,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：focused frontend 59/59 PASS（CodeMirrorDiffView 3 + CodeMirrorEditor 32 + events-bus 4 + DiffActionBar 11 + desktopBridge 9）；`cd frontend && npx tsc --noEmit` 0 错；`node --check` 覆盖 `working-tree-review.js` / `main.js` / `preload.js`；`docs:reconcile` 0 validation issues；`docs:check` 143 PASS；`ui:audit:check` PASS。实现 commit 为 `71d4f78`；canonical P6 refresh 因既有 Result Studio issue fail-closed，未写入 evidence。
 
 **状态**: in_progress (dev Electron 边界内 verified 待实机过目)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-201: Result Studio P6 evidence diagnostics repair (2026-08-28 active)
+
+**目标**：修复 P6 recovery/pressure driver 与当前 Result Studio UI 契约之间的采集断层，并为失败诊断提供可观察数据；这是 P6 evidence chain repair 的一部分，不是新的用户功能。
+
+**改动范围**：
+- `ResultView.tsx`：revision-only 预览允许构建 active artifact；空 artifact label/type 使用当前 selected name 与 classifier 兜底；根节点新增 `data-debug-selected-name`、`data-debug-artifact-count`、`data-debug-job-status`、`data-debug-viewer`、`data-debug-revision`。
+- `project-workspace.tsx`：deep-link 支持显式 workspace mode，history mode 保留打开语义，并在 URL 已携带 mode 时避免二次改写 mode。
+- 0 新增 IPC / 0 新增依赖。
+
+**验证边界**：`44a4b7e` 是不可变实现提交，本次为后续 canonical 台账补登。该提交的 P6 完整刷新仍 fail-closed（当前 canonical stored source map 为 `p6_stored_source_map_invalid`，live updater 为既有 Result Studio 债务阻断），因此 UI-201 保持 `in_progress`，不得标记 `verified`。
+
+**状态**: in_progress (driver-observable diagnostics and deep-link routing implemented_unverified)。G0 开发期常态 · 不外推 packaged / Provider / GA。

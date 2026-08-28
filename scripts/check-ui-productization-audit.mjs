@@ -196,11 +196,19 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // 未带 UI-###；台账已由本 commit 补登为 UI-195（in_progress）。
   // 不重写共享历史。
   '9cb6e9624bea9d33c5e9fd08cf52c7137d722893',
+  // 2026-08-28 P6 evidence collection chain repair 不可变提交 44a4b7e：
+  // subject `fix(result-studio)` 未带 UI-###；台账已由本 commit 补登为
+  // UI-201（in_progress）。不重写共享历史。
+  '44a4b7e9087a8eade9c061c1d04c6b543378e159',
 ])
 // These immutable implementation commits have an explicit later canonical
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-08-28 P6 evidence collection chain repair 44a4b7e predates the
+  // UI-201 canonical ledger reconciliation in this governance commit; shared
+  // history is intentionally not rewritten.
+  '44a4b7e9087a8eade9c061c1d04c6b543378e159',
   // P4R-2 was recorded as UI-113 by the immediately following governance
   // commit 2f0e78d. Its separate message exemption remains declared above.
   '17bb486f3eda58cc14aa2ee5d4386b16f20fc18e',
