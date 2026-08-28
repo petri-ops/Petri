@@ -10,6 +10,8 @@ import test from 'node:test';
 const root = mkdtempSync(path.join(tmpdir(), 'biof3-result-route-baseline-'));
 process.env.BIOF3_DB_PATH = path.join(root, 'route.db');
 const require = createRequire(import.meta.url);
+const { runMigrations } = require('../src/migration-runner');
+await runMigrations(process.env.BIOF3_DB_PATH, path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'migrations'));
 const route = require('../core/r-server/routes/result-studio');
 const { readVerifiedFileSnapshot } = require('../core/r-server/helpers/verified-file-snapshot');
 const { queryResultTable } = require('../core/shared-backend/result-studio-table-query');

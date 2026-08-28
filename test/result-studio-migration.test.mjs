@@ -55,7 +55,7 @@ const MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '001_result_studio.sql');
 const WORKFLOW_GRAPH_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '002_result_workflow_graph.sql');
 const REF_TRANSACTION_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '003_result_ref_transactions.sql');
 const REPOSITORY_CONSENT_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '004_git_repository_consent.sql');
-const LATEST_MIGRATION_VERSION = GIT_REPOSITORY_CONSENT_MIGRATION_VERSION;
+const LATEST_MIGRATION_VERSION = 8;
 
 // 收集本文件所有临时目录，统一在「文件级」after 钩子里清理。
 // 文件级钩子在所有 test 级 after 钩子（含各用例的 db.close）之后运行，
@@ -190,6 +190,10 @@ test('RS2 runner installs the schema into an empty database', async (context) =>
     RESULT_WORKFLOW_GRAPH_MIGRATION_VERSION,
     RESULT_REF_TRANSACTION_MIGRATION_VERSION,
     GIT_REPOSITORY_CONSENT_MIGRATION_VERSION,
+    5,
+    6,
+    7,
+    8,
   ]);
 });
 
@@ -230,7 +234,7 @@ test('RS2 runner is idempotent across repeated startups', async (context) => {
   context.after(() => { try { db.close(); } catch { /* noop */ } });
   // 版本只记录一次，不重复插入
   const rows = db.prepare('SELECT version FROM schema_migrations').all();
-  assert.equal(rows.length, 4);
+  assert.equal(rows.length, LATEST_MIGRATION_VERSION);
 });
 
 // ---------------------------------------------------------------------------

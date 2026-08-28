@@ -13,12 +13,23 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
 
 const require = createRequire(import.meta.url);
+
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const selectionDbRoot = mkdtempSync(join(tmpdir(), 'biof3-rs-selection-db-'));
+const selectionDbPath = join(selectionDbRoot, 'test.db');
+process.env.BIOF3_DB_PATH = selectionDbPath;
+const { runMigrations } = require('../src/migration-runner');
+await runMigrations(selectionDbPath, join(REPO_ROOT, 'src', 'migrations'));
 const {
   tool_result_selection_run,
   tool_result_enrichment_from_revision,
 } = require('../core/r-server/agent-tools/result-selection-tools');
+process.env.BIOF3_DB_PATH = undefined;
+rmSync(selectionDbRoot, { recursive: true, force: true });
 
 function sha256(value) {
   return crypto.createHash('sha256').update(value).digest('hex');
