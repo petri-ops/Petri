@@ -353,7 +353,16 @@ export function ReviewMode() {
                 )}
                 <span className="wt-file-hunk-count">{selectedFile.hunks.length} hunk(s)</span>
               </div>
-              <CodeMirrorDiffView filePath={selectedFile.path} isBinary={selectedFile.binary} />
+              <CodeMirrorDiffView
+                filePath={selectedFile.path}
+                isBinary={selectedFile.binary}
+                hunks={selectedFile.hunks}
+                hunkDecisions={selectedFile.hunks.map(
+                  (_, i) => review.decisions[`${selectedFile.path}#${i}`] ?? null,
+                )}
+                onAcceptHunk={(i) => void review.decideHunk(selectedFile.path, i, 'accept')}
+                onRejectHunk={(i) => void review.decideHunk(selectedFile.path, i, 'reject')}
+              />
             </div>
           )}
         </main>

@@ -67,6 +67,8 @@ export const CodeMirrorEditor = forwardRef<EditorApi, CodeMirrorEditorProps>(fun
     onRejectHunk,
     onError,
     showDiffActionBar = false,
+    extraExtensions,
+    diffOptions,
     children,
   },
   ref,
@@ -88,6 +90,8 @@ export const CodeMirrorEditor = forwardRef<EditorApi, CodeMirrorEditorProps>(fun
       onAcceptHunk,
       onRejectHunk,
       onError,
+      extraExtensions,
+      diffOptions,
     },
     apiRef,
   );

@@ -71,4 +71,42 @@ describe('CodeMirrorDiffView', () => {
     if (!alert) throw new Error('Expected error alert to render');
     expect(alert.textContent).toBe('unable to read file');
   });
+
+  it('renders hunk markers and hover accept/reject controls (BLOCK-28)', async () => {
+    fileContentMock.mockImplementation((params: { ref?: 'HEAD' | 'WORKTREE' }) =>
+      fileResult(params.ref === 'HEAD' ? 'line1\n' : 'line1\nline2\n')
+    );
+    const onAcceptHunk = vi.fn();
+    const onRejectHunk = vi.fn();
+
+    render(
+      <CodeMirrorDiffView
+        filePath="sample.py"
+        isBinary={false}
+        hunks={[{ oldStart: 1, newStart: 2, lines: [{ type: 'add', text: 'line2' }] }]}
+        hunkDecisions={[null]}
+        onAcceptHunk={onAcceptHunk}
+        onRejectHunk={onRejectHunk}
+      />
+    );
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-block-22-codemirror]')).not.toBeNull();
+    });
+
+    // 滚动标记条：1 个 hunk → 1 个标记
+    const markers = document.querySelectorAll('.wt-diff-marker');
+    expect(markers.length).toBe(1);
+
+    // hunk 悬浮控件：Accept / Reject 按钮均已注入编辑器行尾
+    await waitFor(() => {
+      expect(document.querySelector('[data-hunk-accept="0"]')).not.toBeNull();
+      expect(document.querySelector('[data-hunk-reject="0"]')).not.toBeNull();
+    });
+
+    const acceptBtn = document.querySelector<HTMLButtonElement>('[data-hunk-accept="0"]');
+    acceptBtn?.click();
+    expect(onAcceptHunk).toHaveBeenCalledTimes(1);
+    expect(onRejectHunk).not.toHaveBeenCalled();
+  });
 });

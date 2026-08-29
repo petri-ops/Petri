@@ -18,7 +18,7 @@
  */
 
 import { useEffect, useImperativeHandle, useRef, type RefObject } from 'react';
-import { Compartment, EditorState } from '@codemirror/state';
+import { Compartment, EditorState, type Extension } from '@codemirror/state';
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import {
@@ -33,7 +33,7 @@ import { tags as t } from '@lezer/highlight';
 import { getBridge } from '../../../lib/desktopBridge';
 import { biof3Events, dispatchBioF3Event } from '../../../lib/events';
 import { loadLanguage } from './extensions/languageLoader';
-import { createUnifiedDiffExtension } from './extensions/unifiedDiff';
+import { createUnifiedDiffExtension, type DiffViewOptions } from './extensions/unifiedDiff';
 import { createScrollToLineApi, scrollToLineExtension } from './extensions/scrollToLine';
 import {
   createAcceptRejectWidgetExtension,
@@ -70,6 +70,10 @@ export interface UseCodeMirrorEditorOptions {
   onRejectHunk?: (hunkId: string) => void;
   /** IPC 失败回调（P2）：走 onError（不接事件总线）。 */
   onError?: (err: unknown) => void;
+  /** BLOCK-28 — 业务层注入的额外 CM6 扩展；数组引用变化时经独立 Compartment 热替换。 */
+  extraExtensions?: Extension[];
+  /** BLOCK-28 — inline-diff 渲染选项（如 collapseUnchanged）。 */
+  diffOptions?: DiffViewOptions;
 }
 
 const biof3HighlightStyle = HighlightStyle.define([
@@ -218,6 +222,8 @@ export function useCodeMirrorEditor(
     onAcceptHunk,
     onRejectHunk,
     onError,
+    extraExtensions,
+    diffOptions,
   } = options;
 
   const viewRef = useRef<EditorView | null>(null);
@@ -225,10 +231,17 @@ export function useCodeMirrorEditor(
   const langCompartmentRef = useRef<Compartment | null>(null);
   const diffCompartmentRef = useRef<Compartment | null>(null);
   const widgetCompartmentRef = useRef<Compartment | null>(null);
+  const extraCompartmentRef = useRef<Compartment | null>(null);
 
   // 当前状态镜像（apiRef 暴露 read 用）
   const currentModeRef = useRef<EditorMode>(mode);
   const currentDiffRevisionRef = useRef<DiffRevision | null>(diffRevision);
+
+  // BLOCK-28 — diffOptions 镜像：所有 createUnifiedDiffExtension 调用统一走此 helper
+  const diffOptionsRef = useRef<DiffViewOptions | undefined>(diffOptions);
+  diffOptionsRef.current = diffOptions;
+  const buildDiffExt = (rev: DiffRevision): Extension[] =>
+    createUnifiedDiffExtension(rev, diffOptionsRef.current);
 
   // P2 回调 ref：避免 EditorApi 重新创建 + 把稳定 callback 注入 widget extension
   const onAcceptHunkRef = useRef<typeof onAcceptHunk>(onAcceptHunk);
@@ -263,7 +276,7 @@ export function useCodeMirrorEditor(
           const updatedHunks = rev.hunks.filter((h) => h.id !== hunkId);
           const updatedRevision: DiffRevision = { ...rev, hunks: updatedHunks };
           currentDiffRevisionRef.current = updatedRevision;
-          v2.dispatch({ effects: diffCompartment.reconfigure(createUnifiedDiffExtension(updatedRevision)) });
+          v2.dispatch({ effects: diffCompartment.reconfigure(buildDiffExt(updatedRevision)) });
         }, 200);
       };
 
@@ -305,7 +318,7 @@ export function useCodeMirrorEditor(
           if (!diffCompartment) return;
           if (next === 'inline-diff') {
             const rev = currentDiffRevisionRef.current;
-            const diffExt = rev ? createUnifiedDiffExtension(rev) : [];
+            const diffExt = rev ? buildDiffExt(rev) : [];
             v.dispatch({ effects: diffCompartment.reconfigure(diffExt) });
           } else {
             v.dispatch({ effects: diffCompartment.reconfigure([]) });
@@ -321,7 +334,7 @@ export function useCodeMirrorEditor(
           // 不能 hot-replace extension；这里通过 reconfigure 触发 StateField 重新初始化
           const diffCompartment = diffCompartmentRef.current;
           if (!diffCompartment) return;
-          const diffExt = rev ? createUnifiedDiffExtension(rev) : [];
+          const diffExt = rev ? buildDiffExt(rev) : [];
           v.dispatch({ effects: diffCompartment.reconfigure(diffExt) });
         },
         getDiffRevision: (): DiffRevision | null => currentDiffRevisionRef.current,
@@ -431,10 +444,12 @@ export function useCodeMirrorEditor(
     const langCompartment = new Compartment();
     const diffCompartment = new Compartment();
     const widgetCompartment = new Compartment();
+    const extraCompartment = new Compartment();
     readonlyCompartmentRef.current = readonlyCompartment;
     langCompartmentRef.current = langCompartment;
     diffCompartmentRef.current = diffCompartment;
     widgetCompartmentRef.current = widgetCompartment;
+    extraCompartmentRef.current = extraCompartment;
 
     const initialMode: EditorMode = mode;
     const initialDiffRevision: DiffRevision | null = diffRevision;
@@ -443,7 +458,7 @@ export function useCodeMirrorEditor(
 
     const diffExtension =
       initialMode === 'inline-diff' && initialDiffRevision
-        ? createUnifiedDiffExtension(initialDiffRevision)
+        ? buildDiffExt(initialDiffRevision)
         : [];
 
     // P2 widget extension：仅 inline-diff 模式挂载
@@ -490,6 +505,7 @@ export function useCodeMirrorEditor(
       langCompartment.of([]),
       diffCompartment.of(diffExtension),
       widgetCompartment.of(widgetExtension),
+      extraCompartment.of(extraExtensions ?? []),
       scrollToLineExtension(),
     ];
 
@@ -564,7 +580,7 @@ export function useCodeMirrorEditor(
     currentModeRef.current = mode;
     if (mode === 'inline-diff') {
       const rev = currentDiffRevisionRef.current;
-      const diffExt = rev ? createUnifiedDiffExtension(rev) : [];
+      const diffExt = rev ? buildDiffExt(rev) : [];
       const widgetExt = rev
         ? createAcceptRejectWidgetExtension({
             callbacks: {
@@ -604,7 +620,7 @@ export function useCodeMirrorEditor(
     if (!view || !diffCompartment || !widgetCompartment) return;
     currentDiffRevisionRef.current = diffRevision;
     if (currentModeRef.current !== 'inline-diff') return;
-    const diffExt = diffRevision ? createUnifiedDiffExtension(diffRevision) : [];
+    const diffExt = diffRevision ? buildDiffExt(diffRevision) : [];
     const widgetExt = diffRevision
       ? createAcceptRejectWidgetExtension({
           callbacks: {
@@ -627,4 +643,12 @@ export function useCodeMirrorEditor(
       ],
     });
   }, [diffRevision]);
+
+  // BLOCK-28 — extraExtensions 变化：经独立 Compartment 热替换（不重建 view）
+  useEffect(() => {
+    const view = viewRef.current;
+    const extraCompartment = extraCompartmentRef.current;
+    if (!view || !extraCompartment) return;
+    view.dispatch({ effects: extraCompartment.reconfigure(extraExtensions ?? []) });
+  }, [extraExtensions]);
 }

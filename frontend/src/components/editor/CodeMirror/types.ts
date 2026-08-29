@@ -14,6 +14,12 @@
  * 任何对 EditorApi 的新增都必须先扩这个 types.ts。
  */
 
+import type { Extension } from '@codemirror/state';
+
+import type { DiffViewOptions } from './extensions/unifiedDiff';
+
+export type { DiffViewOptions };
+
 /**
  * 编辑器模式。
  * - 'normal'：只读 / 可编辑单轨文本（默认）。
@@ -223,4 +229,14 @@ export interface CodeMirrorEditorProps {
    * P3 落地：业务侧 WorkspaceFilePreview 入口按 prop 打开。
    */
   showDiffActionBar?: boolean;
+  /**
+   * BLOCK-28 — 业务层注入的额外 CM6 扩展（如 hunk 悬浮控件）。
+   * 数组引用变化时经独立 Compartment 热替换，不重建 view。
+   */
+  extraExtensions?: Extension[];
+  /**
+   * BLOCK-28 — inline-diff 渲染选项（如 collapseUnchanged 折叠未变更上下文）。
+   * 缺省行为与 BLOCK-22 完全一致。
+   */
+  diffOptions?: DiffViewOptions;
 }

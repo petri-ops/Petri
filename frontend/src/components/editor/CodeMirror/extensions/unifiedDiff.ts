@@ -32,12 +32,25 @@ const DIFF_SCAN_LIMIT = 10000;
 const DIFF_TIMEOUT_MS = 1000;
 
 /**
+ * BLOCK-28 — inline-diff 渲染选项。
+ * `collapseUnchanged`：折叠 hunk 间长段未变更上下文（merge view 原生
+ * "⇕ 展开"控件），用于主区审阅模式的大空间 diff。
+ */
+export interface DiffViewOptions {
+  collapseUnchanged?: { margin: number; minSize: number };
+}
+
+/**
  * 创建 unified diff extension。
  *
  * @param revision DiffRevision；`originalText` / `modifiedText` 都允许空串
  *                 （空文本用于"全新文件" / "全文件删除"场景）
+ * @param options  BLOCK-28 可选渲染选项（向后兼容：缺省行为与 BLOCK-22 一致）
  */
-export function createUnifiedDiffExtension(revision: DiffRevision): Extension[] {
+export function createUnifiedDiffExtension(
+  revision: DiffRevision,
+  options?: DiffViewOptions,
+): Extension[] {
   return unifiedMergeView({
     original: revision.originalText,
     // 行级 + 字符级 inline diff：同行 token 级变更直接渲染字符级高亮
@@ -46,6 +59,8 @@ export function createUnifiedDiffExtension(revision: DiffRevision): Extension[] 
     gutter: true,
     // P1 关闭 Accept/Reject UI；P2 才接 acceptRejectWidget
     mergeControls: false,
+    // BLOCK-28：hunk 间折叠未变更上下文（可选）
+    ...(options?.collapseUnchanged ? { collapseUnchanged: options.collapseUnchanged } : {}),
     // 自定义 diff 算法策略；防大文件卡 UI
     diffConfig: {
       scanLimit: DIFF_SCAN_LIMIT,

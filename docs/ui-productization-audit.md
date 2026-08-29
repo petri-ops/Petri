@@ -1544,3 +1544,15 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc --noEmit 0；定向 vitest 14/14（reviewModeHelpers.test.ts 6 新增 + ReviewMode.test.tsx 5，含「A 键 accept 后文件置灰 + 进度 1/1」交互用例）。
 
 **状态**: in_progress (实现落地，待 dev Electron 实机验收)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-206: BLOCK-28 P3 — diff 区（hunk 悬浮控件 / 滚动标记条 / 展开上下文） (2026-08-29 in_progress)
+
+**改动范围**（BLOCK-28 P3，基于 UI-205）：
+- CodeMirrorEditor additive props（BLOCK-22 面 0 破坏）：`extraExtensions`（业务层 CM6 扩展经独立 extraCompartment 热替换）+ `diffOptions`（inline-diff 渲染选项）；`createUnifiedDiffExtension` 增加 `collapseUnchanged` 选项 → `@codemirror/merge` 原生折叠 hunk 间未变更上下文（margin 3 / minSize 12，自带「⇕ 展开」控件）。
+- 新增 review 层扩展 `hunkControls.ts`：以 git hunk 为语义基准（`path#hunkIndex` 决策键，与键盘 A/R 流一致）在 hunk 首行行尾注入行内 Accept/Reject 按钮；决策后转为 accepted/rejected 状态标签。不使用 merge view 内建 mergeControls（其编辑编辑器文档而非磁盘，与 WTR 决策模型冲突）。
+- `CodeMirrorDiffView` 升级：新增 `hunks` / `hunkDecisions` / `onAcceptHunk` / `onRejectHunk` props；右侧滚动标记条（按 newStart/totalLines 比例定位，点击经 EditorApi.scrollToLine 直达 + pulse 高亮，标记颜色反映决策态）；sticky 文件头在滚动容器外天然吸顶。
+- 0 新增 IPC / 0 新依赖 / AI 审阅 0 重新引入。
+
+**验证**：tsc --noEmit 0；定向 vitest 62/62（CodeMirrorDiffView 新增「markers + hunk 控件 + Accept 回调」用例；CodeMirrorEditor 既有 32 例 0 回归；reviewModeHelpers + ReviewMode 全过）。
+
+**状态**: in_progress (实现落地，待 dev Electron 实机验收)。G0 开发期常态 · 不外推 packaged / Provider / GA。

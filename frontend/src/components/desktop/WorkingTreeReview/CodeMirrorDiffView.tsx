@@ -1,12 +1,28 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { CodeMirrorEditor } from '@/components/editor/CodeMirror/CodeMirrorEditor';
-import type { DiffRevision } from '@/components/editor/CodeMirror/types';
+import type { DiffRevision, EditorApi } from '@/components/editor/CodeMirror/types';
 import { getBridge } from '@/lib/desktopBridge';
+import { createHunkControlsExtension, type HunkControlInfo } from './hunkControls';
+import type { Hunk, HunkDecision } from './useWorkingTreeReview';
 
 export interface CodeMirrorDiffViewProps {
   filePath: string;
   isBinary: boolean;
+  /**
+   * BLOCK-28 — git hunk 列表（与 useWorkingTreeReview.diff.files[].hunks 同源）。
+   * 传入后渲染 hunk 悬浮 accept/reject 控件与滚动标记条。
+   */
+  hunks?: Hunk[];
+  /**
+   * BLOCK-28 — 与 hunks 等长的决策数组（null = pending）。
+   * 来自 useWorkingTreeReview.decisions 的 `path#index` 键。
+   */
+  hunkDecisions?: Array<HunkDecision | null>;
+  /** BLOCK-28 — 悬浮控件 Accept 回调（hunkIndex 语义）。 */
+  onAcceptHunk?: (hunkIndex: number) => void;
+  /** BLOCK-28 — 悬浮控件 Reject 回调（hunkIndex 语义）。 */
+  onRejectHunk?: (hunkIndex: number) => void;
 }
 
 interface FileContentResult {
@@ -16,10 +32,18 @@ interface FileContentResult {
   message?: string;
 }
 
-export function CodeMirrorDiffView({ filePath, isBinary }: CodeMirrorDiffViewProps) {
+export function CodeMirrorDiffView({
+  filePath,
+  isBinary,
+  hunks,
+  hunkDecisions,
+  onAcceptHunk,
+  onRejectHunk,
+}: CodeMirrorDiffViewProps) {
   const [revision, setRevision] = useState<DiffRevision | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const apiRef = useRef<EditorApi | null>(null);
 
   useEffect(() => {
     if (!filePath || isBinary) {
@@ -70,6 +94,38 @@ export function CodeMirrorDiffView({ filePath, isBinary }: CodeMirrorDiffViewPro
     return () => { cancelled = true; };
   }, [filePath, isBinary]);
 
+  // BLOCK-28 — hunk 控件信息（git hunk newStart 对齐 modified doc 行号）
+  const totalLines = useMemo(
+    () => (revision ? revision.modifiedText.split('\n').length : 0),
+    [revision],
+  );
+  const hunkInfos = useMemo<HunkControlInfo[]>(
+    () => (hunks ?? []).map((h, i) => ({
+      hunkIndex: i,
+      line: Math.max(1, Math.min(h.newStart || 1, Math.max(totalLines, 1))),
+      decided: hunkDecisions?.[i] === 'accept' || hunkDecisions?.[i] === 'reject'
+        ? hunkDecisions[i]
+        : null,
+    })),
+    [hunks, hunkDecisions, totalLines],
+  );
+
+  // BLOCK-28 — extraExtensions：hunk 悬浮控件（签名变化时插件内部刷新）
+  const extraExtensions = useMemo(() => {
+    if (!hunks || hunks.length === 0 || !onAcceptHunk || !onRejectHunk) return [];
+    return [createHunkControlsExtension(
+      () => hunkInfos,
+      { onAccept: onAcceptHunk, onReject: onRejectHunk },
+    )];
+  }, [hunkInfos, onAcceptHunk, onRejectHunk]); // hunks 信息已由 hunkInfos 覆盖
+
+  const jumpToHunk = (hunk: Hunk) => {
+    const line = Math.max(1, Math.min(hunk.newStart || 1, Math.max(totalLines, 1)));
+    try {
+      apiRef.current?.scrollToLine({ line, highlight: true });
+    } catch { /* view 可能已销毁 */ }
+  };
+
   if (isBinary) {
     return <div className="wt-file-binary">Binary file changed</div>;
   }
@@ -85,13 +141,37 @@ export function CodeMirrorDiffView({ filePath, isBinary }: CodeMirrorDiffViewPro
   if (!revision) return null;
 
   return (
-    <CodeMirrorEditor
-      value={revision.modifiedText}
-      mode="inline-diff"
-      diffRevision={revision}
-      readonly={true}
-      language={filePath}
-      className="wt-cm-diff"
-    />
+    <div className="wt-diff-wrap">
+      {hunks && hunks.length > 0 && (
+        <div className="wt-diff-markers" role="navigation" aria-label="hunk positions">
+          {hunks.map((h, i) => {
+            const ratio = Math.max(0, Math.min(1, ((h.newStart || 1) - 0.5) / Math.max(totalLines, 1)));
+            const decided = hunkDecisions?.[i];
+            return (
+              <button
+                key={i}
+                type="button"
+                className={`wt-diff-marker${decided === 'accept' ? ' is-accepted' : decided === 'reject' ? ' is-rejected' : ''}`}
+                style={{ top: `${ratio * 100}%` }}
+                title={`Hunk ${i + 1} (line ${h.newStart})`}
+                aria-label={`Jump to hunk ${i + 1}`}
+                onClick={() => jumpToHunk(h)}
+              />
+            );
+          })}
+        </div>
+      )}
+      <CodeMirrorEditor
+        ref={apiRef}
+        value={revision.modifiedText}
+        mode="inline-diff"
+        diffRevision={revision}
+        readonly={true}
+        language={filePath}
+        className="wt-cm-diff"
+        extraExtensions={extraExtensions}
+        diffOptions={{ collapseUnchanged: { margin: 3, minSize: 12 } }}
+      />
+    </div>
   );
 }

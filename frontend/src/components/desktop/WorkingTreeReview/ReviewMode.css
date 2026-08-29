@@ -184,3 +184,94 @@
 .rvw-file-header {
   flex-shrink: 0;
 }
+
+/* P3 — diff 区包装 + 滚动标记条 */
+.wt-diff-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.wt-diff-markers {
+  position: absolute;
+  top: 0;
+  right: 2px;
+  bottom: 0;
+  width: 10px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.wt-diff-marker {
+  position: absolute;
+  left: 0;
+  width: 8px;
+  height: 6px;
+  min-height: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: rgba(80, 130, 200, 0.75);
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translateY(-3px);
+}
+
+.wt-diff-marker:hover {
+  background: rgba(120, 170, 240, 1);
+}
+
+.wt-diff-marker.is-accepted {
+  background: #5cc870;
+}
+
+.wt-diff-marker.is-rejected {
+  background: #d86070;
+}
+
+/* P3 — hunk 悬浮 accept/reject 控件（行尾 inline widget） */
+.wt-hunk-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 10px;
+  vertical-align: baseline;
+}
+
+.wt-hunk-btn {
+  padding: 1px 8px;
+  font-size: 10px;
+  line-height: 1.4;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.wt-hunk-btn-accept {
+  background: rgba(60, 180, 100, 0.16);
+  border-color: rgba(60, 180, 100, 0.45);
+  color: #80e898;
+}
+
+.wt-hunk-btn-accept:hover {
+  background: rgba(60, 180, 100, 0.32);
+}
+
+.wt-hunk-btn-reject {
+  background: rgba(220, 80, 80, 0.16);
+  border-color: rgba(220, 80, 80, 0.45);
+  color: #f08080;
+}
+
+.wt-hunk-btn-reject:hover {
+  background: rgba(220, 80, 80, 0.32);
+}
+
+.wt-hunk-control-state {
+  font-size: 10px;
+  font-family: var(--biof3-mono, monospace);
+  color: var(--biof3-fg-muted, #888);
+}
