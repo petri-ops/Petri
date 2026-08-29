@@ -1602,7 +1602,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - ReviewMode 增加 `variant: 'mode' | 'dock'`：dock 下文件树变为**横向文件条**（chips：状态字母 + basename + ±统计 + 已审 ✓，单行滚动，accent 选中态），diff 区为纵向主体；summary 紧凑化（隐藏快捷键提示、标题 nowrap）；Esc = 关闭 dock。
 - `/review` mode 路由保留（共享组件，UI-204~207 已 verified）。
 
-**验证**：tsc 0；定向 vitest（WorkingTreeReview 16/16；TitleBar 8 failed 为已知 pre-existing 集合，数量一致）。**2026-08-29 dev Electron 实机 verified**：CDP 断言——项目页保持挂载（pathname 不变、projectStillMounted=true）、dock 520px 右停靠、7 个文件 chips、active chip 正确、diff 渲染、hunk 卡片 elevated；Esc 关闭面板；证据 `acceptance/ui-210/`。
+**验证**：tsc 0；定向 vitest（WorkingTreeReview 16/16；TitleBar 8 failed 为已知 pre-existing 集合，数量一致）。**2026-08-29 dev Electron 实机 verified**：CDP 断言——项目页保持挂载（pathname 不变、projectStillMounted=true）、dock 520px 右停靠、7 个文件 chips、active chip 正确、diff 渲染、hunk 卡片 elevated；Esc 关闭面板；证据 `acceptance/ui-210/`。**2026-08-29 补充（用户反馈「审阅卡片咋没有」）**：首页「开始工作」启动卡片区新增第 6 张「审阅」卡片（git-branch 图标 +「审阅工作区改动（接受/拒绝/提交）」），点击直接打开 wt-dock——CDP 断言 6 卡片齐全、点击后 dock 520px 打开；截图 `acceptance/ui-210/home-cards.png`、`home-card-opens-dock.png`。
 
 **状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 

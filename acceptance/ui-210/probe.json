@@ -1,0 +1,19 @@
+{
+  "before": {
+    "cardCount": 6,
+    "labels": [
+      "结果",
+      "后端",
+      "浏览器",
+      "文件",
+      "侧边聊天",
+      "审阅"
+    ],
+    "reviewCardPresent": true,
+    "reviewCardText": "审阅审阅工作区改动（接受/拒绝/提交）"
+  },
+  "after": {
+    "dockPresent": true,
+    "dockWidth": 519.9974975585938
+  }
+}

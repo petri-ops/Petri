@@ -3242,6 +3242,7 @@ export function EmptyResult({
   onOpenBrowser,
   onOpenFiles,
   onOpenChat,
+  onOpenReview,
 }: {
   project: Project;
   onOpenResults?: () => void;
@@ -3249,6 +3250,8 @@ export function EmptyResult({
   onOpenBrowser?: () => void;
   onOpenFiles?: () => void;
   onOpenChat?: () => void;
+  /** BLOCK-28.2 — 打开右侧审阅停靠面板（CodeReview）。 */
+  onOpenReview?: () => void;
 }): React.ReactElement {
   return (
     <div className={styles.emptyResult}>
@@ -3294,6 +3297,13 @@ export function EmptyResult({
           <div className={styles.emptyResultLaunchText}>
             <span>侧边聊天</span>
             <small>打开右侧会话面板</small>
+          </div>
+        </button>
+        <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenReview} disabled={!onOpenReview}>
+          <Icon name="git-branch" size={16} />
+          <div className={styles.emptyResultLaunchText}>
+            <span>审阅</span>
+            <small>审阅工作区改动（接受/拒绝/提交）</small>
           </div>
         </button>
       </div>

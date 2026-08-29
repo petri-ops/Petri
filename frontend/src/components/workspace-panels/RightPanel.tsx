@@ -22,6 +22,7 @@ import {
 } from '@/pages/project-workspace';
 import { tools as staticTools } from '@/pages/_data';
 import { AnalysisLaunchPanel } from '@/components/workspace-panels/AnalysisLaunchPanel';
+import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import styles from '@/pages/project-workspace.module.css';
 
 type DispatchSetter<T> = React.Dispatch<React.SetStateAction<T>>;
@@ -107,6 +108,8 @@ export function RightPanel({
   workspaceMode,
   onResize,
 }: RightPanelProps): React.ReactElement | null {
+  // BLOCK-28.2 — 「审阅」启动卡片打开右侧审阅停靠面板
+  const workspacePanels = useWorkspacePanelsContext();
   const handleBrowserNavigationStateChange = React.useCallback(
     ({ canGoBack, canGoForward }: { canGoBack: boolean; canGoForward: boolean }) => {
       ctx.setBrowserCanGoBack(canGoBack);
@@ -144,6 +147,7 @@ export function RightPanel({
                     onOpenBrowser={ctx.handleOpenRightBrowser}
                     onOpenFiles={ctx.handleOpenRightFiles}
                     onOpenChat={ctx.handleOpenRightChat}
+                    onOpenReview={workspacePanels.toggleWorkingTree}
                   />
                 )}
                 {tab === 'results' && ctx.projectId && (
