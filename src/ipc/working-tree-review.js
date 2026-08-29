@@ -18,6 +18,7 @@
 
 const path = require('path');
 const fs = require('fs');
+const { execFile } = require('child_process');
 const { ipcMain, app } = require('electron');
 const { createGitAdapter, GitAdapterError } = require('../../core/shared-backend/git-adapter');
 const { createSenderGuard } = require('./_sender-guard');
@@ -465,6 +466,53 @@ function setupWorkingTreeReviewIpc(options = {}) {
   // decisions 格式：Record<`${file}#${hunkIndex}`, 'accept'|'reject'|'pending'>
   // 提交时只 stage accepted 文件；rejected 文件保持 working tree 不变。
   // 返回 { ok, commit, files, message, stats }。
+  // ============================================================
+  // BLOCK-26 P2 — review target pickers (read-only enumeration)
+  // ============================================================
+  ipcMain.handle('git:recent-branches', async (event) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      const workTree = path.resolve(adapter.workTree || process.cwd());
+      const run = (args) => new Promise((resolve, reject) => {
+        execFile('git', args, { cwd: workTree, maxBuffer: 1024 * 1024, windowsHide: true }, (error, stdout) => {
+          if (error) reject(new GitAdapterError('git_branches_failed', `git ${args[0]} failed.`));
+          else resolve(stdout);
+        });
+      });
+      const branchOutput = await run(['for-each-ref', 'refs/heads', '--format=%(refname:short)']);
+      const currentOutput = await run(['rev-parse', '--abbrev-ref', 'HEAD']);
+      const branches = branchOutput.split('\n').map((s) => s.trim()).filter(Boolean);
+      const current = currentOutput.trim() || null;
+      return { branches, current };
+    });
+  });
+
+  ipcMain.handle('git:recent-commits', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      const workTree = path.resolve(adapter.workTree || process.cwd());
+      const limit = Math.min(Math.max(Number(args.limit) || 100, 1), 200);
+      const commits = await new Promise((resolve, reject) => {
+        execFile(
+          'git',
+          ['log', `-${limit}`, '--no-color', '--format=%H%x1f%h%x1f%s%x1f%ar'],
+          { cwd: workTree, maxBuffer: 2 * 1024 * 1024, windowsHide: true },
+          (error, stdout) => {
+            if (error) reject(new GitAdapterError('git_log_failed', 'git log failed.'));
+            else resolve(stdout);
+          }
+        );
+      });
+      const rows = commits.split('\n').filter(Boolean).map((line) => {
+        const [sha, shortSha, subject, authoredRel] = line.split('\x1f');
+        return { sha, shortSha, subject, authoredRel: authoredRel || '' };
+      }).filter((row) => row.sha && row.subject);
+      return { commits: rows };
+    });
+  });
+
   // ============================================================
   ipcMain.handle('git:commit-review', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;

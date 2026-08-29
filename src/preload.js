@@ -371,6 +371,9 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     applyInverseHunk: (params) => ipcRenderer.invoke('git:apply-inverse-hunk', params || {}),
     // BLOCK-20 — Commit Review
     commitReview: (params) => ipcRenderer.invoke('git:commit-review', params || {}),
+    // BLOCK-26 P2 — review target pickers（只读枚举）
+    recentBranches: () => ipcRenderer.invoke('git:recent-branches'),
+    recentCommits: (params) => ipcRenderer.invoke('git:recent-commits', params || {}),
   },
 
 });

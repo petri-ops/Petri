@@ -14,6 +14,10 @@
  * 任何对 EditorApi 的新增都必须先扩这个 types.ts。
  */
 
+import type { ReviewLineFinding } from './extensions/reviewFindings';
+
+export type { ReviewLineFinding };
+
 /**
  * 编辑器模式。
  * - 'normal'：只读 / 可编辑单轨文本（默认）。
@@ -123,6 +127,11 @@ export interface EditorApi {
   getDiffRevision(): DiffRevision | null;
   /** 滚动到目标行 + 可选 pulse。P1 落地。 */
   scrollToLine(target: ScrollTarget): void;
+  /**
+   * BLOCK-26 P1: 渲染 AI 评审 findings 的行内标注（gutter 徽标 + 行下卡片）。
+   * 传入空数组清除全部标注。
+   */
+  setReviewFindings(findings: ReviewLineFinding[]): void;
   /**
    * Accept 单 hunk：通过 IPC `git:apply-inverse-hunk` 把 hunk 的反向 patch 应用到工作区。
    *

@@ -137,3 +137,39 @@ export async function cancelReviewTask(taskId: string): Promise<void> {
     headers: { ...getAuthHeader() },
   }).catch(() => {});
 }
+
+// ============================================================
+// BLOCK-26 P2 — review target pickers (via the workingTreeReview bridge)
+// ============================================================
+
+export interface RecentBranches {
+  branches: string[];
+  current: string | null;
+}
+
+export interface RecentCommit {
+  sha: string;
+  shortSha: string;
+  subject: string;
+  authoredRel: string;
+}
+
+export async function fetchRecentBranches(): Promise<RecentBranches> {
+  const bridge = (typeof window !== 'undefined' ? (window as unknown as {
+    biof3Desktop?: { workingTreeReview?: { recentBranches?: () => Promise<{ ok: boolean; data?: RecentBranches; error?: string; message?: string }> } };
+  }).biof3Desktop : undefined)?.workingTreeReview;
+  if (!bridge?.recentBranches) throw new Error('bridge_unavailable');
+  const result = await bridge.recentBranches();
+  if (!result.ok || !result.data) throw new Error(result.message || result.error || 'failed to list branches');
+  return result.data;
+}
+
+export async function fetchRecentCommits(limit = 100): Promise<RecentCommit[]> {
+  const bridge = (typeof window !== 'undefined' ? (window as unknown as {
+    biof3Desktop?: { workingTreeReview?: { recentCommits?: (p?: { limit?: number }) => Promise<{ ok: boolean; data?: { commits: RecentCommit[] }; error?: string; message?: string }> } };
+  }).biof3Desktop : undefined)?.workingTreeReview;
+  if (!bridge?.recentCommits) throw new Error('bridge_unavailable');
+  const result = await bridge.recentCommits({ limit });
+  if (!result.ok || !result.data) throw new Error(result.message || result.error || 'failed to list commits');
+  return result.data.commits;
+}

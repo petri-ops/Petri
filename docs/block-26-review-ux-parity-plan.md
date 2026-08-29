@@ -84,3 +84,34 @@ feed), all four ReviewTargets are reachable from the UI, the channel choice
 persists, and results survive a drawer close/reopen — all dev-Electron
 evidenced.
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 6 Closeout record (2026-08-29)
+
+- P0 `32aa055`: registration + Codex UX source analysis.
+- P1 `5bc8b2a`: UX overhaul — readonly `reviewFindings.ts` extension
+  (severity gutter badges + collapsible inline cards, one per line, mirrored
+  from the drawer via `EditorApi.setReviewFindings`, two-way with the list);
+  ReviewFindingsPanel v2 (verdict banner with severity counts/elapsed/
+  channel, per-file grouping, collapsible bodies, confidence display, live
+  activity feed, error retry); useCodeReviewAgent activity/startedAt/
+  channelLabel. WTR vitest 12/12, tsc 0.
+- P2 `40bd0e5`: `git:recent-branches` / `git:recent-commits` read-only IPC
+  (execFile, no shell; limit≤200) + preload/d.ts + searchable datalist
+  pickers (branches as `current -> target`, commits as `sha subject (age)`)
+  + channel persistence via localStorage.
+- P3 `7fc08c5`: `reviewResultStore` per-project outcome restore + running
+  task re-attach via SSE replay; unmount detaches only, backend continues.
+- P4 acceptance (dev Electron, DeepSeek real run): four targets reachable;
+  branch picker (main) and commit picker (100 entries) lazy-load; channel
+  persisted; verdict banner "✕ patch is incorrect" with P1×2; findings
+  grouped by file; clicking a finding shows 2 gutter badges + 2 inline cards
+  on the diff with active highlight; drawer close/reopen restores both
+  findings and verdict. Evidence `acceptance/ui-203/`; ledger UI-203
+  verified (dev boundary). 2/3 planted bugs caught (parseJson unflagged —
+  honest model variance, recorded).
+- Gates: WTR vitest 12/12, tsc --noEmit 0, docs:check / ui:audit:check /
+  docs:reconcile clean at closeout.
+- Remaining candidates (not started): inline annotations on the base-branch
+  diff view, review-model config surface in settings, multi-file inline
+  card pagination.
+G0 开发期常态 · 不外推 packaged/Provider/GA。

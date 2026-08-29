@@ -8,10 +8,10 @@
 // 由 useWorkspacePanels.workingTreeOpen 控制显隐（见 TitleBar 按钮）。
 // ============================================================
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 
 import { dispatchBioF3Event, biof3Events } from '@/lib/events';
-import type { EditorApi } from '@/components/editor/CodeMirror/types';
+import type { EditorApi, ReviewLineFinding } from '@/components/editor/CodeMirror/types';
 import type { ReviewFinding } from '@/lib/review-types';
 import { useWorkingTreeReview } from './useWorkingTreeReview';
 import { CodeMirrorDiffView } from './CodeMirrorDiffView';
@@ -53,6 +53,7 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
 
   const [showAiReview, setShowAiReview] = useState(false);
   const [editorApi, setEditorApi] = useState<EditorApi | null>(null);
+  const [activeFindingLine, setActiveFindingLine] = useState<number | null>(null);
   const pendingScrollRef = useRef<{ path: string; line: number } | null>(null);
 
   // BLOCK-25: apply a pending finding→diff-line jump once the selected file's
@@ -73,19 +74,25 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
   // Select the file matching a finding, then scroll to its line. Same-file
   // jumps scroll immediately (the pending-scroll effect only reruns on file
   // change); cross-file jumps defer to the effect after the editor loads.
-  const handleSelectFinding = (finding: ReviewFinding) => {
-    const absolute = finding.codeLocation.absoluteFilePath.replace(/\\/g, '/');
+  const resolveFindingFile = (absolute: string): string | null => {
+    const normalized = absolute.replace(/\\/g, '/');
     const files = review.status?.files || [];
     const target =
-      files.find((f) => f.path === absolute) ||
-      files.find((f) => absolute.endsWith(`/${f.path}`) || f.path.endsWith(`/${absolute}`)) ||
+      files.find((f) => f.path === normalized) ||
+      files.find((f) => normalized.endsWith(`/${f.path}`) || f.path.endsWith(`/${normalized}`)) ||
       files.find((f) => {
-        const base = absolute.split('/').pop();
+        const base = normalized.split('/').pop();
         return Boolean(base) && f.path.split('/').pop() === base;
       });
-    if (!target) return;
+    return target ? target.path : null;
+  };
+
+  const handleSelectFinding = (finding: ReviewFinding) => {
+    const targetPath = resolveFindingFile(finding.codeLocation.absoluteFilePath);
+    if (!targetPath) return;
     const line = finding.codeLocation.lineRange.start;
-    if (target.path === review.selectedFilePath) {
+    setActiveFindingLine(line);
+    if (targetPath === review.selectedFilePath) {
       const timer = setTimeout(() => {
         try {
           editorApi?.scrollToLine({ line, highlight: true });
@@ -94,9 +101,29 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
       void timer;
       return;
     }
-    pendingScrollRef.current = { path: target.path, line };
-    review.setSelectedFilePath(target.path);
+    pendingScrollRef.current = { path: targetPath, line };
+    review.setSelectedFilePath(targetPath);
   };
+
+  // BLOCK-26 P1: mirror the selected file's findings onto the diff as inline
+  // annotations (gutter badges + cards) two-way with the list.
+  const activeFindingLineRef = useRef<number | null>(null);
+  activeFindingLineRef.current = activeFindingLine;
+  useEffect(() => {
+    if (!editorApi) return;
+    const fileFindings: ReviewLineFinding[] = reviewAgent.findings
+      .filter((f) => resolveFindingFile(f.codeLocation.absoluteFilePath) === review.selectedFilePath)
+      .map((f) => ({
+        line: f.codeLocation.lineRange.start,
+        priority: f.priority,
+        title: f.title,
+        body: f.body,
+        expanded: activeFindingLineRef.current === f.codeLocation.lineRange.start,
+      }));
+    try {
+      editorApi.setReviewFindings(fileFindings);
+    } catch {}
+  });
 
   const handleFixRequested = (prompt: string) => {
     dispatchBioF3Event(biof3Events.copilotAsk, { prompt });
@@ -107,6 +134,13 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
   useEffect(() => {
     if (!isOpen) setShowAiReview(false);
   }, [isOpen]);
+
+  // BLOCK-26 P3: restore the last review outcome / reattach a running task
+  // when the drawer opens on a project with persisted state.
+  useEffect(() => {
+    if (!isOpen || !projectId) return;
+    reviewAgent.restore(projectId);
+  }, [isOpen, projectId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [commitMsg, setCommitMsg] = useState('');
   const [showCommitDialog, setShowCommitDialog] = useState(false);

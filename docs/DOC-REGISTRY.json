@@ -2282,7 +2282,7 @@
       "id": "BLOCK-26-REVIEW-UX-PARITY",
       "path": "docs/block-26-review-ux-parity-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-26-review-ux-parity",
       "entrypoint": "docs/README.md",
@@ -2290,12 +2290,20 @@
         "block-26",
         "review-ux",
         "codex-parity",
-        "G0"
+        "G0",
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-29 用户裁决（'都要做的' + 复刻 codex 审阅使用体验/交互/呈现）启动的唯一 active 工作包。背景分析：仓库内 Codex 体验 = TUI 四项预设菜单 + 可搜索分支/提交选择器 + 朴素转写渲染；IDE 扩展不在本检出，其语义契约（行内评论、按 finding 勾选回传）由协议表达。范围：P1 UX 翻新（verdict 汇总头 / 按文件分组可折叠 findings / diff 行内标注 gutter+卡片 / 活动流 / 空态错误态）；P2 四目标全覆盖（branch:list 复用 + 新增 git:recent-commits IPC）+ 渠道持久化；P3 结果 detached 保留（按 projectId）+ 运行中任务重连；P4 dev Electron 验收（acceptance/ui-203/）。不外推：写侧自动化 / PR 评论面 / packaged / Provider / GA / P7。",
+      "notes": "2026-08-29 用户裁决启动，同日收口 completed。落地：P1 UX 翻新（verdict 汇总头/按文件分组/行内 gutter+卡片标注/活动流/空态错误态，新只读 CM 扩展 reviewFindings.ts 经 EditorApi.setReviewFindings 双向联动）；P2 四目标全覆盖（git:recent-branches / git:recent-commits 新只读 IPC + datalist 选择器）+ 渠道 localStorage 持久化；P3 detached：reviewResultStore 按 projectId 保留最近结局，重开抽屉恢复、运行中任务 SSE 重放重连。实机 verified（UI-203，dev Electron）：四目标/分支 main/提交 100 条/渠道持久化/verdict 横幅/P1×2 分组/行内 2 徽标 2 卡片/重开恢复全通；证据 acceptance/ui-203/。门禁：WTR vitest 12/12、tsc 0、docs/ui-audit 门禁绿。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "registeredAt": "2026-08-29",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-REGISTERED"
+      "phase": "COMPLETED",
+      "linkedCommits": [
+        "32aa055",
+        "5bc8b2a",
+        "40bd0e5",
+        "7fc08c5"
+      ]
     }
   ],
   "lastUpdated": "2026-08-29",

@@ -48,6 +48,7 @@ vi.mock('../../CodeMirror/CodeMirrorEditor', () => ({
         setDiffRevision: mockSetDiffRevision,
         getDiffRevision: mockGetDiffRevision,
         scrollToLine: mockScrollToLine,
+      setReviewFindings: mockScrollToLine,
         acceptHunk: vi.fn(async () => undefined),
         rejectHunk: vi.fn(async () => undefined),
         acceptAll: vi.fn(async () => ({ allOk: true, succeeded: [], failed: [] })),

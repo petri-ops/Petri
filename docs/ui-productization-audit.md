@@ -1499,3 +1499,17 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：定向测试 21/21（review-output / review-prompts / review-git，含真实临时仓库 git exec 与路径穿越拒绝）；tsc --noEmit 0；WTR focused vitest 8/8。**2026-08-29 dev Electron 实机 verified**：scratch fixture（三个埋入 bug：硬编码 key / 越界循环 NaN / eval RCE）+ DeepSeek 渠道真实评审一轮 → 3 条 findings 全中（P1/P1/P2，行号准确）、verdict "patch is incorrect"、点击跳转选中文件并滚动到行（跨文件 + 同文件 pulse）、勾选 2 项后「修复选中项」直达聊天（copilotAsk 既有语义）。证据 `acceptance/ui-202/electron-codex-parity-review-dev.json` + 截图。过程性失败（渠道 Account Suspension / TLS 抖动 / 收敛不达标）均如实浮出并就地加固；模型自找 diff 会 wandering 的问题以 diff 内嵌解决。
 
 **状态**: verified (dev Electron 边界内；评审质量依赖所选渠道模型，无 findings/渠道失败均为诚实展示)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-203: BLOCK-26 — 审阅 UX 复刻翻新（汇总头/分组/行内标注/全目标/detached） (2026-08-29 verified)
+
+**目标**：把 AI 审阅从"窄条列表"升级为 Codex 同款的代码审阅呈现与交互——verdict 汇总头、按文件分组、diff 行内标注（gutter 徽标 + 行下卡片）、运行期活动流、全目标覆盖（uncommitted / base-branch / commit / custom）、渠道持久化、结果 detached 保留。
+
+**改动范围**：
+- 新增只读 CodeMirror 扩展 `extensions/reviewFindings.ts`（gutter 徽标 + 行下折叠卡片，一行取最严重，暴露 `setReviewFindings` StateEffect，经 EditorApi 由抽屉镜像当前文件的 findings，与列表双向高亮）。
+- `ReviewFindingsPanel` v2：verdict 横幅（✓/✕ + 严重度计数 + 耗时 + 渠道徽标 + 说明 + 丢弃计数）、按文件分组、条目正文折叠、置信度展示、运行期活动流（最近 4 条 + 秒表）、错误态就地重试、目标输入（base-branch/commit 为 datalist 可搜索选择器：分支显示 `current -> target`、提交显示 `shortSha subject（age）`）、自定义指令输入。
+- `useCodeReviewAgent`：活动流/startedAt/channelLabel/targetHint、`restore(projectId)`（恢复最近结果 + 运行中任务经 SSE 重放重连）；`reviewResultStore`（内存按 projectId 保留最近结局，取消即清除）。
+- 新增只读 IPC `git:recent-branches` / `git:recent-commits`（limit≤200，execFile 免 shell）+ preload + electron.d.ts；渠道记忆 localStorage `biof3_review_preset_id`。
+
+**验证**：WTR focused vitest 12/12（分组/计数/折叠/活动流/自定义门控/跳转/回传）；tsc --noEmit 0；`node --check` preload/IPC。**2026-08-29 dev Electron 实机 verified**：四目标选项齐全；分支 picker（main，`current -> main`）与提交 picker（100 条，首条 7fc08c5）懒加载；渠道选择持久化；DeepSeek 真实评审 → verdict 横幅（✕ patch is incorrect + P1×2 + 耗时 + 渠道）、按文件分组、点击 finding 后 diff 上出现 2 个 P1 gutter 徽标 + 2 张行内卡片（active 高亮）；关抽屉重开后 2 findings + verdict 完整恢复。证据 `acceptance/ui-203/electron-review-ux-parity-dev.json` + 截图。埋点 2/3 命中（parseJson 未被标记为诚实模型差异）。
+
+**状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

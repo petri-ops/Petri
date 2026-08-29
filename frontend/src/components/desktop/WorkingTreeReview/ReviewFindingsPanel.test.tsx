@@ -66,11 +66,16 @@ function makeAgent(overrides: Partial<CodeReviewAgentApi> = {}): CodeReviewAgent
     error: null,
     taskId: 'task-1',
     selected: new Set<number>(),
+    activity: [],
+    startedAt: null,
+    channelLabel: 'DeepSeek',
+    targetHint: '当前未提交变更',
     start: vi.fn().mockResolvedValue(undefined),
     cancel: vi.fn(),
     reset: vi.fn(),
     toggleFinding: vi.fn(),
     buildFixPrompt: vi.fn().mockReturnValue(null),
+    restore: vi.fn(),
     ...overrides,
   };
 }
@@ -89,7 +94,7 @@ describe('ReviewFindingsPanel', () => {
     render(<ReviewFindingsPanel agent={agent} projectId="p1" onSelectFinding={() => {}} onFixRequested={() => {}} />);
     const titles = screen.getAllByText(/Finding \d/).map((el) => el.textContent);
     expect(titles[0]).toContain('Finding 2'); // P0 sorts first
-    expect(screen.getByText('patch is incorrect')).toBeTruthy();
+    expect(screen.getByText(/patch is incorrect/)).toBeTruthy();
     expect(screen.getByText(/2 条结果格式无效已丢弃/)).toBeTruthy();
     expect(screen.getByText('P0')).toBeTruthy();
   });
@@ -140,5 +145,57 @@ describe('ReviewFindingsPanel', () => {
   it('reviewPriorityLabel maps null to unknown', () => {
     expect(reviewPriorityLabel(null)).toBe('P?');
     expect(reviewPriorityLabel(3)).toBe('P3');
+  });
+});
+
+describe('ReviewFindingsPanel v2 (BLOCK-26 P1)', () => {
+  it('groups findings by file and shows severity counts in the verdict header', () => {
+    const agent = makeAgent();
+    render(<ReviewFindingsPanel agent={agent} projectId="p1" onSelectFinding={() => {}} onFixRequested={() => {}} />);
+    // finding(1) → src/file1.ts, finding(2, P0) → src/file2.ts
+    expect(screen.getByText('src/file1.ts')).toBeTruthy();
+    expect(screen.getByText('src/file2.ts')).toBeTruthy();
+    expect(screen.getByText('P0×1')).toBeTruthy();
+    expect(screen.getByText('P1×1')).toBeTruthy();
+  });
+
+  it('collapses and expands finding bodies via the toggle', () => {
+    const agent = makeAgent();
+    render(<ReviewFindingsPanel agent={agent} projectId="p1" onSelectFinding={() => {}} onFixRequested={() => {}} />);
+    const item = screen.getByText('[P1] Finding 1').closest('.wt-ai-review-item') as HTMLElement;
+    expect(screen.getByText('Body 1')).toBeTruthy();
+    fireEvent.click(item.querySelector('.wt-ai-review-item-toggle') as HTMLElement);
+    expect(screen.queryByText('Body 1')).toBeNull();
+    fireEvent.click(item.querySelector('.wt-ai-review-item-toggle') as HTMLElement);
+    expect(screen.getByText('Body 1')).toBeTruthy();
+  });
+
+  it('shows the rolling activity feed while running', () => {
+    const agent = makeAgent({
+      phase: 'running',
+      statusText: '评审中 · 检查 review_git',
+      findings: [],
+      output: null,
+      activity: [
+        { label: '开始读取变更', at: 1 },
+        { label: 'review_git git diff HEAD', at: 2 },
+      ],
+    });
+    render(<ReviewFindingsPanel agent={agent} projectId="p1" onSelectFinding={() => {}} onFixRequested={() => {}} />);
+    expect(screen.getByText(/开始读取变更/)).toBeTruthy();
+    expect(screen.getByText(/git diff HEAD/)).toBeTruthy();
+  });
+
+  it('custom target requires instructions before start', () => {
+    const start = vi.fn().mockResolvedValue(undefined);
+    const agent = makeAgent({ phase: 'idle', findings: [], output: null, start });
+    render(<ReviewFindingsPanel agent={agent} projectId="p1" onSelectFinding={() => {}} onFixRequested={() => {}} />);
+    fireEvent.change(screen.getByLabelText('审阅目标'), { target: { value: 'custom' } });
+    const startBtn = screen.getByText('开始审阅').closest('button') as HTMLButtonElement;
+    expect(startBtn.disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText('自定义审阅指令'), { target: { value: '只看安全问题' } });
+    expect(startBtn.disabled).toBe(false);
+    fireEvent.click(startBtn);
+    expect(start).toHaveBeenCalledWith('p1', { type: 'custom', instructions: '只看安全问题' }, 'preset-a', 'Channel A');
   });
 });

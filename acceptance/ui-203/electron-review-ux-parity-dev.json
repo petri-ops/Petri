@@ -1,0 +1,48 @@
+{
+  "capturedAt": "2026-08-29T04:22:30.000Z",
+  "boundary": "dev Electron",
+  "url": "http://localhost:3000/project/p_mt15b0aw_f0xa",
+  "commit": "7fc08c5",
+  "passed": true,
+  "qualificationEligible": false,
+  "purpose": "BLOCK-26 P4 acceptance: Codex-parity review UX (summary header, grouped findings, inline diff annotations, activity feed) + full targets + channel persistence + detached results.",
+  "checks": {
+    "targetOptions": [
+      "当前未提交变更",
+      "对比 base 分支 (PR Style)",
+      "指定提交",
+      "自定义审阅指令"
+    ],
+    "branchPickerLoaded": {
+      "branches": [
+        "main"
+      ],
+      "rendered": "current -> main datalist"
+    },
+    "commitPickerLoaded": {
+      "count": 100,
+      "first": "7fc08c5 feat(review): BLOCK-26 P3 detached review"
+    },
+    "channelPersisted": true,
+    "verdictBanner": "✕ patch is incorrect",
+    "severityCounts": [
+      "P1×2"
+    ],
+    "findingsGroupedByFile": [
+      "scratch-b26-fixture.js"
+    ],
+    "findings": [
+      "clamp returns min instead of max when value exceeds max",
+      "Hardcoded live GitHub token committed to repository"
+    ],
+    "inlineGutterBadges": 2,
+    "inlineCards": 2,
+    "inlineCardActiveHighlight": true,
+    "activityFeedAndElapsedDuringRun": true,
+    "detachedRestoreAfterDrawerReopen": {
+      "findings": 2,
+      "verdict": "✕ patch is incorrect"
+    },
+    "plantedBugsCaught": "clamp max-bound bug + hardcoded live token (2/3 planted; parseJson left unflagged — honest model variance)"
+  }
+}

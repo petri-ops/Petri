@@ -35,6 +35,7 @@ import { biof3Events, dispatchBioF3Event } from '../../../lib/events';
 import { loadLanguage } from './extensions/languageLoader';
 import { createUnifiedDiffExtension } from './extensions/unifiedDiff';
 import { createScrollToLineApi, scrollToLineExtension } from './extensions/scrollToLine';
+import { createReviewFindingsExtension, reviewFindingsEffect, type ReviewLineFinding } from './extensions/reviewFindings';
 import {
   createAcceptRejectWidgetExtension,
   type AcceptRejectWidgetCallbacks,
@@ -225,6 +226,8 @@ export function useCodeMirrorEditor(
   const langCompartmentRef = useRef<Compartment | null>(null);
   const diffCompartmentRef = useRef<Compartment | null>(null);
   const widgetCompartmentRef = useRef<Compartment | null>(null);
+  // BLOCK-26 P1: AI review findings rendered as inline diff annotations.
+  const reviewFindingsCompartmentRef = useRef<Compartment | null>(null);
 
   // 当前状态镜像（apiRef 暴露 read 用）
   const currentModeRef = useRef<EditorMode>(mode);
@@ -331,6 +334,12 @@ export function useCodeMirrorEditor(
           const api = createScrollToLineApi(v);
           api.scrollToLine(target);
         },
+        // ==================== BLOCK-26 P1: review findings ====================
+        setReviewFindings: (findings: ReviewLineFinding[]): void => {
+          const v = ensureView();
+          if (!v) return;
+          v.dispatch({ effects: reviewFindingsEffect(findings) });
+        },
         // ==================== P2: accept / reject ====================
         getHunk: (hunkId: string): DiffHunk | null => {
           const rev = currentDiffRevisionRef.current;
@@ -431,10 +440,12 @@ export function useCodeMirrorEditor(
     const langCompartment = new Compartment();
     const diffCompartment = new Compartment();
     const widgetCompartment = new Compartment();
+    const reviewFindingsCompartment = new Compartment();
     readonlyCompartmentRef.current = readonlyCompartment;
     langCompartmentRef.current = langCompartment;
     diffCompartmentRef.current = diffCompartment;
     widgetCompartmentRef.current = widgetCompartment;
+    reviewFindingsCompartmentRef.current = reviewFindingsCompartment;
 
     const initialMode: EditorMode = mode;
     const initialDiffRevision: DiffRevision | null = diffRevision;
@@ -490,6 +501,7 @@ export function useCodeMirrorEditor(
       langCompartment.of([]),
       diffCompartment.of(diffExtension),
       widgetCompartment.of(widgetExtension),
+      reviewFindingsCompartment.of(createReviewFindingsExtension()),
       scrollToLineExtension(),
     ];
 

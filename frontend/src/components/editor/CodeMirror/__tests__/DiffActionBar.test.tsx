@@ -43,6 +43,7 @@ function createSpyApi(options: SpyApiOptions = {}): {
     setDiffRevision: ReturnType<typeof vi.fn>;
     getDiffRevision: ReturnType<typeof vi.fn>;
     scrollToLine: ReturnType<typeof vi.fn>;
+    setReviewFindings: ReturnType<typeof vi.fn>;
     acceptHunk: ReturnType<typeof vi.fn>;
     rejectHunk: ReturnType<typeof vi.fn>;
     acceptAll: ReturnType<typeof vi.fn>;
@@ -70,6 +71,7 @@ function createSpyApi(options: SpyApiOptions = {}): {
       : null;
   const getDiffRevision = vi.fn((): DiffRevision | null => revision);
   const scrollToLine = vi.fn();
+  const setReviewFindings = vi.fn();
   const acceptHunk = vi.fn(async () => undefined);
   const rejectHunk = vi.fn(async () => undefined);
   const acceptAll = vi.fn(async () => ({ allOk: true, succeeded: [], failed: [] }));
@@ -86,6 +88,7 @@ function createSpyApi(options: SpyApiOptions = {}): {
     setDiffRevision,
     getDiffRevision,
     scrollToLine,
+    setReviewFindings,
     acceptHunk,
     rejectHunk,
     acceptAll,
@@ -97,6 +100,7 @@ function createSpyApi(options: SpyApiOptions = {}): {
   return {
     api,
     spies: {
+      setReviewFindings,
       getValue,
       setValue,
       destroy,
@@ -241,6 +245,7 @@ describe('DiffActionBar (Task 3)', () => {
       setDiffRevision: () => undefined,
       getDiffRevision: () => null,
       scrollToLine: () => undefined,
+      setReviewFindings: () => undefined,
       acceptHunk: async () => undefined,
       rejectHunk: async () => undefined,
       acceptAll,
@@ -275,6 +280,7 @@ describe('DiffActionBar (Task 3)', () => {
       setDiffRevision: () => undefined,
       getDiffRevision: () => null,
       scrollToLine: () => undefined,
+      setReviewFindings: () => undefined,
       acceptHunk: async () => undefined,
       rejectHunk: async () => undefined,
       acceptAll: async () => ({ allOk: true, succeeded: [], failed: [] }),
