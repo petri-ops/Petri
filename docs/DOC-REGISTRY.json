@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 129,
-    "lastUpdated": "2026-08-28",
-    "managedMarkdown": 129
+    "documentCount": 130,
+    "lastUpdated": "2026-08-29",
+    "managedMarkdown": 130
   },
   "documents": [
     {
@@ -2277,8 +2277,27 @@
         "c228beb",
         "c09a96a"
       ]
+    },
+    {
+      "id": "BLOCK-26-REVIEW-UX-PARITY",
+      "path": "docs/block-26-review-ux-parity-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-26-review-ux-parity",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-26",
+        "review-ux",
+        "codex-parity",
+        "G0"
+      ],
+      "notes": "2026-08-29 用户裁决（'都要做的' + 复刻 codex 审阅使用体验/交互/呈现）启动的唯一 active 工作包。背景分析：仓库内 Codex 体验 = TUI 四项预设菜单 + 可搜索分支/提交选择器 + 朴素转写渲染；IDE 扩展不在本检出，其语义契约（行内评论、按 finding 勾选回传）由协议表达。范围：P1 UX 翻新（verdict 汇总头 / 按文件分组可折叠 findings / diff 行内标注 gutter+卡片 / 活动流 / 空态错误态）；P2 四目标全覆盖（branch:list 复用 + 新增 git:recent-commits IPC）+ 渠道持久化；P3 结果 detached 保留（按 projectId）+ 运行中任务重连；P4 dev Electron 验收（acceptance/ui-203/）。不外推：写侧自动化 / PR 评论面 / packaged / Provider / GA / P7。",
+      "registeredAt": "2026-08-29",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-REGISTERED"
     }
   ],
-  "lastUpdated": "2026-08-28",
-  "documentCount": 146
+  "lastUpdated": "2026-08-29",
+  "documentCount": 147
 }
