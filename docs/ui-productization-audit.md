@@ -1486,7 +1486,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: in_progress (链路组件已实现 + 单元验证；生产侧已接、消费侧未挂载已实机取证；挂载属业务侧决策)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-202: BLOCK-25 — Codex 同款 AI 代码审阅（WTR 抽屉内 /review 闭环） (2026-08-29 verified)
+## UI-202: BLOCK-25 — Codex 同款 AI 代码审阅（WTR 抽屉内 /review 闭环） (2026-08-29 verified → 2026-08-29 removed)
+
+**2026-08-29 用户裁决（BLOCK-27）**：AI 审阅功能冗余，已整体移除（本条与 UI-203 为历史留痕；实现可在 git 历史 0ca7e59..7fc08c5 找回）。
 
 **目标**：把 openai/codex 的 `/review` 体验落地到 Working Tree Review 抽屉：选择目标与模型渠道 → 只读评审子代理跑真实 diff → 结构化 findings（P0-P3 优先级 / 置信度 / file:line）→ 点击跳转 diff 行 → 勾选后一键「修复选中项」回主聊天。
 
@@ -1500,7 +1502,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified (dev Electron 边界内；评审质量依赖所选渠道模型，无 findings/渠道失败均为诚实展示)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-203: BLOCK-26 — 审阅 UX 复刻翻新（汇总头/分组/行内标注/全目标/detached） (2026-08-29 verified)
+## UI-203: BLOCK-26 — 审阅 UX 复刻翻新（汇总头/分组/行内标注/全目标/detached） (2026-08-29 verified → 2026-08-29 removed)
+
+**2026-08-29 用户裁决（BLOCK-27）**：AI 审阅功能冗余，已整体移除（本条为历史留痕；实现可在 git 历史 0ca7e59..7fc08c5 找回）。
 
 **目标**：把 AI 审阅从"窄条列表"升级为 Codex 同款的代码审阅呈现与交互——verdict 汇总头、按文件分组、diff 行内标注（gutter 徽标 + 行下卡片）、运行期活动流、全目标覆盖（uncommitted / base-branch / commit / custom）、渠道持久化、结果 detached 保留。
 

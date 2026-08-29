@@ -4,9 +4,9 @@
 
 ## Session Snapshot
 
-- **Active work package**: 无。`BLOCK-26-REVIEW-UX-PARITY` 已于 2026-08-29 收口（plan `docs/block-26-review-ux-parity-plan.md` §6）；下一工作包由用户显式裁决启动。
+- **Active work package**: 无。`BLOCK-27-AI-REVIEW-REMOVAL` 已于 2026-08-29 收口（plan `docs/block-27-ai-review-removal-plan.md`）；下一工作包由用户显式裁决启动。
 - **Current branch**: `main`；HEAD、dirty state 与 `origin/main` 同步状态以运行时 Git 为准。
-- **Code review boundary**: WTR 抽屉 AI 审阅已升级为 BLOCK-26 UX：verdict 汇总头（严重度计数/耗时/渠道）、按文件分组、diff 行内标注（gutter 徽标 + 行下卡片，与列表双向）、活动流、四目标（uncommitted/base-branch/commit/custom，分支与提交 datalist 选择器）、渠道 localStorage 持久化、detached 结果恢复与运行中重连。实机证据 `acceptance/ui-203/`（UI-203 verified）；BLOCK-25 闭环证据 `acceptance/ui-202/`（UI-202 verified）。
+- **Code review boundary**: WTR 面板 = 确定性变化跟踪器（diff 视图 / hunk 接受拒绝 / commit），零模型参与；AI 审阅功能已按用户裁决（BLOCK-27）整体移除，UI-202/203 台账留痕，git 历史 0ca7e59..7fc08c5 可恢复。staged-only diff 修复（git diff HEAD）保留。
 - **P6 evidence boundary**: canonical `acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json` 绑定 `1f276de`（206-file binding，10/10 checks）。注意：BLOCK-25 改动了 `core/r-server/**` 与 `src/ipc/working-tree-review.js` 等源文件，P6 evidence 的 206-file binding 若覆盖这些路径，下一次相关门禁会按设计 fail-closed，需要重采。
 - **Minimum recovery**: 先读 `AUDIT-LOG.md` 当前待处理项，再核对 Git，然后用 `DOC-REGISTRY.json` 定位 active 工作包；无 active 包时停止，不通读历史文档。
 - **Last recorded gates**: review 后端测试 21/21 / WTR focused vitest 8/8 / tsc --noEmit 0 / docs:check PASS / ui:audit:check PASS / docs:reconcile 0。UI-202 verified（dev Electron），UI-193/194 保持 in_progress（缺口已取证）。

@@ -450,19 +450,6 @@ declare global {
           error?: string;
           message?: string;
         }>;
-        // BLOCK-26 P2 — review target pickers（只读枚举）
-        recentBranches: () => Promise<{
-          ok: boolean;
-          data?: { branches: string[]; current: string | null };
-          error?: string;
-          message?: string;
-        }>;
-        recentCommits: (params?: { limit?: number }) => Promise<{
-          ok: boolean;
-          data?: { commits: Array<{ sha: string; shortSha: string; subject: string; authoredRel: string }> };
-          error?: string;
-          message?: string;
-        }>;
       };
       // Phase 1: Branch Tab UI - conversation branch management
       branch: {

@@ -1,14 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { CodeMirrorEditor } from '@/components/editor/CodeMirror/CodeMirrorEditor';
-import type { DiffRevision, EditorApi } from '@/components/editor/CodeMirror/types';
+import type { DiffRevision } from '@/components/editor/CodeMirror/types';
 import { getBridge } from '@/lib/desktopBridge';
 
 export interface CodeMirrorDiffViewProps {
   filePath: string;
   isBinary: boolean;
-  /** BLOCK-25: receives the live EditorApi so the drawer can scroll to findings. */
-  onEditorApi?: (api: EditorApi | null) => void;
 }
 
 interface FileContentResult {
@@ -18,16 +16,10 @@ interface FileContentResult {
   message?: string;
 }
 
-export function CodeMirrorDiffView({ filePath, isBinary, onEditorApi }: CodeMirrorDiffViewProps) {
+export function CodeMirrorDiffView({ filePath, isBinary }: CodeMirrorDiffViewProps) {
   const [revision, setRevision] = useState<DiffRevision | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const editorRef = useRef<EditorApi | null>(null);
-
-  useEffect(() => {
-    onEditorApi?.(editorRef.current);
-    return () => onEditorApi?.(null);
-  }, [onEditorApi, revision !== null]);
 
   useEffect(() => {
     if (!filePath || isBinary) {
@@ -94,7 +86,6 @@ export function CodeMirrorDiffView({ filePath, isBinary, onEditorApi }: CodeMirr
 
   return (
     <CodeMirrorEditor
-      ref={editorRef}
       value={revision.modifiedText}
       mode="inline-diff"
       diffRevision={revision}

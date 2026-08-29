@@ -2309,7 +2309,7 @@
       "id": "BLOCK-27-AI-REVIEW-REMOVAL",
       "path": "docs/block-27-ai-review-removal-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-27-ai-review-removal",
       "entrypoint": "docs/README.md",
@@ -2317,12 +2317,18 @@
         "block-27",
         "review",
         "removal",
-        "G0"
+        "G0",
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-29 用户裁决（'这个功能是冗余的'）：AI 审阅（BLOCK-25/26）整体移除。理由：工作区改动主要由 agent 生成，同类模型自审边际价值低；人是审阅者，WTR 确定性跟踪器（diff/hunk 接受拒绝/提交）已覆盖本职。范围：删前端面板/hook/store/client/types 与抽屉接线、CM reviewFindings 扩展与 setReviewFindings、后端 agent-review 四文件 + 路由 + 三个测试 + picker IPC（git:recent-branches/commits）；保留 WTR 面板本体与 staged-diff 修复（c228beb）；UI-202/203 台账与证据作为历史留痕并标注移除决定。git 历史可完整恢复。",
+      "notes": "2026-08-29 用户裁决启动，同日收口 completed。AI 审阅（BLOCK-25/26）整体移除：前端面板/hook/store/client/types + 抽屉接线 + CM reviewFindings 扩展 + EditorApi.setReviewFindings；后端 agent-review 四文件 + 路由 + git:recent-branches/commits picker IPC + 三个 review 测试。保留：WTR 确定性跟踪器本体与 staged-diff 修复（c228beb）。UI-202/203 台账留痕并标注移除决定。门禁：tsc 0 / 相关 vitest 22/22 / node --check / 残留 grep 清零 / docs / ui-audit 绿。commits aac15c4 + 50cdcf0。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "registeredAt": "2026-08-29",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-REGISTERED"
+      "phase": "COMPLETED",
+      "linkedCommits": [
+        "aac15c4",
+        "50cdcf0"
+      ]
     }
   ],
   "lastUpdated": "2026-08-29",

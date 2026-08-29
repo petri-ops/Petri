@@ -1,11 +1,11 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-29（BLOCK-26 已收口：审阅 UX 复刻翻新（汇总头/分组/diff 行内标注/活动流）+ 四目标全覆盖 + 渠道持久化 + detached 结果，dev Electron 实机 verified（UI-203）。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-08-29（BLOCK-27 已收口：AI 审阅按用户裁决整体移除（冗余）；WTR 确定性跟踪器保留。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- 无 active 工作包。`BLOCK-26-REVIEW-UX-PARITY` 已于 2026-08-29 收口（`docs/block-26-review-ux-parity-plan.md` §6）；BLOCK-25 已交付 Codex /review 闭环（UI-202 verified）。
-- 留给用户裁决的后续候选（未启动）：base-branch diff 视图的行内标注扩展、review 模型配置面、UI-193 widget 业务路径与 UI-194 消费侧挂载。
+- 无 active 工作包。`BLOCK-27-AI-REVIEW-REMOVAL` 已于 2026-08-29 收口：AI 审阅（BLOCK-25/26 交付物）按用户裁决整体移除（功能冗余），WTR 确定性跟踪器保留；git 历史 0ca7e59..7fc08c5 可恢复。
+- 留给用户裁决的后续候选（未启动）：UI-193 widget 业务路径与 UI-194 消费侧挂载。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 
 ## 当前结论
