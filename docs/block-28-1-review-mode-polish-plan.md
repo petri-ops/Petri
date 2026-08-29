@@ -1,9 +1,9 @@
 # BLOCK-28.1-REVIEW-MODE-POLISH — 主区审阅模式主题适配 + Codex 级打磨 Plan
 
 - **Plan ID**: `BLOCK-28.1-REVIEW-MODE-POLISH`（BLOCK-28 交付缺陷修复 + UX 打磨，用户裁决 2026-08-29）
-- **状态**: `active`
+- **状态**: `completed`（2026-08-29 启动并收口；UI-208/209 verified，证据 `acceptance/ui-208/`）
 - **truthDomain**: `block-28-review-mode-polish`
-- **阶段**: P1 主题适配（UI-208）→ P2 布局打磨（UI-209）→ P3 实机取证 + 收口
+- **阶段**: P1~P3 全部收口
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 ## 1. 缺陷诊断（2026-08-29 用户反馈 + CDP 截图实锤）

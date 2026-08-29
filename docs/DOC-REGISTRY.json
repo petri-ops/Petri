@@ -2362,7 +2362,7 @@
       "id": "BLOCK-28.1-REVIEW-MODE-POLISH",
       "path": "docs/block-28-1-review-mode-polish-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-28-review-mode-polish",
       "entrypoint": "docs/README.md",
@@ -2372,13 +2372,17 @@
         "theme-fix",
         "ui-polish",
         "G0",
-        "active",
-        "phase=P1"
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-29 用户反馈启动（BLOCK-28 交付缺陷 + UX 打磨）：浅色主题下审阅页半暗半亮串色——WorkingTreeReview.css/ReviewMode.css 沿用旧抽屉的不存在变量名（--biof3-fg/--biof3-bg-elev 等）回退暗色硬编码。P1(UI-208) 全量迁移真实 token（--biof3-bg-canvas/surface/subtle/elevated、--biof3-text*、--biof3-border*、--biof3-status-*、--biof3-font-mono）明暗双主题自适配；P2(UI-209) Codex 级打磨（summary 重排/文件树图标缩进/diff 头统计/commit 主按钮/空态）；P3 CDP 浅+暗双主题取证 acceptance/ui-208/。0 新增 IPC / 0 新依赖 / AI 审阅 0 重新引入。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-08-29 用户反馈启动，同日收口 completed。P1(UI-208)：WorkingTreeReview.css/ReviewMode.css 全量重写为真实语义 token（--biof3-bg-canvas/surface/subtle/elevated、--biof3-text*、--biof3-border*、--biof3-status-*、--biof3-font-mono），不存在变量名 grep 清零，明暗双主题自适配；裁剪 wt-* 至在用类；Commit 升 accent 主按钮。P2(UI-209)：summary 进度细条/文件树 chevron+file 图标+缩进参考线+check 已审标记/diff 头状态徽标+统计/图形化空态（复用既有 Icon 集）。实机 verified（dev Electron CDP 计算样式断言 + 截图 acceptance/ui-208/）：浅色 rgb(248,250,252)+rgb(15,23,42)、暗色 rgb(11,18,32)+rgb(230,237,243) 双主题正确，折叠控件/标记条/hunk 控件不受影响。门禁：tsc 0 / vitest 16/16 / docs:check 150 / ui:audit:check 绿。commits cea4cbb + baea3e2。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-08-29",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P1"
+      "phase": "COMPLETED",
+      "linkedCommits": [
+        "cea4cbb",
+        "baea3e2"
+      ]
     }
   ],
   "lastUpdated": "2026-08-29",

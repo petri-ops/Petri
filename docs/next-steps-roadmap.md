@@ -1,10 +1,10 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-29（BLOCK-28 已收口：代码审阅升级为主区一级审阅模式（/review 路由，VS Code SCM 形态），旧抽屉退役，UI-204~207 verified（dev Electron）。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-08-29（BLOCK-28.1 已收口：主区审阅页主题串色修复 + Codex 级打磨，UI-208/209 verified。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- 无 active 工作包。`BLOCK-28-REVIEW-MODE` 已于 2026-08-29 收口：`/review` 主区一级审阅模式（summary 条 / 分组文件树 / 大空间 diff + hunk 悬浮控件 + 标记条 + collapseUnchanged / 内嵌提交框）落地并 dev Electron 实机 verified（UI-204~207，证据 `acceptance/ui-204/`）；旧侧边抽屉退役（WorkingTreeReview.tsx 删除，TitleBar 按钮改导航）。commits `80f9d62` / `79e54f9` / `c78da2e` / `713b47b` / `9a23d38`。
+- 无 active 工作包。`BLOCK-28.1-REVIEW-MODE-POLISH` 已于 2026-08-29 收口（用户反馈驱动）：主区审阅页浅色主题串色修复（全 token 迁移，明暗双主题自适配，UI-208 verified）+ Codex 级布局打磨（进度细条/图标文件树/diff 头统计/图形化空态/accent Commit 主按钮，UI-209 verified）；证据 `acceptance/ui-208/`。commits `cea4cbb` / `baea3e2`。
 - 留给用户裁决的后续候选（未启动）：UI-193 widget 业务路径与 UI-194 消费侧挂载。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 

@@ -1,15 +1,15 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-29（BLOCK-28 已收口：主区一级审阅模式 /review 落地 + 抽屉退役，UI-204~207 verified；当前无 active 工作包）
+最后更新：2026-08-29（BLOCK-28.1 已收口：主区审阅页主题串色修复 + 打磨，UI-208/209 verified；当前无 active 工作包）
 
 ## Session Snapshot
 
-- **Active work package**: 无。`BLOCK-28-REVIEW-MODE` 已于 2026-08-29 收口（plan `docs/block-28-review-mode-plan.md`）；下一工作包由用户显式裁决启动。
+- **Active work package**: 无。`BLOCK-28.1-REVIEW-MODE-POLISH` 已于 2026-08-29 收口（plan `docs/block-28-1-review-mode-polish-plan.md`）；下一工作包由用户显式裁决启动。
 - **Current branch**: `main`；HEAD、dirty state 与 `origin/main` 同步状态以运行时 Git 为准。
 - **Code review boundary**: 代码审阅现为**主区一级模式**（路由 `/review`，VS Code SCM 形态：summary 条 / 分组文件树 / 大空间 diff / 内嵌提交框），进入方式 = TitleBar 审阅按钮（agent task-done 显示圆点提示）。旧侧边抽屉已退役（`WorkingTreeReview.tsx` 删除；`useWorkspacePanels.workingTreeOpen` 已移除）。确定性内核不变：`useWorkingTreeReview` 状态机 + `git:working-tree-*` 全家桶（diff 基准 = `git diff HEAD`，c228beb 修复保留），hunk 决策键 `path#hunkIndex`，零模型参与；AI 审阅仍按 BLOCK-27 裁决移除。
 - **P6 evidence boundary**: canonical `acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json` 绑定 `1f276de`（206-file binding，10/10 checks）。注意：BLOCK-25 改动了 `core/r-server/**` 与 `src/ipc/working-tree-review.js` 等源文件，P6 evidence 的 206-file binding 若覆盖这些路径，下一次相关门禁会按设计 fail-closed，需要重采。
 - **Minimum recovery**: 先读 `AUDIT-LOG.md` 当前待处理项，再核对 Git，然后用 `DOC-REGISTRY.json` 定位 active 工作包；无 active 包时停止，不通读历史文档。
-- **Last recorded gates**: tsc --noEmit 0 / WorkingTreeReview 定向 vitest 16/16 / docs:check PASS(149) / ui:audit:check PASS / docs:reconcile 0 / git diff --check clean。UI-204~207 verified（dev Electron，证据 `acceptance/ui-204/`）。UI-193/194 保持 in_progress（缺口已取证）。
+- **Last recorded gates**: tsc --noEmit 0 / WorkingTreeReview 定向 vitest 16/16 / docs:check PASS(150) / ui:audit:check PASS / docs:reconcile 0 / git diff --check clean。UI-204~207 与 UI-208/209 verified（dev Electron，证据 `acceptance/ui-204/` 与 `acceptance/ui-208/`）。UI-193/194 保持 in_progress（缺口已取证）。
 - **G0 discipline**: G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 

@@ -4,7 +4,9 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-29（BLOCK-28.1-REVIEW-MODE-POLISH 启动：用户反馈主区审阅页浅色主题串色（BLOCK-28 交付缺陷，旧抽屉 CSS 不存在变量名回退暗色）+ Codex 级打磨需求，plan docs/block-28-1-review-mode-polish-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+最后更新：2026-08-29（BLOCK-28.1-REVIEW-MODE-POLISH 已收口：主区审阅页主题串色修复（全 token 迁移，明暗双主题自适配）+ Codex 级布局打磨，UI-208/209 verified（证据 acceptance/ui-208/）。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+| 2026-08-29 | **BLOCK-28.1-REVIEW-MODE-POLISH 收口（2 commits）**：`cea4cbb` P0 登记 / `baea3e2` P1+P2 落地。**P1（UI-208）主题串色修复**：WorkingTreeReview.css + ReviewMode.css 全量重写为真实语义 token（--biof3-bg-canvas/surface/subtle/elevated、--biof3-text*、--biof3-border*、--biof3-status-*、--biof3-font-mono），不存在变量名 grep 清零；wt-* 裁剪至在用类；Commit 升 accent 主按钮。**P2（UI-209）打磨**：summary 进度细条 / 文件树 chevron+file 图标+缩进参考线+check 已审标记 / diff 头状态徽标+统计 / 图形化空态（复用既有 Icon 集，0 新增）。**实机 verified（CDP 计算样式断言 + 截图 acceptance/ui-208/）**：浅色 container rgb(248,250,252)+文字 rgb(15,23,42)（修复前文字 rgb(224,224,224) 串色）；暗色 rgb(11,18,32)+rgb(230,237,243)；折叠控件/标记条/hunk 控件回归正常。**门禁**：tsc 0 / vitest 16/16 / docs:check 150 / ui:audit:check 绿。**当前 active**：NONE。**G0 开发期常态 · 不外推 packaged/Provider/GA.** | BLOCK-28.1-REVIEW-MODE-POLISH / COMPLETED |
 
 | 2026-08-29 | **BLOCK-28.1-REVIEW-MODE-POLISH 启动登记（P0）**：用户实测反馈"审阅页和生信分析结果界面混在一起、距离 codex 还很远"。CDP 截图取证实锤：浅色主题（data-theme=light）下审阅页 summary 条/侧栏/状态栏仍为暗色硬编码浮在主题浅色画布上、CM 高亮暗色调文字——根因是 BLOCK-28 沿用旧抽屉 CSS 中不存在的变量名（--biof3-fg/--biof3-bg-elev/--biof3-bg-list/--biof3-bg-button/--biof3-mono/--biof3-status-danger）回退暗色常量，与 Infima + --biof3-* 语义 token 体系混用串色。用户裁决 A+B 全套：P1(UI-208) 全量迁移真实 token 明暗双主题自适配；P2(UI-209) Codex 级布局打磨（summary 重排/文件树图标缩进/diff 头统计/commit 主按钮/空态）；P3 CDP 浅+暗双主题取证 acceptance/ui-208/。plan：docs/block-28-1-review-mode-polish-plan.md。| BLOCK-28.1-REVIEW-MODE-POLISH / P0-LAUNCH |
 
