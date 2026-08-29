@@ -23,8 +23,8 @@
 
 /* ---- 按钮 ---- */
 .wt-btn {
-  padding: 5px 12px;
-  font-size: var(--biof3-font-size-caption);
+  padding: 6px 14px;
+  font-size: var(--biof3-font-size-body-sm);
   border: 1px solid var(--biof3-border);
   border-radius: 6px;
   background: var(--biof3-bg-subtle);
@@ -85,14 +85,14 @@
   background: var(--biof3-status-error-bg);
   border-bottom: 1px solid color-mix(in srgb, var(--biof3-status-error) 40%, transparent);
   color: var(--biof3-status-error-fg);
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--biof3-font-size-body-sm);
   flex-shrink: 0;
 }
 
 /* ---- 文件列表 ---- */
 .wt-file-list-title {
   padding: 8px 12px;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--biof3-font-size-sm);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -105,13 +105,13 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 6px 12px;
+  padding: 7px 12px;
   border: 0;
   background: transparent;
   color: var(--biof3-text-secondary);
   cursor: pointer;
   text-align: left;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--biof3-font-size-body-sm);
   border-bottom: 1px solid var(--biof3-border-subtle);
 }
 
@@ -173,7 +173,7 @@
 .wt-file-status-D { color: var(--biof3-status-error-fg); }
 .wt-file-status-R { color: var(--biof3-status-info); }
 .wt-file-status-C { color: var(--biof3-accent); }
-.wt-file-status-? { color: var(--biof3-text-muted); }
+.wt-file-status-\? { color: var(--biof3-text-muted); }
 
 .wt-file-list-path {
   font-family: var(--biof3-font-mono, monospace);
@@ -187,7 +187,7 @@
   padding: 24px;
   text-align: center;
   color: var(--biof3-text-muted);
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--biof3-font-size-body);
 }
 
 /* ---- diff 文件头 ---- */
@@ -222,7 +222,7 @@
 /* ---- 快捷键提示 ---- */
 .wt-shortcut-hint {
   margin-right: 10px;
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   color: var(--biof3-text-tertiary);
   font-family: var(--biof3-font-mono, monospace);
   white-space: nowrap;
@@ -248,7 +248,7 @@
   background: var(--biof3-status-success-bg);
   border-bottom: 1px solid color-mix(in srgb, var(--biof3-status-success-fg) 40%, transparent);
   color: var(--biof3-status-success-fg);
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--biof3-font-size-body-sm);
   flex-shrink: 0;
   gap: 12px;
 }

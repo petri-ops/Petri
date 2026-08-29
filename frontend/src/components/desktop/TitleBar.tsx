@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { useWorkspacePanelsContext } from './WorkspacePanelsContext';
 import { getBridge } from '@/lib/desktopBridge';
@@ -26,44 +26,34 @@ function getIsDesktop(): boolean {
 
 /**
  * Working Tree Review toggle button integrated into TitleBar.
- * BLOCK-28：改为打开主区一级审阅模式（路由 /review）——旧侧边抽屉已退役。
- * 再次点击返回上一页（无历史时回首页）。进入 /review 时清除圆点提示；
- * 不在审阅模式时收到 agent:task-done（agent 完成改动）则亮起圆点。
+ * BLOCK-28.2：Toggle 右侧停靠审阅面板（panels.workingTreeOpen），不再导航全屏。
+ * agent:task-done（agent 完成改动）时亮起圆点提示，打开面板后清除。
  * Desktop-only: in browser dev (no biof3Desktop.isDesktop) the button is hidden.
  */
 function WorkingTreeReviewTitleBarButton(): React.ReactElement | null {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const panels = useWorkspacePanelsContext();
   const isDesktop = getIsDesktop();
   const [hasNewChanges, setHasNewChanges] = useState(false);
-  const isReviewMode = location.pathname === '/review';
+  const isOpen = panels.workingTreeOpen;
 
   useEffect(() => {
-    if (isReviewMode) {
+    if (isOpen) {
       setHasNewChanges(false);
       return;
     }
     return subscribeBioF3Event(biof3Events.agentTaskDone, () => setHasNewChanges(true));
-  }, [isReviewMode]);
+  }, [isOpen]);
 
   if (!isDesktop) return null;
-  const handleClick = () => {
-    if (isReviewMode) {
-      if (window.history.length > 1) navigate(-1);
-      else navigate('/');
-    } else {
-      navigate('/review');
-    }
-  };
-  const title = isReviewMode ? '退出 Code Review' : '打开 Code Review';
+  const title = isOpen ? '收起 Code Review' : '打开 Code Review';
   return (
     <button
       type="button"
-      className={`${styles.iconBtn} ${isReviewMode ? '' : styles.iconBtnInactive}`}
-      onClick={handleClick}
+      className={`${styles.iconBtn} ${isOpen ? '' : styles.iconBtnInactive}`}
+      onClick={() => panels.toggleWorkingTree()}
       title={title}
       aria-label={title}
-      aria-pressed={isReviewMode}
+      aria-pressed={isOpen}
       data-testid="working-tree-review-button"
     >
       <Icon name="git-branch" size={15} />

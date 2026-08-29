@@ -1,0 +1,30 @@
+{
+  "capturedAt": "2026-08-29T11:05:00.000Z",
+  "boundary": "dev Electron",
+  "url": "http://localhost:3000/project/p_mt15b0aw_f0xa（项目页保持挂载，dock 右侧停靠）",
+  "driver": "raw CDP over Node global WebSocket (CDP port 9222)",
+  "fix": "BLOCK-28.2 — CodeReview 改回右侧停靠形态 + 字号升档 + hunk 控件卡片化",
+  "checks": {
+    "dockPresent": true,
+    "dockRect": { "width": 520, "dockedRight": true, "topAtTitlebar": true },
+    "projectPageStillMounted": true,
+    "pathnameUnchanged": "/project/p_mt15b0aw_f0xa",
+    "containerClass": "rvw-container rvw-container--dock",
+    "filestripChips": 7,
+    "activeChip": "frontend/src/App.tsx",
+    "chipShowsStatusAndStats": true,
+    "diffRenderedInDock": true,
+    "hunkCardElevated": true,
+    "hunkCardBg": "rgb(255, 255, 255)",
+    "fontSizesBumped": "caption(12)->body-sm(13) 按钮与列表；标题 nowrap；快捷键提示 dock 隐藏",
+    "escClosesDock": true,
+    "modeRouteStillWorks": "/review 保留（共享组件，已 verified 于 UI-204~207）"
+  },
+  "screenshots": [
+    "acceptance/ui-210/dock-light.png",
+    "acceptance/ui-210/dock-dark.png"
+  ],
+  "passed": true,
+  "qualificationEligible": false,
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA."
+}

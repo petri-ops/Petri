@@ -30,8 +30,20 @@ interface CommitSuccess {
   message: string;
 }
 
-export function ReviewMode() {
+export interface ReviewModeProps {
+  /**
+   * BLOCK-28.2 — 呈现形态：
+   * - 'mode'（默认）：主区一级模式（/review 路由，占满 main 区域）
+   * - 'dock'：右侧停靠面板（wt-dock 容器内，文件条横向、diff 最大化）
+   */
+  variant?: 'mode' | 'dock';
+  /** dock 形态的关闭回调（Esc / 关闭动作触发）。 */
+  onClose?: () => void;
+}
+
+export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   const navigate = useNavigate();
+  const isDock = variant === 'dock';
   const review = useWorkingTreeReview({ isOpen: true });
 
   const [commitMsg, setCommitMsg] = useState('');
@@ -47,12 +59,16 @@ export function ReviewMode() {
     else navigate('/');
   };
 
-  // Esc 语义：先关行内编辑抽屉 → 提交输入框内先失焦 → 最后退出主区审阅模式
+  // Esc 语义：先关行内编辑抽屉 → dock 形态关闭面板 → 输入框失焦 → mode 形态退出
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       if (isEditDrawerOpen) {
         setIsEditDrawerOpen(false);
+        return;
+      }
+      if (isDock && onClose) {
+        onClose();
         return;
       }
       const target = e.target as HTMLElement | null;
@@ -64,7 +80,7 @@ export function ReviewMode() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isEditDrawerOpen, navigate]);
+  }, [isEditDrawerOpen, isDock, onClose, navigate]);
 
   // 切换文件重置 hunk 焦点
   useEffect(() => { setFocusedHunk(0); }, [review.selectedFilePath]);
@@ -162,7 +178,7 @@ export function ReviewMode() {
   };
 
   return (
-    <div className="rvw-container" role="region" aria-label="code review mode">
+    <div className={`rvw-container${isDock ? ' rvw-container--dock' : ''}`} role="region" aria-label="code review mode">
       {/* Commit success toast */}
       {commitSuccess && (
         <div className="wt-commit-success" role="status">
@@ -269,8 +285,46 @@ export function ReviewMode() {
         <div className="wt-error" role="alert">{review.error}</div>
       )}
 
-      <div className="rvw-body">
-        {/* 左栏文件树（P2：目录分组可折叠 / 每文件 +N −M / 已审标记置灰） */}
+      <div className={`rvw-body${isDock ? ' rvw-body--dock' : ''}`}>
+        {/* 左栏文件树（mode：目录分组折叠树 / dock：横向文件条） */}
+        {isDock ? (
+          <div className="rvw-filestrip" data-testid="rvw-file-list" role="tablist" aria-label="changed files">
+            {review.status && review.status.files.length === 0 && (
+              <div className="wt-empty">No working tree changes.</div>
+            )}
+            {statusFiles.map((f) => {
+              const diffFile = diffByPath.get(f.path);
+              const stats = computeFileDiffStats(diffFile);
+              const reviewed = isFileReviewed(diffFile, review.decisions);
+              const selected = review.selectedFilePath === f.path;
+              const fileName = f.path.slice(f.path.lastIndexOf('/') + 1);
+              return (
+                <button
+                  key={f.path}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  className={`rvw-filechip ${selected ? 'active' : ''}${reviewed ? ' rvw-file-reviewed' : ''}`}
+                  onClick={() => review.setSelectedFilePath(f.path)}
+                  title={f.path}
+                >
+                  <span className={`wt-file-status wt-file-status-${f.status}`}>{f.status}</span>
+                  <span className="rvw-filechip-name">{fileName}</span>
+                  {reviewed ? (
+                    <span className="rvw-reviewed-mark"><Icon name="check" size={12} /></span>
+                  ) : (
+                    (stats.added > 0 || stats.removed > 0) && (
+                      <span className="rvw-file-stats">
+                        {stats.added > 0 && <span className="rvw-stat-add">+{stats.added}</span>}
+                        {stats.removed > 0 && <span className="rvw-stat-del">−{stats.removed}</span>}
+                      </span>
+                    )
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
         <aside className="rvw-sidebar" data-testid="rvw-file-list">
           <div className="wt-file-list-title">
             Files ({review.status?.totalFiles ?? 0})
@@ -336,8 +390,9 @@ export function ReviewMode() {
             );
           })}
         </aside>
+        )}
 
-        {/* 右栏大空间 diff（sticky 文件头在滚动容器外，天然吸顶） */}
+        {/* 右栏大空间 diff（sticky 文件头在滚动容器外，天然吸顶；dock 下为纵向主体） */}
         <main className="rvw-diff-area" data-testid="rvw-diff-area">
           {!selectedFile && !review.loading && !review.error && (
             <div className="rvw-empty-state">

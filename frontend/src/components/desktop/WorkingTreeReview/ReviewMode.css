@@ -3,6 +3,8 @@
  *
  * BLOCK-28.1：全量迁移到应用语义 token（custom.css 明暗双套），
  * 修复浅色主题串色。布局对标 VS Code SCM。
+ * BLOCK-28.2：新增 dock 停靠形态（wt-dock 容器内，横向文件条 +
+ * 纵向 diff），字号升档对齐全局基线，hunk 控件卡片化。
  * ============================================================ */
 
 .rvw-container {
@@ -13,6 +15,25 @@
   color: var(--biof3-text);
   overflow: hidden;
   box-sizing: border-box;
+}
+
+/* BLOCK-28.2 — dock 停靠形态：填满 wt-dock 容器（高度由容器决定） */
+.rvw-container--dock {
+  height: 100%;
+}
+
+/* BLOCK-28.2 — 右侧停靠面板容器（AppShell 挂载，不占主区） */
+.wt-dock {
+  position: fixed;
+  top: var(--biof3-titlebar-height, 38px);
+  right: 0;
+  bottom: 0;
+  width: 520px;
+  z-index: 50;
+  background: var(--biof3-bg-canvas);
+  border-left: 1px solid var(--biof3-border);
+  box-shadow: -8px 0 24px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
 }
 
 /* ===== 顶部 summary 条 ===== */
@@ -44,9 +65,26 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--biof3-font-size-body-sm);
   color: var(--biof3-text-secondary);
   white-space: nowrap;
+}
+
+/* BLOCK-28.2 — dock 形态紧凑化：隐藏快捷键提示 */
+.rvw-container--dock .wt-shortcut-hint {
+  display: none;
+}
+
+.rvw-container--dock .rvw-summary {
+  padding: 8px 12px;
+}
+
+.rvw-container--dock .wt-title {
+  white-space: nowrap;
+}
+
+.rvw-container--dock .rvw-summary-stats span:first-child {
+  display: none;
 }
 
 .rvw-review-progress {
@@ -82,6 +120,11 @@
   overflow: hidden;
 }
 
+/* BLOCK-28.2 — dock 形态：纵向堆叠（文件条在上、diff 在下） */
+.rvw-body--dock {
+  flex-direction: column;
+}
+
 .rvw-sidebar {
   width: 300px;
   flex-shrink: 0;
@@ -97,6 +140,58 @@
   flex-direction: column;
   overflow: hidden;
   background: var(--biof3-bg-surface);
+}
+
+/* BLOCK-28.2 — dock：diff 为纵向主体，占满剩余高度 */
+.rvw-body--dock .rvw-diff-area {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ===== BLOCK-28.2 — dock 横向文件条（chips） ===== */
+.rvw-filestrip {
+  flex-shrink: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  padding: 8px 12px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--biof3-border);
+  background: var(--biof3-bg-canvas);
+}
+
+.rvw-filechip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  max-width: 220px;
+  padding: 4px 10px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 999px;
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text-secondary);
+  font-size: var(--biof3-font-size-body-sm);
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.rvw-filechip:hover {
+  background: var(--biof3-hover);
+  border-color: var(--biof3-border-strong);
+}
+
+.rvw-filechip.active {
+  background: var(--biof3-accent-soft);
+  border-color: var(--biof3-accent);
+  color: var(--biof3-text);
+}
+
+.rvw-filechip-name {
+  font-family: var(--biof3-font-mono, monospace);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rvw-file {
@@ -127,7 +222,7 @@
   background: transparent;
   color: var(--biof3-text-tertiary);
   cursor: pointer;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--biof3-font-size-sm);
   font-weight: 600;
   text-align: left;
 }
@@ -276,20 +371,25 @@
   background: var(--biof3-status-error-fg);
 }
 
-/* ===== P3 — hunk 悬浮 accept/reject 控件（行尾 inline widget） ===== */
+/* ===== P3 — hunk 悬浮 accept/reject 控件（行尾卡片） ===== */
 .wt-hunk-controls {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   margin-left: 10px;
   vertical-align: baseline;
+  padding: 3px 6px;
+  background: var(--biof3-bg-elevated);
+  border: 1px solid var(--biof3-border);
+  border-radius: 8px;
+  box-shadow: var(--biof3-shadow-menu);
 }
 
 .wt-hunk-btn {
-  padding: 1px 8px;
-  font-size: 10px;
-  line-height: 1.4;
-  border-radius: 3px;
+  padding: 2px 10px;
+  font-size: var(--biof3-font-size-caption);
+  line-height: 1.5;
+  border-radius: 5px;
   border: 1px solid transparent;
   cursor: pointer;
 }
@@ -340,7 +440,7 @@
   border-radius: 6px;
   padding: 8px 10px;
   font-family: inherit;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--biof3-font-size-body-sm);
   line-height: 1.5;
   resize: none;
 }
@@ -359,7 +459,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--biof3-font-size-caption);
   color: var(--biof3-text-tertiary);
 }
 
@@ -395,7 +495,7 @@
 }
 
 .rvw-empty-state .rvw-empty-title {
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--biof3-font-size-lg);
   font-weight: 600;
   color: var(--biof3-text-secondary);
 }

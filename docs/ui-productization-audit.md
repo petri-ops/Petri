@@ -1591,3 +1591,29 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0 / 定向 vitest 16/16（空态断言同步更新）。**2026-08-29 dev Electron 实机 verified**：浅色 diff 截图确认——白色 summary + 细进度条、侧栏图标树、diff 头统计、底部 accent Commit 主按钮、「14 unchanged lines」折叠控件正常；证据 `acceptance/ui-208/`。
 
 **状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-210: BLOCK-28.2 P1 — CodeReview 右侧停靠形态（wt-dock，不占主区） (2026-08-29 verified)
+
+**用户反馈**：CodeReview 在右侧边栏区域显示即可，不需要整个全屏。
+
+**改动范围**：
+- 恢复 `useWorkspacePanels.workingTreeOpen/setWorkingTreeOpen/toggleWorkingTree`；TitleBar 审阅按钮改回 Toggle（打开/收起 dock，agent task-done 圆点提示保留）。
+- AppShell 在 open 时挂载 `wt-dock`（fixed 右侧 520px、border-left + 阴影、z-index 同旧抽屉层），内嵌 `<ReviewMode variant="dock" onClose={toggle}>`。
+- ReviewMode 增加 `variant: 'mode' | 'dock'`：dock 下文件树变为**横向文件条**（chips：状态字母 + basename + ±统计 + 已审 ✓，单行滚动，accent 选中态），diff 区为纵向主体；summary 紧凑化（隐藏快捷键提示、标题 nowrap）；Esc = 关闭 dock。
+- `/review` mode 路由保留（共享组件，UI-204~207 已 verified）。
+
+**验证**：tsc 0；定向 vitest（WorkingTreeReview 16/16；TitleBar 8 failed 为已知 pre-existing 集合，数量一致）。**2026-08-29 dev Electron 实机 verified**：CDP 断言——项目页保持挂载（pathname 不变、projectStillMounted=true）、dock 520px 右停靠、7 个文件 chips、active chip 正确、diff 渲染、hunk 卡片 elevated；Esc 关闭面板；证据 `acceptance/ui-210/`。
+
+**状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-211: BLOCK-28.2 P2 — 审阅页字号升档 + hunk 控件卡片化 (2026-08-29 verified)
+
+**用户反馈**：①审阅页文字大小与软件不适配（偏小）②hunk 的 Accept/Reject 控件应卡片化。
+
+**改动范围**：
+- 字号升档对齐全局基线：按钮/文件行/统计 caption(12)→body-sm(13)、组头 xs→sm(11)、快捷键提示 10→xs(11)、空态 body-sm→body(14)、空态标题→lg(18)、commitbox 输入 caption→body-sm、meta xs→caption；修复无效选择器 `.wt-file-status-?`（转义为 `\?`，原规则从未生效）。
+- hunk 控件卡片化：`wt-hunk-controls` 改为 elevated 圆角卡片（bg-elevated + border + shadow-menu + 内边距），Accept/Reject 按钮加大热区（caption 字号、10px 圆角）。
+
+**验证**：tsc 0；定向 vitest 16/16。**2026-08-29 dev Electron 实机 verified**：CDP 断言 hunk 卡片 elevated 背景 `rgb(255,255,255)`；浅/暗双主题截图确认字号观感与全局一致；证据 `acceptance/ui-210/`。
+
+**状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

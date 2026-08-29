@@ -10,7 +10,7 @@ const BioF3OpenFileDevBridge = lazy(() =>
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
 import { TitleBar } from '@/components/desktop/TitleBar';
-import { WorkspacePanelsProvider } from '@/components/desktop/WorkspacePanelsContext';
+import { WorkspacePanelsProvider, useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
@@ -23,6 +23,8 @@ import { ResultStudioPage } from '@/pages/result-studio/ResultStudioPage';
 import SkillsPage from '@/pages/skills';
 // BLOCK-28 — 主区一级审阅模式（方案 B），取代旧侧边抽屉 WorkingTreeReview
 import { ReviewModePage } from '@/pages/review';
+// BLOCK-28.2 — 同一组件以 dock 形态停靠右侧（TitleBar Toggle）
+import { ReviewMode } from '@/components/desktop/WorkingTreeReview/ReviewMode';
 import '@/components/desktop/desktop.css';
 // 断点6：注入平台 API 给 @biof3/shared 渲染层组件（如 ActResultCard）
 import { configureApi } from '../../core/packages/shared-copilot/api-inject';
@@ -52,6 +54,7 @@ function DesktopOnboardingMount(): React.ReactElement | null {
 
 /** Lives inside WorkspacePanelsProvider — can access panel state. */
 function AppShell(): React.ReactElement {
+  const panels = useWorkspacePanelsContext();
   const { isOpen, open, close } = useCommandPalette();
 
   return (
@@ -93,6 +96,12 @@ function AppShell(): React.ReactElement {
           commands={[]}
           recentConversations={[]}
         />
+        {/* BLOCK-28.2 — CodeReview 右侧停靠面板（TitleBar 按钮 Toggle，不占主区） */}
+        {panels.workingTreeOpen && (
+          <div className="wt-dock" data-testid="review-dock">
+            <ReviewMode variant="dock" onClose={panels.toggleWorkingTree} />
+          </div>
+        )}
         {/* BLOCK-22 P4.6: DEV ONLY — do NOT use in production */}
         <Suspense fallback={null}>
           <BioF3OpenFileDevBridge />
