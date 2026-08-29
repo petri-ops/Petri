@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -91,9 +91,35 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     });
     expect(screen.getByTestId('rvw-summary-stats').textContent).toContain('+1');
     expect(screen.getByTestId('rvw-summary-stats').textContent).toContain('−0');
+    expect(screen.getByTestId('rvw-review-progress').textContent).toContain('0/1 reviewed');
 
     const list = screen.getByTestId('rvw-file-list');
-    expect(list.textContent).toContain('src/a.py');
+    // 目录分组：组头 src + 文件行 a.py（basename）+ 每文件 +N −M
+    expect(list.textContent).toContain('src');
+    expect(list.textContent).toContain('a.py');
+    expect(list.textContent).toContain('+1');
+  });
+
+  it('marks a file reviewed (dimmed + progress) once all its hunks are decided', async () => {
+    const applyHunk = vi.fn(() => Promise.resolve({ ok: true, data: {} }));
+    getBridgeMock.mockReturnValue(makeBridge({ applyHunk }));
+
+    const { container } = renderReview();
+
+    // 等首个文件自动选中
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-review-progress').textContent).toContain('0/1 reviewed');
+    });
+
+    // A 键 accept 当前 hunk（键盘流与旧抽屉一致）
+    fireEvent.keyDown(window, { key: 'a' });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-review-progress').textContent).toContain('1/1 reviewed');
+    });
+    expect(container.querySelector('.rvw-file-reviewed')).not.toBeNull();
+    expect(container.querySelector('.rvw-reviewed-mark')).not.toBeNull();
+    expect(applyHunk).toHaveBeenCalledTimes(1);
   });
 
   it('shows the empty state when the working tree is clean', async () => {

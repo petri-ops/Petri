@@ -1533,3 +1533,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc --noEmit 0；定向 vitest 13/13 通过（ReviewMode.test.tsx 3 新增 + CodeMirrorDiffView.test.tsx 10）；TitleBar.test.tsx 8 failed 为 pre-existing（干净 HEAD `80f9d62` stash 复测同样 8 failed | 7 passed，属 mac 窗口控件标签旧债，非 BLOCK-28 引入）。实机验收（P5）后统一转 verified，证据落 `acceptance/ui-204/`。
 
 **状态**: in_progress (实现落地，待 dev Electron 实机验收)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-205: BLOCK-28 P2 — 文件树（目录分组 / 每文件 +N −M / 已审标记） (2026-08-29 in_progress)
+
+**改动范围**（BLOCK-28 P2，基于 UI-204 骨架）：
+- 新增纯函数助手 `reviewModeHelpers.ts`：`computeFileDiffStats`（按 diff hunk 行统计每文件 +N −M）、`isFileReviewed`（确定性规则：binary / 0 hunk 自动已审；其余全部 hunk 有决策才算已审）、`groupFilesByDirectory`（按目录稳定分组，根目录置末显示 "."）。
+- 左栏升级为分组文件树：目录组头可折叠（caret 旋转 + aria-expanded）、文件行显示 basename + M/A/D 徽标 + 彩色 +N −M 统计 + accept/reject 决策徽标；全路径入 title。
+- 已审文件置灰（opacity）+ 绿色 ✓ 标记，统计让位给 ✓；summary 条新增审阅进度 `n/m reviewed` 徽标（n = 已审文件数，m = 状态文件总数）。
+
+**验证**：tsc --noEmit 0；定向 vitest 14/14（reviewModeHelpers.test.ts 6 新增 + ReviewMode.test.tsx 5，含「A 键 accept 后文件置灰 + 进度 1/1」交互用例）。
+
+**状态**: in_progress (实现落地，待 dev Electron 实机验收)。G0 开发期常态 · 不外推 packaged / Provider / GA。

@@ -50,6 +50,88 @@
   white-space: nowrap;
 }
 
+.rvw-review-progress {
+  padding: 1px 8px;
+  border-radius: 8px;
+  background: rgba(80, 130, 200, 0.14);
+  color: var(--biof3-fg-muted, #999);
+  font-size: 11px;
+}
+
+/* P2 — 文件树：目录分组 */
+.rvw-group {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.rvw-group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--biof3-fg-muted, #888);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.rvw-group-header:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+}
+
+.rvw-caret {
+  display: inline-block;
+  transition: transform 120ms ease;
+  font-size: 9px;
+}
+
+.rvw-caret-collapsed {
+  transform: rotate(-90deg);
+}
+
+.rvw-group-name {
+  font-family: var(--biof3-mono, monospace);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rvw-group-count {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--biof3-fg-muted, #777);
+}
+
+/* P2 — 文件行：文件名 + 统计 + 已审标记 */
+.rvw-file-row .wt-file-list-path {
+  flex: 1;
+  min-width: 0;
+}
+
+.rvw-file-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-family: var(--biof3-mono, monospace);
+  font-size: 10px;
+}
+
+.rvw-file-reviewed {
+  opacity: 0.45;
+}
+
+.rvw-reviewed-mark {
+  color: #5cc870;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
 .rvw-stat-add {
   font-family: var(--biof3-mono, monospace);
   color: #5cc870;

@@ -9,11 +9,17 @@
 // 键盘流与旧抽屉一致：A/Y accept · R reject · ↑↓ navigate · Esc 退出模式。
 // ============================================================
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useWorkingTreeReview } from './useWorkingTreeReview';
+import { useWorkingTreeReview, type DiffFile } from './useWorkingTreeReview';
 import { CodeMirrorDiffView } from './CodeMirrorDiffView';
 import { CodeReviewDrawer } from './CodeReviewDrawer';
+import {
+  computeFileDiffStats,
+  groupDisplayName,
+  groupFilesByDirectory,
+  isFileReviewed,
+} from './reviewModeHelpers';
 import './WorkingTreeReview.css';
 import './ReviewMode.css';
 
@@ -33,6 +39,7 @@ export function ReviewMode() {
   const [commitError, setCommitError] = useState<string | null>(null);
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const [focusedHunk, setFocusedHunk] = useState(0);
+  const [collapsedDirs, setCollapsedDirs] = useState<Record<string, boolean>>({});
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const exitReviewMode = () => {
@@ -95,6 +102,25 @@ export function ReviewMode() {
   }, [showCommitDialog]);
 
   const selectedFile = review.diff?.files.find((f) => f.path === review.selectedFilePath) || null;
+
+  // P2 — diff 文件索引 + 目录分组 + 已审进度
+  const diffByPath = useMemo(() => {
+    const map = new Map<string, DiffFile>();
+    for (const f of review.diff?.files ?? []) map.set(f.path, f);
+    return map;
+  }, [review.diff]);
+
+  const statusFiles = review.status?.files ?? [];
+  const fileGroups = useMemo(() => groupFilesByDirectory(statusFiles), [review.status]); // eslint-disable-line react-hooks/exhaustive-deps
+  const reviewedCount = useMemo(
+    () => statusFiles.filter((f) => isFileReviewed(diffByPath.get(f.path), review.decisions)).length,
+    [statusFiles, diffByPath, review.decisions]
+  );
+  const totalFiles = statusFiles.length;
+
+  const toggleDir = (dir: string) => {
+    setCollapsedDirs((prev) => ({ ...prev, [dir]: !prev[dir] }));
+  };
 
   const fileDecisionSummary = (path: string) => {
     const keys = Object.entries(review.decisions).filter(([k]) => k.startsWith(`${path}#`));
@@ -180,6 +206,9 @@ export function ReviewMode() {
             {review.diff && (
               <span className="rvw-stat-del">−{review.diff.summary.removed}</span>
             )}
+            <span className="rvw-review-progress" data-testid="rvw-review-progress">
+              {reviewedCount}/{totalFiles} reviewed
+            </span>
           </span>
           {review.taskId && <span className="wt-task-id">task: {review.taskId}</span>}
         </div>
@@ -242,7 +271,7 @@ export function ReviewMode() {
       )}
 
       <div className="rvw-body">
-        {/* 左栏文件列表（P2 升级：目录分组 / 每文件 +N −M / 已审标记） */}
+        {/* 左栏文件树（P2：目录分组可折叠 / 每文件 +N −M / 已审标记置灰） */}
         <aside className="rvw-sidebar" data-testid="rvw-file-list">
           <div className="wt-file-list-title">
             Files ({review.status?.totalFiles ?? 0})
@@ -250,28 +279,58 @@ export function ReviewMode() {
           {review.status && review.status.files.length === 0 && (
             <div className="wt-empty">No working tree changes.</div>
           )}
-          {review.status?.files.map((f) => {
-            const summary = fileDecisionSummary(f.path);
+          {fileGroups.map((group) => {
+            const collapsed = !!collapsedDirs[group.dir];
             return (
-              <button
-                key={f.path}
-                type="button"
-                className={`wt-file-list-item ${review.selectedFilePath === f.path ? 'active' : ''}${summary ? ' wt-file-list-item-decided' : ''}`}
-                onClick={() => review.setSelectedFilePath(f.path)}
-              >
-                <span className={`wt-file-status wt-file-status-${f.status}`}>{f.status}</span>
-                <span className="wt-file-list-path">{f.path}</span>
-                {summary && (
-                  <span className="wt-file-list-badge">
-                    {summary.accepted > 0 && (
-                      <span className="wt-badge-mini wt-badge-accept-mini">{summary.accepted}</span>
-                    )}
-                    {summary.rejected > 0 && (
-                      <span className="wt-badge-mini wt-badge-reject-mini">{summary.rejected}</span>
-                    )}
-                  </span>
-                )}
-              </button>
+              <div key={group.dir || '/'} className="rvw-group">
+                <button
+                  type="button"
+                  className="rvw-group-header"
+                  onClick={() => toggleDir(group.dir)}
+                  aria-expanded={!collapsed}
+                >
+                  <span className={`rvw-caret${collapsed ? ' rvw-caret-collapsed' : ''}`} aria-hidden="true">▾</span>
+                  <span className="rvw-group-name">{groupDisplayName(group.dir)}</span>
+                  <span className="rvw-group-count">{group.files.length}</span>
+                </button>
+                {!collapsed &&
+                  group.files.map((f) => {
+                    const diffFile = diffByPath.get(f.path);
+                    const stats = computeFileDiffStats(diffFile);
+                    const reviewed = isFileReviewed(diffFile, review.decisions);
+                    const summary = fileDecisionSummary(f.path);
+                    const fileName = f.path.slice(f.path.lastIndexOf('/') + 1);
+                    return (
+                      <button
+                        key={f.path}
+                        type="button"
+                        className={`wt-file-list-item rvw-file-row ${review.selectedFilePath === f.path ? 'active' : ''}${reviewed ? ' rvw-file-reviewed' : ''}`}
+                        onClick={() => review.setSelectedFilePath(f.path)}
+                        title={f.path}
+                      >
+                        <span className={`wt-file-status wt-file-status-${f.status}`}>{f.status}</span>
+                        <span className="wt-file-list-path">{fileName}</span>
+                        <span className="wt-file-list-badge">
+                          {summary && summary.accepted > 0 && (
+                            <span className="wt-badge-mini wt-badge-accept-mini">{summary.accepted}</span>
+                          )}
+                          {summary && summary.rejected > 0 && (
+                            <span className="wt-badge-mini wt-badge-reject-mini">{summary.rejected}</span>
+                          )}
+                          {reviewed && (
+                            <span className="rvw-reviewed-mark" title="Reviewed">✓</span>
+                          )}
+                        </span>
+                        {!reviewed && (stats.added > 0 || stats.removed > 0) && (
+                          <span className="rvw-file-stats">
+                            {stats.added > 0 && <span className="rvw-stat-add">+{stats.added}</span>}
+                            {stats.removed > 0 && <span className="rvw-stat-del">−{stats.removed}</span>}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+              </div>
             );
           })}
         </aside>
