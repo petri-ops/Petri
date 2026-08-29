@@ -44,6 +44,7 @@
 26. [`block-25-codex-parity-review-plan.md`](./block-25-codex-parity-review-plan.md) — 2026-08-29 已收口：Codex `/review` 同款 AI 代码审阅落地 WTR 抽屉（只读评审子代理 + 结构化 findings + 跳转 + 修复回传，UI-202 dev Electron verified）；顺带修复 WTR staged-only diff 空面板缺陷；不外推 packaged / Provider / GA / P7。
 27. [`block-26-review-ux-parity-plan.md`](./block-26-review-ux-parity-plan.md) — 2026-08-29 已收口：审阅 UX 复刻翻新 verified（UI-203）——verdict 汇总头 / 按文件分组 / diff 行内 gutter+卡片标注 / 活动流 / 四目标（uncommitted/base-branch/commit/custom）/ 渠道持久化 / detached 结果；不外推写侧自动化 / packaged / Provider / GA / P7。
 28. [`block-27-ai-review-removal-plan.md`](./block-27-ai-review-removal-plan.md) — 2026-08-29 已收口：AI 审阅按用户裁决整体移除（冗余）；WTR 确定性跟踪器（diff/hunk/commit）保留；UI-202/203 台账留痕；git 历史 0ca7e59..7fc08c5 可恢复；不外推 packaged / Provider / GA / P7。
+29. [`block-28-review-mode-plan.md`](./block-28-review-mode-plan.md) — 2026-08-29 用户裁决启动的唯一 active 工作包（BLOCK-28 方案 B）：把代码审阅从侧边抽屉升级为主区一级审阅模式（对标 VS Code SCM）——`/review` 一级路由 + ReviewModePage（summary 条 / 文件树分组 / 大空间 diff / 内嵌提交框）+ TitleBar 导航 + 旧抽屉退役；复用 useWorkingTreeReview / git:working-tree-* 全家桶（0 新增 IPC / 0 新依赖）；UI-204~207 分阶段登记；不外推 packaged / Provider / GA / P7。
 4. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) — 当前永久 G0 可信基础层主线；LF12 原始核心资格保持 maintained，Result Studio 产品支持声明暂停，P7 deferred。
 5. [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) — 已完成的 G0 Baseline v1 资格认证、证据边界与永久维护契约。
 6. [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md) — SDC-0 / SDC-1-A / SDC-1 / SDC-2 已完成；SDC-3～SDC-7 deferred。

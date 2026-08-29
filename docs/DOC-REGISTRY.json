@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 131,
+    "documentCount": 149,
     "lastUpdated": "2026-08-29",
-    "managedMarkdown": 131
+    "managedMarkdown": 149
   },
   "documents": [
     {
@@ -2329,8 +2329,29 @@
         "aac15c4",
         "50cdcf0"
       ]
+    },
+    {
+      "id": "BLOCK-28-REVIEW-MODE",
+      "path": "docs/block-28-review-mode-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-28-review-mode",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-28",
+        "review-mode",
+        "main-area-mode",
+        "G0",
+        "active",
+        "phase=P0-LAUNCH"
+      ],
+      "notes": "2026-08-29 用户裁决启动（BLOCK-28 方案 B）：把代码审阅从侧边抽屉升级为主区一级审阅模式（对标 VS Code SCM）。路由 /review（App 级一级路由，审阅对象是应用工作区仓库非项目作用域）+ ReviewModePage（summary 条/文件树分组/大空间 diff/内嵌提交框）+ TitleBar 按钮改导航 + 旧抽屉退役。复用 useWorkingTreeReview / CodeMirrorDiffView / git:working-tree-* 全家桶（0 新增 IPC，diffForReview=git diff HEAD 修复 c228beb 必须保留）；@codemirror/merge collapseUnchanged 原生展开上下文；0 新 npm 依赖。严禁重新引入 AI 审阅（BLOCK-27 裁决）。阶段 P0 登记 → P1 骨架(UI-204) → P2 文件树(UI-205) → P3 diff 区(UI-206) → P4 内嵌提交(UI-207) → P5 dev Electron 实机验收（证据 acceptance/ui-204/）。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-08-29",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH"
     }
   ],
   "lastUpdated": "2026-08-29",
-  "documentCount": 148
+  "documentCount": 149
 }
