@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 130,
+    "documentCount": 131,
     "lastUpdated": "2026-08-29",
-    "managedMarkdown": 130
+    "managedMarkdown": 131
   },
   "documents": [
     {
@@ -2304,8 +2304,27 @@
         "40bd0e5",
         "7fc08c5"
       ]
+    },
+    {
+      "id": "BLOCK-27-AI-REVIEW-REMOVAL",
+      "path": "docs/block-27-ai-review-removal-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-27-ai-review-removal",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-27",
+        "review",
+        "removal",
+        "G0"
+      ],
+      "notes": "2026-08-29 用户裁决（'这个功能是冗余的'）：AI 审阅（BLOCK-25/26）整体移除。理由：工作区改动主要由 agent 生成，同类模型自审边际价值低；人是审阅者，WTR 确定性跟踪器（diff/hunk 接受拒绝/提交）已覆盖本职。范围：删前端面板/hook/store/client/types 与抽屉接线、CM reviewFindings 扩展与 setReviewFindings、后端 agent-review 四文件 + 路由 + 三个测试 + picker IPC（git:recent-branches/commits）；保留 WTR 面板本体与 staged-diff 修复（c228beb）；UI-202/203 台账与证据作为历史留痕并标注移除决定。git 历史可完整恢复。",
+      "registeredAt": "2026-08-29",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-REGISTERED"
     }
   ],
   "lastUpdated": "2026-08-29",
-  "documentCount": 147
+  "documentCount": 148
 }

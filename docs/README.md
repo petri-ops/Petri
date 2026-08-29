@@ -43,6 +43,7 @@
 25. [`block-24-ui-ledger-backfill-plan.md`](./block-24-ui-ledger-backfill-plan.md) — 2026-08-28 已收口：补登 BLOCK-22 遗留 UI-191~194 台账（UI-191/192 verified；UI-193/194 实机取证后保持 in_progress——widget 未上业务路径 / pending-scroll 消费侧未挂载，证据 + 根因已登记）；`test:changed:list` 确认已被 `852f4b4` 修复；两处集成缺口修复留用户裁决；不外推 packaged / Provider / GA / P7。
 26. [`block-25-codex-parity-review-plan.md`](./block-25-codex-parity-review-plan.md) — 2026-08-29 已收口：Codex `/review` 同款 AI 代码审阅落地 WTR 抽屉（只读评审子代理 + 结构化 findings + 跳转 + 修复回传，UI-202 dev Electron verified）；顺带修复 WTR staged-only diff 空面板缺陷；不外推 packaged / Provider / GA / P7。
 27. [`block-26-review-ux-parity-plan.md`](./block-26-review-ux-parity-plan.md) — 2026-08-29 已收口：审阅 UX 复刻翻新 verified（UI-203）——verdict 汇总头 / 按文件分组 / diff 行内 gutter+卡片标注 / 活动流 / 四目标（uncommitted/base-branch/commit/custom）/ 渠道持久化 / detached 结果；不外推写侧自动化 / packaged / Provider / GA / P7。
+28. [`block-27-ai-review-removal-plan.md`](./block-27-ai-review-removal-plan.md) — 2026-08-29 用户裁决：AI 审阅功能冗余（工作区改动主要由 agent 生成，同类模型自审价值低），整体移除（前端面板/后端子代理/路由/测试/picker IPC）；WTR 确定性跟踪器（diff/hunk/commit）保留；UI-202/203 台账留痕；git 历史可恢复；不外推 packaged / Provider / GA / P7。
 4. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) — 当前永久 G0 可信基础层主线；LF12 原始核心资格保持 maintained，Result Studio 产品支持声明暂停，P7 deferred。
 5. [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) — 已完成的 G0 Baseline v1 资格认证、证据边界与永久维护契约。
 6. [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md) — SDC-0 / SDC-1-A / SDC-1 / SDC-2 已完成；SDC-3～SDC-7 deferred。
