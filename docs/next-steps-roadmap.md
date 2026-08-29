@@ -1,10 +1,10 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-29（BLOCK-28.1 已收口：主区审阅页主题串色修复 + Codex 级打磨，UI-208/209 verified。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-08-29（BLOCK-28.2 已收口：CodeReview 改回右侧停靠面板 + 字号升档 + hunk 控件卡片化，UI-210/211 verified。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- 无 active 工作包。`BLOCK-28.1-REVIEW-MODE-POLISH` 已于 2026-08-29 收口（用户反馈驱动）：主区审阅页浅色主题串色修复（全 token 迁移，明暗双主题自适配，UI-208 verified）+ Codex 级布局打磨（进度细条/图标文件树/diff 头统计/图形化空态/accent Commit 主按钮，UI-209 verified）；证据 `acceptance/ui-208/`。commits `cea4cbb` / `baea3e2`。
+- 无 active 工作包。`BLOCK-28.2-REVIEW-MODE-DOCK` 已于 2026-08-29 收口（用户反馈驱动）：CodeReview 改回右侧停靠面板（wt-dock 520px，TitleBar 按钮 Toggle，项目页保持可见；dock 下横向文件条 + diff 主体），审阅页字号升档对齐全局基线，hunk 控件卡片化；证据 `acceptance/ui-210/`。commit `0143e12`。
 - 留给用户裁决的后续候选（未启动）：UI-193 widget 业务路径与 UI-194 消费侧挂载。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 

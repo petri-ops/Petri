@@ -1,9 +1,9 @@
 # BLOCK-28.2-REVIEW-MODE-DOCK — 审阅右侧停靠形态 + 字号/控件卡片化 Plan
 
 - **Plan ID**: `BLOCK-28.2-REVIEW-MODE-DOCK`（用户反馈驱动，2026-08-29 裁决）
-- **状态**: `active`
+- **状态**: `completed`（2026-08-29 启动并收口；UI-210/211 verified，证据 `acceptance/ui-210/`）
 - **truthDomain**: `block-28-review-mode-dock`
-- **阶段**: P1 停靠形态（UI-210）→ P2 字号适配 + 控件卡片化（UI-211）→ P3 取证 + 收口
+- **阶段**: P1~P3 全部收口
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 ## 1. 用户反馈（2026-08-29，BLOCK-28.1 交付后实测）

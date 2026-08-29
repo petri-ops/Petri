@@ -2388,7 +2388,7 @@
       "id": "BLOCK-28.2-REVIEW-MODE-DOCK",
       "path": "docs/block-28-2-review-mode-dock-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-28-review-mode-dock",
       "entrypoint": "docs/README.md",
@@ -2397,13 +2397,16 @@
         "review-mode",
         "dock",
         "G0",
-        "active",
-        "phase=P1"
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-29 用户反馈启动：①字号与软件不适配（审阅页 10~12px 偏小）②hunk 控件卡片化 ③CodeReview 改回右侧停靠面板不占全屏。P1(UI-210)：恢复 workingTreeOpen Toggle + AppShell wt-dock（fixed 右 520px）内嵌 ReviewMode variant=dock（横向文件条 + diff + commitbox），/review mode 保留共享组件；P2(UI-211)：字号升档对齐全局 + hunk 控件 elevated 卡片化。0 新增 IPC / 0 新依赖 / AI 审阅 0 重新引入。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-08-29 用户反馈启动，同日收口 completed。P1(UI-210)：恢复 workingTreeOpen Toggle + AppShell wt-dock（fixed 右 520px border+阴影）内嵌 ReviewMode variant=dock（横向文件条 chips + diff 纵向主体 + summary 紧凑化），TitleBar 按钮改回开关（task-done 圆点保留），Esc 关面板；/review mode 保留共享组件。P2(UI-211)：字号升档对齐全局基线（按钮/列表 13px、空态标题 18px 等）+ 修复无效选择器 .wt-file-status-? + hunk 控件 elevated 卡片化（bg-elevated+border+shadow）。实机 verified（CDP 断言 + 截图 acceptance/ui-210/）：项目页保持挂载、dock 520px、7 chips、active chip、diff 渲染、hunk 卡片 rgb(255,255,255) elevated、Esc 关闭。门禁：tsc 0 / vitest 16/16 / docs:check 151 / ui:audit:check 绿。commits（P0 登记）+ 0143e12。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-08-29",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P1"
+      "phase": "COMPLETED",
+      "linkedCommits": [
+        "0143e12"
+      ]
     }
   ],
   "lastUpdated": "2026-08-29",
