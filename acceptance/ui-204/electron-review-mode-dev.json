@@ -1,0 +1,94 @@
+{
+  "capturedAt": "2026-08-29T10:05:19.096Z",
+  "round2CapturedAt": "2026-08-29T10:12:00.000Z",
+  "boundary": "dev Electron",
+  "url": "http://localhost:3000/review",
+  "fixture": "ui204-review-mode.tmp.txt (intent-to-add 31 lines; round 2 modified line 15 to create a modify-diff with unchanged context; deleted after capture, acceptance commit 706e0ae reset with git reset --mixed HEAD~1)",
+  "driver": "raw CDP over Node global WebSocket (no extra deps), CDP port 9222",
+  "rounds": {
+    "round1": "full chain on an add-only intent-to-add diff: entry via TitleBar button -> summary -> file tree -> diff -> hunk hover accept -> markers -> inline commit (Cmd+Enter) -> toast -> Esc exit",
+    "round2": "collapseUnchanged (expand context) on a modify-diff with 30 unchanged lines around the hunk"
+  },
+  "checks": {
+    "titleBarBtnVisible": true,
+    "entry": {
+      "pathname": "/review",
+      "container": true,
+      "ariaLabel": "code review mode"
+    },
+    "summary": {
+      "title": "Code Review",
+      "stats": "1 file(s)+31−00/1 reviewed",
+      "note": "1 file(s), +31 −0 colored stats, 0/1 reviewed progress badge"
+    },
+    "fileTree": {
+      "groupNames": ["."],
+      "rows": [
+        {
+          "title": "ui204-review-mode.tmp.txt",
+          "badge": "A",
+          "stats": "+31"
+        }
+      ],
+      "progress": "0/1 reviewed",
+      "note": "root directory group renders as '.', per-file +N −M colored stats, status badge A"
+    },
+    "diffArea": {
+      "headerPath": "ui204-review-mode.tmp.txt",
+      "hunkCount": "1 hunk(s)",
+      "cmRendered": true,
+      "changedLine": true,
+      "fixtureLinePresent": true,
+      "note": "sticky file header outside scroll container; CodeMirror inline diff with cm-changedLine highlighting"
+    },
+    "hunkControls": {
+      "acceptBtns": 1,
+      "rejectBtns": 1,
+      "afterAccept": {
+        "progress": "1/1 reviewed",
+        "commitMeta": "pending: 0accepted: 1rejected: 0Commit (1)",
+        "stateLabel": "accepted",
+        "rowReviewed": true,
+        "reviewedMark": true
+      },
+      "note": "git-hunk-aligned inline Accept/Reject buttons at hunk first line; after accept the file row dims with green check and progress flips to 1/1"
+    },
+    "scrollMarkers": {
+      "count": 1,
+      "clickJumpsViaScrollToLine": true
+    },
+    "commitBox": {
+      "present": true,
+      "inputAria": "Commit message",
+      "placeholder": "Review: accept 1 hunk(s), reject 0 hunk(s) — ⌘+Enter to commit",
+      "messageAfterInsert": "BLOCK-28 review mode acceptance (temporary, reset after evidence)",
+      "outcome": {
+        "toast": true,
+        "toastText": "Committed 706e0ae — 1 file(s)",
+        "shortHash": "706e0ae",
+        "noDialog": true
+      },
+      "note": "Cmd+Enter committed via git:commit-review; in-panel toast replaced the modal dialog; real commit verified in repo then reset (git reset --mixed HEAD~1)"
+    },
+    "escExit": {
+      "pathname": "/project/p_mt15b0aw_f0xa",
+      "note": "Esc returned to the previous page"
+    },
+    "collapseUnchangedRound2": {
+      "collapseWidgetsBefore": 1,
+      "collapseTexts": ["14 unchanged lines"],
+      "expandClicked": true,
+      "collapseWidgetsAfterExpand": 0,
+      "modifiedLineVisible": true,
+      "note": "round 1 add-only intent-to-add diff had no unchanged context so no collapse widget (correct); round 2 modify-diff collapsed 14 unchanged lines into a native widget and expanded on click"
+    }
+  },
+  "screenshots": [
+    "acceptance/ui-204/review-mode-layout.png",
+    "acceptance/ui-204/review-mode-commit-toast.png",
+    "acceptance/ui-204/review-mode-collapse-context.png"
+  ],
+  "passed": true,
+  "qualificationEligible": false,
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA."
+}

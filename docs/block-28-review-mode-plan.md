@@ -1,9 +1,9 @@
 # BLOCK-28-REVIEW-MODE — 主区一级审阅模式（方案 B）Plan
 
 - **Plan ID**: `BLOCK-28-REVIEW-MODE`
-- **状态**: `active`（2026-08-29 用户裁决启动）
+- **状态**: `completed`（2026-08-29 启动并收口；UI-204~207 dev Electron verified，证据 `acceptance/ui-204/`）
 - **truthDomain**: `block-28-review-mode`
-- **阶段**: P0 治理登记完成 → P1~P4 实施 → P5 实机验收 + 收口
+- **阶段**: P0~P5 全部收口
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 ## 1. 背景与目标

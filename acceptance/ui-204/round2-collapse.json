@@ -1,0 +1,17 @@
+{
+  "before": {
+    "headerPath": "ui204-review-mode.tmp.txt",
+    "hunkCount": "1 hunk(s)",
+    "collapseWidgets": 1,
+    "collapseTexts": [
+      "14 unchanged lines"
+    ],
+    "modifiedLineVisible": true
+  },
+  "expandClicked": true,
+  "after": {
+    "collapseWidgets": 0,
+    "modifiedLineVisible": true
+  },
+  "passed": true
+}

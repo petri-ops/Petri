@@ -2334,7 +2334,7 @@
       "id": "BLOCK-28-REVIEW-MODE",
       "path": "docs/block-28-review-mode-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-28-review-mode",
       "entrypoint": "docs/README.md",
@@ -2343,13 +2343,20 @@
         "review-mode",
         "main-area-mode",
         "G0",
-        "active",
-        "phase=P0-LAUNCH"
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-29 用户裁决启动（BLOCK-28 方案 B）：把代码审阅从侧边抽屉升级为主区一级审阅模式（对标 VS Code SCM）。路由 /review（App 级一级路由，审阅对象是应用工作区仓库非项目作用域）+ ReviewModePage（summary 条/文件树分组/大空间 diff/内嵌提交框）+ TitleBar 按钮改导航 + 旧抽屉退役。复用 useWorkingTreeReview / CodeMirrorDiffView / git:working-tree-* 全家桶（0 新增 IPC，diffForReview=git diff HEAD 修复 c228beb 必须保留）；@codemirror/merge collapseUnchanged 原生展开上下文；0 新 npm 依赖。严禁重新引入 AI 审阅（BLOCK-27 裁决）。阶段 P0 登记 → P1 骨架(UI-204) → P2 文件树(UI-205) → P3 diff 区(UI-206) → P4 内嵌提交(UI-207) → P5 dev Electron 实机验收（证据 acceptance/ui-204/）。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-08-29 用户裁决启动，同日收口 completed。落地：P1 /review App 级一级路由 + ReviewMode 主区布局（summary 条/文件树/大空间 diff/内嵌提交框）+ TitleBar 按钮改导航（task-done 圆点）+ 旧抽屉退役（删 WorkingTreeReview.tsx + workingTreeOpen 三件套）；P2 文件树目录分组/每文件 +N −M/已审置灰 ✓/n m reviewed 进度（reviewModeHelpers）；P3 CodeMirrorEditor additive props（extraExtensions 经独立 Compartment 热替换 + diffOptions.collapseUnchanged 原生展开上下文）+ hunkControls git-hunk 语义悬浮 Accept/Reject + 滚动标记条（scrollToLine 直达）；P4 内嵌提交框 ⌘+Enter + 面板内 toast 替代对话框。实机 verified（UI-204~207，dev Electron CDP 驱动）：TitleBar 进入/summary/分组树/diff/悬浮 Accept→置灰+1/1/标记条/⌘+Enter 真实 commit-review toast/Esc 返回全链 + 第二轮 14 unchanged lines 折叠展开；证据 acceptance/ui-204/（3 截图 + JSON）。intent-to-add fixture 验收后删除，验收提交 reset --mixed 回滚 0 残留。门禁：tsc 0 / 定向 vitest 16/16（新增 11 测试）/ docs:check 149 / ui:audit:check / docs:reconcile 0 / git diff --check 绿；TitleBar 8 failed 为 pre-existing（stash 复测证实）。不变量：0 新增 IPC（c228beb 修复保留）/ 0 新 npm 依赖 / 0 AI 审阅重新引入 / preload + electron.d.ts + desktopBridge 0 diff。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-08-29",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH"
+      "phase": "COMPLETED",
+      "linkedCommits": [
+        "80f9d62",
+        "79e54f9",
+        "c78da2e",
+        "713b47b",
+        "9a23d38"
+      ]
     }
   ],
   "lastUpdated": "2026-08-29",

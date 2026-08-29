@@ -1530,22 +1530,22 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - Esc 语义：行内编辑抽屉 → 提交对话框 → 退出审阅模式；键盘流 A/Y/R/↑↓ 保留。
 - 复用：`useWorkingTreeReview` 状态机 / `CodeMirrorDiffView` / `CodeReviewDrawer` / `git:working-tree-*` 全家桶（0 新增 IPC / 0 新依赖 / AI 审阅 0 重新引入）。
 
-**验证**：tsc --noEmit 0；定向 vitest 13/13 通过（ReviewMode.test.tsx 3 新增 + CodeMirrorDiffView.test.tsx 10）；TitleBar.test.tsx 8 failed 为 pre-existing（干净 HEAD `80f9d62` stash 复测同样 8 failed | 7 passed，属 mac 窗口控件标签旧债，非 BLOCK-28 引入）。实机验收（P5）后统一转 verified，证据落 `acceptance/ui-204/`。
+**验证**：tsc --noEmit 0；定向 vitest 13/13 通过（ReviewMode.test.tsx 3 新增 + CodeMirrorDiffView.test.tsx 10）；TitleBar.test.tsx 8 failed 为 pre-existing（干净 HEAD `80f9d62` stash 复测同样 8 failed | 7 passed，属 mac 窗口控件标签旧债，非 BLOCK-28 引入）。**2026-08-29 dev Electron 实机 verified（UI-204 全包统一取证）**：CDP 驱动——TitleBar 按钮点击进入 `/review`（pathname + .rvw-container + aria 断言）、Esc 返回上一页；证据 `acceptance/ui-204/electron-review-mode-dev.json` + 3 截图。
 
-**状态**: in_progress (实现落地，待 dev Electron 实机验收)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-205: BLOCK-28 P2 — 文件树（目录分组 / 每文件 +N −M / 已审标记） (2026-08-29 in_progress)
+## UI-205: BLOCK-28 P2 — 文件树（目录分组 / 每文件 +N −M / 已审标记） (2026-08-29 verified)
 
 **改动范围**（BLOCK-28 P2，基于 UI-204 骨架）：
 - 新增纯函数助手 `reviewModeHelpers.ts`：`computeFileDiffStats`（按 diff hunk 行统计每文件 +N −M）、`isFileReviewed`（确定性规则：binary / 0 hunk 自动已审；其余全部 hunk 有决策才算已审）、`groupFilesByDirectory`（按目录稳定分组，根目录置末显示 "."）。
 - 左栏升级为分组文件树：目录组头可折叠（caret 旋转 + aria-expanded）、文件行显示 basename + M/A/D 徽标 + 彩色 +N −M 统计 + accept/reject 决策徽标；全路径入 title。
 - 已审文件置灰（opacity）+ 绿色 ✓ 标记，统计让位给 ✓；summary 条新增审阅进度 `n/m reviewed` 徽标（n = 已审文件数，m = 状态文件总数）。
 
-**验证**：tsc --noEmit 0；定向 vitest 14/14（reviewModeHelpers.test.ts 6 新增 + ReviewMode.test.tsx 5，含「A 键 accept 后文件置灰 + 进度 1/1」交互用例）。
+**验证**：tsc --noEmit 0；定向 vitest 14/14（reviewModeHelpers.test.ts 6 新增 + ReviewMode.test.tsx 5，含「A 键 accept 后文件置灰 + 进度 1/1」交互用例）。**2026-08-29 dev Electron 实机 verified（UI-204 全包统一取证）**：summary 进度徽标 0/1→1/1、行徽标 A、+31 统计、根目录组 "." 均经 CDP DOM 断言；证据 `acceptance/ui-204/`。
 
-**状态**: in_progress (实现落地，待 dev Electron 实机验收)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-206: BLOCK-28 P3 — diff 区（hunk 悬浮控件 / 滚动标记条 / 展开上下文） (2026-08-29 in_progress)
+## UI-206: BLOCK-28 P3 — diff 区（hunk 悬浮控件 / 滚动标记条 / 展开上下文） (2026-08-29 verified)
 
 **改动范围**（BLOCK-28 P3，基于 UI-205）：
 - CodeMirrorEditor additive props（BLOCK-22 面 0 破坏）：`extraExtensions`（业务层 CM6 扩展经独立 extraCompartment 热替换）+ `diffOptions`（inline-diff 渲染选项）；`createUnifiedDiffExtension` 增加 `collapseUnchanged` 选项 → `@codemirror/merge` 原生折叠 hunk 间未变更上下文（margin 3 / minSize 12，自带「⇕ 展开」控件）。
@@ -1553,11 +1553,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - `CodeMirrorDiffView` 升级：新增 `hunks` / `hunkDecisions` / `onAcceptHunk` / `onRejectHunk` props；右侧滚动标记条（按 newStart/totalLines 比例定位，点击经 EditorApi.scrollToLine 直达 + pulse 高亮，标记颜色反映决策态）；sticky 文件头在滚动容器外天然吸顶。
 - 0 新增 IPC / 0 新依赖 / AI 审阅 0 重新引入。
 
-**验证**：tsc --noEmit 0；定向 vitest 62/62（CodeMirrorDiffView 新增「markers + hunk 控件 + Accept 回调」用例；CodeMirrorEditor 既有 32 例 0 回归；reviewModeHelpers + ReviewMode 全过）。
+**验证**：tsc --noEmit 0；定向 vitest 62/62（CodeMirrorDiffView 新增「markers + hunk 控件 + Accept 回调」用例；CodeMirrorEditor 既有 32 例 0 回归；reviewModeHelpers + ReviewMode 全过）。**2026-08-29 dev Electron 实机 verified（UI-204 全包统一取证）**：悬浮 Accept 点击 → stateLabel "accepted" + 行置灰 + 进度 1/1；标记条 1 个且点击直达；第二轮 modify-diff 中 "14 unchanged lines" 折叠控件出现并点击展开成功；证据 `acceptance/ui-204/`。
 
-**状态**: in_progress (实现落地，待 dev Electron 实机验收)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-207: BLOCK-28 P4 — 内嵌提交流（VS Code SCM 风格 commit box） (2026-08-29 in_progress)
+## UI-207: BLOCK-28 P4 — 内嵌提交流（VS Code SCM 风格 commit box） (2026-08-29 verified)
 
 **改动范围**（BLOCK-28 P4，基于 UI-206）：
 - 底部内嵌提交框替换独立 commit 对话框：message textarea（placeholder 随决策状态给出建议 message / 引导文案）+ ⌘+Enter 提交 + Commit (n) 按钮（hasDecisions && message 非空才可点）。
@@ -1566,6 +1566,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - Esc 语义更新：编辑抽屉 → 提交输入框失焦 → 退出审阅模式。
 - 复用 git:commit-review 通道 0 改动；0 新依赖。
 
-**验证**：tsc --noEmit 0；定向 vitest 16/16（新增「⌘+Enter 提交 → commitReview 契约参数 → toast 轻提示 → 无 dialog」全链用例）。
+**验证**：tsc --noEmit 0；定向 vitest 16/16（新增「⌘+Enter 提交 → commitReview 契约参数 → toast 轻提示 → 无 dialog」全链用例）。**2026-08-29 dev Electron 实机 verified（UI-204 全包统一取证）**：⌘+Enter 真实触发 git:commit-review 创建提交（toast 显示 short hash + 1 file(s)，role=dialog 不存在），验收后该提交已 `git reset --mixed HEAD~1` 回滚、fixture 已删除；证据 `acceptance/ui-204/electron-review-mode-dev.json` + 截图。
 
-**状态**: in_progress (实现落地，待 dev Electron 实机验收)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
