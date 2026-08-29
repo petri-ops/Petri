@@ -1556,3 +1556,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc --noEmit 0；定向 vitest 62/62（CodeMirrorDiffView 新增「markers + hunk 控件 + Accept 回调」用例；CodeMirrorEditor 既有 32 例 0 回归；reviewModeHelpers + ReviewMode 全过）。
 
 **状态**: in_progress (实现落地，待 dev Electron 实机验收)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-207: BLOCK-28 P4 — 内嵌提交流（VS Code SCM 风格 commit box） (2026-08-29 in_progress)
+
+**改动范围**（BLOCK-28 P4，基于 UI-206）：
+- 底部内嵌提交框替换独立 commit 对话框：message textarea（placeholder 随决策状态给出建议 message / 引导文案）+ ⌘+Enter 提交 + Commit (n) 按钮（hasDecisions && message 非空才可点）。
+- 提交成功用面板内轻提示（顶部 wt-commit-success toast，含 short hash + 文件数）替代独立对话框；失败错误内联展示在提交框 meta 行（role=alert）。
+- 决策计数（pending/accepted/rejected）+ truncated/loading 状态并入提交框 meta 行；summary 条 Commit Review 按钮改为聚焦提交输入框（自动预填建议 message）。
+- Esc 语义更新：编辑抽屉 → 提交输入框失焦 → 退出审阅模式。
+- 复用 git:commit-review 通道 0 改动；0 新依赖。
+
+**验证**：tsc --noEmit 0；定向 vitest 16/16（新增「⌘+Enter 提交 → commitReview 契约参数 → toast 轻提示 → 无 dialog」全链用例）。
+
+**状态**: in_progress (实现落地，待 dev Electron 实机验收)。G0 开发期常态 · 不外推 packaged / Provider / GA。

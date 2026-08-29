@@ -122,6 +122,51 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     expect(applyHunk).toHaveBeenCalledTimes(1);
   });
 
+  it('commits from the inline commit box via Cmd+Enter (P4, UI-207)', async () => {
+    const applyHunk = vi.fn(() => Promise.resolve({ ok: true, data: {} }));
+    const commitReview = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          commit: 'abc1234def',
+          files: ['src/a.py'],
+          message: 'msg',
+          rejectedFiles: [],
+          stats: { acceptedFiles: 1, rejectedFiles: 0, totalWorkingTree: 1 },
+        },
+      })
+    );
+    getBridgeMock.mockReturnValue(makeBridge({ applyHunk, commitReview }));
+
+    renderReview();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-review-progress').textContent).toContain('0/1 reviewed');
+    });
+
+    // A 键 accept 当前 hunk
+    fireEvent.keyDown(window, { key: 'a' });
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-review-progress').textContent).toContain('1/1 reviewed');
+    });
+
+    // 输入 message + ⌘+Enter
+    const input = screen.getByLabelText('Commit message') as HTMLTextAreaElement;
+    fireEvent.change(input, { target: { value: 'test commit message' } });
+    fireEvent.keyDown(input, { key: 'Enter', metaKey: true });
+
+    await waitFor(() => {
+      expect(commitReview).toHaveBeenCalledWith(
+        { decisions: { 'src/a.py#0': 'accept' }, message: 'test commit message' },
+      );
+    });
+    // 面板内轻提示替代独立对话框
+    await waitFor(() => {
+      expect(screen.getByRole('status').textContent).toContain('abc1234');
+    });
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
   it('shows the empty state when the working tree is clean', async () => {
     getBridgeMock.mockReturnValue(
       makeBridge({

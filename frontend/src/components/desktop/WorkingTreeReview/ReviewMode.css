@@ -275,3 +275,50 @@
   font-family: var(--biof3-mono, monospace);
   color: var(--biof3-fg-muted, #888);
 }
+
+/* P4 — 底部内嵌提交框（VS Code SCM 风格） */
+.rvw-commitbox {
+  flex-shrink: 0;
+  border-top: 1px solid var(--biof3-border, #404040);
+  background: var(--biof3-bg-elev, #2a2a2a);
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rvw-commitbox-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--biof3-bg, #1e1e1e);
+  color: inherit;
+  border: 1px solid var(--biof3-border, #404040);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.5;
+  resize: none;
+}
+
+.rvw-commitbox-input:focus {
+  outline: none;
+  border-color: rgba(60, 130, 220, 0.6);
+  box-shadow: 0 0 0 2px rgba(60, 130, 220, 0.15);
+}
+
+.rvw-commitbox-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 11px;
+  color: var(--biof3-fg-muted, #888);
+}
+
+.rvw-commitbox-spacer {
+  flex: 1;
+}
+
+.rvw-commitbox-error {
+  color: #f08080;
+}

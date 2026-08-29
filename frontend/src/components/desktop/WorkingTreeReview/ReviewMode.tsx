@@ -5,7 +5,7 @@
 // 复用 useWorkingTreeReview 状态机 + CodeMirrorDiffView + CodeReviewDrawer，
 // IPC 0 新增（git:working-tree-* 全家桶；diffForReview=git diff HEAD 修复保留）。
 // 布局：顶部 summary 条 / 左栏文件列表 / 右栏大空间 diff（sticky 文件头）/
-//       底部状态栏（P4 起底部换内嵌提交框）。
+//       底部内嵌提交框（VS Code SCM 风格，⌘+Enter，提交成功面板内轻提示）。
 // 键盘流与旧抽屉一致：A/Y accept · R reject · ↑↓ navigate · Esc 退出模式。
 // ============================================================
 
@@ -34,7 +34,6 @@ export function ReviewMode() {
   const review = useWorkingTreeReview({ isOpen: true });
 
   const [commitMsg, setCommitMsg] = useState('');
-  const [showCommitDialog, setShowCommitDialog] = useState(false);
   const [commitSuccess, setCommitSuccess] = useState<CommitSuccess | null>(null);
   const [commitError, setCommitError] = useState<string | null>(null);
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
@@ -47,22 +46,24 @@ export function ReviewMode() {
     else navigate('/');
   };
 
-  // Esc 语义：先关行内编辑抽屉 → 再关提交对话框 → 最后退出主区审阅模式
+  // Esc 语义：先关行内编辑抽屉 → 提交输入框内先失焦 → 最后退出主区审阅模式
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       if (isEditDrawerOpen) {
         setIsEditDrawerOpen(false);
-      } else if (showCommitDialog) {
-        setShowCommitDialog(false);
-        setCommitError(null);
-      } else {
-        exitReviewMode();
+        return;
       }
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT')) {
+        target.blur();
+        return;
+      }
+      exitReviewMode();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isEditDrawerOpen, showCommitDialog, navigate]);
+  }, [isEditDrawerOpen, navigate]);
 
   // 切换文件重置 hunk 焦点
   useEffect(() => { setFocusedHunk(0); }, [review.selectedFilePath]);
@@ -93,13 +94,6 @@ export function ReviewMode() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [review, focusedHunk]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // 自动 focus 提交 message textarea
-  useEffect(() => {
-    if (showCommitDialog && textareaRef.current) {
-      textareaRef.current.focus();
-    }
-  }, [showCommitDialog]);
 
   const selectedFile = review.diff?.files.find((f) => f.path === review.selectedFilePath) || null;
 
@@ -142,12 +136,14 @@ export function ReviewMode() {
     }
     setCommitError(null);
     setCommitSuccess(null);
-    setShowCommitDialog(true);
+    // P4 — 内嵌提交框：聚焦 message 输入而非弹对话框
+    textareaRef.current?.focus();
   };
 
   const handleCommitConfirm = async () => {
     if (!commitMsg.trim()) {
       setCommitError('Commit message is required.');
+      textareaRef.current?.focus();
       return;
     }
     setCommitError(null);
@@ -158,16 +154,10 @@ export function ReviewMode() {
         files: result.files,
         message: commitMsg.trim(),
       });
-      setShowCommitDialog(false);
       setCommitMsg('');
     } catch (e) {
       setCommitError(e instanceof Error ? e.message : String(e));
     }
-  };
-
-  const handleCommitCancel = () => {
-    setShowCommitDialog(false);
-    setCommitError(null);
   };
 
   return (
@@ -368,91 +358,57 @@ export function ReviewMode() {
         </main>
       </div>
 
-      {/* 底部状态栏（P4 起替换为内嵌提交框） */}
-      <div className="wt-statusbar">
-        <span>pending: {review.pendingCount}</span>
-        <span>accepted: {review.appliedCount}</span>
-        <span>rejected: {review.rejectedCount}</span>
-        {review.diff?.truncated && <span className="wt-warning">output truncated</span>}
-        {review.loading && <span>loading...</span>}
-      </div>
-
-      {/* Commit message dialog（P4 起替换为内嵌提交框；此间保留对话框流） */}
-      {showCommitDialog && (
-        <div className="wt-dialog-overlay" role="dialog" aria-modal="true" aria-label="Commit message">
-          <div className="wt-dialog">
-            <div className="wt-dialog-header">
-              <span className="wt-dialog-title">Commit Review</span>
-              <button
-                type="button"
-                className="wt-dialog-close"
-                onClick={handleCommitCancel}
-                aria-label="Close dialog"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="wt-dialog-body">
-              <div className="wt-dialog-summary">
-                <span className="wt-badge wt-badge-accept">{acceptedCount} accepted</span>
-                <span className="wt-badge wt-badge-reject">{rejectedCount} rejected</span>
-                <span className="wt-dialog-files">
-                  {acceptedCount > 0
-                    ? `Will stage ${acceptedCount} file(s) and commit.`
-                    : 'No files will be committed.'}
-                </span>
-              </div>
-
-              <label htmlFor="wt-commit-message" className="wt-dialog-label">
-                Commit message
-              </label>
-              <textarea
-                id="wt-commit-message"
-                ref={textareaRef}
-                className="wt-dialog-textarea"
-                value={commitMsg}
-                onChange={(e) => {
-                  setCommitMsg(e.target.value);
-                  if (commitError) setCommitError(null);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                    void handleCommitConfirm();
-                  }
-                  if (e.key === 'Escape') handleCommitCancel();
-                }}
-                placeholder="Describe what changed and why..."
-                rows={4}
-              />
-
-              {commitError && (
-                <div className="wt-dialog-error" role="alert">{commitError}</div>
-              )}
-
-              <div className="wt-dialog-hint">
-                {acceptedCount === 0
-                  ? 'No hunks accepted — nothing will be staged or committed.'
-                  : `Accepted hunks will be staged and committed. Press ⌘+Enter to confirm.`}
-              </div>
-            </div>
-
-            <div className="wt-dialog-footer">
-              <button type="button" className="wt-btn" onClick={handleCommitCancel}>
-                Cancel
-              </button>
-              <button
-                type="button"
-                className={`wt-btn wt-btn-commit${acceptedCount === 0 ? ' wt-btn-disabled' : ''}`}
-                onClick={() => void handleCommitConfirm()}
-                disabled={acceptedCount === 0 || review.loading}
-              >
-                {review.loading ? 'Committing...' : `Commit (${acceptedCount})`}
-              </button>
-            </div>
-          </div>
+      {/* P4 — 底部内嵌提交框（VS Code SCM 风格）：message + ⌘+Enter + 面板内轻提示 */}
+      <footer className="rvw-commitbox" data-testid="rvw-commitbox">
+        <textarea
+          ref={textareaRef}
+          className="rvw-commitbox-input"
+          value={commitMsg}
+          onChange={(e) => {
+            setCommitMsg(e.target.value);
+            if (commitError) setCommitError(null);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+              e.preventDefault();
+              void handleCommitConfirm();
+            }
+          }}
+          placeholder={
+            hasDecisions
+              ? `Review: accept ${acceptedCount} hunk(s), reject ${rejectedCount} hunk(s) — ⌘+Enter to commit`
+              : hasDecisions || review.status?.files.length
+                ? 'Review files first (Accept or Reject hunks), then commit here.'
+                : 'No working tree changes to commit.'
+          }
+          rows={2}
+          aria-label="Commit message"
+        />
+        <div className="rvw-commitbox-meta">
+          <span>pending: {review.pendingCount}</span>
+          <span>accepted: {acceptedCount}</span>
+          <span>rejected: {rejectedCount}</span>
+          {review.diff?.truncated && <span className="wt-warning">output truncated</span>}
+          {review.loading && <span>loading...</span>}
+          {commitError && (
+            <span className="rvw-commitbox-error" role="alert">{commitError}</span>
+          )}
+          <span className="rvw-commitbox-spacer" />
+          <button
+            type="button"
+            className={`wt-btn wt-btn-commit${!hasDecisions || !commitMsg.trim() ? ' wt-btn-disabled' : ''}`}
+            onClick={() => void handleCommitConfirm()}
+            disabled={!hasDecisions || !commitMsg.trim() || review.loading}
+            title={
+              !hasDecisions
+                ? 'Review files first (Accept or Reject hunks)'
+                : `Commit ${decisionCount} decision(s): ${acceptedCount} accept, ${rejectedCount} reject`
+            }
+          >
+            {review.loading ? 'Committing…' : `Commit (${acceptedCount})`}
+          </button>
         </div>
-      )}
+      </footer>
 
       {/* 行内编辑抽屉（复用，非旧侧边抽屉） */}
       <CodeReviewDrawer
