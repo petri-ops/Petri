@@ -1,0 +1,104 @@
+/* ============================================================
+ * ReviewMode.css — BLOCK-28 主区一级审阅模式（方案 B）
+ *
+ * 主区一级模式布局：填满 main 区域（titlebar 下方全部空间），
+ * 对标 VS Code SCM / PR 页面。复用 WorkingTreeReview.css 的 wt-* 基础件
+ * （按钮 / 徽标 / 状态栏 / 对话框），本文件只定义模式级布局 rvw-*。
+ * ============================================================ */
+
+.rvw-container {
+  height: calc(100vh - var(--biof3-titlebar-height, 40px));
+  display: flex;
+  flex-direction: column;
+  background: var(--biof3-surface-dim, #1e1e1e);
+  color: var(--biof3-fg, #e0e0e0);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* 顶部 summary 条 */
+.rvw-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--biof3-border, #404040);
+  background: var(--biof3-bg-elev, #2a2a2a);
+  flex-shrink: 0;
+}
+
+.rvw-summary-left,
+.rvw-summary-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.rvw-summary-left {
+  flex: 1;
+  overflow: hidden;
+}
+
+.rvw-summary-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--biof3-fg-muted, #888);
+  white-space: nowrap;
+}
+
+.rvw-stat-add {
+  font-family: var(--biof3-mono, monospace);
+  color: #5cc870;
+  font-weight: 600;
+}
+
+.rvw-stat-del {
+  font-family: var(--biof3-mono, monospace);
+  color: #d86070;
+  font-weight: 600;
+}
+
+.rvw-summary-actions {
+  flex-shrink: 0;
+}
+
+/* 主体：左栏文件树 + 右栏大空间 diff */
+.rvw-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.rvw-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--biof3-border, #404040);
+  overflow-y: auto;
+  background: var(--biof3-bg-list, #232323);
+}
+
+.rvw-diff-area {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.rvw-file {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* sticky 文件头：位于滚动容器（wt-cm-diff）之外，天然吸顶 */
+.rvw-file-header {
+  flex-shrink: 0;
+}

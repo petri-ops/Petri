@@ -55,17 +55,14 @@ export interface WorkspacePanels {
   rightOpen: boolean;
   bottomTerminalOpen: boolean;
   summaryOpen: boolean;
-  workingTreeOpen: boolean;
   setLeftOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setRightOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setBottomTerminalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setSummaryOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setWorkingTreeOpen: React.Dispatch<React.SetStateAction<boolean>>;
   toggleLeft: () => void;
   toggleRight: () => void;
   toggleBottomTerminal: () => void;
   toggleSummary: () => void;
-  toggleWorkingTree: () => void;
   titleBar: TitleBarState;
   setTitleBar: React.Dispatch<React.SetStateAction<TitleBarState>>;
   updateTitleBar: (patch: Partial<TitleBarState>) => void;
@@ -116,14 +113,12 @@ export function useWorkspacePanels(): WorkspacePanels {
   const [rightOpen, setRightOpen] = useState(true);
   const [bottomTerminalOpen, setBottomTerminalOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
-  const [workingTreeOpen, setWorkingTreeOpen] = useState(false);
   const [titleBar, setTitleBar] = useState<TitleBarState>(DEFAULT_TITLE_BAR);
 
   const toggleLeft = useCallback(() => setLeftOpen((v) => !v), []);
   const toggleRight = useCallback(() => setRightOpen((v) => !v), []);
   const toggleBottomTerminal = useCallback(() => setBottomTerminalOpen((v) => !v), []);
   const toggleSummary = useCallback(() => setSummaryOpen((v) => !v), []);
-  const toggleWorkingTree = useCallback(() => setWorkingTreeOpen((v) => !v), []);
   const updateTitleBar = useCallback((patch: Partial<TitleBarState>) => {
     setTitleBar((current) => {
       const next = { ...current, ...patch };
@@ -136,17 +131,14 @@ export function useWorkspacePanels(): WorkspacePanels {
     rightOpen,
     bottomTerminalOpen,
     summaryOpen,
-    workingTreeOpen,
     setLeftOpen,
     setRightOpen,
     setBottomTerminalOpen,
     setSummaryOpen,
-    setWorkingTreeOpen,
     toggleLeft,
     toggleRight,
     toggleBottomTerminal,
     toggleSummary,
-    toggleWorkingTree,
     titleBar,
     setTitleBar,
     updateTitleBar,

@@ -1517,3 +1517,19 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：WTR focused vitest 12/12（分组/计数/折叠/活动流/自定义门控/跳转/回传）；tsc --noEmit 0；`node --check` preload/IPC。**2026-08-29 dev Electron 实机 verified**：四目标选项齐全；分支 picker（main，`current -> main`）与提交 picker（100 条，首条 7fc08c5）懒加载；渠道选择持久化；DeepSeek 真实评审 → verdict 横幅（✕ patch is incorrect + P1×2 + 耗时 + 渠道）、按文件分组、点击 finding 后 diff 上出现 2 个 P1 gutter 徽标 + 2 张行内卡片（active 高亮）；关抽屉重开后 2 findings + verdict 完整恢复。证据 `acceptance/ui-203/electron-review-ux-parity-dev.json` + 截图。埋点 2/3 命中（parseJson 未被标记为诚实模型差异）。
 
 **状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-204: BLOCK-28 P1 — 主区一级审阅模式骨架（/review 路由 + 抽屉退役） (2026-08-29 in_progress)
+
+**目标**（BLOCK-28 方案 B）：把代码审阅从 TitleBar 侧边抽屉升级为主区一级审阅模式（对标 VS Code SCM 空间与动线）。
+
+**P1 改动范围**：
+- 新路由 `/review`（App 级一级路由，审阅对象是应用工作区仓库非项目作用域）+ `pages/review.tsx`（ReviewModePage）。
+- 新组件 `WorkingTreeReview/ReviewMode.tsx` + `ReviewMode.css`：主区布局（顶部 summary 条：标题 / 文件数 / 全局 +N −M 彩色统计 / Refresh / Edit file / Commit Review / Revert all；左栏文件列表；右栏大空间 diff + sticky 文件头；底部状态栏）。
+- 旧抽屉退役（plan §4 D1）：删除 `WorkingTreeReview.tsx` 组件与 App.tsx 挂载点；`useWorkspacePanels` 移除 `workingTreeOpen/setWorkingTreeOpen/toggleWorkingTree`（双形态双维护不划算，主区模式是功能超集）。
+- TitleBar 审阅按钮改导航：进入 `/review` / 再次点击返回上一页；agent task-done 自动弹层改为按钮圆点提示（`.reviewDot`，进入审阅模式自动清除）。
+- Esc 语义：行内编辑抽屉 → 提交对话框 → 退出审阅模式；键盘流 A/Y/R/↑↓ 保留。
+- 复用：`useWorkingTreeReview` 状态机 / `CodeMirrorDiffView` / `CodeReviewDrawer` / `git:working-tree-*` 全家桶（0 新增 IPC / 0 新依赖 / AI 审阅 0 重新引入）。
+
+**验证**：tsc --noEmit 0；定向 vitest 13/13 通过（ReviewMode.test.tsx 3 新增 + CodeMirrorDiffView.test.tsx 10）；TitleBar.test.tsx 8 failed 为 pre-existing（干净 HEAD `80f9d62` stash 复测同样 8 failed | 7 passed，属 mac 窗口控件标签旧债，非 BLOCK-28 引入）。实机验收（P5）后统一转 verified，证据落 `acceptance/ui-204/`。
+
+**状态**: in_progress (实现落地，待 dev Electron 实机验收)。G0 开发期常态 · 不外推 packaged / Provider / GA。

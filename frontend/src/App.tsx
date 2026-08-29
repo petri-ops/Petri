@@ -10,19 +10,19 @@ const BioF3OpenFileDevBridge = lazy(() =>
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
 import { TitleBar } from '@/components/desktop/TitleBar';
-import { WorkspacePanelsProvider, useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
+import { WorkspacePanelsProvider } from '@/components/desktop/WorkspacePanelsContext';
 import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import { CommandPalette, useCommandPalette } from '@/components/copilot/CommandPalette';
-import { WorkingTreeReview } from '@/components/desktop/WorkingTreeReview/WorkingTreeReview';
-import '@/components/desktop/WorkingTreeReview/WorkingTreeReview.css';
 import HomePage from '@/pages/home';
 // NOTE: Legacy pages (tools, admin, docs, figcode, single-cell, spatial) have been removed
 // as the desktop application now uses the Agent-based workflow through ProjectWorkspace.
 import { ProjectWorkspace } from '@/pages/project-workspace';
 import { ResultStudioPage } from '@/pages/result-studio/ResultStudioPage';
 import SkillsPage from '@/pages/skills';
+// BLOCK-28 — 主区一级审阅模式（方案 B），取代旧侧边抽屉 WorkingTreeReview
+import { ReviewModePage } from '@/pages/review';
 import '@/components/desktop/desktop.css';
 // 断点6：注入平台 API 给 @biof3/shared 渲染层组件（如 ActResultCard）
 import { configureApi } from '../../core/packages/shared-copilot/api-inject';
@@ -52,7 +52,6 @@ function DesktopOnboardingMount(): React.ReactElement | null {
 
 /** Lives inside WorkspacePanelsProvider — can access panel state. */
 function AppShell(): React.ReactElement {
-  const panels = useWorkspacePanelsContext();
   const { isOpen, open, close } = useCommandPalette();
 
   return (
@@ -75,6 +74,8 @@ function AppShell(): React.ReactElement {
             <Route path="/" element={<HomePage />} />
             {/* Skills management page */}
             <Route path="/skills" element={<SkillsPage />} />
+            {/* BLOCK-28 — main-area code review mode (VS Code SCM style) */}
+            <Route path="/review" element={<ReviewModePage />} />
             {/* Result Studio — standalone results view with branch tabs in TitleBar */}
             {/* MUST come before the wildcard /* route, otherwise it never matches */}
             <Route path="/project/:projectId/results" element={<ResultStudioPage />} />
@@ -91,10 +92,6 @@ function AppShell(): React.ReactElement {
           onClose={close}
           commands={[]}
           recentConversations={[]}
-        />
-        <WorkingTreeReview
-          isOpen={panels.workingTreeOpen}
-          onClose={panels.toggleWorkingTree}
         />
         {/* BLOCK-22 P4.6: DEV ONLY — do NOT use in production */}
         <Suspense fallback={null}>

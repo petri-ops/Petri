@@ -1,22 +1,21 @@
 // ============================================================
-// WorkingTreeReview — BLOCK-20 thin-slice 常驻右侧审阅面板
+// ReviewMode — BLOCK-28 主区一级审阅模式（方案 B）
 //
-// 顶部工具栏：刷新 / Commit Review / Revert all
-// 中部 file list（左侧） + 选中文件的 hunk 视图（右侧）
-// 底部状态栏：pending / accepted / rejected 计数
-// Commit Review 点击后弹出 commit message dialog。
-// 由 useWorkspacePanels.workingTreeOpen 控制显隐（见 TitleBar 按钮）。
+// 取代 BLOCK-20 侧边抽屉形态（WorkingTreeReview.tsx 已删除）。
+// 复用 useWorkingTreeReview 状态机 + CodeMirrorDiffView + CodeReviewDrawer，
+// IPC 0 新增（git:working-tree-* 全家桶；diffForReview=git diff HEAD 修复保留）。
+// 布局：顶部 summary 条 / 左栏文件列表 / 右栏大空间 diff（sticky 文件头）/
+//       底部状态栏（P4 起底部换内嵌提交框）。
+// 键盘流与旧抽屉一致：A/Y accept · R reject · ↑↓ navigate · Esc 退出模式。
 // ============================================================
 
 import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useWorkingTreeReview } from './useWorkingTreeReview';
 import { CodeMirrorDiffView } from './CodeMirrorDiffView';
 import { CodeReviewDrawer } from './CodeReviewDrawer';
-
-export interface WorkingTreeReviewProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+import './WorkingTreeReview.css';
+import './ReviewMode.css';
 
 interface CommitSuccess {
   commit: string | null;
@@ -24,54 +23,45 @@ interface CommitSuccess {
   message: string;
 }
 
-export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
-  const review = useWorkingTreeReview({ isOpen, onClose });
+export function ReviewMode() {
+  const navigate = useNavigate();
+  const review = useWorkingTreeReview({ isOpen: true });
 
   const [commitMsg, setCommitMsg] = useState('');
   const [showCommitDialog, setShowCommitDialog] = useState(false);
   const [commitSuccess, setCommitSuccess] = useState<CommitSuccess | null>(null);
   const [commitError, setCommitError] = useState<string | null>(null);
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
+  const [focusedHunk, setFocusedHunk] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const exitReviewMode = () => {
+    if (window.history.length > 1) navigate(-1);
+    else navigate('/');
+  };
+
+  // Esc 语义：先关行内编辑抽屉 → 再关提交对话框 → 最后退出主区审阅模式
   useEffect(() => {
-    if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (isEditDrawerOpen) {
-          setIsEditDrawerOpen(false);
-        } else if (showCommitDialog) {
-          setShowCommitDialog(false);
-          setCommitError(null);
-        } else {
-          onClose();
-        }
+      if (e.key !== 'Escape') return;
+      if (isEditDrawerOpen) {
+        setIsEditDrawerOpen(false);
+      } else if (showCommitDialog) {
+        setShowCommitDialog(false);
+        setCommitError(null);
+      } else {
+        exitReviewMode();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen, showCommitDialog, isEditDrawerOpen, onClose]);
+  }, [isEditDrawerOpen, showCommitDialog, navigate]);
 
-  useEffect(() => {
-    if (isOpen) void review.refresh();
-  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // 自动 focus textarea
-  useEffect(() => {
-    if (showCommitDialog && textareaRef.current) {
-      textareaRef.current.focus();
-    }
-  }, [showCommitDialog]);
-
-  // BLOCK-20 keyboard navigation state
-  const [focusedHunk, setFocusedHunk] = useState(0);
-
-  // Reset focus when switching files
+  // 切换文件重置 hunk 焦点
   useEffect(() => { setFocusedHunk(0); }, [review.selectedFilePath]);
 
-  // Keyboard shortcuts: A/Y accept, R reject, ↑↓ navigate hunks
+  // 键盘流：A/Y accept · R reject · ↑↓(j/k) navigate（与旧抽屉一致）
   useEffect(() => {
-    if (!isOpen) return;
     const file = review.diff?.files.find((f) => f.path === review.selectedFilePath) || null;
     if (!file) return;
     const onKey = (e: KeyboardEvent) => {
@@ -95,9 +85,14 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [review, focusedHunk, review.decisions, review.selectedFilePath, isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [review, focusedHunk]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!isOpen) return null;
+  // 自动 focus 提交 message textarea
+  useEffect(() => {
+    if (showCommitDialog && textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, [showCommitDialog]);
 
   const selectedFile = review.diff?.files.find((f) => f.path === review.selectedFilePath) || null;
 
@@ -110,14 +105,12 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
   };
 
   const hasDecisions = Object.keys(review.decisions).length > 0;
-
   const decisionCount = Object.keys(review.decisions).length;
   const acceptedCount = review.appliedCount;
   const rejectedCount = review.rejectedCount;
 
   const handleCommitReviewClick = () => {
     if (!hasDecisions) return;
-    // 预填默认 message
     if (!commitMsg) {
       setCommitMsg(`Review: accept ${acceptedCount} hunk(s), reject ${rejectedCount} hunk(s)`);
     }
@@ -152,7 +145,7 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
   };
 
   return (
-    <div className="wt-container" role="region" aria-label="code review panel">
+    <div className="rvw-container" role="region" aria-label="code review mode">
       {/* Commit success toast */}
       {commitSuccess && (
         <div className="wt-commit-success" role="status">
@@ -175,16 +168,27 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
         </div>
       )}
 
-      <div className="wt-toolbar">
-        <div className="wt-toolbar-left">
+      {/* 顶部 summary 条 */}
+      <header className="rvw-summary">
+        <div className="rvw-summary-left">
           <span className="wt-title">Code Review</span>
+          <span className="rvw-summary-stats" data-testid="rvw-summary-stats">
+            <span>{review.status?.totalFiles ?? 0} file(s)</span>
+            {review.diff && (
+              <span className="rvw-stat-add">+{review.diff.summary.added}</span>
+            )}
+            {review.diff && (
+              <span className="rvw-stat-del">−{review.diff.summary.removed}</span>
+            )}
+          </span>
           {review.taskId && <span className="wt-task-id">task: {review.taskId}</span>}
         </div>
-        <div className="wt-toolbar-right">
+        <div className="rvw-summary-actions">
           <span className="wt-shortcut-hint">
             <kbd>A</kbd>/<kbd>Y</kbd> accept &nbsp;
             <kbd>R</kbd> reject &nbsp;
-            <kbd>↑↓</kbd> navigate
+            <kbd>↑↓</kbd> navigate &nbsp;
+            <kbd>Esc</kbd> exit
           </span>
           <button
             type="button"
@@ -231,18 +235,19 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
             Revert all
           </button>
         </div>
-      </div>
+      </header>
 
       {review.error && (
         <div className="wt-error" role="alert">{review.error}</div>
       )}
 
-      <div className="wt-body">
-        <aside className="wt-file-list">
+      <div className="rvw-body">
+        {/* 左栏文件列表（P2 升级：目录分组 / 每文件 +N −M / 已审标记） */}
+        <aside className="rvw-sidebar" data-testid="rvw-file-list">
           <div className="wt-file-list-title">
             Files ({review.status?.totalFiles ?? 0})
           </div>
-          {review.status?.files.length === 0 && (
+          {review.status && review.status.files.length === 0 && (
             <div className="wt-empty">No working tree changes.</div>
           )}
           {review.status?.files.map((f) => {
@@ -271,13 +276,18 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
           })}
         </aside>
 
-        <main className="wt-main">
+        {/* 右栏大空间 diff（sticky 文件头在滚动容器外，天然吸顶） */}
+        <main className="rvw-diff-area" data-testid="rvw-diff-area">
           {!selectedFile && (
-            <div className="wt-empty">Select a file on the left to view hunks.</div>
+            <div className="wt-empty">
+              {review.loading
+                ? 'Loading working tree diff…'
+                : 'Select a file on the left to review its diff.'}
+            </div>
           )}
           {selectedFile && (
-            <div className="wt-file">
-              <div className="wt-file-header">
+            <div className="rvw-file">
+              <div className="wt-file-header rvw-file-header">
                 <span className="wt-file-path">{selectedFile.path}</span>
                 {selectedFile.oldPath && selectedFile.oldPath !== selectedFile.path && (
                   <span className="wt-file-old-path">← {selectedFile.oldPath}</span>
@@ -290,6 +300,7 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
         </main>
       </div>
 
+      {/* 底部状态栏（P4 起替换为内嵌提交框） */}
       <div className="wt-statusbar">
         <span>pending: {review.pendingCount}</span>
         <span>accepted: {review.appliedCount}</span>
@@ -298,7 +309,7 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
         {review.loading && <span>loading...</span>}
       </div>
 
-      {/* Commit message dialog (overlay) */}
+      {/* Commit message dialog（P4 起替换为内嵌提交框；此间保留对话框流） */}
       {showCommitDialog && (
         <div className="wt-dialog-overlay" role="dialog" aria-modal="true" aria-label="Commit message">
           <div className="wt-dialog">
@@ -375,7 +386,7 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
         </div>
       )}
 
-      {/* BLOCK-20 PHASE 3 — inline-edit drawer */}
+      {/* 行内编辑抽屉（复用，非旧侧边抽屉） */}
       <CodeReviewDrawer
         isOpen={isEditDrawerOpen}
         onClose={() => {
