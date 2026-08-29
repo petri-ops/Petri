@@ -4,7 +4,9 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-29（BLOCK-28.1-REVIEW-MODE-POLISH 已收口：主区审阅页主题串色修复（全 token 迁移，明暗双主题自适配）+ Codex 级布局打磨，UI-208/209 verified（证据 acceptance/ui-208/）。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+最后更新：2026-08-29（BLOCK-28.2-REVIEW-MODE-DOCK 启动：用户反馈 ①字号与软件不适配 ②hunk 控件卡片化 ③CodeReview 改回右侧停靠面板不占全屏，plan docs/block-28-2-review-mode-dock-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+| 2026-08-29 | **BLOCK-28.2-REVIEW-MODE-DOCK 启动登记（P0）**：用户实测 BLOCK-28.1 后反馈三条：①审阅页文字大小与软件不适配（10~12px 偏小于全局 13~15.5px 基线）②hunk 的 Accept/Reject 控件应卡片化 ③CodeReview 在右侧边栏区域显示即可、不需要整个全屏。方案：P1(UI-210) 恢复 workingTreeOpen Toggle + AppShell wt-dock（fixed 右侧 520px）内嵌 ReviewMode variant=dock（横向文件条 + diff + commitbox），/review mode 保留共享组件；P2(UI-211) 字号升档对齐全局 + hunk 控件 elevated 卡片化；P3 CDP 取证 acceptance/ui-210/。plan：docs/block-28-2-review-mode-dock-plan.md。| BLOCK-28.2-REVIEW-MODE-DOCK / P0-LAUNCH |
 
 | 2026-08-29 | **BLOCK-28.1-REVIEW-MODE-POLISH 收口（2 commits）**：`cea4cbb` P0 登记 / `baea3e2` P1+P2 落地。**P1（UI-208）主题串色修复**：WorkingTreeReview.css + ReviewMode.css 全量重写为真实语义 token（--biof3-bg-canvas/surface/subtle/elevated、--biof3-text*、--biof3-border*、--biof3-status-*、--biof3-font-mono），不存在变量名 grep 清零；wt-* 裁剪至在用类；Commit 升 accent 主按钮。**P2（UI-209）打磨**：summary 进度细条 / 文件树 chevron+file 图标+缩进参考线+check 已审标记 / diff 头状态徽标+统计 / 图形化空态（复用既有 Icon 集，0 新增）。**实机 verified（CDP 计算样式断言 + 截图 acceptance/ui-208/）**：浅色 container rgb(248,250,252)+文字 rgb(15,23,42)（修复前文字 rgb(224,224,224) 串色）；暗色 rgb(11,18,32)+rgb(230,237,243)；折叠控件/标记条/hunk 控件回归正常。**门禁**：tsc 0 / vitest 16/16 / docs:check 150 / ui:audit:check 绿。**当前 active**：NONE。**G0 开发期常态 · 不外推 packaged/Provider/GA.** | BLOCK-28.1-REVIEW-MODE-POLISH / COMPLETED |
 
