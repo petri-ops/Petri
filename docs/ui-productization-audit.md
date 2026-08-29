@@ -1617,3 +1617,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；定向 vitest 16/16。**2026-08-29 dev Electron 实机 verified**：CDP 断言 hunk 卡片 elevated 背景 `rgb(255,255,255)`；浅/暗双主题截图确认字号观感与全局一致；证据 `acceptance/ui-210/`。
 
 **状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-212: BLOCK-28.3 — 审阅面板中文化 + 按钮卡片化 + chrome 字号对齐 12px (2026-08-29 verified)
+
+**用户反馈**：①「code review 是审阅」②按钮应对齐首页快捷入口的卡片风格 ③审阅界面文字明显比其它文字大（BLOCK-28.2 提到 13px 超出软件 chrome 主流 12px）。
+
+**改动范围**：
+- 中文化：标题/空态「审阅」、按钮「编辑文件/刷新/提交审阅/全部还原」、快捷键提示（接受/拒绝/切换/退出）、提交框 placeholder 与 aria（提交信息）、meta（待定/接受/拒绝）、toast「已提交」、文件列表「文件 (n)」「暂无工作区改动。」、hunk 控件「接受/拒绝/已接受/已拒绝」、标记条 title、diff 头「n 个 hunk」、加载/二进制文案；TitleBar tooltip「打开/收起审阅」。
+- 字号对齐：chrome 全部回落 `--biof3-font-size-caption`（12px，与其它桌面面板 0.72~0.76rem 主流一致）；summary 标题 body-sm（13px）；chips 12px。
+- 按钮卡片化：`.wt-btn` 白底（bg-surface）+ 描边 + 8px 圆角 + 微阴影，hover 加深——对齐首页快捷入口卡片语言；Commit 保持 accent 实色主按钮。
+
+**验证**：tsc 0；定向 vitest 16/16（断言同步中文化）。**2026-08-29 dev Electron 实机 verified**：CDP 计算样式断言——标题「审阅」13px、按钮 12px/8px 圆角/卡片阴影、chips 12px、中文 placeholder 与 meta、进度「n/m 已审」；截图 `acceptance/ui-212/dock-zh.png`。
+
+**状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

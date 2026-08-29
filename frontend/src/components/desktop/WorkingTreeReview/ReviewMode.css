@@ -65,7 +65,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--biof3-font-size-caption);
   color: var(--biof3-text-secondary);
   white-space: nowrap;
 }
@@ -171,7 +171,7 @@
   border-radius: 999px;
   background: var(--biof3-bg-surface);
   color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--biof3-font-size-caption);
   cursor: pointer;
   transition: background 120ms ease, border-color 120ms ease;
 }
@@ -440,7 +440,7 @@
   border-radius: 6px;
   padding: 8px 10px;
   font-family: inherit;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--biof3-font-size-caption);
   line-height: 1.5;
   resize: none;
 }

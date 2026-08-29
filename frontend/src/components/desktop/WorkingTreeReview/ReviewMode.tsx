@@ -178,17 +178,17 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   };
 
   return (
-    <div className={`rvw-container${isDock ? ' rvw-container--dock' : ''}`} role="region" aria-label="code review mode">
+    <div className={`rvw-container${isDock ? ' rvw-container--dock' : ''}`} role="region" aria-label="审阅面板">
       {/* Commit success toast */}
       {commitSuccess && (
         <div className="wt-commit-success" role="status">
           <span>
-            <strong>Committed</strong>
+            <strong>已提交</strong>
             {commitSuccess.commit && (
               <span className="wt-commit-hash"> {commitSuccess.commit.slice(0, 7)}</span>
             )}
             {' — '}
-            {commitSuccess.files.length} file(s)
+            {commitSuccess.files.length} 个文件
           </span>
           <button
             type="button"
@@ -204,9 +204,9 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
       {/* 顶部 summary 条 + 审阅进度细条 */}
       <header className="rvw-summary">
         <div className="rvw-summary-left">
-          <span className="wt-title">Code Review</span>
+          <span className="wt-title">审阅</span>
           <span className="rvw-summary-stats" data-testid="rvw-summary-stats">
-            <span>{review.status?.totalFiles ?? 0} file(s)</span>
+              <span>{review.status?.totalFiles ?? 0} 个文件</span>
             {review.diff && (
               <span className="rvw-stat-add">+{review.diff.summary.added}</span>
             )}
@@ -214,17 +214,17 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
               <span className="rvw-stat-del">−{review.diff.summary.removed}</span>
             )}
             <span className="rvw-review-progress" data-testid="rvw-review-progress">
-              {reviewedCount}/{totalFiles} reviewed
+              {reviewedCount}/{totalFiles} 已审
             </span>
           </span>
           {review.taskId && <span className="wt-task-id">task: {review.taskId}</span>}
         </div>
         <div className="rvw-summary-actions">
           <span className="wt-shortcut-hint">
-            <kbd>A</kbd>/<kbd>Y</kbd> accept &nbsp;
-            <kbd>R</kbd> reject &nbsp;
-            <kbd>↑↓</kbd> navigate &nbsp;
-            <kbd>Esc</kbd> exit
+            <kbd>A</kbd>/<kbd>Y</kbd> 接受 &nbsp;
+            <kbd>R</kbd> 拒绝 &nbsp;
+            <kbd>↑↓</kbd> 切换 &nbsp;
+            <kbd>Esc</kbd> 退出
           </span>
           <button
             type="button"
@@ -233,21 +233,21 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
             disabled={!selectedFile || selectedFile.binary}
             title={
               selectedFile?.binary
-                ? 'Binary file — cannot edit inline'
+                ? '二进制文件 — 无法行内编辑'
                 : selectedFile
-                  ? `Open ${selectedFile.path} in the inline editor`
-                  : 'Select a file first'
+                  ? `在行内编辑器中打开 ${selectedFile.path}`
+                  : '请先选择文件'
             }
           >
-            Edit file
+            编辑文件
           </button>
           <button
             type="button"
             className="wt-btn"
             onClick={() => void review.refresh()}
-            title="Refresh working tree diff"
+            title="刷新工作区差异"
           >
-            Refresh
+            刷新
           </button>
           <button
             type="button"
@@ -256,11 +256,11 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
             disabled={!hasDecisions}
             title={
               hasDecisions
-                ? `Commit ${decisionCount} decision(s): ${acceptedCount} accept, ${rejectedCount} reject`
-                : 'Review files first (Accept or Reject hunks)'
+                ? `提交 ${decisionCount} 个决策：${acceptedCount} 接受，${rejectedCount} 拒绝`
+                : '请先审阅（接受或拒绝 hunk）'
             }
           >
-            Commit Review{hasDecisions ? ` (${decisionCount})` : ''}
+            提交审阅{hasDecisions ? ` (${decisionCount})` : ''}
           </button>
           <button
             type="button"
@@ -268,7 +268,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
             onClick={() => void review.revertAll()}
             disabled={!review.status || review.status.files.length === 0}
           >
-            Revert all
+            全部还原
           </button>
         </div>
       </header>
@@ -288,9 +288,9 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
       <div className={`rvw-body${isDock ? ' rvw-body--dock' : ''}`}>
         {/* 左栏文件树（mode：目录分组折叠树 / dock：横向文件条） */}
         {isDock ? (
-          <div className="rvw-filestrip" data-testid="rvw-file-list" role="tablist" aria-label="changed files">
+          <div className="rvw-filestrip" data-testid="rvw-file-list" role="tablist" aria-label="改动文件">
             {review.status && review.status.files.length === 0 && (
-              <div className="wt-empty">No working tree changes.</div>
+              <div className="wt-empty">暂无工作区改动。</div>
             )}
             {statusFiles.map((f) => {
               const diffFile = diffByPath.get(f.path);
@@ -327,10 +327,10 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
         ) : (
         <aside className="rvw-sidebar" data-testid="rvw-file-list">
           <div className="wt-file-list-title">
-            Files ({review.status?.totalFiles ?? 0})
+            文件 ({review.status?.totalFiles ?? 0})
           </div>
           {review.status && review.status.files.length === 0 && (
-            <div className="wt-empty">No working tree changes.</div>
+            <div className="wt-empty">暂无工作区改动。</div>
           )}
           {fileGroups.map((group) => {
             const collapsed = !!collapsedDirs[group.dir];
@@ -397,10 +397,10 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
           {!selectedFile && !review.loading && !review.error && (
             <div className="rvw-empty-state">
               <span className="rvw-empty-icon"><Icon name="git-branch" size={22} /></span>
-              <span className="rvw-empty-title">Code Review</span>
+              <span className="rvw-empty-title">审阅</span>
               <span className="rvw-empty-hint">
-                Review the working tree changes here: accept or reject hunks, then
-                commit. Press A/Y to accept, R to reject, ↑↓ to navigate hunks.
+                在这里审阅工作区改动：接受或拒绝 hunk，然后提交。
+                A/Y 接受 · R 拒绝 · ↑↓ 切换 hunk。
               </span>
             </div>
           )}
@@ -418,7 +418,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                   <span className="rvw-stat-add">+{computeFileDiffStats(selectedFile).added}</span>
                   <span className="rvw-stat-del">−{computeFileDiffStats(selectedFile).removed}</span>
                 </span>
-                <span className="wt-file-hunk-count">{selectedFile.hunks.length} hunk(s)</span>
+                <span className="wt-file-hunk-count">{selectedFile.hunks.length} 个 hunk</span>
               </div>
               <CodeMirrorDiffView
                 filePath={selectedFile.path}
@@ -453,20 +453,20 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
           }}
           placeholder={
             hasDecisions
-              ? `Review: accept ${acceptedCount} hunk(s), reject ${rejectedCount} hunk(s) — ⌘+Enter to commit`
+              ? `审阅：接受 ${acceptedCount} 个 hunk，拒绝 ${rejectedCount} 个 — ⌘+Enter 提交`
               : hasDecisions || review.status?.files.length
-                ? 'Review files first (Accept or Reject hunks), then commit here.'
-                : 'No working tree changes to commit.'
+                ? '请先审阅（接受或拒绝 hunk），然后在此提交。'
+                : '当前没有可提交的工作区改动。'
           }
           rows={2}
-          aria-label="Commit message"
+          aria-label="提交信息"
         />
         <div className="rvw-commitbox-meta">
-          <span>pending: {review.pendingCount}</span>
-          <span>accepted: {acceptedCount}</span>
-          <span>rejected: {rejectedCount}</span>
-          {review.diff?.truncated && <span className="wt-warning">output truncated</span>}
-          {review.loading && <span>loading...</span>}
+          <span>待定: {review.pendingCount}</span>
+          <span>接受: {acceptedCount}</span>
+          <span>拒绝: {rejectedCount}</span>
+          {review.diff?.truncated && <span className="wt-warning">输出已截断</span>}
+          {review.loading && <span>加载中…</span>}
           {commitError && (
             <span className="rvw-commitbox-error" role="alert">{commitError}</span>
           )}
@@ -478,11 +478,11 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
             disabled={!hasDecisions || !commitMsg.trim() || review.loading}
             title={
               !hasDecisions
-                ? 'Review files first (Accept or Reject hunks)'
-                : `Commit ${decisionCount} decision(s): ${acceptedCount} accept, ${rejectedCount} reject`
+                ? '请先审阅（接受或拒绝 hunk）'
+                : `提交 ${decisionCount} 个决策：${acceptedCount} 接受，${rejectedCount} 拒绝`
             }
           >
-            {review.loading ? 'Committing…' : `Commit (${acceptedCount})`}
+            {review.loading ? '提交中…' : `提交 (${acceptedCount})`}
           </button>
         </div>
       </footer>

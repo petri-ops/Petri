@@ -83,15 +83,15 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
 
     renderReview();
 
-    expect(screen.getByRole('region', { name: 'code review mode' })).not.toBeNull();
-    expect(screen.getByText('Code Review')).not.toBeNull();
+    expect(screen.getByRole('region', { name: '审阅面板' })).not.toBeNull();
+    expect(screen.getByText('审阅')).not.toBeNull();
 
     await waitFor(() => {
-      expect(screen.getByTestId('rvw-summary-stats').textContent).toContain('1 file(s)');
+      expect(screen.getByTestId('rvw-summary-stats').textContent).toContain('1 个文件');
     });
     expect(screen.getByTestId('rvw-summary-stats').textContent).toContain('+1');
     expect(screen.getByTestId('rvw-summary-stats').textContent).toContain('−0');
-    expect(screen.getByTestId('rvw-review-progress').textContent).toContain('0/1 reviewed');
+    expect(screen.getByTestId('rvw-review-progress').textContent).toContain('0/1 已审');
 
     const list = screen.getByTestId('rvw-file-list');
     // 目录分组：组头 src + 文件行 a.py（basename）+ 每文件 +N −M
@@ -108,14 +108,14 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
 
     // 等首个文件自动选中
     await waitFor(() => {
-      expect(screen.getByTestId('rvw-review-progress').textContent).toContain('0/1 reviewed');
+      expect(screen.getByTestId('rvw-review-progress').textContent).toContain('0/1 已审');
     });
 
     // A 键 accept 当前 hunk（键盘流与旧抽屉一致）
     fireEvent.keyDown(window, { key: 'a' });
 
     await waitFor(() => {
-      expect(screen.getByTestId('rvw-review-progress').textContent).toContain('1/1 reviewed');
+      expect(screen.getByTestId('rvw-review-progress').textContent).toContain('1/1 已审');
     });
     expect(container.querySelector('.rvw-file-reviewed')).not.toBeNull();
     expect(container.querySelector('.rvw-reviewed-mark')).not.toBeNull();
@@ -141,17 +141,17 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     renderReview();
 
     await waitFor(() => {
-      expect(screen.getByTestId('rvw-review-progress').textContent).toContain('0/1 reviewed');
+      expect(screen.getByTestId('rvw-review-progress').textContent).toContain('0/1 已审');
     });
 
     // A 键 accept 当前 hunk
     fireEvent.keyDown(window, { key: 'a' });
     await waitFor(() => {
-      expect(screen.getByTestId('rvw-review-progress').textContent).toContain('1/1 reviewed');
+      expect(screen.getByTestId('rvw-review-progress').textContent).toContain('1/1 已审');
     });
 
     // 输入 message + ⌘+Enter
-    const input = screen.getByLabelText('Commit message') as HTMLTextAreaElement;
+    const input = screen.getByLabelText('提交信息') as HTMLTextAreaElement;
     fireEvent.change(input, { target: { value: 'test commit message' } });
     fireEvent.keyDown(input, { key: 'Enter', metaKey: true });
 
@@ -188,7 +188,7 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     renderReview();
 
     await waitFor(() => {
-      expect(screen.getByText('No working tree changes.')).not.toBeNull();
+      expect(screen.getByText('暂无工作区改动。')).not.toBeNull();
     });
   });
 
@@ -210,6 +210,6 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     await waitFor(() => {
       expect(container.querySelector('.rvw-empty-state')).not.toBeNull();
     });
-    expect(container.querySelector('.rvw-empty-title')?.textContent).toBe('Code Review');
+    expect(container.querySelector('.rvw-empty-title')?.textContent).toBe('审阅');
   });
 });

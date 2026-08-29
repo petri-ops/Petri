@@ -10,7 +10,7 @@
 /* ---- 标题 / 徽标文本 ---- */
 .wt-title {
   font-weight: 600;
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--biof3-font-size-body-sm);
   letter-spacing: 0.02em;
   color: var(--biof3-text);
 }
@@ -21,21 +21,23 @@
   color: var(--biof3-text-tertiary);
 }
 
-/* ---- 按钮 ---- */
+/* ---- 按钮（BLOCK-28.3：卡片风格，对齐首页快捷入口；字号对齐软件 chrome 12px） ---- */
 .wt-btn {
-  padding: 6px 14px;
-  font-size: var(--biof3-font-size-body-sm);
+  padding: 5px 12px;
+  font-size: var(--biof3-font-size-caption);
   border: 1px solid var(--biof3-border);
-  border-radius: 6px;
-  background: var(--biof3-bg-subtle);
+  border-radius: 8px;
+  background: var(--biof3-bg-surface);
   color: var(--biof3-text);
   cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
 }
 
 .wt-btn:hover:not(:disabled) {
   background: var(--biof3-hover);
   border-color: var(--biof3-border-strong);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
 }
 
 .wt-btn:disabled,
@@ -85,7 +87,7 @@
   background: var(--biof3-status-error-bg);
   border-bottom: 1px solid color-mix(in srgb, var(--biof3-status-error) 40%, transparent);
   color: var(--biof3-status-error-fg);
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--biof3-font-size-caption);
   flex-shrink: 0;
 }
 
@@ -111,7 +113,7 @@
   color: var(--biof3-text-secondary);
   cursor: pointer;
   text-align: left;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--biof3-font-size-caption);
   border-bottom: 1px solid var(--biof3-border-subtle);
 }
 
@@ -187,7 +189,7 @@
   padding: 24px;
   text-align: center;
   color: var(--biof3-text-muted);
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--biof3-font-size-caption);
 }
 
 /* ---- diff 文件头 ---- */
@@ -248,7 +250,7 @@
   background: var(--biof3-status-success-bg);
   border-bottom: 1px solid color-mix(in srgb, var(--biof3-status-success-fg) 40%, transparent);
   color: var(--biof3-status-success-fg);
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--biof3-font-size-caption);
   flex-shrink: 0;
   gap: 12px;
 }

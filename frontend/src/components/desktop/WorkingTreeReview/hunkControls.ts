@@ -59,14 +59,14 @@ class HunkControlWidget extends WidgetType {
       wrap.classList.add(this.info.decided === 'accept' ? 'is-accepted' : 'is-rejected');
       const label = document.createElement('span');
       label.className = 'wt-hunk-control-state';
-      label.textContent = this.info.decided === 'accept' ? 'accepted' : 'rejected';
+      label.textContent = this.info.decided === 'accept' ? '已接受' : '已拒绝';
       wrap.appendChild(label);
     } else {
       const accept = document.createElement('button');
       accept.type = 'button';
       accept.className = 'wt-hunk-btn wt-hunk-btn-accept';
-      accept.textContent = 'Accept';
-      accept.title = 'Accept hunk (A)';
+      accept.textContent = '接受';
+      accept.title = '接受此 hunk (A)';
       accept.setAttribute(DATA_HUNK_ACCEPT, String(this.info.hunkIndex));
       accept.addEventListener('mousedown', (e) => e.stopPropagation());
       accept.addEventListener('click', (e) => {
@@ -77,8 +77,8 @@ class HunkControlWidget extends WidgetType {
       const reject = document.createElement('button');
       reject.type = 'button';
       reject.className = 'wt-hunk-btn wt-hunk-btn-reject';
-      reject.textContent = 'Reject';
-      reject.title = 'Reject hunk (R)';
+      reject.textContent = '拒绝';
+      reject.title = '拒绝此 hunk (R)';
       reject.setAttribute(DATA_HUNK_REJECT, String(this.info.hunkIndex));
       reject.addEventListener('mousedown', (e) => e.stopPropagation());
       reject.addEventListener('click', (e) => {

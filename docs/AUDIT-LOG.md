@@ -4,7 +4,9 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-29（BLOCK-28.2-REVIEW-MODE-DOCK 已收口：CodeReview 改回右侧停靠面板（wt-dock 520px 不占主区）+ 审阅页字号升档 + hunk 控件卡片化，UI-210/211 verified（证据 acceptance/ui-210/）。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+最后更新：2026-08-29（BLOCK-28.3-REVIEW-MODE-CHROME-FIX 已收口：审阅面板中文化（「审阅」）+ 按钮卡片化 + chrome 字号对齐 12px，UI-212 verified（证据 acceptance/ui-212/）。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+| 2026-08-29 | **BLOCK-28.3-REVIEW-MODE-CHROME-FIX 收口**：用户反馈①Code Review 应为「审阅」②按钮应对齐首页卡片风格③审阅界面文字偏大。落地（UI-212）：面板全面中文化（标题/按钮「编辑文件/刷新/提交审阅/全部还原」/空态/提交框/hunk 控件「接受/拒绝」/Toast「已提交」/TitleBar「打开/收起审阅」）；`.wt-btn` 卡片化（白底+描边+8px 圆角+微阴影，对齐首页快捷入口）；chrome 字号回落 caption(12px) 对齐软件主流（summary 标题 13px）。**实机 verified（CDP 断言 + 截图 acceptance/ui-212/）**：标题「审阅」13px、按钮 12px/8px 卡片、chips 12px、进度「n/m 已审」。**门禁**：tsc 0 / vitest 16/16 / docs:check 152 / ui:audit:check 绿。**当前 active**：NONE。**G0 开发期常态 · 不外推 packaged/Provider/GA.** | BLOCK-28.3-REVIEW-MODE-CHROME-FIX / COMPLETED |
 
 | 2026-08-29 | **BLOCK-28.2-REVIEW-MODE-DOCK 收口**：P0 登记 + `0143e12` 落地。**P1（UI-210）dock 形态**：恢复 workingTreeOpen Toggle，TitleBar 按钮开/关右侧 wt-dock（fixed 520px border+阴影，项目页保持挂载不占主区）；ReviewMode 增加 variant mode\|dock（dock：横向文件条 chips + diff 纵向主体 + summary 紧凑化，Esc 关面板）；/review mode 保留共享组件。**P2（UI-211）字号+卡片**：审阅页字号升档对齐全局基线（13/18px 等）、修复无效选择器 .wt-file-status-?（转义后原规则首次生效）、hunk Accept/Reject 控件 elevated 卡片化。**实机 verified（CDP 断言 + 截图 acceptance/ui-210/）**：dock 520px 右停靠、项目页 pathname 不变、7 chips、active chip 正确、diff 渲染、hunk 卡片 rgb(255,255,255) elevated、浅暗双主题正确。**门禁**：tsc 0 / vitest 16/16 / docs:check 151 / ui:audit:check 绿（TitleBar 8 failed 仍为 pre-existing 集合）。**当前 active**：NONE。**G0 开发期常态 · 不外推 packaged/Provider/GA.** | BLOCK-28.2-REVIEW-MODE-DOCK / COMPLETED |
 

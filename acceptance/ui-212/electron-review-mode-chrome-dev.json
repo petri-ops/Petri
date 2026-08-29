@@ -1,0 +1,27 @@
+{
+  "capturedAt": "2026-08-29T12:25:00.000Z",
+  "boundary": "dev Electron",
+  "url": "http://localhost:3000/project/p_mt15b0aw_f0xa（dock 右侧停靠）",
+  "driver": "raw CDP over Node global WebSocket (CDP port 9222)",
+  "fix": "BLOCK-28.3 — 审阅面板中文化 + 按钮卡片化 + chrome 字号对齐 12px",
+  "checks": {
+    "title": "审阅",
+    "titleFontSize": "13px",
+    "buttons": ["编辑文件", "刷新", "提交审阅", "全部还原"],
+    "buttonFontSize": "12px",
+    "buttonRadius": "8px",
+    "buttonCardStyle": "bg-surface + border + shadow 0 1px 2px",
+    "chipFontSize": "12px",
+    "commitPlaceholder": "请先审阅（接受或拒绝 hunk），然后在此提交。",
+    "commitMeta": "待定/接受/拒绝 中文计数",
+    "progressText": "0/11 已审",
+    "hunkControlLabels": "接受/拒绝/已接受/已拒绝",
+    "fontSizeAlignment": "chrome 统一 12px（caption），与软件其它面板 0.72~0.76rem 主流一致"
+  },
+  "screenshots": [
+    "acceptance/ui-212/dock-zh.png"
+  ],
+  "passed": true,
+  "qualificationEligible": false,
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA."
+}

@@ -127,11 +127,11 @@ export function CodeMirrorDiffView({
   };
 
   if (isBinary) {
-    return <div className="wt-file-binary">Binary file changed</div>;
+    return <div className="wt-file-binary">二进制文件变更</div>;
   }
 
   if (loading) {
-    return <div className="wt-diff-loading">Loading diff…</div>;
+    return <div className="wt-diff-loading">差异加载中…</div>;
   }
 
   if (error) {
@@ -153,8 +153,8 @@ export function CodeMirrorDiffView({
                 type="button"
                 className={`wt-diff-marker${decided === 'accept' ? ' is-accepted' : decided === 'reject' ? ' is-rejected' : ''}`}
                 style={{ top: `${ratio * 100}%` }}
-                title={`Hunk ${i + 1} (line ${h.newStart})`}
-                aria-label={`Jump to hunk ${i + 1}`}
+                title={`Hunk ${i + 1}（第 ${h.newStart} 行）`}
+                aria-label={`跳转到 hunk ${i + 1}`}
                 onClick={() => jumpToHunk(h)}
               />
             );

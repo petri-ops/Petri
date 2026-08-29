@@ -45,7 +45,7 @@ function WorkingTreeReviewTitleBarButton(): React.ReactElement | null {
   }, [isOpen]);
 
   if (!isDesktop) return null;
-  const title = isOpen ? '收起 Code Review' : '打开 Code Review';
+  const title = isOpen ? '收起审阅' : '打开审阅';
   return (
     <button
       type="button"

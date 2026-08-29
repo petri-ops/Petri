@@ -35,7 +35,7 @@ describe('CodeMirrorDiffView', () => {
 
     expect(getBridgeMock).not.toHaveBeenCalled();
     expect(fileContentMock).not.toHaveBeenCalled();
-    expect(document.querySelector('.wt-file-binary')?.textContent).toBe('Binary file changed');
+    expect(document.querySelector('.wt-file-binary')?.textContent).toBe('二进制文件变更');
   });
 
   it('renders a readonly inline diff after loading both revisions', async () => {
