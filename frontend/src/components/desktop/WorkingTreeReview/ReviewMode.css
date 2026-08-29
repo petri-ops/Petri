@@ -1,30 +1,29 @@
 /* ============================================================
  * ReviewMode.css — BLOCK-28 主区一级审阅模式（方案 B）
  *
- * 主区一级模式布局：填满 main 区域（titlebar 下方全部空间），
- * 对标 VS Code SCM / PR 页面。复用 WorkingTreeReview.css 的 wt-* 基础件
- * （按钮 / 徽标 / 状态栏 / 对话框），本文件只定义模式级布局 rvw-*。
+ * BLOCK-28.1：全量迁移到应用语义 token（custom.css 明暗双套），
+ * 修复浅色主题串色。布局对标 VS Code SCM。
  * ============================================================ */
 
 .rvw-container {
-  height: calc(100vh - var(--biof3-titlebar-height, 40px));
+  height: calc(100vh - var(--biof3-titlebar-height, 38px));
   display: flex;
   flex-direction: column;
-  background: var(--biof3-surface-dim, #1e1e1e);
-  color: var(--biof3-fg, #e0e0e0);
+  background: var(--biof3-bg-canvas);
+  color: var(--biof3-text);
   overflow: hidden;
   box-sizing: border-box;
 }
 
-/* 顶部 summary 条 */
+/* ===== 顶部 summary 条 ===== */
 .rvw-summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 10px 16px;
-  border-bottom: 1px solid var(--biof3-border, #404040);
-  background: var(--biof3-bg-elev, #2a2a2a);
+  border-bottom: 1px solid var(--biof3-border);
+  background: var(--biof3-bg-surface);
   flex-shrink: 0;
 }
 
@@ -45,110 +44,37 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
-  color: var(--biof3-fg-muted, #888);
+  font-size: var(--biof3-font-size-caption);
+  color: var(--biof3-text-secondary);
   white-space: nowrap;
 }
 
 .rvw-review-progress {
   padding: 1px 8px;
   border-radius: 8px;
-  background: rgba(80, 130, 200, 0.14);
-  color: var(--biof3-fg-muted, #999);
-  font-size: 11px;
-}
-
-/* P2 — 文件树：目录分组 */
-.rvw-group {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-.rvw-group-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
-  padding: 6px 12px;
-  border: 0;
-  background: transparent;
-  color: var(--biof3-fg-muted, #888);
-  cursor: pointer;
-  font-size: 11px;
+  background: var(--biof3-accent-soft);
+  color: var(--biof3-accent);
+  font-size: var(--biof3-font-size-xs);
   font-weight: 600;
-  text-align: left;
 }
 
-.rvw-group-header:hover {
-  background: rgba(255, 255, 255, 0.04);
-  color: inherit;
-}
-
-.rvw-caret {
-  display: inline-block;
-  transition: transform 120ms ease;
-  font-size: 9px;
-}
-
-.rvw-caret-collapsed {
-  transform: rotate(-90deg);
-}
-
-.rvw-group-name {
-  font-family: var(--biof3-mono, monospace);
+/* P2 — 审阅进度细条（summary 底部） */
+.rvw-progress-track {
+  position: relative;
+  height: 2px;
+  background: var(--biof3-bg-subtle);
+  flex-shrink: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.rvw-group-count {
-  margin-left: auto;
-  font-size: 10px;
-  color: var(--biof3-fg-muted, #777);
+.rvw-progress-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--biof3-accent);
+  transition: width 200ms ease;
 }
 
-/* P2 — 文件行：文件名 + 统计 + 已审标记 */
-.rvw-file-row .wt-file-list-path {
-  flex: 1;
-  min-width: 0;
-}
-
-.rvw-file-stats {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-  font-family: var(--biof3-mono, monospace);
-  font-size: 10px;
-}
-
-.rvw-file-reviewed {
-  opacity: 0.45;
-}
-
-.rvw-reviewed-mark {
-  color: #5cc870;
-  font-size: 11px;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.rvw-stat-add {
-  font-family: var(--biof3-mono, monospace);
-  color: #5cc870;
-  font-weight: 600;
-}
-
-.rvw-stat-del {
-  font-family: var(--biof3-mono, monospace);
-  color: #d86070;
-  font-weight: 600;
-}
-
-.rvw-summary-actions {
-  flex-shrink: 0;
-}
-
-/* 主体：左栏文件树 + 右栏大空间 diff */
+/* ===== 主体：左栏文件树 + 右栏大空间 diff ===== */
 .rvw-body {
   flex: 1;
   display: flex;
@@ -159,9 +85,9 @@
 .rvw-sidebar {
   width: 300px;
   flex-shrink: 0;
-  border-right: 1px solid var(--biof3-border, #404040);
+  border-right: 1px solid var(--biof3-border);
   overflow-y: auto;
-  background: var(--biof3-bg-list, #232323);
+  background: var(--biof3-bg-canvas);
 }
 
 .rvw-diff-area {
@@ -170,6 +96,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: var(--biof3-bg-surface);
 }
 
 .rvw-file {
@@ -185,7 +112,123 @@
   flex-shrink: 0;
 }
 
-/* P3 — diff 区包装 + 滚动标记条 */
+/* ===== P2 — 文件树：目录分组 ===== */
+.rvw-group {
+  border-bottom: 1px solid var(--biof3-border-subtle);
+}
+
+.rvw-group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--biof3-text-tertiary);
+  cursor: pointer;
+  font-size: var(--biof3-font-size-xs);
+  font-weight: 600;
+  text-align: left;
+}
+
+.rvw-group-header:hover {
+  background: var(--biof3-hover);
+  color: var(--biof3-text-secondary);
+}
+
+.rvw-caret {
+  display: inline-flex;
+  align-items: center;
+  color: var(--biof3-text-muted);
+  transition: transform 120ms ease;
+}
+
+.rvw-caret-collapsed .rvw-caret-icon {
+  transform: rotate(-90deg);
+}
+
+.rvw-caret-icon {
+  transition: transform 120ms ease;
+  display: inline-flex;
+}
+
+.rvw-group-name {
+  font-family: var(--biof3-font-mono, monospace);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rvw-group-count {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--biof3-text-muted);
+}
+
+/* ===== P2 — 文件行：图标 + 文件名 + 统计 + 已审标记 ===== */
+.rvw-file-row {
+  position: relative;
+}
+
+.rvw-file-row .wt-file-list-path {
+  flex: 1;
+  min-width: 0;
+}
+
+/* P2 — 树形缩进参考线 */
+.rvw-file-row::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--biof3-border-subtle);
+}
+
+.rvw-file-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--biof3-text-muted);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.rvw-file-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-family: var(--biof3-font-mono, monospace);
+  font-size: 10px;
+}
+
+.rvw-stat-add {
+  font-family: var(--biof3-font-mono, monospace);
+  color: var(--biof3-status-success-fg);
+  font-weight: 600;
+}
+
+.rvw-stat-del {
+  font-family: var(--biof3-font-mono, monospace);
+  color: var(--biof3-status-error-fg);
+  font-weight: 600;
+}
+
+.rvw-file-reviewed {
+  opacity: 0.55;
+}
+
+.rvw-reviewed-mark {
+  color: var(--biof3-status-success-fg);
+  font-size: var(--biof3-font-size-xs);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ===== P3 — diff 区包装 + 滚动标记条 ===== */
 .wt-diff-wrap {
   position: relative;
   flex: 1;
@@ -214,25 +257,26 @@
   padding: 0;
   border: 0;
   border-radius: 2px;
-  background: rgba(80, 130, 200, 0.75);
+  background: var(--biof3-accent);
+  opacity: 0.75;
   cursor: pointer;
   pointer-events: auto;
   transform: translateY(-3px);
 }
 
 .wt-diff-marker:hover {
-  background: rgba(120, 170, 240, 1);
+  opacity: 1;
 }
 
 .wt-diff-marker.is-accepted {
-  background: #5cc870;
+  background: var(--biof3-status-success-fg);
 }
 
 .wt-diff-marker.is-rejected {
-  background: #d86070;
+  background: var(--biof3-status-error-fg);
 }
 
-/* P3 — hunk 悬浮 accept/reject 控件（行尾 inline widget） */
+/* ===== P3 — hunk 悬浮 accept/reject 控件（行尾 inline widget） ===== */
 .wt-hunk-controls {
   display: inline-flex;
   align-items: center;
@@ -251,36 +295,36 @@
 }
 
 .wt-hunk-btn-accept {
-  background: rgba(60, 180, 100, 0.16);
-  border-color: rgba(60, 180, 100, 0.45);
-  color: #80e898;
+  background: var(--biof3-status-success-bg);
+  border-color: color-mix(in srgb, var(--biof3-status-success-fg) 45%, transparent);
+  color: var(--biof3-status-success-fg);
 }
 
 .wt-hunk-btn-accept:hover {
-  background: rgba(60, 180, 100, 0.32);
+  background: color-mix(in srgb, var(--biof3-status-success-fg) 18%, transparent);
 }
 
 .wt-hunk-btn-reject {
-  background: rgba(220, 80, 80, 0.16);
-  border-color: rgba(220, 80, 80, 0.45);
-  color: #f08080;
+  background: var(--biof3-status-error-bg);
+  border-color: color-mix(in srgb, var(--biof3-status-error-fg) 45%, transparent);
+  color: var(--biof3-status-error-fg);
 }
 
 .wt-hunk-btn-reject:hover {
-  background: rgba(220, 80, 80, 0.32);
+  background: color-mix(in srgb, var(--biof3-status-error-fg) 18%, transparent);
 }
 
 .wt-hunk-control-state {
   font-size: 10px;
-  font-family: var(--biof3-mono, monospace);
-  color: var(--biof3-fg-muted, #888);
+  font-family: var(--biof3-font-mono, monospace);
+  color: var(--biof3-text-muted);
 }
 
-/* P4 — 底部内嵌提交框（VS Code SCM 风格） */
+/* ===== P4 — 底部内嵌提交框（VS Code SCM 风格） ===== */
 .rvw-commitbox {
   flex-shrink: 0;
-  border-top: 1px solid var(--biof3-border, #404040);
-  background: var(--biof3-bg-elev, #2a2a2a);
+  border-top: 1px solid var(--biof3-border);
+  background: var(--biof3-bg-surface);
   padding: 10px 16px;
   display: flex;
   flex-direction: column;
@@ -290,29 +334,33 @@
 .rvw-commitbox-input {
   width: 100%;
   box-sizing: border-box;
-  background: var(--biof3-bg, #1e1e1e);
-  color: inherit;
-  border: 1px solid var(--biof3-border, #404040);
-  border-radius: 4px;
+  background: var(--biof3-input-bg);
+  color: var(--biof3-text);
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
   padding: 8px 10px;
   font-family: inherit;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   line-height: 1.5;
   resize: none;
 }
 
+.rvw-commitbox-input::placeholder {
+  color: var(--biof3-text-muted);
+}
+
 .rvw-commitbox-input:focus {
   outline: none;
-  border-color: rgba(60, 130, 220, 0.6);
-  box-shadow: 0 0 0 2px rgba(60, 130, 220, 0.15);
+  border-color: var(--biof3-accent);
+  box-shadow: 0 0 0 2px var(--biof3-accent-soft);
 }
 
 .rvw-commitbox-meta {
   display: flex;
   align-items: center;
   gap: 14px;
-  font-size: 11px;
-  color: var(--biof3-fg-muted, #888);
+  font-size: var(--biof3-font-size-xs);
+  color: var(--biof3-text-tertiary);
 }
 
 .rvw-commitbox-spacer {
@@ -320,5 +368,42 @@
 }
 
 .rvw-commitbox-error {
-  color: #f08080;
+  color: var(--biof3-status-error-fg);
+}
+
+/* ===== P2 — 空态（图形化居中） ===== */
+.rvw-empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--biof3-text-muted);
+  padding: 40px;
+}
+
+.rvw-empty-state .rvw-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text-muted);
+}
+
+.rvw-empty-state .rvw-empty-title {
+  font-size: var(--biof3-font-size-body);
+  font-weight: 600;
+  color: var(--biof3-text-secondary);
+}
+
+.rvw-empty-state .rvw-empty-hint {
+  font-size: var(--biof3-font-size-caption);
+  color: var(--biof3-text-muted);
+  max-width: 420px;
+  text-align: center;
+  line-height: 1.6;
 }

@@ -192,8 +192,8 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     });
   });
 
-  it('shows the select-file hint when no diff files exist but status has entries', async () => {
-    // status 有文件但 diff 未覆盖（如纯 untracked）：右栏出现引导文案
+  it('shows the graphical empty state when no diff files exist but status has entries', async () => {
+    // status 有文件但 diff 未覆盖（如纯 untracked）：右栏出现图形化空态
     getBridgeMock.mockReturnValue(
       makeBridge({
         diff: vi.fn(() =>
@@ -205,12 +205,11 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
       })
     );
 
-    renderReview();
+    const { container } = renderReview();
 
     await waitFor(() => {
-      expect(
-        screen.getByText('Select a file on the left to review its diff.')
-      ).not.toBeNull();
+      expect(container.querySelector('.rvw-empty-state')).not.toBeNull();
     });
+    expect(container.querySelector('.rvw-empty-title')?.textContent).toBe('Code Review');
   });
 });

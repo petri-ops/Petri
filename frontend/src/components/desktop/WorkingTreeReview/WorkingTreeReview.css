@@ -1,144 +1,103 @@
 /* ============================================================
- * WorkingTreeReview.css — BLOCK-20 thin-slice 常驻右侧审阅面板
+ * WorkingTreeReview.css — 审阅共享基础件（BLOCK-28.1 全 token 重写）
  *
- * 右侧侧边栏面板，position: fixed 锚定在标题栏轨道下方，
- * 与现有 RightPanel / BottomTerminal 共享同一个 workspace chrome；
- * 通过 WorkspacePanels context 的 workingTreeOpen 控制显隐（TitleBar 按钮触发）。
- * 主题色与既有 Result Studio diff 风格一致（+/- 绿/红）。
- * 对齐 G0 既有 Visual Language，不引入外部资源。
+ * 历史：BLOCK-20 抽屉形态遗留样式，抽屉退役（BLOCK-28）后仅保留
+ * 主区审阅模式（ReviewMode.tsx / CodeMirrorDiffView.tsx）在用的类。
+ * BLOCK-28.1：全部迁移到应用语义 token（custom.css 明暗双套），
+ * 修复浅色主题串色——不再使用任何不存在的 --biof3-* 变量名与暗色硬编码。
  * ============================================================ */
 
-.wt-container {
-  position: fixed;
-  top: var(--biof3-titlebar-height, 40px);
-  right: 0;
-  bottom: 0;
-  width: 450px;
-  z-index: 50;
-  background: var(--biof3-surface-dim, #1e1e1e);
-  color: var(--biof3-fg, #e0e0e0);
-  border-left: 1px solid var(--biof3-border, #404040);
-  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.18);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-.wt-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--biof3-border, #404040);
-  background: var(--biof3-bg-elev, #2a2a2a);
-  flex-shrink: 0;
-}
-
-.wt-toolbar-left,
-.wt-toolbar-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
+/* ---- 标题 / 徽标文本 ---- */
 .wt-title {
   font-weight: 600;
-  font-size: 14px;
+  font-size: var(--biof3-font-size-body);
   letter-spacing: 0.02em;
+  color: var(--biof3-text);
 }
 
 .wt-task-id {
-  font-family: var(--biof3-mono, monospace);
-  font-size: 11px;
-  color: var(--biof3-fg-muted, #888);
+  font-family: var(--biof3-font-mono, monospace);
+  font-size: var(--biof3-font-size-xs);
+  color: var(--biof3-text-tertiary);
 }
 
+/* ---- 按钮 ---- */
 .wt-btn {
-  padding: 6px 12px;
-  font-size: 12px;
-  border: 1px solid var(--biof3-border, #404040);
-  border-radius: 4px;
-  background: var(--biof3-bg-button, #3a3a3a);
-  color: inherit;
+  padding: 5px 12px;
+  font-size: var(--biof3-font-size-caption);
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text);
   cursor: pointer;
-  transition: background 120ms ease;
+  transition: background 120ms ease, border-color 120ms ease;
 }
 
 .wt-btn:hover:not(:disabled) {
-  background: var(--biof3-bg-button-hover, #4a4a4a);
+  background: var(--biof3-hover);
+  border-color: var(--biof3-border-strong);
 }
 
-.wt-btn:disabled {
+.wt-btn:disabled,
+.wt-btn-disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
-.wt-btn-accept {
-  background: rgba(60, 180, 100, 0.18);
-  border-color: rgba(60, 180, 100, 0.5);
-}
-
-.wt-btn-accept:hover:not(:disabled) {
-  background: rgba(60, 180, 100, 0.32);
-}
-
-.wt-btn-reject {
-  background: rgba(220, 80, 80, 0.18);
-  border-color: rgba(220, 80, 80, 0.5);
-}
-
-.wt-btn-reject:hover:not(:disabled) {
-  background: rgba(220, 80, 80, 0.32);
-}
-
-.wt-btn-danger {
-  background: rgba(220, 80, 80, 0.18);
-  border-color: rgba(220, 80, 80, 0.5);
-}
-
-/* BLOCK-20 PHASE 3 — Edit file button (inline-edit drawer trigger) */
+/* 行内编辑抽屉入口（次强调） */
 .wt-edit-btn {
-  background: rgba(80, 130, 200, 0.18);
-  border-color: rgba(80, 130, 200, 0.45);
+  background: var(--biof3-accent-soft);
+  border-color: color-mix(in srgb, var(--biof3-accent) 45%, transparent);
+  color: var(--biof3-accent);
 }
 
 .wt-edit-btn:hover:not(:disabled) {
-  background: rgba(80, 130, 200, 0.32);
+  background: color-mix(in srgb, var(--biof3-accent) 24%, transparent);
 }
 
+/* 危险操作（Revert all） */
+.wt-btn-danger {
+  background: var(--biof3-status-error-bg);
+  border-color: color-mix(in srgb, var(--biof3-status-error) 45%, transparent);
+  color: var(--biof3-status-error-fg);
+}
+
+.wt-btn-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--biof3-status-error) 18%, transparent);
+}
+
+/* 主操作（Commit） */
+.wt-btn-commit {
+  background: var(--biof3-accent);
+  border-color: var(--biof3-accent);
+  color: var(--biof3-on-accent);
+  font-weight: 600;
+}
+
+.wt-btn-commit:hover:not(:disabled) {
+  background: var(--biof3-accent-hover);
+  border-color: var(--biof3-accent-hover);
+}
+
+/* ---- 错误横幅 ---- */
 .wt-error {
   padding: 8px 16px;
-  background: rgba(220, 80, 80, 0.18);
-  border-bottom: 1px solid rgba(220, 80, 80, 0.4);
-  color: #ffc8c8;
-  font-size: 12px;
+  background: var(--biof3-status-error-bg);
+  border-bottom: 1px solid color-mix(in srgb, var(--biof3-status-error) 40%, transparent);
+  color: var(--biof3-status-error-fg);
+  font-size: var(--biof3-font-size-caption);
   flex-shrink: 0;
 }
 
-.wt-body {
-  flex: 1;
-  display: flex;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.wt-file-list {
-  width: 220px;
-  flex-shrink: 0;
-  border-right: 1px solid var(--biof3-border, #404040);
-  overflow-y: auto;
-  background: var(--biof3-bg-list, #232323);
-}
-
+/* ---- 文件列表 ---- */
 .wt-file-list-title {
   padding: 8px 12px;
-  font-size: 11px;
+  font-size: var(--biof3-font-size-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--biof3-fg-muted, #888);
-  border-bottom: 1px solid var(--biof3-border, #404040);
+  color: var(--biof3-text-tertiary);
+  border-bottom: 1px solid var(--biof3-border-subtle);
 }
 
 .wt-file-list-item {
@@ -149,25 +108,23 @@
   padding: 6px 12px;
   border: 0;
   background: transparent;
-  color: inherit;
+  color: var(--biof3-text-secondary);
   cursor: pointer;
   text-align: left;
-  font-size: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: var(--biof3-font-size-caption);
+  border-bottom: 1px solid var(--biof3-border-subtle);
 }
 
 .wt-file-list-item:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--biof3-hover);
+  color: var(--biof3-text);
 }
 
 .wt-file-list-item.active {
-  background: rgba(80, 130, 200, 0.18);
-  border-left: 3px solid rgba(80, 130, 200, 0.7);
+  background: var(--biof3-accent-soft);
+  border-left: 3px solid var(--biof3-accent);
   padding-left: 9px;
-}
-
-.wt-file-list-item-decided {
-  background: rgba(60, 180, 100, 0.06);
+  color: var(--biof3-text);
 }
 
 .wt-file-list-badge {
@@ -191,293 +148,114 @@
 }
 
 .wt-badge-accept-mini {
-  background: rgba(60, 180, 100, 0.3);
-  color: #80e898;
-  border: 1px solid rgba(60, 180, 100, 0.5);
+  background: var(--biof3-status-success-bg);
+  color: var(--biof3-status-success-fg);
+  border: 1px solid color-mix(in srgb, var(--biof3-status-success-fg) 40%, transparent);
 }
 
 .wt-badge-reject-mini {
-  background: rgba(220, 80, 80, 0.3);
-  color: #f08080;
-  border: 1px solid rgba(220, 80, 80, 0.5);
+  background: var(--biof3-status-error-bg);
+  color: var(--biof3-status-error-fg);
+  border: 1px solid color-mix(in srgb, var(--biof3-status-error-fg) 40%, transparent);
 }
 
 .wt-file-status {
-  font-family: var(--biof3-mono, monospace);
+  font-family: var(--biof3-font-mono, monospace);
   font-size: 10px;
   width: 16px;
   text-align: center;
   flex-shrink: 0;
-  color: var(--biof3-fg-muted, #888);
+  color: var(--biof3-text-muted);
 }
 
-.wt-file-status-M { color: #e0a040; }
-.wt-file-status-A { color: #5cc870; }
-.wt-file-status-D { color: #d86070; }
-.wt-file-status-R { color: #6090d0; }
-.wt-file-status-C { color: #a060c0; }
-.wt-file-status-? { color: #888; }
+.wt-file-status-M { color: var(--biof3-status-warning); }
+.wt-file-status-A { color: var(--biof3-status-success-fg); }
+.wt-file-status-D { color: var(--biof3-status-error-fg); }
+.wt-file-status-R { color: var(--biof3-status-info); }
+.wt-file-status-C { color: var(--biof3-accent); }
+.wt-file-status-? { color: var(--biof3-text-muted); }
 
 .wt-file-list-path {
-  font-family: var(--biof3-mono, monospace);
+  font-family: var(--biof3-font-mono, monospace);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.wt-main {
-  flex: 1;
-  overflow: auto;
-  padding: 12px 16px;
-}
-
+/* ---- 空态 ---- */
 .wt-empty {
   padding: 24px;
   text-align: center;
-  color: var(--biof3-fg-muted, #888);
-  font-size: 13px;
+  color: var(--biof3-text-muted);
+  font-size: var(--biof3-font-size-body-sm);
 }
 
-.wt-file {
-  margin-bottom: 16px;
-  border: 1px solid var(--biof3-border, #404040);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
+/* ---- diff 文件头 ---- */
 .wt-file-header {
   padding: 8px 12px;
-  background: var(--biof3-bg-elev, #2a2a2a);
-  border-bottom: 1px solid var(--biof3-border, #404040);
+  background: var(--biof3-bg-surface);
+  border-bottom: 1px solid var(--biof3-border);
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
 }
 
 .wt-file-path {
-  font-family: var(--biof3-mono, monospace);
+  font-family: var(--biof3-font-mono, monospace);
   font-weight: 600;
+  color: var(--biof3-text);
 }
 
 .wt-file-old-path {
-  font-family: var(--biof3-mono, monospace);
-  color: var(--biof3-fg-muted, #888);
-  font-size: 11px;
+  font-family: var(--biof3-font-mono, monospace);
+  color: var(--biof3-text-tertiary);
+  font-size: var(--biof3-font-size-xs);
 }
 
+.wt-file-hunk-count {
+  margin-left: auto;
+  font-size: var(--biof3-font-size-xs);
+  color: var(--biof3-text-tertiary);
+}
+
+/* ---- 快捷键提示 ---- */
 .wt-shortcut-hint {
   margin-right: 10px;
   font-size: 10px;
-  color: var(--biof3-fg-muted, #666);
-  font-family: var(--biof3-mono, monospace);
+  color: var(--biof3-text-tertiary);
+  font-family: var(--biof3-font-mono, monospace);
   white-space: nowrap;
 }
 
 .wt-shortcut-hint kbd {
   display: inline-block;
   padding: 0 3px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--biof3-border);
   border-radius: 3px;
-  background: rgba(255, 255, 255, 0.06);
-  font-family: var(--biof3-mono, monospace);
+  background: var(--biof3-bg-subtle);
+  font-family: var(--biof3-font-mono, monospace);
   font-size: 10px;
+  color: var(--biof3-text-secondary);
 }
 
-.wt-file-hunk-count {
-  margin-left: auto;
-  font-size: 11px;
-  color: var(--biof3-fg-muted, #888);
-}
-
-.wt-file-binary {
-  padding: 16px;
-  text-align: center;
-}
-
-.wt-binary-marker {
-  color: var(--biof3-fg-muted, #888);
-  font-style: italic;
-  font-size: 12px;
-}
-
-.wt-hunk {
-  border-bottom: 1px solid var(--biof3-border, #404040);
-}
-
-.wt-hunk-focused > .wt-hunk,
-.wt-hunk-focused .wt-hunk {
-  outline: 2px solid rgba(60, 130, 220, 0.4);
-  outline-offset: -2px;
-  border-radius: 2px;
-}
-
-.wt-hunk:last-child {
-  border-bottom: 0;
-}
-
-.wt-hunk-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border-bottom: 1px solid var(--biof3-border, #404040);
-  font-family: var(--biof3-mono, monospace);
-  font-size: 11px;
-}
-
-.wt-hunk-marker {
-  color: var(--biof3-fg-muted, #888);
-}
-
-.wt-hunk-actions {
-  display: flex;
-  gap: 6px;
-}
-
-.wt-hunk-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: var(--biof3-mono, monospace);
-  font-size: 12px;
-}
-
-.wt-line td {
-  padding: 0 6px;
-  vertical-align: top;
-}
-
-.wt-gutter {
-  text-align: right;
-  color: var(--biof3-fg-muted, #888);
-  user-select: none;
-  width: 40px;
-  border-right: 1px solid var(--biof3-border, #404040);
-  font-size: 10px;
-  padding: 0 6px;
-}
-
-.wt-marker {
-  width: 16px;
-  text-align: center;
-  user-select: none;
-  color: var(--biof3-fg-muted, #888);
-}
-
-.wt-content {
-  white-space: pre;
-}
-
-.wt-line-ctx {
-  background: transparent;
-}
-
-.wt-line-add {
-  background: rgba(60, 180, 100, 0.16);
-}
-
-.wt-line-add .wt-marker {
-  color: #5cc870;
-}
-
-.wt-line-del {
-  background: rgba(220, 80, 80, 0.16);
-}
-
-.wt-line-del .wt-marker {
-  color: #d86070;
-}
-
-.wt-hunk-truncated {
-  padding: 8px 12px;
-  text-align: center;
-  font-size: 11px;
-  color: var(--biof3-fg-muted, #888);
-  font-style: italic;
-}
-
-.wt-reject-dialog {
-  padding: 12px;
-  border-top: 1px solid var(--biof3-border, #404040);
-  background: rgba(220, 80, 80, 0.04);
-}
-
-.wt-reject-textarea {
-  width: 100%;
-  background: var(--biof3-bg, #1e1e1e);
-  color: inherit;
-  border: 1px solid var(--biof3-border, #404040);
-  border-radius: 4px;
-  padding: 8px;
-  font-family: var(--biof3-mono, monospace);
-  font-size: 12px;
-  resize: vertical;
-}
-
-.wt-reject-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.wt-statusbar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 8px 16px;
-  border-top: 1px solid var(--biof3-border, #404040);
-  background: var(--biof3-bg-elev, #2a2a2a);
-  font-size: 11px;
-  color: var(--biof3-fg-muted, #888);
-  flex-shrink: 0;
-}
-
-.wt-warning {
-  color: #e0a040;
-}
-
-/* ============================================================
- * Commit Review button
- * ============================================================ */
-
-.wt-btn-commit {
-  background: rgba(60, 130, 220, 0.22);
-  border-color: rgba(60, 130, 220, 0.55);
-  color: #80b8f0;
-}
-
-.wt-btn-commit:hover:not(:disabled) {
-  background: rgba(60, 130, 220, 0.38);
-}
-
-.wt-btn-disabled,
-.wt-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-/* ============================================================
- * Commit success toast
- * ============================================================ */
-
+/* ---- 提交成功 toast（面板内轻提示） ---- */
 .wt-commit-success {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  background: rgba(60, 180, 100, 0.18);
-  border-bottom: 1px solid rgba(60, 180, 100, 0.4);
-  color: #a8f0b8;
-  font-size: 12px;
+  background: var(--biof3-status-success-bg);
+  border-bottom: 1px solid color-mix(in srgb, var(--biof3-status-success-fg) 40%, transparent);
+  color: var(--biof3-status-success-fg);
+  font-size: var(--biof3-font-size-caption);
   flex-shrink: 0;
   gap: 12px;
 }
 
 .wt-commit-hash {
-  font-family: var(--biof3-mono, monospace);
-  color: #80d888;
+  font-family: var(--biof3-font-mono, monospace);
+  color: var(--biof3-status-success-fg);
 }
 
 .wt-commit-success-close {
@@ -495,153 +273,18 @@
   opacity: 1;
 }
 
-/* ============================================================
- * Commit message dialog (modal overlay)
- * ============================================================ */
-
-.wt-dialog-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  padding: 20px;
+/* ---- 警示 / 二进制 ---- */
+.wt-warning {
+  color: var(--biof3-status-warning-fg);
 }
 
-.wt-dialog {
-  background: var(--biof3-bg-elev, #2a2a2a);
-  border: 1px solid var(--biof3-border, #404040);
-  border-radius: 8px;
-  width: 100%;
-  max-width: 420px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.wt-dialog-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px 10px;
-  border-bottom: 1px solid var(--biof3-border, #404040);
-}
-
-.wt-dialog-title {
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.wt-dialog-close {
-  background: none;
-  border: none;
-  color: var(--biof3-fg-muted, #888);
-  cursor: pointer;
-  font-size: 14px;
-  padding: 2px 4px;
-  border-radius: 3px;
-  line-height: 1;
-}
-
-.wt-dialog-close:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: inherit;
-}
-
-.wt-dialog-body {
+.wt-file-binary {
   padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  text-align: center;
+  color: var(--biof3-text-muted);
 }
 
-.wt-dialog-summary {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 12px;
-}
-
-.wt-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.wt-badge-accept {
-  background: rgba(60, 180, 100, 0.2);
-  color: #80e898;
-  border: 1px solid rgba(60, 180, 100, 0.4);
-}
-
-.wt-badge-reject {
-  background: rgba(220, 80, 80, 0.2);
-  color: #f08080;
-  border: 1px solid rgba(220, 80, 80, 0.4);
-}
-
-.wt-dialog-files {
-  color: var(--biof3-fg-muted, #888);
-}
-
-.wt-dialog-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--biof3-fg-muted, #888);
-}
-
-.wt-dialog-textarea {
-  width: 100%;
-  background: var(--biof3-bg, #1e1e1e);
-  color: inherit;
-  border: 1px solid var(--biof3-border, #404040);
-  border-radius: 4px;
-  padding: 8px 10px;
-  font-family: var(--biof3-mono, monospace);
-  font-size: 12px;
-  resize: vertical;
-  box-sizing: border-box;
-  line-height: 1.5;
-}
-
-.wt-dialog-textarea:focus {
-  outline: none;
-  border-color: rgba(60, 130, 220, 0.6);
-  box-shadow: 0 0 0 2px rgba(60, 130, 220, 0.15);
-}
-
-.wt-dialog-error {
-  padding: 8px 10px;
-  background: rgba(220, 80, 80, 0.15);
-  border: 1px solid rgba(220, 80, 80, 0.4);
-  border-radius: 4px;
-  color: #f08080;
-  font-size: 12px;
-}
-
-.wt-dialog-hint {
-  font-size: 11px;
-  color: var(--biof3-fg-muted, #888);
-  line-height: 1.5;
-}
-
-.wt-dialog-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 10px 16px 14px;
-  border-top: 1px solid var(--biof3-border, #404040);
-}
-
-/* BLOCK-23 — CodeMirror diff view container */
+/* ---- BLOCK-23 — CodeMirror diff 容器 ---- */
 .wt-cm-diff {
   flex: 1;
   min-height: 0;
@@ -653,13 +296,12 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  color: var(--biof3-fg-muted, #888);
-  font-size: 13px;
+  color: var(--biof3-text-muted);
+  font-size: var(--biof3-font-size-body-sm);
 }
 
 .wt-diff-error {
   padding: 12px 16px;
-  color: var(--biof3-status-danger, #f08080);
-  font-size: 12px;
+  color: var(--biof3-status-error-fg);
+  font-size: var(--biof3-font-size-caption);
 }
-

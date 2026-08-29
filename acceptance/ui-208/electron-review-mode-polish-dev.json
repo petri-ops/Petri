@@ -1,0 +1,40 @@
+{
+  "capturedAt": "2026-08-29T10:48:00.000Z",
+  "boundary": "dev Electron",
+  "url": "http://localhost:3000/review",
+  "driver": "raw CDP over Node global WebSocket (CDP port 9222)",
+  "fix": "BLOCK-28.1 — 主区审阅页浅色主题串色修复（全 token 迁移）+ Codex 级布局打磨",
+  "themeAdaptation": {
+    "light": {
+      "containerBg": "rgb(248, 250, 252)",
+      "containerText": "rgb(15, 23, 42)",
+      "summaryBg": "rgb(255, 255, 255)",
+      "summaryText": "rgb(15, 23, 42)",
+      "note": "修复前 containerText 为 rgb(224,224,224)（暗色回退）浮在浅背景上；修复后为 --biof3-text 深色"
+    },
+    "dark": {
+      "containerBg": "rgb(11, 18, 32)",
+      "containerText": "rgb(230, 237, 243)",
+      "note": "暗色主题同样正确（--biof3-bg-canvas / --biof3-text）"
+    }
+  },
+  "checks": {
+    "noUnusedTokenVars": true,
+    "note": "WorkingTreeReview.css + ReviewMode.css 中不再存在 --biof3-fg/--biof3-bg-elev/--biof3-bg-list/--biof3-bg-button/--biof3-mono/--biof3-status-danger 等不存在的变量名（grep 0 命中）",
+    "fileTreeIcons": true,
+    "treeIndentGuide": true,
+    "progressTrack": true,
+    "graphicalEmptyState": true,
+    "diffHeaderStats": true,
+    "collapseUnchangedStillWorks": true,
+    "collapseTexts": ["14 unchanged lines"]
+  },
+  "screenshots": [
+    "acceptance/ui-208/light-review.png",
+    "acceptance/ui-208/light-review-diff.png",
+    "acceptance/ui-208/dark-review-diff.png"
+  ],
+  "passed": true,
+  "qualificationEligible": false,
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA."
+}

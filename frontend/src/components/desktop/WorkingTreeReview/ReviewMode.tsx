@@ -11,6 +11,7 @@
 
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Icon } from '@/components/icons/Icon';
 import { useWorkingTreeReview, type DiffFile } from './useWorkingTreeReview';
 import { CodeMirrorDiffView } from './CodeMirrorDiffView';
 import { CodeReviewDrawer } from './CodeReviewDrawer';
@@ -184,7 +185,7 @@ export function ReviewMode() {
         </div>
       )}
 
-      {/* 顶部 summary 条 */}
+      {/* 顶部 summary 条 + 审阅进度细条 */}
       <header className="rvw-summary">
         <div className="rvw-summary-left">
           <span className="wt-title">Code Review</span>
@@ -255,6 +256,14 @@ export function ReviewMode() {
           </button>
         </div>
       </header>
+      {totalFiles > 0 && (
+        <div className="rvw-progress-track" aria-hidden="true">
+          <div
+            className="rvw-progress-fill"
+            style={{ width: `${totalFiles ? (reviewedCount / totalFiles) * 100 : 0}%` }}
+          />
+        </div>
+      )}
 
       {review.error && (
         <div className="wt-error" role="alert">{review.error}</div>
@@ -279,7 +288,9 @@ export function ReviewMode() {
                   onClick={() => toggleDir(group.dir)}
                   aria-expanded={!collapsed}
                 >
-                  <span className={`rvw-caret${collapsed ? ' rvw-caret-collapsed' : ''}`} aria-hidden="true">▾</span>
+                  <span className={`rvw-caret${collapsed ? ' rvw-caret-collapsed' : ''}`}>
+                    <span className="rvw-caret-icon"><Icon name="chevron-down" size={12} /></span>
+                  </span>
                   <span className="rvw-group-name">{groupDisplayName(group.dir)}</span>
                   <span className="rvw-group-count">{group.files.length}</span>
                 </button>
@@ -299,6 +310,7 @@ export function ReviewMode() {
                         title={f.path}
                       >
                         <span className={`wt-file-status wt-file-status-${f.status}`}>{f.status}</span>
+                        <span className="rvw-file-icon"><Icon name="file" size={13} /></span>
                         <span className="wt-file-list-path">{fileName}</span>
                         <span className="wt-file-list-badge">
                           {summary && summary.accepted > 0 && (
@@ -308,7 +320,7 @@ export function ReviewMode() {
                             <span className="wt-badge-mini wt-badge-reject-mini">{summary.rejected}</span>
                           )}
                           {reviewed && (
-                            <span className="rvw-reviewed-mark" title="Reviewed">✓</span>
+                            <span className="rvw-reviewed-mark" title="Reviewed"><Icon name="check" size={12} /></span>
                           )}
                         </span>
                         {!reviewed && (stats.added > 0 || stats.removed > 0) && (
@@ -327,20 +339,30 @@ export function ReviewMode() {
 
         {/* 右栏大空间 diff（sticky 文件头在滚动容器外，天然吸顶） */}
         <main className="rvw-diff-area" data-testid="rvw-diff-area">
-          {!selectedFile && (
-            <div className="wt-empty">
-              {review.loading
-                ? 'Loading working tree diff…'
-                : 'Select a file on the left to review its diff.'}
+          {!selectedFile && !review.loading && !review.error && (
+            <div className="rvw-empty-state">
+              <span className="rvw-empty-icon"><Icon name="git-branch" size={22} /></span>
+              <span className="rvw-empty-title">Code Review</span>
+              <span className="rvw-empty-hint">
+                Review the working tree changes here: accept or reject hunks, then
+                commit. Press A/Y to accept, R to reject, ↑↓ to navigate hunks.
+              </span>
             </div>
           )}
           {selectedFile && (
             <div className="rvw-file">
               <div className="wt-file-header rvw-file-header">
+                <span className={`wt-file-status wt-file-status-${review.status?.files.find((s) => s.path === selectedFile.path)?.status ?? '?'}`}>
+                  {review.status?.files.find((s) => s.path === selectedFile.path)?.status ?? '?'}
+                </span>
                 <span className="wt-file-path">{selectedFile.path}</span>
                 {selectedFile.oldPath && selectedFile.oldPath !== selectedFile.path && (
                   <span className="wt-file-old-path">← {selectedFile.oldPath}</span>
                 )}
+                <span className="rvw-file-stats">
+                  <span className="rvw-stat-add">+{computeFileDiffStats(selectedFile).added}</span>
+                  <span className="rvw-stat-del">−{computeFileDiffStats(selectedFile).removed}</span>
+                </span>
                 <span className="wt-file-hunk-count">{selectedFile.hunks.length} hunk(s)</span>
               </div>
               <CodeMirrorDiffView

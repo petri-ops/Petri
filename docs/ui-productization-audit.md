@@ -1569,3 +1569,25 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc --noEmit 0；定向 vitest 16/16（新增「⌘+Enter 提交 → commitReview 契约参数 → toast 轻提示 → 无 dialog」全链用例）。**2026-08-29 dev Electron 实机 verified（UI-204 全包统一取证）**：⌘+Enter 真实触发 git:commit-review 创建提交（toast 显示 short hash + 1 file(s)，role=dialog 不存在），验收后该提交已 `git reset --mixed HEAD~1` 回滚、fixture 已删除；证据 `acceptance/ui-204/electron-review-mode-dev.json` + 截图。
 
 **状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-208: BLOCK-28.1 P1 — 主区审阅页浅色主题串色修复（全 token 迁移） (2026-08-29 verified)
+
+**缺陷**（用户实测反馈 + CDP 截图实锤）：浅色主题（`data-theme="light"`）下主区审阅页 summary 条/侧栏/状态栏为暗色硬编码浮在主题浅色画布上、CM 高亮暗色调文字——WorkingTreeReview.css/ReviewMode.css 沿用旧抽屉的不存在变量名（`--biof3-fg` / `--biof3-bg-elev` / `--biof3-bg-list` / `--biof3-bg-button` / `--biof3-mono` / `--biof3-status-danger`）回退暗色常量，与 Infima + `--biof3-*` 语义 token 体系混用串色。
+
+**修复**：两份 CSS 全量重写为真实 token（`--biof3-bg-canvas/surface/subtle/elevated`、`--biof3-text/secondary/tertiary/muted`、`--biof3-border(-strong/-subtle)`、`--biof3-accent(-soft/-hover)`、`--biof3-status-success/error/-fg/-bg`、`--biof3-font-mono`、`--biof3-font-size-*`），WorkingTreeReview.css 同时裁剪为仅剩在用 wt-* 类（对话框/旧表格样式清除）；Commit 主按钮升为 accent 主色。不存在的变量名 grep 0 命中。BLOCK-22 CM 层已用存在 token，0 改动。
+
+**验证**：tsc 0 / 定向 vitest 16/16。**2026-08-29 dev Electron 实机 verified**：CDP 计算样式断言——浅色 container `rgb(248,250,252)` + 文字 `rgb(15,23,42)`（修复前文字为 `rgb(224,224,224)` 串色）；暗色 `rgb(11,18,32)` + `rgb(230,237,243)` 双主题正确；截图 `acceptance/ui-208/`。
+
+**状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-209: BLOCK-28.1 P2 — 主区审阅页 Codex 级布局打磨 (2026-08-29 verified)
+
+**改动范围**：
+- summary 条下新增审阅进度细条（accent 色，随 n/m reviewed 增长）。
+- 文件树：组头 caret 图标化（chevron-down）、文件行 file 图标 + 树形缩进参考线、已审标记 check 图标化；diff sticky 头补状态徽标（M/A/D）与每文件 +N −M 统计。
+- 空态图形化：git-branch 图标 + 标题 + 快捷键引导文案（替代单行灰字）。
+- 复用既有 Icon 集合（chevron-down/file/check/git-branch），0 新增图标/依赖/IPC。
+
+**验证**：tsc 0 / 定向 vitest 16/16（空态断言同步更新）。**2026-08-29 dev Electron 实机 verified**：浅色 diff 截图确认——白色 summary + 细进度条、侧栏图标树、diff 头统计、底部 accent Commit 主按钮、「14 unchanged lines」折叠控件正常；证据 `acceptance/ui-208/`。
+
+**状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
