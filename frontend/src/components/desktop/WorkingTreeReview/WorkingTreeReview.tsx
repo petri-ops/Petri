@@ -9,9 +9,15 @@
 // ============================================================
 
 import { useEffect, useState, useRef } from 'react';
+
+import { dispatchBioF3Event, biof3Events } from '@/lib/events';
+import type { EditorApi } from '@/components/editor/CodeMirror/types';
+import type { ReviewFinding } from '@/lib/review-types';
 import { useWorkingTreeReview } from './useWorkingTreeReview';
 import { CodeMirrorDiffView } from './CodeMirrorDiffView';
 import { CodeReviewDrawer } from './CodeReviewDrawer';
+import { ReviewFindingsPanel } from './ReviewFindingsPanel';
+import { useCodeReviewAgent } from './useCodeReviewAgent';
 
 export interface WorkingTreeReviewProps {
   isOpen: boolean;
@@ -24,8 +30,83 @@ interface CommitSuccess {
   message: string;
 }
 
+/** /project/:projectId/* route watcher — the drawer mounts outside <Routes>. */
+function useCurrentProjectId(isOpen: boolean): string | null {
+  const [projectId, setProjectId] = useState<string | null>(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    const read = () => {
+      const match = window.location.pathname.match(/\/project\/([^/]+)/);
+      setProjectId(match ? decodeURIComponent(match[1]) : null);
+    };
+    read();
+    window.addEventListener('popstate', read);
+    return () => window.removeEventListener('popstate', read);
+  }, [isOpen]);
+  return projectId;
+}
+
 export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
   const review = useWorkingTreeReview({ isOpen, onClose });
+  const reviewAgent = useCodeReviewAgent();
+  const projectId = useCurrentProjectId(isOpen);
+
+  const [showAiReview, setShowAiReview] = useState(false);
+  const [editorApi, setEditorApi] = useState<EditorApi | null>(null);
+  const pendingScrollRef = useRef<{ path: string; line: number } | null>(null);
+
+  // BLOCK-25: apply a pending finding→diff-line jump once the selected file's
+  // editor is live. Re-applies safely because it clears the pending target.
+  useEffect(() => {
+    const pending = pendingScrollRef.current;
+    if (!pending || !editorApi) return;
+    if (pending.path !== review.selectedFilePath) return;
+    const timer = setTimeout(() => {
+      try {
+        editorApi.scrollToLine({ line: pending.line, highlight: true });
+      } catch {}
+      pendingScrollRef.current = null;
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [editorApi, review.selectedFilePath]);
+
+  // Select the file matching a finding, then scroll to its line. Same-file
+  // jumps scroll immediately (the pending-scroll effect only reruns on file
+  // change); cross-file jumps defer to the effect after the editor loads.
+  const handleSelectFinding = (finding: ReviewFinding) => {
+    const absolute = finding.codeLocation.absoluteFilePath.replace(/\\/g, '/');
+    const files = review.status?.files || [];
+    const target =
+      files.find((f) => f.path === absolute) ||
+      files.find((f) => absolute.endsWith(`/${f.path}`) || f.path.endsWith(`/${absolute}`)) ||
+      files.find((f) => {
+        const base = absolute.split('/').pop();
+        return Boolean(base) && f.path.split('/').pop() === base;
+      });
+    if (!target) return;
+    const line = finding.codeLocation.lineRange.start;
+    if (target.path === review.selectedFilePath) {
+      const timer = setTimeout(() => {
+        try {
+          editorApi?.scrollToLine({ line, highlight: true });
+        } catch {}
+      }, 120);
+      void timer;
+      return;
+    }
+    pendingScrollRef.current = { path: target.path, line };
+    review.setSelectedFilePath(target.path);
+  };
+
+  const handleFixRequested = (prompt: string) => {
+    dispatchBioF3Event(biof3Events.copilotAsk, { prompt });
+  };
+
+  // Reset transient AI review panel visibility with the drawer itself; the
+  // agent hook keeps its own abort-on-unmount behaviour.
+  useEffect(() => {
+    if (!isOpen) setShowAiReview(false);
+  }, [isOpen]);
 
   const [commitMsg, setCommitMsg] = useState('');
   const [showCommitDialog, setShowCommitDialog] = useState(false);
@@ -188,6 +269,15 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
           </span>
           <button
             type="button"
+            className={`wt-btn wt-ai-review-toggle${showAiReview ? ' wt-ai-review-toggle-active' : ''}`}
+            onClick={() => setShowAiReview((prev) => !prev)}
+            aria-pressed={showAiReview}
+            title="对当前工作区变更运行 AI 评审（Codex /review 体验）"
+          >
+            AI 审阅
+          </button>
+          <button
+            type="button"
             className="wt-btn wt-edit-btn"
             onClick={() => setIsEditDrawerOpen(true)}
             disabled={!selectedFile || selectedFile.binary}
@@ -237,6 +327,15 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
         <div className="wt-error" role="alert">{review.error}</div>
       )}
 
+      {showAiReview && (
+        <ReviewFindingsPanel
+          agent={reviewAgent}
+          projectId={projectId}
+          onSelectFinding={handleSelectFinding}
+          onFixRequested={handleFixRequested}
+        />
+      )}
+
       <div className="wt-body">
         <aside className="wt-file-list">
           <div className="wt-file-list-title">
@@ -284,7 +383,11 @@ export function WorkingTreeReview({ isOpen, onClose }: WorkingTreeReviewProps) {
                 )}
                 <span className="wt-file-hunk-count">{selectedFile.hunks.length} hunk(s)</span>
               </div>
-              <CodeMirrorDiffView filePath={selectedFile.path} isBinary={selectedFile.binary} />
+              <CodeMirrorDiffView
+                filePath={selectedFile.path}
+                isBinary={selectedFile.binary}
+                onEditorApi={setEditorApi}
+              />
             </div>
           )}
         </main>

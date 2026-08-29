@@ -1,0 +1,45 @@
+{
+  "capturedAt": "2026-08-29T00:27:48.000Z",
+  "boundary": "dev Electron",
+  "url": "http://localhost:3000/project/p_mt15b0aw_f0xa",
+  "commit": "c09a96a",
+  "passed": true,
+  "qualificationEligible": false,
+  "purpose": "BLOCK-25 P3 acceptance: Codex-parity AI review loop over the workspace repo (scratch fixture with three planted bugs), real provider run on the DeepSeek channel.",
+  "checks": {
+    "launchFromDrawer": true,
+    "channelPickerUsed": "DeepSeek (composer-independent selection)",
+    "readOnlySubAgentRan": true,
+    "toolEventsObservable": true,
+    "findingsRendered": 3,
+    "findings": [
+      {
+        "priority": "P1",
+        "title": "[P1] Remove hardcoded live API key from source",
+        "location": "scratch-review-fixture.js:2-2",
+        "bodySnippet": "`scratch-review-fixture.js` hardcodes a live-looking API key (`sk-live-0123456789abcdef0123456789abcdef`) in the source and exports it as the default. Even in a"
+      },
+      {
+        "priority": "P1",
+        "title": "[P1] Fix off-by-one in average loop",
+        "location": "scratch-review-fixture.js:6-8",
+        "bodySnippet": "The loop in `average` runs `i <= values.length`, so on the final iteration it reads `values[length]` (undefined). That turns `sum` into `NaN`, so `average` alwa"
+      },
+      {
+        "priority": "P2",
+        "title": "[P2] Avoid eval for user-provided expressions",
+        "location": "scratch-review-fixture.js:12-14",
+        "bodySnippet": "`runUserExpression` passes arbitrary user input directly to `eval`, which enables arbitrary code execution if the input is untrusted. If expression evaluation i"
+      }
+    ],
+    "plantedBugsAllCaught": true,
+    "overallVerdict": "patch is incorrect",
+    "findingClickJumpsToDiffLine": true,
+    "selectedFileAfterJump": "scratch-review-fixture.js",
+    "diffRenderedAfterJump": true,
+    "sameFileReJumpPulse": true,
+    "fixHandOffToChat": true,
+    "honestFailurePaths": "provider Account Suspension / TLS disconnect / budget exhaustion all surfaced verbatim during bring-up (subsequently hardened: error event mapping, bounded retry, convergence nudge)"
+  },
+  "notes": "Diff-embedding (ba02c12) was required: models left to discover the diff themselves wandered the repository until the budget expired. WTR staged-only diff defect fixed separately (c228beb)."
+}

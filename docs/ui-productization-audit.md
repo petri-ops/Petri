@@ -1485,3 +1485,17 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：BLOCK-22 focused vitest 53/53（ChatCardLinkBridge 7 + pendingScrollContext 6 + WorkspaceFilePreviewBridge 8 用例）。实机验证已于 BLOCK-24 P2 完成，结论为"生产侧已接、消费侧未挂载"。
 
 **状态**: in_progress (链路组件已实现 + 单元验证；生产侧已接、消费侧未挂载已实机取证；挂载属业务侧决策)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-202: BLOCK-25 — Codex 同款 AI 代码审阅（WTR 抽屉内 /review 闭环） (2026-08-29 verified)
+
+**目标**：把 openai/codex 的 `/review` 体验落地到 Working Tree Review 抽屉：选择目标与模型渠道 → 只读评审子代理跑真实 diff → 结构化 findings（P0-P3 优先级 / 置信度 / file:line）→ 点击跳转 diff 行 → 勾选后一键「修复选中项」回主聊天。
+
+**改动范围**：
+- 后端 `core/r-server/agent-review/`（review-prompts / review-git / review-output / review-runner）：Codex rubric 移植（只读边界 + P0-P3 + 严格 JSON schema + AGENTS.md 规则归因）、read-only 命令白名单（git 只读子命令 + cat/head/tail/wc/sed/grep/rg，tokenize 拒绝 shell 元字符，execFile 免 shell，逐工具写/执行旗标黑名单）、三级容错解析（全文 JSON → 嵌入 JSON → 纯文本兜底）+ 严格 sanitizer（范围/优先级/置信度钳制，坏 finding 逐条丢弃计数）、有界工具循环（12 迭代 / 24 调用）+ 收敛催促 + 瞬时网络错误单次重试。
+- 路由 `routes/agent-review.js`（POST /api/agent/review，kind=review，复用 agent task store / 既有 SSE 订阅与取消端点，0 新增 MCP 工具）；runner 预计算 diff（status + diff HEAD / merge-base / git show，60k 截断）内嵌提示。
+- 前端 `lib/review-types.ts` + `lib/review-client.ts` + WTR 抽屉 `ReviewFindingsPanel`（目标/渠道选择、P0-P3 徽标、verdict 徽章、丢弃计数、file:line 点击跳转、勾选、修复选中项）+ `useCodeReviewAgent` 状态机；`CodeMirrorDiffView` 暴露 EditorApi 供跳行；同文件跳转直接滚动，跨文件经 pending-scroll 延迟。
+- 顺带修复（验收暴露的真实缺陷）：WTR diff 通道 staged-only 变更永远空面板（`git diff` 不含 staged → 改 `git diff HEAD`，c228beb）。
+
+**验证**：定向测试 21/21（review-output / review-prompts / review-git，含真实临时仓库 git exec 与路径穿越拒绝）；tsc --noEmit 0；WTR focused vitest 8/8。**2026-08-29 dev Electron 实机 verified**：scratch fixture（三个埋入 bug：硬编码 key / 越界循环 NaN / eval RCE）+ DeepSeek 渠道真实评审一轮 → 3 条 findings 全中（P1/P1/P2，行号准确）、verdict "patch is incorrect"、点击跳转选中文件并滚动到行（跨文件 + 同文件 pulse）、勾选 2 项后「修复选中项」直达聊天（copilotAsk 既有语义）。证据 `acceptance/ui-202/electron-codex-parity-review-dev.json` + 截图。过程性失败（渠道 Account Suspension / TLS 抖动 / 收敛不达标）均如实浮出并就地加固；模型自找 diff 会 wandering 的问题以 diff 内嵌解决。
+
+**状态**: verified (dev Electron 边界内；评审质量依赖所选渠道模型，无 findings/渠道失败均为诚实展示)。G0 开发期常态 · 不外推 packaged / Provider / GA。

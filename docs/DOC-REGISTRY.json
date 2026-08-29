@@ -2253,7 +2253,7 @@
       "id": "BLOCK-25-CODEX-PARITY-REVIEW",
       "path": "docs/block-25-codex-parity-review-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-25-codex-parity-review",
       "entrypoint": "docs/README.md",
@@ -2261,12 +2261,22 @@
         "block-25",
         "code-review",
         "codex-parity",
-        "G0"
+        "G0",
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-28 用户裁决（'实现和 codex 一样的代码审阅效果'）启动的唯一 active 工作包。参考实现为本地检出 desktop/codex/（openai/codex）：ReviewTarget 四目标 + rubric 系统提示 + 只读评审子会话 + ReviewOutputEvent 结构化 findings（P0-P3/置信度/file:line）+ 勾选回传修复。落地在既有资产上：BLOCK-20 diff IPC + BLOCK-22/23 CodeMirror diff + UI-140 sub-agent 运行时。范围：协议与 TS 类型、只读 review 子任务 runner（工具白名单=只读 git/shell，禁写）、三级容错解析、WTR 抽屉 findings UI（跳转 diff 行 = UI-194 缺失的消费者 + 勾选回主聊天修复）。0 新增 MCP 工具；IPC 新增仅限 review 启动/状态通道。不外推：写侧自动化 / guardian 自动审 / packaged / Provider / GA / P7。",
+      "notes": "2026-08-28 用户裁决启动（\"实现和 codex 一样的代码审阅效果\"），2026-08-29 收口 completed。落地：只读评审子代理（rubric 移植 + read-only 命令白名单 + 三级容错解析 sanitizer + 有界工具循环 + 收敛催促 + 瞬时网络重试 + diff 内嵌），POST /api/agent/review 复用 agent task store（0 新增 MCP 工具，SSE/取消复用既有端点），WTR 抽屉 findings UI（P0-P3 徽标 / verdict / file:line 跳转 / 勾选 / 修复选中项直达聊天 / 渠道选择默认作曲家当前渠道）。实机 verified（UI-202，dev Electron）：DeepSeek 渠道评审三埋点 fixture，3/3 findings 全中、verdict 正确、跳转与回传全通；证据 acceptance/ui-202/。顺带修复 WTR staged-only diff 空面板缺陷（c228beb）。门禁：review 测试 21/21、WTR vitest 8/8、tsc 0、docs/ui-audit 门禁绿。未启动候选：base-branch/commit 目标、detached 会话、review 模型配置持久化。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "registeredAt": "2026-08-28",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-REGISTERED"
+      "phase": "COMPLETED",
+      "linkedCommits": [
+        "0ca7e59",
+        "c3b91fd",
+        "b4c1b9a",
+        "ba02c12",
+        "c228beb",
+        "c09a96a"
+      ]
     }
   ],
   "lastUpdated": "2026-08-28",

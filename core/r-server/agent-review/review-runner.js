@@ -24,6 +24,7 @@ const { parseReviewOutputEvent } = require('./review-output');
 const MAX_ITERATIONS = 12;
 const MAX_TOOL_CALLS = 24;
 const MAX_TOOL_OUTPUT_CHARS = 16_000;
+const MAX_DIFF_CHARS = 60_000;
 
 const REVIEW_TOOLS = [
   {
@@ -119,6 +120,36 @@ async function executeReviewToolCall(call, workspacePath) {
  * Run the review conversation. Resolves { ok, reviewOutput?, error? } where
  * reviewOutput is the sanitized event from review-output.js.
  */
+/**
+ * Precompute the diff under review so the reviewer does not have to discover
+ * it by trial and error. DeepSeek-class models wander the repository when
+ * left to find the diff themselves; embedding it makes convergence the
+ * default. Tools remain available for context beyond the diff.
+ */
+async function collectDiffContext(workspacePath, target) {
+  const sections = [];
+  if (target.type === 'uncommitted_changes') {
+    const status = await execReviewCommand('git status --short', workspacePath);
+    if (status.ok && status.stdout.trim()) {
+      sections.push(`git status --short:\n${status.stdout.trim()}`);
+    }
+    const diff = await execReviewCommand('git diff HEAD', workspacePath);
+    if (diff.ok && diff.stdout.trim()) sections.push(`git diff HEAD:\n${diff.stdout}`);
+  } else if (target.type === 'base_branch') {
+    const mergeBaseSha = await resolveMergeBaseSha(workspacePath, target.branch);
+    const range = mergeBaseSha || target.branch;
+    const diff = await execReviewCommand(`git diff ${range}`, workspacePath);
+    if (diff.ok && diff.stdout.trim()) sections.push(`git diff ${range}:\n${diff.stdout}`);
+  } else if (target.type === 'commit') {
+    const show = await execReviewCommand(`git show ${target.sha}`, workspacePath);
+    if (show.ok && show.stdout.trim()) sections.push(`git show ${target.sha}:\n${show.stdout}`);
+  }
+  if (sections.length === 0) return null;
+  const joined = sections.join('\n\n');
+  if (joined.length <= MAX_DIFF_CHARS) return joined;
+  return `${joined.slice(0, MAX_DIFF_CHARS)}\n...[diff truncated at ${MAX_DIFF_CHARS} chars]`;
+}
+
 async function runReviewTask({
   taskId,
   userId,
@@ -143,6 +174,18 @@ async function runReviewTask({
     } else {
       userPrompt = buildReviewPrompt(target);
     }
+    // The reviewer needs the workspace root to resolve absolute paths for
+    // review_read_file (code_location uses absolute_file_path).
+    userPrompt += `\n\nProject workspace root: ${cwd}`;
+    const diffContext = await collectDiffContext(cwd, target);
+    if (diffContext) {
+      userPrompt += `\n\n=== Diff under review (precomputed) ===\n${diffContext}`;
+      userPrompt +=
+        '\n\nThe diff above IS the change under review. Review it directly; use review_git / review_read_file only when you genuinely need surrounding context, then output the final JSON. Do not explore the repository at large — findings must come from the diff.';
+    } else if (target.type === 'uncommitted_changes') {
+      userPrompt +=
+        '\n\nNo working-tree diff was found. Verify with review_git (git status --short); if the tree is genuinely clean, output the final JSON with zero findings.';
+    }
   } catch (error) {
     return { ok: false, error: `review prompt build failed: ${String(error && error.message).slice(0, 200)}` };
   }
@@ -159,24 +202,39 @@ async function runReviewTask({
   for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration += 1) {
     if (cancelled()) return { ok: false, error: 'cancelled' };
 
-    const upJson = await callChatProvider(
-      providerName,
-      apiKey,
-      {
-        messages,
-        temperature: 0.2,
-        max_tokens: 8192,
-        tools: REVIEW_TOOLS,
-        tool_choice: 'auto',
-      },
-      { userId: userId || null, kind: 'review_iter' },
-      (event) => {
-        if (event && event.type === 'content_delta' && event.content) {
-          emit({ event: 'delta', choices: [{ delta: { content: event.content } }] });
-        }
-      },
-      { baseUrl, profileId, modelOverride: modelName, signal: undefined }
-    );
+    // Streaming mode: the final message.content can be empty while the text
+    // arrives as content_delta events (same contract as loop-orchestrator's
+    // streamedText), so accumulate and prefer whichever is non-empty.
+    let streamedText = '';
+    const onStreamEvent = (event) => {
+      if (event && event.type === 'content_delta' && event.content) {
+        streamedText += event.content;
+        emit({ event: 'delta', choices: [{ delta: { content: event.content } }] });
+      }
+    };
+    const reqBody = {
+      messages,
+      temperature: 0.2,
+      max_tokens: 8192,
+      tools: REVIEW_TOOLS,
+      tool_choice: 'auto',
+    };
+    const telemetry = { userId: userId || null, kind: 'review_iter' };
+    const callOpts = { baseUrl, profileId, modelOverride: modelName, signal: undefined };
+    let upJson = await callChatProvider(providerName, apiKey, reqBody, telemetry, onStreamEvent, callOpts);
+    // One bounded retry for transient transport kills (TLS disconnect /
+    // ECONNRESET class) that produced no streamed content — a flaky proxy
+    // must not abort an otherwise healthy review run. Retries only while
+    // nothing has streamed and no tool call was consumed this iteration.
+    if (
+      upJson && upJson.error
+      && streamedText.length === 0
+      && /socket disconnected|tls|econnreset|etimedout|fetch failed|network|epipe/i.test(String(upJson.error))
+    ) {
+      emit({ event: 'agent_status', phase: 'review_retry', reason: 'transient_network_error' });
+      await new Promise((r) => setTimeout(r, 1500));
+      upJson = await callChatProvider(providerName, apiKey, reqBody, telemetry, onStreamEvent, callOpts);
+    }
 
     if (!upJson || upJson.error || !upJson.choices || !upJson.choices[0]) {
       const reason = String((upJson && (upJson.message || upJson.error)) || 'provider returned no choices');
@@ -185,7 +243,9 @@ async function runReviewTask({
 
     const msg = upJson.choices[0].message || {};
     const toolCalls = Array.isArray(msg.tool_calls) ? msg.tool_calls : [];
-    const contentText = typeof msg.content === 'string' ? msg.content : '';
+    const contentText = (typeof msg.content === 'string' && msg.content.trim())
+      ? msg.content
+      : streamedText;
 
     if (toolCalls.length === 0) {
       finalText = contentText;
@@ -203,12 +263,33 @@ async function runReviewTask({
       if (toolCallCount > MAX_TOOL_CALLS) {
         return { ok: false, error: `review tool call budget exceeded (${MAX_TOOL_CALLS})` };
       }
-      emit({ event: 'agent_status', phase: 'review_tool', iteration, name: call.function && call.function.name });
+      let argsPreview = '';
+      try {
+        const parsed = JSON.parse((call.function && call.function.arguments) || '{}');
+        argsPreview = String(parsed.command || parsed.path || '').slice(0, 140);
+      } catch {}
+      emit({
+        event: 'agent_status',
+        phase: 'review_tool',
+        iteration,
+        name: call.function && call.function.name,
+        detail: argsPreview,
+      });
       const result = await executeReviewToolCall(call, cwd);
       messages.push({
         role: 'tool',
         tool_call_id: call.id,
         content: result.output,
+      });
+    }
+    // Nudge AFTER the tool results — tool_calls messages must be followed
+    // immediately by their tool responses (OpenAI-compatible protocol).
+    if (MAX_ITERATIONS - iteration <= 3) {
+      messages.push({
+        role: 'user',
+        content:
+          `Inspection budget nearly exhausted (${iteration}/${MAX_ITERATIONS} iterations used). ` +
+          'Stop exploring. Based on what you have already seen, output ONLY the final JSON verdict now.',
       });
     }
   }

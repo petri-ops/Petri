@@ -66,6 +66,20 @@ function resolveGitAdapter() {
 }
 
 /**
+ * BLOCK-25 acceptance fix: WTR's baseline is "working tree vs git HEAD"
+ * (BLOCK-20 spec), so the default diff must include staged-only changes.
+ * A plain `git diff` shows unstaged changes only, which left files with
+ * staged-only edits rendering an empty diff panel. Explicit staged
+ * requests keep using --cached.
+ */
+function diffForReview(adapter, paths, stagedOnly) {
+  if (stagedOnly) {
+    return adapter.diff({ paths, staged: true });
+  }
+  return adapter.diff({ paths, fromRef: 'HEAD' });
+}
+
+/**
  * 把 unified diff text 解析为 file→hunks 树。若含 `Binary files ... differ` 行则整文件标 binary。
  * @param {string} diffText
  * @returns {{ files: Array<{ path: string, oldPath: string|null, hunks: any[], binary: boolean }>, truncated: boolean, summary: { added: number, removed: number } }}
@@ -251,11 +265,11 @@ function setupWorkingTreeReviewIpc(options = {}) {
         if (changedPaths.length === 0) {
           return { files: [], truncated: false, summary: { added: 0, removed: 0 } };
         }
-        const rawAll = adapter.diff({ paths: changedPaths, staged: !!args.staged });
+        const rawAll = diffForReview(adapter, changedPaths, !!args.staged);
         const parsedAll = parseDiffFiles(rawAll.patch || '');
         return parsedAll;
       }
-      const raw = adapter.diff({ paths: effectivePaths, staged: !!args.staged });
+      const raw = diffForReview(adapter, effectivePaths, !!args.staged);
       const parsed = parseDiffFiles(raw.patch || '');
       return parsed;
     });

@@ -101,3 +101,34 @@ implemented, unit-verified, and dev-Electron evidenced, with ledgers synced
 and the review flow honest about its model-dependence (no findings when no
 channel is configured is an acceptable, surfaced state).
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 6 Closeout record (2026-08-29)
+
+- P1 `0ca7e59`: review sub-agent backend (prompts / read-only git boundary /
+  parser-sanitizer / bounded runner) + route `POST /api/agent/review` on the
+  shared agent task store (0 new MCP tools, existing SSE + cancel reused);
+  focused tests 21/21.
+- P2 `c3b91fd` + `b4c1b9a`: findings panel (priority badges, verdict, jump,
+  checkboxes, 修复选中项), EditorApi exposure, task-failure honesty (error
+  events map to the panel instead of rendering as zero findings), and a
+  review channel picker defaulting to the composer's active preset.
+- Acceptance-hardening fixes `ba02c12` (six squashed): streamed final text,
+  transient-transport retry, convergence nudge + tool observability,
+  absolute-path file reads + workspace root in prompt, and diff embedding —
+  the decisive one: models left to discover the diff themselves wandered the
+  repository until the budget expired.
+- Separate defect fixed under this package `c228beb`: WTR diff covered
+  unstaged changes only, so staged-only edits rendered an empty diff panel
+  forever (`git diff` → `git diff HEAD`).
+- P3 `c09a96a` evidence: dev Electron, DeepSeek channel, real review of a
+  scratch fixture with three planted bugs — 3/3 findings caught
+  (P1 hardcoded key, P1 off-by-one NaN, P2 eval RCE) with accurate line
+  ranges, verdict "patch is incorrect", cross-file and same-file finding
+  jumps with pulse, fix hand-off delivered to chat. Evidence:
+  `acceptance/ui-202/electron-codex-parity-review-dev.json` + screenshot.
+  Ledger: UI-202 verified (dev Electron boundary).
+- Gates: review tests 21/21, WTR vitest 8/8, tsc --noEmit 0,
+  docs:check / ui:audit:check / docs:reconcile clean at closeout.
+- Follow-up candidates (not started): base-branch / commit review targets
+  in the picker, detached review sessions, review-model config persistence.
+G0 开发期常态 · 不外推 packaged/Provider/GA。

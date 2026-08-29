@@ -145,18 +145,20 @@ function execReviewCommand(command, workspacePath, { timeoutMs } = {}) {
 }
 
 /**
- * Resolve a workspace-relative file path and read it with a hard size cap.
- * Path traversal outside the workspace is denied.
+ * Read a text file from the workspace. Accepts workspace-relative AND
+ * absolute paths (the review rubric's code_location contract uses absolute
+ * paths); absolute paths must resolve inside the workspace. Hard size cap.
  */
 function readWorkspaceFile(filePath, workspacePath, { maxBytes = 256 * 1024 } = {}) {
   return new Promise((resolve) => {
-    const relative = typeof filePath === 'string' ? filePath.trim().replace(/^\/+/, '') : '';
-    if (!relative || relative.includes('..') || relative.includes('\0')) {
+    const raw = typeof filePath === 'string' ? filePath.trim() : '';
+    if (!raw || raw.includes('\0') || raw.includes('..')) {
       resolve({ ok: false, error: 'path_invalid' });
       return;
     }
-    const target = path.resolve(workspacePath, relative);
-    if (!target.startsWith(`${path.resolve(workspacePath)}${path.sep}`)) {
+    const workspaceRoot = path.resolve(workspacePath);
+    const target = path.isAbsolute(raw) ? path.resolve(raw) : path.resolve(workspaceRoot, raw);
+    if (target !== workspaceRoot && !target.startsWith(`${workspaceRoot}${path.sep}`)) {
       resolve({ ok: false, error: 'path_outside_workspace' });
       return;
     }
