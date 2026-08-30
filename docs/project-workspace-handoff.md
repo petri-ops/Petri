@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-30（BLOCK-30 单后端收敛与更名已收口：py-server/gateway 摘除、core/r-server → core/biof3-server；P6 证据重采待安静环境，见 roadmap；当前无 active 工作包）
+最后更新：2026-08-30（BLOCK-30 单后端收敛与更名已收口：py-server/gateway 摘除、core/r-server → core/biof3-server；P6 证据已重采回绿，g0:result-studio:p6 0 失败；当前无 active 工作包）
 
 ## Session Snapshot
 

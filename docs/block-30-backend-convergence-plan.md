@@ -166,3 +166,16 @@ test/workspace-data-import.test.mjs
 - 基线 168 → P5 172 的 +4 即上述 4 例，修复后无新增回归。
 - P6 canonical evidence：`p6_current_source_tree_not_exact` fail-closed 按设计生效
   （206 文件绑定含旧路径 + 旧 commit），重采运行手册见 §P5 收口记与 AUDIT-LOG 待处理项。
+
+
+## 附录 C · P6 证据重采闭环（2026-08-30，HEAD=508999c）
+
+1. `508999c`：补齐 impact-map 的 16 个 UI 证据目录映射（acceptance/ui-193…220，
+   BLOCK-22~29 期间累积的基线既有债务）。该债务使 test-affected 用例自 08-29 起在全量
+   跑中持续红，且该用例位于 P6 门禁测试清单内，阻塞重采链。
+2. 干净树重采：首次尝试被脏树 `p6_evidence_source_binding_not_current` fail-closed
+   拦截（采集要求 committed tree，机制按设计工作）；提交映射修复后重跑成功。
+3. 证据：`capturedAt=2026-08-30T10:44:52Z`、`sourceCommit=508999c`、10/10 canonical
+   checks、`sourceCommitMatchesSourceHashes=true`。
+4. 整条门禁 `npm run g0:result-studio:p6`：tests 363 / pass 356 / **fail 0** +
+   PASS 10/10。BLOCK-30 无遗留。

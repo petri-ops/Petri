@@ -336,7 +336,9 @@ P4 更名 `core/biof3-server`（`4e51ae1`，534 文件原子提交；env 变量�
 历史文档刻意不改）。验证：定向测试全绿、tsc 0、前端 build、隔离启动
 health ok + 6 Python 工具注册、docs:check 161。
 
-**遗留跟踪**：P6 canonical evidence 的 206 文件 source binding 因更名 fail-closed
-（`p6_current_source_tree_not_exact`，机制按设计工作）；重采须在安静环境跑
-`npm run g0:result-studio:p6:update`（真实重启/压力/恢复矩阵，对负载敏感）。
+**遗留已闭环（同日）**：`508999c` 补齐 16 个 UI 证据目录 impact-map 映射（基线既有
+债务，曾阻塞重采链）后，干净树重采 `--write-evidence` 成功——证据绑定
+`sourceCommit=508999c`、10/10 canonical checks；`npm run g0:result-studio:p6`
+整条回绿（363 tests / fail 0）。首次尝试被脏树 `p6_evidence_source_binding_not_current`
+fail-closed 拦截，机制按设计工作。
 G0 开发期常态 · 不外推 packaged/Provider/GA.
