@@ -1643,3 +1643,17 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；定向 vitest 19/19（ReviewMode 7，含退出按钮 2 新用例）。**2026-08-29 dev Electron 实机 verified**：CDP 断言——「+」菜单含「审阅」项、点击打开 520px dock、面板「退出」按钮点击关闭 dock；截图 `acceptance/ui-213/`。
 
 **状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-214: BLOCK-28.5 — 审阅并入右侧边栏 tab 体系（退役 wt-dock 浮层另类） (2026-08-30 verified)
+
+**用户反馈**：「审阅这个内容界面应该像其它选项一样嵌入在右侧边栏内部的……目前的像是一个另类」——BLOCK-28.2 的 wt-dock（position: fixed 520px 浮层）悬浮在侧栏之上，与结果/文件/后端/浏览器/聊天/分析的 RightPanel 多 tab 体系不一致。
+
+**改动范围**：
+- `RightPanelMode` 增加 `'review'`；`RIGHT_PANEL_ITEMS` 增加审阅项——「+」菜单原生包含（删除 BLOCK-28.4 的 concat hack 与 `onSelectToolItem` 特殊分支），TitleBar tab 条自动获得「审阅」pill。
+- RightPanel 渲染 `tab === 'review'` 分支：复用 `ReviewMode variant="dock"`（横向文件条紧凑形态）填满 tab 容器（`.rightPanelReviewTab` overflow hidden）；退出按钮/Esc = `closeRightPanelTab('review')`。
+- 全局 `workingTreeOpen` ⇄ review tab 双向同步（ProjectWorkspace effect）：TitleBar 分支按钮 / agent task-done 圆点行为不变；用户关 tab 回写 `setWorkingTreeOpen(false)`。
+- AppShell wt-dock 浮层降级为兜底：仅 ProjectWorkspace 未挂载的路由（首页/skills/results 页）渲染；首页启动卡片「审阅」改走 `openRightPanel('review')`。
+
+**验证**：tsc 0；定向 vitest（WorkingTreeReview 3 文件全绿；TitleBar 8 failed 为台账记录的 pre-existing 集合，数量一致）。**2026-08-30 dev 实机 verified**：CDP 断言 6/6——审阅面板嵌入 `aside.rightCol` 内部（region closest('aside') 命中）、`.wt-dock` count=0、tab 条「审阅」pill 激活、退出按钮/Esc 关 tab 且 tab 条同步清除、与「分析」tab 并存切换 keep-alive；截图 `acceptance/ui-214/`。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

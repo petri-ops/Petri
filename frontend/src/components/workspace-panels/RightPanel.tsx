@@ -22,7 +22,8 @@ import {
 } from '@/pages/project-workspace';
 import { tools as staticTools } from '@/pages/_data';
 import { AnalysisLaunchPanel } from '@/components/workspace-panels/AnalysisLaunchPanel';
-import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
+// BLOCK-28.5 — 审阅并入右侧边栏 tab 体系（复用 dock 紧凑形态，填满 tab 容器）
+import { ReviewMode } from '@/components/desktop/WorkingTreeReview/ReviewMode';
 import styles from '@/pages/project-workspace.module.css';
 
 type DispatchSetter<T> = React.Dispatch<React.SetStateAction<T>>;
@@ -108,8 +109,6 @@ export function RightPanel({
   workspaceMode,
   onResize,
 }: RightPanelProps): React.ReactElement | null {
-  // BLOCK-28.2 — 「审阅」启动卡片打开右侧审阅停靠面板
-  const workspacePanels = useWorkspacePanelsContext();
   const handleBrowserNavigationStateChange = React.useCallback(
     ({ canGoBack, canGoForward }: { canGoBack: boolean; canGoForward: boolean }) => {
       ctx.setBrowserCanGoBack(canGoBack);
@@ -137,7 +136,9 @@ export function RightPanel({
                 key={tab}
                 className={`${styles.rightPanelTabContent} ${
                   ctx.rightTab === tab ? styles.rightPanelTabContentActive : ''
-                } ${tab === 'browser' ? styles.rightPanelBrowserTab : ''}`}
+                } ${tab === 'browser' ? styles.rightPanelBrowserTab : ''} ${
+                  tab === 'review' ? styles.rightPanelReviewTab : ''
+                }`}
               >
                 {tab === 'home' && (
                   <EmptyResult
@@ -147,7 +148,7 @@ export function RightPanel({
                     onOpenBrowser={ctx.handleOpenRightBrowser}
                     onOpenFiles={ctx.handleOpenRightFiles}
                     onOpenChat={ctx.handleOpenRightChat}
-                    onOpenReview={workspacePanels.toggleWorkingTree}
+                    onOpenReview={() => ctx.openRightPanel('review')}
                   />
                 )}
                 {tab === 'results' && ctx.projectId && (
@@ -223,6 +224,12 @@ export function RightPanel({
                       ctx.handleAskAgent(`请运行「${tool.title}」分析（${tool.category}）。`);
                       ctx.handleOpenRightChat();
                     }}
+                  />
+                )}
+                {tab === 'review' && (
+                  <ReviewMode
+                    variant="dock"
+                    onClose={() => ctx.closeRightPanelTab('review')}
                   />
                 )}
               </div>

@@ -162,7 +162,7 @@ const markdownSanitizeSchema = {
 
 export type { ActiveArtifact, JobStats } from '@/components/workspace-panels/ResultView';
 
-export type RightPanelMode = 'home' | 'results' | 'files' | 'terminal' | 'browser' | 'chat' | 'analyze';
+export type RightPanelMode = 'home' | 'results' | 'files' | 'terminal' | 'browser' | 'chat' | 'analyze' | 'review';
 
 const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconName }> = [
   { id: 'results', label: '结果', icon: 'bar-chart' },
@@ -171,6 +171,8 @@ const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconNa
   { id: 'browser', label: '浏览器', icon: 'globe' },
   { id: 'chat', label: '聊天', icon: 'sidebar' },
   { id: 'analyze', label: '分析', icon: 'sparkles' },
+  // BLOCK-28.5 — 审阅并入右侧边栏 tab 体系（与其它入口同级，不再是浮层另类）
+  { id: 'review', label: '审阅', icon: 'git-branch' },
 ];
 
 function toCopilotHarnessSummary(index: HarnessIndexSummary | null | undefined): HarnessContextSummary | undefined {
@@ -549,6 +551,21 @@ export function ProjectWorkspace(): React.ReactElement {
     setRightTab(tab);
     setRightOpen(true);
   }, [compactLayout]);
+
+  // BLOCK-28.5 — 审阅并入右侧边栏：全局 workingTreeOpen（TitleBar 分支按钮 /
+  // agent task-done 圆点 / 首页卡片）⇄ review tab 双向同步。
+  // 全局标志翻开 → 打开 review tab；收起 → 关 tab。用户在 TitleBar tab 条或
+  // 面板退出按钮关掉 review tab → 回写全局标志，TitleBar 按钮态保持一致。
+  useEffect(() => {
+    if (shell.workingTreeOpen) openRightPanel('review');
+    else closeRightPanelTab('review');
+  }, [shell.workingTreeOpen, openRightPanel, closeRightPanelTab]);
+
+  useEffect(() => {
+    if (!openRightTabs.includes('review') && shell.workingTreeOpen) {
+      shell.setWorkingTreeOpen(false);
+    }
+  }, [openRightTabs, shell]);
 
   const [allProjects, setAllProjects] = useState<Project[]>([]);
 
@@ -991,23 +1008,15 @@ export function ProjectWorkspace(): React.ReactElement {
       onCloseTab: (tabId) => closeRightPanelTab(tabId as RightPanelMode),
       onMoreAction: () => setRightToolMenuOpen((value) => !value),
       toolMenuOpen: rightToolMenuOpen,
-      toolMenuItems: (RIGHT_PANEL_ITEMS.map((item) => ({
+      toolMenuItems: RIGHT_PANEL_ITEMS.map((item) => ({
         id: item.id,
         label: item.label,
         icon: item.icon,
         isOpen: openRightTabs.includes(item.id),
-      })) as Array<{ id: string; label: string; icon: IconName; isOpen: boolean }>).concat([
-        // BLOCK-28.4 — 「审阅」入口：打开右侧审阅停靠面板（不切换 RightPanelMode）
-        { id: 'review', label: '审阅', icon: 'git-branch' as IconName, isOpen: shell.workingTreeOpen },
-      ]),
+      })),
       onSelectToolItem: (tabId) => {
         if (tabId === 'results') {
           handleOpenRightResults();
-          setRightToolMenuOpen(false);
-          return;
-        }
-        if (tabId === 'review') {
-          shell.toggleWorkingTree();
           setRightToolMenuOpen(false);
           return;
         }

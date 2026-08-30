@@ -3110,6 +3110,11 @@ button.workspacePinnedSummaryMetricCard:hover {
   height: 100%;
 }
 
+/* BLOCK-28.5 — 审阅 tab：填满容器且不滚动（ReviewMode dock 形态自带布局） */
+.rightPanelReviewTab {
+  overflow: hidden;
+}
+
 .rightPanelTabs {
   display: flex;
   align-items: center;

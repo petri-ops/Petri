@@ -2,6 +2,7 @@
 // 路由出口 + 首次启动引导
 
 import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { useLocation } from 'react-router-dom';
 // BLOCK-22 P4.6: DEV ONLY — manual file-open testing entry via window.__biof3DispatchOpenFile
 // Production build: React.lazy + NODE_ENV=production → tree-shakeable, zero runtime cost
 const BioF3OpenFileDevBridge = lazy(() =>
@@ -56,6 +57,12 @@ function DesktopOnboardingMount(): React.ReactElement | null {
 function AppShell(): React.ReactElement {
   const panels = useWorkspacePanelsContext();
   const { isOpen, open, close } = useCommandPalette();
+  const location = useLocation();
+  // BLOCK-28.5 — 项目工作区内审阅已并入右侧边栏 tab（ProjectWorkspace 双向同步），
+  // 浮层只在 ProjectWorkspace 未挂载的路由（首页 / skills / results 页）兜底，
+  // 保证 TitleBar 审阅按钮全局可用。
+  const isWorkspaceRoute =
+    /^\/project\/[^/]+/.test(location.pathname) && !/\/results\/?$/.test(location.pathname);
 
   return (
     <>
@@ -96,8 +103,8 @@ function AppShell(): React.ReactElement {
           commands={[]}
           recentConversations={[]}
         />
-        {/* BLOCK-28.2 — CodeReview 右侧停靠面板（TitleBar 按钮 Toggle，不占主区） */}
-        {panels.workingTreeOpen && (
+        {/* BLOCK-28.5 — 浮层兜底：仅工作区外路由（工作区内为右侧边栏 review tab） */}
+        {panels.workingTreeOpen && !isWorkspaceRoute && (
           <div className="wt-dock" data-testid="review-dock">
             <ReviewMode variant="dock" onClose={panels.toggleWorkingTree} />
           </div>
