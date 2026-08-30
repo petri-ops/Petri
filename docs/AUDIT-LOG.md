@@ -4,7 +4,9 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-30（BLOCK-29.3-COMMIT-DETAIL 收口：审阅提交详情增强——完整提交说明 body + 汇总统计详情头，UI-223 verified，证据 `acceptance/ui-223/`；当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+最后更新：2026-08-30（BLOCK-29.4-COMMIT-FILE-FULLTEXT P0 登记：UI-224 提交时点文件全文查看——纯前端复用 commitFileContent 两版全文加 viewMode 切换；其余只读候选（全分支历史/blame/两提交对比）登记 roadmap 待裁决。此前：BLOCK-29.3 已收口（UI-223 verified）。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+| 2026-08-30 | **BLOCK-29.4-COMMIT-FILE-FULLTEXT P0 启动登记**：用户问「能否看更多的内容呢 理论上只要想都应该能看到的」；AskUserQuestion（全分支历史/文件全文/blame/两提交对比多选）未获勾选，主 Agent 按推荐项取最小增量落地：提交时点文件全文查看（UI-224）。数据流盘点：`git:commit-file-content` 已返回 original/modified 两版全文，`CommitDiffFileView` 本地 revision 已持有，仅 UI 未渲染——纯前端 viewMode 三态切换（diff 默认/全文·改动后/全文·改动前，新增文件改动前禁用，切文件重置），全文复用 CodeMirrorEditor readonly（lineNumbers 内建）+ 扩展名 language 小映射。**范围修正**：其余只读候选（全分支历史 log --all + 分支选择器 / blame / 任意两提交对比 / stash-tag / 未跟踪预览）登记 roadmap 待用户裁决，不擅自扩权；分支切换/push-pull 维持排除。0 新增 IPC / 0 新依赖 / AI 审阅 0 重新引入。阶段：P0 登记 → P1 实现 + 桥桩实机证据 `acceptance/ui-224/` → P2 收口。plan：`docs/block-29-4-commit-file-fulltext-plan.md`。**当前 active**：BLOCK-29.4。G0 开发期常态 · 不外推 packaged/Provider/GA. | BLOCK-29.4-COMMIT-FILE-FULLTEXT / P0-LAUNCH |
 
 | 2026-08-30 | **BLOCK-29.3-COMMIT-DETAIL 收口（UI-223 verified）**：P0 `9d62ac1` 登记 → P1 `38980b6` 落地 → 本 commit P2 收口。git-adapter log 改 `\x01` 记录分隔 + `%b`（多行 body 不能按行切），真实仓库快测过；`git:commit-log` 载荷 additive 增加 message（0 新增通道）；ReviewMode 详情头 `.rvw-commit-info`（subject/作者·时间/汇总统计 N 文件 +A −D 复用 commitDiff summary + body 原生 details 折叠）。**门禁**：tsc 0 / 定向 vitest 23/23（新增详情头用例）/ node --check / docs:check 163 / ui:audit:check / docs:reconcile。**实机**（localhost:3000 磁盘真实 git 桥桩）：详情头折叠展开断言、汇总「2 文件 +11 −0」、无 body 提交不渲染 details，截图 `acceptance/ui-223/`；fixture 验收后 reset --mixed 回滚 0 残留。**观察项**：窄面板 summary 按钮遮挡「改动/历史」tab（UI-219 既有观察项，程序化点击可通过），维持待布局打磨。**当前 active**：NONE。G0 开发期常态 · 不外推 packaged/Provider/GA. | BLOCK-29.3-COMMIT-DETAIL / COMPLETED |
 
