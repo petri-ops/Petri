@@ -1458,22 +1458,8 @@
   color: var(--biof3-on-solid);
 }
 
-.sc-send-cta-stop {
-  background: var(--biof3-text);
-  color: var(--biof3-on-solid);
-}
-
-.sc-send-cta-queue {
-  background: var(--biof3-accent);
-  color: var(--biof3-on-accent);
-}
-
-.sc-queued-count {
-  align-self: center;
-  color: var(--biof3-text-muted);
-  font-size: var(--biof3-font-size-sm);
-  white-space: nowrap;
-}
+/* BLOCK-28.8: .sc-send-cta-stop / .sc-send-cta-queue / .sc-queued-count
+   已随「停止生成 / 排队」按钮移除（用户裁决）。 */
 
 /* HLE-C4R: durable loop status panel. Shows the backend loop phase, attempt
    count and public stage conclusions. Colour tone is honest — a blocked /

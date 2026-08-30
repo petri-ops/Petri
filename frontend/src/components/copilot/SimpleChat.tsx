@@ -752,9 +752,7 @@ export function SimpleChat({
   // approve/reject/auto-approve callbacks that wrap `send`.
   const {
     send,
-    stop,
     regenerate,
-    queue,
     runInBackground,
     streaming,
   } = useChatStream({
@@ -1032,12 +1030,9 @@ export function SimpleChat({
     }
   };
 
-  const queueCurrentPrompt = () => {
-    // The actual queue logic lives in useChatStream (the `queue` callback).
-    // The composer button passes the current input text explicitly so the
-    // hook does not need to depend on the parent-owned `input` state.
-    queue(input.trim());
-  };
+  // BLOCK-28.8 — 移除排队/停止生成按钮（用户裁决）：
+  // 流式期间仅保留禁用态发送按钮；stop/queue 能力保留在 useChatStream 内，
+  // 需要时可经事件或快捷键恢复。
 
   // Create new conversation
   const newConversation = useCallback(async () => {
@@ -1564,36 +1559,14 @@ export function SimpleChat({
                     </>
                   )}
                 </div>
-                {streaming ? (
-                  <>
-                    <button
-                      className="sc-send-cta sc-send-cta-queue"
-                      onClick={queueCurrentPrompt}
-                      disabled={!input.trim()}
-                      title="当前任务完成后发送"
-                      aria-label="当前任务完成后发送"
-                    >
-                      <Icon name="arrow-up" size={12} />
-                    </button>
-                    <button className="sc-send-cta sc-send-cta-stop" onClick={stop} title="停止生成">
-                      <Icon name="square" size={14} />
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    className="sc-send-cta sc-send-cta-send"
-                    onClick={() => send(input)}
-                    disabled={!input.trim()}
-                    title="发送消息"
-                  >
-                    <Icon name="arrow-up" size={12} />
-                  </button>
-                )}
-                {queuedPrompts.length > 0 && (
-                  <span className="sc-queued-count" aria-label={`已排队 ${queuedPrompts.length} 条消息`}>
-                    已排队 {queuedPrompts.length}
-                  </span>
-                )}
+                <button
+                  className="sc-send-cta sc-send-cta-send"
+                  onClick={() => send(input)}
+                  disabled={!input.trim() || streaming}
+                  title={streaming ? '任务进行中…' : '发送消息'}
+                >
+                  <Icon name="arrow-up" size={12} />
+                </button>
                 {/* BLOCK-20: live context-budget ring updated by token_budget SSE event. */}
                 <ContextBudgetButton budget={tokenBudget} activeContextWindow={undefined} />
               </div>

@@ -1684,3 +1684,15 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；定向 vitest 4/4（AgentChangesCard：±明细渲染 / 干净树隐藏 / 点击行派发事件 / agentTaskDone 触发刷新显现）+ copilot 目录全绿。**2026-08-30 dev 实机 verified**：CDP 6/6——注入与磁盘 git 一致的桥桩后（纯浏览器无 preload bridge，Electron 实机走 IPC）卡片渲染「2 个文件 +1 −0」（M README.md +1 −0、? ui287-demo.py +0 −0）；点 README.md 行 → 审阅 tab 自动打开且该文件 aria-selected、文件头「M README.md +1 −0｜1 个 hunk」、diff 渲染 +1 行；折叠/展开、「查看全部」、X 关闭均通过；截图 `acceptance/ui-216/`。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-217: BLOCK-28.8 — 聊天输入区移除「排队 / 停止生成」按钮（用户裁决） (2026-08-30 verified)
+
+**用户反馈**：①「完全访问 / 只读模式」是否起作用（澄清，无代码改动）②会话任务启动时出现的「停止生成」和左边「排队」按钮没必要，取消掉。
+
+**问题 1 澄清（访问模式真实生效）**：链路完整——SimpleChat `accessMode` state → `startConversationRun` context.accessMode → `/api/ai/chat`；后端权威执行：`agent-tool-policy.js:136`（mutating 操作 read 模式拒绝）、`workspace_exec` 需 full（:183）、`workspace-tools.js` 写工具检查（:666/:700）、`agent-execution-policy.js`（accessMode 缺省 read，full 才允许 execution）；前端另有 `accessModeValidator` 同步预检 + 只读模式 ApprovalCard 二次确认（SimpleChat:1330）。
+
+**问题 2 改动范围**：SimpleChat composer 删除流式态 `sc-send-cta-queue`（排队）与 `sc-send-cta-stop`（停止生成）按钮、`queueCurrentPrompt` 包装与「已排队 N 条」角标；流式期间保留唯一发送按钮（禁用态，title「任务进行中…」）。`stop`/`queue` 能力保留在 useChatStream（仅移除按钮入口，需要时可经事件/快捷键恢复）；`queuedPrompts` 排水机制保留。CSS 清理 `.sc-send-cta-stop/.sc-send-cta-queue/.sc-queued-count` 三条规则。
+
+**验证**：tsc 0；copilot 定向 vitest 179/179。**2026-08-30 dev 实机 verified**：CDP 断言——`.sc-send-cta-stop`/`-queue`/`.sc-queued-count` 计数=0、唯一 `.sc-send-cta-send`（空输入禁用守卫正常）、访问选择器在位、改动卡片干净树隐藏；截图 `acceptance/ui-217/`。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

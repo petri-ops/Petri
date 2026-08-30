@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 156,
+    "documentCount": 157,
     "lastUpdated": "2026-08-29",
-    "managedMarkdown": 156
+    "managedMarkdown": 157
   },
   "documents": [
     {
@@ -2485,8 +2485,22 @@
       "registeredAt": "2026-08-30",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-28.8-COMPOSER-CTA-TRIM",
+      "path": "docs/block-28-8-composer-cta-trim-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-28-composer-cta-trim",
+      "entrypoint": "docs/README.md",
+      "tags": ["block-28-8", "chat", "composer", "cta-trim", "G0", "completed", "phase=COMPLETED", "UI-217"],
+      "notes": "2026-08-30 用户反馈启动：任务进行时输入区的「排队」「停止生成」按钮没必要，取消。SimpleChat composer 删除 sc-send-cta-queue/-stop 两按钮 + queueCurrentPrompt + 已排队角标；流式期间保留唯一发送按钮（禁用态）；stop/queue 能力保留在 useChatStream（仅移除按钮入口）；CSS 清理三条规则。附带澄清：完全访问/只读模式真实生效（后端 agent-tool-policy 权威执行）。2026-08-30 收口 verified：tsc 0 / copilot vitest 179/179 / CDP 回归通过，证据 acceptance/ui-217/。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-08-30",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "COMPLETED"
     }
   ],
   "lastUpdated": "2026-08-30",
-  "documentCount": 156
+  "documentCount": 157
 }
