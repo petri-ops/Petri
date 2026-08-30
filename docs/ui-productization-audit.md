@@ -1630,3 +1630,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；定向 vitest 16/16（断言同步中文化）。**2026-08-29 dev Electron 实机 verified**：CDP 计算样式断言——标题「审阅」13px、按钮 12px/8px 圆角/卡片阴影、chips 12px、中文 placeholder 与 meta、进度「n/m 已审」；截图 `acceptance/ui-212/dock-zh.png`。
 
 **状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-213: BLOCK-28.4 — 审阅面板显式退出按钮 + 「+」菜单审阅入口 (2026-08-29 verified)
+
+**用户反馈**：①「审阅界面有退出按钮吗 不然打开了 不知道怎么退出」（现仅 Esc / TitleBar Toggle 隐性入口）②「+」下拉菜单（结果/文件/后端/浏览器/聊天/分析）应加「审阅」入口。
+
+**改动范围**：
+- ReviewMode summary 栏尾部新增「退出」X 按钮（Icon `x`，`data-testid="rvw-exit-button"`）：dock 形态 → `onClose()`（title「关闭审阅面板 (Esc)」）；mode 形态 → `exitReviewMode()`（title「退出审阅模式」）。Esc 语义层级不变（编辑抽屉 → dock 关闭 → 输入框失焦 → mode 退出）。
+- 「+」菜单 `toolMenuItems` 尾部 concat `{ id: 'review', label: '审阅', icon: 'git-branch', isOpen: shell.workingTreeOpen }`；`onSelectToolItem` 对 `review` 走 `shell.toggleWorkingTree()`，不切换 RightPanelMode。
+- 单测补齐：ReviewMode.test.tsx 新增 2 用例（dock 点击退出调 onClose；mode 点击退出经 MemoryRouter 历史栈断言 navigate(-1) 回退）。
+
+**验证**：tsc 0；定向 vitest 19/19（ReviewMode 7，含退出按钮 2 新用例）。**2026-08-29 dev Electron 实机 verified**：CDP 断言——「+」菜单含「审阅」项、点击打开 520px dock、面板「退出」按钮点击关闭 dock；截图 `acceptance/ui-213/`。
+
+**状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

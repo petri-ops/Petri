@@ -270,6 +270,17 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
           >
             全部还原
           </button>
+          <button
+            type="button"
+            className="wt-btn wt-exit-btn"
+            onClick={() => (isDock && onClose ? onClose() : exitReviewMode())}
+            title={isDock ? '关闭审阅面板 (Esc)' : '退出审阅模式'}
+            aria-label="退出审阅"
+            data-testid="rvw-exit-button"
+          >
+            <Icon name="x" size={13} />
+            退出
+          </button>
         </div>
       </header>
       {totalFiles > 0 && (

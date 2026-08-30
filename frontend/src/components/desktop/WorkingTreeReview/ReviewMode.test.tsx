@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ReviewMode } from './ReviewMode';
@@ -211,5 +211,51 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
       expect(container.querySelector('.rvw-empty-state')).not.toBeNull();
     });
     expect(container.querySelector('.rvw-empty-title')?.textContent).toBe('审阅');
+  });
+
+  it('BLOCK-28.4: exit button calls onClose in dock variant', async () => {
+    getBridgeMock.mockReturnValue(makeBridge());
+    const onClose = vi.fn();
+
+    render(
+      <MemoryRouter initialEntries={['/project/p1/results']}>
+        <ReviewMode variant="dock" onClose={onClose} />
+      </MemoryRouter>
+    );
+
+    const exitBtn = await screen.findByTestId('rvw-exit-button');
+    expect(exitBtn.getAttribute('title')).toBe('关闭审阅面板 (Esc)');
+    fireEvent.click(exitBtn);
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('BLOCK-28.4: exit button navigates back in mode variant', async () => {
+    getBridgeMock.mockReturnValue(makeBridge());
+    // jsdom 的 window.history.length 恒为 1，stub 成 >1 才能走 navigate(-1) 分支
+    const lengthSpy = vi.spyOn(window.history, 'length', 'get').mockReturnValue(3);
+    let pathname = '';
+    const LocationProbe = () => {
+      const loc = useLocation();
+      pathname = loc.pathname;
+      return null;
+    };
+
+    render(
+      <MemoryRouter initialEntries={['/project/p1/results', '/review']} initialIndex={1}>
+        <LocationProbe />
+        <ReviewMode />
+      </MemoryRouter>
+    );
+
+    const exitBtn = await screen.findByTestId('rvw-exit-button');
+    expect(pathname).toBe('/review');
+    fireEvent.click(exitBtn);
+
+    // mode 形态无 onClose，退出走历史回退（navigate(-1)）
+    await waitFor(() => {
+      expect(pathname).toBe('/project/p1/results');
+    });
+    lengthSpy.mockRestore();
   });
 });

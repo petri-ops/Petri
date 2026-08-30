@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 152,
+    "documentCount": 153,
     "lastUpdated": "2026-08-29",
-    "managedMarkdown": 152
+    "managedMarkdown": 153
   },
   "documents": [
     {
@@ -2429,8 +2429,22 @@
       "registeredAt": "2026-08-29",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-28.4-REVIEW-EXIT-ENTRY",
+      "path": "docs/block-28-4-review-exit-entry-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-28-review-exit-entry",
+      "entrypoint": "docs/README.md",
+      "tags": ["block-28-4", "review-mode", "exit-button", "plus-menu", "G0", "completed", "phase=COMPLETED", "UI-213"],
+      "notes": "2026-08-29 用户反馈启动：①审阅面板加显式「退出审阅」按钮（现仅 Esc/TitleBar Toggle）②「+」下拉菜单（结果/文件/后端/浏览器/聊天/分析）加「审阅」入口。ReviewMode summary 尾部 X 按钮（dock→onClose / mode→exitReviewMode）；toolMenuItems concat 审阅项，onSelectToolItem 走 toggleWorkingTree。单 PHASE UI-213。0 新增 IPC / 0 新依赖 / AI 审阅 0 重新引入。2026-08-30 收口 verified：tsc 0 / 定向 vitest 19/19 / CDP 实机 8/8，证据 acceptance/ui-213/。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-08-29",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "COMPLETED"
     }
   ],
-  "lastUpdated": "2026-08-29",
-  "documentCount": 152
+  "lastUpdated": "2026-08-30",
+  "documentCount": 153
 }

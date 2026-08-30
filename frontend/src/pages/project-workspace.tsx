@@ -991,15 +991,23 @@ export function ProjectWorkspace(): React.ReactElement {
       onCloseTab: (tabId) => closeRightPanelTab(tabId as RightPanelMode),
       onMoreAction: () => setRightToolMenuOpen((value) => !value),
       toolMenuOpen: rightToolMenuOpen,
-      toolMenuItems: RIGHT_PANEL_ITEMS.map((item) => ({
+      toolMenuItems: (RIGHT_PANEL_ITEMS.map((item) => ({
         id: item.id,
         label: item.label,
         icon: item.icon,
         isOpen: openRightTabs.includes(item.id),
-      })).concat([]),
+      })) as Array<{ id: string; label: string; icon: IconName; isOpen: boolean }>).concat([
+        // BLOCK-28.4 — 「审阅」入口：打开右侧审阅停靠面板（不切换 RightPanelMode）
+        { id: 'review', label: '审阅', icon: 'git-branch' as IconName, isOpen: shell.workingTreeOpen },
+      ]),
       onSelectToolItem: (tabId) => {
         if (tabId === 'results') {
           handleOpenRightResults();
+          setRightToolMenuOpen(false);
+          return;
+        }
+        if (tabId === 'review') {
+          shell.toggleWorkingTree();
           setRightToolMenuOpen(false);
           return;
         }
