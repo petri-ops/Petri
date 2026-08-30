@@ -1,11 +1,11 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-29（BLOCK-28.3 已收口：审阅面板中文化 + 按钮卡片化 + chrome 字号对齐 12px，UI-212 verified。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-08-30（BLOCK-29.3 已收口：审阅历史分区提交详情增强——完整提交说明 body + 汇总统计详情头，UI-223 verified，证据 `acceptance/ui-223/`。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- 无 active 工作包。`BLOCK-28.3-REVIEW-MODE-CHROME-FIX` 已于 2026-08-29 收口（用户反馈驱动）：审阅面板全面中文化（「审阅」）、按钮卡片化对齐首页风格、chrome 字号回落 12px 对齐软件主流；证据 `acceptance/ui-212/`。
-- 留给用户裁决的后续候选（未启动）：UI-193 widget 业务路径与 UI-194 消费侧挂载。
+- 无 active 工作包。`BLOCK-29.3-COMMIT-DETAIL` 已于 2026-08-30 收口（用户反馈驱动）：审阅历史分区点提交可见详情头——subject / 作者·时间 / 汇总统计（N 文件 +A −D）+ 完整提交说明 body 折叠展示（git-adapter log 改 `\x01` 记录分隔解析 `%b`，`git:commit-log` 载荷 additive 增加 message，0 新增 IPC 通道）；证据 `acceptance/ui-223/`。
+- 留给用户裁决的后续候选：审阅窄视口布局打磨（UI-219 观察项：summary 操作按钮遮挡「改动/历史」tab）；git 工具三期（分支切换/暂存区/push-pull/stash-tag-blame，此前裁决排除、用户想加再启动）；UI-193 widget 业务路径与 UI-194 消费侧挂载；ui:audit `--report` 模式 schema 大小写债务（AUDIT-LOG 2026-08-30 🟢）。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 
 ## 当前结论

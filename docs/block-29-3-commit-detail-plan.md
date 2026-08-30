@@ -1,9 +1,9 @@
 # BLOCK-29.3-COMMIT-DETAIL — 提交详情增强（完整提交说明 + 汇总统计） Plan
 
 - **Plan ID**: `BLOCK-29.3-COMMIT-DETAIL`（用户裁决，2026-08-30，选项「完整说明 + ±统计」）
-- **状态**: `active`（P0）
+- **状态**: `completed`（2026-08-30 收口：tsc 0 / 定向 vitest 23/23 / adapter 真实仓库快测 / CDP 实机断言详情头折叠展开 + 汇总统计 + 无 body 不渲染 details，证据 `acceptance/ui-223/`；UI-223 verified）
 - **truthDomain**: `block-29-3-commit-detail`
-- **阶段**: P0 治理登记（本 commit）→ P1 实现（UI-223）+ 实机证据 → P2 收口
+- **阶段**: P0 治理登记（`9d62ac1`）→ P1 实现（UI-223，`38980b6`）+ 实机证据 → P2 收口（本 commit）
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 ## 1. 用户反馈（2026-08-30）

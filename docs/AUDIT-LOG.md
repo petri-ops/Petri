@@ -4,7 +4,9 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-30（BLOCK-29.3-COMMIT-DETAIL P0 登记：UI-223 提交详情增强——完整提交说明 + 汇总统计，plan `docs/block-29-3-commit-detail-plan.md`。此前：UI-221 台账补登 + ui:audit 门禁盲区/`--report` schema 债务登记。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+最后更新：2026-08-30（BLOCK-29.3-COMMIT-DETAIL 收口：审阅提交详情增强——完整提交说明 body + 汇总统计详情头，UI-223 verified，证据 `acceptance/ui-223/`；当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+| 2026-08-30 | **BLOCK-29.3-COMMIT-DETAIL 收口（UI-223 verified）**：P0 `9d62ac1` 登记 → P1 `38980b6` 落地 → 本 commit P2 收口。git-adapter log 改 `\x01` 记录分隔 + `%b`（多行 body 不能按行切），真实仓库快测过；`git:commit-log` 载荷 additive 增加 message（0 新增通道）；ReviewMode 详情头 `.rvw-commit-info`（subject/作者·时间/汇总统计 N 文件 +A −D 复用 commitDiff summary + body 原生 details 折叠）。**门禁**：tsc 0 / 定向 vitest 23/23（新增详情头用例）/ node --check / docs:check 163 / ui:audit:check / docs:reconcile。**实机**（localhost:3000 磁盘真实 git 桥桩）：详情头折叠展开断言、汇总「2 文件 +11 −0」、无 body 提交不渲染 details，截图 `acceptance/ui-223/`；fixture 验收后 reset --mixed 回滚 0 残留。**观察项**：窄面板 summary 按钮遮挡「改动/历史」tab（UI-219 既有观察项，程序化点击可通过），维持待布局打磨。**当前 active**：NONE。G0 开发期常态 · 不外推 packaged/Provider/GA. | BLOCK-29.3-COMMIT-DETAIL / COMPLETED |
 
 | 2026-08-30 | **BLOCK-29.3-COMMIT-DETAIL P0 启动登记**：用户实测审阅「历史」分区反馈 commit 无详细信息（完整提交说明 body 应用内不可见：adapter log 仅解析 `%s` subject 一行），AskUserQuestion 裁决选项「完整说明 + ±统计」。方案（单 PHASE，UI-223）：adapter log 改 `\x01` 记录分隔 + `%b` body；`git:commit-log` 载荷 additive 增加 message（0 新增通道）；提交详情头 `.rvw-commit-info`（subject + author·时间 + 汇总统计复用既有 commitDiff summary + body 原生 details 折叠）。**范围修正**：文件条每文件 ±统计 BLOCK-29 已交付，不重做。非范围：列表行内嵌 body / body 搜索 / amend / 暂存区·分支切换·push-pull 维持排除 / 0 新依赖 / AI 审阅 0 重新引入。阶段：P0 登记 → P1 实现 + CDP 实机证据 `acceptance/ui-223/` → P2 收口。plan：`docs/block-29-3-commit-detail-plan.md`。**当前 active**：BLOCK-29.3。G0 开发期常态 · 不外推 packaged/Provider/GA. | BLOCK-29.3-COMMIT-DETAIL / P0-LAUNCH |
 
