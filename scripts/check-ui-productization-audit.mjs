@@ -46,6 +46,13 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-08-30 BLOCK-30-BACKEND-CONVERGENCE 不可变实现提交 (P1/P2/P4)：
+  // 后端收敛与更名（py-server 摘除 / gateway 摘除 / core/r-server →
+  // core/biof3-server），前端仅路径级 import 变化。UI 影响补登为 UI-222
+  // （合并条目）。豁免同提交台账与 UI-### 编号要求。
+  'edd1116b2b524bfdc96fc16bc16fa2ad8318b216',
+  'd4f459d734b5b7d71076cfb34f661d27e9b8117a',
+  '4e51ae15e6e2d92fa5fa4d59f0a76bb898c56c55',
   // 2026-08-27 UI-199 implementation commit: title has "ui-199" lowercase but
   // the ledger convention wants UI-### uppercase with the full id format the
   // uiIds() regex matches... actually title is "feat(ui-199): ..." which the
@@ -205,6 +212,11 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-08-30 BLOCK-30-BACKEND-CONVERGENCE P1/P2/P4：UI 影响补登为 UI-222
+  // （合并条目，见 LEGACY_MESSAGE_EXEMPTIONS 注释）。豁免同提交台账要求。
+  'edd1116b2b524bfdc96fc16bc16fa2ad8318b216',
+  'd4f459d734b5b7d71076cfb34f661d27e9b8117a',
+  '4e51ae15e6e2d92fa5fa4d59f0a76bb898c56c55',
   // 2026-08-28 P6 evidence collection chain repair 44a4b7e predates the
   // UI-201 canonical ledger reconciliation in this governance commit; shared
   // history is intentionally not rewritten.

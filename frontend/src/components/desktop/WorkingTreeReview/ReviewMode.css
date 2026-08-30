@@ -659,3 +659,88 @@
   max-height: 60vh;
   overflow-y: auto;
 }
+
+/* ===== BLOCK-29.2 — 行内操作（文件历史 / 放弃更改）+ 历史头部 ===== */
+.rvw-acc-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  color: var(--biof3-text-muted);
+  opacity: 0;
+  transition: opacity 0.12s ease, background 0.12s ease;
+  flex-shrink: 0;
+}
+
+.rvw-acc-row:hover .rvw-acc-action {
+  opacity: 1;
+}
+
+.rvw-acc-action:hover {
+  background: var(--biof3-hover);
+  color: var(--biof3-text);
+}
+
+.rvw-acc-action-danger:hover {
+  background: var(--biof3-status-error-bg);
+  color: var(--biof3-status-error-fg);
+}
+
+.rvw-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--biof3-border);
+}
+
+.rvw-history-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--biof3-accent-soft);
+  color: var(--biof3-accent);
+  font-size: var(--biof3-font-size-xs);
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rvw-history-filter-clear {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.rvw-history-filter-clear:hover {
+  color: var(--biof3-text);
+}
+
+.rvw-history-filter-spacer {
+  flex: 0 0 auto;
+}
+
+.rvw-history-more {
+  display: block;
+  width: calc(100% - 20px);
+  margin: 4px 10px 8px;
+  padding: 5px 0;
+  border: 1px dashed var(--biof3-border);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  font-size: var(--biof3-font-size-caption);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.rvw-history-more:hover {
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text);
+}

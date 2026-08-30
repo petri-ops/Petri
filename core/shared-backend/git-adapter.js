@@ -525,7 +525,7 @@ function createGitAdapter(options = {}) {
      * limit 上限 200；ref 必须是安全的 ref 表达式（hex sha / 分支名 / HEAD），
      * 不接受空白与以 '-' 开头的值，防参数注入。
      */
-    log({ limit = 50, ref = 'HEAD', file = null } = {}) {
+    log({ limit = 50, ref = 'HEAD', file = null, skip = 0 } = {}) {
       const maxCount = Math.max(1, Math.min(Number(limit) || 50, 200));
       const refArg = typeof ref === 'string' && ref.trim() && !ref.trim().startsWith('-')
         ? ref.trim()
@@ -534,8 +534,10 @@ function createGitAdapter(options = {}) {
         'log',
         '--pretty=format:%H%x00%h%x00%an%x00%aI%x00%s',
         '--max-count=' + String(maxCount),
-        refArg,
       ];
+      const skipCount = Math.max(0, Math.floor(Number(skip) || 0));
+      if (skipCount > 0) args.push('--skip=' + String(skipCount));
+      args.push(refArg);
       if (typeof file === 'string' && file.trim()) {
         const safeFile = assertSafePathspecs([file.trim()], scope);
         args.push('--', ...safeFile);
@@ -1019,6 +1021,49 @@ function createGitAdapter(options = {}) {
         );
       }
       return { ok: true, reverted: [target] };
+    },
+
+    /**
+     * BLOCK-29.2 — 放弃单个文件的工作区改动（VS Code「Discard Changes」语义）。
+     * tracked 文件 → checkout HEAD 还原；untracked 文件 → 直接删除
+     * （与 VS Code 行为一致）。路径经 assertSafePathspecs 且限制在 workTree 内。
+     */
+    discardFile({ path } = {}) {
+      const safe = assertSafePathspecs([path], scope);
+      const target = safe[0];
+      const tracked = run(['ls-files', '--', target], { allowFailure: true, readOnly: true });
+      const isTracked = tracked.ok && tracked.stdout.trim() !== '';
+      if (!isTracked) {
+        const abs = pathModule.resolve(resolvedWorkTree, target);
+        if (abs !== resolvedWorkTree && !abs.startsWith(resolvedWorkTree + pathModule.sep)) {
+          throw new GitAdapterError('path_escape', 'path escapes work tree.');
+        }
+        if (fs.existsSync(abs)) fs.unlinkSync(abs);
+        return { ok: true, discarded: [target], deleted: true };
+      }
+      const result = run(['checkout', 'HEAD', '--', target], { allowFailure: true });
+      if (!result.ok) {
+        throw new GitAdapterError('git_checkout_failed', `git checkout HEAD -- ${target} failed.`, result);
+      }
+      return { ok: true, discarded: [target], deleted: false };
+    },
+
+    /**
+     * BLOCK-29.2 — 撤销最近一次提交（mixed reset HEAD~1）：提交内容回到
+     * 工作区未暂存状态，可重新审阅。根提交（无父）不可撤销，显式报错。
+     */
+    undoLastCommit() {
+      const head = run(['rev-parse', '--verify', 'HEAD'], { allowFailure: true, readOnly: true });
+      if (!head.ok) {
+        throw new GitAdapterError('no_commits', 'Repository has no commits to undo.');
+      }
+      const parent = run(['rev-parse', '--verify', 'HEAD~1'], { allowFailure: true, readOnly: true });
+      if (!parent.ok) {
+        throw new GitAdapterError('root_commit', 'The root commit cannot be undone.');
+      }
+      const output = run(['reset', '--mixed', 'HEAD~1'], { allowFailure: true });
+      if (!output.ok) throw new GitAdapterError('git_reset_failed', 'git reset HEAD~1 failed.', output);
+      return { ok: true, undoneCommit: head.stdout.trim() };
     },
 
     /**

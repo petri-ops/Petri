@@ -119,14 +119,20 @@ export interface UseWorkingTreeReviewReturn {
   setHistoryView: (view: 'changes' | 'history') => void;
   commits: CommitInfo[] | null;
   commitsLoading: boolean;
+  historyFileFilter: string | null;
+  hasMoreHistory: boolean;
   selectedCommit: CommitInfo | null;
   commitDiff: DiffResult | null;
   commitDiffLoading: boolean;
   selectedCommitFilePath: string | null;
   setSelectedCommitFilePath: (path: string | null) => void;
-  loadHistory: () => Promise<void>;
+  loadHistory: (opts?: { file?: string | null; skip?: number; append?: boolean }) => Promise<void>;
   openCommit: (commit: CommitInfo) => Promise<void>;
   backToCommitList: () => void;
+  /** BLOCK-29.2 — 放弃单文件工作区改动（tracked 还原 / untracked 删除）。 */
+  discardFile: (path: string) => Promise<boolean>;
+  /** BLOCK-29.2 — 撤销最近一次提交（mixed reset，内容回工作区）。 */
+  undoLastCommit: () => Promise<boolean>;
 }
 
 export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}): UseWorkingTreeReviewReturn {
@@ -352,21 +358,30 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
   const [historyView, setHistoryView] = useState<'changes' | 'history'>('changes');
   const [commits, setCommits] = useState<CommitInfo[] | null>(null);
   const [commitsLoading, setCommitsLoading] = useState(false);
+  const [historyFileFilter, setHistoryFileFilter] = useState<string | null>(null);
+  const [hasMoreHistory, setHasMoreHistory] = useState(false);
   const [selectedCommit, setSelectedCommit] = useState<CommitInfo | null>(null);
   const [commitDiff, setCommitDiff] = useState<DiffResult | null>(null);
   const [commitDiffLoading, setCommitDiffLoading] = useState(false);
   const [selectedCommitFilePath, setSelectedCommitFilePath] = useState<string | null>(null);
+  const historyFileFilterRef = useRef<string | null>(null);
+  historyFileFilterRef.current = historyFileFilter;
 
-  const loadHistory = useCallback(async () => {
+  const loadHistory = useCallback(async (opts: { file?: string | null; skip?: number; append?: boolean } = {}) => {
     const bridge = getBridge('workingTreeReview');
     if (!bridge) return;
+    const file = opts.file !== undefined ? opts.file : historyFileFilterRef.current;
+    const skip = Math.max(0, opts.skip ?? 0);
+    const append = opts.append === true;
     setCommitsLoading(true);
     try {
-      const res = await bridge.commitLog({ limit: 50 });
-      if (res.ok && res.data) setCommits(res.data.commits ?? []);
-      else setCommits([]);
+      const res = await bridge.commitLog({ limit: 50, skip, file });
+      const list: CommitInfo[] = res.ok && res.data ? res.data.commits ?? [] : [];
+      setCommits((prev) => (append && prev ? [...prev, ...list] : list));
+      setHistoryFileFilter(file ?? null);
+      setHasMoreHistory(list.length >= 50);
     } catch {
-      setCommits([]);
+      if (!append) setCommits([]);
     } finally {
       setCommitsLoading(false);
     }
@@ -399,6 +414,43 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     setSelectedCommitFilePath(null);
   }, []);
 
+  // BLOCK-29.2 — 放弃单文件工作区改动（tracked 还原 / untracked 删除）
+  const discardFile = useCallback(async (path: string) => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) return false;
+    try {
+      const res = await bridge.discardFile({ path });
+      if (!res.ok) {
+        setError(res.message || res.error || '放弃更改失败。');
+        return false;
+      }
+      await refresh();
+      return true;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      return false;
+    }
+  }, [refresh]);
+
+  // BLOCK-29.2 — 撤销最近一次提交（mixed reset，提交内容回工作区重新审阅）
+  const undoLastCommit = useCallback(async () => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) return false;
+    try {
+      const res = await bridge.undoLastCommit();
+      if (!res.ok) {
+        setError(res.message || res.error || '撤销提交失败。');
+        return false;
+      }
+      await refresh();
+      await loadHistory({});
+      return true;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      return false;
+    }
+  }, [refresh, loadHistory]);
+
   const pendingCount = Object.values(decisions).filter((d) => d === 'pending').length;
   const appliedCount = Object.values(decisions).filter((d) => d === 'accept').length;
   const rejectedCount = Object.values(decisions).filter((d) => d === 'reject').length;
@@ -428,6 +480,8 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     setHistoryView,
     commits,
     commitsLoading,
+    historyFileFilter,
+    hasMoreHistory,
     selectedCommit,
     commitDiff,
     commitDiffLoading,
@@ -436,5 +490,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     loadHistory,
     openCommit,
     backToCommitList,
+    discardFile,
+    undoLastCommit,
   };
 }

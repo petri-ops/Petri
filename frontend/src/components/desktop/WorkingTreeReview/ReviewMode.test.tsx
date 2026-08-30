@@ -62,6 +62,9 @@ function makeBridge(overrides: Record<string, unknown> = {}) {
     commitLog: vi.fn(() => Promise.resolve({ ok: true, data: { commits: [], count: 0 } })),
     commitDiff: vi.fn(() => Promise.resolve({ ok: true, data: { files: [], truncated: false, summary: { added: 0, removed: 0 } } })),
     commitFileContent: vi.fn(() => Promise.resolve({ ok: true, data: { original: '', modified: '' } })),
+    // BLOCK-29.2 — git 工具二期
+    discardFile: vi.fn(() => Promise.resolve({ ok: true, data: { discarded: [], deleted: false } })),
+    undoLastCommit: vi.fn(() => Promise.resolve({ ok: true, data: { undoneCommit: 'abc' } })),
     ...overrides,
   };
 }
@@ -272,6 +275,63 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     await waitFor(() => {
       expect(document.querySelector('.rvw-acc-diff')).not.toBeNull();
     });
+  });
+
+  it('BLOCK-29.2: row discard/file-history actions and history head tools', async () => {
+    const commitLog = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          commits: [
+            { sha: 'a1b2c3d4e5f6', shortSha: 'a1b2c3d', author: 'tester', isoDate: '2026-08-30T10:00:00Z', subject: 'first commit' },
+          ],
+          count: 1,
+        },
+      })
+    );
+    const discardFile = vi.fn(() => Promise.resolve({ ok: true, data: { discarded: ['src/a.py'], deleted: false } }));
+    const undoLastCommit = vi.fn(() => Promise.resolve({ ok: true, data: { undoneCommit: 'a1b2c3d4e5f6' } }));
+    getBridgeMock.mockReturnValue(makeBridge({ commitLog, discardFile, undoLastCommit }));
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    // 行内操作按钮仅存在于 dock 手风琴
+    render(
+      <MemoryRouter initialEntries={['/project/p1/results']}>
+        <ReviewMode variant="dock" onClose={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-review-progress')).toBeTruthy();
+    });
+
+    // 1) 行内「放弃更改」→ confirm 后调用 discardFile
+    fireEvent.click(screen.getByLabelText('放弃对 a.py 的更改'));
+    await waitFor(() => {
+      expect(discardFile).toHaveBeenCalledWith({ path: 'src/a.py' });
+    });
+    expect(confirmSpy).toHaveBeenCalled();
+
+    // 2) 行内「历史」→ 按文件过滤加载
+    fireEvent.click(screen.getByLabelText('查看 a.py 的历史提交'));
+    await waitFor(() => {
+      expect(commitLog).toHaveBeenCalledWith(expect.objectContaining({ file: 'src/a.py' }));
+    });
+    const filter = await screen.findByText(/文件: src\/a\.py/);
+    expect(filter).toBeTruthy();
+
+    // 3) 清除过滤 → file: null
+    fireEvent.click(screen.getByLabelText('清除文件过滤'));
+    await waitFor(() => {
+      expect(commitLog).toHaveBeenCalledWith(expect.objectContaining({ file: null }));
+    });
+
+    // 4) 撤销上次提交 → confirm 后调用 undoLastCommit
+    fireEvent.click(screen.getByText('撤销上次提交'));
+    await waitFor(() => {
+      expect(undoLastCommit).toHaveBeenCalled();
+    });
+    confirmSpy.mockRestore();
   });
 
   it('shows the empty state when the working tree is clean', async () => {

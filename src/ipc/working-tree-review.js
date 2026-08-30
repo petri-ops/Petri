@@ -592,6 +592,30 @@ function setupWorkingTreeReviewIpc(options = {}) {
     });
   });
 
+  // ============================================================
+  // BLOCK-29.2 — git 工具二期（审阅面板内联操作，均带前端确认框）：
+  //   git:discard-file      放弃单文件工作区改动（tracked 还原 / untracked 删除）
+  //   git:undo-last-commit  撤销最近一次提交（mixed reset，内容回工作区）
+  // ============================================================
+  ipcMain.handle('git:discard-file', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      if (!args || typeof args.path !== 'string' || !args.path) {
+        throw new GitAdapterError('path_required', 'path is required.');
+      }
+      return adapter.discardFile({ path: args.path });
+    });
+  });
+
+  ipcMain.handle('git:undo-last-commit', async (event) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      return adapter.undoLastCommit();
+    });
+  });
+
   /**
    * 暴露 main→renderer 通知触发器，供主进程其他模块（如 agent runner / SSE listener）
    * 在任务完成时调用。BLOCK-16 PHASE 3 接入。

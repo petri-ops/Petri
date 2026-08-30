@@ -1736,3 +1736,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；定向 vitest 21/21（新增 dock 手风琴用例：选中文件默认展开 / 点击收起 / 再点展开，makeBridge 补 fileContent）。**2026-08-30 dev 实机 verified**：CDP 6/6——注入桥桩后：`.rvw-filechip`/`.rvw-diff-area` 计数=0、`rvw-accordion` 两行文件行（M README.md +1、Py demo-291.py）、README.md 默认展开且行内绿色新增行、demo-291.py 展开显示未跟踪占位、再点收起、接受后底部提交条出现；截图 `acceptance/ui-220/`。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-222: BLOCK-30 — 单后端收敛与更名的 UI 影响补登（P1/P2/P4 合并条目） (2026-08-30 verified)
+
+**背景**：BLOCK-30-BACKEND-CONVERGENCE（用户裁决，单后端收敛工作包）P1 摘除 py-server（edd1116）、P2 摘除 gateway（d4f459d）、P4 core/r-server 更名 core/biof3-server（4e51ae1）三个提交含前端路径级改动（import/常量指向），但提交时未按台账规则同步 ui-productization-audit.md 与 UI-### 编号。经 ui:audit:check 发现后补登本合并条目，并在 check 脚本 LEGACY_*_EXEMPTIONS 白名单登记三个 sha（惯例：不可变实现提交 + 事后 canonical 补登）。
+
+**UI 影响评估**：前端仅模块解析路径与 `R_SERVER_URL`/`pythonApiBase` 常量指向调整（biof3-server 正名），运行拓扑收敛为 biof3-server + plumber 单后端；组件结构、视觉、交互 0 变化；工具契约 / schema / MCP / 插件格式 0 改动。详见 docs/block-30-backend-convergence-plan.md（P1 edd1116 / P2 d4f459d / P3 2f563a1 改判池接线不接入 / P4 4e51ae1 更名 534 文件原子提交）。
+
+**验证**：BLOCK-30 自身门禁（定向测试全绿、tsc 0、build、隔离启动）+ 本会话快速回归：WorkingTreeReview 定向 vitest 21/21（审阅/git 工具功能不受影响）、tsc 0。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

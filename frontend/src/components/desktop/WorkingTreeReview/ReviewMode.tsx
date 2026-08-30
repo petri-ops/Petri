@@ -467,9 +467,42 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
             </>
           ) : (
             <div className="rvw-history-list" data-testid="rvw-history-list">
+              {/* BLOCK-29.2 — 历史头部：文件过滤徽标 + 撤销上次提交 */}
+              <div className="rvw-history-head">
+                {review.historyFileFilter ? (
+                  <span className="rvw-history-filter" title="仅显示该文件的提交">
+                    文件: {review.historyFileFilter}
+                    <span
+                      role="button"
+                      tabIndex={-1}
+                      className="rvw-history-filter-clear"
+                      aria-label="清除文件过滤"
+                      title="清除过滤"
+                      onClick={() => void review.loadHistory({ file: null })}
+                    >
+                      <Icon name="x" size={10} />
+                    </span>
+                  </span>
+                ) : (
+                  <span className="rvw-history-filter-spacer" />
+                )}
+                <button
+                  type="button"
+                  className="wt-btn"
+                  disabled={review.commitsLoading || !review.commits || review.commits.length === 0}
+                  onClick={() => {
+                    if (window.confirm('撤销最近一次提交？提交内容将回到工作区，可重新审阅。')) {
+                      void review.undoLastCommit();
+                    }
+                  }}
+                  title="撤销最近一次提交（内容回到工作区）"
+                >
+                  撤销上次提交
+                </button>
+              </div>
               {review.commitsLoading && <div className="wt-diff-loading">提交历史加载中…</div>}
               {review.commits && review.commits.length === 0 && (
-                <div className="wt-empty">暂无提交记录。</div>
+                <div className="wt-empty">{review.historyFileFilter ? '该文件暂无提交记录。' : '暂无提交记录。'}</div>
               )}
               {review.commits?.map((c) => (
                 <button
@@ -484,6 +517,15 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                   <span className="rvw-history-meta">{c.author} · {formatCommitDate(c.isoDate)}</span>
                 </button>
               ))}
+              {review.hasMoreHistory && !review.commitsLoading && (
+                <button
+                  type="button"
+                  className="rvw-history-more"
+                  onClick={() => void review.loadHistory({ skip: review.commits?.length ?? 0, append: true })}
+                >
+                  加载更多
+                </button>
+              )}
             </div>
           )
         )}
@@ -527,6 +569,36 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                         {stats.removed > 0 && <span className="rvw-stat-del">−{stats.removed}</span>}
                       </span>
                     ) : null}
+                    {/* BLOCK-29.2 — 行内操作：查看该文件历史 / 放弃更改（span 嵌于按钮行内） */}
+                    <span
+                      role="button"
+                      tabIndex={-1}
+                      className="rvw-acc-action"
+                      title="查看该文件的历史提交"
+                      aria-label={`查看 ${fileName} 的历史提交`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        review.setHistoryView('history');
+                        void review.loadHistory({ file: f.path });
+                      }}
+                    >
+                      <Icon name="clock" size={12} />
+                    </span>
+                    <span
+                      role="button"
+                      tabIndex={-1}
+                      className="rvw-acc-action rvw-acc-action-danger"
+                      title="放弃更改（未跟踪文件将被删除）"
+                      aria-label={`放弃对 ${fileName} 的更改`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm(`放弃对 ${fileName} 的更改？未跟踪文件将被删除，此操作不可撤销。`)) {
+                          void review.discardFile(f.path);
+                        }
+                      }}
+                    >
+                      <Icon name="trash" size={12} />
+                    </span>
                   </button>
                   {expanded && (
                     <div className="rvw-acc-diff">

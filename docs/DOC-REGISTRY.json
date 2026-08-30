@@ -2637,8 +2637,33 @@
       "registeredAt": "2026-08-30",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-29.2-GIT-TOOLS-PHASE2",
+      "path": "docs/block-29-2-git-tools-phase2-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-29-git-tools-phase2",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-29-2",
+        "review-mode",
+        "git-tools",
+        "discard",
+        "undo-commit",
+        "pagination",
+        "G0",
+        "completed",
+        "phase=COMPLETED",
+        "UI-221"
+      ],
+      "notes": "2026-08-30 用户确认 BLOCK-30 进度变化后裁决 git 工具二期 4 项：单文件放弃更改（adapter discardFile：tracked checkout 还原/untracked 删除，路径限 workTree 内）、文件级历史（log file 过滤 + 历史分区过滤徽标可清除）、撤销上次提交（adapter undoLastCommit：mixed reset HEAD~1，根提交拒绝，内容回工作区重新审阅）、历史分页（log --skip，每页 50 append）。IPC git:discard-file/undo-last-commit；dock 行 hover 操作（clock 历史/trash 放弃，confirm 确认）；修复 adapter 内 path 模块遮蔽陷阱（pathModule 别名）。0 新增依赖 / AI 审阅 0 重新引入。2026-08-30 收口 verified：tsc 0 / vitest 22/22 / adapter 真实仓库 4 项快测（skip 分页页序、discard tracked/untracked、undo 后恢复）/ CDP 核心断言，证据 acceptance/ui-221/。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-08-30",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "COMPLETED"
     }
   ],
   "lastUpdated": "2026-08-30 (BLOCK-30 completed)",
-  "documentCount": 161
+  "documentCount": 162
 }

@@ -449,7 +449,7 @@ declare global {
           message?: string;
         }>;
         // BLOCK-29 — 提交历史（审阅面板「历史」分区，只读）
-        commitLog: (params: { limit?: number }) => Promise<{
+        commitLog: (params: { limit?: number; skip?: number; file?: string | null }) => Promise<{
           ok: boolean;
           data?: { commits: Array<{ sha: string; shortSha: string; author: string; isoDate: string; subject: string }>; count: number };
           error?: string;
@@ -464,6 +464,19 @@ declare global {
         commitFileContent: (params: { hash: string; path: string }) => Promise<{
           ok: boolean;
           data?: { original: string; modified: string };
+          error?: string;
+          message?: string;
+        }>;
+        // BLOCK-29.2 — git 工具二期（前端确认后调用）
+        discardFile: (params: { path: string }) => Promise<{
+          ok: boolean;
+          data?: { discarded: string[]; deleted: boolean };
+          error?: string;
+          message?: string;
+        }>;
+        undoLastCommit: () => Promise<{
+          ok: boolean;
+          data?: { undoneCommit: string };
           error?: string;
           message?: string;
         }>;
