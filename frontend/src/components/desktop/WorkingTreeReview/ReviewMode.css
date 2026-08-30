@@ -800,21 +800,11 @@
   color: var(--biof3-text-secondary);
 }
 
-.rvw-commit-body summary {
-  cursor: pointer;
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-secondary);
-  user-select: none;
-}
-
-.rvw-commit-body summary:hover {
-  color: var(--biof3-text);
-}
-
+/* UI-230 — 完整提交说明默认直接展开（用户反馈：点开就应向下展开，不再折叠） */
 .rvw-commit-body pre {
-  margin: 4px 0 0;
+  margin: 0;
   padding: 6px 8px;
-  max-height: 180px;
+  max-height: 40vh;
   overflow: auto;
   white-space: pre-wrap;
   word-break: break-word;

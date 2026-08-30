@@ -294,19 +294,19 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     expect(info.textContent).toContain('+3');
     expect(info.textContent).toContain('−1');
 
-    // 完整提交说明默认折叠（details 内容在 DOM 中但收起）
-    const details = screen.getByText('完整提交说明').closest('details');
-    expect(details).toBeTruthy();
-    expect(details?.textContent).toContain('user ruling line');
-    expect(details?.textContent).toContain('impl detail line');
+    // UI-230 — 完整提交说明默认直接展开（无折叠开关）
+    const body = screen.getByTestId('rvw-commit-body');
+    expect(body.textContent).toContain('user ruling line');
+    expect(body.textContent).toContain('impl detail line');
+    expect(screen.queryByText('完整提交说明')).toBeNull();
 
-    // 无 body 的提交不渲染折叠说明
+    // 无 body 的提交不渲染说明块
     fireEvent.click(screen.getByRole('button', { name: /返回历史/ }));
     fireEvent.click(await screen.findByText('no body'));
     await waitFor(() => {
       expect(screen.getByTestId('rvw-commit-info').textContent).toContain('no body');
     });
-    expect(screen.queryByText('完整提交说明')).toBeNull();
+    expect(screen.queryByTestId('rvw-commit-body')).toBeNull();
   });
 
   it('BLOCK-29.4: commit file fulltext view toggle', async () => {

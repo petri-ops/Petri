@@ -23,4 +23,8 @@
 
 tsc 0 / 定向 vitest（ReviewMode：详情头完整说明折叠展开、汇总统计、body 为空不渲染 details）/ docs:check / ui:audit:check / docs:reconcile；**实机**：localhost:3000 项目页注入桥桩（磁盘真实 git 状态喂 commitLog/commitDiff），CDP 断言详情头 body 展示 + 汇总统计，截图 `acceptance/ui-223/`。
 
+## 4. 增量记录
+
+- **UI-230（2026-08-30，用户反馈「点开就应该向下展开详细内容」）**：详情头完整说明去掉 `<details>` 折叠，点开提交即直接渲染全文（上限 40vh 内部滚动）；提交见 ui-productization-audit.md UI-230 条。
+
 G0 开发期常态 · 不外推 packaged/Provider/GA.

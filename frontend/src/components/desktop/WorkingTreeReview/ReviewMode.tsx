@@ -657,10 +657,9 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                   )}
                 </div>
                 {review.selectedCommit.message && (
-                  <details className="rvw-commit-body">
-                    <summary>完整提交说明</summary>
+                  <div className="rvw-commit-body" data-testid="rvw-commit-body">
                     <pre>{review.selectedCommit.message}</pre>
-                  </details>
+                  </div>
                 )}
               </div>
               {/* BLOCK-29 — 提交内：文件条 + 只读 diff（vs 第一父提交） */}

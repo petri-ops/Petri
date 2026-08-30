@@ -1847,3 +1847,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：node --check 3 文件；adapter 真实仓库快测；tsc 0；定向 vitest 28/28（新增用例：stash 列表渲染 + 标签 optgroup）。**2026-08-30 dev 实机 verified**（localhost:3000 桥桩）：历史分区 stash 列表渲染（stash@{0} + subject + 时间）、选择器含「标签」optgroup（v229-demo（tag））；改动分区未跟踪文件 ui229-untracked.md 展开渲染只读全文（DOM 断言 `rvw-untracked-preview` 含「# ui229 未跟踪预览 / WORKTREE 直读磁盘」完整内容）；截图 `acceptance/ui-229/stash-tags.png`（未跟踪预览另有 DOM 断言在案，截图通道当日抖动）。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-230: BLOCK-29.3 增量 — 完整提交说明默认直接展开（用户反馈） (2026-08-30 verified)
+
+**用户反馈**：「历史记录 需要点击完整提交说明 到新的页面才能展开 不需要这么麻烦 点开就应该向下展开详细内容」——UI-223 交付的详情头完整说明默认折叠（原生 details），用户要求点开提交即直接展开。按治理「增量复用既有 Plan ID」，挂 BLOCK-29.3-COMMIT-DETAIL（plan `docs/block-29-3-commit-detail-plan.md` 增量注记），不新开工作包。
+
+**改动范围**（ReviewMode.tsx + ReviewMode.css）：详情头完整说明去掉 `<details>` 折叠开关，点开提交即直接渲染全文（`data-testid="rvw-commit-body"`）；pre 上限 180px → 40vh（超长说明内部滚动，不把 diff 挤出视野）；移除 summary 相关样式。
+
+**验证**：tsc 0；定向 vitest 28/28（用例更新：点开提交即见 `rvw-commit-body` 全文、无「完整提交说明」开关、无 body 提交不渲染说明块）。**2026-08-30 dev 实机 verified**（localhost:3000 桥桩）：点开提交 body 直接可见（preHeight 164px）、折叠开关 0 残留；截图 `acceptance/ui-230/body-expanded-on-open.png`。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
