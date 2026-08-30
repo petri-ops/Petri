@@ -57,6 +57,10 @@ function makeBridge(overrides: Record<string, unknown> = {}) {
     revert: vi.fn(() => Promise.resolve({ ok: true, data: { reverted: [] } })),
     commitReview: vi.fn(() => Promise.resolve({ ok: true, data: {} })),
     onTaskDone: vi.fn(() => vi.fn()),
+    // BLOCK-29 — 提交历史（默认空实现，历史用例中覆写）
+    commitLog: vi.fn(() => Promise.resolve({ ok: true, data: { commits: [], count: 0 } })),
+    commitDiff: vi.fn(() => Promise.resolve({ ok: true, data: { files: [], truncated: false, summary: { added: 0, removed: 0 } } })),
+    commitFileContent: vi.fn(() => Promise.resolve({ ok: true, data: { original: '', modified: '' } })),
     ...overrides,
   };
 }
@@ -183,6 +187,58 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     const box = await screen.findByTestId('rvw-commitbox');
     expect(box.textContent).toContain('接受 1');
     expect(screen.getByLabelText('提交信息').tagName).toBe('INPUT');
+  });
+
+  it('BLOCK-29: history view lists commits and opens a commit diff', async () => {
+    const commitLog = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          commits: [
+            { sha: 'a1b2c3d4e5f6', shortSha: 'a1b2c3d', author: 'tester', isoDate: '2026-08-30T10:00:00Z', subject: 'first commit' },
+          ],
+          count: 1,
+        },
+      })
+    );
+    const commitDiff = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          files: [
+            { path: 'src/a.py', oldPath: null, binary: false, hunks: [{ oldStart: 1, newStart: 1, lines: [{ type: 'add', text: 'hello' }] }] },
+          ],
+          truncated: false,
+          summary: { added: 1, removed: 0 },
+        },
+      })
+    );
+    const commitFileContent = vi.fn(() =>
+      Promise.resolve({ ok: true, data: { original: 'old\n', modified: 'old\nhello\n' } })
+    );
+    getBridgeMock.mockReturnValue(makeBridge({ commitLog, commitDiff, commitFileContent }));
+
+    renderReview();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-review-progress')).toBeTruthy();
+    });
+
+    // 切到历史分区 → 提交列表
+    fireEvent.click(screen.getByRole('tab', { name: '历史' }));
+    const list = await screen.findByTestId('rvw-history-list');
+    expect(list.textContent).toContain('first commit');
+    expect(list.textContent).toContain('a1b2c3d');
+    expect(commitLog).toHaveBeenCalled();
+
+    // 点击提交 → 打开该提交 diff（文件条 + 只读视图）
+    fireEvent.click(screen.getByText('first commit'));
+    await screen.findByTestId('rvw-commit-diff-area');
+    await waitFor(() => {
+      expect(screen.getAllByText('src/a.py').length).toBeGreaterThan(0);
+    });
+    expect(commitDiff).toHaveBeenCalledWith({ hash: 'a1b2c3d4e5f6' });
+    expect(commitFileContent).toHaveBeenCalledWith({ hash: 'a1b2c3d4e5f6', path: 'src/a.py' });
   });
 
   it('shows the empty state when the working tree is clean', async () => {

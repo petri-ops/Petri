@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 158,
+    "documentCount": 159,
     "lastUpdated": "2026-08-29",
-    "managedMarkdown": 158
+    "managedMarkdown": 159
   },
   "documents": [
     {
@@ -2513,8 +2513,22 @@
       "registeredAt": "2026-08-30",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-29-COMMIT-HISTORY",
+      "path": "docs/block-29-commit-history-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-29-commit-history",
+      "entrypoint": "docs/README.md",
+      "tags": ["block-29", "review-mode", "commit-history", "git", "G0", "completed", "phase=COMPLETED", "UI-219"],
+      "notes": "2026-08-30 用户反馈启动：审阅中是否加入 VS Code 式 git 工具。经盘点裁决第一期只做提交历史。git-adapter 新增 log()（NUL 分隔解析，limit≤200）；IPC 新增 git:commit-log/commit-diff/commit-file-content 三条只读通道（commit-diff=vs 第一父提交，根提交回退空树）；preload 暴露三方法；审阅面板加「改动/历史」分段切换，历史列表（shortSha+subject+author·时间）点提交经 CodeMirrorDiffView revisionOverride 只读渲染 diff；历史分区禁用 A/R 键盘流。分支切换/unstage/push 明确排除。2026-08-30 收口 verified：tsc 0 / vitest 20/20 / CDP 6/6，证据 acceptance/ui-219/。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-08-30",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "COMPLETED"
     }
   ],
   "lastUpdated": "2026-08-30",
-  "documentCount": 158
+  "documentCount": 159
 }

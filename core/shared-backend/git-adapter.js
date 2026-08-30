@@ -519,6 +519,45 @@ function createGitAdapter(options = {}) {
       return { paths: safe, patch: output.stdout };
     },
 
+    /**
+     * BLOCK-29 — 提交历史列表（git log）。
+     * NUL 分隔 format（sha/shortSha/author/isoDate/subject），解析无歧义；
+     * limit 上限 200；ref 必须是安全的 ref 表达式（hex sha / 分支名 / HEAD），
+     * 不接受空白与以 '-' 开头的值，防参数注入。
+     */
+    log({ limit = 50, ref = 'HEAD', file = null } = {}) {
+      const maxCount = Math.max(1, Math.min(Number(limit) || 50, 200));
+      const refArg = typeof ref === 'string' && ref.trim() && !ref.trim().startsWith('-')
+        ? ref.trim()
+        : 'HEAD';
+      const args = [
+        'log',
+        '--pretty=format:%H%x00%h%x00%an%x00%aI%x00%s',
+        '--max-count=' + String(maxCount),
+        refArg,
+      ];
+      if (typeof file === 'string' && file.trim()) {
+        const safeFile = assertSafePathspecs([file.trim()], scope);
+        args.push('--', ...safeFile);
+      }
+      const output = run(args, { allowFailure: true, readOnly: true });
+      if (!output.ok) throw new GitAdapterError('git_log_failed', 'Scoped git log failed.', output);
+      const commits = [];
+      for (const line of output.stdout.split('\n')) {
+        if (!line) continue;
+        const fields = line.split('\x00');
+        if (fields.length < 5 || !/^[0-9a-f]{7,64}$/i.test(fields[0])) continue;
+        commits.push({
+          sha: fields[0],
+          shortSha: fields[1] || fields[0].slice(0, 7),
+          author: fields[2] || '',
+          isoDate: fields[3] || '',
+          subject: fields[4] || '',
+        });
+      }
+      return { commits, count: commits.length };
+    },
+
     /** 显式路径暂存。整树写法在 assertSafePathspecs 层已被拒绝。 */
     stage({ paths } = {}) {
       const safe = assertSafePathspecs(paths, scope);

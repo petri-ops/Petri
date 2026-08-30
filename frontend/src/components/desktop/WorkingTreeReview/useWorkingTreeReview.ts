@@ -58,6 +58,15 @@ export interface DiffResult {
   summary: { added: number; removed: number };
 }
 
+/** BLOCK-29 — git log 单条提交（NUL 分隔解析，见 git-adapter.log）。 */
+export interface CommitInfo {
+  sha: string;
+  shortSha: string;
+  author: string;
+  isoDate: string;
+  subject: string;
+}
+
 export interface WorkingTreeStatus {
   files: Array<{ path: string; oldPath: string | null; status: string; untracked: boolean; conflicted: boolean }>;
   totalFiles: number;
@@ -105,6 +114,19 @@ export interface UseWorkingTreeReviewReturn {
   }>;
   isDialogOpen: boolean;
   setDialogOpen: (open: boolean) => void;
+  /** BLOCK-29 — 提交历史分区状态与动作。 */
+  historyView: 'changes' | 'history';
+  setHistoryView: (view: 'changes' | 'history') => void;
+  commits: CommitInfo[] | null;
+  commitsLoading: boolean;
+  selectedCommit: CommitInfo | null;
+  commitDiff: DiffResult | null;
+  commitDiffLoading: boolean;
+  selectedCommitFilePath: string | null;
+  setSelectedCommitFilePath: (path: string | null) => void;
+  loadHistory: () => Promise<void>;
+  openCommit: (commit: CommitInfo) => Promise<void>;
+  backToCommitList: () => void;
 }
 
 export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}): UseWorkingTreeReviewReturn {
@@ -326,6 +348,57 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     }
   }, [options.isOpen, refresh]);
 
+  // BLOCK-29 — 提交历史分区状态
+  const [historyView, setHistoryView] = useState<'changes' | 'history'>('changes');
+  const [commits, setCommits] = useState<CommitInfo[] | null>(null);
+  const [commitsLoading, setCommitsLoading] = useState(false);
+  const [selectedCommit, setSelectedCommit] = useState<CommitInfo | null>(null);
+  const [commitDiff, setCommitDiff] = useState<DiffResult | null>(null);
+  const [commitDiffLoading, setCommitDiffLoading] = useState(false);
+  const [selectedCommitFilePath, setSelectedCommitFilePath] = useState<string | null>(null);
+
+  const loadHistory = useCallback(async () => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) return;
+    setCommitsLoading(true);
+    try {
+      const res = await bridge.commitLog({ limit: 50 });
+      if (res.ok && res.data) setCommits(res.data.commits ?? []);
+      else setCommits([]);
+    } catch {
+      setCommits([]);
+    } finally {
+      setCommitsLoading(false);
+    }
+  }, []);
+
+  const openCommit = useCallback(async (commit: CommitInfo) => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) return;
+    setSelectedCommit(commit);
+    setCommitDiff(null);
+    setSelectedCommitFilePath(null);
+    setCommitDiffLoading(true);
+    try {
+      const res = await bridge.commitDiff({ hash: commit.sha });
+      const parsed: DiffResult = res.ok && res.data
+        ? res.data
+        : { files: [], truncated: false, summary: { added: 0, removed: 0 } };
+      setCommitDiff(parsed);
+      setSelectedCommitFilePath(parsed.files[0]?.path ?? null);
+    } catch {
+      setCommitDiff({ files: [], truncated: false, summary: { added: 0, removed: 0 } });
+    } finally {
+      setCommitDiffLoading(false);
+    }
+  }, []);
+
+  const backToCommitList = useCallback(() => {
+    setSelectedCommit(null);
+    setCommitDiff(null);
+    setSelectedCommitFilePath(null);
+  }, []);
+
   const pendingCount = Object.values(decisions).filter((d) => d === 'pending').length;
   const appliedCount = Object.values(decisions).filter((d) => d === 'accept').length;
   const rejectedCount = Object.values(decisions).filter((d) => d === 'reject').length;
@@ -351,5 +424,17 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     commitReview,
     isDialogOpen,
     setDialogOpen,
+    historyView,
+    setHistoryView,
+    commits,
+    commitsLoading,
+    selectedCommit,
+    commitDiff,
+    commitDiffLoading,
+    selectedCommitFilePath,
+    setSelectedCommitFilePath,
+    loadHistory,
+    openCommit,
+    backToCommitList,
   };
 }

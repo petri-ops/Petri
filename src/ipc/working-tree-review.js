@@ -523,6 +523,75 @@ function setupWorkingTreeReviewIpc(options = {}) {
     });
   });
 
+  // ============================================================
+  // BLOCK-29 — 提交历史（git log）与任意提交 diff 查看通道。
+  // 仅供审阅面板「历史」分区只读使用；不提供 checkout/push 等写操作。
+  // ============================================================
+
+  const SHA_RE = /^[0-9a-f]{7,64}$/i;
+  const EMPTY_TREE_SHA = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
+
+  function assertSha(value, name) {
+    if (typeof value !== 'string' || !SHA_RE.test(value)) {
+      throw new GitAdapterError('invalid_sha', `${name} must be a hex commit sha.`);
+    }
+    return value;
+  }
+
+  /** 单个提交的 diff（vs 第一父提交；根提交回退到空树）。 */
+  function commitDiffParsed(adapter, hash) {
+    try {
+      return parseDiffFiles(adapter.diff({ fromRef: `${hash}^`, toRef: hash }).patch || '');
+    } catch (e) {
+      // 根提交无父：与空树比较
+      if (e instanceof GitAdapterError) {
+        return parseDiffFiles(adapter.diff({ fromRef: EMPTY_TREE_SHA, toRef: hash }).patch || '');
+      }
+      throw e;
+    }
+  }
+
+  ipcMain.handle('git:commit-log', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      const limit = typeof args.limit === 'number' ? args.limit : 50;
+      const result = adapter.log({ limit });
+      return { commits: result.commits, count: result.count };
+    });
+  });
+
+  ipcMain.handle('git:commit-diff', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      const hash = assertSha(args && args.hash, 'hash');
+      return commitDiffParsed(adapter, hash);
+    });
+  });
+
+  ipcMain.handle('git:commit-file-content', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      const hash = assertSha(args && args.hash, 'hash');
+      if (!args || typeof args.path !== 'string' || !args.path) {
+        throw new GitAdapterError('path_required', 'path is required.');
+      }
+      const at = (ref) => {
+        try {
+          return adapter.showFile({ ref, filePath: args.path });
+        } catch {
+          return null; // 新增文件在父提交不存在 / 删除文件在本提交不存在
+        }
+      };
+      return {
+        original: at(`${hash}^`) ?? '',
+        modified: at(hash) ?? '',
+      };
+    });
+  });
+
   /**
    * 暴露 main→renderer 通知触发器，供主进程其他模块（如 agent runner / SSE listener）
    * 在任务完成时调用。BLOCK-16 PHASE 3 接入。

@@ -23,6 +23,11 @@ export interface CodeMirrorDiffViewProps {
   onAcceptHunk?: (hunkIndex: number) => void;
   /** BLOCK-28 — 悬浮控件 Reject 回调（hunkIndex 语义）。 */
   onRejectHunk?: (hunkIndex: number) => void;
+  /**
+   * BLOCK-29 — 外部直接提供的 diff revision（提交历史只读查看）。
+   * 提供时跳过 HEAD/WORKTREE 桥加载；hunk 控件仍由 onAccept/onReject 是否传入决定。
+   */
+  revisionOverride?: DiffRevision | null;
 }
 
 interface FileContentResult {
@@ -39,6 +44,7 @@ export function CodeMirrorDiffView({
   hunkDecisions,
   onAcceptHunk,
   onRejectHunk,
+  revisionOverride,
 }: CodeMirrorDiffViewProps) {
   const [revision, setRevision] = useState<DiffRevision | null>(null);
   const [loading, setLoading] = useState(false);
@@ -46,6 +52,12 @@ export function CodeMirrorDiffView({
   const apiRef = useRef<EditorApi | null>(null);
 
   useEffect(() => {
+    if (revisionOverride) {
+      setRevision(revisionOverride);
+      setError(null);
+      setLoading(false);
+      return;
+    }
     if (!filePath || isBinary) {
       setRevision(null);
       setError(null);
@@ -92,7 +104,7 @@ export function CodeMirrorDiffView({
     });
 
     return () => { cancelled = true; };
-  }, [filePath, isBinary]);
+  }, [filePath, isBinary, revisionOverride]);
 
   // BLOCK-28 — hunk 控件信息（git hunk newStart 对齐 modified doc 行号）
   const totalLines = useMemo(

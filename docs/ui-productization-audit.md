@@ -1709,3 +1709,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；定向 vitest 19/19（新增用例：无决策 commitbox 隐藏 / accept 后出现且「提交信息」为单行 INPUT）。**2026-08-30 dev 实机 verified**：CDP 5/5——无决策 `.rvw-commitbox` 不存在且 diff 正常渲染；接受后提交条出现（「接受 1」摘要、INPUT、placeholder「提交信息（⌘+Enter 提交：接受 1，拒绝 0）」、按钮「提交 (1)」）；「全部还原」后再次消失；截图 `acceptance/ui-218/`。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-219: BLOCK-29 — 审阅面板「提交历史」分区（第一期 git 工具） (2026-08-30 verified)
+
+**用户反馈**：「审阅中，关于版本控制 git 工具这些的使用是不是要加入？类似于 VS Code 中？」——经全链路盘点（git-adapter 已有任意提交间 diff/showFile，缺 log/checkout/unstage；branch:* IPC 是对话分支非 git），用户裁决第一期只做**提交历史**；分支切换/unstage/push-pull 明确排除。
+
+**改动范围**：
+- git-adapter 新增 `log({limit, ref, file})`：NUL 分隔 `%H%x00%h%x00%an%x00%aI%x00%s` 解析，limit ≤200，ref 拒绝 `-` 开头（防参数注入）；经测试项目真实仓库验证。
+- IPC 新增 3 条**只读**通道：`git:commit-log`（列表）/ `git:commit-diff`（单提交 vs 第一父提交，根提交回退空树比较，复用 parseDiffFiles）/ `git:commit-file-content`（父提交与本提交两版全文，缺失侧空串）；sha hex 白名单校验。preload 暴露 `commitLog/commitDiff/commitFileContent`。
+- 前端：useWorkingTreeReview 新增 historyView/commits/selectedCommit/commitDiff 状态与 loadHistory/openCommit/backToCommitList；CodeMirrorDiffView 新增 `revisionOverride` prop（跳过 HEAD/WORKTREE 加载，提交 diff 只读复用）；ReviewMode summary 条「改动 | 历史」分段切换——历史列表（shortSha + subject + author · 时间）→ 点提交渲染文件条 + 只读 diff（CommitDiffFileView）；历史分区禁用 A/R/↑↓ 键盘流。
+
+**验证**：tsc 0；定向 vitest 20/20（新增历史用例：列表渲染 + 点提交加载 diff 与两版全文）。**2026-08-30 dev 实机 verified**：CDP 6/6——注入与磁盘 git 一致的桥桩后：「改动/历史」tablist 存在、历史列表两条真实提交（shortSha/subject/author·时间）、点开提交 diff 绿色新增行与「N 个 hunk」文件头、← 返回列表、切回改动分区；截图 `acceptance/ui-219/`。观察项：窄视口下 summary 操作按钮可能遮挡分区 tab（列宽拖宽即可用），后续布局打磨项。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

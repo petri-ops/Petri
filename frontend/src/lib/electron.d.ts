@@ -450,6 +450,25 @@ declare global {
           error?: string;
           message?: string;
         }>;
+        // BLOCK-29 — 提交历史（审阅面板「历史」分区，只读）
+        commitLog: (params: { limit?: number }) => Promise<{
+          ok: boolean;
+          data?: { commits: Array<{ sha: string; shortSha: string; author: string; isoDate: string; subject: string }>; count: number };
+          error?: string;
+          message?: string;
+        }>;
+        commitDiff: (params: { hash: string }) => Promise<{
+          ok: boolean;
+          data?: { files: Array<{ path: string; oldPath: string | null; binary: boolean; hunks: Array<{ oldStart: number; newStart: number; lines: Array<{ type: 'add' | 'del' | 'ctx'; text: string }> }> }>; truncated: boolean; summary: { added: number; removed: number } };
+          error?: string;
+          message?: string;
+        }>;
+        commitFileContent: (params: { hash: string; path: string }) => Promise<{
+          ok: boolean;
+          data?: { original: string; modified: string };
+          error?: string;
+          message?: string;
+        }>;
       };
       // Phase 1: Branch Tab UI - conversation branch management
       branch: {
