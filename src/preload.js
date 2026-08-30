@@ -373,6 +373,8 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     commitLog: (params) => ipcRenderer.invoke('git:commit-log', params || {}),
     commitDiff: (params) => ipcRenderer.invoke('git:commit-diff', params || {}),
     commitFileContent: (params) => ipcRenderer.invoke('git:commit-file-content', params || {}),
+    // BLOCK-29.5 — 本地分支列表（历史分区选择器，只读）
+    branchList: (params) => ipcRenderer.invoke('git:branch-list', params || {}),
     // BLOCK-29.2 — git 工具二期（前端确认后调用）
     discardFile: (params) => ipcRenderer.invoke('git:discard-file', params || {}),
     undoLastCommit: () => ipcRenderer.invoke('git:undo-last-commit'),

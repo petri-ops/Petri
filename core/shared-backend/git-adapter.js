@@ -294,6 +294,15 @@ function parsePorcelainZ(stdout) {
  * @param {{ gitDir: string, workTree: string, gitBin?: string, allowHooks?: boolean,
  *           identity?: { name: string, email: string }|null }} options
  */
+// BLOCK-29.5 — ref 安全校验：非空字符串、trim 后不以 '-' 开头（防参数注入）；
+// 空/非法值回退 null（调用方决定 HEAD 兜底）。log/blame/区间 diff 共用。
+function assertSafeRef(ref) {
+  if (typeof ref !== 'string') return null;
+  const trimmed = ref.trim();
+  if (!trimmed || trimmed.startsWith('-')) return null;
+  return trimmed;
+}
+
 function createGitAdapter(options = {}) {
   const { gitDir, workTree } = options;
   if (!gitDir || typeof gitDir !== 'string') {
@@ -528,9 +537,7 @@ function createGitAdapter(options = {}) {
      */
     log({ limit = 50, ref = 'HEAD', file = null, skip = 0 } = {}) {
       const maxCount = Math.max(1, Math.min(Number(limit) || 50, 200));
-      const refArg = typeof ref === 'string' && ref.trim() && !ref.trim().startsWith('-')
-        ? ref.trim()
-        : 'HEAD';
+      const refArg = assertSafeRef(ref) ?? 'HEAD';
       const args = [
         'log',
         '--pretty=format:%x01%H%x00%h%x00%an%x00%aI%x00%s%x00%b',
@@ -560,6 +567,31 @@ function createGitAdapter(options = {}) {
         });
       }
       return { commits, count: commits.length };
+    },
+
+    /**
+     * BLOCK-29.5 — 本地分支列表（只读）。for-each-ref refs/heads，
+     * NUL 分隔（name/shortSha/isoDate/HEAD 标记），供历史分区选择器。
+     */
+    listBranches() {
+      const output = run(
+        ['for-each-ref', '--format=%(refname:short)%00%(objectname:short)%00%(committerdate:iso8601-strict)%00%(HEAD)', 'refs/heads'],
+        { allowFailure: true, readOnly: true },
+      );
+      if (!output.ok) throw new GitAdapterError('git_branch_list_failed', 'Scoped git for-each-ref failed.', output);
+      const branches = [];
+      for (const line of output.stdout.split('\n')) {
+        if (!line) continue;
+        const fields = line.split('\x00');
+        if (fields.length < 4 || !fields[0]) continue;
+        branches.push({
+          name: fields[0],
+          shortSha: fields[1] || '',
+          isoDate: fields[2] || '',
+          current: fields[3] === '*',
+        });
+      }
+      return { branches, count: branches.length };
     },
 
     /** 显式路径暂存。整树写法在 assertSafePathspecs 层已被拒绝。 */

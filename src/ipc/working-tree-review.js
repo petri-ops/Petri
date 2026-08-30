@@ -556,8 +556,23 @@ function setupWorkingTreeReviewIpc(options = {}) {
     return safeInvoke(async () => {
       const adapter = resolveGitAdapter();
       const limit = typeof args.limit === 'number' ? args.limit : 50;
-      const result = adapter.log({ limit });
+      // BLOCK-29.5 — skip/file 透传修复（UI-221 分页与文件历史在真实 IPC 链路被丢弃）
+      // + ref 透传（分支选择器，只读）。
+      const skip = typeof args.skip === 'number' ? args.skip : 0;
+      const file = typeof args.file === 'string' && args.file ? args.file : null;
+      const ref = typeof args.ref === 'string' && args.ref ? args.ref : null;
+      const result = adapter.log({ limit, skip, file, ref });
       return { commits: result.commits, count: result.count };
+    });
+  });
+
+  // BLOCK-29.5 — 本地分支列表（历史分区选择器，只读）
+  ipcMain.handle('git:branch-list', async (event) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      const result = adapter.listBranches();
+      return { branches: result.branches, count: result.count };
     });
   });
 

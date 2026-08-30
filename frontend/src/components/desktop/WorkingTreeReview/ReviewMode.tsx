@@ -367,6 +367,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
               onClick={() => {
                 review.setHistoryView('history');
                 void review.loadHistory();
+                void review.loadBranches();
               }}
             >
               历史
@@ -569,6 +570,22 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                 ) : (
                   <span className="rvw-history-filter-spacer" />
                 )}
+                {/* BLOCK-29.5 — 分支选择器：只读查看其他分支历史，不切换工作区分支 */}
+                <select
+                  className="rvw-branch-select"
+                  aria-label="提交历史分支"
+                  value={review.activeBranch ?? ''}
+                  onChange={(e) => void review.switchBranch(e.target.value || null)}
+                  title="查看其他分支的提交历史（只读，不切换工作区分支）"
+                >
+                  <option value="">当前分支 (HEAD)</option>
+                  {(review.branches ?? []).map((b) => (
+                    <option key={b.name} value={b.name}>
+                      {b.name}
+                      {b.current ? '（当前）' : ''}
+                    </option>
+                  ))}
+                </select>
                 <button
                   type="button"
                   className="wt-btn"

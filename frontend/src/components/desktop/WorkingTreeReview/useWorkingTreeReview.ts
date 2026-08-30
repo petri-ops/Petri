@@ -58,6 +58,14 @@ export interface DiffResult {
   summary: { added: number; removed: number };
 }
 
+/** BLOCK-29.5 — 本地分支（for-each-ref refs/heads，历史分区选择器，只读）。 */
+export interface BranchInfo {
+  name: string;
+  shortSha: string;
+  isoDate: string;
+  current: boolean;
+}
+
 /** BLOCK-29 — git log 单条提交（NUL 分隔解析，见 git-adapter.log）。 */
 export interface CommitInfo {
   sha: string;
@@ -129,6 +137,11 @@ export interface UseWorkingTreeReviewReturn {
   selectedCommitFilePath: string | null;
   setSelectedCommitFilePath: (path: string | null) => void;
   loadHistory: (opts?: { file?: string | null; skip?: number; append?: boolean }) => Promise<void>;
+  /** BLOCK-29.5 — 分支选择器（只读查看其他分支历史）。 */
+  loadBranches: () => Promise<void>;
+  branches: BranchInfo[] | null;
+  activeBranch: string | null;
+  switchBranch: (name: string | null) => Promise<void>;
   openCommit: (commit: CommitInfo) => Promise<void>;
   backToCommitList: () => void;
   /** BLOCK-29.2 — 放弃单文件工作区改动（tracked 还原 / untracked 删除）。 */
@@ -368,6 +381,22 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
   const [selectedCommitFilePath, setSelectedCommitFilePath] = useState<string | null>(null);
   const historyFileFilterRef = useRef<string | null>(null);
   historyFileFilterRef.current = historyFileFilter;
+  // BLOCK-29.5 — 分支选择器（只读查看其他分支历史，不切换工作区分支）
+  const [branches, setBranches] = useState<BranchInfo[] | null>(null);
+  const [activeBranch, setActiveBranch] = useState<string | null>(null);
+  const activeBranchRef = useRef<string | null>(null);
+  activeBranchRef.current = activeBranch;
+
+  const loadBranches = useCallback(async () => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) return;
+    try {
+      const res = await bridge.branchList({});
+      setBranches(res.ok && res.data ? res.data.branches ?? [] : []);
+    } catch {
+      setBranches([]);
+    }
+  }, []);
 
   const loadHistory = useCallback(async (opts: { file?: string | null; skip?: number; append?: boolean } = {}) => {
     const bridge = getBridge('workingTreeReview');
@@ -377,7 +406,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     const append = opts.append === true;
     setCommitsLoading(true);
     try {
-      const res = await bridge.commitLog({ limit: 50, skip, file });
+      const res = await bridge.commitLog({ limit: 50, skip, file, ref: activeBranchRef.current });
       const list: CommitInfo[] = res.ok && res.data ? res.data.commits ?? [] : [];
       setCommits((prev) => (append && prev ? [...prev, ...list] : list));
       setHistoryFileFilter(file ?? null);
@@ -388,6 +417,16 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
       setCommitsLoading(false);
     }
   }, []);
+
+  /** BLOCK-29.5 — 切换历史查看分支（null = HEAD/当前分支）。只影响历史列表，不写 refs。 */
+  const switchBranch = useCallback(async (name: string | null) => {
+    activeBranchRef.current = name;
+    setActiveBranch(name);
+    setSelectedCommit(null);
+    setCommitDiff(null);
+    setSelectedCommitFilePath(null);
+    await loadHistory({ file: null });
+  }, [loadHistory]);
 
   const openCommit = useCallback(async (commit: CommitInfo) => {
     const bridge = getBridge('workingTreeReview');
@@ -490,6 +529,10 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     selectedCommitFilePath,
     setSelectedCommitFilePath,
     loadHistory,
+    loadBranches,
+    branches,
+    activeBranch,
+    switchBranch,
     openCommit,
     backToCommitList,
     discardFile,

@@ -60,6 +60,7 @@ function makeBridge(overrides: Record<string, unknown> = {}) {
     fileContent: vi.fn(() => Promise.resolve({ ok: true, data: { content: 'line1\n' } })),
     // BLOCK-29 — 提交历史（默认空实现，历史用例中覆写）
     commitLog: vi.fn(() => Promise.resolve({ ok: true, data: { commits: [], count: 0 } })),
+    branchList: vi.fn(() => Promise.resolve({ ok: true, data: { branches: [{ name: 'main', shortSha: 'a1b2c3d', isoDate: '', current: true }], count: 1 } })),
     commitDiff: vi.fn(() => Promise.resolve({ ok: true, data: { files: [], truncated: false, summary: { added: 0, removed: 0 } } })),
     commitFileContent: vi.fn(() => Promise.resolve({ ok: true, data: { original: '', modified: '' } })),
     // BLOCK-29.2 — git 工具二期
@@ -380,6 +381,52 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     fireEvent.click(screen.getByRole('button', { name: '全文·改动后' }));
     await waitFor(() => {
       expect(screen.getByTestId('rvw-fulltext').textContent).toContain('new-content-line');
+    });
+  });
+
+  it('BLOCK-29.5: branch selector reloads history with ref', async () => {
+    const commitLog = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          commits: [
+            { sha: 'a1b2c3d4e5f6', shortSha: 'a1b2c3d', author: 'tester', isoDate: '2026-08-30T10:00:00Z', subject: 'branch commit', message: '' },
+          ],
+          count: 1,
+        },
+      })
+    );
+    const branchList = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          branches: [
+            { name: 'main', shortSha: 'a1b2c3d', isoDate: '', current: true },
+            { name: 'feature', shortSha: 'b2c3d4e', isoDate: '', current: false },
+          ],
+          count: 2,
+        },
+      })
+    );
+    getBridgeMock.mockReturnValue(makeBridge({ commitLog, branchList }));
+
+    renderReview();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-review-progress')).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('tab', { name: '历史' }));
+    await screen.findByTestId('rvw-history-list');
+
+    // 选择器渲染默认项 + 分支列表
+    const select = screen.getByLabelText('提交历史分支');
+    expect(select).toBeTruthy();
+
+    // 切换分支 → commitLog 带 ref 重新加载
+    fireEvent.change(select, { target: { value: 'feature' } });
+    await waitFor(() => {
+      expect(commitLog).toHaveBeenCalledWith(expect.objectContaining({ ref: 'feature' }));
     });
   });
 

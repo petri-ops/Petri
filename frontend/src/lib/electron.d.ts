@@ -448,10 +448,18 @@ declare global {
           error?: string;
           message?: string;
         }>;
-        // BLOCK-29 — 提交历史（审阅面板「历史」分区，只读）；BLOCK-29.3 载荷 additive 增加 message
-        commitLog: (params: { limit?: number; skip?: number; file?: string | null }) => Promise<{
+        // BLOCK-29 — 提交历史（审阅面板「历史」分区，只读）；BLOCK-29.3 载荷 additive 增加 message；
+        // BLOCK-29.5 参数 additive 增加 ref（分支选择器）并修复 skip/file IPC 透传
+        commitLog: (params: { limit?: number; skip?: number; file?: string | null; ref?: string | null }) => Promise<{
           ok: boolean;
           data?: { commits: Array<{ sha: string; shortSha: string; author: string; isoDate: string; subject: string; message: string }>; count: number };
+          error?: string;
+          message?: string;
+        }>;
+        // BLOCK-29.5 — 本地分支列表（历史分区选择器，只读）
+        branchList: (params?: Record<string, never>) => Promise<{
+          ok: boolean;
+          data?: { branches: Array<{ name: string; shortSha: string; isoDate: string; current: boolean }>; count: number };
           error?: string;
           message?: string;
         }>;

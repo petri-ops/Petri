@@ -1746,9 +1746,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - IPC：新增 `git:discard-file` / `git:undo-last-commit` 两条通道（src/ipc/working-tree-review.js，前端 confirm 后调用）；preload 暴露 `discardFile / undoLastCommit`。
 - 前端（ReviewMode dock 变体）：手风琴文件行 hover 操作——`clock` 查看该文件历史（loadHistory({file}) 切历史分区，历史头部文件过滤徽标可清除）、`trash` 放弃更改（window.confirm 确认，untracked 提示将被删除）；历史分区头部「撤销上次提交」按钮（confirm 后 mixed reset，内容回工作区重新审阅，自动刷新 status 与历史）；历史列表尾「加载更多」（skip 分页 append，每页 50，返回不满 50 条即末页）。
 
-**验证**：tsc 0；定向 vitest 22/22 + copilot 200/200（新增用例：行内放弃→discardFile、行内历史→file 过滤、清除过滤→file:null、撤销→undoLastCommit，均含 confirm）；adapter 真实仓库快测 4 项（log skip 分页页序 / discard tracked 还原 / discard untracked 删除 / undo mixed reset 后恢复提交）全过。**2026-08-30 dev 实机 verified**：CDP 核心断言（discard/undo 调用计数、文件过滤徽标、撤销入口、分页 append 50→51 机制），截图 `acceptance/ui-221/file-filter.png`、`acceptance/ui-221/undo.png`。
+**验证**：tsc 0；定向 vitest 22/22 + copilot 200/200（新增用例：行内放弃→discardFile、行内历史→file 过滤、清除过滤→file:null、撤销→undoLastCommit，均含 confirm）；adapter 真实仓库快测 4 项（log skip 分页页序 / discard tracked 还原 / discard untracked 删除 / undo mixed reset 后恢复提交）全过。**2026-08-30 dev 实机 verified**：CDP 核心断言（discard/undo 调用计数、文件过滤徽标、撤销入口、分页 append 50→51 机制），截图 `acceptance/ui-221/file-filter.png`、`acceptance/ui-221/undo.png`。**2026-08-30 晚间勘误（BLOCK-29.5 P2 发现）**：上述 CDP 断言经浏览器桥桩执行，而真实 IPC 链路 `git:commit-log` handler 当时只透传 `limit`——`skip`/`file` 被丢弃，即真实 Electron 中「历史分页」与「文件级历史」失效（adapter 与 shim 两层各自正确，断点在 IPC 契约层）。已由 UI-226（BLOCK-29.5 P2）修复透传；真实链路回归待 dev Electron 重启载入新主进程代码后随 UI-226 复核。
 
-**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**状态**: verified (dev 边界内；分页/文件过滤真实链路修复见 UI-226)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-222: BLOCK-30 — 单后端收敛与更名的 UI 影响补登（P1/P2/P4 合并条目） (2026-08-30 verified)
 
@@ -1793,5 +1793,18 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **改动范围**（纯 CSS，ReviewMode.css）：`.rvw-summary` 增 `flex-wrap: wrap`（row-gap 6px）；`.rvw-summary-left` 改 `flex: 1 1 auto` + `min-width: fit-content`（tabs/stats 不再被挤压）；`.rvw-summary-actions` 增 `flex-shrink: 0 + flex-wrap: wrap + justify-content: flex-end`。宽屏单行布局不变；窄宽度操作按钮换行到第二行，tabs 恒可点。
 
 **验证**：**2026-08-30 dev 实机 verified**（localhost:3000 磁盘真实 git 桥桩）：1440×900 默认 dock 真实 Playwright 点击「历史」（无 force）通过、历史列表 4 行渲染；1024×800 窄视口「改动⇄历史」真实点击往返通过，截图可见操作按钮换行第二行、tabs 完整可点，证据 `acceptance/ui-225/narrow-1024-realclick-ok.png`。UI-219 观察项就此收口。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-226: BLOCK-29.5 P2 — 全分支历史（分支选择器）+ commit-log IPC 透传修复 (2026-08-30 verified)
+
+**背景**：用户裁决启动只读视野菜单（BLOCK-29.5）。实施 P2 时发现存量 IPC 断点：`git:commit-log` handler 只透传 `limit`，UI-221 的 `skip`（分页）与 `file`（文件历史过滤）在真实 Electron 链路被丢弃——adapter 与桥桩两层各自正确、断点恰在 IPC 契约层（详见 UI-221 勘误脚注），真实使用中「加载更多」恒返回同一页、文件历史恒不过滤。
+
+**改动范围**：
+- git-adapter：ref 校验提炼为模块级 `assertSafeRef`（非空字符串、拒绝 `-` 开头参数注入，空值回退 HEAD）；新增只读 `listBranches()`（`for-each-ref refs/heads`，NUL 分隔 name/shortSha/isoDate/HEAD 标记）；`log({ref})` 走统一校验。真实仓库快测：listBranches 当前分支标记正确、按 ref 取 log 与 HEAD 一致、恶意 ref `--all` 安全回退 HEAD。
+- IPC：`git:commit-log` 透传修复（skip/file 补回 + ref 新增，全部 additive）；新只读通道 `git:branch-list`；preload 暴露 `branchList`；electron.d.ts commitLog 参数 + branchList 类型。
+- 前端：hook 增 `branches/activeBranch/switchBranch/loadBranches`（`activeBranchRef` 镜像避免 setState 时序耦合；切分支重置选中提交并按 ref 重载，只影响历史列表不写 refs）；历史头部增分支选择器（当前分支标记，title 注明只读）；ReviewMode 历史 tab 点击同时拉取分支列表。
+
+**验证**：node --check 3 文件；adapter 真实仓库快测（listBranches / ref log / 注入回退）；tsc 0；定向 vitest 25/25（新增用例：选择器渲染 + 切分支触发 commitLog 带 ref）。**2026-08-30 dev 实机 verified**（localhost:3000 磁盘真实 git 桥桩）：选择器渲染「当前分支 (HEAD) + main（当前）+ 其他分支」，切换后 `commitLog` 以 `ref` 重新加载（调用序列 `null → "codex/old-work"`）、列表按分支渲染、选中态保持；截图 `acceptance/ui-226/branch-selector.png`。**边界**：skip/file 透传修复的最终真实链路复核以 dev Electron 重启载入新主进程代码后为准（UI-221 勘误同日登记）。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
