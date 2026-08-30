@@ -1737,6 +1737,19 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-221: BLOCK-29.2 — git 工具二期：单文件放弃更改 / 文件级历史 / 撤销上次提交 / 历史分页 (2026-08-30 verified)
+
+**用户反馈**：「工作进度已经变了（BLOCK-30 单后端收敛本地落地）。确认之后，重点优化 git 工具在审阅中的不全，看看 VS Code 有哪些功能有必要再更新。」——经 VS Code SCM 功能对照盘点，用户多选裁决二期做 4 项：单文件放弃更改 / 文件级历史 / 撤销上次提交 / 历史分页加载；暂存区 / 分支切换 / push-pull 维持排除。plan `docs/block-29-2-git-tools-phase2-plan.md`（2026-08-30 同日收口，本条目为 2026-08-30 晚间审计补登——实现提交 `1946971` 因同提交写入的是 UI-222 补登段，默认门禁「同提交动了台账」判定未拦住本条目漏登，详见 AUDIT-LOG 2026-08-30 UI-221 条）。
+
+**改动范围**：
+- git-adapter（core/shared-backend/git-adapter.js，唯一 git 命令边界）：新增 `discardFile({path})`（tracked → checkout HEAD 还原；untracked → 删除文件，路径限 workTree 内）、`undoLastCommit()`（mixed reset HEAD~1，根提交显式拒绝）、`log` 增加 `skip` 分页参数（--skip=N）；顺带修复模块内 `path` 局部变量遮蔽的历史陷阱（沿用顶部 `pathModule` 别名）。
+- IPC：新增 `git:discard-file` / `git:undo-last-commit` 两条通道（src/ipc/working-tree-review.js，前端 confirm 后调用）；preload 暴露 `discardFile / undoLastCommit`。
+- 前端（ReviewMode dock 变体）：手风琴文件行 hover 操作——`clock` 查看该文件历史（loadHistory({file}) 切历史分区，历史头部文件过滤徽标可清除）、`trash` 放弃更改（window.confirm 确认，untracked 提示将被删除）；历史分区头部「撤销上次提交」按钮（confirm 后 mixed reset，内容回工作区重新审阅，自动刷新 status 与历史）；历史列表尾「加载更多」（skip 分页 append，每页 50，返回不满 50 条即末页）。
+
+**验证**：tsc 0；定向 vitest 22/22 + copilot 200/200（新增用例：行内放弃→discardFile、行内历史→file 过滤、清除过滤→file:null、撤销→undoLastCommit，均含 confirm）；adapter 真实仓库快测 4 项（log skip 分页页序 / discard tracked 还原 / discard untracked 删除 / undo mixed reset 后恢复提交）全过。**2026-08-30 dev 实机 verified**：CDP 核心断言（discard/undo 调用计数、文件过滤徽标、撤销入口、分页 append 50→51 机制），截图 `acceptance/ui-221/file-filter.png`、`acceptance/ui-221/undo.png`。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-222: BLOCK-30 — 单后端收敛与更名的 UI 影响补登（P1/P2/P4 合并条目） (2026-08-30 verified)
 
 **背景**：BLOCK-30-BACKEND-CONVERGENCE（用户裁决，单后端收敛工作包）P1 摘除 py-server（edd1116）、P2 摘除 gateway（d4f459d）、P4 core/r-server 更名 core/biof3-server（4e51ae1）三个提交含前端路径级改动（import/常量指向），但提交时未按台账规则同步 ui-productization-audit.md 与 UI-### 编号。经 ui:audit:check 发现后补登本合并条目，并在 check 脚本 LEGACY_*_EXEMPTIONS 白名单登记三个 sha（惯例：不可变实现提交 + 事后 canonical 补登）。
