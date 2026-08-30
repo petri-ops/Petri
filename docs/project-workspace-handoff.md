@@ -1,13 +1,14 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-30（BLOCK-29.3 提交详情增强已收口：完整提交说明 body + 汇总统计详情头，UI-223 verified；当前无 active 工作包）
+最后更新：2026-08-30（BLOCK-29.4 提交时点文件全文查看已收口：diff/全文三态切换，UI-224 verified；当前无 active 工作包）
 
 ## Session Snapshot
 
-- **Active work package**: 无。`BLOCK-29.3-COMMIT-DETAIL` 已于 2026-08-30 收口（plan `docs/block-29-3-commit-detail-plan.md`，UI-223 verified，证据 `acceptance/ui-223/`）；下一工作包由用户显式裁决启动。
+- **Active work package**: 无。`BLOCK-29.4-COMMIT-FILE-FULLTEXT` 已于 2026-08-30 收口（plan `docs/block-29-4-commit-file-fulltext-plan.md`，UI-224 verified，证据 `acceptance/ui-224/`）；下一工作包由用户显式裁决启动。
 - **Current branch**: `main`；HEAD、dirty state 与 `origin/main` 同步状态以运行时 Git 为准。
-- **Code review boundary**: 代码审阅为**右侧停靠面板**（TitleBar 审阅按钮 Toggle；面板内 = 手风琴文件列表（BLOCK-29.1）+ 提交详情头（BLOCK-29.3：subject/作者·时间/汇总统计 + 完整提交说明 body 折叠）+ 行内 diff + 内嵌提交框）。`/review` 主区 mode 路由保留（同一 ReviewMode 组件）。审阅内核与主题契约不变：真实语义 token 明暗自适配、`git diff HEAD` 基准（c228beb 保留）、hunk 决策键 `path#hunkIndex`、零模型参与。
+- **Code review boundary**: 代码审阅为**右侧停靠面板**（TitleBar 审阅按钮 Toggle；面板内 = 手风琴文件列表（BLOCK-29.1）+ 提交详情头（BLOCK-29.3）+ 行内 diff + 文件全文三态切换（BLOCK-29.4：diff / 全文·改动后 / 全文·改动前）+ 内嵌提交框）。`/review` 主区 mode 路由保留（同一 ReviewMode 组件）。审阅内核与主题契约不变：真实语义 token 明暗自适配、`git diff HEAD` 基准（c228beb 保留）、hunk 决策键 `path#hunkIndex`、零模型参与。
 - **git history data shape**: `git:commit-log` 载荷 `commits[]` 自 BLOCK-29.3 起含 `message`（完整提交说明，`\x01` 记录分隔解析 `%b`）；前端 `CommitInfo.message` 为必填——浏览器 shim 桩的 commitLog 返回值必须含该字段，否则详情头可能渲染空。
+- **git 只读视野候选（待用户裁决，未实施）**：全分支历史（log --all + 分支选择器）/ blame 逐行归属 / 任意两提交对比 / stash-tag 查看 / 未跟踪文件内容预览；写操作（分支切换/暂存区/push-pull）维持此前裁决排除。
 - **P6 evidence boundary**: canonical `acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json` 绑定 `1f276de`（206-file binding，10/10 checks）。注意：BLOCK-25 改动了 `core/r-server/**` 与 `src/ipc/working-tree-review.js` 等源文件，P6 evidence 的 206-file binding 若覆盖这些路径，下一次相关门禁会按设计 fail-closed，需要重采。
 - **Minimum recovery**: 先读 `AUDIT-LOG.md` 当前待处理项，再核对 Git，然后用 `DOC-REGISTRY.json` 定位 active 工作包；无 active 包时停止，不通读历史文档。
 - **Last recorded gates**: tsc --noEmit 0 / WorkingTreeReview 定向 vitest 23/23 / docs:check PASS(163) / ui:audit:check PASS / docs:reconcile 0 / git diff --check clean。UI-204~212、UI-219~223 verified（dev 边界内，证据 `acceptance/ui-204/`、`acceptance/ui-208/`、`acceptance/ui-210/`、`acceptance/ui-212/`、`acceptance/ui-219/`~`acceptance/ui-223/`）。UI-193/194 保持 in_progress（缺口已取证）。

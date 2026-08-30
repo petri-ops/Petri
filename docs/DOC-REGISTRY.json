@@ -2690,7 +2690,7 @@
       "id": "BLOCK-29.4-COMMIT-FILE-FULLTEXT",
       "path": "docs/block-29-4-commit-file-fulltext-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-29-4-commit-file-fulltext",
       "entrypoint": "docs/README.md",
@@ -2700,14 +2700,14 @@
         "git-tools",
         "fulltext",
         "G0",
-        "active",
-        "phase=P0",
-        "UI-224"
+        "UI-224",
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-30 用户提出「理论上只要想都应该能看到的」；AskUserQuestion 未勾选，主 Agent 按推荐项取最小增量：提交时点文件全文查看——CommitDiffFileView 本地 revision.originalText/modifiedText 已持有两版全文，纯前端加 viewMode 三态切换（diff 默认/全文·改动后/全文·改动前，新增文件改动前禁用），全文复用 CodeMirrorEditor readonly（lineNumbers 内建）+ 扩展名 language 小映射。0 后端改动 / 0 新增 IPC / 0 新依赖 / AI 审阅 0 重新引入。其余只读候选（全分支历史/blame/两提交对比/stash-tag/未跟踪预览）登记 roadmap 待裁决。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-08-30 用户提出「理论上只要想都应该能看到的」；AskUserQuestion 未勾选，主 Agent 按推荐项取最小增量：提交时点文件全文查看——CommitDiffFileView 本地 revision.originalText/modifiedText 已持有两版全文，纯前端加 viewMode 三态切换（diff 默认/全文·改动后/全文·改动前，新增文件改动前禁用），全文复用 CodeMirrorEditor readonly（lineNumbers 内建）+ 扩展名 language 小映射。0 后端改动 / 0 新增 IPC / 0 新依赖 / AI 审阅 0 重新引入。其余只读候选（全分支历史/blame/两提交对比/stash-tag/未跟踪预览）登记 roadmap 待裁决。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-08-30 收口 verified：P0 20f056e / P1 e05b5c3；tsc 0 / vitest 24/24 / theme-token 14/14 / 桥桩实机三态断言，证据 acceptance/ui-224/。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-08-30",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0"
+      "phase": "COMPLETED"
     }
   ],
   "lastUpdated": "2026-08-30 (BLOCK-30 completed)",

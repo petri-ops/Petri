@@ -1,9 +1,9 @@
 # BLOCK-29.4-COMMIT-FILE-FULLTEXT — 提交时点文件全文查看 Plan
 
 - **Plan ID**: `BLOCK-29.4-COMMIT-FILE-FULLTEXT`（2026-08-30；用户提出「理论上只要想都应该能看到的」后 AskUserQuestion 未勾选，主 Agent 按推荐项取最小增量落地，其余只读候选项登记待裁决）
-- **状态**: `active`（P0）
+- **状态**: `completed`（2026-08-30 收口：tsc 0 / 定向 vitest 24/24 / theme-token 14/14 / 桥桩实机三态断言，证据 `acceptance/ui-224/`；UI-224 verified）
 - **truthDomain**: `block-29-4-commit-file-fulltext`
-- **阶段**: P0 治理登记（本 commit）→ P1 实现（UI-224）+ 实机证据 → P2 收口
+- **阶段**: P0 治理登记（`20f056e`）→ P1 实现（UI-224，`e05b5c3`）+ 实机证据 → P2 收口（本 commit）
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 ## 1. 背景与范围
