@@ -448,10 +448,10 @@ declare global {
           error?: string;
           message?: string;
         }>;
-        // BLOCK-29 — 提交历史（审阅面板「历史」分区，只读）
+        // BLOCK-29 — 提交历史（审阅面板「历史」分区，只读）；BLOCK-29.3 载荷 additive 增加 message
         commitLog: (params: { limit?: number; skip?: number; file?: string | null }) => Promise<{
           ok: boolean;
-          data?: { commits: Array<{ sha: string; shortSha: string; author: string; isoDate: string; subject: string }>; count: number };
+          data?: { commits: Array<{ sha: string; shortSha: string; author: string; isoDate: string; subject: string; message: string }>; count: number };
           error?: string;
           message?: string;
         }>;

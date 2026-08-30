@@ -245,6 +245,67 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     expect(commitFileContent).toHaveBeenCalledWith({ hash: 'a1b2c3d4e5f6', path: 'src/a.py' });
   });
 
+  it('BLOCK-29.3: commit detail shows full message body and aggregate stats', async () => {
+    const commitLog = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          commits: [
+            { sha: 'a1b2c3d4e5f6', shortSha: 'a1b2c3d', author: 'tester', isoDate: '2026-08-30T10:00:00Z', subject: 'with body', message: 'user ruling line\nimpl detail line' },
+            { sha: 'b2c3d4e5f6a1', shortSha: 'b2c3d4e', author: 'tester', isoDate: '2026-08-30T09:00:00Z', subject: 'no body', message: '' },
+          ],
+          count: 2,
+        },
+      })
+    );
+    const commitDiff = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          files: [
+            { path: 'src/a.py', oldPath: null, binary: false, hunks: [{ oldStart: 1, newStart: 1, lines: [{ type: 'add', text: 'hello' }] }] },
+            { path: 'src/b.py', oldPath: null, binary: false, hunks: [{ oldStart: 1, newStart: 1, lines: [{ type: 'add', text: 'world' }] }] },
+          ],
+          truncated: false,
+          summary: { added: 3, removed: 1 },
+        },
+      })
+    );
+    const commitFileContent = vi.fn(() =>
+      Promise.resolve({ ok: true, data: { original: 'old\n', modified: 'old\nhello\n' } })
+    );
+    getBridgeMock.mockReturnValue(makeBridge({ commitLog, commitDiff, commitFileContent }));
+
+    renderReview();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-review-progress')).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('tab', { name: '历史' }));
+    fireEvent.click(await screen.findByText('with body'));
+
+    const info = await screen.findByTestId('rvw-commit-info');
+    expect(info.textContent).toContain('with body');
+    expect(info.textContent).toContain('2 文件');
+    expect(info.textContent).toContain('+3');
+    expect(info.textContent).toContain('−1');
+
+    // 完整提交说明默认折叠（details 内容在 DOM 中但收起）
+    const details = screen.getByText('完整提交说明').closest('details');
+    expect(details).toBeTruthy();
+    expect(details?.textContent).toContain('user ruling line');
+    expect(details?.textContent).toContain('impl detail line');
+
+    // 无 body 的提交不渲染折叠说明
+    fireEvent.click(screen.getByRole('button', { name: /返回历史/ }));
+    fireEvent.click(await screen.findByText('no body'));
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-commit-info').textContent).toContain('no body');
+    });
+    expect(screen.queryByText('完整提交说明')).toBeNull();
+  });
+
   it('BLOCK-29.1: dock accordion rows expand inline diff on click', async () => {
     getBridgeMock.mockReturnValue(makeBridge());
 

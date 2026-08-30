@@ -406,6 +406,28 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
         {review.historyView === 'history' && (
           review.selectedCommit ? (
             <>
+              {/* BLOCK-29.3 — 提交详情头：subject / 作者·时间 / 汇总统计 + 完整提交说明 */}
+              <div className="rvw-commit-info" data-testid="rvw-commit-info">
+                <div className="rvw-commit-info-head">
+                  <span className="rvw-commit-subject">{review.selectedCommit.subject}</span>
+                  <span className="rvw-commit-meta">
+                    {review.selectedCommit.author} · {formatCommitDate(review.selectedCommit.isoDate)}
+                  </span>
+                  {review.commitDiff && (
+                    <span className="rvw-commit-summary">
+                      {review.commitDiff.files.length} 文件
+                      <span className="rvw-stat-add">+{review.commitDiff.summary.added}</span>
+                      <span className="rvw-stat-del">−{review.commitDiff.summary.removed}</span>
+                    </span>
+                  )}
+                </div>
+                {review.selectedCommit.message && (
+                  <details className="rvw-commit-body">
+                    <summary>完整提交说明</summary>
+                    <pre>{review.selectedCommit.message}</pre>
+                  </details>
+                )}
+              </div>
               {/* BLOCK-29 — 提交内：文件条 + 只读 diff（vs 第一父提交） */}
               <div className="rvw-filestrip" role="tablist" aria-label="提交改动文件">
                 <button

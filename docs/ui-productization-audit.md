@@ -1759,3 +1759,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：BLOCK-30 自身门禁（定向测试全绿、tsc 0、build、隔离启动）+ 本会话快速回归：WorkingTreeReview 定向 vitest 21/21（审阅/git 工具功能不受影响）、tsc 0。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-223: BLOCK-29.3 — 提交详情增强：完整提交说明 + 汇总统计 (2026-08-30 verified)
+
+**用户反馈**：「我看到了具体的历史记录 但是这个历史记录没有详细的信息吗 我记得每次 commit都应该有改变的信息在的」——现状点提交只见文件条 + 只读 diff（每文件 ±统计 BLOCK-29 已交付），完整提交说明（message body）应用内不可见：git-adapter log 仅解析 `%s` subject 一行，终端 `git show` 才能看到正文。用户 AskUserQuestion 裁决选项「完整说明 + ±统计」。plan `docs/block-29-3-commit-detail-plan.md`（P0 登记 `9d62ac1`）。
+
+**改动范围**：
+- git-adapter `log()`：pretty format 改 `\x01` 记录分隔 + `%b` body 字段（body 可含换行、不能按行切），解析按 `\x01` 分记录，body 去尾部换行；真实仓库快测通过（多行 body 完整解析、trailing newline 剥离）。
+- `git:commit-log` 载荷 additive 增加 `message` 字段（0 新增 IPC 通道，preload 直传不改）；`electron.d.ts` commitLog commits 类型 + `useWorkingTreeReview` `CommitInfo` 增加 `message`。
+- ReviewMode 提交详情视图新增 `.rvw-commit-info` 详情头：subject（粗体）+ author · formatCommitDate + 汇总统计（`N 文件 +A −D`，复用既有 commitDiff summary/files.length，0 新查询）；body 非空时原生 `<details>` 折叠展示完整说明（默认收起，零新增 state）；字号只用 `--biof3-font-size-*` token（body-sm 13px / xs 10px）。
+
+**验证**：tsc 0；定向 vitest 23/23（新增用例：详情头完整说明折叠展开 + 汇总统计 + 无 body 不渲染 details）；node --check；adapter 真实仓库快测（多行 body 解析）。**2026-08-30 dev 实机 verified**：localhost:3000 注入磁盘真实 git 桥桩后断言——详情头 subject/meta/「2 文件 +11 −0」、details 默认收起、展开显示 4 行完整说明、文件条每文件 ±统计（demo-293-notes.md +7 / demo-293.py +4）、无 body 提交（a3b567f）不渲染 details；截图 `acceptance/ui-223/`（detail-header-collapsed / detail-header-expanded / history-list）。fixture 提交验收后 reset --mixed 回滚，0 残留。**观察项**：窄面板下 summary 操作按钮遮挡「改动/历史」tab（UI-219 既有观察项，真实点击被拦、程序化点击可通过），维持待布局打磨。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

@@ -521,7 +521,8 @@ function createGitAdapter(options = {}) {
 
     /**
      * BLOCK-29 — 提交历史列表（git log）。
-     * NUL 分隔 format（sha/shortSha/author/isoDate/subject），解析无歧义；
+     * BLOCK-29.3 — 记录分隔改为 \x01、追加 %b 完整提交说明（body 可含换行，
+     * 不能按行切分）；字段 NUL 分隔（sha/shortSha/author/isoDate/subject/message）。
      * limit 上限 200；ref 必须是安全的 ref 表达式（hex sha / 分支名 / HEAD），
      * 不接受空白与以 '-' 开头的值，防参数注入。
      */
@@ -532,7 +533,7 @@ function createGitAdapter(options = {}) {
         : 'HEAD';
       const args = [
         'log',
-        '--pretty=format:%H%x00%h%x00%an%x00%aI%x00%s',
+        '--pretty=format:%x01%H%x00%h%x00%an%x00%aI%x00%s%x00%b',
         '--max-count=' + String(maxCount),
       ];
       const skipCount = Math.max(0, Math.floor(Number(skip) || 0));
@@ -545,16 +546,17 @@ function createGitAdapter(options = {}) {
       const output = run(args, { allowFailure: true, readOnly: true });
       if (!output.ok) throw new GitAdapterError('git_log_failed', 'Scoped git log failed.', output);
       const commits = [];
-      for (const line of output.stdout.split('\n')) {
-        if (!line) continue;
-        const fields = line.split('\x00');
-        if (fields.length < 5 || !/^[0-9a-f]{7,64}$/i.test(fields[0])) continue;
+      for (const record of output.stdout.split('\x01')) {
+        if (!record) continue;
+        const fields = record.split('\x00');
+        if (fields.length < 6 || !/^[0-9a-f]{7,64}$/i.test(fields[0])) continue;
         commits.push({
           sha: fields[0],
           shortSha: fields[1] || fields[0].slice(0, 7),
           author: fields[2] || '',
           isoDate: fields[3] || '',
           subject: fields[4] || '',
+          message: (fields[5] ?? '').replace(/\n+$/, ''),
         });
       }
       return { commits, count: commits.length };

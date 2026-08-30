@@ -744,3 +744,73 @@
   background: var(--biof3-bg-subtle);
   color: var(--biof3-text);
 }
+
+/* BLOCK-29.3 — 提交详情头：subject / 作者·时间 / 汇总统计 + 完整提交说明 */
+.rvw-commit-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--biof3-border);
+  background: var(--biof3-bg-subtle);
+}
+
+.rvw-commit-info-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.rvw-commit-subject {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: var(--biof3-font-size-body-sm);
+  color: var(--biof3-text);
+}
+
+.rvw-commit-meta {
+  flex-shrink: 0;
+  font-size: var(--biof3-font-size-xs);
+  color: var(--biof3-text-muted);
+}
+
+.rvw-commit-summary {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: var(--biof3-font-size-xs);
+  color: var(--biof3-text-secondary);
+}
+
+.rvw-commit-body summary {
+  cursor: pointer;
+  font-size: var(--biof3-font-size-xs);
+  color: var(--biof3-text-secondary);
+  user-select: none;
+}
+
+.rvw-commit-body summary:hover {
+  color: var(--biof3-text);
+}
+
+.rvw-commit-body pre {
+  margin: 4px 0 0;
+  padding: 6px 8px;
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--biof3-font-mono);
+  font-size: var(--biof3-font-size-body-sm);
+  color: var(--biof3-text-secondary);
+  background: var(--biof3-bg-canvas);
+  border: 1px solid var(--biof3-border);
+  border-radius: 7px;
+}

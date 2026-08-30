@@ -65,6 +65,8 @@ export interface CommitInfo {
   author: string;
   isoDate: string;
   subject: string;
+  /** BLOCK-29.3 — 完整提交说明（%b，body 为空时为空串）。 */
+  message: string;
 }
 
 export interface WorkingTreeStatus {
