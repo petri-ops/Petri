@@ -1,27 +1,29 @@
 # BioF3 Desktop Core 架构
 
-> 最后更新：2026-07-16
+> 最后更新：2026-08-30（BLOCK-30 P1/P2：py-server 与 gateway 摘除，单后端拓扑）
 
-`core/r-server` 是 BioF3 Desktop 随应用打包的本地 Node 后端。它不部署到
-Web/ECS，不连接 PostgreSQL、OSS 或容器运行时。
+`core/r-server` 是 BioF3 Desktop 唯一的本地 Node 业务后端。它不部署到
+Web/ECS，不连接 PostgreSQL、OSS 或容器运行时；R/Python 分析由它经
+shared-backend 执行器注册表直接 spawn 内嵌解释器执行。
 
 ## 运行拓扑
 
 ```text
 Electron main
 ├── Vite/React renderer
-├── core/r-server/server.js (local HTTP)
-│   ├── SQLite
-│   ├── local filesystem
-│   ├── embedded/system R
-│   └── AI agent + MCP registry
-└── core/py-server/server.js (local HTTP)
-    ├── same SQLite/local storage contract
-    └── embedded/system Python
+└── core/r-server/server.js (local HTTP, 唯一业务后端)
+    ├── SQLite (biof3.db，单写入方)
+    ├── local filesystem
+    ├── embedded/system R        （spawn Rscript）
+    ├── embedded/system Python   （spawn python，经执行器注册表）
+    └── AI agent + MCP registry
 ```
 
-Electron 主进程分配本机端口并注入本地数据、结果和运行时路径。两个服务只在
+Electron 主进程分配本机端口并注入本地数据、结果和运行时路径。r-server 只在
 桌面生命周期内运行，文件落在用户的 BioF3 本地目录或项目 workspace。
+（BLOCK-30 P1/P2：原 core/py-server 与 core/gateway 已摘除——前端此前对
+py-server 为 0 直连、裸执行入口恒 410、`tool_jobs` 双写入方收敛为单写入方；
+gateway 仅剩健康探活消费者。）
 
 ## 唯一分析事实链
 
@@ -62,9 +64,11 @@ core/r-server/
 └── tool-scripts/             R/Python 脚本与报告模板
 ```
 
-`core/shared-backend` 提供本地存储适配器、执行器注册、execution context、项目
-运行目录和跨 R/Python 服务共享的纯逻辑。`core/py-server` 只保留当前工具执行
-接口；旧单细胞/空间异步 `/api/task` 引擎已经移除。
+`core/shared-backend` 提供本地存储适配器、执行器注册表（R/Python/未来语言共用
+同一 `LanguageExecutor` 接口与 `buildPoolWorker` 池钩子）、execution context、
+项目运行目录等纯逻辑，被 r-server 与 Electron 主进程共同复用。
+（BLOCK-30 P1：原 `core/py-server` 已摘除，其 `py-pool.js` 常驻 Python worker
+池抢救至 `shared-backend/executors/`，接线见 BLOCK-30 P3。）
 
 ## 存储与路径
 

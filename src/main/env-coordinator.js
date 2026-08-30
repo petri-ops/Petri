@@ -21,7 +21,7 @@
 // which lived in main.js — so we import them here).
 //
 // Required inputs:
-//   - backendPorts { gateway, r, python, plumber, renderer }
+//   - backendPorts { r, plumber, renderer }（BLOCK-30 P2：gateway/python 已摘除）
 //   - app.getPath (electron app)
 //   - path/fs (Node core)
 //   - resolveResource, resolveRuntime, _detectSystemR,
@@ -167,16 +167,16 @@ function resolveRuntimeLocal(lang, userDataDir) {
 // All port fallback values used to be scattered across:
 //   core/r-server/server.js:130            (R_SERVER_PORT || 3003)
 //   core/r-server/config.js:23             (R_SERVER_PORT || '3003')
-//   src/preload.js:67-68                   (R_SERVER_PORT || 3001 / PY_SERVER_PORT || 3004)
+//   src/preload.js:67-68                   (R_SERVER_PORT || 3001；PY_SERVER_PORT 随 BLOCK-30 摘除)
 //   src/backend-health.js:13-16            (4 separate defaults)
 //
 // These four sites all encode the same fact — the localhost port for
 // a given backend role — but with three different defaults (3001 vs
 // 3003 vs 3005). When the Electron main process is running,
-// setupDesktopEnv() sets R_SERVER_PORT / PY_SERVER_PORT / GATEWAY_PORT
+// setupDesktopEnv() sets R_SERVER_PORT / PLUMBER_PORT（BLOCK-30 起 py-server/gateway 已摘除）
 // / PLUMBER_PORT on process.env before any of these modules reads
-// them, so the fallback is unreachable. When the r-server / py-server
-// are launched as standalone child processes (without Electron's main),
+// it, so the fallback is unreachable. When the r-server / py-server
+// is launched as a standalone child process (without Electron's main),
 // env-coordinator is *not* running and the fallback kicks in.
 //
 // Centralising the fallback here lets the four readers stay
@@ -186,7 +186,6 @@ function resolveRuntimeLocal(lang, userDataDir) {
 //   r       → 3001  (matches preload.js / backend-health.js historical default)
 //   python  → 3004  (matches preload.js / backend-health.js historical default)
 //   plumber → 8787  (matches backend-health.js historical default)
-//   gateway → 3005  (matches backend-health.js historical default)
 //
 // 3003 was the legacy r-server default (server.js / config.js); the
 // Electron main process always overwrites R_SERVER_PORT before these
@@ -210,10 +209,6 @@ function getBackendPort(role, fallback) {
     if (process.env.PLUMBER_PORT) return parseInt(process.env.PLUMBER_PORT, 10);
     return fallback != null ? fallback : 8787;
   }
-  if (role === 'gateway') {
-    if (process.env.GATEWAY_PORT) return parseInt(process.env.GATEWAY_PORT, 10);
-    return fallback != null ? fallback : 3005;
-  }
   throw new Error(`getBackendPort: unknown role ${JSON.stringify(role)}`);
 }
 
@@ -221,7 +216,6 @@ function getBackendPorts() {
   return {
     r: getBackendPort('r'),
     plumber: getBackendPort('plumber'),
-    gateway: getBackendPort('gateway'),
   };
 }
 
@@ -279,10 +273,7 @@ function setupDesktopEnv(backendPorts) {
 
   process.env.R_SERVER_PORT = String(backendPorts.r);
   process.env.PLUMBER_PORT = String(backendPorts.plumber);
-  process.env.GATEWAY_PORT = String(backendPorts.gateway);
-  // Gateway health probes and proxies use the full URL, not the port alone.
   process.env.R_SERVER_URL = `http://127.0.0.1:${backendPorts.r}`;
-  process.env.GATEWAY_URL = `http://127.0.0.1:${backendPorts.gateway}`;
   if (backendPorts.renderer) {
     process.env.BIOF3_RENDERER_PORT = String(backendPorts.renderer);
     process.env.BIOF3_RENDERER_ORIGIN = `http://localhost:${backendPorts.renderer}`;

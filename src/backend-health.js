@@ -14,14 +14,13 @@
 
 // A-009: pull every backend port from env-coordinator instead of each
 // file duplicating the per-port fallback literal here. The Electron
-// main process sets R_SERVER_PORT / PLUMBER_PORT /
-// GATEWAY_PORT before this module is required, so the helper defaults
+// main process sets R_SERVER_PORT / PLUMBER_PORT
+// before this module is required, so the helper defaults
 // are only hit in the standalone fallback path.
 const { getBackendPort } = require('./main/env-coordinator');
 
 const R_SERVER_HEALTH = `http://localhost:${getBackendPort('r')}/api/health`;
 const PLUMBER_HEALTH = `http://localhost:${getBackendPort('plumber')}/health`;
-const GATEWAY_HEALTH = `http://localhost:${getBackendPort('gateway')}/health`;
 
 /**
  * 探测一个 URL 是否可达且返回 2xx。1.5s 超时，失败返回 false（不抛）。
@@ -73,16 +72,13 @@ async function getBackendStatus({ runtimeStatus, procs, probeHealth, probePlumbe
   const rRuntime = !!runtimeStatus?.r?.installed;
   const pyRuntime = !!runtimeStatus?.python?.installed;
 
-  const gatewayAlive = isProcAlive(procs?.gateway);
   const rServerAlive = isProcAlive(procs?.rServer);
   const plumberAlive = isProcAlive(procs?.plumber);
 
-  const probeG = () => probeUrl(GATEWAY_HEALTH);
   const probeH = probeHealth || (() => probeUrl(R_SERVER_HEALTH));
   const probePl = probePlumber || (() => probeUrl(PLUMBER_HEALTH));
 
   // 只在进程存活时才探测（进程已死则直接 false，省一次网络往返）
-  const gatewayUp = gatewayAlive && (await probeG());
   const rServerUp = rRuntime && rServerAlive && (await probeH());
   const plumberUp = plumberAlive && (await probePl());
 
@@ -98,7 +94,7 @@ async function getBackendStatus({ runtimeStatus, procs, probeHealth, probePlumbe
     downReason = 'R 后端未就绪，点此诊断';
   }
 
-  return { rRuntime, pyRuntime, gatewayUp, rServerUp, plumberUp, isReady, downReason };
+  return { rRuntime, pyRuntime, rServerUp, plumberUp, isReady, downReason };
 }
 
 module.exports = { getBackendStatus, mergeRuntimeStatusWithConfiguredHomes, probeUrl };

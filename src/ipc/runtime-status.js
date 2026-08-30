@@ -4,7 +4,7 @@
 // Extracted from src/main.js by BLOCK-9.1 PHASE 2.
 // Original location: src/main.js ~line 1278 (setupRuntimeIpc).
 //
-// Backend procs (gateway/rServer/plumber) are passed
+// Backend procs (rServer/plumber) are passed
 // in by the caller (main.js) because they live as module-level
 // `let ChildProc` variables in src/main.js — see backend-proc-
 // manager.js (PHASE 3+ future) for the planned centralized home.
@@ -13,7 +13,7 @@
 
 const { ipcMain } = require("electron");
 
-function setupRuntimeIpc({ gatewayProc, rServerProc, plumberProc } = {}) {
+function setupRuntimeIpc({ rServerProc, plumberProc } = {}) {
   ipcMain.handle("runtime:status", async () => {
     try {
       const { getRuntimeStatus } = require("../plugin-manager");
@@ -36,7 +36,6 @@ function setupRuntimeIpc({ gatewayProc, rServerProc, plumberProc } = {}) {
       return await getBackendStatus({
         runtimeStatus: mergeRuntimeStatusWithConfiguredHomes(getRuntimeStatus()),
         procs: {
-          gateway: gatewayProc,
           rServer: rServerProc,
           plumber: plumberProc,
         },

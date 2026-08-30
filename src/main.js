@@ -393,14 +393,12 @@ async function main() {
   }
 
   // 1. 启动后端服务
-  // r-server 常驻（BLOCK-30 P1：唯一业务后端，Python 工具经执行器注册表本地执行）。
-  // Gateway 协调层统一入口，在 r-server 之后启动。
-  // BLOCK-9.1 PHASE 4: startRServer/startGateway moved
-  // to src/main/backend-proc-manager.js. main.js orchestrates via
-  // named imports.
+  // r-server 常驻（BLOCK-30 P1/P2：唯一业务后端，Python 工具经执行器注册表
+  // 本地执行；gateway 协调层已摘除）。
+  // BLOCK-9.1 PHASE 4: startRServer moved to src/main/backend-proc-manager.js.
+  // main.js orchestrates via named imports.
   const {
     startRServer,
-    startGateway,
     startPlumber,
     stopPlumber,
     getProcs,
@@ -409,7 +407,6 @@ async function main() {
     readLogTail,
   } = require("./main/backend-proc-manager");
   await startRServer();
-  await startGateway();
   // plumber 仍按需启停 - 只在 FigCode 重绘时通过 IPC plumber:start 触发
 
   // 2. 加载已安装插件
@@ -551,8 +548,8 @@ app.on("before-quit", () => {
   const { rServerSupervisor, stopPlumber } = require("./main/backend-proc-manager");
   stopPlumber("app-quit");
   rServerSupervisor.shutdown("app-quit");
-  const { gatewayProc, plumberProc } = getProcs();
-  for (const proc of [gatewayProc, plumberProc]) {
+  const { plumberProc } = getProcs();
+  for (const proc of [plumberProc]) {
     if (proc) {
       try {
         proc.kill();

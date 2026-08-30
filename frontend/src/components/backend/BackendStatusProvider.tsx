@@ -2,16 +2,12 @@
 // 挂在 App 根，下游用 useBackendStatus() 消费。
 // r-server 不通时由摘要概览显示降级提示。
 //
-// Phase 3 增强：添加 Gateway (3002) 健康检查聚合
+// （BLOCK-30 P2：曾有的 Gateway 健康聚合随 gateway 摘除）
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { BackendStatus } from '@/lib/electron';
-import type { GatewayHealthStatus } from '@/lib/gateway-client';
 
-// 增强的后端状态类型
-export interface EnhancedBackendStatus extends BackendStatus {
-  gatewayUp: boolean;
-  gatewayHealth?: GatewayHealthStatus;
-}
+// 增强的后端状态类型（BLOCK-30 P2：gateway 字段随 gateway 摘除，回归 BackendStatus 本体）
+export type EnhancedBackendStatus = BackendStatus;
 
 // 初始态：检测中
 const INITIAL_STATUS: EnhancedBackendStatus = {
@@ -22,7 +18,6 @@ const INITIAL_STATUS: EnhancedBackendStatus = {
   isReady: false,
   downReason: '',
   loaded: false,
-  gatewayUp: false,
 };
 
 const Ctx = createContext<EnhancedBackendStatus>(INITIAL_STATUS);
@@ -39,37 +34,10 @@ async function probeHealth(url: string): Promise<boolean> {
   }
 }
 
-async function probeGatewayHealth(): Promise<GatewayHealthStatus> {
-  try {
-    const response = await fetch('http://127.0.0.1:3005/health', {
-      signal: AbortSignal.timeout(3000),
-    });
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        gateway: true,
-        ...data,
-      };
-    }
-    return { gateway: false, error: `HTTP ${response.status}` };
-  } catch (e) {
-    return {
-      gateway: false,
-      error: e instanceof Error ? e.message : 'Connection failed',
-    };
-  }
-}
-
 async function readBackendStatus(): Promise<EnhancedBackendStatus | null> {
   const desktopStatus = await window.biof3Desktop?.backend?.status();
   if (desktopStatus) {
-    // 添加 Gateway 探测
-    const gatewayHealth = await probeGatewayHealth();
-    return {
-      ...desktopStatus,
-      gatewayUp: gatewayHealth.gateway,
-      gatewayHealth,
-    };
+    return { ...desktopStatus };
   }
   // Vite's renderer-only development mode has no preload bridge. Probe the
   // same local services so the real workspace UI remains available for visual
@@ -77,11 +45,7 @@ async function readBackendStatus(): Promise<EnhancedBackendStatus | null> {
   if (!import.meta.env.DEV) return null;
   // BLOCK-30 P1: py-server HTTP 探针已摘除（Python 执行并入 r-server），
   // 渲染进程无从探测运行时安装态，pyRuntime 恒 false（仅视觉回归路径）。
-  const [rServerUp, gatewayUp] = await Promise.all([
-    probeHealth('http://127.0.0.1:3001/api/health'),
-    probeHealth('http://127.0.0.1:3005/health'),
-  ]);
-  const gatewayHealth = await probeGatewayHealth();
+  const rServerUp = await probeHealth('http://127.0.0.1:3001/api/health');
   return {
     rRuntime: rServerUp,
     pyRuntime: false,
@@ -90,8 +54,6 @@ async function readBackendStatus(): Promise<EnhancedBackendStatus | null> {
     isReady: rServerUp,
     downReason: rServerUp ? null : '本地分析服务尚未就绪',
     loaded: true,
-    gatewayUp,
-    gatewayHealth,
   };
 }
 

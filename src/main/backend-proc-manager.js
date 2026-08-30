@@ -5,14 +5,14 @@
 //
 // Extracted from src/main.js by BLOCK-9.1 PHASE 4.
 // Original location: src/main.js ~lines 96-139 (log streams),
-// ~lines 320-428 (startGateway / startRServer), ~lines 430-613
+// ~lines 320-428 (startGateway / startRServer；gateway 部分随 BLOCK-30 P2 摘除), ~lines 430-613
 // (startPyServer / stopPyServer / startPlumber / stopPlumber +
 //  idle timer helpers + rServerSupervisor).
 //
 // Design rationale:
 //   - The backend procs are module-level `let ChildProc`
 //     variables in main.js that are shared across:
-//       * startup functions (startRServer / startGateway / ...)
+//       * startup functions (startRServer / ...)
 //       * setupRuntimeIpc / setupTerminalIpc / setupDiagnosticIpc
 //         (IPC handlers that read procs for status snapshots)
 //       * before-quit / app lifecycle hooks
@@ -27,8 +27,8 @@
 //   - module-level start/stop functions (consumed by main.js
 //     at boot, by setupBackendLifecycleIpc via parameter
 //     injection, and by tests)
-//   - getProcs() — returns a snapshot { gatewayProc, rServerProc,
-//     plumberProc } for IPC snapshot handlers
+//   - getProcs() — returns a snapshot { rServerProc, plumberProc }
+//     for IPC snapshot handlers
 //   - getLogDir() / flushLogs() / readLogTail() — for
 //     setupDiagnosticIpc / setupTerminalIpc
 //
@@ -155,12 +155,11 @@ function readLogTail(filePath, maxLines = 120) {
 // ── Backend procs (3 child processes; BLOCK-30 P1 removed py-server) ──
 // Mutable let variables — the .on("exit") handlers null them
 // out, same behavior as before.
-let gatewayProc = null;
 let rServerProc = null;
 let plumberProc = null;
 
 function getProcs() {
-  return { gatewayProc, rServerProc, plumberProc };
+  return { rServerProc, plumberProc };
 }
 
 // ── Plumber idle timer (5min auto-stop) ────────────────────────
@@ -180,57 +179,6 @@ function _resetPlumberIdleTimer() {
     console.log("[desktop] plumber idle timeout (5min), stopping");
     stopPlumber("idle-timeout");
   }, PLUMBER_IDLE_TIMEOUT_MS);
-}
-
-// ── startGateway ───────────────────────────────────────────────
-function startGateway(reason = "boot") {
-  const gatewayPath = resolveCore("gateway", "server.js");
-  if (!fs.existsSync(gatewayPath)) {
-    console.warn("[desktop] gateway not found, skipping:", gatewayPath);
-    return { ok: false, error: "gateway script not found" };
-  }
-
-  try {
-    // gateway 内部 rServerUrl 默认指向 :3003，但 r-server 实际监听
-    // R_SERVER_PORT（dev/桌面默认 3001）。不显式注入 R_SERVER_URL 会导致
-    // gateway /health 聚合误报 503、/r-server 代理打到死端口。
-    const rServerUrl =
-      process.env.R_SERVER_URL ||
-      `http://127.0.0.1:${process.env.R_SERVER_PORT || 3001}`;
-    gatewayProc = spawn(NODE_BIN, [gatewayPath], {
-      env: { ...process.env, ELECTRON_RUN_AS_NODE: "1", R_SERVER_URL: rServerUrl },
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-  } catch (e) {
-    console.error("[desktop] gateway spawn failed:", e.message);
-    gatewayProc = null;
-    return { ok: false, error: e.message };
-  }
-
-  _createLogStream("gateway");
-  gatewayProc.stdout.on("data", (d) => {
-    const text = d.toString().trim();
-    if (text) {
-      console.log(`[gateway] ${text}`);
-      _writeLog("gateway", `[gateway] ${text}`);
-    }
-  });
-  gatewayProc.stderr.on("data", (d) => {
-    const text = d.toString().trim();
-    if (text) {
-      console.error(`[gateway] ${text}`);
-      _writeLog("gateway", `[gateway:ERR] ${text}`);
-    }
-  });
-  gatewayProc.on("exit", (code) => {
-    console.log(`[desktop] gateway exited: ${code}`);
-    gatewayProc = null;
-  });
-
-  console.log(
-    `[desktop] gateway spawned (pid=${gatewayProc.pid}) on :${process.env.GATEWAY_PORT} — reason=${reason}`,
-  );
-  return { ok: true, pid: gatewayProc.pid };
 }
 
 // ── startRServer (with supervisor) ─────────────────────────────
@@ -381,7 +329,6 @@ module.exports = {
   readLogTail,
   // lifecycle
   startRServer,
-  startGateway,
   startPlumber,
   stopPlumber,
   // supervisor (for before-quit shutdown in main.js)

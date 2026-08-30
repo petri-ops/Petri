@@ -394,7 +394,6 @@
       "patterns": [
         "core/r-server/**",
         "core/packages/**",
-        "core/gateway/**",
         "core/shared-backend/storage/**",
         "core/shared-backend/path-safe.js",
         "core/shared-backend/local-request-boundary.js"
