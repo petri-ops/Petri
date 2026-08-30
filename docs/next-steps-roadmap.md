@@ -1,11 +1,11 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-30（BLOCK-29.4 已收口：提交时点文件全文查看——diff/全文三态切换，UI-224 verified，证据 `acceptance/ui-224/`。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-08-30（BLOCK-29.5 已收口：审阅 git 只读视野扩展五项全落——遮挡修复/全分支历史/blame/两提交对比/stash-tag-未跟踪预览，UI-225~229 verified，证据 `acceptance/ui-225/`~`acceptance/ui-229/`；附带修复 git:commit-log skip/file 透传断点（UI-221 勘误）。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- 无 active 工作包。`BLOCK-29.4-COMMIT-FILE-FULLTEXT` 已于 2026-08-30 收口（用户方向「理论上想看都应该能看」的最小增量）：提交详情文件视图三态切换——diff / 全文·改动后 / 全文·改动前（新增文件禁用改动前），全文复用 commitFileContent 两版数据 + CodeMirrorEditor readonly，纯前端 0 后端改动；证据 `acceptance/ui-224/`。
-- 留给用户裁决的后续候选：**git 只读视野扩展**（① 全分支历史：log --all + 分支选择器，只读；② blame 逐行归属；③ 任意两提交对比；④ 小件：stash/tag 查看、未跟踪文件内容预览）；**审阅窄视口布局打磨**（UI-219 观察项：summary 操作按钮遮挡「改动/历史」tab，UI-223/224 验收中真实点击再次被拦）；git 写操作三期（分支切换/暂存区/push-pull，此前裁决排除）；UI-193 widget 业务路径与 UI-194 消费侧挂载；ui:audit `--report` 模式 schema 大小写债务（AUDIT-LOG 2026-08-30 🟢）。
+- 无 active 工作包。`BLOCK-29.5-REVIEW-READONLY-VISION` 已于 2026-08-30 收口（用户裁决「确认」启动菜单，5 PHASE 串行）：①窄面板「改动/历史」tab 遮挡修复（UI-219 观察项收口，真实点击验收）②全分支历史（分支选择器，只读）③blame 逐行归属（文件视图第四态）④任意两提交对比（区间 diff）⑤stash 只读列表/标签 optgroup/未跟踪文件预览；**附带发现并修复存量 IPC 断点**——`git:commit-log` 曾只透传 limit，UI-221 的历史分页与文件历史在真实 Electron 链路失效（UI-221 勘误 + UI-226 修复；真实链路最终复核以 dev Electron 重启载入新主进程代码为准）。
+- 留给用户裁决的后续候选：git 写操作三期（分支切换/暂存区两栏/push-pull，此前裁决排除）；UI-193 widget 业务路径与 UI-194 消费侧挂载；ui:audit `--report` 模式 schema 大小写债务（AUDIT-LOG 2026-08-30 🟢）。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 
 ## 当前结论

@@ -1,9 +1,9 @@
 # BLOCK-29.5-REVIEW-READONLY-VISION — 审阅 git 只读视野扩展（遮挡修复 + 全分支历史 + blame + 两提交对比 + 小件） Plan
 
 - **Plan ID**: `BLOCK-29.5-REVIEW-READONLY-VISION`（用户裁决「确认」，2026-08-30——确认启动上轮列出的只读视野候选菜单）
-- **状态**: `active`（P0）
+- **状态**: `completed`（2026-08-30 收口：P1~P5 全部落地，tsc 0 / 定向 vitest 28/28 / adapter 真实仓库快测 / 桥桩实机断言，证据 `acceptance/ui-225/`~`acceptance/ui-229/`；UI-225~229 verified。**附带修复存量 IPC 断点**：`git:commit-log` 曾丢弃 skip/file，UI-221 分页与文件历史在真实链路失效（UI-221 勘误 + UI-226 修复），真实链路最终复核以 dev Electron 重启为准）
 - **truthDomain**: `block-29-5-review-readonly-vision`
-- **阶段**: P0 登记（本 commit）→ P1~P5 串行（每个 PHASE 独立提交 + 独立 UI-### 台账同步）→ P6 桥桩实机总验收 + 收口
+- **阶段**: P0 登记（`b9b61da`）→ P1（UI-225，`810ca5a`）→ P2（UI-226，`39d7f9c`）→ P3（UI-227，`9925bf9`）→ P4+P5（UI-228/229，`d2c9316`）→ P6 收口（本 commit）
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 ## 1. 背景

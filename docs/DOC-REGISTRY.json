@@ -2713,7 +2713,7 @@
       "id": "BLOCK-29.5-REVIEW-READONLY-VISION",
       "path": "docs/block-29-5-review-readonly-vision-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-29-5-review-readonly-vision",
       "entrypoint": "docs/README.md",
@@ -2727,18 +2727,18 @@
         "compare",
         "stash",
         "G0",
-        "active",
-        "phase=P0",
         "UI-225",
         "UI-226",
         "UI-227",
         "UI-228",
-        "UI-229"
+        "UI-229",
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-30 用户裁决「确认」启动只读视野菜单。P1 UI-225 窄面板 tabs 遮挡修复（summary wrap + fit-content）；P2 UI-226 全分支历史（listBranches + commit-log ref 透传 + git:branch-list + 分支选择器，只读不切分支）；P3 UI-227 blame（porcelain 解析 + git:blame + 文件视图第四态）；P4 UI-228 两提交对比（commit-diff/file-content 区间参数 additive + 对比模式）；P5 UI-229 小件（stash 只读列表/tagList 选择器分组/未跟踪文件 WORKTREE 全文预览）。写操作维持排除 / 0 新依赖 / AI 审阅 0 重新引入。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-08-30 用户裁决「确认」启动只读视野菜单。P1 UI-225 窄面板 tabs 遮挡修复（summary wrap + fit-content）；P2 UI-226 全分支历史（listBranches + commit-log ref 透传 + git:branch-list + 分支选择器，只读不切分支）；P3 UI-227 blame（porcelain 解析 + git:blame + 文件视图第四态）；P4 UI-228 两提交对比（commit-diff/file-content 区间参数 additive + 对比模式）；P5 UI-229 小件（stash 只读列表/tagList 选择器分组/未跟踪文件 WORKTREE 全文预览）。写操作维持排除 / 0 新依赖 / AI 审阅 0 重新引入。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-08-30 收口 verified：P0 b9b61da / P1 810ca5a / P2 39d7f9c / P3 9925bf9 / P4+P5 d2c9316；tsc 0 / vitest 28/28 / adapter 真实仓库快测（branches/blame/stash/tag）/ 桥桩实机断言，证据 acceptance/ui-225~229/。附带修复 git:commit-log skip/file 透传断点（UI-221 勘误）。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-08-30",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0"
+      "phase": "COMPLETED"
     }
   ],
   "lastUpdated": "2026-08-30 (BLOCK-30 completed)",
