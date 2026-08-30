@@ -570,6 +570,60 @@ function createGitAdapter(options = {}) {
     },
 
     /**
+     * BLOCK-29.5 — 逐行归属（只读）。--porcelain 解析；commit 信息按 sha 去重；
+     * 行数超 5000 截断（truncated: true）；行 → shortSha 映射，内容由前端全文视图对齐。
+     */
+    blame({ path: filePath, ref = null } = {}) {
+      const safe = assertSafePathspecs([filePath], scope);
+      const args = ['blame', '--porcelain'];
+      const refArg = assertSafeRef(ref);
+      if (refArg) args.push(refArg);
+      args.push('--', safe[0]);
+      const output = run(args, { allowFailure: true, readOnly: true });
+      if (!output.ok) throw new GitAdapterError('git_blame_failed', 'Scoped git blame failed.', output);
+      const lines = [];
+      const commits = new Map();
+      let cur = null;
+      for (const raw of output.stdout.split('\n')) {
+        if (cur === null) {
+          const m = /^([0-9a-f]{40})\s+(\d+)\s+(\d+)(?:\s+(\d+))?$/.exec(raw);
+          if (!m) continue;
+          cur = { sha: m[1], finalLine: Number(m[3]), author: '', authorTime: '', summary: '' };
+          continue;
+        }
+        if (raw.startsWith('author ')) { cur.author = raw.slice(7); continue; }
+        if (raw.startsWith('author-time ')) { cur.authorTime = raw.slice(12); continue; }
+        if (raw.startsWith('summary ')) { cur.summary = raw.slice(8); continue; }
+        if (raw.startsWith('\t')) {
+          // 行引用与 commits 键都用 shortSha，前端单表查找
+          const shortSha = cur.sha.slice(0, 7);
+          if (!commits.has(shortSha)) {
+            const epoch = Number(cur.authorTime);
+            commits.set(shortSha, {
+              sha: cur.sha,
+              shortSha,
+              author: cur.author || '',
+              isoDate: Number.isFinite(epoch) && epoch > 0 ? new Date(epoch * 1000).toISOString() : '',
+              subject: cur.summary || '',
+            });
+          }
+          lines.push({ line: cur.finalLine, sha: shortSha });
+          cur = null;
+          continue;
+        }
+        // 其它 header（committer / filename / previous / boundary）忽略
+      }
+      const maxLines = 5000;
+      const truncated = lines.length > maxLines;
+      return {
+        path: safe[0],
+        lines: truncated ? lines.slice(0, maxLines) : lines,
+        commits: Object.fromEntries(commits),
+        truncated,
+      };
+    },
+
+    /**
      * BLOCK-29.5 — 本地分支列表（只读）。for-each-ref refs/heads，
      * NUL 分隔（name/shortSha/isoDate/HEAD 标记），供历史分区选择器。
      */

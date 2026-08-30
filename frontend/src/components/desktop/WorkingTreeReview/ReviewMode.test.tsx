@@ -430,6 +430,77 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     });
   });
 
+  it('BLOCK-29.5: blame view renders per-line attribution', async () => {
+    const commitLog = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          commits: [
+            { sha: 'a1b2c3d4e5f6', shortSha: 'a1b2c3d', author: 'tester', isoDate: '2026-08-30T10:00:00Z', subject: 'blame commit', message: '' },
+          ],
+          count: 1,
+        },
+      })
+    );
+    const commitDiff = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          files: [
+            { path: 'src/a.py', oldPath: null, binary: false, hunks: [{ oldStart: 1, newStart: 1, lines: [{ type: 'ctx', text: 'l1' }, { type: 'ctx', text: 'l2' }] }] },
+          ],
+          truncated: false,
+          summary: { added: 0, removed: 0 },
+        },
+      })
+    );
+    const commitFileContent = vi.fn(() =>
+      Promise.resolve({ ok: true, data: { original: 'l1\nl2\n', modified: 'l1\nl2\n' } })
+    );
+    const blame = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          path: 'src/a.py',
+          lines: [
+            { line: 1, sha: 'a1b2c3d' },
+            { line: 2, sha: 'b2c3d4e' },
+          ],
+          commits: {
+            a1b2c3d: { sha: 'a1b2c3d4e5f6', shortSha: 'a1b2c3d', author: 'alice', isoDate: '2026-08-30T10:00:00Z', subject: 'first' },
+            b2c3d4e: { sha: 'b2c3d4e5f6a1', shortSha: 'b2c3d4e', author: 'bob', isoDate: '2026-08-30T11:00:00Z', subject: 'second' },
+          },
+          truncated: false,
+        },
+      })
+    );
+    getBridgeMock.mockReturnValue(makeBridge({ commitLog, commitDiff, commitFileContent, blame }));
+
+    renderReview();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-review-progress')).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('tab', { name: '历史' }));
+    fireEvent.click(await screen.findByText('blame commit'));
+    await screen.findByTestId('rvw-commit-diff-area');
+    await waitFor(() => {
+      expect(screen.getAllByText('src/a.py').length).toBeGreaterThan(0);
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'blame' }));
+    const grid = await screen.findByTestId('rvw-blame');
+    await waitFor(() => {
+      expect(grid.textContent).toContain('alice');
+    });
+    expect(grid.textContent).toContain('a1b2c3d');
+    expect(grid.textContent).toContain('bob');
+    expect(grid.textContent).toContain('l1');
+    expect(grid.textContent).toContain('l2');
+    expect(blame).toHaveBeenCalledWith({ path: 'src/a.py', ref: 'a1b2c3d4e5f6' });
+  });
+
   it('BLOCK-29.1: dock accordion rows expand inline diff on click', async () => {
     getBridgeMock.mockReturnValue(makeBridge());
 

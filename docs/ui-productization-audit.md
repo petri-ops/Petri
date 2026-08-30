@@ -1808,3 +1808,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：node --check 3 文件；adapter 真实仓库快测（listBranches / ref log / 注入回退）；tsc 0；定向 vitest 25/25（新增用例：选择器渲染 + 切分支触发 commitLog 带 ref）。**2026-08-30 dev 实机 verified**（localhost:3000 磁盘真实 git 桥桩）：选择器渲染「当前分支 (HEAD) + main（当前）+ 其他分支」，切换后 `commitLog` 以 `ref` 重新加载（调用序列 `null → "codex/old-work"`）、列表按分支渲染、选中态保持；截图 `acceptance/ui-226/branch-selector.png`。**边界**：skip/file 透传修复的最终真实链路复核以 dev Electron 重启载入新主进程代码后为准（UI-221 勘误同日登记）。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-227: BLOCK-29.5 P3 — blame 逐行归属（文件视图第四态） (2026-08-30 verified)
+
+**背景**：BLOCK-29.5 只读视野第三项：每行是谁在哪次提交改的。adapter 是唯一 git 命令边界，blame 解析自包含实现（`--porcelain`；IDE MCP 工具的同形解析器 `core/biof3-server/mcp/ide-tools/git-blame.js` 因与 allowlist/spawnSync 耦合不直接复用）。
+
+**改动范围**：
+- git-adapter 新增只读 `blame({path, ref})`：porcelain 解析（行 → shortSha；commit 信息按 shortSha 去重，author/author-time/summary 仅首块出现可正确聚合）；行数超 5000 截断（`truncated` fail-closed 提示）；ref 走 `assertSafeRef`。
+- IPC 新只读通道 `git:blame`（path 必填 + ref 可为提交 sha）；preload 暴露 `blame`；electron.d.ts 同步。
+- 前端：提交文件视图第四态 `blame`（diff / 全文·改动后 / 全文·改动前 / blame），三列等宽栅格（行号 + shortSha 作者·日期 + 内容，行 hover 高亮 + title 显示提交 subject）；进入第四态按 `{path, ref: hash}` 拉取；切文件/提交重置回 diff。
+
+**验证**：node --check 3 文件；adapter 真实仓库快测（本仓 AUDIT-LOG.md：601 行 / 162 commits / 行→commit 查找 0 丢失）；tsc 0；定向 vitest 26/26（新增用例：blame 视图渲染两行两归属 + 断言 `blame({path, ref: hash})` 调用契约）。**2026-08-30 dev 实机 verified**（localhost:3000 桥桩 + 真实 adapter blame 数据）：2de3897 提交 README.md → blame 视图两行分别归属 94e3047（init）与 2de3897，调用参数 `{path: 'README.md', ref: <full sha>}` 正确；截图 `acceptance/ui-227/blame-view.png`。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

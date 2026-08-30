@@ -882,3 +882,49 @@
   font-family: inherit;
   cursor: pointer;
 }
+
+/* BLOCK-29.5 — blame 逐行归属视图 */
+.rvw-blame-grid {
+  font-family: var(--biof3-font-mono);
+  font-size: var(--biof3-font-size-xs);
+}
+
+.rvw-blame-row {
+  display: grid;
+  grid-template-columns: 3.5em 15em 1fr;
+  gap: 8px;
+  padding: 0 8px;
+  line-height: 1.7;
+}
+
+.rvw-blame-row:hover {
+  background: var(--biof3-bg-subtle);
+}
+
+.rvw-blame-line {
+  text-align: right;
+  color: var(--biof3-text-muted);
+  user-select: none;
+}
+
+.rvw-blame-meta {
+  display: inline-flex;
+  gap: 6px;
+  min-width: 0;
+  color: var(--biof3-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rvw-blame-sha {
+  font-weight: 600;
+  color: var(--biof3-text);
+}
+
+.rvw-blame-content {
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--biof3-text);
+}

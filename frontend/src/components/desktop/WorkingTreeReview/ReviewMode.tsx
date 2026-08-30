@@ -50,7 +50,13 @@ const FULLTEXT_LANGUAGE_BY_EXT: Record<string, string> = {
   tsx: 'javascript',
 };
 
-type CommitFileViewMode = 'diff' | 'fullModified' | 'fullOriginal';
+type CommitFileViewMode = 'diff' | 'fullModified' | 'fullOriginal' | 'blame';
+
+interface BlameData {
+  lines: Array<{ line: number; sha: string }>;
+  commits: Record<string, { sha: string; shortSha: string; author: string; isoDate: string; subject: string }>;
+  truncated: boolean;
+}
 
 /**
  * BLOCK-29 — 提交内单文件只读 diff：经 commitFileContent 取两版全文，
@@ -63,6 +69,10 @@ function CommitDiffFileView({ hash, file }: { hash: string; file: DiffFile }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<CommitFileViewMode>('diff');
+  // BLOCK-29.5 — blame 逐行归属（第四态，该提交时点版本）
+  const [blameData, setBlameData] = useState<BlameData | null>(null);
+  const [blameLoading, setBlameLoading] = useState(false);
+  const [blameError, setBlameError] = useState<string | null>(null);
 
   useEffect(() => {
     if (file.binary) return;
@@ -73,6 +83,8 @@ function CommitDiffFileView({ hash, file }: { hash: string; file: DiffFile }) {
     setError(null);
     setRevision(null);
     setViewMode('diff');
+    setBlameData(null);
+    setBlameError(null);
     bridge.commitFileContent({ hash, path: file.path })
       .then((res) => {
         if (cancelled) return;
@@ -95,6 +107,29 @@ function CommitDiffFileView({ hash, file }: { hash: string; file: DiffFile }) {
     return () => { cancelled = true; };
   }, [hash, file.path, file.binary]);
 
+  useEffect(() => {
+    if (viewMode !== 'blame') return;
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) return;
+    let cancelled = false;
+    setBlameLoading(true);
+    setBlameError(null);
+    setBlameData(null);
+    bridge.blame({ path: file.path, ref: hash })
+      .then((res) => {
+        if (cancelled) return;
+        if (res.ok && res.data) setBlameData(res.data);
+        else setBlameError(res.message || res.error || '加载 blame 失败。');
+      })
+      .catch((e: unknown) => {
+        if (!cancelled) setBlameError(e instanceof Error ? e.message : String(e));
+      })
+      .finally(() => {
+        if (!cancelled) setBlameLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [viewMode, hash, file.path]);
+
   if (file.binary) return <div className="wt-file-binary">二进制文件变更</div>;
   if (loading) return <div className="wt-diff-loading">差异加载中…</div>;
   if (error) return <div className="wt-diff-error" role="alert">{error}</div>;
@@ -109,6 +144,7 @@ function CommitDiffFileView({ hash, file }: { hash: string; file: DiffFile }) {
       title: hasOriginal ? '父提交时点的文件全文' : '新增文件没有改动前版本',
       disabled: !hasOriginal,
     },
+    { key: 'blame', label: 'blame', title: '逐行归属（该提交时点版本）' },
   ];
   return (
     <div className="rvw-commit-file-view">
@@ -134,6 +170,33 @@ function CommitDiffFileView({ hash, file }: { hash: string; file: DiffFile }) {
           hunks={file.hunks}
           revisionOverride={revision}
         />
+      ) : viewMode === 'blame' ? (
+        <div className="rvw-fulltext-wrap" data-testid="rvw-blame">
+          {blameLoading && <div className="wt-diff-loading">归属加载中…</div>}
+          {blameError && <div className="wt-diff-error" role="alert">{blameError}</div>}
+          {blameData && (() => {
+            const contentLines = revision.modifiedText.split('\n');
+            const day = (iso: string) => (iso ? iso.slice(0, 10) : '');
+            return (
+              <div className="rvw-blame-grid">
+                {blameData.lines.map((l) => {
+                  const c = blameData.commits[l.sha];
+                  return (
+                    <div key={l.line} className="rvw-blame-row" title={c ? c.subject : ''}>
+                      <span className="rvw-blame-line">{l.line}</span>
+                      <span className="rvw-blame-meta">
+                        <span className="rvw-blame-sha">{l.sha}</span>
+                        <span className="rvw-blame-author">{c ? c.author : ''} · {c ? day(c.isoDate) : ''}</span>
+                      </span>
+                      <span className="rvw-blame-content">{contentLines[l.line - 1] ?? ''}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
+          {blameData?.truncated && <div className="wt-empty">文件超过 5000 行，仅显示前 5000 行归属。</div>}
+        </div>
       ) : (
         <div className="rvw-fulltext-wrap" data-testid="rvw-fulltext">
           <CodeMirrorEditor

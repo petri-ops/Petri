@@ -576,6 +576,19 @@ function setupWorkingTreeReviewIpc(options = {}) {
     });
   });
 
+  // BLOCK-29.5 — 逐行归属（文件视图第四态，只读）
+  ipcMain.handle('git:blame', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      if (!args || typeof args.path !== 'string' || !args.path) {
+        throw new GitAdapterError('path_required', 'path is required.');
+      }
+      const ref = typeof args.ref === 'string' && args.ref ? args.ref : null;
+      return adapter.blame({ path: args.path, ref });
+    });
+  });
+
   ipcMain.handle('git:commit-diff', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {

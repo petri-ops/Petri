@@ -463,6 +463,13 @@ declare global {
           error?: string;
           message?: string;
         }>;
+        // BLOCK-29.5 — 逐行归属（文件视图第四态，只读；ref 可为提交 sha）
+        blame: (params: { path: string; ref?: string | null }) => Promise<{
+          ok: boolean;
+          data?: { path: string; lines: Array<{ line: number; sha: string }>; commits: Record<string, { sha: string; shortSha: string; author: string; isoDate: string; subject: string }>; truncated: boolean };
+          error?: string;
+          message?: string;
+        }>;
         commitDiff: (params: { hash: string }) => Promise<{
           ok: boolean;
           data?: { files: Array<{ path: string; oldPath: string | null; binary: boolean; hunks: Array<{ oldStart: number; newStart: number; lines: Array<{ type: 'add' | 'del' | 'ctx'; text: string }> }> }>; truncated: boolean; summary: { added: number; removed: number } };
