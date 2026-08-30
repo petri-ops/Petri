@@ -1668,4 +1668,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **验证**：tsc 0；全套 vitest 786/794（8 失败为 TitleBar 已知遗留集合；theme-token-contract PASS）。残留硬编码清点仅剩计划内例外（7/8/9/9.5/24px、≥1.5rem display）。**2026-08-30 dev 实机 verified**：CDP 全页计算字号扫描 5/5——可见文本仅落在 {10,11,12,13,14,16,18}px，无半像素与 rem 野值；审阅面板标题 13px/按钮 12px/chips 12px；聊天消息正文 13px/meta 11px；明暗双主题字号分布逐元素一致；截图 `acceptance/ui-215/`。
 
+**2026-08-30 补充（UA 默认字号收敛）**：首轮实机扫描发现无文字图标按钮/容器命中 Chrome BUTTON UA 默认 13.3333px（10pt），补 `font-size: var(--biof3-font-size-caption)` 共 11 处——TitleBar `.iconBtn`、LeftPanel `.iconBtn`、`.sc-composer-icon-btn`、`.sc-send-cta`、`.sc-model-option`、`.biof3-desktop-panel__close`、`.biof3-settings-nav__item`、`.panelBackdrop`、`.emptyResultLaunchCard`（启动卡片 6 张容器）、ContextBudgetBar 圆钮（内联）、`.xterm textarea`（可访问性隐藏元素，canvas 渲染不受影响）。终扫（终端挂载态全页 390 元素 + 3 伪元素）：**13.3333px = 0，小数 px = 0**，分布收敛为 {10, 11, 12, 13, 16}px 全整数集合；审阅面板开合回归通过。
+
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

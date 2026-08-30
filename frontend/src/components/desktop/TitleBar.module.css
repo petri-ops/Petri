@@ -603,6 +603,8 @@
   transition: background 0.14s ease, color 0.14s ease, opacity 0.14s ease;
   padding: 0;
   flex-shrink: 0;
+  /* UI-215 补充：纯图标按钮收敛 UA 默认字号（13.3333px）到 token */
+  font-size: var(--biof3-font-size-caption);
 }
 
 .iconBtn:focus-visible,

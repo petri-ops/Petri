@@ -105,6 +105,8 @@
   color: var(--biof3-text);
   text-align: left;
   cursor: pointer;
+  /* UI-215 补充：容器收敛 UA 默认字号（子级 title/meta 自带 token） */
+  font-size: var(--biof3-font-size-caption);
 }
 
 .sc-model-group + .sc-model-group {
@@ -1318,6 +1320,8 @@
   color: var(--biof3-text-tertiary);
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
+  /* UI-215 补充：纯图标按钮收敛 UA 默认字号到 token */
+  font-size: var(--biof3-font-size-caption);
 }
 
 .sc-composer-icon-btn:hover {
@@ -1431,6 +1435,8 @@
   box-shadow: none;
   cursor: pointer;
   transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+  /* UI-215 补充：纯图标按钮收敛 UA 默认字号到 token */
+  font-size: var(--biof3-font-size-caption);
 }
 
 .sc-send-cta:disabled {

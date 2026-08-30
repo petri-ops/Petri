@@ -139,6 +139,8 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
           justifyContent: 'center',
           padding: 0,
           transition: 'background 0.15s ease',
+          /* UI-215 补充：纯图标圆钮收敛 UA 默认字号到 token */
+          fontSize: 'var(--biof3-font-size-caption)',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = 'var(--biof3-bg-subtle, rgba(0,0,0,0.04))';

@@ -124,6 +124,8 @@
   cursor: pointer;
   border-radius: 6px;
   transition: background 0.15s, color 0.15s;
+  /* UI-215 补充：纯图标按钮收敛 UA 默认字号到 token */
+  font-size: var(--biof3-font-size-caption);
 }
 
 .iconBtn:hover {
@@ -565,6 +567,8 @@
 
 .panelBackdrop {
   display: none;
+  /* UI-215 补充：纯图标遮罩按钮收敛 UA 默认字号到 token */
+  font-size: var(--biof3-font-size-caption);
 }
 
 /* Left column */
@@ -3348,6 +3352,11 @@ button.workspacePinnedSummaryMetricCard:hover {
   background: transparent;
 }
 
+/* UI-215 补充：xterm 可访问性隐藏 textarea 收敛 UA 默认字号（canvas 渲染不受影响） */
+.embeddedTerminalHost :global(.xterm textarea) {
+  font-size: var(--biof3-font-size-caption);
+}
+
 .embeddedTerminalHost :global(.xterm-viewport),
 .embeddedTerminalHost :global(.xterm-screen) {
   background: transparent !important;
@@ -5332,6 +5341,8 @@ body.biof3-resizing-columns * {
   text-align: left;
   cursor: pointer;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+  /* UI-215 补充：卡片容器收敛 UA 默认字号（子级文本自带 token） */
+  font-size: var(--biof3-font-size-caption);
 }
 
 .emptyResultLaunchCard:hover {

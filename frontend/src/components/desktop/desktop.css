@@ -291,6 +291,8 @@
     background 0.15s,
     color 0.15s;
   flex-shrink: 0;
+  /* UI-215 补充：纯图标按钮收敛 UA 默认字号到 token */
+  font-size: var(--biof3-font-size-caption);
 }
 
 .biof3-desktop-panel__close:hover {
@@ -340,6 +342,8 @@
   color: var(--biof3-text-secondary);
   text-align: left;
   cursor: pointer;
+  /* UI-215 补充：容器收敛 UA 默认字号（子级 span/strong/small 自带 token） */
+  font-size: var(--biof3-font-size-caption);
 }
 
 .biof3-settings-nav__item:hover {
