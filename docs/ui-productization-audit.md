@@ -1696,3 +1696,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；copilot 定向 vitest 179/179。**2026-08-30 dev 实机 verified**：CDP 断言——`.sc-send-cta-stop`/`-queue`/`.sc-queued-count` 计数=0、唯一 `.sc-send-cta-send`（空输入禁用守卫正常）、访问选择器在位、改动卡片干净树隐藏；截图 `acceptance/ui-217/`。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-218: BLOCK-28.9 — 审阅底部提交条按需出现（隐藏常驻输入框） (2026-08-30 verified)
+
+**用户反馈**：「优化审阅界面内容的呈现效果，为什么底部还有输入框？？？」——底部提交框（VS Code SCM 风格）常驻渲染 2 行 textarea，无决策时也占位、观感像聊天输入框。
+
+**改动范围**：
+- ReviewMode footer 改为**按需出现**：无审阅决策（`!hasDecisions`）整体不渲染；有决策显示**单行紧凑提交条**——决策摘要（「接受 n / 拒绝 n」绿/红着色 + 有待定时「待定 n」）+ 单行 input（placeholder 含 ⌘+Enter 提示与决策计数）+ 主按钮「提交 (n)」。
+- ⌘+Enter 提交、错误提示、提交成功 toast（wt-commit-success）保留；提交按钮禁用条件简化为「信息为空」（决策存在由渲染条件保证）；`textareaRef` 类型改 HTMLInputElement。
+- CSS：`.rvw-commitbox` 紧凑化（padding 7/12、gap 6、input 12px token、meta xs），删除 `.rvw-commitbox-spacer`。
+
+**验证**：tsc 0；定向 vitest 19/19（新增用例：无决策 commitbox 隐藏 / accept 后出现且「提交信息」为单行 INPUT）。**2026-08-30 dev 实机 verified**：CDP 5/5——无决策 `.rvw-commitbox` 不存在且 diff 正常渲染；接受后提交条出现（「接受 1」摘要、INPUT、placeholder「提交信息（⌘+Enter 提交：接受 1，拒绝 0）」、按钮「提交 (1)」）；「全部还原」后再次消失；截图 `acceptance/ui-218/`。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

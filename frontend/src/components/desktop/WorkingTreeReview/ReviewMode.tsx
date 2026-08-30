@@ -52,7 +52,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const [focusedHunk, setFocusedHunk] = useState(0);
   const [collapsedDirs, setCollapsedDirs] = useState<Record<string, boolean>>({});
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = useRef<HTMLInputElement>(null);
 
   const exitReviewMode = () => {
     if (window.history.length > 1) navigate(-1);
@@ -446,57 +446,49 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
         </main>
       </div>
 
-      {/* P4 — 底部内嵌提交框（VS Code SCM 风格）：message + ⌘+Enter + 面板内轻提示 */}
-      <footer className="rvw-commitbox" data-testid="rvw-commitbox">
-        <textarea
-          ref={textareaRef}
-          className="rvw-commitbox-input"
-          value={commitMsg}
-          onChange={(e) => {
-            setCommitMsg(e.target.value);
-            if (commitError) setCommitError(null);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-              e.preventDefault();
-              void handleCommitConfirm();
-            }
-          }}
-          placeholder={
-            hasDecisions
-              ? `审阅：接受 ${acceptedCount} 个 hunk，拒绝 ${rejectedCount} 个 — ⌘+Enter 提交`
-              : hasDecisions || review.status?.files.length
-                ? '请先审阅（接受或拒绝 hunk），然后在此提交。'
-                : '当前没有可提交的工作区改动。'
-          }
-          rows={2}
-          aria-label="提交信息"
-        />
-        <div className="rvw-commitbox-meta">
-          <span>待定: {review.pendingCount}</span>
-          <span>接受: {acceptedCount}</span>
-          <span>拒绝: {rejectedCount}</span>
-          {review.diff?.truncated && <span className="wt-warning">输出已截断</span>}
-          {review.loading && <span>加载中…</span>}
-          {commitError && (
-            <span className="rvw-commitbox-error" role="alert">{commitError}</span>
-          )}
-          <span className="rvw-commitbox-spacer" />
+      {/* BLOCK-28.9 — 底部提交条按需出现：有审阅决策才显示（单行紧凑条），
+          无决策时隐藏底部输入框（用户反馈：不需要常驻输入框） */}
+      {hasDecisions && (
+        <footer className="rvw-commitbox" data-testid="rvw-commitbox">
+          <div className="rvw-commitbox-meta">
+            <span className="rvw-commitbox-stat">接受 {acceptedCount}</span>
+            <span className="rvw-commitbox-stat rvw-commitbox-stat-reject">拒绝 {rejectedCount}</span>
+            {review.pendingCount > 0 && <span className="rvw-commitbox-stat">待定 {review.pendingCount}</span>}
+            {review.diff?.truncated && <span className="wt-warning">输出已截断</span>}
+            {review.loading && <span>加载中…</span>}
+            {commitError && (
+              <span className="rvw-commitbox-error" role="alert">{commitError}</span>
+            )}
+          </div>
+          <input
+            ref={textareaRef}
+            className="rvw-commitbox-input"
+            type="text"
+            value={commitMsg}
+            onChange={(e) => {
+              setCommitMsg(e.target.value);
+              if (commitError) setCommitError(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                void handleCommitConfirm();
+              }
+            }}
+            placeholder={`提交信息（⌘+Enter 提交：接受 ${acceptedCount}，拒绝 ${rejectedCount}）`}
+            aria-label="提交信息"
+          />
           <button
             type="button"
-            className={`wt-btn wt-btn-commit${!hasDecisions || !commitMsg.trim() ? ' wt-btn-disabled' : ''}`}
+            className={`wt-btn wt-btn-commit${!commitMsg.trim() ? ' wt-btn-disabled' : ''}`}
             onClick={() => void handleCommitConfirm()}
-            disabled={!hasDecisions || !commitMsg.trim() || review.loading}
-            title={
-              !hasDecisions
-                ? '请先审阅（接受或拒绝 hunk）'
-                : `提交 ${decisionCount} 个决策：${acceptedCount} 接受，${rejectedCount} 拒绝`
-            }
+            disabled={!commitMsg.trim() || review.loading}
+            title={`提交 ${decisionCount} 个决策：${acceptedCount} 接受，${rejectedCount} 拒绝`}
           >
-            {review.loading ? '提交中…' : `提交 (${acceptedCount})`}
+            {review.loading ? '提交中…' : `提交 (${decisionCount})`}
           </button>
-        </div>
-      </footer>
+        </footer>
+      )}
 
       {/* 行内编辑抽屉（复用，非旧侧边抽屉） */}
       <CodeReviewDrawer

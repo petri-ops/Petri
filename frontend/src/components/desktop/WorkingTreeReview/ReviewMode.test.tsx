@@ -167,6 +167,24 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
+  it('BLOCK-28.9: commit bar hidden without decisions, appears after accept', async () => {
+    getBridgeMock.mockReturnValue(makeBridge());
+
+    renderReview();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-review-progress').textContent).toContain('0/1 已审');
+    });
+    // 无决策 → 底部提交条（含输入框）整体隐藏
+    expect(screen.queryByTestId('rvw-commitbox')).toBeNull();
+
+    // A 键 accept 当前 hunk → 提交条出现且含决策摘要
+    fireEvent.keyDown(window, { key: 'a' });
+    const box = await screen.findByTestId('rvw-commitbox');
+    expect(box.textContent).toContain('接受 1');
+    expect(screen.getByLabelText('提交信息').tagName).toBe('INPUT');
+  });
+
   it('shows the empty state when the working tree is clean', async () => {
     getBridgeMock.mockReturnValue(
       makeBridge({

@@ -421,14 +421,16 @@
 }
 
 /* ===== P4 — 底部内嵌提交框（VS Code SCM 风格） ===== */
+/* BLOCK-28.9 — 提交条按需出现（hasDecisions 才渲染），单行紧凑布局：
+   meta 统计行 + 输入行 + 提交按钮 */
 .rvw-commitbox {
   flex-shrink: 0;
   border-top: 1px solid var(--biof3-border);
   background: var(--biof3-bg-surface);
-  padding: 10px 16px;
+  padding: 7px 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .rvw-commitbox-input {
@@ -438,11 +440,9 @@
   color: var(--biof3-text);
   border: 1px solid var(--biof3-border);
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: 6px 10px;
   font-family: inherit;
   font-size: var(--biof3-font-size-caption);
-  line-height: 1.5;
-  resize: none;
 }
 
 .rvw-commitbox-input::placeholder {
@@ -458,13 +458,17 @@
 .rvw-commitbox-meta {
   display: flex;
   align-items: center;
-  gap: 14px;
-  font-size: var(--biof3-font-size-caption);
+  gap: 10px;
+  font-size: var(--biof3-font-size-xs);
   color: var(--biof3-text-tertiary);
 }
 
-.rvw-commitbox-spacer {
-  flex: 1;
+.rvw-commitbox-stat {
+  color: var(--biof3-status-success-fg);
+}
+
+.rvw-commitbox-stat-reject {
+  color: var(--biof3-status-error-fg);
 }
 
 .rvw-commitbox-error {
