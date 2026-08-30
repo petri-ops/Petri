@@ -13,6 +13,7 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { getBridge } from '@/lib/desktopBridge';
+import { CodeMirrorEditor } from '@/components/editor';
 import type { DiffRevision } from '@/components/editor/CodeMirror/types';
 import { WorkspaceFileIcon } from '@/components/workspace-panels/WorkspaceFileIcon';
 import { useWorkingTreeReview, type DiffFile } from './useWorkingTreeReview';
@@ -34,13 +35,34 @@ interface CommitSuccess {
 }
 
 /**
+ * BLOCK-29.4 — 扩展名 → CodeMirror lang-* 语言小映射（未命中走纯文本）。
+ */
+const FULLTEXT_LANGUAGE_BY_EXT: Record<string, string> = {
+  py: 'python',
+  md: 'markdown',
+  json: 'json',
+  yaml: 'yaml',
+  yml: 'yaml',
+  js: 'javascript',
+  mjs: 'javascript',
+  jsx: 'javascript',
+  ts: 'javascript',
+  tsx: 'javascript',
+};
+
+type CommitFileViewMode = 'diff' | 'fullModified' | 'fullOriginal';
+
+/**
  * BLOCK-29 — 提交内单文件只读 diff：经 commitFileContent 取两版全文，
  * 组装 DiffRevision 交 CodeMirrorDiffView（revisionOverride，无 accept/reject 控件）。
+ * BLOCK-29.4 — 两版全文本就持有，增加视图切换：diff / 全文·改动后 / 全文·改动前
+ * （新增文件无改动前版本时禁用），全文用 CodeMirrorEditor 只读渲染。
  */
 function CommitDiffFileView({ hash, file }: { hash: string; file: DiffFile }) {
   const [revision, setRevision] = useState<DiffRevision | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<CommitFileViewMode>('diff');
 
   useEffect(() => {
     if (file.binary) return;
@@ -50,6 +72,7 @@ function CommitDiffFileView({ hash, file }: { hash: string; file: DiffFile }) {
     setLoading(true);
     setError(null);
     setRevision(null);
+    setViewMode('diff');
     bridge.commitFileContent({ hash, path: file.path })
       .then((res) => {
         if (cancelled) return;
@@ -76,13 +99,51 @@ function CommitDiffFileView({ hash, file }: { hash: string; file: DiffFile }) {
   if (loading) return <div className="wt-diff-loading">差异加载中…</div>;
   if (error) return <div className="wt-diff-error" role="alert">{error}</div>;
   if (!revision) return null;
+  const hasOriginal = revision.originalText.length > 0;
+  const viewOptions: Array<{ key: CommitFileViewMode; label: string; title: string; disabled?: boolean }> = [
+    { key: 'diff', label: 'diff', title: '差异视图' },
+    { key: 'fullModified', label: '全文·改动后', title: '该提交时点的文件全文' },
+    {
+      key: 'fullOriginal',
+      label: '全文·改动前',
+      title: hasOriginal ? '父提交时点的文件全文' : '新增文件没有改动前版本',
+      disabled: !hasOriginal,
+    },
+  ];
   return (
-    <CodeMirrorDiffView
-      filePath={file.path}
-      isBinary={file.binary}
-      hunks={file.hunks}
-      revisionOverride={revision}
-    />
+    <div className="rvw-commit-file-view">
+      <div className="rvw-viewmode-toggle" role="group" aria-label="文件视图切换">
+        {viewOptions.map((opt) => (
+          <button
+            key={opt.key}
+            type="button"
+            className={`rvw-viewmode-btn${viewMode === opt.key ? ' active' : ''}`}
+            aria-pressed={viewMode === opt.key}
+            disabled={opt.disabled}
+            title={opt.title}
+            onClick={() => setViewMode(opt.key)}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+      {viewMode === 'diff' ? (
+        <CodeMirrorDiffView
+          filePath={file.path}
+          isBinary={file.binary}
+          hunks={file.hunks}
+          revisionOverride={revision}
+        />
+      ) : (
+        <div className="rvw-fulltext-wrap" data-testid="rvw-fulltext">
+          <CodeMirrorEditor
+            value={viewMode === 'fullModified' ? revision.modifiedText : revision.originalText}
+            language={FULLTEXT_LANGUAGE_BY_EXT[file.path.slice(file.path.lastIndexOf('.') + 1).toLowerCase()]}
+            className="rvw-fulltext-editor"
+          />
+        </div>
+      )}
+    </div>
   );
 }
 

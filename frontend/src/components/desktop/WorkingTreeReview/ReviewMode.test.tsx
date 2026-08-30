@@ -306,6 +306,83 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     expect(screen.queryByText('完整提交说明')).toBeNull();
   });
 
+  it('BLOCK-29.4: commit file fulltext view toggle', async () => {
+    const commitLog = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          commits: [
+            { sha: 'a1b2c3d4e5f6', shortSha: 'a1b2c3d', author: 'tester', isoDate: '2026-08-30T10:00:00Z', subject: 'fulltext commit', message: '' },
+          ],
+          count: 1,
+        },
+      })
+    );
+    const commitDiff = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          files: [
+            { path: 'src/a.py', oldPath: null, binary: false, hunks: [{ oldStart: 1, newStart: 1, lines: [{ type: 'add', text: 'hello' }] }] },
+            { path: 'src/new.py', oldPath: null, binary: false, hunks: [{ oldStart: 1, newStart: 1, lines: [{ type: 'add', text: 'new-content-line' }] }] },
+          ],
+          truncated: false,
+          summary: { added: 2, removed: 0 },
+        },
+      })
+    );
+    const commitFileContent = vi.fn(({ path }: { path: string }) => {
+      if (path === 'src/a.py') {
+        return Promise.resolve({ ok: true, data: { original: 'kept\nremoved-line\n', modified: 'kept\nhello\nunique-full-line\n' } });
+      }
+      return Promise.resolve({ ok: true, data: { original: '', modified: 'new-content-line\n' } });
+    });
+    getBridgeMock.mockReturnValue(makeBridge({ commitLog, commitDiff, commitFileContent }));
+
+    renderReview();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-review-progress')).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('tab', { name: '历史' }));
+    fireEvent.click(await screen.findByText('fulltext commit'));
+    await screen.findByTestId('rvw-commit-diff-area');
+    await waitFor(() => {
+      expect(screen.getAllByText('src/a.py').length).toBeGreaterThan(0);
+    });
+
+    // 默认 diff 视图：无全文容器
+    expect(screen.queryByTestId('rvw-fulltext')).toBeNull();
+
+    // 全文·改动后：提交时点完整全文（含 diff 折叠区之外的行）
+    fireEvent.click(screen.getByRole('button', { name: '全文·改动后' }));
+    const full = await screen.findByTestId('rvw-fulltext');
+    await waitFor(() => {
+      expect(full.textContent).toContain('unique-full-line');
+    });
+
+    // 全文·改动前：父提交版本（含被删除行）
+    fireEvent.click(screen.getByRole('button', { name: '全文·改动前' }));
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-fulltext').textContent).toContain('removed-line');
+    });
+
+    // 切到新增文件：视图重置回 diff、改动前禁用
+    fireEvent.click(screen.getByRole('tab', { name: /new\.py/ }));
+    await waitFor(() => {
+      expect(screen.queryByTestId('rvw-fulltext')).toBeNull();
+    });
+    const beforeBtn = screen.getByRole('button', { name: '全文·改动前' });
+    expect(beforeBtn).toHaveProperty('disabled', true);
+
+    // 新增文件的全文·改动后
+    fireEvent.click(screen.getByRole('button', { name: '全文·改动后' }));
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-fulltext').textContent).toContain('new-content-line');
+    });
+  });
+
   it('BLOCK-29.1: dock accordion rows expand inline diff on click', async () => {
     getBridgeMock.mockReturnValue(makeBridge());
 

@@ -1772,3 +1772,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；定向 vitest 23/23（新增用例：详情头完整说明折叠展开 + 汇总统计 + 无 body 不渲染 details）；node --check；adapter 真实仓库快测（多行 body 解析）。**2026-08-30 dev 实机 verified**：localhost:3000 注入磁盘真实 git 桥桩后断言——详情头 subject/meta/「2 文件 +11 −0」、details 默认收起、展开显示 4 行完整说明、文件条每文件 ±统计（demo-293-notes.md +7 / demo-293.py +4）、无 body 提交（a3b567f）不渲染 details；截图 `acceptance/ui-223/`（detail-header-collapsed / detail-header-expanded / history-list）。fixture 提交验收后 reset --mixed 回滚，0 残留。**观察项**：窄面板下 summary 操作按钮遮挡「改动/历史」tab（UI-219 既有观察项，真实点击被拦、程序化点击可通过），维持待布局打磨。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-224: BLOCK-29.4 — 提交时点文件全文查看（diff / 全文·改动后 / 全文·改动前 切换） (2026-08-30 verified)
+
+**用户反馈**：「能否看更多的内容呢 理论上只要想都应该能看到的」——盘点发现 `git:commit-file-content` 已返回提交时点文件两版全文（original/modified），`CommitDiffFileView` 本地 revision 已持有，但 UI 仅渲染 diff。AskUserQuestion 多选未获勾选，主 Agent 按推荐项取最小增量（其余只读候选登记 roadmap 待裁决）。plan `docs/block-29-4-commit-file-fulltext-plan.md`（P0 登记 `20f056e`）。
+
+**改动范围**：
+- `CommitDiffFileView` 增 `viewMode` 本地三态（diff 默认 / 全文·改动后 / 全文·改动前），`hash`/`file.path` 变化重置回 diff；新增文件（originalText 为空）禁用「全文·改动前」；二进制/加载/错误分支不变。
+- 全文渲染复用 `CodeMirrorEditor`（readonly 默认 true、lineNumbers 内建），新增扩展名→language 小映射（py/md/json/yaml/js系，未命中纯文本）；容器 `.rvw-fulltext-wrap` max-height 60vh 独立滚动。
+- 纯前端：0 后端改动 / 0 新增 IPC / 0 新依赖 / AI 审阅 0 重新引入。
+
+**验证**：tsc 0；定向 vitest 24/24（新增用例：三态切换内容断言、切文件重置 diff、新增文件改动前禁用）；theme-token 契约 14/14。**2026-08-30 dev 实机 verified**：localhost:3000 注入磁盘真实 git 桥桩后断言——修改文件（demo-289.py）「全文·改动后」= 提交时点完整文件（行号内建、含 diff 折叠区外追加行 A/B）、「全文·改动前」= 父提交版本（无追加行）、切新增文件（ui224-demo.md）视图重置 diff 且「改动前」禁用、新增文件「改动后」全文完整；截图 `acceptance/ui-224/`（fulltext-modified / fulltext-original / fulltext-newfile-disabled-before）。fixture 提交验收后 reset --mixed + checkout 还原，0 残留。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
