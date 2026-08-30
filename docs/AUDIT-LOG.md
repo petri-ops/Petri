@@ -4,7 +4,9 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-29（BLOCK-28.3-REVIEW-MODE-CHROME-FIX 已收口：审阅面板中文化（「审阅」）+ 按钮卡片化 + chrome 字号对齐 12px，UI-212 verified（证据 acceptance/ui-212/）。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+最后更新：2026-08-30（BLOCK-30-BACKEND-CONVERGENCE P0 立项：单后端收敛与更名 biof3-server，plan `docs/block-30-backend-convergence-plan.md`。BLOCK-29 / BLOCK-29.1 已于当日收口（`7cdd4d8` / `be799ad`，UI-219/220）。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+| 2026-08-30 | **BLOCK-30-BACKEND-CONVERGENCE P0 立项登记**：用户裁决启动（"可以的 开整"）。目标：单后端收敛与更名——P1 摘除 py-server（先 git mv 抢救 py-pool 至 shared-backend/executors；删 tools-router 镜像契约 / r-server-db 桥（`tool_jobs` 收敛单写入方）/ 410 的 /api/run / pyserver.db 遗留；backend-proc-manager + backend-lifecycle + env-coordinator + preload + env.ts + BackendStatusProvider + electron-builder 同步）/ P2 摘除 gateway / P3 py-pool 接线 tools-executor（惰性启动 + 按 pyHome 分区 + 空闲 5min 回收 + maxRestarts，唯一行为增强）/ P4 更名 core/biof3-server（原子提交，词边界替换 ~400 文件引用面）/ P5 收口。**基线（HEAD=be799ad）**：census py-server 80 / gateway 15 / R_SERVER_URL 17 / pythonApiBase 8 / r-server ~400 文件；全量测试基线复采中（去耦文档旧基线 268 tests / 5 qa-smoke 已过期）。**补记**：BLOCK-29（`7cdd4d8`，UI-219）与 BLOCK-29.1（`be799ad`，UI-220）已于 2026-08-30 收口（DOC-REGISTRY/README 已登记，本表当时漏登，此处补记）。plan：`docs/block-30-backend-convergence-plan.md`。**当前 active**：BLOCK-30。G0 开发期常态 · 不外推 packaged/Provider/GA. | BLOCK-30-BACKEND-CONVERGENCE / P0-LAUNCH |
 
 | 2026-08-29 | **BLOCK-28.3-REVIEW-MODE-CHROME-FIX 收口**：用户反馈①Code Review 应为「审阅」②按钮应对齐首页卡片风格③审阅界面文字偏大。落地（UI-212）：面板全面中文化（标题/按钮「编辑文件/刷新/提交审阅/全部还原」/空态/提交框/hunk 控件「接受/拒绝」/Toast「已提交」/TitleBar「打开/收起审阅」）；`.wt-btn` 卡片化（白底+描边+8px 圆角+微阴影，对齐首页快捷入口）；chrome 字号回落 caption(12px) 对齐软件主流（summary 标题 13px）。**实机 verified（CDP 断言 + 截图 acceptance/ui-212/）**：标题「审阅」13px、按钮 12px/8px 卡片、chips 12px、进度「n/m 已审」。**门禁**：tsc 0 / vitest 16/16 / docs:check 152 / ui:audit:check 绿。**当前 active**：NONE。**G0 开发期常态 · 不外推 packaged/Provider/GA.** | BLOCK-28.3-REVIEW-MODE-CHROME-FIX / COMPLETED |
 
