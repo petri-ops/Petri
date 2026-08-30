@@ -57,13 +57,16 @@ plan 文档 + DOC-REGISTRY 登记 + README 入口 + AUDIT-LOG P0 行；census �
 ### P2 · 摘除 gateway（1 commit）
 删 `core/gateway/`、`backend-proc-manager.js` gateway spawn 与 `R_SERVER_URL` 注入、前端 gateway-client 探活改直探 r-server。验证门与回滚同 P1。此后常驻子进程 = r-server + plumber。
 
-### P3 · 池接线（1~2 commit，唯一行为增强）
-`py-pool` 接入 `tools-executor` Python 路径替代每 job 冷 spawn。设计约束：
-- **池按解析运行时分区**（key = resolved pyHome；runtime 插件可装多版本，`builtAgainst` ABI 校验已暗示）；
-- **惰性启动 + 空闲回收**：首次跑 Python 工具才起池，空闲 5 分钟停（复用 plumber idle-stop 模式；常驻 scanpy worker 占内存，桌面不能白养）；
-- 保留 py-pool 超时与 `_maxRestarts`；池状态接 `diagnostic:export`。
+### P3 · 池接线 —— **实施阶段改判：不接入**（2026-08-30 实施评估）
+P1 抢救的 `py-pool.js` 保留为 `shared-backend/executors/` 资产，但**不接入** `tools-executor` 的 tool-job 执行路径。实施深查发现的架构冲突（当时立项评估未及）：
 
-**验证门**：定向测试 + 冷/热启动计时对比证据 + soak（连续 20 个 Python job 无泄漏/无僵尸）。**回滚**：revert 后退回冷 spawn，行为仍正确。
+1. **取消契约冲突（决定性）**：tool_job 事实链依赖进程级取消——`tool_jobs.process_pid` 落库 + durable cancellation 按 pid 杀进程 + heartbeat 探活（`process-lifecycle.js`）。池化 worker 中脚本无常驻独立进程可杀：要么杀掉 worker（丢热状态、破坏并发），要么取消退化为不杀进程——两者都削弱事实链取消保证，违反本 plan 不变量 #1。
+2. **隔离即正确性**：每 job 冷 spawn 提供干净解释器状态；常驻 worker 会让 scanpy/全局模块状态跨 job 泄漏，对分析类工具是正确性风险。
+3. **收益错配**：池原为已废弃的交互式 `/api/run` 快路径设计；工具 job 是数十秒到分钟级批分析，冷启动 import（约 5–10s）占比有限。
+
+**处置**：`py-pool.js` 留作 `buildPoolWorker()` 池语义的参考实现；未来若引入不走 tool-job 事实链的轻量执行面（如无取消需求的本地快速试算），再评估启用。
+
+**验证门**：无需运行时验证（无行为变化）；本节改判经 plan 修订记录，随 P4 提交。
 
 ### P4 · 更名 `core/biof3-server`（1 commit，原子）
 1. `git mv core/r-server core/biof3-server`（保历史）。
