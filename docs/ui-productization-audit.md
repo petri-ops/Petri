@@ -1785,3 +1785,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；定向 vitest 24/24（新增用例：三态切换内容断言、切文件重置 diff、新增文件改动前禁用）；theme-token 契约 14/14。**2026-08-30 dev 实机 verified**：localhost:3000 注入磁盘真实 git 桥桩后断言——修改文件（demo-289.py）「全文·改动后」= 提交时点完整文件（行号内建、含 diff 折叠区外追加行 A/B）、「全文·改动前」= 父提交版本（无追加行）、切新增文件（ui224-demo.md）视图重置 diff 且「改动前」禁用、新增文件「改动后」全文完整；截图 `acceptance/ui-224/`（fulltext-modified / fulltext-original / fulltext-newfile-disabled-before）。fixture 提交验收后 reset --mixed + checkout 还原，0 残留。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-225: BLOCK-29.5 P1 — 审阅窄面板「改动/历史」tab 遮挡修复（UI-219 观察项收口） (2026-08-30 verified)
+
+**背景**：UI-219 登记的观察项「窄视口下 summary 操作按钮可能遮挡分区切换」，UI-223/224 实机验收中两次实锤——真实 Playwright 点击「历史」tab 被 `.rvw-summary-actions` 内「编辑文件」按钮盖住（force 与程序化点击才能通过）。根因：`.rvw-summary` 不换行，窄宽度下 `.rvw-summary-left`（flex:1）被挤到近 0 宽，actions 条起点左移、其内容叠住 tabs 命中区。
+
+**改动范围**（纯 CSS，ReviewMode.css）：`.rvw-summary` 增 `flex-wrap: wrap`（row-gap 6px）；`.rvw-summary-left` 改 `flex: 1 1 auto` + `min-width: fit-content`（tabs/stats 不再被挤压）；`.rvw-summary-actions` 增 `flex-shrink: 0 + flex-wrap: wrap + justify-content: flex-end`。宽屏单行布局不变；窄宽度操作按钮换行到第二行，tabs 恒可点。
+
+**验证**：**2026-08-30 dev 实机 verified**（localhost:3000 磁盘真实 git 桥桩）：1440×900 默认 dock 真实 Playwright 点击「历史」（无 force）通过、历史列表 4 行渲染；1024×800 窄视口「改动⇄历史」真实点击往返通过，截图可见操作按钮换行第二行、tabs 完整可点，证据 `acceptance/ui-225/narrow-1024-realclick-ok.png`。UI-219 观察项就此收口。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

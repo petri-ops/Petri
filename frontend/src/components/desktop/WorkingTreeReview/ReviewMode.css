@@ -41,7 +41,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
+  row-gap: 6px;
   padding: 10px 16px;
   border-bottom: 1px solid var(--biof3-border);
   background: var(--biof3-bg-surface);
@@ -57,8 +59,17 @@
 }
 
 .rvw-summary-left {
-  flex: 1;
+  flex: 1 1 auto;
+  /* BLOCK-29.5 — tabs/stats 不被挤压（否则 actions 条起点左移叠住 tab 命中区） */
+  min-width: fit-content;
   overflow: hidden;
+}
+
+.rvw-summary-actions {
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 6px;
 }
 
 .rvw-summary-stats {
