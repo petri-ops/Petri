@@ -210,7 +210,6 @@ export interface EnhancedBackendStatus {
   rRuntime: boolean | null;
   pyRuntime: boolean | null;
   rServerUp: boolean;
-  pyServerUp: boolean;
   plumberUp: boolean;
   isReady: boolean;
   downReason: string | null;

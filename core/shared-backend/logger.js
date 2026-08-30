@@ -1,7 +1,7 @@
 /**
  * BioF3 shared backend — Structured Logger
  *
- * Canonical logger implementation shared by r-server and py-server.
+ * Canonical logger implementation shared by r-server（及 BLOCK-30 前的 py-server）。
  * JSON-formatted logs in production; pretty console in development.
  */
 

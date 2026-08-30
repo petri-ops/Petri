@@ -337,16 +337,10 @@ test('all-job history and status projections retain project and conversation ide
     projectId,
     conversationId: 'history-conversation',
   });
-  const pyBridge = require('../core/py-server/r-server-db');
-  const rows = pyBridge.listToolJobsByUser(historyUser);
-  assert.equal(rows[0].project_id, projectId);
-  assert.equal(rows[0].conversation_id, 'history-conversation');
+  // BLOCK-30 P1: py-server 的 r-server-db 桥与 tools-router 契约镜像
+  // 断言随独立 Python 后端摘除；tool_jobs 现由 r-server 单写入方维护。
 
   const routeSource = readFileSync(resolve(new URL('../core/r-server/routes/tools-metadata.js', import.meta.url).pathname), 'utf8');
   assert.match(routeSource, /SELECT id, tool_id,[^']*project_id, conversation_id FROM tool_jobs/);
   assert.match(routeSource, /conversationId:\s*job\.conversation_id\s*\|\|\s*null/);
-
-  const pyRouteSource = readFileSync(resolve(new URL('../core/py-server/tools-router.js', import.meta.url).pathname), 'utf8');
-  assert.match(pyRouteSource, /projectId:\s*job\.project_id\s*\|\|\s*null/);
-  assert.match(pyRouteSource, /conversationId:\s*job\.conversation_id\s*\|\|\s*null/);
 });

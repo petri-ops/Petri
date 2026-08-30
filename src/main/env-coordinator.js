@@ -206,10 +206,6 @@ function getBackendPort(role, fallback) {
     if (process.env.R_SERVER_PORT) return parseInt(process.env.R_SERVER_PORT, 10);
     return fallback != null ? fallback : 3001;
   }
-  if (role === 'python') {
-    if (process.env.PY_SERVER_PORT) return parseInt(process.env.PY_SERVER_PORT, 10);
-    return fallback != null ? fallback : 3004;
-  }
   if (role === 'plumber') {
     if (process.env.PLUMBER_PORT) return parseInt(process.env.PLUMBER_PORT, 10);
     return fallback != null ? fallback : 8787;
@@ -224,7 +220,6 @@ function getBackendPort(role, fallback) {
 function getBackendPorts() {
   return {
     r: getBackendPort('r'),
-    python: getBackendPort('python'),
     plumber: getBackendPort('plumber'),
     gateway: getBackendPort('gateway'),
   };
@@ -283,12 +278,10 @@ function setupDesktopEnv(backendPorts) {
   }
 
   process.env.R_SERVER_PORT = String(backendPorts.r);
-  process.env.PY_SERVER_PORT = String(backendPorts.python);
   process.env.PLUMBER_PORT = String(backendPorts.plumber);
   process.env.GATEWAY_PORT = String(backendPorts.gateway);
   // Gateway health probes and proxies use the full URL, not the port alone.
   process.env.R_SERVER_URL = `http://127.0.0.1:${backendPorts.r}`;
-  process.env.PY_SERVER_URL = `http://127.0.0.1:${backendPorts.python}`;
   process.env.GATEWAY_URL = `http://127.0.0.1:${backendPorts.gateway}`;
   if (backendPorts.renderer) {
     process.env.BIOF3_RENDERER_PORT = String(backendPorts.renderer);

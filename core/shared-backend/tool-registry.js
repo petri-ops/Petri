@@ -130,7 +130,7 @@ const BUILTIN_TOOLS = [
       },
     },
   },
-  // Python 工具 (Phase 2 产物，源自 py-server/tools-router.js PY_TOOL_REGISTRY)
+  // Python 工具 (Phase 2 产物，历史上源自 py-server/tools-router.js；BLOCK-30 P1 起 py-server 已摘除，此处为内置注册)
   {
     id: 'spatial-standard',
     name: 'Spatial Standard',
@@ -466,73 +466,12 @@ function clearAll() {
 }
 
 /**
- * 从 Python Server 迁移工具定义
- * 读取 py-server/tools-router.js 导出的 PY_TOOL_REGISTRY 并注册
- * @returns {Object} { ok: boolean, count: number, error?: string }
- */
-function migrateFromPyServerRegistry() {
-  try {
-    const pyToolsRouterPath = path.join(__dirname, '..', 'py-server', 'tools-router.js');
-    const fs = require('fs');
-
-    if (!fs.existsSync(pyToolsRouterPath)) {
-      return { ok: false, count: 0, error: 'Python tools router not found' };
-    }
-
-    // 动态 require Python tools router
-    const pyToolsRouter = require(pyToolsRouterPath);
-    const pyRegistry = pyToolsRouter.PY_TOOL_REGISTRY;
-
-    if (!pyRegistry || typeof pyRegistry !== 'object') {
-      return { ok: false, count: 0, error: 'Python tool registry not found or invalid' };
-    }
-
-    let count = 0;
-    for (const [toolId, meta] of Object.entries(pyRegistry)) {
-      // 跳过已注册的 Python 工具（避免重复）
-      if (_registry.has(toolId)) continue;
-
-      const toolEntry = {
-        id: toolId,
-        name: meta.displayName || toolId,
-        language: 'python',
-        endpoint: '/api/tools/run',
-        metadata: {
-          description: `${meta.displayName || toolId} - Python spatial analysis tool`,
-          inputSchema: {
-            type: 'object',
-            properties: {
-              h5ad_file: { type: 'string', description: 'Path to .h5ad file' },
-              sample_id: { type: 'string', description: 'Sample identifier' },
-            },
-            required: ['h5ad_file'],
-          },
-          outputSchema: {
-            type: 'object',
-            properties: {
-              files: { type: 'array', items: { type: 'object' } },
-            },
-          },
-        },
-      };
-      const result = registerTool(toolEntry);
-      if (result.ok) count++;
-    }
-
-    console.log(`[tool-registry] Migrated ${count} tools from Python Server registry`);
-    return { ok: true, count };
-  } catch (e) {
-    return { ok: false, count: 0, error: e.message };
-  }
-}
-
-/**
  * 初始化 Python 工具（启动时调用）
- * 从 py-server/tools-router.js 同步工具定义到注册表
+ * 使用内置的 Python 工具定义（BUILTIN_TOOLS 中已定义）。
+ * （BLOCK-30 P1：py-server/tools-router.js 已随 py-server 摘除，
+ * 原 migrateFromPyServerRegistry 迁移路径删除。）
  */
 function initPythonTools() {
-  // 直接使用内置的 Python 工具定义（BUILTIN_TOOLS 中已定义）
-  // 如需动态从 py-server 加载，可调用 migrateFromPyServerRegistry()
   const pythonTools = listTools({ language: 'python' });
   if (pythonTools.length > 0) {
     console.log(`[tool-registry] Initialized ${pythonTools.length} Python tools`);
@@ -552,7 +491,6 @@ module.exports = {
   getPythonTools,
   getBuiltinTools,
   migrateFromRServerRegistry,
-  migrateFromPyServerRegistry,
   initPythonTools,
   getStats,
   clearAll,

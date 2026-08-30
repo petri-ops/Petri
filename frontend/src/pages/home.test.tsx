@@ -34,7 +34,6 @@ function status(overrides: Partial<BackendStatus>): BackendStatus {
     rRuntime: true,
     pyRuntime: true,
     rServerUp: false,
-    pyServerUp: false,
     plumberUp: false,
     isReady: false,
     downReason: null,

@@ -171,7 +171,7 @@ function _enforce(moduleKeys, req, res, next) {
  *     cost-/data-sensitive API surface: copilot / tools / single-cell / spatial.
  *   - /api/data is the shared CRUD layer for BOTH single-cell and spatial
  *     (distinguished by project.modality), so it accepts either permission.
- *   - Spatial compute runs on py-server (/api/py/*), a separate process not
+ *   - Spatial compute runs locally inside r-server（BLOCK-30 P1 前在独立 py-server，/api/py/*）,
  *     covered by this r-server gate; add an equivalent check there when
  *     spatial task dispatch goes live (currently placeholder).
  */

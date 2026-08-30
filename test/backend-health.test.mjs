@@ -1,5 +1,7 @@
 // M1-1 后端就绪感知层测试
 // 运行：cd desktop-app && node --test test/backend-health.test.mjs
+// BLOCK-30 P1: py-server HTTP 服务已摘除——probePy/pyServerUp 场景删除，
+// pyRuntime 仅反映运行时安装态（Python 工具由 r-server 本地执行）。
 import assert from 'node:assert/strict';
 import {
   getBackendStatus,
@@ -22,17 +24,16 @@ import {
   const status = await getBackendStatus({
     runtimeStatus: { r: { installed: true }, python: { installed: true } },
     probeHealth: async () => true,
-    probePy: async () => true,
     probePlumber: async () => true,
-    procs: { rServer: { killed: false }, pyServer: { killed: false }, plumber: { killed: false } },
+    procs: { rServer: { killed: false }, plumber: { killed: false } },
   });
   assert.strictEqual(status.rRuntime, true, 'rRuntime 应为 true');
   assert.strictEqual(status.pyRuntime, true, 'pyRuntime 应为 true');
   assert.strictEqual(status.rServerUp, true, 'rServerUp 应为 true');
-  assert.strictEqual(status.pyServerUp, true, 'pyServerUp 应为 true');
   assert.strictEqual(status.plumberUp, true, 'plumberUp 应为 true');
   assert.strictEqual(status.isReady, true, 'isReady 应为 true');
   assert.strictEqual(status.downReason, null, 'downReason 应为 null');
+  assert.strictEqual('pyServerUp' in status, false, 'pyServerUp 字段应已随 BLOCK-30 P1 移除');
   console.log('✓ 场景1 全就绪通过');
 }
 
@@ -41,8 +42,7 @@ import {
   const status = await getBackendStatus({
     runtimeStatus: { r: { installed: false }, python: { installed: true } },
     probeHealth: async () => true,
-    probePy: async () => true,
-    procs: { rServer: null, pyServer: { killed: false }, plumber: null },
+    procs: { rServer: null, plumber: null },
   });
   assert.strictEqual(status.rRuntime, false, 'rRuntime 应为 false');
   assert.strictEqual(status.rServerUp, false, 'rServerUp 应为 false');
@@ -56,8 +56,7 @@ import {
   const status = await getBackendStatus({
     runtimeStatus: { r: { installed: true }, python: { installed: true } },
     probeHealth: async () => false,
-    probePy: async () => true,
-    procs: { rServer: { killed: false }, pyServer: { killed: false }, plumber: { killed: false } },
+    procs: { rServer: { killed: false }, plumber: { killed: false } },
   });
   assert.strictEqual(status.rRuntime, true, 'rRuntime 应为 true');
   assert.strictEqual(status.rServerUp, false, 'rServerUp 应为 false（health 探测失败）');
@@ -71,8 +70,7 @@ import {
   const status = await getBackendStatus({
     runtimeStatus: { r: { installed: true }, python: { installed: true } },
     probeHealth: async () => true,
-    probePy: async () => true,
-    procs: { rServer: { killed: true }, pyServer: { killed: false }, plumber: { killed: false } },
+    procs: { rServer: { killed: true }, plumber: { killed: false } },
   });
   assert.strictEqual(status.rServerUp, false, 'rServerUp 应为 false（进程 killed）');
   assert.strictEqual(status.isReady, false, 'isReady 应为 false');
@@ -84,28 +82,25 @@ import {
   const status = await getBackendStatus({
     runtimeStatus: { r: { installed: true }, python: { installed: false } },
     probeHealth: async () => true,
-    probePy: async () => false,
-    procs: { rServer: null, pyServer: null, plumber: null },
+    procs: { rServer: null, plumber: null },
   });
   assert.strictEqual(status.rServerUp, false, 'rServerUp 应为 false（procs.rServer=null）');
   assert.strictEqual(status.isReady, false, 'isReady 应为 false');
   console.log('✓ 场景5 进程 null 通过');
 }
 
-// === 场景 6：py-server 不影响 isReady（按需起），plumber 同理 ===
+// === 场景 6：plumber 不影响 isReady（按需起）===
 {
   const status = await getBackendStatus({
     runtimeStatus: { r: { installed: true }, python: { installed: false } },
     probeHealth: async () => true,
-    probePy: async () => false,
-    procs: { rServer: { killed: false }, pyServer: null, plumber: null },
+    procs: { rServer: { killed: false }, plumber: null },
   });
   assert.strictEqual(status.rServerUp, true, 'rServerUp 应为 true');
-  assert.strictEqual(status.pyServerUp, false, 'pyServerUp 应为 false');
   assert.strictEqual(status.plumberUp, false, 'plumberUp 应为 false');
   assert.strictEqual(status.isReady, true, 'isReady 应为 true（仅 r-server 是硬要求）');
   assert.strictEqual(status.downReason, null, 'downReason 应为 null');
-  console.log('✓ 场景6 py/plumber 按需通过');
+  console.log('✓ 场景6 plumber 按需通过');
 }
 
 console.log('\n所有 backend-health 测试通过');

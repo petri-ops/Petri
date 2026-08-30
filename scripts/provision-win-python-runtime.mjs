@@ -4,7 +4,7 @@
  * ---------------------------------------------------------------
  * 开发机一键引导：在本机 Windows 上把 BioF3 的 Python 运行时装进
  *   %USERPROFILE%/Documents/BioF3-Local/runtimes/Python
- * （与 main.js resolveRuntime 的第一优先路径一致），从而 py-server
+ * （与 main.js resolveRuntime 的第一优先路径一致），从而 Python 执行器
  * 在下次 `npm run dev` 时自动启动——无需手动安装 Python，也无需等
  * OSS 上的官方 windows-x64 制品（Week 3/4）。
  *
@@ -66,7 +66,7 @@ async function main() {
   const existing = pyExeAt(TARGET);
   if (existing) {
     console.log(`[provision] 已就绪，无需重复安装: ${existing}`);
-    console.log('[provision] 直接重启 `npm run dev` 即可启动 py-server。');
+    console.log('[provision] 直接重启 `npm run dev` 即可使用新运行时。');
     return;
   }
 
@@ -110,19 +110,19 @@ async function main() {
     await download('https://bootstrap.pypa.io/get-pip.py', getpip);
     sh(py, [getpip]);
 
-    // 安装科学栈（单个包失败不阻断，保证 py-server 能起）
+    // 安装科学栈（单个包失败不阻断，保证 Python 执行器可用）
     console.log(`[provision] installing requirements: ${REQUIREMENTS}`);
     const r = spawnSync(py, ['-m', 'pip', 'install', '--no-cache-dir', '-r', REQUIREMENTS], {
       stdio: 'inherit', windowsHide: true,
     });
     if (r.status !== 0) {
-      console.warn(`[provision] 部分包安装失败（exit ${r.status}）。py-server 仍可启动；失败的包待官方制品就绪后再补。`);
+      console.warn(`[provision] 部分包安装失败（exit ${r.status}）。Python 执行器仍可用；失败的包待官方制品就绪后再补。`);
     }
 
     console.log('\n==================== PROVISION COMPLETE ====================');
     console.log(`Python 运行时已安装到: ${TARGET}`);
-    console.log('下一步：重启 `npm run dev`，main.js 会在启动时解析到该运行时并自动 spawn py-server(3004)。');
-    console.log('验证：dev 控制台应出现 `[desktop] Python runtime: ...` 与 `[desktop] py-server spawned ...`。');
+    console.log('下一步：重启 `npm run dev`，main.js 会在启动时解析到该运行时并注入后端。');
+    console.log('验证：dev 控制台应出现 `[desktop] Python runtime: ...`。');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

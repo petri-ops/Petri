@@ -244,13 +244,13 @@ async function stopWorkspaceDevProcesses() {
       console.warn(`[dev] ${error.message}`);
     }
   }
-  // Always sweep vite / r-server / py-server regardless of OS — these are the
-    // three ports the dev loop actually waits on. The order matches the boot
+  // Always sweep vite / r-server regardless of OS — these are the
+    // ports the dev loop actually waits on. The order matches the boot
     // sequence so an older stack drops in reverse.
+    // (BLOCK-30 P1: 独立 Python 后端 :3004 已摘除。)
   const rendererPort = Number(new URL(rendererUrl).port) || 3000;
   await stopPidsByPort(rendererPort, 'vite renderer');
   await stopPidsByPort(3001, 'r-server');
-  await stopPidsByPort(3004, 'py-server');
 }
 
 async function main() {

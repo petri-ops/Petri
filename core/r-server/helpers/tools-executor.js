@@ -1226,7 +1226,7 @@ function createToolsExecutor({
       console.warn('[tools] plugin-loader lookup failed for', toolId, ':', e.message);
     }
 
-    // Built-in registry is the local R-tool fallback. Python tools run in py-server.
+    // Built-in registry is the local R-tool fallback. Python tools run locally via the executor registry.
     try {
       const { getToolConfig: getRegistryConfig } = require('../tool-registry');
       const cfg = getRegistryConfig(toolId);

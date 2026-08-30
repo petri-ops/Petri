@@ -118,7 +118,6 @@ function registerBackendStatusHandler(config) {
       rRuntime: rServerUp,
       pyRuntime: false,
       rServerUp,
-      pyServerUp: false,
       plumberUp: false,
       isReady: rServerUp,
       downReason: rServerUp ? null : '本地分析服务尚未就绪',

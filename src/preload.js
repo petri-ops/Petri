@@ -10,16 +10,16 @@
 
 const { contextBridge, ipcRenderer } = require('electron');
 
-// A-009: pull the r-server / py-server port fallbacks from env-coordinator
+// A-009: pull the r-server port fallback from env-coordinator
 // instead of duplicating the per-port fallback defaults here. The
-// Electron main process sets R_SERVER_PORT / PY_SERVER_PORT on
-// process.env before preload.js runs, so the helper defaults
-// (3001 / 3004) are only consulted in the rare standalone-render
+// Electron main process sets R_SERVER_PORT on
+// process.env before preload.js runs, so the helper default
+// (3001) is only consulted in the rare standalone-render
 // fallback path.
-// A-009: getBackendPort() defaults were 3001 (r) / 3004 (python).
-// Electron main process's setupDesktopEnv() injects the resolved ports
-// into process.env.R_SERVER_PORT / PY_SERVER_PORT *before* preload.js
-// runs (env-coordinator.js writes them at lines 285-286). Reading from
+// A-009: getBackendPort() default was 3001 (r).
+// Electron main process's setupDesktopEnv() injects the resolved port
+// into process.env.R_SERVER_PORT *before* preload.js
+// runs (env-coordinator.js writes it in setupDesktopEnv). Reading from
 // process.env directly is therefore equivalent to calling the helper,
 // and avoids the cross-file require which is forbidden when
 // BrowserWindow is launched with sandbox: true (the require here
@@ -33,7 +33,6 @@ function _readPort(envName, defaultPort) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : defaultPort;
 }
 const _rPort = _readPort('R_SERVER_PORT', 3001);
-const _pyPort = _readPort('PY_SERVER_PORT', 3004);
 
 const AGENT_WORKBENCH_FLAG_CHANNEL = 'biof3:agent-workbench-flags';
 const AGENT_WORKBENCH_FLAGS = { extraRenderers: false };
@@ -90,7 +89,6 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
   arch: process.arch,
   backendConfig: Object.freeze({
     rApiBase: `http://localhost:${_rPort}/api`,
-    pythonApiBase: `http://localhost:${_pyPort}/api`,
   }),
 
   // 窗口控制（配合 frame:false 自定义标题栏）

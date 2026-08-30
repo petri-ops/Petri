@@ -65,8 +65,9 @@ publish:
   url: https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/updates/macos
   channel: latest
 
-# 额外资源：r-server / py-server / shared-backend / 前端 build 产物 / 内置插件
-# r-server 和 py-server 作为子进程 spawn，需要带上各自的 node_modules
+# 额外资源：r-server / shared-backend / 前端 build 产物 / 内置插件
+# r-server 作为子进程 spawn，需要带上各自的 node_modules
+# （BLOCK-30 P1：独立 Python 后端已摘除，Python 工具由 r-server 经执行器本地执行）
 #
 # 阶段 3（desktop-spa）：前端 build 产物改为 Vite SPA（frontend/dist）
 # Docusaurus build 仍保留（docs/blog iframe 过渡，阶段 2 后移除）
@@ -76,16 +77,9 @@ publish:
 # 用户首次启动后在插件商店下载 R/Python Runtime 到 ~/Documents/BioF3-Local/runtimes/
 extraResources:
   # 去 submodule 后：core 内嵌在 desktop 仓根 core/ 下
-  # 打包时把 core 的 r-server/py-server/shared-backend 复制到 resources/core/
+  # 打包时把 core 的 r-server/shared-backend 复制到 resources/core/
   - from: ./core/r-server
     to: core/r-server
-    filter:
-      - "**/*"
-      - "!**/.DS_Store"
-      - "!**/*.log"
-      - "!**/test*"
-  - from: ./core/py-server
-    to: core/py-server
     filter:
       - "**/*"
       - "!**/.DS_Store"

@@ -1,7 +1,7 @@
 /**
  * Storage Adapter Registry — 存储适配器注册表
  *
- * 桌面版只使用 LocalFileStorage（本地文件系统）。r-server / py-server
+ * 桌面版只使用 LocalFileStorage（本地文件系统）。r-server
  * 通过 getActiveStorage() 获取，避免各自重复实现文件操作。
  *
  * 接口规范（StorageAdapter）：

@@ -3,7 +3,7 @@
  * scripts/install-core-deps.mjs
  *
  * postinstall hook: install node_modules for the embedded core servers
- * (core/r-server, core/py-server), which are spawned as child processes at
+ * (core/r-server), which are spawned as child processes at
  * runtime and packaged verbatim via electron-builder extraResources.
  *
  * These directories have their own package.json but their node_modules are
@@ -34,7 +34,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const CORE_SERVERS = ['core/r-server', 'core/py-server'];
+const CORE_SERVERS = ['core/r-server']; // BLOCK-30 P1: 独立 Python 后端已摘除
 // Native modules in the core servers that must match the system Node ABI.
 // `binary` is the compiled addon file name (convention: name with - → _).
 const NATIVE_MODULES = [{ name: 'better-sqlite3', binary: 'better_sqlite3.node' }];

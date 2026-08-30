@@ -6,7 +6,7 @@
  *            → 生成 HTML 报告 → 落盘到 --report-out。
  *
  * 这是 *人可跑* 的 burn-in 脚本（不是 Playwright，也不是单元测试）。
- * 假定 r-server 已在 localhost:3001 启动（py-server :3004 不在本路径）。
+ * 假定 r-server 已在 localhost:3001 启动（BLOCK-30 P1 后为唯一后端）。
  *
  * ⚠️ 本脚本对 **运行中的真实服务器** 演练，因此会在该服务器配置的数据根下创建
  *    真实项目、真实 tool_job 与真实结果文件。对桌面/开发服务器而言那就是

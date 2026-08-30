@@ -4,15 +4,16 @@
 // Extracted from src/main.js by BLOCK-9.1 PHASE 2.
 // Original location: src/main.js ~line 1278 (setupRuntimeIpc).
 //
-// Backend procs (gateway/rServer/pyServer/plumber) are passed
+// Backend procs (gateway/rServer/plumber) are passed
 // in by the caller (main.js) because they live as module-level
 // `let ChildProc` variables in src/main.js — see backend-proc-
 // manager.js (PHASE 3+ future) for the planned centralized home.
+// BLOCK-30 P1: pyServerProc removed with the py-server HTTP service.
 // ============================================================
 
 const { ipcMain } = require("electron");
 
-function setupRuntimeIpc({ gatewayProc, rServerProc, pyServerProc, plumberProc } = {}) {
+function setupRuntimeIpc({ gatewayProc, rServerProc, plumberProc } = {}) {
   ipcMain.handle("runtime:status", async () => {
     try {
       const { getRuntimeStatus } = require("../plugin-manager");
@@ -37,7 +38,6 @@ function setupRuntimeIpc({ gatewayProc, rServerProc, pyServerProc, plumberProc }
         procs: {
           gateway: gatewayProc,
           rServer: rServerProc,
-          pyServer: pyServerProc,
           plumber: plumberProc,
         },
       });
@@ -50,7 +50,6 @@ function setupRuntimeIpc({ gatewayProc, rServerProc, pyServerProc, plumberProc }
         rRuntime: null,
         pyRuntime: null,
         rServerUp: false,
-        pyServerUp: false,
         plumberUp: false,
         isReady: false,
         downReason: "状态查询失败: " + e.message,

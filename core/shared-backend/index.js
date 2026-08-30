@@ -9,7 +9,7 @@
  *     recordAiUsage: require('./helpers/ai-usage').recordAiUsage,
  *   });
  *
- * 斩断 shared-backend 对 r-server/py-server 的反向 require（分仓前置）。
+ * 斩断 shared-backend 对 r-server 的反向 require（分仓前置；BLOCK-30 P1 起 py-server 已摘除）。
  */
 
 const configHelper = require('./config-helper');

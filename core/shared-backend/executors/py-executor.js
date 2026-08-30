@@ -32,7 +32,9 @@ class PythonExecutor {
   /** Python 可执行文件路径（内嵌 Python）。 */
   get binPath() {
     const cfg = getPyConfig();
-    const runtimeHome = cfg.pyHome || path.join(__dirname, '../../py-server/Python');
+    // BLOCK-30 P1: py-server/Python dev fallback removed with py-server;
+    // empty runtimeHome → getPythonRuntimeExecutable null → system PATH fallback.
+    const runtimeHome = cfg.pyHome || '';
     return getPythonRuntimeExecutable(runtimeHome) || findExecutableOnPath(getPythonExecutableNames());
   }
 

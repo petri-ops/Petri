@@ -3,7 +3,8 @@
  *
  * 职责：
  * 1. 设置桌面版本地存储、运行时和用户数据环境变量
- * 2. 启动 r-server + py-server（子进程 spawn，避免原生模块 V8 版本冲突）
+ * 2. 启动 r-server（子进程 spawn，避免原生模块 V8 版本冲突；BLOCK-30 P1 起
+ *    无独立 py-server，Python 工具由 r-server 经执行器注册表本地执行）
  * 3. 启动 R plumber replot 服务（spawn 子进程）
  * 4. 加载已安装插件
  * 5. 内容增量同步（后台）
@@ -92,13 +93,14 @@ process.stderr?.on?.("error", (err) => {
 // ── 路径解析（开发模式 vs 打包模式）────────────────────────────
 // 去 submodule 后（core 内嵌）：
 //   - desktop 自己的资源（frontend/dist, build, resources/）在 desktop 仓根
-//   - core 资源（r-server, py-server, shared-backend）内嵌在 desktop 仓根 core/ 下
+//   - core 资源（r-server, shared-backend）内嵌在 desktop 仓根 core/ 下
+//     （BLOCK-30 P1：py-server / gateway 已摘除）
 // 开发模式：PROJECT_ROOT = desktop 仓根（src/..），CORE_ROOT = PROJECT_ROOT/core
 // 打包模式：desktop 资源在 process.resourcesPath，core 资源在 process.resourcesPath/core
 // IS_DEV / PROJECT_ROOT / resolveCoreRoot / resolveResource / resolveCore
 // 已提取到 src/main/core-utils.js
 
-// ── 解析用来跑 r-server/py-server 的 node 可执行文件 ────────────
+// ── 解析用来跑后端子进程的 node 可执行文件 ──────────────────────
 // resolveNodeBin / NODE_BIN 已提取到 src/main/core-utils.js
 
 // ── 基础 Runtime 自带包集合 ─────────────────────────────────────
@@ -167,9 +169,9 @@ if (!hasSingleInstanceLock) {
 // setupCsp 已提取到 src/main/csp-config.js
 
 // ── IPC：Runtime 状态查询 ──────────────────────────────────────
-// ── IPC：M2-7 按需启停 py-server / plumber ──────────────────────
-// 前端在用 Python 工具前调 biof3Desktop.py.start()，用完调 .stop()；
+// ── IPC：M2-7 按需启停 plumber ─────────────────────────────────
 // plumber 在重绘前调 .start()。未调用时 5min idle 自动 stop。
+// （BLOCK-30 P1：py:start/py:stop 已随 py-server 摘除。）
 // ── IPC：macOS 小团队更新（OSS 清单 + 已校验 DMG）─────────────
 // ── IPC：文件对话框（preload 暴露的 files.saveDialog/openDialog）─────────
 // ── IPC：诊断日志导出 / 数据备份（M2-8）─────────────────────────
@@ -391,16 +393,14 @@ async function main() {
   }
 
   // 1. 启动后端服务
-  // r-server 常驻；py-server 也在应用启动时预热，减少首次使用等待。
+  // r-server 常驻（BLOCK-30 P1：唯一业务后端，Python 工具经执行器注册表本地执行）。
   // Gateway 协调层统一入口，在 r-server 之后启动。
-  // BLOCK-9.1 PHASE 4: startRServer/startGateway/startPyServer moved
+  // BLOCK-9.1 PHASE 4: startRServer/startGateway moved
   // to src/main/backend-proc-manager.js. main.js orchestrates via
   // named imports.
   const {
     startRServer,
     startGateway,
-    startPyServer,
-    stopPyServer,
     startPlumber,
     stopPlumber,
     getProcs,
@@ -415,15 +415,12 @@ async function main() {
   // 2. 加载已安装插件
   await loadInstalledPlugins({ require });
 
-  // 3. 启动 Python 后端（热启动）
-  await startPyServer("boot");
-
-  // 4. 内容增量同步（后台）
+  // 3. 内容增量同步（后台）
   startContentSync({ require });
 
   // 5. 设置 IPC
   // TLS/Proxy fix: 渲染进程(Chromium)默认继承系统代理，会把 localhost 的
-  // r-server/py-server 请求也塞进系统代理，导致
+  // r-server 请求也塞进系统代理，导致
   // "Client network socket disconnected before secure TLS connection was
   // established"。只绕开本地回环，外网仍走原代理（避免 blanket direct://
   // 误伤需要代理才能访问的外网 LLM）。注意：r-server 出站 LLM 走 Node
@@ -471,7 +468,7 @@ async function main() {
   // snapshot at invocation time via getProcs() from backend-proc-manager.
   const _procsSnapshot = getProcs();
   setupRuntimeIpc(_procsSnapshot);
-  setupBackendLifecycleIpc({ startPyServer, stopPyServer, startPlumber, stopPlumber });
+  setupBackendLifecycleIpc({ startPlumber, stopPlumber });
   // BLOCK-9.1 PHASE 4: high-risk setup functions with log/proc injection
   const { setupTerminalIpc } = require("./ipc/terminal");
   const { setupDiagnosticIpc } = require("./ipc/diagnostic");
@@ -554,8 +551,8 @@ app.on("before-quit", () => {
   const { rServerSupervisor, stopPlumber } = require("./main/backend-proc-manager");
   stopPlumber("app-quit");
   rServerSupervisor.shutdown("app-quit");
-  const { gatewayProc, pyServerProc, plumberProc } = getProcs();
-  for (const proc of [gatewayProc, pyServerProc, plumberProc]) {
+  const { gatewayProc, plumberProc } = getProcs();
+  for (const proc of [gatewayProc, plumberProc]) {
     if (proc) {
       try {
         proc.kill();

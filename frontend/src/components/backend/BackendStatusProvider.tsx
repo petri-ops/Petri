@@ -18,7 +18,6 @@ const INITIAL_STATUS: EnhancedBackendStatus = {
   rRuntime: false,
   pyRuntime: false,
   rServerUp: false,
-  pyServerUp: false,
   plumberUp: false,
   isReady: false,
   downReason: '',
@@ -76,17 +75,17 @@ async function readBackendStatus(): Promise<EnhancedBackendStatus | null> {
   // same local services so the real workspace UI remains available for visual
   // regression and accessibility acceptance; packaged builds never use this.
   if (!import.meta.env.DEV) return null;
-  const [rServerUp, pyServerUp, gatewayUp] = await Promise.all([
+  // BLOCK-30 P1: py-server HTTP 探针已摘除（Python 执行并入 r-server），
+  // 渲染进程无从探测运行时安装态，pyRuntime 恒 false（仅视觉回归路径）。
+  const [rServerUp, gatewayUp] = await Promise.all([
     probeHealth('http://127.0.0.1:3001/api/health'),
-    probeHealth('http://127.0.0.1:3004/api/health'),
     probeHealth('http://127.0.0.1:3005/health'),
   ]);
   const gatewayHealth = await probeGatewayHealth();
   return {
     rRuntime: rServerUp,
-    pyRuntime: pyServerUp,
+    pyRuntime: false,
     rServerUp,
-    pyServerUp,
     plumberUp: false,
     isReady: rServerUp,
     downReason: rServerUp ? null : '本地分析服务尚未就绪',

@@ -98,33 +98,55 @@ plan 文档 + DOC-REGISTRY 登记 + README 入口 + AUDIT-LOG P0 行；census �
 - 命令：`npm run test:all:workspace`（Node --test 全量 + 前端 vitest；原始日志 /tmp/block30-p0-baseline.log，临时不归档）
 - Node 侧汇总：**tests 2352 / pass 2169 / fail 168 / skipped 15 / suites 181**，exit 1
 - 失败签名定性：SQLITE_ERROR ×148 + "no such table" ×25 为主——指向测试环境共享 DB 迁移未应用（migration-runner 由 Electron 启动执行），属**环境可复现基线**而非产品回归；与本包无关（P0 仅改文档）。
-- P5 对比规则：同命令同环境重采，**只将失败集合的新增项计为回归**；基线失败集合（26 个测试文件）如下：
+- P5 对比规则：同命令同环境重采，**只将失败集合的新增项计为回归**；
+- 提取方法勘误（2026-08-30 补记）：首次提取只捕获了文件级 ✖ 行（26 个），漏掉子测试级失败（如 preload-agentdocreview-namespace）；已改用 "test at" 上下文解析法重提为 47 个文件。A/B stash 对照证实 agentDocReview 5 失败在 HEAD 即存在，非本包引入；基线失败集合（47 个测试文件）如下：
 
 ```
+test/act-tool-core.test.mjs
 test/agent-approval.test.mjs
 test/agent-concurrency.test.mjs
 test/agent-provider-boundary.test.mjs
 test/agent-query-result.test.mjs
 test/agent-run-tool.test.mjs
+test/agent-runner-conversation-adapter.test.mjs
+test/agent-runner-facade-compat.test.mjs
+test/agent-runner-facade.test.mjs
+test/agent-runner-loop-orchestrator.test.mjs
 test/agent-tool-policy.test.mjs
 test/agent-tool-registry.test.mjs
 test/agent-tool-result.test.mjs
 test/agent-vision.test.mjs
 test/agent-workflow-phase6.test.mjs
+test/deepseek-retry.test.mjs
+test/desktop-agent-prompt.test.mjs
+test/env-coordinator-port.test.mjs
 test/execution-conversation-threading.test.mjs
 test/g0-api-route.test.mjs
 test/g0-project-baseline.test.mjs
+test/g0-rs-p6-product-acceptance.test.mjs
+test/g0-rs-p7-acceptance.test.mjs
+test/g0-rs-ux1h-acceptance.test.mjs
 test/harness-workspace-tools.test.mjs
 test/loop-agent-integration.test.mjs
+test/loop-api-route.test.mjs
+test/loop-controller-integration.test.mjs
+test/loop-durable-resume.test.mjs
+test/loop-orchestrator-subdomains.test.mjs
+test/loop-repository.test.mjs
+test/preload-agentdocreview-namespace.test.mjs
 test/project-memory-isolation.test.mjs
 test/project-memory-migration.test.mjs
 test/project-sandbox-mcp-tools.test.mjs
 test/release-contract.test.mjs
 test/result-edit-agent-tool.test.mjs
+test/result-replay-service.test.mjs
 test/result-studio-agent-binding.test.mjs
 test/result-studio-context.test.mjs
+test/routes-harness-subdomains.test.mjs
 test/routes-result-studio-facade.test.mjs
+test/routes-result-studio-subdomains.test.mjs
 test/scientific-task-persistence.test.mjs
+test/test-affected.test.mjs
 test/tool-job-conversation.test.mjs
 test/workspace-data-import.test.mjs
 ```

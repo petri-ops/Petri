@@ -2,23 +2,24 @@
 // 聚合 runtime:status + health 探测 + 子进程存活，给渲染进程一个"是否就绪"的统一答案。
 //
 // 接口：
-//   getBackendStatus({ runtimeStatus, procs, probeHealth?, probePy? })
-//     → { rRuntime, pyRuntime, rServerUp, pyServerUp, plumberUp, isReady, downReason }
+//   getBackendStatus({ runtimeStatus, procs, probeHealth? })
+//     → { rRuntime, pyRuntime, rServerUp, plumberUp, isReady, downReason }
 //
-// 生产用：probeHealth/probePy 默认走 fetch('http://localhost:PORT/api/health')，1.5s 超时。
-// 测试用：注入 probeHealth/probePy mock 函数。
+// 生产用：probeHealth 默认走 fetch('http://localhost:PORT/api/health')，1.5s 超时。
+// 测试用：注入 probeHealth mock 函数。
 //
-// isReady 最低要求 = rServerUp（r-server 是硬底座，py/plumber 按需）。
+// isReady 最低要求 = rServerUp（r-server 是硬底座，plumber 按需）。
+// BLOCK-30 P1: pyServerUp 随 py-server HTTP 服务摘除；pyRuntime 保留
+// （Python 工具仍由 r-server 经内嵌 Python 运行时执行）。
 
 // A-009: pull every backend port from env-coordinator instead of each
 // file duplicating the per-port fallback literal here. The Electron
-// main process sets R_SERVER_PORT / PY_SERVER_PORT / PLUMBER_PORT /
+// main process sets R_SERVER_PORT / PLUMBER_PORT /
 // GATEWAY_PORT before this module is required, so the helper defaults
 // are only hit in the standalone fallback path.
 const { getBackendPort } = require('./main/env-coordinator');
 
 const R_SERVER_HEALTH = `http://localhost:${getBackendPort('r')}/api/health`;
-const PY_SERVER_HEALTH = `http://localhost:${getBackendPort('python')}/api/health`;
 const PLUMBER_HEALTH = `http://localhost:${getBackendPort('plumber')}/health`;
 const GATEWAY_HEALTH = `http://localhost:${getBackendPort('gateway')}/health`;
 
@@ -64,29 +65,25 @@ function mergeRuntimeStatusWithConfiguredHomes(runtimeStatus, env = process.env)
  * 聚合后端状态。
  * @param {object} opts
  * @param {object} opts.runtimeStatus - getRuntimeStatus() 返回的 { r:{installed}, python:{installed} }
- * @param {object} opts.procs - { gateway, rServer, pyServer, plumber }，每个为 spawn 返回的 ChildProcess 或 null
+ * @param {object} opts.procs - { gateway, rServer, plumber }，每个为 spawn 返回的 ChildProcess 或 null
  * @param {function?:} opts.probeHealth - 可注入的 r-server health 探测（测试用）
- * @param {function?:} opts.probePy - 可注入的 py-server health 探测（测试用）
  * @param {function?:} opts.probePlumber - 可注入的 plumber 探测（测试用）
  */
-async function getBackendStatus({ runtimeStatus, procs, probeHealth, probePy, probePlumber }) {
+async function getBackendStatus({ runtimeStatus, procs, probeHealth, probePlumber }) {
   const rRuntime = !!runtimeStatus?.r?.installed;
   const pyRuntime = !!runtimeStatus?.python?.installed;
 
   const gatewayAlive = isProcAlive(procs?.gateway);
   const rServerAlive = isProcAlive(procs?.rServer);
-  const pyServerAlive = isProcAlive(procs?.pyServer);
   const plumberAlive = isProcAlive(procs?.plumber);
 
   const probeG = () => probeUrl(GATEWAY_HEALTH);
   const probeH = probeHealth || (() => probeUrl(R_SERVER_HEALTH));
-  const probeP = probePy || (() => probeUrl(PY_SERVER_HEALTH));
   const probePl = probePlumber || (() => probeUrl(PLUMBER_HEALTH));
 
   // 只在进程存活时才探测（进程已死则直接 false，省一次网络往返）
   const gatewayUp = gatewayAlive && (await probeG());
   const rServerUp = rRuntime && rServerAlive && (await probeH());
-  const pyServerUp = pyRuntime && pyServerAlive && (await probeP());
   const plumberUp = plumberAlive && (await probePl());
 
   // isReady 最低要求 = r-server 就绪
@@ -101,7 +98,7 @@ async function getBackendStatus({ runtimeStatus, procs, probeHealth, probePy, pr
     downReason = 'R 后端未就绪，点此诊断';
   }
 
-  return { rRuntime, pyRuntime, gatewayUp, rServerUp, pyServerUp, plumberUp, isReady, downReason };
+  return { rRuntime, pyRuntime, gatewayUp, rServerUp, plumberUp, isReady, downReason };
 }
 
 module.exports = { getBackendStatus, mergeRuntimeStatusWithConfiguredHomes, probeUrl };

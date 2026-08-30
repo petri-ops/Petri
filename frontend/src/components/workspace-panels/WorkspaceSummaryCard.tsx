@@ -303,7 +303,6 @@ export function WorkspaceSummaryCard({
                 <RuntimeStatusChip
                   label="Py"
                   runtimeReady={backendStatus.pyRuntime === true}
-                  serverUp={backendStatus.pyServerUp}
                 />
               </span>
             </div>
@@ -341,16 +340,23 @@ function RuntimeStatusChip({
 }: {
   label: string;
   runtimeReady: boolean;
-  serverUp: boolean;
+  /** 独立 HTTP 后端进程是否在线；Python 执行已并入 r-server（BLOCK-30），
+   *  Py chip 不传该 prop，仅展示运行时安装状态。 */
+  serverUp?: boolean;
   downReason?: string | null;
 }): React.ReactElement {
-  const state = serverUp ? 'online' : runtimeReady ? 'offline' : 'missing';
-  const stateLabel = serverUp ? '后端运行中' : runtimeReady ? '后端未启动' : '运行时未安装';
+  const hasServer = serverUp !== undefined;
+  const state = !hasServer
+    ? runtimeReady ? 'online' : 'missing'
+    : serverUp ? 'online' : runtimeReady ? 'offline' : 'missing';
+  const stateLabel = !hasServer
+    ? runtimeReady ? '运行时就绪' : '运行时未安装'
+    : serverUp ? '后端运行中' : runtimeReady ? '后端未启动' : '运行时未安装';
   return (
     <span
       className={styles.workspacePinnedSummaryRuntimeChip}
       data-state={state}
-      title={`${label} ${stateLabel}${downReason && !serverUp ? `：${downReason}` : ''}`}
+      title={`${label} ${stateLabel}${downReason && serverUp === false ? `：${downReason}` : ''}`}
     >
       <i />
       {label}

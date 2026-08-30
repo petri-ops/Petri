@@ -1344,7 +1344,7 @@ export const tools: Tool[] = [
 - 重构 vs 真实表达散点(模型保真度)
 - latent_embeddings.csv(可下游喂 ml-classifier)
 
-**Python 后端**(py-server \`ml_autoencoder\` task type · 容器 PyTorch 2.12 + cu130 · 容器有 GPU 时秒级,CPU 模式 ~10s/100 epochs)。`,
+**Python 后端**(内置 Python 工具 \`ml_autoencoder\` · 容器 PyTorch 2.12 + cu130 · 容器有 GPU 时秒级,CPU 模式 ~10s/100 epochs)。`,
     inputs: [
       {
         id: 'matrix',
@@ -1393,7 +1393,7 @@ export const tools: Tool[] = [
     category: '机器学习',
     language: 'python',
     description:
-      '上传 AnnData(.h5ad),scvi-tools 训 VAE + 负二项 + UMAP + Leiden 聚类。Python / py-server 后端,演示 600 cells × 2000 genes 端到端 ~50 秒。',
+      '上传 AnnData(.h5ad),scvi-tools 训 VAE + 负二项 + UMAP + Leiden 聚类。Python 后端,演示 600 cells × 2000 genes 端到端 ~50 秒。',
     longDescription: `单细胞深度学习工具(对应教程 [09 章](/docs/machine-learning/module09)):
 
 基于 [scvi-tools](https://scvi-tools.org/),用 VAE + 负二项分布建模单细胞。
@@ -1407,7 +1407,7 @@ export const tools: Tool[] = [
 
 **输出**:UMAP plot + ELBO 曲线 + 整合后的 .h5ad(含 \`adata.obsm["X_scVI"]\`)。
 
-**Python 后端**(走 py-server 的 \`scvi_annotation\` task type · 容器 PyTorch 2.12 + cu130 + scvi-tools 1.4.2)。`,
+**Python 后端**(内置 Python 工具 \`scvi_annotation\` · 容器 PyTorch 2.12 + cu130 + scvi-tools 1.4.2)。`,
     inputs: [
       {
         id: 'adata',
@@ -1660,7 +1660,7 @@ export const tools: Tool[] = [
 
 **输出**:UMAP + 聚类 + 贡献图 + 整合后 .h5ad。
 
-**Python 后端**(py-server \`mo_multivi\` task type)。`,
+**Python 后端**(内置 Python 工具 \`mo_multivi\`)。`,
     inputs: [
       {
         id: 'adata',
@@ -1715,7 +1715,7 @@ export const tools: Tool[] = [
 
 **输出**:WNN UMAP + ADT 分布 + 模态权重图 + 整合后 .h5ad。
 
-**Python 后端**(py-server \`mo_citeseq\` task type)。`,
+**Python 后端**(内置 Python 工具 \`mo_citeseq\`)。`,
     inputs: [
       {
         id: 'adata',
@@ -1764,7 +1764,7 @@ export const tools: Tool[] = [
     category: '空间组学',
     language: 'python',
     description:
-      "上传空间转录组 AnnData (.h5ad)，自动跑 QC + 标准化 + 聚类 + UMAP + 邻域富集 + 空间高变基因检测（Moran's I）。后端走 py-server (scanpy + Squidpy)。",
+      "上传空间转录组 AnnData (.h5ad)，自动跑 QC + 标准化 + 聚类 + UMAP + 邻域富集 + 空间高变基因检测（Moran's I）。后端走内置 Python 执行器 (scanpy + Squidpy)。",
     longDescription: `空间转录组标准分析（对应 [module10](/docs/single-cell/module10)）:
 
 基于 [scanpy](https://scanpy.readthedocs.io/) + [Squidpy](https://squidpy.readthedocs.io/) 完整流程:
@@ -1784,7 +1784,7 @@ export const tools: Tool[] = [
 - \`result_spatial.h5ad\` (含 leiden/umap/spatial_neighbors)
 - \`summary.json\` (n_spots, n_clusters, n_significant_svgs, top SVG 列表)
 
-**Python 后端**: py-server \`spatial_standard\` task type，容器 biof3_python_1（scanpy 1.11.5 + squidpy 1.8.1 + spatialdata 0.7.3）。`,
+**Python 后端**: 内置 Python 工具 \`spatial_standard\`（scanpy 1.11.5 + squidpy 1.8.1 + spatialdata 0.7.3）。`,
     inputs: [
       {
         id: 'adata',
@@ -1859,7 +1859,7 @@ export const tools: Tool[] = [
     category: '空间组学',
     language: 'python',
     description:
-      "上传空间转录组 AnnData，三种方法（Moran's I + Geary's C + Sepal）并行检测空间高变基因，输出三方法韦恩图共识 + score 相关性。后端走 py-server (Squidpy)。",
+      "上传空间转录组 AnnData，三种方法（Moran's I + Geary's C + Sepal）并行检测空间高变基因，输出三方法韦恩图共识 + score 相关性。后端走内置 Python 执行器 (Squidpy)。",
     longDescription: `空间高变基因（Spatially Variable Genes, SVGs）检测工具：
 
 **为什么要 3 种方法？** 单一方法（如 Moran\'s I）容易受数据噪声影响。本工具同时跑：
@@ -1880,7 +1880,7 @@ export const tools: Tool[] = [
 - \`result_spatial.h5ad\` — 父 AnnData + \`uns['svg_results']\`
 - \`metadata.csv\` / \`features.csv\`
 
-**Python 后端**: py-server \`spatial_svg\` task type（Squidpy 1.8 + matplotlib_venn 1.1）。`,
+**Python 后端**: 内置 Python 工具 \`spatial_svg\`（Squidpy 1.8 + matplotlib_venn 1.1）。`,
     inputs: [
       {
         id: 'adata',
@@ -1958,7 +1958,7 @@ export const tools: Tool[] = [
 - \`cell_type_abundance.csv\` — Spot × 细胞类型丰度矩阵
 - \`result_spatial.h5ad\` — AnnData + \`obsm['tangram_ct_pred']\` + \`obs['dominant_celltype']\`
 
-**Python 后端**: py-server \`spatial_deconv\` task type（Tangram 1.0 + Squidpy 1.8）。`,
+**Python 后端**: 内置 Python 工具 \`spatial_deconv\`（Tangram 1.0 + Squidpy 1.8）。`,
     inputs: [
       {
         id: 'adata',
@@ -2027,7 +2027,7 @@ export const tools: Tool[] = [
 - \`lr_score_per_spot.csv\` — Spot × Top-N LR 分数（可下游做 cluster-level 分析）
 - \`result_spatial.h5ad\` — AnnData + \`uns['lr_results']\`
 
-**Python 后端**: py-server \`spatial_lr\` task type（LIANA 1.4 + Squidpy 1.8）。`,
+**Python 后端**: 内置 Python 工具 \`spatial_lr\`（LIANA 1.4 + Squidpy 1.8）。`,
     inputs: [
       {
         id: 'adata',

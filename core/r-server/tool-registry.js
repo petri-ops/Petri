@@ -165,7 +165,7 @@ const TOOLS = {
   },
   'ml-scvi-annotate': {
     displayName: 'scVI 自动注释',
-    script: 'scvi_annotation',  // 复用 py-server 现有 task type
+    script: 'scvi_annotation',
     lang: 'python',
     description: '单细胞 scVI 整合 + UMAP/Leiden 聚类(scvi-tools)',
     csvInputs: [],  // h5ad 二进制
@@ -198,7 +198,7 @@ const TOOLS = {
   // ============================================================
   'spatial-standard': {
     displayName: 'Spatial Standard',
-    script: 'spatial_standard',  // py-server task type
+    script: 'spatial_standard',
     lang: 'python',
     description: '空间转录组标准流程(scanpy + Squidpy: QC → 聚类 → UMAP → 邻域富集 → 空间高变基因 Moran\'s I)',
     csvInputs: [],  // .h5ad 二进制

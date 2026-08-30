@@ -3,7 +3,7 @@
  *
  * Path-traversal guards for joining user-supplied segments under a base
  * directory. Extracted from r-server/helpers/tools-assets.js so platform,
- * r-server, and py-server can share the same guard without importing from
+ * r-server can share the same guard without importing from
  * r-server by name.
  */
 

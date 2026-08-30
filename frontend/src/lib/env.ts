@@ -4,9 +4,11 @@
 // 桌面版恒为 true（这个前端只在桌面版跑）
 export const IS_DESKTOP = true;
 
-function backendApiBase(language: 'r' | 'python'): string {
+// BLOCK-30 P1: py-server HTTP 服务已摘除，唯一业务后端是 r-server；
+// Python 工具在服务端经 shared-backend 执行器注册表本地执行。
+// language 参数保留仅为兼容既有调用点，路由恒走同一后端。
+function backendApiBase(_language?: 'r' | 'python'): string {
   const config = typeof window !== 'undefined' ? window.biof3Desktop?.backendConfig : undefined;
-  if (language === 'python') return config?.pythonApiBase || 'http://localhost:3004/api';
   return config?.rApiBase || 'http://localhost:3001/api';
 }
 

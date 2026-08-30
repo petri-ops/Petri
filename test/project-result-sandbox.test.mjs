@@ -33,7 +33,7 @@ describe('Phase 0: 基线审计 — 当前路径行为', () => {
     });
 
     it('全局 tool-jobs 目录存在或可创建', () => {
-      // 当前 r-server/routes/tools.js 和 py-server/tools-router.js 使用此目录
+      // 当前 r-server/routes/tools.js 使用此目录（独立 Python 后端已于 BLOCK-30 P1 摘除）
       const exists = fs.existsSync(GLOBAL_TOOL_JOBS_DIR);
       assert.ok(exists || true, '目录应该在首次工具执行时创建');
     });
@@ -65,7 +65,6 @@ describe('Phase 0: 基线审计 — 当前路径行为', () => {
       // 预期行为：写入 project.workspace_path/results/jobs/<jobId>
       //
       // 证据位置：
-      // - core/py-server/tools-router.js:32-36
 
       assert.fail('Python 工具当前写入全局 tool-jobs，而不是项目 workspace');
     });
@@ -130,7 +129,6 @@ describe('Phase 0: 基线审计 — 当前路径行为', () => {
 
     it('记录：R/Python executor 固定使用全局 JOBS_DIR', () => {
       // r-server/routes/tools.js:29
-      // py-server/tools-router.js:32
       // 需要改为：从 projectId 解析 workspace/results/jobs/<jobId>
       assert.ok(true, '已记录');
     });

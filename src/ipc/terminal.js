@@ -9,7 +9,7 @@
 //
 // Dependencies injected via parameter:
 //   - mainWindow: for terminal:data / terminal:exit events
-//   - getProcs(): { gatewayProc, rServerProc, pyServerProc, plumberProc }
+//   - getProcs(): { gatewayProc, rServerProc, plumberProc }
 //   - getLogDir(): log directory path
 //   - readLogTail(filePath): tail helper
 //   - resolveCore: path resolver (duplicated for self-containment)
@@ -52,7 +52,8 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
       const logDir = getLogDir();
       // Snapshot the procs at handler invocation time so a stale
       // proc that exited during the IPC round-trip is observed.
-      const { gatewayProc, rServerProc, pyServerProc, plumberProc } = getProcs();
+      // BLOCK-30 P1: py-server 服务已摘除，进程清单不再包含它。
+      const { gatewayProc, rServerProc, plumberProc } = getProcs();
       const processes = [
         {
           id: "gateway",
@@ -71,15 +72,6 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
           pid: rServerProc?.pid || null,
           logPath: path.join(logDir, "r-server.log"),
           output: readLogTail(path.join(logDir, "r-server.log")),
-        },
-        {
-          id: "py-server",
-          label: "Python 后端",
-          command: `node ${resolveCore("py-server", "server.js")}`,
-          status: pyServerProc && !pyServerProc.killed ? "running" : "stopped",
-          pid: pyServerProc?.pid || null,
-          logPath: path.join(logDir, "py-server.log"),
-          output: readLogTail(path.join(logDir, "py-server.log")),
         },
         {
           id: "plumber",

@@ -10,8 +10,6 @@ const evidenceDir = join(repoRoot, 'acceptance/g0-critical-crosscut-hardening');
 const files = [
   'package.json',
   'src/main.js',
-  'core/py-server/server.js',
-  'core/py-server/routes/raw-execution.js',
   'core/r-server/bootstrap.js',
   'core/r-server/db.js',
   'core/r-server/helpers/local-request-boundary.js',

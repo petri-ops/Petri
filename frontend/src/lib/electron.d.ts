@@ -10,7 +10,6 @@ export interface BackendStatus {
   rRuntime: boolean | null;
   pyRuntime: boolean | null;
   rServerUp: boolean;
-  pyServerUp: boolean;
   plumberUp: boolean;
   isReady: boolean;
   downReason: string | null;
@@ -54,7 +53,6 @@ declare global {
       arch: string;
       backendConfig: {
         rApiBase: string;
-        pythonApiBase: string;
       };
       window: {
         minimize: () => void;

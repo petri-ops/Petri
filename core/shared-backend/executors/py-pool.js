@@ -3,17 +3,38 @@
  *
  * Each worker is a persistent `python -u` session with scanpy/numpy/pandas
  * pre-imported. Reads script paths from stdin.
+ *
+ * BLOCK-30 P1: salvaged from core/py-server/py-pool.js (git mv) when the
+ * py-server HTTP surface was removed. Config now resolves through
+ * shared-backend config-helper (env fallback) instead of py-server/config.
+ * Not wired into any execution path yet — BLOCK-30 P3 wires it into the
+ * tools-executor Python path (lazy start + idle recycle + per-runtime keys).
  */
 
 const {spawn} = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const config = require('./config');
-const logger = require('./logger');
+const logger = require('../logger');
+const configHelper = require('../config-helper');
 const {
   getPythonRuntimeExecutable,
   getPythonSitePackagesDir,
-} = require('../shared-backend/runtime-paths');
+} = require('../runtime-paths');
+const { getExecutor } = require('./index');
+
+// Pool-local defaults mirror the former py-server/config.js semantics.
+// PY_POOL_SIZE / PY_RUN_TIMEOUT_MS stay the tuning knobs.
+function _poolConfig() {
+  const cfg = configHelper.getConfig();
+  return {
+    pyHome: cfg.pyHome || process.env.BIOF3_PY_HOME || '',
+    localDataDir:
+      process.env.BIOF3_LOCAL_DATA_DIR ||
+      path.dirname(cfg.tempDir || '/tmp/biof3-tmp'),
+    poolSize: parseInt(process.env.PY_POOL_SIZE || '2', 10),
+    runTimeoutMs: parseInt(process.env.PY_RUN_TIMEOUT_MS || '30000', 10),
+  };
+}
 
 // Packages to pre-import in each Python worker
 const PREIMPORT = [
@@ -25,8 +46,7 @@ const PREIMPORT = [
   'import json, os, sys',
 ];
 
-const WORKER_TIMEOUT_MS = config.runTimeoutMs;
-const { getExecutor } = require('../shared-backend/executors');
+const WORKER_TIMEOUT_MS = _poolConfig().runTimeoutMs;
 
 class PyWorker {
   constructor(id) {
@@ -67,10 +87,11 @@ for line in sys.stdin:
 `;
 
     // 本地执行：直接 spawn 内嵌 python
+    const pyHome = _poolConfig().pyHome;
     const pyBin =
-      getPythonRuntimeExecutable(config.pyHome || process.env.BIOF3_PY_HOME || '') ||
+      getPythonRuntimeExecutable(pyHome) ||
       getExecutor('python').binPath;
-    const siteDir = getPythonSitePackagesDir(config.pyHome || process.env.BIOF3_PY_HOME || '');
+    const siteDir = getPythonSitePackagesDir(pyHome);
     const env = { ...process.env, PYTHONUNBUFFERED: '1' };
     if (require('fs').existsSync(siteDir)) {
       env.PYTHONPATH = siteDir + (env.PYTHONPATH ? path.delimiter + env.PYTHONPATH : '');
@@ -163,7 +184,7 @@ for line in sys.stdin:
 }
 
 class PyPool {
-  constructor(size = config.poolSize) {
+  constructor(size = _poolConfig().poolSize) {
     this.workers = [];
     this.size = size;
     this._requestQueue = [];
@@ -177,7 +198,7 @@ class PyPool {
 
   async execute(code, workDir) {
     const scriptPath = path.join(workDir, 'run.py');
-    const datasetCacheDir = path.join(config.localDataDir, 'cache', 'datasets');
+    const datasetCacheDir = path.join(_poolConfig().localDataDir, 'cache', 'datasets');
 
     const pyScript = `
 import os, sys, json
@@ -252,7 +273,7 @@ finally:
 }
 
 function createPool() {
-  const pool = new PyPool(config.poolSize);
+  const pool = new PyPool(_poolConfig().poolSize);
   setInterval(() => pool._drainRequestQueue(), 500);
   return pool;
 }

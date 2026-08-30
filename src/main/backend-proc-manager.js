@@ -1,7 +1,7 @@
 // ============================================================
-// Backend process manager — central registry for the 4 backend
-// child processes (gateway / r-server / py-server / plumber)
-// plus their log streams and idle timers.
+// Backend process manager — central registry for the backend
+// child processes (gateway / r-server / plumber; BLOCK-30 P1 起
+// py-server 已摘除) plus their log streams and idle timers.
 //
 // Extracted from src/main.js by BLOCK-9.1 PHASE 4.
 // Original location: src/main.js ~lines 96-139 (log streams),
@@ -10,7 +10,7 @@
 //  idle timer helpers + rServerSupervisor).
 //
 // Design rationale:
-//   - The 4 backend procs are module-level `let ChildProc`
+//   - The backend procs are module-level `let ChildProc`
 //     variables in main.js that are shared across:
 //       * startup functions (startRServer / startGateway / ...)
 //       * setupRuntimeIpc / setupTerminalIpc / setupDiagnosticIpc
@@ -28,7 +28,7 @@
 //     at boot, by setupBackendLifecycleIpc via parameter
 //     injection, and by tests)
 //   - getProcs() — returns a snapshot { gatewayProc, rServerProc,
-//     pyServerProc, plumberProc } for IPC snapshot handlers
+//     plumberProc } for IPC snapshot handlers
 //   - getLogDir() / flushLogs() / readLogTail() — for
 //     setupDiagnosticIpc / setupTerminalIpc
 //
@@ -152,16 +152,15 @@ function readLogTail(filePath, maxLines = 120) {
   }
 }
 
-// ── Backend procs (4 child processes) ─────────────────────────
+// ── Backend procs (3 child processes; BLOCK-30 P1 removed py-server) ──
 // Mutable let variables — the .on("exit") handlers null them
 // out, same behavior as before.
 let gatewayProc = null;
 let rServerProc = null;
-let pyServerProc = null;
 let plumberProc = null;
 
 function getProcs() {
-  return { gatewayProc, rServerProc, pyServerProc, plumberProc };
+  return { gatewayProc, rServerProc, plumberProc };
 }
 
 // ── Plumber idle timer (5min auto-stop) ────────────────────────
@@ -297,72 +296,9 @@ function startRServer(reason = "boot") {
 }
 
 // ── startPyServer / stopPyServer ───────────────────────────────
-function startPyServer(reason = "ipc") {
-  if (pyServerProc && !pyServerProc.killed) {
-    return { ok: true, alreadyRunning: true, pid: pyServerProc.pid };
-  }
-
-  if (!process.env.BIOF3_PY_HOME || !fs.existsSync(process.env.BIOF3_PY_HOME)) {
-    console.warn("[desktop] py-server skipped — Python runtime not installed");
-    return { ok: false, error: "Python runtime not installed" };
-  }
-
-  const pyServerPath = resolveCore("py-server", "server.js");
-  if (!fs.existsSync(pyServerPath)) {
-    console.error("[desktop] py-server not found:", pyServerPath);
-    return { ok: false, error: "py-server script not found" };
-  }
-
-  try {
-    pyServerProc = spawn(NODE_BIN, [pyServerPath], {
-      env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-  } catch (e) {
-    console.error("[desktop] py-server spawn failed:", e.message);
-    pyServerProc = null;
-    return { ok: false, error: e.message };
-  }
-
-  _createLogStream("py-server");
-  pyServerProc.stdout.on("data", (d) => {
-    const text = d.toString().trim();
-    if (text) {
-      console.log(`[py-server] ${text}`);
-      _writeLog("py-server", `[py-server] ${text}`);
-    }
-  });
-  pyServerProc.stderr.on("data", (d) => {
-    const text = d.toString().trim();
-    if (text) {
-      console.error(`[py-server] ${text}`);
-      _writeLog("py-server", `[py-server:ERR] ${text}`);
-    }
-  });
-  pyServerProc.on("exit", (code) => {
-    console.log(`[desktop] py-server exited: ${code}`);
-    pyServerProc = null;
-  });
-
-  console.log(
-    `[desktop] py-server spawned (pid=${pyServerProc.pid}) on :${process.env.PY_SERVER_PORT} — reason=${reason}`,
-  );
-  return { ok: true, pid: pyServerProc.pid };
-}
-
-function stopPyServer(reason = "ipc") {
-  if (!pyServerProc || pyServerProc.killed) {
-    pyServerProc = null;
-    return { ok: true, wasRunning: false };
-  }
-  try {
-    pyServerProc.kill();
-    console.log(`[desktop] py-server stopped — reason=${reason}`);
-  } catch (e) {
-    console.error("[desktop] py-server stop failed:", e.message);
-  }
-  return { ok: true, wasRunning: true };
-}
+// BLOCK-30 P1: removed with the py-server HTTP service. Python tool
+// execution runs inside r-server via the shared-backend executor
+// registry (spawn 内嵌 python)，无需独立 Python 后端进程。
 
 // ── startPlumber / stopPlumber ─────────────────────────────────
 const { getRuntimeBinName } = require("../platform-compat");
@@ -446,8 +382,6 @@ module.exports = {
   // lifecycle
   startRServer,
   startGateway,
-  startPyServer,
-  stopPyServer,
   startPlumber,
   stopPlumber,
   // supervisor (for before-quit shutdown in main.js)

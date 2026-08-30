@@ -1,11 +1,11 @@
 /**
  * shared-backend/config-helper.js — 统一读取 config 的入口（自洽版）
  *
- * 断点1（分仓前置）：斩断对 r-server/py-server 的反向 require。
- * 调用方（r-server/py-server/desktop）启动时调 configure({getConfig}) 注入自己的 config；
+ * 断点1（分仓前置）：斩断对 r-server 的反向 require。
+ * 调用方（r-server/desktop）启动时调 configure({getConfig}) 注入自己的 config；
  * 未注入时从环境变量构造 fallback（保持原行为，shared-backend 仍能独立跑）。
  *
- * 历史上本模块按优先级 require r-server/config → py-server/config，那是"假独立"——
+ * 历史上本模块按优先级 require r-server/config → py-server/config（py-server 已于 BLOCK-30 P1 摘除），那是"假独立"——
  * 分仓后 ../r-server/config 路径会断，initSharedBackend / 执行器 / 存储 / llm-providers 全炸。
  * 依赖反转后，shared-backend 真自洽，分仓安全。
  *
@@ -36,7 +36,7 @@ function configure(provider) {
 function getConfig() {
   // 优先用注入的
   if (_getConfig) return _getConfig();
-  // fallback：从环境变量构造（真自洽，不依赖 r-server/py-server）
+  // fallback：从环境变量构造（真自洽，不依赖 r-server）
   return {
     rHome: process.env.BIOF3_R_HOME || '',
     pyHome: process.env.BIOF3_PY_HOME || '',
