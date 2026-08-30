@@ -2608,3 +2608,146 @@
     padding: 6px 12px;
   }
 }
+
+/* ============================================================
+ * BLOCK-28.7 — 工作区改动卡片（AgentChangesCard）
+ * agentTaskDone 后展示每文件 ±统计；点击行派发 reviewOpenFile 跳审阅。
+ * ============================================================ */
+.sc-changes-card {
+  flex-shrink: 0;
+  margin: 6px 14px 0;
+  border: 1px solid var(--biof3-border);
+  border-radius: 10px;
+  background: var(--biof3-bg-surface);
+  overflow: hidden;
+}
+
+.sc-changes-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  background: transparent;
+  color: var(--biof3-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.sc-changes-header:hover {
+  background: var(--biof3-bg-subtle);
+}
+
+.sc-changes-title {
+  flex: 1;
+  font-size: var(--biof3-font-size-caption);
+  font-weight: 600;
+  color: var(--biof3-text);
+  white-space: nowrap;
+}
+
+.sc-changes-count {
+  font-size: var(--biof3-font-size-xs);
+  color: var(--biof3-text-secondary);
+  white-space: nowrap;
+}
+
+.sc-changes-total {
+  display: inline-flex;
+  gap: 6px;
+  font-size: var(--biof3-font-size-xs);
+  font-family: var(--biof3-font-mono, monospace);
+}
+
+.sc-changes-dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  color: var(--biof3-text-muted);
+}
+
+.sc-changes-dismiss:hover {
+  background: var(--biof3-hover);
+  color: var(--biof3-text);
+}
+
+.sc-changes-list {
+  max-height: 176px;
+  overflow-y: auto;
+  border-top: 1px solid var(--biof3-border);
+  padding: 3px 0;
+}
+
+.sc-changes-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 4px 10px;
+  border: none;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  cursor: pointer;
+  text-align: left;
+  font-size: var(--biof3-font-size-caption);
+  font-family: var(--biof3-font-mono, monospace);
+}
+
+.sc-changes-row:hover {
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text);
+}
+
+.sc-changes-row-path {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sc-changes-row-all {
+  color: var(--biof3-accent);
+}
+
+.sc-changes-add {
+  color: var(--biof3-status-success-fg);
+}
+
+.sc-changes-del {
+  color: var(--biof3-status-error-fg);
+}
+
+.sc-changes-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 4px;
+  font-size: var(--biof3-font-size-xs);
+  font-weight: 700;
+  font-family: var(--biof3-font-mono, monospace);
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text-secondary);
+}
+
+.sc-changes-badge-add {
+  background: var(--biof3-status-success-bg);
+  color: var(--biof3-status-success-fg);
+}
+
+.sc-changes-badge-del {
+  background: var(--biof3-status-error-bg);
+  color: var(--biof3-status-error-fg);
+}
+
+.sc-changes-badge-untracked {
+  background: var(--biof3-accent-soft, var(--biof3-bg-subtle));
+  color: var(--biof3-accent);
+}

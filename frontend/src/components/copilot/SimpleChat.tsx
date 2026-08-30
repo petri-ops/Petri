@@ -60,6 +60,7 @@ import {
   closeImagePreview,
 } from './SimpleChat/attachments';
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
+import { AgentChangesCard } from './AgentChangesCard';
 import {
   stringifyParamValue,
   shortValue,
@@ -1336,6 +1337,9 @@ export function SimpleChat({
             />
           )}
         </div>
+
+        {/* BLOCK-28.7 — 工作区改动卡片：每文件 ±统计，点击行跳转审阅 */}
+        <AgentChangesCard />
 
         <div
           className="sc-input-area"

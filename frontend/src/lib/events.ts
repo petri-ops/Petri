@@ -72,6 +72,13 @@ export const biof3Events = {
 
   /** BLOCK-22 P4.10: fired by useCodeMirrorEditor after rejectHunk IPC succeeds. */
   hunkRejected: 'biof3:hunk-rejected',
+
+  /**
+   * BLOCK-28.7: 请求打开审阅并选中指定文件（聊天区改动卡片点击行触发）。
+   * ProjectWorkspace 监听后 openRightPanel('review')；
+   * useWorkingTreeReview 监听后 setSelectedFilePath。
+   */
+  reviewOpenFile: 'biof3:review-open-file',
 } as const;
 
 export interface ConversationForkedDetail {
@@ -205,7 +212,13 @@ export type BioF3EventMap = {
   [biof3Events.tokenBudget]: TokenBudgetDetail;
   [biof3Events.hunkAccepted]: HunkAcceptedDetail;
   [biof3Events.hunkRejected]: HunkRejectedDetail;
+  [biof3Events.reviewOpenFile]: ReviewOpenFileDetail;
 };
+
+/** BLOCK-28.7: 打开审阅并选中指定文件的载荷。 */
+export interface ReviewOpenFileDetail {
+  filePath: string;
+}
 
 /** Dispatch a typed event on window */
 export function dispatchBioF3Event<K extends BioF3EventName>(

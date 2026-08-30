@@ -1671,3 +1671,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **2026-08-30 补充（UA 默认字号收敛）**：首轮实机扫描发现无文字图标按钮/容器命中 Chrome BUTTON UA 默认 13.3333px（10pt），补 `font-size: var(--biof3-font-size-caption)` 共 11 处——TitleBar `.iconBtn`、LeftPanel `.iconBtn`、`.sc-composer-icon-btn`、`.sc-send-cta`、`.sc-model-option`、`.biof3-desktop-panel__close`、`.biof3-settings-nav__item`、`.panelBackdrop`、`.emptyResultLaunchCard`（启动卡片 6 张容器）、ContextBudgetBar 圆钮（内联）、`.xterm textarea`（可访问性隐藏元素，canvas 渲染不受影响）。终扫（终端挂载态全页 390 元素 + 3 伪元素）：**13.3333px = 0，小数 px = 0**，分布收敛为 {10, 11, 12, 13, 16}px 全整数集合；审阅面板开合回归通过。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-216: BLOCK-28.7 — 聊天区「工作区改动」卡片（每文件 ±统计，点击跳审阅） (2026-08-30 verified)
+
+**用户反馈**：「聊天会话区域会有文件改变的详细信息吗？具体到每个文件的变化数量，点击具体的改变信息后可以跳转到审阅查看？」
+
+**改动范围**：
+- 新增 `AgentChangesCard`（copilot/，挂 SimpleChat 输入区上方）：订阅 `biof3:agent-task-done` + 挂载时拉取 `git:working-tree-status` + `git:diff-for-review`，`computeFileDiffStats` 算每文件 +N −M。头行（折叠/展开 +「N 个文件」+ 总 ± + 关闭 X）、明细行（A/M/D/? 状态徽标 + 路径 + 每文件 ±）、「打开审阅查看全部改动」尾行。git 为唯一事实源（提交/还原后重查自动更新/消失）；bridge 缺失（纯浏览器）整卡隐藏。
+- 新增事件 `biof3:review-open-file { filePath }`：ProjectWorkspace 监听 → `openRightPanel('review')`；useWorkingTreeReview 监听 → `setSelectedFilePath(filePath)` + refresh。「查看全部」派发空 filePath（仅开 tab）。
+- CSS（simple-chat.css）：卡片/徽标复用 `--biof3-font-size-*` token 与 status 语义色。
+
+**验证**：tsc 0；定向 vitest 4/4（AgentChangesCard：±明细渲染 / 干净树隐藏 / 点击行派发事件 / agentTaskDone 触发刷新显现）+ copilot 目录全绿。**2026-08-30 dev 实机 verified**：CDP 6/6——注入与磁盘 git 一致的桥桩后（纯浏览器无 preload bridge，Electron 实机走 IPC）卡片渲染「2 个文件 +1 −0」（M README.md +1 −0、? ui287-demo.py +0 −0）；点 README.md 行 → 审阅 tab 自动打开且该文件 aria-selected、文件头「M README.md +1 −0｜1 个 hunk」、diff 渲染 +1 行；折叠/展开、「查看全部」、X 关闭均通过；截图 `acceptance/ui-216/`。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

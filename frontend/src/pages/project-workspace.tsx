@@ -567,6 +567,13 @@ export function ProjectWorkspace(): React.ReactElement {
     }
   }, [openRightTabs, shell]);
 
+  // BLOCK-28.7 — 聊天区改动卡片点击：打开审阅 tab（文件选中由 useWorkingTreeReview 监听）
+  useEffect(() => {
+    return subscribeBioF3Event(biof3Events.reviewOpenFile, () => {
+      openRightPanel('review');
+    });
+  }, [openRightPanel]);
+
   const [allProjects, setAllProjects] = useState<Project[]>([]);
 
   useEffect(() => {

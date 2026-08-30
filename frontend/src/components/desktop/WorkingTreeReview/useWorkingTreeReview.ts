@@ -307,6 +307,17 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     };
   }, [refresh]);
 
+  // BLOCK-28.7 — 聊天区改动卡片点击文件行：刷新并选中该文件。
+  // 路径必须在当前工作区 status 里（防御外部乱传）；diff 未覆盖时先 refresh。
+  useEffect(() => {
+    return subscribeBioF3Event(biof3Events.reviewOpenFile, (detail) => {
+      const target = detail?.filePath || '';
+      if (!target) return;
+      setSelectedFilePath((current) => (current === target ? current : target));
+      void refresh();
+    });
+  }, [refresh]);
+
   // 外部 isOpen 触发（手动工具栏按钮）
   useEffect(() => {
     if (options.isOpen) {
