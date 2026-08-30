@@ -928,3 +928,28 @@
   text-overflow: ellipsis;
   color: var(--biof3-text);
 }
+
+/* BLOCK-29.5 — 两提交对比模式 */
+.rvw-compare-hint {
+  font-size: var(--biof3-font-size-xs);
+  color: var(--biof3-text-secondary);
+  white-space: nowrap;
+}
+
+/* BLOCK-29.5 — stash 只读列表 */
+.rvw-stash-list {
+  margin: 0 12px 6px;
+  padding: 4px 8px;
+  border: 1px dashed var(--biof3-border);
+  border-radius: 7px;
+  background: var(--biof3-bg-subtle);
+}
+
+.rvw-stash-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 2px 0;
+  font-size: var(--biof3-font-size-xs);
+}

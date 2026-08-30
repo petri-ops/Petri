@@ -1821,3 +1821,29 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：node --check 3 文件；adapter 真实仓库快测（本仓 AUDIT-LOG.md：601 行 / 162 commits / 行→commit 查找 0 丢失）；tsc 0；定向 vitest 26/26（新增用例：blame 视图渲染两行两归属 + 断言 `blame({path, ref: hash})` 调用契约）。**2026-08-30 dev 实机 verified**（localhost:3000 桥桩 + 真实 adapter blame 数据）：2de3897 提交 README.md → blame 视图两行分别归属 94e3047（init）与 2de3897，调用参数 `{path: 'README.md', ref: <full sha>}` 正确；截图 `acceptance/ui-227/blame-view.png`。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-228: BLOCK-29.5 P4 — 任意两提交对比（对比模式 + 区间 diff） (2026-08-30 verified)
+
+**背景**：BLOCK-29.5 只读视野第四项：此前只能看「单提交 vs 父提交」，任意两提交的区间差异看不到。全部复用既有通道的 additive 参数，不新增 IPC 通道。
+
+**改动范围**：
+- IPC：`git:commit-diff` 增区间分支 `{fromRef, toRef}`（均 assertSha hex 校验，`adapter.diff` 区间 patch → `parseDiffFiles`）；`git:commit-file-content` 增区间分支 `{path, fromRef, toRef}`（fromRef 版本为 original、toRef 为 modified，`showFile` 直读，缺失侧空串）。
+- hook：对比模式状态机（`compareMode/compareBase/compareFrom/compareTo/compareDiff/compareFilePath` + `enterCompareMode/exitCompareMode/handleCompareClick`）——历史头部「对比」进入，依次点两提交 = 基准→目标，加载区间 diff；对比模式下行点击走 `handleCompareClick`，退出恢复正常 openCommit。
+- ReviewMode：对比视图（详情头「对比 A..B + N 文件 ±A −D + 退出对比」+ 文件条 ±统计 + 只读 diff；`CommitDiffFileView` 增可选 fromRef/toRef props 走区间取文）；历史头部对比模式提示（「点选基准提交」→「已选基准 X，点选目标提交」）。
+
+**验证**：node --check；tsc 0；定向 vitest 27/27（新增用例：进入对比→选基准→选目标 → 断言 `commitDiff({fromRef, toRef})` 调用契约 + 对比头渲染「对比 b2c3d4e..a1b2c3d / 1 文件」）。**2026-08-30 dev 实机 verified**（localhost:3000 桥桩）：对比模式点选 2de3897→a3b567f，`commitDiff`/`commitFileContent` 均以完整 sha 区间参数调用、对比头「对比 2de3897..a3b567f · 1 文件 +1 −0」、文件条与只读 diff 渲染、退出对比恢复；截图 `acceptance/ui-228/compare-view.png`。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-229: BLOCK-29.5 P5 — stash 只读列表 / 标签分组 / 未跟踪文件预览 (2026-08-30 verified)
+
+**背景**：BLOCK-29.5 只读视野收尾小件三项。stash 仅查看（pop/apply/clear 等写操作维持排除）；标签经历史选择器按 ref 查看；未跟踪文件此前手风琴展开只有「暂无行级 diff」占位。
+
+**改动范围**：
+- git-adapter：只读 `stashList()`（`stash list` NUL 分隔 ref/shortSha/isoDate/subject，0 写操作）与 `tagList()`（`for-each-ref refs/tags` 按创建时间倒序）；真实仓库快测（desktop 仓 0 stash / 7 个真实 v0.0.1-rc.x tag 解析正确）。
+- IPC：新只读通道 `git:stash-list` / `git:tag-list`；preload `stashList/tagList`；d.ts 同步。
+- 前端：hook `stashes/tags/loadStashesAndTags`（历史 tab 点击时加载）；历史分区头部下方 stash 只读列表（ref + subject + 时间，有内容才显示）；分支选择器增「标签」optgroup（tag 名作 ref 直查该标签历史）；未跟踪文件展开替换为 `UntrackedFilePreview`（既有 `fileContent({ref:'WORKTREE'})` 直读磁盘 + CodeMirrorEditor 只读渲染，失败/空文件/加载态分明）。
+
+**验证**：node --check 3 文件；adapter 真实仓库快测；tsc 0；定向 vitest 28/28（新增用例：stash 列表渲染 + 标签 optgroup）。**2026-08-30 dev 实机 verified**（localhost:3000 桥桩）：历史分区 stash 列表渲染（stash@{0} + subject + 时间）、选择器含「标签」optgroup（v229-demo（tag））；改动分区未跟踪文件 ui229-untracked.md 展开渲染只读全文（DOM 断言 `rvw-untracked-preview` 含「# ui229 未跟踪预览 / WORKTREE 直读磁盘」完整内容）；截图 `acceptance/ui-229/stash-tags.png`（未跟踪预览另有 DOM 断言在案，截图通道当日抖动）。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

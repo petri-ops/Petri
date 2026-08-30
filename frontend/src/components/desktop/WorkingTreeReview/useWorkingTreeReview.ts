@@ -66,6 +66,21 @@ export interface BranchInfo {
   current: boolean;
 }
 
+/** BLOCK-29.5 — stash 条目（只读列表，不含写操作）。 */
+export interface StashEntry {
+  ref: string;
+  shortSha: string;
+  isoDate: string;
+  subject: string;
+}
+
+/** BLOCK-29.5 — 标签（只读列表）。 */
+export interface TagEntry {
+  name: string;
+  shortSha: string;
+  isoDate: string;
+}
+
 /** BLOCK-29 — git log 单条提交（NUL 分隔解析，见 git-adapter.log）。 */
 export interface CommitInfo {
   sha: string;
@@ -142,6 +157,22 @@ export interface UseWorkingTreeReviewReturn {
   branches: BranchInfo[] | null;
   activeBranch: string | null;
   switchBranch: (name: string | null) => Promise<void>;
+  /** BLOCK-29.5 — stash/标签只读列表。 */
+  loadStashesAndTags: () => Promise<void>;
+  stashes: StashEntry[] | null;
+  tags: TagEntry[] | null;
+  /** BLOCK-29.5 — 两提交对比模式（点选基准→目标，只读区间 diff）。 */
+  compareMode: boolean;
+  compareBase: CommitInfo | null;
+  compareFrom: CommitInfo | null;
+  compareTo: CommitInfo | null;
+  compareDiff: DiffResult | null;
+  compareLoading: boolean;
+  compareFilePath: string | null;
+  setCompareFilePath: (path: string | null) => void;
+  enterCompareMode: () => void;
+  exitCompareMode: () => void;
+  handleCompareClick: (commit: CommitInfo) => Promise<void>;
   openCommit: (commit: CommitInfo) => Promise<void>;
   backToCommitList: () => void;
   /** BLOCK-29.2 — 放弃单文件工作区改动（tracked 还原 / untracked 删除）。 */
@@ -398,6 +429,26 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     }
   }, []);
 
+  // BLOCK-29.5 — stash/标签只读列表（历史分区展示）
+  const [stashes, setStashes] = useState<StashEntry[] | null>(null);
+  const [tags, setTags] = useState<TagEntry[] | null>(null);
+  const loadStashesAndTags = useCallback(async () => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) return;
+    try {
+      const r = await bridge.stashList({});
+      setStashes(r.ok && r.data ? r.data.stashes ?? [] : []);
+    } catch {
+      setStashes([]);
+    }
+    try {
+      const r2 = await bridge.tagList({});
+      setTags(r2.ok && r2.data ? r2.data.tags ?? [] : []);
+    } catch {
+      setTags([]);
+    }
+  }, []);
+
   const loadHistory = useCallback(async (opts: { file?: string | null; skip?: number; append?: boolean } = {}) => {
     const bridge = getBridge('workingTreeReview');
     if (!bridge) return;
@@ -427,6 +478,62 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     setSelectedCommitFilePath(null);
     await loadHistory({ file: null });
   }, [loadHistory]);
+
+  // BLOCK-29.5 — 两提交对比模式（点选基准→目标，只读区间 diff）
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareBase, setCompareBase] = useState<CommitInfo | null>(null);
+  const [compareFrom, setCompareFrom] = useState<CommitInfo | null>(null);
+  const [compareTo, setCompareTo] = useState<CommitInfo | null>(null);
+  const [compareDiff, setCompareDiff] = useState<DiffResult | null>(null);
+  const [compareLoading, setCompareLoading] = useState(false);
+  const [compareFilePath, setCompareFilePath] = useState<string | null>(null);
+
+  const enterCompareMode = useCallback(() => {
+    setCompareMode(true);
+    setCompareBase(null);
+    setCompareFrom(null);
+    setCompareTo(null);
+    setCompareDiff(null);
+    setSelectedCommit(null);
+    setCommitDiff(null);
+    setSelectedCommitFilePath(null);
+  }, []);
+
+  const exitCompareMode = useCallback(() => {
+    setCompareMode(false);
+    setCompareBase(null);
+    setCompareFrom(null);
+    setCompareTo(null);
+    setCompareDiff(null);
+    setCompareFilePath(null);
+  }, []);
+
+  const handleCompareClick = useCallback(async (commit: CommitInfo) => {
+    if (!compareBase) {
+      setCompareBase(commit);
+      return;
+    }
+    if (commit.sha === compareBase.sha) return;
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) return;
+    setCompareLoading(true);
+    try {
+      const res = await bridge.commitDiff({ fromRef: compareBase.sha, toRef: commit.sha });
+      const parsed: DiffResult = res.ok && res.data
+        ? res.data
+        : { files: [], truncated: false, summary: { added: 0, removed: 0 } };
+      setCompareFrom(compareBase);
+      setCompareTo(commit);
+      setCompareDiff(parsed);
+      setCompareFilePath(parsed.files[0]?.path ?? null);
+    } catch {
+      setCompareFrom(compareBase);
+      setCompareTo(commit);
+      setCompareDiff({ files: [], truncated: false, summary: { added: 0, removed: 0 } });
+    } finally {
+      setCompareLoading(false);
+    }
+  }, [compareBase]);
 
   const openCommit = useCallback(async (commit: CommitInfo) => {
     const bridge = getBridge('workingTreeReview');
@@ -533,6 +640,20 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     branches,
     activeBranch,
     switchBranch,
+    loadStashesAndTags,
+    stashes,
+    tags,
+    compareMode,
+    compareBase,
+    compareFrom,
+    compareTo,
+    compareDiff,
+    compareLoading,
+    compareFilePath,
+    setCompareFilePath,
+    enterCompareMode,
+    exitCompareMode,
+    handleCompareClick,
     openCommit,
     backToCommitList,
     discardFile,

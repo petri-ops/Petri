@@ -648,6 +648,45 @@ function createGitAdapter(options = {}) {
       return { branches, count: branches.length };
     },
 
+    /**
+     * BLOCK-29.5 — stash 列表（只读）。git stash list，NUL 分隔（ref/shortSha/isoDate/subject）。
+     * 不含 pop/apply/clear 等写操作。
+     */
+    stashList() {
+      const output = run(['stash', 'list', '--date=iso-strict', '--format=%gd%00%h%00%aI%00%gs'], {
+        allowFailure: true,
+        readOnly: true,
+      });
+      if (!output.ok) throw new GitAdapterError('git_stash_list_failed', 'Scoped git stash list failed.', output);
+      const stashes = [];
+      for (const line of output.stdout.split('\n')) {
+        if (!line) continue;
+        const fields = line.split('\x00');
+        if (fields.length < 4 || !fields[0]) continue;
+        stashes.push({ ref: fields[0], shortSha: fields[1] || '', isoDate: fields[2] || '', subject: fields[3] || '' });
+      }
+      return { stashes, count: stashes.length };
+    },
+
+    /**
+     * BLOCK-29.5 — 标签列表（只读）。for-each-ref refs/tags，按创建时间倒序。
+     */
+    tagList() {
+      const output = run(
+        ['for-each-ref', '--sort=-creatordate', '--format=%(refname:short)%00%(objectname:short)%00%(creatordate:iso8601-strict)', 'refs/tags'],
+        { allowFailure: true, readOnly: true },
+      );
+      if (!output.ok) throw new GitAdapterError('git_tag_list_failed', 'Scoped git for-each-ref tags failed.', output);
+      const tags = [];
+      for (const line of output.stdout.split('\n')) {
+        if (!line) continue;
+        const fields = line.split('\x00');
+        if (fields.length < 3 || !fields[0]) continue;
+        tags.push({ name: fields[0], shortSha: fields[1] || '', isoDate: fields[2] || '' });
+      }
+      return { tags, count: tags.length };
+    },
+
     /** 显式路径暂存。整树写法在 assertSafePathspecs 层已被拒绝。 */
     stage({ paths } = {}) {
       const safe = assertSafePathspecs(paths, scope);

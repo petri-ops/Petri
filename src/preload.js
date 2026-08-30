@@ -377,6 +377,9 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     branchList: (params) => ipcRenderer.invoke('git:branch-list', params || {}),
     // BLOCK-29.5 — 逐行归属（文件视图第四态，只读）
     blame: (params) => ipcRenderer.invoke('git:blame', params || {}),
+    // BLOCK-29.5 — stash/标签列表（只读）
+    stashList: (params) => ipcRenderer.invoke('git:stash-list', params || {}),
+    tagList: (params) => ipcRenderer.invoke('git:tag-list', params || {}),
     // BLOCK-29.2 — git 工具二期（前端确认后调用）
     discardFile: (params) => ipcRenderer.invoke('git:discard-file', params || {}),
     undoLastCommit: () => ipcRenderer.invoke('git:undo-last-commit'),

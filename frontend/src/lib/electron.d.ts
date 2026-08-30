@@ -470,13 +470,28 @@ declare global {
           error?: string;
           message?: string;
         }>;
-        commitDiff: (params: { hash: string }) => Promise<{
+        // BLOCK-29.5 — stash/标签列表（只读）
+        stashList: (params?: Record<string, never>) => Promise<{
+          ok: boolean;
+          data?: { stashes: Array<{ ref: string; shortSha: string; isoDate: string; subject: string }>; count: number };
+          error?: string;
+          message?: string;
+        }>;
+        tagList: (params?: Record<string, never>) => Promise<{
+          ok: boolean;
+          data?: { tags: Array<{ name: string; shortSha: string; isoDate: string }>; count: number };
+          error?: string;
+          message?: string;
+        }>;
+        // BLOCK-29.5 — commitDiff/commitFileContent 参数 additive：区间对比模式
+        //（commitDiff 传 {fromRef,toRef}；commitFileContent 传 {path,fromRef,toRef}，hash 可省）
+        commitDiff: (params: { hash?: string; fromRef?: string; toRef?: string }) => Promise<{
           ok: boolean;
           data?: { files: Array<{ path: string; oldPath: string | null; binary: boolean; hunks: Array<{ oldStart: number; newStart: number; lines: Array<{ type: 'add' | 'del' | 'ctx'; text: string }> }> }>; truncated: boolean; summary: { added: number; removed: number } };
           error?: string;
           message?: string;
         }>;
-        commitFileContent: (params: { hash: string; path: string }) => Promise<{
+        commitFileContent: (params: { hash?: string; path: string; fromRef?: string; toRef?: string }) => Promise<{
           ok: boolean;
           data?: { original: string; modified: string };
           error?: string;

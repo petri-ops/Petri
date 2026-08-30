@@ -63,8 +63,9 @@ interface BlameData {
  * 组装 DiffRevision 交 CodeMirrorDiffView（revisionOverride，无 accept/reject 控件）。
  * BLOCK-29.4 — 两版全文本就持有，增加视图切换：diff / 全文·改动后 / 全文·改动前
  * （新增文件无改动前版本时禁用），全文用 CodeMirrorEditor 只读渲染。
+ * BLOCK-29.5 — 对比模式传 fromRef/toRef（sha 区间），hash 为目标提交。
  */
-function CommitDiffFileView({ hash, file }: { hash: string; file: DiffFile }) {
+function CommitDiffFileView({ hash, file, fromRef = null, toRef = null }: { hash: string; file: DiffFile; fromRef?: string | null; toRef?: string | null }) {
   const [revision, setRevision] = useState<DiffRevision | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +86,7 @@ function CommitDiffFileView({ hash, file }: { hash: string; file: DiffFile }) {
     setViewMode('diff');
     setBlameData(null);
     setBlameError(null);
-    bridge.commitFileContent({ hash, path: file.path })
+    bridge.commitFileContent(fromRef && toRef ? { path: file.path, fromRef, toRef } : { hash, path: file.path })
       .then((res) => {
         if (cancelled) return;
         if (res.ok && res.data) {
@@ -214,6 +215,44 @@ function formatCommitDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+/**
+ * BLOCK-29.5 — 未跟踪文件只读预览：fileContent WORKTREE 直读磁盘，
+ * 替换原「暂无行级 diff」占位（CodeMirrorEditor 只读渲染）。
+ */
+function UntrackedFilePreview({ path }: { path: string }) {
+  const [content, setContent] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) return;
+    let cancelled = false;
+    setContent(null);
+    setFailed(false);
+    bridge.fileContent({ path, ref: 'WORKTREE' })
+      .then((res) => {
+        if (cancelled) return;
+        if (res.ok && res.data) setContent(res.data.content);
+        else setFailed(true);
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+    return () => { cancelled = true; };
+  }, [path]);
+  if (failed) return <div className="wt-empty">未跟踪文件 — 内容读取失败。</div>;
+  if (content === null) return <div className="wt-empty">未跟踪文件 — 内容加载中…</div>;
+  if (content === '') return <div className="wt-empty">未跟踪文件 — 空文件。</div>;
+  return (
+    <div className="rvw-fulltext-wrap" data-testid="rvw-untracked-preview">
+      <CodeMirrorEditor
+        value={content}
+        language={FULLTEXT_LANGUAGE_BY_EXT[path.slice(path.lastIndexOf('.') + 1).toLowerCase()]}
+        className="rvw-fulltext-editor"
+      />
+    </div>
+  );
 }
 
 export interface ReviewModeProps {
@@ -431,6 +470,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                 review.setHistoryView('history');
                 void review.loadHistory();
                 void review.loadBranches();
+                void review.loadStashesAndTags();
               }}
             >
               历史
@@ -529,7 +569,77 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
 
       <div className={`rvw-body${isDock ? ' rvw-body--dock' : ''}`}>
         {review.historyView === 'history' && (
-          review.selectedCommit ? (
+          review.compareMode && review.compareDiff ? (
+            <>
+              {/* BLOCK-29.5 — 区间对比：A..B 文件条 + 只读 diff */}
+              <div className="rvw-commit-info" data-testid="rvw-compare-info">
+                <div className="rvw-commit-info-head">
+                  <span className="rvw-commit-subject">对比 {review.compareFrom?.shortSha}..{review.compareTo?.shortSha}</span>
+                  <span className="rvw-commit-summary">
+                    {(review.compareDiff.files ?? []).length} 文件
+                    <span className="rvw-stat-add">+{review.compareDiff.summary.added}</span>
+                    <span className="rvw-stat-del">−{review.compareDiff.summary.removed}</span>
+                  </span>
+                  <button type="button" className="rvw-viewmode-btn" onClick={review.exitCompareMode}>
+                    退出对比
+                  </button>
+                </div>
+              </div>
+              <div className="rvw-filestrip" role="tablist" aria-label="对比改动文件">
+                {(review.compareDiff.files ?? []).map((f) => {
+                  const stats = computeFileDiffStats(f);
+                  const selected = review.compareFilePath === f.path;
+                  const fileName = f.path.slice(f.path.lastIndexOf('/') + 1);
+                  return (
+                    <button
+                      key={f.path}
+                      type="button"
+                      role="tab"
+                      aria-selected={selected}
+                      className={`rvw-filechip${selected ? ' active' : ''}`}
+                      onClick={() => review.setCompareFilePath(f.path)}
+                      title={f.path}
+                    >
+                      <span className="rvw-filechip-name">{fileName}</span>
+                      {(stats.added > 0 || stats.removed > 0) && (
+                        <span className="rvw-file-stats">
+                          {stats.added > 0 && <span className="rvw-stat-add">+{stats.added}</span>}
+                          {stats.removed > 0 && <span className="rvw-stat-del">−{stats.removed}</span>}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              <main className="rvw-diff-area" data-testid="rvw-compare-diff-area">
+                {(() => {
+                  const file = (review.compareDiff?.files ?? []).find((f) => f.path === review.compareFilePath) || null;
+                  if (!file) {
+                    return <div className="wt-empty">该区间没有可显示的文件差异。</div>;
+                  }
+                  return (
+                    <div className="rvw-file">
+                      <div className="wt-file-header rvw-file-header">
+                        <span className="rvw-history-sha">{review.compareFrom?.shortSha}..{review.compareTo?.shortSha}</span>
+                        <span className="wt-file-path">{file.path}</span>
+                        <span className="rvw-file-stats">
+                          <span className="rvw-stat-add">+{computeFileDiffStats(file).added}</span>
+                          <span className="rvw-stat-del">−{computeFileDiffStats(file).removed}</span>
+                        </span>
+                        <span className="wt-file-hunk-count">{file.hunks.length} 个 hunk</span>
+                      </div>
+                      <CommitDiffFileView
+                        hash={review.compareTo?.sha ?? ''}
+                        file={file}
+                        fromRef={review.compareFrom?.sha ?? null}
+                        toRef={review.compareTo?.sha ?? null}
+                      />
+                    </div>
+                  );
+                })()}
+              </main>
+            </>
+          ) : review.selectedCommit ? (
             <>
               {/* BLOCK-29.3 — 提交详情头：subject / 作者·时间 / 汇总统计 + 完整提交说明 */}
               <div className="rvw-commit-info" data-testid="rvw-commit-info">
@@ -648,6 +758,15 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                       {b.current ? '（当前）' : ''}
                     </option>
                   ))}
+                  {review.tags && review.tags.length > 0 && (
+                    <optgroup label="标签">
+                      {review.tags.map((t) => (
+                        <option key={t.name} value={t.name}>
+                          {t.name}（tag）
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
                 </select>
                 <button
                   type="button"
@@ -662,7 +781,35 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                 >
                   撤销上次提交
                 </button>
+                {/* BLOCK-29.5 — 两提交对比模式（只读区间 diff） */}
+                <button
+                  type="button"
+                  className="wt-btn"
+                  onClick={() => (review.compareMode ? review.exitCompareMode() : review.enterCompareMode())}
+                  title="选两个提交对比区间差异（只读）"
+                >
+                  {review.compareMode ? '退出对比' : '对比'}
+                </button>
+                {review.compareMode && (
+                  <span className="rvw-compare-hint" title="对比模式">
+                    {review.compareBase
+                      ? `已选基准 ${review.compareBase.shortSha}，点选目标提交`
+                      : '对比模式：点选基准提交'}
+                  </span>
+                )}
               </div>
+              {/* BLOCK-29.5 — stash 只读列表（有内容才显示，不含写操作） */}
+              {review.stashes && review.stashes.length > 0 && (
+                <div className="rvw-stash-list" data-testid="rvw-stash-list">
+                  {review.stashes.map((s) => (
+                    <div key={s.ref} className="rvw-stash-row" title={s.subject}>
+                      <span className="rvw-blame-sha">{s.ref}</span>
+                      <span className="rvw-history-subject">{s.subject}</span>
+                      <span className="rvw-history-meta">{formatCommitDate(s.isoDate)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
               {review.commitsLoading && <div className="wt-diff-loading">提交历史加载中…</div>}
               {review.commits && review.commits.length === 0 && (
                 <div className="wt-empty">{review.historyFileFilter ? '该文件暂无提交记录。' : '暂无提交记录。'}</div>
@@ -672,7 +819,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                   key={c.sha}
                   type="button"
                   className="rvw-history-row"
-                  onClick={() => void review.openCommit(c)}
+                  onClick={() => void (review.compareMode ? review.handleCompareClick(c) : review.openCommit(c))}
                   title={c.subject}
                 >
                   <span className="rvw-history-sha">{c.shortSha}</span>
@@ -777,7 +924,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                           onRejectHunk={(i) => void review.decideHunk(f.path, i, 'reject')}
                         />
                       ) : (
-                        <div className="wt-empty">未跟踪文件 — 暂无行级 diff。</div>
+                        <UntrackedFilePreview path={f.path} />
                       )}
                     </div>
                   )}

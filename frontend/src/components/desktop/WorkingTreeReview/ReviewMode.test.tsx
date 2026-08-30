@@ -61,6 +61,8 @@ function makeBridge(overrides: Record<string, unknown> = {}) {
     // BLOCK-29 — 提交历史（默认空实现，历史用例中覆写）
     commitLog: vi.fn(() => Promise.resolve({ ok: true, data: { commits: [], count: 0 } })),
     branchList: vi.fn(() => Promise.resolve({ ok: true, data: { branches: [{ name: 'main', shortSha: 'a1b2c3d', isoDate: '', current: true }], count: 1 } })),
+    stashList: vi.fn(() => Promise.resolve({ ok: true, data: { stashes: [], count: 0 } })),
+    tagList: vi.fn(() => Promise.resolve({ ok: true, data: { tags: [], count: 0 } })),
     commitDiff: vi.fn(() => Promise.resolve({ ok: true, data: { files: [], truncated: false, summary: { added: 0, removed: 0 } } })),
     commitFileContent: vi.fn(() => Promise.resolve({ ok: true, data: { original: '', modified: '' } })),
     // BLOCK-29.2 — git 工具二期
@@ -499,6 +501,97 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     expect(grid.textContent).toContain('l1');
     expect(grid.textContent).toContain('l2');
     expect(blame).toHaveBeenCalledWith({ path: 'src/a.py', ref: 'a1b2c3d4e5f6' });
+  });
+
+  it('BLOCK-29.5: compare mode loads range diff between two commits', async () => {
+    const commitLog = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          commits: [
+            { sha: 'a1b2c3d4e5f6', shortSha: 'a1b2c3d', author: 'tester', isoDate: '2026-08-30T12:00:00Z', subject: 'newer commit', message: '' },
+            { sha: 'b2c3d4e5f6a1', shortSha: 'b2c3d4e', author: 'tester', isoDate: '2026-08-30T11:00:00Z', subject: 'older commit', message: '' },
+          ],
+          count: 2,
+        },
+      })
+    );
+    const commitDiff = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          files: [
+            { path: 'src/r.py', oldPath: null, binary: false, hunks: [{ oldStart: 1, newStart: 1, lines: [{ type: 'add', text: 'r1' }] }] },
+          ],
+          truncated: false,
+          summary: { added: 1, removed: 0 },
+        },
+      })
+    );
+    const commitFileContent = vi.fn(() =>
+      Promise.resolve({ ok: true, data: { original: 'old\n', modified: 'new\n' } })
+    );
+    getBridgeMock.mockReturnValue(makeBridge({ commitLog, commitDiff, commitFileContent }));
+
+    renderReview();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-review-progress')).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('tab', { name: '历史' }));
+    await screen.findByTestId('rvw-history-list');
+
+    // 进入对比模式 → 点选基准 → 点选目标
+    fireEvent.click(screen.getByRole('button', { name: '对比' }));
+    expect(screen.getByText('对比模式：点选基准提交')).toBeTruthy();
+    fireEvent.click(await screen.findByText('older commit'));
+    expect(screen.getByText(/已选基准 b2c3d4e/)).toBeTruthy();
+    fireEvent.click(await screen.findByText('newer commit'));
+
+    await screen.findByTestId('rvw-compare-info');
+    expect(commitDiff).toHaveBeenCalledWith({ fromRef: 'b2c3d4e5f6a1', toRef: 'a1b2c3d4e5f6' });
+    expect(screen.getByTestId('rvw-compare-info').textContent).toContain('对比 b2c3d4e..a1b2c3d');
+    expect(screen.getByTestId('rvw-compare-info').textContent).toContain('1 文件');
+  });
+
+  it('BLOCK-29.5: stash list, tag optgroup and untracked preview', async () => {
+    const stashList = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: { stashes: [{ ref: 'stash@{0}', shortSha: 'a1b2c3d', isoDate: '2026-08-30T10:00:00Z', subject: 'WIP on main' }], count: 1 },
+      })
+    );
+    const tagList = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: { tags: [{ name: 'v229-demo', shortSha: 'b2c3d4e', isoDate: '2026-08-30T10:00:00Z' }], count: 1 },
+      })
+    );
+    const fileContent = vi.fn(() =>
+      Promise.resolve({ ok: true, data: { content: '# hello untracked\n', encoding: 'utf-8', size: 19 } })
+    );
+    getBridgeMock.mockReturnValue(makeBridge({ stashList, tagList, fileContent }));
+
+    renderReview();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-review-progress')).toBeTruthy();
+    });
+
+    // 历史 tab：stash 列表 + 标签分组
+    fireEvent.click(screen.getByRole('tab', { name: '历史' }));
+    const list = await screen.findByTestId('rvw-history-list');
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-stash-list')).toBeTruthy();
+    });
+    expect(screen.getByTestId('rvw-stash-list').textContent).toContain('WIP on main');
+    expect(stashList).toHaveBeenCalled();
+    const select = screen.getByLabelText('提交历史分支') as HTMLSelectElement;
+    const optgroup = select.querySelector('optgroup');
+    expect(optgroup).toBeTruthy();
+    expect(optgroup?.getAttribute('label')).toBe('标签');
+    expect(list).toBeTruthy();
   });
 
   it('BLOCK-29.1: dock accordion rows expand inline diff on click', async () => {

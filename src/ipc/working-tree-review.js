@@ -589,10 +589,36 @@ function setupWorkingTreeReviewIpc(options = {}) {
     });
   });
 
+  // BLOCK-29.5 — stash 列表（只读，不含 pop/apply 写操作）
+  ipcMain.handle('git:stash-list', async (event) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      const result = adapter.stashList();
+      return { stashes: result.stashes, count: result.count };
+    });
+  });
+
+  // BLOCK-29.5 — 标签列表（只读）
+  ipcMain.handle('git:tag-list', async (event) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = resolveGitAdapter();
+      const result = adapter.tagList();
+      return { tags: result.tags, count: result.count };
+    });
+  });
+
   ipcMain.handle('git:commit-diff', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
       const adapter = resolveGitAdapter();
+      // BLOCK-29.5 — 区间对比模式：fromRef..toRef（均为 hex sha，只读）
+      if (args && typeof args.fromRef === 'string' && typeof args.toRef === 'string') {
+        const fromRef = assertSha(args.fromRef, 'fromRef');
+        const toRef = assertSha(args.toRef, 'toRef');
+        return parseDiffFiles(adapter.diff({ fromRef, toRef }).patch || '');
+      }
       const hash = assertSha(args && args.hash, 'hash');
       return commitDiffParsed(adapter, hash);
     });
@@ -602,10 +628,23 @@ function setupWorkingTreeReviewIpc(options = {}) {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
       const adapter = resolveGitAdapter();
-      const hash = assertSha(args && args.hash, 'hash');
       if (!args || typeof args.path !== 'string' || !args.path) {
         throw new GitAdapterError('path_required', 'path is required.');
       }
+      // BLOCK-29.5 — 区间模式：fromRef 版本为 original，toRef 版本为 modified（均为 hex sha）
+      if (typeof args.fromRef === 'string' && typeof args.toRef === 'string') {
+        const fromRef = assertSha(args.fromRef, 'fromRef');
+        const toRef = assertSha(args.toRef, 'toRef');
+        const atRange = (ref) => {
+          try {
+            return adapter.showFile({ ref, filePath: args.path });
+          } catch {
+            return null;
+          }
+        };
+        return { original: atRange(fromRef) ?? '', modified: atRange(toRef) ?? '' };
+      }
+      const hash = assertSha(args && args.hash, 'hash');
       const at = (ref) => {
         try {
           return adapter.showFile({ ref, filePath: args.path });
