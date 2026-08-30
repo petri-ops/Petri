@@ -324,3 +324,19 @@ G0 开发期常态 · 不外推 packaged/Provider/GA/P7/notarization/dist stalen
 ### BLOCK-18 → superseded（2026-08-22）
 
 用户裁决"代码审阅模式"应该是**系统级常驻面板 + 全文本覆盖**，BLOCK-18 仅做 markdown 文件页内 toggle 不够。BLOCK-18 已实现的 `agentDocReview:saveCurrent` / `workspace.writeTextFile` / inline-edit `<textarea>` / markdownDiff.ts 等资产由 BLOCK-20 复用；BLOCK-18 状态转 `superseded`。
+
+
+## 2026-08-30 BLOCK-30 单后端收敛与更名 COMPLETED（P6 证据重采待安静环境）
+
+用户裁决"开整"。5 阶段全部落地：P0 立项+基线（`214185f`）→ P1 摘除 py-server
+（`edd1116`，56 文件；py-pool 抢救至 shared-backend；`tool_jobs` 单写入方）→
+P2 摘除 gateway（`d4f459d`；拓扑收敛为 biof3-server + plumber）→ P3 池接线改判
+不接入（`2f563a1`；与 tool_job 进程级取消契约冲突，py-pool 留作参考资产）→
+P4 更名 `core/biof3-server`（`4e51ae1`，534 文件原子提交；env 变量名/IPC 通道/
+历史文档刻意不改）。验证：定向测试全绿、tsc 0、前端 build、隔离启动
+health ok + 6 Python 工具注册、docs:check 161。
+
+**遗留跟踪**：P6 canonical evidence 的 206 文件 source binding 因更名 fail-closed
+（`p6_current_source_tree_not_exact`，机制按设计工作）；重采须在安静环境跑
+`npm run g0:result-studio:p6:update`（真实重启/压力/恢复矩阵，对负载敏感）。
+G0 开发期常态 · 不外推 packaged/Provider/GA.

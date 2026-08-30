@@ -115,6 +115,17 @@
 | 运行形态 | 单进程本地全能，后端只监听 loopback，无 platform/api/worker 分支 |
 | 依赖 | server 端不再有 `ali-oss`/`pg`/`deasync`；根 `ali-oss` 仅发布脚本用 |
 
+### 2026-08-30 BLOCK-30 增量：单后端收敛与更名
+
+- `core/py-server` 与 `core/gateway` 摘除（py-server 前端 0 直连、裸执行恒 410、
+  `tool_jobs` 双写入方收敛为 r-server 单写入方；gateway 仅剩健康探活消费者）。
+- `core/r-server` 更名 `core/biof3-server`：它是唯一业务后端（Node/Express + SQLite），
+  R/Python 分析由 shared-backend 执行器注册表直接 spawn 内嵌解释器——目录名不再撒谎。
+- py-server 的常驻 Python worker 池（`py-pool.js`）抢救至 `core/shared-backend/executors/`，
+  未接线：池与 tool_job 的进程级取消契约（`process_pid` kill + heartbeat）冲突，详见
+  `docs/block-30-backend-convergence-plan.md` §P3 改判。
+- "不引入第二套后端"不变量由此从纪律约定升级为字面事实：仓库内只剩一个业务后端目录。
+
 ## 下阶段建议
 
 > 当时使用的 Agent 接手提示词已失效并归档于 [`agent-handoff-prompt.md`](./archive/checkpoints/agent-handoff-prompt.md)；当前 Agent 必须从 `AGENTS.md` 和文档入口恢复状态。

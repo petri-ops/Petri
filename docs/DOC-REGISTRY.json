@@ -2617,7 +2617,7 @@
       "id": "BLOCK-30-BACKEND-CONVERGENCE",
       "path": "docs/block-30-backend-convergence-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-30-backend-convergence",
       "entrypoint": "docs/README.md",
@@ -2630,15 +2630,15 @@
         "rename",
         "biof3-server",
         "G0",
-        "active",
-        "phase=P0-LAUNCH"
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-30 用户裁决启动：单后端收敛与更名。架构评估结论：r-server/py-server 均为 Node 业务后端，Python 工具由 r-server 经执行器注册表直接 spawn 内嵌解释器；py-server 前端 0 直连（仅健康探活）、裸执行恒 410、tool_jobs 双写入方；gateway 仅剩健康探活消费者。P1 摘除 py-server（py-pool 先 git mv 抢救至 shared-backend/executors）→ P2 摘除 gateway → P3 池接线（惰性 + 按 pyHome 分区 + 空闲回收）→ P4 更名 core/biof3-server（原子提交、词边界替换）→ P5 收口。非范围：工具契约/schema/MCP/插件格式 0 改动，rApiBase 不改名，plumber 保留。基线：HEAD=be799ad，census py-server 80 / gateway 15 / R_SERVER_URL 17 / pythonApiBase 8 / r-server ~400。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-08-30 用户裁决启动：单后端收敛与更名。架构评估结论：r-server/py-server 均为 Node 业务后端，Python 工具由 r-server 经执行器注册表直接 spawn 内嵌解释器；py-server 前端 0 直连（仅健康探活）、裸执行恒 410、tool_jobs 双写入方；gateway 仅剩健康探活消费者。P1 摘除 py-server（py-pool 先 git mv 抢救至 shared-backend/executors）→ P2 摘除 gateway → P3 池接线（惰性 + 按 pyHome 分区 + 空闲回收）→ P4 更名 core/biof3-server（原子提交、词边界替换）→ P5 收口。非范围：工具契约/schema/MCP/插件格式 0 改动，rApiBase 不改名，plumber 保留。基线：HEAD=be799ad，census py-server 80 / gateway 15 / R_SERVER_URL 17 / pythonApiBase 8 / r-server ~400。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-08-30 收口：P1 edd1116 摘除 py-server（56 文件，tool_jobs 单写入方，py-pool 抢救至 shared-backend/executors）/ P2 d4f459d 摘除 gateway（拓扑=biof3-server+plumber，ARCHITECTURE 重写）/ P3 2f563a1 改判池接线不接入（与 process_pid 取消契约冲突）/ P4 4e51ae1 更名 core/biof3-server（534 文件原子）。验证：定向测试全绿、tsc 0、build、隔离启动、docs:check 161。遗留：P6 canonical evidence 206 文件绑定因更名 fail-closed（p6_current_source_tree_not_exact），重采须安静环境跑 npm run g0:result-studio:p6:update（负载敏感矩阵），已在 AUDIT-LOG 待处理项跟踪。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-08-30",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH"
+      "phase": "COMPLETED"
     }
   ],
-  "lastUpdated": "2026-08-30 (BLOCK-30 P0-LAUNCH)",
+  "lastUpdated": "2026-08-30 (BLOCK-30 completed)",
   "documentCount": 161
 }

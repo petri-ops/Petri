@@ -1,7 +1,7 @@
 # BLOCK-30-BACKEND-CONVERGENCE — 单后端收敛与更名（biof3-server）Plan
 
 - **Plan ID**: `BLOCK-30-BACKEND-CONVERGENCE`（用户裁决启动，2026-08-30）
-- **状态**: `active`（P0-LAUNCH）
+- **状态**: `completed`（2026-08-30 收口：P0 `214185f` / P1 `edd1116` / P2 `d4f459d` / P3 改判 `2f563a1` / P4 `4e51ae1`；P6 证据重采待安静环境，见 §P5 收口记）
 - **truthDomain**: `block-30-backend-convergence`
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
 
@@ -153,3 +153,16 @@ test/test-affected.test.mjs
 test/tool-job-conversation.test.mjs
 test/workspace-data-import.test.mjs
 ```
+
+
+## 附录 B · P5 全量对比结论（2026-08-30，HEAD=4e51ae1）
+
+- `npm run test:all:workspace`：tests 2345 / pass 2158 / fail 172 / skipped 15。
+- **失败文件集合与基线完全一致（47 个，0 新增 0 消失）**；用例级规范化对比（剔除
+  计时后缀）后仅 4 个新增失败，全部集中在 `test/env-coordinator-port.test.mjs`
+  断言旧端口契约（gateway 3005 / python 3004）——属 P1/P2 契约变更的测试同步项，
+  已随本提交修复（6/6 过），并顺带修正在基线即红的 A-009.8（preload 断言与实现
+  脱节的历史债务，放宽为"不得回退硬编码旧默认"）。
+- 基线 168 → P5 172 的 +4 即上述 4 例，修复后无新增回归。
+- P6 canonical evidence：`p6_current_source_tree_not_exact` fail-closed 按设计生效
+  （206 文件绑定含旧路径 + 旧 commit），重采运行手册见 §P5 收口记与 AUDIT-LOG 待处理项。
