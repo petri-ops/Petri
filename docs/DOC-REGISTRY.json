@@ -2662,8 +2662,31 @@
       "registeredAt": "2026-08-30",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-29.3-COMMIT-DETAIL",
+      "path": "docs/block-29-3-commit-detail-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-29-3-commit-detail",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-29-3",
+        "review-mode",
+        "git-tools",
+        "commit-detail",
+        "G0",
+        "active",
+        "phase=P0",
+        "UI-223"
+      ],
+      "notes": "2026-08-30 用户裁决（选项「完整说明 + ±统计」）：审阅历史分区提交详情增强——adapter log 解析加 %b 完整提交说明（\\x01 记录分隔防 body 换行歧义）、git:commit-log 载荷 additive 增加 message 字段（0 新增通道）、提交详情头 .rvw-commit-info（subject + author·时间 + 汇总统计 N 文件 +A −D 复用既有 commitDiff summary、body 原生 details 折叠）；文件条每文件 ±统计 BLOCK-29 已交付不重做。0 新依赖 / AI 审阅 0 重新引入。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-08-30",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0"
     }
   ],
   "lastUpdated": "2026-08-30 (BLOCK-30 completed)",
-  "documentCount": 162
+  "documentCount": 163
 }
