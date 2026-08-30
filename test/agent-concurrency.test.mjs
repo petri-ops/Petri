@@ -9,10 +9,10 @@ const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-agent-concurrency-'
 process.env.BIOF3_DB_PATH = path.join(tempDir, 'agent-concurrency.db');
 
 const require = createRequire(import.meta.url);
-const db = require('../core/r-server/db');
-const conv = require('../core/r-server/helpers/conversations');
-const runtime = require('../core/r-server/helpers/runtime');
-const agentTaskStore = require('../core/r-server/agent-task-store');
+const db = require('../core/biof3-server/db');
+const conv = require('../core/biof3-server/helpers/conversations');
+const runtime = require('../core/biof3-server/helpers/runtime');
+const agentTaskStore = require('../core/biof3-server/agent-task-store');
 const { buildLoopRun } = require('../core/shared-backend/loop-contract');
 const sqlite = db.getDatabase();
 

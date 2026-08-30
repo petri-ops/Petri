@@ -9,10 +9,10 @@ const {
   toInternalUri,
   hasUsableArtifactTruth,
   isRealPathInsideRoot,
-} = require('../core/r-server/helpers/chat-file-references.js');
+} = require('../core/biof3-server/helpers/chat-file-references.js');
 const {
   renderFileReferenceHints,
-} = require('../core/r-server/helpers/system-prompt.js');
+} = require('../core/biof3-server/helpers/system-prompt.js');
 
 test('decodes internal artifact and workspace paths segment by segment', () => {
   assert.deepEqual(

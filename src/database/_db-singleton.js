@@ -13,7 +13,7 @@
  *   better-sqlite3's WAL mode that's tolerable for readers but compounds
  *   writer-lock contention when both modules are live in IPC handlers and
  *   MCP-server code paths (PR-012). And neither module set `journal_mode =
- *   WAL` nor `busy_timeout`, so writes from `core/r-server/db.js` (which
+ *   WAL` nor `busy_timeout`, so writes from `core/biof3-server/db.js` (which
  *   does set them) raced the desktop handlers (E-019).
  *
  * What this module provides:
@@ -32,13 +32,13 @@
  * E-019 full: the connection is opened with journal_mode=WAL and
  * busy_timeout = getBusyTimeout() (canonical source: shared-backend
  * config-helper.js → getDbConfig().busyTimeoutMs, default 10000ms). Every
- * SQLite handle in the desktop + r-server process family now uses the
+ * SQLite handle in the desktop + biof3-server process family now uses the
  * same value via the same config helper.
  *
  * 100% backward compatible:
  *   branch-db.js / result-db.js keep their public exports (getDatabase,
  *   closeDatabase, getDatabasePath) and re-export them as thin shims over
- *   this singleton, so existing IPC handlers and r-server MCP code that
+ *   this singleton, so existing IPC handlers and biof3-server MCP code that
  *   imported them keep working without changes.
  */
 
@@ -78,8 +78,8 @@ function openDb(role) {
   const db = new Database(dbPath);
   // Apply the canonical WAL + busy_timeout from config-helper (E-019 full).
   // Setting busy_timeout on every open guarantees that even when called
-  // before any r-server child process is spawned, the desktop handle is
-  // already consistent with r-server's policy.
+  // before any biof3-server child process is spawned, the desktop handle is
+  // already consistent with biof3-server's policy.
   db.pragma(`journal_mode = WAL`);
   db.pragma(`busy_timeout = ${getBusyTimeout()}`);
   // foreign_keys=ON matches shared-backend/db.js behavior and prevents

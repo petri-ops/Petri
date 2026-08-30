@@ -56,13 +56,13 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
       const { rServerProc, plumberProc } = getProcs();
       const processes = [
         {
-          id: "r-server",
+          id: "biof3-server",
           label: "R 后端",
-          command: `node ${resolveCore("r-server", "server.js")}`,
+          command: `node ${resolveCore("biof3-server", "server.js")}`,
           status: rServerProc && !rServerProc.killed ? "running" : "stopped",
           pid: rServerProc?.pid || null,
-          logPath: path.join(logDir, "r-server.log"),
-          output: readLogTail(path.join(logDir, "r-server.log")),
+          logPath: path.join(logDir, "biof3-server.log"),
+          output: readLogTail(path.join(logDir, "biof3-server.log")),
         },
         {
           id: "plumber",
@@ -72,7 +72,7 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
                 process.env.BIOF3_R_HOME,
                 "bin",
                 getRuntimeBinName("r", process.platform),
-              )} ${resolveCore("r-server", "replot.R")} --port 8787`
+              )} ${resolveCore("biof3-server", "replot.R")} --port 8787`
             : `${getRuntimeBinName("r", process.platform)} replot.R --port 8787`,
           status: plumberProc && !plumberProc.killed ? "running" : "stopped",
           pid: plumberProc?.pid || null,

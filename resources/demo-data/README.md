@@ -1,7 +1,7 @@
 # Demo data (Week 3 first-success path)
 
 Per-tool demo fixtures that the desktop app's "Use sample data" button
-serves and the r-server's `/api/tools/demo-data/:toolId/:filename` route
+serves and the biof3-server's `/api/tools/demo-data/:toolId/:filename` route
 also serves. Used by `scripts/golden-path.mjs` and the frontend
 onboarding flow.
 
@@ -26,7 +26,7 @@ resources/demo-data/
 ### `deseq2/` — bulk RNA-seq demo (canonical first-success path)
 WT/KO contrast, 2 replicates per condition. 5 genes up in KO, 3 down in
 KO, 2 housekeeping flat. Header `gene,WT_1,WT_2,KO_1,KO_2`. Filenames
-match the r-server's `tool-demo-data/deseq2/` (legacy) and the
+match the biof3-server's `tool-demo-data/deseq2/` (legacy) and the
 frontend's `loadDemoForForm()` expectations.
 
 ### `volcano-plot/` — DEG visualization
@@ -80,13 +80,13 @@ desktop repo:
   `system.file('extdata', ...)` or vendor as a single small binary
   file.
 
-## Why these are NOT vendored in the r-server
+## Why these are NOT vendored in the biof3-server
 
-The r-server's `tool-demo-data/` tree lives at
-`vendor/biof3-core/r-server/tool-demo-data/` and is excluded from
+The biof3-server's `tool-demo-data/` tree lives at
+`vendor/biof3-core/biof3-server/tool-demo-data/` and is excluded from
 production deploys (`deploy.sh` lines 197, 583, 1013). Week 3 puts
 fixtures in the desktop repo so the desktop app can run a full
-golden-path without needing the r-server deployment to also have them.
+golden-path without needing the biof3-server deployment to also have them.
 In Week 4+ when the runtime artifact is wired in, the filenames here
 will already match what `/api/tools/demo-data/deseq2/demo-counts.csv`
 serves, so the same files Just Work in both places.

@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const REGISTRY_PATH = resolve(__dirname, '..', 'core', 'r-server', 'mcp', 'registry.js');
+const REGISTRY_PATH = resolve(__dirname, '..', 'core', 'biof3-server', 'mcp', 'registry.js');
 
 const registry = await import(pathToFileURL(REGISTRY_PATH).href);
 

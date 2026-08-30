@@ -11,9 +11,9 @@ process.env.BIOF3_DB_PATH = join(tempRoot, 'ux1g1.db');
 process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 
 const require = createRequire(import.meta.url);
-const db = require('../core/r-server/db');
+const db = require('../core/biof3-server/db');
 const BetterSqlite = require('better-sqlite3');
-const dbModulePath = resolve(new URL('../core/r-server/db.js', import.meta.url).pathname);
+const dbModulePath = resolve(new URL('../core/biof3-server/db.js', import.meta.url).pathname);
 
 after(() => {
   if (db.db?.open) db.db.close();
@@ -294,7 +294,7 @@ test('HTTP approval acknowledgement requires and verifies project/conversation s
   db.setToolJobApproval(job.id, 'ack-ux1g1-route', Date.now() + 60_000);
 
   const handlers = new Map();
-  require('../core/r-server/routes/ai-legacy')({
+  require('../core/biof3-server/routes/ai-legacy')({
     post(path, ...callbacks) { handlers.set(path, callbacks.at(-1)); },
   });
   const handler = handlers.get('/api/ai/run-tool-ack/:token');
@@ -337,10 +337,10 @@ test('all-job history and status projections retain project and conversation ide
     projectId,
     conversationId: 'history-conversation',
   });
-  // BLOCK-30 P1: py-server 的 r-server-db 桥与 tools-router 契约镜像
-  // 断言随独立 Python 后端摘除；tool_jobs 现由 r-server 单写入方维护。
+  // BLOCK-30 P1: py-server 的 biof3-server-db 桥与 tools-router 契约镜像
+  // 断言随独立 Python 后端摘除；tool_jobs 现由 biof3-server 单写入方维护。
 
-  const routeSource = readFileSync(resolve(new URL('../core/r-server/routes/tools-metadata.js', import.meta.url).pathname), 'utf8');
+  const routeSource = readFileSync(resolve(new URL('../core/biof3-server/routes/tools-metadata.js', import.meta.url).pathname), 'utf8');
   assert.match(routeSource, /SELECT id, tool_id,[^']*project_id, conversation_id FROM tool_jobs/);
   assert.match(routeSource, /conversationId:\s*job\.conversation_id\s*\|\|\s*null/);
 });

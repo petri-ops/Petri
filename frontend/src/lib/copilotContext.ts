@@ -53,7 +53,7 @@ export interface CopilotContext {
   pageOutline?: string[];
   /** Heading currently in viewport (closest one above the fold) */
   visibleHeading?: string;
-  // W3-C: 当前云平台模块（决定 r-server system-prompt 走 spatial / single-cell 分支）
+  // W3-C: 当前云平台模块（决定 biof3-server system-prompt 走 spatial / single-cell 分支）
   currentModule?: 'single-cell' | 'spatial';
   // single-cell + spatial 共享字段（同结构）
   projectId?: string;

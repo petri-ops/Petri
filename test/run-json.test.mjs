@@ -4,7 +4,7 @@
  *
  * Asserts the shape of the run.json record the golden-path script
  * writes alongside its HTML report. We re-run the same logic in
- * isolation here (no r-server, no DESeq2, just record construction)
+ * isolation here (no biof3-server, no DESeq2, just record construction)
  * and verify the resulting JSON:
  *
  *   1. parses
@@ -118,7 +118,7 @@ const FIXTURE = resolve(REPO_ROOT, 'test/fixtures/golden-path/deseq2-run.json');
 }
 
 // Rescue-path schema (Week 3B): golden-path.mjs writes a
-// `analysis_succeeded_zip_packaging_pending` record when r-server's
+// `analysis_succeeded_zip_packaging_pending` record when biof3-server's
 // HTML-report endpoint returns report_source_not_found (a known packaging
 // gap: the zip post-processor that bundles
 // output/ → all_results.zip isn't wired yet, so report endpoint 502s
@@ -150,7 +150,7 @@ const rescue = {
     artifactList: ['deg_table.csv', 'volcano.png', 'report.html'],
   },
   exit: 'analysis_succeeded_zip_packaging_pending',
-  notes: 'R analysis completed; r-server zip post-processor did not run.',
+  notes: 'R analysis completed; biof3-server zip post-processor did not run.',
 };
 let rb = 0;
 const r2check = (cond, msg) => { if (cond) console.log(`  ✓ ${msg}`); else { console.error(`  ✗ ${msg}`); rb++; } };

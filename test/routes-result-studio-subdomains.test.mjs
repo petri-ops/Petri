@@ -82,13 +82,13 @@ function makeFakeApp() {
 
 test('9 subdomain files are all require()-able and export register()', () => {
   for (const name of SUBDOMAINS) {
-    const sub = require(`../core/r-server/routes/result-studio/${name}`);
+    const sub = require(`../core/biof3-server/routes/result-studio/${name}`);
     assert.equal(typeof sub.register, 'function', `${name}.register must be a function`);
   }
 });
 
 test('routes/result-studio/index.js register() accepts an Express app and runs without error', () => {
-  const index = require('../core/r-server/routes/result-studio/index');
+  const index = require('../core/biof3-server/routes/result-studio/index');
   const app = makeFakeApp();
   // register() 内部会调 9 个子域 register，每个子域会调 app.get/post 挂载端点
   assert.doesNotThrow(() => index.register(app), 'index.register(app) should not throw');
@@ -98,7 +98,7 @@ test('routes/result-studio/index.js register() accepts an Express app and runs w
 });
 
 test('routes/result-studio/index.js register() mounts 9 subdomains in declared order', () => {
-  const index = require('../core/r-server/routes/result-studio/index');
+  const index = require('../core/biof3-server/routes/result-studio/index');
   const app = makeFakeApp();
   index.register(app);
   // 验证每条 EXPECTED_ENDPOINTS 都被挂载
@@ -109,12 +109,12 @@ test('routes/result-studio/index.js register() mounts 9 subdomains in declared o
 });
 
 test('main file routes/result-studio.js still exports a callable register function', () => {
-  const main = require('../core/r-server/routes/result-studio');
+  const main = require('../core/biof3-server/routes/result-studio');
   assert.equal(typeof main, 'function', 'main export must be a callable register function');
 });
 
 test('main file facade _test field exposes 10 helpers for backward compat', () => {
-  const main = require('../core/r-server/routes/result-studio');
+  const main = require('../core/biof3-server/routes/result-studio');
   const expected = [
     'attachExistingRepositoryWithExplicitConsent',
     'baselineFailureDiagnostic',
@@ -137,7 +137,7 @@ test('main file is a thin facade (line count significantly reduced)', () => {
   // 加载 fs + path 后 readFileSync 计数。
   const fs = require('node:fs');
   const path = require('node:path');
-  const mainPath = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'core', 'r-server', 'routes', 'result-studio.js');
+  const mainPath = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'core', 'biof3-server', 'routes', 'result-studio.js');
   const content = fs.readFileSync(mainPath, 'utf8');
   const lineCount = content.split('\n').length;
   assert.ok(lineCount <= 80, `main file should be ≤ 80 lines (thin facade), got ${lineCount}`);
@@ -148,7 +148,7 @@ test('main file is a thin facade (line count significantly reduced)', () => {
 test('each subdomain file has reasonable line count (≥ 30, ≤ 320)', () => {
   const fs = require('node:fs');
   const path = require('node:path');
-  const subDir = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'core', 'r-server', 'routes', 'result-studio');
+  const subDir = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'core', 'biof3-server', 'routes', 'result-studio');
   for (const name of SUBDOMAINS) {
     const subPath = path.join(subDir, `${name}.js`);
     const content = fs.readFileSync(subPath, 'utf8');
@@ -159,7 +159,7 @@ test('each subdomain file has reasonable line count (≥ 30, ≤ 320)', () => {
 });
 
 test('routes/result-studio/index.js exposes _submodules and _helpers surfaces', () => {
-  const index = require('../core/r-server/routes/result-studio/index');
+  const index = require('../core/biof3-server/routes/result-studio/index');
   assert.ok(index._submodules, '_submodules must exist');
   assert.ok(index._helpers, '_helpers must exist');
   for (const name of SUBDOMAINS) {
@@ -172,7 +172,7 @@ test('routes/result-studio/index.js exposes _submodules and _helpers surfaces', 
 
 test('endpoints match between subdomain register() and main file register() (no path drift)', () => {
   // 分别用 fake app 通过 index.js 和每个子域独立注册，比较挂载的 endpoints
-  const index = require('../core/r-server/routes/result-studio/index');
+  const index = require('../core/biof3-server/routes/result-studio/index');
   const indexApp = makeFakeApp();
   index.register(indexApp);
 

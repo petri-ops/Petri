@@ -6,7 +6,7 @@
   "version": "1.0.0",
   "language": "r",
   "sourcePolicy": "builtin-canonical",
-  "description": "Seurat 5.x 标准 single-cell RNA-seq 分析管线: QC → Normalize → HVG → Scale → PCA → Cluster → UMAP → Markers。完全运行于 biof3-r-runtime (dev Electron 边界内), 复用既有 core/r-server/tool-scripts/seurat-standard.R 步骤 0 ground truth。",
+  "description": "Seurat 5.x 标准 single-cell RNA-seq 分析管线: QC → Normalize → HVG → Scale → PCA → Cluster → UMAP → Markers。完全运行于 biof3-r-runtime (dev Electron 边界内), 复用既有 core/biof3-server/tool-scripts/seurat-standard.R 步骤 0 ground truth。",
   "packages": {
     "r": {
       "Seurat": ">=5.0.0",

@@ -257,7 +257,7 @@ export function useChatStream({
   // 8. `runInBackground` — spawn a sub-agent task while the
   // primary conversation loop is busy. Requires an active parent
   // task (activeRun?.taskId); the parent Claude/Codex/Codex
-  // subagent system (r-server) provides the routing.
+  // subagent system (biof3-server) provides the routing.
   const runInBackground = useCallback((text: string) => {
     const trimmed = text.trim();
     if (!trimmed || !conversationId) return;

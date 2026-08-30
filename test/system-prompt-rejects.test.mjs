@@ -17,7 +17,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-const helper = await import('../core/r-server/helpers/system-prompt.js');
+const helper = await import('../core/biof3-server/helpers/system-prompt.js');
 const {
   renderWorkingTreeRejectsForPrompt,
   loadWorkingTreeRejectEntries,

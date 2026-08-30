@@ -80,7 +80,7 @@ async function buildMigrationSchema() {
 /**
  * 定义代码中实际使用的 schema（预期）
  * 
- * 这里列出 core/r-server/db.js 和前端 bridges 中使用的表与关键列。
+ * 这里列出 core/biof3-server/db.js 和前端 bridges 中使用的表与关键列。
  * 不需要列出所有列，只需列出代码中 SELECT/INSERT 明确依赖的列。
  */
 const expectedSchema = {

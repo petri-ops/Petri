@@ -50,10 +50,10 @@ function makeCheck(id, passed, evidence, detail) {
 
 function inspectLf0(startReport, verification = null, options = {}) {
   const bundle = g0.validateG0BaselineBundle();
-  const dbSource = read('core/r-server/db.js');
-  const apiSource = read('core/r-server/api-data.js');
+  const dbSource = read('core/biof3-server/db.js');
+  const apiSource = read('core/biof3-server/api-data.js');
   const layoutSource = read('core/shared-backend/project-run-layout.js');
-  const workspaceSource = read('core/r-server/agent-tools/workspace-tools.js');
+  const workspaceSource = read('core/biof3-server/agent-tools/workspace-tools.js');
   const plan = read('docs/g0-living-foundation-plan.md');
   const packageJson = JSON.parse(read('package.json'));
   const supportGroups = ['platforms', 'providers', 'runtimes', 'plugins', 'projectFormats'];
@@ -112,7 +112,7 @@ function inspectLf0(startReport, verification = null, options = {}) {
         && /opened_baseline_id/.test(dbSource)
         && /opened_bundle_digest/.test(dbSource)
         && /compatibility_status/.test(dbSource),
-      ['core/r-server/db.js'],
+      ['core/biof3-server/db.js'],
       'Projects persist creating/opening baseline identity and compatibility verdict.',
     ),
     makeCheck(
@@ -127,7 +127,7 @@ function inspectLf0(startReport, verification = null, options = {}) {
       [
         'core/shared-backend/g0-baseline.js',
         'core/shared-backend/project-run-layout.js',
-        'core/r-server/agent-tools/workspace-tools.js',
+        'core/biof3-server/agent-tools/workspace-tools.js',
       ],
       'Future or identity-conflicting projects remain readable but formal execution and writes are blocked.',
     ),
@@ -135,7 +135,7 @@ function inspectLf0(startReport, verification = null, options = {}) {
       'G0-LF0-07',
       /router\.get\('\/g0-baseline'/.test(apiSource)
         && /router\.get\('\/projects\/:id\/g0-baseline'/.test(apiSource),
-      ['core/r-server/api-data.js', 'frontend/src/lib/project-types.ts'],
+      ['core/biof3-server/api-data.js', 'frontend/src/lib/project-types.ts'],
       'Current and per-project baseline identities are exposed through the existing project API.',
     ),
     makeCheck(

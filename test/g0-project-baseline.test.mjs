@@ -10,10 +10,10 @@ const tempRoot = mkdtempSync(join(tmpdir(), 'biof3-g0-lf0-'));
 process.env.BIOF3_DB_PATH = join(tempRoot, 'g0-lf0.db');
 process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 const require = createRequire(import.meta.url);
-const db = require('../core/r-server/db');
+const db = require('../core/biof3-server/db');
 const g0 = require('../core/shared-backend/g0-baseline');
 const { resolveProjectRunLayout } = require('../core/shared-backend/project-run-layout');
-const { createWorkspaceTools } = require('../core/r-server/agent-tools/workspace-tools');
+const { createWorkspaceTools } = require('../core/biof3-server/agent-tools/workspace-tools');
 
 after(() => {
   try {
@@ -144,7 +144,7 @@ test('deleting a project deletes its G0 identity record', () => {
 
 test('an earlier LF0 project baseline table upgrades idempotently and backfills exact identities', () => {
   const migrationDbPath = join(tempRoot, 'g0-lf0-old-schema.db');
-  const Database = require('../core/r-server/node_modules/better-sqlite3');
+  const Database = require('../core/biof3-server/node_modules/better-sqlite3');
   const migrationDb = new Database(migrationDbPath);
   const current = g0.getCurrentG0Baseline();
   migrationDb.exec(`CREATE TABLE project_g0_baselines (
@@ -179,7 +179,7 @@ test('an earlier LF0 project baseline table upgrades idempotently and backfills 
   const probe = spawnSync(
     process.execPath,
     ['-e', `
-      const db = require('./core/r-server/db');
+      const db = require('./core/biof3-server/db');
       const columns = db.db.prepare('PRAGMA table_info(project_g0_baselines)').all().map((item) => item.name);
       const row = db.db.prepare('SELECT * FROM project_g0_baselines WHERE project_id = ?').get('old_schema_project');
       process.stdout.write(JSON.stringify({ columns, row }));

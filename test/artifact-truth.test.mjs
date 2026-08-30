@@ -21,7 +21,7 @@ const {
   __dirname,
   '..',
   'core',
-  'r-server',
+  'biof3-server',
   'helpers',
   'artifact-truth.js',
 ));
@@ -69,7 +69,7 @@ const { _test: metadataTest, reconcileToolJobArtifacts } = req(resolve(
   __dirname,
   '..',
   'core',
-  'r-server',
+  'biof3-server',
   'routes',
   'tools-metadata.js',
 ));
@@ -77,7 +77,7 @@ const { _test: executorTest } = req(resolve(
   __dirname,
   '..',
   'core',
-  'r-server',
+  'biof3-server',
   'helpers',
   'tools-executor.js',
 ));

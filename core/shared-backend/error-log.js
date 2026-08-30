@@ -2,7 +2,7 @@
  * BioF3 shared backend — Error Log
  *
  * Append-only JSONL error log shared by all backend roles. Replaces the
- * previous r-server/helpers/error-log.js. No external dependencies.
+ * previous biof3-server/helpers/error-log.js. No external dependencies.
  */
 
 const fsPromises = require('fs').promises;

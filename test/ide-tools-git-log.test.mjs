@@ -12,7 +12,7 @@ import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const IDE_TOOLS = resolve(__dirname, '..', 'core/r-server/mcp/ide-tools');
+const IDE_TOOLS = resolve(__dirname, '..', 'core/biof3-server/mcp/ide-tools');
 
 const ideTools = await import(
   pathToFileURL(resolve(IDE_TOOLS, 'index.js')).href

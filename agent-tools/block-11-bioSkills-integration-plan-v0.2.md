@@ -81,7 +81,7 @@
 
 ### §0.5.6 已存可复用的 Seurat 工具步骤 0（PHASE 1 直接调用）
 
-- `core/r-server/tool-scripts/seurat-standard.R` + `_seurat-standard-scope.md`（已存在）
+- `core/biof3-server/tool-scripts/seurat-standard.R` + `_seurat-standard-scope.md`（已存在）
 - 提供给 PHASE 1 single-cell R 侧 `seurat` / `seurat-advanced` plugin 的最小脚本骨架基础（复用而非重写）
 
 ---
@@ -303,7 +303,7 @@ resources/skills/{skill-id}/
 
 **批次纪律**：
 - pertpy / cassiopeia 标注为 **deferred-to-v2**（不纳入 PHASE 1）
-- 现有 `seurat-standard.R` 工具脚本（`core/r-server/tool-scripts/`）可直接复用为 `seurat` plugin 骨架
+- 现有 `seurat-standard.R` 工具脚本（`core/biof3-server/tool-scripts/`）可直接复用为 `seurat` plugin 骨架
 
 ### PHASE 2（**待启动** · variant-calling P0）
 
@@ -346,7 +346,7 @@ v0.2 替换 v0.1 §5 PHASE 3：原计划"pathway + methylation"调整为 **methy
 - ✅ `resources/built-in-plugins/manifest.schema.json`（plugin manifest schema）
 - ✅ `biof3-py-runtime` v1.0.0（10 个核心包 + figcode 卡片artifact：scanpy/squidpy/scvelo/xgboost/shap/liana）
 - ✅ `biof3-r-runtime` v1.0.0（26 个核心包 + Bioconductor 间接至 70+：Seurat/clusterProfiler/enrichplot/DOSE/msigdbr + figcode artifact：monocle3/scDblFinder/CytoTRACE）
-- ✅ PHASE 1 可复用 `core/r-server/tool-scripts/seurat-standard.R` + `_seurat-standard-scope.md`
+- ✅ PHASE 1 可复用 `core/biof3-server/tool-scripts/seurat-standard.R` + `_seurat-standard-scope.md`
 - ⚠️ PHASE 2-5 启动前需评估 runtime 增量决策（见 §4.5）
 
 ---
@@ -407,7 +407,7 @@ BLOCK-11 PHASE 1-5 完成 = 以下全部为真：
 - `resources/skills/deg-analysis-standard/skill.json`（skill 参考实现）
 - `resources/built-in-plugins/deseq2/plugin.json`（plugin 参考实现）
 - `resources/built-in-plugins/go-kegg/plugin.json`（enrichment 类参考）
-- `core/r-server/tool-scripts/seurat-standard.R` + `_seurat-standard-scope.md`（PHASE 1 直接复用）
+- `core/biof3-server/tool-scripts/seurat-standard.R` + `_seurat-standard-scope.md`（PHASE 1 直接复用）
 
 ---
 

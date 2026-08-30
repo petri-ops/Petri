@@ -21,7 +21,7 @@ const evidencePath = path.join(rootDir, 'acceptance/g0-result-studio/rs-p4r-sour
 const sourceFiles = Object.freeze({
   observation: 'scripts/g0-rs-p4r-source-observation.mjs',
   corpus: 'scripts/g0-rs-p4r-corpus.mjs',
-  routes: 'core/r-server/routes/result-studio.js',
+  routes: 'core/biof3-server/routes/result-studio.js',
   sourceProjection: 'core/shared-backend/result-revision-source.js',
   replayService: 'core/shared-backend/result-replay-service.js',
   deseq2Definition: 'resources/built-in-plugins/deseq2/tool-definition.json',

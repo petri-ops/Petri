@@ -107,8 +107,8 @@ test('A-009.7 getBackendPorts returns every role', () => {
 test('A-009.8 4 scattered fallback sites now read from env-coordinator', () => {
   // The 4 files that historically inlined `process.env.X_PORT || <default>`
   // must now delegate to env-coordinator. We assert source-text:
-  //   - core/r-server/server.js: must contain `getBackendPort('r')`
-  //   - core/r-server/config.js: must contain `getBackendPort('r')`
+  //   - core/biof3-server/server.js: must contain `getBackendPort('r')`
+  //   - core/biof3-server/config.js: must contain `getBackendPort('r')`
   //   - src/preload.js: must contain `getBackendPort('r')` and
   //     `getBackendPort('python')`
   //   - src/backend-health.js: must contain getBackendPort for all 4 roles
@@ -119,12 +119,12 @@ test('A-009.8 4 scattered fallback sites now read from env-coordinator', () => {
   // behaviour are fine.
   const sites = [
     {
-      file: 'core/r-server/server.js',
+      file: 'core/biof3-server/server.js',
       mustContain: [`getBackendPort('r')`],
       legacyEnvFallbacks: [/process\.env\.R_SERVER_PORT\s*\|\|\s*3003/],
     },
     {
-      file: 'core/r-server/config.js',
+      file: 'core/biof3-server/config.js',
       mustContain: [`getBackendPort('r')`],
       legacyEnvFallbacks: [/process\.env\.R_SERVER_PORT\s*\|\|\s*['"]?3003/],
     },

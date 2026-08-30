@@ -100,7 +100,7 @@
 | baseline 不在历史 | ENFORCEMENT_BASELINE `0611ce5b52f8d6d3ff9b8ecf25656553837f41cd` 不在 HEAD 可达祖先 | 罕见 | ✅ **`baselineIsAvailable`**（行 127-134）：不可达则 `console.warn` 跳过历史检查 | OK —— 但会**静默放行所有历史漂移**。**建议**：warn 同时打一行 `[ui-audit] baseline missing → HISTORY GATE DISABLED`，让审计者明确知道"当前没有历史 gate"。 |
 | UI 表面脚本未覆盖 `frontend/src/hooks/` | 业务代码放进 hook 文件 | `e6bf72f` 的 `useSkillStore.ts`（注：来自台账描述，hooks 文件不在 `isUiSurface` 命中，但实际是依赖提交，**靠 EXEMPTIONS 兜底**已记录） | ❌ **`hooks/` 不在 `isUiSurface` 白名单** | **缺口**：见 §2 行 4 的"覆盖路径"建议 —— 加 `frontend/src/hooks/` |
 | `frontend/src/lib/` 里的 IPC 类型 / 客户端库 | `electron.d.ts` / `events.ts` / `chat-file-references.ts` 等 | `3000a06` 包含 `frontend/src/lib/electron.d.ts`（台账说明：非 UI 表面） | ❌ **未覆盖** | 不算 UI 表面（IPC 类型），按当前 `isUiSurface` 口径 OK；但 `chat-file-references.ts` 是有 UI 副作用的工具，如果未来类似纯函数 + UI 引用再次出现可能漏。 |
-| r-server 路由冲突 | 2026-08-16 AUDIT-LOG 行 119 报告 `r-server /api/ai/agent` 路由加载失败（`no such column: next_retry_at`） | commit `d8464fd` 修复 | ⚠️ **不归本两脚本管**（代码层 + DB schema 问题） | 仅在收口记录里出现 `docs:check` / `ui:audit:check` 跑过的证据 |
+| biof3-server 路由冲突 | 2026-08-16 AUDIT-LOG 行 119 报告 `biof3-server /api/ai/agent` 路由加载失败（`no such column: next_retry_at`） | commit `d8464fd` 修复 | ⚠️ **不归本两脚本管**（代码层 + DB schema 问题） | 仅在收口记录里出现 `docs:check` / `ui:audit:check` 跑过的证据 |
 
 **总体结论**：**所有 categories 中 docs-governance 覆盖 100%（9/9 类别覆盖）**；**ui-audit 覆盖 9/11 类别**（缺口：hooks/ + baseline 缺失时的放行）—— 后者**当前**以 EXEMPTIONS 手工兜底，**长期看 EXEMPTIONS 累计已达 20 条**，是治理债信号。
 

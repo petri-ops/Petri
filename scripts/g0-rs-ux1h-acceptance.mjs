@@ -50,7 +50,7 @@ const SOURCE_FILES = Object.freeze([
   'scripts/g0-sdc1-local-gateway.mjs',
   'scripts/g0-sdc1-electron-driver.cjs',
   'core/shared-backend/llm-providers/deepseek.js',
-  'core/r-server/routes/ai-agent.js',
+  'core/biof3-server/routes/ai-agent.js',
   'resources/built-in-plugins/deseq2/plugin.json',
   'resources/built-in-plugins/deseq2/scripts/deseq2.R',
   'test/g0-rs-ux1h-acceptance.test.mjs',

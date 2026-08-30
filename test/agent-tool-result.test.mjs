@@ -9,9 +9,9 @@ import path from 'node:path';
 const require = createRequire(import.meta.url);
 const TEST_DB_DIR = fsSync.mkdtempSync(path.join(os.tmpdir(), 'biof3-agent-tool-result-'));
 process.env.BIOF3_DB_PATH = path.join(TEST_DB_DIR, 'biof3.db');
-const db = require('../core/r-server/db.js');
+const db = require('../core/biof3-server/db.js');
 // 单测绕过 server.js 启动；显式复用真实启动路径的 Plan 表初始化，确保干净工作树可运行。
-require('../core/r-server/ai-bridge.js');
+require('../core/biof3-server/ai-bridge.js');
 const {
   createModelResultState,
   createRejectedToolResult,
@@ -22,8 +22,8 @@ const {
   buildToolCallEvent,
   buildToolResultEvent,
   createToolActivityRecorder,
-} = require('../core/r-server/agent-tools');
-const { createToolTraceStore } = require('../core/r-server/agent-tools/tool-trace-store');
+} = require('../core/biof3-server/agent-tools');
+const { createToolTraceStore } = require('../core/biof3-server/agent-tools/tool-trace-store');
 
 after(() => {
   try {

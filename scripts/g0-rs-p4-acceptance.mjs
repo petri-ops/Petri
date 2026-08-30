@@ -27,11 +27,11 @@ const item = (id, passed, evidence, detail) => ({ id, passed: passed === true, e
 const sourceFiles = {
   controls: 'core/shared-backend/result-edit-controls.js',
   intent: 'core/shared-backend/result-edit-intent.js',
-  contextTools: 'core/r-server/agent-tools/result-context-tools.js',
-  contextEditTools: 'core/r-server/agent-tools/result-context-edit-tools.js',
-  toolDefinitions: 'core/r-server/agent-tools/tool-defs.js',
+  contextTools: 'core/biof3-server/agent-tools/result-context-tools.js',
+  contextEditTools: 'core/biof3-server/agent-tools/result-context-edit-tools.js',
+  toolDefinitions: 'core/biof3-server/agent-tools/tool-defs.js',
   changeSetService: 'core/shared-backend/result-changeset-service.js',
-  routes: 'core/r-server/routes/result-studio.js',
+  routes: 'core/biof3-server/routes/result-studio.js',
   panel: 'frontend/src/components/result-studio/ResultEditPanel.tsx',
   panelStyle: 'frontend/src/components/result-studio/ResultEditPanel.module.css',
   panelTest: 'frontend/src/components/result-studio/ResultEditPanel.test.tsx',
@@ -44,7 +44,7 @@ const sourceFiles = {
   rightPanelTest: 'frontend/src/components/workspace-panels/RightPanel.test.tsx',
   workspace: 'frontend/src/pages/project-workspace.tsx',
   contextClient: 'frontend/src/lib/result-studio-interaction-client.ts',
-  systemPrompt: 'core/r-server/helpers/system-prompt.js',
+  systemPrompt: 'core/biof3-server/helpers/system-prompt.js',
   volcanoDescriptor: 'resources/built-in-plugins/volcano-plot/tool-definition.json',
   volcanoScript: 'resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R',
   volcanoGolden: 'resources/built-in-plugins/volcano-plot/golden-revisions/result-studio-v1.json',
@@ -218,7 +218,7 @@ function projectControls() {
 /** 读取模型可见 schema，证明 AI 侧与手动侧共用同一入口。 */
 function providerDefinitions() {
   const probe = spawnSync(process.execPath, ['-e',
-    "process.stdout.write('__DEFS__' + JSON.stringify(require('./core/r-server/agent-tools/registry.js').getProviderToolDefs()))",
+    "process.stdout.write('__DEFS__' + JSON.stringify(require('./core/biof3-server/agent-tools/registry.js').getProviderToolDefs()))",
   ], { cwd: root, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
   if (probe.status !== 0) throw new Error('tool registry failed to load');
   const marker = probe.stdout.indexOf('__DEFS__');

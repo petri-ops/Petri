@@ -1,7 +1,7 @@
 /**
  * DashScope Embedding Provider — 向量化 provider
  *
- * 从 r-server/helpers/memory-vectors.js 的 dashscopeEmbed 抽取，
+ * 从 biof3-server/helpers/memory-vectors.js 的 dashscopeEmbed 抽取，
  * 实现 LLMProvider 接口。apiKey 从参数传入（不再从 process.env 硬读）。
  *
  * 桌面版用户在设置页填 DashScope API key（阿里云百炼平台获取）。
@@ -14,7 +14,7 @@ const EMBEDDING_DIM = 1024;
 const EMBEDDING_MODEL = 'text-embedding-v3';
 const MAX_CONTENT_LEN = 1500;
 
-// 断点1：ai-usage 经注入式 helper 获取，斩断对 r-server/helpers/ai-usage 的反向 require
+// 断点1：ai-usage 经注入式 helper 获取，斩断对 biof3-server/helpers/ai-usage 的反向 require
 const aiUsageHelper = require('../ai-usage-helper');
 function getRecordAiUsage() {
   return aiUsageHelper.recordAiUsage;

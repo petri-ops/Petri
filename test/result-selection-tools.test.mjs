@@ -27,7 +27,7 @@ await runMigrations(selectionDbPath, join(REPO_ROOT, 'src', 'migrations'));
 const {
   tool_result_selection_run,
   tool_result_enrichment_from_revision,
-} = require('../core/r-server/agent-tools/result-selection-tools');
+} = require('../core/biof3-server/agent-tools/result-selection-tools');
 process.env.BIOF3_DB_PATH = undefined;
 rmSync(selectionDbRoot, { recursive: true, force: true });
 

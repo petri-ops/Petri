@@ -1,6 +1,6 @@
 // M1-1 后端就绪感知层 — 全局 Context + 5s 轮询
 // 挂在 App 根，下游用 useBackendStatus() 消费。
-// r-server 不通时由摘要概览显示降级提示。
+// biof3-server 不通时由摘要概览显示降级提示。
 //
 // （BLOCK-30 P2：曾有的 Gateway 健康聚合随 gateway 摘除）
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
@@ -43,7 +43,7 @@ async function readBackendStatus(): Promise<EnhancedBackendStatus | null> {
   // same local services so the real workspace UI remains available for visual
   // regression and accessibility acceptance; packaged builds never use this.
   if (!import.meta.env.DEV) return null;
-  // BLOCK-30 P1: py-server HTTP 探针已摘除（Python 执行并入 r-server），
+  // BLOCK-30 P1: py-server HTTP 探针已摘除（Python 执行并入 biof3-server），
   // 渲染进程无从探测运行时安装态，pyRuntime 恒 false（仅视觉回归路径）。
   const rServerUp = await probeHealth('http://127.0.0.1:3001/api/health');
   return {

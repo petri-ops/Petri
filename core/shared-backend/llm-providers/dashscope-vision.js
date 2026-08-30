@@ -16,7 +16,7 @@
 const https = require('https');
 const logger = require('../logger');
 
-// 断点1：ai-usage 经注入式 helper 获取，斩断对 r-server/helpers/ai-usage 的反向 require
+// 断点1：ai-usage 经注入式 helper 获取，斩断对 biof3-server/helpers/ai-usage 的反向 require
 const aiUsageHelper = require('../ai-usage-helper');
 function getRecordAiUsage() {
   return aiUsageHelper.recordAiUsage;

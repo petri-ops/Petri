@@ -24,8 +24,8 @@
  *    throw; they do not silently mutate state.
  *
  * This module is pure (no I/O, no db, no network). The persistence
- * layer (SQLite) lives in `core/r-server/db.js`. The route layer
- * (`/api/loop/iterate`) lives in `core/r-server/routes/harness.js`.
+ * layer (SQLite) lives in `core/biof3-server/db.js`. The route layer
+ * (`/api/loop/iterate`) lives in `core/biof3-server/routes/harness.js`.
  *
  * HLE-1 scope: schema + canonicalize + hash + reason codes + redaction.
  * HLE-2 scope: controller (observe → decide → validate → execute →

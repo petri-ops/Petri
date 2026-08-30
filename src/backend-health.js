@@ -8,9 +8,9 @@
 // 生产用：probeHealth 默认走 fetch('http://localhost:PORT/api/health')，1.5s 超时。
 // 测试用：注入 probeHealth mock 函数。
 //
-// isReady 最低要求 = rServerUp（r-server 是硬底座，plumber 按需）。
+// isReady 最低要求 = rServerUp（biof3-server 是硬底座，plumber 按需）。
 // BLOCK-30 P1: pyServerUp 随 py-server HTTP 服务摘除；pyRuntime 保留
-// （Python 工具仍由 r-server 经内嵌 Python 运行时执行）。
+// （Python 工具仍由 biof3-server 经内嵌 Python 运行时执行）。
 
 // A-009: pull every backend port from env-coordinator instead of each
 // file duplicating the per-port fallback literal here. The Electron
@@ -65,7 +65,7 @@ function mergeRuntimeStatusWithConfiguredHomes(runtimeStatus, env = process.env)
  * @param {object} opts
  * @param {object} opts.runtimeStatus - getRuntimeStatus() 返回的 { r:{installed}, python:{installed} }
  * @param {object} opts.procs - { gateway, rServer, plumber }，每个为 spawn 返回的 ChildProcess 或 null
- * @param {function?:} opts.probeHealth - 可注入的 r-server health 探测（测试用）
+ * @param {function?:} opts.probeHealth - 可注入的 biof3-server health 探测（测试用）
  * @param {function?:} opts.probePlumber - 可注入的 plumber 探测（测试用）
  */
 async function getBackendStatus({ runtimeStatus, procs, probeHealth, probePlumber }) {
@@ -82,7 +82,7 @@ async function getBackendStatus({ runtimeStatus, procs, probeHealth, probePlumbe
   const rServerUp = rRuntime && rServerAlive && (await probeH());
   const plumberUp = plumberAlive && (await probePl());
 
-  // isReady 最低要求 = r-server 就绪
+  // isReady 最低要求 = biof3-server 就绪
   const isReady = !!rServerUp;
 
   let downReason = null;

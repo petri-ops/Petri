@@ -12,9 +12,9 @@ test('P7 producer is packaged-only, source-bound, and never imports historical R
   assert.match(source, /activateAllWindows/);
   assert.match(source, /kCGWindowLayer/);
   for (const completionSource of [
-    'core/r-server/agent-runner.js',
-    'core/r-server/agent-tools/agent-loop-control.js',
-    'core/r-server/agent-tools/result-context-binding.js',
+    'core/biof3-server/agent-runner.js',
+    'core/biof3-server/agent-tools/agent-loop-control.js',
+    'core/biof3-server/agent-tools/result-context-binding.js',
     'frontend/src/lib/result-edit-agent-bridge.ts',
   ]) assert.match(source, new RegExp(completionSource.replaceAll('/', '\\/').replaceAll('.', '\\.')));
   assert.doesNotMatch(source, /rs9-(?:product|provider|visual)-acceptance\.json/);
@@ -50,7 +50,7 @@ test('P7 UI trace accepts truthful enrichment submission or completion wording',
 
 test('P7 bound drawer completion guard covers both legacy HTTP and durable task Agent paths', () => {
   for (const path of ['routes/ai-agent.js', 'agent-runner.js']) {
-    const source = readFileSync(new URL(`../core/r-server/${path}`, import.meta.url), 'utf8');
+    const source = readFileSync(new URL(`../core/biof3-server/${path}`, import.meta.url), 'utf8');
     assert.match(source, /createResultEditCompletionGuard/);
     assert.match(source, /expectation:\s*toolCtx\.resultStudioCompletionExpectation/);
     assert.match(source, /resultEditCompletionGuard\.recordToolResult\(name, result\)/);

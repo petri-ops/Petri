@@ -18,7 +18,7 @@
  *  - Evaluate: should the loop exit? (all gaps resolved, or terminal error).
  *
  * NOT in scope (HLE-1: already done; HLE-3: validators; HLE-4: repair strategies):
- *  - Actually executing a tool (tool_executor lives in r-server).
+ *  - Actually executing a tool (tool_executor lives in biof3-server).
  *  - Replaying a session from disk.
  *  - Re-routing around a failed node (HLE-4 repair strategy).
  *

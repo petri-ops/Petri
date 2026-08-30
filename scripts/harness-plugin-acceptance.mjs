@@ -84,7 +84,7 @@ async function runAcceptance() {
   // 验收内置源码本身，不能让用户目录中的已安装旧版本覆盖 built-in。
   process.env.BIOF3_PLUGINS_DIR = path.join(tempRoot, 'plugins');
   fs.mkdirSync(process.env.BIOF3_PLUGINS_DIR, { recursive: true });
-  const { tool_run_tool } = require('../core/r-server/agent-tools/learning');
+  const { tool_run_tool } = require('../core/biof3-server/agent-tools/learning');
   const results = [];
   try {
     for (const id of pluginIds()) {

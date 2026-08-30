@@ -48,7 +48,7 @@ const COMMIT = /^[a-f0-9]{40}$/;
 const TERMINAL_JOBS = new Set(['completed', 'failed', 'cancelled', 'recovery_required']);
 
 const Database = require(require.resolve('better-sqlite3', {
-  paths: [path.join(ROOT, 'core', 'r-server'), ROOT],
+  paths: [path.join(ROOT, 'core', 'biof3-server'), ROOT],
 }));
 
 export const P6_RECOVERY_ELECTRON_CLASSIFICATION =
@@ -64,9 +64,9 @@ const SOURCE_PATHS = Object.freeze([
   'scripts/g0-rs-p6-real-restart-prototype.mjs',
   'scripts/g0-rs-p5-acceptance.mjs',
   'scripts/g0-rs-p4r-capture.mjs',
-  'core/r-server/helpers/artifact-truth.js',
-  'core/r-server/helpers/tools-executor.js',
-  'core/r-server/routes/result-studio.js',
+  'core/biof3-server/helpers/artifact-truth.js',
+  'core/biof3-server/helpers/tools-executor.js',
+  'core/biof3-server/routes/result-studio.js',
   'core/shared-backend/result-changeset-service.js',
   'core/shared-backend/result-studio-background-child.js',
   'core/shared-backend/result-studio-background.js',

@@ -7,7 +7,7 @@
  *
  * The platform glue lives in
  * `frontend/src/lib/chat-file-references.ts` and wires `fetchJson` to the
- * `r-server` `/api/harness/file-references/resolve` endpoint.
+ * `biof3-server` `/api/harness/file-references/resolve` endpoint.
  */
 
 // ---------------------------------------------------------------------------

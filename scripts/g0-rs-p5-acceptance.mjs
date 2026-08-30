@@ -85,27 +85,27 @@ export const P5_SOURCE_FILES = Object.freeze({
   packageScripts: 'package.json',
   frontendPackage: 'frontend/package.json',
   impactMap: 'test/impact-map.json',
-  server: 'core/r-server/server.js',
-  routeRegistry: 'core/r-server/routes/index.js',
-  dataApi: 'core/r-server/api-data.js',
-  routes: 'core/r-server/routes/result-studio.js',
-  toolsRoute: 'core/r-server/routes/tools.js',
-  toolsPlatformRoute: 'core/r-server/routes/tools-platform.js',
-  agentLearning: 'core/r-server/agent-tools/learning.js',
-  agentRegistry: 'core/r-server/agent-tools/registry.js',
-  contextBinding: 'core/r-server/agent-tools/result-context-binding.js',
-  contextTools: 'core/r-server/agent-tools/result-context-tools.js',
-  contextEditTools: 'core/r-server/agent-tools/result-context-edit-tools.js',
-  editTools: 'core/r-server/agent-tools/result-edit-tools.js',
-  selectionTools: 'core/r-server/agent-tools/result-selection-tools.js',
-  toolDefinitions: 'core/r-server/agent-tools/tool-defs.js',
-  database: 'core/r-server/db.js',
-  artifactTruth: 'core/r-server/helpers/artifact-truth.js',
-  toolExecutor: 'core/r-server/helpers/tools-executor.js',
-  mcpRegistry: 'core/r-server/mcp/registry.js',
-  toolsMetadata: 'core/r-server/routes/tools-metadata.js',
-  pluginLoader: 'core/r-server/plugin-loader.js',
-  toolRegistry: 'core/r-server/tool-registry.js',
+  server: 'core/biof3-server/server.js',
+  routeRegistry: 'core/biof3-server/routes/index.js',
+  dataApi: 'core/biof3-server/api-data.js',
+  routes: 'core/biof3-server/routes/result-studio.js',
+  toolsRoute: 'core/biof3-server/routes/tools.js',
+  toolsPlatformRoute: 'core/biof3-server/routes/tools-platform.js',
+  agentLearning: 'core/biof3-server/agent-tools/learning.js',
+  agentRegistry: 'core/biof3-server/agent-tools/registry.js',
+  contextBinding: 'core/biof3-server/agent-tools/result-context-binding.js',
+  contextTools: 'core/biof3-server/agent-tools/result-context-tools.js',
+  contextEditTools: 'core/biof3-server/agent-tools/result-context-edit-tools.js',
+  editTools: 'core/biof3-server/agent-tools/result-edit-tools.js',
+  selectionTools: 'core/biof3-server/agent-tools/result-selection-tools.js',
+  toolDefinitions: 'core/biof3-server/agent-tools/tool-defs.js',
+  database: 'core/biof3-server/db.js',
+  artifactTruth: 'core/biof3-server/helpers/artifact-truth.js',
+  toolExecutor: 'core/biof3-server/helpers/tools-executor.js',
+  mcpRegistry: 'core/biof3-server/mcp/registry.js',
+  toolsMetadata: 'core/biof3-server/routes/tools-metadata.js',
+  pluginLoader: 'core/biof3-server/plugin-loader.js',
+  toolRegistry: 'core/biof3-server/tool-registry.js',
   artifactManifest: 'core/shared-backend/artifact-manifest.js',
   executionProvenance: 'core/shared-backend/execution-provenance.js',
   gitAdapter: 'core/shared-backend/git-adapter.js',
@@ -228,7 +228,7 @@ function openP5Database(dbPath, { readonly = true } = {}) {
   const resolved = path.resolve(String(dbPath || ''));
   assert(Boolean(dbPath) && existsSync(resolved), 'p5_no_seed_database_missing');
   const Database = require(require.resolve('better-sqlite3', {
-    paths: [path.join(ROOT, 'core', 'r-server'), ROOT],
+    paths: [path.join(ROOT, 'core', 'biof3-server'), ROOT],
   }));
   return new Database(resolved, readonly ? { readonly: true } : undefined);
 }
@@ -1341,7 +1341,7 @@ function runWorker(env, spec) {
 async function runWorkerMain() {
   const payload = process.argv[process.argv.indexOf('--worker') + 1];
   const spec = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
-  const db = require(path.join(ROOT, 'core/r-server/db.js'));
+  const db = require(path.join(ROOT, 'core/biof3-server/db.js'));
   const project = db.getProject(spec.projectId);
   if (!project) throw new Error('worker_project_not_found');
   const ownerId = String(project.user_id || 'local-user');
@@ -1349,11 +1349,11 @@ async function runWorkerMain() {
   // registered execution boundary here initializes the same validated
   // built-in/installed/development plugin sources before any Agent tool reads
   // a trusted Result Studio descriptor.
-  const mcpRegistry = require(path.join(ROOT, 'core/r-server/mcp/registry.js'));
+  const mcpRegistry = require(path.join(ROOT, 'core/biof3-server/mcp/registry.js'));
 
   if (spec.op === 'selection_enrichment') {
     const { tool_result_selection_run: runSelection } = require(
-      path.join(ROOT, 'core/r-server/agent-tools/result-selection-tools.js')
+      path.join(ROOT, 'core/biof3-server/agent-tools/result-selection-tools.js')
     );
     const result = await runSelection({
       selectionId: spec.selectionId,
@@ -1368,7 +1368,7 @@ async function runWorkerMain() {
 
   if (spec.op === 'artifact_tool_run') {
     const { tool_run_tool: runTool } = require(
-      path.join(ROOT, 'core/r-server/agent-tools/learning.js')
+      path.join(ROOT, 'core/biof3-server/agent-tools/learning.js')
     );
     const { createResultStudioRepository } = require(
       path.join(ROOT, 'core/shared-backend/result-studio-repository.js')
@@ -1415,10 +1415,10 @@ async function runWorkerMain() {
   }
 
   const { createResultContextEditTools, resolveResultStudioContext } = require(
-    path.join(ROOT, 'core/r-server/agent-tools/result-context-edit-tools.js')
+    path.join(ROOT, 'core/biof3-server/agent-tools/result-context-edit-tools.js')
   );
   const { createResultChangeSetTools } = require(
-    path.join(ROOT, 'core/r-server/agent-tools/result-edit-tools.js')
+    path.join(ROOT, 'core/biof3-server/agent-tools/result-edit-tools.js')
   );
   const ctx = {
     projectId: spec.projectId,
@@ -2062,7 +2062,7 @@ function exactInputHashes(before, after) {
 
 function readDatabaseTruth(dbPath, projectId) {
   const Database = require(require.resolve('better-sqlite3', {
-    paths: [path.join(ROOT, 'core/r-server'), ROOT],
+    paths: [path.join(ROOT, 'core/biof3-server'), ROOT],
   }));
   const sqlite = new Database(dbPath, { readonly: true });
   try {

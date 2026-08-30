@@ -244,13 +244,13 @@ async function stopWorkspaceDevProcesses() {
       console.warn(`[dev] ${error.message}`);
     }
   }
-  // Always sweep vite / r-server regardless of OS — these are the
+  // Always sweep vite / biof3-server regardless of OS — these are the
     // ports the dev loop actually waits on. The order matches the boot
     // sequence so an older stack drops in reverse.
     // (BLOCK-30 P1: 独立 Python 后端 :3004 已摘除。)
   const rendererPort = Number(new URL(rendererUrl).port) || 3000;
   await stopPidsByPort(rendererPort, 'vite renderer');
-  await stopPidsByPort(3001, 'r-server');
+  await stopPidsByPort(3001, 'biof3-server');
 }
 
 async function main() {
@@ -271,18 +271,18 @@ async function main() {
   spawnChild(npmCmd, ['--prefix', 'frontend', 'run', 'dev']);
   await waitForUrl(rendererUrl);
 
-  // r-server (and later Electron) both need the same DB. The Electron main
+  // biof3-server (and later Electron) both need the same DB. The Electron main
   // process stores it in ~/Library/Application Support/biof3-local/ (see
-  // env-coordinator.js). We mirror that path here so r-server opens the already-
-  // migrated DB instead of its own empty core/r-server/bioF3.db.
+  // env-coordinator.js). We mirror that path here so biof3-server opens the already-
+  // migrated DB instead of its own empty core/biof3-server/bioF3.db.
   const rServerUserDataDir = process.env.BIOF3_ELECTRON_USER_DATA_DIR ||
     path.join(os.homedir(), 'Library', 'Application Support', 'biof3-local');
   process.env.BIOF3_DB_PATH = path.join(rServerUserDataDir, 'bioF3.db');
 
-  // Run pending DB migrations against the shared DB before r-server starts.
+  // Run pending DB migrations against the shared DB before biof3-server starts.
   // Uses the same BIOF3_BETTER_SQLITE3_ROOT root as main.js:367 so the
   // better-sqlite3 native addon ABI matches.
-  const migrationEnv = { ...process.env, ELECTRON_RUN_AS_NODE: '1', BIOF3_BETTER_SQLITE3_ROOT: path.join(projectRoot, 'core/r-server') };
+  const migrationEnv = { ...process.env, ELECTRON_RUN_AS_NODE: '1', BIOF3_BETTER_SQLITE3_ROOT: path.join(projectRoot, 'core/biof3-server') };
   const migrationResult = spawnSync(
     process.execPath,
     [path.join(projectRoot, 'src', 'migration-runner.js'), process.env.BIOF3_DB_PATH, path.join(projectRoot, 'src', 'migrations')],
@@ -295,10 +295,10 @@ async function main() {
   const migrationOutput = String(migrationResult.stdout || '').trim();
   if (migrationOutput) console.log('[dev-electron] ' + migrationOutput.replace(/\n/g, '\n[dev-electron] '));
 
-  // Start r-server on :3001 so /api/ai/chat (and other /api/* routes used by
+  // Start biof3-server on :3001 so /api/ai/chat (and other /api/* routes used by
   // the renderer) are reachable from the dev shell. Without this the copilot
   // context-budget ring (UI-190) and other live SSE features stay empty.
-  spawnChild(npmCmd, ['--prefix', 'core/r-server', 'start'], { env: { ...process.env } });
+  spawnChild(npmCmd, ['--prefix', 'core/biof3-server', 'start'], { env: { ...process.env } });
   await waitForUrl('http://127.0.0.1:3001/api/health');
 
   // Optional extra Electron CLI args for local debugging, e.g.

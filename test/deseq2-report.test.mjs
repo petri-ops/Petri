@@ -3,7 +3,7 @@
 // 锁定两点：
 //  1. deseq2-report-template.html 必须包含 7 张图的 <img> 锚点 URL（deseq2.R 的 gsub
 //     按这些 URL 替换为 base64）以及 9 个摘要占位符 {{...}}，否则报告仍是空壳。
-//  2. deseq2.R 不得再硬编码 POSIX 路径 /opt/biof3-r-server/...（Windows/macOS app
+//  2. deseq2.R 不得再硬编码 POSIX 路径 /opt/biof3-biof3-server/...（Windows/macOS app
 //     bundle 均不存在）；改用宿主注入的 BIOF3_BUILT_IN_PLUGINS_DIR 兜底，并实际做
 //     摘要 token 替换。
 
@@ -65,8 +65,8 @@ test('report template declares the DEG results-table token', () => {
 // ── 2. R 脚本：无 POSIX 硬编码 + 平台安全兜底 + token 替换 ──
 test('deseq2.R does NOT hardcode POSIX /opt path', () => {
   assert.ok(
-    !script.includes('/opt/biof3-r-server'),
-    'deseq2.R must not hardcode the POSIX /opt/biof3-r-server path (broken on Windows/macOS bundle)'
+    !script.includes('/opt/biof3-biof3-server'),
+    'deseq2.R must not hardcode the POSIX /opt/biof3-biof3-server path (broken on Windows/macOS bundle)'
   );
 });
 

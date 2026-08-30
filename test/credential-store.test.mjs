@@ -6,12 +6,12 @@ import test from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { createCredentialStore } = require('../core/r-server/helpers/credential-store.js');
+const { createCredentialStore } = require('../core/biof3-server/helpers/credential-store.js');
 const {
   _extractCredentialUpdates,
   listAvailableModels,
   testApiKey,
-} = require('../core/r-server/helpers/ai-settings.js');
+} = require('../core/biof3-server/helpers/ai-settings.js');
 const { registerProvider } = require('../core/shared-backend/llm-providers/index.js');
 
 test('file credential backend separates secrets with owner-only permissions', () => {

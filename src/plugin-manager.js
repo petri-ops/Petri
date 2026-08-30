@@ -91,7 +91,7 @@ const {
   loadAllPlugins,
 } = require('./plugin/uninstall');
 
-const pluginLoader = require(path.join(PROJECT_ROOT, 'r-server', 'plugin-loader.js'));
+const pluginLoader = require(path.join(PROJECT_ROOT, 'biof3-server', 'plugin-loader.js'));
 
 // ════════════════════════════════════════════════════════════════
 // Install orchestrators — kept in this module because each cross-

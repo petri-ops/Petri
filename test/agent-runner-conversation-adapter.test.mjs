@@ -15,7 +15,7 @@ const require = createRequire(import.meta.url);
 
 describe('agent-runner-conversation-adapter.test.mjs (BLOCK-14 PHASE 3.1 message/conversation helpers)', () => {
   it('buildConversationMetadata normalizes guest vs user audience and tolerates null inputs', () => {
-    const ca = require(resolve('core/r-server/conversation-adapter.js'));
+    const ca = require(resolve('core/biof3-server/conversation-adapter.js'));
     assert.strictEqual(typeof ca.buildConversationMetadata, 'function');
 
     // user audience with full context
@@ -40,7 +40,7 @@ describe('agent-runner-conversation-adapter.test.mjs (BLOCK-14 PHASE 3.1 message
   });
 
   it('announceActiveConversation emits the conversation event with id+title and is a no-op for null conv (session-isolation guard)', () => {
-    const ca = require(resolve('core/r-server/conversation-adapter.js'));
+    const ca = require(resolve('core/biof3-server/conversation-adapter.js'));
 
     // active conv present → emit {event, conversationId, title}
     const captured = [];
@@ -65,7 +65,7 @@ describe('agent-runner-conversation-adapter.test.mjs (BLOCK-14 PHASE 3.1 message
   });
 
   it('appendAssistantMessage fail-closed envelope returns {persisted:false, shifted:false} for empty/whitespace assistantAcc, missing userId, missing conversationId', () => {
-    const ca = require(resolve('core/r-server/conversation-adapter.js'));
+    const ca = require(resolve('core/biof3-server/conversation-adapter.js'));
     assert.strictEqual(typeof ca.appendAssistantMessage, 'function');
 
     // empty assistantAcc → fail-closed before any DB write

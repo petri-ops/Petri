@@ -26,7 +26,7 @@ sample-metadata-validator → seurat-standard → (future: cellchat / singleR / 
 
 ## 复用既有 ground truth
 
-本插件的 R 脚本 `scripts/seurat-standard.R` 与既有 `core/r-server/tool-scripts/seurat-standard.R` 同源，遵循 `core/r-server/tool-scripts/_seurat-standard-scope.md` 步骤 0 的全部 in-scope 步骤（9 步）+ out-of-scope 边界声明。**原 `core/r-server/tool-scripts/seurat-standard.R` 保留**作为向后兼容；本插件是独立拷贝，作为 builtin-canonical plugin 暴露给 BioF3 调度器。
+本插件的 R 脚本 `scripts/seurat-standard.R` 与既有 `core/biof3-server/tool-scripts/seurat-standard.R` 同源，遵循 `core/biof3-server/tool-scripts/_seurat-standard-scope.md` 步骤 0 的全部 in-scope 步骤（9 步）+ out-of-scope 边界声明。**原 `core/biof3-server/tool-scripts/seurat-standard.R` 保留**作为向后兼容；本插件是独立拷贝，作为 builtin-canonical plugin 暴露给 BioF3 调度器。
 
 ## 输入
 

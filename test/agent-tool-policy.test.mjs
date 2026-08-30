@@ -11,15 +11,15 @@ const require = createRequire(import.meta.url);
 const {
   decideAgentToolCall,
   isProtectedScientificSource,
-} = require('../core/r-server/agent-tools/agent-tool-policy.js');
+} = require('../core/biof3-server/agent-tools/agent-tool-policy.js');
 const {
   createAgentToolInterceptor,
   validateToolArguments,
-} = require('../core/r-server/agent-tools/agent-tool-interceptor.js');
-const { getToolEntry } = require('../core/r-server/agent-tools/registry.js');
-const { createWorkspaceTools } = require('../core/r-server/agent-tools/workspace-tools.js');
-const { dispatchTool } = require('../core/r-server/agent-tools/index.js');
-const db = require('../core/r-server/db.js');
+} = require('../core/biof3-server/agent-tools/agent-tool-interceptor.js');
+const { getToolEntry } = require('../core/biof3-server/agent-tools/registry.js');
+const { createWorkspaceTools } = require('../core/biof3-server/agent-tools/workspace-tools.js');
+const { dispatchTool } = require('../core/biof3-server/agent-tools/index.js');
+const db = require('../core/biof3-server/db.js');
 
 // Windows (without Developer Mode) and some CI images cannot create symlinks,
 // which breaks the escape-prevention fixture. Probe once and skip the symlink

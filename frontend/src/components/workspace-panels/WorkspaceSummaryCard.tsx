@@ -340,7 +340,7 @@ function RuntimeStatusChip({
 }: {
   label: string;
   runtimeReady: boolean;
-  /** 独立 HTTP 后端进程是否在线；Python 执行已并入 r-server（BLOCK-30），
+  /** 独立 HTTP 后端进程是否在线；Python 执行已并入 biof3-server（BLOCK-30），
    *  Py chip 不传该 prop，仅展示运行时安装状态。 */
   serverUp?: boolean;
   downReason?: string | null;

@@ -11,7 +11,7 @@ import { dirname, resolve } from 'node:path';
 import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const CORE = resolve(__dirname, '..', 'core', 'r-server');
+const CORE = resolve(__dirname, '..', 'core', 'biof3-server');
 
 const allowlist = await import(
   pathToFileURL(resolve(CORE, 'mcp/ide-tools/path-allowlist.js')).href

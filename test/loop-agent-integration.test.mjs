@@ -35,7 +35,7 @@ const {
   runAgentLoop,
   resolveAgentTaskTerminal,
   buildLoopObservationEvidence,
-} = require(resolve(__dirname, '../core/r-server/agent-runner'));
+} = require(resolve(__dirname, '../core/biof3-server/agent-runner'));
 
 function mapDecisionToIterationStatus(decision) {
   switch (decision) {
@@ -426,7 +426,7 @@ describe('HLE-C1: Loop Agent Integration', () => {
 
   describe('Repair lineage resolution', () => {
     it('treats a preflight failure as resolved by a later completed same-tool Job', async () => {
-      const { resolveFailedJobReplacements } = await import('../core/r-server/agent-runner.js');
+      const { resolveFailedJobReplacements } = await import('../core/biof3-server/agent-runner.js');
       const resolved = resolveFailedJobReplacements([
         {
           callId: 'preflight-call',
@@ -461,7 +461,7 @@ describe('HLE-C1: Loop Agent Integration', () => {
     });
 
     it('records an observed replacement even when no deterministic repair strategy matched', async () => {
-      const { buildObservedReplacementAttempt } = await import('../core/r-server/agent-runner.js');
+      const { buildObservedReplacementAttempt } = await import('../core/biof3-server/agent-runner.js');
       const attempt = buildObservedReplacementAttempt(
         { faultType: 'unknown_failure' },
         {

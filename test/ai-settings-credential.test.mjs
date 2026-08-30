@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 import test from 'node:test';
 
 const require = createRequire(import.meta.url);
-const { resolveChatModelCredential } = require('../core/r-server/helpers/ai-settings');
+const { resolveChatModelCredential } = require('../core/biof3-server/helpers/ai-settings');
 
 test('selected custom model resolves its credentialRef before provider fallback', () => {
   const reads = [];

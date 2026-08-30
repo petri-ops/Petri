@@ -6,7 +6,7 @@
  *            → 生成 HTML 报告 → 落盘到 --report-out。
  *
  * 这是 *人可跑* 的 burn-in 脚本（不是 Playwright，也不是单元测试）。
- * 假定 r-server 已在 localhost:3001 启动（BLOCK-30 P1 后为唯一后端）。
+ * 假定 biof3-server 已在 localhost:3001 启动（BLOCK-30 P1 后为唯一后端）。
  *
  * ⚠️ 本脚本对 **运行中的真实服务器** 演练，因此会在该服务器配置的数据根下创建
  *    真实项目、真实 tool_job 与真实结果文件。对桌面/开发服务器而言那就是
@@ -15,7 +15,7 @@
  *    要完全隔离地演练，请改用 `scripts/g0-rs-p4r-corpus.mjs`，它在一次性
  *    临时根中执行同一条 run_tool → tool_job → artifact truth 链。
  *
- * 真实端点（与 plan 描述的 /api/tools/deseq2/... 有出入，落地以 r-server 为准）：
+ * 真实端点（与 plan 描述的 /api/tools/deseq2/... 有出入，落地以 biof3-server 为准）：
  *   GET  /api/health
  *   POST /api/data/projects                       → 创建项目
  *   GET  /api/tools/demo-data/deseq2/<file>       → 拉 demo 输入（demo-counts.csv / demo-coldata.csv）
@@ -143,12 +143,12 @@ const RUN_STARTED_AT = new Date().toISOString();
   log('INFO', 'STEP 1: GET /api/health');
   const r = await http('GET', '/api/health');
   if (r.status !== 200) {
-    bail(`r-server health check failed (status=${r.status}). 确认 r-server 已启动在 ${R_BASE}`);
+    bail(`biof3-server health check failed (status=${r.status}). 确认 biof3-server 已启动在 ${R_BASE}`);
   }
   if (!r.body || r.body.status !== 'ok') {
-    bail(`r-server health body invalid: ${JSON.stringify(r.body)}`);
+    bail(`biof3-server health body invalid: ${JSON.stringify(r.body)}`);
   }
-  log('INFO', `✓ r-server healthy at ${R_BASE}`);
+  log('INFO', `✓ biof3-server healthy at ${R_BASE}`);
 }
 
 // ── 步骤 2：创建项目 ────────────────────────────────────────
@@ -208,7 +208,7 @@ let countsText, coldataText;
       countsText = await fetchDemoText('demo-counts.csv');
       coldataText = await fetchDemoText('demo-coldata.csv');
     } catch (e) {
-      bail(`demo data fetch failed: ${e.message}. r-server 的 demo-data 路由可能没有装内置 demo 资源。` +
+      bail(`demo data fetch failed: ${e.message}. biof3-server 的 demo-data 路由可能没有装内置 demo 资源。` +
            `重试方案：先 npm run dev 起桌面版，在工具页点击"使用示例数据"生成 demo 资源，` +
            `或者用 --demo-input <dir> 指定本地 CSV 文件。`);
     }
@@ -347,7 +347,7 @@ let servedUrl = null;
     // Compatibility rescue for pre-Stage-4 installed builds.
     log('WARN', `  report endpoint returned report_source_not_found (status=${r.status})`);
     log('WARN', '  → entering disk-artifact rescue path: R analysis likely succeeded;');
-    log('WARN', '    r-server just could not bundle output/ → all_results.zip in local mode.');
+    log('WARN', '    biof3-server just could not bundle output/ → all_results.zip in local mode.');
     log('WARN', '    Continuing with /api/tools/status to harvest artifact list for run.json');
   } else {
     bail(`report generation failed: status=${r.status} body=${JSON.stringify(r.body)?.slice(0, 500)}`, 2);
@@ -388,7 +388,7 @@ if (htmlPath && htmlContent) {
     exit: 'passed',
   };
 } else {
-  // Rescue path: HTML report missing because r-server's zip post-processor
+  // Rescue path: HTML report missing because biof3-server's zip post-processor
   // didn't run in local mode. Pull artifact metadata from /status and write
   // a best-effort record so we still capture what happened.
   log('INFO', `STEP 7 (rescue): GET /api/tools/status/${jobId} for artifact metadata`);
@@ -438,7 +438,7 @@ if (htmlPath && htmlContent) {
     },
     exit: 'analysis_succeeded_zip_packaging_pending',
     notes: `Rescued from ${sb.status || 'unknown'} job via /status artifact list. ` +
-           `r-server report endpoint returned report_source_not_found (known local-mode ` +
+           `biof3-server report endpoint returned report_source_not_found (known local-mode ` +
            `gap; see docs/first-success-path.md §C). R analysis artifacts exist on disk at ` +
            `the job's canonicalPath; HTML report not yet synthesized.`,
   };

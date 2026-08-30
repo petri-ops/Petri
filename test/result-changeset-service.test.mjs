@@ -31,7 +31,7 @@ const {
 } = require('../core/shared-backend/result-changeset-service');
 const { projectRevisionSource } = require('../core/shared-backend/result-revision-source');
 const { restoreArtifactRevision } = require('../core/shared-backend/result-compare-service');
-const { resolveResultStudioScriptOverride } = require('../core/r-server/mcp/registry')._test;
+const { resolveResultStudioScriptOverride } = require('../core/biof3-server/mcp/registry')._test;
 
 function signedExecutionProvenance(payload) {
   return { ...payload, provenanceHash: computeExecutionProvenanceHash(payload) };

@@ -3,7 +3,7 @@
  *
  * Phase 3: MCP/Agent 工具入口收敛测试
  *
- * 验证 r-server/mcp/registry.js 的物理目录解析：
+ * 验证 biof3-server/mcp/registry.js 的物理目录解析：
  * - 物理目录主键统一使用正式 tool_job.id（不再用 mcp_* 身份）
  * - 带 projectId → 结果落在 <workspace>/results/jobs/<toolJobId>（项目沙盒）
  * - 无 projectId → 落共享全局 tool-jobs/<toolJobId>（不再是独立 mcp-tool-jobs）
@@ -24,7 +24,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const require = createRequire(import.meta.url);
 
-const R_SERVER = path.join(__dirname, '..', 'core', 'r-server');
+const R_SERVER = path.join(__dirname, '..', 'core', 'biof3-server');
 const db = require(path.join(R_SERVER, 'db.js'));
 const registry = require(path.join(R_SERVER, 'mcp', 'registry.js'));
 const { resolveMcpJobLayout, GLOBAL_JOBS_DIR } = registry._test;

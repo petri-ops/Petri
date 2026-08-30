@@ -113,7 +113,7 @@ test('P6-1a service fixture source binding owns recovery, lease, UI explainabili
     'core/shared-backend/result-studio-runtime-lease.js',
     'core/shared-backend/result-changeset-service.js',
     'test/result-changeset-service.test.mjs',
-    'core/r-server/routes/result-studio.js',
+    'core/biof3-server/routes/result-studio.js',
     'test/result-studio-route-baseline.test.mjs',
     'frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx',
     'frontend/src/components/result-studio/ResultStudioChangeSetPanel.test.tsx',

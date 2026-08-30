@@ -37,9 +37,9 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SERVER_ENTRY = path.join(REPO_ROOT, 'core', 'r-server', 'server.js');
+const SERVER_ENTRY = path.join(REPO_ROOT, 'core', 'biof3-server', 'server.js');
 const MIGRATIONS_DIR = path.join(REPO_ROOT, 'src', 'migrations');
-const REPO_DB = path.join(REPO_ROOT, 'core', 'r-server', 'biof3.db');
+const REPO_DB = path.join(REPO_ROOT, 'core', 'biof3-server', 'biof3.db');
 
 /**
  * Every environment variable that decides where the backend WRITES.
@@ -199,7 +199,7 @@ export async function applyMigrations(dbPath, { quiet = false } = {}) {
 /** Report which RS tables actually exist, so a capture cannot silently run half-migrated. */
 export function inspectTables(dbPath) {
   const Database = require(require.resolve('better-sqlite3', {
-    paths: [path.join(REPO_ROOT, 'core', 'r-server'), REPO_ROOT],
+    paths: [path.join(REPO_ROOT, 'core', 'biof3-server'), REPO_ROOT],
   }));
   const db = new Database(dbPath, { readonly: true });
   try {

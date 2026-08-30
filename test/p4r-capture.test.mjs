@@ -24,7 +24,7 @@ import {
 } from '../scripts/g0-rs-p4r-capture.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const REPO_DB = path.join(REPO_ROOT, 'core', 'r-server', 'biof3.db');
+const REPO_DB = path.join(REPO_ROOT, 'core', 'biof3-server', 'biof3.db');
 
 /**
  * Paths that fall back to ~/Documents/BioF3-Local — the real user data root,

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * scripts/qa-smoke.mjs — Gate 5 headless 冒烟（无需启动 r-server / Electron）
+ * scripts/qa-smoke.mjs — Gate 5 headless 冒烟（无需启动 biof3-server / Electron）
  *
  * 检查 Gate 5 §200-216 release-contract 中无需 worker / 无需真实桌面的可声明
  * 静态项：前端 token 覆盖、面板折叠状态、copilot / chat reset、文件树预览、
@@ -248,10 +248,10 @@ register('telemetry', 'telemetry.js 暴露发行漏斗钩子（开关 + 接收�
 
 // report-theme — 报告主题色同步
 register('report-theme', '报告生成时按当前主题取色', () => {
-  if (!exists('core/r-server/helpers/report-theme.js')) {
+  if (!exists('core/biof3-server/helpers/report-theme.js')) {
     throw new Error('report-theme.js 不存在 — Gate 5 §200 "最终 HTML 报告按当前主题生成" 路径未闭环');
   }
-  const rt = read('core/r-server/helpers/report-theme.js');
+  const rt = read('core/biof3-server/helpers/report-theme.js');
   if (!/theme|color|palette|dark|light/i.test(rt)) {
     throw new Error('report-theme.js 缺少 theme/color/palette 关键字');
   }

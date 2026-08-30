@@ -2,7 +2,7 @@ const AGENT_WORKFLOW_TEMPLATE_VERSION = 1;
 const { isRegisteredProfile } = require('./artifact-profiles');
 
 // A-003 configure inject: harness-workflow-state is injected at bootstrap time,
-// not required at load time. This breaks the shared-backend → r-server reverse require.
+// not required at load time. This breaks the shared-backend → biof3-server reverse require.
 let _projectHarnessWorkflowJob = null;
 function configure(opts) {
   if (opts && opts.projectHarnessWorkflowJob) {

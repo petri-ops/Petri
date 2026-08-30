@@ -30,9 +30,9 @@ const {
   McpValidationError,
   _validateValue,
   _valueType,
-} = require('../core/r-server/mcp/_validate-tool-args.js');
+} = require('../core/biof3-server/mcp/_validate-tool-args.js');
 
-const pluginLoader = require('../core/r-server/plugin-loader.js');
+const pluginLoader = require('../core/biof3-server/plugin-loader.js');
 
 // ── Test 1: valid args pass ──────────────────────────────────────────────────
 

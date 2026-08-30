@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 import test from 'node:test';
 
 const require = createRequire(import.meta.url);
-const routePath = '../core/r-server/routes/result-studio';
+const routePath = '../core/biof3-server/routes/result-studio';
 const route = require(routePath);
 
 test('routes/result-studio facade expose all 10 _test helpers (100% backward compat)', () => {
@@ -29,7 +29,7 @@ test('routes/result-studio facade register function is a callable', () => {
 });
 
 test('_helpers/validate.js exposes userId / isAdminOrInternal / canAccessProject', () => {
-  const validate = require('../core/r-server/routes/_helpers/validate');
+  const validate = require('../core/biof3-server/routes/_helpers/validate');
   for (const name of ['userId', 'isAdminOrInternal', 'canAccessProject']) {
     assert.equal(typeof validate[name], 'function', `validate.${name} missing`);
   }
@@ -41,7 +41,7 @@ test('_helpers/validate.js exposes userId / isAdminOrInternal / canAccessProject
 });
 
 test('_helpers/repository.js exposes repository helpers', () => {
-  const repo = require('../core/r-server/routes/_helpers/repository');
+  const repo = require('../core/biof3-server/routes/_helpers/repository');
   for (const name of [
     'loadJobAndProject',
     'findArtifactRecord',
@@ -66,7 +66,7 @@ test('_helpers/repository.js exposes repository helpers', () => {
 });
 
 test('_helpers/format.js exposes publicResultStudioErrorMessage / sendArtifactResolutionError', () => {
-  const format = require('../core/r-server/routes/_helpers/format');
+  const format = require('../core/biof3-server/routes/_helpers/format');
   for (const name of ['publicResultStudioErrorMessage', 'sendArtifactResolutionError', 'artifactTruthError', 'artifactTruthAvailability']) {
     assert.equal(typeof format[name], 'function', `format.${name} missing`);
   }
@@ -76,7 +76,7 @@ test('_helpers/format.js exposes publicResultStudioErrorMessage / sendArtifactRe
 });
 
 test('_helpers/context.js exposes buildContextBoundPreviewBudget', () => {
-  const ctx = require('../core/r-server/routes/_helpers/context');
+  const ctx = require('../core/biof3-server/routes/_helpers/context');
   assert.equal(typeof ctx.buildContextBoundPreviewBudget, 'function');
   const out = ctx.buildContextBoundPreviewBudget({ activePreviewJobs: 2 });
   assert.ok(out && out.snapshot && out.budget, 'must return { snapshot, budget }');
@@ -84,7 +84,7 @@ test('_helpers/context.js exposes buildContextBoundPreviewBudget', () => {
 });
 
 test('_helpers/storage.js exposes hashing / csv / open snapshot', () => {
-  const storage = require('../core/r-server/routes/_helpers/storage');
+  const storage = require('../core/biof3-server/routes/_helpers/storage');
   for (const name of [
     'hashFile',
     'resolveWorkspaceFileForRevision',
@@ -103,7 +103,7 @@ test('_helpers/storage.js exposes hashing / csv / open snapshot', () => {
 });
 
 test('_helpers/workflow.js exposes 7 workflow helpers', () => {
-  const w = require('../core/r-server/routes/_helpers/workflow');
+  const w = require('../core/biof3-server/routes/_helpers/workflow');
   for (const name of [
     'attachExistingRepositoryWithExplicitConsent',
     'resolveInteractionBaselineRevision',
@@ -124,7 +124,7 @@ test('_helpers/workflow.js exposes 7 workflow helpers', () => {
 });
 
 test('routes/result-studio/index.js facade exposes required surfaces', () => {
-  const index = require('../core/r-server/routes/result-studio/index');
+  const index = require('../core/biof3-server/routes/result-studio/index');
   assert.equal(typeof index.register, 'function');
   assert.ok(index._submodules, 'must expose _submodules');
   assert.ok(index._helpers, 'must expose _helpers');
@@ -139,19 +139,19 @@ test('routes/result-studio/index.js facade exposes required surfaces', () => {
 test('routes/result-studio 9 subdomain stubs are all loadable', () => {
   const subs = ['repository', 'interaction', 'selection', 'context', 'changesets', 'revisions', 'storage', 'workspace', 'preview-budget'];
   for (const name of subs) {
-    const sub = require(`../core/r-server/routes/result-studio/${name}`);
+    const sub = require(`../core/biof3-server/routes/result-studio/${name}`);
     assert.equal(typeof sub.register, 'function', `${name}.register missing`);
   }
 });
 
 test('routes/result-studio facade preserves _test reference identity with helpers', () => {
   // route._test.<helper> === helpers.<helper>（同一函数引用，纯转发）
-  const validate = require('../core/r-server/routes/_helpers/validate');
-  const repository = require('../core/r-server/routes/_helpers/repository');
-  const format = require('../core/r-server/routes/_helpers/format');
-  const context = require('../core/r-server/routes/_helpers/context');
-  const storage = require('../core/r-server/routes/_helpers/storage');
-  const workflow = require('../core/r-server/routes/_helpers/workflow');
+  const validate = require('../core/biof3-server/routes/_helpers/validate');
+  const repository = require('../core/biof3-server/routes/_helpers/repository');
+  const format = require('../core/biof3-server/routes/_helpers/format');
+  const context = require('../core/biof3-server/routes/_helpers/context');
+  const storage = require('../core/biof3-server/routes/_helpers/storage');
+  const workflow = require('../core/biof3-server/routes/_helpers/workflow');
 
   // Indirect 通过 _test 暴露：
   assert.equal(route._test.publicResultStudioErrorMessage, format.publicResultStudioErrorMessage);

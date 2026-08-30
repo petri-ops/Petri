@@ -10,7 +10,7 @@
 
 const { contextBridge, ipcRenderer } = require('electron');
 
-// A-009: pull the r-server port fallback from env-coordinator
+// A-009: pull the biof3-server port fallback from env-coordinator
 // instead of duplicating the per-port fallback defaults here. The
 // Electron main process sets R_SERVER_PORT on
 // process.env before preload.js runs, so the helper default
@@ -131,7 +131,7 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
   },
 
   // 应用级控制 — 装完运行时后需整体重启（BIOF3_R_HOME 在 main 启动时固化，
-  // 只重启 r-server 不够，必须重新解析 runtime 路径）
+  // 只重启 biof3-server 不够，必须重新解析 runtime 路径）
   app: {
     relaunch: () => ipcRenderer.invoke('app:relaunch'),
   },

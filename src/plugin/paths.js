@@ -88,7 +88,7 @@ try {
 // 调执行器做 runtime 校验/装包，需要正确 rHome）。
 try {
   require(SHARED_BACKEND_DIR).configure({
-    getConfig: () => require(path.join(PROJECT_ROOT, 'r-server', 'config')),
+    getConfig: () => require(path.join(PROJECT_ROOT, 'biof3-server', 'config')),
   });
 } catch (e) {
   console.warn('[plugin] shared-backend configure failed:', e.message);

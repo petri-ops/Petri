@@ -89,7 +89,7 @@ desktop/
 │   │   └── desktopBridge.ts  # IPC 桥接
 │   └── themes/            # 主题系统
 ├── test/                   # Electron 测试
-└── core/                   # 核心后端（仓库内，已内联；r-server/py-server/shared-backend）
+└── core/                   # 核心后端（仓库内，已内联；biof3-server/py-server/shared-backend）
 ```
 
 > 架构去耦（2026-07）：core 已从 vendor submodule 内联；OSS/PostgreSQL/docker 双模式已移除，

@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const CORE = resolve(__dirname, '..', 'core', 'r-server');
+const CORE = resolve(__dirname, '..', 'core', 'biof3-server');
 
 const resources = await import(
   pathToFileURL(resolve(CORE, 'mcp/ide-tools/resources.js')).href

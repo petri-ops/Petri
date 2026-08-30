@@ -101,7 +101,7 @@ function apiRequest(method, pathname, { userId, role, userObjectOnly = false } =
 }
 
 before(async () => {
-  db = (await import('../core/r-server/db.js')).default || (await import('../core/r-server/db.js'));
+  db = (await import('../core/biof3-server/db.js')).default || (await import('../core/biof3-server/db.js'));
   lc = (await import('../core/shared-backend/loop-contract.js')).default;
 
   // Fixtures: an owned project and a public project.
@@ -116,7 +116,7 @@ before(async () => {
 
   // Mount the REAL router on a real Express app with a mock-auth middleware.
   const express = require('express');
-  const { registerAiLoopRoutes } = require('../core/r-server/routes/ai-loop.js');
+  const { registerAiLoopRoutes } = require('../core/biof3-server/routes/ai-loop.js');
   const app = express();
   app.use(express.json());
   // Mock auth: translate test headers into req.userId / req.user
@@ -355,7 +355,7 @@ test('RT-17 session summary replays public iterations, activity and conversation
     publicConclusion: '表达矩阵质控完成',
   });
   db.persistLoopIteration(iteration);
-  const { recordAiUsage } = require('../core/r-server/helpers/ai-usage.js');
+  const { recordAiUsage } = require('../core/biof3-server/helpers/ai-usage.js');
   recordAiUsage({
     userId: OWNER_ID,
     conversationId,
@@ -390,7 +390,7 @@ test('RT-18 session summary enforces project ownership', async () => {
 
 test('RT-19 production route registry mounts bounded Loop API before the legacy catch-all', () => {
   const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-  const source = fs.readFileSync(path.join(repoRoot, 'core/r-server/routes/index.js'), 'utf8');
+  const source = fs.readFileSync(path.join(repoRoot, 'core/biof3-server/routes/index.js'), 'utf8');
   const loopApi = source.indexOf("['AI Loop API'");
   const harness = source.indexOf("['Harness'");
   assert.ok(loopApi >= 0 && harness >= 0);

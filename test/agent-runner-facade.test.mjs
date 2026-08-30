@@ -12,7 +12,7 @@ function resolve(...segments) {
 
 describe('agent-runner-facade.test.mjs (BLOCK-14 PHASE 3.1 facade)', () => {
   it('exports exactly the 5 PHASE 3.1 documented APIs (no extras)', async () => {
-    const mod = await import(resolve('core/r-server/agent-runner.js'));
+    const mod = await import(resolve('core/biof3-server/agent-runner.js'));
     const expected = [
       'runAgentLoop',
       'resolveAgentTaskTerminal',
@@ -31,7 +31,7 @@ describe('agent-runner-facade.test.mjs (BLOCK-14 PHASE 3.1 facade)', () => {
   });
 
   it('resolveAgentTaskTerminal error envelope covers all 5 branches', async () => {
-    const { resolveAgentTaskTerminal } = await import(resolve('core/r-server/agent-runner.js'));
+    const { resolveAgentTaskTerminal } = await import(resolve('core/biof3-server/agent-runner.js'));
 
     // branch 1: cancelled takes precedence
     const cancelled = resolveAgentTaskTerminal({
@@ -64,7 +64,7 @@ describe('agent-runner-facade.test.mjs (BLOCK-14 PHASE 3.1 facade)', () => {
   });
 
   it('resolveFailedJobReplacements fail-closed path distinguishes repaired vs unresolved', async () => {
-    const { resolveFailedJobReplacements } = await import(resolve('core/r-server/agent-runner.js'));
+    const { resolveFailedJobReplacements } = await import(resolve('core/biof3-server/agent-runner.js'));
 
     // repaired: same-tool, higher iteration
     const repairedJobs = [

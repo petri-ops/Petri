@@ -2,7 +2,7 @@
  * frontend/src/lib/loop-client.ts
  * HLE-C4R: typed REST client for the Harness Loop durable API (/api/loop/*).
  *
- * Mirrors the compact projections exposed by core/r-server/routes/ai-loop.js.
+ * Mirrors the compact projections exposed by core/biof3-server/routes/ai-loop.js.
  * The UI consumes THIS + the live SSE loop events as the single source of loop
  * truth — it must never maintain a second completion state. All completion /
  * recovery decisions come from the backend loopStatus + recovery projection.

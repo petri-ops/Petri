@@ -9,7 +9,7 @@ import type { CopilotContext } from '@/lib/copilotContext';
 /**
  * Destructive tools (backend registry names) that should be blocked in
  * read-only mode.  The backend decideAgentToolCall() is the authoritative
- * enforcer (core/r-server/agent-tools/agent-tool-policy.js); this set
+ * enforcer (core/biof3-server/agent-tools/agent-tool-policy.js); this set
  * mirrors its MUTATING_SIDE_EFFECTS = { 'workspace-write', 'execution' }
  * so the frontend can surface a synchronous UI hint before network IO.
  *

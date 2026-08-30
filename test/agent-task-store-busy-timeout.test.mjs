@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
-const coreServerRoot = path.join(root, 'core', 'r-server');
+const coreServerRoot = path.join(root, 'core', 'biof3-server');
 const req = createRequire(path.join(coreServerRoot, 'package.json'));
 const Database = req('better-sqlite3');
 
@@ -33,7 +33,7 @@ test('E-019.1 agent-task-store reads busy_timeout from getBusyTimeout()', (t) =>
   process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
   // agent-task-store reads config.dbPath for its target file path. We
   // intercept it via BIOF3_DB_PATH env so we can keep the rest of the
-  // r-server config untouched.
+  // biof3-server config untouched.
   process.env.BIOF3_DB_PATH = path.join(tmp, 'agent-task-store.db');
 
   t.after(() => {
@@ -53,7 +53,7 @@ test('E-019.1 agent-task-store reads busy_timeout from getBusyTimeout()', (t) =>
   // not exported; verify the override flowed through by reading the source
   // (E-019.2 already asserts no hardcode) and by applying the same pragma
   // to a fresh open against the same file with the same override in scope.
-  const agentTaskStorePath = path.resolve(root, 'core/r-server/agent-task-store.js');
+  const agentTaskStorePath = path.resolve(root, 'core/biof3-server/agent-task-store.js');
   delete req.cache[req.resolve(agentTaskStorePath)];
   const mod = req(agentTaskStorePath);
   assert.ok(mod && typeof mod === 'object', 'agent-task-store must load without error');
@@ -85,7 +85,7 @@ test('E-019.1 agent-task-store reads busy_timeout from getBusyTimeout()', (t) =>
 });
 
 test('E-019.2 agent-task-store.js no longer hardcodes busy_timeout = 5000', () => {
-  const agentTaskStorePath = path.resolve(root, 'core/r-server/agent-task-store.js');
+  const agentTaskStorePath = path.resolve(root, 'core/biof3-server/agent-task-store.js');
   const source = fs.readFileSync(agentTaskStorePath, 'utf8');
   // The legacy literal was `db.pragma('busy_timeout = 5000')` and is gone.
   assert.ok(

@@ -9,8 +9,8 @@ const {
   createResultEditProgressRecorder,
   finalizeResultEditProgress,
   projectResultStudioToolContext,
-} = require('../core/r-server/agent-tools/result-context-binding');
-const { createAgentToolInterceptor } = require('../core/r-server/agent-tools/agent-tool-interceptor');
+} = require('../core/biof3-server/agent-tools/result-context-binding');
+const { createAgentToolInterceptor } = require('../core/biof3-server/agent-tools/agent-tool-interceptor');
 
 const TOKEN = 'f'.repeat(64);
 
@@ -212,7 +212,7 @@ test('P4R-3 uses one executable finalizer for returned provider errors and norma
 });
 
 test('P4R-3 wires the same context/progress helpers into task and legacy production paths', () => {
-  for (const path of ['core/r-server/agent-runner.js', 'core/r-server/routes/ai-agent.js']) {
+  for (const path of ['core/biof3-server/agent-runner.js', 'core/biof3-server/routes/ai-agent.js']) {
     const text = source(path);
     assert.match(text, /\.\.\.projectResultStudioToolContext\(context\)/);
     assert.match(text, /createResultEditProgressRecorder\(\)/);
@@ -225,5 +225,5 @@ test('P4R-3 wires the same context/progress helpers into task and legacy product
     assert.match(text, /result_edit_completion_retry/);
     assert.match(text, /resultEditCompletionGuard\.requiresToolExecution\(\)/);
   }
-  assert.match(source('core/r-server/agent-tools/result-context-binding.js'), /已完成的阶段结论已保留/);
+  assert.match(source('core/biof3-server/agent-tools/result-context-binding.js'), /已完成的阶段结论已保留/);
 });

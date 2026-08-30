@@ -5,8 +5,8 @@ const path = require('path');
 
 // Shared R_LIBS_USER resolver for plugin R scripts.
 //
-// Both the HTTP executor (core/r-server/helpers/tools-executor.js) and the MCP
-// registry (core/r-server/mcp/registry.js) need to assemble the same three-tier
+// Both the HTTP executor (core/biof3-server/helpers/tools-executor.js) and the MCP
+// registry (core/biof3-server/mcp/registry.js) need to assemble the same three-tier
 // R library search path before spawning Rscript for a plugin. This module is
 // the single source of truth for that logic so the two call sites cannot drift
 // (audit AUDIT-LOG §3 problem A: ~25 lines duplicated across both files).

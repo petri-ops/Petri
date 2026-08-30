@@ -12,7 +12,7 @@
 //     and returns an updates[] list. Read-only.
 //   loadAllPlugins(): startup-time restore — rehydrates runtime env
 //     vars, registers content-plugin docs in globalThis, and pushes
-//     tool plugin metadata to r-server via registerPluginInServer.
+//     tool plugin metadata to biof3-server via registerPluginInServer.
 // ============================================================
 
 const fs = require('fs');
@@ -33,7 +33,7 @@ const {
   PROJECT_ROOT,
   SHARED_BACKEND_DIR,
 } = require('./paths');
-const pluginLoader = require(path.join(PROJECT_ROOT, 'r-server', 'plugin-loader.js'));
+const pluginLoader = require(path.join(PROJECT_ROOT, 'biof3-server', 'plugin-loader.js'));
 const {
   getInstalledPlugins,
   removeInstalledPlugin,

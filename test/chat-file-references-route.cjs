@@ -37,7 +37,7 @@ function clearHarnessCache(rServer) {
 }
 
 function loadResolveRoute(dbStub) {
-  const rServer = path.resolve(__dirname, '..', 'core', 'r-server');
+  const rServer = path.resolve(__dirname, '..', 'core', 'biof3-server');
   const harnessModulePath = path.join(rServer, 'routes', 'harness.js');
   const dbModulePath = path.join(rServer, 'db.js');
 

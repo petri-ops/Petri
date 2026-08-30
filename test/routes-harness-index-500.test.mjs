@@ -37,7 +37,7 @@ const ROOT_HELPER = path.resolve(
   path.dirname(new URL(import.meta.url).pathname),
   '..',
   'core',
-  'r-server',
+  'biof3-server',
   'routes',
   '_helpers',
   'harness-shared.js',
@@ -57,11 +57,11 @@ const ROOT_HELPER = path.resolve(
  * Build a minimal Express-like app that mounts only the /api/harness/index
  * route from routes/harness/resources.js, backed by a stubbed db and a
  * scratch directory so we can exercise the real handler without booting the
- * whole r-server.
+ * whole biof3-server.
  *
  * Must be called with a stubDbAlreadyInjected=true after the test has set up
  * the require.cache override for the db module. Otherwise the helper will
- * load the real db (which fails because there is no r-server/db in the test
+ * load the real db (which fails because there is no biof3-server/db in the test
  * cwd) before the stub lands.
  */
 function buildTestApp(opts = {}) {
@@ -84,13 +84,13 @@ function buildTestApp(opts = {}) {
   // installDbStub()).
   Object.keys(require.cache).forEach((key) => {
     if (
-      key.includes('/core/r-server/routes/_helpers/harness-shared.js') ||
-      key.includes('/core/r-server/routes/harness/') ||
-      key.includes('/core/r-server/routes/harness/index.js') ||
-      key.endsWith('/core/r-server/routes/harness/resources.js') ||
-      key.endsWith('/core/r-server/routes/harness/workflow.js') ||
-      key.endsWith('/core/r-server/routes/harness/repair.js') ||
-      key.endsWith('/core/r-server/routes/harness/scientific-task.js')
+      key.includes('/core/biof3-server/routes/_helpers/harness-shared.js') ||
+      key.includes('/core/biof3-server/routes/harness/') ||
+      key.includes('/core/biof3-server/routes/harness/index.js') ||
+      key.endsWith('/core/biof3-server/routes/harness/resources.js') ||
+      key.endsWith('/core/biof3-server/routes/harness/workflow.js') ||
+      key.endsWith('/core/biof3-server/routes/harness/repair.js') ||
+      key.endsWith('/core/biof3-server/routes/harness/scientific-task.js')
     ) {
       delete require.cache[key];
     }
@@ -104,25 +104,25 @@ function buildTestApp(opts = {}) {
     next();
   });
 
-  const resourcesRoute = require('../core/r-server/routes/harness/resources.js');
+  const resourcesRoute = require('../core/biof3-server/routes/harness/resources.js');
   resourcesRoute.register(app);
   return app;
 }
 
 /**
- * Inject a stub for core/r-server/db into the require cache BEFORE the helper
+ * Inject a stub for core/biof3-server/db into the require cache BEFORE the helper
  * module loads. The stub must mirror the parts of db that harness-shared uses.
  */
 function installDbStub(fakeProject) {
   // Resolve the db module path RELATIVE TO THE DESKTOP REPO ROOT, not the test
-  // file. require.resolve('../../core/r-server/db.js') would resolve to
-  // <workspace>/core/r-server/db.js (one level too high), which is the bug
+  // file. require.resolve('../../core/biof3-server/db.js') would resolve to
+  // <workspace>/core/biof3-server/db.js (one level too high), which is the bug
   // pattern that originally caused this BLOCK-21 regression.
   const dbModulePath = require.resolve(path.join(
     path.dirname(new URL(import.meta.url).pathname),
     '..',
     'core',
-    'r-server',
+    'biof3-server',
     'db.js',
   ));
   require.cache[dbModulePath] = {

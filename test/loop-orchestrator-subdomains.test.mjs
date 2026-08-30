@@ -15,24 +15,24 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
 
   describe('loop-orchestrator.js', () => {
     it('should require without error', async () => {
-      const mod = await import(resolve('core/r-server/loop-orchestrator.js'));
+      const mod = await import(resolve('core/biof3-server/loop-orchestrator.js'));
       assert.ok(mod, 'module should be loaded');
     });
 
     it('should export runLoop function', async () => {
-      const { runLoop } = await import(resolve('core/r-server/loop-orchestrator.js'));
+      const { runLoop } = await import(resolve('core/biof3-server/loop-orchestrator.js'));
       assert.strictEqual(typeof runLoop, 'function', 'runLoop should be a function');
     });
 
     it('runLoop should be async function', async () => {
-      const { runLoop } = await import(resolve('core/r-server/loop-orchestrator.js'));
+      const { runLoop } = await import(resolve('core/biof3-server/loop-orchestrator.js'));
       assert.ok(runLoop.constructor.name === 'AsyncFunction', 'runLoop should be async');
     });
 
     it('should NOT reference harness-workflow-state', async () => {
       const fs = await import('fs');
       const content = fs.readFileSync(
-        resolve('core/r-server/loop-orchestrator.js'),
+        resolve('core/biof3-server/loop-orchestrator.js'),
         'utf8'
       );
       const matches = content.match(/require.*harness-workflow-state|harnessWorkflowState/g);
@@ -46,12 +46,12 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
 
   describe('conversation-adapter.js', () => {
     it('should require without error', async () => {
-      const mod = await import(resolve('core/r-server/conversation-adapter.js'));
+      const mod = await import(resolve('core/biof3-server/conversation-adapter.js'));
       assert.ok(mod, 'module should be loaded');
     });
 
     it('should export required functions', async () => {
-      const mod = await import(resolve('core/r-server/conversation-adapter.js'));
+      const mod = await import(resolve('core/biof3-server/conversation-adapter.js'));
       assert.strictEqual(typeof mod.appendAssistantMessage, 'function');
       assert.strictEqual(typeof mod.appendUserMessage, 'function');
       assert.strictEqual(typeof mod.saveChatTurnToMemory, 'function');
@@ -63,7 +63,7 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
     });
 
     it('should re-export conversation helpers', async () => {
-      const mod = await import(resolve('core/r-server/conversation-adapter.js'));
+      const mod = await import(resolve('core/biof3-server/conversation-adapter.js'));
       assert.strictEqual(typeof mod.getOrCreateActiveConversation, 'function');
       assert.strictEqual(typeof mod.appendMessageToConversation, 'function');
       assert.strictEqual(typeof mod._maybeAutoTitleConversation, 'function');
@@ -73,22 +73,22 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
 
   describe('agent-runner.js facade', () => {
     it('should require without error', async () => {
-      const mod = await import(resolve('core/r-server/agent-runner.js'));
+      const mod = await import(resolve('core/biof3-server/agent-runner.js'));
       assert.ok(mod, 'module should be loaded');
     });
 
     it('should export runAgentLoop function', async () => {
-      const { runAgentLoop } = await import(resolve('core/r-server/agent-runner.js'));
+      const { runAgentLoop } = await import(resolve('core/biof3-server/agent-runner.js'));
       assert.strictEqual(typeof runAgentLoop, 'function', 'runAgentLoop should be a function');
     });
 
     it('runAgentLoop should be async function', async () => {
-      const { runAgentLoop } = await import(resolve('core/r-server/agent-runner.js'));
+      const { runAgentLoop } = await import(resolve('core/biof3-server/agent-runner.js'));
       assert.ok(runAgentLoop.constructor.name === 'AsyncFunction', 'runAgentLoop should be async');
     });
 
     it('should export 5 named functions (signature unchanged)', async () => {
-      const mod = await import(resolve('core/r-server/agent-runner.js'));
+      const mod = await import(resolve('core/biof3-server/agent-runner.js'));
       const namedExports = Object.keys(mod).filter(
         k => !k.startsWith('default') && !k.startsWith('module')
       );
@@ -104,7 +104,7 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
     });
 
     it('runAgentLoop should be callable with documented parameters', async () => {
-      const { runAgentLoop } = await import(resolve('core/r-server/agent-runner.js'));
+      const { runAgentLoop } = await import(resolve('core/biof3-server/agent-runner.js'));
       // runAgentLoop uses destructuring with defaults, so length reports all params
       // We verify it's a function that can be called
       assert.ok(typeof runAgentLoop === 'function', 'runAgentLoop should be callable');
@@ -115,7 +115,7 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
     it('agent-runner.js should be under 700 lines', async () => {
       const fs = await import('fs');
       const content = fs.readFileSync(
-        resolve('core/r-server/agent-runner.js'),
+        resolve('core/biof3-server/agent-runner.js'),
         'utf8'
       );
       const lines = content.split('\n').length;
@@ -128,7 +128,7 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
     it('loop-orchestrator.js should be under 1100 lines', async () => {
       const fs = await import('fs');
       const content = fs.readFileSync(
-        resolve('core/r-server/loop-orchestrator.js'),
+        resolve('core/biof3-server/loop-orchestrator.js'),
         'utf8'
       );
       const lines = content.split('\n').length;
@@ -141,7 +141,7 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
     it('conversation-adapter.js should be under 450 lines', async () => {
       const fs = await import('fs');
       const content = fs.readFileSync(
-        resolve('core/r-server/conversation-adapter.js'),
+        resolve('core/biof3-server/conversation-adapter.js'),
         'utf8'
       );
       const lines = content.split('\n').length;

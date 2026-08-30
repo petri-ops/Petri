@@ -3,8 +3,8 @@
  *
  * Stage 3 B2 part2 — run-path wiring contract.
  *
- * The two R run paths (core/r-server/helpers/tools-executor.js and
- * core/r-server/mcp/registry.js) now call `ensureBundlesForPlugin(cfg)` BEFORE
+ * The two R run paths (core/biof3-server/helpers/tools-executor.js and
+ * core/biof3-server/mcp/registry.js) now call `ensureBundlesForPlugin(cfg)` BEFORE
  * `resolveRLibsForPlugin(cfg)` for R plugins that declare `requiresBundle`.
  * These tests exercise that exact ordered contract WITHOUT spawning a real
  * executor or Rscript: they assert the observable behavior the wiring depends

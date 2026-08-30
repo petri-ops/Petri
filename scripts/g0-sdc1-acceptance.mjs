@@ -21,7 +21,7 @@ const EVIDENCE_PATH = path.join(ROOT, 'acceptance/g0-scientific-data-contract/da
 const SCREENSHOT_DIR = path.join(ROOT, 'acceptance/g0-scientific-data-contract/data-to-first-result');
 const SOURCE_FILES = Object.freeze([
   'core/shared-backend/data-profiler.js',
-  'core/r-server/routes/files.js',
+  'core/biof3-server/routes/files.js',
   'frontend/src/lib/data-profile.ts',
   'frontend/src/components/workspace-panels/DataIntakeControl.tsx',
   'frontend/src/components/workspace-panels/RightPanel.tsx',

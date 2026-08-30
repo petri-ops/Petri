@@ -52,10 +52,10 @@ export const LIVE_SOURCE_FILES = Object.freeze({
   producerTest: 'test/p4r-live-observation.test.mjs',
   corpus: 'scripts/g0-rs-p4r-corpus.mjs',
   capture: 'scripts/g0-rs-p4r-capture.mjs',
-  routes: 'core/r-server/routes/result-studio.js',
-  contextTools: 'core/r-server/agent-tools/result-context-tools.js',
-  contextEditTools: 'core/r-server/agent-tools/result-context-edit-tools.js',
-  editTools: 'core/r-server/agent-tools/result-edit-tools.js',
+  routes: 'core/biof3-server/routes/result-studio.js',
+  contextTools: 'core/biof3-server/agent-tools/result-context-tools.js',
+  contextEditTools: 'core/biof3-server/agent-tools/result-context-edit-tools.js',
+  editTools: 'core/biof3-server/agent-tools/result-edit-tools.js',
   changeSetService: 'core/shared-backend/result-changeset-service.js',
   compareService: 'core/shared-backend/result-compare-service.js',
   revisionSource: 'core/shared-backend/result-revision-source.js',
@@ -63,7 +63,7 @@ export const LIVE_SOURCE_FILES = Object.freeze({
   background: 'core/shared-backend/result-studio-background.js',
   backgroundChild: 'core/shared-backend/result-studio-background-child.js',
   repository: 'core/shared-backend/result-studio-repository.js',
-  conversations: 'core/r-server/helpers/conversations.js',
+  conversations: 'core/biof3-server/helpers/conversations.js',
   packageScripts: 'package.json',
   impactMap: 'test/impact-map.json',
 });
@@ -279,7 +279,7 @@ function artifactName(outputs, preferred = 'volcano.png') {
 
 function openDatabase(dbPath, { readonly = false } = {}) {
   const Database = require(require.resolve('better-sqlite3', {
-    paths: [path.join(ROOT, 'core/r-server'), ROOT],
+    paths: [path.join(ROOT, 'core/biof3-server'), ROOT],
   }));
   return new Database(dbPath, readonly ? { readonly: true } : undefined);
 }
@@ -464,16 +464,16 @@ async function runAgentChildMain() {
   const spec = JSON.parse(process.argv[index + 1]);
   const {
     createResultContextEditTools,
-  } = require(path.join(ROOT, 'core/r-server/agent-tools/result-context-edit-tools.js'));
+  } = require(path.join(ROOT, 'core/biof3-server/agent-tools/result-context-edit-tools.js'));
   const {
     createResultChangeSetTools,
-  } = require(path.join(ROOT, 'core/r-server/agent-tools/result-edit-tools.js'));
-  const mcpRegistry = require(path.join(ROOT, 'core/r-server/mcp/registry.js'));
+  } = require(path.join(ROOT, 'core/biof3-server/agent-tools/result-edit-tools.js'));
+  const mcpRegistry = require(path.join(ROOT, 'core/biof3-server/mcp/registry.js'));
   const {
     getOrCreateActiveConversation,
     appendMessageToConversation,
-  } = require(path.join(ROOT, 'core/r-server/helpers/conversations.js'));
-  const db = require(path.join(ROOT, 'core/r-server/db.js'));
+  } = require(path.join(ROOT, 'core/biof3-server/helpers/conversations.js'));
+  const db = require(path.join(ROOT, 'core/biof3-server/db.js'));
   const project = db.getProject(spec.projectId);
   const ownerId = String(project?.user_id || '').trim();
   if (!project || !ownerId) throw new Error('live project owner is unavailable');

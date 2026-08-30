@@ -3,10 +3,10 @@ import { createRequire } from 'node:module';
 import test, { afterEach } from 'node:test';
 
 const require = createRequire(import.meta.url);
-const express = require('../core/r-server/node_modules/express');
-const perfProbe = require('../core/r-server/helpers/perf-probe');
-const { requestTimingMiddleware } = require('../core/r-server/bootstrap');
-const registerPerfProbeRoutes = require('../core/r-server/routes/perf-probe');
+const express = require('../core/biof3-server/node_modules/express');
+const perfProbe = require('../core/biof3-server/helpers/perf-probe');
+const { requestTimingMiddleware } = require('../core/biof3-server/bootstrap');
+const registerPerfProbeRoutes = require('../core/biof3-server/routes/perf-probe');
 
 async function withServer(configure, run) {
   const app = express();

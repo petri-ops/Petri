@@ -7,9 +7,9 @@ import os from 'node:os';
 import path from 'node:path';
 
 const require = createRequire(import.meta.url);
-const { createWorkspaceTools } = require('../core/r-server/agent-tools/workspace-tools.js');
-const { getToolDefs } = require('../core/r-server/agent-tools/tool-defs.js');
-const { dispatchTool } = require('../core/r-server/agent-tools/index.js');
+const { createWorkspaceTools } = require('../core/biof3-server/agent-tools/workspace-tools.js');
+const { getToolDefs } = require('../core/biof3-server/agent-tools/tool-defs.js');
+const { dispatchTool } = require('../core/biof3-server/agent-tools/index.js');
 
 // Windows (without Developer Mode) and some CI images cannot create symlinks,
 // which breaks the escape-prevention fixture. Probe once and skip the symlink

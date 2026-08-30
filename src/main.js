@@ -3,8 +3,8 @@
  *
  * 职责：
  * 1. 设置桌面版本地存储、运行时和用户数据环境变量
- * 2. 启动 r-server（子进程 spawn，避免原生模块 V8 版本冲突；BLOCK-30 P1 起
- *    无独立 py-server，Python 工具由 r-server 经执行器注册表本地执行）
+ * 2. 启动 biof3-server（子进程 spawn，避免原生模块 V8 版本冲突；BLOCK-30 P1 起
+ *    无独立 py-server，Python 工具由 biof3-server 经执行器注册表本地执行）
  * 3. 启动 R plumber replot 服务（spawn 子进程）
  * 4. 加载已安装插件
  * 5. 内容增量同步（后台）
@@ -93,7 +93,7 @@ process.stderr?.on?.("error", (err) => {
 // ── 路径解析（开发模式 vs 打包模式）────────────────────────────
 // 去 submodule 后（core 内嵌）：
 //   - desktop 自己的资源（frontend/dist, build, resources/）在 desktop 仓根
-//   - core 资源（r-server, shared-backend）内嵌在 desktop 仓根 core/ 下
+//   - core 资源（biof3-server, shared-backend）内嵌在 desktop 仓根 core/ 下
 //     （BLOCK-30 P1：py-server / gateway 已摘除）
 // 开发模式：PROJECT_ROOT = desktop 仓根（src/..），CORE_ROOT = PROJECT_ROOT/core
 // 打包模式：desktop 资源在 process.resourcesPath，core 资源在 process.resourcesPath/core
@@ -355,8 +355,8 @@ async function main() {
   const { setupDesktopEnv } = require("./main/env-coordinator");
   setupDesktopEnv(backendPorts);
 
-  // M1-4 (H3)：启动 r-server 前跑 db migration，防升级 schema 错乱。
-  // Migration must use the same selected Node boundary as r-server. Loading
+  // M1-4 (H3)：启动 biof3-server 前跑 db migration，防升级 schema 错乱。
+  // Migration must use the same selected Node boundary as biof3-server. Loading
   // better-sqlite3 inside Electron would require a different native ABI and
   // would break the system-Node copy used by Harness/backend processes.
   try {
@@ -366,7 +366,7 @@ async function main() {
       fs.mkdirSync(path.dirname(dbPath), { recursive: true });
       const migrationEnv = { ...process.env, ELECTRON_RUN_AS_NODE: "1" };
       if (IS_DEV) {
-        migrationEnv.BIOF3_BETTER_SQLITE3_ROOT = resolveCore("r-server");
+        migrationEnv.BIOF3_BETTER_SQLITE3_ROOT = resolveCore("biof3-server");
       } else {
         delete migrationEnv.BIOF3_BETTER_SQLITE3_ROOT;
       }
@@ -389,11 +389,11 @@ async function main() {
     }
   } catch (e) {
     console.error("[desktop] migration failed:", e.message);
-    // 不阻断启动——r-server 的 initSchema() 仍会兜底建表
+    // 不阻断启动——biof3-server 的 initSchema() 仍会兜底建表
   }
 
   // 1. 启动后端服务
-  // r-server 常驻（BLOCK-30 P1/P2：唯一业务后端，Python 工具经执行器注册表
+  // biof3-server 常驻（BLOCK-30 P1/P2：唯一业务后端，Python 工具经执行器注册表
   // 本地执行；gateway 协调层已摘除）。
   // BLOCK-9.1 PHASE 4: startRServer moved to src/main/backend-proc-manager.js.
   // main.js orchestrates via named imports.
@@ -417,10 +417,10 @@ async function main() {
 
   // 5. 设置 IPC
   // TLS/Proxy fix: 渲染进程(Chromium)默认继承系统代理，会把 localhost 的
-  // r-server 请求也塞进系统代理，导致
+  // biof3-server 请求也塞进系统代理，导致
   // "Client network socket disconnected before secure TLS connection was
   // established"。只绕开本地回环，外网仍走原代理（避免 blanket direct://
-  // 误伤需要代理才能访问的外网 LLM）。注意：r-server 出站 LLM 走 Node
+  // 误伤需要代理才能访问的外网 LLM）。注意：biof3-server 出站 LLM 走 Node
   // fetch/https，本就不吃系统代理，此设置不影响它。
   try {
     session.defaultSession.setProxy({

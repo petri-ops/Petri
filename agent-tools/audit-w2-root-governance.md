@@ -146,7 +146,7 @@ git log --oneline -5:
   11e8809 fix(docs-registry): AGENT-INTERACTION-EVAL-20260814 kind=planning → reference
   719a5af docs(roadmap,handoff): Sync next-steps-roadmap + workspace-handoff to 2026-08-16
   820851a docs(governance): Relocate agent-interaction-evaluation.md to docs/planning/
-  f6301cc docs(audit): WB-NAMESPACE-PUSH-2026-08-16 + r-server /api/ai/agent 路由修复
+  f6301cc docs(audit): WB-NAMESPACE-PUSH-2026-08-16 + biof3-server /api/ai/agent 路由修复
   01c5e0b feat(skills): UI-161 closeout — relocate Skills entry to LeftPanel
 ```
 

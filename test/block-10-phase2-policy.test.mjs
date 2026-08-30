@@ -20,16 +20,16 @@ const require = createRequire(import.meta.url);
 const {
   effectiveOperation,
   checkAllowedDownstream,
-} = require('../core/r-server/agent-tools/agent-tool-policy.js');
+} = require('../core/biof3-server/agent-tools/agent-tool-policy.js');
 
 const {
   bindResultStudioContextToken,
   CONTEXT_BOUND_TOOLS,
-} = require('../core/r-server/agent-tools/result-context-binding.js');
+} = require('../core/biof3-server/agent-tools/result-context-binding.js');
 
 const {
   inferExecutionPolicy,
-} = require('../core/r-server/helpers/agent-execution-policy.js');
+} = require('../core/biof3-server/helpers/agent-execution-policy.js');
 
 const readOnlyContract = { sideEffect: 'none', riskTier: 'R0', category: 'retrieval' };
 

@@ -19,9 +19,9 @@ const ancestor = (c) => { try { execFileSync('git', ['merge-base', '--is-ancesto
 function inspect(verification = null, bootstrap = false) {
   const plan = read('docs/g0-living-foundation-plan.md');
   const loader = read('core/shared-backend/plugin-sdk.js');
-  const policy = read('core/r-server/agent-tools/agent-tool-policy.js');
-  const workspace = read('core/r-server/agent-tools/workspace-tools.js');
-  const server = read('core/r-server/server.js');
+  const policy = read('core/biof3-server/agent-tools/agent-tool-policy.js');
+  const workspace = read('core/biof3-server/agent-tools/workspace-tools.js');
+  const server = read('core/biof3-server/server.js');
   const commands = verification?.commands || [];
   const checks = [
     item('G0-W4-01', g0.validateG0BaselineBundle().ok && g0.manifest.lifecycleStatus === 'maintained' && g0.manifest.qualificationStatus === 'qualified', ['core/shared-backend/g0/baseline-manifest.json'], 'Maintained qualified baseline retains fourth-wave contracts.'),
@@ -29,10 +29,10 @@ function inspect(verification = null, bootstrap = false) {
     item('G0-W4-03', /builtin-canonical/.test(loader) && supply.contract.forbidden.includes('plugin_owned_job_or_artifact_ledger'), ['core/shared-backend/plugin-sdk.js'], 'LF7 reuses canonical Plugin SDK without a second ledger.'),
     item('G0-W4-04', /failureModes/.test(loader) && /validators/.test(read('core/shared-backend/g0-capability-supply-chain.js')), ['core/shared-backend/plugin-sdk.js', 'core/shared-backend/g0-capability-supply-chain.js'], 'Plugin failure and validator contracts are enforced.'),
     item('G0-W4-05', g0.securityPermissionMatrix.contractVersion === 2 && g0.securityPermissionMatrix.riskFactors.length === 6, ['core/shared-backend/g0/security-permission-matrix.json'], 'LF8 evaluates mode, scope, risk, path and side effects.'),
-    item('G0-W4-06', /source_data_immutable/.test(policy) && /command_blocked/.test(workspace), ['core/r-server/agent-tools/agent-tool-policy.js', 'core/r-server/agent-tools/workspace-tools.js'], 'LF8 production boundaries remain wired.'),
+    item('G0-W4-06', /source_data_immutable/.test(policy) && /command_blocked/.test(workspace), ['core/biof3-server/agent-tools/agent-tool-policy.js', 'core/biof3-server/agent-tools/workspace-tools.js'], 'LF8 production boundaries remain wired.'),
     item('G0-W4-07', g0.securityPermissionMatrix.fullAccessStillBlocks.length >= 7, ['core/shared-backend/g0/security-permission-matrix.json'], 'Full access retains non-negotiable blocks.'),
     item('G0-W4-08', resilience.validateFaultMatrix().ok && resilience.contract.faultDomains.length === 8, ['core/shared-backend/g0/resilience-lab.json'], 'LF10 covers eight fault domains.'),
-    item('G0-W4-09', resilience.contract.requiredAssertions.length === 5 && /recovery_required/.test(server), ['core/r-server/server.js'], 'LF10 requires no false success, audit, isolation, stable science and bounded retry.'),
+    item('G0-W4-09', resilience.contract.requiredAssertions.length === 5 && /recovery_required/.test(server), ['core/biof3-server/server.js'], 'LF10 requires no false success, audit, isolation, stable science and bounded retry.'),
     item('G0-W4-10', g0.manifest.executionTruthChain.join(',') === 'run_tool,tool_job,artifact_truth', ['core/shared-backend/g0/constitution.json'], 'No second execution or fault truth exists.'),
     item('G0-W4-11', bootstrap || (/G0-LF7[\s\S]*?状态：`completed`/.test(plan) && /G0-LF8[\s\S]*?状态：`completed`/.test(plan) && /G0-LF10[\s\S]*?状态：`completed`/.test(plan)), ['docs/g0-living-foundation-plan.md'], bootstrap ? 'Source bootstrap.' : 'LF7/LF8/LF10 completion recorded.'),
     item('G0-W4-12', bootstrap || (commands.length >= 8 && commands.every((x) => x.passed)), ['acceptance/g0-living-foundation/g0-fourth-wave-acceptance.json'], bootstrap ? 'Evidence bootstrap.' : 'All command gates passed.'),

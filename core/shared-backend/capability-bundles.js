@@ -21,7 +21,7 @@ const { execFile } = require('child_process');
  *
  * Layering:
  *   - This module is PURE DATA + THIN ORCHESTRATION. It has no `electron`
- *     dependency and can run in core/ (r-server, tests) and the main process.
+ *     dependency and can run in core/ (biof3-server, tests) and the main process.
  *   - `capability-provisioning.js` is the generic download/verify/install
  *     engine. This module supplies it descriptors and decides *whether* a
  *     bundle should be fetched.

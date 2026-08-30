@@ -9,7 +9,7 @@ import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
-const coreServerRoot = join(root, 'core', 'r-server');
+const coreServerRoot = join(root, 'core', 'biof3-server');
 const coreRequire = createRequire(join(coreServerRoot, 'package.json'));
 
 test('migration CLI uses the Core native dependency boundary and records schema version', (t) => {

@@ -7,11 +7,11 @@ import { dirname, resolve, join } from 'node:path';
 
 const path = { join };
 const __dirname = dirname(fileURLToPath(import.meta.url));
-// desktop-app/test → 仓库根/r-server
-const R_SERVER = resolve(__dirname, '..', 'core', 'r-server');
+// desktop-app/test → 仓库根/biof3-server
+const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
 
 const pluginLoader = await import(pathToFileURL(R_SERVER + '/plugin-loader.js').href);
-const registryModule = await import(pathToFileURL(resolve(__dirname, '..', 'core', 'r-server', 'mcp', 'registry.js')).href);
+const registryModule = await import(pathToFileURL(resolve(__dirname, '..', 'core', 'biof3-server', 'mcp', 'registry.js')).href);
 const { listTools, callTool } = registryModule;
 const registryTest = registryModule.default?._test || registryModule._test;
 

@@ -2,7 +2,7 @@
  * BioF3 Desktop — chat file reference resolution (platform glue)
  *
  * Wires the platform-agnostic `resolveFileReferences` (in shared-copilot)
- * to r-server's `POST /api/harness/file-references/resolve` endpoint and
+ * to biof3-server's `POST /api/harness/file-references/resolve` endpoint and
  * re-exports the pure classify / extract helpers so application code can
  * import everything from a single entry point.
  */

@@ -30,8 +30,8 @@ const {
   createVerifiedSnapshotReadStream,
   pipeVerifiedSnapshotToResponse,
   readVerifiedFileSnapshot,
-} = require('../core/r-server/helpers/verified-file-snapshot');
-const { _test } = require('../core/r-server/helpers/tools-executor');
+} = require('../core/biof3-server/helpers/verified-file-snapshot');
+const { _test } = require('../core/biof3-server/helpers/tools-executor');
 
 test('tool executor hydrates persisted params and project context before provenance', () => {
   const job = _test.hydrateExecutionJob({

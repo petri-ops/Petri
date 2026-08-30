@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sdk = require('../core/shared-backend/result-studio-plugin-sdk');
-const { normalizePluginManifest } = require('../core/r-server/plugin-loader');
+const { normalizePluginManifest } = require('../core/biof3-server/plugin-loader');
 const pluginIds = ['deseq2', 'volcano-plot', 'gene-correlation', 'go-kegg'];
 
 function readPlugin(id) {

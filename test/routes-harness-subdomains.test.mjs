@@ -85,13 +85,13 @@ function makeFakeApp() {
 
 test('7 subdomain files are all require()-able and export register()', () => {
   for (const name of SUBDOMAINS) {
-    const sub = require(`../core/r-server/routes/harness/${name}`);
+    const sub = require(`../core/biof3-server/routes/harness/${name}`);
     assert.equal(typeof sub.register, 'function', `${name}.register must be a function`);
   }
 });
 
 test('routes/harness/index.js register() accepts an Express app and runs without error', () => {
-  const index = require('../core/r-server/routes/harness/index');
+  const index = require('../core/biof3-server/routes/harness/index');
   const app = makeFakeApp();
   // register() 内部会调 7 个子域 register，每个子域会调 app.get/post 挂载端点
   assert.doesNotThrow(() => index.register(app), 'index.register(app) should not throw');
@@ -104,7 +104,7 @@ test('routes/harness/index.js register() accepts an Express app and runs without
 });
 
 test('routes/harness/index.js register() mounts 19 endpoints with correct method + path', () => {
-  const index = require('../core/r-server/routes/harness/index');
+  const index = require('../core/biof3-server/routes/harness/index');
   const app = makeFakeApp();
   index.register(app);
   // 验证每条 EXPECTED_ENDPOINTS 都被挂载
@@ -115,7 +115,7 @@ test('routes/harness/index.js register() mounts 19 endpoints with correct method
 });
 
 test('main file routes/harness.js still exports a callable register function', () => {
-  const main = require('../core/r-server/routes/harness');
+  const main = require('../core/biof3-server/routes/harness');
   assert.equal(typeof main, 'function', 'main export must be a callable register function');
 });
 
@@ -127,7 +127,7 @@ test('main file is a thin facade (line count significantly reduced)', () => {
     path.dirname(new URL(import.meta.url).pathname),
     '..',
     'core',
-    'r-server',
+    'biof3-server',
     'routes',
     'harness.js',
   );
@@ -145,7 +145,7 @@ test('each subdomain file has reasonable line count (≥ 30, ≤ 500)', () => {
     path.dirname(new URL(import.meta.url).pathname),
     '..',
     'core',
-    'r-server',
+    'biof3-server',
     'routes',
     'harness',
   );
@@ -159,7 +159,7 @@ test('each subdomain file has reasonable line count (≥ 30, ≤ 500)', () => {
 });
 
 test('routes/harness/index.js exposes _submodules surface with all 7 subdomains', () => {
-  const index = require('../core/r-server/routes/harness/index');
+  const index = require('../core/biof3-server/routes/harness/index');
   assert.ok(index._submodules, '_submodules must exist');
   // Map subdomain name → JS identifier (scientific-task has hyphen → camelCase)
   const NAME_MAP = {
@@ -181,8 +181,8 @@ test('routes/harness/index.js exposes _submodules surface with all 7 subdomains'
 
 test('endpoints match between subdomain register() and main file register() (no path drift)', () => {
   // 分别用 fake app 通过 index.js 和主文件 facade 注册，比较挂载的 endpoints
-  const index = require('../core/r-server/routes/harness/index');
-  const main = require('../core/r-server/routes/harness');
+  const index = require('../core/biof3-server/routes/harness/index');
+  const main = require('../core/biof3-server/routes/harness');
 
   const indexApp = makeFakeApp();
   index.register(indexApp);
@@ -205,8 +205,8 @@ test('endpoints match between subdomain register() and main file register() (no 
 });
 
 test('_helpers/harness-shared.js and _helpers/workspace-file-index.js are require()-able', () => {
-  const harnessShared = require('../core/r-server/routes/_helpers/harness-shared');
-  const workspaceFileIndex = require('../core/r-server/routes/_helpers/workspace-file-index');
+  const harnessShared = require('../core/biof3-server/routes/_helpers/harness-shared');
+  const workspaceFileIndex = require('../core/biof3-server/routes/_helpers/workspace-file-index');
   // 关键 helper 存在性
   assert.equal(typeof harnessShared.authorizeAndResolveOptions, 'function', 'authorizeAndResolveOptions must exist');
   assert.equal(typeof harnessShared.canAccessProject, 'function', 'canAccessProject must exist');

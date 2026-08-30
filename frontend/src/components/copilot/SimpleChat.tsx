@@ -1445,7 +1445,7 @@ export function SimpleChat({
                 <button
                   type="button"
                   className={`sc-composer-icon-btn${refreshing ? ' is-refreshing' : ''}${hasFileReferences ? '' : ' is-faded'}`}
-                  title="重新解析当前会话中的文件链接（清除解析缓存并对所有已落地消息重跑解析器；首次生效需重启 Electron 让 r-server 加载最新索引逻辑）"
+                  title="重新解析当前会话中的文件链接（清除解析缓存并对所有已落地消息重跑解析器；首次生效需重启 Electron 让 biof3-server 加载最新索引逻辑）"
                   aria-label="刷新文件链接"
                   disabled={refreshing}
                   onClick={() => void handleRefresh()}

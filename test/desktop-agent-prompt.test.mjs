@@ -3,11 +3,11 @@ import test from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { buildSystemPrompt } = require('../core/r-server/helpers/system-prompt.js');
+const { buildSystemPrompt } = require('../core/biof3-server/helpers/system-prompt.js');
 const {
   appendDesktopAgentInstructions,
-} = require('../core/r-server/helpers/desktop-agent-prompt.js');
-const { getToolDefs } = require('../core/r-server/agent-tools/tool-defs.js');
+} = require('../core/biof3-server/helpers/desktop-agent-prompt.js');
+const { getToolDefs } = require('../core/biof3-server/agent-tools/tool-defs.js');
 
 test('desktop prompt rejects legacy identity and automatic recommendation patterns', () => {
   const prompt = appendDesktopAgentInstructions(

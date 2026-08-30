@@ -9,7 +9,7 @@
  *   A-010.4 getCoreEnv() snapshot is frozen (cannot be mutated by caller)
  *   A-010.5 getEnv(KEY, fallback) falls back to literal when env unset
  *   A-010.6 getEnv treats empty-string env as unset (returns fallback)
- *   A-010.7 6 core env reads in core/r-server/config.js no longer hit
+ *   A-010.7 6 core env reads in core/biof3-server/config.js no longer hit
  *             process.env directly
  *
  * 运行：cd desktop && node --test test/config-helper-centralized.test.mjs
@@ -130,20 +130,20 @@ test('A-010.6 getEnv treats empty-string env as unset', () => {
   }
 });
 
-test('A-010.7 6 core env reads in core/r-server/config.js no longer hit process.env directly', () => {
+test('A-010.7 6 core env reads in core/biof3-server/config.js no longer hit process.env directly', () => {
   // The 6 fields routed through getCoreEnv() in config.js must no longer
   // read process.env.X directly. We assert source-text against the new
   // pattern: `rHome: _coreEnv.rHome` (or similar). The legacy literal
   // `process.env.BIOF3_R_HOME || ''` must be gone.
   const configSource = fs.readFileSync(
-    path.join(root, 'core/r-server/config.js'),
+    path.join(root, 'core/biof3-server/config.js'),
     'utf8',
   );
 
   // Positive: the helper is referenced.
   assert.ok(
     configSource.includes('getCoreEnv'),
-    'core/r-server/config.js must read core env through config-helper.getCoreEnv()',
+    'core/biof3-server/config.js must read core env through config-helper.getCoreEnv()',
   );
 
   // Negative: the 6 directly-read env fields must no longer appear in
@@ -160,7 +160,7 @@ test('A-010.7 6 core env reads in core/r-server/config.js no longer hit process.
   for (const re of legacyReadPatterns) {
     assert.ok(
       !re.test(configSource),
-      `core/r-server/config.js must not carry legacy \`${re}\``,
+      `core/biof3-server/config.js must not carry legacy \`${re}\``,
     );
   }
 
@@ -173,7 +173,7 @@ test('A-010.7 6 core env reads in core/r-server/config.js no longer hit process.
   try {
     // Bust the require cache so config.js re-evaluates with the new env.
     const configPath = req.resolve(
-      path.join(root, 'core/r-server/config.js'),
+      path.join(root, 'core/biof3-server/config.js'),
     );
     delete req.cache[configPath];
     const freshConfig = req(configPath);

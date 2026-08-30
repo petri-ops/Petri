@@ -2,9 +2,9 @@
  * BioF3 shared backend — Path Safety Helpers
  *
  * Path-traversal guards for joining user-supplied segments under a base
- * directory. Extracted from r-server/helpers/tools-assets.js so platform,
- * r-server can share the same guard without importing from
- * r-server by name.
+ * directory. Extracted from biof3-server/helpers/tools-assets.js so platform,
+ * biof3-server can share the same guard without importing from
+ * biof3-server by name.
  */
 
 const path = require('path');

@@ -141,7 +141,7 @@ async function fetchJson(port, pathname, timeoutMs = 2500) {
 
 function appendBounded(state, chunk) {
   state.log = `${state.log}${String(chunk)}`.slice(-262144);
-  const match = state.log.match(/r-server spawned[^\n]*on :(\d+)/);
+  const match = state.log.match(/biof3-server spawned[^\n]*on :(\d+)/);
   if (match) state.port = Number(match[1]);
 }
 
@@ -313,7 +313,7 @@ export async function runPackagedQualification({
 
   const requiredResources = [
     join(paths.resources, 'frontend/dist/index.html'),
-    join(paths.resources, 'core/r-server/server.js'),
+    join(paths.resources, 'core/biof3-server/server.js'),
     join(paths.resources, 'core/shared-backend/g0-baseline.js'),
     join(paths.resources, 'built-in-plugins/manifest.json'),
     join(paths.resources, 'built-in-plugins/deseq2/scripts/deseq2.R'),

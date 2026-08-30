@@ -10,7 +10,7 @@ const {
   resolveUploadedFiles,
   writeUploadedFiles,
   validateUploadedFiles,
-} = require('../core/r-server/helpers/tools-executor')._test;
+} = require('../core/biof3-server/helpers/tools-executor')._test;
 
 function jobWithFile(name, content) {
   const jobDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-input-validation-'));

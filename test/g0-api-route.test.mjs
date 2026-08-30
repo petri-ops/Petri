@@ -11,9 +11,9 @@ process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 
 const require = createRequire(import.meta.url);
 const express = require('express');
-const db = require('../core/r-server/db');
+const db = require('../core/biof3-server/db');
 const g0 = require('../core/shared-backend/g0-baseline');
-const apiData = require('../core/r-server/api-data');
+const apiData = require('../core/biof3-server/api-data');
 
 let server;
 let baseUrl;

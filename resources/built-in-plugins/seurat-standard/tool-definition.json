@@ -4,7 +4,7 @@
   "subtitle": "scRNA-seq 标准 R 流程 (QC → Normalize → HVG → Scale → PCA → Cluster → UMAP → Markers)",
   "category": "single-cell",
   "language": "r",
-  "description": "基于 Seurat 5.x 对 10X 三件套 / CSV / TSV / h5 矩阵执行单细胞 RNA-seq 标准分析: QC + NormalizeData + FindVariableFeatures + ScaleData + RunPCA + FindNeighbors + FindClusters + RunUMAP + FindAllMarkers。输出 10 张 PNG/PDF 图 + 6 份中间数据 CSV + seurat_obj.rds + report.html + manifest.json。复用既有 core/r-server/tool-scripts/seurat-standard.R 的步骤 0 ground truth (_seurat-standard-scope.md)。",
+  "description": "基于 Seurat 5.x 对 10X 三件套 / CSV / TSV / h5 矩阵执行单细胞 RNA-seq 标准分析: QC + NormalizeData + FindVariableFeatures + ScaleData + RunPCA + FindNeighbors + FindClusters + RunUMAP + FindAllMarkers。输出 10 张 PNG/PDF 图 + 6 份中间数据 CSV + seurat_obj.rds + report.html + manifest.json。复用既有 core/biof3-server/tool-scripts/seurat-standard.R 的步骤 0 ground truth (_seurat-standard-scope.md)。",
   "inputs": [
     {
       "id": "matrix_file",

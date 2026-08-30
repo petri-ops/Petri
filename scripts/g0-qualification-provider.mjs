@@ -13,7 +13,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const evidencePath = join(root, 'acceptance/g0-qualification/real-provider.json');
 const require = createRequire(import.meta.url);
 const qualification = require('../core/shared-backend/g0-baseline-qualification');
-const aiSettings = require('../core/r-server/helpers/ai-settings');
+const aiSettings = require('../core/biof3-server/helpers/ai-settings');
 const sha256 = (value) => createHash('sha256').update(String(value)).digest('hex');
 const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
 

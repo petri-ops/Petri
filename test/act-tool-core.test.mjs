@@ -11,7 +11,7 @@ import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const R_SERVER = resolve(__dirname, '..', 'core', 'r-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
 const req = createRequire(import.meta.url);
 
 const _core = req(R_SERVER + '/agent-tools/act-tool-core.js');

@@ -42,7 +42,7 @@ const WORKER_TIMEOUT_MS = 5 * 60 * 1000;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/;
 
 const Database = require(require.resolve('better-sqlite3', {
-  paths: [path.join(ROOT, 'core', 'r-server'), ROOT],
+  paths: [path.join(ROOT, 'core', 'biof3-server'), ROOT],
 }));
 const {
   ModelGateway,
@@ -86,16 +86,16 @@ export const P6_PRODUCT_SCENARIO_SOURCE_FILES = Object.freeze({
   providerStreamAggregate: 'core/shared-backend/llm-providers/stream-aggregate.js',
   aiUsageHelper: 'core/shared-backend/ai-usage-helper.js',
   sharedLogger: 'core/shared-backend/logger.js',
-  rServerLogger: 'core/r-server/logger.js',
-  resultEditTools: 'core/r-server/agent-tools/result-edit-tools.js',
-  resultContextEditTools: 'core/r-server/agent-tools/result-context-edit-tools.js',
+  rServerLogger: 'core/biof3-server/logger.js',
+  resultEditTools: 'core/biof3-server/agent-tools/result-edit-tools.js',
+  resultContextEditTools: 'core/biof3-server/agent-tools/result-context-edit-tools.js',
   changeSetService: 'core/shared-backend/result-changeset-service.js',
   compareService: 'core/shared-backend/result-compare-service.js',
   resultStudioContracts: 'core/shared-backend/result-studio-contracts.js',
   resultStudioSchema: 'core/shared-backend/result-studio-schema.js',
   scientificTaskSpec: 'core/shared-backend/scientific-task-spec.js',
   lifecycle: 'core/shared-backend/result-studio-lifecycle.js',
-  routes: 'core/r-server/routes/result-studio.js',
+  routes: 'core/biof3-server/routes/result-studio.js',
 });
 
 function invariant(condition, code, detail = null) {
@@ -288,17 +288,17 @@ function workerSummary(result, planned) {
 async function runScenarioWorkerMain() {
   const payloadIndex = process.argv.indexOf('--scenario-worker') + 1;
   const spec = JSON.parse(Buffer.from(process.argv[payloadIndex], 'base64url').toString('utf8'));
-  const db = require(path.join(ROOT, 'core/r-server/db.js'));
-  const mcpRegistry = require(path.join(ROOT, 'core/r-server/mcp/registry.js'));
+  const db = require(path.join(ROOT, 'core/biof3-server/db.js'));
+  const mcpRegistry = require(path.join(ROOT, 'core/biof3-server/mcp/registry.js'));
   const {
     createResultChangeSetTools,
-  } = require(path.join(ROOT, 'core/r-server/agent-tools/result-edit-tools.js'));
+  } = require(path.join(ROOT, 'core/biof3-server/agent-tools/result-edit-tools.js'));
   const {
     createResultChangeSet,
   } = require(path.join(ROOT, 'core/shared-backend/result-changeset-service.js'));
   const {
     createResultContextEditTools,
-  } = require(path.join(ROOT, 'core/r-server/agent-tools/result-context-edit-tools.js'));
+  } = require(path.join(ROOT, 'core/biof3-server/agent-tools/result-context-edit-tools.js'));
 
   const project = db.getProject(spec.projectId);
   invariant(project?.id === spec.projectId, 'p6_product_worker_project_missing');

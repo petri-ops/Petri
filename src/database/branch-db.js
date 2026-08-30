@@ -10,7 +10,7 @@
 //   centralized in src/database/_db-singleton.js. This module is a thin
 //   wrapper that delegates every connection to openDb('branch'), and
 //   keeps its public exports (getDatabase, getDatabasePath, closeDatabase)
-//   as shims for backward compatibility with IPC handlers and r-server
+//   as shims for backward compatibility with IPC handlers and biof3-server
 //   MCP code paths that import them.
 // ============================================================
 

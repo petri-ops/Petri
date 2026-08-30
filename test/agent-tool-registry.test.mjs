@@ -11,9 +11,9 @@ const {
   getProviderToolDefs,
   getToolContract,
   getToolRegistry,
-} = require('../core/r-server/agent-tools/registry.js');
-const { getToolDefs } = require('../core/r-server/agent-tools/tool-defs.js');
-const { dispatchTool } = require('../core/r-server/agent-tools/index.js');
+} = require('../core/biof3-server/agent-tools/registry.js');
+const { getToolDefs } = require('../core/biof3-server/agent-tools/tool-defs.js');
+const { dispatchTool } = require('../core/biof3-server/agent-tools/index.js');
 const { DeepSeekProvider } = require('../core/shared-backend/llm-providers/deepseek.js');
 const {
   openAIToAnthropicRequest,
@@ -137,9 +137,9 @@ test('risk tier allowlist cannot be extended by registry consumers', () => {
 test('schema-first loading does not capture partial act helper exports', () => {
   const script = `
     (async () => {
-      const { getToolDefs } = require('./core/r-server/agent-tools/tool-defs.js');
-      const planTools = require('./core/r-server/agent-tools/plan-ui-tools.js');
-      const actTools = require('./core/r-server/agent-tools/act-tools.js');
+      const { getToolDefs } = require('./core/biof3-server/agent-tools/tool-defs.js');
+      const planTools = require('./core/biof3-server/agent-tools/plan-ui-tools.js');
+      const actTools = require('./core/biof3-server/agent-tools/act-tools.js');
       if (getToolDefs().length !== 33) throw new Error('unexpected tool count');
       if (!actTools.testFilterExpr('5', '>3')) throw new Error('filter helper unavailable');
       const context = {};

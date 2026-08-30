@@ -17,7 +17,7 @@ const assert = require('node:assert');
 const path = require('node:path');
 const fs = require('node:fs');
 
-const routesDir = path.resolve(__dirname, '../core/r-server/routes');
+const routesDir = path.resolve(__dirname, '../core/biof3-server/routes');
 
 function makeMockApp() {
   const routes = [];
@@ -32,31 +32,31 @@ describe('routes/ai-agent subdomains', () => {
 
   // ---- 5 submodules require without error ----
   it('chat.js loads and has register function', () => {
-    const chat = require('../core/r-server/routes/ai-agent/chat');
+    const chat = require('../core/biof3-server/routes/ai-agent/chat');
     assert.ok(chat, 'chat module loaded');
     assert.strictEqual(typeof chat.register, 'function', 'chat.register is a function');
   });
 
   it('context.js loads and has register function', () => {
-    const context = require('../core/r-server/routes/ai-agent/context');
+    const context = require('../core/biof3-server/routes/ai-agent/context');
     assert.ok(context, 'context module loaded');
     assert.strictEqual(typeof context.register, 'function', 'context.register is a function');
   });
 
   it('events.js loads and has register function', () => {
-    const events = require('../core/r-server/routes/ai-agent/events');
+    const events = require('../core/biof3-server/routes/ai-agent/events');
     assert.ok(events, 'events module loaded');
     assert.strictEqual(typeof events.register, 'function', 'events.register is a function');
   });
 
   it('tools.js loads and has register function', () => {
-    const tools = require('../core/r-server/routes/ai-agent/tools');
+    const tools = require('../core/biof3-server/routes/ai-agent/tools');
     assert.ok(tools, 'tools module loaded');
     assert.strictEqual(typeof tools.register, 'function', 'tools.register is a function');
   });
 
   it('index.js loads and has register + _submodules', () => {
-    const index = require('../core/r-server/routes/ai-agent/index');
+    const index = require('../core/biof3-server/routes/ai-agent/index');
     assert.ok(index, 'index module loaded');
     assert.strictEqual(typeof index.register, 'function', 'index.register is a function');
     assert.ok(index._submodules, 'index._submodules exists');
@@ -68,14 +68,14 @@ describe('routes/ai-agent subdomains', () => {
 
   // ---- Main facade loads ----
   it('main routes/ai-agent.js facade loads without error', () => {
-    const facade = require('../core/r-server/routes/ai-agent');
+    const facade = require('../core/biof3-server/routes/ai-agent');
     assert.ok(facade, 'facade loaded');
     assert.strictEqual(typeof facade, 'function', 'facade is a register function');
   });
 
   // ---- 3 endpoint paths preserved ----
   it('chat.js register() attaches POST /api/ai/agent', () => {
-    const chat = require('../core/r-server/routes/ai-agent/chat');
+    const chat = require('../core/biof3-server/routes/ai-agent/chat');
     const { app, routes } = makeMockApp();
     chat.register(app);
     const agentRoute = routes.find(r => r.path === '/api/ai/agent');
@@ -83,7 +83,7 @@ describe('routes/ai-agent subdomains', () => {
   });
 
   it('context.js register() attaches POST /api/ai/agent/task/:taskId/cancel', () => {
-    const context = require('../core/r-server/routes/ai-agent/context');
+    const context = require('../core/biof3-server/routes/ai-agent/context');
     const { app, routes } = makeMockApp();
     context.register(app);
     const cancelRoute = routes.find(r => r.path === '/api/ai/agent/task/:taskId/cancel');
@@ -91,7 +91,7 @@ describe('routes/ai-agent subdomains', () => {
   });
 
   it('events.js register() attaches GET /api/ai/agent/task/:taskId (SSE subscribe)', () => {
-    const events = require('../core/r-server/routes/ai-agent/events');
+    const events = require('../core/biof3-server/routes/ai-agent/events');
     const { app, routes } = makeMockApp();
     events.register(app);
     const subscribeRoute = routes.find(r => r.path === '/api/ai/agent/task/:taskId');
@@ -100,7 +100,7 @@ describe('routes/ai-agent subdomains', () => {
 
   // ---- index.js produces all 3 endpoints ----
   it('index.js register() attaches all 3 endpoints', () => {
-    const index = require('../core/r-server/routes/ai-agent/index');
+    const index = require('../core/biof3-server/routes/ai-agent/index');
     const { app, routes } = makeMockApp();
     index.register(app);
     assert.ok(routes.find(r => r.path === '/api/ai/agent'), 'POST /api/ai/agent in index');

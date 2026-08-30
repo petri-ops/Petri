@@ -68,7 +68,7 @@ function setupWindowIpc({ ipcMain, process, app, getMainWindow }) {
   });
 
   // ── App relaunch (for runtime install / env refresh) ────────
-  // BIOF3_R_HOME env is fixed at startup; a partial r-server restart
+  // BIOF3_R_HOME env is fixed at startup; a partial biof3-server restart
   // would still read stale values — require full app relaunch.
   ipcMain.handle("app:relaunch", async () => {
     try {

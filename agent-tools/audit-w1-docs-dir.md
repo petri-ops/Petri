@@ -90,7 +90,7 @@
 | `docs/project-workspace-handoff.md` | **"最后更新：2026-08-11"** 但 mtime 2026-08-16（worker-C 同步笔录）。同步笔录已加；但头部"最后更新"字面仍是 2026-08-11 | 行 3 "最后更新：2026-08-11"；行 213-241 段是 2026-08-16 追加 | **更新头部日期**到 2026-08-16（与 mtime 对齐） |
 | `docs/harness-engine-spec.md` / `docs/harness-roadmap.md` / `docs/harness-loop-engineering-plan.md` | **"v1.0 / v1.1 / v1.2 不同小版本分布"**：`harness-engine-spec.md` 为 v1、`harness-loop-engineering-plan.md` 为 v1（但 §"未来"段提到 Harness v1.1）、`harness-loop-production-closure-plan.md` 收口标记 `Harness v1.1 / Loop Engineering v1`——3 份文档版本号口径不一致 | 行 3 / 行 39 / 行 5、41 | **保留**（属于"v1 = 主线 / v1.1 = 收口"区分）；不在 A1 修复 |
 | `docs/agent-workbench-enhancement-plan.md` | **TOC 段包括 4 段 mermaid 样代码**：行 1476-1485 包含 `git mv` / `mkdir -p` / `git mv` 等 bash 命令（被解析为代码块但语义上是"归档迁移脚本"），文档阅读者易误以为是已执行 | 行 1476-1485 | **保留**（占位/草案），但段头补"以下为草案脚本，未执行；归档操作需由 A2 / A4 决策后启动"——转交主 agent |
-| `docs/AUDIT-LOG.md` | **"最后更新：2026-08-15"** 顶部元数据，但 mtime 2026-08-16（已收口"wb/ 命名空间分支一次性推送" + "r-server /api/ai/agent 路由修复"）——行 7 顶部"最后更新"未更新到 2026-08-16 | 行 7；AUDIT-LOG 行 118-119 是 2026-08-16 收口条目 | **更新头部日期**到 2026-08-16 |
+| `docs/AUDIT-LOG.md` | **"最后更新：2026-08-15"** 顶部元数据，但 mtime 2026-08-16（已收口"wb/ 命名空间分支一次性推送" + "biof3-server /api/ai/agent 路由修复"）——行 7 顶部"最后更新"未更新到 2026-08-16 | 行 7；AUDIT-LOG 行 118-119 是 2026-08-16 收口条目 | **更新头部日期**到 2026-08-16 |
 | `docs/codex-style-workbench-direction.md` | **mtime 2026-07-08**（最久 39 天前）。`DOC-REGISTRY` 标 `status:reference / canonical=true / truthDomain=workbench-ui-direction`——当前 UI 方向仍以此为锚，但 `agent-workbench-enhancement-plan.md` §1.4 已把"Codex 工作台" 方向重新定义；该文档与 enhancement plan 概念重叠 | 行 1 "最后更新：2026-07-08"；行 1-3 描述"Codex 式工作台交互"；agent-workbench enhancement plan §1.4 重新定义 | **保留**（DOC-REGISTRY 决定）；但 README 第 22 行对此文档标注"(*Codex 方向，2026-07-08 快照；当前实现路径以 `agent-workbench-enhancement-plan.md` §1.4 增量增强口径为准*)" |
 | `docs/agent-workbench-p1-a5-verification-2026-08-15.md` / `docs/agent-workbench-dev-electron-verification-2026-08-15.md` / `docs/t-aw-013-packaged-verification-2026-08-15.md` | **3 份相互关联的验证报告，互相引用对方"已完成"**：A5 报告行 5 引用 commit `db2e04b`；T-AW-014 报告行 17 引用 T-AW-013 commit `1d1d1b2`；T-AW-013 报告行 5 不引用前一份——文档生命周期为 1 轮验证，但 `ui-productization-audit.md` 行 244 提到"未引用实际 renderer source"——A5 / T-AW-014 已借此对齐 | 3 份文档相互引用 | **OK**（3 份报告已通过 AUDIT-LOG 2026-08-15 06:00 收口） |
 | `docs/ide-research/mcp-ide-tools-design.md` | **§7 实施计划** 第 2 阶段仍是 Monaco 编辑器 6 个工具（行 60-90），但 `g0-ide-mcp-tools-plan.md` §Phase 2 行 44-46 已声明 "Phase 2 — 编辑器 + 搜索（P0/P1）"**继续 `deferred`**——两份文档对 Phase 2 状态描述虽一致（都 deferred），但需求列已"21 工具"vs"实际实现 18 工具" | 行 60-90；`g0-ide-mcp-tools-plan.md` §11 收口 | **保留**（研究文档保持原状）；但 README 行 14 frame 描述"21 个 IDE MCP 工具"与 `g0-ide-mcp-tools-plan.md` 行 4 "18 个 `ide_*` 工具"不一致——README 必须更新到 18 |
@@ -197,7 +197,7 @@
 
 3. **`docs/README.md` 行 14 "21 个 IDE MCP 工具"漂移** — 实际 18 个（`g0-ide-mcp-tools-plan.md` 行 4）；需 README 维护者直接改 1 行
 
-4. **`docs/AUDIT-LOG.md` 顶部"最后更新：2026-08-15"vs mtime 2026-08-16 漂移** — 2026-08-16 收口 2 条（wb/ 命名空间分支 + r-server `/api/ai/agent` 路由修复）未改顶部日期；属于治理收口细节，由 A4（registry）协调
+4. **`docs/AUDIT-LOG.md` 顶部"最后更新：2026-08-15"vs mtime 2026-08-16 漂移** — 2026-08-16 收口 2 条（wb/ 命名空间分支 + biof3-server `/api/ai/agent` 路由修复）未改顶部日期；属于治理收口细节，由 A4（registry）协调
 
 5. **`docs/project-workspace-handoff.md` 头部"最后更新：2026-08-11" vs mtime 2026-08-16** — 同步笔录已加但头部日期未更新（与 4 同源）
 

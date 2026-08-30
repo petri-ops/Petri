@@ -6,7 +6,7 @@ const require = createRequire(import.meta.url);
 const g0 = require('../core/shared-backend/g0-baseline');
 const truth = require('../core/shared-backend/g0-truth-projection');
 const durable = require('../core/shared-backend/g0-durable-state');
-const { projectHarnessWorkflowJob } = require('../core/r-server/helpers/harness-workflow-state');
+const { projectHarnessWorkflowJob } = require('../core/biof3-server/helpers/harness-workflow-state');
 
 function validJob(overrides = {}) {
   return {

@@ -25,8 +25,8 @@ const HISTORICAL_INPUTS = Object.freeze({
 const SOURCE_INPUTS = Object.freeze({
   projectWorkspace: 'frontend/src/pages/project-workspace.tsx',
   artifactSelection: 'frontend/src/lib/artifact-selection.ts',
-  resultStudioRoute: 'core/r-server/routes/result-studio.js',
-  systemPrompt: 'core/r-server/helpers/system-prompt.js',
+  resultStudioRoute: 'core/biof3-server/routes/result-studio.js',
+  systemPrompt: 'core/biof3-server/helpers/system-prompt.js',
   supportMatrix: 'core/shared-backend/g0/support-matrix.json',
   qualificationManifest: 'core/shared-backend/g0/qualification-manifest.json',
   productQualification: 'core/shared-backend/result-studio-qualification.js',

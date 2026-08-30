@@ -9,7 +9,7 @@ describe('desktop backend API routing', () => {
   it('uses the standard local port when preload configuration is unavailable', () => {
     expect(getApiPrefix()).toBe('http://localhost:3001/api');
     // BLOCK-30 P1: 单后端收敛，language 参数不再分流（Python 工具由
-    // 服务端执行器本地执行），恒返回 r-server 基址。
+    // 服务端执行器本地执行），恒返回 biof3-server 基址。
     expect(getApiPrefix('python')).toBe('http://localhost:3001/api');
     expect(getComputeApiPrefix()).toBe('http://localhost:3001/api');
     expect(getPlatformApiPrefix()).toBe('http://localhost:3001/api');

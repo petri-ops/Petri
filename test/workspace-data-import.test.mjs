@@ -7,8 +7,8 @@ import test from 'node:test';
 
 const require = createRequire(import.meta.url);
 const express = require('express');
-const db = require('../core/r-server/db.js');
-const registerFileRoutes = require('../core/r-server/routes/files.js');
+const db = require('../core/biof3-server/db.js');
+const registerFileRoutes = require('../core/biof3-server/routes/files.js');
 
 async function listen(app) {
   const server = app.listen(0, '127.0.0.1');

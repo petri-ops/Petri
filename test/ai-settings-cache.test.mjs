@@ -9,7 +9,7 @@ test('ai settings cache reloads changes written by another desktop process', () 
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-ai-settings-'));
   const settingsFile = path.join(dir, 'ai-settings.json');
   fs.writeFileSync(settingsFile, JSON.stringify({ model_fallback_enabled: false }));
-  const modulePath = path.resolve('core/r-server/helpers/ai-settings.js');
+  const modulePath = path.resolve('core/biof3-server/helpers/ai-settings.js');
   const script = `
     const fs = require('fs');
     const settings = require(${JSON.stringify(modulePath)});

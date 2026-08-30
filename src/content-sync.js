@@ -159,7 +159,7 @@ async function syncContent() {
     `[content-sync] done: ${successCount} downloaded, ${failCount} failed, ${removed.length} removed`
   );
 
-  // 7. 通知 r-server 内容更新（R 脚本是运行时读盘，无需重载）
+  // 7. 通知 biof3-server 内容更新（R 脚本是运行时读盘，无需重载）
   if (globalThis._biof3ContentUpdated) {
     try {
       globalThis._biof3ContentUpdated();

@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
-const coreServerRoot = path.join(root, 'core', 'r-server');
+const coreServerRoot = path.join(root, 'core', 'biof3-server');
 const req = createRequire(path.join(coreServerRoot, 'package.json'));
 
 // Core's better-sqlite3 — the migration-runner paths and singleton both

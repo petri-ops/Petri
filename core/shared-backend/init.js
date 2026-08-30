@@ -1,7 +1,7 @@
 /**
  * shared-backend/init.js — 桌面版启动时注册所有执行器和存储适配器
  *
- * r-server 启动时 require 本模块，自动注册：
+ * biof3-server 启动时 require 本模块，自动注册：
  *   - R 执行器（RExecutor）
  *   - Python 执行器（PyExecutor）
  *   - 本地存储适配器（LocalFileStorage）

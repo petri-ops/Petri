@@ -150,7 +150,7 @@ function pickArtifact(outputs) {
 
 function alignDisposableDesktopIdentity(databasePath, projectId) {
   const Database = require(require.resolve('better-sqlite3', {
-    paths: [path.join(repoRoot, 'core/r-server'), repoRoot],
+    paths: [path.join(repoRoot, 'core/biof3-server'), repoRoot],
   }));
   const sqlite = new Database(databasePath);
   try {

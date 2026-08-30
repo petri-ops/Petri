@@ -42,7 +42,7 @@ const WORKER_HOLD_CONFIRMATION_GRACE_MS = 1_000;
 const JOB_TIMEOUT_MS = 180_000;
 
 const Database = require(require.resolve('better-sqlite3', {
-  paths: [path.join(ROOT, 'core', 'r-server'), ROOT],
+  paths: [path.join(ROOT, 'core', 'biof3-server'), ROOT],
 }));
 const { createResultStudioRepository } = require(
   path.join(ROOT, 'core/shared-backend/result-studio-repository.js')

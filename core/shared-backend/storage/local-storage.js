@@ -2,7 +2,7 @@
  * Local File Storage — 本地文件存储适配器
  *
  * 桌面版默认存储后端。所有文件操作走本地文件系统，
- * URL 返回 /api/files/<key> 路由路径，由 r-server 的 files-local 路由提供下载。
+ * URL 返回 /api/files/<key> 路由路径，由 biof3-server 的 files-local 路由提供下载。
  */
 
 const path = require('path');
@@ -10,7 +10,7 @@ const fs = require('fs');
 const logger = require('../logger');
 const { safeJoinUnder } = require('../path-safe');
 
-// 从 config-helper 读取配置（断点1：斩断对 r-server/config 的反向 require）
+// 从 config-helper 读取配置（断点1：斩断对 biof3-server/config 的反向 require）
 const configHelper = require('../config-helper');
 function getRConfig() {
   return configHelper.getConfig();

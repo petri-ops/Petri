@@ -744,7 +744,7 @@ test('P5 cohort ReplayPackage binds and independently validates every per-Job pa
 });
 
 test('P5 HTTP replay preserves generated downstream Artifact lineage through the registered tool boundary', () => {
-  const routeSource = readFileSync(join(import.meta.dirname, '..', 'core/r-server/routes/result-studio.js'), 'utf8');
+  const routeSource = readFileSync(join(import.meta.dirname, '..', 'core/biof3-server/routes/result-studio.js'), 'utf8');
   const replayRouteStart = routeSource.indexOf("app.post('/api/result-studio/revisions/:revisionId/replay'");
   const replayRouteEnd = routeSource.indexOf("app.get('/api/result-studio/changesets/:changeSetId/compare'", replayRouteStart);
   assert.ok(replayRouteStart >= 0 && replayRouteEnd > replayRouteStart, 'controlled replay route is unavailable');

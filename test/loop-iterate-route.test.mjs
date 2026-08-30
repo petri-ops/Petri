@@ -35,7 +35,7 @@ const lc = (await import('../core/shared-backend/loop-contract.js')).default;
 // Load DB — must happen after BIOF3_DB_PATH is set
 let db;
 try {
-  const dbMod = await import('../core/r-server/db.js');
+  const dbMod = await import('../core/biof3-server/db.js');
   db = dbMod.default || dbMod;
 } catch (e) {
   db = null;

@@ -1,5 +1,5 @@
 # Embedded core server dependencies (formerly vendor/biof3-core submodule)
-core/r-server/node_modules/
+core/biof3-server/node_modules/
 core/py-server/node_modules/
 core/**/node_modules/
 

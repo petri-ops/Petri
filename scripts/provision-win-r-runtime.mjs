@@ -4,7 +4,7 @@
  * ---------------------------------------------------------------
  * 开发机一键引导：在本机 Windows 上把 BioF3 的 R 运行时装进
  *   %USERPROFILE%/Documents/BioF3-Local/runtimes/R
- * （与 main.js resolveRuntime 的第一优先路径一致），从而 r-server
+ * （与 main.js resolveRuntime 的第一优先路径一致），从而 biof3-server
  * 在下次 `npm run dev` 时自动启动——无需手动安装 R，也无需等
  * OSS 上的官方 windows-x64 制品（Week 3/4）。
  *
@@ -74,7 +74,7 @@ async function main() {
   const existing = rScriptExeAt(TARGET);
   if (existing) {
     console.log(`[provision-r] 已就绪，无需重复安装: ${existing}`);
-    console.log('[provision-r] 直接重启 `npm run dev` 即可启动 r-server。');
+    console.log('[provision-r] 直接重启 `npm run dev` 即可启动 biof3-server。');
     return;
   }
 
@@ -118,13 +118,13 @@ async function main() {
     console.log(`[provision-r] installing ${packages.length} R packages (CRAN + Bioconductor)...`);
     const r = spawnSync(rscript, [tmpR], { stdio: 'inherit', windowsHide: true, timeout: 1000 * 60 * 90 });
     if (r.status !== 0) {
-      console.warn(`[provision-r] 部分 R 包安装失败（exit ${r.status}）。r-server 仍可启动；失败包待官方制品就绪后再补。`);
+      console.warn(`[provision-r] 部分 R 包安装失败（exit ${r.status}）。biof3-server 仍可启动；失败包待官方制品就绪后再补。`);
     }
 
     console.log('\n==================== PROVISION COMPLETE ====================');
     console.log(`R 运行时已安装到: ${TARGET}`);
-    console.log('下一步：重启 `npm run dev`，main.js 会在启动时解析到该运行时并自动 spawn r-server(3001)。');
-    console.log('验证：dev 控制台应出现 `[desktop] R runtime: ...` 与 r-server 启动日志。');
+    console.log('下一步：重启 `npm run dev`，main.js 会在启动时解析到该运行时并自动 spawn biof3-server(3001)。');
+    console.log('验证：dev 控制台应出现 `[desktop] R runtime: ...` 与 biof3-server 启动日志。');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

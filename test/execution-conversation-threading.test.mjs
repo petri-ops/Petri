@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
 const require = createRequire(import.meta.url);
-const { createResultChangeSetTools } = require('../core/r-server/agent-tools/result-edit-tools');
+const { createResultChangeSetTools } = require('../core/biof3-server/agent-tools/result-edit-tools');
 
 test('Result Edit executeJob forwards the trusted tool context conversation', async (context) => {
   const root = mkdtempSync(join(tmpdir(), 'biof3-execution-conversation-'));

@@ -45,9 +45,9 @@ const EVIDENCE_KEYS = new Set([
   'writeError', 'execError', 'sensitiveError', 'escapeError',
 ]);
 
-const { createAgentToolInterceptor } = require('../core/r-server/agent-tools/agent-tool-interceptor.js');
-const { createWorkspaceTools } = require('../core/r-server/agent-tools/workspace-tools.js');
-const { getToolEntry } = require('../core/r-server/agent-tools/registry.js');
+const { createAgentToolInterceptor } = require('../core/biof3-server/agent-tools/agent-tool-interceptor.js');
+const { createWorkspaceTools } = require('../core/biof3-server/agent-tools/workspace-tools.js');
+const { getToolEntry } = require('../core/biof3-server/agent-tools/registry.js');
 
 function sha256(value) {
   return crypto.createHash('sha256').update(value).digest('hex');

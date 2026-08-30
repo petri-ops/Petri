@@ -32,7 +32,7 @@ exports.default = async function afterPack(context) {
     throw new Error(`rebuilt better-sqlite3 binary not found: ${source}`);
   }
 
-  for (const server of ['r-server', 'py-server']) {
+  for (const server of ['biof3-server', 'py-server']) {
     const target = path.join(
       resourcesDir,
       'core',

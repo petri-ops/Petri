@@ -30,7 +30,7 @@ let lc;
 let cleanupDir;
 
 before(async () => {
-  db = (await import('../core/r-server/db.js')).default || (await import('../core/r-server/db.js'));
+  db = (await import('../core/biof3-server/db.js')).default || (await import('../core/biof3-server/db.js'));
   lc = loopContract;
   cleanupDir = TMP_DIR;
 });

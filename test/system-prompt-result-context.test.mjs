@@ -3,7 +3,7 @@ import test from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { buildSystemPrompt } = require('../core/r-server/helpers/system-prompt');
+const { buildSystemPrompt } = require('../core/biof3-server/helpers/system-prompt');
 
 const INTERNAL_IDS = Object.freeze({
   jobId: 'job_7f3a2b',

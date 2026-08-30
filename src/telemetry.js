@@ -37,7 +37,7 @@ function _resolveResource(...parts) {
  */
 function isTelemetryEnabled() {
   try {
-    const { getAiSettings } = require(_resolveResource('r-server', 'helpers', 'ai-settings.js'));
+    const { getAiSettings } = require(_resolveResource('biof3-server', 'helpers', 'ai-settings.js'));
     const s = getAiSettings();
     return !!(s && s.telemetry_enabled === true);
   } catch {

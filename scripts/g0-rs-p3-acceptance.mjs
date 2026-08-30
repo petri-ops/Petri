@@ -23,13 +23,13 @@ const item = (id, passed, evidence, detail) => ({ id, passed: passed === true, e
 
 const sourceFiles = {
   contextContract: 'core/shared-backend/result-studio-context.js',
-  contextTools: 'core/r-server/agent-tools/result-context-tools.js',
-  contextEditTools: 'core/r-server/agent-tools/result-context-edit-tools.js',
-  toolDefinitions: 'core/r-server/agent-tools/tool-defs.js',
-  toolRegistry: 'core/r-server/agent-tools/registry.js',
-  systemPrompt: 'core/r-server/helpers/system-prompt.js',
-  routes: 'core/r-server/routes/result-studio.js',
-  editTools: 'core/r-server/agent-tools/result-edit-tools.js',
+  contextTools: 'core/biof3-server/agent-tools/result-context-tools.js',
+  contextEditTools: 'core/biof3-server/agent-tools/result-context-edit-tools.js',
+  toolDefinitions: 'core/biof3-server/agent-tools/tool-defs.js',
+  toolRegistry: 'core/biof3-server/agent-tools/registry.js',
+  systemPrompt: 'core/biof3-server/helpers/system-prompt.js',
+  routes: 'core/biof3-server/routes/result-studio.js',
+  editTools: 'core/biof3-server/agent-tools/result-edit-tools.js',
   contextClient: 'frontend/src/lib/result-studio-interaction-client.ts',
   surface: 'frontend/src/components/result-studio/ResultStudioSurface.tsx',
   surfaceStyle: 'frontend/src/components/result-studio/ResultStudioSurface.module.css',
@@ -131,7 +131,7 @@ function providerDefinitions() {
   // 用显式哨兵切分：注册表加载会打印启动日志（含 `[llm-providers]` 这类方括号），
   // 直接取第一个 '[' 会切到日志上，而不是 JSON 数组。
   const probe = spawnSync(process.execPath, ['-e',
-    "process.stdout.write('<<RS_P3_DEFS>>' + JSON.stringify(require('./core/r-server/agent-tools/registry.js').getProviderToolDefs()))",
+    "process.stdout.write('<<RS_P3_DEFS>>' + JSON.stringify(require('./core/biof3-server/agent-tools/registry.js').getProviderToolDefs()))",
   ], { cwd: root, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
   if (probe.status !== 0) throw new Error('tool registry failed to load');
   const marker = '<<RS_P3_DEFS>>';

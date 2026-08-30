@@ -165,8 +165,8 @@ function resolveRuntimeLocal(lang, userDataDir) {
 // A-009 single source of truth for backend ports.
 //
 // All port fallback values used to be scattered across:
-//   core/r-server/server.js:130            (R_SERVER_PORT || 3003)
-//   core/r-server/config.js:23             (R_SERVER_PORT || '3003')
+//   core/biof3-server/server.js:130            (R_SERVER_PORT || 3003)
+//   core/biof3-server/config.js:23             (R_SERVER_PORT || '3003')
 //   src/preload.js:67-68                   (R_SERVER_PORT || 3001；PY_SERVER_PORT 随 BLOCK-30 摘除)
 //   src/backend-health.js:13-16            (4 separate defaults)
 //
@@ -175,7 +175,7 @@ function resolveRuntimeLocal(lang, userDataDir) {
 // 3003 vs 3005). When the Electron main process is running,
 // setupDesktopEnv() sets R_SERVER_PORT / PLUMBER_PORT（BLOCK-30 起 py-server/gateway 已摘除）
 // / PLUMBER_PORT on process.env before any of these modules reads
-// it, so the fallback is unreachable. When the r-server / py-server
+// it, so the fallback is unreachable. When the biof3-server / py-server
 // is launched as a standalone child process (without Electron's main),
 // env-coordinator is *not* running and the fallback kicks in.
 //
@@ -187,7 +187,7 @@ function resolveRuntimeLocal(lang, userDataDir) {
 //   python  → 3004  (matches preload.js / backend-health.js historical default)
 //   plumber → 8787  (matches backend-health.js historical default)
 //
-// 3003 was the legacy r-server default (server.js / config.js); the
+// 3003 was the legacy biof3-server default (server.js / config.js); the
 // Electron main process always overwrites R_SERVER_PORT before these
 // readers execute, so the historical 3003 was never reachable in dev
 // Electron. The new canonical default is 3001, which matches what

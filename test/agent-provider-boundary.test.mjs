@@ -19,7 +19,7 @@ const {
   createResultEditCompletionGuard,
   createAgentToolCallController,
   runAgentToolCallBatch,
-} = require('../core/r-server/agent-tools');
+} = require('../core/biof3-server/agent-tools');
 
 test('bound result edits cannot finish successfully before a real preview-ready candidate exists', () => {
   const guard = createResultEditCompletionGuard({ required: true });

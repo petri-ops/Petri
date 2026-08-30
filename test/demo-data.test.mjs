@@ -4,7 +4,7 @@
  *
  * Asserts every built-in tool's demo fixture under resources/demo-data/<tool>/
  * is present, well-formed, and gives the corresponding R script something
- * meaningful to call. Pure local test — no r-server needed.
+ * meaningful to call. Pure local test — no biof3-server needed.
  *
  * Coverage:
  *   • deseq2          — demo-counts.csv + demo-coldata.csv

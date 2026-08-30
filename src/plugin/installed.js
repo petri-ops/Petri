@@ -17,7 +17,7 @@ const {
   INSTALLED_FILE,
   PROJECT_ROOT,
 } = require('./paths');
-const pluginLoader = require(path.join(PROJECT_ROOT, 'r-server', 'plugin-loader.js'));
+const pluginLoader = require(path.join(PROJECT_ROOT, 'biof3-server', 'plugin-loader.js'));
 
 function getInstalledPlugins() {
   try {

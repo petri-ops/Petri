@@ -102,7 +102,7 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 - `resources/demo-data/<tool>/` demo fixtures for 9 of 11 built-in
   tools. Each fixture matches the file shape expected by the
-  corresponding r-server `tool-scripts/<tool>.R`:
+  corresponding biof3-server `tool-scripts/<tool>.R`:
   - `deseq2/` -- 10-gene counts (5 up + 3 down + 2 housekeeping) +
     WT/KO coldata (2 reps each)
   - `volcano-plot/` -- 25-row DEG table (10 up + 8 down + 7 NS)
@@ -134,7 +134,7 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - `docs/first-success-path.md` -- end-to-end walkthrough of the
   user journey + reproduction steps for the captured real run.
 - `test/fixtures/golden-path/deseq2-run.json` -- JSON-only record
-  of the real captured run from 2026-07-14: DESeq2 on the r-server's bundled demo
+  of the real captured run from 2026-07-14: DESeq2 on the biof3-server's bundled demo
   data, 6 samples, 1978 genes tested, 82 sig genes (46 up / 36
   down), 23 artifacts.
 
@@ -150,7 +150,7 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - **seurat-standard / wgcna / maftools-mutation demo data** --
   require real external datasets (PBMC 3k, TCGA-BRCA, TCGA-LAML
   MAF). Worker task required.
-- **r-server local-mode zip post-processor** -- the r-server
+- **biof3-server local-mode zip post-processor** -- the biof3-server
   marks a job `failed: Required artifact zip was not produced`
   in `BIOF3_EXEC_MODE=local`, even when all 23 R-output
   artifacts exist on disk. This blocks the report endpoint
@@ -178,7 +178,7 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 - `scripts/golden-path.mjs` — two-stage rescue path for the local-mode
   zip post-processor gap:
-  - Step 5: if r-server marks a job `failed: Required artifact zip was
+  - Step 5: if biof3-server marks a job `failed: Required artifact zip was
     not produced` but `/api/tools/status/:id` shows ≥3 artifacts on
     disk, harvest the artifact list and continue to step 6 instead of
     bailing.
@@ -191,7 +191,7 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
   `summary.sig_genes` as number, etc.).
 - `tmp/golden-path/report/deseq2-job_51d05ccdece3450c.run.json` —
   real captured run from the modified script on 2026-07-14 against
-  the same r-server local-mode config; 22 artifacts, sig_genes=82,
+  the same biof3-server local-mode config; 22 artifacts, sig_genes=82,
   up=46, down=36.
 - `docs/first-success-path.md` — append `Update 2026-07-14: rescue
   path landed` section documenting the two-stage rescue and the

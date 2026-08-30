@@ -13,7 +13,7 @@
  * fails closed. The developer database and ~/Documents/BioF3-Local are never
  * touched.
  *
- * WHY A CHILD PROCESS: core/r-server/config.js and core/r-server/db.js snapshot
+ * WHY A CHILD PROCESS: core/biof3-server/config.js and core/biof3-server/db.js snapshot
  * the environment at module load, and mcp/registry.js computes its jobs dir at
  * load too. A caller that already required any of them would bind the run to
  * real paths no matter what we assign afterwards. Running the tools in a fresh
@@ -45,8 +45,8 @@ const SELF = fileURLToPath(import.meta.url);
 
 /** Real inputs shipped with the repo. Not synthetic, not user data. */
 export const CORPUS_INPUTS = Object.freeze({
-  counts: 'core/r-server/tool-demo-data/deseq2/demo-counts.csv',
-  coldata: 'core/r-server/tool-demo-data/deseq2/demo-coldata.csv',
+  counts: 'core/biof3-server/tool-demo-data/deseq2/demo-counts.csv',
+  coldata: 'core/biof3-server/tool-demo-data/deseq2/demo-coldata.csv',
   enrichmentGenes: 'resources/built-in-plugins/go-kegg/demo-data/genes.csv',
 });
 
@@ -131,8 +131,8 @@ async function runStepsInChild() {
   const require = createRequire(import.meta.url);
   const spec = JSON.parse(process.argv[process.argv.indexOf('--child') + 1]);
 
-  const { tool_run_tool: runTool } = require(path.join(REPO_ROOT, 'core', 'r-server', 'agent-tools', 'learning.js'));
-  const db = require(path.join(REPO_ROOT, 'core', 'r-server', 'db.js'));
+  const { tool_run_tool: runTool } = require(path.join(REPO_ROOT, 'core', 'biof3-server', 'agent-tools', 'learning.js'));
+  const db = require(path.join(REPO_ROOT, 'core', 'biof3-server', 'db.js'));
 
   // A project is REQUIRED, not cosmetic. Every Result Studio route
   // (interaction, context-envelope, changesets, workspace/status) validates a

@@ -11,8 +11,8 @@ const {
   createResultEditPlanTool,
   createResultChangeSetTools,
   projectDirectEnrichmentSubgraph,
-} = require('../core/r-server/agent-tools/result-edit-tools');
-const { normalizePluginManifest } = require('../core/r-server/plugin-loader');
+} = require('../core/biof3-server/agent-tools/result-edit-tools');
+const { normalizePluginManifest } = require('../core/biof3-server/plugin-loader');
 const { computeExecutionProvenanceHash } = require('../core/shared-backend/execution-provenance');
 
 function makeJob(projectId = 'p_1') {

@@ -33,9 +33,9 @@ first-success path used for onboarding and the golden-path script.
 ## Layout decision
 
 These files live under `resources/demo-data/deseq2/` (desktop repo)
-rather than the r-server's `tool-demo-data/` tree because Week 3
+rather than the biof3-server's `tool-demo-data/` tree because Week 3
 focuses on local desktop validation and we don't want to round-trip
-through the vendored r-server layout until Week 4 picks up an actual
+through the vendored biof3-server layout until Week 4 picks up an actual
 runtime artifact. The filename contract (`demo-counts.csv`,
 `demo-coldata.csv`) matches what `/api/tools/demo-data/deseq2/:filename`
 serves upstream, so the same files will work once the runtime

@@ -254,8 +254,8 @@ test('seurat-standard plugin 目录无未提交孤儿文件', () => {
   }
 });
 
-test('既有 core/r-server/tool-scripts/seurat-standard.R 保留不变（向后兼容）', () => {
-  const orig = resolve(repoRoot, 'core/r-server/tool-scripts/seurat-standard.R');
+test('既有 core/biof3-server/tool-scripts/seurat-standard.R 保留不变（向后兼容）', () => {
+  const orig = resolve(repoRoot, 'core/biof3-server/tool-scripts/seurat-standard.R');
   assert.ok(existsSync(orig), 'original seurat-standard.R missing (should be preserved)');
   const stats = statSync(orig);
   assert.ok(stats.size > 5000, `original seurat-standard.R too small: ${stats.size} bytes`);

@@ -34,10 +34,10 @@ const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8'
 const item = (id, passed, evidence, detail) => ({ id, passed: passed === true, evidence, detail });
 
 const sourceFiles = {
-  probe: 'core/r-server/helpers/perf-probe.js',
-  probeRoutes: 'core/r-server/routes/perf-probe.js',
-  bootstrap: 'core/r-server/bootstrap.js',
-  routes: 'core/r-server/routes/result-studio.js',
+  probe: 'core/biof3-server/helpers/perf-probe.js',
+  probeRoutes: 'core/biof3-server/routes/perf-probe.js',
+  bootstrap: 'core/biof3-server/bootstrap.js',
+  routes: 'core/biof3-server/routes/result-studio.js',
   background: 'core/shared-backend/result-studio-background.js',
   backgroundChild: 'core/shared-backend/result-studio-background-child.js',
   capture: 'scripts/g0-rs-p4r-capture.mjs',
@@ -279,7 +279,7 @@ function probeIsolationBehaviour() {
 
 /** Exercise the probe rather than grepping it: off by default, real samples when armed. */
 function probeBehaviourCheck() {
-  const perfProbe = createRequire(import.meta.url)(join(root, 'core/r-server/helpers/perf-probe.js'));
+  const perfProbe = createRequire(import.meta.url)(join(root, 'core/biof3-server/helpers/perf-probe.js'));
   const hadFlag = process.env.BIOF3_PERF_PROBE;
   delete process.env.BIOF3_PERF_PROBE;
   perfProbe.disableProbe();

@@ -8,13 +8,13 @@ import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const R_SERVER = resolve(__dirname, '..', 'core', 'r-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
 const req = createRequire(import.meta.url);
 
 const db = req(R_SERVER + '/db.js');
 const { tool_read_image } = req(R_SERVER + '/agent-tools/vision-tools.js');
 // 动态 import 必须用 file:// URL（Windows 绝对路径 D:/... 不被 ESM loader 接受）
-const { callTool } = await import(pathToFileURL(resolve(__dirname, '..', 'core', 'r-server', 'mcp', 'registry.js')).href);
+const { callTool } = await import(pathToFileURL(resolve(__dirname, '..', 'core', 'biof3-server', 'mcp', 'registry.js')).href);
 
 const RUN_LIVE = process.env.RUN_VISION_LIVE === '1';
 

@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
 const BUILT_IN_DIR = path.join(REPO_ROOT, 'resources', 'built-in-plugins');
 const require = createRequire(import.meta.url);
-const pluginLoader = require(path.join(REPO_ROOT, 'core', 'r-server', 'plugin-loader.js'));
+const pluginLoader = require(path.join(REPO_ROOT, 'core', 'biof3-server', 'plugin-loader.js'));
 const { inspectPluginSources } = require(path.join(REPO_ROOT, 'core', 'shared-backend', 'plugin-sdk.js'));
 
 function defaultSources({ root, installedRoot, developmentRoots = [] } = {}) {

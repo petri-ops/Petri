@@ -5,7 +5,7 @@
  * 没有项目时才保留创建项目的启动页。
  *
  * ⚠️ 首次运行死锁修复（见 .workbuddy/memory）：
- * 项目列表走 r-server(:3001)，而 r-server 需要 R 运行时；R 运行时又只能从
+ * 项目列表走 biof3-server(:3001)，而 biof3-server 需要 R 运行时；R 运行时又只能从
  * 插件商店安装，而商店此前唯一入口在「项目工作台」内部 —— 于是形成死锁：
  *   没装 R → 进不了工作台 → 进不了工作台就装不了 R。
  * 修复：检测到 R 运行时缺失时，本页直接渲染「首次配置」引导页，并内嵌
@@ -137,7 +137,7 @@ export default function Home(): React.ReactElement {
   // ── 启动/配置引导页：两类截然不同的状态，必须分开处理 ──
   // ① runtimeMissing：R 运行时**确认缺失**（backend:status 显式返回 false）。
   //    此时才需要去插件商店装运行时 —— 真正的"首次配置"场景。
-  // ② backendNotReady：状态已检测（loaded=true）但后端 30s 仍未就绪（r-server
+  // ② backendNotReady：状态已检测（loaded=true）但后端 30s 仍未就绪（biof3-server
   //    没起来）。这是"后端启动慢/启动失败"，**不是**缺运行时 —— 误导用户去装
   //    运行时毫无意义，应给"重试/重启"出路，文案明确说"本地分析服务未启动"。
   // 注：runtimeMissing 用 `=== false` 而非 `!rRuntime`，因为 rRuntime 为 null

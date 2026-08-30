@@ -9,7 +9,7 @@ import { after, test } from 'node:test';
 
 const require = createRequire(import.meta.url);
 const Database = require(require.resolve('better-sqlite3', {
-  paths: [path.resolve('core/r-server'), path.resolve('.')],
+  paths: [path.resolve('core/biof3-server'), path.resolve('.')],
 }));
 const {
   backgroundChildForkOptions,

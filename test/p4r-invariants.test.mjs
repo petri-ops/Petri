@@ -53,7 +53,7 @@ const R_BLOCKER = rRuntimeBlocker();
 
 function openDisposableDb(dbPath) {
   const Database = require(require.resolve('better-sqlite3', {
-    paths: [path.join(REPO_ROOT, 'core', 'r-server'), REPO_ROOT],
+    paths: [path.join(REPO_ROOT, 'core', 'biof3-server'), REPO_ROOT],
   }));
   return new Database(dbPath, { readonly: true });
 }
@@ -173,7 +173,7 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
 
     // Prove the independence rather than implying it: the byte route must not
     // be reachable only after the result-studio surface has been touched.
-    const routes = readFileSync(path.join(REPO_ROOT, 'core/r-server/routes/tools-platform.js'), 'utf8');
+    const routes = readFileSync(path.join(REPO_ROOT, 'core/biof3-server/routes/tools-platform.js'), 'utf8');
     assert.ok(
       !/result-studio/.test(routes),
       'the artifact byte route file must not reference the result-studio surface',
@@ -230,7 +230,7 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
     const workspace = path.join(ctx.root, 'readonly-version-project');
     mkdirSync(workspace, { recursive: true });
     const Database = require(require.resolve('better-sqlite3', {
-      paths: [path.join(REPO_ROOT, 'core', 'r-server'), REPO_ROOT],
+      paths: [path.join(REPO_ROOT, 'core', 'biof3-server'), REPO_ROOT],
     }));
     const writable = new Database(ctx.env.BIOF3_DB_PATH);
     try {
@@ -290,7 +290,7 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
   test('3b: controlled replay requires context-bound preflight and creates one non-current candidate', async () => {
     assert.ok(ctx.replayRevisionId, 'a replayable standalone-volcano Revision is required');
     const Database = require(require.resolve('better-sqlite3', {
-      paths: [path.join(REPO_ROOT, 'core', 'r-server'), REPO_ROOT],
+      paths: [path.join(REPO_ROOT, 'core', 'biof3-server'), REPO_ROOT],
     }));
     const writable = new Database(ctx.env.BIOF3_DB_PATH);
     try {

@@ -20,7 +20,7 @@ import { fingerprintRealDataRoot } from '../scripts/g0-rs-p4r-capture.mjs';
 import { CORPUS_INPUTS, CORPUS_STEPS, generateCorpus } from '../scripts/g0-rs-p4r-corpus.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const REPO_DB = path.join(REPO_ROOT, 'core', 'r-server', 'biof3.db');
+const REPO_DB = path.join(REPO_ROOT, 'core', 'biof3-server', 'biof3.db');
 const REAL_DATA_ROOT = path.join(homedir(), 'Documents', 'BioF3-Local');
 
 /** Report why the R-backed test cannot run, or null when it can. */

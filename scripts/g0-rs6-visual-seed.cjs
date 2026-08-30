@@ -14,7 +14,7 @@ fs.mkdirSync(workspaceRoot, { recursive: true });
 process.env.BIOF3_DB_PATH = path.join(root, 'biof3.db');
 process.env.BIOF3_LOCAL_DATA_DIR = root;
 
-const db = require('../core/r-server/db');
+const db = require('../core/biof3-server/db');
 const { ensureResultStudioSchema } = require('../core/shared-backend/result-studio-schema');
 const { createResultStudioRepository } = require('../core/shared-backend/result-studio-repository');
 const { bindProjectRepository } = require('../core/shared-backend/git-repository-binding');

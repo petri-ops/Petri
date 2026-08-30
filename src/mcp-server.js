@@ -24,7 +24,7 @@ async function startMcpServer() {
   const coreRoot = fs.existsSync(devCorePath)
     ? devCorePath
     : path.join(process.resourcesPath || '', 'core');
-  const { listTools, callTool } = require(path.join(coreRoot, 'r-server', 'mcp', 'registry'));
+  const { listTools, callTool } = require(path.join(coreRoot, 'biof3-server', 'mcp', 'registry'));
 
   const server = new Server(
     { name: 'biof3-mcp', version: '0.1.0' },

@@ -19,11 +19,11 @@ const {
   resolveContextChangeSet,
   createResultStudioContextTool,
   guardContextOperation,
-} = require('../core/r-server/agent-tools/result-context-tools');
+} = require('../core/biof3-server/agent-tools/result-context-tools');
 const {
   publicProgress,
   createResultContextEditTools,
-} = require('../core/r-server/agent-tools/result-context-edit-tools');
+} = require('../core/biof3-server/agent-tools/result-context-edit-tools');
 
 const SCRIPT_SHA = 'a'.repeat(64);
 

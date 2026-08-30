@@ -1,6 +1,6 @@
 // ============================================================
 // Backend process manager — central registry for the backend
-// child processes (gateway / r-server / plumber; BLOCK-30 P1 起
+// child processes (gateway / biof3-server / plumber; BLOCK-30 P1 起
 // py-server 已摘除) plus their log streams and idle timers.
 //
 // Extracted from src/main.js by BLOCK-9.1 PHASE 4.
@@ -183,11 +183,11 @@ function _resetPlumberIdleTimer() {
 
 // ── startRServer (with supervisor) ─────────────────────────────
 const rServerSupervisor = createOwnedBackendSupervisor({
-  name: "r-server",
+  name: "biof3-server",
   spawnProcess: () => {
-    const rServerPath = resolveCore("r-server", "server.js");
+    const rServerPath = resolveCore("biof3-server", "server.js");
     const child = spawn(NODE_BIN, [rServerPath], {
-      // BLOCK-16 PHASE 3: 把 Electron userData 路径显式注入给 r-server subprocess，
+      // BLOCK-16 PHASE 3: 把 Electron userData 路径显式注入给 biof3-server subprocess，
       // 让 system-prompt 能读 working-tree-review/rejects/（30 天 TTL 拒绝清单）。
       env: {
         ...process.env,
@@ -197,19 +197,19 @@ const rServerSupervisor = createOwnedBackendSupervisor({
       stdio: ["ignore", "pipe", "pipe"],
     });
 
-    _createLogStream("r-server");
+    _createLogStream("biof3-server");
     child.stdout.on("data", (d) => {
       const text = d.toString().trim();
       if (text) {
-        console.log(`[r-server] ${text}`);
-        _writeLog("r-server", `[r-server] ${text}`);
+        console.log(`[biof3-server] ${text}`);
+        _writeLog("biof3-server", `[biof3-server] ${text}`);
       }
     });
     child.stderr.on("data", (d) => {
       const text = d.toString().trim();
       if (text) {
-        console.error(`[r-server] ${text}`);
-        _writeLog("r-server", `[r-server:ERR] ${text}`);
+        console.error(`[biof3-server] ${text}`);
+        _writeLog("biof3-server", `[biof3-server:ERR] ${text}`);
       }
     });
     return child;
@@ -223,21 +223,21 @@ const rServerSupervisor = createOwnedBackendSupervisor({
 
 function startRServer(reason = "boot") {
   if (!process.env.BIOF3_R_HOME || !fs.existsSync(process.env.BIOF3_R_HOME)) {
-    console.warn("[desktop] r-server skipped — R runtime not installed");
+    console.warn("[desktop] biof3-server skipped — R runtime not installed");
     return { ok: false, error: "R runtime not installed" };
   }
 
-  const rServerPath = resolveCore("r-server", "server.js");
+  const rServerPath = resolveCore("biof3-server", "server.js");
   if (!fs.existsSync(rServerPath)) {
-    console.error("[desktop] r-server not found:", rServerPath);
-    return { ok: false, error: "r-server script not found" };
+    console.error("[desktop] biof3-server not found:", rServerPath);
+    return { ok: false, error: "biof3-server script not found" };
   }
 
   const result = rServerSupervisor.start(reason);
 
   if (result.ok && !result.alreadyRunning) {
     console.log(
-      `[desktop] r-server spawned (pid=${result.pid}) on :${process.env.R_SERVER_PORT} — reason=${reason}`,
+      `[desktop] biof3-server spawned (pid=${result.pid}) on :${process.env.R_SERVER_PORT} — reason=${reason}`,
     );
   }
   return result;
@@ -245,7 +245,7 @@ function startRServer(reason = "boot") {
 
 // ── startPyServer / stopPyServer ───────────────────────────────
 // BLOCK-30 P1: removed with the py-server HTTP service. Python tool
-// execution runs inside r-server via the shared-backend executor
+// execution runs inside biof3-server via the shared-backend executor
 // registry (spawn 内嵌 python)，无需独立 Python 后端进程。
 
 // ── startPlumber / stopPlumber ─────────────────────────────────
@@ -272,7 +272,7 @@ function startPlumber(reason = "ipc") {
     return { ok: false, error: "Rscript not found" };
   }
 
-  const plumberScript = resolveCore("r-server", "replot.R");
+  const plumberScript = resolveCore("biof3-server", "replot.R");
   if (!fs.existsSync(plumberScript)) {
     console.warn("[desktop] plumber script not found, replot disabled");
     return { ok: false, error: "plumber script not found" };

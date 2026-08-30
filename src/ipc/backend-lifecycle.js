@@ -5,12 +5,12 @@
 // Original location: src/main.js ~line 1328 (setupBackendLifecycleIpc).
 //
 // BLOCK-30 P1: py:start / py:stop removed with the py-server HTTP
-// service — Python tool execution runs inside r-server via the
+// service — Python tool execution runs inside biof3-server via the
 // shared-backend executor registry, no standalone Python backend.
 //
 // startPlumber / stopPlumber are passed in by main.js — they live as
 // module-level functions in backend-proc-manager.js and depend on the
-// r-server supervisor and plumber child-process state.
+// biof3-server supervisor and plumber child-process state.
 // ============================================================
 
 const { ipcMain } = require("electron");

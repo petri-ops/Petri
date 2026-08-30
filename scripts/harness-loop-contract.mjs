@@ -34,8 +34,8 @@ const results = [];
 
 const filesToCheck = [
   'core/shared-backend/loop-contract.js',
-  'core/r-server/db.js',
-  'core/r-server/routes/harness.js',
+  'core/biof3-server/db.js',
+  'core/biof3-server/routes/harness.js',
 ];
 
 for (const file of filesToCheck) {

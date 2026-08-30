@@ -76,8 +76,8 @@
       "note": "P4R source projection, controlled replay, background materialization and Code tests are owned by P4R; the explicit invariant gates remain listed so a route regression cannot be hidden by the default bundle.",
       "patterns": [
         "core/shared-backend/result-*.js",
-        "core/r-server/routes/result-studio.js",
-        "core/r-server/agent-tools/result-*.js",
+        "core/biof3-server/routes/result-studio.js",
+        "core/biof3-server/agent-tools/result-*.js",
         "frontend/src/components/result-studio/**",
         "frontend/src/lib/result-studio-*.ts",
         "frontend/src/lib/result-edit-agent-bridge.ts",
@@ -112,7 +112,7 @@
     {
       "id": "agent-tool-interceptor",
       "patterns": [
-        "core/r-server/agent-tools/agent-tool-interceptor.js"
+        "core/biof3-server/agent-tools/agent-tool-interceptor.js"
       ],
       "tests": [
         "test/agent-tool-policy.test.mjs",
@@ -123,10 +123,10 @@
     {
       "id": "result-studio-agent-runtime",
       "patterns": [
-        "core/r-server/agent-runner.js",
-        "core/r-server/routes/ai-agent.js",
-        "core/r-server/helpers/ai-settings.js",
-        "core/r-server/helpers/system-prompt.js"
+        "core/biof3-server/agent-runner.js",
+        "core/biof3-server/routes/ai-agent.js",
+        "core/biof3-server/helpers/ai-settings.js",
+        "core/biof3-server/helpers/system-prompt.js"
       ],
       "tests": [
         "test/ai-settings-credential.test.mjs",
@@ -139,9 +139,9 @@
       "id": "loop",
       "patterns": [
         "core/shared-backend/loop-*.js",
-        "core/r-server/agent-runner.js",
-        "core/r-server/routes/ai-loop.js",
-        "core/r-server/routes/loop.js"
+        "core/biof3-server/agent-runner.js",
+        "core/biof3-server/routes/ai-loop.js",
+        "core/biof3-server/routes/loop.js"
       ],
       "tests": [
         "test/loop-contract.test.mjs",
@@ -191,7 +191,7 @@
       "note": "SDC1-A keeps project-local import, bounded structural profiling, fail-closed readiness, the existing Agent handoff, and its development Electron observer under one focused regression bundle; it does not qualify SDC-2+ or P7. Frontend tests are selected through frontendRelated and run by Vitest.",
       "patterns": [
         "core/shared-backend/data-profiler.js",
-        "core/r-server/routes/files.js",
+        "core/biof3-server/routes/files.js",
         "frontend/src/lib/data-profile.ts",
         "frontend/src/components/workspace-panels/DataIntakeControl.tsx",
         "scripts/g0-sdc1-*",
@@ -208,15 +208,15 @@
       "id": "ux1g1-tool-job-conversation",
       "note": "Conversation-bound ToolJob identity covers migration, creation, approval continuation, plugin execution/retry, ScientificTask/workflow binding, Result Studio derived execution, all job-history projections, and frontend compatibility mapping. Frontend tests are selected through frontendRelated and run by Vitest.",
       "patterns": [
-        "core/r-server/db.js",
-        "core/r-server/api-data.js",
-        "core/r-server/agent-tools/learning.js",
-        "core/r-server/agent-tools/result-edit-tools.js",
-        "core/r-server/mcp/registry.js",
-        "core/r-server/routes/ai-legacy.js",
-        "core/r-server/routes/harness.js",
-        "core/r-server/routes/result-studio.js",
-        "core/r-server/routes/tools-metadata.js",
+        "core/biof3-server/db.js",
+        "core/biof3-server/api-data.js",
+        "core/biof3-server/agent-tools/learning.js",
+        "core/biof3-server/agent-tools/result-edit-tools.js",
+        "core/biof3-server/mcp/registry.js",
+        "core/biof3-server/routes/ai-legacy.js",
+        "core/biof3-server/routes/harness.js",
+        "core/biof3-server/routes/result-studio.js",
+        "core/biof3-server/routes/tools-metadata.js",
         "frontend/src/lib/project-types.ts",
         "frontend/src/lib/project-store.ts",
         "frontend/src/components/copilot/copilotClient.ts",
@@ -245,7 +245,7 @@
         "frontend/src/components/desktop/TitleBar.tsx",
         "frontend/src/components/desktop/TitleBar.module.css",
         "frontend/src/lib/project-store.ts",
-        "core/r-server/routes/tools-metadata.js"
+        "core/biof3-server/routes/tools-metadata.js"
       ],
       "tests": [
         "test/tool-job-conversation.test.mjs",
@@ -298,7 +298,7 @@
         "core/shared-backend/llm-*.js",
         "core/shared-backend/model-*.js",
         "core/shared-backend/llm-providers/**",
-        "core/r-server/agent-tools/vision-tools.js"
+        "core/biof3-server/agent-tools/vision-tools.js"
       ],
       "tests": [
         "test/model-gateway.test.mjs",
@@ -327,11 +327,11 @@
       "id": "chf0-critical",
       "patterns": [
         "src/main.js",
-        "core/r-server/helpers/process-lifecycle.js",
-        "core/r-server/helpers/tools-executor.js",
-        "core/r-server/routes/files.js",
-        "core/r-server/routes/r-compute.js",
-        "core/r-server/routes/tools-platform.js",
+        "core/biof3-server/helpers/process-lifecycle.js",
+        "core/biof3-server/helpers/tools-executor.js",
+        "core/biof3-server/routes/files.js",
+        "core/biof3-server/routes/r-compute.js",
+        "core/biof3-server/routes/tools-platform.js",
         "core/shared-backend/local-request-boundary.js",
         "resources/built-in-plugins/pca-explorer/**",
         "resources/built-in-plugins/volcano-plot/**"
@@ -347,10 +347,10 @@
       "id": "plugin-runtime",
       "patterns": [
         "resources/built-in-plugins/**",
-        "core/r-server/plugin-loader.js",
-        "core/r-server/mcp/**",
-        "core/r-server/tool-registry.js",
-        "core/r-server/tool-scripts/**",
+        "core/biof3-server/plugin-loader.js",
+        "core/biof3-server/mcp/**",
+        "core/biof3-server/tool-registry.js",
+        "core/biof3-server/tool-scripts/**",
         "src/plugin-manager.js"
       ],
       "tests": [
@@ -373,7 +373,7 @@
       "patterns": [
         "src/**",
         "build/**",
-        "core/r-server/db.js",
+        "core/biof3-server/db.js",
         "src/migrations/**",
         "electron-builder.yml"
       ],
@@ -392,7 +392,7 @@
     {
       "id": "backend-fallback",
       "patterns": [
-        "core/r-server/**",
+        "core/biof3-server/**",
         "core/packages/**",
         "core/shared-backend/storage/**",
         "core/shared-backend/path-safe.js",
@@ -604,10 +604,10 @@
     {
       "id": "perf-probe",
       "patterns": [
-        "core/r-server/helpers/perf-probe.js",
-        "core/r-server/routes/perf-probe.js",
-        "core/r-server/bootstrap.js",
-        "core/r-server/server.js"
+        "core/biof3-server/helpers/perf-probe.js",
+        "core/biof3-server/routes/perf-probe.js",
+        "core/biof3-server/bootstrap.js",
+        "core/biof3-server/server.js"
       ],
       "tests": [
         "test/perf-probe.test.mjs",
@@ -788,7 +788,7 @@
       "id": "p6-canonical-source-binding",
       "note": "Every source byte eligible for the canonical P6 binding selects the fast recomputing verifier. The bounded broad prefixes are intentional: a future source-map addition inside the same runtime surfaces must fail closed until evidence is refreshed, while the expensive live matrix remains opt-in.",
       "patterns": [
-        "core/r-server/**",
+        "core/biof3-server/**",
         "core/shared-backend/**",
         "frontend/src/**",
         "frontend/vite.config.ts",
@@ -949,11 +949,11 @@
       "id": "ide-git-tools",
       "note": "Phase 3 IDE MCP git tools (git-diff / git-log / git-show / git-blame) are exercised by the dedicated test files. The new test files are also auto-selected by test-infrastructure through test/**.",
       "patterns": [
-        "core/r-server/mcp/ide-tools/git-diff.js",
-        "core/r-server/mcp/ide-tools/git-log.js",
-        "core/r-server/mcp/ide-tools/git-show.js",
-        "core/r-server/mcp/ide-tools/git-blame.js",
-        "core/r-server/mcp/ide-tools/diff-helpers.js",
+        "core/biof3-server/mcp/ide-tools/git-diff.js",
+        "core/biof3-server/mcp/ide-tools/git-log.js",
+        "core/biof3-server/mcp/ide-tools/git-show.js",
+        "core/biof3-server/mcp/ide-tools/git-blame.js",
+        "core/biof3-server/mcp/ide-tools/diff-helpers.js",
         "test/ide-tools-git-diff.test.mjs",
         "test/ide-tools-git-log.test.mjs",
         "test/ide-tools-git-show.test.mjs",

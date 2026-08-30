@@ -19,9 +19,9 @@ const localRHome = path.join(os.homedir(), 'Documents', 'BioF3-Local', 'runtimes
 if (fs.existsSync(path.join(localRHome, 'bin', 'Rscript'))) process.env.BIOF3_R_HOME = localRHome;
 
 const require = createRequire(import.meta.url);
-const db = require('../core/r-server/db');
-const pluginLoader = require('../core/r-server/plugin-loader');
-const { tool_run_tool } = require('../core/r-server/agent-tools/learning');
+const db = require('../core/biof3-server/db');
+const pluginLoader = require('../core/biof3-server/plugin-loader');
+const { tool_run_tool } = require('../core/biof3-server/agent-tools/learning');
 const { confirmScientificTask } = require('../core/shared-backend/scientific-task-confirmation');
 const { createDeliveryManifest, writeDeliveryManifest } = require('../core/shared-backend/delivery-manifest');
 const { resolveProjectRunLayout } = require('../core/shared-backend/project-run-layout');

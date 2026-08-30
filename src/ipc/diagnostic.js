@@ -84,7 +84,7 @@ function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs } = {}) {
         archive.pipe(output);
 
         // 添加日志文件
-        for (const name of ["r-server"]) { // BLOCK-30 P1: py-server 已摘除 {
+        for (const name of ["biof3-server"]) { // BLOCK-30 P1: py-server 已摘除 {
           const logFile = path.join(logDir, `${name}.log`);
           if (fs.existsSync(logFile)) {
             archive.append(
@@ -122,7 +122,7 @@ function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs } = {}) {
         lines.push("=== BioF3 Diagnostic Package ===");
         lines.push(JSON.stringify(sysInfo, null, 2));
         lines.push("");
-        for (const name of ["r-server"]) { // BLOCK-30 P1: py-server 已摘除 {
+        for (const name of ["biof3-server"]) { // BLOCK-30 P1: py-server 已摘除 {
           const logFile = path.join(logDir, `${name}.log`);
           lines.push(`\n=== ${name}.log ===`);
           try {

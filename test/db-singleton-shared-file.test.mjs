@@ -1,6 +1,6 @@
 /**
  * BLOCK-10 PHASE 1.1 (PR-012) — branch-db + result-db share one connection
- * when targeting the same file (desktop main + r-server MCP child process).
+ * when targeting the same file (desktop main + biof3-server MCP child process).
  *
  * Coverage:
  *   PR-012.1 branch + result use the same resolved file path (legacy
@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
-const coreServerRoot = path.join(root, 'core', 'r-server');
+const coreServerRoot = path.join(root, 'core', 'biof3-server');
 const req = createRequire(path.join(coreServerRoot, 'package.json'));
 const rootReq = createRequire(path.join(root, 'package.json'));
 
@@ -81,7 +81,7 @@ test('PR-012.2 openDb(branch) and openDb(result) return the same Database instan
   );
 
   // The legacy public shims from branch-db / result-db must agree too —
-  // otherwise r-server/mcp/branch-context.js would still see two distinct
+  // otherwise biof3-server/mcp/branch-context.js would still see two distinct
   // handles via the legacy API surface.
   const legacyBranch = getDatabase();
   const legacyResult = getResultDatabase();

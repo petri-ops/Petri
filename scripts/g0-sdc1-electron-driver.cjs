@@ -7,7 +7,7 @@ const path = require('node:path');
 
 const CONFIG_ENV = 'BIOF3_SDC1_DRIVER_CONFIG';
 const PRELOAD_PATH = path.resolve(__dirname, '..', 'src', 'preload.js');
-const AI_SETTINGS_HELPER_PATH = path.resolve(__dirname, '..', 'core', 'r-server', 'helpers', 'ai-settings.js');
+const AI_SETTINGS_HELPER_PATH = path.resolve(__dirname, '..', 'core', 'biof3-server', 'helpers', 'ai-settings.js');
 const CHAT_INPUT_SELECTOR = 'textarea.sc-input[placeholder^="输入消息…"]';
 const SEND_BUTTON_SELECTOR = 'button.sc-send-cta-send[title="发送消息"]';
 const POLL_MS = 125;

@@ -12,7 +12,7 @@ const { execFileSync, spawn } = require('child_process');
 const logger = require('../logger');
 const { findExecutableOnPath, getRuntimeBinName } = require('../runtime-paths');
 
-// 从 config-helper 读取配置（断点1：斩断对 r-server/config 的反向 require）
+// 从 config-helper 读取配置（断点1：斩断对 biof3-server/config 的反向 require）
 // 调用方启动时通过 require('shared-backend').configure({getConfig}) 注入；
 // 未注入时 config-helper 走 env fallback，仍能独立跑。
 const configHelper = require('../config-helper');
@@ -28,7 +28,7 @@ class RExecutor {
   /** Rscript 可执行文件路径（内嵌 R）。 */
   get binPath() {
     const cfg = getRConfig();
-    const rHome = cfg.rHome || path.join(__dirname, '../../r-server/R');
+    const rHome = cfg.rHome || path.join(__dirname, '../../biof3-server/R');
     // Use the platform-correct binary name (Rscript.exe on Windows) so the
     // embedded path is resolved by existsSync instead of falling through to a
     // PATH search that misses an isolated (non-PATH) runtime tree.

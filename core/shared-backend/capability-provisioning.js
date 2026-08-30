@@ -12,7 +12,7 @@
  *   - No second download/verify/install system: this module re-implements
  *     the same download + streaming SHA-256 + atomic-move steps already used
  *     by `src/plugin-manager.js`, but stays free of an `electron` dependency
- *     so it can run in `core/` (r-server, tests) as well as the main process.
+ *     so it can run in `core/` (biof3-server, tests) as well as the main process.
  *   - Offline-first: callers should prefer an already-provisioned capability
  *     and only reach the network when the local copy is missing or invalid
  *     (D5). This module doesn't decide *when* to fetch — callers (Harness

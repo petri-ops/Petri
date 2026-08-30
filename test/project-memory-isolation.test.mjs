@@ -9,13 +9,13 @@ const require = createRequire(import.meta.url);
 const tempRoot = mkdtempSync(join(tmpdir(), 'biof3-project-memory-'));
 process.env.BIOF3_DB_PATH = join(tempRoot, 'memory.db');
 
-const dbMod = require('../core/r-server/db.js');
+const dbMod = require('../core/biof3-server/db.js');
 const sqlite = dbMod.getDatabase();
-const memories = require('../core/r-server/helpers/memory-vectors.js');
-const facts = require('../core/r-server/helpers/user-facts.js');
-const summaries = require('../core/r-server/helpers/chat-summary.js');
-const { buildSiteSnapshotAsync } = require('../core/r-server/helpers/site-snapshot.js');
-const { tool_query, tool_search } = require('../core/r-server/agent-tools/query-tools.js');
+const memories = require('../core/biof3-server/helpers/memory-vectors.js');
+const facts = require('../core/biof3-server/helpers/user-facts.js');
+const summaries = require('../core/biof3-server/helpers/chat-summary.js');
+const { buildSiteSnapshotAsync } = require('../core/biof3-server/helpers/site-snapshot.js');
+const { tool_query, tool_search } = require('../core/biof3-server/agent-tools/query-tools.js');
 
 const userId = 'user-memory-test';
 const projectA = 'project-memory-a';

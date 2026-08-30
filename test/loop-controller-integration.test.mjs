@@ -40,7 +40,7 @@ function dagProgress(nodeIds = []) {
 before(async () => {
   tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-ctrl-int-'));
   process.env.BIOF3_DB_PATH = path.join(tmpDir, 'test.db');
-  db = (await import('../core/r-server/db.js')).default;
+  db = (await import('../core/biof3-server/db.js')).default;
 });
 
 after(() => {

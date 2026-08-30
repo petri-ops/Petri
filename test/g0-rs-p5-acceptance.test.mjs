@@ -25,7 +25,7 @@ import {
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const Database = require(require.resolve('better-sqlite3', {
-  paths: [path.join(ROOT, 'core/r-server'), ROOT],
+  paths: [path.join(ROOT, 'core/biof3-server'), ROOT],
 }));
 
 test('P5 SVG evidence recognizes equivalent rendered color encodings', () => {
@@ -221,8 +221,8 @@ test('P5 source binding contains every declared focused test and direct executio
     'test/impact-map.json',
     'core/shared-backend/git-adapter.js',
     'core/shared-backend/git-repository-binding.js',
-    'core/r-server/routes/tools-platform.js',
-    'core/r-server/plugin-loader.js',
+    'core/biof3-server/routes/tools-platform.js',
+    'core/biof3-server/plugin-loader.js',
     'resources/built-in-plugins/deseq2/scripts/deseq2.R',
     'resources/built-in-plugins/go-kegg/demo-data/genes.csv',
   ]) {

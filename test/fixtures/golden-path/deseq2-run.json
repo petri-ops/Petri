@@ -33,5 +33,5 @@
     "runtimes": { "r_server": "0.9.0", "r_version": "4.5.2", "r_packages": ["DESeq2", "ggplot2", "ggrepel", "pheatmap"] }
   },
   "exit": "analysis_succeeded_zip_packaging_pending",
-  "notes": "Real run captured 2026-07-14 against locally-bootstrapped r-server; JSON-only fixture keeps tests independent of binary archives and developer-specific tmp paths."
+  "notes": "Real run captured 2026-07-14 against locally-bootstrapped biof3-server; JSON-only fixture keeps tests independent of binary archives and developer-specific tmp paths."
 }

@@ -13,13 +13,13 @@ function resolve(...segments) {
 
 describe('agent-runner-loop-orchestrator.test.mjs (BLOCK-14 PHASE 3.1 state machine)', () => {
   it('exports runLoop as the sole public API and preserves PHASE 3.1 contract', async () => {
-    const mod = await import(resolve('core/r-server/loop-orchestrator.js'));
+    const mod = await import(resolve('core/biof3-server/loop-orchestrator.js'));
     assert.strictEqual(typeof mod.runLoop, 'function', 'runLoop must be exported');
     assert.strictEqual(mod.runLoop.constructor.name, 'AsyncFunction', 'runLoop must be async');
 
     // loop-orchestrator is the pure state machine; PHASE 3.1 forbids harness-workflow-state
-    // imports because shared-backend must not reverse-require into r-server.
-    const src = readFileSync(resolve('core/r-server/loop-orchestrator.js'), 'utf8');
+    // imports because shared-backend must not reverse-require into biof3-server.
+    const src = readFileSync(resolve('core/biof3-server/loop-orchestrator.js'), 'utf8');
     assert.equal(
       /require.*harness-workflow-state/.test(src),
       false,
@@ -37,7 +37,7 @@ describe('agent-runner-loop-orchestrator.test.mjs (BLOCK-14 PHASE 3.1 state mach
   });
 
   it('runLoop input contract requires the 9 callbacks + config + conversationState', async () => {
-    const src = readFileSync(resolve('core/r-server/loop-orchestrator.js'), 'utf8');
+    const src = readFileSync(resolve('core/biof3-server/loop-orchestrator.js'), 'utf8');
 
     // Function signature destructures 9 named top-level opts
     const requiredOpts = [
@@ -70,7 +70,7 @@ describe('agent-runner-loop-orchestrator.test.mjs (BLOCK-14 PHASE 3.1 state mach
   });
 
   it('agent-runner facade correctly wires runLoop with 4 emit callbacks and config', async () => {
-    const facadeSrc = readFileSync(resolve('core/r-server/agent-runner.js'), 'utf8');
+    const facadeSrc = readFileSync(resolve('core/biof3-server/agent-runner.js'), 'utf8');
 
     // facade must require loop-orchestrator's runLoop
     assert.ok(

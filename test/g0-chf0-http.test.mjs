@@ -8,8 +8,8 @@ import test from 'node:test';
 const require = createRequire(import.meta.url);
 const express = require('express');
 const boundary = require('../core/shared-backend/local-request-boundary.js');
-const registerFileRoutes = require('../core/r-server/routes/files.js');
-const { registerRCompute } = require('../core/r-server/routes/r-compute.js');
+const registerFileRoutes = require('../core/biof3-server/routes/files.js');
+const { registerRCompute } = require('../core/biof3-server/routes/r-compute.js');
 const { LocalFileStorage } = require('../core/shared-backend/storage/local-storage.js');
 const { registerStorage } = require('../core/shared-backend/storage/index.js');
 

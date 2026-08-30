@@ -1,7 +1,7 @@
 // M1-1 后端就绪感知层测试
 // 运行：cd desktop-app && node --test test/backend-health.test.mjs
 // BLOCK-30 P1: py-server HTTP 服务已摘除——probePy/pyServerUp 场景删除，
-// pyRuntime 仅反映运行时安装态（Python 工具由 r-server 本地执行）。
+// pyRuntime 仅反映运行时安装态（Python 工具由 biof3-server 本地执行）。
 import assert from 'node:assert/strict';
 import {
   getBackendStatus,
@@ -51,7 +51,7 @@ import {
   console.log('✓ 场景2 R 未装通过：', status.downReason);
 }
 
-// === 场景 3：R 装了但 r-server 未起（health 探测失败）===
+// === 场景 3：R 装了但 biof3-server 未起（health 探测失败）===
 {
   const status = await getBackendStatus({
     runtimeStatus: { r: { installed: true }, python: { installed: true } },
@@ -62,10 +62,10 @@ import {
   assert.strictEqual(status.rServerUp, false, 'rServerUp 应为 false（health 探测失败）');
   assert.strictEqual(status.isReady, false, 'isReady 应为 false');
   assert.ok(status.downReason, 'downReason 应非空');
-  console.log('✓ 场景3 r-server 未起通过：', status.downReason);
+  console.log('✓ 场景3 biof3-server 未起通过：', status.downReason);
 }
 
-// === 场景 4：r-server 进程已退出（killed=true）===
+// === 场景 4：biof3-server 进程已退出（killed=true）===
 {
   const status = await getBackendStatus({
     runtimeStatus: { r: { installed: true }, python: { installed: true } },
@@ -74,10 +74,10 @@ import {
   });
   assert.strictEqual(status.rServerUp, false, 'rServerUp 应为 false（进程 killed）');
   assert.strictEqual(status.isReady, false, 'isReady 应为 false');
-  console.log('✓ 场景4 r-server killed 通过');
+  console.log('✓ 场景4 biof3-server killed 通过');
 }
 
-// === 场景 5：r-server 进程对象为 null（未 spawn）===
+// === 场景 5：biof3-server 进程对象为 null（未 spawn）===
 {
   const status = await getBackendStatus({
     runtimeStatus: { r: { installed: true }, python: { installed: false } },
@@ -98,7 +98,7 @@ import {
   });
   assert.strictEqual(status.rServerUp, true, 'rServerUp 应为 true');
   assert.strictEqual(status.plumberUp, false, 'plumberUp 应为 false');
-  assert.strictEqual(status.isReady, true, 'isReady 应为 true（仅 r-server 是硬要求）');
+  assert.strictEqual(status.isReady, true, 'isReady 应为 true（仅 biof3-server 是硬要求）');
   assert.strictEqual(status.downReason, null, 'downReason 应为 null');
   console.log('✓ 场景6 plumber 按需通过');
 }

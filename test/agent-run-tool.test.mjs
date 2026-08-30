@@ -11,7 +11,7 @@ import os from 'node:os';
 
 const path = { join };
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const R_SERVER = resolve(__dirname, '..', 'core', 'r-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
 const req = createRequire(import.meta.url);
 const TEST_DB_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-agent-run-tool-'));
 process.env.BIOF3_DB_PATH = path.join(TEST_DB_DIR, 'biof3.db');

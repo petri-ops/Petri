@@ -89,7 +89,7 @@ export const P6_SERVICE_FIXTURE_SOURCE_FILES = Object.freeze({
   gitAdapter: 'core/shared-backend/git-adapter.js',
   gitBinding: 'core/shared-backend/git-repository-binding.js',
   resourceSnapshot: 'core/shared-backend/runtime-resource-snapshot.js',
-  routes: 'core/r-server/routes/result-studio.js',
+  routes: 'core/biof3-server/routes/result-studio.js',
   routeBaselineTest: 'test/result-studio-route-baseline.test.mjs',
   resultClient: 'frontend/src/components/result-studio/resultStudioClient.ts',
   changeSetPanel: 'frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx',

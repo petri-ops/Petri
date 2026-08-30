@@ -51,11 +51,11 @@ const SOURCE_FILES = Object.freeze([
   'core/shared-backend/result-studio-evidence-bundle.js',
   'core/shared-backend/git-repository-consent-schema.js',
   'src/migrations/004_git_repository_consent.sql',
-  'core/r-server/helpers/ai-settings.js',
-  'core/r-server/agent-runner.js',
-  'core/r-server/agent-tools/agent-loop-control.js',
-  'core/r-server/agent-tools/result-context-binding.js',
-  'core/r-server/routes/ai-agent.js',
+  'core/biof3-server/helpers/ai-settings.js',
+  'core/biof3-server/agent-runner.js',
+  'core/biof3-server/agent-tools/agent-loop-control.js',
+  'core/biof3-server/agent-tools/result-context-binding.js',
+  'core/biof3-server/routes/ai-agent.js',
   'frontend/src/pages/project-workspace.tsx',
   'frontend/src/components/result-studio/ResultAgentComposer.tsx',
   'frontend/src/components/result-studio/ResultEditPanel.tsx',
@@ -72,9 +72,9 @@ const SHA256 = /^[a-f0-9]{64}$/;
 const COMMIT = /^[a-f0-9]{40}$/;
 
 const Database = require(require.resolve('better-sqlite3', {
-  paths: [path.join(ROOT, 'core/r-server'), ROOT],
+  paths: [path.join(ROOT, 'core/biof3-server'), ROOT],
 }));
-const aiSettings = require('../core/r-server/helpers/ai-settings');
+const aiSettings = require('../core/biof3-server/helpers/ai-settings');
 const { ModelGateway, getProvider } = require('../core/shared-backend/llm-providers');
 const {
   REQUIRED_ENVIRONMENTS,
@@ -424,7 +424,7 @@ function stageRuntimes(dataDir) {
 
 function appendLog(state, chunk) {
   state.log = `${state.log}${String(chunk || '')}`.slice(-262_144);
-  const match = state.log.match(/r-server spawned[^\n]*on :(\d+)/);
+  const match = state.log.match(/biof3-server spawned[^\n]*on :(\d+)/);
   if (match) state.backendPort = Number(match[1]);
 }
 

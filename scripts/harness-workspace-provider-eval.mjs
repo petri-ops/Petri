@@ -44,11 +44,11 @@ const MAX_TOOL_CALLS = 12;
 const providerModule = require(path.join(REPO_ROOT, 'core/shared-backend/llm-providers/index.js'));
 const { ModelGateway, getProvider } = providerModule;
 const aiUsageHelper = require(path.join(REPO_ROOT, 'core/shared-backend/ai-usage-helper.js'));
-const { WORKSPACE_TOOL_DEFS } = require(path.join(REPO_ROOT, 'core/r-server/agent-tools/tool-defs.js'));
-const { createWorkspaceTools } = require(path.join(REPO_ROOT, 'core/r-server/agent-tools/workspace-tools.js'));
-const { dispatchTool } = require(path.join(REPO_ROOT, 'core/r-server/agent-tools/index.js'));
-const { inferExecutionPolicy } = require(path.join(REPO_ROOT, 'core/r-server/helpers/agent-execution-policy.js'));
-const { appendDesktopAgentInstructions } = require(path.join(REPO_ROOT, 'core/r-server/helpers/desktop-agent-prompt.js'));
+const { WORKSPACE_TOOL_DEFS } = require(path.join(REPO_ROOT, 'core/biof3-server/agent-tools/tool-defs.js'));
+const { createWorkspaceTools } = require(path.join(REPO_ROOT, 'core/biof3-server/agent-tools/workspace-tools.js'));
+const { dispatchTool } = require(path.join(REPO_ROOT, 'core/biof3-server/agent-tools/index.js'));
+const { inferExecutionPolicy } = require(path.join(REPO_ROOT, 'core/biof3-server/helpers/agent-execution-policy.js'));
+const { appendDesktopAgentInstructions } = require(path.join(REPO_ROOT, 'core/biof3-server/helpers/desktop-agent-prompt.js'));
 
 // Live acceptance must not write usage records to the user's database.
 aiUsageHelper.configure({ recordAiUsage: () => {} });

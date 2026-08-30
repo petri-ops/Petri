@@ -79,12 +79,12 @@ export const P6_UI110_SOURCE_SENTINELS = Object.freeze({
   p6GatewayTest: 'test/g0-rs-p6-ui110-local-gateway.test.mjs',
   baselineRouteTest: 'test/result-studio-route-baseline.test.mjs',
   electronPreload: 'src/preload.js',
-  aiSettings: 'core/r-server/helpers/ai-settings.js',
+  aiSettings: 'core/biof3-server/helpers/ai-settings.js',
   modelProfile: 'core/shared-backend/llm-providers/model-profile.js',
   providerTransport: 'core/shared-backend/llm-providers/deepseek.js',
-  modelGateway: 'core/r-server/helpers/model-gateway.js',
-  agentRoute: 'core/r-server/routes/ai-agent.js',
-  agentRunner: 'core/r-server/agent-runner.js',
+  modelGateway: 'core/biof3-server/helpers/model-gateway.js',
+  agentRoute: 'core/biof3-server/routes/ai-agent.js',
+  agentRunner: 'core/biof3-server/agent-runner.js',
   redaction: 'core/shared-backend/redaction.js',
   diagnosticRedactionTest: 'test/diagnostic-redaction.test.mjs',
   capabilityProvisioning: 'core/shared-backend/capability-provisioning.js',
@@ -724,7 +724,7 @@ function renderContractFromSvg(filePath) {
 
 function openReadonlyDatabase(dbPath) {
   const Database = require(require.resolve('better-sqlite3', {
-    paths: [path.join(ROOT, 'core/r-server'), ROOT],
+    paths: [path.join(ROOT, 'core/biof3-server'), ROOT],
   }));
   return new Database(dbPath, { readonly: true });
 }

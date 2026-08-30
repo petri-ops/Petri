@@ -17,9 +17,9 @@ const {
   resolveLifecycleDurations,
   scheduleHardTimeout,
   terminateChildProcess,
-} = require('../core/r-server/helpers/process-lifecycle.js');
-const { createToolsPlatformRoutes } = require('../core/r-server/routes/tools-platform.js');
-const { _test: toolsExecutorTest } = require('../core/r-server/helpers/tools-executor.js');
+} = require('../core/biof3-server/helpers/process-lifecycle.js');
+const { createToolsPlatformRoutes } = require('../core/biof3-server/routes/tools-platform.js');
+const { _test: toolsExecutorTest } = require('../core/biof3-server/helpers/tools-executor.js');
 
 function fakeChild(killImpl) {
   const child = new EventEmitter();
@@ -613,7 +613,7 @@ test('P6 spawned owners arm the hard kill budget before heartbeat monitoring', (
   assert.equal(order.at(-1), 'heartbeat-refresh');
 
   const source = readFileSync(
-    new URL('../core/r-server/helpers/tools-executor.js', import.meta.url),
+    new URL('../core/biof3-server/helpers/tools-executor.js', import.meta.url),
     'utf8',
   );
   const spawnedOwner = source.indexOf('owner.process = child;');

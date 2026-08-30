@@ -3,7 +3,7 @@ import test from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { buildSystemPrompt } = require('../core/r-server/helpers/system-prompt.js');
+const { buildSystemPrompt } = require('../core/biof3-server/helpers/system-prompt.js');
 
 test('system prompt keeps the assistant role brand-neutral and discloses the real provider and model', () => {
   const prompt = buildSystemPrompt(

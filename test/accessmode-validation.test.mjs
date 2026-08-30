@@ -14,7 +14,7 @@ const require = createRequire(import.meta.url);
 
 // 测试策略层逻辑
 test('agent-tool-policy accessMode validation', async (t) => {
-  const { decideAgentToolCall } = require('../core/r-server/agent-tools/agent-tool-policy.js');
+  const { decideAgentToolCall } = require('../core/biof3-server/agent-tools/agent-tool-policy.js');
 
   await t.test('should allow mutating tools in full access mode', () => {
     const decision = decideAgentToolCall({
