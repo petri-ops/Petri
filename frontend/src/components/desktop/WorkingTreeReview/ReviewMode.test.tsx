@@ -57,6 +57,7 @@ function makeBridge(overrides: Record<string, unknown> = {}) {
     revert: vi.fn(() => Promise.resolve({ ok: true, data: { reverted: [] } })),
     commitReview: vi.fn(() => Promise.resolve({ ok: true, data: {} })),
     onTaskDone: vi.fn(() => vi.fn()),
+    fileContent: vi.fn(() => Promise.resolve({ ok: true, data: { content: 'line1\n' } })),
     // BLOCK-29 — 提交历史（默认空实现，历史用例中覆写）
     commitLog: vi.fn(() => Promise.resolve({ ok: true, data: { commits: [], count: 0 } })),
     commitDiff: vi.fn(() => Promise.resolve({ ok: true, data: { files: [], truncated: false, summary: { added: 0, removed: 0 } } })),
@@ -239,6 +240,38 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     });
     expect(commitDiff).toHaveBeenCalledWith({ hash: 'a1b2c3d4e5f6' });
     expect(commitFileContent).toHaveBeenCalledWith({ hash: 'a1b2c3d4e5f6', path: 'src/a.py' });
+  });
+
+  it('BLOCK-29.1: dock accordion rows expand inline diff on click', async () => {
+    getBridgeMock.mockReturnValue(makeBridge());
+
+    render(
+      <MemoryRouter initialEntries={['/project/p1/results']}>
+        <ReviewMode variant="dock" onClose={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    const list = await screen.findByTestId('rvw-file-list');
+    expect(list.textContent).toContain('a.py');
+
+    // 当前选中文件（首个 diff 文件）默认展开
+    const row = screen.getByTitle('src/a.py');
+    expect(row.getAttribute('aria-expanded')).toBe('true');
+    await waitFor(() => {
+      expect(document.querySelector('.rvw-acc-diff')).not.toBeNull();
+    });
+
+    // 点击收起
+    fireEvent.click(row);
+    expect(row.getAttribute('aria-expanded')).toBe('false');
+    expect(document.querySelector('.rvw-acc-diff')).toBeNull();
+
+    // 再次点击展开
+    fireEvent.click(row);
+    expect(row.getAttribute('aria-expanded')).toBe('true');
+    await waitFor(() => {
+      expect(document.querySelector('.rvw-acc-diff')).not.toBeNull();
+    });
   });
 
   it('shows the empty state when the working tree is clean', async () => {

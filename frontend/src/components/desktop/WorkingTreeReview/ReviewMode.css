@@ -602,3 +602,60 @@
 .rvw-history-back:hover {
   background: var(--biof3-bg-subtle);
 }
+
+/* ===== BLOCK-29.1 — dock 手风琴：文件行一级，点击展开行内 diff ===== */
+.rvw-accordion {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 4px 0 8px;
+}
+
+.rvw-acc-item {
+  border-bottom: 1px solid var(--biof3-border-subtle);
+}
+
+.rvw-acc-item.active {
+  background: var(--biof3-accent-soft);
+}
+
+.rvw-acc-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  color: var(--biof3-text);
+  cursor: pointer;
+  text-align: left;
+  font-size: var(--biof3-font-size-caption);
+}
+
+.rvw-acc-row:hover {
+  background: var(--biof3-bg-subtle);
+}
+
+.rvw-acc-name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rvw-acc-dir {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--biof3-text-muted);
+}
+
+.rvw-acc-diff {
+  border-top: 1px solid var(--biof3-border-subtle);
+  background: var(--biof3-bg-canvas);
+  max-height: 60vh;
+  overflow-y: auto;
+}

@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { getBridge } from '@/lib/desktopBridge';
 import type { DiffRevision } from '@/components/editor/CodeMirror/types';
+import { WorkspaceFileIcon } from '@/components/workspace-panels/WorkspaceFileIcon';
 import { useWorkingTreeReview, type DiffFile } from './useWorkingTreeReview';
 import { CodeMirrorDiffView } from './CodeMirrorDiffView';
 import { CodeReviewDrawer } from './CodeReviewDrawer';
@@ -114,6 +115,24 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   const [focusedHunk, setFocusedHunk] = useState(0);
   const [collapsedDirs, setCollapsedDirs] = useState<Record<string, boolean>>({});
   const textareaRef = useRef<HTMLInputElement>(null);
+
+  // BLOCK-29.1 — dock 手风琴：每文件一行，点击展开/收起行内 diff。
+  // selectedFilePath 变化（聊天卡片跳转等）时自动展开对应行。
+  const [expandedPaths, setExpandedPaths] = useState<Set<string>>(() => new Set());
+  useEffect(() => {
+    const target = review.selectedFilePath;
+    if (!target) return;
+    setExpandedPaths((prev) => (prev.has(target) ? prev : new Set(prev).add(target)));
+  }, [review.selectedFilePath]);
+  const toggleAccordionRow = (path: string) => {
+    setExpandedPaths((prev) => {
+      const next = new Set(prev);
+      if (next.has(path)) next.delete(path);
+      else next.add(path);
+      return next;
+    });
+    review.setSelectedFilePath(path);
+  };
 
   const exitReviewMode = () => {
     if (window.history.length > 1) navigate(-1);
@@ -470,7 +489,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
         )}
         {review.historyView === 'changes' && (<>
         {isDock ? (
-          <div className="rvw-filestrip" data-testid="rvw-file-list" role="tablist" aria-label="改动文件">
+          <div className="rvw-accordion" data-testid="rvw-file-list" role="list" aria-label="改动文件">
             {review.status && review.status.files.length === 0 && (
               <div className="wt-empty">暂无工作区改动。</div>
             )}
@@ -479,30 +498,55 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
               const stats = computeFileDiffStats(diffFile);
               const reviewed = isFileReviewed(diffFile, review.decisions);
               const selected = review.selectedFilePath === f.path;
+              const expanded = expandedPaths.has(f.path);
               const fileName = f.path.slice(f.path.lastIndexOf('/') + 1);
+              const dirPath = f.path.slice(0, f.path.lastIndexOf('/'));
               return (
-                <button
+                <div
                   key={f.path}
-                  type="button"
-                  role="tab"
-                  aria-selected={selected}
-                  className={`rvw-filechip ${selected ? 'active' : ''}${reviewed ? ' rvw-file-reviewed' : ''}`}
-                  onClick={() => review.setSelectedFilePath(f.path)}
-                  title={f.path}
+                  className={`rvw-acc-item${selected ? ' active' : ''}${reviewed ? ' rvw-file-reviewed' : ''}`}
                 >
-                  <span className={`wt-file-status wt-file-status-${f.status}`}>{f.status}</span>
-                  <span className="rvw-filechip-name">{fileName}</span>
-                  {reviewed ? (
-                    <span className="rvw-reviewed-mark"><Icon name="check" size={12} /></span>
-                  ) : (
-                    (stats.added > 0 || stats.removed > 0) && (
+                  <button
+                    type="button"
+                    className="rvw-acc-row"
+                    aria-expanded={expanded}
+                    onClick={() => toggleAccordionRow(f.path)}
+                    title={f.path}
+                  >
+                    <span className={`rvw-caret${expanded ? '' : ' rvw-caret-collapsed'}`}>
+                      <span className="rvw-caret-icon"><Icon name="chevron-down" size={12} /></span>
+                    </span>
+                    <WorkspaceFileIcon name={f.path} type="file" />
+                    <span className="rvw-acc-name">{fileName}</span>
+                    {dirPath && <span className="rvw-acc-dir">{dirPath}/</span>}
+                    {reviewed ? (
+                      <span className="rvw-reviewed-mark"><Icon name="check" size={12} /></span>
+                    ) : (stats.added > 0 || stats.removed > 0) ? (
                       <span className="rvw-file-stats">
                         {stats.added > 0 && <span className="rvw-stat-add">+{stats.added}</span>}
                         {stats.removed > 0 && <span className="rvw-stat-del">−{stats.removed}</span>}
                       </span>
-                    )
+                    ) : null}
+                  </button>
+                  {expanded && (
+                    <div className="rvw-acc-diff">
+                      {diffFile ? (
+                        <CodeMirrorDiffView
+                          filePath={f.path}
+                          isBinary={diffFile.binary}
+                          hunks={diffFile.hunks}
+                          hunkDecisions={diffFile.hunks.map(
+                            (_, i) => review.decisions[`${f.path}#${i}`] ?? null,
+                          )}
+                          onAcceptHunk={(i) => void review.decideHunk(f.path, i, 'accept')}
+                          onRejectHunk={(i) => void review.decideHunk(f.path, i, 'reject')}
+                        />
+                      ) : (
+                        <div className="wt-empty">未跟踪文件 — 暂无行级 diff。</div>
+                      )}
+                    </div>
                   )}
-                </button>
+                </div>
               );
             })}
           </div>
@@ -574,7 +618,8 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
         </aside>
         )}
 
-        {/* 右栏大空间 diff（sticky 文件头在滚动容器外，天然吸顶；dock 下为纵向主体） */}
+        {/* 右栏大空间 diff（仅 mode 变体；dock 为手风琴行内 diff） */}
+        {!isDock && (
         <main className="rvw-diff-area" data-testid="rvw-diff-area">
           {!selectedFile && !review.loading && !review.error && (
             <div className="rvw-empty-state">
@@ -615,6 +660,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
             </div>
           )}
         </main>
+        )}
         </>)}
       </div>
 

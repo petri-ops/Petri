@@ -1722,3 +1722,17 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；定向 vitest 20/20（新增历史用例：列表渲染 + 点提交加载 diff 与两版全文）。**2026-08-30 dev 实机 verified**：CDP 6/6——注入与磁盘 git 一致的桥桩后：「改动/历史」tablist 存在、历史列表两条真实提交（shortSha/subject/author·时间）、点开提交 diff 绿色新增行与「N 个 hunk」文件头、← 返回列表、切回改动分区；截图 `acceptance/ui-219/`。观察项：窄视口下 summary 操作按钮可能遮挡分区 tab（列宽拖宽即可用），后续布局打磨项。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-220: BLOCK-29.1 — 审阅 dock 手风琴文件列表（文件行一级，点击展开行内 diff） (2026-08-30 verified)
+
+**用户反馈**：「改动的文件名字在最上层，我希望是改动的文件名是一级，点击之后向下展开，这样可以一次性看到有哪些文件发生改动，点击展开后看到详细的改动信息」（参考 Cursor 例图）——原 dock 横向文件条 + 底部单文件 diff 无法一眼看全所有改动文件。
+
+**改动范围**：
+- ReviewMode dock 变体重构为**纵向手风琴**（`.rvw-accordion`）：一行一文件——caret（收起旋转 -90°）+ `WorkspaceFileIcon` 类型图标 + 文件名（粗体）+ 目录路径灰字 + ±统计 / 已审 ✓；点击行向下展开该文件**行内 diff**（复用 CodeMirrorDiffView，含 accept/reject 控件，多行可同开）；未跟踪文件（不在 diff 中）展开显示占位说明。
+- 当前选中文件默认展开；`selectedFilePath` 变化（聊天卡片跳转 `biof3:review-open-file`）自动展开对应行；行点击同时 `setSelectedFilePath`（A/R 键盘流仍作用于最后展开文件）。
+- mode 变体（/review 全页）保持「侧栏 + 大 diff 区」布局不变；历史/提交 diff 分区不受影响。
+- CSS：`.rvw-accordion/.rvw-acc-item/.rvw-acc-row/.rvw-acc-name/.rvw-acc-dir/.rvw-acc-diff`（展开区 max-height 60vh 独立滚动）。
+
+**验证**：tsc 0；定向 vitest 21/21（新增 dock 手风琴用例：选中文件默认展开 / 点击收起 / 再点展开，makeBridge 补 fileContent）。**2026-08-30 dev 实机 verified**：CDP 6/6——注入桥桩后：`.rvw-filechip`/`.rvw-diff-area` 计数=0、`rvw-accordion` 两行文件行（M README.md +1、Py demo-291.py）、README.md 默认展开且行内绿色新增行、demo-291.py 展开显示未跟踪占位、再点收起、接受后底部提交条出现；截图 `acceptance/ui-220/`。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

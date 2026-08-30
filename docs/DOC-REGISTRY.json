@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 159,
+    "documentCount": 160,
     "lastUpdated": "2026-08-29",
-    "managedMarkdown": 159
+    "managedMarkdown": 160
   },
   "documents": [
     {
@@ -2527,8 +2527,22 @@
       "registeredAt": "2026-08-30",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-29.1-ACCORDION-FILE-LIST",
+      "path": "docs/block-29-1-accordion-file-list-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-29-accordion-file-list",
+      "entrypoint": "docs/README.md",
+      "tags": ["block-29-1", "review-mode", "accordion", "ux", "G0", "completed", "phase=COMPLETED", "UI-220"],
+      "notes": "2026-08-30 用户反馈启动（参考 Cursor 例图）：改动文件名应为一级，点击向下展开行内 diff，一眼看全所有改动文件。dock 变体弃用横向文件条+底部单文件 diff，改纵向手风琴（caret + WorkspaceFileIcon + 文件名 + 目录灰字 + ±统计/已审✓），点击展开行内 diff（多行可同开），未跟踪文件占位说明；选中文件默认展开，聊天卡片跳转自动展开；mode 变体布局不变。0 新增 IPC / 0 新依赖 / AI 审阅 0 重新引入。2026-08-30 收口 verified：tsc 0 / vitest 21/21 / CDP 6/6，证据 acceptance/ui-220/。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-08-30",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "COMPLETED"
     }
   ],
   "lastUpdated": "2026-08-30",
-  "documentCount": 159
+  "documentCount": 160
 }
