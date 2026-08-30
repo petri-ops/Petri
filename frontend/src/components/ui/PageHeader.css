@@ -29,7 +29,7 @@
   align-items: center;
   gap: 0;
   margin-bottom: 8px;
-  font-size: 0.8rem;
+  font-size: var(--biof3-font-size-body-sm);
 }
 
 .biof3-page-header__crumb-wrap {
@@ -98,7 +98,7 @@ a.biof3-page-header__crumb:hover {
 
 .biof3-page-header__title {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: var(--biof3-font-size-2xl);
   font-weight: 700;
   line-height: 1.25;
   color: var(--biof3-text);
@@ -106,7 +106,7 @@ a.biof3-page-header__crumb:hover {
 
 .biof3-page-header__subtitle {
   margin: 4px 0 0;
-  font-size: 0.88rem;
+  font-size: var(--biof3-font-size-body);
   color: var(--biof3-text-tertiary);
   line-height: 1.5;
 }
@@ -121,7 +121,7 @@ a.biof3-page-header__crumb:hover {
     padding: 14px 16px 10px;
   }
   .biof3-page-header__title {
-    font-size: 1.15rem;
+    font-size: var(--biof3-font-size-lg);
   }
   .biof3-page-header__icon {
     width: 34px;

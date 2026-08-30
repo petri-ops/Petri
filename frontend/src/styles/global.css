@@ -23,6 +23,7 @@
   --biof3-font-size-caption: 0.75rem; /* 12px 说明/caption */
   --biof3-font-size-body-sm: 0.8125rem; /* 13px 紧凑正文/表格 */
   --biof3-font-size-body: 0.875rem; /* 14px 正文 */
+  --biof3-font-size-md: 1rem; /* 16px 小标题/MD h2 */
   --biof3-font-size-lg: 1.125rem; /* 18px 小标题 */
   --biof3-font-size-xl: 1.25rem; /* 20px 标题 */
   --biof3-font-size-2xl: 1.375rem; /* 22px 大标题 */
@@ -61,7 +62,7 @@ body {
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
     'Microsoft YaHei', sans-serif;
-  font-size: 16px;
+  font-size: var(--biof3-font-size-md);
   background: var(--ifm-background-color);
   color: var(--biof3-text-secondary);
   -webkit-font-smoothing: antialiased;
@@ -112,7 +113,7 @@ body {
   align-items: center;
   justify-content: center;
   color: var(--biof3-text-muted);
-  font-size: 0.95rem;
+  font-size: var(--biof3-font-size-md);
 }
 .biof3-docs-frame {
   width: 100%;

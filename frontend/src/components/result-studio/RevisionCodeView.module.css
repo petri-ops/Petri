@@ -1,16 +1,16 @@
 .surface { display: grid; gap: 12px; padding: 16px; min-width: 0; }
 .header { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
-.header h3 { margin: 0; font-size: 15px; }
-.header p { margin: 4px 0 0; color: var(--biof3-text-secondary); font-size: 12px; }
+.header h3 { margin: 0; font-size: var(--biof3-font-size-md); }
+.header p { margin: 4px 0 0; color: var(--biof3-text-secondary); font-size: var(--biof3-font-size-caption); }
 .actions { display: flex; gap: 6px; align-items: flex-start; flex-wrap: wrap; }
 .actions button, .status button, .surface > button { border: 1px solid var(--biof3-border); border-radius: 6px; background: var(--biof3-surface); color: var(--biof3-text-primary); padding: 5px 9px; cursor: pointer; }
 .menu { display: grid; gap: 4px; position: absolute; right: 0; z-index: 2; min-width: 150px; padding: 8px; background: var(--biof3-surface); border: 1px solid var(--biof3-border); border-radius: 7px; box-shadow: var(--biof3-shadow-sm); }
 .actions details { position: relative; }
 .actions summary { list-style: none; border: 1px solid var(--biof3-border); border-radius: 6px; padding: 5px 9px; cursor: pointer; }
-.status { display: flex; gap: 8px; align-items: center; color: var(--biof3-text-secondary); font-size: 12px; }
+.status { display: flex; gap: 8px; align-items: center; color: var(--biof3-text-secondary); font-size: var(--biof3-font-size-caption); }
 .replayConfirm { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--biof3-border); border-radius: 8px; background: var(--biof3-surface-raised); }
-.replayConfirm ul { margin: 0; padding-left: 20px; color: var(--biof3-text-secondary); font-size: 12px; line-height: 1.55; }
-.technical { color: var(--biof3-text-secondary); font-size: 11px; }
+.replayConfirm ul { margin: 0; padding-left: 20px; color: var(--biof3-text-secondary); font-size: var(--biof3-font-size-caption); line-height: 1.55; }
+.technical { color: var(--biof3-text-secondary); font-size: var(--biof3-font-size-sm); }
 .technical dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 10px; }
 .technical dd { margin: 0; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, monospace; }
 .code { margin: 0; padding: 14px; overflow: auto; border: 1px solid var(--biof3-border); border-radius: 8px; background: var(--biof3-surface-raised); max-height: 68vh; }

@@ -78,7 +78,7 @@
 }
 
 .biof3-login-modal__brand strong {
-  font-size: 1.3rem;
+  font-size: var(--biof3-font-size-xl);
   letter-spacing: 0.04em;
   background: var(--ifm-color-primary);
   -webkit-background-clip: text;
@@ -89,7 +89,7 @@
 .biof3-login-modal__tagline {
   display: block;
   margin-top: 2px;
-  font-size: 0.8rem;
+  font-size: var(--biof3-font-size-body-sm);
   color: var(--biof3-text-secondary);
 }
 
@@ -103,7 +103,7 @@
   border-radius: 8px;
   background: var(--biof3-status-success-bg);
   color: var(--biof3-status-success-fg);
-  font-size: 0.85rem;
+  font-size: var(--biof3-font-size-body-sm);
   text-align: center;
 }
 
@@ -127,7 +127,7 @@
   flex: 1;
   background: transparent;
   border: 0;
-  font-size: 0.9rem;
+  font-size: var(--biof3-font-size-body);
   font-weight: 600;
   padding: 8px 4px 10px;
   cursor: pointer;
@@ -156,7 +156,7 @@
 
 .biof3-login-modal__field label {
   display: block;
-  font-size: 0.78rem;
+  font-size: var(--biof3-font-size-caption);
   font-weight: 500;
   margin-bottom: 4px;
   color: var(--biof3-text-secondary);
@@ -168,7 +168,7 @@
 
 .biof3-login-modal__field input {
   width: 100%;
-  font-size: 0.9rem;
+  font-size: var(--biof3-font-size-body);
   padding: 8px 11px;
   border-radius: 8px;
   border: 1px solid var(--biof3-border);
@@ -199,7 +199,7 @@
   border-radius: 6px;
   background: var(--biof3-status-error-bg);
   color: var(--biof3-status-error-fg);
-  font-size: 0.82rem;
+  font-size: var(--biof3-font-size-body-sm);
 }
 
 [data-theme='dark'] .biof3-login-modal__error {
@@ -215,7 +215,7 @@
   border: 0;
   padding: 9px 14px;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: var(--biof3-font-size-body);
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -236,7 +236,7 @@
 .biof3-login-modal__footer {
   margin-top: 14px;
   text-align: center;
-  font-size: 0.82rem;
+  font-size: var(--biof3-font-size-body-sm);
   color: var(--biof3-text-secondary);
 }
 
@@ -261,7 +261,7 @@
 .biof3-login-modal__hint {
   display: block;
   margin-top: 4px;
-  font-size: 0.75rem;
+  font-size: var(--biof3-font-size-caption);
   color: var(--biof3-text-tertiary);
 }
 
@@ -281,13 +281,13 @@
 }
 
 .biof3-login-modal__welcome h2 {
-  font-size: 1.25rem;
+  font-size: var(--biof3-font-size-xl);
   margin: 0 0 0.5rem;
   color: var(--biof3-text);
 }
 
 .biof3-login-modal__welcome-desc {
-  font-size: 0.875rem;
+  font-size: var(--biof3-font-size-body);
   color: var(--biof3-text-tertiary);
   margin-bottom: 1.25rem;
 }
@@ -332,10 +332,10 @@
 }
 
 .biof3-login-modal__welcome-link strong {
-  font-size: 0.875rem;
+  font-size: var(--biof3-font-size-body);
 }
 
 .biof3-login-modal__welcome-link small {
-  font-size: 0.75rem;
+  font-size: var(--biof3-font-size-caption);
   color: var(--biof3-text-tertiary);
 }

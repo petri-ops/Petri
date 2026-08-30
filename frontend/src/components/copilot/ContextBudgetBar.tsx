@@ -72,7 +72,7 @@ function IdleRing({ contextWindow }: { contextWindow: number }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
       <Ring pct={0} color={color} />
-      <span style={{ fontSize: '10px', color, fontFamily: 'monospace', fontWeight: 600, lineHeight: 1 }}>
+      <span style={{ fontSize: 'var(--biof3-font-size-xs)', color, fontFamily: 'monospace', fontWeight: 600, lineHeight: 1 }}>
         {formatTokens(contextWindow)}
       </span>
     </div>
@@ -118,7 +118,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
   ) : contextWindow > 0 ? (
     <Ring pct={0} color="#9ca3af" />
   ) : (
-    <span style={{ fontSize: '11px', color: '#9ca3af', fontFamily: 'monospace' }}>—</span>
+    <span style={{ fontSize: 'var(--biof3-font-size-sm)', color: '#9ca3af', fontFamily: 'monospace' }}>—</span>
   );
 
   return (
@@ -161,7 +161,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
             border: '1px solid var(--color-border, #e5e7eb)',
             borderRadius: '10px',
             padding: '10px 12px',
-            fontSize: '12px',
+            fontSize: 'var(--biof3-font-size-caption)',
             color: 'var(--color-text-primary, #111827)',
             boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
             whiteSpace: 'nowrap',
@@ -170,10 +170,10 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-            <span style={{ fontWeight: 600, fontSize: '12px' }}>上下文用量</span>
-            <span style={{ fontSize: '11px', color, fontWeight: 600 }}>
+            <span style={{ fontWeight: 600, fontSize: 'var(--biof3-font-size-caption)' }}>上下文用量</span>
+            <span style={{ fontSize: 'var(--biof3-font-size-sm)', color, fontWeight: 600 }}>
               {hasData ? `${pct}%` : '待机'}
-              {isIdle && lastBudget && <span style={{ fontSize: '10px', color: 'var(--color-text-tertiary, #9ca3af)', fontWeight: 400 }}> · 上次</span>}
+              {isIdle && lastBudget && <span style={{ fontSize: 'var(--biof3-font-size-xs)', color: 'var(--color-text-tertiary, #9ca3af)', fontWeight: 400 }}> · 上次</span>}
             </span>
           </div>
 
@@ -187,7 +187,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
             }} />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '11px', color: 'var(--color-text-secondary, #6b7280)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: 'var(--biof3-font-size-sm)', color: 'var(--color-text-secondary, #6b7280)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>消息 tokens</span>
               <span style={{ fontFamily: 'monospace', color: 'var(--color-text-primary)' }}>
@@ -201,7 +201,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
               </span>
             </div>
             {contextWindow === 0 && (
-              <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary, #9ca3af)', marginTop: '2px' }}>
+              <div style={{ fontSize: 'var(--biof3-font-size-xs)', color: 'var(--color-text-tertiary, #9ca3af)', marginTop: '2px' }}>
                 模型上下文窗口未知，可在设置中配置
               </div>
             )}
@@ -230,7 +230,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
 
           {displayBudget?.categories && (
             <div style={{ marginTop: '8px', borderTop: '1px solid var(--color-border, #e5e7eb)', paddingTop: '8px' }}>
-              <div style={{ fontWeight: 600, fontSize: '11px', marginBottom: '6px', color: 'var(--color-text-secondary, #6b7280)' }}>
+              <div style={{ fontWeight: 600, fontSize: 'var(--biof3-font-size-sm)', marginBottom: '6px', color: 'var(--color-text-secondary, #6b7280)' }}>
                 用量分布（占上下文窗口）
               </div>
               {([
@@ -243,7 +243,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
                 const catPct = contextWindow > 0 ? (catValue / contextWindow) * 100 : 0;
                 return (
                   <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <span style={{ width: '60px', fontSize: '10px', color: 'var(--color-text-secondary, #6b7280)', flexShrink: 0 }}>{label}</span>
+                    <span style={{ width: '60px', fontSize: 'var(--biof3-font-size-xs)', color: 'var(--color-text-secondary, #6b7280)', flexShrink: 0 }}>{label}</span>
                     <div style={{ flex: 1, height: '4px', background: '#e5e7eb', borderRadius: '2px' }}>
                       <div style={{
                         width: `${Math.min(catPct, 100)}%`,
@@ -252,7 +252,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
                         borderRadius: '2px',
                       }} />
                     </div>
-                    <span style={{ width: '45px', fontSize: '10px', fontFamily: 'monospace', textAlign: 'right', color: 'var(--color-text-primary)', flexShrink: 0 }}>
+                    <span style={{ width: '45px', fontSize: 'var(--biof3-font-size-xs)', fontFamily: 'monospace', textAlign: 'right', color: 'var(--color-text-primary)', flexShrink: 0 }}>
                       {formatTokens(catValue)}
                     </span>
                   </div>

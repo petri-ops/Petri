@@ -66,14 +66,14 @@
 
 .drawerTitleLabel {
   font-weight: 600;
-  font-size: 14px;
+  font-size: var(--biof3-font-size-body);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .drawerFilePath {
   font-family: var(--biof3-mono, monospace);
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   color: var(--biof3-fg-muted, #888);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -90,7 +90,7 @@
 
 .unsavedMarker {
   color: #e0a040;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   animation: pulse 1.4s ease-in-out infinite;
 }
 
@@ -105,7 +105,7 @@
   background: rgba(220, 80, 80, 0.18);
   border-bottom: 1px solid rgba(220, 80, 80, 0.4);
   color: #ffc8c8;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   flex-shrink: 0;
 }
 
@@ -123,7 +123,7 @@
   align-items: center;
   justify-content: center;
   color: var(--biof3-fg-muted, #888);
-  font-size: 13px;
+  font-size: var(--biof3-font-size-body-sm);
 }
 
 .drawerBinary {
@@ -137,7 +137,7 @@
 .binaryMarker {
   color: var(--biof3-fg-muted, #888);
   font-style: italic;
-  font-size: 13px;
+  font-size: var(--biof3-font-size-body-sm);
   text-align: center;
 }
 
@@ -173,7 +173,7 @@
 
 .diffPaneLabel {
   font-family: var(--biof3-mono, monospace);
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   color: var(--biof3-fg-muted, #888);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -181,7 +181,7 @@
 }
 
 .editedMarker {
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   color: #e0a040;
   font-family: var(--biof3-mono, monospace);
 }
@@ -196,7 +196,7 @@
   border: none;
   padding: 10px 12px;
   font-family: var(--biof3-mono, monospace);
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   line-height: 1.6;
   resize: none;
   overflow: auto;
@@ -230,7 +230,7 @@
 }
 
 .drawerHint {
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   color: var(--biof3-fg-muted, #888);
   flex: 1;
   min-width: 0;
@@ -246,7 +246,7 @@
 /* Buttons */
 .drawerBtn {
   padding: 6px 14px;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   border: 1px solid var(--biof3-border, #404040);
   border-radius: 4px;
   background: var(--biof3-bg-button, #3a3a3a);

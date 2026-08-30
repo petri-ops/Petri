@@ -133,7 +133,7 @@
   color: white;
   border: none;
   border-radius: 3px;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   font-weight: 600;
   width: 20px;
   height: 20px;
@@ -160,7 +160,7 @@
   color: white;
   border: none;
   border-radius: 3px;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   font-weight: 600;
   width: 20px;
   height: 20px;

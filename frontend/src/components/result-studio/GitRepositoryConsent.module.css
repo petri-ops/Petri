@@ -20,21 +20,21 @@
 
 .line {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--biof3-font-size-body-sm);
   line-height: 1.5;
   color: var(--biof3-text-secondary);
 }
 
 .title {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--biof3-font-size-body-sm);
   font-weight: 600;
   color: var(--biof3-text);
 }
 
 .hint {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   line-height: 1.5;
   color: var(--biof3-text-tertiary, var(--biof3-text-secondary));
 }
@@ -43,7 +43,7 @@
   margin: 0;
   padding-left: 10px;
   border-left: 3px solid var(--biof3-warning, #a86400);
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   line-height: 1.5;
   color: var(--biof3-text-secondary);
 }
@@ -58,7 +58,7 @@
   color: var(--biof3-text);
   cursor: pointer;
   font: inherit;
-  font-size: 13px;
+  font-size: var(--biof3-font-size-body-sm);
 }
 
 .action:hover {

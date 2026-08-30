@@ -16,7 +16,7 @@
   color: var(--biof3-text-secondary);
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   text-align: left;
 }
 
@@ -62,7 +62,7 @@
   color: var(--biof3-text-secondary);
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   text-align: left;
 }
 

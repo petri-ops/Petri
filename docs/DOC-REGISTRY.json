@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 154,
+    "documentCount": 155,
     "lastUpdated": "2026-08-29",
-    "managedMarkdown": 154
+    "managedMarkdown": 155
   },
   "documents": [
     {
@@ -2457,8 +2457,22 @@
       "registeredAt": "2026-08-30",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-28.6-FONT-SIZE-TOKEN-UNIFICATION",
+      "path": "docs/block-28-6-font-size-token-unification-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-28-font-size-token-unification",
+      "entrypoint": "docs/README.md",
+      "tags": ["block-28-6", "font-size", "token", "design-system", "G0", "completed", "phase=COMPLETED", "UI-215"],
+      "notes": "2026-08-30 用户反馈启动：审阅与会话区文字大小是否统一，软件所有文字字号应统一。裁决：同一层级=绝对同一字号（不做单一字号），全量归档 9 级 token（新增 md=16px）。codemod 678 处/34 文件（simple-chat 79、project-workspace.module 234、desktop.css 70、custom.css 72）；保留 <10px 装饰缩微与 display 大标题例外。顺带补齐 theme-token-contract 第 3 批 7 个缺口令牌（转绿）。2026-08-30 收口 verified：tsc 0 / vitest 786/794 / CDP 5/5，证据 acceptance/ui-215/。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-08-30",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "COMPLETED"
     }
   ],
   "lastUpdated": "2026-08-30",
-  "documentCount": 154
+  "documentCount": 155
 }

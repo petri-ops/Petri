@@ -139,6 +139,18 @@
      取值对齐组件原 fallback，保证零视觉回归。 */
   --biof3-surface-2: rgba(127, 127, 127, 0.12);
   --biof3-status-idle: #9ca3af;
+  /* ===== UI-215 / BLOCK-28.6 补齐 theme-token-contract 缺口（第 3 批） =====
+     CodeReviewDrawer.module.css 沿用旧抽屉时代的未定义变量名（引用处带
+     fallback），project-workspace.module.css / useCodeMirrorEditor.ts 引用
+     裸 --biof3-status-success。取值优先 var() 引用既有语义令牌（明暗自动
+     适配），颜色类对齐组件原 fallback，保证零视觉回归。 */
+  --biof3-fg: var(--biof3-text);
+  --biof3-fg-muted: var(--biof3-text-muted);
+  --biof3-bg-elev: var(--biof3-bg-elevated);
+  --biof3-bg-button: var(--biof3-bg-surface);
+  --biof3-bg-button-hover: var(--biof3-bg-hover);
+  --biof3-mono: var(--biof3-font-mono);
+  --biof3-status-success: #22c55e;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -246,7 +258,7 @@
 
 /* Compact documentation reading density */
 .theme-doc-markdown {
-  font-size: 0.98rem;
+  font-size: var(--biof3-font-size-md);
   line-height: 1.68;
   max-width: 860px;
 }
@@ -266,17 +278,17 @@
   margin-top: 1.75rem;
   padding-top: 0.2rem;
   border-top: 1px solid var(--biof3-border);
-  font-size: 1.42rem;
+  font-size: var(--biof3-font-size-2xl);
 }
 
 .theme-doc-markdown h3 {
   margin-top: 1.25rem;
-  font-size: 1.12rem;
+  font-size: var(--biof3-font-size-lg);
 }
 
 .theme-doc-markdown h4 {
   margin-top: 1rem;
-  font-size: 1rem;
+  font-size: var(--biof3-font-size-md);
 }
 
 .theme-doc-markdown p {
@@ -307,7 +319,7 @@
   display: table;
   width: 100%;
   margin: 0.9rem 0 1rem;
-  font-size: 0.92rem;
+  font-size: var(--biof3-font-size-body);
 }
 
 .theme-doc-markdown thead tr,
@@ -373,7 +385,7 @@
 }
 
 .theme-doc-toc-desktop {
-  font-size: 0.84rem;
+  font-size: var(--biof3-font-size-body-sm);
 }
 
 /* 文档页桌面大屏：左栏贴左、TOC 贴右、正文在主区域内居中 */
@@ -417,7 +429,7 @@
 }
 
 .theme-doc-sidebar-menu {
-  font-size: 0.92rem;
+  font-size: var(--biof3-font-size-body);
 }
 
 .theme-doc-sidebar-menu .menu__link {
@@ -448,14 +460,14 @@
 .biof3-sidebar-wechat strong {
   display: block;
   color: var(--biof3-text);
-  font-size: 0.78rem;
+  font-size: var(--biof3-font-size-caption);
   line-height: 1.3;
 }
 
 .biof3-sidebar-wechat p {
   margin: 0.22rem 0 0;
   color: var(--biof3-text-tertiary);
-  font-size: 0.72rem;
+  font-size: var(--biof3-font-size-sm);
   line-height: 1.4;
 }
 
@@ -514,7 +526,7 @@
   overflow-wrap: anywhere;
   color: var(--biof3-text);
   font-family: var(--ifm-font-family-monospace);
-  font-size: 0.76rem;
+  font-size: var(--biof3-font-size-caption);
   font-weight: 650;
 }
 
@@ -527,7 +539,7 @@
   background: transparent;
   color: var(--ifm-color-primary);
   cursor: pointer;
-  font-size: 0.78rem;
+  font-size: var(--biof3-font-size-caption);
   font-weight: 650;
   line-height: 1.2;
   padding: 0.38rem 0.58rem;
@@ -548,13 +560,13 @@
 }
 
 .biof3-download__icon {
-  font-size: 0.84rem;
+  font-size: var(--biof3-font-size-body-sm);
   line-height: 1;
 }
 
 .biof3-download__size {
   color: var(--biof3-text-tertiary);
-  font-size: 0.74rem;
+  font-size: var(--biof3-font-size-sm);
 }
 
 .theme-doc-markdown h2 + .biof3-download {
@@ -585,7 +597,7 @@
   border-radius: 999px;
   background: var(--biof3-accent-bg);
   color: var(--ifm-color-primary-dark);
-  font-size: 0.72rem;
+  font-size: var(--biof3-font-size-sm);
   font-weight: 800;
   line-height: 1.35;
 }
@@ -594,13 +606,13 @@
   margin: 0 0 0.28rem;
   padding: 0;
   border: 0;
-  font-size: 1.05rem;
+  font-size: var(--biof3-font-size-md);
 }
 
 .biof3-export-panel__text p {
   margin: 0;
   color: var(--biof3-text-secondary);
-  font-size: 0.88rem;
+  font-size: var(--biof3-font-size-body);
   line-height: 1.5;
 }
 
@@ -621,7 +633,7 @@
   background: transparent;
   color: var(--biof3-text-secondary);
   cursor: pointer;
-  font-size: 0.78rem;
+  font-size: var(--biof3-font-size-caption);
   font-weight: 650;
   font-family: inherit;
   line-height: 1.2;
@@ -660,7 +672,7 @@
 
 .biof3-export-panel__link {
   color: var(--biof3-text-secondary);
-  font-size: 0.84rem;
+  font-size: var(--biof3-font-size-body-sm);
   font-weight: 700;
   text-decoration: none;
 }
@@ -686,13 +698,13 @@
   padding: 0;
   border: 0;
   color: var(--biof3-text);
-  font-size: 1.1rem;
+  font-size: var(--biof3-font-size-lg);
 }
 
 .biof3-comments__header p {
   margin: 0;
   color: var(--biof3-text-secondary);
-  font-size: 0.88rem;
+  font-size: var(--biof3-font-size-body);
   line-height: 1.6;
 }
 
@@ -707,10 +719,10 @@
   border-top: none;
 }
 .biof3-comments--compact .biof3-comments__header h2 {
-  font-size: 0.78rem;
+  font-size: var(--biof3-font-size-caption);
 }
 .biof3-comments--compact .biof3-comments__header p {
-  font-size: 0.7rem;
+  font-size: var(--biof3-font-size-sm);
 }
 .biof3-comments--compact .wl-emoji-popup {
   transform: scale(0.7);
@@ -724,7 +736,7 @@
   gap: 4px;
 }
 .biof3-comments--compact .wl-reaction-item {
-  font-size: 14px;
+  font-size: var(--biof3-font-size-body);
   padding: 3px 6px;
 }
 .biof3-comments--compact .wl-reaction-item .wl-reaction-img {
@@ -733,25 +745,25 @@
 }
 .biof3-comments--compact .wl-panel,
 .biof3-comments--compact .wl-cards {
-  font-size: 0.75rem;
+  font-size: var(--biof3-font-size-caption);
 }
 .biof3-comments--compact .wl-editor {
   min-height: 60px;
 }
 .biof3-comments--compact .wl-panel .wl-header {
-  font-size: 0.72rem;
+  font-size: var(--biof3-font-size-sm);
 }
 .biof3-comments--compact .wl-panel .wl-header input {
-  font-size: 0.72rem;
+  font-size: var(--biof3-font-size-sm);
   padding: 4px 6px;
 }
 .biof3-comments--compact .wl-btn {
-  font-size: 0.7rem;
+  font-size: var(--biof3-font-size-sm);
   padding: 4px 10px;
 }
 .biof3-comments--compact .wl-card .wl-meta,
 .biof3-comments--compact .wl-card .wl-content {
-  font-size: 0.73rem;
+  font-size: var(--biof3-font-size-sm);
 }
 
 /* 响应式设计：在小屏幕上图片更小 */
@@ -765,7 +777,7 @@
   }
 
   .theme-doc-markdown h2 {
-    font-size: 1.25rem;
+    font-size: var(--biof3-font-size-xl);
   }
 
   .markdown img {
@@ -777,7 +789,7 @@
   .markdown pre {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    font-size: 0.82rem;
+    font-size: var(--biof3-font-size-body-sm);
   }
 
   /* Mobile: long tables get horizontal scroll instead of breaking layout */
@@ -844,7 +856,7 @@
 
   .biof3-download__button::after {
     content: ' ↗';
-    font-size: 0.72rem;
+    font-size: var(--biof3-font-size-sm);
   }
 
   .theme-doc-markdown {
@@ -962,7 +974,7 @@
 
 .run-modal-header h3 {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--biof3-font-size-body);
   font-weight: 700;
   color: var(--biof3-text);
   white-space: nowrap;
@@ -979,7 +991,7 @@
 .run-modal-marquee-text {
   display: inline-block;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   color: var(--biof3-text-muted);
   font-weight: 500;
   animation: marqueeScroll 12s linear infinite;
@@ -1010,7 +1022,7 @@
   border-radius: 5px;
   background: var(--biof3-bg-surface);
   color: var(--biof3-text-secondary);
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   font-weight: 650;
   text-decoration: none;
   transition: all 0.12s;
@@ -1024,7 +1036,7 @@
 }
 
 .run-modal-dl-icon {
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   line-height: 1;
 }
 
@@ -1038,7 +1050,7 @@
   border-radius: 6px;
   background: transparent;
   color: var(--biof3-text-secondary);
-  font-size: 20px;
+  font-size: var(--biof3-font-size-xl);
   cursor: pointer;
   transition: all 0.12s;
 }
@@ -1101,7 +1113,7 @@
   border: 1px solid var(--biof3-status-online);
   background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
   color: #fff;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s;
@@ -1124,7 +1136,7 @@
 }
 
 .run-modal-code-hint {
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   color: var(--biof3-text-muted);
   font-weight: 500;
 }
@@ -1184,7 +1196,7 @@
 }
 
 .run-modal:fullscreen .run-modal-left .run-modal-editor {
-  font-size: 13px;
+  font-size: var(--biof3-font-size-body-sm);
 }
 
 .run-modal-left .run-modal-editor {
@@ -1198,7 +1210,7 @@
   padding: 14px 16px;
   background: var(--biof3-bg-subtle);
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   line-height: 1.6;
   color: var(--biof3-text);
   outline: none;
@@ -1246,7 +1258,7 @@
 }
 
 .run-modal-card-title {
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   font-weight: 750;
   color: var(--biof3-text-muted);
   text-transform: uppercase;
@@ -1269,7 +1281,7 @@
 }
 
 .run-modal-data-hint {
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   color: var(--biof3-text-muted);
   font-style: italic;
 }
@@ -1293,7 +1305,7 @@
 .run-modal-data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   font-family: 'SFMono-Regular', Consolas, monospace;
 }
 
@@ -1330,7 +1342,7 @@
   flex-shrink: 0;
   width: 32px;
   padding-top: 5px;
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   font-weight: 750;
   color: var(--biof3-text-muted);
   text-align: right;
@@ -1369,7 +1381,7 @@
   border-radius: 5px;
   background: var(--biof3-bg-surface);
   color: var(--biof3-text-secondary);
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.12s;
@@ -1390,7 +1402,7 @@
   border-radius: 14px;
   background: var(--biof3-bg-surface);
   color: var(--biof3-text-secondary);
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   font-weight: 650;
   cursor: pointer;
   transition: all 0.12s;
@@ -1445,7 +1457,7 @@
 }
 
 .run-modal-data-modal-header span {
-  font-size: 13px;
+  font-size: var(--biof3-font-size-body-sm);
   font-weight: 700;
   color: var(--biof3-status-success-fg);
 }
@@ -1457,7 +1469,7 @@
   border-radius: 4px;
   background: transparent;
   color: var(--biof3-text-secondary);
-  font-size: 18px;
+  font-size: var(--biof3-font-size-lg);
   cursor: pointer;
 }
 
@@ -1486,7 +1498,7 @@
 }
 
 .run-modal-theme-label {
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   font-weight: 700;
   color: var(--biof3-text-muted);
   letter-spacing: 0.02em;
@@ -1510,7 +1522,7 @@
   border-radius: 14px;
   background: var(--biof3-bg-surface);
   color: var(--biof3-text-secondary);
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   font-weight: 650;
   cursor: pointer;
   transition: all 0.12s;
@@ -1537,7 +1549,7 @@
   border-radius: 14px;
   background: var(--biof3-bg-surface);
   color: var(--biof3-text-secondary);
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   font-weight: 650;
   cursor: pointer;
   transition: all 0.12s;
@@ -1570,7 +1582,7 @@
   border-radius: 0;
   background: var(--biof3-bg-subtle);
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   line-height: 1.6;
   color: var(--biof3-text);
   resize: none;
@@ -1590,7 +1602,7 @@
   border-radius: 5px;
   background: var(--ifm-color-primary);
   color: white;
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s;
@@ -1611,7 +1623,7 @@
 
 .run-modal-elapsed {
   color: var(--biof3-text-muted);
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   font-weight: 500;
   margin-left: auto;
 }
@@ -1621,7 +1633,7 @@
   border-radius: 4px;
   background: var(--biof3-status-success-bg);
   color: var(--biof3-status-success-fg);
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -1633,7 +1645,7 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   font-weight: 600;
   color: var(--biof3-text-secondary);
 }
@@ -1643,7 +1655,7 @@
   padding: 3px 5px;
   border: 1px solid var(--biof3-border);
   border-radius: 4px;
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   font-weight: 600;
   color: var(--biof3-text);
   text-align: center;
@@ -1657,12 +1669,12 @@
 
 .run-modal-param-unit {
   color: var(--biof3-text-muted);
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
 }
 
 .run-modal-param-sep {
   color: var(--biof3-text-muted);
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   margin-left: 6px;
 }
 
@@ -1677,7 +1689,7 @@
   padding: 2px 4px;
   border: 1px solid var(--biof3-border);
   border-radius: 4px;
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   color: var(--biof3-text);
   background: var(--biof3-bg-surface);
   outline: none;
@@ -1711,7 +1723,7 @@
   height: 100%;
   min-height: 120px;
   color: var(--biof3-text-muted);
-  font-size: 13px;
+  font-size: var(--biof3-font-size-body-sm);
   text-align: center;
 }
 
@@ -1722,7 +1734,7 @@
   height: 100%;
   min-height: 120px;
   color: var(--ifm-color-primary);
-  font-size: 14px;
+  font-size: var(--biof3-font-size-body);
   font-weight: 600;
   animation: pulse 1.5s ease-in-out infinite;
 }
@@ -1738,7 +1750,7 @@
   border-radius: 6px;
   margin-bottom: 8px;
   color: var(--biof3-status-warning-fg);
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   font-weight: 600;
   animation: pulse 1.2s ease-in-out infinite;
 }
@@ -1757,7 +1769,7 @@
   margin: 0;
   padding: 12px 14px;
   font-family: 'SFMono-Regular', Consolas, monospace;
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   line-height: 1.5;
   color: var(--biof3-text-secondary);
   white-space: pre-wrap;
@@ -1804,7 +1816,7 @@
   display: inline-flex;
   align-items: center;
   padding: 6px 14px;
-  font-size: 13px;
+  font-size: var(--biof3-font-size-body-sm);
   font-weight: 600;
   color: #fff;
   background: var(--biof3-accent);
@@ -1833,7 +1845,7 @@
   border-radius: 4px;
   background: var(--biof3-bg-surface);
   color: var(--biof3-text-secondary);
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   font-weight: 650;
   text-decoration: none;
   cursor: pointer;
@@ -1880,7 +1892,7 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.15);
   color: white;
-  font-size: 22px;
+  font-size: var(--biof3-font-size-2xl);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1979,7 +1991,7 @@
   justify-content: center;
   background: var(--ifm-color-primary);
   color: white;
-  font-size: 16px;
+  font-size: var(--biof3-font-size-md);
   font-weight: 800;
   flex-shrink: 0;
 }
@@ -1990,7 +2002,7 @@
 }
 
 .try-online-title {
-  font-size: 13px;
+  font-size: var(--biof3-font-size-body-sm);
   font-weight: 700;
   color: var(--biof3-text);
   margin-bottom: 2px;
@@ -2001,7 +2013,7 @@
 }
 
 .try-online-desc {
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   color: var(--biof3-text-secondary);
 }
 
@@ -2010,7 +2022,7 @@
 }
 
 .try-online-arrow {
-  font-size: 20px;
+  font-size: var(--biof3-font-size-xl);
   color: var(--ifm-color-primary);
   flex-shrink: 0;
   transition: transform 0.15s;
@@ -2121,7 +2133,7 @@ button.DocSearch-Button .DocSearch-Button-Keys,
   display: inline-block;
   margin-left: 6px;
   padding: 1px 6px;
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   font-weight: 600;
   color: var(--biof3-status-warning-fg);
   background: var(--biof3-status-warning-bg);

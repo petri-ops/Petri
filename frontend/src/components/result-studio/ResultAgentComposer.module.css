@@ -37,7 +37,7 @@
   background: transparent;
   color: var(--biof3-text-primary);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   line-height: 18px;
   transition: min-height 120ms ease;
 }
@@ -71,7 +71,7 @@
   margin: 0;
   padding: 0 2px;
   color: var(--biof3-text-secondary);
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   line-height: 1.4;
 }
 
@@ -101,7 +101,7 @@
   border: 1px solid var(--biof3-border);
   border-radius: 5px;
   color: var(--biof3-text-secondary);
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
 }
 
 .progress small {
@@ -112,7 +112,7 @@
 .terminal {
   margin: 0;
   color: var(--biof3-status-error);
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   line-height: 1.4;
 }
 

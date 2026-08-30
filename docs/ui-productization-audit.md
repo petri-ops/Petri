@@ -1642,7 +1642,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **验证**：tsc 0；定向 vitest 19/19（ReviewMode 7，含退出按钮 2 新用例）。**2026-08-29 dev Electron 实机 verified**：CDP 断言——「+」菜单含「审阅」项、点击打开 520px dock、面板「退出」按钮点击关闭 dock；截图 `acceptance/ui-213/`。
 
-**状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-214: BLOCK-28.5 — 审阅并入右侧边栏 tab 体系（退役 wt-dock 浮层另类） (2026-08-30 verified)
 
@@ -1655,5 +1655,17 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - AppShell wt-dock 浮层降级为兜底：仅 ProjectWorkspace 未挂载的路由（首页/skills/results 页）渲染；首页启动卡片「审阅」改走 `openRightPanel('review')`。
 
 **验证**：tsc 0；定向 vitest（WorkingTreeReview 3 文件全绿；TitleBar 8 failed 为台账记录的 pre-existing 集合，数量一致）。**2026-08-30 dev 实机 verified**：CDP 断言 6/6——审阅面板嵌入 `aside.rightCol` 内部（region closest('aside') 命中）、`.wt-dock` count=0、tab 条「审阅」pill 激活、退出按钮/Esc 关 tab 且 tab 条同步清除、与「分析」tab 并存切换 keep-alive；截图 `acceptance/ui-214/`。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-215: BLOCK-28.6 — 全局字号 token 统一（678 处/34 文件归档 9 级 token） (2026-08-30 verified)
+
+**用户反馈**：「审阅的文字和消息会话区的文字大小统一了吗？我觉得软件的所有文字字号都应统一大小」——审阅面板已 token 化（UI-212），但会话区（simple-chat.css 40+ 处硬编码，含 10.5/11.5/12.5/13.5 半像素野值）与全局 30+ 文件硬编码字号未统一。
+
+**裁决**：不做「一个字号走天下」（层级是可读性基础），做「同一层级 = 绝对同一字号」——全量归档到 9 级 `--biof3-font-size-*`（新增 `md=16px`）。映射：10/10.5→xs，11/11.5→sm，12/12.5→caption，13/13.5→body-sm，14→body，15/16/17→md，18→lg，20→xl，21/22→2xl，28→3xl；rem 同步就近归档（0.68~0.74→sm、0.75~0.78→caption、0.8~0.85→body-sm、0.86~0.92→body、0.95~1.05→md、1.1~1.15→lg 等）。**保留例外**：<10px 装饰缩微（WorkspaceFileIcon 7/8px、微角标 9px）、24px/>28px display 大标题、em/% 等比、xterm 配置值。
+
+**改动范围**：codemod（Node 脚本，一次性）替换 `font-size: Npx|Nrem` 与 tsx 内联 `fontSize: 'Npx'` 共 **678 处 / 34 文件**（simple-chat.css 79、project-workspace.module.css 234、desktop.css 70、custom.css 72、skills 34、result-studio 各面板等）。顺带补齐 theme-token-contract 第 3 批缺口 7 个（`--biof3-fg/-fg-muted/-bg-elev/-bg-button/-bg-button-hover/-mono/-status-success`，CodeReviewDrawer 旧抽屉时代未定义变量名 + 裸 status-success 引用；沿用 UI-151/155 先例 var() 别名 + 对齐 fallback），该测试由 pre-existing 失败转绿。
+
+**验证**：tsc 0；全套 vitest 786/794（8 失败为 TitleBar 已知遗留集合；theme-token-contract PASS）。残留硬编码清点仅剩计划内例外（7/8/9/9.5/24px、≥1.5rem display）。**2026-08-30 dev 实机 verified**：CDP 全页计算字号扫描 5/5——可见文本仅落在 {10,11,12,13,14,16,18}px，无半像素与 rem 野值；审阅面板标题 13px/按钮 12px/chips 12px；聊天消息正文 13px/meta 11px；明暗双主题字号分布逐元素一致；截图 `acceptance/ui-215/`。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

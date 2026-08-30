@@ -10,7 +10,7 @@
 
 .homeState {
   gap: 9px;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
 }
 
 .homeState button,
@@ -56,12 +56,12 @@
 .emptyHome h1 {
   margin: 4px 0 0;
   color: var(--biof3-text);
-  font-size: 18px;
+  font-size: var(--biof3-font-size-lg);
 }
 
 .emptyHome p {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
 }
 
 .emptyHomeCreate {
@@ -128,14 +128,14 @@
 .setupHome h1 {
   margin: 2px 0 0;
   color: var(--biof3-text);
-  font-size: 21px;
+  font-size: var(--biof3-font-size-2xl);
   letter-spacing: -0.01em;
 }
 
 .setupLead {
   margin: 0;
   max-width: 460px;
-  font-size: 12.5px;
+  font-size: var(--biof3-font-size-caption);
   line-height: 1.7;
 }
 
@@ -175,18 +175,18 @@
 
 .setupCheckName {
   color: var(--biof3-text);
-  font-size: 13px;
+  font-size: var(--biof3-font-size-body-sm);
   font-weight: 500;
 }
 
 .setupCheckMeta {
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   opacity: 0.7;
 }
 
 .setupCheckState {
   margin-left: auto;
-  font-size: 11.5px;
+  font-size: var(--biof3-font-size-sm);
   font-variant-numeric: tabular-nums;
 }
 
@@ -206,7 +206,7 @@
   height: 36px;
   padding: 0 16px;
   border-radius: 9px;
-  font-size: 12.5px;
+  font-size: var(--biof3-font-size-caption);
   cursor: pointer;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -244,7 +244,7 @@
 
 .setupReason {
   margin: 4px 0 0;
-  font-size: 11.5px;
+  font-size: var(--biof3-font-size-sm);
   opacity: 0.75;
 }
 
@@ -273,7 +273,7 @@
   border-top: 1px solid var(--biof3-border);
   background: var(--biof3-accent-bg);
   color: var(--biof3-text);
-  font-size: 12.5px;
+  font-size: var(--biof3-font-size-caption);
   animation: setupEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -291,7 +291,7 @@
   border-radius: 8px;
   background: var(--biof3-accent);
   color: #fff;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   cursor: pointer;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }

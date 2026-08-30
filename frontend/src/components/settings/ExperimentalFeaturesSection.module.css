@@ -9,7 +9,7 @@
 
 .heading h3 {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--biof3-font-size-md);
   color: var(--biof3-text, inherit);
 }
 
@@ -18,7 +18,7 @@
 .featureLabel small {
   margin: 4px 0 0;
   color: var(--biof3-text-tertiary, inherit);
-  font-size: 0.78rem;
+  font-size: var(--biof3-font-size-caption);
   line-height: 1.45;
 }
 
@@ -39,7 +39,7 @@
 }
 
 .featureLabel > span {
-  font-size: 0.88rem;
+  font-size: var(--biof3-font-size-body);
   font-weight: 650;
 }
 

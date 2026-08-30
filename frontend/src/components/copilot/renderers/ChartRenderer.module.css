@@ -34,7 +34,7 @@
   position: relative;
   width: 100%;
   max-width: 100%;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   line-height: 1.45;
   color: var(--biof3-text);
 }
@@ -83,7 +83,7 @@
 }
 
 .barLabel {
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   fill: var(--biof3-text-secondary);
   font-variant-numeric: tabular-nums;
 }
@@ -120,7 +120,7 @@
 }
 
 .tickLabel {
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   fill: var(--biof3-text-tertiary);
   /* Tick labels can be long; truncate visually rather than
      pushing the SVG wider than the card. */
@@ -149,7 +149,7 @@
   background: var(--biof3-bg-surface);
   color: var(--biof3-text-secondary);
   font: inherit;
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   line-height: 1;
   cursor: pointer;
   transition: background-color 120ms ease, color 120ms ease,
@@ -195,7 +195,7 @@
 }
 
 .legendText {
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   fill: var(--biof3-text-secondary);
   color: inherit;
 }
@@ -217,7 +217,7 @@
   background: var(--biof3-bg-surface);
   color: var(--biof3-text);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   line-height: 1.2;
   pointer-events: none;
   max-width: 60%;
@@ -246,7 +246,7 @@
   background: var(--biof3-bg-subtle);
   color: var(--biof3-text-secondary);
   font-family: var(--biof3-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   line-height: 1.45;
   overflow-x: auto;
   white-space: pre;
@@ -254,7 +254,7 @@
 
 .fallbackNote {
   margin: 0 0 6px;
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   color: var(--biof3-text-tertiary);
   font-family: var(--biof3-font-sans, inherit);
   font-style: normal;

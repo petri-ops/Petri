@@ -59,7 +59,7 @@
   background: transparent;
   color: inherit;
   cursor: pointer;
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   font-weight: 580;
   line-height: 16px;
 }
@@ -104,7 +104,7 @@
   border-radius: 5px;
   background: var(--biof3-bg-surface);
   color: var(--biof3-text);
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   font-weight: 580;
   line-height: 16px;
 }
@@ -177,7 +177,7 @@
   border-radius: 7px;
   background: transparent;
   color: var(--biof3-text-secondary);
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   text-align: left;
   cursor: pointer;
 }

@@ -143,7 +143,7 @@
   min-width: 16px;
   height: 16px;
   border-radius: 8px;
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   font-weight: 700;
   padding: 0 3px;
   line-height: 1;
@@ -163,7 +163,7 @@
 
 .wt-file-status {
   font-family: var(--biof3-font-mono, monospace);
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   width: 16px;
   text-align: center;
   flex-shrink: 0;
@@ -237,7 +237,7 @@
   border-radius: 3px;
   background: var(--biof3-bg-subtle);
   font-family: var(--biof3-font-mono, monospace);
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   color: var(--biof3-text-secondary);
 }
 
@@ -265,7 +265,7 @@
   border: none;
   color: inherit;
   cursor: pointer;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   padding: 0;
   opacity: 0.7;
   flex-shrink: 0;

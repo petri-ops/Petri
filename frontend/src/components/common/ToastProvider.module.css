@@ -22,7 +22,7 @@
   background: var(--biof3-bg-elevated);
   color: var(--biof3-text);
   box-shadow: var(--biof3-shadow-sm);
-  font-size: 13px;
+  font-size: var(--biof3-font-size-body-sm);
   line-height: 1.4;
 }
 
@@ -50,7 +50,7 @@
   border: none;
   background: transparent;
   color: var(--biof3-text-secondary);
-  font-size: 16px;
+  font-size: var(--biof3-font-size-md);
   line-height: 1;
   cursor: pointer;
   padding: 0 2px;

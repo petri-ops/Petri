@@ -43,7 +43,7 @@
 
 .caption {
   margin: 0;
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   line-height: 1.4;
   color: var(--biof3-text-tertiary);
   /* Allow long captions to wrap naturally inside the card body. */
@@ -58,7 +58,7 @@
   background: var(--biof3-bg-subtle);
   color: var(--biof3-text-secondary);
   font-family: var(--biof3-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   line-height: 1.45;
   overflow-x: auto;
   white-space: pre;
@@ -66,7 +66,7 @@
 
 .fallbackNote {
   margin: 0 0 6px;
-  font-size: 11px;
+  font-size: var(--biof3-font-size-sm);
   color: var(--biof3-text-tertiary);
   font-family: var(--biof3-font-sans, inherit);
   font-style: normal;

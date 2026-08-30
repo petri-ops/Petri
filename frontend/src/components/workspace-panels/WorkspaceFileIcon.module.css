@@ -57,14 +57,14 @@
 .fileIcon[data-kind='config'] {
   color: #d56a24;
   background: transparent;
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
   font-weight: 500;
 }
 
 .fileIcon[data-kind='markdown'] {
   color: #24914d;
   background: transparent;
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
 }
 
 .fileIcon[data-kind='document'] {
@@ -86,7 +86,7 @@
 .fileIcon[data-kind='web'] {
   color: #d8752c;
   background: rgb(216 117 44 / 10%);
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
 }
 
 .fileIcon[data-kind='style'] {

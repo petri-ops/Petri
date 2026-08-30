@@ -45,7 +45,7 @@
   background: transparent;
   color: var(--biof3-text);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--biof3-font-size-body-sm);
   font-weight: 650;
   text-overflow: ellipsis;
   cursor: pointer;
@@ -55,7 +55,7 @@
   min-width: 0;
   overflow: hidden;
   color: var(--biof3-text);
-  font-size: 13px;
+  font-size: var(--biof3-font-size-body-sm);
   line-height: 24px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -130,13 +130,13 @@ button.iconAction {
 .moreHeader strong {
   overflow-wrap: anywhere;
   color: var(--biof3-text);
-  font-size: 12px;
+  font-size: var(--biof3-font-size-caption);
 }
 
 .moreHeader span,
 .menuLabel {
   color: var(--biof3-text-tertiary);
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
 }
 
 .truthBadge,
@@ -180,7 +180,7 @@ button.iconAction {
   color: var(--biof3-text-tertiary);
   cursor: pointer;
   font: inherit;
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
 }
 
 .modeSwitcher button:hover {
@@ -218,7 +218,7 @@ button.iconAction {
   background: transparent;
   color: var(--biof3-text-secondary);
   font: inherit;
-  font-size: 10px;
+  font-size: var(--biof3-font-size-xs);
   text-decoration: none;
   cursor: pointer;
 }
