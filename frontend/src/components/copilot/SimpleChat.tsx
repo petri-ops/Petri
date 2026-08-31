@@ -1359,8 +1359,8 @@ export function SimpleChat({
           )}
         </div>
 
-        {/* BLOCK-28.7 — 工作区改动卡片：每文件 ±统计，点击行跳转审阅 */}
-        <AgentChangesCard />
+        {/* BLOCK-28.7 — 工作区改动卡片：每文件 ±统计，点击行跳转审阅；BLOCK-31 P3 传入会话 id 做会话作用域 */}
+        <AgentChangesCard conversationId={conversationId} />
 
         {/* UI-262 — 聊天区左缘用户消息导航条：悬浮预览、点击跳转对应消息 */}
         {railItems.length > 0 && <MessageRail items={railItems} onJump={handleRailJump} />}

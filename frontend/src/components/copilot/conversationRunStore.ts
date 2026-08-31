@@ -20,6 +20,7 @@ import {
 import { fetchLoopRuns } from '@/lib/loop-client';
 import type { LoopPhaseEvent, LoopIterationEvent, LoopRunCompact } from '@/lib/loop-client';
 import { formatErrorForUser } from './errorMessages';
+import { recordConversationFileChange } from './conversationChangesStore';
 
 export interface ConversationPendingApproval {
   ackToken: string;
@@ -400,6 +401,22 @@ export function startConversationRun(options: StartConversationRunOptions): bool
         event.toolResult?.status === 'success' &&
         ['workspace_write', 'workspace_replace', 'workspace_exec'].includes(event.toolResult.tool || event.name)
       ) {
+        // BLOCK-31 P2: 实时登记本会话改动文件（收尾时由权威清单对账合并）
+        const writeData = event.toolResult?.data as
+          | { path?: unknown; created?: unknown; dryRun?: unknown }
+          | undefined;
+        if (
+          (event.toolResult?.tool === 'workspace_write' || event.toolResult?.tool === 'workspace_replace') &&
+          writeData &&
+          typeof writeData.path === 'string' &&
+          writeData.dryRun !== true
+        ) {
+          recordConversationFileChange(
+            conversationId,
+            writeData.path,
+            writeData.created === true ? 'created' : 'modified'
+          );
+        }
         dispatchBioF3Event(biof3Events.projectWorkspaceChanged, {
           projectId: options.projectId,
           source: 'agent',

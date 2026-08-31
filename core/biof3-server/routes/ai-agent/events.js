@@ -73,7 +73,8 @@ module.exports = {
         } else if (freshTask.agent_status === 'cancelled') {
           sseSend({ event: 'agent_cancelled' });
         } else {
-          sseSend({ event: 'done' });
+          // BLOCK-31 P1: done 事件携带权威 filesChanged 清单
+          sseSend({ event: 'done', filesChanged: freshTask.filesChanged || [] });
         }
         sseSend('[DONE]');
         return res.end();
@@ -95,7 +96,8 @@ module.exports = {
             } else if (t.agent_status === 'cancelled') {
               sseSend({ event: 'agent_cancelled' });
             } else {
-              sseSend({ event: 'done' });
+              // BLOCK-31 P1: done 事件携带权威 filesChanged 清单
+              sseSend({ event: 'done', filesChanged: t.filesChanged || [] });
             }
             sseSend('[DONE]');
             res.end();

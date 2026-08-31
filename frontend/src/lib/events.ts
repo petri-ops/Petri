@@ -90,12 +90,14 @@ export interface ConversationForkedDetail {
 
 /**
  * BLOCK-16 PHASE 3：agent task 完成事件 payload。
- * taskId 必填；filesChanged 由后端 SSE done 事件可选附带（v1 thin-slice 默认空数组，renderer
- * 走 useWorkingTreeReview 自刷 status 兜底——避免 chat 协议层协议变更）。
+ * taskId 必填；filesChanged 自 BLOCK-31 P1 起由后端 SSE done 事件携带权威清单
+ * （task_events 回放聚合 workspace_write/replace，workspace_exec 归属盲区不计入）；
+ * conversationId 为该任务所属会话（renderer 据此建立会话级改动索引）。
  */
 export interface AgentTaskDoneDetail {
   taskId: string;
   filesChanged?: Array<{ path: string; status: string }>;
+  conversationId?: string;
 }
 
 /** BLOCK-20: fired by backend SSE once per agent run with live token budget. */

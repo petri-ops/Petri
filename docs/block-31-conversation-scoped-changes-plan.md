@@ -1,9 +1,9 @@
 # BLOCK-31-CONV-SCOPED-CHANGES — 会话级改动归属（权威文件清单）Plan
 
 - **Plan ID**: `BLOCK-31-CONV-SCOPED-CHANGES`（2026-09-01；用户确认「工作区改动/审阅是全项目共享视图」后裁决「要做会话隔离 权威清单」启动）
-- **状态**: `active`（P0 治理登记，本 commit）
+- **状态**: `active`（P0 登记 → P1/P2/P3 已实现，见 §6 进展；P4 实机收口待办）
 - **truthDomain**: `block-31-conv-scoped-changes`
-- **阶段**: P0 治理登记（本 commit）→ P1 后端权威清单 → P2 renderer 契约接入 → P3 UI 会话过滤 → P4 实机收口
+- **阶段**: P0 治理登记 → P1 后端权威清单 → P2 renderer 契约接入 → P3 UI 会话过滤 → P4 实机收口
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 ## 1. 背景与问题（2026-09-01 调查结论）
@@ -41,5 +41,27 @@
 - 前端：`tsc --noEmit` 0；copilotClient / AgentChangesCard 定向 vitest
 - 治理：`docs:check` / `ui:audit:check` / `docs:reconcile`
 - 实机（P4）：dev Electron——会话 A 让 AI 改文件 → A 卡片显示该文件；切会话 B 卡片不显示 A 的文件；「全部改动」/审阅可见全量。截图 `acceptance/ui-263/`。
+
+## 6. 实现进展（P1–P3，2026-09-01）
+
+**P1 后端权威清单（已落地）**：
+
+- 新模块 `core/biof3-server/agent-files-changed.js`：`aggregateFilesChanged(events)` 纯聚合——回放 task_events，提取 `workspace_write`/`workspace_replace` 成功结果（`toolResult.data.ok===true`）的 `path`；`created`→`created`、否则 `modified`；`dryRun` 与失败写入跳过；`publicData` 预览截断时按 `callId` 回退到 `tool_call` 的 `args.path` 并置 `attributionComplete=false`；`approval_required` 跳过。
+- `agent-task-store.js`：additive 列 `tasks.files_changed_json`（ALTER 容错）；`markAgentTaskDone/Failed/Cancelled` 接受可选 `filesChanged`（`COALESCE` 保留原值）；`getAgentTask` 返回解析后的 `filesChanged`；`resetTaskForRetry` 重试前清空清单。
+- `agent-runner.js`：终态判定前 `collectFilesChangedForTask` 聚合并随三个终态标记持久化（聚合失败不阻塞终态）。
+- `routes/ai-agent/events.js`：两处 SSE `done` 注入 `filesChanged`（task 模式权威通道；legacy 直连路径无 task_events，维持空清单由前端兜底——诚实边界）。
+- 测试 `test/agent-files-changed.test.mjs` 6/6（created/modified 去重、dryRun/失败/approval 跳过、截断回退、无关工具忽略、store round-trip、重试清空）；`agent-task-cancellation` 回归 1/1。`agent-concurrency.test.mjs` 失败为**存量环境问题**（HEAD 无本改动同样失败：临时库缺 `projects` 表），与本包无关。
+
+**P2 renderer 契约（已落地）**：
+
+- `copilotClient.ts`：`emitAgentTaskDone` 增加 `payload {filesChanged, conversationId}`；task 订阅路径记录 SSE `done` 的 `filesChanged` 并在 `[DONE]`/流结束/`done` 事件三处派发；`_dispatchSseEvent` done 分支与 legacy 路径带 `opts.conversationId`。
+- `lib/events.ts`：`AgentTaskDoneDetail` 增加 `conversationId?`（`filesChanged` 字段原先已预留）。
+- 新 store `conversationChangesStore.ts`：按 conversationId 的改动索引（live 记录 + done 权威对账合并，权威清单外路径保留兼容 exec 盲区/并发）；快照缓存保证 `useSyncExternalStore` 引用稳定。
+- `conversationRunStore.ts` `onToolResult`：`workspace_write`/`workspace_replace` 成功且非 dryRun 时实时登记（`data.path`/`data.created`）。
+
+**P3 UI 会话过滤（已落地）**：
+
+- `AgentChangesCard` 接受 `conversationId`（SimpleChat 传入）；会话有归属记录时默认**「本会话改动」**（标题/计数/± 按过滤后清单），卡片内新增「本会话 / 全部」segmented 切换（`sc-changes-scope-*`，token 化样式）；**无归属记录（旧会话/索引空）保持全量视图**，不渲染切换。审阅面板保持 git 全量事实源（本包不改）。
+- 测试：AgentChangesCard vitest 7/7（新增会话默认过滤 / 「全部」切换 / 无归属回退全量）；SimpleChat vitest 6/6；tsc 0 / build 通过。
 
 G0 开发期常态 · 不外推 packaged / Provider / GA / P7.

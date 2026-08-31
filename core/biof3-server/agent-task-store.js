@@ -289,6 +289,8 @@ for (const statement of [
   'ALTER TABLE tasks ADD COLUMN retry_error_type TEXT',
   'ALTER TABLE tasks ADD COLUMN next_retry_at TEXT',
   'ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0',
+  // BLOCK-31 P1: 会话级改动归属——任务终态持久化权威 filesChanged 清单（JSON 数组）
+  'ALTER TABLE tasks ADD COLUMN files_changed_json TEXT',
   'CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status)',
   'CREATE INDEX IF NOT EXISTS idx_tasks_created ON tasks(created_at)',
   'CREATE INDEX IF NOT EXISTS idx_tasks_next_retry ON tasks(next_retry_at) WHERE status = \'retry_pending\'',
@@ -324,7 +326,7 @@ const stmts = {
   `),
   get: db.prepare(
     `SELECT id, params, status, created_at, finished_at, error, user_id, agent_status,
-            retry_count, retry_error_type, next_retry_at, max_retries
+            retry_count, retry_error_type, next_retry_at, max_retries, files_changed_json
      FROM tasks WHERE id = ? AND type = 'agent_loop'`
   ),
   insertEvent: db.prepare(`
@@ -347,7 +349,12 @@ const stmts = {
      AND next_retry_at <= ? ORDER BY next_retry_at ASC`
   ),
   updateStatus: db.prepare(
-    `UPDATE tasks SET agent_status = ?, status = ?, error = ?, finished_at = ?
+    `UPDATE tasks SET agent_status = ?, status = ?, error = ?, finished_at = ?,
+     files_changed_json = COALESCE(?, files_changed_json)
+     WHERE id = ? AND type = 'agent_loop'`
+  ),
+  setFilesChanged: db.prepare(
+    `UPDATE tasks SET files_changed_json = ?
      WHERE id = ? AND type = 'agent_loop'`
   ),
   requestCancel: db.prepare(
@@ -411,6 +418,8 @@ function getAgentTask(taskId) {
     retryErrorType: row.retry_error_type || null,
     nextRetryAt: row.next_retry_at || null,
     maxRetries: row.max_retries || 0,
+    // BLOCK-31 P1: 权威任务改动文件清单（终态时由 agent-runner 聚合写入）
+    filesChanged: tryParse(row.files_changed_json) || [],
     // Route compatibility while the persisted SQLite columns remain snake_case.
     user_id: row.user_id || null,
     agent_status: row.agent_status || null,
@@ -436,16 +445,35 @@ function getAgentTaskEventsSince(taskId, afterSeq, limit = 500) {
   }));
 }
 
-function markAgentTaskDone(taskId) {
-  stmts.updateStatus.run('done', 'completed', null, new Date().toISOString(), taskId);
+function serializeFilesChanged(filesChanged) {
+  if (!Array.isArray(filesChanged) || filesChanged.length === 0) return null;
+  try {
+    return JSON.stringify(filesChanged);
+  } catch {
+    return null;
+  }
 }
 
-function markAgentTaskFailed(taskId, error) {
+// BLOCK-31 P1: filesChanged 为可选权威清单（agent-files-changed.js 聚合产物），
+// 传空/缺省时保留列中原值（COALESCE）。
+function markAgentTaskDone(taskId, filesChanged) {
+  stmts.updateStatus.run(
+    'done',
+    'completed',
+    null,
+    new Date().toISOString(),
+    serializeFilesChanged(filesChanged),
+    taskId
+  );
+}
+
+function markAgentTaskFailed(taskId, error, filesChanged) {
   stmts.updateStatus.run(
     'failed',
     'failed',
     String(error || 'Agent 任务失败'),
     new Date().toISOString(),
+    serializeFilesChanged(filesChanged),
     taskId
   );
 }
@@ -524,12 +552,13 @@ function isAgentTaskCancellationRequested(taskId) {
   return task?.agentStatus === 'cancel_requested' || task?.agentStatus === 'cancelled';
 }
 
-function markAgentTaskCancelled(taskId) {
+function markAgentTaskCancelled(taskId, filesChanged) {
   stmts.updateStatus.run(
     'cancelled',
     'cancelled',
     null,
     new Date().toISOString(),
+    serializeFilesChanged(filesChanged),
     taskId
   );
 }
@@ -609,7 +638,9 @@ function getRetryableTasks() {
  */
 function resetTaskForRetry(taskId) {
   stmts.clearRetryInfo.run(taskId);
-  stmts.updateStatus.run('running', 'running', null, null, taskId);
+  // 重试重新运行前清除上一轮的终态文件清单
+  stmts.setFilesChanged.run(null, taskId);
+  stmts.updateStatus.run('running', 'running', null, null, null, taskId);
 }
 
 /**

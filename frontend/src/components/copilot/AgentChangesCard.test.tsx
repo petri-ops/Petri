@@ -2,6 +2,10 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AgentChangesCard } from './AgentChangesCard';
+import {
+  clearConversationFileChanges,
+  recordConversationFileChange,
+} from './conversationChangesStore';
 import { biof3Events } from '@/lib/events';
 
 const { getBridgeMock } = vi.hoisted(() => ({
@@ -63,10 +67,12 @@ function makeBridge(files: Array<{ path: string; status: string }>) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  clearConversationFileChanges('conv-1');
 });
 
 afterEach(() => {
   cleanup();
+  clearConversationFileChanges('conv-1');
 });
 
 describe('AgentChangesCard (BLOCK-28.7)', () => {
@@ -131,5 +137,55 @@ describe('AgentChangesCard (BLOCK-28.7)', () => {
 
     const card = await screen.findByTestId('agent-changes-card');
     expect(card.textContent).toContain('gen/out.py');
+  });
+});
+
+describe('AgentChangesCard 会话作用域 (BLOCK-31 P3)', () => {
+  it('defaults to conversation scope when the session has attributed changes', async () => {
+    getBridgeMock.mockReturnValue(
+      makeBridge([
+        { path: 'mine.md', status: 'M' },
+        { path: 'other.py', status: 'M' },
+      ])
+    );
+    recordConversationFileChange('conv-1', 'mine.md', 'modified');
+
+    render(<AgentChangesCard conversationId="conv-1" />);
+
+    const card = await screen.findByTestId('agent-changes-card');
+    // 默认只显示当前会话归属的文件
+    expect(card.textContent).toContain('本会话改动');
+    expect(card.textContent).toContain('1 个文件');
+    expect(card.textContent).toContain('mine.md');
+    expect(card.textContent).not.toContain('other.py');
+  });
+
+  it('「全部」toggle reveals the full working tree view', async () => {
+    getBridgeMock.mockReturnValue(
+      makeBridge([
+        { path: 'mine.md', status: 'M' },
+        { path: 'other.py', status: 'M' },
+      ])
+    );
+    recordConversationFileChange('conv-1', 'mine.md', 'modified');
+
+    render(<AgentChangesCard conversationId="conv-1" />);
+    fireEvent.click(await screen.findByRole('tab', { name: '全部' }));
+
+    const card = await screen.findByTestId('agent-changes-card');
+    expect(card.textContent).toContain('工作区改动');
+    expect(card.textContent).toContain('2 个文件');
+    expect(card.textContent).toContain('other.py');
+  });
+
+  it('keeps the full view when the conversation has no attributed changes', async () => {
+    getBridgeMock.mockReturnValue(makeBridge([{ path: 'legacy.md', status: 'M' }]));
+
+    render(<AgentChangesCard conversationId="conv-other" />);
+
+    const card = await screen.findByTestId('agent-changes-card');
+    expect(card.textContent).toContain('工作区改动');
+    expect(card.textContent).toContain('legacy.md');
+    expect(screen.queryByRole('tab', { name: '全部' })).toBeNull();
   });
 });

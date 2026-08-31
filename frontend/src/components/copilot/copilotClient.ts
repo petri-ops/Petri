@@ -15,14 +15,24 @@ export function getApiPrefix(): string {
 /**
  * BLOCK-16 PHASE 3：在 primary agent task 收尾时派发 biof3:agent-task-done，
  * 触发 useWorkingTreeReview 自动弹出浮层。仅 kind === 'primary' 触发；
- * subagent 收尾不广播（避免淹没）。filesChanged 默认空数组 —— 后端 SSE
- * 当前不带改动清单，renderer 走 useWorkingTreeReview 自刷兜底。
+ * subagent 收尾不广播（避免淹没）。
+ * BLOCK-31 P2：payload 尽量携带 SSE done 事件中的权威 filesChanged（后端
+ * task_events 回放聚合产物）与任务所属 conversationId（供会话级改动索引）；
+ * legacy 路径或后端未携带时缺省，消费方仍走 git status/diff 自刷兜底。
  */
-function emitAgentTaskDone(taskId: string, optsKind?: string): void {
+function emitAgentTaskDone(
+  taskId: string,
+  optsKind?: string,
+  payload?: { filesChanged?: Array<{ path: string; status: string }>; conversationId?: string }
+): void {
   if (!taskId) return;
   if (optsKind === 'subagent') return;
   try {
-    const detail: AgentTaskDoneDetail = { taskId, filesChanged: [] };
+    const detail: AgentTaskDoneDetail = {
+      taskId,
+      filesChanged: payload?.filesChanged ?? [],
+      conversationId: payload?.conversationId,
+    };
     dispatchBioF3Event(biof3Events.agentTaskDone, detail);
   } catch {
     // 事件总线失败不应阻塞 SSE 收口路径
@@ -549,6 +559,8 @@ export async function subscribeAgentTask(
   const decoder = new TextDecoder('utf-8');
   let buffer = '';
   let lastSeq = afterSeq;
+  // BLOCK-31 P2: 记录 SSE done 事件携带的权威 filesChanged，随 agentTaskDone 派发
+  let doneFiles: Array<{ path: string; status: string }> | undefined;
   while (true) {
     const { value, done } = await reader.read();
     if (done) break;
@@ -563,7 +575,10 @@ export async function subscribeAgentTask(
         const data = m[1];
         if (data === '[DONE]') {
           onDone?.();
-          emitAgentTaskDone(taskId, kind);
+          emitAgentTaskDone(taskId, kind, {
+            filesChanged: doneFiles,
+            conversationId: opts.conversationId,
+          });
           try {
             localStorage.removeItem('biof3_agent_task_' + taskId);
           } catch {}
@@ -574,6 +589,9 @@ export async function subscribeAgentTask(
           // task 模式事件包成 {seq, eventType, payload}，取 payload 走原解析
           const evt = obj.payload ? obj.payload : obj;
           if (typeof obj.seq === 'number') lastSeq = obj.seq;
+          if (evt && evt.event === 'done' && Array.isArray(evt.filesChanged)) {
+            doneFiles = evt.filesChanged;
+          }
           _handleSseEvent(evt, opts);
         } catch {
           // Bad JSON — ignore
@@ -582,7 +600,10 @@ export async function subscribeAgentTask(
     }
   }
   onDone?.();
-  emitAgentTaskDone(taskId, kind);
+  emitAgentTaskDone(taskId, kind, {
+    filesChanged: doneFiles,
+    conversationId: opts.conversationId,
+  });
 }
 
 /** 处理单个 SSE 事件对象（原 streamChat 的解析逻辑，task/legacy 共用） */
@@ -699,7 +720,11 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
   if (obj.event === 'done') {
     const doneTaskId =
       (typeof obj.taskId === 'string' && obj.taskId) || 'legacy';
-    emitAgentTaskDone(doneTaskId, kind);
+    // BLOCK-31 P2: done 事件携带权威 filesChanged + 任务所属会话
+    emitAgentTaskDone(doneTaskId, kind, {
+      filesChanged: Array.isArray(obj.filesChanged) ? obj.filesChanged : undefined,
+      conversationId: opts.conversationId,
+    });
     return;
   }
   if (obj.event === 'token_budget') {
@@ -766,7 +791,7 @@ async function streamChatLegacy(opts: StreamChatOptions): Promise<void> {
           const data = m[1];
           if (data === '[DONE]') {
             onDone?.();
-            emitAgentTaskDone('legacy', kind);
+            emitAgentTaskDone('legacy', kind, { conversationId: opts.conversationId });
             return;
           }
           try {
@@ -779,7 +804,7 @@ async function streamChatLegacy(opts: StreamChatOptions): Promise<void> {
       }
     }
     onDone?.();
-    emitAgentTaskDone('legacy', kind);
+    emitAgentTaskDone('legacy', kind, { conversationId: opts.conversationId });
   } catch (err: unknown) {
     if ((err as Error)?.name === 'AbortError') return;
     onError?.(err instanceof Error ? err : new Error(String(err)));

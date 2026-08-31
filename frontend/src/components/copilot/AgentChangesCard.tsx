@@ -6,9 +6,13 @@
 // （ProjectWorkspace 监听打开审阅 tab，useWorkingTreeReview 监听选中文件）。
 // 非 desktop 环境（bridge 不可用）或工作区无改动时整卡隐藏。
 // git 是唯一事实源：每次刷新都重查 status/diff，提交/还原后自动消失。
+//
+// BLOCK-31 P3 会话作用域：conversationId 有归属记录时默认只显示**当前会话**
+// 的改动（conversationChangesStore 索引），提供「本会话 / 全部」切换；
+// 无归属记录（旧会话 / 索引为空）时保持全量视图。审阅面板仍是项目全景。
 // ============================================================
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { getBridge } from '@/lib/desktopBridge';
 import { biof3Events, dispatchBioF3Event, subscribeBioF3Event } from '@/lib/events';
@@ -16,6 +20,10 @@ import { computeFileDiffStats } from '@/components/desktop/WorkingTreeReview/rev
 import { CodeMirrorDiffView } from '@/components/desktop/WorkingTreeReview/CodeMirrorDiffView';
 import { HoverPreviewPopover } from '@/components/desktop/WorkingTreeReview/HoverPreviewPopover';
 import type { DiffFile } from '@/components/desktop/WorkingTreeReview/useWorkingTreeReview';
+import {
+  getConversationFileChanges,
+  subscribeConversationChanges,
+} from './conversationChangesStore';
 
 interface ChangeEntry {
   path: string;
@@ -33,12 +41,28 @@ const STATUS_CLASS: Record<string, string> = {
   '?': 'sc-changes-badge sc-changes-badge-untracked',
 };
 
-export function AgentChangesCard(): React.ReactElement | null {
+export function AgentChangesCard({
+  conversationId,
+}: {
+  conversationId?: string | null;
+}): React.ReactElement | null {
   const [entries, setEntries] = useState<ChangeEntry[] | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const [expanded, setExpanded] = useState(true);
+  // BLOCK-31 P3 — 'conversation' 仅在有归属记录时生效（见 effectiveScope）
+  const [scopePreference, setScopePreference] = useState<'conversation' | 'all'>('conversation');
   // UI-252 — 行 diff 数据保留供悬停预览复用（与审阅详情同源）
   const [diffFiles, setDiffFiles] = useState<Map<string, DiffFile>>(() => new Map());
+
+  // BLOCK-31 P2 — 当前会话的改动文件索引（live 记录 + 权威清单对账）
+  const conversationChanges = useSyncExternalStore(
+    subscribeConversationChanges,
+    () => getConversationFileChanges(conversationId)
+  );
+  const conversationPaths = useMemo(
+    () => new Set(conversationChanges.map((c) => c.path)),
+    [conversationChanges]
+  );
 
   // UI-252/UI-255 — 悬停浮动预览：hover 350ms 弹出只读 diff（定位/尺寸由 HoverPreviewPopover 自适应）
   const [hoverPreview, setHoverPreview] = useState<{ path: string; anchor: DOMRect } | null>(null);
@@ -111,8 +135,18 @@ export function AgentChangesCard(): React.ReactElement | null {
 
   if (!entries || entries.length === 0 || dismissed) return null;
 
-  const totalAdded = entries.reduce((acc, e) => acc + e.added, 0);
-  const totalRemoved = entries.reduce((acc, e) => acc + e.removed, 0);
+  // BLOCK-31 P3 — 会话归属记录存在时才启用会话过滤（旧会话 / 索引为空 → 全量视图）
+  const hasConversationScope = Boolean(conversationId) && conversationPaths.size > 0;
+  const effectiveScope =
+    hasConversationScope && scopePreference === 'conversation' ? 'conversation' : 'all';
+  const visibleEntries =
+    effectiveScope === 'conversation'
+      ? entries.filter((e) => conversationPaths.has(e.path))
+      : entries;
+  if (visibleEntries.length === 0) return null;
+
+  const totalAdded = visibleEntries.reduce((acc, e) => acc + e.added, 0);
+  const totalRemoved = visibleEntries.reduce((acc, e) => acc + e.removed, 0);
 
   return (
     <div className="sc-changes-card" data-testid="agent-changes-card">
@@ -124,8 +158,10 @@ export function AgentChangesCard(): React.ReactElement | null {
         title={expanded ? '收起改动明细' : '展开改动明细'}
       >
         <Icon name={expanded ? 'chevron-down' : 'chevron-right'} size={13} />
-        <span className="sc-changes-title">工作区改动</span>
-        <span className="sc-changes-count">{entries.length} 个文件</span>
+        <span className="sc-changes-title">
+          {effectiveScope === 'conversation' ? '本会话改动' : '工作区改动'}
+        </span>
+        <span className="sc-changes-count">{visibleEntries.length} 个文件</span>
         <span className="sc-changes-total">
           <span className="sc-changes-add">+{totalAdded}</span>
           <span className="sc-changes-del">−{totalRemoved}</span>
@@ -149,9 +185,35 @@ export function AgentChangesCard(): React.ReactElement | null {
           <Icon name="x" size={12} />
         </span>
       </button>
+      {hasConversationScope && (
+        <div
+          className="sc-changes-scope-toggle"
+          role="tablist"
+          aria-label="改动范围切换"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={effectiveScope === 'conversation'}
+            className={`sc-changes-scope-btn${effectiveScope === 'conversation' ? ' sc-changes-scope-btn-active' : ''}`}
+            onClick={() => setScopePreference('conversation')}
+          >
+            本会话
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={effectiveScope === 'all'}
+            className={`sc-changes-scope-btn${effectiveScope === 'all' ? ' sc-changes-scope-btn-active' : ''}`}
+            onClick={() => setScopePreference('all')}
+          >
+            全部
+          </button>
+        </div>
+      )}
       {expanded && (
         <div className="sc-changes-list">
-          {entries.map((entry) => (
+          {visibleEntries.map((entry) => (
             <button
               key={entry.path}
               type="button"

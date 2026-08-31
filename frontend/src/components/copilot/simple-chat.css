@@ -2673,6 +2673,41 @@
   text-align: left;
 }
 
+/* BLOCK-31 P3 — 会话/全部 作用域切换（仅当前会话有归属记录时渲染） */
+.sc-changes-scope-toggle {
+  display: flex;
+  gap: 2px;
+  margin: 0 10px 6px;
+  padding: 2px;
+  border-radius: 7px;
+  background: var(--biof3-bg-subtle);
+  width: fit-content;
+}
+
+.sc-changes-scope-btn {
+  padding: 2px 10px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  font-size: var(--biof3-font-size-xs);
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, background 0.15s;
+}
+
+.sc-changes-scope-btn:hover {
+  color: var(--biof3-text);
+}
+
+.sc-changes-scope-btn-active {
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
 .sc-changes-header:hover {
   background: var(--biof3-bg-subtle);
 }

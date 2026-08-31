@@ -701,6 +701,14 @@ async function runAgentLoop({
   }
 
   // ---------- Terminal task resolution ----------
+  // BLOCK-31 P1: 终态前回放本 task 的 task_events，聚合权威 filesChanged
+  // 清单（workspace_write/replace 成功写入的文件），随终态持久化；
+  // 聚合失败不阻塞终态标记（清单缺省为空，前端有兜底）。
+  let taskFilesChanged = [];
+  try {
+    const { collectFilesChangedForTask } = require('./agent-files-changed');
+    taskFilesChanged = collectFilesChangedForTask(agentTaskStore, taskId).files;
+  } catch {}
   try {
     const terminal = resolveAgentTaskTerminal({
       cancelled: cancellationObserved || (typeof shouldAbort === 'function' ? shouldAbort() : false),
@@ -709,11 +717,11 @@ async function runAgentLoop({
       pendingApproval: pendingApprovalEmitted,
     });
     if (terminal.status === 'cancelled') {
-      agentTaskStore.markAgentTaskCancelled(taskId);
+      agentTaskStore.markAgentTaskCancelled(taskId, taskFilesChanged);
     } else if (terminal.status === 'completed') {
-      agentTaskStore.markAgentTaskDone(taskId);
+      agentTaskStore.markAgentTaskDone(taskId, taskFilesChanged);
     } else {
-      agentTaskStore.markAgentTaskFailed(taskId, terminal.error);
+      agentTaskStore.markAgentTaskFailed(taskId, terminal.error, taskFilesChanged);
     }
   } catch {}
 
