@@ -1911,3 +1911,15 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：node --test test/git-adapter.test.mjs 39/39（UI-232 用例扩展 stats 断言：两提交精确统计 + message 不串行）；tsc 0；定向 vitest 29/29（新增用例：commitLog 带 stats → 行默认显示统计，无需点开）。**2026-08-31 dev 实机 verified**（localhost:3000 桥桩带 stats）：不点任何提交，4 行统计全部默认显示（64c7c10「2 文件 +7 −0」等）；截图 `acceptance/ui-234/default-stats.png`。**边界**：adapter 改动在主进程，dev Electron 重启后真实数据生效（与 UI-232 同一次重启覆盖）。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-235: BLOCK-29 增量 — 历史分区汇总替代误置的工作区统计 (2026-08-31 verified)
+
+**用户反馈**：「这个上面的 +0 -0 是什么意思？？？是不是应该是当前选中分支的总变化比较好呢」——summary 条的「+0 −0 / n/m 已审」是工作区未提交改动统计与审阅进度，在「历史」分区不适用（工作区干净时恒为 0），纯属误导。
+
+**改动范围**（ReviewMode.tsx，纯前端）：
+- 历史分区 summary 改显历史语境汇总：`{当前分支 | 分支名/标签名} · 已加载 N 条提交 · 合计 +A −D`；合计 = 已加载提交 `stats` 聚合（`historyAggregate` useMemo），「已加载」措辞诚实——不冒充全分支总量，随「加载更多」增长；无 stats 数据（旧桥桩）时不显示合计。
+- 改动分区保持工作区统计不变；两分区各用独立 testid（`rvw-summary-stats` / `rvw-history-summary-stats`）。
+
+**验证**：tsc 0；定向 vitest 30/30（新增用例：历史汇总分支/条数/合计断言 + 分区切换互斥恢复）。**2026-08-31 dev 实机 verified**（localhost:3000 桥桩带 stats）：历史分区显示「当前分支 · 已加载 4 条提交 · 合计 +10 −0」（7+1+1+1=10 聚合正确）、工作区统计 0 出现；切回改动分区恢复「0 个文件 +0 −0 0/0 已审」；截图 `acceptance/ui-235/history-summary.png`。纯前端，刷新即生效。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

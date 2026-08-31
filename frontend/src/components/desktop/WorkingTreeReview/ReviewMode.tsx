@@ -479,6 +479,22 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   );
   const totalFiles = statusFiles.length;
 
+  // UI-235 — 历史分区汇总：当前 ref + 已加载提交数 + 已加载提交合计 ±
+  //（替代误置的工作区 +0 −0/审阅进度；「已加载」措辞保证不冒充全分支总量）
+  const historyAggregate = useMemo(() => {
+    let added = 0;
+    let removed = 0;
+    let withStats = false;
+    for (const c of review.commits ?? []) {
+      if (c.stats) {
+        withStats = true;
+        added += c.stats.added;
+        removed += c.stats.removed;
+      }
+    }
+    return withStats ? { added, removed } : null;
+  }, [review.commits]);
+
   const toggleDir = (dir: string) => {
     setCollapsedDirs((prev) => ({ ...prev, [dir]: !prev[dir] }));
   };
@@ -581,18 +597,33 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
               历史
             </button>
           </div>
-          <span className="rvw-summary-stats" data-testid="rvw-summary-stats">
+          {review.historyView === 'changes' ? (
+            <span className="rvw-summary-stats" data-testid="rvw-summary-stats">
               <span>{review.status?.totalFiles ?? 0} 个文件</span>
-            {review.diff && (
-              <span className="rvw-stat-add">+{review.diff.summary.added}</span>
-            )}
-            {review.diff && (
-              <span className="rvw-stat-del">−{review.diff.summary.removed}</span>
-            )}
-            <span className="rvw-review-progress" data-testid="rvw-review-progress">
-              {reviewedCount}/{totalFiles} 已审
+              {review.diff && (
+                <span className="rvw-stat-add">+{review.diff.summary.added}</span>
+              )}
+              {review.diff && (
+                <span className="rvw-stat-del">−{review.diff.summary.removed}</span>
+              )}
+              <span className="rvw-review-progress" data-testid="rvw-review-progress">
+                {reviewedCount}/{totalFiles} 已审
+              </span>
             </span>
-          </span>
+          ) : (
+            /* UI-235 — 历史分区：工作区统计不适用，改显分支/标签 + 已加载提交数 + 合计 */
+            <span className="rvw-summary-stats" data-testid="rvw-history-summary-stats">
+              <span>{review.activeBranch ?? '当前分支'}</span>
+              <span>已加载 {review.commits?.length ?? 0} 条提交</span>
+              {historyAggregate && (
+                <>
+                  <span>合计</span>
+                  <span className="rvw-stat-add">+{historyAggregate.added}</span>
+                  <span className="rvw-stat-del">−{historyAggregate.removed}</span>
+                </>
+              )}
+            </span>
+          )}
           {review.taskId && <span className="wt-task-id">task: {review.taskId}</span>}
         </div>
         <div className="rvw-summary-actions">

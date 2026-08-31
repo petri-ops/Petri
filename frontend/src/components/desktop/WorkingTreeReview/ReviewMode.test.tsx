@@ -349,6 +349,44 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     expect(row.textContent).toContain('−1');
   });
 
+  it('UI-235: history tab summary shows ref, loaded commits and aggregate stats', async () => {
+    const commitLog = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          commits: [
+            { sha: 'a1b2c3d4e5f6', shortSha: 'a1b2c3d', author: 'tester', isoDate: '2026-08-31T10:00:00Z', subject: 'c1', message: '', stats: { files: 1, added: 5, removed: 2 } },
+            { sha: 'b2c3d4e5f6a1', shortSha: 'b2c3d4e', author: 'tester', isoDate: '2026-08-31T09:00:00Z', subject: 'c2', message: '', stats: { files: 3, added: 10, removed: 4 } },
+          ],
+          count: 2,
+        },
+      })
+    );
+    getBridgeMock.mockReturnValue(makeBridge({ commitLog }));
+
+    renderReview();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-review-progress')).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('tab', { name: '历史' }));
+    const summary = await screen.findByTestId('rvw-history-summary-stats');
+    expect(summary.textContent).toContain('当前分支');
+    expect(summary.textContent).toContain('已加载 2 条提交');
+    expect(summary.textContent).toContain('合计');
+    expect(summary.textContent).toContain('+15');
+    expect(summary.textContent).toContain('−6');
+
+    // 工作区统计在历史分区不显示
+    expect(screen.queryByTestId('rvw-summary-stats')).toBeNull();
+
+    // 切回改动分区恢复工作区统计
+    fireEvent.click(screen.getByRole('tab', { name: '改动' }));
+    expect(screen.queryByTestId('rvw-history-summary-stats')).toBeNull();
+    expect(screen.getByTestId('rvw-summary-stats')).toBeTruthy();
+  });
+
   it('BLOCK-29.4: commit file fulltext view toggle', async () => {
     const commitLog = vi.fn(() =>
       Promise.resolve({
