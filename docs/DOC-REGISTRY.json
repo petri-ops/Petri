@@ -2767,7 +2767,7 @@
       "id": "TYPOGRAPHY-HIERARCHY",
       "path": "docs/typography-hierarchy-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "typography-hierarchy",
       "entrypoint": "docs/README.md",
@@ -2779,15 +2779,15 @@
         "UI-239",
         "UI-240",
         "UI-241",
-        "active",
-        "phase=P0-LAUNCH"
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-31 用户反馈编辑区/diff 区字号层次不齐、要整体协调。实测定位三条根因：① CodeMirror 全链无字号声明（diff/全文继承 16px vs chrome 12-13px）② Infima code/pre 88% 规则未被 global.css 接管（代码块=容器×0.88 漂移）③ 低于 token 阶梯的 7~9px 硬编码。方案：P1 CM .cm-scroller 统一 body-sm 13px（UI-239）/ P2 global.css 接管 code(caption 12)/pre(body-sm 13) + cp-code-pre 对齐（UI-240）/ P3 fileTreeSize 9px、icon badge 7~8px 收口 xs（UI-241）/ P4 disposable fixture 实机验收。范围外：字体族漂移（观察项）、暗色单独调、UI-193/194 挂载、git 写操作。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-08-31 用户反馈编辑区/diff 区字号层次不齐、要整体协调。实测定位三条根因：① CodeMirror 全链无字号声明（diff 继承 16px vs chrome 12-13px）② Infima code/pre 88% 规则未被 global.css 接管 ③ 低于 token 阶梯的 7~9px 硬编码 18 处。2026-08-31 收口 verified：P0 62adfa3 / P1 UI-239 36e36f5（CM 全场景 13px）/ P2 UI-240 9c796c1（接管 88%，代码块 13/行内 12）/ P3 UI-241 1314135（7~9px 收口 xs）；dev Electron CDP 实机三场景断言 + 截图 acceptance/ui-239~241/；tsc 0 / theme-token PASS / docs:check 167 / ui:audit:check / docs:reconcile 0。字体族漂移为观察项移交 roadmap。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-08-31",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH"
+      "phase": "COMPLETED"
     }
   ],
-  "lastUpdated": "2026-08-31 (TYPOGRAPHY-HIERARCHY P0 launch)",
+  "lastUpdated": "2026-08-31 (TYPOGRAPHY-HIERARCHY completed)",
   "documentCount": 167
 }

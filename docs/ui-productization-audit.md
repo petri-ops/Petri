@@ -1963,7 +1963,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-239: TYPOGRAPHY-HIERARCHY P1 — CodeMirror 全场景 13px 基准（diff/全文/gutter 统一） (2026-08-31 in_progress)
+## UI-239: TYPOGRAPHY-HIERARCHY P1 — CodeMirror 全场景 13px 基准（diff/全文/gutter 统一） (2026-08-31 verified)
 
 **用户反馈**：「编辑区或者diff区域文字的大小层次不齐的 不协调呀…要整体协调才可以的」。**实测定位**（browser-use 连 localhost:3000 读 computed style + 全仓 CSS 审计）：CodeMirror 全链无字号声明——`CodeMirrorEditor.module.css` 的 `.cm-scroller` 只设 font-family，`.wt-cm-diff`→`.rvw-*` 容器链到 body（16px）均无 font-size，CM6 baseTheme 无默认字号（dist 验证）→ 审阅 diff 代码/提交全文（UI-224）/blame 渲染 **16px**，同屏 chrome（标题 13/统计 12/tab 12）差 3~4px，即「diff 区域层次不齐」主源。
 
@@ -1971,9 +1971,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / 定向 vitest（theme-token 契约 + CM 相关）/ docs:check / ui:audit:check。**待 P4 实机**：disposable fixture 造脏文件后断言 `.cm-line`/`.cm-gutters` computed 13px，截图 `acceptance/ui-239/` 后转 verified。
 
-**状态**: in_progress（实现已落地，实机验收留 P4）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**2026-08-31 dev Electron 实机 verified**（CDP 9222 驱动，intent-to-add fixture `typo-fixture-demo.py` 真实 hunk，验收后删除 0 残留）：审阅改动 diff `.cm-line`/`.cm-content`/`.cm-gutters`/`.cm-scroller` 全部 **13px**（修复前继承 16px），chrome 标题 13/统计 12/tab 12，层次连贯；历史分区点开提交 diff 13px；`CommitDiffFileView` 全文 viewMode（UI-224 场景）正文/gutter 13px。截图 `acceptance/ui-239/review-diff-light.png`、`review-fulltext-light.png`。
 
-## UI-240: TYPOGRAPHY-HIERARCHY P2 — Infima `code`/`pre` 88% 接管 + 代码块统一 13px (2026-08-31 in_progress)
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-240: TYPOGRAPHY-HIERARCHY P2 — Infima `code`/`pre` 88% 接管 + 代码块统一 13px (2026-08-31 verified)
 
 **实测定位**（同 UI-239 审计）：`custom.css --ifm-code-font-size: 88%` + Infima 裸元素规则（`code{font-size:88%}`、`pre{font:88%/1.45 mono}`）从未被桌面覆盖（`global.css` 只接管背景/边框）→ 一切 `<pre>`/`<code>` 渲染为容器 × 0.88（13→11.4px、16→14.1px），各容器基准不同导致「小一号」互不一致——「编辑区」代码忽大忽小的来源。连带发现两处同族漂移：聊天双套代码块 12/13 并存（`.cp-md .cp-code-pre` caption vs `.sc-msg-body pre` body-sm）、Result Studio 代码视图硬编码 `font: 12px`（`RevisionCodeView.module.css`）。
 
@@ -1984,9 +1986,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / 定向 vitest（theme-token 契约 + 受影响组件）/ docs:check / ui:audit:check。**待 P4 实机**：HighlightedCode/聊天/markdown 预览 computed 断言 + 截图 `acceptance/ui-240/` 后转 verified。
 
-**状态**: in_progress（实现已落地，实机验收留 P4）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**2026-08-31 dev Electron 实机 verified**（CDP 9222，fixture 项目 workspace=/tmp/biof3-typo-fixture，验收后清理）：markdown 预览正文 13px / 行内 code **12px**（修复前 88%→11.44px）/ 代码块 pre **13px + ui-monospace**（修复前 88%→11.44px 且字族漂移）；文件编辑器 textarea 13px；暗色抽查同 token（13/12/13）。`.cp-code-pre` 与 `RevisionCodeView` 为显式 token 静态断言。截图 `acceptance/ui-240/workspace-markdown-preview-light.png`、`workspace-markdown-preview-dark.png`。
 
-## UI-241: TYPOGRAPHY-HIERARCHY P3 — 低于 token 阶梯的 7~9px 硬编码收口 (2026-08-31 in_progress)
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-241: TYPOGRAPHY-HIERARCHY P3 — 低于 token 阶梯的 7~9px 硬编码收口 (2026-08-31 verified)
 
 **实测定位**（同 UI-239 全文档 computed 扫描）：token 阶梯最小档 xs(10px)，但文件树文件大小 9px（`_fileTreeSize`）、文件图标徽标/字形 7~8px（`WorkspaceFileIcon.module.css`，同一文件内已混用 7/8/10/12 四档）、Result Studio 微标签与 TitleBar 会话徽标等 9px 共 18 处硬编码低于阶梯。实测全景 9 档混排（7/8/9/10/11/12/13/14/16px）中的最小三档全部属此类脏值。
 
@@ -1994,4 +1998,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / 定向 vitest / docs:check / ui:audit:check。**待 P4 实机**：文件树/图标徽标/TitleBar computed 断言 + 截图 `acceptance/ui-241/` 后转 verified。
 
-**状态**: in_progress（实现已落地，实机验收留 P4）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**2026-08-31 dev Electron 实机 verified**（CDP 9222，fixture 项目文件树）：`fileTreeSize` **10px**（修复前 9px）、`fileIcon` 徽标 **10px**（修复前 7/8px；18px 图标盒内 10px 徽标实机无溢出）、`fileTreeLink` 13px。`acceptance/ui-241/evidence.json` 断言在案（画面同 `acceptance/ui-240/workspace-markdown-preview-light.png`）。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

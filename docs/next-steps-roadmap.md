@@ -1,11 +1,11 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-31（TYPOGRAPHY-HIERARCHY P0 登记：字号层次系统性统一——用户反馈「编辑区/diff 区文字大小层次不齐」，实测定位 CM 全链无字号/Infima code-pre 88% 未接管/7~9px 硬编码三条根因，UI-239~241 待落地；同日 LIGHT-THEME-PURITY 已收口（UI-238 verified）且审阅面板完成 UI-230~237 连续增量。当前 active：TYPOGRAPHY-HIERARCHY。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-08-31（TYPOGRAPHY-HIERARCHY 已收口：字号层次系统性统一——CM 全场景 13px 基准 UI-239 / Infima code-pre 接管代码块统一 UI-240 / 7~9px 硬编码收口 UI-241，三 UI verified，证据 `acceptance/ui-239/`~`ui-241/`；同日 LIGHT-THEME-PURITY 已收口（UI-238）且审阅面板完成 UI-230~237 连续增量。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- **当前唯一 active 工作包：`TYPOGRAPHY-HIERARCHY`**（2026-08-31 用户裁决启动，plan [`typography-hierarchy-plan.md`](./typography-hierarchy-plan.md)）：字号层次系统性统一——P1 CM 全场景 13px 基准（UI-239）/ P2 global.css 接管 `code`/`pre` + 代码块统一（UI-240）/ P3 低于阶梯硬编码收口（UI-241）/ P4 disposable fixture 实机验收 + 收口。范围外：字体族漂移（观察项）、暗色单独调、UI-193/194 挂载、git 写操作。此前 `LIGHT-THEME-PURITY` 已收口（浅色 token 切 zinc + 纯白画布，UI-238 verified）；另同日完成审阅面板 UI-230~237 连续增量。
-- 留给用户裁决的后续候选：git 写操作三期（分支切换/暂存区两栏/push-pull，此前裁决排除）；UI-193 widget 业务路径与 UI-194 消费侧挂载；ui:audit `--report` 模式 schema 大小写债务（AUDIT-LOG 2026-08-30 🟢）；字体族漂移统一（TYPOGRAPHY-HIERARCHY 观察项）。
+- 无 active 工作包。`TYPOGRAPHY-HIERARCHY` 已于 2026-08-31 收口（用户反馈「编辑区/diff 区字号层次不齐、要整体协调」）：P1 CM 全场景 13px 基准（UI-239）/ P2 Infima `code`/`pre` 88% 接管 + 代码块统一 13px、行内 12px（UI-240）/ P3 全仓 18 处 7~9px 硬编码收口 xs（UI-241）；dev Electron CDP 实机三场景断言 verified，证据 `acceptance/ui-239/`~`ui-241/`。同日 `LIGHT-THEME-PURITY` 收口（UI-238）+ 审阅面板 UI-230~237 连续增量。
+- 留给用户裁决的后续候选：git 写操作三期（分支切换/暂存区两栏/push-pull，此前裁决排除）；UI-193 widget 业务路径与 UI-194 消费侧挂载；ui:audit `--report` 模式 schema 大小写债务（AUDIT-LOG 2026-08-30 🟢）；字体族漂移统一（-apple-system vs system-ui/Arial，TYPOGRAPHY-HIERARCHY 观察项移交）。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 
 ## 当前结论

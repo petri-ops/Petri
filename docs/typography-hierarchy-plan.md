@@ -1,7 +1,7 @@
 # TYPOGRAPHY-HIERARCHY — 字号层次系统性统一（代码表面 13px 基准 + Infima 接管 + 脏值收口） Plan
 
 - **Plan ID**: `TYPOGRAPHY-HIERARCHY`（用户反馈驱动，2026-08-31：「编辑区或者diff区域文字的大小层次不齐的 不协调呀…要整体协调」）
-- **状态**: `active`（P0 登记）
+- **状态**: `completed`（2026-08-31 收口：P0 `62adfa3` → P1 UI-239 `36e36f5` → P2 UI-240 `9c796c1` → P3 UI-241 `1314135` → 本 commit P4 实机 + P5 收口；dev Electron 实机 verified ×3，证据 `acceptance/ui-239/`~`ui-241/`）
 - **truthDomain**: `typography-hierarchy`
 - **阶段**: P0 登记 → P1 CodeMirror 13px 基准（UI-239）→ P2 `code`/`pre` 接管 + 代码块统一（UI-240）→ P3 低于阶梯硬编码收口（UI-241）→ P4 实机 fixture 验收 + 收口
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
@@ -50,5 +50,11 @@ disposable fixture repo（/tmp）+ 新建项目指向（UI-127 consent 先例，
 ## 4. 门禁
 
 tsc 0 / 定向 vitest（theme-token 契约 + 受影响组件测试）/ docs:check / ui:audit:check；P4 收口加 docs:reconcile；台账每增量同提交同步。
+
+## 5. 收口（2026-08-31）
+
+- **实机**（dev Electron CDP 9222，真实验收链——审阅 adapter 固定解析 app 仓库本体，`working-tree-review.js:49`，故 fixture 用 intent-to-add 文件进本仓 diff，BLOCK-28 P5 先例）：UI-239 改动 diff / 历史 commit diff / 提交全文三场景 `.cm-line`/gutter 全 13px；UI-240 预览正文 13 / 行内 code 12 / 代码块 13+ui-monospace、暗色抽查同 token；UI-241 文件树大小/图标徽标 10px、文件名 13px，18px 图标盒 10px 徽标无溢出。fixture/临时项目/临时文件验收后全部清理 0 残留；两后端（3001/52437）测试项目记录删除。
+- **门禁**：tsc 0 / theme-token 契约 PASS / docs:check 167 / ui:audit:check / docs:reconcile 0。
+- **观察项移交**：字体族漂移（-apple-system 与 system-ui/Arial 并存）未处理，roadmap 候选留待用户裁决。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA.

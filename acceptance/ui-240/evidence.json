@@ -1,0 +1,21 @@
+{
+  "ui": "UI-240",
+  "workPackage": "TYPOGRAPHY-HIERARCHY P2",
+  "capturedAt": "2026-08-31T06:10:00Z",
+  "implementCommit": "9c796c1",
+  "environment": "dev Electron 30.5.1 (CDP 9222), fixture 项目 workspace=/tmp/biof3-typo-fixture (验收后清理)",
+  "assertions": {
+    "markdownPreview.body": "13px (修复前 13px, 不变)",
+    "markdownPreview.inlineCode": "12px (修复前 13×0.88≈11.44px 漂移)",
+    "markdownPreview.preBlock": "13px/ui-monospace (修复前 88%≈11.44px + 字族漂移)",
+    "chat.cpCodePre": "13px (静态 token 断言, caption→body-sm)",
+    "resultStudio.revisionCodeView": "13px (静态 token 断言, 12px 硬编码→body-sm)",
+    "darkTheme.cmLine": "13px",
+    "darkTheme.preview/inline/pre": "13px/12px/13px (同 token, 暗色抽查)"
+  },
+  "screenshots": [
+    "workspace-markdown-preview-light.png",
+    "workspace-markdown-preview-dark.png"
+  ],
+  "result": "pass"
+}

@@ -1,0 +1,25 @@
+{
+  "ui": "UI-239",
+  "workPackage": "TYPOGRAPHY-HIERARCHY P1",
+  "capturedAt": "2026-08-31T06:10:00Z",
+  "implementCommit": "36e36f5",
+  "environment": "dev Electron 30.5.1 (CDP 9222 驱动), localhost:3000, intent-to-add fixture typo-fixture-demo.py (git add -N, 验收后删除 0 残留)",
+  "assertions": {
+    "reviewDiff.cmLine": "13px (修复前继承 16px)",
+    "reviewDiff.cmContent": "13px",
+    "reviewDiff.cmGutters": "13px (行号与正文对齐)",
+    "reviewDiff.cmScroller": "13px",
+    "chrome.wtTitle": "13px",
+    "chrome.rvwSummaryStats": "12px",
+    "chrome.tab": "12px",
+    "body": "16px",
+    "historyCommitDiff.cmLine": "13px (历史分区点开提交)",
+    "commitFileFulltext.cmLine": "13px (CommitDiffFileView 全文 viewMode, UI-224 场景)",
+    "commitFileFulltext.cmGutters": "13px"
+  },
+  "screenshots": [
+    "review-diff-light.png",
+    "review-fulltext-light.png"
+  ],
+  "result": "pass"
+}
