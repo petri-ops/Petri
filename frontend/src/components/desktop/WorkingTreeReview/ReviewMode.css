@@ -694,13 +694,15 @@
   text-overflow: ellipsis;
 }
 
-.rvw-acc-dir {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--biof3-text-muted);
+/* BLOCK-29.7 UI-244 — dock 目录分组树：组头与 /review 主区左树同构，文件缩进 + 缩进参考线 */
+.rvw-acc-group-files {
+  margin-left: 13px;
+  padding-left: 4px;
+  border-left: 1px solid var(--biof3-border-tertiary, var(--biof3-border));
+}
+
+.rvw-acc-item--nested .rvw-acc-row {
+  padding: 5px 8px 5px 4px;
 }
 
 .rvw-acc-diff {
@@ -881,6 +883,96 @@
   border-left: 2px solid var(--biof3-border-strong);
   background: transparent;
   border-radius: 0 7px 7px 0;
+}
+
+/* BLOCK-29.7 UI-244 — 提交详情：左 mini 目录树 + 右 diff，版本改动 ↔ 项目结构对应可见 */
+.rvw-commit-detail-body {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-top: 6px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--biof3-bg-canvas);
+}
+
+.rvw-commit-tree {
+  width: 172px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  max-height: 60vh;
+  padding: 4px 0;
+  border-right: 1px solid var(--biof3-border);
+  background: var(--biof3-bg-surface);
+}
+
+.rvw-commit-tree-dir {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  padding: 4px 8px 2px;
+  border: none;
+  background: transparent;
+  color: var(--biof3-text-tertiary);
+  font-size: var(--biof3-font-size-xs);
+  font-weight: 600;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rvw-commit-tree-dir-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rvw-commit-tree-count {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.rvw-commit-tree-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 8px 4px 22px;
+  border: none;
+  background: transparent;
+  color: var(--biof3-text);
+  cursor: pointer;
+  text-align: left;
+  font-size: var(--biof3-font-size-caption);
+}
+
+.rvw-commit-tree-row:hover {
+  background: var(--biof3-hover);
+}
+
+.rvw-commit-tree-row.active {
+  background: var(--biof3-accent-soft);
+  color: var(--biof3-accent);
+  font-weight: 600;
+}
+
+.rvw-commit-tree-file {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rvw-commit-diff {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  max-height: 60vh;
 }
 
 /* UI-233 — 汇总统计上移到列表行 */

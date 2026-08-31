@@ -223,6 +223,9 @@ function ExpandedCommitDetail({ commit, onSummary }: { commit: CommitInfo; onSum
   // UI-232 — 加载失败与「真没有差异」分开呈现，不再让报错伪装成空提交
   const [error, setError] = useState<string | null>(null);
   const [filePath, setFilePath] = useState<string | null>(null);
+  // BLOCK-29.7 UI-244 — 提交文件树：左 mini 树 + 右 diff，结构可见
+  const [treeCollapsed, setTreeCollapsed] = useState<Record<string, boolean>>({});
+  const commitGroups = useMemo(() => groupFilesByDirectory(diff?.files ?? []), [diff]);
   useEffect(() => {
     const bridge = getBridge('workingTreeReview');
     if (!bridge) return;
@@ -259,33 +262,56 @@ function ExpandedCommitDetail({ commit, onSummary }: { commit: CommitInfo; onSum
           <pre>{commit.message}</pre>
         </div>
       )}
-      <div className="rvw-filestrip" role="tablist" aria-label="提交改动文件">
-        {(diff?.files ?? []).map((f) => {
-          const stats = computeFileDiffStats(f);
-          const selected = filePath === f.path;
-          const fileName = f.path.slice(f.path.lastIndexOf('/') + 1);
-          return (
-            <button
-              key={f.path}
-              type="button"
-              role="tab"
-              aria-selected={selected}
-              className={`rvw-filechip${selected ? ' active' : ''}`}
-              onClick={() => setFilePath(f.path)}
-              title={f.path}
-            >
-              <span className="rvw-filechip-name">{fileName}</span>
-              {(stats.added > 0 || stats.removed > 0) && (
-                <span className="rvw-file-stats">
-                  {stats.added > 0 && <span className="rvw-stat-add">+{stats.added}</span>}
-                  {stats.removed > 0 && <span className="rvw-stat-del">−{stats.removed}</span>}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-      <main className="rvw-diff-area" data-testid="rvw-commit-diff-area">
+      {/* BLOCK-29.7 UI-244 — filestrip → 左 mini 目录树 + 右 diff：版本改动 ↔ 项目结构对应可见 */}
+      <div className="rvw-commit-detail-body">
+        <aside className="rvw-commit-tree" role="tablist" aria-label="提交改动文件树">
+          {commitGroups.map((group) => {
+            const collapsed = !!treeCollapsed[group.dir];
+            return (
+              <div key={group.dir || '/'} className="rvw-commit-tree-group">
+                <button
+                  type="button"
+                  className="rvw-commit-tree-dir"
+                  aria-expanded={!collapsed}
+                  title={group.dir || '（根目录）'}
+                  onClick={() => setTreeCollapsed((s) => ({ ...s, [group.dir]: !collapsed }))}
+                >
+                  <span className={`rvw-caret${collapsed ? ' rvw-caret-collapsed' : ''}`}>
+                    <span className="rvw-caret-icon"><Icon name="chevron-down" size={11} /></span>
+                  </span>
+                  <span className="rvw-commit-tree-dir-name">{groupDisplayName(group.dir)}</span>
+                  <span className="rvw-commit-tree-count">{group.files.length}</span>
+                </button>
+                {!collapsed &&
+                  group.files.map((f) => {
+                    const stats = computeFileDiffStats(f);
+                    const selected = filePath === f.path;
+                    const fileName = f.path.slice(f.path.lastIndexOf('/') + 1);
+                    return (
+                      <button
+                        key={f.path}
+                        type="button"
+                        role="tab"
+                        aria-selected={selected}
+                        className={`rvw-commit-tree-row${selected ? ' active' : ''}`}
+                        onClick={() => setFilePath(f.path)}
+                        title={f.path}
+                      >
+                        <span className="rvw-commit-tree-file">{fileName}</span>
+                        {(stats.added > 0 || stats.removed > 0) && (
+                          <span className="rvw-file-stats">
+                            {stats.added > 0 && <span className="rvw-stat-add">+{stats.added}</span>}
+                            {stats.removed > 0 && <span className="rvw-stat-del">−{stats.removed}</span>}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+              </div>
+            );
+          })}
+        </aside>
+        <main className="rvw-diff-area rvw-commit-diff" data-testid="rvw-commit-diff-area">
         {loading && <div className="wt-diff-loading">提交差异加载中…</div>}
         {!loading && !error && (() => {
           const file = (diff?.files ?? []).find((f) => f.path === filePath) || null;
@@ -307,7 +333,8 @@ function ExpandedCommitDetail({ commit, onSummary }: { commit: CommitInfo; onSum
             </div>
           );
         })()}
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
@@ -947,39 +974,57 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
             {review.status && review.status.files.length === 0 && (
               <div className="wt-empty">暂无工作区改动。</div>
             )}
-            {statusFiles.map((f) => {
-              const diffFile = diffByPath.get(f.path);
-              const stats = computeFileDiffStats(diffFile);
-              const reviewed = isFileReviewed(diffFile, review.decisions);
-              const selected = review.selectedFilePath === f.path;
-              const expanded = expandedPaths.has(f.path);
-              const fileName = f.path.slice(f.path.lastIndexOf('/') + 1);
-              const dirPath = f.path.slice(0, f.path.lastIndexOf('/'));
+            {/* BLOCK-29.7 UI-244 — dock 手风琴升级目录分组树：结构与 /review 主区左树同构 */}
+            {fileGroups.map((group) => {
+              const collapsed = !!collapsedDirs[group.dir];
               return (
-                <div
-                  key={f.path}
-                  className={`rvw-acc-item${selected ? ' active' : ''}${reviewed ? ' rvw-file-reviewed' : ''}`}
-                >
+                <div key={group.dir || '/'} className="rvw-acc-group">
                   <button
                     type="button"
-                    className="rvw-acc-row"
-                    aria-expanded={expanded}
-                    onClick={() => toggleAccordionRow(f.path)}
-                    title={f.path}
+                    className="rvw-group-header"
+                    onClick={() => toggleDir(group.dir)}
+                    aria-expanded={!collapsed}
+                    title={group.dir || '（根目录）'}
                   >
-                    <span className={`rvw-caret${expanded ? '' : ' rvw-caret-collapsed'}`}>
+                    <span className={`rvw-caret${collapsed ? ' rvw-caret-collapsed' : ''}`}>
                       <span className="rvw-caret-icon"><Icon name="chevron-down" size={12} /></span>
                     </span>
-                    <WorkspaceFileIcon name={f.path} type="file" />
-                    <span className="rvw-acc-name">{fileName}</span>
-                    {dirPath && <span className="rvw-acc-dir">{dirPath}/</span>}
-                    {reviewed ? (
-                      <span className="rvw-reviewed-mark"><Icon name="check" size={12} /></span>
-                    ) : (stats.added > 0 || stats.removed > 0) ? (
-                      <span className="rvw-file-stats">
-                        {stats.added > 0 && <span className="rvw-stat-add">+{stats.added}</span>}
-                        {stats.removed > 0 && <span className="rvw-stat-del">−{stats.removed}</span>}
-                      </span>
+                    <span className="rvw-group-name">{groupDisplayName(group.dir)}</span>
+                    <span className="rvw-group-count">{group.files.length}</span>
+                  </button>
+                  {!collapsed && (
+                    <div className="rvw-acc-group-files">
+                      {group.files.map((f) => {
+                        const diffFile = diffByPath.get(f.path);
+                        const stats = computeFileDiffStats(diffFile);
+                        const reviewed = isFileReviewed(diffFile, review.decisions);
+                        const selected = review.selectedFilePath === f.path;
+                        const expanded = expandedPaths.has(f.path);
+                        const fileName = f.path.slice(f.path.lastIndexOf('/') + 1);
+                        return (
+                          <div
+                            key={f.path}
+                            className={`rvw-acc-item rvw-acc-item--nested${selected ? ' active' : ''}${reviewed ? ' rvw-file-reviewed' : ''}`}
+                          >
+                            <button
+                              type="button"
+                              className="rvw-acc-row"
+                              aria-expanded={expanded}
+                              onClick={() => toggleAccordionRow(f.path)}
+                              title={f.path}
+                            >
+                              <span className={`rvw-caret${expanded ? '' : ' rvw-caret-collapsed'}`}>
+                                <span className="rvw-caret-icon"><Icon name="chevron-down" size={12} /></span>
+                              </span>
+                              <WorkspaceFileIcon name={f.path} type="file" />
+                              <span className="rvw-acc-name">{fileName}</span>
+                              {reviewed ? (
+                                <span className="rvw-reviewed-mark"><Icon name="check" size={12} /></span>
+                              ) : (stats.added > 0 || stats.removed > 0) ? (
+                                <span className="rvw-file-stats">
+                                  {stats.added > 0 && <span className="rvw-stat-add">+{stats.added}</span>}
+                                  {stats.removed > 0 && <span className="rvw-stat-del">−{stats.removed}</span>}
+                                </span>
                     ) : null}
                     {/* BLOCK-29.2 — 行内操作：查看该文件历史 / 放弃更改（span 嵌于按钮行内） */}
                     {/* BLOCK-29.6 UI-243 — 行内「编辑」取代原 summary 全局按钮（已知二进制才隐藏） */}
@@ -1044,6 +1089,11 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                       ) : (
                         <UntrackedFilePreview path={f.path} />
                       )}
+                    </div>
+                  )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

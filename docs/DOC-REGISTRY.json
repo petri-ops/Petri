@@ -2835,7 +2835,7 @@
       "id": "BLOCK-29.7-REVIEW-CHANGES-TREE",
       "path": "docs/block-29-7-review-changes-tree-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-29-review-changes-tree",
       "entrypoint": "docs/README.md",
@@ -2845,15 +2845,15 @@
         "layout",
         "G0",
         "UI-244",
-        "active",
-        "phase=P0-LAUNCH"
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-31 用户提出审阅增加文件树以看清每个版本每个文件修改对应的项目结构变化。现状：/review 主区已有目录分组左树（BLOCK-28 P2），dock 是平铺手风琴（目录仅文字后缀），历史提交详情是横向 chips。方案：dock 手风琴升级目录分组树（复用 groupFilesByDirectory/collapsedDirs，缩进+参考线，行内三操作保留）+ 历史提交详情改左 mini 树(168px)+右 diff（局部折叠 state）；三处同构。0 新增 IPC / 0 新依赖 / 审阅内核不动。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-08-31 用户提出审阅增加文件树看清版本↔项目结构。收口 verified：P0 f02f263 / P1+P2 同提交（dock 手风琴→目录分组树：fileGroups 分组+组头复用 rvw-group-header/collapsedDirs+缩进参考线+行内三操作，rvw-acc-dir 清除，groupDisplayName 根目录 '.'→'（根目录）'；历史提交详情 filestrip→左 mini 树 172px+右 diff，局部 treeCollapsed，双侧 max-height 60vh 独立滚动）；实机 dock 分组树 5 组/7 嵌套行/折叠展开 ✓、提交树选中+diff ✓，证据 acceptance/ui-244/；tsc 0 / ReviewMode vitest 19/19 / docs:check 170 / ui:audit:check 267 / docs:reconcile 0。0 新增 IPC / 0 新依赖 / 审阅内核不动。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-08-31",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH"
+      "phase": "COMPLETED"
     }
   ],
-  "lastUpdated": "2026-08-31 (BLOCK-29.7 P0 launch)",
+  "lastUpdated": "2026-08-31 (BLOCK-29.7 completed)",
   "documentCount": 170
 }

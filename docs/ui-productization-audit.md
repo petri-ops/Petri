@@ -2032,3 +2032,15 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **2026-08-31 dev Electron 实机 verified**（CDP 9222，dock 520px，intent-to-add fixture，验收后删除）：summary **单行 41px**（修复前三行堆叠）；行动区 = info(dock 隐藏)/刷新 28/全部还原 28 danger-ghost/提交审阅 28 primary/退出 28 icon-only，编辑文件不再占用 summary；历史行左组（过滤徽标+分支选择器 28px+对比）+ 右组 ⋯ 菜单（打开 → 撤销上次提交 danger 项 confirm 保留 → backdrop 关闭 ✓）；**dock 行内编辑落地为手风琴行第三操作**（编辑 wrench accent hover / 查看历史 clock / 放弃 trash，已知二进制隐藏，`diffFile.binary` 判定），/review 主区为文件头 `rvw-inline-edit-btn`（accent-ghost）。截图 `acceptance/ui-243/review-changes-compact.png`、`review-history-menu.png`。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-244: BLOCK-29.7 P1 — 审阅文件导航树化（dock 目录分组树 + 历史提交树） (2026-08-31 verified)
+
+**用户提出**：审阅增加文件树，看清每个版本每个文件的修改对应的项目结构变化。现状：/review 主区已有目录分组左树（BLOCK-28 P2），dock 是平铺手风琴（目录仅 `rvw-acc-dir` 文字后缀），历史提交详情是横向 chips 多文件铺成一片。
+
+**改动**（0 新增 IPC / 0 新依赖 / 审阅内核不动）：
+- **dock 改动手风琴 → 目录分组树**：`fileGroups`（`groupFilesByDirectory`）分组渲染，组头复用 `rvw-group-header` 交互（共享组件既有 `collapsedDirs`/`toggleDir`，与 /review 主区同构），文件行嵌套缩进 + `rvw-acc-group-files` 缩进参考线，行内三操作/统计保留；删除冗余 `rvw-acc-dir` 后缀（CSS 死样式一并清除）；`groupDisplayName` 根目录 `"."` → `（根目录）`。
+- **历史提交详情 filestrip → 左 mini 树 + 右 diff**：`ExpandedCommitDetail` 内 `commitGroups`（复用同一 helper）+ 局部 `treeCollapsed` 折叠态；`.rvw-commit-detail-body`（树 172px + diff 余宽），树行选中 accent、组行 caret+计数，`max-height 60vh` 双侧独立滚动。
+
+**门禁**：tsc 0 / ReviewMode vitest 19/19 / docs:check / ui:audit:check。**2026-08-31 dev Electron 实机 verified**（CDP 9222，多目录 intent-to-add fixture docs-fix/scripts-fix/根，验收后删除）：dock 分组树 5 组（含（根目录）新标签）、7 嵌套行、目录后缀清零、组折叠/展开 ✓；历史提交展开左 mini 树（组+行选中 accent）+ 右 diff 渲染 ✓。截图 `acceptance/ui-244/review-dock-grouped-tree.png`、`review-commit-tree.png`。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

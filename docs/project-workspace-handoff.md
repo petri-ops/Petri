@@ -1,11 +1,10 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-31（BLOCK-29.7-REVIEW-CHANGES-TREE P0 登记——审阅文件导航树化，dock 分组树 + 历史提交树，UI-244 待落地；同日 UI-238~243 六个视觉增量已收口）
+最后更新：2026-08-31（BLOCK-29.7-REVIEW-CHANGES-TREE 审阅文件导航树化已收口：dock 目录分组树 + 历史提交左 mini 树+右 diff，UI-244 verified，证据 `acceptance/ui-244/`；同日 UI-238~243 六个视觉增量已收口；当前无 active 工作包）
 
 ## Session Snapshot
 
-- **Active work package**: `BLOCK-29.7-REVIEW-CHANGES-TREE`（2026-08-31 用户提出并裁决实现，P0 登记完成；plan `docs/block-29-7-review-changes-tree-plan.md`）。审阅文件导航树化：dock 改动手风琴升级目录分组树 + 历史提交详情左 mini 树+右 diff（UI-244）；0 新增 IPC / 0 新依赖 / 审阅内核不动。
-- （前条 active）`BLOCK-29.6-REVIEW-CHROME-COMPACT` 已于 2026-08-31 收口（plan `docs/block-29-6-review-chrome-compact-plan.md`；UI-243 verified，证据 `acceptance/ui-243/`）。**审阅 chrome 契约现状**：summary 单行（提交审阅唯一 primary、刷新/退出 icon 化、全部还原 danger-ghost、快捷键提示 info tooltip）；历史行左组（过滤+分支选择器 28px+对比）+ ⋯ 溢出菜单（撤销上次提交，confirm 保留）；`.wt-btn` 28px 栅格；行内编辑 = dock 手风琴行 wrench 操作 + /review 文件头 `rvw-inline-edit-btn`。**字体契约**：sans=`--biof3-font-sans`（含 CJK）、mono=`--biof3-font-mono`、表单控件 inherit、新表面禁止字面量字体栈。**字号契约**：代码表面基准 body-sm 13px、行内 code caption 12px、阶梯最小 xs 10px。
+- **Active work package**: 无。`BLOCK-29.7-REVIEW-CHANGES-TREE` 已于 2026-08-31 收口（plan `docs/block-29-7-review-changes-tree-plan.md`；UI-244 verified，证据 `acceptance/ui-244/`）。**审阅文件导航契约**：dock 改动 = 目录分组树（组头折叠与 /review 主区共享 collapsedDirs 语义、缩进参考线、行内编辑/历史/放弃三操作）；历史提交详情 = 左 mini 树 172px + 右 diff（局部 treeCollapsed）；/review 主区 = 左侧目录分组树（BLOCK-28 P2 原有）；三处同构共用 `groupFilesByDirectory`/`groupDisplayName`（根目录标签「（根目录）」）。**审阅 chrome 契约**：summary 单行（提交审阅唯一 primary、刷新/退出 icon 化、全部还原 danger-ghost）；历史行 ⋯ 溢出菜单（撤销上次提交，confirm 保留）；`.wt-btn` 28px 栅格。**字体契约**：sans=`--biof3-font-sans`（含 CJK）、mono=`--biof3-font-mono`、表单控件 inherit、新表面禁止字面量字体栈。**字号契约**：代码表面基准 body-sm 13px、行内 code caption 12px、阶梯最小 xs 10px。
 - **Current branch**: `main`；HEAD、dirty state 与 `origin/main` 同步状态以运行时 Git 为准。
 - **Code review boundary**: 代码审阅为**右侧停靠面板**（TitleBar 审阅按钮 Toggle；面板内 = 手风琴文件列表（BLOCK-29.1，未跟踪文件可预览 WORKTREE 全文）+ 提交详情头（BLOCK-29.3）+ 文件视图四态（BLOCK-29.4 三态 + BLOCK-29.5 blame）+ 分支选择器/标签 optgroup/stash 只读列表（BLOCK-29.5）+ 两提交对比模式 + 内嵌提交框）。`/review` 主区 mode 路由保留（同一 ReviewMode 组件）。审阅内核与主题契约不变：真实语义 token 明暗自适配、`git diff HEAD` 基准（c228beb 保留）、hunk 决策键 `path#hunkIndex`、零模型参与。
 - **git history data shape**: `git:commit-log` 载荷 `commits[]` 自 BLOCK-29.3 起含 `message`（完整提交说明）；`commitDiff`/`commitFileContent` 自 BLOCK-29.5 起支持 `{fromRef,toRef}` 区间模式（hash 可省）；`branchList/blame/stashList/tagList` 为 BLOCK-29.5 新只读通道——浏览器 shim 桩若缺这些方法，对应功能降级为空/错误态（blame 视图会显示加载失败，属预期）。

@@ -1,7 +1,7 @@
 # BLOCK-29.7-REVIEW-CHANGES-TREE — 审阅文件导航树化（dock 目录分组树 + 历史版本树） Plan
 
 - **Plan ID**: `BLOCK-29.7-REVIEW-CHANGES-TREE`（用户 2026-08-31：「审阅 增加右侧文件树 体验会比较好…用户会很清楚每个版本每个文件的修改对应的是整个项目结构的变化 规划一下 实现」）
-- **状态**: `active`（P0 登记）
+- **状态**: `completed`（2026-08-31 收口：P0 `f02f263` → 本 commit P1 实现 + P2 实机收口；dev Electron 实机 verified，证据 `acceptance/ui-244/`）
 - **truthDomain**: `block-29-review-changes-tree`（审阅文件导航树子域；BLOCK-29 系列延续）
 - **阶段**: P0 登记 → P1 实现（UI-244）→ P2 实机 + 收口
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
@@ -22,5 +22,11 @@
 ## 3. 门禁与实机
 
 tsc 0 / ReviewMode 定向 vitest / docs:check / ui:audit:check；实机（dev Electron CDP，intent-to-add fixture）：dock 分组树折叠/展开/行内操作、历史提交树选中切 diff、多目录结构可见性；截图 `acceptance/ui-244/`；台账同提交同步。
+
+## 4. 收口（2026-08-31）
+
+- **实机**（CDP 9222，多目录 intent-to-add fixture docs-fix/scripts-fix/根，验收后删除）：dock 分组树 5 组（含（根目录）新标签）、7 嵌套行、目录后缀清零、组折叠/展开 ✓；历史提交展开左 mini 树（组 docs + 行选中 accent）+ 右 diff ✓。`groupDisplayName` 根目录 `"."` → `（根目录）`。
+- **门禁**：tsc 0 / ReviewMode vitest 19/19 / docs:check 170 / ui:audit:check 267 / docs:reconcile 0。
+- **不变量**：0 新增 IPC / 0 新依赖 / 审阅内核不动；三处（dock 树/提交树//review 左树）同构共用 groupFilesByDirectory。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA.

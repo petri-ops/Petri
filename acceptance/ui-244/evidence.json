@@ -1,0 +1,19 @@
+{
+  "ui": "UI-244",
+  "workPackage": "BLOCK-29.7-REVIEW-CHANGES-TREE P1",
+  "capturedAt": "2026-08-31T07:25:00Z",
+  "implementCommit": "同提交（P1 实现 + P2 实机收口）",
+  "environment": "dev Electron 30.5.1 (CDP 9222), dock 520px, 多目录 intent-to-add fixture（docs-fix/scripts-fix/根，验收后删除）",
+  "assertions": {
+    "dock.tree": "分组树 5 组（acceptance/ui-244 / docs-fix / frontend/src/.../WorkingTreeReview / scripts-fix / （根目录）新标签）、7 嵌套行、目录后缀清零",
+    "dock.collapse": "docs-fix 组折叠→aria-expanded=false→再展开=true ✓",
+    "commitTree": "历史提交展开左 mini 树（组 docs + 行选中 accent）+ 右 diff .rvw-file 渲染 ✓",
+    "reviewModeTests": "19/19",
+    "tsc": "0"
+  },
+  "screenshots": [
+    "review-dock-grouped-tree.png",
+    "review-commit-tree.png"
+  ],
+  "result": "pass"
+}

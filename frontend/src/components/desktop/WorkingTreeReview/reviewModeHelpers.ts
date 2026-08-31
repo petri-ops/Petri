@@ -68,7 +68,7 @@ export function groupFilesByDirectory<T extends { path: string }>(files: T[]): F
     }));
 }
 
-/** 分组显示名：根目录显示 "."，其余显示目录路径。 */
+/** 分组显示名：根目录显示「（根目录）」（UI-244），其余显示目录路径。 */
 export function groupDisplayName(dir: string): string {
-  return dir === '' ? '.' : dir;
+  return dir === '' ? '（根目录）' : dir;
 }
