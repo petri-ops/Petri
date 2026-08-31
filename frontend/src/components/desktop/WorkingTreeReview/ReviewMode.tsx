@@ -218,25 +218,30 @@ function CommitDiffFileView({ hash, file, fromRef = null, toRef = null }: { hash
 function ExpandedCommitDetail({ commit }: { commit: CommitInfo }) {
   const [diff, setDiff] = useState<DiffResult | null>(null);
   const [loading, setLoading] = useState(false);
+  // UI-232 — 加载失败与「真没有差异」分开呈现，不再让报错伪装成空提交
+  const [error, setError] = useState<string | null>(null);
   const [filePath, setFilePath] = useState<string | null>(null);
   useEffect(() => {
     const bridge = getBridge('workingTreeReview');
     if (!bridge) return;
     let cancelled = false;
     setLoading(true);
+    setError(null);
     setDiff(null);
     setFilePath(null);
     bridge.commitDiff({ hash: commit.sha })
       .then((res) => {
         if (cancelled) return;
-        const parsed: DiffResult = res.ok && res.data
-          ? res.data
-          : { files: [], truncated: false, summary: { added: 0, removed: 0 } };
-        setDiff(parsed);
-        setFilePath(parsed.files[0]?.path ?? null);
+        if (res.ok && res.data) {
+          const parsed: DiffResult = res.data;
+          setDiff(parsed);
+          setFilePath(parsed.files[0]?.path ?? null);
+        } else {
+          setError(res.message || res.error || '提交差异加载失败。');
+        }
       })
-      .catch(() => {
-        if (!cancelled) setDiff({ files: [], truncated: false, summary: { added: 0, removed: 0 } });
+      .catch((e: unknown) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -265,6 +270,7 @@ function ExpandedCommitDetail({ commit }: { commit: CommitInfo }) {
           </div>
         )}
       </div>
+      {error && <div className="wt-diff-error" role="alert">提交差异加载失败：{error}</div>}
       <div className="rvw-filestrip" role="tablist" aria-label="提交改动文件">
         {(diff?.files ?? []).map((f) => {
           const stats = computeFileDiffStats(f);
@@ -293,10 +299,10 @@ function ExpandedCommitDetail({ commit }: { commit: CommitInfo }) {
       </div>
       <main className="rvw-diff-area" data-testid="rvw-commit-diff-area">
         {loading && <div className="wt-diff-loading">提交差异加载中…</div>}
-        {!loading && (() => {
+        {!loading && !error && (() => {
           const file = (diff?.files ?? []).find((f) => f.path === filePath) || null;
           if (!file) {
-            return <div className="wt-empty">该提交没有可显示的文件差异。</div>;
+            return <div className="wt-empty">该提交没有可显示的文件差异（空提交）。</div>;
           }
           return (
             <div className="rvw-file">
@@ -678,24 +684,25 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
 
       <div className={`rvw-body${isDock ? ' rvw-body--dock' : ''}`}>
         {review.historyView === 'history' && (
-          review.compareMode && review.compareDiff ? (
+          review.compareMode && (review.compareDiff || review.compareError) ? (
             <>
               {/* BLOCK-29.5 — 区间对比：A..B 文件条 + 只读 diff */}
               <div className="rvw-commit-info" data-testid="rvw-compare-info">
                 <div className="rvw-commit-info-head">
                   <span className="rvw-commit-subject">对比 {review.compareFrom?.shortSha}..{review.compareTo?.shortSha}</span>
                   <span className="rvw-commit-summary">
-                    {(review.compareDiff.files ?? []).length} 文件
-                    <span className="rvw-stat-add">+{review.compareDiff.summary.added}</span>
-                    <span className="rvw-stat-del">−{review.compareDiff.summary.removed}</span>
+                    {(review.compareDiff?.files ?? []).length} 文件
+                    <span className="rvw-stat-add">+{review.compareDiff?.summary.added ?? 0}</span>
+                    <span className="rvw-stat-del">−{review.compareDiff?.summary.removed ?? 0}</span>
                   </span>
+                  {review.compareError && <span className="wt-diff-error" role="alert">区间差异加载失败：{review.compareError}</span>}
                   <button type="button" className="rvw-viewmode-btn" onClick={review.exitCompareMode}>
                     退出对比
                   </button>
                 </div>
               </div>
               <div className="rvw-filestrip" role="tablist" aria-label="对比改动文件">
-                {(review.compareDiff.files ?? []).map((f) => {
+                {(review.compareDiff?.files ?? []).map((f) => {
                   const stats = computeFileDiffStats(f);
                   const selected = review.compareFilePath === f.path;
                   const fileName = f.path.slice(f.path.lastIndexOf('/') + 1);
@@ -721,10 +728,10 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                 })}
               </div>
               <main className="rvw-diff-area" data-testid="rvw-compare-diff-area">
-                {(() => {
+                {!review.compareError && (() => {
                   const file = (review.compareDiff?.files ?? []).find((f) => f.path === review.compareFilePath) || null;
                   if (!file) {
-                    return <div className="wt-empty">该区间没有可显示的文件差异。</div>;
+                    return <div className="wt-empty">该区间没有可显示的文件差异（两提交间无差异）。</div>;
                   }
                   return (
                     <div className="rvw-file">

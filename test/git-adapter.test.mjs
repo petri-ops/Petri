@@ -701,3 +701,38 @@ test('BLOCK-20 listModified validates paths are safe', { skip: !gitReady }, (con
     'pathspec_invalid'
   );
 });
+
+// UI-232 — 提交间区间 diff 不带 pathspec（有界只读）必须可用；
+// 工作区 diff（无 ref）维持 pathspec 强制。此前 commitDiffParsed 传空路径被
+// assertSafePathspecs 拒绝（pathspec_required），真实 IPC 链路所有提交差异恒为空，
+// 前端误显示「该提交没有可显示的文件差异」。
+test('UI-232 two-ref range diff works without pathspecs; working-tree diff stays strict', { skip: !gitReady }, (context) => {
+  const root = makeWorkspace(context, 'biof3-ui232-');
+  const gitDir = join(root, '.git');
+  const git = (args) => execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' });
+  git(['init', '--quiet']);
+  git(['config', 'user.email', 'test@example.com']);
+  git(['config', 'user.name', 'test']);
+  writeFileSync(join(root, 'a.txt'), 'line-v1\n', 'utf8');
+  git(['add', 'a.txt']);
+  git(['commit', '--quiet', '-m', 'first']);
+  const first = git(['rev-parse', 'HEAD']).trim();
+  writeFileSync(join(root, 'a.txt'), 'line-v1\nline-v2\n', 'utf8');
+  writeFileSync(join(root, 'b.txt'), 'new-file\n', 'utf8');
+  git(['add', 'a.txt', 'b.txt']);
+  git(['commit', '--quiet', '-m', 'second']);
+  const second = git(['rev-parse', 'HEAD']).trim();
+
+  const adapter = createGitAdapter({ gitDir, workTree: root });
+
+  // 区间 diff（无 pathspec）— 此前抛 pathspec_required
+  const range = adapter.diff({ fromRef: first, toRef: second });
+  assert.ok(range.patch.includes('+line-v2'), 'expected +line-v2 in range patch');
+  assert.ok(range.patch.includes('+new-file'), 'expected +new-file in range patch');
+
+  // 工作区 diff（无 ref）维持整树禁令
+  assert.throws(
+    () => adapter.diff({}),
+    (e) => e instanceof GitAdapterError && e.code === 'pathspec_required'
+  );
+});

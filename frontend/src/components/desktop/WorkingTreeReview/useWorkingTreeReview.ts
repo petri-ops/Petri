@@ -163,6 +163,8 @@ export interface UseWorkingTreeReviewReturn {
   compareTo: CommitInfo | null;
   compareDiff: DiffResult | null;
   compareLoading: boolean;
+  /** UI-232 — 区间差异加载失败（与「真没有差异」分开呈现）。 */
+  compareError: string | null;
   compareFilePath: string | null;
   setCompareFilePath: (path: string | null) => void;
   enterCompareMode: () => void;
@@ -472,6 +474,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
   const [compareTo, setCompareTo] = useState<CommitInfo | null>(null);
   const [compareDiff, setCompareDiff] = useState<DiffResult | null>(null);
   const [compareLoading, setCompareLoading] = useState(false);
+  const [compareError, setCompareError] = useState<string | null>(null);
   const [compareFilePath, setCompareFilePath] = useState<string | null>(null);
 
   const enterCompareMode = useCallback(() => {
@@ -480,6 +483,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     setCompareFrom(null);
     setCompareTo(null);
     setCompareDiff(null);
+    setCompareError(null);
   }, []);
 
   const exitCompareMode = useCallback(() => {
@@ -488,6 +492,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     setCompareFrom(null);
     setCompareTo(null);
     setCompareDiff(null);
+    setCompareError(null);
     setCompareFilePath(null);
   }, []);
 
@@ -500,19 +505,20 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     const bridge = getBridge('workingTreeReview');
     if (!bridge) return;
     setCompareLoading(true);
+    setCompareError(null);
     try {
       const res = await bridge.commitDiff({ fromRef: compareBase.sha, toRef: commit.sha });
-      const parsed: DiffResult = res.ok && res.data
-        ? res.data
-        : { files: [], truncated: false, summary: { added: 0, removed: 0 } };
+      if (!res.ok || !res.data) {
+        setCompareError(res.message || res.error || '区间差异加载失败。');
+        return;
+      }
+      const parsed: DiffResult = res.data;
       setCompareFrom(compareBase);
       setCompareTo(commit);
       setCompareDiff(parsed);
       setCompareFilePath(parsed.files[0]?.path ?? null);
-    } catch {
-      setCompareFrom(compareBase);
-      setCompareTo(commit);
-      setCompareDiff({ files: [], truncated: false, summary: { added: 0, removed: 0 } });
+    } catch (e: unknown) {
+      setCompareError(e instanceof Error ? e.message : String(e));
     } finally {
       setCompareLoading(false);
     }
@@ -600,6 +606,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     compareTo,
     compareDiff,
     compareLoading,
+    compareError,
     compareFilePath,
     setCompareFilePath,
     enterCompareMode,

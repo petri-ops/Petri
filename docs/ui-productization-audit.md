@@ -1871,3 +1871,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；定向 vitest 28/28（用例重写：点行后列表仍可见 + 行内 diff 渲染；收起/切换行；其余历史相关用例同步更新）。**2026-08-30 dev 实机 verified**（localhost:3000 桥桩）：列表保留、64c7c10 与 2de3897 两行同开（aria-expanded true/false/true/false）、详情含完整说明 body 与文件 chips、返回按钮 0 残留；截图 `acceptance/ui-231/inline-expand.png`。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-232: BLOCK-29 增量 — 修复真实链路提交差异恒为空（pathspec 断点）+ 失败态诚实呈现 (2026-08-30 verified)
+
+**用户反馈**：「如果已经提交了 怎么会有 该提交没有可显示的文件差异 呢」——已提交的 commit 必有差异，该文案出现即查询失败被伪装成空。**根因**：adapter `diff()` 经 `assertSafePathspecs` 强制 pathspec（防全树操作的既有 fail-closed 设计），而 `git:commit-diff` 的 `commitDiffParsed` 以 `{fromRef: hash^, toRef: hash}` **不带路径**调用 → 抛 `pathspec_required` → IPC error → 前端 catch 落成空 diff → 所有提交（含区间对比 `{fromRef,toRef}`，UI-228 同路径）在真实 Electron 中恒显示「0 文件 +0 −0 / 没有可显示的文件差异」。与 UI-226 修的 skip/file 断点同构：adapter 与 shim 各自正确、断点在契约层，历史验证全走浏览器桩未暴露——**该链路自 UI-219 起在真实 app 中从未工作过**。
+
+**改动范围**：
+- git-adapter `diff()`：双 ref（fromRef+toRef）区间是有界提交间只读比较，无 pathspec 时放行整树；工作区 diff（无 ref，含 --cached）维持 pathspec 强制不变。真实仓库验证：desktop 仓 HEAD^→HEAD 返回 22914 字符 patch（含 docs/ 7 文件）。
+- 前端诚实化：`ExpandedCommitDetail` 增 error 态（「提交差异加载失败：<原因>」role=alert），失败不再渲染「没有可显示的文件差异」；空态文案改「（空提交）」；对比模式同步增 `compareError`（hook 状态 + 对比头显示，`compareDiff` 空值全链 null-safe）。
+- 回归测试：`test/git-adapter.test.mjs` 新增用例——临时真实仓库两 ref 无 pathspec diff 返回完整 patch + 工作区无 ref diff 仍抛 `pathspec_required`。
+
+**验证**：node --test test/git-adapter.test.mjs 39/39（含新用例）；tsc 0；定向 vitest 28/28。**2026-08-30 dev 实机 verified**（localhost:3000 桥桩失败模式注入）：commitDiff 返回 ok:false → 详情显示「提交差异加载失败：Scoped git diff failed.」、误导性空态 0 出现。**边界**：adapter 修复在主进程，**dev Electron 须重启**后真实链路才回绿；重启后提交详情与区间对比将显示真实文件差异（此前恒空）。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

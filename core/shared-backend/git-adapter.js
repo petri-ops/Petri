@@ -515,9 +515,16 @@ function createGitAdapter(options = {}) {
       };
     },
 
-    /** 路径受限 diff。`staged` 走 --cached；给定 refs 则比较两个提交。 */
+    /** 路径受限 diff。`staged` 走 --cached；给定 refs 则比较两个提交。
+     * UI-232 — 双 ref（fromRef+toRef）区间是有界的提交间只读比较，允许不带
+     * pathspec 整树比较；工作区 diff（无 ref，含 --cached）维持 pathspec 强制
+     * （assertSafePathspecs fail-closed 不变）。此前 commitDiffParsed 传空路径
+     * 被拒（pathspec_required），真实链路所有提交差异恒为空。 */
     diff({ paths, staged = false, fromRef = null, toRef = null } = {}) {
-      const safe = assertSafePathspecs(paths, scope);
+      const boundedRange = Boolean(fromRef && toRef);
+      const safe = boundedRange && (paths === undefined || paths === null)
+        ? []
+        : assertSafePathspecs(paths, scope);
       const args = ['diff', '--no-color', '--no-ext-diff'];
       if (staged) args.push('--cached');
       if (fromRef) args.push(fromRef);
