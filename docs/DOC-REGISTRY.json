@@ -2791,7 +2791,7 @@
       "id": "FONT-FAMILY-UNIFICATION",
       "path": "docs/font-family-unification-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "font-family-unification",
       "entrypoint": "docs/README.md",
@@ -2801,15 +2801,15 @@
         "design-tokens",
         "G0",
         "UI-242",
-        "active",
-        "phase=P0-LAUNCH"
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-31 TYPOGRAPHY-HIERARCHY 观察项移交，用户裁决「字体族漂移也修了吧」。实机全栈清点四层漂移：① Chrome UA 按钮默认 Arial（无 inherit 的 button）② Infima --ifm-font-family-base（system-ui 无 CJK）③ --biof3-font-sans 缺 CJK 且 body 用字面量栈（BlinkMacSystemFont 序列化为 \"system-ui\" 属假象）④ mono 栈动物园（SF Mono/Fira ×9 + SFMono 字面量×2 + desktop.css + RevisionCodeView + CM 幽灵 --font-family-mono）。方案：sans 单栈（token 补 CJK + Infima 覆写 + body 消费 token + 表单控件 inherit）+ mono 单栈（全部收口 var(--biof3-font-mono)）；不动 xterm 终端字体。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-08-31 TYPOGRAPHY-HIERARCHY 观察项移交，用户裁决启动。四层漂移：Chrome UA 按钮 Arial / Infima 字族无 CJK / sans token 缺 CJK / mono 栈动物园。2026-08-31 收口 verified：P0 c824f35 / P1 UI-242 c4f921e（sans 单栈补 CJK + Infima 覆写 + 表单控件 inherit + mono 全收口 token + font: 简写硬编码字号 ×4 同步 token 化）；dev Electron CDP 复测全应用 sans/mono 单栈、Arial 元素数 0（唯一例外 xterm-char-measure-element deliberate 不动），证据 acceptance/ui-242/；tsc 0 / theme-token PASS / docs:check 168 / ui:audit:check 264。字体契约：新表面禁止字面量字体栈。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-08-31",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH"
+      "phase": "COMPLETED"
     }
   ],
-  "lastUpdated": "2026-08-31 (FONT-FAMILY-UNIFICATION P0 launch)",
+  "lastUpdated": "2026-08-31 (FONT-FAMILY-UNIFICATION completed)",
   "documentCount": 168
 }

@@ -1,7 +1,7 @@
 # FONT-FAMILY-UNIFICATION — 字体族统一（sans/mono 单栈化） Plan
 
 - **Plan ID**: `FONT-FAMILY-UNIFICATION`（TYPOGRAPHY-HIERARCHY 观察项移交，用户 2026-08-31 裁决：「字体族漂移也修了吧」）
-- **状态**: `active`（P0 登记）
+- **状态**: `completed`（2026-08-31 收口：P0 `c824f35` → P1 UI-242 `c4f921e` → 本 commit P2 实机 + 收口；dev Electron 实机 verified，证据 `acceptance/ui-242/`）
 - **truthDomain**: `font-family-unification`
 - **阶段**: P0 登记 → P1 实现（UI-242）→ P2 实机 + 收口
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
@@ -25,5 +25,11 @@
 ## 3. 门禁与实机
 
 tsc 0 / theme-token 契约 / docs:check / ui:audit:check；实机（dev Electron CDP）：全栈清点复测期望 sans 单栈 + mono 单栈、按钮计算栈不再 Arial；截图 `acceptance/ui-242/`；台账同提交同步。
+
+## 4. 收口（2026-08-31）
+
+- **实机**（CDP 9222，HMR 推送后复测）：全应用 sans 单栈（含原 UA Arial 的红绿灯按钮/会话选择器入栈）、mono 单栈（token）、**Arial 元素数 = 0**；唯一例外 `xterm-char-measure-element`（xterm 内部测量，deliberate 不动）。附带收口 `font:` 简写里的硬编码字号 ×4（11px→sm / 12px→caption / 13px→body-sm）。
+- **门禁**：tsc 0 / theme-token 契约 PASS / docs:check 168 / ui:audit:check 264 编号。
+- **字体契约现状**：sans = `--biof3-font-sans`（含 CJK），mono = `--biof3-font-mono`，表单控件 `font-family: inherit`；Infima `--ifm-font-family-base/monospace` 覆写指向同 token。新表面禁止字面量字体栈。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA.

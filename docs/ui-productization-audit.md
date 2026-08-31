@@ -2002,7 +2002,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-242: FONT-FAMILY-UNIFICATION P1 — 字体族统一（sans/mono 单栈化，杀 Chrome UA 按钮 Arial） (2026-08-31 in_progress)
+## UI-242: FONT-FAMILY-UNIFICATION P1 — 字体族统一（sans/mono 单栈化，杀 Chrome UA 按钮 Arial） (2026-08-31 verified)
 
 **实测定位**（dev Electron CDP 遍历 computed fontFamily 全栈清点）四层漂移：① **Chrome UA 按钮默认 Arial**——`<button>` 不继承字体，无显式 `font-family: inherit` 的按钮（TitleBar 药丸/关闭/红绿灯/全部未接管按钮）计算栈即 `Arial`（此前误判为神秘声明，实为 UA 默认）；② **Infima 元素**用 `--ifm-font-family-base`（system-ui 打头、无 CJK）≠ body 栈；③ **`--biof3-font-sans` 缺 CJK** 且 body 用独立字面量栈（`BlinkMacSystemFont` 计算值序列化为 `"system-ui"` 系假象）；④ **mono 栈动物园**——聊天 `'SF Mono','Fira Code'`×9、custom.css SFMono 字面量×2、desktop.css×1、project-workspace.module.css `font:` 简写×6（含 11px/12px/13px 硬编码字号同栈漂移）、CM 幽灵变量 `--font-family-mono`（恒回退 generic monospace）。
 
@@ -2014,4 +2014,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / theme-token 契约 / docs:check / ui:audit:check。**待 P2 实机**：全栈清点复测 sans 单栈 + mono 单栈、按钮计算栈不再 Arial，截图 `acceptance/ui-242/` 后转 verified。
 
-**状态**: in_progress（实现已落地，实机验收留 P2）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**2026-08-31 dev Electron 实机 verified**（CDP 9222，Vite HMR 推送后全栈清点复测）：全应用 sans **单栈**（-apple-system/system-ui/Segoe UI/PingFang SC/Hiragino Sans GB/Microsoft YaHei/Roboto——原 UA Arial 的红绿灯按钮、会话选择器全部入栈）、mono **单栈**（`--biof3-font-mono` token）；**全应用 Arial 元素数 = 0**；唯一例外 `xterm-char-measure-element`（xterm 终端内部测量元素，deliberate 不动）。截图 `acceptance/ui-242/workspace-light-after.png`。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

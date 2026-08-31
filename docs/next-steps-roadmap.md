@@ -1,10 +1,10 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-31（FONT-FAMILY-UNIFICATION P0 登记：字体族统一——实机清点 Chrome UA 按钮 Arial / Infima 字族无 CJK / sans token 缺 CJK / mono 栈动物园四层漂移，UI-242 待落地；同日 TYPOGRAPHY-HIERARCHY（UI-239~241）与 LIGHT-THEME-PURITY（UI-238）已收口。当前 active：FONT-FAMILY-UNIFICATION。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-08-31（FONT-FAMILY-UNIFICATION 已收口：字体族 sans/mono 单栈化，UI-242 verified，Arial 元素数 0，证据 `acceptance/ui-242/`；同日 TYPOGRAPHY-HIERARCHY（UI-239~241）与 LIGHT-THEME-PURITY（UI-238）已收口。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- **当前唯一 active 工作包：`FONT-FAMILY-UNIFICATION`**（2026-08-31 用户裁决启动，plan [`font-family-unification-plan.md`](./font-family-unification-plan.md)）：字体族统一（TYPOGRAPHY-HIERARCHY 观察项移交）——sans 单栈（token 补 CJK + Infima `--ifm-font-family-base` 覆写 + body 消费 token + 表单控件 `font-family: inherit` 杀 Chrome UA 按钮默认 Arial）+ mono 单栈（全部字面量收口 `var(--biof3-font-mono)`）；xterm 终端字体不动（UI-242）。此前 `TYPOGRAPHY-HIERARCHY` 已收口（UI-239~241 verified，证据 `acceptance/ui-239/`~`ui-241/`）。
+- 无 active 工作包。`FONT-FAMILY-UNIFICATION` 已于 2026-08-31 收口（用户裁决「字体族漂移也修了吧」）：sans 单栈（token 补 CJK + Infima 覆写 + body 消费 + 表单控件 `font-family: inherit` 杀 Chrome UA 按钮 Arial）+ mono 单栈（字面量动物园全收口 token，`font:` 简写硬编码字号 ×4 同步 token 化）；实机 Arial 元素数 0（UI-242 verified，证据 `acceptance/ui-242/`）。同日 `TYPOGRAPHY-HIERARCHY`（UI-239~241）与 `LIGHT-THEME-PURITY`（UI-238）已收口。
 - 留给用户裁决的后续候选：git 写操作三期（分支切换/暂存区两栏/push-pull，此前裁决排除）；UI-193 widget 业务路径与 UI-194 消费侧挂载；ui:audit `--report` 模式 schema 大小写债务（AUDIT-LOG 2026-08-30 🟢）。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 
