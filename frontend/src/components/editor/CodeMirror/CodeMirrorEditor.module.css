@@ -16,6 +16,9 @@
 
 .cmEditor :global(.cm-scroller) {
   font-family: var(--font-family-mono, monospace);
+  /* TYPOGRAPHY-HIERARCHY UI-239 — CM 全链原本无字号（继承到 body 16px），
+     与同屏 chrome 12~13px 断层；统一代码表面基准 13px。 */
+  font-size: var(--biof3-font-size-body-sm);
   overflow: auto;
 }
 

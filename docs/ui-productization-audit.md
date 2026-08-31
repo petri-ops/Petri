@@ -1962,3 +1962,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；定向 vitest 44/44（5 文件含 theme-token 契约）。**2026-08-31 dev 实机 verified**（localhost:3000 浅色主题）：工作区页纯白画布 + 发丝线 + teal 卡片（截图 `acceptance/ui-238/home-light.png`）、审阅历史展开详情/引用体说明/accent 竖线在纯白下成立（`acceptance/ui-238/review-history-light.png`），脏感消除。纯 token 改动，刷新即生效。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-239: TYPOGRAPHY-HIERARCHY P1 — CodeMirror 全场景 13px 基准（diff/全文/gutter 统一） (2026-08-31 in_progress)
+
+**用户反馈**：「编辑区或者diff区域文字的大小层次不齐的 不协调呀…要整体协调才可以的」。**实测定位**（browser-use 连 localhost:3000 读 computed style + 全仓 CSS 审计）：CodeMirror 全链无字号声明——`CodeMirrorEditor.module.css` 的 `.cm-scroller` 只设 font-family，`.wt-cm-diff`→`.rvw-*` 容器链到 body（16px）均无 font-size，CM6 baseTheme 无默认字号（dist 验证）→ 审阅 diff 代码/提交全文（UI-224）/blame 渲染 **16px**，同屏 chrome（标题 13/统计 12/tab 12）差 3~4px，即「diff 区域层次不齐」主源。
+
+**改动**（单行 CSS）：`.cmEditor :global(.cm-scroller)` 增加 `font-size: var(--biof3-font-size-body-sm)`（13px）——一处声明覆盖全部 CM 挂载场景（审阅 diff / 提交全文 / blame / 未来编辑区），行号 gutter 同步继承 13px；基准对齐聊天正文/文件树/markdown 预览（13px）。
+
+**门禁**：tsc 0 / 定向 vitest（theme-token 契约 + CM 相关）/ docs:check / ui:audit:check。**待 P4 实机**：disposable fixture 造脏文件后断言 `.cm-line`/`.cm-gutters` computed 13px，截图 `acceptance/ui-239/` 后转 verified。
+
+**状态**: in_progress（实现已落地，实机验收留 P4）。G0 开发期常态 · 不外推 packaged / Provider / GA。
