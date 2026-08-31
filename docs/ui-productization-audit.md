@@ -1947,3 +1947,18 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；定向 vitest 30/30 + theme-token 14/14。**2026-08-31 dev 实机 verified**（localhost:3000 桥桩，浅色主题对齐用户截图视角）：展开行 `backgroundColor = rgba(0,0,0,0)`、左竖线 `rgb(13,148,136) 2px inset`、subject accent 着色；截图 `acceptance/ui-237/light-expanded-accent.png`。纯 CSS，刷新即生效。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-238: LIGHT-THEME-PURITY P1 — 浅色主题系统性去脏（slate 蓝灰 → zinc 中性 + 纯白画布） (2026-08-31 verified)
+
+**用户反馈**：「软件整个还有大量的浅灰…浅灰是软件的主题色吗？系统性识别并优化…要纯净感，目前的灰有一种说不出来的脏感」。**系统性诊断**：浅色主题全部表面/边线/文字采用 Tailwind slate 系（带蓝调），大面积铺底 + 多层相近蓝灰叠放 = 脏感根源；「浅灰确实是主题色」——但不应是。**纯净感配方**（Notion/Linear/Vercel 公共做法）：纯白主导 + 无彩中性灰只做发丝线/hover + 单一品牌彩。
+
+**改动范围**（token 为唯一杠杆，组件零改动；custom.css 浅色块 + global.css surface-dim）：
+- 表面：`bg-canvas` #f8fafc → **#ffffff**（纯白画布）、`bg-subtle` #f1f5f9 → #f4f4f5、`surface-dim` 同步。
+- 边线：`border` #e2e8f0 → #e4e4e7、`border-strong` → #d4d4d8、`border-tertiary` → #ebebee。
+- 文字中性化：text #0f172a → #18181b、secondary → #3f3f46、tertiary → #71717a、muted → #a1a1aa、terminal 系列同步。
+- overlay/shadow 基色 rgba(15,23,42,…) → rgba(24,24,27,…)；hover #eef2f7 → #f4f4f5。
+- **不动**：暗色 navy 主题（刻意品牌冷调）、teal accent 与状态色（唯一的彩）、对比度不降（zinc-900 on white ≈ 原 slate-900）。硬编码审计：全仓 slate 字面量仅 2 处且属暗色语境，不动。
+
+**验证**：tsc 0；定向 vitest 44/44（5 文件含 theme-token 契约）。**2026-08-31 dev 实机 verified**（localhost:3000 浅色主题）：工作区页纯白画布 + 发丝线 + teal 卡片（截图 `acceptance/ui-238/home-light.png`）、审阅历史展开详情/引用体说明/accent 竖线在纯白下成立（`acceptance/ui-238/review-history-light.png`），脏感消除。纯 token 改动，刷新即生效。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

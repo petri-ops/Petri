@@ -38,9 +38,9 @@
   --biof3-space-6: 24px;
   --biof3-live-result-right-width: 720px;
 
-  /* dock/面板表面色 — 亮色浅灰（与正文白底微区分），暗色蓝灰深底（保持品牌冷调，
-     非 infima emphasis 的纯灰） */
-  --biof3-surface-dim: #f8fafc;
+  /* dock/面板表面色 — UI-238 亮色切中性 zinc（与白底发丝线区分），暗色蓝灰深底
+     （保持品牌冷调，非 infima emphasis 的纯灰） */
+  --biof3-surface-dim: #f4f4f5;
 }
 
 [data-theme='dark'] {
