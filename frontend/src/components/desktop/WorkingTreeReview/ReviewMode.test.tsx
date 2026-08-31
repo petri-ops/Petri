@@ -753,7 +753,8 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
       expect(commitLog).toHaveBeenCalledWith(expect.objectContaining({ file: null }));
     });
 
-    // 4) 撤销上次提交 → confirm 后调用 undoLastCommit
+    // 4) BLOCK-29.6 UI-243 — 撤销上次提交入 ⋯ 溢出菜单：开菜单 → confirm 后调用 undoLastCommit
+    fireEvent.click(screen.getByLabelText('更多历史操作'));
     fireEvent.click(screen.getByText('撤销上次提交'));
     await waitFor(() => {
       expect(undoLastCommit).toHaveBeenCalled();

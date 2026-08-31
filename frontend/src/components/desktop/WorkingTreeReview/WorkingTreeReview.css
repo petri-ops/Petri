@@ -21,12 +21,16 @@
   color: var(--biof3-text-tertiary);
 }
 
-/* ---- 按钮（BLOCK-28.3：卡片风格，对齐首页快捷入口；字号对齐软件 chrome 12px） ---- */
+/* ---- 按钮（BLOCK-28.3 卡片风格；BLOCK-29.6 UI-243 紧凑化：28px 控件栅格） ---- */
 .wt-btn {
-  padding: 5px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 10px;
   font-size: var(--biof3-font-size-caption);
   border: 1px solid var(--biof3-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--biof3-bg-surface);
   color: var(--biof3-text);
   cursor: pointer;
@@ -46,26 +50,40 @@
   cursor: not-allowed;
 }
 
-/* 行内编辑抽屉入口（次强调） */
-.wt-edit-btn {
-  background: var(--biof3-accent-soft);
-  border-color: color-mix(in srgb, var(--biof3-accent) 45%, transparent);
-  color: var(--biof3-accent);
+/* BLOCK-29.6 UI-243 — icon-only 按钮（刷新/退出/⋯），ghost 形态 */
+.wt-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  cursor: pointer;
+  font-size: var(--biof3-font-size-caption);
+  line-height: 1;
+  transition: background 120ms ease, color 120ms ease;
 }
 
-.wt-edit-btn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--biof3-accent) 24%, transparent);
+.wt-icon-btn:hover:not(:disabled) {
+  background: var(--biof3-hover);
+  color: var(--biof3-text);
 }
 
-/* 危险操作（Revert all） */
+/* 危险操作（Revert all）— UI-243 降为 danger-ghost，唯一 primary 留给提交审阅 */
 .wt-btn-danger {
-  background: var(--biof3-status-error-bg);
-  border-color: color-mix(in srgb, var(--biof3-status-error) 45%, transparent);
+  background: transparent;
+  border-color: transparent;
   color: var(--biof3-status-error-fg);
+  box-shadow: none;
 }
 
 .wt-btn-danger:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--biof3-status-error) 18%, transparent);
+  background: var(--biof3-status-error-bg);
+  border-color: color-mix(in srgb, var(--biof3-status-error) 45%, transparent);
 }
 
 /* 主操作（Commit） */
@@ -219,26 +237,6 @@
   margin-left: auto;
   font-size: var(--biof3-font-size-xs);
   color: var(--biof3-text-tertiary);
-}
-
-/* ---- 快捷键提示 ---- */
-.wt-shortcut-hint {
-  margin-right: 10px;
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-tertiary);
-  font-family: var(--biof3-font-mono, monospace);
-  white-space: nowrap;
-}
-
-.wt-shortcut-hint kbd {
-  display: inline-block;
-  padding: 0 3px;
-  border: 1px solid var(--biof3-border);
-  border-radius: 3px;
-  background: var(--biof3-bg-subtle);
-  font-family: var(--biof3-font-mono, monospace);
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-secondary);
 }
 
 /* ---- 提交成功 toast（面板内轻提示） ---- */

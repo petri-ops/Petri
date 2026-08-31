@@ -36,15 +36,14 @@
   overflow: hidden;
 }
 
-/* ===== 顶部 summary 条 ===== */
+/* ===== 顶部 summary 条（BLOCK-29.6 UI-243 — 单行紧凑，不折行） ===== */
 .rvw-summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 12px;
-  row-gap: 6px;
-  padding: 10px 16px;
+  padding: 6px 12px;
   border-bottom: 1px solid var(--biof3-border);
   background: var(--biof3-bg-surface);
   flex-shrink: 0;
@@ -60,16 +59,33 @@
 
 .rvw-summary-left {
   flex: 1 1 auto;
-  /* BLOCK-29.5 — tabs/stats 不被挤压（否则 actions 条起点左移叠住 tab 命中区） */
-  min-width: fit-content;
+  /* UI-225 修复由 nowrap + 子元素 shrink 规则接管：标题/tabs 不缩，stats 弹性省略 */
+  min-width: 0;
   overflow: hidden;
+}
+
+.rvw-summary-left .wt-title,
+.rvw-summary-left .rvw-view-switch {
+  flex-shrink: 0;
 }
 
 .rvw-summary-actions {
   flex-shrink: 0;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-end;
-  row-gap: 6px;
+  gap: 6px;
+}
+
+/* BLOCK-29.6 UI-243 — 快捷键提示 tooltip（info icon） */
+.rvw-help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  color: var(--biof3-text-tertiary);
+  cursor: help;
 }
 
 .rvw-summary-stats {
@@ -79,15 +95,20 @@
   font-size: var(--biof3-font-size-caption);
   color: var(--biof3-text-secondary);
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
+  flex: 0 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* BLOCK-28.2 — dock 形态紧凑化：隐藏快捷键提示 */
-.rvw-container--dock .wt-shortcut-hint {
+/* BLOCK-28.2 — dock 形态紧凑化：隐藏快捷键提示与首段统计 */
+.rvw-container--dock .rvw-help-btn {
   display: none;
 }
 
 .rvw-container--dock .rvw-summary {
-  padding: 8px 12px;
+  padding: 6px 12px;
 }
 
 .rvw-container--dock .wt-title {
@@ -300,6 +321,23 @@
   flex-shrink: 0;
   position: relative;
   z-index: 1;
+}
+
+/* BLOCK-29.6 UI-243 — 文件头行内「编辑」按钮（accent-ghost，接管原 wt-edit-btn 语义） */
+.rvw-inline-edit-btn {
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 5px;
+  font-size: var(--biof3-font-size-xs);
+  background: var(--biof3-accent-soft);
+  border-color: color-mix(in srgb, var(--biof3-accent) 45%, transparent);
+  color: var(--biof3-accent);
+  box-shadow: none;
+}
+
+.rvw-inline-edit-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--biof3-accent) 24%, transparent);
+  border-color: color-mix(in srgb, var(--biof3-accent) 60%, transparent);
 }
 
 .rvw-file-stats {
@@ -709,6 +747,66 @@
   border-bottom: 1px solid var(--biof3-border);
 }
 
+/* BLOCK-29.6 UI-243 — 左组上下文（过滤徽标+分支+对比）紧挨，右组 ⋯ 溢出菜单 */
+.rvw-history-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.rvw-history-more {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.rvw-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+}
+
+.rvw-overflow-menu {
+  position: absolute;
+  right: 0;
+  top: 32px;
+  z-index: 91;
+  min-width: 168px;
+  padding: 4px;
+  background: var(--biof3-bg-elevated, var(--biof3-bg-surface));
+  border: 1px solid var(--biof3-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+}
+
+.rvw-overflow-menu-item {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--biof3-text);
+  font-size: var(--biof3-font-size-caption);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rvw-overflow-menu-item:hover:not(:disabled) {
+  background: var(--biof3-hover);
+}
+
+.rvw-overflow-menu-item--danger {
+  color: var(--biof3-status-error-fg);
+}
+
+.rvw-overflow-menu-item:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .rvw-history-filter {
   display: inline-flex;
   align-items: center;
@@ -900,12 +998,13 @@
 /* BLOCK-29.5 — 历史分区分支选择器（只读） */
 .rvw-branch-select {
   max-width: 180px;
-  padding: 3px 6px;
+  height: 28px;
+  padding: 0 6px;
   border: 1px solid var(--biof3-border);
   border-radius: 6px;
   background: var(--biof3-bg-canvas);
   color: var(--biof3-text);
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--biof3-font-size-caption);
   font-family: inherit;
   cursor: pointer;
 }

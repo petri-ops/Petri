@@ -2017,3 +2017,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **2026-08-31 dev Electron 实机 verified**（CDP 9222，Vite HMR 推送后全栈清点复测）：全应用 sans **单栈**（-apple-system/system-ui/Segoe UI/PingFang SC/Hiragino Sans GB/Microsoft YaHei/Roboto——原 UA Arial 的红绿灯按钮、会话选择器全部入栈）、mono **单栈**（`--biof3-font-mono` token）；**全应用 Arial 元素数 = 0**；唯一例外 `xterm-char-measure-element`（xterm 终端内部测量元素，deliberate 不动）。截图 `acceptance/ui-242/workspace-light-after.png`。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-243: BLOCK-29.6 P1 — 审阅头部 chrome 紧凑化（Summary 一行化 + 历史行重排 + 撤销入溢出菜单） (2026-08-31 in_progress)
+
+**用户反馈**：截图「审阅的上面这几个按钮的布局不太专业」，AskUserQuestion 裁决 A+B 全套。诊断：`.rvw-summary` 窄面板折行 → 标题/按钮/历史工具三行堆叠；五个同尺寸 chip 主次不分（唯一 primary 提交审阅被淹没）；破坏性「撤销上次提交」与只读「对比」同权重并排；✕退出混进行动区；快捷键提示常驻；原生 select 与 chip 风格不一。
+
+**改动**（0 新增 IPC / 0 新依赖 / 审阅内核不动）：
+- **A Summary 一行化**：`.rvw-summary` nowrap 紧凑（6px 12px），标题/tabs 不缩、stats 弹性省略 + tabular-nums；行动区 = info icon（快捷键 tooltip，dock 隐藏）+ 刷新 icon-button + 全部还原 danger-ghost + 提交审阅唯一 primary + ✕ icon-only 退出；「编辑文件」从全局工具条移到 diff 文件头行内（`.rvw-inline-edit-btn` accent-ghost，选中非二进制才渲染）；`.wt-shortcut-hint`/`.wt-edit-btn` 死样式清除；`.wt-btn` 紧凑 28px/6px radius。
+- **B 历史行重排**：`.rvw-history-tools` 左组（过滤徽标+分支选择器+对比，28px 统一高、caption 12px）+ `.rvw-history-more` 右组 ⋯ 溢出菜单（本地 state + backdrop 点外关闭），「撤销上次提交」入菜单为危险项（`window.confirm` 保留），不再与只读控件平权。
+- 测试同步：ReviewMode.test.tsx 撤销用例先点 ⋯ 菜单。
+
+**门禁**：tsc 0 / ReviewMode vitest 19/19 / docs:check / ui:audit:check。**待 P2 实机**：dock 520px 单行断言 + ⋯ 菜单交互 + 文件头行内编辑，截图 `acceptance/ui-243/` 后转 verified。
+
+**状态**: in_progress（实现已落地，实机验收留 P2）。G0 开发期常态 · 不外推 packaged / Provider / GA。

@@ -382,6 +382,8 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   const [expandedCommits, setExpandedCommits] = useState<Set<string>>(new Set());
   // UI-233 — 汇总统计上移到行（首次展开后加载并保留）
   const [commitSummaries, setCommitSummaries] = useState<Record<string, { files: number; added: number; removed: number }>>({});
+  // BLOCK-29.6 UI-243 — 历史行 ⋯ 溢出菜单（收纳破坏性「撤销上次提交」）
+  const [historyMenuOpen, setHistoryMenuOpen] = useState(false);
   const textareaRef = useRef<HTMLInputElement>(null);
 
   // BLOCK-29.1 — dock 手风琴：每文件一行，点击展开/收起行内 diff。
@@ -627,34 +629,31 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
           {review.taskId && <span className="wt-task-id">task: {review.taskId}</span>}
         </div>
         <div className="rvw-summary-actions">
-          <span className="wt-shortcut-hint">
-            <kbd>A</kbd>/<kbd>Y</kbd> 接受 &nbsp;
-            <kbd>R</kbd> 拒绝 &nbsp;
-            <kbd>↑↓</kbd> 切换 &nbsp;
-            <kbd>Esc</kbd> 退出
+          {/* BLOCK-29.6 UI-243 — 快捷键提示收进 info tooltip，不再常驻占地 */}
+          <span
+            className="rvw-help-btn"
+            title="快捷键：A/Y 接受 · R 拒绝 · ↑↓ 切换 hunk · Esc 退出"
+            aria-label="快捷键说明"
+          >
+            <Icon name="info" size={13} />
           </span>
+          {/* BLOCK-29.6 UI-243 — 刷新 icon 化 */}
           <button
             type="button"
-            className="wt-btn wt-edit-btn"
-            onClick={() => setIsEditDrawerOpen(true)}
-            disabled={!selectedFile || selectedFile.binary}
-            title={
-              selectedFile?.binary
-                ? '二进制文件 — 无法行内编辑'
-                : selectedFile
-                  ? `在行内编辑器中打开 ${selectedFile.path}`
-                  : '请先选择文件'
-            }
+            className="wt-icon-btn"
+            onClick={() => void review.refresh()}
+            title="刷新工作区差异"
+            aria-label="刷新"
           >
-            编辑文件
+            <Icon name="refresh" size={13} />
           </button>
           <button
             type="button"
-            className="wt-btn"
-            onClick={() => void review.refresh()}
-            title="刷新工作区差异"
+            className="wt-btn wt-btn-danger"
+            onClick={() => void review.revertAll()}
+            disabled={!review.status || review.status.files.length === 0}
           >
-            刷新
+            全部还原
           </button>
           <button
             type="button"
@@ -669,24 +668,16 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
           >
             提交审阅{hasDecisions ? ` (${decisionCount})` : ''}
           </button>
+          {/* BLOCK-29.6 UI-243 — 退出属面板导航，icon-only 靠右 */}
           <button
             type="button"
-            className="wt-btn wt-btn-danger"
-            onClick={() => void review.revertAll()}
-            disabled={!review.status || review.status.files.length === 0}
-          >
-            全部还原
-          </button>
-          <button
-            type="button"
-            className="wt-btn wt-exit-btn"
+            className="wt-icon-btn rvw-exit-btn"
             onClick={() => (isDock && onClose ? onClose() : exitReviewMode())}
             title={isDock ? '关闭审阅面板 (Esc)' : '退出审阅模式'}
             aria-label="退出审阅"
             data-testid="rvw-exit-button"
           >
-            <Icon name="x" size={13} />
-            退出
+            <Icon name="x" size={14} />
           </button>
         </div>
       </header>
@@ -779,78 +770,105 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
           ) : (
             <div className="rvw-history-list" data-testid="rvw-history-list">
               {/* BLOCK-29.2 — 历史头部：文件过滤徽标 + 撤销上次提交 */}
+              {/* BLOCK-29.6 UI-243 — 左组（过滤+分支+对比）右组（⋯ 溢出菜单收纳撤销），破坏性动作不再与只读控件平权 */}
               <div className="rvw-history-head">
-                {review.historyFileFilter ? (
-                  <span className="rvw-history-filter" title="仅显示该文件的提交">
-                    文件: {review.historyFileFilter}
-                    <span
-                      role="button"
-                      tabIndex={-1}
-                      className="rvw-history-filter-clear"
-                      aria-label="清除文件过滤"
-                      title="清除过滤"
-                      onClick={() => void review.loadHistory({ file: null })}
-                    >
-                      <Icon name="x" size={10} />
+                <div className="rvw-history-tools">
+                  {review.historyFileFilter ? (
+                    <span className="rvw-history-filter" title="仅显示该文件的提交">
+                      文件: {review.historyFileFilter}
+                      <span
+                        role="button"
+                        tabIndex={-1}
+                        className="rvw-history-filter-clear"
+                        aria-label="清除文件过滤"
+                        title="清除过滤"
+                        onClick={() => void review.loadHistory({ file: null })}
+                      >
+                        <Icon name="x" size={10} />
+                      </span>
                     </span>
-                  </span>
-                ) : (
-                  <span className="rvw-history-filter-spacer" />
-                )}
-                {/* BLOCK-29.5 — 分支选择器：只读查看其他分支历史，不切换工作区分支 */}
-                <select
-                  className="rvw-branch-select"
-                  aria-label="提交历史分支"
-                  value={review.activeBranch ?? ''}
-                  onChange={(e) => void review.switchBranch(e.target.value || null)}
-                  title="查看其他分支的提交历史（只读，不切换工作区分支）"
-                >
-                  <option value="">当前分支 (HEAD)</option>
-                  {(review.branches ?? []).map((b) => (
-                    <option key={b.name} value={b.name}>
-                      {b.name}
-                      {b.current ? '（当前）' : ''}
-                    </option>
-                  ))}
-                  {review.tags && review.tags.length > 0 && (
-                    <optgroup label="标签">
-                      {review.tags.map((t) => (
-                        <option key={t.name} value={t.name}>
-                          {t.name}（tag）
-                        </option>
-                      ))}
-                    </optgroup>
+                  ) : null}
+                  {/* BLOCK-29.5 — 分支选择器：只读查看其他分支历史，不切换工作区分支 */}
+                  <select
+                    className="rvw-branch-select"
+                    aria-label="提交历史分支"
+                    value={review.activeBranch ?? ''}
+                    onChange={(e) => void review.switchBranch(e.target.value || null)}
+                    title="查看其他分支的提交历史（只读，不切换工作区分支）"
+                  >
+                    <option value="">当前分支 (HEAD)</option>
+                    {(review.branches ?? []).map((b) => (
+                      <option key={b.name} value={b.name}>
+                        {b.name}
+                        {b.current ? '（当前）' : ''}
+                      </option>
+                    ))}
+                    {review.tags && review.tags.length > 0 && (
+                      <optgroup label="标签">
+                        {review.tags.map((t) => (
+                          <option key={t.name} value={t.name}>
+                            {t.name}（tag）
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                  </select>
+                  {/* BLOCK-29.5 — 两提交对比模式（只读区间 diff） */}
+                  <button
+                    type="button"
+                    className="wt-btn"
+                    onClick={() => (review.compareMode ? review.exitCompareMode() : review.enterCompareMode())}
+                    title="选两个提交对比区间差异（只读）"
+                  >
+                    {review.compareMode ? '退出对比' : '对比'}
+                  </button>
+                  {review.compareMode && (
+                    <span className="rvw-compare-hint" title="对比模式">
+                      {review.compareBase
+                        ? `已选基准 ${review.compareBase.shortSha}，点选目标提交`
+                        : '对比模式：点选基准提交'}
+                    </span>
                   )}
-                </select>
-                <button
-                  type="button"
-                  className="wt-btn"
-                  disabled={review.commitsLoading || !review.commits || review.commits.length === 0}
-                  onClick={() => {
-                    if (window.confirm('撤销最近一次提交？提交内容将回到工作区，可重新审阅。')) {
-                      void review.undoLastCommit();
-                    }
-                  }}
-                  title="撤销最近一次提交（内容回到工作区）"
-                >
-                  撤销上次提交
-                </button>
-                {/* BLOCK-29.5 — 两提交对比模式（只读区间 diff） */}
-                <button
-                  type="button"
-                  className="wt-btn"
-                  onClick={() => (review.compareMode ? review.exitCompareMode() : review.enterCompareMode())}
-                  title="选两个提交对比区间差异（只读）"
-                >
-                  {review.compareMode ? '退出对比' : '对比'}
-                </button>
-                {review.compareMode && (
-                  <span className="rvw-compare-hint" title="对比模式">
-                    {review.compareBase
-                      ? `已选基准 ${review.compareBase.shortSha}，点选目标提交`
-                      : '对比模式：点选基准提交'}
-                  </span>
-                )}
+                </div>
+                <div className="rvw-history-more">
+                  <button
+                    type="button"
+                    className="wt-icon-btn"
+                    aria-label="更多历史操作"
+                    aria-haspopup="menu"
+                    aria-expanded={historyMenuOpen}
+                    title="更多操作"
+                    onClick={() => setHistoryMenuOpen((open) => !open)}
+                  >
+                    ⋯
+                  </button>
+                  {historyMenuOpen && (
+                    <>
+                      <div
+                        className="rvw-menu-backdrop"
+                        onClick={() => setHistoryMenuOpen(false)}
+                        aria-hidden="true"
+                      />
+                      <div className="rvw-overflow-menu" role="menu" aria-label="历史操作菜单">
+                        <button
+                          type="button"
+                          role="menuitem"
+                          className="rvw-overflow-menu-item rvw-overflow-menu-item--danger"
+                          disabled={review.commitsLoading || !review.commits || review.commits.length === 0}
+                          title="撤销最近一次提交（内容回到工作区）"
+                          onClick={() => {
+                            setHistoryMenuOpen(false);
+                            if (window.confirm('撤销最近一次提交？提交内容将回到工作区，可重新审阅。')) {
+                              void review.undoLastCommit();
+                            }
+                          }}
+                        >
+                          撤销上次提交
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
               {/* BLOCK-29.5 — stash 只读列表（有内容才显示，不含写操作） */}
               {review.stashes && review.stashes.length > 0 && (
@@ -1112,6 +1130,17 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                   <span className="rvw-stat-del">−{computeFileDiffStats(selectedFile).removed}</span>
                 </span>
                 <span className="wt-file-hunk-count">{selectedFile.hunks.length} 个 hunk</span>
+                {/* BLOCK-29.6 UI-243 — 编辑动作移到文件头行内（选中非二进制才出现） */}
+                {!selectedFile.binary && (
+                  <button
+                    type="button"
+                    className="wt-btn rvw-inline-edit-btn"
+                    onClick={() => setIsEditDrawerOpen(true)}
+                    title={`在行内编辑器中打开 ${selectedFile.path}`}
+                  >
+                    编辑
+                  </button>
+                )}
               </div>
               <CodeMirrorDiffView
                 filePath={selectedFile.path}
