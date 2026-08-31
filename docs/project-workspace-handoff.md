@@ -1,10 +1,10 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-31（FONT-FAMILY-UNIFICATION 字体族统一已收口：sans/mono 单栈化，UI-242 verified，Arial 元素数 0，证据 `acceptance/ui-242/`；同日 TYPOGRAPHY-HIERARCHY 已收口 UI-239~241 verified；当前无 active 工作包）
+最后更新：2026-08-31（BLOCK-29.6-REVIEW-CHROME-COMPACT P0 登记——审阅头部 chrome 紧凑化，UI-243 待落地；同日 UI-238~242 五个视觉增量已收口）
 
 ## Session Snapshot
 
-- **Active work package**: 无。`FONT-FAMILY-UNIFICATION` 已于 2026-08-31 收口（plan `docs/font-family-unification-plan.md`；UI-242 verified，证据 `acceptance/ui-242/`）。**字体契约现状**：sans = `--biof3-font-sans`（含 CJK）、mono = `--biof3-font-mono`、表单控件 `font-family: inherit`、Infima `--ifm-font-family-base/monospace` 覆写同 token；新表面禁止字面量字体栈；xterm 终端字体独立（deliberate）。字号契约：代码表面基准 body-sm 13px、行内 code caption 12px、阶梯最小 xs 10px。
+- **Active work package**: `BLOCK-29.6-REVIEW-CHROME-COMPACT`（2026-08-31 用户裁决 A+B 全套，P0 登记完成；plan `docs/block-29-6-review-chrome-compact-plan.md`）。审阅头部 chrome 紧凑化：Summary 一行化（提交审阅唯一 primary、刷新/退出 icon 化、编辑文件移文件头行内、快捷键提示收 tooltip、全部还原降 danger-ghost、stats 弱化）+ 历史行重排（分支选择器+对比左组、撤销上次提交入 ⋯ 溢出菜单保留 confirm）+ 控件统一 28px/caption/8px 栅格（UI-243）。0 新增 IPC / 0 新依赖 / 审阅内核不动。
 - **Current branch**: `main`；HEAD、dirty state 与 `origin/main` 同步状态以运行时 Git 为准。
 - **Code review boundary**: 代码审阅为**右侧停靠面板**（TitleBar 审阅按钮 Toggle；面板内 = 手风琴文件列表（BLOCK-29.1，未跟踪文件可预览 WORKTREE 全文）+ 提交详情头（BLOCK-29.3）+ 文件视图四态（BLOCK-29.4 三态 + BLOCK-29.5 blame）+ 分支选择器/标签 optgroup/stash 只读列表（BLOCK-29.5）+ 两提交对比模式 + 内嵌提交框）。`/review` 主区 mode 路由保留（同一 ReviewMode 组件）。审阅内核与主题契约不变：真实语义 token 明暗自适配、`git diff HEAD` 基准（c228beb 保留）、hunk 决策键 `path#hunkIndex`、零模型参与。
 - **git history data shape**: `git:commit-log` 载荷 `commits[]` 自 BLOCK-29.3 起含 `message`（完整提交说明）；`commitDiff`/`commitFileContent` 自 BLOCK-29.5 起支持 `{fromRef,toRef}` 区间模式（hash 可省）；`branchList/blame/stashList/tagList` 为 BLOCK-29.5 新只读通道——浏览器 shim 桩若缺这些方法，对应功能降级为空/错误态（blame 视图会显示加载失败，属预期）。
