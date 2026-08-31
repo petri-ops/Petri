@@ -1105,6 +1105,8 @@
   font-size: var(--biof3-font-size-caption);
   font-family: inherit;
   cursor: pointer;
+  /* UI-245 — 分支选择器不参与 flex 挤压 */
+  flex-shrink: 0;
 }
 
 /* BLOCK-29.5 — blame 逐行归属视图 */

@@ -2044,3 +2044,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：tsc 0 / ReviewMode vitest 19/19 / docs:check / ui:audit:check。**2026-08-31 dev Electron 实机 verified**（CDP 9222，多目录 intent-to-add fixture docs-fix/scripts-fix/根，验收后删除）：dock 分组树 5 组（含（根目录）新标签）、7 嵌套行、目录后缀清零、组折叠/展开 ✓；历史提交展开左 mini 树（组+行选中 accent）+ 右 diff 渲染 ✓。截图 `acceptance/ui-244/review-dock-grouped-tree.png`、`review-commit-tree.png`。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-245: BLOCK-29 增量 — 历史工具条防挤压（对比按钮竖排字修复）+ 分支切换实测 (2026-08-31 verified)
+
+**用户反馈**：截图「这个地方有瑕疵…无法切换分支选项吗？」。诊断（CDP 实测）：①「对比」按钮被 `.rvw-history-tools` flex 挤压至 33px 宽、两字竖排——`.wt-btn` 无 `white-space: nowrap`/`flex-shrink: 0`（UI-243 紧凑化引入的挤压回归）；② 分支下拉**功能完好**（9 选项：main + 7 tag），「无法切换」系体验误判——当前就在 main，选「main（当前）」无变化；切换 tag 时 stats 分支名与合计即时变化即为反馈。
+
+**改动**：`.wt-btn` 增加 `white-space: nowrap; flex-shrink: 0`；`.rvw-branch-select` 增加 `flex-shrink: 0`。
+
+**门禁与实机**：**2026-08-31 dev Electron 实机 verified**（CDP 9222）：「对比」45px 单行 28 高；切换 `v0.0.1-rc.1` → stats 即变「v0.0.1-rc.1 已加载 50 条提交 合计+11729 −2509」（历史真实切到 tag），切回 HEAD 恢复 ✓。截图 `acceptance/ui-244/history-toolbar-fixed.png`。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
