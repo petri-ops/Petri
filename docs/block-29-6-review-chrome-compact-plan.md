@@ -1,7 +1,7 @@
 # BLOCK-29.6-REVIEW-CHROME-COMPACT — 审阅头部 chrome 紧凑化（A+B 全套） Plan
 
 - **Plan ID**: `BLOCK-29.6-REVIEW-CHROME-COMPACT`（用户截图反馈驱动，2026-08-31：「审阅的上面这几个按钮的布局不太专业」；AskUserQuestion 裁决 A+B 全套）
-- **状态**: `active`（P0 登记）
+- **状态**: `completed`（2026-08-31 收口：P0 `484beb1` → P1 UI-243 `e47663b` → 本 commit P2 实机 + 收口；dev Electron 实机 verified，证据 `acceptance/ui-243/`）
 - **truthDomain**: `block-29-review-mode`（BLOCK-29 审阅面板系列延续）
 - **阶段**: P0 登记 → P1 实现（UI-243）→ P2 实机 + 收口
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
@@ -29,5 +29,11 @@
 ## 3. 门禁与实机
 
 tsc 0 / 定向 vitest（ReviewMode 相关）/ docs:check / ui:audit:check；实机（dev Electron CDP）：dock 520px + /review 断言单行布局、撤销入菜单、文件头行内编辑、控件 28px；截图 `acceptance/ui-243/`；台账同提交同步。
+
+## 4. 收口（2026-08-31）
+
+- **实机**（CDP 9222，dock 520px）：summary 单行 41px（原三行堆叠）；行动区 5 控件全 28px、提交审阅唯一 primary、退出 icon-only、编辑文件移出行；历史行左组 + ⋯ 菜单（撤销上次提交 danger 项，confirm 保留，backdrop 关闭 ✓）。**实现修正一处**：dock 手风琴与 /review 主区展开结构不同——行内编辑在 dock 落地为手风琴行第三操作（wrench icon，`diffFile.binary` 已知二进制隐藏，accent hover），/review 主区为文件头 `rvw-inline-edit-btn`；两路径实测均出。
+- **门禁**：tsc 0 / ReviewMode vitest 19/19 / docs:check 169 / ui:audit:check 265 / docs:reconcile 0。
+- **不变量**：0 新增 IPC / 0 新依赖 / 审阅内核（diff/hunk/提交/历史数据流）不动；`window.confirm` 语义保留。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA.

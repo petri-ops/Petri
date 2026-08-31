@@ -982,6 +982,22 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                       </span>
                     ) : null}
                     {/* BLOCK-29.2 — 行内操作：查看该文件历史 / 放弃更改（span 嵌于按钮行内） */}
+                    {/* BLOCK-29.6 UI-243 — 行内「编辑」取代原 summary 全局按钮（已知二进制才隐藏） */}
+                    {!diffFile?.binary && (
+                      <span
+                        role="button"
+                        tabIndex={-1}
+                        className="rvw-acc-action rvw-acc-action-edit"
+                        title={`在行内编辑器中打开 ${fileName}`}
+                        aria-label={`编辑 ${fileName}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsEditDrawerOpen(true);
+                        }}
+                      >
+                        <Icon name="wrench" size={12} />
+                      </span>
+                    )}
                     <span
                       role="button"
                       tabIndex={-1}

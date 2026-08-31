@@ -1,10 +1,10 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-31（BLOCK-29.6-REVIEW-CHROME-COMPACT P0 登记：审阅头部 chrome 紧凑化——用户截图反馈按钮布局不专业，裁决 A+B 全套，UI-243 待落地；同日 UI-238~242 五个视觉增量已收口。当前 active：BLOCK-29.6。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-08-31（BLOCK-29.6-REVIEW-CHROME-COMPACT 已收口：审阅头部 chrome 紧凑化——summary 单行 41px、提交审阅唯一 primary、撤销入 ⋯ 溢出菜单、行内编辑三形态，UI-243 verified，证据 `acceptance/ui-243/`；同日 UI-238~242 五个视觉增量已收口。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- **当前唯一 active 工作包：`BLOCK-29.6-REVIEW-CHROME-COMPACT`**（2026-08-31 用户裁决 A+B 全套，plan [`block-29-6-review-chrome-compact-plan.md`](./block-29-6-review-chrome-compact-plan.md)）：审阅头部 chrome 紧凑化——Summary 一行化（提交审阅唯一 primary / 刷新·退出 icon 化 / 编辑文件移文件头行内 / 快捷键提示收 tooltip / 全部还原降 danger-ghost）+ 历史行重排（分支+对比左组 / 撤销上次提交入 ⋯ 溢出菜单保留 confirm）+ 控件统一 28px·caption·8px 栅格（UI-243）。此前同日已收口：UI-238（浅色纯净）/ UI-239~241（字号层次）/ UI-242（字体族单栈）。
+- 无 active 工作包。`BLOCK-29.6-REVIEW-CHROME-COMPACT` 已于 2026-08-31 收口（用户截图反馈按钮布局不专业，裁决 A+B 全套）：Summary 一行化 41px（提交审阅唯一 primary / 刷新·退出 icon 化 / 全部还原 danger-ghost / 快捷键提示收 tooltip）+ 历史行左组重排 + 撤销上次提交入 ⋯ 溢出菜单（confirm 保留）+ 控件 28px 栅格 + 行内编辑三形态（dock 手风琴行 wrench / /review 文件头 accent-ghost）；UI-243 verified，证据 `acceptance/ui-243/`。同日已收口：UI-238（浅色纯净）/ UI-239~241（字号层次）/ UI-242（字体族单栈）。
 - 留给用户裁决的后续候选：git 写操作三期（分支切换/暂存区两栏/push-pull，此前裁决排除）；UI-193 widget 业务路径与 UI-194 消费侧挂载；ui:audit `--report` 模式 schema 大小写债务（AUDIT-LOG 2026-08-30 🟢）。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 

@@ -2813,7 +2813,7 @@
       "id": "BLOCK-29.6-REVIEW-CHROME-COMPACT",
       "path": "docs/block-29-6-review-chrome-compact-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-29-review-mode",
       "entrypoint": "docs/README.md",
@@ -2823,15 +2823,15 @@
         "layout",
         "G0",
         "UI-243",
-        "active",
-        "phase=P0-LAUNCH"
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-31 用户截图反馈审阅头部按钮布局不专业，AskUserQuestion 裁决 A+B 全套。诊断：三行堆叠（summary 窄面板折行）/五 chip 主次不分/破坏性撤销与只读对比平权/退出混进行动区/快捷键提示常驻/select 与 chip 风格不一。方案：Summary 一行化（编辑文件移文件头行内、刷新/退出 icon 化、快捷键提示收 tooltip、全部还原降 danger-ghost、提交审阅唯一 primary）+ 历史行重排（分支+对比左组、撤销上次提交入 ⋯ 溢出菜单保留 confirm）+ 控件统一 28px/caption 12px/8px 栅格；0 新增 IPC / 0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-08-31 用户截图反馈审阅头部按钮布局不专业，裁决 A+B 全套。收口 verified：P0 484beb1 / P1 UI-243 e47663b（Summary 一行化 41px：提交审阅唯一 primary、刷新/退出 icon 化、全部还原 danger-ghost、快捷键提示收 tooltip、stats 弱化 tabular-nums；历史行左组 过滤+分支选择器 28px+对比、右组 ⋯ 溢出菜单收纳撤销上次提交保留 confirm；.wt-btn 紧凑 28px 栅格）+ P2 实机（dock 行内编辑落地为手风琴行第三操作 wrench/diffFile.binary 判定，/review 主区为文件头 rvw-inline-edit-btn；两路径实测）；证据 acceptance/ui-243/；tsc 0 / ReviewMode vitest 19/19 / docs:check 169 / ui:audit:check 265 / docs:reconcile 0。0 新增 IPC / 0 新依赖 / 审阅内核不动。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-08-31",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH"
+      "phase": "COMPLETED"
     }
   ],
-  "lastUpdated": "2026-08-31 (BLOCK-29.6 P0 launch)",
+  "lastUpdated": "2026-08-31 (BLOCK-29.6 completed)",
   "documentCount": 169
 }

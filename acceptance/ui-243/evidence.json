@@ -1,0 +1,22 @@
+{
+  "ui": "UI-243",
+  "workPackage": "BLOCK-29.6-REVIEW-CHROME-COMPACT P1",
+  "capturedAt": "2026-08-31T06:58:00Z",
+  "implementCommit": "e47663b",
+  "environment": "dev Electron 30.5.1 (CDP 9222), dock 520px 审阅面板, intent-to-add fixture typo-fixture-demo.py (验收后删除)",
+  "assertions": {
+    "summary.singleLine": "true (高度 41px, 修复前三行堆叠)",
+    "summary.actions": "快捷键说明(info, dock 隐藏)/刷新 28px/全部还原 28px danger-ghost/提交审阅 28px primary/退出审阅 28px icon-only",
+    "summary.editRemoved": "编辑文件不再占用 summary 行",
+    "historyHead.groups": "左组 过滤徽标+分支选择器(28px)+对比; 右组 ⋯ 溢出菜单",
+    "overflowMenu": "⋯ 打开 → 撤销上次提交 (danger item, window.confirm 保留) → backdrop 点外关闭 ✓",
+    "inlineEdit.dock": "手风琴行内 编辑/查看历史/放弃更改 三操作 (编辑=accent hover, 已知二进制隐藏)",
+    "inlineEdit.modeHeader": "/review 主区文件头 rvw-inline-edit-btn (accent-ghost)",
+    "buttons28": "wt-btn 全部 28px 高"
+  },
+  "screenshots": [
+    "review-changes-compact.png",
+    "review-history-menu.png"
+  ],
+  "result": "pass"
+}

@@ -2018,7 +2018,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-243: BLOCK-29.6 P1 — 审阅头部 chrome 紧凑化（Summary 一行化 + 历史行重排 + 撤销入溢出菜单） (2026-08-31 in_progress)
+## UI-243: BLOCK-29.6 P1 — 审阅头部 chrome 紧凑化（Summary 一行化 + 历史行重排 + 撤销入溢出菜单） (2026-08-31 verified)
 
 **用户反馈**：截图「审阅的上面这几个按钮的布局不太专业」，AskUserQuestion 裁决 A+B 全套。诊断：`.rvw-summary` 窄面板折行 → 标题/按钮/历史工具三行堆叠；五个同尺寸 chip 主次不分（唯一 primary 提交审阅被淹没）；破坏性「撤销上次提交」与只读「对比」同权重并排；✕退出混进行动区；快捷键提示常驻；原生 select 与 chip 风格不一。
 
@@ -2029,4 +2029,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / ReviewMode vitest 19/19 / docs:check / ui:audit:check。**待 P2 实机**：dock 520px 单行断言 + ⋯ 菜单交互 + 文件头行内编辑，截图 `acceptance/ui-243/` 后转 verified。
 
-**状态**: in_progress（实现已落地，实机验收留 P2）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**2026-08-31 dev Electron 实机 verified**（CDP 9222，dock 520px，intent-to-add fixture，验收后删除）：summary **单行 41px**（修复前三行堆叠）；行动区 = info(dock 隐藏)/刷新 28/全部还原 28 danger-ghost/提交审阅 28 primary/退出 28 icon-only，编辑文件不再占用 summary；历史行左组（过滤徽标+分支选择器 28px+对比）+ 右组 ⋯ 菜单（打开 → 撤销上次提交 danger 项 confirm 保留 → backdrop 关闭 ✓）；**dock 行内编辑落地为手风琴行第三操作**（编辑 wrench accent hover / 查看历史 clock / 放弃 trash，已知二进制隐藏，`diffFile.binary` 判定），/review 主区为文件头 `rvw-inline-edit-btn`（accent-ghost）。截图 `acceptance/ui-243/review-changes-compact.png`、`review-history-menu.png`。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
