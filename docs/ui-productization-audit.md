@@ -2001,3 +2001,17 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **2026-08-31 dev Electron 实机 verified**（CDP 9222，fixture 项目文件树）：`fileTreeSize` **10px**（修复前 9px）、`fileIcon` 徽标 **10px**（修复前 7/8px；18px 图标盒内 10px 徽标实机无溢出）、`fileTreeLink` 13px。`acceptance/ui-241/evidence.json` 断言在案（画面同 `acceptance/ui-240/workspace-markdown-preview-light.png`）。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-242: FONT-FAMILY-UNIFICATION P1 — 字体族统一（sans/mono 单栈化，杀 Chrome UA 按钮 Arial） (2026-08-31 in_progress)
+
+**实测定位**（dev Electron CDP 遍历 computed fontFamily 全栈清点）四层漂移：① **Chrome UA 按钮默认 Arial**——`<button>` 不继承字体，无显式 `font-family: inherit` 的按钮（TitleBar 药丸/关闭/红绿灯/全部未接管按钮）计算栈即 `Arial`（此前误判为神秘声明，实为 UA 默认）；② **Infima 元素**用 `--ifm-font-family-base`（system-ui 打头、无 CJK）≠ body 栈；③ **`--biof3-font-sans` 缺 CJK** 且 body 用独立字面量栈（`BlinkMacSystemFont` 计算值序列化为 `"system-ui"` 系假象）；④ **mono 栈动物园**——聊天 `'SF Mono','Fira Code'`×9、custom.css SFMono 字面量×2、desktop.css×1、project-workspace.module.css `font:` 简写×6（含 11px/12px/13px 硬编码字号同栈漂移）、CM 幽灵变量 `--font-family-mono`（恒回退 generic monospace）。
+
+**改动**（sans 单栈 + mono 单栈）：
+- `custom.css`：`--biof3-font-sans` 补 CJK（PingFang SC / Hiragino Sans GB / Microsoft YaHei）；覆写 `--ifm-font-family-base` 同栈 + `--ifm-font-family-monospace: var(--biof3-font-mono)`；字面量 mono ×2 → token。
+- `global.css`：body 改消费 `var(--biof3-font-sans)`；新增 `button, input, select, textarea { font-family: inherit }` 杀 UA Arial。
+- `simple-chat.css` ×9、`desktop.css` ×1、`project-workspace.module.css` ×6（`font:` 简写字号同步 token 化）、`RevisionCodeView.module.css` ×2、`CodeMirrorEditor.module.css` 幽灵变量 → token。
+- **不动**：xterm 终端字体（themes/terminal-themes deliberate surface）、`--biof3-mono` 别名（已指向 mono token）。
+
+**门禁**：tsc 0 / theme-token 契约 / docs:check / ui:audit:check。**待 P2 实机**：全栈清点复测 sans 单栈 + mono 单栈、按钮计算栈不再 Arial，截图 `acceptance/ui-242/` 后转 verified。
+
+**状态**: in_progress（实现已落地，实机验收留 P2）。G0 开发期常态 · 不外推 packaged / Provider / GA。

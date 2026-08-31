@@ -3384,7 +3384,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   overflow: auto;
   background: var(--biof3-bg-terminal);
   color: var(--biof3-text-terminal-strong);
-  font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font: var(--biof3-font-size-sm)/1.4 var(--biof3-font-mono, monospace);
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -3398,7 +3398,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   border-top: 1px solid rgba(148, 163, 184, 0.18);
   background: var(--biof3-bg-terminal);
   color: var(--biof3-text-terminal-prompt);
-  font: 11px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font: var(--biof3-font-size-sm) var(--biof3-font-mono, monospace);
 }
 
 .embeddedTerminalInputRow input {
@@ -5983,7 +5983,7 @@ body.biof3-resizing-columns * {
   background: var(--biof3-bg-subtle);
   border: 1px solid var(--biof3-border);
   border-radius: 6px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--biof3-font-mono, monospace);
   font-size: var(--biof3-font-size-caption);
   line-height: 1.55;
   color: var(--biof3-text);
@@ -6057,7 +6057,7 @@ body.biof3-resizing-columns * {
   background: var(--biof3-bg-subtle);
   border: 1px solid var(--biof3-border);
   border-radius: 6px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--biof3-font-mono, monospace);
   font-size: var(--biof3-font-size-caption);
   list-style-type: square;
 }
@@ -6126,7 +6126,7 @@ body.biof3-resizing-columns * {
   overflow: auto;
   background: var(--biof3-bg-surface);
   color: var(--biof3-text);
-  font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font: var(--biof3-font-size-caption)/1.55 var(--biof3-font-mono, monospace);
   tab-size: 2;
   white-space: pre;
 }
@@ -6301,7 +6301,7 @@ body.biof3-resizing-columns * {
   padding: 12px 0;
   background: var(--biof3-bg-surface);
   color: var(--biof3-text);
-  font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font: var(--biof3-font-size-caption)/1.55 var(--biof3-font-mono, monospace);
   tab-size: 2;
   overflow: auto;
 }
@@ -6393,7 +6393,7 @@ body.biof3-resizing-columns * {
   resize: none;
   background: var(--biof3-bg-surface);
   color: var(--biof3-text);
-  font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font: var(--biof3-font-size-body-sm)/1.6 var(--biof3-font-mono, monospace);
   tab-size: 2;
 }
 

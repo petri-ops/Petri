@@ -15,6 +15,10 @@
   --ifm-color-primary-lightest: #3cad6e;
   --ifm-code-font-size: 88%;
   --ifm-font-size-base: 15.5px;
+  /* FONT-FAMILY-UNIFICATION UI-242 — Infima 元素与全局同一 sans 栈（补 CJK） */
+  --ifm-font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --ifm-font-family-monospace: var(--biof3-font-mono);
   --ifm-line-height-base: 1.65;
   --ifm-heading-line-height: 1.28;
   --ifm-heading-margin-bottom: 0.55rem;
@@ -84,7 +88,8 @@
   --biof3-accent: #0d9488;
   --biof3-accent-soft: rgba(13, 148, 136, 0.16);
   --biof3-accent-bg: #f0fdfa;
-  --biof3-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --biof3-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --biof3-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --biof3-hover: #f4f4f5;
   --biof3-surface-dim: #f4f4f5;
@@ -1211,7 +1216,7 @@
   border-radius: 0;
   padding: 14px 16px;
   background: var(--biof3-bg-subtle);
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: var(--biof3-font-mono, monospace);
   font-size: var(--biof3-font-size-caption);
   line-height: 1.6;
   color: var(--biof3-text);
@@ -1308,7 +1313,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: var(--biof3-font-size-xs);
-  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-family: var(--biof3-font-mono, monospace);
 }
 
 .run-modal-data-table th {
@@ -1583,7 +1588,7 @@
   border: none;
   border-radius: 0;
   background: var(--biof3-bg-subtle);
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: var(--biof3-font-mono, monospace);
   font-size: var(--biof3-font-size-caption);
   line-height: 1.6;
   color: var(--biof3-text);
@@ -1770,7 +1775,7 @@
 .run-modal-stdout {
   margin: 0;
   padding: 12px 14px;
-  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-family: var(--biof3-font-mono, monospace);
   font-size: var(--biof3-font-size-sm);
   line-height: 1.5;
   color: var(--biof3-text-secondary);

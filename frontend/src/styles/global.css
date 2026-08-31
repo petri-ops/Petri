@@ -59,9 +59,7 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
-    'Microsoft YaHei', sans-serif;
+  font-family: var(--biof3-font-sans);
   font-size: var(--biof3-font-size-md);
   background: var(--ifm-background-color);
   color: var(--biof3-text-secondary);
@@ -127,6 +125,15 @@ body {
  * 仅作用于未被 .biof3-docs-content 重新定义的页面（应用页）。
  * docs/blog 页有自己的 .biof3-docs-content 规则，优先级更高，不受影响。
  * ──────────────────────────────────────────────────────────── */
+
+/* 表单控件：Chrome UA 默认不继承字体（button 计算栈会落到 Arial），
+   统一继承全局 sans 栈（FONT-FAMILY-UNIFICATION UI-242） */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
 
 /* inline code：去掉 infima 的硬边框（暗色下难看），保留淡背景；
    TYPOGRAPHY-HIERARCHY UI-240：接管字号/字族——infima 的 --ifm-code-font-size:88%

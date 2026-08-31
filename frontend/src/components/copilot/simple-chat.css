@@ -482,7 +482,7 @@
 }
 
 .sc-msg-body code {
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-family: var(--biof3-font-mono, monospace);
   font-size: var(--biof3-font-size-body-sm);
 }
 
@@ -605,14 +605,14 @@
   border-radius: 4px;
   background: transparent;
   padding: 1px 4px;
-  font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+  font-family: var(--biof3-font-mono, monospace);
   font-size: 0.9em;
 }
 
 .cp-file-ref-code {
   border-bottom-color: color-mix(in srgb, var(--biof3-accent) 42%, transparent 58%);
   background: transparent;
-  font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+  font-family: var(--biof3-font-mono, monospace);
   font-size: 0.9em;
 }
 
@@ -741,7 +741,7 @@
 }
 
 .cp-code-pre code {
-  font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+  font-family: var(--biof3-font-mono, monospace);
 }
 
 .cp-table-figure {
@@ -961,7 +961,7 @@
 
 .sc-tool-activity-name {
   color: var(--biof3-text);
-  font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+  font-family: var(--biof3-font-mono, monospace);
   font-size: var(--biof3-font-size-caption);
   font-weight: 700;
   overflow-wrap: anywhere;
@@ -977,7 +977,7 @@
   max-width: min(720px, 70vw);
   overflow: hidden;
   color: var(--biof3-text);
-  font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+  font-family: var(--biof3-font-mono, monospace);
   font-size: var(--biof3-font-size-caption);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -985,7 +985,7 @@
 
 .sc-tool-activity-tool {
   color: var(--biof3-text-tertiary);
-  font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+  font-family: var(--biof3-font-mono, monospace);
   font-size: var(--biof3-font-size-xs);
 }
 
@@ -1762,7 +1762,7 @@
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.06);
   font-size: var(--biof3-font-size-xs);
-  font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+  font-family: var(--biof3-font-mono, monospace);
   line-height: 1.5;
   overflow-x: auto;
   white-space: pre-wrap;
@@ -2126,7 +2126,7 @@
   font-size: var(--biof3-font-size-sm);
   font-weight: 600;
   color: var(--biof3-text-tertiary);
-  font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+  font-family: var(--biof3-font-mono, monospace);
 }
 
 /* Empty state */
@@ -2168,7 +2168,7 @@
   background: var(--biof3-bg-surface);
   font-size: var(--biof3-font-size-xs);
   font-weight: 600;
-  font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+  font-family: var(--biof3-font-mono, monospace);
   color: var(--biof3-text-secondary);
 }
 

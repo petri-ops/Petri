@@ -1184,7 +1184,7 @@
   background: var(--biof3-bg-surface);
 }
 .biof3-data-dir-path {
-  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  font-family: var(--biof3-font-mono, monospace);
   font-size: var(--biof3-font-size-caption);
   color: var(--biof3-text-secondary);
   padding: 6px 8px;
