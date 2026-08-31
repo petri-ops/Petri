@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-30（BLOCK-29.5 审阅只读视野扩展已收口：遮挡修复/全分支历史/blame/两提交对比/stash-tag-未跟踪预览，UI-225~229 verified；当前无 active 工作包）
+最后更新：2026-08-31（LIGHT-THEME-PURITY 浅色主题纯净度调优已收口：slate→zinc 中性 + 纯白画布，UI-238 verified；同期审阅面板 UI-230~237 连续增量；当前无 active 工作包）
 
 ## Session Snapshot
 

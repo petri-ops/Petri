@@ -1,10 +1,10 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-30（BLOCK-29.5 已收口：审阅 git 只读视野扩展五项全落——遮挡修复/全分支历史/blame/两提交对比/stash-tag-未跟踪预览，UI-225~229 verified，证据 `acceptance/ui-225/`~`acceptance/ui-229/`；附带修复 git:commit-log skip/file 透传断点（UI-221 勘误）。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-08-31（LIGHT-THEME-PURITY 已收口：浅色主题纯净度系统性调优——slate 蓝灰切 zinc 中性 + 纯白画布，UI-238 verified，证据 `acceptance/ui-238/`；同期审阅面板完成 UI-230~237 连续增量。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- 无 active 工作包。`BLOCK-29.5-REVIEW-READONLY-VISION` 已于 2026-08-30 收口（用户裁决「确认」启动菜单，5 PHASE 串行）：①窄面板「改动/历史」tab 遮挡修复（UI-219 观察项收口，真实点击验收）②全分支历史（分支选择器，只读）③blame 逐行归属（文件视图第四态）④任意两提交对比（区间 diff）⑤stash 只读列表/标签 optgroup/未跟踪文件预览；**附带发现并修复存量 IPC 断点**——`git:commit-log` 曾只透传 limit，UI-221 的历史分页与文件历史在真实 Electron 链路失效（UI-221 勘误 + UI-226 修复；真实链路最终复核以 dev Electron 重启载入新主进程代码为准）。
+- 无 active 工作包。`LIGHT-THEME-PURITY` 已于 2026-08-31 收口（用户反馈「浅灰脏感、要纯净感」）：浅色 token 整体从 slate 蓝灰切 zinc 无彩中性 + 纯白画布（token 为唯一杠杆，组件零改动），暗色 navy 与 teal accent 不动；脏感消除。另同日完成审阅面板 UI-230~237 连续增量（提交详情/行内展开/统计默认显示/背景统一/IPC 断点修复）。
 - 留给用户裁决的后续候选：git 写操作三期（分支切换/暂存区两栏/push-pull，此前裁决排除）；UI-193 widget 业务路径与 UI-194 消费侧挂载；ui:audit `--report` 模式 schema 大小写债务（AUDIT-LOG 2026-08-30 🟢）。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 

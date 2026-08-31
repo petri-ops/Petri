@@ -1,9 +1,9 @@
 # LIGHT-THEME-PURITY — 浅色主题纯净度系统性调优（slate 蓝灰 → zinc 中性 + 纯白画布） Plan
 
 - **Plan ID**: `LIGHT-THEME-PURITY`（用户反馈驱动，2026-08-31：「整个软件还有大量浅灰…浅灰是主题色吗…要纯净感，目前的灰有一种说不出来的脏感」）
-- **状态**: `active`（P0）
+- **状态**: `completed`（2026-08-31 收口：tsc 0 / 定向 vitest 44/44 含 theme-token 契约 / 实机工作区+审阅浅色截图，证据 `acceptance/ui-238/`；UI-238 verified）
 - **truthDomain**: `light-theme-purity`
-- **阶段**: P0 登记（本 commit）→ P1 token 重调（UI-238）+ 全页实机验证 → P2 收口
+- **阶段**: P0 登记（`5cd744e`）→ P1 token 重调（UI-238，`7eb11f2`）→ P2 收口（本 commit）
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 ## 1. 诊断（设计审计）

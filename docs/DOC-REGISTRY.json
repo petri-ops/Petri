@@ -2744,7 +2744,7 @@
       "id": "LIGHT-THEME-PURITY",
       "path": "docs/light-theme-purity-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "light-theme-purity",
       "entrypoint": "docs/README.md",
@@ -2754,14 +2754,14 @@
         "purity",
         "zinc",
         "G0",
-        "active",
-        "phase=P0",
-        "UI-238"
+        "UI-238",
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-08-31 用户反馈浅灰脏感、要纯净感。诊断：浅色主题基底为 slate 蓝灰系大面积铺底。方案：浅色 token 整体切 zinc 中性 + 纯白画布（canvas→#ffffff、subtle/border/hover/text 系列中性化），暗色 navy 与 teal accent 不动；token 为唯一杠杆（硬编码灰仅 2 处且属暗色语境）。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-08-31 用户反馈浅灰脏感、要纯净感。诊断：浅色主题基底为 slate 蓝灰系大面积铺底。方案：浅色 token 整体切 zinc 中性 + 纯白画布（canvas→#ffffff、subtle/border/hover/text 系列中性化），暗色 navy 与 teal accent 不动；token 为唯一杠杆（硬编码灰仅 2 处且属暗色语境）。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-08-31 收口 verified：P0 5cd744e / P1 7eb11f2；tsc 0 / vitest 44/44 含 theme-token / 实机工作区+审阅浅色截图 acceptance/ui-238/。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-08-31",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0"
+      "phase": "COMPLETED"
     }
   ],
   "lastUpdated": "2026-08-30 (BLOCK-30 completed)",
