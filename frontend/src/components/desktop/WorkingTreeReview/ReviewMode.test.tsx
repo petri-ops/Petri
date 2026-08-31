@@ -238,9 +238,10 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     expect(list.textContent).toContain('a1b2c3d');
     expect(commitLog).toHaveBeenCalled();
 
-    // 点击提交 → 打开该提交 diff（文件条 + 只读视图）
+    // 点击提交 → 行内展开详情（UI-231：列表保留不跳转）
     fireEvent.click(screen.getByText('first commit'));
     await screen.findByTestId('rvw-commit-diff-area');
+    expect(screen.getByTestId('rvw-history-list')).toBeTruthy();
     await waitFor(() => {
       expect(screen.getAllByText('src/a.py').length).toBeGreaterThan(0);
     });
@@ -301,8 +302,12 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     expect(screen.queryByText('完整提交说明')).toBeNull();
 
     // 无 body 的提交不渲染说明块
-    fireEvent.click(screen.getByRole('button', { name: /返回历史/ }));
-    fireEvent.click(await screen.findByText('no body'));
+    // UI-231 — 收起『with body』行（再次点行），展开『no body』行
+    fireEvent.click(screen.getByRole('button', { name: /with body/ }));
+    await waitFor(() => {
+      expect(screen.queryByTestId('rvw-commit-info')).toBeNull();
+    });
+    fireEvent.click(screen.getByRole('button', { name: /no body/ }));
     await waitFor(() => {
       expect(screen.getByTestId('rvw-commit-info').textContent).toContain('no body');
     });

@@ -39,3 +39,7 @@ tsc 0 / 定向 vitest 20/20（新增历史用例：列表渲染 + 点提交加�
 ui:audit:check / docs:check；adapter.log 经测试项目真实仓库验证；
 CDP 实机 6/6（分区切换、历史列表、点开提交 diff 绿色新增行、返回、切回改动），
 截图落 `acceptance/ui-219/`。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
+## 增量记录
+
+- **UI-230 / UI-231（2026-08-30，用户反馈驱动）**：UI-230 完整提交说明默认直接展开（去 details 折叠，见 BLOCK-29.3 plan 增量记录）；UI-231 历史列表点击提交改为**行内向下展开详情**（自包含 `ExpandedCommitDetail`，列表不跳转、可同开多条、返回按钮移除；hook 移除 openCommit/selectedCommit 跳转式状态），见 ui-productization-audit.md UI-231 条。G0 开发期常态 · 不外推 packaged/Provider/GA.

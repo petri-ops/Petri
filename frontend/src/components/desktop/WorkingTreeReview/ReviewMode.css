@@ -756,6 +756,19 @@
   color: var(--biof3-text);
 }
 
+/* UI-231 — 历史行内展开详情（列表不跳转，可同开多条） */
+.rvw-history-row[aria-expanded='true'] {
+  background: var(--biof3-bg-subtle);
+}
+
+.rvw-history-detail {
+  margin: 2px 0 8px;
+  padding: 6px 8px;
+  border-left: 2px solid var(--biof3-border-strong);
+  background: var(--biof3-bg-subtle);
+  border-radius: 0 7px 7px 0;
+}
+
 /* BLOCK-29.3 — 提交详情头：subject / 作者·时间 / 汇总统计 + 完整提交说明 */
 .rvw-commit-info {
   display: flex;

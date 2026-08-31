@@ -146,11 +146,6 @@ export interface UseWorkingTreeReviewReturn {
   commitsLoading: boolean;
   historyFileFilter: string | null;
   hasMoreHistory: boolean;
-  selectedCommit: CommitInfo | null;
-  commitDiff: DiffResult | null;
-  commitDiffLoading: boolean;
-  selectedCommitFilePath: string | null;
-  setSelectedCommitFilePath: (path: string | null) => void;
   loadHistory: (opts?: { file?: string | null; skip?: number; append?: boolean }) => Promise<void>;
   /** BLOCK-29.5 — 分支选择器（只读查看其他分支历史）。 */
   loadBranches: () => Promise<void>;
@@ -173,8 +168,6 @@ export interface UseWorkingTreeReviewReturn {
   enterCompareMode: () => void;
   exitCompareMode: () => void;
   handleCompareClick: (commit: CommitInfo) => Promise<void>;
-  openCommit: (commit: CommitInfo) => Promise<void>;
-  backToCommitList: () => void;
   /** BLOCK-29.2 — 放弃单文件工作区改动（tracked 还原 / untracked 删除）。 */
   discardFile: (path: string) => Promise<boolean>;
   /** BLOCK-29.2 — 撤销最近一次提交（mixed reset，内容回工作区）。 */
@@ -406,10 +399,6 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
   const [commitsLoading, setCommitsLoading] = useState(false);
   const [historyFileFilter, setHistoryFileFilter] = useState<string | null>(null);
   const [hasMoreHistory, setHasMoreHistory] = useState(false);
-  const [selectedCommit, setSelectedCommit] = useState<CommitInfo | null>(null);
-  const [commitDiff, setCommitDiff] = useState<DiffResult | null>(null);
-  const [commitDiffLoading, setCommitDiffLoading] = useState(false);
-  const [selectedCommitFilePath, setSelectedCommitFilePath] = useState<string | null>(null);
   const historyFileFilterRef = useRef<string | null>(null);
   historyFileFilterRef.current = historyFileFilter;
   // BLOCK-29.5 — 分支选择器（只读查看其他分支历史，不切换工作区分支）
@@ -473,9 +462,6 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
   const switchBranch = useCallback(async (name: string | null) => {
     activeBranchRef.current = name;
     setActiveBranch(name);
-    setSelectedCommit(null);
-    setCommitDiff(null);
-    setSelectedCommitFilePath(null);
     await loadHistory({ file: null });
   }, [loadHistory]);
 
@@ -494,9 +480,6 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     setCompareFrom(null);
     setCompareTo(null);
     setCompareDiff(null);
-    setSelectedCommit(null);
-    setCommitDiff(null);
-    setSelectedCommitFilePath(null);
   }, []);
 
   const exitCompareMode = useCallback(() => {
@@ -534,33 +517,6 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
       setCompareLoading(false);
     }
   }, [compareBase]);
-
-  const openCommit = useCallback(async (commit: CommitInfo) => {
-    const bridge = getBridge('workingTreeReview');
-    if (!bridge) return;
-    setSelectedCommit(commit);
-    setCommitDiff(null);
-    setSelectedCommitFilePath(null);
-    setCommitDiffLoading(true);
-    try {
-      const res = await bridge.commitDiff({ hash: commit.sha });
-      const parsed: DiffResult = res.ok && res.data
-        ? res.data
-        : { files: [], truncated: false, summary: { added: 0, removed: 0 } };
-      setCommitDiff(parsed);
-      setSelectedCommitFilePath(parsed.files[0]?.path ?? null);
-    } catch {
-      setCommitDiff({ files: [], truncated: false, summary: { added: 0, removed: 0 } });
-    } finally {
-      setCommitDiffLoading(false);
-    }
-  }, []);
-
-  const backToCommitList = useCallback(() => {
-    setSelectedCommit(null);
-    setCommitDiff(null);
-    setSelectedCommitFilePath(null);
-  }, []);
 
   // BLOCK-29.2 — 放弃单文件工作区改动（tracked 还原 / untracked 删除）
   const discardFile = useCallback(async (path: string) => {
@@ -630,11 +586,6 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     commitsLoading,
     historyFileFilter,
     hasMoreHistory,
-    selectedCommit,
-    commitDiff,
-    commitDiffLoading,
-    selectedCommitFilePath,
-    setSelectedCommitFilePath,
     loadHistory,
     loadBranches,
     branches,
@@ -654,8 +605,6 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     enterCompareMode,
     exitCompareMode,
     handleCompareClick,
-    openCommit,
-    backToCommitList,
     discardFile,
     undoLastCommit,
   };

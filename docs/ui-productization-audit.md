@@ -1857,3 +1857,17 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；定向 vitest 28/28（用例更新：点开提交即见 `rvw-commit-body` 全文、无「完整提交说明」开关、无 body 提交不渲染说明块）。**2026-08-30 dev 实机 verified**（localhost:3000 桥桩）：点开提交 body 直接可见（preHeight 164px）、折叠开关 0 残留；截图 `acceptance/ui-230/body-expanded-on-open.png`。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-231: BLOCK-29 增量 — 历史列表点击提交改为行内向下展开（不再跳转） (2026-08-30 verified)
+
+**用户反馈**：「我的意思是 点击不要到新的界面了 应该是直接向下展开」——UI-219 起点开提交会**替换**历史列表为详情视图（需「← 返回历史」回去），用户要求与 BLOCK-29.1 文件手风琴一致的交互：点行 = 行下展开，列表不动。
+
+**改动范围**：
+- 新增自包含组件 `ExpandedCommitDetail`（自行拉取 commitDiff 与选中文件全文、本地管理选中文件与四态视图），展开在触发行正下方：详情头（subject / 作者·时间 / N 文件 ±A −D）+ 完整提交说明直显（UI-230 语义）+ 文件条 ±统计 + 只读 diff（含全文/blame 四态）。
+- 历史列表行改 `aria-expanded` 手风琴语义：点行切换展开/收起，**多条可同开**、列表与滚动位置不动；「← 返回历史」按钮与跳转式详情视图整体移除；对比模式下行点击行为不变（仍走 handleCompareClick）。
+- hook 清理：移除跳转式状态与动作（`selectedCommit/commitDiff/commitDiffLoading/selectedCommitFilePath/openCommit/backToCommitList`），switchBranch/enterCompareMode 相应精简。
+- 按治理增量规则复用 Plan ID `BLOCK-29-COMMIT-HISTORY`（plan 增量记录 UI-230/231）。
+
+**验证**：tsc 0；定向 vitest 28/28（用例重写：点行后列表仍可见 + 行内 diff 渲染；收起/切换行；其余历史相关用例同步更新）。**2026-08-30 dev 实机 verified**（localhost:3000 桥桩）：列表保留、64c7c10 与 2de3897 两行同开（aria-expanded true/false/true/false）、详情含完整说明 body 与文件 chips、返回按钮 0 残留；截图 `acceptance/ui-231/inline-expand.png`。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

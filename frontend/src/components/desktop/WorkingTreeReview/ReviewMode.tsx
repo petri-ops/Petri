@@ -9,14 +9,14 @@
 // 键盘流与旧抽屉一致：A/Y accept · R reject · ↑↓ navigate · Esc 退出模式。
 // ============================================================
 
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { Fragment, useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { getBridge } from '@/lib/desktopBridge';
 import { CodeMirrorEditor } from '@/components/editor';
 import type { DiffRevision } from '@/components/editor/CodeMirror/types';
 import { WorkspaceFileIcon } from '@/components/workspace-panels/WorkspaceFileIcon';
-import { useWorkingTreeReview, type DiffFile } from './useWorkingTreeReview';
+import { useWorkingTreeReview, type CommitInfo, type DiffFile, type DiffResult } from './useWorkingTreeReview';
 import { CodeMirrorDiffView } from './CodeMirrorDiffView';
 import { CodeReviewDrawer } from './CodeReviewDrawer';
 import {
@@ -211,6 +211,113 @@ function CommitDiffFileView({ hash, file, fromRef = null, toRef = null }: { hash
   );
 }
 
+/**
+ * UI-231 — 历史列表行内展开的提交详情（自包含）：
+ * 自行拉取 commitDiff 与选中文件全文，展开在触发行正下方；列表不跳转、可同开多条。
+ */
+function ExpandedCommitDetail({ commit }: { commit: CommitInfo }) {
+  const [diff, setDiff] = useState<DiffResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [filePath, setFilePath] = useState<string | null>(null);
+  useEffect(() => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) return;
+    let cancelled = false;
+    setLoading(true);
+    setDiff(null);
+    setFilePath(null);
+    bridge.commitDiff({ hash: commit.sha })
+      .then((res) => {
+        if (cancelled) return;
+        const parsed: DiffResult = res.ok && res.data
+          ? res.data
+          : { files: [], truncated: false, summary: { added: 0, removed: 0 } };
+        setDiff(parsed);
+        setFilePath(parsed.files[0]?.path ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setDiff({ files: [], truncated: false, summary: { added: 0, removed: 0 } });
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [commit.sha]);
+  return (
+    <div className="rvw-history-detail" data-testid={`rvw-commit-detail-${commit.shortSha}`}>
+      <div className="rvw-commit-info" data-testid="rvw-commit-info">
+        <div className="rvw-commit-info-head">
+          <span className="rvw-commit-subject">{commit.subject}</span>
+          <span className="rvw-commit-meta">
+            {commit.author} · {formatCommitDate(commit.isoDate)}
+          </span>
+          {diff && (
+            <span className="rvw-commit-summary">
+              {diff.files.length} 文件
+              <span className="rvw-stat-add">+{diff.summary.added}</span>
+              <span className="rvw-stat-del">−{diff.summary.removed}</span>
+            </span>
+          )}
+        </div>
+        {commit.message && (
+          <div className="rvw-commit-body" data-testid="rvw-commit-body">
+            <pre>{commit.message}</pre>
+          </div>
+        )}
+      </div>
+      <div className="rvw-filestrip" role="tablist" aria-label="提交改动文件">
+        {(diff?.files ?? []).map((f) => {
+          const stats = computeFileDiffStats(f);
+          const selected = filePath === f.path;
+          const fileName = f.path.slice(f.path.lastIndexOf('/') + 1);
+          return (
+            <button
+              key={f.path}
+              type="button"
+              role="tab"
+              aria-selected={selected}
+              className={`rvw-filechip${selected ? ' active' : ''}`}
+              onClick={() => setFilePath(f.path)}
+              title={f.path}
+            >
+              <span className="rvw-filechip-name">{fileName}</span>
+              {(stats.added > 0 || stats.removed > 0) && (
+                <span className="rvw-file-stats">
+                  {stats.added > 0 && <span className="rvw-stat-add">+{stats.added}</span>}
+                  {stats.removed > 0 && <span className="rvw-stat-del">−{stats.removed}</span>}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      <main className="rvw-diff-area" data-testid="rvw-commit-diff-area">
+        {loading && <div className="wt-diff-loading">提交差异加载中…</div>}
+        {!loading && (() => {
+          const file = (diff?.files ?? []).find((f) => f.path === filePath) || null;
+          if (!file) {
+            return <div className="wt-empty">该提交没有可显示的文件差异。</div>;
+          }
+          return (
+            <div className="rvw-file">
+              <div className="wt-file-header rvw-file-header">
+                <span className="rvw-history-sha">{commit.shortSha}</span>
+                <span className="wt-file-path">{file.path}</span>
+                <span className="rvw-file-stats">
+                  <span className="rvw-stat-add">+{computeFileDiffStats(file).added}</span>
+                  <span className="rvw-stat-del">−{computeFileDiffStats(file).removed}</span>
+                </span>
+                <span className="wt-file-hunk-count">{file.hunks.length} 个 hunk</span>
+              </div>
+              <CommitDiffFileView hash={commit.sha} file={file} />
+            </div>
+          );
+        })()}
+      </main>
+    </div>
+  );
+}
+
 function formatCommitDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
@@ -277,6 +384,8 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const [focusedHunk, setFocusedHunk] = useState(0);
   const [collapsedDirs, setCollapsedDirs] = useState<Record<string, boolean>>({});
+  // UI-231 — 历史行内展开（点行 = 行下展开详情，列表不动，可同开多条）
+  const [expandedCommits, setExpandedCommits] = useState<Set<string>>(new Set());
   const textareaRef = useRef<HTMLInputElement>(null);
 
   // BLOCK-29.1 — dock 手风琴：每文件一行，点击展开/收起行内 diff。
@@ -639,88 +748,6 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                 })()}
               </main>
             </>
-          ) : review.selectedCommit ? (
-            <>
-              {/* BLOCK-29.3 — 提交详情头：subject / 作者·时间 / 汇总统计 + 完整提交说明 */}
-              <div className="rvw-commit-info" data-testid="rvw-commit-info">
-                <div className="rvw-commit-info-head">
-                  <span className="rvw-commit-subject">{review.selectedCommit.subject}</span>
-                  <span className="rvw-commit-meta">
-                    {review.selectedCommit.author} · {formatCommitDate(review.selectedCommit.isoDate)}
-                  </span>
-                  {review.commitDiff && (
-                    <span className="rvw-commit-summary">
-                      {review.commitDiff.files.length} 文件
-                      <span className="rvw-stat-add">+{review.commitDiff.summary.added}</span>
-                      <span className="rvw-stat-del">−{review.commitDiff.summary.removed}</span>
-                    </span>
-                  )}
-                </div>
-                {review.selectedCommit.message && (
-                  <div className="rvw-commit-body" data-testid="rvw-commit-body">
-                    <pre>{review.selectedCommit.message}</pre>
-                  </div>
-                )}
-              </div>
-              {/* BLOCK-29 — 提交内：文件条 + 只读 diff（vs 第一父提交） */}
-              <div className="rvw-filestrip" role="tablist" aria-label="提交改动文件">
-                <button
-                  type="button"
-                  className="rvw-history-back"
-                  onClick={review.backToCommitList}
-                  title="返回提交历史"
-                >
-                  ← 返回历史
-                </button>
-                {(review.commitDiff?.files ?? []).map((f) => {
-                  const stats = computeFileDiffStats(f);
-                  const selected = review.selectedCommitFilePath === f.path;
-                  const fileName = f.path.slice(f.path.lastIndexOf('/') + 1);
-                  return (
-                    <button
-                      key={f.path}
-                      type="button"
-                      role="tab"
-                      aria-selected={selected}
-                      className={`rvw-filechip${selected ? ' active' : ''}`}
-                      onClick={() => review.setSelectedCommitFilePath(f.path)}
-                      title={f.path}
-                    >
-                      <span className="rvw-filechip-name">{fileName}</span>
-                      {(stats.added > 0 || stats.removed > 0) && (
-                        <span className="rvw-file-stats">
-                          {stats.added > 0 && <span className="rvw-stat-add">+{stats.added}</span>}
-                          {stats.removed > 0 && <span className="rvw-stat-del">−{stats.removed}</span>}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              <main className="rvw-diff-area" data-testid="rvw-commit-diff-area">
-                {review.commitDiffLoading && <div className="wt-diff-loading">提交差异加载中…</div>}
-                {!review.commitDiffLoading && (() => {
-                  const file = review.commitDiff?.files.find((f) => f.path === review.selectedCommitFilePath) || null;
-                  if (!file) {
-                    return <div className="wt-empty">该提交没有可显示的文件差异。</div>;
-                  }
-                  return (
-                    <div className="rvw-file">
-                      <div className="wt-file-header rvw-file-header">
-                        <span className="rvw-history-sha">{review.selectedCommit.shortSha}</span>
-                        <span className="wt-file-path">{file.path}</span>
-                        <span className="rvw-file-stats">
-                          <span className="rvw-stat-add">+{computeFileDiffStats(file).added}</span>
-                          <span className="rvw-stat-del">−{computeFileDiffStats(file).removed}</span>
-                        </span>
-                        <span className="wt-file-hunk-count">{file.hunks.length} 个 hunk</span>
-                      </div>
-                      <CommitDiffFileView hash={review.selectedCommit.sha} file={file} />
-                    </div>
-                  );
-                })()}
-              </main>
-            </>
           ) : (
             <div className="rvw-history-list" data-testid="rvw-history-list">
               {/* BLOCK-29.2 — 历史头部：文件过滤徽标 + 撤销上次提交 */}
@@ -814,17 +841,31 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                 <div className="wt-empty">{review.historyFileFilter ? '该文件暂无提交记录。' : '暂无提交记录。'}</div>
               )}
               {review.commits?.map((c) => (
-                <button
-                  key={c.sha}
-                  type="button"
-                  className="rvw-history-row"
-                  onClick={() => void (review.compareMode ? review.handleCompareClick(c) : review.openCommit(c))}
-                  title={c.subject}
-                >
-                  <span className="rvw-history-sha">{c.shortSha}</span>
-                  <span className="rvw-history-subject">{c.subject}</span>
-                  <span className="rvw-history-meta">{c.author} · {formatCommitDate(c.isoDate)}</span>
-                </button>
+                <Fragment key={c.sha}>
+                  <button
+                    type="button"
+                    className="rvw-history-row"
+                    aria-expanded={expandedCommits.has(c.sha)}
+                    onClick={() => {
+                      if (review.compareMode) {
+                        void review.handleCompareClick(c);
+                        return;
+                      }
+                      setExpandedCommits((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(c.sha)) next.delete(c.sha);
+                        else next.add(c.sha);
+                        return next;
+                      });
+                    }}
+                    title={c.subject}
+                  >
+                    <span className="rvw-history-sha">{c.shortSha}</span>
+                    <span className="rvw-history-subject">{c.subject}</span>
+                    <span className="rvw-history-meta">{c.author} · {formatCommitDate(c.isoDate)}</span>
+                  </button>
+                  {expandedCommits.has(c.sha) && <ExpandedCommitDetail commit={c} />}
+                </Fragment>
               ))}
               {review.hasMoreHistory && !review.commitsLoading && (
                 <button
