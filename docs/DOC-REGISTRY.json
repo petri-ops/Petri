@@ -2830,8 +2830,30 @@
       "registeredAt": "2026-08-31",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-29.7-REVIEW-CHANGES-TREE",
+      "path": "docs/block-29-7-review-changes-tree-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-29-review-changes-tree",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "review-mode",
+        "file-tree",
+        "layout",
+        "G0",
+        "UI-244",
+        "active",
+        "phase=P0-LAUNCH"
+      ],
+      "notes": "2026-08-31 用户提出审阅增加文件树以看清每个版本每个文件修改对应的项目结构变化。现状：/review 主区已有目录分组左树（BLOCK-28 P2），dock 是平铺手风琴（目录仅文字后缀），历史提交详情是横向 chips。方案：dock 手风琴升级目录分组树（复用 groupFilesByDirectory/collapsedDirs，缩进+参考线，行内三操作保留）+ 历史提交详情改左 mini 树(168px)+右 diff（局部折叠 state）；三处同构。0 新增 IPC / 0 新依赖 / 审阅内核不动。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-08-31",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH"
     }
   ],
-  "lastUpdated": "2026-08-31 (BLOCK-29.6 completed)",
-  "documentCount": 169
+  "lastUpdated": "2026-08-31 (BLOCK-29.7 P0 launch)",
+  "documentCount": 170
 }
