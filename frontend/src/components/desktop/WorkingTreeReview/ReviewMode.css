@@ -761,11 +761,13 @@
   background: var(--biof3-bg-subtle);
 }
 
+/* UI-236 — 视觉统一：内容区单一画布色，结构靠发丝线；
+   灰底只保留给交互态（行 hover/选中、按钮）。展开区以左侧竖线标记，不再铺灰。 */
 .rvw-history-detail {
   margin: 2px 0 8px;
-  padding: 6px 8px;
+  padding: 2px 8px 6px 10px;
   border-left: 2px solid var(--biof3-border-strong);
-  background: var(--biof3-bg-subtle);
+  background: transparent;
   border-radius: 0 7px 7px 0;
 }
 
@@ -825,19 +827,22 @@
 }
 
 /* UI-230 — 完整提交说明默认直接展开（用户反馈：点开就应向下展开，不再折叠） */
+/* UI-236 — blockquote 化：去灰底盒子和四边框，左竖线 + 弱化等宽文字，排版驱动 */
 .rvw-commit-body pre {
   margin: 0;
-  padding: 6px 8px;
+  padding: 2px 0 2px 10px;
   max-height: 40vh;
   overflow: auto;
   white-space: pre-wrap;
   word-break: break-word;
   font-family: var(--biof3-font-mono);
   font-size: var(--biof3-font-size-body-sm);
+  line-height: 1.6;
   color: var(--biof3-text-secondary);
-  background: var(--biof3-bg-canvas);
-  border: 1px solid var(--biof3-border);
-  border-radius: 7px;
+  background: transparent;
+  border: none;
+  border-left: 2px solid var(--biof3-border);
+  border-radius: 0;
 }
 
 /* BLOCK-29.4 — 提交文件视图切换（diff / 全文）与全文只读视图 */
@@ -950,13 +955,14 @@
   white-space: nowrap;
 }
 
-/* BLOCK-29.5 — stash 只读列表 */
+/* BLOCK-29.5 — stash 只读列表（UI-236：去灰底与虚线，发丝线 + 左竖线标记） */
 .rvw-stash-list {
   margin: 0 12px 6px;
-  padding: 4px 8px;
-  border: 1px dashed var(--biof3-border);
-  border-radius: 7px;
-  background: var(--biof3-bg-subtle);
+  padding: 2px 8px;
+  border: none;
+  border-left: 2px solid var(--biof3-border);
+  border-radius: 0;
+  background: transparent;
 }
 
 .rvw-stash-row {

@@ -1923,3 +1923,17 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；定向 vitest 30/30（新增用例：历史汇总分支/条数/合计断言 + 分区切换互斥恢复）。**2026-08-31 dev 实机 verified**（localhost:3000 桥桩带 stats）：历史分区显示「当前分支 · 已加载 4 条提交 · 合计 +10 −0」（7+1+1+1=10 聚合正确）、工作区统计 0 出现；切回改动分区恢复「0 个文件 +0 −0 0/0 已审」；截图 `acceptance/ui-235/history-summary.png`。纯前端，刷新即生效。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-236: BLOCK-29 增量 — 审阅面板背景视觉统一（去静态灰底，灰只给交互态） (2026-08-31 verified)
+
+**用户反馈**：「目前审阅背景都是灰色的 很不好看 从设计的角度来说 你觉得应该怎么统一背景色呢 要高级些」——设计审计：历史流里展开区（bg-subtle）、提交说明（灰底描边盒）、stash 列表（bg-subtle + 虚线）多层灰底叠加成「灰汤」。设计原则：**内容区单一画布色，结构靠发丝线与留白；灰是状态色不是装修色**——灰底只保留给交互态（行 hover/选中、按钮、进度条），顶栏保留 surface 与内容区形成层级。
+
+**改动范围**（ReviewMode.css，纯样式）：
+- `.rvw-history-detail` 展开区：去 bg-subtle → 透明，保留左侧 2px 竖线作为区域标记。
+- `.rvw-commit-body pre` 提交说明：blockquote 化——去灰底与四边框，左侧 2px 发丝线 + 弱化等宽文字 + 1.6 行高，排版驱动而非盒子驱动。
+- `.rvw-stash-list`：去灰底与虚线框 → 透明 + 左竖线。
+- 全部走语义 token，明暗主题自动成立；代码区（diff/全文）保持 surface/canvas 有界 surface 不变。
+
+**验证**：tsc 0；定向 vitest 30/30 + theme-token 契约 14/14（纯 CSS 改动）。**2026-08-31 dev 实机 verified**（localhost:3000 桥桩）：透明背景计算样式断言（detailBg/preBg = rgba(0,0,0,0)、pre 左边框 2px solid）+ 暗色/浅色双主题截图对比（`acceptance/ui-236/dark-unified.png`、`light-unified.png`）——内容区单一底色、发丝线结构、说明成引用体。纯 CSS，刷新即生效。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
