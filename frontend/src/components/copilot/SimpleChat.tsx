@@ -61,6 +61,7 @@ import {
 } from './SimpleChat/attachments';
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
 import { AgentChangesCard } from './AgentChangesCard';
+import { MessageRail, type MessageRailItem } from './MessageRail';
 import {
   stringifyParamValue,
   shortValue,
@@ -629,6 +630,31 @@ export function SimpleChat({
     }
   }, [activeRun, durableLoop.loop, messages]);
 
+  // UI-262 — 左缘用户消息导航条：当前会话每条用户消息一个刻度，
+  // 附紧随其后的 AI 回复摘要供悬浮预览。
+  const railItems = useMemo<MessageRailItem[]>(() => {
+    const items: MessageRailItem[] = [];
+    displayMessages.forEach((m, i) => {
+      if (m.role !== 'user' || !m.content) return;
+      let reply: string | undefined;
+      for (let j = i + 1; j < displayMessages.length; j++) {
+        if (displayMessages[j].role === 'assistant') {
+          reply = displayMessages[j].content;
+          break;
+        }
+      }
+      items.push({ key: m.ts ? `${m.ts}-${i}` : `idx-${i}`, content: m.content, reply });
+    });
+    return items;
+  }, [displayMessages]);
+
+  const handleRailJump = useCallback((index: number) => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const nodes = container.querySelectorAll<HTMLElement>('.sc-msg-user');
+    nodes[index]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
   const inputLength = input.trim().length;
   const composerWidth = Math.min(980, Math.max(560, 560 + Math.sqrt(inputLength) * 42));
 
@@ -1155,7 +1181,7 @@ export function SimpleChat({
 
   return (
     <div className="sc-root">
-      <div className="sc-body">
+      <div className="sc-body" data-rail-body>
         <div className="sc-messages" ref={scrollRef}>
           {loading && <div className="sc-loading">加载会话…</div>}
           {!loading && displayMessages.length === 0 && (
@@ -1335,6 +1361,9 @@ export function SimpleChat({
 
         {/* BLOCK-28.7 — 工作区改动卡片：每文件 ±统计，点击行跳转审阅 */}
         <AgentChangesCard />
+
+        {/* UI-262 — 聊天区左缘用户消息导航条：悬浮预览、点击跳转对应消息 */}
+        {railItems.length > 0 && <MessageRail items={railItems} onJump={handleRailJump} />}
 
         <div
           className="sc-input-area"

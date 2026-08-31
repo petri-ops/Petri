@@ -2054,3 +2054,169 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁与实机**：**2026-08-31 dev Electron 实机 verified**（CDP 9222）：「对比」45px 单行 28 高；切换 `v0.0.1-rc.1` → stats 即变「v0.0.1-rc.1 已加载 50 条提交 合计+11729 −2509」（历史真实切到 tag），切回 HEAD 恢复 ✓。截图 `acceptance/ui-244/history-toolbar-fixed.png`。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-246: BLOCK-29 增量 — 历史工具条层级修复（sticky 钉住 + rvw-history-menu 类名解冲突） (2026-08-31 verified)
+
+**背景**：用户实测反馈历史工具条随滚动走位裁出残影、⋯ 菜单锚点漂移。诊断：① `.rvw-history-head` 无 sticky；② ⋯ 菜单容器误复用 `.rvw-history-more`——那是「加载更多」按钮的类（全宽虚线框），继承出多余层且锚点漂移。
+
+**改动**：`.rvw-history-head` 加 sticky；⋯ 容器类改名 `.rvw-history-menu`。实机截图 `acceptance/ui-246/history-toolbar-layer-fixed.png`。
+
+**后续**：UI-247 把历史第二行整体并入 summary 行，sticky 部分随整行删除（summary 本身固定顶部，原目标达成）；`.rvw-history-menu` 类名修复保留（菜单迁入 summary-actions）。
+
+**状态**: verified (dev 边界内，部分被 UI-247 取代)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-247: BLOCK-29 增量 — 分支选择/对比/⋯ 并入审阅 tabs 行，历史第二行取消 (2026-08-31 in_progress)
+
+**用户反馈**：截图「这个分支选择的按钮是不是应该放到 审阅 改动 历史 同一行 目前两行很不和谐」。
+
+**改动**（0 新增 IPC / 0 新依赖）：历史分区的文件过滤徽标、分支选择器、对比按钮（含对比模式提示）并入 `rvw-summary-left`（紧跟 改动|历史 tabs 之后，stats 之前）；⋯ 溢出菜单（撤销上次提交）移入 `rvw-summary-actions`（仅历史分区渲染）；删除 `rvw-history-head` 第二行及 `.rvw-history-head`/`.rvw-history-tools` 死样式。CSS：summary 内分支选择限宽 150px、`.wt-btn`/过滤徽标不参与 flex 挤压。
+
+**门禁**：tsc 0 / ReviewMode vitest 30/30 / docs:check 170 / docs:reconcile 0。待 dev Electron 实机过目后转 verified。注：对比按钮随后由 UI-249 按用户裁决移除。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-249: BLOCK-29 增量 — 移除历史「对比」（两提交区间对比模式） (2026-08-31 in_progress)
+
+**用户反馈**：「历史 点击后 有对比 对比是不是没有实际意义？ 可以清掉吗」。
+
+**评估**：对比 = BLOCK-29.5 UI-228 的两提交区间 diff（点基准→点目标看 A..B），功能真实但低频、入口语义不自明（UI-245 同类反馈佐证）。按用户裁决移除。
+
+**改动**（0 IPC 删除 / 0 依赖变动）：summary 行「对比」按钮与提示移除；`rvw-body` 对比视图分支（文件条 + 区间 diff）与历史行点选分支逻辑删除；hook 删除 compareMode/compareBase/compareFrom/compareTo/compareDiff/compareError/compareFilePath 状态与 enterCompareMode/exitCompareMode/handleCompareClick（接口 + 实现共 ~70 行）；死样式清除（`.rvw-filestrip`/`.rvw-filechip*`/`.rvw-commit-info*`/`.rvw-commit-subject`/`.rvw-commit-meta`/`.rvw-commit-summary`/`.rvw-compare-hint`）。`git:commit-diff` IPC 保留（历史提交行内展开详情仍消费）。
+
+**门禁**：tsc 0 / ReviewMode vitest 29/29（对比用例随功能删除）/ docs:check 170 / ui:audit:check / docs:reconcile 0。待 dev Electron 实机过目后转 verified。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-250: BLOCK-29 增量 — 改动文件行悬停浮动预览（审阅详情同源只读 diff） (2026-08-31 in_progress)
+
+**用户反馈**：「工作区 改动部分 会列出来具体有哪些文件修改了 鼠标放上去能否出现悬浮窗口展示详细信息呢？详细信息就是审阅里的详细信息」。
+
+**改动**（0 新增 IPC / 0 新依赖）：dock 手风琴行 + /review 主区文件行 hover 350ms 后在行旁弹出 fixed 浮窗——头部（状态徽标 + 完整路径 + +/− 统计）+ 只读 diff（复用 `CodeMirrorDiffView`，不传 accept/reject 即无操作控件）；二进制文件显示说明文案；未跟踪文件复用 `UntrackedFilePreview` 显示工作区内容。行为细节：移入浮窗可停留阅读，移开 120ms 关闭；**已展开行（dock）/已选中行（主区）不弹**（信息重复，且不拦截点击展开/选中语义）；浮窗 420px、max-height 60vh、右溢出自动翻转到行左侧。
+
+**门禁**：tsc 0 / ReviewMode vitest 29/29。待 dev Electron 实机过目后转 verified。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-252: BLOCK-29 增量 — 会话区「工作区改动」卡片文件行悬停预览 (2026-08-31 in_progress)
+
+**用户反馈**：「会话区这部分的 工作区改动也要可以鼠标悬浮上去就可以有预览的小窗口」（截图：聊天区 AgentChangesCard 文件列表）。
+
+**改动**（0 新增 IPC / 0 新依赖）：`AgentChangesCard` 刷新时保留按文件的完整 diff 数据（原只留统计）；文件行 hover 350ms 弹出 fixed 浮窗——状态徽标 + 完整路径 + +/− 统计 + 只读 diff（复用 `CodeMirrorDiffView` 无操作控件）；二进制/未跟踪文件显示说明文案。交互与 UI-250 一致（移入可停留/移开 120ms 关闭）；点击行仍跳审阅。样式入 `simple-chat.css`（`WorkingTreeReview.css` 已由 App 级引入，CodeMirror 样式全局可用）。
+
+**门禁**：tsc 0 / AgentChangesCard + WorkingTreeReview vitest 35/35。待 dev Electron 实机过目后转 verified。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-253: 增量 — 创建项目前确认具体工作目录路径 (2026-08-31 in_progress)
+
+**用户反馈**：「选择工作目录并创建 还没有解决 能打开 但是不能确定具体的项目路径」。
+
+**改动**：两条创建路径增加**创建前路径确认**——① 首页：选定目录后内联确认面板（完整路径框 + 项目名 + 「在此处创建」/「重新选择」），创建动作与选择解耦；② 项目左栏「+」：`window.confirm` 展示完整路径 + 项目名后创建。配合 UI-251 的失败可见化，具体项目路径从「选完即建、不可见」变为「显式确认、可反悔」。
+
+**门禁**：tsc 0 / project-store + LeftPanel + home vitest 10/10 / docs:check / ui:audit:check / docs:reconcile。待实机过目后转 verified。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-254: BLOCK-29 增量 — dock 改动分区右侧常驻文件树（左手风琴 + 右导航树） (2026-08-31 in_progress)
+
+**用户反馈**：截图 dock 改动页面「右侧要有 文件树」。AskUserQuestion 裁决「保留手风琴 + 右侧树」。
+
+**改动**（0 新增 IPC / 0 新依赖 / 审阅内核不动）：dock 改动分区改为 `rvw-dock-split` 左右分栏——左侧手风琴（行为不变：点击行展开行内 diff、悬停预览、展开全部/收起全部）+ 右侧 230px 常驻文件树（目录分组 + 文件行，含已审勾/±统计/选中高亮）。右树交互：组头点击 = 折叠/展开该目录（与左侧共享 collapsedDirs）；文件行点击 = 展开/收起左侧行内 diff 并 `scrollIntoView` 滚动定位（手风琴行新增 `data-acc-path` 锚点）。右树 hover 暂不弹预览（点击即开 diff）。
+
+**门禁**：tsc 0 / ReviewMode vitest 29/29（手风琴测试改用 `data-acc-path` 精确定位，双树同 path 不再歧义）/ docs:check 170 / ui:audit:check / docs:reconcile 0。待 dev Electron 实机过目后转 verified。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-255: BLOCK-29 增量 — 悬停预览浮窗位置/尺寸自适应（不再超出应用边界） (2026-08-31 in_progress)
+
+**用户反馈**：「卡片悬停预览出来的内容位置和大小能否自适应 尽可能的不被遮挡 目前这个容易超出软件边界」。
+
+**改动**（0 新增 IPC / 0 新依赖）：抽共享组件 `HoverPreviewPopover`（审阅 UI-250 与会话卡片 UI-252 共用）——① 宽度按触发行一侧可用空间收缩（右侧 <300px 自动翻转到左侧，两侧都窄钳到最小 260px，上限 420px）；② 首帧隐藏，`useLayoutEffect` 实测渲染高度后钳制 top，保证浮窗底边不越过应用窗口；③ 定位逻辑收敛到单组件，两处调用方只传 anchor（触发行 rect）。CSS 保持 420px 基准宽，inline maxWidth 动态收窄。
+
+**门禁**：tsc 0 / ReviewMode + AgentChangesCard vitest 33/33。待 dev Electron 实机过目后转 verified。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-262: BLOCK-29 增量 — 聊天区左缘「用户消息导航条」（Codex 风格刻度 rail） (2026-08-31 verified)
+
+**用户反馈**（附 Codex 风格截图）：「左侧增加 聊天会话记录 点击出现会话记录的悬浮卡片 可以参考codex中的实现方式」→ 首版左栏 header 时钟方案被否（「不及预期」）；二版会话列表卡片再次被否（「卡片样式太丑……这个是针对当前会话不是所有会话 收录的应该是用户发送的消息 把手是贴边窄条，用户的每个消息都应该是一个条」）→ 按澄清改为 Codex 式**用户消息刻度 rail**，经四轮实机微调后用户确认「很好」并裁决提交。
+
+**改动**（0 新增 IPC / 0 新依赖）：新组件 `MessageRail`（挂在 SimpleChat `.sc-body` 内，`data-rail-body` 为定位锚点）——聊天区**左缘垂直居中一条贴边窄 rail**，**当前会话的每条用户消息对应一个横杠刻度**（space-evenly 均布，rail 最大高 62%）；**悬浮刻度弹出预览卡片**（用户消息原文 + 紧随其后的 AI 回复摘要，line-clamp 截断，卡片 top 按实高两阶段夹取保证不出聊天区上下边界），**点击刻度 `scrollIntoView` 平滑跳转到聊天区对应那条用户消息**。`railItems` 由 `displayMessages` 派生（role=user 且有内容），跳转经 `scrollRef` 查询 `.sc-msg-user` 按序号定位。已删除二版 `ChatHistoryRail`（会话列表卡片）组件及 CenterPanel 接入。**按用户反馈调整可见性**：刻度更贴左（左内边距 5→2px）、颜色加重（border 色→text-tertiary + opacity 0.72），hover/active 刻度加宽至 16px×3px accent；`.sc-messages` 左内边距 4→18px 让出刻度沟槽，消息内容与刻度分离。**预览卡片同方案精修**：left 22→24px 对齐沟槽外缘、宽 320px、阴影收敛（8/24/0.12），用户消息加 3px accent 左边条强化「这是你发的消息」的辨识。**沟槽生效修复 + rail 左移**：`.agentMain/.rightChatPanel :global(.sc-messages)` 的 `padding: 0` 覆盖了基础沟槽，改 `0 0 0 18px` 修复；`workspaceSessionFrameChat` 左 padding 32→8px（用户裁决：尽可能贴近左侧边界）+ tick 左内边距 2→0px；默认刻度减淡（10px×2px、opacity 0.45），hover/active 显著加长至 24px×3px accent（卡片左移 28px 让位）。
+
+**门禁**：tsc 0 / SimpleChat + AgentChangesCard vitest 10/10 / docs:check 170 / ui:audit:check。dev Electron 实机多轮过目，用户确认后转 verified。
+
+**状态**: verified（dev Electron 边界内）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-260: BLOCK-29 增量 — 审阅文件树改按钮切换（默认收起，不再常驻占右侧栏） (2026-08-31 in_progress)
+
+**用户反馈**：「审阅中的文件树 目前是默认展开占据右侧栏 能否变成按钮呢 点击展开点击也可以收缩 效果和 文件中的 文件树保持一致」。（另确认：文件树打开图片文件已支持 `<img>` 图片预览，走 `isImageFile` + `workspaceImagePreview`，无需改动。）
+
+**改动**（0 新增 IPC / 0 新依赖）：dock 审阅摘要行新增「文件树」开合按钮——`dockTreeOpen` 默认 `false`（右侧栏不再被文件树常驻占据），点击展开 / 再点收缩；右侧文件树 aside 仅在展开时渲染。与「展开全部/收起全部」按钮同排。**UI-261 按用户反馈两轮调整**：① 图标形式改为与「文件」侧文件树一致的 **chevron + 文件夹图标**（复用 `rvw-caret` 旋转约定 + `WorkspaceFileIcon type="dir"`；收起 chevron 朝右、展开朝下，展开时 accent 描边高亮）；② 位置移到面板**最右侧，替换原「退出」按钮**（dock 审阅不需要退出按钮，关面板走右侧 tab × / Esc；主区 /review 形态保留退出；测试同步断言 dock 无 exit 按钮且 Esc 仍触发 onClose）。
+
+**门禁**：tsc 0 / ReviewMode vitest 18/18 / docs:check 170 / ui:audit:check。待实机验证后转 verified。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-259: 增量 — 应用内「选择文件夹」选择器（不依赖系统目录面板） (2026-08-31 in_progress)
+
+**用户反馈**：「选择路径 只有打开 难道不能有选择文件夹这个按钮吗 选择哪个文件夹 工作空间路径不就有了吗」——确认核心诉求是点选文件夹直接得到工作空间路径。
+
+**改动**（1 新增 IPC `file:list-directory` / 0 新依赖）：新增共享组件 **FolderPicker**（应用内文件夹浏览器）——面包屑导航（home 段显示 ~）+ 一级子目录列表（隐藏项跳过、中文排序）+ 上一级 + **「选择此文件夹」**，经 `file:list-directory`（realpath + isDirectory + EACCES/EPERM 可见化）读取目录。接入三处：① 左栏创建面板「选择文件夹…」；② 左栏更改工作目录面板「选择文件夹…」；③ 首页手动输入路径区「选择文件夹…」（选中即回填路径输入框，再点确认创建）。替换掉 UI-257/258 中走系统面板的「浏览目录…」入口。**另按用户反馈系统性重做工作台视觉**：对齐 setupHome 设计语言——radial 渐变背景 + layers 图标芯片 + 2xl 标题、项目单列卡片（accent 图标芯片 / mono 路径 / 右侧更新日期 / 悬浮上浮描边）、创建卡片左对齐 + 分组 eyebrow 标签，入场动画复用 setupEnter。
+
+**门禁**：tsc 0 / LeftPanel + home vitest 9/9 / docs:check 170 / ui:audit:check。需重启 dev Electron（新 IPC）。待实机验证后转 verified。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-258: 增量 — 工作台常驻创建入口 + 空白项目（创建后可选/可换工作目录） (2026-08-31 in_progress)
+
+**用户反馈**：「不能设置 是否需要新增一个 创建项目 按钮 创建项目后 可以切换或者选择工作空间」（AskUserQuestion 裁决：入口=首页常驻；工作空间=创建后可选/可换）。
+
+**改动**（0 新增 IPC / 0 新依赖，复用 UI-257 的 `file:validate-directory`）：① **首页工作台**：应用内导航到 `/` 渲染工作台视图（项目卡片列表 + 常驻「创建新项目」卡片，三种方式同区：选目录 / 手动输路径 / 空白项目）；冷启动 `location.key === 'default'` 保持原自动跳最近项目行为不变。② **空白项目**：只填名字（选填，自动命名）即可创建，不强制先绑目录；创建后在项目内随时设置。③ **左栏工作台入口**：「项目」标题旁新增 home 图标（Link → `/`）。④ **更改工作目录内联面板**：原「更改项目工作目录」（仅系统面板）升级为内联面板——路径可粘贴/可编辑 + 校验（validateDirectory）保存 + 浏览目录兜底，替换原 handleChangeWorkspacePath。⑤ Icon 新增 `home`。
+
+**门禁**：tsc 0 / LeftPanel + home vitest 9/9 / TitleBar + RightPanel + ReviewMode + AgentChangesCard 38/38 / docs:check 170 / ui:audit:check。需重启 dev Electron（UI-257 的 preload/main IPC）。待实机验证后转 verified。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-257: 增量 — 创建项目手动输入路径兜底（绕过系统目录面板禁用「打开」） (2026-08-31 in_progress)
+
+**用户反馈**（附截图）：「我点开之后 不能选择有的路径来作为工作空间进行项目开发」——macOS 目录选择面板中选中文件夹后「打开」按钮置灰（面板顶部显示"文件夹通过文件共享进行共享"横幅），部分路径无法经原生面板选定，创建流程卡死在第一步。
+
+**诊断**（CDP 连入真实 dev Electron 渲染进程 + 接口实测）：按钮接线 ✓ / 桥 `openDirectoryDialog` 存在 ✓ / `showOpenDialog` 正常弹出 ✓ / 后端 `POST /projects`（App 实际使用的 :58629 实例）创建成功 ✓——链路各环完好，卡点在**系统目录面板本身**（macOS 对共享标记路径禁用确认按钮），应用侧无法修复面板行为。
+
+**改动**（1 新增 IPC `file:validate-directory` / 0 新依赖）：两条创建路径均新增**手动输入路径**兜底——① 左栏「+」改为打开**内联创建面板**：路径输入框（可粘贴/可编辑）+ 「创建项目」（校验通过后以目录名创建并跳转）+ 「浏览目录…」（仍可走系统面板）+ 「取消」；不再强制先弹系统面板。② 首页创建区新增「或手动输入路径」（按需显示输入框，用户偏好）。校验经 `file:validate-directory`（存在 + 是目录 + 返回 realpath），坏路径在创建前报错，不再落库坏 workspace。
+
+**门禁**：tsc 0 / LeftPanel + home vitest 9/9 / docs:check 170 / ui:audit:check。**需重启 dev Electron**（preload/main 新增 IPC 不走 HMR）。待实机验证后转 verified。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-256: 清理 — 移除 TitleBar「打开审阅」按钮及死链（审阅入口已迁移右侧边栏） (2026-08-31 in_progress)
+
+**用户反馈**：「右上角的 打开审阅 这个按钮没有用了 审阅入口已经迁移了 清理掉这里相关联的代码也可以清理 保持纯净」。
+
+**改动**（0 新增 IPC / 0 新依赖）：TitleBar 审阅入口迁移到右侧边栏「审阅」tab 后，TitleBar `WorkingTreeReviewTitleBarButton` 及其 `workingTreeOpen` 状态链全部成为死代码，整链移除——① TitleBar 按钮组件 + `.reviewDot` 圆点样式；② `useWorkspacePanels` 的 `workingTreeOpen/setWorkingTreeOpen/toggleWorkingTree`；③ App.tsx 工作区外 `wt-dock` 浮层兜底（含 `isWorkspaceRoute`/`useLocation`/dock 形态 `.wt-dock` CSS；`variant="dock"` 本体保留，RightPanel review tab 仍在用）；④ ProjectWorkspace 的 workingTreeOpen ⇄ review tab 双向同步 effect。顺带修复 TitleBar.test.tsx 8 个历史失败用例（断言仍停留在 mac 交通灯「最大化窗口」旧行为，现行为「全屏」+ `toggleFullScreen`）。
+
+**门禁**：tsc 0 / TitleBar + RightPanel + ReviewMode + AgentChangesCard vitest 38/38 / docs:check 170 / ui:audit:check。待 dev Electron 实机确认按钮消失、审阅 tab 入口正常后转 verified。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-251: 增量 — 创建项目失败可见化（左栏 +/首页创建全链路错误反馈） (2026-08-31 in_progress)
+
+**用户反馈**：「我点击创建新项目按钮 但是不能选择具体的文件夹 有问题就优化」。
+
+**诊断**：静态核对全链（preload `files.openDirectoryDialog` → `file:open-dialog` openDirectory → `dialog.showOpenDialog` → `POST /api/data/projects` workspacePath 透传 → `db.createProject` 优先用选定目录）——链路本身完整。真正的问题：**创建流程所有失败路径都静默**（桥缺失 → 无反应；对话框失败 → null 无反应；`createProject` 接口报错 → 未捕获的 rejection 无反应），用户侧表现为「点了不能选文件夹」。
+
+**改动**：home 首页创建 + 项目左栏「+」创建两条路径统一加固——① 桥缺失时显式提示「当前运行环境不支持选择工作目录」；② 接口/未知错误 try/catch 后以可见文案呈现（首页错误行 `emptyHomeError` / 工作区 `workspaceNotice`），不再静默。取消选择仍为无操作。
+
+**门禁**：tsc 0 / project-store + LeftPanel + home vitest 10/10 / docs:check 170 / ui:audit:check / docs:reconcile 0。待实机复现验证后转 verified（若仍无法弹窗，需用户提供具体症状：对话框完全未弹 / 选择后创建失败）。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-248: BLOCK-29 增量 — 改动分区「展开全部/收起全部」批量文件差异 (2026-08-31 in_progress)
+
+**用户反馈**：「审阅中增加 按钮 展开或者关闭 全部文件变更 按钮 优化使用体验」。
+
+**改动**：dock 手风琴 summary 行（改动分区）新增 `展开全部/收起全部` 切换按钮——展开时同时打开全部目录分组并展开全部文件行内 diff，收起清空行内展开（不动目录分组）；主区（/review）文件列表为点选式无行内展开，按钮仅 dock 渲染。0 新增 IPC / 0 新依赖。
+
+**门禁**：tsc 0 / ReviewMode vitest 30/30。待 dev Electron 实机过目后转 verified。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。

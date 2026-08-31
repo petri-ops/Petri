@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { useWorkspacePanelsContext } from './WorkspacePanelsContext';
 import { getBridge } from '@/lib/desktopBridge';
-import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import { BranchTabsWrapper } from '@/components/branch/BranchTabsWrapper';
 import styles from './TitleBar.module.css';
 
@@ -22,44 +21,6 @@ function getIsMac(): boolean {
 
 function getIsDesktop(): boolean {
   return typeof window !== 'undefined' && window.biof3Desktop?.isDesktop === true;
-}
-
-/**
- * Working Tree Review toggle button integrated into TitleBar.
- * BLOCK-28.2：Toggle 右侧停靠审阅面板（panels.workingTreeOpen），不再导航全屏。
- * agent:task-done（agent 完成改动）时亮起圆点提示，打开面板后清除。
- * Desktop-only: in browser dev (no biof3Desktop.isDesktop) the button is hidden.
- */
-function WorkingTreeReviewTitleBarButton(): React.ReactElement | null {
-  const panels = useWorkspacePanelsContext();
-  const isDesktop = getIsDesktop();
-  const [hasNewChanges, setHasNewChanges] = useState(false);
-  const isOpen = panels.workingTreeOpen;
-
-  useEffect(() => {
-    if (isOpen) {
-      setHasNewChanges(false);
-      return;
-    }
-    return subscribeBioF3Event(biof3Events.agentTaskDone, () => setHasNewChanges(true));
-  }, [isOpen]);
-
-  if (!isDesktop) return null;
-  const title = isOpen ? '收起审阅' : '打开审阅';
-  return (
-    <button
-      type="button"
-      className={`${styles.iconBtn} ${isOpen ? '' : styles.iconBtnInactive}`}
-      onClick={() => panels.toggleWorkingTree()}
-      title={title}
-      aria-label={title}
-      aria-pressed={isOpen}
-      data-testid="working-tree-review-button"
-    >
-      <Icon name="git-branch" size={15} />
-      {hasNewChanges && <span className={styles.reviewDot} aria-hidden="true" />}
-    </button>
-  );
 }
 
 /**
@@ -602,7 +563,6 @@ export function TitleBar(): React.ReactElement {
         )}
 
         <div className={styles.windowTools}>
-          <WorkingTreeReviewTitleBarButton />
           <button
             type="button"
             className={`${styles.iconBtn} ${!panels.bottomTerminalOpen ? styles.iconBtnInactive : ''}`}

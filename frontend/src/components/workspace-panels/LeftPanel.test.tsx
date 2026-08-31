@@ -1,5 +1,6 @@
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LeftPanel, type LeftPanelContext } from './LeftPanel';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
@@ -28,7 +29,15 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext {
     expandedProjects: new Set<string>(),
     creatingProject: false,
     creatingConversation: false,
-    createProjectFromDirectory: vi.fn(),
+    createPanel: {
+      open: false,
+      path: '',
+      error: '',
+      onOpen: vi.fn(),
+      onClose: vi.fn(),
+      onPathChange: vi.fn(),
+      onConfirm: vi.fn(),
+    },
     createConversationForProject: vi.fn(),
     renameProject: vi.fn(async () => true),
     renameConversation: vi.fn(async () => true),
@@ -45,31 +54,75 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext {
     handleSwitchConversation: vi.fn(),
     toggleProjectExpand: vi.fn(),
     handleOpenWorkspacePath: vi.fn(),
-    handleChangeWorkspacePath: vi.fn(),
+    workspaceEdit: {
+      open: false,
+      path: '',
+      error: '',
+      saving: false,
+      onOpen: vi.fn(),
+      onClose: vi.fn(),
+      onPathChange: vi.fn(),
+      onSave: vi.fn(),
+    },
   } as unknown as LeftPanelContext;
+}
+
+// LeftPanel 使用 react-router Link（工作台入口），测试统一包 Router
+function renderLeftPanel(ctx: LeftPanelContext) {
+  return render(
+    <MemoryRouter>
+      <LeftPanel ctx={ctx} />
+    </MemoryRouter>
+  );
 }
 
 describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
   it('marks search quick-action with aria-current="page" when workspaceMode is search', () => {
-    render(<LeftPanel ctx={buildCtx('search')} />);
+    renderLeftPanel(buildCtx('search'));
     const searchBtn = screen.getByRole('button', { name: '搜索' });
     expect(searchBtn.getAttribute('aria-current')).toBe('page');
   });
 
+  // UI-257 — 内联创建面板：路径可粘贴/可编辑，确认回调携带面板输入
+  it('renders the inline create panel and fires onConfirm from manual path input', () => {
+    const onConfirm = vi.fn();
+    const onPathChange = vi.fn();
+    const base = buildCtx('chat');
+    const ctx = {
+      ...base,
+      createPanel: {
+        ...base.createPanel,
+        open: true,
+        path: '/tmp/biof3-manual-ws',
+        onPathChange,
+        onConfirm,
+      },
+    } as unknown as LeftPanelContext;
+    renderLeftPanel(ctx);
+
+    const input = screen.getByLabelText('项目工作目录完整路径') as HTMLInputElement;
+    expect(input.value).toBe('/tmp/biof3-manual-ws');
+    fireEvent.change(input, { target: { value: '/tmp/edited-ws' } });
+    expect(onPathChange).toHaveBeenCalledWith('/tmp/edited-ws');
+
+    fireEvent.click(screen.getByRole('button', { name: '创建项目' }));
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+  });
+
   it('marks plugins quick-action with aria-current="page" when workspaceMode is plugins', () => {
-    render(<LeftPanel ctx={buildCtx('plugins')} />);
+    renderLeftPanel(buildCtx('plugins'));
     const pluginsBtn = screen.getByRole('button', { name: '插件' });
     expect(pluginsBtn.getAttribute('aria-current')).toBe('page');
   });
 
   it('marks footer settings button with aria-current="page" when workspaceMode is settings', () => {
-    render(<LeftPanel ctx={buildCtx('settings')} />);
+    renderLeftPanel(buildCtx('settings'));
     const settingsBtn = screen.getAllByRole('button', { name: '设置' });
     expect(settingsBtn[0].getAttribute('aria-current')).toBe('page');
   });
 
   it('does not set aria-current="page" on inactive quick-action buttons', () => {
-    render(<LeftPanel ctx={buildCtx('result')} />);
+    renderLeftPanel(buildCtx('result'));
     const searchBtn = screen.getByRole('button', { name: '搜索' });
     const pluginsBtn = screen.getByRole('button', { name: '插件' });
     const skillsBtn = screen.getByRole('button', { name: 'Skills' });
@@ -79,7 +132,7 @@ describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
   });
 
   it('preserves the natural Tab order from JSX (no tabindex on quick-action buttons)', () => {
-    render(<LeftPanel ctx={buildCtx('result')} />);
+    renderLeftPanel(buildCtx('result'));
     const searchBtn = screen.getByRole('button', { name: '搜索' });
     const pluginsBtn = screen.getByRole('button', { name: '插件' });
     const skillsBtn = screen.getByRole('button', { name: 'Skills' });
@@ -89,7 +142,7 @@ describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
   });
 
   it('exposes all 4 quick-entry buttons by accessible name (3 QuickActions + 1 footer Settings)', () => {
-    render(<LeftPanel ctx={buildCtx('result')} />);
+    renderLeftPanel(buildCtx('result'));
     expect(screen.getByRole('button', { name: '搜索' })).toBeTruthy();
     expect(screen.getByRole('button', { name: '插件' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Skills' })).toBeTruthy();

@@ -13,10 +13,11 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
+import { FolderPicker } from '@/components/desktop/FolderPicker';
 import { createProject, listProjectJobs, listProjects } from '@/lib/project-store';
 import type { Project, ToolJob } from '@/lib/project-types';
 import styles from './home.module.css';
@@ -46,10 +47,21 @@ function pickRecentCompletedJob(jobs: ToolJob[], projects: Project[]): ToolJob |
 export default function Home(): React.ReactElement {
   const backendStatus = useBackendStatus();
   const navigate = useNavigate();
+  const location = useLocation();
+  // UI-258 — 应用冷启动（location.key === 'default'）保持自动跳最近项目；
+  // 应用内导航到 / 时渲染工作台（项目列表 + 常驻创建入口）。
+  const isInitialEntry = location.key === 'default';
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [projects, setProjects] = useState<Project[]>([]);
   const [targetProjectId, setTargetProjectId] = useState<string | null>(null);
   const [targetJobId, setTargetJobId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  // UI-258 — 空白项目：只填名字创建，工作目录稍后在项目内设置/更换
+  const [blankName, setBlankName] = useState('');
+  // UI-251 — 创建失败可见化（桥缺失/对话框失败/接口报错）
+  const [createError, setCreateError] = useState('');
+  // UI-253 — 选定工作目录后的创建确认（具体路径可见、可反悔）
+  const [pendingWorkspace, setPendingWorkspace] = useState<{ path: string; name: string } | null>(null);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [storeOpen, setStoreOpen] = useState(false);
   const [relaunching, setRelaunching] = useState(false);
@@ -63,6 +75,7 @@ export default function Home(): React.ReactElement {
       try {
         const projects = await listProjects();
         if (cancelled) return;
+        setProjects(projects);
         const jobsByProject = await Promise.all(
           projects.map((project) => listProjectJobs(project.id).catch(() => []))
         );
@@ -107,21 +120,97 @@ export default function Home(): React.ReactElement {
   const handleCreateProject = useCallback(async () => {
     if (creating) return;
     setCreating(true);
+    setCreateError('');
     try {
-      const selectedPath = await window.biof3Desktop?.files?.openDirectoryDialog?.();
+      // UI-251 — 创建失败不再静默：桥缺失/对话框失败/接口报错都要有可见反馈
+      const dialog = window.biof3Desktop?.files?.openDirectoryDialog;
+      if (typeof dialog !== 'function') {
+        setCreateError('当前运行环境不支持选择工作目录（请在 BioF3 桌面应用中使用）。');
+        return;
+      }
+      const selectedPath = await dialog();
       if (!selectedPath) return;
       const normalizedPath = selectedPath.replace(/[\\/]+$/, '');
       const name = normalizedPath.split(/[\\/]/).pop()?.trim() || '新项目';
-      const project = await createProject({
-        name,
-        modality: 'general',
-        workspacePath: selectedPath,
-      });
-      navigate(`/project/${project.id}`, { replace: true });
+      // UI-253 — 选定目录先确认再创建：具体项目路径可见、可反悔
+      setPendingWorkspace({ path: selectedPath, name });
+    } catch (e) {
+      setCreateError(`创建项目失败：${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setCreating(false);
     }
-  }, [creating, navigate]);
+  }, [creating]);
+
+  // UI-257 — 手动输入路径：目录选择面板被系统禁用「打开」按钮时的兜底通道
+  const [manualPathOpen, setManualPathOpen] = useState(false);
+  const [manualPath, setManualPath] = useState('');
+  const [manualValidating, setManualValidating] = useState(false);
+  // UI-259 — 应用内「选择文件夹」展开状态
+  const [browseOpen, setBrowseOpen] = useState(false);
+  const [browseFrom, setBrowseFrom] = useState('');
+
+  const confirmManualPath = useCallback(async () => {
+    if (manualValidating) return;
+    const validate = window.biof3Desktop?.files?.validateDirectory;
+    if (typeof validate !== 'function') {
+      setCreateError('当前运行环境不支持路径校验（请在 BioF3 桌面应用中使用）。');
+      return;
+    }
+    setManualValidating(true);
+    setCreateError('');
+    try {
+      const res = await validate(manualPath);
+      if (!res.ok || !res.data?.path) {
+        setCreateError(res.error || '路径校验失败');
+        return;
+      }
+      const finalPath = res.data.path;
+      const name = finalPath.split(/[\\/]/).pop()?.trim() || '新项目';
+      setPendingWorkspace({ path: finalPath, name });
+      setManualPathOpen(false);
+      setManualPath('');
+    } catch (e) {
+      setCreateError(`路径校验失败：${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setManualValidating(false);
+    }
+  }, [manualPath, manualValidating]);
+
+  // UI-258 — 空白项目：只填名字创建（工作目录缺省由后端分配，可稍后设置/更换）
+  const createBlankProject = useCallback(async () => {
+    if (creating) return;
+    setCreating(true);
+    setCreateError('');
+    try {
+      const name = blankName.trim() || `项目-${new Date().toISOString().slice(5, 16).replace('T', '-')}`;
+      const project = await createProject({ name, modality: 'general' });
+      setBlankName('');
+      navigate(`/project/${project.id}`, { replace: true });
+    } catch (e) {
+      setCreateError(`创建项目失败：${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setCreating(false);
+    }
+  }, [blankName, creating, navigate]);
+
+  const confirmCreatePending = useCallback(async () => {
+    if (!pendingWorkspace || creating) return;
+    setCreating(true);
+    setCreateError('');
+    try {
+      const project = await createProject({
+        name: pendingWorkspace.name,
+        modality: 'general',
+        workspacePath: pendingWorkspace.path,
+      });
+      setPendingWorkspace(null);
+      navigate(`/project/${project.id}`, { replace: true });
+    } catch (e) {
+      setCreateError(`创建项目失败：${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setCreating(false);
+    }
+  }, [creating, navigate, pendingWorkspace]);
 
   const handleRelaunch = useCallback(async () => {
     if (relaunching) return;
@@ -296,6 +385,186 @@ export default function Home(): React.ReactElement {
     );
   }
 
+  // UI-258 — 创建控制区（空首页与工作台共用）：确认面板 / 选目录 / 手动输路径
+  const createControls = (
+    <>
+      {pendingWorkspace ? (
+        <>
+          <p className={styles.emptyHomePendingLabel}>将在以下目录创建项目：</p>
+          <p className={styles.emptyHomePendingPath} title={pendingWorkspace.path}>
+            {pendingWorkspace.path}
+          </p>
+          <p className={styles.emptyHomePendingLabel}>
+            项目名：<strong>{pendingWorkspace.name}</strong>
+          </p>
+          <div className={styles.emptyHomePendingActions}>
+            <button
+              className="biof3-btn biof3-btn--sm"
+              type="button"
+              onClick={() => void confirmCreatePending()}
+              disabled={creating}
+            >
+              {creating ? '创建中…' : '在此处创建'}
+            </button>
+            <button
+              className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+              type="button"
+              onClick={() => setPendingWorkspace(null)}
+              disabled={creating}
+            >
+              重新选择
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => void handleCreateProject()} disabled={creating}>
+            {creating ? '创建中…' : '选择工作目录并创建'}
+          </button>
+          {/* UI-257 — 手动输入路径兜底：目录面板「打开」被系统禁用时可粘贴完整路径 */}
+          {!manualPathOpen ? (
+            <button
+              className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+              type="button"
+              onClick={() => setManualPathOpen(true)}
+              disabled={creating}
+            >
+              或手动输入路径
+            </button>
+          ) : (
+            <>
+              <div className={styles.emptyHomeManual}>
+                <input
+                  className={styles.emptyHomeManualInput}
+                  type="text"
+                  value={manualPath}
+                  onChange={(e) => setManualPath(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') void confirmManualPath();
+                    if (e.key === 'Escape') setManualPathOpen(false);
+                  }}
+                  placeholder="/Users/you/path/to/project"
+                  autoFocus
+                  aria-label="项目工作目录完整路径"
+                />
+                {/* UI-259 — 应用内选择文件夹：点选目录直接得到路径，不依赖系统面板 */}
+                <button
+                  className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+                  type="button"
+                  onClick={() => {
+                    if (!browseOpen) setBrowseFrom(manualPath);
+                    setBrowseOpen((o) => !o);
+                  }}
+                  aria-expanded={browseOpen}
+                  disabled={manualValidating}
+                >
+                  选择文件夹…
+                </button>
+                <button
+                  className="biof3-btn biof3-btn--sm"
+                  type="button"
+                  onClick={() => void confirmManualPath()}
+                  disabled={manualValidating || !manualPath.trim()}
+                >
+                  {manualValidating ? '校验中…' : '确认路径'}
+                </button>
+              </div>
+              {browseOpen && (
+                <div className={styles.homeFolderPicker}>
+                  <FolderPicker
+                    initialPath={browseFrom}
+                    pickLabel="就选这个文件夹"
+                    onPick={(picked) => {
+                      setManualPath(picked);
+                      setBrowseOpen(false);
+                    }}
+                    onCancel={() => setBrowseOpen(false)}
+                  />
+                </div>
+              )}
+            </>
+          )}
+          {/* UI-258 — 空白项目：只填名字创建，工作目录稍后在项目内设置/更换 */}
+          <div className={styles.emptyHomeManual}>
+            <input
+              className={styles.emptyHomeManualInput}
+              type="text"
+              value={blankName}
+              onChange={(e) => setBlankName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') void createBlankProject();
+              }}
+              placeholder="项目名（选填，默认自动命名）"
+              aria-label="空白项目名称"
+            />
+            <button
+              className="biof3-btn biof3-btn--sm"
+              type="button"
+              onClick={() => void createBlankProject()}
+              disabled={creating}
+              title="先不绑定工作目录，创建后在项目内随时设置"
+            >
+              创建空白项目
+            </button>
+          </div>
+        </>
+      )}
+      {createError && (
+        <p className={styles.emptyHomeError} role="alert">{createError}</p>
+      )}
+    </>
+  );
+
+  // UI-258 — 工作台视图：应用内导航到 / 时展示项目列表 + 常驻创建入口；
+  // 冷启动（isInitialEntry）保持原自动跳最近项目行为，不落在这里。
+  // UI-259 — 视觉对齐全局设计语言（radial 渐变 + 图标芯片 + 悬浮卡片，同 setupHome）。
+  if (status === 'ready' && !isInitialEntry && projects.length > 0) {
+    const sorted = [...projects].sort((a, b) => {
+      const bt = new Date(b.updatedAt || b.createdAt || 0).getTime();
+      const at = new Date(a.updatedAt || a.createdAt || 0).getTime();
+      return bt - at;
+    });
+    return (
+      <section className={styles.workbench} aria-label="项目工作台">
+        <div className={styles.workbenchHeader}>
+          <div className={styles.workbenchIcon}><Icon name="layers" size={24} /></div>
+          <h1>工作台</h1>
+          <p className={styles.workbenchLead}>选择项目继续，或创建新项目。</p>
+        </div>
+        <div className={styles.workbenchBody}>
+          <div className={styles.workbenchSectionLabel}>项目 · {sorted.length}</div>
+          <div className={styles.workbenchGrid}>
+            {sorted.map((project) => (
+              <button
+                key={project.id}
+                type="button"
+                className={styles.workbenchCard}
+                onClick={() => navigate(`/project/${project.id}`)}
+                title={project.workspacePath || project.name}
+              >
+                <span className={styles.workbenchCardIcon}><Icon name="folder" size={16} /></span>
+                <span className={styles.workbenchCardMain}>
+                  <span className={styles.workbenchCardName}>{project.name}</span>
+                  <span className={styles.workbenchCardPath}>
+                    {project.workspacePath || '未设置工作目录 · 可在项目内更改'}
+                  </span>
+                </span>
+                <span className={styles.workbenchCardDate}>
+                  {new Date(project.updatedAt || project.createdAt || 0)
+                    .toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}
+                </span>
+              </button>
+            ))}
+          </div>
+          <div className={styles.workbenchSectionLabel}>创建新项目</div>
+          <div className={styles.workbenchCreate}>
+            {createControls}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (targetProjectId) {
     if (targetJobId) {
       // BLOCK-10-audit-closeout: home.tsx 的 auto-navigate 之前用 `?mode=scheduled`，
@@ -338,11 +607,7 @@ export default function Home(): React.ReactElement {
       <div className={styles.emptyHomeIcon}><Icon name="folder" size={22} /></div>
       <h1>创建第一个项目</h1>
       <p>选择工作目录后，将以目录名称创建项目。</p>
-      <div className={styles.emptyHomeCreate}>
-        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => void handleCreateProject()} disabled={creating}>
-          {creating ? '创建中…' : '选择工作目录并创建'}
-        </button>
-      </div>
+      <div className={styles.emptyHomeCreate}>{createControls}</div>
     </section>
   );
 }

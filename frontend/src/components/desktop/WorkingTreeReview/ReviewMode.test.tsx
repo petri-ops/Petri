@@ -581,57 +581,8 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     expect(blame).toHaveBeenCalledWith({ path: 'src/a.py', ref: 'a1b2c3d4e5f6' });
   });
 
-  it('BLOCK-29.5: compare mode loads range diff between two commits', async () => {
-    const commitLog = vi.fn(() =>
-      Promise.resolve({
-        ok: true,
-        data: {
-          commits: [
-            { sha: 'a1b2c3d4e5f6', shortSha: 'a1b2c3d', author: 'tester', isoDate: '2026-08-30T12:00:00Z', subject: 'newer commit', message: '' },
-            { sha: 'b2c3d4e5f6a1', shortSha: 'b2c3d4e', author: 'tester', isoDate: '2026-08-30T11:00:00Z', subject: 'older commit', message: '' },
-          ],
-          count: 2,
-        },
-      })
-    );
-    const commitDiff = vi.fn(() =>
-      Promise.resolve({
-        ok: true,
-        data: {
-          files: [
-            { path: 'src/r.py', oldPath: null, binary: false, hunks: [{ oldStart: 1, newStart: 1, lines: [{ type: 'add', text: 'r1' }] }] },
-          ],
-          truncated: false,
-          summary: { added: 1, removed: 0 },
-        },
-      })
-    );
-    const commitFileContent = vi.fn(() =>
-      Promise.resolve({ ok: true, data: { original: 'old\n', modified: 'new\n' } })
-    );
-    getBridgeMock.mockReturnValue(makeBridge({ commitLog, commitDiff, commitFileContent }));
-
-    renderReview();
-
-    await waitFor(() => {
-      expect(screen.getByTestId('rvw-review-progress')).toBeTruthy();
-    });
-
-    fireEvent.click(screen.getByRole('tab', { name: '历史' }));
-    await screen.findByTestId('rvw-history-list');
-
-    // 进入对比模式 → 点选基准 → 点选目标
-    fireEvent.click(screen.getByRole('button', { name: '对比' }));
-    expect(screen.getByText('对比模式：点选基准提交')).toBeTruthy();
-    fireEvent.click(await screen.findByText('older commit'));
-    expect(screen.getByText(/已选基准 b2c3d4e/)).toBeTruthy();
-    fireEvent.click(await screen.findByText('newer commit'));
-
-    await screen.findByTestId('rvw-compare-info');
-    expect(commitDiff).toHaveBeenCalledWith({ fromRef: 'b2c3d4e5f6a1', toRef: 'a1b2c3d4e5f6' });
-    expect(screen.getByTestId('rvw-compare-info').textContent).toContain('对比 b2c3d4e..a1b2c3d');
-    expect(screen.getByTestId('rvw-compare-info').textContent).toContain('1 文件');
-  });
+  // UI-249 — BLOCK-29.5 两提交对比模式已移除（低频且入口语义不自明），
+  // `git:commit-diff` IPC 保留供历史提交行内展开详情消费。
 
   it('BLOCK-29.5: stash list, tag optgroup and untracked preview', async () => {
     const stashList = vi.fn(() =>
@@ -685,20 +636,22 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     expect(list.textContent).toContain('a.py');
 
     // 当前选中文件（首个 diff 文件）默认展开
-    const row = screen.getByTitle('src/a.py');
-    expect(row.getAttribute('aria-expanded')).toBe('true');
+    // UI-254 — 右侧常驻文件树与手风琴行同 path，用 data-acc-path 精确定位手风琴行
+    const row = document.querySelector<HTMLButtonElement>('[data-acc-path="src/a.py"]');
+    expect(row).not.toBeNull();
+    expect(row?.getAttribute('aria-expanded')).toBe('true');
     await waitFor(() => {
       expect(document.querySelector('.rvw-acc-diff')).not.toBeNull();
     });
 
     // 点击收起
-    fireEvent.click(row);
-    expect(row.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(row!);
+    expect(row!.getAttribute('aria-expanded')).toBe('false');
     expect(document.querySelector('.rvw-acc-diff')).toBeNull();
 
     // 再次点击展开
-    fireEvent.click(row);
-    expect(row.getAttribute('aria-expanded')).toBe('true');
+    fireEvent.click(row!);
+    expect(row!.getAttribute('aria-expanded')).toBe('true');
     await waitFor(() => {
       expect(document.querySelector('.rvw-acc-diff')).not.toBeNull();
     });
@@ -808,7 +761,7 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     expect(container.querySelector('.rvw-empty-title')?.textContent).toBe('审阅');
   });
 
-  it('BLOCK-28.4: exit button calls onClose in dock variant', async () => {
+  it('UI-260/261: dock has no exit button (file-tree toggle instead); Esc still calls onClose', async () => {
     getBridgeMock.mockReturnValue(makeBridge());
     const onClose = vi.fn();
 
@@ -818,11 +771,12 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
       </MemoryRouter>
     );
 
-    const exitBtn = await screen.findByTestId('rvw-exit-button');
-    expect(exitBtn.getAttribute('title')).toBe('关闭审阅面板 (Esc)');
-    fireEvent.click(exitBtn);
+    // dock 最右侧是文件树开合按钮，退出按钮已被替换（关面板走 tab × / Esc）
+    await screen.findByLabelText('展开文件树');
+    expect(screen.queryByTestId('rvw-exit-button')).toBeNull();
 
-    expect(onClose).toHaveBeenCalledTimes(1);
+    fireEvent.keyDown(window, { key: 'Escape' });
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
   });
 
   it('BLOCK-28.4: exit button navigates back in mode variant', async () => {

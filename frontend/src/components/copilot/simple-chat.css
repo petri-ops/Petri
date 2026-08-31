@@ -140,6 +140,7 @@
 
 /* Messages area */
 .sc-body {
+  position: relative; /* UI-262 — 左缘 MessageRail 的定位锚点 */
   flex: 1;
   min-height: 0;
   height: 100%;
@@ -153,7 +154,8 @@
 .sc-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 2px 4px 0;
+  /* 左侧 18px 让位给 UI-262 的 MessageRail 刻度条，避免消息内容与刻度贴在一起 */
+  padding: 2px 4px 0 18px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -2607,6 +2609,55 @@
   border-radius: 10px;
   background: var(--biof3-bg-surface);
   overflow: hidden;
+}
+
+/* UI-252 — 文件行悬停浮动预览：只读 diff（与审阅详情同源；fixed 定位不拦截点击） */
+.sc-changes-hover-preview {
+  position: fixed;
+  z-index: 80;
+  width: 420px;
+  max-width: calc(100vw - 16px);
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--biof3-bg-elevated, var(--biof3-bg-surface));
+  border: 1px solid var(--biof3-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+  overflow: hidden;
+}
+
+.sc-changes-hover-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--biof3-border);
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.sc-changes-hover-path {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--biof3-font-mono);
+  font-size: var(--biof3-font-size-xs);
+  color: var(--biof3-text-secondary);
+}
+
+.sc-changes-hover-body {
+  overflow: auto;
+  min-height: 0;
+}
+
+.sc-changes-hover-empty {
+  padding: 14px 12px;
+  font-size: var(--biof3-font-size-caption);
+  color: var(--biof3-text-secondary);
+  text-align: center;
 }
 
 .sc-changes-header {

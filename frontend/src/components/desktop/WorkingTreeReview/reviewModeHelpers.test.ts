@@ -79,8 +79,8 @@ describe('groupFilesByDirectory', () => {
     expect(groups[2].files.map((f) => f.path)).toEqual(['README.md']);
   });
 
-  it('renders root group display name as "."', () => {
-    expect(groupDisplayName('')).toBe('.');
+  it('renders root group display name as （根目录） (UI-244)', () => {
+    expect(groupDisplayName('')).toBe('（根目录）');
     expect(groupDisplayName('src')).toBe('src');
   });
 });

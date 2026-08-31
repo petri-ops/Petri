@@ -81,6 +81,249 @@
   opacity: 0.5;
 }
 
+/* UI-251 — 创建失败可见化 */
+.emptyHomeError {
+  margin: 8px 0 0;
+  color: var(--biof3-status-error-fg, #b91c1c);
+  font-size: var(--biof3-font-size-caption);
+}
+
+/* UI-257 — 手动输入路径兜底（按需显示） */
+.emptyHomeManual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  max-width: 460px;
+  margin: 4px auto 0;
+}
+
+/* UI-258/259 — 工作台视图：视觉语言对齐 setupHome（radial 渐变 + 图标芯片 + 悬浮卡片） */
+.workbench {
+  min-height: calc(100vh - var(--biof3-titlebar-height));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 48px 32px 40px;
+  overflow-y: auto;
+  background:
+    radial-gradient(1200px 480px at 50% -10%, var(--biof3-accent-bg), transparent 70%),
+    var(--biof3-bg-surface);
+  color: var(--biof3-text-secondary);
+  animation: setupEnter 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.workbenchHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.workbenchIcon {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  background: var(--biof3-accent-bg);
+  color: var(--biof3-accent);
+  border: 1px solid var(--biof3-border);
+}
+
+.workbench h1 {
+  margin: 2px 0 0;
+  color: var(--biof3-text);
+  font-size: var(--biof3-font-size-2xl);
+  letter-spacing: -0.01em;
+}
+
+.workbenchLead {
+  margin: 0;
+  font-size: var(--biof3-font-size-caption);
+  color: var(--biof3-text-secondary);
+}
+
+.workbenchBody {
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.workbenchSectionLabel {
+  margin-top: 10px;
+  font-size: var(--biof3-font-size-caption);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--biof3-text-muted, var(--biof3-text-secondary));
+}
+
+.workbenchGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.workbenchCard {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 14px;
+  text-align: left;
+  border: 1px solid var(--biof3-border);
+  border-radius: 12px;
+  background: var(--biof3-bg-canvas);
+  color: var(--biof3-text);
+  cursor: pointer;
+  transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.workbenchCard:hover {
+  transform: translateY(-1px);
+  border-color: var(--biof3-accent);
+}
+
+.workbenchCardIcon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--biof3-accent-bg);
+  color: var(--biof3-accent);
+}
+
+.workbenchCardMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.workbenchCardName {
+  font-size: var(--biof3-font-size-body-sm);
+  font-weight: 600;
+  color: var(--biof3-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workbenchCardPath {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--biof3-font-size-caption);
+  font-family: var(--biof3-font-mono);
+  color: var(--biof3-text-muted, var(--biof3-text-secondary));
+}
+
+.workbenchCardDate {
+  flex-shrink: 0;
+  align-self: flex-start;
+  font-size: var(--biof3-font-size-caption);
+  color: var(--biof3-text-muted, var(--biof3-text-secondary));
+  font-variant-numeric: tabular-nums;
+}
+
+.workbenchCreate {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 12px;
+  background: var(--biof3-bg-canvas);
+}
+
+/* 工作台内创建控件左对齐（空首页保持居中） */
+.workbenchCreate .emptyHomeManual {
+  justify-content: flex-start;
+  margin: 0;
+}
+
+.workbenchCreate .emptyHomeError {
+  text-align: left;
+}
+
+.workbenchCreate .emptyHomePendingActions {
+  justify-content: flex-start;
+}
+
+.workbenchCreate .emptyHomePendingPath {
+  max-width: 100%;
+}
+
+.emptyHomeManualInput {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  box-sizing: border-box;
+  padding: 0 9px;
+  font-size: var(--biof3-font-size-caption);
+  font-family: var(--biof3-font-mono);
+  border: 1px solid var(--biof3-border);
+  border-radius: 7px;
+  background: var(--biof3-bg-canvas);
+  color: var(--biof3-text);
+}
+
+.emptyHomeManualInput:focus {
+  outline: none;
+  border-color: var(--biof3-accent);
+}
+
+/* UI-259 — 应用内文件夹选择器容器 */
+.homeFolderPicker {
+  width: 100%;
+  max-width: 460px;
+  margin: 4px auto 0;
+  text-align: left;
+}
+
+/* UI-253 — 选定目录确认：具体项目路径可见、可反悔 */
+.emptyHomePendingLabel {
+  margin: 6px 0 0;
+  font-size: var(--biof3-font-size-caption);
+  color: var(--biof3-text-secondary);
+}
+
+.emptyHomePendingPath {
+  margin: 4px 0 0;
+  padding: 6px 10px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 1px solid var(--biof3-border);
+  border-radius: 8px;
+  background: var(--biof3-bg-subtle);
+  font-family: var(--biof3-font-mono);
+  font-size: var(--biof3-font-size-xs);
+  color: var(--biof3-text);
+  text-align: left;
+}
+
+.emptyHomePendingActions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
 @keyframes homePulse {
   0%, 100% { opacity: 0.35; }
   50% { opacity: 1; }

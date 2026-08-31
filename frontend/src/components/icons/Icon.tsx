@@ -88,7 +88,8 @@ export type IconName =
   | 'layers'
   | 'play'
   | 'info'
-  | 'table';
+  | 'table'
+  | 'home';
 
 interface IconProps {
   name: IconName;
@@ -612,6 +613,14 @@ const paths: Record<IconName, React.ReactNode> = {
       <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4" />
       <line x1="3" y1="9" x2="21" y2="9" />
       <line x1="3" y1="15" x2="21" y2="15" />
+    </>
+  ),
+  // Home — workbench (Lucide home)
+  home: (
+    <>
+      <path d="m3 10.5 9-7.5 9 7.5" />
+      <path d="M5 9.5V21h14V9.5" />
+      <path d="M9.5 21v-6.5h5V21" />
     </>
   ),
 };

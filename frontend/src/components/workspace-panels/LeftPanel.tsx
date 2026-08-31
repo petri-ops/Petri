@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
+import { FolderPicker } from '@/components/desktop/FolderPicker';
 import type { Project } from '@/lib/project-types';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
@@ -26,8 +28,28 @@ export interface LeftPanelContext {
   // One-click creators
   creatingProject: boolean;
   creatingConversation: boolean;
-  createProjectFromDirectory: () => void | Promise<void>;
+  /** UI-257 — 内联创建项目面板：路径可粘贴/可编辑，绕过系统目录面板限制 */
+  createPanel: {
+    open: boolean;
+    path: string;
+    error: string;
+    onOpen: () => void;
+    onClose: () => void;
+    onPathChange: (path: string) => void;
+    onConfirm: () => void | Promise<void>;
+  };
   createConversationForProject: (projectId?: string) => void | Promise<void>;
+  /** UI-258 — 更改当前项目工作目录（路径可粘贴/可编辑） */
+  workspaceEdit: {
+    open: boolean;
+    path: string;
+    error: string;
+    saving: boolean;
+    onOpen: () => void;
+    onClose: () => void;
+    onPathChange: (path: string) => void;
+    onSave: () => void | Promise<void>;
+  };
   renameProject: (projectId: string, name: string) => Promise<boolean>;
   renameConversation: (conversationId: string, title: string) => Promise<boolean>;
   archiveProject: (projectId: string) => Promise<boolean>;
@@ -48,7 +70,6 @@ export interface LeftPanelContext {
   handleSwitchConversation: (id: string) => void;
   toggleProjectExpand: (id: string) => void;
   handleOpenWorkspacePath: () => void | Promise<void>;
-  handleChangeWorkspacePath: () => void | Promise<void>;
 
   // Desktop mode: hide conversations in sidebar (use TitleBar selector instead)
   showConversations?: boolean;
@@ -100,6 +121,50 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
 // ---------------------------------------------------------------------------
 // Pieces
 // ---------------------------------------------------------------------------
+
+/** UI-259 — 应用内「选择文件夹」按钮：展开 FolderPicker，选中路径写回输入框 */
+function BrowseFolderButton({
+  initialPath,
+  onPick,
+  label = '选择文件夹…',
+  disabled,
+}: {
+  initialPath: string;
+  onPick: (path: string) => void;
+  label?: string;
+  disabled?: boolean;
+}): React.ReactElement {
+  const [open, setOpen] = useState(false);
+  const [browseFrom, setBrowseFrom] = useState('');
+  return (
+    <>
+      <button
+        type="button"
+        className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+        onClick={() => {
+          if (!open) setBrowseFrom(initialPath || '');
+          setOpen((o) => !o);
+        }}
+        aria-expanded={open}
+        disabled={disabled}
+      >
+        {label}
+      </button>
+      {open && (
+        <div className={styles.leftCreatePickerWrap}>
+          <FolderPicker
+            initialPath={browseFrom}
+            onPick={(picked) => {
+              onPick(picked);
+              setOpen(false);
+            }}
+            onCancel={() => setOpen(false)}
+          />
+        </div>
+      )}
+    </>
+  );
+}
 
 function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   const items: Array<{
@@ -161,17 +226,120 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
 
 function ProjectTreeHeader({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   return (
-    <div className={styles.leftPanelHeader}>
-      <span className={styles.leftPanelTitle}>项目</span>
-      <button
-        className={styles.iconBtn}
-        onClick={ctx.createProjectFromDirectory}
-        title="选择工作目录并创建项目"
-        disabled={ctx.creatingProject}
-      >
-        <Icon name="plus" size={16} />
-      </button>
-    </div>
+    <>
+      <div className={styles.leftPanelHeader}>
+        <span className={styles.leftPanelTitle}>项目</span>
+        <div className={styles.leftPanelHeaderActions}>
+          {/* UI-258 — 返回工作台（项目列表 + 常驻创建入口） */}
+          <Link to="/" className={styles.iconBtn} title="返回工作台" aria-label="返回工作台">
+            <Icon name="home" size={15} />
+          </Link>
+          <button
+            className={styles.iconBtn}
+            onClick={ctx.createPanel.onOpen}
+            title="新建项目（选择或粘贴工作目录）"
+            aria-expanded={ctx.createPanel.open}
+            disabled={ctx.creatingProject}
+          >
+            <Icon name="plus" size={16} />
+          </button>
+        </div>
+      </div>
+      {/* UI-257 — 内联创建面板：路径可粘贴/可编辑（macOS 面板禁用「打开」时的兜底） */}
+      {ctx.createPanel.open && (
+        <div className={styles.leftCreatePanel} data-testid="left-create-panel">
+          <div className={styles.leftCreateRow}>
+            <input
+              className={styles.leftCreateInput}
+              type="text"
+              value={ctx.createPanel.path}
+              onChange={(e) => ctx.createPanel.onPathChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') void ctx.createPanel.onConfirm();
+                if (e.key === 'Escape') ctx.createPanel.onClose();
+              }}
+              placeholder="/Users/you/path/to/project"
+              autoFocus
+              aria-label="项目工作目录完整路径"
+            />
+          </div>
+          {ctx.createPanel.error && (
+            <p className={styles.leftCreateError} role="alert">{ctx.createPanel.error}</p>
+          )}
+          <div className={styles.leftCreateActions}>
+            <button
+              type="button"
+              className="biof3-btn biof3-btn--sm"
+              onClick={() => void ctx.createPanel.onConfirm()}
+              disabled={ctx.creatingProject || !ctx.createPanel.path.trim()}
+              title="校验路径并以目录名创建项目"
+            >
+              {ctx.creatingProject ? '创建中…' : '创建项目'}
+            </button>
+            <BrowseFolderButton
+              initialPath={ctx.createPanel.path}
+              onPick={ctx.createPanel.onPathChange}
+              disabled={ctx.creatingProject}
+            />
+            <button
+              type="button"
+              className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+              onClick={ctx.createPanel.onClose}
+              disabled={ctx.creatingProject}
+            >
+              取消
+            </button>
+          </div>
+        </div>
+      )}
+      {/* UI-258 — 更改当前项目工作目录：路径可粘贴/可编辑 */}
+      {ctx.workspaceEdit.open && (
+        <div className={styles.leftCreatePanel} data-testid="left-ws-edit-panel">
+          <div className={styles.leftCreateRow}>
+            <input
+              className={styles.leftCreateInput}
+              type="text"
+              value={ctx.workspaceEdit.path}
+              onChange={(e) => ctx.workspaceEdit.onPathChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') void ctx.workspaceEdit.onSave();
+                if (e.key === 'Escape') ctx.workspaceEdit.onClose();
+              }}
+              placeholder="/Users/you/path/to/project"
+              autoFocus
+              aria-label="当前项目工作目录完整路径"
+            />
+          </div>
+          {ctx.workspaceEdit.error && (
+            <p className={styles.leftCreateError} role="alert">{ctx.workspaceEdit.error}</p>
+          )}
+          <div className={styles.leftCreateActions}>
+            <button
+              type="button"
+              className="biof3-btn biof3-btn--sm"
+              onClick={() => void ctx.workspaceEdit.onSave()}
+              disabled={ctx.workspaceEdit.saving || !ctx.workspaceEdit.path.trim()}
+              title="校验路径并保存为当前项目的工作目录"
+            >
+              {ctx.workspaceEdit.saving ? '保存中…' : '保存'}
+            </button>
+            <BrowseFolderButton
+              initialPath={ctx.workspaceEdit.path}
+              onPick={ctx.workspaceEdit.onPathChange}
+              disabled={ctx.workspaceEdit.saving}
+            />
+            <button
+              type="button"
+              className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+              onClick={ctx.workspaceEdit.onClose}
+              disabled={ctx.workspaceEdit.saving}
+            >
+              取消
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -292,9 +460,9 @@ function ProjectNode({
             className={styles.projectTreeAddBtn}
             onClick={(e) => {
               e.stopPropagation();
-              ctx.handleChangeWorkspacePath();
+              ctx.workspaceEdit.onOpen();
             }}
-            title="更改项目工作目录"
+            title="更改项目工作目录（可粘贴完整路径）"
           >
             <Icon name="settings" size={12} />
           </button>

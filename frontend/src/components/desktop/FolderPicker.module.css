@@ -1,0 +1,127 @@
+/* FolderPicker.module.css — UI-259 应用内文件夹选择器 */
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.crumbBar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
+  background: var(--biof3-bg-canvas);
+}
+
+.crumbItem {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.crumbSep {
+  margin: 0 2px;
+  color: var(--biof3-text-muted, var(--biof3-text-secondary));
+}
+
+.crumbBtn {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 1px 4px;
+  border: none;
+  background: none;
+  color: var(--biof3-text);
+  font-size: var(--biof3-font-size-xs);
+  font-family: var(--biof3-font-mono);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.crumbBtn:hover {
+  background: var(--biof3-bg-elevated, var(--biof3-bg-surface));
+}
+
+.upBtn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 5px;
+  border: none;
+  background: none;
+  color: var(--biof3-text-secondary, var(--biof3-text-muted));
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.upBtn:hover {
+  background: var(--biof3-bg-elevated, var(--biof3-bg-surface));
+}
+
+.dirList {
+  list-style: none;
+  margin: 0;
+  padding: 2px;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
+  background: var(--biof3-bg-canvas);
+}
+
+.dirRow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 4px 8px;
+  border: none;
+  background: none;
+  color: var(--biof3-text);
+  font-size: var(--biof3-font-size-xs);
+  cursor: pointer;
+  border-radius: 4px;
+  text-align: left;
+}
+
+.dirRow:hover {
+  background: var(--biof3-bg-elevated, var(--biof3-bg-surface));
+}
+
+.dirName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty {
+  padding: 8px;
+  font-size: var(--biof3-font-size-xs);
+  color: var(--biof3-text-muted, var(--biof3-text-secondary));
+}
+
+.error {
+  margin: 0;
+  padding: 6px 8px;
+  font-size: var(--biof3-font-size-xs);
+  color: var(--biof3-danger, #d9534f);
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
+  word-break: break-all;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

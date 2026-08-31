@@ -19,9 +19,9 @@ vi.mock('@/pages/project-workspace', () => ({
   TerminalPanel: () => <div>terminal</div>,
   BrowserPanel: () => <div>browser</div>,
 }));
-// BLOCK-28.2 — RightPanel 使用 useWorkspacePanelsContext 打开审阅停靠面板
+// RightPanel 渲染树内 useWorkspaceLayout 依赖 WorkspacePanelsContext 非 null
 vi.mock('@/components/desktop/WorkspacePanelsContext', () => ({
-  useWorkspacePanelsContext: () => ({ toggleWorkingTree: vi.fn() }),
+  useWorkspacePanelsContext: () => ({}),
 }));
 
 afterEach(cleanup);

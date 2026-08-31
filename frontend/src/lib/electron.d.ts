@@ -239,6 +239,14 @@ declare global {
         saveDialog: (defaultName?: string) => Promise<string | null>;
         openDialog: (filters?: unknown) => Promise<string | null>;
         openDirectoryDialog: () => Promise<string | null>;
+        validateDirectory: (
+          targetPath: string
+        ) => Promise<{ ok: boolean; data?: { path: string }; error?: string }>;
+        listDirectory: (dirPath?: string) => Promise<{
+          ok: boolean;
+          data?: { path: string; parent: string | null; home: string; dirs: Array<{ name: string; path: string }> };
+          error?: string;
+        }>;
         openPath: (targetPath: string) => Promise<{ ok: boolean; error?: string }>;
         openWorkspaceFile: (
           workspacePath: string,

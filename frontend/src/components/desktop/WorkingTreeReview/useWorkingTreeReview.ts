@@ -158,20 +158,6 @@ export interface UseWorkingTreeReviewReturn {
   loadStashesAndTags: () => Promise<void>;
   stashes: StashEntry[] | null;
   tags: TagEntry[] | null;
-  /** BLOCK-29.5 — 两提交对比模式（点选基准→目标，只读区间 diff）。 */
-  compareMode: boolean;
-  compareBase: CommitInfo | null;
-  compareFrom: CommitInfo | null;
-  compareTo: CommitInfo | null;
-  compareDiff: DiffResult | null;
-  compareLoading: boolean;
-  /** UI-232 — 区间差异加载失败（与「真没有差异」分开呈现）。 */
-  compareError: string | null;
-  compareFilePath: string | null;
-  setCompareFilePath: (path: string | null) => void;
-  enterCompareMode: () => void;
-  exitCompareMode: () => void;
-  handleCompareClick: (commit: CommitInfo) => Promise<void>;
   /** BLOCK-29.2 — 放弃单文件工作区改动（tracked 还原 / untracked 删除）。 */
   discardFile: (path: string) => Promise<boolean>;
   /** BLOCK-29.2 — 撤销最近一次提交（mixed reset，内容回工作区）。 */
@@ -469,62 +455,8 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     await loadHistory({ file: null });
   }, [loadHistory]);
 
-  // BLOCK-29.5 — 两提交对比模式（点选基准→目标，只读区间 diff）
-  const [compareMode, setCompareMode] = useState(false);
-  const [compareBase, setCompareBase] = useState<CommitInfo | null>(null);
-  const [compareFrom, setCompareFrom] = useState<CommitInfo | null>(null);
-  const [compareTo, setCompareTo] = useState<CommitInfo | null>(null);
-  const [compareDiff, setCompareDiff] = useState<DiffResult | null>(null);
-  const [compareLoading, setCompareLoading] = useState(false);
-  const [compareError, setCompareError] = useState<string | null>(null);
-  const [compareFilePath, setCompareFilePath] = useState<string | null>(null);
-
-  const enterCompareMode = useCallback(() => {
-    setCompareMode(true);
-    setCompareBase(null);
-    setCompareFrom(null);
-    setCompareTo(null);
-    setCompareDiff(null);
-    setCompareError(null);
-  }, []);
-
-  const exitCompareMode = useCallback(() => {
-    setCompareMode(false);
-    setCompareBase(null);
-    setCompareFrom(null);
-    setCompareTo(null);
-    setCompareDiff(null);
-    setCompareError(null);
-    setCompareFilePath(null);
-  }, []);
-
-  const handleCompareClick = useCallback(async (commit: CommitInfo) => {
-    if (!compareBase) {
-      setCompareBase(commit);
-      return;
-    }
-    if (commit.sha === compareBase.sha) return;
-    const bridge = getBridge('workingTreeReview');
-    if (!bridge) return;
-    setCompareLoading(true);
-    setCompareError(null);
-    try {
-      const res = await bridge.commitDiff({ fromRef: compareBase.sha, toRef: commit.sha });
-      if (!res.ok || !res.data) {
-        setCompareError(res.message || res.error || '区间差异加载失败。');
-        return;
-      }
-      const parsed: DiffResult = res.data;
-      setCompareFrom(compareBase);
-      setCompareTo(commit);
-      setCompareDiff(parsed);
-      setCompareFilePath(parsed.files[0]?.path ?? null);
-    } catch (e: unknown) {
-      setCompareError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setCompareLoading(false);
-    }
-  }, [compareBase]);
+  // UI-249 — BLOCK-29.5 两提交对比模式已按用户裁决移除（低频且入口语义不自明）。
+  // `git:commit-diff` IPC 保留：历史提交行内展开详情仍消费。
 
   // BLOCK-29.2 — 放弃单文件工作区改动（tracked 还原 / untracked 删除）
   const discardFile = useCallback(async (path: string) => {
@@ -602,18 +534,6 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     loadStashesAndTags,
     stashes,
     tags,
-    compareMode,
-    compareBase,
-    compareFrom,
-    compareTo,
-    compareDiff,
-    compareLoading,
-    compareError,
-    compareFilePath,
-    setCompareFilePath,
-    enterCompareMode,
-    exitCompareMode,
-    handleCompareClick,
     discardFile,
     undoLastCommit,
   };

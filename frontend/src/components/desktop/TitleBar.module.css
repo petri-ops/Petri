@@ -631,19 +631,6 @@
   color: color-mix(in srgb, var(--titlebar-ink-muted) 66%, transparent 34%);
 }
 
-/* BLOCK-28 — review 按钮「agent 有新改动」圆点提示（取代旧抽屉自动弹层） */
-.reviewDot {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #5cc870;
-  box-shadow: 0 0 0 2px var(--titlebar-bg, #1e1e1e);
-  pointer-events: none;
-}
-
 .pathPill,
 .tabPill {
   display: flex;

@@ -552,21 +552,6 @@ export function ProjectWorkspace(): React.ReactElement {
     setRightOpen(true);
   }, [compactLayout]);
 
-  // BLOCK-28.5 — 审阅并入右侧边栏：全局 workingTreeOpen（TitleBar 分支按钮 /
-  // agent task-done 圆点 / 首页卡片）⇄ review tab 双向同步。
-  // 全局标志翻开 → 打开 review tab；收起 → 关 tab。用户在 TitleBar tab 条或
-  // 面板退出按钮关掉 review tab → 回写全局标志，TitleBar 按钮态保持一致。
-  useEffect(() => {
-    if (shell.workingTreeOpen) openRightPanel('review');
-    else closeRightPanelTab('review');
-  }, [shell.workingTreeOpen, openRightPanel, closeRightPanelTab]);
-
-  useEffect(() => {
-    if (!openRightTabs.includes('review') && shell.workingTreeOpen) {
-      shell.setWorkingTreeOpen(false);
-    }
-  }, [openRightTabs, shell]);
-
   // BLOCK-28.7 — 聊天区改动卡片点击：打开审阅 tab（文件选中由 useWorkingTreeReview 监听）
   useEffect(() => {
     return subscribeBioF3Event(biof3Events.reviewOpenFile, () => {
@@ -808,18 +793,45 @@ export function ProjectWorkspace(): React.ReactElement {
     return selected || '';
   }, []);
 
-  const createProjectFromDirectory = useCallback(async () => {
+  // UI-257 — 内联创建面板：+ 点击先开面板（路径可粘贴/可编辑），不再强制先走系统
+  // 目录面板（macOS 新系统对"文件共享"标记路径会禁用「打开」按钮，面板不可用时可手输）。
+  const [createPanelOpen, setCreatePanelOpen] = useState(false);
+  const [createPath, setCreatePath] = useState('');
+  const [createError, setCreateError] = useState('');
+
+  const openCreatePanel = useCallback(() => {
+    setCreatePanelOpen(true);
+    setCreatePath('');
+    setCreateError('');
+  }, []);
+
+  const closeCreatePanel = useCallback(() => {
+    setCreatePanelOpen(false);
+    setCreateError('');
+  }, []);
+
+  // UI-251/UI-253 — 创建失败不再静默；创建前路径可见（面板内可编辑）
+  const createProjectFromPanel = useCallback(async () => {
     if (creatingProject) return;
+    const validate = window.biof3Desktop?.files?.validateDirectory;
+    if (typeof validate !== 'function') {
+      setCreateError('当前运行环境不支持路径校验（请在 BioF3 桌面应用中使用）。');
+      return;
+    }
     setCreatingProject(true);
+    setCreateError('');
     try {
-      const selectedPath = await chooseWorkspaceDirectory();
-      if (!selectedPath) return;
-      const normalizedPath = selectedPath.replace(/[\\/]+$/, '');
-      const name = normalizedPath.split(/[\\/]/).pop()?.trim() || '新项目';
+      const res = await validate(createPath);
+      if (!res.ok || !res.data?.path) {
+        setCreateError(res.error || '路径校验失败');
+        return;
+      }
+      const finalPath = res.data.path;
+      const name = finalPath.split(/[\\/]/).pop()?.trim() || '新项目';
       const created = await createProject({
         name,
         modality: 'general',
-        workspacePath: selectedPath,
+        workspacePath: finalPath,
       });
       setAllProjects((prev) => [created, ...prev.filter((item) => item.id !== created.id)]);
       setExpandedProjects((prev) => {
@@ -827,11 +839,15 @@ export function ProjectWorkspace(): React.ReactElement {
         next.add(created.id);
         return next;
       });
+      setCreatePanelOpen(false);
+      setCreatePath('');
       navigate(`/project/${created.id}`);
+    } catch (e) {
+      setCreateError(`创建项目失败：${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setCreatingProject(false);
     }
-  }, [chooseWorkspaceDirectory, creatingProject, navigate]);
+  }, [createPath, creatingProject, navigate]);
 
   const createConversationForProject = useCallback(async (targetProjectId = projectId) => {
     if (!targetProjectId || creatingConversation) return;
@@ -974,22 +990,54 @@ export function ProjectWorkspace(): React.ReactElement {
     }
   }, [project?.workspacePath]);
 
-  const handleChangeWorkspacePath = useCallback(async () => {
-    if (!projectId) return;
-    const selected = await chooseWorkspaceDirectory();
-    if (!selected) return;
-    const next = await updateProject(projectId, { workspacePath: selected });
-    if (next) {
-      setProject(next);
-      setWorkspaceNotice('工作目录已更新');
-      listProjects()
-        .then(setAllProjects)
-        .catch(() => {});
-      window.setTimeout(() => setWorkspaceNotice(''), 2400);
-    } else {
-      setWorkspaceNotice('工作目录更新失败');
+  // UI-258 — 更改工作目录内联面板：路径可粘贴/可编辑（系统面板禁用「打开」时兜底）
+  const [wsEditOpen, setWsEditOpen] = useState(false);
+  const [wsEditPath, setWsEditPath] = useState('');
+  const [wsEditError, setWsEditError] = useState('');
+  const [savingWs, setSavingWs] = useState(false);
+
+  const openWsEdit = useCallback(() => {
+    setWsEditPath(project?.workspacePath || '');
+    setWsEditError('');
+    setWsEditOpen(true);
+  }, [project?.workspacePath]);
+
+  const closeWsEdit = useCallback(() => {
+    setWsEditOpen(false);
+    setWsEditError('');
+  }, []);
+
+  const saveWsEdit = useCallback(async () => {
+    if (!projectId || savingWs) return;
+    const validate = window.biof3Desktop?.files?.validateDirectory;
+    if (typeof validate !== 'function') {
+      setWsEditError('当前运行环境不支持路径校验（请在 BioF3 桌面应用中使用）。');
+      return;
     }
-  }, [chooseWorkspaceDirectory, projectId]);
+    setSavingWs(true);
+    setWsEditError('');
+    try {
+      const res = await validate(wsEditPath);
+      if (!res.ok || !res.data?.path) {
+        setWsEditError(res.error || '路径校验失败');
+        return;
+      }
+      const next = await updateProject(projectId, { workspacePath: res.data.path });
+      if (!next) {
+        setWsEditError('工作目录更新失败');
+        return;
+      }
+      setProject(next);
+      setAllProjects((prev) => prev.map((item) => (item.id === next.id ? next : item)));
+      setWsEditOpen(false);
+      setWorkspaceNotice('工作目录已更新');
+      window.setTimeout(() => setWorkspaceNotice(''), 2400);
+    } catch (e) {
+      setWsEditError(`更新失败：${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setSavingWs(false);
+    }
+  }, [projectId, savingWs, wsEditPath]);
 
   const titleBarTitle = useMemo(
     () => buildResultTitleBarTitle(workspaceMode, project?.name, activeArtifact?.label || activeArtifact?.name),
@@ -1753,8 +1801,28 @@ export function ProjectWorkspace(): React.ReactElement {
     expandedProjects,
     creatingProject,
     creatingConversation,
-    createProjectFromDirectory,
+    // UI-257 — 内联创建面板（路径可粘贴/可编辑，绕过系统面板限制）
+    createPanel: {
+      open: createPanelOpen,
+      path: createPath,
+      error: createError,
+      onOpen: openCreatePanel,
+      onClose: closeCreatePanel,
+      onPathChange: setCreatePath,
+      onConfirm: createProjectFromPanel,
+    },
     createConversationForProject,
+    // UI-258 — 更改当前项目工作目录（路径可粘贴/可编辑）
+    workspaceEdit: {
+      open: wsEditOpen,
+      path: wsEditPath,
+      error: wsEditError,
+      saving: savingWs,
+      onOpen: openWsEdit,
+      onClose: closeWsEdit,
+      onPathChange: setWsEditPath,
+      onSave: saveWsEdit,
+    },
     renameProject: renameProjectInTree,
     renameConversation: renameConversationInTree,
     archiveProject: archiveProjectFromTree,
@@ -1770,7 +1838,6 @@ export function ProjectWorkspace(): React.ReactElement {
     handleSwitchConversation,
     toggleProjectExpand,
     handleOpenWorkspacePath,
-    handleChangeWorkspacePath,
   };
 
   const rightPanelCtx: RightPanelContext = {

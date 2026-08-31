@@ -27,6 +27,8 @@ vi.mock('@/lib/project-store', () => ({
 vi.mock('react-router-dom', () => ({
   Navigate: ({ to }: { to: string }) => <div>navigate:{to}</div>,
   useNavigate: () => vi.fn(),
+  // UI-258 — home 读取 location.key 区分冷启动自动跳转 / 应用内导航到工作台
+  useLocation: () => ({ key: 'default', pathname: '/' }),
 }));
 
 function status(overrides: Partial<BackendStatus>): BackendStatus {

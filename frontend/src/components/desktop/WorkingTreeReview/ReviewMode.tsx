@@ -9,7 +9,7 @@
 // 键盘流与旧抽屉一致：A/Y accept · R reject · ↑↓ navigate · Esc 退出模式。
 // ============================================================
 
-import { Fragment, useEffect, useMemo, useState, useRef } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { getBridge } from '@/lib/desktopBridge';
@@ -18,6 +18,7 @@ import type { DiffRevision } from '@/components/editor/CodeMirror/types';
 import { WorkspaceFileIcon } from '@/components/workspace-panels/WorkspaceFileIcon';
 import { useWorkingTreeReview, type CommitInfo, type DiffFile, type DiffResult } from './useWorkingTreeReview';
 import { CodeMirrorDiffView } from './CodeMirrorDiffView';
+import { HoverPreviewPopover } from './HoverPreviewPopover';
 import { CodeReviewDrawer } from './CodeReviewDrawer';
 import {
   computeFileDiffStats,
@@ -387,7 +388,7 @@ export interface ReviewModeProps {
   /**
    * BLOCK-28.2 — 呈现形态：
    * - 'mode'（默认）：主区一级模式（/review 路由，占满 main 区域）
-   * - 'dock'：右侧停靠面板（wt-dock 容器内，文件条横向、diff 最大化）
+   * - 'dock'：右侧边栏 review tab（文件条横向、diff 最大化）
    */
   variant?: 'mode' | 'dock';
   /** dock 形态的关闭回调（Esc / 关闭动作触发）。 */
@@ -405,6 +406,8 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const [focusedHunk, setFocusedHunk] = useState(0);
   const [collapsedDirs, setCollapsedDirs] = useState<Record<string, boolean>>({});
+  // UI-260 — 右侧文件树改为按钮切换：默认收起（不再常驻占据右侧栏），点击展开/再点收缩
+  const [dockTreeOpen, setDockTreeOpen] = useState(false);
   // UI-231 — 历史行内展开（点行 = 行下展开详情，列表不动，可同开多条）
   const [expandedCommits, setExpandedCommits] = useState<Set<string>>(new Set());
   // UI-233 — 汇总统计上移到行（首次展开后加载并保留）
@@ -430,6 +433,67 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
     });
     review.setSelectedFilePath(path);
   };
+
+  // UI-248 — 批量展开/收起全部文件行内差异：
+  // 展开时同时打开全部目录分组，保证行在树中可见；收起只清行内 diff，不动目录分组。
+  const changeFilePaths = (review.status?.files ?? []).map((f) => f.path);
+  const anyFileExpanded = changeFilePaths.some((p) => expandedPaths.has(p));
+  const toggleExpandAllFiles = () => {
+    if (anyFileExpanded) {
+      setExpandedPaths(new Set());
+      return;
+    }
+    setCollapsedDirs({});
+    setExpandedPaths(new Set(changeFilePaths));
+  };
+
+  // UI-254 — 右侧文件树点击：展开/收起左侧行内 diff，并把该行滚入视野
+  const openFileFromTree = (path: string) => {
+    toggleAccordionRow(path);
+    window.setTimeout(() => {
+      document
+        .querySelector(`[data-acc-path="${CSS.escape(path)}"]`)
+        ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }, 60);
+  };
+
+  // UI-250/UI-255 — 文件行悬停浮动预览：hover 350ms 后弹出只读 diff/内容
+  // （与审阅详情同源同渲染；UI-255 起位置/尺寸由 HoverPreviewPopover 实测自适应，不再超出应用窗口）
+  const [hoverPreview, setHoverPreview] = useState<{ path: string; anchor: DOMRect } | null>(null);
+  const hoverOpenTimer = useRef<number | null>(null);
+  const hoverCloseTimer = useRef<number | null>(null);
+
+  const cancelHoverTimers = useCallback(() => {
+    if (hoverOpenTimer.current !== null) {
+      window.clearTimeout(hoverOpenTimer.current);
+      hoverOpenTimer.current = null;
+    }
+    if (hoverCloseTimer.current !== null) {
+      window.clearTimeout(hoverCloseTimer.current);
+      hoverCloseTimer.current = null;
+    }
+  }, []);
+
+  const scheduleHoverClose = useCallback(() => {
+    if (hoverOpenTimer.current !== null) {
+      window.clearTimeout(hoverOpenTimer.current);
+      hoverOpenTimer.current = null;
+    }
+    if (hoverCloseTimer.current !== null) window.clearTimeout(hoverCloseTimer.current);
+    hoverCloseTimer.current = window.setTimeout(() => setHoverPreview(null), 120);
+  }, []);
+
+  const scheduleHoverPreview = useCallback((path: string, el: HTMLElement) => {
+    if (hoverCloseTimer.current !== null) {
+      window.clearTimeout(hoverCloseTimer.current);
+      hoverCloseTimer.current = null;
+    }
+    if (hoverOpenTimer.current !== null) window.clearTimeout(hoverOpenTimer.current);
+    hoverOpenTimer.current = window.setTimeout(() => {
+      hoverOpenTimer.current = null;
+      setHoverPreview({ path, anchor: el.getBoundingClientRect() });
+    }, 350);
+  }, []);
 
   const exitReviewMode = () => {
     if (window.history.length > 1) navigate(-1);
@@ -626,19 +690,78 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
               历史
             </button>
           </div>
+          {/* UI-247 — 分支选择/对比/文件过滤并入 tabs 行，历史第二行取消：
+              控件紧邻分区切换，不再单独占一行 */}
+          {review.historyView === 'history' && (
+            <>
+              {review.historyFileFilter ? (
+                <span className="rvw-history-filter" title="仅显示该文件的提交">
+                  文件: {review.historyFileFilter}
+                  <span
+                    role="button"
+                    tabIndex={-1}
+                    className="rvw-history-filter-clear"
+                    aria-label="清除文件过滤"
+                    title="清除过滤"
+                    onClick={() => void review.loadHistory({ file: null })}
+                  >
+                    <Icon name="x" size={10} />
+                  </span>
+                </span>
+              ) : null}
+              {/* BLOCK-29.5 — 分支选择器：只读查看其他分支历史，不切换工作区分支 */}
+              <select
+                className="rvw-branch-select"
+                aria-label="提交历史分支"
+                value={review.activeBranch ?? ''}
+                onChange={(e) => void review.switchBranch(e.target.value || null)}
+                title="查看其他分支的提交历史（只读，不切换工作区分支）"
+              >
+                <option value="">当前分支 (HEAD)</option>
+                {(review.branches ?? []).map((b) => (
+                  <option key={b.name} value={b.name}>
+                    {b.name}
+                    {b.current ? '（当前）' : ''}
+                  </option>
+                ))}
+                {review.tags && review.tags.length > 0 && (
+                  <optgroup label="标签">
+                    {review.tags.map((t) => (
+                      <option key={t.name} value={t.name}>
+                        {t.name}（tag）
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+              </select>
+            </>
+          )}
           {review.historyView === 'changes' ? (
-            <span className="rvw-summary-stats" data-testid="rvw-summary-stats">
-              <span>{review.status?.totalFiles ?? 0} 个文件</span>
-              {review.diff && (
-                <span className="rvw-stat-add">+{review.diff.summary.added}</span>
-              )}
-              {review.diff && (
-                <span className="rvw-stat-del">−{review.diff.summary.removed}</span>
-              )}
-              <span className="rvw-review-progress" data-testid="rvw-review-progress">
-                {reviewedCount}/{totalFiles} 已审
+            <>
+              <span className="rvw-summary-stats" data-testid="rvw-summary-stats">
+                <span>{review.status?.totalFiles ?? 0} 个文件</span>
+                {review.diff && (
+                  <span className="rvw-stat-add">+{review.diff.summary.added}</span>
+                )}
+                {review.diff && (
+                  <span className="rvw-stat-del">−{review.diff.summary.removed}</span>
+                )}
+                <span className="rvw-review-progress" data-testid="rvw-review-progress">
+                  {reviewedCount}/{totalFiles} 已审
+                </span>
               </span>
-            </span>
+              {/* UI-248 — 批量展开/收起全部文件行内差异（dock 手风琴行可展开；主区文件列表为点选式不适用） */}
+              {isDock && totalFiles > 0 && (
+                <button
+                  type="button"
+                  className="wt-btn rvw-expand-all-btn"
+                  onClick={toggleExpandAllFiles}
+                  title={anyFileExpanded ? '收起所有文件的行内差异' : '展开所有文件的行内差异'}
+                >
+                  {anyFileExpanded ? '收起全部' : '展开全部'}
+                </button>
+              )}
+            </>
           ) : (
             /* UI-235 — 历史分区：工作区统计不适用，改显分支/标签 + 已加载提交数 + 合计 */
             <span className="rvw-summary-stats" data-testid="rvw-history-summary-stats">
@@ -695,17 +818,76 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
           >
             提交审阅{hasDecisions ? ` (${decisionCount})` : ''}
           </button>
-          {/* BLOCK-29.6 UI-243 — 退出属面板导航，icon-only 靠右 */}
-          <button
-            type="button"
-            className="wt-icon-btn rvw-exit-btn"
-            onClick={() => (isDock && onClose ? onClose() : exitReviewMode())}
-            title={isDock ? '关闭审阅面板 (Esc)' : '退出审阅模式'}
-            aria-label="退出审阅"
-            data-testid="rvw-exit-button"
-          >
-            <Icon name="x" size={14} />
-          </button>
+          {/* UI-247 — 历史 ⋯ 溢出菜单（收纳破坏性「撤销上次提交」）随行内控件并入顶部行 */}
+          {review.historyView === 'history' && (
+            <div className="rvw-history-menu">
+              <button
+                type="button"
+                className="wt-icon-btn"
+                aria-label="更多历史操作"
+                aria-haspopup="menu"
+                aria-expanded={historyMenuOpen}
+                title="更多操作"
+                onClick={() => setHistoryMenuOpen((open) => !open)}
+              >
+                ⋯
+              </button>
+              {historyMenuOpen && (
+                <>
+                  <div
+                    className="rvw-menu-backdrop"
+                    onClick={() => setHistoryMenuOpen(false)}
+                    aria-hidden="true"
+                  />
+                  <div className="rvw-overflow-menu" role="menu" aria-label="历史操作菜单">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="rvw-overflow-menu-item rvw-overflow-menu-item--danger"
+                      disabled={review.commitsLoading || !review.commits || review.commits.length === 0}
+                      title="撤销最近一次提交（内容回到工作区）"
+                      onClick={() => {
+                        setHistoryMenuOpen(false);
+                        if (window.confirm('撤销最近一次提交？提交内容将回到工作区，可重新审阅。')) {
+                          void review.undoLastCommit();
+                        }
+                      }}
+                    >
+                      撤销上次提交
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+          {/* UI-260/261 — dock 最右侧：文件树开合（chevron + 文件夹，替换退出按钮；关面板走 tab × / Esc）；
+              主区 /review 形态仍保留退出按钮 */}
+          {isDock && totalFiles > 0 ? (
+            <button
+              type="button"
+              className="wt-icon-btn rvw-tree-toggle-btn"
+              onClick={() => setDockTreeOpen((v) => !v)}
+              aria-pressed={dockTreeOpen}
+              title={dockTreeOpen ? '收起文件树' : '展开文件树'}
+              aria-label={dockTreeOpen ? '收起文件树' : '展开文件树'}
+            >
+              <span className={`rvw-caret${dockTreeOpen ? '' : ' rvw-caret-collapsed'}`}>
+                <span className="rvw-caret-icon"><Icon name="chevron-down" size={12} /></span>
+              </span>
+              <WorkspaceFileIcon name="" type="dir" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="wt-icon-btn rvw-exit-btn"
+              onClick={() => (isDock && onClose ? onClose() : exitReviewMode())}
+              title={isDock ? '关闭审阅面板 (Esc)' : '退出审阅模式'}
+              aria-label="退出审阅"
+              data-testid="rvw-exit-button"
+            >
+              <Icon name="x" size={14} />
+            </button>
+          )}
         </div>
       </header>
       {totalFiles > 0 && (
@@ -723,180 +905,11 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
 
       <div className={`rvw-body${isDock ? ' rvw-body--dock' : ''}`}>
         {review.historyView === 'history' && (
-          review.compareMode && (review.compareDiff || review.compareError) ? (
-            <>
-              {/* BLOCK-29.5 — 区间对比：A..B 文件条 + 只读 diff */}
-              <div className="rvw-commit-info" data-testid="rvw-compare-info">
-                <div className="rvw-commit-info-head">
-                  <span className="rvw-commit-subject">对比 {review.compareFrom?.shortSha}..{review.compareTo?.shortSha}</span>
-                  <span className="rvw-commit-summary">
-                    {(review.compareDiff?.files ?? []).length} 文件
-                    <span className="rvw-stat-add">+{review.compareDiff?.summary.added ?? 0}</span>
-                    <span className="rvw-stat-del">−{review.compareDiff?.summary.removed ?? 0}</span>
-                  </span>
-                  {review.compareError && <span className="wt-diff-error" role="alert">区间差异加载失败：{review.compareError}</span>}
-                  <button type="button" className="rvw-viewmode-btn" onClick={review.exitCompareMode}>
-                    退出对比
-                  </button>
-                </div>
-              </div>
-              <div className="rvw-filestrip" role="tablist" aria-label="对比改动文件">
-                {(review.compareDiff?.files ?? []).map((f) => {
-                  const stats = computeFileDiffStats(f);
-                  const selected = review.compareFilePath === f.path;
-                  const fileName = f.path.slice(f.path.lastIndexOf('/') + 1);
-                  return (
-                    <button
-                      key={f.path}
-                      type="button"
-                      role="tab"
-                      aria-selected={selected}
-                      className={`rvw-filechip${selected ? ' active' : ''}`}
-                      onClick={() => review.setCompareFilePath(f.path)}
-                      title={f.path}
-                    >
-                      <span className="rvw-filechip-name">{fileName}</span>
-                      {(stats.added > 0 || stats.removed > 0) && (
-                        <span className="rvw-file-stats">
-                          {stats.added > 0 && <span className="rvw-stat-add">+{stats.added}</span>}
-                          {stats.removed > 0 && <span className="rvw-stat-del">−{stats.removed}</span>}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              <main className="rvw-diff-area" data-testid="rvw-compare-diff-area">
-                {!review.compareError && (() => {
-                  const file = (review.compareDiff?.files ?? []).find((f) => f.path === review.compareFilePath) || null;
-                  if (!file) {
-                    return <div className="wt-empty">该区间没有可显示的文件差异（两提交间无差异）。</div>;
-                  }
-                  return (
-                    <div className="rvw-file">
-                      <div className="wt-file-header rvw-file-header">
-                        <span className="rvw-history-sha">{review.compareFrom?.shortSha}..{review.compareTo?.shortSha}</span>
-                        <span className="wt-file-path">{file.path}</span>
-                        <span className="rvw-file-stats">
-                          <span className="rvw-stat-add">+{computeFileDiffStats(file).added}</span>
-                          <span className="rvw-stat-del">−{computeFileDiffStats(file).removed}</span>
-                        </span>
-                        <span className="wt-file-hunk-count">{file.hunks.length} 个 hunk</span>
-                      </div>
-                      <CommitDiffFileView
-                        hash={review.compareTo?.sha ?? ''}
-                        file={file}
-                        fromRef={review.compareFrom?.sha ?? null}
-                        toRef={review.compareTo?.sha ?? null}
-                      />
-                    </div>
-                  );
-                })()}
-              </main>
-            </>
-          ) : (
+          <>
+            {/* UI-249 — BLOCK-29.5 两提交区间对比（对比按钮 + compareMode 视图）已按用户裁决移除：
+                低频且入口语义不自明；`git:commit-diff` IPC 保留（历史提交展开详情仍消费） */}
             <div className="rvw-history-list" data-testid="rvw-history-list">
-              {/* BLOCK-29.2 — 历史头部：文件过滤徽标 + 撤销上次提交 */}
-              {/* BLOCK-29.6 UI-243 — 左组（过滤+分支+对比）右组（⋯ 溢出菜单收纳撤销），破坏性动作不再与只读控件平权 */}
-              <div className="rvw-history-head">
-                <div className="rvw-history-tools">
-                  {review.historyFileFilter ? (
-                    <span className="rvw-history-filter" title="仅显示该文件的提交">
-                      文件: {review.historyFileFilter}
-                      <span
-                        role="button"
-                        tabIndex={-1}
-                        className="rvw-history-filter-clear"
-                        aria-label="清除文件过滤"
-                        title="清除过滤"
-                        onClick={() => void review.loadHistory({ file: null })}
-                      >
-                        <Icon name="x" size={10} />
-                      </span>
-                    </span>
-                  ) : null}
-                  {/* BLOCK-29.5 — 分支选择器：只读查看其他分支历史，不切换工作区分支 */}
-                  <select
-                    className="rvw-branch-select"
-                    aria-label="提交历史分支"
-                    value={review.activeBranch ?? ''}
-                    onChange={(e) => void review.switchBranch(e.target.value || null)}
-                    title="查看其他分支的提交历史（只读，不切换工作区分支）"
-                  >
-                    <option value="">当前分支 (HEAD)</option>
-                    {(review.branches ?? []).map((b) => (
-                      <option key={b.name} value={b.name}>
-                        {b.name}
-                        {b.current ? '（当前）' : ''}
-                      </option>
-                    ))}
-                    {review.tags && review.tags.length > 0 && (
-                      <optgroup label="标签">
-                        {review.tags.map((t) => (
-                          <option key={t.name} value={t.name}>
-                            {t.name}（tag）
-                          </option>
-                        ))}
-                      </optgroup>
-                    )}
-                  </select>
-                  {/* BLOCK-29.5 — 两提交对比模式（只读区间 diff） */}
-                  <button
-                    type="button"
-                    className="wt-btn"
-                    onClick={() => (review.compareMode ? review.exitCompareMode() : review.enterCompareMode())}
-                    title="选两个提交对比区间差异（只读）"
-                  >
-                    {review.compareMode ? '退出对比' : '对比'}
-                  </button>
-                  {review.compareMode && (
-                    <span className="rvw-compare-hint" title="对比模式">
-                      {review.compareBase
-                        ? `已选基准 ${review.compareBase.shortSha}，点选目标提交`
-                        : '对比模式：点选基准提交'}
-                    </span>
-                  )}
-                </div>
-                <div className="rvw-history-more">
-                  <button
-                    type="button"
-                    className="wt-icon-btn"
-                    aria-label="更多历史操作"
-                    aria-haspopup="menu"
-                    aria-expanded={historyMenuOpen}
-                    title="更多操作"
-                    onClick={() => setHistoryMenuOpen((open) => !open)}
-                  >
-                    ⋯
-                  </button>
-                  {historyMenuOpen && (
-                    <>
-                      <div
-                        className="rvw-menu-backdrop"
-                        onClick={() => setHistoryMenuOpen(false)}
-                        aria-hidden="true"
-                      />
-                      <div className="rvw-overflow-menu" role="menu" aria-label="历史操作菜单">
-                        <button
-                          type="button"
-                          role="menuitem"
-                          className="rvw-overflow-menu-item rvw-overflow-menu-item--danger"
-                          disabled={review.commitsLoading || !review.commits || review.commits.length === 0}
-                          title="撤销最近一次提交（内容回到工作区）"
-                          onClick={() => {
-                            setHistoryMenuOpen(false);
-                            if (window.confirm('撤销最近一次提交？提交内容将回到工作区，可重新审阅。')) {
-                              void review.undoLastCommit();
-                            }
-                          }}
-                        >
-                          撤销上次提交
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
+              {/* UI-247 — 历史第二行（rvw-history-head：过滤徽标/分支/⋯）已并入顶部 summary 行 */}
               {/* BLOCK-29.5 — stash 只读列表（有内容才显示，不含写操作） */}
               {review.stashes && review.stashes.length > 0 && (
                 <div className="rvw-stash-list" data-testid="rvw-stash-list">
@@ -923,10 +936,6 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                     className="rvw-history-row"
                     aria-expanded={expandedCommits.has(c.sha)}
                     onClick={() => {
-                      if (review.compareMode) {
-                        void review.handleCompareClick(c);
-                        return;
-                      }
                       setExpandedCommits((prev) => {
                         const next = new Set(prev);
                         if (next.has(c.sha)) next.delete(c.sha);
@@ -966,10 +975,11 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                 </button>
               )}
             </div>
-          )
+          </>
         )}
         {review.historyView === 'changes' && (<>
         {isDock ? (
+          <div className="rvw-dock-split">
           <div className="rvw-accordion" data-testid="rvw-file-list" role="list" aria-label="改动文件">
             {review.status && review.status.files.length === 0 && (
               <div className="wt-empty">暂无工作区改动。</div>
@@ -1010,7 +1020,13 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                               type="button"
                               className="rvw-acc-row"
                               aria-expanded={expanded}
+                              data-acc-path={f.path}
                               onClick={() => toggleAccordionRow(f.path)}
+                              onMouseEnter={(e) => {
+                                // 行内 diff 已展开时不弹悬浮预览（信息重复）
+                                if (!expandedPaths.has(f.path)) scheduleHoverPreview(f.path, e.currentTarget);
+                              }}
+                              onMouseLeave={scheduleHoverClose}
                               title={f.path}
                             >
                               <span className={`rvw-caret${expanded ? '' : ' rvw-caret-collapsed'}`}>
@@ -1100,6 +1116,61 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
               );
             })}
           </div>
+          {/* UI-254/260 — 右侧文件树：按钮切换显示（默认收起），树仅作导航（点击=展开/收起左侧行并滚动定位） */}
+          {isDock && dockTreeOpen && (
+          <aside className="rvw-dock-tree" data-testid="rvw-dock-tree" aria-label="改动文件树">
+            <div className="rvw-dock-tree-title">文件树</div>
+            {fileGroups.map((group) => {
+              const collapsed = !!collapsedDirs[group.dir];
+              return (
+                <div key={group.dir || '/'} className="rvw-dock-tree-group">
+                  <button
+                    type="button"
+                    className="rvw-dock-tree-dir"
+                    aria-expanded={!collapsed}
+                    title={group.dir || '（根目录）'}
+                    onClick={() => toggleDir(group.dir)}
+                  >
+                    <span className={`rvw-caret${collapsed ? ' rvw-caret-collapsed' : ''}`}>
+                      <span className="rvw-caret-icon"><Icon name="chevron-down" size={12} /></span>
+                    </span>
+                    <span className="rvw-group-name">{groupDisplayName(group.dir)}</span>
+                    <span className="rvw-group-count">{group.files.length}</span>
+                  </button>
+                  {!collapsed && group.files.map((f) => {
+                    const diffFile = diffByPath.get(f.path);
+                    const stats = computeFileDiffStats(diffFile);
+                    const reviewed = isFileReviewed(diffFile, review.decisions);
+                    const fileName = f.path.slice(f.path.lastIndexOf('/') + 1);
+                    const rowExpanded = expandedPaths.has(f.path);
+                    return (
+                      <button
+                        key={f.path}
+                        type="button"
+                        className={`rvw-dock-tree-file${review.selectedFilePath === f.path ? ' active' : ''}${reviewed ? ' rvw-file-reviewed' : ''}`}
+                        aria-expanded={rowExpanded}
+                        title={f.path}
+                        onClick={() => openFileFromTree(f.path)}
+                      >
+                        <WorkspaceFileIcon name={f.path} type="file" />
+                        <span className="rvw-dock-tree-file-name">{fileName}</span>
+                        {reviewed ? (
+                          <span className="rvw-reviewed-mark"><Icon name="check" size={12} /></span>
+                        ) : (stats.added > 0 || stats.removed > 0) ? (
+                          <span className="rvw-file-stats">
+                            {stats.added > 0 && <span className="rvw-stat-add">+{stats.added}</span>}
+                            {stats.removed > 0 && <span className="rvw-stat-del">−{stats.removed}</span>}
+                          </span>
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </aside>
+          )}
+          </div>
         ) : (
         <aside className="rvw-sidebar" data-testid="rvw-file-list">
           <div className="wt-file-list-title">
@@ -1137,6 +1208,11 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                         type="button"
                         className={`wt-file-list-item rvw-file-row ${review.selectedFilePath === f.path ? 'active' : ''}${reviewed ? ' rvw-file-reviewed' : ''}`}
                         onClick={() => review.setSelectedFilePath(f.path)}
+                        onMouseEnter={(e) => {
+                          // 选中文件的 diff 已在主区展示，不弹悬浮预览（信息重复）
+                          if (review.selectedFilePath !== f.path) scheduleHoverPreview(f.path, e.currentTarget);
+                        }}
+                        onMouseLeave={scheduleHoverClose}
                         title={f.path}
                       >
                         <span className={`wt-file-status wt-file-status-${f.status}`}>{f.status}</span>
@@ -1280,6 +1356,46 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
         filePath={review.selectedFilePath}
         workspacePath={null}
       />
+
+      {/* UI-250/UI-255 — 文件行悬停浮动预览：只读 diff/内容 + 状态统计头（定位/尺寸自适应） */}
+      {hoverPreview && (() => {
+        const previewDiff = diffByPath.get(hoverPreview.path);
+        const previewStatus = review.status?.files.find((f) => f.path === hoverPreview.path);
+        const previewStats = computeFileDiffStats(previewDiff);
+        return (
+          <HoverPreviewPopover
+            anchor={hoverPreview.anchor}
+            testid="rvw-hover-preview"
+            className="rvw-hover-preview"
+            onMouseEnter={cancelHoverTimers}
+            onMouseLeave={scheduleHoverClose}
+          >
+            <div className="rvw-hover-preview-head">
+              <span className={`wt-file-status wt-file-status-${previewStatus?.status ?? '?'}`}>
+                {previewStatus?.status ?? '?'}
+              </span>
+              <span className="rvw-hover-preview-path" title={hoverPreview.path}>{hoverPreview.path}</span>
+              <span className="rvw-file-stats">
+                <span className="rvw-stat-add">+{previewStats.added}</span>
+                <span className="rvw-stat-del">−{previewStats.removed}</span>
+              </span>
+            </div>
+            <div className="rvw-hover-preview-body">
+              {previewDiff && !previewDiff.binary ? (
+                <CodeMirrorDiffView
+                  filePath={hoverPreview.path}
+                  isBinary={false}
+                  hunks={previewDiff.hunks}
+                />
+              ) : previewDiff?.binary ? (
+                <div className="wt-empty">二进制文件，无文本差异可预览。</div>
+              ) : (
+                <UntrackedFilePreview path={hoverPreview.path} />
+              )}
+            </div>
+          </HoverPreviewPopover>
+        );
+      })()}
     </div>
   );
 }

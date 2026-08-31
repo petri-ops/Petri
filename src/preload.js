@@ -204,6 +204,8 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     saveDialog: (defaultName) => ipcRenderer.invoke('file:save-dialog', defaultName),
     openDialog: (filters) => ipcRenderer.invoke('file:open-dialog', filters),
     openDirectoryDialog: () => ipcRenderer.invoke('file:open-dialog', { openDirectory: true }),
+    validateDirectory: (targetPath) => ipcRenderer.invoke('file:validate-directory', targetPath),
+    listDirectory: (dirPath) => ipcRenderer.invoke('file:list-directory', dirPath),
     openPath: (targetPath) => ipcRenderer.invoke('file:open-path', targetPath),
     openWorkspaceFile: (workspacePath, relativePath) =>
       ipcRenderer.invoke('file:open-workspace-file', workspacePath, relativePath),

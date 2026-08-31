@@ -845,6 +845,80 @@
   color: var(--biof3-text-muted);
 }
 
+/* UI-258 — header 右侧按钮组（工作台入口 + 新建项目） */
+.leftPanelHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.leftPanelHeaderActions .iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* UI-262 — 会话记录悬浮卡片的定位锚点 */
+.leftPanelWrap {
+  position: relative;
+}
+
+/* UI-257 — 内联创建项目面板：路径可粘贴/可编辑，绕过系统目录面板限制 */
+.leftCreatePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--biof3-border);
+  background: var(--biof3-bg-surface);
+}
+
+.leftCreateRow {
+  display: flex;
+  min-width: 0;
+}
+
+.leftCreateInput {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  font-size: var(--biof3-font-size-xs);
+  font-family: var(--biof3-font-mono);
+  padding: 5px 8px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
+  background: var(--biof3-bg-canvas);
+  color: var(--biof3-text);
+}
+
+.leftCreateInput:focus {
+  outline: none;
+  border-color: var(--biof3-primary, #4a90d9);
+}
+
+.leftCreateError {
+  margin: 0;
+  font-size: var(--biof3-font-size-xs);
+  color: var(--biof3-danger, #d9534f);
+  word-break: break-all;
+}
+
+.leftCreateActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* UI-259 — 应用内文件夹选择器占满整行（flex-wrap 换行到按钮下方） */
+.leftCreatePickerWrap {
+  width: 100%;
+  min-width: 0;
+}
+
 .projectTreeScroll {
   flex: 1;
   overflow-y: auto;
@@ -1434,7 +1508,8 @@
 
 .workspaceSessionFrameChat {
   justify-content: flex-end;
-  padding: 0 32px;
+  /* 左 32→8px：UI-262 刻度 rail 尽可能贴近工作区左缘 */
+  padding: 0 32px 0 8px;
 }
 
 .workspaceSessionLayout {
@@ -1580,7 +1655,8 @@
 }
 
 .agentMain :global(.sc-messages) {
-  padding: 0;
+  /* 左 18px 让位给 UI-262 MessageRail 刻度条（覆盖基础 .sc-messages padding） */
+  padding: 0 0 0 18px;
 }
 
 .agentMain :global(.sc-composer) {
@@ -3206,7 +3282,8 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .rightChatPanel :global(.sc-messages) {
-  padding: 0;
+  /* 左 18px 让位给 UI-262 MessageRail 刻度条（覆盖基础 .sc-messages padding） */
+  padding: 0 0 0 18px;
 }
 
 .rightChatPanel :global(.sc-empty) {

@@ -8,11 +8,13 @@
 // git 是唯一事实源：每次刷新都重查 status/diff，提交/还原后自动消失。
 // ============================================================
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { getBridge } from '@/lib/desktopBridge';
 import { biof3Events, dispatchBioF3Event, subscribeBioF3Event } from '@/lib/events';
 import { computeFileDiffStats } from '@/components/desktop/WorkingTreeReview/reviewModeHelpers';
+import { CodeMirrorDiffView } from '@/components/desktop/WorkingTreeReview/CodeMirrorDiffView';
+import { HoverPreviewPopover } from '@/components/desktop/WorkingTreeReview/HoverPreviewPopover';
 import type { DiffFile } from '@/components/desktop/WorkingTreeReview/useWorkingTreeReview';
 
 interface ChangeEntry {
@@ -35,6 +37,45 @@ export function AgentChangesCard(): React.ReactElement | null {
   const [entries, setEntries] = useState<ChangeEntry[] | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const [expanded, setExpanded] = useState(true);
+  // UI-252 — 行 diff 数据保留供悬停预览复用（与审阅详情同源）
+  const [diffFiles, setDiffFiles] = useState<Map<string, DiffFile>>(() => new Map());
+
+  // UI-252/UI-255 — 悬停浮动预览：hover 350ms 弹出只读 diff（定位/尺寸由 HoverPreviewPopover 自适应）
+  const [hoverPreview, setHoverPreview] = useState<{ path: string; anchor: DOMRect } | null>(null);
+  const hoverOpenTimer = useRef<number | null>(null);
+  const hoverCloseTimer = useRef<number | null>(null);
+
+  const cancelHoverTimers = useCallback(() => {
+    if (hoverOpenTimer.current !== null) {
+      window.clearTimeout(hoverOpenTimer.current);
+      hoverOpenTimer.current = null;
+    }
+    if (hoverCloseTimer.current !== null) {
+      window.clearTimeout(hoverCloseTimer.current);
+      hoverCloseTimer.current = null;
+    }
+  }, []);
+
+  const scheduleHoverClose = useCallback(() => {
+    if (hoverOpenTimer.current !== null) {
+      window.clearTimeout(hoverOpenTimer.current);
+      hoverOpenTimer.current = null;
+    }
+    if (hoverCloseTimer.current !== null) window.clearTimeout(hoverCloseTimer.current);
+    hoverCloseTimer.current = window.setTimeout(() => setHoverPreview(null), 120);
+  }, []);
+
+  const scheduleHoverPreview = useCallback((path: string, el: HTMLElement) => {
+    if (hoverCloseTimer.current !== null) {
+      window.clearTimeout(hoverCloseTimer.current);
+      hoverCloseTimer.current = null;
+    }
+    if (hoverOpenTimer.current !== null) window.clearTimeout(hoverOpenTimer.current);
+    hoverOpenTimer.current = window.setTimeout(() => {
+      hoverOpenTimer.current = null;
+      setHoverPreview({ path, anchor: el.getBoundingClientRect() });
+    }, 350);
+  }, []);
 
   const refresh = useCallback(async () => {
     const bridge = getBridge('workingTreeReview');
@@ -46,6 +87,7 @@ export function AgentChangesCard(): React.ReactElement | null {
       for (const f of (diffRes.ok && diffRes.data ? diffRes.data.files : []) as DiffFile[]) {
         byPath.set(f.path, f);
       }
+      setDiffFiles(byPath);
       const list: ChangeEntry[] = (statusRes.data.files ?? []).map((f) => {
         const stats = computeFileDiffStats(byPath.get(f.path));
         return { path: f.path, status: f.status, added: stats.added, removed: stats.removed };
@@ -115,6 +157,8 @@ export function AgentChangesCard(): React.ReactElement | null {
               type="button"
               className="sc-changes-row"
               title={`${entry.path} — 点击在审阅中查看`}
+              onMouseEnter={(e) => scheduleHoverPreview(entry.path, e.currentTarget)}
+              onMouseLeave={scheduleHoverClose}
               onClick={() =>
                 dispatchBioF3Event(biof3Events.reviewOpenFile, { filePath: entry.path })
               }
@@ -137,6 +181,38 @@ export function AgentChangesCard(): React.ReactElement | null {
           </button>
         </div>
       )}
+      {/* UI-252/UI-255 — 悬停浮动预览：只读 diff + 状态统计头（定位/尺寸自适应） */}
+      {hoverPreview && (() => {
+        const previewDiff = diffFiles.get(hoverPreview.path);
+        const previewEntry = entries.find((e) => e.path === hoverPreview.path);
+        return (
+          <HoverPreviewPopover
+            anchor={hoverPreview.anchor}
+            testid="agent-changes-hover-preview"
+            className="sc-changes-hover-preview"
+            onMouseEnter={cancelHoverTimers}
+            onMouseLeave={scheduleHoverClose}
+          >
+            <div className="sc-changes-hover-head">
+              <span className={STATUS_CLASS[previewEntry?.status ?? ''] ?? 'sc-changes-badge'}>
+                {previewEntry?.status ?? '?'}
+              </span>
+              <span className="sc-changes-hover-path" title={hoverPreview.path}>{hoverPreview.path}</span>
+              <span className="sc-changes-add">+{previewEntry?.added ?? 0}</span>
+              <span className="sc-changes-del">−{previewEntry?.removed ?? 0}</span>
+            </div>
+            <div className="sc-changes-hover-body">
+              {previewDiff && !previewDiff.binary ? (
+                <CodeMirrorDiffView filePath={hoverPreview.path} isBinary={false} hunks={previewDiff.hunks} />
+              ) : previewDiff?.binary ? (
+                <div className="sc-changes-hover-empty">二进制文件，无文本差异可预览。</div>
+              ) : (
+                <div className="sc-changes-hover-empty">新增/未跟踪文件，点击行在审阅中查看内容。</div>
+              )}
+            </div>
+          </HoverPreviewPopover>
+        );
+      })()}
     </div>
   );
 }

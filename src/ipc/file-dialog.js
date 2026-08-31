@@ -13,6 +13,7 @@
 // ============================================================
 
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const { ipcMain, dialog, shell } = require("electron");
 
@@ -71,6 +72,59 @@ function setupFileDialogIpc({ mainWindow } = {}) {
     } catch (e) {
       console.error("[desktop] open dialog failed:", e.message);
       return null;
+    }
+  });
+
+  // UI-257 — 手动输入路径校验：目录选择面板被系统禁用「打开」时的兜底通道。
+  // 校验存在 + 是目录，返回 realpath；不做 TCC/共享限制探测（交由创建失败可见化）。
+  ipcMain.handle("file:validate-directory", async (_event, targetPath) => {
+    try {
+      if (typeof targetPath !== "string" || !targetPath.trim()) {
+        return { ok: false, error: "路径为空" };
+      }
+      const trimmed = targetPath.trim().replace(/[\\/]+$/, "") || "/";
+      if (!path.isAbsolute(trimmed)) {
+        return { ok: false, error: "必须是绝对路径（以 / 开头）" };
+      }
+      const st = fs.statSync(trimmed);
+      if (!st.isDirectory()) {
+        return { ok: false, error: "该路径不是文件夹" };
+      }
+      return { ok: true, data: { path: fs.realpathSync(trimmed) } };
+    } catch (e) {
+      return { ok: false, error: e.code === "ENOENT" ? "路径不存在" : e.message };
+    }
+  });
+
+  // UI-259 — 应用内文件夹浏览：系统目录面板对共享路径禁用「打开」时的兜底通道。
+  // 列出目标目录下的一级子目录（隐藏项跳过），供 FolderPicker 组件导航选择。
+  ipcMain.handle("file:list-directory", async (_event, dirPath) => {
+    try {
+      const raw = typeof dirPath === "string" ? dirPath.trim() : "";
+      const target = raw || os.homedir();
+      const real = fs.realpathSync(target);
+      if (!fs.statSync(real).isDirectory()) {
+        return { ok: false, error: "该路径不是文件夹" };
+      }
+      const dirs = fs
+        .readdirSync(real, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory() && entry.name !== ".")
+        .map((entry) => ({ name: entry.name, path: path.join(real, entry.name) }))
+        .sort((a, b) => a.name.localeCompare(b.name, "zh-Hans"));
+      const parent = path.dirname(real);
+      return {
+        ok: true,
+        data: {
+          path: real,
+          parent: parent === real ? null : parent,
+          home: os.homedir(),
+          dirs,
+        },
+      };
+    } catch (e) {
+      const message =
+        e.code === "EACCES" || e.code === "EPERM" ? "没有权限访问该文件夹" : e.message;
+      return { ok: false, error: message };
     }
   });
 
