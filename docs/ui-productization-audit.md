@@ -1937,3 +1937,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；定向 vitest 30/30 + theme-token 契约 14/14（纯 CSS 改动）。**2026-08-31 dev 实机 verified**（localhost:3000 桥桩）：透明背景计算样式断言（detailBg/preBg = rgba(0,0,0,0)、pre 左边框 2px solid）+ 暗色/浅色双主题截图对比（`acceptance/ui-236/dark-unified.png`、`light-unified.png`）——内容区单一底色、发丝线结构、说明成引用体。纯 CSS，刷新即生效。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-237: BLOCK-29 增量 — 展开行选中态去灰底（accent 竖线 + 标题着色） (2026-08-31 verified)
+
+**用户反馈**：「改好了吗？？？你看看图片背景不还是有灰色的吗」（浅色主题真实数据截图）——UI-236 后剩余的灰是展开行的 `aria-expanded` 选中底色（bg-subtle 灰带）。
+
+**改动范围**（ReviewMode.css，纯样式）：展开行去灰底 → 透明 + `box-shadow: inset 2px 0 0 accent`（左竖线标记，无布局位移）+ subject accent 着色加粗；hover 从 bg-subtle 降为更轻的 `--biof3-hover`。至此面板灰底只剩 hover 瞬态与顶栏 surface 层级，选中语义由 accent 竖线承担。
+
+**验证**：tsc 0；定向 vitest 30/30 + theme-token 14/14。**2026-08-31 dev 实机 verified**（localhost:3000 桥桩，浅色主题对齐用户截图视角）：展开行 `backgroundColor = rgba(0,0,0,0)`、左竖线 `rgb(13,148,136) 2px inset`、subject accent 着色；截图 `acceptance/ui-237/light-expanded-accent.png`。纯 CSS，刷新即生效。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

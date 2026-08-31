@@ -569,8 +569,9 @@
   font-size: var(--biof3-font-size-caption);
 }
 
+/* UI-237 — hover 只留极轻反馈 */
 .rvw-history-row:hover {
-  background: var(--biof3-bg-subtle);
+  background: var(--biof3-hover);
   color: var(--biof3-text);
 }
 
@@ -757,8 +758,15 @@
 }
 
 /* UI-231 — 历史行内展开详情（列表不跳转，可同开多条） */
+/* UI-237 — 展开行不再铺灰底：左侧 accent 竖线 + 标题变色标记选中 */
 .rvw-history-row[aria-expanded='true'] {
-  background: var(--biof3-bg-subtle);
+  background: transparent;
+  box-shadow: inset 2px 0 0 var(--biof3-accent);
+}
+
+.rvw-history-row[aria-expanded='true'] .rvw-history-subject {
+  color: var(--biof3-accent);
+  font-weight: 600;
 }
 
 /* UI-236 — 视觉统一：内容区单一画布色，结构靠发丝线；
