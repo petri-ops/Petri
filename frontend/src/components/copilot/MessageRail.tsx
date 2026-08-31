@@ -75,6 +75,26 @@ export function MessageRail({
     setCardMeasured(true);
   }, [hover, items.length]);
 
+  // 悬浮 rail 上滚动滚轮：逐条切换上一条/下一条用户消息
+  //（聊天区同步滚动 + 弹出对应预览卡片；rail 不可滚动，无需 preventDefault）
+  const handleWheel = (e: React.WheelEvent) => {
+    if (items.length === 0) return;
+    const dir = e.deltaY > 0 ? 1 : -1;
+    setHover((current) => {
+      const next =
+        current === null
+          ? dir > 0
+            ? 0
+            : items.length - 1
+          : Math.max(0, Math.min(items.length - 1, current + dir));
+      if (next !== current) {
+        showCard(next);
+        onJump(next);
+      }
+      return next;
+    });
+  };
+
   if (items.length === 0) return <></>;
 
   return (
@@ -84,6 +104,7 @@ export function MessageRail({
         role="navigation"
         aria-label="用户消息导航"
         onMouseLeave={scheduleClose}
+        onWheel={handleWheel}
       >
         {items.map((item, i) => (
           <button

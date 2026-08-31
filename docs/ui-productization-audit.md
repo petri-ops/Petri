@@ -2143,7 +2143,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **改动**（0 新增 IPC / 0 新依赖）：新组件 `MessageRail`（挂在 SimpleChat `.sc-body` 内，`data-rail-body` 为定位锚点）——聊天区**左缘垂直居中一条贴边窄 rail**，**当前会话的每条用户消息对应一个横杠刻度**（space-evenly 均布，rail 最大高 62%）；**悬浮刻度弹出预览卡片**（用户消息原文 + 紧随其后的 AI 回复摘要，line-clamp 截断，卡片 top 按实高两阶段夹取保证不出聊天区上下边界），**点击刻度 `scrollIntoView` 平滑跳转到聊天区对应那条用户消息**。`railItems` 由 `displayMessages` 派生（role=user 且有内容），跳转经 `scrollRef` 查询 `.sc-msg-user` 按序号定位。已删除二版 `ChatHistoryRail`（会话列表卡片）组件及 CenterPanel 接入。**按用户反馈调整可见性**：刻度更贴左（左内边距 5→2px）、颜色加重（border 色→text-tertiary + opacity 0.72），hover/active 刻度加宽至 16px×3px accent；`.sc-messages` 左内边距 4→18px 让出刻度沟槽，消息内容与刻度分离。**预览卡片同方案精修**：left 22→24px 对齐沟槽外缘、宽 320px、阴影收敛（8/24/0.12），用户消息加 3px accent 左边条强化「这是你发的消息」的辨识。**沟槽生效修复 + rail 左移**：`.agentMain/.rightChatPanel :global(.sc-messages)` 的 `padding: 0` 覆盖了基础沟槽，改 `0 0 0 18px` 修复；`workspaceSessionFrameChat` 左 padding 32→8px（用户裁决：尽可能贴近左侧边界）+ tick 左内边距 2→0px；默认刻度减淡（10px×2px、opacity 0.45），hover/active 显著加长至 24px×3px accent（卡片左移 28px 让位）。
 
-**门禁**：tsc 0 / SimpleChat + AgentChangesCard vitest 10/10 / docs:check 170 / ui:audit:check。dev Electron 实机多轮过目，用户确认后转 verified。
+**门禁**：tsc 0 / SimpleChat + AgentChangesCard vitest 10/10 / docs:check 170 / ui:audit:check。dev Electron 实机多轮过目，用户确认后转 verified。**补充（同日）**：用户问「刻度不会一直增多吧 / 能否滑动选择其它消息」——① rail 高度封顶（聊天区 62%，max 560px），刻度 space-evenly 等距压缩（点击区 min-height 6→4px），消息再多也不会溢出；② 新增 rail 滚轮导航：悬浮 rail 滚动滚轮即逐条切换上一条/下一条用户消息（聊天区同步 scrollIntoView + 弹出对应预览卡片），tsc 0。
 
 **状态**: verified（dev Electron 边界内）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
