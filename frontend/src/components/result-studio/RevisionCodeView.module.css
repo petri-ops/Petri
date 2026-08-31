@@ -14,7 +14,7 @@
 .technical dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 10px; }
 .technical dd { margin: 0; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, monospace; }
 .code { margin: 0; padding: 14px; overflow: auto; border: 1px solid var(--biof3-border); border-radius: 8px; background: var(--biof3-surface-raised); max-height: 68vh; }
-.code code { white-space: pre; font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.code code { white-space: pre; font: var(--biof3-font-size-body-sm) / 1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
 
 .surface button:focus-visible,
 .surface summary:focus-visible,

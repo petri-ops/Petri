@@ -1972,3 +1972,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：tsc 0 / 定向 vitest（theme-token 契约 + CM 相关）/ docs:check / ui:audit:check。**待 P4 实机**：disposable fixture 造脏文件后断言 `.cm-line`/`.cm-gutters` computed 13px，截图 `acceptance/ui-239/` 后转 verified。
 
 **状态**: in_progress（实现已落地，实机验收留 P4）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-240: TYPOGRAPHY-HIERARCHY P2 — Infima `code`/`pre` 88% 接管 + 代码块统一 13px (2026-08-31 in_progress)
+
+**实测定位**（同 UI-239 审计）：`custom.css --ifm-code-font-size: 88%` + Infima 裸元素规则（`code{font-size:88%}`、`pre{font:88%/1.45 mono}`）从未被桌面覆盖（`global.css` 只接管背景/边框）→ 一切 `<pre>`/`<code>` 渲染为容器 × 0.88（13→11.4px、16→14.1px），各容器基准不同导致「小一号」互不一致——「编辑区」代码忽大忽小的来源。连带发现两处同族漂移：聊天双套代码块 12/13 并存（`.cp-md .cp-code-pre` caption vs `.sc-msg-body pre` body-sm）、Result Studio 代码视图硬编码 `font: 12px`（`RevisionCodeView.module.css`）。
+
+**改动**（代码块统一 body-sm 13px / 行内 code 统一 caption 12px）：
+- `global.css` bare `code`：接管 `font-family: var(--biof3-font-mono)` + `font-size: var(--biof3-font-size-caption)`；bare `pre`：接管 `font: var(--biof3-font-size-body-sm)/1.5 var(--biof3-font-mono)`；`pre code` 100%/inherit。88% 漂移废除；显式规则（`.sc-msg-body`/`.workspaceMarkdownPreview code` 行内）specificity 更高不受影响；docs 页 iframe 文档隔离不受影响。
+- `simple-chat.css` `.cp-md .cp-code-pre` caption→body-sm（聊天内两套代码块对齐 13px）。
+- `RevisionCodeView.module.css` `.code code` 12px 硬编码→body-sm token（Result Studio 代码视图 13px）。
+
+**门禁**：tsc 0 / 定向 vitest（theme-token 契约 + 受影响组件）/ docs:check / ui:audit:check。**待 P4 实机**：HighlightedCode/聊天/markdown 预览 computed 断言 + 截图 `acceptance/ui-240/` 后转 verified。
+
+**状态**: in_progress（实现已落地，实机验收留 P4）。G0 开发期常态 · 不外推 packaged / Provider / GA。

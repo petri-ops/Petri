@@ -128,20 +128,28 @@ body {
  * docs/blog 页有自己的 .biof3-docs-content 规则，优先级更高，不受影响。
  * ──────────────────────────────────────────────────────────── */
 
-/* inline code：去掉 infima 的硬边框（暗色下难看），保留淡背景 */
+/* inline code：去掉 infima 的硬边框（暗色下难看），保留淡背景；
+   TYPOGRAPHY-HIERARCHY UI-240：接管字号/字族——infima 的 --ifm-code-font-size:88%
+   让所有 code=容器×0.88 漂移（13→11.4/16→14.1），行内代码统一 caption 12px */
 code {
   border: none;
   background-color: var(--biof3-bg-subtle);
+  font-family: var(--biof3-font-mono, monospace);
+  font-size: var(--biof3-font-size-caption);
 }
 /* pre 代码块：去掉 infima 默认背景，让应用页自己的代码块样式生效；
-   docs/blog 的 .biof3-docs-content pre 会重新给深色背景 */
+   docs/blog 的 .biof3-docs-content pre 会重新给深色背景；
+   UI-240：接管字号——infima pre{font:88% mono} 使代码块随容器漂移，
+   统一代码块基准 body-sm 13px（对齐聊天正文/CM diff/文件树） */
 pre {
   background-color: transparent;
   padding: 0;
   margin: 0;
+  font: var(--biof3-font-size-body-sm) / 1.5 var(--biof3-font-mono, monospace);
 }
 pre code {
   background-color: transparent;
+  font-size: inherit;
 }
 
 /* 链接：应用页用次级色 + hover 主色，避免满屏绿色 link 抢视觉 */

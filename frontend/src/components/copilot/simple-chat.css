@@ -725,7 +725,8 @@
   border-radius: 0;
   background: transparent;
   overflow-x: auto;
-  font-size: var(--biof3-font-size-caption);
+  /* TYPOGRAPHY-HIERARCHY UI-240 — 与 .sc-msg-body pre 对齐为代码块基准 13px */
+  font-size: var(--biof3-font-size-body-sm);
   line-height: 1.55;
 }
 
