@@ -44,3 +44,4 @@ CDP 实机 6/6（分区切换、历史列表、点开提交 diff 绿色新增行
 
 - **UI-230 / UI-231（2026-08-30，用户反馈驱动）**：UI-230 完整提交说明默认直接展开（去 details 折叠，见 BLOCK-29.3 plan 增量记录）；UI-231 历史列表点击提交改为**行内向下展开详情**（自包含 `ExpandedCommitDetail`，列表不跳转、可同开多条、返回按钮移除；hook 移除 openCommit/selectedCommit 跳转式状态），见 ui-productization-audit.md UI-231 条。G0 开发期常态 · 不外推 packaged/Provider/GA.
 - **UI-232（2026-08-30，用户反馈「已提交怎么会有 没有可显示的文件差异」）**：修复真实链路提交差异恒为空的存量断点——adapter `diff()` 双 ref 区间放行无 pathspec（有界只读；工作区整树禁令不变），前端失败态与空提交分开呈现；`test/git-adapter.test.mjs` 39/39 锁契约。**真实 app 需重启 Electron 生效**。见 ui-productization-audit.md UI-232 条。G0 开发期常态 · 不外推 packaged/Provider/GA.
+- **UI-233（2026-08-30，用户反馈「出现两次…保留一个就可以了吧」）**：行内展开详情去掉重复的 subject/作者·时间详情头，汇总统计「N 文件 +A −D」上移到列表行（首次展开后加载、收起后保留），展开区直接以完整提交说明开始。见 ui-productization-audit.md UI-233 条。G0 开发期常态 · 不外推 packaged/Provider/GA.

@@ -214,8 +214,10 @@ function CommitDiffFileView({ hash, file, fromRef = null, toRef = null }: { hash
 /**
  * UI-231 — 历史列表行内展开的提交详情（自包含）：
  * 自行拉取 commitDiff 与选中文件全文，展开在触发行正下方；列表不跳转、可同开多条。
+ * UI-233 — 详情头不再重复 subject/作者·时间（行上已有）；汇总统计经 onSummary
+ * 上移到行展示；展开区直接以完整提交说明开始。
  */
-function ExpandedCommitDetail({ commit }: { commit: CommitInfo }) {
+function ExpandedCommitDetail({ commit, onSummary }: { commit: CommitInfo; onSummary?: (s: { files: number; added: number; removed: number }) => void }) {
   const [diff, setDiff] = useState<DiffResult | null>(null);
   const [loading, setLoading] = useState(false);
   // UI-232 — 加载失败与「真没有差异」分开呈现，不再让报错伪装成空提交
@@ -236,6 +238,7 @@ function ExpandedCommitDetail({ commit }: { commit: CommitInfo }) {
           const parsed: DiffResult = res.data;
           setDiff(parsed);
           setFilePath(parsed.files[0]?.path ?? null);
+          onSummary?.({ files: parsed.files.length, added: parsed.summary.added, removed: parsed.summary.removed });
         } else {
           setError(res.message || res.error || '提交差异加载失败。');
         }
@@ -250,27 +253,12 @@ function ExpandedCommitDetail({ commit }: { commit: CommitInfo }) {
   }, [commit.sha]);
   return (
     <div className="rvw-history-detail" data-testid={`rvw-commit-detail-${commit.shortSha}`}>
-      <div className="rvw-commit-info" data-testid="rvw-commit-info">
-        <div className="rvw-commit-info-head">
-          <span className="rvw-commit-subject">{commit.subject}</span>
-          <span className="rvw-commit-meta">
-            {commit.author} · {formatCommitDate(commit.isoDate)}
-          </span>
-          {diff && (
-            <span className="rvw-commit-summary">
-              {diff.files.length} 文件
-              <span className="rvw-stat-add">+{diff.summary.added}</span>
-              <span className="rvw-stat-del">−{diff.summary.removed}</span>
-            </span>
-          )}
-        </div>
-        {commit.message && (
-          <div className="rvw-commit-body" data-testid="rvw-commit-body">
-            <pre>{commit.message}</pre>
-          </div>
-        )}
-      </div>
       {error && <div className="wt-diff-error" role="alert">提交差异加载失败：{error}</div>}
+      {commit.message && (
+        <div className="rvw-commit-body" data-testid="rvw-commit-body">
+          <pre>{commit.message}</pre>
+        </div>
+      )}
       <div className="rvw-filestrip" role="tablist" aria-label="提交改动文件">
         {(diff?.files ?? []).map((f) => {
           const stats = computeFileDiffStats(f);
@@ -392,6 +380,8 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   const [collapsedDirs, setCollapsedDirs] = useState<Record<string, boolean>>({});
   // UI-231 — 历史行内展开（点行 = 行下展开详情，列表不动，可同开多条）
   const [expandedCommits, setExpandedCommits] = useState<Set<string>>(new Set());
+  // UI-233 — 汇总统计上移到行（首次展开后加载并保留）
+  const [commitSummaries, setCommitSummaries] = useState<Record<string, { files: number; added: number; removed: number }>>({});
   const textareaRef = useRef<HTMLInputElement>(null);
 
   // BLOCK-29.1 — dock 手风琴：每文件一行，点击展开/收起行内 diff。
@@ -867,11 +857,23 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                     }}
                     title={c.subject}
                   >
-                    <span className="rvw-history-sha">{c.shortSha}</span>
-                    <span className="rvw-history-subject">{c.subject}</span>
-                    <span className="rvw-history-meta">{c.author} · {formatCommitDate(c.isoDate)}</span>
-                  </button>
-                  {expandedCommits.has(c.sha) && <ExpandedCommitDetail commit={c} />}
+                  <span className="rvw-history-sha">{c.shortSha}</span>
+                  <span className="rvw-history-subject">{c.subject}</span>
+                  {commitSummaries[c.sha] && (
+                    <span className="rvw-history-row-stats" title="该提交改动统计">
+                      {commitSummaries[c.sha].files} 文件
+                      <span className="rvw-stat-add">+{commitSummaries[c.sha].added}</span>
+                      <span className="rvw-stat-del">−{commitSummaries[c.sha].removed}</span>
+                    </span>
+                  )}
+                  <span className="rvw-history-meta">{c.author} · {formatCommitDate(c.isoDate)}</span>
+                </button>
+                {expandedCommits.has(c.sha) && (
+                  <ExpandedCommitDetail
+                    commit={c}
+                    onSummary={(s) => setCommitSummaries((prev) => ({ ...prev, [c.sha]: s }))}
+                  />
+                )}
                 </Fragment>
               ))}
               {review.hasMoreHistory && !review.commitsLoading && (

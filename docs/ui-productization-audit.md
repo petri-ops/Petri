@@ -1884,3 +1884,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：node --test test/git-adapter.test.mjs 39/39（含新用例）；tsc 0；定向 vitest 28/28。**2026-08-30 dev 实机 verified**（localhost:3000 桥桩失败模式注入）：commitDiff 返回 ok:false → 详情显示「提交差异加载失败：Scoped git diff failed.」、误导性空态 0 出现。**边界**：adapter 修复在主进程，**dev Electron 须重启**后真实链路才回绿；重启后提交详情与区间对比将显示真实文件差异（此前恒空）。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-233: BLOCK-29 增量 — 展开详情去重：统计上移到列表行，详情头移除 (2026-08-30 verified)
+
+**用户反馈**：「出现两次…保留一个就可以了吧 详细的信息 6 文件 +95 −25 加到第一次出现的位置」——UI-231 行内展开后，列表行与详情头重复展示 subject/作者·时间。
+
+**改动范围**（ReviewMode.tsx + css）：
+- `ExpandedCommitDetail` 移除整个详情头（`rvw-commit-info`：subject/作者·时间/汇总统计）——行上已有 subject 与作者·时间，不再重复；展开区直接以完整提交说明开始（UI-230 语义保持），其后文件条 + diff。
+- 汇总统计「N 文件 +A −D」上移到列表行：新增 `commitSummaries` 状态（sha → 统计），`ExpandedCommitDetail` 经 `onSummary` 回调上报，行尾渲染 `.rvw-history-row-stats`；首次展开后加载，**收起后保留在行上**。
+- subject 全页唯一（行上），实机断言 `subjectCount === 1`。
+
+**验证**：tsc 0；定向 vitest 28/28（用例更新：详情头 0 出现、行上统计断言、收起后统计保留、无 body 提交详情无说明块）。**2026-08-30 dev 实机 verified**（localhost:3000 桥桩）：64c7c10 行显示「2 文件 +7 −0」、subject 全页唯一、详情头 0 残留、body 直显、收起后统计保留；截图 `acceptance/ui-233/row-stats.png`。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

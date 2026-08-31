@@ -289,29 +289,36 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     fireEvent.click(screen.getByRole('tab', { name: '历史' }));
     fireEvent.click(await screen.findByText('with body'));
 
-    const info = await screen.findByTestId('rvw-commit-info');
-    expect(info.textContent).toContain('with body');
-    expect(info.textContent).toContain('2 文件');
-    expect(info.textContent).toContain('+3');
-    expect(info.textContent).toContain('−1');
+    // UI-233 — 详情头不再重复 subject/作者；汇总统计上移到行
+    await waitFor(() => {
+      expect(screen.queryByTestId('rvw-commit-info')).toBeNull();
+    });
+    const row = await screen.findByRole('button', { name: /with body/ });
+    await waitFor(() => {
+      expect(row.textContent).toContain('2 文件');
+    });
+    expect(row.textContent).toContain('+3');
+    expect(row.textContent).toContain('−1');
 
-    // UI-230 — 完整提交说明默认直接展开（无折叠开关）
+    // UI-230 — 完整提交说明默认直接展开（无折叠开关），展开区不再有 subject 头
     const body = screen.getByTestId('rvw-commit-body');
     expect(body.textContent).toContain('user ruling line');
     expect(body.textContent).toContain('impl detail line');
     expect(screen.queryByText('完整提交说明')).toBeNull();
 
-    // 无 body 的提交不渲染说明块
-    // UI-231 — 收起『with body』行（再次点行），展开『no body』行
+    // UI-231 — 收起后行上统计保留；无 body 的提交不渲染说明块
     fireEvent.click(screen.getByRole('button', { name: /with body/ }));
     await waitFor(() => {
-      expect(screen.queryByTestId('rvw-commit-info')).toBeNull();
+      expect(screen.queryByTestId('rvw-commit-body')).toBeNull();
     });
+    expect(screen.getByRole('button', { name: /with body/ }).textContent).toContain('2 文件');
+
     fireEvent.click(screen.getByRole('button', { name: /no body/ }));
+    const detail2 = await screen.findByTestId('rvw-commit-detail-b2c3d4e');
+    expect(detail2).toBeTruthy();
     await waitFor(() => {
-      expect(screen.getByTestId('rvw-commit-info').textContent).toContain('no body');
+      expect(detail2.querySelector('[data-testid="rvw-commit-body"]')).toBeNull();
     });
-    expect(screen.queryByTestId('rvw-commit-body')).toBeNull();
   });
 
   it('BLOCK-29.4: commit file fulltext view toggle', async () => {

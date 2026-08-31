@@ -769,6 +769,17 @@
   border-radius: 0 7px 7px 0;
 }
 
+/* UI-233 — 汇总统计上移到列表行 */
+.rvw-history-row-stats {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: var(--biof3-font-size-xs);
+  color: var(--biof3-text-secondary);
+  white-space: nowrap;
+}
+
 /* BLOCK-29.3 — 提交详情头：subject / 作者·时间 / 汇总统计 + 完整提交说明 */
 .rvw-commit-info {
   display: flex;
