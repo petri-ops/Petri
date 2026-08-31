@@ -1,10 +1,10 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-31（LIGHT-THEME-PURITY 浅色主题纯净度调优已收口：slate→zinc 中性 + 纯白画布，UI-238 verified；同期审阅面板 UI-230~237 连续增量；当前无 active 工作包）
+最后更新：2026-08-31（TYPOGRAPHY-HIERARCHY 字号层次系统性统一 P0 登记——用户反馈「编辑区/diff 区文字大小层次不齐」，实测定位三条根因：CM 全链无字号/Infima code-pre 88% 未接管/7~9px 硬编码；UI-239~241 待落地。同日 LIGHT-THEME-PURITY 已收口 UI-238 verified；审阅面板 UI-230~237 连续增量）
 
 ## Session Snapshot
 
-- **Active work package**: 无。`BLOCK-29.5-REVIEW-READONLY-VISION` 已于 2026-08-30 收口（plan `docs/block-29-5-review-readonly-vision-plan.md`，UI-225~229 verified，证据 `acceptance/ui-225/`~`acceptance/ui-229/`）；下一工作包由用户显式裁决启动。
+- **Active work package**: `TYPOGRAPHY-HIERARCHY`（2026-08-31 用户裁决启动，P0 登记完成；plan `docs/typography-hierarchy-plan.md`）。字号层次系统性统一：P1 CM 全场景 13px 基准（UI-239）/ P2 global.css 接管 `code`/`pre` + 代码块统一（UI-240）/ P3 低于阶梯硬编码收口（UI-241）/ P4 disposable fixture 实机验收 + 收口。**范围外**：字体族漂移（观察项）、暗色单独调、UI-193/194 业务挂载、git 写操作。
 - **Current branch**: `main`；HEAD、dirty state 与 `origin/main` 同步状态以运行时 Git 为准。
 - **Code review boundary**: 代码审阅为**右侧停靠面板**（TitleBar 审阅按钮 Toggle；面板内 = 手风琴文件列表（BLOCK-29.1，未跟踪文件可预览 WORKTREE 全文）+ 提交详情头（BLOCK-29.3）+ 文件视图四态（BLOCK-29.4 三态 + BLOCK-29.5 blame）+ 分支选择器/标签 optgroup/stash 只读列表（BLOCK-29.5）+ 两提交对比模式 + 内嵌提交框）。`/review` 主区 mode 路由保留（同一 ReviewMode 组件）。审阅内核与主题契约不变：真实语义 token 明暗自适配、`git diff HEAD` 基准（c228beb 保留）、hunk 决策键 `path#hunkIndex`、零模型参与。
 - **git history data shape**: `git:commit-log` 载荷 `commits[]` 自 BLOCK-29.3 起含 `message`（完整提交说明）；`commitDiff`/`commitFileContent` 自 BLOCK-29.5 起支持 `{fromRef,toRef}` 区间模式（hash 可省）；`branchList/blame/stashList/tagList` 为 BLOCK-29.5 新只读通道——浏览器 shim 桩若缺这些方法，对应功能降级为空/错误态（blame 视图会显示加载失败，属预期）。
