@@ -539,6 +539,8 @@ function createGitAdapter(options = {}) {
      * BLOCK-29 — 提交历史列表（git log）。
      * BLOCK-29.3 — 记录分隔改为 \x01、追加 %b 完整提交说明（body 可含换行，
      * 不能按行切分）；字段 NUL 分隔（sha/shortSha/author/isoDate/subject/message）。
+     * UI-234 — 加 --shortstat：每条提交附 stats {files, added, removed}（随 log
+     * 一次取回，前端列表行默认可见，无需点开）。stat 行附在记录末尾，从末行提取。
      * limit 上限 200；ref 必须是安全的 ref 表达式（hex sha / 分支名 / HEAD），
      * 不接受空白与以 '-' 开头的值，防参数注入。
      */
@@ -548,6 +550,7 @@ function createGitAdapter(options = {}) {
       const args = [
         'log',
         '--pretty=format:%x01%H%x00%h%x00%an%x00%aI%x00%s%x00%b',
+        '--shortstat',
         '--max-count=' + String(maxCount),
       ];
       const skipCount = Math.max(0, Math.floor(Number(skip) || 0));
@@ -559,18 +562,31 @@ function createGitAdapter(options = {}) {
       }
       const output = run(args, { allowFailure: true, readOnly: true });
       if (!output.ok) throw new GitAdapterError('git_log_failed', 'Scoped git log failed.', output);
+      // UI-234 — git --shortstat 行：" N files changed, X insertions(+), Y deletions(-)"
+      // （仅插入/仅删除时对应段可缺省；空提交无 stat 行）
+      const STAT_LINE_RE = /^ (\d+) files? changed(?:, (\d+) insertions?\(\+\))?(?:, (\d+) deletions?\(-\))?\s*$/;
       const commits = [];
       for (const record of output.stdout.split('\x01')) {
         if (!record) continue;
         const fields = record.split('\x00');
         if (fields.length < 6 || !/^[0-9a-f]{7,64}$/i.test(fields[0])) continue;
+        let message = (fields[5] ?? '').replace(/\n+$/, '');
+        let stats = null;
+        const msgLines = message.split('\n');
+        const m = STAT_LINE_RE.exec(msgLines[msgLines.length - 1] ?? '');
+        if (m) {
+          stats = { files: Number(m[1]), added: Number(m[2] ?? 0), removed: Number(m[3] ?? 0) };
+          msgLines.pop();
+          message = msgLines.join('\n').replace(/\n+$/, '');
+        }
         commits.push({
           sha: fields[0],
           shortSha: fields[1] || fields[0].slice(0, 7),
           author: fields[2] || '',
           isoDate: fields[3] || '',
           subject: fields[4] || '',
-          message: (fields[5] ?? '').replace(/\n+$/, ''),
+          message,
+          stats,
         });
       }
       return { commits, count: commits.length };

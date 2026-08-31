@@ -735,4 +735,13 @@ test('UI-232 two-ref range diff works without pathspecs; working-tree diff stays
     () => adapter.diff({}),
     (e) => e instanceof GitAdapterError && e.code === 'pathspec_required'
   );
+
+  // UI-234 — log 附带 --shortstat 统计（默认可见，无需点开），message 不混入 stat 行
+  const page = adapter.log({ limit: 10 });
+  const firstEntry = page.commits.find((c) => c.subject === 'first');
+  const secondEntry = page.commits.find((c) => c.subject === 'second');
+  assert.ok(firstEntry && secondEntry, 'expected both fixture commits in log');
+  assert.deepEqual(firstEntry.stats, { files: 1, added: 1, removed: 0 });
+  assert.deepEqual(secondEntry.stats, { files: 2, added: 2, removed: 0 });
+  assert.equal(secondEntry.message, '', 'stat line must not leak into message');
 });

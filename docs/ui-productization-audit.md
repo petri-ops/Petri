@@ -1897,3 +1897,17 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc 0；定向 vitest 28/28（用例更新：详情头 0 出现、行上统计断言、收起后统计保留、无 body 提交详情无说明块）。**2026-08-30 dev 实机 verified**（localhost:3000 桥桩）：64c7c10 行显示「2 文件 +7 −0」、subject 全页唯一、详情头 0 残留、body 直显、收起后统计保留；截图 `acceptance/ui-233/row-stats.png`。
 
 **状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-234: BLOCK-29 增量 — 历史行统计默认显示（log --shortstat 随列表一次取回） (2026-08-31 verified)
+
+**用户反馈**：「目前点击之后 才会出现数据 是否可以默认就显示呢」「重启后也是 点击之后才出现真实 git 数据」——UI-233 的行上统计依赖点开后的 commitDiff 回调，未点开的行没有统计。改为统计随历史列表本身一次取回。
+
+**改动范围**：
+- git-adapter `log()` 加 `--shortstat`：每条提交附 `stats {files, added, removed}`（一条 git 命令整页都有，非逐提交请求）；stat 行附在记录末尾，从记录末行提取（正则含仅插入/仅删除缺省段），不混入 `message`；空提交无 stat 行 → `stats: null`。
+- 载荷 additive：`git:commit-log` commits[] 增 `stats`（IPC/preload 直传）；`electron.d.ts` + `CommitInfo` 增可选 `stats`。
+- 前端：行上统计优先读 `c.stats`，旧桥桩/无 stats 时回退既有 `commitSummaries`（点开加载）路径保留。
+- 真实仓库验证：desktop 仓前 4 条提交统计与提交内容一致（如 `a8b90f1` = 6 文件 +95 −25），626 字符多行 body 无 stat 行混入。
+
+**验证**：node --test test/git-adapter.test.mjs 39/39（UI-232 用例扩展 stats 断言：两提交精确统计 + message 不串行）；tsc 0；定向 vitest 29/29（新增用例：commitLog 带 stats → 行默认显示统计，无需点开）。**2026-08-31 dev 实机 verified**（localhost:3000 桥桩带 stats）：不点任何提交，4 行统计全部默认显示（64c7c10「2 文件 +7 −0」等）；截图 `acceptance/ui-234/default-stats.png`。**边界**：adapter 改动在主进程，dev Electron 重启后真实数据生效（与 UI-232 同一次重启覆盖）。
+
+**状态**: verified (dev 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。

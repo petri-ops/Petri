@@ -321,6 +321,34 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     });
   });
 
+  it('UI-234: history rows show stats by default from commitLog', async () => {
+    const commitLog = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        data: {
+          commits: [
+            { sha: 'a1b2c3d4e5f6', shortSha: 'a1b2c3d', author: 'tester', isoDate: '2026-08-31T10:00:00Z', subject: 'stat commit', message: '', stats: { files: 2, added: 3, removed: 1 } },
+          ],
+          count: 1,
+        },
+      })
+    );
+    getBridgeMock.mockReturnValue(makeBridge({ commitLog }));
+
+    renderReview();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('rvw-review-progress')).toBeTruthy();
+    });
+
+    // 不点开任何提交，行上即有统计
+    fireEvent.click(screen.getByRole('tab', { name: '历史' }));
+    const row = await screen.findByRole('button', { name: /stat commit/ });
+    expect(row.textContent).toContain('2 文件');
+    expect(row.textContent).toContain('+3');
+    expect(row.textContent).toContain('−1');
+  });
+
   it('BLOCK-29.4: commit file fulltext view toggle', async () => {
     const commitLog = vi.fn(() =>
       Promise.resolve({

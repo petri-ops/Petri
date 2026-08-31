@@ -837,7 +837,10 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
               {review.commits && review.commits.length === 0 && (
                 <div className="wt-empty">{review.historyFileFilter ? '该文件暂无提交记录。' : '暂无提交记录。'}</div>
               )}
-              {review.commits?.map((c) => (
+              {review.commits?.map((c) => {
+                // UI-234 — 统计默认随 log 到达；展开回退（旧桥桩无 stats 时）仍走 commitSummaries
+                const rowStats = c.stats ?? commitSummaries[c.sha] ?? null;
+                return (
                 <Fragment key={c.sha}>
                   <button
                     type="button"
@@ -857,25 +860,26 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                     }}
                     title={c.subject}
                   >
-                  <span className="rvw-history-sha">{c.shortSha}</span>
-                  <span className="rvw-history-subject">{c.subject}</span>
-                  {commitSummaries[c.sha] && (
-                    <span className="rvw-history-row-stats" title="该提交改动统计">
-                      {commitSummaries[c.sha].files} 文件
-                      <span className="rvw-stat-add">+{commitSummaries[c.sha].added}</span>
-                      <span className="rvw-stat-del">−{commitSummaries[c.sha].removed}</span>
-                    </span>
+                    <span className="rvw-history-sha">{c.shortSha}</span>
+                    <span className="rvw-history-subject">{c.subject}</span>
+                    {rowStats && (
+                      <span className="rvw-history-row-stats" title="该提交改动统计">
+                        {rowStats.files} 文件
+                        <span className="rvw-stat-add">+{rowStats.added}</span>
+                        <span className="rvw-stat-del">−{rowStats.removed}</span>
+                      </span>
+                    )}
+                    <span className="rvw-history-meta">{c.author} · {formatCommitDate(c.isoDate)}</span>
+                  </button>
+                  {expandedCommits.has(c.sha) && (
+                    <ExpandedCommitDetail
+                      commit={c}
+                      onSummary={(s) => setCommitSummaries((prev) => ({ ...prev, [c.sha]: s }))}
+                    />
                   )}
-                  <span className="rvw-history-meta">{c.author} · {formatCommitDate(c.isoDate)}</span>
-                </button>
-                {expandedCommits.has(c.sha) && (
-                  <ExpandedCommitDetail
-                    commit={c}
-                    onSummary={(s) => setCommitSummaries((prev) => ({ ...prev, [c.sha]: s }))}
-                  />
-                )}
                 </Fragment>
-              ))}
+                );
+              })}
               {review.hasMoreHistory && !review.commitsLoading && (
                 <button
                   type="button"

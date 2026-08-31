@@ -90,6 +90,8 @@ export interface CommitInfo {
   subject: string;
   /** BLOCK-29.3 — 完整提交说明（%b，body 为空时为空串）。 */
   message: string;
+  /** UI-234 — 改动统计（--shortstat，随 log 一次取回；空提交为 null）。 */
+  stats?: { files: number; added: number; removed: number } | null;
 }
 
 export interface WorkingTreeStatus {

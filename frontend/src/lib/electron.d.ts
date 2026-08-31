@@ -449,10 +449,11 @@ declare global {
           message?: string;
         }>;
         // BLOCK-29 — 提交历史（审阅面板「历史」分区，只读）；BLOCK-29.3 载荷 additive 增加 message；
-        // BLOCK-29.5 参数 additive 增加 ref（分支选择器）并修复 skip/file IPC 透传
+        // BLOCK-29.5 参数 additive 增加 ref（分支选择器）并修复 skip/file IPC 透传；
+        // UI-234 载荷 additive 增加 stats（--shortstat，列表行默认可见）
         commitLog: (params: { limit?: number; skip?: number; file?: string | null; ref?: string | null }) => Promise<{
           ok: boolean;
-          data?: { commits: Array<{ sha: string; shortSha: string; author: string; isoDate: string; subject: string; message: string }>; count: number };
+          data?: { commits: Array<{ sha: string; shortSha: string; author: string; isoDate: string; subject: string; message: string; stats?: { files: number; added: number; removed: number } | null }>; count: number };
           error?: string;
           message?: string;
         }>;
