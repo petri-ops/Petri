@@ -2639,6 +2639,29 @@
       "phase": "COMPLETED"
     },
     {
+      "id": "BLOCK-31-CONV-SCOPED-CHANGES",
+      "path": "docs/block-31-conversation-scoped-changes-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-31-conv-scoped-changes",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-31",
+        "conversation-scoped",
+        "agent-task",
+        "files-changed",
+        "sse",
+        "G0",
+        "active",
+        "phase=P0-LAUNCH"
+      ],
+      "notes": "2026-09-01 用户裁决启动（「要做会话隔离 权威清单」）：工作区改动卡片与审阅现为项目级 git working tree 全量共享视图（全链路无 conversation 过滤）。方案：后端 agent-runner 收尾回放 task_events 聚合 workspace_write/replace 的 path 集合产出权威 filesChanged（workspace_exec 诚实标注 unattributed），持久化到 task 终态并注入 SSE done payload（协议字段 AgentTaskDoneDetail.filesChanged 已预留）；renderer 按 conversationId 建立任务改动索引；AgentChangesCard 默认只显示当前会话改动，审阅面板保持 git 全量事实源语义不变。归属链：loop_runs.conversation_id（真列）为准，tasks.params.conversationId 兜底；会话内 primary+subagent 并发按 task 归属后聚合。非范围：hunk 级归属、git snapshot 作归属源、主进程备用通道启用、审阅内核改动、0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-01",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH"
+    },
+    {
       "id": "BLOCK-29.2-GIT-TOOLS-PHASE2",
       "path": "docs/block-29-2-git-tools-phase2-plan.md",
       "kind": "work-package",
