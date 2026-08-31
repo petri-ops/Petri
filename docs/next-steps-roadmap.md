@@ -1,11 +1,11 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-31（TYPOGRAPHY-HIERARCHY 已收口：字号层次系统性统一——CM 全场景 13px 基准 UI-239 / Infima code-pre 接管代码块统一 UI-240 / 7~9px 硬编码收口 UI-241，三 UI verified，证据 `acceptance/ui-239/`~`ui-241/`；同日 LIGHT-THEME-PURITY 已收口（UI-238）且审阅面板完成 UI-230~237 连续增量。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-08-31（FONT-FAMILY-UNIFICATION P0 登记：字体族统一——实机清点 Chrome UA 按钮 Arial / Infima 字族无 CJK / sans token 缺 CJK / mono 栈动物园四层漂移，UI-242 待落地；同日 TYPOGRAPHY-HIERARCHY（UI-239~241）与 LIGHT-THEME-PURITY（UI-238）已收口。当前 active：FONT-FAMILY-UNIFICATION。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- 无 active 工作包。`TYPOGRAPHY-HIERARCHY` 已于 2026-08-31 收口（用户反馈「编辑区/diff 区字号层次不齐、要整体协调」）：P1 CM 全场景 13px 基准（UI-239）/ P2 Infima `code`/`pre` 88% 接管 + 代码块统一 13px、行内 12px（UI-240）/ P3 全仓 18 处 7~9px 硬编码收口 xs（UI-241）；dev Electron CDP 实机三场景断言 verified，证据 `acceptance/ui-239/`~`ui-241/`。同日 `LIGHT-THEME-PURITY` 收口（UI-238）+ 审阅面板 UI-230~237 连续增量。
-- 留给用户裁决的后续候选：git 写操作三期（分支切换/暂存区两栏/push-pull，此前裁决排除）；UI-193 widget 业务路径与 UI-194 消费侧挂载；ui:audit `--report` 模式 schema 大小写债务（AUDIT-LOG 2026-08-30 🟢）；字体族漂移统一（-apple-system vs system-ui/Arial，TYPOGRAPHY-HIERARCHY 观察项移交）。
+- **当前唯一 active 工作包：`FONT-FAMILY-UNIFICATION`**（2026-08-31 用户裁决启动，plan [`font-family-unification-plan.md`](./font-family-unification-plan.md)）：字体族统一（TYPOGRAPHY-HIERARCHY 观察项移交）——sans 单栈（token 补 CJK + Infima `--ifm-font-family-base` 覆写 + body 消费 token + 表单控件 `font-family: inherit` 杀 Chrome UA 按钮默认 Arial）+ mono 单栈（全部字面量收口 `var(--biof3-font-mono)`）；xterm 终端字体不动（UI-242）。此前 `TYPOGRAPHY-HIERARCHY` 已收口（UI-239~241 verified，证据 `acceptance/ui-239/`~`ui-241/`）。
+- 留给用户裁决的后续候选：git 写操作三期（分支切换/暂存区两栏/push-pull，此前裁决排除）；UI-193 widget 业务路径与 UI-194 消费侧挂载；ui:audit `--report` 模式 schema 大小写债务（AUDIT-LOG 2026-08-30 🟢）。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 
 ## 当前结论
