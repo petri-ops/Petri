@@ -106,7 +106,7 @@
 
 .progress small {
   color: var(--biof3-text-tertiary);
-  font-size: 9px;
+  font-size: var(--biof3-font-size-xs);
 }
 
 .terminal {

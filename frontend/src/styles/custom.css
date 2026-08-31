@@ -1301,7 +1301,7 @@
   overflow: auto;
   border: 1px solid var(--biof3-border);
   border-radius: 4px;
-  font-size: 9px;
+  font-size: var(--biof3-font-size-xs);
 }
 
 .run-modal-data-table {

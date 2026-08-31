@@ -149,7 +149,7 @@ button.iconAction {
   border: 1px solid var(--biof3-border);
   border-radius: 999px;
   color: var(--biof3-text-secondary);
-  font-size: 9px;
+  font-size: var(--biof3-font-size-xs);
   font-weight: 650;
   white-space: nowrap;
 }
@@ -265,7 +265,7 @@ button.iconAction {
 .relatedFiles button small {
   flex: 0 0 auto;
   color: var(--biof3-text-tertiary);
-  font-size: 9px;
+  font-size: var(--biof3-font-size-xs);
 }
 
 @container (max-width: 520px) {

@@ -1515,7 +1515,7 @@
 }
 
 .workspaceSessionChromeEyebrow {
-  font-size: 8px;
+  font-size: var(--biof3-font-size-xs);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -2004,7 +2004,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   align-items: center;
   gap: 5px;
   flex-shrink: 0;
-  font-size: 9px;
+  font-size: var(--biof3-font-size-xs);
   font-weight: 600;
   color: var(--biof3-text-tertiary);
 }
@@ -2057,7 +2057,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   overflow: hidden;
   padding: 0 3px;
   color: var(--biof3-text-tertiary);
-  font-size: 9px;
+  font-size: var(--biof3-font-size-xs);
   line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2065,12 +2065,12 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .workspacePinnedSummaryQueueLabel {
   color: var(--biof3-text-tertiary);
-  font-size: 9px;
+  font-size: var(--biof3-font-size-xs);
 }
 
 .workspaceWorkflowStateLabel {
   padding-right: 6px;
-  font-size: 9px;
+  font-size: var(--biof3-font-size-xs);
   color: var(--biof3-text-tertiary);
 }
 
@@ -2111,7 +2111,7 @@ button.workspacePinnedSummaryMetricCard:hover {
 .workspaceWorkflowNextAction {
   padding: 1px 6px 0;
   overflow: hidden;
-  font-size: 9px;
+  font-size: var(--biof3-font-size-xs);
   color: var(--biof3-text-tertiary);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2301,7 +2301,7 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .workspacePinnedSummaryRuntimeChip {
   gap: 3px !important;
-  font-size: 9px;
+  font-size: var(--biof3-font-size-xs);
   font-weight: 600;
   color: var(--biof3-text-secondary);
 }
@@ -4040,7 +4040,7 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
 .resultWorkflowBarMain small {
   flex-shrink: 0;
   color: var(--biof3-text-tertiary);
-  font-size: 9px;
+  font-size: var(--biof3-font-size-xs);
 }
 
 .resultWorkflowDot {
@@ -5469,7 +5469,7 @@ body.biof3-resizing-columns * {
 }
 
 .fileTreeSize {
-  font-size: 9px;
+  font-size: var(--biof3-font-size-xs);
   color: var(--biof3-text-tertiary);
   flex-shrink: 0;
   margin-left: auto;
@@ -6575,7 +6575,7 @@ body.biof3-resizing-columns * {
 }
 
 .toolBadge {
-  font-size: 9px;
+  font-size: var(--biof3-font-size-xs);
   padding: 1px 6px;
   border-radius: 8px;
   background: var(--biof3-warning-bg);
@@ -6618,7 +6618,7 @@ body.biof3-resizing-columns * {
 }
 
 .toolboxTabBadge {
-  font-size: 9px;
+  font-size: var(--biof3-font-size-xs);
   padding: 0 5px;
   border-radius: 8px;
   background: var(--biof3-accent);

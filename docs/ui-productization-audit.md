@@ -1985,3 +1985,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：tsc 0 / 定向 vitest（theme-token 契约 + 受影响组件）/ docs:check / ui:audit:check。**待 P4 实机**：HighlightedCode/聊天/markdown 预览 computed 断言 + 截图 `acceptance/ui-240/` 后转 verified。
 
 **状态**: in_progress（实现已落地，实机验收留 P4）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-241: TYPOGRAPHY-HIERARCHY P3 — 低于 token 阶梯的 7~9px 硬编码收口 (2026-08-31 in_progress)
+
+**实测定位**（同 UI-239 全文档 computed 扫描）：token 阶梯最小档 xs(10px)，但文件树文件大小 9px（`_fileTreeSize`）、文件图标徽标/字形 7~8px（`WorkspaceFileIcon.module.css`，同一文件内已混用 7/8/10/12 四档）、Result Studio 微标签与 TitleBar 会话徽标等 9px 共 18 处硬编码低于阶梯。实测全景 9 档混排（7/8/9/10/11/12/13/14/16px）中的最小三档全部属此类脏值。
+
+**改动**（全部收口到 `var(--biof3-font-size-xs)` = 10px，0 档位语义变化）：`project-workspace.module.css` 9px×10 + eyebrow 8px；`WorkspaceFileIcon.module.css` badge 8px + glyph 7px×5（18px 图标盒内 10px 徽标待 P4 实机核对不溢出）；`custom.css` run-modal 表格 9px；`TitleBar.module.css` convSelectorBadge 9px；`ScientificInteractionViewer` caveat/matrix 9px×2；`CompactResultNavigator` truthBadge/relatedFiles 9px×2；`ResultAgentComposer` progress small 9px。grep 兜底全仓 font-size 7~9px 清零。
+
+**门禁**：tsc 0 / 定向 vitest / docs:check / ui:audit:check。**待 P4 实机**：文件树/图标徽标/TitleBar computed 断言 + 截图 `acceptance/ui-241/` 后转 verified。
+
+**状态**: in_progress（实现已落地，实机验收留 P4）。G0 开发期常态 · 不外推 packaged / Provider / GA。

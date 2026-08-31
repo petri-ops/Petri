@@ -38,9 +38,9 @@
 .scatter .axisLabel { font-size: var(--biof3-font-size-sm); }
 .legend { display: flex; flex-wrap: wrap; gap: 5px; padding: 7px 9px 0; }
 .legend button { padding: 0 8px; font-size: var(--biof3-font-size-xs); }
-.caveat { padding: 4px 9px 8px; color: var(--biof3-text-tertiary); font-size: 9px; }
+.caveat { padding: 4px 9px 8px; color: var(--biof3-text-tertiary); font-size: var(--biof3-font-size-xs); }
 .matrix { display: grid; max-width: 100%; flex: 1; align-content: start; gap: 1px; padding: 8px; overflow: auto; }
-.matrix button { min-width: 0; height: 28px; overflow: hidden; border: 0; background: transparent; color: var(--biof3-text-secondary); cursor: pointer; font: inherit; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.matrix button { min-width: 0; height: 28px; overflow: hidden; border: 0; background: transparent; color: var(--biof3-text-secondary); cursor: pointer; font: inherit; font-size: var(--biof3-font-size-xs); text-overflow: ellipsis; white-space: nowrap; }
 .matrix > button:not(:first-child) { writing-mode: vertical-rl; }
 .matrix span { width: 28px; height: 28px; background: color-mix(in srgb, #dc2626 calc(var(--matrix-value) * 100%), #2563eb); }
 .selectionBar button:focus-visible,
