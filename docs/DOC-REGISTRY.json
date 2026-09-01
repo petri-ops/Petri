@@ -18,7 +18,7 @@
       "id": "BLOCK-36-TOOL-ACTIVITY-DOCK",
       "path": "docs/block-36-tool-activity-dock-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-36-tool-activity-dock",
       "entrypoint": "docs/README.md",
@@ -28,13 +28,12 @@
         "tool-activity",
         "floating-dock",
         "G0",
-        "active",
-        "phase=P1-IMPL"
+        "completed"
       ],
-      "notes": "2026-09-02 立项（用户三选一裁决）：①会话区内联工具记录收敛为一行摘要条，点击打开小窗口定位；②BackgroundProcessDock 扩展为会话级统一「执行记录」浮窗 ToolActivityDock（tab 按消息分组含历史恢复 + 后台进程特殊 tab）；③检测到 running 自动弹出、完成后保留、手动关闭后新运行 re-pop、可折叠 chip。改动面：新增 ToolActivityDock.tsx/.module.css，SimpleChat.tsx 摘要条化 + 组 memo + 挂载点替换，删除 BackgroundProcessDock 三件套；backgroundProcesses.ts/toolActivity.ts/持久化链路不变。验收：P2 定向 vitest（组 tab/自动弹出/定位/chip/re-pop/进程 tab）+ tsc；P3 实机（dev Electron 工具任务 → 弹出/保留/折叠/re-pop/历史恢复）存 acceptance/ui-267/。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-09-02 立项并当日收口（用户三选一裁决）：①会话区内联工具记录收敛为一行摘要条，点击打开小窗口定位；②BackgroundProcessDock 扩展为会话级统一「执行记录」浮窗 ToolActivityDock（tab 按消息分组含历史恢复 + 后台进程特殊 tab）；③检测到 running 自动弹出、完成后保留、手动关闭后新运行 re-pop、可折叠 chip。改动面：新增 ToolActivityDock.tsx/.module.css，SimpleChat.tsx 摘要条化 + 组 memo + 挂载点替换，删除 BackgroundProcessDock 三件套。P3 实机收口全过（弹出/保留/折叠/re-pop/历史恢复/进程 tab + HTTP 200 交叉验证），实机修复 stale activeTab 空标题问题，UI-267 verified，证据 acceptance/ui-267/。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-02",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P1-IMPL"
+      "phase": "DONE"
     },
     {
       "id": "AGENT-CONCURRENCY",

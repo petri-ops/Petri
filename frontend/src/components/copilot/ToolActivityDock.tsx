@@ -179,9 +179,14 @@ export function ToolActivityDock({
     if (runningGroup) setActiveTab(runningGroup.id);
   }, [runningSig, dismissed, groups]);
 
-  // 未选中 tab 时默认定位：最新运行组 → 最新分组 → 后台进程
+  // 未选中 tab（或选中 tab 已因消息重排失效）时重新定位：
+  // 最新运行组 → 最新分组 → 后台进程
   useEffect(() => {
-    if (dismissed || activeTab) return;
+    if (dismissed) return;
+    const activeValid =
+      activeTab !== null &&
+      (activeTab === PROCESSES_TAB || groups.some((group) => group.id === activeTab));
+    if (activeValid) return;
     const runningGroup = [...groups]
       .reverse()
       .find((group) =>

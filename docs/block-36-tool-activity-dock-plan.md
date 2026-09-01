@@ -1,6 +1,6 @@
 # BLOCK-36 — 会话区工具执行记录独立小窗口（ToolActivityDock）
 
-> status: active · truthDomain: `block-36-tool-activity-dock` · registered: 2026-09-02
+> status: completed · truthDomain: `block-36-tool-activity-dock` · registered: 2026-09-02
 > owner: main agent · branch: main（单工作包串行，前置 BLOCK-34/35 已 completed）
 
 ## 1. 背景（用户需求）
@@ -48,5 +48,13 @@ BLOCK-34 的 [BackgroundProcessDock] 浮窗只承接 `workspace_exec_background`
 
 P1–P2 完成并门禁全绿 → 代码提交（含 UI 台账 UI-267 in_progress）；P3 实机证据
 齐 → UI-267 verified + 本 plan status completed + DOC-REGISTRY/AUDIT-LOG/README 同步。
+
+**收口记录（2026-09-02）**：P3 实机验证全过（摘要条收敛+点击定位 / 运行中自动弹出
+re-pop / 完成后保留 / 折叠 chip / 关闭后 re-pop / 后台进程 tab 实时日志 + HTTP 200
+交叉验证 / 会话切换隔离 + 历史恢复），证据 `acceptance/ui-267/`（6 截图 +
+evidence.json S1–S7）。实机发现并修复 stale activeTab 退化空标题问题（含回归测试
+10/10）。附注：亚秒级快速工具不闪现弹窗属预期设计；DeepSeek 偶发虚构执行报告
+（无工具调用）为模型质量问题，不在本工作包范围。定向 node --test 33 pass / 3 fail
+均为既有环境性失败（与本次改动无关、改动前已存在）。
 
 G0 开发期常态 · 不外推 packaged / Provider / GA。

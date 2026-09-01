@@ -243,6 +243,36 @@ describe('ToolActivityDock (BLOCK-36)', () => {
     expect(screen.queryByTestId('tool-activity-dock')).toBeNull();
   });
 
+  it('re-targets a stale activeTab when the group id changes (single group shows details)', async () => {
+    // 实机问题回归：流式完成后分组 key 变化导致 activeTab 失效、
+    // 单分组不渲染 tab → 浮窗只剩空标题。应自动重新定位到现存分组。
+    const { rerender } = render(
+      <ToolActivityDock
+        conversationId="conv-1"
+        projectId="p-1"
+        groups={[group('assistant-ts-old-1', '10:00', ['success'])]}
+        focusRequest={{ groupId: 'assistant-ts-old-1', nonce: 3 }}
+      />
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('tool-activity-dock')).toBeTruthy();
+    });
+    expect(screen.getAllByText(/已完成/).length).toBeGreaterThan(0);
+
+    rerender(
+      <ToolActivityDock
+        conversationId="conv-1"
+        projectId="p-1"
+        groups={[group('assistant-ts-new-2', '10:00', ['success'])]}
+        focusRequest={{ groupId: 'assistant-ts-old-1', nonce: 3 }}
+      />
+    );
+    // activeTab 失效后详情仍应渲染（重新定位到新分组 id），不能退化为空标题
+    await waitFor(() => {
+      expect(screen.getAllByText(/已完成/).length).toBeGreaterThan(0);
+    });
+  });
+
   it('shows a processes tab when the backend reports processes', async () => {
     listBackgroundProcesses.mockResolvedValue([runningProc]);
     render(
