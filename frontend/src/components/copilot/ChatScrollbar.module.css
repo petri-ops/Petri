@@ -32,8 +32,8 @@
   right: 1px;
   width: 5px;
   border-radius: 999px;
-  /* 默认柔和灰（与左 rail 刻度 idle 0.45 透明度同层），hover 转主题 accent */
-  background: color-mix(in srgb, var(--biof3-text-tertiary) 30%, transparent);
+  /* 常态淡主题青绿（与左 rail active 刻度同色系），hover 加深 */
+  background: color-mix(in srgb, var(--biof3-accent) 35%, transparent);
   transition: background 0.15s, width 0.15s, right 0.15s;
   cursor: pointer;
 }
