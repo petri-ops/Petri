@@ -259,6 +259,8 @@
       "patterns": [
         "frontend/src/components/copilot/SimpleChat.tsx",
         "frontend/src/components/copilot/SimpleChat.test.tsx",
+        "frontend/src/components/copilot/ToolActivityDock.tsx",
+        "frontend/src/components/copilot/ToolActivityDock.test.tsx",
         "frontend/src/components/copilot/toolSummaryPresentation.ts",
         "scripts/g0-rs-ux1h-*",
         "acceptance/g0-rs-ux1h/**"

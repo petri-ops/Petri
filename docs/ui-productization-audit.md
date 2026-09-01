@@ -2137,6 +2137,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-267: BLOCK-36 — 会话区工具执行记录独立小窗口（ToolActivityDock 统一执行记录浮窗） (2026-09-02 in_progress)
+
+**用户需求**（BLOCK-36 立项）：「优化会话区，把工具执行记录独立成小窗口」→ 三项设计裁决（用户确认）：①内联收敛为一行摘要条（点击打开浮窗定位）；②BackgroundProcessDock 扩展为会话级统一浮窗（tab 按消息分组含历史恢复 + 后台进程特殊 tab）；③running 自动弹出/完成后保留/关闭后新运行 re-pop/可折叠 chip。
+
+**改动**（0 新增 IPC / 0 新依赖 / 0 持久化结构变化）：① 新组件 `ToolActivityDock`（+ `.module.css`，吸收 BLOCK-34 BackgroundProcessDock 全部行为：agentBackgroundProcess 事件弹出、1s 轮询进程表/日志尾部、等宽日志自动滚动、chip 折叠、× 关闭）——tab 按消息分组渲染工具活动详情（复用 `sc-tool-activity*` 全局类），分组数据 = displayMessages 的 toolActivities（含历史恢复快照）；re-pop 触发依据 = 运行中/待确认活动集合签名变化（非计数增减），折叠态不强拆；focusRequest 按 nonce 去重防内联对象引用重复触发；会话切换重置回关闭态。② `SimpleChat.tsx`：`activityGroups` memo（组 id 与消息渲染 key 一致）；内联 `ToolActivityList` 收敛为一行摘要条（`onOpen` 打开浮窗定位）；挂载点替换。③ 删除 `BackgroundProcessDock.tsx` / `.module.css` / `.test.tsx`（行为被吸收，组件连带状态链移除）；`backgroundProcesses.ts`、`toolActivity.ts`、持久化链路不变。
+
+**门禁**（P2 阶段）：tsc 0 / ToolActivityDock vitest 9/9（初始隐藏/focusRequest 定位/自动弹出+完成后保留/折叠不强拆/关闭后新运行 re-pop/会话切换重置/后台进程 tab/跨会话忽略） / copilot 目录回归 20 文件 192/192 / impact-map ux1h-async-tool-surface 增补 ToolActivityDock 模式。P3 实机收口：待执行（证据将存 `acceptance/ui-267/`）。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-266: BLOCK-34 P3 — 后台进程浮窗（workspace_exec_background 独立小窗口） (2026-09-01 verified)
 
 **用户反馈**（BLOCK-34 立项）：「用到终端或者持续性输出的任务可以出现个独立的小窗口」→ 三项设计裁决：快照随消息落库 / 右下角浮窗+可折叠 / 仅 background 任务触发。

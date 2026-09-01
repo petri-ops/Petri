@@ -1,4 +1,4 @@
-/* BLOCK-34 P3 — 后台进程浮窗（右下角固定锚点，避开边界） */
+/* BLOCK-36 — 会话级「执行记录」浮窗（右下角固定锚点，吸收 BLOCK-34 样式并扩展分组详情区） */
 
 .dock {
   position: fixed;
@@ -8,7 +8,7 @@
   display: flex;
   flex-direction: column;
   width: min(520px, calc(100vw - 32px));
-  max-height: min(420px, calc(100vh - 32px));
+  max-height: min(460px, calc(100vh - 32px));
   border: 1px solid var(--biof3-border);
   border-radius: 14px;
   background: var(--biof3-bg-surface);
@@ -29,16 +29,25 @@
   font-size: var(--biof3-font-size-body-sm);
   font-weight: 600;
   color: var(--biof3-text);
+  white-space: nowrap;
 }
 
 .tabs {
   display: flex;
   gap: 4px;
   min-width: 0;
-  overflow: hidden;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   border: 1px solid transparent;
   border-radius: 999px;
   background: transparent;
@@ -46,6 +55,7 @@
   font-size: var(--biof3-font-size-body-sm);
   padding: 1px 8px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .tab:hover {
@@ -55,6 +65,15 @@
 .tabActive {
   border-color: var(--biof3-accent);
   color: var(--biof3-accent);
+}
+
+.tabDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--biof3-accent);
+  animation: tool-dock-pulse 1.6s ease-in-out infinite;
 }
 
 .headerActions {
@@ -93,6 +112,21 @@
 .iconBtn:hover {
   background: var(--biof3-user-bubble-bg);
   color: var(--biof3-text);
+}
+
+/* 工具活动分组详情区（复用 simple-chat.css 的 sc-tool-activity* 全局类） */
+
+.detail {
+  padding: 2px 12px 8px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.groupSummary {
+  padding: 6px 2px;
+  font-size: var(--biof3-font-size-body-sm);
+  font-weight: 500;
+  color: var(--biof3-text-secondary);
 }
 
 .command {
@@ -200,10 +234,10 @@
 .dot[data-status='running'] {
   background: var(--biof3-accent);
   opacity: 1;
-  animation: bp-dock-pulse 1.6s ease-in-out infinite;
+  animation: tool-dock-pulse 1.6s ease-in-out infinite;
 }
 
-@keyframes bp-dock-pulse {
+@keyframes tool-dock-pulse {
   0%,
   100% {
     opacity: 1;

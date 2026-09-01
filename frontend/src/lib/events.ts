@@ -82,7 +82,7 @@ export const biof3Events = {
 
   /**
    * BLOCK-34 P3: agent 成功启动后台进程（workspace_exec_background）时由
-   * conversationRunStore 派发；BackgroundProcessDock 订阅后自动弹出浮窗
+   * conversationRunStore 派发；ToolActivityDock 订阅后自动弹出后台进程 tab（BLOCK-36 吸收原 BackgroundProcessDock）
    * 并开始轮询该进程日志。
    */
   agentBackgroundProcess: 'biof3:agent-background-process',

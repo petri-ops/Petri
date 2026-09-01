@@ -4,7 +4,9 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-09-02（BLOCK-35 收口 completed：launch-token 定向 shutdown + boot 清理 cli.js 变体盲区修正，P2 实机双判据 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+最后更新：2026-09-02（BLOCK-36 立项：会话区工具执行记录独立小窗口 ToolActivityDock，P1-IMPL 进行中。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+| 2026-09-02 | **BLOCK-36-TOOL-ACTIVITY-DOCK 立项（active）**：用户需求「优化会话区，把工具执行记录独立成小窗口」，三项设计裁决（用户确认）：①内联收敛为一行摘要条（点击打开浮窗定位）；②BackgroundProcessDock 扩展为会话级统一浮窗 ToolActivityDock（tab 按消息分组含历史恢复 + 后台进程特殊 tab）；③running 自动弹出/完成后保留/关闭后新运行 re-pop/可折叠 chip。改动面：新增 ToolActivityDock.tsx/.module.css、SimpleChat.tsx 摘要条化、删除 BackgroundProcessDock 三件套；持久化链路不变。验收：P2 定向 vitest + tsc；P3 实机存 acceptance/ui-267/。G0 开发期常态 · 不外推 packaged/Provider/GA. | BLOCK-36-TOOL-ACTIVITY-DOCK / P1-IMPL |
 
 | 2026-09-02 | **BLOCK-35-DEV-ELECTRON-KILL-SCOPE 收口（P1–P2 全部完成）**：P1（commit `e14569e`）launch-token 定向：wrapper 经 `open --args` 注入一次性 `--biof3-dev-launch-token`，`shutdown()` 改 `stopLaunchedElectron()` 只 signal token 命中的本 wrapper 实例，`waitForWorkspaceElectron` token 就绪判定防陈旧实例假阳性。P2（commit `5b135c5`）实机验收发现 boot 全杀盲区并修正：`npx electron .`（cli.js）启动的主进程 argv 为 `.../dist/electron`（小写直连），旧 `pgrep -f <electronBinary(.app 路径)>` 漏杀该变体 → `getWorkspaceElectronPids` 改 ERE 双变体匹配（Helper 位于 Frameworks 不匹配，仍只中主进程）。**P2 实机双判据 PASS**（事件轮询驱动，B 采用 cli.js 变体 + 独立 userData）：① SIGTERM wrapper A → A 实例退（token 定向）、并存 B 存活（主进程 + B 自身后端 /api/health）；② 重启 wrapper → boot 清理按设计清杀 B（盲区回归覆盖）。门禁：node --check / docs:check 175 PASS / ui:audit:check PASS / docs:reconcile 0 issue。验收脚本与过程日志：/tmp/b35-accept.mjs、/tmp/b35-accept.txt（判据记录于 plan §4 与 commit message）。**当前 active**：NONE。G0 开发期常态 · 不外推 packaged/Provider/GA. | BLOCK-35-DEV-ELECTRON-KILL-SCOPE / COMPLETED |
 

@@ -60,8 +60,9 @@ import {
   closeImagePreview,
 } from './SimpleChat/attachments';
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
-// BLOCK-34 P3: 后台进程浮窗（workspace_exec_background 自动弹出）
-import { BackgroundProcessDock } from './BackgroundProcessDock';
+// BLOCK-36: 会话级「执行记录」浮窗（吸收 BLOCK-34 后台进程浮窗 + 工具活动分组）
+import { ToolActivityDock } from './ToolActivityDock';
+import type { ToolActivityDockGroup, ToolActivityFocusRequest } from './ToolActivityDock';
 import { AgentChangesCard } from './AgentChangesCard';
 import { MessageRail, type MessageRailItem } from './MessageRail';
 import {
@@ -134,8 +135,6 @@ import {
 import { CopilotMarkdown } from './copilotMarkdown';
 import {
   formatToolDuration,
-  formatToolSideEffects,
-  restoreToolActivities,
   type ToolActivityItem,
 } from './toolActivity';
 import { resolveToolSummaryPresentation } from './toolSummaryPresentation';
@@ -613,6 +612,36 @@ export function SimpleChat({
   const standaloneDurableLoop = durableLoop.loop && !displayMessages.some((message) => message.loop)
     ? durableLoop.loop
     : null;
+
+  // BLOCK-36 — 会话级「执行记录」浮窗分组：每条带工具活动的消息一组（含历史恢复快照），
+  // id 与消息渲染 key 一致，供内联摘要条点击定位。
+  const activityGroups = useMemo<ToolActivityDockGroup[]>(() => {
+    const groups: ToolActivityDockGroup[] = [];
+    displayMessages.forEach((m, i) => {
+      const activities = m.toolActivities || [];
+      if (activities.length === 0) return;
+      const key = m.ts ? `${m.role}-${m.ts}-${i}` : `${m.role}-${i}`;
+      const tsDate = m.ts ? Date.parse(m.ts) : Number.NaN;
+      const label = Number.isFinite(tsDate)
+        ? `${String(new Date(tsDate).getHours()).padStart(2, '0')}:${String(new Date(tsDate).getMinutes()).padStart(2, '0')}`
+        : `记录 ${groups.length + 1}`;
+      groups.push({
+        id: key,
+        label,
+        activities,
+        processingDurationMs: m.processingDurationMs,
+      });
+    });
+    return groups;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, activeRun, durableLoop.loop]);
+
+  const [dockFocus, setDockFocus] = useState<ToolActivityFocusRequest | null>(null);
+  const dockFocusNonce = useRef(0);
+  const openToolActivityGroup = useCallback((groupId: string) => {
+    dockFocusNonce.current += 1;
+    setDockFocus({ groupId, nonce: dockFocusNonce.current });
+  }, []);
 
   // T83: does the latest AI reply contain any file references? Drives the
   // fade of the file-reference refresh button when there's nothing to refresh.
@@ -1207,6 +1236,7 @@ export function SimpleChat({
                   <ToolActivityList
                     activities={messageActivities}
                     processingDurationMs={m.processingDurationMs}
+                    onOpen={() => openToolActivityGroup(key)}
                   />
                 )}
                 <div className={`sc-msg sc-msg-${m.role}`}>
@@ -1606,8 +1636,13 @@ export function SimpleChat({
         </div>
       </div>
 
-      {/* BLOCK-34 P3: 后台进程浮窗（仅 workspace_exec_background 触发） */}
-      <BackgroundProcessDock conversationId={conversationId} projectId={projectId} />
+      {/* BLOCK-36: 会话级「执行记录」浮窗（工具活动分组 + 后台进程 tab） */}
+      <ToolActivityDock
+        conversationId={conversationId}
+        projectId={projectId}
+        groups={activityGroups}
+        focusRequest={dockFocus}
+      />
 
       {/* Image Preview Modal */}
       {previewImage && (
@@ -1783,34 +1818,14 @@ function ErrorBanner({ message, severity, showDetails, technicalDetails }: Error
 function ToolActivityList({
   activities,
   processingDurationMs,
+  onOpen,
 }: {
   activities: ToolActivityItem[];
   processingDurationMs?: number;
+  onOpen: () => void;
 }): React.ReactElement {
-  const [expanded, setExpanded] = useState(false);
-  // BLOCK-33 P3 — 流式输出到达时自动展开；用户手动收起后不再强制展开
-  const [userToggled, setUserToggled] = useState(false);
-  const statusLabels: Record<ToolActivityItem['status'], string> = {
-    running: '运行中',
-    awaiting_confirmation: '等待确认',
-    success: '已完成',
-    error: '失败',
-    denied: '已拒绝',
-  };
-
-  useEffect(() => {
-    if (activities.length === 0) {
-      setExpanded(false);
-      setUserToggled(false);
-    }
-  }, [activities.length]);
-
-  const hasStreamingOutput = activities.some((activity) => activity.output?.tail);
-
-  useEffect(() => {
-    if (hasStreamingOutput && !userToggled) setExpanded(true);
-  }, [hasStreamingOutput, userToggled]);
-
+  // BLOCK-36 — 内联收敛为一行摘要条：详情与流式输出移入右下角「执行记录」浮窗，
+  // 点击摘要条打开浮窗并定位到本条消息的工具分组。
   const running = activities.filter((activity) => activity.status === 'running').length;
   const awaiting = activities.filter((activity) => activity.status === 'awaiting_confirmation').length;
   const attention = activities.filter(
@@ -1841,55 +1856,13 @@ function ToolActivityList({
       <button
         type="button"
         className="sc-tool-activity-summary"
-        aria-expanded={expanded}
-        aria-label={expanded ? '收起处理详情' : '展开处理详情'}
-        title={expanded ? '收起处理详情' : '展开处理详情'}
-        onClick={() => {
-          setUserToggled(true);
-          setExpanded((current) => !current);
-        }}
+        aria-label="在执行记录窗口查看详情"
+        title="在执行记录窗口查看详情"
+        onClick={onOpen}
       >
         <span className="sc-tool-activity-summary-label">{summary}</span>
-        <Icon name={expanded ? 'chevron-down' : 'chevron-right'} size={14} />
+        <Icon name="chevron-right" size={14} />
       </button>
-      {expanded && activities.map((activity) => {
-        const duration = formatToolDuration(activity.durationMs);
-        const sideEffects = formatToolSideEffects(activity.sideEffects);
-        const showReason = activity.status === 'error' || activity.status === 'denied';
-        return (
-          <div
-            key={activity.key}
-            className={`sc-tool-activity sc-tool-activity-${activity.status}`}
-          >
-            <span className="sc-tool-activity-icon" aria-hidden="true">
-              <Icon name={activity.status === 'success' ? 'check' : 'wrench'} size={14} />
-            </span>
-            <div className="sc-tool-activity-body sc-tool-activity-detail">
-              <span className="sc-tool-activity-action">{activity.actionLabel}</span>
-              {activity.actionDetail && (
-                <code className="sc-tool-activity-command">{activity.actionDetail}</code>
-              )}
-              <span className="sc-tool-activity-status">{statusLabels[activity.status]}</span>
-              {duration && <span>{duration}</span>}
-              <span className="sc-tool-activity-tool">{activity.name}</span>
-              {activity.truncated && activity.status === 'success' && <span>仅显示摘要</span>}
-              {sideEffects && <span>影响：{sideEffects}</span>}
-              {showReason && activity.terminationReason && (
-                <span className="sc-tool-activity-reason">原因：{activity.terminationReason}</span>
-              )}
-              {/* BLOCK-33 P3 — workspace_exec 流式输出等宽区（tail + 截断标记） */}
-              {activity.output?.tail && (
-                <pre
-                  className={`sc-tool-activity-output${activity.output.truncated ? ' sc-tool-activity-output-truncated' : ''}`}
-                >
-                  {activity.output.tail}
-                  {activity.output.truncated ? '\n…（输出已截断）' : ''}
-                </pre>
-              )}
-            </div>
-          </div>
-        );
-      })}
     </div>
   );
 }
