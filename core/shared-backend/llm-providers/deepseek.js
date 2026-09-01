@@ -5,6 +5,7 @@
 const http = require('http');
 const https = require('https');
 const aiUsageHelper = require('../ai-usage-helper');
+const { stripLeakedToolMarkup, createDsmlStreamGuard } = require('./dsml-guard');
 
 const DEFAULT_BASE_URL = 'https://api.deepseek.com';
 const CHAT_PATH = '/chat/completions';
@@ -215,6 +216,12 @@ class DeepSeekProvider {
                 finish({ error: 'http_error', message, status: res.statusCode }, 'http_error');
                 return;
               }
+              // DSML 泄漏防护（非流式路径）：assistant 正文中的内部工具调用
+              // 标记永不合法，返回前清洗，避免泄漏进持久化历史。
+              const envelopeChoice = parsed && parsed.choices && parsed.choices[0];
+              if (envelopeChoice && envelopeChoice.message && typeof envelopeChoice.message.content === 'string') {
+                envelopeChoice.message.content = stripLeakedToolMarkup(envelopeChoice.message.content);
+              }
               finish(parsed, parsed && parsed.error ? 'api_error' : null, parsed && parsed.usage);
             } catch (error) {
               const status = Number(res.statusCode);
@@ -277,6 +284,9 @@ class DeepSeekProvider {
     return new Promise((resolve) => {
       const endpoint = resolveEndpoint(options && options.baseUrl, CHAT_PATH, this.defaultBaseUrl);
       const contentParts = [];
+      // DSML 泄漏防护：模型偶发把内部工具调用标记当正文输出（UI-265 实机观察），
+      // 增量与最终聚合都在 provider 层清洗，保证 SSE 与持久化历史一致干净。
+      const dsmlGuard = createDsmlStreamGuard();
       const toolCalls = [];
       let usage = null;
       let finishReason = null;
@@ -308,6 +318,8 @@ class DeepSeekProvider {
           fail('parse_error', '模型响应未包含可识别的 choices');
           return;
         }
+        const flushedTail = dsmlGuard.flush();
+        if (flushedTail) contentParts.push(flushedTail);
         emit({ type: 'done', usage });
         finish({
           choices: [
@@ -356,8 +368,11 @@ class DeepSeekProvider {
         if (choice.message && typeof choice.message === 'object') {
           const message = choice.message;
           if (typeof message.content === 'string' && message.content) {
-            contentParts.push(message.content);
-            emit({ type: 'content_delta', content: message.content });
+            const cleanContent = stripLeakedToolMarkup(message.content);
+            if (cleanContent) {
+              contentParts.push(cleanContent);
+              emit({ type: 'content_delta', content: cleanContent });
+            }
           }
           if (Array.isArray(message.tool_calls)) {
             for (let index = 0; index < message.tool_calls.length; index += 1) {
@@ -371,8 +386,11 @@ class DeepSeekProvider {
         }
         const delta = choice.delta || {};
         if (typeof delta.content === 'string' && delta.content) {
-          contentParts.push(delta.content);
-          emit({ type: 'content_delta', content: delta.content });
+          const cleanDelta = dsmlGuard.push(delta.content);
+          if (cleanDelta) {
+            contentParts.push(cleanDelta);
+            emit({ type: 'content_delta', content: cleanDelta });
+          }
         }
         if (Array.isArray(delta.tool_calls)) {
           for (const toolDelta of delta.tool_calls) {
