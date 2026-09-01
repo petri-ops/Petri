@@ -9,7 +9,7 @@
   z-index: 26;
 }
 
-/* 常驻轨道线：端点淡出，替代原 .sc-messages 背景线 */
+/* 常驻轨道线：端点淡出，比 thumb 更淡一层 */
 .line {
   position: absolute;
   top: 14px;
@@ -20,8 +20,8 @@
   background: linear-gradient(
     to bottom,
     transparent 0,
-    color-mix(in srgb, var(--biof3-border) 55%, transparent) 12px,
-    color-mix(in srgb, var(--biof3-border) 55%, transparent) calc(100% - 12px),
+    color-mix(in srgb, var(--biof3-border) 45%, transparent) 12px,
+    color-mix(in srgb, var(--biof3-border) 45%, transparent) calc(100% - 12px),
     transparent 100%
   );
   pointer-events: none;
@@ -32,7 +32,8 @@
   right: 1px;
   width: 5px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--biof3-text-tertiary) 40%, transparent);
+  /* 默认柔和灰（与左 rail 刻度 idle 0.45 透明度同层），hover 转主题 accent */
+  background: color-mix(in srgb, var(--biof3-text-tertiary) 30%, transparent);
   transition: background 0.15s, width 0.15s, right 0.15s;
   cursor: pointer;
 }
@@ -41,5 +42,5 @@
 .thumbActive {
   right: 0.5px;
   width: 6px;
-  background: color-mix(in srgb, var(--biof3-text-secondary) 55%, transparent);
+  background: color-mix(in srgb, var(--biof3-accent) 75%, transparent);
 }
