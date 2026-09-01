@@ -1,7 +1,7 @@
 # BLOCK-33-GENERAL-CODING-AGENT — 通用跨平台编码 Agent 能力 Plan
 
 - **Plan ID**: `BLOCK-33-GENERAL-CODING-AGENT`（2026-09-01；用户裁决「现在需要做通用跨平台编码 Agent 了，你看情况逐步推进，要完美解决」）
-- **状态**: `active`（P0 登记 → P1 环境自省 → P2 命令策略化 → P3 流式输出 → P4 后台进程 → P5 平台指导 → P6 实机收口）
+- **状态**: `completed`（2026-09-01 P0–P6 全部收口：P0 登记 → P1 环境自省 → P2 命令策略化 → P3 流式输出 → P4 后台进程 → P5 平台指导 → P6 实机收口；实机证据 `acceptance/ui-265/`，UI-265 verified）
 - **truthDomain**: `block-33-general-coding-agent`
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
 

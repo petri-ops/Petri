@@ -1,0 +1,51 @@
+{
+  "ui": "UI-265",
+  "workPackage": "BLOCK-33-GENERAL-CODING-AGENT",
+  "phase": "P6 实机收口",
+  "capturedAt": "2026-09-01T09:43:00Z",
+  "environment": "dev Electron (CDP 9222) + biof3-server :52397（supervisor 重启加载 P1–P5 最新代码；BIOF3_ELECTRON_USER_DATA_DIR/BIOF3_LOCAL_DATA_DIR 指向 .biof3-dev-user-data）",
+  "model": "DeepSeek deepseek-v4-flash-vision-exp（真实 task，非 mock）",
+  "project": "desktop p_mt15b0aw_f0xa → 应用仓库本体（新对话经左栏「创建新对话」创建，绑定正确项目）",
+  "scenarios": [
+    {
+      "id": "S1-system_info环境识别",
+      "steps": "用户任务：请先调用 system_info 查看环境，再 workspace_exec 运行 uname -s 验证一致并报告",
+      "observed": "agent 回复「平台为 Darwin (macOS)，uname → 返回 Darwin，与 system_info 的平台一致；shell 为 /bin/zsh，架构为 arm64，两者完全吻合」。task_events 权威证据：tool_call system_info → success (150.7ms)；tool_call workspace_exec {command:\"uname -s\"} → tool_output \"Darwin\\n\" → success。",
+      "screenshot": "01-system_info-env.png",
+      "result": "PASS"
+    },
+    {
+      "id": "S2-cwd多命令+流式追加",
+      "steps": "用户任务：用 workspace_exec 的 cwd 参数分别在子目录 core 和 test 下运行 pwd 与 ls（不用 cd 拼接），再跑 for i in 1..5; do echo tick-$i; sleep 1; done 观察流式",
+      "observed": "UI 工具活动条显示「已运行 pwd && ls」输出 /Users/.../desktop/core 与 test 目录内容（cwd 沙箱校验通过、exitCode=0、durationMs 17–41ms）；agent 按 P5 指导自主选择 workspace_exec_background 跑 tick 循环 + process_status 查询（4700ms 时 running，随后 exited，tick-1~5 全部输出）；UI 出现「仅流式增量」等宽输出区标签。task_events：tool_output 增量事件（pwd 路径文本）+ workspace_exec_background/process_status call/result 对。process_status 连续第 3 次重复调用被 repeated_tool_call 护栏拦截（防抖生效，诚实错误返回）。",
+      "screenshot": "02-cwd-streaming-mid.png / 03-background-tick-final.png",
+      "result": "PASS"
+    },
+    {
+      "id": "S3-background完整起停链",
+      "steps": "用户任务：workspace_exec_background 启动 node http server (:18733) → process_status 确认存活 → curl 验证返回 ok → process_stop → 再 process_status 确认停止",
+      "observed": "全链 11 步 8 次工具调用全部成功：process_status 确认运行中（pid=57115，日志 1915 字节，startedAt 保存）；curl -s http://127.0.0.1:18733/ 返回 ok（exitCode=0，45ms，tool_output \"ok\"）；process_stop → ok（SIGTERM→宽限→SIGKILL 信号链收尾，exitCode 137 如实报告）；后台进程已清理退出。task_events trace_c0e2f20d 完整记录。",
+      "screenshot": "04-bg-http-server-full-chain.png / 05-closeout.png",
+      "result": "PASS"
+    }
+  ],
+  "implementationNotes": [
+    "实机前 supervisor 重启：旧后端进程（P4 提交前启动）SIGTERM 优雅退出挂起（db_ok:false），SIGKILL 后 supervisor 自动重新拉起并加载最新代码（端口 52397 由主进程 env 注入，重启不变）",
+    "发现开发机上同时存在 8/30 旧 Electron 实例遗留的孤儿后端进程（监听 57368），与当前实例（52397）并存；已清理孤儿，属环境噪音非代码缺陷",
+    "模型侧瑕疵（非工具链缺陷）：deepseek-v4-flash 在多轮工具调用后偶发将 DSML 工具调用标记当正文输出（03 截图尾部可见），不影响工具执行与结果正确性；如需根治属 Provider/提示词层后续工作",
+    "Windows 路径按计划靠代码审查 + 单测覆盖（shellInvocation/powershell 分支），实机 Windows 属 G1+ 不外推"
+  ],
+  "screenshots": [
+    "01-system_info-env.png（S1：system_info + uname 环境一致报告）",
+    "02-cwd-streaming-mid.png（S2：cwd=core/test pwd&&ls 输出区 + 仅流式增量标签）",
+    "03-background-tick-final.png（S2 终态：tick-1~5 全部输出 + background 生命周期）",
+    "04-bg-http-server-full-chain.png（S3：http server 起→查活→curl ok→stop 全链）",
+    "05-closeout.png（S3 终态收口视图）"
+  ],
+  "gates": {
+    "backend": "node --check 通过 / 定向 node --test（system_info 形状 / cwd 沙箱 / shell 选择 / 黑名单对 background / process_stop 信号链）P1–P5 各阶段已过",
+    "frontend": "tsc 0 / SimpleChat + toolActivity 定向 vitest（P3 已过）",
+    "governance": "docs:check 173 / ui:audit:check / docs:reconcile（收口提交时复跑）"
+  },
+  "g0": "G0 开发期常态 · 不外推 packaged / Provider / GA."
+}

@@ -2137,15 +2137,17 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-265: BLOCK-33 — 通用编码 Agent UI 增量（system_info 工具活动条标签；P3 流式输出 / P6 实机收口增量扩展） (2026-09-01 in_progress)
+## UI-265: BLOCK-33 — 通用编码 Agent UI 增量（system_info 工具活动条标签；P3 流式输出 / P6 实机收口增量扩展） (2026-09-01 verified)
 
 **背景**（BLOCK-33 P1，实现提交 `0acffcc`）：通用跨平台编码 Agent 能力 P1 环境自省落地，UI 侧增量 = `frontend/src/components/copilot/toolActivity.ts` 工具活动条新增 `system_info → 「已查询 · 系统环境」` 标签映射。该提交未同步台账（UI-AUDIT-FIX 由本条补登，不重写共享历史，提交哈希豁免登记于检查器）。
 
-**后续增量**（同编号累积）：P3 已实现（2026-09-01）——工具活动条内实时追加等宽输出区（`sc-tool-activity-output`，tail 显示 + 截断标记；流式输出到达时自动展开，手动收起后不强制），SSE 新事件 `tool_output`（callId 关联、200ms 节流、单调用 16K 字符封顶）；P6 dev Electron 实机收口（system_info 识别环境 / cwd 多命令 / 流式追加 / background 起停）后转 verified。
+**后续增量**（同编号累积）：P3 已实现（2026-09-01）——工具活动条内实时追加等宽输出区（`sc-tool-activity-output`，tail 显示 + 截断标记；流式输出到达时自动展开，手动收起后不强制），SSE 新事件 `tool_output`（callId 关联、200ms 节流、单调用 16K 字符封顶）。
 
-**门禁**（P1 已过）：tsc 0 / 定向 node --test 3/3 / toolActivity 7/7 / docs:check 173。
+**P6 实机收口**（2026-09-01，dev Electron CDP 9222 + biof3-server :52397，真实 DeepSeek task）：system_info 正确识别 Darwin/arm64 + /bin/zsh（uname -s 交叉验证一致）；workspace_exec cwd 参数在 core/test 子目录生效（pwd 输出正确、exitCode=0）；流式增量等宽输出区实机可见（tool_output 事件 + 「仅流式增量」标签）；background 完整起停链（node http server :18733 → process_status 存活 → curl 返回 ok → process_stop → 确认清理退出）。权威证据 task_events trace_5fbd04c7 / trace_89b0c73a / trace_c0e2f20d；截图 + evidence.json 见 `acceptance/ui-265/`。UI-265 转 verified。
 
-**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**门禁**（P1–P6 已过）：tsc 0 / 定向 node --test / toolActivity 7/7 / docs:check 173。
+
+**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-264: BLOCK-32 — 项目级审阅隔离（审阅/改动卡片按项目工作区仓库解析） (2026-09-01 verified)
 
