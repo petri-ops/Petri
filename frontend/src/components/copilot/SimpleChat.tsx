@@ -1783,6 +1783,8 @@ function ToolActivityList({
   processingDurationMs?: number;
 }): React.ReactElement {
   const [expanded, setExpanded] = useState(false);
+  // BLOCK-33 P3 — 流式输出到达时自动展开；用户手动收起后不再强制展开
+  const [userToggled, setUserToggled] = useState(false);
   const statusLabels: Record<ToolActivityItem['status'], string> = {
     running: '运行中',
     awaiting_confirmation: '等待确认',
@@ -1792,8 +1794,17 @@ function ToolActivityList({
   };
 
   useEffect(() => {
-    if (activities.length === 0) setExpanded(false);
+    if (activities.length === 0) {
+      setExpanded(false);
+      setUserToggled(false);
+    }
   }, [activities.length]);
+
+  const hasStreamingOutput = activities.some((activity) => activity.output?.tail);
+
+  useEffect(() => {
+    if (hasStreamingOutput && !userToggled) setExpanded(true);
+  }, [hasStreamingOutput, userToggled]);
 
   const running = activities.filter((activity) => activity.status === 'running').length;
   const awaiting = activities.filter((activity) => activity.status === 'awaiting_confirmation').length;
@@ -1828,7 +1839,10 @@ function ToolActivityList({
         aria-expanded={expanded}
         aria-label={expanded ? '收起处理详情' : '展开处理详情'}
         title={expanded ? '收起处理详情' : '展开处理详情'}
-        onClick={() => setExpanded((current) => !current)}
+        onClick={() => {
+          setUserToggled(true);
+          setExpanded((current) => !current);
+        }}
       >
         <span className="sc-tool-activity-summary-label">{summary}</span>
         <Icon name={expanded ? 'chevron-down' : 'chevron-right'} size={14} />
@@ -1857,6 +1871,15 @@ function ToolActivityList({
               {sideEffects && <span>影响：{sideEffects}</span>}
               {showReason && activity.terminationReason && (
                 <span className="sc-tool-activity-reason">原因：{activity.terminationReason}</span>
+              )}
+              {/* BLOCK-33 P3 — workspace_exec 流式输出等宽区（tail + 截断标记） */}
+              {activity.output?.tail && (
+                <pre
+                  className={`sc-tool-activity-output${activity.output.truncated ? ' sc-tool-activity-output-truncated' : ''}`}
+                >
+                  {activity.output.tail}
+                  {activity.output.truncated ? '\n…（输出已截断）' : ''}
+                </pre>
               )}
             </div>
           </div>

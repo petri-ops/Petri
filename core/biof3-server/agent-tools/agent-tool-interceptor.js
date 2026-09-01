@@ -79,7 +79,7 @@ function createAgentToolInterceptor(options = {}) {
   const workspacePreflight = options.preflightWorkspaceTool || preflightWorkspaceTool;
   const decide = options.decideAgentToolCall || decideAgentToolCall;
 
-  return async function interceptAgentToolCall(name, argsObj, ctx = {}) {
+  return async function interceptAgentToolCall(name, argsObj, ctx = {}, handlerOptions = {}) {
     const entry = resolveEntry(name);
     if (!entry) {
       return {
@@ -117,7 +117,9 @@ function createAgentToolInterceptor(options = {}) {
     const decision = decide({ name, args, ctx, contract: entry.contract, preflight });
     if (decision.decision === 'deny') return policyResult(decision);
 
-    return entry.handler(args, ctx);
+    // BLOCK-33 P3 — handlerOptions（可选 { onOutput }）透传给 handler；
+    // 现有 handler 均为 (args, ctx) 签名，多余的实参会被安全忽略。
+    return entry.handler(args, ctx, handlerOptions);
   };
 }
 

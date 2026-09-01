@@ -120,7 +120,13 @@ async function executeToolCall(name, args = {}, ctx = {}, options = {}) {
   const startedAt = process.hrtime.bigint();
   let data;
   try {
-    data = await interceptAgentToolCall(name, args, ctx);
+    // BLOCK-33 P3 — options.onOutput（可选）透传到 handler（workspace_exec 流式输出）
+    data = await interceptAgentToolCall(
+      name,
+      args,
+      ctx,
+      typeof options.onOutput === 'function' ? { onOutput: options.onOutput } : {}
+    );
   } catch (error) {
     data = {
       ok: false,

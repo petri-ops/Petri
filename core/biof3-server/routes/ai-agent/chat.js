@@ -57,6 +57,7 @@ const {
   serializeToolResultForModel,
   buildToolCallEvent,
   buildToolResultEvent,
+  createToolOutputStream,
   createToolActivityRecorder,
   MAX_AGENT_ITERS,
   MAX_AGENT_TOOL_CALLS,
@@ -866,7 +867,16 @@ module.exports = {
             execute: async ({ name, args, callId }) => {
               assistantToolActivities.recordCall({ name, args, traceId, callId, iteration: iter + 1 });
               sseSend(buildToolCallEvent({ name, args, traceId, callId, iteration: iter + 1 }));
-              let envelope = await executeToolCall(name, args, toolCtx, { traceId, callId });
+              // BLOCK-33 P3 — workspace_exec 流式输出：增量经 tool_output 事件实时下发
+              const outputStream = createToolOutputStream({
+                name, callId, traceId, iteration: iter + 1, emit: sseSend,
+              });
+              let envelope = await executeToolCall(name, args, toolCtx, {
+                traceId,
+                callId,
+                ...(name === 'workspace_exec' ? { onOutput: outputStream.onOutput } : {}),
+              });
+              outputStream.flush();
               let result = localizeToolResult(envelope.data);
               resultEditCompletionGuard.recordToolResult(name, result);
               envelope = replaceToolResultData(envelope, result);

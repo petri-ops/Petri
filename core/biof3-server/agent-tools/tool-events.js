@@ -126,6 +126,92 @@ function compactActivityDetail(value) {
   return normalized.length > 140 ? `${normalized.slice(0, 137)}…` : normalized;
 }
 
+// ===== BLOCK-33 P3 — workspace_exec 流式输出（tool_output SSE 事件） =====
+
+const TOOL_OUTPUT_INTERVAL_MS = 200;
+// 单次工具调用流式输出的总字符封顶；超出后发一次 truncated 标记并丢弃后续增量。
+const TOOL_OUTPUT_MAX_CHARS = 16000;
+
+/**
+ * 构造 tool_output SSE 事件（callId 关联到对应 tool_call / tool_result）。
+ * text 已经过脱敏；事件本身再整体脱敏一次，与 tool_call/tool_result 对齐。
+ */
+function buildToolOutputEvent({ name, callId, traceId, iteration, text, truncated }) {
+  return redactSensitiveValue({
+    event: 'tool_output',
+    name,
+    callId,
+    traceId,
+    ...(Number.isFinite(iteration) ? { iteration } : {}),
+    text: String(text || ''),
+    ...(truncated ? { truncated: true } : {}),
+  });
+}
+
+/**
+ * 创建工具输出流式发射器：聚合增量、按 TOOL_OUTPUT_INTERVAL_MS 节流、
+ * 总量封顶 TOOL_OUTPUT_MAX_CHARS。返回 onOutput(chunk) 回调（chunk 形如
+ * { stream: 'stdout' | 'stderr', text }) 与 flush()（命令结束后冲刷剩余缓冲）。
+ * 非 workspace_exec 工具或未提供 emit 时返回 no-op。
+ */
+function createToolOutputStream({ name, callId, traceId, iteration, emit, intervalMs = TOOL_OUTPUT_INTERVAL_MS, maxChars = TOOL_OUTPUT_MAX_CHARS }) {
+  if (!emit || name !== 'workspace_exec' || !callId) {
+    return { onOutput: () => {}, flush: () => {} };
+  }
+  const limit = Math.max(256, Number(maxChars) || TOOL_OUTPUT_MAX_CHARS);
+  const interval = Math.max(50, Number(intervalMs) || TOOL_OUTPUT_INTERVAL_MS);
+  let buffer = '';
+  let emittedChars = 0;
+  let truncatedSent = false;
+  let timer = null;
+
+  const send = (text, truncated) => {
+    if (!text) return;
+    try {
+      emit(buildToolOutputEvent({ name, callId, traceId, iteration, text, truncated }));
+    } catch {
+      // SSE 发送失败不阻塞工具执行
+    }
+  };
+
+  const flush = () => {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    if (truncatedSent) return;
+    if (buffer) {
+      send(buffer, false);
+      buffer = '';
+    }
+  };
+
+  const onOutput = (chunk) => {
+    if (truncatedSent || !chunk || typeof chunk.text !== 'string' || !chunk.text) return;
+    if (emittedChars >= limit) return;
+    buffer += chunk.text;
+    emittedChars += chunk.text.length;
+    if (emittedChars >= limit) {
+      // 封顶：本次冲刷后发 truncated 标记，后续增量丢弃
+      const room = Math.max(0, limit - (emittedChars - buffer.length));
+      send(buffer.slice(0, room), false);
+      buffer = '';
+      truncatedSent = true;
+      send('…（输出超出流式上限，已截断）', true);
+      return;
+    }
+    if (timer) return;
+    timer = setTimeout(() => {
+      timer = null;
+      if (truncatedSent || !buffer) return;
+      send(buffer, false);
+      buffer = '';
+    }, interval);
+  };
+
+  return { onOutput, flush };
+}
+
 /** Safe, compact activity details suitable for conversation metadata. */
 function summarizeToolCallForActivity(name, args = {}) {
   switch (name) {
@@ -218,8 +304,12 @@ function createToolActivityRecorder() {
 }
 
 module.exports = {
+  TOOL_OUTPUT_INTERVAL_MS,
+  TOOL_OUTPUT_MAX_CHARS,
   buildToolCallEvent,
+  buildToolOutputEvent,
   buildToolResultEvent,
+  createToolOutputStream,
   summarizeToolCallForActivity,
   createToolActivityRecorder,
 };

@@ -11,7 +11,8 @@ const crypto = require('crypto');
 const fsp = require('fs/promises');
 const path = require('path');
 const { promisify } = require('util');
-const { execFile } = require('child_process');
+const { execFile, spawn } = require('child_process');
+const { StringDecoder } = require('string_decoder');
 const { assertProjectG0Compatible } = require('../../shared-backend/g0-baseline');
 const execFileAsync = promisify(execFile);
 
@@ -65,6 +66,116 @@ function clampInteger(value, fallback, min, max) {
 
 function errorResult(error, message, extra = {}) {
   return { ok: false, error, message, ...extra };
+}
+
+// BLOCK-33 P3 — spawn 执行命令：stdout/stderr 增量通过 onOutput({ stream, text })
+// 外抛供 SSE 流式转发，同时保留 execFile 的超时/maxBuffer 截断语义。
+// 返回统一形状：{ ok, code, signal, timedOut, stdout, stderr, truncated, errorMessage }
+function spawnCommand(invocation, { cwd, timeout, maxBuffer, onOutput }) {
+  return new Promise((resolve) => {
+    let child;
+    try {
+      child = spawn(invocation.executable, invocation.args, {
+        cwd,
+        shell: false,
+        windowsHide: true,
+      });
+    } catch (error) {
+      resolve({
+        ok: false, code: 1, signal: null, timedOut: false,
+        stdout: '', stderr: error.message, truncated: false, errorMessage: error.message,
+      });
+      return;
+    }
+
+    const stdoutDecoder = new StringDecoder('utf8');
+    const stderrDecoder = new StringDecoder('utf8');
+    let stdoutBuf = Buffer.alloc(0);
+    let stderrBuf = Buffer.alloc(0);
+    let truncated = false;
+    let timedOut = false;
+    let settled = false;
+    let killTimer = null;
+    let forceKillTimer = null;
+
+    const clearTimers = () => {
+      if (killTimer) clearTimeout(killTimer);
+      if (forceKillTimer) clearTimeout(forceKillTimer);
+    };
+
+    const killChild = () => {
+      try { child.kill('SIGTERM'); } catch {}
+      forceKillTimer = setTimeout(() => {
+        try { child.kill('SIGKILL'); } catch {}
+      }, 5000);
+    };
+
+    // 返回 false 表示该流已超限，调用方应终止进程（对齐 execFile maxBuffer 行为）
+    const collect = (chunk, isStdout) => {
+      const target = isStdout ? stdoutBuf : stderrBuf;
+      if (target.length >= maxBuffer) {
+        truncated = true;
+        return false;
+      }
+      const room = maxBuffer - target.length;
+      const sliced = chunk.length > room ? chunk.subarray(0, room) : chunk;
+      if (isStdout) stdoutBuf = Buffer.concat([stdoutBuf, sliced]);
+      else stderrBuf = Buffer.concat([stderrBuf, sliced]);
+      if (chunk.length > room) {
+        truncated = true;
+        return false;
+      }
+      return true;
+    };
+
+    const attach = (stream, isStdout, decoder) => {
+      if (!stream) return;
+      stream.on('data', (chunk) => {
+        const text = decoder.write(chunk);
+        if (onOutput && text) {
+          try { onOutput({ stream: isStdout ? 'stdout' : 'stderr', text }); } catch {}
+        }
+        if (!collect(chunk, isStdout)) killChild();
+      });
+    };
+    attach(child.stdout, true, stdoutDecoder);
+    attach(child.stderr, false, stderrDecoder);
+
+    if (Number.isFinite(timeout) && timeout > 0) {
+      killTimer = setTimeout(() => {
+        timedOut = true;
+        killChild();
+      }, timeout);
+    }
+
+    child.on('error', (error) => {
+      if (settled) return;
+      settled = true;
+      clearTimers();
+      resolve({
+        ok: false, code: 1, signal: null, timedOut,
+        stdout: stdoutBuf.toString('utf8'),
+        stderr: (stderrBuf.toString('utf8') + (stderrBuf.length ? '\n' : '') + error.message),
+        truncated, errorMessage: error.message,
+      });
+    });
+
+    child.on('close', (code, signal) => {
+      if (settled) return;
+      settled = true;
+      clearTimers();
+      resolve({
+        ok: code === 0,
+        code,
+        signal: signal || null,
+        timedOut,
+        stdout: stdoutBuf.toString('utf8') + stdoutDecoder.end(),
+        stderr: stderrBuf.toString('utf8') + stderrDecoder.end(),
+        truncated,
+        errorMessage: null,
+      });
+    });
+  });
 }
 
 function normalizeRelativePath(value) {
@@ -734,7 +845,8 @@ function createWorkspaceTools(options = {}) {
     });
   }
 
-  async function executeCommand(args = {}, ctx = {}) {
+  // handlerOptions: BLOCK-33 P3 — 第 3 参携带 { onOutput } 流式回调（可选）
+  async function executeCommand(args = {}, ctx = {}, handlerOptions = {}) {
     if (ctx.accessMode !== 'full') {
       return errorResult('access_mode_read_only', '聊天当前处于只读模式，禁止执行命令');
     }
@@ -767,16 +879,16 @@ function createWorkspaceTools(options = {}) {
       const invocation = shellInvocation(command, shellPreference);
       if (invocation.error) return errorResult('invalid_arguments', invocation.error);
       const startedAt = Date.now();
-      try {
-        const result = await execFileAsync(invocation.executable, invocation.args, {
-          cwd: cwdRoot,
-          shell: false,
-          timeout: clampInteger(args.timeoutMs, DEFAULT_COMMAND_TIMEOUT_MS, 100, MAX_COMMAND_TIMEOUT_MS),
-          maxBuffer: MAX_COMMAND_OUTPUT_BYTES,
-          windowsHide: true,
-        });
-        const stdout = String(result.stdout || '');
-        const stderr = String(result.stderr || '');
+      const spawnResult = await spawnCommand(invocation, {
+        cwd: cwdRoot,
+        timeout: clampInteger(args.timeoutMs, DEFAULT_COMMAND_TIMEOUT_MS, 100, MAX_COMMAND_TIMEOUT_MS),
+        maxBuffer: MAX_COMMAND_OUTPUT_BYTES,
+        onOutput: handlerOptions && typeof handlerOptions.onOutput === 'function'
+          ? handlerOptions.onOutput
+          : null,
+      });
+      const durationMs = Date.now() - startedAt;
+      if (spawnResult.ok) {
         return {
           ok: true,
           command,
@@ -785,26 +897,25 @@ function createWorkspaceTools(options = {}) {
           exitCode: 0,
           signal: null,
           timedOut: false,
-          durationMs: Date.now() - startedAt,
-          stdout: stdout.slice(0, MAX_COMMAND_OUTPUT_BYTES),
-          stderr: stderr.slice(0, MAX_COMMAND_OUTPUT_BYTES),
-          truncated: Buffer.byteLength(stdout) > MAX_COMMAND_OUTPUT_BYTES || Buffer.byteLength(stderr) > MAX_COMMAND_OUTPUT_BYTES,
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          command,
-          cwd: cwdLabel,
-          shell: invocation.executable,
-          exitCode: Number.isInteger(error.code) ? error.code : 1,
-          signal: error.signal || null,
-          timedOut: error.killed === true,
-          durationMs: Date.now() - startedAt,
-          stdout: String(error.stdout || '').slice(0, MAX_COMMAND_OUTPUT_BYTES),
-          stderr: String(error.stderr || error.message || '').slice(0, MAX_COMMAND_OUTPUT_BYTES),
-          truncated: Boolean(error && error.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER'),
+          durationMs,
+          stdout: spawnResult.stdout.slice(0, MAX_COMMAND_OUTPUT_BYTES),
+          stderr: spawnResult.stderr.slice(0, MAX_COMMAND_OUTPUT_BYTES),
+          truncated: spawnResult.truncated,
         };
       }
+      return {
+        ok: false,
+        command,
+        cwd: cwdLabel,
+        shell: invocation.executable,
+        exitCode: Number.isInteger(spawnResult.code) ? spawnResult.code : 1,
+        signal: spawnResult.signal,
+        timedOut: spawnResult.timedOut,
+        durationMs,
+        stdout: spawnResult.stdout.slice(0, MAX_COMMAND_OUTPUT_BYTES),
+        stderr: spawnResult.stderr.slice(0, MAX_COMMAND_OUTPUT_BYTES),
+        truncated: spawnResult.truncated,
+      };
     }, { requireCompatible: true });
   }
 

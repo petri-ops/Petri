@@ -122,6 +122,16 @@ export interface ToolCallEvent {
   iteration?: number;
 }
 
+/** BLOCK-33 P3 — workspace_exec 流式输出增量（callId 关联 tool_call/tool_result）。 */
+export interface ToolOutputEvent {
+  name: string;
+  traceId?: string;
+  callId?: string;
+  iteration?: number;
+  text: string;
+  truncated?: boolean;
+}
+
 export interface ToolSideEffects {
   type: 'none' | 'state-write' | 'workspace-write' | 'execution' | 'external-request';
   riskTier: 'R0' | 'R1' | 'R2' | 'R3';
@@ -243,6 +253,17 @@ export function parseToolCallEvent(obj: Record<string, unknown>): ToolCallEvent 
   };
 }
 
+export function parseToolOutputEvent(obj: Record<string, unknown>): ToolOutputEvent {
+  return {
+    name: String(obj.name || ''),
+    traceId: typeof obj.traceId === 'string' ? obj.traceId : undefined,
+    callId: typeof obj.callId === 'string' ? obj.callId : undefined,
+    iteration: typeof obj.iteration === 'number' ? obj.iteration : undefined,
+    text: typeof obj.text === 'string' ? obj.text : '',
+    truncated: obj.truncated === true,
+  };
+}
+
 export function parseToolResultEvent(obj: Record<string, unknown>): ToolResultEvent {
   return {
     name: String(obj.name || ''),
@@ -322,6 +343,8 @@ export interface StreamChatOptions {
   onResultEditProgress?: (progress: ResultEditProgressEvent) => void;
   /** Tool call started */
   onToolCall?: (e: ToolCallEvent) => void;
+  /** BLOCK-33 P3 — workspace_exec 增量输出（节流聚合后的文本块） */
+  onToolOutput?: (e: ToolOutputEvent) => void;
   /** Tool call returned */
   onToolResult?: (e: ToolResultEvent) => void;
   /** Server announces (or creates) the active conversation */
@@ -634,6 +657,7 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
     onAgentProgress,
     onResultEditProgress,
     onToolCall,
+    onToolOutput,
     onToolResult,
     onConversation,
     onTopicShift,
@@ -711,6 +735,12 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
   }
   if (obj.event === 'tool_call') {
     onToolCall?.(parseToolCallEvent(obj));
+    return;
+  }
+  if (obj.event === 'tool_output') {
+    // BLOCK-33 P3 — 空 text 增量无意义，直接丢弃
+    const outputEvent = parseToolOutputEvent(obj);
+    if (outputEvent.text) onToolOutput?.(outputEvent);
     return;
   }
   if (obj.event === 'tool_result') {

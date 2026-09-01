@@ -8,12 +8,14 @@ import {
   subscribeAgentTask,
   type ChatMessage,
   type ToolCallEvent,
+  type ToolOutputEvent,
   type ToolResultEvent,
   type ResultEditProgressEvent,
   type StreamChatOptions,
 } from './copilotClient';
 import {
   mergeToolCallActivity,
+  mergeToolOutputActivity,
   mergeToolResultActivity,
   type ToolActivityItem,
 } from './toolActivity';
@@ -299,6 +301,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     | 'onResultEditProgress'
     | 'onDelta'
     | 'onToolCall'
+    | 'onToolOutput'
     | 'onToolResult'
     | 'onLoopPhase'
     | 'onLoopIteration'
@@ -380,6 +383,12 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       replaceRun(conversationId, (current) => ({
         ...current,
         toolActivities: mergeToolCallActivity(current.toolActivities, event),
+      }));
+    },
+    onToolOutput: (event: ToolOutputEvent) => {
+      replaceRun(conversationId, (current) => ({
+        ...current,
+        toolActivities: mergeToolOutputActivity(current.toolActivities, event),
       }));
     },
     onToolResult: (event: ToolResultEvent) => {
@@ -730,6 +739,13 @@ export function startSubAgentTask(options: StartSubAgentTaskOptions): void {
       replaceSubTask(currentTaskId, (c) => ({
         ...c,
         toolActivities: mergeToolCallActivity(c.toolActivities, event),
+      }));
+    },
+    onToolOutput: (event) => {
+      if (!currentTaskId) return;
+      replaceSubTask(currentTaskId, (c) => ({
+        ...c,
+        toolActivities: mergeToolOutputActivity(c.toolActivities, event),
       }));
     },
     onToolResult: (event) => {

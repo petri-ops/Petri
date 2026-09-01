@@ -41,7 +41,9 @@ const {
 } = require('./agent-loop-control');
 const {
   buildToolCallEvent,
+  buildToolOutputEvent,
   buildToolResultEvent,
+  createToolOutputStream,
   createToolActivityRecorder,
 } = require('./tool-events');
 const { inferExecutionPolicy } = require('../helpers/agent-execution-policy');
@@ -62,7 +64,9 @@ module.exports = {
   replaceToolResultData,
   serializeToolResultForModel,
   buildToolCallEvent,
+  buildToolOutputEvent,
   buildToolResultEvent,
+  createToolOutputStream,
   createToolActivityRecorder,
   MAX_AGENT_ITERS,
   MAX_AGENT_TOOL_ITERS,

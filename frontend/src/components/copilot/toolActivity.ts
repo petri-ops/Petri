@@ -1,10 +1,17 @@
 import type {
   ToolCallEvent,
+  ToolOutputEvent,
   ToolResultEvent,
   ToolSideEffects,
 } from './copilotClient';
 
 export type ToolActivityStatus = 'running' | 'awaiting_confirmation' | 'success' | 'error' | 'denied';
+
+/** BLOCK-33 P3 — 流式输出尾部（内存态，不随会话持久化）。 */
+export interface ToolActivityOutput {
+  tail: string;
+  truncated: boolean;
+}
 
 export interface ToolActivityItem {
   key: string;
@@ -24,6 +31,7 @@ export interface ToolActivityItem {
   summary?: string;
   actionLabel: string;
   actionDetail?: string;
+  output?: ToolActivityOutput;
 }
 
 const ACTIVITY_STATUSES: ToolActivityStatus[] = [
@@ -176,6 +184,46 @@ function inferLegacyStatus(event: ToolResultEvent): ToolActivityStatus {
     : 'success';
 }
 
+// BLOCK-33 P3 — 活动条内保留的输出尾部上限；更早内容折叠为前导省略号。
+const OUTPUT_TAIL_CHARS = 2000;
+
+/**
+ * 把 tool_output 增量并入对应工具活动项（按 callId 关联）。
+ * 无匹配活动项时挂到最新的同工具 running 项；仍无则忽略（迟到/乱序输出）。
+ */
+export function mergeToolOutputActivity(
+  current: ToolActivityItem[],
+  event: ToolOutputEvent
+): ToolActivityItem[] {
+  if (!event.text) return current;
+  const baseKey = event.callId || legacyKey(event.name, event.traceId);
+  let index = current.findIndex((item) => item.key === baseKey);
+  if (index < 0) {
+    for (let i = current.length - 1; i >= 0; i -= 1) {
+      if (current[i].name === event.name && current[i].status === 'running') {
+        index = i;
+        break;
+      }
+    }
+  }
+  if (index < 0) return current;
+  const existing = current[index];
+  const previous = existing.output?.tail || '';
+  let tail = previous + event.text;
+  if (tail.length > OUTPUT_TAIL_CHARS) {
+    tail = `…${tail.slice(-(OUTPUT_TAIL_CHARS - 1))}`;
+  }
+  const next = current.slice();
+  next[index] = {
+    ...existing,
+    output: {
+      tail,
+      truncated: Boolean(existing.output?.truncated) || event.truncated === true,
+    },
+  };
+  return next;
+}
+
 export function mergeToolResultActivity(
   current: ToolActivityItem[],
   event: ToolResultEvent
@@ -215,6 +263,8 @@ export function mergeToolResultActivity(
     terminationReason: result?.terminationReason,
     sideEffects: result?.sideEffects,
     summary: event.summary,
+    // BLOCK-33 P3 — tool_result 合并时保留运行期累积的流式输出尾部
+    output: index >= 0 ? current[index].output : undefined,
     actionLabel: index >= 0 ? current[index].actionLabel : fallbackAction.actionLabel,
     actionDetail: index >= 0 ? current[index].actionDetail : fallbackAction.actionDetail,
   };

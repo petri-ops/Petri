@@ -64,6 +64,7 @@ const {
   runAgentToolCallBatch,
   buildToolCallEvent,
   buildToolResultEvent,
+  createToolOutputStream,
   replaceToolResultData,
   serializeToolResultForModel,
   createAgentToolCallController,
@@ -705,7 +706,16 @@ async function runLoop({
           }
           assistantToolActivities.recordCall({ name, args, traceId, callId, iteration: iter + 1 });
           _emit(buildToolCallEvent({ name, args, traceId, callId, iteration: iter + 1 }));
-          let envelope = await executeToolCall(name, args, toolCtx, { traceId, callId });
+          // BLOCK-33 P3 — workspace_exec 流式输出：增量经 tool_output 事件实时下发
+          const outputStream = createToolOutputStream({
+            name, callId, traceId, iteration: iter + 1, emit: _emit,
+          });
+          let envelope = await executeToolCall(name, args, toolCtx, {
+            traceId,
+            callId,
+            ...(name === 'workspace_exec' ? { onOutput: outputStream.onOutput } : {}),
+          });
+          outputStream.flush();
           let result = localizeToolResult(envelope.data);
           resultEditCompletionGuard.recordToolResult(name, result);
           envelope = replaceToolResultData(envelope, result);

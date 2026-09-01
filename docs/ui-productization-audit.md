@@ -2141,7 +2141,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **背景**（BLOCK-33 P1，实现提交 `0acffcc`）：通用跨平台编码 Agent 能力 P1 环境自省落地，UI 侧增量 = `frontend/src/components/copilot/toolActivity.ts` 工具活动条新增 `system_info → 「已查询 · 系统环境」` 标签映射。该提交未同步台账（UI-AUDIT-FIX 由本条补登，不重写共享历史，提交哈希豁免登记于检查器）。
 
-**后续增量**（同编号累积）：P3 流式输出在工具活动条内实时追加等宽输出区（tail 显示 + 截断标记）；P6 dev Electron 实机收口（system_info 识别环境 / cwd 多命令 / 流式追加 / background 起停）后转 verified。
+**后续增量**（同编号累积）：P3 已实现（2026-09-01）——工具活动条内实时追加等宽输出区（`sc-tool-activity-output`，tail 显示 + 截断标记；流式输出到达时自动展开，手动收起后不强制），SSE 新事件 `tool_output`（callId 关联、200ms 节流、单调用 16K 字符封顶）；P6 dev Electron 实机收口（system_info 识别环境 / cwd 多命令 / 流式追加 / background 起停）后转 verified。
 
 **门禁**（P1 已过）：tsc 0 / 定向 node --test 3/3 / toolActivity 7/7 / docs:check 173。
 
