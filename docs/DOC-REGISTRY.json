@@ -2903,7 +2903,7 @@
       "id": "BLOCK-33-GENERAL-CODING-AGENT",
       "path": "docs/block-33-general-coding-agent-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-33-general-coding-agent",
       "entrypoint": "docs/README.md",
@@ -2915,15 +2915,38 @@
         "background-process",
         "cross-platform",
         "G0",
+        "completed",
+        "phase=COMPLETED"
+      ],
+      "notes": "2026-09-01 P0–P6 全部收口 completed：P1 system_info 工具 + 环境摘要行；P2 cwd/shell 策略化 + 结果增强；P3 spawn 流式 onOutput → SSE tool_output + UI 实时输出区；P4 workspace_exec_background / process_status / process_stop（黑名单生效，进程表内存态）；P5 desktop-agent-prompt 平台指导；P6 dev Electron 实机收口 UI-265 verified。收口后两轮 DSML 泄漏防护跟进（eb2de82 半角 + 110cff9 全角｜｜DSML｜｜变体 + flush 收紧）。安全边界不动。实机证据 acceptance/ui-265/。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-01",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-34-AGENT-TOOL-TRAIL-DOCK",
+      "path": "docs/block-34-agent-tool-trail-dock-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-34-agent-tool-trail-dock",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-34",
+        "tool-activities",
+        "persistence",
+        "background-process",
+        "dock",
+        "G0",
         "active",
         "phase=P0-LAUNCH"
       ],
-      "notes": "2026-09-01 用户裁决「做通用跨平台编码 Agent，逐步推进，要完美解决」。评估确认 5 缺口：无环境自省 / 命令无流式输出 / 无后台进程 / 无跨调用状态（cd 不持久）/ Windows 方言陷阱。方案：P1 system_info 工具 + system prompt 环境摘要行；P2 workspace_exec 加 cwd（沙箱校验）与 shell（auto/posix/powershell/cmd）参数 + 结果增强（exitCode/durationMs/截断可见）；P3 spawn 流式输出经 onOutput 回调 → SSE tool_output（callId 关联、~200ms 节流）→ UI 工具活动条实时追加；P4 workspace_exec_background（detached + 工作区 tmp 日志）+ process_status + process_stop（SIGTERM→SIGKILL），黑名单同样生效，进程表内存态 per conversationId（重启失联诚实边界）；P5 desktop-agent-prompt 平台命令指导；P6 dev Electron 实机收口 + UI-265（Windows 实机属 G1+ 不外推，代码审查+单测覆盖）。安全边界不动：commandVerdict 黑名单全能力生效、workspace 沙箱含 cwd、accessMode full 门槛不变。非范围：pty/交互式 shell、提权、远程执行、0 新 npm 依赖。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-09-01 用户反馈「任务完成后工具执行记录不见了；希望全部保存但会话区整洁；终端/持续输出任务可出现独立小窗口」。根因（已调查）：task 链路 agent-runner 落库时 assistantToolActivities 显式传 null → meta_json 无工具记录 → 完成后前端 re-conciliation 用持久化消息覆盖内存快照致记录消失；task_events 全量事件仍在。用户三裁决：快照随消息落库 / 右下角浮窗+可折叠 / 仅 background 任务触发。方案：P1 runLoop 返回 assistantToolActivities recorder → agent-runner 传入 adapter（snapshot 已有 100 条上限与摘要截断）；P2 前端历史恢复核对（restoreSimpleMessage/ToolActivityList 链路已就绪，最小修补）；P3 后台进程浮窗——后端两个只读端点（会话进程列表 + 日志尾部，复用 readLogTail）+ 前端 BackgroundProcessDock（workspace_exec_background 成功 tool_result 自动弹出、1s 轮询、可折叠 chip、可关闭、位置自适应、mono 字体契约）；P4 dev Electron 实机收口 + UI-266。非范围：tool_events 全文回放二期、进程表跨重启恢复、浮窗拖拽、普通命令窗口化、0 新依赖 0 新 IPC。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-01",
       "archivePolicy": "archive_when_superseded",
       "phase": "P0-LAUNCH"
     }
   ],
-  "lastUpdated": "2026-09-01 (BLOCK-33 P0 launched)",
-  "documentCount": 173
+  "lastUpdated": "2026-09-01 (BLOCK-33 completed; BLOCK-34 P0 launched)",
+  "documentCount": 174
 }
