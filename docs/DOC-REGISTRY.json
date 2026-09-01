@@ -2950,7 +2950,7 @@
       "id": "BLOCK-35-DEV-ELECTRON-KILL-SCOPE",
       "path": "docs/block-35-dev-electron-kill-scope-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-35-dev-electron-kill-scope",
       "entrypoint": "docs/README.md",
@@ -2959,15 +2959,15 @@
         "dev-electron",
         "process-management",
         "G0",
-        "active",
-        "phase=P0-LAUNCH"
+        "completed",
+        "phase=COMPLETED"
       ],
-      "notes": "2026-09-01 BLOCK-34 P4 实机暴露：dev-electron.js shutdown() 经 stopWorkspaceElectron() 以 pgrep -f electronBinary 全杀工作区全部 Electron 主进程，误杀非本 wrapper 启动的并存实例（两次 Electron 静默退出，根因链见 plan §1）。修复：launch 时注入一次性 --biof3-dev-launch-token，shutdown 只 signal token 精确命中的本 wrapper 实例；waitForWorkspaceElectron 改 token 就绪判定；boot 清理保持全杀（清理上次会话遗留属设计）。非范围：vite/backend 退出触发整组重启语义、Windows 分支、boot 多 wrapper 互杀、0 新依赖 0 产品代码改动。验收：并存双实例（独立 userData 过单例锁）SIGTERM wrapper A → A 退 B 存；boot 清理仍按设计清杀 B。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-09-01 立项：dev-electron.js shutdown() 全杀工作区 Electron 误杀并存实例（BLOCK-34 P4 实机两次静默退出根因）。P1（e14569e）launch-token 定向：open --args 注入一次性 --biof3-dev-launch-token，shutdown 只 signal token 命中的本 wrapper 实例；waitForWorkspaceElectron token 就绪判定。P2（5b135c5）实机验收发现 boot 全杀盲区并修正：npx electron .（cli.js）主进程 argv 为 .../dist/electron 小写变体，旧 pgrep 只中 .app 路径 → getWorkspaceElectronPids 改 ERE 双变体匹配（Helper 不匹配）。P2 实机双判据 PASS（事件轮询，B 为 cli.js 变体）：① SIGTERM wrapper A → A 退 B 存（含 B 自身后端 health）；② 重启 wrapper → boot 清理按设计清杀 B。门禁：node --check / docs:check 175 / ui:audit:check / docs:reconcile 0。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-01",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH"
+      "phase": "COMPLETED"
     }
   ],
-  "lastUpdated": "2026-09-01 (BLOCK-34 completed; BLOCK-35 P0 launched)",
+  "lastUpdated": "2026-09-02 (BLOCK-35 completed)",
   "documentCount": 175
 }

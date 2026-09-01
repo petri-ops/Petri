@@ -1,6 +1,6 @@
 # BLOCK-35 — dev-electron 停止链误杀并存 Electron 实例修复
 
-> status: active · truthDomain: `block-35-dev-electron-kill-scope` · registered: 2026-09-01
+> status: completed · truthDomain: `block-35-dev-electron-kill-scope` · registered: 2026-09-01 · closed: 2026-09-02（P1 `e14569e` + P2 `5b135c5`，双判据 PASS）
 > owner: main agent · branch: main（单工作包串行，前置 BLOCK-34 已 completed）
 
 ## 1. 背景与根因（P4 实机观测）
