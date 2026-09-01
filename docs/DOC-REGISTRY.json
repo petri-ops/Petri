@@ -2875,8 +2875,31 @@
       "registeredAt": "2026-08-31",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-32-PROJECT-SCOPED-REVIEW",
+      "path": "docs/block-32-project-scoped-review-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-32-project-scoped-review",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-32",
+        "project-scoped",
+        "review-mode",
+        "git-adapter",
+        "ipc",
+        "G0",
+        "active",
+        "phase=P0-LAUNCH"
+      ],
+      "notes": "2026-09-01 用户指出「不同项目审阅中的变化也应该是隔离开的」并裁决立项全套做 + 非 git 项目诚实空态。问题：working-tree-review.js 全部 20 个 git:* IPC handler 调无参 resolveGitAdapter()（固定 app 仓库候选），审阅/改动卡片/CodeMirror inline diff 全消费同一绑定——任何项目看到的都是 desktop 应用仓库的改动/历史。方案：P1 resolveGitAdapter(projectId) 从本地 DB 取 project.workspace_path 校验 .git（非 git 抛新错误码 project_workspace_not_git），20 个 handler args 加 projectId?: string（additive，未传维持旧行为渐进兼容）；P2 preload/electron.d.ts/desktopBridge workingTreeReview 全方法加 projectId，useWorkingTreeReview/AgentChangesCard/CodeMirror 链路透传（路由 /project/:id 取当前项目），ReviewMode 渲染非 git 诚实空态；P3 实机跨项目隔离验证 + UI-264。非范围：git init 引导、写操作语义变化、BLOCK-31 会话归属逻辑、0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-01",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH"
     }
   ],
-  "lastUpdated": "2026-08-31 (BLOCK-29.7 completed)",
-  "documentCount": 170
+  "lastUpdated": "2026-09-01 (BLOCK-32 P0 launched)",
+  "documentCount": 172
 }
