@@ -47,6 +47,9 @@ const {
   tool_workspace_write,
   tool_workspace_replace,
   tool_workspace_exec,
+  tool_workspace_exec_background,
+  tool_process_status,
+  tool_process_stop,
 } = require('./workspace-tools');
 const { tool_system_info } = require('./system-info-tools');
 
@@ -80,6 +83,9 @@ const HANDLERS = {
   workspace_write: tool_workspace_write,
   workspace_replace: tool_workspace_replace,
   workspace_exec: tool_workspace_exec,
+  workspace_exec_background: tool_workspace_exec_background,
+  process_status: tool_process_status,
+  process_stop: tool_process_stop,
   system_info: tool_system_info,
   query: tool_query,
   read_page: tool_read_page,
@@ -133,6 +139,10 @@ const CONTRACTS = {
   workspace_write: contract('workspace', 'workspace-write', 'R2', ['project.files'], 200),
   workspace_replace: contract('workspace', 'workspace-write', 'R2', ['project.files'], 200),
   workspace_exec: contract('workspace', 'execution', 'R2', ['project.files', 'local.process'], 30000),
+  // BLOCK-33 P4 — 后台进程：启动即返回（估时短），实际进程时长不占用工具执行预算
+  workspace_exec_background: contract('workspace', 'execution', 'R2', ['project.files', 'local.process'], 5000),
+  process_status: contract('workspace', 'none', 'R0', ['local.process'], 500),
+  process_stop: contract('workspace', 'execution', 'R2', ['local.process'], 5000),
   // BLOCK-33 P1 — 环境自省：只读零副作用，不依赖项目工作区（category 非 workspace → 不走 preflight）
   system_info: contract('verification', 'none', 'R0', ['local.process'], 1000),
   query: contract('retrieval', 'none', 'R0', ['project.database'], 250),

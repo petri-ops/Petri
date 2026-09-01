@@ -217,6 +217,13 @@ function summarizeToolCallForActivity(name, args = {}) {
   switch (name) {
     case 'workspace_exec':
       return { actionLabel: '已运行', actionDetail: compactActivityDetail(args.command) || '命令' };
+    // BLOCK-33 P4 — 后台进程三件套
+    case 'workspace_exec_background':
+      return { actionLabel: '后台运行', actionDetail: compactActivityDetail(args.command) || '命令' };
+    case 'process_status':
+      return { actionLabel: '查询后台进程', actionDetail: compactActivityDetail(args.processId) || '全部' };
+    case 'process_stop':
+      return { actionLabel: '停止后台进程', actionDetail: compactActivityDetail(args.processId) || '进程' };
     case 'workspace_read': {
       const path = compactActivityDetail(args.path) || '文件';
       const start = Number.isInteger(args.startLine) ? ` · 第 ${args.startLine} 行起` : '';

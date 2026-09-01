@@ -139,6 +139,53 @@ const WORKSPACE_TOOL_DEFS = [
   {
     type: 'function',
     function: {
+      name: 'workspace_exec_background',
+      description:
+        '在项目工作区以后台进程启动长时间运行的命令（如本地 HTTP 服务、长训练脚本），立即返回进程 ID（processId）、系统 pid 与日志相对路径。stdout 与 stderr 合并写入工作区 .biof3-agent-tmp/ 下的日志文件，可用 workspace_read 查看日志、process_status 查询存活与日志尾部、process_stop 停止。安全边界与 workspace_exec 相同（黑名单先行、需完全访问模式）。科学分析正式结果仍应通过 run_tool。',
+      parameters: {
+        type: 'object',
+        properties: {
+          command: { type: 'string', description: '要在项目工作目录中后台执行的 shell 命令，例如 "python -m http.server 8642"' },
+          cwd: { type: 'string', description: '相对项目根目录的工作子目录（必须已存在）' },
+          shell: { type: 'string', enum: ['auto', 'posix', 'powershell', 'cmd'], description: 'shell 选择：auto=平台默认（Windows=cmd，其他=$SHELL）' },
+        },
+        required: ['command'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'process_status',
+      description:
+        '查询本会话通过 workspace_exec_background 启动的后台进程状态：存活/退出/停止、退出码、运行时长与日志尾部。不带 processId 时返回本会话全部后台进程；进程表为内存态，应用重启后失效（日志文件仍在，可手工查看）。',
+      parameters: {
+        type: 'object',
+        properties: {
+          processId: { type: 'string', description: '可选；workspace_exec_background 返回的进程 ID。省略时列出本会话全部后台进程' },
+          logTailBytes: { type: 'integer', description: '日志尾部读取字节数，默认 4096，最大 65536' },
+        },
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'process_stop',
+      description:
+        '停止本会话启动的后台进程：先 SIGTERM，宽限 3 秒后仍存活则 SIGKILL（Windows 使用 taskkill /T /F）。只能停止本工具启动的进程，不能按系统 pid 任意杀进程。',
+      parameters: {
+        type: 'object',
+        properties: {
+          processId: { type: 'string', description: 'workspace_exec_background 返回的进程 ID' },
+        },
+        required: ['processId'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'system_info',
       description:
         '获取当前系统与命令执行环境信息：操作系统与架构、shell 解释器、路径分隔符、Node/npm/Python/Git 版本等。只读、零副作用。在编写或执行任何平台相关命令（workspace_exec）之前先调用，避免跨平台命令语法错误；探测命令不存在时对应版本返回 null。',

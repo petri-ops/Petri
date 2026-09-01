@@ -279,6 +279,85 @@ function authorizeProject(project, userId, db) {
   }
 }
 
+// ===== BLOCK-33 P4 — 后台进程（workspace_exec_background / process_status / process_stop） =====
+// 进程表为内存态、per conversation（应用重启自然失效——诚实边界，日志文件仍在工作区内可手工查看）。
+const BACKGROUND_LOG_DIR = '.biof3-agent-tmp';
+const BACKGROUND_MAX_RUNNING_PER_SESSION = 16;
+const BACKGROUND_MAX_RECORDS = 256;
+const BACKGROUND_LOG_TAIL_DEFAULT = 4096;
+const BACKGROUND_LOG_TAIL_MAX = 65536;
+const PROCESS_STOP_GRACE_MS = 3000;
+
+const backgroundProcesses = new Map();
+
+function backgroundSessionKey(ctx = {}) {
+  if (ctx.conversationId) return `conv:${ctx.conversationId}`;
+  return `project:${ctx.projectId || 'unknown'}:${ctx.userId || 'unknown'}`;
+}
+
+async function readLogTail(logPath, bytes) {
+  const handle = await fsp.open(logPath, 'r');
+  try {
+    const stat = await handle.stat();
+    const size = Math.min(stat.size, bytes);
+    if (size <= 0) return { text: '', truncated: false, size: stat.size };
+    const buffer = Buffer.alloc(size);
+    await handle.read(buffer, 0, size, stat.size - size);
+    return {
+      text: buffer.toString('utf8'),
+      truncated: stat.size > bytes,
+      size: stat.size,
+    };
+  } finally {
+    await handle.close();
+  }
+}
+
+function killBackgroundProcess(record, signal) {
+  const isWindows = process.platform === 'win32';
+  try {
+    if (isWindows) {
+      // Windows：taskkill /T 结束整棵进程树
+      spawn('taskkill', ['/pid', String(record.pid), '/T', '/F'], { windowsHide: true }).unref();
+      return;
+    }
+    if (record.detachedGroup) {
+      // posix：detached 使子进程成为进程组长，负 pid 可杀整组（shell 及其后代）
+      try {
+        process.kill(-record.pid, signal);
+        return;
+      } catch {
+        // 进程组已消失，退回直接杀
+      }
+    }
+    record.child.kill(signal);
+  } catch {
+    // 进程已退出：close 回调负责收敛状态
+  }
+}
+
+function terminateBackgroundProcess(record) {
+  if (record.status !== 'running') return;
+  killBackgroundProcess(record, 'SIGTERM');
+  setTimeout(() => {
+    if (record.status !== 'running') return;
+    killBackgroundProcess(record, 'SIGKILL');
+  }, PROCESS_STOP_GRACE_MS);
+}
+
+function pruneBackgroundRecords() {
+  if (backgroundProcesses.size <= BACKGROUND_MAX_RECORDS) return;
+  const removable = [...backgroundProcesses.values()]
+    .filter((record) => record.status !== 'running')
+    .sort((a, b) => a.startedAt - b.startedAt);
+  let overflow = backgroundProcesses.size - BACKGROUND_MAX_RECORDS;
+  for (const record of removable) {
+    if (overflow <= 0) break;
+    backgroundProcesses.delete(record.id);
+    overflow -= 1;
+  }
+}
+
 function createWorkspaceTools(options = {}) {
   const dbProvider = options.dbProvider || (() => require('../db'));
   const targetLocks = new Map();
@@ -801,7 +880,7 @@ function createWorkspaceTools(options = {}) {
 
   async function preflightTool(name, args = {}, ctx = {}) {
     return withWorkspace(ctx, async ({ root }) => {
-      if (name === 'workspace_exec') {
+      if (name === 'workspace_exec' || name === 'workspace_exec_background') {
         if (ctx.accessMode !== 'full') {
           return errorResult('access_mode_read_only', '聊天当前处于只读模式，禁止执行命令');
         }
@@ -824,6 +903,11 @@ function createWorkspaceTools(options = {}) {
         };
       }
 
+      if (name === 'process_status' || name === 'process_stop') {
+        // BLOCK-33 P4 — 只操作本工具启动的进程，无文件路径参数
+        return { ok: true, commandRisk: 'process_control' };
+      }
+
       const resolved = await resolveWorkspaceTarget(root, args.path || '.', {
         createRoot: args.dryRun !== true,
       });
@@ -841,7 +925,7 @@ function createWorkspaceTools(options = {}) {
       };
     }, {
       createRoot: args.dryRun !== true,
-      requireCompatible: ['workspace_write', 'workspace_replace', 'workspace_exec'].includes(name),
+      requireCompatible: ['workspace_write', 'workspace_replace', 'workspace_exec', 'workspace_exec_background'].includes(name),
     });
   }
 
@@ -919,6 +1003,217 @@ function createWorkspaceTools(options = {}) {
     }, { requireCompatible: true });
   }
 
+  // BLOCK-33 P4 — 后台启动长任务：黑名单/accessMode/沙箱与 workspace_exec 相同，
+  // 输出重定向到工作区 .biof3-agent-tmp/ 日志文件，立即返回 processId。
+  async function execBackground(args = {}, ctx = {}) {
+    if (ctx.accessMode !== 'full') {
+      return errorResult('access_mode_read_only', '聊天当前处于只读模式，禁止启动后台进程');
+    }
+    const command = String(args.command || '').trim();
+    if (!command) return errorResult('invalid_arguments', 'command 不能为空');
+    const verdict = commandVerdict(command);
+    if (!verdict.ok) return errorResult('command_blocked', verdict.reason);
+    const shellPreference = String(args.shell || 'auto').toLowerCase();
+    return withWorkspace(ctx, async ({ root }) => {
+      const sessionKey = backgroundSessionKey(ctx);
+      let runningCount = 0;
+      for (const record of backgroundProcesses.values()) {
+        if (record.sessionKey === sessionKey && record.status === 'running') runningCount += 1;
+      }
+      if (runningCount >= BACKGROUND_MAX_RUNNING_PER_SESSION) {
+        return errorResult(
+          'resource_limit',
+          `本会话后台进程已达上限 ${BACKGROUND_MAX_RUNNING_PER_SESSION}，请先用 process_stop 释放`
+        );
+      }
+      let cwdRoot = root;
+      let cwdLabel = '.';
+      if (args.cwd != null && String(args.cwd).trim() !== '' && String(args.cwd).trim() !== '.') {
+        try {
+          const resolvedCwd = await resolveWorkspaceTarget(root, String(args.cwd).trim(), {
+            createRoot: false,
+          });
+          const cwdStat = await fsp.stat(resolvedCwd.target).catch(() => null);
+          if (!cwdStat || !cwdStat.isDirectory()) {
+            return errorResult('invalid_arguments', `cwd 不是工作区内已存在的目录: ${resolvedCwd.relativePath}`);
+          }
+          cwdRoot = resolvedCwd.target;
+          cwdLabel = resolvedCwd.relativePath;
+        } catch (error) {
+          return errorResult(
+            error && error.code ? error.code : 'invalid_arguments',
+            (error && error.message) || 'cwd 校验失败'
+          );
+        }
+      }
+      const invocation = shellInvocation(command, shellPreference);
+      if (invocation.error) return errorResult('invalid_arguments', invocation.error);
+
+      const processId = `bg-${Date.now().toString(36)}-${crypto.randomBytes(3).toString('hex')}`;
+      const logRelativePath = `${BACKGROUND_LOG_DIR}/${processId}.log`;
+      const logPath = path.join(root, BACKGROUND_LOG_DIR, `${processId}.log`);
+      await fsp.mkdir(path.dirname(logPath), { recursive: true });
+      const logFd = await fsp.open(logPath, 'a');
+      let child;
+      try {
+        child = spawn(invocation.executable, invocation.args, {
+          cwd: cwdRoot,
+          // posix 下 detached 使子进程成为进程组长，process_stop 可整组终止
+          detached: process.platform !== 'win32',
+          stdio: ['ignore', logFd.fd, logFd.fd],
+          windowsHide: true,
+        });
+      } catch (error) {
+        await logFd.close().catch(() => {});
+        return errorResult('invalid_arguments', (error && error.message) || '后台进程启动失败');
+      }
+      logFd.close().catch(() => {});
+
+      const record = {
+        id: processId,
+        sessionKey,
+        projectId: ctx.projectId || null,
+        userId: ctx.userId || null,
+        command,
+        cwd: cwdLabel,
+        shell: invocation.executable,
+        pid: child.pid,
+        child,
+        detachedGroup: process.platform !== 'win32',
+        logPath,
+        logRelativePath,
+        startedAt: Date.now(),
+        endedAt: null,
+        status: 'running',
+        exitCode: null,
+        signal: null,
+        stoppedByUser: false,
+        spawnError: null,
+      };
+      child.on('close', (code, signal) => {
+        record.status = record.stoppedByUser ? 'stopped' : 'exited';
+        record.exitCode = Number.isInteger(code) ? code : null;
+        record.signal = signal || null;
+        record.endedAt = Date.now();
+      });
+      child.on('error', (error) => {
+        record.status = 'failed';
+        record.spawnError = (error && error.message) || '后台进程异常退出';
+        record.endedAt = Date.now();
+      });
+      // 诚实边界：应用退出后后台进程继续存活（日志文件仍在），不做进程树托管
+      child.unref();
+
+      backgroundProcesses.set(processId, record);
+      pruneBackgroundRecords();
+      return {
+        ok: true,
+        processId,
+        pid: record.pid,
+        command,
+        cwd: cwdLabel,
+        shell: invocation.executable,
+        status: 'running',
+        startedAtIso: new Date(record.startedAt).toISOString(),
+        logPath: logRelativePath,
+        note: '输出已重定向到日志文件：workspace_read 可读取全文，process_status 查询存活与日志尾部，process_stop 停止',
+      };
+    }, { requireCompatible: true });
+  }
+
+  // BLOCK-33 P4 — 查询本会话后台进程（存活状态 + 日志尾部）
+  async function processStatus(args = {}, ctx = {}) {
+    const sessionKey = backgroundSessionKey(ctx);
+    const logTailBytes = clampInteger(
+      args.logTailBytes, BACKGROUND_LOG_TAIL_DEFAULT, 128, BACKGROUND_LOG_TAIL_MAX
+    );
+    const missingMessage = '未找到该后台进程（可能属于其他会话，或应用已重启导致进程表失效）';
+    const viewRecord = async (record) => {
+      const view = {
+        processId: record.id,
+        pid: record.pid,
+        status: record.status,
+        command: record.command,
+        cwd: record.cwd,
+        shell: record.shell,
+        startedAtIso: new Date(record.startedAt).toISOString(),
+        durationMs: (record.endedAt || Date.now()) - record.startedAt,
+        exitCode: record.exitCode,
+        signal: record.signal,
+        logPath: record.logRelativePath,
+      };
+      if (record.spawnError) view.spawnError = record.spawnError;
+      if (record.status === 'running') {
+        // 兜底核验：进程表在但系统进程已消失（如被外部杀掉）
+        let alive = true;
+        try {
+          process.kill(record.pid, 0);
+        } catch (error) {
+          alive = Boolean(error && error.code === 'EPERM');
+        }
+        if (!alive) {
+          view.status = 'orphaned';
+          return view;
+        }
+      }
+      try {
+        const tail = await readLogTail(record.logPath, logTailBytes);
+        view.logTail = tail.text;
+        view.logTruncated = tail.truncated;
+        view.logSizeBytes = tail.size;
+      } catch {
+        // 日志文件缺失不阻塞状态查询
+      }
+      return view;
+    };
+    if (args.processId != null && String(args.processId).trim() !== '') {
+      const record = backgroundProcesses.get(String(args.processId).trim());
+      if (!record || record.sessionKey !== sessionKey) {
+        return errorResult('not_found', missingMessage);
+      }
+      return { ok: true, process: await viewRecord(record) };
+    }
+    const records = [...backgroundProcesses.values()]
+      .filter((record) => record.sessionKey === sessionKey)
+      .sort((a, b) => a.startedAt - b.startedAt);
+    const processes = await Promise.all(records.map(viewRecord));
+    return { ok: true, count: processes.length, processes };
+  }
+
+  // BLOCK-33 P4 — 停止本会话后台进程：SIGTERM → 宽限 3s → SIGKILL
+  async function processStop(args = {}, ctx = {}) {
+    if (ctx.accessMode !== 'full') {
+      return errorResult('access_mode_read_only', '聊天当前处于只读模式，禁止停止后台进程');
+    }
+    const processId = String(args.processId || '').trim();
+    if (!processId) return errorResult('invalid_arguments', 'processId 不能为空');
+    const sessionKey = backgroundSessionKey(ctx);
+    const record = backgroundProcesses.get(processId);
+    if (!record || record.sessionKey !== sessionKey) {
+      return errorResult('not_found', '未找到该后台进程（只能停止本会话启动的进程）');
+    }
+    if (record.status !== 'running') {
+      return {
+        ok: true,
+        processId,
+        status: record.status,
+        alreadyStopped: true,
+        exitCode: record.exitCode,
+      };
+    }
+    record.stoppedByUser = true;
+    terminateBackgroundProcess(record);
+    return {
+      ok: true,
+      processId,
+      pid: record.pid,
+      status: 'stopping',
+      stopSignal: 'SIGTERM',
+      graceMs: PROCESS_STOP_GRACE_MS,
+      note: '已发送 SIGTERM，宽限 3 秒后仍存活将 SIGKILL；用 process_status 查看最终状态',
+    };
+  }
+
   return {
     listDirectory,
     findFiles,
@@ -927,6 +1222,9 @@ function createWorkspaceTools(options = {}) {
     writeFile,
     replaceText,
     executeCommand,
+    execBackground,
+    processStatus,
+    processStop,
     preflightTool,
     commandVerdict,
   };
@@ -943,6 +1241,9 @@ module.exports = {
   tool_workspace_write: defaultTools.writeFile,
   tool_workspace_replace: defaultTools.replaceText,
   tool_workspace_exec: defaultTools.executeCommand,
+  tool_workspace_exec_background: defaultTools.execBackground,
+  tool_process_status: defaultTools.processStatus,
+  tool_process_stop: defaultTools.processStop,
   preflightWorkspaceTool: defaultTools.preflightTool,
   _internal: {
     commandVerdict: defaultTools.commandVerdict,
