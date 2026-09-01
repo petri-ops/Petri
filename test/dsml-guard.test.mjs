@@ -54,6 +54,17 @@ test('stripLeakedToolMarkup truncates from the first DSML mark', () => {
   assert.equal(stripLeakedToolMarkup(null), '');
 });
 
+test('stripLeakedToolMarkup also truncates fullwidth variants (U+FF5C)', () => {
+  // 实机复验观察到的 tokenizer 变体：｜｜DSML｜｜
+  assert.equal(stripLeakedToolMarkup('报告如下。｜｜DSML｜｜invoke name="process_status"'), '报告如下。');
+  assert.equal(stripLeakedToolMarkup('｜｜DSML｜｜｜｜DSML｜｜'), '');
+  assert.equal(stripLeakedToolMarkup('正文 ｜｜/DSML｜｜ 尾部'), '正文 ');
+  // 半角/全角混合
+  assert.equal(stripLeakedToolMarkup('正文 <｜DSML｜>x'), '正文 ');
+  // 普通全角竖线文本不受影响
+  assert.equal(stripLeakedToolMarkup('A｜B 全角正文'), 'A｜B 全角正文');
+});
+
 test('stream guard keeps plain text intact across chunks including partial-bracket tails', () => {
   const guard = createDsmlStreamGuard();
   let out = '';
@@ -87,7 +98,35 @@ test('stream guard holds a partial close-mark tail and releases it on flush', ()
   let out = guard.push('结尾文本 <|/DS');
   assert.equal(out, '结尾文本 ');
   out += guard.flush();
-  assert.equal(out, '结尾文本 <|/DS');
+  assert.equal(out, '结尾文本 ');
+});
+
+test('stream guard strips fullwidth ｜｜DSML｜｜ deltas (real-device variant)', () => {
+  const guard = createDsmlStreamGuard();
+  let out = '';
+  out += guard.push('后台进程已干净终止。');
+  out += guard.push('｜｜DSML｜｜');
+  out += guard.push('｜｜DSML｜｜invoke');
+  out += guard.flush();
+  assert.equal(out, '后台进程已干净终止。');
+});
+
+test('stream guard strips a fullwidth mark split across chunks', () => {
+  const guard = createDsmlStreamGuard();
+  let out = '';
+  out += guard.push('完成。');
+  out += guard.push('｜｜DS');
+  out += guard.push('ML｜｜invoke…');
+  out += guard.flush();
+  assert.equal(out, '完成。');
+});
+
+test('stream guard flush drops a trailing partial mark fragment', () => {
+  const guard = createDsmlStreamGuard();
+  let out = guard.push('正文完整');
+  out += guard.push(' ｜｜DS');
+  out += guard.flush();
+  assert.equal(out, '正文完整 ');
 });
 
 test('chatStream: leaked DSML in deltas never reaches SSE events or aggregate content', async () => {
