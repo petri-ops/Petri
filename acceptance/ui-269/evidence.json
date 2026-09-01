@@ -1,0 +1,50 @@
+{
+  "id": "UI-269",
+  "title": "右缘自定义滚动条 ChatScrollbar：隐藏系统原生 thumb，常驻纤细 thumb + 轨道线（视觉与应用设计语言协调）",
+  "date": "2026-09-02",
+  "user_feedback": "帮我调整右侧滚动条的视觉样式，使其更协调（前序 UI-268 两次调整后，macOS 系统 overlay thumb 仍粗/深/短暂出现，与应用纤细线条设计语言不协调）",
+  "changes": [
+    "新增 ChatScrollbar.tsx + .module.css：挂在 .sc-body（非滚动容器）内，右缘偏移由 CSS 变量 --scb-right 提供（simple-chat.css 默认 12px / agentMain 0px / rightChatPanel 10px），与 .sc-messages 右缘精确对齐",
+    "视觉：常驻 1px 轨道线（端点 12px 淡出、border 55%，替代 UI-268 的 .sc-messages 背景线）+ 5px 常驻圆角 thumb（text-tertiary 40%），hover/拖拽加深至 text-secondary 55% 并增宽至 6px——与左缘 MessageRail 刻度视觉语言一致",
+    "交互：thumb 指针拖拽（setPointerCapture）、点击轨道以点击处为中心平滑跳转、热区滚轮透传给消息容器；内容不溢出时整条不渲染",
+    "度量：scroll 事件 + ResizeObserver（容器 + 全部子元素）+ MutationObserver（子元素增删时重挂 observer），流式输出/图片加载实时跟随",
+    "simple-chat.css：.sc-messages 隐藏原生滚动条（scrollbar-width: none + ::-webkit-scrollbar display:none）、移除 UI-268 背景线与无效的 classic 自定义规则；.sc-body 增加 --scb-right: 12px",
+    "project-workspace.module.css：agentMain/rightChatPanel 两处 sc-body 分别覆盖 --scb-right: 0px / 10px"
+  ],
+  "verification": [
+    {
+      "step": "S1",
+      "name": "原生滚动条已隐藏 + 组件接管",
+      "method": "CDP evaluate：getComputedStyle(.sc-messages).scrollbarWidth === 'none'；自定义 track/thumb 已渲染；--scb-right 变量按上下文生效（agentMain 0px）"
+    },
+    {
+      "step": "S2",
+      "name": "视觉协调",
+      "method": "全页截图 + sips 裁剪：淡灰圆角常驻 thumb 压轨道线，与左缘 MessageRail 刻度风格对称；消息内容与滚动条区域 18px 分离保持不变。见 01-custom-scrollbar.png"
+    },
+    {
+      "step": "S3",
+      "name": "点击轨道跳转",
+      "method": "CDP PointerEvent 于轨道中部 → scrollTop 0 → 701 / max 763（平滑跳转）"
+    },
+    {
+      "step": "S4",
+      "name": "滚轮透传",
+      "method": "CDP WheelEvent deltaY=240 于热区 → scrollTop 701 → 762"
+    },
+    {
+      "step": "S5",
+      "name": "真实拖拽",
+      "method": "CDP Input.dispatchMouseEvent mousePressed → mouseMoved ×6（+120px）→ mouseReleased → scrollTop 0 → 228（方向与比例正确）"
+    },
+    {
+      "step": "S6",
+      "name": "vitest 4/4",
+      "method": "无溢出不渲染 / 溢出渲染 track+thumb+line / scroll 事件更新 thumb 位置 / resize 后溢出消失即隐藏"
+    }
+  ],
+  "evidence_files": ["acceptance/ui-269/01-custom-scrollbar.png"],
+  "tests": "frontend npx vitest run src/components/copilot/ChatScrollbar.test.tsx → 4/4；回归 ToolActivityDock 10/10 + SimpleChat 2 files 15/15；tsc 0 错误",
+  "notes": "G0 开发期常态 · 不外推 packaged / Provider / GA。",
+  "status": "verified"
+}

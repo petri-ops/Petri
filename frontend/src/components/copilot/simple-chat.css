@@ -140,7 +140,7 @@
 
 /* Messages area */
 .sc-body {
-  position: relative; /* UI-262 — 左缘 MessageRail 的定位锚点 */
+  position: relative; /* UI-262 — 左缘 MessageRail 的定位锚点；UI-269 右缘 ChatScrollbar 锚点 */
   flex: 1;
   min-height: 0;
   height: 100%;
@@ -149,14 +149,15 @@
   gap: 10px;
   padding: 12px 12px 12px;
   overflow: hidden;
+  /* UI-269 — ChatScrollbar 右缘偏移（= 右 padding），上下文可覆盖 */
+  --scb-right: 12px;
 }
 
 .sc-messages {
   flex: 1;
   overflow-y: auto;
-  /* 左侧 18px 让位给 UI-262 的 MessageRail 刻度条，避免消息内容与刻度贴在一起；
-     右侧 18px（UI-268）与左 rail 对称，overlay thumb（右缘 ~7px）出现时
-     与内容保持 ~11px 间隙，彻底避免重合 */
+  /* 左侧 18px 让位给 UI-262 的 MessageRail 刻度条；右侧 18px 与左 rail 对称，
+     内容与右缘滚动条区域分开 */
   padding: 2px 18px 0 18px;
   display: flex;
   flex-direction: column;
@@ -164,40 +165,12 @@
   min-height: 0;
   will-change: scroll-position;
   contain: layout style paint;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--biof3-border) 46%, transparent) transparent;
-  /* UI-268 — 右缘常驻滑轨线：容器背景不随滚动移动，与左 rail 沟槽对称；
-     overlay thumb 出现时恰好压在线上（距右缘 3px 居中于 thumb 区域） */
-  background-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    color-mix(in srgb, var(--biof3-border) 55%, transparent) 12px,
-    color-mix(in srgb, var(--biof3-border) 55%, transparent) calc(100% - 12px),
-    transparent 100%
-  );
-  background-repeat: no-repeat;
-  background-position: right 3px center;
-  background-size: 1px min(62%, 560px);
+  /* UI-269 — 隐藏原生滚动条（macOS overlay thumb 样式突兀），由 ChatScrollbar 接管 */
+  scrollbar-width: none;
 }
 
 .sc-messages::-webkit-scrollbar {
-  width: 7px;
-}
-
-.sc-messages::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sc-messages::-webkit-scrollbar-thumb {
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--biof3-border-strong) 42%, transparent);
-  background-clip: padding-box;
-}
-
-.sc-messages::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--biof3-text-secondary) 42%, transparent);
-  background-clip: padding-box;
+  display: none;
 }
 
 .sc-loading {

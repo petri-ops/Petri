@@ -65,6 +65,7 @@ import { ToolActivityDock } from './ToolActivityDock';
 import type { ToolActivityDockGroup, ToolActivityFocusRequest } from './ToolActivityDock';
 import { AgentChangesCard } from './AgentChangesCard';
 import { MessageRail, type MessageRailItem } from './MessageRail';
+import { ChatScrollbar } from './ChatScrollbar';
 import {
   stringifyParamValue,
   shortValue,
@@ -1396,6 +1397,9 @@ export function SimpleChat({
 
         {/* UI-262 — 聊天区左缘用户消息导航条：悬浮预览、点击跳转对应消息 */}
         {railItems.length > 0 && <MessageRail items={railItems} onJump={handleRailJump} />}
+
+        {/* UI-269 — 右缘自定义滚动条：隐藏系统原生 thumb，常驻纤细 thumb + 轨道线 */}
+        <ChatScrollbar containerRef={scrollRef} />
 
         <div
           className="sc-input-area"

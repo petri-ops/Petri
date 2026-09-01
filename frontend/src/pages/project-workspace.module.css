@@ -1652,6 +1652,8 @@
 
 .agentMain :global(.sc-body) {
   padding: 12px 0 14px;
+  /* UI-269 — ChatScrollbar 与 .sc-messages 右缘对齐（sc-body 右 padding 为 0） */
+  --scb-right: 0px;
 }
 
 .agentMain :global(.sc-messages) {
@@ -3279,6 +3281,8 @@ button.workspacePinnedSummaryMetricCard:hover {
 .rightChatPanel :global(.sc-body) {
   gap: 8px;
   padding: 8px 10px 10px;
+  /* UI-269 — ChatScrollbar 与 .sc-messages 右缘对齐（sc-body 右 padding 10px） */
+  --scb-right: 10px;
 }
 
 .rightChatPanel :global(.sc-messages) {

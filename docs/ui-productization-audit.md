@@ -2137,6 +2137,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-269: 右缘自定义滚动条 ChatScrollbar（隐藏系统原生 thumb，常驻纤细 thumb + 轨道线） (2026-09-02 verified)
+
+**用户反馈**：「帮我调整右侧滚动条的视觉样式，使其更协调」（UI-268 两次调整后，macOS 系统 overlay thumb 仍粗/深/短暂出现，与应用纤细线条设计语言不协调）。
+
+**改动**（0 新增 IPC / 0 新依赖）：① 新增 `ChatScrollbar.tsx` + `.module.css`：挂在 `.sc-body`（非滚动容器）内，右缘偏移由 CSS 变量 `--scb-right` 提供（simple-chat.css 默认 12px / agentMain 0px / rightChatPanel 10px），与 `.sc-messages` 右缘精确对齐；② 视觉：常驻 1px 轨道线（端点 12px 淡出、border 55%，替代 UI-268 的 `.sc-messages` 背景线）+ 5px 常驻圆角 thumb（text-tertiary 40%），hover/拖拽加深至 text-secondary 55% 并增宽至 6px——与左缘 MessageRail 刻度视觉语言一致；③ 交互：thumb 指针拖拽（setPointerCapture）、点击轨道以点击处为中心平滑跳转、热区滚轮透传；内容不溢出时整条不渲染；④ 度量：scroll 事件 + ResizeObserver（容器+子元素）+ MutationObserver；⑤ `.sc-messages` 隐藏原生滚动条（`scrollbar-width: none` + `::-webkit-scrollbar display:none`），移除 UI-268 背景线与无效 classic 自定义规则；两处 module 覆盖 `--scb-right`。
+
+**验证**：CDP 实机——`scrollbarWidth === 'none'` + 组件接管；点击轨道中部 scrollTop 0→701/max 763 平滑跳转；热区滚轮透传 701→762；`Input.dispatchMouseEvent` 真实拖拽 +120px → scrollTop 0→228。vitest 4/4（无溢出隐藏/溢出渲染/scroll 重定位/resize 后隐藏）；回归 ToolActivityDock 10/10 + SimpleChat 15/15；tsc 0。证据 `acceptance/ui-269/`。
+
+**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-268: 会话区滚动条与内容分离 + 右缘常驻滑轨线（与左缘 MessageRail 对称） (2026-09-02 verified)
 
 **用户反馈**：「聊天会话区上下滑动窗口的时候，右侧的定位柱状和会话区重合了……调整位置要分开，像左侧条形区一样的边界感」。
