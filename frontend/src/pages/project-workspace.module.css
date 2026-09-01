@@ -1508,8 +1508,9 @@
 
 .workspaceSessionFrameChat {
   justify-content: flex-end;
-  /* 左 32→8px：UI-262 刻度 rail 尽可能贴近工作区左缘 */
-  padding: 0 32px 0 8px;
+  /* 左 32→8px：UI-262 刻度 rail 尽可能贴近工作区左缘；
+     右 32→14px（UI-269）：ChatScrollbar thumb 贴聊天侧边栏最右缘 */
+  padding: 0 14px 0 8px;
 }
 
 .workspaceSessionLayout {
@@ -1559,7 +1560,8 @@
 .workspaceSessionFrameChat .workspaceSessionContent {
   justify-content: flex-end;
   padding-inline-start: 18px;
-  padding-inline-end: 18px;
+  /* 右 padding 让位（UI-269）：thumb 需贴侧边栏最右缘，文字留白由 .sc-messages 自身 18px padding 保证 */
+  padding-inline-end: 0;
 }
 
 .workspaceSessionChrome {
