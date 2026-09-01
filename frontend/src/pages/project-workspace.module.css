@@ -1655,8 +1655,8 @@
 }
 
 .agentMain :global(.sc-messages) {
-  /* 左 18px 让位给 UI-262 MessageRail 刻度条；右 12px（UI-268）与滚动条 thumb 分开 */
-  padding: 0 12px 0 18px;
+  /* 左 18px 让位给 UI-262 MessageRail 刻度条；右 18px（UI-268）与滚动条 thumb 分开 */
+  padding: 0 18px 0 18px;
 }
 
 .agentMain :global(.sc-composer) {
@@ -3282,8 +3282,8 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .rightChatPanel :global(.sc-messages) {
-  /* 左 18px 让位给 UI-262 MessageRail 刻度条；右 12px（UI-268）与滚动条 thumb 分开 */
-  padding: 0 12px 0 18px;
+  /* 左 18px 让位给 UI-262 MessageRail 刻度条；右 18px（UI-268）与滚动条 thumb 分开 */
+  padding: 0 18px 0 18px;
 }
 
 .rightChatPanel :global(.sc-empty) {

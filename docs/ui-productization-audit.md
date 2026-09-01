@@ -2141,9 +2141,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **用户反馈**：「聊天会话区上下滑动窗口的时候，右侧的定位柱状和会话区重合了……调整位置要分开，像左侧条形区一样的边界感」。
 
-**改动**（0 新增 IPC / 0 新依赖 / 纯 CSS）：① `.sc-messages` padding-right 4px → 12px，消息内容与 overlay 滚动条 thumb 分开（左 18px 右 12px 与 UI-262 左 rail 对称让位）；② 右缘常驻滑轨线（容器 background-image 1px 竖线：`right 3px` 居中于 thumb 区域、高 `min(62%,560px)` 与左 rail 沟槽对称、端点 12px 淡出、border 55%）——容器背景不随内容滚动，thumb 出现时恰好压线；③ `project-workspace.module.css` 两处 `:global(.sc-messages)`（agentMain / rightChatPanel）padding 同步 `0 12px 0 18px`，防 module 覆盖吞掉右侧让位（UI-262 同类教训）。
+**改动**（0 新增 IPC / 0 新依赖 / 纯 CSS）：① `.sc-messages` padding-right 4px → 18px，消息内容与 overlay 滚动条 thumb 分开（左右侧对称让位 18px/18px 与 UI-262 左 rail 对称；初版 12px 经用户复核仍显贴边，加深至 18px，thumb 与内容间隙 ~11px，见 04-gap-18px.png）；② 右缘常驻滑轨线（容器 background-image 1px 竖线：`right 3px` 居中于 thumb 区域、高 `min(62%,560px)` 与左 rail 沟槽对称、端点 12px 淡出、border 55%）——容器背景不随内容滚动，thumb 出现时恰好压线；③ `project-workspace.module.css` 两处 `:global(.sc-messages)`（agentMain / rightChatPanel）padding 同步 `0 18px 0 18px`，防 module 覆盖吞掉右侧让位（UI-262 同类教训）。
 
-**实机验证**（dev Electron CDP）：`getComputedStyle(.sc-messages).paddingRight === '12px'`；`offsetWidth - clientWidth === 0` 确认 macOS overlay 行为（classic `::-webkit-scrollbar-track` 渐变不渲染，故改用容器背景线方案）；scrollTop 置中触发 thumb 截图显示 thumb 恰好压线、未覆盖区段露出常驻线；scrollTop=0/中段对比轨道线位置恒定（背景不随滚动）。证据 `acceptance/ui-268/`（3 截图 + evidence.json S1–S5）。附注：本环境 `Page.captureScreenshot` 的 clip 坐标与 CSS px 不一致（dpr≈1.389），clip 截图不可用，证据改用全页截图 + sips 裁剪放大，fixed 探针标定确认坐标。
+**实机验证**（dev Electron CDP）：`getComputedStyle(.sc-messages).paddingRight === '18px'`（12px 初版复核后加深）；`offsetWidth - clientWidth === 0` 确认 macOS overlay 行为（classic `::-webkit-scrollbar-track` 渐变不渲染，故改用容器背景线方案）；scrollTop 置中触发 thumb 截图显示 thumb 恰好压线、未覆盖区段露出常驻线；scrollTop=0/中段对比轨道线位置恒定（背景不随滚动）。证据 `acceptance/ui-268/`（4 截图 + evidence.json S1–S5）。附注：本环境 `Page.captureScreenshot` 的 clip 坐标与 CSS px 不一致（dpr≈1.389），clip 截图不可用，证据改用全页截图 + sips 裁剪放大，fixed 探针标定确认坐标。
 
 **状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 

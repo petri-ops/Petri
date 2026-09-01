@@ -155,8 +155,9 @@
   flex: 1;
   overflow-y: auto;
   /* 左侧 18px 让位给 UI-262 的 MessageRail 刻度条，避免消息内容与刻度贴在一起；
-     右侧 12px（UI-268）让内容与滚动条 thumb 分开，形成与左 rail 对称的边界感 */
-  padding: 2px 12px 0 18px;
+     右侧 18px（UI-268）与左 rail 对称，overlay thumb（右缘 ~7px）出现时
+     与内容保持 ~11px 间隙，彻底避免重合 */
+  padding: 2px 18px 0 18px;
   display: flex;
   flex-direction: column;
   gap: 14px;
