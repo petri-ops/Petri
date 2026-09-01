@@ -1212,9 +1212,10 @@ export function SimpleChat({
   }, [setActiveModelId]);
 
   return (
-    <div className="sc-root">
-      <div className="sc-body" data-rail-body>
-        <div className="sc-messages" ref={scrollRef}>
+    <div className="sc-outer" data-rail-body>
+      <div className="sc-root">
+        <div className="sc-body">
+          <div className="sc-messages" ref={scrollRef}>
           {loading && <div className="sc-loading">加载会话…</div>}
           {!loading && displayMessages.length === 0 && (
             <div className="sc-empty">
@@ -1394,12 +1395,6 @@ export function SimpleChat({
 
         {/* BLOCK-28.7 — 工作区改动卡片：每文件 ±统计，点击行跳转审阅；BLOCK-31 P3 传入会话 id 做会话作用域 */}
         <AgentChangesCard conversationId={conversationId} />
-
-        {/* UI-262 — 聊天区左缘用户消息导航条：悬浮预览、点击跳转对应消息 */}
-        {railItems.length > 0 && <MessageRail items={railItems} onJump={handleRailJump} />}
-
-        {/* UI-269 — 右缘自定义滚动条：隐藏系统原生 thumb，常驻纤细 thumb + 轨道线 */}
-        <ChatScrollbar containerRef={scrollRef} />
 
         <div
           className="sc-input-area"
@@ -1639,6 +1634,15 @@ export function SimpleChat({
           </div>
         </div>
       </div>
+      </div>
+
+      {/* UI-262 — 聊天区左缘用户消息导航条：锚定 sc-outer（会话栏最左边界），
+          会话内容卡片（sc-root）固定宽度居中时 rail 仍贴列缘；悬浮预览、点击跳转对应消息 */}
+      {railItems.length > 0 && <MessageRail items={railItems} onJump={handleRailJump} />}
+
+      {/* UI-269 — 右缘自定义滚动条：锚定 sc-outer（会话栏最右边界），与 rail 左右对称；
+          隐藏系统原生 thumb，常驻纤细 thumb + 轨道线 */}
+      <ChatScrollbar containerRef={scrollRef} />
 
       {/* BLOCK-36: 会话级「执行记录」浮窗（工具活动分组 + 后台进程 tab） */}
       <ToolActivityDock

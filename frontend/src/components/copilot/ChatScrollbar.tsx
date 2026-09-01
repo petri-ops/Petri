@@ -15,9 +15,10 @@ interface ChatScrollbarProps {
  * 设计语言不协调），改为常驻纤细 thumb + 轨道线，视觉语言与左缘
  * MessageRail 刻度一致（低透明度、hover 加深、圆角）。
  *
- * 定位：挂在 .sc-body（非滚动容器）内，右缘偏移由 CSS 变量
- * `--scb-right` 提供（simple-chat.css 默认 12px；agentMain 0px；
- * rightChatPanel 10px），与 .sc-messages 右缘精确对齐。
+ * 定位：挂在 .sc-outer（非滚动容器，会话栏全宽最外边界）内，右缘偏移由 CSS 变量
+ * `--scb-right` 提供（sc-outer 默认 0px = 贴会话栏最右边界，与左缘 MessageRail
+ * 左右对称；rightChatPanel 10px 保持原有内衬），会话内容卡片（sc-root 860px）
+ * 固定宽度居中时 thumb 仍贴列缘。
  */
 export function ChatScrollbar({ containerRef }: ChatScrollbarProps) {
   const [metrics, setMetrics] = useState({ clientH: 0, scrollH: 0, scrollTop: 0 });

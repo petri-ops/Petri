@@ -2135,7 +2135,19 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / ReviewMode + AgentChangesCard vitest 33/33。待 dev Electron 实机过目后转 verified。
 
-**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-270: rail/thumb 锚定会话栏最外边界（会话内容固定宽度居中不变） (2026-09-02 verified)
+
+**用户反馈**：「中间栏会话区的左侧信息条和右侧的thumb 能否完全保持 左右最边界区域呢 中间会话区宽度固定」——UI-269 五调引入 `.sc-root` max-width 860px 居中后，rail 与 thumb 仍锚定在卡片内（sc-body），宽屏时随 860px 卡片内缩，未贴中栏最外边界。
+
+**改动**（0 新增 IPC / 0 新依赖）：SimpleChat 新增全宽外层 `.sc-outer`（position: relative，承载 `data-rail-body` 定位锚点与 `--scb-right: 0px` 默认值），MessageRail 与 ChatScrollbar 从 `.sc-body` 移挂到 `.sc-outer`——rail `left:0` / thumb `right:0` 始终贴会话栏（中栏/右栏聊天）最外边界，会话内容卡片（`.sc-root` 860px 居中）固定宽度不变；`.sc-root` 边框/radius/阴影不动。rightChatPanel 保持原有 10px 右缘内衬（`--scb-right: 10px` 移至 `.rightChatPanel :global(.sc-outer)`）；MessageRail 预览卡片定位契约不变（closest `[data-rail-body]`，现解析到 sc-outer，垂直夹取范围含 composer 与原 sc-body 一致）。
+
+**实机验证**（dev Electron CDP 9222，Vite dev bundle HMR 后实时测量，中栏宽 1203.6px）：S1 rail 贴最左边界——`railLeft 388.0013 === outerLeft 388.0013`（offset 0）；S2 thumb 贴最右边界——`trackRight 1591.6050 ≈ outerRight 1591.6050`（offset <0.001px）；S3 内容固定宽度居中——`.sc-root` 宽 859.995px，gapLeft 171.799 ≈ gapRight 171.810。证据 `acceptance/ui-270/`（1 截图 + evidence.json S1–S3）。
+
+**门禁**：tsc 0 / ChatScrollbar + SimpleChat vitest 10/10 / docs:check 176 / ui:audit:check。
+
+**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-269: 右缘自定义滚动条 ChatScrollbar（隐藏系统原生 thumb，常驻纤细 thumb + 轨道线） (2026-09-02 verified)
 
@@ -2145,7 +2157,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **验证**：CDP 实机——`scrollbarWidth === 'none'` + 组件接管；点击轨道中部 scrollTop 0→701/max 763 平滑跳转；热区滚轮透传 701→762；`Input.dispatchMouseEvent` 真实拖拽 +120px → scrollTop 0→228。vitest 4/4（无溢出隐藏/溢出渲染/scroll 重定位/resize 后隐藏）；回归 ToolActivityDock 10/10 + SimpleChat 15/15；tsc 0。证据 `acceptance/ui-269/`。
 
-**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**状态**: verified（2026-09-02 六调——挂点移至 `.sc-outer` 贴会话栏最外边界，见 UI-270，随其实机复验）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-268: 会话区滚动条与内容分离 + 右缘常驻滑轨线（与左缘 MessageRail 对称） (2026-09-02 verified)
 
@@ -2223,7 +2235,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / SimpleChat + AgentChangesCard vitest 10/10 / docs:check 170 / ui:audit:check。dev Electron 实机多轮过目，用户确认后转 verified。**补充（同日）**：用户问「刻度不会一直增多吧 / 能否滑动选择其它消息」——① rail 高度封顶（聊天区 62%，max 560px），刻度 space-evenly 等距压缩（点击区 min-height 6→4px），消息再多也不会溢出；② 新增 rail 滚轮导航：悬浮 rail 滚动滚轮即逐条切换上一条/下一条用户消息（聊天区同步 scrollIntoView + 弹出对应预览卡片），tsc 0。
 
-**状态**: verified（dev Electron 边界内）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**状态**: verified（2026-09-02 锚点随 UI-270 移至 `.sc-outer` 贴会话栏最外边界，随其实机复验）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-260: BLOCK-29 增量 — 审阅文件树改按钮切换（默认收起，不再常驻占右侧栏） (2026-08-31 in_progress)
 

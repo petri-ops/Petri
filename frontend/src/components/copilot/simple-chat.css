@@ -8,7 +8,7 @@
   flex: 1;
   width: 100%;
   /* UI-269 — 会话区固定宽度居中：宽屏（如右侧面板关闭）时左右对称留白，
-     窄屏（右栏开启挤压）时不生效；rail/滚动条随列缘对齐 */
+     窄屏（右栏开启挤压）时不生效；rail/滚动条锚定 sc-outer，始终贴会话栏最外边界 */
   max-width: 860px;
   margin: 0 auto;
   height: 100%;
@@ -143,8 +143,21 @@
 }
 
 /* Messages area */
+.sc-outer {
+  position: relative; /* UI-262 左缘 MessageRail / UI-269 右缘 ChatScrollbar 的定位锚点（[data-rail-body]） */
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  /* UI-269 — ChatScrollbar 右缘偏移：默认 0 = thumb 贴会话栏最右边界（与左 rail 对称） */
+  --scb-right: 0px;
+}
+
 .sc-body {
-  position: relative; /* UI-262 — 左缘 MessageRail 的定位锚点；UI-269 右缘 ChatScrollbar 锚点 */
+  position: relative;
   flex: 1;
   min-height: 0;
   height: 100%;
@@ -153,8 +166,6 @@
   gap: 10px;
   padding: 12px 12px 12px;
   overflow: hidden;
-  /* UI-269 — ChatScrollbar 右缘偏移（= 右 padding），上下文可覆盖 */
-  --scb-right: 12px;
 }
 
 .sc-messages {

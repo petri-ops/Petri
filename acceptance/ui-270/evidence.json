@@ -1,0 +1,42 @@
+{
+  "ui": "UI-270",
+  "date": "2026-09-02",
+  "title": "rail/thumb 锚定会话栏最外边界（会话内容固定宽度居中不变）",
+  "method": "dev Electron CDP 9222 Runtime.evaluate（Vite dev bundle HMR 后实时测量）",
+  "environment": {
+    "window": "dev Electron",
+    "page": "localhost:3000 project workspace chat (agentMain 中栏)",
+    "columnWidth": 1203.6
+  },
+  "checks": [
+    {
+      "id": "S1",
+      "name": "rail 贴中栏最左边界",
+      "expect": "rail.getBoundingClientRect().left === .sc-outer.getBoundingClientRect().left",
+      "actual": { "outerLeft": 388.0012512207031, "railLeft": 388.0012512207031, "offset": 0 },
+      "pass": true
+    },
+    {
+      "id": "S2",
+      "name": "thumb 贴中栏最右边界",
+      "expect": "track.getBoundingClientRect().right ≈ .sc-outer.getBoundingClientRect().right",
+      "actual": { "outerRight": 1591.6050109863281, "trackRight": 1591.6050491333008, "offset": -0.00003814697265625 },
+      "pass": true
+    },
+    {
+      "id": "S3",
+      "name": "会话内容固定宽度居中",
+      "expect": ".sc-root width === 860px 且 gapLeft ≈ gapRight",
+      "actual": { "rootWidth": 859.9950561523438, "gapLeft": 171.79879760742188, "gapRight": 171.80990600585938 },
+      "pass": true
+    }
+  ],
+  "screenshots": ["01-outer-anchor.png"],
+  "gates": {
+    "tsc": "0 errors",
+    "vitest": "ChatScrollbar 4/4 + SimpleChat 6/6",
+    "docs:check": "PASS (176)",
+    "ui:audit:check": "PASS"
+  },
+  "notes": "MessageRail/ChatScrollbar 挂点从 .sc-body 移至全宽 .sc-outer（data-rail-body 锚点随迁）；rightChatPanel --scb-right:10px 内衬保持。UI-262/UI-269 状态行已标注随 UI-270 复验。"
+}
