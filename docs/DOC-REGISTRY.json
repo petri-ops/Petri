@@ -2927,7 +2927,7 @@
       "id": "BLOCK-34-AGENT-TOOL-TRAIL-DOCK",
       "path": "docs/block-34-agent-tool-trail-dock-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-34-agent-tool-trail-dock",
       "entrypoint": "docs/README.md",

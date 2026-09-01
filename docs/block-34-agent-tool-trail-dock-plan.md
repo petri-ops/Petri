@@ -1,7 +1,7 @@
 # BLOCK-34-AGENT-TOOL-TRAIL-DOCK — 会话工具记录持久化 + 后台进程浮窗 Plan
 
 - **Plan ID**: `BLOCK-34-AGENT-TOOL-TRAIL-DOCK`（2026-09-01；用户反馈「开发过程中会执行很多工具，但任务完成后记录就不见了，希望全部内容都保存但会话区保持整洁，终端/持续输出任务可以出现独立小窗口」；三个设计决策经 AskUserQuestion 裁决：快照随消息落库 / 右下角浮窗+可折叠 / 仅 background 任务触发）
-- **状态**: `active`（P1–P3 已完成并独立提交；P4 实机收口 + UI-266 verified 待做）
+- **状态**: `completed`（P0–P4 全部完成；P4 实机收口证据 `acceptance/ui-266/evidence.json`，UI-266 verified）
 - **truthDomain**: `block-34-agent-tool-trail-dock`
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
 

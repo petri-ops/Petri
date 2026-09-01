@@ -1,0 +1,64 @@
+{
+  "ui": "UI-266",
+  "workPackage": "BLOCK-34-AGENT-TOOL-TRAIL-DOCK",
+  "phase": "P4 实机收口",
+  "capturedAt": "2026-09-01T12:28:00Z",
+  "environment": "dev Electron (CDP 9222) + biof3-server :3001/:64514（含 P3 新路由 routes/ai-agent/background-processes.js；BIOF3_ELECTRON_USER_DATA_DIR/BIOF3_LOCAL_DATA_DIR 指向 .biof3-dev-user-data）",
+  "model": "DeepSeek（真实 task，非 mock）",
+  "project": "desktop p_msh9wyfo_ns9y（新对话经左栏「创建新对话」创建，绑定正确项目）",
+  "scenarios": [
+    {
+      "id": "S1-浮窗自动弹出与实时状态",
+      "steps": "用户任务：请使用 workspace_exec_background 工具，在项目工作区后台启动 python3 -m http.server 8765，启动成功后只回复一句话",
+      "observed": "agent 调用 workspace_exec_background 成功后，右下角 BackgroundProcessDock 自动弹出：状态标签「运行中 · 2s」随轮询递增（2s→6s→8s），命令行区显示 python3 -m http.server 8765，等宽日志区自动滚动吸附底部（autoScrollPinned=true）。事件链路：tool_result(data.processId) → biof3:agent-background-process → Dock 挂载 + 1s 轮询列表/日志端点。",
+      "screenshot": "p4-shot-1-dock-expanded.png",
+      "result": "PASS"
+    },
+    {
+      "id": "S1b-日志尾部增量渲染",
+      "steps": "同 S1 会话（首次运行 8765 被上一任务孤儿进程占用，http.server 打印 Address already in use 错误栈后退出）",
+      "observed": "浮窗日志区流式渲染 python traceback（OSError: [Errno 48] Address already in use），logLen 增长至 1623 字符，状态如实收敛为「已退出」——日志尾部增量渲染与失败态诚实展示均验证（孤儿进程已被清理后重跑 S1 干净通过）。另附带验证：上一 app 实例退出后 background 子进程独立存活（孤儿占用端口），符合「跨重启不恢复、只读内存表」设计边界。",
+      "screenshot": null,
+      "result": "PASS"
+    },
+    {
+      "id": "S2-折叠chip与重新展开",
+      "steps": "点击浮窗「折叠」按钮 → 观察右下角 chip → 点击 chip",
+      "observed": "折叠后浮窗收起为圆角 chip（含状态点 + 「后台进程」文案），点击 chip 重新展开完整浮窗（data-testid=background-process-dock 重新出现）。",
+      "screenshot": "p4-shot-2-chip.png",
+      "result": "PASS"
+    },
+    {
+      "id": "S3-process_stop停止收敛",
+      "steps": "用户任务：请用 process_stop 工具停止你刚才启动的那个后台进程（python3 -m http.server 8765）",
+      "observed": "agent 调用 process_stop 后，浮窗状态在下一轮询周期内从「运行中 · 8s」收敛为「已停止」，无需手动刷新。",
+      "screenshot": "p4-shot-3-stopped.png",
+      "result": "PASS"
+    },
+    {
+      "id": "S4-工具记录持久化（BLOCK-34 P1/P2 闭环）",
+      "steps": "任务完成后 reload 页面（并经历一次 dev Electron 实例重启），重新进入同一会话",
+      "observed": "会话区 assistant 消息恢复出工具活动摘要条：「已完成 2 项 · 调用 1 次 · 后台运行 1 次 · 3.9 s」，用户消息与 agent 回复（含后台进程 ID bg-mtimzjva-*）完整保留——P1 落库（meta_json.toolActivities）+ P2 restoreToolActivities 恢复链路实机确认。任务后不再「记录消失」。",
+      "screenshot": "p4-shot-4-after-reload.png",
+      "result": "PASS"
+    }
+  ],
+  "implementationNotes": [
+    "dev 基建噪音（非 BLOCK-34 缺陷）：scripts/dev-electron.js 的 stopWorkspaceElectron() 以 pgrep 全杀 workspace Electron 实例，wrapper 子进程异常退出时会误杀并存实例；实机中两次 Electron 静默退出均发生于该清理链（后端日志 [lifecycle] db closed on SIGTERM），与 BLOCK-34 代码无关",
+    "浮窗状态/进程表为内存态：app 重启后 Dock 不恢复（符合计划 Non-Scope 0 跨重启恢复）；关闭按钮 × 的组件级行为由 BackgroundProcessDock.test.tsx 覆盖（关闭→消失→新事件可再弹出）",
+    "http.server 首行日志因 python stderr 缓冲在 8s 观察窗内未出现，日志增量渲染以 S1b 错误栈流式输出为证",
+    "Windows 行为按计划靠代码审查 + 单测覆盖，实机 Windows 属 G1+ 不外推"
+  ],
+  "screenshots": [
+    "p4-shot-1-dock-expanded.png（S1：浮窗自动弹出 + 运行中计时 + 命令行 + 日志区）",
+    "p4-shot-2-chip.png（S2：折叠为右下角 chip）",
+    "p4-shot-3-stopped.png（S3：process_stop 后状态收敛「已停止」）",
+    "p4-shot-4-after-reload.png（S4：reload 后工具活动摘要条恢复）"
+  ],
+  "gates": {
+    "backend": "node --check 通过 / block34-background-processes-route node --test 5/5（401/400/会话隔离/日志尾部/跨会话 404）",
+    "frontend": "tsc 0 / BackgroundProcessDock vitest 5/5 / toolActivity + conversationRunStore 回归 36/36",
+    "governance": "docs:check / ui:audit:check（收口提交时复跑）"
+  },
+  "g0": "G0 开发期常态 · 不外推 packaged / Provider / GA."
+}

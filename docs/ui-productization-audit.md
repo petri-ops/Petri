@@ -2137,15 +2137,15 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-266: BLOCK-34 P3 — 后台进程浮窗（workspace_exec_background 独立小窗口） (2026-09-01 in_progress)
+## UI-266: BLOCK-34 P3 — 后台进程浮窗（workspace_exec_background 独立小窗口） (2026-09-01 verified)
 
 **用户反馈**（BLOCK-34 立项）：「用到终端或者持续性输出的任务可以出现个独立的小窗口」→ 三项设计裁决：快照随消息落库 / 右下角浮窗+可折叠 / 仅 background 任务触发。
 
 **改动**（0 新增 IPC / 0 新依赖）：① 后端新增只读路由 `routes/ai-agent/background-processes.js`（`GET /api/ai/agent/background-processes?conversationId=` 列表 + `GET .../:processId/log` 日志尾部，复用 `processStatus` 的 sessionKey 会话隔离与 `readLogTail`，数据源为内存进程表，0 新持久化）；② `conversationRunStore.onToolResult` 检测 `workspace_exec_background` 成功（`toolResult.data.processId`）派发新事件 `biof3:agent-background-process`；③ 新组件 `BackgroundProcessDock`（SimpleChat 挂载，右下角 fixed 锚点）——事件触发自动弹出、1s 轮询列表+活跃进程日志尾部（32KB）、等宽日志区自动滚动（用户上滚暂停、回到底部恢复）、多进程 tab 切换、可折叠为 chip（运行中计数 + 状态点）、可手动关闭（关闭后新事件可再弹出）；样式全走 `--biof3-*` token + `--biof3-font-mono`。
 
-**门禁**（P3 阶段）：tsc 0 / 后端路由定向 node --test 5/5（401/400/会话隔离 200+404） / BackgroundProcessDock vitest 5/5（自动弹出/跨会话忽略/折叠 chip/关闭再开） / toolActivity + conversationRunStore 回归 36/36 / docs:check 174。待 P4 实机收口后转 verified。
+**门禁**（P3 阶段）：tsc 0 / 后端路由定向 node --test 5/5（401/400/会话隔离 200+404） / BackgroundProcessDock vitest 5/5（自动弹出/跨会话忽略/折叠 chip/关闭再开） / toolActivity + conversationRunStore 回归 36/36 / docs:check 174。P4 实机收口证据：`acceptance/ui-266/evidence.json`（dev Electron CDP 9222 + 真实 DeepSeek task：浮窗自动弹出/运行中计时/日志流式/折叠 chip/process_stop 收敛「已停止」/reload 后工具活动摘要条「已完成 2 项 · 调用 1 次 · 后台运行 1 次 · 3.9 s」恢复，S1–S4 全 PASS）。
 
-**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-265: BLOCK-33 — 通用编码 Agent UI 增量（system_info 工具活动条标签；P3 流式输出 / P6 实机收口增量扩展） (2026-09-01 verified)
 
