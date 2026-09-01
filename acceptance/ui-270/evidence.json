@@ -31,7 +31,19 @@
       "pass": true
     }
   ],
-  "screenshots": ["01-outer-anchor.png"],
+  "screenshots": ["01-outer-anchor.png", "02-line-removed.png", "03-thumb-75px.png"],
+  "increment": {
+    "feedback": "右侧的 thumb 有个导轨线 这个不需要吧",
+    "change": "移除 ChatScrollbar 常驻 1px 导轨线（.line 元素与样式），track 仅保留 thumb；测试断言反转",
+    "check": { "lineRemoved": true, "thumbPresent": true, "trackChildren": 1 },
+    "pass": true
+  },
+  "increment2": {
+    "feedback": "thumb还是有点 太长了 改成75px",
+    "change": "THUMB_LENGTH 125px → 75px",
+    "check": { "thumbHeight": 74.99250030517578, "styleHeight": "75px" },
+    "pass": true
+  },
   "gates": {
     "tsc": "0 errors",
     "vitest": "ChatScrollbar 4/4 + SimpleChat 6/6",

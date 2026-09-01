@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './ChatScrollbar.module.css';
 
 const TRACK_INSET = 14; // 轨道上下留白（与左 rail 的 8px 内衬感对齐）
-const THUMB_LENGTH = 125; // UI-269：thumb 固定长度（用户裁决「缩短到 125px」）
+const THUMB_LENGTH = 75; // UI-269：thumb 固定长度（初版 125px，UI-270 增补用户裁决「改成75px」）
 
 interface ChatScrollbarProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -126,7 +126,6 @@ export function ChatScrollbar({ containerRef }: ChatScrollbarProps) {
       onWheel={onWheel}
       role="presentation"
     >
-      <div className={styles.line} aria-hidden />
       <div
         className={`${styles.thumb}${dragging ? ` ${styles.thumbActive}` : ''}`}
         style={{ top: TRACK_INSET + thumbY, height: thumbH }}

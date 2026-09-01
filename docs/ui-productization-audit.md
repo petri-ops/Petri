@@ -2145,6 +2145,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **实机验证**（dev Electron CDP 9222，Vite dev bundle HMR 后实时测量，中栏宽 1203.6px）：S1 rail 贴最左边界——`railLeft 388.0013 === outerLeft 388.0013`（offset 0）；S2 thumb 贴最右边界——`trackRight 1591.6050 ≈ outerRight 1591.6050`（offset <0.001px）；S3 内容固定宽度居中——`.sc-root` 宽 859.995px，gapLeft 171.799 ≈ gapRight 171.810。证据 `acceptance/ui-270/`（1 截图 + evidence.json S1–S3）。
 
+**增补（同日，用户裁决「右侧的 thumb 有个导轨线 这个不需要吧」）**：移除 UI-269 引入的常驻 1px 导轨线——删除 ChatScrollbar `.line` 元素与样式（端点淡出渐变竖线），track 仅保留 thumb；测试断言反转（`[class*=line]` 应为 null）。CDP 实机复验：`lineRemoved: true / thumbPresent: true / trackChildren: 1`。证据 `acceptance/ui-270/02-line-removed.png`。
+
+**增补二（同日，用户裁决「thumb还是有点 太长了 改成75px」）**：`THUMB_LENGTH` 125px → 75px。CDP 实机复验：`thumbHeight 74.99px / styleHeight 75px`。证据 `acceptance/ui-270/03-thumb-75px.png`。
+
 **门禁**：tsc 0 / ChatScrollbar + SimpleChat vitest 10/10 / docs:check 176 / ui:audit:check。
 
 **状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。

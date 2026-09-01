@@ -61,7 +61,8 @@ describe('ChatScrollbar', () => {
     const { container } = render(<ChatScrollbar containerRef={ref} />);
     expect(container.querySelector('[class*=track]')).toBeTruthy();
     expect(container.querySelector('[class*=thumb]')).toBeTruthy();
-    expect(container.querySelector('[class*=line]')).toBeTruthy();
+    // UI-270 增补 — 导轨线已按用户裁决移除，仅保留 thumb
+    expect(container.querySelector('[class*=line]')).toBeNull();
   });
 
   it('repositions the thumb on scroll events', () => {
