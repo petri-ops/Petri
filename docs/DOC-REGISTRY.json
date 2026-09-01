@@ -2938,15 +2938,36 @@
         "background-process",
         "dock",
         "G0",
+        "completed",
+        "phase=P4-DONE"
+      ],
+      "notes": "2026-09-01 用户反馈「任务完成后工具执行记录不见了；希望全部保存但会话区整洁；终端/持续输出任务可出现独立小窗口」。根因（已调查）：task 链路 agent-runner 落库时 assistantToolActivities 显式传 null → meta_json 无工具记录 → 完成后前端 re-conciliation 用持久化消息覆盖内存快照致记录消失；task_events 全量事件仍在。用户三裁决：快照随消息落库 / 右下角浮窗+可折叠 / 仅 background 任务触发。方案：P1 runLoop 返回 assistantToolActivities recorder → agent-runner 传入 adapter（snapshot 已有 100 条上限与摘要截断）；P2 前端历史恢复核对（restoreSimpleMessage/ToolActivityList 链路已就绪，最小修补）；P3 后台进程浮窗——后端两个只读端点（会话进程列表 + 日志尾部，复用 readLogTail）+ 前端 BackgroundProcessDock（workspace_exec_background 成功 tool_result 自动弹出、1s 轮询、可折叠 chip、可关闭、位置自适应、mono 字体契约）；P4 dev Electron 实机收口 + UI-266（S1–S4 全 PASS，证据 acceptance/ui-266/）。非范围：tool_events 全文回放二期、进程表跨重启恢复、浮窗拖拽、普通命令窗口化、0 新依赖 0 新 IPC。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-01",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P4-DONE"
+    },
+    {
+      "id": "BLOCK-35-DEV-ELECTRON-KILL-SCOPE",
+      "path": "docs/block-35-dev-electron-kill-scope-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-35-dev-electron-kill-scope",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-35",
+        "dev-electron",
+        "process-management",
+        "G0",
         "active",
         "phase=P0-LAUNCH"
       ],
-      "notes": "2026-09-01 用户反馈「任务完成后工具执行记录不见了；希望全部保存但会话区整洁；终端/持续输出任务可出现独立小窗口」。根因（已调查）：task 链路 agent-runner 落库时 assistantToolActivities 显式传 null → meta_json 无工具记录 → 完成后前端 re-conciliation 用持久化消息覆盖内存快照致记录消失；task_events 全量事件仍在。用户三裁决：快照随消息落库 / 右下角浮窗+可折叠 / 仅 background 任务触发。方案：P1 runLoop 返回 assistantToolActivities recorder → agent-runner 传入 adapter（snapshot 已有 100 条上限与摘要截断）；P2 前端历史恢复核对（restoreSimpleMessage/ToolActivityList 链路已就绪，最小修补）；P3 后台进程浮窗——后端两个只读端点（会话进程列表 + 日志尾部，复用 readLogTail）+ 前端 BackgroundProcessDock（workspace_exec_background 成功 tool_result 自动弹出、1s 轮询、可折叠 chip、可关闭、位置自适应、mono 字体契约）；P4 dev Electron 实机收口 + UI-266。非范围：tool_events 全文回放二期、进程表跨重启恢复、浮窗拖拽、普通命令窗口化、0 新依赖 0 新 IPC。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-09-01 BLOCK-34 P4 实机暴露：dev-electron.js shutdown() 经 stopWorkspaceElectron() 以 pgrep -f electronBinary 全杀工作区全部 Electron 主进程，误杀非本 wrapper 启动的并存实例（两次 Electron 静默退出，根因链见 plan §1）。修复：launch 时注入一次性 --biof3-dev-launch-token，shutdown 只 signal token 精确命中的本 wrapper 实例；waitForWorkspaceElectron 改 token 就绪判定；boot 清理保持全杀（清理上次会话遗留属设计）。非范围：vite/backend 退出触发整组重启语义、Windows 分支、boot 多 wrapper 互杀、0 新依赖 0 产品代码改动。验收：并存双实例（独立 userData 过单例锁）SIGTERM wrapper A → A 退 B 存；boot 清理仍按设计清杀 B。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-01",
       "archivePolicy": "archive_when_superseded",
       "phase": "P0-LAUNCH"
     }
   ],
-  "lastUpdated": "2026-09-01 (BLOCK-33 completed; BLOCK-34 P0 launched)",
-  "documentCount": 174
+  "lastUpdated": "2026-09-01 (BLOCK-34 completed; BLOCK-35 P0 launched)",
+  "documentCount": 175
 }
