@@ -17,11 +17,12 @@ function appendDesktopAgentInstructions(prompt) {
 
 === 桌面项目 Agent 工具规则 ===
 - ${envLine}
-- 编写或执行平台相关命令前先调用 system_info 确认环境；命令语法必须匹配该平台的 shell。workspace_exec 每条命令都是独立 shell：cd 与环境变量不跨调用持久，需要子目录时把命令写成 "cd 子目录 && 实际命令" 或使用绝对/相对路径，不要假设上一次的 cd 仍然生效。
+- 编写或执行平台相关命令前先调用 system_info 确认环境；命令语法必须匹配该平台的 shell。workspace_exec / workspace_exec_background 每条命令都是独立 shell：cd 与环境变量不跨调用持久，需要子目录时优先使用 cwd 参数，其次才把命令写成 "cd 子目录 && 实际命令" 或使用绝对/相对路径，不要假设上一次的 cd 仍然生效。
+- Windows 上优先 workspace_exec 的 shell="powershell"（现代语法、对象管道），cmd.exe 仅作旧式脚本兜底，posix shell 在 Windows 不可用；macOS/Linux 使用默认 $SHELL。路径分隔符与引号规则随平台变化，不要硬编码单一平台的命令语法。
 - 基础文件操作优先使用 workspace_list / workspace_find / workspace_search / workspace_read；所有路径都相对当前项目工作区，不得猜测或输出本机绝对路径。
 - 修改文件前先 workspace_read 获取真实内容和 sha256；小范围修改用 workspace_replace，创建或完整覆写用 workspace_write。写入后再次读取或运行检查验证结果。
-- 短命令使用 workspace_exec，工作目录固定为当前项目根目录；不得尝试绕过危险命令、超时、输出截断或只读模式限制。长驻进程不使用该工具。
-- 聊天处于只读模式，或用户明确只要求检查/评估/规划时，只能调用四个只读 workspace 工具，不得修改文件、运行命令或执行分析。
+- 短命令使用 workspace_exec（可用 cwd 指定已存在的子目录）；长任务、本地 HTTP 服务或长训练脚本使用 workspace_exec_background 启动，输出自动写入 .biof3-agent-tmp/ 下的日志文件，用 process_status 查询存活与日志尾部、process_stop 停止，不要用 nohup / & 后台符逃避超时管理。不得尝试绕过危险命令、超时、输出截断或只读模式限制；结果 truncated=true 或退出码非 0 时，先看 stderr 或日志定位原因，输出被截断时用 head/tail（或 PowerShell Select-Object）配合 workspace_read 分段读取目标文件，不要盲目整跑重试。
+- 聊天处于只读模式，或用户明确只要求检查/评估/规划时，只能调用只读工具（workspace_list / workspace_find / workspace_search / workspace_read / system_info / process_status），不得修改文件、运行命令或启动后台进程。
 - 读取项目资源用 query；查已安装内容插件的使用说明时用 read_page("/plugin/<id>/<slug>") 或 search(scope="plugins")。
 - 跑分析前先用 run_tool(op="list") 核对真实 toolId、输入契约和可用 demo metadata；不得拼接开发者机器路径。
 - 多步骤标准流程先用 run_tool(op="plan")，每一步执行后检查 tool_job/artifact truth，再用 bind_artifact 绑定已验证产物。

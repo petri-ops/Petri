@@ -3,6 +3,29 @@ import test from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
+// registry 链路（query-tools → db.js）在 require 时即 prepare 语句，
+// 不能依赖开发机运行时库：自举一个已迁移的临时 DB（同 agent-workspace-exec-background.test.mjs）。
+{
+  const Database = require('better-sqlite3');
+  const fssync = require('node:fs');
+  const os = require('node:os');
+  const nodePath = require('node:path');
+  const tempDbDir = fssync.mkdtempSync(nodePath.join(os.tmpdir(), 'biof3-agent-prompt-db-'));
+  const db = new Database(nodePath.join(tempDbDir, 'biof3.db'));
+  const migrationsDir = nodePath.resolve('src/migrations');
+  for (const file of fssync.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
+    db.exec(fssync.readFileSync(nodePath.join(migrationsDir, file), 'utf8'));
+  }
+  db.close();
+  process.env.BIOF3_DB_PATH = nodePath.join(tempDbDir, 'biof3.db');
+  process.on('exit', () => {
+    try {
+      fssync.rmSync(tempDbDir, { recursive: true, force: true });
+    } catch {
+      // 清理失败不影响测试结果
+    }
+  });
+}
 const { buildSystemPrompt } = require('../core/biof3-server/helpers/system-prompt.js');
 const {
   appendDesktopAgentInstructions,
@@ -49,4 +72,27 @@ test('desktop prompt keeps result presentation deterministic and excludes legacy
   ));
   assert.match(prompt, /客户端依据成功事件自动打开结果/);
   assert.doesNotMatch(prompt, /discover_capabilities|act_generic|open_result handler/);
+});
+
+test('desktop prompt injects platform command guidance (BLOCK-33 P5)', () => {
+  const prompt = appendDesktopAgentInstructions(buildSystemPrompt(
+    { page: 'desktop-project', projectId: 'project-a' },
+    { provider: 'deepseek', providerLabel: 'DeepSeek', model: 'deepseek-v4-flash' }
+  ));
+  // 环境自省与跨调用不持久
+  assert.match(prompt, /编写或执行平台相关命令前先调用 system_info/);
+  assert.match(prompt, /cd 与环境变量不跨调用持久/);
+  assert.match(prompt, /优先使用 cwd 参数/);
+  // Windows 平台指导
+  assert.match(prompt, /shell="powershell"/);
+  assert.match(prompt, /cmd\.exe 仅作旧式脚本兜底/);
+  assert.match(prompt, /posix shell 在 Windows 不可用/);
+  // 长任务用 background 工具
+  assert.match(prompt, /workspace_exec_background 启动/);
+  assert.match(prompt, /process_status 查询存活与日志尾部/);
+  assert.match(prompt, /process_stop 停止/);
+  assert.match(prompt, /不要用 nohup \/ & 后台符逃避超时管理/);
+  // 截断分段读取
+  assert.match(prompt, /truncated=true/);
+  assert.match(prompt, /head\/tail（或 PowerShell Select-Object）配合 workspace_read 分段读取/);
 });
