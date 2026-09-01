@@ -79,6 +79,13 @@ export const biof3Events = {
    * useWorkingTreeReview 监听后 setSelectedFilePath。
    */
   reviewOpenFile: 'biof3:review-open-file',
+
+  /**
+   * BLOCK-34 P3: agent 成功启动后台进程（workspace_exec_background）时由
+   * conversationRunStore 派发；BackgroundProcessDock 订阅后自动弹出浮窗
+   * 并开始轮询该进程日志。
+   */
+  agentBackgroundProcess: 'biof3:agent-background-process',
 } as const;
 
 export interface ConversationForkedDetail {
@@ -215,7 +222,14 @@ export type BioF3EventMap = {
   [biof3Events.hunkAccepted]: HunkAcceptedDetail;
   [biof3Events.hunkRejected]: HunkRejectedDetail;
   [biof3Events.reviewOpenFile]: ReviewOpenFileDetail;
+  [biof3Events.agentBackgroundProcess]: AgentBackgroundProcessDetail;
 };
+
+/** BLOCK-34 P3: 后台进程启动事件载荷。 */
+export interface AgentBackgroundProcessDetail {
+  processId: string;
+  conversationId?: string;
+}
 
 /** BLOCK-28.7: 打开审阅并选中指定文件的载荷。 */
 export interface ReviewOpenFileDetail {

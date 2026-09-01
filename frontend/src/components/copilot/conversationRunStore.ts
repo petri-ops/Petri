@@ -442,6 +442,25 @@ export function startConversationRun(options: StartConversationRunOptions): bool
           projectId: options.projectId,
         });
       }
+      // BLOCK-34 P3: 后台进程启动成功 → 通知浮窗自动弹出并轮询日志
+      if (
+        event.toolResult?.tool === 'workspace_exec_background' &&
+        event.toolResult?.status === 'success'
+      ) {
+        const bgData = event.toolResult?.data as { processId?: unknown } | undefined;
+        const processId =
+          bgData && typeof bgData.processId === 'string' ? bgData.processId : null;
+        if (processId) {
+          try {
+            dispatchBioF3Event(biof3Events.agentBackgroundProcess, {
+              processId,
+              conversationId,
+            });
+          } catch {
+            // 事件总线失败不阻塞工具结果处理
+          }
+        }
+      }
     },
     onLoopPhase: (info) => {
       replaceRun(conversationId, (current) => ({

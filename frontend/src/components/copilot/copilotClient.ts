@@ -39,7 +39,7 @@ function emitAgentTaskDone(
   }
 }
 
-function getAuthHeader(): Record<string, string> {
+export function getAuthHeader(): Record<string, string> {
   if (typeof window === 'undefined') return {};
   try {
     const token = localStorage.getItem('biof3_token');

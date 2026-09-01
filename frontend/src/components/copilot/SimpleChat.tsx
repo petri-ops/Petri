@@ -60,6 +60,8 @@ import {
   closeImagePreview,
 } from './SimpleChat/attachments';
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
+// BLOCK-34 P3: 后台进程浮窗（workspace_exec_background 自动弹出）
+import { BackgroundProcessDock } from './BackgroundProcessDock';
 import { AgentChangesCard } from './AgentChangesCard';
 import { MessageRail, type MessageRailItem } from './MessageRail';
 import {
@@ -1603,6 +1605,9 @@ export function SimpleChat({
           </div>
         </div>
       </div>
+
+      {/* BLOCK-34 P3: 后台进程浮窗（仅 workspace_exec_background 触发） */}
+      <BackgroundProcessDock conversationId={conversationId} projectId={projectId} />
 
       {/* Image Preview Modal */}
       {previewImage && (

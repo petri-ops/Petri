@@ -1,0 +1,214 @@
+/* BLOCK-34 P3 — 后台进程浮窗（右下角固定锚点，避开边界） */
+
+.dock {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  width: min(520px, calc(100vw - 32px));
+  max-height: min(420px, calc(100vh - 32px));
+  border: 1px solid var(--biof3-border);
+  border-radius: 14px;
+  background: var(--biof3-bg-surface);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--biof3-border);
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: var(--biof3-font-size-body-sm);
+  font-weight: 600;
+  color: var(--biof3-text);
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.tab {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  font-size: var(--biof3-font-size-body-sm);
+  padding: 1px 8px;
+  cursor: pointer;
+}
+
+.tab:hover {
+  background: var(--biof3-user-bubble-bg);
+}
+
+.tabActive {
+  border-color: var(--biof3-accent);
+  color: var(--biof3-accent);
+}
+
+.headerActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.statusLabel {
+  font-size: var(--biof3-font-size-body-sm);
+  color: var(--biof3-text-secondary);
+  white-space: nowrap;
+}
+
+.statusLabel[data-status='running'] {
+  color: var(--biof3-accent);
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.iconBtn:hover {
+  background: var(--biof3-user-bubble-bg);
+  color: var(--biof3-text);
+}
+
+.command {
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--biof3-border);
+  font-family: var(--biof3-font-mono, monospace);
+  font-size: var(--biof3-font-size-body-sm);
+  color: var(--biof3-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.log {
+  margin: 0;
+  padding: 8px 10px;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  font-family: var(--biof3-font-mono, monospace);
+  font-size: var(--biof3-font-size-body-sm);
+  line-height: 1.45;
+  color: var(--biof3-text);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.log[data-empty] {
+  color: var(--biof3-text-secondary);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 10px;
+  border-top: 1px solid var(--biof3-border);
+  flex-shrink: 0;
+}
+
+.footerBtn {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  font-size: var(--biof3-font-size-body-sm);
+  padding: 1px 8px;
+  cursor: pointer;
+}
+
+.footerBtnActive {
+  border-color: var(--biof3-accent);
+  color: var(--biof3-accent);
+}
+
+.truncated,
+.meta {
+  font-size: var(--biof3-font-size-body-sm);
+  color: var(--biof3-text-secondary);
+}
+
+.meta {
+  margin-left: auto;
+}
+
+/* 折叠 chip */
+
+.chip {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 90;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 999px;
+  background: var(--biof3-bg-surface);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  color: var(--biof3-text-secondary);
+  font-size: var(--biof3-font-size-body-sm);
+  cursor: pointer;
+}
+
+.chip:hover {
+  color: var(--biof3-text);
+}
+
+.chipLabel {
+  white-space: nowrap;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--biof3-text-secondary);
+  opacity: 0.6;
+}
+
+.dot[data-status='running'] {
+  background: var(--biof3-accent);
+  opacity: 1;
+  animation: bp-dock-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes bp-dock-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
