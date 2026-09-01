@@ -619,6 +619,9 @@ async function runAgentLoop({
   // ---------- Run loop via orchestrator ----------
   const {
     assistantText,
+    // BLOCK-34 P1 — 工具活动快照随消息落库（此前传 null 导致任务完成后
+    // 前端 re-conciliation 覆盖内存快照时工具记录消失）。
+    assistantToolActivities,
     loopRunId,
     loopState,
     cancellationObserved,
@@ -657,7 +660,7 @@ async function runAgentLoop({
         turnStartedAt,
         assistantProgress: null,
         resultEditProgress: null,
-        assistantToolActivities: null,
+        assistantToolActivities: assistantToolActivities || null,
         assistantResultCards: [],
         loopRunId,
         loopState,

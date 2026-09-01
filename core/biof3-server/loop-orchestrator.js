@@ -1102,6 +1102,9 @@ async function runLoop({
 
   return {
     assistantText: assistantAcc,
+    // BLOCK-34 P1 — 工具活动 recorder 随结果返回，供 agent-runner 落库到
+    // 会话消息 meta（修复「任务完成后工具记录消失」：此前落库传 null）。
+    assistantToolActivities,
     loopRunId,
     loopState,
     toolResultEventsByCallId,
