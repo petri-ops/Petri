@@ -167,6 +167,39 @@ describe('tool activity projection', () => {
     expect(restoreToolActivities([{ name: 'workspace_read', status: 'unknown' }])).toEqual([]);
   });
 
+  it('BLOCK-34 P2: restores the backend tool-activity recorder snapshot shape without drops', () => {
+    // 后端 createToolActivityRecorder.recordResult 的持久化形状（summary +
+    // actionLabel/actionDetail + callId/iteration + 截断标记）。恢复链路必须
+    // 不丢项，否则历史会话的工具 chip 将整体消失（BLOCK-34 根因的展示面）。
+    const persisted = [{
+      key: 'call_bg',
+      callId: 'call_bg',
+      traceId: 'trace_bg',
+      iteration: 2,
+      name: 'workspace_exec_background',
+      status: 'success',
+      durationMs: 120,
+      truncated: true,
+      summary: '启动 node server.js（后台）',
+      actionLabel: '已运行',
+      actionDetail: 'node server.js',
+      sideEffects: { type: 'none', riskTier: 'R0', resources: [] },
+    }];
+    expect(restoreToolActivities(persisted)).toEqual([expect.objectContaining({
+      key: 'call_bg',
+      callId: 'call_bg',
+      iteration: 2,
+      name: 'workspace_exec_background',
+      status: 'success',
+      durationMs: 120,
+      truncated: true,
+      summary: '启动 node server.js（后台）',
+      actionLabel: '已运行',
+      actionDetail: 'node server.js',
+      sideEffects: { type: 'none', riskTier: 'R0', resources: [] },
+    })]);
+  });
+
   it('projects safe Codex-style activity details without exposing write content', () => {
     expect(summarizeToolCall('workspace_exec', { command: 'pwd' }))
       .toEqual({ actionLabel: '已运行', actionDetail: 'pwd' });
