@@ -506,7 +506,8 @@ module.exports = {
       }
 
       systemPrompt = appendDesktopAgentInstructions(systemPrompt);
-      const executionPolicy = inferExecutionPolicy(messages);
+      // BLOCK-31 P4 fix: 传 context 使 accessMode=full 真正生效（S-003 契约，见 agent-runner 同修复）
+      const executionPolicy = inferExecutionPolicy(messages, context);
       if (!executionPolicy.allowExecution) {
         systemPrompt +=
           '\n\n=== 本轮只读约束 ===' +

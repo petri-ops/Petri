@@ -1,0 +1,61 @@
+{
+  "ui": "UI-263",
+  "workPackage": "BLOCK-31-CONV-SCOPED-CHANGES",
+  "phase": "P4 实机收口",
+  "capturedAt": "2026-09-01T01:40:00Z",
+  "sourceCommitBase": "96996a3（原 c3baf6b，P4 收口时 amend 补 UI-263 编号，内容不变）",
+  "environment": "dev Electron (CDP 9222) + biof3-server (spawn 后端，验证中因 P4 缺陷修复重启一次)",
+  "project": "desktop (p_mt15b0aw_f0xa, workspace = 应用仓库本体，审阅 adapter 绑定仓库)",
+  "model": "DeepSeek deepseek-v4-flash-vision-exp（openai-compatible preset，真实 agent task）",
+  "scenarios": [
+    {
+      "id": "S1-会话A写文件",
+      "steps": "会话 A（conv_3760e060-394）发送真实 agent 任务：workspace_write 创建 block31-acceptance-a.txt",
+      "expected": "任务收尾后 A 卡片默认「本会话改动」且只显示 A 的文件",
+      "observed": "卡片标题「本会话改动 · 1 个文件」，rows=[block31-acceptance-a.txt]，scope 切换激活「本会话」",
+      "backendEvidence": "tasks.files_changed_json = [{\"path\":\"block31-acceptance-a.txt\",\"status\":\"created\"}]（P1 权威清单持久化）",
+      "result": "PASS"
+    },
+    {
+      "id": "S2-会话B不可见A改动",
+      "steps": "desktop 项目新建会话 B（conv_f115f109-07a）发送任务：workspace_write 创建 block31-acceptance-b.txt",
+      "expected": "B 卡片默认「本会话改动」且不显示 A 的 a.txt",
+      "observed": "卡片标题「本会话改动 · 1 个文件」，rows=[block31-acceptance-b.txt]，无 a.txt —— 会话隔离成立",
+      "backendEvidence": "tasks.files_changed_json = [{\"path\":\"block31-acceptance-b.txt\",\"status\":\"created\"}]；desktop 仓库根两个 fixture 文件同时在盘",
+      "result": "PASS"
+    },
+    {
+      "id": "S3-全部视图为git全量",
+      "steps": "B 卡片点「全部」切换",
+      "observed": "标题变「工作区改动 · 6 个文件」，含 a.txt + b.txt + 未提交代码改动 + db 运行时文件 —— 审阅/全量事实源语义不变",
+      "result": "PASS"
+    },
+    {
+      "id": "S4-旧会话回退全量",
+      "steps": "切到 BLOCK-31 之前的旧会话（conv_823d9c17-77a，无归属记录）",
+      "observed": "标题「工作区改动 · 6 个文件」，无「本会话/全部」切换（hasToggle=false）—— 设计内兼容回退",
+      "result": "PASS"
+    }
+  ],
+  "blockerFixedInP4": {
+    "issue": "inferExecutionPolicy(messages) 两处调用点（agent-runner.js:533 / routes/ai-agent/chat.js:509）漏传 context —— S-003 设计中 ctx.accessMode 是唯一判定源，缺省 read 导致「完全访问」恒失效、workspace_write/replace/exec 全部被拒（execution_not_allowed / read_only）。存量缺陷（block-10 S-003 起即如此），BLOCK-31 P4 实机验收时暴露。",
+    "fix": "两处改为 inferExecutionPolicy(messages, context)。node --check 过；后端定向测试 6/6 + 1/1 过；修复后真实 agent 写入成功（S1/S2）。",
+    "note": "前端 UI 完全访问 pill 一直显示 full，与后端拒绝行为不一致 —— 修复后一致。"
+  },
+  "observations": [
+    "会话归属索引（conversationChangesStore）为内存态：页面 reload 后历史会话的「本会话改动」索引丢失，回退全量视图；仅当 localStorage 存有该会话未完成任务 key 时经任务事件重放重建（B 会话即如此恢复，A 会话回退全量）。权威清单已持久化于 tasks.files_changed_json，候选改进：挂载时按会话从后端水合归属索引（需后端提供 task→conversation 查询；loop_runs 对 task 模式任务未落行，不能直接复用）。登记 roadmap 候选待用户裁决，不在本包扩权。",
+    "localStorage 残留 biof3_agent_task_* 孤儿 key（[DONE] 未到达/流中断时不清理），resubscribe 以 conversationId+projectId 过滤避免误恢复，无功能性影响；属存量卫生项。"
+  ],
+  "screenshots": [
+    "b-conversation-scope.png（S2：B 会话本会话改动只含 b.txt）",
+    "b-all-scope.png（S3：全部 = git 全量 6 文件）",
+    "legacy-conversation-fallback.png（S4：旧会话回退全量且无切换）"
+  ],
+  "gates": {
+    "backendNodeTest": "agent-files-changed 6/6 + agent-task-cancellation 1/1",
+    "frontendVitest": "AgentChangesCard 7/7 + SimpleChat 6/6",
+    "syntax": "node --check agent-runner.js / chat.js 通过"
+  },
+  "cleanup": "验收 fixture 文件（desktop 根 a.txt/b.txt + ThinkSpace b.txt）验收后删除；会话 A/B 为真实用户数据保留",
+  "g0": "G0 开发期常态 · 不外推 packaged / Provider / GA."
+}

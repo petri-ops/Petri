@@ -2137,15 +2137,17 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-263: BLOCK-31 P3 — 工作区改动卡片会话作用域（本会话 / 全部 切换） (2026-09-01 in_progress)
+## UI-263: BLOCK-31 P3 — 工作区改动卡片会话作用域（本会话 / 全部 切换） (2026-09-01 verified)
 
 **用户裁决**（BLOCK-31-CONV-SCOPED-CHANGES「要做会话隔离 权威清单」）：工作区改动卡片此前为项目级 git working tree 全量视图（UI-252 基线），所有会话共享同一份；本条交付卡片侧的**会话隔离视图**。
 
 **改动**：`AgentChangesCard` 接受 `conversationId`（SimpleChat 传入）——当前会话有归属记录（`conversationChangesStore` 索引：运行中 `onToolResult` 实时登记 `workspace_write/replace` 成功写入 + 任务收尾用后端权威 `filesChanged`（BLOCK-31 P1 SSE `done` payload，task_events 回放聚合）按 conversationId 对账合并）时，默认只显示**本会话改动**（标题「本会话改动」+ 过滤后计数/± 统计），卡片内新增「本会话 / 全部」segmented 切换（`sc-changes-scope-*` token 化）；**无归属记录时保持全量「工作区改动」视图且不渲染切换**（旧会话/索引空兼容）。点击行跳审阅、悬停预览（UI-252/255）行为不变；**审阅面板保持 git 全量事实源（项目全景）语义不变**。0 新增 IPC（后端 done payload 为既有通道 additive）/ 0 新依赖。已知的诚实边界：`workspace_exec`（shell 写文件）不可精确归属，不计入会话清单，但保留在「全部」视图。
 
-**门禁**：tsc 0 / AgentChangesCard vitest 7/7（新增：会话默认过滤 / 「全部」切换 / 无归属回退全量）/ SimpleChat vitest 6/6 / 后端 agent-files-changed 定向 6/6 + cancellation 回归 / docs:check / ui:audit:check。待 dev Electron 实机（会话 A 改动对会话 B 不可见）后转 verified。
+**门禁**：tsc 0 / AgentChangesCard vitest 7/7（新增：会话默认过滤 / 「全部」切换 / 无归属回退全量）/ SimpleChat vitest 6/6 / 后端 agent-files-changed 定向 6/6 + cancellation 回归 / docs:check / ui:audit:check。
 
-**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**P4 实机收口（dev Electron CDP 9222 + 真实 DeepSeek agent task，desktop 项目 = 审阅 adapter 绑定仓库）**：S1 会话 A（conv_3760e060-394）agent `workspace_write` 创建 a.txt → A 卡片「本会话改动 · 1 个文件」仅 a.txt，后端 `tasks.files_changed_json` 权威清单同步持久化 ✓；S2 会话 B（conv_f115f109-07a）创建 b.txt → B 卡片仅 b.txt，**A 的 a.txt 不可见（会话隔离核心判据）** ✓；S3 B 卡点「全部」→「工作区改动 · 6 个文件」= git 全量（含 a.txt + b.txt + 代码改动），审阅事实源语义不变 ✓；S4 BLOCK-31 之前的旧会话 → 回退全量且不渲染切换 ✓。证据 `acceptance/ui-263/`（3 截图 + evidence.json）。**P4 顺带修复实机暴露的阻断性存量缺陷**：`inferExecutionPolicy(messages)` 两处调用点（agent-runner.js / routes/ai-agent/chat.js）自 BLOCK-10 S-003 起漏传 context，`ctx.accessMode` 永远缺省 read →「完全访问」恒失效、workspace_write/replace/exec 全部被拒；修复 = 两处补传 context（前端 pill 与后端行为恢复一致）。**观察项登记 roadmap 候选**（不扩权）：会话归属索引为内存态，页面 reload 后历史会话回退全量视图（权威清单已在 `tasks.files_changed_json` 持久化；候选改进 = 挂载时按会话从后端水合，需 task→conversation 查询；loop_runs 对 task 模式未落行不能直接复用）。
+
+**状态**: verified（dev Electron 边界内）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-262: BLOCK-29 增量 — 聊天区左缘「用户消息导航条」（Codex 风格刻度 rail） (2026-08-31 verified)
 

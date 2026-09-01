@@ -1,7 +1,7 @@
 # BLOCK-31-CONV-SCOPED-CHANGES — 会话级改动归属（权威文件清单）Plan
 
 - **Plan ID**: `BLOCK-31-CONV-SCOPED-CHANGES`（2026-09-01；用户确认「工作区改动/审阅是全项目共享视图」后裁决「要做会话隔离 权威清单」启动）
-- **状态**: `active`（P0 登记 → P1/P2/P3 已实现，见 §6 进展；P4 实机收口待办）
+- **状态**: `completed`（P0 登记 → P1/P2/P3 实现 → P4 实机收口，2026-09-01；UI-263 verified）
 - **truthDomain**: `block-31-conv-scoped-changes`
 - **阶段**: P0 治理登记 → P1 后端权威清单 → P2 renderer 契约接入 → P3 UI 会话过滤 → P4 实机收口
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
@@ -63,5 +63,12 @@
 
 - `AgentChangesCard` 接受 `conversationId`（SimpleChat 传入）；会话有归属记录时默认**「本会话改动」**（标题/计数/± 按过滤后清单），卡片内新增「本会话 / 全部」segmented 切换（`sc-changes-scope-*`，token 化样式）；**无归属记录（旧会话/索引空）保持全量视图**，不渲染切换。审阅面板保持 git 全量事实源（本包不改）。
 - 测试：AgentChangesCard vitest 7/7（新增会话默认过滤 / 「全部」切换 / 无归属回退全量）；SimpleChat vitest 6/6；tsc 0 / build 通过。
+
+**P4 实机收口（2026-09-01，完成）**：
+
+- **验收**（dev Electron CDP 9222 + 真实 DeepSeek agent task，desktop 项目）：S1 会话 A 写 a.txt → A 卡片「本会话改动」仅 a.txt + 后端 `tasks.files_changed_json` 权威清单持久化 ✓；S2 会话 B 写 b.txt → B 卡片仅 b.txt、A 的 a.txt 不可见（隔离核心判据）✓；S3「全部」= git 全量（审阅语义不变）✓；S4 旧会话回退全量且无切换 ✓。证据 `acceptance/ui-263/`（3 截图 + evidence.json）；UI-263 verified。
+- **阻断性存量缺陷修复（本包顺带）**：`inferExecutionPolicy(messages)` 两处调用点（`agent-runner.js` / `routes/ai-agent/chat.js`）自 BLOCK-10 S-003 起漏传 context → `ctx.accessMode` 恒缺省 read →「完全访问」失效、workspace_write/replace/exec 全部被拒（实机两次复现：context 存 `accessMode:'full'` 仍 denied）。修复 = 两处补传 context。后端定向 6/6 + 1/1 过；`node --check` 过。
+- **门禁**：后端 agent-files-changed 6/6 + agent-task-cancellation 1/1；前端 AgentChangesCard 7/7 + SimpleChat 6/6；docs:check / ui:audit:check / docs:reconcile。
+- **观察项登记 roadmap 候选（不扩权）**：会话归属索引为内存态，页面 reload 后历史会话回退全量视图；候选改进 = 挂载时按会话从后端权威清单（`tasks.files_changed_json`）水合，需 task→conversation 查询通道（loop_runs 对 task 模式未落行，不能直接复用）。
 
 G0 开发期常态 · 不外推 packaged / Provider / GA / P7.

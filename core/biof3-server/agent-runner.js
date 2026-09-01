@@ -530,7 +530,9 @@ async function runAgentLoop({
   systemPrompt = appendDesktopAgentInstructions(systemPrompt);
 
   // Infer execution policy
-  const executionPolicy = inferExecutionPolicy(messages);
+  // BLOCK-31 P4 fix: 必须传 context —— S-003 设计中 ctx.accessMode 是唯一判定源，
+  // 旧调用点漏传导致「完全访问」恒被降级 read、workspace_write 全部被拒。
+  const executionPolicy = inferExecutionPolicy(messages, context);
   if (!executionPolicy.allowExecution) {
     systemPrompt +=
       '\n\n=== 本轮只读约束 ===' +
