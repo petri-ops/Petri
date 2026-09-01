@@ -31,6 +31,11 @@ const electronErrorLogPath = `${electronLogPath}.error`;
 const children = new Set();
 let shuttingDown = false;
 let launchedElectronViaOpen = false;
+// BLOCK-35：launch-token 定向。shutdown 只杀本 wrapper 启动的 Electron 实例
+// （token 随 --args 注入主进程 argv；Helper 子进程 argv 不含 token，天然只中主进程），
+// 不再按二进制路径全杀工作区 Electron —— 否则会误杀人工 `electron . --dev`
+// 或另一 wrapper 启动的并存实例（BLOCK-34 P4 实机两次静默退出的根因）。
+const launchToken = `biof3dev-${process.pid}-${Date.now().toString(36)}`;
 
 function spawnChild(command, args, options = {}) {
   const { shutdownOnExit = 'error', ...spawnOptions } = options;
@@ -78,6 +83,21 @@ function getWorkspaceElectronPids() {
     .split(/\s+/)
     .map(Number)
     .filter((pid) => Number.isInteger(pid) && pid > 0);
+}
+
+// 本 wrapper 经 `open --args ... --biof3-dev-launch-token=<token>` 启动的实例。
+// pattern 不带前导 `--`（避免被 pgrep 当选项解析）；pgrep 会把仍存活的 `open`
+// 自身也命中（其 argv 含 token），排除掉。
+function getLaunchedElectronPids() {
+  if (process.platform !== 'darwin') return [];
+  const result = spawnSync('pgrep', ['-f', `biof3-dev-launch-token=${launchToken}`], { encoding: 'utf8' });
+  if (result.status !== 0) return [];
+  const childPids = new Set([...children].map((child) => child.pid));
+  return result.stdout
+    .trim()
+    .split(/\s+/)
+    .map(Number)
+    .filter((pid) => Number.isInteger(pid) && pid > 0 && !childPids.has(pid));
 }
 
 function signalPids(pids, signal) {
@@ -128,10 +148,26 @@ async function stopWorkspaceElectron() {
   }
 }
 
+// BLOCK-35：shutdown 路径专用 —— 只停本 wrapper 启动的实例，并存实例不受影响。
+async function stopLaunchedElectron() {
+  const pids = getLaunchedElectronPids();
+  if (pids.length === 0) return;
+  signalPids(pids, 'SIGTERM');
+  const remaining = await waitForPidsToExit(pids, 5000);
+  if (remaining.length > 0) {
+    signalPids(remaining, 'SIGKILL');
+    const survivors = await waitForPidsToExit(remaining, 2000);
+    if (survivors.length > 0) {
+      throw new Error(`Unable to stop launched Electron processes: ${survivors.join(', ')}`);
+    }
+  }
+}
+
 async function waitForWorkspaceElectron(timeoutMs = 15000) {
   const startedAt = Date.now();
   while (Date.now() - startedAt <= timeoutMs) {
-    if (getWorkspaceElectronPids().length > 0) return;
+    // token 就绪判定：只认本 wrapper 启动的实例，陈旧实例不构成假阳性
+    if (getLaunchedElectronPids().length > 0) return;
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
   throw new Error(
@@ -146,10 +182,12 @@ async function shutdown(code = 0) {
     terminateChild(child);
   }
   // On macOS the Electron instance is launched via `open -a` (GUI session) and
-  // is not part of our process group, so tear it down explicitly.
+  // is not part of our process group, so tear it down explicitly. BLOCK-35:
+  // only the instance this wrapper launched (token-scoped) — coexisting
+  // Electron instances from this workspace must survive our shutdown.
   if (launchedElectronViaOpen && process.platform === 'darwin') {
     try {
-      await stopWorkspaceElectron();
+      await stopLaunchedElectron();
     } catch (error) {
       console.error(`[dev] ${error.message}`);
       code = code || 1;
@@ -346,7 +384,7 @@ async function main() {
     if (process.env.ELECTRON_DISABLE_SANDBOX) {
       openArgs.push('--env', `ELECTRON_DISABLE_SANDBOX=${process.env.ELECTRON_DISABLE_SANDBOX}`);
     }
-    openArgs.push('--args', projectRoot, '--dev', ...extraElectronArgs);
+    openArgs.push('--args', projectRoot, '--dev', `--biof3-dev-launch-token=${launchToken}`, ...extraElectronArgs);
     spawnChild('/usr/bin/open', openArgs);
     await waitForWorkspaceElectron();
     console.log(`[dev] Electron started via LaunchServices; main log: ${electronLogPath}`);
