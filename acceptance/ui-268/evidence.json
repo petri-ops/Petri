@@ -1,0 +1,46 @@
+{
+  "id": "UI-268",
+  "title": "聊天会话区滚动条与消息内容分离 + 右缘常驻滑轨线（与左缘 MessageRail 沟槽对称）",
+  "date": "2026-09-02",
+  "user_feedback": "聊天会话区上下滑动窗口的时候，右侧的定位柱状（滚动条 thumb）和会话区内容重合了，调整位置要分开，像左侧条形区一样的边界感",
+  "changes": [
+    "simple-chat.css .sc-messages：padding-right 4px → 12px，内容与滚动条 thumb 分开（左右侧分别让位 18px/12px，与 UI-262 左 rail 对称）",
+    "simple-chat.css .sc-messages：右缘常驻滑轨线（background-image 1px 竖线，right 3px 居中于 thumb 区域，高度 min(62%,560px) 与左 rail 对称，端点 12px 淡出，border 55%）——容器背景不随内容滚动，overlay thumb 出现时恰好压在线上",
+    "::-webkit-scrollbar 宽 5px → 7px（classic 环境下兼容），track 保持透明（常驻视觉由背景线承担）",
+    "project-workspace.module.css 两处 :global(.sc-messages) padding 同步 0 12px 0 18px（agentMain / rightChatPanel 上下文，防 module 覆盖吞掉右侧让位——UI-262 同类教训）"
+  ],
+  "verification": [
+    {
+      "step": "S1",
+      "name": "内容与 thumb 分离",
+      "method": "CDP Runtime.evaluate getComputedStyle(.sc-messages).paddingRight === '12px'（HMR 生效）；elementFromPoint(right-3) 命中 .sc-messages 自身，无遮挡"
+    },
+    {
+      "step": "S2",
+      "name": "overlay 滚动条确认",
+      "method": "offsetWidth - clientWidth === 0 → macOS overlay 行为（classic 自定义 track 渐变不渲染，故改用容器背景线方案）"
+    },
+    {
+      "step": "S3",
+      "name": "thumb 压线滚动",
+      "method": "scrollTop 置中触发 overlay thumb → 截图显示 thumb（灰色圆角条）恰好压在轨道线上；thumb 未覆盖区段露出常驻线。见 01-thumb-on-track.png"
+    },
+    {
+      "step": "S4",
+      "name": "常驻轨道线静态形态",
+      "method": "清除探针后截图：右缘 1px 淡灰线（border 55%）持续可见、端点淡出、高度居中 62% 与左 rail 对称。见 02-track-line.png"
+    },
+    {
+      "step": "S5",
+      "name": "背景不随内容滚动",
+      "method": "scrollTop=0 与 scrollTop=中段两次裁剪对比，轨道线位置恒定（右缘 right 3px）"
+    }
+  ],
+  "evidence_files": [
+    "acceptance/ui-268/01-thumb-on-track.png",
+    "acceptance/ui-268/02-track-line.png",
+    "acceptance/ui-268/03-viewport-full.png"
+  ],
+  "notes": "Page.captureScreenshot 的 clip 在本环境（Electron dpr≈1.389）坐标单位与 CSS px 不一致，clip 截图不可用；证据改用全页截图 + sips 裁剪放大。fixed 探针标定确认全页截图坐标正确。G0 开发期常态 · 不外推 packaged / Provider / GA。",
+  "status": "verified"
+}

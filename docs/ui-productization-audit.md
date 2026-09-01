@@ -2137,6 +2137,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-268: 会话区滚动条与内容分离 + 右缘常驻滑轨线（与左缘 MessageRail 对称） (2026-09-02 verified)
+
+**用户反馈**：「聊天会话区上下滑动窗口的时候，右侧的定位柱状和会话区重合了……调整位置要分开，像左侧条形区一样的边界感」。
+
+**改动**（0 新增 IPC / 0 新依赖 / 纯 CSS）：① `.sc-messages` padding-right 4px → 12px，消息内容与 overlay 滚动条 thumb 分开（左 18px 右 12px 与 UI-262 左 rail 对称让位）；② 右缘常驻滑轨线（容器 background-image 1px 竖线：`right 3px` 居中于 thumb 区域、高 `min(62%,560px)` 与左 rail 沟槽对称、端点 12px 淡出、border 55%）——容器背景不随内容滚动，thumb 出现时恰好压线；③ `project-workspace.module.css` 两处 `:global(.sc-messages)`（agentMain / rightChatPanel）padding 同步 `0 12px 0 18px`，防 module 覆盖吞掉右侧让位（UI-262 同类教训）。
+
+**实机验证**（dev Electron CDP）：`getComputedStyle(.sc-messages).paddingRight === '12px'`；`offsetWidth - clientWidth === 0` 确认 macOS overlay 行为（classic `::-webkit-scrollbar-track` 渐变不渲染，故改用容器背景线方案）；scrollTop 置中触发 thumb 截图显示 thumb 恰好压线、未覆盖区段露出常驻线；scrollTop=0/中段对比轨道线位置恒定（背景不随滚动）。证据 `acceptance/ui-268/`（3 截图 + evidence.json S1–S5）。附注：本环境 `Page.captureScreenshot` 的 clip 坐标与 CSS px 不一致（dpr≈1.389），clip 截图不可用，证据改用全页截图 + sips 裁剪放大，fixed 探针标定确认坐标。
+
+**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-267: BLOCK-36 — 会话区工具执行记录独立小窗口（ToolActivityDock 统一执行记录浮窗） (2026-09-02 verified)
 
 **用户需求**（BLOCK-36 立项）：「优化会话区，把工具执行记录独立成小窗口」→ 三项设计裁决（用户确认）：①内联收敛为一行摘要条（点击打开浮窗定位）；②BackgroundProcessDock 扩展为会话级统一浮窗（tab 按消息分组含历史恢复 + 后台进程特殊 tab）；③running 自动弹出/完成后保留/关闭后新运行 re-pop/可折叠 chip。

@@ -973,7 +973,8 @@
         "acceptance/ui-264/**",
         "acceptance/ui-265/**",
         "acceptance/ui-266/**",
-        "acceptance/ui-267/**"
+        "acceptance/ui-267/**",
+        "acceptance/ui-268/**"
       ],
       "classifiesScripts": false
     },
