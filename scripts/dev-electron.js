@@ -74,9 +74,18 @@ function terminateChild(child) {
   }
 }
 
+// 工作区 Electron 主进程的两种启动变体（BLOCK-35 P2 实机发现）：
+// 1. wrapper 经 `open -a Electron.app` 启动 → argv 为
+//    `<root>/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron`
+// 2. `npx electron .` / `./node_modules/.bin/electron`（cli.js）启动 → argv 为
+//    `<root>/node_modules/electron/dist/electron`（小写直连二进制）。
+// 旧模式只匹配 .app 路径，boot 清理会漏掉变体 2。Helper 子进程位于
+// `.../Frameworks/Electron Helper ...`，不匹配任一分支，天然只中主进程。
 function getWorkspaceElectronPids() {
   if (process.platform !== 'darwin' || !fs.existsSync(electronBinary)) return [];
-  const result = spawnSync('pgrep', ['-f', electronBinary], { encoding: 'utf8' });
+  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = `${esc(projectRoot)}/node_modules/electron/dist/(Electron[.]app/Contents/MacOS/Electron|electron)( |$)`;
+  const result = spawnSync('pgrep', ['-f', pattern], { encoding: 'utf8' });
   if (result.status !== 0) return [];
   return result.stdout
     .trim()

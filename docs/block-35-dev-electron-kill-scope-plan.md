@@ -33,6 +33,13 @@ BLOCK-34 代码无关的时刻（agent 任务收尾后 / 人工 kill 8765 孤儿
 - `waitForWorkspaceElectron` 改用 token 匹配就绪判定（不再被陈旧实例假阳性）。
 - **boot 清理保持全杀不变**：`stopWorkspaceDevProcesses()` 清理「上次会话遗留」的
   语义不变（此时无法知道遗留实例的 token），这是设计意图非误杀。
+- **P2 实机修正（2026-09-02）**：boot 全杀的匹配模式存在盲区 —— 工作区 Electron
+  主进程有两种 argv 变体：`open -a` 启动为 `.../dist/Electron.app/Contents/MacOS/Electron`，
+  `npx electron .`（cli.js）启动为 `.../dist/electron`（小写直连）。旧 `pgrep -f
+  <electronBinary>` 只中前者，boot 清理会漏杀变体 2。已改为 ERE
+  `<root>/node_modules/electron/dist/(Electron[.]app/Contents/MacOS/Electron|electron)( |$)`
+  （Helper 位于 `.../Frameworks/Electron Helper ...` 不匹配，仍只中主进程）。
+  shutdown 定向路径（token）不受影响。
 
 ## 3. 非范围
 
@@ -45,9 +52,11 @@ BLOCK-34 代码无关的时刻（agent 任务收尾后 / 人工 kill 8765 孤儿
 
 - P1：`node --check scripts/dev-electron.js`；启动链冒烟（wrapper 正常拉起 Electron + CDP）。
 - P2（实机核心判据）：wrapper A 启动实例 A（CDP 9222）→ 人工以独立
-  `BIOF3_ELECTRON_USER_DATA_DIR` 启动并存实例 B（单例锁按 userData 隔离，可共存）
-  → SIGTERM wrapper A → **A 实例退出、B 实例存活**（修复前 B 会被全杀）；
-  再验证 boot 清理：重启 wrapper 时 B 被按设计清杀。
+  `BIOF3_ELECTRON_USER_DATA_DIR` 启动并存实例 B（单例锁按 userData 隔离，可共存），
+  B 采用 `./node_modules/.bin/electron`（cli.js 变体）启动以覆盖 boot 清理盲区
+  回归 → SIGTERM wrapper A → **A 实例退出、B 实例存活**（修复前 B 会被全杀）；
+  再验证 boot 清理：重启 wrapper 时 B 被按设计清杀。判定采用事件轮询
+  （A 亡 / B 存活 = 主进程存活 + B 自身后端 /api/health 响应），不依赖固定 sleep。
 - 证据：`acceptance/` 不新增 UI 台账（无 UI 变更），判据记录于本文件 §5 与 commit message。
 
 ## 5. 收口语义
