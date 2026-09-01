@@ -48,6 +48,7 @@ const {
   tool_workspace_replace,
   tool_workspace_exec,
 } = require('./workspace-tools');
+const { tool_system_info } = require('./system-info-tools');
 
 const CONTRACT_VERSION = '1.0.0';
 const RISK_TIERS = Object.freeze(['R0', 'R1', 'R2', 'R3']);
@@ -79,6 +80,7 @@ const HANDLERS = {
   workspace_write: tool_workspace_write,
   workspace_replace: tool_workspace_replace,
   workspace_exec: tool_workspace_exec,
+  system_info: tool_system_info,
   query: tool_query,
   read_page: tool_read_page,
   search: tool_search,
@@ -131,6 +133,8 @@ const CONTRACTS = {
   workspace_write: contract('workspace', 'workspace-write', 'R2', ['project.files'], 200),
   workspace_replace: contract('workspace', 'workspace-write', 'R2', ['project.files'], 200),
   workspace_exec: contract('workspace', 'execution', 'R2', ['project.files', 'local.process'], 30000),
+  // BLOCK-33 P1 — 环境自省：只读零副作用，不依赖项目工作区（category 非 workspace → 不走 preflight）
+  system_info: contract('verification', 'none', 'R0', ['local.process'], 1000),
   query: contract('retrieval', 'none', 'R0', ['project.database'], 250),
   read_page: contract('retrieval', 'external-request', 'R1', ['plugin.content', 'network.remote'], 15000),
   search: contract('retrieval', 'external-request', 'R1', ['project.database', 'plugin.content', 'llm.provider'], 30000),

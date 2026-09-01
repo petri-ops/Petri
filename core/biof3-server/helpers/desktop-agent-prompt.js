@@ -5,9 +5,19 @@
  */
 function appendDesktopAgentInstructions(prompt) {
   const cleanBase = String(prompt || '').replace(/\n\n=== Tool Calling 指南 ===[\s\S]*$/, '');
+  // BLOCK-33 P1 — 环境摘要：让模型在第一轮就知道平台与 shell，避免跨平台命令试探。
+  const os = require('os');
+  const path = require('path');
+  const platform = process.platform;
+  const shell = platform === 'win32'
+    ? (process.env.ComSpec || 'cmd.exe')
+    : (process.env.SHELL && path.isAbsolute(process.env.SHELL) ? process.env.SHELL : '/bin/sh');
+  const envLine = `当前执行环境：${os.type()} ${os.release()} · ${os.arch()} · shell=${shell} · 路径分隔符="${path.sep}"（workspace_exec 详情可用 system_info 工具查询）。`;
   return cleanBase + `
 
 === 桌面项目 Agent 工具规则 ===
+- ${envLine}
+- 编写或执行平台相关命令前先调用 system_info 确认环境；命令语法必须匹配该平台的 shell。workspace_exec 每条命令都是独立 shell：cd 与环境变量不跨调用持久，需要子目录时把命令写成 "cd 子目录 && 实际命令" 或使用绝对/相对路径，不要假设上一次的 cd 仍然生效。
 - 基础文件操作优先使用 workspace_list / workspace_find / workspace_search / workspace_read；所有路径都相对当前项目工作区，不得猜测或输出本机绝对路径。
 - 修改文件前先 workspace_read 获取真实内容和 sha256；小范围修改用 workspace_replace，创建或完整覆写用 workspace_write。写入后再次读取或运行检查验证结果。
 - 短命令使用 workspace_exec，工作目录固定为当前项目根目录；不得尝试绕过危险命令、超时、输出截断或只读模式限制。长驻进程不使用该工具。

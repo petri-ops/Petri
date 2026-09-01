@@ -134,6 +134,18 @@ const WORKSPACE_TOOL_DEFS = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'system_info',
+      description:
+        '获取当前系统与命令执行环境信息：操作系统与架构、shell 解释器、路径分隔符、Node/npm/Python/Git 版本等。只读、零副作用。在编写或执行任何平台相关命令（workspace_exec）之前先调用，避免跨平台命令语法错误；探测命令不存在时对应版本返回 null。',
+      parameters: {
+        type: 'object',
+        properties: {},
+      },
+    },
+  },
 ];
 
 const TOOL_DEFS = [

@@ -114,6 +114,9 @@ export function summarizeToolCall(
       return { actionLabel: '已修改', actionDetail: compactDetail(args.path) || '文件' };
     case 'run_tool':
       return { actionLabel: '已运行', actionDetail: compactDetail(args.toolId) || '分析工具' };
+    case 'system_info':
+      // BLOCK-33 P1 — 环境自省：只读、无参数
+      return { actionLabel: '已查询', actionDetail: '系统环境' };
     default:
       return { actionLabel: '已调用', actionDetail: name };
   }
