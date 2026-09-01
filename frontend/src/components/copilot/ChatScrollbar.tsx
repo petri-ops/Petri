@@ -2,8 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './ChatScrollbar.module.css';
 
 const TRACK_INSET = 14; // 轨道上下留白（与左 rail 的 8px 内衬感对齐）
-const MIN_THUMB = 32;
-const MAX_THUMB_RATIO = 0.2; // UI-269：thumb 最长为轨道的 20%——用户裁决「大幅调短」
+const THUMB_LENGTH = 125; // UI-269：thumb 固定长度（用户裁决「缩短到 125px」）
 
 interface ChatScrollbarProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -60,9 +59,7 @@ export function ChatScrollbar({ containerRef }: ChatScrollbarProps) {
   const overflow = scrollH > clientH + 1;
   const maxScroll = Math.max(0, scrollH - clientH);
   const trackH = Math.max(0, clientH - TRACK_INSET * 2);
-  const thumbH = Math.round(
-    Math.min(MAX_THUMB_RATIO * trackH, Math.max(MIN_THUMB, (clientH / Math.max(scrollH, 1)) * trackH))
-  );
+  const thumbH = Math.min(THUMB_LENGTH, trackH);
   const maxThumbY = Math.max(0, trackH - thumbH);
   const thumbY = maxScroll > 0 ? (scrollTop / maxScroll) * maxThumbY : 0;
 

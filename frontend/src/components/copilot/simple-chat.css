@@ -7,6 +7,10 @@
   flex-direction: column;
   flex: 1;
   width: 100%;
+  /* UI-269 — 会话区固定宽度居中：宽屏（如右侧面板关闭）时左右对称留白，
+     窄屏（右栏开启挤压）时不生效；rail/滚动条随列缘对齐 */
+  max-width: 860px;
+  margin: 0 auto;
   height: 100%;
   min-height: 0;
   overflow: hidden;
