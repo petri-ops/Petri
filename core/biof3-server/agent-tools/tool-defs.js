@@ -128,6 +128,8 @@ const WORKSPACE_TOOL_DEFS = [
         type: 'object',
         properties: {
           command: { type: 'string', description: '要在项目工作目录中执行的 shell 命令，例如 "head -5 counts.csv"、"cat metadata.csv" 或 "Rscript scripts/qc.R"' },
+          cwd: { type: 'string', description: '相对项目根目录的工作子目录（必须已存在）；每条命令都是独立 shell，cd 不跨调用持久，需要子目录时优先用本参数' },
+          shell: { type: 'string', enum: ['auto', 'posix', 'powershell', 'cmd'], description: 'shell 选择：auto=平台默认（Windows=cmd，其他=$SHELL）；Windows 建议显式用 powershell 获得现代语法' },
           timeoutMs: { type: 'integer', description: '超时毫秒，默认 120000，最大 1800000' },
         },
         required: ['command'],

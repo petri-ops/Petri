@@ -207,11 +207,20 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // subject `fix(result-studio)` 未带 UI-###；台账已由本 commit 补登为
   // UI-201（in_progress）。不重写共享历史。
   '44a4b7e9087a8eade9c061c1d04c6b543378e159',
+  // 2026-09-01 BLOCK-33 P1 环境自省不可变提交 0acffcc：subject
+  // `feat(block-33): P1 环境自省——system_info 工具 + prompt 环境摘要行`
+  // 未带 UI-###；台账已由后续 UI-AUDIT-FIX（P2 提交）补登为 UI-265
+  // （in_progress）。不重写共享历史。
+  '0acffcc13c78a27c1c1e764c5d56afe13e4602ef',
 ])
 // These immutable implementation commits have an explicit later canonical
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-09-01 BLOCK-33 P1 环境自省 0acffcc 触碰 toolActivity.ts（UI surface），
+  // 台账已由后续 UI-AUDIT-FIX（P2 提交）补登为 UI-265（in_progress）。
+  // 豁免同提交台账要求。
+  '0acffcc13c78a27c1c1e764c5d56afe13e4602ef',
   // 2026-08-30 BLOCK-30-BACKEND-CONVERGENCE P1/P2/P4：UI 影响补登为 UI-222
   // （合并条目，见 LEGACY_MESSAGE_EXEMPTIONS 注释）。豁免同提交台账要求。
   'edd1116b2b524bfdc96fc16bc16fa2ad8318b216',

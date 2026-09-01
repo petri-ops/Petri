@@ -2137,6 +2137,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-265: BLOCK-33 — 通用编码 Agent UI 增量（system_info 工具活动条标签；P3 流式输出 / P6 实机收口增量扩展） (2026-09-01 in_progress)
+
+**背景**（BLOCK-33 P1，实现提交 `0acffcc`）：通用跨平台编码 Agent 能力 P1 环境自省落地，UI 侧增量 = `frontend/src/components/copilot/toolActivity.ts` 工具活动条新增 `system_info → 「已查询 · 系统环境」` 标签映射。该提交未同步台账（UI-AUDIT-FIX 由本条补登，不重写共享历史，提交哈希豁免登记于检查器）。
+
+**后续增量**（同编号累积）：P3 流式输出在工具活动条内实时追加等宽输出区（tail 显示 + 截断标记）；P6 dev Electron 实机收口（system_info 识别环境 / cwd 多命令 / 流式追加 / background 起停）后转 verified。
+
+**门禁**（P1 已过）：tsc 0 / 定向 node --test 3/3 / toolActivity 7/7 / docs:check 173。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-264: BLOCK-32 — 项目级审阅隔离（审阅/改动卡片按项目工作区仓库解析） (2026-09-01 verified)
 
 **用户反馈**（BLOCK-31 收口后）：「审阅中也是看到所有的吗？不同项目审阅中的变化也应该是隔离开的吧」→ 调查确认：`working-tree-review.js` 全部 20 个 `git:*` IPC handler 调无参 `resolveGitAdapter()`（固定候选 `app.getAppPath()`），任何项目看到的都是 desktop 应用仓库的改动/历史；AskUserQuestion 裁决「立项全套做」+ 非 git 项目「诚实空态」。

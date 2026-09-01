@@ -647,7 +647,35 @@ function createWorkspaceTools(options = {}) {
     return { ok: true };
   }
 
-  function shellInvocation(command) {
+  function shellInvocation(command, shellPreference) {
+    // BLOCK-33 P2 — shell 选择：auto（平台默认）| posix | powershell | cmd。
+    // Windows 上 PowerShell 提供现代语法（对象管道、POSIX 风格引号），降低方言陷阱。
+    const preference = String(shellPreference || 'auto').toLowerCase();
+    if (preference === 'posix') {
+      if (process.platform === 'win32') {
+        return { error: 'posix shell 在 Windows 上不可用，请使用 powershell 或 cmd' };
+      }
+      return {
+        executable: process.env.SHELL && path.isAbsolute(process.env.SHELL) ? process.env.SHELL : '/bin/sh',
+        args: ['-lc', command],
+      };
+    }
+    if (preference === 'powershell') {
+      const executable = process.platform === 'win32' ? 'powershell.exe' : 'pwsh';
+      return {
+        executable,
+        args: ['-NoProfile', '-NonInteractive', '-Command', command],
+      };
+    }
+    if (preference === 'cmd') {
+      if (process.platform !== 'win32') {
+        return { error: 'cmd.exe 仅在 Windows 上可用' };
+      }
+      return {
+        executable: process.env.ComSpec || 'cmd.exe',
+        args: ['/d', '/s', '/c', command],
+      };
+    }
     if (process.platform === 'win32') {
       return {
         executable: process.env.ComSpec || 'cmd.exe',
@@ -669,6 +697,16 @@ function createWorkspaceTools(options = {}) {
         const command = String(args.command || '').trim();
         const verdict = commandVerdict(command);
         if (!verdict.ok) return errorResult('command_blocked', verdict.reason);
+        // BLOCK-33 P2 — cwd 提前校验（fail-early），执行时 handler 内还会再解析一次
+        if (args.cwd != null && String(args.cwd).trim() !== '' && String(args.cwd).trim() !== '.') {
+          const resolvedCwd = await resolveWorkspaceTarget(root, String(args.cwd).trim(), {
+            createRoot: false,
+          });
+          const cwdStat = await fsp.stat(resolvedCwd.target).catch(() => null);
+          if (!cwdStat || !cwdStat.isDirectory()) {
+            return errorResult('invalid_arguments', `cwd 不是工作区内已存在的目录: ${resolvedCwd.relativePath}`);
+          }
+        }
         return {
           ok: true,
           commandRisk: 'full_access',
@@ -703,11 +741,35 @@ function createWorkspaceTools(options = {}) {
     const command = String(args.command || '').trim();
     const verdict = commandVerdict(command);
     if (!verdict.ok) return errorResult('command_blocked', verdict.reason);
+    const shellPreference = String(args.shell || 'auto').toLowerCase();
     return withWorkspace(ctx, async ({ root }) => {
-      const invocation = shellInvocation(command);
+      // BLOCK-33 P2 — cwd 参数：相对工作区根，过沙箱校验（逃逸/符号链接拒绝）
+      let cwdRoot = root;
+      let cwdLabel = '.';
+      if (args.cwd != null && String(args.cwd).trim() !== '' && String(args.cwd).trim() !== '.') {
+        try {
+          const resolvedCwd = await resolveWorkspaceTarget(root, String(args.cwd).trim(), {
+            createRoot: false,
+          });
+          const cwdStat = await fsp.stat(resolvedCwd.target).catch(() => null);
+          if (!cwdStat || !cwdStat.isDirectory()) {
+            return errorResult('invalid_arguments', `cwd 不是工作区内已存在的目录: ${resolvedCwd.relativePath}`);
+          }
+          cwdRoot = resolvedCwd.target;
+          cwdLabel = resolvedCwd.relativePath;
+        } catch (error) {
+          return errorResult(
+            error && error.code ? error.code : 'invalid_arguments',
+            (error && error.message) || 'cwd 校验失败'
+          );
+        }
+      }
+      const invocation = shellInvocation(command, shellPreference);
+      if (invocation.error) return errorResult('invalid_arguments', invocation.error);
+      const startedAt = Date.now();
       try {
         const result = await execFileAsync(invocation.executable, invocation.args, {
-          cwd: root,
+          cwd: cwdRoot,
           shell: false,
           timeout: clampInteger(args.timeoutMs, DEFAULT_COMMAND_TIMEOUT_MS, 100, MAX_COMMAND_TIMEOUT_MS),
           maxBuffer: MAX_COMMAND_OUTPUT_BYTES,
@@ -718,10 +780,12 @@ function createWorkspaceTools(options = {}) {
         return {
           ok: true,
           command,
-          cwd: '.',
+          cwd: cwdLabel,
+          shell: invocation.executable,
           exitCode: 0,
           signal: null,
           timedOut: false,
+          durationMs: Date.now() - startedAt,
           stdout: stdout.slice(0, MAX_COMMAND_OUTPUT_BYTES),
           stderr: stderr.slice(0, MAX_COMMAND_OUTPUT_BYTES),
           truncated: Buffer.byteLength(stdout) > MAX_COMMAND_OUTPUT_BYTES || Buffer.byteLength(stderr) > MAX_COMMAND_OUTPUT_BYTES,
@@ -730,10 +794,12 @@ function createWorkspaceTools(options = {}) {
         return {
           ok: false,
           command,
-          cwd: '.',
+          cwd: cwdLabel,
+          shell: invocation.executable,
           exitCode: Number.isInteger(error.code) ? error.code : 1,
           signal: error.signal || null,
           timedOut: error.killed === true,
+          durationMs: Date.now() - startedAt,
           stdout: String(error.stdout || '').slice(0, MAX_COMMAND_OUTPUT_BYTES),
           stderr: String(error.stderr || error.message || '').slice(0, MAX_COMMAND_OUTPUT_BYTES),
           truncated: Boolean(error && error.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER'),
