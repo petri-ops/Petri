@@ -18,6 +18,7 @@
  */
 
 import { useEffect, useImperativeHandle, useRef, type RefObject } from 'react';
+import { useParams } from 'react-router-dom';
 import { Compartment, EditorState, type Extension } from '@codemirror/state';
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
@@ -94,13 +95,14 @@ const biof3HighlightStyle = HighlightStyle.define([
  */
 
 interface WorkingTreeReviewLike {
-  applyInverseHunk: (params: { patch: string }) => Promise<{
+  // BLOCK-32 — params 增加 projectId（项目级审阅隔离，additive）
+  applyInverseHunk: (params: { patch: string; projectId?: string }) => Promise<{
     ok: boolean;
     data?: { ok: true };
     error?: string;
     message?: string;
   }>;
-  revertFile: (params: { path: string }) => Promise<{
+  revertFile: (params: { path: string; projectId?: string }) => Promise<{
     ok: boolean;
     data?: { reverted: string[] };
     error?: string;
@@ -111,6 +113,7 @@ interface WorkingTreeReviewLike {
     hunkIndex: number;
     patch: string;
     feedback?: string;
+    projectId?: string;
   }) => Promise<{
     ok: boolean;
     data?: unknown;
@@ -149,13 +152,13 @@ function countLines(text: string): number {
   return parts[parts.length - 1] === '' ? parts.length - 1 : parts.length;
 }
 
-async function runAcceptHunkIPC(rev: DiffRevision, hunk: DiffHunk): Promise<void> {
+async function runAcceptHunkIPC(rev: DiffRevision, hunk: DiffHunk, projectId?: string): Promise<void> {
   const bridge = getBridge('workingTreeReview') as WorkingTreeReviewLike | null;
   if (!bridge) {
     throw new Error('Desktop IPC bridge "workingTreeReview" is not available.');
   }
   const patch = buildForwardPatch(rev, hunk);
-  const result = await bridge.applyInverseHunk({ patch });
+  const result = await bridge.applyInverseHunk({ patch, projectId });
   if (!result.ok) {
     throw new Error(result.error || result.message || 'applyInverseHunk failed.');
   }
@@ -166,6 +169,7 @@ async function runRejectHunkIPC(
   hunk: DiffHunk,
   hunkIndex: number,
   feedback?: string,
+  projectId?: string,
 ): Promise<void> {
   const bridge = getBridge('workingTreeReview') as WorkingTreeReviewLike | null;
   if (!bridge) {
@@ -177,18 +181,19 @@ async function runRejectHunkIPC(
     hunkIndex,
     patch,
     feedback,
+    projectId,
   });
   if (!result.ok) {
     throw new Error(result.error || result.message || 'rejectHunkByInverseHunk failed.');
   }
 }
 
-async function runRejectFileIPC(rev: DiffRevision): Promise<void> {
+async function runRejectFileIPC(rev: DiffRevision, projectId?: string): Promise<void> {
   const bridge = getBridge('workingTreeReview') as WorkingTreeReviewLike | null;
   if (!bridge) {
     throw new Error('Desktop IPC bridge "workingTreeReview" is not available.');
   }
-  const result = await bridge.revertFile({ path: rev.filePath });
+  const result = await bridge.revertFile({ path: rev.filePath, projectId });
   if (!result.ok) {
     throw new Error(result.error || result.message || 'revertFile failed.');
   }
@@ -236,6 +241,12 @@ export function useCodeMirrorEditor(
   // 当前状态镜像（apiRef 暴露 read 用）
   const currentModeRef = useRef<EditorMode>(mode);
   const currentDiffRevisionRef = useRef<DiffRevision | null>(diffRevision);
+
+  // BLOCK-32 — 项目级审阅隔离：accept/reject/revertFile IPC 落到当前项目工作区仓库
+  // （/project/:projectId 路由内取路由参数；其余路由回退应用仓库旧行为）
+  const routeParams = useParams<{ projectId?: string }>();
+  const projectIdRef = useRef<string | null>(null);
+  projectIdRef.current = routeParams.projectId ?? null;
 
   // BLOCK-28 — diffOptions 镜像：所有 createUnifiedDiffExtension 调用统一走此 helper
   const diffOptionsRef = useRef<DiffViewOptions | undefined>(diffOptions);
@@ -358,7 +369,7 @@ export function useCodeMirrorEditor(
           const hunk = (rev.hunks ?? []).find((h) => h.id === hunkId);
           if (!hunk) return;
           try {
-            await runAcceptHunkIPC(rev, hunk);
+            await runAcceptHunkIPC(rev, hunk, projectIdRef.current ?? undefined);
           } catch (err) {
             onErrorRef.current?.(err);
             throw err;
@@ -382,7 +393,7 @@ export function useCodeMirrorEditor(
           if (!hunk) return;
           const hunkIndex = (rev.hunks ?? []).findIndex((h) => h.id === hunkId);
           try {
-            await runRejectHunkIPC(rev, hunk, hunkIndex);
+            await runRejectHunkIPC(rev, hunk, hunkIndex, undefined, projectIdRef.current ?? undefined);
           } catch (err) {
             onErrorRef.current?.(err);
             throw err;
@@ -408,7 +419,7 @@ export function useCodeMirrorEditor(
           const failed: Array<{ hunkId: string; error: string }> = [];
           for (const hunk of rev.hunks) {
             try {
-              await runAcceptHunkIPC(rev, hunk);
+              await runAcceptHunkIPC(rev, hunk, projectIdRef.current ?? undefined);
               succeeded.push(hunk.id);
               onAcceptHunkRef.current?.(hunk.id);
             } catch (err) {
@@ -423,7 +434,7 @@ export function useCodeMirrorEditor(
           const rev = currentDiffRevisionRef.current;
           if (!rev) return;
           try {
-            await runRejectFileIPC(rev);
+            await runRejectFileIPC(rev, projectIdRef.current ?? undefined);
           } catch (err) {
             onErrorRef.current?.(err);
             throw err;

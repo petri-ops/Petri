@@ -20,6 +20,7 @@ const path = require('path');
 const fs = require('fs');
 const { ipcMain, app } = require('electron');
 const { createGitAdapter, GitAdapterError } = require('../../core/shared-backend/git-adapter');
+const { getBackendPort } = require('../main/env-coordinator');
 const { createSenderGuard } = require('./_sender-guard');
 
 const MAX_HUNK_LINES_HARD_CAP = 5000;
@@ -43,10 +44,50 @@ async function safeInvoke(body) {
 }
 
 /**
- * 取得当前 working tree 的 GitAdapter。worktree = app.getPath('userData')/workspace。
- * 失败时抛 GitAdapterError('git_repo_not_found')。
+ * BLOCK-32 P1 — 取项目工作区路径（经后端 HTTP，避免主进程直连 better-sqlite3 的
+ * ABI 不匹配问题：Electron 主进程 Node ABI ≠ npm 安装编译目标）。短 TTL 缓存
+ * （30s）吸收高频 status/diff 轮询；项目不存在返回 null。
  */
-function resolveGitAdapter() {
+const PROJECT_WORKSPACE_TTL_MS = 30_000;
+const projectWorkspaceCache = new Map();
+
+async function getProjectWorkspacePath(projectId) {
+  const cached = projectWorkspaceCache.get(projectId);
+  if (cached && Date.now() - cached.at < PROJECT_WORKSPACE_TTL_MS) return cached.workspacePath;
+  const base = `http://127.0.0.1:${getBackendPort('r')}`;
+  const res = await fetch(`${base}/api/data/projects`);
+  if (!res.ok) {
+    throw new GitAdapterError('project_not_found', `无法读取项目信息 (HTTP ${res.status})`, { projectId });
+  }
+  const body = await res.json();
+  const project = (body.projects || []).find((p) => p.id === projectId);
+  if (!project) {
+    throw new GitAdapterError('project_not_found', `项目不存在: ${projectId}`, { projectId });
+  }
+  const workspacePath = project.workspace_path || null;
+  projectWorkspaceCache.set(projectId, { workspacePath, at: Date.now() });
+  return workspacePath;
+}
+
+/**
+ * 取得当前 working tree 的 GitAdapter。
+ * BLOCK-32 P1 项目级审阅隔离：传 projectId 时解析该项目工作区的 git 仓库
+ * （后端 /api/data/projects → workspace_path，校验 .git 存在；非 git 抛
+ * `project_workspace_not_git`）；未传时维持旧行为（app 仓库候选）渐进兼容。
+ * 失败时抛 GitAdapterError。
+ */
+async function resolveGitAdapter(projectId) {
+  if (projectId) {
+    const workspacePath = await getProjectWorkspacePath(projectId);
+    if (!workspacePath || !fs.existsSync(path.join(workspacePath, '.git'))) {
+      throw new GitAdapterError(
+        'project_workspace_not_git',
+        '当前项目工作区不是 git 仓库，无法提供审阅数据。',
+        { projectId, workspacePath: workspacePath || null }
+      );
+    }
+    return createGitAdapter({ gitDir: path.join(workspacePath, '.git'), workTree: workspacePath });
+  }
   const userData = app.getPath('userData');
   const candidates = [
     app.getAppPath(),
@@ -233,10 +274,10 @@ function _writeRejectEntry(userDataDir, args) {
 function setupWorkingTreeReviewIpc(options = {}) {
   const assertSender = createSenderGuard(options.mainWindow);
 
-  ipcMain.handle('git:working-tree-status', async (event) => {
+  ipcMain.handle('git:working-tree-status', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       const status = adapter.repositoryStatus({ untracked: 'all' });
       return {
         files: status.entries.map((e) => ({
@@ -256,7 +297,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
   ipcMain.handle('git:working-tree-diff', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       const paths = Array.isArray(args.paths) && args.paths.length > 0 ? args.paths : null;
       const effectivePaths = paths;
       if (!effectivePaths) {
@@ -278,7 +319,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
   ipcMain.handle('git:working-tree-file-content', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       if (!args || !args.path || typeof args.path !== 'string') {
         throw new GitAdapterError('path_required', 'path is required.');
       }
@@ -311,7 +352,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
   ipcMain.handle('git:hunk-apply', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       if (!args || typeof args.file !== 'string' || typeof args.hunkIndex !== 'number') {
         throw new GitAdapterError('args_required', 'file and hunkIndex are required.');
       }
@@ -347,7 +388,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
   ipcMain.handle('git:working-tree-revert', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       const paths = Array.isArray(args.paths) && args.paths.length > 0 ? args.paths : null;
       return adapter.revertPaths({ paths });
     });
@@ -361,7 +402,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
   ipcMain.handle('git:list-modified', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       const includeUntracked = args.includeUntracked !== false; // default true
       const result = adapter.listModified({ includeUntracked });
       return { files: result.files, count: result.files.length };
@@ -371,7 +412,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
   ipcMain.handle('git:file-head-content', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       if (!args || !args.path || typeof args.path !== 'string') {
         throw new GitAdapterError('path_required', 'path is required.');
       }
@@ -383,7 +424,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
   ipcMain.handle('git:split-side-diff', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       if (!args || !args.path || typeof args.path !== 'string') {
         throw new GitAdapterError('path_required', 'path is required.');
       }
@@ -406,7 +447,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
   ipcMain.handle('git:revert-file', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       if (!args || !args.path || typeof args.path !== 'string') {
         throw new GitAdapterError('path_required', 'path is required.');
       }
@@ -418,7 +459,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
   ipcMain.handle('git:apply-inverse-hunk', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       if (!args || typeof args.patch !== 'string' || args.patch.length === 0) {
         throw new GitAdapterError('patch_required', 'patch text is required.');
       }
@@ -437,7 +478,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
   ipcMain.handle('git:hunk-reject-inverse', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       if (!args || typeof args.file !== 'string' || typeof args.hunkIndex !== 'number') {
         throw new GitAdapterError('args_required', 'file and hunkIndex are required.');
       }
@@ -469,7 +510,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
   ipcMain.handle('git:commit-review', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
 
       if (!args || !args.decisions || typeof args.decisions !== 'object') {
         throw new GitAdapterError('decisions_required', 'decisions map is required.');
@@ -554,7 +595,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
   ipcMain.handle('git:commit-log', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       const limit = typeof args.limit === 'number' ? args.limit : 50;
       // BLOCK-29.5 — skip/file 透传修复（UI-221 分页与文件历史在真实 IPC 链路被丢弃）
       // + ref 透传（分支选择器，只读）。
@@ -567,10 +608,10 @@ function setupWorkingTreeReviewIpc(options = {}) {
   });
 
   // BLOCK-29.5 — 本地分支列表（历史分区选择器，只读）
-  ipcMain.handle('git:branch-list', async (event) => {
+  ipcMain.handle('git:branch-list', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       const result = adapter.listBranches();
       return { branches: result.branches, count: result.count };
     });
@@ -580,7 +621,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
   ipcMain.handle('git:blame', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       if (!args || typeof args.path !== 'string' || !args.path) {
         throw new GitAdapterError('path_required', 'path is required.');
       }
@@ -590,20 +631,20 @@ function setupWorkingTreeReviewIpc(options = {}) {
   });
 
   // BLOCK-29.5 — stash 列表（只读，不含 pop/apply 写操作）
-  ipcMain.handle('git:stash-list', async (event) => {
+  ipcMain.handle('git:stash-list', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       const result = adapter.stashList();
       return { stashes: result.stashes, count: result.count };
     });
   });
 
   // BLOCK-29.5 — 标签列表（只读）
-  ipcMain.handle('git:tag-list', async (event) => {
+  ipcMain.handle('git:tag-list', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       const result = adapter.tagList();
       return { tags: result.tags, count: result.count };
     });
@@ -612,7 +653,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
   ipcMain.handle('git:commit-diff', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       // BLOCK-29.5 — 区间对比模式：fromRef..toRef（均为 hex sha，只读）
       if (args && typeof args.fromRef === 'string' && typeof args.toRef === 'string') {
         const fromRef = assertSha(args.fromRef, 'fromRef');
@@ -627,7 +668,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
   ipcMain.handle('git:commit-file-content', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       if (!args || typeof args.path !== 'string' || !args.path) {
         throw new GitAdapterError('path_required', 'path is required.');
       }
@@ -667,7 +708,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
   ipcMain.handle('git:discard-file', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       if (!args || typeof args.path !== 'string' || !args.path) {
         throw new GitAdapterError('path_required', 'path is required.');
       }
@@ -675,10 +716,10 @@ function setupWorkingTreeReviewIpc(options = {}) {
     });
   });
 
-  ipcMain.handle('git:undo-last-commit', async (event) => {
+  ipcMain.handle('git:undo-last-commit', async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {
-      const adapter = resolveGitAdapter();
+      const adapter = await resolveGitAdapter(args.projectId);
       return adapter.undoLastCommit();
     });
   });

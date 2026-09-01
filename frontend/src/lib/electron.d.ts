@@ -330,8 +330,9 @@ declare global {
         onError: (cb: (msg: string) => void) => () => void;
       };
       // BLOCK-16 — Working Tree Review Mode (PR-style diff viewer)
+      // BLOCK-32 — 全方法 params 可携带 projectId（项目级审阅隔离，additive）
       workingTreeReview: {
-        status: () => Promise<{
+        status: (params?: { projectId?: string }) => Promise<{
           ok: boolean;
           data?: {
             files: Array<{ path: string; oldPath: string | null; status: string; untracked: boolean; conflicted: boolean }>;
@@ -342,7 +343,7 @@ declare global {
           error?: string;
           message?: string;
         }>;
-        diff: (params?: { paths?: string[]; staged?: boolean }) => Promise<{
+        diff: (params?: { paths?: string[]; staged?: boolean; projectId?: string }) => Promise<{
           ok: boolean;
           data?: {
             files: Array<{
@@ -357,7 +358,7 @@ declare global {
           error?: string;
           message?: string;
         }>;
-        fileContent: (params: { path: string; ref?: 'HEAD' | 'WORKTREE' }) => Promise<{
+        fileContent: (params: { path: string; ref?: 'HEAD' | 'WORKTREE'; projectId?: string }) => Promise<{
           ok: boolean;
           data?: { content: string; encoding: 'utf-8' | 'base64'; size: number; truncated?: boolean; message?: string };
           error?: string;
@@ -370,6 +371,7 @@ declare global {
           hunk?: { oldStart: number; newStart: number; lines: Array<{ type: 'add' | 'del' | 'ctx'; text: string }> };
           feedback?: string;
           taskId?: string;
+          projectId?: string;
         }) => Promise<{
           ok: boolean;
           data?: { action: 'accept' | 'reject'; file: string; hunkIndex: number };
@@ -386,13 +388,14 @@ declare global {
           hunk?: { oldStart: number; newStart: number; lines: Array<{ type: 'add' | 'del' | 'ctx'; text: string }> };
           feedback?: string;
           taskId?: string;
+          projectId?: string;
         }) => Promise<{
           ok: boolean;
           data?: { ok: true; action: 'reject'; file: string; hunkIndex: number };
           error?: string;
           message?: string;
         }>;
-        revert: (params?: { paths?: string[] }) => Promise<{
+        revert: (params?: { paths?: string[]; projectId?: string }) => Promise<{
           ok: boolean;
           data?: { reverted: string[] };
           error?: string;
@@ -400,7 +403,7 @@ declare global {
         }>;
         onTaskDone: (cb: (info: { taskId: string | null; filesChanged: string[]; notifiedAt: string }) => void) => () => void;
         // BLOCK-20 — Code Review Panel 新增 5 方法
-        listModified: (params?: { includeUntracked?: boolean }) => Promise<{
+        listModified: (params?: { includeUntracked?: boolean; projectId?: string }) => Promise<{
           ok: boolean;
           data?: {
             files: Array<{ path: string; status: string; indexStatus: string; workTreeStatus: string }>;
@@ -409,13 +412,13 @@ declare global {
           error?: string;
           message?: string;
         }>;
-        fileHeadContent: (params: { path: string }) => Promise<{
+        fileHeadContent: (params: { path: string; projectId?: string }) => Promise<{
           ok: boolean;
           data?: { content: string | null; mtime: string | null };
           error?: string;
           message?: string;
         }>;
-        splitSideDiff: (params: { path: string; context?: number }) => Promise<{
+        splitSideDiff: (params: { path: string; context?: number; projectId?: string }) => Promise<{
           ok: boolean;
           data?: {
             diff: string;
@@ -428,13 +431,13 @@ declare global {
           error?: string;
           message?: string;
         }>;
-        revertFile: (params: { path: string }) => Promise<{
+        revertFile: (params: { path: string; projectId?: string }) => Promise<{
           ok: boolean;
           data?: { reverted: string[] };
           error?: string;
           message?: string;
         }>;
-        applyInverseHunk: (params: { patch: string }) => Promise<{
+        applyInverseHunk: (params: { patch: string; projectId?: string }) => Promise<{
           ok: boolean;
           data?: { ok: true };
           error?: string;
@@ -444,6 +447,7 @@ declare global {
         commitReview: (params: {
           decisions: Record<string, 'accept' | 'reject' | 'pending'>;
           message: string;
+          projectId?: string;
         }) => Promise<{
           ok: boolean;
           data?: {
@@ -459,34 +463,34 @@ declare global {
         // BLOCK-29 — 提交历史（审阅面板「历史」分区，只读）；BLOCK-29.3 载荷 additive 增加 message；
         // BLOCK-29.5 参数 additive 增加 ref（分支选择器）并修复 skip/file IPC 透传；
         // UI-234 载荷 additive 增加 stats（--shortstat，列表行默认可见）
-        commitLog: (params: { limit?: number; skip?: number; file?: string | null; ref?: string | null }) => Promise<{
+        commitLog: (params: { limit?: number; skip?: number; file?: string | null; ref?: string | null; projectId?: string }) => Promise<{
           ok: boolean;
           data?: { commits: Array<{ sha: string; shortSha: string; author: string; isoDate: string; subject: string; message: string; stats?: { files: number; added: number; removed: number } | null }>; count: number };
           error?: string;
           message?: string;
         }>;
         // BLOCK-29.5 — 本地分支列表（历史分区选择器，只读）
-        branchList: (params?: Record<string, never>) => Promise<{
+        branchList: (params?: { projectId?: string }) => Promise<{
           ok: boolean;
           data?: { branches: Array<{ name: string; shortSha: string; isoDate: string; current: boolean }>; count: number };
           error?: string;
           message?: string;
         }>;
         // BLOCK-29.5 — 逐行归属（文件视图第四态，只读；ref 可为提交 sha）
-        blame: (params: { path: string; ref?: string | null }) => Promise<{
+        blame: (params: { path: string; ref?: string | null; projectId?: string }) => Promise<{
           ok: boolean;
           data?: { path: string; lines: Array<{ line: number; sha: string }>; commits: Record<string, { sha: string; shortSha: string; author: string; isoDate: string; subject: string }>; truncated: boolean };
           error?: string;
           message?: string;
         }>;
         // BLOCK-29.5 — stash/标签列表（只读）
-        stashList: (params?: Record<string, never>) => Promise<{
+        stashList: (params?: { projectId?: string }) => Promise<{
           ok: boolean;
           data?: { stashes: Array<{ ref: string; shortSha: string; isoDate: string; subject: string }>; count: number };
           error?: string;
           message?: string;
         }>;
-        tagList: (params?: Record<string, never>) => Promise<{
+        tagList: (params?: { projectId?: string }) => Promise<{
           ok: boolean;
           data?: { tags: Array<{ name: string; shortSha: string; isoDate: string }>; count: number };
           error?: string;
@@ -494,26 +498,26 @@ declare global {
         }>;
         // BLOCK-29.5 — commitDiff/commitFileContent 参数 additive：区间对比模式
         //（commitDiff 传 {fromRef,toRef}；commitFileContent 传 {path,fromRef,toRef}，hash 可省）
-        commitDiff: (params: { hash?: string; fromRef?: string; toRef?: string }) => Promise<{
+        commitDiff: (params: { hash?: string; fromRef?: string; toRef?: string; projectId?: string }) => Promise<{
           ok: boolean;
           data?: { files: Array<{ path: string; oldPath: string | null; binary: boolean; hunks: Array<{ oldStart: number; newStart: number; lines: Array<{ type: 'add' | 'del' | 'ctx'; text: string }> }> }>; truncated: boolean; summary: { added: number; removed: number } };
           error?: string;
           message?: string;
         }>;
-        commitFileContent: (params: { hash?: string; path: string; fromRef?: string; toRef?: string }) => Promise<{
+        commitFileContent: (params: { hash?: string; path: string; fromRef?: string; toRef?: string; projectId?: string }) => Promise<{
           ok: boolean;
           data?: { original: string; modified: string };
           error?: string;
           message?: string;
         }>;
         // BLOCK-29.2 — git 工具二期（前端确认后调用）
-        discardFile: (params: { path: string }) => Promise<{
+        discardFile: (params: { path: string; projectId?: string }) => Promise<{
           ok: boolean;
           data?: { discarded: string[]; deleted: boolean };
           error?: string;
           message?: string;
         }>;
-        undoLastCommit: () => Promise<{
+        undoLastCommit: (params?: { projectId?: string }) => Promise<{
           ok: boolean;
           data?: { undoneCommit: string };
           error?: string;

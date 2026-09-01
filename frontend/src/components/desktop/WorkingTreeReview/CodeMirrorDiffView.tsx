@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 import { CodeMirrorEditor } from '@/components/editor/CodeMirror/CodeMirrorEditor';
 import type { DiffRevision, EditorApi } from '@/components/editor/CodeMirror/types';
@@ -50,6 +51,9 @@ export function CodeMirrorDiffView({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const apiRef = useRef<EditorApi | null>(null);
+  // BLOCK-32 — 项目级审阅隔离：fileContent 消费当前项目工作区仓库
+  const routeParams = useParams<{ projectId?: string }>();
+  const projectId = routeParams.projectId;
 
   useEffect(() => {
     if (revisionOverride) {
@@ -76,11 +80,13 @@ export function CodeMirrorDiffView({
       const headResult = (await bridge.fileContent({
         path: filePath,
         ref: 'HEAD',
+        projectId,
       })) as FileContentResult;
 
       const worktreeResult = (await bridge.fileContent({
         path: filePath,
         ref: 'WORKTREE',
+        projectId,
       })) as FileContentResult;
 
       if (cancelled) return;
@@ -104,7 +110,7 @@ export function CodeMirrorDiffView({
     });
 
     return () => { cancelled = true; };
-  }, [filePath, isBinary, revisionOverride]);
+  }, [filePath, isBinary, revisionOverride, projectId]);
 
   // BLOCK-28 — hunk 控件信息（git hunk newStart 对齐 modified doc 行号）
   const totalLines = useMemo(

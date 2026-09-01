@@ -2880,7 +2880,7 @@
       "id": "BLOCK-32-PROJECT-SCOPED-REVIEW",
       "path": "docs/block-32-project-scoped-review-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-32-project-scoped-review",
       "entrypoint": "docs/README.md",
@@ -2891,15 +2891,15 @@
         "git-adapter",
         "ipc",
         "G0",
-        "active",
-        "phase=P0-LAUNCH"
+        "completed",
+        "phase=P0-P3-COMPLETED"
       ],
-      "notes": "2026-09-01 用户指出「不同项目审阅中的变化也应该是隔离开的」并裁决立项全套做 + 非 git 项目诚实空态。问题：working-tree-review.js 全部 20 个 git:* IPC handler 调无参 resolveGitAdapter()（固定 app 仓库候选），审阅/改动卡片/CodeMirror inline diff 全消费同一绑定——任何项目看到的都是 desktop 应用仓库的改动/历史。方案：P1 resolveGitAdapter(projectId) 从本地 DB 取 project.workspace_path 校验 .git（非 git 抛新错误码 project_workspace_not_git），20 个 handler args 加 projectId?: string（additive，未传维持旧行为渐进兼容）；P2 preload/electron.d.ts/desktopBridge workingTreeReview 全方法加 projectId，useWorkingTreeReview/AgentChangesCard/CodeMirror 链路透传（路由 /project/:id 取当前项目），ReviewMode 渲染非 git 诚实空态；P3 实机跨项目隔离验证 + UI-264。非范围：git init 引导、写操作语义变化、BLOCK-31 会话归属逻辑、0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-09-01 用户指出「不同项目审阅中的变化也应该是隔离开的」并裁决立项全套做 + 非 git 项目诚实空态。问题：working-tree-review.js 全部 20 个 git:* IPC handler 调无参 resolveGitAdapter()（固定 app 仓库候选），审阅/改动卡片/CodeMirror inline diff 全消费同一绑定——任何项目看到的都是 desktop 应用仓库的改动/历史。收口：P1 resolveGitAdapter(projectId) async 化，项目 workspace 经后端 HTTP（getBackendPort('r') + /api/data/projects，30s TTL 缓存）解析——主进程禁直连 better-sqlite3（ABI 123 vs 137 崩溃，首版即复现）；非 git 抛 project_workspace_not_git；20 个 handler args.projectId? additive。P2 前端 projectId 统一经 useParams（/project/:projectId）零透传：useWorkingTreeReview/AgentChangesCard/CodeMirrorDiffView/useCodeMirrorEditor/ReviewMode 子组件；ReviewMode 非 git 诚实空态 rvw-not-git；/review 独立路由维持应用仓库旧行为（诚实边界）。P3 实机 verified：tinkspace=ThinkSpace 仓库（115 文件 +770 −9877 / master 提交）vs desktop=应用仓库互不串；非 git 空态过验；证据 acceptance/ui-264/（4 截图 + evidence.json）。门禁：tsc 0 / 定向 vitest 67/67 / docs:check 172 / ui:audit:check / docs:reconcile 0。dev 启动需 BIOF3_ELECTRON_USER_DATA_DIR + BIOF3_LOCAL_DATA_DIR 指向 .biof3-dev-user-data。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-01",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH"
+      "phase": "P0-P3-COMPLETED"
     }
   ],
-  "lastUpdated": "2026-09-01 (BLOCK-32 P0 launched)",
+  "lastUpdated": "2026-09-01 (BLOCK-32 completed)",
   "documentCount": 172
 }

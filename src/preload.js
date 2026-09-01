@@ -352,7 +352,8 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
   // BLOCK-20 — per-hunk reject via applyInverseHunk: 前端组装正向 unified diff patch,
   // 主进程内部 invert + apply 回退 working tree；reject 清单写入与 BLOCK-16 schema 对齐。
   workingTreeReview: {
-    status: () => ipcRenderer.invoke('git:working-tree-status'),
+    // BLOCK-32 — 全方法 params 可携带 projectId（项目级审阅隔离，additive）
+    status: (params) => ipcRenderer.invoke('git:working-tree-status', params || {}),
     diff: (params) => ipcRenderer.invoke('git:working-tree-diff', params || {}),
     fileContent: (params) => ipcRenderer.invoke('git:working-tree-file-content', params || {}),
     applyHunk: (params) => ipcRenderer.invoke('git:hunk-apply', params || {}),
@@ -384,7 +385,7 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     tagList: (params) => ipcRenderer.invoke('git:tag-list', params || {}),
     // BLOCK-29.2 — git 工具二期（前端确认后调用）
     discardFile: (params) => ipcRenderer.invoke('git:discard-file', params || {}),
-    undoLastCommit: () => ipcRenderer.invoke('git:undo-last-commit'),
+    undoLastCommit: (params) => ipcRenderer.invoke('git:undo-last-commit', params || {}),
   },
 
 });

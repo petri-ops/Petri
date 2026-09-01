@@ -1,7 +1,7 @@
 # BLOCK-32-PROJECT-SCOPED-REVIEW — 项目级审阅隔离 Plan
 
 - **Plan ID**: `BLOCK-32-PROJECT-SCOPED-REVIEW`（2026-09-01；BLOCK-31 P4 收口后用户指出「审阅中也是看到所有的吗？不同项目审阅中的变化也应该是隔离开的吧」，AskUserQuestion 裁决「立项，全套做」+ 非 git 项目「诚实空态」启动）
-- **状态**: `active`（P0 登记 → P1 后端项目仓库解析 → P2 前端契约与空态 → P3 实机收口）
+- **状态**: `completed`（P0 登记 → P1 后端 → P2 前端 → P3 实机收口，2026-09-01；UI-264 verified）
 - **truthDomain**: `block-32-project-scoped-review`
 - **G0 纪律**: G0 开发期常态 · 不外推 packaged/Provider/GA.
 
@@ -38,5 +38,15 @@
 - 前端：`tsc --noEmit` 0；ReviewMode + AgentChangesCard + useWorkingTreeReview 相关定向 vitest
 - 治理：`docs:check` / `ui:audit:check` / `docs:reconcile`
 - 实机（P3）：dev Electron——tinkspace 审阅显示 ThinkSpace 仓库改动与历史、desktop 审阅显示应用仓库，互相隔离；非 git 项目空态；截图 `acceptance/ui-264/` + evidence.json
+
+## 6. 实现进展与收口（P1–P3，2026-09-01 完成）
+
+**P1 后端**：`resolveGitAdapter(projectId)` async 化——项目 workspace **经后端 HTTP 解析**（`getBackendPort('r')` + `/api/data/projects`，30s TTL 缓存）。**关键实现修正**：首版直连 `db.getProject` 在主进程崩溃（better-sqlite3 ABI：Electron Node=123 vs npm 编译目标=137），主进程禁直连 DB 是硬约束，HTTP 解析为刻意设计。非 git 抛 `project_workspace_not_git`、项目不存在抛 `project_not_found`；20 个 handler `args.projectId?` additive + `await`。
+
+**P2 前端**：projectId 统一经 `useParams`（`/project/:projectId`）解析，零 props 透传——`useWorkingTreeReview`（12 个 bridge 调用全加 projectId；refresh 改稳定引用；projectId 切换清态重取；新增 `workspaceNotGit`）、`AgentChangesCard`、`CodeMirrorDiffView`、`useCodeMirrorEditor`（accept/reject/revertFile）、ReviewMode 三子组件；ReviewMode 非 git 诚实空态（`rvw-not-git`）。`/review` 独立路由无项目上下文 → 维持应用仓库旧行为（诚实边界，登记）。
+
+**P3 实机收口（verified）**：S1 IPC 层 tinkspace→ThinkSpace / desktop→应用仓库互不串；S2 tinkspace 审阅 115 文件 +770 −9877 全为 ThinkSpace 路径、历史 = ThinkSpace master 提交；S3 desktop 审阅 = 应用仓库 working tree；S4 非 git 探针项目渲染诚实空态（验收后已删）。证据 `acceptance/ui-264/`（4 截图 + evidence.json）。门禁：tsc 0 / 定向 vitest 67/67 / node --check / docs:check 172 / ui:audit:check / docs:reconcile 0。
+
+**dev 启动注意**：需 `BIOF3_ELECTRON_USER_DATA_DIR=$PWD/.biof3-dev-user-data BIOF3_LOCAL_DATA_DIR=$PWD/.biof3-dev-user-data/data`，否则 userData 落到 `~/Documents/BioF3-Local` 旧库（env-coordinator `setupDesktopEnv` 语义）。
 
 G0 开发期常态 · 不外推 packaged / Provider / GA.

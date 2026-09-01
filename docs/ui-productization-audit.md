@@ -2137,6 +2137,18 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-264: BLOCK-32 — 项目级审阅隔离（审阅/改动卡片按项目工作区仓库解析） (2026-09-01 verified)
+
+**用户反馈**（BLOCK-31 收口后）：「审阅中也是看到所有的吗？不同项目审阅中的变化也应该是隔离开的吧」→ 调查确认：`working-tree-review.js` 全部 20 个 `git:*` IPC handler 调无参 `resolveGitAdapter()`（固定候选 `app.getAppPath()`），任何项目看到的都是 desktop 应用仓库的改动/历史；AskUserQuestion 裁决「立项全套做」+ 非 git 项目「诚实空态」。
+
+**改动**（0 新增 IPC 通道 / 0 新依赖）：① 后端 `resolveGitAdapter(projectId)`——传 projectId 经后端 HTTP（`getBackendPort('r')` + `/api/data/projects`，30s TTL 缓存）解析 `project.workspace_path` 并校验 `.git`（非 git 抛新错误码 `project_workspace_not_git`，项目不存在抛 `project_not_found`）；20 个 handler `args.projectId?` additive（未传维持应用仓库旧行为）。**主进程不直连 better-sqlite3**（Electron ABI 123 vs npm 编译目标 137 会崩，首次实现即复现）——经后端 HTTP 是刻意设计。② 前端 projectId 统一经 `useParams`（`/project/:projectId` 路由）解析，零 props 透传：`useWorkingTreeReview`（全部 12 个 bridge 调用 + projectId 切换清态重取 + `workspaceNotGit` 状态）、`AgentChangesCard`、`CodeMirrorDiffView`、`useCodeMirrorEditor`（accept/reject/revertFile IPC）、ReviewMode 三个子组件（commitFileContent/commitDiff/UntrackedFilePreview）。③ ReviewMode 渲染非 git 诚实空态（`rvw-not-git`：「当前项目工作区不是 git 仓库」），不回退显示应用仓库。`/review` 独立路由无项目上下文 → 维持应用仓库旧行为（诚实边界）。
+
+**实机 verified**（dev Electron + CDP）：S1 IPC 层 tinkspace→ThinkSpace 仓库文件 / desktop→应用仓库文件互不串；S2 tinkspace 审阅改动 115 文件 +770 −9877 全为 ThinkSpace 路径、历史显示 ThinkSpace master 提交（desktop 提交不可见）；S3 desktop 审阅 10 文件 = 应用仓库 working tree；S4 非 git 项目（一次性探针，验收后已删）渲染诚实空态。证据 `acceptance/ui-264/`（4 截图 + evidence.json）。**dev 启动注意**：需 `BIOF3_ELECTRON_USER_DATA_DIR` + `BIOF3_LOCAL_DATA_DIR` 指向 `.biof3-dev-user-data`，否则落到 `~/Documents/BioF3-Local` 旧库。
+
+**门禁**：tsc 0 / ReviewMode + AgentChangesCard + SimpleChat + CodeMirror 定向 vitest 67/67 / node --check / docs:check 172 / ui:audit:check / docs:reconcile 0。
+
+**状态**: verified（dev Electron 边界内）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-263: BLOCK-31 P3 — 工作区改动卡片会话作用域（本会话 / 全部 切换） (2026-09-01 verified)
 
 **用户裁决**（BLOCK-31-CONV-SCOPED-CHANGES「要做会话隔离 权威清单」）：工作区改动卡片此前为项目级 git working tree 全量视图（UI-252 基线），所有会话共享同一份；本条交付卡片侧的**会话隔离视图**。

@@ -13,6 +13,7 @@
 // ============================================================
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useParams } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { getBridge } from '@/lib/desktopBridge';
 import { biof3Events, dispatchBioF3Event, subscribeBioF3Event } from '@/lib/events';
@@ -53,6 +54,11 @@ export function AgentChangesCard({
   const [scopePreference, setScopePreference] = useState<'conversation' | 'all'>('conversation');
   // UI-252 — 行 diff 数据保留供悬停预览复用（与审阅详情同源）
   const [diffFiles, setDiffFiles] = useState<Map<string, DiffFile>>(() => new Map());
+
+  // BLOCK-32 — 项目级审阅隔离：projectId 取自当前路由（/project/:projectId）
+  const routeParams = useParams<{ projectId?: string }>();
+  const projectIdRef = useRef<string | null>(null);
+  projectIdRef.current = routeParams.projectId ?? null;
 
   // BLOCK-31 P2 — 当前会话的改动文件索引（live 记录 + 权威清单对账）
   const conversationChanges = useSyncExternalStore(
@@ -105,7 +111,9 @@ export function AgentChangesCard({
     const bridge = getBridge('workingTreeReview');
     if (!bridge) return;
     try {
-      const [statusRes, diffRes] = await Promise.all([bridge.status(), bridge.diff({})]);
+      // BLOCK-32 — 项目级审阅隔离：改动卡片消费当前项目工作区仓库
+      const pid = projectIdRef.current ?? undefined;
+      const [statusRes, diffRes] = await Promise.all([bridge.status({ projectId: pid }), bridge.diff({ projectId: pid })]);
       if (!statusRes.ok || !statusRes.data) return;
       const byPath = new Map<string, DiffFile>();
       for (const f of (diffRes.ok && diffRes.data ? diffRes.data.files : []) as DiffFile[]) {

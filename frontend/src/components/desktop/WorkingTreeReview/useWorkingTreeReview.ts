@@ -8,6 +8,7 @@
 // ============================================================
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import { getBridge } from '@/lib/desktopBridge';
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 
@@ -162,9 +163,18 @@ export interface UseWorkingTreeReviewReturn {
   discardFile: (path: string) => Promise<boolean>;
   /** BLOCK-29.2 — 撤销最近一次提交（mixed reset，内容回工作区）。 */
   undoLastCommit: () => Promise<boolean>;
+  /**
+   * BLOCK-32 — 当前项目工作区不是 git 仓库（后端 `project_workspace_not_git`）。
+   * true 时审阅应渲染诚实空态，不显示任何仓库数据。
+   */
+  workspaceNotGit: boolean;
 }
 
 export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}): UseWorkingTreeReviewReturn {
+  // BLOCK-32 P2 — 项目级审阅隔离：projectId 取自当前路由（/project/:projectId）。
+  // /review 独立路由无项目上下文 → null → 后端维持应用仓库旧行为（诚实边界）。
+  const routeParams = useParams<{ projectId?: string }>();
+  const projectId = routeParams.projectId ?? null;
   const [open, setOpenState] = useState(false);
   const [taskId, setTaskId] = useState<string | null>(null);
   const [status, setStatus] = useState<WorkingTreeStatus | null>(null);
@@ -174,8 +184,13 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
+  const [workspaceNotGit, setWorkspaceNotGit] = useState(false);
   const taskIdRef = useRef<string | null>(null);
   taskIdRef.current = taskId;
+  const projectIdRef = useRef<string | null>(null);
+  projectIdRef.current = projectId;
+  const selectedFilePathRef = useRef<string | null>(null);
+  selectedFilePathRef.current = selectedFilePath;
 
   const setOpen = useCallback((next: boolean) => {
     setOpenState(next);
@@ -190,15 +205,19 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     setLoading(true);
     setError(null);
     try {
-      const [statusRes, diffRes] = await Promise.all([bridge.status(), bridge.diff({})]);
+      const pid = projectIdRef.current ?? undefined;
+      const [statusRes, diffRes] = await Promise.all([bridge.status({ projectId: pid }), bridge.diff({ projectId: pid })]);
       if (statusRes.ok && statusRes.data) {
         setStatus(statusRes.data);
+        setWorkspaceNotGit(false);
       } else {
+        // BLOCK-32 — 非 git 工作区诚实标记（审阅渲染空态），不回退显示应用仓库
+        setWorkspaceNotGit(statusRes.error === 'project_workspace_not_git');
         setStatus({ files: [], totalFiles: 0, hasUntracked: false, hasConflict: false });
       }
       if (diffRes.ok && diffRes.data) {
         setDiff(diffRes.data);
-        if (diffRes.data.files.length > 0 && !selectedFilePath) {
+        if (diffRes.data.files.length > 0 && !selectedFilePathRef.current) {
           const first = diffRes.data.files[0];
           setSelectedFilePath(first.path);
         }
@@ -210,7 +229,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     } finally {
       setLoading(false);
     }
-  }, [selectedFilePath]);
+  }, []);
 
   const decideHunk = useCallback(async (file: string, hunkIndex: number, action: 'accept' | 'reject', feedback?: string) => {
     const bridge = getBridge('workingTreeReview');
@@ -226,6 +245,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
         hunk: hunk || undefined,
         feedback: feedback || undefined,
         taskId: taskIdRef.current || undefined,
+        projectId: projectIdRef.current ?? undefined,
       });
       if (!res.ok) {
         setDecisions((prev) => {
@@ -271,6 +291,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
         hunk: hunk || undefined,
         feedback: feedback || undefined,
         taskId: taskIdRef.current || undefined,
+        projectId: projectIdRef.current ?? undefined,
       });
       if (!res.ok) {
         setDecisions((prev) => {
@@ -296,7 +317,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     if (!status || status.files.length === 0) return;
     setLoading(true);
     try {
-      const res = await bridge.revert({ paths: status.files.map((f) => f.path) });
+      const res = await bridge.revert({ paths: status.files.map((f) => f.path), projectId: projectIdRef.current ?? undefined });
       if (!res.ok) {
         setError(res.message || res.error || 'revert failed');
       } else {
@@ -317,7 +338,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     setLoading(true);
     setError(null);
     try {
-      const res = await bridge.commitReview({ decisions, message });
+      const res = await bridge.commitReview({ decisions, message, projectId: projectIdRef.current ?? undefined });
       if (!res.ok) {
         throw new Error(res.message || res.error || 'commit failed');
       }
@@ -333,6 +354,22 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
       setLoading(false);
     }
   }, [decisions, refresh]);
+
+  // BLOCK-32 — 项目切换（路由 projectId 变化）时清空上一项目的审阅状态并重取。
+  // refresh 已稳定（无依赖），本 effect 只在 projectId 变化时触发。
+  useEffect(() => {
+    setStatus(null);
+    setDiff(null);
+    setSelectedFilePath(null);
+    setDecisions({});
+    setWorkspaceNotGit(false);
+    setCommits(null);
+    setBranches(null);
+    setStashes(null);
+    setTags(null);
+    setHistoryFileFilter(null);
+    void refresh();
+  }, [projectId, refresh]);
 
   // 订阅 agent:task-done（renderer 侧主路径）—— SSE done 派发的 biof3:agent-task-done
   // 会自动弹出浮层。preload 的 bridge.onTaskDone（main→renderer webContents.send）
@@ -401,7 +438,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     const bridge = getBridge('workingTreeReview');
     if (!bridge) return;
     try {
-      const res = await bridge.branchList({});
+      const res = await bridge.branchList({ projectId: projectIdRef.current ?? undefined });
       setBranches(res.ok && res.data ? res.data.branches ?? [] : []);
     } catch {
       setBranches([]);
@@ -415,13 +452,13 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     const bridge = getBridge('workingTreeReview');
     if (!bridge) return;
     try {
-      const r = await bridge.stashList({});
+      const r = await bridge.stashList({ projectId: projectIdRef.current ?? undefined });
       setStashes(r.ok && r.data ? r.data.stashes ?? [] : []);
     } catch {
       setStashes([]);
     }
     try {
-      const r2 = await bridge.tagList({});
+      const r2 = await bridge.tagList({ projectId: projectIdRef.current ?? undefined });
       setTags(r2.ok && r2.data ? r2.data.tags ?? [] : []);
     } catch {
       setTags([]);
@@ -436,7 +473,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     const append = opts.append === true;
     setCommitsLoading(true);
     try {
-      const res = await bridge.commitLog({ limit: 50, skip, file, ref: activeBranchRef.current });
+      const res = await bridge.commitLog({ limit: 50, skip, file, ref: activeBranchRef.current, projectId: projectIdRef.current ?? undefined });
       const list: CommitInfo[] = res.ok && res.data ? res.data.commits ?? [] : [];
       setCommits((prev) => (append && prev ? [...prev, ...list] : list));
       setHistoryFileFilter(file ?? null);
@@ -463,7 +500,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     const bridge = getBridge('workingTreeReview');
     if (!bridge) return false;
     try {
-      const res = await bridge.discardFile({ path });
+      const res = await bridge.discardFile({ path, projectId: projectIdRef.current ?? undefined });
       if (!res.ok) {
         setError(res.message || res.error || '放弃更改失败。');
         return false;
@@ -481,7 +518,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     const bridge = getBridge('workingTreeReview');
     if (!bridge) return false;
     try {
-      const res = await bridge.undoLastCommit();
+      const res = await bridge.undoLastCommit({ projectId: projectIdRef.current ?? undefined });
       if (!res.ok) {
         setError(res.message || res.error || '撤销提交失败。');
         return false;
@@ -536,5 +573,6 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     tags,
     discardFile,
     undoLastCommit,
+    workspaceNotGit,
   };
 }

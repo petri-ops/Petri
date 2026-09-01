@@ -1,0 +1,54 @@
+{
+  "ui": "UI-264",
+  "workPackage": "BLOCK-32-PROJECT-SCOPED-REVIEW",
+  "phase": "P3 实机收口",
+  "capturedAt": "2026-09-01T05:20:00Z",
+  "environment": "dev Electron (CDP 9222) + biof3-server :52397（BIOF3_ELECTRON_USER_DATA_DIR/BIOF3_LOCAL_DATA_DIR 指向 .biof3-dev-user-data）",
+  "projects": {
+    "tinkspace": "p_mthvakv3_fffw → /Users/zhangdiandian/Documents/2.OpenWork/ThinkSpace（独立 git 仓库）",
+    "desktop": "p_mt15b0aw_f0xa → 应用仓库本体"
+  },
+  "scenarios": [
+    {
+      "id": "S1-IPC层项目隔离",
+      "steps": "页面上下文直调 workingTreeReview.status({projectId}) 对比两项目",
+      "observed": "tinkspace → ThinkSpace 仓库文件（.gitignore/ARCHITECTURE.md/backend/...）；desktop → 应用仓库文件（本工作包改动 + db 运行时文件）。互不串。",
+      "result": "PASS"
+    },
+    {
+      "id": "S2-tinkspace审阅UI",
+      "steps": "tinkspace 项目打开右侧审阅 dock，改动 + 历史分区",
+      "observed": "改动分区 115 个文件 +770 −9877，全部为 ThinkSpace 相对路径；历史分区显示 ThinkSpace 仓库 master 分支（5 条提交，Knowledge Universe 作者），desktop 仓库提交（c3baf6b 等）不可见",
+      "result": "PASS"
+    },
+    {
+      "id": "S3-desktop审阅UI",
+      "steps": "desktop 项目打开审阅 dock 改动分区",
+      "observed": "10 个文件 +209 −76 = 应用仓库 working tree（BLOCK-32 改动 + biof3.db-shm/wal），项目隔离双向成立",
+      "result": "PASS"
+    },
+    {
+      "id": "S4-非git项目诚实空态",
+      "steps": "创建一次性项目 block32-nogit-probe（workspace=/tmp/block32-nogit，无 .git），打开审阅",
+      "observed": "渲染 data-testid=rvw-not-git 诚实空态：「当前项目工作区不是 git 仓库」，不显示任何仓库数据（无回退到应用仓库）。验收后探针项目与目录已删除。",
+      "result": "PASS"
+    }
+  ],
+  "implementationNotes": [
+    "主进程不能直连 better-sqlite3（Electron ABI 123 vs npm 编译目标 137，首次实现即崩溃）——项目 workspace 经后端 HTTP（getBackendPort('r') + /api/data/projects）解析，30s TTL 缓存",
+    "前端 projectId 统一经 react-router useParams（/project/:projectId 路由）解析，无 props 层层透传；/review 独立路由无项目上下文 → null → 后端维持应用仓库旧行为（诚实边界，登记于 plan）",
+    "dev Electron 启动需 BIOF3_ELECTRON_USER_DATA_DIR + BIOF3_LOCAL_DATA_DIR 指向 .biof3-dev-user-data，否则落到 ~/Documents/BioF3-Local 旧库（本次实机踩坑，env-coordinator.js setupDesktopEnv 语义）"
+  ],
+  "screenshots": [
+    "tinkspace-review-thinkspace-repo.png（S2 改动：ThinkSpace 仓库）",
+    "tinkspace-review-history.png（S2 历史：ThinkSpace master 提交）",
+    "desktop-review-app-repo.png（S3：应用仓库改动）",
+    "nogit-empty-state.png（S4 诚实空态）"
+  ],
+  "gates": {
+    "frontend": "tsc 0 / ReviewMode + AgentChangesCard + SimpleChat + CodeMirror 定向 vitest 67/67",
+    "syntax": "node --check working-tree-review.js 通过",
+    "governance": "docs:check 172 / ui:audit:check / docs:reconcile 0（收口提交时复跑）"
+  },
+  "g0": "G0 开发期常态 · 不外推 packaged / Provider / GA."
+}

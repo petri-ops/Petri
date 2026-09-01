@@ -10,7 +10,7 @@
 // ============================================================
 
 import { Fragment, useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { getBridge } from '@/lib/desktopBridge';
 import { CodeMirrorEditor } from '@/components/editor';
@@ -75,6 +75,8 @@ function CommitDiffFileView({ hash, file, fromRef = null, toRef = null }: { hash
   const [blameData, setBlameData] = useState<BlameData | null>(null);
   const [blameLoading, setBlameLoading] = useState(false);
   const [blameError, setBlameError] = useState<string | null>(null);
+  // BLOCK-32 — 项目级审阅隔离
+  const { projectId } = useParams<{ projectId?: string }>();
 
   useEffect(() => {
     if (file.binary) return;
@@ -87,7 +89,7 @@ function CommitDiffFileView({ hash, file, fromRef = null, toRef = null }: { hash
     setViewMode('diff');
     setBlameData(null);
     setBlameError(null);
-    bridge.commitFileContent(fromRef && toRef ? { path: file.path, fromRef, toRef } : { hash, path: file.path })
+    bridge.commitFileContent(fromRef && toRef ? { path: file.path, fromRef, toRef, projectId } : { hash, path: file.path, projectId })
       .then((res) => {
         if (cancelled) return;
         if (res.ok && res.data) {
@@ -226,6 +228,8 @@ function ExpandedCommitDetail({ commit, onSummary }: { commit: CommitInfo; onSum
   const [filePath, setFilePath] = useState<string | null>(null);
   // BLOCK-29.7 UI-244 — 提交文件树：左 mini 树 + 右 diff，结构可见
   const [treeCollapsed, setTreeCollapsed] = useState<Record<string, boolean>>({});
+  // BLOCK-32 — 项目级审阅隔离
+  const { projectId } = useParams<{ projectId?: string }>();
   const commitGroups = useMemo(() => groupFilesByDirectory(diff?.files ?? []), [diff]);
   useEffect(() => {
     const bridge = getBridge('workingTreeReview');
@@ -235,7 +239,7 @@ function ExpandedCommitDetail({ commit, onSummary }: { commit: CommitInfo; onSum
     setError(null);
     setDiff(null);
     setFilePath(null);
-    bridge.commitDiff({ hash: commit.sha })
+    bridge.commitDiff({ hash: commit.sha, projectId })
       .then((res) => {
         if (cancelled) return;
         if (res.ok && res.data) {
@@ -353,13 +357,15 @@ function formatCommitDate(iso: string): string {
 function UntrackedFilePreview({ path }: { path: string }) {
   const [content, setContent] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  // BLOCK-32 — 项目级审阅隔离
+  const { projectId } = useParams<{ projectId?: string }>();
   useEffect(() => {
     const bridge = getBridge('workingTreeReview');
     if (!bridge) return;
     let cancelled = false;
     setContent(null);
     setFailed(false);
-    bridge.fileContent({ path, ref: 'WORKTREE' })
+    bridge.fileContent({ path, ref: 'WORKTREE', projectId })
       .then((res) => {
         if (cancelled) return;
         if (res.ok && res.data) setContent(res.data.content);
@@ -635,6 +641,24 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
       setCommitError(e instanceof Error ? e.message : String(e));
     }
   };
+
+  // BLOCK-32 — 非 git 工作区诚实空态：不显示任何仓库数据，只说明原因。
+  if (review.workspaceNotGit) {
+    return (
+      <div
+        className={`rvw-container${isDock ? ' rvw-container--dock' : ''}`}
+        role="region"
+        aria-label="审阅面板"
+        data-testid="rvw-not-git"
+      >
+        <div className="wt-empty">
+          <Icon name="git-branch" size={18} />
+          <p>当前项目工作区不是 git 仓库</p>
+          <p>审阅基于项目工作区的 git 版本历史。该工作区尚未初始化 git 仓库，暂无可审阅的改动与历史。</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`rvw-container${isDock ? ' rvw-container--dock' : ''}`} role="region" aria-label="审阅面板">
