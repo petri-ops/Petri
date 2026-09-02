@@ -4,7 +4,11 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-09-02（BLOCK-36 立项：会话区工具执行记录独立小窗口 ToolActivityDock，P1-IMPL 进行中。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+最后更新：2026-09-02（BLOCK-37 立项：模型 I/O 信息流全量捕获 + 本地持久化 + 会话级查看器，P0-LAUNCH；并补记 BLOCK-36 收口（plan/DOC-REGISTRY 此前已 completed，台账漏发）。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+| 2026-09-02 | **BLOCK-37-LLM-IO-TRANSCRIPT P0 立项登记**：用户问「发送到模型端口的消息是什么格式？请求与返回的完整消息能否做成信息流保存？」→ 调查确认：请求为 OpenAI 兼容 chat-completions（messages 四角色 + tools schema，每轮全量重发历史），响应为 SSE delta 流聚合；**唯一收口点 ModelGateway 两分支**（流式 provider.chatStream+onEvent / 非流式 provider.chat），覆盖 DeepSeek/DashScope/Anthropic 全 provider 与 agent 任务/普通对话全调用方。用户裁决「按所有模型调用都存」。**方案**（P1–P4 串行）：P1 `io-transcript.js` sink（按会话 JSONL 追加，记录 messages 全量+响应聚合全文含 reasoning/tool_calls/usage，8MB 截断纪律先丢帧再丢中段并诚实标记，fire-and-forget 不阻塞模型主链路）+ gateway 埋点；P2 只读端点（索引+单条，conversationId 路径安全校验）；P3 会话级「模型 I/O」查看器（icon 入口按需打开、索引+角色折叠树详情，只读，UI-274）；P4 dev Electron 实机收口（agent 任务+普通对话双链对照）。非范围：脱敏/历史回填/帧级回放 UI/SQLite 新表/0 新依赖。plan：`docs/block-37-llm-io-transcript-plan.md`；DOC-REGISTRY 177 documents。**当前 active**：BLOCK-37。G0 开发期常态 · 不外推 packaged/Provider/GA. | BLOCK-37-LLM-IO-TRANSCRIPT / P0-LAUNCH |
+
+| 2026-09-02 | **BLOCK-36-TOOL-ACTIVITY-DOCK 收口补记（plan/DOC-REGISTRY 均已完成，本台账此前漏发收口条目）**：P1–P3 全部完成——ToolActivityDock 统一浮窗（吸收 BackgroundProcessDock：摘要条点击定位 focusRequest / running 自动弹出 / 完成后保留 / 折叠 chip / 关闭后 re-pop / 历史 tab 恢复 / 后台进程实时日志 tab），SimpleChat 摘要条化 + 挂载点替换 + BackgroundProcessDock 三件套移除；P3 实机 7 场景全过，证据 `acceptance/ui-267/`（6 截图 + evidence.json S1–S7）；实机修复 stale activeTab 空标题（回归 10/10）。后继 UI-271/272/273 按用户反馈将执行记录改回内联两级折叠（摘要条 + 思考/执行手风琴 + 逐轮 diff），ToolActivityDock 保留承载浮窗入口语义。UI-267 verified。**当前 active**：BLOCK-37。G0 开发期常态 · 不外推 packaged/Provider/GA. | BLOCK-36-TOOL-ACTIVITY-DOCK / COMPLETED |
 
 | 2026-09-02 | **BLOCK-36-TOOL-ACTIVITY-DOCK 立项（active）**：用户需求「优化会话区，把工具执行记录独立成小窗口」，三项设计裁决（用户确认）：①内联收敛为一行摘要条（点击打开浮窗定位）；②BackgroundProcessDock 扩展为会话级统一浮窗 ToolActivityDock（tab 按消息分组含历史恢复 + 后台进程特殊 tab）；③running 自动弹出/完成后保留/关闭后新运行 re-pop/可折叠 chip。改动面：新增 ToolActivityDock.tsx/.module.css、SimpleChat.tsx 摘要条化、删除 BackgroundProcessDock 三件套；持久化链路不变。验收：P2 定向 vitest + tsc；P3 实机存 acceptance/ui-267/。G0 开发期常态 · 不外推 packaged/Provider/GA. | BLOCK-36-TOOL-ACTIVITY-DOCK / P1-IMPL |
 

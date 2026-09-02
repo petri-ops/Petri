@@ -15,6 +15,28 @@
   },
   "documents": [
     {
+      "id": "BLOCK-37-LLM-IO-TRANSCRIPT",
+      "path": "docs/block-37-llm-io-transcript-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-37-llm-io-transcript",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-37",
+        "llm-io",
+        "model-gateway",
+        "transcript",
+        "viewer",
+        "G0",
+        "active"
+      ],
+      "notes": "2026-09-02 立项（用户裁决「所有模型调用都存」）：在 ModelGateway 两个分支（流式 onEvent tee + 非流式）埋点捕获全部 provider（DeepSeek/DashScope/Anthropic）与全部调用方（agent 任务/普通对话）的请求 messages 全量 + 响应聚合全文（含 reasoning/tool_calls/usage），按会话 JSONL 追加落盘（8MB 截断纪律，fire-and-forget 不阻塞主链路），只读端点 + 会话级「模型 I/O」信息流查看器（UI-274）。非范围：脱敏、历史回填、帧级回放 UI、SQLite 新表。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-02",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH"
+    },
+    {
       "id": "BLOCK-36-TOOL-ACTIVITY-DOCK",
       "path": "docs/block-36-tool-activity-dock-plan.md",
       "kind": "work-package",
