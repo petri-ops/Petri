@@ -63,6 +63,7 @@ import {
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
 // UI-268: 「后台进程」浮窗（持久输出独立小窗口）；工具活动记录改为内联手风琴
 import { ToolActivityDock } from './ToolActivityDock';
+import { LlmTranscriptViewer } from './LlmTranscriptViewer';
 import { AgentChangesCard } from './AgentChangesCard';
 import { MessageRail, type MessageRailItem } from './MessageRail';
 import { ChatScrollbar } from './ChatScrollbar';
@@ -817,6 +818,9 @@ export function SimpleChat({
     window.setTimeout(() => setRefreshing(false), 700);
   }, [refreshing]);
 
+  // BLOCK-37 P3 / UI-274: 会话级「模型 I/O」信息流查看器（按需打开，不常驻）
+  const [ioTranscriptOpen, setIoTranscriptOpen] = useState(false);
+
   // Fork: create a new conversation with all messages copied from the current one.
   const handleFork = useCallback(async () => {
     if (!conversationId || forking) return;
@@ -1488,6 +1492,16 @@ export function SimpleChat({
                 >
                   <Icon name="refresh" size={16} className={refreshing ? 'sc-icon-spin' : undefined} />
                 </button>
+                <button
+                  type="button"
+                  className="sc-composer-icon-btn"
+                  title="模型 I/O 信息流（本会话全部模型调用的请求与响应原文，只读）"
+                  aria-label="模型 I/O 信息流"
+                  disabled={!conversationId}
+                  onClick={() => setIoTranscriptOpen(true)}
+                >
+                  <Icon name="cpu" size={16} />
+                </button>
                 <div className="sc-access-picker">
                   <button
                     type="button"
@@ -1622,6 +1636,14 @@ export function SimpleChat({
 
       {/* UI-268: 「后台进程」浮窗（持久输出独立小窗口） */}
       <ToolActivityDock conversationId={conversationId} projectId={projectId} />
+
+      {/* BLOCK-37 P3 / UI-274: 会话级「模型 I/O」信息流查看器（按需打开，Esc/遮罩关闭） */}
+      {ioTranscriptOpen && (
+        <LlmTranscriptViewer
+          conversationId={conversationId}
+          onClose={() => setIoTranscriptOpen(false)}
+        />
+      )}
 
       {/* Image Preview Modal */}
       {previewImage && (

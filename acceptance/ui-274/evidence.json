@@ -1,0 +1,37 @@
+{
+  "workPackage": "BLOCK-37 — 模型 I/O 信息流（P1–P4）",
+  "ui": "UI-274",
+  "date": "2026-09-02",
+  "environment": {
+    "devElectron": "BIOF3_ELECTRON_USER_DATA_DIR=$PWD/.biof3-dev-user-data BIOF3_LOCAL_DATA_DIR=$PWD/.biof3-dev-user-data/data",
+    "backend": ":3001（PID 42162，12:47 重启加载最新代码，含 P1 埋点 + P2 端点）",
+    "vite": ":3000",
+    "cdp": "9222"
+  },
+  "steps": [
+    {
+      "id": "S1",
+      "name": "普通对话一轮 → 落盘 + 索引",
+      "detail": "ThinkSpace 项目新建会话，发送普通消息。落盘 conv_59c5e41c-953.jsonl 2 条记录：① agent_iter（请求 2 messages / finish=stop / content 与 UI 回复逐字一致 / usage 11413 tok / 76 帧 / 未截断 / 50.6KB）；② conversation_title（标题生成调用也被「所有模型调用都存」捕获）。查看器索引渲染 2 行倒序（时间/模型/kind/tokens/体积）。证据 b37-s2-index.png。"
+    },
+    {
+      "id": "S2",
+      "name": "详情展开 + 截断/诚实标记 + 消息折叠树",
+      "detail": "点击 agent_iter 行展开：请求 messages 按角色折叠（system/user role chip + 预览），user 消息点击展开全文与发送内容一致；响应区 finish/usage（入/出 tokens）/帧数/正文渲染正确。Esc 关闭面板（panelGone=true）。证据 b37-s3-detail.png、b37-s4-msg-expanded.png。"
+    },
+    {
+      "id": "S3",
+      "name": "agent 任务多轮迭代捕获",
+      "detail": "新会话发送写文件任务。conv_723b45d0-85c.jsonl 3 条记录：第 1 轮 agent_iter（finish=tool_calls，toolCalls=[workspace_write]，content=「我来创建这个文件。」）；第 2 轮 agent_iter（messages 2→4 增长，finish=stop，content=「创建成功。」）；conversation_title。查看器 3 行倒序，工具调用块渲染 workspace_write arguments（path/content）与落盘文件逐字一致（ThinkSpace/hello-block37.txt，验收后已清理）。证据 b37-s5-agent-detail.png。"
+    },
+    {
+      "id": "S4",
+      "name": "只读端点 + 门禁",
+      "detail": "node --test test/block37-llm-transcript-route.test.mjs 10/10（鉴权/校验/穿越/隔离/空态/轮转/详情命中）；block37-llm-io-transcript.test.mjs 11/11；LlmTranscriptViewer vitest 6/6 + SimpleChat/ToolActivityDock 回归 11/11；tsc 0；docs:check 177；ui:audit:check。"
+    }
+  ],
+  "notes": [
+    "发送按钮在首个会话回复完成后保持 disabled（reload 后依旧）；新会话不受影响，agent 任务正常收尾。疑似既有会话 streaming 粘滞问题，与 BLOCK-37 无关，未阻塞验收。",
+    "routes-ai-agent-subdomains.test.cjs 的 SQLITE_ERROR 为既有环境性失败（HEAD 同样失败），与本工作包无关。"
+  ]
+}

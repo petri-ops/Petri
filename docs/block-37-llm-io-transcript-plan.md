@@ -1,7 +1,8 @@
 # BLOCK-37 — 模型 I/O 信息流（全量捕获 + 本地持久化 + 会话级查看器）
 
-> status: active · truthDomain: `block-37-llm-io-transcript` · registered: 2026-09-02
+> status: completed · truthDomain: `block-37-llm-io-transcript` · registered: 2026-09-02
 > owner: main agent · branch: main（单工作包串行，前置 BLOCK-36 已 completed）
+> 收口 2026-09-02：P1–P4 全部完成，UI-274 verified，证据 `acceptance/ui-274/`（4 截图 + evidence.json）。
 
 ## 1. 背景（用户需求 + 已调查事实）
 

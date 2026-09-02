@@ -2137,6 +2137,18 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-274: 会话级「模型 I/O」信息流查看器（BLOCK-37 P1–P4） (2026-09-02 verified)
+
+**用户反馈**：「我们每次和模型交互的时候 都会打包整个消息发送到 模型端口那里 那发送的消息是什么格式呢？ 这份消息以及模型提供商返回的完整消息能否做成信息流保存下来？？？」——用户裁决「按所有模型调用都存的方案立项」（BLOCK-37）。
+
+**改动**（0 新依赖 / 严格只读）：① P1 落盘：[io-transcript.js](core/shared-backend/llm-providers/io-transcript.js) sink 按会话 JSONL 追加（`<BIOF3_LOCAL_DATA_DIR>/llm-transcripts/<conversationId>.jsonl`，无会话归 unattributed），每条记录 = 请求 messages 全量 + 响应聚合（content / reasoning / tool_calls / finish_reason / usage）+ delta 帧样本，8MB 三级截断（丢帧 → 折叠 messages 中段 → 逐条截断，全部诚实标记）+ 64MB 文件轮转，fire-and-forget 绝不阻塞模型主链路；[model-gateway.js](core/shared-backend/llm-providers/model-gateway.js) chat（流式 tee 帧）/ 非流式 / vision / 每次 fallback attempt 独立埋点；② P2 只读端点：[llm-transcripts.js](core/biof3-server/routes/ai-agent/llm-transcripts.js) `GET /api/ai/agent/llm-transcripts`（索引：时间/模型/kind/attempt/耗时/finish/usage/帧数/截断标记/error/sizeBytes，不含正文，含轮转文件，ts 升序）+ `GET /api/ai/agent/llm-transcripts/record`（id/traceId 命中单条完整记录），conversationId 白名单拒路径穿越，文件不存在诚实空态；③ P3 查看器：[LlmTranscriptViewer.tsx](frontend/src/components/copilot/LlmTranscriptViewer.tsx) 输入区工具 icon（cpu）按需打开浮层面板，索引倒序（时间/模型/kind/tokens/体积/错误点/截断 chip），点击展开单条——请求 messages 按角色折叠（role chip + 预览 + 展开全文）+ 响应聚合正文（思考/正文/工具调用/usage/帧数）+ 截断诚实标记，Esc/遮罩关闭，全 `--biof3-*` token 白底细边框风格；[llmTranscripts.ts](frontend/src/components/copilot/llmTranscripts.ts) 只读客户端。
+
+**门禁**：`node --test test/block37-llm-io-transcript.test.mjs` 11/11（P1）/ `node --test test/block37-llm-transcript-route.test.mjs` 10/10（P2：鉴权/校验/穿越/隔离/空态/轮转/详情命中）/ LlmTranscriptViewer vitest 6/6 + SimpleChat + ToolActivityDock 回归 11/11 / tsc 0 / docs:check 177 / ui:audit:check。既有环境性失败：routes-ai-agent-subdomains.test.cjs 的 SQLITE_ERROR 为 db 加载问题，HEAD 同样失败，与本工作包无关。
+
+**实机验证**（dev Electron CDP 9222 + 新后端 :3001，ThinkSpace 工作区）：S1 普通对话一轮 → `conv_59c5e41c-953.jsonl` 2 条记录（agent_iter：请求 2 messages / finish=stop / content 与 UI 回复逐字一致 / usage 11413 tok / 76 帧；conversation_title 标题生成调用也被「所有调用都存」捕获），查看器索引 2 行倒序渲染；S2 详情展开：请求 messages 角色折叠树（user 展开全文与发送一致）+ 响应 finish/usage（入/出）/帧数/正文，Esc 关闭；S3 agent 写文件任务 → 3 条记录：两轮 agent_iter（第 1 轮 finish=tool_calls + workspace_write arguments 与落盘文件逐字一致，第 2 轮 messages 2→4 增长 finish=stop）+ conversation_title，工具调用块渲染正确；S4 探针文件已清理。证据 `acceptance/ui-274/`（4 截图 + evidence.json S1–S4）。
+
+**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-273: 本会话改动按执行步骤（agent 迭代轮次）分组归属 (2026-09-02 verified)
 
 **用户反馈**：「目前 我们有本会话改动的所有文件是集中在一个工作区中的 能否落到每个执行步骤中呢？」——BLOCK-31 P3 的会话改动卡片只列文件清单，改动与执行记录（思考/工具轮次）无法对应；裁决为会话作用域下按 agent 迭代轮次分组展示。
