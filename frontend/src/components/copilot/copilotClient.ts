@@ -330,7 +330,8 @@ export interface StreamChatOptions {
   /** UI-272 — 模型思考段增量（reasoning_content），按迭代聚合由调用方处理 */
   onReasoning?: (delta: string) => void;
   onDone?: () => void;
-  onError?: (err: Error) => void;
+  /** BLOCK-38 P2: info.resumable = 服务中断清扫标记的任务（可续跑），interruptedAt 为中断时间。 */
+  onError?: (err: Error, info?: { resumable?: boolean; interruptedAt?: string | null }) => void;
   /** Agent iteration started (1-indexed) */
   onIter?: (n: number) => void;
   /** Agent runtime status that should be visible while no answer text is available. */
@@ -361,6 +362,79 @@ export interface StreamChatOptions {
   onLoopIteration?: (info: { loopRunId: string; iterationId: string; sequence: number; decision: string; decisionReasonCode: string; publicConclusion: string; status: string; proposedActionKey: string | null; actionKeyHash: string | null }) => void;
   /** Background task created for this run. Used by the UI to request a real cancellation. */
   onTaskStarted?: (taskId: string) => void;
+}
+
+// ===========================================================================
+// BLOCK-38 P2 — Agent 任务中断续跑 API
+// ===========================================================================
+
+/** 中断前最后一次模型调用摘要（GET resume 预览 / POST resume 响应共用形状） */
+export interface ResumeLastModelCall {
+  ts: string | null;
+  kind: string | null;
+  model: string | null;
+  provider: string | null;
+  finishReason: string | null;
+  toolCallNames?: string[];
+  error: string | null;
+  truncated?: boolean;
+}
+
+/** GET /ai/agent/task/:taskId/resume — 只读预览（确认弹层数据源） */
+export async function previewAgentTaskResume(taskId: string): Promise<{
+  resumable: boolean;
+  interruptedAt: string | null;
+  lastModelCall: ResumeLastModelCall | null;
+  progressDigest: string | null;
+}> {
+  await ensureOnlineOrThrow();
+  const resp = await fetch(`${getApiPrefix()}/ai/agent/task/${encodeURIComponent(taskId)}/resume`, {
+    method: 'GET',
+    headers: { ...getAuthHeader() },
+  });
+  let body: Record<string, unknown> = {};
+  try {
+    body = await resp.json();
+  } catch {}
+  if (!resp.ok) {
+    throw new Error(String((body as { error?: string }).error || `HTTP ${resp.status}`));
+  }
+  return {
+    resumable: body.resumable === true,
+    interruptedAt: typeof body.interruptedAt === 'string' ? body.interruptedAt : null,
+    lastModelCall: (body.lastModelCall as ResumeLastModelCall | null) || null,
+    progressDigest: typeof body.progressDigest === 'string' ? body.progressDigest : null,
+  };
+}
+
+/** POST /ai/agent/task/:taskId/resume — 执行续跑（新建关联 task 并进入 agent loop） */
+export async function resumeAgentTask(taskId: string): Promise<{
+  taskId: string;
+  conversationId: string | null;
+  resumeOfTaskId: string;
+  interruptedAt: string | null;
+  lastModelCall: ResumeLastModelCall | null;
+}> {
+  await ensureOnlineOrThrow();
+  const resp = await fetch(`${getApiPrefix()}/ai/agent/task/${encodeURIComponent(taskId)}/resume`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    body: JSON.stringify({}),
+  });
+  let body: Record<string, unknown> = {};
+  try {
+    body = await resp.json();
+  } catch {}
+  if (!resp.ok || !body.taskId) {
+    throw new Error(String((body as { error?: string }).error || `HTTP ${resp.status}`));
+  }
+  return {
+    taskId: String(body.taskId),
+    conversationId: typeof body.conversationId === 'string' ? body.conversationId : null,
+    resumeOfTaskId: String(body.resumeOfTaskId || taskId),
+    interruptedAt: typeof body.interruptedAt === 'string' ? body.interruptedAt : null,
+    lastModelCall: (body.lastModelCall as ResumeLastModelCall | null) || null,
+  };
 }
 
 export async function retryToolSummary(input: {
@@ -671,7 +745,11 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
     kind,
   } = opts;
   if (obj.error) {
-    onError?.(new Error(obj.error));
+    // BLOCK-38 P2: 后端 error 事件携带 resumable/interruptedAt（服务中断清扫标记）
+    onError?.(new Error(obj.error), {
+      resumable: obj.resumable === true,
+      interruptedAt: typeof obj.interruptedAt === 'string' ? obj.interruptedAt : null,
+    });
     return;
   }
   if (obj.event === 'conversation') {

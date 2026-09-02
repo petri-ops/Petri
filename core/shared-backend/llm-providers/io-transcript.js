@@ -237,10 +237,54 @@ function createIoTranscriptSink(options = {}) {
   return { record, dir };
 }
 
+/**
+ * BLOCK-38 P1 — 取证读取：会话信息流末条（中断续跑前的「中断前最后状态」摘要来源）。
+ * 只读；活跃文件为空/不存在时回退最近的轮转留存文件（<id>.<ts>.jsonl 按名字取最新）。
+ * 任何失败返回 null（诚实空态），绝不抛错。
+ */
+function readLastRecord(conversationId, options = {}) {
+  try {
+    const dataDir = String(options.dataDir || '');
+    if (!dataDir) return null;
+    const fsMod = options.fs || fs;
+    const dir = path.join(dataDir, 'llm-transcripts');
+    const stem = safeIdPart(conversationId);
+    const active = path.join(dir, `${stem}.jsonl`);
+
+    let lines = [];
+    try {
+      lines = fsMod.readFileSync(active, 'utf8').split('\n').filter((line) => line.trim());
+    } catch {}
+    if (lines.length === 0) {
+      // 回退轮转留存文件：按文件名取时间戳后缀最大的
+      try {
+        const archived = fsMod
+          .readdirSync(dir)
+          .filter((name) => name.startsWith(`${stem}.`) && name.endsWith('.jsonl'))
+          .sort();
+        for (let i = archived.length - 1; i >= 0 && lines.length === 0; i--) {
+          try {
+            lines = fsMod
+              .readFileSync(path.join(dir, archived[i]), 'utf8')
+              .split('\n')
+              .filter((line) => line.trim());
+          } catch {}
+        }
+      } catch {}
+    }
+    if (lines.length === 0) return null;
+    const parsed = JSON.parse(lines[lines.length - 1]);
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 module.exports = {
   createIoTranscriptSink,
   normalizeResponse,
   applyTruncation,
+  readLastRecord,
   safeIdPart,
   UNATTRIBUTED,
   MAX_RECORD_BYTES_DEFAULT,

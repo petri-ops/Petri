@@ -69,7 +69,13 @@ module.exports = {
       const freshTask = agentTaskStore.getAgentTask(taskId);
       if (isTerminal(freshTask)) {
         if (freshTask.agent_status === 'failed') {
-          sseSend({ event: 'error', error: freshTask.error || 'agent task 失败' });
+          // BLOCK-38 P1: 中断任务（服务重启清扫标记）附带 resumable 标记，前端据此显示「继续执行」
+          sseSend({
+            event: 'error',
+            error: freshTask.error || 'agent task 失败',
+            resumable: Boolean(freshTask.interruptedAt),
+            interruptedAt: freshTask.interruptedAt || null,
+          });
         } else if (freshTask.agent_status === 'cancelled') {
           sseSend({ event: 'agent_cancelled' });
         } else {
@@ -92,7 +98,13 @@ module.exports = {
           if (isTerminal(t)) {
             clearInterval(poll);
             if (t.agent_status === 'failed') {
-              sseSend({ event: 'error', error: t.error || 'agent task 失败' });
+              // BLOCK-38 P1: 轮询路径同样携带 resumable 标记
+              sseSend({
+                event: 'error',
+                error: t.error || 'agent task 失败',
+                resumable: Boolean(t.interruptedAt),
+                interruptedAt: t.interruptedAt || null,
+              });
             } else if (t.agent_status === 'cancelled') {
               sseSend({ event: 'agent_cancelled' });
             } else {

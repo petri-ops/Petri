@@ -54,4 +54,10 @@
 
 P1–P3 完成且门禁全绿 → 提交（UI-275 in_progress）；P4 实机证据齐 → UI-275 verified + 本 plan status completed + DOC-REGISTRY 同步。
 
+## 6. 进度记录
+
+- 2026-09-02 P1 完成：agent-task-store（`interrupted_at` 列 + `sweepInterruptedRunningTasks` 启动清扫 + `getResumableTask`，dbMod 缺省单例 db——测试禁止另开第二连接，会触发 SQLITE_IOERR_SHORT_READ）；io-transcript `readLastRecord`（活跃文件 + 轮转留存回退 + 诚实空态）；resume 路由（GET 只读预览 + POST 续跑）；events.js failed 事件携带 `resumable`/`interruptedAt`。`test/block38-agent-task-resume.test.mjs` 9/9。
+- 2026-09-02 P2 完成：copilotClient onError 透传 + `previewAgentTaskResume`/`resumeAgentTask`；conversationRunStore `resumable`/`interruptedAt`/`resumeOfTaskId` 快照字段 + `resumeInterruptedConversation` action（新 run 携带审计链走既有订阅渲染链路）；ResumePrompt 组件（仅中断任务显示「继续执行」，确认层 = 中断时间 + lastModelCall 摘要 + progressDigest，全 `--biof3-*` token）。ResumePrompt vitest 3/3 + conversationRunStore vitest 32/32 + tsc 0 + docs:check / ui:audit:check（UI-275 in_progress）。test:changed 3 个失败经 stash 前后对比确认为既有失败（agent-provider-boundary db 加载 / test-affected 证据对账 / P6 证据 hash 漂移）。
+- 待办：P4 实机收口（中断 → 续跑 → 完成全链，证据 `acceptance/ui-275/`）。
+
 G0 开发期常态 · 不外推 packaged / Provider / GA。

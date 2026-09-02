@@ -4,6 +4,7 @@ import { biof3Events, dispatchBioF3Event } from '@/lib/events';
 import {
   cancelAgentTask,
   findResumableAgentTask,
+  resumeAgentTask,
   streamChat,
   subscribeAgentTask,
   type ChatMessage,
@@ -98,6 +99,12 @@ export interface ConversationRunSnapshot {
   loop?: ConversationLoopState | null;
   /** UI-272 — 按迭代聚合的模型思考段（reasoning_content），流式累积；done 后随消息展示并经后端 meta 持久化。 */
   reasoningByIteration?: Record<number, string>;
+  /** BLOCK-38 P2 — 服务中断被清扫标记的任务可续跑（SSE error 事件 resumable 标记），UI 据此显示「继续执行」。 */
+  resumable?: boolean;
+  /** BLOCK-38 P2 — 服务中断时间（后端清扫写入 interrupted_at）。 */
+  interruptedAt?: string;
+  /** BLOCK-38 P2 — 续跑已发起后被续跑的原 taskId（审计链展示用）。 */
+  resumeOfTaskId?: string;
 }
 
 interface StartConversationRunOptions {
@@ -115,6 +122,11 @@ interface StartConversationRunOptions {
    * 避免主 run 孤儿化。userContent 退化为占位提示。
    */
   resumeTaskId?: string;
+  /**
+   * BLOCK-38 P2 — 被续跑的原 taskId（审计链）。续跑 run 的快照携带此字段，
+   * 供 UI 展示「续跑自 xxx」；不影响事件流订阅逻辑。
+   */
+  resumeOfTaskId?: string;
 }
 
 const runs = new Map<string, ConversationRunSnapshot>();
@@ -267,10 +279,11 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     pendingApproval: null,
     startedAt,
     taskId: options.resumeTaskId ?? undefined,
+    resumeOfTaskId: options.resumeOfTaskId,
   });
   emit(conversationId);
 
-  const finish = (status: 'done' | 'error', error?: Error) => {
+  const finish = (status: 'done' | 'error', error?: Error, errorInfo?: { resumable?: boolean; interruptedAt?: string | null }) => {
     if (runs.get(conversationId)?.status !== 'running') return;
     const completedAt = Date.now();
     const formattedError = error ? formatErrorForUser(error) : null;
@@ -292,6 +305,9 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       statusMessage: undefined,
       technicalDetails: status === 'error' ? rawStack : undefined,
       errorCode: status === 'error' ? errorCode : undefined,
+      // BLOCK-38 P2 — 仅服务中断（resumable 标记 + 已知 taskId）允许续跑
+      resumable: status === 'error' && errorInfo?.resumable === true && Boolean(current.taskId),
+      interruptedAt: status === 'error' && errorInfo?.interruptedAt ? errorInfo.interruptedAt : undefined,
       processingDurationMs: Math.max(0, completedAt - current.startedAt),
       completedAt,
     }));
@@ -503,7 +519,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       }));
     },
     onDone: () => finish('done'),
-    onError: (error) => finish('error', error),
+    onError: (error, info) => finish('error', error, info),
   };
 
   if (options.resumeTaskId) {
@@ -931,7 +947,8 @@ export async function resumeSubAgentTasks(
 export function resumeConversationRun(
   resumeTaskId: string,
   conversationId: string,
-  projectId?: string
+  projectId?: string,
+  resumeOfTaskId?: string
 ): boolean {
   return startConversationRun({
     conversationId,
@@ -940,7 +957,30 @@ export function resumeConversationRun(
     messages: [],
     context: { page: 'desktop-project', projectId: projectId || '' },
     resumeTaskId,
+    resumeOfTaskId,
   });
+}
+
+/**
+ * BLOCK-38 P2 — 用户点击「继续执行」：对服务中断（resumable）的主 run 调 resume
+ * 端点，新建关联 task（原 task 保持 failed 不可变）并立即订阅新 task 事件流，
+ * 走既有流式渲染链路。返回新 taskId；失败抛错（由 UI 弹层展示）。
+ */
+export async function resumeInterruptedConversation(
+  conversationId: string,
+  projectId?: string
+): Promise<string> {
+  const snapshot = getConversationRunSnapshot(conversationId);
+  if (!snapshot || !snapshot.resumable || !snapshot.taskId) {
+    throw new Error('当前会话没有可续跑的中断任务');
+  }
+  if (isConversationRunning(conversationId)) {
+    throw new Error('任务仍在运行，无需续跑');
+  }
+  const result = await resumeAgentTask(snapshot.taskId);
+  // 续跑已受理：新 run 直接以 resumeOfTaskId 携带审计链（原 taskId 保持 failed 不可变）
+  resumeConversationRun(result.taskId, conversationId, projectId, snapshot.taskId);
+  return result.taskId;
 }
 
 /**

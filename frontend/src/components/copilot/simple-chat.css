@@ -1911,7 +1911,153 @@
 }
 
 .sc-error-details {
+  margin-top: 6px;
+}
+
+/* ===========================================================================
+ * BLOCK-38 P2 / UI-275 — 「继续执行」入口 + 中断恢复确认弹层
+ * =========================================================================== */
+
+.sc-resume-wrap {
+  position: relative;
   margin-top: 8px;
+  display: inline-flex;
+}
+
+.sc-resume-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--biof3-accent-border, rgba(13, 148, 136, 0.4));
+  border-radius: 7px;
+  background: var(--biof3-accent-bg, #f0fdfa);
+  color: var(--biof3-accent, #0d9488);
+  font: inherit;
+  font-size: var(--biof3-font-size-sm);
+  cursor: pointer;
+}
+
+.sc-resume-btn:hover {
+  filter: brightness(0.97);
+}
+
+[data-theme='dark'] .sc-resume-btn {
+  background: rgba(45, 212, 191, 0.1);
+  border-color: rgba(45, 212, 191, 0.3);
+  color: var(--biof3-accent, #2dd4bf);
+}
+
+.sc-resume-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 90;
+  width: 340px;
+  padding: 12px 14px;
+  border: 1px solid var(--biof3-border, #e5e7eb);
+  border-radius: 10px;
+  background: var(--biof3-bg-elevated, #ffffff);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
+  font-size: var(--biof3-font-size-sm);
+}
+
+.sc-resume-popover-title {
+  font-size: var(--biof3-font-size-body-sm);
+  font-weight: 600;
+  color: var(--biof3-text-primary, var(--biof3-text, #111827));
+  margin-bottom: 8px;
+}
+
+.sc-resume-section {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--biof3-border-tertiary, rgba(0, 0, 0, 0.06));
+}
+
+.sc-resume-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.sc-resume-label {
+  flex: none;
+  width: 72px;
+  color: var(--biof3-text-muted);
+  font-size: var(--biof3-font-size-caption);
+}
+
+.sc-resume-value {
+  color: var(--biof3-text-primary, var(--biof3-text, #111827));
+  font-size: var(--biof3-font-size-sm);
+  word-break: break-all;
+}
+
+.sc-resume-digest {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border: 1px solid var(--biof3-border-tertiary, rgba(0, 0, 0, 0.06));
+  border-radius: 7px;
+  max-height: 132px;
+  overflow: auto;
+  font-family: var(--biof3-font-mono, ui-monospace, monospace);
+  font-size: var(--biof3-font-size-caption);
+  line-height: 1.55;
+  color: var(--biof3-text-secondary, var(--biof3-text, #374151));
+  white-space: pre-wrap;
+}
+
+.sc-resume-error {
+  margin-top: 6px;
+  color: var(--biof3-danger, #dc2626);
+  font-size: var(--biof3-font-size-caption);
+  word-break: break-all;
+}
+
+.sc-resume-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.sc-resume-cancel,
+.sc-resume-confirm {
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 7px;
+  font: inherit;
+  font-size: var(--biof3-font-size-sm);
+  cursor: pointer;
+}
+
+.sc-resume-cancel {
+  border: 1px solid var(--biof3-border, #e5e7eb);
+  background: transparent;
+  color: var(--biof3-text-secondary, #374151);
+}
+
+.sc-resume-cancel:hover {
+  background: var(--biof3-hover);
+}
+
+.sc-resume-confirm {
+  border: 0;
+  background: var(--biof3-accent, #0d9488);
+  color: #ffffff;
+}
+
+.sc-resume-confirm:hover {
+  filter: brightness(1.05);
+}
+
+.sc-resume-cancel:disabled,
+.sc-resume-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .sc-error-details summary {

@@ -146,11 +146,13 @@ import {
   clearConversationRun,
   shouldClearReconciledConversationRun,
   resumeConversationRun,
+  resumeInterruptedConversation,
   useConversationRun,
   resumeOrphanAgentTasks,
   type ConversationPendingApproval,
   type ConversationLoopState,
 } from './conversationRunStore';
+import { ResumePrompt } from './SimpleChat/ResumePrompt';
 import { useErrorFormatter } from './useErrorFormatter';
 import { deriveLoopDisplay, loopDecisionLabel } from '@/lib/loop-client';
 import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop';
@@ -609,6 +611,10 @@ export function SimpleChat({
         // these the user only ever sees the humanised "发生未知错误".
         technicalDetails: activeRun.technicalDetails,
         errorCode: activeRun.errorCode,
+        // BLOCK-38 P2 / UI-275 — 服务中断可续跑：转发标记 + taskId 供「继续执行」入口
+        resumable: activeRun.resumable,
+        interruptedAt: activeRun.interruptedAt,
+        taskId: activeRun.taskId,
       });
     }
     return next;
@@ -1267,6 +1273,19 @@ export function SimpleChat({
                           severity={formatted.severity}
                           showDetails={formatted.showDetails}
                           technicalDetails={techDetails}
+                        />
+                      );
+                    })()}
+                    {/* BLOCK-38 P2 / UI-275 — 仅服务中断任务显示「继续执行」（非中断失败诚实走 retry 链路） */}
+                    {conversationId && m.role === 'assistant' && m.error && m.resumable && m.taskId && (() => {
+                      const resumeTaskId = m.taskId;
+                      const activeConversationId = conversationId;
+                      return (
+                        <ResumePrompt
+                          taskId={resumeTaskId}
+                          onConfirm={async () => {
+                            await resumeInterruptedConversation(activeConversationId, projectId);
+                          }}
                         />
                       );
                     })()}

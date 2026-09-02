@@ -100,6 +100,12 @@ export interface SimpleMessage {
   resultNodes?: ResultNode[];
   /** UI-272 — 按迭代聚合的模型思考段（reasoning_content），展开执行记录时展示工具衔接思路。 */
   reasoningByIteration?: Record<number, string>;
+  /** BLOCK-38 P2 / UI-275 — 服务中断可续跑（SSE error 事件 resumable 标记），显示「继续执行」入口。 */
+  resumable?: boolean;
+  /** BLOCK-38 P2 / UI-275 — 服务中断时间（后端清扫写入 interrupted_at）。 */
+  interruptedAt?: string;
+  /** BLOCK-38 P2 / UI-275 — 本 run 的 agent task id（续跑预览/执行的目标）。 */
+  taskId?: string;
 }
 
 /**

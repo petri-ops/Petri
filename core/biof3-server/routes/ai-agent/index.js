@@ -18,6 +18,7 @@ const events = require('./events');
 const tools = require('./tools');
 const backgroundProcesses = require('./background-processes');
 const llmTranscripts = require('./llm-transcripts');
+const resume = require('./resume');
 
 // AGENT_TASK_MODE_v1：默认 task 模式（loop 后台跑 + 订阅重连），legacy 回退到直连 SSE
 const USE_AGENT_TASK_MODE = (process.env.BIOF3_AGENT_TASK_MODE || 'task') !== 'legacy';
@@ -33,8 +34,9 @@ module.exports = {
     events.register(app);
     backgroundProcesses.register(app);
     llmTranscripts.register(app);
+    resume.register(app);
   },
 
   // 子模块 surface（方便测试与子域调试）
-  _submodules: { chat, context, events, tools, backgroundProcesses, llmTranscripts },
+  _submodules: { chat, context, events, tools, backgroundProcesses, llmTranscripts, resume },
 };

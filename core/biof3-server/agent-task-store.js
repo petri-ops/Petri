@@ -291,6 +291,9 @@ for (const statement of [
   'ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0',
   // BLOCK-31 P1: 会话级改动归属——任务终态持久化权威 filesChanged 清单（JSON 数组）
   'ALTER TABLE tasks ADD COLUMN files_changed_json TEXT',
+  // BLOCK-38 P1: 中断续跑——服务重启清扫把 running agent_loop 任务标 failed 时写显式中断时间戳，
+  // resume 端点仅接受 interrupted_at 非空的任务（非中断失败走既有 retry_pending 链路）
+  'ALTER TABLE tasks ADD COLUMN interrupted_at TEXT',
   'CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status)',
   'CREATE INDEX IF NOT EXISTS idx_tasks_created ON tasks(created_at)',
   'CREATE INDEX IF NOT EXISTS idx_tasks_next_retry ON tasks(next_retry_at) WHERE status = \'retry_pending\'',
@@ -307,17 +310,30 @@ for (const statement of [
   }
 }
 
-const interrupted = db
-  .prepare(
-    `UPDATE tasks
-     SET status = 'failed', agent_status = 'failed', error = '服务重启，Agent 任务中断', finished_at = ?
-     WHERE type = 'agent_loop' AND status = 'running'`
-  )
-  .run(new Date().toISOString());
-
-if (interrupted.changes > 0) {
-  logger.warn(`Marked ${interrupted.changes} interrupted Agent task(s) as failed on startup`);
+// BLOCK-38 P1: 服务重启清扫（dbMod 可注入以便测试，缺省用单例 db——测试必须复用
+// 同一连接，另开第二个 better-sqlite3 连接会触发 SQLITE_IOERR_SHORT_READ）。
+// 把仍在 running 的 agent_loop 任务标记为 failed 并写入显式 interrupted_at 时间戳
+// ——这是 resume 端点判定「可续跑」的唯一依据。模块加载时对单例 db 执行一次。
+function sweepInterruptedRunningTasks(dbMod = db, { now = () => new Date().toISOString() } = {}) {
+  try {
+    const interrupted = dbMod
+      .prepare(
+        `UPDATE tasks
+         SET status = 'failed', agent_status = 'failed', error = '服务重启，Agent 任务中断', finished_at = ?, interrupted_at = ?
+         WHERE type = 'agent_loop' AND status = 'running'`
+      )
+      .run(now(), now());
+    if (interrupted.changes > 0) {
+      logger.warn(`Marked ${interrupted.changes} interrupted Agent task(s) as failed on startup`);
+    }
+    return interrupted.changes;
+  } catch (err) {
+    logger.warn(`[agent-task-store] interrupted task sweep failed: ${err && err.message}`);
+    return 0;
+  }
 }
+
+sweepInterruptedRunningTasks(db);
 
 const stmts = {
   insert: db.prepare(`
@@ -326,8 +342,15 @@ const stmts = {
   `),
   get: db.prepare(
     `SELECT id, params, status, created_at, finished_at, error, user_id, agent_status,
-            retry_count, retry_error_type, next_retry_at, max_retries, files_changed_json
+            retry_count, retry_error_type, next_retry_at, max_retries, files_changed_json, interrupted_at
      FROM tasks WHERE id = ? AND type = 'agent_loop'`
+  ),
+  // BLOCK-38 P1: 可续跑任务查询——只有启动清扫显式标记 interrupted_at 的 failed 任务可续跑
+  getResumable: db.prepare(
+    `SELECT id, params, status, created_at, finished_at, error, user_id, agent_status,
+            retry_count, retry_error_type, next_retry_at, max_retries, files_changed_json, interrupted_at
+     FROM tasks
+     WHERE id = ? AND type = 'agent_loop' AND interrupted_at IS NOT NULL AND status = 'failed'`
   ),
   insertEvent: db.prepare(`
     INSERT INTO task_events (task_id, seq, event_type, payload, created_at)
@@ -402,9 +425,7 @@ function createAgentTask(opts = {}) {
   return result;
 }
 
-function getAgentTask(taskId) {
-  const row = stmts.get.get(taskId);
-  if (!row) return null;
+function mapTaskRow(row) {
   return {
     taskId: row.id,
     params: tryParse(row.params),
@@ -420,10 +441,25 @@ function getAgentTask(taskId) {
     maxRetries: row.max_retries || 0,
     // BLOCK-31 P1: 权威任务改动文件清单（终态时由 agent-runner 聚合写入）
     filesChanged: tryParse(row.files_changed_json) || [],
+    // BLOCK-38 P1: 中断时间戳（非空 = 服务重启清扫标记，可续跑）
+    interruptedAt: row.interrupted_at || null,
     // Route compatibility while the persisted SQLite columns remain snake_case.
     user_id: row.user_id || null,
     agent_status: row.agent_status || null,
   };
+}
+
+function getAgentTask(taskId) {
+  const row = stmts.get.get(taskId);
+  if (!row) return null;
+  return mapTaskRow(row);
+}
+
+// BLOCK-38 P1: 可续跑任务——仅 interrupted_at 非空的 failed 任务；不存在返回 null。
+function getResumableTask(taskId) {
+  const row = stmts.getResumable.get(taskId);
+  if (!row) return null;
+  return mapTaskRow(row);
 }
 
 function appendAgentTaskEvent(taskId, seq, eventType, payload) {
@@ -673,6 +709,8 @@ module.exports = {
   insertAgentTask,
   createAgentTask,
   getAgentTask,
+  getResumableTask,
+  sweepInterruptedRunningTasks,
   appendAgentTaskEvent,
   getAgentTaskEventsSince,
   getRunningChildAgentTasks,

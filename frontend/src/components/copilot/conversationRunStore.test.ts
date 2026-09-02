@@ -1,11 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { cancelAgentTaskMock, streamChatMock, subscribeAgentTaskMock, fetchLoopRunsMock, findResumableAgentTaskMock } = vi.hoisted(() => ({
+const { cancelAgentTaskMock, streamChatMock, subscribeAgentTaskMock, fetchLoopRunsMock, findResumableAgentTaskMock, resumeAgentTaskMock } = vi.hoisted(() => ({
   cancelAgentTaskMock: vi.fn(),
   streamChatMock: vi.fn(),
   subscribeAgentTaskMock: vi.fn(),
   fetchLoopRunsMock: vi.fn(),
   findResumableAgentTaskMock: vi.fn(),
+  resumeAgentTaskMock: vi.fn(),
 }));
 
 vi.mock('./copilotClient', async (importOriginal) => {
@@ -14,6 +15,7 @@ vi.mock('./copilotClient', async (importOriginal) => {
     ...original,
     cancelAgentTask: cancelAgentTaskMock,
     findResumableAgentTask: findResumableAgentTaskMock,
+    resumeAgentTask: resumeAgentTaskMock,
     streamChat: streamChatMock,
     subscribeAgentTask: subscribeAgentTaskMock,
   };
@@ -33,6 +35,7 @@ import {
   getSubAgentTaskSnapshot,
   listSubAgentTasksForConversation,
   resultEditProgressForContext,
+  resumeInterruptedConversation,
   shouldClearReconciledConversationRun,
   startConversationRun,
   startSubAgentTask,
@@ -70,6 +73,11 @@ describe('conversation run store', () => {
     streamChatMock.mockResolvedValue(undefined);
     cancelAgentTaskMock.mockReset();
     cancelAgentTaskMock.mockResolvedValue(undefined);
+    resumeAgentTaskMock.mockReset();
+    subscribeAgentTaskMock.mockReset();
+    subscribeAgentTaskMock.mockResolvedValue(undefined);
+    findResumableAgentTaskMock.mockReset();
+    fetchLoopRunsMock.mockReset();
   });
 
   afterEach(() => {
@@ -380,6 +388,78 @@ describe('conversation run store', () => {
       status: 'stopped',
       pendingApproval: { ackToken: 'ack-1' },
     })).toBe(false);
+  });
+
+  // ---------------------------------------------------------------------------
+  // BLOCK-38 P2 — 中断续跑：resumable 标记透传 + resume action 链路
+  // ---------------------------------------------------------------------------
+
+  it('BLOCK-38: interrupted error marks the run resumable; plain error stays non-resumable', () => {
+    start('conversation-b38a', 'long running job');
+    const callbacksA = streamChatMock.mock.calls[0][0];
+    callbacksA.onTaskStarted('task-b38-a');
+    callbacksA.onError(new Error('服务重启，Agent 任务中断'), {
+      resumable: true,
+      interruptedAt: '2026-09-02T12:00:00.000Z',
+    });
+    expect(getConversationRunSnapshot('conversation-b38a')).toMatchObject({
+      status: 'error',
+      resumable: true,
+      interruptedAt: '2026-09-02T12:00:00.000Z',
+      taskId: 'task-b38-a',
+    });
+
+    start('conversation-b38b', 'plain failure');
+    const callbacksB = streamChatMock.mock.calls[1][0];
+    callbacksB.onTaskStarted('task-b38-b');
+    callbacksB.onError(new Error('模型上游错误'));
+    expect(getConversationRunSnapshot('conversation-b38b')).toMatchObject({
+      status: 'error',
+      resumable: false,
+    });
+  });
+
+  it('BLOCK-38: resume action calls the endpoint with the interrupted taskId and subscribes the new task', async () => {
+    start('conversation-b38c', 'resume me');
+    const callbacks = streamChatMock.mock.calls[0][0];
+    callbacks.onTaskStarted('task-b38-old');
+    callbacks.onError(new Error('服务重启，Agent 任务中断'), {
+      resumable: true,
+      interruptedAt: '2026-09-02T12:30:00.000Z',
+    });
+
+    resumeAgentTaskMock.mockResolvedValue({
+      taskId: 'task-b38-new',
+      conversationId: 'conversation-b38c',
+      resumeOfTaskId: 'task-b38-old',
+      interruptedAt: '2026-09-02T12:30:00.000Z',
+      lastModelCall: null,
+    });
+
+    const newTaskId = await resumeInterruptedConversation('conversation-b38c', 'project-1');
+    expect(newTaskId).toBe('task-b38-new');
+    expect(resumeAgentTaskMock).toHaveBeenCalledWith('task-b38-old');
+
+    // 新 run 携带审计链（resumeOfTaskId = 原 taskId），非中断失败不残留 resumable
+    const snapshot = getConversationRunSnapshot('conversation-b38c');
+    expect(snapshot?.resumeOfTaskId).toBe('task-b38-old');
+    expect(snapshot?.resumable ?? false).toBe(false);
+    expect(snapshot?.status).toBe('running');
+    expect(subscribeAgentTaskMock).toHaveBeenCalledWith(
+      'task-b38-new',
+      expect.objectContaining({ conversationId: 'conversation-b38c' }),
+      0
+    );
+  });
+
+  it('BLOCK-38: resume action refuses when the run is not resumable', async () => {
+    start('conversation-b38d', 'plain failure');
+    streamChatMock.mock.calls[0][0].onTaskStarted('task-b38-d');
+    streamChatMock.mock.calls[0][0].onError(new Error('模型上游错误'));
+    await expect(resumeInterruptedConversation('conversation-b38d', 'project-1')).rejects.toThrow(
+      '当前会话没有可续跑的中断任务'
+    );
+    expect(resumeAgentTaskMock).not.toHaveBeenCalled();
   });
 
   // ---------------------------------------------------------------------------
