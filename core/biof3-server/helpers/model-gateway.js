@@ -7,6 +7,7 @@
 
 const providers = require('../../shared-backend/llm-providers');
 const logger = require('../../shared-backend/logger');
+const { createIoTranscriptSink } = require('../../shared-backend/llm-providers/io-transcript');
 const aiSettings = require('./ai-settings');
 
 function getCredential(credentialRef, profile) {
@@ -16,6 +17,20 @@ function getCredential(credentialRef, profile) {
   return aiSettings.getApiKey((profile && profile.provider) || ref);
 }
 
+// BLOCK-37 — 模型 I/O 信息流落盘：<BIOF3_LOCAL_DATA_DIR>/llm-transcripts/<conversationId>.jsonl
+const localDataRoot = process.env.BIOF3_LOCAL_DATA_DIR
+  || require('path').join(require('os').homedir(), 'Documents', 'BioF3-Local');
+const ioTranscriptSink = createIoTranscriptSink({ dataDir: localDataRoot });
+
+function recordTranscript(entry) {
+  // fire-and-forget：sink 内部吞错，这里再兜一层
+  try {
+    ioTranscriptSink.record(entry);
+  } catch (err) {
+    logger.warn('[model-gateway] llm transcript record failed', { error: String(err && err.message) });
+  }
+}
+
 const modelGateway = new providers.ModelGateway({
   getSettings: aiSettings.getAiSettings,
   getCredential,
@@ -23,6 +38,7 @@ const modelGateway = new providers.ModelGateway({
   recordRouting(event) {
     logger.warn('[model-gateway] explicit fallback', event);
   },
+  recordTranscript,
 });
 
 module.exports = { modelGateway, getCredential };

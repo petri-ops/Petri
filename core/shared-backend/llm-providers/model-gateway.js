@@ -47,8 +47,11 @@ function routingReason(result) {
   };
 }
 
+// BLOCK-37 — 单条 transcript 保留的 delta 帧样本上限（超限诚实计数，聚合响应不受影响）
+const MAX_TRANSCRIPT_FRAMES = 2000;
+
 class ModelGateway {
-  constructor({ getSettings, getCredential, getProvider, recordRouting }) {
+  constructor({ getSettings, getCredential, getProvider, recordRouting, recordTranscript }) {
     if (typeof getSettings !== 'function') throw new Error('ModelGateway requires getSettings');
     if (typeof getCredential !== 'function') throw new Error('ModelGateway requires getCredential');
     if (typeof getProvider !== 'function') throw new Error('ModelGateway requires getProvider');
@@ -56,6 +59,33 @@ class ModelGateway {
     this._getCredential = getCredential;
     this._getProvider = getProvider;
     this._recordRouting = typeof recordRouting === 'function' ? recordRouting : () => {};
+    // BLOCK-37 — 模型 I/O 信息流落盘（fire-and-forget，绝不影响调用主链路）
+    this._recordTranscript = typeof recordTranscript === 'function' ? recordTranscript : null;
+  }
+
+  /** BLOCK-37 — 一次 provider 交互的 transcript 组装与提交（含 fallback 的每次 attempt 独立记录）。 */
+  _emitTranscript({
+    role, attemptIndex, profile, requestBody, telemetry, result, frames, framesCount, framesTruncated, durationMs,
+  }) {
+    if (!this._recordTranscript) return;
+    try {
+      this._recordTranscript({
+        telemetry: telemetry || {},
+        requestBody: requestBody || {},
+        result,
+        frames,
+        framesCount,
+        framesTruncated,
+        provider: profile.provider,
+        profileId: profile.id,
+        role,
+        attemptIndex,
+        model: requestBody && requestBody.model,
+        durationMs,
+      });
+    } catch {
+      // transcript 永不影响调用主链路
+    }
   }
 
   getConfig() {
@@ -147,16 +177,36 @@ class ModelGateway {
       const options = { baseUrl: profile.baseUrl, signal, profile };
       let emittedOutput = false;
       let result;
+      // BLOCK-37 — 流式分支 tee delta 帧（上限内保留样本，超限诚实计数）
+      const transcriptFrames = [];
+      let framesOverflow = 0;
+      const startedAt = Date.now();
       if (canStream) {
         result = await provider.chatStream(apiKey, requestBody, telemetry || {}, (event) => {
           if (event && (event.type === 'content_delta' || event.type === 'tool_call_delta')) emittedOutput = true;
           // Hold a failed attempt's terminal error until the gateway decides
           // whether it will switch. Output and successful events remain live.
-          if (!event || event.type !== 'error') onEvent(event);
+          if (!event || event.type !== 'error') {
+            if (event && transcriptFrames.length < MAX_TRANSCRIPT_FRAMES) transcriptFrames.push(event);
+            else if (event) framesOverflow += 1;
+            onEvent(event);
+          }
         }, options);
       } else {
         result = await provider.chat(apiKey, requestBody, telemetry || {}, options);
       }
+      this._emitTranscript({
+        role,
+        attemptIndex: index,
+        profile,
+        requestBody,
+        telemetry,
+        result,
+        frames: transcriptFrames.length > 0 ? transcriptFrames : undefined,
+        framesCount: transcriptFrames.length + framesOverflow,
+        framesTruncated: framesOverflow > 0,
+        durationMs: Date.now() - startedAt,
+      });
       let resultFallbackReason = null;
       if (!emittedOutput && typeof fallbackWhen === 'function') {
         try {
@@ -210,12 +260,23 @@ class ModelGateway {
         const fallback = this._recordFallback('vision', previousProfileId, profile.id, previousReason);
         if (typeof onEvent === 'function') onEvent({ type: 'model_fallback', ...fallback });
       }
+      const visionBody = { ...(body || {}), model: profile.model };
+      const startedAt = Date.now();
       const result = await provider.chat(
         apiKey,
-        { ...(body || {}), model: profile.model },
+        visionBody,
         telemetry || {},
         { baseUrl: profile.baseUrl, profile }
       );
+      this._emitTranscript({
+        role: 'vision',
+        attemptIndex: index,
+        profile,
+        requestBody: visionBody,
+        telemetry,
+        result,
+        durationMs: Date.now() - startedAt,
+      });
       if (isRetryableProviderError(result) && index < attempts.length - 1) {
         previousProfileId = profile.id;
         previousReason = routingReason(result);

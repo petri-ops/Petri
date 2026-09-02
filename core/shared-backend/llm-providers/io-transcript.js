@@ -1,0 +1,248 @@
+/**
+ * llm-providers/io-transcript.js — 模型 I/O 信息流落盘（BLOCK-37 P1）。
+ *
+ * 覆盖「所有模型调用」的请求与响应完整原文持久化：
+ * - 按会话分文件追加 JSONL（<dataDir>/llm-transcripts/<conversationId>.jsonl），
+ *   无 conversationId 的调用归 unattributed.jsonl。
+ * - 每条记录 = 一次真实模型交互：请求 messages 全量 + 响应聚合全文
+ *   （content / reasoning_content / tool_calls / finish_reason / usage）+ delta 帧样本。
+ * - 截断纪律（诚实标记）：单条硬上限 8MB——超限先丢 delta 帧（保聚合响应完整），
+ *   再折叠 request.messages 中段（保首尾 + messagesTruncated 计数），
+ *   仍超限则逐条截断单条 message 内容。
+ * - 文件轮转：活跃文件超 64MB 先改名留存再开新文件。
+ * - 本模块绝不抛错：写失败静默（调用方 fire-and-forget），不影响模型调用主链路。
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const MAX_RECORD_BYTES_DEFAULT = 8 * 1024 * 1024; // 8MB
+const MAX_FRAMES_DEFAULT = 2000;
+const MAX_FILE_BYTES_DEFAULT = 64 * 1024 * 1024; // 64MB
+const UNATTRIBUTED = 'unattributed';
+const MESSAGE_KEEP_HEAD = 4;
+const MESSAGE_KEEP_TAIL = 16;
+const MESSAGE_CONTENT_CLIP = 2000;
+
+function safeStringify(value) {
+  const seen = new WeakSet();
+  try {
+    return JSON.stringify(value, (key, val) => {
+      if (typeof val === 'object' && val !== null) {
+        if (seen.has(val)) return '[Circular]';
+        seen.add(val);
+      }
+      return val;
+    });
+  } catch {
+    return 'null';
+  }
+}
+
+function safeIdPart(value) {
+  const raw = String(value || '');
+  // 路径安全：只留字母数字、连字符、下划线；空值归 unattributed
+  const cleaned = raw.replace(/[^A-Za-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '');
+  return cleaned || UNATTRIBUTED;
+}
+
+function stampId(now = () => new Date()) {
+  return `rt_${now().getTime()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/** 从 provider 聚合结果中提取响应全文（诚实保留 reasoning / tool_calls / usage）。 */
+function normalizeResponse(result) {
+  if (!result || typeof result !== 'object') return null;
+  if (result.error) return null;
+  const choice = result.choices && result.choices[0];
+  const message = choice && choice.message ? choice.message : {};
+  return {
+    content: typeof message.content === 'string' ? message.content : '',
+    reasoningContent: typeof message.reasoning_content === 'string' ? message.reasoning_content : undefined,
+    toolCalls: Array.isArray(message.tool_calls) ? message.tool_calls : undefined,
+    finishReason: choice ? choice.finish_reason : undefined,
+    usage: result.usage && typeof result.usage === 'object' ? result.usage : undefined,
+  };
+}
+
+function clipMessageForBudget(message) {
+  const next = { ...message };
+  if (typeof next.content === 'string' && next.content.length > MESSAGE_CONTENT_CLIP) {
+    next.content = `${next.content.slice(0, MESSAGE_CONTENT_CLIP)}…[BLOCK-37 截断]`;
+  }
+  if (Array.isArray(next.content)) {
+    // 多模态 content 数组：文本片段逐段截断
+    next.content = next.content.map((part) => {
+      if (part && typeof part === 'object' && typeof part.text === 'string' && part.text.length > MESSAGE_CONTENT_CLIP) {
+        return { ...part, text: `${part.text.slice(0, MESSAGE_CONTENT_CLIP)}…[BLOCK-37 截断]` };
+      }
+      return part;
+    });
+  }
+  if (typeof next.reasoning_content === 'string' && next.reasoning_content.length > MESSAGE_CONTENT_CLIP) {
+    next.reasoning_content = `${next.reasoning_content.slice(0, MESSAGE_CONTENT_CLIP)}…[BLOCK-37 截断]`;
+  }
+  return next;
+}
+
+/** 三级截断（仅在超限时逐级触发）：丢帧 → 折叠 messages 中段 → 逐条截断内容。全部诚实标记。 */
+function applyTruncation(record, maxBytes) {
+  const size = () => safeStringify(record).length;
+  if (size() <= maxBytes) return record;
+  record.truncated = true;
+
+  // 第一级：丢 delta 帧（聚合响应保持完整）
+  if (record.frames && record.frames.length > 0) {
+    record.frames = [];
+    record.framesTruncated = true;
+  }
+  if (size() <= maxBytes) return record;
+
+  // 第二级：折叠 request.messages 中段（保首尾）
+  const messages = Array.isArray(record.request && record.request.messages)
+    ? record.request.messages
+    : null;
+  if (messages && messages.length > MESSAGE_KEEP_HEAD + MESSAGE_KEEP_TAIL) {
+    const head = messages.slice(0, MESSAGE_KEEP_HEAD);
+    const tail = messages.slice(-MESSAGE_KEEP_TAIL);
+    const dropped = messages.length - MESSAGE_KEEP_HEAD - MESSAGE_KEEP_TAIL;
+    record.request.messages = [
+      ...head,
+      { role: 'system', content: `[BLOCK-37 截断：中段 ${dropped} 条消息未存盘]` },
+      ...tail,
+    ];
+    record.messagesTruncated = dropped;
+  }
+  if (size() <= maxBytes) return record;
+
+  // 第三级：逐条截断 message 内容（含已保留的首尾与响应聚合）
+  if (messages) {
+    record.request.messages = record.request.messages.map(clipMessageForBudget);
+  }
+  if (record.response) {
+    if (typeof record.response.content === 'string' && record.response.content.length > MESSAGE_CONTENT_CLIP) {
+      record.response.content = `${record.response.content.slice(0, MESSAGE_CONTENT_CLIP)}…[BLOCK-37 截断]`;
+    }
+    if (typeof record.response.reasoningContent === 'string' && record.response.reasoningContent.length > MESSAGE_CONTENT_CLIP) {
+      record.response.reasoningContent = `${record.response.reasoningContent.slice(0, MESSAGE_CONTENT_CLIP)}…[BLOCK-37 截断]`;
+    }
+  }
+  return record;
+}
+
+/**
+ * 创建落盘 sink。
+ * @param {object} options
+ * @param {string} options.dataDir 本地数据根目录（BIOF3_LOCAL_DATA_DIR 同源解析）
+ * @param {number} [options.maxRecordBytes] 单条记录上限（默认 8MB）
+ * @param {number} [options.maxFrames] 单条记录保留的 delta 帧上限（默认 2000）
+ * @param {number} [options.maxFileBytes] 单文件轮转阈值（默认 64MB）
+ * @param {object} [options.fs] 可注入 fs（测试用）
+ * @param {() => Date} [options.now] 可注入时钟（测试用）
+ */
+function createIoTranscriptSink(options = {}) {
+  const dataDir = String(options.dataDir || '');
+  if (!dataDir) throw new Error('createIoTranscriptSink requires dataDir');
+  const dir = path.join(dataDir, 'llm-transcripts');
+  const maxRecordBytes = Number.isFinite(options.maxRecordBytes) ? options.maxRecordBytes : MAX_RECORD_BYTES_DEFAULT;
+  const maxFrames = Number.isFinite(options.maxFrames) ? options.maxFrames : MAX_FRAMES_DEFAULT;
+  const maxFileBytes = Number.isFinite(options.maxFileBytes) ? options.maxFileBytes : MAX_FILE_BYTES_DEFAULT;
+  const fsMod = options.fs || fs;
+  const now = options.now || (() => new Date());
+
+  function ensureDir() {
+    try {
+      fsMod.mkdirSync(dir, { recursive: true });
+    } catch {
+      // 已存在或不可创建——后续 appendFileSync 自会失败并被吞掉
+    }
+  }
+
+  function targetFile(conversationId) {
+    return path.join(dir, `${safeIdPart(conversationId)}.jsonl`);
+  }
+
+  /** 活跃文件超阈值时轮转留存（重命名后开新文件）。 */
+  function rotateIfNeeded(file) {
+    try {
+      const stat = fsMod.statSync(file);
+      if (stat && stat.size >= maxFileBytes) {
+        fsMod.renameSync(file, `${file.slice(0, -6)}.${now().getTime()}.jsonl`);
+      }
+    } catch {
+      // 文件不存在等情况直接忽略
+    }
+  }
+
+  /**
+   * 记录一次模型交互。fire-and-forget：同步段吞错，不向调用方抛任何异常。
+   * @param {object} entry
+   * @param {object} [entry.telemetry] {userId?, conversationId?, kind?, traceId?}
+   * @param {object} [entry.requestBody] OpenAI 兼容请求体（messages 全量）
+   * @param {object} [entry.result] provider 聚合结果（成功或 {error}）
+   * @param {Array} [entry.frames] 流式 delta 帧样本（已按 maxFrames 截取）
+   * @param {boolean} [entry.framesTruncated] 帧是否超上限被截
+   * @param {string} [entry.provider] provider 名
+   * @param {string} [entry.profileId] 模型配置 id
+   * @param {string} [entry.role] gateway 角色（chat/agent/vision…）
+   * @param {number} [entry.attemptIndex] fallback 尝试序号（0 = 首选）
+   * @param {number} [entry.durationMs] 调用耗时
+   */
+  function record(entry) {
+    try {
+      const src = entry || {};
+      const telemetry = src.telemetry && typeof src.telemetry === 'object' ? src.telemetry : {};
+      const response = normalizeResponse(src.result);
+      const record_ = {
+        id: stampId(now),
+        ts: now().toISOString(),
+        conversationId: telemetry.conversationId || null,
+        kind: telemetry.kind || 'chat',
+        traceId: telemetry.traceId || undefined,
+        userId: telemetry.userId || undefined,
+        role: src.role || 'chat',
+        provider: src.provider || undefined,
+        profileId: src.profileId || undefined,
+        attemptIndex: Number.isFinite(src.attemptIndex) ? src.attemptIndex : 0,
+        model: src.model || undefined,
+        durationMs: Number.isFinite(src.durationMs) ? src.durationMs : undefined,
+        request: {
+          messages: Array.isArray(src.requestBody && src.requestBody.messages) ? src.requestBody.messages : [],
+          params: safeStringify({ ...(src.requestBody || {}), messages: undefined }),
+        },
+        response,
+        error: src.result && src.result.error
+          ? (typeof src.result.error === 'string' ? src.result.error : String(src.result.error.code || src.result.error.type || 'api_error'))
+          : null,
+        frames: Array.isArray(src.frames) ? src.frames : undefined,
+        framesCount: Number.isFinite(src.framesCount) ? src.framesCount : (Array.isArray(src.frames) ? src.frames.length : 0),
+        framesTruncated: src.framesTruncated === true,
+        truncated: false,
+        messagesTruncated: 0,
+      };
+
+      const sized = applyTruncation(record_, maxRecordBytes);
+      const line = safeStringify(sized);
+      if (!line || line === 'null') return;
+
+      ensureDir();
+      const file = targetFile(sized.conversationId);
+      rotateIfNeeded(file);
+      fsMod.appendFileSync(file, `${line}\n`);
+    } catch {
+      // 落盘永不影响主链路
+    }
+  }
+
+  return { record, dir };
+}
+
+module.exports = {
+  createIoTranscriptSink,
+  normalizeResponse,
+  applyTruncation,
+  safeIdPart,
+  UNATTRIBUTED,
+  MAX_RECORD_BYTES_DEFAULT,
+  MAX_FRAMES_DEFAULT,
+};
