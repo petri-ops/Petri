@@ -2137,6 +2137,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-276: Agent 事件流断线重连——免刷新自动亮「继续执行」（BLOCK-39） (2026-09-02 in_progress)
+
+**用户需求**：BLOCK-38 收口时登记的候选增强，用户裁决启动——后端重启中断任务后，前端应自动置 run 失败态并亮出「继续执行」按钮，免去刷新页面一步（BLOCK-38 现状：仅刷新后挂载孤儿恢复才发现）。
+
+**改动**（0 新依赖 / 0 后端改动）：① [copilotClient.ts](../frontend/src/components/copilot/copilotClient.ts) `subscribeAgentTask`（fetch-stream）拆出单次订阅 `subscribeAgentTaskOnce` + 外层有界退避重连——新增 typed `AgentStreamDisconnectedError`（fetch 网络 reject / reader.read 断开 / 流结束未见 `[DONE]` 三类可重连，HTTP 4xx/5xx 与 AbortError 不重试），重连 URL 带 `afterSeq=lastSeq` 续传不重放（events.js 订阅回放 + 终态必发 `[DONE]` 语义现成），退避 1s 指数至 4s 封顶、总窗口约 90s，重连期回调 `onStreamReconnecting`；② `streamChatViaTask` 错误边界重划：提交阶段保留 legacy 回退，订阅阶段（已持有 taskId）不再回退 legacy（防重发整段对话重复执行已完成步骤），重试耗尽如实 onError；干净截断不再误调 `onDone`（消除"假完成"）；③ [conversationRunStore.ts](../frontend/src/components/copilot/conversationRunStore.ts) `onStreamReconnecting` 置 `statusMessage: '与任务失去连接，正在重连（第 N 次）…'`（后续 delta/finish 既有清理），主 run/resume/sub-agent 三处订阅 catch 透传真实错误、AbortError 不算失败。重连后收到 failed+`resumable:true` 终态事件 → 既有 `onError→finish('error')` 链自动置失败态并亮 ResumePrompt「继续执行」按钮（BLOCK-38 链路复用）。
+
+**门禁**：新增 `copilotClient.streamReconnect.test.ts` 6/6（截断→afterSeq 续传重连→failed+resumable 终态 = 免刷新亮按钮核心判据 / 读流中途断开保留 lastSeq + 退避序列 1s→2s / 重试耗尽 25 次连接如实上抛 / 截断耗尽不误调 onDone / HTTP 4xx 不重试 / abort 不重试不触发 onError）/ conversationRunStore vitest 33/33（新增重连 statusMessage 置位与清理）/ copilot 全目录 218/218 / tsc 0。
+
+**状态**: in_progress（P4 dev Electron 实机收口待做：kill -9 :3001 → 不刷新 → 自动亮按钮 → 续跑全链，证据存 `acceptance/ui-276/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-275: Agent 任务中断续跑——「继续执行」入口（BLOCK-38 P2） (2026-09-02 verified)
 
 **实机验收**（dev Electron，证据 [acceptance/ui-275/](../acceptance/ui-275/evidence.json)）：S1 kill -9 :3001 模拟服务重启 → 启动清扫将 running 任务 7d2e9c32 标记 failed + interrupted_at（SQLite 核证）→ S2 刷新页面孤儿恢复订阅，ErrorBanner + 「继续执行」按钮出现，改动卡片记录中断前第 1/2 轮（r1/r2.md）→ S3 确认弹层展示中断时间/模型/结束原因「准备调用工具」/待执行工具/进度摘要 → S4 确认续跑：新 task efff49da 带 resumeOfTaskId 审计链 completed，正好补写 r3/r4/r5 未重复执行，原 task 不可变并写 task_resumed 溯源事件，总结明确区分「本次创建」与「中断前」。非中断失败任务诚实不显示按钮（端点侧 409/resumable:false 由集成测试覆盖）。UI-275 verified，BLOCK-38 收口 completed。G0 开发期常态 · 不外推 packaged / Provider / GA。

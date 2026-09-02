@@ -329,6 +329,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     | 'onLoopIteration'
     | 'onDone'
     | 'onError'
+    | 'onStreamReconnecting'
   > = {
     onIter: (iteration) => {
       // UI-272 — 先更新迭代号再走原有重置逻辑
@@ -520,6 +521,13 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     },
     onDone: () => finish('done'),
     onError: (error, info) => finish('error', error, info),
+    // BLOCK-39: 断线重连期间在摘要条显示重连提示（后续 delta/finish 既有清理会置 undefined）
+    onStreamReconnecting: (info) => {
+      replaceRun(conversationId, (current) => ({
+        ...current,
+        statusMessage: `与任务失去连接，正在重连（第 ${info.attempt} 次）…`,
+      }));
+    },
   };
 
   if (options.resumeTaskId) {
@@ -529,7 +537,11 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       { messages: [], conversationId, signal: ctrl.signal, ...callbacks },
       0
     )
-      .catch(() => finish('error', new Error('订阅失败')))
+      .catch((err: unknown) => {
+        // BLOCK-39: 透传真实错误（含 AgentStreamDisconnectedError 重试耗尽），中止不算失败
+        if ((err as Error)?.name === 'AbortError') return;
+        finish('error', err instanceof Error ? err : new Error('订阅失败'));
+      })
       .finally(() => {
         if (controllers.get(conversationId) === ctrl) controllers.delete(conversationId);
       });

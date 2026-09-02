@@ -61,5 +61,6 @@ P1–P3 完成且门禁全绿 → 提交（UI-276 in_progress）；P4 实机证�
 ## 6. 进度记录
 
 - 2026-09-02 P0 立项登记（用户裁决启动；承接 BLOCK-38 收口时登记的 roadmap 候选）。
+- 2026-09-02 P1–P3 完成：copilotClient `subscribeAgentTask` 拆 `subscribeAgentTaskOnce`（返回 lastSeq，终态必收 `[DONE]`，截断即 typed `AgentStreamDisconnectedError`）+ 有界退避重连（1s→4s 封顶，24 次重试总窗口约 90s，`afterSeq=err.lastSeq` 续传；实现更正：plan P1 草案写"约 60s"，实际 24 次 ≈ 90s）+ `onStreamReconnecting` 回调；`streamChatViaTask` 提交阶段保留 legacy 回退、订阅阶段如实 onError；干净截断不再误调 `onDone`。conversationRunStore 主 run `onStreamReconnecting` 置 statusMessage「与任务失去连接，正在重连（第 N 次）…」（delta/finish 既有清理），主 run/resume/sub-agent 三处订阅 catch 透传真实错误、AbortError 不算失败。门禁：新增 `copilotClient.streamReconnect.test.ts` 6/6（核心判据 = 截断→afterSeq 续传重连→failed+resumable 终态）/ conversationRunStore 33/33 / copilot 全目录 218/218 / tsc 0；docs:check / ui:audit:check。UI-276 in_progress，待 P4 实机。
 
 G0 开发期常态 · 不外推 packaged / Provider / GA。

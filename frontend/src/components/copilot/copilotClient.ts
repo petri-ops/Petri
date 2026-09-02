@@ -332,6 +332,8 @@ export interface StreamChatOptions {
   onDone?: () => void;
   /** BLOCK-38 P2: info.resumable = 服务中断清扫标记的任务（可续跑），interruptedAt 为中断时间。 */
   onError?: (err: Error, info?: { resumable?: boolean; interruptedAt?: string | null }) => void;
+  /** BLOCK-39: 订阅断线进入第 attempt 次重连（afterSeq=lastSeq 续传），nextRetryMs 后重试。 */
+  onStreamReconnecting?: (info: { taskId: string; attempt: number; lastSeq: number; nextRetryMs: number }) => void;
   /** Agent iteration started (1-indexed) */
   onIter?: (n: number) => void;
   /** Agent runtime status that should be visible while no answer text is available. */
@@ -561,34 +563,43 @@ export function findResumableSubAgentTasks(): ResumableSubAgentTask[] {
 
 /** task 模式：提交拿 taskId → 订阅事件流 */
 async function streamChatViaTask(opts: StreamChatOptions): Promise<void> {
-  const { onDone } = opts;
+  let taskId: string;
   try {
-    const taskId = await submitAgentTask(opts);
-    opts.onTaskStarted?.(taskId);
-    // 存 localStorage 供重连发现（CopilotChat mount 时检查）。
-    // AGENT-CONCURRENCY: 记录 kind + parentTaskId，使 sub-agent 不被误当主 run 恢复。
-    try {
-      localStorage.setItem(
-        'biof3_agent_task_' + taskId,
-        JSON.stringify({
-          taskId,
-          ts: Date.now(),
-          kind: opts.kind || 'primary',
-          parentTaskId: opts.parentTaskId || null,
-          conversationId: opts.conversationId || null,
-          projectId: opts.context?.projectId || null,
-        })
-      );
-    } catch {}
-    await subscribeAgentTask(taskId, opts, 0);
+    taskId = await submitAgentTask(opts);
   } catch (err: unknown) {
     if ((err as Error)?.name === 'AbortError') return;
-    // task 模式失败时回退到 legacy（兼容期保护）
+    // task 模式提交失败回退到 legacy（兼容期保护，仅限提交阶段）
     try {
       return await streamChatLegacy(opts);
     } catch {
       opts.onError?.(err instanceof Error ? err : new Error(String(err)));
     }
+    return;
+  }
+  opts.onTaskStarted?.(taskId);
+  // 存 localStorage 供重连发现（CopilotChat mount 时检查）。
+  // AGENT-CONCURRENCY: 记录 kind + parentTaskId，使 sub-agent 不被误当主 run 恢复。
+  try {
+    localStorage.setItem(
+      'biof3_agent_task_' + taskId,
+      JSON.stringify({
+        taskId,
+        ts: Date.now(),
+        kind: opts.kind || 'primary',
+        parentTaskId: opts.parentTaskId || null,
+        conversationId: opts.conversationId || null,
+        projectId: opts.context?.projectId || null,
+      })
+    );
+  } catch {}
+  try {
+    await subscribeAgentTask(taskId, opts, 0);
+  } catch (err: unknown) {
+    if ((err as Error)?.name === 'AbortError') return;
+    // BLOCK-39: 订阅阶段（已持有 taskId）不再回退 legacy——重发整段对话会重复执行
+    // 已完成的步骤。断线已由 subscribeAgentTask 有界重连兜底，此处为重试耗尽或
+    // 不可重试错误（HTTP 4xx/5xx），如实上报（用户仍可刷新走孤儿恢复）。
+    opts.onError?.(err instanceof Error ? err : new Error(String(err)));
   }
 }
 
@@ -636,18 +647,105 @@ async function submitAgentTask(opts: StreamChatOptions): Promise<string> {
   return data.taskId as string;
 }
 
-/** GET /ai/agent/task/:taskId 订阅事件流（afterSeq 支持续传） */
+/**
+ * BLOCK-39: 订阅断线信号（typed）。仅三类来源：fetch 网络 reject（后端不可达）、
+ * reader.read() reject（连接被切断）、流结束未见 [DONE]（干净截断）。携带 lastSeq
+ * 供重连时 afterSeq 续传；HTTP 4xx/5xx 与 AbortError 不属于此类型（不重试）。
+ */
+export class AgentStreamDisconnectedError extends Error {
+  readonly lastSeq: number;
+  constructor(message: string, lastSeq: number) {
+    super(message);
+    this.name = 'AgentStreamDisconnected';
+    this.lastSeq = lastSeq;
+  }
+}
+
+/** 有界退避重连：起始 1s 指数至 4s 封顶，总窗口约 90s（覆盖 dev 后端重启 + 富余）。 */
+const STREAM_RECONNECT_MAX_ATTEMPTS = 24;
+const STREAM_RECONNECT_BASE_DELAY_MS = 1000;
+const STREAM_RECONNECT_MAX_DELAY_MS = 4000;
+
+function isAbortError(err: unknown): boolean {
+  return (err as Error)?.name === 'AbortError';
+}
+
+function abortableDelay(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) {
+      const err = new Error('Aborted');
+      err.name = 'AbortError';
+      reject(err);
+      return;
+    }
+    const onAbort = () => {
+      clearTimeout(timer);
+      const err = new Error('Aborted');
+      err.name = 'AbortError';
+      reject(err);
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener('abort', onAbort, { once: true });
+  });
+}
+
+/** GET /ai/agent/task/:taskId 订阅事件流（afterSeq 支持续传；断线有界退避重连） */
 export async function subscribeAgentTask(
   taskId: string,
   opts: StreamChatOptions,
   afterSeq = 0
 ): Promise<void> {
+  let seq = afterSeq;
+  for (let attempt = 0; ; attempt++) {
+    try {
+      seq = await subscribeAgentTaskOnce(taskId, opts, seq);
+      return;
+    } catch (err: unknown) {
+      if (
+        err instanceof AgentStreamDisconnectedError &&
+        attempt < STREAM_RECONNECT_MAX_ATTEMPTS
+      ) {
+        // 断线时已收到的最后 seq（可能大于进入时的 afterSeq），重连从其后续传
+        seq = err.lastSeq;
+        const nextRetryMs = Math.min(
+          STREAM_RECONNECT_BASE_DELAY_MS * 2 ** attempt,
+          STREAM_RECONNECT_MAX_DELAY_MS
+        );
+        try {
+          opts.onStreamReconnecting?.({ taskId, attempt: attempt + 1, lastSeq: seq, nextRetryMs });
+          await abortableDelay(nextRetryMs, opts.signal);
+        } catch (delayErr: unknown) {
+          // 等待期间用户主动停止 → AbortError 上抛（调用方静默处理）
+          throw delayErr;
+        }
+        continue;
+      }
+      throw err;
+    }
+  }
+}
+
+/** 单次订阅尝试；正常完成（收到 [DONE]）返回最后的 seq，断线抛 AgentStreamDisconnectedError */
+async function subscribeAgentTaskOnce(
+  taskId: string,
+  opts: StreamChatOptions,
+  afterSeq = 0
+): Promise<number> {
   const { signal, onDone, kind } = opts;
   // token 放 query（fetch 也能带 header，但 query 兼容 EventSource 未来切换）
   const authHeader = getAuthHeader();
   const token = authHeader.Authorization?.replace('Bearer ', '');
   const url = `${getApiPrefix()}/ai/agent/task/${taskId}?afterSeq=${afterSeq}${token ? '&token=' + encodeURIComponent(token) : ''}`;
-  const resp = await fetch(url, { method: 'GET', headers: { ...authHeader }, signal });
+  let resp: Response;
+  try {
+    resp = await fetch(url, { method: 'GET', headers: { ...authHeader }, signal });
+  } catch (err: unknown) {
+    if (isAbortError(err)) throw err;
+    throw new AgentStreamDisconnectedError('任务事件流连接中断', afterSeq);
+  }
   if (!resp.ok || !resp.body) {
     let errText = `HTTP ${resp.status}`;
     try {
@@ -660,10 +758,18 @@ export async function subscribeAgentTask(
   const decoder = new TextDecoder('utf-8');
   let buffer = '';
   let lastSeq = afterSeq;
+  let sawDone = false;
   // BLOCK-31 P2: 记录 SSE done 事件携带的权威 filesChanged，随 agentTaskDone 派发
   let doneFiles: Array<{ path: string; status: string }> | undefined;
   while (true) {
-    const { value, done } = await reader.read();
+    let chunk: ReadableStreamReadResult<Uint8Array>;
+    try {
+      chunk = await reader.read();
+    } catch (err: unknown) {
+      if (isAbortError(err)) throw err;
+      throw new AgentStreamDisconnectedError('任务事件流连接中断', lastSeq);
+    }
+    const { value, done } = chunk;
     if (done) break;
     buffer += decoder.decode(value, { stream: true });
     let sepIdx;
@@ -675,15 +781,11 @@ export async function subscribeAgentTask(
         if (!m) continue;
         const data = m[1];
         if (data === '[DONE]') {
-          onDone?.();
-          emitAgentTaskDone(taskId, kind, {
-            filesChanged: doneFiles,
-            conversationId: opts.conversationId,
-          });
+          sawDone = true;
           try {
             localStorage.removeItem('biof3_agent_task_' + taskId);
           } catch {}
-          return;
+          break;
         }
         try {
           const obj = JSON.parse(data);
@@ -698,13 +800,21 @@ export async function subscribeAgentTask(
           // Bad JSON — ignore
         }
       }
+      if (sawDone) break;
     }
+    if (sawDone) break;
+  }
+  if (!sawDone) {
+    // BLOCK-39: 后端终态必发 [DONE]（events.js），干净截断 = 异常断线；
+    // 不得误调 onDone 假装完成（任务实际可能已被清扫为 failed+interrupted）。
+    throw new AgentStreamDisconnectedError('任务事件流在完成前中断', lastSeq);
   }
   onDone?.();
   emitAgentTaskDone(taskId, kind, {
     filesChanged: doneFiles,
     conversationId: opts.conversationId,
   });
+  return lastSeq;
 }
 
 /** 处理单个 SSE 事件对象（原 streamChat 的解析逻辑，task/legacy 共用） */

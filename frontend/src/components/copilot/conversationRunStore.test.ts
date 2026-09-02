@@ -105,6 +105,18 @@ describe('conversation run store', () => {
     });
   });
 
+  it('BLOCK-39: 断线重连期间显示重连提示，后续增量到达后清理', () => {
+    start('conversation-reconnect', 'run a long task');
+    const callbacks = streamChatMock.mock.calls[0][0];
+    callbacks.onStreamReconnecting?.({ taskId: 't-1', attempt: 2, lastSeq: 5, nextRetryMs: 4000 });
+    expect(getConversationRunSnapshot('conversation-reconnect')).toMatchObject({
+      status: 'running',
+      statusMessage: '与任务失去连接，正在重连（第 2 次）…',
+    });
+    callbacks.onDelta('back online');
+    expect(getConversationRunSnapshot('conversation-reconnect')?.statusMessage).toBeUndefined();
+  });
+
   it('keeps RS5 ChangeSet progress ordered and visible as a compact status', () => {
     start('conversation-rs5', 'change the palette');
     const callbacks = streamChatMock.mock.calls[0][0];
