@@ -50,6 +50,12 @@
       "claim": "续跑后改动归属连续（同会话改动卡片按轮次分组）",
       "evidence": "完成后会话改动卡片显示 4 个文件，第 1 轮/第 2 轮分组，无需刷新",
       "source": "r2-t8-resumed-done.png 底部 innerText（第 1 轮 2 个文件 / 第 2 轮 2 个文件）"
+    },
+    {
+      "id": "A7",
+      "claim": "「继续执行」按钮亮出后长稳态（零干扰）",
+      "evidence": "kill 后零干扰只读探针：+5s/+15s/+60s/+120s/+300s 五个检查点 resumeBtnVisible 全为 true，window.__b39marker 全程存活（页面零重载）、无重连提示闪烁；亮置 5 分钟后点击 → 确认 → 续跑 completed（s3/s4 补齐、s1/s2 mtime 不变）",
+      "source": "验收会话 stability 探针记录（stab1/stab2 脚本 + step11 复跑输出）"
     }
   ],
   "rounds": [
@@ -64,7 +70,7 @@
   ],
   "unitTestsRef": "frontend/src/components/copilot/copilotClient.streamReconnect.test.ts（6/6，截断→afterSeq 续传→failed+resumable 终态）",
   "exceptions": [
-    "round 1 观察到一次自动化干扰下的按钮状态复探不一致（弹层/轮询时序干扰），round 2 全程干净复现，判定为验收自动化噪声而非产品缺陷；如需可另开候选核实按钮长稳态",
+    "round 1 观察到一次自动化干扰下的按钮状态复探不一致，后续零干扰长稳态探针（A7）证明按钮 5 分钟内稳定可见且可续跑，判定为验收自动化噪声（弹层/轮询时序干扰）而非产品缺陷",
     "wrapper 级联：dev-electron wrapper 自身 spawn 的 ：3001 后端被 kill 会级联关停整个 dev 栈（spawnChild 既有语义），与本次验收无关——渲染端使用的是 Electron supervisor 托管后端"
   ],
   "g0Note": "G0 开发期常态 · 不外推 packaged / Provider / GA"
