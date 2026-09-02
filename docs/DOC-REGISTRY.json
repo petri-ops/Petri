@@ -18,7 +18,7 @@
       "id": "BLOCK-39-AGENT-STREAM-RECONNECT",
       "path": "docs/block-39-agent-stream-reconnect-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-39-agent-stream-reconnect",
       "entrypoint": "docs/README.md",
@@ -28,8 +28,7 @@
         "sse",
         "reconnect",
         "resume",
-        "G0",
-        "active"
+        "G0"
       ],
       "notes": "2026-09-02 立项（用户裁决，承接 BLOCK-38 收口时登记的候选增强）：后端重启中断 agent 任务后，前端免刷新自动发现 interrupted 并亮「继续执行」按钮——subscribeAgentTask（fetch-stream）拆单次订阅 + typed AgentStreamDisconnectedError（fetch reject / reader 断开 / 截断未见 [DONE]），有界退避重试 afterSeq=lastSeq 续传（events.js 已支持回放与终态必发 [DONE]，0 后端改动）；streamChatViaTask 订阅阶段不再回退 legacy（防重发整段对话重复执行）+ 干净截断不再误调 onDone（消除假完成）；重连期间 statusMessage「正在重连」；onError→finish('error') 复用 BLOCK-38 resumable 链自动亮按钮。P4 实机证据 acceptance/ui-276/（UI-276）。非范围：自动续跑/轮询心跳/刷新路径改动/后端改动/G1+。0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-02",

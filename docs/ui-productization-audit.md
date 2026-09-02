@@ -2137,7 +2137,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-276: Agent 事件流断线重连——免刷新自动亮「继续执行」（BLOCK-39） (2026-09-02 in_progress)
+## UI-276: Agent 事件流断线重连——免刷新自动亮「继续执行」（BLOCK-39） (2026-09-02 verified)
 
 **用户需求**：BLOCK-38 收口时登记的候选增强，用户裁决启动——后端重启中断任务后，前端应自动置 run 失败态并亮出「继续执行」按钮，免去刷新页面一步（BLOCK-38 现状：仅刷新后挂载孤儿恢复才发现）。
 

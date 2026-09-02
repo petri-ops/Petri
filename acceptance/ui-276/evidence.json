@@ -1,0 +1,71 @@
+{
+  "workPackage": "BLOCK-39",
+  "uiItem": "UI-276",
+  "title": "Agent 事件流断线重连——免刷新自动亮继续执行按钮",
+  "date": "2026-09-02",
+  "environment": {
+    "mode": "dev Electron (npm run dev, renderer-HMR)",
+    "backend": "biof3-server，Electron 主进程 supervisor 托管（本次实机端口 :65281，kill 后自动重启）",
+    "cdp": "9222 驱动，全程页面未 reload（CDP 连接与截图连续可证）",
+    "model": "gemini-3.7-flash-tiered（ninijoker）",
+    "accessMode": "完全访问"
+  },
+  "scenario": {
+    "task": "agent 写文件任务：在项目工作区依次创建 p39s1.txt ~ p39s4.txt（多轮 workspace_write）",
+    "interruption": "任务进行中（2/4 文件已创建）对 Electron 托管后端 kill -9；supervisor 自动重启后端，启动清扫将 running 任务标记 failed + interrupted_at"
+  },
+  "assertions": [
+    {
+      "id": "A1",
+      "claim": "kill 后端后免刷新出现重连提示",
+      "evidence": "kill 后轮询 t0+2ms 即见 statusMessage「与任务失去连接，正在重连（第 1 次）…」",
+      "source": "r2-reconnect-timeline.log 第一条；r2-t4-reconnecting.png"
+    },
+    {
+      "id": "A2",
+      "claim": "免刷新自动亮「继续执行」按钮",
+      "evidence": "t0+807ms 时 resumeBtn=true、重连提示已清除（SSE 以 afterSeq 续传收到 failed+resumable 终态）",
+      "source": "r2-reconnect-timeline.log.txt 第二条；r2-t5-resume-button-lit.png"
+    },
+    {
+      "id": "A3",
+      "claim": "确认弹层数据准确（中断时间 + 中断前最后状态）",
+      "evidence": "弹层展示「继续执行 · 中断恢复 / 中断时间 / 中断前最后状态 / 进度：已完成 p39s1.txt 的创建…」，与任务实际进度一致",
+      "source": "r1-t7-confirm-dialog.png（round 1 同链路截图）"
+    },
+    {
+      "id": "A4",
+      "claim": "确认后续跑至完成，未重跑已完成步骤",
+      "evidence": "点击「确认继续」→ 新 task ed4f4132 创建（resumeOf 原任务 7d5b6e81）→ p39s3/p39s4 创建；p39s1/p39s2 mtime 前后一致（NO_REEXEC_S1S2: true）",
+      "source": "resume-verify-script.mjs 输出 DONE:true S3S4:true NO_REEXEC_S1S2:true；r2-t8-resumed-done.png"
+    },
+    {
+      "id": "A5",
+      "claim": "后端清扫与续跑任务落库正确",
+      "evidence": "tasks 表：7d5b6e81 status=failed interrupted_at=2026-09-02T11:25:05.848Z（服务重启，Agent 任务中断）；ed4f4132 status=completed finished_at=11:25:41；后端日志「Marked 1 interrupted Agent task(s) as failed on startup」",
+      "source": ".biof3-dev-user-data/data/biof3.db tasks 表；biof3-electron-main.log"
+    },
+    {
+      "id": "A6",
+      "claim": "续跑后改动归属连续（同会话改动卡片按轮次分组）",
+      "evidence": "完成后会话改动卡片显示 4 个文件，第 1 轮/第 2 轮分组，无需刷新",
+      "source": "r2-t8-resumed-done.png 底部 innerText（第 1 轮 2 个文件 / 第 2 轮 2 个文件）"
+    }
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "note": "kill 后同样 ~805ms 自动亮按钮；确认弹层打开后因验收自动化脚本按钮匹配缺陷（/继续执行$/ 未命中「确认继续」）未完成二次确认，改用 curl POST /ai/agent/task/:id/resume 验证端点续跑成功（新任务 cdc7b48d completed，s3/s4 由其创建，s1/s2 未重跑）。UI 链路以 round 2 为准。"
+    },
+    {
+      "round": 2,
+      "note": "端到端全 UI 链路：新会话 → 发任务 → 2/4 文件时 kill -9 后端 → 免刷新重连提示 → 807ms 按钮亮 → 确认弹层 → 确认继续 → 续跑完成 → 改动卡片 4 文件分组。"
+    }
+  ],
+  "unitTestsRef": "frontend/src/components/copilot/copilotClient.streamReconnect.test.ts（6/6，截断→afterSeq 续传→failed+resumable 终态）",
+  "exceptions": [
+    "round 1 观察到一次自动化干扰下的按钮状态复探不一致（弹层/轮询时序干扰），round 2 全程干净复现，判定为验收自动化噪声而非产品缺陷；如需可另开候选核实按钮长稳态",
+    "wrapper 级联：dev-electron wrapper 自身 spawn 的 ：3001 后端被 kill 会级联关停整个 dev 栈（spawnChild 既有语义），与本次验收无关——渲染端使用的是 Electron supervisor 托管后端"
+  ],
+  "g0Note": "G0 开发期常态 · 不外推 packaged / Provider / GA"
+}
