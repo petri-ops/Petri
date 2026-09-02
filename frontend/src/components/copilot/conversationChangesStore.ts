@@ -12,6 +12,7 @@
 // ============================================================
 
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
+import { getApiPrefix } from '@/lib/env';
 
 export interface ConversationFileChange {
   path: string;
@@ -130,4 +131,100 @@ export function clearConversationFileChanges(conversationId: string): void {
     invalidateSnapshot(conversationId);
     emitChange();
   }
+}
+
+// ============================================================
+// BLOCK-40 P2 — reload 后会话改动水合
+//
+// 数据源：GET /api/ai/agent/conversation-changes?conversationId=
+// （tasks.files_changed_json 权威清单跨任务合并，见 routes/ai-agent/
+// conversation-changes.js）。纪律：
+//   - 只填充 live/已有记录缺失的路径（live 记录与权威对账优先，不覆盖）
+//   - in-flight 去重 + 每会话每页面生命周期只拉取一次
+//   - 失败静默：维持现状全量视图回退，不新增报错面
+// ============================================================
+
+/** 权威清单端点返回的单条改动（后端 camelCase 字段）。 */
+interface HydratedChangeItem {
+  path?: unknown;
+  status?: unknown;
+  iteration?: unknown;
+  tool?: unknown;
+  lastChangedAt?: unknown;
+}
+
+/** epoch ms 解析：ISO 字符串 / 数字均可，不可解析时回退 Date.now()。 */
+function toEpochMs(value: unknown): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') {
+    const ms = Date.parse(value);
+    if (Number.isFinite(ms)) return ms;
+  }
+  return Date.now();
+}
+
+/** 把权威清单条目合并进内存索引（只填充缺失路径，不覆盖已有记录）。 */
+export function mergeConversationFileChanges(
+  conversationId: string | undefined | null,
+  items: HydratedChangeItem[]
+): void {
+  if (!conversationId || !Array.isArray(items)) return;
+  const valid = items.filter(
+    (item): item is { path: string } & HydratedChangeItem =>
+      Boolean(item) && typeof item.path === 'string' && item.path.length > 0
+  );
+  if (valid.length === 0) return;
+  ensureSubscribed();
+  const bucket = changesByConversation.get(conversationId) ?? new Map();
+  for (const item of valid) {
+    if (bucket.has(item.path)) continue; // live / 已有记录优先，不覆盖
+    bucket.set(item.path, {
+      path: item.path,
+      status: item.status === 'created' ? 'created' : 'modified',
+      lastChangedAt: toEpochMs(item.lastChangedAt),
+      iteration: typeof item.iteration === 'number' ? item.iteration : undefined,
+      tool: typeof item.tool === 'string' ? item.tool : undefined,
+    });
+  }
+  changesByConversation.set(conversationId, bucket);
+  invalidateSnapshot(conversationId);
+  emitChange();
+}
+
+const hydrateInFlight = new Map<string, Promise<void>>();
+const hydratedOnce = new Set<string>();
+
+/**
+ * 从后端权威清单水合某会话的改动归属（挂载/切会话时调用）。
+ * 同会话只拉取一次（含并发去重）；失败静默维持全量回退。
+ */
+export function hydrateConversationFileChanges(
+  conversationId: string | undefined | null
+): Promise<void> {
+  if (!conversationId) return Promise.resolve();
+  if (hydratedOnce.has(conversationId)) return Promise.resolve();
+  const inFlight = hydrateInFlight.get(conversationId);
+  if (inFlight) return inFlight;
+  const promise = (async () => {
+    try {
+      const res = await fetch(
+        `${getApiPrefix()}/ai/agent/conversation-changes?conversationId=${encodeURIComponent(conversationId)}`
+      );
+      if (res.ok) {
+        const data = (await res.json()) as { changes?: HydratedChangeItem[] };
+        mergeConversationFileChanges(
+          conversationId,
+          Array.isArray(data?.changes) ? data.changes : []
+        );
+      }
+      // 非 2xx（400 校验失败 / 500 查询失败）— 诚实回退现状全量视图
+    } catch {
+      // 网络失败静默：不新增报错面
+    } finally {
+      hydrateInFlight.delete(conversationId);
+      hydratedOnce.add(conversationId);
+    }
+  })();
+  hydrateInFlight.set(conversationId, promise);
+  return promise;
 }

@@ -2137,6 +2137,18 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-277: 会话改动水合——reload 后历史会话恢复「本会话改动」精确归属（BLOCK-40） (2026-09-02 verified)
+
+**用户需求**：BLOCK-31 收口时登记的 roadmap 候选，用户裁决启动——`conversationChangesStore` 归属索引为纯内存态，页面 reload 后历史会话「本会话改动」回退全量视图；权威清单已持久化于 `tasks.files_changed_json`，只缺只读端点 + 前端挂载水合。
+
+**改动**（0 新依赖 / 后端只读，0 写路径改动）：① [agent-task-store.js](../core/biof3-server/agent-task-store.js) 新增 `listByConversation` 预编译语句（`json_extract(params,'$.conversationId')`，仅 terminal 任务，`COALESCE(finished_at, created_at)` 升序）+ `listConversationChanges`（跨任务按 path 合并、后写覆盖先写，`lastChangedAt` 用任务 finishedAt/createdAt 兜底）；② 新路由 [conversation-changes.js](../core/biof3-server/routes/ai-agent/conversation-changes.js) `GET /api/ai/agent/conversation-changes?conversationId=`（白名单校验、无任务诚实空清单、严格只读），[index.js](../core/biof3-server/routes/ai-agent/index.js) 注册；③ [conversationChangesStore.ts](../frontend/src/components/copilot/conversationChangesStore.ts) 新增 `mergeConversationFileChanges`（只填充 live/已有记录缺失路径，不覆盖）+ `hydrateConversationFileChanges`（in-flight + once 去重，失败静默维持全量回退）；④ [AgentChangesCard.tsx](../frontend/src/components/copilot/AgentChangesCard.tsx) 挂载/切会话时水合，成功后 `hasConversationScope` 变 true 自动切「本会话改动」视图（BLOCK-31 语义复用）。
+
+**门禁**：新增 `test/block40-conversation-changes.test.mjs` 7/7（多任务聚合/新覆盖旧/running 排除/400 校验/跨会话隔离/空清单）+ `conversationChangesStore.hydrate.test.ts` 8/8（合并不覆盖 live/once 去重/400 与网络失败静默回退）+ AgentChangesCard vitest 9/9（新增水合后自动切会话视图，deferred fetch 消竞态）/ tsc 0 / docs:check 180。
+
+**P4 实机**（dev Electron，真实后端 63008）：S1 会话 A agent 写 p40-a.txt → 卡片「本会话改动 · 第 1 轮 · p40-a.txt」，端点返回 `[{path,status:created,iteration:1,tool}]` ✓；S2 reload 后会话 A 卡片直接恢复「本会话改动」（不再全量回退）✓；S3 会话 B 写 p40-b.txt → reload → B 默认恢复仅 p40-b.txt ✓；S4 切回 A 仅 p40-a.txt（跨会话隔离不串，BLOCK-31 S2 判据 reload 后仍成立）✓。实机暴露并修复 P1 两处遗留缺陷：`listConversationChanges` 未定义（require 即崩）与 `index.js` register 漏挂载（端点 404）。证据 `acceptance/ui-277/`（4 截图 + evidence.json）。
+
+**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-276: Agent 事件流断线重连——免刷新自动亮「继续执行」（BLOCK-39） (2026-09-02 verified)
 
 **用户需求**：BLOCK-38 收口时登记的候选增强，用户裁决启动——后端重启中断任务后，前端应自动置 run 失败态并亮出「继续执行」按钮，免去刷新页面一步（BLOCK-38 现状：仅刷新后挂载孤儿恢复才发现）。

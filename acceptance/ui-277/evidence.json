@@ -1,0 +1,49 @@
+{
+  "ui": "UI-277",
+  "block": "BLOCK-40-CONV-CHANGES-HYDRATION",
+  "date": "2026-09-02",
+  "environment": {
+    "stack": "dev Electron (wrapper nohup, BIOF3_ELECTRON_USER_DATA_DIR/.biof3-dev-user-data)",
+    "realBackend": "http://localhost:63008/api（Electron supervisor 托管，BIOF3_DB_PATH=.biof3-dev-user-data/data/biof3.db）",
+    "note": ":3001 为 wrapper 侧后端（bioF3.db 空库），端点冒烟以页面 window.biof3Desktop.backendConfig.rApiBase 注入基址为准",
+    "project": "tinkspace (p_mthvakv3_fffw)",
+    "sessionA": "conv_e8db19c1-de3",
+    "sessionB": "会话 B（S3 新建，任务 2026-09-02T13:0xZ 完成）"
+  },
+  "steps": [
+    {
+      "id": "S1",
+      "claim": "实时链路：会话 A agent 任务写 p40-a.txt，卡片显示「本会话改动 · 第 1 轮 · p40-a.txt」；后端权威清单端点返回 [{path:p40-a.txt,status:created,iteration:1,tool:workspace_write,lastChangedAt:2026-09-02T12:57:13.699Z}]",
+      "evidence": "s1-live-conversation-scope.png + curl 冒烟（:63008）"
+    },
+    {
+      "id": "S2",
+      "claim": "核心判据：location.reload() 后打开会话 A，卡片直接显示「本会话改动」（第 1 轮 · p40-a.txt），不再回退全量视图（内存索引经水合恢复）",
+      "evidence": "s2-reload-hydrated-session-a.png"
+    },
+    {
+      "id": "S3",
+      "claim": "会话隔离：会话 B agent 写 p40-b.txt → reload → B 默认恢复仅 p40-b.txt（B 的权威清单水合，不含 A 的文件）",
+      "evidence": "s3-reload-hydrated-session-b.png"
+    },
+    {
+      "id": "S4",
+      "claim": "切换隔离：切回会话 A，卡片仅 p40-a.txt——BLOCK-31 S2 跨会话隔离判据在 reload 后仍成立",
+      "evidence": "s4-switch-back-session-a-isolated.png"
+    }
+  ],
+  "fixesDuringAcceptance": [
+    "P1 缺陷①：listConversationChanges 被 export 但未定义（require 即 ReferenceError）——补实现于 agent-task-store.js",
+    "P1 缺陷②：routes/ai-agent/index.js require 了 conversation-changes 但 register() 内漏调用（端点 404）——补 register + _submodules"
+  ],
+  "gates": {
+    "backendNodeTest": "test/block40-conversation-changes.test.mjs 7/7 + 回归 agent-files-changed 7/7",
+    "frontendVitest": "conversationChangesStore.hydrate.test.ts 8/8 + AgentChangesCard.test.tsx 9/9",
+    "tsc": 0,
+    "docsCheck": "PASS (180)",
+    "uiAuditCheck": "PASS"
+  },
+  "artifacts": [
+    "p40-a.txt / p40-b.txt（tinkspace 项目工作区内的 agent 写入产物，git 为事实源）"
+  ]
+}

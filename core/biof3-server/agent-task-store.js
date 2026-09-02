@@ -371,6 +371,17 @@ const stmts = {
      FROM tasks WHERE type = 'agent_loop' AND status = 'retry_pending'
      AND next_retry_at <= ? ORDER BY next_retry_at ASC`
   ),
+  // BLOCK-40 P1: 会话改动权威清单水合数据源——按会话查询已终态 agent_loop
+  // 任务（params 为 JSON，conversationId 走 json_extract；排除 running/
+  // retry_pending，未终态任务的 files_changed_json 尚未聚合，不构成权威清单）。
+  listByConversation: db.prepare(
+    `SELECT id, status, created_at, finished_at, files_changed_json
+     FROM tasks
+     WHERE type = 'agent_loop'
+       AND status NOT IN ('running', 'retry_pending')
+       AND json_extract(params, '$.conversationId') = ?
+     ORDER BY COALESCE(finished_at, created_at) ASC`
+  ),
   updateStatus: db.prepare(
     `UPDATE tasks SET agent_status = ?, status = ?, error = ?, finished_at = ?,
      files_changed_json = COALESCE(?, files_changed_json)
@@ -705,11 +716,38 @@ function tryParse(value) {
   }
 }
 
+// BLOCK-40 P1: 会话改动权威清单水合源——跨任务按 path 合并（行序 =
+// COALESCE(finished_at, created_at) 升序，后写覆盖先写），返回
+// [{path,status,iteration,tool,lastChangedAt}]；lastChangedAt 用任务
+// finishedAt/createdAt 兜底（files_changed_json 本身不存逐文件时间戳）。
+function listConversationChanges(conversationId) {
+  if (!conversationId) return [];
+  const rows = stmts.listByConversation.all(conversationId);
+  const byPath = new Map();
+  for (const row of rows) {
+    const items = tryParse(row.files_changed_json);
+    if (!Array.isArray(items)) continue;
+    const ts = row.finished_at || row.created_at;
+    for (const item of items) {
+      if (!item || typeof item.path !== 'string' || !item.path) continue;
+      byPath.set(item.path, {
+        path: item.path,
+        status: item.status === 'created' ? 'created' : 'modified',
+        iteration: typeof item.iteration === 'number' ? item.iteration : undefined,
+        tool: typeof item.tool === 'string' ? item.tool : undefined,
+        lastChangedAt: ts,
+      });
+    }
+  }
+  return Array.from(byPath.values());
+}
+
 module.exports = {
   insertAgentTask,
   createAgentTask,
   getAgentTask,
   getResumableTask,
+  listConversationChanges,
   sweepInterruptedRunningTasks,
   appendAgentTaskEvent,
   getAgentTaskEventsSince,

@@ -18,6 +18,7 @@ const events = require('./events');
 const tools = require('./tools');
 const backgroundProcesses = require('./background-processes');
 const llmTranscripts = require('./llm-transcripts');
+const conversationChanges = require('./conversation-changes');
 const resume = require('./resume');
 
 // AGENT_TASK_MODE_v1：默认 task 模式（loop 后台跑 + 订阅重连），legacy 回退到直连 SSE
@@ -34,9 +35,10 @@ module.exports = {
     events.register(app);
     backgroundProcesses.register(app);
     llmTranscripts.register(app);
+    conversationChanges.register(app);
     resume.register(app);
   },
 
   // 子模块 surface（方便测试与子域调试）
-  _submodules: { chat, context, events, tools, backgroundProcesses, llmTranscripts, resume },
+  _submodules: { chat, context, events, tools, backgroundProcesses, llmTranscripts, conversationChanges, resume },
 };

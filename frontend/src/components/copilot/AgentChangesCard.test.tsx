@@ -68,11 +68,16 @@ function makeBridge(files: Array<{ path: string; status: string }>) {
 beforeEach(() => {
   vi.clearAllMocks();
   clearConversationFileChanges('conv-1');
+  // BLOCK-40 P2 — 挂载即水合：默认 stub 掉真实 fetch（非 2xx 静默回退），
+  // 水合专项用例内按需覆盖
+  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({ ok: false, status: 400 } as Response)));
 });
 
 afterEach(() => {
   cleanup();
   clearConversationFileChanges('conv-1');
+  clearConversationFileChanges('conv-hy-e2e');
+  vi.unstubAllGlobals();
 });
 
 describe('AgentChangesCard (BLOCK-28.7)', () => {
@@ -221,5 +226,55 @@ describe('AgentChangesCard 会话作用域 (BLOCK-31 P3)', () => {
     expect(otherIdx).toBeGreaterThan(secondIdx);
     expect(card.textContent).toContain('first.ts');
     expect(card.textContent).toContain('exec-made.txt');
+  });
+});
+
+describe('AgentChangesCard 水合 (BLOCK-40 P2)', () => {
+  it('reload 后挂载：索引为空先全量回退，水合成功自动切「本会话改动」', async () => {
+    getBridgeMock.mockReturnValue(
+      makeBridge([
+        { path: 'hy-a.md', status: 'M' },
+        { path: 'other.py', status: 'M' },
+      ])
+    );
+    // 用手工 resolve 的 deferred 控制水合时点，消除竞态：
+    // 先断言全量回退，再放行水合结果
+    let resolveHydrate: (v: Response) => void = () => {};
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        () =>
+          new Promise<Response>((resolve) => {
+            resolveHydrate = resolve;
+          })
+      )
+    );
+
+    render(<AgentChangesCard conversationId="conv-hy-e2e" />);
+
+    // 水合返回前：索引为空 → 诚实回退全量视图（现状行为）
+    const card = await screen.findByTestId('agent-changes-card');
+    expect(card.textContent).toContain('工作区改动');
+    expect(card.textContent).toContain('other.py');
+
+    resolveHydrate({
+      ok: true,
+      status: 200,
+      json: () =>
+        Promise.resolve({
+          conversationId: 'conv-hy-e2e',
+          changes: [
+            { path: 'hy-a.md', status: 'created', iteration: 1, tool: 'workspace_write', lastChangedAt: '2026-09-02T01:00:00.000Z' },
+          ],
+        }),
+    } as Response);
+
+    // 水合成功 → 会话归属恢复 → 默认视图自动切「本会话改动」（BLOCK-31 S1 语义）
+    await waitFor(() => {
+      expect(card.textContent).toContain('本会话改动');
+    });
+    expect(card.textContent).toContain('1 个文件');
+    expect(card.textContent).toContain('hy-a.md');
+    expect(card.textContent).not.toContain('other.py');
   });
 });

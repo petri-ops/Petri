@@ -23,6 +23,7 @@ import { HoverPreviewPopover } from '@/components/desktop/WorkingTreeReview/Hove
 import type { DiffFile } from '@/components/desktop/WorkingTreeReview/useWorkingTreeReview';
 import {
   getConversationFileChanges,
+  hydrateConversationFileChanges,
   subscribeConversationChanges,
 } from './conversationChangesStore';
 
@@ -110,6 +111,14 @@ export function AgentChangesCard({
   // BLOCK-31 P3 — 会话归属记录存在时才启用会话过滤（旧会话 / 索引为空 → 全量视图）
   // 注意：以下派生值须在所有 hooks 之前计算（Hooks 不能位于条件 return 之后）
   const hasConversationScope = Boolean(conversationId) && conversationPaths.size > 0;
+
+  // BLOCK-40 P2 — reload/冷启动后会话归属索引为空：从后端权威清单水合
+  // （tasks.files_changed_json，store 内 in-flight + once 去重，失败静默）。
+  // 水合成功后 hasConversationScope 变 true，视图自动切「本会话改动」。
+  useEffect(() => {
+    if (conversationId) void hydrateConversationFileChanges(conversationId);
+  }, [conversationId]);
+
   const effectiveScope =
     hasConversationScope && scopePreference === 'conversation' ? 'conversation' : 'all';
   const entryList = entries ?? [];
