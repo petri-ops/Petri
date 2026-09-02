@@ -2137,6 +2137,20 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-273: 本会话改动按执行步骤（agent 迭代轮次）分组归属 (2026-09-02 verified)
+
+**用户反馈**：「目前 我们有本会话改动的所有文件是集中在一个工作区中的 能否落到每个执行步骤中呢？」——BLOCK-31 P3 的会话改动卡片只列文件清单，改动与执行记录（思考/工具轮次）无法对应；裁决为会话作用域下按 agent 迭代轮次分组展示。
+
+**改动**（0 新增 IPC / 0 新依赖）：① 后端 [agent-files-changed.js](core/biof3-server/agent-files-changed.js) 聚合时为每个文件附 `iteration`（tool_result 迭代号，preview 截断时回退 tool_call 迭代号）与 `tool`（workspace_write / workspace_replace）；② 前端 [conversationChangesStore.ts](frontend/src/components/copilot/conversationChangesStore.ts) 记录归属（运行中 tool_result 实时记录 + agentTaskDone 权威清单对账双通道）；③ [AgentChangesCard.tsx](frontend/src/components/copilot/AgentChangesCard.tsx) 会话作用域下按迭代升序分组渲染，组头「第 N 轮」+ 文件数，exec 盲区（无迭代归属）归入末尾「其他改动」，全部作用域维持平铺。修复过程：分组 Hooks 曾置于条件 return 之后触发 "Rendered more hooks" 崩溃，已上移至全部早退 return 之前。
+
+**门禁**：tsc 0 / `node --test test/agent-files-changed.test.mjs` 7/7（新增迭代归属用例）/ AgentChangesCard vitest 8/8（新增分组排序用例）/ conversationRunStore + ToolActivityList vitest 33/33 / docs:check 176 / ui:audit:check。
+
+**实机验证**（dev Electron CDP 9222 + 新后端 :3001，ThinkSpace 工作区）：S1 旧会话（UI-272 清单无 iteration）回退平铺「其他改动」；S2 两轮写文件任务后卡片分组「第 3 轮 2 个文件」（a.txt 最后一写 replace 在第 3 轮，后写覆盖先写，符合语义）；S3 追加任务两文件分轮写入，卡片渲染三组迭代升序：第 1 轮(c1) / 第 2 轮(c2) / 第 3 轮(a+b)；S4 交叉核对 biof3.db tasks.files_changed_json——iteration/tool 字段与 UI 分组完全一致；S5 探针文件清理。证据 `acceptance/ui-273/`（4 截图 + evidence.json S1–S5）。
+
+**增补 1 — 每次操作的逐行改动同步记录在执行记录内**（用户反馈：「这些文件的改动 同步记录在 每一次操作的地方 每一轮修改」）：① 后端 [workspace-tools.js](core/biof3-server/agent-tools/workspace-tools.js) `buildChangeDiff`（LCS 逐行 diff，公共前后缀裁剪 + DP 规模上限 1200 行退化为诚实整段替换统计，hunks ±2 行上下文、展示上限 48 行、单行 240 字符截断）接入 write/replace 结果；空文件（含新建）按 0 行计，修复创建误报 `−1`；② [tool-events.js](core/biof3-server/agent-tools/tool-events.js) 将 `changeDiff` 挂 toolResult 顶层（独立于 data，规避 publicData 截断，4KB 上限超限保留诚实统计丢弃 hunks）并随活动快照落库（历史会话可回看）；③ 前端 [toolActivity.ts](frontend/src/components/copilot/toolActivity.ts) 类型 + merge/restore 白名单；④ [ToolActivityList.tsx](frontend/src/components/copilot/ToolActivityList.tsx) ActivityRow 展开行渲染与改动卡片同构的文件行（`📄 路径 +N −M`，点击派发 `reviewOpenFile` 跳审阅，走 BLOCK-32 项目级解析）+ CodeMirrorDiffView 逐行预览，替换通用「影响」描述；⑤ 样式去灰底（思考块 5% 强调色底、diff 预览与 exec 输出 `--biof3-bg-subtle` 底全部移除，统一白底+细边框/分隔线，与会话区整体风格一致）。门禁增补：后端 harness/block34/agent-files-changed 25/25（新增 changeDiff 用例；harness 需迁移引导的临时 DB 运行，直接 node --test 会因 require 链打开无 migrations 的默认库报 `no such table: projects`）/ 前端 toolActivity + ToolActivityList + AgentChangesCard + conversationRunStore vitest 49/49（新增文件行跳审阅用例）/ tsc 0。实机增补验证（LinkSpace 工作区新会话）：写入行 +3−0 / 替换行 +1−1 逐行 diff 预览渲染正确，点击文件行右侧审阅面板自动打开，证据 `acceptance/ui-273/live-changediff*.png`、`live-clean-style.png`。
+
+**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-272: 模型思考过程全链路（reasoning_content 采集 → SSE 透传 → meta 持久化 → 执行记录内联展示） (2026-09-02 verified)
 
 **用户反馈**：「内容有点少了 看不到思考过程 无法确定每个工具之间的衔接思路 这个能优化做到吗？」——调查确认思考数据此前在 provider/route/前端/持久化四层全部缺失（`delta.reasoning_content` 被静默丢弃）；用户裁决**全套做**（含持久化，历史会话可回看）。

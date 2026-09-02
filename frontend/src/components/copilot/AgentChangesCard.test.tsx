@@ -188,4 +188,38 @@ describe('AgentChangesCard 会话作用域 (BLOCK-31 P3)', () => {
     expect(card.textContent).toContain('legacy.md');
     expect(screen.queryByRole('tab', { name: '全部' })).toBeNull();
   });
+
+  it('groups conversation-scope rows by execution step (iteration) with unattributed last (UI-273)', async () => {
+    getBridgeMock.mockReturnValue(
+      makeBridge([
+        { path: 'late.md', status: 'M' },
+        { path: 'exec-made.txt', status: '?' },
+        { path: 'second.py', status: 'M' },
+        { path: 'first.ts', status: 'M' },
+      ])
+    );
+    recordConversationFileChange('conv-1', 'first.ts', 'modified', { iteration: 1, tool: 'workspace_write' });
+    recordConversationFileChange('conv-1', 'second.py', 'modified', { iteration: 2, tool: 'workspace_replace' });
+    recordConversationFileChange('conv-1', 'late.md', 'modified', { iteration: 2, tool: 'workspace_write' });
+    // exec 盲区：无迭代归属
+    recordConversationFileChange('conv-1', 'exec-made.txt', 'created');
+
+    render(<AgentChangesCard conversationId="conv-1" />);
+
+    const card = await screen.findByTestId('agent-changes-card');
+    expect(card.textContent).toContain('本会话改动');
+    expect(card.textContent).toContain('4 个文件');
+    // 组头按迭代升序：第 1 轮 → 第 2 轮 → 其他改动（exec 盲区）
+    expect(card.textContent).toContain('第 1 轮');
+    expect(card.textContent).toContain('第 2 轮');
+    expect(card.textContent).toContain('其他改动');
+    const firstIdx = card.textContent.indexOf('第 1 轮');
+    const secondIdx = card.textContent.indexOf('第 2 轮');
+    const otherIdx = card.textContent.indexOf('其他改动');
+    expect(firstIdx).toBeGreaterThan(-1);
+    expect(secondIdx).toBeGreaterThan(firstIdx);
+    expect(otherIdx).toBeGreaterThan(secondIdx);
+    expect(card.textContent).toContain('first.ts');
+    expect(card.textContent).toContain('exec-made.txt');
+  });
 });

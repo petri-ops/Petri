@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { ToolActivityList } from './ToolActivityList';
+import { biof3Events } from '@/lib/events';
 import type { ToolActivityItem } from './toolActivity';
 
 function activity(
@@ -93,5 +94,56 @@ describe('ToolActivityList (UI-271 内联手风琴)', () => {
     expect(screen.queryByText('第一轮先看目录')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: '展开思考 第 1 轮' }));
     expect(screen.getByText('第一轮先看目录')).toBeTruthy();
+  });
+
+  it('renders a changeDiff file row like the changes card and jumps to review on click (UI-273)', () => {
+    render(
+      <ToolActivityList
+        activities={[
+          activity('success', {
+            key: 'w1',
+            actionLabel: '已修改',
+            actionDetail: 'src/u273.ts',
+            changeDiff: {
+              added: 3,
+              removed: 1,
+              truncated: false,
+              hunks: [
+                {
+                  oldStart: 1,
+                  newStart: 1,
+                  lines: [
+                    { type: 'ctx', text: 'alpha' },
+                    { type: 'del', text: 'beta' },
+                    { type: 'add', text: 'beta2' },
+                  ],
+                },
+              ],
+            },
+          }),
+        ]}
+      />
+    );
+    fireEvent.click(screen.getByText(/已完成 1 项/));
+    fireEvent.click(screen.getByRole('button', { name: '展开执行详情 已修改' }));
+
+    // 文件行：路径 + ±统计（与工作区改动卡片同构）
+    const fileRow = screen.getByRole('button', { name: /src\/u273\.ts \+3 −1/ });
+    expect(fileRow.textContent).toContain('+3');
+    expect(fileRow.textContent).toContain('−1');
+    expect(fileRow.closest('.sc-tool-changediff')?.querySelector('.sc-tool-changediff-preview')).toBeTruthy();
+
+    // 点击文件行 → 派发 reviewOpenFile 携带路径
+    const seen: Array<{ filePath: string }> = [];
+    const listener = (e: Event) => {
+      seen.push((e as CustomEvent<{ filePath: string }>).detail);
+    };
+    window.addEventListener(biof3Events.reviewOpenFile, listener);
+    try {
+      fireEvent.click(fileRow);
+    } finally {
+      window.removeEventListener(biof3Events.reviewOpenFile, listener);
+    }
+    expect(seen).toEqual([{ filePath: 'src/u273.ts' }]);
   });
 });

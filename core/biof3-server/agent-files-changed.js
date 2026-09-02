@@ -26,7 +26,7 @@ function isPreviewOnly(data) {
 
 /**
  * @param {Array<{seq:number,eventType:string,payload:object}>} events 按 seq 升序
- * @returns {{ files: Array<{path:string,status:'created'|'modified'}>, attributionComplete: boolean, sawExec: boolean }}
+ * @returns {{ files: Array<{path:string,status:'created'|'modified',iteration?:number,tool?:string}>, attributionComplete: boolean, sawExec: boolean }}
  */
 function aggregateFilesChanged(events) {
   const callArgsByCallId = new Map();
@@ -43,6 +43,8 @@ function aggregateFilesChanged(events) {
         callArgsByCallId.set(payload.callId, {
           path: typeof args.path === 'string' ? args.path : null,
           dryRun: args.dryRun === true,
+          // UI-273 — 执行步骤归属：tool_call 事件携带迭代号
+          iteration: Number.isFinite(payload.iteration) ? payload.iteration : null,
         });
       } else if (payload.name === 'workspace_exec') {
         // exec 是否写过文件不可静态判定，仅作为「清单可能不完整」的信号
@@ -59,6 +61,7 @@ function aggregateFilesChanged(events) {
     let path = null;
     let created = null;
     let dryRun = false;
+    let iteration = Number.isFinite(payload.iteration) ? payload.iteration : null;
 
     if (data && typeof data === 'object' && !isPreviewOnly(data)) {
       if (data.ok !== true) continue; // 失败的写入不算改动
@@ -72,10 +75,17 @@ function aggregateFilesChanged(events) {
       if (!callInfo || !callInfo.path) continue;
       path = callInfo.path;
       dryRun = callInfo.dryRun;
+      if (iteration == null) iteration = callInfo.iteration;
     }
 
     if (!path || dryRun) continue;
-    files.set(path, { path, status: created ? 'created' : 'modified' });
+    // UI-273 — 带执行步骤归属（迭代号 + 工具名）；后写覆盖先写
+    files.set(path, {
+      path,
+      status: created ? 'created' : 'modified',
+      ...(iteration != null ? { iteration } : {}),
+      ...(tr.tool ? { tool: tr.tool } : {}),
+    });
   }
 
   return {

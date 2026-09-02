@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
+import { CodeMirrorDiffView } from '@/components/desktop/WorkingTreeReview/CodeMirrorDiffView';
+import { biof3Events, dispatchBioF3Event } from '@/lib/events';
 import {
   formatToolDuration,
   formatToolSideEffects,
@@ -83,7 +85,48 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
         <div className="sc-tool-activity-body sc-tool-activity-detail">
           <span className="sc-tool-activity-tool">{activity.name}</span>
           {activity.truncated && activity.status === 'success' && <span>仅显示摘要</span>}
-          {sideEffects && <span>影响：{sideEffects}</span>}
+          {/* UI-273 增补 — 写操作展开显示本次操作的实际改动：文件行（点击跳审阅）+ diff 预览，
+              与工作区改动卡片（AgentChangesCard）同构呈现 */}
+          {activity.changeDiff ? (
+            <div className="sc-tool-changediff">
+              <button
+                type="button"
+                className="sc-tool-changediff-file"
+                title={`${activity.actionDetail || activity.name} — 点击在审阅中查看`}
+                onClick={() =>
+                  dispatchBioF3Event(biof3Events.reviewOpenFile, {
+                    filePath: activity.actionDetail || activity.name,
+                  })
+                }
+              >
+                <Icon name="file" size={12} />
+                <span className="sc-tool-changediff-path">
+                  {activity.actionDetail || activity.name}
+                </span>
+                <span className="sc-changes-add">+{activity.changeDiff.added}</span>
+                <span className="sc-changes-del">−{activity.changeDiff.removed}</span>
+              </button>
+              {activity.changeDiff.truncated && (
+                <span className="sc-tool-changediff-truncated">差异已截断</span>
+              )}
+              {activity.changeDiff.hunks.length > 0 ? (
+                <div className="sc-tool-changediff-preview">
+                  {activity.changeDiff.hunks.map((hunk, hunkIndex) => (
+                    <CodeMirrorDiffView
+                      key={`${activity.key}:${hunkIndex}`}
+                      filePath={activity.actionDetail || activity.name}
+                      isBinary={false}
+                      hunks={[hunk]}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="sc-tool-changediff-empty">差异较大，仅显示行数统计。</div>
+              )}
+            </div>
+          ) : (
+            sideEffects && <span>影响：{sideEffects}</span>
+          )}
           {showReason && activity.terminationReason && (
             <span className="sc-tool-activity-reason">原因：{activity.terminationReason}</span>
           )}

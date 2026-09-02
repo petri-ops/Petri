@@ -651,6 +651,158 @@ function createWorkspaceTools(options = {}) {
     };
   }
 
+  // UI-273 增补 — 逐行 diff（统计 + 截断 hunks），供前端执行记录展开行展示每次操作的实际改动。
+  // hunks 结构与前端 DiffFile 对齐：{ oldStart, newStart, lines: [{ type: 'ctx'|'add'|'del', text }] }。
+  const CHANGE_DIFF_MAX_DP_LINES = 1200; // 超过则退化为整段替换统计（诚实计数，不产精细 hunks）
+  const CHANGE_DIFF_MAX_HUNK_LINES = 48; // diff 展示行数上限
+  const CHANGE_DIFF_MAX_LINE_CHARS = 240; // 单行文本上限
+
+  function buildChangeDiff(beforeRaw, afterRaw) {
+    const toLines = (value) => {
+      const text = value == null ? '' : Buffer.isBuffer(value) ? value.toString('utf8') : String(value);
+      if (text === '') return []; // 空文件（含新建）= 0 行，不产生删除行
+      const lines = text.split('\n');
+      if (lines.length > 1 && lines[lines.length - 1] === '') lines.pop(); // 尾部换行不产生空行差异
+      return lines;
+    };
+    const a = toLines(beforeRaw);
+    const b = toLines(afterRaw);
+
+    // 公共前后缀裁剪，缩小 DP 规模
+    let start = 0;
+    while (start < a.length && start < b.length && a[start] === b[start]) start += 1;
+    let endA = a.length;
+    let endB = b.length;
+    while (endA > start && endB > start && a[endA - 1] === b[endB - 1]) {
+      endA -= 1;
+      endB -= 1;
+    }
+    const midA = a.slice(start, endA);
+    const midB = b.slice(start, endB);
+
+    function diffMidOps() {
+      const n = midA.length;
+      const m = midB.length;
+      if (n === 0 && m === 0) return [];
+      if (n > CHANGE_DIFF_MAX_DP_LINES || m > CHANGE_DIFF_MAX_DP_LINES) {
+        // 整段替换近似：计数诚实（删 A 段 + 增 B 段），不产精细 hunks
+        return [
+          ...midA.map((text, i) => ({ type: 'del', text, oldLine: start + i + 1, newLine: null })),
+          ...midB.map((text, j) => ({ type: 'add', text, oldLine: null, newLine: start + j + 1 })),
+        ];
+      }
+      const dp = new Uint32Array((n + 1) * (m + 1));
+      const w = m + 1;
+      for (let i = n - 1; i >= 0; i -= 1) {
+        for (let j = m - 1; j >= 0; j -= 1) {
+          dp[i * w + j] = midA[i] === midB[j]
+            ? dp[(i + 1) * w + j + 1] + 1
+            : Math.max(dp[(i + 1) * w + j], dp[i * w + j + 1]);
+        }
+      }
+      const ops = [];
+      let i = 0;
+      let j = 0;
+      while (i < n && j < m) {
+        if (midA[i] === midB[j]) {
+          ops.push({ type: 'ctx', text: midA[i], oldLine: start + i + 1, newLine: start + j + 1 });
+          i += 1;
+          j += 1;
+        } else if (dp[(i + 1) * w + j] >= dp[i * w + j + 1]) {
+          ops.push({ type: 'del', text: midA[i], oldLine: start + i + 1, newLine: null });
+          i += 1;
+        } else {
+          ops.push({ type: 'add', text: midB[j], oldLine: null, newLine: start + j + 1 });
+          j += 1;
+        }
+      }
+      while (i < n) {
+        ops.push({ type: 'del', text: midA[i], oldLine: start + i + 1, newLine: null });
+        i += 1;
+      }
+      while (j < m) {
+        ops.push({ type: 'add', text: midB[j], oldLine: null, newLine: start + j + 1 });
+        j += 1;
+      }
+      return ops;
+    }
+
+    const ops = diffMidOps();
+    let added = 0;
+    let removed = 0;
+    for (const op of ops) {
+      if (op.type === 'add') added += 1;
+      else if (op.type === 'del') removed += 1;
+    }
+
+    // 组装带 ±2 行上下文的 hunks，限制总行数
+    const CONTEXT = 2;
+    const clip = (line) => (line.length > CHANGE_DIFF_MAX_LINE_CHARS ? `${line.slice(0, CHANGE_DIFF_MAX_LINE_CHARS)}…` : line);
+    const hunks = [];
+    let linesUsed = 0;
+    let hunksTruncated = false;
+    let idx = 0;
+    while (idx < ops.length) {
+      if (ops[idx].type === 'ctx') {
+        idx += 1;
+        continue;
+      }
+      const hunkStart = Math.max(0, idx - CONTEXT);
+      let hunkEnd = idx;
+      let quiet = 0;
+      let k = idx;
+      while (k < ops.length) {
+        if (ops[k].type === 'ctx') {
+          quiet += 1;
+          if (quiet > CONTEXT) break;
+        } else {
+          quiet = 0;
+          hunkEnd = k;
+        }
+        k += 1;
+      }
+      const slice = ops.slice(hunkStart, hunkEnd + 1);
+      if (linesUsed + slice.length > CHANGE_DIFF_MAX_HUNK_LINES) {
+        hunksTruncated = true;
+        break;
+      }
+      linesUsed += slice.length;
+      const oldFirst = slice.find((op) => op.oldLine != null);
+      const newFirst = slice.find((op) => op.newLine != null);
+      hunks.push({
+        oldStart: oldFirst ? oldFirst.oldLine : (newFirst ? newFirst.newLine : 1),
+        newStart: newFirst ? newFirst.newLine : (oldFirst ? oldFirst.oldLine : 1),
+        lines: slice.map((op) => ({ type: op.type, text: clip(op.text) })),
+      });
+      idx = hunkEnd + 1;
+    }
+    if (idx < ops.length) hunksTruncated = true;
+
+    // 公共前后缀不参与 DP，但作为 ctx 上下文补进首/末 hunk（各最多 CONTEXT 行）
+    if (hunks.length > 0) {
+      const prefixCtx = a.slice(Math.max(0, start - CONTEXT), start).map((text, i) => ({
+        type: 'ctx',
+        text: clip(text),
+        line: Math.max(0, start - CONTEXT) + i + 1,
+      }));
+      if (prefixCtx.length > 0) {
+        hunks[0].lines.unshift(...prefixCtx);
+        hunks[0].oldStart = prefixCtx[0].line;
+        hunks[0].newStart = prefixCtx[0].line;
+      }
+      const suffixCtx = a.slice(endA, Math.min(a.length, endA + CONTEXT)).map((text, i) => ({
+        type: 'ctx',
+        text: clip(text),
+        line: endA + i + 1,
+      }));
+      if (suffixCtx.length > 0) {
+        hunks[hunks.length - 1].lines.push(...suffixCtx);
+      }
+    }
+
+    return { added, removed, truncated: hunksTruncated, hunks };
+  }
+
   async function atomicPublish(target, content, expected, options = {}) {
     await fsp.mkdir(path.dirname(target), { recursive: true });
     const tempPath = path.join(
@@ -723,6 +875,7 @@ function createWorkspaceTools(options = {}) {
       return withTargetLock(resolved.target, async () => {
         const existing = await checkWritePreconditions(resolved.target, args);
         const changeSummary = buildChangeSummary(resolved.relativePath, existing, content);
+        const changeDiff = buildChangeDiff(existing, content);
         if (args.dryRun !== true) {
           await atomicPublish(resolved.target, content, existing, { prefix: 'write' });
         }
@@ -735,6 +888,7 @@ function createWorkspaceTools(options = {}) {
           sha256: sha256(content),
           dryRun: args.dryRun === true,
           changeSummary,
+          changeDiff,
         };
       });
     }, { createRoot: args.dryRun !== true, requireCompatible: true });
@@ -774,6 +928,7 @@ function createWorkspaceTools(options = {}) {
           return errorResult('content_too_large', `替换后的文件超过 ${MAX_WRITE_BYTES} 字节`);
         }
         const changeSummary = buildChangeSummary(resolved.relativePath, before, after);
+        const changeDiff = buildChangeDiff(before, after);
         if (args.dryRun !== true) {
           await atomicPublish(resolved.target, after, before, {
             prefix: 'replace',
@@ -788,6 +943,7 @@ function createWorkspaceTools(options = {}) {
           sha256: sha256(after),
           dryRun: args.dryRun === true,
           changeSummary,
+          changeDiff,
         };
       });
     }, { createRoot: args.dryRun !== true, requireCompatible: true });

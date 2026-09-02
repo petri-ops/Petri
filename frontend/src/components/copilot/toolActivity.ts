@@ -13,6 +13,55 @@ export interface ToolActivityOutput {
   truncated: boolean;
 }
 
+/** UI-273 增补 — 写操作（workspace_write / workspace_replace）的逐行改动，随活动落库。 */
+export type ToolChangeDiffLineType = 'ctx' | 'add' | 'del';
+
+export interface ToolChangeDiffHunk {
+  oldStart: number;
+  newStart: number;
+  lines: Array<{ type: ToolChangeDiffLineType; text: string }>;
+}
+
+export interface ToolActivityChangeDiff {
+  added: number;
+  removed: number;
+  truncated?: boolean;
+  hunks: ToolChangeDiffHunk[];
+}
+
+function parseChangeDiff(value: unknown): ToolActivityChangeDiff | undefined {
+  if (!value || typeof value !== 'object') return undefined;
+  const raw = value as Record<string, unknown>;
+  const added = typeof raw.added === 'number' && Number.isFinite(raw.added) ? raw.added : 0;
+  const removed = typeof raw.removed === 'number' && Number.isFinite(raw.removed) ? raw.removed : 0;
+  const hunks = Array.isArray(raw.hunks)
+    ? raw.hunks.flatMap((hunk) => {
+        if (!hunk || typeof hunk !== 'object') return [];
+        const h = hunk as Record<string, unknown>;
+        const lines = Array.isArray(h.lines)
+          ? h.lines.flatMap((line) => {
+              if (!line || typeof line !== 'object') return [];
+              const l = line as Record<string, unknown>;
+              if (typeof l.text !== 'string' || typeof l.type !== 'string') return [];
+              const type: ToolChangeDiffLineType = l.type === 'add' || l.type === 'del' ? l.type : 'ctx';
+              return [{ type, text: l.text }];
+            })
+          : [];
+        return [{
+          oldStart: typeof h.oldStart === 'number' ? h.oldStart : 1,
+          newStart: typeof h.newStart === 'number' ? h.newStart : 1,
+          lines,
+        }];
+      })
+    : [];
+  return {
+    added,
+    removed,
+    truncated: raw.truncated === true,
+    hunks,
+  };
+}
+
 export interface ToolActivityItem {
   key: string;
   toolJobId?: string;
@@ -28,6 +77,7 @@ export interface ToolActivityItem {
   truncated?: boolean;
   terminationReason?: string;
   sideEffects?: ToolSideEffects;
+  changeDiff?: ToolActivityChangeDiff;
   summary?: string;
   actionLabel: string;
   actionDetail?: string;
@@ -76,6 +126,7 @@ export function restoreToolActivities(value: unknown): ToolActivityItem[] {
       truncated: typeof raw.truncated === 'boolean' ? raw.truncated : undefined,
       terminationReason: typeof raw.terminationReason === 'string' ? raw.terminationReason : undefined,
       sideEffects,
+      changeDiff: parseChangeDiff(raw.changeDiff),
       summary: typeof raw.summary === 'string' ? raw.summary : undefined,
       actionLabel: typeof raw.actionLabel === 'string' ? raw.actionLabel : '已调用',
       actionDetail: typeof raw.actionDetail === 'string' ? raw.actionDetail : undefined,
@@ -262,6 +313,7 @@ export function mergeToolResultActivity(
     truncated: result?.truncated,
     terminationReason: result?.terminationReason,
     sideEffects: result?.sideEffects,
+    changeDiff: parseChangeDiff(result?.changeDiff),
     summary: event.summary,
     // BLOCK-33 P3 — tool_result 合并时保留运行期累积的流式输出尾部
     output: index >= 0 ? current[index].output : undefined,

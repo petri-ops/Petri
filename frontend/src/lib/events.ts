@@ -103,7 +103,14 @@ export interface ConversationForkedDetail {
  */
 export interface AgentTaskDoneDetail {
   taskId: string;
-  filesChanged?: Array<{ path: string; status: string }>;
+  filesChanged?: Array<{
+    path: string;
+    status: string;
+    /** UI-273 — 执行步骤归属：改动发生时的 agent 迭代号（后端聚合提供，旧清单缺省） */
+    iteration?: number;
+    /** UI-273 — 产生改动的工具名（workspace_write / workspace_replace） */
+    tool?: string;
+  }>;
   conversationId?: string;
 }
 

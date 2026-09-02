@@ -107,6 +107,72 @@ export function AgentChangesCard({
     }, 350);
   }, []);
 
+  // BLOCK-31 P3 — 会话归属记录存在时才启用会话过滤（旧会话 / 索引为空 → 全量视图）
+  // 注意：以下派生值须在所有 hooks 之前计算（Hooks 不能位于条件 return 之后）
+  const hasConversationScope = Boolean(conversationId) && conversationPaths.size > 0;
+  const effectiveScope =
+    hasConversationScope && scopePreference === 'conversation' ? 'conversation' : 'all';
+  const entryList = entries ?? [];
+  const visibleEntries =
+    effectiveScope === 'conversation'
+      ? entryList.filter((e) => conversationPaths.has(e.path))
+      : entryList;
+
+  // UI-273 — 会话作用域下按执行步骤（agent 迭代轮次）分组展示；未归属的排末尾
+  const groupedRows = useMemo(() => {
+    if (effectiveScope !== 'conversation') return null;
+    const changeByPath = new Map(conversationChanges.map((c) => [c.path, c]));
+    const groups: Array<{ key: string; iteration: number | null; label: string; rows: ChangeEntry[] }> = [];
+    const byIteration = new Map<number, ChangeEntry[]>();
+    const others: ChangeEntry[] = [];
+    for (const entry of visibleEntries) {
+      const change = changeByPath.get(entry.path);
+      if (change && typeof change.iteration === 'number') {
+        const bucket = byIteration.get(change.iteration) ?? [];
+        bucket.push(entry);
+        byIteration.set(change.iteration, bucket);
+      } else {
+        others.push(entry);
+      }
+    }
+    for (const iteration of Array.from(byIteration.keys()).sort((a, b) => a - b)) {
+      groups.push({
+        key: `iter-${iteration}`,
+        iteration,
+        label: `第 ${iteration} 轮`,
+        rows: byIteration.get(iteration) ?? [],
+      });
+    }
+    if (others.length > 0) {
+      groups.push({ key: 'other', iteration: null, label: '其他改动', rows: others });
+    }
+    return groups;
+  }, [effectiveScope, conversationChanges, visibleEntries]);
+
+  const renderRow = useCallback(
+    (entry: ChangeEntry) => (
+      <button
+        key={entry.path}
+        type="button"
+        className="sc-changes-row"
+        title={`${entry.path} — 点击在审阅中查看`}
+        onMouseEnter={(e) => scheduleHoverPreview(entry.path, e.currentTarget)}
+        onMouseLeave={scheduleHoverClose}
+        onClick={() =>
+          dispatchBioF3Event(biof3Events.reviewOpenFile, { filePath: entry.path })
+        }
+      >
+        <span className={STATUS_CLASS[entry.status] ?? 'sc-changes-badge'}>
+          {entry.status}
+        </span>
+        <span className="sc-changes-row-path">{entry.path}</span>
+        <span className="sc-changes-add">+{entry.added}</span>
+        <span className="sc-changes-del">−{entry.removed}</span>
+      </button>
+    ),
+    [scheduleHoverPreview, scheduleHoverClose]
+  );
+
   const refresh = useCallback(async () => {
     const bridge = getBridge('workingTreeReview');
     if (!bridge) return;
@@ -143,14 +209,6 @@ export function AgentChangesCard({
 
   if (!entries || entries.length === 0 || dismissed) return null;
 
-  // BLOCK-31 P3 — 会话归属记录存在时才启用会话过滤（旧会话 / 索引为空 → 全量视图）
-  const hasConversationScope = Boolean(conversationId) && conversationPaths.size > 0;
-  const effectiveScope =
-    hasConversationScope && scopePreference === 'conversation' ? 'conversation' : 'all';
-  const visibleEntries =
-    effectiveScope === 'conversation'
-      ? entries.filter((e) => conversationPaths.has(e.path))
-      : entries;
   if (visibleEntries.length === 0) return null;
 
   const totalAdded = visibleEntries.reduce((acc, e) => acc + e.added, 0);
@@ -221,26 +279,18 @@ export function AgentChangesCard({
       )}
       {expanded && (
         <div className="sc-changes-list">
-          {visibleEntries.map((entry) => (
-            <button
-              key={entry.path}
-              type="button"
-              className="sc-changes-row"
-              title={`${entry.path} — 点击在审阅中查看`}
-              onMouseEnter={(e) => scheduleHoverPreview(entry.path, e.currentTarget)}
-              onMouseLeave={scheduleHoverClose}
-              onClick={() =>
-                dispatchBioF3Event(biof3Events.reviewOpenFile, { filePath: entry.path })
-              }
-            >
-              <span className={STATUS_CLASS[entry.status] ?? 'sc-changes-badge'}>
-                {entry.status}
-              </span>
-              <span className="sc-changes-row-path">{entry.path}</span>
-              <span className="sc-changes-add">+{entry.added}</span>
-              <span className="sc-changes-del">−{entry.removed}</span>
-            </button>
-          ))}
+          {groupedRows
+            ? groupedRows.map((group) => (
+                <div key={group.key} className="sc-changes-group">
+                  <div className="sc-changes-group-label" title="改动归属的执行步骤（agent 迭代轮次）">
+                    <Icon name="wrench" size={11} />
+                    <span>{group.label}</span>
+                    <span className="sc-changes-group-count">{group.rows.length} 个文件</span>
+                  </div>
+                  {group.rows.map(renderRow)}
+                </div>
+              ))
+            : visibleEntries.map(renderRow)}
           <button
             type="button"
             className="sc-changes-row sc-changes-row-all"

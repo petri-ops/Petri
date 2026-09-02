@@ -1,0 +1,53 @@
+{
+  "id": "UI-273",
+  "title": "本会话改动按执行步骤（agent 迭代轮次）分组归属",
+  "date": "2026-09-02",
+  "env": "dev Electron (CDP 9222) + 新后端 :3001（09:50 启动，晚于 agent-files-changed.js mtime 09:33，确认新代码）",
+  "project": "p_mthvakv3_fffw (linkspace/tinkspace, workspace /Users/zhangdiandian/Documents/2.OpenWork/ThinkSpace)",
+  "steps": [
+    {
+      "id": "S1",
+      "name": "基线：旧会话（UI-272 probe，权威清单无 iteration 字段）回退平铺",
+      "evidence": "01-baseline-old-conv-flat.png",
+      "observed": "本会话改动卡显示「其他改动 1 个文件 u272-probe.txt」，无迭代归属的正确回退"
+    },
+    {
+      "id": "S2",
+      "name": "任务 1：两轮写文件（创建 u273-a.txt → replace u273-a.txt + 创建 u273-b.txt）",
+      "evidence": "02-single-group-round3.png",
+      "observed": "任务完成（4 轮 · 修改 3 次 · 10s）后卡片分组「第 3 轮 2 个文件：u273-a.txt, u273-b.txt」；a.txt 创建在早轮、最后一写（replace）在第 3 轮，按后写覆盖先写归属第 3 轮，符合语义"
+    },
+    {
+      "id": "S3",
+      "name": "任务 2（同会话追加）：两文件分轮写入（第 1 轮 u273-c1.txt，第 2 轮 u273-c2.txt）",
+      "evidence": "03-multi-group.png",
+      "observed": "卡片渲染三组且迭代升序：第 1 轮(u273-c1.txt) / 第 2 轮(u273-c2.txt) / 第 3 轮(u273-a.txt, u273-b.txt)，共 4 个文件"
+    },
+    {
+      "id": "S4",
+      "name": "交叉核对后端权威清单 tasks.files_changed_json（biof3.db 只读查询）",
+      "evidence": "本文件内联记录",
+      "observed": [
+        "task 13e3a32b: u273-c1.txt {status:created, iteration:1, tool:workspace_write}; u273-c2.txt {status:created, iteration:2, tool:workspace_write}",
+        "task ff9ef50d: u273-a.txt {status:modified, iteration:3, tool:workspace_replace}; u273-b.txt {status:created, iteration:3, tool:workspace_write}",
+        "task 139227e2 (UI-272 旧任务): u272-probe.txt 无 iteration/tool（旧清单缺省）→ 前端回退「其他改动」"
+      ],
+      "conclusion": "后端持久化字段与 UI 分组完全一致"
+    },
+    {
+      "id": "S5",
+      "name": "清理探针文件（u273-a/b/c1/c2.txt）",
+      "evidence": "04-after-cleanup.png",
+      "observed": "4 个探针文件已从 workspace 删除；卡片继续显示 u272-probe*.txt（先前验收遗留，非本次产物，保留）与工作区既有改动——git 为准行为正确"
+    }
+  ],
+  "gates": {
+    "node --test test/agent-files-changed.test.mjs": "7/7 pass",
+    "AgentChangesCard.test.tsx (vitest)": "8/8 pass",
+    "conversationRunStore + ToolActivityList (vitest)": "33/33 pass",
+    "tsc --noEmit": "0 errors",
+    "docs:check": "PASS (176)",
+    "ui:audit:check": "PASS"
+  },
+  "conclusion": "verified：改动卡会话作用域按执行步骤分组，与后端权威清单一致；旧会话无归属字段时回退平铺"
+}

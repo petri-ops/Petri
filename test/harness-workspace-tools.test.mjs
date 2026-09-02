@@ -298,6 +298,48 @@ test('creates files and requires explicit overwrite plus matching sha256', async
   assert.equal(overwritten.created, false);
 });
 
+test('write/replace results carry per-line changeDiff for UI execution records (UI-273)', async () => {
+  // 创建：全部为新增行，无 ctx
+  const created = await tools.writeFile({ path: 'diff/probe.txt', content: 'alpha\nbeta\n' }, ctx);
+  assert.equal(created.ok, true);
+  assert.deepEqual(
+    { added: created.changeDiff.added, removed: created.changeDiff.removed, truncated: created.changeDiff.truncated },
+    { added: 2, removed: 0, truncated: false }
+  );
+  assert.equal(created.changeDiff.hunks.length, 1);
+  assert.ok(created.changeDiff.hunks[0].lines.every((l) => l.type === 'add'));
+
+  // 覆写：局部修改 → del+add 统计，hunk 含 del/add/ctx
+  const overwritten = await tools.writeFile(
+    {
+      path: 'diff/probe.txt',
+      content: 'alpha\nbeta2\ngamma\n',
+      overwrite: true,
+      expectedSha256: created.sha256,
+    },
+    ctx
+  );
+  assert.equal(overwritten.ok, true);
+  assert.equal(overwritten.changeDiff.added, 2);
+  assert.equal(overwritten.changeDiff.removed, 1);
+  const flat = overwritten.changeDiff.hunks.flatMap((h) => h.lines.map((l) => l.type));
+  assert.ok(flat.includes('del'), 'hunk should contain del lines');
+  assert.ok(flat.includes('add'), 'hunk should contain add lines');
+  assert.ok(flat.includes('ctx'), 'hunk should contain ctx context lines');
+
+  // 替换：oldText/newText 差异反映到统计
+  const read = await tools.readFile({ path: 'diff/probe.txt' }, ctx);
+  const replaced = await tools.replaceText(
+    { path: 'diff/probe.txt', oldText: 'gamma', newText: 'delta', expectedSha256: read.sha256 },
+    ctx
+  );
+  assert.equal(replaced.ok, true);
+  assert.deepEqual(
+    { added: replaced.changeDiff.added, removed: replaced.changeDiff.removed },
+    { added: 1, removed: 1 }
+  );
+});
+
 test('precise replace requires sha at the handler and supports optimistic concurrency', async () => {
   const missingSha = await tools.replaceText(
     { path: 'notes.md', oldText: 'TP53 is important.', newText: 'changed' },

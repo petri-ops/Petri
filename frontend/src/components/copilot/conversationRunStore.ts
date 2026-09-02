@@ -446,7 +446,12 @@ export function startConversationRun(options: StartConversationRunOptions): bool
           recordConversationFileChange(
             conversationId,
             writeData.path,
-            writeData.created === true ? 'created' : 'modified'
+            writeData.created === true ? 'created' : 'modified',
+            // UI-273 — 执行步骤归属：tool_result 事件携带迭代号与工具名
+            {
+              iteration: typeof event.iteration === 'number' ? event.iteration : undefined,
+              tool: event.toolResult?.tool,
+            }
           );
         }
         dispatchBioF3Event(biof3Events.projectWorkspaceChanged, {

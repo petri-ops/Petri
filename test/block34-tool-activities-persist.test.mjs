@@ -137,4 +137,59 @@ describe('BLOCK-34 P1 behavior: recorder snapshot lands in copilot_messages.meta
       db.close();
     }
   });
+
+  it('UI-273: buildToolResultEvent and recorder snapshot carry changeDiff for write ops', () => {
+    const { createToolActivityRecorder } = require(resolve('core/biof3-server/agent-tools'));
+    const { buildToolResultEvent } = require(resolve('core/biof3-server/agent-tools/tool-events'));
+
+    const changeDiff = {
+      added: 2,
+      removed: 1,
+      truncated: false,
+      hunks: [{
+        oldStart: 1,
+        newStart: 1,
+        lines: [
+          { type: 'ctx', text: 'alpha' },
+          { type: 'del', text: 'beta' },
+          { type: 'add', text: 'beta2' },
+          { type: 'add', text: 'gamma' },
+        ],
+      }],
+    };
+
+    // changeDiff 挂 toolResult 顶层（独立于 data）
+    const evt = buildToolResultEvent({
+      contractVersion: '1', traceId: 'tr', callId: 'call_d', tool: 'workspace_write',
+      status: 'success', durationMs: 5, data: { ok: true, path: 'a.txt', created: true, changeDiff },
+    });
+    assert.ok(evt.toolResult.changeDiff, 'changeDiff must be present at toolResult level');
+    assert.strictEqual(evt.toolResult.changeDiff.added, 2);
+    assert.strictEqual(evt.toolResult.changeDiff.hunks.length, 1);
+
+    // data 超限被 publicData 截断时 changeDiff 仍存活
+    const evt2 = buildToolResultEvent({
+      contractVersion: '1', traceId: 'tr', callId: 'call_e', tool: 'workspace_write',
+      status: 'success', durationMs: 5,
+      data: { ok: true, path: 'a.txt', changeDiff, filler: 'x'.repeat(3000) },
+    });
+    assert.strictEqual(evt2.toolResult.previewTruncated, true);
+    assert.ok(evt2.toolResult.changeDiff, 'changeDiff must survive publicData truncation');
+
+    // recorder 快照：recordResult 提取 changeDiff 随消息落库
+    const recorder = createToolActivityRecorder();
+    recorder.recordCall({ name: 'workspace_write', args: { path: 'a.txt' }, traceId: 'tr', callId: 'call_e', iteration: 1 });
+    recorder.recordResult({ ...evt2, iteration: 1 });
+    const snap = recorder.snapshot();
+    assert.ok(snap[0].changeDiff, 'persisted activity must include changeDiff');
+    assert.strictEqual(snap[0].changeDiff.added, 2);
+    assert.strictEqual(snap[0].changeDiff.hunks.length, 1);
+
+    // 只读工具不产生 changeDiff
+    const evtRead = buildToolResultEvent({
+      contractVersion: '1', traceId: 'tr', callId: 'call_r', tool: 'workspace_read',
+      status: 'success', durationMs: 5, data: { ok: true, path: 'a.txt' },
+    });
+    assert.strictEqual(evtRead.toolResult.changeDiff, undefined);
+  });
 });

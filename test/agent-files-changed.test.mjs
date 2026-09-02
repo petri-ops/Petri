@@ -66,8 +66,9 @@ test('aggregates created + modified writes and dedupes by path', () => {
   ];
   const result = aggregateFilesChanged(events);
   assert.deepEqual(result.files, [
-    { path: 'a.md', status: 'modified' }, // 后写覆盖先写：created → modified
-    { path: 'b.py', status: 'modified' },
+    // 后写覆盖先写：created → modified；tool 随结果记录（UI-273 执行步骤归属）
+    { path: 'a.md', status: 'modified', tool: 'workspace_write' },
+    { path: 'b.py', status: 'modified', tool: 'workspace_replace' },
   ]);
   assert.equal(result.attributionComplete, true);
 });
@@ -147,8 +148,60 @@ test('falls back to tool_call args.path when the result data is preview-truncate
     },
   ];
   const result = aggregateFilesChanged(events);
-  assert.deepEqual(result.files, [{ path: 'big-file.md', status: 'modified' }]);
+  assert.deepEqual(result.files, [{ path: 'big-file.md', status: 'modified', tool: 'workspace_write' }]);
   assert.equal(result.attributionComplete, false);
+});
+
+// UI-273 — 执行步骤归属：tool_result / tool_call 事件的 iteration 随清单带出
+test('attributes files to the agent iteration from tool_result, falling back to tool_call', () => {
+  const events = [
+    {
+      seq: 1,
+      eventType: 'tool_call',
+      payload: {
+        event: 'tool_call',
+        name: 'workspace_write',
+        callId: 'c1',
+        iteration: 2,
+        args: { path: 'truncated.md', dryRun: false },
+      },
+    },
+    {
+      seq: 2,
+      eventType: 'tool_result',
+      payload: {
+        event: 'tool_result',
+        iteration: 2,
+        toolResult: {
+          tool: 'workspace_write',
+          status: 'success',
+          callId: 'c1',
+          previewTruncated: true,
+          data: { preview: '{"ok":true,…' },
+        },
+      },
+    },
+    {
+      seq: 3,
+      eventType: 'tool_result',
+      payload: {
+        event: 'tool_result',
+        iteration: 3,
+        toolResult: {
+          tool: 'workspace_replace',
+          status: 'success',
+          callId: 'c2',
+          data: { ok: true, path: 'b.py', created: false, dryRun: false },
+        },
+      },
+    },
+  ];
+  const result = aggregateFilesChanged(events);
+  assert.deepEqual(result.files, [
+    // preview 截断回退：iteration 取 tool_call 事件
+    { path: 'truncated.md', status: 'modified', iteration: 2, tool: 'workspace_write' },
+    { path: 'b.py', status: 'modified', iteration: 3, tool: 'workspace_replace' },
+  ]);
 });
 
 test('ignores unrelated tools and empty events', () => {
@@ -186,13 +239,13 @@ test('markAgentTaskDone persists the authoritative filesChanged list', () => {
   );
 
   const aggregated = collectFilesChangedForTask(store, 'task-fc-1');
-  assert.deepEqual(aggregated.files, [{ path: 'report.md', status: 'created' }]);
+  assert.deepEqual(aggregated.files, [{ path: 'report.md', status: 'created', tool: 'workspace_write' }]);
 
   store.markAgentTaskDone('task-fc-1', aggregated.files);
   const task = store.getAgentTask('task-fc-1');
   assert.equal(task.agentStatus, 'done');
   assert.equal(task.status, 'completed');
-  assert.deepEqual(task.filesChanged, [{ path: 'report.md', status: 'created' }]);
+  assert.deepEqual(task.filesChanged, [{ path: 'report.md', status: 'created', tool: 'workspace_write' }]);
 });
 
 test('terminal marks without filesChanged keep the list empty; resetTaskForRetry clears it', () => {

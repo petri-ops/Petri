@@ -154,6 +154,8 @@ export interface StructuredToolResult {
   truncated: boolean;
   sideEffects: ToolSideEffects;
   data?: unknown;
+  /** UI-273 — 写操作（workspace_write / workspace_replace）的逐行改动（toolResult 顶层，独立于 data 截断）。 */
+  changeDiff?: unknown;
 }
 
 export interface ToolResultEvent {

@@ -18,6 +18,10 @@ export interface ConversationFileChange {
   status: 'created' | 'modified';
   /** 最近一次改动的 epoch ms（用于排序） */
   lastChangedAt: number;
+  /** UI-273 — 执行步骤归属：改动发生时的 agent 迭代号（未知时缺省） */
+  iteration?: number;
+  /** UI-273 — 产生改动的工具名（workspace_write / workspace_replace） */
+  tool?: string;
 }
 
 type ChangeListener = () => void;
@@ -54,6 +58,10 @@ function ensureSubscribed(): void {
         path: item.path,
         status: item.status === 'created' ? 'created' : 'modified',
         lastChangedAt: existing?.lastChangedAt ?? now,
+        // UI-273 — 权威清单携带执行步骤归属（旧格式清单无此字段则保留 live 值）
+        iteration:
+          typeof item.iteration === 'number' ? item.iteration : existing?.iteration,
+        tool: typeof item.tool === 'string' ? item.tool : existing?.tool,
       });
     }
     // 权威清单之外的 live 记录保留（exec 盲区 / 并发任务），不删除
@@ -75,12 +83,20 @@ function emitChange(): void {
 export function recordConversationFileChange(
   conversationId: string | undefined | null,
   path: string,
-  status: 'created' | 'modified'
+  status: 'created' | 'modified',
+  /** UI-273 — 执行步骤归属（迭代号 + 工具名），未知时缺省 */
+  attribution?: { iteration?: number; tool?: string }
 ): void {
   if (!conversationId || !path) return;
   ensureSubscribed();
   const bucket = changesByConversation.get(conversationId) ?? new Map();
-  bucket.set(path, { path, status, lastChangedAt: Date.now() });
+  bucket.set(path, {
+    path,
+    status,
+    lastChangedAt: Date.now(),
+    iteration: attribution?.iteration,
+    tool: attribution?.tool,
+  });
   changesByConversation.set(conversationId, bucket);
   invalidateSnapshot(conversationId);
   emitChange();

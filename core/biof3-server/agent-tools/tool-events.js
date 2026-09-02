@@ -22,6 +22,23 @@ function publicData(data) {
   };
 }
 
+// UI-273 增补 — 写操作的逐行改动（统计 + 截断 hunks）。挂在 toolResult 顶层而非 data 内：
+// data 受 PUBLIC_DATA_LIMIT 截断，超限会被整体替换为 preview 字符串，diff 必须独立存活。
+const CHANGE_DIFF_LIMIT = 4000;
+
+function boundedChangeDiff(result) {
+  if (!result || typeof result !== 'object') return undefined;
+  const raw = result.changeDiff;
+  if (!raw || typeof raw !== 'object') return undefined;
+  const added = Number.isFinite(raw.added) ? raw.added : 0;
+  const removed = Number.isFinite(raw.removed) ? raw.removed : 0;
+  const hunks = Array.isArray(raw.hunks) ? raw.hunks : [];
+  const base = { added, removed, truncated: raw.truncated === true, hunks };
+  if (safeJson(base).length <= CHANGE_DIFF_LIMIT) return base;
+  // 超限：保留诚实统计，丢弃精细 hunks
+  return { added, removed, truncated: true, hunks: [] };
+}
+
 function buildToolCallEvent({ name, args, traceId, callId, iteration }) {
   return {
     event: 'tool_call',
@@ -64,6 +81,8 @@ function buildToolResultEvent(envelope, args = {}, options = {}) {
       truncated: Boolean(envelope.truncated || published.truncated),
       sideEffects: envelope.sideEffects,
       data: published.data,
+      // UI-273 — 写操作逐行改动（独立于 data，规避 publicData 截断）
+      ...(boundedChangeDiff(result) ? { changeDiff: boundedChangeDiff(result) } : {}),
     },
   };
 
@@ -295,6 +314,15 @@ function createToolActivityRecorder() {
       truncated: result.truncated,
       terminationReason: result.terminationReason,
       sideEffects: result.sideEffects,
+      // UI-273 — 写操作逐行改动随活动快照落库（历史会话展开执行记录可回看）
+      changeDiff: result.changeDiff && typeof result.changeDiff === 'object'
+        ? {
+            added: Number.isFinite(result.changeDiff.added) ? result.changeDiff.added : 0,
+            removed: Number.isFinite(result.changeDiff.removed) ? result.changeDiff.removed : 0,
+            truncated: result.changeDiff.truncated === true,
+            hunks: Array.isArray(result.changeDiff.hunks) ? result.changeDiff.hunks.slice(0, 20) : [],
+          }
+        : undefined,
       summary: event.summary,
       actionLabel: existing ? existing.actionLabel : summarizeToolCallForActivity(name).actionLabel,
       actionDetail: existing ? existing.actionDetail : summarizeToolCallForActivity(name).actionDetail,
