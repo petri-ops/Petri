@@ -489,15 +489,27 @@ async function main() {
     console.log(`[dev] Electron started via LaunchServices; main log: ${electronLogPath}`);
     console.log(`[dev] Electron stderr: ${electronErrorLogPath}`);
   } else {
-    spawnChild(npxCmd, ['electron', '.', '--dev', ...extraElectronArgs], {
-      shutdownOnExit: 'always',
-      env: {
+    // Ensure dev data directories exist (macOS does this above; Windows must match).
+    fs.mkdirSync(electronUserDataDir, { recursive: true });
+    fs.mkdirSync(electronLocalDataDir, { recursive: true });
+      // Strip ELECTRON_RUN_AS_NODE before spawning the GUI. That var is set
+      // only for the migration-runner child (run as plain Node); if it leaks
+      // into the Electron main process, Electron degenerates into a plain Node
+      // and require('electron').app becomes undefined — crashing main.js at
+      // app.requestSingleInstanceLock(). (2026-09-02 launch fix.)
+      const electronEnv = {
         ...process.env,
         ELECTRON_IS_DEV: '1',
         NODE_ENV: 'development',
         BIOF3_RENDERER_DEV_URL: rendererUrl,
-      },
-    });
+        BIOF3_ELECTRON_USER_DATA_DIR: electronUserDataDir,
+        BIOF3_LOCAL_DATA_DIR: electronLocalDataDir,
+      };
+      delete electronEnv.ELECTRON_RUN_AS_NODE;
+      spawnChild(npxCmd, ['electron', '.', '--dev', ...extraElectronArgs], {
+        shutdownOnExit: 'always',
+        env: electronEnv,
+      });
   }
 }
 
