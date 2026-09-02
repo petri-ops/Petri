@@ -506,6 +506,8 @@ async function runLoop({
   let fatalAgentError = null;
   const assistantResultCards = [];
   const assistantToolActivities = require('./agent-tools').createToolActivityRecorder();
+  // UI-272 — 按迭代聚合模型思考段（reasoning_content），随结果返回供落库
+  const reasoningByIteration = Object.create(null);
   const continuationGuard = createContinuationGuard({
     maxChains: MAX_CONTINUATION_CHAINS,
     maxTokens: MAX_CONTINUATION_TOKENS,
@@ -575,6 +577,19 @@ async function runLoop({
               streamedText += event.content;
               if (!resultEditCompletionGuard.required) {
                 _emit({ choices: [{ delta: { content: event.content } }] });
+              }
+            }
+            // UI-272 — 思考段增量：按迭代聚合（截断 6K）并实时下发前端
+            if (event.type === 'reasoning_delta' && event.content && !aborted()) {
+              const key = String(iter + 1);
+              const prev = reasoningByIteration[key] || '';
+              if (prev.length < 6144) {
+                reasoningByIteration[key] = (prev + event.content).length > 6144
+                  ? (prev + event.content).slice(0, 6144) + '\n…（思考段已截断）'
+                  : prev + event.content;
+              }
+              if (!resultEditCompletionGuard.required) {
+                _emit({ choices: [{ delta: { reasoning_content: event.content } }] });
               }
             }
           },
@@ -1105,6 +1120,8 @@ async function runLoop({
     // BLOCK-34 P1 — 工具活动 recorder 随结果返回，供 agent-runner 落库到
     // 会话消息 meta（修复「任务完成后工具记录消失」：此前落库传 null）。
     assistantToolActivities,
+    // UI-272 — 思考段随结果返回，供 agent-runner 落库到消息 meta
+    reasoningByIteration,
     loopRunId,
     loopState,
     toolResultEventsByCallId,

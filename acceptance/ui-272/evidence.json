@@ -1,0 +1,39 @@
+{
+  "ui": "UI-272",
+  "title": "模型思考过程全链路（reasoning_content 采集 → SSE 透传 → meta 持久化 → 执行记录内联展示）",
+  "verifiedAt": "2026-09-02",
+  "environment": "dev Electron (CDP 9222) + biof3-server :3001（新代码重启后验证）",
+  "task": "真实 DeepSeek agent 任务：三步工具调用（workspace_exec ls → workspace_write u272-probe.txt → workspace_exec cat）",
+  "model": "deepseek-v4-flash-vision-exp",
+  "checks": [
+    {
+      "id": "S1",
+      "name": "DB meta 持久化",
+      "method": "只读查询 copilot_messages（task 139227e2 / conv_dace1956）",
+      "result": "meta_json 含 reasoningByIteration，第 1/2/3 轮思考段均落库（6K 截断策略生效）"
+    },
+    {
+      "id": "S2",
+      "name": "执行记录内联思考段",
+      "method": "CDP 点击摘要条 .sc-tool-activity-summary 展开手风琴",
+      "result": "reasoningCount=3，三个『思考 · 第 N 轮』引用块按迭代穿插在工具记录之间",
+      "evidence": "01-reasoning-inline-expanded.png"
+    },
+    {
+      "id": "S3",
+      "name": "历史会话恢复",
+      "method": "location.reload() 后重新展开摘要条",
+      "result": "reasoningCount=3，思考段从 meta.reasoningByIteration 完整恢复",
+      "evidence": "02-reasoning-restored-after-reload.png"
+    },
+    {
+      "id": "S4",
+      "name": "两级折叠（用户裁决增补）",
+      "method": "摘要条展开后 CDP 检查行头/详情可见性 + 截图",
+      "result": "手风琴内 8 个行头（3 思考 + 5 执行）默认全部收起（reasoningTexts=0 / outputs=0）；点击单条思考/执行仅展开该条（行头含命令摘要+状态+耗时，chevron 旋转）；其余行保持收起",
+      "evidence": "03-two-level-rows-collapsed.png / 04-two-level-row-expanded.png"
+    }
+  ],
+  "notes": "首次实机验证（00:45 任务）meta 无思考段，排查发现 :3001 后端为旧代码（07:35 启动早于改动）；kill 后由 dev-electron 重启新后端（00:56），复验通过。摘要条按钮类名为 .sc-tool-activity-summary（.sc-tool-activity-list 为容器）。",
+  "preExistingFailures": "test/deepseek-retry.test.mjs 预存 6 个 retry 语义用例基线即失败（deepseek.js 历史无 retry 层，测试指向不存在的层），与本次无关"
+}

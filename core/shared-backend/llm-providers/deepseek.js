@@ -367,6 +367,10 @@ class DeepSeekProvider {
         // of silently completing with an empty assistant message.
         if (choice.message && typeof choice.message === 'object') {
           const message = choice.message;
+          // UI-272: 非流式信封也可能携带思考内容（reasoning_content）
+          if (typeof message.reasoning_content === 'string' && message.reasoning_content) {
+            emit({ type: 'reasoning_delta', content: message.reasoning_content });
+          }
           if (typeof message.content === 'string' && message.content) {
             const cleanContent = stripLeakedToolMarkup(message.content);
             if (cleanContent) {
@@ -385,6 +389,11 @@ class DeepSeekProvider {
           return;
         }
         const delta = choice.delta || {};
+        // UI-272: 模型思考过程（DeepSeek reasoning_content）— 此前被直接丢弃，
+        // 导致会话内无法回看工具调用之间的衔接思路
+        if (typeof delta.reasoning_content === 'string' && delta.reasoning_content) {
+          emit({ type: 'reasoning_delta', content: delta.reasoning_content });
+        }
         if (typeof delta.content === 'string' && delta.content) {
           const cleanDelta = dsmlGuard.push(delta.content);
           if (cleanDelta) {

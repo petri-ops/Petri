@@ -567,6 +567,8 @@ module.exports = {
       let finalizationRouting = null;
       const assistantResultCards = [];
       const assistantToolActivities = createToolActivityRecorder();
+      // UI-272: 每轮迭代的模型思考段（reasoning_content），供前端回看工具衔接思路
+      const reasoningByIteration = Object.create(null);
 
       try {
         for (let iter = 0; iter < MAX_AGENT_ITERS && !aborted; iter++) {
@@ -595,11 +597,13 @@ module.exports = {
           };
 
           let streamedText = '';
+          let iterReasoningAcc = '';
           let upJson;
           let attemptBody = reqBody;
           const attemptLimit = finalizing ? MAX_FINALIZATION_ATTEMPTS : 1;
           for (let attempt = 1; attempt <= attemptLimit && !aborted; attempt++) {
             streamedText = '';
+            iterReasoningAcc = '';
             const protocolRecoveryAttempt = finalizing && attempt > 1;
             upJson = await callChatProvider(
               providerName,
@@ -615,6 +619,13 @@ module.exports = {
                   streamedText += event.content;
                   if (!resultEditCompletionGuard.required) {
                     sseSend({ choices: [{ delta: { content: event.content } }] });
+                  }
+                }
+                // UI-272: 思考段增量 — 转发给前端实时展示，并按迭代聚合供持久化
+                if (event.type === 'reasoning_delta' && event.content && !aborted) {
+                  if (iterReasoningAcc.length <= 32768) {
+                    iterReasoningAcc += event.content;
+                    sseSend({ choices: [{ delta: { reasoning_content: event.content } }] });
                   }
                 }
               },
@@ -672,9 +683,25 @@ module.exports = {
                       sseSend({ choices: [{ delta: { content: event.content } }] });
                     }
                   }
+                  // UI-272: provider 重试路径同样采集思考段
+                  if (event.type === 'reasoning_delta' && event.content && !aborted) {
+                    if (iterReasoningAcc.length <= 32768) {
+                      iterReasoningAcc += event.content;
+                      sseSend({ choices: [{ delta: { reasoning_content: event.content } }] });
+                    }
+                  }
                 },
                 { baseUrl, profileId: selectedPreset && selectedPreset.id, modelOverride: modelName }
               );
+            }
+          }
+          // UI-272: 记录本轮思考段（截断 6K，供 meta 持久化与前端回看）
+          {
+            const reasoningText = String(iterReasoningAcc || '').trim();
+            if (reasoningText) {
+              reasoningByIteration[iter + 1] = reasoningText.length > 6144
+                ? reasoningText.slice(0, 6144) + '\n…（思考段已截断）'
+                : reasoningText;
             }
           }
           if (!upJson || upJson.error || !upJson.choices) {
@@ -1001,6 +1028,10 @@ module.exports = {
                     ...(assistantResultCards.length ? { resultCards: assistantResultCards } : {}),
                     ...(assistantToolActivities.snapshot().length
                       ? { toolActivities: assistantToolActivities.snapshot() }
+                      : {}),
+                    // UI-272: 思考段按迭代持久化（供历史会话回看工具衔接思路）
+                    ...(Object.keys(reasoningByIteration).length
+                      ? { reasoningByIteration }
                       : {}),
                   };
                   appendMessageToConversation(_activeConv.id, 'assistant', assistantAcc.trim(), assistantMeta);

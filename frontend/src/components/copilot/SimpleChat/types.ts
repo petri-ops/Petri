@@ -98,6 +98,29 @@ export interface SimpleMessage {
    * without any visible error.
    */
   resultNodes?: ResultNode[];
+  /** UI-272 — 按迭代聚合的模型思考段（reasoning_content），展开执行记录时展示工具衔接思路。 */
+  reasoningByIteration?: Record<number, string>;
+}
+
+/**
+ * UI-272 — 恢复 meta.reasoningByIteration 白名单：数字迭代键 + 字符串值，
+ * 单段 8K / 最多 24 段封顶，异常形状静默丢弃。
+ */
+function restoreReasoningByIteration(
+  raw: unknown
+): Record<number, string> | undefined {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+  const out: Record<number, string> = {};
+  let count = 0;
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    const iteration = Number(key);
+    if (!Number.isInteger(iteration) || iteration < 1 || typeof value !== 'string') continue;
+    if (!value.trim()) continue;
+    if (count >= 24) break;
+    out[iteration] = value.slice(0, 8192);
+    count += 1;
+  }
+  return count > 0 ? out : undefined;
 }
 
 export function restoreSimpleMessage(message: ConversationMessage): SimpleMessage {
@@ -129,6 +152,7 @@ export function restoreSimpleMessage(message: ConversationMessage): SimpleMessag
       ? meta.processingDurationMs
       : undefined,
     resultNodes: parseAssistantResultNodes(meta.resultNodes) ?? undefined,
+    reasoningByIteration: restoreReasoningByIteration(meta.reasoningByIteration),
   };
 }
 

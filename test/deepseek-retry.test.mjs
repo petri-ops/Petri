@@ -240,6 +240,71 @@ test('chat: aborted signal cancels in-flight request without retrying', async ()
   }
 });
 
+// UI-272: 流式思考段（reasoning_content）必须以 reasoning_delta 事件透传，
+// 不再被静默丢弃 —— 会话内回看工具衔接思路的数据源。
+test('chatStream: emits reasoning_delta for delta.reasoning_content and non-stream envelope', async () => {
+  const { server, baseUrl } = await startServer((_req, res) => {
+    res.writeHead(200, { 'content-type': 'text/event-stream' });
+    res.write('data: {"choices":[{"delta":{"reasoning_content":"先看目录结构"}}]}\n\n');
+    res.write('data: {"choices":[{"delta":{"reasoning_content":"，再查入口文件"}}]}\n\n');
+    res.write('data: {"choices":[{"delta":{"content":"好的。"},"finish_reason":"stop"}],"usage":{"prompt_tokens":1,"completion_tokens":1}}\n\n');
+    res.write('data: [DONE]\n\n');
+    res.end();
+  });
+  try {
+    const events = [];
+    const result = await new DeepSeekProvider().chatStream(
+      'key',
+      { model: 'deepseek-chat', messages: [] },
+      {},
+      (event) => events.push(event),
+      { baseUrl, timeout: 500 }
+    );
+    assert.ok(!result.error, 'final result must not carry an error');
+    const reasoning = events
+      .filter((e) => e.type === 'reasoning_delta')
+      .map((e) => e.content)
+      .join('');
+    assert.equal(reasoning, '先看目录结构，再查入口文件');
+    // content 与 reasoning 互不污染
+    const content = events
+      .filter((e) => e.type === 'content_delta')
+      .map((e) => e.content)
+      .join('');
+    assert.equal(content, '好的。');
+    assert.equal(result.choices[0].message.content, '好的。');
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test('chatStream: non-stream message envelope with reasoning_content also emits reasoning_delta', async () => {
+  const { server, baseUrl } = await startServer((_req, res) => {
+    res.writeHead(200, { 'content-type': 'text/event-stream' });
+    res.write('data: {"choices":[{"message":{"reasoning_content":"思考中","content":"答案"},"finish_reason":"stop"}],"usage":{"prompt_tokens":1,"completion_tokens":1}}\n\n');
+    res.write('data: [DONE]\n\n');
+    res.end();
+  });
+  try {
+    const events = [];
+    const result = await new DeepSeekProvider().chatStream(
+      'key',
+      { model: 'deepseek-chat', messages: [] },
+      {},
+      (event) => events.push(event),
+      { baseUrl, timeout: 500 }
+    );
+    assert.ok(!result.error);
+    const reasoning = events
+      .filter((e) => e.type === 'reasoning_delta')
+      .map((e) => e.content)
+      .join('');
+    assert.equal(reasoning, '思考中');
+  } finally {
+    await closeServer(server);
+  }
+});
+
 test('chatStream: with retry opts in and recovers from transient req_error', async () => {
   let connectionCount = 0;
   const { server, baseUrl } = await startServer((_req, res) => {

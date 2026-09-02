@@ -46,6 +46,7 @@ import {
 import {
   DEFAULT_EXAMPLE_PROMPTS,
   MessageMeta,
+  MessageTime,
   ExamplePrompts,
   compactStageConclusion,
 } from './SimpleChat/helpers';
@@ -60,9 +61,8 @@ import {
   closeImagePreview,
 } from './SimpleChat/attachments';
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
-// BLOCK-36: 会话级「执行记录」浮窗（吸收 BLOCK-34 后台进程浮窗 + 工具活动分组）
+// UI-268: 「后台进程」浮窗（持久输出独立小窗口）；工具活动记录改为内联手风琴
 import { ToolActivityDock } from './ToolActivityDock';
-import type { ToolActivityDockGroup, ToolActivityFocusRequest } from './ToolActivityDock';
 import { AgentChangesCard } from './AgentChangesCard';
 import { MessageRail, type MessageRailItem } from './MessageRail';
 import { ChatScrollbar } from './ChatScrollbar';
@@ -138,6 +138,7 @@ import {
   formatToolDuration,
   type ToolActivityItem,
 } from './toolActivity';
+import { ToolActivityList } from './ToolActivityList';
 import { resolveToolSummaryPresentation } from './toolSummaryPresentation';
 import {
   clearConversationPendingApproval,
@@ -593,6 +594,7 @@ export function SimpleChat({
         error: summaryPresentation.error,
         ts: activeRun.assistantTs,
         toolActivities: activeRun.toolActivities,
+        reasoningByIteration: activeRun.reasoningByIteration,
         processingDurationMs: activeRun.processingDurationMs,
         statusMessage: summaryPresentation.statusMessage,
         summaryUnavailable: summaryPresentation.summaryUnavailable,
@@ -613,36 +615,6 @@ export function SimpleChat({
   const standaloneDurableLoop = durableLoop.loop && !displayMessages.some((message) => message.loop)
     ? durableLoop.loop
     : null;
-
-  // BLOCK-36 — 会话级「执行记录」浮窗分组：每条带工具活动的消息一组（含历史恢复快照），
-  // id 与消息渲染 key 一致，供内联摘要条点击定位。
-  const activityGroups = useMemo<ToolActivityDockGroup[]>(() => {
-    const groups: ToolActivityDockGroup[] = [];
-    displayMessages.forEach((m, i) => {
-      const activities = m.toolActivities || [];
-      if (activities.length === 0) return;
-      const key = m.ts ? `${m.role}-${m.ts}-${i}` : `${m.role}-${i}`;
-      const tsDate = m.ts ? Date.parse(m.ts) : Number.NaN;
-      const label = Number.isFinite(tsDate)
-        ? `${String(new Date(tsDate).getHours()).padStart(2, '0')}:${String(new Date(tsDate).getMinutes()).padStart(2, '0')}`
-        : `记录 ${groups.length + 1}`;
-      groups.push({
-        id: key,
-        label,
-        activities,
-        processingDurationMs: m.processingDurationMs,
-      });
-    });
-    return groups;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages, activeRun, durableLoop.loop]);
-
-  const [dockFocus, setDockFocus] = useState<ToolActivityFocusRequest | null>(null);
-  const dockFocusNonce = useRef(0);
-  const openToolActivityGroup = useCallback((groupId: string) => {
-    dockFocusNonce.current += 1;
-    setDockFocus({ groupId, nonce: dockFocusNonce.current });
-  }, []);
 
   // T83: does the latest AI reply contain any file references? Drives the
   // fade of the file-reference refresh button when there's nothing to refresh.
@@ -1234,13 +1206,6 @@ export function SimpleChat({
             const messageActivities = m.toolActivities || [];
             return (
               <React.Fragment key={key}>
-                {messageActivities.length > 0 && (
-                  <ToolActivityList
-                    activities={messageActivities}
-                    processingDurationMs={m.processingDurationMs}
-                    onOpen={() => openToolActivityGroup(key)}
-                  />
-                )}
                 <div className={`sc-msg sc-msg-${m.role}`}>
                   <div className="sc-msg-avatar">
                     {m.role === 'user' ? (
@@ -1250,7 +1215,15 @@ export function SimpleChat({
                     )}
                   </div>
                   <div className="sc-msg-body">
-                    {m.role === 'assistant' && <MessageMeta modelName={m.modelName} ts={m.ts} />}
+                    {/* UI-271 增补：摘要条移入 agent 消息体（图标之下），明确归属本次回复 */}
+                    {messageActivities.length > 0 && (
+                      <ToolActivityList
+                        activities={messageActivities}
+                        processingDurationMs={m.processingDurationMs}
+                        reasoningByIteration={m.reasoningByIteration}
+                      />
+                    )}
+                    {m.role === 'assistant' && <MessageMeta modelName={m.modelName} />}
                     {m.role === 'assistant' && m.loop && m.loop.loopRunId && (
                       <LoopStatusPanel loop={m.loop} pending={Boolean(m.pending)} />
                     )}
@@ -1365,6 +1338,9 @@ export function SimpleChat({
                           <Icon name="git-branch" size={14} />
                           {forkingAtIndex === i ? '创建中…' : '创建分支'}
                         </button>
+                        {/* UI-271 增补：回复时间移至操作行「创建分支」右侧 */}
+                        <span className="sc-msg-action-divider" aria-hidden="true" />
+                        <MessageTime ts={m.ts} />
                       </div>
                     )}
                   </div>
@@ -1644,13 +1620,8 @@ export function SimpleChat({
           隐藏系统原生 thumb，常驻纤细 thumb + 轨道线 */}
       <ChatScrollbar containerRef={scrollRef} />
 
-      {/* BLOCK-36: 会话级「执行记录」浮窗（工具活动分组 + 后台进程 tab） */}
-      <ToolActivityDock
-        conversationId={conversationId}
-        projectId={projectId}
-        groups={activityGroups}
-        focusRequest={dockFocus}
-      />
+      {/* UI-268: 「后台进程」浮窗（持久输出独立小窗口） */}
+      <ToolActivityDock conversationId={conversationId} projectId={projectId} />
 
       {/* Image Preview Modal */}
       {previewImage && (
@@ -1819,58 +1790,6 @@ function ErrorBanner({ message, severity, showDetails, technicalDetails }: Error
           <pre className="sc-error-details-content">{technicalDetails}</pre>
         </details>
       )}
-    </div>
-  );
-}
-
-function ToolActivityList({
-  activities,
-  processingDurationMs,
-  onOpen,
-}: {
-  activities: ToolActivityItem[];
-  processingDurationMs?: number;
-  onOpen: () => void;
-}): React.ReactElement {
-  // BLOCK-36 — 内联收敛为一行摘要条：详情与流式输出移入右下角「执行记录」浮窗，
-  // 点击摘要条打开浮窗并定位到本条消息的工具分组。
-  const running = activities.filter((activity) => activity.status === 'running').length;
-  const awaiting = activities.filter((activity) => activity.status === 'awaiting_confirmation').length;
-  const attention = activities.filter(
-    (activity) => activity.status === 'error' || activity.status === 'denied'
-  ).length;
-  const totalDurationMs = activities.reduce(
-    (total, activity) => total + (typeof activity.durationMs === 'number' ? activity.durationMs : 0),
-    0
-  );
-  const totalDuration = formatToolDuration(processingDurationMs ?? totalDurationMs);
-  const actionCounts = activities.reduce<Record<string, number>>((counts, activity) => {
-    const action = activity.actionLabel.replace(/^已/, '') || '处理';
-    counts[action] = (counts[action] || 0) + 1;
-    return counts;
-  }, {});
-  const actionSummary = Object.entries(actionCounts)
-    .slice(0, 3)
-    .map(([action, count]) => `${action} ${count} 次`)
-    .join(' · ');
-  const summary = running > 0
-    ? `正在处理 ${running}/${activities.length} 项${actionSummary ? ` · ${actionSummary}` : ''}`
-    : awaiting > 0
-      ? `等待确认 ${awaiting} 项`
-      : `已完成 ${activities.length} 项${attention ? ` · ${attention} 项需注意` : ''}${actionSummary ? ` · ${actionSummary}` : ''}${totalDuration ? ` · ${totalDuration}` : ''}`;
-
-  return (
-    <div className="sc-tool-activity-list" aria-label="工具活动">
-      <button
-        type="button"
-        className="sc-tool-activity-summary"
-        aria-label="在执行记录窗口查看详情"
-        title="在执行记录窗口查看详情"
-        onClick={onOpen}
-      >
-        <span className="sc-tool-activity-summary-label">{summary}</span>
-        <Icon name="chevron-right" size={14} />
-      </button>
     </div>
   );
 }

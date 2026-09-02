@@ -2137,6 +2137,38 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-272: 模型思考过程全链路（reasoning_content 采集 → SSE 透传 → meta 持久化 → 执行记录内联展示） (2026-09-02 verified)
+
+**用户反馈**：「内容有点少了 看不到思考过程 无法确定每个工具之间的衔接思路 这个能优化做到吗？」——调查确认思考数据此前在 provider/route/前端/持久化四层全部缺失（`delta.reasoning_content` 被静默丢弃）；用户裁决**全套做**（含持久化，历史会话可回看）。
+
+**改动**（0 新依赖）：① [deepseek.js](core/shared-backend/llm-providers/deepseek.js)：流式 `delta.reasoning_content` 与非流式 message 信封的 reasoning_content 均以新事件 `reasoning_delta` 透传；② [ai-agent/chat.js](core/biof3-server/routes/ai-agent/chat.js)：主调用与 provider 重试路径的 onEvent 均处理 reasoning_delta（单迭代转发封顶 32K），按迭代聚合 `reasoningByIteration[iter]`（单段 6K 截断）并写入 assistantMeta 持久化；②b（agent 任务路径补漏）[loop-orchestrator.js](core/biof3-server/loop-orchestrator.js)：流式回调聚合 `reasoningByIteration[iter+1]`（6K 截断）并实时下发 `choices[0].delta.reasoning_content` 帧，随 runLoop 结果返回；[agent-runner.js](core/biof3-server/agent-runner.js) 与 [conversation-adapter.js](core/biof3-server/conversation-adapter.js) 将其写入 assistant 消息 meta——修复 agent 任务思考段不落库（DB 验证 meta 缺失）；③ 前端 [copilotClient.ts](frontend/src/components/copilot/copilotClient.ts) 新增 `onReasoning` 回调解析 `choices[0].delta.reasoning_content`（task 模式与 legacy 共用 _dispatchSseEvent）；[conversationRunStore.ts](frontend/src/components/copilot/conversationRunStore.ts) 按迭代分桶累积（单迭代 24K 封顶，onIter 更新桶号），快照新增 `reasoningByIteration`；④ [SimpleChat/types.ts](frontend/src/components/copilot/SimpleChat/types.ts) `restoreReasoningByIteration` 白名单恢复（单段 8K/24 段封顶）；⑤ [ToolActivityList.tsx](frontend/src/components/copilot/ToolActivityList.tsx) 展开面板内：每次工具调用前渲染其迭代思考段（`思考 · 第 N 轮`引用块，同轮多工具只展示一次），无对应工具的思考段（最终结论整理）按迭代序补在末尾；单段限高 160px 滚动。非 reasoning 模型（无 reasoning_content）功能静默不展示。
+
+**门禁**：tsc 0 / 前端 vitest 38/38（runStore 思考分桶 + ToolActivityList 思考段去重/末尾补渲染）/ `node --test test/deepseek-retry.test.mjs` 新增 2 用例通过（预存 6 个 retry 语义用例基线即失败，与本次无关，已如实记录）/ chat.js 与 deepseek.js `node --check` 通过 / docs:check 176 / ui:audit:check。
+
+**实机验证**：见下方增补记录。
+
+**增补（同日实机收口）**：新增 [test/ui272-reasoning-persist.test.mjs](test/ui272-reasoning-persist.test.mjs)（静态契约 + adapter 落库行为 4/4，含空对象/缺省不写 meta 键）；清理 deepseek.js 临时探针。首次实机验证 meta 仍缺思考段，排查发现 `:3001` 后端为**旧代码**进程（启动早于改动，dev-electron 的健康检查被旧进程满足）——kill 后由 dev-electron 以新代码重启，复验通过。真实 DeepSeek 任务（ls → workspace_write → cat 三步工具链，deepseek-v4-flash-vision-exp）：①DB `copilot_messages.meta_json` 含 `reasoningByIteration` 第 1/2/3 轮真实思考内容；②摘要条（`.sc-tool-activity-summary`，容器为 `.sc-tool-activity-list`，父级 `sc-msg-body`）展开后 3 个『思考 · 第 N 轮』块按迭代穿插于工具记录之间；③`location.reload()` 后完整恢复。证据 `acceptance/ui-272/`（01-reasoning-inline-expanded / 02-reasoning-restored-after-reload + evidence.json）。测试门禁新增：`node --test test/ui272-reasoning-persist.test.mjs` 4/4。
+
+**增补 2（同日 · 用户裁决两级折叠）**：用户反馈「一点开就全部展开了」——[ToolActivityList.tsx](frontend/src/components/copilot/ToolActivityList.tsx) 改为两级折叠：手风琴内的「思考」块（ReasoningRow）与每条「执行」记录（ActivityRow）默认各自收起为一行摘要（思考：`思考 · 第 N 轮`；执行：图标+动作+命令摘要+状态+耗时），点击单条展开详情（思考全文 160px 限高滚动 / 命令输出等），chevron 旋转指示；其余行不受影响。CSS 新增 `.sc-tool-row-head` / `.sc-tool-row-chevron` / `.sc-tool-activity-duration`（[simple-chat.css](frontend/src/components/copilot/simple-chat.css)）。测试更新 4/4（含两级折叠收起/展开断言）、tsc 0 错误；实机复验：摘要条展开后 8 个行头全收起，单条点击仅展开该条（证据 03/04 截图 + evidence.json S4）。
+
+**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-271: 执行记录内联手风琴（摘要条就地向下展开；ToolActivityDock 精简为后台进程浮窗） (2026-09-02 verified)
+
+**用户反馈**：「执行记录位置不合适 有个割裂感 点击后向下展开执行记录（包括执行命令，执行的详细输出）？」——UI-267 的右下角浮窗与消息上下文割裂；裁决为摘要条就地向下展开。
+
+**改动**（0 新增 IPC / 0 新依赖 / 0 持久化结构变化）：① 新组件 `ToolActivityList.tsx`（从 SimpleChat 内联抽出）——摘要条改为手风琴：点击就地向下展开本条消息全部工具活动记录（复用 `sc-tool-activity*` 全局类：命令 code + 输出 pre + 状态/时长/影响面），再点收起；chevron 随展开旋转 90°；纯点击驱动不自动展开（保持会话区干净）。② `ToolActivityDock.tsx` 精简为纯后台进程浮窗（标题「后台进程」）——移除 groups/tabs/focusRequest/工具活动详情/auto-pop 运行签名机制，保留 agentBackgroundProcess 事件弹出、1s 轮询、日志自动滚动、chip 折叠、关闭 re-pop（持久输出独立小窗口职责不变，历史会话不自动弹出）。③ `SimpleChat.tsx`：删除 `activityGroups` memo + `dockFocus` 状态链，Dock 仅传 conversationId/projectId。④ `simple-chat.css` 增 `.sc-tool-activity-inline`（2px 左缘线 + 10px 缩进）与 chevron 旋转规则。
+
+**门禁**：tsc 0 / ToolActivityDock vitest 5/5（重写：事件弹出/跨会话忽略/chip 折叠不强拆/关闭 re-pop/会话切换重置） / ToolActivityList vitest 3/3（默认收起/展开显示命令+输出/运行中不自动展开） / SimpleChat + ChatScrollbar 回归 19/19 / docs:check 176 / ui:audit:check。
+
+**实机验证**（dev Electron CDP 9222，「系统环境验证报告」会话，真实历史 6 项工具活动）：S1 点击展开——`aria-expanded true`、`.sc-tool-activity-inline` 在 `.sc-root` 会话区内渲染 6 行记录、含执行命令（node http server / curl / process_stop）；S2 再点收起——inline 移除；S3 无割裂——无后台进程时浮窗不出现（`dockVisible false`），记录完全内联在消息上下文中。证据 `acceptance/ui-271/`（01-inline-expanded / 02-collapsed-clean 截图 + evidence.json）。
+
+**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+**增补（同日，用户裁决「摘要条应该放在agent图标之下，不然让人有一种和此次agent回复无关的感觉；摘要条中增加任务耗时」）**：①摘要条从独立行（38px 左缩进、位于消息块之上）移入 `sc-msg-body` 首元素（agent 图标之下、MessageMeta 之上），去掉独立行缩进与下边框，明确归属本次回复；②完成态摘要显式携带 `耗时 {formatToolDuration(processingDurationMs ?? totalDurationMs)}` 标签。CDP 实机复验：`inMsgBody true / isBodyFirstChild true / underAssistantIcon true`，label「已完成 6 项 · … · 耗时 11 s」。证据 `acceptance/ui-271/03-in-message-body.png`。门禁同上全过（vitest 27/27 含耗时断言）。
+
+**增补二（同日，用户裁决「对话时间是不是应该放到底部 创建分支 右侧？」）**：①`MessageMeta` 顶部只留模型名（无模型名时整体不渲染），移除时间与分隔符（连带清理 `.sc-msg-meta-sep` 样式）；②新增 `MessageTime`（helpers.tsx，保留 30s 自刷新渐进格式化「刚刚 → HH:MM → MM-DD HH:MM」），渲染到底部操作行「创建分支」右侧（divider 分隔，随操作行 hover/focus 显现，样式 `.sc-msg-action-time`）。CDP 实机复验：顶部 `topMetaText null`、`timeText「09-01 22:43」inActionsRow true / afterFork true`。证据 `acceptance/ui-271/04-time-in-actions-row.png`。
+
 ## UI-270: rail/thumb 锚定会话栏最外边界（会话内容固定宽度居中不变） (2026-09-02 verified)
 
 **用户反馈**：「中间栏会话区的左侧信息条和右侧的thumb 能否完全保持 左右最边界区域呢 中间会话区宽度固定」——UI-269 五调引入 `.sc-root` max-width 860px 居中后，rail 与 thumb 仍锚定在卡片内（sc-body），宽屏时随 860px 卡片内缩，未贴中栏最外边界。

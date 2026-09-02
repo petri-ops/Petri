@@ -206,6 +206,23 @@ describe('conversation run store', () => {
     });
   });
 
+  it('buckets reasoning deltas by iteration (UI-272)', () => {
+    start('conversation-r', 'verify the pipeline');
+    const callbacks = streamChatMock.mock.calls[0][0];
+
+    callbacks.onIter(1);
+    callbacks.onReasoning?.('先确认目录结构，');
+    callbacks.onReasoning?.('再查入口文件');
+    callbacks.onIter(2);
+    callbacks.onReasoning?.('第二轮：检查输出格式');
+
+    const snapshot = getConversationRunSnapshot('conversation-r');
+    expect(snapshot?.reasoningByIteration).toEqual({
+      1: '先确认目录结构，再查入口文件',
+      2: '第二轮：检查输出格式',
+    });
+  });
+
   it('preserves progress and tool activity when the user stops a background task', async () => {
     start('conversation-a', 'run a long analysis');
     const callbacks = streamChatMock.mock.calls[0][0];

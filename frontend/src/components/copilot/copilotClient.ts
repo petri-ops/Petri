@@ -325,6 +325,8 @@ export interface StreamChatOptions {
   /** Parent primary taskId when kind === 'subagent' (server validates ownership). */
   parentTaskId?: string;
   onDelta: (delta: string) => void;
+  /** UI-272 — 模型思考段增量（reasoning_content），按迭代聚合由调用方处理 */
+  onReasoning?: (delta: string) => void;
   onDone?: () => void;
   onError?: (err: Error) => void;
   /** Agent iteration started (1-indexed) */
@@ -650,6 +652,7 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
 function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
   const {
     onDelta,
+    onReasoning,
     onDone,
     onError,
     onIter,
@@ -772,6 +775,11 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
   const delta = obj?.choices?.[0]?.delta?.content;
   if (typeof delta === 'string' && delta.length > 0) {
     onDelta(delta);
+  }
+  // UI-272 — 思考段增量（OpenAI 兼容 reasoning_content 字段）
+  const reasoningDelta = obj?.choices?.[0]?.delta?.reasoning_content;
+  if (typeof reasoningDelta === 'string' && reasoningDelta.length > 0) {
+    onReasoning?.(reasoningDelta);
   }
 }
 

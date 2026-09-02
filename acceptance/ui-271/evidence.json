@@ -1,0 +1,52 @@
+{
+  "id": "UI-271",
+  "title": "执行记录内联手风琴（摘要条就地向下展开；ToolActivityDock 精简为后台进程浮窗）",
+  "date": "2026-09-02",
+  "environment": "dev Electron CDP 9222（Vite dev bundle HMR），会话「系统环境验证报告」（真实历史 6 项工具活动）",
+  "screenshots": ["01-inline-expanded.png", "02-collapsed-clean.png", "03-in-message-body.png", "04-time-in-actions-row.png"],
+  "increment": {
+    "feedback": "摘要条应该放在agent图标之下，不然让人有一种和此次agent回复无关的感觉；摘要条中增加任务耗时",
+    "change": "摘要条移入 sc-msg-body 首元素（agent 图标之下）；完成态摘要显式携带 耗时 标签",
+    "check": { "inMsgBody": true, "isBodyFirstChild": true, "underAssistantIcon": true, "label": "已完成 6 项 · 调用 1 次 · 后台运行 1 次 · 查询后台进程 2 次 · 耗时 11 s" },
+    "pass": true
+  },
+  "increment2": {
+    "feedback": "对话时间（09-01 22:43）是不是应该放到底部 创建分支 右侧？",
+    "change": "MessageMeta 顶部只留模型名；新增 MessageTime 渲染到操作行「创建分支」右侧（hover/focus 显现）",
+    "check": { "topMetaText": null, "timeText": "09-01 22:43", "timeInActionsRow": true, "timeAfterFork": true },
+    "pass": true
+  },
+  "checks": [
+    {
+      "id": "S1",
+      "name": "点击摘要条就地向下展开",
+      "check": {
+        "ariaExpanded": "true",
+        "inlineInConvArea": true,
+        "rows": 6,
+        "hasCommand": true,
+        "hasOutputTailThisConv": false
+      },
+      "pass": true
+    },
+    {
+      "id": "S2",
+      "name": "再次点击收起",
+      "check": { "expandedAfterReclick": false },
+      "pass": true
+    },
+    {
+      "id": "S3",
+      "name": "无后台进程时浮窗不出现（记录完全内联，无割裂）",
+      "check": { "dockVisible": false },
+      "pass": true
+    }
+  ],
+  "gates": {
+    "tsc": "0 errors",
+    "vitest": "ToolActivityDock 5/5 + ToolActivityList 3/3 + SimpleChat/ChatScrollbar 回归 19/19",
+    "docsCheck": "pass",
+    "uiAuditCheck": "pass"
+  },
+  "pass": true
+}

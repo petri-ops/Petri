@@ -403,6 +403,14 @@
   opacity: 1;
 }
 
+/* UI-271 增补 — 操作行内的回复时间（「创建分支」右侧，随操作行 hover 显现） */
+.sc-msg-action-time {
+  font-size: var(--biof3-font-size-sm);
+  line-height: 1;
+  color: var(--biof3-text-muted);
+  user-select: none;
+}
+
 .sc-msg-actions-summary {
   opacity: 1;
   flex-wrap: wrap;
@@ -461,10 +469,6 @@
 .sc-msg-meta-model {
   font-weight: 600;
   color: var(--biof3-text-tertiary);
-}
-
-.sc-msg-meta-sep {
-  color: var(--biof3-border-strong);
 }
 
 .sc-msg-body p {
@@ -868,12 +872,12 @@
 .cp-status-mark-progress { color: var(--biof3-accent); background: var(--biof3-accent-surface); }
 
 /* Tool activity */
+/* UI-271 增补：摘要条移入 agent 消息体（sc-msg-body 首元素，图标之下）——
+   去掉独立行时代的 38px 左缩进与下边框，明确归属本次回复 */
 .sc-tool-activity-list {
   display: grid;
   gap: 0;
-  align-self: stretch;
-  margin-left: 38px;
-  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border) 72%, transparent);
+  margin: 0 0 2px;
 }
 
 .sc-tool-activity-summary {
@@ -902,12 +906,88 @@
   font-weight: 500;
 }
 
-.sc-tool-activity {
+/* UI-268 — 摘要条手风琴：chevron 随展开旋转；内联记录面板就地向下展开 */
+.sc-tool-activity-summary[data-expanded] svg {
+  transform: rotate(90deg);
+}
+
+.sc-tool-activity-inline {
+  padding: 2px 0 6px 10px;
+  border-left: 2px solid color-mix(in srgb, var(--biof3-border) 62%, transparent);
+  display: grid;
+  gap: 2px;
+}
+
+/* UI-272 — 思考段（工具调用之间的衔接思路）：可折叠行，头部一行摘要 */
+.sc-tool-reasoning {
+  margin: 4px 0 2px;
+  border-left: 2px solid color-mix(in srgb, var(--biof3-accent) 42%, transparent);
+  background: color-mix(in srgb, var(--biof3-accent) 5%, transparent);
+  border-radius: 0 6px 6px 0;
+}
+
+.sc-tool-reasoning-head {
+  padding: 6px 8px;
+}
+
+.sc-tool-reasoning-label {
+  font-size: var(--biof3-font-size-body-sm);
+  font-weight: 600;
+  color: var(--biof3-text-tertiary);
+}
+
+.sc-tool-reasoning-text {
+  margin: 0 8px 6px;
+  font-size: var(--biof3-font-size-body-sm);
+  line-height: 1.55;
+  color: var(--biof3-text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+/* UI-272 增补 — 两级折叠行头：思考/执行条目默认收起，点击展开详情 */
+.sc-tool-row-head {
   display: flex;
   align-items: center;
   gap: 6px;
+  width: 100%;
   min-width: 0;
   padding: 4px 2px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sc-tool-row-head:hover {
+  background: color-mix(in srgb, var(--biof3-border) 32%, transparent);
+}
+
+.sc-tool-row-chevron {
+  display: flex;
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: var(--biof3-text-tertiary);
+}
+
+.sc-tool-row-head[data-expanded] .sc-tool-row-chevron svg {
+  transform: rotate(90deg);
+}
+
+.sc-tool-activity-duration {
+  color: var(--biof3-text-tertiary);
+  font-size: var(--biof3-font-size-xs);
+}
+
+.sc-tool-activity {
+  display: block;
+  min-width: 0;
+  padding: 2px 2px;
   border: 0;
   border-top: 1px solid color-mix(in srgb, var(--biof3-border) 58%, transparent);
   border-radius: 0;
@@ -950,6 +1030,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 3px 7px;
+  margin: 0 2px 4px 22px;
   color: var(--biof3-text-tertiary);
   font-size: var(--biof3-font-size-xs);
   line-height: 1.35;

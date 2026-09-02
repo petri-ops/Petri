@@ -42,11 +42,23 @@ export const DEFAULT_EXAMPLE_PROMPTS: ExamplePrompt[] = [
 ];
 
 /**
- * T83 — small header shown on every AI message: `模型名 · 回复时间`.
- * Time is progressively formatted (刚刚 → HH:MM → MM-DD HH:MM) via a 30s
- * timer so an open conversation ages the labels without a full re-render.
+ * T83 — small header shown on every AI message: 模型名。
+ * （UI-271 增补：回复时间移至底部操作行「创建分支」右侧，由 MessageTime 渲染）
  */
-export function MessageMeta({ modelName, ts }: { modelName?: string; ts?: string }): React.ReactElement | null {
+export function MessageMeta({ modelName }: { modelName?: string; ts?: string }): React.ReactElement | null {
+  if (!modelName) return null;
+  return (
+    <div className="sc-msg-meta" aria-label="回复信息">
+      <span className="sc-msg-meta-model">{modelName}</span>
+    </div>
+  );
+}
+
+/**
+ * UI-271 增补 — 回复时间（底部操作行内）。
+ * 时间渐进格式化（刚刚 → HH:MM → MM-DD HH:MM），30s 定时器让时间标签随时间自刷新。
+ */
+export function MessageTime({ ts }: { ts?: string }): React.ReactElement | null {
   const [, setTick] = useState(0);
   useEffect(() => {
     const timer = window.setInterval(() => setTick((n) => n + 1), 30000);
@@ -55,13 +67,7 @@ export function MessageMeta({ modelName, ts }: { modelName?: string; ts?: string
   if (!ts) return null;
   const time = formatRelativeTime(ts);
   if (!time) return null;
-  return (
-    <div className="sc-msg-meta" aria-label="回复信息">
-      {modelName && <span className="sc-msg-meta-model">{modelName}</span>}
-      {modelName && <span className="sc-msg-meta-sep" aria-hidden="true">·</span>}
-      <span className="sc-msg-meta-time">{time}</span>
-    </div>
-  );
+  return <span className="sc-msg-action-time">{time}</span>;
 }
 
 export function ExamplePrompts({ prompts, onSelect }: ExamplePromptsProps): React.ReactElement {

@@ -96,6 +96,8 @@ export interface ConversationRunSnapshot {
   parentTaskId?: string;
   /** HLE-C4R: live durable-loop projection (null until the backend starts a LoopRun). */
   loop?: ConversationLoopState | null;
+  /** UI-272 — 按迭代聚合的模型思考段（reasoning_content），流式累积；done 后随消息展示并经后端 meta 持久化。 */
+  reasoningByIteration?: Record<number, string>;
 }
 
 interface StartConversationRunOptions {
@@ -241,6 +243,8 @@ export function startConversationRun(options: StartConversationRunOptions): bool
   controllers.get(conversationId)?.abort();
   controllers.set(conversationId, ctrl);
   let assistantAcc = '';
+  // UI-272 — 当前迭代号（onIter 更新），思考段按迭代分桶
+  let currentIter = 1;
 
   runs.set(conversationId, {
     conversationId,
@@ -259,6 +263,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       ? options.context.activeArtifact.contextToken
       : undefined,
     toolActivities: [],
+    reasoningByIteration: {},
     pendingApproval: null,
     startedAt,
     taskId: options.resumeTaskId ?? undefined,
@@ -300,6 +305,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     | 'onAgentProgress'
     | 'onResultEditProgress'
     | 'onDelta'
+    | 'onReasoning'
     | 'onToolCall'
     | 'onToolOutput'
     | 'onToolResult'
@@ -309,6 +315,8 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     | 'onError'
   > = {
     onIter: (iteration) => {
+      // UI-272 — 先更新迭代号再走原有重置逻辑
+      currentIter = Math.max(1, iteration);
       if (iteration <= 1) return;
       assistantAcc = '';
       replaceRun(conversationId, (current) => ({
@@ -378,6 +386,21 @@ export function startConversationRun(options: StartConversationRunOptions): bool
         assistantPending: false,
         statusMessage: undefined,
       }));
+    },
+    // UI-272 — 思考段增量按迭代累积（单迭代 24K 封顶，防 meta 膨胀）
+    onReasoning: (delta) => {
+      replaceRun(conversationId, (current) => {
+        const prev = current.reasoningByIteration?.[currentIter] || '';
+        if (prev.length >= 24576) return current;
+        const merged = (prev + delta).slice(0, 24576);
+        return {
+          ...current,
+          reasoningByIteration: {
+            ...(current.reasoningByIteration || {}),
+            [currentIter]: merged,
+          },
+        };
+      });
     },
     onToolCall: (event: ToolCallEvent) => {
       replaceRun(conversationId, (current) => ({

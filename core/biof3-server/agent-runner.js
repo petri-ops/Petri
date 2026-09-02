@@ -622,6 +622,7 @@ async function runAgentLoop({
     // BLOCK-34 P1 — 工具活动快照随消息落库（此前传 null 导致任务完成后
     // 前端 re-conciliation 覆盖内存快照时工具记录消失）。
     assistantToolActivities,
+    reasoningByIteration,
     loopRunId,
     loopState,
     cancellationObserved,
@@ -661,6 +662,10 @@ async function runAgentLoop({
         assistantProgress: null,
         resultEditProgress: null,
         assistantToolActivities: assistantToolActivities || null,
+        // UI-272 — 思考段随消息落库（历史会话可回看每轮工具调用前的思考）
+        reasoningByIteration: reasoningByIteration && Object.keys(reasoningByIteration).length
+          ? reasoningByIteration
+          : null,
         assistantResultCards: [],
         loopRunId,
         loopState,

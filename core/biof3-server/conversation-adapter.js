@@ -69,6 +69,8 @@ function appendAssistantMessage({
   assistantProgress,
   resultEditProgress,
   assistantToolActivities,
+  // UI-272 — 按迭代聚合的模型思考段（reasoning_content），随消息落库
+  reasoningByIteration,
   assistantResultCards,
   loopRunId,
   loopState,
@@ -157,6 +159,11 @@ function appendAssistantMessage({
     // Add tool activities
     if (assistantToolActivities && assistantToolActivities.snapshot && assistantToolActivities.snapshot().length > 0) {
       assistantMeta.toolActivities = assistantToolActivities.snapshot();
+    }
+
+    // UI-272 — Add reasoning by iteration
+    if (reasoningByIteration && typeof reasoningByIteration === 'object' && Object.keys(reasoningByIteration).length > 0) {
+      assistantMeta.reasoningByIteration = reasoningByIteration;
     }
 
     // Add loop reference
