@@ -1464,7 +1464,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified (dev Electron 边界内；UI-200 证据 + focused 单测)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-193: BLOCK-22 — Accept/Reject widget 与 hunk IPC (2026-08-24 → 2026-08-28 in_progress)
+## UI-193: BLOCK-22 — Accept/Reject widget 与 hunk IPC (2026-08-24 → 2026-09-03 superseded · BLOCK-43 收口)
 
 **目标**：在 inline-diff 视图内提供按 hunk 的 Accept/Reject widget，接入 BLOCK-20 既有 git IPC（0 新增 IPC）。
 
@@ -1472,7 +1472,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **验证**：BLOCK-22 focused vitest 53/53（widget 形态/回调/IPC mock 用例）。**2026-08-28 dev Electron 实机过目（BLOCK-24 P1）**：scratch 修改 CHANGELOG.md 后，`listModified` 正确看到修改、inline diff 正常渲染（changed ×2 / inserted ×1，scratch 行可见），但 accept/reject widget 未渲染（widget host / accept / reject 按钮均为 0）。**根因（代码级确认）**：BLOCK-23 `CodeMirrorDiffView` 构造的 `DiffRevision` 不含 `hunks` 字段，widget extension 的 `getHunks()` 恒为空；Working Tree Review 的 accept/reject 交互实际由 BLOCK-20 抽屉动作条承担（头部 A accept / R reject + pending/accepted/rejected 计数）。证据 `acceptance/ui-193/electron-accept-reject-widget-dev.{json,png}`（passed:false，含根因）。widget 上业务路径（填充 hunks 或把 accept/reject 路由到 widget）属产品决策，不在 BLOCK-24 台账范围。
 
-**状态**: in_progress (extension 已实现 + 单元验证；业务路径未呈现 widget，集成缺口已实机取证并登记)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**BLOCK-43（2026-09-02，用户裁决「退休死代码 + 实机复核」）**：BLOCK-28 `hunkControls.ts`（`wt-hunk-controls` 悬浮控件，git hunk 语义 + `path#hunkIndex` 决策键 + 键盘 A/R 流）已在 ReviewMode 业务路径承担按 hunk 接受/拒绝（UI-206 verified），BLOCK-22 通用 widget 与之功能重叠且业务路径从未点亮，判定死代码退休。P1 已移除全链：`acceptRejectWidget.ts` / `DiffActionBar.tsx`（+ module.css）/ `events-bus.test.tsx` 整删，`useCodeMirrorEditor.ts` / `types.ts` / `CodeMirrorEditor.tsx` / `CodeMirrorEditor.module.css` / `events.ts`（hunkAccepted/hunkRejected）/ `index.ts` barrel 及相关测试桩清理；hunkControls 活路径（`decideHunk` / `applyInverseHunk` / `rejectHunkByInverseHunk` / `revertFile` bridge 方法与 IPC）全保留。P2 定向门禁：tsc 0 + 定向 vitest 87/87（editor + WorkingTreeReview）+ docs:check PASS。
+
+**P3 实机复核（2026-09-03，dev Electron CDP :9222，tinkspace 项目 ThinkSpace 工作区）**：login.html 双 hunk scratch 改动 → `wt-hunk-controls` 渲染（每 hunk 首行行尾接受/拒绝按钮）→ 鼠标点击「接受」→ 已接受态 → 键盘 j 导航 + r 拒绝 → 双 hunk 相继「已拒绝」且磁盘 SCRATCH 行全部回退（`git diff login.html` 归零，scratch 无残留）。复核中就地修复活路径真实缺陷：`src/ipc/working-tree-review.js` `buildReversePatchForReject` 反向 patch 头部 start/count 按正向语义取值（pre-image 应为 new 侧）且变更块内 -/+ 行交错违反 unified diff 规范，git apply 必拒——修正取值并按块分组重排后，离线临时仓（-U3 单 hunk 全 reject / -U1 双 hunk 逐个 reject）与实机均干净 apply。证据 `acceptance/ui-193/block43-p3-live-check.json` + 截图。
+
+**状态**: superseded（BLOCK-43 收口：业务路径 = UI-206 hunkControls + BLOCK-43 P3 实机复核；通用 widget 死代码已退休）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-194: BLOCK-22 — 聊天卡片跳转联动与 pending-scroll 桥接层 (2026-08-24 → 2026-09-02 verified)
 

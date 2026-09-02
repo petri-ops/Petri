@@ -57,7 +57,8 @@ export function createUnifiedDiffExtension(
     allowInlineDiffs: true,
     // 行号 gutter 标记
     gutter: true,
-    // P1 关闭 Accept/Reject UI；P2 才接 acceptRejectWidget
+    // BLOCK-43：通用 Accept/Reject widget 已退休，不启用 mergeControls；
+    // 业务路径的按 hunk 决策由 BLOCK-28 hunkControls 承担
     mergeControls: false,
     // BLOCK-28：hunk 间折叠未变更上下文（可选）
     ...(options?.collapseUnchanged ? { collapseUnchanged: options.collapseUnchanged } : {}),

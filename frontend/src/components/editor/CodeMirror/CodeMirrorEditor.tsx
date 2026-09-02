@@ -8,30 +8,22 @@
  * - mode：normal / inline-diff 切换通过 diffCompartment reconfigure
  * - diffRevision：仅 inline-diff 模式生效；变化时 reconfigure diff extension
  *
- * P2 新增：
- * - 接受 `onAcceptHunk` / `onRejectHunk` / `onError` props 透传到 hook
- * - 通过 `EditorApiContext` 把 EditorApi 实例暴露给可能的 P3 业务侧
- *   （不实际消费）
+ * 通过 `EditorApiContext` 把 EditorApi 实例暴露给下游业务侧。
  *
  * 设计要点：
  * - useRef 守护 React 19 strict mode 的双 mount
  * - 把父 DOM 通过 ref 传给 useCodeMirrorEditor
  * - 用 forwardRef 暴露 EditorApi
  *
- * 不接：
- * - 事件总线 events.ts（P3 才接）
- * - WorkspaceFilePreview 容器入口（P3 才接）
- *
- * P3 增量（Task 3）：
- * - 新增 `showDiffActionBar?: boolean` prop（默认 false 向后兼容）
- * - 打开后挂 `<DiffActionBar>` 在 parentRef DOM 内最前（视觉位于编辑器上方）
- * - 不接管 CodeMirror 的 contentDOM；CM6 EditorView 仍按既有路径 append 到 parent
+ * BLOCK-43（UI-193 收口）：移除 BLOCK-22 通用 accept/reject widget 链路
+ * （DiffActionBar 挂载 + onAcceptHunk/onRejectHunk/onError/showDiffActionBar
+ * props）。业务路径的按 hunk 接受/拒绝由 BLOCK-28 `hunkControls.ts`
+ * （经 extraExtensions 注入）承担。
  */
 
 import React, { createContext, forwardRef, useContext, useRef } from 'react';
 
 import { useCodeMirrorEditor } from './useCodeMirrorEditor';
-import { DiffActionBar } from './DiffActionBar';
 import type {
   CodeMirrorEditorProps,
   EditorApi,
@@ -40,10 +32,10 @@ import type {
 import styles from './CodeMirrorEditor.module.css';
 
 /**
- * EditorApiContext：P2 新增。
+ * EditorApiContext。
  *
- * 让父组件以外的下游组件（例如 P3 WorkspaceFilePreview 内嵌区）能拿到
- * 当前 CodeMirrorEditor 的 EditorApi 实例；P3 才真正消费。
+ * 让父组件以外的下游组件（例如 WorkspaceFilePreview 内嵌区）能拿到
+ * 当前 CodeMirrorEditor 的 EditorApi 实例。
  *
  * 设计要点：
  * - 默认值 null（未在 Provider 内时）
@@ -63,11 +55,7 @@ export const CodeMirrorEditor = forwardRef<EditorApi, CodeMirrorEditorProps>(fun
     mode = 'normal',
     diffRevision = null,
     className,
-    onAcceptHunk,
-    onRejectHunk,
-    onError,
     onChange,
-    showDiffActionBar = false,
     extraExtensions,
     diffOptions,
     children,
@@ -97,9 +85,6 @@ export const CodeMirrorEditor = forwardRef<EditorApi, CodeMirrorEditorProps>(fun
       language,
       mode,
       diffRevision,
-      onAcceptHunk,
-      onRejectHunk,
-      onError,
       onChange: handleOnChange,
       extraExtensions,
       diffOptions,
@@ -137,11 +122,7 @@ export const CodeMirrorEditor = forwardRef<EditorApi, CodeMirrorEditorProps>(fun
         data-readonly={readonly ? 'true' : 'false'}
         data-cm6-mode={(mode as EditorMode) ?? 'normal'}
         aria-readonly={readonly}
-        data-show-diff-action-bar={showDiffActionBar ? 'true' : 'false'}
       >
-        {showDiffActionBar ? (
-          <DiffActionBar apiRef={apiRef} onError={onError} />
-        ) : null}
         {children}
       </div>
     </EditorApiContext.Provider>

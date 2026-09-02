@@ -1,0 +1,58 @@
+{
+  "block": "BLOCK-43-UI193-WIDGET-BUSINESS-PATH-CLOSEOUT",
+  "phase": "P3 实机复核",
+  "date": "2026-09-03",
+  "env": {
+    "devElectron": true,
+    "cdpPort": 9222,
+    "project": "p_mthvakv3_fffw (tinkspace)",
+    "workspace": "/Users/zhangdiandian/Documents/2.OpenWork/ThinkSpace",
+    "targetFile": "login.html（双 hunk scratch 改动：SCRATCH HUNK A 近 <head>、SCRATCH HUNK B 近注册链接）"
+  },
+  "fixVerified": {
+    "target": "src/ipc/working-tree-review.js buildReversePatchForReject",
+    "bug": "反向 patch 头部 start/count 按正向 patch 取值（pre-image 应为 hunk.new 侧），且变更块内 -/+ 行交错不符合 unified diff 规范，git apply 校验 pre-image 不符必拒",
+    "fix": [
+      "oldStart=hunk.newStart / newStart=hunk.oldStart；oldCount=ctx+add、newCount=ctx+del",
+      "连续非 ctx 块内先输出全部反转删除行（原 add → '-'）再输出插入行（原 del → '+'）"
+    ],
+    "offlineEvidence": "临时 git 仓（/tmp/b43-reject-patch-verify.mjs）：-U3 单 hunk 全 reject 与 -U1 双 hunk 逐个 reject 均干净 apply，终态=base",
+    "liveEvidence": "实机 hunk0（A 行）与 hunk1（B 行）先后 r 拒绝，磁盘 SCRATCH 行均消失，git diff login.html 清零"
+  },
+  "steps": [
+    {
+      "step": "1. hunkControls 渲染",
+      "action": "审阅 tab → 展开 login.html diff",
+      "expected": "每个 hunk 首行行尾 wt-hunk-controls 悬浮控件，含「接受」「拒绝」按钮",
+      "observed": "README.md 编辑器 1 控件 + login.html 编辑器 2 控件（data-hunk-control=0/1），均渲染接受/拒绝按钮",
+      "pass": true
+    },
+    {
+      "step": "2. 鼠标 accept",
+      "action": "点击 login.html hunk0「接受」",
+      "expected": "决策态变为已接受",
+      "observed": "控件文本「已接受」（is-accepted class）",
+      "pass": true
+    },
+    {
+      "step": "3. 键盘流 j 导航 + r 拒绝",
+      "action": "blur 聊天输入框后 Input.dispatchKeyEvent j → r",
+      "expected": "j 聚焦下一 hunk；r 拒绝当前聚焦 hunk，磁盘回退",
+      "observed": "hunk0、hunk1 相继显示「已拒绝」；磁盘 login.html 的 SCRATCH HUNK A/B 行均被移除，git diff 归零",
+      "pass": true,
+      "note": "焦点在聊天输入框（TEXTAREA.sc-input）时按键被按设计拦截，需先 blur —— 与既有 BLOCK-29 键盘流边界一致"
+    },
+    {
+      "step": "4. 决策可变更",
+      "action": "hunk0 先 accept 后 reject",
+      "expected": "决策状态可覆盖更新",
+      "observed": "已接受 → 已拒绝，均正确落盘",
+      "pass": true
+    }
+  ],
+  "screenshots": [
+    "block43-review-dock-open.png",
+    "block43-after-rejects.png"
+  ],
+  "scratchCleanup": "login.html 双 hunk 已全部 reject，工作区恢复 HEAD 原状（git diff login.html 为空），无 scratch 残留"
+}

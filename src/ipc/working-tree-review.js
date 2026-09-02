@@ -198,15 +198,36 @@ function parseDiffFiles(diffText) {
  */
 function buildReversePatchForReject({ file, hunkIndex, hunk }) {
   if (!hunk || !Array.isArray(hunk.lines)) return null;
-  const oldStart = hunk.oldStart || 0;
-  const newStart = hunk.newStart || 0;
-  const header = `diff --git a/${file} b/${file}\n--- a/${file}\n+++ b/${file}\n@@ -${oldStart},${hunk.lines.filter((l) => l.type !== 'add').length} +${newStart},${hunk.lines.filter((l) => l.type !== 'del').length} @@\n`;
+  // 反向 patch 的 pre-image 是「当前已修改文件」（hunk 的 new 侧）：
+  //   - 行 = add 行（当前文件持有、将被移除），pre-image 行数 = ctx + add = filter(type !== 'del')
+  //   + 行 = del 行（还原回旧文件），post-image 行数 = ctx + del = filter(type !== 'add')
+  // 起始行同理：pre-image 用 hunk.newStart，post-image 用 hunk.oldStart。
+  // （BLOCK-43 P3 实机复核修复：原实现 start 与 count 均按正向 patch 取值，git apply 校验 pre-image 行数不符必拒。）
+  const oldStart = hunk.newStart || 0;
+  const newStart = hunk.oldStart || 0;
+  const oldCount = hunk.lines.filter((l) => l.type !== 'del').length;
+  const newCount = hunk.lines.filter((l) => l.type !== 'add').length;
+  const header = `diff --git a/${file} b/${file}\n--- a/${file}\n+++ b/${file}\n@@ -${oldStart},${oldCount} +${newStart},${newCount} @@\n`;
+  // unified diff 规范：一个连续变更块内必须先全部 `-` 行再全部 `+` 行。
+  // 原始 diff 的块内顺序是 [del, add]，逐行反转会得到交错序列，git apply 拒绝。
+  // 因此按连续非 ctx 块分组：先输出反转后的删除行（原 add → `-`），再输出插入行（原 del → `+`）。
   let body = '';
+  let run = [];
+  const flushRun = () => {
+    if (!run.length) return;
+    for (const l of run) if (l.type === 'add') body += `-${l.text}\n`;
+    for (const l of run) if (l.type === 'del') body += `+${l.text}\n`;
+    run = [];
+  };
   for (const line of hunk.lines) {
-    if (line.type === 'add') body += `-${line.text}\n`;
-    else if (line.type === 'del') body += `+${line.text}\n`;
-    else body += ` ${line.text}\n`;
+    if (line.type === 'ctx') {
+      flushRun();
+      body += ` ${line.text}\n`;
+    } else {
+      run.push(line);
+    }
   }
+  flushRun();
   return header + body;
 }
 

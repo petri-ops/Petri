@@ -1,10 +1,11 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-02（**BLOCK-42-PENDING-SCROLL-CONSUMER-MOUNT 已收口**：pending-scroll 消费侧挂载完成，UI-194 升 verified，P4 实机 6 场景全 PASS 并就地修复 relay 缺 pulseMs 与 BLOCK-20 遗留打开即误报 dirty 两缺陷；plan `docs/block-42-pending-scroll-consumer-mount-plan.md`。同日 BLOCK-41-GIT-WRITE-OPS-PHASE3 已收口（UI-278 verified，收口提交 `38c6edf1`）。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-03（**BLOCK-43-UI193-WIDGET-BUSINESS-PATH-CLOSEOUT 已收口**：P1 死代码移除 + P2 定向门禁 + P3 实机复核（就地修复 `buildReversePatchForReject` 反向 patch 头缺陷）+ P4 UI-193 superseded；证据 `acceptance/ui-193/block43-p3-live-check.json`。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- 当前无 active 工作包。已收口候选：UI-194 消费侧挂载 BLOCK-42 已于 2026-09-02 收口（UI-194 verified，证据 `acceptance/ui-194/`）；git 写操作三期 BLOCK-41 已于 2026-09-02 收口（UI-278 verified，`38c6edf1`）。剩余候选：UI-193 widget 业务路径；ui:audit `--report` 模式 schema 大小写债务（AUDIT-LOG 2026-08-30 🟢）。下一个工作项待用户裁决后启动。
+- 当前无 active 工作包（BLOCK-43 已于 2026-09-03 收口，Plan `docs/block-43-ui193-widget-business-path-closeout-plan.md` §7）。不自动启动新工作包，待用户裁决下一候选。
+- 已收口候选：UI-194 消费侧挂载 BLOCK-42 已于 2026-09-02 收口（UI-194 verified，`42ae921d`）；git 写操作三期 BLOCK-41 已于 2026-09-02 收口（UI-278 verified，`38c6edf1`）；UI-193 widget 业务路径 BLOCK-43 已于 2026-09-03 收口（UI-193 superseded）。剩余候选：ui:audit `--report` 模式 schema 大小写债务（AUDIT-LOG 2026-08-30 🟢）。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 
 ## 当前结论

@@ -18,7 +18,6 @@ export type {
   DiffRevision,
   DiffHunk,
   ScrollTarget,
-  AcceptRejectEvent,
 } from './CodeMirror/types';
 
 // ===== P3 桥接层 (UI-194) =====

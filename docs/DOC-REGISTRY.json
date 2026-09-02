@@ -3117,8 +3117,29 @@
       "registeredAt": "2026-09-02",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-43-UI193-WIDGET-BUSINESS-PATH-CLOSEOUT",
+      "path": "docs/block-43-ui193-widget-business-path-closeout-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-43-ui193-widget-business-path-closeout",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-43",
+        "ui-193",
+        "accept-reject-widget",
+        "hunk-controls",
+        "dead-code-retirement",
+        "G0"
+      ],
+      "notes": "2026-09-02 立项（用户裁决「退休死代码 + 实机复核」）：UI-193 widget 业务路径收口。摸底确认 BLOCK-22 通用 accept/reject widget（DiffRevision.hunks 驱动）业务路径恒不渲染且无业务消费方，与 BLOCK-28 hunkControls（git hunk + decisions 驱动，UI-206 verified）功能重叠。P1 移除死代码链（acceptRejectWidget.ts / EditorApi acceptHunk·rejectHunk·acceptAll·rejectAll / DiffActionBar + showDiffActionBar / hunkAccepted·hunkRejected 事件 / CSS / 相关测试），保留 hunkControls 活路径与 WTR bridge 方法；P2 定向 vitest+tsc+docs:check+ui:audit:check；P3 dev Electron 实机复核 post-BLOCK-41 两栏审阅 hunkControls 接受/拒绝/键盘流，证据 acceptance/ui-193/；P4 UI-193 台账 superseded 收口。非范围：hunkControls 业务链 / BLOCK-41 两栏 / BLOCK-42 pending-scroll / 0 新 IPC 0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-09-03 收口：P1 死代码移除 + P2 定向门禁 + P3 实机复核（就地修复 buildReversePatchForReject 反向 patch 头缺陷，离线+实机双验证）+ P4 台账 superseded。证据 acceptance/ui-193/block43-p3-live-check.json。",
+      "registeredAt": "2026-09-02",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P4-CLOSEOUT"
     }
   ],
   "lastUpdated": "2026-09-02",
-  "documentCount": 182
+  "documentCount": 183
 }
