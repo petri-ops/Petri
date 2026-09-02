@@ -52,6 +52,8 @@ import type { CopilotContext, HarnessContextSummary } from '@/lib/copilotContext
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
 import { usePendingScroll } from '@/lib/pendingScrollContext';
 import type { DiffRevision } from '@/components/editor/CodeMirror/types';
+// BLOCK-42 — pending-scroll 消费侧挂载（UI-194）：预览编辑器切 CodeMirror
+import { WorkspaceFilePreviewBridge } from '@/components/editor';
 import { getBrowserViewportSize, isBioF3LocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { useTheme } from '@/themes/ThemeProvider';
@@ -1620,6 +1622,9 @@ export function ProjectWorkspace(): React.ReactElement {
           line: detail.line,
           column: detail.column,
           diffRevision,
+          // BLOCK-42 P4：事件驱动的跳转（聊天卡片/审阅联动）补 pulse 高亮，
+          // 与 highlight:true 简写（3000ms）及 WTR review 跳行行为一致。
+          pulseMs: 3000,
           timestamp: Date.now(),
         });
       }
@@ -2550,7 +2555,12 @@ function WorkspaceFilePreview({
         const clipped = body.length > 120_000
           ? `${body.slice(0, 120_000)}\n\n... 文件较大，仅预览前 120KB`
           : body;
-        setText(formatPreviewText(file.name, clipped));
+        // BLOCK-42 P4：打开文件时同步保存基线。此前 textSaved 恒为 ''，
+        // 文本/JSON/markdown 文件一打开就误报「有未保存修改」（BLOCK-20 遗留缺陷，
+        // 实机走查暴露）。基线=打开时的格式化内容，恢复语义不变（回退到已加载内容）。
+        const formatted = formatPreviewText(file.name, clipped);
+        setText(formatted);
+        setTextSaved(formatted);
         setStatus('ready');
       })
       .catch(() => {
@@ -2776,30 +2786,36 @@ function WorkspaceFilePreview({
           </div>
         )}
         {status === 'ready' && fallbackKind === 'markdown' && mdView === 'edit' && (
-          <textarea
-            className={styles.workspaceMarkdownEditor}
+          /* BLOCK-42 — pending-scroll 消费侧挂载：textarea → CodeMirror（跳转/pulse 联动） */
+          <WorkspaceFilePreviewBridge
+            filePath={file.path}
             value={text}
-            onChange={(e) => setText(e.target.value)}
-            spellCheck={false}
-            aria-label="markdown 编辑器"
+            language="markdown"
+            readonly={false}
+            className={styles.workspaceCodeEditor}
+            onChange={setText}
           />
         )}
         {status === 'ready' && fallbackKind === 'text' && (
-          <textarea
-            className={styles.workspaceMarkdownEditor}
+          /* BLOCK-42 — 同上：文本/代码预览切 CodeMirror */
+          <WorkspaceFilePreviewBridge
+            filePath={file.path}
             value={text}
-            onChange={(e) => setText(e.target.value)}
-            spellCheck={false}
-            aria-label={codeLanguage ? '代码编辑器' : '文本编辑器'}
+            language={codeLanguage || undefined}
+            readonly={false}
+            className={styles.workspaceCodeEditor}
+            onChange={setText}
           />
         )}
         {status === 'ready' && fallbackKind === 'json' && (
-          <textarea
-            className={styles.workspaceMarkdownEditor}
+          /* BLOCK-42 — 同上：JSON 预览切 CodeMirror */
+          <WorkspaceFilePreviewBridge
+            filePath={file.path}
             value={text}
-            onChange={(e) => setText(e.target.value)}
-            spellCheck={false}
-            aria-label="JSON 编辑器"
+            language="json"
+            readonly={false}
+            className={styles.workspaceCodeEditor}
+            onChange={setText}
           />
         )}
       </div>

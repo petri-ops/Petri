@@ -162,6 +162,56 @@ describe('CodeMirrorEditor (P0 smoke)', () => {
   });
 });
 
+describe('CodeMirrorEditor (BLOCK-42 onChange)', () => {
+  it('fires onChange when setValue changes the document (normal mode)', () => {
+    const ref = createRef<EditorApi>();
+    const onChange = vi.fn();
+    render(<CodeMirrorEditor ref={ref} value="v1" readonly={false} onChange={onChange} />);
+    act(() => {
+      ref.current?.setValue('v2');
+    });
+    expect(onChange).toHaveBeenCalledWith('v2');
+  });
+
+  // 注：用户真实打字路径（contentEditable 输入）在 happy-dom 下无法模拟
+  // （execCommand 不可用），由 P4 dev Electron 实机走查覆盖。
+
+  it('syncs lastValue so an external value reset is not swallowed (no feedback loop)', () => {
+    // 打字 → onChange → 业务侧 setText → value prop 回流：组件不得再循环派发
+    const ref = createRef<EditorApi>();
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <CodeMirrorEditor ref={ref} value="v1" readonly={false} onChange={onChange} />,
+    );
+    act(() => {
+      ref.current?.setValue('user typed');
+    });
+    const callsAfterEdit = onChange.mock.calls.length;
+    // 模拟业务侧受控回流：value prop 与编辑器当前 doc 一致 → 不应再触发 onChange
+    rerender(<CodeMirrorEditor ref={ref} value="user typed" readonly={false} onChange={onChange} />);
+    expect(onChange.mock.calls.length).toBe(callsAfterEdit);
+    expect(ref.current?.getValue()).toBe('user typed');
+  });
+
+  it('does not fire onChange in inline-diff mode', () => {
+    const ref = createRef<EditorApi>();
+    const onChange = vi.fn();
+    render(
+      <CodeMirrorEditor
+        ref={ref}
+        value="ignore"
+        mode="inline-diff"
+        diffRevision={helperRevision}
+        onChange={onChange}
+      />,
+    );
+    act(() => {
+      ref.current?.setDiffRevision(helperRevision);
+    });
+    expect(onChange).not.toHaveBeenCalled();
+  });
+});
+
 describe('CodeMirrorEditor (P1 mode / diff API)', () => {
   it('initial mode defaults to normal and getMode returns normal', () => {
     const ref = createRef<EditorApi>();

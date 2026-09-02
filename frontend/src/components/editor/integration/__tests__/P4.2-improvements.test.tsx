@@ -107,7 +107,13 @@ describe('P4.2 WorkspaceFilePreviewBridge — BridgeRoot auto-wrap', () => {
     expect(getByTestId('mock-codemirror')).toBeTruthy(); // no crash from double Provider
   });
 
-  it('does NOT double wrap when outer Provider is present', () => {
+  it('does NOT double wrap when outer Provider is present', async () => {
+    // BLOCK-42 P4：消费改为 rAF 延迟一帧（同文件重开滚动丢失修复），
+    // 故 one-shot 断言需等 rAF 回调执行。
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
+      cb(performance.now());
+      return 0;
+    });
     const capture: PendingCapture | null = {
       setPendingRequest: () => undefined,
       pendingRequest: null,
@@ -125,7 +131,7 @@ describe('P4.2 WorkspaceFilePreviewBridge — BridgeRoot auto-wrap', () => {
     );
     expect(getByTestId('mock-codemirror')).toBeTruthy();
     // Outer context should be usable (setPendingRequest not broken by double wrap)
-    act(() => {
+    await act(async () => {
       capture!.setPendingRequest({
         filePath: '/workspace/outer.py',
         line: 1,
@@ -133,6 +139,7 @@ describe('P4.2 WorkspaceFilePreviewBridge — BridgeRoot auto-wrap', () => {
       });
     });
     expect(capture!.pendingRequest).toBeNull(); // one-shot consumption worked
+    vi.unstubAllGlobals();
   });
 });
 

@@ -71,6 +71,8 @@ export interface UseCodeMirrorEditorOptions {
   onRejectHunk?: (hunkId: string) => void;
   /** IPC 失败回调（P2）：走 onError（不接事件总线）。 */
   onError?: (err: unknown) => void;
+  /** BLOCK-42 — 文档变化回调（normal 模式 only；inline-diff 不派发）。 */
+  onChange?: (value: string) => void;
   /** BLOCK-28 — 业务层注入的额外 CM6 扩展；数组引用变化时经独立 Compartment 热替换。 */
   extraExtensions?: Extension[];
   /** BLOCK-28 — inline-diff 渲染选项（如 collapseUnchanged）。 */
@@ -227,6 +229,7 @@ export function useCodeMirrorEditor(
     onAcceptHunk,
     onRejectHunk,
     onError,
+    onChange,
     extraExtensions,
     diffOptions,
   } = options;
@@ -261,6 +264,9 @@ export function useCodeMirrorEditor(
   onAcceptHunkRef.current = onAcceptHunk;
   onRejectHunkRef.current = onRejectHunk;
   onErrorRef.current = onError;
+  // BLOCK-42 — onChange 走 ref（updateListener 扩展不随 callback 引用变化 reconfigure）
+  const onChangeRef = useRef<typeof onChange>(onChange);
+  onChangeRef.current = onChange;
 
   useImperativeHandle(
     apiRef,
@@ -518,6 +524,12 @@ export function useCodeMirrorEditor(
       widgetCompartment.of(widgetExtension),
       extraCompartment.of(extraExtensions ?? []),
       scrollToLineExtension(),
+      // BLOCK-42 — 文档变化派发（normal 模式 only；callback 走 ref 保持扩展稳定）
+      EditorView.updateListener.of((u) => {
+        if (!u.docChanged) return;
+        if (currentModeRef.current === 'inline-diff') return;
+        onChangeRef.current?.(u.state.doc.toString());
+      }),
     ];
 
     const state = EditorState.create({

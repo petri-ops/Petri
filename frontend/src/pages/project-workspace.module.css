@@ -6487,6 +6487,18 @@ body.biof3-resizing-columns * {
   box-shadow: inset 2px 0 0 var(--biof3-accent, #4f86ff);
 }
 
+/* BLOCK-42 — CodeMirror 预览编辑器容器（text/json/markdown-edit）：
+   占满预览区；内边距/字体由 CM scroller 自管，容器只负责尺寸与配色 */
+.workspaceCodeEditor {
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text);
+}
+
 .workspaceMarkdownSave {
   display: inline-flex;
   align-items: center;

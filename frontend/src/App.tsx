@@ -15,6 +15,8 @@ import { BackendStatusProvider } from '@/components/backend/BackendStatusProvide
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import { CommandPalette, useCommandPalette } from '@/components/copilot/CommandPalette';
+// BLOCK-42 — pending-scroll 全局 Provider（见 AppShell 内注释）
+import { PendingScrollProvider } from '@/lib/pendingScrollContext';
 import HomePage from '@/pages/home';
 // NOTE: Legacy pages (tools, admin, docs, figcode, single-cell, spatial) have been removed
 // as the desktop application now uses the Agent-based workflow through ProjectWorkspace.
@@ -58,6 +60,11 @@ function AppShell(): React.ReactElement {
     <>
       <TitleBar />
       <CopilotContextProvider>
+        {/* BLOCK-42 — pending-scroll 全局 Provider：页面级写入端（ProjectWorkspace
+            事件 relay）与消费端（WorkspaceFilePreviewBridge / dev bridge / 未来
+            ChatCardLinkBridge）必须在同一 Context 实例内，否则写入端拿到 FALLBACK
+            no-op 静默丢弃。Provider 仅一个 useState，全局挂载零副作用。 */}
+        <PendingScrollProvider>
         <main
           className="biof3-spa-main"
           style={{
@@ -97,6 +104,7 @@ function AppShell(): React.ReactElement {
         <Suspense fallback={null}>
           <BioF3OpenFileDevBridge />
         </Suspense>
+        </PendingScrollProvider>
       </CopilotContextProvider>
     </>
   );

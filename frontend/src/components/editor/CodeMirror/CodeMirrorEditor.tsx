@@ -66,6 +66,7 @@ export const CodeMirrorEditor = forwardRef<EditorApi, CodeMirrorEditorProps>(fun
     onAcceptHunk,
     onRejectHunk,
     onError,
+    onChange,
     showDiffActionBar = false,
     extraExtensions,
     diffOptions,
@@ -79,6 +80,15 @@ export const CodeMirrorEditor = forwardRef<EditorApi, CodeMirrorEditorProps>(fun
   // 让 EditorApiContext 消费者能在 api 就绪后 re-render；初始化为 null
   const [contextApi, setContextApi] = React.useState<EditorApi | null>(null);
 
+  // BLOCK-42 — onChange 包装：同步 lastValueRef，防止「打字 → onChange → setText →
+  // value effect → setValue」的反馈回路（value effect 命中 lastValueRef 短路）
+  const handleChangeRef = useRef(onChange);
+  handleChangeRef.current = onChange;
+  const handleOnChange = React.useCallback((next: string) => {
+    lastValueRef.current = next;
+    handleChangeRef.current?.(next);
+  }, []);
+
   useCodeMirrorEditor(
     {
       parentRef,
@@ -90,6 +100,7 @@ export const CodeMirrorEditor = forwardRef<EditorApi, CodeMirrorEditorProps>(fun
       onAcceptHunk,
       onRejectHunk,
       onError,
+      onChange: handleOnChange,
       extraExtensions,
       diffOptions,
     },

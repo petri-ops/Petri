@@ -215,6 +215,12 @@ export interface CodeMirrorEditorProps {
    */
   onError?: (err: unknown) => void;
   /**
+   * BLOCK-42 — 文档变化回调（normal 模式 only；inline-diff 模式不派发）。
+   * 用户编辑与程序化 setValue 都可能触发；业务侧（WorkspaceFilePreview）
+   * 用它同步 React state 保持既有 dirty/save 链路。
+   */
+  onChange?: (value: string) => void;
+  /**
    * 子节点：挂在编辑器 DOM 容器内，可在 P3 由业务侧用于额外 UI 叠层
    * （例如 HunkHUD、跳转锚点）。P2 不消费。
    */

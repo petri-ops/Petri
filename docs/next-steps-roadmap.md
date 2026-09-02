@@ -1,11 +1,10 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-02（**BLOCK-41-GIT-WRITE-OPS-PHASE3 启动**：git 写操作三期，用户裁决含手动提交框 + 分支切换脏树阻止并提示；plan `docs/block-41-git-write-ops-phase3-plan.md`，UI-278。同日 BLOCK-40-CONV-CHANGES-HYDRATION 已收口（UI-277 verified，收口提交 `c7036dc0`）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-02（**BLOCK-42-PENDING-SCROLL-CONSUMER-MOUNT 已收口**：pending-scroll 消费侧挂载完成，UI-194 升 verified，P4 实机 6 场景全 PASS 并就地修复 relay 缺 pulseMs 与 BLOCK-20 遗留打开即误报 dirty 两缺陷；plan `docs/block-42-pending-scroll-consumer-mount-plan.md`。同日 BLOCK-41-GIT-WRITE-OPS-PHASE3 已收口（UI-278 verified，收口提交 `38c6edf1`）。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- **Active 工作包：`BLOCK-41-GIT-WRITE-OPS-PHASE3`**（2026-09-02 用户裁决启动，承接 BLOCK-29 起维持排除的候选）：审阅面板 git 写操作三期——P1 adapter 写方法（unstage / commitIndex / checkoutBranch 脏树拒绝+冲突清单 / remoteList / remoteStatus ahead-behind / push / pull）→ P2 七条 IPC 通道（resolveGitAdapter 项目级隔离）→ P3 审阅改动 tab staged/unstaged 两栏 + 行内 stage/unstage + staged diff + 手动提交框 + 分支选择器真切换（脏树阻止并提示）+ push/pull 按钮 + ahead/behind 徽标 → P4 真仓库快测 + dev Electron 实机收口（UI-278）。详 Plan：`docs/block-41-git-write-ops-phase3-plan.md`。
-- 已收口候选：git 写操作三期已于 2026-09-02 由用户显式裁决启动（BLOCK-41）。剩余候选：UI-193 widget 业务路径与 UI-194 消费侧挂载；ui:audit `--report` 模式 schema 大小写债务（AUDIT-LOG 2026-08-30 🟢）。
+- 当前无 active 工作包。已收口候选：UI-194 消费侧挂载 BLOCK-42 已于 2026-09-02 收口（UI-194 verified，证据 `acceptance/ui-194/`）；git 写操作三期 BLOCK-41 已于 2026-09-02 收口（UI-278 verified，`38c6edf1`）。剩余候选：UI-193 widget 业务路径；ui:audit `--report` 模式 schema 大小写债务（AUDIT-LOG 2026-08-30 🟢）。下一个工作项待用户裁决后启动。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 
 ## 当前结论

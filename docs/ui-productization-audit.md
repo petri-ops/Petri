@@ -1474,7 +1474,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: in_progress (extension 已实现 + 单元验证；业务路径未呈现 widget，集成缺口已实机取证并登记)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-194: BLOCK-22 — 聊天卡片跳转联动与 pending-scroll 桥接层 (2026-08-24 → 2026-08-28 in_progress)
+## UI-194: BLOCK-22 — 聊天卡片跳转联动与 pending-scroll 桥接层 (2026-08-24 → 2026-09-02 verified)
 
 **目标**：建立"事件 → PendingScrollContext → CodeMirrorEditor 滚动定位"的桥接层，支撑聊天卡片跳转到文件预览指定行。
 
@@ -1482,9 +1482,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **边界（诚实声明）**：`ChatCardLinkBridge` 未挂载到聊天 UI —— 按 BLOCK-22 收口决策，业务侧入口的具体接入动作不在 P3 范围，属业务侧后续决策。**2026-08-28 dev Electron 实机过目（BLOCK-24 P2）**：经已挂载的 dev bridge 调用 `window.__biof3DispatchOpenFile('frontend/src/lib/desktopBridge.ts', 40)` 被接受，但预览未打开、无 pulse 高亮——**消费侧未挂载**：`WorkspaceFilePreviewBridge` 与 `ChatCardLinkBridge` 仅 barrel 导出，全仓无 JSX 挂载点，dispatch 的 pending request 无消费者。证据 `acceptance/ui-194/electron-pending-scroll-dev.{json,png}`（passed:false，含根因）。
 
-**验证**：BLOCK-22 focused vitest 53/53（ChatCardLinkBridge 7 + pendingScrollContext 6 + WorkspaceFilePreviewBridge 8 用例）。实机验证已于 BLOCK-24 P2 完成，结论为"生产侧已接、消费侧未挂载"。
+**验证**：BLOCK-22 focused vitest 53/53（ChatCardLinkBridge 7 + pendingScrollContext 6 + WorkspaceFilePreviewBridge 8 用例）。实机验证已于 BLOCK-24 P2 完成，结论为"生产侧已接、消费侧未挂载"。**2026-09-02 BLOCK-42 消费侧挂载（P1-P3 已实现）**：`CodeMirrorEditor` additive 新增 `onChange`（updateListener，normal 模式 only，防反馈回路 lastValueRef 短路）；`project-workspace.tsx` 的 text / json / markdown-edit 三条 textarea 路径替换为 `WorkspaceFilePreviewBridge`（onChange→setText 保持 BLOCK-20 dirty/save 链路）；`App.tsx` 根节点挂全局 `PendingScrollProvider`（写入端与消费端同 Context 实例）；`WorkspaceFilePreviewBridge` pendingRequest 消费改 rAF 延迟一帧修复同文件重开滚动丢失。P3 门禁：定向 vitest 59/59（含新增 onChange 3 用例 + P4.2 rAF 语义修正）+ tsc 0。
 
-**状态**: in_progress (链路组件已实现 + 单元验证；生产侧已接、消费侧未挂载已实机取证；挂载属业务侧决策)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**P4 实机走查**（2026-09-02，dev Electron CDP :9222，tinkspace 项目 ThinkSpace 工作区，scratch 探针文件验收后已清理）：6 场景全 PASS——300 行文件事件跳转（聊天卡片同路径）第 250 行落点可见 / `.cm-pulse-highlight` 高亮出现（截图 `b42-codemirror-jump-pulse.png`）/ CM insertText 编辑→dirty→保存→磁盘核对含插入标记且 badge 清除 / 同文件重开跳转滚动落点正确（rAF 修复生效）/ 163KB 大文件 120KB 截断注记 / text·json·markdown-edit 三路径 CodeMirror 挂载。走查中就地修复两个缺陷：①事件 relay 未传 `pulseMs` 导致跳转无高亮（补 3000ms，与 `highlight:true` 简写一致）；②BLOCK-20 遗留「打开即误报有未保存修改」（`textSaved` 基线恒 `''`，fetch 后同步基线修复）。证据 [acceptance/ui-194/](../acceptance/ui-194/README.md)。
+
+**状态**: verified（BLOCK-42 消费侧挂载收口）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-202: BLOCK-25 — Codex 同款 AI 代码审阅（WTR 抽屉内 /review 闭环） (2026-08-29 verified → 2026-08-29 removed)
 

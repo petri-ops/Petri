@@ -242,6 +242,11 @@ function BridgeInner({
   );
 
   // 处理 pendingRequest 变化
+  // BLOCK-42 P4 实机缺陷修复：同文件重开（activeFile 引用变化 → 重新 fetch →
+  // status loading 卸载编辑器 → ready 重建）时，旧 view 会在卸载前同步消费
+  // pendingRequest 并滚动，随后 view 销毁导致滚动丢失。改为 rAF 延迟一帧消费：
+  // unmount 时 cleanup 取消 rAF（不清空 pendingRequest），新实例 mount 后
+  // api 就绪（reloadKey 触发 effect re-run）再消费。
   useEffect(() => {
     if (!pendingRequest) return;
     if (pendingRequest.filePath !== filePath) return;
@@ -249,27 +254,33 @@ function BridgeInner({
     const api = editorApiRef.current;
     if (!api) return;
 
-    // 1) 应用 diff revision（若存在）：先切到 inline-diff 再 setDiffRevision
-    if (pendingRequest.diffRevision) {
-      api.setMode('inline-diff');
-      api.setDiffRevision(pendingRequest.diffRevision);
-    } else {
-      // 恢复业务侧传入的基础 mode / revision
-      api.setMode(baseModeRef.current);
-      api.setDiffRevision(baseDiffRevisionRef.current);
-    }
+    const raf = requestAnimationFrame(() => {
+      const liveApi = editorApiRef.current;
+      if (!liveApi) return; // view 已销毁：保留 pendingRequest 给重建后的实例
 
-    // 2) 滚动到目标行
-    api.scrollToLine({
-      line: pendingRequest.line,
-      column: pendingRequest.column,
-      pulseMs: pendingRequest.pulseMs,
+      // 1) 应用 diff revision（若存在）：先切到 inline-diff 再 setDiffRevision
+      if (pendingRequest.diffRevision) {
+        liveApi.setMode('inline-diff');
+        liveApi.setDiffRevision(pendingRequest.diffRevision);
+      } else {
+        // 恢复业务侧传入的基础 mode / revision
+        liveApi.setMode(baseModeRef.current);
+        liveApi.setDiffRevision(baseDiffRevisionRef.current);
+      }
+
+      // 2) 滚动到目标行
+      liveApi.scrollToLine({
+        line: pendingRequest.line,
+        column: pendingRequest.column,
+        pulseMs: pendingRequest.pulseMs,
+      });
+
+      // 3) 清空 pendingRequest（一次性语义）
+      setPendingRequest(null);
     });
-
-    // 3) 清空 pendingRequest（一次性语义）
-    setPendingRequest(null);
+    return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingRequest, filePath]);
+  }, [pendingRequest, filePath, reloadKey]);
 
   // P4.2：EditorApiContext 消费者需要 EditorApi 实例（通过稳定引用 + reloadKey 触发重渲染）
   // eslint-disable-next-line react-hooks/rules-of-hooks
