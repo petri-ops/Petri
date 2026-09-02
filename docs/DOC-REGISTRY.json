@@ -9,11 +9,33 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 160,
-    "lastUpdated": "2026-08-29",
-    "managedMarkdown": 160
+    "documentCount": 161,
+    "lastUpdated": "2026-09-02",
+    "managedMarkdown": 161
   },
   "documents": [
+    {
+      "id": "BLOCK-38-AGENT-TASK-RESUME",
+      "path": "docs/block-38-agent-task-resume-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-38-agent-task-resume",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-38",
+        "agent-task",
+        "resume",
+        "interruption",
+        "loop-orchestrator",
+        "G0",
+        "active"
+      ],
+      "notes": "2026-09-02 立项（用户裁决，承接 BLOCK-37 收口讨论中「任务异常中断后可在任何阶段启动」的目的）：服务重启清扫把 running agent_loop 任务标 failed 后无续跑入口（agent-task-store.js）——本工作包交付手动续跑能力：启动清扫写入显式 interrupted_at 标记（新列，ALTER 容错）+ POST /api/ai/agent/task/:taskId/resume 端点（仅 interrupted 任务可续跑；非中断失败诚实 409 走既有 retry_pending 链路；原 task 不可变，续跑 = 同会话新 agent_loop task 带 resumeOfTaskId，loop-orchestrator 依 conversationId 自动 resume 原 loop run）+ 中断前最后一条模型调用取证摘要（llm-transcripts 会话末条）+ 前端「继续执行」按钮与确认弹层（UI-275）。非范围：自动续跑/subagent/帧级回放/内存态恢复/批量续跑/G1+。0 新依赖；重试链路语义不动。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-02",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH"
+    },
     {
       "id": "BLOCK-37-LLM-IO-TRANSCRIPT",
       "path": "docs/block-37-llm-io-transcript-plan.md",
