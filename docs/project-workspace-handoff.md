@@ -1,16 +1,16 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-01（**BLOCK-31-CONV-SCOPED-CHANGES P0 立项**：会话级改动归属·权威文件清单，用户裁决「要做会话隔离 权威清单」；plan `docs/block-31-conversation-scoped-changes-plan.md`。同日 BLOCK-29 UI 增量批量收口 3645b40（UI-246~262，其中 UI-262 聊天区消息导航条 verified）+ cb0774e（UI-262 滚轮导航补充）。）
+最后更新：2026-09-02（**BLOCK-41-GIT-WRITE-OPS-PHASE3 启动**：git 写操作三期，用户裁决含手动提交框 + 分支切换脏树阻止并提示；plan `docs/block-41-git-write-ops-phase3-plan.md`。同日 BLOCK-40-CONV-CHANGES-HYDRATION 已收口（UI-277 verified，收口提交 `c7036dc0`）。）
 
 ## Session Snapshot
 
-- **Active work package**: `BLOCK-31-CONV-SCOPED-CHANGES`（P0 已登记，P1 未开工）。目标：后端 agent-runner 收尾回放 `task_events` 聚合 `workspace_write`/`workspace_replace` 产出权威 `filesChanged`（持久化 + SSE `done` payload），renderer 按 conversationId 建立索引，改动卡片默认只显示当前会话改动，审阅面板保持 git 全量事实源。**改动视图作用域契约**：改动卡片 = 当前会话视角（BLOCK-31 后）；审阅 = 项目全景（git 唯一事实源，不变）。详 Plan：`docs/block-31-conversation-scoped-changes-plan.md`。
+- **Active work package**: `BLOCK-41-GIT-WRITE-OPS-PHASE3`（P0 已登记，P1 未开工）。目标：审阅面板（项目工作区仓库）git 写操作三期——暂存区两栏（stage/unstage + staged diff + 手动提交框）、分支选择器真切换（脏树拒绝+冲突清单，stash 写维持排除）、push/pull + ahead/behind 徽标（认证依赖系统 credential helper，`GIT_TERMINAL_PROMPT=0` 防挂起）。详 Plan：`docs/block-41-git-write-ops-phase3-plan.md`。
 - **历史收口**: `BLOCK-29.7-REVIEW-CHANGES-TREE` 已于 2026-08-31 收口（plan `docs/block-29-7-review-changes-tree-plan.md`；UI-244 verified，证据 `acceptance/ui-244/`）。**审阅文件导航契约**：dock 改动 = 目录分组树（组头折叠与 /review 主区共享 collapsedDirs 语义、缩进参考线、行内编辑/历史/放弃三操作）；历史提交详情 = 左 mini 树 172px + 右 diff（局部 treeCollapsed）；/review 主区 = 左侧目录分组树（BLOCK-28 P2 原有）；三处同构共用 `groupFilesByDirectory`/`groupDisplayName`（根目录标签「（根目录）」）。**审阅 chrome 契约**：summary 单行（提交审阅唯一 primary、刷新/退出 icon 化、全部还原 danger-ghost）；历史行 ⋯ 溢出菜单（撤销上次提交，confirm 保留）；`.wt-btn` 28px 栅格。**字体契约**：sans=`--biof3-font-sans`（含 CJK）、mono=`--biof3-font-mono`、表单控件 inherit、新表面禁止字面量字体栈。**字号契约**：代码表面基准 body-sm 13px、行内 code caption 12px、阶梯最小 xs 10px。
 - **Current branch**: `main`；HEAD、dirty state 与 `origin/main` 同步状态以运行时 Git 为准。
 - **Code review boundary**: 代码审阅为**右侧停靠面板**（TitleBar 审阅按钮 Toggle；面板内 = 手风琴文件列表（BLOCK-29.1，未跟踪文件可预览 WORKTREE 全文）+ 提交详情头（BLOCK-29.3）+ 文件视图四态（BLOCK-29.4 三态 + BLOCK-29.5 blame）+ 分支选择器/标签 optgroup/stash 只读列表（BLOCK-29.5）+ 两提交对比模式 + 内嵌提交框）。`/review` 主区 mode 路由保留（同一 ReviewMode 组件）。审阅内核与主题契约不变：真实语义 token 明暗自适配、`git diff HEAD` 基准（c228beb 保留）、hunk 决策键 `path#hunkIndex`、零模型参与。
 - **git history data shape**: `git:commit-log` 载荷 `commits[]` 自 BLOCK-29.3 起含 `message`（完整提交说明）；`commitDiff`/`commitFileContent` 自 BLOCK-29.5 起支持 `{fromRef,toRef}` 区间模式（hash 可省）；`branchList/blame/stashList/tagList` 为 BLOCK-29.5 新只读通道——浏览器 shim 桩若缺这些方法，对应功能降级为空/错误态（blame 视图会显示加载失败，属预期）。
 - **注意（真实链路）**: `git:commit-log` 的 skip/file 透传断点已修（UI-226），**运行中的 dev Electron 须重启**才会载入新主进程代码；重启后 UI-221 分页/文件历史在真实 app 恢复。
-- **git 只读视野已全部交付**；写操作候选（分支切换/暂存区两栏/push-pull/stash 写）维持此前裁决排除，需用户显式裁决才启动。
+- **git 写操作边界（BLOCK-41 起变化）**：写操作候选（分支切换/暂存区两栏/push-pull）已于 2026-09-02 由用户显式裁决启动为 `BLOCK-41`（含手动提交框；脏树切换拒绝并提示冲突清单）；stash 写操作维持排除。
 - **P6 evidence boundary**: canonical `acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json` 绑定 `1f276de`（206-file binding，10/10 checks）。注意：BLOCK-25 改动了 `core/r-server/**` 与 `src/ipc/working-tree-review.js` 等源文件，P6 evidence 的 206-file binding 若覆盖这些路径，下一次相关门禁会按设计 fail-closed，需要重采。
 - **Minimum recovery**: 先读 `AUDIT-LOG.md` 当前待处理项，再核对 Git，然后用 `DOC-REGISTRY.json` 定位 active 工作包；无 active 包时停止，不通读历史文档。
 - **Last recorded gates**: tsc --noEmit 0 / WorkingTreeReview 定向 vitest 23/23 / docs:check PASS(163) / ui:audit:check PASS / docs:reconcile 0 / git diff --check clean。UI-204~212、UI-219~223 verified（dev 边界内，证据 `acceptance/ui-204/`、`acceptance/ui-208/`、`acceptance/ui-210/`、`acceptance/ui-212/`、`acceptance/ui-219/`~`acceptance/ui-223/`）。UI-193/194 保持 in_progress（缺口已取证）。

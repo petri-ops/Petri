@@ -422,6 +422,48 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   const [historyMenuOpen, setHistoryMenuOpen] = useState(false);
   const textareaRef = useRef<HTMLInputElement>(null);
 
+  // ============================================================
+  // BLOCK-41 — git 写操作三期（staged 提交框 / 真实分支切换 / push-pull）
+  // ============================================================
+  const [stagedCommitMsg, setStagedCommitMsg] = useState('');
+  const [stagedCommitError, setStagedCommitError] = useState<string | null>(null);
+  const [stagedCommitting, setStagedCommitting] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<{ message: string; conflicts: string[] } | null>(null);
+  const [syncBusy, setSyncBusy] = useState<'push' | 'pull' | null>(null);
+
+  // 改动分区挂载时取分支列表 + 远程同步状态（切换选择器与 push/pull 徽标消费）
+  useEffect(() => {
+    if (review.historyView !== 'changes') return;
+    void review.loadBranches();
+    void review.loadRemoteStatus();
+  }, [review.historyView]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleStagedCommit = async () => {
+    const msg = stagedCommitMsg.trim();
+    if (!msg || stagedCommitting) return;
+    setStagedCommitting(true);
+    setStagedCommitError(null);
+    try {
+      const res = await review.commitIndex(msg);
+      setCommitSuccess({ commit: res.commit, files: stagedFiles.map((f) => f.path), message: msg });
+      setStagedCommitMsg('');
+    } catch (e) {
+      setStagedCommitError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setStagedCommitting(false);
+    }
+  };
+
+  const currentBranchName = review.branches?.find((b) => b.current)?.name ?? null;
+
+  const handleCheckoutBranch = async (name: string) => {
+    setCheckoutError(null);
+    const res = await review.checkoutBranch(name);
+    if (!res.ok) {
+      setCheckoutError({ message: res.message ?? '切换分支失败。', conflicts: res.conflicts ?? [] });
+    }
+  };
+
   // BLOCK-29.1 — dock 手风琴：每文件一行，点击展开/收起行内 diff。
   // selectedFilePath 变化（聊天卡片跳转等）时自动展开对应行。
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(() => new Set());
@@ -534,7 +576,13 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
 
   // 键盘流：A/Y accept · R reject · ↑↓(j/k) navigate（与旧抽屉一致）
   useEffect(() => {
-    const file = review.diff?.files.find((f) => f.path === review.selectedFilePath) || null;
+    const path = review.selectedFilePath;
+    if (!path) return;
+    // BLOCK-41 — staged 文件选中时 hunk 来自 stagedDiff（HEAD→index）
+    const isStaged = review.status?.files.some((f) => f.path === path && f.staged);
+    const file = (isStaged
+      ? stagedDiffByPath.get(path) ?? review.diff?.files.find((f) => f.path === path)
+      : review.diff?.files.find((f) => f.path === path)) || null;
     if (!file) return;
     const onKey = (e: KeyboardEvent) => {
       // BLOCK-29 — 历史分区为只读，A/R/↑↓ 只作用于「改动」分区
@@ -561,8 +609,6 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
     return () => window.removeEventListener('keydown', onKey);
   }, [review, focusedHunk]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const selectedFile = review.diff?.files.find((f) => f.path === review.selectedFilePath) || null;
-
   // P2 — diff 文件索引 + 目录分组 + 已审进度
   const diffByPath = useMemo(() => {
     const map = new Map<string, DiffFile>();
@@ -570,11 +616,37 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
     return map;
   }, [review.diff]);
 
+  // BLOCK-41 — staged diff 索引（HEAD→index）+ 暂存两栏分组（porcelain X：index 状态非空 → staged）
+  const stagedDiffByPath = useMemo(() => {
+    const map = new Map<string, DiffFile>();
+    for (const f of review.stagedDiff?.files ?? []) map.set(f.path, f);
+    return map;
+  }, [review.stagedDiff]);
+
   const statusFiles = review.status?.files ?? [];
+  const stagedFiles = statusFiles.filter((f) => f.staged);
+  const unstagedFiles = statusFiles.filter((f) => !f.staged);
+  const stagedGroups = useMemo(() => groupFilesByDirectory(stagedFiles), [review.status]); // eslint-disable-line react-hooks/exhaustive-deps
+  const unstagedGroups = useMemo(() => groupFilesByDirectory(unstagedFiles), [review.status]); // eslint-disable-line react-hooks/exhaustive-deps
   const fileGroups = useMemo(() => groupFilesByDirectory(statusFiles), [review.status]); // eslint-disable-line react-hooks/exhaustive-deps
+  // 按栏取 diff：staged 行走 HEAD→index（staged diff），unstaged 行走既有组合 diff
+  const diffForStatusFile = useCallback((f: { path: string; staged: boolean }) => {
+    if (f.staged) return stagedDiffByPath.get(f.path) ?? diffByPath.get(f.path);
+    return diffByPath.get(f.path);
+  }, [stagedDiffByPath, diffByPath]);
+
+  const selectedFile = (() => {
+    const path = review.selectedFilePath;
+    if (!path) return null;
+    // BLOCK-41 — staged 文件选中时优先展示 staged diff（HEAD→index）
+    const isStaged = stagedFiles.some((f) => f.path === path);
+    if (isStaged) return stagedDiffByPath.get(path) ?? diffByPath.get(path) ?? null;
+    return diffByPath.get(path) ?? null;
+  })();
+
   const reviewedCount = useMemo(
-    () => statusFiles.filter((f) => isFileReviewed(diffByPath.get(f.path), review.decisions)).length,
-    [statusFiles, diffByPath, review.decisions]
+    () => statusFiles.filter((f) => isFileReviewed(diffForStatusFile(f), review.decisions)).length,
+    [statusFiles, diffForStatusFile, review.decisions] // eslint-disable-line react-hooks/exhaustive-deps
   );
   const totalFiles = statusFiles.length;
 
@@ -785,6 +857,31 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                   {anyFileExpanded ? '收起全部' : '展开全部'}
                 </button>
               )}
+              {/* BLOCK-41 — 真实分支切换（写 refs；脏树拒绝并列出冲突文件）。
+                  与历史分区只读 ref 选择器（switchBranch）语义不同。 */}
+              {(review.branches ?? []).length > 0 && (
+                <select
+                  className="rvw-branch-select"
+                  aria-label="切换工作区分支"
+                  data-testid="rvw-branch-switch"
+                  value={currentBranchName ?? ''}
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    if (!name || name === currentBranchName) return;
+                    if (window.confirm(`切换到分支 '${name}'？有未提交改动时切换将被阻止。`)) {
+                      void handleCheckoutBranch(name);
+                    }
+                  }}
+                  title="切换工作区分支（有未提交改动时会被阻止）"
+                >
+                  {(review.branches ?? []).map((b) => (
+                    <option key={b.name} value={b.name}>
+                      {b.name}
+                      {b.current ? '（当前）' : ''}
+                    </option>
+                  ))}
+                </select>
+              )}
             </>
           ) : (
             /* UI-235 — 历史分区：工作区统计不适用，改显分支/标签 + 已加载提交数 + 合计 */
@@ -803,6 +900,36 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
           {review.taskId && <span className="wt-task-id">task: {review.taskId}</span>}
         </div>
         <div className="rvw-summary-actions">
+          {/* BLOCK-41 — ahead/behind 徽标 + push/pull（有上游才显徽标；无上游首推自动 -u） */}
+          {review.remoteSync?.upstream && (
+            <span className="rvw-sync-badge" title={`上游 ${review.remoteSync.upstream}`}>
+              {(review.remoteSync.ahead ?? 0) > 0 && <span className="rvw-sync-ahead">↑{review.remoteSync.ahead}</span>}
+              {(review.remoteSync.behind ?? 0) > 0 && <span className="rvw-sync-behind">↓{review.remoteSync.behind}</span>}
+              {(review.remoteSync.ahead ?? 0) === 0 && (review.remoteSync.behind ?? 0) === 0 && <span>已同步</span>}
+            </span>
+          )}
+          <button
+            type="button"
+            className="wt-icon-btn"
+            onClick={() => { setSyncBusy('pull'); void review.pullRemote().finally(() => setSyncBusy(null)); }}
+            disabled={syncBusy !== null}
+            title={review.remoteSync?.upstream ? `拉取（${review.remoteSync.upstream}）` : '无上游分支，无法拉取'}
+            aria-label="拉取"
+            data-testid="rvw-pull-btn"
+          >
+            <Icon name="download" size={13} />
+          </button>
+          <button
+            type="button"
+            className="wt-icon-btn"
+            onClick={() => { setSyncBusy('push'); void review.pushRemote().finally(() => setSyncBusy(null)); }}
+            disabled={syncBusy !== null}
+            title={review.remoteSync?.upstream ? `推送（${review.remoteSync.upstream}）` : '推送到远程并建立跟踪'}
+            aria-label="推送"
+            data-testid="rvw-push-btn"
+          >
+            <Icon name="arrow-up" size={13} />
+          </button>
           {/* BLOCK-29.6 UI-243 — 快捷键提示收进 info tooltip，不再常驻占地 */}
           <span
             className="rvw-help-btn"
@@ -926,6 +1053,19 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
       {review.error && (
         <div className="wt-error" role="alert">{review.error}</div>
       )}
+      {/* BLOCK-41 — 分支切换失败（脏树拒绝等）：错误信息 + 冲突文件清单 */}
+      {checkoutError && (
+        <div className="wt-error rvw-checkout-error" role="alert" data-testid="rvw-checkout-error">
+          <div>{checkoutError.message}</div>
+          {checkoutError.conflicts.length > 0 && (
+            <ul className="rvw-checkout-conflicts">
+              {checkoutError.conflicts.map((p) => (
+                <li key={p} className="rvw-checkout-conflict-path">{p}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       <div className={`rvw-body${isDock ? ' rvw-body--dock' : ''}`}>
         {review.historyView === 'history' && (
@@ -1008,8 +1148,18 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
             {review.status && review.status.files.length === 0 && (
               <div className="wt-empty">暂无工作区改动。</div>
             )}
-            {/* BLOCK-29.7 UI-244 — dock 手风琴升级目录分组树：结构与 /review 主区左树同构 */}
-            {fileGroups.map((group) => {
+            {/* BLOCK-41 — 暂存两栏分组（porcelain X）：staged 行 diff 走 HEAD→index，unstaged 行走组合 diff */}
+            {([
+              { key: 'staged', label: '暂存的更改', sectionIcon: 'minus' as const, groups: stagedGroups },
+              { key: 'unstaged', label: '更改', sectionIcon: 'plus' as const, groups: unstagedGroups },
+            ]).filter((section) => section.groups.length > 0).map((section) => (
+              <div key={section.key} className={`rvw-stage-section rvw-stage-section--${section.key}`} data-testid={`rvw-section-${section.key}`}>
+                <div className="rvw-stage-section-title">
+                  <Icon name={section.sectionIcon} size={12} />
+                  <span>{section.label}</span>
+                  <span className="rvw-group-count">{section.groups.reduce((n, g) => n + g.files.length, 0)}</span>
+                </div>
+            {section.groups.map((group) => {
               const collapsed = !!collapsedDirs[group.dir];
               return (
                 <div key={group.dir || '/'} className="rvw-acc-group">
@@ -1029,7 +1179,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                   {!collapsed && (
                     <div className="rvw-acc-group-files">
                       {group.files.map((f) => {
-                        const diffFile = diffByPath.get(f.path);
+                        const diffFile = diffForStatusFile(f);
                         const stats = computeFileDiffStats(diffFile);
                         const reviewed = isFileReviewed(diffFile, review.decisions);
                         const selected = review.selectedFilePath === f.path;
@@ -1066,6 +1216,20 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                                   {stats.removed > 0 && <span className="rvw-stat-del">−{stats.removed}</span>}
                                 </span>
                     ) : null}
+                    {/* BLOCK-41 — 行内 stage/unstage（staged 行取消暂存，unstaged 行暂存） */}
+                    <span
+                      role="button"
+                      tabIndex={-1}
+                      className="rvw-acc-action rvw-acc-action-stage"
+                      title={f.staged ? '取消暂存' : '暂存'}
+                      aria-label={f.staged ? `取消暂存 ${fileName}` : `暂存 ${fileName}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void (f.staged ? review.unstagePaths([f.path]) : review.stagePaths([f.path]));
+                      }}
+                    >
+                      <Icon name={f.staged ? 'minus' : 'plus'} size={12} />
+                    </span>
                     {/* BLOCK-29.2 — 行内操作：查看该文件历史 / 放弃更改（span 嵌于按钮行内） */}
                     {/* BLOCK-29.6 UI-243 — 行内「编辑」取代原 summary 全局按钮（已知二进制才隐藏） */}
                     {!diffFile?.binary && (
@@ -1139,6 +1303,8 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                 </div>
               );
             })}
+              </div>
+            ))}
           </div>
           {/* UI-254/260 — 右侧文件树：按钮切换显示（默认收起），树仅作导航（点击=展开/收起左侧行并滚动定位） */}
           {isDock && dockTreeOpen && (
@@ -1203,7 +1369,18 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
           {review.status && review.status.files.length === 0 && (
             <div className="wt-empty">暂无工作区改动。</div>
           )}
-          {fileGroups.map((group) => {
+          {/* BLOCK-41 — 暂存两栏分组（porcelain X）：staged 行 diff 走 HEAD→index，unstaged 行走组合 diff */}
+          {([
+            { key: 'staged', label: '暂存的更改', sectionIcon: 'minus' as const, groups: stagedGroups },
+            { key: 'unstaged', label: '更改', sectionIcon: 'plus' as const, groups: unstagedGroups },
+          ]).filter((section) => section.groups.length > 0).map((section) => (
+            <div key={section.key} className={`rvw-stage-section rvw-stage-section--${section.key}`} data-testid={`rvw-section-${section.key}`}>
+              <div className="rvw-stage-section-title">
+                <Icon name={section.sectionIcon} size={12} />
+                <span>{section.label}</span>
+                <span className="rvw-group-count">{section.groups.reduce((n, g) => n + g.files.length, 0)}</span>
+              </div>
+          {section.groups.map((group) => {
             const collapsed = !!collapsedDirs[group.dir];
             return (
               <div key={group.dir || '/'} className="rvw-group">
@@ -1221,7 +1398,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                 </button>
                 {!collapsed &&
                   group.files.map((f) => {
-                    const diffFile = diffByPath.get(f.path);
+                    const diffFile = diffForStatusFile(f);
                     const stats = computeFileDiffStats(diffFile);
                     const reviewed = isFileReviewed(diffFile, review.decisions);
                     const summary = fileDecisionSummary(f.path);
@@ -1259,12 +1436,28 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                             {stats.removed > 0 && <span className="rvw-stat-del">−{stats.removed}</span>}
                           </span>
                         )}
+                        {/* BLOCK-41 — 行内 stage/unstage（span 嵌于按钮行内） */}
+                        <span
+                          role="button"
+                          tabIndex={-1}
+                          className="rvw-acc-action rvw-acc-action-stage"
+                          title={f.staged ? '取消暂存' : '暂存'}
+                          aria-label={f.staged ? `取消暂存 ${fileName}` : `暂存 ${fileName}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void (f.staged ? review.unstagePaths([f.path]) : review.stagePaths([f.path]));
+                          }}
+                        >
+                          <Icon name={f.staged ? 'minus' : 'plus'} size={12} />
+                        </span>
                       </button>
                     );
                   })}
               </div>
             );
           })}
+            </div>
+          ))}
         </aside>
         )}
 
@@ -1369,6 +1562,44 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
         </footer>
       )}
 
+      {/* BLOCK-41 — staged 栏提交框：有暂存文件才出现（按需，单行 + ⌘Enter，空信息禁用） */}
+      {review.historyView === 'changes' && stagedFiles.length > 0 && (
+        <footer className="rvw-commitbox rvw-commitbox--staged" data-testid="rvw-staged-commitbox">
+          <div className="rvw-commitbox-meta">
+            <span className="rvw-commitbox-stat">暂存 {stagedFiles.length} 个文件</span>
+            {stagedCommitError && (
+              <span className="rvw-commitbox-error" role="alert">{stagedCommitError}</span>
+            )}
+          </div>
+          <input
+            className="rvw-commitbox-input"
+            type="text"
+            value={stagedCommitMsg}
+            onChange={(e) => {
+              setStagedCommitMsg(e.target.value);
+              if (stagedCommitError) setStagedCommitError(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                void handleStagedCommit();
+              }
+            }}
+            placeholder={`提交信息（⌘+Enter 提交暂存的 ${stagedFiles.length} 个文件）`}
+            aria-label="暂存区提交信息"
+          />
+          <button
+            type="button"
+            className={`wt-btn wt-btn-commit${!stagedCommitMsg.trim() ? ' wt-btn-disabled' : ''}`}
+            onClick={() => void handleStagedCommit()}
+            disabled={!stagedCommitMsg.trim() || stagedCommitting}
+            title={`提交暂存的 ${stagedFiles.length} 个文件`}
+          >
+            {stagedCommitting ? '提交中…' : '提交暂存'}
+          </button>
+        </footer>
+      )}
+
       {/* 行内编辑抽屉（复用，非旧侧边抽屉） */}
       <CodeReviewDrawer
         isOpen={isEditDrawerOpen}
@@ -1383,7 +1614,11 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
 
       {/* UI-250/UI-255 — 文件行悬停浮动预览：只读 diff/内容 + 状态统计头（定位/尺寸自适应） */}
       {hoverPreview && (() => {
-        const previewDiff = diffByPath.get(hoverPreview.path);
+        // BLOCK-41 — staged 文件预览走 staged diff（HEAD→index）
+        const previewDiff = diffForStatusFile({
+          path: hoverPreview.path,
+          staged: review.status?.files.some((f) => f.path === hoverPreview.path && f.staged) ?? false,
+        });
         const previewStatus = review.status?.files.find((f) => f.path === hoverPreview.path);
         const previewStats = computeFileDiffStats(previewDiff);
         return (

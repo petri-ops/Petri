@@ -1226,3 +1226,81 @@
   padding: 2px 0;
   font-size: var(--biof3-font-size-xs);
 }
+
+/* ===== BLOCK-41 — git 写操作三期：暂存两栏 / stage-unstage / 分支切换错误 / push-pull ===== */
+
+/* 两栏分区（暂存的更改 / 更改）：分区标题行 + 目录组沿用既有 rvw-acc-group / rvw-group */
+.rvw-stage-section {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rvw-stage-section + .rvw-stage-section {
+  margin-top: 6px;
+}
+
+.rvw-stage-section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px 4px;
+  font-size: var(--biof3-font-size-xs);
+  font-weight: 600;
+  color: var(--biof3-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+
+.rvw-stage-section-title .rvw-group-count {
+  margin-left: auto;
+}
+
+/* 行内 stage/unstage：hover 用 accent（staged 行 minus / unstaged 行 plus） */
+.rvw-acc-action-stage:hover {
+  color: var(--biof3-accent);
+  background: var(--biof3-accent-soft);
+}
+
+/* 分支切换失败：错误信息 + 冲突文件清单 */
+.rvw-checkout-error {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rvw-checkout-conflicts {
+  margin: 0;
+  padding-left: 18px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.rvw-checkout-conflict-path {
+  font-family: var(--biof3-font-mono, monospace);
+  font-size: var(--biof3-font-size-xs);
+}
+
+/* ahead/behind 徽标 + push/pull 按钮组（summary 行内） */
+.rvw-sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--biof3-font-size-xs);
+  color: var(--biof3-text-muted);
+  white-space: nowrap;
+}
+
+.rvw-sync-ahead {
+  color: var(--biof3-accent);
+}
+
+.rvw-sync-behind {
+  color: var(--biof3-status-warning-fg, var(--biof3-text-muted));
+}
+
+/* staged 栏提交框：与 AI 审阅提交条同构，顶部细线区分 */
+.rvw-commitbox--staged {
+  border-top: 1px solid var(--biof3-border);
+}

@@ -35,6 +35,29 @@
       "phase": "P0-LAUNCH"
     },
     {
+      "id": "BLOCK-41-GIT-WRITE-OPS-PHASE3",
+      "path": "docs/block-41-git-write-ops-phase3-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-41-git-write-ops-phase3",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-41",
+        "git",
+        "review",
+        "write-ops",
+        "staging",
+        "branch-switch",
+        "push-pull",
+        "G0"
+      ],
+      "notes": "2026-09-02 立项（用户裁决，承接 BLOCK-29 起维持排除的 roadmap 候选）：审阅面板 git 写操作三期。P1 adapter 新增 unstage/commitIndex/checkoutBranch（脏树拒绝+冲突清单）/remoteList/remoteStatus（fetch+ahead/behind）/push/pull（GIT_TERMINAL_PROMPT=0 + timeout + 诊断脱敏）；P2 七条 IPC 通道（git:stage-paths/unstage-paths/commit-index/checkout-branch/remote-status/push/pull，resolveGitAdapter(projectId) 项目级隔离）+ preload additive；P3 前端改动 tab staged/unstaged 两栏 + 行内 stage/unstage + staged diff + 手动提交框（用户裁决含）+ 分支选择器真切换（用户裁决脏树阻止并提示）+ push/pull 按钮 + ahead/behind 徽标；P4 真仓库快测 + dev Electron 实机收口（UI-278，证据 acceptance/ui-278/）。非范围：stash 写/amend/rebase 冲突解决 UI/远程管理/credential UI/AI 审阅重新引入；0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-02",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH"
+    },
+    {
       "id": "BLOCK-39-AGENT-STREAM-RECONNECT",
       "path": "docs/block-39-agent-stream-reconnect-plan.md",
       "kind": "work-package",

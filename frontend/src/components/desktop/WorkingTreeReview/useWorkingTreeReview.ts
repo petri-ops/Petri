@@ -96,10 +96,28 @@ export interface CommitInfo {
 }
 
 export interface WorkingTreeStatus {
-  files: Array<{ path: string; oldPath: string | null; status: string; untracked: boolean; conflicted: boolean }>;
+  files: Array<{
+    path: string;
+    oldPath: string | null;
+    status: string;
+    untracked: boolean;
+    conflicted: boolean;
+    /** BLOCK-41 — porcelain X（index 状态非空 → 已暂存），两栏分组依据 */
+    staged: boolean;
+    /** BLOCK-41 — porcelain X / Y 原始状态字符 */
+    indexStatus: string;
+    worktreeStatus: string;
+  }>;
   totalFiles: number;
   hasUntracked: boolean;
   hasConflict: boolean;
+}
+
+/** BLOCK-41 — 远程同步状态（ahead/behind；无 upstream 或离线时为 null）。 */
+export interface RemoteSyncStatus {
+  upstream: string | null;
+  ahead: number | null;
+  behind: number | null;
 }
 
 export interface UseWorkingTreeReviewOptions {
@@ -168,6 +186,24 @@ export interface UseWorkingTreeReviewReturn {
    * true 时审阅应渲染诚实空态，不显示任何仓库数据。
    */
   workspaceNotGit: boolean;
+  /** BLOCK-41 — staged 文件 diff（HEAD→index），随 refresh 一并取回；无 staged 文件时为 null。 */
+  stagedDiff: DiffResult | null;
+  /** BLOCK-41 — 暂存指定文件（git add）。 */
+  stagePaths: (paths: string[]) => Promise<boolean>;
+  /** BLOCK-41 — 取消暂存指定文件（git reset HEAD --）。 */
+  unstagePaths: (paths: string[]) => Promise<boolean>;
+  /** BLOCK-41 — 提交整个暂存区（无 pathspec，与 commitReview 的 --only 语义区分）。 */
+  commitIndex: (message: string) => Promise<{ commit: string | null; files: number }>;
+  /**
+   * BLOCK-41 — 真实分支切换（git checkout）。脏树拒绝时返回冲突清单。
+   * 与 switchBranch（历史查询 ref）语义不同：本方法写 refs 并刷新全部视野。
+   */
+  checkoutBranch: (name: string) => Promise<{ ok: boolean; message?: string; conflicts?: string[]; alreadyCurrent?: boolean }>;
+  /** BLOCK-41 — 远程同步状态与 push/pull 动作。 */
+  remoteSync: RemoteSyncStatus | null;
+  loadRemoteStatus: () => Promise<void>;
+  pushRemote: () => Promise<boolean>;
+  pullRemote: () => Promise<boolean>;
 }
 
 export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}): UseWorkingTreeReviewReturn {
@@ -185,6 +221,13 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
   const [error, setError] = useState<string | null>(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [workspaceNotGit, setWorkspaceNotGit] = useState(false);
+  // BLOCK-41 — staged diff（HEAD→index）与远程同步状态
+  const [stagedDiff, setStagedDiff] = useState<DiffResult | null>(null);
+  const [remoteSync, setRemoteSync] = useState<RemoteSyncStatus | null>(null);
+  const stagedDiffRef = useRef<DiffResult | null>(null);
+  stagedDiffRef.current = stagedDiff;
+  const remoteSyncRef = useRef<RemoteSyncStatus | null>(null);
+  remoteSyncRef.current = remoteSync;
   const taskIdRef = useRef<string | null>(null);
   taskIdRef.current = taskId;
   const projectIdRef = useRef<string | null>(null);
@@ -224,6 +267,16 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
       } else {
         setDiff({ files: [], truncated: false, summary: { added: 0, removed: 0 } });
       }
+      // BLOCK-41 — staged 文件 diff（HEAD→index）：staged 文件存在时随 refresh 一并取回
+      const stagedPaths = statusRes.ok && statusRes.data
+        ? statusRes.data.files.filter((f) => f.staged).map((f) => f.path)
+        : [];
+      if (stagedPaths.length > 0) {
+        const stagedRes = await bridge.diff({ paths: stagedPaths, staged: true });
+        setStagedDiff(stagedRes.ok && stagedRes.data ? stagedRes.data : { files: [], truncated: false, summary: { added: 0, removed: 0 } });
+      } else {
+        setStagedDiff(null);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -234,7 +287,8 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
   const decideHunk = useCallback(async (file: string, hunkIndex: number, action: 'accept' | 'reject', feedback?: string) => {
     const bridge = getBridge('workingTreeReview');
     if (!bridge) return;
-    const hunk = diff?.files.find((f) => f.path === file)?.hunks[hunkIndex];
+    // BLOCK-41 — staged 文件选中时 hunk 来自 stagedDiff（HEAD→index），优先匹配
+    const hunk = (stagedDiffRef.current?.files.find((f) => f.path === file) ?? diff?.files.find((f) => f.path === file))?.hunks[hunkIndex];
     const key = `${file}#${hunkIndex}`;
     setDecisions((prev) => ({ ...prev, [key]: action === 'accept' ? 'accept' : 'reject' }));
     try {
@@ -271,7 +325,8 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
   const rejectHunkByInverseHunk = useCallback(async (file: string, hunkIndex: number, patch: string, feedback?: string) => {
     const bridge = getBridge('workingTreeReview');
     if (!bridge) return;
-    const hunk = diff?.files.find((f) => f.path === file)?.hunks[hunkIndex];
+    // BLOCK-41 — staged 文件选中时 hunk 来自 stagedDiff（HEAD→index），优先匹配
+    const hunk = (stagedDiffRef.current?.files.find((f) => f.path === file) ?? diff?.files.find((f) => f.path === file))?.hunks[hunkIndex];
     const key = `${file}#${hunkIndex}`;
     setDecisions((prev) => ({ ...prev, [key]: 'reject' }));
     try {
@@ -363,6 +418,8 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     setSelectedFilePath(null);
     setDecisions({});
     setWorkspaceNotGit(false);
+    setStagedDiff(null);
+    setRemoteSync(null);
     setCommits(null);
     setBranches(null);
     setStashes(null);
@@ -532,6 +589,136 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     }
   }, [refresh, loadHistory]);
 
+  // ============================================================
+  // BLOCK-41 — git 写操作三期：暂存 / 取消暂存 / 提交暂存区 / 真实分支切换 / push-pull
+  // 全部走 resolveGitAdapter(projectId) 项目级隔离（P2 IPC 已定契约）。
+  // ============================================================
+
+  const stagePaths = useCallback(async (paths: string[]): Promise<boolean> => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge || paths.length === 0) return false;
+    try {
+      const res = await bridge.stagePaths({ paths, projectId: projectIdRef.current ?? undefined });
+      if (!res.ok) {
+        setError(res.message || res.error || '暂存失败。');
+        return false;
+      }
+      await refresh();
+      return true;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      return false;
+    }
+  }, [refresh]);
+
+  const unstagePaths = useCallback(async (paths: string[]): Promise<boolean> => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge || paths.length === 0) return false;
+    try {
+      const res = await bridge.unstagePaths({ paths, projectId: projectIdRef.current ?? undefined });
+      if (!res.ok) {
+        setError(res.message || res.error || '取消暂存失败。');
+        return false;
+      }
+      await refresh();
+      return true;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      return false;
+    }
+  }, [refresh]);
+
+  // BLOCK-41 — 远程同步状态（stable；push 首推时读 upstream 判定是否 -u）
+  const loadRemoteStatus = useCallback(async () => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) return;
+    try {
+      const res = await bridge.remoteStatus({ projectId: projectIdRef.current ?? undefined });
+      setRemoteSync(res.ok && res.data ? { upstream: res.data.upstream ?? null, ahead: res.data.ahead ?? null, behind: res.data.behind ?? null } : null);
+    } catch {
+      setRemoteSync(null);
+    }
+  }, []);
+
+  const commitIndex = useCallback(async (message: string): Promise<{ commit: string | null; files: number }> => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) throw new Error('bridge unavailable');
+    const res = await bridge.commitIndex({ message, projectId: projectIdRef.current ?? undefined });
+    if (!res.ok) {
+      throw new Error(res.message || res.error || '提交暂存区失败。');
+    }
+    await refresh();
+    await loadHistory({ file: null });
+    await loadRemoteStatus();
+    return { commit: res.data?.commit ?? null, files: res.data?.remaining ?? 0 };
+  }, [refresh, loadHistory, loadRemoteStatus]);
+
+  const checkoutBranch = useCallback(async (name: string): Promise<{ ok: boolean; message?: string; conflicts?: string[]; alreadyCurrent?: boolean }> => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) return { ok: false, message: 'bridge unavailable' };
+    try {
+      const res = await bridge.checkoutBranch({ name, projectId: projectIdRef.current ?? undefined });
+      if (!res.ok) {
+        return {
+          ok: false,
+          message: res.message || res.error || `切换到分支 '${name}' 失败。`,
+          conflicts: res.detail?.conflicts ?? [],
+        };
+      }
+      if (res.data?.switched === false) {
+        return { ok: true, alreadyCurrent: true };
+      }
+      // 切换成功：工作区 / 暂存区 / 历史 / 远程状态全部刷新
+      setSelectedFilePath(null);
+      await refresh();
+      await loadBranches();
+      await loadHistory({ file: null });
+      await loadRemoteStatus();
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, message: e instanceof Error ? e.message : String(e) };
+    }
+  }, [refresh, loadBranches, loadHistory, loadRemoteStatus]);
+
+  const pushRemote = useCallback(async (): Promise<boolean> => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) return false;
+    try {
+      // 无 upstream 时自动 -u 建立跟踪（首推场景）；否则纯 push
+      const setUpstream = remoteSyncRef.current?.upstream == null;
+      const res = await bridge.push({ setUpstream, projectId: projectIdRef.current ?? undefined });
+      if (!res.ok) {
+        setError(res.message || res.error || '推送失败。');
+        return false;
+      }
+      await loadRemoteStatus();
+      await loadHistory({ file: null });
+      return true;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      return false;
+    }
+  }, [loadRemoteStatus, loadHistory]);
+
+  const pullRemote = useCallback(async (): Promise<boolean> => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) return false;
+    try {
+      const res = await bridge.pull({ projectId: projectIdRef.current ?? undefined });
+      if (!res.ok) {
+        setError(res.message || res.error || '拉取失败。');
+        return false;
+      }
+      await refresh();
+      await loadRemoteStatus();
+      await loadHistory({ file: null });
+      return true;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      return false;
+    }
+  }, [refresh, loadRemoteStatus, loadHistory]);
+
   const pendingCount = Object.values(decisions).filter((d) => d === 'pending').length;
   const appliedCount = Object.values(decisions).filter((d) => d === 'accept').length;
   const rejectedCount = Object.values(decisions).filter((d) => d === 'reject').length;
@@ -574,5 +761,14 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     discardFile,
     undoLastCommit,
     workspaceNotGit,
+    stagedDiff,
+    stagePaths,
+    unstagePaths,
+    commitIndex,
+    checkoutBranch,
+    remoteSync,
+    loadRemoteStatus,
+    pushRemote,
+    pullRemote,
   };
 }

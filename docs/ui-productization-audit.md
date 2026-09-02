@@ -2137,6 +2137,18 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-278: git 写操作三期——暂存两栏 / 真实分支切换 / push-pull（BLOCK-41） (2026-09-02 verified)
+
+**用户需求**：BLOCK-29 起维持排除、登记为 roadmap 候选的 git 写操作三期，2026-09-02 用户裁决启动（三项全做 + staged 提交框 + 脏树阻止并提示冲突文件）。
+
+**改动**（0 新依赖）：① P1 [git-adapter.js](../core/shared-backend/git-adapter.js) 新增 `runAsync`（execFile 异步执行器，push/pull 网络操作不阻塞主进程事件循环）+ 7 方法：`unstage`（reset -q HEAD --，unborn 回退 rm --cached）/ `commitIndex`（无 pathspec 提交整个暂存区）/ `checkoutBranch`（midOperation 拒绝、仅本地分支、幂等、脏树拒绝 `checkout_dirty_worktree` 带冲突清单=本地已改∩HEAD..target 差异）/ `remoteList` / `remoteStatus`（fetch allowFailure 离线降级 → @{upstream} → rev-list left-right ahead/behind）/ `push`（--set-upstream 可选）/ `pull`（merge 语义），全部 `GIT_TERMINAL_PROMPT=0` 防挂起 + stderr 脱敏；② P2 [working-tree-review.js](../src/ipc/working-tree-review.js) 新增 7 条 IPC（git:stage-paths / unstage-paths / commit-index / checkout-branch / remote-list / remote-status / push / pull，全走 resolveGitAdapter(projectId) 项目级隔离 + assertSender + safeInvoke），[preload.js](../src/preload.js) additive 暴露 8 方法，[electron.d.ts](../frontend/src/lib/electron.d.ts) 类型同步（status files 补 staged/indexStatus/worktreeStatus）；③ P3 前端：[useWorkingTreeReview.ts](../frontend/src/components/desktop/WorkingTreeReview/useWorkingTreeReview.ts) 新增 stagedDiff（refresh 时 staged 文件存在则一并取回 `diff({staged:true})`）+ stagePaths/unstagePaths/commitIndex/checkoutBranch/loadRemoteStatus/pushRemote/pullRemote（无 upstream 首推自动 -u）；[ReviewMode.tsx](../frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx) 改动 tab staged/unstaged 两栏分组（dock 手风琴 + 主区左树同构，分区标题「暂存的更改/更改」）+ 行内 stage/unstage 按钮（plus/minus，hover accent）+ staged 文件行/主区 diff/悬浮预览走 staged diff（HEAD→index）+ staged 栏提交框（单行 input + ⌘Enter，空信息禁用，按需出现）+ 改动分区分支选择器真切换（confirm → 脏树失败横幅列冲突文件清单）+ summary 行 push/pull 按钮 + ↑ahead/↓behind 徽标（无 upstream 不显徽标）；[ReviewMode.css](../frontend/src/components/desktop/WorkingTreeReview/ReviewMode.css) 全 `--biof3-*` token。
+
+**门禁**：P1 真实仓库快测 18/18（unstage/commitIndex/checkout 脏树拒绝+冲突清单/checkout 干净切换/push 后 ahead/behind 归零）；`git-adapter.test.mjs` 39/39；前端 WorkingTreeReview vitest 38/38（新增 `ReviewMode.block41.test.tsx` 9/9：两栏分组/staged diff 来源/行内 stage·unstage/staged 提交框 commitIndex/分支切换 confirm+checkoutBranch/脏树拒绝冲突横幅/↑↓徽标+push·pull/无 upstream 自动 -u）；tsc 0；docs:check 181；artifact-truth/backend-health/credential-store/mcp-autoload 28/28。
+
+**P4 实机走查**（2026-09-02，dev Electron CDP :9222，临时专用仓库 + bare remote，验收后项目/仓库已清理）：8 场景全 PASS——两栏分组（staged 空时分区隐藏）/ 行内暂存→staged 栏+staged diff+提交框按需出现 / 行内取消暂存 / 提交框真实 commit（637fc59，ahead ↑1→↑2，git 双核对）/ 脏树切换拒绝（横幅列冲突文件，仓库实际未切换）/ 干净树 feature-b·main 往返（与 `git branch --show-current` 一致）/ push→「已同步」+0/0+remote 收到提交 / 制造 behind=1 后 pull→fast-forward 归零。截图与记录 [acceptance/ui-278/](../acceptance/ui-278/README.md)。
+
+**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-277: 会话改动水合——reload 后历史会话恢复「本会话改动」精确归属（BLOCK-40） (2026-09-02 verified)
 
 **用户需求**：BLOCK-31 收口时登记的 roadmap 候选，用户裁决启动——`conversationChangesStore` 归属索引为纯内存态，页面 reload 后历史会话「本会话改动」回退全量视图；权威清单已持久化于 `tasks.files_changed_json`，只缺只读端点 + 前端挂载水合。

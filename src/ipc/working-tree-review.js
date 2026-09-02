@@ -284,6 +284,10 @@ function setupWorkingTreeReviewIpc(options = {}) {
           path: e.path,
           oldPath: e.oldPath || null,
           status: e.status,
+          // BLOCK-41 — 暂存区两栏分组所需 additive 字段（indexStatus=X → 已暂存）
+          indexStatus: e.indexStatus,
+          worktreeStatus: e.worktreeStatus,
+          staged: !!e.staged,
           untracked: !!e.untracked,
           conflicted: !!e.conflicted,
         })),
@@ -721,6 +725,101 @@ function setupWorkingTreeReviewIpc(options = {}) {
     return safeInvoke(async () => {
       const adapter = await resolveGitAdapter(args.projectId);
       return adapter.undoLastCommit();
+    });
+  });
+
+  // ============================================================
+  // BLOCK-41 — git 写操作三期（审阅面板，均经 resolveGitAdapter 项目级隔离）：
+  //   git:stage-paths       显式路径暂存（复用 BLOCK-20 commit-review 的 adapter.stage）
+  //   git:unstage-paths     显式路径取消暂存（unborn HEAD 回退 git rm --cached）
+  //   git:commit-index      提交整个暂存区（手动提交框；无 pathspec，不隐式带工作区改动）
+  //   git:checkout-branch   切换本地分支（脏树拒绝 + 冲突清单；mid-operation 拒绝）
+  //   git:remote-list       远程列表（只读）
+  //   git:remote-status     fetch + ahead/behind（async，离线诚实降级）
+  //   git:push / git:pull   推送/拉取（async 不阻塞主进程；认证依赖系统 credential helper）
+  // ============================================================
+  ipcMain.handle('git:stage-paths', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = await resolveGitAdapter(args.projectId);
+      if (!args || !Array.isArray(args.paths) || args.paths.length === 0) {
+        throw new GitAdapterError('paths_required', 'paths array is required.');
+      }
+      return adapter.stage({ paths: args.paths });
+    });
+  });
+
+  ipcMain.handle('git:unstage-paths', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = await resolveGitAdapter(args.projectId);
+      if (!args || !Array.isArray(args.paths) || args.paths.length === 0) {
+        throw new GitAdapterError('paths_required', 'paths array is required.');
+      }
+      return adapter.unstage({ paths: args.paths });
+    });
+  });
+
+  ipcMain.handle('git:commit-index', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = await resolveGitAdapter(args.projectId);
+      if (!args || typeof args.message !== 'string' || args.message.trim() === '') {
+        throw new GitAdapterError('commit_message_required', 'Commit message is required.');
+      }
+      const result = adapter.commitIndex({ message: args.message.trim() });
+      const newStatus = adapter.repositoryStatus({ untracked: 'all' });
+      return { ...result, remaining: newStatus.entries.length };
+    });
+  });
+
+  ipcMain.handle('git:checkout-branch', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = await resolveGitAdapter(args.projectId);
+      if (!args || typeof args.name !== 'string' || !args.name.trim()) {
+        throw new GitAdapterError('branch_name_required', 'Branch name is required.');
+      }
+      return adapter.checkoutBranch({ name: args.name.trim() });
+    });
+  });
+
+  ipcMain.handle('git:remote-list', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = await resolveGitAdapter(args.projectId);
+      return adapter.remoteList();
+    });
+  });
+
+  ipcMain.handle('git:remote-status', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = await resolveGitAdapter(args.projectId);
+      return adapter.remoteStatus();
+    });
+  });
+
+  ipcMain.handle('git:push', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = await resolveGitAdapter(args.projectId);
+      return adapter.push({
+        remote: typeof args.remote === 'string' ? args.remote : null,
+        branch: typeof args.branch === 'string' ? args.branch : null,
+        setUpstream: args.setUpstream === true,
+      });
+    });
+  });
+
+  ipcMain.handle('git:pull', async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = await resolveGitAdapter(args.projectId);
+      return adapter.pull({
+        remote: typeof args.remote === 'string' ? args.remote : null,
+        branch: typeof args.branch === 'string' ? args.branch : null,
+      });
     });
   });
 

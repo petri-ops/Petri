@@ -1,11 +1,11 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-31（BLOCK-29.7-REVIEW-CHANGES-TREE 已收口：审阅文件导航树化——dock 目录分组树 + 历史提交左 mini 树+右 diff，版本改动 ↔ 项目结构对应可见，UI-244 verified，证据 `acceptance/ui-244/`；同日 UI-238~243 六个视觉增量已收口。当前无 active 工作包，下一工作包由用户显式裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-02（**BLOCK-41-GIT-WRITE-OPS-PHASE3 启动**：git 写操作三期，用户裁决含手动提交框 + 分支切换脏树阻止并提示；plan `docs/block-41-git-write-ops-phase3-plan.md`，UI-278。同日 BLOCK-40-CONV-CHANGES-HYDRATION 已收口（UI-277 verified，收口提交 `c7036dc0`）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- 无 active 工作包。`BLOCK-29.7-REVIEW-CHANGES-TREE` 已于 2026-08-31 收口（用户提出审阅增加文件树看清版本↔项目结构）：dock 改动手风琴升级目录分组树（组头折叠与 /review 主区同构、缩进参考线、行内三操作保留、根目录标签「（根目录）」）+ 历史提交详情改左 mini 树 172px + 右 diff；UI-244 verified，证据 `acceptance/ui-244/`。同日已收口：`BLOCK-29.6`（审阅头部 chrome 紧凑化 UI-243）/ UI-238（浅色纯净）/ UI-239~241（字号层次）/ UI-242（字体族单栈）。
-- 留给用户裁决的后续候选：git 写操作三期（分支切换/暂存区两栏/push-pull，此前裁决排除）；UI-193 widget 业务路径与 UI-194 消费侧挂载；ui:audit `--report` 模式 schema 大小写债务（AUDIT-LOG 2026-08-30 🟢）。
+- **Active 工作包：`BLOCK-41-GIT-WRITE-OPS-PHASE3`**（2026-09-02 用户裁决启动，承接 BLOCK-29 起维持排除的候选）：审阅面板 git 写操作三期——P1 adapter 写方法（unstage / commitIndex / checkoutBranch 脏树拒绝+冲突清单 / remoteList / remoteStatus ahead-behind / push / pull）→ P2 七条 IPC 通道（resolveGitAdapter 项目级隔离）→ P3 审阅改动 tab staged/unstaged 两栏 + 行内 stage/unstage + staged diff + 手动提交框 + 分支选择器真切换（脏树阻止并提示）+ push/pull 按钮 + ahead/behind 徽标 → P4 真仓库快测 + dev Electron 实机收口（UI-278）。详 Plan：`docs/block-41-git-write-ops-phase3-plan.md`。
+- 已收口候选：git 写操作三期已于 2026-09-02 由用户显式裁决启动（BLOCK-41）。剩余候选：UI-193 widget 业务路径与 UI-194 消费侧挂载；ui:audit `--report` 模式 schema 大小写债务（AUDIT-LOG 2026-08-30 🟢）。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 
 ## 当前结论

@@ -386,6 +386,15 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     // BLOCK-29.2 — git 工具二期（前端确认后调用）
     discardFile: (params) => ipcRenderer.invoke('git:discard-file', params || {}),
     undoLastCommit: (params) => ipcRenderer.invoke('git:undo-last-commit', params || {}),
+    // BLOCK-41 — git 写操作三期（暂存两栏 / 分支切换 / push-pull）
+    stagePaths: (params) => ipcRenderer.invoke('git:stage-paths', params || {}),
+    unstagePaths: (params) => ipcRenderer.invoke('git:unstage-paths', params || {}),
+    commitIndex: (params) => ipcRenderer.invoke('git:commit-index', params || {}),
+    checkoutBranch: (params) => ipcRenderer.invoke('git:checkout-branch', params || {}),
+    remoteList: (params) => ipcRenderer.invoke('git:remote-list', params || {}),
+    remoteStatus: (params) => ipcRenderer.invoke('git:remote-status', params || {}),
+    push: (params) => ipcRenderer.invoke('git:push', params || {}),
+    pull: (params) => ipcRenderer.invoke('git:pull', params || {}),
   },
 
 });

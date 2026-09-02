@@ -18,7 +18,7 @@
  * - 本模块不判定科学有效性，也不写 Artifact；它只负责文本版本事实。
  */
 
-const { execFileSync } = require('child_process');
+const { execFileSync, execFile } = require('child_process');
 const { randomUUID } = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -365,6 +365,54 @@ function createGitAdapter(options = {}) {
   function identityArgs() {
     if (!identity || !identity.name || !identity.email) return [];
     return ['-c', `user.name=${identity.name}`, '-c', `user.email=${identity.email}`];
+  }
+
+  /**
+   * BLOCK-41 — 异步执行一条 git 命令（push/pull 等网络操作专用）。
+   * 与 run() 同参同样走数组 + 不经 shell + 诊断脱敏，但不阻塞主进程事件循环：
+   * push/pull 可能等待网络/凭据数十秒，execFileSync 会冻结整个 IPC 通道。
+   * @param {string[]} args
+   * @param {{ allowFailure?: boolean, readOnly?: boolean, timeout?: number }} [runOptions]
+   * @returns {Promise<{ok: boolean, stdout: string, stderr: string, status: number|null, code?: string, command: string|null}>}
+   */
+  function runAsync(args, runOptions = {}) {
+    const prefix = ['--git-dir', resolvedGitDir, '--work-tree', resolvedWorkTree];
+    if (!allowHooks) {
+      prefix.unshift('-c', `core.hooksPath=${path.join(resolvedGitDir, 'biof3-disabled-hooks')}`);
+    }
+    const env = baseEnv();
+    if (runOptions.readOnly) env.GIT_OPTIONAL_LOCKS = '0';
+    return new Promise((resolve) => {
+      const child = execFile(
+        gitBin,
+        [...prefix, ...args],
+        {
+          encoding: 'utf8',
+          cwd: fs.existsSync(resolvedWorkTree) ? resolvedWorkTree : undefined,
+          env: { ...env, ...(runOptions.env || {}) },
+          timeout: runOptions.timeout || 60000,
+          maxBuffer: 32 * 1024 * 1024,
+          killSignal: 'SIGKILL',
+        },
+        (error, stdout, stderr) => {
+          if (!error) {
+            resolve({ ok: true, stdout: stdout == null ? '' : String(stdout), stderr: '', status: 0, command: args[0] || null });
+            return;
+          }
+          resolve({
+            ok: false,
+            command: args[0] || null,
+            stdout: stdout ? String(stdout) : '',
+            stderr: redactGitDiagnostic(stderr ? String(stderr) : (error && error.message) || '', scope),
+            status: typeof error.code === 'number' ? error.code : null,
+            killed: error.killed === true,
+            code: error.code === 'ENOENT' ? 'git_executable_not_found' : 'git_command_failed',
+          });
+        }
+      );
+      // 防凭据类交互挂起：execFile 的 timeout 覆盖不了全部等待态，超时兜底强杀。
+      child.on('error', () => { /* 错误已在回调里归一化 */ });
+    });
   }
 
   return {
@@ -744,6 +792,182 @@ function createGitAdapter(options = {}) {
       }
       const output = run(['rev-parse', '--verify', '--quiet', ref], { allowFailure: true, readOnly: true });
       return output.ok ? output.stdout.trim() || null : null;
+    },
+
+    /**
+     * BLOCK-41 — 取消暂存（显式 pathspec）：`git reset -q HEAD -- <paths>`。
+     * unborn HEAD（仓库还没有任何提交）时 HEAD 不存在，回退 `git rm --cached`。
+     * 整树写法在 assertSafePathspecs 层已被拒绝。
+     */
+    unstage({ paths } = {}) {
+      const safe = assertSafePathspecs(paths, scope);
+      const unborn = this.repositoryState().unborn;
+      const args = unborn
+        ? ['rm', '--cached', '--quiet', '--', ...safe]
+        : ['reset', '--quiet', 'HEAD', '--', ...safe];
+      const output = run(args, { allowFailure: true });
+      if (!output.ok) throw new GitAdapterError('git_unstage_failed', 'Scoped git unstage failed.', output);
+      return { unstaged: safe };
+    },
+
+    /**
+     * BLOCK-41 — 提交整个暂存区（无 pathspec），供审阅面板手动提交框使用。
+     * 与 `commit({ paths })` 的 `--only` 路径受限语义区分：这里只提交已经
+     * stage 进 index 的内容，不隐式带任何工作区改动。
+     */
+    commitIndex({ message } = {}) {
+      if (typeof message !== 'string' || message.trim() === '') {
+        throw new GitAdapterError('commit_message_required', 'Commit message is required.');
+      }
+      const args = [...identityArgs(), 'commit', '--quiet', '--no-verify', '-m', message];
+      const output = run(args, { allowFailure: true });
+      if (!output.ok) throw new GitAdapterError('git_commit_failed', 'Staged-area git commit failed.', output);
+      const head = run(['rev-parse', 'HEAD'], { allowFailure: true, readOnly: true });
+      return { commit: head.ok ? head.stdout.trim() : null, message };
+    },
+
+    /**
+     * BLOCK-41 — 切换本地分支（用户裁决：脏树阻止并提示冲突清单）。
+     * - mid-operation（merge/rebase/cherry-pick/revert 进行中）直接拒绝；
+     * - 仅限本地分支（listBranches refs/heads），防止误建分支或切到远程引用；
+     * - 已在目标分支 → 幂等返回 switched:false；
+     * - 有 tracked 未提交改动 → 拒绝（checkout_dirty_worktree），冲突清单 =
+     *   本地已改路径 ∩ HEAD..target 有差异路径（无交集时列全部脏文件）；
+     *   untracked 改动不阻止（git 自身会兜底拒绝覆盖性冲突）。
+     */
+    checkoutBranch({ name } = {}) {
+      const branch = assertSafeRef(name);
+      if (!branch || branch.includes('..') || branch.includes('\x00') || /\s/.test(branch)) {
+        throw new GitAdapterError('branch_name_invalid', 'Invalid branch name.');
+      }
+      const state = this.repositoryState();
+      if (state.midOperation) {
+        throw new GitAdapterError(
+          'checkout_mid_operation',
+          'Repository is mid-operation (merge/rebase/cherry-pick/revert); resolve it before switching branches.'
+        );
+      }
+      const heads = this.listBranches();
+      if (!heads.branches.some((b) => b.name === branch)) {
+        throw new GitAdapterError('branch_not_found', `Local branch '${branch}' does not exist.`);
+      }
+      if (heads.branches.some((b) => b.name === branch && b.current)) {
+        return { branch, switched: false, reason: 'already_current' };
+      }
+      const status = this.repositoryStatus({ untracked: 'normal' });
+      const dirtyTracked = status.entries.filter((e) => !e.untracked);
+      if (dirtyTracked.length > 0) {
+        let conflicts = dirtyTracked.map((e) => e.path);
+        try {
+          const range = run(['diff', '--no-color', '--name-only', 'HEAD', branch], { allowFailure: true, readOnly: true });
+          if (range.ok) {
+            const differing = new Set(range.stdout.split('\n').filter(Boolean));
+            const overlap = dirtyTracked.map((e) => e.path).filter((p) => differing.has(p));
+            if (overlap.length > 0) conflicts = overlap;
+          }
+        } catch { /* 冲突判定失败时保守列全部脏文件 */ }
+        throw new GitAdapterError(
+          'checkout_dirty_worktree',
+          `Working tree has uncommitted changes; commit or discard them before switching to '${branch}'.`,
+          { conflicts, dirtyCount: dirtyTracked.length }
+        );
+      }
+      const output = run(['checkout', '--quiet', branch], { allowFailure: true });
+      if (!output.ok) throw new GitAdapterError('git_checkout_failed', `git checkout '${branch}' failed.`, output);
+      return { branch, switched: true };
+    },
+
+    /** BLOCK-41 — 远程列表（只读，`git remote -v`）。供 push/pull 入口与诊断。 */
+    remoteList() {
+      const output = run(['remote', '-v'], { allowFailure: true, readOnly: true });
+      if (!output.ok) throw new GitAdapterError('git_remote_list_failed', 'git remote failed.', output);
+      const remotes = [];
+      for (const rawLine of output.stdout.split('\n')) {
+        const line = rawLine.trim();
+        if (!line) continue;
+        const match = /^(\S+)\t(\S+)\s+\((push|fetch)\)$/.exec(line);
+        if (!match) continue;
+        let entry = remotes.find((r) => r.name === match[1]);
+        if (!entry) {
+          entry = { name: match[1] };
+          remotes.push(entry);
+        }
+        entry[match[3] === 'push' ? 'pushUrl' : 'fetchUrl'] = match[2];
+      }
+      return { remotes, count: remotes.length };
+    },
+
+    /** 当前分支的推送/拉取目标：branch.<name>.remote 配置 → origin 兜底。 */
+    _resolveUpstreamTarget(branchName) {
+      const cfg = run(['config', '--get', `branch.${branchName}.remote`], { allowFailure: true, readOnly: true });
+      return cfg.ok && cfg.stdout.trim() ? cfg.stdout.trim() : 'origin';
+    },
+
+    /**
+     * BLOCK-41 — 远程同步状态（async）：fetch（离线诚实降级）→ upstream →
+     * ahead/behind（rev-list --left-right --count upstream...HEAD，左 behind 右 ahead）。
+     * 无 upstream / rev-list 失败 → 对应字段 null（UI 显示为不可判断，不虚报同步）。
+     */
+    async remoteStatus() {
+      // fetch 失败（离线/无远程/无凭据）不阻断：ahead/behind 退回上次 fetch 的缓存事实
+      await runAsync(['fetch', '--quiet', '--all'], { allowFailure: true, timeout: 30000 });
+      const upstreamRes = await runAsync(
+        ['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{upstream}'],
+        { allowFailure: true, readOnly: true }
+      );
+      if (!upstreamRes.ok || !upstreamRes.stdout.trim()) {
+        return { upstream: null, ahead: null, behind: null };
+      }
+      const upstream = upstreamRes.stdout.trim();
+      const count = await runAsync(['rev-list', '--left-right', '--count', `${upstream}...HEAD`], {
+        allowFailure: true,
+        readOnly: true,
+      });
+      if (!count.ok) return { upstream, ahead: null, behind: null };
+      const [behind, ahead] = count.stdout.trim().split(/\s+/).map((n) => Number(n) || 0);
+      return { upstream, ahead, behind };
+    },
+
+    /**
+     * BLOCK-41 — 推送（async，不阻塞主进程事件循环）。默认推送当前分支到
+     * 其 configured remote（branch.<name>.remote → origin 兜底）；setUpstream
+     * 时 `--set-upstream`。认证依赖系统 credential helper（baseEnv 已设
+     * GIT_TERMINAL_PROMPT=0 + 空 askpass，无凭据时快速失败不挂起）。
+     */
+    async push({ remote = null, branch = null, setUpstream = false } = {}) {
+      const current = this.listBranches().branches.find((b) => b.current);
+      const branchName = assertSafeRef(branch || (current && current.name));
+      if (!branchName || /\s/.test(branchName)) {
+        throw new GitAdapterError('branch_name_invalid', 'Cannot resolve a branch to push.');
+      }
+      const remoteName = remote ? assertSafeRef(remote) : this._resolveUpstreamTarget(branchName);
+      if (!remoteName || /\s/.test(remoteName)) {
+        throw new GitAdapterError('remote_name_invalid', 'Invalid remote name.');
+      }
+      const args = ['push', ...(setUpstream ? ['--set-upstream', remoteName, branchName] : [remoteName, branchName])];
+      const output = await runAsync(args, { timeout: 120000 });
+      if (!output.ok) throw new GitAdapterError('git_push_failed', 'git push failed.', output);
+      return { remote: remoteName, branch: branchName, pushed: true };
+    },
+
+    /**
+     * BLOCK-41 — 拉取（async）：`git pull <remote> <branch>`（merge 语义，
+     * 不带 --rebase，尊重仓库配置之外的明确预期）。冲突/认证失败诚实报错，
+     * 冲突后 midOperation 状态经 repositoryState() 可见。
+     */
+    async pull({ remote = null, branch = null } = {}) {
+      const current = this.listBranches().branches.find((b) => b.current);
+      const branchName = assertSafeRef(branch || (current && current.name));
+      if (!branchName || /\s/.test(branchName)) {
+        throw new GitAdapterError('branch_name_invalid', 'Cannot resolve a branch to pull.');
+      }
+      const remoteName = remote ? assertSafeRef(remote) : this._resolveUpstreamTarget(branchName);
+      if (!remoteName || /\s/.test(remoteName)) {
+        throw new GitAdapterError('remote_name_invalid', 'Invalid remote name.');
+      }
+      const output = await runAsync(['pull', remoteName, branchName], { timeout: 120000 });
+      if (!output.ok) throw new GitAdapterError('git_pull_failed', 'git pull failed.', output);
+      return { remote: remoteName, branch: branchName, pulled: true, output: output.stdout };
     },
 
     /** Distinguish an absent ref from an unreadable repository. */

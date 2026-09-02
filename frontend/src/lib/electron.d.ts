@@ -335,7 +335,17 @@ declare global {
         status: (params?: { projectId?: string }) => Promise<{
           ok: boolean;
           data?: {
-            files: Array<{ path: string; oldPath: string | null; status: string; untracked: boolean; conflicted: boolean }>;
+            files: Array<{
+              path: string;
+              oldPath: string | null;
+              status: string;
+              untracked: boolean;
+              conflicted: boolean;
+              // BLOCK-41 — 暂存区两栏分组所需 additive 字段（porcelain X/Y）
+              staged: boolean;
+              indexStatus: string;
+              worktreeStatus: string;
+            }>;
             totalFiles: number;
             hasUntracked: boolean;
             hasConflict: boolean;
@@ -520,6 +530,56 @@ declare global {
         undoLastCommit: (params?: { projectId?: string }) => Promise<{
           ok: boolean;
           data?: { undoneCommit: string };
+          error?: string;
+          message?: string;
+        }>;
+        // BLOCK-41 — git 写操作三期（暂存两栏 / 分支切换 / push-pull）
+        stagePaths: (params: { paths: string[]; projectId?: string }) => Promise<{
+          ok: boolean;
+          data?: { staged: string[] };
+          error?: string;
+          message?: string;
+        }>;
+        unstagePaths: (params: { paths: string[]; projectId?: string }) => Promise<{
+          ok: boolean;
+          data?: { unstaged: string[] };
+          error?: string;
+          message?: string;
+        }>;
+        commitIndex: (params: { message: string; projectId?: string }) => Promise<{
+          ok: boolean;
+          data?: { commit: string | null; message: string; remaining: number };
+          error?: string;
+          message?: string;
+        }>;
+        checkoutBranch: (params: { name: string; projectId?: string }) => Promise<{
+          ok: boolean;
+          data?: { branch: string; switched: boolean; reason?: string };
+          error?: string;
+          message?: string;
+          detail?: { conflicts?: string[]; dirtyCount?: number } | null;
+        }>;
+        remoteList: (params?: { projectId?: string }) => Promise<{
+          ok: boolean;
+          data?: { remotes: Array<{ name: string; fetchUrl?: string; pushUrl?: string }>; count: number };
+          error?: string;
+          message?: string;
+        }>;
+        remoteStatus: (params?: { projectId?: string }) => Promise<{
+          ok: boolean;
+          data?: { upstream: string | null; ahead: number | null; behind: number | null };
+          error?: string;
+          message?: string;
+        }>;
+        push: (params: { remote?: string | null; branch?: string | null; setUpstream?: boolean; projectId?: string }) => Promise<{
+          ok: boolean;
+          data?: { remote: string; branch: string; pushed: boolean };
+          error?: string;
+          message?: string;
+        }>;
+        pull: (params: { remote?: string | null; branch?: string | null; projectId?: string }) => Promise<{
+          ok: boolean;
+          data?: { remote: string; branch: string; pulled: boolean; output: string };
           error?: string;
           message?: string;
         }>;
