@@ -1,0 +1,49 @@
+{
+  "workPackage": "BLOCK-38 — Agent 任务中断续跑（P1–P4）",
+  "ui": "UI-275",
+  "date": "2026-09-02",
+  "environment": {
+    "devElectron": "BIOF3_ELECTRON_USER_DATA_DIR=$PWD/.biof3-dev-user-data BIOF3_LOCAL_DATA_DIR=$PWD/.biof3-dev-user-data/data",
+    "backend": ":3001（中断实验前 kill 旧后端并确认新 PID 18341 于 16:41 启动，晚于 BLOCK-38 代码 mtime 16:06，避免旧代码静默满足 health 检查）",
+    "vite": ":3000",
+    "cdp": "9222"
+  },
+  "steps": [
+    {
+      "id": "S0",
+      "name": "正常完成基线（非中断链路无 resumable）",
+      "detail": "ThinkSpace 项目（p_mthvakv3_fffw）两个新会话分别发起 3 文件（notes/alpha/beta/gamma.md）与 5 文件（notes/s1–s5.md）agent 任务，均正常 completed/done，tasks.interrupted_at 为 null，前端无「继续执行」按钮。"
+    },
+    {
+      "id": "S1",
+      "name": "运行中 kill 后端模拟服务重启 → 启动清扫标记中断",
+      "detail": "新会话发送 5 文件任务（notes/r1–r5.md），task 7d2e9c32 于 16:49:45 创建；16:49:55（完成 2 轮 tool_call，已写 r1/r2）kill -9 :3001 后端。dev-electron 自动重启后端（16:41 起的 supervisor 链路），sweepInterruptedRunningTasks 将该任务标记 status/agent_status=failed、error=「服务重启，Agent 任务中断」、interrupted_at=2026-09-02T08:49:56.489Z（SQLite 直查核证）。"
+    },
+    {
+      "id": "S2",
+      "name": "刷新页面 → 孤儿恢复订阅 → 失败事件带 resumable → 继续执行按钮",
+      "detail": "CDP location.reload 后回到项目会话，resumeOrphanAgentTasks 经 localStorage 找到未完成 primary task 并重新订阅；后端 events.js 对 failed 任务下发 error 事件（resumable=true + interruptedAt）。前端 ErrorBanner + 「继续执行」按钮出现，本会话改动卡片按轮次记录中断前第 1 轮 notes/r1.md、第 2 轮 notes/r2.md。证据 01-interrupted-with-resume-btn.png。"
+    },
+    {
+      "id": "S3",
+      "name": "确认弹层：中断时间 + 中断前最后状态取证",
+      "detail": "点击「继续执行」→ GET resume 只读预览 → 弹层显示：中断时间 9/2/2026 4:49:56 PM（与 interrupted_at 一致）、模型 deepseek-v4-flash-vision-exp、调用时间 4:49:54 PM、结束原因「准备调用工具」（finish_reason=tool_calls）、待执行工具 workspace_write、执行进度摘要（agent_progress + 第 1 轮 workspace_write r1.md 参数）。证据 02-resume-confirm-popover.png。"
+    },
+    {
+      "id": "S4",
+      "name": "确认续跑 → 新 task 审计链 + 从既有进度继续 + 完成",
+      "detail": "点击「确认继续」→ POST resume 创建新 task efff49da（params.resumeOfTaskId=7d2e9c32，completed/done，3 个 tool_call 正好补写 r3/r4/r5）；原 task 保持 failed/interrupted 不可变；原 task 写入 task_resumed 溯源事件（payload={newTaskId, resumedAt=08:52:08.056Z}）；agent 总结明确「r3/r4/r5 已创建（本次）… r1、r2 为中断前」，未重复执行已完成步骤；摘要条「完成 3 项 · 修改 3 次 · 耗时 14 s」，弹层关闭且续跑按钮消失。证据 03-resumed-completed.png。"
+    },
+    {
+      "id": "S5",
+      "name": "门禁",
+      "detail": "test/block38-agent-task-resume.test.mjs 9/9（store 清扫/getResumableTask/readLastRecord/端点 401/403/404/409/正常续跑/GET 预览三态——其中 GET 对非中断任务诚实返回 resumable:false 覆盖场景 B 的端点侧判据）；ResumePrompt vitest 3/3；conversationRunStore vitest 32/32；tsc 0；docs:check；ui:audit:check。"
+    }
+  ],
+  "notes": [
+    "DeepSeek 单轮约 4 秒，竞速窗口极窄：正式中断轮采用发送后 4 秒 kill（任务已完成 2 轮工具调用，中断点真实且进度摘要非空）。",
+    "场景 B（非中断失败任务不显示按钮）的实机构造依赖真实模型失败，不易稳定复现；端点侧判据由集成测试覆盖：POST 对非中断失败任务 409、GET 预览 resumable:false；前端按钮渲染条件为 error && resumable && taskId，快照仅在 SSE error 事件带 resumable=true 时置位。",
+    "test:changed 中 agent-provider-boundary（db 加载 SQLITE_ERROR）、test-affected 证据对账、P6 证据 hash 漂移 3 个失败经 stash 前后对比确认为既有失败，与本工作包无关。",
+    "G0 开发期常态 · 不外推 packaged / Provider / GA。"
+  ]
+}

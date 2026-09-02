@@ -18,7 +18,7 @@
       "id": "BLOCK-38-AGENT-TASK-RESUME",
       "path": "docs/block-38-agent-task-resume-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-38-agent-task-resume",
       "entrypoint": "docs/README.md",

@@ -1,6 +1,6 @@
 # BLOCK-38 — Agent 任务中断续跑（resume from interruption）
 
-> status: active · truthDomain: `block-38-agent-task-resume` · registered: 2026-09-02
+> status: completed · truthDomain: `block-38-agent-task-resume` · registered: 2026-09-02 · closed: 2026-09-02
 > owner: main agent · branch: main（单工作包串行，前置 BLOCK-37 已 completed）
 > 立项依据：用户在 BLOCK-37 收口讨论中提出信息流的两大目的——「追溯历史」与「可以在任何阶段启动任务，尽管任务异常中断了」，并裁决「好的，立项 BLOCK-38」。
 
@@ -58,6 +58,6 @@ P1–P3 完成且门禁全绿 → 提交（UI-275 in_progress）；P4 实机证�
 
 - 2026-09-02 P1 完成：agent-task-store（`interrupted_at` 列 + `sweepInterruptedRunningTasks` 启动清扫 + `getResumableTask`，dbMod 缺省单例 db——测试禁止另开第二连接，会触发 SQLITE_IOERR_SHORT_READ）；io-transcript `readLastRecord`（活跃文件 + 轮转留存回退 + 诚实空态）；resume 路由（GET 只读预览 + POST 续跑）；events.js failed 事件携带 `resumable`/`interruptedAt`。`test/block38-agent-task-resume.test.mjs` 9/9。
 - 2026-09-02 P2 完成：copilotClient onError 透传 + `previewAgentTaskResume`/`resumeAgentTask`；conversationRunStore `resumable`/`interruptedAt`/`resumeOfTaskId` 快照字段 + `resumeInterruptedConversation` action（新 run 携带审计链走既有订阅渲染链路）；ResumePrompt 组件（仅中断任务显示「继续执行」，确认层 = 中断时间 + lastModelCall 摘要 + progressDigest，全 `--biof3-*` token）。ResumePrompt vitest 3/3 + conversationRunStore vitest 32/32 + tsc 0 + docs:check / ui:audit:check（UI-275 in_progress）。test:changed 3 个失败经 stash 前后对比确认为既有失败（agent-provider-boundary db 加载 / test-affected 证据对账 / P6 证据 hash 漂移）。
-- 待办：P4 实机收口（中断 → 续跑 → 完成全链，证据 `acceptance/ui-275/`）。
+- 2026-09-02 P4 实机收口完成（证据 `acceptance/ui-275/` evidence.json S0–S5）：kill -9 :3001 真实中断 running 任务（7d2e9c32，已完成 2 轮 tool_call）→ 重启清扫标记 failed + interrupted_at（SQLite 核证）→ 刷新页面孤儿恢复订阅 → ErrorBanner + 「继续执行」按钮 + 改动卡片记录中断前第 1/2 轮 → 确认弹层展示中断时间/模型/结束原因「准备调用工具」/待执行工具/进度摘要 → 续跑新 task efff49da（resumeOfTaskId 审计链）恰好补写 r3/r4/r5 未重复执行，原 task 不可变并写 task_resumed 溯源事件。UI-275 verified，本 plan 收口 completed。DeepSeek 单轮 ~4 秒，正式中断轮采用发送后 4 秒 kill。
 
 G0 开发期常态 · 不外推 packaged / Provider / GA。

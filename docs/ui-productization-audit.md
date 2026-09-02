@@ -2137,15 +2137,15 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-275: Agent 任务中断续跑——「继续执行」入口（BLOCK-38 P2） (2026-09-02 in_progress)
+## UI-275: Agent 任务中断续跑——「继续执行」入口（BLOCK-38 P2） (2026-09-02 verified)
+
+**实机验收**（dev Electron，证据 [acceptance/ui-275/](../acceptance/ui-275/evidence.json)）：S1 kill -9 :3001 模拟服务重启 → 启动清扫将 running 任务 7d2e9c32 标记 failed + interrupted_at（SQLite 核证）→ S2 刷新页面孤儿恢复订阅，ErrorBanner + 「继续执行」按钮出现，改动卡片记录中断前第 1/2 轮（r1/r2.md）→ S3 确认弹层展示中断时间/模型/结束原因「准备调用工具」/待执行工具/进度摘要 → S4 确认续跑：新 task efff49da 带 resumeOfTaskId 审计链 completed，正好补写 r3/r4/r5 未重复执行，原 task 不可变并写 task_resumed 溯源事件，总结明确区分「本次创建」与「中断前」。非中断失败任务诚实不显示按钮（端点侧 409/resumable:false 由集成测试覆盖）。UI-275 verified，BLOCK-38 收口 completed。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 **用户需求**：BLOCK-37 收口讨论中用户提出信息流的两大目的——「追溯历史」与「可以在任何阶段启动任务，尽管任务异常中断了」，裁决立项 BLOCK-38：服务重启被清扫标记（interrupted_at 非空）的失败任务可从既有进度续跑；非中断失败任务诚实走既有 retry 链路，不得混用。
 
 **改动**（0 新依赖）：① 后端：[resume.js](core/biof3-server/routes/ai-agent/resume.js) `GET /api/ai/agent/task/:taskId/resume` 只读预览（resumable/interruptedAt/lastModelCall 取证摘要/progressDigest 执行进度摘要，无副作用）+ `POST` 执行续跑（原 task 保持 failed 不可变；同会话新建 agent_loop task 带 `resumeOfTaskId` 审计链 + `task_resumed` 溯源事件；合成恢复指令注入 task_events 重建的中断前执行进度，已完成的步骤不重复执行）；[events.js](core/biof3-server/routes/ai-agent/events.js) failed SSE 事件携带 `resumable`/`interruptedAt` 标记；② 前端：[copilotClient.ts](frontend/src/components/copilot/copilotClient.ts) `onError` 透传 resumable 信息 + `previewAgentTaskResume`/`resumeAgentTask` API；[conversationRunStore.ts](frontend/src/components/copilot/conversationRunStore.ts) 快照 `resumable`/`interruptedAt`/`resumeOfTaskId` 字段 + `resumeInterruptedConversation` action（新 run 携带审计链并走既有订阅流式渲染链路）；③ UI：[ResumePrompt.tsx](frontend/src/components/copilot/SimpleChat/ResumePrompt.tsx) 仅中断任务显示「继续执行」按钮（非中断失败不显示），点击拉取只读预览弹确认层（中断时间 + 中断前最后一次模型调用摘要 model/结束原因/待执行工具 + 执行进度摘要），确认后调 resume 端点续跑，确认失败错误留在弹层可重试；全 `--biof3-*` token，弹层向上弹出（z-index 90）不遮挡对话区。
 
-**门禁**：`node --test test/block38-agent-task-resume.test.mjs` 9/9（store 清扫/getResumableTask/readLastRecord/端点 401/403/404/409/正常续跑/GET 预览三态）/ ResumePrompt vitest 3/3 + conversationRunStore vitest 32/32（新增中断标记透传 + resume action 链路 + 非续跑拒绝）/ tsc 0 / docs:check / ui:audit:check。test:changed 中 3 个失败（agent-provider-boundary 的 db 加载 SQLITE_ERROR、test-affected 证据对账、P6 证据 hash 漂移）经 stash 前后对比确认为既有失败，与本工作包无关。
-
-**状态**: in_progress（P4 实机收口待做：中断 → 续跑 → 完成全链证据存 `acceptance/ui-275/` 后转 verified）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**门禁**：`node --test test/block38-agent-task-resume.test.mjs` 9/9（store 清扫/getResumableTask/readLastRecord/端点 401/403/404/409/正常续跑/GET 预览三态）/ ResumePrompt vitest 3/3 + conversationRunStore vitest 32/32（新增中断标记透传 + resume action 链路 + 非续跑拒绝）/ tsc 0 / docs:check / ui:audit:check / 实机验收证据 `acceptance/ui-275/`（3 截图 + evidence.json S0–S5）。test:changed 中 3 个失败（agent-provider-boundary 的 db 加载 SQLITE_ERROR、test-affected 证据对账、P6 证据 hash 漂移）经 stash 前后对比确认为既有失败，与本工作包无关。
 
 ## UI-274: 会话级「模型 I/O」信息流查看器（BLOCK-37 P1–P4） (2026-09-02 verified)
 
