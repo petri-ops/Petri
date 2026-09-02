@@ -1,9 +1,9 @@
 {
   "$schema": "./manifest.schema.json",
   "version": "2.0.0",
-  "updated": "2026-08-09",
+  "updated": "2026-09-02",
   "checksumAlgorithm": "sha256",
-  "notes": "Per-platform artifact schema (Week 2 发行可信化). macos-arm64 has real artifacts. windows-x64 runtime artifacts for biof3-r-runtime/biof3-py-runtime ARE declared (real OSS zip, HTTP 200, golden-path verified) so dev/unsigned Windows builds can install the runtime from the store; their sha256/sizeBytes stay null pending Week 4 fill-in (checksum/size checks are skipped per plugin-manager.js when null). release-contract.json platforms[windows-x64].supported stays false until the signed Windows installer passes release gating (Week 3/4). macos-x64/linux-x64 have NO artifacts (placeholder-only). Built-in plugins use built-in:// pseudo-URLs and ship under resources/built-in-plugins/{id}/.",
+  "notes": "Per-platform artifact schema (Week 2 发行可信化). macos-arm64 has real artifacts. windows-x64 runtime artifacts for biof3-r-runtime/biof3-py-runtime ARE declared (real OSS zip, HTTP 200, golden-path verified) so dev/unsigned Windows builds can install the runtime from the store; their sha256/sizeBytes are now filled in (computed locally from the real OSS zip on 2026-09-02), so the install-time fail-closed checksum guard (assertArtifactChecksumDeclared, P0-1) passes and the downloaded zip is verified. release-contract.json platforms[windows-x64].supported stays false until the signed Windows installer passes release gating (Week 3/4). macos-x64/linux-x64 have NO artifacts (placeholder-only). Built-in plugins use built-in:// pseudo-URLs and ship under resources/built-in-plugins/{id}/.",
   "plugins": {
     "biof3-r-runtime": {
       "id": "biof3-r-runtime",
@@ -21,8 +21,8 @@
         },
         "windows-x64": {
           "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/windows-x64.zip",
-          "sha256": null,
-          "sizeBytes": null
+          "sha256": "26b05ba6f3439f2e7ccef9c979d5e157cdc67640fc45fdc759039f2a03dde462",
+          "sizeBytes": 657224393
         }
       },
       "checksumAlgorithm": "sha256",
@@ -50,8 +50,8 @@
         },
         "windows-x64": {
           "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/windows-x64.zip",
-          "sha256": null,
-          "sizeBytes": null
+          "sha256": "5a2e07c6504a49f617d81921e073d157e8fd14e37586e92f78211c2975ab6d11",
+          "sizeBytes": 502819592
         }
       },
       "checksumAlgorithm": "sha256",
