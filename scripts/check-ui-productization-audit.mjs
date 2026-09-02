@@ -450,8 +450,13 @@ function isChoreCommit(subject) {
   return /^\s*(chore|build|ci|docs|test)(\(.*?\))?(!)?:\s/.test(subject)
 }
 
+// BLOCK-44 — 提取边界统一归一为大写 canonical 形态：
+// UI_ID_PATTERN 大小写不敏感（/gi），但 schema（ui-audit-report.schema.json）
+// 与台账条目标题均为严格大写。不归一会导致：
+//   1. 台账行文小写 ui-### 以独立 id 混入 registeredIds（`ui-193` ≠ `UI-193`）；
+//   2. --report 的 knownUiIds/unmappedIds 携带小写 → schema 校验必败 → 报告永不落盘。
 function uiIds(value) {
-  return [...new Set(value.match(UI_ID_PATTERN) ?? [])]
+  return [...new Set((value.match(UI_ID_PATTERN) ?? []).map((id) => id.toUpperCase()))]
 }
 
 function baselineIsAvailable() {

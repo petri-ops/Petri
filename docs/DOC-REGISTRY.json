@@ -3138,6 +3138,28 @@
       "registeredAt": "2026-09-02",
       "archivePolicy": "archive_when_superseded",
       "phase": "P4-CLOSEOUT"
+    },
+    {
+      "id": "BLOCK-44-UI-AUDIT-REPORT-CASE-DEBT",
+      "path": "docs/block-44-ui-audit-report-case-debt-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-44-ui-audit-report-case-debt",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-44",
+        "ui-audit",
+        "report-mode",
+        "schema",
+        "case-debt",
+        "GATES-2",
+        "G0"
+      ],
+      "notes": "2026-09-03 立项（用户裁决「先处理 ui:audit 的 schema 大小写债务」，处理 AUDIT-LOG 2026-08-30 🟢 契约偏差）：ui:audit --report 模式自上线起 schema 校验必失败（提取不归一 → 台账 37 处小写 ui-### 进报告撞严格 pattern → exit 2 报告永不落盘，UI_AUDIT_UNMAPPED 逐编号检查从未生效）。方案：uiIds() 提取边界归一大写（schema 保持严格 canonical，同时修 registeredIds 集合污染），非范围：其余 gate schema / 台账小写行文改写 / 新增检查项。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-09-03 收口：P1 uiIds() 归一大写 + 12/12 测试；P2 --report 实测 exit 0 报告落盘（235 knownUiIds 全 canonical）+ 两门禁 PASS；P3 2026-08-30 🟢 条目 ✅。",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P3-CLOSEOUT"
     }
   ],
   "lastUpdated": "2026-09-02",

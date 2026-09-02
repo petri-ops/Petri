@@ -116,6 +116,36 @@ test('fixture [legacy]: UI-### id absent from registry but commit in LEGACY_MESS
 })
 
 // ---------------------------------------------------------------------------
+// BLOCK-44 — 提取边界大小写归一（uiIds() 输出 canonical 大写）
+// ---------------------------------------------------------------------------
+
+test('fixture [case-normalized]: lowercase ui-### in subject maps to uppercase registered id → no unmapped', () => {
+  const result = detectUnmappedSurface({
+    commit: 'aabbccd111000000000000000000000000000000',
+    subject: 'feat(ui): sample lowercase fixture citing ui-001 and ui-agentwb-001',
+    body: '',
+    registeredIds: REAL_REGISTRY_IDS,
+    legacyMessageExemptions: new Set(),
+    legacyAuditSyncExemptions: new Set(),
+  })
+  assert.equal(result, null, 'lowercase subject ids must normalize to canonical uppercase before registry lookup')
+})
+
+test('fixture [case-normalized-unmapped]: lowercase unknown id reports uppercase canonical unmappedIds', () => {
+  const result = detectUnmappedSurface({
+    commit: '1122335000000000000000000000000000000000',
+    subject: 'feat(ui): lowercase unknown fixture citing ui-998',
+    body: '',
+    registeredIds: REAL_REGISTRY_IDS,
+    legacyMessageExemptions: new Set(),
+    legacyAuditSyncExemptions: new Set(),
+  })
+  assert.ok(result, 'lowercase unknown id must still trigger UI_AUDIT_UNMAPPED')
+  assert.equal(result.code, 'UI_AUDIT_UNMAPPED')
+  assert.deepEqual(result.unmappedIds, ['UI-998'], 'unmappedIds must be canonical uppercase for schema conformance')
+})
+
+// ---------------------------------------------------------------------------
 // Exit-code decision logic (decideExitCode)
 // ---------------------------------------------------------------------------
 
