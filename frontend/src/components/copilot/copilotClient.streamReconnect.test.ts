@@ -201,4 +201,27 @@ describe('BLOCK-39 agent 事件流断线重连', () => {
     expect(opts.onError).not.toHaveBeenCalled();
     expect(opts.onDone).not.toHaveBeenCalled();
   });
+
+  it('回归：后端发带引号 "[DONE]"（JSON.stringify 历史 bug 形状）也能正常收口，不重连不报错', async () => {
+    // 实机缺陷复现形状：events.js 曾用 sseSend('[DONE]') → 序列化为 data: "[DONE]"
+    // → 前端匹配裸 [DONE] 失败 → 正常完成的 task 被判断线 → 90s 重连烧窗后报错
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        sseResponse([
+          'data: {"seq":1,"eventType":"delta","payload":{"delta":"回复完成"}}\n\n',
+          'data: {"event":"done","filesChanged":[]}\n\n',
+          'data: "[DONE]"\n\n',
+        ])
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const opts = makeOpts();
+    await subscribeAgentTask('t-quoted-done', opts, 0);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(opts.onDone).toHaveBeenCalledTimes(1);
+    expect(opts.onError).not.toHaveBeenCalled();
+    expect(opts.onStreamReconnecting).not.toHaveBeenCalled();
+  });
 });

@@ -460,8 +460,11 @@ async function main() {
   setupWorkingTreeReviewIpc({ mainWindow });
   setupResultIpc({ mainWindow: () => mainWindow });
   // BLOCK-9.1 PHASE 2: mid-risk setup functions with dependency injection
-  const { setupRuntimeIpc } = require("./ipc/runtime-status");
-  const { setupAutoUpdateIpc } = require("./ipc/auto-update");
+   const { setupRuntimeIpc } = require("./ipc/runtime-status");
+   // BLOCK-51 回归修复：plumber 清理时误删了本 require 但保留了 L465 调用，
+   // dev Electron 启动即崩 "setupPluginIpc is not defined"（窗口不创建）。
+   const { setupPluginIpc } = require("./ipc/plugin");
+   const { setupAutoUpdateIpc } = require("./ipc/auto-update");
   setupPluginIpc({ mainWindow: () => mainWindow });
   // Capture procs as a snapshot — IPC handlers fetch a fresh
   // snapshot at invocation time via getProcs() from backend-proc-manager.

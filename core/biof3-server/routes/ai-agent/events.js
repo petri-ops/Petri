@@ -52,6 +52,15 @@ module.exports = {
           res.write('data: ' + JSON.stringify(obj) + '\n\n');
         } catch {}
       };
+      // [DONE] 是 SSE 协议哨兵而非 JSON 事件——必须写裸字符串。
+      // 曾用 sseSend('[DONE]') 经 JSON.stringify 序列化成带引号的 "[DONE]"，
+      // 前端 copilotClient 匹配裸 [DONE] 失败 → 每个正常完成的 task 都被
+      // 判为「在完成前中断」→ 90s 重连烧窗后报 AgentStreamDisconnected。
+      const sseDone = () => {
+        try {
+          res.write('data: [DONE]\n\n');
+        } catch {}
+      };
 
       let lastSeq = afterSeq;
       const isTerminal = (t) => t && ['done', 'failed', 'cancelled'].includes(t.agent_status);
@@ -82,7 +91,7 @@ module.exports = {
           // BLOCK-31 P1: done 事件携带权威 filesChanged 清单
           sseSend({ event: 'done', filesChanged: freshTask.filesChanged || [] });
         }
-        sseSend('[DONE]');
+        sseDone();
         return res.end();
       }
 
@@ -111,7 +120,7 @@ module.exports = {
               // BLOCK-31 P1: done 事件携带权威 filesChanged 清单
               sseSend({ event: 'done', filesChanged: t.filesChanged || [] });
             }
-            sseSend('[DONE]');
+            sseDone();
             res.end();
           }
         } catch (e) {

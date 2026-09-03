@@ -543,6 +543,10 @@ async function runAgentLoop({
 
   // BLOCK-20: emit token_budget event for ContextBudgetBar (UI-190)
   // 必须在 _emit 已定义后、首次 iteration 前；systemPrompt 已拼完才能算真实 token。
+  // BLOCK-51 回归修复：safeCtx 此前声明在 try 块内（const 块级作用域），
+  // 而 loopConfig.contextWindow 在块外引用 → "safeCtx is not defined"，
+  // 重启后所有 agent_loop 任务启动即崩（fail-closed）。这里在块外先声明。
+  let safeCtx = 64000;
   try {
     const { systemPromptTokens, messagesTokens, total } = estimateRequestTokens({
       systemPrompt: systemPrompt || '',
@@ -558,7 +562,7 @@ async function runAgentLoop({
     })();
     const { getContextWindow } = require('./helpers/token-estimator');
     const ctxWindow = (await Promise.resolve(getContextWindow(modelName, providerName, baseUrl, null, presetCtx).catch(() => 0))) || 0;
-    const safeCtx = ctxWindow > 0 ? ctxWindow : 64000;
+    safeCtx = ctxWindow > 0 ? ctxWindow : 64000;
     const pct = Math.min(100, Math.round((total / safeCtx) * 100));
     _emit({
       event: 'token_budget',

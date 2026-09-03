@@ -670,6 +670,15 @@ function isAbortError(err: unknown): boolean {
   return (err as Error)?.name === 'AbortError';
 }
 
+/**
+ * [DONE] 哨兵匹配：SSE 惯例是裸 `data: [DONE]`；防御兼容带引号的
+ * `data: "[DONE]"`（JSON.stringify('[DONE]') 的历史 bug 形状——曾导致
+ * 每个 task 完成后被判「在完成前中断」并烧完 90s 重连窗）。
+ */
+function isSseDone(data: string): boolean {
+  return data === '[DONE]' || data === '"[DONE]"';
+}
+
 function abortableDelay(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     if (signal?.aborted) {
@@ -780,7 +789,7 @@ async function subscribeAgentTaskOnce(
         const m = line.match(/^data:\s?(.*)$/);
         if (!m) continue;
         const data = m[1];
-        if (data === '[DONE]') {
+        if (isSseDone(data)) {
           sawDone = true;
           try {
             localStorage.removeItem('biof3_agent_task_' + taskId);
@@ -1017,7 +1026,7 @@ async function streamChatLegacy(opts: StreamChatOptions): Promise<void> {
           const m = line.match(/^data:\s?(.*)$/);
           if (!m) continue;
           const data = m[1];
-          if (data === '[DONE]') {
+          if (isSseDone(data)) {
             onDone?.();
             emitAgentTaskDone('legacy', kind, { conversationId: opts.conversationId });
             return;

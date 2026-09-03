@@ -2157,6 +2157,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-281: AgentStreamDisconnected 根因修复——[DONE] 哨兵序列化形状对齐 + 两个重启暴露回归（BLOCK-52 P1 实机暴露的范围外传输层缺陷） (2026-09-03 verified)
+
+**用户需求**：BLOCK-52 P1 实机收口时登记的范围外既有缺陷——chat 每个任务完成后 copilotClient 报「任务事件流在完成前中断」（AgentStreamDisconnected），24 次退避重连 ~90s 烧窗。根因链：events.js 曾用 `sseSend('[DONE]')` 发终态哨兵 → `JSON.stringify('[DONE]')` 序列化为带引号 `"[DONE]"` → 前端 copilotClient 匹配裸 `[DONE]` 永不成立 → 每个 task 完成后被判「在完成前中断」（终态回放路径同样发带引号哨兵）。旧 dev 实例长期未重启 + BLOCK-39 之前「干净截断=onDone」宽松兜底共同掩盖了该缺陷。
+
+**改动**（0 新增 IPC / 0 新依赖）：① 根因——[events.js](../core/biof3-server/routes/ai-agent/events.js) 终态哨兵改 `sseDone()` 裸写（不走 JSON.stringify）；[copilotClient.ts](../frontend/src/components/copilot/copilotClient.ts) 新增 `isSseDone()` 双形状兼容（裸 `[DONE]` 与带引号 `"[DONE]"` 均识别）+ 带引号形状回归用例（[copilotClient.streamReconnect.test.ts](../frontend/src/components/copilot/copilotClient.streamReconnect.test.ts)）；② 连带回归一（c118e201 引入）——[main.js](../src/main.js) plumber 清理误删 `require("./ipc/plugin")` 但保留调用 → 启动即崩 `setupPluginIpc is not defined`，已恢复 require；③ 连带回归二——[agent-runner.js](../core/biof3-server/agent-runner.js) `safeCtx` 声明在 try 块内而块外引用 → 所有 agent_loop 任务启动即 `failed / safeCtx is not defined`，改为块外 `let safeCtx` + try 内赋值。教训（后续约束）：SSE/IPC 契约测试必须以真实后端输出形状为准（测试桩裸 `[DONE]` vs 真实带引号形状漂移，测试全绿实机炸）；`src/main.js`、`core/**` 改动后必须重启 dev Electron 实机冒烟再收口。
+
+**门禁**：copilotClient 两套件 vitest 18/18、tsc --noEmit 0、`node --check` 三文件通过、docs:check 199、ui:audit:check（本条为传输层修复无 UI 视觉增量，台账行按门禁 UI-surface 规则补登）。
+
+**实机**（2026-09-03，dev Electron CDP :9222 重启后载入全部修复，证据 `acceptance/agent-stream-disconnected-fix/live-check.json`）：3 断言全 PASS——① composer 发送真实消息 assistant 回复正常出现；② 全程无「任务事件流中断」横幅（`.sc-error-banner` null）；③ SQLite 最新任务 `fc8caf44` `agent_status=done` 且 error 空（修复前历史任务 `failed / safeCtx is not defined` 留档对照）。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-280: 选中即引用——右栏预览选中文字一键进对话 composer（BLOCK-52 P1） (2026-09-03 verified)
 
 **用户需求**：BLOCK-52 选中即引用→微调闭环 P1——右侧文件预览中选中的文字可以一键添加到对话输入框，作为下一次提示词的一部分，把「定位成本归零」。
