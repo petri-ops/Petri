@@ -88,6 +88,14 @@ export const biof3Events = {
    * 生成引用块，随下一条消息发送。
    */
   selectionQuote: 'biof3:selection-quote',
+
+  /**
+   * BLOCK-52 P2（图片/结果图引用）：用户在右侧图片预览（WorkspaceFilePreview
+   * 静态图片文件）或结果面板（ResultView 的 Result Studio 结果图）中点击
+   * 「引用到对话」时派发；SimpleChat 订阅后生成图片引用卡（缩略图 + 来源行），
+   * 发送时图片进附件区、artifact 元数据合成进消息文本供模型读取。
+   */
+  imageQuote: 'biof3:image-quote',
 } as const;
 
 export interface ConversationForkedDetail {
@@ -217,6 +225,7 @@ export type BioF3EventMap = {
   [biof3Events.reviewOpenFile]: ReviewOpenFileDetail;
   [biof3Events.agentBackgroundProcess]: AgentBackgroundProcessDetail;
   [biof3Events.selectionQuote]: SelectionQuoteDetail;
+  [biof3Events.imageQuote]: ImageQuoteDetail;
 };
 
 /** BLOCK-34 P3: 后台进程启动事件载荷。 */
@@ -247,6 +256,38 @@ export interface SelectionQuoteDetail {
 /** BLOCK-28.7: 打开审阅并选中指定文件的载荷。 */
 export interface ReviewOpenFileDetail {
   filePath: string;
+}
+
+/** BLOCK-52 P2: Result Studio 结果图的 artifact 血统元数据（`imageQuote` 事件携带）。 */
+export interface ImageQuoteArtifact {
+  /** 结果工具任务 ID（agent 的 read_image 工具按此读图解读）。 */
+  toolJobId: string;
+  /** Result Studio revision ID。 */
+  revisionId?: string;
+  /** Result Studio artifact ID。 */
+  artifactId?: string;
+  /** Revision 序号（1-based，用户可见版本号，供模型与 result_studio_context 交叉核对）。 */
+  revisionOrdinal?: number;
+}
+
+/**
+ * BLOCK-52 P2（图片/结果图引用）：`imageQuote` 事件载荷。
+ * 由 WorkspaceFilePreview（静态图片文件）或 ResultView（Result Studio 结果图）
+ * 在用户点击「引用到对话」时派发。
+ */
+export interface ImageQuoteDetail {
+  /** 所属项目 ID（SimpleChat 据此过滤跨项目引用）；可为空（无项目上下文）。 */
+  projectId?: string;
+  /** 引用来源：workspace 静态图片文件（无血统）/ Result Studio 结果图（带 artifact 血统）。 */
+  kind: 'workspace-file' | 'result-artifact';
+  /** 图片名（引用卡显示用）。 */
+  name: string;
+  /** workspace 相对路径（kind=workspace-file 时提供，供模型按路径读图）。 */
+  path?: string;
+  /** 图片 src（SimpleChat 据此 fetch 转 dataUrl 进附件区）。 */
+  url: string;
+  /** artifact 血统（kind=result-artifact 时提供）。 */
+  artifact?: ImageQuoteArtifact;
 }
 
 /** Dispatch a typed event on window */

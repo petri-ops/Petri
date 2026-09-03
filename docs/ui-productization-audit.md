@@ -2157,6 +2157,26 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-285: 结果图引用→自然语言微调→改参重跑闭环（BLOCK-52 P3） (2026-09-03 verified)
+
+**用户需求**：BLOCK-52 旗舰闭环——对 Result Studio 结果图说一句自然语言（如「把点大小调大」），agent 走 artifact 血统链改参重跑出新 Revision，而不是视觉猜谜。
+
+**改动**：复用 P4R-3 Composer→ChangeSet 链 + result_studio_context 绑定（引用卡 artifact 元数据 toolJobId/revisionId/artifactId/revisionOrdinal 由 P2 引用卡携带）；agent 从引用元数据交叉核对血统后走 `result_changeset_create_in_context` 改参重跑。0 新协议（复用既有 ExtractContext 模式）。
+
+**门禁**：copilot 全家 vitest 239/239、workspace 面板 30/30、tsc 0、后端 agent-vision + agent-tool-registry 13/13（registry 测试顺手补临时 DB 自举修存量 `no such table: projects`）、docs:check 200、ui:audit:check。
+
+**实机**（2026-09-03，dev Electron CDP，证据 `acceptance/block-52/p3-live-assertions.json` 9 断言全 PASS）：ResultView 打开 volcano.png 预览（含引用按钮）→ 物化基线 Revision（ordinal=1, is_current）→ 「引用到对话」→ composer 出现结果图引用卡（缩略图+血统来源行）→ 发送自然语言微调 → **agent 产出新 Revision（ordinal≥2）与基线同 artifact family、来自新 tool job、重跑参数含 point_size=3.2（自然语言→参数 Patch）**。证据备注：p3-01~04 四张截图为同一画面重复截图（截图脚本瑕疵），以断言 JSON 为准。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-284: 图片/结果图引用——预览图片一键进对话 composer（BLOCK-52 P2） (2026-09-03 verified)
+
+**用户需求**：BLOCK-52 P2——右侧文件预览中的静态图片 / Result Studio 结果图可一键引用进对话输入框，作为下次提示词的一部分（分析图微调对智能体一句话改好）。
+
+**改动**：① 事件通道 [events.ts](../frontend/src/lib/events.ts) `imageQuote` 类型化事件（`ImageQuoteDetail`：kind workspace-file/result-artifact + `ImageQuoteArtifact` 血统 toolJobId/revisionId/artifactId/revisionOrdinal）；② 生产端 [project-workspace.tsx](../frontend/src/pages/project-workspace.tsx) 静态图预览「引用到对话」按钮 + [ResultView.tsx](../frontend/src/components/workspace-panels/ResultView.tsx) 结果图引用按钮（携带血统）；③ 后端 [vision-tools.js](../core/biof3-server/agent-tools/vision-tools.js) `read_image` 升级 v2：toolJobId / filePath 双模式（workspace 相对路径读静态图，词法+realpath 双重校验防穿越/符号链接逃逸，4MB 上限，png/jpg/jpeg/svg）；[tool-defs.js](../core/biof3-server/agent-tools/tool-defs.js) READ_IMAGE_v2 schema；④ 消费端 [SimpleChat.tsx](../frontend/src/components/copilot/SimpleChat.tsx) imageRefs 引用卡（上限 4、同源去重、可删除）与 P1 文字引用同管道合并发送、成功清空；⑤ 纯函数 [imageReferences.ts](../frontend/src/components/copilot/SimpleChat/imageReferences.ts) + 配套 vitest；⑥ P1 增量真修复：selectionReferences 引用头半角 `[]` → 全角 `【】`（服务端落库 cleanContent 剥行首半角 `[...]` 导致落库消息缺头 + 前后端重复渲染）。
+
+**门禁**：copilot 全家 vitest 239/239、workspace 30/30、tsc 0、后端 agent-vision 5/5（含路径穿越/符号链接逃逸逐项拦截）+ registry 8/8、docs:check 200。
+
+**实机**（2026-09-03，dev Electron CDP，证据 `acceptance/block-52/p2-live-assertions.json` 6 断言全 PASS + p2-01/02 截图）：图片预览「引用到对话」按钮 → composer 引用卡（缩略图+名称+来源行）→ 发送 → 消息正文含 `【引用图片 quote-live.png】` 前缀 + workspace 相对路径（模型可据此 read_image）→ 发送后引用卡清空。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-283: 非 git 工作区一次性引导——审阅空态内联 git init（BLOCK-53 P2） (2026-09-03 in_progress)
 **用户需求**：BLOCK-53 项目创建体验补丁 P2——非 git 目录进入项目后一次性引导「初始化 git 仓库以启用审阅与版本历史」，dismiss 记一次性不再弹（对齐 codex 信任屏「每目录一次」哲学）；非 git 诚实空态（BLOCK-32）保持为引导后的稳态兜底。
 

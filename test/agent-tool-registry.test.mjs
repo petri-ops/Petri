@@ -2,9 +2,36 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import http from 'node:http';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
 const require = createRequire(import.meta.url);
+
+// BLOCK-52 收口顺手修（存量基建，与 agent-vision.test.mjs 同一修法）：自举临时 DB
+//（src/migrations 全量）——registry 链路 require query-tools → db.js 在 default
+// biof3.db 缺最新 schema 时抛 no such table: projects；BIOF3_DB_PATH 隔离须在
+// require db.js 前生效（CommonJS require 顺序执行）。
+{
+  const fs = require('fs');
+  const os = require('os');
+  const dbPath = require('path');
+  const Database = require(R_SERVER + '/node_modules/better-sqlite3');
+  const tempDbDir = fs.mkdtempSync(dbPath.join(os.tmpdir(), 'biof3-agent-registry-db-'));
+  const boot = new Database(dbPath.join(tempDbDir, 'biof3.db'));
+  const migrationsDir = resolve(__dirname, '..', 'src', 'migrations');
+  for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
+    boot.exec(fs.readFileSync(dbPath.join(migrationsDir, f), 'utf8'));
+  }
+  boot.close();
+  process.env.BIOF3_DB_PATH = dbPath.join(tempDbDir, 'biof3.db');
+  process.on('exit', () => {
+    try { fs.rmSync(tempDbDir, { recursive: true, force: true }); } catch {}
+  });
+}
+
 const {
   RISK_TIERS,
   buildToolRegistry,
@@ -80,8 +107,9 @@ function closeServer(server) {
 
 test('agent registry pairs every model-visible definition with one handler and contract', () => {
   const registry = getToolRegistry();
-  assert.equal(registry.length, 33);
-  assert.equal(new Set(registry.map((entry) => entry.definition.function.name)).size, 33);
+  // 37 = 33（BLOCK-33 时代）+ 4（G0-RS-P3 新增 context-bound 工具）。新增工具时同步此数。
+  assert.equal(registry.length, 37);
+  assert.equal(new Set(registry.map((entry) => entry.definition.function.name)).size, 37);
 
   for (const entry of registry) {
     assert.equal(typeof entry.handler, 'function');
@@ -140,7 +168,7 @@ test('schema-first loading does not capture partial act helper exports', () => {
       const { getToolDefs } = require('./core/biof3-server/agent-tools/tool-defs.js');
       const planTools = require('./core/biof3-server/agent-tools/plan-ui-tools.js');
       const actTools = require('./core/biof3-server/agent-tools/act-tools.js');
-      if (getToolDefs().length !== 33) throw new Error('unexpected tool count');
+      if (getToolDefs().length !== 37) throw new Error('unexpected tool count');
       if (!actTools.testFilterExpr('5', '>3')) throw new Error('filter helper unavailable');
       const context = {};
       const result = await planTools.actOpenFigcodePlot({ figcardId: 'volcano' }, context);
@@ -228,7 +256,7 @@ test('OpenAI-compatible outbound JSON contains Provider schema only', async () =
       { baseUrl }
     );
     assert.equal(result.choices[0].message.content, 'ok');
-    assert.equal(receivedBody.tools.length, 33);
+    assert.equal(receivedBody.tools.length, 37);
     const keys = collectKeys(receivedBody.tools);
     for (const key of INTERNAL_CONTRACT_KEYS) assert.equal(keys.has(key), false, `${key} leaked`);
   } finally {

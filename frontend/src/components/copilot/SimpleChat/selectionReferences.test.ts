@@ -93,8 +93,8 @@ describe('selectionReferences (BLOCK-52 P1)', () => {
     ].filter((r): r is NonNullable<typeof r> => r !== null);
     const composed = composeMessageWithSelectionReferences('把点调大', refs);
 
-    expect(composed.startsWith('[引用 analysis/plots.R:L42-L48]\n> ggplot(...) 等 7 行')).toBe(true);
-    expect(composed.includes('[引用 b.py:L3]\n> line3')).toBe(true);
+    expect(composed.startsWith('【引用 analysis/plots.R:L42-L48】\n> ggplot(...) 等 7 行')).toBe(true);
+    expect(composed.includes('【引用 b.py:L3】\n> line3')).toBe(true);
     expect(composed.endsWith('\n\n把点调大')).toBe(true);
   });
 

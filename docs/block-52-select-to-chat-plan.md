@@ -119,5 +119,9 @@
 
 + 2026-09-03 P0（active 启动）：BLOCK-51 收口（c118e201）释放 active 槽位，用户裁决「继续」启动本包；P1 文字选中引用先行（纯前端 0 新 IPC）；DOC-REGISTRY / roadmap / AUDIT-LOG 同步 active。
 
-+ 2026-09-03 P1 收口（verified）：实现全链路（事件通道 / CM getSelection / 预览工具栏按钮 / SimpleChat 引用条 + sendWithRefs）；门禁 vitest 33/33 + tsc 0 + docs:check 199 + ui:audit:check；dev Electron 实机 5 断言全 PASS（含真实鼠标拖选带行号 + 真实发送模型复述引用内容），证据 `acceptance/block-52/`；台账 UI-280 verified。范围外既有缺陷如实登记：AgentStreamDisconnected（copilotClient.ts SSE 传输层，回复完整到达后断线，与本改动无关，候选另立增量）。下一步：P2 图片/结果图引用。
++ 2026-09-03 P1 收口（verified）：实现全链路（事件通道 / CM getSelection / 预览工具栏按钮 / SimpleChat 引用条 + sendWithRefs）；门禁 vitest 33/33 + tsc 0 + docs:check 199 + ui:audit:check；dev Electron 实机 5 断言全 PASS（含真实鼠标拖选带行号 + 真实发送模型复述引用内容），证据 `acceptance/block-52/`；台账 UI-280 verified。范围外既有缺陷如实登记：AgentStreamDisconnected（copilotClient.ts SSE 传输层，回复完整到达后断线，与本改动无关，候选另立增量——已于 UI-281 根因修复收口）。下一步：P2 图片/结果图引用。
+
++ 2026-09-03 P2 收口（verified，UI-284）：imageQuote 类型化事件（workspace-file/result-artifact + ImageQuoteArtifact 血统）+ 双入口按钮（静态图/结果图「引用到对话」）+ read_image v2（toolJobId/filePath 双模式，词法+realpath 双重校验防穿越/符号链接逃逸）+ SimpleChat imageRefs 引用卡（上限 4/同源去重/与 P1 同管道合并发送/成功清空）；P1 增量真修复：引用头半角 [] → 全角【】（服务端落库 cleanContent 剥行首半角 [] 致落库消息缺头 + 前后端重复渲染）。门禁 copilot 全家 239/239 + workspace 30/30 + tsc 0 + 后端 vision/registry 13/13 + docs:check 200；实机 6 断言全 PASS（p2-live-assertions.json + p2-01/02 截图）。
+
++ 2026-09-03 P3 收口（verified，UI-285，**plan 全三期完成**）：结果图引用 → 自然语言微调 → 改参重跑闭环（复用 P4R-3 Composer→ChangeSet 链 + result_studio_context 绑定，0 新协议）；实机 9 断言全 PASS（p3-live-assertions.json）：基线 Revision 物化（ordinal=1, is_current）→ 引用卡（缩略图+血统来源行）→ 自然语言微调发送 → agent 产出新 Revision（ordinal≥2、同 artifact family、新 tool job、重跑参数含 point_size=3.2——自然语言→参数 Patch 真实链路）。**收口代办说明**：P2/P3 实现与实机验收由并行智能体完成，其后转入静默，收口文书链（门禁全跑、台账 UI-284/285 登记、本进度条目、提交）由主智能体代办；证据备注：p3-01~04 截图为同一画面重复截图（截图脚本瑕疵），以断言 JSON 为准。顺手修：agent-tool-registry.test.mjs 补临时 DB 自举（存量 `no such table: projects`，与 agent-vision.test.mjs 同法）。
 

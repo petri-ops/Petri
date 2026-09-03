@@ -2753,6 +2753,83 @@
 }
 
 /* ============================================================
+   BLOCK-52 P2 — 图片引用卡（image quote cards）
+   与选中引用条同一视觉语言：同容器/边框/字号；缩略图 + 名称 + 来源行
+   ============================================================ */
+
+.sc-image-refs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px 4px;
+  border-top: 1px solid var(--biof3-border);
+  background: color-mix(in srgb, var(--biof3-bg-subtle) 50%, transparent);
+}
+
+.sc-image-ref {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 340px;
+  padding: 4px 6px 4px 4px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 8px;
+  background: var(--biof3-bg-surface);
+}
+
+.sc-image-ref-thumb {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid var(--biof3-border);
+  background: var(--biof3-bg-subtle);
+}
+
+.sc-image-ref-name {
+  flex-shrink: 0;
+  max-width: 120px;
+  font-size: var(--biof3-font-size-sm);
+  color: var(--biof3-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sc-image-ref-source {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--biof3-font-size-sm);
+  font-family: var(--biof3-font-mono, monospace);
+  color: var(--biof3-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sc-image-ref-remove {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--biof3-text-muted);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.sc-image-ref-remove:hover {
+  background: var(--biof3-status-error-bg, rgba(239, 68, 68, 0.12));
+  color: var(--biof3-status-error-fg, #ef4444);
+}
+
+/* ============================================================
    Image Preview Modal
    ============================================================ */
 

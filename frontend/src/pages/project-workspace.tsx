@@ -2551,6 +2551,18 @@ function WorkspaceFilePreview({
     return `${file.url}${separator}workspaceRevision=${refreshVersion}`;
   }, [file?.url, refreshVersion]);
 
+  // BLOCK-52 P2（图片/结果图引用）：把当前预览图片派发给 SimpleChat composer。
+  const handleQuoteImage = useCallback(() => {
+    if (!file || !previewUrl) return;
+    dispatchBioF3Event(biof3Events.imageQuote, {
+      projectId,
+      kind: 'workspace-file',
+      name: file.name,
+      path: file.path,
+      url: previewUrl,
+    });
+  }, [file, previewUrl, projectId]);
+
   useEffect(() => {
     let cancelled = false;
     setText('');
@@ -2753,9 +2765,22 @@ function WorkspaceFilePreview({
           <OfficePreviewPane preview={officePreview} onAssetOpen={setLightboxSrc} />
         )}
         {status === 'ready' && fallbackKind === 'image' && (
-          <button className={styles.workspaceImageButton} onClick={() => setLightboxSrc(previewUrl)}>
-            <img src={previewUrl} alt={file.name} className={styles.workspaceImagePreview} />
-          </button>
+          <>
+            <div className={styles.workspaceMarkdownDiffActions}>
+              {/* BLOCK-52 P2（图片/结果图引用）：把当前预览图片引用到对话 composer */}
+              <button
+                type="button"
+                className={styles.workspaceMarkdownSave}
+                onClick={handleQuoteImage}
+                title="把这张图片引用到对话"
+              >
+                引用到对话
+              </button>
+            </div>
+            <button className={styles.workspaceImageButton} onClick={() => setLightboxSrc(previewUrl)}>
+              <img src={previewUrl} alt={file.name} className={styles.workspaceImagePreview} />
+            </button>
+          </>
         )}
         {status === 'ready' && fallbackKind === 'pdf' && (
           <object

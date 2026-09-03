@@ -510,28 +510,36 @@ const TOOL_DEFS = [
       },
     },
   },
-  // READ_IMAGE_v1（阶段2 Task4）：agent 看图（多模态）
+  // READ_IMAGE_v2（阶段2 Task4 + BLOCK-52 P2）：agent 看图（多模态）
   {
     type: 'function',
     function: {
       name: 'read_image',
       description:
-        '读取某个 tool_job 结果里的图（PNG），交给多模态模型解读图内容。' +
-        '\n用途：run_tool 跑完出图后，如果你需要看图内容才能回答（如"图里上调基因集中在哪？"），调本工具拿图，后端会用 vision 角色模型解读。' +
-        '\n注意：token 消耗较高，仅在用户明确问图内容时调，不要每次出图都读。',
+        '读取一张图交给多模态模型解读图内容。两种输入二选一：\n' +
+        '1) toolJobId：读取某个 tool_job 结果里的图（PNG）。run_tool 跑完出图后，如果你需要看图内容才能回答（如"图里上调基因集中在哪？"），调本工具拿图；可选 fileName 指定哪张图，不传读第一张 plot。\n' +
+        '2) filePath：读取项目工作区里的静态图片（相对路径，如 "figures/map.png"）。当用户在消息里引用了工作区图片（消息开头有 【引用图片 …】 块且含 path: 行）时，用该 path 调本工具看图。\n' +
+        '注意：token 消耗较高，仅在用户明确问图内容或引用图片提问时调，不要每次出图都读。',
       parameters: {
         type: 'object',
         properties: {
           toolJobId: {
             type: 'string',
-            description: 'tool_job id（run_tool 返回的 toolJobId）',
+            description: 'tool_job id（run_tool 返回的 toolJobId）。与 filePath 二选一',
+          },
+          filePath: {
+            type: 'string',
+            description: 'workspace 相对路径（png/jpg/jpeg/svg），如 "figures/umap.png"。与 toolJobId 二选一',
           },
           fileName: {
             type: 'string',
-            description: '可选：指定读哪个图（如 volcano.png）。不传则读第一张 plot',
+            description: '可选（仅 toolJobId 模式）：指定读哪个图（如 volcano.png）。不传则读第一张 plot',
+          },
+          question: {
+            type: 'string',
+            description: '可选：问图什么（默认描述图的主要内容）',
           },
         },
-        required: ['toolJobId'],
       },
     },
   },

@@ -4282,6 +4282,23 @@ body.biof3-resizing-columns * {
   background: var(--biof3-bg-surface);
 }
 
+/* BLOCK-52 P2（图片/结果图引用）：结果图预览列——顶部引用操作行 + 图片画布 */
+.resultPreviewImageColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 8px;
+}
+
+.resultPreviewImageCanvas {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
 .resultPreviewImageButton {
   position: absolute;
   inset: 0;

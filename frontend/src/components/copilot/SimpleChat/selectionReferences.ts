@@ -91,6 +91,8 @@ export function selectionReferenceLocation(ref: Pick<SelectionReference, 'path' 
  * 发送时把引用块渲染成消息正文前缀（引用块在前、用户文本在后）。
  * 引用文字以 blockquote（`>`）逐行呈现，模型可直接读到原文；
  * 无引用时原样返回，零干扰。
+ * 注意：引用头用全角【】而非 []——服务端落库会剥掉行首半角 [...] 前缀
+ * （chat.js cleanContent legacy 正则），[] 会导致落库消息缺头 + 前后端重复渲染。
  */
 export function composeMessageWithSelectionReferences(
   raw: string,
@@ -98,7 +100,7 @@ export function composeMessageWithSelectionReferences(
 ): string {
   if (refs.length === 0) return raw;
   const block = refs
-    .map((ref) => `[引用 ${selectionReferenceLocation(ref)}]\n${
+    .map((ref) => `【引用 ${selectionReferenceLocation(ref)}】\n${
       ref.text.split('\n').map((line) => `> ${line}`).join('\n')
     }`)
     .join('\n\n');

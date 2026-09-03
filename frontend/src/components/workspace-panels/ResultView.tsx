@@ -928,6 +928,23 @@ function ResultArtifactShell({
     };
   }, [activeIsPreviewText, previewAvailabilityKey, previewRetryVersion, selectedArtifact, selectedArtifactName, selectedArtifactUrl]);
 
+  // BLOCK-52 P2（图片/结果图引用）：把当前结果图 + artifact 血统派发给 SimpleChat composer。
+  const handleQuoteArtifactImage = () => {
+    if (!selectedArtifactUrl) return;
+    dispatchBioF3Event(biof3Events.imageQuote, {
+      projectId: project.id,
+      kind: 'result-artifact',
+      name: selectedArtifactName,
+      url: selectedArtifactUrl,
+      artifact: {
+        toolJobId: viewedRevision?.toolJobId || job?.id || '',
+        revisionId: viewedRevision?.revisionId,
+        artifactId: viewedRevision?.artifactId,
+        revisionOrdinal: viewedRevision?.revisionOrdinal,
+      },
+    });
+  };
+
   const retryCurrentPreview = () => {
     setPreviewAvailability({ key: previewAvailabilityKey, status: 'checking', reason: null });
     setPreviewRetryVersion((value) => value + 1);
@@ -980,25 +997,40 @@ function ResultArtifactShell({
     }
     if (viewerAdapter === 'image' && selectedArtifactUrl) {
       return (
-        <button
-          type="button"
-          className={styles.resultPreviewImageButton}
-          onClick={() => setLightboxSrc(selectedArtifactUrl)}
-        >
-          <img
-            key={`${previewAvailabilityKey}:${previewRetryVersion}`}
-            src={selectedArtifactUrl}
-            alt={selectedArtifactLabel || selectedArtifact.name}
-            className={styles.resultPreviewImage}
-            onLoad={() => {
-              setPreviewAvailability({ key: previewAvailabilityKey, status: 'available', reason: null });
-            }}
-            onError={() => {
-              const reason = '结果记录仍在，但当前产物文件不可读取。';
-              setPreviewAvailability({ key: previewAvailabilityKey, status: 'unavailable', reason });
-            }}
-          />
-        </button>
+        <div className={styles.resultPreviewImageColumn}>
+          <div className={styles.workspaceMarkdownDiffActions}>
+            {/* BLOCK-52 P2（图片/结果图引用）：把当前结果图引用到对话 composer */}
+            <button
+              type="button"
+              className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+              onClick={handleQuoteArtifactImage}
+              title="把这张结果图引用到对话"
+            >
+              引用到对话
+            </button>
+          </div>
+          <div className={styles.resultPreviewImageCanvas}>
+            <button
+              type="button"
+              className={styles.resultPreviewImageButton}
+              onClick={() => setLightboxSrc(selectedArtifactUrl)}
+            >
+              <img
+                key={`${previewAvailabilityKey}:${previewRetryVersion}`}
+                src={selectedArtifactUrl}
+                alt={selectedArtifactLabel || selectedArtifact.name}
+                className={styles.resultPreviewImage}
+                onLoad={() => {
+                  setPreviewAvailability({ key: previewAvailabilityKey, status: 'available', reason: null });
+                }}
+                onError={() => {
+                  const reason = '结果记录仍在，但当前产物文件不可读取。';
+                  setPreviewAvailability({ key: previewAvailabilityKey, status: 'unavailable', reason });
+                }}
+              />
+            </button>
+          </div>
+        </div>
       );
     }
     if (previewLoading && !previewText && !previewData) {

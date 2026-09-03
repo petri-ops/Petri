@@ -185,6 +185,13 @@ import {
   selectionReferenceLocation,
   type SelectionReference,
 } from './SimpleChat/selectionReferences';
+// BLOCK-52 P2（图片/结果图引用）: 图片引用卡纯函数助手（状态管理 + 发送渲染）。
+import {
+  appendImageReference,
+  composeMessageWithImageReferences,
+  imageReferenceSourceLine,
+  type ImageReference,
+} from './SimpleChat/imageReferences';
 // BLOCK-20: orphaned helpers (8/21, commit 9cbf8e3) wired into
 // the SimpleChat consumption side. The two helpers below are pure
 // UI utilities and safe to import from the renderer:
@@ -252,6 +259,24 @@ export function SimpleChat({
   }, [ownsCopilotAsk, projectId]);
   const removeSelectionRef = useCallback((id: string) => {
     setSelectionRefs((prev) => prev.filter((ref) => ref.id !== id));
+  }, []);
+  // BLOCK-52 P2（图片/结果图引用）: 右栏图片预览/结果面板图片 → 引用卡，随下一条消息发送。
+  const [imageRefs, setImageRefs] = useState<ImageReference[]>([]);
+  const imageRefsRef = useRef<ImageReference[]>([]);
+  useEffect(() => {
+    imageRefsRef.current = imageRefs;
+  }, [imageRefs]);
+  // 订阅 imageQuote 事件（WorkspaceFilePreview 静态图 / ResultView 结果图）。
+  // 与 P1 同策略：仅 copilotAsk 拥有者消费；跨项目载荷丢弃。
+  useEffect(() => {
+    if (!ownsCopilotAsk) return undefined;
+    return subscribeBioF3Event(biof3Events.imageQuote, (detail) => {
+      if (detail.projectId && detail.projectId !== projectId) return;
+      setImageRefs((prev) => appendImageReference(prev, detail));
+    });
+  }, [ownsCopilotAsk, projectId]);
+  const removeImageRef = useCallback((id: string) => {
+    setImageRefs((prev) => prev.filter((ref) => ref.id !== id));
   }, []);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [previewImage, setPreviewImage] = useState<AttachmentFile | null>(null);
@@ -843,9 +868,17 @@ export function SimpleChat({
 
   // BLOCK-52 P1（选中即引用）：带引用块的发送包装——发送前把引用块渲染进
   // 消息正文，接受成功后清空引用块；被守卫拦截（空文本 / 运行中）时保留待重试。
+  // BLOCK-52 P2：图片引用卡同管道——artifact 元数据合成进正文，成功后一并清空。
   const sendWithRefs = useCallback(async (text: string): Promise<boolean> => {
-    const ok = await send(composeMessageWithSelectionReferences(text, selectionRefsRef.current));
-    if (ok) setSelectionRefs([]);
+    const composed = composeMessageWithImageReferences(
+      composeMessageWithSelectionReferences(text, selectionRefsRef.current),
+      imageRefsRef.current,
+    );
+    const ok = await send(composed);
+    if (ok) {
+      setSelectionRefs([]);
+      setImageRefs([]);
+    }
     return ok;
   }, [send]);
 
@@ -1534,6 +1567,36 @@ export function SimpleChat({
                       onClick={() => removeSelectionRef(ref.id)}
                       title="移除引用"
                       aria-label="移除引用"
+                    >
+                      <Icon name="x" size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {/* BLOCK-52 P2 — 图片引用卡：右栏图片预览选中的图片，随下一条消息发送 */}
+            {imageRefs.length > 0 && (
+              <div className="sc-image-refs">
+                {imageRefs.map((ref) => (
+                  <div
+                    key={ref.id}
+                    className="sc-image-ref"
+                    title={imageReferenceSourceLine(ref)}
+                  >
+                    <img
+                      src={ref.url}
+                      alt={ref.name}
+                      className="sc-image-ref-thumb"
+                      draggable={false}
+                    />
+                    <span className="sc-image-ref-name" title={ref.name}>{ref.name}</span>
+                    <span className="sc-image-ref-source">{imageReferenceSourceLine(ref)}</span>
+                    <button
+                      type="button"
+                      className="sc-image-ref-remove"
+                      onClick={() => removeImageRef(ref.id)}
+                      title="移除图片引用"
+                      aria-label="移除图片引用"
                     >
                       <Icon name="x" size={12} />
                     </button>

@@ -1,0 +1,38 @@
+{
+  "startedAt": "2026-09-03T14:17:26.888Z",
+  "page": "http://localhost:3000/project/p_mt15b0aw_f0xa",
+  "assertions": [
+    {
+      "name": "右栏图片预览出现「引用到对话」按钮并可点击",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "composer 出现图片引用卡（缩略图+名称+来源行）",
+      "pass": true,
+      "detail": "{\"name\":\"quote-live.png\",\"source\":\"figures/quote-live.png\",\"hasThumb\":true,\"thumbSrc\":\"http://localhost:57721/api/workspaces/p_\"}"
+    },
+    {
+      "name": "composer 输入并发送",
+      "pass": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "消息正文含 【引用图片 quote-live.png】 前缀",
+      "pass": true,
+      "detail": "张测试图，请忽略图片内容本身，只回复“已收到图片引用”六个字。已收到图片引用复制重新生成创建分支22:04【引用图片 quote-live.png】> 来源：figures/quote-live.png> path: figures/quote-live.png这是一张测试图，请忽略图片内容本身，只回复“已收到图片引用”六个字。已收到图片引用复制重新生成创建分支22:16【引用图片 quote-live.png】> 来源：figures/quote-live.png> path: figures/quote-live.png这是一张测试图，请忽略图片内容本身，只回复“已收到图片引用”六个字。…"
+    },
+    {
+      "name": "消息正文含 workspace 相对路径（模型可据此 read_image）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "发送后图片引用卡清空",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "finishedAt": "2026-09-03T14:17:35.643Z",
+  "pass": true
+}

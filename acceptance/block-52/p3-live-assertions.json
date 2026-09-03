@@ -1,0 +1,155 @@
+{
+  "startedAt": "2026-09-03T15:09:58.789Z",
+  "page": "http://localhost:3000/project/p_mtlnsv0f_xpjb/result?job=tj_mtlnsv38_yk04",
+  "projectId": "p_mtlnsv0f_xpjb",
+  "toolJobId": "tj_mtlnsv38_yk04",
+  "assertions": [
+    {
+      "name": "ResultView 打开 volcano.png 图片预览（含引用按钮）",
+      "pass": true,
+      "detail": "{\"hasQuoteBtn\":true,\"hasImage\":true}"
+    },
+    {
+      "name": "interaction 物化基线 Revision（ordinal=1，is_current）",
+      "pass": true,
+      "detail": "[{\"revision_id\":\"rev_f934ac245eb88d58fbc897f88176beb1\",\"revision_ordinal\":1,\"tool_job_id\":\"tj_mtlnsv38_yk04\",\"artifact_id\":\"volcano\",\"artifact_family_id\":\"af_b3f7b30190bac172a1ebebbfc585981d\",\"is_current\":0},{\"revision_id\":\"rev_989b34db44a7c69eefdb3319c0f81b53\",\"revision_ordinal\":1,\"tool_job_id\":\"tj_mtlnsv38_yk04\",\"artifact_id\":\"volcano_svg\",\"artifact_family_id\":\"af_77fa53e59c8c67f0c5eb1d33ed0e073"
+    },
+    {
+      "name": "ResultView 出现「引用到对话」按钮并可点击",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "composer 出现 Result Studio 结果图引用卡（缩略图+血统来源行）",
+      "pass": true,
+      "detail": "{\"name\":\"volcano.png\",\"source\":\"Result Studio 结果图\",\"hasThumb\":true}"
+    },
+    {
+      "name": "composer 输入微调语句并发送",
+      "pass": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "agent 微调闭环产出新 Revision（ordinal≥2）",
+      "pass": true,
+      "detail": "[{\"revision_id\":\"rev_f934ac245eb88d58fbc897f88176beb1\",\"revision_ordinal\":1,\"tool_job_id\":\"tj_mtlnsv38_yk04\",\"artifact_id\":\"volcano\",\"artifact_family_id\":\"af_b3f7b30190bac172a1ebebbfc585981d\",\"is_current\":0},{\"revision_id\":\"rev_989b34db44a7c69eefdb3319c0f81b53\",\"revision_ordinal\":1,\"tool_job_id\":\"tj_mtlnsv38_yk04\",\"artifact_id\":\"volcano_svg\",\"artifact_family_id\":\"af_77fa53e59c8c67f0c5eb1d33ed0e073"
+    },
+    {
+      "name": "新 Revision 与基线同 artifact family（重跑链路）",
+      "pass": true,
+      "detail": "af_b3f7b30190bac172a1ebebbfc585981d vs af_b3f7b30190bac172a1ebebbfc585981d"
+    },
+    {
+      "name": "新 Revision 来自新 tool job（真实改参重跑）",
+      "pass": true,
+      "detail": "tj_mtlntnvl_79w0 vs tj_mtlnsv38_yk04"
+    },
+    {
+      "name": "重跑 Job 参数含 point_size=3.2（自然语言→参数 Patch）",
+      "pass": true,
+      "detail": "[{\"params_json\":\"{\\\"deg_table\\\":\\\"/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f/inputs/demo_deg.csv\\\",\\\"fc_threshold\\\":1,\\\"gene_col\\\":\\\"gene\\\",\\\"lfc_col\\\":\\\"log2FC\\\",\\\"pval_col\\\":\\\"padj\\\",\\\"pval_threshold\\\":1.3,\\\"top_"
+    }
+  ],
+  "beforeRevisions": [
+    {
+      "revision_id": "rev_f934ac245eb88d58fbc897f88176beb1",
+      "revision_ordinal": 1,
+      "tool_job_id": "tj_mtlnsv38_yk04",
+      "artifact_id": "volcano",
+      "artifact_family_id": "af_b3f7b30190bac172a1ebebbfc585981d",
+      "is_current": 0
+    },
+    {
+      "revision_id": "rev_989b34db44a7c69eefdb3319c0f81b53",
+      "revision_ordinal": 1,
+      "tool_job_id": "tj_mtlnsv38_yk04",
+      "artifact_id": "volcano_svg",
+      "artifact_family_id": "af_77fa53e59c8c67f0c5eb1d33ed0e0734",
+      "is_current": 0
+    },
+    {
+      "revision_id": "rev_527e0f378a562cb52f27cabe7098346a",
+      "revision_ordinal": 1,
+      "tool_job_id": "tj_mtlnsv38_yk04",
+      "artifact_id": "classified_table",
+      "artifact_family_id": "af_3aa5331c3ad3f4b6cd42597f622e0525",
+      "is_current": 0
+    },
+    {
+      "revision_id": "rev_50b333280bcd43e18c7cbaa2e6468758",
+      "revision_ordinal": 2,
+      "tool_job_id": "tj_mtlntnvl_79w0",
+      "artifact_id": "volcano",
+      "artifact_family_id": "af_b3f7b30190bac172a1ebebbfc585981d",
+      "is_current": 1
+    },
+    {
+      "revision_id": "rev_f0d4ee82e7774472838c280f704fe29f",
+      "revision_ordinal": 2,
+      "tool_job_id": "tj_mtlntnvl_79w0",
+      "artifact_id": "volcano_svg",
+      "artifact_family_id": "af_77fa53e59c8c67f0c5eb1d33ed0e0734",
+      "is_current": 1
+    },
+    {
+      "revision_id": "rev_cd71027578574680935c1a6964c073a2",
+      "revision_ordinal": 2,
+      "tool_job_id": "tj_mtlntnvl_79w0",
+      "artifact_id": "classified_table",
+      "artifact_family_id": "af_3aa5331c3ad3f4b6cd42597f622e0525",
+      "is_current": 1
+    }
+  ],
+  "afterRevisions": [
+    {
+      "revision_id": "rev_f934ac245eb88d58fbc897f88176beb1",
+      "revision_ordinal": 1,
+      "tool_job_id": "tj_mtlnsv38_yk04",
+      "artifact_id": "volcano",
+      "artifact_family_id": "af_b3f7b30190bac172a1ebebbfc585981d",
+      "is_current": 0
+    },
+    {
+      "revision_id": "rev_989b34db44a7c69eefdb3319c0f81b53",
+      "revision_ordinal": 1,
+      "tool_job_id": "tj_mtlnsv38_yk04",
+      "artifact_id": "volcano_svg",
+      "artifact_family_id": "af_77fa53e59c8c67f0c5eb1d33ed0e0734",
+      "is_current": 0
+    },
+    {
+      "revision_id": "rev_527e0f378a562cb52f27cabe7098346a",
+      "revision_ordinal": 1,
+      "tool_job_id": "tj_mtlnsv38_yk04",
+      "artifact_id": "classified_table",
+      "artifact_family_id": "af_3aa5331c3ad3f4b6cd42597f622e0525",
+      "is_current": 0
+    },
+    {
+      "revision_id": "rev_50b333280bcd43e18c7cbaa2e6468758",
+      "revision_ordinal": 2,
+      "tool_job_id": "tj_mtlntnvl_79w0",
+      "artifact_id": "volcano",
+      "artifact_family_id": "af_b3f7b30190bac172a1ebebbfc585981d",
+      "is_current": 1
+    },
+    {
+      "revision_id": "rev_f0d4ee82e7774472838c280f704fe29f",
+      "revision_ordinal": 2,
+      "tool_job_id": "tj_mtlntnvl_79w0",
+      "artifact_id": "volcano_svg",
+      "artifact_family_id": "af_77fa53e59c8c67f0c5eb1d33ed0e0734",
+      "is_current": 1
+    },
+    {
+      "revision_id": "rev_cd71027578574680935c1a6964c073a2",
+      "revision_ordinal": 2,
+      "tool_job_id": "tj_mtlntnvl_79w0",
+      "artifact_id": "classified_table",
+      "artifact_family_id": "af_3aa5331c3ad3f4b6cd42597f622e0525",
+      "is_current": 1
+    }
+  ],
+  "finishedAt": "2026-09-03T15:10:14.024Z",
+  "pass": true
+}

@@ -1,9 +1,11 @@
 /**
  * agent-tools/vision-tools.js — agent-led 阶段2 Task4：agent 看图工具
  *
- * tool_read_image：从 tool_jobs 的结果目录读 PNG → base64，供 agent 解读图内容。
- * 链路：toolJobId → 查 tool_jobs.result_json 拿 jobDir → path.join(jobDir, fileName)
- *      → fs.readFileSync → base64。
+ * tool_read_image：两条读图链路 → base64，供 agent 解读图内容。
+ *   1. 结果图（toolJobId）：tool_jobs.result_json 拿 jobDir → path.join(jobDir, fileName)
+ *   2. 工作区静态图（filePath，BLOCK-52 P2）：ctx.projectId → project.workspace_path
+ *      → 相对路径包含校验（词法 + realpath 双重，防路径穿越/符号链接逃逸）
+ * 链路：fs.readFileSync → base64 → vision provider 解读。
  *
  * agent 循环里 tool_result 含 imageBase64 时，ai-agent.js 改用 vision provider
  * （callVision）喂 image content block，让当前 vision 角色模型看图。
@@ -14,72 +16,138 @@ const dbMod = require('../db');
 const config = require('../config');
 const { callVision } = require('../helpers/llm-client');
 
+const IMAGE_EXT_RE = /\.(png|jpg|jpeg|svg)$/i;
+const IMAGE_MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml' };
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+
 /**
- * tool_read_image — 读工具结果的图，用 vision 角色模型解读图内容。
+ * 解析工作区静态图片的绝对路径（BLOCK-52 P2）。
+ * 边界校验与 workspace-tools.resolveWorkspaceTarget 同级：
+ * 词法包含 + realpath 包含（最近存在祖先），防路径穿越与符号链接逃逸。
+ */
+function resolveWorkspaceImagePath(ctx, relativePath) {
+  const projectId = String((ctx && ctx.projectId) || '').trim();
+  if (!projectId) {
+    return { error: 'project_required', message: '读工作区图片需要项目上下文（projectId）' };
+  }
+  const project = dbMod.getProject(projectId);
+  if (!project) return { error: 'project_not_found', message: `项目 ${projectId} 不存在` };
+  if (!project.workspace_path || !path.isAbsolute(project.workspace_path)) {
+    return { error: 'workspace_unavailable', message: '项目工作区路径未配置或不是绝对路径' };
+  }
+  const trimmed = String(relativePath || '').trim();
+  if (!trimmed) return { error: 'missing_filePath', message: '需要 filePath（workspace 相对路径）' };
+
+  let realRoot;
+  try {
+    realRoot = fs.realpathSync(project.workspace_path);
+  } catch (error) {
+    return { error: 'workspace_unavailable', message: `项目工作区不可访问: ${error.message}` };
+  }
+
+  const target = path.resolve(realRoot, trimmed);
+  if (target !== realRoot && !target.startsWith(realRoot + path.sep)) {
+    return { error: 'path_escape', message: '路径逃逸出当前项目工作区' };
+  }
+  if (!IMAGE_EXT_RE.test(target)) {
+    return { error: 'not_an_image', message: 'filePath 必须指向 png/jpg/jpeg/svg 图片' };
+  }
+  // realpath 包含检查：最近存在祖先，防符号链接指向工作区外
+  let realTarget = target;
+  try {
+    fs.statSync(target);
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return { error: 'file_not_found', message: `${trimmed} 在工作区中不存在` };
+    }
+    return { error: 'file_unreadable', message: `无法访问 ${trimmed}: ${error.message}` };
+  }
+  try {
+    realTarget = fs.realpathSync(target);
+  } catch (error) {
+    return { error: 'file_unreadable', message: `无法解析 ${trimmed}: ${error.message}` };
+  }
+  if (realTarget !== realRoot && !realTarget.startsWith(realRoot + path.sep)) {
+    return { error: 'symlink_escape', message: '符号链接指向项目工作区外部' };
+  }
+  return { imgPath: realTarget, fileName: path.basename(realTarget) };
+}
+
+/**
+ * tool_read_image — 读图（结果图 / 工作区静态图），用 vision 角色模型解读图内容。
  *
  * 设计：agent 调本工具后，后端读图 base64 → 直接调 DashScopeVisionProvider 解读 →
  * 把"图里看到的内容"作为 tool_result 文本返回给 agent。这样 agent 循环不用改
  * （文本 Agent 循环与 vision 解读分别按任务角色解析模型）。
  *
- * @param {object} args - { toolJobId, fileName?, question? }
- *   - toolJobId: tool_jobs.id（run_tool 返回的）
- *   - fileName: 可选，指定读哪个图。不传则读第一张 plot。
- *   - question: 可选，问图什么（默认"描述这张图的主要内容"）。
+ * 两种输入（二选一）：
+ *   - toolJobId: tool_jobs.id（run_tool 返回的）；可选 fileName 指定读哪张图，不传读第一张 plot。
+ *   - filePath: workspace 相对路径（BLOCK-52 P2 图片引用；前端「引用到对话」消息正文里的 path）。
+ *     需 ctx.projectId 项目上下文，边界校验见 resolveWorkspaceImagePath。
+ * @param {object} args - { toolJobId?, fileName?, filePath?, question? }
  * @returns {Promise<{ok, description, fileName}|{error, message}>}
  */
 async function tool_read_image(args, ctx) {
   const toolJobId = args && args.toolJobId;
-  if (!toolJobId) return { error: 'missing_toolJobId', message: '需要 toolJobId' };
-
-  const job = dbMod.getToolJob(toolJobId);
-  if (!job) return { error: 'job_not_found', message: `tool_job ${toolJobId} 不存在` };
-  if (job.status !== 'completed') {
-    return { error: 'job_not_completed', message: `任务状态 ${job.status}，无法读图` };
+  const filePath = args && args.filePath;
+  if (!toolJobId && !filePath) {
+    return { error: 'missing_toolJobId', message: '需要 toolJobId 或 filePath（二选一）' };
   }
 
-  const result = job.result || {};
-  const jobDir = result.jobDir;
-  if (!jobDir) return { error: 'no_jobDir', message: 'result 里没有 jobDir 路径' };
-
-  const outputs = result.outputs || [];
-  const files = result.files || [];
-  let targetName = args.fileName;
-  if (!targetName) {
-    const plot = outputs.find((o) => o.type === 'plot' || /\.(png|jpg|jpeg|svg)$/i.test(o.name || ''));
-    targetName = plot ? plot.name : files.find((f) => /\.(png|jpg|jpeg|svg)$/i.test(f));
-  }
-  // fallback：outputs/files 都没找到，直接列 jobDir 目录找第一张图
-  if (!targetName && jobDir && fs.existsSync(jobDir)) {
-    const listDir = (dir) => {
-      try { return fs.readdirSync(dir); } catch { return []; }
-    };
-    const allFiles = [...listDir(path.join(jobDir, 'output')), ...listDir(jobDir)];
-    const img = allFiles.find((f) => /\.(png|jpg|jpeg|svg)$/i.test(f));
-    if (img) targetName = img;
-  }
-  if (!targetName) return { error: 'no_image', message: '结果目录里没找到图文件' };
-
-  const candidates = [
-    path.join(jobDir, 'output', targetName),
-    path.join(jobDir, targetName),
-  ];
   let imgPath = null;
-  for (const p of candidates) {
-    if (fs.existsSync(p)) {
-      imgPath = p;
-      break;
+  let targetName = null;
+  if (filePath) {
+    const resolved = resolveWorkspaceImagePath(ctx, filePath);
+    if (resolved.error) return resolved;
+    imgPath = resolved.imgPath;
+    targetName = resolved.fileName;
+  } else {
+    const job = dbMod.getToolJob(toolJobId);
+    if (!job) return { error: 'job_not_found', message: `tool_job ${toolJobId} 不存在` };
+    if (job.status !== 'completed') {
+      return { error: 'job_not_completed', message: `任务状态 ${job.status}，无法读图` };
     }
-  }
-  if (!imgPath) return { error: 'file_not_found', message: `${targetName} 在 ${jobDir} 下不存在` };
 
-  const ext = path.extname(targetName).toLowerCase();
-  const mimeType =
-    ext === '.png' ? 'image/png' :
-    ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' :
-    ext === '.svg' ? 'image/svg+xml' : 'image/png';
+    const result = job.result || {};
+    const jobDir = result.jobDir;
+    if (!jobDir) return { error: 'no_jobDir', message: 'result 里没有 jobDir 路径' };
+
+    const outputs = result.outputs || [];
+    const files = result.files || [];
+    targetName = args.fileName;
+    if (!targetName) {
+      const plot = outputs.find((o) => o.type === 'plot' || IMAGE_EXT_RE.test(o.name || ''));
+      targetName = plot ? plot.name : files.find((f) => IMAGE_EXT_RE.test(f));
+    }
+    // fallback：outputs/files 都没找到，直接列 jobDir 目录找第一张图
+    if (!targetName && jobDir && fs.existsSync(jobDir)) {
+      const listDir = (dir) => {
+        try { return fs.readdirSync(dir); } catch { return []; }
+      };
+      const allFiles = [...listDir(path.join(jobDir, 'output')), ...listDir(jobDir)];
+      const img = allFiles.find((f) => IMAGE_EXT_RE.test(f));
+      if (img) targetName = img;
+    }
+    if (!targetName) return { error: 'no_image', message: '结果目录里没找到图文件' };
+
+    const candidates = [
+      path.join(jobDir, 'output', targetName),
+      path.join(jobDir, targetName),
+    ];
+    for (const p of candidates) {
+      if (fs.existsSync(p)) {
+        imgPath = p;
+        break;
+      }
+    }
+    if (!imgPath) return { error: 'file_not_found', message: `${targetName} 在 ${jobDir} 下不存在` };
+  }
+
+  const ext = path.extname(imgPath).toLowerCase();
+  const mimeType = IMAGE_MIME[ext] || 'image/png';
 
   const buf = fs.readFileSync(imgPath);
-  if (buf.length > 4 * 1024 * 1024) {
+  if (buf.length > MAX_IMAGE_BYTES) {
     return { error: 'image_too_large', message: `${targetName} ${(buf.length/1024/1024).toFixed(1)}MB 超 4MB 上限` };
   }
   const imageBase64 = buf.toString('base64');
@@ -122,4 +190,5 @@ async function tool_read_image(args, ctx) {
 
 module.exports = {
   tool_read_image,
+  resolveWorkspaceImagePath,
 };
