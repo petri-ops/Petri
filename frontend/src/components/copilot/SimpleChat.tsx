@@ -114,7 +114,7 @@ import {
 import { useCopilotContext } from '@/lib/copilotContextProvider';
 import { formatRelativeTime } from '@/lib/format';
 import { useConversations } from '@/hooks/useConversations';
-import { biof3Events, dispatchBioF3Event } from '@/lib/events';
+import { biof3Events, dispatchBioF3Event, subscribeBioF3Event } from '@/lib/events';
 import '@/lib/chat-file-references';
 import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-references';
 import { __resetFileReferenceCache, extractFileReferenceCandidates } from '@/lib/chat-file-references';
@@ -177,6 +177,14 @@ import {
 // `starting` state, messagesRef/sendRef indirection, the copilotAsk
 // event subscription, and the queue drain effect.
 import { useChatStream } from './SimpleChat/hooks/useChatStream';
+// BLOCK-52 P1（选中即引用）: 引用块纯函数助手（状态管理 + 发送渲染）。
+import {
+  appendSelectionReference,
+  composeMessageWithSelectionReferences,
+  selectionReferenceChipLabel,
+  selectionReferenceLocation,
+  type SelectionReference,
+} from './SimpleChat/selectionReferences';
 // BLOCK-20: orphaned helpers (8/21, commit 9cbf8e3) wired into
 // the SimpleChat consumption side. The two helpers below are pure
 // UI utilities and safe to import from the renderer:
@@ -227,6 +235,24 @@ export function SimpleChat({
   const [input, setInput] = useState('');
   const [queuedPrompts, setQueuedPrompts] = useState<string[]>([]);
   const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
+  // BLOCK-52 P1（选中即引用）: 右栏预览选中文字 → 引用块，随下一条消息发送。
+  const [selectionRefs, setSelectionRefs] = useState<SelectionReference[]>([]);
+  const selectionRefsRef = useRef<SelectionReference[]>([]);
+  useEffect(() => {
+    selectionRefsRef.current = selectionRefs;
+  }, [selectionRefs]);
+  // 订阅右栏 WorkspaceFilePreview 的「引用到对话」事件。仅 copilotAsk 拥有者
+  // （中央会话）消费，避免右栏 chat tab 与中央会话重复入列；跨项目载荷丢弃。
+  useEffect(() => {
+    if (!ownsCopilotAsk) return undefined;
+    return subscribeBioF3Event(biof3Events.selectionQuote, (detail) => {
+      if (detail.projectId && detail.projectId !== projectId) return;
+      setSelectionRefs((prev) => appendSelectionReference(prev, detail));
+    });
+  }, [ownsCopilotAsk, projectId]);
+  const removeSelectionRef = useCallback((id: string) => {
+    setSelectionRefs((prev) => prev.filter((ref) => ref.id !== id));
+  }, []);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [previewImage, setPreviewImage] = useState<AttachmentFile | null>(null);
   const MAX_SUMMARY_RETRIES = 3;
@@ -815,6 +841,14 @@ export function SimpleChat({
     createConversationForRun,
   });
 
+  // BLOCK-52 P1（选中即引用）：带引用块的发送包装——发送前把引用块渲染进
+  // 消息正文，接受成功后清空引用块；被守卫拦截（空文本 / 运行中）时保留待重试。
+  const sendWithRefs = useCallback(async (text: string): Promise<boolean> => {
+    const ok = await send(composeMessageWithSelectionReferences(text, selectionRefsRef.current));
+    if (ok) setSelectionRefs([]);
+    return ok;
+  }, [send]);
+
   // T83: file-reference refresh feedback layer (no core-logic change).
   const handleRefresh = useCallback(() => {
     if (refreshing) return;
@@ -1059,13 +1093,16 @@ export function SimpleChat({
       const trimmed = input.trim();
       if (!trimmed) return;
       if (streaming) {
-        setQueuedPrompts((current) => [...current, trimmed].slice(-5));
+        // BLOCK-52 P1：排队消息同样携带当前引用块，入列后清空。
+        const queuedWithRefs = composeMessageWithSelectionReferences(trimmed, selectionRefsRef.current);
+        setQueuedPrompts((current) => [...current, queuedWithRefs].slice(-5));
         setInput('');
         historyNavRef.current = INITIAL_NAV_STATE;
         clearConversationDraft(projectId, conversationId);
         if (taRef.current) taRef.current.style.height = 'auto';
+        setSelectionRefs([]);
       } else {
-        void send(trimmed);
+        void sendWithRefs(trimmed);
       }
     }
   };
@@ -1479,6 +1516,31 @@ export function SimpleChat({
                 ))}
               </div>
             )}
+            {/* BLOCK-52 P1 — 选中即引用条：右栏预览选中的文字块，随下一条消息发送 */}
+            {selectionRefs.length > 0 && (
+              <div className="sc-selection-refs">
+                {selectionRefs.map((ref) => (
+                  <div
+                    key={ref.id}
+                    className="sc-selection-ref"
+                    title={`${selectionReferenceLocation(ref)}\n${ref.text}`}
+                  >
+                    <Icon name="file" size={12} />
+                    <span className="sc-selection-ref-loc">{selectionReferenceLocation(ref)}</span>
+                    <span className="sc-selection-ref-text">{selectionReferenceChipLabel(ref)}</span>
+                    <button
+                      type="button"
+                      className="sc-selection-ref-remove"
+                      onClick={() => removeSelectionRef(ref.id)}
+                      title="移除引用"
+                      aria-label="移除引用"
+                    >
+                      <Icon name="x" size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="sc-composer-body">
               <textarea
                 ref={taRef}
@@ -1630,7 +1692,7 @@ export function SimpleChat({
                 </div>
                 <button
                   className="sc-send-cta sc-send-cta-send"
-                  onClick={() => send(input)}
+                  onClick={() => void sendWithRefs(input)}
                   disabled={!input.trim() || streaming}
                   title={streaming ? '任务进行中…' : '发送消息'}
                 >

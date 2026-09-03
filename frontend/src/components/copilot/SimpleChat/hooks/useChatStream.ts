@@ -84,7 +84,12 @@ export interface UseChatStreamArgs {
 }
 
 export interface UseChatStreamReturn {
-  send: (text: string, contextOverride?: Partial<CopilotContext>) => Promise<void>;
+  /**
+   * 发送一条消息。返回 Promise<boolean>：true = 已接受并启动（或进入）运行；
+   * false = 因守卫（空文本 / streaming / 会话已在运行 / 启动失败）未发送。
+   * BLOCK-52 P1：SimpleChat.sendWithRefs 依赖该返回值决定是否清空引用块。
+   */
+  send: (text: string, contextOverride?: Partial<CopilotContext>) => Promise<boolean>;
   stop: () => void;
   regenerate: () => void;
   queue: (text: string) => void;
@@ -141,21 +146,21 @@ export function useChatStream({
   // 3. `send` — primary entry point. Creates a conversation if
   // needed, builds the upstream message history, and starts a
   // durable run via conversationRunStore.
-  const send = useCallback(async (text: string, contextOverride?: Partial<CopilotContext>) => {
+  const send = useCallback(async (text: string, contextOverride?: Partial<CopilotContext>): Promise<boolean> => {
     const trimmed = text.trim();
-    if (!trimmed || streaming) return;
+    if (!trimmed || streaming) return false;
     setStarting(true);
 
     try {
       let targetConversationId = conversationId;
       if (!targetConversationId) {
         const created = await createConversationForRun('新对话');
-        if (!created) return;
+        if (!created) return false;
         migrateConversationDraft(projectId, null, created.id);
         targetConversationId = created.id;
         onConversationChange(created.id);
       }
-      if (isConversationRunning(targetConversationId)) return;
+      if (isConversationRunning(targetConversationId)) return false;
 
       const tagged: ChatMessage[] = messagesRef.current
         .filter((m) => !m.error && !m.pending)
@@ -178,11 +183,12 @@ export function useChatStream({
           accessMode,
         },
       });
-      if (!started) return;
+      if (!started) return false;
       clearConversationDraft(projectId, conversationId);
       setInput('');
       historyNavRef.current = INITIAL_NAV_STATE;
       if (taRef.current) taRef.current.style.height = 'auto';
+      return true;
     } finally {
       setStarting(false);
     }

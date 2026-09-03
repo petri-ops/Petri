@@ -89,10 +89,24 @@ export interface ScrollTarget {
 }
 
 /**
+ * BLOCK-52 P1（选中即引用）：编辑器当前选区的只读快照。
+ * 行号为 1-based，与 ScrollTarget.line / pendingScroll 语义一致。
+ */
+export interface EditorSelectionInfo {
+  /** 选中文字原文（调用方负责截断上限）。 */
+  text: string;
+  /** 起始行（1-based）。 */
+  startLine: number;
+  /** 结束行（1-based，含端点）。 */
+  endLine: number;
+}
+
+/**
  * CodeMirror EditorView 的命令面（P0 + P1）。
  *
  * P0：getValue / setValue / destroy
  * P1：setMode / setDiffRevision / scrollToLine / getDiffRevision / getMode
+ * BLOCK-52 P1：getSelection
  *
  * BLOCK-43：通用 accept/reject EditorApi（acceptHunk/rejectHunk/acceptAll/
  * rejectAll/getHunk/dismissHunk）已随 BLOCK-22 通用 widget 链路退休；
@@ -105,6 +119,8 @@ export interface EditorApi {
   setValue(value: string): void;
   /** 卸载时调用。 */
   destroy(): void;
+  /** BLOCK-52 P1：读出当前非空选区（空选区返回 null）。 */
+  getSelection(): EditorSelectionInfo | null;
   /** 切换 EditorMode（normal ↔ inline-diff）。P1 落地。 */
   setMode(mode: EditorMode): void;
   /** 当前 mode。P1 落地。 */

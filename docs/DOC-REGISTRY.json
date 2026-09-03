@@ -3359,7 +3359,7 @@
       "id": "BLOCK-52-SELECT-TO-CHAT",
       "path": "docs/block-52-select-to-chat-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "active",
       "canonical": true,
       "truthDomain": "block-52-select-to-chat",
       "entrypoint": "docs/README.md",
@@ -3372,10 +3372,10 @@
         "ux",
         "G0"
       ],
-      "notes": "2026-09-03 planned 登记（用户裁决立项）：选中即引用→对话微调闭环——P1 文字选中引用（selection→composer 引用块，纯前端 0 新 IPC）；P2 图片/artifact 引用（图+job/revision 元数据卡进 composer，只读归属查询）；P3 微调闭环（contextToken 绑定→result_changeset_create_in_context 改参重跑出新 Revision，生信旗舰第一块体验拼图）。复用 6 项既有资产（chat-file-references/attachments/pendingScrollContext/result_studio_context/read_image/P4R Composer 链）。战略对齐：观察期裁决下底座与旗舰两方向均不浪费。排队 BLOCK-51 之后。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-09-03 active 启动（用户裁决「继续」，BLOCK-51 收口 c118e201 释放槽位）：P1 文字选中引用先行（selection→composer 引用块，纯前端 0 新 IPC，chat-file-references 扩展 selection 级 + SimpleChat composer 引用条 UI）。原 planned 登记内容：P1 文字选中引用；P2 图片/artifact 引用（图+job/revision 元数据卡，只读归属查询）；P3 微调闭环（contextToken 绑定→result_changeset_create_in_context 改参重跑出新 Revision）。复用 6 项既有资产（chat-file-references/attachments/pendingScrollContext/result_studio_context/read_image/P4R Composer 链）。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-03",
       "archivePolicy": "archive_when_superseded",
-      "phase": "PLANNED"
+      "phase": "P1-IN-PROGRESS"
     },
     {
       "id": "BLOCK-53-PROJECT-CREATION-UX",

@@ -126,6 +126,19 @@ export function useCodeMirrorEditor(
           // inline-diff 模式下 doc 由 unifiedMergeView 管理，但 getValue 仍返回当前 doc
           return v.state.doc.toString();
         },
+        // BLOCK-52 P1（选中即引用）：读出非空选区；行号 1-based（lineAt().number）
+        getSelection: () => {
+          const v = ensureView();
+          if (!v) return null;
+          const { state } = v;
+          const range = state.selection.main;
+          if (range.from === range.to) return null;
+          return {
+            text: state.sliceDoc(range.from, range.to),
+            startLine: state.doc.lineAt(range.from).number,
+            endLine: state.doc.lineAt(range.to).number,
+          };
+        },
         setValue: (next: string): void => {
           const v = ensureView();
           if (!v) return;

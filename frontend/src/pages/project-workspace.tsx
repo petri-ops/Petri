@@ -51,7 +51,7 @@ import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import type { CopilotContext, HarnessContextSummary } from '@/lib/copilotContext';
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
 import { usePendingScroll } from '@/lib/pendingScrollContext';
-import type { DiffRevision } from '@/components/editor/CodeMirror/types';
+import type { DiffRevision, EditorApi } from '@/components/editor/CodeMirror/types';
 // BLOCK-42 — pending-scroll 消费侧挂载（UI-194）：预览编辑器切 CodeMirror
 import { WorkspaceFilePreviewBridge } from '@/components/editor';
 import { getBrowserViewportSize, isBioF3LocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
@@ -2484,6 +2484,57 @@ function WorkspaceFilePreview({
   const [textSaved, setTextSaved] = useState<string>('');
   // BLOCK-21 — Markdown view toggle: 'edit' | 'preview'; resets on file switch
   const [mdView, setMdView] = useState<'edit' | 'preview'>('preview');
+  // BLOCK-52 P1（选中即引用）：编辑器命令面 + 预览容器内选中状态跟踪。
+  const editorApiRef = useRef<EditorApi | null>(null);
+  const previewBodyRef = useRef<HTMLDivElement | null>(null);
+  const [hasPreviewSelection, setHasPreviewSelection] = useState(false);
+
+  useEffect(() => {
+    const onSelectionChange = () => {
+      const sel = window.getSelection();
+      const host = previewBodyRef.current;
+      if (!sel || sel.isCollapsed || sel.rangeCount === 0 || !host || !sel.anchorNode) {
+        setHasPreviewSelection(false);
+        return;
+      }
+      // CodeMirror 选中会同步到 DOM selection；统一按「选区在预览容器内」判定。
+      setHasPreviewSelection(host.contains(sel.anchorNode) && host.contains(sel.focusNode));
+    };
+    document.addEventListener('selectionchange', onSelectionChange);
+    return () => document.removeEventListener('selectionchange', onSelectionChange);
+  }, []);
+
+  // BLOCK-52 P1（选中即引用）：把选中文字派发给 SimpleChat composer。
+  // CodeMirror 选区优先（带行号）；Markdown 渲染视图等场景退回 DOM selection（无行号）。
+  const handleQuoteSelection = useCallback(() => {
+    if (!file) return;
+    const cmSel = editorApiRef.current?.getSelection();
+    if (cmSel && cmSel.text.trim()) {
+      dispatchBioF3Event(biof3Events.selectionQuote, {
+        projectId,
+        path: file.path,
+        name: file.name,
+        startLine: cmSel.startLine,
+        endLine: cmSel.endLine,
+        text: cmSel.text,
+      });
+      return;
+    }
+    const domSel = window.getSelection();
+    const host = previewBodyRef.current;
+    const text = domSel?.toString() ?? '';
+    if (
+      domSel && !domSel.isCollapsed && text.trim()
+      && host && domSel.anchorNode && host.contains(domSel.anchorNode)
+    ) {
+      dispatchBioF3Event(biof3Events.selectionQuote, {
+        projectId,
+        path: file.path,
+        name: file.name,
+        text,
+      });
+    }
+  }, [file, projectId]);
 
   const isImage = isImageFile(file?.name);
   const isText = isTextFile(file?.name);
@@ -2617,7 +2668,7 @@ function WorkspaceFilePreview({
   return (
     <div className={styles.workspacePreview}>
       {openError && <div className={styles.workspacePreviewError}>{openError}</div>}
-      <div className={styles.workspacePreviewBody}>
+      <div className={styles.workspacePreviewBody} ref={previewBodyRef}>
         {(isMarkdown || fallbackKind === 'text' || fallbackKind === 'json') && (
           <div className={styles.workspaceMarkdownDiffToolbar}>
             {isMarkdown && (
@@ -2641,6 +2692,17 @@ function WorkspaceFilePreview({
               </div>
             )}
             <div className={styles.workspaceMarkdownDiffActions}>
+              {/* BLOCK-52 P1（选中即引用）：选中预览文字后一键引用到对话 composer */}
+              <button
+                type="button"
+                className={styles.workspaceMarkdownSave}
+                disabled={!hasPreviewSelection}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={handleQuoteSelection}
+                title="把选中文字引用到对话"
+              >
+                引用到对话
+              </button>
               {text !== textSaved && (
                 <span className={styles.workspaceMarkdownDiffHint}>有未保存修改</span>
               )}
@@ -2794,6 +2856,7 @@ function WorkspaceFilePreview({
             readonly={false}
             className={styles.workspaceCodeEditor}
             onChange={setText}
+            editorRef={editorApiRef}
           />
         )}
         {status === 'ready' && fallbackKind === 'text' && (
@@ -2805,6 +2868,7 @@ function WorkspaceFilePreview({
             readonly={false}
             className={styles.workspaceCodeEditor}
             onChange={setText}
+            editorRef={editorApiRef}
           />
         )}
         {status === 'ready' && fallbackKind === 'json' && (
@@ -2816,6 +2880,7 @@ function WorkspaceFilePreview({
             readonly={false}
             className={styles.workspaceCodeEditor}
             onChange={setText}
+            editorRef={editorApiRef}
           />
         )}
       </div>

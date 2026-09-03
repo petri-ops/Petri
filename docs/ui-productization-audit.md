@@ -2157,6 +2157,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-280: 选中即引用——右栏预览选中文字一键进对话 composer（BLOCK-52 P1） (2026-09-03 verified)
+
+**用户需求**：BLOCK-52 选中即引用→微调闭环 P1——右侧文件预览中选中的文字可以一键添加到对话输入框，作为下一次提示词的一部分，把「定位成本归零」。
+
+**改动**（纯前端 / 0 新增 IPC / 0 新依赖）：① 事件通道 [events.ts](../frontend/src/lib/events.ts) 新增 `selectionQuote` 类型化事件（`SelectionQuoteDetail`：projectId/path/name/startLine/endLine/text）；② [CodeMirror types](../frontend/src/components/editor/CodeMirror/types.ts) 新增 `EditorSelectionInfo` + `EditorApi.getSelection()`（[useCodeMirrorEditor](../frontend/src/components/editor/CodeMirror/useCodeMirrorEditor.ts) 实现：空选区返 null，行号 1-based）；③ 生产端 [project-workspace.tsx](../frontend/src/pages/project-workspace.tsx) `WorkspaceFilePreview`：预览工具栏新增「引用到对话」按钮（selectionchange 跟踪容器内选中态控制可用性，`onMouseDown` preventDefault 防点击丢失选区；CodeMirror 选区优先带行号，Markdown 渲染视图退回 DOM selection 无行号），三个 WorkspaceFilePreviewBridge 挂 `editorRef`；④ 消费端 [SimpleChat.tsx](../frontend/src/components/copilot/SimpleChat.tsx)：selectionRefs 状态 + selectionQuote 事件订阅（仅 ownsCopilotAsk 拥有者消费 / 跨项目载荷丢弃）+ composer 引用条 chips（可删除、上限 8、同源去重）+ `sendWithRefs` 发送包装（引用正文 blockquote 前缀合并，发送成功清空、守卫拦截保留；Enter 排队同样携带引用）；⑤ 纯函数 [selectionReferences.ts](../frontend/src/components/copilot/SimpleChat/selectionReferences.ts)（8000 字符截断 / 位置标签 / 消息合成 / chip 文案），样式 [simple-chat.css](../frontend/src/components/copilot/simple-chat.css) 与附件区同一视觉语言。
+
+**门禁**：selectionReferences + WorkspaceFilePreviewBridge vitest 14/14、SimpleChat 三套件 19/19、tsc 0、docs:check 199。
+
+**实机**（2026-09-03，dev Electron CDP :9222 + Vite :3000，项目 tinkspace / README.md，证据 `acceptance/block-52/p1-live-check.json` + 截图）：5 断言全 PASS——①入口按钮渲染且初始禁用；②Markdown 渲染视图 DOM selection → chip `README.md`（无行号，符合语义）；③chip 可删除；④CM6 编辑器 CDP 原生鼠标拖选 L1-L4 → chip `README.md:L1-L4`（行号正确）；⑤真实发送 → 用户消息以 `[引用 README.md:L1-L4]` + blockquote 引文开头、模型正常复述引用内容、发送后 chip 清空。已知既有问题（范围外如实登记）：`AgentStreamDisconnected`（copilotClient.ts SSE 传输层，回复完整到达后断线报错，与本改动无关）。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-279: 审阅 diff——已删除/已消失文件结构化兜底，不再报 file not found（BLOCK-50） (2026-09-03 verified)
 
 **用户需求**：审阅面板点击已删除（D）文件行报「file not found」错误——删除文件是审阅的合法条目，不应走读取失败路径。

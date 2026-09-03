@@ -2689,6 +2689,70 @@
 }
 
 /* ============================================================
+   BLOCK-52 P1 — 选中即引用条（selection quote chips）
+   与附件区（sc-attachments）同一视觉语言：同容器/边框/字号
+   ============================================================ */
+
+.sc-selection-refs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px 4px;
+  border-top: 1px solid var(--biof3-border);
+  background: color-mix(in srgb, var(--biof3-bg-subtle) 50%, transparent);
+}
+
+.sc-selection-ref {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 340px;
+  padding: 4px 6px 4px 8px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 8px;
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text-secondary);
+}
+
+.sc-selection-ref-loc {
+  flex-shrink: 0;
+  font-size: var(--biof3-font-size-sm);
+  font-family: var(--biof3-font-mono, monospace);
+  color: var(--biof3-text-secondary);
+}
+
+.sc-selection-ref-text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--biof3-font-size-sm);
+  color: var(--biof3-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sc-selection-ref-remove {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--biof3-text-muted);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.sc-selection-ref-remove:hover {
+  background: var(--biof3-status-error-bg, rgba(239, 68, 68, 0.12));
+  color: var(--biof3-status-error-fg, #ef4444);
+}
+
+/* ============================================================
    Image Preview Modal
    ============================================================ */
 

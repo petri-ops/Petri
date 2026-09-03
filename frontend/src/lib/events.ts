@@ -80,6 +80,14 @@ export const biof3Events = {
    * 并开始轮询该进程日志。
    */
   agentBackgroundProcess: 'biof3:agent-background-process',
+
+  /**
+   * BLOCK-52 P1（选中即引用）：用户在右侧文件预览（CodeMirror 编辑器或
+   * Markdown 渲染视图）中选中文字并点击「引用到对话」时由 WorkspaceFilePreview
+   * 派发；SimpleChat（中央会话 ownsCopilotAsk 拥有者）订阅后在 composer
+   * 生成引用块，随下一条消息发送。
+   */
+  selectionQuote: 'biof3:selection-quote',
 } as const;
 
 export interface ConversationForkedDetail {
@@ -208,12 +216,32 @@ export type BioF3EventMap = {
   [biof3Events.tokenBudget]: TokenBudgetDetail;
   [biof3Events.reviewOpenFile]: ReviewOpenFileDetail;
   [biof3Events.agentBackgroundProcess]: AgentBackgroundProcessDetail;
+  [biof3Events.selectionQuote]: SelectionQuoteDetail;
 };
 
 /** BLOCK-34 P3: 后台进程启动事件载荷。 */
 export interface AgentBackgroundProcessDetail {
   processId: string;
   conversationId?: string;
+}
+
+/**
+ * BLOCK-52 P1（选中即引用）：`selectionQuote` 事件载荷。
+ * 由 WorkspaceFilePreview 在用户点击「引用到对话」时派发。
+ */
+export interface SelectionQuoteDetail {
+  /** 所属项目 ID（SimpleChat 据此过滤跨项目引用）；可为空（无项目上下文）。 */
+  projectId?: string;
+  /** 被引用文件的 workspace 相对路径。 */
+  path: string;
+  /** 文件名（chip 显示用），缺省时由 path 尾段推导。 */
+  name?: string;
+  /** 起始行（1-based；CodeMirror 编辑器内选中时提供，Markdown 渲染视图无行号）。 */
+  startLine?: number;
+  /** 结束行（1-based，含端点）。 */
+  endLine?: number;
+  /** 选中文字原文（已在生产侧截断到上限）。 */
+  text: string;
 }
 
 /** BLOCK-28.7: 打开审阅并选中指定文件的载荷。 */

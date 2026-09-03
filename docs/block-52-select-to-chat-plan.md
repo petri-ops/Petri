@@ -78,6 +78,20 @@
 
 + 新 UI 编号按台账纪律同提交登记
 
+### P1 实施落点（2026-09-03 verified）
+
++ 事件通道：`frontend/src/lib/events.ts` `selectionQuote`（SelectionQuoteDetail：projectId/path/name/startLine/endLine/text）
+
++ 编辑器命令面：CodeMirror `types.ts` `EditorSelectionInfo` + `EditorApi.getSelection()`（`useCodeMirrorEditor.ts` 实现，空选区返 null）
+
++ 生产端：`project-workspace.tsx` WorkspaceFilePreview 工具栏「引用到对话」按钮——selectionchange 跟踪容器内选中态控制可用性、onMouseDown preventDefault 防点击丢选区、CM 选区优先带行号 / Markdown 渲染视图退回 DOM selection（无行号）；三个 WorkspaceFilePreviewBridge 挂 editorRef
+
++ 消费端：`SimpleChat.tsx` selectionRefs 状态 + 事件订阅（ownsCopilotAsk 拥有者 / 跨项目丢弃）+ composer 引用条 chips（可删除 / 上限 8 / 同源去重）+ `sendWithRefs`（blockquote 前缀合并，成功清空 / 守卫拦截保留，Enter 排队同携带）+ `simple-chat.css` 引用条样式（与附件区同一视觉语言）
+
++ 纯函数：`SimpleChat/selectionReferences.ts`（8000 字符截断 / 位置标签 / 消息合成 / chip 文案）+ `selectionReferences.test.ts` 6 用例
+
++ 台账：UI-280（verified）；证据：`acceptance/block-52/p1-live-check.json` + `p1-send-with-reference.png`
+
 ## 4. 非范围
 
 + 视觉框选截图（box-select 区域截图引用）——留候选
@@ -102,4 +116,8 @@
 ## 6. 进度记录
 
 + 2026-09-03 P0（planned 登记）：用户裁决立项；方案源自「选中→引用→微调」交互讨论（产品体验观察 × 生信微调场景）；资产盘点确认复用率极高（6 项已有资产，缺交互 chrome 与胶水）；本计划落盘并注册 DOC-REGISTRY；排队于 BLOCK-51 之后，启动由用户裁决。
+
++ 2026-09-03 P0（active 启动）：BLOCK-51 收口（c118e201）释放 active 槽位，用户裁决「继续」启动本包；P1 文字选中引用先行（纯前端 0 新 IPC）；DOC-REGISTRY / roadmap / AUDIT-LOG 同步 active。
+
++ 2026-09-03 P1 收口（verified）：实现全链路（事件通道 / CM getSelection / 预览工具栏按钮 / SimpleChat 引用条 + sendWithRefs）；门禁 vitest 33/33 + tsc 0 + docs:check 199 + ui:audit:check；dev Electron 实机 5 断言全 PASS（含真实鼠标拖选带行号 + 真实发送模型复述引用内容），证据 `acceptance/block-52/`；台账 UI-280 verified。范围外既有缺陷如实登记：AgentStreamDisconnected（copilotClient.ts SSE 传输层，回复完整到达后断线，与本改动无关，候选另立增量）。下一步：P2 图片/结果图引用。
 

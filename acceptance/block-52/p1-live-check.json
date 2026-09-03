@@ -1,0 +1,42 @@
+{
+  "block": "BLOCK-52 P1 文字选中引用",
+  "ui": "UI-280",
+  "date": "2026-09-03",
+  "env": "dev Electron (CDP :9222, Vite :3000), project p_mthvakv3_fffw (tinkspace), README.md",
+  "assertions": [
+    {
+      "step": "A-入口渲染",
+      "action": "经 projectOpenWorkspaceFile 事件打开 README.md（Markdown 预览视图）",
+      "expect": "预览工具栏出现「引用到对话」按钮且初始禁用（无选区）",
+      "result": "PASS — quoteBtn: true, quoteDisabled: true"
+    },
+    {
+      "step": "A-Markdown 渲染视图 DOM selection 路径",
+      "action": "在 workspaceMarkdownPreview 内用 Range+Selection API 选中 ASCII 树文本",
+      "expect": "selectionchange 后按钮 enable；点击后 SimpleChat composer 出现 chip（无行号）",
+      "result": "PASS — chip { loc: 'README.md', text: '「ThinkSpace/ ├── packages…」' }"
+    },
+    {
+      "step": "A-chip 删除",
+      "action": "点击 chip 的移除按钮",
+      "expect": "chip 消失",
+      "result": "PASS — chipCount 0"
+    },
+    {
+      "step": "B-CodeMirror 编辑器路径（真实鼠标拖选）",
+      "action": "切「编辑」视图挂载 CM6；CDP Input.dispatchMouseEvent 从 L1 拖选到 L4",
+      "expect": "按钮 enable；点击后 chip 带行号",
+      "result": "PASS — chip { loc: 'README.md:L1-L4', text: '「# ThinkSpace 可嵌入的空间化数据可视…」' }"
+    },
+    {
+      "step": "C-发送链路",
+      "action": "composer 输入测试文本后点击发送按钮（真实发送，模型回复）",
+      "expect": "用户消息含 blockquote 引用正文；发送成功后 chip 清空",
+      "result": "PASS — msg 以 '[引用 README.md:L1-L4]' 开头含 > blockquote 引文与用户文本；chipCountAfterSend: 0；模型正常回复「收到，已成功接收到你的引用测试消息」"
+    }
+  ],
+  "screenshots": ["p1-send-with-reference.png"],
+  "known_issues_not_in_scope": [
+    "AgentStreamDisconnected（任务事件流在完成前中断，copilotClient.ts subscribeAgentTaskOnce）——既有传输层问题，模型回复已完整到达后流断线报错；与本次改动无关（本包未触碰 SSE/传输层），如实登记不就地修复"
+  ]
+}

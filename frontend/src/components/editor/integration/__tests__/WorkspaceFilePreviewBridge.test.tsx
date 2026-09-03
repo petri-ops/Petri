@@ -18,7 +18,7 @@ import React from 'react';
 import { cleanup, render, act, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { DiffRevision, EditorApi, EditorMode } from '../../CodeMirror/types';
+import type { DiffRevision, EditorApi, EditorMode, EditorSelectionInfo } from '../../CodeMirror/types';
 
 // ===== Mock CodeMirrorEditor =====
 //
@@ -35,6 +35,8 @@ const mockSetValue = vi.fn();
 const mockDestroy = vi.fn();
 const mockGetMode = vi.fn((): EditorMode => 'normal');
 const mockGetDiffRevision = vi.fn((): DiffRevision | null => null);
+// BLOCK-52 P1（选中即引用）：mock EditorApi 必须补齐 getSelection 命令面
+const mockGetSelection = vi.fn((): EditorSelectionInfo | null => null);
 
 vi.mock('../../CodeMirror/CodeMirrorEditor', () => ({
   CodeMirrorEditor: React.forwardRef<EditorApi, { children?: React.ReactNode }>(
@@ -43,6 +45,7 @@ vi.mock('../../CodeMirror/CodeMirrorEditor', () => ({
         getValue: mockGetValue,
         setValue: mockSetValue,
         destroy: mockDestroy,
+        getSelection: mockGetSelection,
         setMode: mockSetMode,
         getMode: mockGetMode,
         setDiffRevision: mockSetDiffRevision,
@@ -68,6 +71,7 @@ afterEach(() => {
   mockDestroy.mockClear();
   mockGetMode.mockClear();
   mockGetDiffRevision.mockClear();
+  mockGetSelection.mockClear();
 });
 
 // ===== Helper consumer =====
