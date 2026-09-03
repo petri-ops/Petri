@@ -13,6 +13,13 @@ const fs = require('fs');
 const http = require('http');
 const os = require('os');
 const path = require('path');
+// BLOCK-45 — 启动记录持久化 + boot 清理决策（纯逻辑，可单测）。
+const {
+  readLaunchRecord,
+  writeLaunchRecord,
+  clearLaunchRecord,
+  resolveBootElectronAction,
+} = require('./lib/dev-launch-state');
 
 const isWin = process.platform === 'win32';
 const npmCmd = isWin ? 'npm.cmd' : 'npm';
@@ -36,6 +43,10 @@ let launchedElectronViaOpen = false;
 // 不再按二进制路径全杀工作区 Electron —— 否则会误杀人工 `electron . --dev`
 // 或另一 wrapper 启动的并存实例（BLOCK-34 P4 实机两次静默退出的根因）。
 const launchToken = `biof3dev-${process.pid}-${Date.now().toString(36)}`;
+// BLOCK-45：boot 清理逃生口 —— 仅显式传入时恢复旧「全杀工作区 Electron」语义，
+// 覆盖 pre-BLOCK-45 无启动记录残留实例的极端场景。
+const forceCleanElectron =
+  process.argv.includes('--force-clean-electron') || process.env.BIOF3_FORCE_CLEAN_ELECTRON === '1';
 
 function spawnChild(command, args, options = {}) {
   const { shutdownOnExit = 'error', ...spawnOptions } = options;
@@ -94,12 +105,12 @@ function getWorkspaceElectronPids() {
     .filter((pid) => Number.isInteger(pid) && pid > 0);
 }
 
-// 本 wrapper 经 `open --args ... --biof3-dev-launch-token=<token>` 启动的实例。
-// pattern 不带前导 `--`（避免被 pgrep 当选项解析）；pgrep 会把仍存活的 `open`
-// 自身也命中（其 argv 含 token），排除掉。
-function getLaunchedElectronPids() {
-  if (process.platform !== 'darwin') return [];
-  const result = spawnSync('pgrep', ['-f', `biof3-dev-launch-token=${launchToken}`], { encoding: 'utf8' });
+// token 定向 pgrep（BLOCK-45 泛化）：匹配 argv 含 `biof3-dev-launch-token=<token>`
+// 的进程。pattern 不带前导 `--`（避免被 pgrep 当选项解析）；pgrep 会把仍存活的
+// `open` 自身也命中（其 argv 含 token），排除掉。
+function getElectronPidsByToken(token) {
+  if (process.platform !== 'darwin' || !token) return [];
+  const result = spawnSync('pgrep', ['-f', `biof3-dev-launch-token=${token}`], { encoding: 'utf8' });
   if (result.status !== 0) return [];
   const childPids = new Set([...children].map((child) => child.pid));
   return result.stdout
@@ -107,6 +118,63 @@ function getLaunchedElectronPids() {
     .split(/\s+/)
     .map(Number)
     .filter((pid) => Number.isInteger(pid) && pid > 0 && !childPids.has(pid));
+}
+
+// 本 wrapper 经 `open --args ... --biof3-dev-launch-token=<token>` 启动的实例。
+function getLaunchedElectronPids() {
+  return getElectronPidsByToken(launchToken);
+}
+
+function isPidAlive(pid) {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// BLOCK-45：SIGTERM → 等待 → SIGKILL 的优雅击杀，boot 清理与 shutdown 共用。
+async function killPidsGracefully(pids, label) {
+  if (pids.length === 0) return;
+  signalPids(pids, 'SIGTERM');
+  const remaining = await waitForPidsToExit(pids, 5000);
+  if (remaining.length > 0) {
+    signalPids(remaining, 'SIGKILL');
+    const survivors = await waitForPidsToExit(remaining, 2000);
+    if (survivors.length > 0) {
+      throw new Error(`Unable to stop ${label}: ${survivors.join(', ')}`);
+    }
+  }
+}
+
+// BLOCK-45 逃生口：显式 force-clean 时恢复旧「全杀工作区 Electron 主进程」语义。
+async function stopWorkspaceElectron() {
+  const pids = getWorkspaceElectronPids();
+  if (pids.length === 0) return;
+  await killPidsGracefully(pids, 'workspace Electron processes');
+}
+
+// BLOCK-45：boot 清理 Electron 段 —— 读上一启动记录做定向决策，
+// 不再按二进制路径全杀（并存实例误杀根因，BLOCK-43 P3 实测踩中）。
+// fail-closed 决策向上抛出（中止 boot）；清理失败仅告警不阻塞端口接管。
+async function stopPreviousLaunchElectron() {
+  const record = readLaunchRecord(electronUserDataDir);
+  const tokenPids = record ? getElectronPidsByToken(record.token) : [];
+  const wrapperAlive = record
+    ? record.wrapperPid !== process.pid && isPidAlive(record.wrapperPid)
+    : false;
+  const decision = resolveBootElectronAction({
+    record,
+    wrapperAlive,
+    hasTokenPids: tokenPids.length > 0,
+    forceClean: false,
+  });
+  if (decision.action === 'fail') throw new Error(decision.message);
+  if (decision.action === 'cleanup') {
+    console.log(`[dev] cleaning up previous launch Electron (token-scoped, pids: ${tokenPids.join(', ')})`);
+    await killPidsGracefully(tokenPids, 'previous launch Electron');
+  }
 }
 
 function signalPids(pids, signal) {
@@ -160,16 +228,7 @@ async function stopWorkspaceElectron() {
 // BLOCK-35：shutdown 路径专用 —— 只停本 wrapper 启动的实例，并存实例不受影响。
 async function stopLaunchedElectron() {
   const pids = getLaunchedElectronPids();
-  if (pids.length === 0) return;
-  signalPids(pids, 'SIGTERM');
-  const remaining = await waitForPidsToExit(pids, 5000);
-  if (remaining.length > 0) {
-    signalPids(remaining, 'SIGKILL');
-    const survivors = await waitForPidsToExit(remaining, 2000);
-    if (survivors.length > 0) {
-      throw new Error(`Unable to stop launched Electron processes: ${survivors.join(', ')}`);
-    }
-  }
+  await killPidsGracefully(pids, 'launched Electron');
 }
 
 async function waitForWorkspaceElectron(timeoutMs = 15000) {
@@ -200,6 +259,14 @@ async function shutdown(code = 0) {
     } catch (error) {
       console.error(`[dev] ${error.message}`);
       code = code || 1;
+    }
+    // BLOCK-45：清掉自己的启动记录（仅当记录仍指向本 wrapper —— 若已被
+    // 后继 wrapper 覆盖则不动，避免误删他者记录）。
+    try {
+      const record = readLaunchRecord(electronUserDataDir);
+      if (record && record.token === launchToken) clearLaunchRecord(electronUserDataDir);
+    } catch {
+      // best-effort；残留记录会在下次 boot 按「wrapper 已死」路径正常清理
     }
   }
   process.exit(code);
@@ -284,11 +351,27 @@ async function stopWorkspaceDevProcesses() {
   // macOS-launched Electron is detached from our process group and survives
   // shell exits; kill it before touching the backend ports so it doesn't
   // immediately re-bind them via its child process manager.
+  //
+  // BLOCK-45：Electron 段不再按二进制路径全杀（并存实例误杀根因）——
+  //   - 显式 `--force-clean-electron` / BIOF3_FORCE_CLEAN_ELECTRON=1 →
+  //     恢复旧全杀语义（逃生口，覆盖 pre-BLOCK-45 无记录残留）；
+  //   - 默认走 token 定向：上一 wrapper 仍存活且其 token 命中 → fail-closed
+  //     抛错中止 boot（提示先停旧栈）；wrapper 已死 → token 定向清理残留；
+  //     无记录 → 跳过 Electron 段（仅端口接管）。
+  //   fail-closed 决策必须向上传播中止 boot（不得吞掉）；清理类失败仅告警。
   if (process.platform === 'darwin') {
     try {
-      await stopWorkspaceElectron();
+      if (forceCleanElectron) {
+        await stopWorkspaceElectron();
+      } else {
+        await stopPreviousLaunchElectron();
+      }
     } catch (error) {
-      console.warn(`[dev] ${error.message}`);
+      if (forceCleanElectron) {
+        console.warn(`[dev] ${error.message}`);
+      } else {
+        throw error;
+      }
     }
   }
   // Always sweep vite / biof3-server regardless of OS — these are the
@@ -366,6 +449,13 @@ async function main() {
     // binary from this workspace; never match generic Electron Helper processes.
     fs.mkdirSync(electronUserDataDir, { recursive: true });
     fs.mkdirSync(electronLocalDataDir, { recursive: true });
+    // BLOCK-45：持久化本次启动记录 —— 下次 boot 的清理只认这条记录指向的
+    // 实例（token 定向），并存实例不再被无差别击杀。
+    writeLaunchRecord(electronUserDataDir, {
+      token: launchToken,
+      wrapperPid: process.pid,
+      startedAt: new Date().toISOString(),
+    });
     fs.writeFileSync(electronLogPath, '');
     fs.writeFileSync(electronErrorLogPath, '');
     // `open` returns immediately; do NOT treat its exit as a shutdown signal.

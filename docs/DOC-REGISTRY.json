@@ -3160,6 +3160,27 @@
       "registeredAt": "2026-09-03",
       "archivePolicy": "archive_when_superseded",
       "phase": "P3-CLOSEOUT"
+    },
+    {
+      "id": "BLOCK-45-DEV-ELECTRON-STOP-COLLATERAL-FIX",
+      "path": "docs/block-45-dev-electron-stop-collateral-fix-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-45-dev-electron-stop-collateral-fix",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-45",
+        "dev-electron",
+        "boot-cleanup",
+        "token-scoped",
+        "collateral-kill",
+        "G0"
+      ],
+      "notes": "2026-09-03 立项（用户裁决）：dev-electron.js boot 清理路径 stopWorkspaceElectron() pgrep 全杀本仓库 Electron 主进程，误杀并存 dev 栈实例（BLOCK-43 P3 实测踩中）；shutdown() 退出路径已 BLOCK-35 token 定向而 boot 路径漏改，行为不对称。方案：launch token 持久化 + boot 清理 token 定向 + 并存 wrapper fail-closed 守卫 + --force-clean-electron 显式逃生口；vite/backend 端口 sweep 不变。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-09-03 收口：P1 dev-launch-state.js + dev-electron token 定向 boot 清理；P2 12/12 单测；P3 实机四场景全 PASS（E0 force-clean / S1 并存 fail-closed / S2 正常接管 / S3 崩溃残留定向清理）；P4 文档同步。",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P4-CLOSEOUT"
     }
   ],
   "lastUpdated": "2026-09-02",

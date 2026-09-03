@@ -1,0 +1,70 @@
+{
+  "workPackage": "BLOCK-45-DEV-ELECTRON-STOP-COLLATERAL-FIX",
+  "plan": "docs/block-45-dev-electron-stop-collateral-fix-plan.md",
+  "executedAt": "2026-09-03",
+  "platform": "darwin (macOS)",
+  "scope": "dev Electron boot 清理误杀并存实例修复 —— 实机四场景验证",
+  "environment": {
+    "env": "BIOF3_ELECTRON_USER_DATA_DIR=$PWD/.biof3-dev-user-data BIOF3_LOCAL_DATA_DIR=$PWD/.biof3-dev-user-data/data",
+    "initialState": ":3000 残留 vite (pid 1669)；无 token Electron；无启动记录（pre-BLOCK-45）；另发现昨晚 npx 变体无 token Electron 残留 (pid 941) 持 Chromium singleton lock",
+    "logs": ["/tmp/b45-stackA.log", "/tmp/b45-stackA2.log", "/tmp/b45-stackC.log", "/tmp/b45-stackD.log"]
+  },
+  "scenarios": [
+    {
+      "id": "E0-force-clean-escape-hatch",
+      "name": "--force-clean-electron 逃生口：全杀无 token 残留",
+      "given": "栈 A boot 后其 Electron 因老实例 (941) 持 singleton lock 静默退出；941 无 token（npx 变体，pre-BLOCK-45）",
+      "when": "npm run dev -- --force-clean-electron（栈 A2）",
+      "then": [
+        "老实例 941 被 force-clean 击杀（ps -p 941 → NO）",
+        "新 Electron main (72391) 带 token 存活",
+        "启动记录更新为 A2 wrapper (72119)"
+      ],
+      "result": "PASS"
+    },
+    {
+      "id": "S1-concurrent-fail-closed",
+      "name": "并存 wrapper fail-closed 守卫",
+      "given": "栈 A2 完整运行（Electron 72391 + vite :3000 + backend :3001）",
+      "when": "另起 wrapper B（npm run dev）",
+      "then": [
+        "B 报错退出：'BioF3 dev stack is already running (wrapper pid 72119...) Stop it first (Ctrl+C ... or: kill 72119) ... --force-clean-electron'",
+        "A2 的 Electron 72391 仍存活（旧实现此处被全杀 —— 本工作包核心回归点）",
+        "A2 后端 health OK；启动记录未被 B 覆盖"
+      ],
+      "result": "PASS"
+    },
+    {
+      "id": "S2-graceful-stop-then-takeover",
+      "name": "优雅停机 → 新 boot 正常接管",
+      "given": "栈 A2 运行中",
+      "when": "SIGTERM A2 wrapper (72119) → boot 栈 C",
+      "then": [
+        "A2 优雅退出：Electron 停止、启动记录清除",
+        "栈 C 正常启动（无 fail-closed、无 cleanup 日志——A2 已自清，符合预期）",
+        "C 的 Electron (73328) 带 token 存活；记录指向 C (73127)"
+      ],
+      "result": "PASS"
+    },
+    {
+      "id": "S3-crashed-wrapper-token-scoped-cleanup",
+      "name": "崩溃残留 → token 定向清理",
+      "given": "kill -9 wrapper C (73127) 模拟崩溃：记录残留 (73127) + Electron 残留 (73328) 存活",
+      "when": "boot 栈 D",
+      "then": [
+        "D 日志实锤：'[dev] cleaning up previous launch Electron (token-scoped, pids: 73328)'",
+        "残留 73328 被定向击杀（GONE），其余进程不受影响",
+        "D 正常启动：Electron (74102) 带 token 存活、记录更新为 D (73855)"
+      ],
+      "result": "PASS"
+    }
+  ],
+  "teardown": "SIGTERM D wrapper → Electron 停止 + 记录清除；:3000/:3001 0 listeners",
+  "liveFindings": [
+    "无 token 老实例持 .biof3-dev-user-data Chromium singleton lock 会使新 boot 的 Electron 静默退出（stderr 仅 devtools bind Address already in use，主日志空）——force-clean 逃生口即为此场景设计",
+    "kill -9 wrapper 的 vite/backend 子进程成为孤儿继续监听端口，由既有端口 sweep 接管（Electron 段修复不改变该语义）",
+    "验证中的瞬态读数（Electron 存活/记录更新）须在 boot 完全 settle 后读，早读会得到陈旧值"
+  ],
+  "unitTests": "test/scripts/dev-launch-state.test.mjs 12/12（决策三分支 + force 逃生口 + 记录读写清 roundtrip）",
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}
