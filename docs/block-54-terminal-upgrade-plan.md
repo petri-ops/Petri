@@ -1,6 +1,6 @@
 # BLOCK-54 — 终端升级：yield 中间档 + 多 Tab 用户终端
 
-> 状态：`planned`（候选，待用户裁决启动；当前 active 为 NONE，排队 BLOCK-51 之后）
+> 状态：`completed`（P0-P5 全部完成，2026-09-04 收口；P0 2026-09-03 启动，用户授权「你决定」，依 roadmap 建议序 51→52/53/54 选定）
 > 立项日期：2026-09-03（用户裁决「按这个方案立项并固化成 plan 文档」）
 > truthDomain: `block-54-terminal-upgrade`
 > 来源：codex unified exec 终端架构调研（本会话）；前置：BLOCK-51 P4 已修复终端崩溃（mainWindow 形态错配），本包不重复该修复
@@ -97,4 +97,14 @@
 ## 6. 进度记录
 
 - 2026-09-03 P0（planned 登记）：用户裁决立项；方案源自 codex unified exec 调研（yield\_time\_ms 中间档 / 64 会话上限哲学 / token 预算输出）对比 BioF3 差距（模型侧缺 yield、用户侧终端单例）；本计划落盘并注册 DOC-REGISTRY；排队 BLOCK-51 之后。
+
+- 2026-09-04 **P1 完成**：workspace\_exec 新增 `yield_ms`（默认 10000，范围 250-30000，钳制不报错）+ `max_output_tokens`（token 预算截断 + 诚实标记）；超时路径按 exec\_background 同款 record 挂入既有后台进程表（`process_status` 轮询收尾 / `process_stop` 停止），与 exec\_background 正交 0 重复设施；tool-defs schema 同步。定向 `agent-workspace-exec-yield.test.mjs` 全绿。
+
+- 2026-09-04 **P2 完成**：`terminal.js` 单例 → `Map<sessionId, proc>`（上限 4）；IPC additive（旧调用归一 `default` tab）+ 新增 `terminal:session-list`；`terminal:data/exit` 事件带 sessionId；`before-quit` kill-all。preload 终端桥 additive + electron.d.ts 同步。前端 `terminalTabs.ts`（纯函数）+ `useTerminalTabs.ts`（懒启动/事件路由/关闭即回收）+ BottomTerminal tab 条 UI；旧 `useTerminalSession` 删除。后端 [terminal-multisession-ipc.test.mjs] 6/6、前端 vitest 15/15、tsc 0。
+
+- 2026-09-04 **P3 完成**：docs:reconcile 0 / docs:check 200 / ui:audit:check PASS；UI-286 登记 `ui-productization-audit.md`。顺手修复 BLOCK-52 收口遗留：`test:changed:list` fail-closed（block52-\* 脚本未分类 + 3 个未映射本地产物）——impact-map 补 `script-block-live-drivers` 规则与 `.gitignore`（.trae/ /figures/ 根级 db）；新增测试登记 electron-runtime 规则。
+
+- 2026-09-04 **P4 完成**：模型侧实驱 `scripts/block54-yield-live.cjs`（agent 同款 tool 面直驱 + 真实子进程/真进程表）：短命令完整返回 / 长命令 1s yielded+processId / process\_status 轮询收尾含完整输出 / 超范围钳制 / token 截断标记，6/6 PASS（证据 `acceptance/block-54/model-side-yield.json`）。用户侧实机 `scripts/block54-live.cjs`（dev Electron CDP）：12 断言全 PASS（证据 `user-side-tabs.json` + 3 截图）——1 tab 懒启动 / 3 tab 独立 pty pid 互异 / cwd 绑项目 workspace / 每 tab 真实键入输出按 sessionId 路由不串 tab / 关 tab 进程回收 DOM 移除回显保留 / 退出 before-quit kill-all 0 孤儿。
+
+- 2026-09-04 **P5 收口**：UI-286 → verified；本 plan 状态 → completed；AUDIT-LOG 登记；registry/roadmap 回写。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

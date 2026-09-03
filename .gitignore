@@ -53,6 +53,8 @@ eval-reports/
 # node_modules/ and *.log are already ignored globally above; these are the
 # core-specific dev databases, caches, backups, and large demo datasets.
 core/r-server/biof3.db*
+core/biof3-server/biof3.db-shm
+core/biof3-server/biof3.db-wal
 core/r-server/.tmp/
 core/r-server/backups/
 core/py-server/pyserver.db*
@@ -70,5 +72,15 @@ resources/built-in-plugins/**/*.pyc
 
 # WorkBuddy agent 工作区记忆（本地工具产物，非项目源码）
 .workbuddy/
+
+# Trae IDE 本地文档/会话产物（机器本地，非项目源码）
+.trae/
+
+# 根级 dev SQLite（桌面主库在 core/biof3-server/biof3.db，见上方 core 条目）
+/core/biof3.db*
+
+# 实机验收探针截图等本地图形草稿（正式证据在 acceptance/ 下）
+/figures/
+
 # Local third-party source mirror used for read-only reference.
 /codex/

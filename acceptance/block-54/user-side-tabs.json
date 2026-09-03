@@ -1,0 +1,74 @@
+{
+  "startedAt": "2026-09-03T17:42:28.639Z",
+  "page": "http://localhost:3000/project/p_mtlnsv0f_xpjb?job=tj_mtlnwhd9_3gs1",
+  "projectId": "p_mtlnsv0f_xpjb",
+  "assertions": [
+    {
+      "name": "TitleBar「展开底部终端」可点击",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "面板展开后自动创建首个 tab（懒启动）",
+      "pass": true,
+      "detail": "tab bodies=1"
+    },
+    {
+      "name": "首个 tab 已拉起独立 pty（listSessions 1 会话）",
+      "pass": true,
+      "detail": "[{\"sessionId\":\"tab-1\",\"pid\":82661,\"cwd\":\"/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f\",\"running\":true}]"
+    },
+    {
+      "name": "「新建终端标签」×2 → 3 tab 并存（tab-1/2/3）",
+      "pass": true,
+      "detail": "[\"tab-1\",\"tab-2\",\"tab-3\"]"
+    },
+    {
+      "name": "3 tab 各自独立 pty（3 会话、pid 互异）",
+      "pass": true,
+      "detail": "[{\"id\":\"tab-1\",\"pid\":82661},{\"id\":\"tab-2\",\"pid\":82728},{\"id\":\"tab-3\",\"pid\":82785}]"
+    },
+    {
+      "name": "新 tab 默认 cwd 绑定项目 workspace",
+      "pass": true,
+      "detail": "cwd=/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f"
+    },
+    {
+      "name": "tab-1 输出路由正确：pwd=block52-p3-09031507-mtlnsv0f + marker-1，且不含其他 tab marker",
+      "pass": true,
+      "detail": "~/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f main* ⇡ ❯ pwd && echo b54-marker-1                                                        "
+    },
+    {
+      "name": "tab-2 输出路由正确：pwd=block52-p3-09031507-mtlnsv0f + marker-2，且不含其他 tab marker",
+      "pass": true,
+      "detail": "~/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f main* ⇡ ❯ pwd && echo b54-marker-2                                                        "
+    },
+    {
+      "name": "tab-3 输出路由正确：pwd=block52-p3-09031507-mtlnsv0f + marker-3，且不含其他 tab marker",
+      "pass": true,
+      "detail": "~/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f main* ⇡ ❯ pwd && echo b54-marker-3                                                        "
+    },
+    {
+      "name": "tab-3 × 关闭按钮可点击",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "关闭 tab-3 后会话回收（listSessions 2、无 tab-3）",
+      "pass": true,
+      "detail": "[\"tab-1\",\"tab-2\"]"
+    },
+    {
+      "name": "tab-3 DOM 移除（tab-1/2 回显保留）",
+      "pass": true,
+      "detail": "[\"tab-1\",\"tab-2\"]"
+    },
+    {
+      "name": "退出应用后 pty 全量回收（before-quit kill-all，0 孤儿）",
+      "pass": true,
+      "detail": "pids=[82661,82728]"
+    }
+  ],
+  "finishedAt": "2026-09-03T17:42:44.988Z",
+  "allPass": true
+}

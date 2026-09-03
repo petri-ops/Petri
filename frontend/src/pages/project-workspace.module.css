@@ -3422,6 +3422,150 @@ button.workspacePinnedSummaryMetricCard:hover {
   color: var(--biof3-text-terminal-strong);
 }
 
+/* BLOCK-54 P2 — terminal tab strip (multi-tab, cap 4, codex-style pills). */
+.embeddedTerminalTabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 24px;
+  padding: 2px 7px 2px 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border) 72%, transparent);
+  background: color-mix(in srgb, var(--biof3-bg-terminal) 92%, var(--biof3-bg-subtle) 8%);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.embeddedTerminalTabs::-webkit-scrollbar {
+  display: none;
+}
+
+.embeddedTerminalTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 170px;
+  padding: 0 3px 0 2px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--biof3-text-terminal-muted);
+}
+
+.embeddedTerminalTab[data-exited='true'] {
+  opacity: 0.55;
+}
+
+.embeddedTerminalTabActive {
+  border-color: color-mix(in srgb, var(--biof3-border-strong) 66%, transparent);
+  background: color-mix(in srgb, var(--biof3-hover) 70%, transparent);
+  color: var(--biof3-text-terminal-strong);
+}
+
+.embeddedTerminalTabLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 1px 4px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: var(--biof3-font-size-xs);
+  line-height: 18px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.embeddedTerminalTabLabel small {
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--biof3-text-terminal-muted);
+  font-size: var(--biof3-font-size-xs);
+  letter-spacing: 0.2px;
+}
+
+.embeddedTerminalTabDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--biof3-text-muted);
+  flex-shrink: 0;
+}
+
+.embeddedTerminalTabDot[data-running='true'] {
+  background: var(--biof3-status-online);
+}
+
+.embeddedTerminalTabClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--biof3-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.embeddedTerminalTabClose:hover {
+  background: var(--biof3-hover);
+  color: var(--biof3-text-terminal-strong);
+}
+
+.embeddedTerminalTabAdd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 19px;
+  padding: 0;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--biof3-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.embeddedTerminalTabAdd:hover {
+  background: var(--biof3-hover);
+  color: var(--biof3-text-terminal-strong);
+}
+
+.embeddedTerminalNotice {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--biof3-warning, #d97706) 14%, transparent);
+  color: var(--biof3-warning, #d97706);
+  font-size: var(--biof3-font-size-xs);
+  white-space: nowrap;
+}
+
+.embeddedTerminalBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  position: relative;
+}
+
+.embeddedTerminalHostHidden {
+  display: none;
+}
+
+.embeddedTerminalEmpty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--biof3-text-terminal-muted);
+  font-size: var(--biof3-font-size-sm);
+}
+
 /* xterm host — Codex-like dark terminal area */
 .embeddedTerminalHost {
   flex: 1;

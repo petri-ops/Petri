@@ -123,14 +123,16 @@ const WORKSPACE_TOOL_DEFS = [
     function: {
       name: 'workspace_exec',
       description:
-        '在当前项目工作区打开通用命令行。完全访问模式允许使用 shell 执行用户机器上可用的命令、脚本、管道和重定向；交互式提权、不可恢复删除、静默远端推送和远程脚本管道仍由安全边界拒绝。只读模式或用户明确要求仅检查/规划时禁止调用。科学分析正式结果仍应通过 run_tool 进入 tool_job 与 artifact truth。',
+        '在当前项目工作区打开通用命令行。完全访问模式允许使用 shell 执行用户机器上可用的命令、脚本、管道和重定向；交互式提权、不可恢复删除、静默远端推送和远程脚本管道仍由安全边界拒绝。只读模式或用户明确要求仅检查/规划时禁止调用。科学分析正式结果仍应通过 run_tool 进入 tool_job 与 artifact truth。长命令建议传 yield_ms：等到产出或超时即交还控制权，未完成时自动转入后台进程表（返回 yielded:true + processId，用 process_status 轮询收尾），避免傻等阻塞。',
       parameters: {
         type: 'object',
         properties: {
           command: { type: 'string', description: '要在项目工作目录中执行的 shell 命令，例如 "head -5 counts.csv"、"cat metadata.csv" 或 "Rscript scripts/qc.R"' },
           cwd: { type: 'string', description: '相对项目根目录的工作子目录（必须已存在）；每条命令都是独立 shell，cd 不跨调用持久，需要子目录时优先用本参数' },
           shell: { type: 'string', enum: ['auto', 'posix', 'powershell', 'cmd'], description: 'shell 选择：auto=平台默认（Windows=cmd，其他=$SHELL）；Windows 建议显式用 powershell 获得现代语法' },
-          timeoutMs: { type: 'integer', description: '超时毫秒，默认 120000，最大 1800000' },
+          timeoutMs: { type: 'integer', description: '超时毫秒，默认 120000，最大 1800000（仅同步等待模式；传了 yield_ms 时忽略）' },
+          yield_ms: { type: 'integer', description: 'BLOCK-54 yield 中间档：等到产出或本超时即返回。完成→完整结果；超时→{yielded:true, processId} 转入后台进程表（process_status 轮询 / process_stop 停止）。默认 10000，范围 250-30000。预期 >30s 的命令直接用 workspace_exec_background' },
+          max_output_tokens: { type: 'integer', description: '可选：输出 token 预算（默认 10000，封顶 50000），超出按 token 截断并标记 outputTruncatedByTokenBudget' },
         },
         required: ['command'],
       },

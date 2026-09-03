@@ -1,0 +1,38 @@
+{
+  "startedAt": "2026-09-03T17:12:26.636Z",
+  "workspace": "/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop",
+  "assertions": [
+    {
+      "name": "短命令 yield 预算内完整返回（无 yielded 标记）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"exitCode\":0}"
+    },
+    {
+      "name": "长命令 1s 处交还控制权：yielded + processId 挂后台进程表",
+      "pass": true,
+      "detail": "{\"ok\":true,\"yielded\":true,\"processId\":\"bg-mtls97s1-40652a\"}"
+    },
+    {
+      "name": "yield 后 process_status 可见该进程",
+      "pass": true,
+      "detail": "{\"processId\":\"bg-mtls97s1-40652a\",\"pid\":75936,\"status\":\"running\",\"command\":\"echo b54-yield-started && sleep 3 && echo b54-yield-done\",\"cwd\":\".\",\"shell\":\"/bin/zsh\",\"startedAtIso\":\"2026-09-03T17:12:26.7"
+    },
+    {
+      "name": "轮询收尾：命令真实退出且日志含完整输出（b54-yield-done）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"process\":{\"processId\":\"bg-mtls97s1-40652a\",\"pid\":75936,\"status\":\"running\",\"command\":\"echo b54-yield-started && sleep 3 && echo b54-yield-done\",\"cwd\":\".\",\"shell\":\"/bin/zsh\",\"startedAtIso\":\""
+    },
+    {
+      "name": "yield_ms 超范围被钳制不报错（99999999 → 30s 上限）",
+      "pass": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "输出超 token 预算被截断且诚实标记",
+      "pass": true,
+      "detail": "输出超出 max_output_tokens=100 预算，已按 token 预算截断（完整输出可改用 exec_background 落日志后 workspace_read）"
+    }
+  ],
+  "finishedAt": "2026-09-03T17:12:27.968Z",
+  "allPass": true
+}

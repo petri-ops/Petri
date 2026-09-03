@@ -279,20 +279,40 @@ declare global {
         }>;
         openLogDir: () => Promise<{ ok: boolean; path?: string; error?: string }>;
         openShell: (targetPath?: string) => Promise<{ ok: boolean; path?: string; error?: string }>;
-        startSession: (targetPath?: string) => Promise<{
+        /** BLOCK-54 P2 多 Tab：sessionId 可选（不传 = 旧单会话 default tab）。 */
+        startSession: (
+          targetPath?: string,
+          sessionId?: string
+        ) => Promise<{
           ok: boolean;
           pid?: number;
           cwd?: string;
           shell?: string;
           reused?: boolean;
+          sessionId?: string;
+          limitReached?: boolean;
           error?: string;
         }>;
-        writeSession: (input: string) => Promise<{ ok: boolean; error?: string }>;
-        resizeSession: (cols: number, rows: number) => Promise<{ ok: boolean; error?: string }>;
-        stopSession: () => Promise<{ ok: boolean; wasRunning?: boolean }>;
-        onData: (callback: (data: string) => void) => () => void;
+        writeSession: (input: string, sessionId?: string) => Promise<{ ok: boolean; error?: string }>;
+        resizeSession: (
+          cols: number,
+          rows: number,
+          sessionId?: string
+        ) => Promise<{ ok: boolean; error?: string }>;
+        stopSession: (sessionId?: string) => Promise<{ ok: boolean; wasRunning?: boolean }>;
+        listSessions: () => Promise<{
+          ok: boolean;
+          sessions?: Array<{ sessionId: string; pid: number; cwd: string; running: boolean }>;
+          maxTabs?: number;
+          error?: string;
+        }>;
+        onData: (callback: (payload: { sessionId: string; data: string }) => void) => () => void;
         onExit: (
-          callback: (data: { code?: number | null; signal?: string | null }) => void
+          callback: (payload: {
+            sessionId: string;
+            code?: number | null;
+            signal?: string | null;
+          }) => void
         ) => () => void;
       };
       updater: {

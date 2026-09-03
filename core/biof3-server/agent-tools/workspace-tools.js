@@ -54,6 +54,16 @@ const MAX_COMMAND_OUTPUT_BYTES = 1024 * 1024;
 const DEFAULT_COMMAND_TIMEOUT_MS = 120000;
 const MAX_COMMAND_TIMEOUT_MS = 30 * 60 * 1000;
 
+// BLOCK-54 P1 — workspace_exec yield 中间档（对齐 codex yield_time_ms）：
+// 提供了 yield_ms 才启用（不传保持既有同步语义，向后兼容）；等到产出或超时即
+// 交还控制权，超时未完成的命令挂入既有后台进程表（与 exec_background 共用
+// process_status/process_stop，0 重复设施）。输出另受 token 级预算截断。
+const DEFAULT_YIELD_MS = 10000;
+const MIN_YIELD_MS = 250;
+const MAX_YIELD_MS = 30000;
+const DEFAULT_MAX_OUTPUT_TOKENS = 10000;
+const MAX_OUTPUT_TOKENS_CAP = 50000;
+
 function sha256(content) {
   return crypto.createHash('sha256').update(content).digest('hex');
 }
@@ -1093,6 +1103,17 @@ function createWorkspaceTools(options = {}) {
     const command = String(args.command || '').trim();
     const verdict = commandVerdict(command);
     if (!verdict.ok) return errorResult('command_blocked', verdict.reason);
+    // BLOCK-54 P1 — yield 中间档分流：显式传 yield_ms（>0）才启用；不传 = 既有同步语义
+    if (args.yield_ms != null && Number(args.yield_ms) > 0) {
+      const yieldMs = clampInteger(args.yield_ms, DEFAULT_YIELD_MS, MIN_YIELD_MS, MAX_YIELD_MS);
+      const maxOutputTokens = clampInteger(
+        args.max_output_tokens,
+        DEFAULT_MAX_OUTPUT_TOKENS,
+        100,
+        MAX_OUTPUT_TOKENS_CAP
+      );
+      return executeCommandWithYield(args, ctx, yieldMs, maxOutputTokens);
+    }
     const shellPreference = String(args.shell || 'auto').toLowerCase();
     return withWorkspace(ctx, async ({ root }) => {
       // BLOCK-33 P2 — cwd 参数：相对工作区根，过沙箱校验（逃逸/符号链接拒绝）
@@ -1157,6 +1178,209 @@ function createWorkspaceTools(options = {}) {
         truncated: spawnResult.truncated,
       };
     }, { requireCompatible: true });
+  }
+
+  // BLOCK-54 P1 — workspace_exec yield 中间档：命令启动后等到产出或 yield_ms 超时。
+  // 完成路径返回与同步 workspace_exec 相同形状（另加 token 预算截断标记）；
+  // 超时路径把仍存活的子进程按 exec_background 同款 record 挂入 backgroundProcesses
+  // （process_status 轮询日志尾部 / process_stop 停止），返回 { yielded: true, processId }。
+  async function executeCommandWithYield(args, ctx, yieldMs, maxOutputTokens) {
+    const command = String(args.command || '').trim();
+    const shellPreference = String(args.shell || 'auto').toLowerCase();
+    return withWorkspace(ctx, async ({ root }) => {
+      let cwdRoot = root;
+      let cwdLabel = '.';
+      if (args.cwd != null && String(args.cwd).trim() !== '' && String(args.cwd).trim() !== '.') {
+        try {
+          const resolvedCwd = await resolveWorkspaceTarget(root, String(args.cwd).trim(), {
+            createRoot: false,
+          });
+          const cwdStat = await fsp.stat(resolvedCwd.target).catch(() => null);
+          if (!cwdStat || !cwdStat.isDirectory()) {
+            return errorResult('invalid_arguments', `cwd 不是工作区内已存在的目录: ${resolvedCwd.relativePath}`);
+          }
+          cwdRoot = resolvedCwd.target;
+          cwdLabel = resolvedCwd.relativePath;
+        } catch (error) {
+          return errorResult(
+            error && error.code ? error.code : 'invalid_arguments',
+            (error && error.message) || 'cwd 校验失败'
+          );
+        }
+      }
+      const invocation = shellInvocation(command, shellPreference);
+      if (invocation.error) return errorResult('invalid_arguments', invocation.error);
+
+      const sessionKey = backgroundSessionKey(ctx);
+      let runningCount = 0;
+      for (const record of backgroundProcesses.values()) {
+        if (record.sessionKey === sessionKey && record.status === 'running') runningCount += 1;
+      }
+      if (runningCount >= BACKGROUND_MAX_RUNNING_PER_SESSION) {
+        return errorResult(
+          'resource_limit',
+          `本会话后台进程已达上限 ${BACKGROUND_MAX_RUNNING_PER_SESSION}，请先用 process_stop 释放`
+        );
+      }
+
+      const processId = `bg-${Date.now().toString(36)}-${crypto.randomBytes(3).toString('hex')}`;
+      const logRelativePath = `${BACKGROUND_LOG_DIR}/${processId}.log`;
+      const logPath = path.join(root, BACKGROUND_LOG_DIR, `${processId}.log`);
+      await fsp.mkdir(path.dirname(logPath), { recursive: true });
+      const logFd = await fsp.open(logPath, 'a');
+      let child;
+      try {
+        child = spawn(invocation.executable, invocation.args, {
+          cwd: cwdRoot,
+          detached: process.platform !== 'win32',
+          stdio: ['ignore', 'pipe', 'pipe'],
+          windowsHide: true,
+        });
+      } catch (error) {
+        await logFd.close().catch(() => {});
+        return errorResult('invalid_arguments', (error && error.message) || '命令启动失败');
+      }
+
+      const startedAt = Date.now();
+      const stdoutChunks = [];
+      const stderrChunks = [];
+      let collected = 0;
+      const appendLog = (chunk) => {
+        logFd.write(chunk).catch(() => {});
+      };
+      child.stdout.on('data', (chunk) => {
+        appendLog(chunk);
+        if (collected < MAX_COMMAND_OUTPUT_BYTES) {
+          stdoutChunks.push(chunk);
+          collected += chunk.length;
+        }
+      });
+      child.stderr.on('data', (chunk) => {
+        appendLog(chunk);
+        if (collected < MAX_COMMAND_OUTPUT_BYTES) {
+          stderrChunks.push(chunk);
+          collected += chunk.length;
+        }
+      });
+
+      const outcome = await new Promise((resolve) => {
+        let settled = false;
+        child.on('close', (code, signal) => {
+          if (!settled) {
+            settled = true;
+            resolve({ exited: true, code, signal });
+          }
+        });
+        child.on('error', (error) => {
+          if (!settled) {
+            settled = true;
+            resolve({ exited: true, code: 1, signal: null, spawnError: (error && error.message) || '进程异常' });
+          }
+        });
+        setTimeout(() => {
+          if (!settled) {
+            settled = true;
+            resolve({ exited: false });
+          }
+        }, yieldMs);
+      });
+
+      if (outcome.exited) {
+        // 完成路径：等数据 flush 后关日志，Buffer 返回（形状对齐同步路径）
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        logFd.close().catch(() => {});
+        const stdoutRaw = Buffer.concat(stdoutChunks).toString('utf-8');
+        const stderrRaw = Buffer.concat(stderrChunks).toString('utf-8');
+        const durationMs = Date.now() - startedAt;
+        const stdoutBudgeted = applyOutputTokenBudget(stdoutRaw, maxOutputTokens);
+        const stderrBudgeted = applyOutputTokenBudget(stderrRaw, maxOutputTokens);
+        const result = {
+          ok: !outcome.spawnError && outcome.code === 0,
+          command,
+          cwd: cwdLabel,
+          shell: invocation.executable,
+          exitCode: Number.isInteger(outcome.code) ? outcome.code : 1,
+          signal: outcome.signal || null,
+          timedOut: false,
+          durationMs,
+          stdout: stdoutBudgeted.text,
+          stderr: outcome.spawnError ? `${stderrRaw}${stderrRaw ? '\n' : ''}${outcome.spawnError}` : stderrBudgeted.text,
+          truncated: collected >= MAX_COMMAND_OUTPUT_BYTES,
+        };
+        if (stdoutBudgeted.truncated || stderrBudgeted.truncated) {
+          result.outputTruncatedByTokenBudget = true;
+          result.note = `输出超出 max_output_tokens=${maxOutputTokens} 预算，已按 token 预算截断（完整输出可改用 exec_background 落日志后 workspace_read）`;
+        }
+        return result;
+      }
+
+      // 超时路径：按 exec_background 同款 record 挂入进程表（日志 fd 保持打开，
+      // onData 持续落盘；process_status 读日志尾部 / process_stop 走既有信号链）
+      const record = {
+        id: processId,
+        sessionKey,
+        projectId: ctx.projectId || null,
+        userId: ctx.userId || null,
+        command,
+        cwd: cwdLabel,
+        shell: invocation.executable,
+        pid: child.pid,
+        child,
+        detachedGroup: process.platform !== 'win32',
+        viaYield: true,
+        yieldMs,
+        logPath,
+        logRelativePath,
+        startedAt,
+        endedAt: null,
+        status: 'running',
+        exitCode: null,
+        signal: null,
+        stoppedByUser: false,
+        spawnError: null,
+      };
+      child.on('close', (code, signal) => {
+        record.status = record.stoppedByUser ? 'stopped' : 'exited';
+        record.exitCode = Number.isInteger(code) ? code : null;
+        record.signal = signal || null;
+        record.endedAt = Date.now();
+        logFd.close().catch(() => {});
+      });
+      child.on('error', (error) => {
+        record.status = 'failed';
+        record.spawnError = (error && error.message) || '进程异常退出';
+        record.endedAt = Date.now();
+      });
+      child.unref();
+      backgroundProcesses.set(processId, record);
+      pruneBackgroundRecords();
+      return {
+        ok: true,
+        yielded: true,
+        processId,
+        pid: record.pid,
+        command,
+        cwd: cwdLabel,
+        shell: invocation.executable,
+        yieldMs,
+        logPath: logRelativePath,
+        stdoutPreview: applyOutputTokenBudget(Buffer.concat(stdoutChunks).toString('utf-8'), maxOutputTokens).text,
+        note: `${yieldMs}ms 内未完成：已转入后台进程表（输出持续写入日志）。process_status 轮询收尾，process_stop 停止。`,
+      };
+    }, { requireCompatible: true });
+  }
+
+  // BLOCK-54 P1 — token 级输出预算截断（tiktoken countTokens，fallback chars/4）
+  function applyOutputTokenBudget(text, budget) {
+    if (!text) return { text: '', truncated: false };
+    const { countTokens } = require('../helpers/token-estimator');
+    const tokens = countTokens(text);
+    if (tokens <= budget) return { text, truncated: false };
+    let cut = text.slice(0, Math.max(Math.floor((text.length * budget) / tokens) - 64, 1));
+    while (cut.length > 1 && countTokens(cut) > budget) {
+      cut = cut.slice(0, Math.floor(cut.length * 0.9));
+    }
+    return { text: cut, truncated: true };
   }
 
   // BLOCK-33 P4 — 后台启动长任务：黑名单/accessMode/沙箱与 workspace_exec 相同，

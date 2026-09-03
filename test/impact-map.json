@@ -387,7 +387,8 @@
         "test/platform-compat.test.mjs",
         "test/migration-runner.test.mjs",
         "test/backend-health.test.mjs",
-        "test/credential-store.test.mjs"
+        "test/credential-store.test.mjs",
+        "test/terminal-multisession-ipc.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -435,6 +436,7 @@
     {
       "id": "script-provision",
       "patterns": [
+        "scripts/install-r-tool-dependencies.mjs",
         "scripts/provision-*.mjs",
         "scripts/upload-*.mjs"
       ],
@@ -548,8 +550,9 @@
         "scripts/dev-*.js",
         "scripts/dev-*.mjs",
         "scripts/dev-*.sh",
-        "scripts/qa-smoke.mjs",
-        "scripts/golden-path.mjs"
+        "scripts/golden-path.mjs",
+        "scripts/lib/dev-launch-state.js",
+        "scripts/qa-smoke.mjs"
       ],
       "tests": [
         "test/qa-smoke.test.mjs",
@@ -1042,6 +1045,24 @@
         "test/test-affected.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "script-block-live-drivers",
+      "note": "BLOCK 实机 CDP 驱动与探针（acceptance/block-N 证据采集），一次性证据脚本按 development-smoke 分类。",
+      "patterns": [
+        "acceptance/block-52/**",
+        "acceptance/block-53/**",
+        "acceptance/block-54/**",
+        "scripts/block52-*.cjs",
+        "scripts/block52-*.mjs",
+        "scripts/block54-*.cjs",
+        "scripts/block54-*.mjs"
+      ],
+      "tests": [
+        "test/test-affected.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
     }
   ]
 }

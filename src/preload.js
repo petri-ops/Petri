@@ -236,23 +236,37 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     openDir: () => ipcRenderer.invoke('data:open-dir'),
   },
 
-  // 右侧工具栏
+  // 右侧工具栏。BLOCK-54 P2 多 Tab：session 形通道全量 additive——
+  // 可选 sessionId 形参（不传 = 旧单会话 default tab，主进程归一兼容）；
+  // terminal:data / terminal:exit 事件 payload 为 { sessionId, ... }（渲染端按 tab 路由）。
   terminal: {
     snapshot: () => ipcRenderer.invoke('terminal:snapshot'),
     openLogDir: () => ipcRenderer.invoke('terminal:open-log-dir'),
     openShell: (targetPath) => ipcRenderer.invoke('terminal:open-shell', targetPath),
-    startSession: (targetPath) => ipcRenderer.invoke('terminal:session-start', targetPath),
-    writeSession: (input) => ipcRenderer.invoke('terminal:session-write', input),
-    resizeSession: (cols, rows) =>
-      ipcRenderer.invoke('terminal:session-resize', { cols, rows }),
-    stopSession: () => ipcRenderer.invoke('terminal:session-stop'),
+    startSession: (targetPath, sessionId) =>
+      ipcRenderer.invoke(
+        'terminal:session-start',
+        sessionId ? { sessionId, targetPath } : targetPath
+      ),
+    writeSession: (input, sessionId) =>
+      ipcRenderer.invoke(
+        'terminal:session-write',
+        sessionId ? { sessionId, text: input } : input
+      ),
+    resizeSession: (cols, rows, sessionId) =>
+      ipcRenderer.invoke(
+        'terminal:session-resize',
+        sessionId ? { cols, rows, sessionId } : { cols, rows }
+      ),
+    stopSession: (sessionId) => ipcRenderer.invoke('terminal:session-stop', sessionId),
+    listSessions: () => ipcRenderer.invoke('terminal:session-list'),
     onData: (callback) => {
-      const handler = (_event, data) => callback(data);
+      const handler = (_event, payload) => callback(payload);
       ipcRenderer.on('terminal:data', handler);
       return () => ipcRenderer.removeListener('terminal:data', handler);
     },
     onExit: (callback) => {
-      const handler = (_event, data) => callback(data);
+      const handler = (_event, payload) => callback(payload);
       ipcRenderer.on('terminal:exit', handler);
       return () => ipcRenderer.removeListener('terminal:exit', handler);
     },

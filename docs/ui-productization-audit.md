@@ -2157,6 +2157,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-286: 底部终端多 Tab——独立 pty 会话 + tab 条管理（BLOCK-54 P2） (2026-09-04 verified)
+
+**用户需求**：BLOCK-54 P2 用户侧——底部终端从单例会话升级为多 Tab（一个跑 dev server、一个进 R 环境）；上限 4 对齐 codex 64 上限哲学取 GUI 小值；每 tab 独立 cwd（默认当前项目 workspace）。
+
+**改动**：① 主进程 [terminal.js](../src/ipc/terminal.js) 单例 `shellProc` → `Map<sessionId, proc>`（上限 `MAX_TERMINAL_TABS=4`）；IPC 全量 additive 兼容（旧调用不带 sessionId = `default` tab，单会话语义不变）；新增 `terminal:session-list`；`terminal:data`/`terminal:exit` payload 带 `sessionId` 供 renderer 按 tab 路由；`before-quit` 遍历 Map 全量 kill（对齐 codex `terminate_all_processes`）；② [preload.js](../src/preload.js) 终端桥 additive（`startSession/writeSession/resizeSession/stopSession` 增 `sessionId` 形参 + `listSessions`）+ [electron.d.ts](../frontend/src/lib/electron.d.ts) 类型同步；③ 前端新 [terminalTabs.ts](../frontend/src/hooks/terminalTabs.ts)（纯函数 tab 增删/上限）+ [useTerminalTabs.ts](../frontend/src/hooks/useTerminalTabs.ts)（每 tab 独立 xterm 实例 + 懒启动：面板展开 && tab 首次激活才起 pty；事件按 sessionId 路由；关闭即 stop+dispose；卸载全量回收）；④ [BottomTerminal.tsx](../frontend/src/components/workspace-panels/BottomTerminal.tsx) tab 条 UI（+ 新建 / × 关闭 / 点击切换 / 运行状态点 / 上限提示条）+ [project-workspace.module.css](../frontend/src/pages/project-workspace.module.css) 样式；旧 [useTerminalSession.ts](../frontend/src/hooks/) 删除（被多 tab hook 取代）。
+
+**门禁**：后端 [terminal-multisession-ipc.test.mjs](../test/terminal-multisession-ipc.test.mjs) 6/6（多会话并存+路由 / 事件带 sessionId+exit 移除 / 上限拒绝+腾位复开 / 旧形态 default 兼容 / before-quit kill-all / pty spawn 规格）；前端 terminalTabs + useTerminalTabs vitest 15/15、tsc 0；agent-workspace-exec-yield + platform-compat 回归 19/19；docs:check 200。
+
+**实机**（2026-09-04，dev Electron CDP :9222，证据 `acceptance/block-54/user-side-tabs.json` 12 断言全 PASS + p4-01/02/03 三张截图）：TitleBar 展开底部终端 → 首个 tab 自动懒启动（listSessions 1 会话）→「新建终端标签」×2 → 3 tab 并存、3 个独立 pty（pid 互异）且 cwd 同绑项目 workspace → 每 tab 真实键入 `pwd && echo b54-marker-N` → 输出各正确路由到对应 xterm（pwd 输出 = 项目 workspace，marker 不串 tab）→ 关闭「终端 3」× → listSessions 回收为 2 会话、DOM tab-3 移除、tab-1/2 回显保留 → `window.close()` 退出应用 → before-quit 全量 kill，剩余 2 个 pty pid 双双消失（0 孤儿）。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-285: 结果图引用→自然语言微调→改参重跑闭环（BLOCK-52 P3） (2026-09-03 verified)
 
 **用户需求**：BLOCK-52 旗舰闭环——对 Result Studio 结果图说一句自然语言（如「把点大小调大」），agent 走 artifact 血统链改参重跑出新 Revision，而不是视觉猜谜。

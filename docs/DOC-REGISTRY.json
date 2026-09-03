@@ -3402,7 +3402,7 @@
       "id": "BLOCK-54-TERMINAL-UPGRADE",
       "path": "docs/block-54-terminal-upgrade-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-54-terminal-upgrade",
       "entrypoint": "docs/README.md",
@@ -3415,10 +3415,10 @@
         "node-pty",
         "G0"
       ],
-      "notes": "2026-09-03 planned 登记（用户裁决立项）：终端升级（源自 codex unified exec 调研）——P1 模型侧 workspace_exec 加 yield_ms（默认 10s 范围 250ms-30s，超时返回 handle 进既有后台进程表，与 exec_background 正交）+ token 预算输出截断；P2 用户侧底部终端多 Tab（上限 4，shellProc 单例→Map，IPC additive sessionId 兼容旧调用，退出全量 kill 对齐 terminate_all_processes）。前置：BLOCK-51 P4 已修终端崩溃。0 新依赖。排队 BLOCK-51 之后。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-09-03 planned 登记（用户裁决立项）：终端升级（源自 codex unified exec 调研）；2026-09-04 P0-P5 completed——P1 workspace_exec yield_ms 中间档 + max_output_tokens token 截断（实驱 6/6，acceptance/block-54/model-side-yield.json）+ P2 底部终端多 Tab（UI-286 verified：terminal.js Map 上限 4 / IPC additive sessionId 兼容 / before-quit kill-all；前端 terminalTabs+useTerminalTabs 懒启动；实机 CDP 12 断言 0 孤儿，acceptance/block-54/user-side-tabs.json）。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-03",
       "archivePolicy": "archive_when_superseded",
-      "phase": "PLANNED"
+      "phase": "COMPLETED"
     },
     {
       "id": "BLOCK-55-ENGINEERING-PLAN-MODE",
