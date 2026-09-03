@@ -1,11 +1,12 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-03（**BLOCK-45-DEV-ELECTRON-STOP-COLLATERAL-FIX 已收口**：boot 清理 token 定向 + 并存 fail-closed + force-clean 逃生口，实机四场景全 PASS，证据 `acceptance/block-45/block45-live-check.json`。同日 BLOCK-44 已收口（ui:audit --report schema 债务）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-03（**BLOCK-46-IN-PROGRESS-BATCH-REVIEW 收口**：2026-08-31 批次 12 项 in_progress（UI-247~260 系列）批量 dev Electron 实机复核全部升 verified（证据 `acceptance/block-46/`）+ UI-255 标题修正；复测发现浮窗纵向越界已登记候选。同日 BLOCK-44/45 已收口。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- 当前无 active 工作包（BLOCK-45 已于 2026-09-03 收口，Plan `docs/block-45-dev-electron-stop-collateral-fix-plan.md` §5）。不自动启动新工作包，待用户裁决下一候选。
-- 已收口候选：UI-194 消费侧挂载 BLOCK-42 已于 2026-09-02 收口（UI-194 verified，`42ae921d`）；git 写操作三期 BLOCK-41 已于 2026-09-02 收口（UI-278 verified，`38c6edf1`）；UI-193 widget 业务路径 BLOCK-43 已于 2026-09-03 收口（UI-193 superseded，`f57089cb`）；ui:audit `--report` schema 大小写债务 BLOCK-44 已于 2026-09-03 收口（AUDIT-LOG 2026-08-30 🟢 ✅，`8deff99a`）；dev-electron 停止逻辑修复 BLOCK-45 已于 2026-09-03 收口。
+- **Active 工作包：NONE**（BLOCK-46 已收口，等待用户裁决下一工作包）。
+- 已收口候选：UI-193 widget 业务路径 BLOCK-43（superseded，`f57089cb`）；ui:audit `--report` schema 债务 BLOCK-44（`8deff99a`）；dev-electron 停止逻辑修复 BLOCK-45（`56442ee1`）；近期 in_progress 批量复核 BLOCK-46（12 项升 verified，提交见 git log）。
+- 增量候选（需用户裁决）：**UI-255 浮窗纵向越界修复**——`HoverPreviewPopover` 的 `useLayoutEffect` 仅在 anchor 变化时测高，diff 内容异步膨胀后 top 不重算，浮窗高度达 60vh 上限时底边可越界约 145px（winH 1277 / bottom 1422，BLOCK-46 复测实测）；修法：重算时机改为内容高度稳定后（如 ResizeObserver）。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 
 ## 当前结论

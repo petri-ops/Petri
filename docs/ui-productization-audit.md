@@ -2071,7 +2071,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified (dev 边界内，部分被 UI-247 取代)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-247: BLOCK-29 增量 — 分支选择/对比/⋯ 并入审阅 tabs 行，历史第二行取消 (2026-08-31 in_progress)
+## UI-247: BLOCK-29 增量 — 分支选择/对比/⋯ 并入审阅 tabs 行，历史第二行取消 (2026-08-31 verified)
 
 **用户反馈**：截图「这个分支选择的按钮是不是应该放到 审阅 改动 历史 同一行 目前两行很不和谐」。
 
@@ -2079,9 +2079,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / ReviewMode vitest 30/30 / docs:check 170 / docs:reconcile 0。待 dev Electron 实机过目后转 verified。注：对比按钮随后由 UI-249 按用户裁决移除。
 
-**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**BLOCK-46 实机复核（2026-09-03）**：`.rvw-summary-left` 含 改动|历史 tabs + stats + 分支选择器（master（当前））单行渲染；对比按钮未回归出现（UI-249 移除保持）。
 
-## UI-249: BLOCK-29 增量 — 移除历史「对比」（两提交区间对比模式） (2026-08-31 in_progress)
+**状态**: verified（2026-09-03 BLOCK-46 dev Electron 实机复核，证据 `acceptance/block-46/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-249: BLOCK-29 增量 — 移除历史「对比」（两提交区间对比模式） (2026-08-31 verified)
 
 **用户反馈**：「历史 点击后 有对比 对比是不是没有实际意义？ 可以清掉吗」。
 
@@ -2091,9 +2093,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / ReviewMode vitest 29/29（对比用例随功能删除）/ docs:check 170 / ui:audit:check / docs:reconcile 0。待 dev Electron 实机过目后转 verified。
 
-**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**BLOCK-46 实机复核（2026-09-03）**：历史分区渲染正常，全页无「对比」按钮（compareButtonsVisible=0）。
 
-## UI-250: BLOCK-29 增量 — 改动文件行悬停浮动预览（审阅详情同源只读 diff） (2026-08-31 in_progress)
+**状态**: verified（2026-09-03 BLOCK-46 dev Electron 实机复核，证据 `acceptance/block-46/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-250: BLOCK-29 增量 — 改动文件行悬停浮动预览（审阅详情同源只读 diff） (2026-08-31 verified)
 
 **用户反馈**：「工作区 改动部分 会列出来具体有哪些文件修改了 鼠标放上去能否出现悬浮窗口展示详细信息呢？详细信息就是审阅里的详细信息」。
 
@@ -2101,9 +2105,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / ReviewMode vitest 29/29。待 dev Electron 实机过目后转 verified。
 
-**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**BLOCK-46 实机复核（2026-09-03）**：dock 行 hover 350ms 弹出浮窗（头部徽标+路径+统计+diff）；已展开行 hover 不弹（负向断言 PASS）；行近右缘时浮窗自动翻转到行左侧。
 
-## UI-252: BLOCK-29 增量 — 会话区「工作区改动」卡片文件行悬停预览 (2026-08-31 in_progress)
+**状态**: verified（2026-09-03 BLOCK-46 dev Electron 实机复核，证据 `acceptance/block-46/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-252: BLOCK-29 增量 — 会话区「工作区改动」卡片文件行悬停预览 (2026-08-31 verified)
 
 **用户反馈**：「会话区这部分的 工作区改动也要可以鼠标悬浮上去就可以有预览的小窗口」（截图：聊天区 AgentChangesCard 文件列表）。
 
@@ -2111,9 +2117,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / AgentChangesCard + WorkingTreeReview vitest 35/35。待 dev Electron 实机过目后转 verified。
 
-**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**BLOCK-46 实机复核（2026-09-03）**：会话卡片 p40-b.txt 行 hover 弹浮窗（未跟踪文件显示说明文案）；点击行跳转审阅 PASS。
 
-## UI-253: 增量 — 创建项目前确认具体工作目录路径 (2026-08-31 in_progress)
+**状态**: verified（2026-09-03 BLOCK-46 dev Electron 实机复核，证据 `acceptance/block-46/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-253: 增量 — 创建项目前确认具体工作目录路径 (2026-08-31 verified)
 
 **用户反馈**：「选择工作目录并创建 还没有解决 能打开 但是不能确定具体的项目路径」。
 
@@ -2121,9 +2129,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / project-store + LeftPanel + home vitest 10/10 / docs:check / ui:audit:check / docs:reconcile。待实机过目后转 verified。
 
-**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**BLOCK-46 实机复核（2026-09-03）**：确认面板完整渲染（将在以下目录创建项目 /private/tmp/biof3-tmp + 项目名 biof3-tmp + 在此处创建/重新选择）；在此处创建后成功跳转新项目。
 
-## UI-254: BLOCK-29 增量 — dock 改动分区右侧常驻文件树（左手风琴 + 右导航树） (2026-08-31 in_progress)
+**状态**: verified（2026-09-03 BLOCK-46 dev Electron 实机复核，证据 `acceptance/block-46/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-254: BLOCK-29 增量 — dock 改动分区右侧常驻文件树（左手风琴 + 右导航树） (2026-08-31 verified)
 
 **用户反馈**：截图 dock 改动页面「右侧要有 文件树」。AskUserQuestion 裁决「保留手风琴 + 右侧树」。
 
@@ -2133,7 +2143,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-255: BLOCK-29 增量 — 悬停预览浮窗位置/尺寸自适应（不再超出应用边界） (2026-08-31 in_progress)
+## UI-255: BLOCK-29 增量 — 悬停预览浮窗位置/尺寸自适应（不再超出应用边界） (2026-08-31 verified)
 
 **用户反馈**：「卡片悬停预览出来的内容位置和大小能否自适应 尽可能的不被遮挡 目前这个容易超出软件边界」。
 
@@ -2141,7 +2151,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / ReviewMode + AgentChangesCard vitest 33/33。待 dev Electron 实机过目后转 verified。
 
-**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**BLOCK-46 复测（2026-09-03）**：横向自适应（420px 基准宽收缩、右侧贴边翻转到行左侧）实机 PASS；发现纵向边界——`HoverPreviewPopover` 的 `useLayoutEffect` 仅在 anchor 变化时测高，diff 内容异步膨胀（如 +42/−103 中等体量）后 top 不重算，浮窗高度达 60vh 上限时底边可越界约 145px（winH 1277 / bottom 1422）；已在 roadmap 登记增量候选（重算时机改为内容高度稳定后）。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-278: git 写操作三期——暂存两栏 / 真实分支切换 / push-pull（BLOCK-41） (2026-09-02 verified)
 
@@ -2349,7 +2359,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified（2026-09-02 锚点随 UI-270 移至 `.sc-outer` 贴会话栏最外边界，随其实机复验）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-260: BLOCK-29 增量 — 审阅文件树改按钮切换（默认收起，不再常驻占右侧栏） (2026-08-31 in_progress)
+## UI-260: BLOCK-29 增量 — 审阅文件树改按钮切换（默认收起，不再常驻占右侧栏） (2026-08-31 verified)
 
 **用户反馈**：「审阅中的文件树 目前是默认展开占据右侧栏 能否变成按钮呢 点击展开点击也可以收缩 效果和 文件中的 文件树保持一致」。（另确认：文件树打开图片文件已支持 `<img>` 图片预览，走 `isImageFile` + `workspaceImagePreview`，无需改动。）
 
@@ -2357,9 +2367,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / ReviewMode vitest 18/18 / docs:check 170 / ui:audit:check。待实机验证后转 verified。
 
-**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**BLOCK-46 实机复核（2026-09-03）**：`rvw-tree-toggle-btn`（最右，title=展开文件树）默认收起（split 单子元素）；点击展开 `.rvw-dock-tree` 230px（title 变 收起文件树）。
 
-## UI-259: 增量 — 应用内「选择文件夹」选择器（不依赖系统目录面板） (2026-08-31 in_progress)
+**状态**: verified（2026-09-03 BLOCK-46 dev Electron 实机复核，证据 `acceptance/block-46/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-259: 增量 — 应用内「选择文件夹」选择器（不依赖系统目录面板） (2026-08-31 verified)
 
 **用户反馈**：「选择路径 只有打开 难道不能有选择文件夹这个按钮吗 选择哪个文件夹 工作空间路径不就有了吗」——确认核心诉求是点选文件夹直接得到工作空间路径。
 
@@ -2367,9 +2379,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / LeftPanel + home vitest 9/9 / docs:check 170 / ui:audit:check。需重启 dev Electron（新 IPC）。待实机验证后转 verified。
 
-**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**BLOCK-46 实机复核（2026-09-03）**：应用内 FolderPicker 展开（/ 根列表 → 点入 /tmp → biof3-tmp），「就选这个文件夹」回写 realpath /private/tmp/biof3-tmp 到输入框，全程未依赖系统目录面板。
 
-## UI-258: 增量 — 工作台常驻创建入口 + 空白项目（创建后可选/可换工作目录） (2026-08-31 in_progress)
+**状态**: verified（2026-09-03 BLOCK-46 dev Electron 实机复核，证据 `acceptance/block-46/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-258: 增量 — 工作台常驻创建入口 + 空白项目（创建后可选/可换工作目录） (2026-08-31 verified)
 
 **用户反馈**：「不能设置 是否需要新增一个 创建项目 按钮 创建项目后 可以切换或者选择工作空间」（AskUserQuestion 裁决：入口=首页常驻；工作空间=创建后可选/可换）。
 
@@ -2377,9 +2391,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / LeftPanel + home vitest 9/9 / TitleBar + RightPanel + ReviewMode + AgentChangesCard 38/38 / docs:check 170 / ui:audit:check。需重启 dev Electron（UI-257 的 preload/main IPC）。待实机验证后转 verified。
 
-**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**BLOCK-46 实机复核（2026-09-03）**：工作台 `/` 渲染项目卡片 + 常驻创建卡片（选目录/手动输路径/空白项目三方式）；空白项目创建成功（自动命名 项目-09-03-02:04，无需目录）；「更改项目工作目录」内联面板改到 /private/tmp/b46-ws 并经 sqlite 持久化核对；左栏「项目」标题旁 home 图标入口可用。
 
-## UI-257: 增量 — 创建项目手动输入路径兜底（绕过系统目录面板禁用「打开」） (2026-08-31 in_progress)
+**状态**: verified（2026-09-03 BLOCK-46 dev Electron 实机复核，证据 `acceptance/block-46/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-257: 增量 — 创建项目手动输入路径兜底（绕过系统目录面板禁用「打开」） (2026-08-31 verified)
 
 **用户反馈**（附截图）：「我点开之后 不能选择有的路径来作为工作空间进行项目开发」——macOS 目录选择面板中选中文件夹后「打开」按钮置灰（面板顶部显示"文件夹通过文件共享进行共享"横幅），部分路径无法经原生面板选定，创建流程卡死在第一步。
 
@@ -2389,9 +2405,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / LeftPanel + home vitest 9/9 / docs:check 170 / ui:audit:check。**需重启 dev Electron**（preload/main 新增 IPC 不走 HMR）。待实机验证后转 verified。
 
-**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**BLOCK-46 实机复核（2026-09-03）**：手动输入路径框（aria-label=项目工作目录完整路径）+ 确认路径校验链路可用，配合 UI-253 确认面板全链走通。
 
-## UI-256: 清理 — 移除 TitleBar「打开审阅」按钮及死链（审阅入口已迁移右侧边栏） (2026-08-31 in_progress)
+**状态**: verified（2026-09-03 BLOCK-46 dev Electron 实机复核，证据 `acceptance/block-46/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-256: 清理 — 移除 TitleBar「打开审阅」按钮及死链（审阅入口已迁移右侧边栏） (2026-08-31 verified)
 
 **用户反馈**：「右上角的 打开审阅 这个按钮没有用了 审阅入口已经迁移了 清理掉这里相关联的代码也可以清理 保持纯净」。
 
@@ -2399,7 +2417,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / TitleBar + RightPanel + ReviewMode + AgentChangesCard vitest 38/38 / docs:check 170 / ui:audit:check。待 dev Electron 实机确认按钮消失、审阅 tab 入口正常后转 verified。
 
-**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**BLOCK-46 实机复核（2026-09-03）**：TitleBar 仅「新对话」按钮，无「打开审阅」（会话改动卡片内「打开审阅查看全部改动」跳转链接为审阅迁移后的合规入口，非 TitleBar 死链）。
+
+**状态**: verified（2026-09-03 BLOCK-46 dev Electron 实机复核，证据 `acceptance/block-46/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-251: 增量 — 创建项目失败可见化（左栏 +/首页创建全链路错误反馈） (2026-08-31 in_progress)
 
@@ -2409,9 +2429,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **改动**：home 首页创建 + 项目左栏「+」创建两条路径统一加固——① 桥缺失时显式提示「当前运行环境不支持选择工作目录」；② 接口/未知错误 try/catch 后以可见文案呈现（首页错误行 `emptyHomeError` / 工作区 `workspaceNotice`），不再静默。取消选择仍为无操作。
 
-**门禁**：tsc 0 / project-store + LeftPanel + home vitest 10/10 / docs:check 170 / ui:audit:check / docs:reconcile 0。待实机复现验证后转 verified（若仍无法弹窗，需用户提供具体症状：对话框完全未弹 / 选择后创建失败）。
+**门禁**：tsc 0 / project-store + LeftPanel + home vitest 10/10 / docs:check 170 / ui:audit:check / docs:reconcile 0。
 
-**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**BLOCK-46 实机复核（2026-09-03）**：非法路径（/tmp/biof3-tmp\x 下含非法字符）创建失败后左栏错误提示实机 PASS（`acceptance/block-46/ui-251-left-panel-error.png`）；首页创建路径错误行 PASS（`acceptance/block-46/ui-251-invalid-path-error.png`）。**状态**: verified（2026-09-03 BLOCK-46 dev Electron 实机复核，证据 `acceptance/block-46/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-248: BLOCK-29 增量 — 改动分区「展开全部/收起全部」批量文件差异 (2026-08-31 in_progress)
 

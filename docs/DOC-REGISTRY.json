@@ -3181,6 +3181,28 @@
       "registeredAt": "2026-09-03",
       "archivePolicy": "archive_when_superseded",
       "phase": "P4-CLOSEOUT"
+    },
+    {
+      "id": "BLOCK-46-IN-PROGRESS-BATCH-REVIEW",
+      "path": "docs/block-46-in-progress-batch-review-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-46-in-progress-batch-review",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-46",
+        "ui-audit",
+        "batch-review",
+        "live-verification",
+        "ui-247",
+        "ui-260",
+        "G0"
+      ],
+      "notes": "2026-09-03 立项（用户裁决）：2026-08-31 批次 12 项 in_progress（UI-247/249/250/251/252/253/254/256/257/258/259/260）批量 dev Electron 实机复核升 verified + UI-255 标题修正；以 post-BLOCK-41/43 当前实现为准，漂移如实记录；组 A 审阅 UI（7 项）/ 组 B 项目创建（5 项），证据 acceptance/block-46/；不改产品代码（纯标题不一致可就地修）。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-09-03 收口（P0–P4 全部完成）：P1 组 A 审阅 UI 7 项 + P2 组 B 项目创建 6 项 CDP dev Electron 实机复核全 PASS（临时项目验收后清理），证据 acceptance/block-46/（10 截图）；P3 台账 12 项逐项升 verified（标题+状态行+复核记录）+ UI-255 标题修正，复测发现浮窗纵向越界（内容异步膨胀 top 不重算）如实登记 roadmap 增量候选，不就地大修；P4 gates docs:check 186 / ui:audit:check / docs:reconcile 0 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "COMPLETED"
     }
   ],
   "lastUpdated": "2026-09-02",
