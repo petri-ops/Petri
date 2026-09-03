@@ -109,4 +109,42 @@ describe('CodeMirrorDiffView', () => {
     expect(onAcceptHunk).toHaveBeenCalledTimes(1);
     expect(onRejectHunk).not.toHaveBeenCalled();
   });
+
+  // BLOCK-50 — 工作区已删除文件：呈现删除 diff + 提示条，而非 file not found 报错
+  it('shows deleted diff note when worktree file is deleted but present in HEAD (BLOCK-50)', async () => {
+    fileContentMock.mockImplementation((params: { ref?: 'HEAD' | 'WORKTREE' }) =>
+      params.ref === 'HEAD'
+        ? fileResult('head content\n')
+        : Promise.resolve({ ok: true, data: { content: '', encoding: 'utf-8', size: 0, deleted: true } })
+    );
+
+    render(<CodeMirrorDiffView filePath="removed.py" isBinary={false} />);
+
+    await waitFor(() => {
+      expect(document.querySelector('.wt-diff-deleted-note')).not.toBeNull();
+    });
+    expect(document.querySelector('.wt-diff-deleted-note')?.textContent).toContain('工作区已删除');
+    // modified 侧为空 = 删除语义，编辑器仍渲染（HEAD 内容 → 空的删除 diff）
+    expect(document.querySelector('[data-block-22-codemirror]')).not.toBeNull();
+    expect(document.querySelector('[role="alert"]')).toBeNull();
+  });
+
+  // BLOCK-50 — 文件彻底消失（HEAD 与工作区均无）：占位而非报错
+  it('shows missing placeholder when file exists neither in worktree nor HEAD (BLOCK-50)', async () => {
+    fileContentMock.mockImplementation((params: { ref?: 'HEAD' | 'WORKTREE' }) =>
+      params.ref === 'HEAD'
+        ? Promise.resolve({ ok: false, error: 'file_missing' })
+        : Promise.resolve({ ok: true, data: { content: '', encoding: 'utf-8', size: 0, missing: true } })
+    );
+
+    render(<CodeMirrorDiffView filePath="ghost.md" isBinary={false} />);
+
+    const missing = await waitFor(() => {
+      const el = document.querySelector('.wt-diff-missing');
+      expect(el).not.toBeNull();
+      return el;
+    });
+    expect(missing?.textContent).toContain('文件已不在工作区与 HEAD 中');
+    expect(document.querySelector('[role="alert"]')).toBeNull();
+  });
 });

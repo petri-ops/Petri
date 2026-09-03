@@ -33,7 +33,7 @@ export interface CodeMirrorDiffViewProps {
 
 interface FileContentResult {
   ok: boolean;
-  data?: { content: string; truncated?: boolean };
+  data?: { content: string; truncated?: boolean; deleted?: boolean; missing?: boolean };
   error?: string;
   message?: string;
 }
@@ -50,6 +50,9 @@ export function CodeMirrorDiffView({
   const [revision, setRevision] = useState<DiffRevision | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // BLOCK-50 — 工作区文件缺失的结构化兜底：deleted=HEAD 有（呈现删除 diff）；missing=彻底消失（占位）
+  const [worktreeDeleted, setWorktreeDeleted] = useState(false);
+  const [worktreeMissing, setWorktreeMissing] = useState(false);
   const apiRef = useRef<EditorApi | null>(null);
   // BLOCK-32 — 项目级审阅隔离：fileContent 消费当前项目工作区仓库
   const routeParams = useParams<{ projectId?: string }>();
@@ -74,6 +77,8 @@ export function CodeMirrorDiffView({
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setWorktreeDeleted(false);
+    setWorktreeMissing(false);
     setRevision(null);
 
     const load = async (): Promise<void> => {
@@ -94,6 +99,16 @@ export function CodeMirrorDiffView({
       if (!worktreeResult.ok) {
         setError(worktreeResult.message || worktreeResult.error || 'Failed to load working tree content.');
         return;
+      }
+
+      if (worktreeResult.data?.missing) {
+        // BLOCK-50 — 工作区与 HEAD 均无此文件（历史残留）：占位而非报错
+        setWorktreeMissing(true);
+        return;
+      }
+      if (worktreeResult.data?.deleted) {
+        // BLOCK-50 — 工作区已删除：modified 侧为空，diff 呈现全文删除
+        setWorktreeDeleted(true);
       }
 
       setRevision({
@@ -156,10 +171,18 @@ export function CodeMirrorDiffView({
     return <div className="wt-diff-error" role="alert">{error}</div>;
   }
 
+  // BLOCK-50 — 文件在 HEAD 与工作区均已不存在（历史残留条目）：占位而非报错
+  if (worktreeMissing) {
+    return <div className="wt-diff-missing">文件已不在工作区与 HEAD 中，无内容可展示。</div>;
+  }
+
   if (!revision) return null;
 
   return (
     <div className="wt-diff-wrap">
+      {worktreeDeleted && (
+        <div className="wt-diff-deleted-note" role="note">工作区已删除此文件，以下为相对 HEAD 的删除 diff。</div>
+      )}
       {hunks && hunks.length > 0 && (
         <div className="wt-diff-markers" role="navigation" aria-label="hunk positions">
           {hunks.map((h, i) => {

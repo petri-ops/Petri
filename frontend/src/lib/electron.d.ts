@@ -370,7 +370,7 @@ declare global {
         }>;
         fileContent: (params: { path: string; ref?: 'HEAD' | 'WORKTREE'; projectId?: string }) => Promise<{
           ok: boolean;
-          data?: { content: string; encoding: 'utf-8' | 'base64'; size: number; truncated?: boolean; message?: string };
+          data?: { content: string; encoding: 'utf-8' | 'base64'; size: number; truncated?: boolean; message?: string; deleted?: boolean; missing?: boolean };
           error?: string;
           message?: string;
         }>;

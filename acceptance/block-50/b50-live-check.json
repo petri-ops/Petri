@@ -1,0 +1,28 @@
+{
+  "row": {
+    "found": true,
+    "top": 389.4300231933594,
+    "cx": 1519.4363403320312,
+    "cy": 404.4206485748291,
+    "expanded": "true"
+  },
+  "state": {
+    "alert": null,
+    "note": "工作区已删除此文件，以下为相对 HEAD 的删除 diff。",
+    "missing": null,
+    "hasCm": true
+  },
+  "hover": {
+    "present": true,
+    "alert": null,
+    "hasNote": true,
+    "text": "?ARCHITECTURE.md+0−237工作区已删除此文件，以下为相对 HEAD 的删除 diff。91# 架构说明## 系统架构### 前端架构```main.js (主控制器)    ├── Views (视图层)    │   ├"
+  },
+  "verdict": {
+    "expandNoAlert": true,
+    "deletedNoteShown": true,
+    "hoverNoAlert": true,
+    "hoverPresent": true
+  },
+  "at": "2026-09-03T04:22:27.415Z"
+}

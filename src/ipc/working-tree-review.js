@@ -357,7 +357,13 @@ function setupWorkingTreeReviewIpc(options = {}) {
       }
       const abs = path.resolve(adapter.workTree || process.cwd(), args.path);
       if (!fs.existsSync(abs)) {
-        throw new GitAdapterError('file_missing', `file not found: ${args.path}`);
+        // BLOCK-50 — 已删除（D）/已消失文件是审阅合法条目，不再抛 file_missing：
+        // HEAD 有（showFile 返回非 null）→ deleted:true（空内容呈现删除 diff）；
+        // HEAD 也无（null）→ missing:true（彻底消失，前端占位）。
+        const headContent = adapter.showFile({ ref: 'HEAD', filePath: args.path });
+        return headContent != null
+          ? { content: '', encoding: 'utf-8', size: 0, deleted: true }
+          : { content: '', encoding: 'utf-8', size: 0, missing: true };
       }
       const stat = fs.statSync(abs);
       if (stat.size > MAX_FILE_CONTENT_BYTES) {

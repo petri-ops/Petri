@@ -308,3 +308,20 @@
   color: var(--biof3-status-error-fg);
   font-size: var(--biof3-font-size-caption);
 }
+
+/* BLOCK-50 — 工作区文件缺失的结构化兜底占位 */
+.wt-diff-missing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: var(--biof3-text-muted);
+  font-size: var(--biof3-font-size-body-sm);
+}
+
+.wt-diff-deleted-note {
+  padding: 6px 16px;
+  color: var(--biof3-text-muted);
+  font-size: var(--biof3-font-size-caption);
+  border-bottom: 1px solid var(--biof3-border-subtle);
+}
