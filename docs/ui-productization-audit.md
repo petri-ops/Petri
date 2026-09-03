@@ -2177,14 +2177,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **实机**（2026-09-03，dev Electron CDP，证据 `acceptance/block-52/p2-live-assertions.json` 6 断言全 PASS + p2-01/02 截图）：图片预览「引用到对话」按钮 → composer 引用卡（缩略图+名称+来源行）→ 发送 → 消息正文含 `【引用图片 quote-live.png】` 前缀 + workspace 相对路径（模型可据此 read_image）→ 发送后引用卡清空。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-283: 非 git 工作区一次性引导——审阅空态内联 git init（BLOCK-53 P2） (2026-09-03 in_progress)
+## UI-283: 非 git 工作区一次性引导——审阅空态内联 git init（BLOCK-53 P2） (2026-09-03 verified)
 **用户需求**：BLOCK-53 项目创建体验补丁 P2——非 git 目录进入项目后一次性引导「初始化 git 仓库以启用审阅与版本历史」，dismiss 记一次性不再弹（对齐 codex 信任屏「每目录一次」哲学）；非 git 诚实空态（BLOCK-32）保持为引导后的稳态兜底。
 
 **改动**（0 新 npm 依赖 / 1 新 IPC）：① 后端 [working-tree-review.js](../src/ipc/working-tree-review.js) 新增 `git:init-repository`（projectId → getProjectWorkspacePath → `initRepositoryAt`：git init + 全量初始提交，幂等 alreadyGit；commit 失败不回滚 init，返回 committed:false + 可行动 warning；git 缺失 ENOENT 结构化 `git_not_found`）+ `initRepositoryAt` 导出供测试；② [preload.js](../src/preload.js) `workingTreeReview.initRepository` + [electron.d.ts](../frontend/src/lib/electron.d.ts) 类型同步；③ [ReviewMode.tsx](../frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx) 非 git 空态内嵌引导条（useParams projectId 路由定位；内联二次确认明示「将创建 .git + 全量初始提交」；「不再提示」写 localStorage `biof3.gitinit.dismissed.<projectId>` 一次性记忆；init 成功 `review.refresh()` 后空态自动切换为正常审阅视图）；样式入 [WorkingTreeReview.css](../frontend/src/components/desktop/WorkingTreeReview/WorkingTreeReview.css)。**并行边界**：BLOCK-52 P2 并行收口期间启动，文件面零重叠（不触碰 project-workspace / SimpleChat / ResultView / events.ts / agent-tools）。
 
 **门禁**：后端 node --test `working-tree-review-init.test.mjs` 3/3（init+提交成功 / alreadyGit 幂等 / commit 失败保留 .git+warning）；ReviewMode vitest 21/21（新增 3 用例：空态引导条渲染 / 确认流 initRepository({projectId})+refresh 切回审阅 / dismiss 一次性记忆重挂不復现）；tsc 0；docs:check 199。
 
-**实机**（2026-09-03，dev Electron CDP :9222，证据 `acceptance/block-53/live-check.json` + 4 截图）：4 断言 PASS——非 git 项目右栏审阅 dock 空态引导条渲染（初始化按钮+不再提示）；内联二次确认展开（明示「创建 .git 仓库 + 全量初始提交」）；桥缺失降级可见错误（实机栈半新半旧：preload 已载新桥而主进程 handler 未注册，invoke 报错被 `.wt-gitinit-message` 如实展示、不静默不崩溃）；「不再提示」→ 引导条消失 + localStorage `biof3.gitinit.dismissed.<projectId>=1`、SPA 重挂后不再出现且空态兜底正常。**遗留 S5**：init 全链（桥→handler→git init→refresh 切回审阅视图）待 dev Electron 重启后补验（与 BLOCK-52 错峰约定不抢栈重启；后端 `initRepositoryAt` 已由 node --test 真实 git 执行覆盖）。**状态**: in_progress（S5 待补）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**实机**（2026-09-03，dev Electron CDP :9222，证据 `acceptance/block-53/live-check.json` 8 断言 + `s5-live-check.json` 4 断言 + 5 截图）：交互层 4 断言 PASS（空态引导条渲染 / 内联二次确认展开明示「创建 .git + 全量初始提交」/ 桥缺失降级可见错误——半新半旧栈 invoke 报错被 `.wt-gitinit-message` 如实展示不静默 / 「不再提示」消失 + localStorage 记忆重挂不復现）。**S5 init 全链补验（dev Electron 重启载入新 preload+主进程后）4/4 PASS**：新栈桥就绪（initRepository + pathForFile）→ 引导条出现（dismiss 记忆清除后）→ 确认初始化 → **真实 git init 全链**（`.git` 创建 + `5835ff7 Initial commit (BioF3)`，磁盘双重核对）→ 空态消失自动切回审阅视图（截图 `s5-init-full-chain.png`）。临时验收项目 p_mtlmidcb_q46h 已归档回收站、/tmp fixture 已清理。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-282: 拖拽目录直达创建——home 窗口 drop + 左栏 drop 进既有确认链（BLOCK-53 P1） (2026-09-03 verified)
 

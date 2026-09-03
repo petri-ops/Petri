@@ -1,6 +1,6 @@
 # BLOCK-58 — R 工具依赖治理：install.packages 移出执行路径
 
-> 状态：`active`（P0 启动，2026-09-03 用户裁决立项；并行三包中的第三包）
+> 状态：`completed`（P0–P5 收口，2026-09-03）
 > 立项日期：2026-09-03（AUDIT-LOG 🟠 广播项「R/Python 环境审计（第三轮）」转 active）
 > truthDomain: `block-58-r-dependency-governance`
 > 来源：AUDIT-LOG 2026-09-03 🟠 R/Python 环境审计（第三轮）——tool-scripts 运行时内联 install.packages 破坏可复现性

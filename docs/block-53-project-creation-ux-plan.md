@@ -1,6 +1,6 @@
 # BLOCK-53 — 项目创建体验补丁：拖拽直达 + 一次性引导
 
-> 状态：`active`（P0 启动，2026-09-03 用户裁决「B」并行启动）
+> 状态：`completed`（P1/P2 全 verified，2026-09-03 收口）
 > 立项日期：2026-09-03（用户裁决「做成一个独立的包」）；启动日期：2026-09-03（用户裁决方案 B：BLOCK-52 收口期间并行启动本包，验收资源错峰）
 > truthDomain: `block-53-project-creation-ux`
 > 来源：codex vs BioF3 新项目创建体验对比调研（本会话）
@@ -93,4 +93,5 @@
 - 2026-09-03 P3 门禁：后端 node --test 3/3、home vitest 4/4、LeftPanel 9/9、ReviewMode 21/21、tsc 0、docs:check 199、ui:audit:check PASS；台账 UI-282/UI-283 同提交登记。
 - 2026-09-03 P4 实机（dev Electron CDP，8 断言全 PASS，证据 `acceptance/block-53/`）：S3 左栏 drop→内联面板+路径回填（validateDirectory 真实 realpath /tmp→/private/tmp）；S1a workbench 窗口 drop→UI-253 确认面板；S1b 确认创建→真实项目创建+跳转；S2 drop 单文件→「该路径不是文件夹」可见错误；S4a 非 git 项目审阅空态+引导条渲染；S4b 内联二次确认展开；S4c 桥缺失降级可见错误（半新半旧栈：preload 新而主进程旧，invoke no handler 被如实展示不静默）；S4d dismiss→消失+localStorage 记忆；S4e 重挂不再出现+空态兜底正常。**遗留 S5（init 全链）**：`git:init-repository` 桥→handler→init→refresh 切视图全链需 dev Electron 重启后补验（错峰约定，不与 BLOCK-52 抢栈；后端 initRepositoryAt 已由 node --test 真实 git 执行覆盖）；临时项目 p_mtlmidcb_q46h（/tmp/b53-accept-dir）保留至 S5 补验完成后清理。
 - 2026-09-03 P5 收口：UI-282 转 verified（P1 全链实机证据充分）；UI-283 维持 in_progress（S5 待补）；提交仅含本包文件面。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- 2026-09-03 **S5 补验完成 → 全包收口（P1/P2 全 verified）**：BLOCK-52 收口提交后重启 dev Electron（新 preload + 主进程 handler 全载入），CDP 实机 4 断言全 PASS（`acceptance/block-53/s5-live-check.json` + `s5-init-full-chain.png`）：新栈桥就绪 → 引导条出现（清 dismiss 记忆）→ 确认初始化 → **真实 git init 全链**（.git 创建 + `5835ff7 Initial commit (BioF3)` 磁盘核对）→ 空态消失自动切回审阅视图。临时项目 p_mtlmidcb_q46h 归档回收站、/tmp fixture 清理。UI-283 转 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

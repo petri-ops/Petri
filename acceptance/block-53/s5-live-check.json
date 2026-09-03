@@ -1,0 +1,22 @@
+[
+  {
+    "assert": "S5-0 新栈桥就绪（initRepository + pathForFile）+ 清 dismiss 记忆",
+    "pass": true,
+    "detail": "{'hasInitRepo': True, 'hasPathForFile': True}"
+  },
+  {
+    "assert": "S5-1 非 git 空态 + 一次性引导条出现（dismiss 记忆已清）",
+    "pass": true,
+    "detail": "{'prompt': True, 'notGit': True}"
+  },
+  {
+    "assert": "S5-2 确认初始化 → git init 全链 → 空态消失切回审阅视图",
+    "pass": true,
+    "detail": "{\"notGitGone\":true,\"reviewUp\":true}"
+  },
+  {
+    "assert": "S5-3 磁盘核对：.git 创建 + 初始提交存在",
+    "pass": true,
+    "detail": "5835ff7 Initial commit (BioF3)"
+  }
+]

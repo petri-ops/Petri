@@ -3381,7 +3381,7 @@
       "id": "BLOCK-53-PROJECT-CREATION-UX",
       "path": "docs/block-53-project-creation-ux-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-53-project-creation-ux",
       "entrypoint": "docs/README.md",
@@ -3396,7 +3396,7 @@
       "notes": "2026-09-03 planned 登记（用户裁决独立立项）：项目创建体验补丁（源自 codex vs BioF3 创建方式对比调研）——P1 拖拽目录直达创建（drop → 复用 UI-253 pendingWorkspace 确认链，不绕过确认）；P2 非 git 目录一次性引导条（git init 一键启用审阅，dismiss 一次性记忆，对齐 codex 信任屏哲学）。不改注册式项目模型，0 新依赖。排队 BLOCK-51 之后。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-03",
       "archivePolicy": "archive_when_superseded",
-      "phase": "PLANNED"
+      "phase": "COMPLETED"
     },
     {
       "id": "BLOCK-54-TERMINAL-UPGRADE",
@@ -3491,7 +3491,7 @@
       "id": "BLOCK-58-R-DEPENDENCY-GOVERNANCE",
       "path": "docs/block-58-r-dependency-governance-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-58-r-dependency-governance",
       "entrypoint": "docs/README.md",
@@ -3507,7 +3507,7 @@
       "notes": "2026-09-03 active 登记（用户裁决立项，AUDIT-LOG 🟠 广播项转 active）：7 个内置 R 工具脚本执行路径内联 install.packages（非确定性版本/CRAN 网络撞超时/绕过 builtAgainst）移出执行路径。根因=内置 tool-scripts 在插件体系外（无 manifest/无 packages 声明/无预编译包），机制缺口而非机制缺失。方案：_dependencies.json 单一事实源 + 7 脚本 fail-fast 化（缺包结构化错误不联网）+ JS 执行前毫秒级检查拒绝 + scripts/install-r-tool-dependencies.mjs 显式补装命令（版本快照打印）。本机 R 4.5.2 实测缺 16 包（当前靠内联安装才跑通，行为变化如实登记）。预编译包插件 biof3-r-toolchain 实体构建（CRAN 下载/编译/发布面）登记后续候选。0 新 npm 依赖。并行三包之一（BLOCK-52 收口中 + BLOCK-53 遗留 S5），文件面 tool-scripts/+scripts/ 与两 active 包零重叠。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-03",
       "archivePolicy": "archive_when_superseded",
-      "phase": "ACTIVE-P0"
+      "phase": "COMPLETED"
     }
   ],
   "lastUpdated": "2026-09-03 (BLOCK-57-REMOTE-EXECUTION planned 登记)",
