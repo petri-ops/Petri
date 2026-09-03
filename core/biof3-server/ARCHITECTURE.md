@@ -1,6 +1,6 @@
 # BioF3 Desktop Core 架构
 
-> 最后更新：2026-08-30（BLOCK-30 P1/P2：py-server 与 gateway 摘除，单后端拓扑）
+> 最后更新：2026-09-03（BLOCK-51 P3：plumber 空壳路由摘除，R 单轨拓扑与现实对齐）
 
 `core/biof3-server` 是 BioF3 Desktop 唯一的本地 Node 业务后端。它不部署到
 Web/ECS，不连接 PostgreSQL、OSS 或容器运行时；R/Python 分析由它经
@@ -23,7 +23,10 @@ Electron 主进程分配本机端口并注入本地数据、结果和运行时�
 桌面生命周期内运行，文件落在用户的 BioF3 本地目录或项目 workspace。
 （BLOCK-30 P1/P2：原 core/py-server 与 core/gateway 已摘除——前端此前对
 py-server 为 0 直连、裸执行入口恒 410、`tool_jobs` 双写入方收敛为单写入方；
-gateway 仅剩健康探活消费者。）
+gateway 仅剩健康探活消费者。BLOCK-51 P3：原 `/api/replot/*` plumber 代理路由
+已摘除——replot.R 从未存在于 git 历史，plumber 进程从未启动；R 事实上单轨 =
+tools-executor 每任务独立 Rscript 子进程，交互式重绘由 Result Studio 版本化
+编辑取代。）
 
 ## 唯一分析事实链
 

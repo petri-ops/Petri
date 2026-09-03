@@ -4,14 +4,15 @@
  *
  * Coverage:
  *   A-009.1 getBackendPort('r') default 3001
- *   A-009.4 getBackendPort('plumber') default 8787
  *   A-009.5 env override (R_SERVER_PORT=4000 → getBackendPort('r') === 4000)
- *   A-009.6 unknown role throws（BLOCK-30 起 gateway/python 也归入 unknown）
+ *   A-009.6 unknown role throws（BLOCK-30 起 gateway/python 也归入 unknown；
+ *           BLOCK-51 P3 起 plumber 同样归入 unknown）
  *   A-009.7 getBackendPorts() returns all remaining roles
  *   A-009.8 scattered fallback sites read from env-coordinator
  *
  * BLOCK-30 P1/P2: python(3004) 与 gateway(3005) 角色随 py-server/gateway
  * 摘除——getBackendPort 对这两个角色现在抛 unknown role。
+ * BLOCK-51 P3: plumber(8787) 角色随 plumber 空壳摘除——同样抛 unknown role。
  *
  * 运行：cd desktop && node --test test/env-coordinator-port.test.mjs
  */
@@ -30,7 +31,7 @@ const { getBackendPort, getBackendPorts } = await import(
 
 // The env-var keys we own. Save + restore around every test so we
 // don't leak state into other suites.
-const ENV_KEYS = ['R_SERVER_PORT', 'PLUMBER_PORT'];
+const ENV_KEYS = ['R_SERVER_PORT'];
 
 function snapshotEnv() {
   const saved = {};
@@ -52,20 +53,10 @@ test('A-009.1 getBackendPort("r") default 3001', () => {
   restoreEnv(saved);
 });
 
-test('A-009.4 getBackendPort("plumber") default 8787', () => {
-  const saved = snapshotEnv();
-  delete process.env.PLUMBER_PORT;
-  assert.strictEqual(getBackendPort('plumber'), 8787);
-  restoreEnv(saved);
-});
-
 test('A-009.5 env override beats default', () => {
   const saved = snapshotEnv();
   process.env.R_SERVER_PORT = '4000';
   assert.strictEqual(getBackendPort('r'), 4000);
-  // string-coerced numeric env (e.g. "4001") should also round-trip.
-  process.env.PLUMBER_PORT = '4001';
-  assert.strictEqual(getBackendPort('plumber'), 4001);
   restoreEnv(saved);
 });
 
@@ -76,16 +67,16 @@ test('A-009.6 unknown role throws', () => {
   // BLOCK-30 P1/P2: py-server/gateway 已摘除，这两个角色同样不存在。
   assert.throws(() => getBackendPort('gateway'), /unknown role/i);
   assert.throws(() => getBackendPort('python'), /unknown role/i);
+  // BLOCK-51 P3: plumber 空壳已摘除。
+  assert.throws(() => getBackendPort('plumber'), /unknown role/i);
 });
 
 test('A-009.7 getBackendPorts returns every role', () => {
   const saved = snapshotEnv();
   delete process.env.R_SERVER_PORT;
-  delete process.env.PLUMBER_PORT;
   const ports = getBackendPorts();
   assert.deepStrictEqual(ports, {
     r: 3001,
-    plumber: 8787,
   });
   restoreEnv(saved);
 });
@@ -97,7 +88,8 @@ test('A-009.8 scattered fallback sites now read from env-coordinator', () => {
   //   - core/biof3-server/config.js: must contain `getBackendPort('r')`
   //   - src/preload.js: must contain `getBackendPort('r')`
   //     （BLOCK-30 起 preload 只读 r 端口）
-  //   - src/backend-health.js: must contain getBackendPort for r + plumber
+  //   - src/backend-health.js: must contain getBackendPort for r
+  //     （BLOCK-51 P3 起 plumber 端口消费方已清零）
   //
   // For "must not contain legacy fallback", we look for the *executable*
   // pattern (`process.env.X_PORT || ` followed by a digit) — not for the
@@ -129,7 +121,6 @@ test('A-009.8 scattered fallback sites now read from env-coordinator', () => {
       file: 'src/backend-health.js',
       mustContain: [
         `getBackendPort('r')`,
-        `getBackendPort('plumber')`,
       ],
       legacyEnvFallbacks: [
         /process\.env\.R_SERVER_PORT\s*\|\|\s*3001/,

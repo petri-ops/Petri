@@ -3,12 +3,22 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-agent-concurrency-'));
 process.env.BIOF3_DB_PATH = path.join(tempDir, 'agent-concurrency.db');
 
 const require = createRequire(import.meta.url);
+const TEST_DIR = path.dirname(fileURLToPath(import.meta.url));
+
+// BLOCK-51 测试基建修复：projects / copilot_messages 等表 DDL 由 src/migrations/*.sql
+// 管理（生产由 Electron migration-runner 应用），core/biof3-server/db.js 模块顶层即
+// prepare projects——全新临时库必须先跑同一 migration 链再加载 db.js，否则模块加载即
+// 抛 no such table: projects（block-30 后既有损坏，本轮顺带修复）。
+const { runMigrations } = require('../src/migration-runner');
+await runMigrations(process.env.BIOF3_DB_PATH, path.join(TEST_DIR, '../src/migrations'));
+
 const db = require('../core/biof3-server/db');
 const conv = require('../core/biof3-server/helpers/conversations');
 const runtime = require('../core/biof3-server/helpers/runtime');
@@ -255,4 +265,54 @@ test('取消 sub-agent 不级联到父/兄弟（A-4 反向）', () => {
   assert.equal(agentTaskStore.getAgentTask('task-rev-s1').agentStatus, 'cancel_requested');
   assert.equal(agentTaskStore.getAgentTask('task-rev').agentStatus, 'running', '父 agent 不应被级联');
   assert.equal(agentTaskStore.getAgentTask('task-rev-s2').agentStatus, 'running', '兄弟子 agent 不应被级联');
+});
+
+// ============================================================
+// BLOCK-51 M1 — 路由层调用形状契约（堵「纯函数层测试掩盖路由层契约漂移」盲区）
+// 生产调用点仅两处：chat.js（按 wantKind 区分）/ resume.js（恒 primary）。
+// 静态形状断言 + 路由语义最小复现，旧形状（两参调用，isPrimary 缺省 false）出现即失败。
+// ============================================================
+
+test('BLOCK-51 M1 — 路由层 acquire 调用形状契约（isPrimary 必传）', () => {
+  const chatSrc = fs.readFileSync(path.join(TEST_DIR, '../core/biof3-server/routes/ai-agent/chat.js'), 'utf8');
+  const resumeSrc = fs.readFileSync(path.join(TEST_DIR, '../core/biof3-server/routes/ai-agent/resume.js'), 'utf8');
+
+  // chat.js：primary/subagent 按 wantKind 区分（M1 修复形状）
+  assert.match(
+    chatSrc,
+    /aiTaskConcurrencyAcquire\(userId,\s*tasks?[A-Za-z]*,\s*\{\s*isPrimary:\s*wantKind\s*===\s*'primary'\s*\}\)/,
+    'chat.js 必须按 wantKind 传 isPrimary',
+  );
+  // resume.js：恢复用户主动对话，恒为 primary
+  assert.match(
+    resumeSrc,
+    /aiTaskConcurrencyAcquire\(userId,\s*newTaskId,\s*\{\s*isPrimary:\s*true\s*\}\)/,
+    'resume.js 必须恒传 isPrimary: true',
+  );
+  // 旧形状回归警戒：两参 acquire 调用（isPrimary 缺省 → 永远按 subagent 计数）都是缺陷
+  const OLD_SHAPE = /aiTaskConcurrencyAcquire\(\s*[A-Za-z_$][\w$]*\s*,\s*[A-Za-z_$][\w$]*\s*\)/;
+  assert.doesNotMatch(chatSrc, OLD_SHAPE, 'chat.js 存在未传 isPrimary 的旧形状调用');
+  assert.doesNotMatch(resumeSrc, OLD_SHAPE, 'resume.js 存在未传 isPrimary 的旧形状调用');
+});
+
+test('BLOCK-51 M1 — 路由语义复现：4 subagent 占满后主对话不被拒、第 5 subagent 拒绝', () => {
+  // 与 chat.js L229 完全一致的调用形状（最小复现，不启 HTTP 服务）
+  const acquireAsRoute = (user, taskId, wantKind) =>
+    runtime.aiTaskConcurrencyAcquire(user, taskId, { isPrimary: wantKind === 'primary' });
+
+  const user = 'user-route-shape';
+  for (let i = 1; i <= 4; i++) {
+    assert.equal(acquireAsRoute(user, `rs-sub-${i}`, 'subagent').ok, true, `sub-agent ${i} 应被允许`);
+  }
+  const fifth = acquireAsRoute(user, 'rs-sub-5', 'subagent');
+  assert.equal(fifth.ok, false, '第 5 个 subagent 应被拒绝');
+  assert.equal(fifth.reason, 'user_limit');
+  assert.equal(
+    acquireAsRoute(user, 'rs-primary', 'primary').ok,
+    true,
+    'M1 修复核心：4 个 subagent 占满时新主对话必须能拿到预留槽（修复前此处被拒且文案误导）',
+  );
+
+  runtime.aiTaskConcurrencyRelease(user, 'rs-primary');
+  for (let i = 1; i <= 4; i++) runtime.aiTaskConcurrencyRelease(user, `rs-sub-${i}`);
 });

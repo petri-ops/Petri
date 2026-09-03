@@ -189,15 +189,8 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     status: () => ipcRenderer.invoke('backend:status'),
   },
 
-  // M2-7：py-server / plumber 按需启停（lazy，idle 5min 自动停）
-  py: {
-    start: () => ipcRenderer.invoke('py:start'),
-    stop: () => ipcRenderer.invoke('py:stop'),
-  },
-  plumber: {
-    start: () => ipcRenderer.invoke('plumber:start'),
-    stop: () => ipcRenderer.invoke('plumber:stop'),
-  },
+  // BLOCK-51 P3: py / plumber 按需启停通道已随 py-server（BLOCK-30 P1）
+  // 与 plumber 空壳（BLOCK-51 P3）摘除。
 
   // 文件系统（有限暴露）
   files: {

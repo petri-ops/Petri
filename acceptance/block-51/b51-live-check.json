@@ -1,0 +1,25 @@
+{
+  "raf": "raf 0ms",
+  "btn": {
+    "label": "收起底部终端",
+    "cx": 1807.0650691986084,
+    "cy": 18.99000120162964
+  },
+  "state": {
+    "hasXterm": true,
+    "rowCount": 8,
+    "text": "drwxr-xr-x@   3 zhangdiandian  staff     96  5月 28 20:26 sample-data|drwxr-xr-x@  10 zhangdiandian  staff    320  5月 28 22:13 src|-rw-------@   1 zhangdiandian  staff     10  9月  2 08:57 u272-probe.tx"
+  },
+  "alive": "alive /project/p_mthvakv3_fffw",
+  "crash": {
+    "uncaughtExceptionCount": 0,
+    "isDestroyedErrorCount": 0,
+    "source": "biof3-electron-main.log + .error grep after full terminal open/pty data flow"
+  },
+  "verdict": {
+    "mainProcessAlive": true,
+    "xtermRendered": true,
+    "crashAnomaliesDelta": 0
+  },
+  "at": "2026-09-03T09:15:11.845Z"
+}

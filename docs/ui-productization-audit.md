@@ -2109,6 +2109,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified（2026-09-03 BLOCK-46 dev Electron 实机复核，证据 `acceptance/block-46/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+**BLOCK-50 缺陷修复（2026-09-03 verified）**：修复本条与 UI-206 链路的「file not found」报障——已删除（D）/已消失文件是审阅合法条目，但 `git:working-tree-file-content` WORKTREE 分支磁盘缺失即抛 `file_missing`，导致悬停预览/审阅详情/未跟踪预览三消费方报错（用户实测 `docs/archive/.git-quick-ref.md`）。修法：后端结构化兜底（HEAD 有→`deleted:true` 呈现删除 diff + 提示条；HEAD 无→`missing:true` 占位），前端 `CodeMirrorDiffView`/`UntrackedFilePreview` 改占位不再报错。门禁：后端 node --test 4/4（新增 `test/working-tree-review-file-content.test.mjs`）、WorkingTreeReview vitest 43/43、tsc 0。dev Electron 实机复现原场景通过：展开删除行无报错、删除提示条+删除 diff 渲染；悬停未展开删除行 `ARCHITECTURE.md` 预览浮窗 `+0−237` 删除 diff 无报错（证据 `acceptance/block-50/`；plan：`docs/block-50-review-file-not-found-plan.md`）。
+
 ## UI-252: BLOCK-29 增量 — 会话区「工作区改动」卡片文件行悬停预览 (2026-08-31 verified)
 
 **用户反馈**：「会话区这部分的 工作区改动也要可以鼠标悬浮上去就可以有预览的小窗口」（截图：聊天区 AgentChangesCard 文件列表）。
@@ -2154,6 +2156,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **BLOCK-46 复测（2026-09-03）**：横向自适应（420px 基准宽收缩、右侧贴边翻转到行左侧）实机 PASS；发现纵向边界——`HoverPreviewPopover` 的 `useLayoutEffect` 仅在 anchor 变化时测高，diff 内容异步膨胀（如 +42/−103 中等体量）后 top 不重算，浮窗高度达 60vh 上限时底边可越界约 145px（winH 1277 / bottom 1422）；已在 roadmap 登记增量候选（重算时机改为内容高度稳定后）。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-279: 审阅 diff——已删除/已消失文件结构化兜底，不再报 file not found（BLOCK-50） (2026-09-03 verified)
+
+**用户需求**：审阅面板点击已删除（D）文件行报「file not found」错误——删除文件是审阅的合法条目，不应走读取失败路径。
+
+**改动**（0 新增 IPC / 0 新依赖）：[working-tree-review.js](../src/ipc/working-tree-review.js) `git:working-tree-file-content` 对 WORKTREE 分支磁盘缺失文件不再 throw `file_missing`——HEAD 可得返回 `{deleted:true}`（前端呈现删除 diff），否则返回 `{missing:true}`（结构化占位）；前端 [CodeMirrorDiffView](../frontend/src/components/desktop/WorkingTreeReview/CodeMirrorDiffView.tsx) 新增删除提示条 / missing 占位态，[UntrackedFilePreview](../frontend/src/components/desktop/WorkingTreeReview/UntrackedFilePreview.tsx) 占位化，[electron.d.ts](../frontend/src/lib/electron.d.ts) 类型同步。实现提交 `ce43048`（提交标题/正文标注 BLOCK-50，本行为补登台账同步）。
+
+**门禁**：后端 node --test 4/4、WorkingTreeReview vitest 43/43、tsc 0；dev Electron 实机复现用户原场景（docs/archive/.git-quick-ref.md）删除提示条 + 删除 diff、悬停预览 +0-237 无报错，证据 `acceptance/block-50/`。
+
+**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-278: git 写操作三期——暂存两栏 / 真实分支切换 / push-pull（BLOCK-41） (2026-09-02 verified)
 

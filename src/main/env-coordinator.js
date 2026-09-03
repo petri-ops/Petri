@@ -21,7 +21,8 @@
 // which lived in main.js — so we import them here).
 //
 // Required inputs:
-//   - backendPorts { r, plumber, renderer }（BLOCK-30 P2：gateway/python 已摘除）
+//   - backendPorts { r, renderer }（BLOCK-30 P2：gateway/python 已摘除；
+//     BLOCK-51 P3：plumber 已摘除）
 //   - app.getPath (electron app)
 //   - path/fs (Node core)
 //   - resolveResource, resolveRuntime, _detectSystemR,
@@ -173,8 +174,8 @@ function resolveRuntimeLocal(lang, userDataDir) {
 // These four sites all encode the same fact — the localhost port for
 // a given backend role — but with three different defaults (3001 vs
 // 3003 vs 3005). When the Electron main process is running,
-// setupDesktopEnv() sets R_SERVER_PORT / PLUMBER_PORT（BLOCK-30 起 py-server/gateway 已摘除）
-// / PLUMBER_PORT on process.env before any of these modules reads
+// setupDesktopEnv() sets R_SERVER_PORT（BLOCK-30 起 py-server/gateway 已摘除，
+// BLOCK-51 P3 起 plumber 已摘除）on process.env before any of these modules reads
 // it, so the fallback is unreachable. When the biof3-server / py-server
 // is launched as a standalone child process (without Electron's main),
 // env-coordinator is *not* running and the fallback kicks in.
@@ -185,7 +186,6 @@ function resolveRuntimeLocal(lang, userDataDir) {
 // defaults match what each file used to ship:
 //   r       → 3001  (matches preload.js / backend-health.js historical default)
 //   python  → 3004  (matches preload.js / backend-health.js historical default)
-//   plumber → 8787  (matches backend-health.js historical default)
 //
 // 3003 was the legacy biof3-server default (server.js / config.js); the
 // Electron main process always overwrites R_SERVER_PORT before these
@@ -205,17 +205,12 @@ function getBackendPort(role, fallback) {
     if (process.env.R_SERVER_PORT) return parseInt(process.env.R_SERVER_PORT, 10);
     return fallback != null ? fallback : 3001;
   }
-  if (role === 'plumber') {
-    if (process.env.PLUMBER_PORT) return parseInt(process.env.PLUMBER_PORT, 10);
-    return fallback != null ? fallback : 8787;
-  }
   throw new Error(`getBackendPort: unknown role ${JSON.stringify(role)}`);
 }
 
 function getBackendPorts() {
   return {
     r: getBackendPort('r'),
-    plumber: getBackendPort('plumber'),
   };
 }
 
@@ -272,7 +267,6 @@ function setupDesktopEnv(backendPorts) {
   }
 
   process.env.R_SERVER_PORT = String(backendPorts.r);
-  process.env.PLUMBER_PORT = String(backendPorts.plumber);
   process.env.R_SERVER_URL = `http://127.0.0.1:${backendPorts.r}`;
   if (backendPorts.renderer) {
     process.env.BIOF3_RENDERER_PORT = String(backendPorts.renderer);

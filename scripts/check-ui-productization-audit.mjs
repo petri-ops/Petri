@@ -212,6 +212,11 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // 未带 UI-###；台账已由后续 UI-AUDIT-FIX（P2 提交）补登为 UI-265
   // （in_progress）。不重写共享历史。
   '0acffcc13c78a27c1c1e764c5d56afe13e4602ef',
+  // 2026-09-03 BLOCK-50 审阅删除文件兜底不可变提交 ce43048：subject
+  // `fix(review): 已删除/已消失文件结构化兜底` 未带 UI-###；台账已由
+  // BLOCK-51 收口提交补登为 UI-279（verified，实机证据 acceptance/block-50/）。
+  // 不重写共享历史。
+  'ce43048305c4abb3a565860addc52e8b072a877d',
 ])
 // These immutable implementation commits have an explicit later canonical
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
@@ -366,6 +371,9 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 未带 UI-###；台账已由本 commit 补登为 UI-195（in_progress）。
   // 不重写共享历史。
   '9cb6e9624bea9d33c5e9fd08cf52c7137d722893',
+  // 2026-09-03 BLOCK-50 审阅删除文件兜底不可变提交 ce43048：台账已由
+  // BLOCK-51 收口提交补登为 UI-279（verified）。豁免同提交台账要求。
+  'ce43048305c4abb3a565860addc52e8b072a877d',
 ])
 // UI-### issue ids: numeric series (UI-001..UI-999) and the named
 // AGENTWB namespace (UI-AGENTWB-001..UI-AGENTWB-999) used by the

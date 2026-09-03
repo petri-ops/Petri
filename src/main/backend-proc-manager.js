@@ -1,12 +1,13 @@
 // ============================================================
 // Backend process manager — central registry for the backend
-// child processes (gateway / biof3-server / plumber; BLOCK-30 P1 起
-// py-server 已摘除) plus their log streams and idle timers.
+// child process (biof3-server；BLOCK-30 P1 起 py-server 已摘除，
+// BLOCK-51 P3 起 plumber 空壳已清理——R 为 tools-executor 单轨)
+// plus its log streams and supervisor.
 //
 // Extracted from src/main.js by BLOCK-9.1 PHASE 4.
 // Original location: src/main.js ~lines 96-139 (log streams),
 // ~lines 320-428 (startGateway / startRServer；gateway 部分随 BLOCK-30 P2 摘除), ~lines 430-613
-// (startPyServer / stopPyServer / startPlumber / stopPlumber +
+// (startPyServer / stopPyServer +
 //  idle timer helpers + rServerSupervisor).
 //
 // Design rationale:
@@ -25,15 +26,14 @@
 //
 // Exports:
 //   - module-level start/stop functions (consumed by main.js
-//     at boot, by setupBackendLifecycleIpc via parameter
-//     injection, and by tests)
-//   - getProcs() — returns a snapshot { rServerProc, plumberProc }
+//     at boot, and by tests)
+//   - getProcs() — returns a snapshot { rServerProc }
 //     for IPC snapshot handlers
 //   - getLogDir() / flushLogs() / readLogTail() — for
 //     setupDiagnosticIpc / setupTerminalIpc
 //
-// The 4 backend procs remain mutable `let` variables here so
-// the .on("exit") handlers can null them out as before. IPC
+// The backend proc remains a mutable `let` variable here so
+// the .on("exit") handlers can null it out as before. IPC
 // handlers that need a snapshot call getProcs() at handler
 // invocation time.
 // ============================================================
@@ -152,33 +152,14 @@ function readLogTail(filePath, maxLines = 120) {
   }
 }
 
-// ── Backend procs (3 child processes; BLOCK-30 P1 removed py-server) ──
+// ── Backend procs (1 child process; BLOCK-30 P1 removed py-server,
+//    BLOCK-51 P3 removed plumber shell) ──
 // Mutable let variables — the .on("exit") handlers null them
 // out, same behavior as before.
 let rServerProc = null;
-let plumberProc = null;
 
 function getProcs() {
-  return { rServerProc, plumberProc };
-}
-
-// ── Plumber idle timer (5min auto-stop) ────────────────────────
-let plumberIdleTimer = null;
-const PLUMBER_IDLE_TIMEOUT_MS = 5 * 60 * 1000;
-
-function _clearPlumberIdleTimer() {
-  if (plumberIdleTimer) {
-    clearTimeout(plumberIdleTimer);
-    plumberIdleTimer = null;
-  }
-}
-
-function _resetPlumberIdleTimer() {
-  _clearPlumberIdleTimer();
-  plumberIdleTimer = setTimeout(() => {
-    console.log("[desktop] plumber idle timeout (5min), stopping");
-    stopPlumber("idle-timeout");
-  }, PLUMBER_IDLE_TIMEOUT_MS);
+  return { rServerProc };
 }
 
 // ── startRServer (with supervisor) ─────────────────────────────
@@ -247,79 +228,11 @@ function startRServer(reason = "boot") {
 // BLOCK-30 P1: removed with the py-server HTTP service. Python tool
 // execution runs inside biof3-server via the shared-backend executor
 // registry (spawn 内嵌 python)，无需独立 Python 后端进程。
-
+//
 // ── startPlumber / stopPlumber ─────────────────────────────────
-const { getRuntimeBinName } = require("../platform-compat");
-
-function startPlumber(reason = "ipc") {
-  if (plumberProc && !plumberProc.killed) {
-    _resetPlumberIdleTimer();
-    return { ok: true, alreadyRunning: true, pid: plumberProc.pid };
-  }
-
-  if (!process.env.BIOF3_R_HOME || !fs.existsSync(process.env.BIOF3_R_HOME)) {
-    console.warn("[desktop] plumber skipped — R runtime not installed");
-    return { ok: false, error: "R runtime not installed" };
-  }
-
-  const rBin = path.join(
-    process.env.BIOF3_R_HOME,
-    "bin",
-    getRuntimeBinName("r", process.platform),
-  );
-  if (!fs.existsSync(rBin)) {
-    console.warn("[desktop] Rscript not found, plumber skipped:", rBin);
-    return { ok: false, error: "Rscript not found" };
-  }
-
-  const plumberScript = resolveCore("biof3-server", "replot.R");
-  if (!fs.existsSync(plumberScript)) {
-    console.warn("[desktop] plumber script not found, replot disabled");
-    return { ok: false, error: "plumber script not found" };
-  }
-
-  try {
-    plumberProc = spawn(rBin, [plumberScript, "--port", process.env.PLUMBER_PORT], {
-      env: { ...process.env, R_HOME: process.env.BIOF3_R_HOME },
-      stdio: "pipe",
-    });
-  } catch (e) {
-    console.error("[desktop] plumber spawn failed:", e.message);
-    plumberProc = null;
-    return { ok: false, error: e.message };
-  }
-
-  plumberProc.stdout.on("data", (d) =>
-    console.log("[plumber]", d.toString().trim()),
-  );
-  plumberProc.stderr.on("data", (d) =>
-    console.error("[plumber]", d.toString().trim()),
-  );
-  plumberProc.on("exit", (code) => {
-    console.log(`[desktop] plumber exited: ${code}`);
-    plumberProc = null;
-    _clearPlumberIdleTimer();
-  });
-
-  _resetPlumberIdleTimer();
-  console.log(`[desktop] plumber started on :${process.env.PLUMBER_PORT} — reason=${reason}`);
-  return { ok: true, pid: plumberProc.pid };
-}
-
-function stopPlumber(reason = "ipc") {
-  _clearPlumberIdleTimer();
-  if (!plumberProc || plumberProc.killed) {
-    plumberProc = null;
-    return { ok: true, wasRunning: false };
-  }
-  try {
-    plumberProc.kill();
-    console.log(`[desktop] plumber stopped — reason=${reason}`);
-  } catch (e) {
-    console.error("[desktop] plumber stop failed:", e.message);
-  }
-  return { ok: true, wasRunning: true };
-}
+// BLOCK-51 P3: removed with the plumber shell. replot.R 从未存在于
+// git 历史，plumber 进程从未启动；R 实际单轨 = tools-executor 每任务
+// 独立 Rscript 子进程。交互式重绘已由 Result Studio 版本化编辑取代。
 
 module.exports = {
   // procs / logs
@@ -329,8 +242,6 @@ module.exports = {
   readLogTail,
   // lifecycle
   startRServer,
-  startPlumber,
-  stopPlumber,
   // supervisor (for before-quit shutdown in main.js)
   rServerSupervisor,
 };

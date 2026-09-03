@@ -9,7 +9,7 @@
 //
 // Dependencies injected via parameter:
 //   - mainWindow: for terminal:data / terminal:exit events
-//   - getProcs(): { rServerProc, plumberProc }
+//   - getProcs(): { rServerProc }
 //   - getLogDir(): log directory path
 //   - readLogTail(filePath): tail helper
 //   - resolveCore: path resolver (duplicated for self-containment)
@@ -24,7 +24,7 @@
 const fs = require("fs");
 const path = require("path");
 const { ipcMain, app, shell } = require("electron");
-const { getRuntimeBinName, getOpenShellPlan, getSessionShellSpec } =
+const { getOpenShellPlan, getSessionShellSpec } =
   require("../platform-compat");
 
 // resolveCore mirror (self-contained, identical to main.js logic)
@@ -53,7 +53,8 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
       // Snapshot the procs at handler invocation time so a stale
       // proc that exited during the IPC round-trip is observed.
       // BLOCK-30 P1: py-server 服务已摘除，进程清单不再包含它。
-      const { rServerProc, plumberProc } = getProcs();
+      // BLOCK-51 P3: plumber 空壳已清理，进程清单不再包含它。
+      const { rServerProc } = getProcs();
       const processes = [
         {
           id: "biof3-server",
@@ -63,21 +64,6 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
           pid: rServerProc?.pid || null,
           logPath: path.join(logDir, "biof3-server.log"),
           output: readLogTail(path.join(logDir, "biof3-server.log")),
-        },
-        {
-          id: "plumber",
-          label: "R plumber",
-          command: process.env.BIOF3_R_HOME
-            ? `${path.join(
-                process.env.BIOF3_R_HOME,
-                "bin",
-                getRuntimeBinName("r", process.platform),
-              )} ${resolveCore("biof3-server", "replot.R")} --port 8787`
-            : `${getRuntimeBinName("r", process.platform)} replot.R --port 8787`,
-          status: plumberProc && !plumberProc.killed ? "running" : "stopped",
-          pid: plumberProc?.pid || null,
-          logPath: path.join(logDir, "plumber.log"),
-          output: readLogTail(path.join(logDir, "plumber.log")),
         },
       ];
       return {

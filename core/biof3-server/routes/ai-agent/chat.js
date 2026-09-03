@@ -226,7 +226,7 @@ module.exports = {
           return res.status(500).json({ status: 'error', error: '创建 agent task 失败: ' + e.message });
         }
 
-        const acquired = aiTaskConcurrencyAcquire(userId, taskId);
+        const acquired = aiTaskConcurrencyAcquire(userId, taskId, { isPrimary: wantKind === 'primary' });
         if (!acquired) {
           agentTaskStore.markAgentTaskFailed(taskId, '并发限制');
           return res.status(429).json({ status: 'error', error: '并发限制，请稍后再试' });

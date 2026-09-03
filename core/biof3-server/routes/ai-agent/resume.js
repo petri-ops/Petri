@@ -215,7 +215,8 @@ module.exports = {
       } catch {}
 
       const { aiTaskConcurrencyAcquire, aiTaskConcurrencyRelease } = require('../../helpers/runtime');
-      const acquired = aiTaskConcurrencyAcquire(userId, newTaskId);
+      // BLOCK-51 M1 — resume 恢复的是用户主动发起的对话，恒为 primary（预留槽语义）
+      const acquired = aiTaskConcurrencyAcquire(userId, newTaskId, { isPrimary: true });
       if (!acquired) {
         agentTaskStore.markAgentTaskFailed(newTaskId, '并发限制');
         return res.status(429).json({ status: 'error', error: '并发限制，请稍后再试' });

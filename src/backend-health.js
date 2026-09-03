@@ -3,24 +3,25 @@
 //
 // 接口：
 //   getBackendStatus({ runtimeStatus, procs, probeHealth? })
-//     → { rRuntime, pyRuntime, rServerUp, plumberUp, isReady, downReason }
+//     → { rRuntime, pyRuntime, rServerUp, isReady, downReason }
 //
 // 生产用：probeHealth 默认走 fetch('http://localhost:PORT/api/health')，1.5s 超时。
 // 测试用：注入 probeHealth mock 函数。
 //
-// isReady 最低要求 = rServerUp（biof3-server 是硬底座，plumber 按需）。
+// isReady 最低要求 = rServerUp（biof3-server 是硬底座）。
 // BLOCK-30 P1: pyServerUp 随 py-server HTTP 服务摘除；pyRuntime 保留
 // （Python 工具仍由 biof3-server 经内嵌 Python 运行时执行）。
+// BLOCK-51 P3: plumberUp 随 plumber 空壳摘除（replot.R 从未存在，
+// plumber 进程从未启动，恒为 false 的死指标）。
 
 // A-009: pull every backend port from env-coordinator instead of each
 // file duplicating the per-port fallback literal here. The Electron
-// main process sets R_SERVER_PORT / PLUMBER_PORT
+// main process sets R_SERVER_PORT
 // before this module is required, so the helper defaults
 // are only hit in the standalone fallback path.
 const { getBackendPort } = require('./main/env-coordinator');
 
 const R_SERVER_HEALTH = `http://localhost:${getBackendPort('r')}/api/health`;
-const PLUMBER_HEALTH = `http://localhost:${getBackendPort('plumber')}/health`;
 
 /**
  * 探测一个 URL 是否可达且返回 2xx。1.5s 超时，失败返回 false（不抛）。
@@ -64,23 +65,19 @@ function mergeRuntimeStatusWithConfiguredHomes(runtimeStatus, env = process.env)
  * 聚合后端状态。
  * @param {object} opts
  * @param {object} opts.runtimeStatus - getRuntimeStatus() 返回的 { r:{installed}, python:{installed} }
- * @param {object} opts.procs - { gateway, rServer, plumber }，每个为 spawn 返回的 ChildProcess 或 null
+ * @param {object} opts.procs - { rServer }，spawn 返回的 ChildProcess 或 null
  * @param {function?:} opts.probeHealth - 可注入的 biof3-server health 探测（测试用）
- * @param {function?:} opts.probePlumber - 可注入的 plumber 探测（测试用）
  */
-async function getBackendStatus({ runtimeStatus, procs, probeHealth, probePlumber }) {
+async function getBackendStatus({ runtimeStatus, procs, probeHealth }) {
   const rRuntime = !!runtimeStatus?.r?.installed;
   const pyRuntime = !!runtimeStatus?.python?.installed;
 
   const rServerAlive = isProcAlive(procs?.rServer);
-  const plumberAlive = isProcAlive(procs?.plumber);
 
   const probeH = probeHealth || (() => probeUrl(R_SERVER_HEALTH));
-  const probePl = probePlumber || (() => probeUrl(PLUMBER_HEALTH));
 
   // 只在进程存活时才探测（进程已死则直接 false，省一次网络往返）
   const rServerUp = rRuntime && rServerAlive && (await probeH());
-  const plumberUp = plumberAlive && (await probePl());
 
   // isReady 最低要求 = biof3-server 就绪
   const isReady = !!rServerUp;
@@ -94,7 +91,7 @@ async function getBackendStatus({ runtimeStatus, procs, probeHealth, probePlumbe
     downReason = 'R 后端未就绪，点此诊断';
   }
 
-  return { rRuntime, pyRuntime, rServerUp, plumberUp, isReady, downReason };
+  return { rRuntime, pyRuntime, rServerUp, isReady, downReason };
 }
 
 module.exports = { getBackendStatus, mergeRuntimeStatusWithConfiguredHomes, probeUrl };

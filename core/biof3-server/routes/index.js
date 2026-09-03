@@ -43,7 +43,6 @@ module.exports = async function registerRoutes(app) {
     ['AI chat', () => require('./ai-chat')(app)],
     ['AI agent', () => require('./ai-agent')(app)],
     ['AI settings', () => require('./ai-settings-api').registerAiSettingsRoutes(app)],
-    ['R compute', () => require('./r-compute').registerRCompute(app)],
   ];
 
   for (const [name, fn] of routes) {

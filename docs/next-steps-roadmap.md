@@ -1,14 +1,19 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-03（**BLOCK-47-UI255-POPOVER-VERTICAL-CLAMP 收口**：HoverPreviewPopover 内容异步膨胀后纵向越界已修——ResizeObserver 重钳，实机底行场景底边精确贴合 winH-8、横向翻转不回归，证据 `acceptance/block-47/`。同日 BLOCK-46 已收口（12 项升 verified，`51dc2d93`）；BLOCK-48/49 planned 候选已登记（用户裁决，非 active）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-03（**BLOCK-51-AUDIT-FIXES 收口**：M1 isPrimary 修复 + 上下文熔断接线 + plumber 空壳清理 + P4 终端崩溃修复，P5 定向门禁全绿（定向 22/22 + 回归 57/57 + tsc 0 + docs:check + ui:audit:check），P6 并发/修剪实机场景留日常使用观察（终端部分已实机验证）。**当前 active：NONE**；planned 候选 48/49/52-57 待用户裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- **Active 工作包：NONE**（BLOCK-47 已收口；BLOCK-48/49 为 planned 候选，等待用户裁决启动）。
-- 已收口候选：UI-193 widget 业务路径 BLOCK-43（superseded，`f57089cb`）；ui:audit `--report` schema 债务 BLOCK-44（`8deff99a`）；dev-electron 停止逻辑修复 BLOCK-45（`56442ee1`）；近期 in_progress 批量复核 BLOCK-46（12 项升 verified，提交见 git log）。
-- 已启动增量候选：UI-255 浮窗纵向越界修复 → BLOCK-47（active，见上）。
+- **Active 工作包：NONE**（BLOCK-51 已收口；planned 候选 48/49/52-57 等待用户裁决启动）。
+- 已收口候选：UI-193 widget 业务路径 BLOCK-43（superseded，`f57089cb`）；ui:audit `--report` schema 债务 BLOCK-44（`8deff99a`）；dev-electron 停止逻辑修复 BLOCK-45（`56442ee1`）；近期 in_progress 批量复核 BLOCK-46（12 项升 verified，提交见 git log）；UI-255 浮窗纵向越界修复 BLOCK-47（RO 重钳，证据 `acceptance/block-47/`）；审阅「file not found」修复 BLOCK-50（结构化兜底 deleted/missing，证据 `acceptance/block-50/`）；审计修复包 BLOCK-51（M1 isPrimary + 上下文熔断 + plumber 清理 + 终端崩溃修复，2026-09-03 收口）。
 - **planned 候选（待用户裁决启动）：`BLOCK-48-COMPUTER-USE`**（2026-09-03 用户裁决立项调研）：macOS 电脑控制模块——对标 TRAE computer-use 插件，AX 语义树 + CGEvent 合成事件双层架构（Swift sidecar 进程 + agent 工具对标 `ide_*` 模式七工具 + 授权门），技术调研与实施计划已落盘 `docs/block-48-computer-use-plan.md`；不抢占 BLOCK-47 active 槽位，收口后由用户裁决启动。
 - **planned 候选（待用户裁决启动）：`BLOCK-49-MULTI-AGENT-SPAWN`**（2026-09-03 用户裁决立项）：多 Agent 内生派生——对标 codex MultiAgentV2，把既有 `kind='subagent'` 链路（loop_runs 父子持久化/并发槽/级联取消）包装为模型可见工具面（MVP 三工具 + 终态摘要回传 + 权限继承不放大 + explicit 模式），计划落盘 `docs/block-49-multi-agent-spawn-plan.md`；不抢占 BLOCK-47 active 槽位，收口后由用户裁决启动。
+- **planned 候选：`BLOCK-52-SELECT-TO-CHAT`**（2026-09-03 用户裁决立项）：选中即引用→对话微调闭环——P1 文字选中引用（selection→composer 引用块）/ P2 图片引用（图+job/revision 元数据卡）/ P3 微调闭环（contextToken 绑定→改参重跑出新 Revision，生信旗舰第一块体验拼图）；复用 6 项既有资产（chat-file-references/attachments/pendingScrollContext/result_studio_context/read_image/P4R Composer 链）；plan `docs/block-52-select-to-chat-plan.md`；启动顺序待用户裁决。
+- **planned 候选：`BLOCK-53-PROJECT-CREATION-UX`**（2026-09-03 用户裁决立项）：项目创建体验补丁（源自 codex vs BioF3 创建方式对比调研）——P1 拖拽目录直达创建（drop→复用 UI-253 pendingWorkspace 确认链，不绕过确认）；P2 非 git 目录一次性引导（git init 一键启用审阅，dismiss 一次性记忆，对齐 codex 信任屏哲学）；不改注册式项目模型；plan `docs/block-53-project-creation-ux-plan.md`；排队 BLOCK-51 之后。
+- **planned 候选：`BLOCK-54-TERMINAL-UPGRADE`**（2026-09-03 用户裁决立项）：终端升级（源自 codex unified exec 调研）——P1 模型侧 workspace_exec 加 yield_ms（默认 10s 范围 250ms-30s，超时返回 handle 进既有后台进程表，与 exec_background 正交）+ token 预算输出截断；P2 用户侧底部终端多 Tab（上限 4，terminal.js 单例→Map，IPC additive sessionId 兼容旧调用，退出全量 kill 对齐 codex terminate_all_processes）；plan `docs/block-54-terminal-upgrade-plan.md`；排队 BLOCK-51 之后。
+- **planned 候选：`BLOCK-55-ENGINEERING-PLAN-MODE`**（2026-09-03 用户裁决立项）：渐进式工程计划模式（源自 codex plan mode 精华提取：二档模式/plan 模式收工具/批准三选一/轻门不重流程）——P1 Spec 轻门（copilot_plans draft 状态 + spec_md + plan 模式开关收写类工具 + 批准三选一弹窗，不依赖 BLOCK-49）；P2 步骤级 agent 分派（assignee→spawn_agent/wait_agent，**依赖 BLOCK-49 落地**）；P3 Replan 修订案；复用 tool_plan 生命周期/步骤状态机，Harness Workflow 独立不动；plan `docs/block-55-engineering-plan-mode-plan.md`；建议执行序 51→52/53/54→49→55。
+- **planned 候选：`BLOCK-56-RELIABILITY-DEPTH`**（2026-09-03 用户裁决立项）：可靠性纵深（源自 codex 第四轮调研，主题=坏情况任务不报废）——P1 模型降级链路（错误分类+任务级 fallback 切 profile 续跑复用 BLOCK-38 resume 链+降级事件用户可见，单级不连环；生信场景价值：长分析后模型挂降级保成果）；P2 沙箱中间档 workspace-write（三档 accessMode+validator 矩阵，与 BLOCK-55 plan 模式衔接）；P3 上下文保鲜（workspace_read 内容指纹+unchanged/changed 标记，模型裁决不自动重读）；F4 记忆系统仅登记留候选；plan `docs/block-56-reliability-depth-plan.md`；排队 BLOCK-51 之后。
+- **planned 候选：`BLOCK-57-REMOTE-EXECUTION`**（2026-09-03 用户裁决立项）：远程执行——本地指挥席 + SSH headless 执行节点 + 调度器适配（源自算力扩展设计讨论；核心裁决=不做 Linux 桌面版）；复用 LanguageExecutor 抽象（新增 remote-executor.js）/ tool_jobs 状态机 / Job 文件级形态（script+params）；四阶段：P1 SSH 直连单服务器直跑、P2 Slurm 适配（sbatch/sacct/scancel+排队位置显示）、P3 复现链跨机（provenance 记执行目标+产物 hash 校验拉回）、P4 LSF/SGE+多目标路由；跨机复现红利强化护城河；P1-P2 G0 兼容产品能力（用户自有服务器/集群 SSH 出去，无 BioF3 云中转）；体量排队清单最大包，建议排 BLOCK-56 之后独立大阶段，启动前 P0 先做设计评审（断线/凭据/状态机映射/产物签名深水区）；plan `docs/block-57-remote-execution-plan.md`。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 
 ## 当前结论

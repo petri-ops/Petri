@@ -614,6 +614,8 @@ async function runAgentLoop({
     executionPolicy,
     tools,
     MAX_AGENT_TOOL_CALLS,
+    // BLOCK-51 P2 — 上下文熔断：loop 内每轮请求前的预算检查复用同一 ctxWindow
+    contextWindow: safeCtx,
   };
 
   // ---------- Run loop via orchestrator ----------

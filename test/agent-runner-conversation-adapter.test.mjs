@@ -1,17 +1,25 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import path from 'node:path';
+import fs from 'node:fs';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// BLOCK-51 测试基建修复（与 agent-concurrency.test.mjs 同一修复）：conversation-adapter
+// 依赖链模块顶层即 prepare projects——先跑生产 migration 链再加载。
+const require = createRequire(import.meta.url);
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-conv-adapter-'));
+process.env.BIOF3_DB_PATH = path.join(tempDir, 'conv-adapter.db');
+const { runMigrations } = require('../src/migration-runner');
+await runMigrations(process.env.BIOF3_DB_PATH, path.join(__dirname, '../src/migrations'));
+
 function resolve(...segments) {
   return path.resolve(__dirname, '..', ...segments);
 }
-
-const require = createRequire(import.meta.url);
 
 describe('agent-runner-conversation-adapter.test.mjs (BLOCK-14 PHASE 3.1 message/conversation helpers)', () => {
   it('buildConversationMetadata normalizes guest vs user audience and tolerates null inputs', () => {

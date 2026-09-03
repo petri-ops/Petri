@@ -83,6 +83,9 @@ const {
   createResultEditProgressRecorder,
   finalizeResultEditProgress,
 } = require('./agent-tools/result-context-binding');
+// BLOCK-51 P2 — 上下文熔断：预算估算 + 超窗修剪
+const { estimateRequestTokens } = require('./helpers/token-estimator');
+const { trimMessagesToBudget } = require('./helpers/message-trimmer');
 
 /**
  * Run the agent loop state machine.
@@ -123,6 +126,7 @@ async function runLoop({
     parentLoopRunId,
     context,
     executionPolicy,
+    contextWindow,
   } = config;
 
   // ---------- Loop state variables (6 closures) ----------
@@ -134,6 +138,10 @@ async function runLoop({
   let loopPublicConclusion = null;
 
   // ---------- Internal state ----------
+  // BLOCK-51 P2 — 上下文熔断：agent-runner 已把 safeCtx（>0）放入 config.contextWindow；
+  // 这里做兜底归一（0/undefined → 64000），与 agent-runner 的 token_budget 口径一致。
+  const loopContextWindow = (typeof contextWindow === 'number' && contextWindow > 0) ? contextWindow : 64000;
+  let contextBudgetTrimmed = false;
   const assistantProgress = createAgentProgressRecorder();
   const toolResultEventsByCallId = {};
   const loopArtifactCache = {};
@@ -542,6 +550,47 @@ async function runLoop({
             ? '已达到显式配置的工具调用保护上限。请基于已收到的工具结果直接说明停止原因、已完成工作和未执行步骤，不要再调用工具，也不得声称尚未启动的工作正在执行。'
             : '检测到相同工具和参数反复调用，任务可能陷入异常循环。请停止调用工具，直接说明异常、已完成工作和未执行步骤；不得声称尚未启动的工作正在执行。',
         });
+      }
+
+      // BLOCK-51 P2 — 上下文熔断：每轮请求构造前预算检查，超过 ctxWindow*0.85 时
+      // 用既有 trimMessagesToBudget 一次性修剪（保近期+工具结果/压缩历史/摘要提示）。
+      // system prompt 不参与 trim（trimmer 语义本就如此）；就地替换内容保持数组引用稳定。
+      if (!contextBudgetTrimmed) {
+        try {
+          const hasSystem = messages.length > 0 && messages[0].role === 'system';
+          const est = estimateRequestTokens({
+            systemPrompt: hasSystem ? (messages[0].content || '') : '',
+            messages: hasSystem ? messages.slice(1) : messages,
+            maxTokens: 16384, // 与下方 reqBody.max_tokens 一致
+          });
+          if (est.total > loopContextWindow * 0.85) {
+            const result = trimMessagesToBudget({
+              fullMessages: messages,
+              contextWindow: loopContextWindow,
+              headroom: 16384, // 与 reqBody.max_tokens 一致，预算 = ctx - system - headroom
+              systemPromptTokens: est.systemPromptTokens,
+            });
+            if (result.stats && result.stats.trimmed) {
+              contextBudgetTrimmed = true;
+              const trimmed = result.messages;
+              messages.length = 0;
+              for (const m of trimmed) messages.push(m);
+              _emit({
+                event: 'token_budget',
+                contextWindow: loopContextWindow,
+                messagesTokensUsed: result.stats.messagesTokensUsed,
+                systemPromptTokens: est.systemPromptTokens,
+                messagesTokens: result.stats.messagesTokensUsed,
+                pct: Math.min(100, Math.round((result.stats.messagesTokensUsed / loopContextWindow) * 100)),
+                trimmed: true,
+                messagesDropped: result.stats.messagesDropped,
+              });
+              console.log(`[context-breaker] iter ${iter + 1} trimmed ${result.stats.messagesDropped} messages: ${est.total} → ${result.stats.messagesTokensUsed} tokens (ctx ${loopContextWindow})`);
+            }
+          }
+        } catch (e) {
+          console.log('[context-breaker-error]', e && e.message);
+        }
       }
 
       const reqBody = {

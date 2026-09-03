@@ -3010,10 +3010,7 @@ export function TerminalPanel({
     return () => window.clearInterval(timer);
   }, [refresh]);
 
-  const visibleProcesses = useMemo(
-    () => (snapshot?.processes || []).filter((proc) => proc.id !== 'plumber'),
-    [snapshot]
-  );
+  const visibleProcesses = useMemo(() => snapshot?.processes || [], [snapshot]);
 
   return (
     <div className={styles.terminalPanel}>

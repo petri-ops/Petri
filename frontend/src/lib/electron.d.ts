@@ -10,7 +10,6 @@ export interface BackendStatus {
   rRuntime: boolean | null;
   pyRuntime: boolean | null;
   rServerUp: boolean;
-  plumberUp: boolean;
   isReady: boolean;
   downReason: string | null;
   /** true once the first backend status read has resolved — lets the UI
@@ -216,25 +215,8 @@ declare global {
       backend: {
         status: () => Promise<BackendStatus>;
       };
-      // M2-7：py-server / plumber 按需启停（lazy，idle 5min 自动停）
-      py: {
-        start: () => Promise<{
-          ok: boolean;
-          alreadyRunning?: boolean;
-          pid?: number;
-          error?: string;
-        }>;
-        stop: () => Promise<{ ok: boolean; wasRunning?: boolean }>;
-      };
-      plumber: {
-        start: () => Promise<{
-          ok: boolean;
-          alreadyRunning?: boolean;
-          pid?: number;
-          error?: string;
-        }>;
-        stop: () => Promise<{ ok: boolean; wasRunning?: boolean }>;
-      };
+      // BLOCK-51 P3：py / plumber 按需启停通道已随 py-server（BLOCK-30 P1）
+      // 与 plumber 空壳（BLOCK-51 P3）摘除。
       files: {
         saveDialog: (defaultName?: string) => Promise<string | null>;
         openDialog: (filters?: unknown) => Promise<string | null>;

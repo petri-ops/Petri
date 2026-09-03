@@ -3226,6 +3226,27 @@
       "phase": "COMPLETED"
     },
     {
+      "id": "BLOCK-50-REVIEW-FILE-NOT-FOUND",
+      "path": "docs/block-50-review-file-not-found-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-50-review-file-not-found",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-50",
+        "ui-audit",
+        "review",
+        "defect-fix",
+        "completed",
+        "G0"
+      ],
+      "notes": "2026-09-03 立项（用户报障）并同日收口：审阅/悬停预览/未跟踪预览对已删除或已消失文件抛 file not found——git:working-tree-file-content WORKTREE 分支磁盘缺失即 throw file_missing，而删除文件（D）是审阅合法条目。修法：后端结构化兜底（HEAD 有→deleted:true 空内容呈现删除 diff；HEAD 无→missing:true），前端 CodeMirrorDiffView/UntrackedFilePreview 改占位不再报错。P2 后端 node --test 4/4 + WorkingTreeReview vitest 43/43 + tsc 0；P3 dev Electron 实机复现用户原场景（ThinkSpace docs/archive/.git-quick-ref.md）删除提示条+删除 diff、悬停预览 +0−237 无报错，证据 acceptance/block-50/；P4 UI-250 台账转 verified、roadmap active 清空。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "COMPLETED"
+    },
+    {
       "id": "BLOCK-48-COMPUTER-USE",
       "path": "docs/block-48-computer-use-plan.md",
       "kind": "work-package",
@@ -3269,8 +3290,204 @@
       "registeredAt": "2026-09-03",
       "archivePolicy": "archive_when_superseded",
       "phase": "PLANNED"
+    },
+    {
+      "id": "DESIGN-REVIEW-2026-09",
+      "path": "docs/design-review-2026-09.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "design-review-2026-09",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "design-review",
+        "architecture",
+        "ipc-contract",
+        "store-kernel",
+        "render-pipeline",
+        "test-architecture",
+        "G0"
+      ],
+      "notes": "2026-09-03 只读设计层评审（与 AUDIT-51 四域代码审计互补）：7 项结论——IPC 双层手工类型声明复发 ≥3 次（单一事实源候选）/ store 集群缺共享内核 / SimpleChat 拆分实质 -7% 未完成 / 渲染管线整树重绘为僵硬根因 / 测试层级错位（M1 推广）/ 产品重心观察 / 三项做对的设计。候选队列：BLOCK-51（审计修复含 M1）+ 设计评审 5 项 + BLOCK-48/49。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "retain_stable_path",
+      "phase": "REFERENCE"
+    },
+    {
+      "id": "BLOCK-51-AUDIT-FIXES",
+      "path": "docs/block-51-audit-fixes-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-51-audit-fixes",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-51",
+        "audit-fixes",
+        "concurrency",
+        "is-primary",
+        "context-window",
+        "message-trimmer",
+        "G0"
+      ],
+      "notes": "2026-09-03 completed 收口：P1 M1 isPrimary 修复（chat.js/resume.js 路由层显式传参 + 路由层形状契约测试 10/10，含测试基建 migration 修复）；P2 上下文熔断接线（loop 每轮预算检查 >85% 触发 trimMessagesToBudget + 防抖 + token_budget(trimmed) 事件，测试 3/3）；P3 plumber 空壳清理（startPlumber/r-compute.js/路由挂载/plumberUp/前端 replot 消费链全移除，拓扑改 biof3-server 单轨）；P4 mainWindow 形态错配修复（getter→方法 + WTR 传参 + 回归测试 5/5）。P5 定向门禁：定向 22/22 + 回归 57/57 + tsc 0 + docs:check + ui:audit:check 全绿。P6 并发/修剪实机场景留日常观察（终端部分已实机验证）。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "COMPLETED"
+    },
+    {
+      "id": "PRODUCT-STRATEGY-REVIEW-2026-09",
+      "path": "docs/product-strategy-review-2026-09.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "product-strategy-review-2026-09",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "product-strategy",
+        "positioning",
+        "bioinformatics",
+        "agent-platform",
+        "G0"
+      ],
+      "notes": "2026-09-03 战略定位评审（用户犹豫中先固化，不改变当前执行队列）：核心判断=通用 agent 为底座 / 生信工作台为旗舰；稀缺资产盘点（Artifact Truth 链/parameterImpacts/R runtime/bioSkills/版本化科学编辑）vs 已商品化能力（chat/git/终端）；若未来转向，候选队列重排参照（BLOCK-49 升/BLOCK-48 降）；任何转向须用户显式裁决。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "retain_stable_path",
+      "phase": "REFERENCE"
+    },
+    {
+      "id": "BLOCK-52-SELECT-TO-CHAT",
+      "path": "docs/block-52-select-to-chat-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-52-select-to-chat",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-52",
+        "select-to-chat",
+        "reference",
+        "artifact-context",
+        "result-editing",
+        "ux",
+        "G0"
+      ],
+      "notes": "2026-09-03 planned 登记（用户裁决立项）：选中即引用→对话微调闭环——P1 文字选中引用（selection→composer 引用块，纯前端 0 新 IPC）；P2 图片/artifact 引用（图+job/revision 元数据卡进 composer，只读归属查询）；P3 微调闭环（contextToken 绑定→result_changeset_create_in_context 改参重跑出新 Revision，生信旗舰第一块体验拼图）。复用 6 项既有资产（chat-file-references/attachments/pendingScrollContext/result_studio_context/read_image/P4R Composer 链）。战略对齐：观察期裁决下底座与旗舰两方向均不浪费。排队 BLOCK-51 之后。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "PLANNED"
+    },
+    {
+      "id": "BLOCK-53-PROJECT-CREATION-UX",
+      "path": "docs/block-53-project-creation-ux-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-53-project-creation-ux",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-53",
+        "project-creation",
+        "drag-drop",
+        "git-init-guide",
+        "ux",
+        "G0"
+      ],
+      "notes": "2026-09-03 planned 登记（用户裁决独立立项）：项目创建体验补丁（源自 codex vs BioF3 创建方式对比调研）——P1 拖拽目录直达创建（drop → 复用 UI-253 pendingWorkspace 确认链，不绕过确认）；P2 非 git 目录一次性引导条（git init 一键启用审阅，dismiss 一次性记忆，对齐 codex 信任屏哲学）。不改注册式项目模型，0 新依赖。排队 BLOCK-51 之后。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "PLANNED"
+    },
+    {
+      "id": "BLOCK-54-TERMINAL-UPGRADE",
+      "path": "docs/block-54-terminal-upgrade-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-54-terminal-upgrade",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-54",
+        "terminal",
+        "yield",
+        "multi-tab",
+        "workspace-exec",
+        "node-pty",
+        "G0"
+      ],
+      "notes": "2026-09-03 planned 登记（用户裁决立项）：终端升级（源自 codex unified exec 调研）——P1 模型侧 workspace_exec 加 yield_ms（默认 10s 范围 250ms-30s，超时返回 handle 进既有后台进程表，与 exec_background 正交）+ token 预算输出截断；P2 用户侧底部终端多 Tab（上限 4，shellProc 单例→Map，IPC additive sessionId 兼容旧调用，退出全量 kill 对齐 terminate_all_processes）。前置：BLOCK-51 P4 已修终端崩溃。0 新依赖。排队 BLOCK-51 之后。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "PLANNED"
+    },
+    {
+      "id": "BLOCK-55-ENGINEERING-PLAN-MODE",
+      "path": "docs/block-55-engineering-plan-mode-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-55-engineering-plan-mode",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-55",
+        "plan-mode",
+        "spec-gate",
+        "multi-agent",
+        "replan",
+        "codex-reference",
+        "G0"
+      ],
+      "notes": "2026-09-03 planned 登记（用户裁决「渐进式 + 参考 codex 取精华」）：渐进式工程计划模式——P1 Spec 轻门（draft 状态 + spec_md + plan 模式开关收写类工具 + 批准三选一弹窗【批准执行/清上下文执行/继续讨论】，不依赖 BLOCK-49）；P2 步骤级 agent 分派（assignee→spawn_agent/wait_agent，依赖 BLOCK-49）；P3 Replan 修订案。codex 精华：二档模式/plan 模式收工具/三选一裁决/轻门不重流程。复用 tool_plan 生命周期+步骤状态机+Harness Workflow 独立不动。建议序：51→52/53/54→49→55。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "PLANNED"
+    },
+    {
+      "id": "BLOCK-56-RELIABILITY-DEPTH",
+      "path": "docs/block-56-reliability-depth-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-56-reliability-depth",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-56",
+        "model-fallback",
+        "sandbox-tier",
+        "workspace-write",
+        "stale-context",
+        "reliability",
+        "G0"
+      ],
+      "notes": "2026-09-03 planned 登记（用户裁决「四个新发现单独开一个 block」）：可靠性纵深（源自 codex 第四轮调研，主题=坏情况任务不报废）——P1 模型降级链路（错误分类+任务级 fallback 切 profile 续跑复用 BLOCK-38 resume 链+降级事件用户可见，单级不连环）；P2 沙箱中间档 workspace-write（三档 accessMode+validator 矩阵，与 BLOCK-55 plan 模式衔接）；P3 上下文保鲜（workspace_read 内容指纹+loop 内存 map+unchanged/changed 标记，模型裁决不自动重读）；F4 记忆系统仅登记（半成品资产在，留候选）。生信场景价值：30min 分析后模型挂降级保成果。0 新依赖。排队 BLOCK-51 之后。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "PLANNED"
+    },
+    {
+      "id": "BLOCK-57-REMOTE-EXECUTION",
+      "path": "docs/block-57-remote-execution-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-57-remote-execution",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-57",
+        "remote-execution",
+        "ssh",
+        "headless-agent",
+        "slurm",
+        "hpc",
+        "compute-to-data",
+        "G0"
+      ],
+      "notes": "2026-09-03 planned 登记（用户裁决立项：算力扩展设计讨论）：核心裁决=不做 Linux 桌面版（解决算力认同而非算力本身），做本地指挥席 + SSH headless 执行节点 + 调度器适配。复用三项既有资产（LanguageExecutor 抽象新增 remote-executor.js / tool_jobs 状态机 / Job 文件级形态 script+params）。四阶段：P1 SSH 直连单服务器直跑、P2 Slurm 适配 sbatch/sacct/scancel、P3 复现链跨机 provenance+hash 校验、P4 LSF/SGE+多目标路由。想象力：~/.ssh/config 即目标清单零注册发现、Agent 自选算力 execution_targets 工具、资源预估 prefill sbatch 头、数据重力路由。跨机复现红利强化护城河。P1-P2 G0 兼容产品能力（用户自有服务器/集群 SSH 出去，无 BioF3 云中转，不踩 Provider/发布纪律）。体量排队清单最大包，建议排 BLOCK-56 之后独立大阶段，P0 先做设计评审（断线/凭据/状态机映射/产物签名深水区）。0 新 npm 依赖倾向。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "PLANNED"
     }
   ],
-  "lastUpdated": "2026-09-03 (BLOCK-49-MULTI-AGENT-SPAWN planned 登记)",
-  "documentCount": 189
+  "lastUpdated": "2026-09-03 (BLOCK-57-REMOTE-EXECUTION planned 登记)",
+  "documentCount": 199
 }

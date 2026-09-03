@@ -4,12 +4,12 @@
  * 职责：
  * 1. 设置桌面版本地存储、运行时和用户数据环境变量
  * 2. 启动 biof3-server（子进程 spawn，避免原生模块 V8 版本冲突；BLOCK-30 P1 起
- *    无独立 py-server，Python 工具由 biof3-server 经执行器注册表本地执行）
- * 3. 启动 R plumber replot 服务（spawn 子进程）
- * 4. 加载已安装插件
- * 5. 内容增量同步（后台）
- * 6. 创建 webview 窗口加载内嵌静态站
- * 7. 外部链接走系统浏览器
+ *    无独立 py-server，Python 工具由 biof3-server 经执行器注册表本地执行；
+ *    BLOCK-51 P3 起 plumber 空壳也已摘除，R 为 tools-executor 单轨）
+ * 3. 加载已安装插件
+ * 4. 内容增量同步（后台）
+ * 5. 创建 webview 窗口加载内嵌静态站
+ * 6. 外部链接走系统浏览器
  */
 
 const {
@@ -135,7 +135,12 @@ const getMainWindow = () => _mainWindow;
 const setMainWindow = (w) => { _mainWindow = w; };
 // mainWindow stays as a compatibility alias for the single-instance handler
 // (PHASE 4 will handle the hasSingleInstanceLock + second-instance handler extraction)
-const mainWindow = { get isDestroyed() { return _mainWindow == null || _mainWindow.isDestroyed(); }, get webContents() { return _mainWindow?.webContents; }, get isMinimized() { return _mainWindow?.isMinimized(); }, get isFocused() { return _mainWindow?.isFocused(); }, restore() { _mainWindow?.restore(); }, show() { _mainWindow?.show(); }, focus() { _mainWindow?.focus(); } };
+// BLOCK-51 修复：isDestroyed 由 getter（返回 boolean）改为方法——对齐 Electron BrowserWindow
+// API 形态。此前 terminal.js / skills-window.js / diagnostic.js 等按真窗口的
+// `isDestroyed()` 方法形式调用，getter 求值得到 boolean 后被当函数调用，
+// 抛 "mainWindow.isDestroyed is not a function"（终端场景在 pty onData 异步
+// 回调中无 catch，直接导致主进程 Uncaught Exception）。
+const mainWindow = { isDestroyed() { return _mainWindow == null || _mainWindow.isDestroyed(); }, get webContents() { return _mainWindow?.webContents; }, isMinimized() { return _mainWindow?.isMinimized(); }, isFocused() { return _mainWindow?.isFocused(); }, restore() { _mainWindow?.restore(); }, show() { _mainWindow?.show(); }, focus() { _mainWindow?.focus(); } };
 
 // BioF3 owns local backend ports and must run as a single application
 // instance. A repeated launch focuses the existing window instead of starting
@@ -169,9 +174,8 @@ if (!hasSingleInstanceLock) {
 // setupCsp 已提取到 src/main/csp-config.js
 
 // ── IPC：Runtime 状态查询 ──────────────────────────────────────
-// ── IPC：M2-7 按需启停 plumber ─────────────────────────────────
-// plumber 在重绘前调 .start()。未调用时 5min idle 自动 stop。
-// （BLOCK-30 P1：py:start/py:stop 已随 py-server 摘除。）
+// （BLOCK-30 P1：py:start/py:stop 已随 py-server 摘除；
+//   BLOCK-51 P3：plumber:start/plumber:stop 已随 plumber 空壳摘除。）
 // ── IPC：macOS 小团队更新（OSS 清单 + 已校验 DMG）─────────────
 // ── IPC：文件对话框（preload 暴露的 files.saveDialog/openDialog）─────────
 // ── IPC：诊断日志导出 / 数据备份（M2-8）─────────────────────────
@@ -399,15 +403,12 @@ async function main() {
   // main.js orchestrates via named imports.
   const {
     startRServer,
-    startPlumber,
-    stopPlumber,
     getProcs,
     getLogDir,
     flushLogs,
     readLogTail,
   } = require("./main/backend-proc-manager");
   await startRServer();
-  // plumber 仍按需启停 - 只在 FigCode 重绘时通过 IPC plumber:start 触发
 
   // 2. 加载已安装插件
   await loadInstalledPlugins({ require });
@@ -453,19 +454,19 @@ async function main() {
   setupFileDialogIpc({ mainWindow });
   setupDataManagementIpc();
   setupBranchIpc({ mainWindow: () => mainWindow });
-  setupWorkingTreeReviewIpc({ mainWindow: () => mainWindow });
+  // BLOCK-51 修复：working-tree-review 内部（L858 notifyAgentTaskDone）按对象用法消费
+  // options.mainWindow（isDestroyed()/webContents.send），此前传 thunk 函数导致
+  // 调用时 "options.mainWindow.isDestroyed is not a function"。sender-guard 双形态兼容。
+  setupWorkingTreeReviewIpc({ mainWindow });
   setupResultIpc({ mainWindow: () => mainWindow });
   // BLOCK-9.1 PHASE 2: mid-risk setup functions with dependency injection
   const { setupRuntimeIpc } = require("./ipc/runtime-status");
-  const { setupBackendLifecycleIpc } = require("./ipc/backend-lifecycle");
-  const { setupPluginIpc } = require("./ipc/plugin");
   const { setupAutoUpdateIpc } = require("./ipc/auto-update");
   setupPluginIpc({ mainWindow: () => mainWindow });
   // Capture procs as a snapshot — IPC handlers fetch a fresh
   // snapshot at invocation time via getProcs() from backend-proc-manager.
   const _procsSnapshot = getProcs();
   setupRuntimeIpc(_procsSnapshot);
-  setupBackendLifecycleIpc({ startPlumber, stopPlumber });
   // BLOCK-9.1 PHASE 4: high-risk setup functions with log/proc injection
   const { setupTerminalIpc } = require("./ipc/terminal");
   const { setupDiagnosticIpc } = require("./ipc/diagnostic");
@@ -544,18 +545,8 @@ app.on("before-quit", () => {
   // BLOCK-9.1 PHASE 4: backend proc handles moved to
   // src/main/backend-proc-manager.js. Import them here for the
   // before-quit shutdown sequence.
-  const { getProcs } = require("./main/backend-proc-manager");
-  const { rServerSupervisor, stopPlumber } = require("./main/backend-proc-manager");
-  stopPlumber("app-quit");
+  const { rServerSupervisor } = require("./main/backend-proc-manager");
   rServerSupervisor.shutdown("app-quit");
-  const { plumberProc } = getProcs();
-  for (const proc of [plumberProc]) {
-    if (proc) {
-      try {
-        proc.kill();
-      } catch {}
-    }
-  }
 });
 
 // setupAppMenu moved to src/main/_app-menu.js (SUB-15.1 PHASE 2)
