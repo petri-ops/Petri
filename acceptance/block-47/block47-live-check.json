@@ -1,0 +1,31 @@
+{
+  "row": {
+    "top": 333.7762756347656,
+    "bottom": 363.7575263977051,
+    "left": 1187.7525634765625,
+    "right": 1851.1201171875,
+    "cx": 1519.4363403320312,
+    "cy": 348.76690101623535,
+    "expanded": "false"
+  },
+  "stable": {
+    "stable": true,
+    "h": 766.3612670898438,
+    "top": 325.7662658691406,
+    "bottom": 1092.1275329589844,
+    "left": 757.7437744140625,
+    "right": 1177.7400512695312
+  },
+  "verdict": {
+    "winH": 1277,
+    "popoverHeight": 766.3612670898438,
+    "popoverTop": 325.7662658691406,
+    "popoverBottom": 1092.1275329589844,
+    "bottomOverflowPx": -176.9,
+    "bottomClampPass": true,
+    "rowRight": 1851.1201171875,
+    "flipToLeftPass": true,
+    "visiblePass": true
+  },
+  "at": "2026-09-03T03:24:15.845Z"
+}

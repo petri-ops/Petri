@@ -37,14 +37,21 @@ export function HoverPreviewPopover({
   const left = preferRight
     ? anchor.right + 10
     : Math.max(MARGIN, anchor.left - maxWidth - 10);
-  // 高度需渲染后实测：首帧隐藏，测出后钳制 top 使底边不越界
+  // 高度需渲染后实测：首帧隐藏，测出后钳制 top 使底边不越界；
+  // 内容异步膨胀（如 diff 流式渲染）后 ResizeObserver 触发重钳（BLOCK-47 纵向越界修复）
   const [top, setTop] = useState<number | null>(null);
 
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const h = el.getBoundingClientRect().height;
-    setTop(Math.max(MARGIN, Math.min(anchor.top - MARGIN, window.innerHeight - h - MARGIN)));
+    const clampTop = () => {
+      const h = el.getBoundingClientRect().height;
+      setTop(Math.max(MARGIN, Math.min(anchor.top - MARGIN, window.innerHeight - h - MARGIN)));
+    };
+    clampTop();
+    const ro = new ResizeObserver(clampTop);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, [anchor]);
 
   return (

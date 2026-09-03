@@ -2153,6 +2153,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-46 复测（2026-09-03）**：横向自适应（420px 基准宽收缩、右侧贴边翻转到行左侧）实机 PASS；发现纵向边界——`HoverPreviewPopover` 的 `useLayoutEffect` 仅在 anchor 变化时测高，diff 内容异步膨胀（如 +42/−103 中等体量）后 top 不重算，浮窗高度达 60vh 上限时底边可越界约 145px（winH 1277 / bottom 1422）；已在 roadmap 登记增量候选（重算时机改为内容高度稳定后）。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+**BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-278: git 写操作三期——暂存两栏 / 真实分支切换 / push-pull（BLOCK-41） (2026-09-02 verified)
 
 **用户需求**：BLOCK-29 起维持排除、登记为 roadmap 候选的 git 写操作三期，2026-09-02 用户裁决启动（三项全做 + staged 提交框 + 脏树阻止并提示冲突文件）。

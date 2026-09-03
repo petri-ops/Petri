@@ -1,12 +1,14 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-03（**BLOCK-46-IN-PROGRESS-BATCH-REVIEW 收口**：2026-08-31 批次 12 项 in_progress（UI-247~260 系列）批量 dev Electron 实机复核全部升 verified（证据 `acceptance/block-46/`）+ UI-255 标题修正；复测发现浮窗纵向越界已登记候选。同日 BLOCK-44/45 已收口。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-03（**BLOCK-47-UI255-POPOVER-VERTICAL-CLAMP 收口**：HoverPreviewPopover 内容异步膨胀后纵向越界已修——ResizeObserver 重钳，实机底行场景底边精确贴合 winH-8、横向翻转不回归，证据 `acceptance/block-47/`。同日 BLOCK-46 已收口（12 项升 verified，`51dc2d93`）；BLOCK-48/49 planned 候选已登记（用户裁决，非 active）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
-- **Active 工作包：NONE**（BLOCK-46 已收口，等待用户裁决下一工作包）。
+- **Active 工作包：NONE**（BLOCK-47 已收口；BLOCK-48/49 为 planned 候选，等待用户裁决启动）。
 - 已收口候选：UI-193 widget 业务路径 BLOCK-43（superseded，`f57089cb`）；ui:audit `--report` schema 债务 BLOCK-44（`8deff99a`）；dev-electron 停止逻辑修复 BLOCK-45（`56442ee1`）；近期 in_progress 批量复核 BLOCK-46（12 项升 verified，提交见 git log）。
-- 增量候选（需用户裁决）：**UI-255 浮窗纵向越界修复**——`HoverPreviewPopover` 的 `useLayoutEffect` 仅在 anchor 变化时测高，diff 内容异步膨胀后 top 不重算，浮窗高度达 60vh 上限时底边可越界约 145px（winH 1277 / bottom 1422，BLOCK-46 复测实测）；修法：重算时机改为内容高度稳定后（如 ResizeObserver）。
+- 已启动增量候选：UI-255 浮窗纵向越界修复 → BLOCK-47（active，见上）。
+- **planned 候选（待用户裁决启动）：`BLOCK-48-COMPUTER-USE`**（2026-09-03 用户裁决立项调研）：macOS 电脑控制模块——对标 TRAE computer-use 插件，AX 语义树 + CGEvent 合成事件双层架构（Swift sidecar 进程 + agent 工具对标 `ide_*` 模式七工具 + 授权门），技术调研与实施计划已落盘 `docs/block-48-computer-use-plan.md`；不抢占 BLOCK-47 active 槽位，收口后由用户裁决启动。
+- **planned 候选（待用户裁决启动）：`BLOCK-49-MULTI-AGENT-SPAWN`**（2026-09-03 用户裁决立项）：多 Agent 内生派生——对标 codex MultiAgentV2，把既有 `kind='subagent'` 链路（loop_runs 父子持久化/并发槽/级联取消）包装为模型可见工具面（MVP 三工具 + 终态摘要回传 + 权限继承不放大 + explicit 模式），计划落盘 `docs/block-49-multi-agent-spawn-plan.md`；不抢占 BLOCK-47 active 槽位，收口后由用户裁决启动。
 - `src/preload.js` 已纳入 P6 canonical source-binding impact rule，后续映射新增必须在证据刷新前 fail closed。
 
 ## 当前结论

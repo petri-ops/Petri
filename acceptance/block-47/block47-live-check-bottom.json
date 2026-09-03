@@ -1,0 +1,39 @@
+{
+  "row": {
+    "top": 950.6025390625,
+    "bottom": 980.5837898254395,
+    "left": 1187.7525634765625,
+    "right": 1851.1201171875,
+    "cx": 1519.4363403320312,
+    "cy": 965.5931644439697,
+    "expanded": "false",
+    "scrollTop": 3092.400146484375
+  },
+  "pt": {
+    "cx": 1519.4363403320312,
+    "cy": 965.5931644439697,
+    "expanded": "false"
+  },
+  "stable": {
+    "stable": true,
+    "h": 766.3612670898438,
+    "top": 502.6275329589844,
+    "bottom": 1268.9888000488281,
+    "left": 757.7437744140625,
+    "right": 1177.7400512695312
+  },
+  "verdict": {
+    "winH": 1277,
+    "cap60vh": 766,
+    "anchorTop": 965.5931644439697,
+    "popoverHeight": 766.3612670898438,
+    "popoverTop": 502.6275329589844,
+    "popoverBottom": 1268.9888000488281,
+    "atCap": true,
+    "bottomOverflowPx": 0,
+    "bottomClampPass": true,
+    "withoutFixBottom": 1724,
+    "visiblePass": true
+  },
+  "at": "2026-09-03T03:23:35.189Z"
+}

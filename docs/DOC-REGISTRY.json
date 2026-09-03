@@ -3203,8 +3203,74 @@
       "registeredAt": "2026-09-03",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-47-UI255-POPOVER-VERTICAL-CLAMP",
+      "path": "docs/block-47-ui255-popover-vertical-clamp-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-47-ui255-popover-vertical-clamp",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-47",
+        "ui-audit",
+        "ui-255",
+        "hover-preview",
+        "defect-fix",
+        "G0"
+      ],
+      "notes": "2026-09-03 立项（用户裁决启动 roadmap 增量候选）：UI-255 复测发现 HoverPreviewPopover 纵向越界——useLayoutEffect 仅 anchor 变化时测高，CodeMirrorDiffView 异步膨胀后 top 不重算，60vh 上限时底边越界约 145px；修法 ResizeObserver 内容高度变化后重钳 top，单组件 ~15 行 0 新依赖，两消费方零改动。P1 实现 → P2 vitest+tsc+gates → P3 dev Electron 实机（acceptance/block-47/）→ P4 UI-255 台账补记收口。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-09-03 收口（P0–P4 全部完成）：P1 RO 纵向重钳 + 3 组件用例；P2 vitest 50/50 + tsc 0 + docs:check 187 + ui:audit:check；P3 dev Electron 实机底行重钳（top 942.6→502.6，底边贴合 winH-8，修复前越界 455px）+ 顶行/横向翻转不回归，证据 acceptance/block-47/；P4 UI-255 台账转 verified。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-48-COMPUTER-USE",
+      "path": "docs/block-48-computer-use-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-48-computer-use",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-48",
+        "computer-use",
+        "macos-accessibility",
+        "axuielement",
+        "cgevent",
+        "swift-sidecar",
+        "agent-tools",
+        "G0"
+      ],
+      "notes": "2026-09-03 planned 登记（用户裁决：调研 TRAE computer-use 插件实现后立项，后续为 BioF3 增加同型模块）：TRAE 插件=纯注册壳（能力内置宿主 subagent）；技术方案=AX 语义树 + CGEvent 合成事件双层架构，Swift sidecar 进程（backend-proc-manager 托管，绕开 Electron ABI 教训），agent 工具对标 ide_* 模式七工具（snapshot/click/type/press/scroll/screenshot/wait）+ 授权门；已知坑：Electron AX 懒初始化 kAXErrorCannotComplete / TCC 权限三件套 / Chromium 系 AX 树受限。待 BLOCK-47 收口后用户裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "PLANNED"
+    },
+    {
+      "id": "BLOCK-49-MULTI-AGENT-SPAWN",
+      "path": "docs/block-49-multi-agent-spawn-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-49-multi-agent-spawn",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-49",
+        "multi-agent",
+        "subagent-spawn",
+        "agent-tools",
+        "codex-reference",
+        "loop-runs",
+        "G0"
+      ],
+      "notes": "2026-09-03 planned 登记（用户裁决：按 codex MultiAgentV2 调研方案立项）：把既有 kind=subagent 链路（loop_runs 父子持久化 / 并发槽 / 级联取消 / REST 入口）包装为模型可见的 agent 工具面，完成外生→内生转身；MVP 三工具 spawn_agent/list_agents/wait_agent + 终态摘要回传（token-estimator 预算截断）+ 权限继承不放大 + explicit 模式；二期 send_message/followup_task/interrupt_agent 与 proactive 留候选；0 新依赖，不动主 loop 串行结构。待 BLOCK-47 收口后用户裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "PLANNED"
     }
   ],
-  "lastUpdated": "2026-09-02",
-  "documentCount": 183
+  "lastUpdated": "2026-09-03 (BLOCK-49-MULTI-AGENT-SPAWN planned 登记)",
+  "documentCount": 189
 }
