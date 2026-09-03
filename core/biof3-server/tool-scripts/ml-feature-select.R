@@ -22,11 +22,13 @@ suppressMessages({
 
 # Optional packages — install if missing
 need_pkgs <- c("caret", "Boruta", "mRMRe", "glmnet", "e1071")
-for (pkg in need_pkgs) {
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    cat(sprintf("[ml-feature-select] Installing %s...\n", pkg))
-    install.packages(pkg, repos = "https://cloud.r-project.org/", quiet = TRUE)
-  }
+# BLOCK-58 — 依赖执行路径零安装：缺包毫秒级 fail-fast（结构化错误，绝不联网）。
+# 依赖单一事实源：_dependencies.json；显式补装：scripts/install-r-tool-dependencies.mjs
+missing_pkgs <- need_pkgs[!vapply(need_pkgs, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing_pkgs) > 0) {
+  cat(sprintf("MISSING_R_PACKAGES: %s\n", paste(missing_pkgs, collapse = ", ")))
+  cat("Install first via: node scripts/install-r-tool-dependencies.mjs --tool ml-feature-select\n")
+  quit(status = 1)
 }
 
 if (!exists("%||%")) {
@@ -222,7 +224,7 @@ tryCatch({
 
 if (is.null(boruta_rank)) {
   # Fallback: Random Forest importance via ranger (lightweight)
-  if (!requireNamespace("ranger", quietly = TRUE)) install.packages("ranger", repos = "https://cloud.r-project.org/", quiet = TRUE)
+  # BLOCK-58 — ranger 缺包时由上方 MISSING_R_PACKAGES fail-fast 统一拦截（不在此联网安装）
   suppressMessages(library(ranger))
   rf_df <- as.data.frame(X)
   rf_df$label <- labels_vec

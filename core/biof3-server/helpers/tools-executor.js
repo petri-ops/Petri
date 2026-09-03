@@ -1359,6 +1359,19 @@ function createToolsExecutor({
         return;
       }
       if (cfg.lang === 'r') {
+        // BLOCK-58 — 内置 R 工具脚本执行前毫秒级依赖检查（读 _dependencies.json，
+        // executor.checkPackageInstalled 查 R_HOME/library 目录存在性）：缺包直接
+        // fail-fast 拒绝派生进程（脚本内亦有 MISSING_R_PACKAGES 兜底，分析路径零联网安装）。
+        // 插件脚本（_isPlugin）走 manifest packages + 预编译包通道，不在此管。
+        if (!cfg._isPlugin) {
+          const { checkToolDependencies, missingPackagesMessage } = require('./tool-dependencies');
+          const depCheck = checkToolDependencies(executor, cfg.script);
+          if (depCheck.checked && depCheck.missing.length > 0) {
+            await markJobFailed(jobId, missingPackagesMessage(toolId, depCheck.missing), 'dependencies');
+            releaseActiveToolJob(activeToolJobs, jobId, owner);
+            return;
+          }
+        }
         // R 工具脚本约定：commandArgs(trailingOnly=TRUE)[1] = job_dir
         //（deseq2.R: `args <- commandArgs(trailingOnly=TRUE); job_dir <- args[1]`）
         // 不能用 buildSpawnCommand（它加 --args params.json，是 figcode 脚本约定，

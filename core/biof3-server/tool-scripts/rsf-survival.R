@@ -21,11 +21,13 @@ suppressMessages({
 })
 
 need_pkgs <- c("randomForestSRC", "timeROC", "pec")
-for (pkg in need_pkgs) {
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    cat(sprintf("[rsf-survival] Installing %s...\n", pkg))
-    install.packages(pkg, repos = "https://cloud.r-project.org/", quiet = TRUE)
-  }
+# BLOCK-58 — 依赖执行路径零安装：缺包毫秒级 fail-fast（结构化错误，绝不联网）。
+# 依赖单一事实源：_dependencies.json；显式补装：scripts/install-r-tool-dependencies.mjs
+missing_pkgs <- need_pkgs[!vapply(need_pkgs, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing_pkgs) > 0) {
+  cat(sprintf("MISSING_R_PACKAGES: %s\n", paste(missing_pkgs, collapse = ", ")))
+  cat("Install first via: node scripts/install-r-tool-dependencies.mjs --tool rsf-survival\n")
+  quit(status = 1)
 }
 
 if (!exists("%||%")) {

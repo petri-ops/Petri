@@ -3486,6 +3486,28 @@
       "registeredAt": "2026-09-03",
       "archivePolicy": "archive_when_superseded",
       "phase": "PLANNED"
+    },
+    {
+      "id": "BLOCK-58-R-DEPENDENCY-GOVERNANCE",
+      "path": "docs/block-58-r-dependency-governance-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-58-r-dependency-governance",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-58",
+        "r-dependency",
+        "install-packages",
+        "reproducibility",
+        "artifact-truth",
+        "tool-scripts",
+        "G0"
+      ],
+      "notes": "2026-09-03 active 登记（用户裁决立项，AUDIT-LOG 🟠 广播项转 active）：7 个内置 R 工具脚本执行路径内联 install.packages（非确定性版本/CRAN 网络撞超时/绕过 builtAgainst）移出执行路径。根因=内置 tool-scripts 在插件体系外（无 manifest/无 packages 声明/无预编译包），机制缺口而非机制缺失。方案：_dependencies.json 单一事实源 + 7 脚本 fail-fast 化（缺包结构化错误不联网）+ JS 执行前毫秒级检查拒绝 + scripts/install-r-tool-dependencies.mjs 显式补装命令（版本快照打印）。本机 R 4.5.2 实测缺 16 包（当前靠内联安装才跑通，行为变化如实登记）。预编译包插件 biof3-r-toolchain 实体构建（CRAN 下载/编译/发布面）登记后续候选。0 新 npm 依赖。并行三包之一（BLOCK-52 收口中 + BLOCK-53 遗留 S5），文件面 tool-scripts/+scripts/ 与两 active 包零重叠。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-03",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "ACTIVE-P0"
     }
   ],
   "lastUpdated": "2026-09-03 (BLOCK-57-REMOTE-EXECUTION planned 登记)",
