@@ -8,7 +8,7 @@
  * navbar（SPA 没有 navbar）。body padding 由 DesktopToolbar 组件自己管理。
  */
 
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 // A-009: pull the biof3-server port fallback from env-coordinator
 // instead of duplicating the per-port fallback defaults here. The
@@ -202,6 +202,16 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     openPath: (targetPath) => ipcRenderer.invoke('file:open-path', targetPath),
     openWorkspaceFile: (workspacePath, relativePath) =>
       ipcRenderer.invoke('file:open-workspace-file', workspacePath, relativePath),
+    // BLOCK-53 P1 — 拖拽目录直达创建：把拖入窗口的 File 对象解析为磁盘绝对路径。
+    // webUtils.getPathForFile 是 Electron 官方通道（File.path 自 32 起移除）；沙箱
+    // 环境或非文件拖入时兜底 file.path（Electron 30 仍可用），都拿不到返回 null。
+    pathForFile: (file) => {
+      try {
+        const p = webUtils.getPathForFile(file);
+        if (p) return p;
+      } catch { /* fall through */ }
+      return (file && typeof file.path === 'string' && file.path) || null;
+    },
   },
 
   // BLOCK-19 — workspace 文件写（仅限当前项目的 workspaceDir 边界内文本覆盖）
@@ -388,6 +398,8 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     remoteStatus: (params) => ipcRenderer.invoke('git:remote-status', params || {}),
     push: (params) => ipcRenderer.invoke('git:push', params || {}),
     pull: (params) => ipcRenderer.invoke('git:pull', params || {}),
+    // BLOCK-53 P2 — 非 git 工作区一次性引导：git init + 初始提交（幂等，已 init 时 alreadyGit）
+    initRepository: (params) => ipcRenderer.invoke('git:init-repository', params || {}),
   },
 
 });

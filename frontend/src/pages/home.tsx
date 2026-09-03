@@ -212,6 +212,62 @@ export default function Home(): React.ReactElement {
     }
   }, [creating, navigate, pendingWorkspace]);
 
+  // BLOCK-53 P1 — 拖拽目录直达创建：拖入的路径走与手动路径相同的校验链
+  //（validateDirectory），通过后进 UI-253 既有确认面板 —— 拖拽降低的只是
+  // 「打开系统选择器」的成本，确认与反悔环节不减少。
+  const acceptDroppedPath = useCallback(async (rawPath: string | null) => {
+    if (!rawPath) {
+      setCreateError('无法读取拖入项的路径（请拖入文件夹）。');
+      return;
+    }
+    const validate = window.biof3Desktop?.files?.validateDirectory;
+    if (typeof validate !== 'function') {
+      setCreateError('当前运行环境不支持路径校验（请在 BioF3 桌面应用中使用）。');
+      return;
+    }
+    try {
+      const res = await validate(rawPath);
+      if (!res.ok || !res.data?.path) {
+        setCreateError(res.error || '拖入的路径校验失败');
+        return;
+      }
+      const finalPath = res.data.path;
+      const name = finalPath.split(/[\\/]/).pop()?.trim() || '新项目';
+      setPendingWorkspace({ path: finalPath, name });
+    } catch (e) {
+      setCreateError(`拖入路径校验失败：${e instanceof Error ? e.message : String(e)}`);
+    }
+  }, []);
+
+  // BLOCK-53 P1 — Home 挂载期接管窗口级文件拖入：Chromium 默认行为是导航到
+  // 拖入的文件路径，必须对 dragover/drop 双双 preventDefault；drop 取第一个
+  // 拖入项，经 preload 的 pathForFile（webUtils）解析磁盘绝对路径。
+  useEffect(() => {
+    const prevent = (e: DragEvent) => {
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+    };
+    const onDrop = (e: DragEvent) => {
+      e.preventDefault();
+      const file = e.dataTransfer?.files?.[0];
+      if (!file) {
+        void acceptDroppedPath(null);
+        return;
+      }
+      const pathFor = window.biof3Desktop?.files?.pathForFile;
+      const raw = typeof pathFor === 'function'
+        ? pathFor(file)
+        : (file as File & { path?: string }).path || null;
+      void acceptDroppedPath(raw);
+    };
+    window.addEventListener('dragover', prevent);
+    window.addEventListener('drop', onDrop);
+    return () => {
+      window.removeEventListener('dragover', prevent);
+      window.removeEventListener('drop', onDrop);
+    };
+  }, [acceptDroppedPath]);
+
   const handleRelaunch = useCallback(async () => {
     if (relaunching) return;
     setRelaunching(true);

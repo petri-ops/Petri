@@ -2157,6 +2157,25 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-283: 非 git 工作区一次性引导——审阅空态内联 git init（BLOCK-53 P2） (2026-09-03 in_progress)
+**用户需求**：BLOCK-53 项目创建体验补丁 P2——非 git 目录进入项目后一次性引导「初始化 git 仓库以启用审阅与版本历史」，dismiss 记一次性不再弹（对齐 codex 信任屏「每目录一次」哲学）；非 git 诚实空态（BLOCK-32）保持为引导后的稳态兜底。
+
+**改动**（0 新 npm 依赖 / 1 新 IPC）：① 后端 [working-tree-review.js](../src/ipc/working-tree-review.js) 新增 `git:init-repository`（projectId → getProjectWorkspacePath → `initRepositoryAt`：git init + 全量初始提交，幂等 alreadyGit；commit 失败不回滚 init，返回 committed:false + 可行动 warning；git 缺失 ENOENT 结构化 `git_not_found`）+ `initRepositoryAt` 导出供测试；② [preload.js](../src/preload.js) `workingTreeReview.initRepository` + [electron.d.ts](../frontend/src/lib/electron.d.ts) 类型同步；③ [ReviewMode.tsx](../frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx) 非 git 空态内嵌引导条（useParams projectId 路由定位；内联二次确认明示「将创建 .git + 全量初始提交」；「不再提示」写 localStorage `biof3.gitinit.dismissed.<projectId>` 一次性记忆；init 成功 `review.refresh()` 后空态自动切换为正常审阅视图）；样式入 [WorkingTreeReview.css](../frontend/src/components/desktop/WorkingTreeReview/WorkingTreeReview.css)。**并行边界**：BLOCK-52 P2 并行收口期间启动，文件面零重叠（不触碰 project-workspace / SimpleChat / ResultView / events.ts / agent-tools）。
+
+**门禁**：后端 node --test `working-tree-review-init.test.mjs` 3/3（init+提交成功 / alreadyGit 幂等 / commit 失败保留 .git+warning）；ReviewMode vitest 21/21（新增 3 用例：空态引导条渲染 / 确认流 initRepository({projectId})+refresh 切回审阅 / dismiss 一次性记忆重挂不復现）；tsc 0；docs:check 199。
+
+**实机**（2026-09-03，dev Electron CDP :9222，证据 `acceptance/block-53/live-check.json` + 4 截图）：4 断言 PASS——非 git 项目右栏审阅 dock 空态引导条渲染（初始化按钮+不再提示）；内联二次确认展开（明示「创建 .git 仓库 + 全量初始提交」）；桥缺失降级可见错误（实机栈半新半旧：preload 已载新桥而主进程 handler 未注册，invoke 报错被 `.wt-gitinit-message` 如实展示、不静默不崩溃）；「不再提示」→ 引导条消失 + localStorage `biof3.gitinit.dismissed.<projectId>=1`、SPA 重挂后不再出现且空态兜底正常。**遗留 S5**：init 全链（桥→handler→git init→refresh 切回审阅视图）待 dev Electron 重启后补验（与 BLOCK-52 错峰约定不抢栈重启；后端 `initRepositoryAt` 已由 node --test 真实 git 执行覆盖）。**状态**: in_progress（S5 待补）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-282: 拖拽目录直达创建——home 窗口 drop + 左栏 drop 进既有确认链（BLOCK-53 P1） (2026-09-03 verified)
+
+**用户需求**：BLOCK-53 项目创建体验补丁 P1——把系统目录拖进窗口即直达创建流程；拖拽降低的是「打开系统选择器」的成本，UI-253 确认与反悔环节不减少（不绕过确认）。
+
+**改动**（0 新增 IPC / 0 新 npm 依赖）：① [preload.js](../src/preload.js) `files.pathForFile`（webUtils.getPathForFile 官方通道优先，file.path 兜底，防 Electron 32+ 移除 File.path）+ [electron.d.ts](../frontend/src/lib/electron.d.ts) 类型同步；② [home.tsx](../frontend/src/pages/home.tsx) 挂载期接管窗口级 dragover/drop（preventDefault 阻止 Chromium 默认导航到拖入文件；drop 取第一个拖入项 → pathForFile → `validateDirectory` 校验 → 进 UI-253 既有 pendingWorkspace 确认面板；拖入单文件/无效项走 createError 可见提示）；③ [LeftPanel.tsx](../frontend/src/components/workspace-panels/LeftPanel.tsx) 左栏 drop → validateDirectory → 打开 UI-257 既有内联创建面板并回填路径（onOpen + onPathChange，用户仍需确认创建；拖拽悬停 inline outline 反馈、失败用既有 leftCreateError 展示）。
+
+**门禁**：home vitest 4/4（新增 2 用例：drop 目录 → UI-253 确认面板出现且校验链被真实调用 / drop 非目录 → 可见错误无确认面板）；LeftPanel vitest 9/9（新增 2 用例：drop → createPanel.onOpen+onPathChange 回填 / drop 非目录 → 错误展示且面板不开）；tsc 0；docs:check 199。
+
+**实机**（2026-09-03，dev Electron CDP :9222，vite HMR 生效栈，证据 `acceptance/block-53/live-check.json`）：4 断言全 PASS——① workbench（应用内导航，location.key≠default）窗口级 drop `/tmp/b53-accept-dir` → UI-253 确认面板出现且路径经 validateDirectory 真实 realpath（/tmp→/private/tmp）；② 点「在此处创建」→ 真实项目创建并跳转 `/project/p_mtlmidcb_q46h`；③ drop 单文件 → `[role=alert]`「该路径不是文件夹」可见错误、无确认面板；④ 左栏 drop → UI-257 内联创建面板打开且输入框回填校验后路径（零碰 project-workspace.tsx）。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-281: AgentStreamDisconnected 根因修复——[DONE] 哨兵序列化形状对齐 + 两个重启暴露回归（BLOCK-52 P1 实机暴露的范围外传输层缺陷） (2026-09-03 verified)
 
 **用户需求**：BLOCK-52 P1 实机收口时登记的范围外既有缺陷——chat 每个任务完成后 copilotClient 报「任务事件流在完成前中断」（AgentStreamDisconnected），24 次退避重连 ~90s 烧窗。根因链：events.js 曾用 `sseSend('[DONE]')` 发终态哨兵 → `JSON.stringify('[DONE]')` 序列化为带引号 `"[DONE]"` → 前端 copilotClient 匹配裸 `[DONE]` 永不成立 → 每个 task 完成后被判「在完成前中断」（终态回放路径同样发带引号哨兵）。旧 dev 实例长期未重启 + BLOCK-39 之前「干净截断=onDone」宽松兜底共同掩盖了该缺陷。

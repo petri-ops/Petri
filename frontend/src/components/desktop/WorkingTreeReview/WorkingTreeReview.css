@@ -213,6 +213,35 @@
   font-size: var(--biof3-font-size-caption);
 }
 
+/* ---- BLOCK-53 P2 / UI-283 — 非 git 工作区一次性 git init 引导 ---- */
+.wt-gitinit-prompt {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.wt-gitinit-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.wt-gitinit-confirm-lead {
+  margin: 0;
+  max-width: 380px;
+  color: var(--biof3-text);
+}
+
+.wt-gitinit-message {
+  margin: 0;
+  max-width: 420px;
+  color: var(--biof3-text-muted);
+  font-size: var(--biof3-font-size-caption);
+}
+
 /* ---- diff 文件头 ---- */
 .wt-file-header {
   padding: 8px 12px;

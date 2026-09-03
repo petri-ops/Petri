@@ -95,12 +95,68 @@ export interface LeftPanelProps {
  *   └──────────────────────────────┘
  */
 export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
+  // BLOCK-53 P1 — 拖拽目录直达创建：drop 到左栏 → validateDirectory 校验 →
+  // 打开既有内联创建面板（ctx.createPanel）并回填路径。复用 UI-257 既有确认链，
+  // 用户仍需看到完整路径并点「创建项目」，拖拽不绕过任何确认环节。
+  const [dropActive, setDropActive] = useState(false);
+  const [dropHint, setDropHint] = useState<string | null>(null);
+
+  const handlePanelDrop = async (e: React.DragEvent): Promise<void> => {
+    e.preventDefault();
+    setDropActive(false);
+    const file = e.dataTransfer?.files?.[0];
+    if (!file) {
+      setDropHint('拖入的不是有效的文件/文件夹');
+      return;
+    }
+    const pathFor = window.biof3Desktop?.files?.pathForFile;
+    const raw = typeof pathFor === 'function'
+      ? pathFor(file)
+      : (file as File & { path?: string }).path || null;
+    if (!raw) {
+      setDropHint('无法读取拖入项的路径');
+      return;
+    }
+    const validate = window.biof3Desktop?.files?.validateDirectory;
+    if (typeof validate !== 'function') {
+      setDropHint('当前运行环境不支持路径校验（请在 BioF3 桌面应用中使用）。');
+      return;
+    }
+    try {
+      const res = await validate(raw);
+      if (!res.ok || !res.data?.path) {
+        setDropHint(res.error || '拖入的路径校验失败');
+        return;
+      }
+      ctx.createPanel.onOpen();
+      ctx.createPanel.onPathChange(res.data.path);
+      setDropHint(null);
+    } catch (err) {
+      setDropHint(err instanceof Error ? err.message : String(err));
+    }
+  };
+
   return (
     <aside className={styles.leftCol} style={{ width: ctx.width }}>
-      <div className={styles.leftPanelWrap}>
+      <div
+        className={styles.leftPanelWrap}
+        style={dropActive ? { outline: '1px dashed var(--biof3-color-accent, teal)', outlineOffset: '-4px' } : undefined}
+        onDragOver={(e) => {
+          e.preventDefault();
+          if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+          setDropActive(true);
+        }}
+        onDragLeave={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) setDropActive(false);
+        }}
+        onDrop={(e) => void handlePanelDrop(e)}
+      >
         <QuickActions ctx={ctx} />
         <ProjectTreeHeader ctx={ctx} />
         <ProjectTree ctx={ctx} />
+        {dropHint && (
+          <p className={styles.leftCreateError} role="alert" style={{ padding: '0 12px' }}>{dropHint}</p>
+        )}
         <div className={styles.leftPanelFooter}>
           <button
             type="button"

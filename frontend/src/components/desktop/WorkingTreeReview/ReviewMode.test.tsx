@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter, useLocation } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ReviewMode } from './ReviewMode';
@@ -806,5 +806,103 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
       expect(pathname).toBe('/project/p1/results');
     });
     lengthSpy.mockRestore();
+  });
+});
+
+// ============================================================================
+// BLOCK-53 P2 / UI-283 — 非 git 工作区一次性 git init 引导：
+// 空态引导条出现 / 确认初始化调 initRepository 后 refresh 切回审阅视图 /
+// 「不再提示」写一次性记忆且重挂不復现。
+// ============================================================================
+describe('BLOCK-53 P2 — not-git one-time git init prompt', () => {
+  afterEach(() => {
+    window.localStorage.clear();
+  });
+
+  // 真实 Route 挂载：useParams 必须能解析 projectId（与生产 /project/:projectId 路由一致）。
+  // 注意 hook 的 isOpen:true 挂载 effect 会叠加项目切换 effect 触发两次 refresh（既有幂等行为），
+  // 所以 status mock 用状态 flag（gitReady）而非调用计数驱动。
+  function renderAtProject() {
+    return render(
+      <MemoryRouter initialEntries={['/project/p1/results']}>
+        <Routes>
+          <Route path="/project/:projectId/results" element={<ReviewMode variant="dock" onClose={vi.fn()} />} />
+        </Routes>
+      </MemoryRouter>
+    );
+  }
+
+  function makeNotGitBridge(overrides: Record<string, unknown> = {}) {
+    return makeBridge({
+      status: vi.fn(() =>
+        Promise.resolve({ ok: false, error: 'project_workspace_not_git', message: 'not a git repo' })
+      ),
+      ...overrides,
+    });
+  }
+
+  it('renders the one-time init prompt inside the not-git empty state', async () => {
+    getBridgeMock.mockReturnValue(makeNotGitBridge());
+    renderAtProject();
+
+    expect(await screen.findByTestId('rvw-not-git')).toBeTruthy();
+    expect(screen.getByTestId('git-init-prompt')).toBeTruthy();
+    expect(screen.getByRole('button', { name: '初始化 git 仓库…' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '不再提示' })).toBeTruthy();
+  });
+
+  it('confirm flow → initRepository({projectId}) → refresh leaves the empty state', async () => {
+    let gitReady = false;
+    const initRepository = vi.fn(() => {
+      gitReady = true;
+      return Promise.resolve({ ok: true, data: { initialized: true, committed: true, path: '/tmp/ws' } });
+    });
+    getBridgeMock.mockReturnValue(
+      makeNotGitBridge({
+        status: vi.fn(() =>
+          gitReady
+            ? Promise.resolve({
+                ok: true,
+                data: { files: [], totalFiles: 0, hasUntracked: false, hasConflict: false },
+              })
+            : Promise.resolve({ ok: false, error: 'project_workspace_not_git', message: 'not a git repo' })
+        ),
+        initRepository,
+      })
+    );
+    renderAtProject();
+
+    expect(await screen.findByTestId('git-init-prompt')).toBeTruthy();
+
+    // 内联二次确认：先展开确认行（明示将创建 .git + 初始提交），再点确认
+    fireEvent.click(screen.getByRole('button', { name: '初始化 git 仓库…' }));
+    // 文案里 .git 被 <code> 包裹打断文本节点，用连续片段断言
+    expect(screen.getByText(/把现有全部文件作为初始提交/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: '确认初始化' }));
+
+    await waitFor(() => {
+      expect(initRepository).toHaveBeenCalledWith({ projectId: 'p1' });
+    });
+    // init 成功 → refresh → workspaceNotGit 翻转 → 空态消失
+    await waitFor(() => {
+      expect(screen.queryByTestId('rvw-not-git')).toBeNull();
+    });
+  });
+
+  it('dismiss writes a one-time memory and the prompt stays gone after remount', async () => {
+    getBridgeMock.mockReturnValue(makeNotGitBridge());
+    const { unmount } = renderAtProject();
+
+    expect(await screen.findByTestId('git-init-prompt')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: '不再提示' }));
+    expect(screen.queryByTestId('git-init-prompt')).toBeNull();
+    expect(window.localStorage.getItem('biof3.gitinit.dismissed.p1')).toBe('1');
+
+    unmount();
+    getBridgeMock.mockReturnValue(makeNotGitBridge());
+    renderAtProject();
+
+    expect(await screen.findByTestId('rvw-not-git')).toBeTruthy();
+    expect(screen.queryByTestId('git-init-prompt')).toBeNull();
   });
 });

@@ -234,6 +234,8 @@ declare global {
           workspacePath: string,
           relativePath: string
         ) => Promise<{ ok: boolean; error?: string }>;
+        /** BLOCK-53 P1 — 拖拽目录直达：把拖入窗口的 File 对象解析为磁盘绝对路径（拿不到返回 null）。 */
+        pathForFile: (file: File) => string | null;
       };
       // BLOCK-19 — workspace 边界内文本覆盖
       workspace: {
@@ -562,6 +564,19 @@ declare global {
         pull: (params: { remote?: string | null; branch?: string | null; projectId?: string }) => Promise<{
           ok: boolean;
           data?: { remote: string; branch: string; pulled: boolean; output: string };
+          error?: string;
+          message?: string;
+        }>;
+        /** BLOCK-53 P2 — 非 git 工作区一次性引导：git init + 初始提交（幂等）。 */
+        initRepository: (params: { projectId: string }) => Promise<{
+          ok: boolean;
+          data?: {
+            alreadyGit?: boolean;
+            initialized?: boolean;
+            committed?: boolean;
+            path: string;
+            warning?: string;
+          };
           error?: string;
           message?: string;
         }>;

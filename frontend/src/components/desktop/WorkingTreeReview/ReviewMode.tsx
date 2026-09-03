@@ -408,6 +408,8 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   const navigate = useNavigate();
   const isDock = variant === 'dock';
   const review = useWorkingTreeReview({ isOpen: true });
+  // BLOCK-53 P2 — 非 git 工作区一次性引导需要 projectId 定位工作区与记忆 dismiss。
+  const { projectId } = useParams<{ projectId?: string }>();
 
   const [commitMsg, setCommitMsg] = useState('');
   const [commitSuccess, setCommitSuccess] = useState<CommitSuccess | null>(null);
@@ -440,6 +442,67 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
     void review.loadBranches();
     void review.loadRemoteStatus();
   }, [review.historyView]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ============================================================
+  // BLOCK-53 P2 — 非 git 工作区一次性引导（UI-283）：
+  // 空态里给「初始化 git 仓库」入口（内联二次确认，明示将创建 .git +
+  // 全量初始提交）；dismiss 记一次性（localStorage 按 projectId，对齐
+  // codex 信任屏「每目录只弹一次」哲学）。init 成功后 refresh 让空态
+  // 自动切换为正常审阅视图；非 git 诚实空态仍是引导后的稳态兜底。
+  // ============================================================
+  const [gitInitBusy, setGitInitBusy] = useState(false);
+  const [gitInitConfirmOpen, setGitInitConfirmOpen] = useState(false);
+  const [gitInitMessage, setGitInitMessage] = useState<string | null>(null);
+  const [gitInitDismissed, setGitInitDismissed] = useState(false);
+
+  useEffect(() => {
+    try {
+      setGitInitDismissed(window.localStorage.getItem(`biof3.gitinit.dismissed.${projectId || 'default'}`) === '1');
+    } catch {
+      // localStorage 不可用（私有模式等）时按「未 dismiss」处理，引导仍可用
+      setGitInitDismissed(false);
+    }
+  }, [projectId]);
+
+  const dismissGitInitPrompt = useCallback(() => {
+    setGitInitDismissed(true);
+    try {
+      // projectId 缺席（异常路由）时也按一次性记忆处理，用兜底 key
+      window.localStorage.setItem(`biof3.gitinit.dismissed.${projectId || 'default'}`, '1');
+    } catch {
+      // ignore：记忆失败仅影响「不再弹」，本次 dismiss 仍然生效
+    }
+  }, [projectId]);
+
+  const handleGitInit = useCallback(async () => {
+    if (gitInitBusy) return;
+    if (!projectId) {
+      setGitInitMessage('无法定位当前项目（缺少路由参数），请从项目工作台进入审阅。');
+      return;
+    }
+    setGitInitBusy(true);
+    setGitInitMessage(null);
+    try {
+      const bridge = getBridge('workingTreeReview');
+      const res = await bridge?.initRepository?.({ projectId });
+      if (!res || !res.ok) {
+        setGitInitMessage(res?.message || res?.error || 'git 初始化失败');
+        return;
+      }
+      if (res.data?.warning) {
+        // init 已成功但初始提交未完成（如 git 身份未配置）——如实展示，审阅已可用
+        setGitInitMessage(res.data.warning);
+        return;
+      }
+      setGitInitConfirmOpen(false);
+      await review.refresh();
+    } catch (e) {
+      setGitInitMessage(e instanceof Error ? e.message : String(e));
+    } finally {
+      setGitInitBusy(false);
+    }
+  }, [gitInitBusy, projectId, review]);
+
 
   const handleStagedCommit = async () => {
     const msg = stagedCommitMsg.trim();
@@ -718,6 +781,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   };
 
   // BLOCK-32 — 非 git 工作区诚实空态：不显示任何仓库数据，只说明原因。
+  // BLOCK-53 P2 — 空态内嵌一次性「初始化 git 仓库」引导（dismiss 后不再出现）。
   if (review.workspaceNotGit) {
     return (
       <div
@@ -730,6 +794,57 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
           <Icon name="git-branch" size={18} />
           <p>当前项目工作区不是 git 仓库</p>
           <p>审阅基于项目工作区的 git 版本历史。该工作区尚未初始化 git 仓库，暂无可审阅的改动与历史。</p>
+          {!gitInitDismissed && (
+            <div className="wt-gitinit-prompt" data-testid="git-init-prompt">
+              {!gitInitConfirmOpen ? (
+                <div className="wt-gitinit-actions">
+                  <button
+                    type="button"
+                    className="biof3-btn biof3-btn--sm"
+                    onClick={() => setGitInitConfirmOpen(true)}
+                    disabled={gitInitBusy}
+                  >
+                    初始化 git 仓库…
+                  </button>
+                  <button
+                    type="button"
+                    className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+                    onClick={dismissGitInitPrompt}
+                    disabled={gitInitBusy}
+                  >
+                    不再提示
+                  </button>
+                </div>
+              ) : (
+                <div className="wt-gitinit-confirm">
+                  <p className="wt-gitinit-confirm-lead">
+                    将在当前项目工作区创建 <code>.git</code> 仓库，并把现有全部文件作为初始提交。
+                  </p>
+                  <div className="wt-gitinit-actions">
+                    <button
+                      type="button"
+                      className="biof3-btn biof3-btn--sm"
+                      onClick={() => void handleGitInit()}
+                      disabled={gitInitBusy}
+                    >
+                      {gitInitBusy ? '初始化中…' : '确认初始化'}
+                    </button>
+                    <button
+                      type="button"
+                      className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+                      onClick={() => setGitInitConfirmOpen(false)}
+                      disabled={gitInitBusy}
+                    >
+                      取消
+                    </button>
+                  </div>
+                </div>
+              )}
+              {gitInitMessage && (
+                <p className="wt-gitinit-message" role="alert">{gitInitMessage}</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     );

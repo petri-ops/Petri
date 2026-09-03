@@ -1,0 +1,42 @@
+[
+  {
+    "assert": "S4b 内联二次确认展开（明示 .git + 初始提交）",
+    "pass": true,
+    "detail": "将在当前项目工作区创建 .git 仓库，并把现有全部文件作为初始提交。"
+  },
+  {
+    "assert": "S4c 桥缺失降级：确认初始化显示可见错误信息（不静默、不崩溃）",
+    "pass": true,
+    "detail": "msg:Error invoking remote method 'git:init-repository': Error: No handler registered for 'git:init-repository'"
+  },
+  {
+    "assert": "S4d 不再提示 → 引导条消失 + localStorage 一次性记忆（空态兜底仍在）",
+    "pass": true,
+    "detail": "{'promptGone': True, 'notGitStill': True, 'ls': '1'}"
+  },
+  {
+    "assert": "S4e 重挂后引导条不再出现（一次性记忆生效），空态兜底正常",
+    "pass": true,
+    "detail": "{'notGit': True, 'promptBack': False}"
+  },
+  {
+    "assert": "S3 左栏 drop → 内联创建面板打开且路径回填",
+    "pass": true,
+    "detail": "panel+input:/private/tmp/b53-accept-dir（validateDirectory 真实 realpath 生效）"
+  },
+  {
+    "assert": "S1a workbench 窗口 drop → UI-253 确认面板出现且路径正确",
+    "pass": true,
+    "detail": "confirm-ok"
+  },
+  {
+    "assert": "S1b 确认创建 → 跳转新项目工作台",
+    "pass": true,
+    "detail": "/project/p_mtlmidcb_q46h"
+  },
+  {
+    "assert": "S2 drop 单文件 → 可见错误提示（不是文件夹）",
+    "pass": true,
+    "detail": "err:该路径不是文件夹"
+  }
+]

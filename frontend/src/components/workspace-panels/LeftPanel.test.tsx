@@ -149,3 +149,66 @@ describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
     expect(screen.getAllByRole('button', { name: '设置' })).toHaveLength(1);
   });
 });
+
+// ============================================================================
+// BLOCK-53 P1 / UI-282 — 拖拽目录直达创建：drop 到左栏 → validateDirectory
+// 校验 → 打开既有内联创建面板（ctx.createPanel）并回填路径（不绕过确认链）。
+// ============================================================================
+describe('BLOCK-53 P1 drag-to-create (left panel)', () => {
+  const originalDesktop = (window as { biof3Desktop?: unknown }).biof3Desktop;
+
+  afterEach(() => {
+    Object.defineProperty(window, 'biof3Desktop', {
+      configurable: true,
+      value: originalDesktop,
+    });
+  });
+
+  function mockDesktop(validate: (path: string) => unknown) {
+    Object.defineProperty(window, 'biof3Desktop', {
+      configurable: true,
+      value: {
+        files: {
+          validateDirectory: vi.fn(validate),
+          pathForFile: vi.fn(() => '/tmp/dropped-ws'),
+        },
+      },
+    });
+  }
+
+  it('drop a directory → opens the create panel with the validated path', async () => {
+    mockDesktop(() => ({ ok: true, data: { path: '/tmp/dropped-ws' } }));
+    const base = buildCtx('chat');
+    const ctx = {
+      ...base,
+      createPanel: { ...base.createPanel, open: false },
+    } as unknown as LeftPanelContext;
+    const { container } = renderLeftPanel(ctx);
+
+    const wrap = container.querySelector('[class*="leftPanelWrap"]') as HTMLElement;
+    expect(wrap).not.toBeNull();
+    fireEvent.drop(wrap, { dataTransfer: { files: [{ name: 'dropped-ws' }] } });
+
+    await vi.waitFor(() => {
+      expect(ctx.createPanel.onOpen).toHaveBeenCalledTimes(1);
+      expect(ctx.createPanel.onPathChange).toHaveBeenCalledWith('/tmp/dropped-ws');
+    });
+  });
+
+  it('drop a non-directory file → shows the validation error, panel stays closed', async () => {
+    mockDesktop(() => ({ ok: false, error: '该路径不是文件夹' }));
+    const base = buildCtx('chat');
+    const ctx = {
+      ...base,
+      createPanel: { ...base.createPanel, open: false },
+    } as unknown as LeftPanelContext;
+    const { container } = renderLeftPanel(ctx);
+
+    const wrap = container.querySelector('[class*="leftPanelWrap"]') as HTMLElement;
+    fireEvent.drop(wrap, { dataTransfer: { files: [{ name: 'note.txt' }] } });
+
+    expect(await screen.findByText('该路径不是文件夹')).toBeTruthy();
+    expect(ctx.createPanel.onOpen).not.toHaveBeenCalled();
+    expect(ctx.createPanel.onPathChange).not.toHaveBeenCalled();
+  });
+});

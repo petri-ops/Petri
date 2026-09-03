@@ -3,6 +3,7 @@ import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { BackendStatus } from '@/lib/electron';
 import Home from './home';
+import { listProjects } from '@/lib/project-store';
 
 let backendStatus: BackendStatus;
 
@@ -74,5 +75,75 @@ describe('UI-141 startup gate', () => {
     expect(screen.getByRole('heading', { name: '先安装分析运行时' })).toBeTruthy();
     expect(screen.getByRole('button', { name: '打开插件商店安装' })).toBeTruthy();
     expect(screen.queryByText('本地分析服务未就绪')).toBeNull();
+  });
+});
+
+// ============================================================================
+// BLOCK-53 P1 / UI-282 — 拖拽目录直达创建：窗口 drop → validateDirectory →
+// UI-253 既有确认面板（不绕过确认）。jsdom 无 DragEvent 构造器，用 Event
+// + defineProperty 挂 dataTransfer 模拟 Finder 拖入。
+// ============================================================================
+describe('BLOCK-53 P1 drag-to-create', () => {
+  const originalDesktop = (window as { biof3Desktop?: unknown }).biof3Desktop;
+
+  function mockDesktop(validate: (path: string) => unknown) {
+    Object.defineProperty(window, 'biof3Desktop', {
+      configurable: true,
+      value: {
+        files: {
+          validateDirectory: vi.fn(validate),
+          pathForFile: vi.fn(() => '/tmp/drop-proj'),
+        },
+      },
+    });
+  }
+
+  function fireWindowDrop(files: Array<{ name: string }>) {
+    const evt = new Event('drop') as DragEvent;
+    Object.defineProperty(evt, 'dataTransfer', {
+      configurable: true,
+      value: { files },
+    });
+    window.dispatchEvent(evt);
+  }
+
+  afterEach(() => {
+    Object.defineProperty(window, 'biof3Desktop', {
+      configurable: true,
+      value: originalDesktop,
+    });
+  });
+
+  it('drops a directory → validates → shows the UI-253 confirm panel', async () => {
+    backendStatus = status({ isReady: true, rServerUp: true });
+    // vi.restoreAllMocks（全局 afterEach）会清掉模块级 mock 实现，这里重设
+    vi.mocked(listProjects).mockResolvedValue([]);
+    mockDesktop(() => ({ ok: true, data: { path: '/tmp/drop-proj' } }));
+    vi.useRealTimers();
+    render(<Home />);
+    await screen.findByText('创建第一个项目');
+
+    fireWindowDrop([{ name: 'drop-proj' }]);
+
+    expect(await screen.findByText('将在以下目录创建项目：')).toBeTruthy();
+    expect(screen.getByText('/tmp/drop-proj')).toBeTruthy();
+    expect(screen.getByRole('button', { name: '在此处创建' })).toBeTruthy();
+    // 校验链被真实调用（拖入路径走同一校验，不绕过）
+    expect((window as unknown as { biof3Desktop: { files: { validateDirectory: ReturnType<typeof vi.fn> } } }).biof3Desktop.files.validateDirectory)
+      .toHaveBeenCalledWith('/tmp/drop-proj');
+  });
+
+  it('drops a non-directory file → visible error, no confirm panel', async () => {
+    backendStatus = status({ isReady: true, rServerUp: true });
+    vi.mocked(listProjects).mockResolvedValue([]);
+    mockDesktop(() => ({ ok: false, error: '该路径不是文件夹' }));
+    vi.useRealTimers();
+    render(<Home />);
+    await screen.findByText('创建第一个项目');
+
+    fireWindowDrop([{ name: 'note.txt' }]);
+
+    expect(await screen.findByText('该路径不是文件夹')).toBeTruthy();
+    expect(screen.queryByText('将在以下目录创建项目：')).toBeNull();
   });
 });
