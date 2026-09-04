@@ -1,7 +1,7 @@
 # BLOCK-57 — 远程执行：本地指挥席 + SSH 执行节点 + 调度器适配
 
-> 状态：`planned`（候选，待用户裁决启动；当前 active 为 NONE。体量为排队清单中最大包，建议排在 BLOCK-56 之后启动，且启动前先做 P0 设计评审）
-> 立项日期：2026-09-03（用户裁决「立项」）
+> 状态：`active`（2026-09-04 用户裁决「启动 BLOCK-57 远程执行」；当前阶段 = P0 设计评审中，评审文档 [`block-57-design-review.md`](./block-57-design-review.md) 待用户确认后进 P1）
+> 立项日期：2026-09-03（用户裁决「立项」）· 启动日期：2026-09-04（用户裁决「启动 BLOCK-57 远程执行」）
 > truthDomain: `block-57-remote-execution`
 > 来源：生信算力需求讨论（用户提出「适配算力集群进行大数据量运算」，问 Linux 版还是接口）
 
@@ -97,4 +97,5 @@
 
 ## 11. 进度记录
 
+- 2026-09-04 P0（启动 + 设计评审产出）：用户裁决「启动 BLOCK-57 远程执行」，本工作包转 active（当前唯一）。设计评审文档落盘 [`block-57-design-review.md`](./block-57-design-review.md)：基于源码事实基线（executors 注册表接口 / tools-executor executeJob 全流程 / process-lifecycle 心跳-僵尸-硬超时 / artifact-manifest 形状）给出九项设计裁决 D1-D9 + 五项与原 plan 的偏差清单（daemonless 节点侧 / tar-over-ssh 基线 / remote-execution 目标级模块落位 / 远程作业豁免本地 zombie stale-fail 与 30min 硬超时 / 主机指纹 strict 默认）+ 错误分类表 + P1 范围切分 + 验证策略（unit / loopback live / 真实节点收口门）+ 待用户确认问题清单八项。**P1 待评审确认后启动**。
 - 2026-09-03 P0（planned 登记）：用户裁决立项；方案=本地指挥席 + SSH headless 执行节点 + 调度器适配（不做 Linux 桌面版）；三项既有资产复用（executor 抽象/tool_jobs 状态机/Job 文件级形态）；四阶段渐进 + 想象力清单 + 跨机复现红利；本计划落盘并注册 DOC-REGISTRY；建议排在 BLOCK-55 之后，启动前 P0 设计评审。

@@ -3468,7 +3468,7 @@
       "id": "BLOCK-57-REMOTE-EXECUTION",
       "path": "docs/block-57-remote-execution-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "active",
       "canonical": true,
       "truthDomain": "block-57-remote-execution",
       "entrypoint": "docs/README.md",
@@ -3482,10 +3482,33 @@
         "compute-to-data",
         "G0"
       ],
-      "notes": "2026-09-03 planned 登记（用户裁决立项：算力扩展设计讨论）：核心裁决=不做 Linux 桌面版（解决算力认同而非算力本身），做本地指挥席 + SSH headless 执行节点 + 调度器适配。复用三项既有资产（LanguageExecutor 抽象新增 remote-executor.js / tool_jobs 状态机 / Job 文件级形态 script+params）。四阶段：P1 SSH 直连单服务器直跑、P2 Slurm 适配 sbatch/sacct/scancel、P3 复现链跨机 provenance+hash 校验、P4 LSF/SGE+多目标路由。想象力：~/.ssh/config 即目标清单零注册发现、Agent 自选算力 execution_targets 工具、资源预估 prefill sbatch 头、数据重力路由。跨机复现红利强化护城河。P1-P2 G0 兼容产品能力（用户自有服务器/集群 SSH 出去，无 BioF3 云中转，不踩 Provider/发布纪律）。体量排队清单最大包，建议排 BLOCK-56 之后独立大阶段，P0 先做设计评审（断线/凭据/状态机映射/产物签名深水区）。0 新 npm 依赖倾向。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-09-04 启动（active，用户裁决「启动 BLOCK-57 远程执行」）：P0 设计评审已产出 docs/block-57-design-review.md（九项设计裁决 D1-D9 + 五项 plan 偏差 + 错误分类表 + P1 范围切分 + 八项待确认问题），待用户确认后进 P1（SSH 直连）。2026-09-03 planned 登记（用户裁决立项：算力扩展设计讨论）：核心裁决=不做 Linux 桌面版（解决算力认同而非算力本身），做本地指挥席 + SSH headless 执行节点 + 调度器适配。复用三项既有资产（LanguageExecutor 抽象 / tool_jobs 状态机 / Job 文件级形态 script+params）。四阶段：P1 SSH 直连单服务器直跑、P2 Slurm 适配 sbatch/sacct/scancel、P3 复现链跨机 provenance+hash 校验、P4 LSF/SGE+多目标路由。P1-P2 G0 兼容产品能力（用户自有服务器/集群 SSH 出去，无 BioF3 云中转，不踩 Provider/发布纪律）。体量排队清单最大包。0 新 npm 依赖。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-03",
       "archivePolicy": "archive_when_superseded",
-      "phase": "PLANNED"
+      "phase": "P0-LAUNCH"
+    },
+    {
+      "id": "BLOCK-57-DESIGN-REVIEW",
+      "path": "docs/block-57-design-review.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "truthDomain": "block-57-design-review",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "archive_when_superseded",
+      "title": "BLOCK-57 P0 设计评审 — 远程执行深水区（draft，待用户确认）",
+      "owner": "agent",
+      "registeredAt": "2026-09-04",
+      "tags": [
+        "block-57",
+        "remote-execution",
+        "design-review",
+        "ssh",
+        "reconcile",
+        "artifact-integrity",
+        "G0"
+      ],
+      "notes": "BLOCK-57 P0 评审产出（2026-09-04）：代码事实基线 + 九项设计裁决（daemonless 节点侧 / tar-over-ssh 基线 / remote-execution 目标级模块 / 节点真相状态映射 / 断线 reconcile 语义 + 远程豁免本地 zombie 与硬超时 / 凭据 strict / transfer-manifest 双层 hash / 错误分类表 / ExecutionTarget 零回归不变量）+ 五项 plan 偏差清单 + P1 In/Out + 验证策略 + 八项待确认问题。用户全部确认后转 confirmed，BLOCK-57 进 P1。"
     },
     {
       "id": "BLOCK-58-R-DEPENDENCY-GOVERNANCE",
@@ -3510,6 +3533,6 @@
       "phase": "COMPLETED"
     }
   ],
-  "lastUpdated": "2026-09-03 (BLOCK-57-REMOTE-EXECUTION planned 登记)",
+  "lastUpdated": "2026-09-04 (BLOCK-57-REMOTE-EXECUTION 启动 active + BLOCK-57-DESIGN-REVIEW 登记)",
   "documentCount": 199
 }
