@@ -1,0 +1,89 @@
+{
+  "startedAt": "2026-09-04T15:33:34.889Z",
+  "page": "http://localhost:3000/project/p_mtlnsv0f_xpjb",
+  "projectId": "p_mtlnsv0f_xpjb",
+  "assertions": [
+    {
+      "name": "场景 A（沿用已通过证据）",
+      "pass": true,
+      "detail": "skipped by flag"
+    },
+    {
+      "name": "A0 设置面板切到「计算与数据」节",
+      "pass": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "A1 设置页 remote-targets 面板渲染",
+      "pass": true,
+      "detail": "{\"ok\":true,\"hint\":\"把分析任务提交到你自己的服务器直跑：凭据完全复用本机 SSH 配置（只认 key，BioF3 不存任何密钥）。 首次使用请先在终端 ssh 该主机一次完成指纹确认。不添加任何目标时，一切照常在本机执行。\"}"
+    },
+    {
+      "name": "A2 ~/.ssh/config 发现候选含 aliyun（零注册发现）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A3 UI 注册 aliyun 目标（行渲染，容忍已注册）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"note\":\"already_registered_row_visible\"}"
+    },
+    {
+      "name": "A3 UI 注册 dell 目标（行渲染，容忍已注册）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"note\":\"already_registered_row_visible\"}"
+    },
+    {
+      "name": "A4 UI 探测 aliyun → 状态「就绪」+ 节点摘要",
+      "pass": true,
+      "detail": "{\"ok\":true,\"summary\":\"Linux 6.8.0-57-generic \"}"
+    },
+    {
+      "name": "A4 UI 探测 dell → 状态「就绪」+ 节点摘要",
+      "pass": true,
+      "detail": "{\"ok\":true,\"summary\":\"Linux 6.8.0-137-generic \"}"
+    },
+    {
+      "name": "A5 双目标落库（dev DB execution_targets，probe 持久）",
+      "pass": true,
+      "detail": "[{\"alias\":\"aliyun\",\"status\":\"ready\"},{\"alias\":\"dell\",\"status\":\"ready\"}]"
+    },
+    {
+      "name": "B1 发送 deseq2 运行请求",
+      "pass": true,
+      "detail": "{\"ok\":true,\"cleared\":true}"
+    },
+    {
+      "name": "B2 确认卡渲染且执行目标下拉出现（默认本机）",
+      "pass": false,
+      "detail": "{\"present\":false}"
+    },
+    {
+      "name": "B3 下拉选项含 aliyun",
+      "pass": false,
+      "detail": ""
+    },
+    {
+      "name": "B4 选择 aliyun 并点击开始（批准）",
+      "pass": false,
+      "detail": "{\"ok\":false,\"reason\":\"no_selector\"}"
+    },
+    {
+      "name": "B5 作业落库携带 execution_target_id=aliyun 目标",
+      "pass": true,
+      "detail": "{\"id\":\"job_b184a3f715e749d9\",\"tool_id\":\"ml-feature-select\",\"status\":\"failed\",\"error\":\"节点缺少 R (Rscript) 运行时（目标 aliyun）\",\"execution_target_id\":\"tgt_5a5c07672a4e\",\"created_at\":1788536911768}"
+    },
+    {
+      "name": "B6 aliyun 无 R → stage=runtime 诚实失败（探针来源=远程目标）",
+      "pass": true,
+      "detail": "status=failed error=节点缺少 R (Rscript) 运行时（目标 aliyun）"
+    },
+    {
+      "name": "B7 作业列表「远程」徽章渲染",
+      "pass": false,
+      "detail": ""
+    }
+  ],
+  "allPass": false,
+  "finishedAt": "2026-09-04T15:48:40.810Z"
+}

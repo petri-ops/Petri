@@ -6,9 +6,11 @@
  */
 
 const { createTargetRegistry } = require('../helpers/remote-execution/target-registry');
+const { createRemoteJobRunner } = require('../helpers/remote-execution/remote-job-runner');
 
 function createRemoteTargetRoutes({ db, getUserId }) {
-  const registry = createTargetRegistry({ db });
+  const remoteRunner = createRemoteJobRunner();
+  const registry = createTargetRegistry({ db, ensureAgent: ({ alias }) => remoteRunner.ensureAgent({ alias }) });
 
   function serialize(row) {
     if (!row) return row;
@@ -40,7 +42,7 @@ function createRemoteTargetRoutes({ db, getUserId }) {
       const uid = getUserId(req);
       if (!uid) return res.status(401).json({ error: 'login_required' });
       const { alias, label } = req.body || {};
-      const result = registry.register({ alias, label });
+      const result = await registry.register({ alias, label });
       if (!result.ok) {
         return res.status(result.error === 'invalid_alias' ? 400 : 409).json({ ok: false, error: result.error });
       }

@@ -20,7 +20,9 @@ function newTargetId(alias) {
 }
 
 // db = biof3-server 的 async facade（get/all/run 均返回 Promise）——一切访问必须 await。
-function createTargetRegistry({ db }) {
+// ensureAgent：可选注入（remote-job-runner.ensureAgent）——probe 是用户与节点的首次接触，
+// 必须自带 agent 引导部署，否则新节点的首次探测必然失败（agent 尚不在节点上）。
+function createTargetRegistry({ db, ensureAgent }) {
   async function listRegistered() {
     return db.prepare('SELECT * FROM execution_targets ORDER BY created_at').all();
   }
@@ -95,6 +97,14 @@ function createTargetRegistry({ db }) {
   async function probe({ id }) {
     const target = await getById({ id });
     if (!target) return { ok: false, error: 'target_not_found' };
+    if (typeof ensureAgent === 'function') {
+      const deployed = await ensureAgent({ alias: target.alias });
+      if (!deployed.ok) {
+        await db.prepare("UPDATE execution_targets SET status='unreachable', last_probe_at=? WHERE id=?")
+          .run(Date.now(), target.id);
+        return { ok: false, error: deployed.error.kind, detail: deployed.error.detail };
+      }
+    }
     const op = await runSshOp({ alias: target.alias, remoteCommand: remoteAgentCommand(['probe', 'r', 'python']), timeoutMs: 20000 });
     if (op.classified.kind !== 'ok') {
       await db.prepare("UPDATE execution_targets SET status='unreachable', last_probe_at=? WHERE id=?")

@@ -1327,7 +1327,7 @@ function createToolsExecutor({
   }
 
   // BLOCK-57 —— 远程执行编排（daemonless：节点真相在 state/exit 文件，见设计评审 D1/D4/D5）
-  const targetRegistry = createTargetRegistry({ db });
+  const targetRegistry = createTargetRegistry({ db, ensureAgent: ({ alias }) => remoteRunner.ensureAgent({ alias }) });
   const remoteRunner = createRemoteJobRunner();
 
   const REMOTE_RUNNER_SAMPLES = {
