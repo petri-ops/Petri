@@ -2175,7 +2175,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：[accessModeValidator.test.ts](../frontend/src/components/copilot/accessModeValidator.test.ts) 新建 4/4；后端 [accessmode-validation.test.mjs](../test/accessmode-validation.test.mjs) 三档矩阵 14/14 + 沙箱回归 37/37 + exec 回归 56/57（唯一失败为预存环境问题，HEAD 基线同失败）；tsc 0。
 
-**待实机**：dev Electron 档位菜单切换 + workspace-write 档实际写/禁写行为过目后转 verified。**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**实机过目（2026-09-04，随 BLOCK-49 P4 顺带）**：dev Electron 档位菜单三选过目 5/5（三选项齐备/选「项目写」按钮标签回写/恢复无副作用，证据 `acceptance/block-56/ui288-menu-live.json` + 截图）；**顺带发现并修复** [SimpleChat.tsx](../frontend/src/components/copilot/SimpleChat.tsx) `accessModeLabel` 二值漂移（选 workspace-write 按钮显示「只读模式」→ 三档三元表达式，tsc 0 + 实机回归）。**待实机**：workspace-write 档实际写/禁写行为过目后转 verified。**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-286: 底部终端多 Tab——独立 pty 会话 + tab 条管理（BLOCK-54 P2） (2026-09-04 verified)
 

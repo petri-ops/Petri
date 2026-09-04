@@ -3273,7 +3273,7 @@
       "id": "BLOCK-49-MULTI-AGENT-SPAWN",
       "path": "docs/block-49-multi-agent-spawn-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-49-multi-agent-spawn",
       "entrypoint": "docs/README.md",
@@ -3286,10 +3286,10 @@
         "loop-runs",
         "G0"
       ],
-      "notes": "2026-09-03 planned 登记（用户裁决：按 codex MultiAgentV2 调研方案立项）：把既有 kind=subagent 链路（loop_runs 父子持久化 / 并发槽 / 级联取消 / REST 入口）包装为模型可见的 agent 工具面，完成外生→内生转身；MVP 三工具 spawn_agent/list_agents/wait_agent + 终态摘要回传（token-estimator 预算截断）+ 权限继承不放大 + explicit 模式；二期 send_message/followup_task/interrupt_agent 与 proactive 留候选；0 新依赖，不动主 loop 串行结构。2026-09-04 用户裁决启动，当前唯一 active（P4 实机顺带 BLOCK-56 UI-287/288 过目）。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-09-03 planned 登记（用户裁决：按 codex MultiAgentV2 调研方案立项）：把既有 kind=subagent 链路（loop_runs 父子持久化 / 并发槽 / 级联取消 / REST 入口）包装为模型可见的 agent 工具面，完成外生→内生转身；MVP 三工具 spawn_agent/list_agents/wait_agent + 终态摘要回传（token-estimator 预算截断）+ 权限继承不放大 + explicit 模式；二期 send_message/followup_task/interrupt_agent 与 proactive 留候选；0 新依赖，不动主 loop 串行结构。2026-09-04 P1→P5 一次会话收口 completed：工具面/回传协议/定向门禁/dev Electron 实机（mock live 17/17 + UI live 6/6，证据 acceptance/block-49/）全绿；P4 实录 stale dev server 致 assistantText 空已重启复验；顺带 UI-288 菜单过目 5/5 并修 SimpleChat L1223 档位标签漂移。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-03",
       "archivePolicy": "archive_when_superseded",
-      "phase": "ACTIVE-P0"
+      "phase": "COMPLETED"
     },
     {
       "id": "DESIGN-REVIEW-2026-09",

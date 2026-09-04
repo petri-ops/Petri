@@ -52,6 +52,7 @@ const {
   tool_process_stop,
 } = require('./workspace-tools');
 const { tool_system_info } = require('./system-info-tools');
+const { spawn_agent, list_agents, wait_agent } = require('./spawn-agent-tools');
 
 const CONTRACT_VERSION = '1.0.0';
 const RISK_TIERS = Object.freeze(['R0', 'R1', 'R2', 'R3']);
@@ -66,6 +67,7 @@ const CATEGORIES = new Set([
   'reporting',
   'verification',
   'result-studio',
+  'agent-management',
 ]);
 const SIDE_EFFECTS = new Set([
   'none',
@@ -115,6 +117,10 @@ const HANDLERS = {
   result_changeset_adopt_in_context: tool_result_changeset_adopt_in_context,
   result_changeset_revert_in_context: tool_result_changeset_revert_in_context,
   result_enrichment_from_context: tool_result_enrichment_from_context,
+  // BLOCK-49 — 多 Agent 派生（进程内复用 subagent 执行链；spawn fail-closed 于 policy 层）
+  spawn_agent,
+  list_agents,
+  wait_agent,
 };
 
 function contract(category, sideEffect, riskTier, resources, estimatedDurationMs) {
@@ -171,6 +177,10 @@ const CONTRACTS = {
   result_changeset_compare_in_context: contract('result-studio', 'none', 'R0', ['artifacts', 'project.database', 'project.files'], 1700),
   result_changeset_adopt_in_context: contract('result-studio', 'state-write', 'R2', ['artifacts', 'project.database', 'project.files'], 1200),
   result_changeset_revert_in_context: contract('result-studio', 'state-write', 'R2', ['artifacts', 'project.database', 'project.files'], 1200),
+  // BLOCK-49 — spawn 立即返回（子 agent 时长不占工具执行预算）；wait 阻塞等待终态
+  spawn_agent: contract('agent-management', 'state-write', 'R2', ['agent_tasks', 'loop_runs'], 2000),
+  list_agents: contract('agent-management', 'none', 'R0', ['agent_tasks'], 500),
+  wait_agent: contract('agent-management', 'none', 'R1', ['agent_tasks', 'loop_runs'], 300000),
 };
 
 function cloneJson(value) {

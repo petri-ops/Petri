@@ -33,9 +33,24 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-loop-route-int-'));
 process.env.BIOF3_DB_PATH = path.join(TMP_DIR, 'test.db');
+
+// 新鲜 DB 必须先应用 src/migrations 全量（projects 等用户数据表由迁移管理，
+// db.js 模块加载即预编译 projects 语句）。与 block49-spawn-agent-tools.test.mjs
+// 同一自举手法；否则 before() 内 import db.js 即抛 no such table: projects，
+// 全部 RT 用例连带失败。
+{
+  const Database = require('../core/biof3-server/node_modules/better-sqlite3');
+  const migrationsDir = path.resolve(__dirname, '..', 'src', 'migrations');
+  const boot = new Database(process.env.BIOF3_DB_PATH);
+  for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
+    boot.exec(fs.readFileSync(path.join(migrationsDir, f), 'utf8'));
+  }
+  boot.close();
+}
 
 let db;
 let lc;

@@ -586,6 +586,8 @@ async function runAgentLoop({
   // Build tool context
   const toolCtx = {
     userId,
+    // BLOCK-49 — 子 agent 派生工具（spawn/list/wait_agent）的父子关系锚点
+    taskId,
     projectId: context && context.projectId,
     ...projectResultStudioToolContext(context),
     // BLOCK-56 P2 — workspace-write 中间档透传（additive：未知值维持塌缩 full）

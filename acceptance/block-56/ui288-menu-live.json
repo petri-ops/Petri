@@ -1,0 +1,35 @@
+{
+  "startedAt": "2026-09-04T04:51:39.851Z",
+  "assertions": [
+    {
+      "name": "dev Electron 页面可达",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mtlnsv0f_xpjb"
+    },
+    {
+      "name": "档位按钮可见（title=选择访问模式）",
+      "pass": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "三选项齐备（完全访问/项目写/只读模式）",
+      "pass": true,
+      "detail": "{\"count\":3,\"titles\":[\"完全访问\",\"项目写\",\"只读模式\"]}"
+    },
+    {
+      "name": "选「项目写」后按钮标签=项目写（L1223 三档标签回归）",
+      "pass": true,
+      "detail": "项目写"
+    },
+    {
+      "name": "恢复「完全访问」（无档位副作用）",
+      "pass": true,
+      "detail": "完全访问"
+    }
+  ],
+  "screenshots": [
+    "ui288-menu-options.png"
+  ],
+  "finishedAt": "2026-09-04T04:51:44.344Z",
+  "allPass": true
+}

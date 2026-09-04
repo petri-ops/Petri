@@ -220,6 +220,9 @@ module.exports = {
               modelName,
               kind: wantKind,
               parentTaskId: parentTaskId || null,
+              // BLOCK-49: 派生工具精确继承模型所需（spawn-agent-tools 合成 preset 用）
+              profileId: selectedPreset && selectedPreset.id,
+              baseUrl: baseUrl || undefined,
             },
           }).taskId;
         } catch (e) {
@@ -227,7 +230,8 @@ module.exports = {
         }
 
         const acquired = aiTaskConcurrencyAcquire(userId, taskId, { isPrimary: wantKind === 'primary' });
-        if (!acquired) {
+        // acquire 返回 {ok:boolean,...}（对象恒真值），必须显式判 ok —— 与 resume.js 同契约修正
+        if (!acquired || acquired.ok === false) {
           agentTaskStore.markAgentTaskFailed(taskId, '并发限制');
           return res.status(429).json({ status: 'error', error: '并发限制，请稍后再试' });
         }

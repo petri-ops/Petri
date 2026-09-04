@@ -365,6 +365,15 @@ const stmts = {
             retry_count, retry_error_type, next_retry_at, max_retries
      FROM tasks WHERE type = 'agent_loop' AND status = 'running'`
   ),
+  // BLOCK-49: 全量子 agent 查询（含终态）——list_agents 工具数据源；
+  // created_at 有索引（insert 顺序），parentTaskId 过滤在 JS 侧做 params 解析，
+  // 与 getRunningChildAgentTasks 同一手法（params 为 JSON 文本，走 json_extract
+  // 会因历史脏数据形态差异漏行）。
+  listAll: db.prepare(
+    `SELECT id, params, status, created_at, finished_at, error, user_id, agent_status,
+            retry_count, retry_error_type, next_retry_at, max_retries, files_changed_json, interrupted_at
+     FROM tasks WHERE type = 'agent_loop' ORDER BY created_at ASC`
+  ),
   listRetryPending: db.prepare(
     `SELECT id, params, status, created_at, finished_at, error, user_id, agent_status,
             retry_count, retry_error_type, next_retry_at, max_retries
@@ -545,6 +554,22 @@ function getRunningChildAgentTasks(parentTaskId) {
     retryErrorType: row.retry_error_type || null,
     nextRetryAt: row.next_retry_at || null,
     maxRetries: row.max_retries || 0,
+  })).filter((task) => task.params?.kind === 'subagent' && task.params?.parentTaskId === parentTaskId);
+}
+
+// BLOCK-49: list_agents 数据源——当前任务派生的全部子 agent（含终态，按派生序）
+function listChildAgentTasks(parentTaskId) {
+  if (!parentTaskId) return [];
+  return stmts.listAll.all().map((row) => ({
+    taskId: row.id,
+    params: tryParse(row.params),
+    status: row.status,
+    createdAt: row.created_at,
+    finishedAt: row.finished_at,
+    error: row.error,
+    userId: row.user_id || null,
+    agentStatus: row.agent_status || null,
+    filesChanged: tryParse(row.files_changed_json) || [],
   })).filter((task) => task.params?.kind === 'subagent' && task.params?.parentTaskId === parentTaskId);
 }
 
@@ -752,6 +777,7 @@ module.exports = {
   appendAgentTaskEvent,
   getAgentTaskEventsSince,
   getRunningChildAgentTasks,
+  listChildAgentTasks,
   markAgentTaskDone,
   markAgentTaskFailed,
   requestAgentTaskCancel,

@@ -19,11 +19,29 @@ import assert from 'node:assert';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
 
 import loopContract from '../core/shared-backend/loop-contract.js';
 
+const require = createRequire(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-loop-'));
 process.env.BIOF3_DB_PATH = path.join(TMP_DIR, 'test.db');
+
+// 新鲜 DB 必须先应用 src/migrations 全量（projects 等用户数据表由迁移管理，
+// db.js 模块加载即预编译 projects 语句）；否则 import db.js 即抛
+// no such table: projects，整组用例连带失败。与 loop-api-route.test.mjs 同一自举手法。
+{
+  const Database = require('../core/biof3-server/node_modules/better-sqlite3');
+  const migrationsDir = path.resolve(__dirname, '..', 'src', 'migrations');
+  const boot = new Database(process.env.BIOF3_DB_PATH);
+  for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
+    boot.exec(fs.readFileSync(path.join(migrationsDir, f), 'utf8'));
+  }
+  boot.close();
+}
 
 let db;
 let lc;

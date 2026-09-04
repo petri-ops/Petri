@@ -204,9 +204,23 @@ async function _maybeDetectTopicShift(conversationId, userId) {
   }
 }
 
+// BLOCK-49: 按 taskId 读取最近一条 assistant 消息——wait_agent 终态摘要数据源
+//（agent-runner 会话持久化时把 taskId 写入 copilot_messages.task_id）
+function getAssistantMessageByTaskId(taskId) {
+  if (!taskId) return null;
+  try {
+    return sqlite.prepare(
+      "SELECT content, ts FROM copilot_messages WHERE task_id = ? AND role = 'assistant' ORDER BY ts DESC, id DESC LIMIT 1"
+    ).get(String(taskId)) || null;
+  } catch {
+    return null;
+  }
+}
+
 module.exports = {
   getOrCreateActiveConversation,
   appendMessageToConversation,
+  getAssistantMessageByTaskId,
   _maybeAutoTitleConversation,
   _maybeDetectTopicShift,
 };

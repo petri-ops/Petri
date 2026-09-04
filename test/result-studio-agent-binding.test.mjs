@@ -212,18 +212,41 @@ test('P4R-3 uses one executable finalizer for returned provider errors and norma
 });
 
 test('P4R-3 wires the same context/progress helpers into task and legacy production paths', () => {
-  for (const path of ['core/biof3-server/agent-runner.js', 'core/biof3-server/routes/ai-agent.js']) {
-    const text = source(path);
-    assert.match(text, /\.\.\.projectResultStudioToolContext\(context\)/);
-    assert.match(text, /createResultEditProgressRecorder\(\)/);
-    assert.match(text, /resultEditProgress:\s*resultEditProgress\.snapshot\(\)/);
-    assert.match(text, /providerFailureReason/);
-    assert.match(text, /finalizeResultEditProgress\(resultEditProgress/);
-    assert.match(text, /agent_run_failed/);
-    assert.match(text, /createResultEditCompletionGuard/);
-    assert.match(text, /resultEditCompletionGuard\.recordToolResult\(name, result\)/);
-    assert.match(text, /result_edit_completion_retry/);
-    assert.match(text, /resultEditCompletionGuard\.requiresToolExecution\(\)/);
+  // 任务路径（BLOCK-49 对齐 thin-facade 现状）：agent-runner 投影上下文与失败原因，
+  // loop-orchestrator 承载进度记录/完成守卫/终态收尾
+  const runnerText = source('core/biof3-server/agent-runner.js');
+  assert.match(runnerText, /\.\.\.projectResultStudioToolContext\(context\)/);
+  assert.match(runnerText, /providerFailureReason/);
+
+  const orchestratorText = source('core/biof3-server/loop-orchestrator.js');
+  for (const pattern of [
+    /createResultEditProgressRecorder\(\)/,
+    /providerFailureReason/,
+    /finalizeResultEditProgress\(resultEditProgress/,
+    /agent_run_failed/,
+    /createResultEditCompletionGuard/,
+    /resultEditCompletionGuard\.recordToolResult\(name, result\)/,
+    /result_edit_completion_retry/,
+    /resultEditCompletionGuard\.requiresToolExecution\(\)/,
+  ]) {
+    assert.match(orchestratorText, pattern);
+  }
+
+  // legacy SSE 路径：routes/ai-agent.js 已下沉为 thin facade，真实接线在 ai-agent/chat.js
+  const chatText = source('core/biof3-server/routes/ai-agent/chat.js');
+  for (const pattern of [
+    /\.\.\.projectResultStudioToolContext\(context\)/,
+    /createResultEditProgressRecorder\(\)/,
+    /resultEditProgress:\s*resultEditProgress\.snapshot\(\)/,
+    /providerFailureReason/,
+    /finalizeResultEditProgress\(resultEditProgress/,
+    /agent_run_failed/,
+    /createResultEditCompletionGuard/,
+    /resultEditCompletionGuard\.recordToolResult\(name, result\)/,
+    /result_edit_completion_retry/,
+    /resultEditCompletionGuard\.requiresToolExecution\(\)/,
+  ]) {
+    assert.match(chatText, pattern);
   }
   assert.match(source('core/biof3-server/agent-tools/result-context-binding.js'), /已完成的阶段结论已保留/);
 });

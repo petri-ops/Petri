@@ -1220,7 +1220,7 @@ export function SimpleChat({
 
   const examplePromptsToShow = displayMessages.length === 0 ? examplePrompts : [];
 
-  const accessModeLabel = accessMode === 'full' ? '完全访问' : '只读模式';
+  const accessModeLabel = accessMode === 'full' ? '完全访问' : accessMode === 'workspace-write' ? '项目写' : '只读模式';
   const modelGroups = modelPresets.reduce<Array<{
     key: string;
     supplier: string;

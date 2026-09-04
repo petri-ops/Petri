@@ -1,6 +1,6 @@
 # BLOCK-49 — 多 Agent 内生派生（Multi-Agent Spawn）技术调研与实施计划
 
-> 状态：`active`（2026-09-04 用户裁决启动，当前唯一 active 工作包；P1 工具面→P2 回传协议→P3 门禁→P4 实机→P5 收口，一次会话收口节奏对齐 BLOCK-54/56）
+> 状态：`completed`（2026-09-04 P1→P5 一次会话收口；工具面/回传协议/定向门禁/dev Electron 实机全绿，证据 `acceptance/block-49/`；收口提交见 git log。G0 开发期常态 · 不外推 packaged/Provider/GA）
 > 立项日期：2026-09-03
 > truthDomain: `block-49-multi-agent-spawn`
 
@@ -130,4 +130,15 @@
 ## 7. 进度记录
 
 - 2026-09-03 P0（planned 登记）：完成 codex MultiAgentV2 双向调研（六工具协议 / 继承覆盖 / 回传机制）与 BioF3 地基盘点（四项复用资产 + 五个断点）；本计划落盘并注册 DOC-REGISTRY；待 BLOCK-47 收口后由用户裁决启动。
+- 2026-09-04 P1→P5 一次会话收口（节奏对齐 BLOCK-54/56）：
+  - **P0 启动登记**：用户裁决启动，plan active + DOC-REGISTRY + roadmap/AUDIT-LOG 登记；顺带修正 BLOCK-56 收口提交 `9f7e44f5` 的两处同文件并行编辑竞态丢失（plan-56 状态头 + roadmap 头部）。
+  - **P1 工具面 MVP**：`agent-tools/spawn-agent-tools.js` 三工具（spawn_agent 异步返回 agentId / list_agents 含终态 / wait_agent 阻塞轮询+超时让出）；tool-defs OpenAI schema + registry 契约注册（spawn=state-write/R2、list=none/R0、wait=none/R1，新 category=agent-management）；执行层进程内直调既有 subagent 链（agent-task-store + runAgentLoop 懒加载断 require 环 + aiTaskConcurrency 槽），不走 HTTP 自调用；父 loop toolCtx 注入 taskId 锚点（agent-runner.js）。
+  - **P2 回传协议**：终态摘要 token 预算截断（4000 上界按 1 token/char 最坏密度折算字符上限，刻意不跑 tiktoken 防事件循环阻塞）；正文数据源 `copilot_messages.task_id`（conversations.js 新增 getAssistantMessageByTaskId，done 终态后短暂重试窗口）；权限整体继承父 context 不放大；spawn fail-closed（只有 primary 可派生 + wait/list 双重校验 parentTaskId+userId）；tool-execution 投影白名单补 agentId/status/kind（缺它模型无法 wait_agent，实机回归证实会触发重复派生异常循环）。
+  - **P3 定向门禁**：`test/block49-spawn-agent-tools.test.mjs` 三工具契约 + policy fail-closed（read/workspace-write 拒 spawn）+ 超槽诚实拒绝 + 级联取消不外溢 + 会话持久化摘要；相关 loop 回归（agent-tool-registry / loop-api-route / loop-controller-integration / loop-durable-resume / loop-repository / result-studio-agent-binding）+ tsc 0 + docs:check + ui:audit:check。
+  - **P4 dev Electron 实机**：`scripts/block49-live.cjs`（mock LLM 真 loop：A 单发顺派 / B 并发双派时间窗重叠 / C 级联取消）17/17 证据 `acceptance/block-49/spawn-agent-live.json`；`scripts/block49-ui-live.cjs`（CDP 驱动真实模型：一句话派生 2 子 agent → 并发 → wait 收摘要 → 父整合汇报）6/6 证据 `acceptance/block-49/ui-live.json` + 3 张截图。
+  - **P4 实录（重要教训）**：首轮 UI 实机父模型报告 wait_agent 摘要 `assistantText` 为空——取证（LLM transcript + DB）定位为 **stale dev server**（server 10:28 启动 < 核心文件 11:18 变更，工具已注册但 buildTerminalSummary 为旧稿；mock live 系新进程故通过）；重启 dev Electron 后重跑 6/6 全绿、assistantText 非空、父任务成功整合两份子 agent 逐字结论。再次验证既有纪律「主进程/后端代码变更后必须重启 dev Electron」。
+  - **P4 顺带（BLOCK-56 过目）**：UI-288 档位三选菜单实机过目 5/5（证据 `acceptance/block-56/ui288-menu-live.json`）——发现并修复 `SimpleChat.tsx` L1223 档位标签二值漂移（选「项目写」按钮显示「只读模式」，改三档三元表达式，tsc 0 + 实机回归）；workspace-write 档实际写/禁写行为过目与 UI-287 降级任务条（需真实降级事件）仍留 BLOCK-56 名下 in_progress。
+  - **脚本卫生**：`block49-ui-live.cjs` 证据落盘后显式 `process.exit`（CDP websocket 句柄挂住事件循环曾致 10min 看门狗误杀 exit 2 假阴性）。
+  - **范围如实说明**：§2.4 UI 专项「子 agent 活动条」未实现（MVP 收敛后端工具面闭环；三工具调用在既有工具活动区已可见），登记为后续候选；二期三工具（send_message / followup_task / interrupt_agent）与 proactive 模式留候选（§2.1/§4 不变）。
+  - **收口门禁**：docs:reconcile + docs:check（200 PASS）+ ui:audit:check PASS；定向 `test:changed` 589 项 579 过，10 败全部位于 4 个 **HEAD 预存失败文件**（agent-run-tool / g0-api-route / scientific-task-persistence / tool-job-conversation——测试自举未先跑迁移即 require db.js，顶层 prepare `projects` 语句触发 `no such table`，stash 后 HEAD 同败已复核），**BLOCK-49 零回归**；block49 专项与 loop 回归全过。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

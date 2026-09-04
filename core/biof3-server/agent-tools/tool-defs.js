@@ -888,6 +888,61 @@ const TOOL_DEFS = [
       },
     },
   },
+  // BLOCK-49 — 多 Agent 派生工具面（权限继承 fail-closed：spawn 为 state-write，
+  // 只读/项目写模式在 policy 层拒绝；子 agent 整体继承父 context）
+  {
+    type: 'function',
+    function: {
+      name: 'spawn_agent',
+      description:
+        '派生一个子智能体异步执行独立子任务。子智能体拥有自己的思考和工具调用能力，' +
+        '权限与当前会话一致（继承只读/项目写/完全访问），完成后用 wait_agent 获取结果摘要。' +
+        '适合可并行的独立子任务（如分别分析多个文件、分别跑多个校验）。子 agent 不能再派生子 agent。',
+      parameters: {
+        type: 'object',
+        properties: {
+          task: {
+            type: 'string',
+            description: '子智能体要完成的任务描述，应清晰、自包含（子 agent 看不到当前对话历史）',
+          },
+          model: {
+            type: 'string',
+            description: '可选，子智能体使用的模型（须是已配置的模型 preset 的 model 或 id）；默认继承当前会话模型',
+          },
+          instructions: {
+            type: 'string',
+            description: '可选，对子智能体的额外约束或指导（如输出格式、边界）',
+          },
+        },
+        required: ['task'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'list_agents',
+      description: '列出当前会话派生的全部子智能体及其状态（running/done/failed/cancelled）。',
+      parameters: { type: 'object', properties: {} },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'wait_agent',
+      description:
+        '等待指定子智能体结束并返回结果摘要（阻塞调用）。摘要含最终回复正文（受 token 预算截断）、' +
+        '改动文件清单与失败原因。超时不会终止子智能体，可稍后重试。',
+      parameters: {
+        type: 'object',
+        properties: {
+          agentId: { type: 'string', description: 'spawn_agent 返回的 agentId' },
+          timeout: { type: 'integer', description: '超时毫秒数，默认 300000（5 分钟），上限 600000' },
+        },
+        required: ['agentId'],
+      },
+    },
+  },
 ];
 
 function getToolDefs() {

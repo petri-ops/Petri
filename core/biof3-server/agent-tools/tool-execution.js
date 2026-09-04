@@ -317,6 +317,45 @@ function projectToolData(tool, data, envelope, state) {
       truncated: data.truncated === true || String(data.stdout || '').length > MODEL_OUTPUT_TAIL || String(data.stderr || '').length > MODEL_OUTPUT_TAIL,
     };
   }
+  // BLOCK-49 — 多 Agent 派生工具面：commonData 白名单会剥掉 agentId/status/kind，
+  // 模型拿不到 agentId 就无法 wait_agent（实机回归已证实会触发重复派生异常循环）。
+  // 成功与 fail（extra 携带 agentId/reason）两条路径都要保住关键字段。
+  if (tool === 'spawn_agent') {
+    return {
+      ...commonData(data),
+      agentId: data.agentId,
+      status: data.status,
+      kind: data.kind,
+      ...(data.model !== undefined ? { model: data.model } : {}),
+      ...(data.reason !== undefined ? { reason: data.reason } : {}),
+    };
+  }
+  if (tool === 'list_agents') {
+    const agents = Array.isArray(data.agents) ? data.agents : [];
+    return {
+      ...commonData(data),
+      agents: agents.map((agent) => ({
+        agentId: agent.agentId,
+        status: agent.status,
+        agentStatus: agent.agentStatus,
+        task: tail(agent.task, 120),
+        createdAt: agent.createdAt,
+        ...(agent.finishedAt !== undefined ? { finishedAt: agent.finishedAt } : {}),
+        ...(agent.error !== undefined ? { error: tail(agent.error, 200) } : {}),
+      })),
+      returnedAgents: agents.length,
+      totalReturnedByTool: agents.length,
+    };
+  }
+  if (tool === 'wait_agent') {
+    return {
+      ...commonData(data),
+      agentId: data.agentId,
+      status: data.status,
+      agentStatus: data.agentStatus,
+      summary: data.summary,
+    };
+  }
   return data;
 }
 

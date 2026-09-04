@@ -978,7 +978,22 @@
         "acceptance/ui-266/**",
         "acceptance/ui-267/**",
         "acceptance/ui-268/**",
-        "acceptance/ui-269/**"
+        "acceptance/ui-269/**",
+        "acceptance/ui-270/**",
+        "acceptance/ui-271/**",
+        "acceptance/ui-272/**",
+        "acceptance/ui-273/**",
+        "acceptance/ui-274/**",
+        "acceptance/ui-275/**",
+        "acceptance/ui-276/**",
+        "acceptance/ui-277/**",
+        "acceptance/ui-278/**",
+        "acceptance/agent-stream-disconnected-fix/**",
+        "acceptance/block-45/**",
+        "acceptance/block-46/**",
+        "acceptance/block-47/**",
+        "acceptance/block-50/**",
+        "acceptance/block-51/**"
       ],
       "classifiesScripts": false
     },
@@ -1050,13 +1065,19 @@
       "id": "script-block-live-drivers",
       "note": "BLOCK 实机 CDP 驱动与探针（acceptance/block-N 证据采集），一次性证据脚本按 development-smoke 分类。",
       "patterns": [
+        "acceptance/block-49/**",
         "acceptance/block-52/**",
         "acceptance/block-53/**",
         "acceptance/block-54/**",
+        "acceptance/block-56/**",
+        "scripts/block49-*.cjs",
+        "scripts/block49-*.mjs",
         "scripts/block52-*.cjs",
         "scripts/block52-*.mjs",
         "scripts/block54-*.cjs",
-        "scripts/block54-*.mjs"
+        "scripts/block54-*.mjs",
+        "scripts/block56-*.cjs",
+        "scripts/block56-*.mjs"
       ],
       "tests": [
         "test/test-affected.test.mjs"

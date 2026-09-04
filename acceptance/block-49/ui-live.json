@@ -1,0 +1,73 @@
+{
+  "startedAt": "2026-09-04T04:36:02.078Z",
+  "page": "http://localhost:3000/project/p_mtlnsv0f_xpjb?job=tj_mtlnwhd9_3gs1",
+  "projectId": "p_mtlnsv0f_xpjb",
+  "assertions": [
+    {
+      "name": "composer 输入多 agent 指令并发送",
+      "pass": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "真实模型经 spawn_agent 派生 ≥2 个子 agent（spawnSource=tool:spawn_agent）",
+      "pass": true,
+      "detail": "[{\"agentId\":\"8e526d60-5e88-44b7-bce1-3c60b50f3319\",\"status\":\"completed\",\"kind\":\"subagent\"},{\"agentId\":\"f8b14009-fd81-4618-b55f-3272a34718cf\",\"status\":\"completed\",\"kind\":\"subagent\"}]"
+    },
+    {
+      "name": "父子溯源成立（两个子 agent 同一 parentTaskId）",
+      "pass": true,
+      "detail": "[\"241bdd93-e397-40a0-b50f-7be5ad5a948d\",\"241bdd93-e397-40a0-b50f-7be5ad5a948d\"]"
+    },
+    {
+      "name": "子 agent 全部到达终态",
+      "pass": true,
+      "detail": "[{\"agentId\":\"8e526d60-5e88-44b7-bce1-3c60b50f3319\",\"status\":\"completed\"},{\"agentId\":\"f8b14009-fd81-4618-b55f-3272a34718cf\",\"status\":\"completed\"}]"
+    },
+    {
+      "name": "父任务最终回复整合两份子 agent 结论（wait_agent 回传协议可见）",
+      "pass": true,
+      "detail": "两个子 agent 均已 `done`，且这次 `wait_agent` 成功捕获到各自正文（`assistantText` 非空）。以下是合并汇报。\n\n---\n\n**合并汇报**\n\n我们整理了两项任务的结果。基因功能方面：BRCA1 参与 DNA 双链断裂的同源重组修复，维持基因组稳定性，其功能缺失会显著增加乳腺癌和卵巢癌风险；TP53 作为转录因子响应 DNA 损伤与细胞压力，诱导细胞周期阻滞"
+    },
+    {
+      "name": "实机截图证据齐备（≥2 张）",
+      "pass": true,
+      "detail": "[\"p49-01-sent.png\",\"p49-02-children-running.png\",\"p49-03-integrated.png\"]"
+    }
+  ],
+  "baselineChildrenCount": 4,
+  "baselineIso": "2026-09-04T04:36:02.078Z",
+  "children": [
+    {
+      "agentId": "8e526d60-5e88-44b7-bce1-3c60b50f3319",
+      "status": "completed",
+      "agentStatus": "done",
+      "createdAt": "2026-09-04T04:36:08.570Z",
+      "finishedAt": "2026-09-04T04:36:11.558Z",
+      "kind": "subagent",
+      "parentTaskId": "241bdd93-e397-40a0-b50f-7be5ad5a948d",
+      "task": "给出以下三个基因各一句功能说明（每句一句话，直接给出结论，不要额外解释）：BRCA1、TP53、EGFR。"
+    },
+    {
+      "agentId": "f8b14009-fd81-4618-b55f-3272a34718cf",
+      "status": "completed",
+      "agentStatus": "done",
+      "createdAt": "2026-09-04T04:36:08.573Z",
+      "finishedAt": "2026-09-04T04:36:10.463Z",
+      "kind": "subagent",
+      "parentTaskId": "241bdd93-e397-40a0-b50f-7be5ad5a948d",
+      "task": "把字符串 biof3 反转，并写出一句话说明。直接给出反转后的字符串和一句话说明。"
+    }
+  ],
+  "parentTaskId": "241bdd93-e397-40a0-b50f-7be5ad5a948d",
+  "parentFinal": {
+    "content": "两个子 agent 均已 `done`，且这次 `wait_agent` 成功捕获到各自正文（`assistantText` 非空）。以下是合并汇报。\n\n---\n\n**合并汇报**\n\n我们整理了两项任务的结果。基因功能方面：BRCA1 参与 DNA 双链断裂的同源重组修复，维持基因组稳定性，其功能缺失会显著增加乳腺癌和卵巢癌风险；TP53 作为转录因子响应 DNA 损伤与细胞压力，诱导细胞周期阻滞、修复或凋亡，是当前最常失活的肿瘤抑制基因；EGFR 是一种受体酪氨酸激酶，结合配体后激活下游增殖与存活信号通路，其突变或过表达与多种上皮性肿瘤的发生及靶向治疗应答密切相关。另一项任务中，把字符串反转：原串 **biof3** 按字符反转后得到 **3foib**，即从尾到头重新排列。",
+    "ts": "2026-09-04T04:36:15.066Z"
+  },
+  "screenshots": [
+    "p49-01-sent.png",
+    "p49-02-children-running.png",
+    "p49-03-integrated.png"
+  ],
+  "finishedAt": "2026-09-04T04:36:19.063Z",
+  "allPass": true
+}

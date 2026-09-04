@@ -1,0 +1,215 @@
+{
+  "startedAt": "2026-09-04T04:03:18.619Z",
+  "assertions": [
+    {
+      "name": "A0 父任务主会话并发槽获取成功",
+      "pass": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "A1 父 loop 正常完成",
+      "pass": true,
+      "detail": "{\"status\":\"completed\"}"
+    },
+    {
+      "name": "A2 子 agent 落库：kind=subagent + parentTaskId 溯源 + spawnSource",
+      "pass": true,
+      "detail": "[{\"agentId\":\"0e77d217-4c87-4d29-96a1-f66164fba1c9\",\"status\":\"completed\",\"kind\":\"subagent\",\"parentTaskId\":\"788a68f9-13a4-473a-8d05-e194e6cbad12\",\"spawnSource\":\"tool:spawn_agent\"}]"
+    },
+    {
+      "name": "A3 子 agent 真实跑完（completed）",
+      "pass": true,
+      "detail": "{\"status\":\"completed\"}"
+    },
+    {
+      "name": "A4 wait_agent 摘要回流父上下文（父正文包含子 agent 结论）",
+      "pass": true,
+      "detail": "DONE: 子 agent 汇报已收到 —— CHILD-REPORT-A: 计算完成，7 乘 6 等于 42，没有余数。"
+    },
+    {
+      "name": "A5 子 agent 会话消息已持久化（task_id 可查，供 wait_agent 摘要）",
+      "pass": true,
+      "detail": "{\"content\":\"CHILD-REPORT-A: 计算完成，7 乘 6 等于 42，没有余数。\",\"ts\":\"2026-09-04T04:03:19.184Z\"}"
+    },
+    {
+      "name": "A6 权限继承：子 agent 继承父 context（page/accessMode）",
+      "pass": true,
+      "detail": "{\"page\":\"chat\",\"accessMode\":\"full\"}"
+    },
+    {
+      "name": "A7 并发槽闭环：子 agent 终态后子 agent 槽可再次占用",
+      "pass": true,
+      "detail": "acquire probe after child terminal"
+    },
+    {
+      "name": "B0 第二父任务主会话槽获取成功",
+      "pass": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "B1 第二父 loop 正常完成",
+      "pass": true,
+      "detail": "{\"status\":\"completed\",\"text\":\"DONE-BOTH: 两份子 agent 报告已收到 —— CHILD-REPORT-A: 计算完成，7 乘 6 等于 42，没有余数。 / CHILD-REPORT-B: 计算完成，9 乘 9 等于 81，九九归一。\"}"
+    },
+    {
+      "name": "B2 模型并发派生两个子 agent",
+      "pass": true,
+      "detail": "{\"count\":2}"
+    },
+    {
+      "name": "B3 两个子 agent 都真实跑完（completed）",
+      "pass": true,
+      "detail": "[{\"agentId\":\"55401118-e4a6-42b4-b2e4-40659dbdda69\",\"status\":\"completed\",\"createdAt\":\"2026-09-04T04:03:19.804Z\",\"finishedAt\":\"2026-09-04T04:03:20.231Z\",\"task\":\"LIVE-CHILD-A: 计算 7 乘 6 并直接给出结果\"},{\"agentId\":\"b0cc91c2-7ac2-4889-8337-9a162090a3c7\",\"status\":\"completed\",\"createdAt\":\"2026-09-04T04:03:19.825Z"
+    },
+    {
+      "name": "B4 并发时间窗重叠（第二个子 agent 派生时第一个仍在运行）",
+      "pass": true,
+      "detail": "[{\"agentId\":\"55401118-e4a6-42b4-b2e4-40659dbdda69\",\"status\":\"completed\",\"createdAt\":\"2026-09-04T04:03:19.804Z\",\"finishedAt\":\"2026-09-04T04:03:20.231Z\",\"task\":\"LIVE-CHILD-A: 计算 7 乘 6 并直接给出结果\"},{\"agentId\":\"b0cc91c2-7ac2-4889-8337-9a162090a3c7\",\"status\":\"completed\",\"createdAt\":\"2026-09-04T04:03:19.825Z"
+    },
+    {
+      "name": "B5 父整合两份子 agent 报告",
+      "pass": true,
+      "detail": "DONE-BOTH: 两份子 agent 报告已收到 —— CHILD-REPORT-A: 计算完成，7 乘 6 等于 42，没有余数。 / CHILD-REPORT-B: 计算完成，9 乘 9 等于 81，九九归一。"
+    },
+    {
+      "name": "C1 spawn_agent 直调成功（异步返回 agentId）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"agentId\":\"7f6ddc11-8044-4d78-b4c7-92631fef5770\",\"status\":\"running\",\"kind\":\"subagent\"}"
+    },
+    {
+      "name": "C2 级联取消：父取消后子 agent 被级联置为取消态",
+      "pass": true,
+      "detail": "{\"parentTaskId\":\"93316ce2-aa04-47ad-972c-9934aac3ccf6\",\"parentStatus\":\"running\",\"parentAgentStatus\":\"cancel_requested\",\"childTaskId\":\"7f6ddc11-8044-4d78-b4c7-92631fef5770\",\"childStatus\":\"cancelled\",\"childAgentStatus\":\"cancelled\",\"cascadeCancelledIds\":[\"93316ce2-aa04-47ad-972c-9934aac3ccf6\",\"7f6ddc11"
+    },
+    {
+      "name": "C3 级联取消不外溢：父任务自身进入取消态",
+      "pass": true,
+      "detail": "{\"parentTaskId\":\"93316ce2-aa04-47ad-972c-9934aac3ccf6\",\"parentStatus\":\"running\",\"parentAgentStatus\":\"cancel_requested\",\"childTaskId\":\"7f6ddc11-8044-4d78-b4c7-92631fef5770\",\"childStatus\":\"cancelled\",\"childAgentStatus\":\"cancelled\",\"cascadeCancelledIds\":[\"93316ce2-aa04-47ad-972c-9934aac3ccf6\",\"7f6ddc11"
+    }
+  ],
+  "scenarioA": {
+    "taskId": "788a68f9-13a4-473a-8d05-e194e6cbad12",
+    "status": "completed",
+    "assistantText": "DONE: 子 agent 汇报已收到 —— CHILD-REPORT-A: 计算完成，7 乘 6 等于 42，没有余数。",
+    "children": [
+      {
+        "agentId": "0e77d217-4c87-4d29-96a1-f66164fba1c9",
+        "status": "completed",
+        "kind": "subagent",
+        "parentTaskId": "788a68f9-13a4-473a-8d05-e194e6cbad12",
+        "spawnSource": "tool:spawn_agent"
+      }
+    ],
+    "childMessage": {
+      "content": "CHILD-REPORT-A: 计算完成，7 乘 6 等于 42，没有余数。",
+      "ts": "2026-09-04T04:03:19.184Z"
+    }
+  },
+  "scenarioB": {
+    "taskId": "9b74e802-af9a-4f5b-a36b-bc803336bbd7",
+    "status": "completed",
+    "assistantText": "DONE-BOTH: 两份子 agent 报告已收到 —— CHILD-REPORT-A: 计算完成，7 乘 6 等于 42，没有余数。 / CHILD-REPORT-B: 计算完成，9 乘 9 等于 81，九九归一。",
+    "children": [
+      {
+        "agentId": "55401118-e4a6-42b4-b2e4-40659dbdda69",
+        "status": "completed",
+        "createdAt": "2026-09-04T04:03:19.804Z",
+        "finishedAt": "2026-09-04T04:03:20.231Z",
+        "task": "LIVE-CHILD-A: 计算 7 乘 6 并直接给出结果"
+      },
+      {
+        "agentId": "b0cc91c2-7ac2-4889-8337-9a162090a3c7",
+        "status": "completed",
+        "createdAt": "2026-09-04T04:03:19.825Z",
+        "finishedAt": "2026-09-04T04:03:20.257Z",
+        "task": "LIVE-CHILD-B: 计算 9 乘 9 并直接给出结果"
+      }
+    ]
+  },
+  "scenarioC": {
+    "parentTaskId": "93316ce2-aa04-47ad-972c-9934aac3ccf6",
+    "parentStatus": "running",
+    "parentAgentStatus": "cancel_requested",
+    "childTaskId": "7f6ddc11-8044-4d78-b4c7-92631fef5770",
+    "childStatus": "cancelled",
+    "childAgentStatus": "cancelled",
+    "cascadeCancelledIds": [
+      "93316ce2-aa04-47ad-972c-9934aac3ccf6",
+      "7f6ddc11-8044-4d78-b4c7-92631fef5770"
+    ]
+  },
+  "mockHits": [
+    {
+      "path": "/chat/completions",
+      "firstUser": "LIVE-PARENT: 请派生一个子 agent 计算 7 乘 6，等待它完成",
+      "toolMsgCount": 0,
+      "spawnResults": 0,
+      "waitResults": 0
+    },
+    {
+      "path": "/chat/completions",
+      "firstUser": "LIVE-PARENT: 请派生一个子 agent 计算 7 乘 6，等待它完成",
+      "toolMsgCount": 1,
+      "spawnResults": 1,
+      "waitResults": 0
+    },
+    {
+      "path": "/chat/completions",
+      "firstUser": "LIVE-CHILD-A: 计算 7 乘 6 并直接给出结果。",
+      "toolMsgCount": 0,
+      "spawnResults": 0,
+      "waitResults": 0
+    },
+    {
+      "path": "/chat/completions",
+      "firstUser": "LIVE-PARENT: 请派生一个子 agent 计算 7 乘 6，等待它完成",
+      "toolMsgCount": 2,
+      "spawnResults": 1,
+      "waitResults": 1
+    },
+    {
+      "path": "/chat/completions",
+      "firstUser": "LIVE-PARENT-CONCURRENT: 请同时派生两个子 agent：一",
+      "toolMsgCount": 0,
+      "spawnResults": 0,
+      "waitResults": 0
+    },
+    {
+      "path": "/chat/completions",
+      "firstUser": "LIVE-PARENT-CONCURRENT: 请同时派生两个子 agent：一",
+      "toolMsgCount": 1,
+      "spawnResults": 1,
+      "waitResults": 0
+    },
+    {
+      "path": "/chat/completions",
+      "firstUser": "LIVE-CHILD-A: 计算 7 乘 6 并直接给出结果。",
+      "toolMsgCount": 0,
+      "spawnResults": 0,
+      "waitResults": 0
+    },
+    {
+      "path": "/chat/completions",
+      "firstUser": "LIVE-PARENT-CONCURRENT: 请同时派生两个子 agent：一",
+      "toolMsgCount": 2,
+      "spawnResults": 2,
+      "waitResults": 0
+    },
+    {
+      "path": "/chat/completions",
+      "firstUser": "LIVE-CHILD-B: 计算 9 乘 9 并直接给出结果。",
+      "toolMsgCount": 0,
+      "spawnResults": 0,
+      "waitResults": 0
+    },
+    {
+      "path": "/chat/completions",
+      "firstUser": "LIVE-PARENT-CONCURRENT: 请同时派生两个子 agent：一",
+      "toolMsgCount": 4,
+      "spawnResults": 2,
+      "waitResults": 2
+    }
+  ],
+  "finishedAt": "2026-09-04T04:03:21.370Z",
+  "allPass": true
+}

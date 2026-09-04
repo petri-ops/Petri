@@ -107,9 +107,9 @@ function closeServer(server) {
 
 test('agent registry pairs every model-visible definition with one handler and contract', () => {
   const registry = getToolRegistry();
-  // 37 = 33（BLOCK-33 时代）+ 4（G0-RS-P3 新增 context-bound 工具）。新增工具时同步此数。
-  assert.equal(registry.length, 37);
-  assert.equal(new Set(registry.map((entry) => entry.definition.function.name)).size, 37);
+  // 40 = 37（BLOCK-52 时代）+ 3（BLOCK-49 spawn_agent/list_agents/wait_agent）。新增工具时同步此数。
+  assert.equal(registry.length, 40);
+  assert.equal(new Set(registry.map((entry) => entry.definition.function.name)).size, 40);
 
   for (const entry of registry) {
     assert.equal(typeof entry.handler, 'function');
@@ -168,7 +168,7 @@ test('schema-first loading does not capture partial act helper exports', () => {
       const { getToolDefs } = require('./core/biof3-server/agent-tools/tool-defs.js');
       const planTools = require('./core/biof3-server/agent-tools/plan-ui-tools.js');
       const actTools = require('./core/biof3-server/agent-tools/act-tools.js');
-      if (getToolDefs().length !== 37) throw new Error('unexpected tool count');
+      if (getToolDefs().length !== 40) throw new Error('unexpected tool count');
       if (!actTools.testFilterExpr('5', '>3')) throw new Error('filter helper unavailable');
       const context = {};
       const result = await planTools.actOpenFigcodePlot({ figcardId: 'volcano' }, context);
@@ -256,7 +256,7 @@ test('OpenAI-compatible outbound JSON contains Provider schema only', async () =
       { baseUrl }
     );
     assert.equal(result.choices[0].message.content, 'ok');
-    assert.equal(receivedBody.tools.length, 37);
+    assert.equal(receivedBody.tools.length, 40);
     const keys = collectKeys(receivedBody.tools);
     for (const key of INTERNAL_CONTRACT_KEYS) assert.equal(keys.has(key), false, `${key} leaked`);
   } finally {
