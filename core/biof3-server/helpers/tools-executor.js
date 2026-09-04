@@ -42,6 +42,59 @@ const {
   scheduleHardTimeout,
   terminateChildProcess,
 } = require('../helpers/process-lifecycle');
+const { createTargetRegistry } = require('./remote-execution/target-registry');
+const { createRemoteJobRunner, AGENT_SCRIPT_HASH } = require('./remote-execution/remote-job-runner');
+const { remoteJobDirPath } = require('./remote-execution/ssh-transport');
+
+/**
+ * BLOCK-57 — Job provenance 构建工厂。
+ * 从 executeJob 提取（原为闭包），使本地 / 远程 / 重启恢复三条执行路径
+ * 产出完全同形的 provenance.json；executionTarget 块为远程作业 additive 扩展。
+ */
+function buildJobProvenance({
+  jobId,
+  job,
+  toolId,
+  cfg,
+  jobDir,
+  runtimeCommand,
+  runtimeReady,
+  runtimeVersion,
+  runCmd,
+  startedAt,
+  artifacts = [],
+  executionTarget = null,
+}) {
+  const dbMod = require('../db');
+  const pluginLoader = require('../plugin-loader');
+  const toolDefinition = pluginLoader.getToolDefinition(toolId) || {};
+  const pluginManifest = pluginLoader.getPluginManifest(toolId) || cfg;
+  const scientificTask = typeof dbMod.getScientificTaskByToolJob === 'function' ? dbMod.getScientificTaskByToolJob(jobId) : null;
+  const provenance = createExecutionProvenance({
+    toolJobId: jobId,
+    projectId: job.project_id || null,
+    scientificTask,
+    plugin: pluginManifest,
+    params: job.params || {},
+    inputs: collectExecutionInputs({
+      inputDefinitions: Array.isArray(toolDefinition.inputs) ? toolDefinition.inputs : [],
+      params: job.params || {},
+      jobDir,
+    }),
+    runtime: { name: cfg.lang || null, command: runtimeCommand, version: runtimeVersion, ready: runtimeReady?.ready },
+    runScriptPath: path.join(jobDir, 'run-script.' + (cfg.lang === 'r' ? 'R' : 'py')),
+    command: { executable: runCmd[0], args: runCmd.slice(1), cwd: jobDir },
+    artifacts,
+    startedAt,
+    completedAt: new Date().toISOString(),
+  });
+  if (executionTarget) {
+    provenance.executionTarget = executionTarget;
+  }
+  const provenancePath = path.join(jobDir, 'provenance.json');
+  fs.writeFileSync(provenancePath, JSON.stringify(provenance, null, 2));
+  return { provenance, provenancePath, pluginManifest };
+}
 
 function isManagedResultDir(candidate, jobsDir) {
   if (!candidate || !jobsDir) return false;
@@ -845,6 +898,19 @@ function createToolsExecutor({
   }
 
   function killLocalToolJob(jobId) {
+    // BLOCK-57：远程作业取消——本地 durable 取消态照常落定；节点侧补发 agent cancel，
+    // 由 attach 循环 / re-adopt 扫描对账收敛为 cancelled（节点真相胜出）。
+    void (async () => {
+      try {
+        const remoteJob = await db.prepare('SELECT execution_target_id FROM tool_jobs WHERE id=?').get(jobId);
+        if (remoteJob && remoteJob.execution_target_id) {
+          const target = await targetRegistry.getById({ id: remoteJob.execution_target_id });
+          if (target) {
+            await remoteRunner.cancel({ alias: target.alias, jobId }).catch(() => {});
+          }
+        }
+      } catch {}
+    })();
     return requestActiveToolJobCancellation(activeToolJobs, jobId);
   }
 
@@ -1118,11 +1184,14 @@ function createToolsExecutor({
   async function recoverZombieJobs({ startup = false } = {}) {
     try {
       const cutoff = Date.now() - ZOMBIE_TIMEOUT_MS;
-      await recoverStaleActiveJobs({ activeJobs: activeToolJobs, cutoff, db });
+      // BLOCK-57：远程作业无本地子进程，本地 stale-kill 语义不适用（D5.3 连不上≠作业死）。
+      const locallyOwned = new Map([...activeToolJobs].filter(([, active]) => !active.remote));
+      await recoverStaleActiveJobs({ activeJobs: locallyOwned, cutoff, db });
       const result = await markUnownedStaleJobs({
         db,
         cutoff,
         ownedJobIds: activeToolJobs.keys(),
+        excludeRemoteTargets: true,
       });
       if (result.changes > 0) {
         console.log(`[tools] Recovered ${result.changes} unowned zombie job(s)`);
@@ -1137,6 +1206,20 @@ function createToolsExecutor({
             ],
           });
         } catch {}
+      }
+      // BLOCK-57：远程作业对账恢复（D5.2）——running + 有目标 + 本进程无 owner
+      // （重启遗留）→ re-attach；节点状态真相决定终态。
+      try {
+        const remoteRunning = await db
+          .prepare("SELECT id FROM tool_jobs WHERE status='running' AND execution_target_id IS NOT NULL")
+          .all();
+        for (const row of remoteRunning) {
+          if (!activeToolJobs.has(row.id)) {
+            await adoptRemoteRunningJob(row.id);
+          }
+        }
+      } catch (e) {
+        console.warn('[tools] remote re-adopt scan failed:', e.message);
       }
     } catch (e) {
       console.warn(`[tools] recoverZombieJobs failed: ${e.message} — skipping startup scan`);
@@ -1243,247 +1326,319 @@ function createToolsExecutor({
     return null;
   }
 
-  async function executeJob(jobId, toolId, jobDir, stagedInputFiles = []) {
-    const owner = claimActiveToolJob(activeToolJobs, { jobId, toolId });
-    if (!owner) {
-      console.warn('[tools] Job ' + jobId + ' already has an active execution owner');
-      return;
-    }
-    const started = await db
-      .prepare('UPDATE tool_jobs SET status = ? WHERE id = ? AND status = ?')
-      .run('running', jobId, 'pending');
-    if (!started || started.changes < 1) {
-      releaseActiveToolJob(activeToolJobs, jobId, owner);
-      console.log('[tools] Job ' + jobId + ' not started because it is no longer pending');
-      return;
-    }
-    const job = hydrateExecutionJob(
-      await db.prepare('SELECT * FROM tool_jobs WHERE id = ?').get(jobId)
-    );
-    if (!job) {
-      await markJobFailed(jobId, 'Tool job disappeared before execution.', 'setup');
-      releaseActiveToolJob(activeToolJobs, jobId, owner);
-      return;
-    }
-    let stagedInputSnapshots;
-    try {
-      stagedInputSnapshots = captureStagedInputSnapshots(stagedInputFiles);
-    } catch (error) {
-      await markJobFailed(jobId, `Staged input snapshot failed: ${error.message}`, 'setup');
-      releaseActiveToolJob(activeToolJobs, jobId, owner);
-      return;
-    }
-    const outputDir = path.join(jobDir, 'output');
-    config.mkdirSandbox(outputDir);
+  // BLOCK-57 —— 远程执行编排（daemonless：节点真相在 state/exit 文件，见设计评审 D1/D4/D5）
+  const targetRegistry = createTargetRegistry({ db });
+  const remoteRunner = createRemoteJobRunner();
 
-    const cfg = getToolConfig(toolId);
-    if (!cfg) {
-      await markJobFailed(jobId, 'Unknown tool: ' + toolId, 'config');
-      releaseActiveToolJob(activeToolJobs, jobId, owner);
-      return;
+  const REMOTE_RUNNER_SAMPLES = {
+    peak: {},
+    sampling: { status: 'unavailable', sampleCount: null, reason: 'remote_execution' },
+    peakStatus: 'unavailable',
+  };
+  const REMOTE_LOG_CAP_BYTES = 10 * 1024 * 1024;
+
+  /**
+   * 提交前解析执行目标：目标存在 → 节点探测 → 语言运行时解析（诚实失败）。
+   * argmode 镜像本地 spawn 约定：R 一律 job_dir；Python 插件 job_dir / 内置 params。
+   */
+  async function resolveRemoteTargetForJob({ cfg, targetId }) {
+    const target = await targetRegistry.getById({ id: targetId });
+    if (!target) {
+      return { error: true, stage: 'setup', message: '执行目标不存在或已被移除（' + String(targetId).slice(0, 40) + '）' };
     }
-
-    // 插件脚本：cfg.script 已是绝对路径；内置工具：拼 scriptsDir
-    const scriptSrc = cfg._isPlugin ? cfg.script : path.join(scriptsDir, cfg.script);
-    if (!fs.existsSync(scriptSrc)) {
-      await markJobFailed(jobId, 'Script not found: ' + cfg.script, 'config');
-      releaseActiveToolJob(activeToolJobs, jobId, owner);
-      return;
+    const probe = await targetRegistry.probe({ id: target.id });
+    if (!probe.ok) {
+      return { error: true, stage: 'setup', message: '执行目标探测失败（' + probe.error + '）：' + (probe.detail || '') };
     }
-
-    const scriptPath = path.join(jobDir, 'run-script.' + (cfg.lang === 'r' ? 'R' : 'py'));
-
-    try {
-      fs.copyFileSync(
-        scriptSrc,
-        path.join(jobDir, 'run-script.' + (cfg.lang === 'r' ? 'R' : 'py'))
-      );
-      // 报告模板：插件自带模板优先；内置插件可复用 biof3-server 旧模板。
-      const templateCandidates = cfg._isPlugin
-        ? [
-            path.join(cfg.pluginDir, toolId + '-report-template.html'),
-            path.join(scriptsDir, toolId + '-report-template.html'),
-          ]
-        : [path.join(scriptsDir, toolId + '-report-template.html')];
-      const templateSrc = templateCandidates.find((candidate) => fs.existsSync(candidate));
-      if (templateSrc) {
-        fs.copyFileSync(templateSrc, path.join(jobDir, 'report-template.html'));
-      }
-      if (cfg.lang === 'r') {
-        const sharedHelpers = ['_biof3-theme.R'];
-        // 插件脚本目录优先（build-plugin.sh 已把 _biof3-theme.R 复制进去），其次 scriptsDir
-        const helperSearchDirs = cfg._isPlugin
-          ? [path.dirname(scriptSrc), scriptsDir]
-          : [scriptsDir];
-        for (const h of sharedHelpers) {
-          for (const dir of helperSearchDirs) {
-            const src = path.join(dir, h);
-            if (fs.existsSync(src)) {
-              fs.copyFileSync(src, path.join(jobDir, h));
-              break;
-            }
-          }
-        }
-      }
-    } catch (e) {
-      await markJobFailed(jobId, 'Copy failed: ' + e.message, 'setup');
-      releaseActiveToolJob(activeToolJobs, jobId, owner);
-      return;
+    const runtime = remoteRunner.resolveRuntime(probe.info, cfg.lang);
+    // 目标级运行时覆盖（module 系统 / 非 PATH 安装）优先于探测结果
+    let override = null;
+    try { override = target.runtime_json ? JSON.parse(target.runtime_json) : null; } catch { override = null; }
+    const overrideBin = override && typeof override[cfg.lang] === 'string' ? override[cfg.lang] : null;
+    if (overrideBin) {
+      runtime.ready = true;
+      runtime.runtimeBin = overrideBin;
+      runtime.reason = null;
+      runtime.overridden = true;
     }
+    if (!runtime.ready) {
+      return { error: true, stage: 'runtime', message: runtime.reason + '（目标 ' + target.alias + '）' };
+    }
+    const argmode = cfg.lang === 'r' || cfg._isPlugin ? 'jobdir' : 'params';
+    return { target, probeInfo: probe.info, runtime, argmode, mode: 'submit' };
+  }
 
-    // 本地执行：直接调内嵌 Rscript/python3。
-    let runCmd;
-    let runEnv = undefined;
-    let runtimeReady = null;
-    let runtimeCommand = null;
-    let runtimeVersion = null;
-    {
-      const { getExecutor } = require('../../shared-backend/executors');
-      const executor = getExecutor(cfg.lang);
-      runtimeCommand = executor && executor.binPath;
-      runtimeReady =
-        executor && executor.binPath
-          ? { runtime: cfg.lang || null, ready: true, command: executor.binPath, reason: null }
-          : {
-              runtime: cfg.lang || null,
-              ready: false,
-              command: null,
-              reason: `未找到 ${cfg.lang || 'unknown'} 执行器`,
-            };
-      runtimeVersion = runtimeReady.ready && typeof executor.getRuntimeVersion === 'function'
-        ? executor.getRuntimeVersion()
-        : null;
-      if (!runtimeReady.ready) {
-        await markJobFailed(jobId, runtimeReady.reason, 'runtime');
+  /**
+   * 远程作业主循环：提交（attach 模式跳过）→ 日志流（断开即重连，偏移续传）→
+   * 30s 轮询节点状态（心跳事实源）→ 终态后产物拉回 + sha256 对账 → 共用 finalize。
+   * 传输失败永不改写作业终态（D8），只有节点真相与产物校验可以。
+   */
+  async function runRemoteToolJob({
+    owner,
+    jobId,
+    jobDir,
+    outputDir,
+    cfg,
+    remoteDispatch,
+    finalizeJobRun,
+    markJobFailed: markFailed,
+  }) {
+    const alias = remoteDispatch.target.alias;
+    owner.remote = true;
+
+    let stdoutText = '';
+    const mirrorLogPath = path.join(outputDir, 'remote-runner.log');
+    const appendLog = (text) => {
+      stdoutText = (stdoutText + text).slice(-REMOTE_LOG_CAP_BYTES);
+      try { fs.appendFileSync(mirrorLogPath, text); } catch {}
+    };
+
+    let logOffset = 0;
+    let logStream = null;
+    const startLogStream = () => {
+      logStream = remoteRunner.streamLog({
+        alias,
+        jobId,
+        offset: logOffset,
+        onChunk: (chunk) => {
+          logOffset += chunk.length;
+          appendLog(chunk.toString('utf8'));
+        },
+        onExit: () => { logStream = null; },
+      });
+    };
+
+    if (remoteDispatch.mode !== 'attach') {
+      owner.phase = 'remote-submitting';
+      const submitted = await remoteRunner.submit({
+        target: remoteDispatch.target,
+        jobId,
+        jobDir,
+        lang: cfg.lang,
+        argmode: remoteDispatch.argmode,
+        runtimeBin: remoteDispatch.runtime.runtimeBin,
+      });
+      if (!submitted.ok) {
+        const kind = (submitted.error && submitted.error.kind) || 'transport.unknown';
+        const detail = (submitted.error && submitted.error.detail) || '';
+        const stage = submitted.stage === 'start' && kind === 'node.runtime_missing' ? 'runtime' : 'setup';
+        await markFailed(jobId, '远程提交失败（' + submitted.stage + '/' + kind + '）：' + detail, stage);
         releaseActiveToolJob(activeToolJobs, jobId, owner);
         return;
       }
-      if (cfg.lang === 'r') {
-        // BLOCK-58 — 内置 R 工具脚本执行前毫秒级依赖检查（读 _dependencies.json，
-        // executor.checkPackageInstalled 查 R_HOME/library 目录存在性）：缺包直接
-        // fail-fast 拒绝派生进程（脚本内亦有 MISSING_R_PACKAGES 兜底，分析路径零联网安装）。
-        // 插件脚本（_isPlugin）走 manifest packages + 预编译包通道，不在此管。
-        if (!cfg._isPlugin) {
-          const { checkToolDependencies, missingPackagesMessage } = require('./tool-dependencies');
-          const depCheck = checkToolDependencies(executor, cfg.script);
-          if (depCheck.checked && depCheck.missing.length > 0) {
-            await markJobFailed(jobId, missingPackagesMessage(toolId, depCheck.missing), 'dependencies');
-            releaseActiveToolJob(activeToolJobs, jobId, owner);
-            return;
-          }
-        }
-        // R 工具脚本约定：commandArgs(trailingOnly=TRUE)[1] = job_dir
-        //（deseq2.R: `args <- commandArgs(trailingOnly=TRUE); job_dir <- args[1]`）
-        // 不能用 buildSpawnCommand（它加 --args params.json，是 figcode 脚本约定，
-        // 会让 args[1]="--args"，R 脚本 source(file.path("--args",...)) 找不到文件）
-        runCmd = [executor.binPath, scriptPath, jobDir];
-        // 插件脚本：注入插件自带的预编译包目录到 R 库搜索路径，
-        // 让 library(DESeq2) 等从 pluginDir/packages/r 加载，不污染基础 runtime library。
-        // R_LIBS_USER 会被追加到默认 .libPaths() 之后，runtime 基础包仍可用。
-        // 三段式组装逻辑抽到 shared-backend/r-libs-resolver.js（与 mcp/registry.js 共用）。
-        if (cfg._isPlugin) {
-          // Stage 3 B2 part2：在组装 R_LIBS_USER 之前，先确保插件声明的 capability
-          // bundle 已就绪（缺则按需下载）。ensureBundlesForPlugin 对 unpublished /
-          // unknown bundle 不下载、不抛错；任何非 ok 结果只 warn，随后照常继续用基础
-          // runtime 跑（与接线前行为完全一致——resolveRLibsForPlugin 找不到即返回 null）。
-          // 绝不因 bundle 未就绪而中断 job。await 确保已下载的 bundle 能被随后的
-          // resolveRLibsForPlugin → checkCapabilityReady 命中。
-          if (cfg.requiresBundle) {
-            try {
-              const ensured = await ensureBundlesForPlugin(cfg);
-              if (ensured && !ensured.ok) {
-                console.warn(
-                  '[tools] capability bundle not fully ready for',
-                  toolId,
-                  '— continuing with base runtime:',
-                  JSON.stringify(ensured.results)
-                );
-              }
-            } catch (e) {
-              console.warn('[tools] ensureBundlesForPlugin failed for', toolId, ':', e.message);
-            }
-          }
-          const resolvedEnv = resolveRLibsForPlugin(cfg);
-          if (resolvedEnv) runEnv = resolvedEnv;
-        }
-      } else {
-        const spawnCmd = executor.buildSpawnCommand(scriptPath, jobDir, {});
-        if (cfg._isPlugin) {
-          runCmd = [executor.binPath, scriptPath, jobDir];
-        } else {
-          runCmd = [spawnCmd.cmd, ...spawnCmd.args];
-        }
-        if (spawnCmd.env) runEnv = spawnCmd.env;
-      }
     }
+    owner.phase = 'remote-running';
+    startLogStream();
 
-    if (!await canLaunchOwnedToolJob({ activeToolJobs, db, jobId, owner })) {
-      releaseActiveToolJob(activeToolJobs, jobId, owner);
-      console.log('[tools] Job ' + jobId + ' launch suppressed by durable cancellation state');
+    let cancelSent = false;
+    let unknownCount = 0;
+    for (;;) {
+      await new Promise((resolve) => setTimeout(resolve, HEARTBEAT_INTERVAL_MS));
+      if (owner.cancelRequested && !cancelSent) {
+        cancelSent = true;
+        await remoteRunner.cancel({ alias, jobId });
+      }
+      const status = await remoteRunner.pollStatus({ alias, jobId });
+      if (!status.ok) {
+        // 传输失败 ≠ 作业失败：挂起重试，UI 以「状态未知（以节点为准）」理解。
+        if (!logStream) startLogStream();
+        continue;
+      }
+      if (status.kind === 'active') {
+        unknownCount = 0;
+        try {
+          await db.prepare("UPDATE tool_jobs SET heartbeat_at=? WHERE id=? AND status='running'").run(Date.now(), jobId);
+        } catch {}
+        owner.lastHeartbeatAt = Date.now();
+        owner.livenessLostAt = null;
+        if (!logStream) startLogStream();
+        continue;
+      }
+      if (status.kind === 'unknown') {
+        unknownCount += 1;
+        if (unknownCount >= 3) {
+          // 节点明确应答无此作业记录——节点真相胜出，诚实失败（D4）。
+          try { if (logStream) logStream.stop(); } catch {}
+          await markFailed(jobId, '节点侧无此作业记录（可能已被清理或 agent 数据目录被移除）', 'execute');
+          releaseActiveToolJob(activeToolJobs, jobId, owner);
+          return;
+        }
+        continue;
+      }
+      // terminal —— 节点终态事实（exit.json）
+      try { if (logStream) logStream.stop(); } catch {}
+      const exit = await remoteRunner.fetchExitInfo({ alias, jobId });
+      const exitInfo = exit.ok ? exit.info : null;
+      const code = Number(exitInfo && exitInfo.code);
+      if (owner.cancelRequested) {
+        // 取消收敛：finalize 内 cancelRequested 分支落 cancelled（与本地同链）。
+        await finalizeJobRun({ err: null, stdout: stdoutText, stderr: '', sampledResources: REMOTE_RUNNER_SAMPLES });
+        return;
+      }
+      const pulled = await remoteRunner.pullOutputs({ target: remoteDispatch.target, jobId, localJobDir: jobDir });
+      if (!pulled.ok) {
+        if (pulled.stage === 'verify') {
+          await markFailed(jobId, '产物传输完整性校验失败（fail-closed）：' + ((pulled.error && pulled.error.detail) || ''), 'artifact_validation');
+          releaseActiveToolJob(activeToolJobs, jobId, owner);
+          return;
+        }
+        if (Number.isFinite(code) && code !== 0) {
+          // 作业已失败的诊断性产物：拉不回也如实进失败链，不无限重试。
+          const scriptErr = Object.assign(new Error('remote script exited ' + code), { code });
+          await finalizeJobRun({ err: scriptErr, stdout: stdoutText, stderr: '', sampledResources: REMOTE_RUNNER_SAMPLES });
+          return;
+        }
+        // 成功作业的产物传输失败：挂起重试（终态事实不会消失），回到轮询循环。
+        if (!logStream) startLogStream();
+        continue;
+      }
+      const scriptErr = Number.isFinite(code) && code !== 0
+        ? Object.assign(new Error('remote script exited ' + code), { code })
+        : null;
+      await finalizeJobRun({ err: scriptErr, stdout: stdoutText, stderr: '', sampledResources: REMOTE_RUNNER_SAMPLES });
       return;
     }
+  }
 
+  /**
+   * 重启恢复（D5.2 启动扫描）：re-attach 节点侧仍在运行的远程作业，走同一
+   * 收尾工厂。节点探测失败不标败（连不上≠作业死），留待下次扫描。
+   */
+  async function adoptRemoteRunningJob(jobId) {
+    let job;
+    try {
+      job = await db.prepare('SELECT * FROM tool_jobs WHERE id=?').get(jobId);
+    } catch {
+      return;
+    }
+    if (!job || job.status !== 'running' || !job.execution_target_id) return;
+    if (activeToolJobs.has(jobId)) return;
+    const cfg = getToolConfig(job.tool_id);
+    if (!cfg) {
+      await markJobFailed(jobId, 'Unknown tool: ' + job.tool_id, 'config');
+      return;
+    }
+    const owner = claimActiveToolJob(activeToolJobs, { jobId, toolId: job.tool_id });
+    if (!owner) return;
+    let jobDir = null;
+    if (job.project_id) {
+      try {
+        const layout = resolveProjectRunLayout({
+          projectId: job.project_id,
+          toolJobId: jobId,
+          db: dbMod,
+          skipPermissionCheck: true,
+          ensureDirs: true,
+        });
+        jobDir = layout.jobRoot;
+      } catch (error) {
+        console.warn('[tools] remote adopt project layout failed:', error.message);
+      }
+    }
+    if (!jobDir) jobDir = safeJoinUnder(jobsDir, jobId);
+    if (!jobDir) {
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+      return;
+    }
+    config.mkdirSandbox(jobDir);
+    const outputDir = path.join(jobDir, 'output');
+    config.mkdirSandbox(outputDir);
+    const dispatch = await resolveRemoteTargetForJob({ cfg, targetId: job.execution_target_id });
+    if (dispatch.error) {
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+      console.warn('[tools] remote adopt probe failed for ' + jobId + ': ' + dispatch.message);
+      return;
+    }
+    dispatch.mode = 'attach';
     const startedAt = new Date().toISOString();
-    const resourceStart = createRuntimeResourceSnapshot({
-      disk: diskSnapshot(outputDir),
-      runtime: { r: cfg.lang === 'r' && runtimeReady?.ready, python: cfg.lang === 'python' && runtimeReady?.ready },
-      activeJobs: activeToolJobs.size,
-      observedAt: startedAt,
+    const runtimeCommand = dispatch.runtime.runtimeBin;
+    const runtimeReady = { runtime: cfg.lang || null, ready: true, command: runtimeCommand, reason: null };
+    const runtimeVersion = dispatch.runtime.version;
+    const remoteScriptBase = 'run-script.' + (cfg.lang === 'r' ? 'R' : 'py');
+    const runCmd = dispatch.argmode === 'jobdir'
+      ? [runtimeCommand, remoteScriptBase, remoteJobDirPath(jobId)]
+      : [runtimeCommand, remoteScriptBase, '--args', 'params.json'];
+    const buildProvenance = (artifacts = []) => buildJobProvenance({
+      jobId,
+      job: hydrateExecutionJob(job),
+      toolId: job.tool_id,
+      cfg,
+      jobDir,
+      runtimeCommand,
+      runtimeReady,
+      runtimeVersion,
+      runCmd,
+      startedAt,
+      artifacts,
+      executionTarget: {
+        kind: 'ssh-direct',
+        targetId: dispatch.target.id,
+        alias: dispatch.target.alias,
+        nodeOs: dispatch.probeInfo.os || null,
+        runtime: { name: cfg.lang || null, version: runtimeVersion, command: runtimeCommand },
+        remoteJobDir: remoteJobDirPath(jobId),
+        argmode: dispatch.argmode,
+        agentVersion: AGENT_SCRIPT_HASH,
+        transport: 'tar-over-ssh',
+        recoveredAfterRestart: true,
+      },
     });
-    const buildProvenance = (artifacts = []) => {
-      const dbMod = require('../db');
-      const pluginLoader = require('../plugin-loader');
-      const toolDefinition = pluginLoader.getToolDefinition(toolId) || {};
-      const pluginManifest = pluginLoader.getPluginManifest(toolId) || cfg;
-      const scientificTask = typeof dbMod.getScientificTaskByToolJob === 'function' ? dbMod.getScientificTaskByToolJob(jobId) : null;
-      const provenance = createExecutionProvenance({
-        toolJobId: jobId,
-        projectId: job.project_id || null,
-        scientificTask,
-        plugin: pluginManifest,
-        params: job.params || {},
-        inputs: collectExecutionInputs({
-          inputDefinitions: Array.isArray(toolDefinition.inputs) ? toolDefinition.inputs : [],
-          params: job.params || {},
-          jobDir,
-        }),
-        runtime: { name: cfg.lang || null, command: runtimeCommand, version: runtimeVersion, ready: runtimeReady?.ready },
-        runScriptPath: scriptPath,
-        command: { executable: runCmd[0], args: runCmd.slice(1), cwd: jobDir },
-        artifacts,
-        startedAt,
-        completedAt: new Date().toISOString(),
-      });
-      const provenancePath = path.join(jobDir, 'provenance.json');
-      fs.writeFileSync(provenancePath, JSON.stringify(provenance, null, 2));
-      return { provenance, provenancePath, pluginManifest };
-    };
-    const hardTimeoutMs = TOOL_LIFECYCLE.hardTimeoutMs;
-    let resourceSampler = null;
-    const child = execFile(
-      runCmd[0],
-      runCmd.slice(1),
-      { timeout: 0, maxBuffer: 10 * 1024 * 1024, env: runEnv },
-      async (err, stdout, stderr) => {
-        try {
+    const finalizeJobRun = createJobRunFinalizer({
+      owner,
+      jobId,
+      toolId: job.tool_id,
+      cfg,
+      jobDir,
+      outputDir,
+      stagedInputFiles: [],
+      stagedInputSnapshots: [],
+      buildProvenance,
+      resourceStart: createRuntimeResourceSnapshot({
+        disk: diskSnapshot(outputDir),
+        runtime: { r: cfg.lang === 'r', python: cfg.lang === 'python' },
+        activeJobs: activeToolJobs.size,
+        observedAt: startedAt,
+      }),
+      runtimeCommand,
+      runtimeReady,
+      hardTimeoutMs: TOOL_LIFECYCLE.hardTimeoutMs,
+    });
+    console.log('[tools] re-adopting remote job ' + jobId + ' on ' + dispatch.target.alias);
+    await runRemoteToolJob({
+      owner,
+      jobId,
+      jobDir,
+      outputDir,
+      cfg,
+      remoteDispatch: dispatch,
+      finalizeJobRun,
+      markJobFailed,
+    });
+  }
+
+  // BLOCK-57：Job 终态收尾工厂。本地 / 远程提交 / 重启恢复三条执行路径共用同一
+  // 收尾实现（cancellation / failure / artifact 校验 / manifest / completed 落库），
+  // 不存在第二条 Artifact Truth 构建路径。
+  function createJobRunFinalizer(deps) {
+    const {
+      owner,
+      jobId,
+      toolId,
+      cfg,
+      jobDir,
+      outputDir,
+      stagedInputFiles,
+      stagedInputSnapshots,
+      buildProvenance,
+      resourceStart,
+      runtimeCommand,
+      runtimeReady,
+      hardTimeoutMs,
+    } = deps;
+    return async function finalizeJobRun({ err, stdout, stderr, sampledResources }) {
+      try {
         const active = owner;
         clearActiveToolJobLifecycleTimers(active);
-        let sampledResources;
-        try {
-          sampledResources = resourceSampler
-            ? await resourceSampler.stop()
-            : {
-              peak: {},
-              sampling: { status: 'unavailable', sampleCount: null, reason: 'process_sampler_unavailable' },
-              peakStatus: 'unavailable',
-            };
-        } catch {
-          sampledResources = {
-            peak: {},
-            sampling: { status: 'unavailable', sampleCount: null, reason: 'process_sampler_failed' },
-            peakStatus: 'unavailable',
-          };
-        }
         const resourceEnd = createRuntimeResourceSnapshot({
           disk: diskSnapshot(outputDir),
           runtime: { r: cfg.lang === 'r' && runtimeReady?.ready, python: cfg.lang === 'python' && runtimeReady?.ready },
@@ -1741,6 +1896,312 @@ function createToolsExecutor({
         } finally {
           releaseActiveToolJob(activeToolJobs, jobId, owner);
         }
+      };
+    }
+
+  async function executeJob(jobId, toolId, jobDir, stagedInputFiles = []) {
+    const owner = claimActiveToolJob(activeToolJobs, { jobId, toolId });
+    if (!owner) {
+      console.warn('[tools] Job ' + jobId + ' already has an active execution owner');
+      return;
+    }
+    const started = await db
+      .prepare('UPDATE tool_jobs SET status = ? WHERE id = ? AND status = ?')
+      .run('running', jobId, 'pending');
+    if (!started || started.changes < 1) {
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+      console.log('[tools] Job ' + jobId + ' not started because it is no longer pending');
+      return;
+    }
+    const job = hydrateExecutionJob(
+      await db.prepare('SELECT * FROM tool_jobs WHERE id = ?').get(jobId)
+    );
+    if (!job) {
+      await markJobFailed(jobId, 'Tool job disappeared before execution.', 'setup');
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+      return;
+    }
+    let stagedInputSnapshots;
+    try {
+      stagedInputSnapshots = captureStagedInputSnapshots(stagedInputFiles);
+    } catch (error) {
+      await markJobFailed(jobId, `Staged input snapshot failed: ${error.message}`, 'setup');
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+      return;
+    }
+    const outputDir = path.join(jobDir, 'output');
+    config.mkdirSandbox(outputDir);
+
+    const cfg = getToolConfig(toolId);
+    if (!cfg) {
+      await markJobFailed(jobId, 'Unknown tool: ' + toolId, 'config');
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+      return;
+    }
+
+    // 插件脚本：cfg.script 已是绝对路径；内置工具：拼 scriptsDir
+    const scriptSrc = cfg._isPlugin ? cfg.script : path.join(scriptsDir, cfg.script);
+    if (!fs.existsSync(scriptSrc)) {
+      await markJobFailed(jobId, 'Script not found: ' + cfg.script, 'config');
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+      return;
+    }
+
+    const scriptPath = path.join(jobDir, 'run-script.' + (cfg.lang === 'r' ? 'R' : 'py'));
+
+    try {
+      fs.copyFileSync(
+        scriptSrc,
+        path.join(jobDir, 'run-script.' + (cfg.lang === 'r' ? 'R' : 'py'))
+      );
+      // 报告模板：插件自带模板优先；内置插件可复用 biof3-server 旧模板。
+      const templateCandidates = cfg._isPlugin
+        ? [
+            path.join(cfg.pluginDir, toolId + '-report-template.html'),
+            path.join(scriptsDir, toolId + '-report-template.html'),
+          ]
+        : [path.join(scriptsDir, toolId + '-report-template.html')];
+      const templateSrc = templateCandidates.find((candidate) => fs.existsSync(candidate));
+      if (templateSrc) {
+        fs.copyFileSync(templateSrc, path.join(jobDir, 'report-template.html'));
+      }
+      if (cfg.lang === 'r') {
+        const sharedHelpers = ['_biof3-theme.R'];
+        // 插件脚本目录优先（build-plugin.sh 已把 _biof3-theme.R 复制进去），其次 scriptsDir
+        const helperSearchDirs = cfg._isPlugin
+          ? [path.dirname(scriptSrc), scriptsDir]
+          : [scriptsDir];
+        for (const h of sharedHelpers) {
+          for (const dir of helperSearchDirs) {
+            const src = path.join(dir, h);
+            if (fs.existsSync(src)) {
+              fs.copyFileSync(src, path.join(jobDir, h));
+              break;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      await markJobFailed(jobId, 'Copy failed: ' + e.message, 'setup');
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+      return;
+    }
+
+    // 本地执行：直接调内嵌 Rscript/python3。
+    let runCmd;
+    let runEnv = undefined;
+    let runtimeReady = null;
+    let runtimeCommand = null;
+    let runtimeVersion = null;
+
+    // BLOCK-57：作业级 ExecutionTarget 分派。execution_target_id 为 NULL 走
+    // 本地路径（逐字节不变）；非 NULL 走远程（节点探测 → 语言运行时解析）。
+    // 远程作业不做本地 BLOCK-58 依赖检查与本地 binPath 检查——节点侧运行时
+    // 以 agent probe 为准，缺失走 stage=runtime 诚实失败。
+    let remoteDispatch = null;
+    if (job.execution_target_id) {
+      remoteDispatch = await resolveRemoteTargetForJob({ jobId, cfg, targetId: job.execution_target_id });
+      if (remoteDispatch.error) {
+        await markJobFailed(jobId, remoteDispatch.message, remoteDispatch.stage);
+        releaseActiveToolJob(activeToolJobs, jobId, owner);
+        return;
+      }
+      runtimeReady = { runtime: cfg.lang || null, ready: true, command: remoteDispatch.runtime.runtimeBin, reason: null };
+      runtimeCommand = remoteDispatch.runtime.runtimeBin;
+      runtimeVersion = remoteDispatch.runtime.version;
+      const remoteScriptBase = 'run-script.' + (cfg.lang === 'r' ? 'R' : 'py');
+      runCmd = remoteDispatch.argmode === 'jobdir'
+        ? [remoteDispatch.runtime.runtimeBin, remoteScriptBase, remoteJobDirPath(jobId)]
+        : [remoteDispatch.runtime.runtimeBin, remoteScriptBase, '--args', 'params.json'];
+    }
+    if (!remoteDispatch) {
+      const { getExecutor } = require('../../shared-backend/executors');
+      const executor = getExecutor(cfg.lang);
+      runtimeCommand = executor && executor.binPath;
+      runtimeReady =
+        executor && executor.binPath
+          ? { runtime: cfg.lang || null, ready: true, command: executor.binPath, reason: null }
+          : {
+              runtime: cfg.lang || null,
+              ready: false,
+              command: null,
+              reason: `未找到 ${cfg.lang || 'unknown'} 执行器`,
+            };
+      runtimeVersion = runtimeReady.ready && typeof executor.getRuntimeVersion === 'function'
+        ? executor.getRuntimeVersion()
+        : null;
+      if (!runtimeReady.ready) {
+        await markJobFailed(jobId, runtimeReady.reason, 'runtime');
+        releaseActiveToolJob(activeToolJobs, jobId, owner);
+        return;
+      }
+      if (cfg.lang === 'r') {
+        // BLOCK-58 — 内置 R 工具脚本执行前毫秒级依赖检查（读 _dependencies.json，
+        // executor.checkPackageInstalled 查 R_HOME/library 目录存在性）：缺包直接
+        // fail-fast 拒绝派生进程（脚本内亦有 MISSING_R_PACKAGES 兜底，分析路径零联网安装）。
+        // 插件脚本（_isPlugin）走 manifest packages + 预编译包通道，不在此管。
+        if (!cfg._isPlugin) {
+          const { checkToolDependencies, missingPackagesMessage } = require('./tool-dependencies');
+          const depCheck = checkToolDependencies(executor, cfg.script);
+          if (depCheck.checked && depCheck.missing.length > 0) {
+            await markJobFailed(jobId, missingPackagesMessage(toolId, depCheck.missing), 'dependencies');
+            releaseActiveToolJob(activeToolJobs, jobId, owner);
+            return;
+          }
+        }
+        // R 工具脚本约定：commandArgs(trailingOnly=TRUE)[1] = job_dir
+        //（deseq2.R: `args <- commandArgs(trailingOnly=TRUE); job_dir <- args[1]`）
+        // 不能用 buildSpawnCommand（它加 --args params.json，是 figcode 脚本约定，
+        // 会让 args[1]="--args"，R 脚本 source(file.path("--args",...)) 找不到文件）
+        runCmd = [executor.binPath, scriptPath, jobDir];
+        // 插件脚本：注入插件自带的预编译包目录到 R 库搜索路径，
+        // 让 library(DESeq2) 等从 pluginDir/packages/r 加载，不污染基础 runtime library。
+        // R_LIBS_USER 会被追加到默认 .libPaths() 之后，runtime 基础包仍可用。
+        // 三段式组装逻辑抽到 shared-backend/r-libs-resolver.js（与 mcp/registry.js 共用）。
+        if (cfg._isPlugin) {
+          // Stage 3 B2 part2：在组装 R_LIBS_USER 之前，先确保插件声明的 capability
+          // bundle 已就绪（缺则按需下载）。ensureBundlesForPlugin 对 unpublished /
+          // unknown bundle 不下载、不抛错；任何非 ok 结果只 warn，随后照常继续用基础
+          // runtime 跑（与接线前行为完全一致——resolveRLibsForPlugin 找不到即返回 null）。
+          // 绝不因 bundle 未就绪而中断 job。await 确保已下载的 bundle 能被随后的
+          // resolveRLibsForPlugin → checkCapabilityReady 命中。
+          if (cfg.requiresBundle) {
+            try {
+              const ensured = await ensureBundlesForPlugin(cfg);
+              if (ensured && !ensured.ok) {
+                console.warn(
+                  '[tools] capability bundle not fully ready for',
+                  toolId,
+                  '— continuing with base runtime:',
+                  JSON.stringify(ensured.results)
+                );
+              }
+            } catch (e) {
+              console.warn('[tools] ensureBundlesForPlugin failed for', toolId, ':', e.message);
+            }
+          }
+          const resolvedEnv = resolveRLibsForPlugin(cfg);
+          if (resolvedEnv) runEnv = resolvedEnv;
+        }
+      } else {
+        const spawnCmd = executor.buildSpawnCommand(scriptPath, jobDir, {});
+        if (cfg._isPlugin) {
+          runCmd = [executor.binPath, scriptPath, jobDir];
+        } else {
+          runCmd = [spawnCmd.cmd, ...spawnCmd.args];
+        }
+        if (spawnCmd.env) runEnv = spawnCmd.env;
+      }
+    }
+
+    if (!await canLaunchOwnedToolJob({ activeToolJobs, db, jobId, owner })) {
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+      console.log('[tools] Job ' + jobId + ' launch suppressed by durable cancellation state');
+      // BLOCK-57：远程分派窗口长（探测+上传需数秒），durable cancel 抑制启动后
+      // 必须行级收敛为 cancelled——与 cancel 路由的行级 UPDATE 同语义，防作业行滞留 running。
+      try {
+        await db
+          .prepare(
+            'UPDATE tool_jobs SET status=?, error=NULL, completed_at=?, process_pid=NULL, heartbeat_at=NULL '
+            + 'WHERE id=? AND status IN (?,?,?)'
+          )
+          .run('cancelled', Date.now(), jobId, 'pending', 'running', 'cancelled');
+      } catch (error) {
+        console.warn('[tools] suppressed-launch cancellation convergence failed:', error.message);
+      }
+      return;
+    }
+
+    const startedAt = new Date().toISOString();
+    const resourceStart = createRuntimeResourceSnapshot({
+      disk: diskSnapshot(outputDir),
+      runtime: { r: cfg.lang === 'r' && runtimeReady?.ready, python: cfg.lang === 'python' && runtimeReady?.ready },
+      activeJobs: activeToolJobs.size,
+      observedAt: startedAt,
+    });
+    const buildProvenance = (artifacts = []) => buildJobProvenance({
+      jobId,
+      job,
+      toolId,
+      cfg,
+      jobDir,
+      runtimeCommand,
+      runtimeReady,
+      runtimeVersion,
+      runCmd,
+      startedAt,
+      artifacts,
+      executionTarget: remoteDispatch ? {
+        kind: 'ssh-direct',
+        targetId: remoteDispatch.target.id,
+        alias: remoteDispatch.target.alias,
+        nodeOs: remoteDispatch.probeInfo.os || null,
+        runtime: { name: cfg.lang || null, version: runtimeVersion, command: runtimeCommand },
+        remoteJobDir: remoteJobDirPath(jobId),
+        argmode: remoteDispatch.argmode,
+        agentVersion: AGENT_SCRIPT_HASH,
+        transport: 'tar-over-ssh',
+      } : null,
+    });
+    const hardTimeoutMs = TOOL_LIFECYCLE.hardTimeoutMs;
+    let resourceSampler = null;
+    const collectSampledResources = async () => {
+      try {
+        return resourceSampler
+          ? await resourceSampler.stop()
+          : {
+            peak: {},
+            sampling: { status: 'unavailable', sampleCount: null, reason: 'process_sampler_unavailable' },
+            peakStatus: 'unavailable',
+          };
+      } catch {
+        return {
+          peak: {},
+          sampling: { status: 'unavailable', sampleCount: null, reason: 'process_sampler_failed' },
+          peakStatus: 'unavailable',
+        };
+      }
+    };
+    // BLOCK-57：终态收尾统一入口（工厂实现见 createJobRunFinalizer）——本地 execFile
+    // 回调与远程执行路径共用，保证 provenance/校验/落库链路与 Artifact Truth 同构。
+    const finalizeJobRun = createJobRunFinalizer({
+      owner,
+      jobId,
+      toolId,
+      cfg,
+      jobDir,
+      outputDir,
+      stagedInputFiles,
+      stagedInputSnapshots,
+      buildProvenance,
+      resourceStart,
+      runtimeCommand,
+      runtimeReady,
+      hardTimeoutMs,
+    });
+
+    // BLOCK-57：远程执行路径——提交 + 日志流 + 节点真相轮询 + 产物拉回对账，
+    // 终态后与本地路径共用同一条 finalizeJobRun 链。
+    if (remoteDispatch) {
+      await runRemoteToolJob({
+        owner,
+        jobId,
+        jobDir,
+        outputDir,
+        cfg,
+        remoteDispatch,
+        finalizeJobRun,
+        markJobFailed,
+      });
+      return;
+    }
+
+    const child = execFile(
+      runCmd[0],
+      runCmd.slice(1),
+      { timeout: 0, maxBuffer: 10 * 1024 * 1024, env: runEnv },
+      async (err, stdout, stderr) => {
+        await finalizeJobRun({ err, stdout, stderr, sampledResources: await collectSampledResources() });
       }
     );
     owner.process = child;
@@ -1782,9 +2243,28 @@ function createToolsExecutor({
   async function handleToolRun(req, res) {
     const uid = forwardedToolRunUserId(req);
     if (!uid) return res.status(401).json({ error: 'login_required' });
-    const { toolId, params, files, projectId } = req.body || {};
+    const { toolId, files, projectId } = req.body || {};
     if (!toolId) return res.status(400).json({ error: 'missing_tool_id' });
     const isTest = isSmokeTestRequest(req);
+
+    // BLOCK-57：executionTargetId 为 params 保留键——作业级 ExecutionTarget，
+    // 服务端剥离后不入 params.json（脚本参数面零污染）；未知目标 fail-closed。
+    let executionTargetId = null;
+    let params = (req.body && req.body.params) || {};
+    if (params && typeof params === 'object' && 'executionTargetId' in params) {
+      const raw = params.executionTargetId;
+      const rest = { ...params };
+      delete rest.executionTargetId;
+      params = rest;
+      executionTargetId = typeof raw === 'string' && raw.trim() ? raw.trim() : null;
+    }
+    if (executionTargetId && !(await targetRegistry.getById({ id: executionTargetId }))) {
+      return res.status(400).json({
+        ok: false,
+        error: 'unknown_execution_target',
+        message: '执行目标不存在：' + executionTargetId,
+      });
+    }
 
     const jobId = 'job_' + uuidv4().replace(/-/g, '').slice(0, 16);
 
@@ -1877,7 +2357,7 @@ function createToolsExecutor({
 
     await db
       .prepare(
-        'INSERT INTO tool_jobs (id,user_id,tool_id,params_json,status,created_at,name,is_test_run,project_id) VALUES (?,?,?,?,?,?,?,?,?)'
+        'INSERT INTO tool_jobs (id,user_id,tool_id,params_json,status,created_at,name,is_test_run,project_id,execution_target_id) VALUES (?,?,?,?,?,?,?,?,?,?)'
       )
       .run(
         jobId,
@@ -1888,7 +2368,8 @@ function createToolsExecutor({
         Date.now(),
         jobName,
         isTest ? 1 : 0,
-        projectId || null
+        projectId || null,
+        executionTargetId
       );
     void executeJob(jobId, toolId, jobDir, uploadResult.entries.map((entry) => entry.filePath))
       .catch((error) => handleActiveToolJobSetupFailure({

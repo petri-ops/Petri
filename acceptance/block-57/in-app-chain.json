@@ -1,0 +1,43 @@
+{
+  "block": "BLOCK-57",
+  "part": "in-app-chain",
+  "at": "2026-09-04T12:54:58.618Z",
+  "allPass": true,
+  "results": [
+    {
+      "name": "P0 目标注册+探测就绪（与 REST 同源注册表）",
+      "pass": true,
+      "detail": "{\"os\":\"Linux 6.8.0-57-generic\",\"r\":\"missing\",\"python\":\"/usr/bin/python3\",\"pythonversion\":\"3.12.3\",\"scheduler\":\"none\"}"
+    },
+    {
+      "name": "P1 作业创建携带执行目标（保留键已从 params 剥离）",
+      "pass": true,
+      "detail": "job=job_1ce919f72d5143b7 target=tgt_5a5c07672a4e"
+    },
+    {
+      "name": "P2 远程作业经真实 executeJob 分派收尾为 completed",
+      "pass": true,
+      "detail": "status=completed error=null"
+    },
+    {
+      "name": "P3 provenance.executionTarget 记录跨机事实（alias/transport/agentVersion）",
+      "pass": true,
+      "detail": "{\"kind\":\"ssh-direct\",\"alias\":\"aliyun\",\"transport\":\"tar-over-ssh\",\"nodeOs\":\"Linux 6.8.0-57-generic\",\"runtime\":{\"name\":\"python\",\"version\":\"3.12.3\",\"command\":\"/usr/bin/python3\"}}"
+    },
+    {
+      "name": "P4 Artifact Truth 与 manifest 与本地作业同构",
+      "pass": true,
+      "detail": "truth=valid artifacts=3 manifestAt=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/biof3-block57-live-IEusz2/results/tool-jobs/job_1ce919f72d5143b7/output/artifact-manifest.json resultDir=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/biof3-block57-live-IEusz2/results/tool-jobs/job_1ce919f72d5143b7/output"
+    },
+    {
+      "name": "P5 R 工具提交到无 R 节点 → stage=runtime 诚实拒绝",
+      "pass": true,
+      "detail": "status=failed error=节点缺少 R (Rscript) 运行时（目标 aliyun）"
+    },
+    {
+      "name": "P6 取消请求收敛到确定终态（期望 cancelled）",
+      "pass": true,
+      "detail": "status=cancelled"
+    }
+  ]
+}

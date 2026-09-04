@@ -46,6 +46,8 @@ export interface ToolJob {
   name?: string;
   project_id?: string | null;
   conversationId?: string | null;
+  /** BLOCK-57：远程执行目标 id（null/undefined = 本机执行） */
+  execution_target_id?: string | null;
 }
 
 export interface Dataset {

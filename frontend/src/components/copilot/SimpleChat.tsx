@@ -26,6 +26,7 @@
 // ============================================================
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 
 // ── BLOCK-9.2 PHASE 4: types + helpers + attachments re-exports for backward compat ──
 import {
@@ -306,6 +307,23 @@ export function SimpleChat({
   const [refreshing, setRefreshing] = useState(false);
   const [paramDraft, setParamDraft] = useState<Record<string, string>>({});
   const [approvalRepair, setApprovalRepair] = useState<ApprovalRepairState>({ status: 'idle' });
+  // BLOCK-57：远程执行目标——确认卡选择器数据（仅当存在已注册目标时渲染，本机永远是默认）
+  const [remoteTargets, setRemoteTargets] = useState<Array<{ id: string; alias: string }>>([]);
+  const [approvalExecutionTargetId, setApprovalExecutionTargetId] = useState('');
+
+  useEffect(() => {
+    // 目标列表加载失败保持静默（未登录/后端旧版）：选择器不渲染，零行为变化。
+    const token = typeof getToken === 'function' ? getToken() : null;
+    void fetch(`${getPlatformApiPrefix()}/remote-targets`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    })
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((payload) => {
+        const registered = Array.isArray(payload?.registered) ? payload.registered : [];
+        setRemoteTargets(registered.map((row: { id: string; alias: string }) => ({ id: row.id, alias: row.alias })));
+      })
+      .catch(() => setRemoteTargets([]));
+  }, []);
   const autoApproveRef = useRef<string | null>(null);
   const [modelMenuOpen, setModelMenuOpen] = useState<'supplier' | 'model' | null>(null);
   const [modelSupplierKey, setModelSupplierKey] = useState<string | null>(null);
@@ -1121,6 +1139,9 @@ export function SimpleChat({
         mergedParams[key] = value;
       }
     });
+    if (approvalExecutionTargetId) {
+      mergedParams.executionTargetId = approvalExecutionTargetId;
+    }
     const { ackToken, toolId } = pendingApproval;
     const acknowledged = await ackRunTool(ackToken, true, {
       projectId: projectId || null,
@@ -1131,7 +1152,7 @@ export function SimpleChat({
     send(
       `用户已确认开始（ackToken=${ackToken}）。请重调 run_tool(op=run, toolId="${toolId ?? ''}", params=${JSON.stringify(mergedParams)}, ackToken="${ackToken}") 续跑该重操作。`
     );
-  }, [conversationId, paramDraft, pendingApproval, projectId, send, streaming]);
+  }, [approvalExecutionTargetId, conversationId, paramDraft, pendingApproval, projectId, send, streaming]);
 
   const rejectPending = useCallback(async () => {
     if (!pendingApproval || streaming) return;
@@ -1577,6 +1598,9 @@ export function SimpleChat({
             <ApprovalCard
               approval={pendingApproval}
               repairState={approvalRepair}
+              remoteTargets={remoteTargets}
+              executionTargetId={approvalExecutionTargetId}
+              onExecutionTargetChange={setApprovalExecutionTargetId}
               onApprove={() => void approvePending()}
               onReject={() => void rejectPending()}
               busy={streaming}
@@ -2133,12 +2157,18 @@ function ErrorBanner({ message, severity, showDetails, technicalDetails }: Error
 function ApprovalCard({
   approval,
   repairState,
+  remoteTargets,
+  executionTargetId,
+  onExecutionTargetChange,
   onApprove,
   onReject,
   busy,
 }: {
   approval: PendingApproval;
   repairState: ApprovalRepairState;
+  remoteTargets: Array<{ id: string; alias: string }>;
+  executionTargetId: string;
+  onExecutionTargetChange: (value: string) => void;
   onApprove: () => void;
   onReject: () => void;
   busy: boolean;
@@ -2174,6 +2204,22 @@ function ApprovalCard({
       <div className="sc-approval-risk">
         正式分析会写入项目任务记录，并生成可复现的参数、输入和结果产物。
       </div>
+      {remoteTargets.length > 0 && (
+        <div className="sc-approval-target" data-testid="approval-execution-target">
+          <label className="biof3-field__hint" htmlFor="sc-execution-target-select">执行目标</label>
+          <select
+            id="sc-execution-target-select"
+            value={executionTargetId}
+            onChange={(event) => onExecutionTargetChange(event.target.value)}
+            disabled={busy}
+          >
+            <option value="">本机（默认）</option>
+            {remoteTargets.map((target) => (
+              <option key={target.id} value={target.id}>{target.alias}</option>
+            ))}
+          </select>
+        </div>
+      )}
       <div className="sc-approval-actions">
         <button
           type="button"

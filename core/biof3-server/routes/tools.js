@@ -99,6 +99,8 @@ const {
 });
 
 const registerToolsMetadata = createToolsMetadataRoutes({db, getUserId: userId, jobsDir: JOBS_DIR});
+// BLOCK-57：远程执行目标管理（列表/注册/探测/移除）
+const { registerRemoteTargets } = require('./remote-targets').createRemoteTargetRoutes({ db, getUserId: userId });
 const registerToolsPlatform = createToolsPlatformRoutes({
   db,
   getUserId: userId,
@@ -120,4 +122,5 @@ const registerToolsPlatform = createToolsPlatformRoutes({
 module.exports = function registerTools(app) {
   registerToolsMetadata(app);
   registerToolsPlatform(app);
+  registerRemoteTargets(app);
 };

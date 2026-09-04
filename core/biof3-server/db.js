@@ -455,6 +455,22 @@ try {
   try { db.exec('ALTER TABLE tool_jobs ADD COLUMN process_pid INTEGER'); } catch {}
   try { db.exec('ALTER TABLE tool_jobs ADD COLUMN heartbeat_at BIGINT'); } catch {}
   try { db.exec('CREATE INDEX IF NOT EXISTS idx_tool_jobs_project ON tool_jobs(project_id)'); } catch {}
+  // BLOCK-57：远程执行目标（作业级 ExecutionTarget，本地永远是默认——列为 NULL 即本地路径）
+  try {
+    db.exec(`CREATE TABLE IF NOT EXISTS execution_targets (
+      id TEXT PRIMARY KEY,
+      alias TEXT NOT NULL,
+      label TEXT DEFAULT '',
+      created_at BIGINT NOT NULL,
+      last_probe_json TEXT,
+      last_probe_at BIGINT,
+      status TEXT DEFAULT 'unprobed'
+    )`);
+  } catch {}
+  try { db.exec('ALTER TABLE tool_jobs ADD COLUMN execution_target_id TEXT'); } catch {}
+  try { db.exec('CREATE INDEX IF NOT EXISTS idx_tool_jobs_execution_target ON tool_jobs(execution_target_id)'); } catch {}
+  // 目标级运行时路径覆盖（{"r":"/abs/Rscript"}）——集群 module 系统 / 非 PATH 安装的运行时
+  try { db.exec('ALTER TABLE execution_targets ADD COLUMN runtime_json TEXT'); } catch {}
 } catch {}
 
 // UX1G-1: bind persisted tool jobs to the conversation that authorized them.

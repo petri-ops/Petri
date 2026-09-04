@@ -238,21 +238,29 @@ async function recoverStaleActiveJobs({
  * an unrelated process would be a safety violation. Instead, we mark the job
  * record as failed and rely on the next lifecycle sweep or manual intervention.
  *
+ * BLOCK-57: `excludeRemoteTargets` keeps remote-target jobs out of the local
+ * stale-fail sweep entirely — a lost SSH connection does not mean a dead job.
+ * Node-side truth (agent state/exit files) owns their terminal transition via
+ * the remote reconcile path; failing them here would kill healthy remote runs.
+ *
  * @param {Object} params
  * @param {import('better-sqlite3').Database} params.db
  * @param {number} params.cutoff - Timestamp threshold for stale detection
  * @param {Function} [params.now] - Time provider (defaults to Date.now)
  * @param {number[]} [params.ownedJobIds] - Job IDs to exclude from marking
+ * @param {boolean} [params.excludeRemoteTargets] - Skip jobs with execution_target_id
  */
-async function markUnownedStaleJobs({ db, cutoff, now = Date.now, ownedJobIds = [] }) {
+async function markUnownedStaleJobs({ db, cutoff, now = Date.now, ownedJobIds = [], excludeRemoteTargets = false }) {
   const owned = [...new Set(Array.from(ownedJobIds, (jobId) => String(jobId)))];
   const excludeOwned = owned.length > 0
     ? ` AND id NOT IN (${owned.map(() => '?').join(',')})`
     : '';
+  const remoteGuard = excludeRemoteTargets ? ' AND (execution_target_id IS NULL)' : '';
   return db
     .prepare(
       "UPDATE tool_jobs SET status = 'failed', error = '任务心跳失活且无本次进程句柄；进程归属无法证明，未发送信号', completed_at = ? WHERE status IN ('running', 'pending') AND COALESCE(heartbeat_at, created_at) < ?"
       + excludeOwned
+      + remoteGuard
     )
     .run(now(), cutoff, ...owned);
 }

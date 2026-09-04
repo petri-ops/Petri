@@ -178,6 +178,14 @@ function createToolsMetadataRoutes({db, getUserId, jobsDir = ''}) {
         if (!job) return res.status(404).json({error: 'not_found'});
         if (job.user_id !== uid && req.user && req.user.role !== 'admin') return res.status(403).json({error: 'forbidden'});
         const reconciled = await reconcileStoredResult(job);
+        // BLOCK-57：远程目标徽章数据源（alias 便于直接上屏）
+        let executionTarget = null;
+        if (job.execution_target_id) {
+          try {
+            const targetRow = await db.prepare('SELECT id, alias FROM execution_targets WHERE id = ?').get(job.execution_target_id);
+            executionTarget = targetRow ? { id: targetRow.id, alias: targetRow.alias } : null;
+          } catch { executionTarget = null; }
+        }
         res.json({
           ok: true,
           id: job.id,
@@ -187,6 +195,7 @@ function createToolsMetadataRoutes({db, getUserId, jobsDir = ''}) {
           name: job.name,
           projectId: job.project_id || null,
           conversationId: job.conversation_id || null,
+          executionTarget,
           params: publicRecoveryParams(parseJsonMaybe(job.params_json, {})),
           recoveryHistory: parseJsonMaybe(job.params_json, {}).__harnessRecovery || [],
           ackStatus: job.ack_status || null,
@@ -260,7 +269,7 @@ function createToolsMetadataRoutes({db, getUserId, jobsDir = ''}) {
       const uid = getUserId(req);
       if (!uid) return res.status(401).json({error: 'login_required'});
       try {
-        const jobs = await db.prepare('SELECT id, tool_id, status, created_at, completed_at, error, name, project_id, conversation_id FROM tool_jobs WHERE user_id = ? AND is_test_run = 0 ORDER BY created_at DESC LIMIT 50').all(uid);
+        const jobs = await db.prepare('SELECT id, tool_id, status, created_at, completed_at, error, name, project_id, conversation_id, execution_target_id FROM tool_jobs WHERE user_id = ? AND is_test_run = 0 ORDER BY created_at DESC LIMIT 50').all(uid);
         res.json({ok: true, jobs});
       } catch (e) {
         res.status(500).json({error: e.message});

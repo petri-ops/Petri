@@ -70,7 +70,14 @@ export function ResultsLibrary({ projectId, jobs, onOpenJob }: ResultsLibraryPro
                 onClick={() => onOpenJob(job.id)}
               >
                 <span className={styles.resultsLibraryItemMain}>
-                  <span className={styles.resultsLibraryItemTitle}>{jobTitle(job)}</span>
+                  <span className={styles.resultsLibraryItemTitle}>
+                    {jobTitle(job)}
+                    {job.execution_target_id ? (
+                      <span title="此任务在远程执行目标上运行" style={{ marginLeft: 6, fontSize: 11, padding: '0 6px', borderRadius: 999, border: '1px solid currentColor', opacity: 0.75 }}>
+                        远程
+                      </span>
+                    ) : null}
+                  </span>
                   <span className={styles.resultsLibraryItemMeta}>
                     {formatRelativeTime(job.created_at)}
                     {' · '}

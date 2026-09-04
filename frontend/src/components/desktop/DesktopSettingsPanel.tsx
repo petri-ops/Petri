@@ -53,6 +53,7 @@ import { UpdateChecker } from './DesktopSettingsPanel/sections/UpdateChecker';
 import { ExportDiagnostic } from './DesktopSettingsPanel/sections/ExportDiagnostic';
 import { DataManagement } from './DesktopSettingsPanel/sections/DataManagement';
 import { ComputeExecution } from './DesktopSettingsPanel/sections/ComputeExecution';
+import { RemoteTargets } from './DesktopSettingsPanel/sections/RemoteTargets';
 import { TrashManagement } from './DesktopSettingsPanel/sections/TrashManagement';
 import { HarnessEnvironment } from './DesktopSettingsPanel/sections/HarnessEnvironment';
 
@@ -798,6 +799,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
               <p>设置分析任务的执行位置，并查看本地数据占用。</p>
             </div>
         <ComputeExecution />
+
+        <RemoteTargets />
 
         <hr className="biof3-section-divider" />
 

@@ -3482,10 +3482,10 @@
         "compute-to-data",
         "G0"
       ],
-      "notes": "2026-09-04 启动（active，用户裁决「启动 BLOCK-57 远程执行」）：P0 设计评审已产出 docs/block-57-design-review.md（九项设计裁决 D1-D9 + 五项 plan 偏差 + 错误分类表 + P1 范围切分 + 八项待确认问题），待用户确认后进 P1（SSH 直连）。2026-09-03 planned 登记（用户裁决立项：算力扩展设计讨论）：核心裁决=不做 Linux 桌面版（解决算力认同而非算力本身），做本地指挥席 + SSH headless 执行节点 + 调度器适配。复用三项既有资产（LanguageExecutor 抽象 / tool_jobs 状态机 / Job 文件级形态 script+params）。四阶段：P1 SSH 直连单服务器直跑、P2 Slurm 适配 sbatch/sacct/scancel、P3 复现链跨机 provenance+hash 校验、P4 LSF/SGE+多目标路由。P1-P2 G0 兼容产品能力（用户自有服务器/集群 SSH 出去，无 BioF3 云中转，不踩 Provider/发布纪律）。体量排队清单最大包。0 新 npm 依赖。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-09-04 P1 SSH 直连收口 completed（真实节点 aliyun 全链 ALL PASS：模块级 10/10 + 应用级 7/7；UI-290 in_progress 待 dev Electron UI 实机；P2 Slurm 适配/P3 复现链跨机/P4 广度待续）。2026-09-04 P0 设计评审 confirmed（九项裁决 D1-D9 + 五项偏差，docs/block-57-design-review.md）；同日用户裁决启动 active。2026-09-04 启动（active，用户裁决「启动 BLOCK-57 远程执行」）：P0 设计评审已产出 docs/block-57-design-review.md（九项设计裁决 D1-D9 + 五项 plan 偏差 + 错误分类表 + P1 范围切分 + 八项待确认问题），待用户确认后进 P1（SSH 直连）。2026-09-03 planned 登记（用户裁决立项：算力扩展设计讨论）：核心裁决=不做 Linux 桌面版（解决算力认同而非算力本身），做本地指挥席 + SSH headless 执行节点 + 调度器适配。复用三项既有资产（LanguageExecutor 抽象 / tool_jobs 状态机 / Job 文件级形态 script+params）。四阶段：P1 SSH 直连单服务器直跑、P2 Slurm 适配 sbatch/sacct/scancel、P3 复现链跨机 provenance+hash 校验、P4 LSF/SGE+多目标路由。P1-P2 G0 兼容产品能力（用户自有服务器/集群 SSH 出去，无 BioF3 云中转，不踩 Provider/发布纪律）。体量排队清单最大包。0 新 npm 依赖。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-03",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH"
+      "phase": "P1-COMPLETED"
     },
     {
       "id": "BLOCK-57-DESIGN-REVIEW",
@@ -3496,7 +3496,7 @@
       "truthDomain": "block-57-design-review",
       "entrypoint": "docs/README.md",
       "archivePolicy": "archive_when_superseded",
-      "title": "BLOCK-57 P0 设计评审 — 远程执行深水区（draft，待用户确认）",
+      "title": "BLOCK-57 P0 设计评审 — 远程执行深水区（confirmed，2026-09-04 用户全项确认）",
       "owner": "agent",
       "registeredAt": "2026-09-04",
       "tags": [
@@ -3531,8 +3531,30 @@
       "registeredAt": "2026-09-03",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-59-WINDOW-SYSTEM",
+      "path": "docs/block-59-window-system-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-59-window-system",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-59",
+        "window-system",
+        "pop-out",
+        "command-center",
+        "activity-rail",
+        "multi-window",
+        "G0"
+      ],
+      "notes": "2026-09-04 planned 登记（用户裁决立项：子 agent 工作流/分析结果的独立展示窗口，经四轮讨论收敛）：三层架构权重 70/20/10——L1 停靠↔弹出（VS Code auxiliary windows 模式，日常路径）/ L2 指挥中心墙（codex agent command center 模式，多任务俯瞰单例窗）/ L3 边缘活动轨道（原创配件：降格窗口存放处，只读窗口注册表不建第二套真相，与消息轨道同构视觉语言）。核心契约：窗口状态机 docked→popped→railed→closed 三活态一终态，× 永远是降格不是销毁（写死不可变契约），销毁只有轨道显式移除一条路；弹出窗 ≤4 并发上限超限自动降最老。关键裁决：P1 弹出窗一律只读（编辑留在主窗，切掉双窗写冲突）/ 弹出窗不置顶（仅轨道容器 alwaysOnTop）/ 同内容禁止双开=聚焦既有窗 / 位置记忆归主进程+副屏失效回落 / 路由白名单 main 校验 fail-closed。复用 src/main/_window-create.js + 同一 SPA 走路由 + task_events/SSE 链，0 新 npm 依赖。分期 P0 窗口管理器→P1 结果窗→P2 轨道+终端窗（与 BLOCK-54 兼容）→P3 指挥中心（零第二真相只读投影）→P4 agent 窗（依赖 BLOCK-49）。资源四层缓解：懒创建/隐藏保活/≤4 上限/多入口 bundle 备用。排 BLOCK-51 之后可启动。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-04",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "PLANNED"
     }
   ],
-  "lastUpdated": "2026-09-04 (BLOCK-57-REMOTE-EXECUTION 启动 active + BLOCK-57-DESIGN-REVIEW 登记)",
-  "documentCount": 199
+  "lastUpdated": "2026-09-04 (BLOCK-57 P1-COMPLETED aliyun 全链 ALL PASS + UI-290 in_progress；BLOCK-59-WINDOW-SYSTEM planned 并行登记共存)",
+  "documentCount": 202
 }

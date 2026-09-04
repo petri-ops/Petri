@@ -1063,7 +1063,7 @@
     },
     {
       "id": "script-block-live-drivers",
-      "note": "BLOCK 实机 CDP 驱动与探针（acceptance/block-N 证据采集），一次性证据脚本按 development-smoke 分类。",
+      "note": "BLOCK 实机 CDP 驱动与探针（acceptance/block-N 证据采集），一次性证据脚本按 development-smoke 分类。 BLOCK-57 实机 SSH 全链驱动（aliyun 真实节点 + in-app 分派）同分类。",
       "patterns": [
         "acceptance/block-49/**",
         "acceptance/block-52/**",
@@ -1077,7 +1077,13 @@
         "scripts/block54-*.cjs",
         "scripts/block54-*.mjs",
         "scripts/block56-*.cjs",
-        "scripts/block56-*.mjs"
+        "scripts/block56-*.mjs",
+        "acceptance/block-57/**",
+        "scripts/block57-*.cjs",
+        "scripts/block57-*.mjs",
+        "acceptance/block-55/**",
+        "scripts/block55-*.cjs",
+        "scripts/block55-*.mjs"
       ],
       "tests": [
         "test/test-affected.test.mjs"

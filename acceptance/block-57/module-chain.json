@@ -1,0 +1,60 @@
+{
+  "block": "BLOCK-57",
+  "part": "module-chain",
+  "host": "aliyun",
+  "nodeOs": "Linux 6.8.0-57-generic",
+  "at": "2026-09-04T12:54:21.528Z",
+  "allPass": true,
+  "results": [
+    {
+      "name": "A agent 部署且二次调用幂等（sha256 钉扎，不再重传）",
+      "pass": true,
+      "detail": "first={\"ok\":true,\"deployed\":false} second={\"ok\":true,\"deployed\":false}"
+    },
+    {
+      "name": "B 节点探测诚实上报（os/python/scheduler）",
+      "pass": true,
+      "detail": "{\"os\":\"Linux 6.8.0-57-generic\",\"r\":\"missing\",\"python\":\"/usr/bin/python3\",\"pythonversion\":\"3.12.3\",\"scheduler\":\"none\"}"
+    },
+    {
+      "name": "E 节点缺失语言运行时时诚实返回 not-ready",
+      "pass": true,
+      "detail": "r=missing ready=false"
+    },
+    {
+      "name": "C1 提交（bundle 上传 + agent start 确认 active）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"remoteDir\":\"$HOME/.biof3-agent/jobs/job_blk57c_mtmygwed\"}"
+    },
+    {
+      "name": "C2 日志流断流重连后作业继续、终态对齐 exit=0",
+      "pass": true,
+      "detail": "terminal=true exit={\"jobId\":\"job_blk57c_mtmygwed\",\"code\":0,\"signal\":null,\"at\":1788526455202} log=180B"
+    },
+    {
+      "name": "C3 日志内容真实回流（progress + DONE，断流重连不丢尾段）",
+      "pass": true,
+      "detail": "fullLog=366B streamPrefix=progress step 1/10 label=blk57-live | progress step 1/10 label=blk57-live | progress step 2/10 label=blk57-live"
+    },
+    {
+      "name": "C4 产物拉回 + sha256 对账通过（manifest 独立产物可读）",
+      "pass": true,
+      "detail": "pulled={\"ok\":true,\"entries\":2}"
+    },
+    {
+      "name": "F 产物 hash 对账失败 fail-closed（幽灵条目被拒）",
+      "pass": true,
+      "detail": "{\"stage\":\"verify\",\"err\":\"transfer.hash_mismatch\"}"
+    },
+    {
+      "name": "D1 取消场景提交成功",
+      "pass": true,
+      "detail": "{\"ok\":true,\"remoteDir\":\"$HOME/.biof3-agent/jobs/job_blk57d_mtmyh3fk\"}"
+    },
+    {
+      "name": "D2 取消经 TERM 收敛（exit.json 信号=SIGTERM，节点真相）",
+      "pass": true,
+      "detail": "terminal=true cancelSent=true exit={\"jobId\":\"job_blk57d_mtmyh3fk\",\"code\":15,\"signal\":\"SIGTERM\",\"at\":1788526460055}"
+    }
+  ]
+}

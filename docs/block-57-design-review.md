@@ -1,6 +1,6 @@
 # BLOCK-57 P0 设计评审 — 远程执行深水区
 
-> 状态：`draft`（待用户确认；确认后 BLOCK-57 进 P1）
+> 状态：`confirmed`（2026-09-04 用户裁决「可以的 你来」全项确认；真实节点验收服务器指定为 `aliyun`——实测 Ubuntu kernel 6.8 / Python 3.12.3 / GNU tar 1.35 / 2C1.6G / key 认证 BatchMode 直通，节点无 R：R 作业诚实走 runtime_missing 路径，P1 全链路验收以 Python 工具作业承载）
 > 归属：`BLOCK-57-REMOTE-EXECUTION`（canonical plan：[`block-57-remote-execution-plan.md`](./block-57-remote-execution-plan.md)）
 > 评审范围：plan §8 P0 指定深水区 —— 传输协议细节 / 断线语义 / 凭据处理 / 产物校验 / 错误分类
 > 评审日期：2026-09-04
