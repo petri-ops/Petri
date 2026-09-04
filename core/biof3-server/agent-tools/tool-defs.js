@@ -368,8 +368,10 @@ const TOOL_DEFS = [
         '（例如"做完整的 PBMC 分析"或"对比两种方案"）时，应当先创建一个 plan，' +
         '再按步骤执行。Plan 跨会话保存，用户和 AI 都能看到推进进度。\n\n' +
         '操作：' +
-        ' create（创建新 plan，需要 title + steps[]）;' +
+        ' create（创建新 plan，需要 title + steps[]；计划模式下必须传 draft=true + specMd）;' +
         ' update_step（更新某 step 的状态/结果）;' +
+        ' update_spec（BLOCK-55：更新 draft 计划的 specMd 正文）;' +
+        ' propose_revision（BLOCK-55：执行期提交修订案 steps[]，用户批准后替换）;' +
         ' list（列用户所有 plan）;' +
         ' get（按 id 获取详情）;' +
         ' pause / resume（暂停/恢复整个 plan）;' +
@@ -379,27 +381,47 @@ const TOOL_DEFS = [
         properties: {
           op: {
             type: 'string',
-            enum: ['create', 'update_step', 'list', 'get', 'pause', 'resume', 'complete', 'cancel'],
+            enum: ['create', 'update_step', 'update_spec', 'propose_revision', 'list', 'get', 'pause', 'resume', 'complete', 'cancel'],
             description: '操作类型',
           },
           planId: {
             type: 'string',
-            description: 'update_step / get / pause / resume / complete / cancel 用',
+            description: 'update_step / update_spec / propose_revision / get / pause / resume / complete / cancel 用',
           },
           title: { type: 'string', description: 'create 用：plan 简短标题（一句话）' },
           goal: { type: 'string', description: 'create 用：plan 的最终目标（详细描述）' },
+          draft: {
+            type: 'boolean',
+            description: 'create 用：计划模式（Spec 门）下必须传 true，创建 draft 态计划等待用户批准',
+          },
+          specMd: {
+            type: 'string',
+            description: 'create/update_spec 用：计划正文 Markdown，必须自包含——目标与边界、每步做什么用什么工具、验收标准（批准后可能仅凭它在全新上下文执行）',
+          },
           steps: {
             type: 'array',
-            description: 'create 用：步骤数组，每步 {n, title, hint?}。建议 3-8 步',
+            description: 'create / propose_revision 用：步骤数组，每步 {n, title, hint?, assignee?}。建议 3-8 步',
             items: {
               type: 'object',
               properties: {
                 n: { type: 'integer' },
                 title: { type: 'string' },
                 hint: { type: 'string', description: '可选：执行此步的提示或参数建议' },
+                assignee: {
+                  type: 'string',
+                  enum: ['subagent'],
+                  description: '可选：填 "subagent" 表示该步骤派子智能体独立执行（BLOCK-55 P2）',
+                },
+                status: {
+                  type: 'string',
+                  enum: ['pending', 'done', 'skipped'],
+                  description: '仅 propose_revision 用：修订案中已完成步骤保留 done 以延续进度',
+                },
+                result: { type: 'string', description: '仅 propose_revision 用：已完成步骤的结果引用' },
               },
             },
           },
+          reason: { type: 'string', description: 'propose_revision 用：为什么要修订（失败了什么、偏离了什么）' },
           stepN: { type: 'integer', description: 'update_step 用：步骤序号（从 1 开始）' },
           stepStatus: {
             type: 'string',

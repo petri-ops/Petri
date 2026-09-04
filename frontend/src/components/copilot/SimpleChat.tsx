@@ -209,6 +209,19 @@ import {
 //     event we render in idle mode with no live `budget`, which
 //     surfaces the placeholder (`—`) instead of fake numbers.
 import { isToolCallAllowed } from './accessModeValidator';
+// BLOCK-55 P1/P2/P3 — Spec 门：计划模式开关 + 批准三选一 + 修订批准
+import {
+  PlanApprovalCard,
+  type PlanApprovalAction,
+  type PlanApprovalCardPlan,
+} from './SimpleChat/PlanApprovalCard';
+import {
+  approvePlan,
+  approvePlanRevision,
+  buildFreshPlanTurn,
+  fetchDraftPlansForConversation,
+  fetchPlansWithPendingRevision,
+} from './planApprovals';
 import { ContextBudgetButton, type TokenBudget } from './ContextBudgetBar';
 
 // SimpleMessage + restoreSimpleMessage + AgentProgressUpdate + restoreProgressUpdates + MessageMeta moved to
@@ -298,6 +311,11 @@ export function SimpleChat({
   const [modelSupplierKey, setModelSupplierKey] = useState<string | null>(null);
   const [accessMenuOpen, setAccessMenuOpen] = useState(false);
   const [accessMode, setAccessMode] = useState<'full' | 'workspace-write' | 'read'>('full');
+  // BLOCK-55 P1 — Spec 门计划模式：只读探索 + 起草计划（写类工具被 policy 拒绝）
+  const [planMode, setPlanMode] = useState(false);
+  const [pendingPlan, setPendingPlan] = useState<PlanApprovalCardPlan | null>(null);
+  const [pendingRevision, setPendingRevision] = useState<{ planId: string; title: string; revNo: number } | null>(null);
+  const [planCardBusy, setPlanCardBusy] = useState(false);
   const [forking, setForking] = useState(false);
   const [tokenBudget, setTokenBudget] = useState<TokenBudget | null>(null);
   // Per-message index for "fork at this message" action
@@ -881,6 +899,7 @@ export function SimpleChat({
     activeModel,
     activeModelId,
     accessMode,
+    planMode,
     createConversationForRun,
   });
 
@@ -899,6 +918,85 @@ export function SimpleChat({
     }
     return ok;
   }, [send]);
+
+  // BLOCK-55 P1/P3 — run 结束 / 会话切换后拉取待批准 draft 计划与待批准修订案。
+  // 拉取失败静默降级（批准卡缺席不影响普通对话）。
+  useEffect(() => {
+    if (!conversationId || streaming) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const drafts = await fetchDraftPlansForConversation(conversationId);
+        if (!cancelled) setPendingPlan(drafts[0] ? { ...drafts[0] } : null);
+      } catch {
+        if (!cancelled) setPendingPlan(null);
+      }
+      try {
+        const revPlans = await fetchPlansWithPendingRevision(conversationId);
+        if (!cancelled) {
+          const first = revPlans[0];
+          setPendingRevision(
+            first && typeof first.pending_revision_no === 'number'
+              ? { planId: first.id, title: first.title, revNo: first.pending_revision_no }
+              : null
+          );
+        }
+      } catch {
+        if (!cancelled) setPendingRevision(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [conversationId, streaming]);
+
+  // BLOCK-55 P1 — 批准三选一：批准执行 / 批准并清上下文执行 / 继续讨论
+  const handlePlanApprove = useCallback(async (action: PlanApprovalAction) => {
+    if (!pendingPlan || planCardBusy) return;
+    setPlanCardBusy(true);
+    try {
+      await approvePlan(pendingPlan.id, action);
+      const plan = pendingPlan;
+      setPendingPlan(null);
+      if (action === 'keep-planning') return;
+      setPlanMode(false);
+      if (action === 'execute') {
+        await send(
+          `计划「${plan.title}」已批准（planId: ${plan.id}），请从第一个 pending 步骤开始执行，每完成一步用 plan(op="update_step") 写回状态。`,
+          { approvedPlanId: plan.id }
+        );
+      } else {
+        await send(
+          buildFreshPlanTurn(plan),
+          { approvedPlanId: plan.id, approvedPlanFresh: true },
+          { freshTurn: true }
+        );
+      }
+    } catch {
+      // 批准失败：保留批准卡供用户重试
+    } finally {
+      setPlanCardBusy(false);
+    }
+  }, [pendingPlan, planCardBusy, send]);
+
+  // BLOCK-55 P3 — 修订案批准：替换步骤表后通知继续
+  const handleRevisionApprove = useCallback(async () => {
+    if (!pendingRevision || planCardBusy) return;
+    setPlanCardBusy(true);
+    try {
+      await approvePlanRevision(pendingRevision.planId, pendingRevision.revNo);
+      const rev = pendingRevision;
+      setPendingRevision(null);
+      await send(
+        `计划「${rev.title}」修订案 #${rev.revNo} 已批准，请按修订后的步骤表继续执行。`,
+        { approvedPlanId: rev.planId }
+      );
+    } catch {
+      // 失败保留修订条
+    } finally {
+      setPlanCardBusy(false);
+    }
+  }, [pendingRevision, planCardBusy, send]);
 
   // T83: file-reference refresh feedback layer (no core-logic change).
   const handleRefresh = useCallback(() => {
@@ -1489,6 +1587,32 @@ export function SimpleChat({
         {/* BLOCK-28.7 — 工作区改动卡片：每文件 ±统计，点击行跳转审阅；BLOCK-31 P3 传入会话 id 做会话作用域 */}
         <AgentChangesCard conversationId={conversationId} />
 
+        {/* BLOCK-55 P1/P3 — 计划批准卡 + 修订批准条（仅在有待批准内容时渲染） */}
+        {pendingPlan && (
+          <PlanApprovalCard
+            plan={pendingPlan}
+            busy={planCardBusy}
+            onApprove={(action) => void handlePlanApprove(action)}
+            onDismiss={() => setPendingPlan(null)}
+          />
+        )}
+        {pendingRevision && !pendingPlan && (
+          <div className="sc-plan-revision-banner" role="status">
+            <Icon name="git-branch" size={14} />
+            <span className="sc-plan-revision-text">
+              计划「{pendingRevision.title}」有待批准修订案 #{pendingRevision.revNo}
+            </span>
+            <button
+              type="button"
+              className="sc-plan-approval-btn sc-plan-approval-btn-primary"
+              disabled={planCardBusy}
+              onClick={() => void handleRevisionApprove()}
+            >
+              批准修订
+            </button>
+          </div>
+        )}
+
         <div
           className="sc-input-area"
           style={{ ['--sc-composer-width' as string]: `${composerWidth}px` }}
@@ -1722,6 +1846,17 @@ export function SimpleChat({
                     </>
                   )}
                 </div>
+                {/* BLOCK-55 P1 — Spec 门计划模式开关（与档位菜单并列，会话内生效） */}
+                <button
+                  type="button"
+                  className={`sc-plan-mode-btn${planMode ? ' is-active' : ''}`}
+                  title="计划模式（Spec 门）：开启后智能体只读探索并起草计划，写类工具被禁用；计划获批后自动恢复执行"
+                  aria-pressed={planMode}
+                  onClick={() => setPlanMode((value) => !value)}
+                >
+                  <Icon name="list-details" size={14} />
+                  <span>计划模式</span>
+                </button>
               </div>
               <div className="sc-composer-right">
                 <div className="sc-model-picker-pair">

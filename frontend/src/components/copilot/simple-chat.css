@@ -433,6 +433,150 @@
   font-size: var(--biof3-font-size-caption);
 }
 
+/* BLOCK-55 P1 — 计划模式开关（档位菜单旁） */
+.sc-plan-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--biof3-border);
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  font-size: var(--biof3-font-size-caption);
+  cursor: pointer;
+}
+.sc-plan-mode-btn.is-active {
+  background: var(--biof3-border);
+  color: var(--biof3-text-primary);
+  border-color: var(--biof3-text-primary);
+}
+
+/* BLOCK-55 P1 — 计划批准卡（draft 计划三选一） */
+.sc-plan-approval {
+  margin: 0 16px 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sc-plan-approval-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sc-plan-approval-title {
+  font-weight: 600;
+  font-size: var(--biof3-font-size-body);
+}
+.sc-plan-approval-plan-title {
+  color: var(--biof3-text-secondary);
+  font-size: var(--biof3-font-size-caption);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sc-plan-approval-close {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  cursor: pointer;
+  padding: 2px;
+  display: inline-flex;
+}
+.sc-plan-approval-goal {
+  font-size: var(--biof3-font-size-caption);
+  color: var(--biof3-text-secondary);
+}
+.sc-plan-approval-steps {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--biof3-font-size-caption);
+}
+.sc-plan-approval-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sc-plan-approval-assignee {
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--biof3-border);
+  font-size: var(--biof3-font-size-caption);
+  color: var(--biof3-text-secondary);
+}
+.sc-plan-approval-spec {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sc-plan-approval-spec-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  font-size: var(--biof3-font-size-caption);
+  cursor: pointer;
+  padding: 0;
+}
+.sc-plan-approval-spec-body {
+  max-height: 200px;
+  overflow: auto;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--biof3-border);
+  font-size: var(--biof3-font-size-caption);
+}
+.sc-plan-approval-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.sc-plan-approval-btn {
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--biof3-border);
+  background: transparent;
+  color: var(--biof3-text-primary);
+  font-size: var(--biof3-font-size-caption);
+  cursor: pointer;
+}
+.sc-plan-approval-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.sc-plan-approval-btn-primary {
+  border-color: transparent;
+  font-weight: 600;
+}
+
+/* BLOCK-55 P3 — 修订批准条 */
+.sc-plan-revision-banner {
+  margin: 0 16px 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 10px;
+  font-size: var(--biof3-font-size-caption);
+}
+.sc-plan-revision-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .sc-msg-action {
   display: inline-flex;
   align-items: center;

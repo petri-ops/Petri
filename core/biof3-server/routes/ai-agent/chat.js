@@ -523,6 +523,26 @@ module.exports = {
 
       let aborted = false;
       const resultEditProgress = createResultEditProgressRecorder();
+      const planModeActive = context && context.planMode === true;
+      if (planModeActive) {
+        // BLOCK-55 P1 — 计划模式纪律（对齐 codex plan mode：纯讨论 + 只留计划工具）
+        systemPrompt +=
+          '\n\n=== 计划模式（Spec 门）===' +
+          '\n当前处于计划模式：写文件、跑分析、运行命令等有副作用的工具全部被禁止，只能只读探索（读文件/检索/查数据）和起草计划。' +
+          '\n流程：① 只读探索充分理解需求 → ② 调用 plan(op="create", title, goal, steps[], specMd, draft=true) 提交完整计划 → ③ 用一句话告诉用户计划已提交待批准，然后停止，不要继续调用其他工具。' +
+          '\nspecMd 是计划正文，必须自包含：目标与边界 / 每个步骤做什么、用什么工具、验收标准（用户批准后可能在一个全新上下文中仅凭 spec 执行，讨论细节写进 spec，不要依赖对话记忆）。' +
+          '\n步骤可标 assignee: "subagent" 表示该步骤适合派子智能体独立完成（执行期分派）；缺省由主智能体自己执行。' +
+          '\n用户要求修改计划：调用 plan(op="update_spec", planId, specMd) 更新正文（可配合 steps 重建——draft 态直接重新 create 亦可），然后继续等待批准。' +
+          '\n计划被批准后（系统提示会出现已批准计划），退出计划模式按步骤执行。';
+      }
+      if (!planModeActive && context && context.approvedPlanId) {
+        systemPrompt +=
+          '\n\n=== 已批准计划执行 ===' +
+          `\n计划 ${context.approvedPlanId} 已获用户批准${context.approvedPlanFresh ? '（本 turn 为全新上下文，spec 即全部依据）' : ''}。` +
+          '\n从第一个 pending 步骤开始执行，每完成一步 plan(op="update_step") 写回状态与结果引用。' +
+          '\n标记 assignee="subagent" 的步骤：用 spawn_agent(task=该步骤自包含描述+验收标准) 派子智能体执行，wait_agent 收结果摘要后写回；多个无依赖 assignee 步骤可并行派发（受并发槽约束，超限诚实等待）。' +
+          '\n步骤失败时不要硬冲：先重试一次，仍失败则 plan(op="propose_revision", planId, reason, steps[]) 提交修订案（保留已完成步骤为 done），等待用户批准。';
+      }
       const toolCtx = {
         userId: req.user && req.user.id,
         projectId: context && context.projectId,
@@ -531,6 +551,8 @@ module.exports = {
         accessMode: context && (context.accessMode === 'read' || context.accessMode === 'workspace-write')
           ? context.accessMode
           : 'full',
+        // BLOCK-55 P1 — Spec 门计划模式（policy 层收写类工具，仅放行 plan）
+        planMode: context && context.planMode === true,
         allowExecution: executionPolicy.allowExecution,
         executionPolicyReason: executionPolicy.reason,
         docsIndex: {},

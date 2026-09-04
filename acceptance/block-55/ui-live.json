@@ -1,0 +1,142 @@
+{
+  "startedAt": "2026-09-04T10:30:00.456Z",
+  "page": "http://localhost:3000/project/p_mtlnsv0f_xpjb",
+  "projectId": "p_mtlnsv0f_xpjb",
+  "dbPath": "/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/biof3.db",
+  "assertions": [
+    {
+      "name": "UI「计划模式」开关可点击且进入激活态（aria-pressed=true）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"pressed\":\"true\",\"active\":true}"
+    },
+    {
+      "name": "composer 输入计划起草指令并发送",
+      "pass": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "真实模型经 plan(create, draft=true) 提交 draft 计划（status=draft）",
+      "pass": true,
+      "detail": "planId=plan_102f4a98-28a"
+    },
+    {
+      "name": "draft 计划携带自包含 specMd（spec_md 非空）",
+      "pass": true,
+      "detail": "len=734"
+    },
+    {
+      "name": "draft 步骤表含 assignee=subagent 标记（P2 分派语义进计划）",
+      "pass": true,
+      "detail": "[{\"n\":1,\"assignee\":\"subagent\",\"status\":\"pending\"},{\"n\":2,\"assignee\":null,\"status\":\"pending\"},{\"n\":3,\"assignee\":null,\"status\":\"pending\"}]"
+    },
+    {
+      "name": "run 结束后前端拉取 draft → 批准卡渲染（spec 正文 + 步骤表 + 三按钮）",
+      "pass": true,
+      "detail": "{\"title\":\"BRCA1/TP53 功能说明 + biof3 反转（第四轮）\",\"hasSpec\":true,\"stepCount\":3,\"buttons\":[\"批准并执行\",\"批准并清上下文执行\",\"继续讨论（含 1 个子智能体步骤）\"]}"
+    },
+    {
+      "name": "点击「批准并清上下文执行」",
+      "pass": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "批准后 plan 状态 draft → approved",
+      "pass": true,
+      "detail": "planId=plan_102f4a98-28a"
+    },
+    {
+      "name": "批准后计划模式开关自动关闭（aria-pressed=false）",
+      "pass": true,
+      "detail": "aria-pressed=false"
+    },
+    {
+      "name": "清上下文执行：执行 run 消息数组仅含 spec 自包含首条（不带讨论历史）",
+      "pass": true,
+      "detail": "messages=1, head=计划「BRCA1/TP53 功能说明 + biof3 反转（第四轮）」已批准（planId: plan_102f4a98"
+    },
+    {
+      "name": "执行期步骤推进：assignee 分派与主 agent 步骤经 update_step 写回终态",
+      "pass": true,
+      "detail": "[{\"n\":1,\"status\":\"done\"},{\"n\":2,\"status\":\"done\"},{\"n\":3,\"status\":\"done\"}]"
+    },
+    {
+      "name": "P2 分派：assignee 步骤经 spawn_agent 派生真实子 agent（BLOCK-49 工具链）",
+      "pass": true,
+      "detail": "[{\"agentId\":\"17854de4-95e5-4f60-97f0-db603223afff\",\"status\":\"completed\",\"task\":\"请输出两行文本，每行格式为「基因名: 一句话功能说明」，分别针对 BRCA1 和 TP53。要求：\\n- 每句不超过 40 个中文字符；\\n- 内容准确：BRCA1\"}]"
+    },
+    {
+      "name": "执行 run 最终回复产出（汇总报告）",
+      "pass": true,
+      "detail": "## 汇报\n\n**基因功能说明**（来源：子 agent 原文）：\n- BRCA1: 参与DNA双链断裂的同源重组修复，维持基因组稳定性\n- TP53: 响应DNA损伤，阻滞细胞周期并诱导凋亡，抑制肿瘤发生\n\n**字符串反转**（来源：主 "
+    },
+    {
+      "name": "P3 replan：待批准修订条渲染（planId + revNo 可见）",
+      "pass": true,
+      "detail": "{\"text\":\"计划「BLOCK55 修订验证计划」有待批准修订案 #1\",\"hasApprove\":true}"
+    },
+    {
+      "name": "点击「批准修订」",
+      "pass": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "修订案 applied（批准后生效，不可重复应用语义由后端守卫）",
+      "pass": true,
+      "detail": "{\"status\":\"applied\",\"applied_at\":\"2026-09-04T10:32:00.775Z\"}"
+    },
+    {
+      "name": "修订批准后步骤表整体替换（保留 done，失败步骤被修订为新步骤）",
+      "pass": true,
+      "detail": "[{\"n\":1,\"title\":\"旧步骤：将被修订替换\",\"status\":\"done\"},{\"n\":2,\"title\":\"新步骤：一句话说明修订已生效\",\"status\":\"pending\"}]"
+    }
+  ],
+  "draft": {
+    "id": "plan_102f4a98-28a",
+    "userId": "local-user"
+  },
+  "approvalCard": {
+    "title": "BRCA1/TP53 功能说明 + biof3 反转（第四轮）",
+    "hasSpec": true,
+    "stepCount": 3,
+    "buttons": [
+      "批准并执行",
+      "批准并清上下文执行",
+      "继续讨论（含 1 个子智能体步骤）"
+    ]
+  },
+  "planModeOffAfterApprove": "false",
+  "stepsAfterExecute": [
+    {
+      "n": 1,
+      "status": "done",
+      "assignee": "subagent"
+    },
+    {
+      "n": 2,
+      "status": "done",
+      "assignee": null
+    },
+    {
+      "n": 3,
+      "status": "done",
+      "assignee": null
+    }
+  ],
+  "children": [
+    {
+      "agentId": "17854de4-95e5-4f60-97f0-db603223afff",
+      "status": "completed",
+      "agentStatus": "done",
+      "kind": "subagent",
+      "parentTaskId": "56b4a268-3a3c-4593-bc19-c0db5739b439",
+      "task": "请输出两行文本，每行格式为「基因名: 一句话功能说明」，分别针对 BRCA1 和 TP53。要求：\n- 每句不超过 40 个中文字符；\n- 内容准确：BRCA1"
+    }
+  ],
+  "revisionPlanId": "plan_b55revtdxxf",
+  "revisionBanner": {
+    "text": "计划「BLOCK55 修订验证计划」有待批准修订案 #1",
+    "hasApprove": true
+  },
+  "finishedAt": "2026-09-04T10:32:04.958Z",
+  "allPass": true
+}

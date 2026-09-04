@@ -22,43 +22,22 @@ const { fetchDocsIndex, getCachedDocsIndex } = require('./helpers/docs-index');
 const { undoAgentAct } = require('./helpers/act-tool');
 
 // PLAN_TOOL_v1 — persistent plan tables + helpers
+// 基础表 DDL 单一事实源在 helpers/plan-lifecycle.js（测试库自举共用）
 (function setupPlanTables() {
   const dbMod = require('./db');
   const sqlite = dbMod.getDatabase();
-  sqlite.exec(`
-    CREATE TABLE IF NOT EXISTS copilot_plans (
-      id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL,
-      title TEXT NOT NULL,
-      goal TEXT,
-      status TEXT NOT NULL DEFAULT 'active',
-      created_at TEXT NOT NULL,
-      updated_at TEXT NOT NULL
-    );
-    CREATE INDEX IF NOT EXISTS idx_copilot_plans_user ON copilot_plans(user_id, status, updated_at DESC);
-
-    CREATE TABLE IF NOT EXISTS copilot_plan_steps (
-      plan_id TEXT NOT NULL,
-      n INTEGER NOT NULL,
-      title TEXT NOT NULL,
-      hint TEXT,
-      status TEXT NOT NULL DEFAULT 'pending',
-      result TEXT,
-      ts TEXT NOT NULL,
-      PRIMARY KEY (plan_id, n)
-    );
-  `);
+  require('./helpers/plan-lifecycle').ensurePlanBaseSchema(sqlite);
 })();
 
-// PLAN_CHAT_LINK_v1
-(function migratePlansAddChatContext() {
+// PLAN_CHAT_LINK_v1（chat_context_excerpt 列已并入 helpers/plan-lifecycle.js
+// 的 ensurePlanBaseSchema，测试库自举共用同一事实源）
+
+// BLOCK-55 P1/P2/P3 — Spec 门 + 步骤分派 + 修订历史（全部 additive）
+// DDL 单一事实源在 helpers/plan-lifecycle.js（测试库自举共用）
+(function migratePlansBlock55() {
   const dbMod = require('./db');
   const sqlite = dbMod.getDatabase();
-  try {
-    sqlite.exec('ALTER TABLE copilot_plans ADD COLUMN chat_context_excerpt TEXT');
-  } catch {
-    /* exists */
-  }
+  require('./helpers/plan-lifecycle').ensureBlock55PlanSchema(sqlite);
 })();
 
 const { isAgentGloballyPaused, setAgentGlobalPause } = require('./helpers/admin-gov');

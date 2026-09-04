@@ -78,6 +78,8 @@ export interface UseChatStreamArgs {
   activeModel: ChatModelPreset | undefined;
   activeModelId: string;
   accessMode: 'full' | 'workspace-write' | 'read';
+  /** BLOCK-55 P1 — 计划模式（Spec 门）：随所有 send 路径进入请求 context。 */
+  planMode: boolean;
 
   // SWR-backed conversation creator
   createConversationForRun: (title?: string) => Promise<{ id: string } | null>;
@@ -88,8 +90,14 @@ export interface UseChatStreamReturn {
    * 发送一条消息。返回 Promise<boolean>：true = 已接受并启动（或进入）运行；
    * false = 因守卫（空文本 / streaming / 会话已在运行 / 启动失败）未发送。
    * BLOCK-52 P1：SimpleChat.sendWithRefs 依赖该返回值决定是否清空引用块。
+   * BLOCK-55 P1：opts.freshTurn=true 时（批准并清上下文执行）消息数组仅含
+   * 本条 spec 自包含首 turn，不带会话历史。
    */
-  send: (text: string, contextOverride?: Partial<CopilotContext>) => Promise<boolean>;
+  send: (
+    text: string,
+    contextOverride?: Partial<CopilotContext>,
+    opts?: { freshTurn?: boolean }
+  ) => Promise<boolean>;
   stop: () => void;
   regenerate: () => void;
   queue: (text: string) => void;
@@ -128,6 +136,7 @@ export function useChatStream({
   activeModel,
   activeModelId,
   accessMode,
+  planMode,
   createConversationForRun,
 }: UseChatStreamArgs): UseChatStreamReturn {
   // 1. `starting` — transient send-in-progress flag (drives the
@@ -146,7 +155,11 @@ export function useChatStream({
   // 3. `send` — primary entry point. Creates a conversation if
   // needed, builds the upstream message history, and starts a
   // durable run via conversationRunStore.
-  const send = useCallback(async (text: string, contextOverride?: Partial<CopilotContext>): Promise<boolean> => {
+  const send = useCallback(async (
+    text: string,
+    contextOverride?: Partial<CopilotContext>,
+    opts?: { freshTurn?: boolean }
+  ): Promise<boolean> => {
     const trimmed = text.trim();
     if (!trimmed || streaming) return false;
     setStarting(true);
@@ -162,10 +175,13 @@ export function useChatStream({
       }
       if (isConversationRunning(targetConversationId)) return false;
 
-      const tagged: ChatMessage[] = messagesRef.current
+      // BLOCK-55 P1 — 清上下文执行：仅发 spec 自包含首 turn，不带会话历史
+      const history: ChatMessage[] = messagesRef.current
         .filter((m) => !m.error && !m.pending)
         .map((m) => ({ role: m.role, content: m.content }));
-      tagged.push({ role: 'user', content: trimmed });
+      const tagged: ChatMessage[] = opts?.freshTurn
+        ? [{ role: 'user', content: trimmed }]
+        : [...history, { role: 'user', content: trimmed }];
 
       const started = startConversationRun({
         conversationId: targetConversationId,
@@ -181,6 +197,7 @@ export function useChatStream({
           page: 'desktop-project',
           projectId,
           accessMode,
+          planMode,
         },
       });
       if (!started) return false;
@@ -199,6 +216,7 @@ export function useChatStream({
     conversationId,
     createConversationForRun,
     onConversationChange,
+    planMode,
     projectId,
     streaming,
   ]);
@@ -286,11 +304,12 @@ export function useChatStream({
         page: 'desktop-project',
         projectId,
         accessMode,
+        planMode,
       },
     });
     setInput('');
     if (taRef.current) taRef.current.style.height = 'auto';
-  }, [accessMode, activeModel, activeModelId, activeRun, conversationId, messages, projectId]);
+  }, [accessMode, activeModel, activeModelId, activeRun, conversationId, messages, planMode, projectId]);
 
   // 9. `queue` — push the current composer text into the queued
   // prompts list. Only allowed while a run is already streaming;

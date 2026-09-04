@@ -1,8 +1,12 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-04（**BLOCK-49-MULTI-AGENT-SPAWN 收口，当前 active：NONE**（BLOCK-49 已 P1→P5 一次会话收口，2026-09-04；BLOCK-56 已全收口 `9f7e44f5` + UI-287/288 实机尾巴 verified，UI 台账无 BLOCK-56 遗留）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-04（**BLOCK-55-ENGINEERING-PLAN-MODE 收口（P1→P3+实机一次会话 completed，UI-289 verified）**；BLOCK-49 收口 `d3b7928b`、BLOCK-56 全收口（UI-287/288 verified `e1e01071`）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
+
+- **当前无 active 工作包**（BLOCK-55 已收口，下一包待用户裁决；planned 候选队列建议 57 远程执行 → 48 电脑控制）。
+
+- **已收口：`BLOCK-55-ENGINEERING-PLAN-MODE`**（2026-09-04 用户裁决「启动55 一次性搞定」→ 同日 P1→P3+实机一次会话收口）：渐进式工程计划模式——P1 Spec 轻门（copilot_plans draft 前置态 + spec_md 自包含计划正文 + 会话级 plan 模式开关收写类工具【复用 accessMode 拦截链，plan 模式视同 read 写拦截 + 保留只读探索】+ 批准三选一【批准执行 / 批准并清上下文执行 / 继续讨论】，清上下文变体 freshTurn 仅注入 spec 自包含首条）→ P2 步骤级 agent 分派（copilot_plan_steps.assignee 可选字段 + assignee 步骤走 BLOCK-49 spawn_agent/wait_agent + 无 assignee 零行为变化）→ P3 Replan（失败步骤 propose_revision 修订案 + 批准整体替换 done 保留 + 修订历史可查不可重复应用）；后端定向 `test/block55-plan-mode.test.mjs` 10/10 + PlanApprovalCard 4/4 + tsc 0；实机 CDP 15/15 断言全 PASS（计划起草→批准卡→清上下文执行→子 agent 分派回写→修订批准条→步骤替换，证据 `acceptance/block-55/` + 截图 ×5）；UI-289 verified；实机发现并修复批准卡字段断层（REST snake_case `spec_md` 不带 steps → list 接口批量附 steps + 前端 `spec_md→specMd` 映射）；plan `docs/block-55-engineering-plan-mode-plan.md`。
 
 - **已收口：`BLOCK-52-SELECT-TO-CHAT`**（2026-09-03；**P1/P2/P3 全三期 completed**）：P1 选中即引用（UI-280 verified）；P2 图片/结果图引用（UI-284 verified：imageQuote 事件 + read_image v2 双模式 + 引用卡，实机 6 断言）；P3 微调闭环（UI-285 verified：自然语言→参数 Patch→新 Revision 重跑，实机 9 断言——生信旗舰链路）；P1 增量真修复（引用头全角【】防落库剥头）；收口文书由主智能体代办（实现智能体静默），证据 `acceptance/block-52/`；plan `docs/block-52-select-to-chat-plan.md`。
 - **已收口：`BLOCK-58-R-DEPENDENCY-GOVERNANCE`**（2026-09-03 用户裁决立项，AUDIT-LOG 🟠 广播项转 active；**P0–P5 收口 `be6cb090`**）：R 工具依赖治理——7 个内置 tool-scripts 执行路径内联 install.packages 已全部移出（_dependencies.json 单一事实源 + MISSING_R_PACKAGES fail-fast + JS 执行前检查 markJobFailed + `scripts/install-r-tool-dependencies.mjs` 显式补装命令）；冒烟闭环（真实补装 SNFtool/mclust 后脚本通过检查进入执行流）；行为变化如实登记（缺包=毫秒级明确失败+指引，分析路径永不碰网络）；候选登记：biof3-r-toolchain 预编译包插件实体构建；plan `docs/block-58-r-dependency-governance-plan.md`；0 新 npm 依赖。

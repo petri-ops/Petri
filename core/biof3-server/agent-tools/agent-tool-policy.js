@@ -128,6 +128,17 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
   }
 
   const operation = effectiveOperation(name, args, contract);
+  // BLOCK-55 P1 — Spec 门 plan 模式：只允许 plan 工具（起草/修订计划本身）与
+  // 只读探索，其余有副作用工具一律拒绝；计划获批（planMode 关闭）后自动恢复。
+  // 复用既有 policy 单闸，不新建第二套权限系统；plan 合同虽是 state-write，
+  // 但它是 plan 模式的被授权主体（对齐 codex「plan 模式只留 update_plan」）。
+  if (operation.mutating && ctx.planMode === true && name !== 'plan') {
+    return deny(
+      'read_only',
+      'plan_mode_active',
+      '计划模式：当前仅进行方案讨论与计划起草，禁止执行有副作用的工具。计划获批后自动恢复执行能力。'
+    );
+  }
   if (operation.mutating && ctx.allowExecution === false) {
     return deny(
       'read_only',

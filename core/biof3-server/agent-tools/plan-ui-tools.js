@@ -24,21 +24,26 @@ async function tool_plan(args, ctx) {
     }
     const planId = 'plan_' + uuidv4().slice(0, 12);
     const now = new Date().toISOString();
+    // BLOCK-55 P1 — Spec 门：draft=true 创建 draft 态计划（等待用户批准后转
+    // approved 再执行）；specMd 为计划正文（目标/边界/步骤+验收标准），批准后
+    // 可能作为新上下文的自包含执行依据。
+    const isDraft = args.draft === true;
     db.prepare(
-      `INSERT INTO copilot_plans(id, user_id, title, goal, status, chat_context_excerpt, conversation_id, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?)`
+      `INSERT INTO copilot_plans(id, user_id, title, goal, status, chat_context_excerpt, spec_md, conversation_id, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)`
     ).run(
       planId,
       userId,
       args.title.slice(0, 200),
       (args.goal || '').slice(0, 1000),
-      'active',
+      isDraft ? 'draft' : 'active',
       (args.chatExcerpt || '').slice(0, 600),
+      args.specMd ? String(args.specMd).slice(0, 30000) : null,
       (ctx && ctx.conversationId) || null,
       now,
       now
     );
     const stepInsert = db.prepare(
-      `INSERT INTO copilot_plan_steps(plan_id, n, title, hint, status, ts) VALUES (?,?,?,?,?,?)`
+      `INSERT INTO copilot_plan_steps(plan_id, n, title, hint, assignee, status, ts) VALUES (?,?,?,?,?,?,?)`
     );
     args.steps.forEach((s, i) => {
       const n = typeof s.n === 'number' ? s.n : i + 1;
@@ -47,6 +52,7 @@ async function tool_plan(args, ctx) {
         n,
         String(s.title || '').slice(0, 200),
         String(s.hint || '').slice(0, 500),
+        s.assignee ? String(s.assignee).slice(0, 40) : null, // BLOCK-55 P2 步骤级分派
         'pending',
         now
       );
@@ -56,7 +62,78 @@ async function tool_plan(args, ctx) {
       planId,
       title: args.title,
       stepCount: args.steps.length,
-      message: '已创建 plan，将按步骤推进',
+      status: isDraft ? 'draft' : 'active',
+      message: isDraft
+        ? '计划草案已提交，等待用户批准。批准前不要执行任何其他操作。'
+        : '已创建 plan，将按步骤推进',
+    };
+  }
+
+  // BLOCK-55 P1 — plan 模式下修订计划正文（仅 draft 态可改；获批后走 propose_revision）
+  if (op === 'update_spec') {
+    if (!args.planId || typeof args.specMd !== 'string') return { error: 'missing_args' };
+    const plan = db
+      .prepare('SELECT id, status FROM copilot_plans WHERE id=? AND user_id=?')
+      .get(args.planId, userId);
+    if (!plan) return { error: 'plan_not_found' };
+    if (plan.status !== 'draft') {
+      return { error: 'plan_not_draft', message: '仅 draft 态计划可更新 spec；已批准计划请用 propose_revision 提修订案。' };
+    }
+    db.prepare('UPDATE copilot_plans SET spec_md=?, updated_at=? WHERE id=?').run(
+      String(args.specMd).slice(0, 30000),
+      new Date().toISOString(),
+      args.planId
+    );
+    return { ok: true, planId: args.planId, message: '计划草案已更新，继续等待用户批准。' };
+  }
+
+  // BLOCK-55 P3 — Replan：失败/偏离时提交修订案（提议暂存，用户批准后替换生效）
+  if (op === 'propose_revision') {
+    if (!args.planId || !Array.isArray(args.steps) || args.steps.length === 0) {
+      return { error: 'missing_args', message: '需要 planId 和修订后的 steps[]（含保留的已完成步骤）' };
+    }
+    const plan = db
+      .prepare('SELECT id, status FROM copilot_plans WHERE id=? AND user_id=?')
+      .get(args.planId, userId);
+    if (!plan) return { error: 'plan_not_found' };
+    if (plan.status === 'draft') {
+      return { error: 'plan_is_draft', message: 'draft 计划直接用 update_spec 修改即可，无需修订案。' };
+    }
+    const allowedStepStatus = new Set(['pending', 'done', 'skipped']);
+    const proposed = args.steps.slice(0, 50).map((s, i) => ({
+      n: typeof s.n === 'number' ? s.n : i + 1,
+      title: String(s.title || '').slice(0, 200),
+      hint: String(s.hint || '').slice(0, 500),
+      assignee: s.assignee ? String(s.assignee).slice(0, 40) : null,
+      status: allowedStepStatus.has(s.status) ? s.status : 'pending',
+      result: s.result ? String(s.result).slice(0, 1000) : null,
+    }));
+    const revRow = db
+      .prepare('SELECT COALESCE(MAX(rev_no), 0) AS maxRev FROM copilot_plan_revisions WHERE plan_id=?')
+      .get(args.planId);
+    const revNo = (revRow && revRow.maxRev ? revRow.maxRev : 0) + 1;
+    const revId = 'prev_' + uuidv4().slice(0, 12);
+    db.prepare(
+      `INSERT INTO copilot_plan_revisions(id, plan_id, rev_no, reason, proposed_json, status, created_at) VALUES (?,?,?,?,?,?,?)`
+    ).run(
+      revId,
+      args.planId,
+      revNo,
+      String(args.reason || '').slice(0, 1000),
+      JSON.stringify(proposed),
+      'proposed',
+      new Date().toISOString()
+    );
+    db.prepare('UPDATE copilot_plans SET updated_at=? WHERE id=?').run(
+      new Date().toISOString(),
+      args.planId
+    );
+    return {
+      ok: true,
+      planId: args.planId,
+      revisionNo: revNo,
+      proposedSteps: proposed.length,
+      message: `修订案 #${revNo} 已提交，等待用户批准。批准前按原计划继续或暂停，不要重复提交。`,
     };
   }
 

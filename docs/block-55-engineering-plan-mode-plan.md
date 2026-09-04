@@ -1,6 +1,6 @@
 # BLOCK-55 — 渐进式工程计划模式（Spec 门 + 步骤分派 + Replan）
 
-> 状态：`planned`（候选，待用户裁决启动；当前 active 为 NONE。**P2 依赖 BLOCK-49 落地**，建议顺序：BLOCK-51 → … → BLOCK-49 → 本包 P1+P2）
+> 状态：`completed`（2026-09-04 用户裁决「启动55 一次性搞定」；BLOCK-49 已落地，P2 前置满足；P1→P2→P3→实机→收口一次会话推进，同日收口）
 > 立项日期：2026-09-03（用户裁决「渐进式 + 参考 codex 取精华」）
 > truthDomain: `block-55-engineering-plan-mode`
 > 来源：BioF3 计划能力现状盘点 + codex plan mode 渐进设计调研（本会话）
@@ -112,4 +112,8 @@
 ## 7. 进度记录
 
 - 2026-09-03 P0（planned 登记）：用户裁决「渐进式 + 参考 codex 取精华」立项；现状盘点（有计划无门单 agent）+ codex 四精华提取（二档模式/收工具/三选一/轻门哲学）；渐进三阶段（P1 轻门不依赖 49 / P2 依赖 49 / P3 增强）；本计划落盘并注册 DOC-REGISTRY。建议执行序：BLOCK-51 → 52/53/54 → 49 → 55。
+
+- 2026-09-04 P0（启动登记，active）：用户裁决「启动55 一次性搞定」；当前唯一 active 工作包。前置核验：BLOCK-49 已收口（`d3b7928b`，spawn_agent/list_agents/wait_agent 在产），P2 前置满足。执行序 P1（Spec 门）→ P2（分派）→ P3（replan）→ 实机（`acceptance/block-55/`）→ 收口。
+
+- 2026-09-04 收口（completed，P1→P3+实机一次会话）：① **P1 Spec 门**——`copilot_plans` additive 列（spec_md/approved_via/revision counter，DDL 事实源收敛至 `helpers/plan-lifecycle.js` 与 ai-bridge 共用）+ draft 前置态（plan 模式下 create 落 draft、批准前不可执行副作用）+ 会话级 plan 模式开关（`agent-tool-policy.js` plan-mode 维度：写类工具拒 `plan_mode_active`、plan 工具放行、只读探索照常）+ 批准三选一 REST（execute / execute-fresh / keep-planning，execute-fresh 合成 freshTurn 消息数组仅含 spec 自包含首条）；② **P2 分派**——`copilot_plan_steps.assignee` 可选列 + 执行到 assignee 步骤走 BLOCK-49 spawn_agent/wait_agent + 结果经 update_step 回写 + 无 assignee 零行为变化（回归用例锁定）；③ **P3 Replan**——propose_revision 修订案 + 批准整体替换（done 步骤保留）+ 修订历史可查 + 不可重复应用 + draft 走 update_spec 拒修订；④ **前端**——PlanApprovalCard（spec 折叠 + 步骤表 + 三按钮）+ 修订批准条 + plan 模式开关按钮（`simple-chat.css` 样式 + `useChatStream`/`copilotContext` 接线）+ `planApprovals.ts`（`spec_md→specMd` 映射 + steps 归一）；⑤ **实机发现并修复批准卡字段断层**——REST 返回 snake_case `spec_md` 且不带 steps（hasSpec:false/stepCount:0）→ `routes/ai-plans.js` list 接口 IN 子句批量附 steps + 前端 mapPlanRow 映射，重启 dev Electron 后复验通过；⑥ **门禁**——后端定向 `test/block55-plan-mode.test.mjs` 10/10 + PlanApprovalCard 4/4 + tsc 0 + docs:check + ui:audit:check；⑦ **实机**——`scripts/block55-ui-live.cjs` CDP 15/15 断言全 PASS（场景 A：真实模型 plan 模式起草 draft→批准卡渲染→批准并清上下文执行→assignee 步骤 spawn 子 agent→update_step 回写→汇总回复；场景 B：直构 active 计划 + proposed 修订→修订批准条→批准替换，证据 `acceptance/block-55/ui-live.json` + 截图 ×5）；UI-289 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
