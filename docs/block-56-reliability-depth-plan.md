@@ -1,6 +1,6 @@
 # BLOCK-56 — 可靠性纵深：模型降级 + 沙箱中间档 + 上下文保鲜
 
-> 状态：`active`（2026-09-04 用户裁决启动，当前唯一 active 工作包；P1→P2→P3 串行实施）
+> 状态：`completed`（2026-09-04 P1→P2→P3→实机 全部收口；F4 记忆系统按计划仅登记不实施）
 > 立项日期：2026-09-03（用户裁决「四个新发现单独开一个 block」）
 > truthDomain: `block-56-reliability-depth`
 > 来源：codex 第四轮调研（compact\_model\_fallback / sandbox\_tags / context\_manager / memories）+ BioF3 上下文审计遗留观察项

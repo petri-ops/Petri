@@ -1,6 +1,6 @@
 # BLOCK-49 — 多 Agent 内生派生（Multi-Agent Spawn）技术调研与实施计划
 
-> 状态：`planned`（候选，待用户裁决启动；当前 active 为 BLOCK-47-UI255-POPOVER-VERTICAL-CLAMP）
+> 状态：`active`（2026-09-04 用户裁决启动，当前唯一 active 工作包；P1 工具面→P2 回传协议→P3 门禁→P4 实机→P5 收口，一次会话收口节奏对齐 BLOCK-54/56）
 > 立项日期：2026-09-03
 > truthDomain: `block-49-multi-agent-spawn`
 
