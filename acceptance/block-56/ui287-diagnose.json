@@ -1,0 +1,339 @@
+{
+  "pinnedTargetId": "34409AC9377E48D158F41C2B6550ADA7",
+  "frontReady": true,
+  "noticeInDom": false,
+  "markerInDom": true,
+  "taskRow": "e645c6c4-6970-49b2-b2bd-c3e5ba303998|completed",
+  "primaryHits": 3,
+  "backupHits": 3,
+  "mof": [
+    {
+      "t": 1788506555466,
+      "conversationId": "conv_05dc94bc-561",
+      "info": {
+        "scope": "request_level",
+        "fromProfileId": "b56-mock-primary",
+        "toProfileId": "b56-mock-backup",
+        "toProfileLabel": null,
+        "reason": null,
+        "newTaskId": null,
+        "message": "模型服务异常，本次调用已自动降级到备用模型继续"
+      }
+    },
+    {
+      "t": 1788506557699,
+      "conversationId": "conv_05dc94bc-561",
+      "info": {
+        "scope": "request_level",
+        "fromProfileId": "b56-mock-primary",
+        "toProfileId": "b56-mock-backup",
+        "toProfileLabel": null,
+        "reason": null,
+        "newTaskId": null,
+        "message": "模型服务异常，本次调用已自动降级到备用模型继续"
+      }
+    }
+  ],
+  "mof2": [
+    {
+      "t": 1788506555466,
+      "key": "conv_05dc94bc-561",
+      "runExists": true,
+      "appliedNotice": "模型服务异常，本次调用已自动降级到备用模型继续",
+      "allKeys": [
+        "conv_05dc94bc-561"
+      ]
+    },
+    {
+      "t": 1788506557699,
+      "key": "conv_05dc94bc-561",
+      "runExists": true,
+      "appliedNotice": "模型服务异常，本次调用已自动降级到备用模型继续",
+      "allKeys": [
+        "conv_05dc94bc-561"
+      ]
+    }
+  ],
+  "disp": [
+    {
+      "t": 1788506555470,
+      "convId": "conv_05dc94bc-561",
+      "runNotice": "模型服务异常，本次调用已自动降级到备用模型继续",
+      "runStatus": "done",
+      "runTaskId": "b42d8614-5878-41c0-9d4c-f0eb916e284e",
+      "lastRole": "assistant",
+      "msgCount": 75,
+      "messagesLen": 73,
+      "alreadyPersisted": false,
+      "lastHasNotice": true,
+      "notices": "user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:Y"
+    },
+    {
+      "t": 1788506555472,
+      "convId": "conv_05dc94bc-561",
+      "runNotice": "模型服务异常，本次调用已自动降级到备用模型继续",
+      "runStatus": "done",
+      "runTaskId": "b42d8614-5878-41c0-9d4c-f0eb916e284e",
+      "lastRole": "assistant",
+      "msgCount": 75,
+      "messagesLen": 73,
+      "alreadyPersisted": false,
+      "lastHasNotice": true,
+      "notices": "user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:Y"
+    },
+    {
+      "t": 1788506557097,
+      "convId": "conv_05dc94bc-561",
+      "runNotice": null,
+      "runStatus": "running",
+      "runTaskId": null,
+      "lastRole": "assistant",
+      "msgCount": 77,
+      "messagesLen": 75,
+      "alreadyPersisted": false,
+      "lastHasNotice": false,
+      "notices": "user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N"
+    },
+    {
+      "t": 1788506557099,
+      "convId": "conv_05dc94bc-561",
+      "runNotice": null,
+      "runStatus": "running",
+      "runTaskId": null,
+      "lastRole": "assistant",
+      "msgCount": 77,
+      "messagesLen": 75,
+      "alreadyPersisted": false,
+      "lastHasNotice": false,
+      "notices": "user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N"
+    },
+    {
+      "t": 1788506557120,
+      "convId": "conv_05dc94bc-561",
+      "runNotice": null,
+      "runStatus": "running",
+      "runTaskId": null,
+      "lastRole": "assistant",
+      "msgCount": 77,
+      "messagesLen": 75,
+      "alreadyPersisted": false,
+      "lastHasNotice": false,
+      "notices": "user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N"
+    },
+    {
+      "t": 1788506557120,
+      "convId": "conv_05dc94bc-561",
+      "runNotice": null,
+      "runStatus": "running",
+      "runTaskId": null,
+      "lastRole": "assistant",
+      "msgCount": 77,
+      "messagesLen": 75,
+      "alreadyPersisted": false,
+      "lastHasNotice": false,
+      "notices": "user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N"
+    },
+    {
+      "t": 1788506557157,
+      "convId": "conv_05dc94bc-561",
+      "runNotice": null,
+      "runStatus": "running",
+      "runTaskId": "e645c6c4-6970-49b2-b2bd-c3e5ba303998",
+      "lastRole": "assistant",
+      "msgCount": 77,
+      "messagesLen": 75,
+      "alreadyPersisted": false,
+      "lastHasNotice": false,
+      "notices": "user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N"
+    },
+    {
+      "t": 1788506557158,
+      "convId": "conv_05dc94bc-561",
+      "runNotice": null,
+      "runStatus": "running",
+      "runTaskId": "e645c6c4-6970-49b2-b2bd-c3e5ba303998",
+      "lastRole": "assistant",
+      "msgCount": 77,
+      "messagesLen": 75,
+      "alreadyPersisted": false,
+      "lastHasNotice": false,
+      "notices": "user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N"
+    },
+    {
+      "t": 1788506557196,
+      "convId": "conv_05dc94bc-561",
+      "runNotice": null,
+      "runStatus": "running",
+      "runTaskId": "e645c6c4-6970-49b2-b2bd-c3e5ba303998",
+      "lastRole": "assistant",
+      "msgCount": 77,
+      "messagesLen": 75,
+      "alreadyPersisted": false,
+      "lastHasNotice": false,
+      "notices": "user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N"
+    },
+    {
+      "t": 1788506557196,
+      "convId": "conv_05dc94bc-561",
+      "runNotice": null,
+      "runStatus": "running",
+      "runTaskId": "e645c6c4-6970-49b2-b2bd-c3e5ba303998",
+      "lastRole": "assistant",
+      "msgCount": 77,
+      "messagesLen": 75,
+      "alreadyPersisted": false,
+      "lastHasNotice": false,
+      "notices": "user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N"
+    },
+    {
+      "t": 1788506557703,
+      "convId": "conv_05dc94bc-561",
+      "runNotice": "模型服务异常，本次调用已自动降级到备用模型继续",
+      "runStatus": "done",
+      "runTaskId": "e645c6c4-6970-49b2-b2bd-c3e5ba303998",
+      "lastRole": "assistant",
+      "msgCount": 77,
+      "messagesLen": 75,
+      "alreadyPersisted": false,
+      "lastHasNotice": true,
+      "notices": "user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:Y"
+    },
+    {
+      "t": 1788506557704,
+      "convId": "conv_05dc94bc-561",
+      "runNotice": "模型服务异常，本次调用已自动降级到备用模型继续",
+      "runStatus": "done",
+      "runTaskId": "e645c6c4-6970-49b2-b2bd-c3e5ba303998",
+      "lastRole": "assistant",
+      "msgCount": 77,
+      "messagesLen": 75,
+      "alreadyPersisted": false,
+      "lastHasNotice": true,
+      "notices": "user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:Y"
+    }
+  ],
+  "sseFB": [
+    {
+      "t": 6040,
+      "url": "4-5878-41c0-9d4c-f0eb916e284e?afterSeq=0",
+      "fb": true,
+      "head": "{\"seq\":4,\"eventType\":\"model_fallback\",\"payload\":{\"event\":\"model_fallback\",\"scope\":\"request_level\",\"role\":\"agent\",\"fromProfileId\":\"b56-mock-p"
+    },
+    {
+      "t": 8273,
+      "url": "4-6970-49b2-b2bd-c3e5ba303998?afterSeq=0",
+      "fb": true,
+      "head": "{\"seq\":4,\"eventType\":\"model_fallback\",\"payload\":{\"event\":\"model_fallback\",\"scope\":\"request_level\",\"role\":\"agent\",\"fromProfileId\":\"b56-mock-p"
+    }
+  ],
+  "sseAll": [
+    {
+      "t": 6040,
+      "fb": false,
+      "head": "{\"seq\":1,\"eventType\":\"conversation\",\"payload\":{\"event\":\"conversation\","
+    },
+    {
+      "t": 6040,
+      "fb": false,
+      "head": "{\"seq\":2,\"eventType\":\"token_budget\",\"payload\":{\"event\":\"token_budget\","
+    },
+    {
+      "t": 6040,
+      "fb": false,
+      "head": "{\"seq\":3,\"eventType\":\"iter\",\"payload\":{\"event\":\"iter\",\"n\":1}}"
+    },
+    {
+      "t": 6040,
+      "fb": true,
+      "head": "{\"seq\":4,\"eventType\":\"model_fallback\",\"payload\":{\"event\":\"model_fallba"
+    },
+    {
+      "t": 6040,
+      "fb": false,
+      "head": "{\"seq\":5,\"eventType\":\"delta\",\"payload\":{\"choices\":[{\"delta\":{\"content\""
+    },
+    {
+      "t": 6040,
+      "fb": false,
+      "head": "{\"seq\":6,\"eventType\":\"done\",\"payload\":{\"event\":\"done\"}}"
+    },
+    {
+      "t": 6040,
+      "fb": false,
+      "head": "{\"event\":\"done\",\"filesChanged\":[]}"
+    },
+    {
+      "t": 6040,
+      "fb": false,
+      "head": "[DONE]"
+    },
+    {
+      "t": 8273,
+      "fb": false,
+      "head": "{\"seq\":1,\"eventType\":\"conversation\",\"payload\":{\"event\":\"conversation\","
+    },
+    {
+      "t": 8273,
+      "fb": false,
+      "head": "{\"seq\":2,\"eventType\":\"token_budget\",\"payload\":{\"event\":\"token_budget\","
+    },
+    {
+      "t": 8273,
+      "fb": false,
+      "head": "{\"seq\":3,\"eventType\":\"iter\",\"payload\":{\"event\":\"iter\",\"n\":1}}"
+    },
+    {
+      "t": 8273,
+      "fb": true,
+      "head": "{\"seq\":4,\"eventType\":\"model_fallback\",\"payload\":{\"event\":\"model_fallba"
+    },
+    {
+      "t": 8273,
+      "fb": false,
+      "head": "{\"seq\":5,\"eventType\":\"delta\",\"payload\":{\"choices\":[{\"delta\":{\"content\""
+    },
+    {
+      "t": 8273,
+      "fb": false,
+      "head": "{\"seq\":6,\"eventType\":\"done\",\"payload\":{\"event\":\"done\"}}"
+    },
+    {
+      "t": 8273,
+      "fb": false,
+      "head": "{\"event\":\"done\",\"filesChanged\":[]}"
+    },
+    {
+      "t": 8273,
+      "fb": false,
+      "head": "[DONE]"
+    }
+  ],
+  "chip": [
+    {
+      "t": 302,
+      "state": null
+    }
+  ],
+  "chipNow": null,
+  "timeline": [
+    {
+      "t": 0,
+      "domNotice": false,
+      "domMarker": true,
+      "task": "e645c6c4-6970-49b2-b2bd-c3e5ba303998|completed",
+      "dispLast": {
+        "t": 1788506557704,
+        "convId": "conv_05dc94bc-561",
+        "runNotice": "模型服务异常，本次调用已自动降级到备用模型继续",
+        "runStatus": "done",
+        "runTaskId": "e645c6c4-6970-49b2-b2bd-c3e5ba303998",
+        "lastRole": "assistant",
+        "msgCount": 77,
+        "messagesLen": 75,
+        "alreadyPersisted": false,
+        "lastHasNotice": true,
+        "notices": "user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:N,user:N,assistant:Y"
+      }
+    }
+  ]
+}

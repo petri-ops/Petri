@@ -421,6 +421,18 @@
   font-size: var(--biof3-font-size-caption);
 }
 
+/* BLOCK-56 P1 / UI-287 — 模型降级提示：任务条内持久显示「已降级到 X 模型」 */
+.sc-msg-fallback-notice {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--biof3-status-warning-bg);
+  color: var(--biof3-warning-text);
+  font-size: var(--biof3-font-size-caption);
+}
+
 .sc-msg-action {
   display: inline-flex;
   align-items: center;

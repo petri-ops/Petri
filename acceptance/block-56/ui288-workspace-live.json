@@ -1,0 +1,62 @@
+{
+  "startedAt": "2026-09-04T05:36:43.747Z",
+  "assertions": [
+    {
+      "name": "菜单选择「项目写」",
+      "pass": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "档位按钮标签=项目写",
+      "pass": true,
+      "detail": "项目写"
+    },
+    {
+      "name": "场景 A 任务到达终态",
+      "pass": true,
+      "detail": "{\"id\":\"e85384e8-7b18-49e4-a393-b4a75fd92302\",\"status\":\"completed\",\"agentStatus\":\"done\"}"
+    },
+    {
+      "name": "workspace_write 放行：探针文件真实落盘（内容 B56-OK）",
+      "pass": true,
+      "detail": "/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f/b56-ui288-probe.txt → \"B56-OK\""
+    },
+    {
+      "name": "场景 A 任务确曾调用 workspace_write",
+      "pass": true,
+      "detail": "params 命中=1（工具痕迹在 tool_activities/task_events）"
+    },
+    {
+      "name": "场景 A 任务 context.accessMode=workspace-write",
+      "pass": true,
+      "detail": "workspace-write"
+    },
+    {
+      "name": "场景 B 任务到达终态",
+      "pass": true,
+      "detail": "{\"id\":\"b6a5c969-481a-4cb6-92dd-f602ae5bfcff\",\"status\":\"completed\",\"agentStatus\":\"done\"}"
+    },
+    {
+      "name": "workspace_exec_background 被拒（task_events 记录 access_mode_workspace_write）",
+      "pass": true,
+      "detail": "命中=1"
+    },
+    {
+      "name": "无后台进程实际启动（无 yielded/processId 痕迹）",
+      "pass": true,
+      "detail": "命中=0"
+    },
+    {
+      "name": "探针文件已清理",
+      "pass": true,
+      "detail": "/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f/b56-ui288-probe.txt"
+    }
+  ],
+  "screenshots": [
+    "ui288-workspace-write-ok.png",
+    "ui288-workspace-write-denied.png"
+  ],
+  "probeCleaned": true,
+  "finishedAt": "2026-09-04T05:36:55.695Z",
+  "allPass": true
+}

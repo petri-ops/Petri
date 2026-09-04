@@ -134,6 +134,23 @@ interface StartConversationRunOptions {
 const runs = new Map<string, ConversationRunSnapshot>();
 const controllers = new Map<string, AbortController>();
 const listeners = new Map<string, Set<() => void>>();
+// BLOCK-56 P1 / UI-287 — 模型降级提示按会话保留。run 终态后的对账会清掉 run
+// 快照（clearConversationRun），notice 若只挂在 run 上，在「降级后数秒内完成」
+// 的场景存活 <300ms，用户不可见；持久化消息也不携带该字段。改为会话级独立
+// 存储，附着到最后一条助手消息渲染，下一次 run 开始时清除。
+const fallbackNotices = new Map<string, { message: string; ts: string }>();
+
+/**
+ * BLOCK-56 P1 / UI-287 — 当前会话待展示的降级提示（请求级 + 任务级共用）。
+ * 无提示返回 null。run 清理 / 页面刷新后仍可读，直到下一次 run 开始。
+ */
+export function getConversationFallbackNotice(conversationId: string): string | null {
+  return fallbackNotices.get(conversationId)?.message ?? null;
+}
+
+function setFallbackNotice(conversationId: string, message: string): void {
+  fallbackNotices.set(conversationId, { message, ts: new Date().toISOString() });
+}
 
 function emit(conversationId: string): void {
   listeners.get(conversationId)?.forEach((listener) => listener());
@@ -252,6 +269,9 @@ export function startConversationRun(options: StartConversationRunOptions): bool
   const { conversationId } = options;
   if (!conversationId || isConversationRunning(conversationId)) return false;
 
+  // BLOCK-56 P1 / UI-287 — 新 run 开始，上一轮降级提示自然消失
+  fallbackNotices.delete(conversationId);
+
   const startedAt = Date.now();
   const ctrl = new AbortController();
   controllers.get(conversationId)?.abort();
@@ -301,14 +321,16 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     // 用户只看到一条「已降级」提示，任务无缝续跑。
     if (status === 'error' && errorInfo?.fallbackTaskId) {
       const previousTaskId = runs.get(conversationId)?.taskId;
+      const noticeText = errorInfo.fallbackLabel
+        ? `模型服务异常，已自动降级到「${errorInfo.fallbackLabel}」继续执行`
+        : '模型服务异常，已自动降级到备用模型继续执行';
+      // BLOCK-56 P1 — 任务级降级：续跑任务完成、run 快照被对账清理后提示仍可见
+      setFallbackNotice(conversationId, noticeText);
       replaceRun(conversationId, (current) => ({
         ...current,
         taskId: errorInfo.fallbackTaskId || current.taskId,
         resumeOfTaskId: previousTaskId || current.resumeOfTaskId,
-        modelFallbackNotice: current.modelFallbackNotice
-          || (errorInfo.fallbackLabel
-            ? `模型服务异常，已自动降级到「${errorInfo.fallbackLabel}」继续执行`
-            : '模型服务异常，已自动降级到备用模型继续执行'),
+        modelFallbackNotice: current.modelFallbackNotice || noticeText,
         statusMessage: errorInfo.fallbackLabel
           ? `已降级到「${errorInfo.fallbackLabel}」继续执行`
           : '已降级到备用模型继续执行',
@@ -378,11 +400,14 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     // BLOCK-56 P1 — 请求级降级（loop 中途 gateway 切备用模型）：记录一次性提示，
     // 任务条显示「已降级到 X 模型」；后续进度不清除 notice 字段（statusMessage 会被正常覆盖）。
     onModelFallback: (info) => {
+      const noticeText = info.message
+        || (info.toProfileLabel ? `已降级到「${info.toProfileLabel}」继续` : '已降级到备用模型继续');
+      // BLOCK-56 P1 — 请求级降级：run 快照记录（statusMessage 等进度字段会被正常
+      // 覆盖），同时写会话级 notice（run 终态对账清 run 后仍持久可见）。
+      setFallbackNotice(conversationId, noticeText);
       replaceRun(conversationId, (current) => ({
         ...current,
-        modelFallbackNotice: current.modelFallbackNotice
-          || info.message
-          || (info.toProfileLabel ? `已降级到「${info.toProfileLabel}」继续` : '已降级到备用模型继续'),
+        modelFallbackNotice: current.modelFallbackNotice || noticeText,
         statusMessage: info.message || '模型服务异常，已自动降级到备用模型继续',
         assistantPending: true,
       }));

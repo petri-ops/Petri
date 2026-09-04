@@ -1,0 +1,79 @@
+{
+  "startedAt": "2026-09-04T07:35:11.249Z",
+  "assertions": [
+    {
+      "name": "场景 R 任务到达终态（completed，同任务）",
+      "pass": true,
+      "detail": "{\"id\":\"f9cbdd03-005b-471b-9a1f-17f10bec68a7\",\"status\":\"completed\"}"
+    },
+    {
+      "name": "场景 R task_events 记录 model_fallback（请求级）",
+      "pass": true,
+      "detail": "命中=1"
+    },
+    {
+      "name": "场景 R mock 主模型确实被命中（500 注入生效）",
+      "pass": true,
+      "detail": "primaryHits=4"
+    },
+    {
+      "name": "场景 R 前端可见备用回复 marker",
+      "pass": true,
+      "detail": "marker in DOM=true"
+    },
+    {
+      "name": "场景 R 前端可见降级 notice（已自动降级 chip）",
+      "pass": true,
+      "detail": "notice in DOM=true"
+    },
+    {
+      "name": "场景 T 原任务 failed + 续跑任务 completed（fallbackOfTaskId 溯源）",
+      "pass": true,
+      "detail": "{\"failed\":\"0b14f667-c711-414e-8a16-8656d86e4aca\",\"resumed\":\"7def68a6-5a21-4f51-872a-e7043bb8e003\"}"
+    },
+    {
+      "name": "场景 T 续跑任务使用备用 profile 且关闭请求级 fallback（单级不连环）",
+      "pass": true,
+      "detail": "B56-Mock-Backup|"
+    },
+    {
+      "name": "场景 T 前端可见备用回复 marker",
+      "pass": true,
+      "detail": "marker in DOM=true"
+    },
+    {
+      "name": "场景 T 前端可见降级 notice（持久渲染条，已自动降级 chip）",
+      "pass": true,
+      "detail": "notice in DOM=true"
+    },
+    {
+      "name": "场景 T 无新增错误横幅（无缝接管，任务未消失）",
+      "pass": true,
+      "detail": "before=0 after=0"
+    },
+    {
+      "name": "ai-settings.json 已恢复原样（active 回 deepseek）",
+      "pass": true,
+      "detail": "byte-exact restore"
+    }
+  ],
+  "screenshots": [
+    "ui287-request-level-fallback.png",
+    "ui287-task-level-fallback.png"
+  ],
+  "frontReady": true,
+  "noticeSeenMidRun": true,
+  "markerSeenMidRun": true,
+  "taskR": {
+    "id": "f9cbdd03-005b-471b-9a1f-17f10bec68a7",
+    "status": "completed"
+  },
+  "pairT": {
+    "failed": "0b14f667-c711-414e-8a16-8656d86e4aca",
+    "resumed": "7def68a6-5a21-4f51-872a-e7043bb8e003"
+  },
+  "primaryHits": 7,
+  "backupHits": 7,
+  "finishedAt": "2026-09-04T07:35:37.234Z",
+  "allPass": true
+}

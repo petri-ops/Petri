@@ -2157,17 +2157,17 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-287: 模型降级任务条显示——请求级 notice + 任务级无缝切订阅（BLOCK-56 P1） (2026-09-04 in_progress)
+## UI-287: 模型降级任务条显示——请求级 notice + 任务级无缝切订阅（BLOCK-56 P1） (2026-09-04 verified)
 
 **用户需求**：BLOCK-56 P1 诚实纪律——模型调用失败自动降级到备用模型时用户必须可见（不静默换模型）：请求级降级在任务条显示 notice；任务级降级前端无缝切到续跑任务订阅，任务不"消失"。
 
 **改动**（0 新增 IPC / 0 新依赖）：[conversationRunStore.ts](../frontend/src/components/copilot/conversationRunStore.ts) 处理 `model_fallback` 事件——请求级（scope=request_level）记入 run notice（任务条显示「已降级到 X 模型继续」）；任务级（scope=task_level）从事件 `newTaskId` 无缝切换订阅到续跑任务（原任务 failed 终态不再渲染错误横幅）；[copilotClient.ts](../frontend/src/components/copilot/copilotClient.ts) `StreamChatOptions` 增 `onModelFallback` 透传 + `SimpleMessage.modelFallbackNotice` 字段；[useChatStream.ts](../frontend/src/components/copilot/SimpleChat/hooks/useChatStream.ts) 事件接入；[SimpleChat/types.ts](../frontend/src/components/copilot/SimpleChat/types.ts) 类型同步。
 
-**门禁**：[conversationRunStore.test.ts](../frontend/src/components/copilot/conversationRunStore.test.ts) 增 2 用例（请求级 notice / 任务级切订阅）35/35、tsc 0；后端链路实机 `scripts/block56-live.cjs` 14/14（真 HTTP 故障注入 → 真 DB 编排 → 备用端点真完成，证据 `acceptance/block-56/model-fallback-live.json`）。
+**实机发现并修复——notice 随 run 终态被销毁（2026-09-04 收口）**：三层探针实机定位（SSE 帧 → store 落盘 → displayMessages 构建逐层取证，`acceptance/block-56/ui287-diagnose.json`）：请求级降级常与任务终态同批到达（备用模型秒回），notice 挂在 run 快照上，而 run 终态对账（`shouldClearReconciledConversationRun` → `clearConversationRun`）紧随其后把 run 连同 notice 一起销毁，且持久化消息不携带该字段——chip 存活 <300ms 用户不可见。修复：store 模块级会话级 `fallbackNotices` map（请求级/任务级双写，`getConversationFallbackNotice` 导出，下一次 run 开始清除），SimpleChat displayMessages 包装层把 notice 附着到最后一条助手消息（覆盖 run 清理后的早返回构建路径）。
 
-**待实机**：dev Electron 任务条降级 notice 显示与续跑任务无缝接管过目后转 verified。**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**门禁**：[conversationRunStore.test.ts](../frontend/src/components/copilot/conversationRunStore.test.ts) 35/35 + SimpleChat 相关 vitest 28/28 + tsc 0；后端链路实机 `scripts/block56-live.cjs` 14/14（证据 `acceptance/block-56/model-fallback-live.json`）。**UI 实机（2026-09-04）**：`scripts/block56-ui-fallback-live.cjs` 11/11 allPass（场景 R：任务完成同任务 + task_events 记录 model_fallback + mock 500 注入生效 + 备用 marker 上屏 + **降级 notice chip 上屏且 run 清理后持久可见**；场景 T：failed→续跑 completed 溯源 + 备用 profile 单级不连环 + 无缝切订阅无错误横幅；ai-settings 字节级恢复），证据 `acceptance/block-56/ui-fallback-live.json` + 截图 ×2。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-288: 模型档位三选菜单——完全访问/项目写/只读（BLOCK-56 P2） (2026-09-04 in_progress)
+## UI-288: 模型档位三选菜单——完全访问/项目写/只读（BLOCK-56 P2） (2026-09-04 verified)
 
 **用户需求**：BLOCK-56 P2 沙箱中间档——SimpleChat 提供三档 accessMode 用户可选：完全访问（full，默认不变）/ 项目写（workspace-write：项目内写 + 前台命令，禁后台进程/插件委托/系统写面）/ 只读（read）。与 BLOCK-55 plan 模式天然衔接（批准后可授 workspace-write 而非直接 full）。
 
@@ -2175,7 +2175,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：[accessModeValidator.test.ts](../frontend/src/components/copilot/accessModeValidator.test.ts) 新建 4/4；后端 [accessmode-validation.test.mjs](../test/accessmode-validation.test.mjs) 三档矩阵 14/14 + 沙箱回归 37/37 + exec 回归 56/57（唯一失败为预存环境问题，HEAD 基线同失败）；tsc 0。
 
-**实机过目（2026-09-04，随 BLOCK-49 P4 顺带）**：dev Electron 档位菜单三选过目 5/5（三选项齐备/选「项目写」按钮标签回写/恢复无副作用，证据 `acceptance/block-56/ui288-menu-live.json` + 截图）；**顺带发现并修复** [SimpleChat.tsx](../frontend/src/components/copilot/SimpleChat.tsx) `accessModeLabel` 二值漂移（选 workspace-write 按钮显示「只读模式」→ 三档三元表达式，tsc 0 + 实机回归）。**待实机**：workspace-write 档实际写/禁写行为过目后转 verified。**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**实机过目（2026-09-04，随 BLOCK-49 P4 顺带）**：dev Electron 档位菜单三选过目 5/5（三选项齐备/选「项目写」按钮标签回写/恢复无副作用，证据 `acceptance/block-56/ui288-menu-live.json` + 截图）；**顺带发现并修复** [SimpleChat.tsx](../frontend/src/components/copilot/SimpleChat.tsx) `accessModeLabel` 二值漂移（选 workspace-write 按钮显示「只读模式」→ 三档三元表达式，tsc 0 + 实机回归）。**行为过目（2026-09-04 收口）**：`scripts/block56-ui288-workspace-live.cjs` 10/10 全 PASS——「项目写」档下 `workspace_write` 探针文件真实落盘（context.accessMode=workspace-write）、`workspace_exec_background` 被拒（task_events 记录 `access_mode_workspace_write`）且无后台进程实际启动、探针清理，证据 `acceptance/block-56/ui288-workspace-live.json` + 截图 ×2。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-286: 底部终端多 Tab——独立 pty 会话 + tab 条管理（BLOCK-54 P2） (2026-09-04 verified)
 

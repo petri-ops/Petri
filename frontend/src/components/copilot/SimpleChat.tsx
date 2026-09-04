@@ -144,6 +144,7 @@ import { resolveToolSummaryPresentation } from './toolSummaryPresentation';
 import {
   clearConversationPendingApproval,
   clearConversationRun,
+  getConversationFallbackNotice,
   shouldClearReconciledConversationRun,
   resumeConversationRun,
   resumeInterruptedConversation,
@@ -600,7 +601,7 @@ export function SimpleChat({
     if (record) resumeConversationRun(record, conversationId, projectId);
   }, [conversationId]);
 
-  const displayMessages = (() => {
+  const baseDisplayMessages = (() => {
     if (!activeRun || activeRun.conversationId !== conversationId) {
       if (!durableLoop.loop) return messages;
       let lastAssistantIndex = -1;
@@ -669,6 +670,21 @@ export function SimpleChat({
         // BLOCK-56 P1 — 模型降级提示（任务条持久显示「已降级到 X 模型」）
         modelFallbackNotice: activeRun.modelFallbackNotice,
       });
+    }
+    return next;
+  })();
+  // BLOCK-56 P1 / UI-287 — 降级提示附着到最后一条助手消息（覆盖全部构建路径）。
+  // 请求级降级常与任务终态同批到达：run 终态对账（clearConversationRun）会清掉
+  // run 快照且持久化消息不携带该字段，因此除 activeRun 外还兜底读会话级 notice
+  // （store 模块级保留，下一次 run 开始才清除），否则提示存活 <300ms 用户不可见。
+  const displayMessages = (() => {
+    const fallbackNotice = activeRun?.modelFallbackNotice
+      || (conversationId ? getConversationFallbackNotice(conversationId) : null);
+    if (!fallbackNotice) return baseDisplayMessages;
+    const next = baseDisplayMessages.slice();
+    const lastMsg = next[next.length - 1];
+    if (lastMsg && lastMsg.role === 'assistant' && !lastMsg.modelFallbackNotice) {
+      next[next.length - 1] = { ...lastMsg, modelFallbackNotice: fallbackNotice };
     }
     return next;
   })();
@@ -1321,6 +1337,12 @@ export function SimpleChat({
                     )}
                     {extraRenderersFlag && m.resultNodes && m.resultNodes.length > 0 && (
                       <AssistantResultNodes nodes={m.resultNodes} />
+                    )}
+                    {m.role === 'assistant' && m.modelFallbackNotice && (
+                      <div className="sc-msg-fallback-notice" role="status">
+                        <Icon name="info" size={14} />
+                        {m.modelFallbackNotice}
+                      </div>
                     )}
                     <CopilotMarkdown
                       text={m.content || m.statusMessage || (m.pending ? '…' : '')}
