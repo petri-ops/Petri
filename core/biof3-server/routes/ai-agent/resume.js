@@ -216,10 +216,12 @@ module.exports = {
 
       const { aiTaskConcurrencyAcquire, aiTaskConcurrencyRelease } = require('../../helpers/runtime');
       // BLOCK-51 M1 — resume 恢复的是用户主动发起的对话，恒为 primary（预留槽语义）
+      // BLOCK-56 P1 顺带修 — acquire 返回对象恒为真值，原 `!acquired` 永不触发；
+      // 改判 `ok === false`，并发受限时诚实 429（此前会超限拉起 loop）。
       const acquired = aiTaskConcurrencyAcquire(userId, newTaskId, { isPrimary: true });
-      if (!acquired) {
-        agentTaskStore.markAgentTaskFailed(newTaskId, '并发限制');
-        return res.status(429).json({ status: 'error', error: '并发限制，请稍后再试' });
+      if (!acquired || acquired.ok === false) {
+        agentTaskStore.markAgentTaskFailed(newTaskId, (acquired && acquired.message) || '并发限制');
+        return res.status(429).json({ status: 'error', error: (acquired && acquired.message) || '并发限制，请稍后再试' });
       }
 
       let _activeConv = null;

@@ -1,0 +1,110 @@
+{
+  "startedAt": "2026-09-04T01:39:29.057Z",
+  "scenario": [
+    {
+      "name": "A-request-level",
+      "primaryHits": 1,
+      "backupHits": 1
+    }
+  ],
+  "assertions": [
+    {
+      "name": "A: primary 端点真实收到 500 探测",
+      "pass": true,
+      "detail": "[{\"mode\":\"overload500\",\"path\":\"/chat/completions\"}]"
+    },
+    {
+      "name": "A: 收到 model_fallback 事件（from=primary to=backup）",
+      "pass": true,
+      "detail": "{\"type\":\"model_fallback\",\"role\":\"chat\",\"fromProfileId\":\"b56-live-primary\",\"toProfileId\":\"b56-live-backup\",\"reason\":{\"code\":\"http_error\",\"status\":500}}"
+    },
+    {
+      "name": "A: 最终响应来自备用端点且附 fallbackFrom 溯源",
+      "pass": true,
+      "detail": "{\"routing\":{\"role\":\"chat\",\"profileId\":\"b56-live-backup\",\"fallbackFrom\":\"b56-live-primary\",\"fallbackReason\":{\"code\":\"http_error\",\"status\":500}}}"
+    },
+    {
+      "name": "B: 真实 400 context 超限错误 + 真分类为可降级(context_window)",
+      "pass": true,
+      "detail": "{\"error\":\"http_error\",\"message\":\"This model's maximum context length is 131072 tokens. However, your messages resulted in 150000 tokens. Please reduce th\",\"classified\":{\"degradable\":true,\"category\":\"context_window\"}}"
+    },
+    {
+      "name": "B: context 超限不触发请求级降级（isRetryable=false，分工正确）",
+      "pass": true,
+      "detail": "{\"routing\":{\"role\":\"agent\",\"profileId\":\"b56-live-primary\"},\"backupHits\":1}"
+    },
+    {
+      "name": "B: 任务级降级启动（category=context_window，新任务已建）",
+      "pass": true,
+      "detail": "{\"launched\":true,\"reason\":null,\"newTaskId\":\"dbc402ed-9d72-459f-8812-a31d928db5e5\",\"category\":\"context_window\",\"toProfileLabel\":\"实机备用模型\"}"
+    },
+    {
+      "name": "B: model_fallback 溯源事件（scope=task_level, newTaskId 可溯）",
+      "pass": true,
+      "detail": "{\"event\":\"model_fallback\",\"scope\":\"task_level\",\"fromProfileId\":\"b56-live-primary\",\"toProfileId\":\"b56-live-backup\",\"toProfileLabel\":\"实机备用模型\",\"reason\":\"This model's maximum context length is 131072 tokens. However, your messages resulted in 1"
+    },
+    {
+      "name": "B: 原 task 保持 failed；续跑 task completed 且带 fallbackOfTaskId/resumeOfTaskId 溯源",
+      "pass": true,
+      "detail": "{\"original\":\"failed\",\"resumed\":\"completed\",\"of\":\"2fdeb49e-a5b3-472a-89fe-69be6ad747fd\"}"
+    },
+    {
+      "name": "B: 续跑任务以备用 profile + disableProviderFallback=true 拉起（单级不连环闸 3）",
+      "pass": true,
+      "detail": "{\"profileId\":\"b56-live-backup\",\"disable\":true}"
+    },
+    {
+      "name": "B: 恢复指令注入（系统注入标记 + 原任务消息 + 进度摘要 + 降级注明要求）",
+      "pass": true,
+      "detail": "\"=== 任务恢复（系统注入，非用户输入） ===\\n上次执行因模型服务异常中断，系统已自动切换到备用模型「实机备用模型」继续本任务。\\n失败原因：This model's maximum context length is 131072 tokens. However, your messages resulted in 150000 tokens. Please reduce the length of the messages.\\n中断前的执行进度：\\n· 第1轮 结果"
+    },
+    {
+      "name": "B: 续跑真实命中备用端点并成功（disableFallback 下仅一次调用）",
+      "pass": true,
+      "detail": "{\"backupHits\":2,\"content\":\"B56-BACKUP-TASK-LEVEL-RESUMED-OK\",\"routing\":{\"role\":\"agent\",\"profileId\":\"b56-live-backup\"}}"
+    },
+    {
+      "name": "B: 单级不连环（续跑任务再失败 → already_resumed，不二次降级）",
+      "pass": true,
+      "detail": "{\"launched\":false,\"reason\":\"already_resumed\",\"newTaskId\":null,\"category\":null,\"toProfileLabel\":null}"
+    },
+    {
+      "name": "C: 真实 401 错误诚实失败（不降级、不建续跑任务）",
+      "pass": true,
+      "detail": "{\"error\":\"http_error\",\"outcome\":{\"launched\":false,\"reason\":\"not_degradable\",\"newTaskId\":null,\"category\":null,\"toProfileLabel\":null}}"
+    },
+    {
+      "name": "D: 未启用降级配置 → no_fallback_profile 诚实失败（但原任务已续跑过，先闸 already_resumed 亦可）",
+      "pass": true,
+      "detail": "{\"launched\":false,\"reason\":\"no_fallback_profile\",\"newTaskId\":null,\"category\":null,\"toProfileLabel\":null}"
+    }
+  ],
+  "config": {
+    "fallbackEnabled": true,
+    "fallbackBindings": {
+      "chat": [
+        "b56-live-backup"
+      ],
+      "agent": [
+        "b56-live-backup"
+      ]
+    },
+    "profiles": [
+      {
+        "id": "b56-live-primary",
+        "provider": "deepseek",
+        "model": "mock-primary",
+        "baseUrl": "http://127.0.0.1:59155"
+      },
+      {
+        "id": "b56-live-backup",
+        "provider": "deepseek",
+        "model": "mock-backup",
+        "baseUrl": "http://127.0.0.1:59156"
+      }
+    ],
+    "dbPath": "tmp(biof3-block56-live-*)/live.db"
+  },
+  "finishedAt": "2026-09-04T01:39:29.211Z",
+  "allPass": true
+}

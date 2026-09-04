@@ -67,6 +67,8 @@ async function callChatProvider(providerName, apiKey, body, telemetry, onEvent, 
     signal: options && options.signal,
     apiKeyOverride: apiKey,
     fallbackWhen: options && options.fallbackWhen,
+    // BLOCK-56 P1 — 降级续跑任务关闭请求级 fallback（单级不连环）
+    disableFallback: !!(options && options.disableFallback),
   });
 }
 

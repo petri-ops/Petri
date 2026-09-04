@@ -65,6 +65,33 @@ module.exports = {
       let lastSeq = afterSeq;
       const isTerminal = (t) => t && ['done', 'failed', 'cancelled'].includes(t.agent_status);
 
+      // BLOCK-56 P1 — 失败终态时查找任务级降级续跑子任务（model_fallback 事件
+      // 携带 newTaskId），error 载荷附带 fallbackTaskId 供前端自动切换订阅。
+      const findFallbackChild = () => {
+        try {
+          const events = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000);
+          for (let i = events.length - 1; i >= 0; i -= 1) {
+            const ev = events[i];
+            if (ev.eventType === 'model_fallback' && ev.payload && ev.payload.newTaskId) return ev.payload;
+          }
+        } catch {}
+        return null;
+      };
+      const failedPayload = (t) => {
+        const fb = findFallbackChild();
+        return {
+          event: 'error',
+          error: t.error || 'agent task 失败',
+          resumable: Boolean(t.interruptedAt),
+          interruptedAt: t.interruptedAt || null,
+          ...(fb ? {
+            fallbackTaskId: fb.newTaskId,
+            fallbackLabel: fb.toProfileLabel || null,
+            fallbackCategory: fb.category || null,
+          } : {}),
+        };
+      };
+
       // 1. 回放已存事件（afterSeq+1 起）
       try {
         const events = agentTaskStore.getAgentTaskEventsSince(taskId, afterSeq);
@@ -79,12 +106,8 @@ module.exports = {
       if (isTerminal(freshTask)) {
         if (freshTask.agent_status === 'failed') {
           // BLOCK-38 P1: 中断任务（服务重启清扫标记）附带 resumable 标记，前端据此显示「继续执行」
-          sseSend({
-            event: 'error',
-            error: freshTask.error || 'agent task 失败',
-            resumable: Boolean(freshTask.interruptedAt),
-            interruptedAt: freshTask.interruptedAt || null,
-          });
+          // BLOCK-56 P1: 附带 fallbackTaskId（任务级降级续跑），前端自动切换订阅
+          sseSend(failedPayload(freshTask));
         } else if (freshTask.agent_status === 'cancelled') {
           sseSend({ event: 'agent_cancelled' });
         } else {
@@ -107,13 +130,8 @@ module.exports = {
           if (isTerminal(t)) {
             clearInterval(poll);
             if (t.agent_status === 'failed') {
-              // BLOCK-38 P1: 轮询路径同样携带 resumable 标记
-              sseSend({
-                event: 'error',
-                error: t.error || 'agent task 失败',
-                resumable: Boolean(t.interruptedAt),
-                interruptedAt: t.interruptedAt || null,
-              });
+              // BLOCK-38 P1: 轮询路径同样携带 resumable 标记；BLOCK-56 P1: 附带 fallbackTaskId
+              sseSend(failedPayload(t));
             } else if (t.agent_status === 'cancelled') {
               sseSend({ event: 'agent_cancelled' });
             } else {

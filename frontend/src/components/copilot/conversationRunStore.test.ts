@@ -117,6 +117,55 @@ describe('conversation run store', () => {
     expect(getConversationRunSnapshot('conversation-reconnect')?.statusMessage).toBeUndefined();
   });
 
+  it('BLOCK-56 P1: 请求级降级事件记录一次性提示且任务保持运行', () => {
+    start('conversation-fallback-note', 'run with fallback');
+    const callbacks = streamChatMock.mock.calls[0][0];
+    callbacks.onModelFallback?.({ scope: 'request_level', toProfileLabel: '备用模型B', message: '已降级到「备用模型B」继续' });
+    const run = getConversationRunSnapshot('conversation-fallback-note');
+    expect(run).toMatchObject({
+      status: 'running',
+      modelFallbackNotice: '已降级到「备用模型B」继续',
+      statusMessage: '已降级到「备用模型B」继续',
+      assistantPending: true,
+    });
+    // 一次性提示：后续重复事件不覆盖已有 notice
+    callbacks.onModelFallback?.({ scope: 'request_level', toProfileLabel: '备用模型C', message: '已降级到「备用模型C」继续' });
+    expect(getConversationRunSnapshot('conversation-fallback-note')?.modelFallbackNotice).toBe('已降级到「备用模型B」继续');
+  });
+
+  it('BLOCK-56 P1: 任务级降级无缝切换订阅新 task，不进入 error 终态', async () => {
+    start('conversation-fallback-switch', 'run with task fallback');
+    const callbacks = streamChatMock.mock.calls[0][0];
+    callbacks.onTaskStarted?.('task-old');
+    expect(getConversationRunSnapshot('conversation-fallback-switch')?.taskId).toBe('task-old');
+
+    callbacks.onError?.(new Error('The server is overloaded'), {
+      fallbackTaskId: 'task-new',
+      fallbackLabel: '备用模型B',
+    });
+    // await 微任务队列，让内部 subscribeAgentTask 拉起
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const run = getConversationRunSnapshot('conversation-fallback-switch');
+    expect(run).toMatchObject({
+      status: 'running',
+      taskId: 'task-new',
+      resumeOfTaskId: 'task-old',
+      modelFallbackNotice: '模型服务异常，已自动降级到「备用模型B」继续执行',
+      assistantPending: true,
+    });
+    // 订阅切换到新 task，且续跑内容继续渲染到同一会话
+    expect(subscribeAgentTaskMock).toHaveBeenCalledWith(
+      'task-new',
+      expect.objectContaining({ conversationId: 'conversation-fallback-switch' }),
+      0
+    );
+    const subCallbacks = subscribeAgentTaskMock.mock.calls[0][1];
+    subCallbacks.onDelta?.('resumed output');
+    expect(getConversationRunSnapshot('conversation-fallback-switch')?.assistantContent).toBe('resumed output');
+  });
+
   it('keeps RS5 ChangeSet progress ordered and visible as a compact status', () => {
     start('conversation-rs5', 'change the palette');
     const callbacks = streamChatMock.mock.calls[0][0];

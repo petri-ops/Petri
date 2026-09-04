@@ -139,10 +139,14 @@ class ModelGateway {
     return event;
   }
 
-  async chat({ role = 'chat', profileId, modelOverride, body, telemetry, onEvent, signal, apiKeyOverride, fallbackWhen } = {}) {
+  async chat({ role = 'chat', profileId, modelOverride, body, telemetry, onEvent, signal, apiKeyOverride, fallbackWhen, disableFallback } = {}) {
     const primary = this._prepare(role, profileId, apiKeyOverride);
     if (primary.error) return primary;
-    const attempts = [primary.profile.id, ...this._fallbackProfileIds(role, primary.profile.id)];
+    // BLOCK-56 P1 — 任务级降级续跑的任务传 disableFallback: true：
+    // 降级任务已是「单级降级」的最后一搏，请求级 fallback 必须关闭，防止 A→B→C 连环。
+    const attempts = disableFallback
+      ? [primary.profile.id]
+      : [primary.profile.id, ...this._fallbackProfileIds(role, primary.profile.id)];
     let lastResult;
     let previousProfileId;
     let previousReason;

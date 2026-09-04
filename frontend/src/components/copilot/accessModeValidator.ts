@@ -1,35 +1,52 @@
 // ============================================================
-// Access Mode Validator — enforces read-only mode restrictions
-// Validates tool calls against accessMode ('full' | 'read') to
-// prevent destructive operations when user selects "只读模式".
+// Access Mode Validator — enforces per-tier tool restrictions
+// BLOCK-56 P2 — three-tier accessMode matrix ('full' |
+// 'workspace-write' | 'read'). Mirrors the authoritative backend
+// decision surface (core/biof3-server/agent-tools/agent-tool-policy.js
+// decideAgentToolCall + workspace-tools preflight) so the frontend can
+// surface a synchronous UI hint before network IO.
+//
+// Matrix (frontend alias → backend registry name):
+//   fs_write / Write / StrReplace / Delete / EditNotebook → workspace_write
+//   Shell / workspace_exec                                → workspace_exec
+//   GitCommit / GitPush / GitBranch / GitMerge / GitRebase → git_* (IDE-side)
+//   InstallPackage / UninstallPackage                     → npm / pip tools (IDE-side)
+//
+//   | surface                        | read | workspace-write | full |
+//   |--------------------------------|------|-----------------|------|
+//   | read-only tools                | yes  | yes             | yes  |
+//   | workspace_write / _replace     | no   | yes             | yes  |
+//   | workspace_exec (foreground)    | no   | yes             | yes  |
+//   | workspace_exec_background      | no   | no              | yes  |
+//   | run_tool (plugin delegation)   | no   | no              | yes  |
+//   | git / package / IDE-side write | no   | no              | yes  |
 // ============================================================
 
 import type { CopilotContext } from '@/lib/copilotContext';
 
-/**
- * Destructive tools (backend registry names) that should be blocked in
- * read-only mode.  The backend decideAgentToolCall() is the authoritative
- * enforcer (core/biof3-server/agent-tools/agent-tool-policy.js); this set
- * mirrors its MUTATING_SIDE_EFFECTS = { 'workspace-write', 'execution' }
- * so the frontend can surface a synchronous UI hint before network IO.
- *
- * Tool-name mapping (frontend alias → backend registry name):
- *   fs_write / Write / StrReplace / Delete / EditNotebook → workspace_write
- *   Shell / workspace_exec                          → workspace_exec
- *   GitCommit / GitPush / GitBranch / GitMerge / GitRebase → git_*
- *   InstallPackage / UninstallPackage               → npm / pip tools
- *
- * For `run_tool` (plugin delegation), the backend resolves `args.op`
- * against READ_ONLY_RUN_TOOL_OPS at decision time; the frontend cannot
- * know the op before network IO, so run_tool is treated as a passthrough
- * in 'full' mode and as potentially destructive in 'read' mode.
- */
-const DESTRUCTIVE_TOOLS = new Set([
-  // Workspace write / replace — matches backend sideEffect: 'workspace-write'
+/** Project-scoped writes — allowed in workspace-write tier (backend sandbox confines to project root). */
+const PROJECT_WRITE_TOOLS = new Set([
   'workspace_write',
   'workspace_replace',
-  // Shell / execution — matches backend sideEffect: 'execution'
+  // Frontend aliases that map to workspace_write
+  'fs_write',
+  'Write',
+  'StrReplace',
+  'Delete',
+  'EditNotebook',
+]);
+
+/** Foreground command execution — allowed in workspace-write tier (blacklist + cwd-in-project enforced backend-side). */
+const FOREGROUND_EXEC_TOOLS = new Set([
   'workspace_exec',
+]);
+
+/** Tools denied in read-only mode (everything with side effects). */
+const DESTRUCTIVE_TOOLS = new Set<string>([
+  ...PROJECT_WRITE_TOOLS,
+  ...FOREGROUND_EXEC_TOOLS,
+  // Shell / execution — matches backend sideEffect: 'execution'
+  'workspace_exec_background',
   'shell_exec',
   // Git write operations
   'git_commit',
@@ -53,17 +70,22 @@ export function isToolCallAllowed(
   context: CopilotContext | undefined
 ): boolean {
   const accessMode = context?.accessMode || 'full';
-  
+
   // Full access mode allows everything
   if (accessMode === 'full') {
     return true;
   }
-  
+
+  // Project-write tier: project-scoped writes + foreground commands only
+  if (accessMode === 'workspace-write') {
+    return PROJECT_WRITE_TOOLS.has(toolName) || FOREGROUND_EXEC_TOOLS.has(toolName);
+  }
+
   // Read-only mode: block destructive tools
   if (accessMode === 'read') {
     return !DESTRUCTIVE_TOOLS.has(toolName);
   }
-  
+
   // Unknown access mode: default to allowing
   return true;
 }
@@ -71,7 +93,10 @@ export function isToolCallAllowed(
 /**
  * Get a user-friendly error message for blocked tool calls.
  */
-export function getBlockedToolMessage(toolName: string): string {
+export function getBlockedToolMessage(toolName: string, accessMode?: string): string {
+  if (accessMode === 'workspace-write') {
+    return `工具 "${toolName}" 超出项目写模式权限：仅允许项目内文件写入与前台命令；后台进程、插件执行与系统写操作需要切换到"完全访问"模式。`;
+  }
   return `工具 "${toolName}" 需要完全访问权限。当前为只读模式，无法执行文件修改或命令操作。请切换到"完全访问"模式后重试。`;
 }
 
@@ -84,6 +109,6 @@ export function validateToolCall(
   context: CopilotContext | undefined
 ): void {
   if (!isToolCallAllowed(toolName, context)) {
-    throw new Error(getBlockedToolMessage(toolName));
+    throw new Error(getBlockedToolMessage(toolName, context?.accessMode));
   }
 }

@@ -323,6 +323,8 @@ async function runAgentLoop({
   shouldAbort,
   kind = 'primary',
   parentLoopRunId = null,
+  // BLOCK-56 P1 — 降级续跑任务置 true：gateway 关闭请求级 fallback（单级不连环）
+  disableProviderFallback = false,
 }) {
   const turnStartedAt = Date.now();
   const isGuest = !userId;
@@ -586,7 +588,10 @@ async function runAgentLoop({
     userId,
     projectId: context && context.projectId,
     ...projectResultStudioToolContext(context),
-    accessMode: context && context.accessMode === 'read' ? 'read' : 'full',
+    // BLOCK-56 P2 — workspace-write 中间档透传（additive：未知值维持塌缩 full）
+    accessMode: context && (context.accessMode === 'read' || context.accessMode === 'workspace-write')
+      ? context.accessMode
+      : 'full',
     allowExecution: executionPolicy.allowExecution,
     executionPolicyReason: executionPolicy.reason,
     docsIndex: {},
@@ -620,6 +625,8 @@ async function runAgentLoop({
     MAX_AGENT_TOOL_CALLS,
     // BLOCK-51 P2 — 上下文熔断：loop 内每轮请求前的预算检查复用同一 ctxWindow
     contextWindow: safeCtx,
+    // BLOCK-56 P1 — 降级续跑任务在 loop 内禁用请求级 fallback
+    disableProviderFallback,
   };
 
   // ---------- Run loop via orchestrator ----------
@@ -637,6 +644,7 @@ async function runAgentLoop({
     finalizationAttempts,
     fatalAgentError,
     pendingApprovalEmitted,
+    modelFallbackOccurred,
   } = await runLoop({
     messages: fullMessages,
     toolCtx,
@@ -738,6 +746,21 @@ async function runAgentLoop({
       agentTaskStore.markAgentTaskDone(taskId, taskFilesChanged);
     } else {
       agentTaskStore.markAgentTaskFailed(taskId, terminal.error, taskFilesChanged);
+      // BLOCK-56 P1 — 任务级模型降级：可降级错误 + 配置了备用 + 未发生过降级
+      // → 切备用 profile 自动续跑一次（单级不连环）。判定不通过时静默返回
+      // 现行为（诚实失败），零回归。
+      try {
+        const { maybeLaunchTaskLevelFallback } = require('./helpers/agent-fallback');
+        maybeLaunchTaskLevelFallback({
+          taskId,
+          error: terminal.error,
+          modelFallbackOccurred: modelFallbackOccurred === true,
+          previousProfileId: profileId || null,
+          kind,
+          _activeConv,
+          emit: (evt) => _emit(evt),
+        });
+      } catch {}
     }
   } catch {}
 

@@ -3446,7 +3446,7 @@
       "id": "BLOCK-56-RELIABILITY-DEPTH",
       "path": "docs/block-56-reliability-depth-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-56-reliability-depth",
       "entrypoint": "docs/README.md",
@@ -3459,10 +3459,10 @@
         "reliability",
         "G0"
       ],
-      "notes": "2026-09-03 planned 登记（用户裁决「四个新发现单独开一个 block」）：可靠性纵深（源自 codex 第四轮调研，主题=坏情况任务不报废）——P1 模型降级链路（错误分类+任务级 fallback 切 profile 续跑复用 BLOCK-38 resume 链+降级事件用户可见，单级不连环）；P2 沙箱中间档 workspace-write（三档 accessMode+validator 矩阵，与 BLOCK-55 plan 模式衔接）；P3 上下文保鲜（workspace_read 内容指纹+loop 内存 map+unchanged/changed 标记，模型裁决不自动重读）；F4 记忆系统仅登记（半成品资产在，留候选）。生信场景价值：30min 分析后模型挂降级保成果。0 新依赖。排队 BLOCK-51 之后。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-09-03 planned 登记（用户裁决「四个新发现单独开一个 block」）：可靠性纵深（源自 codex 第四轮调研，主题=坏情况任务不报废）——P1 模型降级链路（错误分类+任务级 fallback 切 profile 续跑复用 BLOCK-38 resume 链+降级事件用户可见，单级不连环）；P2 沙箱中间档 workspace-write（三档 accessMode+validator 矩阵，与 BLOCK-55 plan 模式衔接）；P3 上下文保鲜（workspace_read 内容指纹+loop 内存 map+unchanged/changed 标记，模型裁决不自动重读）；F4 记忆系统仅登记（半成品资产在，留候选）。生信场景价值：30min 分析后模型挂降级保成果。0 新依赖。2026-09-04 P1→P2→P3→实机全部收口（实机 scripts/block56-live.cjs 14/14，证据 acceptance/block-56/；UI-287/288 in_progress 待 dev Electron 实机）。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-03",
       "archivePolicy": "archive_when_superseded",
-      "phase": "PLANNED"
+      "phase": "COMPLETED"
     },
     {
       "id": "BLOCK-57-REMOTE-EXECUTION",

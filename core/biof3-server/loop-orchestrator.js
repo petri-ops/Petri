@@ -86,6 +86,7 @@ const {
 // BLOCK-51 P2 — 上下文熔断：预算估算 + 超窗修剪
 const { estimateRequestTokens } = require('./helpers/token-estimator');
 const { trimMessagesToBudget } = require('./helpers/message-trimmer');
+const { createFreshnessTracker, applyFreshnessMark } = require('./helpers/context-freshness');
 
 /**
  * Run the agent loop state machine.
@@ -145,6 +146,12 @@ async function runLoop({
   const assistantProgress = createAgentProgressRecorder();
   const toolResultEventsByCallId = {};
   const loopArtifactCache = {};
+  // BLOCK-56 P1 — 本次任务生命周期内是否发生过请求级模型降级
+  // （gateway 内 primary→备用切换）。任务级降级以此判定「单级不连环」。
+  let modelFallbackOccurred = false;
+  // BLOCK-56 P3 — 上下文保鲜：loop 生命周期内的内存 map（path → hash/readAt/iteration），
+  // workspace_read 重复读取同文件时附 unchanged/changedSinceLastRead 标记（不自动重读）。
+  const freshnessTracker = createFreshnessTracker();
 
   // ---------- Event emitter proxy ----------
   const _emit = (obj) => {
@@ -622,6 +629,22 @@ async function runLoop({
             kind: attempt > 1 ? 'agent_finalization_retry' : 'agent_iter',
           },
           protocolRecoveryAttempt ? undefined : (event) => {
+            // BLOCK-56 P1 — 请求级降级事件透传：gateway 内 primary→备用切换时
+            // 发出 model_fallback；此前该事件被吞掉用户不可见。_emit 落
+            // task_events + SSE，前端任务条显示「已降级到 X 模型」。
+            if (event && event.type === 'model_fallback') {
+              modelFallbackOccurred = true;
+              _emit({
+                event: 'model_fallback',
+                scope: 'request_level',
+                role: event.role || null,
+                fromProfileId: event.fromProfileId || null,
+                toProfileId: event.toProfileId || null,
+                reason: event.reason || null,
+                message: '模型服务异常，本次调用已自动降级到备用模型继续',
+              });
+              return;
+            }
             if (event.type === 'content_delta' && event.content && !aborted()) {
               streamedText += event.content;
               if (!resultEditCompletionGuard.required) {
@@ -646,9 +669,15 @@ async function runLoop({
             baseUrl,
             profileId,
             modelOverride: modelName,
+            // BLOCK-56 P1 — 降级续跑任务关闭请求级 fallback（单级不连环）
+            ...(config.disableProviderFallback ? { disableFallback: true } : {}),
             ...(protocolRecoveryAttempt ? { fallbackWhen: require('./agent-tools').finalizationFallbackReason } : {}),
           }
         );
+        // BLOCK-56 P1 — finalization 档不传 onEvent，modelRouting 兜底追踪
+        if (upJson && upJson.modelRouting && upJson.modelRouting.fallbackFrom) {
+          modelFallbackOccurred = true;
+        }
         if (finalizing && upJson && upJson.modelRouting) finalizationRouting = upJson.modelRouting;
         if (!finalizing) break;
         finalizationAttempts = Math.max(finalizationAttempts, attempt);
@@ -781,6 +810,11 @@ async function runLoop({
           });
           outputStream.flush();
           let result = localizeToolResult(envelope.data);
+          // BLOCK-56 P3 — workspace_read 附内容短指纹 + unchanged/changedSinceLastRead
+          // 三态标记（内存 map 判定；不自动重读，重读与否由模型裁决）。
+          if (name === 'workspace_read') {
+            result = applyFreshnessMark(result, freshnessTracker, iter + 1);
+          }
           resultEditCompletionGuard.recordToolResult(name, result);
           envelope = replaceToolResultData(envelope, result);
 
@@ -1183,6 +1217,8 @@ async function runLoop({
     finalizationAttempts,
     fatalAgentError,
     pendingApprovalEmitted,
+    // BLOCK-56 P1 — 任务级降级判定依据：本任务是否已发生过请求级降级
+    modelFallbackOccurred,
   };
 }
 

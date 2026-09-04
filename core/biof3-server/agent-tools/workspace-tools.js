@@ -1047,8 +1047,17 @@ function createWorkspaceTools(options = {}) {
   async function preflightTool(name, args = {}, ctx = {}) {
     return withWorkspace(ctx, async ({ root }) => {
       if (name === 'workspace_exec' || name === 'workspace_exec_background') {
-        if (ctx.accessMode !== 'full') {
-          return errorResult('access_mode_read_only', '聊天当前处于只读模式，禁止执行命令');
+        // BLOCK-56 P2 — workspace-write 中间档：前台命令放行（黑名单维持 + cwd
+        // 限定项目根，下方既有校验不变）；后台进程面维持 full 专属。
+        const execAllowed = ctx.accessMode === 'full'
+          || (ctx.accessMode === 'workspace-write' && name === 'workspace_exec');
+        if (!execAllowed) {
+          return errorResult(
+            ctx.accessMode === 'workspace-write' ? 'access_mode_workspace_write' : 'access_mode_read_only',
+            ctx.accessMode === 'workspace-write'
+              ? '项目写模式仅允许前台命令执行；后台进程需要完全访问模式'
+              : '聊天当前处于只读模式，禁止执行命令'
+          );
         }
         const command = String(args.command || '').trim();
         const verdict = commandVerdict(command);
@@ -1097,7 +1106,8 @@ function createWorkspaceTools(options = {}) {
 
   // handlerOptions: BLOCK-33 P3 — 第 3 参携带 { onOutput } 流式回调（可选）
   async function executeCommand(args = {}, ctx = {}, handlerOptions = {}) {
-    if (ctx.accessMode !== 'full') {
+    // BLOCK-56 P2 — workspace-write 中间档放行前台命令（黑名单 + cwd 限项目根维持）
+    if (ctx.accessMode !== 'full' && ctx.accessMode !== 'workspace-write') {
       return errorResult('access_mode_read_only', '聊天当前处于只读模式，禁止执行命令');
     }
     const command = String(args.command || '').trim();

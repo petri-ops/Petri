@@ -25,7 +25,11 @@ const INTERACTION_MODES = Object.freeze([
   'task_execute',
   'replay',
 ]);
-const ACCESS_MODES = Object.freeze(['read', 'full']);
+// BLOCK-56 P2 — 新增 'workspace-write' 中间档（additive：read/full 原值不变）。
+// 语义矩阵见 docs/block-56-reliability-depth-plan.md 附录 A：
+//   read = 只读；workspace-write = 项目内写 + 前台命令（黑名单+cwd 限项目根）；
+//   full = 完全访问（含后台进程/插件委托/系统写面）。
+const ACCESS_MODES = Object.freeze(['read', 'workspace-write', 'full']);
 const AUTOMATION_MODES = Object.freeze(['guided', 'confirm', 'trusted']);
 const EXPLANATION_LEVELS = Object.freeze(['concise', 'guided', 'technical']);
 const CONFIDENCE_LEVELS = Object.freeze(['unknown', 'low', 'medium', 'high']);

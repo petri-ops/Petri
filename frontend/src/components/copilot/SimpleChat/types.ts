@@ -106,6 +106,8 @@ export interface SimpleMessage {
   interruptedAt?: string;
   /** BLOCK-38 P2 / UI-275 — 本 run 的 agent task id（续跑预览/执行的目标）。 */
   taskId?: string;
+  /** BLOCK-56 P1 — 模型降级提示（请求级/任务级首次发生时记录），任务条持久显示「已降级到 X 模型」。 */
+  modelFallbackNotice?: string;
 }
 
 /**

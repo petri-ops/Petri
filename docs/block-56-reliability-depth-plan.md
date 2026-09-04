@@ -1,6 +1,6 @@
 # BLOCK-56 — 可靠性纵深：模型降级 + 沙箱中间档 + 上下文保鲜
 
-> 状态：`planned`（候选，待用户裁决启动；当前 active 为 NONE，排队 BLOCK-51 之后，可与其并行讨论执行序）
+> 状态：`active`（2026-09-04 用户裁决启动，当前唯一 active 工作包；P1→P2→P3 串行实施）
 > 立项日期：2026-09-03（用户裁决「四个新发现单独开一个 block」）
 > truthDomain: `block-56-reliability-depth`
 > 来源：codex 第四轮调研（compact\_model\_fallback / sandbox\_tags / context\_manager / memories）+ BioF3 上下文审计遗留观察项
@@ -106,4 +106,30 @@ codex 第四轮调研新发现四项机制，共同主题是**可靠性纵深**�
 ## 7. 进度记录
 
 - 2026-09-03 P0（planned 登记）：用户裁决「四个新发现单独开一个 block」；三项实施（模型降级/沙箱中间档/上下文保鲜）+ 一项登记（记忆系统）；主题=可靠性纵深（坏情况任务不报废）；本计划落盘并注册 DOC-REGISTRY；排队 BLOCK-51 之后。
+
+- 2026-09-04 P0（启动登记）：用户裁决「启动 BLOCK-56 可靠性纵深」；当前唯一 active 工作包，P1→P2→P3 串行。
+
+- 2026-09-04 P1（实施收口）：纯策略 `helpers/model-fallback-policy.js`（三可降级类/不可降级类/resume 消息合成）+ 编排 `helpers/agent-fallback.js`（三重闸单级不连环 + BLOCK-38 resume 形态续跑 + 并发槽对齐）+ gateway `disableFallback` 参数 + agent-runner 失败链触发点 + 前端 `conversationRunStore`（请求级 notice / 任务级无缝切订阅）。定向测试：`test/block56-model-fallback.test.mjs`（14 it）+ `test/model-gateway.test.mjs` 增 disableFallback 用例（27/27）+ 前端 `conversationRunStore.test.ts` 增 2 用例（35/35）+ tsc 通过。
+
+- 2026-09-04 P2（实施收口）：三档 accessMode additive 落地。`scientific-task-spec.js` ACCESS_MODES 增 `workspace-write`；`agent-runner.js`/`routes/ai-agent/chat.js` 档位透传（未知值维持塌缩 full）；`agent-execution-policy.js` allowExecution 按 §A 矩阵；`agent-tool-policy.js` workspace-write 白名单（项目写 + 前台命令，其余 execution/state-write 面拒绝为新错误码 `access_mode_workspace_write`）；`workspace-tools.js` preflight/handler 前台命令放行（黑名单 + cwd 限项目根维持），后台进程/进程停止维持 full 专属；前端 `copilotContext.ts`/`useChatStream.ts` 类型、`accessModeValidator.ts` 三档矩阵、`SimpleChat.tsx` 档位菜单（完全访问/项目写/只读）。定向测试：`test/accessmode-validation.test.mjs` 增三档矩阵（14/14）+ 前端 `accessModeValidator.test.ts` 新建（4/4）+ 沙箱回归 37/37 + exec 回归 56/57（唯一失败 `agent-tool-result` 为预存环境问题：测试用未迁移 tmp DB 直载 db.js，HEAD 基线同失败，与本包无关）+ tsc 通过。
+
+- 2026-09-04 P3（实施收口）：`helpers/context-freshness.js`（纯函数：fingerprintOf 前 8 位切片 + createFreshnessTracker 内存 map 三态 + applyFreshnessMark 零副作用增强）+ `loop-orchestrator.js` execute 接缝（workspace_read 结果增强，事件与模型消息共用）。成本边界：readFile 只对 ≤MAX_TEXT_FILE_BYTES 文本文件返回 sha256，指纹为切片零额外哈希成本（二进制/超大文件走既有错误路径天然无需指纹）。不做自动重读（模型裁决权保留）。定向测试：`test/block56-context-freshness.test.mjs` 三态 + 边界 + 真实 workspace_read 集成（7/7）；loop-orchestrator 回归 46/46。
+
+- 2026-09-04 实机（P1 降级链路真链路验证）：`scripts/block56-live.cjs`——本地双 mock OpenAI-compatible 端点（deepseek 真协议，primary 可注入 500/400/401 故障，backup 正常 SSE），真设置落盘（临时 BIOF3_LOCAL_DATA_DIR）+ 真 DB（BIOF3_DB_PATH）+ 真分类 + 真配置解析。14/14 断言全 PASS，证据 `acceptance/block-56/model-fallback-live.json`：A 请求级（500 → gateway 内切备用 + model_fallback 事件 + fallbackFrom 溯源）；B 任务级（400 context 超限 → 请求级不动（isRetryable=false 分工正确）→ 任务失败 → 真分类 context_window → 真建续跑任务（fallbackOfTaskId 溯源）→ 备用端点真完成 + disableProviderFallback=true + 恢复指令注入（系统注入/原消息/进度摘要/降级注明）→ 单级不连环闸 already_resumed）；C 不可降级（401 → not_degradable 诚实失败零回归）；D 未启用配置 → no_fallback_profile 诚实失败。UI 台账同步：UI-287（降级任务条显示）/ UI-288（档位三选菜单）in_progress 待 dev Electron 实机。
+
+## 附录 A — workspace-write 三档工具矩阵（P2 权威语义）
+
+| 面 | read | workspace-write | full | 裁决层 |
+| --- | --- | --- | --- | --- |
+| 只读工具（workspace_read/list/find/search、process_status、system_info 等 sideEffect none） | ✅ | ✅ | ✅ | 无需 gate |
+| 项目内写（workspace_write / workspace_replace；resolveWorkspaceTarget 沙箱限定项目根 + 源数据不可变 + sha256 覆写纪律维持） | ❌ `access_mode_read_only` | ✅ | ✅ | policy L136/L148 |
+| 前台命令（workspace_exec；commandVerdict 黑名单维持 + cwd 限项目根） | ❌ | ✅ | ✅ | policy L183 + preflight + handler |
+| 后台进程（workspace_exec_background / process_stop） | ❌ | ❌ `access_mode_workspace_write` | ✅ | policy L148 + preflight + handler（`!== 'full'` 原样） |
+| 插件执行委托（run_tool op=run，delegatedApproval） | ❌ | ❌ | ✅ | policy L148 |
+| 系统写面（act、plan 落库、result_changeset_adopt/revert/restore 等 state-write/execution） | ❌ | ❌ | ✅ | policy L148 |
+| 只读 op 白名单（run_tool list/plan/status/next/bind_artifact、plan list/get） | ✅ | ✅ | ✅ | effectiveOperation 原样 |
+| ctx.allowExecution=false（用户明确"只检查/只规划"） | ❌ | ❌（覆盖中间档） | ❌ | policy L128 原样（最高优先） |
+
+- 默认档位不变：accessMode 缺省/未知值 → full（既有二档行为零变化）。
+- 与 BLOCK-55 衔接：plan 模式批准后可授予 workspace-write 而非直接 full（衔接语义记录于各自 plan，实施时对齐）。
 

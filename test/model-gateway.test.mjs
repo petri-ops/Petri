@@ -176,6 +176,41 @@ test('gateway only falls back when explicitly enabled and records the switch', a
   });
 });
 
+test('BLOCK-56: disableFallback keeps the request on the primary profile only', async () => {
+  const calls = [];
+  const gateway = new ModelGateway({
+    getSettings: () => ({
+      model_profiles: [
+        { id: 'a', provider: 'first', model: 'a', capabilities: ['chat', 'streaming'] },
+        { id: 'b', provider: 'second', model: 'b', capabilities: ['chat', 'streaming'] },
+      ],
+      model_role_bindings: { chat: 'a' },
+      model_fallback_enabled: true,
+      model_fallback_bindings: { chat: ['b'] },
+    }),
+    getCredential: () => 'key',
+    getProvider: (name) => ({
+      first: {
+        async chatStream(_key, _body, _telemetry, onEvent) {
+          calls.push(name);
+          onEvent({ type: 'error', error: 'http_error', message: 'busy' });
+          return { error: 'http_error', message: 'busy', status: 503 };
+        },
+      },
+    })[name],
+  });
+  const events = [];
+  const result = await gateway.chat({
+    body: { messages: [] },
+    onEvent: (event) => events.push(event),
+    disableFallback: true,
+  });
+
+  assert.deepEqual(calls, ['first'], 'disableFallback 时不允许尝试备用 profile');
+  assert.equal(result.error, 'http_error');
+  assert.equal(result.modelRouting?.fallbackFrom, undefined);
+});
+
 test('gateway can switch profiles when a caller rejects a non-streamed protocol result', async () => {
   const calls = [];
   const gateway = new ModelGateway({

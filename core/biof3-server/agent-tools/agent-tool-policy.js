@@ -116,6 +116,9 @@ function preflightDenial(preflight) {
   if (error === 'access_mode_read_only') {
     return deny('read_only', error, preflight.message || '聊天当前处于只读模式，禁止执行命令。');
   }
+  if (error === 'access_mode_workspace_write') {
+    return deny('read_only', error, preflight.message || '项目写模式仅允许项目内写入与前台命令，该操作需要完全访问模式。');
+  }
   return deny('invalid_arguments', error, preflight.message || '工具参数或目标无效。');
 }
 
@@ -138,6 +141,23 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
       'read_only',
       'access_mode_read_only',
       '聊天当前处于只读模式，禁止执行有副作用的工具。'
+    );
+  }
+  // BLOCK-56 P2 — workspace-write 中间档白名单：仅放行项目内文件写
+  // （sideEffect 'workspace-write'：workspace_write/replace）与前台命令
+  // （workspace_exec，黑名单 + cwd 限项目根由 workspace-tools 兜底）。
+  // 其余 execution/state-write 面（后台进程/进程停止/插件委托 run_tool/act/
+  // plan 落库/result-studio 变更集等）维持 full 专属。
+  if (
+    operation.mutating &&
+    ctx.accessMode === 'workspace-write' &&
+    contract.sideEffect !== 'workspace-write' &&
+    name !== 'workspace_exec'
+  ) {
+    return deny(
+      'read_only',
+      'access_mode_workspace_write',
+      '聊天当前处于项目写模式：仅允许项目内文件写入与前台命令执行；后台进程、插件执行与系统写操作需要完全访问模式。'
     );
   }
   if (contract.riskTier === 'R3') {
@@ -180,7 +200,12 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
       '文本替换前必须先读取文件并传入 expectedSha256。'
     );
   }
-  if (name === 'workspace_exec' && (ctx.accessMode !== 'full' || preflight.commandRisk !== 'full_access')) {
+  // BLOCK-56 P2 — workspace-write 中间档放行前台命令执行（commandVerdict 黑名单
+  // 维持 + cwd 由 resolveWorkspaceTarget 限定项目根）；后台进程/插件委托仍需 full。
+  if (
+    name === 'workspace_exec' &&
+    !['full', 'workspace-write'].includes(ctx.accessMode)
+  ) {
     return deny(
       'read_only',
       'access_mode_read_only',

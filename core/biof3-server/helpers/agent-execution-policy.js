@@ -20,10 +20,15 @@ function inferExecutionPolicy(messages, ctx = {}) {
   // reproduced here (see docs/agent-harness-security-audit-2026-08-17.md
   // §2 S-003 for the prompt-injection vector).
   const accessMode = ctx && typeof ctx.accessMode === 'string' ? ctx.accessMode : 'read';
-  const allowExecution = accessMode === 'full';
+  // BLOCK-56 P2 — workspace-write 中间档：允许项目内写 + 前台命令（收紧面由
+  // agent-tool-policy / workspace-tools 按档位矩阵裁决）；只读档维持拒绝。
+  const allowExecution = accessMode === 'full' || accessMode === 'workspace-write';
+  const reason = accessMode === 'full'
+    ? 'explicit_full_access_mode'
+    : (allowExecution ? 'explicit_workspace_write_access_mode' : 'explicit_read_only_access_mode');
   return {
     allowExecution,
-    reason: allowExecution ? 'explicit_full_access_mode' : 'explicit_read_only_access_mode',
+    reason,
   };
 }
 

@@ -105,6 +105,8 @@ export interface ConversationRunSnapshot {
   interruptedAt?: string;
   /** BLOCK-38 P2 — 续跑已发起后被续跑的原 taskId（审计链展示用）。 */
   resumeOfTaskId?: string;
+  /** BLOCK-56 P1 — 模型降级提示（请求级/任务级首次发生时记录），UI 任务条显示「已降级到 X 模型」。 */
+  modelFallbackNotice?: string;
 }
 
 interface StartConversationRunOptions {
@@ -283,8 +285,49 @@ export function startConversationRun(options: StartConversationRunOptions): bool
   });
   emit(conversationId);
 
-  const finish = (status: 'done' | 'error', error?: Error, errorInfo?: { resumable?: boolean; interruptedAt?: string | null }) => {
+  const finish = (
+    status: 'done' | 'error',
+    error?: Error,
+    errorInfo?: {
+      resumable?: boolean;
+      interruptedAt?: string | null;
+      fallbackTaskId?: string | null;
+      fallbackLabel?: string | null;
+    }
+  ) => {
     if (runs.get(conversationId)?.status !== 'running') return;
+    // BLOCK-56 P1 — 任务级降级：后端已自动切备用 profile 新建续跑 task（原 task
+    // 保持 failed 不可变）。前端不进入 error 终态，原地切换订阅新 task 继续渲染，
+    // 用户只看到一条「已降级」提示，任务无缝续跑。
+    if (status === 'error' && errorInfo?.fallbackTaskId) {
+      const previousTaskId = runs.get(conversationId)?.taskId;
+      replaceRun(conversationId, (current) => ({
+        ...current,
+        taskId: errorInfo.fallbackTaskId || current.taskId,
+        resumeOfTaskId: previousTaskId || current.resumeOfTaskId,
+        modelFallbackNotice: current.modelFallbackNotice
+          || (errorInfo.fallbackLabel
+            ? `模型服务异常，已自动降级到「${errorInfo.fallbackLabel}」继续执行`
+            : '模型服务异常，已自动降级到备用模型继续执行'),
+        statusMessage: errorInfo.fallbackLabel
+          ? `已降级到「${errorInfo.fallbackLabel}」继续执行`
+          : '已降级到备用模型继续执行',
+        assistantPending: true,
+      }));
+      void subscribeAgentTask(
+        errorInfo.fallbackTaskId,
+        { messages: [], conversationId, signal: ctrl.signal, ...callbacks },
+        0
+      )
+        .catch((switchErr: unknown) => {
+          if ((switchErr as Error)?.name === 'AbortError') return;
+          finish('error', switchErr instanceof Error ? switchErr : new Error('降级续跑订阅失败'));
+        })
+        .finally(() => {
+          if (controllers.get(conversationId) === ctrl) controllers.delete(conversationId);
+        });
+      return;
+    }
     const completedAt = Date.now();
     const formattedError = error ? formatErrorForUser(error) : null;
     // UI-AGENTWB-### / chat-error-rendering: persist the raw stack + error
@@ -330,7 +373,20 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     | 'onDone'
     | 'onError'
     | 'onStreamReconnecting'
+    | 'onModelFallback'
   > = {
+    // BLOCK-56 P1 — 请求级降级（loop 中途 gateway 切备用模型）：记录一次性提示，
+    // 任务条显示「已降级到 X 模型」；后续进度不清除 notice 字段（statusMessage 会被正常覆盖）。
+    onModelFallback: (info) => {
+      replaceRun(conversationId, (current) => ({
+        ...current,
+        modelFallbackNotice: current.modelFallbackNotice
+          || info.message
+          || (info.toProfileLabel ? `已降级到「${info.toProfileLabel}」继续` : '已降级到备用模型继续'),
+        statusMessage: info.message || '模型服务异常，已自动降级到备用模型继续',
+        assistantPending: true,
+      }));
+    },
     onIter: (iteration) => {
       // UI-272 — 先更新迭代号再走原有重置逻辑
       currentIter = Math.max(1, iteration);

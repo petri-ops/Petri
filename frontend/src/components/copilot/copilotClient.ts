@@ -330,8 +330,27 @@ export interface StreamChatOptions {
   /** UI-272 — 模型思考段增量（reasoning_content），按迭代聚合由调用方处理 */
   onReasoning?: (delta: string) => void;
   onDone?: () => void;
-  /** BLOCK-38 P2: info.resumable = 服务中断清扫标记的任务（可续跑），interruptedAt 为中断时间。 */
-  onError?: (err: Error, info?: { resumable?: boolean; interruptedAt?: string | null }) => void;
+  /** BLOCK-38 P2: info.resumable = 服务中断清扫标记的任务（可续跑），interruptedAt 为中断时间。
+   *  BLOCK-56 P1: info.fallbackTaskId = 后端已自动切备用模型新建的续跑任务，前端应切换订阅。 */
+  onError?: (
+    err: Error,
+    info?: {
+      resumable?: boolean;
+      interruptedAt?: string | null;
+      fallbackTaskId?: string | null;
+      fallbackLabel?: string | null;
+    }
+  ) => void;
+  /** BLOCK-56 P1 — 模型降级事件（请求级/任务级），info.message 为用户可读文案。 */
+  onModelFallback?: (info: {
+    scope?: 'request_level' | 'task_level' | string;
+    fromProfileId?: string | null;
+    toProfileId?: string | null;
+    toProfileLabel?: string | null;
+    reason?: string | null;
+    newTaskId?: string | null;
+    message?: string | null;
+  }) => void;
   /** BLOCK-39: 订阅断线进入第 attempt 次重连（afterSeq=lastSeq 续传），nextRetryMs 后重试。 */
   onStreamReconnecting?: (info: { taskId: string; attempt: number; lastSeq: number; nextRetryMs: number }) => void;
   /** Agent iteration started (1-indexed) */
@@ -861,13 +880,29 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
     onTopicShift,
     onLoopPhase,
     onLoopIteration,
+    onModelFallback,
     kind,
   } = opts;
   if (obj.error) {
     // BLOCK-38 P2: 后端 error 事件携带 resumable/interruptedAt（服务中断清扫标记）
+    // BLOCK-56 P1: 任务级降级时后端已自动新建续跑 task，error 附带 fallbackTaskId
     onError?.(new Error(obj.error), {
       resumable: obj.resumable === true,
       interruptedAt: typeof obj.interruptedAt === 'string' ? obj.interruptedAt : null,
+      fallbackTaskId: typeof obj.fallbackTaskId === 'string' ? obj.fallbackTaskId : null,
+      fallbackLabel: typeof obj.fallbackLabel === 'string' ? obj.fallbackLabel : null,
+    });
+    return;
+  }
+  if (obj.event === 'model_fallback') {
+    onModelFallback?.({
+      scope: typeof obj.scope === 'string' ? obj.scope : undefined,
+      fromProfileId: typeof obj.fromProfileId === 'string' ? obj.fromProfileId : null,
+      toProfileId: typeof obj.toProfileId === 'string' ? obj.toProfileId : null,
+      toProfileLabel: typeof obj.toProfileLabel === 'string' ? obj.toProfileLabel : null,
+      reason: typeof obj.reason === 'string' ? obj.reason : null,
+      newTaskId: typeof obj.newTaskId === 'string' ? obj.newTaskId : null,
+      message: typeof obj.message === 'string' ? obj.message : null,
     });
     return;
   }

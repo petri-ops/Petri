@@ -2157,6 +2157,26 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-287: 模型降级任务条显示——请求级 notice + 任务级无缝切订阅（BLOCK-56 P1） (2026-09-04 in_progress)
+
+**用户需求**：BLOCK-56 P1 诚实纪律——模型调用失败自动降级到备用模型时用户必须可见（不静默换模型）：请求级降级在任务条显示 notice；任务级降级前端无缝切到续跑任务订阅，任务不"消失"。
+
+**改动**（0 新增 IPC / 0 新依赖）：[conversationRunStore.ts](../frontend/src/components/copilot/conversationRunStore.ts) 处理 `model_fallback` 事件——请求级（scope=request_level）记入 run notice（任务条显示「已降级到 X 模型继续」）；任务级（scope=task_level）从事件 `newTaskId` 无缝切换订阅到续跑任务（原任务 failed 终态不再渲染错误横幅）；[copilotClient.ts](../frontend/src/components/copilot/copilotClient.ts) `StreamChatOptions` 增 `onModelFallback` 透传 + `SimpleMessage.modelFallbackNotice` 字段；[useChatStream.ts](../frontend/src/components/copilot/SimpleChat/hooks/useChatStream.ts) 事件接入；[SimpleChat/types.ts](../frontend/src/components/copilot/SimpleChat/types.ts) 类型同步。
+
+**门禁**：[conversationRunStore.test.ts](../frontend/src/components/copilot/conversationRunStore.test.ts) 增 2 用例（请求级 notice / 任务级切订阅）35/35、tsc 0；后端链路实机 `scripts/block56-live.cjs` 14/14（真 HTTP 故障注入 → 真 DB 编排 → 备用端点真完成，证据 `acceptance/block-56/model-fallback-live.json`）。
+
+**待实机**：dev Electron 任务条降级 notice 显示与续跑任务无缝接管过目后转 verified。**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-288: 模型档位三选菜单——完全访问/项目写/只读（BLOCK-56 P2） (2026-09-04 in_progress)
+
+**用户需求**：BLOCK-56 P2 沙箱中间档——SimpleChat 提供三档 accessMode 用户可选：完全访问（full，默认不变）/ 项目写（workspace-write：项目内写 + 前台命令，禁后台进程/插件委托/系统写面）/ 只读（read）。与 BLOCK-55 plan 模式天然衔接（批准后可授 workspace-write 而非直接 full）。
+
+**改动**（0 新增 IPC / 0 新依赖）：[SimpleChat.tsx](../frontend/src/components/copilot/SimpleChat.tsx) 档位菜单三选（缺省/未知值塌缩 full，既有二档行为零变化）；[accessModeValidator.ts](../frontend/src/components/copilot/accessModeValidator.ts) 三档工具矩阵（PROJECT_WRITE_TOOLS：workspace_write/replace + fs_write/Write/StrReplace/Delete/EditNotebook；FOREGROUND_EXEC_TOOLS：workspace_exec；workspace-write 档仅放行两类 + 只读面，后台进程/插件委托/系统写面拒绝）；[copilotContext.ts](../frontend/src/lib/copilotContext.ts) `accessMode: 'read' | 'workspace-write' | 'full'` 类型；后端同语义（agent-tool-policy 白名单 / agent-execution-policy / scientific-task-spec ACCESS_MODES，语义矩阵见 `docs/block-56-reliability-depth-plan.md` 附录 A）。
+
+**门禁**：[accessModeValidator.test.ts](../frontend/src/components/copilot/accessModeValidator.test.ts) 新建 4/4；后端 [accessmode-validation.test.mjs](../test/accessmode-validation.test.mjs) 三档矩阵 14/14 + 沙箱回归 37/37 + exec 回归 56/57（唯一失败为预存环境问题，HEAD 基线同失败）；tsc 0。
+
+**待实机**：dev Electron 档位菜单切换 + workspace-write 档实际写/禁写行为过目后转 verified。**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-286: 底部终端多 Tab——独立 pty 会话 + tab 条管理（BLOCK-54 P2） (2026-09-04 verified)
 
 **用户需求**：BLOCK-54 P2 用户侧——底部终端从单例会话升级为多 Tab（一个跑 dev server、一个进 R 环境）；上限 4 对齐 codex 64 上限哲学取 GUI 小值；每 tab 独立 cwd（默认当前项目 workspace）。

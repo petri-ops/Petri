@@ -296,7 +296,7 @@ export function SimpleChat({
   const [modelMenuOpen, setModelMenuOpen] = useState<'supplier' | 'model' | null>(null);
   const [modelSupplierKey, setModelSupplierKey] = useState<string | null>(null);
   const [accessMenuOpen, setAccessMenuOpen] = useState(false);
-  const [accessMode, setAccessMode] = useState<'full' | 'read'>('full');
+  const [accessMode, setAccessMode] = useState<'full' | 'workspace-write' | 'read'>('full');
   const [forking, setForking] = useState(false);
   const [tokenBudget, setTokenBudget] = useState<TokenBudget | null>(null);
   // Per-message index for "fork at this message" action
@@ -666,6 +666,8 @@ export function SimpleChat({
         resumable: activeRun.resumable,
         interruptedAt: activeRun.interruptedAt,
         taskId: activeRun.taskId,
+        // BLOCK-56 P1 — 模型降级提示（任务条持久显示「已降级到 X 模型」）
+        modelFallbackNotice: activeRun.modelFallbackNotice,
       });
     }
     return next;
@@ -1671,6 +1673,17 @@ export function SimpleChat({
                         >
                           <span className="sc-access-option-title">完全访问</span>
                           <span className="sc-access-option-sub">允许命令行、文件修改与工具调用</span>
+                        </button>
+                        <button
+                          type="button"
+                          className={`sc-access-option ${accessMode === 'workspace-write' ? 'sc-access-option-active' : ''}`}
+                          onClick={() => {
+                            setAccessMode('workspace-write');
+                            setAccessMenuOpen(false);
+                          }}
+                        >
+                          <span className="sc-access-option-title">项目写</span>
+                          <span className="sc-access-option-sub">允许项目内文件修改与前台命令；后台进程与插件执行不可用</span>
                         </button>
                         <button
                           type="button"

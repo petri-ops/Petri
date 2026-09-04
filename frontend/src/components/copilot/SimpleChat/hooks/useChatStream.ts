@@ -77,7 +77,7 @@ export interface UseChatStreamArgs {
   activeRun: ConversationRunSnapshot | null;
   activeModel: ChatModelPreset | undefined;
   activeModelId: string;
-  accessMode: 'full' | 'read';
+  accessMode: 'full' | 'workspace-write' | 'read';
 
   // SWR-backed conversation creator
   createConversationForRun: (title?: string) => Promise<{ id: string } | null>;

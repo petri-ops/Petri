@@ -523,7 +523,10 @@ module.exports = {
         userId: req.user && req.user.id,
         projectId: context && context.projectId,
         ...projectResultStudioToolContext(context),
-        accessMode: context && context.accessMode === 'read' ? 'read' : 'full',
+        // BLOCK-56 P2 — workspace-write 中间档透传（additive：未知值维持塌缩 full）
+        accessMode: context && (context.accessMode === 'read' || context.accessMode === 'workspace-write')
+          ? context.accessMode
+          : 'full',
         allowExecution: executionPolicy.allowExecution,
         executionPolicyReason: executionPolicy.reason,
         docsIndex: {},
