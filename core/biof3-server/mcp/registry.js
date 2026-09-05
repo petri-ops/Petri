@@ -14,6 +14,11 @@ const fs = require('fs');
 const os = require('os');
 const crypto = require('crypto');
 const { execFile } = require('child_process');
+// BLOCK-57 — 会话执行目标 → 插件远程直跑（设计评审 D1-D9；同步预算 ≤300s 与本地插件语义一致）
+const { createRemoteJobRunner, AGENT_SCRIPT_HASH } = require('../helpers/remote-execution/remote-job-runner');
+const { createTargetRegistry } = require('../helpers/remote-execution/target-registry');
+const { runSshOp, remoteJobDirPath } = require('../helpers/remote-execution/ssh-transport');
+const { remoteAgentCommand } = require('../helpers/remote-execution/node-agent');
 const {
   captureStagedInputSnapshots,
   isInternalArtifactName,
@@ -761,8 +766,15 @@ async function _runPluginScript(
       });
     }
 
-    // 1. 写 params.json（脚本从 args[1]=jobDir 读它）
-    fs.writeFileSync(path.join(jobDir, 'params.json'), JSON.stringify(args || {}));
+    // 1. 写 params.json（脚本从 args[1]=jobDir 读它）。
+    // BLOCK-57：executionTargetId 为会话保留键（composer/模型显式指定），剥离后
+    // 不进脚本参数面；仅在远程分派分支消费。
+    const sessionExecutionTargetId = args && typeof args.executionTargetId === 'string' && args.executionTargetId.trim()
+      ? args.executionTargetId.trim()
+      : null;
+    const scriptParams = { ...(args || {}) };
+    if (sessionExecutionTargetId) delete scriptParams.executionTargetId;
+    fs.writeFileSync(path.join(jobDir, 'params.json'), JSON.stringify(scriptParams));
 
     // 1b. file 类型输入：复制文件到 jobDir/<input_id>。
     // BioF3 工具脚本有两种读文件约定：
@@ -970,11 +982,9 @@ async function _runPluginScript(
       });
     }
     const startedAt = new Date().toISOString();
-    execFile(
-      runCmd[0],
-      runCmd.slice(1),
-      { timeout: 300000, maxBuffer: 10 * 1024 * 1024, env: runEnv },
-      async (err, stdout, stderr) => {
+    // BLOCK-57：插件执行收尾统一入口——本地 execFile 与远程直跑共用同一条
+    // 产物/清单/状态落库链路（Artifact Truth 单一真相）。
+    const finalizePluginRun = async (err, stdout, stderr) => {
         if (err) {
           const errText = `执行失败: ${err.killed ? '超时（>300s）' : stderr || err.message}\n\nSTDOUT:\n${stdout || ''}`;
           const blockedManifestPath = [
@@ -1214,10 +1224,148 @@ async function _runPluginScript(
           _jobDir: jobDir,
           toolJobId,
         });
+    };
+
+    // BLOCK-57：会话执行目标 → 远程直跑。对话内插件工具的本地语义本就是同步
+    // 执行（≤300s），远程沿用同一预算：提交 → 轮询节点真相 → 拉回对账 →
+    // 共用收尾。超预算：尽力取消节点侧作业并诚实失败（不悬挂模型回合）。
+    if (sessionExecutionTargetId) {
+      return (async () => {
+        const remoteOutcome = await runPluginToolRemote({
+          sessionExecutionTargetId,
+          jobDir,
+          plugin,
+          language: plugin.language,
+          toolJobId,
+          startedAt,
+          budgetMs: 280000,
+        });
+        const finalizeErr = remoteOutcome.err;
+        await finalizePluginRun(finalizeErr, remoteOutcome.stdout, remoteOutcome.stderr);
+        if (!finalizeErr && remoteOutcome.executionTarget) {
+        try {
+          const provPath = path.join(jobDir, 'provenance.json');
+          if (fs.existsSync(provPath)) {
+            const prov = JSON.parse(fs.readFileSync(provPath, 'utf8'));
+            prov.executionTarget = remoteOutcome.executionTarget;
+            fs.writeFileSync(provPath, JSON.stringify(prov, null, 2));
+          }
+          } catch (e) {
+            console.warn('[mcp-registry] executionTarget provenance merge failed:', e.message);
+          }
+        }
+        return undefined;
+      })();
+    }
+
+    execFile(
+      runCmd[0],
+      runCmd.slice(1),
+      { timeout: 300000, maxBuffer: 10 * 1024 * 1024, env: runEnv },
+      async (err, stdout, stderr) => {
+        await finalizePluginRun(err, stdout, stderr);
       }
     );
   });
 }
+
+/**
+ * BLOCK-57 — 插件工具远程直跑（同步预算内）：部署 agent → 探测运行时 →
+ * 上传 bundle → detached start → 轮询节点真相 → 拉回产物 + sha256 对账。
+ * 返回与本地 execFile 同形的 (err, stdout, stderr) 三元组，交由共用收尾。
+ */
+async function runPluginToolRemote({ sessionExecutionTargetId, jobDir, plugin, language, toolJobId, startedAt, budgetMs }) {
+  const REMOTE_SAMPLES = {
+    peak: {},
+    sampling: { status: 'unavailable', sampleCount: null, reason: 'remote_execution' },
+    peakStatus: 'unavailable',
+  };
+  const failWith = (message) => ({ err: Object.assign(new Error(message), { code: 1 }), stdout: '', stderr: message });
+
+  try {
+    const runner = createRemoteJobRunner();
+    const dbModule = require('../db');
+    const registry = createTargetRegistry({ db: dbModule.getAsyncDatabase(), ensureAgent: (dep) => runner.ensureAgent({ alias: dep.alias }) });
+    const target = await registry.getById({ id: sessionExecutionTargetId });
+    if (!target) return failWith('执行目标不存在或已被移除');
+
+    const probe = await registry.probe({ id: target.id });
+    if (!probe.ok) return failWith(`执行目标探测失败（${probe.error}）：${probe.detail || ''}`);
+    const runtime = runner.resolveRuntime(probe.info, language);
+    if (!runtime.ready) return failWith(`${runtime.reason}（目标 ${target.alias}）`);
+    // 作业行补记执行目标（徽章/审计数据源；callTool 建行时无此字段）
+    try {
+      dbModule.getAsyncDatabase().prepare('UPDATE tool_jobs SET execution_target_id=? WHERE id=?').run(target.id, toolJobId);
+    } catch (e) {
+      console.warn('[mcp-registry] execution_target_id write failed:', e.message);
+    }
+
+    const jobId = 'rjob_' + String(toolJobId || ('t' + Date.now())).replace(/[^A-Za-z0-9._-]/g, '').slice(0, 40) + '_' + String(Date.now()).slice(-6);
+    const submitted = await runner.submit({
+      target, jobId, jobDir, lang: language, argmode: 'jobdir', runtimeBin: runtime.runtimeBin,
+    });
+    if (!submitted.ok) {
+      const kind = (submitted.error && submitted.error.kind) || 'transport.unknown';
+      return failWith(`远程提交失败（${submitted.stage}/${kind}）：${(submitted.error && submitted.error.detail) || ''}`);
+    }
+
+    const deadline = Date.now() + budgetMs;
+    let exitInfo = null;
+    while (Date.now() < deadline) {
+      const status = await runner.pollStatus({ alias: target.alias, jobId });
+      if (status.ok && status.kind === 'terminal') {
+        const exit = await runner.fetchExitInfo({ alias: target.alias, jobId });
+        exitInfo = exit.ok ? exit.info : null;
+        break;
+      }
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+    if (!exitInfo) {
+      await runner.cancel({ alias: target.alias, jobId }).catch(() => {});
+      return failWith(`远程执行超出同步预算（${Math.round(budgetMs / 1000)}s）；已请求取消节点侧作业。长任务请拆分或使用异步路径（候选）。`);
+    }
+
+    const code = Number(exitInfo.code);
+    const pulled = await runner.pullOutputs({ target, jobId, localJobDir: jobDir });
+    let fullLog = '';
+    try {
+      const logOp = await runSshOp({ alias: target.alias, remoteCommand: remoteAgentCommand(['log', jobId, '0']), timeoutMs: 20000 });
+      if (logOp.classified.kind === 'ok') fullLog = logOp.stdout;
+    } catch {}
+    if (!pulled.ok && pulled.stage === 'verify') {
+      return { err: Object.assign(new Error(`产物传输完整性校验失败（fail-closed）：${(pulled.error && pulled.error.detail) || ''}`), { code: 1 }), stdout: fullLog, stderr: '' };
+    }
+    if (!pulled.ok && !(Number.isFinite(code) && code !== 0)) {
+      // 成功作业产物传输失败：重试窗口已在 pullOutputs 内；此处诚实失败。
+      return { err: Object.assign(new Error(`产物拉回失败：${(pulled.error && pulled.error.detail) || pulled.stderr || ''}`), { code: 1 }), stdout: fullLog, stderr: '' };
+    }
+
+    const executionTarget = {
+      kind: 'ssh-direct',
+      targetId: target.id,
+      alias: target.alias,
+      nodeOs: (probe.info && probe.info.os) || null,
+      runtime: { name: language, version: runtime.version, command: runtime.runtimeBin },
+      remoteJobDir: remoteJobDirPath(jobId),
+      argmode: 'jobdir',
+      agentVersion: AGENT_SCRIPT_HASH,
+      transport: 'tar-over-ssh',
+    };
+    const scriptErr = Number.isFinite(code) && code !== 0
+      ? Object.assign(new Error(`remote script exited ${code}`), { code })
+      : null;
+    return {
+      err: scriptErr,
+      stdout: fullLog,
+      stderr: '',
+      executionTarget,
+    };
+  } catch (error) {
+    return failWith(`远程执行异常：${error.message}`);
+  }
+}
+
+
 
 /**
  * 执行已注册插件工具。

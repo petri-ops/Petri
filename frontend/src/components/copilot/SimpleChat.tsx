@@ -310,6 +310,9 @@ export function SimpleChat({
   // BLOCK-57：远程执行目标——确认卡选择器数据（仅当存在已注册目标时渲染，本机永远是默认）
   const [remoteTargets, setRemoteTargets] = useState<Array<{ id: string; alias: string }>>([]);
   const [approvalExecutionTargetId, setApprovalExecutionTargetId] = useState('');
+  // BLOCK-57 UI-290 — 会话级执行目标：composer 选择器（本机永远默认）
+  const [sessionExecTargetId, setSessionExecTargetId] = useState<string>('');
+  const [execTargetMenuOpen, setExecTargetMenuOpen] = useState(false);
 
   useEffect(() => {
     // 目标列表加载失败保持静默（未登录/后端旧版）：选择器不渲染，零行为变化。
@@ -918,6 +921,7 @@ export function SimpleChat({
     activeModelId,
     accessMode,
     planMode,
+    executionTargetId: sessionExecTargetId || null,
     createConversationForRun,
   });
 
@@ -1881,6 +1885,46 @@ export function SimpleChat({
                   <Icon name="list-details" size={14} />
                   <span>计划模式</span>
                 </button>
+                {remoteTargets.length > 0 && (
+                  <div className="sc-exec-target-picker">
+                    <button
+                      type="button"
+                      className={`sc-plan-mode-btn${sessionExecTargetId ? ' is-active' : ''}`}
+                      title="执行目标：选择本会话分析任务的运行位置（本机永远默认）"
+                      aria-expanded={execTargetMenuOpen}
+                      onClick={() => setExecTargetMenuOpen((v) => !v)}
+                    >
+                      <Icon name="cpu" size={14} />
+                      <span>{sessionExecTargetId ? (remoteTargets.find((t) => t.id === sessionExecTargetId)?.alias || '远程') : '本机'}</span>
+                    </button>
+                    {execTargetMenuOpen && (
+                      <>
+                        <div className="sc-access-overlay" onClick={() => setExecTargetMenuOpen(false)} />
+                        <div className="sc-access-menu">
+                          <button
+                            type="button"
+                            className={`sc-access-option ${!sessionExecTargetId ? 'sc-access-option-active' : ''}`}
+                            onClick={() => { setSessionExecTargetId(''); setExecTargetMenuOpen(false); }}
+                          >
+                            <span className="sc-access-option-title">本机（默认）</span>
+                            <span className="sc-access-option-sub">分析在本机执行，零变化</span>
+                          </button>
+                          {remoteTargets.map((t) => (
+                            <button
+                              key={t.id}
+                              type="button"
+                              className={`sc-access-option ${sessionExecTargetId === t.id ? 'sc-access-option-active' : ''}`}
+                              onClick={() => { setSessionExecTargetId(t.id); setExecTargetMenuOpen(false); }}
+                            >
+                              <span className="sc-access-option-title">{t.alias}</span>
+                              <span className="sc-access-option-sub">分析提交到该服务器执行</span>
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="sc-composer-right">
                 <div className="sc-model-picker-pair">

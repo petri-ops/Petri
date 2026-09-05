@@ -553,6 +553,11 @@ module.exports = {
           : 'full',
         // BLOCK-55 P1 — Spec 门计划模式（policy 层收写类工具，仅放行 plan）
         planMode: context && context.planMode === true,
+        // BLOCK-57 UI-290 — 会话级执行目标（composer 选择器；learning 层在自动
+        // 执行分支校验注册表后注入 params，未知目标 fail-closed 回退本机）
+        executionTargetId: context && typeof context.executionTargetId === 'string' && context.executionTargetId.trim()
+          ? context.executionTargetId.trim()
+          : null,
         allowExecution: executionPolicy.allowExecution,
         executionPolicyReason: executionPolicy.reason,
         docsIndex: {},

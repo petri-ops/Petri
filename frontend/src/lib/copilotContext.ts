@@ -80,6 +80,8 @@ export interface CopilotContext {
   accessMode?: 'full' | 'workspace-write' | 'read';
   /** BLOCK-55 P1 — Spec 门计划模式：只读探索 + 起草计划，写类工具被 policy 拒绝。 */
   planMode?: boolean;
+  /** BLOCK-57 UI-290 — 会话级执行目标（composer 选择器；null/缺省 = 本机）。 */
+  executionTargetId?: string | null;
   /** BLOCK-55 P1 — 已批准计划的执行期提示（plan 模式关闭后随首 turn 传给后端）。 */
   approvedPlanId?: string;
   /** BLOCK-55 P1 — 批准并清上下文执行：本 turn 消息数组仅含 spec 自包含首条。 */

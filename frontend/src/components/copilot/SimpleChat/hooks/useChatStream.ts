@@ -80,6 +80,8 @@ export interface UseChatStreamArgs {
   accessMode: 'full' | 'workspace-write' | 'read';
   /** BLOCK-55 P1 — 计划模式（Spec 门）：随所有 send 路径进入请求 context。 */
   planMode: boolean;
+  /** BLOCK-57 UI-290 — 会话级执行目标（composer 选择器；null/缺省 = 本机）。 */
+  executionTargetId: string | null;
 
   // SWR-backed conversation creator
   createConversationForRun: (title?: string) => Promise<{ id: string } | null>;
@@ -137,6 +139,7 @@ export function useChatStream({
   activeModelId,
   accessMode,
   planMode,
+  executionTargetId,
   createConversationForRun,
 }: UseChatStreamArgs): UseChatStreamReturn {
   // 1. `starting` — transient send-in-progress flag (drives the
@@ -198,6 +201,7 @@ export function useChatStream({
           projectId,
           accessMode,
           planMode,
+          executionTargetId: executionTargetId || null,
         },
       });
       if (!started) return false;
@@ -211,6 +215,7 @@ export function useChatStream({
     }
   }, [
     accessMode,
+    executionTargetId,
     activeModel,
     activeModelId,
     conversationId,

@@ -4,6 +4,7 @@
  *  verify_understanding, suggest_review, record_learning_signal)
  */
 const dbMod = require('../db');
+const { withSessionExecutionTarget } = require('../helpers/remote-execution/session-target');
 const sqlite = dbMod.getDatabase();
 // SUGGEST_NEXT_STEPS_BRIDGE_v1 marker
 
@@ -900,6 +901,18 @@ async function tool_run_tool(args, ctx) {
       });
       return { ...executed, scientificTaskRef: { taskId: ref.taskId, version: Number(ref.version || 1) } };
     }
+
+    // BLOCK-57 UI-290：会话级执行目标（composer 选择器）统一注入——位于
+    // scientific 严格门之后（其 params 必须与已确认任务逐字匹配，不注入）、
+    // heavy/非 heavy 执行之前（ack 创建与续跑两侧同 ctx 注入，确定性一致，
+    // sameJsonValue 校验不受影响）。未知目标 fail-closed 丢弃（回退本机）。
+    params = await withSessionExecutionTarget(params, ctx, async (id) => {
+      try {
+        return Boolean(await dbMod.getAsyncDatabase().prepare('SELECT id FROM execution_targets WHERE id=?').get(id));
+      } catch {
+        return false;
+      }
+    });
 
     // Full access is an explicit delegation boundary. Local, reproducible
     // scientific computation can run without a second UI confirmation; its

@@ -1,0 +1,33 @@
+{
+  "startedAt": "2026-09-05T00:31:52.333Z",
+  "projectId": "p_mtlnsv0f_xpjb",
+  "assertions": [
+    {
+      "name": "C1 composer 执行目标 chip 选定 dell",
+      "pass": true,
+      "detail": "{\"ok\":true,\"label\":\"dell\"}"
+    },
+    {
+      "name": "C2 发送 sample-metadata-validator 运行请求",
+      "pass": true,
+      "detail": "{\"ok\":true,\"cleared\":true}"
+    },
+    {
+      "name": "C3 会话作业自动携带 dell 目标",
+      "pass": false,
+      "detail": "{}"
+    },
+    {
+      "name": "C4 dell 远程执行 completed（产物拉回）",
+      "pass": false,
+      "detail": "status=null error=null"
+    },
+    {
+      "name": "C5 作业库「远程」徽章可见（会话自动绑定）",
+      "pass": false,
+      "detail": "{\"count\":0,\"remoteSeen\":false,\"text\":null}"
+    }
+  ],
+  "allPass": false,
+  "finishedAt": "2026-09-05T00:40:05.525Z"
+}
