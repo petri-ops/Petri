@@ -45,6 +45,15 @@ describe('品牌身份契约（BLOCK-61）', () => {
     }
   });
 
+  test('TitleBar wordmark fallback 走品牌模块（禁裸写）', () => {
+    const src = fs.readFileSync(
+      path.join(ROOT, 'frontend', 'src', 'components', 'desktop', 'TitleBar.tsx'),
+      'utf8',
+    );
+    assert.match(src, /return BRAND\.APP_NAME;/, 'getFallbackTitle 兜底必须返回 BRAND.APP_NAME');
+    assert.doesNotMatch(src, /return '(BioF3|Gewu)'/, '不得裸写品牌字面量');
+  });
+
   test('历史品牌名不得裸写在业务代码中（白名单外）', () => {
     // 白名单：品牌模块自身（LEGACY 常量）+ 协议命名空间 + 兼容别名
     const ALLOWLIST_FILES = new Set([

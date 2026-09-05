@@ -4,7 +4,7 @@ export type ThemePreference = 'system' | 'light' | 'dark';
 export type ResolvedTheme = 'light' | 'dark';
 // BLOCK-61：新 key 命名空间 gewu-*；历史 key 读兼容（偏好零丢失），写入只落新 key。
 const THEME_STORAGE_KEY = 'gewu-theme';
-const LEGACY_THEME_KEYS = ['gewu-theme', 'theme'] as const;
+const LEGACY_THEME_KEYS = ['biof3-theme', 'theme'] as const;
 const THEME_CHANGE_EVENT = 'gewu:theme-change';
 
 interface ThemeContextValue {
@@ -20,7 +20,16 @@ function readPreference(): ThemePreference {
     const saved =
       localStorage.getItem(THEME_STORAGE_KEY) ||
       LEGACY_THEME_KEYS.map((key) => localStorage.getItem(key)).find((v) => v != null);
-    if (saved === 'light' || saved === 'dark' || saved === 'system') return saved;
+    if (saved === 'light' || saved === 'dark' || saved === 'system') {
+      // BLOCK-61 读到即迁移：历史 key 偏好落新 key 并清除旧 key
+      try {
+        if (localStorage.getItem(THEME_STORAGE_KEY) == null) localStorage.setItem(THEME_STORAGE_KEY, saved);
+        for (const key of LEGACY_THEME_KEYS) localStorage.removeItem(key);
+      } catch {
+        /* 迁移写失败不影响读取 */
+      }
+      return saved;
+    }
   } catch {
     // Storage can be unavailable in hardened renderer contexts.
   }

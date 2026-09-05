@@ -1,6 +1,6 @@
 # BLOCK-61 — 品牌身份系统化改名：BioF3 → Gewu（格物）
 
-> 状态：`active`（2026-09-06 用户裁决「Gewu 暂时定这个可以，单独开一个 block 彻底系统性修改名字，设计时让后续改名字变得灵活点」，side chat 会话；当前唯一 active 工作包）
+> 状态：`completed`（2026-09-06 用户裁决「Gewu 暂时定这个可以，单独开一个 block 彻底系统性修改名字，设计时让后续改名字变得灵活点」，side chat 会话；当前唯一 active 工作包）
 > 立项日期：2026-09-06
 > truthDomain: `block-61-brand-rename-gewu`
 > 来源：用户判定「BioF3」的 Bio 前缀把领域焊死，而产品已长成本地优先的智能体指挥席（多 agent 派生 49 / 计划模式 55 / 远程执行 57 / 窗口系统 59 / 即有电脑控制 48），领域无关。经候选比对（格物 Gewu / Tycho / Braid / Petri）用户裁决 **Gewu（格物）**。
@@ -60,4 +60,5 @@
 
 ## 7. 进度记录
 
+- 2026-09-06 P0–P5 整包收口（一次会话）：P1 品牌模块双端 + 契约测试（4/4：常量/双端镜像/wordmark 走模块/历史名禁裸写白名单扫描）；P2 Tier A（窗口标题 windowTitle() 构建器、TitleBar fallback、index.html、MCP `gewu-mcp`、Documents 目录 resolveLocalDirName 旧目录优先）；P3 Tier B（preload 桥双 key window.gewu+biof3Desktop、storage 五族读旧写新、事件 18 通道 biof3:*→gewu:*）；P4 Tier C（155 文件机械替换：--biof3-*→--gewu-*、.biof3-*→.gewu-*、标识符；theme-token-contract 绿）；P5（package gewu-desktop/gewu-desktop-frontend + lockfile、AGENTS.md/docs/README 品牌行、sidecar gewu-computer-use）。**plan 具体化偏差（如实登记）**：① env 前缀 BIOF3_* 归入协议命名空间不改名（350+ 处 core/脚本关联、零用户可见价值，Tier C 的「env 双读」取消——记入 §4 协议清单）；② Tier A 静态 UI 文案随机械 sed 替换为 Gewu（不逐一走品牌模块 import），「禁裸写」由旧名禁令测试守护；③ 实机抓真修：品牌模块自身被 sed 误伤（LEGACY 常量）+ ThemeProvider legacy 列表被误伤——保护清单必须包含品牌模块自身；④ 主题迁移跨窗竞态如实记录（隐藏轨道窗 storage 监听抢先迁移，行为正确）。**门禁**：brand-identity 4/4 + node 回归 67/67 + tsc 0 + 前端 vitest 79/79 + docs:check 204 + ui:audit:check PASS + 实机 9 断言 allPass（acceptance/block-61/）+ BLOCK-59 ui-live/theme-live 回归 PASS（零破坏）。UI-299 verified。**收口后行动项**：BLOCK-48 恢复 active 继续 P1（检查点 c29d9f04）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 - 2026-09-06 P0（active 立项）：用户裁决于 side chat 会话（Gewu 定名 + 本 BLOCK 指令 + 「后续改名灵活」设计要求）。盘点：11,199 行 / 1,073 文件含 biof3 字样；大头 = CSS 机械面（~4,400 行，契约测试护航）与历史文档（~1,700 行，不动）。当前唯一 active 工作包 = BLOCK-61；BLOCK-48 仍为 planned 候选，排本包之后。

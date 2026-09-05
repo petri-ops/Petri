@@ -1109,6 +1109,8 @@
         "scripts/block57-*.mjs",
         "acceptance/block-59/**",
         "scripts/block59-*.cjs",
+        "acceptance/block-61/**",
+        "scripts/block61-*.cjs",
         "acceptance/block-48/**",
         "scripts/block48-*.cjs",
         "acceptance/block-55/**",

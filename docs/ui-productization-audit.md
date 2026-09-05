@@ -2165,7 +2165,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：brand-identity 契约 3/3；核心+回归 node 测试 67/67；tsc 0；前端受影响 vitest 79/79（ThemeProvider/copilotClient/ToolActivityDock/theme-token-contract 等 8 文件）；docs:check PASS 204。
 
-**实机**：（待 dev Electron 重启冒烟——窗口标题/wordmark/onboarding/主题亮暗/弹出窗/轨道，证据 `acceptance/block-61/`）。**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**实机（2026-09-06，dev Electron CDP，证据 `acceptance/block-61/brand-live.json` 9 断言 allPass + 截图 ×3，脚本 [block61-brand-live.cjs](../scripts/block61-brand-live.cjs)）**：① `document.title === 'Gewu'`（主窗 + 弹出窗）；② `window.gewu` 主桥可用 + `biof3Desktop` 兼容别名可用（contextBridge 双暴露为独立代理，功能等价——BLOCK-59 全套实机脚本经别名回归 PASS）；③ **历史主题偏好不丢**：仅存 `biof3-theme=dark` 时升级后仍 dark（读到即迁移：gewu-theme=dark + 旧 key 清除；跨窗竞态如实记录——隐藏轨道窗 storage 监听会抢先迁移，属正确行为）；④ `gewu:theme-change` 事件链生效；⑤ 弹出窗（经兼容别名驱动）标题/内容正常；⑥ Git 授权横幅等 swept 文案上屏（「未授权 Gewu 写入」，截图 p61-01）。**回归**：BLOCK-59 ui-live 26 断言 + theme-live 9 断言全 PASS（改名零破坏）。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-298: 边缘活动轨道加映三——滚轮换卡 + 卡片垂直钳位（BLOCK-59 加映，plan §5 补全） (2026-09-06 verified)
 
