@@ -308,13 +308,10 @@ export function SimpleChat({
   const [paramDraft, setParamDraft] = useState<Record<string, string>>({});
   const [approvalRepair, setApprovalRepair] = useState<ApprovalRepairState>({ status: 'idle' });
   // BLOCK-57：远程执行目标——确认卡选择器数据（仅当存在已注册目标时渲染，本机永远是默认）
-  const [remoteTargets, setRemoteTargets] = useState<Array<{ id: string; alias: string }>>([]);
-  const [approvalExecutionTargetId, setApprovalExecutionTargetId] = useState('');
   // BLOCK-60 — composer 工具栏容器查询窄态（ResizeObserver 只读宽度，不影响弹性宽度逻辑）
   const composerBarRef = useRef<HTMLDivElement | null>(null);
   const [composerNarrow, setComposerNarrow] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
-  const [composerMoreSub, setComposerMoreSub] = useState<'main' | 'targets'>('main');
   useEffect(() => {
     const el = composerBarRef.current;
     if (!el || typeof ResizeObserver === 'undefined') return;
@@ -327,34 +324,7 @@ export function SimpleChat({
 
   // BLOCK-57 UI-290 — 执行目标：composer 选择器（本机永远默认；选择持久化，
   // 页面刷新/重启后保留——用户测试反馈会话态易丢失，跑错本机）。
-  const EXEC_TARGET_STORAGE_KEY = 'biof3.executionTargetId';
-  const [sessionExecTargetId, setSessionExecTargetIdState] = useState<string>(() => {
-    try { return window.localStorage.getItem(EXEC_TARGET_STORAGE_KEY) || ''; } catch { return ''; }
-  });
-  const setSessionExecTargetId = (value: string) => {
-    setSessionExecTargetIdState(value);
-    try {
-      if (value) window.localStorage.setItem(EXEC_TARGET_STORAGE_KEY, value);
-      else window.localStorage.removeItem(EXEC_TARGET_STORAGE_KEY);
-    } catch { /* 隐私模式等场景下允许失败，仅本次会话生效 */ }
-  };
-  const [execTargetMenuOpen, setExecTargetMenuOpen] = useState(false);
 
-  useEffect(() => {
-    // 目标列表加载失败保持静默（未登录/后端旧版）：选择器不渲染，零行为变化。
-    const token = typeof getToken === 'function' ? getToken() : null;
-    void fetch(`${getPlatformApiPrefix()}/remote-targets`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    })
-      .then(async (response) => (response.ok ? response.json() : null))
-      .then((payload) => {
-        const registered = Array.isArray(payload?.registered) ? payload.registered : [];
-        const ids = new Set(registered.map((row: { id: string }) => row.id));
-        setRemoteTargets(registered.map((row: { id: string; alias: string }) => ({ id: row.id, alias: row.alias })));
-        setSessionExecTargetIdState((current) => (current && !ids.has(current) ? '' : current));
-      })
-      .catch(() => setRemoteTargets([]));
-  }, []);
   const autoApproveRef = useRef<string | null>(null);
   const [modelMenuOpen, setModelMenuOpen] = useState<'supplier' | 'model' | null>(null);
   const [modelSupplierKey, setModelSupplierKey] = useState<string | null>(null);
@@ -803,7 +773,7 @@ export function SimpleChat({
   }, []);
 
   const inputLength = input.trim().length;
-  const composerWidth = Math.min(980, Math.max(560, 560 + Math.sqrt(inputLength) * 42));
+  const composerWidth = Math.min(980, Math.max(720, 720 + Math.sqrt(inputLength) * 42));
 
   // Auto-resize textarea height. Width is handled by the composer CSS var.
   const resizeTextarea = useCallback((ta: HTMLTextAreaElement | null) => {
@@ -949,7 +919,6 @@ export function SimpleChat({
     activeModelId,
     accessMode,
     planMode,
-    executionTargetId: sessionExecTargetId || null,
     createConversationForRun,
   });
 
@@ -1171,9 +1140,6 @@ export function SimpleChat({
         mergedParams[key] = value;
       }
     });
-    if (approvalExecutionTargetId) {
-      mergedParams.executionTargetId = approvalExecutionTargetId;
-    }
     const { ackToken, toolId } = pendingApproval;
     const acknowledged = await ackRunTool(ackToken, true, {
       projectId: projectId || null,
@@ -1184,7 +1150,7 @@ export function SimpleChat({
     send(
       `用户已确认开始（ackToken=${ackToken}）。请重调 run_tool(op=run, toolId="${toolId ?? ''}", params=${JSON.stringify(mergedParams)}, ackToken="${ackToken}") 续跑该重操作。`
     );
-  }, [approvalExecutionTargetId, conversationId, paramDraft, pendingApproval, projectId, send, streaming]);
+  }, [conversationId, paramDraft, pendingApproval, projectId, send, streaming]);
 
   const rejectPending = useCallback(async () => {
     if (!pendingApproval || streaming) return;
@@ -1630,9 +1596,6 @@ export function SimpleChat({
             <ApprovalCard
               approval={pendingApproval}
               repairState={approvalRepair}
-              remoteTargets={remoteTargets}
-              executionTargetId={approvalExecutionTargetId}
-              onExecutionTargetChange={setApprovalExecutionTargetId}
               onApprove={() => void approvePending()}
               onReject={() => void rejectPending()}
               busy={streaming}
@@ -1886,49 +1849,10 @@ export function SimpleChat({
                   <Icon name="list-details" size={14} />
                   <span>计划模式</span>
                 </button>
-                {remoteTargets.length > 0 && (
-                  <div className="sc-exec-target-picker sc-toolbar-secondary">
-                    <button
-                      type="button"
-                      className={`sc-plan-mode-btn${sessionExecTargetId ? ' is-active' : ''}`}
-                      title="执行目标：选择本会话分析任务的运行位置（本机永远默认）"
-                      aria-expanded={execTargetMenuOpen}
-                      onClick={() => setExecTargetMenuOpen((v) => !v)}
-                    >
-                      <Icon name="cpu" size={14} />
-                      <span>{sessionExecTargetId ? (remoteTargets.find((t) => t.id === sessionExecTargetId)?.alias || '远程') : '本机'}</span>
-                    </button>
-                    {execTargetMenuOpen && (
-                      <>
-                        <div className="sc-access-overlay" onClick={() => setExecTargetMenuOpen(false)} />
-                        <div className="sc-access-menu">
-                          <button
-                            type="button"
-                            className={`sc-access-option ${!sessionExecTargetId ? 'sc-access-option-active' : ''}`}
-                            onClick={() => { setSessionExecTargetId(''); setExecTargetMenuOpen(false); }}
-                          >
-                            <span className="sc-access-option-title">本机（默认）</span>
-                            <span className="sc-access-option-sub">分析在本机执行，零变化</span>
-                          </button>
-                          {remoteTargets.map((t) => (
-                            <button
-                              key={t.id}
-                              type="button"
-                              className={`sc-access-option ${sessionExecTargetId === t.id ? 'sc-access-option-active' : ''}`}
-                              onClick={() => { setSessionExecTargetId(t.id); setExecTargetMenuOpen(false); }}
-                            >
-                              <span className="sc-access-option-title">{t.alias}</span>
-                              <span className="sc-access-option-sub">分析提交到该服务器执行</span>
-                            </button>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
+                {/* BLOCK-57 UI-290 + BLOCK-60 — 执行目标选择已迁至 设置→计算与数据（默认执行目标），composer 不再承载 */}
               </div>
               <div className="sc-composer-right">
-                {/* BLOCK-60 — ⋯ 工具菜单：低频操作常驻 + 窄态收纳计划模式/执行目标 */}
+                {/* BLOCK-60 — ⋯ 工具菜单：低频操作常驻 + 窄态收纳计划模式 */}
                 <div className="sc-toolbar-more">
                   <button
                     type="button"
@@ -1936,99 +1860,47 @@ export function SimpleChat({
                     title="更多工具"
                     aria-label="更多工具"
                     aria-expanded={composerMoreOpen}
-                    onClick={() => { setComposerMoreOpen((v) => !v); setComposerMoreSub('main'); }}
+                    onClick={() => setComposerMoreOpen((v) => !v)}
                   >
                     <Icon name="more-horizontal" size={16} />
                   </button>
                   {composerMoreOpen && (
                     <>
-                      <div className="sc-access-overlay" onClick={() => { setComposerMoreOpen(false); setComposerMoreSub('main'); }} />
+                      <div className="sc-access-overlay" onClick={() => setComposerMoreOpen(false)} />
                       <div className="sc-access-menu sc-toolbar-more-menu">
-                        {composerMoreSub === 'targets' ? (
+                        <div className="sc-menu-section-label">操作</div>
+                        <button
+                          type="button"
+                          className="sc-access-option"
+                          disabled={refreshing}
+                          onClick={() => { setComposerMoreOpen(false); void handleRefresh(); }}
+                        >
+                          <span className="sc-access-option-title">刷新文件链接</span>
+                          <span className="sc-access-option-sub">清除解析缓存并对已落地消息重跑解析</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="sc-access-option"
+                          disabled={!conversationId}
+                          onClick={() => { setComposerMoreOpen(false); setIoTranscriptOpen(true); }}
+                        >
+                          <span className="sc-access-option-title">模型 I/O 信息流</span>
+                          <span className="sc-access-option-sub">本会话模型调用的请求与响应原文（只读）</span>
+                        </button>
+                        {composerNarrow && (
                           <>
+                            <div className="sc-menu-section-label">模式</div>
                             <button
                               type="button"
-                              className="sc-access-option sc-menu-back"
-                              onClick={() => setComposerMoreSub('main')}
+                              className={`sc-access-option${planMode ? ' sc-access-option-active' : ''}`}
+                              onClick={() => setPlanMode((v) => !v)}
                             >
-                              <span className="sc-access-option-title">‹ 执行目标</span>
+                              <span className="sc-access-option-title">计划模式{planMode ? '（开）' : '（关）'}</span>
+                              <span className="sc-access-option-sub">只读探索并起草计划，获批后自动恢复执行</span>
                             </button>
-                            <button
-                              type="button"
-                              className={`sc-access-option${!sessionExecTargetId ? ' sc-access-option-active' : ''}`}
-                              onClick={() => { setSessionExecTargetId(''); setComposerMoreOpen(false); setComposerMoreSub('main'); }}
-                            >
-                              <span className="sc-access-option-title">本机{!sessionExecTargetId ? ' ✓' : ''}</span>
-                              <span className="sc-access-option-sub">分析在本机执行</span>
-                            </button>
-                            {remoteTargets.map((t) => (
-                              <button
-                                key={t.id}
-                                type="button"
-                                className={`sc-access-option${sessionExecTargetId === t.id ? ' sc-access-option-active' : ''}`}
-                                onClick={() => { setSessionExecTargetId(t.id); setComposerMoreOpen(false); setComposerMoreSub('main'); }}
-                              >
-                                <span className="sc-access-option-title">{t.alias}{sessionExecTargetId === t.id ? ' ✓' : ''}</span>
-                                <span className="sc-access-option-sub">分析提交到该服务器执行</span>
-                              </button>
-                            ))}
-                          </>
-                        ) : (
-                          <>
-                            <div className="sc-menu-section-label">操作</div>
-                            <button
-                              type="button"
-                              className="sc-access-option"
-                              disabled={refreshing}
-                              onClick={() => { setComposerMoreOpen(false); setComposerMoreSub('main'); void handleRefresh(); }}
-                            >
-                              <span className="sc-access-option-title">刷新文件链接</span>
-                              <span className="sc-access-option-sub">清除解析缓存并对已落地消息重跑解析</span>
-                            </button>
-                            <button
-                              type="button"
-                              className="sc-access-option"
-                              disabled={!conversationId}
-                              onClick={() => { setComposerMoreOpen(false); setComposerMoreSub('main'); setIoTranscriptOpen(true); }}
-                            >
-                              <span className="sc-access-option-title">模型 I/O 信息流</span>
-                              <span className="sc-access-option-sub">本会话模型调用的请求与响应原文（只读）</span>
-                            </button>
-                            {composerNarrow && (
-                              <>
-                                <div className="sc-menu-section-label">模式</div>
-                                <button
-                                  type="button"
-                                  className={`sc-access-option${planMode ? ' sc-access-option-active' : ''}`}
-                                  onClick={() => setPlanMode((v) => !v)}
-                                >
-                                  <span className="sc-access-option-title">计划模式{planMode ? '（开）' : '（关）'}</span>
-                                  <span className="sc-access-option-sub">只读探索并起草计划，获批后自动恢复执行</span>
-                                </button>
-                              </>
-                            )}
-                            <div className="sc-menu-section-label">算力</div>
-                            <button
-                              type="button"
-                              className={`sc-access-option${!sessionExecTargetId ? ' sc-access-option-active' : ''}`}
-                              onClick={() => setSessionExecTargetId('')}
-                            >
-                              <span className="sc-access-option-title">本机{!sessionExecTargetId ? ' ✓' : ''}</span>
-                              <span className="sc-access-option-sub">分析在本机执行</span>
-                            </button>
-                            {remoteTargets.map((t) => (
-                              <button
-                                key={t.id}
-                                type="button"
-                                className={`sc-access-option${sessionExecTargetId === t.id ? ' sc-access-option-active' : ''}`}
-                                onClick={() => setSessionExecTargetId(t.id)}
-                              >
-                                <span className="sc-access-option-title">{t.alias}{sessionExecTargetId === t.id ? ' ✓' : ''}</span>
-                                <span className="sc-access-option-sub">分析提交到该服务器执行</span>
-                              </button>
-                            ))}
                           </>
                         )}
+                        {/* BLOCK-57 UI-290 — 执行目标选择已迁至 设置→计算与数据；composer 不再承载 */}
                       </div>
                     </>
                   )}
@@ -2307,18 +2179,12 @@ function ErrorBanner({ message, severity, showDetails, technicalDetails }: Error
 function ApprovalCard({
   approval,
   repairState,
-  remoteTargets,
-  executionTargetId,
-  onExecutionTargetChange,
   onApprove,
   onReject,
   busy,
 }: {
   approval: PendingApproval;
   repairState: ApprovalRepairState;
-  remoteTargets: Array<{ id: string; alias: string }>;
-  executionTargetId: string;
-  onExecutionTargetChange: (value: string) => void;
   onApprove: () => void;
   onReject: () => void;
   busy: boolean;
@@ -2354,22 +2220,6 @@ function ApprovalCard({
       <div className="sc-approval-risk">
         正式分析会写入项目任务记录，并生成可复现的参数、输入和结果产物。
       </div>
-      {remoteTargets.length > 0 && (
-        <div className="sc-approval-target" data-testid="approval-execution-target">
-          <label className="biof3-field__hint" htmlFor="sc-execution-target-select">执行目标</label>
-          <select
-            id="sc-execution-target-select"
-            value={executionTargetId}
-            onChange={(event) => onExecutionTargetChange(event.target.value)}
-            disabled={busy}
-          >
-            <option value="">本机（默认）</option>
-            {remoteTargets.map((target) => (
-              <option key={target.id} value={target.id}>{target.alias}</option>
-            ))}
-          </select>
-        </div>
-      )}
       <div className="sc-approval-actions">
         <button
           type="button"

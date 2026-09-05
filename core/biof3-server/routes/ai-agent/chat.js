@@ -523,7 +523,24 @@ module.exports = {
 
       let aborted = false;
       const resultEditProgress = createResultEditProgressRecorder();
-      const planModeActive = context && context.planMode === true;
+      const planModeExplicit = context && context.planMode === true;
+      // BLOCK-60 加映三 — 自动计划模式：用户表达「先计划/先出方案/别急着执行」
+      // 类意图且未显式开启 planMode 时，本轮自动套用计划模式纪律（系统提示级
+      // 确定性约束，不依赖模型自觉）。执行类短指令不触发。
+      let planModeAuto = false;
+      if (!planModeExplicit && context && context.projectId) {
+        const firstUser = Array.isArray(messages)
+          ? (messages.find((m) => m && m.role === 'user') || {}).content || ''
+          : '';
+        const text = String(firstUser);
+        const wantsPlan = /(先|只|别|不要)[^。\n]{0,8}(计划|规划|方案|讨论|想法)|先出(一?个)?(方案|计划)|先别(急着)?(执行|做|动手)|不要(直接)?(执行|动手|开跑)|给我(一?个)?(方案|计划)|planning mode|plan first|don.?t execute/i.test(text);
+        // 否定式执行短语（不要执行/别直接跑/先别动手）属计划意图：否定词连同
+        // 其后紧邻的执行短语一并剥除，避免「不要直接执行」被误判为执行意图。
+        const execProbe = text.replace(/(不要|别|先别)[^，。；,;\n]{0,6}(执行|跑|动手|开跑|做|开始)/g, '');
+        const wantsExecute = /(直接|立即|马上)(执行|跑|做|开始)|开干|开始执行|直接跑/i.test(execProbe);
+        planModeAuto = wantsPlan && !wantsExecute;
+      }
+      const planModeActive = planModeExplicit || planModeAuto;
       if (planModeActive) {
         // BLOCK-55 P1 — 计划模式纪律（对齐 codex plan mode：纯讨论 + 只留计划工具）
         systemPrompt +=

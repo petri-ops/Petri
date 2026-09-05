@@ -56,11 +56,25 @@ function describeProbe(info: TargetProbeInfo | null): string {
   return `${info.os} · ${runtimes.length ? runtimes.join(' / ') : '无 R/Python'}${info.scheduler && info.scheduler !== 'none' ? ` · ${info.scheduler}` : ''}`;
 }
 
+const DEFAULT_TARGET_STORAGE_KEY = 'biof3.executionTargetId';
+
 export function RemoteTargets(): React.ReactElement {
   const [data, setData] = useState<TargetsResponse>({ registered: [], discovered: [] });
   const [error, setError] = useState('');
   const [aliasInput, setAliasInput] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
+  // 默认执行目标（BLOCK-57 UI-290 加映二：选择从 composer 迁至设置页；本机永远可选）
+  const [defaultTargetId, setDefaultTargetId] = useState<string>(() => {
+    try { return window.localStorage.getItem(DEFAULT_TARGET_STORAGE_KEY) || ''; } catch { return ''; }
+  });
+
+  const setDefaultTarget = (id: string) => {
+    setDefaultTargetId(id);
+    try {
+      if (id) window.localStorage.setItem(DEFAULT_TARGET_STORAGE_KEY, id);
+      else window.localStorage.removeItem(DEFAULT_TARGET_STORAGE_KEY);
+    } catch { /* 隐私模式等场景允许失败 */ }
+  };
 
   const load = useCallback(async () => {
     try {
@@ -122,6 +136,7 @@ export function RemoteTargets(): React.ReactElement {
         headers: authHeaders(),
       });
       if (!response.ok) throw new Error('移除失败');
+      if (defaultTargetId === id) setDefaultTarget('');
       await load();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
@@ -157,6 +172,14 @@ export function RemoteTargets(): React.ReactElement {
             <span className="biof3-field__hint" style={{ flex: 1, textAlign: 'right' }}>
               {describeProbe(target.lastProbe)}
             </span>
+            <button
+              type="button"
+              disabled={busyId === target.id}
+              onClick={() => { setDefaultTarget(target.id); }}
+              data-testid={`remote-target-default-${target.id}`}
+            >
+              {defaultTargetId === target.id ? '★ 默认' : '设为默认'}
+            </button>
             <button type="button" disabled={busyId === target.id} onClick={() => { void probe(target.id); }}>
               {busyId === target.id ? '探测中…' : '探测'}
             </button>
@@ -179,6 +202,11 @@ export function RemoteTargets(): React.ReactElement {
           添加目标
         </button>
       </div>
+      <p className="biof3-field__hint" data-testid="remote-target-default-summary">
+        当前默认执行目标：{defaultTargetId
+          ? (data.registered.find((t) => t.id === defaultTargetId)?.alias || '已指定目标')
+          : '本机'}{defaultTargetId ? '（分析自动提交到该节点）' : '（分析在本机执行）'}
+      </p>
       {data.discovered.length > 0 && (
         <p className="biof3-field__hint">
           从 ~/.ssh/config 发现：{data.discovered.map((item) => item.alias).join('、')}（输入上方别名即可添加）

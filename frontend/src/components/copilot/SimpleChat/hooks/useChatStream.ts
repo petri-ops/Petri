@@ -80,8 +80,8 @@ export interface UseChatStreamArgs {
   accessMode: 'full' | 'workspace-write' | 'read';
   /** BLOCK-55 P1 — 计划模式（Spec 门）：随所有 send 路径进入请求 context。 */
   planMode: boolean;
-  /** BLOCK-57 UI-290 — 会话级执行目标（composer 选择器；null/缺省 = 本机）。 */
-  executionTargetId: string | null;
+  /** BLOCK-57 UI-290 — 会话级执行目标（设置页「默认执行目标」，localStorage 持久化；缺省 = 本机）。可选：缺省时 send 内部自行读取。 */
+  executionTargetId?: string | null;
 
   // SWR-backed conversation creator
   createConversationForRun: (title?: string) => Promise<{ id: string } | null>;
@@ -201,7 +201,9 @@ export function useChatStream({
           projectId,
           accessMode,
           planMode,
-          executionTargetId: executionTargetId || null,
+          executionTargetId: (executionTargetId ?? (() => {
+            try { return window.localStorage.getItem('biof3.executionTargetId'); } catch { return null; }
+          })()) || null,
         },
       });
       if (!started) return false;
