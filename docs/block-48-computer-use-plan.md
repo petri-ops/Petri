@@ -1,6 +1,6 @@
 # BLOCK-48 — macOS 电脑控制模块（Computer Use）技术调研与实施计划
 
-> 状态：`active`（2026-09-06 **恢复 active**：BLOCK-61 品牌改名已整包收口，本包继续 P1 Swift sidecar PoC；进度检查点 `c29d9f04`。首启记录：2026-09-06 用户裁决「BLOCK-48 开干」；同日曾让位 BLOCK-61 改名先行，改名收口后恢复）
+> 状态：`active`（2026-09-06 **恢复 active**：BLOCK-61 品牌改名已整包收口 `526dd72b`，改名后回归全绿（brand/sidecar/window-manager 51/51 + main.js 回归 11/11 + sidecar 重建 probe trusted）。**P1 已于让位期间完成收口**（`f0aba445`：snapshot→click 闭环 + 权限链路 + Electron AX 坑规避，实机 10 断言 allPass——比暂停登记的检查点 `c29d9f04` 骨架更完整的边界），下一步 P2 七工具完整化。首启记录：2026-09-06 用户裁决「BLOCK-48 开干」；同日曾让位 BLOCK-61 改名先行，改名收口后恢复）
 > 立项日期：2026-09-03；启动日期：2026-09-06
 > truthDomain: `block-48-computer-use`
 > truthDomain: `block-48-computer-use`
