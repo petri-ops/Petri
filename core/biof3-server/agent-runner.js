@@ -596,6 +596,12 @@ async function runAgentLoop({
       : 'full',
     allowExecution: executionPolicy.allowExecution,
     executionPolicyReason: executionPolicy.reason,
+    // BLOCK-57 UI-290 — 会话级执行目标（composer 选择器；learning 层校验注册表
+    // 后在执行时注入 params，未知目标 fail-closed 回退本机）。agent 循环与
+    // chat 内联两条路径都必须透传。
+    executionTargetId: context && typeof context.executionTargetId === 'string' && context.executionTargetId.trim()
+      ? context.executionTargetId.trim()
+      : null,
     docsIndex: {},
     dashscopeEmbed,
     cosineSim,

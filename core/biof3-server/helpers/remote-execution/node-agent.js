@@ -108,6 +108,17 @@ case "$cmd" in
       code=$((raw-128))
       signal="SIG$(kill -l "$raw" 2>/dev/null | tr -d ' ' || echo TERM)"
     fi
+    # 归拢产物：插件约定把产物写在 jobDir 根目录（脚本/参数/主题/模板之外全部
+    # 视为产物），统一并入 output/ 使拉回协议单一化。
+    mkdir -p "$dir/output" 2>/dev/null
+    for f in "$dir"/*; do
+      [ -f "$f" ] || continue
+      b="$(basename "$f")"
+      case "$b" in
+        run-script.*|params.json|_biof3-theme.R|report-template.html|state.json|exit.json|transfer-manifest.json|provenance.json) continue ;;
+      esac
+      cp -f "$f" "$dir/output/" 2>/dev/null
+    done
     ( cd "$dir" && find output -type f -print0 2>/dev/null | LC_ALL=C sort -z | xargs -0 sha256sum 2>/dev/null ) \\
       > "$dir/transfer-manifest.json.tmp" 2>/dev/null
     mv "$dir/transfer-manifest.json.tmp" "$dir/transfer-manifest.json" 2>/dev/null

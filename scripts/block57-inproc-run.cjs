@@ -41,13 +41,12 @@ async function main() {
   };
   const args = {
     op: 'run',
-    toolId: 'sample-metadata-validator',
+    toolId: 'volcano-plot',
     params: {
-      counts: path.join(PROJECT_DIR, 'inputs', 'counts.csv'),
-      metadata: path.join(PROJECT_DIR, 'inputs', 'coldata.csv'),
-      reference_group: 'Control',
-      treatment_group: 'Treatment',
-      min_replicates: 2,
+      deg_table: path.join(PROJECT_DIR, 'inputs', 'demo_deg.csv'),
+      point_size: 4,
+      label_size: 5,
+      export_dpi: 200,
     },
   };
 

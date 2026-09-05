@@ -1231,6 +1231,26 @@ async function _runPluginScript(
     // 共用收尾。超预算：尽力取消节点侧作业并诚实失败（不悬挂模型回合）。
     if (sessionExecutionTargetId) {
       return (async () => {
+        // 远程分派前重写 file 型输入为 jobDir 内文件名（bundled copy 命名约定：
+        // <input_id><原扩展名>，与 1b 拷贝步骤一致）。启发式：字符串参数值指向
+        // 本机真实存在的文件 → 即为 bundled 输入（不依赖 tool-definition 声明，
+        // 部分 插件 的 inputs 为空数组）。脚本侧 cwd=jobDir，绝对本地路径在节点上
+        // 不存在（macOS 路径 ≠ Linux 路径）。
+        try {
+          const rewritten = { ...scriptParams };
+          for (const [key, value] of Object.entries(rewritten)) {
+            if (typeof value === 'string' && value.trim()) {
+              try {
+                if (path.isAbsolute(value) && fs.existsSync(value) && fs.statSync(value).isFile()) {
+                  rewritten[key] = key + path.extname(value);
+                }
+              } catch {}
+            }
+          }
+          fs.writeFileSync(path.join(jobDir, 'params.json'), JSON.stringify(rewritten));
+        } catch (e) {
+          console.warn('[mcp-registry] remote file-input rewrite failed:', e.message);
+        }
         const remoteOutcome = await runPluginToolRemote({
           sessionExecutionTargetId,
           jobDir,
