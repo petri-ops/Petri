@@ -358,6 +358,20 @@
       "classifiesScripts": false
     },
     {
+      "id": "block48-computer-use-sidecar",
+      "note": "BLOCK-48 电脑控制：Swift sidecar 源码与协议契约测试。改动即跑契约测试（前置构建：bash scripts/build-computer-use-sidecar.sh）。",
+      "patterns": [
+        "sidecars/computer-use/Package.swift",
+        "sidecars/computer-use/Sources/**",
+        "scripts/build-computer-use-sidecar.sh",
+        "test/block48-sidecar-contract.test.mjs"
+      ],
+      "tests": [
+        "test/block48-sidecar-contract.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "plugin-runtime",
       "patterns": [
         "resources/built-in-plugins/**",
@@ -1095,6 +1109,8 @@
         "scripts/block57-*.mjs",
         "acceptance/block-59/**",
         "scripts/block59-*.cjs",
+        "acceptance/block-48/**",
+        "scripts/block48-*.cjs",
         "acceptance/block-55/**",
         "scripts/block55-*.cjs",
         "scripts/block55-*.mjs"

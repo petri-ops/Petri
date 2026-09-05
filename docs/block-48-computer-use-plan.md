@@ -119,5 +119,7 @@ biof3-server (Node)                    Swift sidecar（新增，backend-proc-man
 
 ## 7. 进度记录
 
+- 2026-09-06 P1 实施中（进行中）：① **Swift sidecar 骨架落地并编译通过**（`sidecars/computer-use/`，SPM swift-tools 5.9，0 第三方依赖；stdio 行式 JSON 协议：`{id, verb, params}` → `{id, ok, data|error}`；四动词 probe/snapshot/click/axmanual）。**本机工具链坑三条（如实登记）**：本机 CLT SDK（MacOSX 26, Swift 6.3.3）下 ① AX C 常量（kAXValueAttribute 等）经 `as CFString` 传入触发重载解析歧义 → AX 属性名/动作名全部改字符串字面量；② `AXUIElementCopyAttributeValue` 已被审计为 **3 参**（error 出参移除，CF_RETURNS_RETAINED value），4 参调用报 "extra argument"；③ 出参指针须 `AnyObject?`（CFTypeRef 已 = Any，`CFTypeRef?` 即 `Any?` 反而不匹配）。② **权限链路实机验证（诚实路径）**：probe 在宿主未授权时如实返回 `trusted:false` + 中文引导文案（系统设置 → 隐私与安全性 → 辅助功能）；snapshot/click 在未授权时 fail-closed（`not_trusted`）——plan §2.3「TCC 不可编程授予」坑实锤复现。**实机环境事实**：本会话责任进程 = ZCode.app（进程树 zsh ← zcode-cli ← zcode-host-local ← ZCode），System Events 深度 AX 读取被拒（-1719「不允许辅助访问」）→ 待用户手动授权 ZCode 后跑 snapshot→click 闭环。③ **契约测试**（test/block48-sidecar-contract.test.mjs）trust-aware 双态设计：未授权态 7 断言全过（probe 形状/bad_request/unknown_verb/target_required/僵尸 pid/unknown_ref/not_trusted fail-closed）+ 已授权态 2 用例诚实跳过（frontmost snapshot + axmanual）。impact-map 补 sidecar 规则与 live 脚本分类；二进制不入 git（bin/.build gitignore）。
+
 - 2026-09-03 P0（planned 登记）：完成 TRAE 插件本体解剖 + 业界范式调研（AX/CGEvent 双层、CGEventPostToPid 后台投递、Electron AX 懒初始化坑、三方案比选）；本计划落盘并注册 DOC-REGISTRY；待 BLOCK-47 收口后由用户裁决启动。
 

@@ -84,3 +84,7 @@ resources/built-in-plugins/**/*.pyc
 
 # Local third-party source mirror used for read-only reference.
 /codex/
+
+# BLOCK-48 computer-use sidecar build artifacts
+sidecars/computer-use/.build/
+sidecars/computer-use/bin/
