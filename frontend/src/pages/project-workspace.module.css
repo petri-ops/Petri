@@ -896,7 +896,7 @@
 
 .leftCreateInput:focus {
   outline: none;
-  border-color: var(--biof3-primary, #4a90d9);
+  border-color: var(--biof3-accent);
 }
 
 .leftCreateError {

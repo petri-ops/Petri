@@ -140,7 +140,7 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
     <aside className={styles.leftCol} style={{ width: ctx.width }}>
       <div
         className={styles.leftPanelWrap}
-        style={dropActive ? { outline: '1px dashed var(--biof3-color-accent, teal)', outlineOffset: '-4px' } : undefined}
+        style={dropActive ? { outline: '1px dashed var(--biof3-accent)', outlineOffset: '-4px' } : undefined}
         onDragOver={(e) => {
           e.preventDefault();
           if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';

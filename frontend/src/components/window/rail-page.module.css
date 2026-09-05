@@ -17,7 +17,7 @@
   align-items: center;
   gap: 6px;
   padding: 10px 0;
-  background: var(--biof3-bg-secondary, #262b3a);
+  background: var(--biof3-bg-surface);
   border-left: 1px solid var(--biof3-border-color, #323848);
   opacity: 0.45;
   transition: width 0.16s ease, opacity 0.16s ease;
@@ -44,7 +44,7 @@
 
 .tick[data-kind='terminal'],
 .tick[data-kind='agent'] {
-  background: var(--biof3-ok, #4cd48a);
+  background: var(--biof3-status-success);
 }
 
 .tick[data-faded='true'] {
@@ -80,7 +80,7 @@
   padding: 12px;
   border-radius: 10px;
   border: 1px solid var(--biof3-border-color, #323848);
-  background: var(--biof3-bg-primary, #1f2330);
+  background: var(--biof3-bg-canvas);
   box-shadow: 0 10px 32px rgba(0, 0, 0, 0.4);
 }
 

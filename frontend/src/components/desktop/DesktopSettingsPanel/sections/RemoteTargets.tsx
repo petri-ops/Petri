@@ -163,7 +163,7 @@ export function RemoteTargets(): React.ReactElement {
                 fontSize: 12,
                 padding: '1px 8px',
                 borderRadius: 999,
-                background: target.status === 'ready' ? 'var(--biof3-ok-bg, #e6f6e9)' : target.status === 'unreachable' ? 'var(--biof3-warn-bg, #fdeaea)' : 'transparent',
+                background: target.status === 'ready' ? 'var(--biof3-status-success-bg)' : target.status === 'unreachable' ? 'var(--biof3-warning-bg)' : 'transparent',
               }}
               data-testid={`remote-target-status-${target.status}`}
             >

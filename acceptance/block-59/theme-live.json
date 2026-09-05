@@ -1,0 +1,48 @@
+{
+  "startedAt": "2026-09-05T13:16:23.620Z",
+  "assertions": [
+    {
+      "name": "主窗桥可用 + 预清理",
+      "pass": true,
+      "detail": "{\"bridge\":true}"
+    },
+    {
+      "name": "结果窗弹出（light 主题下）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"action\":\"created\",\"autoDemoted\":null}"
+    },
+    {
+      "name": "弹窗 data-theme=light（与主窗一致）",
+      "pass": true,
+      "detail": "{\"theme\":\"light\",\"shellBg\":\"rgb(255, 255, 255)\",\"headerBg\":\"rgb(255, 255, 255)\",\"titleColor\":\"rgb(24, 24, 27)\"}"
+    },
+    {
+      "name": "弹窗外壳背景 = 亮色画布（真实令牌生效）",
+      "pass": true,
+      "detail": "{\"theme\":\"light\",\"shellBg\":\"rgb(255, 255, 255)\",\"headerBg\":\"rgb(255, 255, 255)\",\"titleColor\":\"rgb(24, 24, 27)\"}"
+    },
+    {
+      "name": "主窗切暗 → 弹窗实时跟随（data-theme=dark）",
+      "pass": true,
+      "detail": "{\"theme\":\"dark\",\"shellBg\":\"rgb(11, 18, 32)\"}"
+    },
+    {
+      "name": "弹窗外壳背景 = 暗色画布（#0b1220）",
+      "pass": true,
+      "detail": "{\"theme\":\"dark\",\"shellBg\":\"rgb(11, 18, 32)\"}"
+    },
+    {
+      "name": "弹窗与主窗 data-theme 一致（dark）",
+      "pass": true,
+      "detail": "main=dark pop=dark"
+    },
+    {
+      "name": "指挥中心瓦片暗色表面（bg-surface 令牌）",
+      "pass": true,
+      "detail": "{\"theme\":\"dark\",\"tileBg\":\"rgb(17, 26, 46)\"}"
+    }
+  ],
+  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb",
+  "finishedAt": "2026-09-05T13:16:28.864Z",
+  "allPass": true
+}

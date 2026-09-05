@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: var(--biof3-bg-primary, #1f2330);
+  background: var(--biof3-bg-canvas);
   color: var(--biof3-text-primary, #e6e9f2);
   overflow: hidden;
 }
@@ -17,7 +17,7 @@
   padding: 0 12px;
   flex-shrink: 0;
   border-bottom: 1px solid var(--biof3-border-color, #323848);
-  background: var(--biof3-bg-secondary, #262b3a);
+  background: var(--biof3-bg-surface);
   -webkit-app-region: drag;
   user-select: none;
 }
@@ -93,7 +93,7 @@
   padding: 6px 12px;
   font-size: 12px;
   color: var(--biof3-text-secondary, #9aa3b8);
-  background: var(--biof3-bg-tertiary, #2d3345);
+  background: var(--biof3-bg-subtle);
   border-bottom: 1px solid var(--biof3-border-color, #323848);
 }
 
@@ -116,7 +116,7 @@
   font-size: 12px;
   padding: 4px 10px;
   border-radius: 999px;
-  background: var(--biof3-bg-tertiary, #2d3345);
+  background: var(--biof3-bg-subtle);
   color: var(--biof3-text-secondary, #9aa3b8);
 }
 
@@ -174,7 +174,7 @@
 }
 
 .previewTable th {
-  background: var(--biof3-bg-tertiary, #2d3345);
+  background: var(--biof3-bg-subtle);
   position: sticky;
   top: 0;
 }
@@ -183,7 +183,7 @@
   margin: 0;
   padding: 12px;
   border-radius: 8px;
-  background: var(--biof3-bg-tertiary, #2d3345);
+  background: var(--biof3-bg-subtle);
   font-size: 12px;
   font-family: var(--biof3-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
   white-space: pre-wrap;

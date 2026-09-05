@@ -2157,6 +2157,18 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-296: 窗口系统加映——弹出窗外观主题与主窗一致（BLOCK-59 加映，用户反馈） (2026-09-05 verified)
+
+**用户反馈**：弹出窗（结果视图等）的主题与主界面不一致——弹窗永远是暗色，不跟随外观主题。
+
+**根因**（实机定位 + 契约测试实锤）：BLOCK-59 新增的窗口 CSS 模块（window-shell / rail-page / command-center）引用了**不存在的编造令牌**（`--biof3-bg-primary/-secondary/-tertiary`、`--biof3-ok` 等 8 个）——全部落入硬编码暗色兜底（#1f2330 系），与主题系统脱钩；ThemeProvider 本身工作正常（`data-theme` 属性 + `storage` 事件跨窗同步，弹窗本可实时跟随主窗换主题），被兜底色掩盖。**theme-token-contract 测试（UI-151 契约）本可拦截**，但未纳入 BLOCK-59 定向测试选择——本次一并纳入回归面。
+
+**改动**（纯 CSS 令牌修正，0 逻辑变更）：① 窗口三模块全部改用 custom.css 语义令牌——`--biof3-bg-canvas`（窗体）/`--biof3-bg-surface`（头部/瓦片/卡）/`--biof3-bg-subtle`（次级容器）/`--biof3-status-success`（成功态）/既有 `--biof3-text*`/`--biof3-accent*`/`--biof3-danger`/`--biof3-border-color`，明暗双主题自动适配；② **顺手修 5 处存量令牌违规**（先于 BLOCK-59 存在、契约测试早已红而未被发现）：RemoteTargets.tsx `--biof3-ok-bg/-warn-bg`→`--biof3-status-success-bg/-warning-bg`、simple-chat.css `--biof3-text-quaternary`→`--biof3-text-muted`、LeftPanel.tsx `--biof3-color-accent`→`--biof3-accent`、project-workspace.module.css `--biof3-primary`→`--biof3-accent`——theme-token-contract 回归全绿。
+
+**门禁**：theme-token-contract 1/1（修复前红：9 缺失令牌实锤）；tsc 0；受影响前端 vitest 45/45（契约/CenterPanel/DesktopSettingsPanel/SimpleChat/toolActivity/railEntries/WindowResultPage/LeftPanel）；核心单测 36/36。
+
+**实机（2026-09-05，dev Electron CDP，证据 `acceptance/block-59/theme-live.json` 9 断言 allPass + 截图 ×2，脚本 [block59-theme-live.cjs](../scripts/block59-theme-live.cjs)）**：① light 主题弹出结果窗 → `data-theme=light` + 外壳白画布 rgb(255,255,255) + zinc 文本（截图 p59-theme-light，与 UI-238 浅色纯净主题一致）；② 主窗切暗 → **已打开弹窗经 storage 事件实时跟随**（data-theme=dark + #0b1220 暗画布，截图 p59-theme-dark）+ 与主窗 data-theme 一致；③ 指挥中心瓦片暗色表面 rgb(17,26,46)（bg-surface 令牌生效）；④ 原主题偏好恢复。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-295: 窗口系统 P4——agent 详情窗：子 agent 实时工作流 + 终态摘要对齐 + 活动行入口（BLOCK-59 P4） (2026-09-05 verified)
 
 **用户需求**：BLOCK-59 P4（plan §7）——agent 详情窗（`/window/agent/:runId`），衔接已收口 BLOCK-49 spawn 链路：子 agent 实时工作流展示；终态摘要对齐。

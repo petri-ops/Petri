@@ -41,7 +41,7 @@
   padding: 12px;
   border-radius: 10px;
   border: 1px solid var(--biof3-border-color, #323848);
-  background: var(--biof3-bg-secondary, #262b3a);
+  background: var(--biof3-bg-surface);
   color: var(--biof3-text-primary, #e6e9f2);
   text-align: left;
   cursor: pointer;
@@ -74,7 +74,7 @@
 }
 
 .statusDot[data-status='done'] {
-  background: var(--biof3-ok, #4cd48a);
+  background: var(--biof3-status-success);
 }
 
 .statusDot[data-status='failed'] {
@@ -129,7 +129,7 @@
 }
 
 .tileStatus [data-status='done'] {
-  color: var(--biof3-ok, #4cd48a);
+  color: var(--biof3-status-success);
 }
 
 /* ── P4 agent 详情窗 ─────────────────────────────── */
@@ -183,7 +183,7 @@
   gap: 8px;
   padding: 4px 8px;
   border-radius: 6px;
-  background: var(--biof3-bg-secondary, #262b3a);
+  background: var(--biof3-bg-surface);
 }
 
 .timelineDot {
@@ -196,7 +196,7 @@
 }
 
 .timelineDot[data-status='success'] {
-  background: var(--biof3-ok, #4cd48a);
+  background: var(--biof3-status-success);
   animation: none;
 }
 
@@ -221,7 +221,7 @@
   margin: 0;
   padding: 12px;
   border-radius: 8px;
-  background: var(--biof3-bg-secondary, #262b3a);
+  background: var(--biof3-bg-surface);
   font-size: 12px;
   line-height: 1.6;
   white-space: pre-wrap;

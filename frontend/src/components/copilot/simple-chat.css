@@ -3412,7 +3412,7 @@
 
 .sc-changes-group-count {
   font-weight: 400;
-  color: var(--biof3-text-quaternary, var(--biof3-text-tertiary));
+  color: var(--biof3-text-muted);
 }
 
 .sc-changes-row {
