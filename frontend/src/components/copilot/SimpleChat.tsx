@@ -314,6 +314,7 @@ export function SimpleChat({
   const composerBarRef = useRef<HTMLDivElement | null>(null);
   const [composerNarrow, setComposerNarrow] = useState(false);
   const [composerMoreOpen, setComposerMoreOpen] = useState(false);
+  const [composerMoreSub, setComposerMoreSub] = useState<'main' | 'targets'>('main');
   useEffect(() => {
     const el = composerBarRef.current;
     if (!el || typeof ResizeObserver === 'undefined') return;
@@ -1935,48 +1936,29 @@ export function SimpleChat({
                     title="更多工具"
                     aria-label="更多工具"
                     aria-expanded={composerMoreOpen}
-                    onClick={() => setComposerMoreOpen((v) => !v)}
+                    onClick={() => { setComposerMoreOpen((v) => !v); setComposerMoreSub('main'); }}
                   >
                     <Icon name="more-horizontal" size={16} />
                   </button>
                   {composerMoreOpen && (
                     <>
-                      <div className="sc-access-overlay" onClick={() => setComposerMoreOpen(false)} />
+                      <div className="sc-access-overlay" onClick={() => { setComposerMoreOpen(false); setComposerMoreSub('main'); }} />
                       <div className="sc-access-menu sc-toolbar-more-menu">
-                        <button
-                          type="button"
-                          className="sc-access-option"
-                          disabled={refreshing}
-                          onClick={() => { setComposerMoreOpen(false); void handleRefresh(); }}
-                        >
-                          <span className="sc-access-option-title">刷新文件链接</span>
-                          <span className="sc-access-option-sub">清除解析缓存并对已落地消息重跑解析</span>
-                        </button>
-                        <button
-                          type="button"
-                          className="sc-access-option"
-                          disabled={!conversationId}
-                          onClick={() => { setComposerMoreOpen(false); setIoTranscriptOpen(true); }}
-                        >
-                          <span className="sc-access-option-title">模型 I/O 信息流</span>
-                          <span className="sc-access-option-sub">本会话模型调用的请求与响应原文（只读）</span>
-                        </button>
-                        {composerNarrow && (
+                        {composerMoreSub === 'targets' ? (
                           <>
                             <button
                               type="button"
-                              className={`sc-access-option${planMode ? ' sc-access-option-active' : ''}`}
-                              onClick={() => setPlanMode((v) => !v)}
+                              className="sc-access-option sc-menu-back"
+                              onClick={() => setComposerMoreSub('main')}
                             >
-                              <span className="sc-access-option-title">计划模式{planMode ? '（开）' : '（关）'}</span>
-                              <span className="sc-access-option-sub">只读探索并起草计划，获批后自动恢复执行</span>
+                              <span className="sc-access-option-title">‹ 执行目标</span>
                             </button>
                             <button
                               type="button"
                               className={`sc-access-option${!sessionExecTargetId ? ' sc-access-option-active' : ''}`}
-                              onClick={() => { setSessionExecTargetId(''); setComposerMoreOpen(false); }}
+                              onClick={() => { setSessionExecTargetId(''); setComposerMoreOpen(false); setComposerMoreSub('main'); }}
                             >
-                              <span className="sc-access-option-title">执行目标：本机</span>
+                              <span className="sc-access-option-title">本机{!sessionExecTargetId ? ' ✓' : ''}</span>
                               <span className="sc-access-option-sub">分析在本机执行</span>
                             </button>
                             {remoteTargets.map((t) => (
@@ -1984,12 +1966,56 @@ export function SimpleChat({
                                 key={t.id}
                                 type="button"
                                 className={`sc-access-option${sessionExecTargetId === t.id ? ' sc-access-option-active' : ''}`}
-                                onClick={() => { setSessionExecTargetId(t.id); setComposerMoreOpen(false); }}
+                                onClick={() => { setSessionExecTargetId(t.id); setComposerMoreOpen(false); setComposerMoreSub('main'); }}
                               >
-                                <span className="sc-access-option-title">执行目标：{t.alias}</span>
+                                <span className="sc-access-option-title">{t.alias}{sessionExecTargetId === t.id ? ' ✓' : ''}</span>
                                 <span className="sc-access-option-sub">分析提交到该服务器执行</span>
                               </button>
                             ))}
+                          </>
+                        ) : (
+                          <>
+                            <div className="sc-menu-section-label">操作</div>
+                            <button
+                              type="button"
+                              className="sc-access-option"
+                              disabled={refreshing}
+                              onClick={() => { setComposerMoreOpen(false); setComposerMoreSub('main'); void handleRefresh(); }}
+                            >
+                              <span className="sc-access-option-title">刷新文件链接</span>
+                              <span className="sc-access-option-sub">清除解析缓存并对已落地消息重跑解析</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="sc-access-option"
+                              disabled={!conversationId}
+                              onClick={() => { setComposerMoreOpen(false); setComposerMoreSub('main'); setIoTranscriptOpen(true); }}
+                            >
+                              <span className="sc-access-option-title">模型 I/O 信息流</span>
+                              <span className="sc-access-option-sub">本会话模型调用的请求与响应原文（只读）</span>
+                            </button>
+                            {composerNarrow && (
+                              <>
+                                <div className="sc-menu-section-label">模式</div>
+                                <button
+                                  type="button"
+                                  className={`sc-access-option${planMode ? ' sc-access-option-active' : ''}`}
+                                  onClick={() => setPlanMode((v) => !v)}
+                                >
+                                  <span className="sc-access-option-title">计划模式{planMode ? '（开）' : '（关）'}</span>
+                                  <span className="sc-access-option-sub">只读探索并起草计划，获批后自动恢复执行</span>
+                                </button>
+                              </>
+                            )}
+                            <div className="sc-menu-section-label">算力</div>
+                            <button
+                              type="button"
+                              className="sc-access-option"
+                              onClick={() => setComposerMoreSub('targets')}
+                            >
+                              <span className="sc-access-option-title">执行目标</span>
+                              <span className="sc-access-option-sub">{sessionExecTargetId ? (remoteTargets.find((t) => t.id === sessionExecTargetId)?.alias || '已指定') : '本机'} ›</span>
+                            </button>
                           </>
                         )}
                       </div>

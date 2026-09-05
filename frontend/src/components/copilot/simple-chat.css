@@ -3484,3 +3484,15 @@
   background: var(--biof3-accent-soft, var(--biof3-bg-subtle));
   color: var(--biof3-accent);
 }
+
+/* BLOCK-60 addendum — ⋯ 菜单分区标签 + 二级导航返回 */
+.sc-toolbar-more-menu .sc-menu-section-label {
+  padding: 6px 12px 2px;
+  font-size: var(--biof3-font-size-caption);
+  color: var(--biof3-text-tertiary);
+  letter-spacing: 0.04em;
+}
+
+.sc-toolbar-more-menu .sc-menu-back {
+  border-bottom: 1px solid var(--biof3-border, rgba(128, 128, 128, 0.2));
+}
