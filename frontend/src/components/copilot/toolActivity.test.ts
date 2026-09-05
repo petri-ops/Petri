@@ -210,4 +210,53 @@ describe('tool activity projection', () => {
       content: 'Authorization: secret-value',
     })).toEqual({ actionLabel: '已修改', actionDetail: 'notes.txt' });
   });
+
+  // BLOCK-59 P4 — agent 管理工具结果携带 agentId → 活动行「详情窗」入口数据面
+  it('extracts agentRunId from agent-management tool results only', () => {
+    const spawnResult = {
+      name: 'spawn_agent',
+      summary: '已派生子 agent',
+      toolResult: {
+        contractVersion: '1.0.0',
+        traceId: 'trace_sp',
+        callId: 'call_sp',
+        tool: 'spawn_agent',
+        status: 'success' as const,
+        terminationReason: 'completed',
+        durationMs: 5,
+        truncated: false,
+        sideEffects: { type: 'state-write' as const, riskTier: 'R2' as const, resources: [] },
+        data: { ok: true, agentId: 'task-child-1' },
+      },
+    };
+    const items = mergeToolResultActivity([], spawnResult);
+    expect(items[0].agentRunId).toBe('task-child-1');
+
+    // 非 agent 工具不提取（run_tool 的 data 不进 agentRunId）
+    const runTool = {
+      name: 'run_tool',
+      summary: '完成',
+      toolResult: {
+        ...spawnResult.toolResult,
+        traceId: 'trace_rt',
+        callId: 'call_rt',
+        tool: 'run_tool',
+        data: { agentId: 'not-an-agent' },
+      },
+    };
+    expect(mergeToolResultActivity([], runTool)[0].agentRunId).toBeUndefined();
+
+    // wait_agent 结果同样携带 agentId
+    const waitResult = {
+      ...spawnResult,
+      name: 'wait_agent',
+      toolResult: {
+        ...spawnResult.toolResult,
+        traceId: 'trace_w',
+        callId: 'call_w',
+        tool: 'wait_agent',
+      },
+    };
+    expect(mergeToolResultActivity([], waitResult)[0].agentRunId).toBe('task-child-1');
+  });
 });

@@ -1093,6 +1093,8 @@
         "acceptance/block-57/**",
         "scripts/block57-*.cjs",
         "scripts/block57-*.mjs",
+        "acceptance/block-59/**",
+        "scripts/block59-*.cjs",
         "acceptance/block-55/**",
         "scripts/block55-*.cjs",
         "scripts/block55-*.mjs"

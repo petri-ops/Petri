@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { CodeMirrorDiffView } from '@/components/desktop/WorkingTreeReview/CodeMirrorDiffView';
 import { biof3Events, dispatchBioF3Event } from '@/lib/events';
+import { getBridge } from '@/lib/desktopBridge';
 import {
   formatToolDuration,
   formatToolSideEffects,
@@ -57,6 +58,12 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
   const duration = formatToolDuration(activity.durationMs);
   const sideEffects = formatToolSideEffects(activity.sideEffects);
   const showReason = activity.status === 'error' || activity.status === 'denied';
+  // BLOCK-59 P4 — 子 agent 活动行「详情窗」入口（agent 独立窗：实时工作流 + 终态摘要）
+  const windowManagerBridge = getBridge('windowManager');
+  const openAgentWindow = () => {
+    if (!activity.agentRunId) return;
+    void windowManagerBridge?.popOut('agent', activity.agentRunId);
+  };
   return (
     <div className={`sc-tool-activity sc-tool-activity-${activity.status}`}>
       <button
@@ -84,6 +91,16 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
       {open && (
         <div className="sc-tool-activity-body sc-tool-activity-detail">
           <span className="sc-tool-activity-tool">{activity.name}</span>
+          {activity.agentRunId && windowManagerBridge && (
+            <button
+              type="button"
+              className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+              onClick={openAgentWindow}
+              title="弹出 agent 详情独立窗（实时工作流 + 终态摘要，只读投影）"
+            >
+              详情窗
+            </button>
+          )}
           {activity.truncated && activity.status === 'success' && <span>仅显示摘要</span>}
           {/* UI-273 增补 — 写操作展开显示本次操作的实际改动：文件行（点击跳审阅）+ diff 预览，
               与工作区改动卡片（AgentChangesCard）同构呈现 */}

@@ -82,6 +82,9 @@ export interface ToolActivityItem {
   actionLabel: string;
   actionDetail?: string;
   output?: ToolActivityOutput;
+  /** BLOCK-59 P4 — agent 管理工具（spawn/wait/list）结果携带的子 agent
+   *  任务 id；活动行据此提供「详情窗」入口（弹出 agent 独立窗）。 */
+  agentRunId?: string;
 }
 
 const ACTIVITY_STATUSES: ToolActivityStatus[] = [
@@ -130,6 +133,7 @@ export function restoreToolActivities(value: unknown): ToolActivityItem[] {
       summary: typeof raw.summary === 'string' ? raw.summary : undefined,
       actionLabel: typeof raw.actionLabel === 'string' ? raw.actionLabel : '已调用',
       actionDetail: typeof raw.actionDetail === 'string' ? raw.actionDetail : undefined,
+      agentRunId: typeof raw.agentRunId === 'string' ? raw.agentRunId : undefined,
     }];
   });
 }
@@ -296,6 +300,15 @@ export function mergeToolResultActivity(
   }
 
   const fallbackAction = summarizeToolCall(name);
+  // BLOCK-59 P4 — agent 管理工具结果携带 agentId（子 agent 任务 id），
+  // 提取供活动行「详情窗」入口；其余工具 / 既有值原样保留。
+  const resultData = result?.data as Record<string, unknown> | undefined;
+  const resultAgentRunId =
+    (name === 'spawn_agent' || name === 'wait_agent' || name === 'list_agents') &&
+    resultData &&
+    typeof resultData.agentId === 'string'
+      ? resultData.agentId
+      : undefined;
   const item: ToolActivityItem = {
     key: index >= 0 ? current[index].key : key,
     toolJobId: event.toolJobId || (index >= 0 ? current[index].toolJobId : undefined),
@@ -319,6 +332,7 @@ export function mergeToolResultActivity(
     output: index >= 0 ? current[index].output : undefined,
     actionLabel: index >= 0 ? current[index].actionLabel : fallbackAction.actionLabel,
     actionDetail: index >= 0 ? current[index].actionDetail : fallbackAction.actionDetail,
+    agentRunId: resultAgentRunId || (index >= 0 ? current[index].agentRunId : undefined),
   };
 
   if (index < 0) return [...current, item];

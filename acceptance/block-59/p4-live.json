@@ -1,0 +1,53 @@
+{
+  "startedAt": "2026-09-05T11:56:16.725Z",
+  "assertions": [
+    {
+      "name": "存在可用的历史子 agent 任务（done + tool_call + delta）",
+      "pass": true,
+      "detail": "{\"id\":\"20f71d77-51f9-4282-8513-9ce604da1dc1\",\"agent_status\":\"done\",\"status\":\"completed\",\"toolCalls\":8,\"deltas\":92}"
+    },
+    {
+      "name": "主窗桥可用 + 预清理",
+      "pass": true,
+      "detail": "{\"bridge\":true,\"cleaned\":false}"
+    },
+    {
+      "name": "popOut(agent) → created（BLOCK-49 链路键）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"agent:20f71d77-51f9-4282-8513-9ce604da1dc1\",\"action\":\"created\",\"autoDemoted\":null}"
+    },
+    {
+      "name": "agent 详情窗 target 出现",
+      "pass": true,
+      "detail": "targets=1"
+    },
+    {
+      "name": "时间线渲染工具调用（task_events 回放）",
+      "pass": true,
+      "detail": "{\"timelineRows\":8,\"summaryChars\":1258,\"doneBadge\":\"已完成\",\"errorNote\":null}"
+    },
+    {
+      "name": "终态摘要非空（delta 回放累积，与父会话同源）",
+      "pass": true,
+      "detail": "chars=1258"
+    },
+    {
+      "name": "终态徽章如实（已完成）",
+      "pass": true,
+      "detail": "\"已完成\""
+    },
+    {
+      "name": "无错误横幅（流健康）",
+      "pass": true,
+      "detail": "null"
+    },
+    {
+      "name": "清理：轨道降格 + 显式移除",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"agent:20f71d77-51f9-4282-8513-9ce604da1dc1\",\"state\":\"closed\"}"
+    }
+  ],
+  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb",
+  "finishedAt": "2026-09-05T11:56:18.493Z",
+  "allPass": true
+}

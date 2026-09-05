@@ -2157,6 +2157,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-295: 窗口系统 P4——agent 详情窗：子 agent 实时工作流 + 终态摘要对齐 + 活动行入口（BLOCK-59 P4） (2026-09-05 verified)
+
+**用户需求**：BLOCK-59 P4（plan §7）——agent 详情窗（`/window/agent/:runId`），衔接已收口 BLOCK-49 spawn 链路：子 agent 实时工作流展示；终态摘要对齐。
+
+**改动**（0 新 npm 依赖 / 0 新 IPC / 0 新后端面）：[AgentWindowPage.tsx](../frontend/src/pages/window/AgentWindowPage.tsx)——**零第二真相**：数据全部来自 `/api/ai/agent/task/:taskId` 既有 SSE（task_events 回放 + 实时推送），复用 copilotClient `subscribeAgentTask`（与主窗同一订阅路径，含断线退避续传）；SSE 从 seq 0 全量回放 → **实时工作流时间线**（tool_call/tool_result 按 callId 关联，运行中脉冲/完成绿/失败红 + 耗时，上限 200 条环形截断）+ **终态摘要对齐**（delta 回放累积 = 与父会话/wait_agent 摘要同源，8000 字符展示上限）+ 终态徽章（已完成/失败/已取消）+ agent_status/agent_progress 状态行；[toolActivity.ts](../frontend/src/components/copilot/toolActivity.ts) additive `agentRunId` 字段——agent 管理工具（spawn/wait/list）结果 `data.agentId` 提取（仅这三工具，其余工具 data 不进该字段）；[ToolActivityList.tsx](../frontend/src/components/copilot/ToolActivityList.tsx) 活动行「详情窗」按钮（agentRunId 存在且桌面桥可用时渲染 → `popOut('agent', agentRunId)`）。
+
+**门禁**：tsc 0；核心单测 36/36；前端受影响 vitest（toolActivity 9 含新增 agentRunId 提取三分支用例 / ToolActivityList 5 / SimpleChat 5 / WindowResultPage 4 / railEntries 9）；ui:audit:check PASS。
+
+**实机（2026-09-05，dev Electron CDP，证据 `acceptance/block-59/p4-live.json` 10 断言 allPass + 截图，脚本 [block59-p4-live.cjs](../scripts/block59-p4-live.cjs)）**：真实历史子 agent 任务（20f71d77，done，8 tool_call + 92 delta）驱动——① `popOut('agent', taskId)` → 独立窗 target；② SSE 全量回放渲染：时间线 8 行工具调用（workspace_read/run_tool/workspace_exec + 状态点 + 耗时，截图 p59-p4-01）+ 终态摘要 1258 字符（delta 回放累积）+ **终态徽章「已完成」如实**；③ 无错误横幅（流健康）；④ 清理降格 + 移除。实机抓真修一处：statusChip 类名跨 CSS module 引用错位（command-center vs window-shell），tsc 无法捕获、实机定位——徽章 className undefined 致断言空文本。入口按钮由 toolActivity agentRunId 数据面单测覆盖（实机以同一 popOut IPC 驱动，诚实边界）。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-294: 窗口系统 P3——指挥中心墙：多任务俯瞰单例窗 + 瓦片只读投影 + 下钻 L1 结果窗（BLOCK-59 P3） (2026-09-05 verified)
 
 **用户需求**：BLOCK-59 P3（plan §4.1/§7）——指挥中心墙（codex agent command center 模式）：独立单例总览窗，网格瓦片聚合所有作业实时状态；点击瓦片下钻到 L1 弹出窗。多任务时才打开（随开随关无状态）。
