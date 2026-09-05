@@ -2010,12 +2010,23 @@ export function SimpleChat({
                             <div className="sc-menu-section-label">算力</div>
                             <button
                               type="button"
-                              className="sc-access-option"
-                              onClick={() => setComposerMoreSub('targets')}
+                              className={`sc-access-option${!sessionExecTargetId ? ' sc-access-option-active' : ''}`}
+                              onClick={() => setSessionExecTargetId('')}
                             >
-                              <span className="sc-access-option-title">执行目标</span>
-                              <span className="sc-access-option-sub">{sessionExecTargetId ? (remoteTargets.find((t) => t.id === sessionExecTargetId)?.alias || '已指定') : '本机'} ›</span>
+                              <span className="sc-access-option-title">本机{!sessionExecTargetId ? ' ✓' : ''}</span>
+                              <span className="sc-access-option-sub">分析在本机执行</span>
                             </button>
+                            {remoteTargets.map((t) => (
+                              <button
+                                key={t.id}
+                                type="button"
+                                className={`sc-access-option${sessionExecTargetId === t.id ? ' sc-access-option-active' : ''}`}
+                                onClick={() => setSessionExecTargetId(t.id)}
+                              >
+                                <span className="sc-access-option-title">{t.alias}{sessionExecTargetId === t.id ? ' ✓' : ''}</span>
+                                <span className="sc-access-option-sub">分析提交到该服务器执行</span>
+                              </button>
+                            ))}
                           </>
                         )}
                       </div>

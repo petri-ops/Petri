@@ -2165,6 +2165,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0；受影响 vitest 6/6（SimpleChat/PlanApprovalCard）；docs:check + ui:audit:check PASS。
 
+**加映二（2026-09-05 用户反馈「算力区直接列出全部节点」）**：⋯ 菜单算力分区由「执行目标 ›」钻取改为**平铺直选**（本机/aliyun/dell 全列出，当前项 ✓，点选即切换），移除二级钻取死分支。实机 CDP 验证：三分区 + 全节点平铺直选（截图 `acceptance/block-60/menu-flat.png`）。
+
 **加映（2026-09-05 用户反馈「同类型归属 + 执行目标子导航」）**：⋯ 菜单重构为分区结构（操作/模式/算力 三分区标签）+ 执行目标二级钻取导航（主菜单「执行目标：当前值 ›」→ 子导航 本机/aliyun/dell 单选带 ✓ 与 ‹ 返回，选择即同步 chip 并关闭）。实机 CDP 验证：分区标签/子导航项/选择同步（chip aliyun→dell 复原）全通过（截图 `acceptance/block-60/subnav-picked.png`）。
 
 **实机（2026-09-05，dev Electron CDP，证据 `acceptance/block-60/ui-live.json` + wide-state/narrow-menu/wide-restored 截图）**：宽态 860px 7 控件全展开（+ 已消失/⋯ 就位/双 secondary 可见/执行目标 chip 显示 dell 持久化选择）；清空输入 → 559.99px 窄态：双 secondary display:none、⋯ 菜单六项全功能（刷新/I-O/计划模式开关/执行目标 本机+aliyun+dell）；输入长文本 → 860px 恢复宽态（secondary flex/block 恢复）。弹性效果照常。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
