@@ -160,7 +160,9 @@ function createRemoteJobRunner() {
         return { ok: true, remoteDir };
       }
       if (status.ok && status.kind === 'terminal') {
-        return { ok: false, stage: 'start', error: { kind: 'node.terminated_immediately', retryable: false, detail: JSON.stringify(status.info || {}) } };
+        // 快作业可能在首次轮询前已完成（exit.json 已写）——正常完成路径，
+        // 交由主循环对账拉取；不可误判为失败（曾致快速远程作业假报提交失败）。
+        return { ok: true, remoteDir, fastTerminal: true };
       }
       await new Promise((resolve) => setTimeout(resolve, 600));
     }

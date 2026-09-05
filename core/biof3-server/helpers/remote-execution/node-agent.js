@@ -42,6 +42,7 @@ case "$cmd" in
     ;;
   probe)
     echo "os=$(uname -sr)"
+    echo "hostname=$(hostname 2>/dev/null || echo unknown)"
     for lang in "$@"; do
       case "$lang" in
         r)
@@ -142,6 +143,13 @@ case "$cmd" in
     else
       echo "unknown"
     fi
+    ;;
+  renv)
+    # 环境摘要：R 包名=版本 清单（无 R 时输出空，不视为错误）。
+    if command -v Rscript >/dev/null 2>&1; then
+      Rscript -e 'ip <- installed.packages(); cat(paste(rownames(ip), ip[,"Version"], sep="="), sep="\n")' 2>/dev/null
+    fi
+    exit 0
     ;;
   manifest)
     [ $# -ge 1 ] || die "manifest_usage"

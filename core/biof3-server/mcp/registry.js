@@ -1360,17 +1360,38 @@ async function runPluginToolRemote({ sessionExecutionTargetId, jobDir, plugin, l
       return { err: Object.assign(new Error(`产物拉回失败：${(pulled.error && pulled.error.detail) || pulled.stderr || ''}`), { code: 1 }), stdout: fullLog, stderr: '' };
     }
 
+    // BLOCK-57 P3 — 环境摘要：节点 R 包清单（名=版本）入 provenance，跨机重放
+    // 对账的环境事实。清单仅当语言为 r 时采集（python 环境清单留候选）。
     const executionTarget = {
       kind: 'ssh-direct',
       targetId: target.id,
       alias: target.alias,
+      hostname: (probe.info && probe.info.hostname) || null,
       nodeOs: (probe.info && probe.info.os) || null,
       runtime: { name: language, version: runtime.version, command: runtime.runtimeBin },
       remoteJobDir: remoteJobDirPath(jobId),
       argmode: 'jobdir',
       agentVersion: AGENT_SCRIPT_HASH,
       transport: 'tar-over-ssh',
+      environment: null,
     };
+    if (language === 'r') {
+      try {
+        const envOp = await runSshOp({ alias: target.alias, remoteCommand: remoteAgentCommand(['renv']), timeoutMs: 60000 });
+        if (envOp.classified.kind === 'ok' && envOp.stdout.trim()) {
+          const crypto = require('crypto');
+          const packagesText = envOp.stdout.trim();
+          const lines = packagesText.split('\n').filter(Boolean);
+          executionTarget.environment = {
+            packagesCount: lines.length,
+            packagesSha256: crypto.createHash('sha256').update(packagesText).digest('hex'),
+            packagesText,
+          };
+        }
+      } catch (e) {
+        console.warn('[mcp-registry] renv capture failed:', e.message);
+      }
+    }
     const scriptErr = Number.isFinite(code) && code !== 0
       ? Object.assign(new Error(`remote script exited ${code}`), { code })
       : null;
