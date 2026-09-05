@@ -31,6 +31,8 @@ import { WindowResultPage } from '@/pages/window/WindowResultPage';
 // BLOCK-59 P2 — 终端独立窗 + 边缘活动轨道（内部专用路由）
 import { TerminalWindowPage } from '@/pages/window/TerminalWindowPage';
 import { RailPage } from '@/components/window/RailPage';
+// BLOCK-59 P3 — 指挥中心（多任务俯瞰单例窗）
+import { CommandCenterPage } from '@/pages/window/CommandCenterPage';
 import '@/components/desktop/desktop.css';
 // 断点6：注入平台 API 给 @biof3/shared 渲染层组件（如 ActResultCard）
 import { configureApi } from '../../core/packages/shared-copilot/api-inject';
@@ -136,6 +138,7 @@ export default function App(): React.ReactElement {
       <Routes>
         <Route path="/window/result/:artifactId" element={<WindowResultPage />} />
         <Route path="/window/terminal/:sessionId" element={<TerminalWindowPage />} />
+        <Route path="/window/command-center" element={<CommandCenterPage />} />
         <Route path="/window/rail" element={<RailPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

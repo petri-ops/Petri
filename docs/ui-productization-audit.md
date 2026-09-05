@@ -2157,6 +2157,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-294: 窗口系统 P3——指挥中心墙：多任务俯瞰单例窗 + 瓦片只读投影 + 下钻 L1 结果窗（BLOCK-59 P3） (2026-09-05 verified)
+
+**用户需求**：BLOCK-59 P3（plan §4.1/§7）——指挥中心墙（codex agent command center 模式）：独立单例总览窗，网格瓦片聚合所有作业实时状态；点击瓦片下钻到 L1 弹出窗。多任务时才打开（随开随关无状态）。
+
+**改动**（0 新 npm 依赖 / 0 新 IPC）：[CommandCenterPage.tsx](../frontend/src/pages/window/CommandCenterPage.tsx)（`/window/command-center`）——**零第二真相**（plan §10 治理红线）：瓦片只读 `listAllJobs()`（/api/tools/history 既有 REST，tool_jobs 表投影），5s 轮询，最近 12 瓦片；瓦片 = 作业名 + 工具 id + 状态点（running 脉冲/done 绿/failed 红）+ 远程目标徽章（BLOCK-57 execution_target_id）+ **实时进度诚实形态 = 状态 + 已耗时**（tool_jobs 无百分比概念，不虚构进度条）；点击瓦片 = 下钻（fetch /tools/status 取首选产物 → `popOut('result', jobId:artifactName)`，同内容禁双开契约复用；无产物如实提示不假装下钻）；[WindowShell.tsx](../frontend/src/components/window/WindowShell.tsx) 增 `closeBehavior` prop（'rail' 默认=× 降格契约 / 'close'=× 真关闭——无状态单例不进轨道不显「收回」，plan §4.1）；[TitleBar.tsx](../frontend/src/components/desktop/TitleBar.tsx) windowTools 增指挥中心入口（仅桌面桥可用时渲染）。
+
+**门禁**：核心单测 36/36（新增 P3 静态契约：WindowShell 默认 ×=降格 + close 形态走真关闭 + 指挥中心 closeBehavior="close" + 瓦片只读 listAllJobs 真相 + TitleBar 入口）；tsc 0。
+
+**实机（2026-09-05，dev Electron CDP，证据 `acceptance/block-59/p3-live.json` 10 断言 allPass + 截图，脚本 [block59-p3-live.cjs](../scripts/block59-p3-live.cjs)）**：① `popOut('command-center')` → 单例窗 created；② 重复弹出 → focused 且 target=1（单例不双开）；③ **瓦片与 tool_jobs 真相交叉核对一致**（12 瓦片渲染最近作业真实名称：sample-metadata-validator / volcano-plot，完成/失败状态点如实——截图 p59-p3-01）；④ 点击瓦片 → 下钻 L1 结果窗（popOut result created + 独立窗 target 出现）；⑤ × 关闭指挥中心 → target 消失（随开随关，不进轨道）且已下钻结果窗不受影响（注册表 popped 保持）。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-293: 窗口系统 P2——边缘活动轨道容器窗 + 终端 Tab 升格独立窗 + 数据转发面（BLOCK-59 P2） (2026-09-05 verified)
 
 **用户需求**：BLOCK-59 P2（plan §5/§7）——轨道容器窗（降格窗口的存放处，原创配件）+ 统一 × 语义 + 终端窗弹出（衔接已收口 BLOCK-54：弹出 = 把某 Tab 会话升格为窗）。

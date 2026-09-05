@@ -1,0 +1,133 @@
+/* BLOCK-59 P3 — 指挥中心瓦片墙（只读投影，零第二真相） */
+.gridWrap {
+  padding: 16px;
+}
+
+.loadError,
+.drillNote {
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.loadError {
+  border: 1px solid var(--biof3-danger, #ff7a7a);
+  color: var(--biof3-danger, #ff7a7a);
+}
+
+.drillNote {
+  border: 1px solid var(--biof3-border-color, #323848);
+  color: var(--biof3-text-secondary, #9aa3b8);
+}
+
+.empty {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--biof3-text-secondary, #9aa3b8);
+  font-size: 13px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--biof3-border-color, #323848);
+  background: var(--biof3-bg-secondary, #262b3a);
+  color: var(--biof3-text-primary, #e6e9f2);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.tile:hover {
+  border-color: var(--biof3-accent, #5a9cff);
+  transform: translateY(-1px);
+}
+
+.tileHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--biof3-text-secondary, #9aa3b8);
+}
+
+.statusDot[data-status='running'] {
+  background: var(--biof3-accent, #5a9cff);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.statusDot[data-status='done'] {
+  background: var(--biof3-ok, #4cd48a);
+}
+
+.statusDot[data-status='failed'] {
+  background: var(--biof3-danger, #ff7a7a);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.tileName {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tileMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--biof3-text-secondary, #9aa3b8);
+}
+
+.remoteBadge {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--biof3-accent-soft, rgba(90, 156, 255, 0.16));
+  color: var(--biof3-accent, #5a9cff);
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tileStatus {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--biof3-text-secondary, #9aa3b8);
+}
+
+.tileStatus [data-status='running'] {
+  color: var(--biof3-accent, #5a9cff);
+}
+
+.tileStatus [data-status='failed'] {
+  color: var(--biof3-danger, #ff7a7a);
+}
+
+.tileStatus [data-status='done'] {
+  color: var(--biof3-ok, #4cd48a);
+}

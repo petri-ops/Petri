@@ -1,0 +1,53 @@
+{
+  "startedAt": "2026-09-05T11:31:44.743Z",
+  "assertions": [
+    {
+      "name": "指挥中心弹出 → created（单例通道）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"command-center:\",\"action\":\"created\"}"
+    },
+    {
+      "name": "指挥中心 target 出现",
+      "pass": true,
+      "detail": "targets=1"
+    },
+    {
+      "name": "重复弹出 → focused（单例不双开）",
+      "pass": true,
+      "detail": "action=focused targets=1"
+    },
+    {
+      "name": "指挥中心瓦片渲染（最近 12 作业内）",
+      "pass": true,
+      "detail": "tiles=12"
+    },
+    {
+      "name": "瓦片内容与 tool_jobs 真相一致（真实作业名上屏）",
+      "pass": true,
+      "detail": "expected~=\"sample-metadata-validator via agent\""
+    },
+    {
+      "name": "点击瓦片触发下钻",
+      "pass": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "下钻 → L1 结果窗弹出（popOut result + target 出现）",
+      "pass": true,
+      "detail": "{\"targets\":1,\"entry\":\"result:tj_mtnyx2kb_97hz:design_summary.json\"}"
+    },
+    {
+      "name": "× 关闭指挥中心 → target 消失（不进轨道，随开随关）",
+      "pass": true,
+      "detail": "targets=0"
+    },
+    {
+      "name": "指挥中心关闭不影响已下钻的结果窗（注册表 popped 仍在）",
+      "pass": true,
+      "detail": "[{\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"popped\"}]"
+    }
+  ],
+  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb",
+  "finishedAt": "2026-09-05T11:31:48.335Z",
+  "allPass": true
+}

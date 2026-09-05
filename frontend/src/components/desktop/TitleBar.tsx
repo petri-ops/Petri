@@ -563,6 +563,18 @@ export function TitleBar(): React.ReactElement {
         )}
 
         <div className={styles.windowTools}>
+          {/* BLOCK-59 P3 — 指挥中心入口（多任务俯瞰单例窗，随开随关） */}
+          {getBridge('windowManager') && (
+            <button
+              type="button"
+              className={styles.iconBtn}
+              onClick={() => void getBridge('windowManager')!.popOut('command-center')}
+              title="打开指挥中心（全部作业实时俯瞰）"
+              aria-label="打开指挥中心"
+            >
+              <Icon name="cpu" size={15} />
+            </button>
+          )}
           <button
             type="button"
             className={`${styles.iconBtn} ${!panels.bottomTerminalOpen ? styles.iconBtnInactive : ''}`}

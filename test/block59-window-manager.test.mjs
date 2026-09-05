@@ -444,6 +444,26 @@ describe('适配器与 preload 静态契约', () => {
     assert.match(src, /window:rail-mouse/, '渲染层穿透切换 IPC 存在');
   });
 
+  test('P3 契约：指挥中心单例 ×=直接关闭（不进轨道），入口在 TitleBar', () => {
+    const shellSrc = fs.readFileSync(
+      path.join(__dirname, '..', 'frontend', 'src', 'components', 'window', 'WindowShell.tsx'),
+      'utf8',
+    );
+    assert.match(shellSrc, /closeBehavior = 'rail'/, 'WindowShell 默认 × = 降格（契约）');
+    assert.match(shellSrc, /closeBehavior === 'close'[\s\S]*?window\.close\(\)/, 'close 形态走真关闭');
+    const ccSrc = fs.readFileSync(
+      path.join(__dirname, '..', 'frontend', 'src', 'pages', 'window', 'CommandCenterPage.tsx'),
+      'utf8',
+    );
+    assert.match(ccSrc, /closeBehavior="close"/, '指挥中心 × = 直接关闭（plan §4.1 无状态单例）');
+    assert.match(ccSrc, /listAllJobs/, '瓦片只读既有 REST 真相（零第二真相）');
+    const titleBarSrc = fs.readFileSync(
+      path.join(__dirname, '..', 'frontend', 'src', 'components', 'desktop', 'TitleBar.tsx'),
+      'utf8',
+    );
+    assert.match(titleBarSrc, /popOut\('command-center'\)/, 'TitleBar 指挥中心入口存在');
+  });
+
   test('preload 暴露 windowManager 桥段', () => {
     const src = fs.readFileSync(PRELOAD, 'utf8');
     assert.match(src, /windowManager:\s*\{/, 'biof3Desktop.windowManager 缺失');

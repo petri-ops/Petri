@@ -14,11 +14,15 @@ export function WindowShell({
   title,
   subtitle,
   badge = '独立窗 · 只读',
+  closeBehavior = 'rail',
   children,
 }: {
   title: string;
   subtitle?: string | null;
   badge?: string;
+  /** 'rail'（默认）：× = 降格进轨道（不可变契约）；'close'：× = 直接关闭
+   *  （无状态单例，如指挥中心，plan §4.1）。close 形态不显示「收回」。 */
+  closeBehavior?: 'rail' | 'close';
   children: React.ReactNode;
 }): React.ReactElement {
   const [contentId, setContentId] = useState<string | null>(null);
@@ -54,8 +58,13 @@ export function WindowShell({
   };
 
   const handleDemote = async () => {
-    if (!contentId) return;
     setActionError('');
+    if (closeBehavior === 'close') {
+      // 无状态单例：× 即真关闭（适配器不拦截 closeBehavior 'close'）
+      try { window.close(); } catch {}
+      return;
+    }
+    if (!contentId) return;
     const bridge = getBridge('windowManager');
     const res = await bridge?.minimizeToRail(contentId);
     if (res && !res.ok) setActionError(res.error || '降格失败');
@@ -71,26 +80,26 @@ export function WindowShell({
         </div>
         <div className={styles.actions} data-no-drag-region="">
           {actionError && <span className={styles.actionError}>{actionError}</span>}
-          {contentId && !bridgeMissing && (
-            <>
-              <button
-                type="button"
-                className={styles.actionBtn}
-                onClick={() => void handleReturn()}
-                title="收回主窗（独立窗关闭，内容回主窗）"
-              >
-                收回
-              </button>
-              <button
-                type="button"
-                className={`${styles.actionBtn} ${styles.demoteBtn}`}
-                onClick={() => void handleDemote()}
-                title="降格到边缘活动轨道（不销毁，可从轨道恢复）"
-                aria-label="降格到活动轨道"
-              >
-                ×
-              </button>
-            </>
+          {closeBehavior === 'rail' && contentId && !bridgeMissing && (
+            <button
+              type="button"
+              className={styles.actionBtn}
+              onClick={() => void handleReturn()}
+              title="收回主窗（独立窗关闭，内容回主窗）"
+            >
+              收回
+            </button>
+          )}
+          {(!bridgeMissing || closeBehavior === 'close') && (
+            <button
+              type="button"
+              className={`${styles.actionBtn} ${styles.demoteBtn}`}
+              onClick={() => void handleDemote()}
+              title={closeBehavior === 'close' ? '关闭指挥中心（无状态单例，随开随关）' : '降格到边缘活动轨道（不销毁，可从轨道恢复）'}
+              aria-label={closeBehavior === 'close' ? '关闭指挥中心' : '降格到活动轨道'}
+            >
+              ×
+            </button>
           )}
         </div>
       </header>
