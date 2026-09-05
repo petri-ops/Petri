@@ -1,0 +1,146 @@
+{
+  "startedAt": "2026-09-05T10:43:08.869Z",
+  "assertions": [
+    {
+      "name": "存在可用的 completed 作业（jobId + artifactName）",
+      "pass": true,
+      "detail": "{\"jobId\":\"tj_mtnyx2kb_97hz\",\"jobName\":\"sample-metadata-validator via agent\",\"artifactName\":\"design_summary.json\"}"
+    },
+    {
+      "name": "主窗 preload 暴露 windowManager 桥",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "初始快照：maxPopped=4（≤4 并发契约）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"snapshot\":{\"maxPopped\":4,\"entries\":[],\"singletons\":{\"commandCenter\":{\"type\":\"command-center\",\"route\":\"/windo"
+    },
+    {
+      "name": "popOut → created（白名单键通过，注册表入 popped）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"action\":\"created\",\"autoDemoted\":null}"
+    },
+    {
+      "name": "独立窗 target 出现（/window/result/ 路由）",
+      "pass": true,
+      "detail": "targets=1"
+    },
+    {
+      "name": "独立窗 self() 身份正确",
+      "pass": true,
+      "detail": "{\"ok\":true,\"contentId\":\"result:tj_mtnyx2kb_97hz:design_summary.json\"}"
+    },
+    {
+      "name": "WindowShell chrome 渲染（拖拽区 + 收回 + ×）",
+      "pass": true,
+      "detail": "{\"hasHeader\":true,\"buttons\":[\"收回\",\"×\"],\"hasReturn\":true,\"hasDemote\":true,\"jobTitleSeen\":true,\"hasDegradedNote\":false,\"artifactNameSeen\":true,\"bodyChars\":387}"
+    },
+    {
+      "name": "独立窗无降级提示（桥可用）",
+      "pass": true,
+      "detail": "false"
+    },
+    {
+      "name": "只读内容上屏（任务标题 / 产物名可见）",
+      "pass": true,
+      "detail": "{\"hasHeader\":true,\"buttons\":[\"收回\",\"×\"],\"hasReturn\":true,\"hasDemote\":true,\"jobTitleSeen\":true,\"hasDegradedNote\":false,\"artifactNameSeen\":true,\"bodyChars\":387}"
+    },
+    {
+      "name": "同内容再弹出 = focused（不建第二窗）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"action\":\"focused\"}"
+    },
+    {
+      "name": "同内容双开后独立窗 target 数不变（=1）",
+      "pass": true,
+      "detail": "targets=1"
+    },
+    {
+      "name": "returnToDock → docked（状态零丢失路径）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"docked\"}"
+    },
+    {
+      "name": "收回后独立窗 target 消失（BrowserWindow 销毁）",
+      "pass": true,
+      "detail": "targets=0"
+    },
+    {
+      "name": "再次弹出 → created",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"action\":\"created\",\"autoDemoted\":null}"
+    },
+    {
+      "name": "× → minimizeToRail（降格不是销毁）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"railed\"}"
+    },
+    {
+      "name": "降格后 target 仍在（隐藏保活，注册表保活可恢复）",
+      "pass": true,
+      "detail": "targets=1"
+    },
+    {
+      "name": "注册表条目 railed + static 淡出时间戳",
+      "pass": true,
+      "detail": "{\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"type\":\"result\",\"key\":\"tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"railed\",\"railClass\":\"static\",\"fadeAfter\":1788605291211,\"createdAt\":1788604989096,\"poppedAt\":1788604991167,\"railedAt\":1788604991211}"
+    },
+    {
+      "name": "restore → popped（回记忆位置）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"popped\",\"autoDemoted\":null}"
+    },
+    {
+      "name": "恢复后独立窗 target 存在",
+      "pass": true,
+      "detail": "targets=1"
+    },
+    {
+      "name": "契约：popped 态 remove 被拒（销毁只有轨道显式移除一条路）",
+      "pass": true,
+      "detail": "{\"ok\":false,\"code\":\"invalid_transition\",\"error\":\"仅轨道内窗口可移除: result:tj_mtnyx2kb_97hz:design_summary.json\"}"
+    },
+    {
+      "name": "remove → closed（轨道内显式移除）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"closed\"}"
+    },
+    {
+      "name": "注册表条目终结（终态后不在注册表）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "geometry 持久化文件含该内容键（重启后记忆位置仍可恢复）",
+      "pass": true,
+      "detail": "{\"x\":301,\"y\":113,\"w\":960,\"h\":680,\"displayId\":1}"
+    },
+    {
+      "name": "P1b 主窗结果视图渲染（result mode 深链）",
+      "pass": true,
+      "detail": "{\"path\":\"/project/p_mtlnsv0f_xpjb/result?job=tj_mtnyx2kb_97hz\",\"hasPopBtn\":true,\"popDisabled\":false,\"resultViewShown\":true,\"techName\":\"sample_alignment.csv\"}"
+    },
+    {
+      "name": "P1b「弹出」按钮可见且可用",
+      "pass": true,
+      "detail": "{\"path\":\"/project/p_mtlnsv0f_xpjb/result?job=tj_mtnyx2kb_97hz\",\"hasPopBtn\":true,\"popDisabled\":false,\"resultViewShown\":true,\"techName\":\"sample_alignment.csv\"}"
+    },
+    {
+      "name": "P1b 真实点击「弹出」→ 独立窗出现且注册表 popped",
+      "pass": true,
+      "detail": "{\"targets\":1,\"entry\":{\"id\":\"result:tj_mtnyx2kb_97hz:sample_alignment.csv\",\"type\":\"result\",\"key\":\"tj_mtnyx2kb_97hz:sample_alignment.csv\",\"state\":\"popped\",\"railClass\":\"static\",\"fadeAfter\":null,\"createdAt\":1788604997403,\"poppedAt\":1788604997403,\"railedAt\":null}}"
+    }
+  ],
+  "contentKey": "tj_mtnyx2kb_97hz:design_summary.json",
+  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb/result?job=tj_mtnyx2kb_97hz",
+  "geometry": {
+    "x": 301,
+    "y": 113,
+    "w": 960,
+    "h": 680,
+    "displayId": 1
+  },
+  "finishedAt": "2026-09-05T10:43:17.564Z",
+  "allPass": true
+}

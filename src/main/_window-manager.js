@@ -25,11 +25,12 @@ const MAX_POPPED_WINDOWS = 4;
 // restorable (hidden keep-alive), so the contract is intact.
 const RAIL_STATIC_FADE_MS = 5 * 60 * 1000;
 
-// Content keys are artifact/session/task identifiers. Path
-// traversal is impossible by construction: no slash, no
-// percent, no whitespace, no control chars; encodeURIComponent
-// runs again at route build time.
-const KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9\-_.:@]{0,127}$/;
+// Content keys are artifact/session/task identifiers. Artifact
+// names may be non-ASCII (delivery manifests are user-facing);
+// safety comes from buildRouteForId running encodeURIComponent —
+// the raw key only has to stay free of URL-structure and control
+// characters so the encoded route stays unambiguous.
+const KEY_PATTERN = /^[^\/\\?#"'\s\u0000-\u001f\u007f%]{1,128}$/;
 
 const CONTENT_TYPES = {
   result: {
@@ -94,7 +95,7 @@ function validateContent({ type, key }) {
     }
     return { ok: true, id: `${type}:`, spec, key: "" };
   }
-  if (typeof key !== "string" || !KEY_PATTERN.test(key)) {
+  if (typeof key !== "string" || key === "." || key === ".." || !KEY_PATTERN.test(key)) {
     return { ok: false, code: "invalid_key", error: `内容键不合法: ${String(key).slice(0, 32)}` };
   }
   return { ok: true, id: `${type}:${key}`, spec, key };

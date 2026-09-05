@@ -222,11 +222,18 @@ describe('路由白名单（fail-closed）', () => {
   });
 
   test('非法键 fail-closed：路径穿越 / 斜杠 / 空 / 超长 / 非字符串', () => {
-    for (const key of ['../settings', 'a/b', '', '   ', '.', '%2e%2e', 'a b', `k${'x'.repeat(200)}`, null, 42, {}]) {
+    for (const key of ['../settings', 'a/b', '', '   ', '.', '..', '%2e%2e', 'a b', 'a?b', 'a#b', `k${'x'.repeat(200)}`, null, 42, {}]) {
       const v = validateContent({ type: 'result', key });
       assert.equal(v.ok, false, `键 ${JSON.stringify(key)} 应被拒绝`);
       assert.equal(v.code, 'invalid_key');
     }
+  });
+
+  test('非 ASCII 产物名是合法键（路由经 encodeURIComponent 保安全）', () => {
+    const v = validateContent({ type: 'result', key: '火山图.png' });
+    assert.equal(v.ok, true, '中文产物名应放行');
+    assert.equal(buildRouteForId('result:火山图.png'), `/window/result/${encodeURIComponent('火山图.png')}`);
+    assert.ok(!buildRouteForId('result:火山图.png').includes('火山'), '路由中不得出现原始非 ASCII 段');
   });
 
   test('构建出的路由全部落在白名单模式内', () => {

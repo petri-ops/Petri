@@ -7,7 +7,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 const BioF3OpenFileDevBridge = lazy(() =>
   import('./components/editor/integration/BioF3OpenFileDevBridge')
 );
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
 import { TitleBar } from '@/components/desktop/TitleBar';
 import { WorkspacePanelsProvider, useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
@@ -23,8 +23,11 @@ import HomePage from '@/pages/home';
 import { ProjectWorkspace } from '@/pages/project-workspace';
 import { ResultStudioPage } from '@/pages/result-studio/ResultStudioPage';
 import SkillsPage from '@/pages/skills';
-// BLOCK-28 — 主区一级审阅模式（方案 B），取代旧侧边抽屉 WorkingTreeReview
+// BLOCK-28 — main-area code review mode (VS Code SCM style)
 import { ReviewModePage } from '@/pages/review';
+// BLOCK-59 P1 — 独立窗路由面：/window/* 不走主窗 AppShell（无 TitleBar/
+// Copilot 等 workspace chrome），由 WindowShell 提供最小只读 chrome。
+import { WindowResultPage } from '@/pages/window/WindowResultPage';
 import '@/components/desktop/desktop.css';
 // 断点6：注入平台 API 给 @biof3/shared 渲染层组件（如 ActResultCard）
 import { configureApi } from '../../core/packages/shared-copilot/api-inject';
@@ -111,6 +114,9 @@ function AppShell(): React.ReactElement {
 }
 
 export default function App(): React.ReactElement {
+  const location = useLocation();
+  const isWindowSurface = location.pathname.startsWith('/window/');
+
   useEffect(() => {
     const html = document.documentElement;
     html.classList.add('biof3-desktop');
@@ -118,6 +124,18 @@ export default function App(): React.ReactElement {
     document.body.style.paddingLeft = '0';
     document.body.style.boxSizing = 'border-box';
   }, []);
+
+  // BLOCK-59 P1 — 独立窗（弹出结果窗/终端窗/指挥中心）加载同一 SPA 的
+  // /window/* 路由：只挂 WindowShell 级 chrome，不挂主窗 Provider 树
+  // （窗口永不持有 canonical state，plan §10 治理红线）。
+  if (isWindowSurface) {
+    return (
+      <Routes>
+        <Route path="/window/result/:artifactId" element={<WindowResultPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    );
+  }
 
   return (
     <BackendStatusProvider>

@@ -1,0 +1,204 @@
+/* BLOCK-59 P1 — 弹出窗外壳：frameless 窗口的自绘拖拽区 + 收回/× */
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--biof3-bg-primary, #1f2330);
+  color: var(--biof3-text-primary, #e6e9f2);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 40px;
+  padding: 0 12px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--biof3-border-color, #323848);
+  background: var(--biof3-bg-secondary, #262b3a);
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 1;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--biof3-accent-soft, rgba(90, 156, 255, 0.16));
+  color: var(--biof3-accent, #5a9cff);
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--biof3-text-secondary, #9aa3b8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  -webkit-app-region: no-drag;
+}
+
+.actionError {
+  font-size: 11px;
+  color: var(--biof3-danger, #ff7a7a);
+}
+
+.actionBtn {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 12px;
+  border: 1px solid var(--biof3-border-color, #323848);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--biof3-text-primary, #e6e9f2);
+  cursor: pointer;
+}
+
+.actionBtn:hover {
+  background: var(--biof3-bg-hover, rgba(255, 255, 255, 0.06));
+}
+
+.demoteBtn {
+  width: 26px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.degradedNote {
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--biof3-text-secondary, #9aa3b8);
+  background: var(--biof3-bg-tertiary, #2d3345);
+  border-bottom: 1px solid var(--biof3-border-color, #323848);
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* ── 结果窗只读聚焦视图 ─────────────────────────────── */
+.resultBody {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.statusChip {
+  align-self: flex-start;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--biof3-bg-tertiary, #2d3345);
+  color: var(--biof3-text-secondary, #9aa3b8);
+}
+
+.statusChip[data-status='running'],
+.statusChip[data-status='pending'] {
+  color: var(--biof3-warning, #ffc861);
+}
+
+.statusChip[data-status='failed'] {
+  color: var(--biof3-danger, #ff7a7a);
+}
+
+.errorBlock {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--biof3-danger, #ff7a7a);
+  color: var(--biof3-danger, #ff7a7a);
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+
+.imageCanvas {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.imageCanvas img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.reportFrame {
+  width: 100%;
+  height: calc(100vh - 40px - 32px);
+  border: 1px solid var(--biof3-border-color, #323848);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.previewTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.previewTable th,
+.previewTable td {
+  border: 1px solid var(--biof3-border-color, #323848);
+  padding: 4px 8px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.previewTable th {
+  background: var(--biof3-bg-tertiary, #2d3345);
+  position: sticky;
+  top: 0;
+}
+
+.textPreview {
+  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--biof3-bg-tertiary, #2d3345);
+  font-size: 12px;
+  font-family: var(--biof3-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: calc(100vh - 40px - 32px);
+  overflow: auto;
+}
+
+.placeholder {
+  padding: 24px;
+  text-align: center;
+  color: var(--biof3-text-secondary, #9aa3b8);
+  font-size: 13px;
+}
+
+.placeholder a {
+  color: var(--biof3-accent, #5a9cff);
+}
