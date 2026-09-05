@@ -1,7 +1,7 @@
 # BLOCK-59 — 窗口系统：停靠 / 弹出 / 指挥中心 / 边缘活动轨道
 
-> 状态：`active`（2026-09-05 用户裁决「按照你的建议 先59」启动，当前唯一 active 工作包；P0–P3 无硬依赖，P4 衔接的 BLOCK-49 spawn 链路已收口）
-> 立项日期：2026-09-04（用户裁决「创建吧」）；启动日期：2026-09-05（用户裁决，候选序裁决为 59 先于 48）
+> 状态：`completed`（2026-09-05 用户裁决启动 → 同日 P0–P4 一次会话整包收口：P0 窗口管理器 36/36 + P1 结果窗 26 断言 + P2 轨道/终端窗 14 断言 + P3 指挥中心 10 断言 + P4 agent 详情窗 10 断言，四套实机脚本收口前顺序回归全 PASS；UI-292/293/294/295 verified）
+> 立项日期：2026-09-04（用户裁决「创建吧」）；启动日期：2026-09-05（用户裁决，候选序裁决为 59 先于 48）；收口日期：2026-09-05
 > truthDomain: `block-59-window-system`
 > 来源：用户想法（子 agent 工作流 / 分析结果的独立展示窗口）→ 综合主流参考（VS Code auxiliary windows + codex agent command center）+ 原创配件（边缘活动轨道）；经四轮讨论收敛（三层架构权重裁决 70/20/10）
 
@@ -127,3 +127,10 @@ docked ──弹出──► popped ──×/超上限──► railed ──显
 
 - 2026-09-04 P0（planned 登记）：用户裁决立项。四轮讨论收敛：①用户提出独立窗口想法→评估可行性与资源；②四态形态（停靠/墙/PiP/收起）与参考系；③轨道深挖后被用户纠正「不要跑太远」→收敛为三层架构权重 70/20/10（原创做配件不做中心）；④细化补完（状态机/注册表/IPC/备选裁决/分期）→用户裁决「创建吧」。本计划落盘并注册 DOC-REGISTRY；P0–P3 无硬依赖；P4 衔接已收口的 BLOCK-49。
 - 2026-09-05 P0 启动（planned → active）：用户裁决「按照你的建议 先59」（候选序 59 先于 48）。前置核验：BLOCK-57/60 均已收口、AUDIT-LOG 无阻塞项、无 worktree、工作区无未知 WIP（openclaw/ 非本包范围不触碰）。当前唯一 active 工作包 = BLOCK-59。P0 范围：窗口管理器模块（内容类型注册表/窗口状态机/IPC 面 additive/geometry 主进程持有并持久化）+ 状态机全转移路径单测 + 路由白名单 fail-closed 测试。
+- 2026-09-05 P0–P4 整包收口（一次会话，e3b32e33 → acd863c1）：
+  - **P0 窗口管理器**（e3b32e33）：`src/main/_window-manager.js` 纯核心（无 Electron 依赖参数注入）+ `src/ipc/window-manager.js` 适配器 7 通道 IPC + state-changed 多播 + close 拦截降格 + before-quit 收割 + sender 作用域；`_window-create.js` additive `onSpaServerReady`；preload `windowManager` 桥段 + electron.d.ts；单测 36/36（全转移路径/白名单 fail-closed/geometry round-trip+副屏回落/事件增量/适配器 preload main.js 静态契约锁）；impact-map 补 block59 规则。**plan 具体化偏差（如实登记）**：内容键落地为 `result:<jobId>:<artifactName>`（渲染需 job 上下文，/api/tools/status 语言无关自举）；KEY_PATTERN 放行非 ASCII 产物名（路由经 encodeURIComponent 保安全，'.'/'..' 显式拒绝）。
+  - **P1 结果窗**（40cde076，UI-292 verified）：WindowShell（frameless 拖拽 chrome + 收回/×）+ WindowResultPage 只读聚焦视图（manifest 归一 + Result Studio 纯函数按类型渲染）+ App.tsx /window/* 路由分支（不挂主窗 Provider 树）+ ResultView「弹出」入口；实机 26 断言（弹出/同内容聚焦/收回/× 降格保活/恢复/**popped 态 remove 被拒契约实证**/轨道移除销毁/geometry 持久化/真实按钮点击）。
+  - **P2 轨道 + 终端窗**（ccbe8e2f，UI-293 verified）：28px 透明 alwaysOnTop 轨道条带窗（懒创建/穿透 ignoreMouseEvents/rail-mouse hover 切换/无条目自动 hide）+ RailPage 只读注册表投影（刻度点击恢复/hover 320px 卡显式移除/static 5min 淡出视觉降权/7 刻度收拢 +N）+ terminal.js `forwardToContentWindow`（terminal:data/exit 送达受管窗）+ TerminalWindowPage（同一 pty 第二活视图，主窗 tab 保活零丢失）+ BottomTerminal 升格按钮；**实机抓真修**：rail sender 被自身作用域规则拦截——轨道授予全量变异权（hover 恢复/显式移除是轨道职责，plan §5）；实机 14 断言（pty 升格/xterm 挂载/数据面转发实锤/降格→轨道懒创建/刻度点击恢复/自动隐藏/显式移除终结）。
+  - **P3 指挥中心**（b2397ed2，UI-294 verified）：CommandCenterPage 单例无状态窗（**零第二真相**：瓦片只读 /api/tools/history 既有 REST，5s 轮询最近 12 作业；诚实耗时进度不虚构百分比；点击瓦片下钻 L1 结果窗）+ WindowShell `closeBehavior` prop（'rail' 契约默认 / 'close' 无状态单例真关闭）+ TitleBar 入口；实机 10 断言（单例创建/不双开/瓦片与 tool_jobs 真相交叉核对/下钻弹出/× 随开随关不进轨道）。
+  - **P4 agent 详情窗**（acd863c1，UI-295 verified）：AgentWindowPage 复用 `subscribeAgentTask` 既有 SSE（/api/ai/agent/task 零新后端面，断线退避续传同款）——全量回放即实时路径，时间线 tool_call/result 200 条环形截断 + 终态摘要 delta 回放累积（与父会话/wait_agent 同源）+ 终态徽章如实；toolActivity additive `agentRunId`（仅 spawn/wait/list 提取）+ ToolActivityList「详情窗」按钮；**实机抓真修**：statusChip 类名跨 CSS module 引用错位（tsc 不可见）；实机 10 断言（真实历史子 agent 8 tool_call + 92 delta 回放渲染/摘要 1258 字符/徽章「已完成」/流健康）。
+  - **收口门**：四套实机脚本（block59-ui-live/p2/p3/p4-live）收口前顺序回归全 PASS（60 断言）；单测 36/36；前端受影响 vitest 23/23；tsc 0；docs:check + ui:audit:check PASS；UI-292/293/294/295 verified。诚实范围：重启后弹出窗不恢复（P1 plan 明示，geometry 持久化佐证）；static 5min 淡出由 railEntries 单测覆盖（实机不做 5min 等待）；「详情窗」入口按钮以数据面单测 + 同一 popOut IPC 实机驱动覆盖。0 新 npm 依赖；复用 `_window-create.js`/同一 SPA 路由/task_events 与 SSE 链（plan §10 治理红线全程守住：轨道/指挥中心/agent 窗全部只读投影，窗口永不持有 canonical state）。G0 开发期常态 · 不外推 packaged/Provider/GA。
