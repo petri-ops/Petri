@@ -64,6 +64,55 @@ declare global {
         toggleFullScreen: () => void;
         onFullScreenChanged: (callback: (isFullScreen: boolean) => void) => () => void;
       };
+      /** BLOCK-59 窗口系统 — 窗口状态机（docked/popped/railed/closed）IPC 面。 */
+      windowManager: {
+        /** 把内容弹出为独立窗口；同内容已弹出 = 聚焦既有窗（禁双开）。 */
+        popOut: (type: string, key?: string) => Promise<{
+          ok: boolean;
+          id?: string;
+          action?: 'created' | 'focused' | 'restored' | 'singleton';
+          autoDemoted?: string | null;
+          code?: string;
+          error?: string;
+        }>;
+        /** popped → docked：弹出窗收回主窗（BrowserWindow 销毁，状态零丢失）。 */
+        returnToDock: (id: string) => Promise<{ ok: boolean; state?: string; code?: string; error?: string }>;
+        /** popped → railed：× = 降格进边缘轨道（永不销毁，plan §3 不可变契约）。 */
+        minimizeToRail: (id: string) => Promise<{ ok: boolean; state?: string; code?: string; error?: string }>;
+        /** railed → popped：从轨道恢复（回记忆位置）。 */
+        restore: (id: string) => Promise<{ ok: boolean; state?: string; autoDemoted?: string | null; code?: string; error?: string }>;
+        /** railed → closed：唯一的销毁路径（仅轨道内显式移除）。 */
+        remove: (id: string) => Promise<{ ok: boolean; state?: string; code?: string; error?: string }>;
+        snapshot: () => Promise<{
+          ok: boolean;
+          snapshot?: {
+            maxPopped: number;
+            entries: Array<{
+              id: string;
+              type: string;
+              key: string;
+              state: 'docked' | 'popped' | 'railed';
+              railClass: 'static' | 'persistent';
+              fadeAfter: number | null;
+              createdAt: number;
+              poppedAt: number | null;
+              railedAt: number | null;
+            }>;
+            singletons: Record<string, { type: string; route: string }>;
+          };
+          code?: string;
+        }>;
+        /** 当前窗口的内容身份：主窗为 null，弹出窗为 'type:key'。 */
+        self: () => Promise<{ ok: boolean; contentId: string | null; code?: string }>;
+        /** 注册表增量多播（所有存活窗）：{ kind: 'upsert', entry } / { kind: 'remove', id }。 */
+        onStateChanged: (
+          callback: (
+            payload:
+              | { kind: 'upsert'; entry: { id: string; type: string; key: string; state: 'docked' | 'popped' | 'railed'; railClass: 'static' | 'persistent'; fadeAfter: number | null; createdAt: number; poppedAt: number | null; railedAt: number | null } }
+              | { kind: 'remove'; id: string }
+          ) => void
+        ) => () => void;
+      };
       /** 应用级控制 —— 装完运行时后需整体重启（BIOF3_R_HOME 在 main 启动时固化）。 */
       app: {
         relaunch: () => Promise<{ ok: boolean; error?: string }>;

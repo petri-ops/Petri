@@ -346,6 +346,18 @@
       "classifiesScripts": false
     },
     {
+      "id": "block59-window-manager",
+      "note": "BLOCK-59 窗口系统：窗口管理器核心（状态机/注册表/路由白名单/geometry）+ Electron 适配器 IPC 面。改动即跑核心单测（含适配器/preload/main.js 静态契约锁）。",
+      "patterns": [
+        "src/main/_window-manager.js",
+        "src/ipc/window-manager.js"
+      ],
+      "tests": [
+        "test/block59-window-manager.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "plugin-runtime",
       "patterns": [
         "resources/built-in-plugins/**",

@@ -130,6 +130,25 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     },
   },
 
+  // BLOCK-59 窗口系统 — 弹出窗 / 边缘轨道 / 指挥中心。
+  // × 永远是降格（minimizeToRail），销毁只有轨道显式 remove（plan §3 契约）。
+  windowManager: {
+    popOut: (type, key) => ipcRenderer.invoke('window:pop-out', { type, key }),
+    returnToDock: (id) => ipcRenderer.invoke('window:return', { id }),
+    minimizeToRail: (id) => ipcRenderer.invoke('window:minimize', { id }),
+    restore: (id) => ipcRenderer.invoke('window:restore', { id }),
+    remove: (id) => ipcRenderer.invoke('window:remove', { id }),
+    snapshot: () => ipcRenderer.invoke('window:snapshot'),
+    /** 当前窗口的内容身份：主窗为 null，弹出窗为 'type:key'。 */
+    self: () => ipcRenderer.invoke('window:self'),
+    onStateChanged: (callback) => {
+      if (typeof callback !== 'function') return () => {};
+      const listener = (_event, payload) => callback(payload);
+      ipcRenderer.on('window:state-changed', listener);
+      return () => ipcRenderer.removeListener('window:state-changed', listener);
+    },
+  },
+
   // 应用级控制 — 装完运行时后需整体重启（BIOF3_R_HOME 在 main 启动时固化，
   // 只重启 biof3-server 不够，必须重新解析 runtime 路径）
   app: {

@@ -28,6 +28,9 @@ const fs = require("fs");
  * @param {function} deps.publishAgentWorkbenchFlags - publish fn from _agent-flags.js
  * @param {function} deps.getAgentWorkbenchFlags      - getAgentWorkbenchFlags fn
  * @param {function} deps.startSpaServer      - startSpaServer() from _spa-server.js
+ * @param {function} [deps.onSpaServerReady]  - (spaServerUrl) => void; lets callers
+ *                                              retain the SPA base URL for secondary
+ *                                              windows (BLOCK-59 window manager)
  * @returns {Promise<BrowserWindow>}
  */
 async function createWindow({
@@ -43,6 +46,7 @@ async function createWindow({
   publishAgentWorkbenchFlags,
   getAgentWorkbenchFlags,
   startSpaServer,
+  onSpaServerReady,
 }) {
   // ── SPA Server ───────────────────────────────────────────────
   const { spaServerUrl, spaIndexPath } = await startSpaServer({
@@ -51,6 +55,9 @@ async function createWindow({
     rendererDevUrl,
     process,
   });
+  if (typeof onSpaServerReady === "function" && spaServerUrl) {
+    onSpaServerReady(spaServerUrl);
+  }
 
   // ── Window Creation ──────────────────────────────────────────
   const mainWindow = new BrowserWindow({

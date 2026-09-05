@@ -504,6 +504,16 @@ async function main() {
     publishAgentWorkbenchFlags,
     getAgentWorkbenchFlags: () => agentWorkbenchFlags,
     startSpaServer,
+    onSpaServerReady: noteSpaServerUrl,
+  });
+
+  // 8. 窗口系统 IPC（BLOCK-59 P0）——必须在 createWindow 之后装配：
+  //    SPA base URL 已就绪，主窗口 webContents 已存在可供多播。
+  const { setupWindowManagerIpc } = require("./ipc/window-manager.js");
+  setupWindowManagerIpc({
+    getMainWindow,
+    getSpaBaseUrl: () => windowManagerSpaBaseUrl,
+    resolveResource,
   });
 }
 
@@ -538,6 +548,7 @@ app.on("activate", () => {
       publishAgentWorkbenchFlags,
       getAgentWorkbenchFlags: () => agentWorkbenchFlags,
       startSpaServer,
+      onSpaServerReady: noteSpaServerUrl,
     }).catch((err) => {
       console.error("[desktop] window recreation failed:", err);
     });
@@ -556,3 +567,11 @@ app.on("before-quit", () => {
 
 // Initialize application menu
 setupAppMenu({ app, BrowserWindow, Menu, process });
+
+// ── BLOCK-59 窗口系统 ─────────────────────────────────────────
+// createWindow() 内部启动的 SPA 服务地址需要让弹出窗复用（同一 SPA 走
+// 路由，不建第二套前端，plan §4.2），经 onSpaServerReady 回调留存。
+let windowManagerSpaBaseUrl = null;
+function noteSpaServerUrl(url) {
+  windowManagerSpaBaseUrl = url;
+}
