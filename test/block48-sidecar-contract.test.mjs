@@ -149,7 +149,8 @@ describe('已授权环境：真实目标解析', () => {
     trusted = probe?.data?.trusted === true;
   });
 
-  test('snapshot frontmost：返回 app 信息与元素数组（ref 稳定命名）', { skip: !trusted && '环境未授权辅助功能' }, async () => {
+  test('snapshot frontmost：返回 app 信息与元素数组（ref 稳定命名）', async (t) => {
+    if (!trusted) return t.skip('环境未授权辅助功能');
     const res = await request('snapshot', { target: { frontmost: true }, maxElements: 50 });
     assert.equal(res.ok, true, JSON.stringify(res.error || {}).slice(0, 200));
     assert.ok(res.data.app && typeof res.data.app.pid === 'number');
@@ -169,7 +170,8 @@ describe('已授权环境：真实目标解析', () => {
     }
   });
 
-  test('axmanual 真实目标：applied 布尔 + hint', { skip: !trusted && '环境未授权辅助功能' }, async () => {
+  test('axmanual 真实目标：applied 布尔 + hint', async (t) => {
+    if (!trusted) return t.skip('环境未授权辅助功能');
     const res = await request('axmanual', { target: { frontmost: true } });
     assert.equal(res.ok, true);
     assert.equal(typeof res.data.applied, 'boolean');

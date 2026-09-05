@@ -1,0 +1,20 @@
+{
+  "beforeCount": 175,
+  "afterCount": 175,
+  "verdict": "already_initialized",
+  "rolesSample": [
+    "AXApplication",
+    "AXWindow",
+    "AXGroup",
+    "AXWebArea",
+    "AXButton",
+    "AXStaticText",
+    "AXCheckBox",
+    "AXPopUpButton",
+    "AXLink",
+    "AXMenuBar",
+    "AXMenuBarItem",
+    "AXMenu",
+    "AXMenuItem"
+  ]
+}

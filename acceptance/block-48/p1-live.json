@@ -1,0 +1,47 @@
+{
+  "startedAt": "2026-09-05T23:12:22.373Z",
+  "assertions": [
+    {
+      "name": "A1 权限链路：probe trusted:true（用户已手动授权 ZCode）",
+      "pass": true,
+      "detail": "{\"trusted\":true}"
+    },
+    {
+      "name": "B1 dev Electron 可定位（bundleId + regular policy）",
+      "pass": true,
+      "detail": "{\"count\":175}"
+    },
+    {
+      "name": "B2 AX 懒初始化：axmanual 规避后语义树丰富（或本机已初始化如实记录）",
+      "pass": true,
+      "detail": "{\"beforeCount\":175,\"afterCount\":175,\"verdict\":\"already_initialized\"}"
+    },
+    {
+      "name": "B3 语义树含可交互元素（button/textfield 类角色出现）",
+      "pass": true,
+      "detail": "roles=AXApplication,AXWindow,AXGroup,AXWebArea,AXButton,AXStaticText,AXCheckBox,AXPopUpButton,AXLink,AXMenuBar"
+    },
+    {
+      "name": "C1 TextEdit 运行中语义树可读",
+      "pass": true,
+      "detail": "{\"count\":300}"
+    },
+    {
+      "name": "C2 运行中模式：文本区坐标点击（聚焦光标，无害）",
+      "pass": true,
+      "detail": "{\"id\":11,\"ok\":true,\"data\":{\"method\":\"cgevent\",\"point\":[543,393],\"ref\":\"e4\"}}"
+    },
+    {
+      "name": "C3 点击后焦点在文本区（focusedRole=AXTextArea）",
+      "pass": true,
+      "detail": "{\"focusedBefore\":\"AXTextArea\",\"focusedAfter\":\"AXTextArea\"}"
+    },
+    {
+      "name": "C5 snapshot→click 闭环成立",
+      "pass": true,
+      "detail": "{\"method\":\"cgevent\",\"ref\":\"e4\",\"focusedBefore\":\"AXTextArea\"}"
+    }
+  ],
+  "finishedAt": "2026-09-05T23:12:34.169Z",
+  "allPass": true
+}
