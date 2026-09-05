@@ -310,8 +310,19 @@ export function SimpleChat({
   // BLOCK-57：远程执行目标——确认卡选择器数据（仅当存在已注册目标时渲染，本机永远是默认）
   const [remoteTargets, setRemoteTargets] = useState<Array<{ id: string; alias: string }>>([]);
   const [approvalExecutionTargetId, setApprovalExecutionTargetId] = useState('');
-  // BLOCK-57 UI-290 — 会话级执行目标：composer 选择器（本机永远默认）
-  const [sessionExecTargetId, setSessionExecTargetId] = useState<string>('');
+  // BLOCK-57 UI-290 — 执行目标：composer 选择器（本机永远默认；选择持久化，
+  // 页面刷新/重启后保留——用户测试反馈会话态易丢失，跑错本机）。
+  const EXEC_TARGET_STORAGE_KEY = 'biof3.executionTargetId';
+  const [sessionExecTargetId, setSessionExecTargetIdState] = useState<string>(() => {
+    try { return window.localStorage.getItem(EXEC_TARGET_STORAGE_KEY) || ''; } catch { return ''; }
+  });
+  const setSessionExecTargetId = (value: string) => {
+    setSessionExecTargetIdState(value);
+    try {
+      if (value) window.localStorage.setItem(EXEC_TARGET_STORAGE_KEY, value);
+      else window.localStorage.removeItem(EXEC_TARGET_STORAGE_KEY);
+    } catch { /* 隐私模式等场景下允许失败，仅本次会话生效 */ }
+  };
   const [execTargetMenuOpen, setExecTargetMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -323,7 +334,9 @@ export function SimpleChat({
       .then(async (response) => (response.ok ? response.json() : null))
       .then((payload) => {
         const registered = Array.isArray(payload?.registered) ? payload.registered : [];
+        const ids = new Set(registered.map((row: { id: string }) => row.id));
         setRemoteTargets(registered.map((row: { id: string; alias: string }) => ({ id: row.id, alias: row.alias })));
+        setSessionExecTargetIdState((current) => (current && !ids.has(current) ? '' : current));
       })
       .catch(() => setRemoteTargets([]));
   }, []);
