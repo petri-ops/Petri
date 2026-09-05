@@ -1,0 +1,47 @@
+{
+  "startedAt": "2026-09-05T22:16:53.852Z",
+  "assertions": [
+    {
+      "name": "存在 ≥2 个可用 completed 作业",
+      "pass": true,
+      "detail": "[{\"jobId\":\"tj_mtnyx2kb_97hz\",\"artifactName\":\"design_summary.json\"},{\"jobId\":\"tj_mtnywtsc_dszf\",\"artifactName\":\"counts.csv\"}]"
+    },
+    {
+      "name": "轨道窗出现",
+      "pass": true,
+      "detail": "targets=1"
+    },
+    {
+      "name": "轨道 2 刻度",
+      "pass": true,
+      "detail": "{\"count\":2}"
+    },
+    {
+      "name": "hover 刻度触发",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "hover 卡标题 = 最新降格条目",
+      "pass": true,
+      "detail": "{\"title\":\"结果 · counts.csv\"}"
+    },
+    {
+      "name": "滚轮向下 → 卡切换到次新条目",
+      "pass": true,
+      "detail": "{\"title\":\"结果 · design_summary.json\"}"
+    },
+    {
+      "name": "滚轮向上 → 切回最新条目",
+      "pass": true,
+      "detail": "{\"title\":\"结果 · counts.csv\"}"
+    },
+    {
+      "name": "垂直钳位：卡片完整在窗口界内（12px 边距）",
+      "pass": true,
+      "detail": "{\"top\":12,\"bottom\":342,\"innerHeight\":600}"
+    }
+  ],
+  "finishedAt": "2026-09-05T22:16:59.803Z",
+  "allPass": true
+}

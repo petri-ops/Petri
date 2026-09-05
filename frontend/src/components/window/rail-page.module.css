@@ -77,13 +77,13 @@
   opacity: 0.6;
 }
 
-/* ── hover 卡：锚条带左侧，320px，含降格瞬间内容快照 ── */
+/* ── hover 卡：锚条带左侧、top 跟随悬停刻度（垂直钳位），320px，含降格瞬间内容快照 ── */
 .card {
   pointer-events: auto;
   position: absolute;
   right: 36px;
   width: 320px;
-  max-height: 78vh;
+  max-height: calc(100vh - 24px);
   overflow: auto;
   padding: 12px;
   border-radius: 10px;

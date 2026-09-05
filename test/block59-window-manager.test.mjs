@@ -456,6 +456,22 @@ describe('适配器与 preload 静态契约', () => {
     assert.match(preloadSrc, /thumbnail:\s*\(id\)/, 'preload 暴露 thumbnail');
   });
 
+  test('加映三契约：轨道滚轮换卡 + 卡片垂直钳位（plan §5 补全）', () => {
+    const railSrc = fs.readFileSync(
+      path.join(__dirname, '..', 'frontend', 'src', 'components', 'window', 'RailPage.tsx'),
+      'utf8',
+    );
+    assert.match(railSrc, /onWheel=\{handleWheel\}/, '刻度区滚轮换卡 handler 存在');
+    assert.match(railSrc, /Math\.min\(Math\.max\(anchorTopRef\.current, CARD_EDGE_GAP\), max\)/, '卡片 top 垂直钳位（复用 UI-255 重钳思路）');
+    assert.match(railSrc, /ResizeObserver\(reclamp\)/, '卡片尺寸变化（快照加载）触发重钳');
+    assert.match(railSrc, /tickRefs\.current\[entry\.id\] = el/, '刻度锚点 ref 记录');
+    const cssSrc = fs.readFileSync(
+      path.join(__dirname, '..', 'frontend', 'src', 'components', 'window', 'rail-page.module.css'),
+      'utf8',
+    );
+    assert.match(cssSrc, /max-height: calc\(100vh - 24px\)/, '卡片不超窗口高（钳位兜底）');
+  });
+
   test('P3 契约：指挥中心单例 ×=直接关闭（不进轨道），入口在 TitleBar', () => {
     const shellSrc = fs.readFileSync(
       path.join(__dirname, '..', 'frontend', 'src', 'components', 'window', 'WindowShell.tsx'),

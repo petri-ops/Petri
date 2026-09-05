@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-09-05T17:34:20.810Z",
+  "startedAt": "2026-09-05T22:17:13.792Z",
   "assertions": [
     {
       "name": "主窗桥可用 + 预清理",
@@ -49,7 +49,7 @@
     {
       "name": "点击刻度 → popped（恢复路径完好）",
       "pass": true,
-      "detail": "{\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"type\":\"result\",\"key\":\"tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"popped\",\"railClass\":\"static\",\"fadeAfter\":null,\"createdAt\":1788629661039,\"poppedAt\":1788629664548,\"railedAt\":null}"
+      "detail": "{\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"type\":\"result\",\"key\":\"tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"popped\",\"railClass\":\"static\",\"fadeAfter\":null,\"createdAt\":1788646633946,\"poppedAt\":1788646637473,\"railedAt\":null}"
     },
     {
       "name": "清理：降格 + 显式移除",
@@ -57,6 +57,6 @@
       "detail": "{\"ok\":true,\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"closed\"}"
     }
   ],
-  "finishedAt": "2026-09-05T17:34:25.814Z",
+  "finishedAt": "2026-09-05T22:17:18.748Z",
   "allPass": true
 }

@@ -2157,6 +2157,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-298: 边缘活动轨道加映三——滚轮换卡 + 卡片垂直钳位（BLOCK-59 加映，plan §5 补全） (2026-09-06 verified)
+
+**背景**：对账发现 plan §5 两个交互细节未实现——「滚轮换卡」与「卡片锚轨道左侧、垂直钳位防越界」（首版只做了鼠标逐个悬停 + 卡片固定顶部）。用户裁决「开干」补全。
+
+**改动**（纯前端，0 主进程变更）：[RailPage.tsx](../frontend/src/components/window/RailPage.tsx) ① **滚轮换卡**——条带 `onWheel`：deltaY>0 切向列表下方（更旧条目）、<0 切回上方，统一走 `hoverTick`（取消关闭计时 + 收鼠标 + 更新锚点）；② **卡片垂直钳位**（复用 UI-255 重钳思路）——悬停刻度的 `getBoundingClientRect().top` 记为锚点，卡片 `top` 钳制在 `[12px, innerHeight - 卡高 - 12px]`；快照加载等卡片尺寸变化经 ResizeObserver 重钳；[rail-page.module.css](../frontend/src/components/window/rail-page.module.css) 卡片 `max-height: calc(100vh - 24px)` 兜底。
+
+**门禁**：核心单测 38/38（新增加映三契约锁：onWheel handler / 钳位表达式 / ResizeObserver 重钳 / 刻度锚点 ref / CSS 兜底）；tsc 0；**加映二轨道预览 9 断言实机回归 PASS（hover 流程无破坏）**。
+
+**实机（2026-09-06，dev Electron CDP，证据 `acceptance/block-59/rail-wheel-live.json` 8 断言 allPass + 截图，脚本 [block59-rail-wheel-live.cjs](../scripts/block59-rail-wheel-live.cjs)）**：两个真实作业降格 → 轨道 2 刻度 → hover 刻度卡标题 = 最新条目（counts.csv）→ **滚轮向下切换到次新条目（design_summary.json）→ 滚轮向上切回** → 钳位断言卡 rect top=12 / bottom=342 ≤ 600-12（完整在窗内）。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-297: 边缘活动轨道加映——hover 内容快照预览 + 可辨识类型图标刻度（BLOCK-59 加映二，用户反馈） (2026-09-06 verified)
 
 **用户反馈**（附截图）：① 轨道 hover 应可预览内容；② 轨道「展示不全，看不出来是啥」。
