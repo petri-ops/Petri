@@ -3468,7 +3468,7 @@
       "id": "BLOCK-57-REMOTE-EXECUTION",
       "path": "docs/block-57-remote-execution-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-57-remote-execution",
       "entrypoint": "docs/README.md",
@@ -3482,10 +3482,10 @@
         "compute-to-data",
         "G0"
       ],
-      "notes": "2026-09-05 阶段标记：P1 completed（UI-290 verified，用户真实对话 dell 执行闭环）；P2 Slurm 用户裁决不做（后期再说）；P3/P4 planned 待裁决。2026-09-04 P1 SSH 直连收口 completed（真实节点 aliyun 全链 ALL PASS：模块级 10/10 + 应用级 7/7；UI-290 in_progress 待 dev Electron UI 实机；P2 Slurm 适配/P3 复现链跨机/P4 广度待续）。2026-09-04 P0 设计评审 confirmed（九项裁决 D1-D9 + 五项偏差，docs/block-57-design-review.md）；同日用户裁决启动 active。2026-09-04 启动（active，用户裁决「启动 BLOCK-57 远程执行」）：P0 设计评审已产出 docs/block-57-design-review.md（九项设计裁决 D1-D9 + 五项 plan 偏差 + 错误分类表 + P1 范围切分 + 八项待确认问题），待用户确认后进 P1（SSH 直连）。2026-09-03 planned 登记（用户裁决立项：算力扩展设计讨论）：核心裁决=不做 Linux 桌面版（解决算力认同而非算力本身），做本地指挥席 + SSH headless 执行节点 + 调度器适配。复用三项既有资产（LanguageExecutor 抽象 / tool_jobs 状态机 / Job 文件级形态 script+params）。四阶段：P1 SSH 直连单服务器直跑、P2 Slurm 适配 sbatch/sacct/scancel、P3 复现链跨机 provenance+hash 校验、P4 LSF/SGE+多目标路由。P1-P2 G0 兼容产品能力（用户自有服务器/集群 SSH 出去，无 BioF3 云中转，不踩 Provider/发布纪律）。体量排队清单最大包。0 新 npm 依赖。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-09-05 整包收口 completed：P1 SSH 直连（aliyun 全链 ALL PASS + 用户实测闭环 + UI-290 verified）+ P3 跨机复现对账（数据产物双机逐字节一致）+ P2 Slurm/P4 广度 用户裁决不做。后续候选：dell 按需补装 R 包、结果标题栏目标标识、P2/P4 随需求重启。2026-09-05 阶段标记：P1 completed（UI-290 verified，用户真实对话 dell 执行闭环）；P2 Slurm 用户裁决不做（后期再说）；P3/P4 planned 待裁决。2026-09-04 P1 SSH 直连收口 completed（真实节点 aliyun 全链 ALL PASS：模块级 10/10 + 应用级 7/7；UI-290 in_progress 待 dev Electron UI 实机；P2 Slurm 适配/P3 复现链跨机/P4 广度待续）。2026-09-04 P0 设计评审 confirmed（九项裁决 D1-D9 + 五项偏差，docs/block-57-design-review.md）；同日用户裁决启动 active。2026-09-04 启动（active，用户裁决「启动 BLOCK-57 远程执行」）：P0 设计评审已产出 docs/block-57-design-review.md（九项设计裁决 D1-D9 + 五项 plan 偏差 + 错误分类表 + P1 范围切分 + 八项待确认问题），待用户确认后进 P1（SSH 直连）。2026-09-03 planned 登记（用户裁决立项：算力扩展设计讨论）：核心裁决=不做 Linux 桌面版（解决算力认同而非算力本身），做本地指挥席 + SSH headless 执行节点 + 调度器适配。复用三项既有资产（LanguageExecutor 抽象 / tool_jobs 状态机 / Job 文件级形态 script+params）。四阶段：P1 SSH 直连单服务器直跑、P2 Slurm 适配 sbatch/sacct/scancel、P3 复现链跨机 provenance+hash 校验、P4 LSF/SGE+多目标路由。P1-P2 G0 兼容产品能力（用户自有服务器/集群 SSH 出去，无 BioF3 云中转，不踩 Provider/发布纪律）。体量排队清单最大包。0 新 npm 依赖。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-03",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P1-COMPLETED-P2-DESCOPED"
+      "phase": "COMPLETED"
     },
     {
       "id": "BLOCK-57-DESIGN-REVIEW",
@@ -3576,6 +3576,6 @@
       "phase": "PLANNED"
     }
   ],
-  "lastUpdated": "2026-09-05 (BLOCK-60-COMPOSER-TOOLBAR planned 登记)",
+  "lastUpdated": "2026-09-05 (BLOCK-57-REMOTE-EXECUTION 整包收口 completed：P1+P3 完成、P2/P4 用户裁决不做)",
   "documentCount": 203
 }

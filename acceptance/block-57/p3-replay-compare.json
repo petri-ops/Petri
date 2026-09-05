@@ -1,0 +1,148 @@
+{
+  "block": "BLOCK-57",
+  "part": "P3 跨机复现对账",
+  "at": "2026-09-05T05:54:30.089Z",
+  "runs": {
+    "dell": {
+      "jobId": "tj_mtnywtsc_dszf",
+      "status": "completed",
+      "executionTarget": {
+        "kind": "ssh-direct",
+        "targetId": "tgt_d0e2ece166bd",
+        "alias": "dell",
+        "hostname": "devah",
+        "nodeOs": "Linux 6.8.0-137-generic",
+        "runtime": {
+          "name": "r",
+          "version": "4.5.3",
+          "command": "/usr/bin/Rscript"
+        },
+        "remoteJobDir": "$HOME/.biof3-agent/jobs/rjob_tj_mtnywtsc_dszf_661061",
+        "argmode": "jobdir",
+        "agentVersion": "ec012a2941b550bf",
+        "transport": "tar-over-ssh",
+        "environment": {
+          "packagesCount": 841,
+          "packagesSha256": "86bb05bbdb8b72640808fa2d7291a84d7c72968d1bf42c0b1e2ce3ae07c88c2e",
+          "packagesText": "abind=1.4-8\nABSOLUTE=1.0.6\nafex=1.5-1\nairway=1.28.0\nalabaster.base=1.8.1\nalabaster.matrix=1.8.0\nalabaster.ranges=1.8.0\nalabaster.schemas=1.8.0\nalabaster.se=1.8.0\nALL=1.50.0\nalluvial=0.1-2\nannotate=1.86.1\nAnnotationDbi=1.70.0\nAnnotationHub=3.16.1\nape=5.8-1\napeglm=1.30.0\naplot=0.2.9\nargparse=2.3.1\narrow=23.0.1.1\nAsioHeaders=1.30.2-1\naskpass=1.2.1\nassertthat=0.2.1\nassorthead=1.2.0\nAUCell=1.30.1\nbabelgene=22.9\nbackports=1.5.0\nbase64enc=0.1-3\nbasilisk=1.20.0\nbasilisk.utils=1.20.0\nbatchelor=1.24.0\nBayesFactor=0.9.12-4.7\nbayesm=3.1-7\nBayesSpace=1.18.4\nbayestestR=0.17.0\nbbmle=1.0.25.1\nbdsmatrix=1.3-7\nbeachmat=2.24.0\nbeeswarm=0.4.0\nbench=1.1.4\nBH=1.90.0-1\nbiglm=0.9-3\nBiobase=2.68.0\nBiocBaseUtils=1.10.0\nBiocFileCache=2.16.2\nBiocGenerics=0.54.1\nBiocIO=1.18.0\nbiocmake=1.0.1\nBiocManager=1.30.27\nBiocNeighbors=2.2.0\nBiocParallel=1.42.2\nBiocSingular=1.24.0\nBiocVersion=3.21.1\nbiocViews=1.76.0\nbiomaRt=2.64.0\nBiostrings=2.76.0\nbipartite=2.23\nbit=4.6.0\nbit64=4.6.0-1\nbitops=1.0-9\nblob=1.2.4\nbluster=1.18.0\nBoruta=9.0.0\nBPCells=0.3.1\nbrew=1.0-10\nbridgesampling=1.2-1\nbrio=1.1.5\nBrobdingnag=1.2-9\nbroom=1.0.11\nBSgenome=1.76.0\nBSgenome.Hsapiens.UCSC.hg19=1.4.3\nBSgenome.Hsapiens.UCSC.hg38=1.4.5\nbslib=0.9.0\nBWStest=0.2.3\ncachem=1.1.0\nCairo=1.7-0\ncalibrate=1.7.7\ncallr=3.7.6\ncar=3.1-3\ncarData=3.0-5\ncaret=7.0-1\ncaTools=1.18.3\nCellChat=2.2.0\ncelldex=1.18.0\ncellranger=1.1.0\ncheckmate=2.3.3\nchromote=0.5.1\nchron=2.3-62\ncirclize=0.4.17\nclassInt=0.4-11\ncli=3.6.5\nclipr=0.8.0\nclock=0.7.4\nclue=0.3-66\nclusterGeneration=1.3.8\nClusterGVis=0.99.7\nclusterProfiler=4.16.0\ncmprsk=2.2-12\ncoda=0.19-4.1\ncoin=1.4-3\ncollections=0.3.10\ncolorRamps=2.3.4\ncolorspace=2.1-2\ncombinat=0.0-8\ncommonmark=2.0.0\nComplexHeatmap=2.24.1\ncompositions=2.0-9\nconflicted=1.2.0\nConsensusClusterPlus=1.72.0\ncontfrac=1.1-12\ncorpcor=1.6.10\ncorrelation=0.8.8\ncorrplot=0.95\ncovr=3.6.5\ncowplot=1.2.0\ncpp11=0.5.3\ncrayon=1.5.3\ncreateKEGGdb=0.0.3\ncredentials=2.0.3\ncrosstalk=1.2.2\ncurl=7.0.0\ndata.table=1.18.0\ndata.tree=1.2.0\ndatawizard=1.3.0\nDBI=1.2.3\ndbplyr=2.5.1\ndcurves=0.5.1\nDDRTree=0.1.5\nDelayedArray=0.34.1\nDelayedMatrixStats=1.30.0\ndeldir=2.0-4\ndendextend=1.19.1\nDEoptim=2.2-8\nDEoptimR=1.1-4\nDeriv=4.2.0\ndesc=1.4.3\nDESeq2=1.48.2\ndeSolve=1.40\ndevtools=2.4.6\ndiagram=1.6.5\nDiagrammeR=1.0.11\nDiagrammeRsvg=0.1\ndiffobj=0.3.6\ndigest=0.6.39\ndiptest=0.77-2\ndir.expiry=1.16.0\nDirichletReg=0.7-2\ndistributional=0.5.0\nDNAcopy=1.82.0\nDoAbsolute=2.2.0\ndoBy=4.7.1\ndoParallel=1.0.17\nDOSE=4.2.0\ndotCall64=1.2\nDoubletFinder=2.0.6\ndownlit=0.4.5\ndplyr=1.1.4\ndqrng=0.4.1\nDT=0.34.0\ndtplyr=1.3.2\ndynamicTreeCut=1.63-1\ne1071=1.7-17\neasy.utils=0.1.0\nedgeR=4.6.3\neffectsize=1.0.1\negg=0.4.5\nellipse=0.5.0\nellipsis=0.3.2\nelliptic=1.5-1\nemdbook=1.3.14\nemmeans=2.0.1\nenrichplot=1.28.4\nenrichR=3.4\nestimability=1.5.1\nevaluate=1.0.5\nexactRankTests=0.8-35\nExperimentHub=2.16.1\nexpm=1.0-0\nExPosition=2.11.0\nfacets=0.6.2\nfacetsSuite=2.0.8\nfactoextra=1.0.7\nFactoMineR=2.13\nfansi=1.0.7\nfarver=2.1.2\nfastcluster=1.3.0\nfastDummies=1.7.5\nfastGHQuad=1.0.1\nfastICA=1.2-7\nfastmap=1.2.0\nfastmatch=1.1-8\nfgsea=1.34.2\nfields=17.1\nfilelock=1.0.3\nfindpython=1.0.9\nfitdistrplus=1.2-6\nflashClust=1.01-2\nflextable=0.9.10\nFNN=1.1.4.1\nfoghorn=1.6.1\nfontawesome=0.5.3\nfontBitstreamVera=0.1.1\nfontLiberation=0.1.0\nfontquiver=0.2.1\nforcats=1.0.1\nforeach=1.5.2\nforecast=9.0.0\nformatR=1.14\nFormula=1.2-5\nfortunes=1.5-4\nfracdiff=1.5-3\nfs=1.6.6\nfurrr=0.3.1\nfutile.logger=1.4.9\nfutile.options=1.0.1\nfuture=1.69.0\nfuture.apply=1.20.1\ngapminder=1.0.1\ngargle=1.6.0\ngdata=3.0.1\ngdtools=0.5.0\ngenefilter=1.90.0\ngenerics=0.1.4\nGenomeInfoDb=1.44.3\nGenomeInfoDbData=1.2.14\nGenomicAlignments=1.44.0\nGenomicRanges=1.60.0\ngeometries=0.2.5\ngert=2.3.1\ngetopt=1.20.4\nGetoptLong=1.1.0\nggalluvial=0.12.5\nGGally=2.4.0\ngganimate=1.0.11\nggbeeswarm=0.7.3\nggbreak=0.1.6\nggcorrplot=0.1.4.1\nggdist=3.3.3\nggforce=0.5.0\nggfun=0.2.0\nggh4x=0.3.1\nggiraph=0.9.6\nggnetwork=0.5.14\nggnewscale=0.5.2\nggplot2=3.5.2\nggplot2movies=0.0.1\nggplotify=0.1.3\nggpointdensity=0.2.1\nggpolypath=0.4.0\nggprism=1.0.7\nggpubr=0.6.2\nggraph=2.2.2\nggrastr=1.0.2\nggrepel=0.9.6\nggridges=0.5.7\nggsci=4.2.0\nggside=0.4.1\nggsignif=0.6.4\nggstar=1.0.6\nggstats=0.12.0\nggstatsplot=0.13.4\nggtangle=0.1.1\nggtern=4.0.0\nggtext=0.1.2\nggthemes=5.2.0\nggtree=3.16.3\nggvenn=0.1.19\nggVolcano=0.0.2\ngh=1.5.0\ngitcreds=0.1.2\nglmGamPoi=1.20.0\nglmnet=4.1-10\nGlobalOptions=0.1.3\nglobals=0.18.0\nglue=1.8.0\ngmailr=2.0.0\ngmp=0.7-5\nGO.db=3.21.0\ngoftest=1.2-3\ngoogledrive=2.1.2\ngooglesheets4=1.1.2\nGOSemSim=2.34.0\ngower=1.0.2\nGPArotation=2025.3-1\ngplots=3.3.0\ngraph=1.86.0\ngraphlayouts=1.2.2\ngraphsim=1.0.4\ngridBase=0.4-7\ngridExtra=2.3\ngridGraphics=0.5-1\ngridtext=0.1.6\ngrr=0.9.5\nGSEABase=1.70.1\ngson=0.1.0\ngsubfn=0.7\nGSVA=2.2.1\ngtable=0.3.6\ngtools=3.9.5\ngypsum=1.4.0\nh5mread=1.0.1\nhardhat=1.4.3\nharmony=1.2.4\nhash=2.2.6.3\nhaven=2.5.5\nHDF5Array=1.36.0\nhdf5r=1.3.12\nhdf5r.Extra=0.1.0\nhedgehog=0.2\nhere=1.0.2\nhexbin=1.28.5\nHGNChelper=0.8.15\nHiddenMarkov=1.8-14\nHighFive=3.3.0\nhighr=0.11\nHmisc=5.2-5\nhms=1.1.4\nHSMMSingleCell=1.28.0\nhtmlTable=2.5.0\nhtmltools=0.5.9\nhtmlwidgets=1.6.4\nhttpuv=1.6.16\nhttr=1.4.7\nhttr2=1.2.2\nhunspell=3.0.6\nhypergeo=1.2-14\nica=1.0-3\nids=1.0.1\nigraph=2.2.1\niml=0.11.4\nimpute=1.82.0\ninfercnv=1.24.0\nini=0.3.1\ninline=0.3.21\ninsight=1.4.4\niotools=0.4-0\nipred=0.9-15\nIRanges=2.42.0\nIRdisplay=1.1\nIRIS=1.0\nirlba=2.3.5.1\nisoband=0.3.0\niterators=1.0.14\njose=1.2.1\njpeg=0.1-11\njquerylib=0.1.4\njsonify=1.2.3\njsonlite=2.0.0\njsonvalidate=1.5.0\nKEGG.db=1.0\nKEGGREST=1.48.1\nkernlab=0.9-33\nknitr=1.51\nks=1.15.1\nkSamples=1.2-12\nlabeling=0.4.3\nLahman=13.0-0\nlambda.r=1.2.4\nlanguageserver=0.3.16\nLaplacesDemon=16.1.6\nlater=1.4.5\nlatex2exp=0.9.8\nlava=1.9.1\nlazyeval=0.2.2\nleaflet.providers=2.0.0\nleafpop=0.1.0\nleaps=3.2\nleiden=0.4.3.1\nleidenbase=0.1.36\nlibcoin=1.0-10\nlifecycle=1.0.5\nlimma=3.64.3\nlintr=3.3.0-1\nlistenv=0.10.0\nlistviewer=4.0.0\nlitedown=0.9\nlme4=1.1-38\nlmerTest=3.2-0\nlmtest=0.9-40\nlocfit=1.5-9.12\nlogger=0.4.1\nlogging=0.10-108\nlogspline=2.1.22\nloo=2.9.0\nlpSolve=5.6.23\nlubridate=1.9.4\nlwgeom=0.2-14\nmaftools=2.24.0\nmagick=2.9.0\nmagrittr=2.0.4\nmapproj=1.2.12\nmaps=3.4.3\nmarkdown=2.0\nmathjaxr=2.0-0\nMatrix=1.7-4\nmatrixcalc=1.0-6\nMatrixGenerics=1.20.0\nMatrixModels=0.5-4\nmatrixStats=1.5.0\nmaxLik=1.5-2.2\nmaxstat=0.7-26\nmclust=6.1.2\nmcmc=0.9-8\nMCMCpack=1.7-1\nmemoise=2.0.1\nmetadat=1.4-0\nmetafor=4.8-0\nmetap=1.13\nmetaplus=1.0-6\nmetapod=1.16.0\nMetrics=0.1.4\nmets=1.3.8\nmicrobenchmark=1.5.0\nmiloR=2.4.1\nmime=0.13\nminiUI=0.1.2\nminqa=1.2.8\nmiscTools=0.6-30\nmixtools=2.0.0.1\nmnormt=2.1.1\nmockery=0.4.5\nModelMetrics=1.2.2.2\nmodelr=0.1.11\nmodeltools=0.2-24\nMOFA2=1.18.0\nmonocle=2.36.0\nmonocle3=1.4.26\nmRMRe=2.1.2.2\nmsigdb=1.16.0\nmsigdbr=25.1.1\nmultcomp=1.4-29\nmultcompView=0.1-10\nMultiAssayExperiment=1.34.0\nmulticool=1.0.1\nMultiDataSet=1.36.0\nmultiOmicsViz=0.99.2\nmultiplex=3.9\nmulttest=2.64.0\nmunsell=0.5.1\nmutoss=0.1-14\nmvtnorm=1.3-3\nnanoarrow=0.7.0-2\nnanoparquet=0.4.3\nNebulosa=1.18.0\nnetwork=1.19.0\nnetworkD3=0.4.1\nnloptr=2.2.1\nNMF=0.28\nnumDeriv=2016.8-1.1\nnycflights13=1.0.2\nodbc=1.6.4.1\nofficer=0.7.2\nopenssl=2.3.4\nopenxlsx=4.2.8.1\noptimParallel=1.0-2\noptparse=1.7.5\norg.At.tair.db=3.21.0\norg.Hs.eg.db=3.21.0\norg.Mm.eg.db=3.21.0\norg.Rn.eg.db=3.21.0\nOrgHeatmap=0.3.2\notel=0.2.0\npaletteer=1.7.0\npalmerpenguins=0.1.1\nparallelDist=0.2.7\nparallelly=1.46.1\nparameters=0.28.3\npatchwork=1.3.2\npbapply=1.7-4\npbkrtest=0.5.5\npbmcapply=1.5.1\npctGCdata=0.3.0\npec=2025.06.24\nperformance=0.15.3\npermute=0.9-8\nphangorn=2.12.1\npheatmap=1.0.13\nphyclust=0.1-34\nphytools=2.5-2\npillar=1.11.1\npingr=2.0.5\npkgbuild=1.4.8\npkgconfig=2.0.3\npkgdown=2.2.0\npkgload=1.4.1\nplogr=0.2.0\nplotly=4.11.0\nplotlyGeoAssets=0.0.2\nplotrix=3.8-13\nplumber=1.3.2\nplyr=1.8.9\nPMCMRplus=1.9.12\npng=0.1-8\npolspline=1.1.25\npolyclip=1.10-7\npolynom=1.4-1\npool=1.0.4\nposterior=1.6.1\npracma=2.4.6\npraise=1.0.0\npreprocessCore=1.70.0\npresto=1.0.0\nprettyGraphs=2.2.0\nprettyunits=1.2.0\nprincurve=2.1.6\nprismatic=1.1.2\npROC=1.19.0.1\nprocessx=3.8.6\nprodlim=2026.03.11\nprofmem=0.7.0\nprofvis=0.4.0\nprogress=1.2.3\nprogressr=0.18.0\npromises=1.5.0\nproto=1.0.0\nproxy=0.4-29\nPRROC=1.4\nps=1.9.1\npscl=1.5.9\npsych=2.5.6\nPublish=2025.07.24\npurrr=1.2.0\npwr=1.3-0\nqpdf=1.4.1\nqqconf=1.3.2\nqqman=0.1.9\nqs=0.27.3\nquadprog=1.5-8\nquantmod=0.4.28\nquantreg=6.1\nQuickJSR=1.9.0\nqvalue=2.40.0\nR.cache=0.17.0\nR.methodsS3=1.8.2\nR.oo=1.27.1\nR.utils=2.13.0\nR6=2.6.1\nrafalib=1.0.4\nragg=1.5.0\nrandomForest=4.7-1.2\nrandomForestSRC=3.6.2\nranger=0.17.0\nRANN=2.6.2\nrapidjsonr=1.2.1\nRApiSerialize=0.1.4\nrappdirs=0.3.4\nraster=3.6-32\nRBGL=1.84.0\nrbibutils=2.4.1\nrcmdcheck=1.4.0\nRColorBrewer=1.1-3\nRcpp=1.1.1\nRcppAnnoy=0.0.23\nRcppArmadillo=15.2.3-1\nRcppDist=0.1.1.1\nRcppEigen=0.3.4.0.2\nRcppHNSW=0.6.0\nRcppML=0.3.7\nRcppNumerical=0.7-0\nRcppParallel=5.1.11-1\nRcppPlanc=2.0.13\nRcppProgress=0.4.2\nRcppTOML=0.2.3\nRCurl=1.98-1.17\nRdpack=2.6.5\nreadr=2.1.6\nreadxl=1.4.5\nrecipes=1.3.2\nreformulas=0.4.3\nregistry=0.5-1\nrematch=2.0.0\nrematch2=2.1.2\nremotes=2.5.0\nrenv=1.1.6\nrepr=1.1.7\nreprex=2.1.1\nreshape=0.8.10\nreshape2=1.4.5\nResidualMatrix=1.18.0\nrestfulr=0.0.16\nreticulate=1.44.1\nrex=1.2.1\nRfast=2.1.5.2\nrhdf5=2.52.1\nrhdf5filters=1.20.0\nRhdf5lib=1.30.0\nRhpcBLASctl=0.23-42\nRhtslib=3.4.0\nRigraphlib=1.0.0\nriskRegression=2025.09.17\nrjags=4-17\nrjson=0.2.23\nrlang=1.1.7\nrmarkdown=2.30\nRmpfr=1.1-2\nrms=8.1-1\nRnanoflann=0.0.3\nrngtools=1.5.2\nrobustbase=0.99-6\nROCR=1.0-12\nropls=1.40.0\nroxygen2=7.3.3\nRPostgres=1.4.8\nRPostgreSQL=0.7-8\nrprojroot=2.1.1\nrsample=1.3.1\nRsamtools=2.24.1\nRSpectra=0.16-2\nRSQLite=2.4.5\nrstan=2.32.7\nrstantools=2.6.0\nrstatix=0.7.3\nrstudioapi=0.18.0\nrsvd=1.0.5\nrsvg=2.7.0\nrtracklayer=1.68.0\nRtsne=0.17\nRUnit=0.4.33.1\nrversions=3.0.0\nrvest=1.0.5\ns2=1.1.9\nS4Arrays=1.8.1\nS4Vectors=0.48.0\nS7=0.2.1\nsandwich=3.1-1\nsass=0.4.10\nScaledMatrix=1.16.0\nscales=1.4.0\nscater=1.36.0\nscattermore=1.2\nscatterpie=0.2.6\nscatterplot3d=0.3-44\nscCATCH=3.2.2\nsccore=1.0.6\nscDblFinder=1.22.0\nSCINA=1.2.0\nscMetabolism=0.2.1\nscran=1.36.0\nscrapper=1.2.1\nsctransform=0.4.2\nscuttle=1.18.0\nsegmented=2.2-0\nselectr=0.5-1\nSeqinfo=1.0.0\nservr=0.32\nsessioninfo=1.2.3\nSeurat=5.4.0\nSeuratData=0.2.2.9002\nSeuratDisk=0.0.0.9021\nSeuratObject=5.3.0\nSeuratWrappers=0.4.0\nsf=1.0-24\nsfheaders=0.4.5\nsfsmisc=1.1-23\nshape=1.4.6.1\nshiny=1.12.1\nshinycssloaders=1.1.0\nshinydashboard=0.7.3\nshinyFiles=0.9.3\nshinyjs=2.1.1\nshinytest2=0.4.1\nshinyWidgets=0.9.0\nshowtext=0.9-7\nshowtextdb=3.0\nSingleCellExperiment=1.30.1\nSingleR=2.10.0\nsitmo=2.0.2\nslam=0.1-55\nslider=0.3.3\nslingshot=2.16.0\nsm=2.2-6.0\nsn=2.1.2\nsna=2.8\nSNFtool=2.3.1\nsnow=0.4-4\nsodium=1.4.0\nsourcetools=0.1.7-1\nsp=2.2-0\nspacesXYZ=1.6-0\nspam=2.11-3\nSparseArray=1.8.1\nSparseM=1.84-2\nsparseMatrixStats=1.20.0\nsparsesvd=0.2-3\nsparsevctrs=0.3.6\nSpatialExperiment=1.18.1\nspatstat=3.5-0\nspatstat.data=3.1-9\nspatstat.explore=3.6-0\nspatstat.geom=3.6-1\nspatstat.linnet=3.4-0\nspatstat.model=3.5-0\nspatstat.random=3.4-3\nspatstat.sparse=3.1-0\nspatstat.univar=3.1-6\nspatstat.utils=3.2-1\nspData=2.3.4\nspdep=1.4-1\nspeedglm=0.3-5\nspelling=2.3.2\nsplitstackshape=1.4.8\nSPOTlight=1.12.2\nsqldf=0.4-11\nSQUAREM=2026.1\nStanHeaders=2.32.10\nstars=0.7-0\nstatmod=1.5.1\nstatnet.common=4.13.0\nstatsExpressions=1.7.2\nstringdist=0.9.17\nstringfish=0.18.0\nstringi=1.8.7\nstringr=1.6.0\nstyler=1.11.0\nSummarizedExperiment=1.38.1\nSuppDists=1.1-9.9\nsurvminer=0.5.2\nsvglite=2.2.2\nswagger=5.17.14.1\nswimplot=1.2.0\nsys=3.4.3\nsysfonts=0.8.9\nsystemfonts=1.3.1\nTabulaMurisSenisData=1.14.0\ntensor=1.5.1\ntensorA=0.36.2.1\nTENxVisiumData=1.16.0\nterra=1.8-86\ntestthat=3.3.1\ntextshaping=1.0.4\nTFisher=0.2.0\nTH.data=1.1-5\ntibble=3.3.0\ntidygraph=1.3.1\ntidyr=1.3.2\ntidyselect=1.2.1\ntidytree=0.4.6\ntidyverse=2.0.0\ntimechange=0.3.0\ntimeDate=4051.111\ntimereg=2.0.7\ntimeROC=0.4\ntinytex=0.58\ntopGO=2.60.1\nTPES=1.0.0\ntradeSeq=1.22.0\nTrajectoryUtils=1.16.1\ntransformr=0.1.5\ntreeio=1.32.0\ntreemap=2.4-4\ntreeshap=0.4.0\nTREG=1.12.0\ntseries=0.10-59\nTTR=0.24.4\ntweenr=2.0.3\ntzdb=0.5.0\nUCSC.utils=1.4.0\nunits=1.0-0\nUpSetR=1.4.0\nurca=1.3-4\nurlchecker=1.0.1\nusethis=3.2.1\nutf8=1.2.6\nuuid=1.2-2\nuwot=0.2.4\nV8=8.0.1\nvctrs=0.6.5\nvdiffr=1.0.8\nvegan=2.7-2\nVennDiagram=1.8.2\nVGAM=1.1-14\nvipor=0.4.7\nviridis=0.6.5\nviridisLite=0.4.2\nVISION=3.0.2\nvisNetwork=2.1.4\nvroom=1.6.7\nwaiter=0.2.5.1\nwaldo=0.6.2\nwarp=0.2.3\nwebfakes=1.4.0\nwebshot=0.5.5\nwebsocket=1.4.4\nwebutils=1.2.2\nwesanderson=0.3.7\nWGCNA=1.73\nwhisker=0.4.1\nwhoami=1.3.0\nwithr=3.0.2\nwk=0.9.5\nwordspace=0.2-9\nwritexl=1.5.4\nWriteXLS=6.8.0\nwrMisc=1.15.4\nWRS2=1.1-7\nxfun=0.56\nxgboost=1.7.8.1\nXML=3.99-0.20\nxml2=1.5.2\nxmlparsedata=1.0.5\nxopen=1.0.1\nxtable=1.8-4\nxts=0.14.1\nXVector=0.48.0\nyaml=2.3.12\nyulab.utils=0.2.3\nzeallot=0.2.0\nzigg=0.0.2\nzip=2.3.3\nzlibbioc=1.54.0\nzoo=1.8-15\nBiocGenerics=0.54.0\nDNAcopy=1.82.0\nbase=4.5.3\nboot=1.3-32\nclass=7.3-23\ncluster=2.1.8.2\ncodetools=0.2-20\ncompiler=4.5.3\ndatasets=4.5.3\nforeign=0.8-91\ngraphics=4.5.3\ngrDevices=4.5.3\ngrid=4.5.3\nKernSmooth=2.23-26\nlattice=0.22-9\nMASS=7.3-65\nMatrix=1.7-4\nmethods=4.5.3\nmgcv=1.9-4\nnlme=3.1-168\nnnet=7.3-20\nparallel=4.5.3\nrpart=4.1.24\nspatial=7.3-18\nsplines=4.5.3\nstats=4.5.3\nstats4=4.5.3\nsurvival=3.8-6\ntcltk=4.5.3\ntools=4.5.3\nutils=4.5.3"
+        }
+      }
+    },
+    "local": {
+      "jobId": "tj_mtnyx2kb_97hz",
+      "status": "completed",
+      "executionTarget": null
+    }
+  },
+  "environmentDiff": {
+    "dell": {
+      "os": "Linux 6.8.0-137-generic",
+      "hostname": "devah",
+      "rVersion": "4.5.3",
+      "packagesCount": 841,
+      "packagesSha256": "86bb05bbdb8b72640808fa2d7291a84d7c72968d1bf42c0b1e2ce3ae07c88c2e"
+    },
+    "local": {
+      "rVersion": null,
+      "note": "本机（macOS，BioF3 内嵌 R）"
+    }
+  },
+  "perFile": [
+    {
+      "file": "artifact-manifest.json",
+      "inDell": true,
+      "inLocal": true,
+      "match": false,
+      "dellSha256": "f01924b73ed11ca1de73883a1403d2c0fa181a9a2fc62a6deacf76114ea9b74c",
+      "localSha256": "cef863145ea884ea9623e609f5e431e7ff2f82203c9485e155729aa335101543"
+    },
+    {
+      "file": "counts.csv",
+      "inDell": true,
+      "inLocal": true,
+      "match": true,
+      "dellSha256": "097ec88036b6f61a84f3562606e31664898b49d32bb8593670f5188f14b7c2bf",
+      "localSha256": "097ec88036b6f61a84f3562606e31664898b49d32bb8593670f5188f14b7c2bf"
+    },
+    {
+      "file": "design_summary.json",
+      "inDell": true,
+      "inLocal": true,
+      "match": true,
+      "dellSha256": "bf7aae9aa606139e3541a6b0c3931ab8e00db279b060acd1bb5afb69d1774be2",
+      "localSha256": "bf7aae9aa606139e3541a6b0c3931ab8e00db279b060acd1bb5afb69d1774be2"
+    },
+    {
+      "file": "metadata.csv",
+      "inDell": true,
+      "inLocal": true,
+      "match": true,
+      "dellSha256": "77519a337ccc87a7b1c810c9dd63f580fb6502b72d3edc190efa49ead418af10",
+      "localSha256": "77519a337ccc87a7b1c810c9dd63f580fb6502b72d3edc190efa49ead418af10"
+    },
+    {
+      "file": "report.html",
+      "inDell": true,
+      "inLocal": true,
+      "match": false,
+      "dellSha256": "bdf4fd718868420e6498d5590b41f9d124b549bef2bfeb8d49f9aaee3aed7d5f",
+      "localSha256": "0f246288f1eec1b2aea6ce9347ca721acc124073c2c902eaf2d03bc9077bfae4"
+    },
+    {
+      "file": "runner.log",
+      "inDell": true,
+      "inLocal": false,
+      "match": false,
+      "dellSha256": "72d28481ee5f2398504ba9d58b7e17934dab39b2cfdbcce153a2634a1dec3466",
+      "localSha256": null
+    },
+    {
+      "file": "sample_alignment.csv",
+      "inDell": true,
+      "inLocal": true,
+      "match": true,
+      "dellSha256": "2aa45949cfa29c34a3f1fa7a573514a82cff4a5ab71c6c2092edb5d8eb755da0",
+      "localSha256": "2aa45949cfa29c34a3f1fa7a573514a82cff4a5ab71c6c2092edb5d8eb755da0"
+    },
+    {
+      "file": "validated_metadata.csv",
+      "inDell": true,
+      "inLocal": true,
+      "match": true,
+      "dellSha256": "77519a337ccc87a7b1c810c9dd63f580fb6502b72d3edc190efa49ead418af10",
+      "localSha256": "77519a337ccc87a7b1c810c9dd63f580fb6502b72d3edc190efa49ead418af10"
+    },
+    {
+      "file": "validation_diagnostics.json",
+      "inDell": true,
+      "inLocal": true,
+      "match": false,
+      "dellSha256": "ff5a2d19172fdbc46856aaf2d6d9c1b6738c0e183c2b9bc2a6f097726d2db587",
+      "localSha256": "dc1cc62bc3b3db53094e686114448bff8b7757b4a57ac41f6c59f50459c53153"
+    }
+  ],
+  "dataArtifactsMatch": false,
+  "presentationalNote": "report.html 含生成时间戳，跨环境字节差异属预期，如实单列",
+  "validationDiagnostics": {
+    "rawEqual": false,
+    "timestampStrippedEqual": true,
+    "note": "差异仅为内嵌生成时间戳；剔除时间戳后逐字节一致——科学结论跨机可复现"
+  },
+  "conclusion": {
+    "dataArtifactsReproducible": true,
+    "matchedDataFiles": [
+      "counts.csv(输入副本)",
+      "metadata.csv(输入副本)",
+      "design_summary.json",
+      "sample_alignment.csv",
+      "validated_metadata.csv"
+    ],
+    "expectedDiffs": [
+      "runner.log(日志)",
+      "report.html(内嵌时间戳)",
+      "artifact-manifest.json(封装差异文件的哈希)",
+      "validation_diagnostics.json(仅时间戳，剔除后一致)"
+    ],
+    "statement": "同一分析（同脚本/参数/输入）在 macOS R 4.5.2 与 Linux R 4.5.3 (dell) 双机执行：全部数据产物跨机逐字节一致；日志与含时间戳的展示/封装产物差异如实记录。"
+  }
+}

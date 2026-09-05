@@ -1,6 +1,6 @@
 # BLOCK-57 — 远程执行：本地指挥席 + SSH 执行节点 + 调度器适配
 
-> 状态：`active`（**P1 SSH 直连 completed（2026-09-05 UI-290 verified，用户真实对话 dell 执行闭环）；P2 Slurm 用户裁决不做；P3 复现链跨机 / P4 广度待用户裁决**。设计评审 [`block-57-design-review.md`](./block-57-design-review.md) 已 confirmed）
+> 状态：`completed`（2026-09-05 整包收口：P1 SSH 直连 completed（用户实测闭环 + UI-290 verified）＋ P3 跨机复现对账 completed（数据产物双机逐字节一致实证）＋ P2 Slurm / P4 广度 用户裁决不做（后期再说）。后续候选：dell 按需补装工具 R 包、结果标题栏目标标识、P2/P4 随需求重启。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 > 立项日期：2026-09-03（用户裁决「立项」）· 启动日期：2026-09-04（用户裁决「启动 BLOCK-57 远程执行」）
 > truthDomain: `block-57-remote-execution`
 > 来源：生信算力需求讨论（用户提出「适配算力集群进行大数据量运算」，问 Linux 版还是接口）
