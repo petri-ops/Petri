@@ -1,0 +1,78 @@
+{
+  "startedAt": "2026-09-05T11:01:27.884Z",
+  "assertions": [
+    {
+      "name": "主窗 windowManager/terminal 桥可用 + 预清理",
+      "pass": true,
+      "detail": "{\"bridge\":true,\"cleaned\":false}"
+    },
+    {
+      "name": "终端会话启动（主窗 tab 语义，pty 运行中）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"pid\":26636,\"cwd\":\"/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data\",\"shell\":\"/bin/zsh\",\"sessionId\":\"default\"}"
+    },
+    {
+      "name": "终端 Tab 升格 → created（terminal:<sessionId>）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"terminal:default\",\"action\":\"created\",\"autoDemoted\":null}"
+    },
+    {
+      "name": "终端独立窗 target 出现",
+      "pass": true,
+      "detail": "targets=1"
+    },
+    {
+      "name": "终端独立窗 xterm 挂载",
+      "pass": true,
+      "detail": "{\"hasXterm\":true,\"hasHost\":true,\"attachNote\":\"已挂载运行中的会话（新输出从此刻起显示；滚动回看在主窗标签）\"}"
+    },
+    {
+      "name": "数据面实锤：主窗写入 → pty echo → 转发 → 弹出窗收到",
+      "pass": true,
+      "detail": "marker=B59P2-1788606090097"
+    },
+    {
+      "name": "弹出窗终端有真实渲染内容（xterm rows 非空）",
+      "pass": true,
+      "detail": "chars=325"
+    },
+    {
+      "name": "× → 降格 railed（终端常驻不淡出）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"terminal:default\",\"state\":\"railed\"}"
+    },
+    {
+      "name": "轨道容器窗 target 出现（懒创建）",
+      "pass": true,
+      "detail": "targets=1"
+    },
+    {
+      "name": "轨道窗可见且渲染终端刻度（data-kind=terminal）",
+      "pass": true,
+      "detail": "{\"visible\":\"visible\",\"tickCount\":1,\"terminalTick\":true,\"fadedAttr\":true}"
+    },
+    {
+      "name": "轨道刻度点击 → popped（hover 恢复路径的点击等价）",
+      "pass": true,
+      "detail": "{\"id\":\"terminal:default\",\"type\":\"terminal\",\"key\":\"default\",\"state\":\"popped\",\"railClass\":\"persistent\",\"fadeAfter\":null,\"createdAt\":1788606087942,\"poppedAt\":1788606092283,\"railedAt\":null}"
+    },
+    {
+      "name": "无降格窗口时轨道自动隐藏（visibilityState hidden）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "轨道显式移除 → 条目终结",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "移除后轨道隐藏（常驻窗保活不销毁）",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb?job=tj_mtnyx2kb_97hz",
+  "finishedAt": "2026-09-05T11:01:35.048Z",
+  "allPass": true
+}

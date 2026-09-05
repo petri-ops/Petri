@@ -141,6 +141,8 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     snapshot: () => ipcRenderer.invoke('window:snapshot'),
     /** 当前窗口的内容身份：主窗为 null，弹出窗为 'type:key'。 */
     self: () => ipcRenderer.invoke('window:self'),
+    /** 轨道容器窗专用：hover 条带/卡时切换点击穿透（仅轨道窗 sender 生效）。 */
+    setRailMouseIgnore: (ignore) => ipcRenderer.send('window:rail-mouse', { ignore }),
     onStateChanged: (callback) => {
       if (typeof callback !== 'function') return () => {};
       const listener = (_event, payload) => callback(payload);

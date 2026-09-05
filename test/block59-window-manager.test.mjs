@@ -428,6 +428,22 @@ describe('适配器与 preload 静态契约', () => {
     assert.doesNotMatch(src, /loadURL\(`(?!.*route)/, '不得绕过白名单直接模板拼路由');
   });
 
+  test('P2 契约：terminal.js 向受管窗口转发会话数据（独立终端窗数据面）', () => {
+    const termSrc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'terminal.js'), 'utf8');
+    assert.match(termSrc, /forwardToContentWindow\(`terminal:\$\{payload\.sessionId\}`/, 'terminal:data/exit 必须转发到 terminal:<sessionId> 受管窗');
+    const adapterSrc = fs.readFileSync(ADAPTER, 'utf8');
+    assert.match(adapterSrc, /forwardToContentWindowRef = /, '适配器必须装配转发钩子');
+  });
+
+  test('P2 契约：轨道容器窗规格（懒创建/alwaysOnTop/穿透/无 ×）', () => {
+    const src = fs.readFileSync(ADAPTER, 'utf8');
+    assert.match(src, /setAlwaysOnTop\(true, "floating"\)/, '轨道容器 alwaysOnTop（巡视面）');
+    assert.match(src, /setIgnoreMouseEvents\(true, \{ forward: true \}\)/, '条带外点击穿透');
+    assert.match(src, /skipTaskbar: true/, '轨道不进任务栏');
+    assert.match(src, /focusable: false/, '轨道不抢键盘焦点');
+    assert.match(src, /window:rail-mouse/, '渲染层穿透切换 IPC 存在');
+  });
+
   test('preload 暴露 windowManager 桥段', () => {
     const src = fs.readFileSync(PRELOAD, 'utf8');
     assert.match(src, /windowManager:\s*\{/, 'biof3Desktop.windowManager 缺失');

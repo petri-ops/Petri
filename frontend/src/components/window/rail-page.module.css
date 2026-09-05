@@ -1,0 +1,140 @@
+.railPage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+  pointer-events: none; /* 穿透由主进程 ignoreMouseEvents 控制；双保险 */
+  font-family: var(--biof3-font-sans, inherit);
+}
+
+/* ── 条带（右缘）：常态 14px 半透明，hover 展开 28px ── */
+.strip {
+  pointer-events: auto;
+  width: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 0;
+  background: var(--biof3-bg-secondary, #262b3a);
+  border-left: 1px solid var(--biof3-border-color, #323848);
+  opacity: 0.45;
+  transition: width 0.16s ease, opacity 0.16s ease;
+  overflow: hidden;
+}
+
+.strip:hover,
+.stripActive {
+  width: 28px;
+  opacity: 0.72;
+}
+
+.tick {
+  width: 8px;
+  min-height: 22px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  background: var(--biof3-accent, #5a9cff);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity 0.4s ease;
+}
+
+.tick[data-kind='terminal'],
+.tick[data-kind='agent'] {
+  background: var(--biof3-ok, #4cd48a);
+}
+
+.tick[data-faded='true'] {
+  opacity: 0.22;
+}
+
+.tick:hover {
+  opacity: 1;
+}
+
+.overflowChip {
+  font-size: 9px;
+  color: var(--biof3-text-secondary, #9aa3b8);
+  writing-mode: vertical-rl;
+  letter-spacing: 1px;
+}
+
+.emptyHint {
+  writing-mode: vertical-rl;
+  font-size: 10px;
+  color: var(--biof3-text-secondary, #9aa3b8);
+  opacity: 0.6;
+}
+
+/* ── hover 卡：锚轨道左侧，320px ── */
+.card {
+  pointer-events: auto;
+  position: absolute;
+  right: 36px;
+  width: 320px;
+  max-height: 70vh;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--biof3-border-color, #323848);
+  background: var(--biof3-bg-primary, #1f2330);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.4);
+}
+
+.cardTitle {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--biof3-text-primary, #e6e9f2);
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+
+.cardMeta {
+  display: block;
+  font-size: 11px;
+  color: var(--biof3-text-secondary, #9aa3b8);
+  margin-bottom: 10px;
+}
+
+.cardActions {
+  display: flex;
+  gap: 8px;
+}
+
+.cardBtn {
+  flex: 1;
+  height: 28px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--biof3-border-color, #323848);
+  background: transparent;
+  color: var(--biof3-text-primary, #e6e9f2);
+  cursor: pointer;
+}
+
+.cardBtn:hover {
+  background: var(--biof3-bg-hover, rgba(255, 255, 255, 0.06));
+}
+
+.cardBtnPrimary {
+  background: var(--biof3-accent, #5a9cff);
+  border-color: var(--biof3-accent, #5a9cff);
+  color: #fff;
+}
+
+.cardBtnDanger:hover {
+  background: rgba(255, 122, 122, 0.14);
+  border-color: var(--biof3-danger, #ff7a7a);
+  color: var(--biof3-danger, #ff7a7a);
+}
+
+.fadedNote {
+  display: block;
+  font-size: 11px;
+  color: var(--biof3-text-secondary, #9aa3b8);
+  margin-bottom: 8px;
+}

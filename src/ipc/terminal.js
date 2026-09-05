@@ -28,6 +28,10 @@ const path = require("path");
 const { ipcMain, app, shell } = require("electron");
 const { getOpenShellPlan, getSessionShellSpec } =
   require("../platform-compat");
+// BLOCK-59 P2 — 终端独立窗（升格 Tab）：mainWindow 广播之外，把
+// terminal:data/exit 同步送达承载该会话的弹出窗（terminal:<sessionId>）。
+// 弹出窗是同一 pty 会话的第二活视图，主窗 tab 保活零丢失。
+const { forwardToContentWindow } = require("./window-manager");
 
 // resolveCore mirror (self-contained, identical to main.js logic)
 function resolveCore(...parts) {
@@ -54,6 +58,10 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
   const sendTerminalEvent = (channel, payload) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send(channel, payload);
+    }
+    // BLOCK-59 P2 — 独立终端窗转发（无弹出窗时 no-op）。
+    if (payload && typeof payload.sessionId === "string") {
+      forwardToContentWindow(`terminal:${payload.sessionId}`, channel, payload);
     }
   };
 

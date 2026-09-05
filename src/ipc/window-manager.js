@@ -25,6 +25,18 @@ const {
 } = require("../main/_window-manager");
 
 const GEOMETRY_RECORD_DEBOUNCE_MS = 400;
+const RAIL_CONTENT_ID = "rail:";
+const RAIL_WINDOW_WIDTH = 28; // 屏幕右缘条带；hover 卡向左展开（透明穿透区）
+
+// BLOCK-59 P2 — 终端等会话型数据的受管窗口转发钩子。terminal.js 在
+// mainWindow 广播之外经此把 terminal:data/exit 送达承载该会话的独立窗
+// （contentId = `terminal:<sessionId>`）。setup 前调用为 no-op。
+let forwardToContentWindowRef = null;
+function forwardToContentWindow(contentId, channel, payload) {
+  try {
+    forwardToContentWindowRef?.(contentId, channel, payload);
+  } catch {}
+}
 
 function setupWindowManagerIpc({
   getMainWindow,
@@ -55,9 +67,10 @@ function setupWindowManagerIpc({
   let exiting = false;
 
   // ── Trusted-sender scoping ────────────────────────────────────
-  // Main window may act on every content id; a managed pop-out may
-  // act on itself only. Anything else (webview / foreign sender)
-  // is rejected fail-closed.
+  // Main window may act on every content id; the rail window acts
+  // on all entries too (hover-restore / explicit removal are the
+  // rail's duties, plan §5); any other managed pop-out may act on
+  // itself only. Foreign senders are rejected fail-closed.
   const resolveSenderScope = (event) => {
     const sender = event?.sender;
     if (!sender || sender.isDestroyed()) return null;
@@ -67,14 +80,16 @@ function setupWindowManagerIpc({
     }
     for (const [id, rec] of windows.entries()) {
       if (!rec.win.isDestroyed() && sender === rec.win.webContents) {
-        return { kind: "managed", id };
+        return { kind: id === RAIL_CONTENT_ID ? "rail" : "managed", id };
       }
     }
     return null;
   };
 
   const isMutationAllowed = (scope, id) =>
-    scope.kind === "main" || (scope.kind === "managed" && scope.id === id);
+    scope.kind === "main" ||
+    scope.kind === "rail" ||
+    (scope.kind === "managed" && scope.id === id);
 
   // ── Display / bounds helpers ──────────────────────────────────
 
@@ -150,7 +165,98 @@ function setupWindowManagerIpc({
     }
   };
 
-  core.subscribe(broadcast);
+  core.subscribe((event) => {
+    broadcast(event);
+    syncRailVisibility();
+  });
+
+  // ── 边缘活动轨道容器窗（BLOCK-59 P2，plan §5）─────────────────
+  // 极窄 alwaysOnTop 条带：focusable:false 不抢键盘焦点 / skipTaskbar /
+  // 透明窗体 + setIgnoreMouseEvents(true, {forward:true})——条带与 hover
+  // 卡之外全部点击穿透给底层 app，渲染层在 mouseenter/leave 时切换。
+  // 生命周期属 app 不属主窗（plan §5）；懒创建：第一个窗口被降格才建。
+  const ensureRailWindow = () => {
+    let rec = windows.get(RAIL_CONTENT_ID);
+    if (rec && !rec.win.isDestroyed()) return rec;
+    const spaBase = typeof getSpaBaseUrl === "function" ? getSpaBaseUrl() : null;
+    if (!spaBase) return null;
+    const displays = currentDisplays();
+    const workArea = displays[0]?.workArea || displays[0]?.bounds || null;
+    const height = Math.max(240, Math.min(600, (workArea ? workArea.height : 800) - 120));
+    const win = new BrowserWindow({
+      width: RAIL_WINDOW_WIDTH,
+      height,
+      x: workArea ? workArea.x + workArea.width - RAIL_WINDOW_WIDTH : undefined,
+      y: workArea ? workArea.y + Math.floor((workArea.height - height) / 2) : undefined,
+      frame: false,
+      transparent: true,
+      alwaysOnTop: true,
+      skipTaskbar: true,
+      focusable: false,
+      resizable: false,
+      minimizable: false,
+      maximizable: false,
+      fullscreenable: false,
+      show: false,
+      webPreferences: {
+        preload: resolveResource("preload.js"),
+        contextIsolation: true,
+        nodeIntegration: false,
+        sandbox: true,
+        webSecurity: true,
+      },
+    });
+    try {
+      win.setAlwaysOnTop(true, "floating");
+      win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false });
+      win.setIgnoreMouseEvents(true, { forward: true });
+    } catch {}
+    rec = { id: RAIL_CONTENT_ID, win, expectingClose: false, geometryTimer: null };
+    windows.set(RAIL_CONTENT_ID, rec);
+    // 轨道无 ×（plan §4.1）；任何 close 请求一律隐藏，不销毁
+    win.on("close", (event) => {
+      if (rec.expectingClose || exiting) return;
+      event.preventDefault();
+      if (!win.isDestroyed()) win.hide();
+    });
+    win.on("closed", () => {
+      windows.delete(RAIL_CONTENT_ID);
+    });
+    win.loadURL(new URL("/window/rail", spaBase).toString()).catch((e) => {
+      console.error("[window-manager] rail loadURL failed:", e.message);
+    });
+    return rec;
+  };
+
+  const syncRailVisibility = () => {
+    const railedCount = core
+      .getSnapshot()
+      .entries.filter((e) => e.state === "railed").length;
+    if (railedCount > 0) {
+      const rec = ensureRailWindow();
+      if (rec && !rec.win.isDestroyed()) {
+        try {
+          rec.win.showInactive();
+        } catch {}
+      }
+    } else {
+      const rec = windows.get(RAIL_CONTENT_ID);
+      if (rec && !rec.win.isDestroyed()) {
+        try {
+          rec.win.hide();
+        } catch {}
+      }
+    }
+  };
+
+  // 渲染层 hover 条带/hover 卡时切换点击穿透（P2 plan §5）
+  ipcMain.on("window:rail-mouse", (event, payload) => {
+    const rec = windows.get(RAIL_CONTENT_ID);
+    if (!rec || rec.win.isDestroyed() || event.sender !== rec.win.webContents) return;
+    try {
+      rec.win.setIgnoreMouseEvents(payload?.ignore !== false, { forward: true });
+    } catch {}
+  });
 
   const showAndFocus = (rec) => {
     if (!rec || rec.win.isDestroyed()) return;
@@ -440,6 +546,14 @@ function setupWindowManagerIpc({
       fs.writeFileSync(statePath(), JSON.stringify(core.serialize()));
     } catch {}
   });
+
+  forwardToContentWindowRef = (contentId, channel, payload) => {
+    const rec = windows.get(contentId);
+    if (!rec || rec.win.isDestroyed()) return;
+    try {
+      rec.win.webContents.send(channel, payload);
+    } catch {}
+  };
 }
 
-module.exports = { setupWindowManagerIpc };
+module.exports = { setupWindowManagerIpc, forwardToContentWindow, RAIL_CONTENT_ID };

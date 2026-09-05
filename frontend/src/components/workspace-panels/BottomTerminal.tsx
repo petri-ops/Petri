@@ -3,6 +3,7 @@ import { Icon } from '@/components/icons/Icon';
 import { useTerminalTabs } from '@/hooks/useTerminalTabs';
 import { terminalTabLabel, terminalTabSubtitle } from '@/hooks/terminalTabs';
 import { useTheme } from '@/themes/ThemeProvider';
+import { getBridge } from '@/lib/desktopBridge';
 import styles from '@/pages/project-workspace.module.css';
 
 export interface BottomTerminalProps {
@@ -33,6 +34,8 @@ export function BottomTerminal({
   onClose,
 }: BottomTerminalProps): React.ReactElement {
   const { resolvedTheme } = useTheme();
+  // BLOCK-59 P2 — 终端 Tab 升格为独立窗（同一会话第二活视图，主窗 tab 保活）
+  const windowManagerBridge = getBridge('windowManager');
   const {
     tabs,
     activeId,
@@ -118,6 +121,17 @@ export function BottomTerminal({
                   <small>{terminalTabSubtitle(tab)}</small>
                 ) : null}
               </button>
+              {windowManagerBridge && (
+                <button
+                  type="button"
+                  className={styles.embeddedTerminalTabClose}
+                  aria-label={`升格 ${label} 为独立窗`}
+                  title="升格为独立窗（同一会话第二视图，主窗标签保活）"
+                  onClick={() => void windowManagerBridge!.popOut('terminal', tab.id)}
+                >
+                  <Icon name="arrow-right" size={10} />
+                </button>
+              )}
               <button
                 type="button"
                 className={styles.embeddedTerminalTabClose}
