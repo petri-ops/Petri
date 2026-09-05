@@ -3574,8 +3574,29 @@
       "registeredAt": "2026-09-05",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-61-BRAND-RENAME-GEWU",
+      "path": "docs/block-61-brand-rename-gewu-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-61-brand-rename-gewu",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-61",
+        "brand",
+        "rename",
+        "gewu",
+        "identity-module",
+        "G0"
+      ],
+      "notes": "品牌身份系统化改名 BioF3 → Gewu（格物）。用户裁决（2026-09-06）：名字定 Gewu，单独开 block 彻底系统性改名，设计要求后续改名灵活。核心设计 = 品牌身份单一事实源（src/main/brand.js + frontend/src/lib/brand.ts 双端镜像 + brand-identity 契约测试），三层改名策略：Tier A 用户可见面全改 + 字符串一律从品牌模块取；Tier B 兼容迁移（桥双 key / localStorage 读旧写新 / 事件与 IPC 通道名）；Tier C 机械替换（CSS 令牌与类名 sed，theme-token-contract 护航；env GEWU_ 优先 BIOF3_ 兜底双读）。明确不动（协议命名空间非品牌）：core/biof3-server 目录路径、.biof3-* 用户数据目录（数据连续性红线）、历史文档与 acceptance 证据、git 历史。版本号不变 0.0.1-rc.7。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-06",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "ACTIVE"
     }
   ],
-  "lastUpdated": "2026-09-05 (BLOCK-60-COMPOSER-TOOLBAR 收口 completed，UI-291 verified)",
-  "documentCount": 203
+  "lastUpdated": "2026-09-06",
+  "documentCount": 204
 }

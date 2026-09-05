@@ -1,7 +1,7 @@
 # BLOCK-48 — macOS 电脑控制模块（Computer Use）技术调研与实施计划
 
-> 状态：`active`（2026-09-06 用户裁决「BLOCK-48 开干」启动，当前唯一 active 工作包；P1 Swift sidecar PoC 开工。前期候选序裁决 2026-09-05：排 BLOCK-59 之后，BLOCK-59 已于 2026-09-05 整包收口）
-> 立项日期：2026-09-03；启动日期：2026-09-06
+> 状态：`planned`（2026-09-06 **让位暂停**：用户裁决于 side chat 定名 Gewu 并单独开 BLOCK-61 品牌改名（当前唯一 active），改名收口后本包恢复 active 继续 P1；P1 进度保持在已提交检查点 `c29d9f04`（Swift sidecar 骨架：Package.swift + AXController + stdio JSON probe/snapshot/click），无未提交 WIP。原启动记录：2026-09-06 用户裁决「BLOCK-48 开干」）
+> 立项日期：2026-09-03；启动日期：2026-09-06；让位暂停：2026-09-06
 > truthDomain: `block-48-computer-use`
 
 ## 1. 背景与动机
