@@ -1,7 +1,7 @@
 # BLOCK-48 — macOS 电脑控制模块（Computer Use）技术调研与实施计划
 
-> 状态：`planned`（候选，待用户裁决启动；当前 active 为 BLOCK-47-UI255-POPOVER-VERTICAL-CLAMP）
-> 立项日期：2026-09-03
+> 状态：`active`（2026-09-06 用户裁决「BLOCK-48 开干」启动，当前唯一 active 工作包；P1 Swift sidecar PoC 开工。前期候选序裁决 2026-09-05：排 BLOCK-59 之后，BLOCK-59 已于 2026-09-05 整包收口）
+> 立项日期：2026-09-03；启动日期：2026-09-06
 > truthDomain: `block-48-computer-use`
 
 ## 1. 背景与动机
