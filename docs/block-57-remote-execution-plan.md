@@ -1,6 +1,6 @@
 # BLOCK-57 — 远程执行：本地指挥席 + SSH 执行节点 + 调度器适配
 
-> 状态：`active`（P1 SSH 直连已于 2026-09-04 收口 completed——真实节点 aliyun 全链 ALL PASS；P2 Slurm 适配 / P3 复现链跨机 / P4 广度待续。UI-290 目标管理面 in_progress。设计评审 [`block-57-design-review.md`](./block-57-design-review.md) 已 confirmed）
+> 状态：`active`（**P1 SSH 直连 completed（2026-09-05 UI-290 verified，用户真实对话 dell 执行闭环）；P2 Slurm 用户裁决不做；P3 复现链跨机 / P4 广度待用户裁决**。设计评审 [`block-57-design-review.md`](./block-57-design-review.md) 已 confirmed）
 > 立项日期：2026-09-03（用户裁决「立项」）· 启动日期：2026-09-04（用户裁决「启动 BLOCK-57 远程执行」）
 > truthDomain: `block-57-remote-execution`
 > 来源：生信算力需求讨论（用户提出「适配算力集群进行大数据量运算」，问 Linux 版还是接口）
@@ -96,6 +96,8 @@
 | 凭据安全 | 只用 SSH key（用户既有凭据），BioF3 不存密码；known_hosts 校验开启 |
 
 ## 11. 进度记录
+
+- 2026-09-05 **阶段标记（用户确认收口后）**：P1 completed（含 UI-290 verified）＋ P2 用户裁决「不做，后期再说」＋ P3/P4 保持 planned 待裁决。用户真实对话验证闭环：composer 选 dell → 模型执行 volcano-plot 调整 → completed → 结果页直达。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 - 2026-09-05 **插件链远程集成 + composer chip（UI-290 实机收尾，用户真实对话验证）**：用户实测发现模型可见工具全走 callTool 插件链（tj_ 作业），完全绕开远程路径——① composer「执行目标」chip（SimpleChat，与计划模式并列，仅目标存在时渲染，localStorage 持久化）→ send context → chat.js/agent-runner 双路径 toolCtx 透传（agent-runner 为对话主路径，曾漏接致跑本机——已补）；② learning 统一注入（scientific 严格门之后、heavy/非 heavy 之前，ack 创建/续跑两侧确定性一致，未知目标 fail-closed）；③ mcp/registry callTool 远程分支（剥离保留键/启发式重写 file 型输入为 bundled 文件名/同步预算 280s/execution_target_id 落库/provenance.executionTarget 合并）+ agent 收尾根目录产物归拢 output/ + 拉回后本地归位（插件产物约定闭环）；④ 实机：composer 选 dell → 模型执行 volcano-plot → 作业落 dell（用户真实对话）+ 进程内 run_tool 同路径 PASS（注入日志实锤）；session-target 单测 6/6、徽章组件测试 3/3。UI-290 verified（精确边界见台账）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
