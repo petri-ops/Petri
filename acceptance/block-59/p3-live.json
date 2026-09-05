@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-09-05T11:31:44.743Z",
+  "startedAt": "2026-09-05T12:37:44.984Z",
   "assertions": [
     {
       "name": "指挥中心弹出 → created（单例通道）",
@@ -44,10 +44,10 @@
     {
       "name": "指挥中心关闭不影响已下钻的结果窗（注册表 popped 仍在）",
       "pass": true,
-      "detail": "[{\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"popped\"}]"
+      "detail": "[{\"id\":\"result:tj_mtnxhti6_v9ik:report.html\",\"state\":\"docked\"},{\"id\":\"result:tj_mtnyuk6t_jfqz:counts.csv\",\"state\":\"docked\"},{\"id\":\"result:tj_mtnyso7c_yp88:counts.csv\",\"state\":\"docked\"},{\"id\":\"result:tj_mtnywtsc_dszf:counts.csv\",\"state\":\"docked\"},{\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"popped\"}]"
     }
   ],
-  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb",
-  "finishedAt": "2026-09-05T11:31:48.335Z",
+  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb/result?job=tj_mtnyx2kb_97hz",
+  "finishedAt": "2026-09-05T12:37:48.467Z",
   "allPass": true
 }

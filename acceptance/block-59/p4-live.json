@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-09-05T11:56:16.725Z",
+  "startedAt": "2026-09-05T12:37:48.532Z",
   "assertions": [
     {
       "name": "存在可用的历史子 agent 任务（done + tool_call + delta）",
@@ -47,7 +47,7 @@
       "detail": "{\"ok\":true,\"id\":\"agent:20f71d77-51f9-4282-8513-9ce604da1dc1\",\"state\":\"closed\"}"
     }
   ],
-  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb",
-  "finishedAt": "2026-09-05T11:56:18.493Z",
+  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb/result?job=tj_mtnyx2kb_97hz",
+  "finishedAt": "2026-09-05T12:37:50.268Z",
   "allPass": true
 }

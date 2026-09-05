@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-09-05T10:43:08.869Z",
+  "startedAt": "2026-09-05T12:37:29.058Z",
   "assertions": [
     {
       "name": "存在可用的 completed 作业（jobId + artifactName）",
@@ -14,7 +14,7 @@
     {
       "name": "初始快照：maxPopped=4（≤4 并发契约）",
       "pass": true,
-      "detail": "{\"ok\":true,\"snapshot\":{\"maxPopped\":4,\"entries\":[],\"singletons\":{\"commandCenter\":{\"type\":\"command-center\",\"route\":\"/windo"
+      "detail": "{\"ok\":true,\"snapshot\":{\"maxPopped\":4,\"entries\":[{\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"type\":\"result\",\"key"
     },
     {
       "name": "popOut → created（白名单键通过，注册表入 popped）",
@@ -84,7 +84,7 @@
     {
       "name": "注册表条目 railed + static 淡出时间戳",
       "pass": true,
-      "detail": "{\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"type\":\"result\",\"key\":\"tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"railed\",\"railClass\":\"static\",\"fadeAfter\":1788605291211,\"createdAt\":1788604989096,\"poppedAt\":1788604991167,\"railedAt\":1788604991211}"
+      "detail": "{\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"type\":\"result\",\"key\":\"tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"railed\",\"railClass\":\"static\",\"fadeAfter\":1788612151419,\"createdAt\":1788608681694,\"poppedAt\":1788611851384,\"railedAt\":1788611851419}"
     },
     {
       "name": "restore → popped（回记忆位置）",
@@ -129,11 +129,11 @@
     {
       "name": "P1b 真实点击「弹出」→ 独立窗出现且注册表 popped",
       "pass": true,
-      "detail": "{\"targets\":1,\"entry\":{\"id\":\"result:tj_mtnyx2kb_97hz:sample_alignment.csv\",\"type\":\"result\",\"key\":\"tj_mtnyx2kb_97hz:sample_alignment.csv\",\"state\":\"popped\",\"railClass\":\"static\",\"fadeAfter\":null,\"createdAt\":1788604997403,\"poppedAt\":1788604997403,\"railedAt\":null}}"
+      "detail": "{\"targets\":1,\"entry\":{\"id\":\"result:tj_mtnyx2kb_97hz:sample_alignment.csv\",\"type\":\"result\",\"key\":\"tj_mtnyx2kb_97hz:sample_alignment.csv\",\"state\":\"popped\",\"railClass\":\"static\",\"fadeAfter\":null,\"createdAt\":1788611857619,\"poppedAt\":1788611857619,\"railedAt\":null}}"
     }
   ],
   "contentKey": "tj_mtnyx2kb_97hz:design_summary.json",
-  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb/result?job=tj_mtnyx2kb_97hz",
+  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb",
   "geometry": {
     "x": 301,
     "y": 113,
@@ -141,6 +141,6 @@
     "h": 680,
     "displayId": 1
   },
-  "finishedAt": "2026-09-05T10:43:17.564Z",
+  "finishedAt": "2026-09-05T12:37:37.766Z",
   "allPass": true
 }
