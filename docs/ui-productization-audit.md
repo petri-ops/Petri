@@ -2157,6 +2157,18 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-297: 边缘活动轨道加映——hover 内容快照预览 + 可辨识类型图标刻度（BLOCK-59 加映二，用户反馈） (2026-09-06 verified)
+
+**用户反馈**（附截图）：① 轨道 hover 应可预览内容；② 轨道「展示不全，看不出来是啥」。
+
+**根因**（实机定位）：① 轨道窗本体只有 28px 宽，320px hover 卡**整体被窗体裁剪**——不是「预览弱」而是预览全无（首版设计缺陷：卡片渲染在窗体坐标系内，窗体不够宽就物理不可见）；② 刻度是 8px 纯色块，无法辨认窗口类型。
+
+**改动**（0 新 npm 依赖）：① **轨道窗加宽 28→364px**（预览区 336 透明 + 条带 28）——卡片在预览区内渲染不再被裁剪；预览区保持 `setIgnoreMouseEvents` 穿透，仅条带/卡交互收鼠标（[window-manager.js](../src/ipc/window-manager.js)）；② **降格瞬间内容快照**——`captureThumbnail`（`webContents.capturePage`，窗口**可见态**采集——隐藏后截取得空帧，故 ×/minimize 全部先快照后 hide，async 串行保证顺序；>480px 缩放）；新 `window:thumbnail` IPC + preload `thumbnail` + d.ts；快照随条目 remove/return 清理；③ **hover 卡升级**：内容快照图（`naturalWidth>0` 真实位图，无快照回退虚线占位）+ 标题/静态常驻/快照时点标注 + 恢复/移除；180ms 关闭延迟防「刻度→卡片」跨越条带边界的误关；④ **刻度带类型图标**（result=bar-chart / terminal=terminal / agent=brain，26→34px hover 展宽），不再是纯色块（[RailPage.tsx](../frontend/src/components/window/RailPage.tsx) / [rail-page.module.css](../frontend/src/components/window/rail-page.module.css)）。
+
+**门禁**：核心单测 37/37（新增加映二契约锁：RAIL_WINDOW_WIDTH=364 / thumbnail IPC / capturePage / 先快照后降格时序 / 快照随条目清理 / preload 暴露）；tsc 0；前端 vitest（railEntries + theme-token-contract）11/11；**P2 原有 14 断言实机回归 PASS（无破坏）**。
+
+**实机（2026-09-06，dev Electron CDP，证据 `acceptance/block-59/rail-preview-live.json` 9 断言 allPass + 截图，脚本 [block59-rail-preview-live.cjs](../scripts/block59-rail-preview-live.cjs)）**：① 结果窗弹出 → × 降格 → 轨道窗 `outerWidth===364`（卡右缘 328 < 364，**物理在窗口内**）；② 刻度 svg 图标渲染（data-kind=result）；③ hover（mouseover 合成mouseenter）→ 卡渲染 + 标题「结果 · design_summary.json」+ **快照为真实位图（naturalWidth=480）**（截图 p59-rail-preview：快照 + 标题 + 恢复/移除完整可见）；④ 点击刻度恢复 popped；⑤ 清理降格移除。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-296: 窗口系统加映——弹出窗外观主题与主窗一致（BLOCK-59 加映，用户反馈） (2026-09-05 verified)
 
 **用户反馈**：弹出窗（结果视图等）的主题与主界面不一致——弹窗永远是暗色，不跟随外观主题。

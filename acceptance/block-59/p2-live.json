@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-09-05T12:37:37.834Z",
+  "startedAt": "2026-09-05T17:35:11.572Z",
   "assertions": [
     {
       "name": "主窗 windowManager/terminal 桥可用 + 预清理",
@@ -9,7 +9,7 @@
     {
       "name": "终端会话启动（主窗 tab 语义，pty 运行中）",
       "pass": true,
-      "detail": "{\"ok\":true,\"pid\":23694,\"cwd\":\"/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data\",\"shell\":\"/bin/zsh\",\"sessionId\":\"default\"}"
+      "detail": "{\"ok\":true,\"pid\":26058,\"cwd\":\"/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data\",\"shell\":\"/bin/zsh\",\"sessionId\":\"default\"}"
     },
     {
       "name": "终端 Tab 升格 → created（terminal:<sessionId>）",
@@ -29,12 +29,12 @@
     {
       "name": "数据面实锤：主窗写入 → pty echo → 转发 → 弹出窗收到",
       "pass": true,
-      "detail": "marker=B59P2-1788611860022"
+      "detail": "marker=B59P2-1788629713782"
     },
     {
       "name": "弹出窗终端有真实渲染内容（xterm rows 非空）",
       "pass": true,
-      "detail": "chars=325"
+      "detail": "chars=273"
     },
     {
       "name": "× → 降格 railed（终端常驻不淡出）",
@@ -54,7 +54,7 @@
     {
       "name": "轨道刻度点击 → popped（hover 恢复路径的点击等价）",
       "pass": true,
-      "detail": "{\"id\":\"terminal:default\",\"type\":\"terminal\",\"key\":\"default\",\"state\":\"popped\",\"railClass\":\"persistent\",\"fadeAfter\":null,\"createdAt\":1788611857882,\"poppedAt\":1788611862169,\"railedAt\":null}"
+      "detail": "{\"id\":\"terminal:default\",\"type\":\"terminal\",\"key\":\"default\",\"state\":\"popped\",\"railClass\":\"persistent\",\"fadeAfter\":null,\"createdAt\":1788629711632,\"poppedAt\":1788629715988,\"railedAt\":null}"
     },
     {
       "name": "无降格窗口时轨道自动隐藏（visibilityState hidden）",
@@ -72,7 +72,7 @@
       "detail": ""
     }
   ],
-  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb/result?job=tj_mtnyx2kb_97hz",
-  "finishedAt": "2026-09-05T12:37:44.922Z",
+  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb",
+  "finishedAt": "2026-09-05T17:35:18.770Z",
   "allPass": true
 }

@@ -104,6 +104,8 @@ declare global {
         }>;
         /** 当前窗口的内容身份：主窗为 null，弹出窗为 'type:key'。 */
         self: () => Promise<{ ok: boolean; contentId: string | null; code?: string }>;
+        /** 轨道 hover 卡内容预览：降格瞬间快照 dataURL（无快照 ok:false）。 */
+        thumbnail: (id: string) => Promise<{ ok: boolean; dataUrl?: string | null; code?: string }>;
         /** 轨道容器窗专用：hover 条带/卡时切换点击穿透（仅轨道窗 sender 生效）。 */
         setRailMouseIgnore: (ignore: boolean) => void;
         /** 注册表增量多播（所有存活窗）：{ kind: 'upsert', entry } / { kind: 'remove', id }。 */

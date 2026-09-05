@@ -1,0 +1,62 @@
+{
+  "startedAt": "2026-09-05T17:34:20.810Z",
+  "assertions": [
+    {
+      "name": "主窗桥可用 + 预清理",
+      "pass": true,
+      "detail": "{\"bridge\":true,\"cleaned\":false}"
+    },
+    {
+      "name": "结果窗弹出",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"action\":\"created\",\"autoDemoted\":null}"
+    },
+    {
+      "name": "× 降格（minimize 含快照采集）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"railed\"}"
+    },
+    {
+      "name": "轨道窗 target 出现",
+      "pass": true,
+      "detail": "targets=1"
+    },
+    {
+      "name": "轨道窗宽 364（预览区+条带，卡不再被裁剪）",
+      "pass": true,
+      "detail": "{\"outerWidth\":364,\"innerWidth\":364,\"visible\":\"visible\",\"tickCount\":1,\"tickHasSvg\":true,\"tickKind\":\"result\"}"
+    },
+    {
+      "name": "刻度带类型图标（svg 渲染，非纯色块）",
+      "pass": true,
+      "detail": "{\"outerWidth\":364,\"innerWidth\":364,\"visible\":\"visible\",\"tickCount\":1,\"tickHasSvg\":true,\"tickKind\":\"result\"}"
+    },
+    {
+      "name": "hover 卡渲染且右缘在窗口内（不被窗体裁剪）",
+      "pass": true,
+      "detail": "{\"cardRight\":328,\"innerWidth\":364,\"title\":\"结果 · design_summary.json\",\"hasThumbImg\":true,\"thumbLoaded\":true,\"thumbW\":480}"
+    },
+    {
+      "name": "卡标题可读（类型 · 产物名）",
+      "pass": true,
+      "detail": "\"结果 · design_summary.json\""
+    },
+    {
+      "name": "快照预览为真实位图（naturalWidth>0）",
+      "pass": true,
+      "detail": "{\"w\":480}"
+    },
+    {
+      "name": "点击刻度 → popped（恢复路径完好）",
+      "pass": true,
+      "detail": "{\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"type\":\"result\",\"key\":\"tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"popped\",\"railClass\":\"static\",\"fadeAfter\":null,\"createdAt\":1788629661039,\"poppedAt\":1788629664548,\"railedAt\":null}"
+    },
+    {
+      "name": "清理：降格 + 显式移除",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"closed\"}"
+    }
+  ],
+  "finishedAt": "2026-09-05T17:34:25.814Z",
+  "allPass": true
+}

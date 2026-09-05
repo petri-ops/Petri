@@ -444,6 +444,18 @@ describe('适配器与 preload 静态契约', () => {
     assert.match(src, /window:rail-mouse/, '渲染层穿透切换 IPC 存在');
   });
 
+  test('加映二契约：轨道窗加宽容纳 hover 卡 + 降格瞬间快照 + thumbnail IPC', () => {
+    const src = fs.readFileSync(ADAPTER, 'utf8');
+    assert.match(src, /RAIL_WINDOW_WIDTH = 364/, '轨道窗 364px（预览区 336 + 条带 28），卡片不再被裁剪');
+    assert.match(src, /window:thumbnail/, 'thumbnail IPC 存在（轨道卡内容预览）');
+    assert.match(src, /capturePage\(\)/, '降格瞬间内容快照（capturePage）');
+    assert.match(src, /thumbnails\.delete\(id\)/, '快照随条目终结清理');
+    // 快照必须在降格（hide）之前采集——可见态 capturePage 才可靠
+    assert.match(src, /await captureThumbnail\(rec\);[\s\S]{0,200}core\.minimizeToRail\(id\)/, '先快照后降格');
+    const preloadSrc = fs.readFileSync(PRELOAD, 'utf8');
+    assert.match(preloadSrc, /thumbnail:\s*\(id\)/, 'preload 暴露 thumbnail');
+  });
+
   test('P3 契约：指挥中心单例 ×=直接关闭（不进轨道），入口在 TitleBar', () => {
     const shellSrc = fs.readFileSync(
       path.join(__dirname, '..', 'frontend', 'src', 'components', 'window', 'WindowShell.tsx'),

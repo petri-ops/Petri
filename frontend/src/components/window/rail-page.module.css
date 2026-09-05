@@ -1,3 +1,5 @@
+/* BLOCK-59 P2/加映二 — 边缘活动轨道：右缘条带 + hover 预览卡。
+   轨道窗总宽 364（预览区 336 透明穿透 + 条带 28），卡片渲染在预览区内。 */
 .railPage {
   position: fixed;
   inset: 0;
@@ -5,20 +7,20 @@
   justify-content: flex-end;
   align-items: stretch;
   pointer-events: none; /* 穿透由主进程 ignoreMouseEvents 控制；双保险 */
-  font-family: var(--biof3-font-sans, inherit);
+  font-family: var(--biof3-font-sans);
 }
 
-/* ── 条带（右缘）：常态 14px 半透明，hover 展开 28px ── */
+/* ── 条带（右缘）：26px 常驻 → hover 34px，透明度 0.45 → 0.72 ── */
 .strip {
   pointer-events: auto;
-  width: 14px;
+  width: 26px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
   padding: 10px 0;
   background: var(--biof3-bg-surface);
-  border-left: 1px solid var(--biof3-border-color, #323848);
+  border-left: 1px solid var(--biof3-border);
   opacity: 0.45;
   transition: width 0.16s ease, opacity 0.16s ease;
   overflow: hidden;
@@ -26,38 +28,44 @@
 
 .strip:hover,
 .stripActive {
-  width: 28px;
+  width: 34px;
   opacity: 0.72;
 }
 
+/* 刻度 = 类型图标按钮（bar-chart/terminal/brain），不再是纯色块 */
 .tick {
-  width: 8px;
-  min-height: 22px;
+  width: 20px;
+  height: 32px;
   flex-shrink: 0;
-  border-radius: 4px;
-  background: var(--biof3-accent, #5a9cff);
+  border-radius: 6px;
   border: none;
   padding: 0;
   cursor: pointer;
-  transition: opacity 0.4s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--biof3-accent);
+  transition: opacity 0.4s ease, background 0.12s ease;
 }
 
 .tick[data-kind='terminal'],
 .tick[data-kind='agent'] {
-  background: var(--biof3-status-success);
+  color: var(--biof3-status-success);
 }
 
 .tick[data-faded='true'] {
-  opacity: 0.22;
+  opacity: 0.25;
 }
 
 .tick:hover {
+  background: var(--biof3-bg-subtle);
   opacity: 1;
 }
 
 .overflowChip {
   font-size: 9px;
-  color: var(--biof3-text-secondary, #9aa3b8);
+  color: var(--biof3-text-muted);
   writing-mode: vertical-rl;
   letter-spacing: 1px;
 }
@@ -65,30 +73,60 @@
 .emptyHint {
   writing-mode: vertical-rl;
   font-size: 10px;
-  color: var(--biof3-text-secondary, #9aa3b8);
+  color: var(--biof3-text-muted);
   opacity: 0.6;
 }
 
-/* ── hover 卡：锚轨道左侧，320px ── */
+/* ── hover 卡：锚条带左侧，320px，含降格瞬间内容快照 ── */
 .card {
   pointer-events: auto;
   position: absolute;
   right: 36px;
   width: 320px;
-  max-height: 70vh;
+  max-height: 78vh;
   overflow: auto;
   padding: 12px;
   border-radius: 10px;
-  border: 1px solid var(--biof3-border-color, #323848);
-  background: var(--biof3-bg-canvas);
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--biof3-border);
+  background: var(--biof3-bg-elevated);
+  box-shadow: var(--biof3-shadow-menu);
+}
+
+.thumbWrap {
+  margin-bottom: 10px;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid var(--biof3-border);
+  background: var(--biof3-bg-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+}
+
+.thumbImg {
+  max-width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  display: block;
+}
+
+.thumbFallback {
+  margin-bottom: 10px;
+  padding: 18px 12px;
+  border-radius: 8px;
+  border: 1px dashed var(--biof3-border);
+  background: var(--biof3-bg-subtle);
+  text-align: center;
+  font-size: 11px;
+  color: var(--biof3-text-muted);
 }
 
 .cardTitle {
   display: block;
   font-size: 13px;
   font-weight: 600;
-  color: var(--biof3-text-primary, #e6e9f2);
+  color: var(--biof3-text);
   margin-bottom: 4px;
   word-break: break-all;
 }
@@ -96,7 +134,7 @@
 .cardMeta {
   display: block;
   font-size: 11px;
-  color: var(--biof3-text-secondary, #9aa3b8);
+  color: var(--biof3-text-secondary);
   margin-bottom: 10px;
 }
 
@@ -110,31 +148,35 @@
   height: 28px;
   font-size: 12px;
   border-radius: 6px;
-  border: 1px solid var(--biof3-border-color, #323848);
+  border: 1px solid var(--biof3-border);
   background: transparent;
-  color: var(--biof3-text-primary, #e6e9f2);
+  color: var(--biof3-text);
   cursor: pointer;
 }
 
 .cardBtn:hover {
-  background: var(--biof3-bg-hover, rgba(255, 255, 255, 0.06));
+  background: var(--biof3-hover);
 }
 
 .cardBtnPrimary {
-  background: var(--biof3-accent, #5a9cff);
-  border-color: var(--biof3-accent, #5a9cff);
-  color: #fff;
+  background: var(--biof3-accent);
+  border-color: var(--biof3-accent);
+  color: var(--biof3-on-accent);
+}
+
+.cardBtnPrimary:hover {
+  background: var(--biof3-accent-hover);
 }
 
 .cardBtnDanger:hover {
-  background: rgba(255, 122, 122, 0.14);
-  border-color: var(--biof3-danger, #ff7a7a);
-  color: var(--biof3-danger, #ff7a7a);
+  background: var(--biof3-status-error-bg);
+  border-color: var(--biof3-danger);
+  color: var(--biof3-danger);
 }
 
 .fadedNote {
   display: block;
   font-size: 11px;
-  color: var(--biof3-text-secondary, #9aa3b8);
+  color: var(--biof3-text-muted);
   margin-bottom: 8px;
 }

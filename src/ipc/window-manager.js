@@ -26,7 +26,12 @@ const {
 
 const GEOMETRY_RECORD_DEBOUNCE_MS = 400;
 const RAIL_CONTENT_ID = "rail:";
-const RAIL_WINDOW_WIDTH = 28; // 屏幕右缘条带；hover 卡向左展开（透明穿透区）
+// 轨道窗总宽 = 预览区 336 + 条带 28。hover 卡（320px）渲染在预览区内——
+// 首版窗体只有 28px 宽，卡片整体被窗体裁剪（用户反馈「展示不全/hover 无预览」
+// 的根因）。预览区透明 + ignoreMouseEvents 穿透，仅条带/卡交互时收鼠标。
+const RAIL_WINDOW_WIDTH = 364;
+const RAIL_STRIP_WIDTH = 28;
+const THUMBNAIL_WIDTH = 480;
 
 // BLOCK-59 P2 — 终端等会话型数据的受管窗口转发钩子。terminal.js 在
 // mainWindow 广播之外经此把 terminal:data/exit 送达承载该会话的独立窗
@@ -64,6 +69,10 @@ function setupWindowManagerIpc({
 
   // contentId → { win, expectingClose, geometryTimer }
   const windows = new Map();
+  // contentId → dataURL。降格瞬间（窗口仍可见）截取的内容快照，供轨道
+  // hover 卡预览；隐藏状态下不重截（静态结果窗内容不变，终端/agent 卡
+  // 标注「快照于降格时」）。remove/return 时清理。
+  const thumbnails = new Map();
   let exiting = false;
 
   // ── Trusted-sender scoping ────────────────────────────────────
@@ -147,6 +156,20 @@ function setupWindowManagerIpc({
       rec.geometryTimer = null;
       recordGeometryNow(rec);
     }, GEOMETRY_RECORD_DEBOUNCE_MS);
+  };
+
+  // BLOCK-59 加映二 —— 降格瞬间的内容快照（窗口仍可见时 capturePage 可靠；
+  // 隐藏后截取会得到空帧）。失败静默：轨道卡回退纯文本展示。
+  const captureThumbnail = async (rec) => {
+    if (!rec || rec.win.isDestroyed()) return;
+    try {
+      const image = await rec.win.webContents.capturePage();
+      if (!image || image.isEmpty()) return;
+      const scaled = image.getSize().width > THUMBNAIL_WIDTH
+        ? image.resize({ width: THUMBNAIL_WIDTH })
+        : image;
+      thumbnails.set(rec.id, scaled.toDataURL());
+    } catch {}
   };
 
   // ── Window factory ────────────────────────────────────────────
@@ -339,8 +362,11 @@ function setupWindowManagerIpc({
       if (spec.closeBehavior !== "rail") return;
       event.preventDefault();
       recordGeometryNow(rec);
-      core.minimizeToRail(id);
-      if (!win.isDestroyed()) win.hide();
+      // 快照后降格隐藏（capturePage 需要窗口可见，串行保证顺序）
+      void captureThumbnail(rec).then(() => {
+        core.minimizeToRail(id);
+        if (!win.isDestroyed()) win.hide();
+      });
     });
 
     win.on("closed", () => {
@@ -349,6 +375,7 @@ function setupWindowManagerIpc({
         rec.geometryTimer = null;
       }
       windows.delete(id);
+      thumbnails.delete(id);
       if (rec.expectingClose || exiting) return;
       // Unexpected destroy (crash / destroy()): reconcile the
       // registry so the content stays recoverable from the rail.
@@ -394,10 +421,13 @@ function setupWindowManagerIpc({
     return created.ok ? result : created;
   };
 
-  const hideDemoted = (contentId) => {
+  const hideDemoted = async (contentId) => {
     if (!contentId) return;
     const rec = windows.get(contentId);
-    if (rec && !rec.win.isDestroyed()) rec.win.hide();
+    if (rec && !rec.win.isDestroyed()) {
+      await captureThumbnail(rec); // 降格前快照（可见态）
+      if (!rec.win.isDestroyed()) rec.win.hide();
+    }
   };
 
   // ── IPC surface (plan §4.3, additive) ─────────────────────────
@@ -455,6 +485,7 @@ function setupWindowManagerIpc({
     }
     const result = core.returnToDock(id);
     if (!result.ok) return result;
+    thumbnails.delete(id);
     const rec = windows.get(id);
     if (rec) {
       rec.expectingClose = true;
@@ -468,7 +499,7 @@ function setupWindowManagerIpc({
     return result;
   });
 
-  ipcMain.handle("window:minimize", (event, payload) => {
+  ipcMain.handle("window:minimize", async (event, payload) => {
     const scope = resolveSenderScope(event);
     const id = typeof payload === "string" ? payload : payload?.id;
     if (!scope || !id || !isMutationAllowed(scope, id)) {
@@ -476,6 +507,7 @@ function setupWindowManagerIpc({
     }
     const rec = windows.get(id);
     recordGeometryNow(rec); // while still popped (core enforces state)
+    if (rec && !rec.win.isDestroyed()) await captureThumbnail(rec); // 降格前快照（可见态）
     const result = core.minimizeToRail(id);
     if (!result.ok) return result;
     if (rec && !rec.win.isDestroyed()) rec.win.hide();
@@ -503,6 +535,7 @@ function setupWindowManagerIpc({
     }
     const result = core.remove(id);
     if (!result.ok) return result;
+    thumbnails.delete(id);
     const rec = windows.get(id);
     if (rec) {
       rec.expectingClose = true;
@@ -531,6 +564,15 @@ function setupWindowManagerIpc({
       ok: true,
       contentId: scope.kind === "managed" ? scope.id : null,
     };
+  });
+
+  // BLOCK-59 加映二 —— 轨道 hover 卡内容预览：降格瞬间快照（不可用时
+  // ok:false，卡回退纯文本）。仅受信 sender 可读。
+  ipcMain.handle("window:thumbnail", (event, payload) => {
+    if (!resolveSenderScope(event)) return { ok: false, code: "sender_not_allowed" };
+    const id = typeof payload === "string" ? payload : payload?.id;
+    const dataUrl = id ? thumbnails.get(id) : null;
+    return { ok: !!dataUrl, dataUrl: dataUrl || null };
   });
 
   app.once("before-quit", () => {
