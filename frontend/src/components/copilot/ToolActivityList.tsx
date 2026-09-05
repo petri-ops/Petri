@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { CodeMirrorDiffView } from '@/components/desktop/WorkingTreeReview/CodeMirrorDiffView';
-import { biof3Events, dispatchBioF3Event } from '@/lib/events';
+import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import { getBridge } from '@/lib/desktopBridge';
 import {
   formatToolDuration,
@@ -94,7 +94,7 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
           {activity.agentRunId && windowManagerBridge && (
             <button
               type="button"
-              className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
               onClick={openAgentWindow}
               title="弹出 agent 详情独立窗（实时工作流 + 终态摘要，只读投影）"
             >
@@ -111,7 +111,7 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
                 className="sc-tool-changediff-file"
                 title={`${activity.actionDetail || activity.name} — 点击在审阅中查看`}
                 onClick={() =>
-                  dispatchBioF3Event(biof3Events.reviewOpenFile, {
+                  dispatchGewuEvent(gewuEvents.reviewOpenFile, {
                     filePath: activity.actionDetail || activity.name,
                   })
                 }

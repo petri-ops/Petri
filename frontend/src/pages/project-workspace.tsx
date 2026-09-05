@@ -49,12 +49,12 @@ import { segmentToMode, modeToSegment, type WorkspaceMode } from '@/hooks/useWor
 import { isDirectRecoveryAction, useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import type { CopilotContext, HarnessContextSummary } from '@/lib/copilotContext';
-import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
+import { gewuEvents, subscribeGewuEvent, dispatchGewuEvent } from '@/lib/events';
 import { usePendingScroll } from '@/lib/pendingScrollContext';
 import type { DiffRevision, EditorApi } from '@/components/editor/CodeMirror/types';
 // BLOCK-42 — pending-scroll 消费侧挂载（UI-194）：预览编辑器切 CodeMirror
 import { WorkspaceFilePreviewBridge } from '@/components/editor';
-import { getBrowserViewportSize, isBioF3LocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
+import { getBrowserViewportSize, isGewuLocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { useTheme } from '@/themes/ThemeProvider';
 import { fileExtension, isImageFile, isTextFile, isMarkdownFile, workspaceFileUrlFor, formatPreviewText } from '@/lib/previewFileUtils';
@@ -556,7 +556,7 @@ export function ProjectWorkspace(): React.ReactElement {
 
   // BLOCK-28.7 — 聊天区改动卡片点击：打开审阅 tab（文件选中由 useWorkingTreeReview 监听）
   useEffect(() => {
-    return subscribeBioF3Event(biof3Events.reviewOpenFile, () => {
+    return subscribeGewuEvent(gewuEvents.reviewOpenFile, () => {
       openRightPanel('review');
     });
   }, [openRightPanel]);
@@ -817,7 +817,7 @@ export function ProjectWorkspace(): React.ReactElement {
     if (creatingProject) return;
     const validate = window.biof3Desktop?.files?.validateDirectory;
     if (typeof validate !== 'function') {
-      setCreateError('当前运行环境不支持路径校验（请在 BioF3 桌面应用中使用）。');
+      setCreateError('当前运行环境不支持路径校验（请在 Gewu 桌面应用中使用）。');
       return;
     }
     setCreatingProject(true);
@@ -1013,7 +1013,7 @@ export function ProjectWorkspace(): React.ReactElement {
     if (!projectId || savingWs) return;
     const validate = window.biof3Desktop?.files?.validateDirectory;
     if (typeof validate !== 'function') {
-      setWsEditError('当前运行环境不支持路径校验（请在 BioF3 桌面应用中使用）。');
+      setWsEditError('当前运行环境不支持路径校验（请在 Gewu 桌面应用中使用）。');
       return;
     }
     setSavingWs(true);
@@ -1087,11 +1087,11 @@ export function ProjectWorkspace(): React.ReactElement {
       canGoForward: rightTab === 'browser' && browserCanGoForward,
       onGoBack:
         rightTab === 'browser' && browserCanGoBack
-          ? () => dispatchBioF3Event(biof3Events.browserBack)
+          ? () => dispatchGewuEvent(gewuEvents.browserBack)
           : null,
       onGoForward:
         rightTab === 'browser' && browserCanGoForward
-          ? () => dispatchBioF3Event(biof3Events.browserForward)
+          ? () => dispatchGewuEvent(gewuEvents.browserForward)
           : null,
       // Conversations for TitleBar selector
       conversations: conversations.map(c => ({
@@ -1104,7 +1104,7 @@ export function ProjectWorkspace(): React.ReactElement {
     });
     return () => {
       updateTitleBar({
-        title: 'BioF3',
+        title: 'Gewu',
         leftPanelWidth: 240,
         rightPanelWidth: 340,
         tabs: [],
@@ -1163,7 +1163,7 @@ export function ProjectWorkspace(): React.ReactElement {
         .then(setAllProjects)
         .catch(() => {});
     };
-    const unsub = subscribeBioF3Event(biof3Events.softRefresh, handler);
+    const unsub = subscribeGewuEvent(gewuEvents.softRefresh, handler);
     return unsub;
   }, [fetchData, refreshConversationJobs, refreshConversations]);
 
@@ -1174,7 +1174,7 @@ export function ProjectWorkspace(): React.ReactElement {
       updateWorkspaceMode('chat');
       await Promise.all([refreshConversations(), refreshOtherConversations()]);
     };
-    const unsub = subscribeBioF3Event(biof3Events.conversationForked, handler);
+    const unsub = subscribeGewuEvent(gewuEvents.conversationForked, handler);
     return unsub;
   }, [updateWorkspaceMode, refreshConversations, refreshOtherConversations]);
 
@@ -1558,7 +1558,7 @@ export function ProjectWorkspace(): React.ReactElement {
         handleOpenResult(d.toolJobId, d.projectId || null);
       }
     };
-    const unsub = subscribeBioF3Event(biof3Events.projectOpenResult, handler);
+    const unsub = subscribeGewuEvent(gewuEvents.projectOpenResult, handler);
     return unsub;
   }, [handleOpenResult]);
 
@@ -1577,7 +1577,7 @@ export function ProjectWorkspace(): React.ReactElement {
       }
       void handleOpenResult(detail.jobId, targetProjectId || null, { preserveWorkspaceMode: true });
     };
-    const unsub = subscribeBioF3Event(biof3Events.projectOpenArtifact, handler);
+    const unsub = subscribeGewuEvent(gewuEvents.projectOpenArtifact, handler);
     return unsub;
   }, [handleOpenResult, navigate, projectId]);
 
@@ -1632,7 +1632,7 @@ export function ProjectWorkspace(): React.ReactElement {
         void getBridge('files')?.openWorkspaceFile(workspacePath, detail.relativePath);
       }
     };
-    const unsub = subscribeBioF3Event(biof3Events.projectOpenWorkspaceFile, handler);
+    const unsub = subscribeGewuEvent(gewuEvents.projectOpenWorkspaceFile, handler);
     return unsub;
   }, [handleOpenWorkspaceFile, navigate, openRightPanel, projectId, workspacePath, setPendingRequest]);
 
@@ -1643,7 +1643,7 @@ export function ProjectWorkspace(): React.ReactElement {
       return false;
     }
     setWorkspaceNotice('');
-    dispatchBioF3Event(biof3Events.copilotAsk, { prompt, analysisMode: options?.analysisMode });
+    dispatchGewuEvent(gewuEvents.copilotAsk, { prompt, analysisMode: options?.analysisMode });
     return true;
   }, [activeConvId]);
 
@@ -1669,7 +1669,7 @@ export function ProjectWorkspace(): React.ReactElement {
         return false;
       }
       setWorkspaceNotice('');
-      dispatchBioF3Event(biof3Events.copilotAsk, detail);
+      dispatchGewuEvent(gewuEvents.copilotAsk, detail);
       return true;
     } finally {
       setResultEditSubmitting(false);
@@ -1778,7 +1778,7 @@ export function ProjectWorkspace(): React.ReactElement {
     },
     onWorkflowChanged: () => setWorkflowRefreshKey((value) => value + 1),
     openRevisionWorkspaceFile: (relativePath: string) => {
-      dispatchBioF3Event(biof3Events.projectOpenWorkspaceFile, {
+      dispatchGewuEvent(gewuEvents.projectOpenWorkspaceFile, {
         projectId: projectId || '',
         relativePath,
         name: relativePath.split('/').pop() || relativePath,
@@ -2249,7 +2249,7 @@ export function RightFileTree({
     const timer = window.setInterval(() => {
       if (!document.hidden) void refreshFiles();
     }, 2000);
-    const unsubscribe = subscribeBioF3Event(biof3Events.projectWorkspaceChanged, (detail) => {
+    const unsubscribe = subscribeGewuEvent(gewuEvents.projectWorkspaceChanged, (detail) => {
       if (detail.projectId === project.id) {
         void refreshFiles(true);
       }
@@ -2510,7 +2510,7 @@ function WorkspaceFilePreview({
     if (!file) return;
     const cmSel = editorApiRef.current?.getSelection();
     if (cmSel && cmSel.text.trim()) {
-      dispatchBioF3Event(biof3Events.selectionQuote, {
+      dispatchGewuEvent(gewuEvents.selectionQuote, {
         projectId,
         path: file.path,
         name: file.name,
@@ -2527,7 +2527,7 @@ function WorkspaceFilePreview({
       domSel && !domSel.isCollapsed && text.trim()
       && host && domSel.anchorNode && host.contains(domSel.anchorNode)
     ) {
-      dispatchBioF3Event(biof3Events.selectionQuote, {
+      dispatchGewuEvent(gewuEvents.selectionQuote, {
         projectId,
         path: file.path,
         name: file.name,
@@ -2554,7 +2554,7 @@ function WorkspaceFilePreview({
   // BLOCK-52 P2（图片/结果图引用）：把当前预览图片派发给 SimpleChat composer。
   const handleQuoteImage = useCallback(() => {
     if (!file || !previewUrl) return;
-    dispatchBioF3Event(biof3Events.imageQuote, {
+    dispatchGewuEvent(gewuEvents.imageQuote, {
       projectId,
       kind: 'workspace-file',
       name: file.name,
@@ -2860,7 +2860,7 @@ function WorkspaceFilePreview({
                         e.preventDefault();
                         onOpenFile(linkedFile);
                       }}
-                      style={{ color: 'var(--biof3-accent, #4f86ff)', textDecoration: 'underline', cursor: 'pointer' }}
+                      style={{ color: 'var(--gewu-accent, #4f86ff)', textDecoration: 'underline', cursor: 'pointer' }}
                     >
                       {children}
                     </a>
@@ -3180,7 +3180,7 @@ export function BrowserPanel({
   const webviewRef = useRef<any>(null);
   const [inputUrl, setInputUrl] = useState(() => normalizeBrowserUrl(initialUrl));
   const [frameUrl, setFrameUrl] = useState(() =>
-    isBioF3LocalBrowserUrl(startUrlRef.current) ? startUrlRef.current : ''
+    isGewuLocalBrowserUrl(startUrlRef.current) ? startUrlRef.current : ''
   );
   const [frameKey, setFrameKey] = useState(0);
   const [title, setTitle] = useState('浏览器');
@@ -3213,7 +3213,7 @@ export function BrowserPanel({
       startUrlRef.current = nextUrl;
       setInputUrl(nextUrl);
       onUrlChange(nextUrl);
-      if (isBioF3LocalBrowserUrl(nextUrl)) {
+      if (isGewuLocalBrowserUrl(nextUrl)) {
         setFrameUrl(nextUrl);
         setBrowserError('');
         setLoading(true);
@@ -3246,7 +3246,7 @@ export function BrowserPanel({
     const webview = document.createElement('webview') as any;
     webview.style.border = '0';
     webview.style.display = 'flex';
-    webview.setAttribute('partition', 'persist:biof3-browser');
+    webview.setAttribute('partition', 'persist:gewu-browser');
     webview.setAttribute('allowpopups', 'true');
     webview.src = startUrlRef.current;
 
@@ -3356,8 +3356,8 @@ export function BrowserPanel({
   }, [frameUrl]);
 
   useEffect(() => {
-    const offBack = subscribeBioF3Event(biof3Events.browserBack, () => goBack());
-    const offForward = subscribeBioF3Event(biof3Events.browserForward, () => goForward());
+    const offBack = subscribeGewuEvent(gewuEvents.browserBack, () => goBack());
+    const offForward = subscribeGewuEvent(gewuEvents.browserForward, () => goForward());
     return () => {
       offBack();
       offForward();
@@ -3407,7 +3407,7 @@ export function BrowserPanel({
           key={frameKey}
           className={styles.browserFrame}
           src={frameUrl}
-          title="BioF3 HTML 报告"
+          title="Gewu HTML 报告"
           onLoad={() => {
             setLoading(false);
             setBrowserError('');
@@ -3421,7 +3421,7 @@ export function BrowserPanel({
           <Icon name="globe" size={22} />
           <strong>无法打开网页</strong>
           <span>{browserError}</span>
-          <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={reload}>重新加载</button>
+          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={reload}>重新加载</button>
         </div>
       )}
     </div>

@@ -45,7 +45,7 @@ function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs } = {}) {
         const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
         const { canceled, filePath } = await dialog.showSaveDialog(win, {
           title: "导出诊断日志",
-          defaultPath: `biof3-diagnostic-${ts}.zip`,
+          defaultPath: `gewu-diagnostic-${ts}.zip`,
           filters: [{ name: "ZIP", extensions: ["zip"] }],
         });
         if (canceled) return { ok: false, error: "cancelled" };
@@ -119,7 +119,7 @@ function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs } = {}) {
       if (!usedArchiver) {
         // fallback: 写一个简单的 .txt 包（日志拼接 + 系统信息）
         const lines = [];
-        lines.push("=== BioF3 Diagnostic Package ===");
+        lines.push("=== Gewu Diagnostic Package ===");
         lines.push(JSON.stringify(sysInfo, null, 2));
         lines.push("");
         for (const name of ["biof3-server"]) { // BLOCK-30 P1: py-server 已摘除 {

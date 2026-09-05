@@ -133,7 +133,7 @@ async function initRepositoryAt(workspacePath) {
   }
   try {
     await execFileAsync('git', ['add', '-A'], { cwd: workspacePath, maxBuffer: 32 * 1024 * 1024 });
-    await execFileAsync('git', ['commit', '-m', 'Initial commit (BioF3)'], {
+    await execFileAsync('git', ['commit', '-m', 'Initial commit (Gewu)'], {
       cwd: workspacePath,
       maxBuffer: 32 * 1024 * 1024,
       env: { ...process.env, GIT_EDITOR: 'true' },

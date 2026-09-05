@@ -10,7 +10,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { getBridge } from '@/lib/desktopBridge';
-import { biof3Events, subscribeBioF3Event } from '@/lib/events';
+import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
 
 export type HunkDecision = 'pending' | 'accept' | 'reject';
 
@@ -432,8 +432,8 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
   // 会自动弹出浮层。preload 的 bridge.onTaskDone（main→renderer webContents.send）
   // 保留作为备用通道，给未来 main 真触发时使用。
   useEffect(() => {
-    const unsubscribe = subscribeBioF3Event(
-      biof3Events.agentTaskDone,
+    const unsubscribe = subscribeGewuEvent(
+      gewuEvents.agentTaskDone,
       (detail) => {
         const incoming = detail?.taskId || '';
         setTaskId(incoming);
@@ -461,7 +461,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
   // BLOCK-28.7 — 聊天区改动卡片点击文件行：刷新并选中该文件。
   // 路径必须在当前工作区 status 里（防御外部乱传）；diff 未覆盖时先 refresh。
   useEffect(() => {
-    return subscribeBioF3Event(biof3Events.reviewOpenFile, (detail) => {
+    return subscribeGewuEvent(gewuEvents.reviewOpenFile, (detail) => {
       const target = detail?.filePath || '';
       if (!target) return;
       setSelectedFilePath((current) => (current === target ? current : target));

@@ -31,7 +31,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 import type { CopilotContext } from '@/lib/copilotContext';
-import { biof3Events, subscribeBioF3Event } from '@/lib/events';
+import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
+import { readBrandStorage } from '@/lib/brand';
 import { copilotContextOverrideForAsk } from '@/lib/result-edit-agent-bridge';
 import { INITIAL_NAV_STATE, type HistoryNavState } from '@/components/copilot/chatHistoryNav';
 import {
@@ -202,7 +203,7 @@ export function useChatStream({
           accessMode,
           planMode,
           executionTargetId: (executionTargetId ?? (() => {
-            try { return window.localStorage.getItem('biof3.executionTargetId'); } catch { return null; }
+            try { return readBrandStorage('executionTargetId'); } catch { return null; }
           })()) || null,
         },
       });
@@ -246,7 +247,7 @@ export function useChatStream({
   // happens before the override is applied).
   useEffect(() => {
     if (!ownsCopilotAsk) return undefined;
-    const unsub = subscribeBioF3Event(biof3Events.copilotAsk, (detail) => {
+    const unsub = subscribeGewuEvent(gewuEvents.copilotAsk, (detail) => {
       const { prompt, analysisMode } = detail;
       const p = typeof prompt === 'string' ? prompt.trim() : '';
       if (!p) return;

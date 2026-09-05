@@ -5,7 +5,7 @@
 import type { CopilotContext } from '@/lib/copilotContext';
 
 import { getPlatformApiPrefix } from '@/lib/authClient';
-import { biof3Events, dispatchBioF3Event } from '@/lib/events';
+import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import type { AgentTaskDoneDetail, TokenBudgetDetail } from '@/lib/events';
 
 export function getApiPrefix(): string {
@@ -33,7 +33,7 @@ function emitAgentTaskDone(
       filesChanged: payload?.filesChanged ?? [],
       conversationId: payload?.conversationId,
     };
-    dispatchBioF3Event(biof3Events.agentTaskDone, detail);
+    dispatchGewuEvent(gewuEvents.agentTaskDone, detail);
   } catch {
     // 事件总线失败不应阻塞 SSE 收口路径
   }
@@ -42,7 +42,8 @@ function emitAgentTaskDone(
 export function getAuthHeader(): Record<string, string> {
   if (typeof window === 'undefined') return {};
   try {
-    const token = localStorage.getItem('biof3_token');
+    // BLOCK-61 读旧兼容：历史 key biof3_token
+    const token = localStorage.getItem('gewu_token') ?? localStorage.getItem('biof3_token');
     return token ? { Authorization: `Bearer ${token}` } : {};
   } catch {
     return {};
@@ -510,7 +511,7 @@ export function findResumableAgentTask(
   try {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (!key || !key.startsWith('biof3_agent_task_')) continue;
+      if (!key || !(key.startsWith('gewu_agent_task_') || key.startsWith('biof3_agent_task_'))) continue;
       try {
         const obj = JSON.parse(localStorage.getItem(key) || '{}');
         // AGENT-CONCURRENCY: sub-agent 永不被当主 run 恢复（老 key 无 kind 视为 primary）。
@@ -534,6 +535,7 @@ export function findResumableAgentTask(
   } catch {}
   if (latest && Date.now() - latest.ts > 60 * 60 * 1000) {
     try {
+      localStorage.removeItem('gewu_agent_task_' + latest.taskId);
       localStorage.removeItem('biof3_agent_task_' + latest.taskId);
     } catch {}
     return null;
@@ -558,7 +560,7 @@ export function findResumableSubAgentTasks(): ResumableSubAgentTask[] {
   try {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (!key || !key.startsWith('biof3_agent_task_')) continue;
+      if (!key || !(key.startsWith('gewu_agent_task_') || key.startsWith('biof3_agent_task_'))) continue;
       try {
         const obj = JSON.parse(localStorage.getItem(key) || '{}');
         if (obj?.taskId && typeof obj.ts === 'number' && obj.kind === 'subagent') {
@@ -600,7 +602,7 @@ async function streamChatViaTask(opts: StreamChatOptions): Promise<void> {
   // AGENT-CONCURRENCY: 记录 kind + parentTaskId，使 sub-agent 不被误当主 run 恢复。
   try {
     localStorage.setItem(
-      'biof3_agent_task_' + taskId,
+      'gewu_agent_task_' + taskId,
       JSON.stringify({
         taskId,
         ts: Date.now(),
@@ -811,6 +813,7 @@ async function subscribeAgentTaskOnce(
         if (isSseDone(data)) {
           sawDone = true;
           try {
+            localStorage.removeItem('gewu_agent_task_' + taskId);
             localStorage.removeItem('biof3_agent_task_' + taskId);
           } catch {}
           break;
@@ -1003,7 +1006,7 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
       pct: typeof obj.pct === 'number' ? obj.pct : 0,
       trimmed: typeof obj.trimmed === 'boolean' ? obj.trimmed : false,
     };
-    dispatchBioF3Event(biof3Events.tokenBudget, detail);
+    dispatchGewuEvent(gewuEvents.tokenBudget, detail);
     return;
   }
   const delta = obj?.choices?.[0]?.delta?.content;

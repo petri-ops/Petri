@@ -126,7 +126,7 @@ export function ResultStudioContextBar({
               ['compare', '审查修改'],
               ['history', '版本历史'],
             ] as const).map(([mode, label]) => (
-              <button className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+              <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
                 key={mode}
                 type="button"
                 aria-current={activeMode === mode ? 'page' : undefined}
@@ -244,7 +244,7 @@ export function ResultStudioInspector({
       </dl>
       <ResultStudioContextReadiness context={context} />
       <div className={styles.inspectorActions}>
-        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
           type="button"
           onClick={() => onAskAgent(`请解释当前结果“${title}”的主要结论、可信边界和最合适的下一步。`)}
         >
@@ -252,7 +252,7 @@ export function ResultStudioInspector({
           解释当前结果
         </button>
         {artifact.availabilityStatus === 'unavailable' && (
-          <button className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
             type="button"
             onClick={() => onAskAgent(`请检查并恢复当前结果文件“${title}”。先说明缺失原因和可恢复边界，不要覆盖原始数据。`)}
           >

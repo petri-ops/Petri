@@ -30,9 +30,9 @@ export function Lightbox({
   }, [onClose]);
 
   return (
-    <div className="biof3-lightbox" onClick={onClose}>
-      <img src={src} alt={alt || ''} className="biof3-lightbox__img" />
-      <button className="biof3-lightbox__close" onClick={onClose} aria-label="关闭">
+    <div className="gewu-lightbox" onClick={onClose}>
+      <img src={src} alt={alt || ''} className="gewu-lightbox__img" />
+      <button className="gewu-lightbox__close" onClick={onClose} aria-label="关闭">
         ×
       </button>
     </div>

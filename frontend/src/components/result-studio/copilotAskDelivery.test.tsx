@@ -4,7 +4,7 @@
  * This is delivery, not layout. ResultEditPanel is reachable from every
  * result-opening path (project-workspace.tsx calls openRightPanel('results') at
  * :568, :1068, :1126 and :1279), and submitting dispatches copilotAsk. But
- * dispatchBioF3Event is a bare window.dispatchEvent with no buffering
+ * dispatchGewuEvent is a bare window.dispatchEvent with no buffering
  * (lib/events.ts:113), and SimpleChat.tsx is its only subscriber — so while the
  * conversation was unmounted in result mode the submission vanished, with the
  * synchronous `finally` in handleResultEditSubmit resetting the button to idle
@@ -16,16 +16,16 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { biof3Events, dispatchBioF3Event, subscribeBioF3Event } from '@/lib/events';
+import { gewuEvents, dispatchGewuEvent, subscribeGewuEvent } from '@/lib/events';
 
 describe('copilotAsk delivery', () => {
   it('reaches a live subscriber', () => {
     const received: string[] = [];
-    const unsub = subscribeBioF3Event(biof3Events.copilotAsk, ({ prompt }) => {
+    const unsub = subscribeGewuEvent(gewuEvents.copilotAsk, ({ prompt }) => {
       received.push(String(prompt));
     });
     try {
-      dispatchBioF3Event(biof3Events.copilotAsk, { prompt: '把这些基因做富集' });
+      dispatchGewuEvent(gewuEvents.copilotAsk, { prompt: '把这些基因做富集' });
     } finally {
       unsub();
     }
@@ -37,7 +37,7 @@ describe('copilotAsk delivery', () => {
     // dispatch succeeds, so the caller cannot tell delivery from loss. That is
     // why the fix had to keep the subscriber mounted; adding a retry here would
     // not have helped.
-    const dispatch = () => dispatchBioF3Event(biof3Events.copilotAsk, { prompt: 'lost' });
+    const dispatch = () => dispatchGewuEvent(gewuEvents.copilotAsk, { prompt: 'lost' });
     expect(dispatch).not.toThrow();
   });
 
@@ -49,9 +49,9 @@ describe('copilotAsk delivery', () => {
     const owner = vi.fn();
     const nonOwnerSubscribed = false;
 
-    const unsub = subscribeBioF3Event(biof3Events.copilotAsk, ({ prompt }) => owner(prompt));
+    const unsub = subscribeGewuEvent(gewuEvents.copilotAsk, ({ prompt }) => owner(prompt));
     try {
-      dispatchBioF3Event(biof3Events.copilotAsk, { prompt: 'once' });
+      dispatchGewuEvent(gewuEvents.copilotAsk, { prompt: 'once' });
     } finally {
       unsub();
     }
@@ -62,11 +62,11 @@ describe('copilotAsk delivery', () => {
 
   it('unsubscribes cleanly so an unmounted instance stops receiving', () => {
     const received: string[] = [];
-    const unsub = subscribeBioF3Event(biof3Events.copilotAsk, ({ prompt }) => {
+    const unsub = subscribeGewuEvent(gewuEvents.copilotAsk, ({ prompt }) => {
       received.push(String(prompt));
     });
     unsub();
-    dispatchBioF3Event(biof3Events.copilotAsk, { prompt: 'after unmount' });
+    dispatchGewuEvent(gewuEvents.copilotAsk, { prompt: 'after unmount' });
     expect(received).toEqual([]);
   });
 });

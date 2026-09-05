@@ -19,14 +19,14 @@
 import React, { useState, useCallback } from 'react';
 import { Icon, type IconName } from '@/components/icons/Icon';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
-import { biof3Events, dispatchBioF3Event } from '@/lib/events';
+import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import { loadReleaseTagline } from '@/lib/releaseContract';
 import './desktop.css';
 
-const ONBOARDING_FLAG = 'biof3-onboarding-completed';
+const ONBOARDING_FLAG = 'gewu-onboarding-completed';
 // deprecated: Week 1 起不再写入。保留读取兼容旧用户，下个迭代可移除。
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const MODE_FLAG = 'biof3-onboarding-mode';
+const MODE_FLAG = 'gewu-onboarding-mode';
 
 type Step = 0 | 1;
 
@@ -53,7 +53,7 @@ export function DesktopOnboarding(): React.ReactElement | null {
       // deprecated: 旧版会写 MODE_FLAG（learn/practice），现在不再写，但保留读路径以便后续清理。
       // 故意保留读取调用是为了让未来一个 lint 规则或迁移脚本发现这个键还在被消费。
     } catch {}
-    dispatchBioF3Event(biof3Events.onboardingDone);
+    dispatchGewuEvent(gewuEvents.onboardingDone);
   }, []);
 
   const next = useCallback(() => setStep((s) => (s < 1 ? ((s + 1) as Step) : s)), []);
@@ -71,25 +71,25 @@ export function DesktopOnboarding(): React.ReactElement | null {
   })();
 
   return (
-    <div className="biof3-onboarding-overlay" role="dialog" aria-label="首次启动引导">
-      <div className="biof3-onboarding">
+    <div className="gewu-onboarding-overlay" role="dialog" aria-label="首次启动引导">
+      <div className="gewu-onboarding">
         {/* 进度指示器 */}
-        <div className="biof3-onboarding__steps">
+        <div className="gewu-onboarding__steps">
           {STEPS.map((s, i) => (
             <div
               key={s.title}
-              className={`biof3-onboarding__step ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`}
+              className={`gewu-onboarding__step ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`}
             >
-              <span className="biof3-onboarding__step-icon">
+              <span className="gewu-onboarding__step-icon">
                 <Icon name={i < step ? 'check' : s.icon} size={16} />
               </span>
-              <span className="biof3-onboarding__step-label">{s.title}</span>
+              <span className="gewu-onboarding__step-label">{s.title}</span>
             </div>
           ))}
         </div>
 
         {/* 步骤内容 */}
-        <div className="biof3-onboarding__body">
+        <div className="gewu-onboarding__body">
           {step === 0 && <StepWelcome />}
           {step === 1 && (
             <StepRuntime
@@ -102,19 +102,19 @@ export function DesktopOnboarding(): React.ReactElement | null {
         </div>
 
         {/* 底部按钮 */}
-        <div className="biof3-onboarding__footer">
+        <div className="gewu-onboarding__footer">
           <button
             type="button"
-            className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+            className="gewu-btn gewu-btn--ghost gewu-btn--sm"
             onClick={finish}
           >
             跳过引导
           </button>
-          <div className="biof3-onboarding__footer-right">
+          <div className="gewu-onboarding__footer-right">
             {step > 0 && (
               <button
                 type="button"
-                className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+                className="gewu-btn gewu-btn--ghost gewu-btn--sm"
                 onClick={prev}
               >
                 上一步
@@ -123,7 +123,7 @@ export function DesktopOnboarding(): React.ReactElement | null {
             {step < 1 ? (
               <button
                 type="button"
-                className="biof3-btn biof3-btn--primary biof3-btn--sm"
+                className="gewu-btn gewu-btn--primary gewu-btn--sm"
                 onClick={next}
               >
                 下一步
@@ -132,7 +132,7 @@ export function DesktopOnboarding(): React.ReactElement | null {
             ) : (
               <button
                 type="button"
-                className="biof3-btn biof3-btn--primary biof3-btn--sm"
+                className="gewu-btn gewu-btn--primary gewu-btn--sm"
                 onClick={finish}
               >
                 <Icon name="check" size={14} />
@@ -150,25 +150,25 @@ export function DesktopOnboarding(): React.ReactElement | null {
 function StepWelcome(): React.ReactElement {
   const tagline = loadReleaseTagline();
   return (
-    <div className="biof3-onboarding__step-content">
-      <h2 className="biof3-onboarding__title">欢迎来到 BioF3</h2>
-      <p className="biof3-onboarding__subtitle">{tagline}</p>
-      <div className="biof3-onboarding__plugin-tips">
-        <div className="biof3-onboarding__tip">
+    <div className="gewu-onboarding__step-content">
+      <h2 className="gewu-onboarding__title">欢迎来到 Gewu</h2>
+      <p className="gewu-onboarding__subtitle">{tagline}</p>
+      <div className="gewu-onboarding__plugin-tips">
+        <div className="gewu-onboarding__tip">
           <Icon name="cpu" size={18} />
           <div>
             <strong>R / Python 运行时</strong>
             <p>所有分析的基础，下一步会帮你检测是否已就绪。</p>
           </div>
         </div>
-        <div className="biof3-onboarding__tip">
+        <div className="gewu-onboarding__tip">
           <Icon name="sparkles" size={18} />
           <div>
             <strong>项目工作台</strong>
             <p>创建项目、上传数据、运行工具、检查产物、生成报告，一站完成。</p>
           </div>
         </div>
-        <div className="biof3-onboarding__tip">
+        <div className="gewu-onboarding__tip">
           <Icon name="brain" size={18} />
           <div>
             <strong>AI 分析助手</strong>
@@ -193,12 +193,12 @@ function StepRuntime({
   hasAllRuntime: boolean;
 }): React.ReactElement {
   return (
-    <div className="biof3-onboarding__step-content">
-      <h2 className="biof3-onboarding__title">准备运行时</h2>
-      <p className="biof3-onboarding__subtitle">
-        BioF3 的分析能力依赖 R / Python 运行时。先看看你的环境是否就绪。
+    <div className="gewu-onboarding__step-content">
+      <h2 className="gewu-onboarding__title">准备运行时</h2>
+      <p className="gewu-onboarding__subtitle">
+        Gewu 的分析能力依赖 R / Python 运行时。先看看你的环境是否就绪。
       </p>
-      <div className="biof3-onboarding__env-list">
+      <div className="gewu-onboarding__env-list">
         <EnvRow
           icon="cpu"
           name="R 运行时"
@@ -213,15 +213,15 @@ function StepRuntime({
         />
       </div>
       {hasAllRuntime && (
-        <p className="biof3-onboarding__hint">两个运行时都已就绪，可以直接开始分析了。</p>
+        <p className="gewu-onboarding__hint">两个运行时都已就绪，可以直接开始分析了。</p>
       )}
       {hasAnyRuntime && !hasAllRuntime && (
-        <p className="biof3-onboarding__hint">
+        <p className="gewu-onboarding__hint">
           已装一个运行时，可先开始对应流程；另一个稍后可在插件商店补装。
         </p>
       )}
       {!hasAnyRuntime && (
-        <p className="biof3-onboarding__hint">
+        <p className="gewu-onboarding__hint">
           还没检测到运行时。完成引导后，可在「项目工作台 → 插件商店」一键补装（约 1GB）。
         </p>
       )}
@@ -241,15 +241,15 @@ function EnvRow({
   installed: boolean;
 }): React.ReactElement {
   return (
-    <div className={`biof3-onboarding__env-row ${installed ? 'ok' : 'pending'}`}>
-      <span className="biof3-onboarding__env-icon">
+    <div className={`gewu-onboarding__env-row ${installed ? 'ok' : 'pending'}`}>
+      <span className="gewu-onboarding__env-icon">
         <Icon name={icon} size={20} />
       </span>
-      <div className="biof3-onboarding__env-info">
-        <span className="biof3-onboarding__env-name">{name}</span>
-        <span className="biof3-onboarding__env-desc">{desc}</span>
+      <div className="gewu-onboarding__env-info">
+        <span className="gewu-onboarding__env-name">{name}</span>
+        <span className="gewu-onboarding__env-desc">{desc}</span>
       </div>
-      <span className="biof3-onboarding__env-status">
+      <span className="gewu-onboarding__env-status">
         {installed ? (
           <>
             <Icon name="check" size={14} /> 已就绪

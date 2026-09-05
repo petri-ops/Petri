@@ -159,7 +159,7 @@ describe('ExperimentalFeaturesSection', () => {
     render(<ExperimentalFeaturesSection />);
     const toggle = screen.getByRole('switch', { name: EXTRA_RENDERERS_LABEL }) as HTMLInputElement;
     expect(toggle.getAttribute('aria-label')).toBe(EXTRA_RENDERERS_LABEL);
-    expect(toggle.getAttribute('aria-describedby')).toBe('biof3-extra-renderers-description');
+    expect(toggle.getAttribute('aria-describedby')).toBe('gewu-extra-renderers-description');
     // The description span carries the live "已开启/已关闭" copy.
     expect(screen.getByText('已关闭')).toBeTruthy();
   });

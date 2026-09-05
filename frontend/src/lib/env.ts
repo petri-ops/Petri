@@ -1,4 +1,4 @@
-// BioF3 桌面版原生 shell — 环境与 API 工具
+// Gewu 桌面版原生 shell — 环境与 API 工具
 // 替代 Docusaurus 版的 authClient.ts / getApiPrefix 等
 
 // 桌面版恒为 true（这个前端只在桌面版跑）

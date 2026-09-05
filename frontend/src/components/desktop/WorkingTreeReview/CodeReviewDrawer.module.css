@@ -27,9 +27,9 @@
   width: 640px;
   max-width: 90vw;
   height: 100%;
-  background: var(--biof3-surface-dim, #1e1e1e);
-  color: var(--biof3-fg, #e0e0e0);
-  border-left: 1px solid var(--biof3-border, #404040);
+  background: var(--gewu-surface-dim, #1e1e1e);
+  color: var(--gewu-fg, #e0e0e0);
+  border-left: 1px solid var(--gewu-border, #404040);
   box-shadow: -6px 0 24px rgba(0, 0, 0, 0.35);
   display: flex;
   flex-direction: column;
@@ -48,8 +48,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--biof3-border, #404040);
-  background: var(--biof3-bg-elev, #2a2a2a);
+  border-bottom: 1px solid var(--gewu-border, #404040);
+  background: var(--gewu-bg-elev, #2a2a2a);
   flex-shrink: 0;
   gap: 12px;
   min-height: 52px;
@@ -66,15 +66,15 @@
 
 .drawerTitleLabel {
   font-weight: 600;
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .drawerFilePath {
-  font-family: var(--biof3-mono, monospace);
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-fg-muted, #888);
+  font-family: var(--gewu-mono, monospace);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-fg-muted, #888);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -90,7 +90,7 @@
 
 .unsavedMarker {
   color: #e0a040;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   animation: pulse 1.4s ease-in-out infinite;
 }
 
@@ -105,7 +105,7 @@
   background: rgba(220, 80, 80, 0.18);
   border-bottom: 1px solid rgba(220, 80, 80, 0.4);
   color: #ffc8c8;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   flex-shrink: 0;
 }
 
@@ -122,8 +122,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--biof3-fg-muted, #888);
-  font-size: var(--biof3-font-size-body-sm);
+  color: var(--gewu-fg-muted, #888);
+  font-size: var(--gewu-font-size-body-sm);
 }
 
 .drawerBinary {
@@ -135,9 +135,9 @@
 }
 
 .binaryMarker {
-  color: var(--biof3-fg-muted, #888);
+  color: var(--gewu-fg-muted, #888);
   font-style: italic;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   text-align: center;
 }
 
@@ -158,7 +158,7 @@
 }
 
 .diffPane:first-child {
-  border-right: 1px solid var(--biof3-border, #404040);
+  border-right: 1px solid var(--gewu-border, #404040);
 }
 
 .diffPaneHeader {
@@ -166,24 +166,24 @@
   align-items: center;
   justify-content: space-between;
   padding: 6px 12px;
-  background: var(--biof3-bg-elev, #2a2a2a);
-  border-bottom: 1px solid var(--biof3-border, #404040);
+  background: var(--gewu-bg-elev, #2a2a2a);
+  border-bottom: 1px solid var(--gewu-border, #404040);
   flex-shrink: 0;
 }
 
 .diffPaneLabel {
-  font-family: var(--biof3-mono, monospace);
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-fg-muted, #888);
+  font-family: var(--gewu-mono, monospace);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-fg-muted, #888);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-weight: 600;
 }
 
 .editedMarker {
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   color: #e0a040;
-  font-family: var(--biof3-mono, monospace);
+  font-family: var(--gewu-mono, monospace);
 }
 
 /* Textareas */
@@ -191,12 +191,12 @@
 .editorTextarea {
   flex: 1;
   width: 100%;
-  background: var(--biof3-bg, #1e1e1e);
-  color: var(--biof3-fg, #e0e0e0);
+  background: var(--gewu-bg, #1e1e1e);
+  color: var(--gewu-fg, #e0e0e0);
   border: none;
   padding: 10px 12px;
-  font-family: var(--biof3-mono, monospace);
-  font-size: var(--biof3-font-size-caption);
+  font-family: var(--gewu-mono, monospace);
+  font-size: var(--gewu-font-size-caption);
   line-height: 1.6;
   resize: none;
   overflow: auto;
@@ -221,8 +221,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  border-top: 1px solid var(--biof3-border, #404040);
-  background: var(--biof3-bg-elev, #2a2a2a);
+  border-top: 1px solid var(--gewu-border, #404040);
+  background: var(--gewu-bg-elev, #2a2a2a);
   flex-shrink: 0;
   gap: 12px;
   min-height: 48px;
@@ -230,8 +230,8 @@
 }
 
 .drawerHint {
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-fg-muted, #888);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-fg-muted, #888);
   flex: 1;
   min-width: 0;
 }
@@ -246,10 +246,10 @@
 /* Buttons */
 .drawerBtn {
   padding: 6px 14px;
-  font-size: var(--biof3-font-size-caption);
-  border: 1px solid var(--biof3-border, #404040);
+  font-size: var(--gewu-font-size-caption);
+  border: 1px solid var(--gewu-border, #404040);
   border-radius: 4px;
-  background: var(--biof3-bg-button, #3a3a3a);
+  background: var(--gewu-bg-button, #3a3a3a);
   color: inherit;
   cursor: pointer;
   transition: background 120ms ease;
@@ -258,7 +258,7 @@
 }
 
 .drawerBtn:hover:not(:disabled) {
-  background: var(--biof3-bg-button-hover, #4a4a4a);
+  background: var(--gewu-bg-button-hover, #4a4a4a);
 }
 
 .drawerBtn:disabled {

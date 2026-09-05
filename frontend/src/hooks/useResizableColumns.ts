@@ -25,7 +25,7 @@ export interface ResizableColumnsState {
   ) => void;
 }
 
-const LS_KEY = 'biof3-pw-cols';
+const LS_KEY = 'gewu-pw-cols';
 const LEGACY_DEFAULT_BOTTOM_TERMINAL_HEIGHT = 240;
 const DEFAULT_BOTTOM_TERMINAL_HEIGHT = 176;
 const MIN_BOTTOM_TERMINAL_HEIGHT = 120;
@@ -99,7 +99,7 @@ const MIN_LEFT_WIDTH = 96;
 const MIN_RIGHT_WIDTH = 96;
 const MIN_INPUT_HEIGHT = 48;
 const MIN_RESULT_RIGHT_WIDTH = 360;
-const RESIZING_CLASS = 'biof3-resizing-columns';
+const RESIZING_CLASS = 'gewu-resizing-columns';
 
 function setResizingClass(active: boolean): void {
   if (typeof document === 'undefined') return;
@@ -215,7 +215,7 @@ export function useResizableColumns(
             resultResizeFrame = window.requestAnimationFrame(() => {
               resultResizeFrame = null;
               document.documentElement.style.setProperty(
-                '--biof3-live-result-right-width',
+                '--gewu-live-result-right-width',
                 `${pendingResultRightWidth}px`,
               );
             });
@@ -241,7 +241,7 @@ export function useResizableColumns(
           }
           setResultRightWidth(pendingResultRightWidth);
           window.requestAnimationFrame(() => {
-            document.documentElement.style.removeProperty('--biof3-live-result-right-width');
+            document.documentElement.style.removeProperty('--gewu-live-result-right-width');
           });
         }
         document.removeEventListener('mousemove', onMove);

@@ -56,7 +56,9 @@ function describeProbe(info: TargetProbeInfo | null): string {
   return `${info.os} · ${runtimes.length ? runtimes.join(' / ') : '无 R/Python'}${info.scheduler && info.scheduler !== 'none' ? ` · ${info.scheduler}` : ''}`;
 }
 
-const DEFAULT_TARGET_STORAGE_KEY = 'biof3.executionTargetId';
+const DEFAULT_TARGET_STORAGE_KEY = 'gewu.executionTargetId';
+// BLOCK-61 读旧兼容：历史 key biof3.executionTargetId
+const LEGACY_TARGET_STORAGE_KEY = 'biof3.executionTargetId';
 
 export function RemoteTargets(): React.ReactElement {
   const [data, setData] = useState<TargetsResponse>({ registered: [], discovered: [] });
@@ -65,7 +67,13 @@ export function RemoteTargets(): React.ReactElement {
   const [busyId, setBusyId] = useState<string | null>(null);
   // 默认执行目标（BLOCK-57 UI-290 加映二：选择从 composer 迁至设置页；本机永远可选）
   const [defaultTargetId, setDefaultTargetId] = useState<string>(() => {
-    try { return window.localStorage.getItem(DEFAULT_TARGET_STORAGE_KEY) || ''; } catch { return ''; }
+    try {
+      return (
+        window.localStorage.getItem(DEFAULT_TARGET_STORAGE_KEY)
+        ?? window.localStorage.getItem(LEGACY_TARGET_STORAGE_KEY)
+        ?? ''
+      );
+    } catch { return ''; }
   });
 
   const setDefaultTarget = (id: string) => {
@@ -146,16 +154,16 @@ export function RemoteTargets(): React.ReactElement {
   };
 
   return (
-    <div className="biof3-remote-targets" data-testid="remote-targets-panel">
+    <div className="gewu-remote-targets" data-testid="remote-targets-panel">
       <h4>远程执行目标（SSH）</h4>
-      <p className="biof3-field__hint">
-        把分析任务提交到你自己的服务器直跑：凭据完全复用本机 SSH 配置（只认 key，BioF3 不存任何密钥）。
+      <p className="gewu-field__hint">
+        把分析任务提交到你自己的服务器直跑：凭据完全复用本机 SSH 配置（只认 key，Gewu 不存任何密钥）。
         首次使用请先在终端 ssh 该主机一次完成指纹确认。不添加任何目标时，一切照常在本机执行。
       </p>
-      {data.registered.length === 0 && <p className="biof3-field__hint">尚无已注册目标。</p>}
+      {data.registered.length === 0 && <p className="gewu-field__hint">尚无已注册目标。</p>}
       <ul style={{ listStyle: 'none', margin: '8px 0', padding: 0 }}>
         {data.registered.map((target) => (
-          <li key={target.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--biof3-border, #ddd)' }} data-testid="remote-target-row">
+          <li key={target.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--gewu-border, #ddd)' }} data-testid="remote-target-row">
             <strong>{target.alias}</strong>
             {target.label ? <span>{target.label}</span> : null}
             <span
@@ -163,13 +171,13 @@ export function RemoteTargets(): React.ReactElement {
                 fontSize: 12,
                 padding: '1px 8px',
                 borderRadius: 999,
-                background: target.status === 'ready' ? 'var(--biof3-status-success-bg)' : target.status === 'unreachable' ? 'var(--biof3-warning-bg)' : 'transparent',
+                background: target.status === 'ready' ? 'var(--gewu-status-success-bg)' : target.status === 'unreachable' ? 'var(--gewu-warning-bg)' : 'transparent',
               }}
               data-testid={`remote-target-status-${target.status}`}
             >
               {target.status === 'ready' ? '就绪' : target.status === 'unreachable' ? '不可达' : '未探测'}
             </span>
-            <span className="biof3-field__hint" style={{ flex: 1, textAlign: 'right' }}>
+            <span className="gewu-field__hint" style={{ flex: 1, textAlign: 'right' }}>
               {describeProbe(target.lastProbe)}
             </span>
             <button
@@ -202,17 +210,17 @@ export function RemoteTargets(): React.ReactElement {
           添加目标
         </button>
       </div>
-      <p className="biof3-field__hint" data-testid="remote-target-default-summary">
+      <p className="gewu-field__hint" data-testid="remote-target-default-summary">
         当前默认执行目标：{defaultTargetId
           ? (data.registered.find((t) => t.id === defaultTargetId)?.alias || '已指定目标')
           : '本机'}{defaultTargetId ? '（分析自动提交到该节点）' : '（分析在本机执行）'}
       </p>
       {data.discovered.length > 0 && (
-        <p className="biof3-field__hint">
+        <p className="gewu-field__hint">
           从 ~/.ssh/config 发现：{data.discovered.map((item) => item.alias).join('、')}（输入上方别名即可添加）
         </p>
       )}
-      {error && <p className="biof3-field__hint" role="alert" data-testid="remote-targets-error">{error}</p>}
+      {error && <p className="gewu-field__hint" role="alert" data-testid="remote-targets-error">{error}</p>}
     </div>
   );
 }

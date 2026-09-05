@@ -1,6 +1,6 @@
 /* LoginModal — site-wide auth popup */
 
-.biof3-login-modal-overlay {
+.gewu-login-modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.55);
@@ -10,10 +10,10 @@
   justify-content: center;
   padding: 1rem;
   backdrop-filter: blur(2px);
-  animation: biof3-login-fade 120ms ease-out;
+  animation: gewu-login-fade 120ms ease-out;
 }
 
-@keyframes biof3-login-fade {
+@keyframes gewu-login-fade {
   from {
     opacity: 0;
   }
@@ -22,23 +22,23 @@
   }
 }
 
-.biof3-login-modal {
+.gewu-login-modal {
   position: relative;
   width: min(360px, 100%);
-  background: var(--biof3-bg-elevated);
+  background: var(--gewu-bg-elevated);
   border-radius: 14px;
   padding: 2rem 1.5rem 1.4rem;
   box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.35);
-  animation: biof3-login-pop 140ms cubic-bezier(0.2, 0.8, 0.4, 1);
+  animation: gewu-login-pop 140ms cubic-bezier(0.2, 0.8, 0.4, 1);
 }
 
-[data-theme='dark'] .biof3-login-modal {
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
+[data-theme='dark'] .gewu-login-modal {
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
   box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.6);
 }
 
-@keyframes biof3-login-pop {
+@keyframes gewu-login-pop {
   from {
     transform: translateY(8px) scale(0.98);
     opacity: 0;
@@ -49,7 +49,7 @@
   }
 }
 
-.biof3-login-modal__close {
+.gewu-login-modal__close {
   position: absolute;
   top: 10px;
   right: 12px;
@@ -57,28 +57,28 @@
   border: 0;
   font-size: 1.6rem;
   line-height: 1;
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 6px;
 }
 
-.biof3-login-modal__close:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text-secondary);
+.gewu-login-modal__close:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text-secondary);
 }
 
-[data-theme='dark'] .biof3-login-modal__close:hover {
-  color: var(--biof3-text);
+[data-theme='dark'] .gewu-login-modal__close:hover {
+  color: var(--gewu-text);
 }
 
-.biof3-login-modal__brand {
+.gewu-login-modal__brand {
   text-align: center;
   margin-bottom: 14px;
 }
 
-.biof3-login-modal__brand strong {
-  font-size: var(--biof3-font-size-xl);
+.gewu-login-modal__brand strong {
+  font-size: var(--gewu-font-size-xl);
   letter-spacing: 0.04em;
   background: var(--ifm-color-primary);
   -webkit-background-clip: text;
@@ -86,94 +86,94 @@
   color: transparent;
 }
 
-.biof3-login-modal__tagline {
+.gewu-login-modal__tagline {
   display: block;
   margin-top: 2px;
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-secondary);
 }
 
-[data-theme='dark'] .biof3-login-modal__tagline {
-  color: var(--biof3-text-muted);
+[data-theme='dark'] .gewu-login-modal__tagline {
+  color: var(--gewu-text-muted);
 }
 
-.biof3-login-modal__cta {
+.gewu-login-modal__cta {
   margin: 0 0 14px;
   padding: 8px 12px;
   border-radius: 8px;
-  background: var(--biof3-status-success-bg);
-  color: var(--biof3-status-success-fg);
-  font-size: var(--biof3-font-size-body-sm);
+  background: var(--gewu-status-success-bg);
+  color: var(--gewu-status-success-fg);
+  font-size: var(--gewu-font-size-body-sm);
   text-align: center;
 }
 
-[data-theme='dark'] .biof3-login-modal__cta {
-  background: var(--biof3-status-success-bg);
-  color: var(--biof3-status-success-fg);
+[data-theme='dark'] .gewu-login-modal__cta {
+  background: var(--gewu-status-success-bg);
+  color: var(--gewu-status-success-fg);
 }
 
-.biof3-login-modal__tabs {
+.gewu-login-modal__tabs {
   display: flex;
   gap: 0;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
   margin-bottom: 14px;
 }
 
-[data-theme='dark'] .biof3-login-modal__tabs {
+[data-theme='dark'] .gewu-login-modal__tabs {
   border-bottom-color: #334155;
 }
 
-.biof3-login-modal__tab {
+.gewu-login-modal__tab {
   flex: 1;
   background: transparent;
   border: 0;
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
   font-weight: 600;
   padding: 8px 4px 10px;
   cursor: pointer;
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
   border-bottom: 2px solid transparent;
   transition:
     color 120ms,
     border-color 120ms;
 }
 
-.biof3-login-modal__tab.is-active {
+.gewu-login-modal__tab.is-active {
   color: var(--ifm-color-primary);
   border-bottom-color: var(--ifm-color-primary);
 }
 
-[data-theme='dark'] .biof3-login-modal__tab.is-active {
+[data-theme='dark'] .gewu-login-modal__tab.is-active {
   color: var(--ifm-color-primary-light);
   border-bottom-color: var(--ifm-color-primary-light);
 }
 
-.biof3-login-modal__form {
+.gewu-login-modal__form {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.biof3-login-modal__field label {
+.gewu-login-modal__field label {
   display: block;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 500;
   margin-bottom: 4px;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
-[data-theme='dark'] .biof3-login-modal__field label {
-  color: var(--biof3-text-muted);
+[data-theme='dark'] .gewu-login-modal__field label {
+  color: var(--gewu-text-muted);
 }
 
-.biof3-login-modal__field input {
+.gewu-login-modal__field input {
   width: 100%;
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
   padding: 8px 11px;
   border-radius: 8px;
-  border: 1px solid var(--biof3-border);
-  background: var(--biof3-input-bg);
-  color: var(--biof3-text);
+  border: 1px solid var(--gewu-border);
+  background: var(--gewu-input-bg);
+  color: var(--gewu-text);
   transition:
     border-color 120ms,
     box-shadow 120ms;
@@ -181,33 +181,33 @@
   appearance: none;
 }
 
-.biof3-login-modal__field input:focus {
+.gewu-login-modal__field input:focus {
   outline: none;
   border-color: var(--ifm-color-primary);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
 }
 
-[data-theme='dark'] .biof3-login-modal__field input {
-  background: var(--biof3-bg-canvas);
-  border-color: var(--biof3-border);
-  color: var(--biof3-text);
+[data-theme='dark'] .gewu-login-modal__field input {
+  background: var(--gewu-bg-canvas);
+  border-color: var(--gewu-border);
+  color: var(--gewu-text);
 }
 
-.biof3-login-modal__error {
+.gewu-login-modal__error {
   margin-top: 4px;
   padding: 6px 10px;
   border-radius: 6px;
-  background: var(--biof3-status-error-bg);
-  color: var(--biof3-status-error-fg);
-  font-size: var(--biof3-font-size-body-sm);
+  background: var(--gewu-status-error-bg);
+  color: var(--gewu-status-error-fg);
+  font-size: var(--gewu-font-size-body-sm);
 }
 
-[data-theme='dark'] .biof3-login-modal__error {
-  background: var(--biof3-status-error-bg);
-  color: var(--biof3-status-error-fg);
+[data-theme='dark'] .gewu-login-modal__error {
+  background: var(--gewu-status-error-bg);
+  color: var(--gewu-status-error-fg);
 }
 
-.biof3-login-modal__submit {
+.gewu-login-modal__submit {
   margin-top: 8px;
   width: 100%;
   background: var(--ifm-color-primary);
@@ -215,7 +215,7 @@
   border: 0;
   padding: 9px 14px;
   border-radius: 8px;
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -223,24 +223,24 @@
     transform 120ms;
 }
 
-.biof3-login-modal__submit:hover:not([disabled]) {
+.gewu-login-modal__submit:hover:not([disabled]) {
   filter: brightness(1.05);
   transform: translateY(-1px);
 }
 
-.biof3-login-modal__submit[disabled] {
+.gewu-login-modal__submit[disabled] {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
-.biof3-login-modal__footer {
+.gewu-login-modal__footer {
   margin-top: 14px;
   text-align: center;
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-secondary);
 }
 
-.biof3-login-modal__footer button {
+.gewu-login-modal__footer button {
   background: transparent;
   border: 0;
   color: var(--ifm-color-primary);
@@ -249,63 +249,63 @@
   padding: 0 4px;
 }
 
-[data-theme='dark'] .biof3-login-modal__footer {
-  color: var(--biof3-text-muted);
+[data-theme='dark'] .gewu-login-modal__footer {
+  color: var(--gewu-text-muted);
 }
 
-[data-theme='dark'] .biof3-login-modal__footer button {
+[data-theme='dark'] .gewu-login-modal__footer button {
   color: var(--ifm-color-primary-light);
 }
 
 /* Inline validation hints */
-.biof3-login-modal__hint {
+.gewu-login-modal__hint {
   display: block;
   margin-top: 4px;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-tertiary);
 }
 
-.biof3-login-modal__hint--error {
-  color: var(--biof3-danger);
+.gewu-login-modal__hint--error {
+  color: var(--gewu-danger);
 }
 
 /* Welcome view after registration */
-.biof3-login-modal__welcome {
+.gewu-login-modal__welcome {
   text-align: center;
   padding: 0.5rem 0;
 }
 
-.biof3-login-modal__welcome-emoji {
+.gewu-login-modal__welcome-emoji {
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
 }
 
-.biof3-login-modal__welcome h2 {
-  font-size: var(--biof3-font-size-xl);
+.gewu-login-modal__welcome h2 {
+  font-size: var(--gewu-font-size-xl);
   margin: 0 0 0.5rem;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
-.biof3-login-modal__welcome-desc {
-  font-size: var(--biof3-font-size-body);
-  color: var(--biof3-text-tertiary);
+.gewu-login-modal__welcome-desc {
+  font-size: var(--gewu-font-size-body);
+  color: var(--gewu-text-tertiary);
   margin-bottom: 1.25rem;
 }
 
-.biof3-login-modal__welcome-links {
+.gewu-login-modal__welcome-links {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
 }
 
-.biof3-login-modal__welcome-link {
+.gewu-login-modal__welcome-link {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   border-radius: 8px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   text-decoration: none;
   color: inherit;
   transition:
@@ -313,29 +313,29 @@
     background 0.15s;
 }
 
-.biof3-login-modal__welcome-link:hover {
+.gewu-login-modal__welcome-link:hover {
   border-color: var(--ifm-color-primary);
   background: var(--ifm-color-primary-lightest, #f0f9ff);
   text-decoration: none;
   color: inherit;
 }
 
-.biof3-login-modal__welcome-link-icon {
+.gewu-login-modal__welcome-link-icon {
   font-size: 1.5rem;
   flex-shrink: 0;
 }
 
-.biof3-login-modal__welcome-link span {
+.gewu-login-modal__welcome-link span {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
-.biof3-login-modal__welcome-link strong {
-  font-size: var(--biof3-font-size-body);
+.gewu-login-modal__welcome-link strong {
+  font-size: var(--gewu-font-size-body);
 }
 
-.biof3-login-modal__welcome-link small {
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-tertiary);
+.gewu-login-modal__welcome-link small {
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-tertiary);
 }

@@ -2157,6 +2157,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-299: 品牌改名 Gewu（格物）——窗口标题/wordmark/文案/主题令牌全量 + 品牌单一事实源（BLOCK-61） (2026-09-06 in_progress)
+
+**用户裁决**：定名 **Gewu（格物）**（BioF3 的 Bio 前缀锁死领域，产品已是领域无关的智能体指挥席）；单独开 BLOCK-61 系统性改名，设计要求后续改名灵活。
+
+**改动**：① **品牌单一事实源**（`src/main/brand.js` + `frontend/src/lib/brand.ts` 双端镜像 + [brand-identity 契约测试](../test/brand-identity.test.mjs)：双端常量一致 + 历史名禁裸写白名单扫描）——此后再改名只动两个文件；② **Tier A 用户可见面**：窗口标题（主窗/弹出窗走 `windowTitle()` 构建器）、TitleBar wordmark fallback、index.html 标题、MCP server 名 `gewu-mcp`、onboarding/设置/文件夹选择等文案；③ **Tier B 兼容迁移**：preload 桥双 key（`window.gewu` 主名 + `biof3Desktop` 兼容别名同一 surface，desktopBridge 双读）、localStorage 读旧写新（theme/executionTargetId/gitinit/token/agent_task 五族，历史 key 三种分隔形态全兼容 + 读到即迁移）、渲染层事件名 `biof3:*`→`gewu:*`（18 通道）、主题偏好 key `gewu-theme`；④ **Tier C 机械替换**（155 文件）：CSS 令牌 `--biof3-*`→`--gewu-*`、类名 `.biof3-*`→`.gewu-*`、标识符（biof3Events→gewuEvents 等）；⑤ Documents 目录 `Gewu-Local`（**既有环境探测到 `BioF3-Local` 则继续沿用——数据连续性**）；⑥ sidecar 包名 `gewu-computer-use`、package name `gewu-desktop`/`gewu-desktop-frontend`、AGENTS.md 与 docs/README 入口品牌行。**明确不动（协议命名空间，plan §4）**：`core/biof3-server` 路径、`.biof3-*` 用户数据目录、`BIOF3_*` env 前缀（350+ 处协议面）、历史文档与 acceptance 证据、`window.biof3` 旗标桥别名。
+
+**门禁**：brand-identity 契约 3/3；核心+回归 node 测试 67/67；tsc 0；前端受影响 vitest 79/79（ThemeProvider/copilotClient/ToolActivityDock/theme-token-contract 等 8 文件）；docs:check PASS 204。
+
+**实机**：（待 dev Electron 重启冒烟——窗口标题/wordmark/onboarding/主题亮暗/弹出窗/轨道，证据 `acceptance/block-61/`）。**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-298: 边缘活动轨道加映三——滚轮换卡 + 卡片垂直钳位（BLOCK-59 加映，plan §5 补全） (2026-09-06 verified)
 
 **背景**：对账发现 plan §5 两个交互细节未实现——「滚轮换卡」与「卡片锚轨道左侧、垂直钳位防越界」（首版只做了鼠标逐个悬停 + 卡片固定顶部）。用户裁决「开干」补全。

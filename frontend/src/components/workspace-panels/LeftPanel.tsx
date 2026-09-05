@@ -119,7 +119,7 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
     }
     const validate = window.biof3Desktop?.files?.validateDirectory;
     if (typeof validate !== 'function') {
-      setDropHint('当前运行环境不支持路径校验（请在 BioF3 桌面应用中使用）。');
+      setDropHint('当前运行环境不支持路径校验（请在 Gewu 桌面应用中使用）。');
       return;
     }
     try {
@@ -140,7 +140,7 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
     <aside className={styles.leftCol} style={{ width: ctx.width }}>
       <div
         className={styles.leftPanelWrap}
-        style={dropActive ? { outline: '1px dashed var(--biof3-accent)', outlineOffset: '-4px' } : undefined}
+        style={dropActive ? { outline: '1px dashed var(--gewu-accent)', outlineOffset: '-4px' } : undefined}
         onDragOver={(e) => {
           e.preventDefault();
           if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
@@ -196,7 +196,7 @@ function BrowseFolderButton({
     <>
       <button
         type="button"
-        className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+        className="gewu-btn gewu-btn--ghost gewu-btn--sm"
         onClick={() => {
           if (!open) setBrowseFrom(initialPath || '');
           setOpen((o) => !o);
@@ -325,7 +325,7 @@ function ProjectTreeHeader({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
           <div className={styles.leftCreateActions}>
             <button
               type="button"
-              className="biof3-btn biof3-btn--sm"
+              className="gewu-btn gewu-btn--sm"
               onClick={() => void ctx.createPanel.onConfirm()}
               disabled={ctx.creatingProject || !ctx.createPanel.path.trim()}
               title="校验路径并以目录名创建项目"
@@ -339,7 +339,7 @@ function ProjectTreeHeader({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
             />
             <button
               type="button"
-              className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
               onClick={ctx.createPanel.onClose}
               disabled={ctx.creatingProject}
             >
@@ -372,7 +372,7 @@ function ProjectTreeHeader({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
           <div className={styles.leftCreateActions}>
             <button
               type="button"
-              className="biof3-btn biof3-btn--sm"
+              className="gewu-btn gewu-btn--sm"
               onClick={() => void ctx.workspaceEdit.onSave()}
               disabled={ctx.workspaceEdit.saving || !ctx.workspaceEdit.path.trim()}
               title="校验路径并保存为当前项目的工作目录"
@@ -386,7 +386,7 @@ function ProjectTreeHeader({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
             />
             <button
               type="button"
-              className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
               onClick={ctx.workspaceEdit.onClose}
               disabled={ctx.workspaceEdit.saving}
             >

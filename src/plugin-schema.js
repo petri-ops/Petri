@@ -23,14 +23,14 @@ const PLATFORM_IDS = Object.freeze(['macos-arm64', 'macos-x64', 'windows-x64', '
 // Real download hosts. built-in://... pseudo URLs are exempt.
 // Extend when CI moves Runtime/FigCode zips to a new host (e.g. R2 / OSS release bucket).
 // Week 2 seed list per plan: github.com + githubusercontent variants. The Aliyun OSS
-// bucket biof3-uploads.oss-cn-hangzhou.aliyuncs.com is the current production host
+// bucket gewu-uploads.oss-cn-hangzhou.aliyuncs.com is the current production host
 // for legacy Runtime/FigCode zips and must remain whitelisted until those artifacts
 // are re-published under a github.com release URL.
 const ALLOWED_RUNTIME_HOSTS = Object.freeze([
   'github.com',
   'objects.githubusercontent.com',
   'githubusercontent.com',
-  'biof3-uploads.oss-cn-hangzhou.aliyuncs.com',
+  'gewu-uploads.oss-cn-hangzhou.aliyuncs.com',
 ]);
 
 // Pick the artifact for currentPlatform from a per-platform manifest.

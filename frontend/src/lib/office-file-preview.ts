@@ -1,5 +1,5 @@
 /**
- * BioF3 Desktop — Office / iWork / OpenDocument inline preview
+ * Gewu Desktop — Office / iWork / OpenDocument inline preview
  *
  * Office Open XML (`.docx`, `.xlsx`, `.pptx`) and OpenDocument (`.odt`, `.ods`,
  * `.odp`) are zip containers. iWork (`.pages`, `.numbers`, `.keynote`) uses a

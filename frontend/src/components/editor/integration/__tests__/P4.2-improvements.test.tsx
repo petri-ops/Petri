@@ -5,7 +5,7 @@
  * - P4.2 改进 1：WorkspaceFilePreviewBridge 自动 wrap PendingScrollProvider（避免 double wrap）
  * - P4.2 改进 2：useEditorApi() hook 返回 EditorApi 实例
  * - P4.2 改进 3：ChatCardLink 开箱即用组件（children 可选，默认显示 filePath:line）
- * - P4.2 改进 4：BioF3OpenFileDevBridge 重命名 + AppLevelBridge alias
+ * - P4.2 改进 4：GewuOpenFileDevBridge 重命名 + AppLevelBridge alias
  *
  * 设计要点：
  * - mock CodeMirrorEditor（避免触发完整 CM6 初始化路径）
@@ -53,7 +53,7 @@ import {
 } from '../WorkspaceFilePreviewBridge';
 import type { EditorApi } from '../../CodeMirror/types';
 import { ChatCardLink } from '../../../copilot/integration/ChatCardLinkBridge';
-import { BioF3OpenFileDevBridge, AppLevelBridge } from '../AppLevelBridge';
+import { GewuOpenFileDevBridge, AppLevelBridge } from '../AppLevelBridge';
 import {
   PendingScrollProvider,
   usePendingScroll,
@@ -332,18 +332,18 @@ describe('P4.2 ChatCardLink — out-of-the-box component', () => {
   });
 });
 
-describe('P4.2 BioF3OpenFileDevBridge rename + alias', () => {
+describe('P4.2 GewuOpenFileDevBridge rename + alias', () => {
   afterEach(() => {
     cleanup();
     delete (window as unknown as Record<string, unknown>)['__biof3DispatchOpenFile'];
   });
 
-  it('BioF3OpenFileDevBridge is a function (component)', () => {
-    expect(typeof BioF3OpenFileDevBridge).toBe('function');
+  it('GewuOpenFileDevBridge is a function (component)', () => {
+    expect(typeof GewuOpenFileDevBridge).toBe('function');
   });
 
-  it('AppLevelBridge alias equals BioF3OpenFileDevBridge', () => {
-    expect(AppLevelBridge).toBe(BioF3OpenFileDevBridge);
+  it('AppLevelBridge alias equals GewuOpenFileDevBridge', () => {
+    expect(AppLevelBridge).toBe(GewuOpenFileDevBridge);
   });
 
   it('mounting registers window.__biof3DispatchOpenFile in dev env', () => {
@@ -359,7 +359,7 @@ describe('P4.2 BioF3OpenFileDevBridge rename + alias', () => {
     const { unmount } = render(
       <PendingScrollProvider>
         <PendingCaptureConsumer capture={capture} />
-        <BioF3OpenFileDevBridge />
+        <GewuOpenFileDevBridge />
       </PendingScrollProvider>,
     );
 
@@ -386,7 +386,7 @@ describe('P4.2 BioF3OpenFileDevBridge rename + alias', () => {
 
     const { unmount } = render(
       <PendingScrollProvider>
-        <BioF3OpenFileDevBridge />
+        <GewuOpenFileDevBridge />
       </PendingScrollProvider>,
     );
 

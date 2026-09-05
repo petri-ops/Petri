@@ -65,12 +65,12 @@ export interface UseCodeMirrorEditorOptions {
 }
 
 const biof3HighlightStyle = HighlightStyle.define([
-  { tag: t.keyword, color: 'var(--biof3-status-warning, #c586c0)' },
-  { tag: [t.string, t.special(t.string)], color: 'var(--biof3-status-success, #ce9178)' },
-  { tag: t.number, color: 'var(--biof3-accent, #b5cea8)' },
-  { tag: t.comment, color: 'var(--biof3-text-muted, #6a9955)', fontStyle: 'italic' },
-  { tag: t.variableName, color: 'var(--biof3-text, #9cdcfe)' },
-  { tag: t.typeName, color: 'var(--biof3-accent, #4ec9b0)' },
+  { tag: t.keyword, color: 'var(--gewu-status-warning, #c586c0)' },
+  { tag: [t.string, t.special(t.string)], color: 'var(--gewu-status-success, #ce9178)' },
+  { tag: t.number, color: 'var(--gewu-accent, #b5cea8)' },
+  { tag: t.comment, color: 'var(--gewu-text-muted, #6a9955)', fontStyle: 'italic' },
+  { tag: t.variableName, color: 'var(--gewu-text, #9cdcfe)' },
+  { tag: t.typeName, color: 'var(--gewu-accent, #4ec9b0)' },
 ]);
 
 /**

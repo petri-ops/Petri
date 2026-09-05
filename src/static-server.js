@@ -5,7 +5,7 @@
  *
  * 阶段 3（desktop-spa）起支持双服务器：
  *   - Vite SPA build → :3002（主窗口，base '/'，无 baseUrl 前缀）
- *   - Docusaurus build → :3003（docs/blog iframe 过渡，baseUrl=/BioF3/）
+ *   - Docusaurus build → :3003（docs/blog iframe 过渡，baseUrl=/Gewu/）
  *
  * loadFile（file://）无法正确解析绝对路径资源，故仍需 HTTP 协议。
  */
@@ -48,7 +48,7 @@ function getMime(ext) {
  * @param {string} buildDir - 要托管的目录
  * @param {object} opts
  * @param {number} opts.port - 端口（默认 3002）
- * @param {string} opts.baseUrl - 路径前缀，如 '/BioF3/'（Docusaurus）；Vite SPA 用 '/'
+ * @param {string} opts.baseUrl - 路径前缀，如 '/Gewu/'（Docusaurus）；Vite SPA 用 '/'
  * @param {string} opts.label - 日志标签
  * @param {boolean} opts.spaFallback - 未命中的路径是否回退 index.html（SPA 路由）
  * @param {boolean} opts.fallbackToRandomPort - 端口占用时是否回退到系统分配端口
@@ -69,7 +69,7 @@ async function startStaticServer(buildDir, opts = {}) {
 
   // 归一化 baseUrl：确保以 / 开头、以 / 结尾
   const prefix = baseUrl.startsWith('/') ? baseUrl : '/' + baseUrl;
-  const stripPrefix = prefix === '/' ? null : prefix.replace(/\/$/, ''); // 去尾斜杠，如 '/BioF3'
+  const stripPrefix = prefix === '/' ? null : prefix.replace(/\/$/, ''); // 去尾斜杠，如 '/Gewu'
 
   const server = http.createServer((req, res) => {
     // CORS

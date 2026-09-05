@@ -50,7 +50,8 @@ import type {} from '@/lib/electron'; // ensure the global Window augmentation i
 
 /** Strongly-typed handle to the desktop IPC bridge, narrowing
  *  the optional `window.biof3Desktop` declared in electron.d.ts. */
-type DesktopBridge = NonNullable<Window['biof3Desktop']>;
+// BLOCK-61：主全局名 window.gewu；biof3Desktop 为兼容别名（preload 双暴露）。
+type DesktopBridge = NonNullable<Window['gewu']>;
 
 /** Map of bridge name → its sub-handle type. Keyof the
  *  biof3Desktop declaration, so adding a new bridge in
@@ -68,16 +69,16 @@ export class BridgeUnavailableError extends Error {
   constructor(public readonly bridgeName: string | number | symbol) {
     super(
       `Desktop IPC bridge "${String(bridgeName)}" is not available. ` +
-        `This code path runs only inside the BioF3 desktop app.`
+        `This code path runs only inside the Gewu desktop app.`
     );
     this.name = 'BridgeUnavailableError';
   }
 }
 
-/** True if the page is running inside the BioF3 desktop
+/** True if the page is running inside the Gewu desktop
  *  app (preload has populated window.biof3Desktop). */
 export function isDesktop(): boolean {
-  return typeof window !== 'undefined' && !!window.biof3Desktop;
+  return typeof window !== 'undefined' && !!(window.gewu ?? window.biof3Desktop);
 }
 
 /** Returns the requested sub-bridge handle typed against the
@@ -90,7 +91,7 @@ export function getBridge<K extends DesktopBridgeName>(
   name: K
 ): DesktopBridgeHandle<K> | null {
   if (typeof window === 'undefined') return null;
-  const desktop = window.biof3Desktop;
+  const desktop = window.gewu ?? window.biof3Desktop;
   if (!desktop) return null;
   // electron.d.ts marks every sub-bridge as required (no
   // `?`), but the bridge surface can still be incomplete in

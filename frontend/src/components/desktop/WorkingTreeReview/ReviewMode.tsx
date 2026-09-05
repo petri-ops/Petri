@@ -457,7 +457,10 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
 
   useEffect(() => {
     try {
-      setGitInitDismissed(window.localStorage.getItem(`biof3.gitinit.dismissed.${projectId || 'default'}`) === '1');
+      setGitInitDismissed(
+        window.localStorage.getItem(`gewu.gitinit.dismissed.${projectId || 'default'}`) === '1'
+        || window.localStorage.getItem(`biof3.gitinit.dismissed.${projectId || 'default'}`) === '1',
+      );
     } catch {
       // localStorage 不可用（私有模式等）时按「未 dismiss」处理，引导仍可用
       setGitInitDismissed(false);
@@ -468,7 +471,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
     setGitInitDismissed(true);
     try {
       // projectId 缺席（异常路由）时也按一次性记忆处理，用兜底 key
-      window.localStorage.setItem(`biof3.gitinit.dismissed.${projectId || 'default'}`, '1');
+      window.localStorage.setItem(`gewu.gitinit.dismissed.${projectId || 'default'}`, '1');
     } catch {
       // ignore：记忆失败仅影响「不再弹」，本次 dismiss 仍然生效
     }
@@ -800,7 +803,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                 <div className="wt-gitinit-actions">
                   <button
                     type="button"
-                    className="biof3-btn biof3-btn--sm"
+                    className="gewu-btn gewu-btn--sm"
                     onClick={() => setGitInitConfirmOpen(true)}
                     disabled={gitInitBusy}
                   >
@@ -808,7 +811,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                   </button>
                   <button
                     type="button"
-                    className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+                    className="gewu-btn gewu-btn--ghost gewu-btn--sm"
                     onClick={dismissGitInitPrompt}
                     disabled={gitInitBusy}
                   >
@@ -823,7 +826,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                   <div className="wt-gitinit-actions">
                     <button
                       type="button"
-                      className="biof3-btn biof3-btn--sm"
+                      className="gewu-btn gewu-btn--sm"
                       onClick={() => void handleGitInit()}
                       disabled={gitInitBusy}
                     >
@@ -831,7 +834,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                     </button>
                     <button
                       type="button"
-                      className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+                      className="gewu-btn gewu-btn--ghost gewu-btn--sm"
                       onClick={() => setGitInitConfirmOpen(false)}
                       disabled={gitInitBusy}
                     >

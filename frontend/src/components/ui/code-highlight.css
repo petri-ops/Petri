@@ -1,11 +1,11 @@
 .hljs {
-  color: var(--biof3-code-text, var(--biof3-text));
+  color: var(--gewu-code-text, var(--gewu-text));
   background: transparent;
 }
 
 .hljs-comment,
 .hljs-quote {
-  color: var(--biof3-code-comment, #6a737d);
+  color: var(--gewu-code-comment, #6a737d);
   font-style: italic;
 }
 
@@ -14,7 +14,7 @@
 .hljs-literal,
 .hljs-section,
 .hljs-link {
-  color: var(--biof3-code-keyword, #9c36b5);
+  color: var(--gewu-code-keyword, #9c36b5);
 }
 
 .hljs-string,
@@ -28,7 +28,7 @@
 .hljs-variable,
 .hljs-template-tag,
 .hljs-template-variable {
-  color: var(--biof3-code-string, #176b3a);
+  color: var(--gewu-code-string, #176b3a);
 }
 
 .hljs-number,
@@ -36,28 +36,28 @@
 .hljs-built_in,
 .hljs-builtin-name,
 .hljs-params {
-  color: var(--biof3-code-number, #945500);
+  color: var(--gewu-code-number, #945500);
 }
 
 .hljs-function .hljs-title,
 .hljs-title.function_ {
-  color: var(--biof3-code-function, #075985);
+  color: var(--gewu-code-function, #075985);
 }
 
 .hljs-attr,
 .hljs-property,
 .hljs-selector-id,
 .hljs-selector-class {
-  color: var(--biof3-code-property, #9a3412);
+  color: var(--gewu-code-property, #9a3412);
 }
 
 .hljs-deletion {
-  color: var(--biof3-status-danger-fg);
-  background: var(--biof3-status-danger-bg);
+  color: var(--gewu-status-danger-fg);
+  background: var(--gewu-status-danger-bg);
 }
 
 .hljs-addition {
-  background: var(--biof3-status-success-bg);
+  background: var(--gewu-status-success-bg);
 }
 
 .hljs-emphasis {
@@ -69,11 +69,11 @@
 }
 
 [data-theme='dark'] .hljs {
-  --biof3-code-text: #d6deeb;
-  --biof3-code-comment: #718096;
-  --biof3-code-keyword: #c792ea;
-  --biof3-code-string: #addb67;
-  --biof3-code-number: #f78c6c;
-  --biof3-code-function: #82aaff;
-  --biof3-code-property: #ffcb6b;
+  --gewu-code-text: #d6deeb;
+  --gewu-code-comment: #718096;
+  --gewu-code-keyword: #c792ea;
+  --gewu-code-string: #addb67;
+  --gewu-code-number: #f78c6c;
+  --gewu-code-function: #82aaff;
+  --gewu-code-property: #ffcb6b;
 }

@@ -87,8 +87,8 @@ export function BottomTerminal({
           ) : null}
         </div>
         <div>
-          <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={clear}>清空</button>
-          <button className="biof3-btn biof3-btn--icon" type="button" onClick={onClose} aria-label="关闭终端面板">
+          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={clear}>清空</button>
+          <button className="gewu-btn gewu-btn--icon" type="button" onClick={onClose} aria-label="关闭终端面板">
             <Icon name="x" size={13} />
           </button>
         </div>

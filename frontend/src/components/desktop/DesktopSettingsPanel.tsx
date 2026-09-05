@@ -391,7 +391,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
       ? exportEndpointProfilesJson(userModelProfiles, apiKeys)
       : exportEndpointProfilesCsv(userModelProfiles, apiKeys);
     downloadEndpointFile(
-      `biof3-api-endpoints.${format}`,
+      `gewu-api-endpoints.${format}`,
       content,
       format === 'json' ? 'application/json;charset=utf-8' : 'text/csv;charset=utf-8'
     );
@@ -471,18 +471,18 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   );
 
   return (
-    <div className="biof3-desktop-panel" role="dialog" aria-label="设置">
-      <div className="biof3-desktop-panel__header">
-        <span className="biof3-desktop-panel__icon">
+    <div className="gewu-desktop-panel" role="dialog" aria-label="设置">
+      <div className="gewu-desktop-panel__header">
+        <span className="gewu-desktop-panel__icon">
           <Icon name="settings" size={18} />
         </span>
-        <div className="biof3-desktop-panel__titles">
-          <h2 className="biof3-desktop-panel__title">设置</h2>
-          <p className="biof3-desktop-panel__subtitle">{activeSectionMeta.description}</p>
+        <div className="gewu-desktop-panel__titles">
+          <h2 className="gewu-desktop-panel__title">设置</h2>
+          <p className="gewu-desktop-panel__subtitle">{activeSectionMeta.description}</p>
         </div>
         <button
           type="button"
-          className="biof3-desktop-panel__close"
+          className="gewu-desktop-panel__close"
           onClick={onClose}
           aria-label="关闭"
         >
@@ -490,13 +490,13 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         </button>
       </div>
 
-      <div className="biof3-settings-layout">
-        <nav className="biof3-settings-nav" aria-label="设置分类">
+      <div className="gewu-settings-layout">
+        <nav className="gewu-settings-nav" aria-label="设置分类">
           {SETTINGS_SECTIONS.map((item) => (
             <button
               key={item.id}
               type="button"
-              className={`biof3-settings-nav__item${activeSection === item.id ? ' active' : ''}`}
+              className={`gewu-settings-nav__item${activeSection === item.id ? ' active' : ''}`}
               onClick={() => setActiveSection(item.id)}
             >
               <Icon name={item.icon} size={15} />
@@ -508,17 +508,17 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
           ))}
         </nav>
 
-        <div className="biof3-desktop-panel__body biof3-settings-content">
+        <div className="gewu-desktop-panel__body gewu-settings-content">
         {activeSection === 'general' && (
-          <section className="biof3-settings-section">
-            <div className="biof3-settings-section__heading">
+          <section className="gewu-settings-section">
+            <div className="gewu-settings-section__heading">
               <h3>常规</h3>
               <p>调整应用外观与基础使用偏好。</p>
             </div>
-        <div className="biof3-field">
-          <label className="biof3-field__label">外观主题</label>
+        <div className="gewu-field">
+          <label className="gewu-field__label">外观主题</label>
           <ThemeControl menuPlacement="bottom" />
-          <span className="biof3-badge">
+          <span className="gewu-badge">
             当前：
             {themePreference === 'system'
               ? '跟随系统'
@@ -526,25 +526,25 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 ? '日间'
                 : '夜间'}
           </span>
-          <p className="biof3-field__hint">可跟随 macOS 外观，或固定使用日间/夜间模式。</p>
+          <p className="gewu-field__hint">可跟随 macOS 外观，或固定使用日间/夜间模式。</p>
         </div>
 
           </section>
         )}
 
         {activeSection === 'models' && (
-          <section className="biof3-settings-section biof3-settings-section--models">
-            <div className="biof3-settings-section__heading">
+          <section className="gewu-settings-section gewu-settings-section--models">
+            <div className="gewu-settings-section__heading">
               <h3>API Endpoint</h3>
               <p>
                 为每个渠道选择接口协议，再配置供应商、Base URL、Key 和默认模型；模型能力由后端统一适配。Key
                 {credentialBackend === 'keychain' ? ' 保存在 macOS Keychain。' : ' 保存在独立本地凭据存储。'}
               </p>
-              <p className="biof3-field__hint">Key 默认隐藏，可点击眼睛显示或复制；导出前会确认是否把 Key 写入文件，请仅保存到安全位置。</p>
+              <p className="gewu-field__hint">Key 默认隐藏，可点击眼睛显示或复制；导出前会确认是否把 Key 写入文件，请仅保存到安全位置。</p>
             </div>
-            <div className="biof3-model-list">
+            <div className="gewu-model-list">
               {userModelProfiles.length > 0 && (
-                <div className="biof3-endpoint-list-header" aria-hidden="true">
+                <div className="gewu-endpoint-list-header" aria-hidden="true">
                   <span>协议</span>
                   <span>供应商</span>
                   <span>Base URL</span>
@@ -583,10 +583,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                   || connectionResult?.message
                   || (chatReady ? '连接正常，可在聊天窗口选择' : '测试接口并获取模型列表');
                 return (
-                <div key={profile.id} className="biof3-model-preset biof3-endpoint-card">
-                  <div className="biof3-endpoint-card__grid" role="group" aria-label={`${profile.label || '自定义'} 模型渠道`}>
+                <div key={profile.id} className="gewu-model-preset gewu-endpoint-card">
+                  <div className="gewu-endpoint-card__grid" role="group" aria-label={`${profile.label || '自定义'} 模型渠道`}>
                     <select
-                      className="biof3-select"
+                      className="gewu-select"
                       value={profile.provider}
                       onChange={(event) => updateProfileProvider(
                         profile,
@@ -599,14 +599,14 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       ))}
                     </select>
                     <input
-                      className="biof3-input"
+                      className="gewu-input"
                       value={profile.label}
                       onChange={(event) => updateProfile(profile.id, { label: event.target.value })}
                       placeholder="供应商"
                       aria-label="供应商"
                     />
                     <input
-                      className="biof3-input"
+                      className="gewu-input"
                       value={endpointBaseUrl(profile)}
                       onChange={(e) => {
                         updateProfileBaseUrl(profile, e.target.value || undefined);
@@ -615,10 +615,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       aria-label="Base URL"
                       title={endpointBaseUrl(profile)}
                     />
-                    <div className="biof3-endpoint-key-field">
+                    <div className="gewu-endpoint-key-field">
                       <input
                         type={visibleCredentialIds[id] ? 'text' : 'password'}
-                        className="biof3-input"
+                        className="gewu-input"
                         value={credentialInputs[id] || ''}
                         onChange={(e) => {
                           setCredentialInputs((current) => ({ ...current, [id]: e.target.value }));
@@ -629,7 +629,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       />
                       <button
                         type="button"
-                        className="biof3-endpoint-key-action"
+                        className="gewu-endpoint-key-action"
                         onClick={() => void revealCredential(id)}
                         aria-label="显示 API Key"
                         title="显示 API Key"
@@ -638,7 +638,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       </button>
                       <button
                         type="button"
-                        className="biof3-endpoint-key-action"
+                        className="gewu-endpoint-key-action"
                         onClick={() => void copyCredential(id)}
                         aria-label="复制 API Key"
                         title="复制 API Key"
@@ -647,7 +647,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       </button>
                     </div>
                     <select
-                      className="biof3-select"
+                      className="gewu-select"
                       value={configuredDefault}
                       onChange={(e) => updateProfile(profile.id, { defaultModel: e.target.value, model: profile.model || e.target.value })}
                       disabled={discovering || modelOptions.length === 0}
@@ -661,7 +661,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                     </select>
                     <input
                       type="text"
-                      className="biof3-input biof3-input--sm"
+                      className="gewu-input gewu-input--sm"
                       // Render the user's literal text during editing so the
                       // cursor doesn't jump mid-typing; only format on blur
                       // and when state has a numeric value.
@@ -691,7 +691,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                     />
                     <button
                       type="button"
-                      className={`biof3-btn biof3-btn--ghost biof3-btn--sm biof3-endpoint-card__test${connectionResult?.ok ? ' is-ok' : connectionResult || profileError ? ' is-error' : ''}`}
+                      className={`gewu-btn gewu-btn--ghost gewu-btn--sm gewu-endpoint-card__test${connectionResult?.ok ? ' is-ok' : connectionResult || profileError ? ' is-error' : ''}`}
                       onClick={() => void discoverModels(profile, credentialInputs[id] || '')}
                       disabled={
                         discovering ||
@@ -705,7 +705,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                     </button>
                     <button
                       type="button"
-                      className="biof3-endpoint-card__delete"
+                      className="gewu-endpoint-card__delete"
                       onClick={() => {
                         const label = profile.label?.trim() || '该渠道';
                         if (!window.confirm(`删除「${label}」？已保存的 URL、Key 与默认模型都会从面板移除，回收站不可恢复。`)) return;
@@ -720,10 +720,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 </div>
               );
               })}
-              {userModelProfiles.length === 0 && <p className="biof3-field__hint">尚未配置模型。请添加 API 渠道并填写连接信息。</p>}
+              {userModelProfiles.length === 0 && <p className="gewu-field__hint">尚未配置模型。请添加 API 渠道并填写连接信息。</p>}
             </div>
-            <div className="biof3-model-fallback" aria-label="Agent 模型自动容错">
-              <label className="biof3-model-fallback__toggle">
+            <div className="gewu-model-fallback" aria-label="Agent 模型自动容错">
+              <label className="gewu-model-fallback__toggle">
                 <input
                   type="checkbox"
                   checked={fallbackEnabled}
@@ -734,7 +734,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                   <small>主模型遇到限流、服务异常或最终整理协议失败时，按顺序尝试已选备用模型。</small>
                 </span>
               </label>
-              <div className="biof3-model-fallback__choices" aria-label="Agent 备用模型">
+              <div className="gewu-model-fallback__choices" aria-label="Agent 备用模型">
                 {agentFallbackCandidates.map((profile) => {
                   const selected = agentFallbackProfileIds.includes(profile.id);
                   return (
@@ -755,23 +755,23 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                   );
                 })}
                 {agentFallbackCandidates.length === 0 && (
-                  <span className="biof3-field__hint">还没有其他支持工具调用的模型渠道。</span>
+                  <span className="gewu-field__hint">还没有其他支持工具调用的模型渠道。</span>
                 )}
               </div>
             </div>
-            <div className="biof3-endpoint-list-actions">
-              <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={addProfile}>
+            <div className="gewu-endpoint-list-actions">
+              <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={addProfile}>
                 添加 API 渠道
               </button>
               {userModelProfiles.length > 0 && (
-                <div className="biof3-endpoint-transfer-actions">
-                  <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => exportEndpoints('json')}>
+                <div className="gewu-endpoint-transfer-actions">
+                  <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={() => exportEndpoints('json')}>
                     导出 JSON
                   </button>
-                  <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => exportEndpoints('csv')}>
+                  <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={() => exportEndpoints('csv')}>
                     导出 CSV
                   </button>
-                  <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => endpointImportRef.current?.click()}>
+                  <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={() => endpointImportRef.current?.click()}>
                     导入配置
                   </button>
                   <input
@@ -784,7 +784,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       if (file) void importEndpoints(file);
                     }}
                   />
-                  {endpointTransferMessage && <span className="biof3-field__hint">{endpointTransferMessage}</span>}
+                  {endpointTransferMessage && <span className="gewu-field__hint">{endpointTransferMessage}</span>}
                 </div>
               )}
             </div>
@@ -793,8 +793,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         )}
 
         {activeSection === 'compute' && (
-          <section className="biof3-settings-section">
-            <div className="biof3-settings-section__heading">
+          <section className="gewu-settings-section">
+            <div className="gewu-settings-section__heading">
               <h3>计算与数据</h3>
               <p>设置分析任务的执行位置，并查看本地数据占用。</p>
             </div>
@@ -802,15 +802,15 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
 
         <RemoteTargets />
 
-        <hr className="biof3-section-divider" />
+        <hr className="gewu-section-divider" />
 
         <DataManagement />
 
-        <hr className="biof3-section-divider" />
+        <hr className="gewu-section-divider" />
 
         <HarnessEnvironment />
 
-        <hr className="biof3-section-divider" />
+        <hr className="gewu-section-divider" />
 
         <TrashManagement />
 
@@ -818,8 +818,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         )}
 
         {activeSection === 'usage' && (
-          <section className="biof3-settings-section">
-            <div className="biof3-settings-section__heading">
+          <section className="gewu-settings-section">
+            <div className="gewu-settings-section__heading">
               <h3>用量与资源</h3>
               <p>查看模型成本、缓存命中和当前机器容量，不保存原始数据或密钥。</p>
             </div>
@@ -828,40 +828,40 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         )}
 
         {activeSection === 'maintenance' && (
-          <section className="biof3-settings-section">
-            <div className="biof3-settings-section__heading">
+          <section className="gewu-settings-section">
+            <div className="gewu-settings-section__heading">
               <h3>隐私与维护</h3>
               <p>控制匿名错误反馈，并处理诊断和应用更新。</p>
             </div>
         {/* M2-3：可选错误遥测开关（默认关闭，用户主动开启） */}
-        <div className="biof3-field">
-          <label className="biof3-field__label">开启错误反馈</label>
-          <div className="biof3-toggle-row">
+        <div className="gewu-field">
+          <label className="gewu-field__label">开启错误反馈</label>
+          <div className="gewu-toggle-row">
             <input
               type="checkbox"
-              id="biof3-telemetry-toggle"
-              className="biof3-toggle"
+              id="gewu-telemetry-toggle"
+              className="gewu-toggle"
               checked={telemetryEnabled}
               onChange={(e) => handleToggleTelemetry(e.target.checked)}
             />
-            <label htmlFor="biof3-telemetry-toggle" className="biof3-toggle-label">
+            <label htmlFor="gewu-telemetry-toggle" className="gewu-toggle-label">
               {telemetryEnabled ? '已开启' : '已关闭'}
             </label>
           </div>
-          <p className="biof3-field__hint">
+          <p className="gewu-field__hint">
             开启后，分析出错时仅上报错误分类与应用版本（不含任何用户数据、文件路径或文件名），
             用于改进工具稳定性。可随时关闭。
           </p>
         </div>
-        <div className="biof3-maintenance-actions">
-          <div className="biof3-maintenance-row">
+        <div className="gewu-maintenance-actions">
+          <div className="gewu-maintenance-row">
             <div>
               <strong>应用更新</strong>
               <p>检查并下载适用于当前 Mac 的安装包。</p>
             </div>
             <UpdateChecker />
           </div>
-          <div className="biof3-maintenance-row">
+          <div className="gewu-maintenance-row">
             <div>
               <strong>诊断日志</strong>
               <p>导出用于排查问题的本地诊断信息。</p>
@@ -873,8 +873,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         )}
 
         {activeSection === 'experimental' && (
-          <section className="biof3-settings-section">
-            <div className="biof3-settings-section__heading">
+          <section className="gewu-settings-section">
+            <div className="gewu-settings-section__heading">
               <h3>实验特性</h3>
               <p>这些开关在开发态已验证，但默认关闭；打开前请确认你的使用场景。</p>
             </div>
@@ -884,15 +884,15 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         </div>
       </div>
 
-      {showAiSave && <div className="biof3-desktop-panel__footer biof3-settings-footer">
+      {showAiSave && <div className="gewu-desktop-panel__footer gewu-settings-footer">
         {saved && (
-          <span className="biof3-saved-toast">
+          <span className="gewu-saved-toast">
             <Icon name="check" size={14} /> 已保存
           </span>
         )}
         <button
           type="button"
-          className="biof3-btn biof3-btn--primary biof3-btn--sm"
+          className="gewu-btn gewu-btn--primary gewu-btn--sm"
           onClick={handleSave}
           disabled={saving}
         >

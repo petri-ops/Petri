@@ -115,7 +115,7 @@ import {
 import { useCopilotContext } from '@/lib/copilotContextProvider';
 import { formatRelativeTime } from '@/lib/format';
 import { useConversations } from '@/hooks/useConversations';
-import { biof3Events, dispatchBioF3Event, subscribeBioF3Event } from '@/lib/events';
+import { gewuEvents, dispatchGewuEvent, subscribeGewuEvent } from '@/lib/events';
 import '@/lib/chat-file-references';
 import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-references';
 import { __resetFileReferenceCache, extractFileReferenceCandidates } from '@/lib/chat-file-references';
@@ -267,7 +267,7 @@ export function SimpleChat({
   // （中央会话）消费，避免右栏 chat tab 与中央会话重复入列；跨项目载荷丢弃。
   useEffect(() => {
     if (!ownsCopilotAsk) return undefined;
-    return subscribeBioF3Event(biof3Events.selectionQuote, (detail) => {
+    return subscribeGewuEvent(gewuEvents.selectionQuote, (detail) => {
       if (detail.projectId && detail.projectId !== projectId) return;
       setSelectionRefs((prev) => appendSelectionReference(prev, detail));
     });
@@ -285,7 +285,7 @@ export function SimpleChat({
   // 与 P1 同策略：仅 copilotAsk 拥有者消费；跨项目载荷丢弃。
   useEffect(() => {
     if (!ownsCopilotAsk) return undefined;
-    return subscribeBioF3Event(biof3Events.imageQuote, (detail) => {
+    return subscribeGewuEvent(gewuEvents.imageQuote, (detail) => {
       if (detail.projectId && detail.projectId !== projectId) return;
       setImageRefs((prev) => appendImageReference(prev, detail));
     });
@@ -447,14 +447,14 @@ export function SimpleChat({
     const resolved = detail.resolved;
     if (!resolved || resolved.projectId !== projectId) return;
     if (resolved.kind === 'artifact') {
-      dispatchBioF3Event(biof3Events.projectOpenArtifact, {
+      dispatchGewuEvent(gewuEvents.projectOpenArtifact, {
         jobId: resolved.jobId,
         artifactName: resolved.artifactName,
         projectId,
       });
       return;
     }
-    dispatchBioF3Event(biof3Events.projectOpenWorkspaceFile, {
+    dispatchGewuEvent(gewuEvents.projectOpenWorkspaceFile, {
       projectId,
       relativePath: resolved.relativePath,
       name: resolved.name,
@@ -1054,7 +1054,7 @@ export function SimpleChat({
         await refreshConversations();
         onConversationChange(forked.id);
         // Broadcast so LeftPanel (via project-workspace) refreshes the conversation list
-        dispatchBioF3Event(biof3Events.conversationForked, {
+        dispatchGewuEvent(gewuEvents.conversationForked, {
           newConversationId: forked.id,
           projectId: projectId || '',
         });
@@ -1197,8 +1197,8 @@ export function SimpleChat({
         trimmed: detail.trimmed,
       });
     };
-    window.addEventListener(biof3Events.tokenBudget, handler);
-    return () => window.removeEventListener(biof3Events.tokenBudget, handler);
+    window.addEventListener(gewuEvents.tokenBudget, handler);
+    return () => window.removeEventListener(gewuEvents.tokenBudget, handler);
   }, []);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -2223,7 +2223,7 @@ function ApprovalCard({
       <div className="sc-approval-actions">
         <button
           type="button"
-          className="biof3-btn sc-approval-btn sc-approval-approve"
+          className="gewu-btn sc-approval-btn sc-approval-approve"
           onClick={onApprove}
           disabled={busy}
         >
@@ -2232,7 +2232,7 @@ function ApprovalCard({
         </button>
         <button
           type="button"
-          className="biof3-btn sc-approval-btn sc-approval-cancel"
+          className="gewu-btn sc-approval-btn sc-approval-cancel"
           onClick={onReject}
           disabled={busy}
         >

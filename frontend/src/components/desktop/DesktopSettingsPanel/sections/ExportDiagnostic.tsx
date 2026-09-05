@@ -34,16 +34,16 @@ export function ExportDiagnostic(): React.ReactElement | null {
   if (!window.biof3Desktop?.diagnostic) return null;
 
   return (
-    <div className="biof3-update-section">
+    <div className="gewu-update-section">
       <button
         type="button"
-        className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+        className="gewu-btn gewu-btn--ghost gewu-btn--sm"
         onClick={handleExport}
         disabled={exporting}
       >
         {exporting ? '导出中…' : '导出诊断日志'}
       </button>
-      {msg && <span className="biof3-field__hint">{msg}</span>}
+      {msg && <span className="gewu-field__hint">{msg}</span>}
     </div>
   );
 }

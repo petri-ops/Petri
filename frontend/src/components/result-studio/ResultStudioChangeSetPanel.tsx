@@ -511,7 +511,7 @@ export function ResultStudioChangeSetPanel({
             <span>候选结果已保留；下一步：比较差异后采用或放弃。</span>
           )}
           {workspaceStatus.lifecycle.status === 'recovery_available' && interruptedRecovery && (
-            <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" disabled={busy} onClick={() => void recoverWorkspace()}>
+            <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={busy} onClick={() => void recoverWorkspace()}>
               {interruptedRecoveries.length === 1 ? '恢复修改现场' : '恢复全部修改现场'}
             </button>
           )}
@@ -520,7 +520,7 @@ export function ResultStudioChangeSetPanel({
       {workspaceError && (
         <div className={styles.lifecycle} data-state="unavailable" role="alert">
           <span>{workspaceError}</span>
-          <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" disabled={workspaceLoading} onClick={() => void refreshWorkspaceStatus()}>
+          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={workspaceLoading} onClick={() => void refreshWorkspaceStatus()}>
             {workspaceLoading ? '重试中…' : '重试存储状态'}
           </button>
         </div>
@@ -539,10 +539,10 @@ export function ResultStudioChangeSetPanel({
               </div>
               <div className={styles.historyActions}>
                 {revision.revisionId !== activeRevisionId && (
-                  <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" disabled={busy} onClick={() => onRevisionViewed?.(revision)}>查看</button>
+                  <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={busy} onClick={() => onRevisionViewed?.(revision)}>查看</button>
                 )}
                 {!revision.isCurrent && (
-                  <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" disabled={busy} onClick={() => void restore(revision)}>恢复为新版本</button>
+                  <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={busy} onClick={() => void restore(revision)}>恢复为新版本</button>
                 )}
               </div>
             </div>
@@ -587,7 +587,7 @@ export function ResultStudioChangeSetPanel({
           )}
           <div className={styles.actions}>
             {mode === 'result' && (
-              <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" disabled={busy || loading} onClick={() => onModeChange?.('compare')}>查看详细变化</button>
+              <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={busy || loading} onClick={() => onModeChange?.('compare')}>查看详细变化</button>
             )}
             {selected.status === 'preview_ready' && (
               <>
@@ -605,10 +605,10 @@ export function ResultStudioChangeSetPanel({
         <div className={styles.error} role="alert">
           <span>{error}</span>
           {errorRetry === 'compare' && selected && !comparison && (
-            <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => void loadComparison()}>重试比较</button>
+            <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => void loadComparison()}>重试比较</button>
           )}
           {errorRetry === 'versions' && (
-            <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => void refresh()}>重试版本</button>
+            <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => void refresh()}>重试版本</button>
           )}
         </div>
       )}

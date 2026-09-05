@@ -2,9 +2,10 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 export type ResolvedTheme = 'light' | 'dark';
-const THEME_STORAGE_KEY = 'biof3-theme';
-const LEGACY_THEME_STORAGE_KEY = 'theme';
-const THEME_CHANGE_EVENT = 'biof3:theme-change';
+// BLOCK-61：新 key 命名空间 gewu-*；历史 key 读兼容（偏好零丢失），写入只落新 key。
+const THEME_STORAGE_KEY = 'gewu-theme';
+const LEGACY_THEME_KEYS = ['gewu-theme', 'theme'] as const;
+const THEME_CHANGE_EVENT = 'gewu:theme-change';
 
 interface ThemeContextValue {
   preference: ThemePreference;
@@ -16,7 +17,9 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function readPreference(): ThemePreference {
   try {
-    const saved = localStorage.getItem(THEME_STORAGE_KEY) || localStorage.getItem(LEGACY_THEME_STORAGE_KEY);
+    const saved =
+      localStorage.getItem(THEME_STORAGE_KEY) ||
+      LEGACY_THEME_KEYS.map((key) => localStorage.getItem(key)).find((v) => v != null);
     if (saved === 'light' || saved === 'dark' || saved === 'system') return saved;
   } catch {
     // Storage can be unavailable in hardened renderer contexts.
@@ -66,10 +69,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
         setPreference(next);
       }
     };
-    const onStorage = (event: StorageEvent) => {
-      if (event.key && event.key !== THEME_STORAGE_KEY && event.key !== LEGACY_THEME_STORAGE_KEY) return;
-      setPreferenceState(readPreference());
-    };
+      const onStorage = (event: StorageEvent) => {
+        if (event.key && event.key !== THEME_STORAGE_KEY && !LEGACY_THEME_KEYS.includes(event.key as typeof LEGACY_THEME_KEYS[number])) return;
+        setPreferenceState(readPreference());
+      };
     window.addEventListener(THEME_CHANGE_EVENT, onThemeChange as EventListener);
     window.addEventListener('storage', onStorage);
     return () => {

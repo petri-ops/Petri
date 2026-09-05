@@ -47,7 +47,7 @@ const SHARED_BACKEND_DIR = resolveSharedBackendDir();
 const PROJECT_ROOT = resolveProjectRoot();
 
 const USER_DATA_DIR =
-  process.env.BIOF3_LOCAL_DATA_DIR || path.join(app.getPath('documents'), 'BioF3-Local');
+  process.env.BIOF3_LOCAL_DATA_DIR || path.join(app.getPath('documents'), 'Gewu-Local');
 const PLUGINS_DIR = path.join(USER_DATA_DIR, 'plugins');
 const RUNTIMES_DIR = path.join(USER_DATA_DIR, 'runtimes');
 const INSTALLED_FILE = path.join(PLUGINS_DIR, 'installed.json');
@@ -74,7 +74,7 @@ const BUILT_IN_PLUGINS_DIR = path.join(RESOURCES_PATH, 'built-in-plugins');
 // 远程 manifest URL（插件商店清单）
 const MANIFEST_URL =
   process.env.BIOF3_PLUGIN_MANIFEST_URL ||
-  'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/manifest.json';
+  'https://gewu-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/manifest.json';
 
 // Init shared backend (was in plugin-manager.js L63-67). Idempotent; safe to
 // require at module load.

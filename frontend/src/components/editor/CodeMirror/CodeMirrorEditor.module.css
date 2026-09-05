@@ -17,16 +17,16 @@
 .cmEditor :global(.cm-scroller) {
   /* FONT-FAMILY-UNIFICATION UI-242 — 原 var(--font-family-mono) 为幽灵变量（恒回退
      generic monospace），统一走 canonical mono token。 */
-  font-family: var(--biof3-font-mono, monospace);
+  font-family: var(--gewu-font-mono, monospace);
   /* TYPOGRAPHY-HIERARCHY UI-239 — CM 全链原本无字号（继承到 body 16px），
      与同屏 chrome 12~13px 断层；统一代码表面基准 13px。 */
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   overflow: auto;
 }
 
 .cmEditor :global(.cm-gutters) {
-  background-color: var(--biof3-bg-elevated, transparent);
-  border-right: 1px solid var(--biof3-border, rgba(0, 0, 0, 0.08));
+  background-color: var(--gewu-bg-elevated, transparent);
+  border-right: 1px solid var(--gewu-border, rgba(0, 0, 0, 0.08));
 }
 
 /* ===== P1 unified diff 主题 ===== */

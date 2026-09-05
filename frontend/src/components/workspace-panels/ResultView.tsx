@@ -47,8 +47,8 @@ import { segmentToMode, modeToSegment, type WorkspaceMode } from '@/hooks/useWor
 import { isDirectRecoveryAction, useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import type { CopilotContext, HarnessContextSummary } from '@/lib/copilotContext';
-import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
-import { getBrowserViewportSize, isBioF3LocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
+import { gewuEvents, subscribeGewuEvent, dispatchGewuEvent } from '@/lib/events';
+import { getBrowserViewportSize, isGewuLocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { useTheme } from '@/themes/ThemeProvider';
 import {
@@ -933,7 +933,7 @@ function ResultArtifactShell({
   // BLOCK-52 P2（图片/结果图引用）：把当前结果图 + artifact 血统派发给 SimpleChat composer。
   const handleQuoteArtifactImage = () => {
     if (!selectedArtifactUrl) return;
-    dispatchBioF3Event(biof3Events.imageQuote, {
+    dispatchGewuEvent(gewuEvents.imageQuote, {
       projectId: project.id,
       kind: 'result-artifact',
       name: selectedArtifactName,
@@ -958,8 +958,8 @@ function ResultArtifactShell({
       <strong>当前产物文件不可用</strong>
       <span>{effectivePreviewAvailability.reason || '结果记录仍在，但无法读取对应文件。'}</span>
       <div>
-        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={retryCurrentPreview}>重试预览</button>
-        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={retryCurrentPreview}>重试预览</button>
+        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
           type="button"
           onClick={() => onAskAgent(`请检查并恢复当前结果文件“${selectedArtifactLabel || selectedArtifactName}”。先说明缺失原因和可恢复边界，不要覆盖原始数据。`)}
         >
@@ -1004,7 +1004,7 @@ function ResultArtifactShell({
             {/* BLOCK-52 P2（图片/结果图引用）：把当前结果图引用到对话 composer */}
             <button
               type="button"
-              className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
               onClick={handleQuoteArtifactImage}
               title="把这张结果图引用到对话"
             >
@@ -1209,7 +1209,7 @@ function ResultArtifactShell({
         */}
       </div>
       {recoveryAction && (
-        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
           type="button"
           disabled={recoveryBusy}
           onClick={() => void requestRecovery()}
@@ -1223,10 +1223,10 @@ function ResultArtifactShell({
     <div className={styles.resultWorkflowConfirmation}>
       <span>确认执行“{pendingRecovery.label}”？该操作会写入任务审计记录。</span>
       <div>
-        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" disabled={recoveryBusy} onClick={() => void resolveRecovery(false)}>
+        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={recoveryBusy} onClick={() => void resolveRecovery(false)}>
           取消
         </button>
-        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" disabled={recoveryBusy} onClick={() => void resolveRecovery(true)}>
+        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={recoveryBusy} onClick={() => void resolveRecovery(true)}>
           确认执行
         </button>
       </div>
@@ -1243,7 +1243,7 @@ function ResultArtifactShell({
       {/* BLOCK-59 P1 — 结果弹出独立窗（只读聚焦；× 降格进活动轨道不销毁） */}
       {windowManagerBridge && (
         <button
-          className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+          className="gewu-btn gewu-btn--ghost gewu-btn--sm"
           type="button"
           disabled={!selectedArtifactName}
           onClick={() => {
@@ -1272,7 +1272,7 @@ function ResultArtifactShell({
         </div>
       )}
       {reportArtifact && (
-        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
           type="button"
           disabled={reportGenerating}
           onClick={() => void generateFinalReport()}
@@ -1281,7 +1281,7 @@ function ResultArtifactShell({
         </button>
       )}
       {finalReportUrl && onOpenBrowser && (
-        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => onOpenBrowser(finalReportUrl)}>查看 HTML 报告</button>
+        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => onOpenBrowser(finalReportUrl)}>查看 HTML 报告</button>
       )}
       {finalReportUrl && (
         <a href={finalReportUrl} download="final-report.html">导出 HTML 报告</a>
@@ -1289,7 +1289,7 @@ function ResultArtifactShell({
       {result.deliveryManifest && (
         <>
           <a href={buildUrl('delivery-manifest.json')} target="_blank" rel="noreferrer">查看交付清单</a>
-          <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" disabled={replayPackageBusy} onClick={() => void exportReplayPackage()}>
+          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={replayPackageBusy} onClick={() => void exportReplayPackage()}>
             {replayPackageBusy ? '导出中…' : '导出复现包'}
           </button>
         </>
@@ -1298,7 +1298,7 @@ function ResultArtifactShell({
         <a href={scientificScriptUrl} target="_blank" rel="noreferrer">查看脚本</a>
       )}
       {result.deliveryManifest && (
-        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
           type="button"
           onClick={() => onAskAgent(`请为任务 ${job.id} 的产物 ${selectedArtifactName} 发起重放验证；先展示输入、资源和副作用确认摘要，不要直接执行。`)}
         >
@@ -1420,7 +1420,7 @@ function ResultArtifactShell({
         job.name || job.tool_id,
         <div className={styles.resultPlaceholder}>
           <p>结果加载失败：{resultError}</p>
-          <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => setResultRetryVersion((value) => value + 1)}>重试</button>
+          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => setResultRetryVersion((value) => value + 1)}>重试</button>
         </div>,
         'done'
       );
@@ -1458,7 +1458,7 @@ function ResultArtifactShell({
             visibleSelectionRef.current = null;
             committedSelectionRef.current = null;
             onModeChange?.('result', revision.toolJobId);
-            dispatchBioF3Event(biof3Events.projectOpenArtifact, {
+            dispatchGewuEvent(gewuEvents.projectOpenArtifact, {
               projectId: project.id,
               jobId: revision.toolJobId,
               artifactName: revision.outputPath.split('/').pop() || revision.artifactId,
@@ -1492,7 +1492,7 @@ function ResultArtifactShell({
         {manifestError && (
           <div className={styles.resultWorkflowError} role="alert">
             <span>结果清单暂不可用；已保留可直接读取的结果文件。</span>
-            <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" disabled={manifestLoading} onClick={() => setManifestRetryVersion((value) => value + 1)}>
+            <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={manifestLoading} onClick={() => setManifestRetryVersion((value) => value + 1)}>
               {manifestLoading ? '重试中…' : '重试结果清单'}
             </button>
           </div>
@@ -1500,7 +1500,7 @@ function ResultArtifactShell({
         {interactionError && (
           <div className={styles.resultWorkflowError} role="alert">
             <span>{interactionError}</span>
-            <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => setInteractionRetryVersion((value) => value + 1)}>重试交互能力</button>
+            <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => setInteractionRetryVersion((value) => value + 1)}>重试交互能力</button>
           </div>
         )}
         <div className={styles.resultSidebarPreviewBody}>

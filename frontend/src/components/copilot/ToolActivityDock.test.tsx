@@ -2,7 +2,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ToolActivityDock } from './ToolActivityDock';
-import { biof3Events, dispatchBioF3Event } from '@/lib/events';
+import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 
 const { listBackgroundProcesses, fetchProcessLogTail } = vi.hoisted(() => ({
   listBackgroundProcesses: vi.fn(),
@@ -50,7 +50,7 @@ describe('ToolActivityDock (UI-268 后台进程浮窗)', () => {
     listBackgroundProcesses.mockResolvedValue([runningProc]);
     render(<ToolActivityDock conversationId="conv-1" projectId="p-1" />);
     act(() => {
-      dispatchBioF3Event(biof3Events.agentBackgroundProcess, {
+      dispatchGewuEvent(gewuEvents.agentBackgroundProcess, {
         processId: 'bg-1',
         conversationId: 'conv-1',
       });
@@ -69,7 +69,7 @@ describe('ToolActivityDock (UI-268 后台进程浮窗)', () => {
   it('ignores background-process events from other conversations', () => {
     render(<ToolActivityDock conversationId="conv-1" projectId="p-1" />);
     act(() => {
-      dispatchBioF3Event(biof3Events.agentBackgroundProcess, {
+      dispatchGewuEvent(gewuEvents.agentBackgroundProcess, {
         processId: 'bg-1',
         conversationId: 'conv-other',
       });
@@ -81,7 +81,7 @@ describe('ToolActivityDock (UI-268 后台进程浮窗)', () => {
     listBackgroundProcesses.mockResolvedValue([runningProc]);
     const { rerender } = render(<ToolActivityDock conversationId="conv-1" projectId="p-1" />);
     act(() => {
-      dispatchBioF3Event(biof3Events.agentBackgroundProcess, {
+      dispatchGewuEvent(gewuEvents.agentBackgroundProcess, {
         processId: 'bg-1',
         conversationId: 'conv-1',
       });
@@ -109,7 +109,7 @@ describe('ToolActivityDock (UI-268 后台进程浮窗)', () => {
     expect(screen.queryByTestId('tool-activity-dock')).toBeNull();
     expect(screen.queryByText(/后台进程/)).toBeNull();
     act(() => {
-      dispatchBioF3Event(biof3Events.agentBackgroundProcess, {
+      dispatchGewuEvent(gewuEvents.agentBackgroundProcess, {
         processId: 'bg-2',
         conversationId: 'conv-1',
       });
@@ -123,7 +123,7 @@ describe('ToolActivityDock (UI-268 后台进程浮窗)', () => {
     listBackgroundProcesses.mockResolvedValue([runningProc]);
     const { rerender } = render(<ToolActivityDock conversationId="conv-1" projectId="p-1" />);
     act(() => {
-      dispatchBioF3Event(biof3Events.agentBackgroundProcess, {
+      dispatchGewuEvent(gewuEvents.agentBackgroundProcess, {
         processId: 'bg-1',
         conversationId: 'conv-1',
       });

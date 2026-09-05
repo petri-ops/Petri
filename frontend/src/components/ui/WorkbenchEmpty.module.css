@@ -1,19 +1,19 @@
 .empty {
   text-align: center;
   padding: 60px 20px;
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
 }
 
 .title {
   font-size: var(--ifm-font-size-base);
   font-weight: 700;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   margin-bottom: 6px;
 }
 
 .desc {
-  font-size: var(--biof3-font-size-caption);
-  margin-bottom: var(--biof3-space-5);
+  font-size: var(--gewu-font-size-caption);
+  margin-bottom: var(--gewu-space-5);
   line-height: 1.6;
 }
 
@@ -21,18 +21,18 @@
   display: flex;
   gap: 10px;
   justify-content: center;
-  margin-top: var(--biof3-space-4);
+  margin-top: var(--gewu-space-4);
 }
 
 .hint {
   margin-top: 14px;
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-muted);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-muted);
   line-height: 1.5;
 }
 
 .hint a {
-  color: var(--biof3-teal);
+  color: var(--gewu-teal);
   text-decoration: none;
 }
 

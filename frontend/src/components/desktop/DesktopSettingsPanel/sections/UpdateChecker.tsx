@@ -20,22 +20,22 @@ export function UpdateChecker(): React.ReactElement | null {
   const pct = progress !== null ? Math.round(progress * 100) : 0;
 
   return (
-    <div className="biof3-update-section">
+    <div className="gewu-update-section">
       {downloaded ? (
         <button
           type="button"
-          className="biof3-btn biof3-btn--primary biof3-btn--sm"
+          className="gewu-btn gewu-btn--primary gewu-btn--sm"
           onClick={install}
           disabled={installing}
         >
           {installing ? '正在打开…' : '打开安装包'}
         </button>
       ) : downloading ? (
-        <span className="biof3-update-progress">下载中 {pct}%</span>
+        <span className="gewu-update-progress">下载中 {pct}%</span>
       ) : available ? (
         <button
           type="button"
-          className="biof3-btn biof3-btn--primary biof3-btn--sm"
+          className="gewu-btn gewu-btn--primary gewu-btn--sm"
           onClick={download}
         >
           下载 v{availableVersion}
@@ -43,7 +43,7 @@ export function UpdateChecker(): React.ReactElement | null {
       ) : (
         <button
           type="button"
-          className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+          className="gewu-btn gewu-btn--ghost gewu-btn--sm"
           onClick={check}
           disabled={checking}
         >
@@ -51,9 +51,9 @@ export function UpdateChecker(): React.ReactElement | null {
         </button>
       )}
       {upToDate && !error && (
-        <span className="biof3-field__hint">当前已是最新版本</span>
+        <span className="gewu-field__hint">当前已是最新版本</span>
       )}
-      {error && <span className="biof3-field__hint">{error}</span>}
+      {error && <span className="gewu-field__hint">{error}</span>}
     </div>
   );
 }

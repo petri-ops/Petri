@@ -15,9 +15,9 @@
   gap: 2px;
   min-width: 0;
   padding: 4px 6px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
-  background: var(--biof3-bg-canvas);
+  background: var(--gewu-bg-canvas);
 }
 
 .crumbItem {
@@ -28,7 +28,7 @@
 
 .crumbSep {
   margin: 0 2px;
-  color: var(--biof3-text-muted, var(--biof3-text-secondary));
+  color: var(--gewu-text-muted, var(--gewu-text-secondary));
 }
 
 .crumbBtn {
@@ -39,15 +39,15 @@
   padding: 1px 4px;
   border: none;
   background: none;
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-xs);
-  font-family: var(--biof3-font-mono);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-xs);
+  font-family: var(--gewu-font-mono);
   cursor: pointer;
   border-radius: 4px;
 }
 
 .crumbBtn:hover {
-  background: var(--biof3-bg-elevated, var(--biof3-bg-surface));
+  background: var(--gewu-bg-elevated, var(--gewu-bg-surface));
 }
 
 .upBtn {
@@ -57,13 +57,13 @@
   padding: 2px 5px;
   border: none;
   background: none;
-  color: var(--biof3-text-secondary, var(--biof3-text-muted));
+  color: var(--gewu-text-secondary, var(--gewu-text-muted));
   cursor: pointer;
   border-radius: 4px;
 }
 
 .upBtn:hover {
-  background: var(--biof3-bg-elevated, var(--biof3-bg-surface));
+  background: var(--gewu-bg-elevated, var(--gewu-bg-surface));
 }
 
 .dirList {
@@ -72,9 +72,9 @@
   padding: 2px;
   max-height: 220px;
   overflow-y: auto;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
-  background: var(--biof3-bg-canvas);
+  background: var(--gewu-bg-canvas);
 }
 
 .dirRow {
@@ -85,15 +85,15 @@
   padding: 4px 8px;
   border: none;
   background: none;
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-xs);
   cursor: pointer;
   border-radius: 4px;
   text-align: left;
 }
 
 .dirRow:hover {
-  background: var(--biof3-bg-elevated, var(--biof3-bg-surface));
+  background: var(--gewu-bg-elevated, var(--gewu-bg-surface));
 }
 
 .dirName {
@@ -106,16 +106,16 @@
 
 .empty {
   padding: 8px;
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-muted, var(--biof3-text-secondary));
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-muted, var(--gewu-text-secondary));
 }
 
 .error {
   margin: 0;
   padding: 6px 8px;
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-danger, #d9534f);
-  border: 1px solid var(--biof3-border);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-danger, #d9534f);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
   word-break: break-all;
 }

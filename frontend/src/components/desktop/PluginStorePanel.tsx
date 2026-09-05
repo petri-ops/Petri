@@ -153,10 +153,10 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
 
   const rRuntimeInstalled = runtimeStatus
     ? runtimeStatus.r.installed
-    : installedIds.has('biof3-r-runtime');
+    : installedIds.has('gewu-r-runtime');
   const pyRuntimeInstalled = runtimeStatus
     ? runtimeStatus.python.installed
-    : installedIds.has('biof3-py-runtime');
+    : installedIds.has('gewu-py-runtime');
   const needRuntimeHint =
     runtimeStatus && (!runtimeStatus.r.installed || !runtimeStatus.python.installed);
 
@@ -198,13 +198,13 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
   }
 
   function isPluginInstalled(pluginId: string): boolean {
-    if (pluginId === 'biof3-r-runtime') return rRuntimeInstalled;
-    if (pluginId === 'biof3-py-runtime') return pyRuntimeInstalled;
+    if (pluginId === 'gewu-r-runtime') return rRuntimeInstalled;
+    if (pluginId === 'gewu-py-runtime') return pyRuntimeInstalled;
     return installedIds.has(pluginId);
   }
 
   function isPluginDrifted(pluginId: string): boolean {
-    if (pluginId === 'biof3-r-runtime' || pluginId === 'biof3-py-runtime') {
+    if (pluginId === 'gewu-r-runtime' || pluginId === 'gewu-py-runtime') {
       return !!installedById.get(pluginId)?.manifestDrift;
     }
     return driftedIds.has(pluginId);
@@ -212,17 +212,17 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
 
   return (
     <div
-      className="biof3-desktop-panel biof3-plugin-store-panel"
+      className="gewu-desktop-panel gewu-plugin-store-panel"
       role="dialog"
       aria-label="插件商店"
     >
       {/* Header */}
-      <div className="biof3-plugin-store__header">
-        <span className="biof3-plugin-store__icon">
+      <div className="gewu-plugin-store__header">
+        <span className="gewu-plugin-store__icon">
           <Icon name="puzzle" size={18} />
         </span>
-        <h2 className="biof3-plugin-store__title">插件商店</h2>
-        <div className="biof3-plugin-store__search">
+        <h2 className="gewu-plugin-store__title">插件商店</h2>
+        <div className="gewu-plugin-store__search">
           <input
             type="text"
             placeholder="搜索插件…"
@@ -232,7 +232,7 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
         </div>
         <button
           type="button"
-          className="biof3-plugin-store__close"
+          className="gewu-plugin-store__close"
           onClick={onClose}
           aria-label="关闭"
         >
@@ -241,28 +241,28 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
       </div>
 
       {/* Body: sidebar + content */}
-      <div className="biof3-plugin-store__body">
+      <div className="gewu-plugin-store__body">
         {/* Sidebar */}
-        <nav className="biof3-plugin-store__sidebar">
+        <nav className="gewu-plugin-store__sidebar">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               type="button"
-              className={`biof3-plugin-store__nav-item ${activeCategory === cat.id ? 'active' : ''}`}
+              className={`gewu-plugin-store__nav-item ${activeCategory === cat.id ? 'active' : ''}`}
               onClick={() => setActiveCategory(cat.id)}
             >
               <Icon name={cat.icon} size={16} />
-              <span className="biof3-plugin-store__nav-label">{cat.label}</span>
-              <span className="biof3-plugin-store__nav-count">{categoryCounts[cat.id]}</span>
+              <span className="gewu-plugin-store__nav-label">{cat.label}</span>
+              <span className="gewu-plugin-store__nav-count">{categoryCounts[cat.id]}</span>
             </button>
           ))}
         </nav>
 
         {/* Content */}
-        <div className="biof3-plugin-store__content">
+        <div className="gewu-plugin-store__content">
           {error && (
             <div
-              className="biof3-field__result biof3-field__result--err"
+              className="gewu-field__result gewu-field__result--err"
               style={{ marginBottom: 14 }}
             >
               ✗ {error}
@@ -271,7 +271,7 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
 
           {runtimeJustInstalled && (
             <div
-              className="biof3-field__result biof3-field__result--ok"
+              className="gewu-field__result gewu-field__result--ok"
               style={{ marginBottom: 14 }}
             >
               ✓ {runtimeJustInstalled} 安装成功，<strong>重启应用后生效</strong>。
@@ -279,7 +279,7 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
           )}
 
           {needRuntimeHint && (
-            <div className="biof3-plugin-store__hint">
+            <div className="gewu-plugin-store__hint">
               ⚠️ 未安装基础运行时：
               {!runtimeStatus!.r.installed && ' R'}
               {!runtimeStatus!.python.installed && ' Python'} —
@@ -288,14 +288,14 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
           )}
 
           {filteredEntries.length === 0 && !error && (
-            <div className="biof3-empty">
+            <div className="gewu-empty">
               {searchQuery ? `没有匹配「${searchQuery}」的插件` : '此分类暂无插件'}
             </div>
           )}
 
           {/* Runtime 用列表样式 */}
           {activeCategory === 'all' || activeCategory === 'runtime' ? (
-            <div className="biof3-plugin-store__runtime-list">
+            <div className="gewu-plugin-store__runtime-list">
               {filteredEntries
                 .filter(([, info]) => info.type === 'runtime')
                 .map(([id, info]) => {
@@ -303,38 +303,38 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
                   return (
                     <div
                       key={id}
-                      className={`biof3-plugin-store__runtime-item ${isInstalled ? 'installed' : ''}`}
+                      className={`gewu-plugin-store__runtime-item ${isInstalled ? 'installed' : ''}`}
                     >
-                      <span className="biof3-plugin-store__runtime-icon">
+                      <span className="gewu-plugin-store__runtime-icon">
                         <Icon name="cpu" size={22} />
                       </span>
-                      <div className="biof3-plugin-store__runtime-main">
-                        <div className="biof3-plugin-store__runtime-name">
+                      <div className="gewu-plugin-store__runtime-main">
+                        <div className="gewu-plugin-store__runtime-name">
                           {info.title || id}
                           {isInstalled && (
-                            <span className="biof3-plugin-store__badge-ok">✓ 已安装</span>
+                            <span className="gewu-plugin-store__badge-ok">✓ 已安装</span>
                           )}
                           {isInstalled && isPluginDrifted(id) && (
-                            <span className="biof3-plugin-store__badge-drift">已变更</span>
+                            <span className="gewu-plugin-store__badge-drift">已变更</span>
                           )}
                         </div>
-                        <div className="biof3-plugin-store__runtime-meta">
+                        <div className="gewu-plugin-store__runtime-meta">
                           {info.version && <span>v{info.version}</span>}
                           {info.language && <span>[{info.language}]</span>}
                           {info.size && <span>{formatSize(info.size)}</span>}
-                          <span className="biof3-plugin-store__badge-required">必需</span>
+                          <span className="gewu-plugin-store__badge-required">必需</span>
                         </div>
                         {info.description && (
-                          <div className="biof3-plugin-store__runtime-desc">{info.description}</div>
+                          <div className="gewu-plugin-store__runtime-desc">{info.description}</div>
                         )}
                       </div>
-                      <div className="biof3-plugin-store__runtime-action">
+                      <div className="gewu-plugin-store__runtime-action">
                         {isInstalled ? (
-                          <div className="biof3-plugin-store__action-stack">
+                          <div className="gewu-plugin-store__action-stack">
                             {updateMap.has(id) && (
                               <button
                                 type="button"
-                                className="biof3-btn biof3-btn--primary biof3-btn--sm"
+                                className="gewu-btn gewu-btn--primary gewu-btn--sm"
                                 onClick={() => handleUpdate(id)}
                                 disabled={updatingId === id}
                               >
@@ -346,20 +346,20 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
                             {installing === id &&
                               installProgress[id] &&
                               installProgress[id].total > 0 && (
-                                <div className="biof3-plugin-store__progress">
-                                  <div className="biof3-plugin-store__progress-text">
+                                <div className="gewu-plugin-store__progress">
+                                  <div className="gewu-plugin-store__progress-text">
                                     {(installProgress[id].ratio * 100).toFixed(0)}% ·{' '}
                                     {(installProgress[id].received / 1024 / 1024).toFixed(0)}/
                                     {(installProgress[id].total / 1024 / 1024).toFixed(0)}MB
                                   </div>
-                                  <div className="biof3-plugin-store__progress-bar">
+                                  <div className="gewu-plugin-store__progress-bar">
                                     <div style={{ width: `${installProgress[id].ratio * 100}%` }} />
                                   </div>
                                 </div>
                               )}
                             <button
                               type="button"
-                              className="biof3-btn biof3-btn--danger-ghost biof3-btn--sm"
+                              className="gewu-btn gewu-btn--danger-ghost gewu-btn--sm"
                               onClick={() => handleUninstall(id)}
                               disabled={uninstalling === id}
                             >
@@ -371,20 +371,20 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
                             {installing === id &&
                               installProgress[id] &&
                               installProgress[id].total > 0 && (
-                                <div className="biof3-plugin-store__progress">
-                                  <div className="biof3-plugin-store__progress-text">
+                                <div className="gewu-plugin-store__progress">
+                                  <div className="gewu-plugin-store__progress-text">
                                     {(installProgress[id].ratio * 100).toFixed(0)}% ·{' '}
                                     {(installProgress[id].received / 1024 / 1024).toFixed(0)}/
                                     {(installProgress[id].total / 1024 / 1024).toFixed(0)}MB
                                   </div>
-                                  <div className="biof3-plugin-store__progress-bar">
+                                  <div className="gewu-plugin-store__progress-bar">
                                     <div style={{ width: `${installProgress[id].ratio * 100}%` }} />
                                   </div>
                                 </div>
                               )}
                             <button
                               type="button"
-                              className="biof3-btn biof3-btn--primary biof3-btn--sm"
+                              className="gewu-btn gewu-btn--primary gewu-btn--sm"
                               onClick={() => handleInstall(id, true)}
                               disabled={installing === id}
                             >
@@ -404,7 +404,7 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
             const cardEntries = filteredEntries.filter(([, info]) => info.type !== 'runtime');
             if (cardEntries.length === 0) return null;
             return (
-              <div className="biof3-plugin-store__grid">
+              <div className="gewu-plugin-store__grid">
                 {cardEntries.map(([id, info]) => {
                   const isInstalled = isPluginInstalled(id);
                   const isInstalling = installing === id;
@@ -414,19 +414,19 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
                   return (
                     <div
                       key={id}
-                      className={`biof3-plugin-card ${isInstalled ? 'installed' : ''} ${hasUpdate ? 'has-update' : ''}`}
+                      className={`gewu-plugin-card ${isInstalled ? 'installed' : ''} ${hasUpdate ? 'has-update' : ''}`}
                     >
-                      <div className="biof3-plugin-card__top">
-                        <span className="biof3-plugin-card__icon">
+                      <div className="gewu-plugin-card__top">
+                        <span className="gewu-plugin-card__icon">
                           <Icon name={getCategoryIcon(info)} size={20} />
                         </span>
-                        <div className="biof3-plugin-card__name" title={info.title || id}>
+                        <div className="gewu-plugin-card__name" title={info.title || id}>
                           {info.title || id}
                         </div>
-                        {isInstalled && <span className="biof3-plugin-card__badge">✓</span>}
+                        {isInstalled && <span className="gewu-plugin-card__badge">✓</span>}
                         {isInstalled && isPluginDrifted(id) && (
                           <span
-                            className="biof3-plugin-card__badge-drift"
+                            className="gewu-plugin-card__badge-drift"
                             title="安装后脚本或清单已发生变化"
                           >
                             已变更
@@ -434,17 +434,17 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
                         )}
                         {hasUpdate && (
                           <span
-                            className="biof3-plugin-card__badge-update"
+                            className="gewu-plugin-card__badge-update"
                             title={`有新版本 v${updateMap.get(id)!.latestVersion}`}
                           >
                             ↑
                           </span>
                         )}
                       </div>
-                      <div className="biof3-plugin-card__desc" title={info.description}>
+                      <div className="gewu-plugin-card__desc" title={info.description}>
                         {info.description || '—'}
                       </div>
-                      <div className="biof3-plugin-card__meta">
+                      <div className="gewu-plugin-card__meta">
                         {info.version && <span>v{info.version}</span>}
                         {info.language && (
                           <span className={`lang-${info.language}`}>{info.language}</span>
@@ -453,13 +453,13 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
                         {info.type === 'data' && <span className="tag-data">数据包</span>}
                         {info.optional && <span className="tag-optional">可选</span>}
                       </div>
-                      <div className="biof3-plugin-card__action">
+                      <div className="gewu-plugin-card__action">
                         {isInstalled ? (
-                          <div className="biof3-plugin-store__action-stack">
+                          <div className="gewu-plugin-store__action-stack">
                             {hasUpdate && (
                               <button
                                 type="button"
-                                className="biof3-btn biof3-btn--primary biof3-btn--sm"
+                                className="gewu-btn gewu-btn--primary gewu-btn--sm"
                                 onClick={() => handleUpdate(id)}
                                 disabled={isUpdating}
                               >
@@ -467,20 +467,20 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
                               </button>
                             )}
                             {(isUpdating || isInstalling) && prog && prog.total > 0 && (
-                              <div className="biof3-plugin-store__progress">
-                                <div className="biof3-plugin-store__progress-text">
+                              <div className="gewu-plugin-store__progress">
+                                <div className="gewu-plugin-store__progress-text">
                                   {(prog.ratio * 100).toFixed(0)}% ·{' '}
                                   {(prog.received / 1024 / 1024).toFixed(0)}/
                                   {(prog.total / 1024 / 1024).toFixed(0)}MB
                                 </div>
-                                <div className="biof3-plugin-store__progress-bar">
+                                <div className="gewu-plugin-store__progress-bar">
                                   <div style={{ width: `${prog.ratio * 100}%` }} />
                                 </div>
                               </div>
                             )}
                             <button
                               type="button"
-                              className="biof3-btn biof3-btn--danger-ghost biof3-btn--sm"
+                              className="gewu-btn gewu-btn--danger-ghost gewu-btn--sm"
                               onClick={() => handleUninstall(id)}
                               disabled={uninstalling === id}
                             >
@@ -488,20 +488,20 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
                             </button>
                           </div>
                         ) : isInstalling && prog && prog.total > 0 ? (
-                          <div className="biof3-plugin-store__progress">
-                            <div className="biof3-plugin-store__progress-text">
+                          <div className="gewu-plugin-store__progress">
+                            <div className="gewu-plugin-store__progress-text">
                               {(prog.ratio * 100).toFixed(0)}% ·{' '}
                               {(prog.received / 1024 / 1024).toFixed(0)}/
                               {(prog.total / 1024 / 1024).toFixed(0)}MB
                             </div>
-                            <div className="biof3-plugin-store__progress-bar">
+                            <div className="gewu-plugin-store__progress-bar">
                               <div style={{ width: `${prog.ratio * 100}%` }} />
                             </div>
                           </div>
                         ) : (
                           <button
                             type="button"
-                            className="biof3-btn biof3-btn--primary biof3-btn--sm"
+                            className="gewu-btn gewu-btn--primary gewu-btn--sm"
                             onClick={() => handleInstall(id)}
                             disabled={isInstalling}
                           >
@@ -519,15 +519,15 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
       </div>
 
       {/* Footer */}
-      <div className="biof3-plugin-store__footer">
-        <span className="biof3-plugin-store__footer-info">
+      <div className="gewu-plugin-store__footer">
+        <span className="gewu-plugin-store__footer-info">
           已安装 {installedCount} 个 · 可安装 {availableCount} 个
           {hasUpdates && (
-            <span className="biof3-plugin-store__footer-updates">
+            <span className="gewu-plugin-store__footer-updates">
               {' · '}
               <button
                 type="button"
-                className="biof3-plugin-store__refresh-btn"
+                className="gewu-plugin-store__refresh-btn"
                 onClick={checkForUpdates}
                 disabled={checkingUpdates}
               >

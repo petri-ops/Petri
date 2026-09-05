@@ -18,15 +18,15 @@ export const RESULT_SURFACE_PERFORMANCE_BUDGETS = Object.freeze({
 });
 
 export const RESULT_SURFACE_PERFORMANCE_MARKS = Object.freeze({
-  openStart: 'biof3:result-surface:open-start',
-  openEnd: 'biof3:result-surface:open-end',
-  openMeasure: 'biof3:result-surface:first-visible',
-  artifactStart: 'biof3:result-surface:artifact-start',
-  artifactEnd: 'biof3:result-surface:artifact-end',
-  artifactMeasure: 'biof3:result-surface:artifact-switch',
-  returnStart: 'biof3:result-surface:return-start',
-  returnEnd: 'biof3:result-surface:return-end',
-  returnMeasure: 'biof3:result-surface:return-conversation',
+  openStart: 'gewu:result-surface:open-start',
+  openEnd: 'gewu:result-surface:open-end',
+  openMeasure: 'gewu:result-surface:first-visible',
+  artifactStart: 'gewu:result-surface:artifact-start',
+  artifactEnd: 'gewu:result-surface:artifact-end',
+  artifactMeasure: 'gewu:result-surface:artifact-switch',
+  returnStart: 'gewu:result-surface:return-start',
+  returnEnd: 'gewu:result-surface:return-end',
+  returnMeasure: 'gewu:result-surface:return-conversation',
 });
 
 export function beginResultSurfaceMeasure(markName: string): void {

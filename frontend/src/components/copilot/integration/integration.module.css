@@ -40,8 +40,8 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background-color: var(--biof3-bg-elevated, rgba(255, 255, 255, 0.95));
-  border: 1px solid var(--biof3-border, rgba(0, 0, 0, 0.12));
+  background-color: var(--gewu-bg-elevated, rgba(255, 255, 255, 0.95));
+  border: 1px solid var(--gewu-border, rgba(0, 0, 0, 0.12));
   border-radius: 4px;
   padding: 4px 8px;
   color: var(--color-link, #0066cc);
@@ -54,7 +54,7 @@
 }
 
 .chatCardLinkFloating:hover {
-  background-color: var(--biof3-bg-hover, rgba(0, 0, 0, 0.04));
+  background-color: var(--gewu-bg-hover, rgba(0, 0, 0, 0.04));
 }
 
 .chatCardLinkFloating:focus {

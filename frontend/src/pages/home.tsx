@@ -125,7 +125,7 @@ export default function Home(): React.ReactElement {
       // UI-251 — 创建失败不再静默：桥缺失/对话框失败/接口报错都要有可见反馈
       const dialog = window.biof3Desktop?.files?.openDirectoryDialog;
       if (typeof dialog !== 'function') {
-        setCreateError('当前运行环境不支持选择工作目录（请在 BioF3 桌面应用中使用）。');
+        setCreateError('当前运行环境不支持选择工作目录（请在 Gewu 桌面应用中使用）。');
         return;
       }
       const selectedPath = await dialog();
@@ -153,7 +153,7 @@ export default function Home(): React.ReactElement {
     if (manualValidating) return;
     const validate = window.biof3Desktop?.files?.validateDirectory;
     if (typeof validate !== 'function') {
-      setCreateError('当前运行环境不支持路径校验（请在 BioF3 桌面应用中使用）。');
+      setCreateError('当前运行环境不支持路径校验（请在 Gewu 桌面应用中使用）。');
       return;
     }
     setManualValidating(true);
@@ -222,7 +222,7 @@ export default function Home(): React.ReactElement {
     }
     const validate = window.biof3Desktop?.files?.validateDirectory;
     if (typeof validate !== 'function') {
-      setCreateError('当前运行环境不支持路径校验（请在 BioF3 桌面应用中使用）。');
+      setCreateError('当前运行环境不支持路径校验（请在 Gewu 桌面应用中使用）。');
       return;
     }
     try {
@@ -303,7 +303,7 @@ export default function Home(): React.ReactElement {
               <span>
                 <Icon name="check" size={14} /> R 运行时已就绪，重启应用即可开始分析
               </span>
-              <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => void handleRelaunch()} disabled={relaunching}>
+              <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => void handleRelaunch()} disabled={relaunching}>
                 {relaunching ? '正在重启…' : '立即重启应用'}
               </button>
             </div>
@@ -381,7 +381,7 @@ export default function Home(): React.ReactElement {
         </div>
         <h1>先安装分析运行时</h1>
         <p className={styles.setupLead}>
-          BioF3 的分析能力依赖 R / Python 运行时。运行时体积较大未随安装包分发，
+          Gewu 的分析能力依赖 R / Python 运行时。运行时体积较大未随安装包分发，
           需在插件商店按需下载，装好后即可离线使用。
         </p>
 
@@ -434,7 +434,7 @@ export default function Home(): React.ReactElement {
 
   if (status === 'loading') {
     return (
-      <div className={styles.homeState} aria-label="正在启动 BioF3">
+      <div className={styles.homeState} aria-label="正在启动 Gewu">
         <span className={styles.homeStateDot} />
         <span>{backendStatus.downReason || '正在准备项目工作台…'}</span>
       </div>
@@ -455,7 +455,7 @@ export default function Home(): React.ReactElement {
           </p>
           <div className={styles.emptyHomePendingActions}>
             <button
-              className="biof3-btn biof3-btn--sm"
+              className="gewu-btn gewu-btn--sm"
               type="button"
               onClick={() => void confirmCreatePending()}
               disabled={creating}
@@ -463,7 +463,7 @@ export default function Home(): React.ReactElement {
               {creating ? '创建中…' : '在此处创建'}
             </button>
             <button
-              className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
               type="button"
               onClick={() => setPendingWorkspace(null)}
               disabled={creating}
@@ -474,13 +474,13 @@ export default function Home(): React.ReactElement {
         </>
       ) : (
         <>
-          <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => void handleCreateProject()} disabled={creating}>
+          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => void handleCreateProject()} disabled={creating}>
             {creating ? '创建中…' : '选择工作目录并创建'}
           </button>
           {/* UI-257 — 手动输入路径兜底：目录面板「打开」被系统禁用时可粘贴完整路径 */}
           {!manualPathOpen ? (
             <button
-              className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
               type="button"
               onClick={() => setManualPathOpen(true)}
               disabled={creating}
@@ -505,7 +505,7 @@ export default function Home(): React.ReactElement {
                 />
                 {/* UI-259 — 应用内选择文件夹：点选目录直接得到路径，不依赖系统面板 */}
                 <button
-                  className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+                  className="gewu-btn gewu-btn--ghost gewu-btn--sm"
                   type="button"
                   onClick={() => {
                     if (!browseOpen) setBrowseFrom(manualPath);
@@ -517,7 +517,7 @@ export default function Home(): React.ReactElement {
                   选择文件夹…
                 </button>
                 <button
-                  className="biof3-btn biof3-btn--sm"
+                  className="gewu-btn gewu-btn--sm"
                   type="button"
                   onClick={() => void confirmManualPath()}
                   disabled={manualValidating || !manualPath.trim()}
@@ -554,7 +554,7 @@ export default function Home(): React.ReactElement {
               aria-label="空白项目名称"
             />
             <button
-              className="biof3-btn biof3-btn--sm"
+              className="gewu-btn gewu-btn--sm"
               type="button"
               onClick={() => void createBlankProject()}
               disabled={creating}
@@ -648,7 +648,7 @@ export default function Home(): React.ReactElement {
       <div className={styles.homeState}>
         <Icon name="flag" size={18} />
         <span>项目列表加载失败</span>
-        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => {
+        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => {
           setStatus('loading');
           setLoadAttempt((value) => value + 1);
         }}>

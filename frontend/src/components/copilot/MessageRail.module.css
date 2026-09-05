@@ -32,7 +32,7 @@
   width: 10px;
   height: 2px;
   border-radius: 999px;
-  background: var(--biof3-text-tertiary, var(--biof3-text-secondary));
+  background: var(--gewu-text-tertiary, var(--gewu-text-secondary));
   opacity: 0.45;
   transition: width 0.15s, background 0.15s, opacity 0.15s;
 }
@@ -45,7 +45,7 @@
 .tickBarActive {
   width: 24px;
   height: 3px;
-  background: var(--biof3-accent);
+  background: var(--gewu-accent);
   opacity: 1;
 }
 
@@ -58,9 +58,9 @@
   max-height: min(320px, 55%);
   overflow-y: auto;
   padding: 12px 14px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 12px;
-  background: var(--biof3-bg-elevated, var(--biof3-bg-surface));
+  background: var(--gewu-bg-elevated, var(--gewu-bg-surface));
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
   animation: railCardIn 0.16s ease-out;
 }
@@ -77,14 +77,14 @@
 }
 
 .cardUser {
-  font-size: var(--biof3-font-size-sm, 13px);
+  font-size: var(--gewu-font-size-sm, 13px);
   font-weight: 600;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   line-height: 1.5;
   white-space: pre-line;
   word-break: break-word;
   padding-left: 10px;
-  border-left: 3px solid var(--biof3-accent);
+  border-left: 3px solid var(--gewu-accent);
   display: -webkit-box;
   -webkit-line-clamp: 6;
   -webkit-box-orient: vertical;
@@ -94,12 +94,12 @@
 .cardDivider {
   height: 1px;
   margin: 8px 0;
-  background: var(--biof3-border);
+  background: var(--gewu-border);
 }
 
 .cardReply {
-  font-size: var(--biof3-font-size-xs, 12px);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-xs, 12px);
+  color: var(--gewu-text-secondary);
   line-height: 1.55;
   word-break: break-word;
   display: -webkit-box;

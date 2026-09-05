@@ -1,11 +1,11 @@
-// BioF3 桌面版原生 shell — App 根组件
+// Gewu 桌面版原生 shell — App 根组件
 // 路由出口 + 首次启动引导
 
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 // BLOCK-22 P4.6: DEV ONLY — manual file-open testing entry via window.__biof3DispatchOpenFile
 // Production build: React.lazy + NODE_ENV=production → tree-shakeable, zero runtime cost
-const BioF3OpenFileDevBridge = lazy(() =>
-  import('./components/editor/integration/BioF3OpenFileDevBridge')
+const GewuOpenFileDevBridge = lazy(() =>
+  import('./components/editor/integration/GewuOpenFileDevBridge')
 );
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
@@ -13,7 +13,7 @@ import { TitleBar } from '@/components/desktop/TitleBar';
 import { WorkspacePanelsProvider, useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
-import { biof3Events, subscribeBioF3Event } from '@/lib/events';
+import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
 import { CommandPalette, useCommandPalette } from '@/components/copilot/CommandPalette';
 // BLOCK-42 — pending-scroll 全局 Provider（见 AppShell 内注释）
 import { PendingScrollProvider } from '@/lib/pendingScrollContext';
@@ -41,20 +41,23 @@ import { configureApi } from '../../core/packages/shared-copilot/api-inject';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 configureApi({ getApiPrefix: () => getApiPrefix(), getToken });
 
-const ONBOARDING_FLAG = 'biof3-onboarding-completed';
+// BLOCK-61：新 key + 历史 key 读兼容（已完成的引导不因改名复现）
+const ONBOARDING_FLAG = 'gewu-onboarding-completed';
+const LEGACY_ONBOARDING_FLAG = 'gewu-onboarding-completed';
 
 function DesktopOnboardingMount(): React.ReactElement | null {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
     try {
-      const done = localStorage.getItem(ONBOARDING_FLAG) === '1';
+      const done = localStorage.getItem(ONBOARDING_FLAG) === '1'
+        || localStorage.getItem(LEGACY_ONBOARDING_FLAG) === '1';
       if (!done) setShow(true);
     } catch {
       setShow(true);
     }
     const handler = () => setShow(false);
-    const unsub = subscribeBioF3Event(biof3Events.onboardingDone, handler);
+    const unsub = subscribeGewuEvent(gewuEvents.onboardingDone, handler);
     return unsub;
   }, []);
 
@@ -76,10 +79,10 @@ function AppShell(): React.ReactElement {
             no-op 静默丢弃。Provider 仅一个 useState，全局挂载零副作用。 */}
         <PendingScrollProvider>
         <main
-          className="biof3-spa-main"
+          className="gewu-spa-main"
           style={{
             marginTop: 0,
-            paddingTop: 'var(--biof3-titlebar-height)',
+            paddingTop: 'var(--gewu-titlebar-height)',
             transition: 'margin-left 0.25s ease',
           }}
         >
@@ -112,7 +115,7 @@ function AppShell(): React.ReactElement {
         />
         {/* BLOCK-22 P4.6: DEV ONLY — do NOT use in production */}
         <Suspense fallback={null}>
-          <BioF3OpenFileDevBridge />
+          <GewuOpenFileDevBridge />
         </Suspense>
         </PendingScrollProvider>
       </CopilotContextProvider>
@@ -126,8 +129,8 @@ export default function App(): React.ReactElement {
 
   useEffect(() => {
     const html = document.documentElement;
-    html.classList.add('biof3-desktop');
-    html.classList.remove('biof3-desktop-dock-collapsed');
+    html.classList.add('gewu-desktop');
+    html.classList.remove('gewu-desktop-dock-collapsed');
     document.body.style.paddingLeft = '0';
     document.body.style.boxSizing = 'border-box';
   }, []);

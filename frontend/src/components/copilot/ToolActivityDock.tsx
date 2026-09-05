@@ -6,8 +6,8 @@ import {
   type BackgroundProcessView,
 } from './backgroundProcesses';
 import {
-  biof3Events,
-  subscribeBioF3Event,
+  gewuEvents,
+  subscribeGewuEvent,
   type AgentBackgroundProcessDetail,
 } from '@/lib/events';
 import styles from './ToolActivityDock.module.css';
@@ -73,8 +73,8 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
   // 后台进程事件：绑定到当前会话才弹出
   useEffect(() => {
     if (!conversationId) return;
-    return subscribeBioF3Event(
-      biof3Events.agentBackgroundProcess,
+    return subscribeGewuEvent(
+      gewuEvents.agentBackgroundProcess,
       (detail: AgentBackgroundProcessDetail) => {
         if (detail.conversationId && detail.conversationId !== conversationId) return;
         setDismissed(false);

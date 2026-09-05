@@ -6,7 +6,7 @@ import {
   clearConversationFileChanges,
   recordConversationFileChange,
 } from './conversationChangesStore';
-import { biof3Events } from '@/lib/events';
+import { gewuEvents } from '@/lib/events';
 
 const { getBridgeMock } = vi.hoisted(() => ({
   getBridgeMock: vi.fn(),
@@ -118,13 +118,13 @@ describe('AgentChangesCard (BLOCK-28.7)', () => {
     const listener = (e: Event) => {
       seen.push((e as CustomEvent<{ filePath: string }>).detail);
     };
-    window.addEventListener(biof3Events.reviewOpenFile, listener);
+    window.addEventListener(gewuEvents.reviewOpenFile, listener);
 
     render(<AgentChangesCard />);
     const row = await screen.findByText('src/a.py');
     fireEvent.click(row);
 
-    window.removeEventListener(biof3Events.reviewOpenFile, listener);
+    window.removeEventListener(gewuEvents.reviewOpenFile, listener);
     expect(seen).toEqual([{ filePath: 'src/a.py' }]);
   });
 
@@ -138,7 +138,7 @@ describe('AgentChangesCard (BLOCK-28.7)', () => {
 
     // agent 完成任务 → 工作区出现改动 → 卡片显现
     getBridgeMock.mockReturnValue(makeBridge([{ path: 'gen/out.py', status: 'A' }]));
-    window.dispatchEvent(new CustomEvent(biof3Events.agentTaskDone, { detail: { taskId: 't1' } }));
+    window.dispatchEvent(new CustomEvent(gewuEvents.agentTaskDone, { detail: { taskId: 't1' } }));
 
     const card = await screen.findByTestId('agent-changes-card');
     expect(card.textContent).toContain('gen/out.py');

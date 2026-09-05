@@ -14,7 +14,7 @@ type LoadState =
 /**
  * 用户自有 Git 仓库的显式同意 UI。
  *
- * 后端在 `e14a8e6` 已把"是否授权 BioF3 把 Result Studio 历史写入用户自有仓库"
+ * 后端在 `e14a8e6` 已把"是否授权 Gewu 把 Result Studio 历史写入用户自有仓库"
  * 收敛为独立持久 consent truth，生产调用零硬编码 `true`。本组件只消费后端投影：
  * 当 `decisionRequired` 为 true 时展示 detected / dirty 风险与肯定式 opt-in；
  * 一旦用户明确同意，才调用 `submitExistingRepositoryConsent`。绝不在前端伪造同意。
@@ -78,7 +78,7 @@ export function GitRepositoryConsent({ projectId }: { projectId: string }): Reac
     return (
       <section className={styles.consent} data-state="consented">
         <p className={styles.line}>
-          已授权 BioF3 将 Result Studio 历史写入此项目的自有 Git 仓库。{bindingLabel}。
+          已授权 Gewu 将 Result Studio 历史写入此项目的自有 Git 仓库。{bindingLabel}。
         </p>
       </section>
     );
@@ -95,8 +95,8 @@ export function GitRepositoryConsent({ projectId }: { projectId: string }): Reac
       <section className={styles.consent} data-state="decision-required" role="group" aria-label="Git 仓库同意">
         <p className={styles.title}>检测到项目目录中已有 Git 仓库</p>
         <p className={styles.line}>
-          BioF3 想把 Result Studio 的版本历史写入你自己的仓库。这需要你的明确授权——
-          默认只使用 BioF3 受管理的私有存储，不会触碰你的仓库。
+          Gewu 想把 Result Studio 的版本历史写入你自己的仓库。这需要你的明确授权——
+          默认只使用 Gewu 受管理的私有存储，不会触碰你的仓库。
         </p>
         {status.existingRepositoryDirty && (
           <p className={styles.warning}>
@@ -105,7 +105,7 @@ export function GitRepositoryConsent({ projectId }: { projectId: string }): Reac
           </p>
         )}
         {status.managedRepositoryExists && (
-          <p className={styles.hint}>注意：当前项目已存在 BioF3 受管理仓库，附加自有仓库前请确认不会覆盖未提交的改动。</p>
+          <p className={styles.hint}>注意：当前项目已存在 Gewu 受管理仓库，附加自有仓库前请确认不会覆盖未提交的改动。</p>
         )}
         <button
           type="button"
@@ -113,7 +113,7 @@ export function GitRepositoryConsent({ projectId }: { projectId: string }): Reac
           onClick={handleOptIn}
           disabled={submitting}
         >
-          {submitting ? '正在授权…' : '授权 BioF3 写入我的仓库'}
+          {submitting ? '正在授权…' : '授权 Gewu 写入我的仓库'}
         </button>
       </section>
     );
@@ -122,7 +122,7 @@ export function GitRepositoryConsent({ projectId }: { projectId: string }): Reac
   // 检测到仓库、已授权为 false、但后端判定无需决策（边界态）：展示只读提示。
   return (
     <section className={styles.consent} data-state="detected">
-      <p className={styles.line}>项目目录中存在 Git 仓库，但当前未授权 BioF3 写入。Result Studio 历史将只保存在受管理存储中。</p>
+      <p className={styles.line}>项目目录中存在 Git 仓库，但当前未授权 Gewu 写入。Result Studio 历史将只保存在受管理存储中。</p>
     </section>
   );
 }

@@ -3,11 +3,12 @@ import { useLocation } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { useWorkspacePanelsContext } from './WorkspacePanelsContext';
 import { getBridge } from '@/lib/desktopBridge';
+import { BRAND } from '@/lib/brand';
 import { BranchTabsWrapper } from '@/components/branch/BranchTabsWrapper';
 import styles from './TitleBar.module.css';
 
 /**
- * True when running inside the BioF3 desktop app on macOS, where the OS
+ * True when running inside the Gewu desktop app on macOS, where the OS
  * draws native traffic-light controls (left side) and we must NOT render
  * custom window controls. On Windows/Linux the window is frameless, so we
  * draw our own buttons.
@@ -89,7 +90,7 @@ function getFallbackTitle(pathname: string): string {
   if (pathname.startsWith('/project/')) return '梳理开发进展';
   if (pathname.startsWith('/tools')) return '分析结果';
   if (pathname.startsWith('/admin')) return '管理';
-  return 'BioF3';
+  return BRAND.APP_NAME;
 }
 
 function useDesktopWindowControls(): {

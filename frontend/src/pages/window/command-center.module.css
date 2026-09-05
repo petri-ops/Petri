@@ -12,19 +12,19 @@
 }
 
 .loadError {
-  border: 1px solid var(--biof3-danger, #ff7a7a);
-  color: var(--biof3-danger, #ff7a7a);
+  border: 1px solid var(--gewu-danger, #ff7a7a);
+  color: var(--gewu-danger, #ff7a7a);
 }
 
 .drillNote {
-  border: 1px solid var(--biof3-border-color, #323848);
-  color: var(--biof3-text-secondary, #9aa3b8);
+  border: 1px solid var(--gewu-border-color, #323848);
+  color: var(--gewu-text-secondary, #9aa3b8);
 }
 
 .empty {
   padding: 40px 16px;
   text-align: center;
-  color: var(--biof3-text-secondary, #9aa3b8);
+  color: var(--gewu-text-secondary, #9aa3b8);
   font-size: 13px;
 }
 
@@ -40,16 +40,16 @@
   gap: 8px;
   padding: 12px;
   border-radius: 10px;
-  border: 1px solid var(--biof3-border-color, #323848);
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-primary, #e6e9f2);
+  border: 1px solid var(--gewu-border-color, #323848);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-primary, #e6e9f2);
   text-align: left;
   cursor: pointer;
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
 
 .tile:hover {
-  border-color: var(--biof3-accent, #5a9cff);
+  border-color: var(--gewu-accent, #5a9cff);
   transform: translateY(-1px);
 }
 
@@ -65,20 +65,20 @@
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: var(--biof3-text-secondary, #9aa3b8);
+  background: var(--gewu-text-secondary, #9aa3b8);
 }
 
 .statusDot[data-status='running'] {
-  background: var(--biof3-accent, #5a9cff);
+  background: var(--gewu-accent, #5a9cff);
   animation: pulse 1.6s ease-in-out infinite;
 }
 
 .statusDot[data-status='done'] {
-  background: var(--biof3-status-success);
+  background: var(--gewu-status-success);
 }
 
 .statusDot[data-status='failed'] {
-  background: var(--biof3-danger, #ff7a7a);
+  background: var(--gewu-danger, #ff7a7a);
 }
 
 @keyframes pulse {
@@ -99,14 +99,14 @@
   align-items: center;
   gap: 8px;
   font-size: 11px;
-  color: var(--biof3-text-secondary, #9aa3b8);
+  color: var(--gewu-text-secondary, #9aa3b8);
 }
 
 .remoteBadge {
   padding: 2px 7px;
   border-radius: 999px;
-  background: var(--biof3-accent-soft, rgba(90, 156, 255, 0.16));
-  color: var(--biof3-accent, #5a9cff);
+  background: var(--gewu-accent-soft, rgba(90, 156, 255, 0.16));
+  color: var(--gewu-accent, #5a9cff);
   max-width: 160px;
   white-space: nowrap;
   overflow: hidden;
@@ -117,19 +117,19 @@
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: var(--biof3-text-secondary, #9aa3b8);
+  color: var(--gewu-text-secondary, #9aa3b8);
 }
 
 .tileStatus [data-status='running'] {
-  color: var(--biof3-accent, #5a9cff);
+  color: var(--gewu-accent, #5a9cff);
 }
 
 .tileStatus [data-status='failed'] {
-  color: var(--biof3-danger, #ff7a7a);
+  color: var(--gewu-danger, #ff7a7a);
 }
 
 .tileStatus [data-status='done'] {
-  color: var(--biof3-status-success);
+  color: var(--gewu-status-success);
 }
 
 /* ── P4 agent 详情窗 ─────────────────────────────── */
@@ -148,7 +148,7 @@
 
 .agentStatusLine {
   font-size: 12px;
-  color: var(--biof3-text-secondary, #9aa3b8);
+  color: var(--gewu-text-secondary, #9aa3b8);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -164,7 +164,7 @@
   margin: 0;
   font-size: 12px;
   font-weight: 600;
-  color: var(--biof3-text-secondary, #9aa3b8);
+  color: var(--gewu-text-secondary, #9aa3b8);
   text-transform: none;
 }
 
@@ -183,7 +183,7 @@
   gap: 8px;
   padding: 4px 8px;
   border-radius: 6px;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 .timelineDot {
@@ -191,37 +191,37 @@
   height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: var(--biof3-accent, #5a9cff);
+  background: var(--gewu-accent, #5a9cff);
   animation: pulse 1.6s ease-in-out infinite;
 }
 
 .timelineDot[data-status='success'] {
-  background: var(--biof3-status-success);
+  background: var(--gewu-status-success);
   animation: none;
 }
 
 .timelineDot[data-status='error'],
 .timelineDot[data-status='denied'] {
-  background: var(--biof3-danger, #ff7a7a);
+  background: var(--gewu-danger, #ff7a7a);
   animation: none;
 }
 
 .timelineName {
   font-size: 12px;
-  color: var(--biof3-text-primary, #e6e9f2);
+  color: var(--gewu-text-primary, #e6e9f2);
 }
 
 .timelineStatus {
   margin-left: auto;
   font-size: 11px;
-  color: var(--biof3-text-secondary, #9aa3b8);
+  color: var(--gewu-text-secondary, #9aa3b8);
 }
 
 .agentSummary {
   margin: 0;
   padding: 12px;
   border-radius: 8px;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
   font-size: 12px;
   line-height: 1.6;
   white-space: pre-wrap;

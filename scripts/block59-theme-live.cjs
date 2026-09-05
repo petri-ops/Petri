@@ -118,11 +118,11 @@ async function main() {
 
   const origPref = await evalJSRetry(client, `localStorage.getItem('biof3-theme') || localStorage.getItem('theme') || 'system'`);
   const setTheme = (pref) => evalJSRetry(client, `(() => {
-    window.dispatchEvent(new CustomEvent('biof3:theme-change', { detail: { preference: '${pref}' } }));
+    window.dispatchEvent(new CustomEvent('gewu:theme-change', { detail: { preference: '${pref}' } }));
     return document.documentElement.getAttribute('data-theme');
   })()`);
   const restoreTheme = () => evalJSRetry(client, `(() => {
-    window.dispatchEvent(new CustomEvent('biof3:theme-change', { detail: { preference: ${JSON.stringify(origPref)} } }));
+    window.dispatchEvent(new CustomEvent('gewu:theme-change', { detail: { preference: ${JSON.stringify(origPref)} } }));
     return true;
   })()`);
 

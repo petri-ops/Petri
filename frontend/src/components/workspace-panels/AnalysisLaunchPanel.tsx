@@ -45,7 +45,7 @@ export function AnalysisLaunchPanel({ tools, onLaunch }: AnalysisLaunchPanelProp
                       <span className={styles.analysisLaunchCardTitle}>
                         <span
                           className={styles.analysisLaunchDot}
-                          style={{ background: tool.color || 'var(--biof3-accent, #3b82f6)' }}
+                          style={{ background: tool.color || 'var(--gewu-accent, #3b82f6)' }}
                           aria-hidden
                         />
                         {tool.title}

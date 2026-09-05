@@ -1,5 +1,5 @@
 /**
- * BioF3 Desktop — chat file reference resolution (platform glue)
+ * Gewu Desktop — chat file reference resolution (platform glue)
  *
  * Wires the platform-agnostic `resolveFileReferences` (in shared-copilot)
  * to biof3-server's `POST /api/harness/file-references/resolve` endpoint and

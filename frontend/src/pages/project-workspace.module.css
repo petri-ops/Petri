@@ -6,12 +6,12 @@
 .workspaceRoot {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - var(--biof3-titlebar-height));
-  max-height: calc(100vh - var(--biof3-titlebar-height));
+  height: calc(100vh - var(--gewu-titlebar-height));
+  max-height: calc(100vh - var(--gewu-titlebar-height));
   min-height: 0;
   overflow: hidden;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
 }
 
 /* Header bar — draggable (no-drag on children) */
@@ -21,8 +21,8 @@
   justify-content: space-between;
   padding: 0 10px 0 8px;
   height: 48px;
-  background: var(--biof3-bg-surface);
-  border-bottom: 1px solid var(--biof3-border);
+  background: var(--gewu-bg-surface);
+  border-bottom: 1px solid var(--gewu-border);
   flex-shrink: 0;
   -webkit-app-region: drag;
 }
@@ -47,20 +47,20 @@
   border: 1px solid transparent;
   border-radius: 8px;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   transition: background 0.15s, color 0.15s, box-shadow 0.15s;
   flex-shrink: 0;
 }
 
 .headerRailBtn:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 @keyframes breathe {
   0%, 100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--biof3-accent) 15%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--gewu-accent) 15%, transparent);
     opacity: 0.7;
   }
   50% {
@@ -71,9 +71,9 @@
 
 .headerRailBtn.breathing {
   animation: breathe 2.4s ease-in-out infinite;
-  color: var(--biof3-accent);
-  border-color: var(--biof3-accent-border);
-  background: var(--biof3-accent-bg);
+  color: var(--gewu-accent);
+  border-color: var(--gewu-accent-border);
+  background: var(--gewu-accent-bg);
 }
 
 .headerLeft {
@@ -92,10 +92,10 @@
 }
 
 .projectTitle {
-  font-size: var(--biof3-font-size-md);
+  font-size: var(--gewu-font-size-md);
   font-weight: 600;
   margin: 0;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   max-width: 260px;
   white-space: nowrap;
   overflow: hidden;
@@ -103,11 +103,11 @@
 }
 
 .modalityBadge {
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   padding: 2px 8px;
   border-radius: 4px;
-  background: var(--biof3-accent-bg);
-  color: var(--biof3-accent);
+  background: var(--gewu-accent-bg);
+  color: var(--gewu-accent);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -120,17 +120,17 @@
   height: 32px;
   border: none;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   border-radius: 6px;
   transition: background 0.15s, color 0.15s;
   /* UI-215 补充：纯图标按钮收敛 UA 默认字号到 token */
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .iconBtn:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 .workspacePathBar {
@@ -142,17 +142,17 @@
   flex: 1 1 280px;
   margin: 0 16px;
   padding: 4px 8px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
-  background: var(--biof3-bg);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg);
+  color: var(--gewu-text-secondary);
   overflow: hidden;
 }
 
 .workspacePathLabel {
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 600;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
   text-transform: uppercase;
   flex-shrink: 0;
 }
@@ -163,9 +163,9 @@
   border: none;
   padding: 0;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   font: inherit;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
@@ -175,32 +175,32 @@
 
 .workspacePathText:disabled {
   cursor: default;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspacePathText:not(:disabled):hover {
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
 }
 
 .workspacePathAction {
   flex-shrink: 0;
   border: none;
-  border-left: 1px solid var(--biof3-border);
+  border-left: 1px solid var(--gewu-border);
   padding: 0 0 0 8px;
   background: transparent;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
   cursor: pointer;
 }
 
 .workspacePathAction:hover {
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
 }
 
 .workspacePathNotice {
   flex-shrink: 0;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-accent);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-accent);
 }
 
 .workspaceSummaryBar {
@@ -209,8 +209,8 @@
   justify-content: space-between;
   gap: 14px;
   padding: 10px 12px;
-  border-bottom: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-surface);
+  border-bottom: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-surface);
   flex-shrink: 0;
   min-width: 0;
 }
@@ -222,11 +222,11 @@
 }
 
 .workspaceSummaryEyebrow {
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspaceSummaryTitleRow {
@@ -239,9 +239,9 @@
 
 .workspaceSummaryTitle {
   min-width: 0;
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
   font-weight: 700;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -253,9 +253,9 @@
   height: 20px;
   padding: 0 8px;
   border-radius: 999px;
-  background: var(--biof3-accent-bg);
-  color: var(--biof3-accent);
-  font-size: var(--biof3-font-size-sm);
+  background: var(--gewu-accent-bg);
+  color: var(--gewu-accent);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 700;
   white-space: nowrap;
 }
@@ -266,8 +266,8 @@
   gap: 10px;
   min-width: 0;
   flex-wrap: wrap;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-muted);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-muted);
 }
 
 .workspaceSummaryMeta span {
@@ -292,11 +292,11 @@
   gap: 6px;
   min-height: 28px;
   padding: 0 10px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 999px;
-  background: var(--biof3-surface-translucent);
-  color: var(--biof3-text-muted);
-  font-size: var(--biof3-font-size-caption);
+  background: var(--gewu-surface-translucent);
+  color: var(--gewu-text-muted);
+  font-size: var(--gewu-font-size-caption);
   white-space: nowrap;
 }
 
@@ -305,24 +305,24 @@
 }
 
 .workspaceSummaryChipGood {
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .workspaceSummaryChipWarn {
-  color: var(--biof3-status-warning-fg);
+  color: var(--gewu-status-warning-fg);
 }
 
 .workspaceSummaryChipMuted {
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspaceSummaryChipBtn:hover {
-  border-color: var(--biof3-accent-border);
-  color: var(--biof3-accent);
+  border-color: var(--gewu-accent-border);
+  color: var(--gewu-accent);
 }
 
 .workspaceSummaryChipBtn strong {
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .workspaceSummaryDot,
@@ -332,30 +332,30 @@
   height: 8px;
   flex-shrink: 0;
   border-radius: 999px;
-  background: var(--biof3-text-tertiary);
+  background: var(--gewu-text-tertiary);
 }
 
 .workspaceSummaryDot[data-ready='true'] {
-  background: var(--biof3-status-online);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--biof3-status-online) 15%, transparent);
+  background: var(--gewu-status-online);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gewu-status-online) 15%, transparent);
 }
 
 .workspaceSummaryDot[data-ready='false'] {
-  background: var(--biof3-status-loading);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--biof3-status-loading) 12%, transparent);
+  background: var(--gewu-status-loading);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gewu-status-loading) 12%, transparent);
 }
 
 .workspaceSummaryMiniDot[data-status='online'],
 .workspaceSummaryMiniDot[data-status='runtime'] {
-  background: var(--biof3-status-online);
+  background: var(--gewu-status-online);
 }
 
 .workspaceSummaryMiniDot[data-status='loading'] {
-  background: var(--biof3-status-loading);
+  background: var(--gewu-status-loading);
 }
 
 .workspaceSummaryMiniDot[data-status='offline'] {
-  background: var(--biof3-status-warning);
+  background: var(--gewu-status-warning);
 }
 
 /* ---- 4.5 Project switcher dropdown ---- */
@@ -373,15 +373,15 @@
   height: 24px;
   border: none;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   border-radius: 4px;
   transition: background 0.15s, color 0.15s;
 }
 
 .switcherBtn:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 .switcherOverlay {
@@ -395,10 +395,10 @@
   top: calc(100% + 4px);
   left: 0;
   width: 280px;
-  background: var(--biof3-bg-elevated);
-  border: 1px solid var(--biof3-border);
+  background: var(--gewu-bg-elevated);
+  border: 1px solid var(--gewu-border);
   border-radius: 10px;
-  box-shadow: var(--biof3-shadow-menu);
+  box-shadow: var(--gewu-shadow-menu);
   z-index: 999;
   overflow: hidden;
   display: flex;
@@ -409,16 +409,16 @@
   width: 100%;
   padding: 10px 14px;
   border: none;
-  border-bottom: 1px solid var(--biof3-border);
-  font-size: var(--biof3-font-size-body-sm);
+  border-bottom: 1px solid var(--gewu-border);
+  font-size: var(--gewu-font-size-body-sm);
   outline: none;
-  background: var(--biof3-bg);
-  color: var(--biof3-text);
+  background: var(--gewu-bg);
+  color: var(--gewu-text);
   box-sizing: border-box;
 }
 
 .switcherSearch:focus {
-  border-bottom-color: var(--biof3-accent);
+  border-bottom-color: var(--gewu-accent);
 }
 
 .switcherList {
@@ -429,8 +429,8 @@
 
 .switcherEmpty {
   padding: 16px 14px;
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text-muted);
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-muted);
   text-align: center;
 }
 
@@ -449,33 +449,33 @@
 }
 
 .switcherItem:hover {
-  background: var(--biof3-hover);
+  background: var(--gewu-hover);
 }
 
 .switcherItemActive {
-  background: var(--biof3-accent-bg);
+  background: var(--gewu-accent-bg);
   font-weight: 600;
 }
 
 .switcherItemActive:hover {
-  background: var(--biof3-accent-bg);
+  background: var(--gewu-accent-bg);
 }
 
 .switcherItemName {
   flex: 1;
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text);
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .switcherItemBadge {
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   padding: 1px 6px;
   border-radius: 3px;
-  background: var(--biof3-accent-bg);
-  color: var(--biof3-accent);
+  background: var(--gewu-accent-bg);
+  color: var(--gewu-accent);
   text-transform: uppercase;
   letter-spacing: 0.3px;
   flex-shrink: 0;
@@ -484,15 +484,15 @@
 .switcherNewProject {
   display: block;
   padding: 10px 14px;
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-accent);
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-accent);
   text-decoration: none;
-  border-top: 1px solid var(--biof3-border);
+  border-top: 1px solid var(--gewu-border);
   transition: background 0.12s;
 }
 
 .switcherNewProject:hover {
-  background: var(--biof3-hover);
+  background: var(--gewu-hover);
 }
 
 /* Body — three columns */
@@ -503,7 +503,7 @@
   min-height: 0;
   overflow: hidden;
   position: relative;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 /* 运行时缺失引导横幅 —— 应用打开检测到 R/Python 缺失时主动引导安装 */
@@ -516,12 +516,12 @@
   padding: 10px 16px;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--biof3-status-loading) 18%, transparent),
-    color-mix(in srgb, var(--biof3-status-loading) 6%, transparent)
+    color-mix(in srgb, var(--gewu-status-loading) 18%, transparent),
+    color-mix(in srgb, var(--gewu-status-loading) 6%, transparent)
   );
-  border-bottom: 1px solid color-mix(in srgb, var(--biof3-status-loading) 35%, transparent);
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-body-sm);
+  border-bottom: 1px solid color-mix(in srgb, var(--gewu-status-loading) 35%, transparent);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body-sm);
   animation: runtimeBannerIn 0.25s ease-out;
 }
 
@@ -547,17 +547,17 @@
   flex: none;
   padding: 6px 14px;
   border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--biof3-status-loading) 50%, transparent);
-  background: color-mix(in srgb, var(--biof3-status-loading) 18%, transparent);
-  color: var(--biof3-text);
+  border: 1px solid color-mix(in srgb, var(--gewu-status-loading) 50%, transparent);
+  background: color-mix(in srgb, var(--gewu-status-loading) 18%, transparent);
+  color: var(--gewu-text);
   font-weight: 600;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   cursor: pointer;
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .runtimeMissingBannerBtn:hover {
-  background: color-mix(in srgb, var(--biof3-status-loading) 32%, transparent);
+  background: color-mix(in srgb, var(--gewu-status-loading) 32%, transparent);
   transform: translateY(-1px);
 }
 
@@ -568,15 +568,15 @@
 .panelBackdrop {
   display: none;
   /* UI-215 补充：纯图标遮罩按钮收敛 UA 默认字号到 token */
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
 /* Left column */
 .leftCol {
   width: 220px;
   flex-shrink: 0;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -600,17 +600,17 @@
   min-height: 34px;
   margin: 0 0 10px;
   padding: 0 10px;
-  border: 1px solid color-mix(in srgb, var(--biof3-border) 76%, transparent 24%);
+  border: 1px solid color-mix(in srgb, var(--gewu-border) 76%, transparent 24%);
   border-radius: 8px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
   overflow: hidden;
 }
 
 .leftWorkspaceLabel {
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 600;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
   text-transform: uppercase;
   flex-shrink: 0;
 }
@@ -621,9 +621,9 @@
   border: none;
   padding: 0;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   font: inherit;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
@@ -633,32 +633,32 @@
 
 .leftWorkspaceText:disabled {
   cursor: default;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .leftWorkspaceText:not(:disabled):hover {
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
 }
 
 .leftWorkspaceAction {
   flex-shrink: 0;
   border: none;
-  border-left: 1px solid var(--biof3-border);
+  border-left: 1px solid var(--gewu-border);
   padding: 0 0 0 8px;
   background: transparent;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
   cursor: pointer;
 }
 
 .leftWorkspaceAction:hover {
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
 }
 
 .leftWorkspaceNotice {
   flex-shrink: 0;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-accent);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-accent);
 }
 
 .leftSidebarIntro {
@@ -669,7 +669,7 @@
   min-height: 40px;
   padding: 2px 4px;
   margin-bottom: 8px;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
 }
 
 .leftSidebarEyebrow {
@@ -686,10 +686,10 @@
 .leftSidebarTitle {
   flex: 1;
   min-width: 0;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   line-height: 20px;
   font-weight: 650;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -712,9 +712,9 @@
   border: none;
   padding: 0;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   font: inherit;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   line-height: 14px;
   text-align: left;
   white-space: nowrap;
@@ -725,11 +725,11 @@
 
 .leftSidebarPathText:disabled {
   cursor: default;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .leftSidebarPathText:not(:disabled):hover {
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
 }
 
 .leftSidebarPathAction {
@@ -737,8 +737,8 @@
   border: none;
   padding: 0;
   background: transparent;
-  color: var(--biof3-accent);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-accent);
+  font-size: var(--gewu-font-size-xs);
   cursor: pointer;
 }
 
@@ -747,8 +747,8 @@
 }
 
 .leftSidebarPathNotice {
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-accent);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-accent);
 }
 
 .leftSidebarAction {
@@ -760,30 +760,30 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .leftSidebarAction:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-teal);
+  background: var(--gewu-hover);
+  color: var(--gewu-teal);
 }
 
 .leftQuickActions {
   display: grid;
   gap: 2px;
   padding: 0 0 10px;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
   flex-shrink: 0;
 }
 
 .leftQuickSectionLabel {
   padding: 2px 8px 6px;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 700;
   letter-spacing: 0.4px;
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
   text-transform: uppercase;
 }
 
@@ -797,8 +797,8 @@
   border-radius: 6px;
   padding: 0 10px;
   background: transparent;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-body-sm);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 500;
   text-align: left;
   cursor: pointer;
@@ -806,19 +806,19 @@
 }
 
 .leftQuickAction:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 .leftQuickAction:focus-visible {
-  outline: 2px solid var(--biof3-border-color, var(--biof3-text-secondary));
+  outline: 2px solid var(--gewu-border-color, var(--gewu-text-secondary));
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px var(--biof3-accent-bg, transparent);
+  box-shadow: 0 0 0 3px var(--gewu-accent-bg, transparent);
 }
 
 .leftQuickActionActive {
-  background: var(--biof3-accent-bg);
-  color: var(--biof3-accent);
+  background: var(--gewu-accent-bg);
+  color: var(--gewu-accent);
 }
 
 .leftQuickAction span {
@@ -834,15 +834,15 @@
   justify-content: space-between;
   padding: 10px 8px 8px;
   flex-shrink: 0;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
 }
 
 .leftPanelTitle {
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
 }
 
 /* UI-258 — header 右侧按钮组（工作台入口 + 新建项目） */
@@ -872,8 +872,8 @@
   gap: 8px;
   padding: 8px;
   flex-shrink: 0;
-  border-bottom: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-surface);
+  border-bottom: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-surface);
 }
 
 .leftCreateRow {
@@ -885,24 +885,24 @@
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  font-size: var(--biof3-font-size-xs);
-  font-family: var(--biof3-font-mono);
+  font-size: var(--gewu-font-size-xs);
+  font-family: var(--gewu-font-mono);
   padding: 5px 8px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
-  background: var(--biof3-bg-canvas);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-canvas);
+  color: var(--gewu-text);
 }
 
 .leftCreateInput:focus {
   outline: none;
-  border-color: var(--biof3-accent);
+  border-color: var(--gewu-accent);
 }
 
 .leftCreateError {
   margin: 0;
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-danger, #d9534f);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-danger, #d9534f);
   word-break: break-all;
 }
 
@@ -929,7 +929,7 @@
 .leftPanelFooter {
   flex-shrink: 0;
   padding: 8px 0 0;
-  border-top: 1px solid var(--biof3-border);
+  border-top: 1px solid var(--gewu-border);
 }
 
 .projectTreeNode {
@@ -944,17 +944,17 @@
   padding: 6px 8px;
   cursor: pointer;
   transition: background 0.12s ease;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   user-select: none;
 }
 
 .projectTreeRow:hover {
-  background: var(--biof3-hover);
+  background: var(--gewu-hover);
 }
 
 .projectTreeRowActive {
-  background: var(--biof3-accent-bg);
-  color: var(--biof3-accent);
+  background: var(--gewu-accent-bg);
+  color: var(--gewu-accent);
   font-weight: 500;
 }
 
@@ -968,7 +968,7 @@
   font: inherit;
   text-align: left;
   cursor: text;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -982,7 +982,7 @@
   height: 20px;
   border: none;
   background: transparent;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
   border-radius: 4px;
   cursor: pointer;
   opacity: 0;
@@ -994,8 +994,8 @@
 }
 
 .projectTreeAddBtn:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-accent);
+  background: var(--gewu-hover);
+  color: var(--gewu-accent);
 }
 
 .convList {
@@ -1006,8 +1006,8 @@
 
 .convEmpty {
   padding: 4px 8px 4px 34px;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-muted);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-muted);
 }
 
 .convItem {
@@ -1016,19 +1016,19 @@
   gap: 6px;
   padding: 5px 8px 5px 26px;
   cursor: pointer;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-secondary);
   transition: background 0.12s ease;
   user-select: none;
 }
 
 .convItem:hover {
-  background: var(--biof3-hover);
+  background: var(--gewu-hover);
 }
 
 .convItemActive {
-  background: var(--biof3-accent-bg);
-  color: var(--biof3-accent);
+  background: var(--gewu-accent-bg);
+  color: var(--gewu-accent);
   font-weight: 500;
 }
 
@@ -1038,8 +1038,8 @@
   margin: 0 2px;
   flex: 0 0 auto;
   border-radius: 999px;
-  background: var(--biof3-accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--biof3-accent) 14%, transparent);
+  background: var(--gewu-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gewu-accent) 14%, transparent);
   animation: conv-running-pulse 1.6s ease-in-out infinite;
 }
 
@@ -1080,7 +1080,7 @@
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
   cursor: pointer;
   opacity: 0;
 }
@@ -1091,8 +1091,8 @@
 }
 
 .convItemTrashBtn:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-status-error-fg);
+  background: var(--gewu-hover);
+  color: var(--gewu-status-error-fg);
 }
 
 .convItemTrashBtn:disabled {
@@ -1107,8 +1107,8 @@
 
 .convBranchIndicator {
   flex: 0 0 auto;
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-muted);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-muted);
   margin-right: 2px;
 }
 
@@ -1122,7 +1122,7 @@
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
   cursor: pointer;
   opacity: 0;
 }
@@ -1133,8 +1133,8 @@
 }
 
 .convItemForkBtn:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-accent);
+  background: var(--gewu-hover);
+  color: var(--gewu-accent);
 }
 
 .treeRenameInput {
@@ -1142,14 +1142,14 @@
   min-width: 0;
   height: 22px;
   padding: 0 5px;
-  border: 1px solid var(--biof3-accent-border);
+  border: 1px solid var(--gewu-accent-border);
   border-radius: 5px;
   outline: none;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
   font: inherit;
-  font-size: var(--biof3-font-size-caption);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--biof3-accent) 10%, transparent);
+  font-size: var(--gewu-font-size-caption);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gewu-accent) 10%, transparent);
 }
 
 /* Center column — Agent main interaction area */
@@ -1159,7 +1159,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
   box-sizing: border-box;
   position: relative;
 }
@@ -1181,8 +1181,8 @@
   flex: 1;
   align-items: center;
   justify-content: center;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-caption);
 }
 
 /* UI-148 / T86 — 结果库（result 模式默认空态的库式浏览面板） */
@@ -1199,19 +1199,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: var(--biof3-text-primary, #1a1a1a);
+  color: var(--gewu-text-primary, #1a1a1a);
 }
 .resultsLibraryHeader strong {
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
 }
 .resultsLibraryCount {
   margin-left: 8px;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-tertiary, #8a8a8a);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-tertiary, #8a8a8a);
 }
 .resultsLibraryEmpty {
-  color: var(--biof3-text-tertiary, #8a8a8a);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-text-tertiary, #8a8a8a);
+  font-size: var(--gewu-font-size-caption);
   padding: 12px 0;
 }
 .resultsLibraryList {
@@ -1231,16 +1231,16 @@
   width: 100%;
   text-align: left;
   padding: 10px 12px;
-  border: 1px solid var(--biof3-border, #e2e2e2);
+  border: 1px solid var(--gewu-border, #e2e2e2);
   border-radius: 8px;
-  background: var(--biof3-surface, #ffffff);
-  color: var(--biof3-text-primary, #1a1a1a);
+  background: var(--gewu-surface, #ffffff);
+  color: var(--gewu-text-primary, #1a1a1a);
   cursor: pointer;
   transition: border-color 120ms ease, background 120ms ease;
 }
 .resultsLibraryItem:hover {
-  border-color: var(--biof3-accent, var(--biof3-border-strong, #cfcfcf));
-  background: var(--biof3-surface-hover, #f5f7fa);
+  border-color: var(--gewu-accent, var(--gewu-border-strong, #cfcfcf));
+  background: var(--gewu-surface-hover, #f5f7fa);
 }
 .resultsLibraryItemMain {
   display: flex;
@@ -1249,37 +1249,37 @@
   min-width: 0;
 }
 .resultsLibraryItemTitle {
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .resultsLibraryItemMeta {
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary, #8a8a8a);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary, #8a8a8a);
 }
 .resultsLibraryBadge {
   flex: none;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   padding: 2px 8px;
   border-radius: 999px;
   border: 1px solid transparent;
 }
 .resultsLibraryBadge[data-status='done'] {
-  color: var(--biof3-success, #2e7d32);
+  color: var(--gewu-success, #2e7d32);
   background: rgba(46, 125, 50, 0.12);
 }
 .resultsLibraryBadge[data-status='running'] {
-  color: var(--biof3-info, #1565c0);
+  color: var(--gewu-info, #1565c0);
   background: rgba(21, 101, 192, 0.12);
 }
 .resultsLibraryBadge[data-status='pending'] {
-  color: var(--biof3-text-secondary, #5a5a5a);
-  background: var(--biof3-surface-strong, #f0f0f0);
+  color: var(--gewu-text-secondary, #5a5a5a);
+  background: var(--gewu-surface-strong, #f0f0f0);
 }
 .resultsLibraryBadge[data-status='failed'] {
-  color: var(--biof3-danger, #c62828);
+  color: var(--gewu-danger, #c62828);
   background: rgba(198, 40, 40, 0.12);
 }
 
@@ -1299,12 +1299,12 @@
   gap: 2px;
 }
 .analysisLaunchHeader strong {
-  font-size: var(--biof3-font-size-body);
-  color: var(--biof3-text-primary, #1a1a1a);
+  font-size: var(--gewu-font-size-body);
+  color: var(--gewu-text-primary, #1a1a1a);
 }
 .analysisLaunchHint {
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary, #8a8a8a);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary, #8a8a8a);
 }
 .analysisLaunchList {
   overflow-y: auto;
@@ -1313,9 +1313,9 @@
   gap: 16px;
 }
 .analysisLaunchGroupTitle {
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 600;
-  color: var(--biof3-text-secondary, #5a5a5a);
+  color: var(--gewu-text-secondary, #5a5a5a);
   margin: 0 0 8px;
 }
 .analysisLaunchCards {
@@ -1332,9 +1332,9 @@
   justify-content: space-between;
   gap: 12px;
   padding: 10px 12px;
-  border: 1px solid var(--biof3-border, #e2e2e2);
+  border: 1px solid var(--gewu-border, #e2e2e2);
   border-radius: 8px;
-  background: var(--biof3-surface, #ffffff);
+  background: var(--gewu-surface, #ffffff);
 }
 .analysisLaunchCardMain {
   display: flex;
@@ -1346,9 +1346,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 600;
-  color: var(--biof3-text-primary, #1a1a1a);
+  color: var(--gewu-text-primary, #1a1a1a);
 }
 .analysisLaunchDot {
   width: 8px;
@@ -1357,8 +1357,8 @@
   flex: none;
 }
 .analysisLaunchCardDesc {
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary, #8a8a8a);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary, #8a8a8a);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1367,29 +1367,29 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-secondary, #5a5a5a);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-secondary, #5a5a5a);
 }
 .analysisLaunchLang {
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   padding: 1px 6px;
   border-radius: 4px;
-  border: 1px solid var(--biof3-border, #e2e2e2);
+  border: 1px solid var(--gewu-border, #e2e2e2);
   text-transform: uppercase;
 }
 .analysisLaunchRun {
   flex: none;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   padding: 6px 14px;
   border-radius: 6px;
   border: 1px solid transparent;
-  background: var(--biof3-accent, #3b82f6);
-  color: var(--biof3-on-solid, #ffffff);
+  background: var(--gewu-accent, #3b82f6);
+  color: var(--gewu-on-solid, #ffffff);
   cursor: pointer;
 }
 .analysisLaunchRun:disabled {
-  background: var(--biof3-surface-strong, #f0f0f0);
-  color: var(--biof3-text-tertiary, #8a8a8a);
+  background: var(--gewu-surface-strong, #f0f0f0);
+  color: var(--gewu-text-tertiary, #8a8a8a);
   cursor: not-allowed;
 }
 
@@ -1442,12 +1442,12 @@
   width: 24px;
   height: 48px;
   border-radius: 4px;
-  background: var(--biof3-border);
-  border: 1px solid var(--biof3-border);
+  background: var(--gewu-border);
+  border: 1px solid var(--gewu-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   transition: opacity 0.15s, background 0.15s, box-shadow 0.15s;
 }
 
@@ -1470,7 +1470,7 @@
 /* Breathing animation — subtle pulse to draw attention */
 @keyframes breathe {
   0%, 100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--biof3-accent) 15%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--gewu-accent) 15%, transparent);
     opacity: 0.7;
   }
   50% {
@@ -1483,16 +1483,16 @@
 .rightRailHandle.breathing,
 .bottomRailHandle.breathing {
   animation: breathe 2.4s ease-in-out infinite;
-  color: var(--biof3-accent);
-  border-color: var(--biof3-accent-border);
-  background: var(--biof3-accent-bg);
+  color: var(--gewu-accent);
+  border-color: var(--gewu-accent-border);
+  background: var(--gewu-accent-bg);
 }
 
 .leftRailHandle:hover,
 .rightRailHandle:hover,
 .bottomRailHandle:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
@@ -1582,7 +1582,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .workspaceSessionChromeText {
@@ -1592,18 +1592,18 @@
 }
 
 .workspaceSessionChromeEyebrow {
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspaceSessionChromeTitle {
   min-width: 0;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 600;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1617,15 +1617,15 @@
   height: 30px;
   border: none;
   border-radius: 11px;
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-text-muted);
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-muted);
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .workspaceSessionChromeBtn:hover {
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text);
 }
 
 .workspaceSessionChromeActions {
@@ -1677,7 +1677,7 @@
 
 .rightPanelCollapseBtn {
   flex-shrink: 0;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .workspaceModeSurface {
@@ -1687,13 +1687,13 @@
   padding: 0;
 }
 
-.workspaceModeSurface :global(.biof3-plugin-store-panel) {
+.workspaceModeSurface :global(.gewu-plugin-store-panel) {
   width: 100%;
   height: 100%;
 }
 
-.workspaceModeSurface :global(.biof3-desktop-panel),
-.workspaceModeSurface :global(.biof3-plugin-store-panel) {
+.workspaceModeSurface :global(.gewu-desktop-panel),
+.workspaceModeSurface :global(.gewu-plugin-store-panel) {
   width: 100%;
   height: 100%;
   border-radius: 0;
@@ -1705,7 +1705,7 @@
   flex: 1;
   min-height: 0;
   overflow: auto;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 .workspacePinnedSummary {
@@ -1714,9 +1714,9 @@
   height: auto;
   max-height: calc(100% - 16px);
   max-width: calc(100% - 24px);
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 16px;
-  background: var(--biof3-bg-elevated);
+  background: var(--gewu-bg-elevated);
   box-shadow: none;
   overflow: hidden;
   display: flex;
@@ -1736,7 +1736,7 @@
   flex-shrink: 0;
   min-height: 52px;
   padding: 10px 13px 9px;
-  border-bottom: 1px solid color-mix(in srgb, var(--biof3-text) 6%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--gewu-text) 6%, transparent);
 }
 
 .workspacePinnedSummaryTopBarLeft {
@@ -1753,19 +1753,19 @@
   gap: 7px;
   height: 38px;
   padding: 0 12px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 14px;
-  background: var(--biof3-surface-translucent);
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-body-sm);
+  background: var(--gewu-surface-translucent);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 600;
   cursor: pointer;
   box-shadow: none;
 }
 
 .workspacePinnedSummaryActionBtn:hover {
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
 }
 
 .workspacePinnedSummaryHeaderText {
@@ -1776,11 +1776,11 @@
 }
 
 .workspacePinnedSummaryEyebrow {
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 650;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspacePinnedSummaryTitleRow {
@@ -1794,10 +1794,10 @@
 .workspacePinnedSummaryTitle {
   min-width: 0;
   flex: 1;
-  font-size: var(--biof3-font-size-md);
+  font-size: var(--gewu-font-size-md);
   line-height: 1.2;
   font-weight: 650;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1808,28 +1808,28 @@
   align-items: center;
   gap: 5px;
   flex-shrink: 0;
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-secondary);
 }
 
 .workspacePinnedSummaryStatus > span {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--biof3-text-tertiary);
+  background: var(--gewu-text-tertiary);
 }
 
 .workspacePinnedSummaryStatus[data-status='running'] > span {
-  background: var(--biof3-status-online);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--biof3-status-online) 12%, transparent);
+  background: var(--gewu-status-online);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gewu-status-online) 12%, transparent);
 }
 
 .workspacePinnedSummaryStatus[data-status='failed'] > span {
-  background: var(--biof3-status-error);
+  background: var(--gewu-status-error);
 }
 
 .workspacePinnedSummaryStatus[data-status='done'] > span {
-  background: var(--biof3-status-info);
+  background: var(--gewu-status-info);
 }
 
 .workspacePinnedSummaryBody {
@@ -1864,7 +1864,7 @@
   min-height: 44px;
   padding: 7px 3px;
   border: 0;
-  border-top: 1px solid var(--biof3-border-subtle);
+  border-top: 1px solid var(--gewu-border-subtle);
   border-radius: 0;
   background: transparent;
   color: inherit;
@@ -1878,20 +1878,20 @@ button.workspacePinnedSummaryPrimaryCard {
 
 button.workspacePinnedSummaryPrimaryCard:hover {
   background: transparent;
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
 }
 
 .workspacePinnedSummaryPrimaryCard > svg {
   flex-shrink: 0;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspacePinnedSummaryMetricGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
-  border-top: 1px solid var(--biof3-border-subtle);
-  border-bottom: 1px solid var(--biof3-border-subtle);
+  border-top: 1px solid var(--gewu-border-subtle);
+  border-bottom: 1px solid var(--gewu-border-subtle);
 }
 
 .workspacePinnedSummaryMetricCard {
@@ -1911,7 +1911,7 @@ button.workspacePinnedSummaryPrimaryCard:hover {
 
 .workspacePinnedSummaryMetricCard + .workspacePinnedSummaryMetricCard {
   padding-left: 10px;
-  border-left: 1px solid var(--biof3-border-subtle);
+  border-left: 1px solid var(--gewu-border-subtle);
 }
 
 button.workspacePinnedSummaryMetricCard {
@@ -1920,7 +1920,7 @@ button.workspacePinnedSummaryMetricCard {
 
 button.workspacePinnedSummaryMetricCard:hover {
   background: transparent;
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
 }
 
 .workspacePinnedSummaryMetricCard > span {
@@ -1928,22 +1928,22 @@ button.workspacePinnedSummaryMetricCard:hover {
   align-items: center;
   gap: 6px;
   min-width: 0;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 600;
 }
 
 .workspacePinnedSummaryMetricCard > strong {
   margin-left: auto;
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 650;
   line-height: 1;
 }
 
 .workspacePinnedSummaryMetricCard > strong small {
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 500;
 }
 
@@ -1955,7 +1955,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   min-height: 40px;
   padding: 6px 3px;
   border: 0;
-  border-top: 1px solid var(--biof3-border-subtle);
+  border-top: 1px solid var(--gewu-border-subtle);
   background: transparent;
   color: inherit;
   font: inherit;
@@ -1964,12 +1964,12 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .workspacePinnedSummaryTaskRow:hover {
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
 }
 
 .workspacePinnedSummaryTaskRow > svg {
   flex-shrink: 0;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspacePinnedSummarySectionHeading {
@@ -1984,13 +1984,13 @@ button.workspacePinnedSummaryMetricCard:hover {
   border: 0;
   padding: 0;
   background: transparent;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
   cursor: pointer;
 }
 
 .workspacePinnedSummarySectionHeading > button:hover {
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .workspacePinnedSummaryContext,
@@ -2012,14 +2012,14 @@ button.workspacePinnedSummaryMetricCard:hover {
 .workspacePinnedSummaryContext:hover,
 .workspacePinnedSummaryActivity:hover,
 .workspacePinnedSummarySource:hover {
-  background: var(--biof3-user-bubble-bg);
+  background: var(--gewu-user-bubble-bg);
 }
 
 .workspacePinnedSummaryContext > svg,
 .workspacePinnedSummaryContext > svg:last-child,
 .workspacePinnedSummaryActivity > svg {
   flex-shrink: 0;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspacePinnedSummaryContext > span,
@@ -2033,8 +2033,8 @@ button.workspacePinnedSummaryMetricCard:hover {
 .workspacePinnedSummaryContext strong,
 .workspacePinnedSummaryActivityText strong {
   overflow: hidden;
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2043,8 +2043,8 @@ button.workspacePinnedSummaryMetricCard:hover {
 .workspacePinnedSummaryContext small,
 .workspacePinnedSummaryActivityText small {
   overflow: hidden;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
   white-space: nowrap;
   text-overflow: ellipsis;
 }
@@ -2058,24 +2058,24 @@ button.workspacePinnedSummaryMetricCard:hover {
   flex-shrink: 0;
   border-radius: 0;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .workspacePinnedSummaryActivityIcon[data-status='running'] {
   background: transparent;
-  color: var(--biof3-status-success-fg);
+  color: var(--gewu-status-success-fg);
 }
 
 .workspacePinnedSummaryActivityIcon[data-status='failed'] {
   background: transparent;
-  color: var(--biof3-status-error-fg);
+  color: var(--gewu-status-error-fg);
 }
 
 .workspacePinnedSummarySectionTitle {
   padding: 0;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 600;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspaceLoopBadge {
@@ -2083,9 +2083,9 @@ button.workspacePinnedSummaryMetricCard:hover {
   align-items: center;
   gap: 5px;
   flex-shrink: 0;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 600;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspaceLoopBadge::before {
@@ -2097,15 +2097,15 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .workspaceLoopBadge[data-tone='running'] {
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
 }
 
 .workspaceLoopBadge[data-tone='success'] {
-  color: var(--biof3-status-success-fg);
+  color: var(--gewu-status-success-fg);
 }
 
 .workspaceLoopBadge[data-tone='warning'] {
-  color: var(--biof3-status-warning-fg);
+  color: var(--gewu-status-warning-fg);
 }
 
 .workspaceLoopRecovery {
@@ -2114,7 +2114,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   gap: 5px;
   min-width: 0;
   padding: 2px 3px;
-  color: var(--biof3-status-warning-fg);
+  color: var(--gewu-status-warning-fg);
   font-size: 9.5px;
   line-height: 1.35;
 }
@@ -2124,8 +2124,8 @@ button.workspacePinnedSummaryMetricCard:hover {
   min-width: 0;
   overflow: hidden;
   padding: 1px 3px;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
   line-height: 1.45;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -2135,22 +2135,22 @@ button.workspacePinnedSummaryMetricCard:hover {
   min-width: 0;
   overflow: hidden;
   padding: 0 3px;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
   line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .workspacePinnedSummaryQueueLabel {
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .workspaceWorkflowStateLabel {
   padding-right: 6px;
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspaceWorkflowRail {
@@ -2163,35 +2163,35 @@ button.workspacePinnedSummaryMetricCard:hover {
 .workspaceWorkflowRail > span {
   height: 3px;
   border-radius: 999px;
-  background: var(--biof3-border);
+  background: var(--gewu-border);
 }
 
 .workspaceWorkflowRail > span[data-status='completed'] {
-  background: var(--biof3-accent);
+  background: var(--gewu-accent);
 }
 
 .workspaceWorkflowRail > span[data-status='in_progress'] {
-  background: color-mix(in srgb, var(--biof3-accent) 70%, var(--biof3-bg-surface));
+  background: color-mix(in srgb, var(--gewu-accent) 70%, var(--gewu-bg-surface));
 }
 
 .workspaceWorkflowRail > span[data-status='needs_review'] {
-  background: var(--biof3-status-loading);
+  background: var(--gewu-status-loading);
 }
 
 .workspaceWorkflowRail > span[data-status='failed'],
 .workspaceWorkflowRail > span[data-status='blocked'] {
-  background: var(--biof3-status-error);
+  background: var(--gewu-status-error);
 }
 
 .workspaceWorkflowRail > span[data-status='cancelled'] {
-  background: var(--biof3-text-tertiary);
+  background: var(--gewu-text-tertiary);
 }
 
 .workspaceWorkflowNextAction {
   padding: 1px 6px 0;
   overflow: hidden;
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2203,9 +2203,9 @@ button.workspacePinnedSummaryMetricCard:hover {
 .workspacePinnedSummarySourceLabel {
   flex: 1;
   min-width: 0;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 600;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2213,22 +2213,22 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .workspacePinnedSummarySourceValue {
   flex-shrink: 0;
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspacePinnedSummarySourceEmpty {
   padding: 3px 7px;
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspacePinnedSummaryHistory {
   display: grid;
   gap: 0;
   padding: 0;
-  border-top: 1px solid var(--biof3-border-subtle);
-  border-bottom: 1px solid var(--biof3-border-subtle);
+  border-top: 1px solid var(--gewu-border-subtle);
+  border-bottom: 1px solid var(--gewu-border-subtle);
   border-radius: 0;
   background: transparent;
 }
@@ -2249,11 +2249,11 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .workspacePinnedSummaryHistoryItem:hover {
   background: transparent;
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
 }
 
 .workspacePinnedSummaryHistoryItem + .workspacePinnedSummaryHistoryItem {
-  border-top: 1px solid var(--biof3-border-subtle);
+  border-top: 1px solid var(--gewu-border-subtle);
 }
 
 .workspacePinnedSummaryEmpty {
@@ -2261,8 +2261,8 @@ button.workspacePinnedSummaryMetricCard:hover {
   align-items: center;
   gap: 7px;
   padding: 4px 6px;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
 }
 
 .workspacePinnedSummaryEnvironment {
@@ -2273,8 +2273,8 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .workspacePinnedSummaryEnvironmentCard {
   overflow: hidden;
-  border-top: 1px solid var(--biof3-border-subtle);
-  border-bottom: 1px solid var(--biof3-border-subtle);
+  border-top: 1px solid var(--gewu-border-subtle);
+  border-bottom: 1px solid var(--gewu-border-subtle);
   border-radius: 0;
   background: transparent;
 }
@@ -2286,12 +2286,12 @@ button.workspacePinnedSummaryMetricCard:hover {
   gap: 10px;
   min-height: 32px;
   padding: 6px 3px;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .workspacePinnedSummaryEnvironmentRow + .workspacePinnedSummaryEnvironmentRow {
-  border-top: 1px solid var(--biof3-border-subtle);
+  border-top: 1px solid var(--gewu-border-subtle);
 }
 
 .workspacePinnedSummaryEnvironmentLabel {
@@ -2299,15 +2299,15 @@ button.workspacePinnedSummaryMetricCard:hover {
   align-items: center;
   gap: 7px;
   flex-shrink: 0;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 600;
 }
 
 .workspacePinnedSummaryResourceFacts {
   min-width: 0;
   overflow: hidden;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
   text-align: right;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2322,9 +2322,9 @@ button.workspacePinnedSummaryMetricCard:hover {
   gap: 8px;
   min-height: 0;
   padding: 7px 6px 0;
-  border-top: 1px solid color-mix(in srgb, var(--biof3-text) 6%, transparent);
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-tertiary);
+  border-top: 1px solid color-mix(in srgb, var(--gewu-text) 6%, transparent);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspaceResourceSummary {
@@ -2332,16 +2332,16 @@ button.workspacePinnedSummaryMetricCard:hover {
   justify-content: space-between;
   gap: 10px;
   padding: 8px 12px;
-  border-top: 1px solid var(--biof3-border-subtle);
-  color: var(--biof3-text-muted);
-  font-size: var(--biof3-font-size-sm);
+  border-top: 1px solid var(--gewu-border-subtle);
+  color: var(--gewu-text-muted);
+  font-size: var(--gewu-font-size-sm);
 }
 
 .workspaceResourceSummaryState {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   white-space: nowrap;
 }
 
@@ -2349,21 +2349,21 @@ button.workspacePinnedSummaryMetricCard:hover {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--biof3-status-online);
+  background: var(--gewu-status-online);
 }
 
 .workspacePinnedSummaryEnvironmentRow[data-state='warning'] .workspaceResourceSummaryState i {
-  background: var(--biof3-status-warning-fg);
+  background: var(--gewu-status-warning-fg);
 }
 
 .workspacePinnedSummaryEnvironmentRow[data-state='unavailable'] .workspaceResourceSummaryState i,
 .workspacePinnedSummaryEnvironmentRow[data-state='unknown'] .workspaceResourceSummaryState i {
-  background: var(--biof3-danger);
+  background: var(--gewu-danger);
 }
 
-.workspaceResourceSummary[data-state='warning'] .workspaceResourceSummaryState i { background: var(--biof3-status-warning-fg); }
+.workspaceResourceSummary[data-state='warning'] .workspaceResourceSummaryState i { background: var(--gewu-status-warning-fg); }
 .workspaceResourceSummary[data-state='unavailable'] .workspaceResourceSummaryState i,
-.workspaceResourceSummary[data-state='unknown'] .workspaceResourceSummaryState i { background: var(--biof3-danger); }
+.workspaceResourceSummary[data-state='unknown'] .workspaceResourceSummaryState i { background: var(--gewu-danger); }
 
 .workspacePinnedSummaryFooter span {
   display: inline-flex;
@@ -2380,9 +2380,9 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .workspacePinnedSummaryRuntimeChip {
   gap: 3px !important;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 600;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .workspacePinnedSummaryRuntimeChip > i {
@@ -2390,19 +2390,19 @@ button.workspacePinnedSummaryMetricCard:hover {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--biof3-text-tertiary);
+  background: var(--gewu-text-tertiary);
 }
 
 .workspacePinnedSummaryRuntimeChip[data-state='online'] > i {
-  background: var(--biof3-status-online);
+  background: var(--gewu-status-online);
 }
 
 .workspacePinnedSummaryRuntimeChip[data-state='offline'] > i {
-  background: var(--biof3-status-loading);
+  background: var(--gewu-status-loading);
 }
 
 .workspacePinnedSummaryRuntimeChip[data-state='missing'] {
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 
@@ -2424,17 +2424,17 @@ button.workspacePinnedSummaryMetricCard:hover {
 .workspacePinnedSummaryTaskRow:focus-visible,
 .workspacePinnedSummaryActionBtn:focus-visible,
 .workspacePinnedSummaryFooterBtn:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--biof3-accent) 35%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--gewu-accent) 35%, transparent);
   outline-offset: 2px;
 }
 
-.workspaceEmbeddedPage :global(.biof3-page-header) {
+.workspaceEmbeddedPage :global(.gewu-page-header) {
   padding-left: 16px;
   padding-right: 18px;
   margin-bottom: 10px;
 }
 
-.workspaceEmbeddedPage :global(.biof3-page-header__breadcrumb) {
+.workspaceEmbeddedPage :global(.gewu-page-header__breadcrumb) {
   display: none;
 }
 
@@ -2457,15 +2457,15 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .workspaceSearchTitle {
   margin: 0;
-  font-size: var(--biof3-font-size-2xl);
+  font-size: var(--gewu-font-size-2xl);
   line-height: 1.1;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .workspaceSearchDesc {
   margin: 6px 0 0;
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-secondary);
 }
 
 .workspaceSearchActions {
@@ -2479,12 +2479,12 @@ button.workspacePinnedSummaryMetricCard:hover {
   align-items: center;
   gap: 6px;
   height: 32px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
   padding: 0 10px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-caption);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
   cursor: pointer;
 }
 
@@ -2494,9 +2494,9 @@ button.workspacePinnedSummaryMetricCard:hover {
   gap: 10px;
   min-height: 44px;
   padding: 0 14px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 12px;
-  background: var(--biof3-surface-translucent);
+  background: var(--gewu-surface-translucent);
 }
 
 .workspaceSearchInput {
@@ -2505,8 +2505,8 @@ button.workspacePinnedSummaryMetricCard:hover {
   border: none;
   background: transparent;
   font: inherit;
-  font-size: var(--biof3-font-size-body);
-  color: var(--biof3-text);
+  font-size: var(--gewu-font-size-body);
+  color: var(--gewu-text);
 }
 
 .workspaceSearchInput:focus {
@@ -2528,9 +2528,9 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .workspaceSearchHintCard {
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 10px;
-  background: var(--biof3-surface-translucent);
+  background: var(--gewu-surface-translucent);
   padding: 12px 14px;
   display: flex;
   align-items: baseline;
@@ -2539,14 +2539,14 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .workspaceSearchHintCard span {
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-secondary);
 }
 
 .workspaceSearchHintCard strong {
   font-size: 24px;
   line-height: 1;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .searchResultSection {
@@ -2562,13 +2562,13 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .searchResultHeader h3 {
   margin: 0;
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-secondary);
 }
 
 .searchResultHeader span {
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-tertiary);
 }
 
 .searchResultList {
@@ -2582,10 +2582,10 @@ button.workspacePinnedSummaryMetricCard:hover {
   align-items: center;
   gap: 10px;
   width: 100%;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 10px;
   padding: 10px 12px;
-  background: var(--biof3-surface-translucent);
+  background: var(--gewu-surface-translucent);
   text-align: left;
 }
 
@@ -2594,8 +2594,8 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .searchResultItem:hover {
-  border-color: var(--biof3-accent);
-  background: var(--biof3-bg-surface);
+  border-color: var(--gewu-accent);
+  background: var(--gewu-bg-surface);
 }
 
 .sidebarEmptyState {
@@ -2603,8 +2603,8 @@ button.workspacePinnedSummaryMetricCard:hover {
   padding: 10px 12px;
   border: 1px dashed rgba(148, 163, 184, 0.24);
   border-radius: 8px;
-  color: var(--biof3-text-muted);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-text-muted);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .searchResultMeta {
@@ -2614,17 +2614,17 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .searchResultTitle {
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 600;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .searchResultSub {
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2654,18 +2654,18 @@ button.workspacePinnedSummaryMetricCard:hover {
   gap: 8px;
   height: 30px;
   padding: 0 10px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  background: var(--biof3-surface);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-caption);
+  background: var(--gewu-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 500;
   cursor: pointer;
 }
 
 .scheduledWorkspaceBack:hover {
-  color: var(--biof3-text);
-  background: var(--biof3-hover);
+  color: var(--gewu-text);
+  background: var(--gewu-hover);
 }
 
 .scheduledStats {
@@ -2678,9 +2678,9 @@ button.workspacePinnedSummaryMetricCard:hover {
 .scheduledStatCard {
   min-width: 0;
   padding: 12px 14px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 10px;
-  background: var(--biof3-surface-translucent);
+  background: var(--gewu-surface-translucent);
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -2690,12 +2690,12 @@ button.workspacePinnedSummaryMetricCard:hover {
 .scheduledStatCard strong {
   font-size: 24px;
   line-height: 1;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .scheduledStatLabel {
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-secondary);
 }
 
 .scheduledWorkspaceBody {
@@ -2717,9 +2717,9 @@ button.workspacePinnedSummaryMetricCard:hover {
   align-items: center;
   gap: 14px;
   padding: 32px 28px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 14px;
-  background: var(--biof3-surface-translucent);
+  background: var(--gewu-surface-translucent);
 }
 
 .scheduledEmptyIcon {
@@ -2729,22 +2729,22 @@ button.workspacePinnedSummaryMetricCard:hover {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: var(--biof3-accent-bg);
-  color: var(--biof3-accent);
+  background: var(--gewu-accent-bg);
+  color: var(--gewu-accent);
 }
 
 .scheduledEmptyTitle {
   margin: 0;
-  font-size: var(--biof3-font-size-lg);
+  font-size: var(--gewu-font-size-lg);
   font-weight: 600;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .scheduledEmptyDesc {
   margin: 0;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   line-height: 1.6;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .scheduledEmptyBack {
@@ -2753,27 +2753,27 @@ button.workspacePinnedSummaryMetricCard:hover {
   gap: 8px;
   height: 34px;
   padding: 0 16px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  background: var(--biof3-surface);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-body-sm);
+  background: var(--gewu-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 500;
   cursor: pointer;
 }
 
 .scheduledEmptyBack:hover {
-  color: var(--biof3-text);
-  background: var(--biof3-hover);
+  color: var(--gewu-text);
+  background: var(--gewu-hover);
 }
 
 .scheduledHistoryCol,
 .scheduledResultCol {
   min-height: 0;
   overflow: hidden;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 12px;
-  background: var(--biof3-surface-translucent);
+  background: var(--gewu-surface-translucent);
 }
 
 .scheduledHistoryCol {
@@ -2800,7 +2800,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   width: 360px;
   min-width: 96px;
   flex-shrink: 0;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -2837,7 +2837,7 @@ button.workspacePinnedSummaryMetricCard:hover {
 
   .projectTitle {
     max-width: 140px;
-    font-size: var(--biof3-font-size-body);
+    font-size: var(--gewu-font-size-body);
   }
 
   .scheduledWorkspace {
@@ -2893,7 +2893,7 @@ button.workspacePinnedSummaryMetricCard:hover {
     display: block;
     border: none;
     padding: 0;
-    background: var(--biof3-overlay);
+    background: var(--gewu-overlay);
     cursor: default;
   }
 
@@ -2945,7 +2945,7 @@ button.workspacePinnedSummaryMetricCard:hover {
     grid-template-columns: 1fr;
   }
 
-  .workspaceEmbeddedPage :global(.biof3-page-header) {
+  .workspaceEmbeddedPage :global(.gewu-page-header) {
     padding-left: 12px;
     padding-right: 12px;
   }
@@ -2970,7 +2970,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 .resultPanelBody {
@@ -2988,23 +2988,23 @@ button.workspacePinnedSummaryMetricCard:hover {
   justify-content: space-between;
   gap: 8px;
   padding: 8px 12px;
-  border-bottom: 1px solid var(--biof3-border);
-  background: var(--biof3-surface-alt);
+  border-bottom: 1px solid var(--gewu-border);
+  background: var(--gewu-surface-alt);
 }
 
 .resultScientificDelivery {
   padding: 10px 12px;
-  border-bottom: 1px solid var(--biof3-border);
-  border-left: 3px solid var(--biof3-status-online);
-  background: var(--biof3-bg-surface);
+  border-bottom: 1px solid var(--gewu-border);
+  border-left: 3px solid var(--gewu-status-online);
+  background: var(--gewu-bg-surface);
 }
 
 .resultScientificDelivery[data-status='degraded'] {
-  border-left-color: var(--biof3-warning-text);
+  border-left-color: var(--gewu-warning-text);
 }
 
 .resultScientificDelivery[data-status='blocked'] {
-  border-left-color: var(--biof3-danger);
+  border-left-color: var(--gewu-danger);
 }
 
 .resultScientificDeliveryHeader,
@@ -3020,14 +3020,14 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .resultScientificDeliveryHeader strong {
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text);
 }
 
 .resultScientificDeliveryHeader span,
 .resultScientificDeliveryMeta {
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
 }
 
 .resultScientificDeliveryGrid {
@@ -3038,14 +3038,14 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .resultScientificDeliveryGrid small {
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .resultScientificDeliveryGrid p {
   margin: 3px 0 0;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-sm);
   line-height: 1.45;
 }
 
@@ -3060,9 +3060,9 @@ button.workspacePinnedSummaryMetricCard:hover {
   border: 0;
   padding: 0;
   background: transparent;
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
   font: inherit;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   text-decoration: none;
   cursor: pointer;
 }
@@ -3074,8 +3074,8 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .resultReplayPackageMessage {
   margin-top: 6px;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .resultReportReproductionActions {
@@ -3090,9 +3090,9 @@ button.workspacePinnedSummaryMetricCard:hover {
   border: 0;
   padding: 0;
   background: transparent;
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
   font: inherit;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   text-decoration: none;
   cursor: pointer;
 }
@@ -3118,19 +3118,19 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .resultDeliveryCopy strong {
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text);
 }
 
 .resultDeliveryCopy span,
 .resultDeliveryCopy em {
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
   font-style: normal;
 }
 
 .resultDeliveryCopy em {
-  color: var(--biof3-danger);
+  color: var(--gewu-danger);
 }
 
 .resultDeliveryActions {
@@ -3147,18 +3147,18 @@ button.workspacePinnedSummaryMetricCard:hover {
   align-items: center;
   height: 24px;
   padding: 0 8px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 7px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-xs);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
   text-decoration: none;
   cursor: pointer;
 }
 
 .resultDeliveryActions button:first-child {
-  border-color: var(--biof3-accent-border);
-  background: var(--biof3-accent);
+  border-color: var(--gewu-accent-border);
+  background: var(--gewu-accent);
   color: #fff;
 }
 
@@ -3223,8 +3223,8 @@ button.workspacePinnedSummaryMetricCard:hover {
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
   cursor: pointer;
 }
 
@@ -3235,13 +3235,13 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .rightPanelTab:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-hover);
+  color: var(--gewu-text-secondary);
 }
 
 .rightPanelTabActive {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
   font-weight: 600;
 }
 
@@ -3253,12 +3253,12 @@ button.workspacePinnedSummaryMetricCard:hover {
   height: 16px;
   margin-right: -4px;
   border-radius: 4px;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .rightPanelTabClose:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 .rightChatPanel {
@@ -3305,7 +3305,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  background: var(--biof3-surface);
+  background: var(--gewu-surface);
 }
 
 .embeddedTerminal {
@@ -3317,10 +3317,10 @@ button.workspacePinnedSummaryMetricCard:hover {
   flex-direction: column;
   min-height: 0;
   margin: 0 8px;
-  border: 1px solid color-mix(in srgb, var(--biof3-border) 84%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gewu-border) 84%, transparent);
   border-radius: 9px;
-  background: var(--biof3-bg-terminal);
-  color: var(--biof3-text-terminal-strong);
+  background: var(--gewu-bg-terminal);
+  color: var(--gewu-text-terminal-strong);
   box-shadow: 0 6px 20px rgba(15, 23, 42, 0.1);
   overflow: hidden;
   opacity: 0;
@@ -3350,14 +3350,14 @@ button.workspacePinnedSummaryMetricCard:hover {
   width: 34px;
   height: 2px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--biof3-border-strong) 68%, transparent);
+  background: color-mix(in srgb, var(--gewu-border-strong) 68%, transparent);
   transform: translateX(-50%);
   transition: width 0.14s ease, background 0.14s ease;
 }
 
 .embeddedTerminalResize:hover::after {
   width: 44px;
-  background: var(--biof3-accent);
+  background: var(--gewu-accent);
 }
 
 /* Compact terminal card header, shared by light and dark application themes. */
@@ -3369,22 +3369,22 @@ button.workspacePinnedSummaryMetricCard:hover {
   height: 28px;
   min-height: 28px;
   padding: 1px 7px 0 11px;
-  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border) 72%, transparent);
-  background: color-mix(in srgb, var(--biof3-bg-terminal) 94%, var(--biof3-bg-subtle) 6%);
-  color: var(--biof3-text-terminal-muted);
-  font-size: var(--biof3-font-size-sm);
+  border-bottom: 1px solid color-mix(in srgb, var(--gewu-border) 72%, transparent);
+  background: color-mix(in srgb, var(--gewu-bg-terminal) 94%, var(--gewu-bg-subtle) 6%);
+  color: var(--gewu-text-terminal-muted);
+  font-size: var(--gewu-font-size-sm);
 }
 
 .embeddedTerminalHeader > div {
   display: flex;
   align-items: center;
   gap: 7px;
-  color: var(--biof3-text-terminal-muted);
+  color: var(--gewu-text-terminal-muted);
 }
 
 .embeddedTerminalHeader small {
-  color: var(--biof3-text-terminal-muted);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-terminal-muted);
+  font-size: var(--gewu-font-size-xs);
   letter-spacing: 0.2px;
 }
 
@@ -3393,13 +3393,13 @@ button.workspacePinnedSummaryMetricCard:hover {
   width: 7px;
   height: 7px;
   border-radius: 999px;
-  background: var(--biof3-text-muted);
+  background: var(--gewu-text-muted);
   flex-shrink: 0;
 }
 
 .embeddedTerminalStatusDot[data-running='true'] {
-  background: var(--biof3-status-online);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--biof3-status-online) 18%, transparent);
+  background: var(--gewu-status-online);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gewu-status-online) 18%, transparent);
 }
 
 .embeddedTerminalHeader button {
@@ -3412,14 +3412,14 @@ button.workspacePinnedSummaryMetricCard:hover {
   border: none;
   border-radius: 5px;
   background: transparent;
-  color: var(--biof3-text-muted);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-muted);
+  font-size: var(--gewu-font-size-sm);
   cursor: pointer;
 }
 
 .embeddedTerminalHeader button:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text-terminal-strong);
+  background: var(--gewu-hover);
+  color: var(--gewu-text-terminal-strong);
 }
 
 /* BLOCK-54 P2 — terminal tab strip (multi-tab, cap 4, codex-style pills). */
@@ -3429,8 +3429,8 @@ button.workspacePinnedSummaryMetricCard:hover {
   gap: 4px;
   min-height: 24px;
   padding: 2px 7px 2px 8px;
-  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border) 72%, transparent);
-  background: color-mix(in srgb, var(--biof3-bg-terminal) 92%, var(--biof3-bg-subtle) 8%);
+  border-bottom: 1px solid color-mix(in srgb, var(--gewu-border) 72%, transparent);
+  background: color-mix(in srgb, var(--gewu-bg-terminal) 92%, var(--gewu-bg-subtle) 8%);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -3447,7 +3447,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   padding: 0 3px 0 2px;
   border: 1px solid transparent;
   border-radius: 6px;
-  color: var(--biof3-text-terminal-muted);
+  color: var(--gewu-text-terminal-muted);
 }
 
 .embeddedTerminalTab[data-exited='true'] {
@@ -3455,9 +3455,9 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .embeddedTerminalTabActive {
-  border-color: color-mix(in srgb, var(--biof3-border-strong) 66%, transparent);
-  background: color-mix(in srgb, var(--biof3-hover) 70%, transparent);
-  color: var(--biof3-text-terminal-strong);
+  border-color: color-mix(in srgb, var(--gewu-border-strong) 66%, transparent);
+  background: color-mix(in srgb, var(--gewu-hover) 70%, transparent);
+  color: var(--gewu-text-terminal-strong);
 }
 
 .embeddedTerminalTabLabel {
@@ -3469,7 +3469,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   border: none;
   background: transparent;
   color: inherit;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   line-height: 18px;
   cursor: pointer;
   white-space: nowrap;
@@ -3479,8 +3479,8 @@ button.workspacePinnedSummaryMetricCard:hover {
   max-width: 90px;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--biof3-text-terminal-muted);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-terminal-muted);
+  font-size: var(--gewu-font-size-xs);
   letter-spacing: 0.2px;
 }
 
@@ -3489,12 +3489,12 @@ button.workspacePinnedSummaryMetricCard:hover {
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: var(--biof3-text-muted);
+  background: var(--gewu-text-muted);
   flex-shrink: 0;
 }
 
 .embeddedTerminalTabDot[data-running='true'] {
-  background: var(--biof3-status-online);
+  background: var(--gewu-status-online);
 }
 
 .embeddedTerminalTabClose {
@@ -3507,14 +3507,14 @@ button.workspacePinnedSummaryMetricCard:hover {
   border: none;
   border-radius: 4px;
   background: transparent;
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .embeddedTerminalTabClose:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text-terminal-strong);
+  background: var(--gewu-hover);
+  color: var(--gewu-text-terminal-strong);
 }
 
 .embeddedTerminalTabAdd {
@@ -3527,22 +3527,22 @@ button.workspacePinnedSummaryMetricCard:hover {
   border: none;
   border-radius: 5px;
   background: transparent;
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .embeddedTerminalTabAdd:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text-terminal-strong);
+  background: var(--gewu-hover);
+  color: var(--gewu-text-terminal-strong);
 }
 
 .embeddedTerminalNotice {
   padding: 1px 7px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--biof3-warning, #d97706) 14%, transparent);
-  color: var(--biof3-warning, #d97706);
-  font-size: var(--biof3-font-size-xs);
+  background: color-mix(in srgb, var(--gewu-warning, #d97706) 14%, transparent);
+  color: var(--gewu-warning, #d97706);
+  font-size: var(--gewu-font-size-xs);
   white-space: nowrap;
 }
 
@@ -3562,16 +3562,16 @@ button.workspacePinnedSummaryMetricCard:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--biof3-text-terminal-muted);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-terminal-muted);
+  font-size: var(--gewu-font-size-sm);
 }
 
 /* xterm host — Codex-like dark terminal area */
 .embeddedTerminalHost {
   flex: 1;
   min-height: 0;
-  background: var(--biof3-bg-terminal);
-  color: var(--biof3-text-terminal-strong);
+  background: var(--gewu-bg-terminal);
+  color: var(--gewu-text-terminal-strong);
   border-radius: 0 0 8px 8px;
 }
 
@@ -3583,7 +3583,7 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 /* UI-215 补充：xterm 可访问性隐藏 textarea 收敛 UA 默认字号（canvas 渲染不受影响） */
 .embeddedTerminalHost :global(.xterm textarea) {
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .embeddedTerminalHost :global(.xterm-viewport),
@@ -3600,9 +3600,9 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .embeddedTerminalHost :global(.xterm-viewport)::-webkit-scrollbar-thumb {
-  border: 2px solid var(--biof3-bg-terminal);
+  border: 2px solid var(--gewu-bg-terminal);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--biof3-text-terminal-muted) 52%, transparent);
+  background: color-mix(in srgb, var(--gewu-text-terminal-muted) 52%, transparent);
 }
 
 .embeddedTerminalOutput {
@@ -3611,9 +3611,9 @@ button.workspacePinnedSummaryMetricCard:hover {
   margin: 0;
   padding: 6px 10px 8px;
   overflow: auto;
-  background: var(--biof3-bg-terminal);
-  color: var(--biof3-text-terminal-strong);
-  font: var(--biof3-font-size-sm)/1.4 var(--biof3-font-mono, monospace);
+  background: var(--gewu-bg-terminal);
+  color: var(--gewu-text-terminal-strong);
+  font: var(--gewu-font-size-sm)/1.4 var(--gewu-font-mono, monospace);
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -3625,9 +3625,9 @@ button.workspacePinnedSummaryMetricCard:hover {
   min-height: 30px;
   padding: 3px 12px 5px;
   border-top: 1px solid rgba(148, 163, 184, 0.18);
-  background: var(--biof3-bg-terminal);
-  color: var(--biof3-text-terminal-prompt);
-  font: var(--biof3-font-size-sm) var(--biof3-font-mono, monospace);
+  background: var(--gewu-bg-terminal);
+  color: var(--gewu-text-terminal-prompt);
+  font: var(--gewu-font-size-sm) var(--gewu-font-mono, monospace);
 }
 
 .embeddedTerminalInputRow input {
@@ -3636,12 +3636,12 @@ button.workspacePinnedSummaryMetricCard:hover {
   border: none;
   outline: none;
   background: transparent;
-  color: var(--biof3-text-terminal-strong);
+  color: var(--gewu-text-terminal-strong);
   font: inherit;
 }
 
 .embeddedTerminalInputRow input::placeholder {
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
 }
 
 .browserPanel {
@@ -3666,9 +3666,9 @@ button.workspacePinnedSummaryMetricCard:hover {
   margin: 0;
   padding: 8px 10px;
   border: none;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
   border-radius: 0;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
   flex-shrink: 0;
 }
 
@@ -3679,14 +3679,14 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .terminalPanelTitle {
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 600;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .terminalPanelMeta {
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3705,21 +3705,21 @@ button.workspacePinnedSummaryMetricCard:hover {
   padding: 0 8px;
   height: 24px;
   background: transparent;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-sm);
   cursor: pointer;
 }
 
 .terminalPanelActionBtn:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
-  border-color: var(--biof3-accent-border);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
+  border-color: var(--gewu-accent-border);
 }
 
 .terminalPanelHint {
   padding: 8px 10px 0;
-  color: var(--biof3-status-warning-fg);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-status-warning-fg);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .terminalPanelList {
@@ -3732,10 +3732,10 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .terminalProcessCard {
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
   overflow: hidden;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 .terminalProcessSummary {
@@ -3757,48 +3757,48 @@ button.workspacePinnedSummaryMetricCard:hover {
   align-items: center;
   gap: 8px;
   min-width: 0;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 600;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .terminalProcessMeta {
   flex-shrink: 0;
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary);
 }
 
 .terminalProcessDot {
   width: 7px;
   height: 7px;
   border-radius: 999px;
-  background: var(--biof3-text-muted);
+  background: var(--gewu-text-muted);
 }
 
 .terminalProcessDot[data-status='running'] {
-  background: var(--biof3-status-online);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--biof3-status-online) 16%, transparent);
+  background: var(--gewu-status-online);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gewu-status-online) 16%, transparent);
 }
 
 .terminalProcessDot[data-status='stopped'] {
-  background: var(--biof3-status-warning);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--biof3-status-warning) 14%, transparent);
+  background: var(--gewu-status-warning);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gewu-status-warning) 14%, transparent);
 }
 
 .terminalProcessCommand {
   padding: 0 12px 8px;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
   overflow-wrap: anywhere;
 }
 
 .terminalProcessOutput {
   margin: 0;
   padding: 10px 12px 12px;
-  border-top: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-terminal);
-  color: var(--biof3-text-terminal);
-  font-size: var(--biof3-font-size-sm);
+  border-top: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-terminal);
+  color: var(--gewu-text-terminal);
+  font-size: var(--gewu-font-size-sm);
   line-height: 1.5;
   white-space: pre-wrap;
   overflow: auto;
@@ -3818,16 +3818,16 @@ button.workspacePinnedSummaryMetricCard:hover {
   justify-content: center;
   width: 28px;
   height: 28px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
 }
 
 .browserControlBtn:hover {
-  color: var(--biof3-text);
-  border-color: var(--biof3-accent-border);
+  color: var(--gewu-text);
+  border-color: var(--gewu-accent-border);
 }
 
 .browserUrlBar {
@@ -3842,29 +3842,29 @@ button.workspacePinnedSummaryMetricCard:hover {
   flex: 1;
   min-width: 0;
   height: 28px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
   padding: 0 10px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
   font: inherit;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .browserUrlBar input:focus {
   outline: none;
-  border-color: var(--biof3-accent-border);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--biof3-accent) 12%, transparent);
+  border-color: var(--gewu-accent-border);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gewu-accent) 12%, transparent);
 }
 
 .browserGoBtn {
-  border: 1px solid color-mix(in srgb, var(--biof3-accent) 30%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gewu-accent) 30%, transparent);
   border-radius: 8px;
   padding: 0 10px;
   height: 28px;
-  background: var(--biof3-accent);
+  background: var(--gewu-accent);
   color: #ffffff;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   cursor: pointer;
 }
 
@@ -3878,8 +3878,8 @@ button.workspacePinnedSummaryMetricCard:hover {
   justify-content: space-between;
   gap: 8px;
   padding: 4px 10px 0;
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary);
 }
 
 .browserHost {
@@ -3890,7 +3890,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   margin: 0;
   border-top: none;
   border-radius: 0;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
   position: relative;
   overflow: hidden;
 }
@@ -3902,7 +3902,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   height: 100%;
   min-height: 0;
   border: 0;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 .browserHost :global(webview) {
@@ -3922,24 +3922,24 @@ button.workspacePinnedSummaryMetricCard:hover {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
   text-align: center;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
 }
 
 .browserError strong {
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-body-sm);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body-sm);
 }
 
 .browserError button {
   height: 28px;
   padding: 0 10px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 7px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
   cursor: pointer;
 }
 
@@ -3963,7 +3963,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   bottom: 0;
   left: 4px;
   width: 1px;
-  background: color-mix(in srgb, var(--biof3-border) 62%, transparent 38%);
+  background: color-mix(in srgb, var(--gewu-border) 62%, transparent 38%);
   opacity: 0.72;
 }
 
@@ -3974,13 +3974,13 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .resizeHandleV:hover::after,
 .resizeHandleV:active::after {
-  background: color-mix(in srgb, var(--biof3-accent) 58%, transparent 42%);
+  background: color-mix(in srgb, var(--gewu-accent) 58%, transparent 42%);
   opacity: 0.88;
   width: 2px;
 }
 
-body.biof3-resizing-columns .rightCol iframe,
-body.biof3-resizing-columns .rightPanelTabContent iframe {
+body.gewu-resizing-columns .rightCol iframe,
+body.gewu-resizing-columns .rightPanelTabContent iframe {
   pointer-events: none;
 }
 
@@ -3999,8 +3999,8 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   right: 0;
   bottom: 0;
   width: 320px;
-  background: var(--biof3-bg-surface);
-  border-left: 1px solid var(--biof3-border);
+  background: var(--gewu-bg-surface);
+  border-left: 1px solid var(--gewu-border);
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
   z-index: 999;
   display: flex;
@@ -4014,19 +4014,19 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
   flex-shrink: 0;
 }
 
 .settingsSiderTitle {
-  font-size: var(--biof3-font-size-md);
+  font-size: var(--gewu-font-size-md);
   font-weight: 600;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .iconBtnActive {
-  background: var(--biof3-accent-bg);
-  color: var(--biof3-accent);
+  background: var(--gewu-accent-bg);
+  color: var(--gewu-accent);
 }
 
 @keyframes fadeIn {
@@ -4057,17 +4057,17 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   margin: 0;
 }
 
 .panelEmpty {
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-tertiary);
   padding: 8px 0;
 }
 
@@ -4076,9 +4076,9 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   flex-direction: column;
   gap: 10px;
   padding: 12px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 10px;
-  background: var(--biof3-surface);
+  background: var(--gewu-surface);
 }
 
 .resultSidebarTitleRow {
@@ -4090,9 +4090,9 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
 
 .resultSidebarTitleRow strong {
   flex: 1;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   line-height: 1.35;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4103,8 +4103,8 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 10px;
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary);
 }
 
 .resultSidebarActions {
@@ -4120,27 +4120,27 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   gap: 6px;
   height: 28px;
   padding: 0 10px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  background: var(--biof3-surface);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-caption);
+  background: var(--gewu-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
   cursor: pointer;
 }
 
 .resultSidebarBtn:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 .resultSidebarBtnPrimary {
-  border-color: var(--biof3-accent-border);
-  background: var(--biof3-accent);
+  border-color: var(--gewu-accent-border);
+  background: var(--gewu-accent);
   color: #ffffff;
 }
 
 .resultSidebarBtnPrimary:hover {
-  background: var(--biof3-accent-hover);
+  background: var(--gewu-accent-hover);
   color: #ffffff;
 }
 
@@ -4163,9 +4163,9 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   gap: 7px;
   margin: 0 0 10px;
   padding: 9px 10px;
-  border: 1px solid color-mix(in srgb, var(--biof3-border) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gewu-border) 72%, transparent);
   border-radius: 10px;
-  background: var(--biof3-surface);
+  background: var(--gewu-surface);
 }
 
 .harnessIndexCardHeader {
@@ -4173,9 +4173,9 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 600;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .harnessIndexCardHeader em,
@@ -4183,16 +4183,16 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
 .harnessIndexMuted {
   font-style: normal;
   font-weight: 400;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .harnessIndexStats {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   line-height: 1.35;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .harnessIndexEntries {
@@ -4206,8 +4206,8 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   justify-content: space-between;
   gap: 8px;
   min-width: 0;
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-secondary);
 }
 
 .harnessIndexEntry span {
@@ -4223,7 +4223,7 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
 
 .harnessIndexMuted {
   margin: 0;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   line-height: 1.4;
 }
 
@@ -4248,9 +4248,9 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   flex-shrink: 0;
   min-height: 30px;
   padding: 5px 10px;
-  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border) 64%, transparent);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-xs);
+  border-bottom: 1px solid color-mix(in srgb, var(--gewu-border) 64%, transparent);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .resultWorkflowBarMain {
@@ -4268,8 +4268,8 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
 
 .resultWorkflowBarMain small {
   flex-shrink: 0;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .resultWorkflowDot {
@@ -4277,11 +4277,11 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   height: 6px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: var(--biof3-status-loading);
+  background: var(--gewu-status-loading);
 }
 
 .resultWorkflowDot[data-terminal='true'] {
-  background: var(--biof3-accent);
+  background: var(--gewu-accent);
 }
 
 .resultWorkflowBar > button {
@@ -4289,8 +4289,8 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   border: 0;
   padding: 2px 5px;
   background: transparent;
-  color: var(--biof3-accent);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-accent);
+  font-size: var(--gewu-font-size-xs);
   cursor: pointer;
 }
 
@@ -4312,10 +4312,10 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   gap: 10px;
   flex-shrink: 0;
   padding: 7px 10px;
-  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border) 64%, transparent);
-  background: color-mix(in srgb, var(--biof3-accent) 5%, var(--biof3-bg-surface));
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-xs);
+  border-bottom: 1px solid color-mix(in srgb, var(--gewu-border) 64%, transparent);
+  background: color-mix(in srgb, var(--gewu-accent) 5%, var(--gewu-bg-surface));
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .resultWorkflowConfirmation > span {
@@ -4334,23 +4334,23 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
 .resultWorkflowConfirmation button {
   min-height: 23px;
   padding: 2px 8px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-xs);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
   cursor: pointer;
 }
 
 .resultWorkflowConfirmation button:last-child {
-  border-color: color-mix(in srgb, var(--biof3-accent) 42%, var(--biof3-border));
-  color: var(--biof3-accent);
+  border-color: color-mix(in srgb, var(--gewu-accent) 42%, var(--gewu-border));
+  color: var(--gewu-accent);
 }
 
 .resultWorkflowError {
   justify-content: flex-start;
-  background: var(--biof3-status-error-bg);
-  color: var(--biof3-status-error-fg);
+  background: var(--gewu-status-error-bg);
+  color: var(--gewu-status-error-fg);
 }
 
 .resultWorkflowError > span {
@@ -4375,7 +4375,7 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
 .resultView input:focus-visible,
 .resultView select:focus-visible,
 .resultView textarea:focus-visible {
-  outline: 2px solid var(--biof3-accent);
+  outline: 2px solid var(--gewu-accent);
   outline-offset: 2px;
 }
 
@@ -4386,9 +4386,9 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   flex: 1;
   min-height: 0;
   padding: 12px;
-  border: 1px solid color-mix(in srgb, var(--biof3-border) 78%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gewu-border) 78%, transparent);
   border-radius: 12px;
-  background: var(--biof3-surface);
+  background: var(--gewu-surface);
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
   contain: layout paint;
 }
@@ -4401,19 +4401,19 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   overflow: hidden;
   border: 0;
   border-radius: 0;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
   position: relative;
 }
 
 /* Keep the expensive embedded report out of the frame-by-frame layout pass.
  * The surrounding result workspace still follows the pointer in real time. */
-body.biof3-resizing-columns .rightCol {
+body.gewu-resizing-columns .rightCol {
   transition: none;
   will-change: width;
 }
 
-body.biof3-resizing-columns,
-body.biof3-resizing-columns * {
+body.gewu-resizing-columns,
+body.gewu-resizing-columns * {
   cursor: ew-resize !important;
 }
 
@@ -4423,7 +4423,7 @@ body.biof3-resizing-columns * {
   height: 100%;
   min-height: 100%;
   border: 0;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 /* BLOCK-52 P2（图片/结果图引用）：结果图预览列——顶部引用操作行 + 图片画布 */
@@ -4467,11 +4467,11 @@ body.biof3-resizing-columns * {
 .resultSidebarText {
   margin: 0;
   padding: 10px;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   line-height: 1.55;
   white-space: pre-wrap;
   word-break: break-word;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .resultSidebarFileList {
@@ -4484,35 +4484,35 @@ body.biof3-resizing-columns * {
   flex-direction: column;
   gap: 2px;
   width: 100%;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
   padding: 8px 10px;
-  background: var(--biof3-surface);
+  background: var(--gewu-surface);
   cursor: pointer;
   text-align: left;
 }
 
 .resultSidebarFileItem:hover {
-  background: var(--biof3-hover);
+  background: var(--gewu-hover);
 }
 
 .resultSidebarFileItemActive {
-  border-color: var(--biof3-accent-border);
-  background: var(--biof3-accent-bg);
+  border-color: var(--gewu-accent-border);
+  background: var(--gewu-accent-bg);
 }
 
 .resultSidebarFileName {
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 500;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .resultSidebarFileMeta {
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
 }
 
 .resultSidebarStats {
@@ -4526,39 +4526,39 @@ body.biof3-resizing-columns * {
   flex-direction: column;
   gap: 4px;
   padding: 8px 10px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  background: var(--biof3-surface);
+  background: var(--gewu-surface);
 }
 
 .resultSidebarStat span {
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
 }
 
 .resultSidebarStat strong {
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text);
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text);
 }
 
 .resultSidebarDetails {
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
   padding: 8px 10px;
-  background: var(--biof3-surface);
+  background: var(--gewu-surface);
 }
 
 .resultSidebarDetails summary {
   cursor: pointer;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-secondary);
 }
 
 .resultSidebarDetails pre {
   margin: 8px 0 0;
   max-height: 160px;
   overflow: auto;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
@@ -4585,7 +4585,7 @@ body.biof3-resizing-columns * {
 }
 
 .itemRow:hover {
-  background: var(--biof3-hover);
+  background: var(--gewu-hover);
 }
 
 .itemMeta {
@@ -4596,17 +4596,17 @@ body.biof3-resizing-columns * {
 }
 
 .itemName {
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 500;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .itemSub {
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary);
 }
 
 /* Info block */
@@ -4621,16 +4621,16 @@ body.biof3-resizing-columns * {
   justify-content: space-between;
   gap: 8px;
   margin: 0;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
 }
 
 .infoLabel {
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   flex-shrink: 0;
 }
 
 .infoValue {
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   text-align: right;
   word-break: break-word;
 }
@@ -4656,11 +4656,11 @@ body.biof3-resizing-columns * {
 }
 
 .timelineItem:hover {
-  background: var(--biof3-hover);
+  background: var(--gewu-hover);
 }
 
 .timelineItemActive {
-  background: var(--biof3-accent-bg);
+  background: var(--gewu-accent-bg);
 }
 
 .timelineDot {
@@ -4669,20 +4669,20 @@ body.biof3-resizing-columns * {
   border-radius: 50%;
   margin-top: 5px;
   flex-shrink: 0;
-  background: var(--biof3-text-tertiary);
+  background: var(--gewu-text-tertiary);
 }
 
 .timelineDot[data-status="running"],
 .timelineDot[data-status="pending"] {
-  background: var(--biof3-status-loading);
+  background: var(--gewu-status-loading);
 }
 
 .timelineDot[data-status="done"] {
-  background: var(--biof3-status-online);
+  background: var(--gewu-status-online);
 }
 
 .timelineDot[data-status="failed"] {
-  background: var(--biof3-status-error);
+  background: var(--gewu-status-error);
 }
 
 .timelineContent {
@@ -4693,36 +4693,36 @@ body.biof3-resizing-columns * {
 }
 
 .timelineTitle {
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 500;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .timelineTime {
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary);
 }
 
 .timelineStatus {
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .timelineStatus[data-status="running"],
 .timelineStatus[data-status="pending"] {
-  color: var(--biof3-status-loading);
+  color: var(--gewu-status-loading);
 }
 
 .timelineStatus[data-status="done"] {
-  color: var(--biof3-status-online);
+  color: var(--gewu-status-online);
 }
 
 .timelineStatus[data-status="failed"] {
-  color: var(--biof3-status-error);
+  color: var(--gewu-status-error);
 }
 
 /* Result view */
@@ -4765,7 +4765,7 @@ body.biof3-resizing-columns * {
   gap: 6px;
   margin-top: 0;
   color: var(--text-tertiary);
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
 }
 
 .resultReportExportLinks a {
@@ -4778,7 +4778,7 @@ body.biof3-resizing-columns * {
   overflow-wrap: anywhere;
   color: var(--text-tertiary);
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   margin: 0;
   padding: 2px 0 6px;
 }
@@ -4786,12 +4786,12 @@ body.biof3-resizing-columns * {
 .resultReportActionStatus,
 .resultReportActionError {
   flex-basis: 100%;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   line-height: 1.45;
 }
 
-.resultReportActionStatus { color: var(--biof3-text-tertiary); }
-.resultReportActionError { color: var(--biof3-danger); }
+.resultReportActionStatus { color: var(--gewu-text-tertiary); }
+.resultReportActionError { color: var(--gewu-danger); }
 
 .resultReportSection {
   display: flex;
@@ -4821,7 +4821,7 @@ body.biof3-resizing-columns * {
   height: 100%;
   min-height: 100%;
   border: none;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 .resultReportSection .resultMetrics {
@@ -4862,9 +4862,9 @@ body.biof3-resizing-columns * {
   gap: 12px;
   margin: 4px 0 10px;
   padding: 12px 14px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 10px;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 .resultRawToggleCopy {
@@ -4874,9 +4874,9 @@ body.biof3-resizing-columns * {
 }
 
 .resultRawToggleText {
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   line-height: 1.4;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .resultHeader {
@@ -4885,9 +4885,9 @@ body.biof3-resizing-columns * {
   gap: 12px;
   margin-bottom: 14px;
   padding: 18px 18px 14px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 12px;
-  background: var(--biof3-surface);
+  background: var(--gewu-surface);
 }
 
 .resultHeaderTitleRow {
@@ -4902,8 +4902,8 @@ body.biof3-resizing-columns * {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 10px;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-tertiary);
 }
 
 .resultHeaderMeta span {
@@ -4922,10 +4922,10 @@ body.biof3-resizing-columns * {
 }
 
 .resultTitle {
-  font-size: var(--biof3-font-size-xl);
+  font-size: var(--gewu-font-size-xl);
   font-weight: 600;
   margin: 0;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .resultMetrics {
@@ -4940,20 +4940,20 @@ body.biof3-resizing-columns * {
   flex-direction: column;
   gap: 6px;
   padding: 12px 14px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 10px;
-  background: var(--biof3-surface);
+  background: var(--gewu-surface);
 }
 
 .resultMetricCard span {
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary);
 }
 
 .resultMetricCard strong {
-  font-size: var(--biof3-font-size-xl);
+  font-size: var(--gewu-font-size-xl);
   line-height: 1;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .resultFocusPanel {
@@ -4962,9 +4962,9 @@ body.biof3-resizing-columns * {
   gap: 12px;
   margin-bottom: 16px;
   padding: 14px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 12px;
-  background: var(--biof3-surface);
+  background: var(--gewu-surface);
 }
 
 .resultFocusHeader {
@@ -4981,17 +4981,17 @@ body.biof3-resizing-columns * {
 }
 
 .resultFocusLabel {
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .resultFocusName {
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
   font-weight: 600;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .resultFocusActions {
@@ -5009,19 +5009,19 @@ body.biof3-resizing-columns * {
   height: 28px;
   padding: 0 10px;
   border-radius: 8px;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   text-decoration: none;
 }
 
 .resultFocusActionLink {
-  border: 1px solid var(--biof3-border);
-  background: var(--biof3-surface);
-  color: var(--biof3-text-secondary);
+  border: 1px solid var(--gewu-border);
+  background: var(--gewu-surface);
+  color: var(--gewu-text-secondary);
 }
 
 .resultFocusActionHint {
-  background: var(--biof3-accent-bg);
-  color: var(--biof3-accent);
+  background: var(--gewu-accent-bg);
+  color: var(--gewu-accent);
 }
 
 .resultFocusBody {
@@ -5029,8 +5029,8 @@ body.biof3-resizing-columns * {
   max-height: 62vh;
   overflow: auto;
   border-radius: 10px;
-  background: var(--biof3-bg);
-  border: 1px solid var(--biof3-border);
+  background: var(--gewu-bg);
+  border: 1px solid var(--gewu-border);
 }
 
 .resultPreviewFrame {
@@ -5038,7 +5038,7 @@ body.biof3-resizing-columns * {
   width: 100%;
   height: 520px;
   border: 0;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 .resultPreviewImage {
@@ -5060,24 +5060,24 @@ body.biof3-resizing-columns * {
   gap: 6px;
   margin: 0;
   padding: 18px 16px;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-body-sm);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
 }
 
 .resultPreviewPlaceholder strong {
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .resultPreviewPlaceholder span {
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
   overflow-wrap: anywhere;
 }
 
 .resultPreviewPlaceholder a {
-  color: var(--biof3-accent);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-accent);
+  font-size: var(--gewu-font-size-sm);
   text-decoration: none;
 }
 
@@ -5090,23 +5090,23 @@ body.biof3-resizing-columns * {
   padding: 24px;
   border: 0;
   border-radius: 0;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
   text-align: center;
 }
 
 .resultPreviewUnavailable > svg {
-  color: var(--biof3-danger);
+  color: var(--gewu-danger);
 }
 
 .resultPreviewUnavailable strong {
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-body-sm);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body-sm);
 }
 
 .resultPreviewUnavailable span {
   max-width: 440px;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   line-height: 1.55;
 }
 
@@ -5120,18 +5120,18 @@ body.biof3-resizing-columns * {
 .resultPreviewUnavailable button {
   min-height: 29px;
   padding: 0 10px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
-  background: var(--biof3-bg);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
 }
 
 .resultPreviewUnavailable button:hover {
-  border-color: var(--biof3-border-strong);
-  color: var(--biof3-text);
+  border-color: var(--gewu-border-strong);
+  color: var(--gewu-text);
 }
 
 .resultReportPreview {
@@ -5140,11 +5140,11 @@ body.biof3-resizing-columns * {
   height: 100%;
   min-height: 520px;
   border: 0;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 .resultStatus {
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   padding: 2px 10px;
   border-radius: 4px;
   text-transform: uppercase;
@@ -5153,40 +5153,40 @@ body.biof3-resizing-columns * {
 
 .resultStatus[data-status="running"],
 .resultStatus[data-status="pending"] {
-  background: var(--biof3-status-warning-bg);
-  color: var(--biof3-status-warning-fg);
+  background: var(--gewu-status-warning-bg);
+  color: var(--gewu-status-warning-fg);
 }
 
 .resultStatus[data-status="done"] {
-  background: var(--biof3-status-success-bg);
-  color: var(--biof3-status-success-fg);
+  background: var(--gewu-status-success-bg);
+  color: var(--gewu-status-success-fg);
 }
 
 .resultStatus[data-status="failed"] {
-  background: var(--biof3-status-error-bg);
-  color: var(--biof3-status-error-fg);
+  background: var(--gewu-status-error-bg);
+  color: var(--gewu-status-error-fg);
 }
 
 .resultBody {
-  background: var(--biof3-surface);
-  border: 1px solid var(--biof3-border);
+  background: var(--gewu-surface);
+  border: 1px solid var(--gewu-border);
   border-radius: 12px;
   padding: 24px;
 }
 
 .resultPlaceholder {
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-body);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-body);
 }
 
 .resultError {
   margin-top: 16px;
   padding: 12px;
-  background: var(--biof3-status-error-bg);
-  border: 1px solid var(--biof3-status-error-border);
+  background: var(--gewu-status-error-bg);
+  border: 1px solid var(--gewu-status-error-border);
   border-radius: 8px;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-status-error-fg);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-status-error-fg);
   white-space: pre-wrap;
   overflow-x: auto;
 }
@@ -5203,8 +5203,8 @@ body.biof3-resizing-columns * {
 .spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid var(--biof3-border);
-  border-top-color: var(--biof3-accent);
+  border: 3px solid var(--gewu-border);
+  border-top-color: var(--gewu-accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -5218,27 +5218,27 @@ body.biof3-resizing-columns * {
   display: flex;
   gap: 0;
   margin-bottom: 16px;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
 }
 
 .resultTab {
   padding: 8px 16px;
   border: none;
   background: transparent;
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: color 0.15s, border-color 0.15s;
 }
 
 .resultTab:hover {
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .resultTabActive {
-  color: var(--biof3-accent);
-  border-bottom-color: var(--biof3-accent);
+  color: var(--gewu-accent);
+  border-bottom-color: var(--gewu-accent);
 }
 
 /* Plot cards */
@@ -5249,8 +5249,8 @@ body.biof3-resizing-columns * {
 }
 
 .plotCard {
-  background: var(--biof3-surface);
-  border: 1px solid var(--biof3-border);
+  background: var(--gewu-surface);
+  border: 1px solid var(--gewu-border);
   border-radius: 10px;
   overflow: hidden;
   display: flex;
@@ -5259,8 +5259,8 @@ body.biof3-resizing-columns * {
 }
 
 .plotCardActive {
-  border-color: var(--biof3-accent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--biof3-accent) 16%, transparent);
+  border-color: var(--gewu-accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gewu-accent) 16%, transparent);
 }
 
 .plotCardHeader {
@@ -5268,21 +5268,21 @@ body.biof3-resizing-columns * {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
 }
 
 .plotCardNum {
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 600;
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .plotCardLabel {
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 500;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5304,37 +5304,37 @@ body.biof3-resizing-columns * {
 
 .plotCardFooter {
   padding: 6px 12px;
-  border-top: 1px solid var(--biof3-border);
+  border-top: 1px solid var(--gewu-border);
   display: flex;
   justify-content: flex-end;
 }
 
 .plotCardBtn {
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   padding: 4px 10px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
-  background: var(--biof3-surface);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-surface);
+  color: var(--gewu-text-secondary);
   text-decoration: none;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 
 .plotCardBtn:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 .plotCardBtnPrimary {
   composes: plotCardBtn;
-  background: var(--biof3-accent);
+  background: var(--gewu-accent);
   color: #ffffff;
-  border-color: var(--biof3-accent);
+  border-color: var(--gewu-accent);
 }
 
 .plotCardBtnPrimary:hover {
-  background: var(--biof3-accent-hover);
+  background: var(--gewu-accent-hover);
   color: #ffffff;
 }
 
@@ -5346,8 +5346,8 @@ body.biof3-resizing-columns * {
 }
 
 .fileCard {
-  background: var(--biof3-surface);
-  border: 1px solid var(--biof3-border);
+  background: var(--gewu-surface);
+  border: 1px solid var(--gewu-border);
   border-radius: 10px;
   padding: 16px;
   display: flex;
@@ -5357,24 +5357,24 @@ body.biof3-resizing-columns * {
 }
 
 .fileCardActive {
-  border-color: var(--biof3-accent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--biof3-accent) 16%, transparent);
+  border-color: var(--gewu-accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gewu-accent) 16%, transparent);
 }
 
 .fileCardIcon {
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
   margin-bottom: 4px;
 }
 
 .fileCardName {
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
   font-weight: 600;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .fileCardDesc {
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-tertiary);
   word-break: break-all;
 }
 
@@ -5387,7 +5387,7 @@ body.biof3-resizing-columns * {
 /* CSV preview */
 .csvPreview {
   margin-top: 20px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -5397,8 +5397,8 @@ body.biof3-resizing-columns * {
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: var(--biof3-hover);
-  font-size: var(--biof3-font-size-body-sm);
+  background: var(--gewu-hover);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 500;
 }
 
@@ -5406,8 +5406,8 @@ body.biof3-resizing-columns * {
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: var(--biof3-font-size-md);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-md);
+  color: var(--gewu-text-secondary);
 }
 
 .csvPreviewBody {
@@ -5418,12 +5418,12 @@ body.biof3-resizing-columns * {
 .csvPreviewBody table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .csvPreviewBody td {
   padding: 4px 8px;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
   white-space: nowrap;
   max-width: 200px;
   overflow: hidden;
@@ -5432,7 +5432,7 @@ body.biof3-resizing-columns * {
 
 .csvPreviewBody tr:first-child td {
   font-weight: 600;
-  background: var(--biof3-hover);
+  background: var(--gewu-hover);
   position: sticky;
   top: 0;
 }
@@ -5442,10 +5442,10 @@ body.biof3-resizing-columns * {
   padding: 12px;
   max-height: 400px;
   overflow: auto;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   line-height: 1.5;
   white-space: pre-wrap;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .jobDetails {
@@ -5454,17 +5454,17 @@ body.biof3-resizing-columns * {
 }
 
 .jobDetailSection {
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  background: var(--biof3-bg);
+  background: var(--gewu-bg);
   padding: 12px;
 }
 
 .jobDetailSection h3 {
   margin: 0 0 10px;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 700;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .jobDetailSection dl {
@@ -5477,17 +5477,17 @@ body.biof3-resizing-columns * {
   display: grid;
   grid-template-columns: 92px minmax(0, 1fr);
   gap: 10px;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .jobDetailSection dt {
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .jobDetailSection dd {
   min-width: 0;
   margin: 0;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   overflow-wrap: anywhere;
 }
 
@@ -5496,9 +5496,9 @@ body.biof3-resizing-columns * {
   margin: 0;
   overflow: auto;
   white-space: pre-wrap;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   line-height: 1.5;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .resultRawDetails {
@@ -5509,9 +5509,9 @@ body.biof3-resizing-columns * {
 .resultRawDetails summary {
   cursor: pointer;
   list-style: none;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 600;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .resultRawDetails summary::-webkit-details-marker {
@@ -5540,28 +5540,28 @@ body.biof3-resizing-columns * {
 }
 
 .emptyResultIcon {
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
   opacity: 0.35;
 }
 
 .emptyResultTitle {
-  font-size: var(--biof3-font-size-md);
+  font-size: var(--gewu-font-size-md);
   font-weight: 700;
   margin: 0;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .emptyResultDesc {
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   line-height: 1.5;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   max-width: 330px;
   margin: 0;
 }
 
 .emptyResultProject {
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-tertiary);
   margin: 0;
 }
 
@@ -5580,30 +5580,30 @@ body.biof3-resizing-columns * {
   width: 100%;
   min-height: 54px;
   padding: 10px 12px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 11px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
   text-align: left;
   cursor: pointer;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
   /* UI-215 补充：卡片容器收敛 UA 默认字号（子级文本自带 token） */
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .emptyResultLaunchCard:hover {
-  background: var(--biof3-bg-surface);
-  border-color: var(--biof3-accent-border);
+  background: var(--gewu-bg-surface);
+  border-color: var(--gewu-accent-border);
 }
 
 .emptyResultLaunchCard span {
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 600;
 }
 
 .emptyResultLaunchCard small {
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary);
 }
 
 .emptyResultLaunchText {
@@ -5616,7 +5616,7 @@ body.biof3-resizing-columns * {
 .tabBar {
   display: flex;
   gap: 0;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
   margin-bottom: 4px;
 }
 
@@ -5625,20 +5625,20 @@ body.biof3-resizing-columns * {
   padding: 6px 8px;
   border: none;
   background: transparent;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: color 0.15s, border-color 0.15s;
 }
 
 .tabBtn:hover {
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .tabBtnActive {
-  color: var(--biof3-accent);
-  border-bottom-color: var(--biof3-accent);
+  color: var(--gewu-accent);
+  border-bottom-color: var(--gewu-accent);
 }
 
 /* File tree */
@@ -5664,28 +5664,28 @@ body.biof3-resizing-columns * {
   padding-right: 6px;
   padding-bottom: 3px;
   border: 0;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   background: transparent;
   text-align: left;
   cursor: pointer;
   border-radius: 6px;
   transition: background 0.12s ease, box-shadow 0.12s ease;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-family: inherit;
 }
 
 .fileTreeRow:hover {
-  background: var(--biof3-hover);
+  background: var(--gewu-hover);
 }
 
 .fileTreeRow:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 1px var(--biof3-accent);
+  box-shadow: inset 0 0 0 1px var(--gewu-accent);
 }
 
 .fileTreeRowActive {
-  background: var(--biof3-accent-bg);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--biof3-accent) 46%, transparent);
+  background: var(--gewu-accent-bg);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gewu-accent) 46%, transparent);
 }
 
 .fileTreeChevron {
@@ -5695,18 +5695,18 @@ body.biof3-resizing-columns * {
   align-items: center;
   justify-content: center;
   flex: 0 0 13px;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .fileTreeName {
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .fileTreeLink {
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5715,8 +5715,8 @@ body.biof3-resizing-columns * {
 }
 
 .fileTreeSize {
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
   flex-shrink: 0;
   margin-left: auto;
   opacity: 0;
@@ -5739,7 +5739,7 @@ body.biof3-resizing-columns * {
   min-width: 0;
   min-height: 0;
   height: 100%;
-  background: var(--biof3-surface);
+  background: var(--gewu-surface);
 }
 
 .workspaceFilesMain {
@@ -5759,8 +5759,8 @@ body.biof3-resizing-columns * {
   flex-shrink: 0;
   min-height: 40px;
   padding: 5px 8px;
-  border-bottom: 1px solid var(--biof3-border);
-  background: var(--biof3-surface);
+  border-bottom: 1px solid var(--gewu-border);
+  background: var(--gewu-surface);
 }
 
 .workspaceBreadcrumb {
@@ -5770,8 +5770,8 @@ body.biof3-resizing-columns * {
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .workspaceBreadcrumbSegment {
@@ -5783,7 +5783,7 @@ body.biof3-resizing-columns * {
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   font: inherit;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -5791,20 +5791,20 @@ body.biof3-resizing-columns * {
 }
 
 .workspaceBreadcrumbSegment:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 .workspaceBreadcrumbSeparator {
   flex: 0 0 auto;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspaceBreadcrumbFile {
   flex: 0 1 auto;
   min-width: 32px;
   overflow: hidden;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -5813,7 +5813,7 @@ body.biof3-resizing-columns * {
 .workspaceBreadcrumbEmpty {
   flex: 0 0 auto;
   padding-left: 4px;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspaceTreeToggle {
@@ -5829,15 +5829,15 @@ body.biof3-resizing-columns * {
   height: 30px;
   border: none;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   padding: 0;
   border-radius: 6px;
 }
 
 .workspaceTreeToggle:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 .dataIntakeControl {
@@ -5860,10 +5860,10 @@ body.biof3-resizing-columns * {
   width: min(380px, calc(100% - 16px));
   max-height: min(520px, calc(100vh - 120px));
   overflow: auto;
-  border: 1px solid var(--biof3-border-strong);
+  border: 1px solid var(--gewu-border-strong);
   border-radius: 7px;
-  background: var(--biof3-surface);
-  color: var(--biof3-text);
+  background: var(--gewu-surface);
+  color: var(--gewu-text);
   box-shadow: 0 12px 32px rgb(15 23 42 / 16%);
 }
 
@@ -5873,8 +5873,8 @@ body.biof3-resizing-columns * {
   justify-content: space-between;
   min-height: 38px;
   padding: 7px 10px 7px 12px;
-  border-bottom: 1px solid var(--biof3-border);
-  font-size: var(--biof3-font-size-body-sm);
+  border-bottom: 1px solid var(--gewu-border);
+  font-size: var(--gewu-font-size-body-sm);
 }
 
 .dataIntakeHeader button {
@@ -5887,13 +5887,13 @@ body.biof3-resizing-columns * {
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
 }
 
 .dataIntakeHeader button:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 .dataIntakeState,
@@ -5904,12 +5904,12 @@ body.biof3-resizing-columns * {
   gap: 8px;
   min-height: 96px;
   margin: 12px;
-  border: 1px dashed var(--biof3-border-strong);
+  border: 1px dashed var(--gewu-border-strong);
   border-radius: 6px;
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-secondary);
   font: inherit;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .dataIntakeChoose {
@@ -5917,15 +5917,15 @@ body.biof3-resizing-columns * {
 }
 
 .dataIntakeChoose:hover {
-  border-color: var(--biof3-accent);
-  color: var(--biof3-text);
+  border-color: var(--gewu-accent);
+  color: var(--gewu-text);
 }
 
 .dataIntakeSpinner {
   width: 14px;
   height: 14px;
-  border: 2px solid var(--biof3-border-strong);
-  border-top-color: var(--biof3-accent);
+  border: 2px solid var(--gewu-border-strong);
+  border-top-color: var(--gewu-accent);
   border-radius: 50%;
   animation: dataIntakeSpin 800ms linear infinite;
 }
@@ -5947,8 +5947,8 @@ body.biof3-resizing-columns * {
   gap: 7px;
   min-height: 48px;
   padding: 6px 4px;
-  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border) 72%, transparent);
-  color: var(--biof3-text-secondary);
+  border-bottom: 1px solid color-mix(in srgb, var(--gewu-border) 72%, transparent);
+  color: var(--gewu-text-secondary);
 }
 
 .dataIntakeFileRow:last-child {
@@ -5956,7 +5956,7 @@ body.biof3-resizing-columns * {
 }
 
 .dataIntakeFileRow[data-blocked='true'] {
-  color: var(--biof3-danger);
+  color: var(--gewu-danger);
 }
 
 .dataIntakeFileRow > span {
@@ -5974,19 +5974,19 @@ body.biof3-resizing-columns * {
 }
 
 .dataIntakeFileRow strong {
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 600;
 }
 
 .dataIntakeFileRow small {
   color: inherit;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .dataIntakeFileRow em {
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
   font-style: normal;
 }
 
@@ -5996,14 +5996,14 @@ body.biof3-resizing-columns * {
   gap: 6px;
   min-height: 34px;
   padding: 7px 12px;
-  border-top: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-status-warning-fg);
-  font-size: var(--biof3-font-size-sm);
+  border-top: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-status-warning-fg);
+  font-size: var(--gewu-font-size-sm);
 }
 
 .dataIntakeReadiness[data-status='ready'] {
-  color: var(--biof3-status-success-fg);
+  color: var(--gewu-status-success-fg);
 }
 
 .dataIntakeActions {
@@ -6011,7 +6011,7 @@ body.biof3-resizing-columns * {
   justify-content: flex-end;
   gap: 7px;
   padding: 9px 10px;
-  border-top: 1px solid var(--biof3-border);
+  border-top: 1px solid var(--gewu-border);
 }
 
 .dataIntakePrimary,
@@ -6022,39 +6022,39 @@ body.biof3-resizing-columns * {
   gap: 5px;
   min-height: 30px;
   padding: 4px 10px;
-  border: 1px solid var(--biof3-border-strong);
+  border: 1px solid var(--gewu-border-strong);
   border-radius: 5px;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   font: inherit;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   cursor: pointer;
 }
 
 .dataIntakePrimary {
-  border-color: var(--biof3-accent);
-  background: var(--biof3-accent);
-  color: var(--biof3-on-accent, #fff);
+  border-color: var(--gewu-accent);
+  background: var(--gewu-accent);
+  color: var(--gewu-on-accent, #fff);
 }
 
 .dataIntakePrimary:disabled {
-  border-color: var(--biof3-border);
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-text-tertiary);
+  border-color: var(--gewu-border);
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-tertiary);
   cursor: not-allowed;
 }
 
 .dataIntakeSecondary:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 .dataIntakeError {
   padding: 7px 12px;
-  border-top: 1px solid color-mix(in srgb, var(--biof3-danger) 24%, transparent);
-  background: color-mix(in srgb, var(--biof3-danger) 7%, transparent);
-  color: var(--biof3-danger);
-  font-size: var(--biof3-font-size-sm);
+  border-top: 1px solid color-mix(in srgb, var(--gewu-danger) 24%, transparent);
+  background: color-mix(in srgb, var(--gewu-danger) 7%, transparent);
+  color: var(--gewu-danger);
+  font-size: var(--gewu-font-size-sm);
 }
 
 .workspaceFileTreePaneWrap {
@@ -6062,8 +6062,8 @@ body.biof3-resizing-columns * {
   flex-shrink: 0;
   min-height: 0;
   min-width: 96px;
-  border-left: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-surface);
+  border-left: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-surface);
   overflow: hidden;
 }
 
@@ -6073,7 +6073,7 @@ body.biof3-resizing-columns * {
   height: 100%;
   overflow: auto;
   padding: 10px 10px 8px;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 .workspaceFileTreeResize {
@@ -6084,7 +6084,7 @@ body.biof3-resizing-columns * {
 }
 
 .workspaceFileTreeResize:hover {
-  background: var(--biof3-accent-bg);
+  background: var(--gewu-accent-bg);
 }
 
 .workspaceFilePreviewPane {
@@ -6105,7 +6105,7 @@ body.biof3-resizing-columns * {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: var(--biof3-surface);
+  background: var(--gewu-surface);
 }
 
 .workspacePreviewEmpty {
@@ -6113,8 +6113,8 @@ body.biof3-resizing-columns * {
   justify-content: center;
   gap: 8px;
   padding: 18px;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-body-sm);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-body-sm);
 }
 
 .workspacePreviewActions {
@@ -6132,19 +6132,19 @@ body.biof3-resizing-columns * {
   flex-shrink: 0;
   min-height: 26px;
   padding: 3px 6px;
-  border: 1px solid color-mix(in srgb, var(--biof3-border) 56%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gewu-border) 56%, transparent);
   border-radius: 4px;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   font: inherit;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   cursor: pointer;
 }
 
 .workspacePreviewOpen:hover:not(:disabled) {
-  border-color: var(--biof3-border-strong);
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-text);
+  border-color: var(--gewu-border-strong);
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text);
 }
 
 .workspacePreviewOpen:disabled {
@@ -6160,10 +6160,10 @@ body.biof3-resizing-columns * {
 
 .workspacePreviewError {
   padding: 6px 12px;
-  border-bottom: 1px solid var(--biof3-border);
-  background: color-mix(in srgb, var(--biof3-danger) 7%, transparent);
-  color: var(--biof3-danger);
-  font-size: var(--biof3-font-size-sm);
+  border-bottom: 1px solid var(--gewu-border);
+  background: color-mix(in srgb, var(--gewu-danger) 7%, transparent);
+  color: var(--gewu-danger);
+  font-size: var(--gewu-font-size-sm);
 }
 
 .workspacePreviewBody {
@@ -6172,7 +6172,7 @@ body.biof3-resizing-columns * {
   display: flex;
   flex-direction: column;
   overflow: auto;
-  background: var(--biof3-bg);
+  background: var(--gewu-bg);
 }
 
 .workspaceBinaryFallback {
@@ -6182,31 +6182,31 @@ body.biof3-resizing-columns * {
   justify-content: center;
   gap: 6px;
   padding: 32px 18px;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-body-sm);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-body-sm);
   text-align: center;
 }
 
 .workspaceBinaryMeta {
   margin: 0;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspaceBinaryTitle {
   margin: 0;
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
   font-weight: 600;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .workspaceOfficeDoc,
 .workspaceOfficeSheet,
 .workspaceOfficeListing {
   padding: 18px 22px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-body-sm);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body-sm);
   line-height: 1.7;
   display: flex;
   flex-direction: column;
@@ -6214,10 +6214,10 @@ body.biof3-resizing-columns * {
 }
 
 .workspaceOfficeHeader {
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   text-transform: uppercase;
 }
 
@@ -6226,30 +6226,30 @@ body.biof3-resizing-columns * {
   padding: 14px 16px;
   white-space: pre-wrap;
   word-break: break-word;
-  background: var(--biof3-bg-subtle);
-  border: 1px solid var(--biof3-border);
+  background: var(--gewu-bg-subtle);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
-  font-family: var(--biof3-font-mono, monospace);
-  font-size: var(--biof3-font-size-caption);
+  font-family: var(--gewu-font-mono, monospace);
+  font-size: var(--gewu-font-size-caption);
   line-height: 1.55;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .workspaceOfficeHint {
   margin: 0;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspaceOfficeSheet table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .workspaceOfficeSheet th,
 .workspaceOfficeSheet td {
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   padding: 5px 8px;
   text-align: left;
   white-space: nowrap;
@@ -6259,8 +6259,8 @@ body.biof3-resizing-columns * {
 }
 
 .workspaceOfficeSheet td:first-child {
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-secondary);
   font-weight: 600;
 }
 
@@ -6276,9 +6276,9 @@ body.biof3-resizing-columns * {
   align-items: stretch;
   gap: 6px;
   padding: 8px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
-  background: var(--biof3-bg);
+  background: var(--gewu-bg);
   font: inherit;
   color: inherit;
   cursor: zoom-in;
@@ -6290,8 +6290,8 @@ body.biof3-resizing-columns * {
 }
 
 .workspaceOfficeAsset span {
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -6300,11 +6300,11 @@ body.biof3-resizing-columns * {
 .workspaceOfficeListing ul {
   margin: 0;
   padding: 8px 16px;
-  background: var(--biof3-bg-subtle);
-  border: 1px solid var(--biof3-border);
+  background: var(--gewu-bg-subtle);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
-  font-family: var(--biof3-font-mono, monospace);
-  font-size: var(--biof3-font-size-caption);
+  font-family: var(--gewu-font-mono, monospace);
+  font-size: var(--gewu-font-size-caption);
   list-style-type: square;
 }
 
@@ -6314,23 +6314,23 @@ body.biof3-resizing-columns * {
   width: 100%;
   height: 100%;
   border: none;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 .workspaceCsvPreview {
   padding: 12px;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 .workspaceCsvPreview table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .workspaceCsvPreview th,
 .workspaceCsvPreview td {
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   padding: 5px 8px;
   text-align: left;
   white-space: nowrap;
@@ -6340,8 +6340,8 @@ body.biof3-resizing-columns * {
 }
 
 .workspaceCsvPreview th {
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-secondary);
   font-weight: 700;
   position: sticky;
   top: 0;
@@ -6349,20 +6349,20 @@ body.biof3-resizing-columns * {
 
 .workspaceCsvHint {
   margin: 10px 0 0;
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary);
 }
 
 .workspaceTextPreview {
   margin: 0;
   padding: 12px;
   min-height: 100%;
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-caption);
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 .workspaceCodePreview {
@@ -6370,9 +6370,9 @@ body.biof3-resizing-columns * {
   padding: 14px 16px;
   min-height: 100%;
   overflow: auto;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
-  font: var(--biof3-font-size-caption)/1.55 var(--biof3-font-mono, monospace);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
+  font: var(--gewu-font-size-caption)/1.55 var(--gewu-font-mono, monospace);
   tab-size: 2;
   white-space: pre;
 }
@@ -6388,9 +6388,9 @@ body.biof3-resizing-columns * {
   height: 100%;
   min-height: 0;
   padding: 18px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-body-sm);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body-sm);
   line-height: 1.65;
   overflow-y: auto;
   box-sizing: border-box;
@@ -6400,20 +6400,20 @@ body.biof3-resizing-columns * {
 .workspaceMarkdownPreview h2,
 .workspaceMarkdownPreview h3 {
   margin: 1.1em 0 0.55em;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   line-height: 1.25;
 }
 
 .workspaceMarkdownPreview h1 {
-  font-size: var(--biof3-font-size-2xl);
+  font-size: var(--gewu-font-size-2xl);
 }
 
 .workspaceMarkdownPreview h2 {
-  font-size: var(--biof3-font-size-lg);
+  font-size: var(--gewu-font-size-lg);
 }
 
 .workspaceMarkdownPreview h3 {
-  font-size: var(--biof3-font-size-md);
+  font-size: var(--gewu-font-size-md);
 }
 
 .workspaceMarkdownPreview p,
@@ -6425,17 +6425,17 @@ body.biof3-resizing-columns * {
 .workspaceMarkdownPreview code {
   border-radius: 4px;
   padding: 1px 4px;
-  background: var(--biof3-hover);
-  font-size: var(--biof3-font-size-caption);
+  background: var(--gewu-hover);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .workspaceMarkdownPreview pre {
   margin: 12px 0;
   padding: 12px;
   overflow: auto;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
-  background: var(--biof3-bg-subtle);
+  background: var(--gewu-bg-subtle);
 }
 
 .workspaceMarkdownPreview pre code {
@@ -6447,12 +6447,12 @@ body.biof3-resizing-columns * {
   width: 100%;
   border-collapse: collapse;
   margin: 12px 0;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .workspaceMarkdownPreview th,
 .workspaceMarkdownPreview td {
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   padding: 6px 8px;
   text-align: left;
 }
@@ -6460,8 +6460,8 @@ body.biof3-resizing-columns * {
 .workspaceMarkdownPreview blockquote {
   margin: 12px 0;
   padding-left: 12px;
-  border-left: 3px solid var(--biof3-border);
-  color: var(--biof3-text-secondary);
+  border-left: 3px solid var(--gewu-border);
+  color: var(--gewu-text-secondary);
 }
 
 /* BLOCK-18 — markdown diff toggle + diff 视图 */
@@ -6472,15 +6472,15 @@ body.biof3-resizing-columns * {
   width: 100%;
   gap: 8px;
   padding: 8px 18px;
-  border-bottom: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-subtle);
+  border-bottom: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-subtle);
   flex-shrink: 0;
   box-sizing: border-box;
 }
 
 .workspaceMarkdownDiffTabs {
   display: inline-flex;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -6488,26 +6488,26 @@ body.biof3-resizing-columns * {
 .workspaceMarkdownDiffTab {
   appearance: none;
   border: none;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
   font: inherit;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   padding: 4px 12px;
   cursor: pointer;
   transition: background 120ms ease;
 }
 
 .workspaceMarkdownDiffTab + .workspaceMarkdownDiffTab {
-  border-left: 1px solid var(--biof3-border);
+  border-left: 1px solid var(--gewu-border);
 }
 
 .workspaceMarkdownDiffTab:hover {
-  background: var(--biof3-hover);
+  background: var(--gewu-hover);
 }
 
 .workspaceMarkdownDiffTabActive {
-  background: var(--biof3-accent);
-  color: var(--biof3-bg);
+  background: var(--gewu-accent);
+  color: var(--gewu-bg);
 }
 
 .workspaceMarkdownDiffActions {
@@ -6517,24 +6517,24 @@ body.biof3-resizing-columns * {
 }
 
 .workspaceMarkdownDiffHint {
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-secondary);
 }
 
 .workspaceMarkdownDiffAction {
   appearance: none;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 4px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
   font: inherit;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   padding: 3px 10px;
   cursor: pointer;
 }
 
 .workspaceMarkdownDiffAction:hover:not(:disabled) {
-  background: var(--biof3-hover);
+  background: var(--gewu-hover);
 }
 
 .workspaceMarkdownDiffAction:disabled {
@@ -6545,9 +6545,9 @@ body.biof3-resizing-columns * {
 .workspaceMarkdownDiff {
   min-height: 100%;
   padding: 12px 0;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
-  font: var(--biof3-font-size-caption)/1.55 var(--biof3-font-mono, monospace);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
+  font: var(--gewu-font-size-caption)/1.55 var(--gewu-font-mono, monospace);
   tab-size: 2;
   overflow: auto;
 }
@@ -6563,11 +6563,11 @@ body.biof3-resizing-columns * {
   min-width: 38px;
   padding: 0 6px;
   text-align: right;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   user-select: none;
-  border-right: 1px solid var(--biof3-border);
-  font-size: var(--biof3-font-size-sm);
-  background: var(--biof3-bg-subtle);
+  border-right: 1px solid var(--gewu-border);
+  font-size: var(--gewu-font-size-sm);
+  background: var(--gewu-bg-subtle);
 }
 
 .workspaceMarkdownDiffMarker {
@@ -6575,7 +6575,7 @@ body.biof3-resizing-columns * {
   min-width: 18px;
   padding: 0 4px;
   text-align: center;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   user-select: none;
   font-weight: 600;
 }
@@ -6588,7 +6588,7 @@ body.biof3-resizing-columns * {
 
 /* 上下文行：默认色 */
 .workspaceMarkdownDiffRow_ctx .workspaceMarkdownDiffContent {
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 /* 删除行：整行红色背景 */
@@ -6613,17 +6613,17 @@ body.biof3-resizing-columns * {
 }
 .workspaceMarkdownDiffHunk {
   padding: 4px 12px;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   font-style: italic;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
 }
 
 /* fold 占位：低调灰 */
 .workspaceMarkdownDiffRow_fold > .workspaceMarkdownDiffContent,
 .workspaceMarkdownDiffRow_fold > .workspaceMarkdownDiffMarker,
 .workspaceMarkdownDiffRow_fold > .workspaceMarkdownDiffGutter {
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-secondary);
   font-style: italic;
 }
 
@@ -6637,15 +6637,15 @@ body.biof3-resizing-columns * {
   border: none;
   outline: none;
   resize: none;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
-  font: var(--biof3-font-size-body-sm)/1.6 var(--biof3-font-mono, monospace);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
+  font: var(--gewu-font-size-body-sm)/1.6 var(--gewu-font-mono, monospace);
   tab-size: 2;
 }
 
 .workspaceMarkdownEditor:focus {
-  background: var(--biof3-bg-surface);
-  box-shadow: inset 2px 0 0 var(--biof3-accent, #4f86ff);
+  background: var(--gewu-bg-surface);
+  box-shadow: inset 2px 0 0 var(--gewu-accent, #4f86ff);
 }
 
 /* BLOCK-42 — CodeMirror 预览编辑器容器（text/json/markdown-edit）：
@@ -6656,8 +6656,8 @@ body.biof3-resizing-columns * {
   min-height: 0;
   box-sizing: border-box;
   overflow: hidden;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
 }
 
 .workspaceMarkdownSave {
@@ -6666,11 +6666,11 @@ body.biof3-resizing-columns * {
   gap: 6px;
   margin-right: 6px;
   padding: 4px 10px;
-  font-size: var(--biof3-font-size-caption);
-  border: 1px solid var(--biof3-border);
+  font-size: var(--gewu-font-size-caption);
+  border: 1px solid var(--gewu-border);
   border-radius: 4px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
   cursor: pointer;
 }
 
@@ -6686,7 +6686,7 @@ body.biof3-resizing-columns * {
   width: 100%;
   min-height: 100%;
   border: none;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
   padding: 12px;
   cursor: zoom-in;
 }
@@ -6696,9 +6696,9 @@ body.biof3-resizing-columns * {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 /* Loading / error states */
@@ -6715,14 +6715,14 @@ body.biof3-resizing-columns * {
 
 .loadingWrap p,
 .errorWrap p {
-  font-size: var(--biof3-font-size-md);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-md);
+  color: var(--gewu-text-secondary);
 }
 
 .backLink {
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
   text-decoration: none;
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
 }
 
 .backLink:hover {
@@ -6735,18 +6735,18 @@ body.biof3-resizing-columns * {
 .toolSearch {
   width: 100%;
   padding: 6px 10px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text);
-  background: var(--biof3-surface);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text);
+  background: var(--gewu-surface);
   margin-bottom: 8px;
   outline: none;
   box-sizing: border-box;
 }
 
 .toolSearch:focus {
-  border-color: var(--biof3-accent);
+  border-color: var(--gewu-accent);
 }
 
 .toolCats {
@@ -6758,23 +6758,23 @@ body.biof3-resizing-columns * {
 
 .toolCat {
   padding: 2px 8px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 12px;
   background: transparent;
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   white-space: nowrap;
 }
 
 .toolCat:hover {
-  background: var(--biof3-hover);
+  background: var(--gewu-hover);
 }
 
 .toolCatActive {
-  background: var(--biof3-accent);
+  background: var(--gewu-accent);
   color: #fff;
-  border-color: var(--biof3-accent);
+  border-color: var(--gewu-accent);
 }
 
 .toolList {
@@ -6797,7 +6797,7 @@ body.biof3-resizing-columns * {
 }
 
 .toolItem:hover {
-  background: var(--biof3-hover);
+  background: var(--gewu-hover);
 }
 
 .toolDot {
@@ -6816,28 +6816,28 @@ body.biof3-resizing-columns * {
 }
 
 .toolName {
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 500;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .toolSub {
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .toolBadge {
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   padding: 1px 6px;
   border-radius: 8px;
-  background: var(--biof3-warning-bg);
-  color: var(--biof3-warning-text);
+  background: var(--gewu-warning-bg);
+  color: var(--gewu-warning-text);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -6847,16 +6847,16 @@ body.biof3-resizing-columns * {
   display: flex;
   gap: 0;
   margin-bottom: 8px;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
 }
 
 .toolboxTab {
   padding: 4px 12px;
   border: none;
   background: transparent;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 500;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
@@ -6867,19 +6867,19 @@ body.biof3-resizing-columns * {
 }
 
 .toolboxTab:hover {
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .toolboxTabActive {
-  color: var(--biof3-accent);
-  border-bottom-color: var(--biof3-accent);
+  color: var(--gewu-accent);
+  border-bottom-color: var(--gewu-accent);
 }
 
 .toolboxTabBadge {
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   padding: 0 5px;
   border-radius: 8px;
-  background: var(--biof3-accent);
+  background: var(--gewu-accent);
   color: #fff;
   line-height: 14px;
 }
@@ -6890,9 +6890,9 @@ body.biof3-resizing-columns * {
 }
 
 .pluginSectionTitle {
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 600;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   margin: 0 0 4px 0;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -6908,7 +6908,7 @@ body.biof3-resizing-columns * {
 }
 
 .pluginItem:hover {
-  background: var(--biof3-hover);
+  background: var(--gewu-hover);
 }
 
 .pluginMeta {
@@ -6920,17 +6920,17 @@ body.biof3-resizing-columns * {
 }
 
 .pluginName {
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 500;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .pluginSub {
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -6938,10 +6938,10 @@ body.biof3-resizing-columns * {
 
 .pluginBtnInstall,
 .pluginBtnUninstall {
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   padding: 2px 10px;
   border-radius: 4px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
@@ -6949,9 +6949,9 @@ body.biof3-resizing-columns * {
 }
 
 .pluginBtnInstall {
-  background: var(--biof3-accent);
+  background: var(--gewu-accent);
   color: #fff;
-  border-color: var(--biof3-accent);
+  border-color: var(--gewu-accent);
 }
 
 .pluginBtnInstall:hover:not(:disabled) {
@@ -6960,12 +6960,12 @@ body.biof3-resizing-columns * {
 
 .pluginBtnUninstall {
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .pluginBtnUninstall:hover:not(:disabled) {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 .pluginBtnInstall:disabled,
@@ -6975,26 +6975,26 @@ body.biof3-resizing-columns * {
 }
 
 .pluginError {
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-danger);
-  background: var(--biof3-danger-bg);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-danger);
+  background: var(--gewu-danger-bg);
   padding: 4px 8px;
   border-radius: 4px;
   margin-bottom: 8px;
 }
 .workspaceNotice {
   position: fixed;
-  top: calc(var(--biof3-titlebar-height) + 8px);
+  top: calc(var(--gewu-titlebar-height) + 8px);
   left: 50%;
   z-index: 9000;
   max-width: min(460px, calc(100vw - 24px));
   padding: 7px 10px;
-  border: 1px solid var(--biof3-border-strong);
+  border: 1px solid var(--gewu-border-strong);
   border-radius: 6px;
-  background: var(--biof3-bg-elevated);
-  color: var(--biof3-text);
-  box-shadow: 0 8px 20px color-mix(in srgb, var(--biof3-text) 14%, transparent);
-  font-size: var(--biof3-font-size-caption);
+  background: var(--gewu-bg-elevated);
+  color: var(--gewu-text);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--gewu-text) 14%, transparent);
+  font-size: var(--gewu-font-size-caption);
   line-height: 18px;
   text-align: center;
   transform: translateX(-50%);
@@ -7005,16 +7005,16 @@ body.biof3-resizing-columns * {
 
 .taskMonitor {
   padding: 8px 12px;
-  border-top: 1px solid var(--biof3-border);
+  border-top: 1px solid var(--gewu-border);
 }
 
 .taskMonitorHeader {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 600;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   margin-bottom: 6px;
 }
 
@@ -7023,7 +7023,7 @@ body.biof3-resizing-columns * {
   align-items: center;
   gap: 6px;
   padding: 4px 0;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .taskDot {
@@ -7034,7 +7034,7 @@ body.biof3-resizing-columns * {
 }
 
 .taskDot_running {
-  background: var(--biof3-accent, #3b82f6);
+  background: var(--gewu-accent, #3b82f6);
   animation: taskDotPulse 1.2s ease-in-out infinite;
 }
 
@@ -7043,16 +7043,16 @@ body.biof3-resizing-columns * {
   50% { opacity: 0.35; }
 }
 
-.taskDot_done { background: var(--biof3-status-success, #22c55e); }
-.taskDot_error { background: var(--biof3-status-error, #ef4444); }
-.taskDot_stopped { background: var(--biof3-status-warning, #f59e0b); }
+.taskDot_done { background: var(--gewu-status-success, #22c55e); }
+.taskDot_error { background: var(--gewu-status-error, #ef4444); }
+.taskDot_stopped { background: var(--gewu-status-warning, #f59e0b); }
 
 .taskText {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .taskStopBtn {
@@ -7060,7 +7060,7 @@ body.biof3-resizing-columns * {
   border: none;
   padding: 2px;
   cursor: pointer;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   display: flex;
   align-items: center;
   border-radius: 3px;
@@ -7068,6 +7068,6 @@ body.biof3-resizing-columns * {
 }
 
 .taskStopBtn:hover {
-  color: var(--biof3-status-error, #ef4444);
-  background: var(--biof3-bg-elevated);
+  color: var(--gewu-status-error, #ef4444);
+  background: var(--gewu-bg-elevated);
 }

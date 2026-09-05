@@ -221,7 +221,7 @@ export function WindowResultPage(): React.ReactElement {
           <div className={styles.errorBlock} role="alert">{statusError}</div>
           <button
             type="button"
-            className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+            className="gewu-btn gewu-btn--ghost gewu-btn--sm"
             onClick={() => setRetryVersion((v) => v + 1)}
           >
             重试

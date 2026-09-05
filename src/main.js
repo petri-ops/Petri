@@ -1,5 +1,5 @@
 /**
- * Electron 主进程入口 — BioF3 本地桌面版
+ * Electron 主进程入口 — Gewu 本地桌面版
  *
  * 职责：
  * 1. 设置桌面版本地存储、运行时和用户数据环境变量
@@ -116,7 +116,7 @@ process.stderr?.on?.("error", (err) => {
 // ── 环境变量（桌面版模式）──────────────────────────────────────
 
 // Runtime 解析两级优先：
-//   1. 用户安装的独立 Runtime（~/Documents/BioF3-Local/runtimes/{R|Python}）— 最高优先
+//   1. 用户安装的独立 Runtime（~/Documents/Gewu-Local/runtimes/{R|Python}）— 最高优先
 //   2. 开发模式：检测系统 R/Python（仅 dev，打包模式不检测，保持独立）
 //   3. 都没有 → 返回 null，R/Python 功能不可用，提示从插件商店安装
 // reserveAvailablePort 已提取到 src/main/core-utils.js
@@ -142,7 +142,7 @@ const setMainWindow = (w) => { _mainWindow = w; };
 // 回调中无 catch，直接导致主进程 Uncaught Exception）。
 const mainWindow = { isDestroyed() { return _mainWindow == null || _mainWindow.isDestroyed(); }, get webContents() { return _mainWindow?.webContents; }, isMinimized() { return _mainWindow?.isMinimized(); }, isFocused() { return _mainWindow?.isFocused(); }, restore() { _mainWindow?.restore(); }, show() { _mainWindow?.show(); }, focus() { _mainWindow?.focus(); } };
 
-// BioF3 owns local backend ports and must run as a single application
+// Gewu owns local backend ports and must run as a single application
 // instance. A repeated launch focuses the existing window instead of starting
 // another R/Python service stack.
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
@@ -181,7 +181,7 @@ if (!hasSingleInstanceLock) {
 // ── IPC：诊断日志导出 / 数据备份（M2-8）─────────────────────────
 
 // ── IPC：数据目录管理（卸载数据保留）──────────────────────────
-// 用户可能在操作系统卸载应用后仍想保留 ~/Documents/BioF3-Local/ 数据，
+// 用户可能在操作系统卸载应用后仍想保留 ~/Documents/Gewu-Local/ 数据，
 // 或主动清理。这里提供查看数据目录大小 + 在文件管理器中打开的能力。
 // ── IPC：终端/日志面板 ───────────────────────────────────────
 
@@ -528,7 +528,7 @@ if (process.argv.includes("--dev")) {
 app.whenReady().then(main);
 
 app.on("window-all-closed", () => {
-  // Product contract: closing BioF3 stops the local application and every
+  // Product contract: closing Gewu stops the local application and every
   // backend it owns. Do not keep R/Python services resident on macOS.
   app.quit();
 });

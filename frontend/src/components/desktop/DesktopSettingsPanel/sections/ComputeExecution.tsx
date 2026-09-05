@@ -107,21 +107,21 @@ export function ComputeExecution(): React.ReactElement | null {
     : '本地优先';
 
   return (
-    <div className="biof3-data-section">
+    <div className="gewu-data-section">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-        <label className="biof3-field__label" style={{ marginBottom: 0 }}>
+        <label className="gewu-field__label" style={{ marginBottom: 0 }}>
           计算执行
         </label>
-        <span className="biof3-badge">{currentLabel}</span>
+        <span className="gewu-badge">{currentLabel}</span>
       </div>
-      <p className="biof3-field__hint">
+      <p className="gewu-field__hint">
         默认先用本地；如果切到远端集群，这里就是统一入口。保存后重启应用生效。
       </p>
 
-      <div className="biof3-field">
-        <label className="biof3-field__label">执行位置</label>
+      <div className="gewu-field">
+        <label className="gewu-field__label">执行位置</label>
         <select
-          className="biof3-select"
+          className="gewu-select"
           value={computeSettings.computeMode}
           onChange={(e) =>
             setComputeSettings((prev) => ({
@@ -138,10 +138,10 @@ export function ComputeExecution(): React.ReactElement | null {
 
       {isRemote && (
         <>
-          <div className="biof3-field">
-            <label className="biof3-field__label">远端地址</label>
+          <div className="gewu-field">
+            <label className="gewu-field__label">远端地址</label>
             <input
-              className="biof3-input"
+              className="gewu-input"
               value={computeSettings.remoteComputeUrl}
               onChange={(e) =>
                 setComputeSettings((prev) => ({ ...prev, remoteComputeUrl: e.target.value }))
@@ -150,13 +150,13 @@ export function ComputeExecution(): React.ReactElement | null {
             />
           </div>
 
-          {remoteUrlMissing && <p className="biof3-field__hint">请先填写远端地址。</p>}
+          {remoteUrlMissing && <p className="gewu-field__hint">请先填写远端地址。</p>}
 
-          <div className="biof3-field">
-            <label className="biof3-field__label">访问令牌</label>
+          <div className="gewu-field">
+            <label className="gewu-field__label">访问令牌</label>
             <input
               type="password"
-              className="biof3-input"
+              className="gewu-input"
               value={computeSettings.remoteComputeToken}
               onChange={(e) =>
                 setComputeSettings((prev) => ({ ...prev, remoteComputeToken: e.target.value }))
@@ -165,10 +165,10 @@ export function ComputeExecution(): React.ReactElement | null {
             />
           </div>
 
-          <div className="biof3-field">
-            <label className="biof3-field__label">集群名称</label>
+          <div className="gewu-field">
+            <label className="gewu-field__label">集群名称</label>
             <input
-              className="biof3-input"
+              className="gewu-input"
               value={computeSettings.remoteComputeName}
               onChange={(e) =>
                 setComputeSettings((prev) => ({ ...prev, remoteComputeName: e.target.value }))
@@ -182,15 +182,15 @@ export function ComputeExecution(): React.ReactElement | null {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <button
           type="button"
-          className="biof3-btn biof3-btn--primary biof3-btn--sm"
+          className="gewu-btn gewu-btn--primary gewu-btn--sm"
           onClick={handleSave}
           disabled={saving || loading || remoteUrlMissing}
         >
           {saving ? '保存中…' : '保存计算设置'}
         </button>
-        {saved && <span className="biof3-field__hint">已保存，重启后生效</span>}
+        {saved && <span className="gewu-field__hint">已保存，重启后生效</span>}
       </div>
-      {error && <p className="biof3-field__hint">{error}</p>}
+      {error && <p className="gewu-field__hint">{error}</p>}
     </div>
   );
 }

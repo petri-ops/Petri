@@ -55,25 +55,25 @@ export function DataManagement(): React.ReactElement | null {
   const sortedEntries = Object.entries(breakdown).sort((a, b) => (b[1] || 0) - (a[1] || 0));
 
   return (
-    <div className="biof3-data-section">
-      <label className="biof3-field__label">本地数据目录</label>
-      <p className="biof3-field__hint">
+    <div className="gewu-data-section">
+      <label className="gewu-field__label">本地数据目录</label>
+      <p className="gewu-field__hint">
         分析结果、上传文件、AI 配置、执行配置、运行时都存在这里。卸载应用时此目录会保留，不会自动删除。
       </p>
       {info?.dataDir && (
-        <div className="biof3-data-dir-path" title={info.dataDir}>
+        <div className="gewu-data-dir-path" title={info.dataDir}>
           {info.dataDir}
         </div>
       )}
       {sortedEntries.length > 0 && (
-        <div className="biof3-data-breakdown">
+        <div className="gewu-data-breakdown">
           {sortedEntries.map(([name, size]) => (
-            <div key={name} className="biof3-data-breakdown-row">
-              <span className="biof3-data-breakdown-name">{name}</span>
-              <span className="biof3-data-breakdown-size">{formatSize(size)}</span>
+            <div key={name} className="gewu-data-breakdown-row">
+              <span className="gewu-data-breakdown-name">{name}</span>
+              <span className="gewu-data-breakdown-size">{formatSize(size)}</span>
             </div>
           ))}
-          <div className="biof3-data-breakdown-row biof3-data-breakdown-row--total">
+          <div className="gewu-data-breakdown-row gewu-data-breakdown-row--total">
             <span>合计</span>
             <span>{formatSize(info?.total)}</span>
           </div>
@@ -81,7 +81,7 @@ export function DataManagement(): React.ReactElement | null {
       )}
       <button
         type="button"
-        className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+        className="gewu-btn gewu-btn--ghost gewu-btn--sm"
         onClick={handleOpenDir}
         disabled={opening}
       >

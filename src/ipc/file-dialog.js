@@ -33,7 +33,7 @@ const ALLOWED_OPEN_EXTENSIONS = Object.freeze([
   // Documents & archives
   ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
   ".zip", ".tar", ".gz", ".bz2", ".xz", ".rar",
-  // Genomics / BioF3 domain
+  // Genomics / Gewu domain
   ".h5ad", ".loom", ".mtx", ".h5", ".rds", ".rdata",
   ".maf", ".vcf", ".bed", ".gtf", ".gff", ".fasta", ".fa", ".fastq", ".fq",
 ]);

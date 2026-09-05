@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import type { CopilotContext } from '@/lib/copilotContext';
-import { biof3Events, dispatchBioF3Event } from '@/lib/events';
+import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import {
   cancelAgentTask,
   findResumableAgentTask,
@@ -552,7 +552,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
             }
           );
         }
-        dispatchBioF3Event(biof3Events.projectWorkspaceChanged, {
+        dispatchGewuEvent(gewuEvents.projectWorkspaceChanged, {
           projectId: options.projectId,
           source: 'agent',
         });
@@ -563,7 +563,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
         !event.needApproval &&
         event.toolJobId
       ) {
-        dispatchBioF3Event(biof3Events.projectOpenResult, {
+        dispatchGewuEvent(gewuEvents.projectOpenResult, {
           toolJobId: event.toolJobId,
           projectId: options.projectId,
         });
@@ -578,7 +578,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
           bgData && typeof bgData.processId === 'string' ? bgData.processId : null;
         if (processId) {
           try {
-            dispatchBioF3Event(biof3Events.agentBackgroundProcess, {
+            dispatchGewuEvent(gewuEvents.agentBackgroundProcess, {
               processId,
               conversationId,
             });

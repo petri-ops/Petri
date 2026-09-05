@@ -9,9 +9,9 @@
   flex-direction: column;
   width: min(520px, calc(100vw - 32px));
   max-height: min(460px, calc(100vh - 32px));
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 14px;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
   overflow: hidden;
 }
@@ -21,14 +21,14 @@
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
   flex-shrink: 0;
 }
 
 .title {
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 600;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
 }
 
@@ -51,20 +51,20 @@
   border: 1px solid transparent;
   border-radius: 999px;
   background: transparent;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-body-sm);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
   padding: 1px 8px;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .tab:hover {
-  background: var(--biof3-user-bubble-bg);
+  background: var(--gewu-user-bubble-bg);
 }
 
 .tabActive {
-  border-color: var(--biof3-accent);
-  color: var(--biof3-accent);
+  border-color: var(--gewu-accent);
+  color: var(--gewu-accent);
 }
 
 .tabDot {
@@ -72,7 +72,7 @@
   height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: var(--biof3-accent);
+  background: var(--gewu-accent);
   animation: tool-dock-pulse 1.6s ease-in-out infinite;
 }
 
@@ -85,13 +85,13 @@
 }
 
 .statusLabel {
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-secondary);
   white-space: nowrap;
 }
 
 .statusLabel[data-status='running'] {
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
 }
 
 .iconBtn {
@@ -103,15 +103,15 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   font-size: 14px;
   line-height: 1;
   cursor: pointer;
 }
 
 .iconBtn:hover {
-  background: var(--biof3-user-bubble-bg);
-  color: var(--biof3-text);
+  background: var(--gewu-user-bubble-bg);
+  color: var(--gewu-text);
 }
 
 /* 工具活动分组详情区（复用 simple-chat.css 的 sc-tool-activity* 全局类） */
@@ -124,17 +124,17 @@
 
 .groupSummary {
   padding: 6px 2px;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 500;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .command {
   padding: 5px 10px;
-  border-bottom: 1px solid var(--biof3-border);
-  font-family: var(--biof3-font-mono, monospace);
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text-secondary);
+  border-bottom: 1px solid var(--gewu-border);
+  font-family: var(--gewu-font-mono, monospace);
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -147,16 +147,16 @@
   flex: 1;
   min-height: 0;
   overflow: auto;
-  font-family: var(--biof3-font-mono, monospace);
-  font-size: var(--biof3-font-size-body-sm);
+  font-family: var(--gewu-font-mono, monospace);
+  font-size: var(--gewu-font-size-body-sm);
   line-height: 1.45;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: pre-wrap;
   word-break: break-all;
 }
 
 .log[data-empty] {
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .footer {
@@ -164,7 +164,7 @@
   align-items: center;
   gap: 10px;
   padding: 5px 10px;
-  border-top: 1px solid var(--biof3-border);
+  border-top: 1px solid var(--gewu-border);
   flex-shrink: 0;
 }
 
@@ -172,21 +172,21 @@
   border: 1px solid transparent;
   border-radius: 999px;
   background: transparent;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-body-sm);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
   padding: 1px 8px;
   cursor: pointer;
 }
 
 .footerBtnActive {
-  border-color: var(--biof3-accent);
-  color: var(--biof3-accent);
+  border-color: var(--gewu-accent);
+  color: var(--gewu-accent);
 }
 
 .truncated,
 .meta {
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-secondary);
 }
 
 .meta {
@@ -205,17 +205,17 @@
   gap: 6px;
   height: 30px;
   padding: 0 12px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 999px;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-body-sm);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
   cursor: pointer;
 }
 
 .chip:hover {
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .chipLabel {
@@ -227,12 +227,12 @@
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: var(--biof3-text-secondary);
+  background: var(--gewu-text-secondary);
   opacity: 0.6;
 }
 
 .dot[data-status='running'] {
-  background: var(--biof3-accent);
+  background: var(--gewu-accent);
   opacity: 1;
   animation: tool-dock-pulse 1.6s ease-in-out infinite;
 }

@@ -18,7 +18,7 @@
   /* FONT-FAMILY-UNIFICATION UI-242 — Infima 元素与全局同一 sans 栈（补 CJK） */
   --ifm-font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
     'Microsoft YaHei', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --ifm-font-family-monospace: var(--biof3-font-mono);
+  --ifm-font-family-monospace: var(--gewu-font-mono);
   --ifm-line-height-base: 1.65;
   --ifm-heading-line-height: 1.28;
   --ifm-heading-margin-bottom: 0.55rem;
@@ -28,136 +28,136 @@
   --ifm-table-cell-padding: 0.52rem 0.68rem;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 
-  /* BioF3 brand palette — extracted from index.module.css for site-wide reuse */
-  --biof3-teal: #0f766e;
-  --biof3-teal-dark: #13523f;
-  --biof3-teal-bright: #43d1ae;
-  --biof3-teal-button: #38b27e;
-  --biof3-gold: #f7c96f;
-  --biof3-cream: #f4fbf8;
-  --biof3-ink: #12342f;
-  --biof3-mint: #e4f4ee;
-  --biof3-mint-bright: #8ff0d6;
-  --biof3-frost: #eef8f4;
+  /* Gewu brand palette — extracted from index.module.css for site-wide reuse */
+  --gewu-teal: #0f766e;
+  --gewu-teal-dark: #13523f;
+  --gewu-teal-bright: #43d1ae;
+  --gewu-teal-button: #38b27e;
+  --gewu-gold: #f7c96f;
+  --gewu-cream: #f4fbf8;
+  --gewu-ink: #12342f;
+  --gewu-mint: #e4f4ee;
+  --gewu-mint-bright: #8ff0d6;
+  --gewu-frost: #eef8f4;
 
-  /* ===== BioF3 semantic surface tokens (light mode) =====
-     --biof3-bg-canvas  : 页面级最外层背景（最暗一层）
-     --biof3-bg-surface : 卡片/面板/抽屉表面（比 canvas 亮一档）
-     --biof3-bg-subtle  : 次级容器（侧栏 / list 行 / 浅底）
-     --biof3-bg-elevated: 浮层（菜单 / popover）
-     --biof3-border         : 通用边框
-     --biof3-border-strong  : 重点边框
-     --biof3-text           : 主要文字
-     --biof3-text-secondary : 次要文字
-     --biof3-text-tertiary  : 弱化文字
-     --biof3-text-muted     : 最弱文字
-     --biof3-accent         : 品牌色（teal）
-     --biof3-accent-bg      : 品牌色弱化背景
-     --biof3-hover          : 通用 hover 高亮
+  /* ===== Gewu semantic surface tokens (light mode) =====
+     --gewu-bg-canvas  : 页面级最外层背景（最暗一层）
+     --gewu-bg-surface : 卡片/面板/抽屉表面（比 canvas 亮一档）
+     --gewu-bg-subtle  : 次级容器（侧栏 / list 行 / 浅底）
+     --gewu-bg-elevated: 浮层（菜单 / popover）
+     --gewu-border         : 通用边框
+     --gewu-border-strong  : 重点边框
+     --gewu-text           : 主要文字
+     --gewu-text-secondary : 次要文字
+     --gewu-text-tertiary  : 弱化文字
+     --gewu-text-muted     : 最弱文字
+     --gewu-accent         : 品牌色（teal）
+     --gewu-accent-bg      : 品牌色弱化背景
+     --gewu-hover          : 通用 hover 高亮
   */
   /* UI-238 LIGHT-THEME-PURITY — 浅色基底 slate(蓝灰) → zinc(无彩中性) + 纯白画布：
      脏感根源是蓝调灰大面积铺底；纯净感 = 白主导 + 中性发丝线 + 单一品牌彩。 */
-  --biof3-bg-canvas: #ffffff;
-  --biof3-bg-surface: #ffffff;
-  --biof3-bg-subtle: #f4f4f5;
-  --biof3-bg-elevated: #ffffff;
-  --biof3-bg: var(--biof3-bg-canvas);
-  --biof3-surface: var(--biof3-bg-surface);
-  --biof3-surface-alt: var(--biof3-bg-subtle);
-  --biof3-surface-translucent: color-mix(in srgb, var(--biof3-bg-surface) 82%, transparent);
-  --biof3-surface-hover: var(--biof3-hover);
-  --biof3-border-subtle: color-mix(in srgb, var(--biof3-border) 64%, transparent);
-  --biof3-input-bg: var(--biof3-bg-surface);
-  --biof3-overlay: rgba(24, 24, 27, 0.2);
-  --biof3-shadow-menu: 0 10px 24px rgba(24, 24, 27, 0.14);
-  --biof3-on-accent: #ffffff;
-  --biof3-on-solid: #ffffff;
-  --biof3-warning-bg: var(--biof3-status-warning-bg);
-  --biof3-warning-text: var(--biof3-status-warning-fg);
-  --biof3-warning: var(--biof3-status-warning);
-  --biof3-danger-bg: var(--biof3-status-error-bg);
-  --biof3-border: #e4e4e7;
-  --biof3-border-color: var(--biof3-border);
-  --biof3-border-strong: #d4d4d8;
-  --biof3-border-tertiary: #ebebee;
-  --biof3-text: #18181b;
-  --biof3-text-primary: var(--biof3-text);
-  --biof3-text-secondary: #3f3f46;
-  --biof3-text-tertiary: #71717a;
-  --biof3-text-muted: #a1a1aa;
-  --biof3-accent: #0d9488;
-  --biof3-accent-soft: rgba(13, 148, 136, 0.16);
-  --biof3-accent-bg: #f0fdfa;
-  --biof3-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+  --gewu-bg-canvas: #ffffff;
+  --gewu-bg-surface: #ffffff;
+  --gewu-bg-subtle: #f4f4f5;
+  --gewu-bg-elevated: #ffffff;
+  --gewu-bg: var(--gewu-bg-canvas);
+  --gewu-surface: var(--gewu-bg-surface);
+  --gewu-surface-alt: var(--gewu-bg-subtle);
+  --gewu-surface-translucent: color-mix(in srgb, var(--gewu-bg-surface) 82%, transparent);
+  --gewu-surface-hover: var(--gewu-hover);
+  --gewu-border-subtle: color-mix(in srgb, var(--gewu-border) 64%, transparent);
+  --gewu-input-bg: var(--gewu-bg-surface);
+  --gewu-overlay: rgba(24, 24, 27, 0.2);
+  --gewu-shadow-menu: 0 10px 24px rgba(24, 24, 27, 0.14);
+  --gewu-on-accent: #ffffff;
+  --gewu-on-solid: #ffffff;
+  --gewu-warning-bg: var(--gewu-status-warning-bg);
+  --gewu-warning-text: var(--gewu-status-warning-fg);
+  --gewu-warning: var(--gewu-status-warning);
+  --gewu-danger-bg: var(--gewu-status-error-bg);
+  --gewu-border: #e4e4e7;
+  --gewu-border-color: var(--gewu-border);
+  --gewu-border-strong: #d4d4d8;
+  --gewu-border-tertiary: #ebebee;
+  --gewu-text: #18181b;
+  --gewu-text-primary: var(--gewu-text);
+  --gewu-text-secondary: #3f3f46;
+  --gewu-text-tertiary: #71717a;
+  --gewu-text-muted: #a1a1aa;
+  --gewu-accent: #0d9488;
+  --gewu-accent-soft: rgba(13, 148, 136, 0.16);
+  --gewu-accent-bg: #f0fdfa;
+  --gewu-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
     'Microsoft YaHei', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --biof3-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --biof3-hover: #f4f4f5;
-  --biof3-surface-dim: #f4f4f5;
-  --biof3-accent-hover: #0f766e;
-  --biof3-danger: #ef4444;
-  --biof3-bg-terminal: #ffffff;
-  --biof3-text-terminal: #3f3f46;
-  --biof3-text-terminal-strong: #18181b;
-  --biof3-text-terminal-muted: #64748b;
-  --biof3-text-terminal-prompt: #0d9488;
+  --gewu-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --gewu-hover: #f4f4f5;
+  --gewu-surface-dim: #f4f4f5;
+  --gewu-accent-hover: #0f766e;
+  --gewu-danger: #ef4444;
+  --gewu-bg-terminal: #ffffff;
+  --gewu-text-terminal: #3f3f46;
+  --gewu-text-terminal-strong: #18181b;
+  --gewu-text-terminal-muted: #64748b;
+  --gewu-text-terminal-prompt: #0d9488;
 
   /* ===== 状态语义色（light mode） ===== */
-  --biof3-status-online: #22c55e;
-  --biof3-status-loading: #f59e0b;
-  --biof3-status-warning: #f97316;
-  --biof3-status-error: #ef4444;
-  --biof3-status-info: #3b82f6;
+  --gewu-status-online: #22c55e;
+  --gewu-status-loading: #f59e0b;
+  --gewu-status-warning: #f97316;
+  --gewu-status-error: #ef4444;
+  --gewu-status-info: #3b82f6;
 
   /* ===== 状态卡背景（light mode） ===== */
-  --biof3-status-success-bg: #ecfdf5;
-  --biof3-status-error-bg: #fef2f2;
-  --biof3-status-warning-bg: #fef3c7;
-  --biof3-status-danger-bg: #fffafa;
+  --gewu-status-success-bg: #ecfdf5;
+  --gewu-status-error-bg: #fef2f2;
+  --gewu-status-warning-bg: #fef3c7;
+  --gewu-status-danger-bg: #fffafa;
 
  /* 状态卡前景文字（light） */
- --biof3-status-success-fg: #059669;
- --biof3-status-error-fg: #dc2626;
- --biof3-status-warning-fg: #b45309;
- --biof3-status-danger-fg: #991b1b;
- --biof3-status-error-border: #fecaca;
- --biof3-status-warning-border: #fbbf24;
- --biof3-accent-border: rgba(13, 148, 136, 0.4);
- --biof3-accent-surface: rgba(240, 253, 250, 0.78);
- --biof3-user-bubble-bg: rgba(15, 23, 42, 0.065);
- --biof3-accent-orange: #ea580c;
- --biof3-accent-orange-bg: rgba(249, 115, 22, 0.08);
+ --gewu-status-success-fg: #059669;
+ --gewu-status-error-fg: #dc2626;
+ --gewu-status-warning-fg: #b45309;
+ --gewu-status-danger-fg: #991b1b;
+ --gewu-status-error-border: #fecaca;
+ --gewu-status-warning-border: #fbbf24;
+ --gewu-accent-border: rgba(13, 148, 136, 0.4);
+ --gewu-accent-surface: rgba(240, 253, 250, 0.78);
+ --gewu-user-bubble-bg: rgba(15, 23, 42, 0.065);
+ --gewu-accent-orange: #ea580c;
+ --gewu-accent-orange-bg: rgba(249, 115, 22, 0.08);
 
   /* ===== 设计系统补齐令牌（UI-151 / 关闭 #87 theme-token-contract 缺口） =====
-     以下 7 个令牌此前仅被组件以 var(--biof3-*) 引用却无 :root 定义，
+     以下 7 个令牌此前仅被组件以 var(--gewu-*) 引用却无 :root 定义，
      导致 theme-token-contract 测试失败、且引用处回退为无效值。
      取值优先复用既有语义令牌（surface 类用 var() 引用，明暗双主题自动适配），
      颜色类对齐组件原 fallback，保证零视觉回归。 */
-  --biof3-success: #2e7d32;
-  --biof3-info: #1565c0;
-  --biof3-bg-hover: var(--biof3-hover);
-  --biof3-surface-raised: var(--biof3-bg-elevated);
-  --biof3-bg-surface-raised: var(--biof3-bg-elevated);
-  --biof3-surface-strong: var(--biof3-bg-surface);
-  --biof3-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --gewu-success: #2e7d32;
+  --gewu-info: #1565c0;
+  --gewu-bg-hover: var(--gewu-hover);
+  --gewu-surface-raised: var(--gewu-bg-elevated);
+  --gewu-bg-surface-raised: var(--gewu-bg-elevated);
+  --gewu-surface-strong: var(--gewu-bg-surface);
+  --gewu-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
   /* ===== UI-155 / 关闭合并后暴露的 theme-token-contract 缺口 =====
-     --biof3-surface-2 与 --biof3-status-idle 此前被 simple-chat.css
-     （origin/main PR #13 的 subagent UI）以 var(--biof3-*) 引用却无定义，
+     --gewu-surface-2 与 --gewu-status-idle 此前被 simple-chat.css
+     （origin/main PR #13 的 subagent UI）以 var(--gewu-*) 引用却无定义，
      导致 theme-token-contract 测试失败、引用处回退为无效值。
      取值对齐组件原 fallback，保证零视觉回归。 */
-  --biof3-surface-2: rgba(127, 127, 127, 0.12);
-  --biof3-status-idle: #9ca3af;
+  --gewu-surface-2: rgba(127, 127, 127, 0.12);
+  --gewu-status-idle: #9ca3af;
   /* ===== UI-215 / BLOCK-28.6 补齐 theme-token-contract 缺口（第 3 批） =====
      CodeReviewDrawer.module.css 沿用旧抽屉时代的未定义变量名（引用处带
      fallback），project-workspace.module.css / useCodeMirrorEditor.ts 引用
-     裸 --biof3-status-success。取值优先 var() 引用既有语义令牌（明暗自动
+     裸 --gewu-status-success。取值优先 var() 引用既有语义令牌（明暗自动
      适配），颜色类对齐组件原 fallback，保证零视觉回归。 */
-  --biof3-fg: var(--biof3-text);
-  --biof3-fg-muted: var(--biof3-text-muted);
-  --biof3-bg-elev: var(--biof3-bg-elevated);
-  --biof3-bg-button: var(--biof3-bg-surface);
-  --biof3-bg-button-hover: var(--biof3-bg-hover);
-  --biof3-mono: var(--biof3-font-mono);
-  --biof3-status-success: #22c55e;
+  --gewu-fg: var(--gewu-text);
+  --gewu-fg-muted: var(--gewu-text-muted);
+  --gewu-bg-elev: var(--gewu-bg-elevated);
+  --gewu-bg-button: var(--gewu-bg-surface);
+  --gewu-bg-button-hover: var(--gewu-bg-hover);
+  --gewu-mono: var(--gewu-font-mono);
+  --gewu-status-success: #22c55e;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -172,100 +172,100 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 
   /* Dark mode brand palette overrides */
-  --biof3-ink: #eef8f4;
-  --biof3-mint: rgba(67, 209, 174, 0.14);
-  --biof3-mint-bright: #8ff0d6;
+  --gewu-ink: #eef8f4;
+  --gewu-mint: rgba(67, 209, 174, 0.14);
+  --gewu-mint-bright: #8ff0d6;
 
-  /* ===== BioF3 semantic surface tokens (dark mode) =====
+  /* ===== Gewu semantic surface tokens (dark mode) =====
      暗色下：canvas 最深、surface 抬高一档、subtle 更亮一档；
      文字由浅到深对应层次；accent 提亮为更鲜艳的 teal。
   */
-  --biof3-bg-canvas: #0b1220;
-  --biof3-bg-surface: #111a2e;
-  --biof3-bg-subtle: #182339;
-  --biof3-bg-elevated: #1d2945;
-  --biof3-bg: var(--biof3-bg-canvas);
-  --biof3-surface: var(--biof3-bg-surface);
-  --biof3-surface-alt: var(--biof3-bg-subtle);
-  --biof3-surface-translucent: color-mix(in srgb, var(--biof3-bg-surface) 84%, transparent);
-  --biof3-surface-hover: rgba(148, 163, 184, 0.18);
-  --biof3-border-subtle: color-mix(in srgb, var(--biof3-border) 68%, transparent);
-  --biof3-input-bg: var(--biof3-bg-surface);
-  --biof3-overlay: rgba(2, 6, 23, 0.6);
-  --biof3-shadow-menu: 0 14px 36px rgba(0, 0, 0, 0.34);
-  --biof3-on-accent: #ffffff;
-  --biof3-on-solid: #0b1220;
-  --biof3-warning-bg: var(--biof3-status-warning-bg);
-  --biof3-warning-text: var(--biof3-status-warning-fg);
-  --biof3-warning: var(--biof3-status-warning);
-  --biof3-danger-bg: var(--biof3-status-error-bg);
-  --biof3-border: #243149;
-  --biof3-border-strong: #324466;
-  --biof3-border-tertiary: #2a3a54;
-  --biof3-text: #e6edf3;
-  --biof3-text-primary: var(--biof3-text);
-  --biof3-text-secondary: #b1bac4;
-  --biof3-text-tertiary: #8b98ad;
-  --biof3-text-muted: #6b7689;
-  --biof3-accent: #2dd4bf;
-  --biof3-accent-soft: rgba(45, 212, 191, 0.20);
-  --biof3-accent-bg: rgba(45, 212, 191, 0.14);
-  --biof3-border-color: var(--biof3-border);
-  --biof3-hover: rgba(148, 163, 184, 0.14);
-  --biof3-surface-dim: #111a2e;
-  --biof3-accent-hover: #14b8a6;
-  --biof3-danger: #f87171;
-  --biof3-bg-terminal: var(--biof3-bg-surface);
-  --biof3-text-terminal: #cbd5e1;
-  --biof3-text-terminal-strong: #e6edf3;
-  --biof3-text-terminal-muted: #8b98ad;
-  --biof3-text-terminal-prompt: #2dd4bf;
+  --gewu-bg-canvas: #0b1220;
+  --gewu-bg-surface: #111a2e;
+  --gewu-bg-subtle: #182339;
+  --gewu-bg-elevated: #1d2945;
+  --gewu-bg: var(--gewu-bg-canvas);
+  --gewu-surface: var(--gewu-bg-surface);
+  --gewu-surface-alt: var(--gewu-bg-subtle);
+  --gewu-surface-translucent: color-mix(in srgb, var(--gewu-bg-surface) 84%, transparent);
+  --gewu-surface-hover: rgba(148, 163, 184, 0.18);
+  --gewu-border-subtle: color-mix(in srgb, var(--gewu-border) 68%, transparent);
+  --gewu-input-bg: var(--gewu-bg-surface);
+  --gewu-overlay: rgba(2, 6, 23, 0.6);
+  --gewu-shadow-menu: 0 14px 36px rgba(0, 0, 0, 0.34);
+  --gewu-on-accent: #ffffff;
+  --gewu-on-solid: #0b1220;
+  --gewu-warning-bg: var(--gewu-status-warning-bg);
+  --gewu-warning-text: var(--gewu-status-warning-fg);
+  --gewu-warning: var(--gewu-status-warning);
+  --gewu-danger-bg: var(--gewu-status-error-bg);
+  --gewu-border: #243149;
+  --gewu-border-strong: #324466;
+  --gewu-border-tertiary: #2a3a54;
+  --gewu-text: #e6edf3;
+  --gewu-text-primary: var(--gewu-text);
+  --gewu-text-secondary: #b1bac4;
+  --gewu-text-tertiary: #8b98ad;
+  --gewu-text-muted: #6b7689;
+  --gewu-accent: #2dd4bf;
+  --gewu-accent-soft: rgba(45, 212, 191, 0.20);
+  --gewu-accent-bg: rgba(45, 212, 191, 0.14);
+  --gewu-border-color: var(--gewu-border);
+  --gewu-hover: rgba(148, 163, 184, 0.14);
+  --gewu-surface-dim: #111a2e;
+  --gewu-accent-hover: #14b8a6;
+  --gewu-danger: #f87171;
+  --gewu-bg-terminal: var(--gewu-bg-surface);
+  --gewu-text-terminal: #cbd5e1;
+  --gewu-text-terminal-strong: #e6edf3;
+  --gewu-text-terminal-muted: #8b98ad;
+  --gewu-text-terminal-prompt: #2dd4bf;
 
   /* ===== 状态语义色（dark mode） ===== */
-  --biof3-status-online: #4ade80;
-  --biof3-status-loading: #fbbf24;
-  --biof3-status-warning: #fb923c;
-  --biof3-status-error: #f87171;
-  --biof3-status-info: #60a5fa;
+  --gewu-status-online: #4ade80;
+  --gewu-status-loading: #fbbf24;
+  --gewu-status-warning: #fb923c;
+  --gewu-status-error: #f87171;
+  --gewu-status-info: #60a5fa;
 
   /* ===== 状态卡背景（dark mode） ===== */
-  --biof3-status-success-bg: rgba(34, 197, 94, 0.16);
-  --biof3-status-error-bg: rgba(239, 68, 68, 0.16);
-  --biof3-status-warning-bg: rgba(245, 158, 11, 0.16);
-  --biof3-status-danger-bg: rgba(239, 68, 68, 0.12);
+  --gewu-status-success-bg: rgba(34, 197, 94, 0.16);
+  --gewu-status-error-bg: rgba(239, 68, 68, 0.16);
+  --gewu-status-warning-bg: rgba(245, 158, 11, 0.16);
+  --gewu-status-danger-bg: rgba(239, 68, 68, 0.12);
 
  /* 状态卡前景文字（dark） */
- --biof3-status-success-fg: #4ade80;
- --biof3-status-error-fg: #f87171;
- --biof3-status-warning-fg: #fbbf24;
- --biof3-status-danger-fg: #fca5a5;
- --biof3-status-error-border: rgba(248, 113, 113, 0.32);
- --biof3-status-warning-border: rgba(251, 191, 36, 0.3);
- --biof3-accent-border: rgba(45, 212, 191, 0.4);
- --biof3-accent-surface: rgba(45, 212, 191, 0.12);
- --biof3-user-bubble-bg: rgba(148, 163, 184, 0.12);
-  --biof3-accent-orange: #fb923c;
-  --biof3-accent-orange-bg: rgba(251, 146, 60, 0.16);
+ --gewu-status-success-fg: #4ade80;
+ --gewu-status-error-fg: #f87171;
+ --gewu-status-warning-fg: #fbbf24;
+ --gewu-status-danger-fg: #fca5a5;
+ --gewu-status-error-border: rgba(248, 113, 113, 0.32);
+ --gewu-status-warning-border: rgba(251, 191, 36, 0.3);
+ --gewu-accent-border: rgba(45, 212, 191, 0.4);
+ --gewu-accent-surface: rgba(45, 212, 191, 0.12);
+ --gewu-user-bubble-bg: rgba(148, 163, 184, 0.12);
+  --gewu-accent-orange: #fb923c;
+  --gewu-accent-orange-bg: rgba(251, 146, 60, 0.16);
   /* ===== UI-155 / 合并后暴露的 theme-token-contract 缺口（dark 适配） ===== */
-  --biof3-surface-2: rgba(127, 127, 127, 0.08);
-  --biof3-status-idle: #94a3b8;
+  --gewu-surface-2: rgba(127, 127, 127, 0.08);
+  --gewu-status-idle: #94a3b8;
 
   /* Infima emphasis overrides — 让 ifm 颜色也跟 biof3 深色对齐 */
-  --ifm-background-color: var(--biof3-bg-canvas);
-  --ifm-background-surface-color: var(--biof3-bg-surface);
-  --ifm-color-emphasis-100: var(--biof3-bg-subtle);
-  --ifm-color-emphasis-200: var(--biof3-border);
-  --ifm-color-emphasis-300: var(--biof3-border-strong);
-  --ifm-color-emphasis-500: var(--biof3-text-muted);
-  --ifm-color-emphasis-600: var(--biof3-text-tertiary);
-  --ifm-color-emphasis-700: var(--biof3-text-secondary);
-  --ifm-color-emphasis-800: var(--biof3-text-secondary);
-  --ifm-color-emphasis-900: var(--biof3-text);
+  --ifm-background-color: var(--gewu-bg-canvas);
+  --ifm-background-surface-color: var(--gewu-bg-surface);
+  --ifm-color-emphasis-100: var(--gewu-bg-subtle);
+  --ifm-color-emphasis-200: var(--gewu-border);
+  --ifm-color-emphasis-300: var(--gewu-border-strong);
+  --ifm-color-emphasis-500: var(--gewu-text-muted);
+  --ifm-color-emphasis-600: var(--gewu-text-tertiary);
+  --ifm-color-emphasis-700: var(--gewu-text-secondary);
+  --ifm-color-emphasis-800: var(--gewu-text-secondary);
+  --ifm-color-emphasis-900: var(--gewu-text);
 }
 
 /* Compact documentation reading density */
 .theme-doc-markdown {
-  font-size: var(--biof3-font-size-md);
+  font-size: var(--gewu-font-size-md);
   line-height: 1.68;
   max-width: 860px;
 }
@@ -284,18 +284,18 @@
 .theme-doc-markdown h2 {
   margin-top: 1.75rem;
   padding-top: 0.2rem;
-  border-top: 1px solid var(--biof3-border);
-  font-size: var(--biof3-font-size-2xl);
+  border-top: 1px solid var(--gewu-border);
+  font-size: var(--gewu-font-size-2xl);
 }
 
 .theme-doc-markdown h3 {
   margin-top: 1.25rem;
-  font-size: var(--biof3-font-size-lg);
+  font-size: var(--gewu-font-size-lg);
 }
 
 .theme-doc-markdown h4 {
   margin-top: 1rem;
-  font-size: var(--biof3-font-size-md);
+  font-size: var(--gewu-font-size-md);
 }
 
 .theme-doc-markdown p {
@@ -326,7 +326,7 @@
   display: table;
   width: 100%;
   margin: 0.9rem 0 1rem;
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
 }
 
 .theme-doc-markdown thead tr,
@@ -360,7 +360,7 @@
 }
 
 .theme-doc-markdown .theme-code-block {
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 4px;
 }
 
@@ -392,7 +392,7 @@
 }
 
 .theme-doc-toc-desktop {
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
 }
 
 /* 文档页桌面大屏：左栏贴左、TOC 贴右、正文在主区域内居中 */
@@ -436,7 +436,7 @@
 }
 
 .theme-doc-sidebar-menu {
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
 }
 
 .theme-doc-sidebar-menu .menu__link {
@@ -445,36 +445,36 @@
 }
 
 /* 左侧栏底部：微信公众号卡片 */
-.biof3-sidebar-wechat {
+.gewu-sidebar-wechat {
   display: grid;
   grid-template-columns: 56px 1fr;
   align-items: center;
   gap: 0.55rem;
   margin: 1rem 0.5rem 0;
   padding: 0.55rem 0.65rem;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
   background: transparent;
 }
 
-.biof3-sidebar-wechat img {
+.gewu-sidebar-wechat img {
   width: 56px;
   height: 56px;
   border-radius: 4px;
   object-fit: cover;
 }
 
-.biof3-sidebar-wechat strong {
+.gewu-sidebar-wechat strong {
   display: block;
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-caption);
   line-height: 1.3;
 }
 
-.biof3-sidebar-wechat p {
+.gewu-sidebar-wechat p {
   margin: 0.22rem 0 0;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
   line-height: 1.4;
 }
 
@@ -488,7 +488,7 @@
   flex: 1 1 auto;
 }
 
-.theme-doc-sidebar-container nav.menu > .biof3-sidebar-wechat {
+.theme-doc-sidebar-container nav.menu > .gewu-sidebar-wechat {
   flex: 0 0 auto;
 }
 
@@ -510,7 +510,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.biof3-download {
+.gewu-download {
   justify-content: space-between;
   display: flex;
   align-items: center;
@@ -518,35 +518,35 @@
   flex-wrap: wrap;
   margin: 0.58rem 0;
   padding: 0.62rem 0.72rem;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
   background: transparent;
 }
 
-.biof3-download__meta {
+.gewu-download__meta {
   display: grid;
   gap: 0.16rem;
   min-width: 0;
 }
 
-.biof3-download__name {
+.gewu-download__name {
   overflow-wrap: anywhere;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   font-family: var(--ifm-font-family-monospace);
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 650;
 }
 
-.biof3-download__button {
+.gewu-download__button {
   display: inline-flex;
   align-items: center;
   gap: 0.34rem;
-  border: 1px solid var(--biof3-border-strong);
+  border: 1px solid var(--gewu-border-strong);
   border-radius: 6px;
   background: transparent;
   color: var(--ifm-color-primary);
   cursor: pointer;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 650;
   line-height: 1.2;
   padding: 0.38rem 0.58rem;
@@ -558,29 +558,29 @@
     transform 160ms ease;
 }
 
-.biof3-download__button:hover,
-.biof3-download__button:focus {
+.gewu-download__button:hover,
+.gewu-download__button:focus {
   border-color: var(--ifm-color-primary);
   color: var(--ifm-color-primary-dark);
   text-decoration: none;
   transform: translateY(-1px);
 }
 
-.biof3-download__icon {
-  font-size: var(--biof3-font-size-body-sm);
+.gewu-download__icon {
+  font-size: var(--gewu-font-size-body-sm);
   line-height: 1;
 }
 
-.biof3-download__size {
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-sm);
+.gewu-download__size {
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
 }
 
-.theme-doc-markdown h2 + .biof3-download {
+.theme-doc-markdown h2 + .gewu-download {
   margin-top: 0.35rem;
 }
 
-.biof3-export-panel {
+.gewu-export-panel {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -588,59 +588,59 @@
   flex-wrap: wrap;
   margin: 1.6rem 0 1rem;
   padding: 1rem;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
-.biof3-export-panel__text {
+.gewu-export-panel__text {
   max-width: 30rem;
 }
 
-.biof3-export-panel__badge {
+.gewu-export-panel__badge {
   width: fit-content;
   margin-bottom: 0.28rem;
   padding: 0.12rem 0.42rem;
   border-radius: 999px;
-  background: var(--biof3-accent-bg);
+  background: var(--gewu-accent-bg);
   color: var(--ifm-color-primary-dark);
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 800;
   line-height: 1.35;
 }
 
-.biof3-export-panel__text h2 {
+.gewu-export-panel__text h2 {
   margin: 0 0 0.28rem;
   padding: 0;
   border: 0;
-  font-size: var(--biof3-font-size-md);
+  font-size: var(--gewu-font-size-md);
 }
 
-.biof3-export-panel__text p {
+.gewu-export-panel__text p {
   margin: 0;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-body);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-body);
   line-height: 1.5;
 }
 
-.biof3-export-panel__actions {
+.gewu-export-panel__actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
 }
 
-.biof3-export-panel__button {
+.gewu-export-panel__button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 1.9rem;
-  border: 1px solid var(--biof3-border-strong);
+  border: 1px solid var(--gewu-border-strong);
   border-radius: 6px;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 650;
   font-family: inherit;
   line-height: 1.2;
@@ -648,129 +648,129 @@
   text-decoration: none;
 }
 
-.biof3-export-panel__button:hover,
-.biof3-export-panel__button:focus {
+.gewu-export-panel__button:hover,
+.gewu-export-panel__button:focus {
   border-color: var(--ifm-color-primary);
   color: var(--ifm-color-primary);
   text-decoration: none;
 }
 
-.biof3-export-panel__button--primary {
+.gewu-export-panel__button--primary {
   border-color: var(--ifm-color-primary);
   background: transparent;
   color: var(--ifm-color-primary);
 }
 
-.biof3-export-panel__button--primary:hover,
-.biof3-export-panel__button--primary:focus {
+.gewu-export-panel__button--primary:hover,
+.gewu-export-panel__button--primary:focus {
   background: transparent;
   color: var(--ifm-color-primary-dark);
 }
 
-.biof3-export-panel__button--quiet {
+.gewu-export-panel__button--quiet {
   border-color: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
-.biof3-export-panel__button--quiet:hover,
-.biof3-export-panel__button--quiet:focus {
-  border-color: var(--biof3-border-strong);
+.gewu-export-panel__button--quiet:hover,
+.gewu-export-panel__button--quiet:focus {
+  border-color: var(--gewu-border-strong);
 }
 
-.biof3-export-panel__link {
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-body-sm);
+.gewu-export-panel__link {
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 700;
   text-decoration: none;
 }
 
-.biof3-export-panel__link:hover,
-.biof3-export-panel__link:focus {
+.gewu-export-panel__link:hover,
+.gewu-export-panel__link:focus {
   color: var(--ifm-color-primary);
   text-decoration: none;
 }
 
-.biof3-comments {
+.gewu-comments {
   margin-top: 2.6rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--biof3-border);
+  border-top: 1px solid var(--gewu-border);
 }
 
-.biof3-comments__header {
+.gewu-comments__header {
   margin-bottom: 1.1rem;
 }
 
-.biof3-comments__header h2 {
+.gewu-comments__header h2 {
   margin: 0 0 0.32rem;
   padding: 0;
   border: 0;
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-lg);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-lg);
 }
 
-.biof3-comments__header p {
+.gewu-comments__header p {
   margin: 0;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-body);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-body);
   line-height: 1.6;
 }
 
-.biof3-comments .wl-panel {
+.gewu-comments .wl-panel {
   border-radius: 8px;
 }
 
 /* Compact mode for FigCode right panel */
-.biof3-comments--compact {
+.gewu-comments--compact {
   margin-top: 0.8rem;
   padding-top: 0.5rem;
   border-top: none;
 }
-.biof3-comments--compact .biof3-comments__header h2 {
-  font-size: var(--biof3-font-size-caption);
+.gewu-comments--compact .gewu-comments__header h2 {
+  font-size: var(--gewu-font-size-caption);
 }
-.biof3-comments--compact .biof3-comments__header p {
-  font-size: var(--biof3-font-size-sm);
+.gewu-comments--compact .gewu-comments__header p {
+  font-size: var(--gewu-font-size-sm);
 }
-.biof3-comments--compact .wl-emoji-popup {
+.gewu-comments--compact .wl-emoji-popup {
   transform: scale(0.7);
   transform-origin: top left;
 }
-.biof3-comments--compact .wl-emoji-popup img {
+.gewu-comments--compact .wl-emoji-popup img {
   width: 20px !important;
   height: 20px !important;
 }
-.biof3-comments--compact .wl-reaction {
+.gewu-comments--compact .wl-reaction {
   gap: 4px;
 }
-.biof3-comments--compact .wl-reaction-item {
-  font-size: var(--biof3-font-size-body);
+.gewu-comments--compact .wl-reaction-item {
+  font-size: var(--gewu-font-size-body);
   padding: 3px 6px;
 }
-.biof3-comments--compact .wl-reaction-item .wl-reaction-img {
+.gewu-comments--compact .wl-reaction-item .wl-reaction-img {
   width: 16px;
   height: 16px;
 }
-.biof3-comments--compact .wl-panel,
-.biof3-comments--compact .wl-cards {
-  font-size: var(--biof3-font-size-caption);
+.gewu-comments--compact .wl-panel,
+.gewu-comments--compact .wl-cards {
+  font-size: var(--gewu-font-size-caption);
 }
-.biof3-comments--compact .wl-editor {
+.gewu-comments--compact .wl-editor {
   min-height: 60px;
 }
-.biof3-comments--compact .wl-panel .wl-header {
-  font-size: var(--biof3-font-size-sm);
+.gewu-comments--compact .wl-panel .wl-header {
+  font-size: var(--gewu-font-size-sm);
 }
-.biof3-comments--compact .wl-panel .wl-header input {
-  font-size: var(--biof3-font-size-sm);
+.gewu-comments--compact .wl-panel .wl-header input {
+  font-size: var(--gewu-font-size-sm);
   padding: 4px 6px;
 }
-.biof3-comments--compact .wl-btn {
-  font-size: var(--biof3-font-size-sm);
+.gewu-comments--compact .wl-btn {
+  font-size: var(--gewu-font-size-sm);
   padding: 4px 10px;
 }
-.biof3-comments--compact .wl-card .wl-meta,
-.biof3-comments--compact .wl-card .wl-content {
-  font-size: var(--biof3-font-size-sm);
+.gewu-comments--compact .wl-card .wl-meta,
+.gewu-comments--compact .wl-card .wl-content {
+  font-size: var(--gewu-font-size-sm);
 }
 
 /* 响应式设计：在小屏幕上图片更小 */
@@ -784,7 +784,7 @@
   }
 
   .theme-doc-markdown h2 {
-    font-size: var(--biof3-font-size-xl);
+    font-size: var(--gewu-font-size-xl);
   }
 
   .markdown img {
@@ -796,7 +796,7 @@
   .markdown pre {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    font-size: var(--biof3-font-size-body-sm);
+    font-size: var(--gewu-font-size-body-sm);
   }
 
   /* Mobile: long tables get horizontal scroll instead of breaking layout */
@@ -814,26 +814,26 @@
     word-break: break-word;
   }
 
-  .biof3-download {
+  .gewu-download {
     align-items: stretch;
   }
 
-  .biof3-download__button {
+  .gewu-download__button {
     justify-content: center;
     width: 100%;
   }
 
-  .biof3-export-panel {
+  .gewu-export-panel {
     align-items: stretch;
   }
 
-  .biof3-export-panel__actions,
-  .biof3-export-panel__button,
-  .biof3-export-panel__link {
+  .gewu-export-panel__actions,
+  .gewu-export-panel__button,
+  .gewu-export-panel__link {
     width: 100%;
   }
 
-  .biof3-export-panel__link {
+  .gewu-export-panel__link {
     text-align: center;
   }
 }
@@ -844,26 +844,26 @@
   .theme-doc-toc-desktop,
   .theme-doc-footer,
   .pagination-nav,
-  .biof3-export-panel,
-  .biof3-export-panel__button--quiet,
-  .biof3-comments {
+  .gewu-export-panel,
+  .gewu-export-panel__button--quiet,
+  .gewu-comments {
     display: none !important;
   }
 
-  .biof3-download {
+  .gewu-download {
     break-inside: avoid;
-    border-color: var(--biof3-border-strong);
+    border-color: var(--gewu-border-strong);
     background: transparent;
   }
 
-  .biof3-download__button {
+  .gewu-download__button {
     border-color: var(--ifm-color-primary);
     color: var(--ifm-color-primary);
   }
 
-  .biof3-download__button::after {
+  .gewu-download__button::after {
     content: ' ↗';
-    font-size: var(--biof3-font-size-sm);
+    font-size: var(--gewu-font-size-sm);
   }
 
   .theme-doc-markdown {
@@ -921,7 +921,7 @@
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
   border-radius: 12px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
   overflow: hidden;
@@ -966,8 +966,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 20px;
-  border-bottom: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-subtle);
+  border-bottom: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-subtle);
   flex-shrink: 0;
 }
 
@@ -981,9 +981,9 @@
 
 .run-modal-header h3 {
   margin: 0;
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
   font-weight: 700;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
 }
 
@@ -998,8 +998,8 @@
 .run-modal-marquee-text {
   display: inline-block;
   white-space: nowrap;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-muted);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-muted);
   font-weight: 500;
   animation: marqueeScroll 12s linear infinite;
   padding-left: 100%;
@@ -1025,11 +1025,11 @@
   align-items: center;
   gap: 4px;
   padding: 5px 9px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 5px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-sm);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 650;
   text-decoration: none;
   transition: all 0.12s;
@@ -1043,7 +1043,7 @@
 }
 
 .run-modal-dl-icon {
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   line-height: 1;
 }
 
@@ -1056,15 +1056,15 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-xl);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xl);
   cursor: pointer;
   transition: all 0.12s;
 }
 
 .run-modal-close:hover {
-  background: var(--biof3-status-error-bg);
-  color: var(--biof3-status-error-fg);
+  background: var(--gewu-status-error-bg);
+  color: var(--gewu-status-error-fg);
 }
 
 .run-modal-body {
@@ -1092,7 +1092,7 @@
 .run-modal-left {
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--biof3-border);
+  border-right: 1px solid var(--gewu-border);
   min-height: 0;
 }
 
@@ -1102,8 +1102,8 @@
   align-items: center;
   gap: 8px;
   padding: 6px 10px;
-  border-bottom: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-subtle);
+  border-bottom: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-subtle);
   flex-shrink: 0;
 }
 
@@ -1117,10 +1117,10 @@
   gap: 4px;
   padding: 5px 14px;
   border-radius: 6px;
-  border: 1px solid var(--biof3-status-online);
+  border: 1px solid var(--gewu-status-online);
   background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
   color: #fff;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s;
@@ -1135,16 +1135,16 @@
   transform: translateY(0);
 }
 .run-modal-run-btn:disabled {
-  background: var(--biof3-text-muted);
-  border-color: var(--biof3-text-muted);
+  background: var(--gewu-text-muted);
+  border-color: var(--gewu-text-muted);
   cursor: wait;
   transform: none;
   box-shadow: none;
 }
 
 .run-modal-code-hint {
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-muted);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-muted);
   font-weight: 500;
 }
 
@@ -1155,10 +1155,10 @@
   width: 26px;
   height: 26px;
   padding: 0;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 5px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   transition: all 0.12s;
 }
@@ -1169,8 +1169,8 @@
 }
 
 .run-modal-copy-btn.copied {
-  border-color: var(--biof3-status-online);
-  color: var(--biof3-status-online);
+  border-color: var(--gewu-status-online);
+  color: var(--gewu-status-online);
 }
 
 .run-modal-fullscreen-btn {
@@ -1180,10 +1180,10 @@
   width: 28px;
   height: 28px;
   padding: 0;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   transition: all 0.12s;
 }
@@ -1203,7 +1203,7 @@
 }
 
 .run-modal:fullscreen .run-modal-left .run-modal-editor {
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
 }
 
 .run-modal-left .run-modal-editor {
@@ -1215,16 +1215,16 @@
   border: none;
   border-radius: 0;
   padding: 14px 16px;
-  background: var(--biof3-bg-subtle);
-  font-family: var(--biof3-font-mono, monospace);
-  font-size: var(--biof3-font-size-caption);
+  background: var(--gewu-bg-subtle);
+  font-family: var(--gewu-font-mono, monospace);
+  font-size: var(--gewu-font-size-caption);
   line-height: 1.6;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   outline: none;
 }
 
 .run-modal-left .run-modal-editor:focus {
-  background: var(--biof3-bg-subtle);
+  background: var(--gewu-bg-subtle);
   box-shadow: none;
 }
 
@@ -1254,9 +1254,9 @@
 /* Cards in right panel */
 .run-modal-card {
   padding: 10px 12px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
   min-width: 0;
   overflow: hidden;
 }
@@ -1265,9 +1265,9 @@
 }
 
 .run-modal-card-title {
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 750;
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-bottom: 4px;
@@ -1275,7 +1275,7 @@
 
 .run-modal-card-section {
   padding: 6px 0;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
 }
 
 .run-modal-card-section:first-child {
@@ -1288,8 +1288,8 @@
 }
 
 .run-modal-data-hint {
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-muted);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-muted);
   font-style: italic;
 }
 
@@ -1304,39 +1304,39 @@
 .run-modal-data-table-wrap {
   max-height: 120px;
   overflow: auto;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 4px;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .run-modal-data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--biof3-font-size-xs);
-  font-family: var(--biof3-font-mono, monospace);
+  font-size: var(--gewu-font-size-xs);
+  font-family: var(--gewu-font-mono, monospace);
 }
 
 .run-modal-data-table th {
   position: sticky;
   top: 0;
-  background: var(--biof3-status-success-bg);
+  background: var(--gewu-status-success-bg);
   padding: 3px 6px;
   text-align: left;
   font-weight: 700;
-  color: var(--biof3-status-success-fg);
-  border-bottom: 1px solid var(--biof3-border);
+  color: var(--gewu-status-success-fg);
+  border-bottom: 1px solid var(--gewu-border);
   white-space: nowrap;
 }
 
 .run-modal-data-table td {
   padding: 2px 6px;
-  border-bottom: 1px solid var(--biof3-border);
-  color: var(--biof3-text-secondary);
+  border-bottom: 1px solid var(--gewu-border);
+  color: var(--gewu-text-secondary);
   white-space: nowrap;
 }
 
 .run-modal-data-table tr:hover td {
-  background: var(--biof3-bg-subtle);
+  background: var(--gewu-bg-subtle);
 }
 
 .run-modal-config-row {
@@ -1349,9 +1349,9 @@
   flex-shrink: 0;
   width: 32px;
   padding-top: 5px;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 750;
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
   text-align: right;
 }
 
@@ -1376,7 +1376,7 @@
   gap: 6px;
   flex-shrink: 0;
   padding: 8px 14px;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
 }
 
 .run-modal-action-btn {
@@ -1384,11 +1384,11 @@
   align-items: center;
   gap: 3px;
   padding: 5px 10px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 5px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-sm);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.12s;
@@ -1405,11 +1405,11 @@
   align-items: center;
   gap: 4px;
   padding: 3px 9px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 14px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-xs);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 650;
   cursor: pointer;
   transition: all 0.12s;
@@ -1418,15 +1418,15 @@
 }
 
 .run-modal-data-btn:hover {
-  border-color: var(--biof3-status-info);
-  color: var(--biof3-status-info);
+  border-color: var(--gewu-status-info);
+  color: var(--gewu-status-info);
   text-decoration: none;
 }
 
 .run-modal-data-btn.active {
-  border-color: var(--biof3-status-info);
+  border-color: var(--gewu-status-info);
   background: rgba(96, 165, 250, 0.1);
-  color: var(--biof3-status-info);
+  color: var(--gewu-status-info);
 }
 
 /* Data preview sub-modal */
@@ -1448,7 +1448,7 @@
   max-height: 70vh;
   display: flex;
   flex-direction: column;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
   border-radius: 10px;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
   overflow: hidden;
@@ -1459,14 +1459,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  border-bottom: 1px solid var(--biof3-border);
-  background: var(--biof3-status-success-bg);
+  border-bottom: 1px solid var(--gewu-border);
+  background: var(--gewu-status-success-bg);
 }
 
 .run-modal-data-modal-header span {
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 700;
-  color: var(--biof3-status-success-fg);
+  color: var(--gewu-status-success-fg);
 }
 
 .run-modal-data-modal-header button {
@@ -1475,14 +1475,14 @@
   border: none;
   border-radius: 4px;
   background: transparent;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-lg);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-lg);
   cursor: pointer;
 }
 
 .run-modal-data-modal-header button:hover {
-  background: var(--biof3-status-error-bg);
-  color: var(--biof3-status-error-fg);
+  background: var(--gewu-status-error-bg);
+  color: var(--gewu-status-error-fg);
 }
 
 .run-modal-data-modal .run-modal-data-table-wrap {
@@ -1505,9 +1505,9 @@
 }
 
 .run-modal-theme-label {
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 700;
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
   letter-spacing: 0.02em;
   white-space: nowrap;
   padding-top: 5px;
@@ -1525,11 +1525,11 @@
   display: inline-flex;
   align-items: center;
   padding: 3px 9px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 14px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-xs);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 650;
   cursor: pointer;
   transition: all 0.12s;
@@ -1543,7 +1543,7 @@
 
 .run-modal-theme-chip.active {
   border-color: var(--ifm-color-primary);
-  background: var(--biof3-accent-bg);
+  background: var(--gewu-accent-bg);
   color: var(--ifm-color-primary);
   font-weight: 750;
 }
@@ -1552,11 +1552,11 @@
   display: inline-flex;
   align-items: center;
   padding: 3px 9px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 14px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-xs);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 650;
   cursor: pointer;
   transition: all 0.12s;
@@ -1564,14 +1564,14 @@
 }
 
 .run-modal-layout-chip:hover {
-  border-color: var(--biof3-status-warning-fg);
-  color: var(--biof3-status-warning-fg);
+  border-color: var(--gewu-status-warning-fg);
+  color: var(--gewu-status-warning-fg);
 }
 
 .run-modal-layout-chip.active {
-  border-color: var(--biof3-status-warning-fg);
-  background: var(--biof3-status-warning-bg);
-  color: var(--biof3-status-warning-fg);
+  border-color: var(--gewu-status-warning-fg);
+  background: var(--gewu-status-warning-bg);
+  color: var(--gewu-status-warning-fg);
   font-weight: 750;
 }
 
@@ -1587,17 +1587,17 @@
   padding: 12px 14px;
   border: none;
   border-radius: 0;
-  background: var(--biof3-bg-subtle);
-  font-family: var(--biof3-font-mono, monospace);
-  font-size: var(--biof3-font-size-caption);
+  background: var(--gewu-bg-subtle);
+  font-family: var(--gewu-font-mono, monospace);
+  font-size: var(--gewu-font-size-caption);
   line-height: 1.6;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   resize: none;
   outline: none;
 }
 
 .run-modal-editor:focus {
-  background: var(--biof3-bg-subtle);
+  background: var(--gewu-bg-subtle);
   box-shadow: none;
 }
 
@@ -1609,14 +1609,14 @@
   border-radius: 5px;
   background: var(--ifm-color-primary);
   color: white;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .run-modal-run-btn:hover:not(:disabled) {
-  background: var(--biof3-accent-hover);
+  background: var(--gewu-accent-hover);
 }
 
 .run-modal-run-btn:disabled {
@@ -1629,8 +1629,8 @@
 }
 
 .run-modal-elapsed {
-  color: var(--biof3-text-muted);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-muted);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 500;
   margin-left: auto;
 }
@@ -1638,9 +1638,9 @@
 .run-modal-file-tag {
   padding: 3px 8px;
   border-radius: 4px;
-  background: var(--biof3-status-success-bg);
-  color: var(--biof3-status-success-fg);
-  font-size: var(--biof3-font-size-xs);
+  background: var(--gewu-status-success-bg);
+  color: var(--gewu-status-success-fg);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -1652,19 +1652,19 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 600;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .run-modal-param input {
   width: 52px;
   padding: 3px 5px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 4px;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 600;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   text-align: center;
   outline: none;
   transition: border-color 0.12s;
@@ -1675,13 +1675,13 @@
 }
 
 .run-modal-param-unit {
-  color: var(--biof3-text-muted);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-muted);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .run-modal-param-sep {
-  color: var(--biof3-text-muted);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-muted);
+  font-size: var(--gewu-font-size-xs);
   margin-left: 6px;
 }
 
@@ -1694,11 +1694,11 @@
 
 .run-modal-param select {
   padding: 2px 4px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 4px;
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text);
-  background: var(--biof3-bg-surface);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text);
+  background: var(--gewu-bg-surface);
   outline: none;
   cursor: pointer;
 }
@@ -1708,10 +1708,10 @@
 }
 
 .run-modal-output {
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
   overflow: visible;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
   padding: 8px;
 }
 
@@ -1729,8 +1729,8 @@
   justify-content: center;
   height: 100%;
   min-height: 120px;
-  color: var(--biof3-text-muted);
-  font-size: var(--biof3-font-size-body-sm);
+  color: var(--gewu-text-muted);
+  font-size: var(--gewu-font-size-body-sm);
   text-align: center;
 }
 
@@ -1741,7 +1741,7 @@
   height: 100%;
   min-height: 120px;
   color: var(--ifm-color-primary);
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
   font-weight: 600;
   animation: pulse 1.5s ease-in-out infinite;
 }
@@ -1752,12 +1752,12 @@
   z-index: 2;
   text-align: center;
   padding: 6px 12px;
-  background: var(--biof3-surface-translucent);
+  background: var(--gewu-surface-translucent);
   backdrop-filter: blur(4px);
   border-radius: 6px;
   margin-bottom: 8px;
-  color: var(--biof3-status-warning-fg);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-status-warning-fg);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 600;
   animation: pulse 1.2s ease-in-out infinite;
 }
@@ -1775,10 +1775,10 @@
 .run-modal-stdout {
   margin: 0;
   padding: 12px 14px;
-  font-family: var(--biof3-font-mono, monospace);
-  font-size: var(--biof3-font-size-sm);
+  font-family: var(--gewu-font-mono, monospace);
+  font-size: var(--gewu-font-size-sm);
   line-height: 1.5;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   white-space: pre-wrap;
   word-break: break-all;
   max-height: 200px;
@@ -1791,7 +1791,7 @@
   height: auto;
   margin: 0 auto;
   border-radius: 4px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   cursor: zoom-in;
   transition: transform 0.15s;
 }
@@ -1823,24 +1823,24 @@
   display: inline-flex;
   align-items: center;
   padding: 6px 14px;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 600;
   color: #fff;
-  background: var(--biof3-accent);
+  background: var(--gewu-accent);
   border: none;
   border-radius: 20px;
   cursor: pointer;
   transition: background 0.15s;
 }
 .run-modal-save-btn:hover {
-  background: var(--biof3-accent-hover);
+  background: var(--gewu-accent-hover);
 }
 .run-modal-save-btn:disabled {
   opacity: 0.7;
   cursor: wait;
 }
 .run-modal-save-btn.saved {
-  background: var(--biof3-status-success-fg);
+  background: var(--gewu-status-success-fg);
 }
 
 .run-modal-img-dl {
@@ -1848,11 +1848,11 @@
   align-items: center;
   gap: 3px;
   padding: 4px 10px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 4px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-sm);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 650;
   text-decoration: none;
   cursor: pointer;
@@ -1899,7 +1899,7 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.15);
   color: white;
-  font-size: var(--biof3-font-size-2xl);
+  font-size: var(--gewu-font-size-2xl);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1912,37 +1912,37 @@
 
 /* Dark mode */
 [data-theme='dark'] .run-modal {
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 [data-theme='dark'] .run-modal-header {
-  background: var(--biof3-bg-canvas);
-  border-bottom-color: var(--biof3-border);
+  background: var(--gewu-bg-canvas);
+  border-bottom-color: var(--gewu-border);
 }
 
 [data-theme='dark'] .run-modal-header h3 {
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 [data-theme='dark'] .run-modal-editor {
-  background: var(--biof3-bg-canvas);
-  border-color: var(--biof3-border);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-canvas);
+  border-color: var(--gewu-border);
+  color: var(--gewu-text);
 }
 
 [data-theme='dark'] .run-modal-output {
-  background: var(--biof3-bg-canvas);
-  border-color: var(--biof3-border);
+  background: var(--gewu-bg-canvas);
+  border-color: var(--gewu-border);
 }
 
 [data-theme='dark'] .run-modal-stdout {
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 [data-theme='dark'] .run-modal-reset-btn {
-  background: var(--biof3-bg-subtle);
-  border-color: var(--biof3-border-strong);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg-subtle);
+  border-color: var(--gewu-border-strong);
+  color: var(--gewu-text-secondary);
 }
 
 /* Responsive: stack on narrow screens */
@@ -1953,7 +1953,7 @@
   }
   .run-modal-left {
     border-right: none;
-    border-bottom: 1px solid var(--biof3-border);
+    border-bottom: 1px solid var(--gewu-border);
   }
 }
 
@@ -1986,7 +1986,7 @@
 
 [data-theme='dark'] .try-online-card {
   background: linear-gradient(135deg, rgba(15, 118, 110, 0.1) 0%, rgba(16, 185, 129, 0.08) 100%);
-  border-color: var(--biof3-accent-border);
+  border-color: var(--gewu-accent-border);
 }
 
 .try-online-icon {
@@ -1998,7 +1998,7 @@
   justify-content: center;
   background: var(--ifm-color-primary);
   color: white;
-  font-size: var(--biof3-font-size-md);
+  font-size: var(--gewu-font-size-md);
   font-weight: 800;
   flex-shrink: 0;
 }
@@ -2009,27 +2009,27 @@
 }
 
 .try-online-title {
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 700;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   margin-bottom: 2px;
 }
 
 [data-theme='dark'] .try-online-title {
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .try-online-desc {
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-secondary);
 }
 
 [data-theme='dark'] .try-online-desc {
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
 }
 
 .try-online-arrow {
-  font-size: var(--biof3-font-size-xl);
+  font-size: var(--gewu-font-size-xl);
   color: var(--ifm-color-primary);
   flex-shrink: 0;
   transition: transform 0.15s;
@@ -2120,7 +2120,7 @@ button.DocSearch-Button .DocSearch-Button-Keys,
   height: 18px;
   margin: 0 6px;
   vertical-align: middle;
-  background: var(--biof3-border);
+  background: var(--gewu-border);
   opacity: 0.6;
 }
 
@@ -2140,10 +2140,10 @@ button.DocSearch-Button .DocSearch-Button-Keys,
   display: inline-block;
   margin-left: 6px;
   padding: 1px 6px;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 600;
-  color: var(--biof3-status-warning-fg);
-  background: var(--biof3-status-warning-bg);
+  color: var(--gewu-status-warning-fg);
+  background: var(--gewu-status-warning-bg);
   border-radius: 4px;
   vertical-align: middle;
 }
@@ -2157,50 +2157,50 @@ button.DocSearch-Button .DocSearch-Button-Keys,
 }
 
 /* ===== 桌面版：取消 dock 让位，页面保持全宽 ===== */
-html.biof3-desktop {
+html.gewu-desktop {
   padding-left: 0;
 }
 
 /* 文档页保持全宽 */
-html.biof3-desktop .theme-doc-sidebar-container {
+html.gewu-desktop .theme-doc-sidebar-container {
   margin-left: 0 !important;
 }
 
 /* navbar 内容也右移对齐 */
-html.biof3-desktop .navbar__inner {
+html.gewu-desktop .navbar__inner {
   padding-left: 0;
 }
 
 /* 非文档页的主内容 wrapper 保持全宽 */
-html.biof3-desktop .main-wrapper {
+html.gewu-desktop .main-wrapper {
   margin-left: 0;
 }
 
 /* 首页 hero 区域不需要额外左移 */
-html.biof3-desktop .hero {
+html.gewu-desktop .hero {
   margin-left: 0;
 }
 
 /* ===== docs 教程页：去 Web 痕迹，内容撑满 ===== */
 /* 隐藏右侧 TOC、底部 pagination、编辑此页、docs footer、移动端 TOC 按钮 */
-html.biof3-desktop .theme-doc-toc-desktop,
-html.biof3-desktop .pagination-nav,
-html.biof3-desktop .theme-edit-this-page,
-html.biof3-desktop .theme-doc-footer,
-html.biof3-desktop .tocCollapsibleButton {
+html.gewu-desktop .theme-doc-toc-desktop,
+html.gewu-desktop .pagination-nav,
+html.gewu-desktop .theme-edit-this-page,
+html.gewu-desktop .theme-doc-footer,
+html.gewu-desktop .tocCollapsibleButton {
   display: none !important;
 }
 
 /* 内容区去掉右侧 col--3 留白，撑满 */
-html.biof3-desktop [class*='docMainContainer'] > .container > .row > .col {
+html.gewu-desktop [class*='docMainContainer'] > .container > .row > .col {
   max-width: 100% !important;
 }
 
 /* DocSidebar 收紧：与 dock 视觉统一，去 Web 卡片感 */
-html.biof3-desktop .theme-doc-sidebar-container {
-  border-right: 1px solid var(--biof3-border, #e2e8f0);
+html.gewu-desktop .theme-doc-sidebar-container {
+  border-right: 1px solid var(--gewu-border, #e2e8f0);
   width: 280px;
 }
-html.biof3-desktop .theme-doc-sidebar-container .menu__link {
+html.gewu-desktop .theme-doc-sidebar-container .menu__link {
   border-radius: 6px;
 }

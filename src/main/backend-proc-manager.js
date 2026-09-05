@@ -40,6 +40,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { resolveLocalDirName } = require("./brand");
 const { spawn } = require("child_process");
 const { app } = require("electron");
 const { createOwnedBackendSupervisor } = require("../owned-backend-supervisor");
@@ -105,7 +106,7 @@ const _logStreams = {};
 function getLogDir() {
   const dir = process.env.BIOF3_LOCAL_DATA_DIR
     ? path.join(process.env.BIOF3_LOCAL_DATA_DIR, "logs")
-    : path.join(app.getPath("documents"), "BioF3-Local", "logs");
+    : path.join(app.getPath("documents"), resolveLocalDirName(app), "logs");
   try {
     fs.mkdirSync(dir, { recursive: true });
   } catch {}

@@ -1,8 +1,8 @@
-/* BioF3 桌面版原生 shell — 全局样式 */
+/* Gewu 桌面版原生 shell — 全局样式 */
 /* 复刻 Docusaurus 设计系统：Infima token + custom.css 覆盖，
    但结构走桌面化（无 navbar/footer，dock 浮动侧边栏）。
    - infima default.css：~200 个设计 token（颜色/间距/圆角/阴影/字号/z-index）
-   - 仓库根 custom.css：BioF3 brand palette + primary 色阶覆盖 + markdown 排版
+   - 仓库根 custom.css：Gewu brand palette + primary 色阶覆盖 + markdown 排版
    - 下方桌面版覆盖：body 字体、滚动条、dock 让位 */
 @import 'infima/dist/css/default/default.css';
 @import './custom.css';
@@ -10,7 +10,7 @@
 :root {
   /* 桌面版基础（覆盖 infima 的 web 站点默认） */
   --ifm-navbar-height: 0px; /* 桌面版无 navbar */
-  --biof3-titlebar-height: 38px;
+  --gewu-titlebar-height: 38px;
   /* infima 默认 background-color: transparent（靠 body），桌面版给实色 */
   --ifm-background-color: #ffffff;
   /* 桌面版内容区更紧凑的阅读宽度 */
@@ -18,35 +18,35 @@
   --ifm-line-height-base: 1.65;
 
   /* 桌面版字号 token — Infima 无 heading 字号 token，统一在此定义供 module 引用 */
-  --biof3-font-size-xs: 0.625rem; /* 10px 徽标/角标 */
-  --biof3-font-size-sm: 0.6875rem; /* 11px 辅助文字 */
-  --biof3-font-size-caption: 0.75rem; /* 12px 说明/caption */
-  --biof3-font-size-body-sm: 0.8125rem; /* 13px 紧凑正文/表格 */
-  --biof3-font-size-body: 0.875rem; /* 14px 正文 */
-  --biof3-font-size-md: 1rem; /* 16px 小标题/MD h2 */
-  --biof3-font-size-lg: 1.125rem; /* 18px 小标题 */
-  --biof3-font-size-xl: 1.25rem; /* 20px 标题 */
-  --biof3-font-size-2xl: 1.375rem; /* 22px 大标题 */
-  --biof3-font-size-3xl: 1.75rem; /* 28px 页标题 */
+  --gewu-font-size-xs: 0.625rem; /* 10px 徽标/角标 */
+  --gewu-font-size-sm: 0.6875rem; /* 11px 辅助文字 */
+  --gewu-font-size-caption: 0.75rem; /* 12px 说明/caption */
+  --gewu-font-size-body-sm: 0.8125rem; /* 13px 紧凑正文/表格 */
+  --gewu-font-size-body: 0.875rem; /* 14px 正文 */
+  --gewu-font-size-md: 1rem; /* 16px 小标题/MD h2 */
+  --gewu-font-size-lg: 1.125rem; /* 18px 小标题 */
+  --gewu-font-size-xl: 1.25rem; /* 20px 标题 */
+  --gewu-font-size-2xl: 1.375rem; /* 22px 大标题 */
+  --gewu-font-size-3xl: 1.75rem; /* 28px 页标题 */
 
   /* 桌面版间距 token — 常用 px 档位，零碎值（3/5/10/14px）保留 */
-  --biof3-space-1: 4px;
-  --biof3-space-2: 6px;
-  --biof3-space-3: 8px;
-  --biof3-space-4: 12px;
-  --biof3-space-5: 16px;
-  --biof3-space-6: 24px;
-  --biof3-live-result-right-width: 720px;
+  --gewu-space-1: 4px;
+  --gewu-space-2: 6px;
+  --gewu-space-3: 8px;
+  --gewu-space-4: 12px;
+  --gewu-space-5: 16px;
+  --gewu-space-6: 24px;
+  --gewu-live-result-right-width: 720px;
 
   /* dock/面板表面色 — UI-238 亮色切中性 zinc（与白底发丝线区分），暗色蓝灰深底
      （保持品牌冷调，非 infima emphasis 的纯灰） */
-  --biof3-surface-dim: #f4f4f5;
+  --gewu-surface-dim: #f4f4f5;
 }
 
 [data-theme='dark'] {
   --ifm-background-color: #0f172a;
   --ifm-background-surface-color: #0f172a;
-  --biof3-surface-dim: #0f172a;
+  --gewu-surface-dim: #0f172a;
 }
 
 * {
@@ -59,10 +59,10 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  font-family: var(--biof3-font-sans);
-  font-size: var(--biof3-font-size-md);
+  font-family: var(--gewu-font-sans);
+  font-size: var(--gewu-font-size-md);
   background: var(--ifm-background-color);
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -73,7 +73,7 @@ body {
 }
 
 /* 桌面版主内容区 — dock 右侧 */
-.biof3-spa-main {
+.gewu-spa-main {
   height: 100vh;
   min-height: 0;
   overflow: hidden;
@@ -88,15 +88,15 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--biof3-border) 60%, var(--biof3-bg-subtle) 40%);
+  background: color-mix(in srgb, var(--gewu-border) 60%, var(--gewu-bg-subtle) 40%);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--biof3-text-secondary) 50%, transparent 50%);
+  background: color-mix(in srgb, var(--gewu-text-secondary) 50%, transparent 50%);
 }
 
 /* docs/blog iframe 过渡容器 */
-.biof3-docs-frame-wrap {
+.gewu-docs-frame-wrap {
   position: fixed;
   top: 0;
   left: 64px; /* 让出 dock */
@@ -104,16 +104,16 @@ body {
   bottom: 0;
   background: var(--ifm-background-color, #fff);
 }
-.biof3-docs-frame-loading {
+.gewu-docs-frame-loading {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--biof3-text-muted);
-  font-size: var(--biof3-font-size-md);
+  color: var(--gewu-text-muted);
+  font-size: var(--gewu-font-size-md);
 }
-.biof3-docs-frame {
+.gewu-docs-frame {
   width: 100%;
   height: 100%;
   border: none;
@@ -122,8 +122,8 @@ body {
 
 /* ────────────────────────────────────────────────────────────
  * 桌面版基线覆盖 — 修正 infima 对裸元素的 Web 站点风格副作用
- * 仅作用于未被 .biof3-docs-content 重新定义的页面（应用页）。
- * docs/blog 页有自己的 .biof3-docs-content 规则，优先级更高，不受影响。
+ * 仅作用于未被 .gewu-docs-content 重新定义的页面（应用页）。
+ * docs/blog 页有自己的 .gewu-docs-content 规则，优先级更高，不受影响。
  * ──────────────────────────────────────────────────────────── */
 
 /* 表单控件：Chrome UA 默认不继承字体（button 计算栈会落到 Arial），
@@ -140,19 +140,19 @@ textarea {
    让所有 code=容器×0.88 漂移（13→11.4/16→14.1），行内代码统一 caption 12px */
 code {
   border: none;
-  background-color: var(--biof3-bg-subtle);
-  font-family: var(--biof3-font-mono, monospace);
-  font-size: var(--biof3-font-size-caption);
+  background-color: var(--gewu-bg-subtle);
+  font-family: var(--gewu-font-mono, monospace);
+  font-size: var(--gewu-font-size-caption);
 }
 /* pre 代码块：去掉 infima 默认背景，让应用页自己的代码块样式生效；
-   docs/blog 的 .biof3-docs-content pre 会重新给深色背景；
+   docs/blog 的 .gewu-docs-content pre 会重新给深色背景；
    UI-240：接管字号——infima pre{font:88% mono} 使代码块随容器漂移，
    统一代码块基准 body-sm 13px（对齐聊天正文/CM diff/文件树） */
 pre {
   background-color: transparent;
   padding: 0;
   margin: 0;
-  font: var(--biof3-font-size-body-sm) / 1.5 var(--biof3-font-mono, monospace);
+  font: var(--gewu-font-size-body-sm) / 1.5 var(--gewu-font-mono, monospace);
 }
 pre code {
   background-color: transparent;
@@ -176,7 +176,7 @@ ol {
 
 /* 暗色模式：inline code 背景用半透明，避免亮灰块刺眼 */
 [data-theme='dark'] code {
-  background-color: var(--biof3-border);
+  background-color: var(--gewu-border);
 }
 
 /* ────────────────────────────────────────────────────────────

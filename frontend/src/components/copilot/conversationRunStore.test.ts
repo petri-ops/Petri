@@ -45,7 +45,7 @@ import {
   resumeSubAgentTasks,
   resumeOrphanAgentTasks,
 } from './conversationRunStore';
-import { biof3Events, subscribeBioF3Event } from '@/lib/events';
+import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
 import { deriveLoopDisplay } from '@/lib/loop-client';
 
 function start(conversationId: string, userContent: string, contextToken?: string): void {
@@ -370,7 +370,7 @@ describe('conversation run store', () => {
 
   it('broadcasts a project file refresh after successful workspace mutations and commands', () => {
     const received: Array<{ projectId: string; source: string }> = [];
-    const unsubscribe = subscribeBioF3Event(biof3Events.projectWorkspaceChanged, (detail) => {
+    const unsubscribe = subscribeGewuEvent(gewuEvents.projectWorkspaceChanged, (detail) => {
       received.push(detail);
     });
     start('conversation-a', 'edit a file');
@@ -413,7 +413,7 @@ describe('conversation run store', () => {
 
   it('opens a completed analysis result directly from the run_tool event', () => {
     const received: Array<{ toolJobId: string; projectId?: string | null }> = [];
-    const unsubscribe = subscribeBioF3Event(biof3Events.projectOpenResult, (detail) => {
+    const unsubscribe = subscribeGewuEvent(gewuEvents.projectOpenResult, (detail) => {
       received.push(detail);
     });
     start('conversation-a', 'run analysis');

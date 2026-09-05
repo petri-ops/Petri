@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, renderHook, type RenderHookResult } from '@testing-library/react';
 import { useResizableColumns } from '@/hooks/useResizableColumns';
 
-const LS_KEY = 'biof3-pw-cols';
+const LS_KEY = 'gewu-pw-cols';
 
 function flush() {
   return act(async () => {
@@ -26,7 +26,7 @@ describe('useResizableColumns', () => {
   });
   afterEach(() => {
     localStorage.removeItem(LS_KEY);
-    document.documentElement.style.removeProperty('--biof3-live-result-right-width');
+    document.documentElement.style.removeProperty('--gewu-live-result-right-width');
   });
   it('exposes sane initial sizes', () => {
     const { result } = renderHook(() => useResizableColumns());
@@ -101,12 +101,12 @@ describe('useResizableColumns', () => {
     handler(fakeEvent);
     expect(setCursor).toHaveBeenCalledWith('ew-resize');
     expect(setSelect).toHaveBeenCalledWith('none');
-    expect(document.body.classList.contains('biof3-resizing-columns')).toBe(true);
+    expect(document.body.classList.contains('gewu-resizing-columns')).toBe(true);
 
     fireMouse(document, 'mouseup');
     expect(setCursor).toHaveBeenCalledWith('');
     expect(setSelect).toHaveBeenCalledWith('');
-    expect(document.body.classList.contains('biof3-resizing-columns')).toBe(false);
+    expect(document.body.classList.contains('gewu-resizing-columns')).toBe(false);
   });
 
   it('honors caller-supplied clamp on the bottom terminal resize', async () => {
@@ -173,7 +173,7 @@ describe('useResizableColumns', () => {
       await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
     });
     expect(
-      document.documentElement.style.getPropertyValue('--biof3-live-result-right-width'),
+      document.documentElement.style.getPropertyValue('--gewu-live-result-right-width'),
     ).toBe('420px');
     fireMouse(document, 'mouseup');
     await flush();
@@ -268,7 +268,7 @@ describe('useResizableColumns', () => {
     fireMouse(document, 'mousemove', { clientX: 600, buttons: 0 });
     await flush();
 
-    expect(document.body.classList.contains('biof3-resizing-columns')).toBe(false);
+    expect(document.body.classList.contains('gewu-resizing-columns')).toBe(false);
     expect(result.current.rightWidth).toBe(draggedWidth);
   });
 
@@ -283,7 +283,7 @@ describe('useResizableColumns', () => {
       await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
     });
     expect(
-      document.documentElement.style.getPropertyValue('--biof3-live-result-right-width'),
+      document.documentElement.style.getPropertyValue('--gewu-live-result-right-width'),
     ).toBe('480px');
 
     fireMouse(document, 'mouseup');

@@ -28,16 +28,16 @@ function stripComments(text: string): string {
 }
 
 describe('theme token contract', () => {
-  it('defines every BioF3 token referenced in frontend source', () => {
+  it('defines every Gewu token referenced in frontend source', () => {
     const definitions = new Set<string>();
     const references = new Set<string>();
 
     for (const file of walk(srcRoot)) {
       const text = stripComments(fs.readFileSync(file, 'utf8'));
-      for (const match of text.matchAll(/--biof3-[A-Za-z0-9-]+(?=\s*:)/g)) {
+      for (const match of text.matchAll(/--gewu-[A-Za-z0-9-]+(?=\s*:)/g)) {
         definitions.add(match[0]);
       }
-      for (const match of text.matchAll(/var\(--(biof3-[A-Za-z0-9-]+)/g)) {
+      for (const match of text.matchAll(/var\(--(gewu-[A-Za-z0-9-]+)/g)) {
         references.add(`--${match[1]}`);
       }
     }

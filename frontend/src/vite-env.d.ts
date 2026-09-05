@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-declare module 'virtual:biof3-docs-sidebar' {
+declare module 'virtual:gewu-docs-sidebar' {
   interface DocItem {
     id: string;
     title: string;

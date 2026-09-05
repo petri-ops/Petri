@@ -5,7 +5,7 @@
   min-height: 0;
   flex-direction: column;
   overflow: hidden;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 .canvasBody {
@@ -27,18 +27,18 @@
   align-items: start;
   gap: 10px;
   padding: 10px 14px;
-  border-bottom: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-surface);
+  border-bottom: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-surface);
 }
 
 .backButton,
 .askButton,
 .inspectorActions button,
 .inspectorActions a {
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 7px;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   font: inherit;
 }
@@ -67,8 +67,8 @@
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-body);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body);
   font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -77,8 +77,8 @@
 .contextIdentity p {
   margin: 3px 0 0;
   overflow: hidden;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-sm);
   line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -89,8 +89,8 @@
   flex-wrap: wrap;
   gap: 4px 10px;
   margin-top: 4px;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .modeSwitcher {
@@ -104,22 +104,22 @@
   border: 0;
   border-radius: 5px;
   background: transparent;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   line-height: 22px;
   padding: 0 7px;
 }
 
 .modeSwitcher button:hover {
-  background: var(--biof3-bg-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-hover);
+  color: var(--gewu-text);
 }
 
 .modeSwitcher button[aria-current='page'] {
-  background: color-mix(in srgb, var(--biof3-accent) 12%, transparent);
-  color: var(--biof3-accent);
+  background: color-mix(in srgb, var(--gewu-accent) 12%, transparent);
+  color: var(--gewu-accent);
 }
 
 .truthBadge {
@@ -128,17 +128,17 @@
   align-items: center;
   min-height: 19px;
   padding: 0 7px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 999px;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 600;
 }
 
-.truthBadge[data-tone='valid'] { color: var(--biof3-status-online); }
+.truthBadge[data-tone='valid'] { color: var(--gewu-status-online); }
 .truthBadge[data-tone='degraded'],
-.truthBadge[data-tone='running'] { color: var(--biof3-status-loading); }
-.truthBadge[data-tone='blocked'] { color: var(--biof3-danger); }
+.truthBadge[data-tone='running'] { color: var(--gewu-status-loading); }
+.truthBadge[data-tone='blocked'] { color: var(--gewu-danger); }
 
 .availabilityBadge {
   display: inline-flex;
@@ -146,10 +146,10 @@
   align-items: center;
   min-height: 19px;
   padding: 0 7px;
-  border: 1px solid color-mix(in srgb, var(--biof3-danger) 42%, var(--biof3-border));
+  border: 1px solid color-mix(in srgb, var(--gewu-danger) 42%, var(--gewu-border));
   border-radius: 999px;
-  color: var(--biof3-danger);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-danger);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 650;
 }
 
@@ -159,15 +159,15 @@
   align-items: center;
   gap: 5px;
   padding: 0 10px;
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
 }
 
 .backButton:hover,
 .askButton:hover,
 .inspectorActions button:hover,
 .inspectorActions a:hover {
-  border-color: var(--biof3-border-strong);
-  color: var(--biof3-text);
+  border-color: var(--gewu-border-strong);
+  color: var(--gewu-text);
 }
 
 .inspector,
@@ -179,18 +179,18 @@
   gap: 12px;
   padding: 14px 12px;
   overflow: auto;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .inspectorEmpty {
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
-.inspectorEmpty strong { color: var(--biof3-text); font-size: var(--biof3-font-size-caption); }
-.inspectorEmpty span { max-width: 220px; font-size: var(--biof3-font-size-sm); line-height: 1.5; }
+.inspectorEmpty strong { color: var(--gewu-text); font-size: var(--gewu-font-size-caption); }
+.inspectorEmpty span { max-width: 220px; font-size: var(--gewu-font-size-sm); line-height: 1.5; }
 
 .inspectorHeader {
   display: grid;
@@ -199,8 +199,8 @@
 }
 
 .inspectorHeader > span:first-child {
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 650;
   letter-spacing: .06em;
 }
@@ -208,7 +208,7 @@
 .inspectorHeader strong {
   max-width: 100%;
   overflow: hidden;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -217,7 +217,7 @@
   display: grid;
   gap: 0;
   margin: 0;
-  border-top: 1px solid var(--biof3-border);
+  border-top: 1px solid var(--gewu-border);
 }
 
 .inspectorFacts > div {
@@ -225,11 +225,11 @@
   grid-template-columns: 58px minmax(0, 1fr);
   gap: 8px;
   padding: 7px 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border) 70%, transparent);
-  font-size: var(--biof3-font-size-sm);
+  border-bottom: 1px solid color-mix(in srgb, var(--gewu-border) 70%, transparent);
+  font-size: var(--gewu-font-size-sm);
 }
 
-.inspectorFacts dt { color: var(--biof3-text-tertiary); }
+.inspectorFacts dt { color: var(--gewu-text-tertiary); }
 .inspectorFacts dd { margin: 0; overflow-wrap: anywhere; }
 
 .inspectorActions {
@@ -245,20 +245,20 @@
   align-items: center;
   gap: 5px;
   padding: 0 8px;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   text-decoration: none;
 }
 
 .technicalDetails {
   margin-top: auto;
   padding-top: 8px;
-  border-top: 1px solid var(--biof3-border);
+  border-top: 1px solid var(--gewu-border);
 }
 
 .technicalDetails summary {
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
   cursor: pointer;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .technicalDetails dl {
@@ -266,10 +266,10 @@
   grid-template-columns: 54px minmax(0, 1fr);
   gap: 5px 8px;
   margin: 9px 0 0;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
 }
 
-.technicalDetails dt { color: var(--biof3-text-tertiary); }
+.technicalDetails dt { color: var(--gewu-text-tertiary); }
 .technicalDetails dd { margin: 0; overflow-wrap: anywhere; }
 
 @media (max-width: 820px) {
@@ -297,29 +297,29 @@
 .contextReadiness {
   margin: 0;
   padding: 7px 8px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-sm);
   line-height: 1.5;
 }
 
 .contextReadiness[data-state='ready'] {
-  border-color: color-mix(in srgb, var(--biof3-status-online) 40%, var(--biof3-border));
+  border-color: color-mix(in srgb, var(--gewu-status-online) 40%, var(--gewu-border));
 }
 
 .contextReadiness[data-state='blocked'] {
-  border-color: color-mix(in srgb, var(--biof3-status-loading) 45%, var(--biof3-border));
-  color: var(--biof3-text-primary);
+  border-color: color-mix(in srgb, var(--gewu-status-loading) 45%, var(--gewu-border));
+  color: var(--gewu-text-primary);
 }
 
 .contextReadiness[data-state='loading'] {
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .root button:focus-visible,
 .root a:focus-visible,
 .root summary:focus-visible {
-  outline: 2px solid var(--biof3-accent);
+  outline: 2px solid var(--gewu-accent);
   outline-offset: 2px;
 }

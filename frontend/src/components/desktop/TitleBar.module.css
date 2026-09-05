@@ -1,21 +1,21 @@
 .titleBar {
   --titlebar-left-span: 310px;
   --titlebar-right-span: 540px;
-  --titlebar-height: var(--biof3-titlebar-height);
-  --titlebar-bg: color-mix(in srgb, var(--biof3-bg-surface) 98%, var(--biof3-bg-canvas) 2%);
+  --titlebar-height: var(--gewu-titlebar-height);
+  --titlebar-bg: color-mix(in srgb, var(--gewu-bg-surface) 98%, var(--gewu-bg-canvas) 2%);
   --titlebar-left-bg: var(--titlebar-bg);
-  --titlebar-border: color-mix(in srgb, var(--biof3-border) 72%, transparent 28%);
-  --titlebar-divider: color-mix(in srgb, var(--biof3-border) 64%, transparent 36%);
-  --titlebar-ink: var(--biof3-text);
-  --titlebar-ink-muted: var(--biof3-text-secondary);
-  --titlebar-pill-bg: color-mix(in srgb, var(--biof3-bg-surface) 72%, transparent 28%);
-  --titlebar-pill-border: color-mix(in srgb, var(--biof3-border-strong) 62%, transparent 38%);
-  --titlebar-hover: color-mix(in srgb, var(--biof3-hover) 92%, transparent 8%);
+  --titlebar-border: color-mix(in srgb, var(--gewu-border) 72%, transparent 28%);
+  --titlebar-divider: color-mix(in srgb, var(--gewu-border) 64%, transparent 36%);
+  --titlebar-ink: var(--gewu-text);
+  --titlebar-ink-muted: var(--gewu-text-secondary);
+  --titlebar-pill-bg: color-mix(in srgb, var(--gewu-bg-surface) 72%, transparent 28%);
+  --titlebar-pill-border: color-mix(in srgb, var(--gewu-border-strong) 62%, transparent 38%);
+  --titlebar-hover: color-mix(in srgb, var(--gewu-hover) 92%, transparent 8%);
   --win-btn-size: 22px;
-  --win-btn-bg: color-mix(in srgb, var(--biof3-text) 12%, transparent 88%);
-  --win-btn-bg-hover: color-mix(in srgb, var(--biof3-text) 22%, transparent 78%);
-  --win-btn-fg: color-mix(in srgb, var(--biof3-text) 78%, transparent 22%);
-  --win-btn-bg-close: color-mix(in srgb, var(--biof3-text) 12%, transparent 88%);
+  --win-btn-bg: color-mix(in srgb, var(--gewu-text) 12%, transparent 88%);
+  --win-btn-bg-hover: color-mix(in srgb, var(--gewu-text) 22%, transparent 78%);
+  --win-btn-fg: color-mix(in srgb, var(--gewu-text) 78%, transparent 22%);
+  --win-btn-bg-close: color-mix(in srgb, var(--gewu-text) 12%, transparent 88%);
   --win-btn-bg-close-hover: #e0464e;
   --win-btn-fg-close-hover: #ffffff;
   position: fixed;
@@ -109,7 +109,7 @@
 }
 
 .macTrafficBtn:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--biof3-accent) 78%, white 22%);
+  outline: 2px solid color-mix(in srgb, var(--gewu-accent) 78%, white 22%);
   outline-offset: 1px;
 }
 
@@ -155,7 +155,7 @@
 }
 
 .winBtn:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--biof3-accent) 78%, white 22%);
+  outline: 2px solid color-mix(in srgb, var(--gewu-accent) 78%, white 22%);
   outline-offset: 1px;
 }
 
@@ -232,7 +232,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 630;
   line-height: 16px;
 }
@@ -268,7 +268,7 @@
   border: none;
   background: transparent;
   color: var(--color-text-secondary);
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.15s, color 0.15s;
@@ -319,7 +319,7 @@
   border: none;
   background: transparent;
   color: var(--color-text-primary);
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   text-align: left;
   cursor: pointer;
   transition: background-color 0.1s;
@@ -330,7 +330,7 @@
 }
 
 .convSelectorBadge {
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   padding: 1px 4px;
   background: var(--color-accent-subtle);
   color: var(--color-accent);
@@ -366,7 +366,7 @@
   min-width: 0;
   max-width: 100%;
   padding: 0 7px;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 620;
   line-height: 16px;
   white-space: nowrap;
@@ -396,7 +396,7 @@
 
 .resultPrimary:focus-visible,
 .resultMenuTrigger:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--biof3-accent) 78%, white 22%);
+  outline: 2px solid color-mix(in srgb, var(--gewu-accent) 78%, white 22%);
   outline-offset: 1px;
 }
 
@@ -417,10 +417,10 @@
   width: min(260px, calc(100vw - 20px));
   max-width: calc(100vw - 20px);
   padding: 5px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 9px;
-  background: var(--biof3-bg-elevated);
-  box-shadow: 0 14px 32px color-mix(in srgb, var(--biof3-text) 18%, transparent);
+  background: var(--gewu-bg-elevated);
+  box-shadow: 0 14px 32px color-mix(in srgb, var(--gewu-text) 18%, transparent);
   transform: translateX(-50%);
 }
 
@@ -435,8 +435,8 @@
   border: none;
   border-radius: 7px;
   background: transparent;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-sm);
   text-align: left;
   cursor: pointer;
 }
@@ -449,7 +449,7 @@
 }
 
 .resultMenuItem:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--biof3-accent) 78%, white 22%);
+  outline: 2px solid color-mix(in srgb, var(--gewu-accent) 78%, white 22%);
   outline-offset: -1px;
 }
 
@@ -468,7 +468,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--titlebar-ink-muted);
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .resultMenuItemActive .resultMenuItemStatus {
@@ -545,10 +545,10 @@
   display: grid;
   width: 176px;
   padding: 5px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 10px;
-  background: var(--biof3-bg-elevated);
-  box-shadow: 0 14px 32px color-mix(in srgb, var(--biof3-text) 18%, transparent);
+  background: var(--gewu-bg-elevated);
+  box-shadow: 0 14px 32px color-mix(in srgb, var(--gewu-text) 18%, transparent);
   -webkit-app-region: no-drag;
 }
 
@@ -562,16 +562,16 @@
   border: none;
   border-radius: 7px;
   background: transparent;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-sm);
   text-align: left;
   cursor: pointer;
 }
 
 .toolMenu > button:hover,
 .toolMenuItemActive {
-  background: var(--biof3-hover) !important;
-  color: var(--biof3-text) !important;
+  background: var(--gewu-hover) !important;
+  color: var(--gewu-text) !important;
 }
 
 .toolMenu > button span {
@@ -604,13 +604,13 @@
   padding: 0;
   flex-shrink: 0;
   /* UI-215 补充：纯图标按钮收敛 UA 默认字号（13.3333px）到 token */
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .iconBtn:focus-visible,
 .tabPillMain:focus-visible,
 .tabClose:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--biof3-accent) 78%, white 22%);
+  outline: 2px solid color-mix(in srgb, var(--gewu-accent) 78%, white 22%);
   outline-offset: 1px;
 }
 
@@ -650,8 +650,8 @@
 }
 
 .tabPillActive {
-  background: color-mix(in srgb, var(--biof3-accent-bg) 72%, var(--biof3-bg-surface) 28%);
-  border-color: color-mix(in srgb, var(--biof3-accent) 28%, var(--biof3-border) 72%);
+  background: color-mix(in srgb, var(--gewu-accent-bg) 72%, var(--gewu-bg-surface) 28%);
+  border-color: color-mix(in srgb, var(--gewu-accent) 28%, var(--gewu-border) 72%);
 }
 
 .tabPillMain {
@@ -673,7 +673,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 580;
   line-height: 16px;
 }
@@ -689,8 +689,8 @@
   width: 18px;
   height: 18px;
   border-radius: 6px;
-  background: color-mix(in srgb, var(--biof3-accent) 18%, transparent 82%);
-  color: var(--biof3-accent);
+  background: color-mix(in srgb, var(--gewu-accent) 18%, transparent 82%);
+  color: var(--gewu-accent);
   flex-shrink: 0;
 }
 
@@ -704,7 +704,7 @@
   border-radius: 999px;
   background: transparent;
   color: color-mix(in srgb, var(--titlebar-ink-muted) 72%, transparent 28%);
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   line-height: 1;
   padding: 0;
   cursor: pointer;
@@ -755,9 +755,9 @@
 }
 
 [data-theme='dark'] .titleBar {
-  --titlebar-bg: color-mix(in srgb, var(--biof3-bg-surface) 96%, var(--biof3-bg-canvas) 4%);
+  --titlebar-bg: color-mix(in srgb, var(--gewu-bg-surface) 96%, var(--gewu-bg-canvas) 4%);
   --titlebar-left-bg: var(--titlebar-bg);
-  --titlebar-pill-bg: color-mix(in srgb, var(--biof3-bg-elevated) 70%, transparent 30%);
+  --titlebar-pill-bg: color-mix(in srgb, var(--gewu-bg-elevated) 70%, transparent 30%);
 }
 
 @media (max-width: 1380px) {

@@ -377,7 +377,7 @@ function SessionFrameView({
                 handled by CSS on the projection layer above (aria-hidden plus
                 display:none/flex), so this React gate only destroyed the subtree.
 
-                It made copilotAsk undeliverable: dispatchBioF3Event is a bare
+                It made copilotAsk undeliverable: dispatchGewuEvent is a bare
                 window.dispatchEvent with no buffering (lib/events.ts:113) and
                 SimpleChat.tsx:568 is its only subscriber, so a manual edit
                 submitted from ResultEditPanel — reachable from every result-opening

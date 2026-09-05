@@ -16,7 +16,7 @@
   width: 5px;
   border-radius: 999px;
   /* 深色中性灰常态（用户裁决：不用主题青绿），hover/拖拽加深 */
-  background: color-mix(in srgb, var(--biof3-text-secondary) 55%, transparent);
+  background: color-mix(in srgb, var(--gewu-text-secondary) 55%, transparent);
   transition: background 0.15s, width 0.15s, right 0.15s;
   cursor: pointer;
 }
@@ -25,5 +25,5 @@
 .thumbActive {
   right: 0.5px;
   width: 6px;
-  background: color-mix(in srgb, var(--biof3-text-primary) 75%, transparent);
+  background: color-mix(in srgb, var(--gewu-text-primary) 75%, transparent);
 }

@@ -37,7 +37,7 @@ export const DEFAULT_EXAMPLE_PROMPTS: ExamplePrompt[] = [
     icon: 'zap',
     title: '快速开始',
     description: '查看 AI 能帮你做什么',
-    prompt: 'BioF3 Desktop 能帮我完成哪些任务？',
+    prompt: 'Gewu Desktop 能帮我完成哪些任务？',
   },
 ];
 

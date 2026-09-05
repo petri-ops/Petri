@@ -1,5 +1,5 @@
 /**
- * BioF3 Desktop — typed event bus
+ * Gewu Desktop — typed event bus
  *
  * Replaces magic string CustomEvent names with const-typed symbols.
  * Producers and consumers import from here; one typo now = TS compile error.
@@ -9,15 +9,15 @@
 
 import type { CopilotContext } from '@/lib/copilotContext';
 
-export const biof3Events = {
+export const gewuEvents = {
   /** Fired by DesktopOnboarding on completion; listened by App's DesktopOnboardingMount */
-  onboardingDone: 'biof3:onboarding-done',
+  onboardingDone: 'gewu:onboarding-done',
 
   /** Fired by main.js preload on Cmd+R; listened by project-workspace to refetch state */
-  softRefresh: 'biof3:soft-refresh',
+  softRefresh: 'gewu:soft-refresh',
 
   /** Fired by project-workspace right-panel handlers; listened by project-workspace itself */
-  projectOpenResult: 'biof3:project-open-result',
+  projectOpenResult: 'gewu:project-open-result',
 
   /**
    * Fired by SimpleChat when the user clicks an internal artifact link in
@@ -25,61 +25,61 @@ export const biof3Events = {
    * current job + selects the named artifact, or — when the artifact belongs
    * to a different project — navigates there first.
    */
-  projectOpenArtifact: 'biof3:project-open-artifact',
+  projectOpenArtifact: 'gewu:project-open-artifact',
 
   /**
    * Fired by SimpleChat when the user clicks an internal workspace-file link
    * in the copilot reply. project-workspace validates the target project,
    * opens the file in the right Files panel and adds/focuses the tab.
    */
-  projectOpenWorkspaceFile: 'biof3:project-open-workspace-file',
+  projectOpenWorkspaceFile: 'gewu:project-open-workspace-file',
 
   /**
    * Signals that files in one project may have changed. Agent workspace
    * writes emit this immediately; the Files panel also polls while visible
    * so terminal and external-editor writes converge without manual reload.
    */
-  projectWorkspaceChanged: 'biof3:project-workspace-changed',
+  projectWorkspaceChanged: 'gewu:project-workspace-changed',
 
   /**
    * Fired by project-workspace (handleAskAgent); listened by SimpleChat to inject
    * a prompt into the chat input without navigating.
    */
-  copilotAsk: 'biof3:copilot-ask',
+  copilotAsk: 'gewu:copilot-ask',
 
   /** Fired by the shared TitleBar; listened by BrowserPanel */
-  browserBack: 'biof3:browser-back',
-  browserForward: 'biof3:browser-forward',
+  browserBack: 'gewu:browser-back',
+  browserForward: 'gewu:browser-forward',
 
   /**
    * Fired by SimpleChat when a conversation is forked (via "创建分支" button).
    * project-workspace subscribes and refreshes the conversation list + other projects.
    */
-  conversationForked: 'biof3:conversation-forked',
+  conversationForked: 'gewu:conversation-forked',
 
   /**
    * BLOCK-16 PHASE 3：agent task 收尾时由 SSE parser 派发。
    * useWorkingTreeReview 订阅：自动弹出浮层，避免用户手动点 Review 按钮。
    * payload 含 taskId（agent task identifier）+ filesChanged（若后端在 done 时附了改动清单）。
    */
-  agentTaskDone: 'biof3:agent-task-done',
+  agentTaskDone: 'gewu:agent-task-done',
 
   /** BLOCK-20: fired by backend SSE once per agent run with live token budget. */
-  tokenBudget: 'biof3:token-budget',
+  tokenBudget: 'gewu:token-budget',
 
   /**
    * BLOCK-28.7: 请求打开审阅并选中指定文件（聊天区改动卡片点击行触发）。
    * ProjectWorkspace 监听后 openRightPanel('review')；
    * useWorkingTreeReview 监听后 setSelectedFilePath。
    */
-  reviewOpenFile: 'biof3:review-open-file',
+  reviewOpenFile: 'gewu:review-open-file',
 
   /**
    * BLOCK-34 P3: agent 成功启动后台进程（workspace_exec_background）时由
    * conversationRunStore 派发；ToolActivityDock 订阅后自动弹出后台进程 tab（BLOCK-36 吸收原 BackgroundProcessDock）
    * 并开始轮询该进程日志。
    */
-  agentBackgroundProcess: 'biof3:agent-background-process',
+  agentBackgroundProcess: 'gewu:agent-background-process',
 
   /**
    * BLOCK-52 P1（选中即引用）：用户在右侧文件预览（CodeMirror 编辑器或
@@ -87,7 +87,7 @@ export const biof3Events = {
    * 派发；SimpleChat（中央会话 ownsCopilotAsk 拥有者）订阅后在 composer
    * 生成引用块，随下一条消息发送。
    */
-  selectionQuote: 'biof3:selection-quote',
+  selectionQuote: 'gewu:selection-quote',
 
   /**
    * BLOCK-52 P2（图片/结果图引用）：用户在右侧图片预览（WorkspaceFilePreview
@@ -95,7 +95,7 @@ export const biof3Events = {
    * 「引用到对话」时派发；SimpleChat 订阅后生成图片引用卡（缩略图 + 来源行），
    * 发送时图片进附件区、artifact 元数据合成进消息文本供模型读取。
    */
-  imageQuote: 'biof3:image-quote',
+  imageQuote: 'gewu:image-quote',
 } as const;
 
 export interface ConversationForkedDetail {
@@ -138,7 +138,7 @@ export interface TokenBudgetDetail {
 // Typed helpers
 // ---------------------------------------------------------------------------
 
-export type BioF3EventName = (typeof biof3Events)[keyof typeof biof3Events];
+export type GewuEventName = (typeof gewuEvents)[keyof typeof gewuEvents];
 
 export interface CopilotAskDetail {
   prompt: string;
@@ -209,23 +209,23 @@ export interface ProjectWorkspaceChangedDetail {
   source: 'agent' | 'terminal' | 'external' | 'manual';
 }
 
-export type BioF3EventMap = {
-  [biof3Events.onboardingDone]: undefined;
-  [biof3Events.softRefresh]: undefined;
-  [biof3Events.projectOpenResult]: ProjectOpenResultDetail;
-  [biof3Events.projectOpenArtifact]: ProjectOpenArtifactDetail;
-  [biof3Events.projectOpenWorkspaceFile]: ProjectOpenWorkspaceFileDetail;
-  [biof3Events.projectWorkspaceChanged]: ProjectWorkspaceChangedDetail;
-  [biof3Events.copilotAsk]: CopilotAskDetail;
-  [biof3Events.browserBack]: undefined;
-  [biof3Events.browserForward]: undefined;
-  [biof3Events.conversationForked]: ConversationForkedDetail;
-  [biof3Events.agentTaskDone]: AgentTaskDoneDetail;
-  [biof3Events.tokenBudget]: TokenBudgetDetail;
-  [biof3Events.reviewOpenFile]: ReviewOpenFileDetail;
-  [biof3Events.agentBackgroundProcess]: AgentBackgroundProcessDetail;
-  [biof3Events.selectionQuote]: SelectionQuoteDetail;
-  [biof3Events.imageQuote]: ImageQuoteDetail;
+export type GewuEventMap = {
+  [gewuEvents.onboardingDone]: undefined;
+  [gewuEvents.softRefresh]: undefined;
+  [gewuEvents.projectOpenResult]: ProjectOpenResultDetail;
+  [gewuEvents.projectOpenArtifact]: ProjectOpenArtifactDetail;
+  [gewuEvents.projectOpenWorkspaceFile]: ProjectOpenWorkspaceFileDetail;
+  [gewuEvents.projectWorkspaceChanged]: ProjectWorkspaceChangedDetail;
+  [gewuEvents.copilotAsk]: CopilotAskDetail;
+  [gewuEvents.browserBack]: undefined;
+  [gewuEvents.browserForward]: undefined;
+  [gewuEvents.conversationForked]: ConversationForkedDetail;
+  [gewuEvents.agentTaskDone]: AgentTaskDoneDetail;
+  [gewuEvents.tokenBudget]: TokenBudgetDetail;
+  [gewuEvents.reviewOpenFile]: ReviewOpenFileDetail;
+  [gewuEvents.agentBackgroundProcess]: AgentBackgroundProcessDetail;
+  [gewuEvents.selectionQuote]: SelectionQuoteDetail;
+  [gewuEvents.imageQuote]: ImageQuoteDetail;
 };
 
 /** BLOCK-34 P3: 后台进程启动事件载荷。 */
@@ -291,9 +291,9 @@ export interface ImageQuoteDetail {
 }
 
 /** Dispatch a typed event on window */
-export function dispatchBioF3Event<K extends BioF3EventName>(
+export function dispatchGewuEvent<K extends GewuEventName>(
   name: K,
-  detail?: BioF3EventMap[K]
+  detail?: GewuEventMap[K]
 ): void {
   window.dispatchEvent(new CustomEvent(name, { detail: detail as unknown as CustomEventInit }));
 }
@@ -302,13 +302,13 @@ export function dispatchBioF3Event<K extends BioF3EventName>(
  * Subscribe to a typed event. Returns an unsubscribe function.
  * Set `{ once: true }` for one-shot listeners.
  */
-export function subscribeBioF3Event<K extends BioF3EventName>(
+export function subscribeGewuEvent<K extends GewuEventName>(
   name: K,
-  handler: (detail: BioF3EventMap[K]) => void,
+  handler: (detail: GewuEventMap[K]) => void,
   options?: { once?: boolean }
 ): () => void {
   const wrapped = (e: Event) => {
-    handler((e as CustomEvent).detail as BioF3EventMap[K]);
+    handler((e as CustomEvent).detail as GewuEventMap[K]);
   };
   window.addEventListener(name, wrapped);
   if (options?.once) {

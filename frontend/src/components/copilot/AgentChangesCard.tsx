@@ -16,7 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { useParams } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { getBridge } from '@/lib/desktopBridge';
-import { biof3Events, dispatchBioF3Event, subscribeBioF3Event } from '@/lib/events';
+import { gewuEvents, dispatchGewuEvent, subscribeGewuEvent } from '@/lib/events';
 import { computeFileDiffStats } from '@/components/desktop/WorkingTreeReview/reviewModeHelpers';
 import { CodeMirrorDiffView } from '@/components/desktop/WorkingTreeReview/CodeMirrorDiffView';
 import { HoverPreviewPopover } from '@/components/desktop/WorkingTreeReview/HoverPreviewPopover';
@@ -168,7 +168,7 @@ export function AgentChangesCard({
         onMouseEnter={(e) => scheduleHoverPreview(entry.path, e.currentTarget)}
         onMouseLeave={scheduleHoverClose}
         onClick={() =>
-          dispatchBioF3Event(biof3Events.reviewOpenFile, { filePath: entry.path })
+          dispatchGewuEvent(gewuEvents.reviewOpenFile, { filePath: entry.path })
         }
       >
         <span className={STATUS_CLASS[entry.status] ?? 'sc-changes-badge'}>
@@ -210,8 +210,8 @@ export function AgentChangesCard({
     void refresh();
     // 任务收尾 / 用户打开审阅（提交后文件数会变）都触发重查，git 为准
     const unsubs = [
-      subscribeBioF3Event(biof3Events.agentTaskDone, () => void refresh()),
-      subscribeBioF3Event(biof3Events.reviewOpenFile, () => void refresh()),
+      subscribeGewuEvent(gewuEvents.agentTaskDone, () => void refresh()),
+      subscribeGewuEvent(gewuEvents.reviewOpenFile, () => void refresh()),
     ];
     return () => unsubs.forEach((u) => u());
   }, [refresh]);
@@ -303,7 +303,7 @@ export function AgentChangesCard({
           <button
             type="button"
             className="sc-changes-row sc-changes-row-all"
-            onClick={() => dispatchBioF3Event(biof3Events.reviewOpenFile, { filePath: '' })}
+            onClick={() => dispatchGewuEvent(gewuEvents.reviewOpenFile, { filePath: '' })}
           >
             <Icon name="git-branch" size={12} />
             <span className="sc-changes-row-path">打开审阅查看全部改动</span>

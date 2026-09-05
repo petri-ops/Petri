@@ -1,6 +1,6 @@
 /* Lightbox — fullscreen image viewer */
 
-.biof3-lightbox {
+.gewu-lightbox {
   position: fixed;
   inset: 0;
   z-index: 100000;
@@ -9,10 +9,10 @@
   align-items: center;
   justify-content: center;
   cursor: zoom-out;
-  animation: biof3-lightbox-fade 0.15s ease-out;
+  animation: gewu-lightbox-fade 0.15s ease-out;
 }
 
-.biof3-lightbox__img {
+.gewu-lightbox__img {
   max-width: 92vw;
   max-height: 90vh;
   object-fit: contain;
@@ -20,14 +20,14 @@
   cursor: default;
 }
 
-.biof3-lightbox__close {
+.gewu-lightbox__close {
   position: absolute;
   top: 16px;
   right: 24px;
   background: rgba(255, 255, 255, 0.1);
   border: none;
   color: #fff;
-  font-size: var(--biof3-font-size-3xl);
+  font-size: var(--gewu-font-size-3xl);
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -37,11 +37,11 @@
   justify-content: center;
   transition: background 0.15s;
 }
-.biof3-lightbox__close:hover {
+.gewu-lightbox__close:hover {
   background: rgba(255, 255, 255, 0.25);
 }
 
-@keyframes biof3-lightbox-fade {
+@keyframes gewu-lightbox-fade {
   from {
     opacity: 0;
   }

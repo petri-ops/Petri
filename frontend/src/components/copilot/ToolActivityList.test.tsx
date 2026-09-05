@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { ToolActivityList } from './ToolActivityList';
-import { biof3Events } from '@/lib/events';
+import { gewuEvents } from '@/lib/events';
 import type { ToolActivityItem } from './toolActivity';
 
 function activity(
@@ -138,11 +138,11 @@ describe('ToolActivityList (UI-271 内联手风琴)', () => {
     const listener = (e: Event) => {
       seen.push((e as CustomEvent<{ filePath: string }>).detail);
     };
-    window.addEventListener(biof3Events.reviewOpenFile, listener);
+    window.addEventListener(gewuEvents.reviewOpenFile, listener);
     try {
       fireEvent.click(fileRow);
     } finally {
-      window.removeEventListener(biof3Events.reviewOpenFile, listener);
+      window.removeEventListener(gewuEvents.reviewOpenFile, listener);
     }
     expect(seen).toEqual([{ filePath: 'src/u273.ts' }]);
   });

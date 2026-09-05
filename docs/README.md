@@ -1,4 +1,4 @@
-# BioF3 Desktop 文档入口
+# Gewu Desktop（格物）文档入口
 
 最后更新：2026-08-18（BLOCK-10-AUDIT-CLOSEOUT COMPLETED · BLOCK-10-ARCHITECTURE COMPLETED · **BLOCK-11-BIOSKILLS-INTEGRATION 启动**：用户裁决 "block-11-bioSkills" 启动 v1.0 plan（active）；Top 5 priority categories：single-cell (P0) / variant-calling (P0) / pathway-analysis (P1) / methylation-analysis (P1) / read-qc (P2)；GPTomics/bioSkills.git → BioF3 plugin/skill 映射；6 PHASE：PHASE 0 调研 + PHASE 1 single-cell + PHASE 2 variant-calling + PHASE 3 pathway+methylation + PHASE 4 read-qc + PHASE 5 收口；不外推 packaged / Provider / GA / P7 / notarization / dist staleness G1+）
 

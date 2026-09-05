@@ -52,7 +52,7 @@ struct Response {
 enum Probe {
     static let guidanceText =
         "需要辅助功能权限：系统设置 → 隐私与安全性 → 辅助功能，"
-        + "把 BioF3（或运行它的终端/宿主应用）加入允许列表，然后重试。"
+        + "把 Gewu（或运行它的终端/宿主应用）加入允许列表，然后重试。"
 
     static func isTrusted() -> Bool {
         // prompt=false：诚实探测，不弹系统授权窗（引导由宿主 UI 呈现）。

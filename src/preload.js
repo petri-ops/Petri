@@ -34,7 +34,7 @@ function _readPort(envName, defaultPort) {
 }
 const _rPort = _readPort('R_SERVER_PORT', 3001);
 
-const AGENT_WORKBENCH_FLAG_CHANNEL = 'biof3:agent-workbench-flags';
+const AGENT_WORKBENCH_FLAG_CHANNEL = 'gewu:agent-workbench-flags';
 const AGENT_WORKBENCH_FLAGS = { extraRenderers: false };
 
 ipcRenderer.on(AGENT_WORKBENCH_FLAG_CHANNEL, (_event, payload) => {
@@ -65,7 +65,7 @@ contextBridge.exposeInMainWorld('biof3', {
 
 ipcRenderer.on('app:soft-refresh', () => {
   try {
-    window.dispatchEvent(new CustomEvent('biof3:soft-refresh'));
+    window.dispatchEvent(new CustomEvent('gewu:soft-refresh'));
   } catch {}
 });
 
@@ -82,7 +82,9 @@ contextBridge.exposeInMainWorld('process', {
   },
 });
 
-contextBridge.exposeInMainWorld('biof3Desktop', {
+// BLOCK-61 品牌桥：主全局名 gewu；biof3Desktop 为兼容别名（同一 surface
+// 双暴露，desktopBridge 双读），过渡期后评估移除。
+const desktopBridgeSurface = {
   // 平台标识
   isDesktop: true,
   platform: process.platform,
@@ -438,5 +440,8 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     // BLOCK-53 P2 — 非 git 工作区一次性引导：git init + 初始提交（幂等，已 init 时 alreadyGit）
     initRepository: (params) => ipcRenderer.invoke('git:init-repository', params || {}),
   },
+};
 
-});
+contextBridge.exposeInMainWorld('gewu', desktopBridgeSurface);
+// 兼容别名：历史全局名（desktopBridge 读新优先、旧名兜底）
+contextBridge.exposeInMainWorld('biof3Desktop', desktopBridgeSurface);

@@ -538,7 +538,7 @@ export const tools: Tool[] = [
 
 **Demo 数据**: TCGA-BRCA 218 样本 × 5000 高变基因 + 10 性状（ER/PR/HER2/Stage/Age + PAM50 5 个亚型）
 
-**不在范围内**: SCTransform / 多数据集共识 (Tutorial III) / 模块保守性 / Cytoscape 网络导出 / GO 富集（用 BioF3 GO/KEGG 工具做下游）。`,
+**不在范围内**: SCTransform / 多数据集共识 (Tutorial III) / 模块保守性 / Cytoscape 网络导出 / GO 富集（用 Gewu GO/KEGG 工具做下游）。`,
     inputs: [
       {
         id: 'expression',
@@ -691,7 +691,7 @@ export const tools: Tool[] = [
 
 **不在范围内**: integration（多样本整合）、SCTransform、空间组学、轨迹分析、自动细胞类型注释、doublet 检测。这些功能留给后续专门工具。
 
-**参数默认值**: 全部跟随 Seurat 官方 PBMC 3k tutorial。注：BioF3 教程 docs/single-cell/module03 用 dims=1:20 是 dataset-specific 选择，本工具默认 dims=1:10 跟官方，可在参数中调整。`,
+**参数默认值**: 全部跟随 Seurat 官方 PBMC 3k tutorial。注：Gewu 教程 docs/single-cell/module03 用 dims=1:20 是 dataset-specific 选择，本工具默认 dims=1:10 跟官方，可在参数中调整。`,
     inputs: [
       {
         id: 'matrix',
@@ -746,7 +746,7 @@ export const tools: Tool[] = [
         label: 'PCA 维度',
         type: 'number',
         default: 10,
-        hint: '官方默认 dims=1:10。BioF3 docs 教程用 1:20，可调',
+        hint: '官方默认 dims=1:10。Gewu docs 教程用 1:20，可调',
       },
       {
         id: 'resolution',
@@ -810,7 +810,7 @@ export const tools: Tool[] = [
 
 **Demo**: maftools 官方 TCGA-LAML（193 AML 样本，含 FAB 分类）— 真实科研数据。
 
-**不在范围内**: TCGA cohort 对比 (\`tcgaCompare\`)、Drug-Gene Interactions、PathwayAnalyzer、MAF 格式转换、生存分析（请用 BioF3 KM 工具）。`,
+**不在范围内**: TCGA cohort 对比 (\`tcgaCompare\`)、Drug-Gene Interactions、PathwayAnalyzer、MAF 格式转换、生存分析（请用 Gewu KM 工具）。`,
     inputs: [
       {
         id: 'maf_file',
@@ -901,7 +901,7 @@ export const tools: Tool[] = [
 
 **输出**: 8 张图 × PNG + PDF 双格式 = 16 文件 + 4 份中间数据 + cellchat.rds 完整对象。SCI 风格 (theme_biof3 + 双格式 PDF)。
 
-**Demo 数据**: PBMC 3k 9 种 cell types × 605 cells（基于 BioF3 Seurat 工具派生）。
+**Demo 数据**: PBMC 3k 9 种 cell types × 605 cells（基于 Gewu Seurat 工具派生）。
 
 **不在范围内**: 多数据集对比 (Tutorial Comparison)、Spatial CellChat、NMF pattern analysis、单 pathway 切片热图（用 RunModal）。`,
     inputs: [

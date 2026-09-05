@@ -5,7 +5,7 @@ const { pipeline } = require("stream/promises");
 const { Readable, Transform } = require("stream");
 
 const DEFAULT_FEED_URL =
-  "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/updates/macos/";
+  "https://gewu-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/updates/macos/";
 
 function parseScalar(value) {
   const trimmed = String(value || "").trim();

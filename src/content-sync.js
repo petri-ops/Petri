@@ -15,13 +15,13 @@ const crypto = require('crypto');
 
 const MANIFEST_URL =
   process.env.BIOF3_CONTENT_MANIFEST_URL ||
-  'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/content-manifest.json';
+  'https://gewu-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/content-manifest.json';
 const CONTENT_BASE =
   process.env.BIOF3_CONTENT_BASE ||
-  'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/content/';
+  'https://gewu-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/content/';
 
 const USER_DATA_DIR =
-  process.env.BIOF3_LOCAL_DATA_DIR || path.join(app.getPath('documents'), 'BioF3-Local');
+  process.env.BIOF3_LOCAL_DATA_DIR || path.join(app.getPath('documents'), 'Gewu-Local');
 const LOCAL_CONTENT_DIR = path.join(USER_DATA_DIR, 'content');
 const LOCAL_HASH_FILE = path.join(LOCAL_CONTENT_DIR, 'file-hash.json');
 

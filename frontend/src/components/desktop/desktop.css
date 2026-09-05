@@ -2,26 +2,26 @@
  * Desktop UI — 桌面版左下角 dock + 浮动面板
  *
  * 仅桌面版渲染（组件层 IS_DESKTOP 短路），但样式全局可用。
- * 复用 --biof3-* 调色板，与 LoginModal 同款模态风格。
+ * 复用 --gewu-* 调色板，与 LoginModal 同款模态风格。
  * ============================================================ */
 
 /* ---- 左侧垂直 dock（置顶 + 可收缩） ---- */
-.biof3-desktop-dock {
-  --biof3-dock-padding-top: 8px;
-  --biof3-dock-icon-size: 38px;
-  --biof3-dock-gap: 6px;
+.gewu-desktop-dock {
+  --gewu-dock-padding-top: 8px;
+  --gewu-dock-icon-size: 38px;
+  --gewu-dock-gap: 6px;
   position: fixed;
-  top: var(--biof3-titlebar-height); /* 从统一标题栏轨道下方开始 */
+  top: var(--gewu-titlebar-height); /* 从统一标题栏轨道下方开始 */
   left: 0;
   bottom: 0;
   z-index: 9998;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--biof3-dock-gap);
-  padding: var(--biof3-dock-padding-top) 6px;
-  background: var(--biof3-surface-dim);
-  border-right: 1px solid var(--biof3-border);
+  gap: var(--gewu-dock-gap);
+  padding: var(--gewu-dock-padding-top) 6px;
+  background: var(--gewu-surface-dim);
+  border-right: 1px solid var(--gewu-border);
   width: 64px;
   box-sizing: border-box;
   transition:
@@ -30,27 +30,27 @@
 }
 
 /* 收缩状态：宽度压缩到只留一个 toggle 按钮 */
-.biof3-desktop-dock--collapsed {
+.gewu-desktop-dock--collapsed {
   width: 28px;
   padding: 8px 2px;
 }
 
 /* 收缩时隐藏按钮文字/标签，只保留图标区域 */
-.biof3-desktop-dock--collapsed .biof3-desktop-dock__btn {
+.gewu-desktop-dock--collapsed .gewu-desktop-dock__btn {
   width: 24px;
   height: 24px;
 }
-.biof3-desktop-dock--collapsed .biof3-desktop-dock__btn svg {
+.gewu-desktop-dock--collapsed .gewu-desktop-dock__btn svg {
   width: 16px;
   height: 16px;
 }
 
-[data-theme='dark'] .biof3-desktop-dock {
+[data-theme='dark'] .gewu-desktop-dock {
   border-right-color: rgba(148, 163, 184, 0.15);
 }
 
 /* ---- dock 底部固定项（主题切换 + 收缩 toggle） ---- */
-.biof3-desktop-dock__footer {
+.gewu-desktop-dock__footer {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -62,7 +62,7 @@
 }
 
 /* 收缩/展开 toggle */
-.biof3-desktop-dock__toggle {
+.gewu-desktop-dock__toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -72,29 +72,29 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
   cursor: pointer;
   transition:
     background 0.15s ease,
     color 0.15s ease;
 }
 /* 展开状态下，让 toggle 略靠右，避免贴左缘 */
-.biof3-desktop-dock:not(.biof3-desktop-dock--collapsed) .biof3-desktop-dock__toggle {
+.gewu-desktop-dock:not(.gewu-desktop-dock--collapsed) .gewu-desktop-dock__toggle {
   margin-left: 6px;
 }
-.biof3-desktop-dock__toggle:hover {
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-teal);
+.gewu-desktop-dock__toggle:hover {
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-teal);
 }
-[data-theme='dark'] .biof3-desktop-dock__toggle {
-  color: var(--biof3-text-tertiary);
+[data-theme='dark'] .gewu-desktop-dock__toggle {
+  color: var(--gewu-text-tertiary);
 }
-[data-theme='dark'] .biof3-desktop-dock__toggle:hover {
+[data-theme='dark'] .gewu-desktop-dock__toggle:hover {
   background: rgba(148, 163, 184, 0.12);
-  color: var(--biof3-mint-bright);
+  color: var(--gewu-mint-bright);
 }
 
-.biof3-desktop-dock__bar {
+.gewu-desktop-dock__bar {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -103,11 +103,11 @@
 }
 
 /* 主题切换按钮 — dock 底部固定项，复用 dock btn 样式 */
-.biof3-desktop-dock__theme-toggle {
+.gewu-desktop-dock__theme-toggle {
   flex-shrink: 0;
 }
 
-.biof3-desktop-dock__btn {
+.gewu-desktop-dock__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -117,82 +117,82 @@
   border: none;
   border-radius: 9px;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   transition:
     background 0.15s ease,
     color 0.15s ease;
 }
 
-.biof3-desktop-dock__btn:hover {
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-teal);
+.gewu-desktop-dock__btn:hover {
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-teal);
 }
 
-.biof3-desktop-dock__btn.active {
-  background: var(--biof3-mint);
-  color: var(--biof3-teal);
+.gewu-desktop-dock__btn.active {
+  background: var(--gewu-mint);
+  color: var(--gewu-teal);
 }
 
-[data-theme='dark'] .biof3-desktop-dock__btn {
-  color: var(--biof3-text-muted);
+[data-theme='dark'] .gewu-desktop-dock__btn {
+  color: var(--gewu-text-muted);
 }
 
-[data-theme='dark'] .biof3-desktop-dock__btn:hover {
+[data-theme='dark'] .gewu-desktop-dock__btn:hover {
   background: rgba(148, 163, 184, 0.12);
-  color: var(--biof3-mint-bright);
+  color: var(--gewu-mint-bright);
 }
 
-[data-theme='dark'] .biof3-desktop-dock__btn.active {
+[data-theme='dark'] .gewu-desktop-dock__btn.active {
   background: rgba(67, 209, 174, 0.14);
-  color: var(--biof3-mint-bright);
+  color: var(--gewu-mint-bright);
 }
 
 /* ---- 浮动面板（通用） ---- */
-.biof3-desktop-panel {
+.gewu-desktop-panel {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
   overflow: hidden;
   isolation: isolate;
 }
 
 /* ---- 工作区容器（dock 右侧） ---- */
-.biof3-desktop-workarea {
+.gewu-desktop-workarea {
   position: fixed;
   top: 0; /* 顶栏已隐藏，面板从顶部开始 */
   left: 0;
   bottom: 0;
   z-index: 9998;
-  background: var(--biof3-bg-canvas);
-  border-right: 1px solid var(--biof3-border);
+  background: var(--gewu-bg-canvas);
+  border-right: 1px solid var(--gewu-border);
   box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-.biof3-desktop-workarea--narrow {
+.gewu-desktop-workarea--narrow {
   width: 360px;
 }
 
-.biof3-desktop-workarea--wide {
+.gewu-desktop-workarea--wide {
   width: 520px;
 }
 
 /* 插件商店等需要多列网格的面板：内容区扣掉侧栏后约 800px，可放 3 列卡片。
-   注意：不加 position:relative —— 基类 .biof3-desktop-workarea 的 position:fixed
+   注意：不加 position:relative —— 基类 .gewu-desktop-workarea 的 position:fixed
    已是绝对定位子元素（拖拽手柄）的包含块；若改成 relative 会覆盖 fixed，面板会
    回到正常文档流并跟着 DesktopToolbar 渲染进导航栏内部。 */
-.biof3-desktop-workarea--xwide {
+.gewu-desktop-workarea--xwide {
   width: 960px;
 }
 
 /* 右边缘拖拽手柄：鼠标拖动调整面板宽度 */
-.biof3-desktop-workarea__resize-handle {
+.gewu-desktop-workarea__resize-handle {
   position: absolute;
   top: 0;
   right: -3px;
@@ -204,78 +204,78 @@
   transition: background 0.15s;
 }
 
-.biof3-desktop-workarea__resize-handle:hover,
-.biof3-desktop-workarea__resize-handle:active {
-  background: var(--biof3-accent-border);
+.gewu-desktop-workarea__resize-handle:hover,
+.gewu-desktop-workarea__resize-handle:active {
+  background: var(--gewu-accent-border);
 }
 
-[data-theme='dark'] .biof3-desktop-workarea__resize-handle:hover,
-[data-theme='dark'] .biof3-desktop-workarea__resize-handle:active {
-  background: var(--biof3-accent-border);
+[data-theme='dark'] .gewu-desktop-workarea__resize-handle:hover,
+[data-theme='dark'] .gewu-desktop-workarea__resize-handle:active {
+  background: var(--gewu-accent-border);
 }
 
-[data-theme='dark'] .biof3-desktop-workarea {
+[data-theme='dark'] .gewu-desktop-workarea {
   border-right-color: rgba(148, 163, 184, 0.15);
   box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
 }
 
 /* ---- 面板 Header ---- */
-.biof3-desktop-panel__header {
+.gewu-desktop-panel__header {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 14px 18px;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
   flex-shrink: 0;
 }
 
-[data-theme='dark'] .biof3-desktop-panel__header {
-  border-bottom-color: var(--biof3-border);
+[data-theme='dark'] .gewu-desktop-panel__header {
+  border-bottom-color: var(--gewu-border);
 }
 
-.biof3-desktop-panel__icon {
+.gewu-desktop-panel__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: var(--biof3-accent-surface);
-  color: var(--biof3-accent);
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
   flex-shrink: 0;
 }
 
-[data-theme='dark'] .biof3-desktop-panel__icon {
-  background: var(--biof3-accent-surface);
-  color: var(--biof3-accent);
+[data-theme='dark'] .gewu-desktop-panel__icon {
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
 }
 
-.biof3-desktop-panel__titles {
+.gewu-desktop-panel__titles {
   flex: 1;
   min-width: 0;
 }
 
-.biof3-desktop-panel__title {
+.gewu-desktop-panel__title {
   margin: 0;
-  font-size: var(--biof3-font-size-md);
+  font-size: var(--gewu-font-size-md);
   font-weight: 700;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
-.biof3-desktop-panel__subtitle {
+.gewu-desktop-panel__subtitle {
   margin: 2px 0 0;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-tertiary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-[data-theme='dark'] .biof3-desktop-panel__subtitle {
-  color: var(--biof3-text-tertiary);
+[data-theme='dark'] .gewu-desktop-panel__subtitle {
+  color: var(--gewu-text-tertiary);
 }
 
-.biof3-desktop-panel__close {
+.gewu-desktop-panel__close {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -285,28 +285,28 @@
   border: none;
   border-radius: 7px;
   background: transparent;
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
   cursor: pointer;
   transition:
     background 0.15s,
     color 0.15s;
   flex-shrink: 0;
   /* UI-215 补充：纯图标按钮收敛 UA 默认字号到 token */
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
-.biof3-desktop-panel__close:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+.gewu-desktop-panel__close:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
-[data-theme='dark'] .biof3-desktop-panel__close:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+[data-theme='dark'] .gewu-desktop-panel__close:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 /* ---- 面板 Body ---- */
-.biof3-desktop-panel__body {
+.gewu-desktop-panel__body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -314,23 +314,23 @@
 }
 
 /* ---- 设置：分类导航 + 单区内容 ---- */
-.biof3-settings-layout {
+.gewu-settings-layout {
   flex: 1;
   min-height: 0;
   display: flex;
   overflow: hidden;
 }
 
-.biof3-settings-nav {
+.gewu-settings-nav {
   width: 176px;
   flex-shrink: 0;
   padding: 12px 9px;
-  border-right: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-surface);
+  border-right: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-surface);
   overflow-y: auto;
 }
 
-.biof3-settings-nav__item {
+.gewu-settings-nav__item {
   width: 100%;
   display: flex;
   align-items: flex-start;
@@ -339,184 +339,184 @@
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   text-align: left;
   cursor: pointer;
   /* UI-215 补充：容器收敛 UA 默认字号（子级 span/strong/small 自带 token） */
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
-.biof3-settings-nav__item:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+.gewu-settings-nav__item:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
-.biof3-settings-nav__item.active {
-  background: var(--biof3-accent-surface);
-  color: var(--biof3-accent);
+.gewu-settings-nav__item.active {
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
 }
 
-.biof3-settings-nav__item svg {
+.gewu-settings-nav__item svg {
   flex-shrink: 0;
   margin-top: 2px;
 }
 
-.biof3-settings-nav__item span {
+.gewu-settings-nav__item span {
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.biof3-settings-nav__item strong {
-  font-size: var(--biof3-font-size-body-sm);
+.gewu-settings-nav__item strong {
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 650;
 }
 
-.biof3-settings-nav__item small {
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-sm);
+.gewu-settings-nav__item small {
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
   line-height: 1.3;
 }
 
-.biof3-settings-content {
+.gewu-settings-content {
   padding: 20px 22px 28px;
 }
 
-.biof3-settings-section {
+.gewu-settings-section {
   width: min(100%, 720px);
   margin: 0 auto;
 }
 
-.biof3-settings-section--models {
+.gewu-settings-section--models {
   width: min(100%, 1180px);
 }
 
-.biof3-settings-section__heading {
+.gewu-settings-section__heading {
   margin-bottom: 14px;
   padding-bottom: 10px;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
 }
 
-.biof3-settings-section__heading h3 {
+.gewu-settings-section__heading h3 {
   margin: 0;
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-md);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-md);
   font-weight: 680;
 }
 
-.biof3-settings-section__heading p {
+.gewu-settings-section__heading p {
   margin: 4px 0 0;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-caption);
 }
 
-.biof3-metric-grid {
+.gewu-metric-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
-.biof3-metric-grid > div {
+.gewu-metric-grid > div {
   display: flex;
   flex-direction: column;
   gap: 5px;
   min-width: 0;
   padding: 12px;
-  border: 1px solid var(--biof3-border-subtle);
+  border: 1px solid var(--gewu-border-subtle);
   border-radius: 10px;
-  background: var(--biof3-bg-subtle);
+  background: var(--gewu-bg-subtle);
 }
 
-.biof3-metric-grid small { color: var(--biof3-text-muted); }
-.biof3-metric-grid strong { color: var(--biof3-text); font-size: var(--biof3-font-size-body); overflow-wrap: anywhere; }
-.biof3-resource-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
-.biof3-resource-heading p { margin: 4px 0 0; color: var(--biof3-text-muted); font-size: var(--biof3-font-size-caption); }
+.gewu-metric-grid small { color: var(--gewu-text-muted); }
+.gewu-metric-grid strong { color: var(--gewu-text); font-size: var(--gewu-font-size-body); overflow-wrap: anywhere; }
+.gewu-resource-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.gewu-resource-heading p { margin: 4px 0 0; color: var(--gewu-text-muted); font-size: var(--gewu-font-size-caption); }
 
-.biof3-model-preset {
+.gewu-model-preset {
   display: grid;
   grid-template-columns: minmax(150px, 1.2fr) minmax(120px, 1fr);
   gap: 8px;
   padding: 8px 6px;
   border-radius: 6px;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
   transition: background-color 120ms ease;
 }
 
-.biof3-model-preset:hover,
-.biof3-model-preset:focus-within {
-  background: var(--biof3-hover);
+.gewu-model-preset:hover,
+.gewu-model-preset:focus-within {
+  background: var(--gewu-hover);
 }
 
-.biof3-model-list {
+.gewu-model-list {
   display: grid;
   gap: 2px;
   margin-bottom: 8px;
   overflow-x: auto;
 }
 
-.biof3-endpoint-list-actions {
+.gewu-endpoint-list-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 14px;
 }
 
-.biof3-model-fallback {
+.gewu-model-fallback {
   display: grid;
   grid-template-columns: minmax(230px, 0.9fr) minmax(0, 1.6fr);
   gap: 16px;
   margin: 10px 0 14px;
   padding: 10px 0;
-  border-block: 1px solid var(--biof3-border-subtle);
+  border-block: 1px solid var(--gewu-border-subtle);
 }
 
-.biof3-model-fallback__toggle {
+.gewu-model-fallback__toggle {
   display: flex;
   align-items: flex-start;
   gap: 9px;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   cursor: pointer;
 }
 
-.biof3-model-fallback__toggle span {
+.gewu-model-fallback__toggle span {
   display: grid;
   gap: 3px;
 }
 
-.biof3-model-fallback__toggle strong { font-size: var(--biof3-font-size-caption); }
-.biof3-model-fallback__toggle small {
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-sm);
+.gewu-model-fallback__toggle strong { font-size: var(--gewu-font-size-caption); }
+.gewu-model-fallback__toggle small {
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
   line-height: 1.45;
 }
 
-.biof3-model-fallback__choices {
+.gewu-model-fallback__choices {
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
   gap: 6px;
 }
 
-.biof3-model-fallback__choices label {
+.gewu-model-fallback__choices label {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   min-height: 28px;
   padding: 3px 8px;
-  border: 1px solid var(--biof3-border-subtle);
+  border: 1px solid var(--gewu-border-subtle);
   border-radius: 7px;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-sm);
   cursor: pointer;
 }
 
-.biof3-model-fallback__choices label.is-selected {
-  border-color: var(--biof3-accent);
-  color: var(--biof3-text);
+.gewu-model-fallback__choices label.is-selected {
+  border-color: var(--gewu-accent);
+  color: var(--gewu-text);
 }
 
-.biof3-endpoint-transfer-actions {
+.gewu-endpoint-transfer-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -524,29 +524,29 @@
   margin-left: auto;
 }
 
-.biof3-endpoint-transfer-actions .biof3-field__hint {
+.gewu-endpoint-transfer-actions .gewu-field__hint {
   margin: 0;
 }
 
-.biof3-model-preset__header {
+.gewu-model-preset__header {
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-body-sm);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 650;
 }
 
-.biof3-model-preset__header > div {
+.gewu-model-preset__header > div {
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
 }
 
-.biof3-endpoint-card {
+.gewu-endpoint-card {
   display: block;
   min-width: 1040px;
   padding: 0;
@@ -555,12 +555,12 @@
 
 /* UI-042: 渠道卡片之间用 1px 分隔线区分（相邻卡片顶部加线，首张与列表末尾不产生双线）。
    原台账声明「底部 1px 分隔线 + 末条去线」，此处以 top-border 邻接实现等价视觉且更稳健。 */
-.biof3-endpoint-card + .biof3-endpoint-card {
-  border-top: 1px solid var(--biof3-border);
+.gewu-endpoint-card + .gewu-endpoint-card {
+  border-top: 1px solid var(--gewu-border);
 }
 
-.biof3-endpoint-list-header,
-.biof3-endpoint-card__grid {
+.gewu-endpoint-list-header,
+.gewu-endpoint-card__grid {
   display: grid;
   grid-template-columns:
     minmax(132px, 0.9fr)
@@ -574,23 +574,23 @@
   gap: 6px;
 }
 
-.biof3-endpoint-list-header {
+.gewu-endpoint-list-header {
   min-width: 1040px;
   padding: 0 0 6px;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 620;
   text-transform: none;
   letter-spacing: 0.02em;
 }
 
-.biof3-endpoint-card__delete,
-.biof3-endpoint-card__test {
+.gewu-endpoint-card__delete,
+.gewu-endpoint-card__test {
   min-height: 32px;
   white-space: nowrap;
 }
 
-.biof3-endpoint-card__test {
+.gewu-endpoint-card__test {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -598,15 +598,15 @@
   padding-inline: 8px;
 }
 
-.biof3-endpoint-card__test.is-ok {
-  color: var(--biof3-status-success-fg);
+.gewu-endpoint-card__test.is-ok {
+  color: var(--gewu-status-success-fg);
 }
 
-.biof3-endpoint-card__test.is-error {
-  color: var(--biof3-status-danger-fg);
+.gewu-endpoint-card__test.is-error {
+  color: var(--gewu-status-danger-fg);
 }
 
-.biof3-endpoint-card__delete {
+.gewu-endpoint-card__delete {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -615,22 +615,22 @@
   border: 0;
   border-radius: 7px;
   background: transparent;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
   cursor: pointer;
 }
 
-.biof3-endpoint-card__delete:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-status-danger-fg);
+.gewu-endpoint-card__delete:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-status-danger-fg);
 }
 
-.biof3-endpoint-card .biof3-input,
-.biof3-endpoint-card .biof3-select {
+.gewu-endpoint-card .gewu-input,
+.gewu-endpoint-card .gewu-select {
   min-height: 32px;
   padding: 6px 8px;
 }
 
-.biof3-model-capabilities {
+.gewu-model-capabilities {
   grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
@@ -638,27 +638,27 @@
   padding-top: 0;
 }
 
-.biof3-model-capabilities label {
+.gewu-model-capabilities label {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-sm);
 }
 
-.biof3-credential-card {
+.gewu-credential-card {
   padding: 12px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 10px;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
-.biof3-credential-card .biof3-field__label {
+.gewu-credential-card .gewu-field__label {
   flex-wrap: wrap;
   margin-bottom: 8px;
 }
 
-.biof3-endpoint-key-field {
+.gewu-endpoint-key-field {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 26px 26px;
   align-items: center;
@@ -666,11 +666,11 @@
   min-width: 0;
 }
 
-.biof3-endpoint-key-field .biof3-input {
+.gewu-endpoint-key-field .gewu-input {
   min-width: 0;
 }
 
-.biof3-endpoint-key-action {
+.gewu-endpoint-key-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -680,16 +680,16 @@
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
   cursor: pointer;
 }
 
-.biof3-endpoint-key-action:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+.gewu-endpoint-key-action:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
-.biof3-model-preset__actions {
+.gewu-model-preset__actions {
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
@@ -698,49 +698,49 @@
   padding-top: 2px;
 }
 
-.biof3-model-preset__default {
+.gewu-model-preset__default {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
 }
 
-.biof3-maintenance-actions {
+.gewu-maintenance-actions {
   display: grid;
   gap: 10px;
   margin-top: 18px;
 }
 
-.biof3-maintenance-row {
+.gewu-maintenance-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
   padding: 13px 14px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 10px;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
-.biof3-maintenance-row strong {
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-body-sm);
+.gewu-maintenance-row strong {
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body-sm);
 }
 
-.biof3-maintenance-row p {
+.gewu-maintenance-row p {
   margin: 3px 0 0;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
 }
 
-.biof3-trash-section {
+.gewu-trash-section {
   margin-top: 22px;
   padding-top: 18px;
-  border-top: 1px solid var(--biof3-border);
+  border-top: 1px solid var(--gewu-border);
 }
 
-.biof3-trash-section__header {
+.gewu-trash-section__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -748,198 +748,198 @@
   margin-bottom: 10px;
 }
 
-.biof3-trash-section__header strong {
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-body);
+.gewu-trash-section__header strong {
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body);
 }
 
-.biof3-trash-section__header p {
+.gewu-trash-section__header p {
   margin: 3px 0 0;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-sm);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
 }
 
-.biof3-trash-list {
+.gewu-trash-list {
   display: grid;
   gap: 6px;
 }
 
-.biof3-trash-item {
+.gewu-trash-item {
   display: grid;
   grid-template-columns: 18px minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 8px;
   min-height: 38px;
   padding: 7px 9px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
 }
 
-.biof3-trash-item > div {
+.gewu-trash-item > div {
   min-width: 0;
   display: flex;
   flex-direction: column;
 }
 
-.biof3-trash-item strong {
+.gewu-trash-item strong {
   overflow: hidden;
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.biof3-trash-item small {
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+.gewu-trash-item small {
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
 }
 
-.biof3-trash-item button {
+.gewu-trash-item button {
   padding: 3px 6px;
   border: 0;
   border-radius: 5px;
   background: transparent;
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
   font: inherit;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   cursor: pointer;
 }
 
-.biof3-trash-item button:hover:not(:disabled) {
-  background: var(--biof3-hover);
+.gewu-trash-item button:hover:not(:disabled) {
+  background: var(--gewu-hover);
 }
 
-.biof3-trash-item button.danger {
-  color: var(--biof3-status-error-fg);
+.gewu-trash-item button.danger {
+  color: var(--gewu-status-error-fg);
 }
 
-.biof3-trash-item button:disabled {
+.gewu-trash-item button:disabled {
   cursor: default;
   opacity: 0.5;
 }
 
-.biof3-trash-empty {
+.gewu-trash-empty {
   padding: 18px;
-  border: 1px dashed var(--biof3-border);
+  border: 1px dashed var(--gewu-border);
   border-radius: 8px;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
   text-align: center;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
-.biof3-settings-footer {
+.gewu-settings-footer {
   justify-content: flex-end;
 }
 
 @media (max-width: 680px) {
-  .biof3-settings-layout {
+  .gewu-settings-layout {
     flex-direction: column;
   }
 
-  .biof3-settings-nav {
+  .gewu-settings-nav {
     width: auto;
     display: flex;
     gap: 4px;
     padding: 8px;
     border-right: 0;
-    border-bottom: 1px solid var(--biof3-border);
+    border-bottom: 1px solid var(--gewu-border);
     overflow-x: auto;
   }
 
-  .biof3-settings-nav__item {
+  .gewu-settings-nav__item {
     width: auto;
     flex-shrink: 0;
     align-items: center;
     padding: 7px 9px;
   }
 
-  .biof3-settings-nav__item small {
+  .gewu-settings-nav__item small {
     display: none;
   }
 
-  .biof3-settings-content {
+  .gewu-settings-content {
     padding: 16px;
   }
 
-  .biof3-model-preset {
+  .gewu-model-preset {
     grid-template-columns: 1fr;
   }
 
-  .biof3-maintenance-row {
+  .gewu-maintenance-row {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .biof3-trash-section__header {
+  .gewu-trash-section__header {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .biof3-trash-item {
+  .gewu-trash-item {
     grid-template-columns: 18px minmax(0, 1fr);
   }
 
-  .biof3-trash-item button {
+  .gewu-trash-item button {
     grid-column: auto;
   }
 }
 
 /* ---- 面板 Footer ---- */
-.biof3-desktop-panel__footer {
+.gewu-desktop-panel__footer {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 12px 18px;
-  border-top: 1px solid var(--biof3-border);
+  border-top: 1px solid var(--gewu-border);
   flex-shrink: 0;
 }
 
-[data-theme='dark'] .biof3-desktop-panel__footer {
-  border-top-color: var(--biof3-border);
+[data-theme='dark'] .gewu-desktop-panel__footer {
+  border-top-color: var(--gewu-border);
 }
 
-.biof3-desktop-panel__footer .biof3-saved-toast {
+.gewu-desktop-panel__footer .gewu-saved-toast {
   margin-right: auto;
 }
 
-.biof3-desktop-panel__footer .biof3-update-section {
+.gewu-desktop-panel__footer .gewu-update-section {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
 /* ---- 插件商店面板（工作区内全宽全高） ---- */
-.biof3-plugin-store-panel {
+.gewu-plugin-store-panel {
   width: 100%;
   height: 100%;
 }
 
-/* 插件商店面板复用 .biof3-plugin-store__* 样式 */
-.biof3-plugin-store-panel .biof3-plugin-store__header {
+/* 插件商店面板复用 .gewu-plugin-store__* 样式 */
+.gewu-plugin-store-panel .gewu-plugin-store__header {
   padding: 14px 20px;
 }
 
-.biof3-plugin-store-panel .biof3-plugin-store__body {
+.gewu-plugin-store-panel .gewu-plugin-store__body {
   flex: 1;
   display: flex;
   min-height: 0;
 }
 
-.biof3-plugin-store-panel .biof3-plugin-store__content {
+.gewu-plugin-store-panel .gewu-plugin-store__content {
   flex: 1;
   min-width: 0;
   padding: 14px 18px;
   overflow-y: auto;
 }
 
-.biof3-plugin-store-panel .biof3-plugin-store__footer {
+.gewu-plugin-store-panel .gewu-plugin-store__footer {
   padding: 10px 20px;
 }
 
-@keyframes biof3-desktop-pop {
+@keyframes gewu-desktop-pop {
   from {
     opacity: 0;
     transform: translateY(8px) scale(0.98);
@@ -951,47 +951,47 @@
 }
 
 /* ---- 表单字段 ---- */
-.biof3-field {
+.gewu-field {
   margin-bottom: 18px;
 }
 
-.biof3-field__label {
+.gewu-field__label {
   display: block;
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
   font-weight: 600;
   margin-bottom: 6px;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
-.biof3-field__hint {
+.gewu-field__hint {
   margin: 5px 0 0;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-tertiary);
   line-height: 1.5;
 }
 
-.biof3-field__result {
+.gewu-field__result {
   margin: 7px 0 0;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   line-height: 1.4;
 }
 
-.biof3-field__result--ok {
-  color: var(--biof3-status-success-fg);
+.gewu-field__result--ok {
+  color: var(--gewu-status-success-fg);
 }
-.biof3-field__result--err {
-  color: var(--biof3-status-error-fg);
+.gewu-field__result--err {
+  color: var(--gewu-status-error-fg);
 }
 
-.biof3-input,
-.biof3-select {
+.gewu-input,
+.gewu-select {
   width: 100%;
   padding: 9px 11px;
   border-radius: 8px;
-  border: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-body);
+  border: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body);
   font-family: inherit;
   transition:
     border-color 0.15s ease,
@@ -999,46 +999,46 @@
   box-sizing: border-box;
 }
 
-.biof3-input:focus,
-.biof3-select:focus {
+.gewu-input:focus,
+.gewu-select:focus {
   outline: none;
-  border-color: var(--biof3-accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--biof3-accent-border) 55%, transparent);
+  border-color: var(--gewu-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gewu-accent-border) 55%, transparent);
 }
 
-.biof3-input-row {
+.gewu-input-row {
   display: flex;
   gap: 8px;
   align-items: stretch;
 }
 
-.biof3-input-row .biof3-input {
+.gewu-input-row .gewu-input {
   flex: 1;
 }
 
 /* ---- M2-3 遥测开关 ---- */
-.biof3-toggle-row {
+.gewu-toggle-row {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-top: 4px;
 }
-.biof3-toggle {
+.gewu-toggle {
   appearance: none;
   width: 38px;
   height: 22px;
   border-radius: 999px;
-  background: var(--biof3-border-strong);
+  background: var(--gewu-border-strong);
   position: relative;
   cursor: pointer;
   transition: background 0.15s ease;
   flex-shrink: 0;
   margin: 0;
 }
-.biof3-toggle:checked {
-  background: var(--biof3-accent);
+.gewu-toggle:checked {
+  background: var(--gewu-accent);
 }
-.biof3-toggle::after {
+.gewu-toggle::after {
   content: '';
   position: absolute;
   top: 2px;
@@ -1046,34 +1046,34 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
   transition: transform 0.15s ease;
 }
-.biof3-toggle:checked::after {
+.gewu-toggle:checked::after {
   transform: translateX(16px);
 }
-.biof3-toggle-label {
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text-secondary);
+.gewu-toggle-label {
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   user-select: none;
 }
 
-.biof3-badge {
+.gewu-badge {
   display: inline-flex;
   align-items: center;
   gap: 3px;
   margin-left: 8px;
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 600;
-  background: var(--biof3-accent-surface);
-  color: var(--biof3-accent);
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
 }
 
 /* ---- 按钮 ---- */
-.biof3-btn {
+.gewu-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1081,7 +1081,7 @@
   padding: 8px 16px;
   border: none;
   border-radius: 8px;
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
@@ -1091,140 +1091,140 @@
   white-space: nowrap;
 }
 
-.biof3-btn:disabled {
+.gewu-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
-.biof3-btn--primary {
-  background: var(--biof3-teal);
+.gewu-btn--primary {
+  background: var(--gewu-teal);
   color: #ffffff;
 }
-.biof3-btn--primary:hover:not(:disabled) {
-  background: var(--biof3-teal-dark);
+.gewu-btn--primary:hover:not(:disabled) {
+  background: var(--gewu-teal-dark);
 }
 
-.biof3-btn--ghost {
+.gewu-btn--ghost {
   background: transparent;
-  color: var(--biof3-text-secondary, var(--biof3-text-secondary));
-  border: 1px solid var(--biof3-border-strong, var(--biof3-border-strong));
+  color: var(--gewu-text-secondary, var(--gewu-text-secondary));
+  border: 1px solid var(--gewu-border-strong, var(--gewu-border-strong));
 }
-.biof3-btn--ghost:hover:not(:disabled) {
-  background: var(--biof3-bg-subtle);
+.gewu-btn--ghost:hover:not(:disabled) {
+  background: var(--gewu-bg-subtle);
 }
 
-[data-theme='dark'] .biof3-btn--ghost {
-  color: var(--biof3-text-tertiary, var(--biof3-border-strong));
+[data-theme='dark'] .gewu-btn--ghost {
+  color: var(--gewu-text-tertiary, var(--gewu-border-strong));
   border-color: rgba(148, 163, 184, 0.3);
 }
-[data-theme='dark'] .biof3-btn--ghost:hover:not(:disabled) {
+[data-theme='dark'] .gewu-btn--ghost:hover:not(:disabled) {
   background: rgba(148, 163, 184, 0.12);
 }
 
-.biof3-btn--danger-ghost {
+.gewu-btn--danger-ghost {
   background: transparent;
-  color: var(--biof3-danger);
+  color: var(--gewu-danger);
   border: 1px solid rgba(239, 68, 68, 0.4);
 }
-.biof3-btn--danger-ghost:hover:not(:disabled) {
+.gewu-btn--danger-ghost:hover:not(:disabled) {
   background: rgba(239, 68, 68, 0.08);
 }
 
-.biof3-btn--sm {
+.gewu-btn--sm {
   padding: 6px 12px;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
 }
 
-.biof3-btn--icon {
+.gewu-btn--icon {
   padding: 8px;
   width: 36px;
   height: 36px;
 }
 
 /* ---- 空状态 / 保存提示 / 更新进度 ---- */
-.biof3-empty {
+.gewu-empty {
   padding: 28px 16px;
   text-align: center;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-body);
-  border: 1px dashed var(--biof3-border);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-body);
+  border: 1px dashed var(--gewu-border);
   border-radius: 10px;
 }
 
-.biof3-saved-toast {
+.gewu-saved-toast {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--biof3-accent);
-  font-size: var(--biof3-font-size-body-sm);
+  color: var(--gewu-accent);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 600;
 }
 
-.biof3-update-section {
+.gewu-update-section {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
-.biof3-update-progress {
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-accent);
+.gewu-update-progress {
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-accent);
   font-weight: 600;
 }
 
 /* ---- 数据目录管理（卸载数据保留）---- */
-.biof3-data-section {
+.gewu-data-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 14px;
   margin-top: 8px;
   border-radius: 10px;
-  border: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-surface);
+  border: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-surface);
 }
-.biof3-data-dir-path {
-  font-family: var(--biof3-font-mono, monospace);
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-secondary);
+.gewu-data-dir-path {
+  font-family: var(--gewu-font-mono, monospace);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-secondary);
   padding: 6px 8px;
   border-radius: 6px;
-  background: var(--biof3-bg-surface);
-  border: 1px solid var(--biof3-border);
+  background: var(--gewu-bg-surface);
+  border: 1px solid var(--gewu-border);
   word-break: break-all;
   user-select: all;
 }
 
-.biof3-section-divider {
+.gewu-section-divider {
   border: 0;
   height: 1px;
   margin: 14px 0;
-  background: var(--biof3-border);
+  background: var(--gewu-border);
 }
-.biof3-data-breakdown {
+.gewu-data-breakdown {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-.biof3-data-breakdown-row {
+.gewu-data-breakdown-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   padding: 3px 0;
 }
-.biof3-data-breakdown-name {
-  color: var(--biof3-text-secondary);
+.gewu-data-breakdown-name {
+  color: var(--gewu-text-secondary);
 }
-.biof3-data-breakdown-size {
+.gewu-data-breakdown-size {
   font-variant-numeric: tabular-nums;
   font-weight: 600;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
-.biof3-data-breakdown-row--total {
+.gewu-data-breakdown-row--total {
   margin-top: 4px;
   padding-top: 6px;
-  border-top: 1px solid var(--biof3-border);
+  border-top: 1px solid var(--gewu-border);
   font-weight: 700;
 }
 
@@ -1233,76 +1233,76 @@
  * ============================================================ */
 
 /* ---- Header ---- */
-.biof3-plugin-store__header {
+.gewu-plugin-store__header {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 16px 22px;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
   flex-shrink: 0;
 }
 
-[data-theme='dark'] .biof3-plugin-store__header {
-  border-bottom-color: var(--biof3-border);
+[data-theme='dark'] .gewu-plugin-store__header {
+  border-bottom-color: var(--gewu-border);
 }
 
-.biof3-plugin-store__icon {
+.gewu-plugin-store__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 34px;
   height: 34px;
   border-radius: 9px;
-  background: var(--biof3-accent-surface);
-  color: var(--biof3-accent);
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
   flex-shrink: 0;
 }
 
-[data-theme='dark'] .biof3-plugin-store__icon {
-  background: var(--biof3-accent-surface);
-  color: var(--biof3-accent);
+[data-theme='dark'] .gewu-plugin-store__icon {
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
 }
 
-.biof3-plugin-store__title {
+.gewu-plugin-store__title {
   margin: 0;
-  font-size: var(--biof3-font-size-lg);
+  font-size: var(--gewu-font-size-lg);
   font-weight: 700;
   white-space: nowrap;
 }
 
-.biof3-plugin-store__search {
+.gewu-plugin-store__search {
   flex: 1;
   max-width: 240px;
   margin-left: auto;
 }
 
-.biof3-plugin-store__search input {
+.gewu-plugin-store__search input {
   width: 100%;
   padding: 7px 12px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  font-size: var(--biof3-font-size-body-sm);
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
+  font-size: var(--gewu-font-size-body-sm);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
   outline: none;
   transition: border-color 0.15s;
 }
 
-.biof3-plugin-store__search input:focus {
-  border-color: var(--biof3-accent);
-  background: var(--biof3-bg-surface);
+.gewu-plugin-store__search input:focus {
+  border-color: var(--gewu-accent);
+  background: var(--gewu-bg-surface);
 }
 
-[data-theme='dark'] .biof3-plugin-store__search input {
-  border-color: var(--biof3-border);
+[data-theme='dark'] .gewu-plugin-store__search input {
+  border-color: var(--gewu-border);
 }
 
-[data-theme='dark'] .biof3-plugin-store__search input:focus {
-  border-color: var(--biof3-accent);
-  background: var(--biof3-bg-surface);
+[data-theme='dark'] .gewu-plugin-store__search input:focus {
+  border-color: var(--gewu-accent);
+  background: var(--gewu-bg-surface);
 }
 
-.biof3-plugin-store__close {
+.gewu-plugin-store__close {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1312,7 +1312,7 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--biof3-text-muted);
+  color: var(--gewu-text-muted);
   cursor: pointer;
   transition:
     background 0.15s,
@@ -1320,40 +1320,40 @@
   flex-shrink: 0;
 }
 
-.biof3-plugin-store__close:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+.gewu-plugin-store__close:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
-[data-theme='dark'] .biof3-plugin-store__close:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+[data-theme='dark'] .gewu-plugin-store__close:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 /* ---- Body: sidebar + content ---- */
-.biof3-plugin-store__body {
+.gewu-plugin-store__body {
   flex: 1;
   display: flex;
   min-height: 0;
 }
 
 /* ---- Sidebar ---- */
-.biof3-plugin-store__sidebar {
+.gewu-plugin-store__sidebar {
   width: 160px;
   flex-shrink: 0;
   padding: 12px 8px;
-  border-right: 1px solid var(--biof3-border);
+  border-right: 1px solid var(--gewu-border);
   display: flex;
   flex-direction: column;
   gap: 2px;
   overflow-y: auto;
 }
 
-[data-theme='dark'] .biof3-plugin-store__sidebar {
-  border-right-color: var(--biof3-border);
+[data-theme='dark'] .gewu-plugin-store__sidebar {
+  border-right-color: var(--gewu-border);
 }
 
-.biof3-plugin-store__nav-item {
+.gewu-plugin-store__nav-item {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1361,8 +1361,8 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-body-sm);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -1372,32 +1372,32 @@
   font-family: inherit;
 }
 
-.biof3-plugin-store__nav-item:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+.gewu-plugin-store__nav-item:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
-.biof3-plugin-store__nav-item.active {
-  background: var(--biof3-accent-surface);
-  color: var(--biof3-accent);
+.gewu-plugin-store__nav-item.active {
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
   font-weight: 700;
 }
 
-[data-theme='dark'] .biof3-plugin-store__nav-item {
-  color: var(--biof3-text-tertiary);
+[data-theme='dark'] .gewu-plugin-store__nav-item {
+  color: var(--gewu-text-tertiary);
 }
 
-[data-theme='dark'] .biof3-plugin-store__nav-item:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+[data-theme='dark'] .gewu-plugin-store__nav-item:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
-[data-theme='dark'] .biof3-plugin-store__nav-item.active {
-  background: var(--biof3-accent-surface);
-  color: var(--biof3-accent);
+[data-theme='dark'] .gewu-plugin-store__nav-item.active {
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
 }
 
-.biof3-plugin-store__nav-label {
+.gewu-plugin-store__nav-label {
   flex: 1;
   min-width: 0;
   white-space: nowrap;
@@ -1405,182 +1405,182 @@
   text-overflow: ellipsis;
 }
 
-.biof3-plugin-store__nav-count {
-  font-size: var(--biof3-font-size-sm);
+.gewu-plugin-store__nav-count {
+  font-size: var(--gewu-font-size-sm);
   font-weight: 700;
-  color: var(--biof3-text-muted);
-  background: var(--biof3-bg-subtle);
+  color: var(--gewu-text-muted);
+  background: var(--gewu-bg-subtle);
   padding: 1px 7px;
   border-radius: 999px;
   flex-shrink: 0;
 }
 
-.biof3-plugin-store__nav-item.active .biof3-plugin-store__nav-count {
-  background: var(--biof3-accent-surface);
-  color: var(--biof3-accent);
+.gewu-plugin-store__nav-item.active .gewu-plugin-store__nav-count {
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
 }
 
-[data-theme='dark'] .biof3-plugin-store__nav-count {
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-text-tertiary);
+[data-theme='dark'] .gewu-plugin-store__nav-count {
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-tertiary);
 }
 
-[data-theme='dark'] .biof3-plugin-store__nav-item.active .biof3-plugin-store__nav-count {
-  background: var(--biof3-accent-surface);
-  color: var(--biof3-accent);
+[data-theme='dark'] .gewu-plugin-store__nav-item.active .gewu-plugin-store__nav-count {
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
 }
 
 /* ---- Content ---- */
-.biof3-plugin-store__content {
+.gewu-plugin-store__content {
   flex: 1;
   min-width: 0;
   padding: 16px 20px;
   overflow-y: auto;
 }
 
-.biof3-plugin-store__hint {
+.gewu-plugin-store__hint {
   margin-bottom: 14px;
   padding: 10px 14px;
-  background: var(--biof3-warning-bg);
-  border: 1px solid var(--biof3-status-warning-border);
+  background: var(--gewu-warning-bg);
+  border: 1px solid var(--gewu-status-warning-border);
   border-radius: 8px;
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-warning-text);
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-warning-text);
 }
 
-[data-theme='dark'] .biof3-plugin-store__hint {
-  background: var(--biof3-warning-bg);
-  border-color: var(--biof3-status-warning-border);
-  color: var(--biof3-warning-text);
+[data-theme='dark'] .gewu-plugin-store__hint {
+  background: var(--gewu-warning-bg);
+  border-color: var(--gewu-status-warning-border);
+  color: var(--gewu-warning-text);
 }
 
 /* ---- Runtime list (非卡片，保留行式) ---- */
-.biof3-plugin-store__runtime-list {
+.gewu-plugin-store__runtime-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-bottom: 16px;
 }
 
-.biof3-plugin-store__runtime-item {
+.gewu-plugin-store__runtime-item {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 14px;
   border-radius: 10px;
-  border: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-surface);
+  border: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-surface);
   transition: border-color 0.15s;
 }
 
-.biof3-plugin-store__runtime-item.installed {
-  background: var(--biof3-accent-surface);
-  border-color: var(--biof3-accent-border);
+.gewu-plugin-store__runtime-item.installed {
+  background: var(--gewu-accent-surface);
+  border-color: var(--gewu-accent-border);
 }
 
-[data-theme='dark'] .biof3-plugin-store__runtime-item {
-  border-color: var(--biof3-border);
+[data-theme='dark'] .gewu-plugin-store__runtime-item {
+  border-color: var(--gewu-border);
 }
 
-[data-theme='dark'] .biof3-plugin-store__runtime-item.installed {
-  background: var(--biof3-accent-surface);
-  border-color: var(--biof3-accent-border);
+[data-theme='dark'] .gewu-plugin-store__runtime-item.installed {
+  background: var(--gewu-accent-surface);
+  border-color: var(--gewu-accent-border);
 }
 
-.biof3-plugin-store__runtime-icon {
+.gewu-plugin-store__runtime-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 40px;
   height: 40px;
   border-radius: 9px;
-  background: var(--biof3-accent-surface);
-  color: var(--biof3-accent);
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
   flex-shrink: 0;
 }
 
-[data-theme='dark'] .biof3-plugin-store__runtime-icon {
-  background: var(--biof3-accent-surface);
-  color: var(--biof3-accent);
+[data-theme='dark'] .gewu-plugin-store__runtime-icon {
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
 }
 
-.biof3-plugin-store__runtime-main {
+.gewu-plugin-store__runtime-main {
   flex: 1;
   min-width: 0;
 }
 
-.biof3-plugin-store__runtime-name {
-  font-size: var(--biof3-font-size-body);
+.gewu-plugin-store__runtime-name {
+  font-size: var(--gewu-font-size-body);
   font-weight: 700;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.biof3-plugin-store__badge-ok {
-  font-size: var(--biof3-font-size-sm);
+.gewu-plugin-store__badge-ok {
+  font-size: var(--gewu-font-size-sm);
   font-weight: 600;
-  color: var(--biof3-status-success-fg);
+  color: var(--gewu-status-success-fg);
 }
 
-[data-theme='dark'] .biof3-plugin-store__badge-ok {
-  color: var(--biof3-status-success-fg);
+[data-theme='dark'] .gewu-plugin-store__badge-ok {
+  color: var(--gewu-status-success-fg);
 }
 
-.biof3-plugin-store__badge-drift {
-  font-size: var(--biof3-font-size-sm);
+.gewu-plugin-store__badge-drift {
+  font-size: var(--gewu-font-size-sm);
   font-weight: 700;
-  color: var(--biof3-warning-text);
-  background: var(--biof3-warning-bg);
+  color: var(--gewu-warning-text);
+  background: var(--gewu-warning-bg);
   padding: 1px 6px;
   border-radius: 4px;
 }
 
-[data-theme='dark'] .biof3-plugin-store__badge-drift {
-  color: var(--biof3-warning-text);
-  background: var(--biof3-warning-bg);
+[data-theme='dark'] .gewu-plugin-store__badge-drift {
+  color: var(--gewu-warning-text);
+  background: var(--gewu-warning-bg);
 }
 
-.biof3-plugin-store__runtime-meta {
+.gewu-plugin-store__runtime-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 4px;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-tertiary);
 }
 
-.biof3-plugin-store__runtime-meta span {
+.gewu-plugin-store__runtime-meta span {
   display: inline-flex;
   align-items: center;
 }
 
-.biof3-plugin-store__badge-required {
-  background: var(--biof3-warning-bg);
-  color: var(--biof3-warning-text);
+.gewu-plugin-store__badge-required {
+  background: var(--gewu-warning-bg);
+  color: var(--gewu-warning-text);
   padding: 1px 6px;
   border-radius: 4px;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 600;
 }
 
-[data-theme='dark'] .biof3-plugin-store__badge-required {
-  background: var(--biof3-warning-bg);
-  color: var(--biof3-warning-text);
+[data-theme='dark'] .gewu-plugin-store__badge-required {
+  background: var(--gewu-warning-bg);
+  color: var(--gewu-warning-text);
 }
 
-.biof3-plugin-store__runtime-desc {
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-secondary);
+.gewu-plugin-store__runtime-desc {
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-secondary);
   margin-top: 4px;
   line-height: 1.4;
 }
 
-[data-theme='dark'] .biof3-plugin-store__runtime-desc {
-  color: var(--biof3-text-tertiary);
+[data-theme='dark'] .gewu-plugin-store__runtime-desc {
+  color: var(--gewu-text-tertiary);
 }
 
-.biof3-plugin-store__runtime-action {
+.gewu-plugin-store__runtime-action {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -1590,122 +1590,122 @@
 }
 
 /* ---- 卡片网格 ---- */
-.biof3-plugin-store__grid {
+.gewu-plugin-store__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 10px;
 }
 
-.biof3-plugin-card {
+.gewu-plugin-card {
   display: flex;
   flex-direction: column;
   padding: 14px;
   border-radius: 10px;
-  border: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-surface);
+  border: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-surface);
   transition:
     border-color 0.15s,
     box-shadow 0.15s;
 }
 
-.biof3-plugin-card:hover {
-  border-color: var(--biof3-accent-border);
+.gewu-plugin-card:hover {
+  border-color: var(--gewu-accent-border);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
-.biof3-plugin-card.installed {
-  border-color: var(--biof3-accent-border);
-  background: var(--biof3-accent-surface);
+.gewu-plugin-card.installed {
+  border-color: var(--gewu-accent-border);
+  background: var(--gewu-accent-surface);
 }
 
-[data-theme='dark'] .biof3-plugin-card {
-  border-color: var(--biof3-border);
+[data-theme='dark'] .gewu-plugin-card {
+  border-color: var(--gewu-border);
 }
 
-[data-theme='dark'] .biof3-plugin-card:hover {
-  border-color: var(--biof3-accent-border);
+[data-theme='dark'] .gewu-plugin-card:hover {
+  border-color: var(--gewu-accent-border);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
-[data-theme='dark'] .biof3-plugin-card.installed {
-  border-color: var(--biof3-accent-border);
-  background: var(--biof3-accent-surface);
+[data-theme='dark'] .gewu-plugin-card.installed {
+  border-color: var(--gewu-accent-border);
+  background: var(--gewu-accent-surface);
 }
 
-.biof3-plugin-card__top {
+.gewu-plugin-card__top {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
 }
 
-.biof3-plugin-card__icon {
+.gewu-plugin-card__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  background: var(--biof3-accent-surface);
-  color: var(--biof3-accent);
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
   flex-shrink: 0;
 }
 
-[data-theme='dark'] .biof3-plugin-card__icon {
-  background: var(--biof3-accent-surface);
-  color: var(--biof3-accent);
+[data-theme='dark'] .gewu-plugin-card__icon {
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
 }
 
-.biof3-plugin-card__name {
+.gewu-plugin-card__name {
   flex: 1;
   min-width: 0;
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.biof3-plugin-card__badge {
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-status-success-fg);
+.gewu-plugin-card__badge {
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-status-success-fg);
   font-weight: 700;
   flex-shrink: 0;
 }
 
-[data-theme='dark'] .biof3-plugin-card__badge {
-  color: var(--biof3-status-success-fg);
+[data-theme='dark'] .gewu-plugin-card__badge {
+  color: var(--gewu-status-success-fg);
 }
 
-.biof3-plugin-card__badge-drift {
+.gewu-plugin-card__badge-drift {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 1px 6px;
   border-radius: 999px;
-  background: var(--biof3-warning-bg);
-  color: var(--biof3-warning-text);
-  font-size: var(--biof3-font-size-sm);
+  background: var(--gewu-warning-bg);
+  color: var(--gewu-warning-text);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 700;
   flex-shrink: 0;
 }
 
-[data-theme='dark'] .biof3-plugin-card__badge-drift {
-  background: var(--biof3-warning-bg);
-  color: var(--biof3-warning-text);
+[data-theme='dark'] .gewu-plugin-card__badge-drift {
+  background: var(--gewu-warning-bg);
+  color: var(--gewu-warning-text);
 }
 
 /* 有更新可用的卡片徽章 + 高亮 */
-.biof3-plugin-card__badge-update {
+.gewu-plugin-card__badge-update {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: var(--biof3-accent);
-  color: var(--biof3-on-accent);
-  font-size: var(--biof3-font-size-sm);
+  background: var(--gewu-accent);
+  color: var(--gewu-on-accent);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 700;
   flex-shrink: 0;
   animation: biof3UpdatePulse 1.8s ease-in-out infinite;
@@ -1714,19 +1714,19 @@
 @keyframes biof3UpdatePulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--biof3-accent) 40%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--gewu-accent) 40%, transparent);
   }
   50% {
     box-shadow: 0 0 0 4px transparent;
   }
 }
 
-.biof3-plugin-card.has-update {
-  border-color: var(--biof3-accent-border);
+.gewu-plugin-card.has-update {
+  border-color: var(--gewu-accent-border);
 }
 
 /* 已装插件的操作按钮纵向堆叠（更新 + 卸载） */
-.biof3-plugin-store__action-stack {
+.gewu-plugin-store__action-stack {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -1734,30 +1734,30 @@
 }
 
 /* footer 更新提示 */
-.biof3-plugin-store__footer-updates {
-  color: var(--biof3-accent);
+.gewu-plugin-store__footer-updates {
+  color: var(--gewu-accent);
 }
-.biof3-plugin-store__refresh-btn {
+.gewu-plugin-store__refresh-btn {
   background: none;
   border: none;
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
   font-weight: 600;
   cursor: pointer;
   padding: 0;
   font-size: inherit;
   font-family: inherit;
 }
-.biof3-plugin-store__refresh-btn:hover:not(:disabled) {
+.gewu-plugin-store__refresh-btn:hover:not(:disabled) {
   text-decoration: underline;
 }
-.biof3-plugin-store__refresh-btn:disabled {
+.gewu-plugin-store__refresh-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.biof3-plugin-card__desc {
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-secondary);
+.gewu-plugin-card__desc {
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-secondary);
   line-height: 1.45;
   margin-bottom: 8px;
   display: -webkit-box;
@@ -1767,61 +1767,61 @@
   min-height: 2.2em;
 }
 
-[data-theme='dark'] .biof3-plugin-card__desc {
-  color: var(--biof3-text-tertiary);
+[data-theme='dark'] .gewu-plugin-card__desc {
+  color: var(--gewu-text-tertiary);
 }
 
-.biof3-plugin-card__meta {
+.gewu-plugin-card__meta {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary);
   margin-bottom: 10px;
 }
 
-.biof3-plugin-card__meta span {
+.gewu-plugin-card__meta span {
   display: inline-flex;
   align-items: center;
 }
 
-.biof3-plugin-card__meta .lang-r {
-  color: var(--biof3-status-info);
+.gewu-plugin-card__meta .lang-r {
+  color: var(--gewu-status-info);
   font-weight: 600;
 }
 
-.biof3-plugin-card__meta .lang-python {
-  color: var(--biof3-warning-text);
+.gewu-plugin-card__meta .lang-python {
+  color: var(--gewu-warning-text);
   font-weight: 600;
 }
 
-.biof3-plugin-card__meta .tag-data {
-  background: var(--biof3-accent-surface);
-  color: var(--biof3-accent);
+.gewu-plugin-card__meta .tag-data {
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
   padding: 1px 6px;
   border-radius: 4px;
   font-weight: 600;
 }
 
-.biof3-plugin-card__meta .tag-optional {
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-text-tertiary);
+.gewu-plugin-card__meta .tag-optional {
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-tertiary);
   padding: 1px 6px;
   border-radius: 4px;
   font-weight: 600;
 }
 
-[data-theme='dark'] .biof3-plugin-card__meta .tag-data {
-  background: var(--biof3-accent-bg);
-  color: var(--biof3-accent);
+[data-theme='dark'] .gewu-plugin-card__meta .tag-data {
+  background: var(--gewu-accent-bg);
+  color: var(--gewu-accent);
 }
 
-[data-theme='dark'] .biof3-plugin-card__meta .tag-optional {
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-text-tertiary);
+[data-theme='dark'] .gewu-plugin-card__meta .tag-optional {
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-tertiary);
 }
 
-.biof3-plugin-card__action {
+.gewu-plugin-card__action {
   margin-top: auto;
   display: flex;
   align-items: center;
@@ -1830,64 +1830,64 @@
 }
 
 /* ---- 进度条 ---- */
-.biof3-plugin-store__progress {
+.gewu-plugin-store__progress {
   width: 100%;
 }
 
-.biof3-plugin-store__progress-text {
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary);
+.gewu-plugin-store__progress-text {
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary);
   margin-bottom: 3px;
   text-align: center;
 }
 
-[data-theme='dark'] .biof3-plugin-store__progress-text {
-  color: var(--biof3-text-tertiary);
+[data-theme='dark'] .gewu-plugin-store__progress-text {
+  color: var(--gewu-text-tertiary);
 }
 
-.biof3-plugin-store__progress-bar {
+.gewu-plugin-store__progress-bar {
   height: 4px;
   border-radius: 2px;
-  background: var(--biof3-border);
+  background: var(--gewu-border);
   overflow: hidden;
 }
 
-.biof3-plugin-store__progress-bar > div {
+.gewu-plugin-store__progress-bar > div {
   height: 100%;
-  background: var(--biof3-accent);
+  background: var(--gewu-accent);
   border-radius: 2px;
   transition: width 0.3s ease;
 }
 
-[data-theme='dark'] .biof3-plugin-store__progress-bar {
-  background: var(--biof3-border);
+[data-theme='dark'] .gewu-plugin-store__progress-bar {
+  background: var(--gewu-border);
 }
 
-[data-theme='dark'] .biof3-plugin-store__progress-bar > div {
-  background: var(--biof3-accent);
+[data-theme='dark'] .gewu-plugin-store__progress-bar > div {
+  background: var(--gewu-accent);
 }
 
 /* ---- Footer ---- */
-.biof3-plugin-store__footer {
+.gewu-plugin-store__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 22px;
-  border-top: 1px solid var(--biof3-border);
+  border-top: 1px solid var(--gewu-border);
   flex-shrink: 0;
 }
 
-[data-theme='dark'] .biof3-plugin-store__footer {
-  border-top-color: var(--biof3-border);
+[data-theme='dark'] .gewu-plugin-store__footer {
+  border-top-color: var(--gewu-border);
 }
 
-.biof3-plugin-store__footer-info {
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text-tertiary);
+.gewu-plugin-store__footer-info {
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-tertiary);
 }
 
-[data-theme='dark'] .biof3-plugin-store__footer-info {
-  color: var(--biof3-text-tertiary);
+[data-theme='dark'] .gewu-plugin-store__footer-info {
+  color: var(--gewu-text-tertiary);
 }
 
 /* ============================================================
@@ -1896,7 +1896,7 @@
  * ============================================================ */
 
 /* main 内容区定位（与 SkillsSidebar 配合）*/
-.biof3-spa-main {
+.gewu-spa-main {
   transition: margin-left 0.25s ease;
 }
 
@@ -1904,21 +1904,21 @@
  * 导航面板 — 模块启动器
  * ============================================================ */
 
-.biof3-nav-panel {
+.gewu-nav-panel {
   width: 100%;
   height: 100%;
-  background: var(--biof3-bg-terminal);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-terminal);
+  color: var(--gewu-text);
 }
 
-.biof3-nav-list {
+.gewu-nav-list {
   display: flex;
   flex-direction: column;
   gap: 2px;
   padding: 8px 10px 10px;
 }
 
-.biof3-nav-item {
+.gewu-nav-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1928,7 +1928,7 @@
   border-radius: 8px;
   background: transparent;
   color: rgba(226, 232, 240, 0.84);
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
   font-family: inherit;
   cursor: pointer;
   transition:
@@ -1937,12 +1937,12 @@
   text-align: left;
 }
 
-.biof3-nav-item:hover {
+.gewu-nav-item:hover {
   background: rgba(148, 163, 184, 0.08);
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
-.biof3-nav-item__icon {
+.gewu-nav-item__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1950,121 +1950,121 @@
   height: 28px;
   border-radius: 6px;
   background: rgba(45, 212, 191, 0.12);
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
   flex-shrink: 0;
 }
 
-.biof3-nav-item:hover .biof3-nav-item__icon {
+.gewu-nav-item:hover .gewu-nav-item__icon {
   background: rgba(45, 212, 191, 0.18);
 }
 
-.biof3-nav-item__label {
+.gewu-nav-item__label {
   flex: 1;
   min-width: 0;
 }
 
-.biof3-nav-item__arrow {
+.gewu-nav-item__arrow {
   color: rgba(148, 163, 184, 0.92);
   flex-shrink: 0;
   transition: color 0.15s ease;
 }
 
-.biof3-nav-item:hover .biof3-nav-item__arrow {
-  color: var(--biof3-accent);
+.gewu-nav-item:hover .gewu-nav-item__arrow {
+  color: var(--gewu-accent);
 }
 
 /* dark */
-.biof3-nav-panel .biof3-desktop-panel__header {
+.gewu-nav-panel .gewu-desktop-panel__header {
   border-bottom-color: rgba(148, 163, 184, 0.14);
 }
 
-.biof3-nav-panel .biof3-desktop-panel__title,
-.biof3-nav-panel .biof3-desktop-panel__subtitle {
+.gewu-nav-panel .gewu-desktop-panel__title,
+.gewu-nav-panel .gewu-desktop-panel__subtitle {
   color: #e2e8f0;
 }
 
-.biof3-nav-panel .biof3-desktop-panel__close {
+.gewu-nav-panel .gewu-desktop-panel__close {
   color: rgba(226, 232, 240, 0.84);
 }
 
-.biof3-nav-panel .biof3-desktop-panel__close:hover {
+.gewu-nav-panel .gewu-desktop-panel__close:hover {
   background: rgba(148, 163, 184, 0.12);
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 /* ============================================================
  * 搜索面板
  * ============================================================ */
-.biof3-search-panel {
+.gewu-search-panel {
   width: 100%;
   height: 100%;
 }
 
-.biof3-search-bar-wrap {
+.gewu-search-bar-wrap {
   padding: 8px 0;
 }
 
-.biof3-search-bar-wrap .DocSearch-Button {
+.gewu-search-bar-wrap .DocSearch-Button {
   width: 100%;
   justify-content: flex-start;
   margin: 0;
 }
 
-.biof3-search-hint {
+.gewu-search-hint {
   margin: 8px 0 0;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-muted);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-muted);
   text-align: center;
 }
 
-[data-theme='dark'] .biof3-search-hint {
-  color: var(--biof3-text-tertiary);
+[data-theme='dark'] .gewu-search-hint {
+  color: var(--gewu-text-tertiary);
 }
 
 /* ============================================================
  * dock 按钮拖拽排序样式
  * ============================================================ */
-.biof3-desktop-dock__draggable {
+.gewu-desktop-dock__draggable {
   cursor: grab;
   transition:
     transform 0.15s ease,
     opacity 0.15s ease;
 }
 
-.biof3-desktop-dock__draggable:active {
+.gewu-desktop-dock__draggable:active {
   cursor: grabbing;
 }
 
-.biof3-desktop-dock__draggable.dragging {
+.gewu-desktop-dock__draggable.dragging {
   opacity: 0.4;
   transform: scale(0.95);
 }
 
-.biof3-desktop-dock__draggable.drag-over {
+.gewu-desktop-dock__draggable.drag-over {
   position: relative;
 }
 
 /* 拖拽经过时的视觉反馈：在上方显示一条高亮横线 */
-.biof3-desktop-dock__draggable.drag-over::before {
+.gewu-desktop-dock__draggable.drag-over::before {
   content: '';
   position: absolute;
   top: -2px;
   left: 4px;
   right: 4px;
   height: 2px;
-  background: var(--biof3-teal);
+  background: var(--gewu-teal);
   border-radius: 1px;
   z-index: 1;
 }
 
-[data-theme='dark'] .biof3-desktop-dock__draggable.drag-over::before {
-  background: var(--biof3-teal-bright);
+[data-theme='dark'] .gewu-desktop-dock__draggable.drag-over::before {
+  background: var(--gewu-teal-bright);
 }
 
 /* ============================================================
  * DesktopOnboarding — 首次启动引导向导
  * ============================================================ */
-.biof3-onboarding-overlay {
+.gewu-onboarding-overlay {
   position: fixed;
   inset: 0;
   z-index: 10000;
@@ -2076,203 +2076,203 @@
   animation: runModalFadeIn 0.2s ease;
 }
 
-.biof3-onboarding {
+.gewu-onboarding {
   width: 560px;
   max-width: 92vw;
   max-height: 88vh;
   display: flex;
   flex-direction: column;
-  background: var(--biof3-bg-canvas);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-canvas);
+  color: var(--gewu-text);
   border-radius: 14px;
   box-shadow: 0 24px 72px rgba(0, 0, 0, 0.28);
   overflow: hidden;
   animation: runModalSlideUp 0.25s ease;
 }
-[data-theme='dark'] .biof3-onboarding {
+[data-theme='dark'] .gewu-onboarding {
   box-shadow: 0 24px 72px rgba(0, 0, 0, 0.5);
 }
 
 /* 进度指示器 */
-.biof3-onboarding__steps {
+.gewu-onboarding__steps {
   display: flex;
   align-items: center;
   gap: 0;
   padding: 18px 24px 14px;
-  border-bottom: 1px solid var(--biof3-border, var(--biof3-border));
+  border-bottom: 1px solid var(--gewu-border, var(--gewu-border));
 }
-.biof3-onboarding__step {
+.gewu-onboarding__step {
   display: flex;
   align-items: center;
   gap: 8px;
   flex: 1;
-  color: var(--biof3-text-muted, var(--biof3-text-muted));
-  font-size: var(--biof3-font-size-body-sm);
+  color: var(--gewu-text-muted, var(--gewu-text-muted));
+  font-size: var(--gewu-font-size-body-sm);
 }
-.biof3-onboarding__step + .biof3-onboarding__step::before {
+.gewu-onboarding__step + .gewu-onboarding__step::before {
   content: '';
   width: 24px;
   height: 1px;
-  background: var(--biof3-border-strong, #cbd5e1);
+  background: var(--gewu-border-strong, #cbd5e1);
   margin-right: 8px;
 }
-.biof3-onboarding__step.active {
-  color: var(--biof3-teal);
+.gewu-onboarding__step.active {
+  color: var(--gewu-teal);
   font-weight: 600;
 }
-.biof3-onboarding__step.done {
-  color: var(--biof3-teal);
+.gewu-onboarding__step.done {
+  color: var(--gewu-teal);
 }
-.biof3-onboarding__step-icon {
+.gewu-onboarding__step-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: var(--biof3-bg-subtle);
+  background: var(--gewu-bg-subtle);
   flex-shrink: 0;
 }
-.biof3-onboarding__step.active .biof3-onboarding__step-icon,
-.biof3-onboarding__step.done .biof3-onboarding__step-icon {
-  background: var(--biof3-accent);
+.gewu-onboarding__step.active .gewu-onboarding__step-icon,
+.gewu-onboarding__step.done .gewu-onboarding__step-icon {
+  background: var(--gewu-accent);
   color: #ffffff;
 }
-[data-theme='dark'] .biof3-onboarding__step-icon {
+[data-theme='dark'] .gewu-onboarding__step-icon {
   background: rgba(148, 163, 184, 0.15);
 }
 
 /* 步骤内容 */
-.biof3-onboarding__body {
+.gewu-onboarding__body {
   flex: 1;
   overflow-y: auto;
   padding: 24px;
 }
-.biof3-onboarding__title {
+.gewu-onboarding__title {
   margin: 0 0 6px;
-  font-size: var(--biof3-font-size-xl);
+  font-size: var(--gewu-font-size-xl);
   font-weight: 700;
 }
-.biof3-onboarding__subtitle {
+.gewu-onboarding__subtitle {
   margin: 0 0 18px;
-  color: var(--biof3-text-tertiary, var(--biof3-text-secondary));
-  font-size: var(--biof3-font-size-body);
+  color: var(--gewu-text-tertiary, var(--gewu-text-secondary));
+  font-size: var(--gewu-font-size-body);
   line-height: 1.5;
 }
-[data-theme='dark'] .biof3-onboarding__subtitle {
-  color: var(--biof3-text-muted, var(--biof3-text-muted));
+[data-theme='dark'] .gewu-onboarding__subtitle {
+  color: var(--gewu-text-muted, var(--gewu-text-muted));
 }
 
 /* Step 1: 环境检测 */
-.biof3-onboarding__env-list {
+.gewu-onboarding__env-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-.biof3-onboarding__env-row {
+.gewu-onboarding__env-row {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
   border-radius: 10px;
-  border: 1px solid var(--biof3-border, var(--biof3-border));
-  background: var(--biof3-bg-canvas, var(--biof3-bg-canvas));
+  border: 1px solid var(--gewu-border, var(--gewu-border));
+  background: var(--gewu-bg-canvas, var(--gewu-bg-canvas));
 }
-.biof3-onboarding__env-row.ok {
+.gewu-onboarding__env-row.ok {
   border-color: rgba(16, 118, 110, 0.3);
   background: rgba(16, 118, 110, 0.05);
 }
-.biof3-onboarding__env-icon {
+.gewu-onboarding__env-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-teal);
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-teal);
   flex-shrink: 0;
 }
-.biof3-onboarding__env-info {
+.gewu-onboarding__env-info {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-.biof3-onboarding__env-name {
+.gewu-onboarding__env-name {
   font-weight: 600;
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
 }
-.biof3-onboarding__env-desc {
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-muted, var(--biof3-text-muted));
+.gewu-onboarding__env-desc {
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-muted, var(--gewu-text-muted));
 }
-.biof3-onboarding__env-status {
+.gewu-onboarding__env-status {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 600;
-  color: var(--biof3-text-muted, var(--biof3-text-muted));
+  color: var(--gewu-text-muted, var(--gewu-text-muted));
 }
-.biof3-onboarding__env-row.ok .biof3-onboarding__env-status {
-  color: var(--biof3-teal);
+.gewu-onboarding__env-row.ok .gewu-onboarding__env-status {
+  color: var(--gewu-teal);
 }
-.biof3-onboarding__hint {
+.gewu-onboarding__hint {
   margin: 14px 0 0;
   padding: 10px 12px;
   border-radius: 8px;
-  background: var(--biof3-bg-subtle);
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text-tertiary, var(--biof3-text-secondary));
+  background: var(--gewu-bg-subtle);
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-tertiary, var(--gewu-text-secondary));
 }
 
 /* Step 3: 插件提示 */
-.biof3-onboarding__plugin-tips {
+.gewu-onboarding__plugin-tips {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-bottom: 16px;
 }
-.biof3-onboarding__tip {
+.gewu-onboarding__tip {
   display: flex;
   align-items: flex-start;
   gap: 12px;
   padding: 12px 14px;
   border-radius: 10px;
-  border: 1px solid var(--biof3-border, var(--biof3-border));
+  border: 1px solid var(--gewu-border, var(--gewu-border));
 }
-.biof3-onboarding__tip > svg:first-child,
-.biof3-onboarding__tip > span:first-child {
-  color: var(--biof3-teal);
+.gewu-onboarding__tip > svg:first-child,
+.gewu-onboarding__tip > span:first-child {
+  color: var(--gewu-teal);
   flex-shrink: 0;
   margin-top: 2px;
 }
-.biof3-onboarding__tip strong {
-  font-size: var(--biof3-font-size-body);
+.gewu-onboarding__tip strong {
+  font-size: var(--gewu-font-size-body);
 }
-.biof3-onboarding__tip p {
+.gewu-onboarding__tip p {
   margin: 2px 0 0;
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text-muted, var(--biof3-text-muted));
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-muted, var(--gewu-text-muted));
 }
 
 /* Step 2: 模式选择卡片 */
-.biof3-onboarding__choice-list {
+.gewu-onboarding__choice-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-bottom: 14px;
 }
-.biof3-onboarding__choice {
+.gewu-onboarding__choice {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
   padding: 14px;
   border-radius: 10px;
-  border: 1px solid var(--biof3-border, var(--biof3-border));
-  background: var(--biof3-bg-canvas, var(--biof3-bg-canvas));
+  border: 1px solid var(--gewu-border, var(--gewu-border));
+  background: var(--gewu-bg-canvas, var(--gewu-bg-canvas));
   cursor: pointer;
   text-align: left;
   transition:
@@ -2282,52 +2282,52 @@
   color: inherit;
   font: inherit;
 }
-.biof3-onboarding__choice:hover {
-  border-color: var(--biof3-teal);
+.gewu-onboarding__choice:hover {
+  border-color: var(--gewu-teal);
 }
-.biof3-onboarding__choice.selected {
-  border-color: var(--biof3-teal);
+.gewu-onboarding__choice.selected {
+  border-color: var(--gewu-teal);
   background: rgba(16, 118, 110, 0.06);
-  box-shadow: 0 0 0 1px var(--biof3-teal) inset;
+  box-shadow: 0 0 0 1px var(--gewu-teal) inset;
 }
-.biof3-onboarding__choice-icon {
+.gewu-onboarding__choice-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-teal);
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-teal);
   flex-shrink: 0;
 }
-.biof3-onboarding__choice-body {
+.gewu-onboarding__choice-body {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
-.biof3-onboarding__choice-body strong {
-  font-size: var(--biof3-font-size-md);
+.gewu-onboarding__choice-body strong {
+  font-size: var(--gewu-font-size-md);
 }
-.biof3-onboarding__choice-body p {
+.gewu-onboarding__choice-body p {
   margin: 0;
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text-muted, var(--biof3-text-muted));
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-muted, var(--gewu-text-muted));
   line-height: 1.45;
 }
-.biof3-onboarding__choice-check {
+.gewu-onboarding__choice-check {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 22px;
   height: 22px;
-  color: var(--biof3-teal);
+  color: var(--gewu-teal);
   flex-shrink: 0;
 }
 
 /* Step 3: 插件商店引导 callout */
-.biof3-onboarding__store-callout {
+.gewu-onboarding__store-callout {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -2337,30 +2337,30 @@
   border: 1px solid rgba(16, 118, 110, 0.3);
   background: rgba(16, 118, 110, 0.05);
 }
-.biof3-onboarding__store-callout-body {
+.gewu-onboarding__store-callout-body {
   flex: 1;
 }
-.biof3-onboarding__store-callout-body strong {
-  font-size: var(--biof3-font-size-body);
+.gewu-onboarding__store-callout-body strong {
+  font-size: var(--gewu-font-size-body);
   display: block;
   margin-bottom: 3px;
 }
-.biof3-onboarding__store-callout-body p {
+.gewu-onboarding__store-callout-body p {
   margin: 0;
-  font-size: var(--biof3-font-size-body-sm);
-  color: var(--biof3-text-tertiary, var(--biof3-text-secondary));
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-tertiary, var(--gewu-text-secondary));
   line-height: 1.45;
 }
 
 /* 底部按钮 */
-.biof3-onboarding__footer {
+.gewu-onboarding__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 14px 24px;
-  border-top: 1px solid var(--biof3-border, var(--biof3-border));
+  border-top: 1px solid var(--gewu-border, var(--gewu-border));
 }
-.biof3-onboarding__footer-right {
+.gewu-onboarding__footer-right {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -2368,53 +2368,53 @@
 
 /* ============================================================
  * Docs 目录面板 — DocSidebar portal host（桌面版）
- * DocSidebar 被 portal 到 #biof3-docs-sidebar-host，由 dock 的
- * "目录"按钮 toggle html.biof3-desktop-docs-sidebar-open 控制显隐
+ * DocSidebar 被 portal 到 #gewu-docs-sidebar-host，由 dock 的
+ * "目录"按钮 toggle html.gewu-desktop-docs-sidebar-open 控制显隐
  * ============================================================ */
-#biof3-docs-sidebar-host {
+#gewu-docs-sidebar-host {
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
   width: 320px;
   z-index: 9998;
-  background: var(--biof3-bg-canvas, var(--biof3-bg-canvas));
-  border-right: 1px solid var(--biof3-border, var(--biof3-border));
+  background: var(--gewu-bg-canvas, var(--gewu-bg-canvas));
+  border-right: 1px solid var(--gewu-border, var(--gewu-border));
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
   transform: translateX(-110%); /* 默认隐藏：往左滑出被 dock 遮住 */
   transition: transform 0.22s ease;
   overflow: hidden auto;
   visibility: hidden;
 }
-html.biof3-desktop.biof3-desktop-docs-sidebar-open #biof3-docs-sidebar-host {
+html.gewu-desktop.gewu-desktop-docs-sidebar-open #gewu-docs-sidebar-host {
   transform: translateX(0);
   visibility: visible;
 }
-[data-theme='dark'] #biof3-docs-sidebar-host {
+[data-theme='dark'] #gewu-docs-sidebar-host {
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
   border-right-color: rgba(148, 163, 184, 0.2);
 }
 
 /* host 内的 DocSidebar 去掉原 aside 的固定宽高/负 margin，撑满 host */
-#biof3-docs-sidebar-host .theme-doc-sidebar-container {
+#gewu-docs-sidebar-host .theme-doc-sidebar-container {
   width: 100% !important;
   height: 100% !important;
   margin-top: 0 !important;
   border-right: none !important;
   display: block !important;
 }
-#biof3-docs-sidebar-host .theme-doc-sidebar-container > div {
+#gewu-docs-sidebar-host .theme-doc-sidebar-container > div {
   position: static !important;
   top: auto !important;
   height: 100% !important;
   max-height: 100vh !important;
 }
-#biof3-docs-sidebar-host .menu {
+#gewu-docs-sidebar-host .menu {
   padding: 12px 8px;
   background: transparent;
 }
 /* 隐藏原 DocSidebar 里的 Logo（桌面版 dock 已有品牌区）和折叠按钮（用 dock 控制） */
-#biof3-docs-sidebar-host .sidebarLogo,
-#biof3-docs-sidebar-host .collapseButton {
+#gewu-docs-sidebar-host .sidebarLogo,
+#gewu-docs-sidebar-host .collapseButton {
   display: none !important;
 }

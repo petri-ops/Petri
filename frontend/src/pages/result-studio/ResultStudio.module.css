@@ -341,7 +341,7 @@
 }
 
 .expandIcon {
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   transition: transform var(--transition-fast);
   color: var(--color-text-secondary);
 }
@@ -387,7 +387,7 @@
 }
 
 .currentBadge {
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   font-weight: normal;
   background: var(--color-primary);
   color: white;

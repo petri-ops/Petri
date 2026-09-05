@@ -117,7 +117,7 @@ function SelectionBar({ selection, onClear }: { selection: ArtifactSelection | n
       {selection?.compatibility && selection.compatibility !== 'compatible' && (
         <em data-status={selection.compatibility}>{selection.compatibility === 'stale' ? '选择已过期' : '选择不可用'}</em>
       )}
-      {selection && <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={onClear}>清除</button>}
+      {selection && <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={onClear}>清除</button>}
     </div>
   );
 }
@@ -239,7 +239,7 @@ function VirtualScientificTable({
           {columns.map((column) => <option key={column.field} value={column.field}>{column.field}</option>)}
         </select>
         <input value={filterValue} onChange={(event) => { setFilterValue(event.target.value); resetViewport(); }} placeholder="输入筛选内容" aria-label="筛选内容" />
-        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" disabled={!query?.selectionEvidence.entityIdsHash} onClick={selectAllFiltered}>选择全部筛选结果</button>
+        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={!query?.selectionEvidence.entityIdsHash} onClick={selectAllFiltered}>选择全部筛选结果</button>
         <span>{query ? `${query.matchedCount.toLocaleString()} / ${query.totalRows.toLocaleString()} 行` : '读取中'}</span>
       </div>
       <SelectionBar selection={selection} onClear={() => { selectedRows.current.clear(); onSelectionChange(null); }} />
@@ -263,7 +263,7 @@ function VirtualScientificTable({
       <div className={styles.tableHeader} style={{ gridTemplateColumns: `34px repeat(${columns.length}, minmax(112px, 1fr))` }}>
         <span />
         {columns.map((column) => (
-          <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" key={column.field} type="button" onClick={() => toggleSort(column.field)}>
+          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" key={column.field} type="button" onClick={() => toggleSort(column.field)}>
             {column.field}{sort[0]?.field === column.field ? (sort[0].direction === 'asc' ? ' ↑' : ' ↓') : ''}
           </button>
         ))}
@@ -324,7 +324,7 @@ function ScientificScatter({ manifest, query, selection, onSelectionChange }: {
     <div className={styles.viewer} data-mode="scatter">
       <SelectionBar selection={selection} onClear={() => onSelectionChange(null)} />
       {legends.length > 0 && <div className={styles.legend}>{legends.map((legend) => (
-        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" key={legend} type="button" onClick={() => onSelectionChange(buildLegendSelection(manifest, query.rows.filter((row) => row[mapping.legendField!] === legend)))}>{legend}</button>
+        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" key={legend} type="button" onClick={() => onSelectionChange(buildLegendSelection(manifest, query.rows.filter((row) => row[mapping.legendField!] === legend)))}>{legend}</button>
       ))}</div>}
       <svg
         className={styles.scatter}
@@ -411,10 +411,10 @@ function ScientificMatrix({ manifest, query, selection, onSelectionChange }: {
       <SelectionBar selection={selection} onClear={() => onSelectionChange(null)} />
       <div className={styles.matrix} style={{ gridTemplateColumns: `minmax(110px, auto) repeat(${columns.length}, 28px)` }}>
         <span />
-        {columns.map((field) => <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" key={field} type="button" title={`选择 ${field}`} onClick={() => onSelectionChange(buildColumnSelection(columnManifest, [field]))}>{field}</button>)}
+        {columns.map((field) => <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" key={field} type="button" title={`选择 ${field}`} onClick={() => onSelectionChange(buildColumnSelection(columnManifest, [field]))}>{field}</button>)}
         {rows.map((row) => (
           <React.Fragment key={row[rowField]}>
-            <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => onSelectionChange(buildRowSelection(rowManifest, [row]).selection)}>{row[rowField]}</button>
+            <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => onSelectionChange(buildRowSelection(rowManifest, [row]).selection)}>{row[rowField]}</button>
             {columns.map((field) => {
               const value = numeric(row[field]); const ratio = value === null ? .5 : (value - min) / (max - min || 1);
               return <span key={field} title={`${row[rowField]} × ${field}: ${row[field]}`} style={{ ['--matrix-value' as string]: ratio }} />;

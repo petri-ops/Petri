@@ -3,9 +3,9 @@
   flex-direction: column;
   gap: 6px;
   padding: 8px 12px;
-  border-top: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-primary);
+  border-top: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-primary);
 }
 
 .composerRow {
@@ -13,15 +13,15 @@
   align-items: flex-end;
   gap: 6px;
   min-width: 0;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 7px;
   padding: 3px 4px 3px 9px;
-  background: var(--biof3-bg-elevated);
+  background: var(--gewu-bg-elevated);
   transition: border-color 120ms ease;
 }
 
 .composerRow:focus-within {
-  border-color: var(--biof3-accent);
+  border-color: var(--gewu-accent);
 }
 
 .composerRow textarea {
@@ -35,9 +35,9 @@
   border: 0;
   outline: none;
   background: transparent;
-  color: var(--biof3-text-primary);
+  color: var(--gewu-text-primary);
   font: inherit;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   line-height: 18px;
   transition: min-height 120ms ease;
 }
@@ -56,32 +56,32 @@
   padding: 0;
   border: 0;
   border-radius: 6px;
-  background: var(--biof3-accent);
-  color: var(--biof3-bg-surface);
+  background: var(--gewu-accent);
+  color: var(--gewu-bg-surface);
   cursor: pointer;
 }
 
 .composerRow button:disabled {
-  background: var(--biof3-bg-hover);
-  color: var(--biof3-text-tertiary);
+  background: var(--gewu-bg-hover);
+  color: var(--gewu-text-tertiary);
   cursor: not-allowed;
 }
 
 .readiness {
   margin: 0;
   padding: 0 2px;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
   line-height: 1.4;
 }
 
 .readiness[data-state='loading'] {
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .readiness[data-state='blocked'],
 .readiness[data-state='warning'] {
-  color: var(--biof3-status-error);
+  color: var(--gewu-status-error);
 }
 
 .progress {
@@ -98,21 +98,21 @@
   align-items: center;
   gap: 5px;
   padding: 3px 6px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 5px;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .progress small {
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .terminal {
   margin: 0;
-  color: var(--biof3-status-error);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-status-error);
+  font-size: var(--gewu-font-size-xs);
   line-height: 1.4;
 }
 
@@ -125,6 +125,6 @@
 .root summary:focus-visible,
 .root input:focus-visible,
 .root select:focus-visible {
-  outline: 2px solid var(--biof3-accent);
+  outline: 2px solid var(--gewu-accent);
   outline-offset: 2px;
 }

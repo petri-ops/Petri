@@ -57,7 +57,7 @@ describe('G0-RS-P7 existing Git 显式同意 UI（前端）', () => {
     const group = await screen.findByRole('group', { name: 'Git 仓库同意' });
     expect(group.getAttribute('data-state')).toBe('decision-required');
     expect(group.textContent).toContain('检测到项目目录中已有 Git 仓库');
-    expect(group.textContent).toContain('授权 BioF3 写入我的仓库');
+    expect(group.textContent).toContain('授权 Gewu 写入我的仓库');
     expect(screen.queryByText('已授权')).toBeNull();
     expect(group.textContent).not.toContain('当前仓库有未提交改动');
   });
@@ -74,7 +74,7 @@ describe('G0-RS-P7 existing Git 显式同意 UI（前端）', () => {
     expect(group.textContent).toContain('当前仓库有未提交改动');
     expect(group.textContent).toContain('不会自动暂存、提交或覆盖');
     expect(group.textContent).toContain('后续写入将被阻止');
-    expect((screen.getByRole('button', { name: '授权 BioF3 写入我的仓库' }) as HTMLButtonElement).disabled).toBe(false);
+    expect((screen.getByRole('button', { name: '授权 Gewu 写入我的仓库' }) as HTMLButtonElement).disabled).toBe(false);
   });
 
   it('用户点击授权后调用提交接口并刷新为已授权状态', async () => {
@@ -112,7 +112,7 @@ describe('G0-RS-P7 existing Git 显式同意 UI（前端）', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     render(<GitRepositoryConsent projectId="p1" />);
-    const optIn = await screen.findByRole('button', { name: '授权 BioF3 写入我的仓库' });
+    const optIn = await screen.findByRole('button', { name: '授权 Gewu 写入我的仓库' });
     fireEvent.click(optIn);
 
     await waitFor(() => expect(screen.getByText(/已授权/)).toBeTruthy());

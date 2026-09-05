@@ -2,23 +2,23 @@
   display: grid;
   gap: 14px;
   padding: 16px;
-  border: 1px solid var(--biof3-border, var(--biof3-border-color, #2a3545));
+  border: 1px solid var(--gewu-border, var(--gewu-border-color, #2a3545));
   border-radius: 10px;
-  background: var(--biof3-bg-subtle, rgba(127, 127, 127, 0.06));
+  background: var(--gewu-bg-subtle, rgba(127, 127, 127, 0.06));
 }
 
 .heading h3 {
   margin: 0;
-  font-size: var(--biof3-font-size-md);
-  color: var(--biof3-text, inherit);
+  font-size: var(--gewu-font-size-md);
+  color: var(--gewu-text, inherit);
 }
 
 .heading p,
 .description,
 .featureLabel small {
   margin: 4px 0 0;
-  color: var(--biof3-text-tertiary, inherit);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-text-tertiary, inherit);
+  font-size: var(--gewu-font-size-caption);
   line-height: 1.45;
 }
 
@@ -34,12 +34,12 @@
   display: grid;
   gap: 2px;
   min-width: 0;
-  color: var(--biof3-text, inherit);
+  color: var(--gewu-text, inherit);
   cursor: pointer;
 }
 
 .featureLabel > span {
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
   font-weight: 650;
 }
 
@@ -54,7 +54,7 @@
   width: 36px;
   height: 20px;
   margin: 0;
-  accent-color: var(--biof3-accent, #4f9cf9);
+  accent-color: var(--gewu-accent, #4f9cf9);
   cursor: pointer;
 }
 
@@ -64,12 +64,12 @@
 }
 
 .toggleControl:hover .toggle {
-  outline: 2px solid color-mix(in srgb, var(--biof3-accent, #4f9cf9) 35%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--gewu-accent, #4f9cf9) 35%, transparent);
   outline-offset: 2px;
 }
 
 .toggle:focus-visible {
-  outline: 2px solid var(--biof3-accent, #4f9cf9);
+  outline: 2px solid var(--gewu-accent, #4f9cf9);
   outline-offset: 2px;
 }
 

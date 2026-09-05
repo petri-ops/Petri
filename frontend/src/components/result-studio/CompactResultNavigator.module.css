@@ -7,8 +7,8 @@
   gap: 6px;
   min-height: 44px;
   padding: 5px 10px;
-  border-bottom: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-surface);
+  border-bottom: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-surface);
 }
 
 .currentResult {
@@ -26,7 +26,7 @@
   width: 24px;
   height: 28px;
   flex: 0 0 24px;
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
 }
 
 .currentCopy {
@@ -43,9 +43,9 @@
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   font: inherit;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 650;
   text-overflow: ellipsis;
   cursor: pointer;
@@ -54,8 +54,8 @@
 .currentName {
   min-width: 0;
   overflow: hidden;
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-body-sm);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body-sm);
   line-height: 24px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -79,7 +79,7 @@
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   text-decoration: none;
   list-style: none;
@@ -92,8 +92,8 @@ button.iconAction {
 .iconAction:hover,
 .more > summary:hover,
 .more[open] > summary {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 .more {
@@ -113,9 +113,9 @@ button.iconAction {
   max-height: min(440px, calc(100vh - 120px));
   overflow: auto;
   padding: 10px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
   box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
 }
 
@@ -124,19 +124,19 @@ button.iconAction {
   gap: 2px;
   min-width: 0;
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--biof3-border-subtle);
+  border-bottom: 1px solid var(--gewu-border-subtle);
 }
 
 .moreHeader strong {
   overflow-wrap: anywhere;
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-caption);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .moreHeader span,
 .menuLabel {
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .truthBadge,
@@ -146,22 +146,22 @@ button.iconAction {
   align-items: center;
   min-height: 19px;
   padding: 0 6px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 999px;
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 650;
   white-space: nowrap;
 }
 
-.truthBadge[data-tone='valid'] { color: var(--biof3-status-online); }
+.truthBadge[data-tone='valid'] { color: var(--gewu-status-online); }
 .truthBadge[data-tone='degraded'],
-.truthBadge[data-tone='running'] { color: var(--biof3-status-loading); }
-.truthBadge[data-tone='blocked'] { color: var(--biof3-danger); }
+.truthBadge[data-tone='running'] { color: var(--gewu-status-loading); }
+.truthBadge[data-tone='blocked'] { color: var(--gewu-danger); }
 
 .availabilityBadge {
-  border-color: color-mix(in srgb, var(--biof3-danger) 36%, var(--biof3-border));
-  color: var(--biof3-danger);
+  border-color: color-mix(in srgb, var(--gewu-danger) 36%, var(--gewu-border));
+  color: var(--gewu-danger);
 }
 
 .modeSwitcher {
@@ -177,20 +177,20 @@ button.iconAction {
   border: 0;
   border-radius: 5px;
   background: transparent;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
 }
 
 .modeSwitcher button:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 .modeSwitcher button[aria-current='page'] {
-  background: color-mix(in srgb, var(--biof3-accent) 10%, transparent);
-  color: var(--biof3-accent);
+  background: color-mix(in srgb, var(--gewu-accent) 10%, transparent);
+  color: var(--gewu-accent);
 }
 
 .relatedFiles {
@@ -198,7 +198,7 @@ button.iconAction {
   gap: 2px;
   margin-top: 10px;
   padding-top: 8px;
-  border-top: 1px solid var(--biof3-border-subtle);
+  border-top: 1px solid var(--gewu-border-subtle);
 }
 
 .secondaryActions {
@@ -213,20 +213,20 @@ button.iconAction {
 .secondaryActions button {
   min-height: 26px;
   padding: 3px 7px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 4px;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   font: inherit;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   text-decoration: none;
   cursor: pointer;
 }
 
 .secondaryActions a:hover,
 .secondaryActions button:hover {
-  border-color: var(--biof3-accent-border);
-  color: var(--biof3-accent);
+  border-color: var(--gewu-accent-border);
+  color: var(--gewu-accent);
 }
 
 .menuLabel {
@@ -245,14 +245,14 @@ button.iconAction {
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   text-align: left;
   cursor: pointer;
 }
 
 .relatedFiles button:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-text);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
 }
 
 .relatedFiles button span {
@@ -264,8 +264,8 @@ button.iconAction {
 
 .relatedFiles button small {
   flex: 0 0 auto;
-  color: var(--biof3-text-tertiary);
-  font-size: var(--biof3-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
 }
 
 @container (max-width: 520px) {

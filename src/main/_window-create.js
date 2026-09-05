@@ -11,6 +11,7 @@
 // ============================================================
 
 const fs = require("fs");
+const { BRAND } = require("./brand");
 
 /**
  * Create the main BrowserWindow with all event handlers attached.
@@ -65,7 +66,7 @@ async function createWindow({
     height: 1000,
     minWidth: 720,
     minHeight: 520,
-    title: "BioF3",
+    title: BRAND.APP_NAME, // BLOCK-61：品牌单一事实源
     // Self-drawn traffic-light buttons in TitleBar.tsx — see src/main.js comments
     // around setupWindowIpc() for the IPC contract (window:minimize/maximize/close).
     // Frameless on every platform so the renderer owns the window controls; on macOS

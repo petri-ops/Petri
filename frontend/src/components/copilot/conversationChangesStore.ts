@@ -11,7 +11,7 @@
 // git working tree 仍是 diff/统计的事实源；本 store 只负责「路径归属」。
 // ============================================================
 
-import { biof3Events, subscribeBioF3Event } from '@/lib/events';
+import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
 import { getApiPrefix } from '@/lib/env';
 
 export interface ConversationFileChange {
@@ -45,7 +45,7 @@ function ensureSubscribed(): void {
   subscribed = true;
   // 权威对账：任务收尾时用后端清单覆盖该会话的归属（保留 live 记录中
   // 权威清单之外的路径，兼容 workspace_exec 等盲区与多任务并发）。
-  subscribeBioF3Event(biof3Events.agentTaskDone, (detail) => {
+  subscribeGewuEvent(gewuEvents.agentTaskDone, (detail) => {
     if (!detail?.conversationId || !Array.isArray(detail.filesChanged)) return;
     const authoritative = detail.filesChanged.filter(
       (item) => item && typeof item.path === 'string'

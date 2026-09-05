@@ -11,7 +11,7 @@
 
 const { ipcMain } = require("electron");
 
-const AGENT_WORKBENCH_FLAG_CHANNEL = "biof3:agent-workbench-flags";
+const AGENT_WORKBENCH_FLAG_CHANNEL = "gewu:agent-workbench-flags";
 const AGENT_WORKBENCH_FLAG_NAME = "extraRenderers";
 
 function parseAgentWorkbenchFlags(argv = process.argv, env = process.env) {

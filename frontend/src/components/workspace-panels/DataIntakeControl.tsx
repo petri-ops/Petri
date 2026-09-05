@@ -7,7 +7,7 @@ import {
   primaryFileRole,
   type ImportedDataFile,
 } from '@/lib/data-profile';
-import { biof3Events, dispatchBioF3Event } from '@/lib/events';
+import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import styles from '@/pages/project-workspace.module.css';
 
 const ROLE_LABELS: Record<string, string> = {
@@ -71,7 +71,7 @@ export function DataIntakeControl({
       const next = await importProjectData(projectId, files, controller.signal);
       if (controller.signal.aborted || importControllerRef.current !== controller) return;
       setImported(next);
-      dispatchBioF3Event(biof3Events.projectWorkspaceChanged, {
+      dispatchGewuEvent(gewuEvents.projectWorkspaceChanged, {
         projectId,
         source: 'manual',
       });
@@ -134,7 +134,7 @@ export function DataIntakeControl({
         >
           <header className={styles.dataIntakeHeader}>
             <strong>数据准备</strong>
-            <button className="biof3-btn biof3-btn--icon" type="button" onClick={closeIntake} aria-label="关闭">
+            <button className="gewu-btn gewu-btn--icon" type="button" onClick={closeIntake} aria-label="关闭">
               <Icon name="x" size={13} />
             </button>
           </header>

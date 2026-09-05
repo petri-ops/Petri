@@ -1,6 +1,6 @@
 /**
  * Skills 页面样式
- * 沿用 BioF3 design tokens（--biof3-* 变量）
+ * 沿用 Gewu design tokens（--gewu-* 变量）
  */
 
 /* ============================================================
@@ -8,9 +8,9 @@
    ============================================================ */
 
 .skillsPage {
-  min-height: calc(100vh - var(--biof3-titlebar-height));
+  min-height: calc(100vh - var(--gewu-titlebar-height));
   padding: 20px 24px;
-  background: var(--biof3-bg-surface);
+  background: var(--gewu-bg-surface);
 }
 
 /* ============================================================
@@ -31,16 +31,16 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: var(--biof3-accent-bg);
-  color: var(--biof3-accent);
+  background: var(--gewu-accent-bg);
+  color: var(--gewu-accent);
   flex-shrink: 0;
 }
 
 .pageTitle {
   margin: 0;
-  font-size: var(--biof3-font-size-xl);
+  font-size: var(--gewu-font-size-xl);
   font-weight: 700;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   letter-spacing: -0.01em;
 }
 
@@ -49,8 +49,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-secondary);
 }
 
 .statsBadge {
@@ -59,8 +59,8 @@
   gap: 4px;
   padding: 4px 10px;
   border-radius: 20px;
-  background: var(--biof3-bg-canvas);
-  border: 1px solid var(--biof3-border);
+  background: var(--gewu-bg-canvas);
+  border: 1px solid var(--gewu-border);
 }
 
 /* ============================================================
@@ -89,7 +89,7 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
   pointer-events: none;
 }
 
@@ -97,22 +97,22 @@
   width: 100%;
   height: 36px;
   padding: 0 36px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 9px;
-  background: var(--biof3-bg-canvas);
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-body-sm);
+  background: var(--gewu-bg-canvas);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body-sm);
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .searchInput::placeholder {
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .searchInput:focus {
-  border-color: var(--biof3-accent);
-  box-shadow: 0 0 0 3px var(--biof3-accent-bg);
+  border-color: var(--gewu-accent);
+  box-shadow: 0 0 0 3px var(--gewu-accent-bg);
 }
 
 .clearButton {
@@ -128,14 +128,14 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
 .clearButton:hover {
-  background: var(--biof3-bg-canvas);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg-canvas);
+  color: var(--gewu-text-secondary);
 }
 
 .sourceFilters {
@@ -149,24 +149,24 @@
   gap: 6px;
   height: 32px;
   padding: 0 12px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-caption);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .filterChip:hover {
-  border-color: var(--biof3-accent);
-  color: var(--biof3-text);
+  border-color: var(--gewu-accent);
+  color: var(--gewu-text);
 }
 
 .filterChipActive {
-  border-color: var(--biof3-accent);
-  background: var(--biof3-accent-bg);
-  color: var(--biof3-accent);
+  border-color: var(--gewu-accent);
+  background: var(--gewu-accent-bg);
+  color: var(--gewu-accent);
 }
 
 .filterCount {
@@ -177,13 +177,13 @@
   height: 18px;
   padding: 0 5px;
   border-radius: 9px;
-  background: var(--biof3-bg-canvas);
-  font-size: var(--biof3-font-size-xs);
+  background: var(--gewu-bg-canvas);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 600;
 }
 
 .filterChipActive .filterCount {
-  background: var(--biof3-accent);
+  background: var(--gewu-accent);
   color: white;
 }
 
@@ -203,25 +203,25 @@
   gap: 6px;
   height: 30px;
   padding: 0 12px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 7px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-sm);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-sm);
   white-space: nowrap;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .categoryChip:hover {
-  border-color: var(--biof3-accent);
-  color: var(--biof3-text);
+  border-color: var(--gewu-accent);
+  color: var(--gewu-text);
 }
 
 .categoryChipActive {
-  border-color: var(--biof3-accent);
-  background: var(--biof3-accent-bg);
-  color: var(--biof3-accent);
+  border-color: var(--gewu-accent);
+  background: var(--gewu-accent-bg);
+  color: var(--gewu-accent);
 }
 
 /* ============================================================
@@ -242,7 +242,7 @@
   justify-content: center;
   padding: 60px 20px;
   text-align: center;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .emptyIcon {
@@ -252,20 +252,20 @@
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background: var(--biof3-bg-canvas);
+  background: var(--gewu-bg-canvas);
   margin-bottom: 12px;
 }
 
 .emptyTitle {
   margin: 0 0 4px;
-  font-size: var(--biof3-font-size-md);
+  font-size: var(--gewu-font-size-md);
   font-weight: 600;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .emptyText {
   margin: 0;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
 }
 
 /* ============================================================
@@ -276,16 +276,16 @@
   display: flex;
   flex-direction: column;
   padding: 16px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 12px;
-  background: var(--biof3-bg-canvas);
+  background: var(--gewu-bg-canvas);
   transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
               transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .skillCard:hover {
-  border-color: var(--biof3-accent);
+  border-color: var(--gewu-accent);
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
@@ -308,9 +308,9 @@
 
 .cardTitle {
   margin: 0;
-  font-size: var(--biof3-font-size-body);
+  font-size: var(--gewu-font-size-body);
   font-weight: 600;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -318,17 +318,17 @@
 
 .cardVersion {
   flex-shrink: 0;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 500;
-  color: var(--biof3-text-tertiary);
-  background: var(--biof3-bg-surface);
+  color: var(--gewu-text-tertiary);
+  background: var(--gewu-bg-surface);
   padding: 2px 6px;
   border-radius: 4px;
 }
 
 .sourceBadge {
   flex-shrink: 0;
-  font-size: var(--biof3-font-size-xs);
+  font-size: var(--gewu-font-size-xs);
   font-weight: 600;
   padding: 3px 8px;
   border-radius: 5px;
@@ -338,7 +338,7 @@
 
 .sourceBuiltin {
   background: rgba(67, 209, 174, 0.15);
-  color: var(--biof3-accent);
+  color: var(--gewu-accent);
 }
 
 .sourceInstalled {
@@ -353,9 +353,9 @@
 
 .cardDescription {
   margin: 0 0 12px;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   line-height: 1.6;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -370,16 +370,16 @@
 }
 
 .tag {
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-tertiary);
-  background: var(--biof3-bg-surface);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  background: var(--gewu-bg-surface);
   padding: 3px 8px;
   border-radius: 5px;
 }
 
 .tagMore {
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
   padding: 3px 4px;
 }
 
@@ -389,7 +389,7 @@
   gap: 12px;
   margin-bottom: 14px;
   padding-top: 12px;
-  border-top: 1px solid var(--biof3-border);
+  border-top: 1px solid var(--gewu-border);
 }
 
 .categoryLabel,
@@ -397,8 +397,8 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary);
 }
 
 .cardActions {
@@ -416,7 +416,7 @@
   height: 32px;
   padding: 0 14px;
   border-radius: 8px;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -424,20 +424,20 @@
 
 .detailButton {
   flex: 1;
-  border: 1px solid var(--biof3-border);
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
+  border: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
 }
 
 .detailButton:hover {
-  border-color: var(--biof3-accent);
-  color: var(--biof3-text);
+  border-color: var(--gewu-accent);
+  color: var(--gewu-text);
 }
 
 .executeButton {
   flex: 1;
-  border: 1px solid var(--biof3-accent);
-  background: var(--biof3-accent);
+  border: 1px solid var(--gewu-accent);
+  background: var(--gewu-accent);
   color: white;
 }
 
@@ -478,8 +478,8 @@
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  background: var(--biof3-bg-surface);
-  border: 1px solid var(--biof3-border);
+  background: var(--gewu-bg-surface);
+  border: 1px solid var(--gewu-border);
   border-radius: 16px;
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
   animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -501,7 +501,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 18px 20px;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--gewu-border);
   flex-shrink: 0;
 }
 
@@ -513,16 +513,16 @@
 
 .modalTitle {
   margin: 0;
-  font-size: var(--biof3-font-size-md);
+  font-size: var(--gewu-font-size-md);
   font-weight: 700;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .modalVersion {
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 500;
-  color: var(--biof3-text-tertiary);
-  background: var(--biof3-bg-canvas);
+  color: var(--gewu-text-tertiary);
+  background: var(--gewu-bg-canvas);
   padding: 2px 8px;
   border-radius: 4px;
 }
@@ -536,14 +536,14 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
 .closeButton:hover {
-  background: var(--biof3-bg-canvas);
-  color: var(--biof3-text);
+  background: var(--gewu-bg-canvas);
+  color: var(--gewu-text);
 }
 
 .modalBody {
@@ -562,18 +562,18 @@
 
 .sectionTitle {
   margin: 0 0 10px;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 600;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .description {
   margin: 0;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   line-height: 1.7;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .metaRow {
@@ -587,9 +587,9 @@
   align-items: center;
   padding: 4px 10px;
   border-radius: 6px;
-  background: var(--biof3-accent-bg);
-  color: var(--biof3-accent);
-  font-size: var(--biof3-font-size-sm);
+  background: var(--gewu-accent-bg);
+  color: var(--gewu-accent);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 500;
 }
 
@@ -602,8 +602,8 @@
 }
 
 .pluginLabel {
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-tertiary);
   margin-right: 4px;
 }
 
@@ -613,10 +613,10 @@
   gap: 4px;
   padding: 4px 10px;
   border-radius: 6px;
-  background: var(--biof3-bg-canvas);
-  border: 1px solid var(--biof3-border);
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-text-secondary);
+  background: var(--gewu-bg-canvas);
+  border: 1px solid var(--gewu-border);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-text-secondary);
 }
 
 .pluginOptional {
@@ -626,8 +626,8 @@
 
 .emptyText {
   margin: 0;
-  font-size: var(--biof3-font-size-caption);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-tertiary);
   font-style: italic;
 }
 
@@ -640,8 +640,8 @@
 
 .requiredNote {
   margin: 0 0 8px;
-  font-size: var(--biof3-font-size-sm);
-  color: var(--biof3-accent);
+  font-size: var(--gewu-font-size-sm);
+  color: var(--gewu-accent);
   font-weight: 500;
 }
 
@@ -655,15 +655,15 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font-size: var(--biof3-font-size-caption);
+  font-size: var(--gewu-font-size-caption);
   font-weight: 500;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
 }
 
 .paramDescription {
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 400;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .paramControl {
@@ -678,11 +678,11 @@
   flex: 1;
   height: 34px;
   padding: 0 12px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  background: var(--biof3-bg-canvas);
-  color: var(--biof3-text);
-  font-size: var(--biof3-font-size-caption);
+  background: var(--gewu-bg-canvas);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-caption);
   outline: none;
   transition: border-color 0.2s ease;
 }
@@ -690,7 +690,7 @@
 .select:focus,
 .textInput:focus,
 .numberInput:focus {
-  border-color: var(--biof3-accent);
+  border-color: var(--gewu-accent);
 }
 
 .select {
@@ -698,8 +698,8 @@
 }
 
 .paramDefault {
-  font-size: var(--biof3-font-size-xs);
-  color: var(--biof3-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
   white-space: nowrap;
 }
 
@@ -722,7 +722,7 @@
   width: 40px;
   height: 22px;
   border-radius: 11px;
-  background: var(--biof3-border);
+  background: var(--gewu-border);
   transition: background 0.2s ease;
 }
 
@@ -739,7 +739,7 @@
 }
 
 .toggle input:checked + .toggleSlider {
-  background: var(--biof3-accent);
+  background: var(--gewu-accent);
 }
 
 .toggle input:checked + .toggleSlider::before {
@@ -749,9 +749,9 @@
 /* 输出列表 */
 .outputGroupTitle {
   margin: 0 0 8px;
-  font-size: var(--biof3-font-size-sm);
+  font-size: var(--gewu-font-size-sm);
   font-weight: 500;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .outputList {
@@ -769,24 +769,24 @@
   gap: 8px;
   padding: 10px 12px;
   border-radius: 8px;
-  background: var(--biof3-bg-canvas);
-  font-size: var(--biof3-font-size-caption);
+  background: var(--gewu-bg-canvas);
+  font-size: var(--gewu-font-size-caption);
 }
 
 .outputItem > svg {
   flex-shrink: 0;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
   margin-top: 1px;
 }
 
 .outputLabel {
   font-weight: 500;
-  color: var(--biof3-text);
+  color: var(--gewu-text);
   white-space: nowrap;
 }
 
 .outputDesc {
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   margin-left: 4px;
 }
 
@@ -796,7 +796,7 @@
   justify-content: flex-end;
   gap: 10px;
   padding: 16px 20px;
-  border-top: 1px solid var(--biof3-border);
+  border-top: 1px solid var(--gewu-border);
   flex-shrink: 0;
 }
 
@@ -806,18 +806,18 @@
   justify-content: center;
   height: 36px;
   padding: 0 16px;
-  border: 1px solid var(--biof3-border);
+  border: 1px solid var(--gewu-border);
   border-radius: 9px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
-  font-size: var(--biof3-font-size-body-sm);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .cancelButton:hover {
-  border-color: var(--biof3-text-tertiary);
-  color: var(--biof3-text);
+  border-color: var(--gewu-text-tertiary);
+  color: var(--gewu-text);
 }
 
 .executeButton:disabled {
@@ -852,21 +852,21 @@
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
-  color: var(--biof3-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 .loadingSpinner {
   width: 32px;
   height: 32px;
-  border: 3px solid var(--biof3-border);
-  border-top-color: var(--biof3-accent);
+  border: 3px solid var(--gewu-border);
+  border-top-color: var(--gewu-accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin-bottom: 12px;
 }
 
 .loadingText {
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
 }
 
 .retryBtn {
@@ -875,11 +875,11 @@
   gap: 6px;
   margin-top: 14px;
   padding: 6px 14px;
-  font-size: var(--biof3-font-size-body-sm);
+  font-size: var(--gewu-font-size-body-sm);
   font-weight: 500;
-  color: var(--biof3-text);
-  background: var(--biof3-bg-surface);
-  border: 1px solid var(--biof3-border);
+  color: var(--gewu-text);
+  background: var(--gewu-bg-surface);
+  border: 1px solid var(--gewu-border);
   border-radius: 6px;
   cursor: pointer;
   transition:
@@ -888,9 +888,9 @@
 }
 
 .retryBtn:hover {
-  background: var(--biof3-hover);
-  border-color: var(--biof3-accent);
-  color: var(--biof3-accent);
+  background: var(--gewu-hover);
+  border-color: var(--gewu-accent);
+  color: var(--gewu-accent);
 }
 
 /* ============================================================
@@ -903,10 +903,10 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  background: var(--biof3-bg-canvas);
-  border: 1px solid var(--biof3-border);
+  background: var(--gewu-bg-canvas);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  color: var(--biof3-text-secondary);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
   transition:
     background 0.15s ease,
@@ -916,9 +916,9 @@
 }
 
 .backBtn:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-accent);
-  border-color: var(--biof3-accent);
+  background: var(--gewu-hover);
+  color: var(--gewu-accent);
+  border-color: var(--gewu-accent);
 }
 
 /* ============================================================

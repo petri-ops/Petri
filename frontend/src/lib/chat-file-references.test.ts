@@ -60,13 +60,13 @@ describe('chat-file-references: URL safety', () => {
   });
 
   it('rejects biof3:// schemes that are not artifact/workspace', () => {
-    expect(classifyLink('biof3://admin/exec')).toBe('dangerous');
-    expect(classifyLink('biof3://')).toBe('dangerous');
+    expect(classifyLink('gewu://admin/exec')).toBe('dangerous');
+    expect(classifyLink('gewu://')).toBe('dangerous');
   });
 
   it('accepts biof3://artifact and biof3://workspace', () => {
-    expect(classifyLink('biof3://artifact/job-1/deg.csv')).toBe('artifact');
-    expect(classifyLink('biof3://workspace/proj-1/data/foo.csv')).toBe('workspace');
+    expect(classifyLink('gewu://artifact/job-1/deg.csv')).toBe('artifact');
+    expect(classifyLink('gewu://workspace/proj-1/data/foo.csv')).toBe('workspace');
   });
 
   it('rejects URLs with control characters', () => {
@@ -80,8 +80,8 @@ describe('chat-file-references: candidate extraction', () => {
     const out = extractFileReferenceCandidates(
       'See [report](biof3://artifact/job-1/report.html) and also biof3://workspace/proj-1/data/x.csv',
     );
-    expect(out).toContain('biof3://artifact/job-1/report.html');
-    expect(out).toContain('biof3://workspace/proj-1/data/x.csv');
+    expect(out).toContain('gewu://artifact/job-1/report.html');
+    expect(out).toContain('gewu://workspace/proj-1/data/x.csv');
   });
 
   it('extracts tools/file/<jobId>/<filename> URLs into job/filename tokens', () => {
@@ -108,10 +108,10 @@ describe('chat-file-references: candidate extraction', () => {
 
   it('extracts inline-code workspace paths and internal artifact URIs', () => {
     const out = extractFileReferenceCandidates(
-      'Open `results/deg.csv` or `biof3://artifact/job-1/report.html`.',
+      'Open `results/deg.csv` or `gewu://artifact/job-1/report.html`.',
     );
     expect(out).toContain('results/deg.csv');
-    expect(out).toContain('biof3://artifact/job-1/report.html');
+    expect(out).toContain('gewu://artifact/job-1/report.html');
   });
 
   it('keeps fenced code inert but extracts standalone file references from inline code', () => {
@@ -172,12 +172,12 @@ describe('chat-file-references: candidate extraction', () => {
 
   it('extracts unicode names, quoted paths with spaces, and project absolute paths', () => {
     const out = extractFileReferenceCandidates(
-      '查看 差异基因.csv、"results/final report.html" 和 /Users/demo/BioF3/data/sample matrix.tsv。',
+      '查看 差异基因.csv、"results/final report.html" 和 /Users/demo/Gewu/data/sample matrix.tsv。',
     );
     expect(out).toEqual(expect.arrayContaining([
       '差异基因.csv',
       'results/final report.html',
-      '/Users/demo/BioF3/data/sample matrix.tsv',
+      '/Users/demo/Gewu/data/sample matrix.tsv',
     ]));
   });
 
@@ -187,7 +187,7 @@ describe('chat-file-references: candidate extraction', () => {
     );
     expect(out).toEqual(expect.arrayContaining([
       'frontend/src/config.ts',
-      'biof3://artifact/job-1/report.html',
+      'gewu://artifact/job-1/report.html',
     ]));
   });
 
@@ -323,6 +323,6 @@ describe('chat-file-references: synthetic URI round-trip', () => {
       jobId: 'job-1',
       artifactName: 'deg.csv',
     }));
-    expect(classifyLink('biof3://artifact/job-1/deg.csv')).toBe('artifact');
+    expect(classifyLink('gewu://artifact/job-1/deg.csv')).toBe('artifact');
   });
 });

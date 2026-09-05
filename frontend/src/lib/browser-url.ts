@@ -8,7 +8,7 @@ export function normalizeBrowserUrl(value: string): string {
   return `https://${trimmed}`;
 }
 
-export function isBioF3LocalBrowserUrl(value: string): boolean {
+export function isGewuLocalBrowserUrl(value: string): boolean {
   try {
     const url = new URL(value);
     return url.protocol === 'http:' && (url.hostname === 'localhost' || url.hostname === '127.0.0.1');

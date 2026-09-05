@@ -93,7 +93,7 @@ describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
       createPanel: {
         ...base.createPanel,
         open: true,
-        path: '/tmp/biof3-manual-ws',
+        path: '/tmp/gewu-manual-ws',
         onPathChange,
         onConfirm,
       },
@@ -101,7 +101,7 @@ describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
     renderLeftPanel(ctx);
 
     const input = screen.getByLabelText('项目工作目录完整路径') as HTMLInputElement;
-    expect(input.value).toBe('/tmp/biof3-manual-ws');
+    expect(input.value).toBe('/tmp/gewu-manual-ws');
     fireEvent.change(input, { target: { value: '/tmp/edited-ws' } });
     expect(onPathChange).toHaveBeenCalledWith('/tmp/edited-ws');
 

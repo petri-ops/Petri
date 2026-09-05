@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getBrowserViewportSize, isBioF3LocalBrowserUrl, normalizeBrowserUrl } from './browser-url';
+import { getBrowserViewportSize, isGewuLocalBrowserUrl, normalizeBrowserUrl } from './browser-url';
 
 describe('browser URL routing', () => {
   it('normalizes local and external addresses', () => {
@@ -7,12 +7,12 @@ describe('browser URL routing', () => {
     expect(normalizeBrowserUrl('example.com')).toBe('https://example.com');
   });
 
-  it('uses the stable frame renderer for every local BioF3 page', () => {
-    expect(isBioF3LocalBrowserUrl('http://localhost:3001/api/tools/file/tj_1/final-report.html?token=x')).toBe(true);
-    expect(isBioF3LocalBrowserUrl('http://127.0.0.1:3001/api/tools/file/tj_1/report.html')).toBe(true);
-    expect(isBioF3LocalBrowserUrl('http://localhost:3001/api/health')).toBe(true);
-    expect(isBioF3LocalBrowserUrl('https://localhost:3001/api/health')).toBe(false);
-    expect(isBioF3LocalBrowserUrl('https://example.com/api/tools/file/tj_1/final-report.html')).toBe(false);
+  it('uses the stable frame renderer for every local Gewu page', () => {
+    expect(isGewuLocalBrowserUrl('http://localhost:3001/api/tools/file/tj_1/final-report.html?token=x')).toBe(true);
+    expect(isGewuLocalBrowserUrl('http://127.0.0.1:3001/api/tools/file/tj_1/report.html')).toBe(true);
+    expect(isGewuLocalBrowserUrl('http://localhost:3001/api/health')).toBe(true);
+    expect(isGewuLocalBrowserUrl('https://localhost:3001/api/health')).toBe(false);
+    expect(isGewuLocalBrowserUrl('https://example.com/api/tools/file/tj_1/final-report.html')).toBe(false);
   });
 
   it('turns the live browser host bounds into an explicit pixel viewport', () => {

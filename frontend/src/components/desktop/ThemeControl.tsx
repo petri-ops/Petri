@@ -80,12 +80,12 @@ export function ThemeControl({
 
   return (
     <div
-      className={`biof3-theme-control ${compact ? 'biof3-theme-control--compact' : ''} ${menuPlacement === 'bottom' ? 'biof3-theme-control--menu-bottom' : ''}`}
+      className={`gewu-theme-control ${compact ? 'gewu-theme-control--compact' : ''} ${menuPlacement === 'bottom' ? 'gewu-theme-control--menu-bottom' : ''}`}
       ref={rootRef}
     >
       {open && (
         <div
-          className="biof3-theme-control__menu"
+          className="gewu-theme-control__menu"
           role="menu"
           aria-label="选择外观主题"
           onKeyDown={onMenuKeyDown}
@@ -100,7 +100,7 @@ export function ThemeControl({
               role="menuitemradio"
               aria-checked={preference === option.value}
               tabIndex={preference === option.value ? 0 : -1}
-              className="biof3-theme-control__option"
+              className="gewu-theme-control__option"
               onClick={() => {
                 setPreference(option.value);
                 close();
@@ -116,7 +116,7 @@ export function ThemeControl({
       <button
         type="button"
         ref={triggerRef}
-        className="biof3-theme-control__trigger"
+        className="gewu-theme-control__trigger"
         onClick={() => setOpen((value) => !value)}
         onKeyDown={(event) => {
           if (event.key === 'ArrowDown' && !open) {

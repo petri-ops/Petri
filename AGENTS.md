@@ -1,10 +1,10 @@
-# BioF3 Desktop 项目指令
+# Gewu Desktop（格物）项目指令
 
-本文件指导 AI Agent 理解和处理 BioF3 桌面版项目。
+本文件指导 AI Agent 理解和处理 Gewu（格物，原名 BioF3）桌面版项目。
 
 ## 项目定位
 
-BioF3 Desktop = Electron 桌面应用 + Vite SPA 前端 + MCP Server
+Gewu Desktop（格物，原名 BioF3）= Electron 桌面应用 + Vite SPA 前端 + MCP Server
 本地化 AI 陪伴的全组学学习与实战平台
 
 ## 当前阶段纪律（最高优先级 · G0 长期开发期）

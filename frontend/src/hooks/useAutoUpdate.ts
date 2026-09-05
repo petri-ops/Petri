@@ -1,5 +1,5 @@
 /**
- * useAutoUpdate — unified update state for the BioF3 desktop shell.
+ * useAutoUpdate — unified update state for the Gewu desktop shell.
  *
  * Subscribes to window.biof3Desktop.updater IPC events and exposes a
  * single source of truth for desktop update surfaces such as DesktopSettingsPanel.

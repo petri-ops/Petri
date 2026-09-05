@@ -69,7 +69,7 @@ export interface WorkspacePanels {
 }
 
 const DEFAULT_TITLE_BAR: TitleBarState = {
-  title: 'BioF3',
+  title: 'Gewu',
   leftPanelWidth: 240,
   rightPanelWidth: 340,
   tabs: [],

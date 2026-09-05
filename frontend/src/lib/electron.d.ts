@@ -1,4 +1,4 @@
-// BioF3 桌面版原生 shell — Electron preload 桥
+// Gewu 桌面版原生 shell — Electron preload 桥
 // 桌面版前端通过 window.biof3Desktop 访问 Electron IPC
 // （从 desktop-app/src/preload.js 暴露的 API）
 
@@ -46,7 +46,8 @@ export interface HarnessCapabilityEntry {
 
 declare global {
   interface Window {
-    biof3Desktop?: {
+    /** BLOCK-61 品牌桥主全局名。 */
+    gewu?: {
       isDesktop: true;
       platform: string;
       arch: string;
@@ -843,6 +844,8 @@ declare global {
         };
       };
     };
+    /** BLOCK-61 兼容别名：与 gewu 同一 surface（preload 双暴露）。 */
+    biof3Desktop?: Window['gewu'];
     process?: {
       env: {
         BIOF3_DESKTOP?: string;

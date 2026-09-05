@@ -1,8 +1,8 @@
 {
-  "name": "biof3-local",
+  "name": "gewu-desktop",
   "version": "0.0.1-rc.7",
   "private": true,
-  "description": "BioF3 \u672c\u5730\u684c\u9762\u7248 \u2014 AI \u966a\u4f34\u7684\u5168\u7ec4\u5b66\u5b66\u4e60\u4e0e\u5b9e\u6218\u5e73\u53f0",
+  "description": "Gewu 本地桌面版 — AI 陪伴的全组学学习与实战平台",
   "author": "BioF3",
   "license": "MIT",
   "main": "src/main.js",

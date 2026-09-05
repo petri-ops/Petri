@@ -35,6 +35,7 @@
 const path = require("path");
 const fs = require("fs");
 const { app } = require("electron");
+const { resolveLocalDirName } = require("./brand");
 const { getBuiltInPluginsDir } = require("../platform-compat");
 const { _applyComputeSettings, _loadComputeSettings } = require("../ipc/compute-settings");
 
@@ -221,7 +222,7 @@ function setupDesktopEnv(backendPorts) {
   // 用户数据目录（先确定，resolveRuntime 要用）
   const userDataDir =
     process.env.BIOF3_LOCAL_DATA_DIR ||
-    path.join(app.getPath("documents"), "BioF3-Local");
+    path.join(app.getPath("documents"), resolveLocalDirName(app));
   process.env.BIOF3_LOCAL_DATA_DIR = userDataDir;
   process.env.BIOF3_LOCAL_RESULTS_DIR = path.join(userDataDir, "results");
   process.env.BIOF3_LOCAL_UPLOADS_DIR = path.join(userDataDir, "uploads");

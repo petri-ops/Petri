@@ -23,6 +23,7 @@ const {
   createWindowManagerCore,
   CONTENT_TYPES,
 } = require("../main/_window-manager");
+const { windowTitle } = require("../main/brand");
 
 const GEOMETRY_RECORD_DEBOUNCE_MS = 400;
 const RAIL_CONTENT_ID = "rail:";
@@ -313,7 +314,7 @@ function setupWindowManagerIpc({
       y: bounds.y,
       minWidth: 480,
       minHeight: 360,
-      title: `BioF3 — ${spec.title || "窗口"}`,
+      title: windowTitle(spec.title || "窗口"),
       frame: false,
       backgroundColor: "#1f2330",
       show: false,

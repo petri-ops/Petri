@@ -13,6 +13,7 @@
 const fs = require("fs");
 const path = require("path");
 const { ipcMain, app } = require("electron");
+const { resolveLocalDirName } = require("../main/brand");
 
 const DEFAULT_COMPUTE_SETTINGS = {
   computeMode: "local",
@@ -24,7 +25,7 @@ const DEFAULT_COMPUTE_SETTINGS = {
 function _getSettingsDir() {
   return (
     process.env.BIOF3_LOCAL_DATA_DIR ||
-    path.join(app.getPath("documents"), "BioF3-Local")
+    path.join(app.getPath("documents"), resolveLocalDirName(app))
   );
 }
 
