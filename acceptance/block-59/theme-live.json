@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-09-05T13:16:23.620Z",
+  "startedAt": "2026-09-05T23:39:19.096Z",
   "assertions": [
     {
       "name": "主窗桥可用 + 预清理",
@@ -42,7 +42,7 @@
       "detail": "{\"theme\":\"dark\",\"tileBg\":\"rgb(17, 26, 46)\"}"
     }
   ],
-  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb",
-  "finishedAt": "2026-09-05T13:16:28.864Z",
+  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb/result?job=tj_mtnyx2kb_97hz",
+  "finishedAt": "2026-09-05T23:39:24.452Z",
   "allPass": true
 }

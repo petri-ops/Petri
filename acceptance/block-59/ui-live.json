@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-09-05T12:37:29.058Z",
+  "startedAt": "2026-09-05T23:39:10.016Z",
   "assertions": [
     {
       "name": "存在可用的 completed 作业（jobId + artifactName）",
@@ -14,7 +14,7 @@
     {
       "name": "初始快照：maxPopped=4（≤4 并发契约）",
       "pass": true,
-      "detail": "{\"ok\":true,\"snapshot\":{\"maxPopped\":4,\"entries\":[{\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"type\":\"result\",\"key"
+      "detail": "{\"ok\":true,\"snapshot\":{\"maxPopped\":4,\"entries\":[],\"singletons\":{\"commandCenter\":{\"type\":\"command-center\",\"route\":\"/windo"
     },
     {
       "name": "popOut → created（白名单键通过，注册表入 popped）",
@@ -84,7 +84,7 @@
     {
       "name": "注册表条目 railed + static 淡出时间戳",
       "pass": true,
-      "detail": "{\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"type\":\"result\",\"key\":\"tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"railed\",\"railClass\":\"static\",\"fadeAfter\":1788612151419,\"createdAt\":1788608681694,\"poppedAt\":1788611851384,\"railedAt\":1788611851419}"
+      "detail": "{\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"type\":\"result\",\"key\":\"tj_mtnyx2kb_97hz:design_summary.json\",\"state\":\"railed\",\"railClass\":\"static\",\"fadeAfter\":1788651852343,\"createdAt\":1788651550254,\"poppedAt\":1788651552322,\"railedAt\":1788651552343}"
     },
     {
       "name": "restore → popped（回记忆位置）",
@@ -114,7 +114,7 @@
     {
       "name": "geometry 持久化文件含该内容键（重启后记忆位置仍可恢复）",
       "pass": true,
-      "detail": "{\"x\":301,\"y\":113,\"w\":960,\"h\":680,\"displayId\":1}"
+      "detail": "{\"x\":301,\"y\":113,\"w\":480,\"h\":680,\"displayId\":1}"
     },
     {
       "name": "P1b 主窗结果视图渲染（result mode 深链）",
@@ -129,18 +129,18 @@
     {
       "name": "P1b 真实点击「弹出」→ 独立窗出现且注册表 popped",
       "pass": true,
-      "detail": "{\"targets\":1,\"entry\":{\"id\":\"result:tj_mtnyx2kb_97hz:sample_alignment.csv\",\"type\":\"result\",\"key\":\"tj_mtnyx2kb_97hz:sample_alignment.csv\",\"state\":\"popped\",\"railClass\":\"static\",\"fadeAfter\":null,\"createdAt\":1788611857619,\"poppedAt\":1788611857619,\"railedAt\":null}}"
+      "detail": "{\"targets\":1,\"entry\":{\"id\":\"result:tj_mtnyx2kb_97hz:sample_alignment.csv\",\"type\":\"result\",\"key\":\"tj_mtnyx2kb_97hz:sample_alignment.csv\",\"state\":\"popped\",\"railClass\":\"static\",\"fadeAfter\":null,\"createdAt\":1788651558558,\"poppedAt\":1788651558558,\"railedAt\":null}}"
     }
   ],
   "contentKey": "tj_mtnyx2kb_97hz:design_summary.json",
-  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb",
+  "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb?job=tj_mtnyx2kb_97hz",
   "geometry": {
     "x": 301,
     "y": 113,
-    "w": 960,
+    "w": 480,
     "h": 680,
     "displayId": 1
   },
-  "finishedAt": "2026-09-05T12:37:37.766Z",
+  "finishedAt": "2026-09-05T23:39:19.005Z",
   "allPass": true
 }
