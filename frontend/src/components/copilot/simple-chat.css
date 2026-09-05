@@ -1629,6 +1629,40 @@
   min-width: 0;
 }
 
+/* BLOCK-60 — 容器查询自适应：composer 自身宽度 <680px 时收纳低频/次要控件
+   （计划模式、执行目标转由 ⋯ 菜单承载；已激活的计划模式强制常驻）。 */
+.sc-composer {
+  container-type: inline-size;
+}
+
+@container (max-width: 679px) {
+  .sc-composer .sc-toolbar-secondary {
+    display: none;
+  }
+
+  .sc-composer .sc-plan-mode-btn.is-active.sc-toolbar-secondary {
+    display: inline-flex;
+  }
+}
+
+.sc-toolbar-more {
+  position: relative;
+  display: inline-flex;
+}
+
+.sc-toolbar-more .sc-toolbar-more-menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  z-index: 30;
+  min-width: 260px;
+}
+
+/* BLOCK-60 — 策略组视觉分组：访问模式与模式/目标控件之间加大区隔 */
+.sc-composer-left {
+  gap: 14px;
+}
+
 .sc-composer-right {
   margin-left: auto;
   gap: 10px;

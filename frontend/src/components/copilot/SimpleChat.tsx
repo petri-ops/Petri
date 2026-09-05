@@ -310,6 +310,20 @@ export function SimpleChat({
   // BLOCK-57：远程执行目标——确认卡选择器数据（仅当存在已注册目标时渲染，本机永远是默认）
   const [remoteTargets, setRemoteTargets] = useState<Array<{ id: string; alias: string }>>([]);
   const [approvalExecutionTargetId, setApprovalExecutionTargetId] = useState('');
+  // BLOCK-60 — composer 工具栏容器查询窄态（ResizeObserver 只读宽度，不影响弹性宽度逻辑）
+  const composerBarRef = useRef<HTMLDivElement | null>(null);
+  const [composerNarrow, setComposerNarrow] = useState(false);
+  const [composerMoreOpen, setComposerMoreOpen] = useState(false);
+  useEffect(() => {
+    const el = composerBarRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) setComposerNarrow(entry.contentRect.width < 680);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   // BLOCK-57 UI-290 — 执行目标：composer 选择器（本机永远默认；选择持久化，
   // 页面刷新/重启后保留——用户测试反馈会话态易丢失，跑错本机）。
   const EXEC_TARGET_STORAGE_KEY = 'biof3.executionTargetId';
@@ -1689,6 +1703,7 @@ export function SimpleChat({
             </div>
           )}
           <div
+            ref={composerBarRef}
             className={`sc-composer${isDraggingOver ? ' sc-composer-dragging' : ''}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -1806,35 +1821,7 @@ export function SimpleChat({
             </div>
             <div className="sc-composer-bar">
               <div className="sc-composer-left">
-                <button
-                  type="button"
-                  className="sc-composer-icon-btn"
-                  title="添加内容（即将上线）"
-                  aria-label="添加内容"
-                  disabled
-                >
-                  <Icon name="plus" size={20} />
-                </button>
-                <button
-                  type="button"
-                  className={`sc-composer-icon-btn${refreshing ? ' is-refreshing' : ''}${hasFileReferences ? '' : ' is-faded'}`}
-                  title="重新解析当前会话中的文件链接（清除解析缓存并对所有已落地消息重跑解析器；首次生效需重启 Electron 让 biof3-server 加载最新索引逻辑）"
-                  aria-label="刷新文件链接"
-                  disabled={refreshing}
-                  onClick={() => void handleRefresh()}
-                >
-                  <Icon name="refresh" size={16} className={refreshing ? 'sc-icon-spin' : undefined} />
-                </button>
-                <button
-                  type="button"
-                  className="sc-composer-icon-btn"
-                  title="模型 I/O 信息流（本会话全部模型调用的请求与响应原文，只读）"
-                  aria-label="模型 I/O 信息流"
-                  disabled={!conversationId}
-                  onClick={() => setIoTranscriptOpen(true)}
-                >
-                  <Icon name="cpu" size={16} />
-                </button>
+                {/* BLOCK-60：死控件 + 已移除；刷新/I-O 收进 ⋯ 溢出菜单 */}
                 <div className="sc-access-picker">
                   <button
                     type="button"
@@ -1890,7 +1877,7 @@ export function SimpleChat({
                 {/* BLOCK-55 P1 — Spec 门计划模式开关（与档位菜单并列，会话内生效） */}
                 <button
                   type="button"
-                  className={`sc-plan-mode-btn${planMode ? ' is-active' : ''}`}
+                  className={`sc-plan-mode-btn sc-toolbar-secondary${planMode ? ' is-active' : ''}`}
                   title="计划模式（Spec 门）：开启后智能体只读探索并起草计划，写类工具被禁用；计划获批后自动恢复执行"
                   aria-pressed={planMode}
                   onClick={() => setPlanMode((value) => !value)}
@@ -1899,7 +1886,7 @@ export function SimpleChat({
                   <span>计划模式</span>
                 </button>
                 {remoteTargets.length > 0 && (
-                  <div className="sc-exec-target-picker">
+                  <div className="sc-exec-target-picker sc-toolbar-secondary">
                     <button
                       type="button"
                       className={`sc-plan-mode-btn${sessionExecTargetId ? ' is-active' : ''}`}
@@ -1940,6 +1927,75 @@ export function SimpleChat({
                 )}
               </div>
               <div className="sc-composer-right">
+                {/* BLOCK-60 — ⋯ 工具菜单：低频操作常驻 + 窄态收纳计划模式/执行目标 */}
+                <div className="sc-toolbar-more">
+                  <button
+                    type="button"
+                    className="sc-composer-icon-btn"
+                    title="更多工具"
+                    aria-label="更多工具"
+                    aria-expanded={composerMoreOpen}
+                    onClick={() => setComposerMoreOpen((v) => !v)}
+                  >
+                    <Icon name="more-horizontal" size={16} />
+                  </button>
+                  {composerMoreOpen && (
+                    <>
+                      <div className="sc-access-overlay" onClick={() => setComposerMoreOpen(false)} />
+                      <div className="sc-access-menu sc-toolbar-more-menu">
+                        <button
+                          type="button"
+                          className="sc-access-option"
+                          disabled={refreshing}
+                          onClick={() => { setComposerMoreOpen(false); void handleRefresh(); }}
+                        >
+                          <span className="sc-access-option-title">刷新文件链接</span>
+                          <span className="sc-access-option-sub">清除解析缓存并对已落地消息重跑解析</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="sc-access-option"
+                          disabled={!conversationId}
+                          onClick={() => { setComposerMoreOpen(false); setIoTranscriptOpen(true); }}
+                        >
+                          <span className="sc-access-option-title">模型 I/O 信息流</span>
+                          <span className="sc-access-option-sub">本会话模型调用的请求与响应原文（只读）</span>
+                        </button>
+                        {composerNarrow && (
+                          <>
+                            <button
+                              type="button"
+                              className={`sc-access-option${planMode ? ' sc-access-option-active' : ''}`}
+                              onClick={() => setPlanMode((v) => !v)}
+                            >
+                              <span className="sc-access-option-title">计划模式{planMode ? '（开）' : '（关）'}</span>
+                              <span className="sc-access-option-sub">只读探索并起草计划，获批后自动恢复执行</span>
+                            </button>
+                            <button
+                              type="button"
+                              className={`sc-access-option${!sessionExecTargetId ? ' sc-access-option-active' : ''}`}
+                              onClick={() => { setSessionExecTargetId(''); setComposerMoreOpen(false); }}
+                            >
+                              <span className="sc-access-option-title">执行目标：本机</span>
+                              <span className="sc-access-option-sub">分析在本机执行</span>
+                            </button>
+                            {remoteTargets.map((t) => (
+                              <button
+                                key={t.id}
+                                type="button"
+                                className={`sc-access-option${sessionExecTargetId === t.id ? ' sc-access-option-active' : ''}`}
+                                onClick={() => { setSessionExecTargetId(t.id); setComposerMoreOpen(false); }}
+                              >
+                                <span className="sc-access-option-title">执行目标：{t.alias}</span>
+                                <span className="sc-access-option-sub">分析提交到该服务器执行</span>
+                              </button>
+                            ))}
+                          </>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
                 <div className="sc-model-picker-pair">
                   <div className="sc-model-picker sc-model-picker-footer">
                     <button

@@ -1,0 +1,43 @@
+{
+  "block": "BLOCK-60",
+  "feature": "Composer 工具栏优化（弹性保留 + 死控件收敛 + 容器查询自适应 + 视觉分组）",
+  "at": "2026-09-05",
+  "assertions": [
+    {
+      "name": "死控件 + 按钮移除",
+      "pass": true,
+      "detail": "aria-label=添加内容 的按钮已不在 DOM"
+    },
+    {
+      "name": "宽态（≥680px）7 控件",
+      "pass": true,
+      "detail": "完全访问 + 计划模式 + 执行目标(dell) + 模型组(供应商/模型) + ⋯ + 发送；secondaryVisible=2"
+    },
+    {
+      "name": "窄态（<680px）收纳",
+      "pass": true,
+      "detail": "composer 559.99px：计划模式/执行目标 display:none；⋯ 菜单含 刷新/I-O/计划模式开关/执行目标(本机,aliyun,dell) 全功能项"
+    },
+    {
+      "name": "弹性宽度逻辑零改动",
+      "pass": true,
+      "detail": "空输入 559.99 ↔ 长文本 860，--sc-composer-width 弹性照常；ResizeObserver 只读宽度驱动收纳"
+    },
+    {
+      "name": "宽态恢复",
+      "pass": true,
+      "detail": "secondaryDisplays=['flex','block'] 输入内容后恢复可见"
+    },
+    {
+      "name": "执行目标选择持久化",
+      "pass": true,
+      "detail": "chip 显示 dell（localStorage biof3.executionTargetId=tgt_d0e2ece166bd）"
+    }
+  ],
+  "allPass": true,
+  "screenshots": [
+    "wide-state.png",
+    "narrow-menu.png",
+    "wide-restored.png"
+  ]
+}

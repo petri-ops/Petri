@@ -2157,6 +2157,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-291: Composer 工具栏优化——死控件收敛 + ⋯ 溢出菜单 + 容器查询窄态自适应 + 视觉分组（BLOCK-60） (2026-09-05 verified)
+
+**用户需求**：用户反馈聊天输入框底部工具栏「控件堆在一起」——9 控件（+/刷新/I-O/完全访问/计划模式/执行目标/供应商/模型/发送）单行零分组拥挤。方案 B+：弹性宽度逻辑零改动，收敛死控件 + 低频操作进 ⋯ 溢出菜单 + 容器查询窄态收纳 + 轻量视觉分组。
+
+**改动**（0 新 npm 依赖）：[SimpleChat.tsx](../frontend/src/components/copilot/SimpleChat.tsx) ① 移除永久 disabled 的「+」死按钮；② 刷新文件链接/模型 I-O 信息流收进新增 ⋯ 溢出菜单（`sc-toolbar-more`，复用 sc-access-menu 弹窗风格）；③ 计划模式按钮与执行目标 picker 加 `sc-toolbar-secondary` 类；④ ResizeObserver 只读 composer 宽度驱动 `composerNarrow`（<680px 窄态：⋯ 菜单收纳 计划模式开关 + 执行目标本机/aliyun/dell 单选项；已激活计划模式强制常驻不被隐藏）；[simple-chat.css](../frontend/src/components/copilot/simple-chat.css) `.sc-composer` 加 `container-type: inline-size` + `@container (max-width: 679px)` 收纳规则（is-active 计划模式豁免）+ `.sc-composer-left` gap 8→14 策略组分组。弹性宽度逻辑（composerWidth/--sc-composer-width/resizeTextarea）零改动。
+
+**门禁**：tsc 0；受影响 vitest 6/6（SimpleChat/PlanApprovalCard）；docs:check + ui:audit:check PASS。
+
+**实机（2026-09-05，dev Electron CDP，证据 `acceptance/block-60/ui-live.json` + wide-state/narrow-menu/wide-restored 截图）**：宽态 860px 7 控件全展开（+ 已消失/⋯ 就位/双 secondary 可见/执行目标 chip 显示 dell 持久化选择）；清空输入 → 559.99px 窄态：双 secondary display:none、⋯ 菜单六项全功能（刷新/I-O/计划模式开关/执行目标 本机+aliyun+dell）；输入长文本 → 860px 恢复宽态（secondary flex/block 恢复）。弹性效果照常。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-290: 远程执行目标管理面——设置页目标管理 + composer 执行目标选择器 + 远程作业标识（BLOCK-57 P1） (2026-09-05 verified)
 
 **用户需求**：BLOCK-57 远程执行 P1——把分析任务提交到用户自有 SSH 服务器直跑（本地指挥席哲学：本机永远是默认，目标只是作业级可选参数）。UI 三处最小面：设置页执行目标管理（列表/`~/.ssh/config` 发现候选/注册/探测/移除）；run_tool 确认卡执行目标选择器（仅当存在已注册目标时渲染——空目标表零 UI 面零行为变化）；作业列表远程徽章。

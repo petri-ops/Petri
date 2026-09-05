@@ -3558,7 +3558,7 @@
       "id": "BLOCK-60-COMPOSER-TOOLBAR",
       "path": "docs/block-60-composer-toolbar-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-60-composer-toolbar",
       "entrypoint": "docs/README.md",
@@ -3570,12 +3570,12 @@
         "container-query",
         "G0"
       ],
-      "notes": "2026-09-05 planned 登记（用户反馈聊天输入框工具栏控件堆在一起）：方案B+——保留 composerWidth 弹性宽度逻辑零改动（560+√len*42，上限980，textarea 52→220）+ 移除死控件 disabled + 按钮 + 低频操作（刷新/I/O）收进 ⋯ 溢出菜单 + 容器查询自适应（.sc-composer container-type:inline-size，<680px 收计划模式+执行目标，≥680px 全展开）+ 模型组分段控件视觉+策略组 gap 分组。0 新依赖，纯 CSS+TSX，单阶段可收口。不抢占 BLOCK-57 active。plan docs/block-60-composer-toolbar-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-09-05 用户裁决启动 → 同日收口 completed（UI-291 verified：死控件收敛/⋯菜单/容器查询窄态自适应/弹性零改动）。2026-09-05 planned 登记（用户反馈聊天输入框工具栏控件堆在一起）：方案B+——保留 composerWidth 弹性宽度逻辑零改动（560+√len*42，上限980，textarea 52→220）+ 移除死控件 disabled + 按钮 + 低频操作（刷新/I/O）收进 ⋯ 溢出菜单 + 容器查询自适应（.sc-composer container-type:inline-size，<680px 收计划模式+执行目标，≥680px 全展开）+ 模型组分段控件视觉+策略组 gap 分组。0 新依赖，纯 CSS+TSX，单阶段可收口。不抢占 BLOCK-57 active。plan docs/block-60-composer-toolbar-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-05",
       "archivePolicy": "archive_when_superseded",
-      "phase": "PLANNED"
+      "phase": "COMPLETED"
     }
   ],
-  "lastUpdated": "2026-09-05 (BLOCK-57-REMOTE-EXECUTION 整包收口 completed：P1+P3 完成、P2/P4 用户裁决不做)",
+  "lastUpdated": "2026-09-05 (BLOCK-60-COMPOSER-TOOLBAR 收口 completed，UI-291 verified)",
   "documentCount": 203
 }
