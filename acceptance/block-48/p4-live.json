@@ -1,0 +1,74 @@
+{
+  "startedAt": "2026-09-06T03:23:32.680Z",
+  "assertions": [
+    {
+      "name": "P4-0 computer_authorize：agent 链路权限探测",
+      "pass": true,
+      "detail": "{\"ok\":true,\"screenTrusted\":false,\"screenGuidance\":\"需要屏幕录制权限：系统设置 → 隐私与安全性 → 屏幕录制，把 Gewu（或运行它的终端/宿主应用）加入允许列表后重试。\",\"trusted\":true}"
+    },
+    {
+      "name": "P4-1 TextEdit 目标应用就绪",
+      "pass": true,
+      "detail": "pid=28778"
+    },
+    {
+      "name": "P4-2 snapshot 读状态（agent 链路语义树）",
+      "pass": true,
+      "detail": "{\"count\":400}"
+    },
+    {
+      "name": "确认卡 job 建立（computer_press）",
+      "pass": true,
+      "detail": "{\"toolJobId\":\"tj_mtp8ysza_aal7\"}"
+    },
+    {
+      "name": "用户批准（模拟前端确认卡，computer_press）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P4-3 press Cmd+N（确认门两段式 + 执行）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"modifiers\":[\"cmd\"],\"method\":\"cgevent-key\",\"key\":\"n\"}"
+    },
+    {
+      "name": "P4-4 状态变化：Cmd+N 后窗口数增加",
+      "pass": true,
+      "detail": "{\"before\":2,\"after\":3}"
+    },
+    {
+      "name": "确认卡 job 建立（computer_type）",
+      "pass": true,
+      "detail": "{\"toolJobId\":\"tj_mtp8yv5m_dpka\"}"
+    },
+    {
+      "name": "用户批准（模拟前端确认卡，computer_type）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P4-5 type 中文跨应用输入（焦点=新文档）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"typed\":30,\"method\":\"cgevent-keyboard\"}"
+    },
+    {
+      "name": "P4-6 验证：输入内容出现在 TextEdit 语义树（value 复核）",
+      "pass": true,
+      "detail": "{\"areas\":3,\"hit\":\"BLOCK48-P4-1788665012680 跨应用验证\"}"
+    },
+    {
+      "name": "P4-7 用户旧文档未被污染（不含 marker）",
+      "pass": true,
+      "detail": "\"BLOCK48-P4-1788664923878 跨应用验证AB\""
+    },
+    {
+      "name": "P4-8 screenshot：屏幕录制未授权 → 诚实引导（双态兼容）",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"not_trusted_screen\",\"message\":\"需要屏幕录制权限：系统设置 → 隐私与安全性 → 屏幕录制，把 Gewu（或运行它的终端/宿主应用）加入允许列表后重试。\"}"
+    }
+  ],
+  "marker": "BLOCK48-P4-1788665012680",
+  "finishedAt": "2026-09-06T03:23:37.818Z",
+  "allPass": true,
+  "note": "控制类确认卡的用户批准步在 DB 边界模拟（ackToolJob，与 ai-legacy approve REST 同款调用）；TextEdit 不自动退出（用户文档保护）。"
+}
