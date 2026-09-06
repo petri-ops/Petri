@@ -1932,6 +1932,8 @@ export function SimpleChat({
                     </>
                   )}
                 </div>
+                {/* BLOCK-20: live context-budget ring — UI-301 加映：移到供应商左侧 */}
+                <ContextBudgetButton budget={tokenBudget} activeContextWindow={undefined} />
                 <div className="sc-model-picker-pair">
                   <div className="sc-model-picker sc-model-picker-footer">
                     <button
@@ -1941,9 +1943,11 @@ export function SimpleChat({
                         setModelSupplierKey(activeSupplierGroup?.key || null);
                         setModelMenuOpen((current) => current === 'supplier' ? null : 'supplier');
                       }}
-                      title="选择供应商"
+                      title={activeSupplierGroup?.supplier || activeModel?.label || '选择供应商'}
                     >
-                      <span>{activeSupplierGroup?.supplier || activeModel?.label || '供应商'}</span>
+                      {composerNarrow
+                        ? <Icon name="cpu" size={14} />
+                        : <span>{activeSupplierGroup?.supplier || activeModel?.label || '供应商'}</span>}
                       <Icon name="chevron-down" size={12} />
                     </button>
                   </div>
@@ -1955,9 +1959,11 @@ export function SimpleChat({
                         setModelSupplierKey(selectedSupplierGroup?.key || null);
                         setModelMenuOpen((current) => current === 'model' ? null : 'model');
                       }}
-                      title="选择会话模型"
+                      title={activeModel?.model || '选择会话模型'}
                     >
-                      <span>{activeModel?.model || '选择模型'}</span>
+                      {composerNarrow
+                        ? <Icon name="zap" size={14} />
+                        : <span>{activeModel?.model || '选择模型'}</span>}
                       <Icon name="chevron-down" size={12} />
                     </button>
                   </div>
@@ -2004,8 +2010,6 @@ export function SimpleChat({
                 >
                   <Icon name="arrow-up" size={12} />
                 </button>
-                {/* BLOCK-20: live context-budget ring updated by token_budget SSE event. */}
-                <ContextBudgetButton budget={tokenBudget} activeContextWindow={undefined} />
               </div>
             </div>
           </div>

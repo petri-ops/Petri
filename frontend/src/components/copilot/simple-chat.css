@@ -1664,6 +1664,17 @@
   }
 }
 
+/* BLOCK-49 加映二 — 窄态模型/供应商按钮文字收起（图标化；JS composerNarrow 双保险） */
+@container (max-width: 679px) {
+  .sc-composer .sc-model-btn span {
+    display: none;
+  }
+
+  .sc-composer .sc-model-btn {
+    padding: 4px 6px;
+  }
+}
+
 .sc-toolbar-more {
   position: relative;
   display: inline-flex;
