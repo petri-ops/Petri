@@ -19,7 +19,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const BINARY = path.join(__dirname, '..', 'sidecars', 'computer-use', 'bin', 'biof3-computer-use');
+const BINARY = path.join(__dirname, '..', 'sidecars', 'computer-use', 'bin', 'gewu-computer-use');
 
 // ── sidecar 会话句柄 ────────────────────────────────────────────
 

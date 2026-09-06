@@ -69,10 +69,14 @@ final class AXController {
     }
 
     // ref → 元素（最近一次 snapshot 的注册表）
-    private var elements: [String: AXUIElement] = [:]
-    private var lastSnapshotPid: Int32 = 0
+    // internal：InputController 扩展（同模块跨文件）复用注册表与 pid
+    var elements: [String: AXUIElement] = [:]
+    var lastSnapshotPid: Int32 = 0
 
     func dispatch(id: Int, verb: String, params: [String: Any]) -> Response {
+        if let inputResponse = dispatchInput(id: id, verb: verb, params: params) {
+            return inputResponse
+        }
         switch verb {
         case "probe":
             return probe(id: id)
@@ -91,7 +95,16 @@ final class AXController {
 
     private func probe(id: Int) -> Response {
         if Probe.isTrusted() {
-            return .ok(id: id, ["trusted": true])
+            var data: [String: Any] = ["trusted": true]
+            // P2：屏幕录制权限独立于辅助功能（screenshot 需要），一并诚实探测。
+            let screenTrusted = CGPreflightScreenCaptureAccess()
+            data["screenTrusted"] = screenTrusted
+            if !screenTrusted {
+                data["screenGuidance"] =
+                    "需要屏幕录制权限：系统设置 → 隐私与安全性 → 屏幕录制，"
+                    + "把 Gewu（或运行它的终端/宿主应用）加入允许列表后重试。"
+            }
+            return .ok(id: id, data)
         }
         return .ok(id: id, ["trusted": false, "guidance": Probe.guidanceText])
     }
@@ -102,10 +115,24 @@ final class AXController {
         guard Probe.isTrusted() else {
             return .error(id: id, code: "not_trusted", message: Probe.guidanceText)
         }
+        let data = collectSnapshotData(params)
+        // 采集核的失败形状（target 解析失败等）必须还原为 error 响应，
+        // 不能伪装成 ok:true（契约测试抓到的回归）
+        if data["error"] != nil {
+            return .error(id: id,
+                          code: data["code"] as? String ?? "snapshot_failed",
+                          message: data["message"] as? String ?? "")
+        }
+        return .ok(id: id, data)
+    }
+
+    /// 快照采集核（snapshot 与 wait 共用）：更新注册表 + lastSnapshotPid，
+    /// 返回响应 data 形状。调用方需先确认 trusted。
+    func collectSnapshotData(_ params: [String: Any]) -> [String: Any] {
         let app: NSRunningApplication
         switch resolveTarget(params["target"] as? [String: Any] ?? [:]) {
         case .failure(let err):
-            return .error(id: id, code: err.code, message: err.message)
+            return ["error": true, "code": err.code, "message": err.message]
         case .success(let resolved):
             app = resolved
         }
@@ -142,7 +169,7 @@ final class AXController {
         ]
         if axManualApplied { data["axManual"] = true }
         if let focused = focusedRole(appEl) { data["focusedRole"] = focused }
-        return .ok(id: id, data)
+        return data
     }
 
     // MARK: - click
@@ -156,6 +183,10 @@ final class AXController {
                           message: "ref 不在最近一次 snapshot 注册表中；先 snapshot")
         }
         let preferCoordinate = params["prefer"] as? String == "coordinate"
+        if params["activate"] as? Bool == true {
+            activateTarget(pid: lastSnapshotPid)
+            usleep(300_000)
+        }
 
         // 1) AX 语义层：AXPress（快、语义可信）
         if !preferCoordinate, axPressIfNeeded(el) {
@@ -249,9 +280,6 @@ final class AXController {
         if let value = copyValue(el) { record["value"] = value }
         if let pt = copyPoint(el) { record["position"] = [pt.x, pt.y] }
         if let size = copySize(el) { record["size"] = [size.width, size.height] }
-        if let actions = copyStringArray(el, axActions), !actions.isEmpty {
-            record["actions"] = actions
-        }
         elements[ref] = el
         out.append(record)
 
@@ -267,6 +295,10 @@ final class AXController {
         }
     }
 
+    func activateTarget(pid: Int32) {
+        NSRunningApplication(processIdentifier: pid)?.activate()
+    }
+
     private func setAxManual(_ app: NSRunningApplication) -> Bool {
         let el = AXUIElementCreateApplication(Int32(truncatingIfNeeded: app.processIdentifier))
         let err = AXUIElementSetAttributeValue(el, axManualAccessibility as CFString, kCFBooleanTrue)
@@ -274,9 +306,8 @@ final class AXController {
     }
 
     private func axPressIfNeeded(_ el: AXUIElement) -> Bool {
-        guard let actions = copyStringArray(el, axActions), actions.contains(axPress) else {
-            return false
-        }
+        // macOS 26 SDK：AXActions 属性查询返回 attributeUnsupported（-25205，
+        // 属性已不可用作预判）；直接执行 AXPress，以执行结果为准。
         let err = AXUIElementPerformAction(el, axPress as CFString)
         return err == .success
     }
@@ -298,33 +329,33 @@ final class AXController {
         return value
     }
 
-    private func copyString(_ el: AXUIElement, _ name: String) -> String? {
+    func copyString(_ el: AXUIElement, _ name: String) -> String? {
         copyAny(el, name) as? String
     }
 
-    private func copyStringArray(_ el: AXUIElement, _ name: String) -> [String]? {
+    func copyStringArray(_ el: AXUIElement, _ name: String) -> [String]? {
         copyAny(el, name) as? [String]
     }
 
-    private func copyElementArray(_ el: AXUIElement, _ name: String) -> [AXUIElement]? {
+    func copyElementArray(_ el: AXUIElement, _ name: String) -> [AXUIElement]? {
         copyAny(el, name) as? [AXUIElement]
     }
 
-    private func copyPoint(_ el: AXUIElement) -> CGPoint? {
+    func copyPoint(_ el: AXUIElement) -> CGPoint? {
         guard let raw = copyAny(el, axPosition) else { return nil }
         var pt = CGPoint.zero
         guard AXValueGetValue(raw as! AXValue, .cgPoint, &pt) else { return nil }
         return pt
     }
 
-    private func copySize(_ el: AXUIElement) -> CGSize? {
+    func copySize(_ el: AXUIElement) -> CGSize? {
         guard let raw = copyAny(el, axSize) else { return nil }
         var size = CGSize.zero
         guard AXValueGetValue(raw as! AXValue, .cgSize, &size) else { return nil }
         return size
     }
 
-    private func copyValue(_ el: AXUIElement) -> String? {
+    func copyValue(_ el: AXUIElement) -> String? {
         guard let raw = copyAny(el, axValue) else { return nil }
         if let s = raw as? String { return String(s.prefix(200)) }
         if let n = raw as? NSNumber { return String(n.stringValue.prefix(60)) }

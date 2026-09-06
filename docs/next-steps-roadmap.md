@@ -1,6 +1,6 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-06（**BLOCK-61-BRAND-RENAME-GEWU 整包收口 completed**：产品定名 **Gewu（格物）**——品牌单一事实源（src/main/brand.js + frontend/src/lib/brand.ts）+ 三层改名策略全落地，实机 9 断言 + BLOCK-59 回归全 PASS，UI-299 verified。**BLOCK-48-COMPUTER-USE 恢复 active** 继续 P1（检查点 c29d9f04）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-06（**BLOCK-48 P2 收口 completed**：工具面完整化——type/press/scroll/screenshot/wait 五动词 + axfixture 隔离靶 + 真行为单测 11/11；契约 9/9。P3 进程编排与注册待启动。前情：：产品定名 **Gewu（格物）**——品牌单一事实源（src/main/brand.js + frontend/src/lib/brand.ts）+ 三层改名策略全落地，实机 9 断言 + BLOCK-59 回归全 PASS，UI-299 verified。**BLOCK-48-COMPUTER-USE 恢复 active**，P1 已完成（f0aba445）且 **P2 已收口**（五动词 + fixture + 20/20 单测，详见 plan/AUDIT-LOG），下一步 P3（检查点 c29d9f04）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
