@@ -31,6 +31,8 @@ const ALLOWED_RUNTIME_HOSTS = Object.freeze([
   'objects.githubusercontent.com',
   'githubusercontent.com',
   'gewu-uploads.oss-cn-hangzhou.aliyuncs.com',
+  // BLOCK-61 双兼容：OSS bucket 实际名称未改，新旧 host 都放行
+  'biof3-uploads.oss-cn-hangzhou.aliyuncs.com',
 ]);
 
 // Pick the artifact for currentPlatform from a per-platform manifest.
