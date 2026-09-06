@@ -62,6 +62,11 @@ const {
   tool_computer_wait,
   tool_computer_authorize,
 } = require('./computer-use-tools');
+const {
+  interrupt_agent,
+  send_message,
+  followup_task,
+} = require('./spawn-agent-tools');
 const { spawn_agent, list_agents, wait_agent } = require('./spawn-agent-tools');
 
 const CONTRACT_VERSION = '1.0.0';
@@ -107,6 +112,9 @@ const HANDLERS = {
   computer_screenshot: tool_computer_screenshot,
   computer_wait: tool_computer_wait,
   computer_authorize: tool_computer_authorize,
+  interrupt_agent,
+  send_message,
+  followup_task,
   query: tool_query,
   read_page: tool_read_page,
   search: tool_search,
@@ -180,6 +188,10 @@ const CONTRACTS = {
   computer_press: contract('action', 'execution', 'R2', ['ui.session'], 4000),
   computer_scroll: contract('action', 'execution', 'R2', ['ui.session'], 4000),
   computer_screenshot: contract('vision', 'workspace-write', 'R1', ['ui.session', 'local.process'], 8000),
+  // BLOCK-49 二期 —— 多智能体协作三件套
+  interrupt_agent: contract('agent-management', 'state-write', 'R2', ['ui.session'], 2000),
+  send_message: contract('agent-management', 'state-write', 'R1', ['ui.session'], 1000),
+  followup_task: contract('agent-management', 'state-write', 'R2', ['ui.session', 'local.process'], 5000),
   query: contract('retrieval', 'none', 'R0', ['project.database'], 250),
   read_page: contract('retrieval', 'external-request', 'R1', ['plugin.content', 'network.remote'], 15000),
   search: contract('retrieval', 'external-request', 'R1', ['project.database', 'plugin.content', 'llm.provider'], 30000),

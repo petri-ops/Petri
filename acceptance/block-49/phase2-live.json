@@ -1,0 +1,68 @@
+{
+  "startedAt": "2026-09-06T07:55:38.458Z",
+  "assertions": [
+    {
+      "name": "A1 spawn_agent 派生（agent 链路 + 真实模型）",
+      "pass": true,
+      "detail": "{\"agentId\":\"2698edbb-c1f5-49f4-8130-03f072cd9f0d\"}"
+    },
+    {
+      "name": "A2 子 agent 真跑至终态 completed",
+      "pass": true,
+      "detail": "{\"status\":\"completed\",\"error\":null}"
+    },
+    {
+      "name": "B0 终态 agent send_message → agent_terminal 引导（诚实）",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"agent_terminal\",\"message\":\"子 agent 已结束；请用 followup_task 追加任务（消息将随续派注入）。\",\"agentId\":\"2698edbb-c1f5-49f4-8130-03f072cd9f0d\",\"status\":\"completed\"}"
+    },
+    {
+      "name": "B1 followup_task 续派（前情摘要 + 队列消息注入）",
+      "pass": true,
+      "detail": "{\"agentId\":\"6a7c6f8e-b72e-464f-af55-e744cd8c49b0\"}"
+    },
+    {
+      "name": "B2 续派子 agent 真跑至终态 completed",
+      "pass": true,
+      "detail": "{\"status\":\"completed\",\"error\":null}"
+    },
+    {
+      "name": "C1 子 agent 派生（模型响应窗口内保持运行）",
+      "pass": true,
+      "detail": "{\"agentId\":\"c195b398-2303-463c-bf23-4fa657a51821\"}"
+    },
+    {
+      "name": "C2 运行中 send_message → 入队",
+      "pass": true,
+      "detail": "{\"ok\":true,\"agentId\":\"c195b398-2303-463c-bf23-4fa657a51821\",\"queued\":true,\"note\":\"消息已入队（子 agent 事件流可见）。运行中即时注入需 loop 核心支持（登记候选）；当前该消息将在 followup_task 续派该子 agent 时作为上下文注入。\"}"
+    },
+    {
+      "name": "C3 parent_message 事件持久化（可审计）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "C3 interrupt_agent → cancel_requested",
+      "pass": true,
+      "detail": "{\"ok\":true,\"agentId\":\"c195b398-2303-463c-bf23-4fa657a51821\",\"agentStatus\":\"cancel_requested\",\"cancelledTaskIds\":[\"c195b398-2303-463c-bf23-4fa657a51821\"],\"message\":\"中断请求已发出；子 agent 将在下一个取消检查点让出，wait_agent 会返回其终态摘要。\"}"
+    },
+    {
+      "name": "C4 子 agent 到达终态（取消请求已由 C3 实证）",
+      "pass": true,
+      "detail": "{\"status\":\"cancelled\"}"
+    },
+    {
+      "name": "D1 proactive：父事件流收到 child_finished（≥3 条，无需 wait_agent）",
+      "pass": true,
+      "detail": "[\"c195b398-2303-463c-bf23-4fa657a51821\",\"6a7c6f8e-b72e-464f-af55-e744cd8c49b0\",\"2698edbb-c1f5-49f4-8130-03f072cd9f0d\"]"
+    },
+    {
+      "name": "D2 child_finished 载荷含状态与摘要头",
+      "pass": true,
+      "detail": "{\"childTaskId\":\"2698edbb-c1f5-49f4-8130-03f072cd9f0d\",\"status\":\"completed\",\"summaryHead\":\"**17 × 23 = 391**\\n\\n计算过程（分步拆解）：\\n\\n- 方法一：拆分 23 = 20 + 3\\n  - 17 × 20 = 340\\n  - 17 × 3 = 51\\n  - 340 + 51 = 391\\n\\n- 方法二：拆分 17 = "
+    }
+  ],
+  "parentTaskId": "6c40d2b9-bc66-46e9-88c3-6b525cd8eafb",
+  "finishedAt": "2026-09-06T07:55:45.677Z",
+  "allPass": true
+}

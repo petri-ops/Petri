@@ -147,12 +147,32 @@ async function spawn_agent(args, ctx) {
 
   const model = resolveSpawnModelSettings({ explicitModel: args && args.model, parentParams });
   if (model.error) return fail('invalid_arguments', model.error);
+
+  const userContent = instructions ? `${taskText}\n\n${instructions}` : taskText;
+
+  return launchSubAgent({
+    parentTaskId,
+    userId,
+    parentParams,
+    parentContext,
+    userContent,
+    model,
+    spawnSource: 'tool:spawn_agent',
+  });
+}
+
+/**
+ * launchSubAgent — 创建子 agent 任务 + 并发槽 + 异步启动 loop。
+ * BLOCK-49 二期：从 spawn_agent 抽取核心，spawn_agent / followup_task 共用。
+ * @returns {{ok:true, agentId:string, model?:string} | {ok:false, error, message, ...}}
+ */
+function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, userContent, model, spawnSource }) {
+  const context = { ...(parentContext || {}) };
+  if (model.accessModeHint && !context.accessMode) context.accessMode = model.accessModeHint;
   const preset = model.preset;
   const providerName = (preset && preset.provider) || parentParams.providerName || getChatProviderName();
   const providerLabel = parentParams.providerLabel || providerName;
   const modelName = (preset && preset.model) || parentParams.modelName;
-
-  const userContent = instructions ? `${taskText}\n\n${instructions}` : taskText;
 
   // 会话复用：与 chat.js subagent 分支一致，子 agent 挂在父会话下
   let _activeConv = null;
@@ -179,11 +199,11 @@ async function spawn_agent(args, ctx) {
         modelName,
         kind: 'subagent',
         parentTaskId,
-        spawnSource: 'tool:spawn_agent',
+        spawnSource,
       },
     }).taskId;
   } catch (e) {
-    return fail('spawn_failed', '创建子 agent 任务失败: ' + (e && e.message ? e.message : String(e)));
+    return { ok: false, error: 'spawn_failed', message: '创建子 agent 任务失败: ' + (e && e.message ? e.message : String(e)) };
   }
 
   // 并发槽（与 chat.js 同序：先建任务再 acquire；失败即标 failed 并如实回传）
@@ -234,6 +254,160 @@ async function spawn_agent(args, ctx) {
   });
 
   return { ok: true, agentId: taskId, status: 'running', kind: 'subagent', model: modelName || undefined };
+}
+
+// ── BLOCK-49 二期：运行中协作三件套 ──────────────────────────
+
+/** 事件流末尾 seq（appendAgentTaskEvent 需要显式 seq）。 */
+function nextEventSeq(taskId) {
+  const events = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000);
+  return (events.length ? events[events.length - 1].seq : 0) + 1;
+}
+
+/** 校验 agentId 属于当前任务的子 agent，返回子任务行或 fail 响应。 */
+function findOwnChildOrFail(parentTaskId, agentId) {
+  if (!agentId) {
+    return { error: fail('invalid_arguments', '缺少 agentId。') };
+  }
+  const child = agentTaskStore.listChildAgentTasks(parentTaskId).find((t) => t.taskId === agentId);
+  if (!child) {
+    return { error: fail('not_your_agent', '该 agentId 不属于当前任务派生的子 agent（或不存在）。') };
+  }
+  return { child };
+}
+
+/**
+ * interrupt_agent — 中断运行中的子 agent（cancel_requested，子 loop 在下一
+ * 检查点让出；级联覆盖其派生链）。已终态时幂等返回。
+ */
+async function interrupt_agent(args, ctx) {
+  const parentTaskId = ctx && ctx.taskId;
+  const userId = ctx && ctx.userId;
+  if (!parentTaskId || !userId) return fail('no_parent', 'interrupt_agent 只能在 agent 会话循环内调用。');
+  const { child, error } = findOwnChildOrFail(parentTaskId, String((args && args.agentId) || '').trim());
+  if (error) return error;
+
+  if (TERMINAL_TASK_STATUSES.has(child.status)) {
+    return { ok: true, agentId: child.taskId, alreadyTerminal: true, status: child.status };
+  }
+  const dbMod = require('../db');
+  const { cancelledTaskIds } = agentTaskStore.cancelAgentTaskCascade(child.taskId, { dbMod });
+  try {
+    agentTaskStore.appendAgentTaskEvent(
+      child.taskId, nextEventSeq(child.taskId), 'interrupt_requested',
+      { by: 'parent', parentTaskId, at: new Date().toISOString() },
+    );
+  } catch {}
+  return {
+    ok: true,
+    agentId: child.taskId,
+    agentStatus: 'cancel_requested',
+    cancelledTaskIds,
+    message: '中断请求已发出；子 agent 将在下一个取消检查点让出，wait_agent 会返回其终态摘要。',
+  };
+}
+
+/**
+ * send_message — 向子 agent 投递父消息（持久化到其事件流，followup_task
+ * 续派时作为上下文注入）。运行中即时注入 loop 需改 agent-runner 核心，
+ * 二期 v1 为持久化队列语义（诚实登记）。
+ */
+async function send_message(args, ctx) {
+  const parentTaskId = ctx && ctx.taskId;
+  const userId = ctx && ctx.userId;
+  if (!parentTaskId || !userId) return fail('no_parent', 'send_message 只能在 agent 会话循环内调用。');
+  const message = String((args && args.message) || '').trim();
+  if (!message) return fail('invalid_arguments', 'message 不能为空。');
+  if (message.length > MAX_TASK_CHARS) return fail('invalid_arguments', `message 过长（> ${MAX_TASK_CHARS} 字符）。`);
+  const { child, error } = findOwnChildOrFail(parentTaskId, String((args && args.agentId) || '').trim());
+  if (error) return error;
+
+  if (TERMINAL_TASK_STATUSES.has(child.status)) {
+    return fail('agent_terminal', '子 agent 已结束；请用 followup_task 追加任务（消息将随续派注入）。', { agentId: child.taskId, status: child.status });
+  }
+  try {
+    agentTaskStore.appendAgentTaskEvent(
+      child.taskId, nextEventSeq(child.taskId), 'parent_message',
+      { message, from: 'parent', at: new Date().toISOString() },
+    );
+  } catch (e) {
+    return fail('queue_failed', '消息入队失败: ' + (e && e.message ? e.message : String(e)));
+  }
+  return {
+    ok: true,
+    agentId: child.taskId,
+    queued: true,
+    note: '消息已入队（子 agent 事件流可见）。运行中即时注入需 loop 核心支持（登记候选）；'
+      + '当前该消息将在 followup_task 续派该子 agent 时作为上下文注入。',
+  };
+}
+
+/**
+ * followup_task — 对已终态子 agent 追加任务：以前次摘要 + 队列消息为上下文
+ * 续派新子 agent（复用 spawn 启动核心，模型/权限继承链一致）。
+ */
+async function followup_task(args, ctx) {
+  const parentTaskId = ctx && ctx.taskId;
+  const userId = ctx && ctx.userId;
+  if (!parentTaskId || !userId) return fail('no_parent', 'followup_task 只能在 agent 会话循环内调用。');
+  const taskText = String((args && args.task) || '').trim();
+  if (!taskText) return fail('invalid_arguments', 'task 不能为空：请给出追加的子任务描述。');
+  if (taskText.length > MAX_TASK_CHARS) return fail('invalid_arguments', `task 过长（${taskText.length} > ${MAX_TASK_CHARS} 字符）。`);
+  const { child, error } = findOwnChildOrFail(parentTaskId, String((args && args.agentId) || '').trim());
+  if (error) return error;
+  if (!TERMINAL_TASK_STATUSES.has(child.status)) {
+    return fail('agent_running', '子 agent 仍在运行；先 wait_agent 等终态，或用 interrupt_agent 中断后续派。', { agentId: child.taskId, status: child.status });
+  }
+
+  const childFull = agentTaskStore.getAgentTask(child.taskId);
+  const parentTask = agentTaskStore.getAgentTask(parentTaskId);
+  const parentParams = parentTask.params || {};
+  const summary = await buildTerminalSummary(childFull);
+
+  // 队列消息取出（消费即清：事件流保留审计，续派提示只带未消费语义）
+  const queued = agentTaskStore.getAgentTaskEventsSince(child.taskId, 0, 1000000)
+    .filter((e) => e.eventType === 'parent_message')
+    .map((e) => {
+      // payload 形状双兼容：store 读取已解析为对象；字符串形状防御性保留
+      try {
+        const raw = typeof e.payload === 'string' ? JSON.parse(e.payload || '{}') : (e.payload || {});
+        return String(raw.message || '').slice(0, 500);
+      } catch { return ''; }
+    })
+    .filter(Boolean);
+
+  const parts = [
+    `【续派任务】你此前完成了以下任务，现在基于前情继续：`,
+    `原任务：${summary.task}`,
+  ];
+  if (summary.assistantText) parts.push('前次产出摘要：\n' + summary.assistantText);
+  if (queued.length) {
+    parts.push('期间收到父消息：\n' + queued.map((m) => '- ' + m).join('\n'));
+  }
+  parts.push(`请在此基础上继续新任务：${taskText}`);
+  const userContent = parts.join('\n\n').slice(0, MAX_TASK_CHARS * 2);
+
+  const model = resolveSpawnModelSettings({ explicitModel: args && args.model, parentParams });
+  if (model.error) return fail('invalid_arguments', model.error);
+
+  const launched = launchSubAgent({
+    parentTaskId,
+    userId,
+    parentParams,
+    parentContext: parentParams.context || {},
+    userContent,
+    model,
+    spawnSource: 'tool:followup_task',
+  });
+  if (launched.ok === false) return launched;
+  return {
+    ok: true,
+    agentId: launched.agentId,
+    followupOf: child.taskId,
+    status: 'running',
+    queuedMessagesInjected: queued.length,
+    model: launched.model || undefined,
+  };
 }
 
 /**
@@ -332,6 +506,9 @@ async function buildTerminalSummary(task) {
 
 module.exports = {
   spawn_agent,
+  interrupt_agent,
+  send_message,
+  followup_task,
   list_agents,
   wait_agent,
   // 测试钩子（不进入 registry）

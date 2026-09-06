@@ -770,6 +770,25 @@ async function runAgentLoop({
         });
       } catch {}
     }
+    // BLOCK-49 二期 proactive —— 子 agent 终态主动投递到父任务事件流：
+    // 用户在父任务 SSE 上无需 wait_agent 即可见（协议面 additive，前端
+    // 消费为候选）；父模型上下文不注入（诚实边界）。
+    if (kind === 'subagent') {
+      try {
+        const selfTask = agentTaskStore.getAgentTask(taskId);
+        const parentTaskId = selfTask && selfTask.params && selfTask.params.parentTaskId;
+        if (parentTaskId) {
+          const ownEvents = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000);
+          const seq = (ownEvents.length ? ownEvents[ownEvents.length - 1].seq : 0) + 1;
+          agentTaskStore.appendAgentTaskEvent(parentTaskId, seq, 'child_finished', {
+            childTaskId: taskId,
+            status: terminal.status,
+            summaryHead: String(assistantText || terminal.error || '').slice(0, 200),
+            at: new Date().toISOString(),
+          });
+        }
+      } catch { /* proactive 投递失败不影响终态落库 */ }
+    }
   } catch {}
 
   try {

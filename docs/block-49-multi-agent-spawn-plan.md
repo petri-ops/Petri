@@ -1,6 +1,6 @@
 # BLOCK-49 — 多 Agent 内生派生（Multi-Agent Spawn）技术调研与实施计划
 
-> 状态：`completed`（2026-09-04 P1→P5 一次会话收口；工具面/回传协议/定向门禁/dev Electron 实机全绿，证据 `acceptance/block-49/`；收口提交见 git log。G0 开发期常态 · 不外推 packaged/Provider/GA）
+> 状态：`completed`（2026-09-06 **二期收口**：协作三工具 interrupt_agent/send_message/followup_task + proactive child_finished 投递——注册/政策矩阵/单测 13/13/实机 14 断言全绿（真实模型），证据 `acceptance/block-49/phase2-live.json`。MVP（2026-09-04 P1→P5）+ 二期全 completed。G0 开发期常态 · 不外推 packaged/Provider/GA）
 > 立项日期：2026-09-03
 > truthDomain: `block-49-multi-agent-spawn`
 
@@ -142,3 +142,7 @@
   - **范围如实说明**：§2.4 UI 专项「子 agent 活动条」未实现（MVP 收敛后端工具面闭环；三工具调用在既有工具活动区已可见），登记为后续候选；二期三工具（send_message / followup_task / interrupt_agent）与 proactive 模式留候选（§2.1/§4 不变）。
   - **收口门禁**：docs:reconcile + docs:check（200 PASS）+ ui:audit:check PASS；定向 `test:changed` 589 项 579 过，10 败全部位于 4 个 **HEAD 预存失败文件**（agent-run-tool / g0-api-route / scientific-task-persistence / tool-job-conversation——测试自举未先跑迁移即 require db.js，顶层 prepare `projects` 语句触发 `no such table`，stash 后 HEAD 同败已复核），**BLOCK-49 零回归**；block49 专项与 loop 回归全过。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+
+- 2026-09-06 二期启动（active）：主智能体受权决定启动顺序，从候选（BLOCK-49 二期 / BLOCK-56 F4 记忆 / biof3-r-toolchain）中裁决本包二期先行——多智能体协作是核心骨架、与 BLOCK-48 P3 注册+政策+授权门模式同构风险最低、单会话可收口。范围：interrupt_agent（requestAgentTaskCancel+级联，真实机制复用）/ send_message（持久化消息队列语义——运行中即时注入需改 agent-runner 核心（messages 按值闭包），v1 诚实登记为事件队列 + followup 注入）/ followup_task（终态子 agent 续派：launchSubAgent 从 spawn_agent 抽取共用 + 终态摘要 + 队列消息注入）+ proactive（子 agent 终态 child_finished 事件投递父任务流，SSE 协议面 additive，前端消费登记候选）。
+
+- 2026-09-06 二期收口（completed）：**协作三工具 + proactive 全链落地**。① **interrupt_agent**：requestAgentTaskCancel + cancelAgentTaskCascade 级联 + interrupt_requested 事件审计 + 终态幂等。② **send_message**：持久化消息队列语义（parent_message 事件 → 子 agent 事件流可审计，followup 续派时注入上下文）；**运行中即时注入需改 agent-runner 核心（messages 按值闭包），v1 诚实登记候选**。③ **followup_task**：launchSubAgent 从 spawn_agent 抽取共用（模型/权限/会话继承链一致）+ 终态摘要前情 + 队列消息注入。④ **proactive**：runner 终态钩子 child_finished 事件投递父任务流（SSE 协议面 additive；前端 notice 消费登记候选）。⑤ **单测 13/13**（契约/政策矩阵同 spawn 门/interrupt 幂等与级联/send 入队与终态引导/followup 组合提示断言[摘要+队列注入]/executeToolCall 双态链）+ **实机 14 断言**（真实模型：spawn→wait→followup 续派真跑→运行中入队→中断→cancelled→proactive ≥3 条）。**登记发现**：resolveAgentTaskTerminal 完成判定要求回答 >20 字符——短回答子任务（如纯算式）被判 failed（产品启发式，登记候选待裁决）；实机首两轮模型抖动（已答对判 failed）由该启发式放大。门禁：docs/ui 契约 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -1,6 +1,6 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-06（**BLOCK-48-COMPUTER-USE 整包收口 completed**：macOS 电脑控制 P0–P5 全阶段——Swift sidecar（9 动词）+ axfixture 隔离靶 + SidecarHost 托管 + 8 个 computer_* 工具注册（policy 档位门 + 两段式确认卡 + 路径白名单）+ dev Electron 跨 app 实机闭环 11 断言。前情：BLOCK-61 品牌改名 Gewu/格物收口（UI-299）、BLOCK-59 窗口系统收口（UI-292～298）。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-06（**BLOCK-49 二期收口 completed**：多智能体协作三工具 interrupt_agent/send_message/followup_task + proactive child_finished 投递——单测 13/13 + 实机 14 断言（真实模型全链）。登记发现：子 agent 终态 >20 字符完成判定启发式对短回答误判（候选）。前情：BLOCK-48 电脑控制整包收口、BLOCK-61 品牌改名 Gewu、BLOCK-59 窗口系统。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 

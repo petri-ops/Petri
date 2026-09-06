@@ -337,6 +337,54 @@ const WORKSPACE_TOOL_DEFS = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'interrupt_agent',
+      description:
+        '中断一个仍在运行的子 agent（当前任务派生的）：发出取消请求，子 agent 在下一个取消检查点让出，之后用 wait_agent 可拿到其终态摘要。已终态的子 agent 幂等返回。',
+      parameters: {
+        type: 'object',
+        properties: {
+          agentId: { type: 'string', description: 'list_agents/spawn_agent 返回的子 agent ID' },
+        },
+        required: ['agentId'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'send_message',
+      description:
+        '向自己的一个子 agent 投递父消息（持久化到其事件流）。运行中子 agent 的消息将入队（followup_task 续派时注入其上下文）；已终态的子 agent 会报错——此时应改用 followup_task。',
+      parameters: {
+        type: 'object',
+        properties: {
+          agentId: { type: 'string' },
+          message: { type: 'string', description: '要投递的消息内容' },
+        },
+        required: ['agentId', 'message'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'followup_task',
+      description:
+        '对一个已终态（完成/失败/取消）的子 agent 追加任务：以前次任务摘要 + 期间收到的父消息为上下文，续派一个新子 agent（模型/权限继承链与 spawn_agent 一致）。子 agent 仍在运行时会被拒绝——可先 interrupt_agent。',
+      parameters: {
+        type: 'object',
+        properties: {
+          agentId: { type: 'string', description: '要续派的子 agent ID（须已终态）' },
+          task: { type: 'string', description: '追加的子任务描述' },
+          model: { type: 'string', description: '可选：指定模型 preset（默认继承父）' },
+        },
+        required: ['agentId', 'task'],
+      },
+    },
+  },
 ];
 
 const TOOL_DEFS = [
