@@ -11,6 +11,26 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
 const req = createRequire(import.meta.url);
 
+// BLOCK-49 加映清债 —— 统一临时 DB 自举（存量：单跑/全量缺 projects 表）
+//（BIOF3_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
+{
+  const fsx = req('node:fs');
+  const osx = req('node:os');
+  const pth = req('node:path');
+  const urlx = req('node:url');
+  const hereDir = pth.dirname(urlx.fileURLToPath(import.meta.url));
+  const Database = req(pth.resolve(hereDir, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
+  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'biof3-sweep-db-'));
+  const boot = new Database(pth.join(tempDbDir, 'biof3.db'));
+  const migrationsDir = pth.resolve(hereDir, '..', 'src', 'migrations');
+  for (const f of fsx.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
+    boot.exec(fsx.readFileSync(pth.join(migrationsDir, f), 'utf8'));
+  }
+  boot.close();
+  process.env.BIOF3_DB_PATH = pth.join(tempDbDir, 'biof3.db');
+  process.on('exit', () => { try { fsx.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
+}
+
 const db = req(R_SERVER + '/db.js');
 const learning = req(R_SERVER + '/agent-tools/learning.js');
 

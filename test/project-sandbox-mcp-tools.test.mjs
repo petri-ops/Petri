@@ -24,6 +24,26 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const require = createRequire(import.meta.url);
 
+// BLOCK-49 加映清债 —— 统一临时 DB 自举（存量：单跑/全量缺 projects 表）
+//（BIOF3_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
+{
+  const fsx = require('node:fs');
+  const osx = require('node:os');
+  const pth = require('node:path');
+  const urlx = require('node:url');
+  const hereDir = pth.dirname(urlx.fileURLToPath(import.meta.url));
+  const Database = require(pth.resolve(hereDir, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
+  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'biof3-sweep-db-'));
+  const boot = new Database(pth.join(tempDbDir, 'biof3.db'));
+  const migrationsDir = pth.resolve(hereDir, '..', 'src', 'migrations');
+  for (const f of fsx.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
+    boot.exec(fsx.readFileSync(pth.join(migrationsDir, f), 'utf8'));
+  }
+  boot.close();
+  process.env.BIOF3_DB_PATH = pth.join(tempDbDir, 'biof3.db');
+  process.on('exit', () => { try { fsx.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
+}
+
 const R_SERVER = path.join(__dirname, '..', 'core', 'biof3-server');
 const db = require(path.join(R_SERVER, 'db.js'));
 const registry = require(path.join(R_SERVER, 'mcp', 'registry.js'));

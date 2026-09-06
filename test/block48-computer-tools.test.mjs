@@ -18,6 +18,13 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const R_SERVER = path.resolve(__dirname, '..', 'core', 'biof3-server');
+
+// 全量套件防挂 watchdog：sidecar stdio 在受限环境下可能挂起，
+// 3 分钟强制退出（诚实 fail 而非拖死整个套件）
+setTimeout(() => {
+  console.error('WATCHDOG: block48-computer-tools 3min 超时，强制退出');
+  process.exit(1);
+}, 180000).unref();
 const require = createRequire(import.meta.url);
 
 // 临时 DB 自举（存量基建同款：BIOF3_DB_PATH 须在 require db.js 前生效）

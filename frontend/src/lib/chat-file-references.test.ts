@@ -80,8 +80,9 @@ describe('chat-file-references: candidate extraction', () => {
     const out = extractFileReferenceCandidates(
       'See [report](biof3://artifact/job-1/report.html) and also biof3://workspace/proj-1/data/x.csv',
     );
-    expect(out).toContain('gewu://artifact/job-1/report.html');
-    expect(out).toContain('gewu://workspace/proj-1/data/x.csv');
+    // 逐字语义：输入 biof3:// 历史引用 → 原样提取（双协议兼容）
+    expect(out).toContain('biof3://artifact/job-1/report.html');
+    expect(out).toContain('biof3://workspace/proj-1/data/x.csv');
   });
 
   it('extracts tools/file/<jobId>/<filename> URLs into job/filename tokens', () => {
@@ -111,6 +112,7 @@ describe('chat-file-references: candidate extraction', () => {
       'Open `results/deg.csv` or `gewu://artifact/job-1/report.html`.',
     );
     expect(out).toContain('results/deg.csv');
+    // 逐字语义：inline code 中 gewu:// 原样提取
     expect(out).toContain('gewu://artifact/job-1/report.html');
   });
 
@@ -187,7 +189,7 @@ describe('chat-file-references: candidate extraction', () => {
     );
     expect(out).toEqual(expect.arrayContaining([
       'frontend/src/config.ts',
-      'gewu://artifact/job-1/report.html',
+      'biof3://artifact/job-1/report.html',
     ]));
   });
 

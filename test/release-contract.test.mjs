@@ -14,6 +14,26 @@ import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
+// BLOCK-49 加映清债 —— 统一临时 DB 自举（存量：缺 projects 表）
+{
+  const _fs = await import('node:fs');
+  const _os = await import('node:os');
+  const _path = await import('node:path');
+  const _createRequire = (await import('node:module')).default.createRequire;
+  const _req = _createRequire(import.meta.url);
+  const _here = dirname(fileURLToPath(import.meta.url));
+  const _Database = _req(resolve(_here, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
+  const _dir = _fs.mkdtempSync(_path.resolve(_os.tmpdir(), 'biof3-sweep-db-'));
+  const _boot = new _Database(_path.resolve(_dir, 'biof3.db'));
+  const _mig = _path.resolve(_here, '..', 'src', 'migrations');
+  for (const f of _fs.readdirSync(_mig).filter((f) => f.endsWith('.sql')).sort()) {
+    _boot.exec(_fs.readFileSync(_path.resolve(_mig, f), 'utf8'));
+  }
+  _boot.close();
+  process.env.BIOF3_DB_PATH = _path.resolve(_dir, 'biof3.db');
+  process.on('exit', () => { try { _fs.rmSync(_dir, { recursive: true, force: true }); } catch {} });
+}
+
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, '..');
 const contractPath = resolve(repoRoot, 'release-contract.json');
