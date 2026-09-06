@@ -7,7 +7,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { ThemeControl } from './ThemeControl';
-import { useTheme } from '@/themes/ThemeProvider';
+import { useTheme, FONT_SCALE_MIN, FONT_SCALE_MAX } from '@/themes/ThemeProvider';
 import {
   useAiSettings,
   type ChatModelPreset,
@@ -93,7 +93,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const modelDiscoveryGeneration = useRef<Record<string, number>>({});
   const modelProfilesRef = useRef<ChatModelPreset[]>([]);
   const { refresh: refreshAiSettings } = useAiSettings();
-  const { preference: themePreference } = useTheme();
+  const { preference: themePreference, fontScale, setFontScale } = useTheme();
   // M2-3：错误遥测开关（默认关闭）
   const [telemetryEnabled, setTelemetryEnabled] = useState(false);
 
@@ -527,6 +527,28 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 : '夜间'}
           </span>
           <p className="gewu-field__hint">可跟随 macOS 外观，或固定使用日间/夜间模式。</p>
+        </div>
+        <div className="gewu-field">
+          <label className="gewu-field__label" htmlFor="font-scale-input">界面字号</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              id="font-scale-input"
+              type="number"
+              min={Math.round(FONT_SCALE_MIN * 100)}
+              max={Math.round(FONT_SCALE_MAX * 100)}
+              step={5}
+              value={Math.round(fontScale * 100)}
+              onChange={(e) => {
+                const pct = Number(e.target.value);
+                if (Number.isFinite(pct)) setFontScale(pct / 100);
+              }}
+              style={{ width: 90, height: 32, textAlign: 'right',
+                border: '1px solid var(--gewu-border)', borderRadius: 6,
+                background: 'var(--gewu-bg-surface)', color: 'var(--gewu-text)' }}
+            />
+            <span style={{ color: 'var(--gewu-text-secondary)', fontSize: 13 }}>%</span>
+          </div>
+          <p className="gewu-field__hint">调整应用界面的文字大小（100% = 默认；80%–140%），图标和布局尺寸不受影响。</p>
         </div>
 
           </section>

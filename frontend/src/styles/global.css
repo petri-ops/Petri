@@ -14,20 +14,24 @@
   /* infima 默认 background-color: transparent（靠 body），桌面版给实色 */
   --ifm-background-color: #ffffff;
   /* 桌面版内容区更紧凑的阅读宽度 */
-  --ifm-font-size-base: 15.5px;
+  --ifm-font-size-base: calc(15.5px * var(--gewu-font-scale, 1));
   --ifm-line-height-base: 1.65;
 
-  /* 桌面版字号 token — Infima 无 heading 字号 token，统一在此定义供 module 引用 */
-  --gewu-font-size-xs: 0.625rem; /* 10px 徽标/角标 */
-  --gewu-font-size-sm: 0.6875rem; /* 11px 辅助文字 */
-  --gewu-font-size-caption: 0.75rem; /* 12px 说明/caption */
-  --gewu-font-size-body-sm: 0.8125rem; /* 13px 紧凑正文/表格 */
-  --gewu-font-size-body: 0.875rem; /* 14px 正文 */
-  --gewu-font-size-md: 1rem; /* 16px 小标题/MD h2 */
-  --gewu-font-size-lg: 1.125rem; /* 18px 小标题 */
-  --gewu-font-size-xl: 1.25rem; /* 20px 标题 */
-  --gewu-font-size-2xl: 1.375rem; /* 22px 大标题 */
-  --gewu-font-size-3xl: 1.75rem; /* 28px 页标题 */
+  /* 桌面版字号 token — Infima 无 heading 字号 token，统一在此定义供 module 引用。
+     BLOCK-49 加映三 — 全部 token 走 calc(var(--gewu-font-scale) × 基准)：
+     设置面板「界面字号」调节 root 缩放系数（html.style 注入，默认 1），
+     图标与布局尺寸不受影响。 */
+  --gewu-font-scale: 1;
+  --gewu-font-size-xs: calc(0.625rem * var(--gewu-font-scale)); /* 10px 徽标/角标 */
+  --gewu-font-size-sm: calc(0.6875rem * var(--gewu-font-scale)); /* 11px 辅助文字 */
+  --gewu-font-size-caption: calc(0.75rem * var(--gewu-font-scale)); /* 12px 说明/caption */
+  --gewu-font-size-body-sm: calc(0.8125rem * var(--gewu-font-scale)); /* 13px 紧凑正文/表格 */
+  --gewu-font-size-body: calc(0.875rem * var(--gewu-font-scale)); /* 14px 正文 */
+  --gewu-font-size-md: calc(1rem * var(--gewu-font-scale)); /* 16px 小标题/MD h2 */
+  --gewu-font-size-lg: calc(1.125rem * var(--gewu-font-scale)); /* 18px 小标题 */
+  --gewu-font-size-xl: calc(1.25rem * var(--gewu-font-scale)); /* 20px 标题 */
+  --gewu-font-size-2xl: calc(1.375rem * var(--gewu-font-scale)); /* 22px 大标题 */
+  --gewu-font-size-3xl: calc(1.75rem * var(--gewu-font-scale)); /* 28px 页标题 */
 
   /* 桌面版间距 token — 常用 px 档位，零碎值（3/5/10/14px）保留 */
   --gewu-space-1: 4px;
