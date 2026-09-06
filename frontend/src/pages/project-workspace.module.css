@@ -5573,14 +5573,15 @@ body.gewu-resizing-columns * {
   margin-top: 8px;
 }
 
+/* UI-301 加映 — 卡片文字垂直居中 + 去外框线（保留底色作分区） */
 .emptyResultLaunchCard {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
   width: 100%;
   min-height: 54px;
   padding: 10px 12px;
-  border: 1px solid var(--gewu-border);
+  border: none;
   border-radius: 11px;
   background: var(--gewu-bg-surface);
   color: var(--gewu-text);
@@ -5592,8 +5593,7 @@ body.gewu-resizing-columns * {
 }
 
 .emptyResultLaunchCard:hover {
-  background: var(--gewu-bg-surface);
-  border-color: var(--gewu-accent-border);
+  background: var(--gewu-bg-subtle);
 }
 
 .emptyResultLaunchCard span {
