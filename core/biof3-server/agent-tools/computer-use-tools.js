@@ -63,7 +63,7 @@ function ensureControlConfirmation(args, ctx, { toolId, summary }) {
   if (args && args.confirm === true && ackToken) {
     const job = dbMod.getToolJobByAckToken(ackToken, {
       userId: trustedUserId(ctx),
-      projectId: null,
+      projectId: (ctx && ctx.projectId) || null,
       conversationId: (ctx && ctx.conversationId) || null,
     });
     if (!job || job.tool_id !== toolId) {
@@ -124,7 +124,7 @@ async function runControlTool(toolId, args, ctx, verb, extra = {}) {
   let result;
   try {
     result = await getComputerUseHost().requestWithRecovery(verb, {
-      ...buildTarget(args),
+      target: buildTarget(args),
       ...extra,
     });
   } catch (e) {
@@ -168,7 +168,7 @@ async function tool_computer_snapshot(args = {}, ctx = {}) {
   try {
     return okWrap(
       await getComputerUseHost().requestWithRecovery('snapshot', {
-        ...buildTarget(args),
+        target: buildTarget(args),
         ...extra,
       }),
     );
@@ -209,7 +209,7 @@ async function tool_computer_screenshot(args = {}, ctx = {}) {
   try {
     return okWrap(
       await getComputerUseHost().requestWithRecovery('screenshot', {
-        ...buildTarget(args),
+        target: buildTarget(args),
         out: resolved.out,
       }),
     );
@@ -227,7 +227,7 @@ async function tool_computer_wait(args = {}, ctx = {}) {
   try {
     return okWrap(
       await getComputerUseHost().requestWithRecovery('wait', {
-        ...buildTarget(args),
+        target: buildTarget(args),
         ...extra,
       }, 40000),
     );
