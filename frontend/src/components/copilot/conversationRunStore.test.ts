@@ -37,6 +37,7 @@ import {
   resultEditProgressForContext,
   resumeInterruptedConversation,
   shouldClearReconciledConversationRun,
+  getChildFinishedNotices,
   startConversationRun,
   startSubAgentTask,
   stopConversationRun,
@@ -834,5 +835,51 @@ describe('resumeOrphanAgentTasks (AGENT-CONCURRENCY A-5)', () => {
     await resumeOrphanAgentTasks('c1', 'project-1');
 
     expect(subscribeAgentTaskMock).not.toHaveBeenCalled();
+  });
+});
+
+
+describe('BLOCK-49 加映 — 子 agent 终态通知（proactive child_finished）', () => {
+  it('child_finished 事件累计为会话级 notice（多条保序）', () => {
+    start('conv-child-finished', 'run with sub agents');
+    const callbacks = streamChatMock.mock.calls.at(-1)![0];
+    callbacks.onChildFinished?.({ childTaskId: 'child-a', status: 'completed', summaryHead: '任务 A 完成' });
+    callbacks.onChildFinished?.({ childTaskId: 'child-b', status: 'failed', summaryHead: '任务 B 失败原因' });
+
+    const notices = getChildFinishedNotices('conv-child-finished');
+    expect(notices).toHaveLength(2);
+    expect(notices[0]).toMatchObject({ childTaskId: 'child-a', status: 'completed' });
+    expect(notices[1]).toMatchObject({ childTaskId: 'child-b', status: 'failed' });
+  });
+
+  it('新 run 开始时 notice 清除（会话级生命周期）', () => {
+    start('conv-child-clear', 'first run');
+    streamChatMock.mock.calls.at(-1)![0].onChildFinished?.({
+      childTaskId: 'child-x', status: 'completed', summaryHead: 'X',
+    });
+    expect(getChildFinishedNotices('conv-child-clear')).toHaveLength(1);
+
+    // 首轮 run 结束后再开新 run（运行中守卫会拒绝并发 start）
+    stopConversationRun('conv-child-clear');
+    start('conv-child-clear', 'second run');
+    expect(getChildFinishedNotices('conv-child-clear')).toHaveLength(0);
+  });
+
+  it('超过 10 条丢弃最旧（上限保护）', () => {
+    start('conv-child-cap', 'run with many children');
+    const callbacks = streamChatMock.mock.calls.at(-1)![0];
+    for (let i = 0; i < 12; i++) {
+      callbacks.onChildFinished?.({ childTaskId: `child-${i}`, status: 'completed', summaryHead: String(i) });
+    }
+    const notices = getChildFinishedNotices('conv-child-cap');
+    expect(notices).toHaveLength(10);
+    expect(notices[0].childTaskId).toBe('child-2');
+    expect(notices.at(-1)?.childTaskId).toBe('child-11');
+  });
+
+  it('缺 childTaskId 的事件忽略（防御）', () => {
+    start('conv-child-defensive', 'run');
+    streamChatMock.mock.calls.at(-1)![0].onChildFinished?.({ childTaskId: '', status: 'completed', summaryHead: '' });
+    expect(getChildFinishedNotices('conv-child-defensive')).toHaveLength(0);
   });
 });

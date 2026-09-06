@@ -188,7 +188,11 @@ function resolveAgentTaskTerminal({
       error: fatalError.message || String(fatalError) || 'agent loop failed',
     };
   }
-  if (String(assistantText || '').trim().length > 20 || pendingApproval) {
+  // BLOCK-49 加映 —— 完成判定放宽为非空即完成：原 >20 字符启发式把短回答
+  // 子任务（如纯算式「17 * 23 = 391」14 字符）误判为 failed（实机两轮触发，
+  // 破坏 wait_agent/followup 对短任务可靠性）。空字符串仍判 failed（防御
+  // 「模型全程无输出」的真失败）。
+  if (String(assistantText || '').trim().length > 0 || pendingApproval) {
     return { status: 'completed', error: null };
   }
   return { status: 'failed', error: 'agent loop 未生成有效回复' };

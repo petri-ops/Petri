@@ -146,6 +146,7 @@ import {
   clearConversationPendingApproval,
   clearConversationRun,
   getConversationFallbackNotice,
+  getChildFinishedNotices,
   shouldClearReconciledConversationRun,
   resumeConversationRun,
   resumeInterruptedConversation,
@@ -717,11 +718,24 @@ export function SimpleChat({
   const displayMessages = (() => {
     const fallbackNotice = activeRun?.modelFallbackNotice
       || (conversationId ? getConversationFallbackNotice(conversationId) : null);
-    if (!fallbackNotice) return baseDisplayMessages;
+    const childNotices = conversationId ? getChildFinishedNotices(conversationId) : [];
+    if (!fallbackNotice && childNotices.length === 0) return baseDisplayMessages;
     const next = baseDisplayMessages.slice();
     const lastMsg = next[next.length - 1];
-    if (lastMsg && lastMsg.role === 'assistant' && !lastMsg.modelFallbackNotice) {
-      next[next.length - 1] = { ...lastMsg, modelFallbackNotice: fallbackNotice };
+    if (lastMsg && lastMsg.role === 'assistant') {
+      if (fallbackNotice && !lastMsg.modelFallbackNotice) {
+        next[next.length - 1] = { ...lastMsg, modelFallbackNotice: fallbackNotice };
+      }
+      if (childNotices.length > 0 && !lastMsg.childFinishedNotices) {
+        next[next.length - 1] = {
+          ...next[next.length - 1],
+          childFinishedNotices: childNotices.map((n) => ({
+            childTaskId: n.childTaskId,
+            status: n.status,
+            summaryHead: n.summaryHead,
+          })),
+        };
+      }
     }
     return next;
   })();
@@ -1459,6 +1473,16 @@ export function SimpleChat({
                       <div className="sc-msg-fallback-notice" role="status">
                         <Icon name="info" size={14} />
                         {m.modelFallbackNotice}
+                      </div>
+                    )}
+                    {m.role === 'assistant' && m.childFinishedNotices && m.childFinishedNotices.length > 0 && (
+                      <div className="sc-msg-child-finished" role="status">
+                        {m.childFinishedNotices.map((n) => (
+                          <span key={n.childTaskId} className="sc-msg-child-finished-item">
+                            <Icon name={n.status === 'completed' ? 'check' : n.status === 'failed' ? 'alert-circle' : 'x'} size={12} />
+                            {`子 agent ${n.status === 'completed' ? '已完成' : n.status === 'failed' ? '失败' : '已取消'}：${n.summaryHead.slice(0, 60)}`}
+                          </span>
+                        ))}
                       </div>
                     )}
                     <CopilotMarkdown

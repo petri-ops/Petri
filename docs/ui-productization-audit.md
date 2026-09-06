@@ -2157,6 +2157,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-300: 多智能体 proactive 前端消费——子 agent 终态通知 chip（BLOCK-49 加映） (2026-09-06 verified)
+
+**背景**：BLOCK-49 二期在 runner 终态投递 `child_finished` 事件到父任务 SSE 流，但前端不识别该事件——proactive「主动可见」止步于协议面。同加映包含后端短回答误判修复（非 UI，见 plan §7）。
+
+**改动**（0 新 npm 依赖）：[copilotClient.ts](../frontend/src/components/copilot/copilotClient.ts) StreamChatOptions 增 `onChildFinished` + `child_finished` 事件分发（Unknown event 静默类，additive）；[conversationRunStore.ts](../frontend/src/components/copilot/conversationRunStore.ts) 会话级 `childFinishedNotices`（复用 UI-287 降级 notice 成熟模式：run 生命周期清除、上限 10 条丢最旧、`getChildFinishedNotices` 导出）+ callbacks Pick 类型扩展；[SimpleChat.tsx](../frontend/src/components/copilot/SimpleChat.tsx) notice 附着最后一条助手消息（双 notice 共存兼容）+ 任务条 chip 渲染（`子 agent 已完成/失败/已取消：摘要头`，复用 fallback chip 视觉语法）；[types.ts](../frontend/src/components/copilot/SimpleChat/types.ts) 消息类型扩展；[simple-chat.css](../frontend/src/components/copilot/simple-chat.css) chip 样式（状态色成功/失败）。
+
+**门禁**：tsc 0；conversationRunStore vitest 39/39（新增 4 用例：多条保序/新 run 清除/上限丢弃/防御）；跨包单测 97/97。
+
+**实机**：协议面由 block49-phase2-live.cjs 14 断言覆盖（child_finished 投递实证，D1/D2），前端消费的渲染为纯展示层（数据源同流）。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-299: 品牌改名 Gewu（格物）——窗口标题/wordmark/文案/主题令牌全量 + 品牌单一事实源（BLOCK-61） (2026-09-06 in_progress)
 
 **用户裁决**：定名 **Gewu（格物）**（BioF3 的 Bio 前缀锁死领域，产品已是领域无关的智能体指挥席）；单独开 BLOCK-61 系统性改名，设计要求后续改名灵活。

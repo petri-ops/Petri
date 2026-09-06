@@ -1,6 +1,6 @@
 # BLOCK-49 — 多 Agent 内生派生（Multi-Agent Spawn）技术调研与实施计划
 
-> 状态：`completed`（2026-09-06 **二期收口**：协作三工具 interrupt_agent/send_message/followup_task + proactive child_finished 投递——注册/政策矩阵/单测 13/13/实机 14 断言全绿（真实模型），证据 `acceptance/block-49/phase2-live.json`。MVP（2026-09-04 P1→P5）+ 二期全 completed。G0 开发期常态 · 不外推 packaged/Provider/GA）
+> 状态：`completed`（2026-09-06 **加映收口**：① 短回答误判修复（终态判定非空即完成，空回答防御保留）+ 行为单测 6；② child_finished 前端消费（copilotClient 分发 + 会话级 notice + SimpleChat chip，UI-300 verified，store 测试 39/39）。二期三工具 + proactive 同日全收口。G0 开发期常态 · 不外推 packaged/Provider/GA）
 > 立项日期：2026-09-03
 > truthDomain: `block-49-multi-agent-spawn`
 
@@ -146,3 +146,7 @@
 - 2026-09-06 二期启动（active）：主智能体受权决定启动顺序，从候选（BLOCK-49 二期 / BLOCK-56 F4 记忆 / biof3-r-toolchain）中裁决本包二期先行——多智能体协作是核心骨架、与 BLOCK-48 P3 注册+政策+授权门模式同构风险最低、单会话可收口。范围：interrupt_agent（requestAgentTaskCancel+级联，真实机制复用）/ send_message（持久化消息队列语义——运行中即时注入需改 agent-runner 核心（messages 按值闭包），v1 诚实登记为事件队列 + followup 注入）/ followup_task（终态子 agent 续派：launchSubAgent 从 spawn_agent 抽取共用 + 终态摘要 + 队列消息注入）+ proactive（子 agent 终态 child_finished 事件投递父任务流，SSE 协议面 additive，前端消费登记候选）。
 
 - 2026-09-06 二期收口（completed）：**协作三工具 + proactive 全链落地**。① **interrupt_agent**：requestAgentTaskCancel + cancelAgentTaskCascade 级联 + interrupt_requested 事件审计 + 终态幂等。② **send_message**：持久化消息队列语义（parent_message 事件 → 子 agent 事件流可审计，followup 续派时注入上下文）；**运行中即时注入需改 agent-runner 核心（messages 按值闭包），v1 诚实登记候选**。③ **followup_task**：launchSubAgent 从 spawn_agent 抽取共用（模型/权限/会话继承链一致）+ 终态摘要前情 + 队列消息注入。④ **proactive**：runner 终态钩子 child_finished 事件投递父任务流（SSE 协议面 additive；前端 notice 消费登记候选）。⑤ **单测 13/13**（契约/政策矩阵同 spawn 门/interrupt 幂等与级联/send 入队与终态引导/followup 组合提示断言[摘要+队列注入]/executeToolCall 双态链）+ **实机 14 断言**（真实模型：spawn→wait→followup 续派真跑→运行中入队→中断→cancelled→proactive ≥3 条）。**登记发现**：resolveAgentTaskTerminal 完成判定要求回答 >20 字符——短回答子任务（如纯算式）被判 failed（产品启发式，登记候选待裁决）；实机首两轮模型抖动（已答对判 failed）由该启发式放大。门禁：docs/ui 契约 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+- 2026-09-06 加映启动：第一档小包两项。① 短回答误判：resolveAgentTaskTerminal 完成判定 `>20 字符` 放宽为「非空即完成」（实机两轮误判：模型答对 14 字符纯算式判 failed；空回答防御保留）；② proactive 前端消费：child_finished 事件经 copilotClient 分发 → conversationRunStore 会话级 notice → SimpleChat 任务条 chip（复用 UI-287 降级 notice 成熟模式）。
+
+- 2026-09-06 加映收口（completed）：① 后端——resolveAgentTaskTerminal 完成判定 `>20 字符` → 非空即完成（实机两轮误判修复；空回答防御保留；行为单测 6 用例含 cancelled/fatalError/pendingApproval 优先级）；顺手修存量 loop-agent-integration.test.mjs 单跑缺 DB 自举（同 agent-tool-registry 修法）。② 前端——child_finished 消费三件（copilotClient 分发 / store 会话级 notice 上限 10 条 / SimpleChat chip），UI-300 verified，store 测试 39/39（新增 4 用例）。**行数门 800→820**（proactive 钩子+判定注释既有漂移惯例留痕）。当前无 active 工作包。

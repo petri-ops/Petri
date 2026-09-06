@@ -140,6 +140,27 @@ const listeners = new Map<string, Set<() => void>>();
 // 存储，附着到最后一条助手消息渲染，下一次 run 开始时清除。
 const fallbackNotices = new Map<string, { message: string; ts: string }>();
 
+// BLOCK-49 加映 — proactive：子 agent 终态通知（会话级，下一次 run 开始清除）
+export interface ChildFinishedNotice {
+  childTaskId: string;
+  status: string;
+  summaryHead: string;
+  ts: string;
+}
+const childFinishedNotices = new Map<string, ChildFinishedNotice[]>();
+
+/** BLOCK-49 加映 — 当前会话累计的子 agent 终态通知（下一次 run 开始清除）。 */
+export function getChildFinishedNotices(conversationId: string): ChildFinishedNotice[] {
+  return childFinishedNotices.get(conversationId) ?? [];
+}
+
+function pushChildFinishedNotice(conversationId: string, notice: ChildFinishedNotice): void {
+  const list = childFinishedNotices.get(conversationId) ?? [];
+  list.push(notice);
+  // 上限保护：单会话累计最多 10 条（超出丢最旧）
+  childFinishedNotices.set(conversationId, list.slice(-10));
+}
+
 /**
  * BLOCK-56 P1 / UI-287 — 当前会话待展示的降级提示（请求级 + 任务级共用）。
  * 无提示返回 null。run 清理 / 页面刷新后仍可读，直到下一次 run 开始。
@@ -271,6 +292,8 @@ export function startConversationRun(options: StartConversationRunOptions): bool
 
   // BLOCK-56 P1 / UI-287 — 新 run 开始，上一轮降级提示自然消失
   fallbackNotices.delete(conversationId);
+  // BLOCK-49 加映 — 子 agent 终态通知同理清除
+  childFinishedNotices.delete(conversationId);
 
   const startedAt = Date.now();
   const ctrl = new AbortController();
@@ -395,10 +418,20 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     | 'onDone'
     | 'onError'
     | 'onStreamReconnecting'
+    | 'onChildFinished'
     | 'onModelFallback'
   > = {
     // BLOCK-56 P1 — 请求级降级（loop 中途 gateway 切备用模型）：记录一次性提示，
     // 任务条显示「已降级到 X 模型」；后续进度不清除 notice 字段（statusMessage 会被正常覆盖）。
+    onChildFinished: (info) => {
+      if (!info.childTaskId) return;
+      pushChildFinishedNotice(conversationId, {
+        childTaskId: info.childTaskId,
+        status: info.status,
+        summaryHead: info.summaryHead,
+        ts: new Date().toISOString(),
+      });
+    },
     onModelFallback: (info) => {
       const noticeText = info.message
         || (info.toProfileLabel ? `已降级到「${info.toProfileLabel}」继续` : '已降级到备用模型继续');

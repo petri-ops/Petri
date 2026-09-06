@@ -433,6 +433,25 @@
   font-size: var(--gewu-font-size-caption);
 }
 
+/* BLOCK-49 加映 — 子 agent 终态通知（proactive）：跟随降级 chip 视觉语法 */
+.sc-msg-child-finished {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 2px 0;
+}
+
+.sc-msg-child-finished-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--gewu-status-success-bg);
+  color: var(--gewu-status-success-fg);
+  font-size: var(--gewu-font-size-caption);
+}
+
 /* BLOCK-55 P1 — 计划模式开关（档位菜单旁） */
 .sc-plan-mode-btn {
   display: inline-flex;

@@ -108,6 +108,8 @@ export interface SimpleMessage {
   taskId?: string;
   /** BLOCK-56 P1 — 模型降级提示（请求级/任务级首次发生时记录），任务条持久显示「已降级到 X 模型」。 */
   modelFallbackNotice?: string;
+  /** BLOCK-49 加映 — 子 agent 终态通知（proactive，会话级累计）。 */
+  childFinishedNotices?: Array<{ childTaskId: string; status: string; summaryHead: string }>;
 }
 
 /**

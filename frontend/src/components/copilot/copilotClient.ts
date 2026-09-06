@@ -342,6 +342,12 @@ export interface StreamChatOptions {
       fallbackLabel?: string | null;
     }
   ) => void;
+  /** BLOCK-49 加映 — proactive：子 agent 终态通知（child_finished 事件）。 */
+  onChildFinished?: (info: {
+    childTaskId: string;
+    status: string;
+    summaryHead: string;
+  }) => void;
   /** BLOCK-56 P1 — 模型降级事件（请求级/任务级），info.message 为用户可读文案。 */
   onModelFallback?: (info: {
     scope?: 'request_level' | 'task_level' | string;
@@ -883,6 +889,7 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
     onTopicShift,
     onLoopPhase,
     onLoopIteration,
+    onChildFinished,
     onModelFallback,
     kind,
   } = opts;
@@ -894,6 +901,14 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
       interruptedAt: typeof obj.interruptedAt === 'string' ? obj.interruptedAt : null,
       fallbackTaskId: typeof obj.fallbackTaskId === 'string' ? obj.fallbackTaskId : null,
       fallbackLabel: typeof obj.fallbackLabel === 'string' ? obj.fallbackLabel : null,
+    });
+    return;
+  }
+  if (obj.event === 'child_finished') {
+    onChildFinished?.({
+      childTaskId: String(obj.childTaskId || ''),
+      status: String(obj.status || ''),
+      summaryHead: String(obj.summaryHead || ''),
     });
     return;
   }
