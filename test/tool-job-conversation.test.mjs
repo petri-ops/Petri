@@ -5,11 +5,12 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
+import { bootstrapTestDb } from './helpers/bootstrap-db.mjs';
 
 const tempRoot = mkdtempSync(join(tmpdir(), 'biof3-ux1g1-'));
-process.env.BIOF3_DB_PATH = join(tempRoot, 'ux1g1.db');
 process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 
+bootstrapTestDb();
 const require = createRequire(import.meta.url);
 const db = require('../core/biof3-server/db');
 const BetterSqlite = require('better-sqlite3');

@@ -4,11 +4,14 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
 import test from 'node:test';
+import { bootstrapTestDb } from './helpers/bootstrap-db.mjs';
 
 const require = createRequire(import.meta.url);
 const tempRoot = mkdtempSync(join(tmpdir(), 'biof3-project-memory-migration-'));
 process.env.BIOF3_DB_PATH = join(tempRoot, 'memory.db');
 
+
+bootstrapTestDb();
 const dbMod = require('../core/biof3-server/db.js');
 const sqlite = dbMod.getDatabase();
 const now = new Date().toISOString();

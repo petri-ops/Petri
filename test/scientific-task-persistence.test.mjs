@@ -7,6 +7,17 @@ import { createRequire } from 'node:module';
 
 const tempRoot = mkdtempSync(join(tmpdir(), 'biof3-hrt3-'));
 process.env.BIOF3_DB_PATH = join(tempRoot, 'hrt3.db');
+
+// BLOCK-49 加映清债 —— 补 migration 执行（原仅设 DB 路径未建表 → no such table）
+{
+  const Database = require(req(req('node:path').resolve(__dirname, '..', 'core', 'biof3-server', 'node_modules'), 'better-sqlite3'));
+  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const migrationsDir = req('node:path').resolve(__dirname, '..', 'src', 'migrations');
+  for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
+    boot.exec(fs.readFileSync(req('node:path').join(migrationsDir, f), 'utf8'));
+  }
+  boot.close();
+}
 process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 const require = createRequire(import.meta.url);
 const db = require('../core/biof3-server/db');

@@ -5,10 +5,13 @@ import fsSync from 'node:fs';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { bootstrapTestDb } from './helpers/bootstrap-db.mjs';
 
 const require = createRequire(import.meta.url);
 const TEST_DB_DIR = fsSync.mkdtempSync(path.join(os.tmpdir(), 'biof3-agent-tool-result-'));
 process.env.BIOF3_DB_PATH = path.join(TEST_DB_DIR, 'biof3.db');
+
+bootstrapTestDb();
 const db = require('../core/biof3-server/db.js');
 // 单测绕过 server.js 启动；显式复用真实启动路径的 Plan 表初始化，确保干净工作树可运行。
 require('../core/biof3-server/ai-bridge.js');

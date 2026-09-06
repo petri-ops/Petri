@@ -17,6 +17,18 @@ const TEST_DB_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-agent-run-tool-
 process.env.BIOF3_DB_PATH = path.join(TEST_DB_DIR, 'biof3.db');
 
 // db.js 是 CJS，用 createRequire 拿到 module.exports 的具名函数（await import 只能拿 default）
+
+// BLOCK-49 加映清债 —— 应用全量 migrations（原仅设 DB 路径未建表）
+{
+  const Database = req(R_SERVER + '/node_modules/better-sqlite3');
+  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const migrationsDir = resolve(__dirname, '..', 'src', 'migrations');
+  for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
+    boot.exec(fs.readFileSync(migrationsDir + '/' + f, 'utf8'));
+  }
+  boot.close();
+}
+
 const db = req(R_SERVER + '/db.js');
 const { buildAuthoritativeWorkflowGraph } = req(resolve(__dirname, '..', 'core', 'shared-backend', 'result-workflow-graph.js'));
 const { computeExecutionProvenanceHash } = req(resolve(__dirname, '..', 'core', 'shared-backend', 'execution-provenance.js'));

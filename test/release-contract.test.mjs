@@ -5,7 +5,7 @@
 //   1. release-contract.json 可解析
 //   2. channel === 'beta'
 //   3. 所有 platforms[*].supported === true 的 platform 必须有非 null runtimeArtifact.url
-//   4. goldenPath.tool id 必须在 frontend/src/pages/_data.ts 中出现（粗略字符串匹配）
+//   4. goldenPath.tool id 必须在 frontend/src/tools/inventory.ts 中出现（粗略字符串匹配）
 //
 // 失败即退出非零。
 
@@ -37,11 +37,11 @@ import { dirname, resolve } from 'node:path';
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, '..');
 const contractPath = resolve(repoRoot, 'release-contract.json');
-const dataTsPath = resolve(repoRoot, 'frontend/src/pages/_data.ts');
+const dataTsPath = resolve(repoRoot, 'frontend/src/tools/inventory.ts');
 
 console.log(`[release-contract] loading ${contractPath}`);
 assert(existsSync(contractPath), 'release-contract.json not found at repo root');
-assert(existsSync(dataTsPath), 'frontend/src/pages/_data.ts not found');
+assert(existsSync(dataTsPath), 'frontend/src/tools/inventory.ts not found');
 
 const contract = JSON.parse(readFileSync(contractPath, 'utf8'));
 
@@ -93,7 +93,7 @@ const idPattern = new RegExp(`id:\\s*['"]${toolId}['"]`);
 assert.match(
   dataSrc,
   idPattern,
-  `goldenPath.tool '${toolId}' not found as a tool id in frontend/src/pages/_data.ts — golden path must reference a real tool`
+  `goldenPath.tool '${toolId}' not found as a tool id in frontend/src/tools/inventory.ts — golden path must reference a real tool`
 );
 console.log(`✓ goldenPath.tool '${toolId}' found in _data.ts`);
 

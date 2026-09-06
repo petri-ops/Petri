@@ -2157,7 +2157,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-301: 多智能体活动面板——子 agent 活动条（列表/中断/详情窗，BLOCK-49 加映二） (2026-09-06 verified)
+## UI-301: 多智能体活动面板——子 agent 活动条（列表/中断/详情窗，BLOCK-49 加映二） (2026-09-06 in_progress)
 
 **背景**：二期协作三工具与 proactive 投递均为模型/协议面，用户侧缺少子 agent 的实时可见与操作面（BLOCK-49/52 各自登记的 §2.4 遗留）。
 
@@ -2165,7 +2165,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0；conversationRunStore vitest 43/43（新增 4 用例：spawn 登记可见/child_finished 落账/刷新孤儿建条目/终态幂等）+ toolActivity 8；总回归 80/80（block48/49/59/brand/agent-concurrency）。
 
-**实机**：数据面由 phase2-live.cjs 14 断言覆盖（child_finished 投递实证，D1/D2），面板为同数据源的纯展示层（store 单测断言列表可见性与状态映射）。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**实机**：数据面由 phase2-live.cjs 14 断言覆盖（child_finished 投递实证，D1/D2），面板为同数据源的纯展示层（store 单测断言列表可见性与状态映射）。**UI 渲染待 dev Electron 重启后实机过目确认。状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-300: 多智能体 proactive 前端消费——子 agent 终态通知 chip（BLOCK-49 加映） (2026-09-06 verified)
 
