@@ -52,6 +52,16 @@ const {
   tool_process_stop,
 } = require('./workspace-tools');
 const { tool_system_info } = require('./system-info-tools');
+const {
+  tool_computer_snapshot,
+  tool_computer_click,
+  tool_computer_type,
+  tool_computer_press,
+  tool_computer_scroll,
+  tool_computer_screenshot,
+  tool_computer_wait,
+  tool_computer_authorize,
+} = require('./computer-use-tools');
 const { spawn_agent, list_agents, wait_agent } = require('./spawn-agent-tools');
 
 const CONTRACT_VERSION = '1.0.0';
@@ -89,6 +99,14 @@ const HANDLERS = {
   process_status: tool_process_status,
   process_stop: tool_process_stop,
   system_info: tool_system_info,
+  computer_snapshot: tool_computer_snapshot,
+  computer_click: tool_computer_click,
+  computer_type: tool_computer_type,
+  computer_press: tool_computer_press,
+  computer_scroll: tool_computer_scroll,
+  computer_screenshot: tool_computer_screenshot,
+  computer_wait: tool_computer_wait,
+  computer_authorize: tool_computer_authorize,
   query: tool_query,
   read_page: tool_read_page,
   search: tool_search,
@@ -151,6 +169,17 @@ const CONTRACTS = {
   process_stop: contract('workspace', 'execution', 'R2', ['local.process'], 5000),
   // BLOCK-33 P1 — 环境自省：只读零副作用，不依赖项目工作区（category 非 workspace → 不走 preflight）
   system_info: contract('verification', 'none', 'R0', ['local.process'], 1000),
+  // BLOCK-48 P3 — Computer Use（macOS）：快照/授权/等待为只读面；控制类
+  // action/execution/R2（仅完全访问档，read/planMode/ws-write 由 policy 自动拒）；
+  // screenshot 产物落项目工作区（vision/workspace-write，项目写档即可用）。
+  computer_snapshot: contract('verification', 'none', 'R0', ['ui.session', 'local.process'], 1000),
+  computer_authorize: contract('verification', 'none', 'R0', [], 500),
+  computer_wait: contract('verification', 'none', 'R1', ['ui.session'], 35000),
+  computer_click: contract('action', 'execution', 'R2', ['ui.session'], 8000),
+  computer_type: contract('action', 'execution', 'R2', ['ui.session'], 8000),
+  computer_press: contract('action', 'execution', 'R2', ['ui.session'], 4000),
+  computer_scroll: contract('action', 'execution', 'R2', ['ui.session'], 4000),
+  computer_screenshot: contract('vision', 'workspace-write', 'R1', ['ui.session', 'local.process'], 8000),
   query: contract('retrieval', 'none', 'R0', ['project.database'], 250),
   read_page: contract('retrieval', 'external-request', 'R1', ['plugin.content', 'network.remote'], 15000),
   search: contract('retrieval', 'external-request', 'R1', ['project.database', 'plugin.content', 'llm.provider'], 30000),
