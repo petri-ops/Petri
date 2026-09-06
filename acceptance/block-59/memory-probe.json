@@ -1,0 +1,66 @@
+{
+  "startedAt": "2026-09-06T11:47:00.748Z",
+  "samples": [
+    {
+      "phase": "baseline",
+      "totalMB": 587,
+      "processCount": 4,
+      "mainWindows": 1,
+      "popoutWindows": 0
+    },
+    {
+      "phase": "two-popouts",
+      "totalMB": 949,
+      "processCount": 6,
+      "mainWindows": 1,
+      "popoutWindows": 2
+    },
+    {
+      "phase": "after-remove",
+      "totalMB": 772,
+      "processCount": 5
+    }
+  ],
+  "assertions": [
+    {
+      "name": "弹出 97hz:design_summary.json",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"action\":\"created\",\"autoDemoted\":null}"
+    },
+    {
+      "name": "弹出 mtnywtsc_dszf:counts.csv",
+      "pass": true,
+      "detail": "{\"ok\":true,\"id\":\"result:tj_mtnywtsc_dszf:counts.csv\",\"action\":\"created\",\"autoDemoted\":null}"
+    },
+    {
+      "name": "两窗总量增量非负（测量有效）",
+      "pass": true,
+      "detail": "Δ=362MB"
+    },
+    {
+      "name": "每窗增量 181MB ≤ plan §8 估算上限 200MB → 多入口 bundle 不启动",
+      "pass": true,
+      "detail": "perWindow=181MB"
+    },
+    {
+      "name": "移除后总量回落（低于两窗态）",
+      "pass": true,
+      "detail": "two=949 → closed=772MB"
+    }
+  ],
+  "jsHeaps": [
+    {
+      "url": "dow/result/tj_mtnywtsc_dszf%3Acounts.csv",
+      "heapMB": 15.1
+    },
+    {
+      "url": "t/tj_mtnyx2kb_97hz%3Adesign_summary.json",
+      "heapMB": 14.2
+    }
+  ],
+  "deltaTotalMB": 362,
+  "perWindowMB": 181,
+  "finishedAt": "2026-09-06T11:47:09.171Z",
+  "allPass": true,
+  "verdict": "多入口轻量 bundle 备用方案不启动（实测在 plan §8 估算带内）"
+}

@@ -100,6 +100,8 @@ docked ──弹出──► popped ──×/超上限──► railed ──显
 
 ## 8. 资源账（诚实版）
 
+> **实测（2026-09-06，memory-probe.json）**：dev Electron 真实环境双结果窗实测——每窗增量 **181MB**（总量 Δ362MB/2，含 Chromium 渲染进程开销），每窗 JS 堆仅 14–15MB，移除后总量回落 949→772MB。**实测落在估算带（100–200MB/窗）内 → 多入口轻量 bundle 备用方案不启动**，本项观察收口。
+
 - 每个独立 BrowserWindow ≈ 一个渲染进程 ~100–200MB；5 窗 = 0.5–1GB，对同时跑 R 分析的 16GB 机器不可忽略
 - 四层缓解：**懒创建**（用户第一次弹出才创建）/ **隐藏保活**（hide 后停止 GPU 合成，内存降约 1/3，事件流继续记账）/ **≤4 并发上限**（对齐 BLOCK-54 终端 4 Tab 哲学）/ 轨道窗本体仅 ~40–60MB
 - 反向收益：主窗渲染进程不再被多个实时流重绘拖累——多窗口把渲染负载分摊出去
@@ -137,3 +139,5 @@ docked ──弹出──► popped ──×/超上限──► railed ──显
   - **加映二（2026-09-06 用户反馈「hover 应可预览 / 轨道展示不全看不出是啥」，UI-297 verified）**：根因一=轨道窗 28px 宽，320px hover 卡整体被窗体裁剪（预览物理不可见）→ 轨道窗加宽 28→364（预览区 336 透明穿透 + 条带 28）；根因二=刻度是纯色块 → 刻度带类型图标（bar-chart/terminal/brain）。新增降格瞬间内容快照（capturePage 可见态采集，×/minimize 全部先快照后 hide）+ window:thumbnail IPC；hover 卡 = 快照图 + 标题 + 恢复/移除 + 180ms 防误关延迟。单测 37/37（加映二契约锁）；实机 9 断言（卡右缘 328<364 物理在窗内/快照 naturalWidth=480/图标刻度/恢复路径完好）+ P2 原 14 断言回归 PASS；证据 `acceptance/block-59/rail-preview-live.json`。
   - **加映三（2026-09-06 用户裁决「开干」补全 plan §5 遗留两细节，UI-298 verified）**：滚轮换卡（条带 onWheel，deltaY 方向切换 + 统一 hoverTick）+ 卡片垂直钳位（锚点=悬停刻度 top，钳制 [12, innerHeight-卡高-12]，ResizeObserver 随快照加载重钳，CSS max-height 兜底）。单测 38/38；实机 8 断言（双向滚轮切换/钳位卡 rect 完整在窗内）+ 加映二 9 断言回归 PASS；证据 `acceptance/block-59/rail-wheel-live.json`。至此 plan §5 规格全部落地。
   - **收口门**：四套实机脚本（block59-ui-live/p2/p3/p4-live）收口前顺序回归全 PASS（60 断言）；单测 36/36；前端受影响 vitest 23/23；tsc 0；docs:check + ui:audit:check PASS；UI-292/293/294/295 verified。诚实范围：重启后弹出窗不恢复（P1 plan 明示，geometry 持久化佐证）；static 5min 淡出由 railEntries 单测覆盖（实机不做 5min 等待）；「详情窗」入口按钮以数据面单测 + 同一 popOut IPC 实机驱动覆盖。0 新 npm 依赖；复用 `_window-create.js`/同一 SPA 路由/task_events 与 SSE 链（plan §10 治理红线全程守住：轨道/指挥中心/agent 窗全部只读投影，窗口永不持有 canonical state）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+- 2026-09-06 内存实测（加映收尾）：scripts/block59-memory-probe.cjs——dev Electron 双结果窗实测每窗增量 181MB（估算带内）+ JS 堆 14–15MB + 移除回落；多入口 bundle 备用方案不启动，§8 观察项兑现收口。证据 acceptance/block-59/memory-probe.json。
