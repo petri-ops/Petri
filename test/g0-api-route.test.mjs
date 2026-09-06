@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
 import test, { after, before } from 'node:test';
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+const __dirname = dirname(fileURLToPath(import.meta.url));
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 
 const tempRoot = mkdtempSync(join(tmpdir(), 'biof3-g0-api-'));
 process.env.BIOF3_DB_PATH = join(tempRoot, 'g0-api.db');
@@ -11,6 +14,17 @@ process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 
 const require = createRequire(import.meta.url);
 const express = require('express');
+// BLOCK-49 加映清债 —— 应用全量 migrations
+{
+  const Database = require(resolve(__dirname, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
+  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const migDir = resolve(__dirname, '..', 'src', 'migrations');
+  for (const f of require('node:fs').readdirSync(migDir).filter((f) => f.endsWith('.sql')).sort()) {
+    boot.exec(require('node:fs').readFileSync(require('node:path').resolve(migDir, f), 'utf8'));
+  }
+  boot.close();
+}
+
 const db = require('../core/biof3-server/db');
 const g0 = require('../core/shared-backend/g0-baseline');
 const apiData = require('../core/biof3-server/api-data');

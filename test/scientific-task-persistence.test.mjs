@@ -2,24 +2,28 @@ import assert from 'node:assert/strict';
 import test, { after } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const tempRoot = mkdtempSync(join(tmpdir(), 'biof3-hrt3-'));
 process.env.BIOF3_DB_PATH = join(tempRoot, 'hrt3.db');
 
-// BLOCK-49 加映清债 —— 补 migration 执行（原仅设 DB 路径未建表 → no such table）
+process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
+const require = createRequire(import.meta.url);
+// BLOCK-49 加映清债 —— 应用全量 migrations（原仅设 DB 路径未建表）
 {
-  const Database = require(req(req('node:path').resolve(__dirname, '..', 'core', 'biof3-server', 'node_modules'), 'better-sqlite3'));
+  const Database = require('better-sqlite3');
   const boot = new Database(process.env.BIOF3_DB_PATH);
-  const migrationsDir = req('node:path').resolve(__dirname, '..', 'src', 'migrations');
-  for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
-    boot.exec(fs.readFileSync(req('node:path').join(migrationsDir, f), 'utf8'));
+  const migDir = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'migrations');
+  for (const f of require('node:fs').readdirSync(migDir).filter((f) => f.endsWith('.sql')).sort()) {
+    boot.exec(require('node:fs').readFileSync(require('node:path').join(migDir, f), 'utf8'));
   }
   boot.close();
 }
-process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
-const require = createRequire(import.meta.url);
+
 const db = require('../core/biof3-server/db');
 const { confirmScientificTask } = require('../core/shared-backend/scientific-task-confirmation');
 const { sourceMessageDigest, validateContextCheckpoint } = require('../core/shared-backend/scientific-task-spec');

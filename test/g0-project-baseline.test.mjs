@@ -1,15 +1,36 @@
 import assert from 'node:assert/strict';
 import test, { after } from 'node:test';
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+const __dirname = dirname(fileURLToPath(import.meta.url));
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 
 const tempRoot = mkdtempSync(join(tmpdir(), 'biof3-g0-lf0-'));
 process.env.BIOF3_DB_PATH = join(tempRoot, 'g0-lf0.db');
 process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
+
+// BLOCK-49 加映清债 —— 应用全量 migrations
+{
+  const _cr = createRequire(import.meta.url);
+  const Database = _cr(resolve(__dirname, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
+  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const migDir = resolve(__dirname, '..', 'src', 'migrations');
+  for (const f of _cr('node:fs').readdirSync(migDir).filter((f) => f.endsWith('.sql')).sort()) {
+    const sql = _cr('node:fs').readFileSync(_cr('node:path').resolve(migDir, f), 'utf8');
+    try {
+      boot.exec(sql);
+    } catch (e) {
+      if (!/already exists|duplicate column/i.test(e.message)) throw e;
+    }
+  }
+  boot.close();
+}
 const require = createRequire(import.meta.url);
+
 const db = require('../core/biof3-server/db');
 const g0 = require('../core/shared-backend/g0-baseline');
 const { resolveProjectRunLayout } = require('../core/shared-backend/project-run-layout');
@@ -146,6 +167,20 @@ test('an earlier LF0 project baseline table upgrades idempotently and backfills 
   const migrationDbPath = join(tempRoot, 'g0-lf0-old-schema.db');
   const Database = require('../core/biof3-server/node_modules/better-sqlite3');
   const migrationDb = new Database(migrationDbPath);
+  // migrationDb 需有 projects 表（spawn 子进程的 agent-task-store schema 检查）
+  migrationDb.exec(`CREATE TABLE IF NOT EXISTS projects (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    created_at TEXT,
+    updated_at TEXT,
+    modality TEXT,
+    workspace_path TEXT,
+    status TEXT DEFAULT 'active',
+    g0_baseline_id TEXT,
+    g0_baseline_version TEXT,
+    g0_baseline_manifest_digest TEXT
+  )`);
   const current = g0.getCurrentG0Baseline();
   migrationDb.exec(`CREATE TABLE project_g0_baselines (
     project_id TEXT PRIMARY KEY,

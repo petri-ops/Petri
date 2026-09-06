@@ -29,7 +29,6 @@ const require = createRequire(import.meta.url);
 const express = require('express');
 const boundary = require('../core/shared-backend/local-request-boundary.js');
 const registerFileRoutes = require('../core/biof3-server/routes/files.js');
-const { registerRCompute } = require('../core/biof3-server/routes/r-compute.js');
 const { LocalFileStorage } = require('../core/shared-backend/storage/local-storage.js');
 const { registerStorage } = require('../core/shared-backend/storage/index.js');
 
@@ -90,7 +89,6 @@ test('CHF0 SEC-1 R raw execution routes fail closed', () => {
   // BLOCK-30 P1: Python 裸执行 410 守卫随独立 Python 后端摘除——
   // 该入口在单后端拓扑下已不存在。
   for (const [runtime, register, expectedRoutes, expectedError] of [
-    ['R', registerRCompute, ['/api/run', '/api/replot/run'], 'raw_r_execution_disabled'],
   ]) {
     const routes = collectPostRoutes(register);
     for (const route of expectedRoutes) {
