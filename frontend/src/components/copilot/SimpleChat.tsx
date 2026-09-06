@@ -141,6 +141,7 @@ import {
   type ToolActivityItem,
 } from './toolActivity';
 import { ToolActivityList } from './ToolActivityList';
+import { SubAgentsBar } from './SubAgentsBar';
 import { resolveToolSummaryPresentation } from './toolSummaryPresentation';
 import {
   clearConversationPendingApproval,
@@ -1656,6 +1657,8 @@ export function SimpleChat({
           </div>
         )}
 
+        {/* BLOCK-49 加映二 — 子 agent 活动条（模型派生 + 用户后台双源） */}
+        <SubAgentsBar conversationId={conversationId} />
         <div
           className="sc-input-area"
           style={{ ['--sc-composer-width' as string]: `${composerWidth}px` }}

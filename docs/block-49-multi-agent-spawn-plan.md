@@ -1,6 +1,6 @@
 # BLOCK-49 — 多 Agent 内生派生（Multi-Agent Spawn）技术调研与实施计划
 
-> 状态：`completed`（2026-09-06 **加映收口**：① 短回答误判修复（终态判定非空即完成，空回答防御保留）+ 行为单测 6；② child_finished 前端消费（copilotClient 分发 + 会话级 notice + SimpleChat chip，UI-300 verified，store 测试 39/39）。二期三工具 + proactive 同日全收口。G0 开发期常态 · 不外推 packaged/Provider/GA）
+> 状态：`completed`（2026-09-06 **加映二收口**：多智能体活动面板 SubAgentsBar——模型 spawn 登记 + child_finished 落账双源桥接 + 列表/中断/详情窗操作面，UI-301 verified。至此 MVP（三工具）+ 二期（协作三工具 + proactive）+ 加映（短回答修复 + 前端消费 + 活动面板）全 completed。G0 开发期常态 · 不外推 packaged/Provider/GA）
 > 立项日期：2026-09-03
 > truthDomain: `block-49-multi-agent-spawn`
 
@@ -150,3 +150,5 @@
 - 2026-09-06 加映启动：第一档小包两项。① 短回答误判：resolveAgentTaskTerminal 完成判定 `>20 字符` 放宽为「非空即完成」（实机两轮误判：模型答对 14 字符纯算式判 failed；空回答防御保留）；② proactive 前端消费：child_finished 事件经 copilotClient 分发 → conversationRunStore 会话级 notice → SimpleChat 任务条 chip（复用 UI-287 降级 notice 成熟模式）。
 
 - 2026-09-06 加映收口（completed）：① 后端——resolveAgentTaskTerminal 完成判定 `>20 字符` → 非空即完成（实机两轮误判修复；空回答防御保留；行为单测 6 用例含 cancelled/fatalError/pendingApproval 优先级）；顺手修存量 loop-agent-integration.test.mjs 单跑缺 DB 自举（同 agent-tool-registry 修法）。② 前端——child_finished 消费三件（copilotClient 分发 / store 会话级 notice 上限 10 条 / SimpleChat chip），UI-300 verified，store 测试 39/39（新增 4 用例）。**行数门 800→820**（proactive 钩子+判定注释既有漂移惯例留痕）。当前无 active 工作包。
+
+- 2026-09-06 加映二收口（completed，UI-301 verified）：**多智能体活动面板**——store 双源桥接（模型 spawn_agent：onToolCall 缓存 task 文本按 callId → onToolResult 登记 running；child_finished：running→终态映射 + 摘要落账 + 刷新孤儿建条目 + 幂等）+ SubAgentsBar 组件（单行折叠条：状态点/任务头/中断[stopSubAgentTask→cancel REST]/详情窗[popOut agent]）挂载 SimpleChat 输入框上方。单测 43/43（新增 4 用例）+ 总回归 80/80。用户侧操作面补全：中断=既有 cancel REST，详情窗=BLOCK-59 P4 页面复用；followup 仍为模型侧动作（用户以自然语言驱动，克制不做按钮）。

@@ -161,6 +161,79 @@ function pushChildFinishedNotice(conversationId: string, notice: ChildFinishedNo
   childFinishedNotices.set(conversationId, list.slice(-10));
 }
 
+// BLOCK-49 加映二 —— 模型 spawn_agent 派生的子 agent 登记（活动面板数据源）。
+// spawn 的 task 文本从 tool_call args 捕获（tool_result 只有 agentId），
+// 按 callId 关联到 tool_result。
+const pendingSpawnTaskText = new Map<string, string>();
+
+/** 模型 spawn_agent 派生：登记 running 快照（面板可见；已存在则跳过）。 */
+function recordModelSubAgent(conversationId: string, projectId: string | undefined, taskId: string, userContent: string): void {
+  if (!taskId || subTaskRuns.has(taskId)) return;
+  const startedAt = Date.now();
+  subTaskRuns.set(taskId, {
+    conversationId,
+    projectId: projectId || '',
+    status: 'running',
+    userContent,
+    userTs: new Date(startedAt).toISOString(),
+    assistantContent: '',
+    assistantTs: new Date(startedAt + 1).toISOString(),
+    assistantPending: true,
+    assistantError: false,
+    progressUpdates: [],
+    resultEditProgress: [],
+    toolActivities: [],
+    pendingApproval: null,
+    startedAt,
+    taskId,
+    parentTaskId: undefined,
+  });
+  emitSubTask(taskId);
+}
+
+/** 子 agent 终态落账（child_finished）：running → 终态；页面刷新后无登记时建终态条目。 */
+function settleModelSubAgent(conversationId: string, projectId: string | undefined, info: { childTaskId: string; status: string; summaryHead: string }): void {
+  const statusMap: Record<string, ConversationRunStatus> = {
+    completed: 'done',
+    failed: 'error',
+    cancelled: 'stopped',
+  };
+  const target = statusMap[info.status] ?? 'done';
+  const existing = subTaskRuns.get(info.childTaskId);
+  if (existing && existing.status !== 'running') return; // 已终态，幂等
+  const completedAt = Date.now();
+  const snapshot: ConversationRunSnapshot = existing
+    ? {
+        ...existing,
+        status: target,
+        assistantContent: info.summaryHead,
+        assistantPending: false,
+        assistantError: info.status === 'failed',
+        processingDurationMs: Math.max(0, completedAt - existing.startedAt),
+        completedAt,
+      }
+    : {
+        conversationId,
+        projectId: projectId || '',
+        status: target,
+        userContent: '(页面刷新前派生的子 agent)',
+        userTs: new Date(completedAt).toISOString(),
+        assistantContent: info.summaryHead,
+        assistantTs: new Date(completedAt).toISOString(),
+        assistantPending: false,
+        assistantError: info.status === 'failed',
+        progressUpdates: [],
+        resultEditProgress: [],
+        toolActivities: [],
+        pendingApproval: null,
+        startedAt: completedAt,
+        completedAt,
+        taskId: info.childTaskId,
+      };
+  subTaskRuns.set(info.childTaskId, snapshot);
+  emitSubTask(info.childTaskId);
+}
+
 /**
  * BLOCK-56 P1 / UI-287 — 当前会话待展示的降级提示（请求级 + 任务级共用）。
  * 无提示返回 null。run 清理 / 页面刷新后仍可读，直到下一次 run 开始。
@@ -425,6 +498,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     // 任务条显示「已降级到 X 模型」；后续进度不清除 notice 字段（statusMessage 会被正常覆盖）。
     onChildFinished: (info) => {
       if (!info.childTaskId) return;
+      settleModelSubAgent(conversationId, options.projectId, info);
       pushChildFinishedNotice(conversationId, {
         childTaskId: info.childTaskId,
         status: info.status,
@@ -534,6 +608,11 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       });
     },
     onToolCall: (event: ToolCallEvent) => {
+      // BLOCK-49 加映二 —— spawn_agent 的 task 文本按 callId 缓存（面板行标题）
+      if (event.name === 'spawn_agent' && event.callId) {
+        const taskText = typeof event.args?.task === 'string' ? event.args.task : '';
+        if (taskText) pendingSpawnTaskText.set(event.callId, taskText);
+      }
       replaceRun(conversationId, (current) => ({
         ...current,
         toolActivities: mergeToolCallActivity(current.toolActivities, event),
@@ -546,6 +625,21 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       }));
     },
     onToolResult: (event: ToolResultEvent) => {
+      // BLOCK-49 加映二 —— 模型 spawn_agent 派生：登记 running 快照（活动面板）
+      if (
+        event.name === 'spawn_agent' &&
+        event.toolResult?.status === 'success' &&
+        !event.needApproval
+      ) {
+        const spawnData = event.toolResult?.data as { agentId?: unknown } | undefined;
+        const agentId = spawnData && typeof spawnData.agentId === 'string' ? spawnData.agentId : null;
+        const callKey = event.toolResult?.callId || '';
+        const taskText = pendingSpawnTaskText.get(callKey) || '子 agent';
+        if (agentId) {
+          recordModelSubAgent(conversationId, options.projectId, agentId, taskText);
+          pendingSpawnTaskText.delete(callKey);
+        }
+      }
       replaceRun(conversationId, (current) => ({
         ...current,
         toolActivities: mergeToolResultActivity(current.toolActivities, event),

@@ -883,3 +883,102 @@ describe('BLOCK-49 加映 — 子 agent 终态通知（proactive child_finished�
     expect(getChildFinishedNotices('conv-child-defensive')).toHaveLength(0);
   });
 });
+
+
+describe('BLOCK-49 加映二 — 模型派生子 agent 活动面板数据源', () => {
+  it('spawn_agent 工具结果 → 登记 running 快照（面板列表可见）', () => {
+    start('conv-panel-spawn', 'spawn a sub agent');
+    const callbacks = streamChatMock.mock.calls.at(-1)![0];
+    callbacks.onToolCall?.({
+      name: 'spawn_agent',
+      args: { task: '整理实验数据并输出摘要' },
+      callId: 'call-spawn-1',
+    });
+    callbacks.onToolResult?.({
+      name: 'spawn_agent',
+      summary: '已派生',
+      toolResult: {
+        contractVersion: '1.0.0',
+        traceId: 'tr-1',
+        callId: 'call-spawn-1',
+        tool: 'spawn_agent',
+        status: 'success',
+        terminationReason: 'completed',
+        durationMs: 12,
+        truncated: false,
+        sideEffects: { type: 'state-write', riskTier: 'R2', resources: [] },
+        data: { ok: true, agentId: 'agent-panel-1' },
+      },
+    } as never);
+
+    const list = listSubAgentTasksForConversation('conv-panel-spawn');
+    const entry = list.find((t) => t.taskId === 'agent-panel-1');
+    expect(entry).toBeTruthy();
+    expect(entry?.status).toBe('running');
+    expect(entry?.userContent).toContain('整理实验数据');
+  });
+
+  it('child_finished → 终态落账（done + 摘要），面板行更新', () => {
+    start('conv-panel-settle', 'spawn and settle');
+    const callbacks = streamChatMock.mock.calls.at(-1)![0];
+    callbacks.onToolCall?.({
+      name: 'spawn_agent',
+      args: { task: '分析数据' },
+      callId: 'call-spawn-2',
+    });
+    callbacks.onToolResult?.({
+      name: 'spawn_agent',
+      summary: '已派生',
+      toolResult: {
+        contractVersion: '1.0.0',
+        traceId: 'tr-2',
+        callId: 'call-spawn-2',
+        tool: 'spawn_agent',
+        status: 'success',
+        terminationReason: 'completed',
+        durationMs: 5,
+        truncated: false,
+        sideEffects: { type: 'state-write', riskTier: 'R2', resources: [] },
+        data: { ok: true, agentId: 'agent-panel-2' },
+      },
+    } as never);
+    callbacks.onChildFinished?.({
+      childTaskId: 'agent-panel-2',
+      status: 'completed',
+      summaryHead: '数据分析完成：共 3 条结论',
+    });
+
+    const entry = listSubAgentTasksForConversation('conv-panel-settle')
+      .find((t) => t.taskId === 'agent-panel-2');
+    expect(entry?.status).toBe('done');
+    expect(entry?.assistantContent).toContain('3 条结论');
+    expect(entry?.assistantPending).toBe(false);
+  });
+
+  it('页面刷新场景：无登记的 child_finished 也会建终态条目', () => {
+    start('conv-panel-orphans', 'run');
+    streamChatMock.mock.calls.at(-1)![0].onChildFinished?.({
+      childTaskId: 'agent-orphan-1',
+      status: 'failed',
+      summaryHead: '任务失败原因',
+    });
+    const entry = listSubAgentTasksForConversation('conv-panel-orphans')
+      .find((t) => t.taskId === 'agent-orphan-1');
+    expect(entry?.status).toBe('error');
+    expect(entry?.assistantContent).toContain('任务失败原因');
+  });
+
+  it('终态幂等：重复 child_finished 不覆盖已有终态', () => {
+    start('conv-panel-idem', 'run');
+    const callbacks = streamChatMock.mock.calls.at(-1)![0];
+    callbacks.onChildFinished?.({
+      childTaskId: 'agent-idem-1', status: 'completed', summaryHead: '第一次',
+    });
+    callbacks.onChildFinished?.({
+      childTaskId: 'agent-idem-1', status: 'failed', summaryHead: '第二次',
+    });
+    const entry = listSubAgentTasksForConversation('conv-panel-idem')
+      .find((t) => t.taskId === 'agent-idem-1');
+    expect(entry?.assistantContent).toBe('第一次');
+  });
+});

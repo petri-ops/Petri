@@ -1,6 +1,6 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-06（**BLOCK-49 加映收口 completed**：① 子 agent 短回答误判修复（终态判定非空即完成）；② child_finished 前端消费（UI-300）——多智能体 proactive 闭环。前情：BLOCK-49 二期三工具、BLOCK-48 电脑控制、BLOCK-61 品牌改名、BLOCK-59 窗口系统全收口。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-06（**BLOCK-49 加映二收口 completed（UI-301）**：多智能体活动面板——SubAgentsBar 单行折叠条（列表/中断/详情窗）+ store 双源桥接（模型 spawn 登记 + child_finished 落账）。BLOCK-49 全形态收口（MVP+二期+两加映）。前情：BLOCK-48 电脑控制、BLOCK-61 品牌改名、BLOCK-59 窗口系统。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 
