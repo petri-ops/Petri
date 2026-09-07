@@ -799,10 +799,22 @@ export function ProjectWorkspace(): React.ReactElement {
   const [createPath, setCreatePath] = useState('');
   const [createError, setCreateError] = useState('');
 
-  const openCreatePanel = useCallback(() => {
+  const openCreatePanel = useCallback(async () => {
+    setCreateError('');
+    const dialog = window.biof3Desktop?.files?.openDirectoryDialog;
+    if (typeof dialog === 'function') {
+      const selected = await dialog();
+      if (selected) {
+        // E41+ 原生面板可用：选中的文件夹即项目路径，直达确认态
+        setCreatePanelMode('confirm');
+        setCreatePath(selected);
+        setCreatePanelOpen(true);
+        return;
+      }
+    }
+    // 系统面板取消 / 桥缺失（含旧 Electron 打包版面板置灰）→ 应用内 FolderPicker 兜底
     setCreatePanelMode('browse');
     setCreatePath('');
-    setCreateError('');
     setCreatePanelOpen(true);
   }, []);
 
