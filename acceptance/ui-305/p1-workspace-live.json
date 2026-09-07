@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-09-07T22:47:32.293Z",
+  "probe": {
+    "url": "/project/p_mtrawlau_7rly",
+    "root": 1,
+    "leftCol": true,
+    "centerCol": true,
+    "rightCol": true,
+    "fileTree": false,
+    "composer": true
+  },
+  "pageErrors": [],
+  "checks": [
+    {
+      "name": "route-stable",
+      "pass": true,
+      "detail": "/project/p_mtrawlau_7rly"
+    },
+    {
+      "name": "root-mounted",
+      "pass": true,
+      "detail": "children=1"
+    },
+    {
+      "name": "three-columns",
+      "pass": true,
+      "detail": "L=true C=true R=true"
+    },
+    {
+      "name": "composer-present",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "no-render-exceptions",
+      "pass": true,
+      "detail": "clean"
+    }
+  ],
+  "allPass": true
+}
