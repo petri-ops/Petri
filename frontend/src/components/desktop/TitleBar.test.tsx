@@ -130,7 +130,7 @@ describe('TitleBar desktop window controls', () => {
   // 页面加载后焦点会默认落在「关闭窗口」上，用户击键被按钮吞掉（空格/回车还会误触关闭）。
   it('keeps window controls out of the keyboard focus order', async () => {
     const source = await readFile(
-      resolve(process.cwd(), 'src/components/desktop/TitleBar.tsx'),
+      resolve(process.cwd(), 'src/components/desktop/titlebar/TitleBarLeftZone.tsx'),
       'utf8',
     );
     const controlBlocks = source
