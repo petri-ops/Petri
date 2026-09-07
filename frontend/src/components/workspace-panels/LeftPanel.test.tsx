@@ -51,16 +51,6 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext {
     toggleProjectExpand: vi.fn(),
     handleOpenWorkspacePath: vi.fn(),
     showConversations: true,
-    workspaceEdit: {
-      open: false,
-      path: '',
-      error: '',
-      saving: false,
-      onOpen: vi.fn(),
-      onClose: vi.fn(),
-      onPathChange: vi.fn(),
-      onSave: vi.fn(),
-    },
   };
 }
 
@@ -96,9 +86,7 @@ describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
         <LeftPanel ctx={ctx} />
       </MemoryRouter>
     );
-    // UI-304 简化版 — 错误会显示在面板中，即使 open=false 也会渲染错误提示
-    const alert = screen.queryByRole('alert');
-    expect(alert).toBeTruthy();
-    expect(alert?.textContent).toBe('路径无效');
+    // UI-304 简化版 — 错误会显示在面板中
+    expect(screen.getByRole('alert')).toHaveTextContent('路径无效');
   });
 });

@@ -35,17 +35,6 @@ export interface LeftPanelContext {
     onOpen: () => void | Promise<void>;
   };
   createConversationForProject: (projectId?: string) => void | Promise<void>;
-  /** UI-258 — 更改当前项目工作目录（路径可粘贴/可编辑） */
-  workspaceEdit: {
-    open: boolean;
-    path: string;
-    error: string;
-    saving: boolean;
-    onOpen: () => void;
-    onClose: () => void;
-    onPathChange: (path: string) => void;
-    onSave: () => void | Promise<void>;
-  };
   renameProject: (projectId: string, name: string) => Promise<boolean>;
   renameConversation: (conversationId: string, title: string) => Promise<boolean>;
   archiveProject: (projectId: string) => Promise<boolean>;
@@ -308,53 +297,6 @@ function ProjectTreeHeader({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
           <p className={styles.leftCreateError} role="alert">{ctx.createPanel.error}</p>
         </div>
       )}
-      {/* UI-258 — 更改当前项目工作目录：路径可粘贴/可编辑 */}
-      {ctx.workspaceEdit.open && (
-        <div className={styles.leftCreatePanel} data-testid="left-ws-edit-panel">
-          <div className={styles.leftCreateRow}>
-            <input
-              className={styles.leftCreateInput}
-              type="text"
-              value={ctx.workspaceEdit.path}
-              onChange={(e) => ctx.workspaceEdit.onPathChange(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') void ctx.workspaceEdit.onSave();
-                if (e.key === 'Escape') ctx.workspaceEdit.onClose();
-              }}
-              placeholder="/Users/you/path/to/project"
-              autoFocus
-              aria-label="当前项目工作目录完整路径"
-            />
-          </div>
-          {ctx.workspaceEdit.error && (
-            <p className={styles.leftCreateError} role="alert">{ctx.workspaceEdit.error}</p>
-          )}
-          <div className={styles.leftCreateActions}>
-            <button
-              type="button"
-              className="gewu-btn gewu-btn--sm"
-              onClick={() => void ctx.workspaceEdit.onSave()}
-              disabled={ctx.workspaceEdit.saving || !ctx.workspaceEdit.path.trim()}
-              title="校验路径并保存为当前项目的工作目录"
-            >
-              {ctx.workspaceEdit.saving ? '保存中…' : '保存'}
-            </button>
-            <BrowseFolderButton
-              initialPath={ctx.workspaceEdit.path}
-              onPick={ctx.workspaceEdit.onPathChange}
-              disabled={ctx.workspaceEdit.saving}
-            />
-            <button
-              type="button"
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-              onClick={ctx.workspaceEdit.onClose}
-              disabled={ctx.workspaceEdit.saving}
-            >
-              取消
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 }
@@ -380,131 +322,21 @@ function ProjectTree({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   );
 }
 
-function ProjectNode({
-  project: p,
+function ConversationItem({
+  conversation,
+  projectId,
   ctx,
   isCurrent,
-  isExpanded,
-  conversations: convs,
 }: {
-  project: Project;
-  ctx: LeftPanelContext;
-  isCurrent: boolean;
-  isExpanded: boolean;
-  conversations: ConversationSummary[];
-}): React.ReactElement {
-  const [editingProject, setEditingProject] = React.useState(false);
-  const [projectName, setProjectName] = React.useState(p.name);
-
-  React.useEffect(() => setProjectName(p.name), [p.name]);
-
-  const finishProjectRename = async () => {
-    const name = projectName.trim();
-    if (!name || name === p.name) {
-      setProjectName(p.name);
-      setEditingProject(false);
-      return;
-    }
-    const ok = await ctx.renameProject(p.id, name);
-    if (!ok) setProjectName(p.name);
-    setEditingProject(false);
-  };
-
-  return (
-    <div className={styles.projectTreeNode}>
-      <div
-        className={`${styles.projectTreeRow} ${isCurrent ? styles.projectTreeRowActive : ''}`}
-        onClick={() => {
-          if (!isCurrent) ctx.switchToProject(p.id);
-          ctx.toggleProjectExpand(p.id);
-        }}
-      >
-        <Icon name={isExpanded ? 'chevron-down' : 'chevron-right'} size={12} />
-        <Icon name="folder" size={14} />
-        {editingProject ? (
-          <input
-            className={styles.treeRenameInput}
-            value={projectName}
-            onChange={(event) => setProjectName(event.target.value)}
-            onClick={(event) => event.stopPropagation()}
-            onBlur={() => void finishProjectRename()}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') void finishProjectRename();
-              if (event.key === 'Escape') {
-                setProjectName(p.name);
-                setEditingProject(false);
-              }
-            }}
-            autoFocus
-          />
-        ) : (
-          <button
-            type="button"
-            className={styles.projectTreeName}
-            onDoubleClick={(event) => {
-              event.stopPropagation();
-              setEditingProject(true);
-            }}
-            title="双击重命名项目"
-          >
-            {p.name}
-          </button>
-        )}
-        <button
-          className={styles.projectTreeAddBtn}
-          onClick={(e) => {
-            e.stopPropagation();
-            ctx.createConversationForProject(p.id);
-          }}
-          title="创建新对话"
-          disabled={ctx.creatingConversation}
-        >
-          <Icon name="plus" size={12} />
-        </button>
-        <button
-          className={styles.projectTreeAddBtn}
-          onClick={(event) => {
-            event.stopPropagation();
-            void ctx.archiveProject(p.id);
-          }}
-          title="移入回收站"
-        >
-          <Icon name="trash" size={12} />
-        </button>
-        {isCurrent && (
-          <button
-            className={styles.projectTreeAddBtn}
-            onClick={(e) => {
-              e.stopPropagation();
-              ctx.workspaceEdit.onOpen();
-            }}
-            title="更改项目工作目录（可粘贴完整路径）"
-          >
-            <Icon name="settings" size={12} />
-          </button>
-        )}
-      </div>
-      {isExpanded && (
-        <ul className={styles.convList}>
-          {convs.length === 0 && <li className={styles.convEmpty}>暂无对话</li>}
-          {convs.map((c) => (
-            <ConversationItem key={c.id} conversation={c} projectId={p.id} ctx={ctx} isCurrent={isCurrent} />
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-function ConversationItem({ conversation, projectId, ctx, isCurrent }: {
   conversation: ConversationSummary;
   projectId: string;
   ctx: LeftPanelContext;
   isCurrent: boolean;
 }): React.ReactElement {
+  const conversationRun = useConversationRun(conversation.id);
   const [editing, setEditing] = React.useState(false);
   const [title, setTitle] = React.useState(conversation.title);
-  const conversationRun = useConversationRun(conversation.id);
+
   const isRunning = conversationRun?.status === 'running';
   const hasBranch = Boolean(conversation.parent_id);
 
