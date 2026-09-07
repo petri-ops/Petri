@@ -1,9 +1,9 @@
 # BLOCK-62 — TitleBar 列体化：三列 header 与内容一体化，消灭跨 DOM 树宽度同步
 
 - Plan ID：`BLOCK-62-TITLEBAR-COLUMNIZATION`
-- 状态：active（2026-09-07 用户裁决「按这个方案开始重构，先做拖拽接缝的 spike 验证」→ spike PASS → 启动）
+- 状态：completed（2026-09-07 用户裁决「按这个方案开始重构，先做拖拽接缝的 spike 验证」→ spike PASS → P0/P1a/P1b/P2 同日落地 → P3 用户实机验收通过收口）
 - 前置：UI-305-FRONTEND-LARGE-FILE-REFACTOR 让位（仅立项文档 `ab65f4e6`，无实现提交，让位零损失；恢复需本包收口后用户裁决）
-- 关联：BLOCK-59（窗口系统已收口，pop-out 路由 `/window/*` 不走 AppShell，本包不动其证据面）；UI-309 两轮修复为本包铺垫（live 变量机制在 P2 后退役）
+- 关联：BLOCK-59（窗口系统已收口，pop-out 路由 `/window/*` 不走 AppShell，本包不动其证据面）；UI-309 两轮修复为本包铺垫（P2 实测收敛：context 宽度推送退役，live 变量保留作同树指针跟随）
 - 纪律：G0 开发期常态 · 不外推 packaged/Provider/GA
 
 ## 1. 问题定位
@@ -107,4 +107,5 @@ TitleBar 是独立于工作区的整宽横条（`position: fixed`，[TitleBar.mo
 - **实施记录（P1b 教训）**：结构方案在 wrapper / aside-child / absolute 间反复漂移，靠 `git checkout` 回退到 P1a 检查点后一次性连贯完成——印证 §6「分阶段小提交」纪律；aside-child 胜出的决定性论据=aside 已消费 `--gewu-live-*`，header 交叉轴 stretch 即栏宽（同元素派生，无需再传宽）。
 - **下一步 P2**：同步链退役——`--gewu-live-*`（列体化路由内 header 已不依赖，但栏体 aside 仍消费 → 改为 plain state 同 commit）、fixed 条 `--titlebar-*-span` grid 模拟、`updateTitleBar` 宽度两字段、BottomTerminal offset 改列容器几何；P3 收口转 verified。
 - 2026-09-07 **P2 跨树同步链退役完成（范围经探针实测收敛，与初版计划的差异如实登记）**：**退役** ① `TitleBarState.leftPanelWidth/rightPanelWidth` + 每拖拽帧 `updateTitleBar` 跨树推送（regular 不消费宽度=死链+无谓 churn）→ fixed 条宽度改 props 同树直传（`TitleBarProps`，compact 渲染点传真实宽）；② fixed 条 grid 三处 `var(--gewu-live-*-span)` 死兜底（fixed 条只在 compact/非工作区渲染，拖拽禁用、span 永不写入）。**保留（计划偏差）**：`--gewu-live-*-width/-span` 实时变量与 collapsedRail 常量——探针证实 live 变量角色已从「跨树同步补丁」转为「aside 本体+终端的同树指针跟随」（删除会让 aside 本身退回每帧 commit 一拍滞后，是回归）；collapsedRail 供 fixed 条 compact/收起态。BottomTerminal offset 维持 live-span 消费（同树跟随，合法）。实机：regular gap=0 不回归 / compact 浮层 alignGap=1（rail 归属设计值）/ skills 默认宽不回归 / 零异常；tsc 0 / 定向 53/53 / 门禁 PASS。证据 `acceptance/ui-310/p2-sync-chain-retired.png`。
-- **下一步 P3 收口**：用户实机验收（拖拽/收起态/compact/交通灯）→ UI-310 转 verified + 台账收口笔录 + roadmap 回写。
+- 2026-09-07 **P3 收口 completed**：用户实机验收通过（拖拽顶栏线与栏边一根线实时移动 / 收起态交通灯与工具开关内联可达 / 「+」等菜单展开正常 / 缩窗 ≤960 回退整条顶栏 / 三段顶栏任意处可拖窗口），指示「收口 并 push」。提交链 `dd4740dc`(P0) → `1995a598`(P1a) → `b2207a3d`(P1b) → `fefc6942`(P2)。UI-310 转 verified（证据 `acceptance/ui-310/`）；roadmap active 槽清空、UI-305 恢复候选（启动需用户裁决）。收口门禁：docs:reconcile + docs:check + ui:audit:check。
+- **遗留候选（不阻塞收口，登记待裁决）**：① `--gewu-live-*` 变量与 collapsedRail 常量仍在（P2 实测证明它们是「同树指针跟随」与「fixed 条 compact/收起态」的合法机制，非死链，保留）；② `/project/:id/results` 既有崩溃（AUDIT-LOG 🟢，ResultStudio experimental 面，需单独立项）；③ UI-305 前端巨型组件拆分（本包让位方，恢复需用户裁决）。

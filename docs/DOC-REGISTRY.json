@@ -31,7 +31,7 @@
         "frontend",
         "G0"
       ],
-      "notes": "前端巨型组件拆分清债。2026-09-07 用户裁决立项启动：普查非测试源码 >600 行（project-workspace.tsx 3540 / SimpleChat.tsx 2343 / ReviewMode.tsx 1781 / ResultView.tsx 1609 等），纯重构零行为变化（组件外迁 + hook 抽取，hook 顺序整簇平移），豁免数据/类型/图标类大文件（inventory.ts、electron.d.ts、Icon.tsx），逻辑层 store/client 缓拆按需裁决，Electron 主进程不在范围。P0 SimpleChat（尾部 6 内联组件外迁 + useSummaryRetry + useModelAccessMenus + useConversationResume）→ P1 project-workspace（11 内联组件外迁）→ P2 ReviewMode+ResultView → P3 剩余按收益裁决 + 收口盘点。每阶段定向 vitest + tsc 0 + ui:audit:check + docs:check。0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-09-07 让位 BLOCK-62（单工作包串行；仅立项文档 ab65f4e6，无实现提交，恢复需 BLOCK-62 收口后用户裁决）",
+      "notes": "前端巨型组件拆分清债。2026-09-07 用户裁决立项启动：普查非测试源码 >600 行（project-workspace.tsx 3540 / SimpleChat.tsx 2343 / ReviewMode.tsx 1781 / ResultView.tsx 1609 等），纯重构零行为变化（组件外迁 + hook 抽取，hook 顺序整簇平移），豁免数据/类型/图标类大文件（inventory.ts、electron.d.ts、Icon.tsx），逻辑层 store/client 缓拆按需裁决，Electron 主进程不在范围。P0 SimpleChat（尾部 6 内联组件外迁 + useSummaryRetry + useModelAccessMenus + useConversationResume）→ P1 project-workspace（11 内联组件外迁）→ P2 ReviewMode+ResultView → P3 剩余按收益裁决 + 收口盘点。每阶段定向 vitest + tsc 0 + ui:audit:check + docs:check。0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-09-07 让位 BLOCK-62（单工作包串行；仅立项文档 ab65f4e6，无实现提交，BLOCK-62 已于同日收口，本包转恢复候选（启动需用户裁决））",
       "registeredAt": "2026-09-07",
       "archivePolicy": "archive_when_superseded",
       "phase": "QUEUED"
@@ -3622,7 +3622,7 @@
       "id": "BLOCK-62-TITLEBAR-COLUMNIZATION",
       "path": "docs/block-62-titlebar-columnization-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-62-titlebar-columnization",
       "entrypoint": "docs/README.md",
@@ -3635,10 +3635,10 @@
         "layout",
         "G0"
       ],
-      "notes": "TitleBar 列体化重构（2026-09-07 用户裁决「按这个方案开始重构」，前置 spike 手动实测 PASS）：顶栏从独立整宽横条（grid 模拟三列宽 + 跨 DOM 树同步）拆为三个列级 header 片段，每列 header 与内容同容器，宽度由列容器自身决定，同步契约整体退役（--titlebar-*-span / --gewu-live-* / collapsedRail 180/146/80/196 魔数）。数据契约不动（titleBar state 单一真相，仅删宽度两字段）。spike 证据：相邻 drag 矩形接缝无缝覆盖、动态改宽即时更新、1px gap 死缝=工程纪律（rail 归左列）。UI-305 让位（仅立项文档 ab65f4e6 无实现提交，零损失）。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "TitleBar 列体化重构（2026-09-07 用户裁决「按这个方案开始重构」，前置 spike 手动实测 PASS）：顶栏从独立整宽横条（grid 模拟三列宽 + 跨 DOM 树同步）拆为三个列级 header 片段，每列 header 与内容同容器，宽度由列容器自身决定，同步契约整体退役（--titlebar-*-span / --gewu-live-* / collapsedRail 180/146/80/196 魔数）。数据契约不动（titleBar state 单一真相，仅删宽度两字段）。spike 证据：相邻 drag 矩形接缝无缝覆盖、动态改宽即时更新、1px gap 死缝=工程纪律（rail 归左列）。UI-305 让位（仅立项文档 ab65f4e6 无实现提交，零损失）。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-09-07 同日整包收口 completed（用户实机验收通过，指示「收口 并 push」）：P0 dd4740dc / P1a 1995a598 / P1b b2207a3d / P2 fefc6942，UI-310 verified（证据 acceptance/ui-310/）。P2 范围经探针实测收敛：context 宽度推送退役（fixed 条改 props 同树直传），--gewu-live-* 保留作同树指针跟随、collapsedRail 保留供 fixed 条 compact 态（非死链，计划偏差如实登记）。实机：拖拽 gap=0 / 「+」菜单不裁 / compact 回退 / 三段任意处可拖窗。",
       "registeredAt": "2026-09-07",
       "archivePolicy": "archive_when_superseded",
-      "phase": "ACTIVE"
+      "phase": "COMPLETED"
     }
   ],
   "lastUpdated": "2026-09-07",
