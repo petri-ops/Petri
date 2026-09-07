@@ -68,6 +68,15 @@ function DesktopOnboardingMount(): React.ReactElement | null {
 /** Lives inside WorkspacePanelsProvider. */
 function AppShell(): React.ReactElement {
   const { isOpen, open, close } = useCommandPalette();
+  const location = useLocation();
+  // BLOCK-62 P0 — 列体化壳：仅 ProjectWorkspace 路由（/project/:id/*）走「列容器
+  // 占满视口 + 列内让位固定顶栏」新地基，main 不再 paddingTop 让位；ResultStudio
+  // (/project/:id/results) 与其余路由维持原状。归一化尾斜杠后取 :id 后的子段判定。
+  const isColumnizedWorkspace = (() => {
+    const path = location.pathname.replace(/\/+$/, '') || '/';
+    const m = path.match(/^\/project\/[^/]+(?:\/(.*))?$/);
+    return !!m && m[1] !== 'results';
+  })();
 
   return (
     <>
@@ -82,7 +91,7 @@ function AppShell(): React.ReactElement {
           className="gewu-spa-main"
           style={{
             marginTop: 0,
-            paddingTop: 'var(--gewu-titlebar-height)',
+            paddingTop: isColumnizedWorkspace ? 0 : 'var(--gewu-titlebar-height)',
             transition: 'margin-left 0.25s ease',
           }}
         >

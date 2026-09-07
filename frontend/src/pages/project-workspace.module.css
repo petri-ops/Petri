@@ -6,8 +6,13 @@
 .workspaceRoot {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - var(--gewu-titlebar-height));
-  max-height: calc(100vh - var(--gewu-titlebar-height));
+  /* BLOCK-62 P0 列体化地基：本路由 main 不再 paddingTop 让位固定顶栏，
+     改由 root 占满视口并在内部让出顶栏轨道高度（box-sizing 保证内容区
+     = 100vh - 顶栏）。P1 拆列级 header-slot 后此 padding-top 退役。 */
+  height: 100vh;
+  max-height: 100vh;
+  padding-top: var(--gewu-titlebar-height);
+  box-sizing: border-box;
   min-height: 0;
   overflow: hidden;
   background: var(--gewu-bg-surface);

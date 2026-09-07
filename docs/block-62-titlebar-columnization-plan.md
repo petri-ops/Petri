@@ -42,6 +42,14 @@ TitleBar 是独立于工作区的整宽横条（`position: fixed`，[TitleBar.mo
 - 列收起：header 片段随列 DOM 移除；收起态按钮（左栏 toggle 等）常驻中栏 header 左缘，不再依赖 collapsedRail 魔数
 - 底部 1px 分隔线：各列 header 各自 `border-bottom`，相邻列同色 → 视觉连续一根线
 
+### 3.1.1 P0 布局实现细节（调查暴露的约束，避免下轮重推）
+
+- **workspaceRoot 占满视口**：workspace 路由时 AppShell `main` 的 `paddingTop` 置 0，`.workspaceRoot` 从 `calc(100vh - titlebar)` 改 `100vh`（App.tsx 按路由分流：`/project/:id/*` 且非 `/results` 才走列体化壳；home/skills/review/result-studio 保持 fixed 顶栏 + 各自 `calc(100vh - titlebar)` 不动）。
+- **banner/notice/error 必须脱离流**：现状是 `.workspaceBody` 的前置兄弟（占流）。列体化后若保留占流，会把列内 absolute header 顶下去（顶栏不在视口最顶）。改 `position: absolute; top: 38px; left:0; right:0; z-index` 低于顶栏，覆盖在列 body 之上、header 之下——视觉与现状一致。
+- **每列 = relative 容器 + absolute header-slot + body**：列容器 `position: relative`；header-slot `position:absolute; top:0; left:0; right:0; height:38`（撑满列宽 → 宽度天然与 body 同步，这是消灭同步的机制）；body `padding-top:38` 避让。rail（`.resizeHandleV` 9px 负 margin）移入左列 wrap 全高，遵守 spike 纪律（rail 归列 drag 区）。
+- **Panel width 归属上移**：`LeftPanel`/`RightPanel` 现在组件内自设 `width: ctx.width`；列体化要把 width 上移到列 wrap，Panel 根改 `width:100%`。P0 需触碰两 Panel 根 style（这是 P0 唯一侵入组件内部处）。
+- **P0 期间 header-slot 留空**，fixed 整条 TitleBar 仍覆盖顶部（视觉零变化、可整体回退）；P1 才把整条 TitleBar 内容迁入三段、删 fixed 条与 `--titlebar-*-span`。
+
 ### 3.2 组件拆分（纯呈现层重组，数据契约不动）
 
 | 片段 | 内容 | 归属列 |
@@ -93,3 +101,4 @@ TitleBar 是独立于工作区的整宽横条（`position: fixed`，[TitleBar.mo
 ## 7. 进度记录
 
 - 2026-09-07 立项（用户裁决启动；spike PASS 同日完成于立项前）；UI-305 让位登记
+- 2026-09-07 **P0 地基完成**（最小可回退）：App.tsx 按路由分流 `main` paddingTop（列体化路由 0 / 其余 38，归一化尾斜杠正则排除 `/results`）+ `.workspaceRoot` 改 `100vh + padding-top:38`（box-sizing 保内容区不变）。**未建 header-slot、未动 fixed TitleBar**——视觉与现状零差异，可整体回退。验证：tsc 0 / TitleBar+useResizableColumns vitest 31/31 / CDP 几何 workspace `main padTop=0·rootH=100vh·bodyTop=38·列高=100vh−38`、`/skills` 保持 38。顺带发现并登记 `/results` 既有崩溃（AUDIT-LOG 🟢，非本包引入，stash 验证）。

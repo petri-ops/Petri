@@ -2157,6 +2157,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-310: 增量 — BLOCK-62 TitleBar 列体化 P0 布局地基（列体化路由分流 + workspaceRoot 占满视口）(2026-09-07 in_progress)
+
+**背景**：UI-309 三轮修复（live CSS 变量 / `:global` 标记 / 禁 transition）后确认根因是结构性——TitleBar 独立整宽横条用 grid 模拟三列宽、靠跨 DOM 树同步对齐分隔线。用户裁决启动 BLOCK-62 列体化重构（拖拽接缝 spike 手动实测 PASS 后）。本条为 **P0 地基**，plan `docs/block-62-titlebar-columnization-plan.md`。
+
+**改动**（0 新增 IPC / 0 新依赖，最小可回退）：① [App.tsx](../frontend/src/App.tsx) `AppShell` 按路由分流 `main` 的 `paddingTop`——ProjectWorkspace 路由（`/project/:id/*`，归一化尾斜杠后排除 ResultStudio 的 `/results`）取 0，其余路由维持 `var(--gewu-titlebar-height)`；② [project-workspace.module.css](../frontend/src/pages/project-workspace.module.css) `.workspaceRoot` 从 `calc(100vh - titlebar)` 改 `100vh + padding-top: titlebar`（`box-sizing: border-box` 保内容区高度不变）。**P0 不建 header-slot、不动 fixed TitleBar**——顶栏仍覆盖 0–38，视觉与现状零差异。
+
+**验证**：tsc 触碰文件 0 错误 / TitleBar + useResizableColumns vitest 31/31 / docs:check / ui:audit:check。CDP 实机几何（dev Electron）：workspace 路由 `main padTop=0px · rootH=100vh · bodyTop=38 · 列高=100vh−38`，`/skills` 保持 `padTop=38px` 不回归。**顺带发现**：`/project/:id/results` 既有整页崩溃（`useResultStore.ts:209` `snapshot.results.map is not a function`，`git stash` 验证非本包引入），已登记 AUDIT-LOG 🟢，ResultStudio 属 experimental 面不并入本包。**状态**: in_progress（P0 地基；列级 header 片段与同步链退役在 P1/P2，实机转 verified 留 P3 收口）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-309: 修复 — 恢复 TitleBar 注册（8f3d55a5 误删）：顶部与侧栏宽度同步 +「+」工具菜单复活 (2026-09-07 verified)
 
 **用户反馈**：「软件顶部和下面的工作区域 左右侧栏 宽度调整不是同步的」；「右侧边栏的+ 点击后没有内容了 应该也是存在bug」。主 Agent 先实测对齐理解后用户确认（「应该是的」）修复。
