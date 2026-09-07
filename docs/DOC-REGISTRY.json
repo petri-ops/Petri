@@ -18,7 +18,7 @@
       "id": "UI-305-FRONTEND-LARGE-FILE-REFACTOR",
       "path": "docs/ui-305-frontend-large-file-refactor-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "planned",
       "canonical": true,
       "truthDomain": "ui-305-frontend-large-file-refactor",
       "entrypoint": "docs/README.md",
@@ -31,10 +31,10 @@
         "frontend",
         "G0"
       ],
-      "notes": "前端巨型组件拆分清债。2026-09-07 用户裁决立项启动：普查非测试源码 >600 行（project-workspace.tsx 3540 / SimpleChat.tsx 2343 / ReviewMode.tsx 1781 / ResultView.tsx 1609 等），纯重构零行为变化（组件外迁 + hook 抽取，hook 顺序整簇平移），豁免数据/类型/图标类大文件（inventory.ts、electron.d.ts、Icon.tsx），逻辑层 store/client 缓拆按需裁决，Electron 主进程不在范围。P0 SimpleChat（尾部 6 内联组件外迁 + useSummaryRetry + useModelAccessMenus + useConversationResume）→ P1 project-workspace（11 内联组件外迁）→ P2 ReviewMode+ResultView → P3 剩余按收益裁决 + 收口盘点。每阶段定向 vitest + tsc 0 + ui:audit:check + docs:check。0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "前端巨型组件拆分清债。2026-09-07 用户裁决立项启动：普查非测试源码 >600 行（project-workspace.tsx 3540 / SimpleChat.tsx 2343 / ReviewMode.tsx 1781 / ResultView.tsx 1609 等），纯重构零行为变化（组件外迁 + hook 抽取，hook 顺序整簇平移），豁免数据/类型/图标类大文件（inventory.ts、electron.d.ts、Icon.tsx），逻辑层 store/client 缓拆按需裁决，Electron 主进程不在范围。P0 SimpleChat（尾部 6 内联组件外迁 + useSummaryRetry + useModelAccessMenus + useConversationResume）→ P1 project-workspace（11 内联组件外迁）→ P2 ReviewMode+ResultView → P3 剩余按收益裁决 + 收口盘点。每阶段定向 vitest + tsc 0 + ui:audit:check + docs:check。0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-09-07 让位 BLOCK-62（单工作包串行；仅立项文档 ab65f4e6，无实现提交，恢复需 BLOCK-62 收口后用户裁决）",
       "registeredAt": "2026-09-07",
       "archivePolicy": "archive_when_superseded",
-      "phase": "ACTIVE"
+      "phase": "QUEUED"
     },
     {
       "id": "BLOCK-40-CONV-CHANGES-HYDRATION",
@@ -3601,7 +3601,7 @@
       "id": "BLOCK-61-BRAND-RENAME-GEWU",
       "path": "docs/block-61-brand-rename-gewu-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-61-brand-rename-gewu",
       "entrypoint": "docs/README.md",
@@ -3613,12 +3613,34 @@
         "identity-module",
         "G0"
       ],
-      "notes": "品牌身份系统化改名 BioF3 → Gewu（格物）。用户裁决（2026-09-06）：名字定 Gewu，单独开 block 彻底系统性改名，设计要求后续改名灵活。核心设计 = 品牌身份单一事实源（src/main/brand.js + frontend/src/lib/brand.ts 双端镜像 + brand-identity 契约测试），三层改名策略：Tier A 用户可见面全改 + 字符串一律从品牌模块取；Tier B 兼容迁移（桥双 key / localStorage 读旧写新 / 事件与 IPC 通道名）；Tier C 机械替换（CSS 令牌与类名 sed，theme-token-contract 护航；env GEWU_ 优先 BIOF3_ 兜底双读）。明确不动（协议命名空间非品牌）：core/biof3-server 目录路径、.biof3-* 用户数据目录（数据连续性红线）、历史文档与 acceptance 证据、git 历史。版本号不变 0.0.1-rc.7。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "品牌身份系统化改名 BioF3 → Gewu（格物）。用户裁决（2026-09-06）：名字定 Gewu，单独开 block 彻底系统性改名，设计要求后续改名灵活。核心设计 = 品牌身份单一事实源（src/main/brand.js + frontend/src/lib/brand.ts 双端镜像 + brand-identity 契约测试），三层改名策略：Tier A 用户可见面全改 + 字符串一律从品牌模块取；Tier B 兼容迁移（桥双 key / localStorage 读旧写新 / 事件与 IPC 通道名）；Tier C 机械替换（CSS 令牌与类名 sed，theme-token-contract 护航；env GEWU_ 优先 BIOF3_ 兜底双读）。明确不动（协议命名空间非品牌）：core/biof3-server 目录路径、.biof3-* 用户数据目录（数据连续性红线）、历史文档与 acceptance 证据、git 历史。版本号不变 0.0.1-rc.7。G0 开发期常态 · 不外推 packaged/Provider/GA. 注册表漂移修正（2026-09-07）：roadmap 已记 2026-09-06 同日整包收口（2b55e612 → 032cb82d），registry status 未同步，现补 completed。",
       "registeredAt": "2026-09-06",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-62-TITLEBAR-COLUMNIZATION",
+      "path": "docs/block-62-titlebar-columnization-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-62-titlebar-columnization",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-62",
+        "titlebar",
+        "columnization",
+        "ui",
+        "drag-region",
+        "layout",
+        "G0"
+      ],
+      "notes": "TitleBar 列体化重构（2026-09-07 用户裁决「按这个方案开始重构」，前置 spike 手动实测 PASS）：顶栏从独立整宽横条（grid 模拟三列宽 + 跨 DOM 树同步）拆为三个列级 header 片段，每列 header 与内容同容器，宽度由列容器自身决定，同步契约整体退役（--titlebar-*-span / --gewu-live-* / collapsedRail 180/146/80/196 魔数）。数据契约不动（titleBar state 单一真相，仅删宽度两字段）。spike 证据：相邻 drag 矩形接缝无缝覆盖、动态改宽即时更新、1px gap 死缝=工程纪律（rail 归左列）。UI-305 让位（仅立项文档 ab65f4e6 无实现提交，零损失）。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-07",
       "archivePolicy": "archive_when_superseded",
       "phase": "ACTIVE"
     }
   ],
   "lastUpdated": "2026-09-07",
-  "documentCount": 205
+  "documentCount": 206
 }

@@ -1,7 +1,7 @@
 # UI-305 — 前端巨型组件拆分清债：SimpleChat / project-workspace 等大文件阶段化拆分
 
 - Plan ID：`UI-305-FRONTEND-LARGE-FILE-REFACTOR`
-- 状态：active（2026-09-07 用户裁决立项启动）
+- 状态：planned/queued（2026-09-07 用户裁决立项启动 → 同日让位 BLOCK-62-TITLEBAR-COLUMNIZATION，单工作包串行；仅立项文档 `ab65f4e6` 无实现提交，恢复需 BLOCK-62 收口后用户裁决）
 - 前置：无 active 工作包（TEST-INFRA-DEBT 已于 2026-09-06 收口）
 - 纪律：G0 开发期常态 · 不外推 packaged/Provider/GA
 

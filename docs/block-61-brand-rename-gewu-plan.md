@@ -1,6 +1,6 @@
 # BLOCK-61 — 品牌身份系统化改名：BioF3 → Gewu（格物）
 
-> 状态：`completed`（2026-09-06 用户裁决「Gewu 暂时定这个可以，单独开一个 block 彻底系统性修改名字，设计时让后续改名字变得灵活点」，side chat 会话；当前唯一 active 工作包）
+> 状态：`completed`（2026-09-06 用户裁决「Gewu 暂时定这个可以，单独开一个 block 彻底系统性修改名字，设计时让后续改名字变得灵活点」，side chat 会话；2026-09-07 注册表状态漂移修正，roadmap 已记同日整包收口）
 > 立项日期：2026-09-06
 > truthDomain: `block-61-brand-rename-gewu`
 > 来源：用户判定「BioF3」的 Bio 前缀把领域焊死，而产品已长成本地优先的智能体指挥席（多 agent 派生 49 / 计划模式 55 / 远程执行 57 / 窗口系统 59 / 即有电脑控制 48），领域无关。经候选比对（格物 Gewu / Tycho / Braid / Petri）用户裁决 **Gewu（格物）**。
