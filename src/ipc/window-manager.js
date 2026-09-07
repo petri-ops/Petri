@@ -223,7 +223,7 @@ function setupWindowManagerIpc({
       fullscreenable: false,
       show: false,
       webPreferences: {
-        preload: resolveResource("preload.js"),
+        preload: resolveResource("src", "preload.js"),
         contextIsolation: true,
         nodeIntegration: false,
         sandbox: true,
@@ -319,7 +319,7 @@ function setupWindowManagerIpc({
       backgroundColor: "#1f2330",
       show: false,
       webPreferences: {
-        preload: resolveResource("preload.js"),
+        preload: resolveResource("src", "preload.js"),
         contextIsolation: true,
         nodeIntegration: false,
         sandbox: true,

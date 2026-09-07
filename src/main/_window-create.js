@@ -81,7 +81,7 @@ async function createWindow({
     fullscreen: false,
     simpleFullScreen: false,
     webPreferences: {
-      preload: resolveResource("preload.js"),
+      preload: resolveResource("src", "preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
       webviewTag: true,

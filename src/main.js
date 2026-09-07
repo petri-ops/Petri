@@ -369,7 +369,16 @@ async function main() {
     if (dbPath) {
       fs.mkdirSync(path.dirname(dbPath), { recursive: true });
       const migrationEnv = { ...process.env, ELECTRON_RUN_AS_NODE: "1" };
-      if (IS_DEV) {
+      // Dev: migration child runs under the *system* Node (ABI 137), so it must load
+      // Core's better-sqlite3 (Node-ABI copy), not root's electron-rebuilt copy.
+
+      // Packaged: the child runs under Electron's embedded Node (ABI 145), so it must load the
+      // root copy (which afterPack rebuilt against Electron); delete the override to restore default.
+      // NOTE: read `app.isPackaged` at runtime here — do NOT trust the module-load-time
+      // `IS_DEV` constant: since Electron 41, `require("electron").app` can be undefined
+      // during module evaluation, which silently degrades IS_DEV to false and skips this branch.
+
+      if (!app.isPackaged) {
         migrationEnv.BIOF3_BETTER_SQLITE3_ROOT = resolveCore("biof3-server");
       } else {
         delete migrationEnv.BIOF3_BETTER_SQLITE3_ROOT;

@@ -52,11 +52,18 @@ function _ensureElectronState() {
   try {
     const { app } = require("electron");
     _IS_DEV = !app.isPackaged;
-    _PROJECT_ROOT = _IS_DEV ? path.join(__dirname, "..") : process.resourcesPath;
+    // __dirname = <repo>/src/main. Two levels up lands on the repo root.
+    // (The previous single ".." stopped at <repo>/src and made resolveCore()
+    // / PROJECT_ROOT point one level too shallow. That was harmless while the
+    // root better-sqlite3 happened to match the system Node ABI; after the
+    // Electron 30 -> 41 bump the root copy carries the Electron ABI (145), so
+    // the shallow root made the migration child fall back to it and crash
+    // with "NODE_MODULE_VERSION 145 ... requires 137".)
+    _PROJECT_ROOT = _IS_DEV ? path.join(__dirname, "..", "..") : process.resourcesPath;
   } catch {
     // Fallback for non-Electron env (e.g. `node --check`):
     _IS_DEV = process.env.NODE_ENV === "development" || process.env.ELECTRON_IS_DEV === "1";
-    _PROJECT_ROOT = path.join(__dirname, "..");
+    _PROJECT_ROOT = path.join(__dirname, "..", "..");
   }
 }
 
