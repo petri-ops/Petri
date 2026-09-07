@@ -305,12 +305,9 @@ export function ProjectWorkspace(): React.ReactElement {
   // useOtherConversations below reads from the shared cache; this seed
   // map is only the "just-created, not yet in cache" delta.
   const [otherSeed, setOtherSeed] = useState<Record<string, ConversationSummary[]>>({});
-  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set([projectId || '']));
   const [creatingProject, setCreatingProject] = useState(false);
   const [creatingConversation, setCreatingConversation] = useState(false);
   const [createError, setCreateError] = useState(''); // UI-304 简化版 — 创建项目错误提示
-  const [workspaceSearchQuery, setWorkspaceSearchQuery] = useState('');
-  const [searchConversationIndex, setSearchConversationIndex] = useState<Record<string, ConversationSummary[]>>({});
   // §2 dedup: use the App-level Context directly (5s poll), drop the standalone
   // 10s polling hook and the local state sync layer.
   const backendStatus = useBackendStatus();
@@ -480,6 +477,18 @@ export function ProjectWorkspace(): React.ReactElement {
   }, [openRightPanel]);
 
   const [allProjects, setAllProjects] = useState<Project[]>([]);
+
+  // UI-305 P1.2 — 左栏项目树展开 + 会话搜索状态簇整簇抽入 useProjectTreeState，
+  // 零行为变化（调用点在 allProjects 声明之后）。
+  const {
+    expandedProjects,
+    toggleProjectExpand,
+    expandProject,
+    workspaceSearchQuery,
+    setWorkspaceSearchQuery,
+    searchConversationIndex,
+    ensureSearchConversationIndex,
+  } = useProjectTreeState(projectId, allProjects);
 
   useEffect(() => {
     let cancelled = false;
@@ -802,20 +811,6 @@ export function ProjectWorkspace(): React.ReactElement {
     handleSwitchConversation,
   ]);
 
-  const ensureSearchConversationIndex = useCallback(async () => {
-    const targets = allProjects.filter((item) => !searchConversationIndex[item.id]);
-    if (targets.length === 0) return;
-    const loaded = await Promise.all(
-      targets.map(async (item) => [item.id, await listConversations('active', item.id)] as const)
-    );
-    setSearchConversationIndex((prev) => {
-      const next = { ...prev };
-      loaded.forEach(([id, list]) => {
-        next[id] = list;
-      });
-      return next;
-    });
-  }, [allProjects, searchConversationIndex]);
 
 
   // UI-282 — 拖拽目录直达创建：路径经校验后直接走创建链（UI-304 后无内联面板）
@@ -844,11 +839,7 @@ export function ProjectWorkspace(): React.ReactElement {
       });
 
       setAllProjects((prev) => [created, ...prev.filter((item) => item.id !== created.id)]);
-      setExpandedProjects((prev) => {
-        const next = new Set(prev);
-        next.add(created.id);
-        return next;
-      });
+      expandProject(created.id);
       navigate(`/project/${created.id}`);
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : '创建项目失败');
@@ -875,11 +866,7 @@ export function ProjectWorkspace(): React.ReactElement {
   const createConversationForProject = useCallback(async (targetProjectId = projectId) => {
     if (!targetProjectId || creatingConversation) return;
     updateWorkspaceMode('chat');
-    setExpandedProjects((prev) => {
-      const next = new Set(prev);
-      next.add(targetProjectId);
-      return next;
-    });
+    expandProject(targetProjectId);
     setCreatingConversation(true);
     try {
       const conv = await createConversation('新对话', undefined, targetProjectId);
@@ -944,15 +931,6 @@ export function ProjectWorkspace(): React.ReactElement {
     return forked;
   }, [updateWorkspaceMode, refreshConversations, refreshOtherConversations]);
 
-  // Toggle project expansion in left panel
-  const toggleProjectExpand = useCallback((pid: string) => {
-    setExpandedProjects((prev) => {
-      const next = new Set(prev);
-      if (next.has(pid)) next.delete(pid);
-      else next.add(pid);
-      return next;
-    });
-  }, []);
 
   // Load conversations for other projects when expanded.
   // Plan 1.6 §4.3 — moved to useOtherConversations hook above; the
@@ -1874,3 +1852,4 @@ import { BrowserPanel } from './project-workspace/BrowserPanel';
 import { EmptyResult } from './project-workspace/EmptyResult';
 import { FileTreeList } from './project-workspace/FileTreeList';
 import { WorkspaceFilePreview } from './project-workspace/WorkspaceFilePreview';
+import { useProjectTreeState } from './project-workspace/useProjectTreeState';
