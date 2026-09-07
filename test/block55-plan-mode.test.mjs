@@ -75,6 +75,27 @@ test('无 planMode 时零行为变化（full 模式放行写工具）', () => {
   assert.equal(d.decision, 'allow');
 });
 
+// ---------- UI-303：accessMode='plan' 第四档（计划模式并入档位菜单） ----------
+
+test("accessMode='plan' 档位等效 planMode：mutating 拒绝 + plan/只读放行（即使漏传 planMode 标志）", () => {
+  for (const name of ['workspace_write', 'run_tool', 'spawn_agent']) {
+    const args = name === 'run_tool' ? { op: 'run', toolId: 'x', params: {} } : name === 'workspace_write' ? { relativePath: 'work/a.txt', content: 'x' } : { task: 'x' };
+    const d = decideAgentToolCall({ name, args, ctx: { accessMode: 'plan' }, contract: contractOf(name) });
+    assert.equal(d.decision, 'deny', `${name} 应被拒`);
+    assert.equal(d.error, 'plan_mode_active', `${name} 错误码应为 plan_mode_active`);
+  }
+  const d1 = decideAgentToolCall({ name: 'plan', args: { op: 'create', title: 't', steps: [{ title: 's' }] }, ctx: { accessMode: 'plan' }, contract: contractOf('plan') });
+  assert.equal(d1.decision, 'allow', 'plan 工具是计划档位被授权主体');
+  const d2 = decideAgentToolCall({ name: 'workspace_read', args: { relativePath: 'work/a.txt' }, ctx: { accessMode: 'plan' }, contract: contractOf('workspace_read') });
+  assert.equal(d2.decision, 'allow', '只读探索保留');
+});
+
+test('UI-303 — PLAN_MODE_PROMPT_SECTION 共享常量导出且两条 agent 路径同源', () => {
+  const { PLAN_MODE_PROMPT_SECTION } = require('../core/biof3-server/helpers/plans.js');
+  assert.match(PLAN_MODE_PROMPT_SECTION, /=== 计划模式（Spec 门）===/);
+  assert.match(PLAN_MODE_PROMPT_SECTION, /plan\(op="create"/);
+});
+
 // ---------- P1：draft 创建 + spec_md ----------
 
 test('draft 创建：status=draft + spec_md 落库 + 步骤含 assignee', async () => {

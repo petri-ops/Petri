@@ -153,6 +153,46 @@ test('run_tool run delegates approval instead of inventing a policy confirmation
   assert.equal(result.delegatedApproval, true);
 });
 
+// UI-303 — 计划模式并入档位菜单第四档：accessMode='plan' 独立触发 Spec 门
+// （纵深防御：即使调用方漏传 planMode 标志，档位本身也足以拒绝一切 mutating）
+test('plan access tier enforces the Spec Gate even without an explicit planMode flag', () => {
+  const planTierCtx = { allowExecution: false, accessMode: 'plan' };
+  assert.equal(
+    decideAgentToolCall({
+      name: 'plan',
+      args: { op: 'create' },
+      ctx: planTierCtx,
+      contract: contract('state-write', 'R1', 'planning'),
+    }).decision,
+    'allow',
+    'plan(create) stays allowed in the plan tier'
+  );
+  assert.equal(
+    decideAgentToolCall({ name: 'workspace_read', ctx: planTierCtx, contract: contract() }).decision,
+    'allow',
+    'read-only exploration stays allowed in the plan tier'
+  );
+  for (const [name, args, metadata] of [
+    ['workspace_write', { path: 'x.txt', content: 'y' }, contract('workspace-write', 'R2', 'workspace')],
+    ['workspace_exec', { command: 'pwd' }, contract('execution', 'R2', 'workspace')],
+    ['run_tool', { op: 'run' }, contract('execution', 'R2', 'analysis')],
+  ]) {
+    const denied = decideAgentToolCall({ name, args, ctx: planTierCtx, contract: metadata });
+    assert.equal(denied.decision, 'deny', name);
+    assert.equal(denied.error, 'plan_mode_active', name);
+  }
+  assert.equal(
+    decideAgentToolCall({
+      name: 'workspace_write',
+      args: { path: 'x.txt', content: 'y' },
+      ctx: { planMode: true },
+      contract: contract('workspace-write', 'R2', 'workspace'),
+    }).error,
+    'plan_mode_active',
+    'legacy explicit planMode flag path stays compatible'
+  );
+});
+
 test('scientific source classifier protects existing inputs but allows derived outputs', () => {
   assert.equal(isProtectedScientificSource('metadata.csv'), true);
   assert.equal(isProtectedScientificSource('inputs/cohort.tsv'), true);

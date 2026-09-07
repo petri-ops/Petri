@@ -78,8 +78,9 @@ export interface UseChatStreamArgs {
   activeRun: ConversationRunSnapshot | null;
   activeModel: ChatModelPreset | undefined;
   activeModelId: string;
-  accessMode: 'full' | 'workspace-write' | 'read';
-  /** BLOCK-55 P1 — 计划模式（Spec 门）：随所有 send 路径进入请求 context。 */
+  // UI-303 — 四档：'plan'（计划模式并入档位菜单，Spec 门）
+  accessMode: 'full' | 'workspace-write' | 'plan' | 'read';
+  /** BLOCK-55 P1 — 计划模式（Spec 门）：随所有 send 路径进入请求 context。UI-303 起由 accessMode='plan' 派生。 */
   planMode: boolean;
   /** BLOCK-57 UI-290 — 会话级执行目标（设置页「默认执行目标」，localStorage 持久化；缺省 = 本机）。可选：缺省时 send 内部自行读取。 */
   executionTargetId?: string | null;

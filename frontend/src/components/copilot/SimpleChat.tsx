@@ -331,9 +331,12 @@ export function SimpleChat({
   const [modelMenuOpen, setModelMenuOpen] = useState<'supplier' | 'model' | null>(null);
   const [modelSupplierKey, setModelSupplierKey] = useState<string | null>(null);
   const [accessMenuOpen, setAccessMenuOpen] = useState(false);
-  const [accessMode, setAccessMode] = useState<'full' | 'workspace-write' | 'read'>('full');
-  // BLOCK-55 P1 — Spec 门计划模式：只读探索 + 起草计划（写类工具被 policy 拒绝）
-  const [planMode, setPlanMode] = useState(false);
+  const [accessMode, setAccessMode] = useState<'full' | 'workspace-write' | 'plan' | 'read'>('full');
+  // BLOCK-55 P1 — Spec 门计划模式：只读探索 + 起草计划（写类工具被 policy 拒绝）。
+  // UI-303 — 计划模式并入档位菜单成为第四档：planMode 由 accessMode 派生（单一事实源），
+  // prePlanAccessModeRef 记录进入计划档前的档位，批准执行后恢复。
+  const planMode = accessMode === 'plan';
+  const prePlanAccessModeRef = useRef<'full' | 'workspace-write' | 'read' | null>(null);
   const [pendingPlan, setPendingPlan] = useState<PlanApprovalCardPlan | null>(null);
   const [pendingRevision, setPendingRevision] = useState<{ planId: string; title: string; revNo: number } | null>(null);
   const [planCardBusy, setPlanCardBusy] = useState(false);
@@ -993,7 +996,9 @@ export function SimpleChat({
       const plan = pendingPlan;
       setPendingPlan(null);
       if (action === 'keep-planning') return;
-      setPlanMode(false);
+      // UI-303 — 批准执行即退出计划档：恢复进入计划模式前的档位（缺省完全访问）
+      setAccessMode(prePlanAccessModeRef.current ?? 'full');
+      prePlanAccessModeRef.current = null;
       if (action === 'execute') {
         await send(
           `计划「${plan.title}」已批准（planId: ${plan.id}），请从第一个 pending 步骤开始执行，每完成一步用 plan(op="update_step") 写回状态。`,
@@ -1368,7 +1373,13 @@ export function SimpleChat({
 
   const examplePromptsToShow = displayMessages.length === 0 ? examplePrompts : [];
 
-  const accessModeLabel = accessMode === 'full' ? '完全访问' : accessMode === 'workspace-write' ? '项目写' : '只读模式';
+  const accessModeLabel = accessMode === 'full'
+    ? '完全访问'
+    : accessMode === 'workspace-write'
+      ? '项目写'
+      : accessMode === 'plan'
+        ? '计划模式'
+        : '只读模式';
   const modelGroups = modelPresets.reduce<Array<{
     key: string;
     supplier: string;
@@ -1850,6 +1861,19 @@ export function SimpleChat({
                           <span className="sc-access-option-title">项目写</span>
                           <span className="sc-access-option-sub">允许项目内文件修改与前台命令；后台进程与插件执行不可用</span>
                         </button>
+                        {/* UI-303 — 计划模式并入档位菜单（BLOCK-55 Spec 门）：只读探索 + 起草计划 */}
+                        <button
+                          type="button"
+                          className={`sc-access-option ${accessMode === 'plan' ? 'sc-access-option-active' : ''}`}
+                          onClick={() => {
+                            if (accessMode !== 'plan') prePlanAccessModeRef.current = accessMode;
+                            setAccessMode('plan');
+                            setAccessMenuOpen(false);
+                          }}
+                        >
+                          <span className="sc-access-option-title">计划模式</span>
+                          <span className="sc-access-option-sub">只读探索并起草计划，获批后再执行</span>
+                        </button>
                         <button
                           type="button"
                           className={`sc-access-option ${accessMode === 'read' ? 'sc-access-option-active' : ''}`}
@@ -1865,17 +1889,7 @@ export function SimpleChat({
                     </>
                   )}
                 </div>
-                {/* BLOCK-55 P1 — Spec 门计划模式开关（与档位菜单并列，会话内生效） */}
-                <button
-                  type="button"
-                  className={`sc-plan-mode-btn sc-toolbar-secondary${planMode ? ' is-active' : ''}`}
-                  title="计划模式（Spec 门）：开启后智能体只读探索并起草计划，写类工具被禁用；计划获批后自动恢复执行"
-                  aria-pressed={planMode}
-                  onClick={() => setPlanMode((value) => !value)}
-                >
-                  <Icon name="list-details" size={14} />
-                  <span>计划模式</span>
-                </button>
+                {/* UI-303 — 独立「计划模式」开关已并入左侧档位菜单第四档，composer 不再承载 */}
                 {/* BLOCK-57 UI-290 + BLOCK-60 — 执行目标选择已迁至 设置→计算与数据（默认执行目标），composer 不再承载 */}
               </div>
               <div className="sc-composer-right">
@@ -1914,20 +1928,7 @@ export function SimpleChat({
                           <span className="sc-access-option-title">模型 I/O 信息流</span>
                           <span className="sc-access-option-sub">本会话模型调用的请求与响应原文（只读）</span>
                         </button>
-                        {composerNarrow && (
-                          <>
-                            <div className="sc-menu-section-label">模式</div>
-                            <button
-                              type="button"
-                              className={`sc-access-option${planMode ? ' sc-access-option-active' : ''}`}
-                              onClick={() => setPlanMode((v) => !v)}
-                            >
-                              <span className="sc-access-option-title">计划模式{planMode ? '（开）' : '（关）'}</span>
-                              <span className="sc-access-option-sub">只读探索并起草计划，获批后自动恢复执行</span>
-                            </button>
-                          </>
-                        )}
-                        {/* BLOCK-57 UI-290 — 执行目标选择已迁至 设置→计算与数据；composer 不再承载 */}
+                        {/* UI-303 — 计划模式入口已并入档位菜单，⋯ 窄态收纳项移除；执行目标选择已迁至 设置→计算与数据 */}
                       </div>
                     </>
                   )}

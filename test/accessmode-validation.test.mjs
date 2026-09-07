@@ -149,4 +149,57 @@ test('BLOCK-56 P2 accessMode workspace-write 三档矩阵', async (t) => {
   });
 });
 
+// UI-303 — 计划模式并入档位菜单成为第四档（read / plan / workspace-write / full）
+test('UI-303 accessMode plan 第四档矩阵', async (t) => {
+  const { decideAgentToolCall } = require('../core/biof3-server/agent-tools/agent-tool-policy.js');
+  const { ACCESS_MODES, normalizeScientificTaskSpec } = require('../core/shared-backend/scientific-task-spec.js');
+
+  const decide = (name, sideEffect, accessMode, args = {}, extra = {}) => decideAgentToolCall({
+    name,
+    args,
+    ctx: { accessMode, ...extra },
+    contract: { sideEffect, riskTier: 'R2' },
+  });
+
+  await t.test('plan 档：mutating 一律 plan_mode_active（即使漏传 planMode 标志）', () => {
+    for (const [name, sideEffect, args] of [
+      ['workspace_write', 'workspace-write', { path: 'x.txt', content: 'y' }],
+      ['workspace_exec', 'execution', { command: 'pwd' }],
+      ['workspace_exec_background', 'execution', { command: 'sleep 1' }],
+      ['run_tool', 'execution', { op: 'run' }],
+      ['act', 'execution', { type: 'open' }],
+    ]) {
+      const decision = decide(name, sideEffect, 'plan', args);
+      assert.strictEqual(decision.decision, 'deny', `${name} 应在 plan 档拒绝`);
+      assert.strictEqual(decision.error, 'plan_mode_active', `${name} 拒绝错误码应为 plan_mode_active`);
+    }
+  });
+
+  await t.test('plan 档：plan 工具与只读工具放行', () => {
+    assert.strictEqual(decide('plan', 'state-write', 'plan', { op: 'create' }).decision, 'allow');
+    assert.strictEqual(decide('workspace_read', 'none', 'plan').decision, 'allow');
+    assert.strictEqual(decide('workspace_list', 'none', 'plan').decision, 'allow');
+    assert.strictEqual(decide('run_tool', 'execution', 'plan', { op: 'list' }).decision, 'allow');
+  });
+
+  await t.test('inferExecutionPolicy：plan 档不允许执行', () => {
+    const { inferExecutionPolicy } = require('../core/biof3-server/helpers/agent-execution-policy.js');
+    assert.strictEqual(inferExecutionPolicy([], { accessMode: 'plan' }).allowExecution, false);
+  });
+
+  await t.test('科学任务 spec 面：plan 未知即 fail-closed 回落 read（该面不扩档）', () => {
+    const base = {
+      schemaVersion: 1,
+      taskId: 't1', projectId: 'p1', conversationId: 'c1',
+      originalRequest: 'r',
+      question: { domain: 'd', analysisUnit: 'a', questionType: 'exploratory' },
+      method: { category: 'qc' },
+      inputs: [{ relativePath: 'data.csv', sizeBytes: 1, sha256: null }],
+    };
+    const normalized = normalizeScientificTaskSpec({ ...base, execution: { accessMode: 'plan' } });
+    assert.strictEqual(normalized.execution.accessMode, 'read');
+    assert.ok(ACCESS_MODES.includes('read'));
+  });
+});
+
 console.log('\n✅ 所有 accessMode 策略测试通过！\n');

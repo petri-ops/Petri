@@ -76,9 +76,9 @@ export interface CopilotContext {
   // 6.3 — desktop project workspace context
   /** Current project name (desktop workspace) */
   projectName?: string;
-  /** Agent workspace permission selected in the chat input. */
-  accessMode?: 'full' | 'workspace-write' | 'read';
-  /** BLOCK-55 P1 — Spec 门计划模式：只读探索 + 起草计划，写类工具被 policy 拒绝。 */
+  /** Agent workspace permission selected in the chat input. UI-303 — 'plan' 为第四档（Spec 门计划模式）。 */
+  accessMode?: 'full' | 'workspace-write' | 'plan' | 'read';
+  /** BLOCK-55 P1 — Spec 门计划模式：只读探索 + 起草计划，写类工具被 policy 拒绝。UI-303 起由 accessMode='plan' 派生。 */
   planMode?: boolean;
   /** BLOCK-57 UI-290 — 会话级执行目标（composer 选择器；null/缺省 = 本机）。 */
   executionTargetId?: string | null;

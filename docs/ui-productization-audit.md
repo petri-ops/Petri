@@ -2157,6 +2157,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-303: 增量 — 计划模式并入访问档位菜单第四档（移除独立开关，四模式一处切换） (2026-09-07 in_progress)
+
+**用户反馈**：截图 composer 档位下拉（完全访问/项目写/只读模式）：「计划模式 应该放到这里 这几种模式可以切换的」。
+
+**改动**（0 新增 IPC / 0 新依赖）：BLOCK-55 Spec 门能力不动，入口统一为档位菜单——① [SimpleChat.tsx](../frontend/src/components/copilot/SimpleChat.tsx) 档位下拉在「项目写」与「只读模式」之间新增第四档「计划模式」（副文案「只读探索并起草计划，获批后再执行」）；`accessMode` 联合类型扩为 `'full'|'workspace-write'|'plan'|'read'`（[copilotContext.ts](../frontend/src/lib/copilotContext.ts)、[useChatStream.ts](../frontend/src/components/copilot/SimpleChat/hooks/useChatStream.ts) 同步），**删除独立 planMode state 改由档位派生**（单一事实源）；切入计划档时 `prePlanAccessModeRef` 记录原档位，PlanApprovalCard「批准并执行/批准并清上下文执行」后恢复原档位（缺省 full）；移除 composer 独立「计划模式」开关按钮与 ⋯ 窄态收纳项（[simple-chat.css](../frontend/src/components/copilot/simple-chat.css) 清理 `.sc-plan-mode-btn` 与窄态容器查询规则）。② [accessModeValidator.ts](../frontend/src/components/copilot/accessModeValidator.ts) 增加 plan 档镜像矩阵（只读探索 + 仅放行 plan 工具；run_tool 同步层拒绝，阻断计划模式下重操作 ack 自动批准）+ plan 专属提示文案。③ 后端同档位语义：[chat.js](../core/biof3-server/routes/ai-agent/chat.js) / [agent-runner.js](../core/biof3-server/agent-runner.js) accessMode 合法集加 `'plan'`（未知值仍塌缩 full，**'plan' 绝不可塌缩 full**）且 planMode 由 `(planMode===true || accessMode==='plan')` 派生；agent-runner 补齐 planMode 透传缺口并注入 Spec 门提示段（[helpers/plans.js](../core/biof3-server/helpers/plans.js) 新增共享常量 `PLAN_MODE_PROMPT_SECTION`，chat 与 agent 循环两路径同源防漂移）；[agent-tool-policy.js](../core/biof3-server/agent-tools/agent-tool-policy.js) Spec 门纵深防御（`accessMode='plan'` 独立触发，调用方漏传 planMode 也拦截）+ **plan 工具豁免 `execution_not_allowed` 闸**（修复 'plan' 档 allowExecution=false 会把计划起草本身拒死的缺口）。既有「自动计划模式」意图识别与批准三选一闭环零改动。
+
+**门禁**：tsc 0 / accessModeValidator vitest 5/5（新增 plan 档用例）+ SimpleChat 四件套 vitest 26/26 / 后端定向 node --test 48/48（agent-tool-policy + block55-plan-mode + accessmode-validation，新增 plan 档矩阵与不塌缩断言）/ loop 套件 286/286 / docs:check / ui:audit:check。映射面其余 7 个失败（agent-approval 2、tool-job-conversation 3、result-replay-service 1、g0-rs-ux1h-acceptance 1）经 git stash 干净 main 复核均为存量，非本次引入。
+
+**实机**：待 dev Electron 实机过目（四档下拉切换、计划档起草→批准→执行闭环、批准后档位恢复）后转 verified。**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-301: 多智能体活动面板——子 agent 活动条（列表/中断/详情窗，BLOCK-49 加映二） (2026-09-06 in_progress)
 
 **背景**：二期协作三工具与 proactive 投递均为模型/协议面，用户侧缺少子 agent 的实时可见与操作面（BLOCK-49/52 各自登记的 §2.4 遗留）。

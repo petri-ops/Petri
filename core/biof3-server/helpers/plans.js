@@ -9,6 +9,7 @@
  *   getActivePlanForUserAsync(userId, conversationId) → Promise<plan|null>  (with .steps)
  *   getActivePlanForUser(userId, conversationId)      → plan|null  (sync fallback)
  *   renderActivePlanForPrompt(plan) → string
+ *   PLAN_MODE_PROMPT_SECTION                     — Spec 门计划模式提示段（UI-303，chat/agent-runner 共享）
  *
  * Async helpers use the Promise facade over desktop SQLite.
  */
@@ -321,6 +322,17 @@ async function syncPlanStepStatusFromToolJobAsync(toolJobId, newStatus, errorTex
   }
 }
 
+// UI-303 — Spec 门计划模式提示段（chat.js 与 agent-runner.js 共享同一事实源，
+// 防止两条 agent 路径的纪律注入文案漂移；BLOCK-55 P1 原文迁自 routes/ai-agent/chat.js）
+const PLAN_MODE_PROMPT_SECTION =
+  '\n\n=== 计划模式（Spec 门）===' +
+  '\n当前处于计划模式：写文件、跑分析、运行命令等有副作用的工具全部被禁止，只能只读探索（读文件/检索/查数据）和起草计划。' +
+  '\n流程：① 只读探索充分理解需求 → ② 调用 plan(op="create", title, goal, steps[], specMd, draft=true) 提交完整计划 → ③ 用一句话告诉用户计划已提交待批准，然后停止，不要继续调用其他工具。' +
+  '\nspecMd 是计划正文，必须自包含：目标与边界 / 每个步骤做什么、用什么工具、验收标准（用户批准后可能在一个全新上下文中仅凭 spec 执行，讨论细节写进 spec，不要依赖对话记忆）。' +
+  '\n步骤可标 assignee: "subagent" 表示该步骤适合派子智能体独立完成（执行期分派）；缺省由主智能体自己执行。' +
+  '\n用户要求修改计划：调用 plan(op="update_spec", planId, specMd) 更新正文（可配合 steps 重建——draft 态直接重新 create 亦可），然后继续等待批准。' +
+  '\n计划被批准后（系统提示会出现已批准计划），退出计划模式按步骤执行。';
+
 module.exports = {
   syncPlanStepStatusFromAnalysis,
   syncPlanStepStatusFromAnalysisAsync,
@@ -329,4 +341,5 @@ module.exports = {
   getActivePlanForUserAsync,
   getActivePlanForUser,
   renderActivePlanForPrompt,
+  PLAN_MODE_PROMPT_SECTION,
 };

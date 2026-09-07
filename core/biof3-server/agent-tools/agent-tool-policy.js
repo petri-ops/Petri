@@ -128,18 +128,25 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
   }
 
   const operation = effectiveOperation(name, args, contract);
+  // UI-303 — 计划模式激活判定：显式 planMode 标志（BLOCK-55 旧客户端兼容）或
+  // accessMode='plan' 档位（档位菜单第四档）等效。
+  const planModeActive = ctx.planMode === true || ctx.accessMode === 'plan';
   // BLOCK-55 P1 — Spec 门 plan 模式：只允许 plan 工具（起草/修订计划本身）与
   // 只读探索，其余有副作用工具一律拒绝；计划获批（planMode 关闭）后自动恢复。
   // 复用既有 policy 单闸，不新建第二套权限系统；plan 合同虽是 state-write，
   // 但它是 plan 模式的被授权主体（对齐 codex「plan 模式只留 update_plan」）。
-  if (operation.mutating && ctx.planMode === true && name !== 'plan') {
+  // UI-303 — 即使调用方漏传 planMode，档位本身也足以触发本闸（纵深防御）。
+  if (operation.mutating && planModeActive && name !== 'plan') {
     return deny(
       'read_only',
       'plan_mode_active',
       '计划模式：当前仅进行方案讨论与计划起草，禁止执行有副作用的工具。计划获批后自动恢复执行能力。'
     );
   }
-  if (operation.mutating && ctx.allowExecution === false) {
+  // UI-303 — plan 模式激活时 plan 工具豁免 execution_not_allowed 闸：'plan' 档位
+  // 使 inferExecutionPolicy 判 allowExecution=false（只读约束正确），但起草计划
+  // 本身必须放行，否则计划模式连计划都提交不了。
+  if (operation.mutating && !planModeActive && ctx.allowExecution === false) {
     return deny(
       'read_only',
       'execution_not_allowed',

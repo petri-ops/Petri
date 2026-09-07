@@ -38,7 +38,7 @@ const {
   getChatSummaryAsync,
   summarizeMessages,
 } = require('./helpers/chat-summary');
-const { getActivePlanForUserAsync, renderActivePlanForPrompt } = require('./helpers/plans');
+const { getActivePlanForUserAsync, renderActivePlanForPrompt, PLAN_MODE_PROMPT_SECTION } = require('./helpers/plans');
 const convSync = require('./helpers/conversations');
 const {
   getOrCreateActiveConversation,
@@ -547,6 +547,14 @@ async function runAgentLoop({
       '\n只陈述建议，不要用"要开干吗""是否立即开始"等措辞主动邀请执行。';
   }
 
+  // UI-303 — Spec 门计划模式注入（与 chat.js 同一共享常量）：accessMode='plan'
+  // 档位与显式 planMode 标志等效；agent 循环路径此前不透传 planMode，durable
+  // task / 子 agent 在计划档位下缺纪律约束与 policy 拦截，此处补齐对齐。
+  const planModeActive = (context && context.planMode === true) || (context && context.accessMode === 'plan');
+  if (planModeActive) {
+    systemPrompt += PLAN_MODE_PROMPT_SECTION;
+  }
+
   // BLOCK-20: emit token_budget event for ContextBudgetBar (UI-190)
   // 必须在 _emit 已定义后、首次 iteration 前；systemPrompt 已拼完才能算真实 token。
   // BLOCK-51 回归修复：safeCtx 此前声明在 try 块内（const 块级作用域），
@@ -594,10 +602,13 @@ async function runAgentLoop({
     taskId,
     projectId: context && context.projectId,
     ...projectResultStudioToolContext(context),
-    // BLOCK-56 P2 — workspace-write 中间档透传（additive：未知值维持塌缩 full）
-    accessMode: context && (context.accessMode === 'read' || context.accessMode === 'workspace-write')
+    // BLOCK-56 P2 + UI-303 — 'workspace-write' 中间档与 'plan' 第四档透传
+    // （additive：未知值维持塌缩 full；'plan' 绝不可塌缩 full）
+    accessMode: context && (context.accessMode === 'read' || context.accessMode === 'workspace-write' || context.accessMode === 'plan')
       ? context.accessMode
       : 'full',
+    // UI-303 — Spec 门计划模式透传（此前 agent 循环路径缺失，见上方 planModeActive 注入）
+    planMode: (context && context.planMode === true) || (context && context.accessMode === 'plan'),
     allowExecution: executionPolicy.allowExecution,
     executionPolicyReason: executionPolicy.reason,
     // BLOCK-57 UI-290 — 会话级执行目标（composer 选择器；learning 层校验注册表

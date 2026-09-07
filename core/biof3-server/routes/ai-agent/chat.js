@@ -26,7 +26,7 @@ const {
   getChatSummaryAsync,
   summarizeMessages,
 } = require('../../helpers/chat-summary');
-const { getActivePlanForUserAsync, renderActivePlanForPrompt } = require('../../helpers/plans');
+const { getActivePlanForUserAsync, renderActivePlanForPrompt, PLAN_MODE_PROMPT_SECTION } = require('../../helpers/plans');
 const dbMod = require('../../db');
 const convSync = require('../../helpers/conversations');
 const {
@@ -523,7 +523,8 @@ module.exports = {
 
       let aborted = false;
       const resultEditProgress = createResultEditProgressRecorder();
-      const planModeExplicit = context && context.planMode === true;
+      // UI-303 — 计划模式并入档位菜单第四档：accessMode='plan' 与显式 planMode 标志等效（单一事实源派生）
+      const planModeExplicit = (context && context.planMode === true) || (context && context.accessMode === 'plan');
       // BLOCK-60 加映三 — 自动计划模式：用户表达「先计划/先出方案/别急着执行」
       // 类意图且未显式开启 planMode 时，本轮自动套用计划模式纪律（系统提示级
       // 确定性约束，不依赖模型自觉）。执行类短指令不触发。
@@ -542,15 +543,9 @@ module.exports = {
       }
       const planModeActive = planModeExplicit || planModeAuto;
       if (planModeActive) {
-        // BLOCK-55 P1 — 计划模式纪律（对齐 codex plan mode：纯讨论 + 只留计划工具）
-        systemPrompt +=
-          '\n\n=== 计划模式（Spec 门）===' +
-          '\n当前处于计划模式：写文件、跑分析、运行命令等有副作用的工具全部被禁止，只能只读探索（读文件/检索/查数据）和起草计划。' +
-          '\n流程：① 只读探索充分理解需求 → ② 调用 plan(op="create", title, goal, steps[], specMd, draft=true) 提交完整计划 → ③ 用一句话告诉用户计划已提交待批准，然后停止，不要继续调用其他工具。' +
-          '\nspecMd 是计划正文，必须自包含：目标与边界 / 每个步骤做什么、用什么工具、验收标准（用户批准后可能在一个全新上下文中仅凭 spec 执行，讨论细节写进 spec，不要依赖对话记忆）。' +
-          '\n步骤可标 assignee: "subagent" 表示该步骤适合派子智能体独立完成（执行期分派）；缺省由主智能体自己执行。' +
-          '\n用户要求修改计划：调用 plan(op="update_spec", planId, specMd) 更新正文（可配合 steps 重建——draft 态直接重新 create 亦可），然后继续等待批准。' +
-          '\n计划被批准后（系统提示会出现已批准计划），退出计划模式按步骤执行。';
+        // BLOCK-55 P1 — 计划模式纪律（对齐 codex plan mode：纯讨论 + 只留计划工具）；
+        // UI-303 — 提示段抽至 helpers/plans.js 共享常量，与 agent-runner 路径同源
+        systemPrompt += PLAN_MODE_PROMPT_SECTION;
       }
       if (!planModeActive && context && context.approvedPlanId) {
         systemPrompt +=
@@ -564,12 +559,15 @@ module.exports = {
         userId: req.user && req.user.id,
         projectId: context && context.projectId,
         ...projectResultStudioToolContext(context),
-        // BLOCK-56 P2 — workspace-write 中间档透传（additive：未知值维持塌缩 full）
-        accessMode: context && (context.accessMode === 'read' || context.accessMode === 'workspace-write')
+        // BLOCK-56 P2 + UI-303 — 'workspace-write' 中间档与 'plan' 第四档透传
+        // （additive：未知值维持塌缩 full；'plan' 绝不可塌缩 full，否则档位菜单显示
+        // 计划模式而 policy 放行全部执行面）
+        accessMode: context && (context.accessMode === 'read' || context.accessMode === 'workspace-write' || context.accessMode === 'plan')
           ? context.accessMode
           : 'full',
-        // BLOCK-55 P1 — Spec 门计划模式（policy 层收写类工具，仅放行 plan）
-        planMode: context && context.planMode === true,
+        // BLOCK-55 P1 + UI-303 — Spec 门计划模式（policy 层收写类工具，仅放行 plan）；
+        // accessMode='plan' 派生为 true，兼容旧客户端仅传 planMode 标志
+        planMode: (context && context.planMode === true) || (context && context.accessMode === 'plan'),
         // BLOCK-57 UI-290 — 会话级执行目标（composer 选择器；learning 层在自动
         // 执行分支校验注册表后注入 params，未知目标 fail-closed 回退本机）
         executionTargetId: context && typeof context.executionTargetId === 'string' && context.executionTargetId.trim()

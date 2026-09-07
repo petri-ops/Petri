@@ -32,9 +32,20 @@ describe('accessModeValidator BLOCK-56 P2 三档矩阵', () => {
     }
   });
 
+  // UI-303 — 计划模式并入档位菜单第四档：plan 档 = 只读探索 + 仅放行 plan 工具
+  it('plan 档放行只读探索与 plan 工具，拒绝一切写面', () => {
+    for (const tool of ['workspace_read', 'workspace_list', 'plan']) {
+      expect(isToolCallAllowed(tool, ctx('plan'))).toBe(true);
+    }
+    for (const tool of ['workspace_write', 'workspace_replace', 'workspace_exec', 'workspace_exec_background', 'shell_exec', 'git_commit', 'npm_install', 'run_tool']) {
+      expect(isToolCallAllowed(tool, ctx('plan'))).toBe(false);
+    }
+  });
+
   it('未知档位默认放行；错误信息按档位区分', () => {
     expect(isToolCallAllowed('workspace_write', ctx(undefined))).toBe(true);
     expect(getBlockedToolMessage('git_commit', 'workspace-write')).toContain('项目写模式');
+    expect(getBlockedToolMessage('git_commit', 'plan')).toContain('计划模式');
     expect(getBlockedToolMessage('git_commit', 'read')).toContain('只读模式');
   });
 });

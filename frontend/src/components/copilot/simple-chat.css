@@ -452,24 +452,7 @@
   font-size: var(--gewu-font-size-caption);
 }
 
-/* BLOCK-55 P1 — 计划模式开关（档位菜单旁） */
-.sc-plan-mode-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--gewu-border);
-  background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
-  cursor: pointer;
-}
-.sc-plan-mode-btn.is-active {
-  background: var(--gewu-border);
-  color: var(--gewu-text-primary);
-  border-color: var(--gewu-text-primary);
-}
+/* UI-303 — 独立「计划模式」开关（.sc-plan-mode-btn）已移除：计划模式并入档位菜单第四档 */
 
 /* BLOCK-55 P1 — 计划批准卡（draft 计划三选一） */
 .sc-plan-approval {
@@ -1649,19 +1632,9 @@
 }
 
 /* BLOCK-60 — 容器查询自适应：composer 自身宽度 <680px 时收纳低频/次要控件
-   （计划模式、执行目标转由 ⋯ 菜单承载；已激活的计划模式强制常驻）。 */
+   （UI-303 后计划模式走档位菜单不受窄态影响；模型/供应商按钮文字收起见下）。 */
 .sc-composer {
   container-type: inline-size;
-}
-
-@container (max-width: 679px) {
-  .sc-composer .sc-toolbar-secondary {
-    display: none;
-  }
-
-  .sc-composer .sc-plan-mode-btn.is-active.sc-toolbar-secondary {
-    display: inline-flex;
-  }
 }
 
 /* BLOCK-49 加映二 — 窄态模型/供应商按钮文字收起（图标化；JS composerNarrow 双保险） */
