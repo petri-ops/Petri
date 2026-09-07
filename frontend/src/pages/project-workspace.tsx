@@ -391,6 +391,7 @@ export function ProjectWorkspace(): React.ReactElement {
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set([projectId || '']));
   const [creatingProject, setCreatingProject] = useState(false);
   const [creatingConversation, setCreatingConversation] = useState(false);
+  const [createError, setCreateError] = useState(''); // UI-304 简化版 — 创建项目错误提示
   const [workspaceSearchQuery, setWorkspaceSearchQuery] = useState('');
   const [searchConversationIndex, setSearchConversationIndex] = useState<Record<string, ConversationSummary[]>>({});
   // §2 dedup: use the App-level Context directly (5s poll), drop the standalone
@@ -790,79 +791,34 @@ export function ProjectWorkspace(): React.ReactElement {
     });
   }, [allProjects, searchConversationIndex]);
 
-  // UI-304 加映 — 「+」不再依赖系统目录面板（Electron 30 在 macOS 26 上出现
-  // 「条目可见但打开按钮置灰」的面板兼容问题，共享标记/权限均非根因）：
-  // 点击直接打开应用内 FolderPicker（file:list-directory IPC，全环境可用），
-  // 选定后进入确认态（完整路径 + 项目名）一键创建。手输路径保留为粘贴兜底。
-  const [createPanelOpen, setCreatePanelOpen] = useState(false);
-  const [createPanelMode, setCreatePanelMode] = useState<'browse' | 'confirm' | 'manual'>('browse');
-  const [createPath, setCreatePath] = useState('');
-  const [createError, setCreateError] = useState('');
 
   const openCreatePanel = useCallback(async () => {
     setCreateError('');
     const dialog = window.biof3Desktop?.files?.openDirectoryDialog;
-    if (typeof dialog === 'function') {
-      const selected = await dialog();
-      if (selected) {
-        // 原生面板选中成功：直达确认态
-        setCreatePanelMode('confirm');
-        setCreatePath(selected);
-        setCreatePanelOpen(true);
-        return;
-      }
-      // 原生面板取消：降级到应用内 FolderPicker（零输入可视化导航）
-      setCreatePanelMode('browse');
-      setCreatePath('');
-      setCreatePanelOpen(true);
+    if (typeof dialog !== 'function') {
+      setCreateError('当前环境不支持原生文件夹选择（请在 Gewu 桌面应用中使用）');
       return;
     }
-    // 桥缺失（非桌面环境或旧版本）：直接应用内 FolderPicker
-    setCreatePanelMode('browse');
-    setCreatePath('');
-    setCreatePanelOpen(true);
-  }, []);
-
-  // UI-304 加映 — 确认态「重新选择」：回到应用内文件夹浏览器
-  const repickCreateDirectory = useCallback(() => {
-    setCreatePanelMode('browse');
-    setCreateError('');
-  }, []);
-
-  // UI-304 — 外部路径直达确认态（FolderPicker 选定 / 左栏拖拽目录落位），仍不绕过确认
-  const pickExternalDirectory = useCallback((path: string) => {
-    setCreatePanelMode('confirm');
-    setCreatePath(path);
-    setCreateError('');
-    setCreatePanelOpen(true);
-  }, []);
-
-  const switchCreatePanelManual = useCallback(() => {
-    setCreatePanelMode('manual');
-    setCreateError('');
-  }, []);
-
-  const closeCreatePanel = useCallback(() => {
-    setCreatePanelOpen(false);
-    setCreateError('');
-  }, []);
-
-  // UI-251/UI-253 — 创建失败不再静默；创建前路径可见（面板内可编辑）
-  const createProjectFromPanel = useCallback(async () => {
-    if (creatingProject) return;
+    
+    const selected = await dialog();
+    if (!selected) return; // 用户取消，什么都不做
+    
+    // 直接创建项目（对齐 Codex）
     const validate = window.biof3Desktop?.files?.validateDirectory;
     if (typeof validate !== 'function') {
-      setCreateError('当前运行环境不支持路径校验（请在 Gewu 桌面应用中使用）。');
+      setCreateError('当前环境不支持路径校验');
       return;
     }
+    
     setCreatingProject(true);
-    setCreateError('');
     try {
-      const res = await validate(createPath);
+      const res = await validate(selected);
       if (!res.ok || !res.data?.path) {
-        setCreateError(res.error || '路径校验失败');
+        setCreateError(res.error || '所选路径无效');
+        setCreatingProject(false);
         return;
       }
+      
       const finalPath = res.data.path;
       const name = finalPath.split(/[\\/]/).pop()?.trim() || '新项目';
       const created = await createProject({
@@ -870,21 +826,20 @@ export function ProjectWorkspace(): React.ReactElement {
         modality: 'general',
         workspacePath: finalPath,
       });
+      
       setAllProjects((prev) => [created, ...prev.filter((item) => item.id !== created.id)]);
       setExpandedProjects((prev) => {
         const next = new Set(prev);
         next.add(created.id);
         return next;
       });
-      setCreatePanelOpen(false);
-      setCreatePath('');
       navigate(`/project/${created.id}`);
-    } catch (e) {
-      setCreateError(`创建项目失败：${e instanceof Error ? e.message : String(e)}`);
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : '创建项目失败');
     } finally {
       setCreatingProject(false);
     }
-  }, [createPath, creatingProject, navigate]);
+  }, [navigate]);
 
   const createConversationForProject = useCallback(async (targetProjectId = projectId) => {
     if (!targetProjectId || creatingConversation) return;
@@ -1841,19 +1796,11 @@ export function ProjectWorkspace(): React.ReactElement {
     expandedProjects,
     creatingProject,
     creatingConversation,
-    // UI-304 — 创建面板 dialog-first：确认态（选完目录）/手输态（兜底）双模式
+    // UI-304 简化版 — 点 + 直接创建，无面板
     createPanel: {
-      open: createPanelOpen,
-      mode: createPanelMode,
-      path: createPath,
+      open: false, // 不再需要面板
       error: createError,
       onOpen: openCreatePanel,
-      onClose: closeCreatePanel,
-      onPathChange: setCreatePath,
-      onConfirm: createProjectFromPanel,
-      onRepick: repickCreateDirectory,
-      onSwitchManual: switchCreatePanelManual,
-      onPickExternal: pickExternalDirectory,
     },
     createConversationForProject,
     // UI-258 — 更改当前项目工作目录（路径可粘贴/可编辑）

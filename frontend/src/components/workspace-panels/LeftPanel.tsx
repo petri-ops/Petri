@@ -28,23 +28,11 @@ export interface LeftPanelContext {
   // One-click creators
   creatingProject: boolean;
   creatingConversation: boolean;
-  /** UI-304 加映 — 创建项目面板三模式：browse（应用内 FolderPicker，主入口）/
-      confirm（选定目录后的确认态）/ manual（粘贴路径兜底） */
+  /** UI-304 简化版 — 点 + 直接弹原生面板创建，无需面板 UI */
   createPanel: {
-    open: boolean;
-    mode?: 'browse' | 'confirm' | 'manual';
-    path: string;
-    error: string;
+    open: boolean; // 保持为 false
+    error: string; // 仅用于显示错误
     onOpen: () => void | Promise<void>;
-    onClose: () => void;
-    onPathChange: (path: string) => void;
-    onConfirm: () => void | Promise<void>;
-    /** UI-304 加映 — 确认态「重新选择」：回到应用内文件夹浏览器 */
-    onRepick?: () => void | Promise<void>;
-    /** UI-304 — 切到粘贴路径兜底模式 */
-    onSwitchManual?: () => void;
-    /** UI-304 — 选定路径直达确认态（FolderPicker 选定 / 左栏拖拽落位），仍不绕过确认 */
-    onPickExternal?: (path: string) => void;
   };
   createConversationForProject: (projectId?: string) => void | Promise<void>;
   /** UI-258 — 更改当前项目工作目录（路径可粘贴/可编辑） */
@@ -314,143 +302,10 @@ function ProjectTreeHeader({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
           </button>
         </div>
       </div>
-      {/* UI-304 加映 — 创建面板三模式：browse（应用内 FolderPicker，主入口，不经
-          系统面板——Electron 30 在 macOS 26 上「打开」按钮会置灰）→ confirm（确认态）
-          → 创建；manual 为粘贴路径兜底。 */}
-      {ctx.createPanel.open && ctx.createPanel.mode === 'browse' && (
+      {/* UI-304 简化版 — 错误提示（如果有）*/}
+      {ctx.createPanel.error && (
         <div className={styles.leftCreatePanel} data-testid="left-create-panel">
-          <div className={styles.leftCreatePickerWrap}>
-            <FolderPicker
-              initialPath=""
-              pickLabel="选择此文件夹"
-              onPick={(picked) => {
-                if (typeof ctx.createPanel.onPickExternal === 'function') {
-                  ctx.createPanel.onPickExternal(picked);
-                } else {
-                  ctx.createPanel.onPathChange(picked);
-                  void ctx.createPanel.onConfirm();
-                }
-              }}
-              onCancel={ctx.createPanel.onClose}
-            />
-          </div>
-          {ctx.createPanel.error && (
-            <p className={styles.leftCreateError} role="alert">{ctx.createPanel.error}</p>
-          )}
-          <div className={styles.leftCreateActions}>
-            <button
-              type="button"
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-              onClick={ctx.createPanel.onSwitchManual}
-              disabled={ctx.creatingProject}
-              title="直接粘贴完整目录路径"
-            >
-              粘贴路径
-            </button>
-            <button
-              type="button"
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-              onClick={ctx.createPanel.onClose}
-              disabled={ctx.creatingProject}
-            >
-              取消
-            </button>
-          </div>
-        </div>
-      )}
-      {ctx.createPanel.open && ctx.createPanel.mode === 'confirm' && (
-        <div className={styles.leftCreatePanel} data-testid="left-create-panel">
-          <p className={styles.leftCreateConfirmLabel}>将在以下目录创建项目：</p>
-          <p className={styles.leftCreateConfirmPath} title={ctx.createPanel.path}>
-            {ctx.createPanel.path}
-          </p>
-          <p className={styles.leftCreateConfirmLabel}>
-            项目名：<strong>{ctx.createPanel.path.split(/[\\/]/).pop()?.trim() || '新项目'}</strong>
-          </p>
-          {ctx.createPanel.error && (
-            <p className={styles.leftCreateError} role="alert">{ctx.createPanel.error}</p>
-          )}
-          <div className={styles.leftCreateActions}>
-            <button
-              type="button"
-              className="gewu-btn gewu-btn--sm"
-              onClick={() => void ctx.createPanel.onConfirm()}
-              disabled={ctx.creatingProject || !ctx.createPanel.path.trim()}
-            >
-              {ctx.creatingProject ? '创建中…' : '创建项目'}
-            </button>
-            <button
-              type="button"
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-              onClick={() => void (ctx.createPanel.onRepick?.())}
-              disabled={ctx.creatingProject}
-            >
-              重新选择…
-            </button>
-            <button
-              type="button"
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-              onClick={ctx.createPanel.onSwitchManual}
-              disabled={ctx.creatingProject}
-              title="macOS 对部分共享目录会禁用系统选择器，可手动粘贴完整路径"
-            >
-              手动输入路径
-            </button>
-            <button
-              type="button"
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-              onClick={ctx.createPanel.onClose}
-              disabled={ctx.creatingProject}
-            >
-              取消
-            </button>
-          </div>
-        </div>
-      )}
-      {ctx.createPanel.open && ctx.createPanel.mode === 'manual' && (
-        <div className={styles.leftCreatePanel} data-testid="left-create-panel">
-          <div className={styles.leftCreateRow}>
-            <input
-              className={styles.leftCreateInput}
-              type="text"
-              value={ctx.createPanel.path}
-              onChange={(e) => ctx.createPanel.onPathChange(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') void ctx.createPanel.onConfirm();
-                if (e.key === 'Escape') ctx.createPanel.onClose();
-              }}
-              placeholder="/Users/you/path/to/project"
-              autoFocus
-              aria-label="项目工作目录完整路径"
-            />
-          </div>
-          {ctx.createPanel.error && (
-            <p className={styles.leftCreateError} role="alert">{ctx.createPanel.error}</p>
-          )}
-          <div className={styles.leftCreateActions}>
-            <button
-              type="button"
-              className="gewu-btn gewu-btn--sm"
-              onClick={() => void ctx.createPanel.onConfirm()}
-              disabled={ctx.creatingProject || !ctx.createPanel.path.trim()}
-              title="校验路径并以目录名创建项目"
-            >
-              {ctx.creatingProject ? '创建中…' : '创建项目'}
-            </button>
-            <BrowseFolderButton
-              initialPath={ctx.createPanel.path}
-              onPick={ctx.createPanel.onPathChange}
-              disabled={ctx.creatingProject}
-            />
-            <button
-              type="button"
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-              onClick={ctx.createPanel.onClose}
-              disabled={ctx.creatingProject}
-            >
-              取消
-            </button>
-          </div>
+          <p className={styles.leftCreateError} role="alert">{ctx.createPanel.error}</p>
         </div>
       )}
       {/* UI-258 — 更改当前项目工作目录：路径可粘贴/可编辑 */}
