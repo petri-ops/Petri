@@ -16,6 +16,8 @@ import { BottomTerminal } from '@/components/workspace-panels/BottomTerminal';
 import { CenterPanel, type CenterPanelContext } from '@/components/workspace-panels/CenterPanel';
 import { LeftPanel, type LeftPanelContext } from '@/components/workspace-panels/LeftPanel';
 import { RightPanel, type RightPanelContext } from '@/components/workspace-panels/RightPanel';
+import { ColumnHeader } from '@/components/desktop/titlebar/ColumnizedTitleBar';
+import { TitleBar } from '@/components/desktop/TitleBar';
 import { DataIntakeControl } from '@/components/workspace-panels/DataIntakeControl';
 import { WorkspaceFileIcon } from '@/components/workspace-panels/WorkspaceFileIcon';
 import { getProject, listProjectJobs, listDatasetsByProject, listProjects, updateProject, createProject, setProjectStatus } from '@/lib/project-store';
@@ -1640,8 +1642,11 @@ export function ProjectWorkspace(): React.ReactElement {
 
   if (loading) {
     return (
-      <div className={styles.loadingWrap}>
-        <p>加载项目中…</p>
+      <div className={styles.earlyReturnWrap}>
+        <TitleBar />
+        <div className={styles.loadingWrap}>
+          <p>加载项目中…</p>
+        </div>
       </div>
     );
   }
@@ -1649,18 +1654,24 @@ export function ProjectWorkspace(): React.ReactElement {
   // 只有"尚未加载到项目"时错误才全屏；已加载项目的轮询瞬时错误走顶部横幅，不卸载整页
   if (error && !project) {
     return (
-      <div className={styles.errorWrap}>
-        <p>{error}</p>
-        <Link to="/" className={styles.backLink}>← 返回工作台</Link>
+      <div className={styles.earlyReturnWrap}>
+        <TitleBar />
+        <div className={styles.errorWrap}>
+          <p>{error}</p>
+          <Link to="/" className={styles.backLink}>← 返回工作台</Link>
+        </div>
       </div>
     );
   }
 
   if (!project) {
     return (
-      <div className={styles.errorWrap}>
-        <p>项目不存在</p>
-        <Link to="/" className={styles.backLink}>← 返回工作台</Link>
+      <div className={styles.earlyReturnWrap}>
+        <TitleBar />
+        <div className={styles.errorWrap}>
+          <p>项目不存在</p>
+          <Link to="/" className={styles.backLink}>← 返回工作台</Link>
+        </div>
       </div>
     );
   }
@@ -1669,6 +1680,7 @@ export function ProjectWorkspace(): React.ReactElement {
   // needs to render its 8 workspaceMode layouts. ProjectWorkspace remains the
   // single source of truth; CenterPanel is a pure renderer.
   const centerPanelCtx: CenterPanelContext = {
+    columnHeader: compactLayout ? undefined : <ColumnHeader side="center" />,
     project: project as Project,
     projectId,
     allProjects,
@@ -1746,6 +1758,7 @@ export function ProjectWorkspace(): React.ReactElement {
 
   const leftPanelCtx: LeftPanelContext = {
     width: leftWidth,
+    columnHeader: compactLayout ? undefined : <ColumnHeader side="left" />,
     project: project as Project,
     workspacePath,
     compactWorkspacePath,
@@ -1784,6 +1797,7 @@ export function ProjectWorkspace(): React.ReactElement {
 
   const rightPanelCtx: RightPanelContext = {
     width: effectiveRightWidth,
+    columnHeader: compactLayout ? undefined : <ColumnHeader side="right" />,
     project: project as Project,
     projectId,
     activeConvId,
@@ -1851,9 +1865,16 @@ export function ProjectWorkspace(): React.ReactElement {
   }
 
   return (
-    <div className={styles.workspaceRoot}>
+    <div className={`${styles.workspaceRoot} ${compactLayout ? styles.workspaceRootCompact : ''}`}>
+      {/* BLOCK-62 P1b — compact（≤960px）列变浮层、无「列宽」语义 → fixed 整条
+          回归（ctx 注入的列内 header 已同步禁用）；regular 顶栏由三个列内
+          ColumnHeader 承载（AppShell 在本路由不渲染全局条）。 */}
+      {compactLayout && <TitleBar />}
       {showRuntimeBanner && (
-        <div className={styles.runtimeMissingBanner} role="alert">
+        <div
+          className={`${styles.runtimeMissingBanner} ${compactLayout ? '' : styles.runtimeMissingBannerOverlay}`}
+          role="alert"
+        >
           <span className={styles.runtimeMissingBannerText}>
             <Icon name="cpu" size={15} />
             <span>{runtimeBannerMessage}</span>

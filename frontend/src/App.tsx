@@ -80,7 +80,10 @@ function AppShell(): React.ReactElement {
 
   return (
     <>
-      <TitleBar />
+      {/* BLOCK-62 P1b — 列体化路由的顶栏归 ProjectWorkspace 自持（regular=列内
+          ColumnHeader，loading/error/compact=fixed 条），AppShell 不再渲染全局条，
+          避免与列内 header 双份。其余路由照旧。 */}
+      {!isColumnizedWorkspace && <TitleBar />}
       <CopilotContextProvider>
         {/* BLOCK-42 — pending-scroll 全局 Provider：页面级写入端（ProjectWorkspace
             事件 relay）与消费端（WorkspaceFilePreviewBridge / dev bridge / 未来

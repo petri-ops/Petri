@@ -9,6 +9,12 @@ import styles from '@/pages/project-workspace.module.css';
 export interface LeftPanelContext {
   // Layout
   width: number;
+  /**
+   * BLOCK-62 P1b — 列级 header：渲染为 aside 第一个子元素。aside 交叉轴 stretch
+   * → header 宽 = aside 宽 = 栏宽（同一元素派生、同一次 commit → 分隔线物理一体）。
+   * 未注入（测试）时零变化。
+   */
+  columnHeader?: React.ReactNode;
 
   // Project + workspace
   project: Project;
@@ -123,6 +129,7 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
 
   return (
     <aside className={styles.leftCol} style={{ width: `var(--gewu-live-left-width, ${ctx.width}px)` }}>
+      {ctx.columnHeader}
       <div
         className={styles.leftPanelWrap}
         style={dropActive ? { outline: '1px dashed var(--gewu-accent)', outlineOffset: '-4px' } : undefined}

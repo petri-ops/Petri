@@ -1,0 +1,78 @@
+/* BLOCK-62 P1b — 列级 header。token 与 fixed 条 [TitleBar.module.css](../TitleBar.module.css)
+   同源（zone 片段复用同一组 --titlebar-* 变量），暗色覆盖同步。header 作为栏
+   aside（flex-column）第一个子元素，交叉轴 stretch → 宽 = aside 宽 = 栏宽。 */
+.columnHeader {
+  --titlebar-height: var(--gewu-titlebar-height);
+  --titlebar-bg: color-mix(in srgb, var(--gewu-bg-surface) 98%, var(--gewu-bg-canvas) 2%);
+  --titlebar-left-bg: var(--titlebar-bg);
+  --titlebar-border: color-mix(in srgb, var(--gewu-border) 72%, transparent 28%);
+  --titlebar-divider: color-mix(in srgb, var(--gewu-border) 64%, transparent 36%);
+  --titlebar-ink: var(--gewu-text);
+  --titlebar-ink-muted: var(--gewu-text-secondary);
+  --titlebar-pill-bg: color-mix(in srgb, var(--gewu-bg-surface) 72%, transparent 28%);
+  --titlebar-pill-border: color-mix(in srgb, var(--gewu-border-strong) 62%, transparent 38%);
+  --titlebar-hover: color-mix(in srgb, var(--gewu-hover) 92%, transparent 8%);
+  --win-btn-size: 22px;
+  --win-btn-bg: color-mix(in srgb, var(--gewu-text) 12%, transparent 88%);
+  --win-btn-bg-hover: color-mix(in srgb, var(--gewu-text) 22%, transparent 78%);
+  --win-btn-fg: color-mix(in srgb, var(--gewu-text) 78%, transparent 22%);
+  --win-btn-bg-close: color-mix(in srgb, var(--gewu-text) 12%, transparent 88%);
+  --win-btn-bg-close-hover: #e0464e;
+  --win-btn-fg-close-hover: #ffffff;
+
+  position: relative;
+  /* 与 fixed 条同层级：列内 header 及其菜单须压在 settingsOverlay(998) 之上
+     （今天顶栏在模态之上可见的行为不变）；backdrop-filter 已为本元素建堆叠上下文，
+     菜单 z-index 只在其内竞争。aside overflow:hidden 仅在栏水平边缘裁切，菜单向下
+     开在栏体（aside 全高）内不被裁。 */
+  z-index: 9999;
+  flex-shrink: 0;
+  height: var(--titlebar-height);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  background: var(--titlebar-bg);
+  color: var(--titlebar-ink);
+  line-height: 1;
+  -webkit-app-region: drag;
+  user-select: none;
+  backdrop-filter: saturate(1.1) blur(18px);
+  border-bottom: 1px solid var(--titlebar-border);
+}
+
+/* 单区段（左/右列 header）：zone 在 fixed 条里靠 grid stretch 撑满，flex 行里会
+   按内容收缩；此处强制吃掉 header 全宽。 */
+.columnHeader > div:only-child {
+  flex: 1 1 auto;
+}
+
+/* 中列 header 三段式：收起态区段收缩到内容宽，主区段吃掉剩余。 */
+.inlineZone {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  height: 100%;
+}
+
+.mainZone {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  min-width: 0;
+  height: 100%;
+}
+
+/* 列内 header 不画竖分隔线：栏间分隔线由全高的 resizeHandleV::after 一条线贯穿
+   （header 带与 body 带天然连续）。fixed 条时代 leftZone/centerTitle 的
+   border-right 在列内会与 rail 线错位，故抑制。 */
+.columnHeader > div,
+.mainZone > div,
+.inlineZone > div {
+  border-right: 0;
+}
+
+[data-theme='dark'] .columnHeader {
+  --titlebar-bg: color-mix(in srgb, var(--gewu-bg-surface) 96%, var(--gewu-bg-canvas) 4%);
+  --titlebar-left-bg: var(--titlebar-bg);
+  --titlebar-pill-bg: color-mix(in srgb, var(--gewu-bg-elevated) 70%, transparent 30%);
+}

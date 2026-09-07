@@ -31,6 +31,8 @@ type DispatchSetter<T> = React.Dispatch<React.SetStateAction<T>>;
 export interface RightPanelContext {
   // Layout
   width: number;
+  /** BLOCK-62 P1b — 列级 header（aside 第一个子元素，宽=栏宽，同帧刚性）。 */
+  columnHeader?: React.ReactNode;
 
   // Project + conversation
   project: Project;
@@ -129,6 +131,7 @@ export function RightPanel({
         style={{ width: `var(--gewu-live-right-width, ${ctx.width}px)` }}
         data-workspace-mode={workspaceMode}
       >
+        {ctx.columnHeader}
         <div className={styles.resultPanel}>
           <div className={styles.resultPanelBody}>
             {ctx.openRightTabs.map((tab) => (

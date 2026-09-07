@@ -6,17 +6,38 @@
 .workspaceRoot {
   display: flex;
   flex-direction: column;
-  /* BLOCK-62 P0 列体化地基：本路由 main 不再 paddingTop 让位固定顶栏，
-     改由 root 占满视口并在内部让出顶栏轨道高度（box-sizing 保证内容区
-     = 100vh - 顶栏）。P1 拆列级 header-slot 后此 padding-top 退役。 */
+  /* BLOCK-62 P1b — regular：列内 header 占满视口（无 padding-top 让位）；
+     compact/早退页由 .workspaceRootCompact / .earlyReturnWrap 让位 fixed 条 */
   height: 100vh;
   max-height: 100vh;
-  padding-top: var(--gewu-titlebar-height);
-  box-sizing: border-box;
   min-height: 0;
   overflow: hidden;
+  position: relative;
   background: var(--gewu-bg-surface);
   color: var(--gewu-text);
+}
+
+/* compact（≤960px）：列变浮层无「列宽」语义 → fixed 整条回归，root 让位 38px */
+.workspaceRootCompact {
+  padding-top: var(--gewu-titlebar-height);
+}
+
+/* loading/error 早退页：无列结构 → fixed 整条 + 让位容器（交通灯可达） */
+.earlyReturnWrap {
+  height: 100vh;
+  box-sizing: border-box;
+  padding-top: var(--gewu-titlebar-height);
+}
+
+/* BLOCK-62 P1b regular：运行时缺失横幅悬浮在 header 带之下（列体占满视口，
+   占流会把列内 header 顶离视口顶部，破坏「顶栏在 0-38」不变量）。
+   compact 分支不加此类 → 维持占流（root 已 padding-top 让位 fixed 条，与今天一致）。 */
+.runtimeMissingBannerOverlay {
+  position: absolute;
+  top: var(--gewu-titlebar-height);
+  left: 0;
+  right: 0;
+  z-index: 60;
 }
 
 /* Header bar — draggable (no-drag on children) */
@@ -593,7 +614,10 @@
 .leftPanelWrap {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  /* BLOCK-62 P1b — 列内 header 占 38px，正文改 flex 填充（原 height:100% 会与
+     header 叠加溢出 aside 底 38px，把「设置」行顶出可视区） */
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
   padding: 4px 8px 10px;
 }
@@ -2996,7 +3020,10 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
 .resultPanel {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  /* BLOCK-62 P1b — 列内 header 占 38px，正文改 flex 填充（同 leftPanelWrap）；
+     compact 下 columnHeader 未注入，单子元素 flex:1 仍填满 aside */
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
   background: var(--gewu-bg-surface);
 }

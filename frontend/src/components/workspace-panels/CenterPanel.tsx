@@ -42,6 +42,9 @@ import styles from '@/pages/project-workspace.module.css';
 export type { ActiveArtifact };
 
 export interface CenterPanelContext {
+  /** BLOCK-62 P1b — 列级 header（main 第一个子元素，flex:1 子项各自让位）。 */
+  columnHeader?: React.ReactNode;
+
   // Project + conversation state
   project: Project;
   projectId: string | undefined;
@@ -191,6 +194,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
       style={{ paddingBottom: bottomTerminalOpen ? bottomTerminalHeight : 0 }}
       data-return-conversation-ms={returnConversationMs === null ? undefined : returnConversationMs.toFixed(2)}
     >
+      {ctx.columnHeader}
       {workspaceMode === 'search' && (
         <WorkspaceSearchView ctx={ctx} />
       )}
