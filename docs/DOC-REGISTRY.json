@@ -15,6 +15,28 @@
   },
   "documents": [
     {
+      "id": "UI-305-FRONTEND-LARGE-FILE-REFACTOR",
+      "path": "docs/ui-305-frontend-large-file-refactor-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "ui-305-frontend-large-file-refactor",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "ui-305",
+        "refactor",
+        "large-file",
+        "simplechat",
+        "project-workspace",
+        "frontend",
+        "G0"
+      ],
+      "notes": "前端巨型组件拆分清债。2026-09-07 用户裁决立项启动：普查非测试源码 >600 行（project-workspace.tsx 3540 / SimpleChat.tsx 2343 / ReviewMode.tsx 1781 / ResultView.tsx 1609 等），纯重构零行为变化（组件外迁 + hook 抽取，hook 顺序整簇平移），豁免数据/类型/图标类大文件（inventory.ts、electron.d.ts、Icon.tsx），逻辑层 store/client 缓拆按需裁决，Electron 主进程不在范围。P0 SimpleChat（尾部 6 内联组件外迁 + useSummaryRetry + useModelAccessMenus + useConversationResume）→ P1 project-workspace（11 内联组件外迁）→ P2 ReviewMode+ResultView → P3 剩余按收益裁决 + 收口盘点。每阶段定向 vitest + tsc 0 + ui:audit:check + docs:check。0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-07",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "ACTIVE"
+    },
+    {
       "id": "BLOCK-40-CONV-CHANGES-HYDRATION",
       "path": "docs/block-40-conversation-changes-hydration-plan.md",
       "kind": "work-package",
@@ -3597,6 +3619,6 @@
       "phase": "ACTIVE"
     }
   ],
-  "lastUpdated": "2026-09-06",
-  "documentCount": 204
+  "lastUpdated": "2026-09-07",
+  "documentCount": 205
 }
