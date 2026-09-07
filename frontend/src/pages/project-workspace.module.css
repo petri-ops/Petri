@@ -4007,7 +4007,11 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   cursor: ew-resize;
   background: transparent;
   position: relative;
-  z-index: 5;
+  /* BLOCK-62 加映 — 接缝高亮须全高连续：列内 ColumnHeader(9999) 的不透明背景
+     会盖掉本元素悬停高亮横跨列边界的第二像素（::after hover 2px），呈现为
+     「header 带细、栏体带粗」的上下断层；提到 10000 让命中带与高亮线在 header
+     带同样连续（compact 断点内本元素 display:none，不参与 backdrop/absolute 列竞争）。 */
+  z-index: 10000;
   transition: background 0.15s ease;
 }
 

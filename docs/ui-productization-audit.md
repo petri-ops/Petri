@@ -2175,6 +2175,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **收口（2026-09-07 P3）**：用户实机验收通过（拖拽顶栏线与栏边一根线实时移动、收起态交通灯/工具开关内联可达、「+」等菜单展开正常、缩窗 ≤960 回退整条顶栏、三段顶栏任意处可拖窗口）。提交链 `dd4740dc`(P0) → `1995a598`(P1a) → `b2207a3d`(P1b) → `fefc6942`(P2)。**最终状态**: verified（2026-09-07 dev Electron 实机，证据 `acceptance/ui-310/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+**加映（2026-09-07 用户反馈）— 接缝悬停高亮全高连续**：用户反馈「侧边栏分隔线鼠标放置后上下不是一样的呈现」（截图：悬停态下 header 带细、栏体带粗）。像素级定位：接缝悬停高亮 `resizeHandleV::after` hover 态 2px、横跨列边界像素（x∈[boundary, boundary+2)），P1b 列体化后 header 带内该高亮的第二像素被列内 `ColumnHeader`（z-index 9999 + 不透明 `--titlebar-bg` + backdrop-filter 自建堆叠上下文）的不透明背景盖住——用户截图实测 header 带 1px `(188,155,246)`、栏体带 2px 同色；且 header 带命中/光标被 header 截获（`workspaceBody` 无 z-index 不建堆叠上下文，两者同层竞争）。修法（1 行 CSS / 0 新增 IPC / 0 新依赖）：[project-workspace.module.css](../frontend/src/pages/project-workspace.module.css) `.resizeHandleV` `z-index: 5 → 10000`（高于 ColumnHeader 9999；compact 断点内本元素本就 `display:none` 不参与 absolute 列/backdrop 竞争；LeftPanel 与 RightPanel 两侧接缝共用同 class 一并生效），接缝命中带与高亮线自顶栏到底栏全高连续，与「分隔线刚性由构造保证」同哲学。**门禁**：useResizableColumns + workspace-panels 定向 vitest 44/44 / docs:check 206 / ui:audit:check。**实机**（dev Electron CDP，用户运行中的实例 HMR 生效，脚本 `scripts/ui310-seam-hover-live.cjs` 5/5，证据 `acceptance/ui-310/seam-hover-live.{json,png}`）：header 带线左右两侧 hit 均为接缝元素（修复前为中/左列 ColumnHeader）、真实鼠标悬停 header 带 `:hover` 生效且 `::after`≈2px、截图像素采样 header 带 2.2 ≈ 栏体带 2.2 CSS px 全高一致。**状态**: verified（2026-09-07 dev Electron 实机）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-309: 修复 — 恢复 TitleBar 注册（8f3d55a5 误删）：顶部与侧栏宽度同步 +「+」工具菜单复活 (2026-09-07 verified)
 
 **用户反馈**：「软件顶部和下面的工作区域 左右侧栏 宽度调整不是同步的」；「右侧边栏的+ 点击后没有内容了 应该也是存在bug」。主 Agent 先实测对齐理解后用户确认（「应该是的」）修复。
