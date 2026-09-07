@@ -40,7 +40,7 @@ const VERSION_FIXTURE: ResultVersion = {
 
 type Envelope = { ok: boolean; data?: unknown; error?: string };
 
-function stubBridge(methods: Record<string, ReturnType<typeof vi.fn>>): void {
+function stubBridge(methods: Record<string, unknown>): void {
   (window as unknown as Record<string, unknown>).gewu = { result: methods };
 }
 

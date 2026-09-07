@@ -2157,7 +2157,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-305: 增量 — 前端巨型组件拆分 P0：SimpleChat 内联组件外迁 + 3 hook 抽取（P1–P3 待续）(2026-09-08 in_progress)
+## UI-305: 增量 — 前端巨型组件拆分 P0–P3（SimpleChat / project-workspace / ReviewMode+ResultView 拆分清债）(2026-09-08 verified)
 
 **背景**：普查基线最大簇之一 `SimpleChat.tsx` 2343 行（文件头注释自证 hook order 敏感），plan `docs/ui-305-frontend-large-file-refactor-plan.md` P0 按风险从低到高拆分；**纯重构零行为变化**，整簇平移不重排。plan 前置门槛（`src/ipc/file-dialog.js` UI-304 遗留先行处置）已由 `770cfcf6` 满足。
 
@@ -2169,7 +2169,15 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：SimpleChat 定向 + 全 copilot 面向 + 消费面板 vitest 32 文件 266/266（含新 UI-311 回归与 P0 前既有 SimpleChat/progress/PlanApprovalCard 网）；tsc --noEmit 非 TS2550 0 错误（顺手修复 UI-311 遗留 TS2353 1 处，见 UI-311 更正）；实机见下；ui:audit:check / docs:check。
 
-**实机**（dev Electron CDP，证据 `acceptance/ui-305/p0-simplechat-live.json`）：整页重载拆分后模块图——`.sc-outer` 壳挂载、composer textarea 与消息列表在位、零渲染异常。**行数**：2343 → 1915（-428；P0 目标 ≤1000 的余量留给 P0.5 JSX 拆分裁决）。**状态**: in_progress（P0 completed；P1 project-workspace / P2 ReviewMode+ResultView / P3 收口盘点待续）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+**实机**（dev Electron CDP，证据 `acceptance/ui-305/p0-simplechat-live.json`）：整页重载拆分后模块图——`.sc-outer` 壳挂载、composer textarea 与消息列表在位、零渲染异常。**行数**：2343 → 1915（-428；P0 目标 ≤1000 的余量留给 P0.5 JSX 拆分裁决）。**P1（project-workspace.tsx 3464→1855 行，`160e0f2c`+`feed10da`）**：P1.1 尾部 11 内联组件外迁 `pages/project-workspace/`（FileTreeList/FileTreeItem/RightFileTree/WorkspaceFilePreview/BinaryPreviewCard/OfficePreviewPane/PreviewAssets/TextBlock/TerminalPanel/BrowserPanel/EmptyResult；FileEntry 移入子目录 types.ts、markdownSanitizeSchema 随唯一消费方迁入；导出类组件主文件再导出，导入路径零破坏；主文件未用导入精剪）。P1.2 左栏项目树展开 + 会话搜索状态簇抽入 [useProjectTreeState.ts](../frontend/src/pages/project-workspace/useProjectTreeState.ts)（expandedProjects/toggleProjectExpand/expandProject 三处相同内联写法收敛 + searchQuery/searchIndex/ensureSearch；创建/刷新等编排回调留主组件待 P3 裁决）。
+
+**P2（ReviewMode.tsx 1781→1429 + ResultView.tsx 1609→241）**：CommitDiffFileView/ExpandedCommitDetail/UntrackedFilePreview 外迁 `WorkingTreeReview/`，formatCommitDate 并入既有 reviewModeHelpers.ts，共享类型/常量（CommitSuccess/CommitFileViewMode/BlameData/FULLTEXT_LANGUAGE_BY_EXT）随迁至 helpers 导出；ResultArtifactShell（1369 行单组件）外迁 `workspace-panels/`，EmptyAnalysisResult 随壳迁移并保持主文件再导出。
+
+**P3（逐个裁决 + 基线复查）**：DesktopSettingsPanel 934 不动（设置页单一职责低 churn）；ResultStudioChangeSetPanel 717 不动（Result Studio experimental 面，待 RS 复核窗口一并处理）；ChartRenderer 699 不动（内聚渲染器）；home 669 不动（页面组装层）；逻辑层 conversationRunStore 1255 / copilotClient 1144 / useWorkingTreeReview 774 / useSkillStore 743 / data-profile 643 缓拆不动（契约面广、收益低于风险）；LeftPanel / TitleBar 已不再 >600（前置工作模块化后基线自然下降）；豁免清单照旧（inventory.ts / electron.d.ts / Icon.tsx）。ResultArtifactShell 1481 为单内聚组件，进一步拆分登记为后续候选。
+
+**门禁（全阶段累计）**：各阶段受影响定向 vitest 全绿（SimpleChat 28/28、copilot 全面向+消费面板 266/266、project-workspace 关联 48/48+22/22+18/18、WorkingTreeReview 46/46、workspace-panels+result-studio 194/194）；**收口前端全量 vitest 一次：911/914 通过，3 处失败经 stash 基线复核为 HEAD 存量**（ExperimentalFeaturesSection 2 处 Windows 路径 ENOENT + theme-token-contract 1 处 `--gewu-live-*` JS 注入 token 契约，均非本包引入，已登记 AUDIT-LOG 🟢）；ReviewMode 手风琴用例在全量并发下偶发时序 flake（单独复跑 4/4 + 复跑全量通过）；tsc 非 TS2550 0 错误；ui:audit:check / docs:check。
+
+**实机**（dev Electron CDP，逐阶段）：P0 SimpleChat 壳/composer/消息列表零异常（`acceptance/ui-305/p0-simplechat-live.json`）；P1 三栏布局+composer 挂载零异常（`p1-workspace-live.{json,png}`）；P2 `/project/:id/review` 主区挂载零异常（`p2-review-live.json`）。**状态**: verified（2026-09-08 dev Electron 实机；P0.5 主渲染 JSX 拆分按 plan 单独裁决 defer，ResultArtifactShell 进一步拆分登记候选）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-311: 修复 — ResultStudio `/project/:id/results` 整页崩溃（result:* IPC 信封契约漂移）(2026-09-08 verified)
 

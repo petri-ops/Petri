@@ -72,3 +72,47 @@ export function groupFilesByDirectory<T extends { path: string }>(files: T[]): F
 export function groupDisplayName(dir: string): string {
   return dir === '' ? '（根目录）' : dir;
 }
+
+// UI-305 P2 - extracted from ReviewMode.tsx:
+export function formatCommitDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+/**
+ * BLOCK-29.5 — 未跟踪文件只读预览：fileContent WORKTREE 直读磁盘，
+ * 替换原「暂无行级 diff」占位（CodeMirrorEditor 只读渲染）。
+ */
+
+// UI-305 P2 — 自 ReviewMode.tsx 平移的共享类型/常量（CommitDiffFileView /
+// UntrackedFilePreview / ReviewMode 主组件共用）：
+export interface CommitSuccess {
+  commit: string | null;
+  files: string[];
+  message: string;
+}
+
+/**
+ * BLOCK-29.4 — 扩展名 → CodeMirror lang-* 语言小映射（未命中走纯文本）。
+ */
+export const FULLTEXT_LANGUAGE_BY_EXT: Record<string, string> = {
+  py: 'python',
+  md: 'markdown',
+  json: 'json',
+  yaml: 'yaml',
+  yml: 'yaml',
+  js: 'javascript',
+  mjs: 'javascript',
+  jsx: 'javascript',
+  ts: 'javascript',
+  tsx: 'javascript',
+};
+
+export type CommitFileViewMode = 'diff' | 'fullModified' | 'fullOriginal' | 'blame';
+
+export interface BlameData {
+  lines: Array<{ line: number; sha: string }>;
+  commits: Record<string, { sha: string; shortSha: string; author: string; isoDate: string; subject: string }>;
+  truncated: boolean;
+}

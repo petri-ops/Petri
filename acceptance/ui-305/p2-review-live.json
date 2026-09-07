@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-09-07T23:14:06.377Z",
+  "probeReview": {
+    "path": "/project/p_mtrawlau_7rly/review",
+    "root": 1,
+    "reviewSurface": false
+  },
+  "pageErrors": [],
+  "checks": [
+    {
+      "name": "review-route-reached",
+      "pass": true,
+      "detail": "/project/p_mtrawlau_7rly/review"
+    },
+    {
+      "name": "review-root-mounted",
+      "pass": true,
+      "detail": "children=1"
+    },
+    {
+      "name": "no-render-exceptions",
+      "pass": true,
+      "detail": "clean"
+    }
+  ],
+  "allPass": true
+}
