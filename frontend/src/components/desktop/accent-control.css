@@ -1,0 +1,28 @@
+/* BLOCK-49 加映三 — 主题色（强调色）色板选择控件 */
+.accent-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.accent-control__swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--swatch);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.accent-control__swatch:hover {
+  transform: scale(1.1);
+}
+
+.accent-control__swatch.is-active {
+  box-shadow: 0 0 0 2px var(--gewu-bg-surface), 0 0 0 4px var(--swatch);
+}

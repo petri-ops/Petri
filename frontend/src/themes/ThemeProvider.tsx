@@ -13,6 +13,8 @@ export const FONT_SCALE_STORAGE_KEY = 'gewu-font-scale';
 export const FONT_SCALE_MIN = 0.8;
 export const FONT_SCALE_MAX = 1.4;
 const FONT_CHANGE_EVENT = 'gewu:font-scale-change';
+import { applyAccent, readAccent, ACCENT_STORAGE_KEY, type AccentId } from './accents';
+export { ACCENT_OPTIONS, type AccentId } from './accents';
 
 function readFontScale(): number {
   try {
@@ -35,6 +37,9 @@ interface ThemeContextValue {
   /** BLOCK-49 加映三 — 界面字号缩放系数（0.8–1.4，默认 1）。 */
   fontScale: number;
   setFontScale: (scale: number) => void;
+  /** BLOCK-49 加映三 — 主题色（强调色维度，独立于明暗）。 */
+  accent: AccentId;
+  setAccent: (accent: AccentId) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -69,6 +74,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
   const [systemResolvedTheme, setSystemResolvedTheme] = useState<ResolvedTheme>(systemTheme);
   const resolvedTheme = preference === 'system' ? systemResolvedTheme : preference;
   const [fontScale, setFontScaleState] = useState<number>(readFontScale);
+  const [accent, setAccentState] = useState<AccentId>(readAccent);
 
   const setPreference = useCallback((next: ThemePreference) => {
     setPreferenceState(next);
@@ -77,6 +83,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
     } catch {
       // Keep the in-memory preference when persistence is unavailable.
     }
+  }, []);
+
+  const setAccent = useCallback((next: AccentId) => {
+    setAccentState(next);
+    try { localStorage.setItem(ACCENT_STORAGE_KEY, next); } catch { /* 保留内存 */ }
   }, []);
 
   const setFontScale = useCallback((scale: number) => {
@@ -110,6 +121,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
     applyFontScale(fontScale);
   }, [fontScale]);
 
+  // BLOCK-49 加映三 — 主题色注入（data-accent；teal 默认不设属性）
+  useEffect(() => {
+    applyAccent(accent);
+  }, [accent]);
+
   useEffect(() => {
     const onThemeChange = (event: Event) => {
       const detail = (event as CustomEvent<{ preference?: ThemePreference }>).detail;
@@ -133,19 +149,25 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
       const detail = (event as CustomEvent<{ scale?: number }>).detail;
       if (detail && typeof detail.scale === 'number') setFontScaleState(detail.scale);
     };
+    const onAccentStorage = (event: StorageEvent) => {
+      if (!event.key || event.key !== ACCENT_STORAGE_KEY) return;
+      setAccentState(readAccent());
+    };
     window.addEventListener(THEME_CHANGE_EVENT, onThemeChange as EventListener);
     window.addEventListener(FONT_CHANGE_EVENT, onFontChange);
     window.addEventListener('storage', onStorage);
+    window.addEventListener('storage', onAccentStorage);
     return () => {
       window.removeEventListener(THEME_CHANGE_EVENT, onThemeChange as EventListener);
       window.removeEventListener(FONT_CHANGE_EVENT, onFontChange);
       window.removeEventListener('storage', onStorage);
+      window.removeEventListener('storage', onAccentStorage);
     };
   }, [setPreference]);
 
   const value = useMemo(
-    () => ({ preference, resolvedTheme, setPreference, fontScale, setFontScale }),
-    [preference, resolvedTheme, setPreference, fontScale, setFontScale],
+    () => ({ preference, resolvedTheme, setPreference, fontScale, setFontScale, accent, setAccent }),
+    [preference, resolvedTheme, setPreference, fontScale, setFontScale, accent, setAccent],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

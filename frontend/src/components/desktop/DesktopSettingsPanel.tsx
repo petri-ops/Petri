@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { ThemeControl } from './ThemeControl';
 import { useTheme, FONT_SCALE_MIN, FONT_SCALE_MAX } from '@/themes/ThemeProvider';
+import { AccentControl } from './AccentControl';
 import {
   useAiSettings,
   type ChatModelPreset,
@@ -549,6 +550,11 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
             <span style={{ color: 'var(--gewu-text-secondary)', fontSize: 13 }}>%</span>
           </div>
           <p className="gewu-field__hint">调整应用界面的文字大小（100% = 默认；80%–140%），图标和布局尺寸不受影响。</p>
+        </div>
+        <div className="gewu-field">
+          <label className="gewu-field__label">主题色</label>
+          <AccentControl />
+          <p className="gewu-field__hint">更换应用的强调配色（按钮、链接、高亮等），明暗主题与布局不受影响。</p>
         </div>
 
           </section>
