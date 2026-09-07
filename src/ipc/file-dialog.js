@@ -60,14 +60,19 @@ function setupFileDialogIpc({ mainWindow } = {}) {
         typeof optionsOrFilters === "object" &&
         !Array.isArray(optionsOrFilters);
       const filters = isOptions ? optionsOrFilters.filters : optionsOrFilters;
-      const properties =
-        isOptions && optionsOrFilters.openDirectory
-          ? ["openDirectory", "createDirectory"]
-          : ["openFile"];
-      const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
-        filters: Array.isArray(filters) ? filters : [],
-        properties,
-      });
+      const isDirectory = isOptions && optionsOrFilters.openDirectory;
+      const properties = isDirectory
+        ? ["openDirectory", "createDirectory"]
+        : ["openFile"];
+      // UI-304 加映三 — 对齐 ZCode 实测可用的调用姿势：
+      // ① 目录选择时不带 filters（含空数组）：macOS 上 filters 会挂
+      //    allowed-types 校验链，目录永远匹配不上 → 「打开」按钮恒置灰；
+      // ② 文件选择路径维持原行为（filters 对扩展名过滤有意义）。
+      const showOpts = { properties };
+      if (!isDirectory && Array.isArray(filters) && filters.length > 0) {
+        showOpts.filters = filters;
+      }
+      const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, showOpts);
       return canceled ? null : filePaths[0];
     } catch (e) {
       console.error("[desktop] open dialog failed:", e.message);
