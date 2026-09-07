@@ -1,8 +1,13 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-03 晚（**AgentStreamDisconnected 根因修复包已收口 verified**：实机复测 3/3 PASS + 台账 UI-281 + 门禁全绿。当前 active：BLOCK-52，P1 已 verified（提交 `c055c9e1`），P2 图片/artifact 引用待启动。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-08（**UI-311 ResultStudio /results 整页崩溃修复收口 verified**：AUDIT-LOG 🟢 转正，信封契约漂移修复 + 实机证据。**当前 active：UI-305 前端巨型组件拆分**（用户裁决按序推进，P0 SimpleChat 待启动）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## Session Snapshot
+
+- **UI-311 收口记录（2026-09-08 verified，`1761958f`）**：`/project/:id/results` 整页白屏根因 = result:* IPC 信封契约漂移——handler 统一返回 `{ ok, data?, error? }`、preload 1:1 透传，electron.d.ts 却按裸值声明且 resultBridge/useResultStore 无人拆包。修复：electron.d.ts result 命名空间如实声明信封 + resultBridge 单点拆包（消费方零改动）；回归 9/9 + 受影响面 178/178 + 实机直达 /results 空态页零异常（证据 `acceptance/ui-311/`）。
+- **dev 启动工具链事实（2026-09-08 实测，Windows 本机）**：`npm run dev` 的 wrapper（`scripts/dev-electron.js`）在启动期自行跑 DB migration 且**失败即退出**（`process.execPath` = PATH 上的 node 加载 `core/biof3-server` 的 better-sqlite3，ABI 必须匹配）。`.node-version` 钉 24，本机 fnm default = v24.20.0；若 shell PATH 上的 node 非 24（如系统 22.20.0），wrapper 报 `NODE_MODULE_VERSION 137 ... requires 127` 后直接失败。**启动 dev 前确认 `node -v` = v24**（fnm 环境 `fnm use 24` 或前置 `fnm/node-versions/v24.20.0/installation` 到 PATH）。main.js 内的迁移失败是非致命兜底（initSchema 兜底建表），wrapper 层才是硬门。
+- **「工作区改动」项目关联核查（2026-09-08，准确）**：项目 `p_mtrawlau_7rly`（biof3-desktop）`workspace_path = D:\1.WorkDir\biof3-desktop`（后端实查）；AgentChangesCard 数据链 `git:working-tree-status → resolveGitAdapter(projectId) → project.workspace_path`，卡片与 git 地面真值逐文件精确吻合。
+- **Electron 41 启动修复线（2026-09-07/08 收口推送）**：`b619c756` 剥离 ELECTRON_RUN_AS_NODE / `df777645` .node-version + scripts/dev 工具链 / `ec28e51b` windows-x64 runtime artifact sha256/sizeBytes / `4363a302` preload 路径 + 迁移子进程 ABI 运行时判定 + PROJECT_ROOT 深度修正（22:34 实例实机冒烟）。UI-310 加映：接缝悬停高亮全高连续（`0fc06603`，z-index 5→10000）。
 
 - **修复包收口记录（2026-09-03 晚 verified）**：AgentStreamDisconnected 根因修复包已按接手三步收口——① 实机复测 3/3 PASS（composer 真实消息回复正常 / 无「任务事件流中断」横幅 / SQLite 最新任务 `agent_status=done` 且 error 空，证据 `acceptance/agent-stream-disconnected-fix/live-check.json`）；② 门禁 docs:check 199 + ui:audit:check PASS（台账按 UI-surface 规则补登 UI-281 verified）；③ 修复包已提交。
 - **AgentStreamDisconnected 根因链（已修，交接上下文）**：events.js 曾用 `sseSend('[DONE]')` 发终态哨兵 → `JSON.stringify('[DONE]')` 序列化为带引号 `"[DONE]"` → 前端 copilotClient 匹配裸 `[DONE]` 永不成立 → 每个 task 完成后被判「在完成前中断」→ 24 次退避重连（~90s，终态回放路径同样发带引号哨兵）烧窗后报 AgentStreamDisconnected。旧 dev 实例长期未重启 + BLOCK-39 之前「干净截断=onDone」宽松兜底共同掩盖了该缺陷。修复：后端 `sseDone()` 裸写 + 前端 `isSseDone()` 双形状兼容 + 带引号形状回归用例。
