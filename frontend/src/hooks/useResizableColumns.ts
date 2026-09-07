@@ -202,9 +202,10 @@ export function useResizableColumns(
         if (which === 'left') {
           const w = Math.max(MIN_LEFT_WIDTH, sl + ev.clientX - startX);
           setLeftWidth(w);
-          // UI-309 加映 — 拖动期间同步写实时 CSS 变量，让侧栏宽度与 TitleBar
-          // 分隔在同一帧移动（React 提交晚一拍会造成两根线脱节）；松手后
-          // cleanup 移除变量，无缝交回状态驱动。对齐 --gewu-live-result-right-width 先例。
+          // UI-309 加映 / BLOCK-62 P2 重述角色 — 拖动期写实时 CSS 变量：
+          // -width 让左栏 aside 零延迟跟随指针（列内 ColumnHeader 在 aside 内、
+          // 随 aside 同宽，仍刚性）；-span 让 BottomTerminal 两竖边跟随。
+          // 二者都是「同树指针跟随」，非跨树同步补丁；松手 cleanup 交回 state。
           document.documentElement.style.setProperty('--gewu-live-left-width', `${w}px`);
           document.documentElement.style.setProperty('--gewu-live-left-span', `${w + 1}px`);
         } else if (which === 'right') {

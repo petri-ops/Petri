@@ -778,8 +778,11 @@ export function ProjectWorkspace(): React.ReactElement {
     openRightPanel('chat');
   }, [openRightPanel]);
 
-  // TitleBar 注册 —— 8f3d55a5 曾误删整段（宽度同步 / 右侧工具菜单「+」/
-  // 标签 pills / 结果选择器随之全部失效），UI-309 从 e689f867 恢复。
+  // TitleBar 注册 —— 8f3d55a5 曾误删整段（右侧工具菜单「+」/ 标签 pills / 结果
+  // 选择器随之全部失效），UI-309 从 e689f867 恢复。BLOCK-62 P2：宽度两字段
+  // （leftPanelWidth/rightPanelWidth）已从 TitleBarState 退役——regular 顶栏是
+  // 列内 ColumnHeader（宽=aside 宽，同 commit），compact/loading/error 的 fixed
+  // 条宽度改由本页 props 同树直传，不再每拖拽帧跨树推送 context。
   const titleBarTitle = useMemo(
     () => buildResultTitleBarTitle(workspaceMode, project?.name, activeArtifact?.label || activeArtifact?.name),
     [activeArtifact?.label, activeArtifact?.name, project?.name, workspaceMode],
@@ -788,8 +791,6 @@ export function ProjectWorkspace(): React.ReactElement {
   useEffect(() => {
     updateTitleBar({
       title: titleBarTitle,
-      leftPanelWidth: leftWidth,
-      rightPanelWidth: effectiveRightWidth,
       tabs: titleBarTabs,
       activeTabId: rightTab === 'home' ? null : rightTab,
       onSelectTab: (tabId) => {
@@ -844,8 +845,6 @@ export function ProjectWorkspace(): React.ReactElement {
     return () => {
       updateTitleBar({
         title: 'Gewu',
-        leftPanelWidth: 240,
-        rightPanelWidth: 340,
         tabs: [],
         activeTabId: null,
         onSelectTab: null,
@@ -868,13 +867,11 @@ export function ProjectWorkspace(): React.ReactElement {
     closeRightPanelTab,
     browserCanGoBack,
     browserCanGoForward,
-    leftWidth,
     openRightPanel,
     openRightTabs,
     project?.name,
     titleBarTitle,
     rightTab,
-    effectiveRightWidth,
     handleOpenRightResults,
     handleSelectTitleBarResult,
     rightToolMenuOpen,
@@ -1868,8 +1865,10 @@ export function ProjectWorkspace(): React.ReactElement {
     <div className={`${styles.workspaceRoot} ${compactLayout ? styles.workspaceRootCompact : ''}`}>
       {/* BLOCK-62 P1b — compact（≤960px）列变浮层、无「列宽」语义 → fixed 整条
           回归（ctx 注入的列内 header 已同步禁用）；regular 顶栏由三个列内
-          ColumnHeader 承载（AppShell 在本路由不渲染全局条）。 */}
-      {compactLayout && <TitleBar />}
+          ColumnHeader 承载（AppShell 在本路由不渲染全局条）。
+          P2：浮层列打开时 fixed 条 grid span 与 aside 实际宽对齐 → 栏宽经 props
+          同树直传（同一次 commit），不再走 updateTitleBar context 跨树推送。 */}
+      {compactLayout && <TitleBar leftPanelWidth={leftWidth} rightPanelWidth={effectiveRightWidth} />}
       {showRuntimeBanner && (
         <div
           className={`${styles.runtimeMissingBanner} ${compactLayout ? '' : styles.runtimeMissingBannerOverlay}`}

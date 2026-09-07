@@ -25,7 +25,10 @@
   height: var(--titlebar-height);
   z-index: 9999;
   display: grid;
-  grid-template-columns: var(--gewu-live-left-span, var(--titlebar-left-span)) minmax(0, 1fr) var(--gewu-live-right-span, var(--titlebar-right-span));
+  /* BLOCK-62 P2 — live-span 兜底已退役：fixed 条只在 compact（拖拽禁用，span 变量
+     永不写入）/ 非工作区路由（无侧栏拖拽）渲染；regular 工作区顶栏是列内
+     ColumnHeader（见 ColumnizedTitleBar.module.css），不消费本组件。 */
+  grid-template-columns: var(--titlebar-left-span) minmax(0, 1fr) var(--titlebar-right-span);
   align-items: center;
   background: var(--titlebar-bg);
   color: var(--titlebar-ink);
@@ -762,7 +765,7 @@
 
 @media (max-width: 1380px) {
   .titleBar {
-    grid-template-columns: var(--gewu-live-left-span, var(--titlebar-left-span)) minmax(0, 1fr) var(--gewu-live-right-span, var(--titlebar-right-span));
+    grid-template-columns: var(--titlebar-left-span) minmax(0, 1fr) var(--titlebar-right-span);
   }
 
   .pathPill {
@@ -776,7 +779,7 @@
 
 @media (max-width: 1120px) {
   .titleBar {
-    grid-template-columns: var(--gewu-live-left-span, var(--titlebar-left-span)) minmax(0, 1fr) var(--gewu-live-right-span, var(--titlebar-right-span));
+    grid-template-columns: var(--titlebar-left-span) minmax(0, 1fr) var(--titlebar-right-span);
   }
 
   .pathPill {

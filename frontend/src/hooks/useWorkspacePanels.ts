@@ -27,8 +27,9 @@ export interface TitleBarResultItem {
 
 export interface TitleBarState {
   title: string;
-  leftPanelWidth: number;
-  rightPanelWidth: number;
+  // BLOCK-62 P2 — leftPanelWidth/rightPanelWidth 已退役：列体化后顶栏由三个列内
+  // ColumnHeader 承载（宽度=各自 aside 宽，同一次 commit，无跨树同步）；fixed 整条
+  // 只在 compact/loading/error/非工作区路由渲染，这些态无真实可拖列，宽度推送成死链。
   tabs: TitleBarTab[];
   activeTabId: string | null;
   onSelectTab: ((id: string) => void) | null;
@@ -70,8 +71,6 @@ export interface WorkspacePanels {
 
 const DEFAULT_TITLE_BAR: TitleBarState = {
   title: 'Gewu',
-  leftPanelWidth: 240,
-  rightPanelWidth: 340,
   tabs: [],
   activeTabId: null,
   onSelectTab: null,
@@ -95,8 +94,6 @@ const DEFAULT_TITLE_BAR: TitleBarState = {
 function titleBarDataEqual(a: TitleBarState, b: TitleBarState): boolean {
   return (
     a.title === b.title &&
-    a.leftPanelWidth === b.leftPanelWidth &&
-    a.rightPanelWidth === b.rightPanelWidth &&
     a.activeTabId === b.activeTabId &&
     a.toolMenuOpen === b.toolMenuOpen &&
     a.activeResultId === b.activeResultId &&

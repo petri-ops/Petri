@@ -7,20 +7,26 @@ import { TitleBarCenterZone } from './titlebar/TitleBarCenterZone';
 import { TitleBarRightZone } from './titlebar/TitleBarRightZone';
 
 /**
- * BLOCK-62 P1a — fixed 整条 TitleBar（非列体化路由：home / skills / review /
- * result-studio 用）。
+ * BLOCK-62 P1a/P2 — fixed 整条 TitleBar。
  *
- * 三段内容已提取到 [titlebar/](./titlebar/) 下的容器无关片段（P1b 列级
- * header-slot 复用同一组片段）。本组件只保留 fixed 条特有的：整宽 grid
- * （`--titlebar-*-span` 模拟三列宽）+ 非 mac 双击最大化。
+ * 渲染场景（ProjectWorkspace regular 分支的顶栏是三个列内 ColumnHeader，不用本组件）：
+ * ① 非列体化路由（home / skills / review / result-studio）——AppShell 渲染，无真实
+ *    可拖列，用默认宽；② ProjectWorkspace 的 compact(≤960) / loading / error——
+ *    由页面自持渲染，compact 浮层列与 grid span 对齐所需的栏宽经 **props 同树直传**
+ *    （P2：取代原 updateTitleBar context 跨树推送——那条链每拖拽帧触发全部 context
+ *    消费者重渲染，且列体化 regular 分支根本不消费宽度，是死链 + 无谓 churn）。
  *
- * ProjectWorkspace 路由在 P1b 改走列级 header-slot，不再渲染本组件的 fixed 条；
- * P1a 阶段行为与提取前完全一致（span 注入 / grid / 双击均保留）。
+ * 三段内容在 [titlebar/](./titlebar/) 下的容器无关片段（列级 header 复用同一组）。
  */
-export function TitleBar(): React.ReactElement {
+export interface TitleBarProps {
+  /** 左栏当前宽（仅 compact 浮层对齐需要；非工作区路由省略用默认） */
+  leftPanelWidth?: number;
+  rightPanelWidth?: number;
+}
+
+export function TitleBar({ leftPanelWidth = 240, rightPanelWidth = 340 }: TitleBarProps = {}): React.ReactElement {
   const panels = useWorkspacePanelsContext();
   const isMac = getIsMac();
-  const { leftPanelWidth, rightPanelWidth } = panels.titleBar;
 
   const resizeRail = 1;
   const collapsedLeftRail = isMac ? 180 : 146;
