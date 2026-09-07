@@ -87,6 +87,7 @@ describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
       </MemoryRouter>
     );
     // UI-304 简化版 — 错误会显示在面板中
-    expect(screen.getByRole('alert')).toHaveTextContent('路径无效');
+    const alert = screen.getByRole('alert');
+    expect(alert.textContent).toBe('路径无效');
   });
 });
