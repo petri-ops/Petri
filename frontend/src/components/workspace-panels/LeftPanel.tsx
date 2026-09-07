@@ -28,21 +28,22 @@ export interface LeftPanelContext {
   // One-click creators
   creatingProject: boolean;
   creatingConversation: boolean;
-  /** UI-304 — 创建项目面板双模式：confirm（系统面板选完目录的确认态）/ manual（手输兜底） */
+  /** UI-304 加映 — 创建项目面板三模式：browse（应用内 FolderPicker，主入口）/
+      confirm（选定目录后的确认态）/ manual（粘贴路径兜底） */
   createPanel: {
     open: boolean;
-    mode?: 'confirm' | 'manual';
+    mode?: 'browse' | 'confirm' | 'manual';
     path: string;
     error: string;
     onOpen: () => void | Promise<void>;
     onClose: () => void;
     onPathChange: (path: string) => void;
     onConfirm: () => void | Promise<void>;
-    /** UI-304 — 确认态「重新选择」：再开系统目录选择器 */
+    /** UI-304 加映 — 确认态「重新选择」：回到应用内文件夹浏览器 */
     onRepick?: () => void | Promise<void>;
-    /** UI-304 — 切到手输兜底模式 */
+    /** UI-304 — 切到粘贴路径兜底模式 */
     onSwitchManual?: () => void;
-    /** UI-304 — 外部路径直达确认态（左栏拖拽目录落位），仍不绕过确认 */
+    /** UI-304 — 选定路径直达确认态（FolderPicker 选定 / 左栏拖拽落位），仍不绕过确认 */
     onPickExternal?: (path: string) => void;
   };
   createConversationForProject: (projectId?: string) => void | Promise<void>;
@@ -313,8 +314,50 @@ function ProjectTreeHeader({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
           </button>
         </div>
       </div>
-      {/* UI-304 — 创建面板双模式：confirm（系统面板选完目录的确认态，UI-253 口径）
-          / manual（手输兜底，UI-257：macOS 共享目录禁用系统面板「打开」时可用） */}
+      {/* UI-304 加映 — 创建面板三模式：browse（应用内 FolderPicker，主入口，不经
+          系统面板——Electron 30 在 macOS 26 上「打开」按钮会置灰）→ confirm（确认态）
+          → 创建；manual 为粘贴路径兜底。 */}
+      {ctx.createPanel.open && ctx.createPanel.mode === 'browse' && (
+        <div className={styles.leftCreatePanel} data-testid="left-create-panel">
+          <div className={styles.leftCreatePickerWrap}>
+            <FolderPicker
+              initialPath=""
+              pickLabel="选择此文件夹"
+              onPick={(picked) => {
+                if (typeof ctx.createPanel.onPickExternal === 'function') {
+                  ctx.createPanel.onPickExternal(picked);
+                } else {
+                  ctx.createPanel.onPathChange(picked);
+                  void ctx.createPanel.onConfirm();
+                }
+              }}
+              onCancel={ctx.createPanel.onClose}
+            />
+          </div>
+          {ctx.createPanel.error && (
+            <p className={styles.leftCreateError} role="alert">{ctx.createPanel.error}</p>
+          )}
+          <div className={styles.leftCreateActions}>
+            <button
+              type="button"
+              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              onClick={ctx.createPanel.onSwitchManual}
+              disabled={ctx.creatingProject}
+              title="直接粘贴完整目录路径"
+            >
+              粘贴路径
+            </button>
+            <button
+              type="button"
+              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              onClick={ctx.createPanel.onClose}
+              disabled={ctx.creatingProject}
+            >
+              取消
+            </button>
+          </div>
+        </div>
+      )}
       {ctx.createPanel.open && ctx.createPanel.mode === 'confirm' && (
         <div className={styles.leftCreatePanel} data-testid="left-create-panel">
           <p className={styles.leftCreateConfirmLabel}>将在以下目录创建项目：</p>
@@ -364,7 +407,7 @@ function ProjectTreeHeader({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
           </div>
         </div>
       )}
-      {ctx.createPanel.open && ctx.createPanel.mode !== 'confirm' && (
+      {ctx.createPanel.open && ctx.createPanel.mode === 'manual' && (
         <div className={styles.leftCreatePanel} data-testid="left-create-panel">
           <div className={styles.leftCreateRow}>
             <input

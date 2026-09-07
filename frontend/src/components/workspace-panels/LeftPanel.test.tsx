@@ -188,6 +188,58 @@ describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
 });
 
 // ============================================================================
+// UI-304 加映 — browse 模式：+ 直接打开应用内 FolderPicker（不经系统面板，
+// Electron 30 在 macOS 26 上「打开」按钮置灰），选定后直达确认态回调。
+// ============================================================================
+describe('UI-304 browse-mode create panel (left panel)', () => {
+  const originalDesktop = (window as { biof3Desktop?: unknown }).biof3Desktop;
+
+  afterEach(() => {
+    Object.defineProperty(window, 'biof3Desktop', {
+      configurable: true,
+      value: originalDesktop,
+    });
+  });
+
+  function mockListDirectory(data: unknown) {
+    Object.defineProperty(window, 'biof3Desktop', {
+      configurable: true,
+      value: {
+        files: {
+          listDirectory: vi.fn(async () => ({ ok: true, data })),
+        },
+      },
+    });
+  }
+
+  it('renders the in-app FolderPicker and routes 选择此文件夹 through onPickExternal', async () => {
+    mockListDirectory({ path: '/tmp/gewu-ws', parent: null, home: '/tmp/gewu-ws', dirs: [] });
+    const onPickExternal = vi.fn();
+    const onSwitchManual = vi.fn();
+    const base = buildCtx('chat');
+    const ctx = {
+      ...base,
+      createPanel: {
+        ...base.createPanel,
+        open: true,
+        mode: 'browse' as const,
+        onPickExternal,
+        onSwitchManual,
+      },
+    } as unknown as LeftPanelContext;
+    renderLeftPanel(ctx);
+
+    // 应用内选择器渲染（非系统面板）
+    expect(await screen.findByTestId('folder-picker')).toBeTruthy();
+    fireEvent.click(await screen.findByRole('button', { name: /选择此文件夹/ }));
+    await vi.waitFor(() => {
+      expect(onPickExternal).toHaveBeenCalledWith('/tmp/gewu-ws');
+    });
+    fireEvent.click(screen.getByRole('button', { name: '粘贴路径' }));
+    expect(onSwitchManual).toHaveBeenCalledTimes(1);
+  });
+});
+// ============================================================================
 // BLOCK-53 P1 / UI-282 — 拖拽目录直达创建：drop 到左栏 → validateDirectory
 // 校验 → 打开既有内联创建面板（ctx.createPanel）并回填路径（不绕过确认链）。
 // ============================================================================

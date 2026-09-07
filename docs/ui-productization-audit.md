@@ -2165,7 +2165,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0 / LeftPanel vitest 10/10（新增 confirm 模式用例：路径+项目名渲染、onConfirm/onRepick/onSwitchManual 触发、确认态无手输输入框；drop 用例改断言 `onPickExternal`）/ home + RightPanel + CenterPanel 回归 11/11 / docs:check / ui:audit:check。
 
-**实机**：待 dev Electron 实机过目（点 + 直接弹系统面板、选中后确认块展示完整路径与项目名、重新选择/手动输入路径/取消三路、拖拽直达确认态）后转 verified。**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**实机**：待 dev Electron 实机过目（点 + 直接弹系统面板、选中后确认块展示完整路径与项目名、重新选择/手动输入路径/取消三路、拖拽直达确认态）后转 verified。
+
+**UI-304 加映（2026-09-07，系统面板「打开」置灰修复）**：用户实测点 + 后系统面板对目录「打开」按钮置灰，且**取消「文件共享」后依旧置灰**（共享标记假说证伪；TCC/权限假说也不成立——那类问题表现为选中后拿不到路径，而非按钮置灰；应用侧 `file:open-dialog` 参数为标准 `openDirectory+createDirectory`）。判定：**Electron 30.5.1（2024-08）× macOS 26（darwin 25.6）系统面板兼容问题**——新 macOS 的打开面板由系统 XPC 服务（openAndSavePanelService）渲染，旧 SDK 应用存在条目可见但「打开」恒置灰的已知 bug 类（同代 issue：electron #48191、#47248）。修法：**「+」不再依赖系统面板**——直接打开应用内 FolderPicker（UI-259，`file:list-directory` IPC）browse 模式 → 「选择此文件夹」直达确认态 → 创建；确认态「重新选择」回 browse；「粘贴路径」保留手输兜底；拖拽仍直达确认态；`createPanel.mode` 扩为 `browse|confirm|manual`，`openDirectoryDialog` 从该链路移除。门禁：LeftPanel vitest 11/11（新增 browse 用例：FolderPicker 渲染 + 选择此文件夹经 onPickExternal 直达确认态 + 粘贴路径切换）/ tsc 0 / docs:check / ui:audit:check。首页创建流程仍用系统面板 + 可见手输兜底；系统性解法（升级 Electron 以适配新 macOS 面板）涉及 better-sqlite3 原生模块重建，另行裁决。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-303: 增量 — 计划模式并入访问档位菜单第四档（移除独立开关，四模式一处切换） (2026-09-07 in_progress)
 

@@ -790,47 +790,29 @@ export function ProjectWorkspace(): React.ReactElement {
     });
   }, [allProjects, searchConversationIndex]);
 
-  // UI-304 — 「+」dialog-first：点击直接弹系统目录选择器，选中的文件夹即项目路径；
-  // 确认态面板展示完整路径与项目名（UI-253 口径）一键创建。手输模式保留为兜底
-  // （UI-257：macOS 对"文件共享"标记路径会禁用系统面板「打开」按钮）。
+  // UI-304 加映 — 「+」不再依赖系统目录面板（Electron 30 在 macOS 26 上出现
+  // 「条目可见但打开按钮置灰」的面板兼容问题，共享标记/权限均非根因）：
+  // 点击直接打开应用内 FolderPicker（file:list-directory IPC，全环境可用），
+  // 选定后进入确认态（完整路径 + 项目名）一键创建。手输路径保留为粘贴兜底。
   const [createPanelOpen, setCreatePanelOpen] = useState(false);
-  const [createPanelMode, setCreatePanelMode] = useState<'confirm' | 'manual'>('manual');
+  const [createPanelMode, setCreatePanelMode] = useState<'browse' | 'confirm' | 'manual'>('browse');
   const [createPath, setCreatePath] = useState('');
   const [createError, setCreateError] = useState('');
 
-  const pickDirectoryViaDialog = useCallback(async (): Promise<string | null> => {
-    const dialog = window.biof3Desktop?.files?.openDirectoryDialog;
-    if (typeof dialog !== 'function') return null;
-    const selected = await dialog();
-    return selected || null;
-  }, []);
-
-  const openCreatePanel = useCallback(async () => {
+  const openCreatePanel = useCallback(() => {
+    setCreatePanelMode('browse');
+    setCreatePath('');
     setCreateError('');
-    const dialog = window.biof3Desktop?.files?.openDirectoryDialog;
-    if (typeof dialog !== 'function') {
-      // 桥缺失（非桌面环境）→ 直接以手输模式开面板，保留可见兜底
-      setCreatePanelMode('manual');
-      setCreatePath('');
-      setCreatePanelOpen(true);
-      return;
-    }
-    const selected = await dialog();
-    if (!selected) return; // 用户取消选择：不开面板
-    setCreatePanelMode('confirm');
-    setCreatePath(selected);
     setCreatePanelOpen(true);
   }, []);
 
-  // UI-304 — 确认态「重新选择」：再开一次系统目录选择器，选中即更新路径
-  const repickCreateDirectory = useCallback(async () => {
-    const selected = await pickDirectoryViaDialog();
-    if (!selected) return;
-    setCreatePath(selected);
+  // UI-304 加映 — 确认态「重新选择」：回到应用内文件夹浏览器
+  const repickCreateDirectory = useCallback(() => {
+    setCreatePanelMode('browse');
     setCreateError('');
-  }, [pickDirectoryViaDialog]);
+  }, []);
 
-  // UI-304 — 外部路径直达确认态（左栏拖拽目录落位；仍不绕过确认环节）
+  // UI-304 — 外部路径直达确认态（FolderPicker 选定 / 左栏拖拽目录落位），仍不绕过确认
   const pickExternalDirectory = useCallback((path: string) => {
     setCreatePanelMode('confirm');
     setCreatePath(path);
