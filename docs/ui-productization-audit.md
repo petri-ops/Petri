@@ -2157,6 +2157,20 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-305: 增量 — 前端巨型组件拆分 P0：SimpleChat 内联组件外迁 + 3 hook 抽取（P1–P3 待续）(2026-09-08 in_progress)
+
+**背景**：普查基线最大簇之一 `SimpleChat.tsx` 2343 行（文件头注释自证 hook order 敏感），plan `docs/ui-305-frontend-large-file-refactor-plan.md` P0 按风险从低到高拆分；**纯重构零行为变化**，整簇平移不重排。plan 前置门槛（`src/ipc/file-dialog.js` UI-304 遗留先行处置）已由 `770cfcf6` 满足。
+
+**P0.1 组件外迁**：尾部 6 内联渲染组件外迁 `SimpleChat/` 子目录——[LoopStatusPanel.tsx](../frontend/src/components/copilot/SimpleChat/LoopStatusPanel.tsx) / [AgentProgressList.tsx](../frontend/src/components/copilot/SimpleChat/AgentProgressList.tsx) / [ResultEditProgressList.tsx](../frontend/src/components/copilot/SimpleChat/ResultEditProgressList.tsx)（主文件保持再导出，`SimpleChat.progress.test.ts` 导入路径兼容）/ [ErrorBanner.tsx](../frontend/src/components/copilot/SimpleChat/ErrorBanner.tsx) / [ApprovalCard.tsx](../frontend/src/components/copilot/SimpleChat/ApprovalCard.tsx)（ApprovalRepairHint 仅被卡内使用随卡同文件）；连带 `ApprovalRepairState` 状态机类型移入 [types.ts](../frontend/src/components/copilot/SimpleChat/types.ts)（供主组件与 ApprovalCard 共享）。
+
+**P0.2–P0.4 hook 抽取**（均在依赖声明之后调用，簇内 hook 相对顺序保持原样）：[hooks/useSummaryRetry.ts](../frontend/src/components/copilot/SimpleChat/hooks/useSummaryRetry.ts)（5 useState + retrySummary + UX1H 冷却 tick）/ [hooks/useModelAccessMenus.ts](../frontend/src/components/copilot/SimpleChat/hooks/useModelAccessMenus.ts)（4 useState + planMode 派生 + prePlanAccessModeRef + accessModeLabel + modelGroups/selectedSupplierGroup/preferredPresetForSupplier + selectModel；UI-303 第四档活跃簇）/ [hooks/useConversationResume.ts](../frontend/src/components/copilot/SimpleChat/hooks/useConversationResume.ts)（消息重载 / 隐藏期完结对账 / T82 resumable 重连三 effect + 两 guard ref；reconciledRunRef 供既有 useChatStream 复用归本簇所有）。
+
+**P0.5 主渲染 JSX 拆分（Composer/MessageList）**：按 plan 单独裁决，本期 defer（P1 后视状态再议）。
+
+**门禁**：SimpleChat 定向 + 全 copilot 面向 + 消费面板 vitest 32 文件 266/266（含新 UI-311 回归与 P0 前既有 SimpleChat/progress/PlanApprovalCard 网）；tsc --noEmit 非 TS2550 0 错误（顺手修复 UI-311 遗留 TS2353 1 处，见 UI-311 更正）；实机见下；ui:audit:check / docs:check。
+
+**实机**（dev Electron CDP，证据 `acceptance/ui-305/p0-simplechat-live.json`）：整页重载拆分后模块图——`.sc-outer` 壳挂载、composer textarea 与消息列表在位、零渲染异常。**行数**：2343 → 1915（-428；P0 目标 ≤1000 的余量留给 P0.5 JSX 拆分裁决）。**状态**: in_progress（P0 completed；P1 project-workspace / P2 ReviewMode+ResultView / P3 收口盘点待续）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-311: 修复 — ResultStudio `/project/:id/results` 整页崩溃（result:* IPC 信封契约漂移）(2026-09-08 verified)
 
 **发现**：BLOCK-62 P0 顺带发现并登记 AUDIT-LOG 🟢（2026-09-07）：dev Electron 直达 `/project/:id/results` 整页白屏，`useResultStore` 渲染期 `snapshot.results.map is not a function`，ResultStudioPage 无 error boundary → 整棵 React 树卸载；HEAD 既有、非 BLOCK-62 引入。用户裁决单独立项修复。
@@ -2165,7 +2179,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **改动**（渲染层 2 文件 / 0 新增 IPC / 0 新依赖 / preload 与 handler 零改动）：① electron.d.ts result 命名空间如实声明信封——模块作用域新增 `ResultIpcEnvelope`/`ResultRecord`/`ResultSummaryRecord`/`ResultVersionRecord` 别名，11 方法签名收敛为 `Promise<ResultIpcEnvelope<…>>`（与 workingTreeReview 等命名空间的信封模式同型）；② [resultBridge.ts](../frontend/src/lib/resultBridge.ts) 作为 result 命名空间唯一拆包点——`unwrap`（ok=true → data，否则抛 handler 错误信息，store 捕获落 error 态）+ `unwrapNullable`（get 类 not found 按契约落 null），11 方法全部走拆包；消费方（useResultStore / ResultVersionHistory）零改动。
 
-**门禁**：新增回归 [resultBridge.test.ts](../frontend/src/lib/resultBridge.test.ts) 6 用例 + [useResultStore.test.tsx](../frontend/src/hooks/useResultStore.test.tsx) 3 用例（信封→裸数组 / 错误信封→error 态不崩 / null projectId 不发起加载）9/9；受影响面定向 vitest（result-studio 全套 + desktopBridge）21 文件 178/178；tsc --noEmit 新增 0 错误（存量 12 处 TS2550 `.at()` 于 HEAD 同败，与本包无关）；ui:audit:check / docs:check。
+**门禁**：新增回归 [resultBridge.test.ts](../frontend/src/lib/resultBridge.test.ts) 6 用例 + [useResultStore.test.tsx](../frontend/src/hooks/useResultStore.test.tsx) 3 用例（信封→裸数组 / 错误信封→error 态不崩 / null projectId 不发起加载）9/9；受影响面定向 vitest（result-studio 全套 + desktopBridge）21 文件 178/178；tsc --noEmit 存量 12 处 TS2550 `.at()` 于 HEAD 同败（与本包无关）。**更正（2026-09-08）**：本条发布时「新增 0 错误」表述不准确——resultBridge.test.ts 的 stub 桥接类型引入 1 处 TS2353（tsc 复核跑在测试文件创建前，漏检），已于 UI-305 P0 提交修复（stubBridge 参数放宽为 Record<string, unknown>）；ui:audit:check / docs:check。
 
 **实机**（dev Electron CDP，证据 `acceptance/ui-311/results-route-live.{json,png}`）：直达 `/project/p_mtrawlau_7rly/results` —— React root 正常挂载（children=2）、零页面异常、零 `map is not a function`、渲染真实空态页（「项目结果 / 0 个结果 / 暂无结果 / 在 Copilot 中运行分析后会显示在这里」）。**状态**: verified（2026-09-08 dev Electron 实机）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

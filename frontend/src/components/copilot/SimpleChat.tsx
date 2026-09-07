@@ -43,6 +43,7 @@ import {
   type SimpleChatProps,
   type ErrorBannerProps,
   type PendingApproval,
+  type ApprovalRepairState,
 } from './SimpleChat/types';
 import {
   DEFAULT_EXAMPLE_PROMPTS,
@@ -71,10 +72,19 @@ import { ChatScrollbar } from './ChatScrollbar';
 import {
   stringifyParamValue,
   shortValue,
-  formatHarnessRepair,
-  formatHarnessWarning,
-  formatHarnessDiagnosticIssue,
 } from './SimpleChat/formatHarness';
+// UI-305 P0.1 — 尾部内联渲染组件外迁（LoopStatusPanel / AgentProgressList /
+// ResultEditProgressList / ErrorBanner / ApprovalCard+ApprovalRepairHint），
+// 零行为变化；ResultEditProgressList 按惯例在此再导出保持导入路径兼容。
+import { LoopStatusPanel } from './SimpleChat/LoopStatusPanel';
+import { AgentProgressList } from './SimpleChat/AgentProgressList';
+import { ErrorBanner } from './SimpleChat/ErrorBanner';
+import { ApprovalCard } from './SimpleChat/ApprovalCard';
+import { ResultEditProgressList } from './SimpleChat/ResultEditProgressList';
+import { useSummaryRetry } from './SimpleChat/hooks/useSummaryRetry';
+import { useModelAccessMenus } from './SimpleChat/hooks/useModelAccessMenus';
+import { useConversationResume } from './SimpleChat/hooks/useConversationResume';
+export { ResultEditProgressList };
 
 // Re-export helpers (so `import { restoreSimpleMessage } from './SimpleChat'` keeps working)
 export {
@@ -125,9 +135,6 @@ import { __resetFileReferenceCache, extractFileReferenceCandidates } from '@/lib
 import {
   fetchHarnessToolManifest,
   repairHarnessParams,
-  type HarnessNextAction,
-  type HarnessRunDiagnostics,
-  type HarnessParamRepair,
   type HarnessToolManifest,
 } from '@/lib/harness-client';
 import {
@@ -158,7 +165,6 @@ import {
 } from './conversationRunStore';
 import { ResumePrompt } from './SimpleChat/ResumePrompt';
 import { useErrorFormatter } from './useErrorFormatter';
-import { deriveLoopDisplay, loopDecisionLabel } from '@/lib/loop-client';
 import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop';
 import {
   AssistantResultNodes,
@@ -231,12 +237,6 @@ import { ContextBudgetButton, type TokenBudget } from './ContextBudgetBar';
 // ./SimpleChat/{types,helpers}.ts (BLOCK-9.2 PHASE 4).
 
 
-type ApprovalRepairState =
-  | { status: 'idle' }
-  | { status: 'loading' }
-  | { status: 'ready'; repair: HarnessParamRepair; diagnostics?: HarnessRunDiagnostics | null }
-  | { status: 'skipped'; message: string }
-  | { status: 'error'; message: string };
 
 // ExamplePrompt interface + DEFAULT_EXAMPLE_PROMPTS + ExamplePromptsProps + ExamplePrompts moved to
 // ./SimpleChat/{types,helpers}.ts (BLOCK-9.2 PHASE 4).
@@ -297,13 +297,6 @@ export function SimpleChat({
   }, []);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [previewImage, setPreviewImage] = useState<AttachmentFile | null>(null);
-  const MAX_SUMMARY_RETRIES = 3;
-  const RETRY_BACKOFF_MS = [2000, 4000, 8000];
-  const [summaryRetryState, setSummaryRetryState] = useState<Record<string, 'running' | 'done'>>({});
-  const [summaryRetryErrors, setSummaryRetryErrors] = useState<Record<string, string>>({});
-  const [summaryRetryAttempts, setSummaryRetryAttempts] = useState<Record<string, number>>({});
-  const [summaryRetryCooldownUntil, setSummaryRetryCooldownUntil] = useState<Record<string, number>>({});
-  const [retryTick, setRetryTick] = useState(0);
   const [loading, setLoading] = useState(false);
   // T83: transient spinner state for the file-reference refresh button.
   const [refreshing, setRefreshing] = useState(false);
@@ -328,15 +321,6 @@ export function SimpleChat({
   // 页面刷新/重启后保留——用户测试反馈会话态易丢失，跑错本机）。
 
   const autoApproveRef = useRef<string | null>(null);
-  const [modelMenuOpen, setModelMenuOpen] = useState<'supplier' | 'model' | null>(null);
-  const [modelSupplierKey, setModelSupplierKey] = useState<string | null>(null);
-  const [accessMenuOpen, setAccessMenuOpen] = useState(false);
-  const [accessMode, setAccessMode] = useState<'full' | 'workspace-write' | 'plan' | 'read'>('full');
-  // BLOCK-55 P1 — Spec 门计划模式：只读探索 + 起草计划（写类工具被 policy 拒绝）。
-  // UI-303 — 计划模式并入档位菜单成为第四档：planMode 由 accessMode 派生（单一事实源），
-  // prePlanAccessModeRef 记录进入计划档前的档位，批准执行后恢复。
-  const planMode = accessMode === 'plan';
-  const prePlanAccessModeRef = useRef<'full' | 'workspace-write' | 'read' | null>(null);
   const [pendingPlan, setPendingPlan] = useState<PlanApprovalCardPlan | null>(null);
   const [pendingRevision, setPendingRevision] = useState<{ planId: string; title: string; revNo: number } | null>(null);
   const [planCardBusy, setPlanCardBusy] = useState(false);
@@ -412,6 +396,47 @@ export function SimpleChat({
     activePreset: activeModel,
     setActive: setActiveModelId,
   } = useAiSettings();
+
+  // UI-305 P0.3 — 模型菜单 + 访问档位菜单状态簇（原 322-330 useState/派生 +
+  // 1322-1371 分组与 selectModel）整簇抽入 useModelAccessMenus，簇内 hook 相对
+  // 顺序保持原样、零行为变化；调用点在 useAiSettings 解构之后。
+  const {
+    modelMenuOpen,
+    setModelMenuOpen,
+    modelSupplierKey,
+    setModelSupplierKey,
+    accessMenuOpen,
+    setAccessMenuOpen,
+    accessMode,
+    setAccessMode,
+    planMode,
+    prePlanAccessModeRef,
+    accessModeLabel,
+    modelGroups,
+    activeSupplierGroup,
+    selectedSupplierGroup,
+    preferredPresetForSupplier,
+    selectModel,
+  } = useModelAccessMenus({ modelPresets, activeModelId, setActiveModelId });
+
+  // UI-305 P0.2 — summary retry 状态簇（原 297-303 的 5 个 useState +
+  // retrySummary useCallback + UX1H 冷却 tick effect）整簇抽入 useSummaryRetry，
+  // 簇内 hook 相对顺序保持原样、零行为变化；调用点在全部依赖声明之后。
+  const {
+    retrySummary,
+    summaryRetryState,
+    summaryRetryErrors,
+    summaryRetryAttempts,
+    summaryRetryCooldownUntil,
+    MAX_SUMMARY_RETRIES,
+  } = useSummaryRetry({
+    conversationId,
+    projectId,
+    activeModel,
+    activeModelId,
+    refreshConversations,
+    appendAssistantMessage: (message) => setMessages((current) => [...current, message]),
+  });
 
   // Error formatter hook for user-friendly error display
   const { formatError, getTechnicalDetails } = useErrorFormatter();
@@ -582,66 +607,17 @@ export function SimpleChat({
     };
   }, [pendingApproval, projectId]);
 
-  // Load messages when conversationId changes
-  useEffect(() => {
-    setMessages([]);
-    if (!conversationId) {
-      setLoading(false);
-      return;
-    }
-    let cancelled = false;
-    setLoading(true);
-    (async () => {
-      const msgs = await getConversationMessages(conversationId, 200);
-      if (cancelled) return;
-      const ui: SimpleMessage[] = msgs.map(restoreSimpleMessage);
-      setMessages(ui);
-      setLoading(false);
-    })();
-    return () => { cancelled = true; };
-  }, [conversationId]);
-
-  // A completed run may have settled while this conversation was hidden or
-  // while the whole chat surface was unmounted. Reconcile from SQLite when it
-  // becomes visible again; running/error snapshots remain available in the
-  // shared store so switching views never loses live state.
-  const reconciledRunRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!conversationId || !activeRun || activeRun.status === 'running' || !activeRun.completedAt) return;
-    const reconciliationId = `${conversationId}:${activeRun.completedAt}`;
-    if (reconciledRunRef.current === reconciliationId) return;
-    let cancelled = false;
-    (async () => {
-      const persisted = await getConversationMessages(conversationId, 200);
-      if (cancelled) return;
-      reconciledRunRef.current = reconciliationId;
-      setMessages(persisted.map(restoreSimpleMessage));
-      // Cancellation is persisted by the backend just like successful
-      // completion. Once SQLite has supplied that durable message, discard
-      // the local snapshot so progress and tool blocks are not duplicated.
-      if (shouldClearReconciledConversationRun(activeRun)) {
-        clearConversationRun(conversationId);
-      }
-      await refreshConversations();
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [activeRun, conversationId, refreshConversations]);
-
-  // T82 — recover an in-progress agent task after a refresh / Electron restart.
-  // On conversation mount, if a prior run left a resumable task in localStorage
-  // (findResumableAgentTask), reconnect its SSE and rebuild the live snapshot so
-  // the user does not stare at a blank "running" state for the whole ~10+ min run.
-  // Guarded so it only attempts once per conversationId (also survives StrictMode).
-  const resumableCheckedRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!conversationId) return;
-    if (resumableCheckedRef.current === conversationId) return;
-    resumableCheckedRef.current = conversationId;
-    const record = findResumableAgentTask(conversationId, projectId);
-    if (record) resumeConversationRun(record, conversationId, projectId);
-  }, [conversationId]);
+  // UI-305 P0.4 — 会话恢复/对账簇（原 609-668 三个 effect：消息重载、
+  // 隐藏期完结对账、T82 resumable 重连）整簇抽入 useConversationResume，
+  // 零行为变化。
+  const { reconciledRunRef } = useConversationResume({
+    conversationId,
+    projectId,
+    activeRun,
+    refreshConversations,
+    setMessages,
+    setLoading,
+  });
 
   const baseDisplayMessages = (() => {
     if (!activeRun || activeRun.conversationId !== conversationId) {
@@ -1084,71 +1060,7 @@ export function SimpleChat({
     }
   }, [conversationId, forkingAtIndex, projectId, refreshConversations, onConversationChange]);
 
-  const retrySummary = useCallback(async (toolJobId: string) => {
-    const attempts = summaryRetryAttempts[toolJobId] ?? 0;
-    if (!conversationId) return;
-    if (summaryRetryState[toolJobId] === 'running') return;
-    if (attempts >= MAX_SUMMARY_RETRIES) return;
-    if (Date.now() < (summaryRetryCooldownUntil[toolJobId] ?? 0)) return;
-    setSummaryRetryState((current) => ({ ...current, [toolJobId]: 'running' }));
-    setSummaryRetryErrors((current) => {
-      const next = { ...current };
-      delete next[toolJobId];
-      return next;
-    });
-    try {
-      const content = await retryToolSummary({
-        toolJobId,
-        projectId,
-        conversationId,
-        modelPresetId: activeModel?.endpointProfileId || activeModelId,
-      });
-      setMessages((current) => [
-        ...current,
-        { role: 'assistant', content, ts: new Date().toISOString() },
-      ]);
-      clearConversationRun(conversationId);
-      setSummaryRetryState((current) => ({ ...current, [toolJobId]: 'done' }));
-      setSummaryRetryAttempts((current) => {
-        const next = { ...current };
-        delete next[toolJobId];
-        return next;
-      });
-      setSummaryRetryCooldownUntil((current) => {
-        const next = { ...current };
-        delete next[toolJobId];
-        return next;
-      });
-      await refreshConversations();
-    } catch (error) {
-      const nextAttempts = attempts + 1;
-      setSummaryRetryAttempts((current) => ({ ...current, [toolJobId]: nextAttempts }));
-      setSummaryRetryState((current) => {
-        const next = { ...current };
-        delete next[toolJobId];
-        return next;
-      });
-      setSummaryRetryErrors((current) => ({
-        ...current,
-        [toolJobId]: error instanceof Error ? error.message : 'AI 总结仍不可用，请稍后重试',
-      }));
-      if (nextAttempts < MAX_SUMMARY_RETRIES) {
-        const backoff = RETRY_BACKOFF_MS[nextAttempts - 1] ?? 8000;
-        setSummaryRetryCooldownUntil((current) => ({ ...current, [toolJobId]: Date.now() + backoff }));
-      }
-    }
-  }, [activeModel, activeModelId, conversationId, projectId, refreshConversations, summaryRetryState, summaryRetryAttempts, summaryRetryCooldownUntil]);
 
-  // UX1H: tick while any summary-retry cooldown is active so the "冷却中 Ns"
-  // label and re-enable update without a full external re-render.
-  useEffect(() => {
-    const now = Date.now();
-    const active = Object.values(summaryRetryCooldownUntil).filter((until) => until > now);
-    if (active.length === 0) return;
-    const minUntil = Math.min(...active);
-    const timer = window.setTimeout(() => setRetryTick((t) => t + 1), Math.max(250, minUntil - Date.now()));
-    return () => window.clearTimeout(timer);
-  }, [summaryRetryCooldownUntil, retryTick]);
 
   const approvePending = useCallback(async () => {
     if (!pendingApproval || streaming) return;
@@ -1373,56 +1285,6 @@ export function SimpleChat({
 
   const examplePromptsToShow = displayMessages.length === 0 ? examplePrompts : [];
 
-  const accessModeLabel = accessMode === 'full'
-    ? '完全访问'
-    : accessMode === 'workspace-write'
-      ? '项目写'
-      : accessMode === 'plan'
-        ? '计划模式'
-        : '只读模式';
-  const modelGroups = modelPresets.reduce<Array<{
-    key: string;
-    supplier: string;
-    defaultModel: string;
-    lastSelectedModel: string;
-    presets: ChatModelPreset[];
-  }>>(
-    (groups, preset) => {
-      const supplier = preset.label || preset.provider;
-      const key = preset.endpointProfileId || preset.provider;
-      const existing = groups.find((group) => group.key === key);
-      if (existing) existing.presets.push(preset);
-      else groups.push({
-        key,
-        supplier,
-        defaultModel: preset.defaultModel || preset.model,
-        lastSelectedModel: preset.lastSelectedModel || preset.model,
-        presets: [preset],
-      });
-      return groups;
-    },
-    []
-  );
-  const activeSupplierGroup = modelGroups.find((group) =>
-    group.presets.some((preset) => preset.id === activeModelId)
-  ) || modelGroups[0];
-  const selectedSupplierGroup = modelGroups.find((group) => group.key === modelSupplierKey)
-    || activeSupplierGroup;
-  const preferredPresetForSupplier = useCallback((group: typeof modelGroups[number]) => {
-    return preferredModelPreset(
-      group.presets,
-      group.key === activeSupplierGroup?.key ? activeModelId : undefined,
-      group.lastSelectedModel,
-      group.defaultModel
-    );
-  }, [activeModelId, activeSupplierGroup?.key]);
-  const selectModel = useCallback(async (preset: ChatModelPreset) => {
-    setModelMenuOpen(null);
-    setModelSupplierKey(null);
-    // Hook persists the new active id + llm_provider via electron
-    // bridge (Plan 1.6 §4.5 — replaces the local get-then-save).
-    await setActiveModelId(preset.id);
-  }, [setActiveModelId]);
 
   return (
     <div className="sc-outer" data-rail-body>
@@ -2051,293 +1913,3 @@ export function SimpleChat({
 // ImagePreviewModal (and ImagePreviewModalProps) moved to ./SimpleChat/ImagePreviewModal.tsx (BLOCK-9.2 PHASE 4).
 // The canonical component is imported at the top of this file and re-exported from
 // the header for any consumer reaching it via the SimpleChat path.
-
-function LoopStatusPanel({
-  loop,
-  pending,
-}: {
-  loop: ConversationLoopState;
-  pending: boolean;
-}): React.ReactElement {
-  const [expanded, setExpanded] = useState(false);
-  const display = deriveLoopDisplay(loop, pending);
-  const iterations = loop.iterations || [];
-  // Only surface public conclusions — never hidden reasoning. The backend
-  // already redacts these; blocked/failed turns must read as "not complete".
-  const conclusions = iterations.filter(
-    (it) => it.publicConclusion && it.publicConclusion.trim()
-  );
-
-  return (
-    <div className={`sc-loop-panel sc-loop-tone-${display.tone}`} aria-label="任务循环状态">
-      <button
-        type="button"
-        className="sc-loop-summary"
-        aria-expanded={expanded}
-        aria-controls="sc-loop-iterations"
-        aria-label={expanded ? '收起循环详情' : '展开循环详情'}
-        onClick={() => setExpanded((current) => !current)}
-      >
-        <span className="sc-loop-status-dot" aria-hidden="true" />
-        <span className="sc-loop-status-label">{display.label}</span>
-        {display.attempts > 0 && (
-          <span className="sc-loop-attempts">· {display.attempts} 轮</span>
-        )}
-        {loop.latestConclusion && (
-          <span className="sc-loop-latest">
-            · {compactStageConclusion(loop.latestConclusion, 80)}
-          </span>
-        )}
-        {conclusions.length > 0 && <Icon name={expanded ? 'chevron-down' : 'chevron-right'} size={13} />}
-      </button>
-      {expanded && conclusions.length > 0 && (
-        <div className="sc-loop-iterations">
-          {conclusions.map((it) => (
-            <div
-              key={it.iterationId}
-              className={`sc-loop-iteration sc-loop-iteration-${it.status}`}
-            >
-              <span className="sc-loop-iteration-seq" aria-hidden="true">#{it.sequence}</span>
-              <span className="sc-loop-iteration-decision">{loopDecisionLabel(it.decision)}</span>
-              <span className="sc-loop-iteration-conclusion">
-                {compactStageConclusion(it.publicConclusion, 200)}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function AgentProgressList({
-  updates,
-  pending,
-  onFileReferenceClick,
-}: {
-  updates: AgentProgressUpdate[];
-  pending: boolean;
-  onFileReferenceClick: (detail: FileReferenceClickDetail) => void;
-}): React.ReactElement {
-  // Every progress update after the first starts with the previous stage's
-  // public conclusion (enforced by the agent prompt). The first update is only
-  // an intention, so it is deliberately omitted from the conclusion trail.
-  const conclusions = updates.slice(1).map((progress) => ({
-    key: `${progress.iteration}:${progress.content}`,
-    content: compactStageConclusion(progress.content),
-  })).filter((item) => item.content);
-
-  return (
-    <div className="sc-agent-progress" aria-label="阶段结论">
-      {conclusions.map((conclusion) => (
-        <div key={conclusion.key} className="sc-agent-progress-item">
-          <span className="sc-agent-progress-dot" aria-hidden="true" />
-          <CopilotMarkdown
-            text={conclusion.content}
-            onFileReferenceClick={onFileReferenceClick}
-            resolveContext={null}
-          />
-        </div>
-      ))}
-      {pending && (
-        <div className="sc-agent-progress-item sc-agent-progress-current">
-          <span className="sc-agent-progress-dot" aria-hidden="true" />
-          <span>当前阶段执行中</span>
-        </div>
-      )}
-    </div>
-  );
-}
-
-export function ResultEditProgressList({
-  events,
-}: {
-  events: ResultEditProgressEvent[];
-}): React.ReactElement {
-  const phases = new Map<string, { label: string; status: string }>();
-  for (const event of events) {
-    if (!event.publicPhase || !event.publicPhaseLabel) continue;
-    phases.set(event.publicPhase, { label: event.publicPhaseLabel, status: event.status });
-  }
-  const terminal = [...events].reverse().find((event) => event.status === 'terminal');
-  return (
-    <div className="sc-result-edit-progress" aria-label="结果修改五阶段进度">
-      {[...phases.entries()].map(([phase, item]) => (
-        <span key={phase} data-status={item.status}>
-          {item.label}
-        </span>
-      ))}
-      {terminal && (
-        <strong>{terminal.stage === 'cancelled' ? '修改已停止' : '修改未完成'}</strong>
-      )}
-    </div>
-  );
-}
-
-// compactStageConclusion + ErrorBannerProps moved to ./SimpleChat/{helpers,types}.ts (BLOCK-9.2 PHASE 4).
-
-function ErrorBanner({ message, severity, showDetails, technicalDetails }: ErrorBannerProps): React.ReactElement {
-  const [detailsExpanded, setDetailsExpanded] = useState(false);
-
-  const severityClass = `sc-error-${severity}`;
-  const iconName: IconName = severity === 'error' ? 'alert-circle' : severity === 'warning' ? 'alert-triangle' : 'help-circle';
-
-  return (
-    <div className={`sc-error-banner ${severityClass}`} role="alert">
-      <div className="sc-error-header">
-        <Icon name={iconName} size={16} />
-        <span className="sc-error-message">{message}</span>
-      </div>
-      {showDetails && technicalDetails && (
-        <button
-          type="button"
-          className="sc-error-toggle"
-          onClick={() => setDetailsExpanded((prev) => !prev)}
-          aria-expanded={detailsExpanded}
-        >
-          {detailsExpanded ? '收起详情' : '查看详情'}
-          <Icon name={detailsExpanded ? 'chevron-up' : 'chevron-down'} size={12} />
-        </button>
-      )}
-      {showDetails && detailsExpanded && technicalDetails && (
-        <details className="sc-error-details" open>
-          <pre className="sc-error-details-content">{technicalDetails}</pre>
-        </details>
-      )}
-    </div>
-  );
-}
-
-function ApprovalCard({
-  approval,
-  repairState,
-  onApprove,
-  onReject,
-  busy,
-}: {
-  approval: PendingApproval;
-  repairState: ApprovalRepairState;
-  onApprove: () => void;
-  onReject: () => void;
-  busy: boolean;
-}): React.ReactElement {
-  const repairItems = repairState.status === 'ready' ? repairState.repair.repairs || [] : [];
-  const warningItems = repairState.status === 'ready' ? repairState.repair.warnings || [] : [];
-  const diagnostics = repairState.status === 'ready' ? repairState.diagnostics : null;
-  const nextActions = diagnostics?.nextActions || [];
-  return (
-    <div className="sc-approval-card">
-      <div className="sc-approval-header">
-        <div className="sc-approval-icon">
-          <Icon name="shield" size={16} />
-        </div>
-        <div className="sc-approval-title-wrap">
-          <div className="sc-approval-title">Harness 自动校正</div>
-          <div className="sc-approval-sub">
-            {approval.toolId || 'analysis'}{approval.toolJobId ? ` · ${approval.toolJobId}` : ''}
-          </div>
-        </div>
-      </div>
-      <div className="sc-approval-message">
-        {approval.message && !/确认参数|请确认|confirm/i.test(approval.message)
-          ? approval.message
-          : 'Harness 已接管参数校正，系统将自动启动该分析。'}
-      </div>
-      <ApprovalRepairHint
-        state={repairState}
-        repairItems={repairItems}
-        warningItems={warningItems}
-        nextActions={nextActions}
-      />
-      <div className="sc-approval-risk">
-        正式分析会写入项目任务记录，并生成可复现的参数、输入和结果产物。
-      </div>
-      <div className="sc-approval-actions">
-        <button
-          type="button"
-          className="gewu-btn sc-approval-btn sc-approval-approve"
-          onClick={onApprove}
-          disabled={busy}
-        >
-          <Icon name="check" size={13} />
-          开始
-        </button>
-        <button
-          type="button"
-          className="gewu-btn sc-approval-btn sc-approval-cancel"
-          onClick={onReject}
-          disabled={busy}
-        >
-          <Icon name="x" size={13} />
-          取消
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function ApprovalRepairHint({
-  state,
-  repairItems,
-  warningItems,
-  nextActions,
-}: {
-  state: ApprovalRepairState;
-  repairItems: Array<Record<string, unknown>>;
-  warningItems: Array<Record<string, unknown>>;
-  nextActions: HarnessNextAction[];
-}): React.ReactElement | null {
-  if (state.status === 'idle') return null;
-  if (state.status === 'loading') {
-    return <div className="sc-approval-harness">Harness 正在根据项目文件探测并校正参数…</div>;
-  }
-  if (state.status === 'skipped') {
-    return <div className="sc-approval-harness sc-approval-harness-muted">{state.message}</div>;
-  }
-  if (state.status === 'error') {
-    return <div className="sc-approval-harness sc-approval-harness-warning">Harness 建议暂不可用：{state.message}</div>;
-  }
-  const diagnostics = state.diagnostics || null;
-  const diagnosticIssues = diagnostics?.issues || [];
-  if (!repairItems.length && !warningItems.length && !diagnosticIssues.length) {
-    return <div className="sc-approval-harness">Harness 已检查项目文件，当前参数无需自动修正。</div>;
-  }
-  const blocked = diagnostics?.status === 'blocked';
-  const needsReview = diagnostics?.status === 'needs_review';
-  return (
-    <div className={`sc-approval-harness ${blocked ? 'sc-approval-harness-blocked' : ''}`}>
-      <div className="sc-approval-harness-title">
-        {blocked ? 'Harness 阻塞项' : needsReview ? 'Harness 需确认项' : 'Harness 参数建议'}
-      </div>
-      {repairItems.length > 0 && (
-        <ul className="sc-approval-harness-list">
-          {repairItems.slice(0, 4).map((item, index) => (
-            <li key={`${String(item.code || 'repair')}-${index}`}>{formatHarnessRepair(item)}</li>
-          ))}
-        </ul>
-      )}
-      {diagnosticIssues.length > 0 && (
-        <ul className="sc-approval-harness-list">
-          {diagnosticIssues.slice(0, 3).map((item, index) => (
-            <li key={`${String(item.code || 'issue')}-${index}`}>{formatHarnessDiagnosticIssue(item)}</li>
-          ))}
-        </ul>
-      )}
-      {warningItems.length > 0 && (
-        <div className="sc-approval-harness-warning">
-          {warningItems.slice(0, 2).map((item) => formatHarnessWarning(item)).join('；')}
-        </div>
-      )}
-      {nextActions.length > 0 && (
-        <div className="sc-approval-harness-next">
-          {nextActions.slice(0, 4).map((action) => action.label).join(' · ')}
-        </div>
-      )}
-      {blocked && (
-        <div className="sc-approval-harness-warning">
-          当前参数暂不可执行，请先补齐文件、修正格式或配置运行时。
-        </div>
-      )}
-    </div>
-  );
-}
