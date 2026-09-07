@@ -2821,6 +2821,17 @@ button.workspacePinnedSummaryMetricCard:hover {
   transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* UI-309 加映 — 拖动期刚性一致：leftCol/rightCol 的 width transition 与
+   embeddedTerminal 的 left transition 会让栏体以 0.2s 级缓动「追赶」实时变量，
+   而顶栏分隔线随同一变量瞬时移动 → 拖动中肉眼可见两根线脱节。
+   useResizableColumns 拖动期间在 body 上挂 gewu-resizing-columns 标记
+   （松手摘除），标记期间禁用这三条 transition；展开/收起动画不受影响。 */
+body:global(.gewu-resizing-columns) .leftCol,
+body:global(.gewu-resizing-columns) .rightCol,
+body:global(.gewu-resizing-columns) .embeddedTerminal {
+  transition: none;
+}
+
 @media (max-width: 960px) {
   .workspaceHeader {
     padding: 0 8px;
@@ -3991,8 +4002,8 @@ button.workspacePinnedSummaryMetricCard:hover {
   width: 2px;
 }
 
-body.gewu-resizing-columns .rightCol iframe,
-body.gewu-resizing-columns .rightPanelTabContent iframe {
+body:global(.gewu-resizing-columns) .rightCol iframe,
+body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
   pointer-events: none;
 }
 
@@ -4418,14 +4429,16 @@ body.gewu-resizing-columns .rightPanelTabContent iframe {
 }
 
 /* Keep the expensive embedded report out of the frame-by-frame layout pass.
- * The surrounding result workspace still follows the pointer in real time. */
-body.gewu-resizing-columns .rightCol {
+ * The surrounding result workspace still follows the pointer in real time.
+ * :global — body 类由 useResizableColumns 挂字面量，不能被 CSS Modules 本地化
+ * （此前 body 类被 hash 成 _gewu-resizing-columns_xxx，整组规则从未生效）。 */
+body:global(.gewu-resizing-columns) .rightCol {
   transition: none;
   will-change: width;
 }
 
-body.gewu-resizing-columns,
-body.gewu-resizing-columns * {
+body:global(.gewu-resizing-columns),
+body:global(.gewu-resizing-columns) * {
   cursor: ew-resize !important;
 }
 
