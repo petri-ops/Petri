@@ -2157,6 +2157,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-304: 增量 — 左栏「+」创建项目 dialog-first（点 + 直接弹系统文件夹选择器，选中即项目路径） (2026-09-07 in_progress)
+
+**用户反馈**：截图左栏「+」内联创建面板（路径输入框优先 + 选择文件夹按钮）：「点击+ 应该是打开文件夹，打开的文件夹就是创建项目所在的路径了。目前好像不是的，变成了输入路径，再确定，这样很不合理」。
+
+**改动**（0 新增 IPC / 0 新依赖）：UI-257 的「手输优先」翻转为 UI-253 首页同款的「选目录优先」，手输降级为兜底——① [project-workspace.tsx](../frontend/src/pages/project-workspace.tsx) `openCreatePanel` 改 dialog-first：点「+」直接调 `openDirectoryDialog()`，选中 → 面板以 **confirm 模式**打开（写入所选路径），取消 → 不开面板，桥缺失（非桌面环境）→ 直接以 manual 模式开面板（不静默）；新增 `createPanelMode` state + `repickCreateDirectory`（重新选择）+ `pickExternalDirectory`（外部路径直达确认态）+ `switchCreatePanelManual`；删除无调用方的死代码 `chooseWorkspaceDirectory`。② [LeftPanel.tsx](../frontend/src/components/workspace-panels/LeftPanel.tsx) 创建面板双模式渲染——confirm：首页 UI-253 口径确认块（「将在以下目录创建项目：」+ 完整路径 + 「项目名：目录名」+ 创建项目/重新选择…/手动输入路径/取消）；manual：原 UI 原样保留（可编辑输入 + FolderPicker「选择文件夹…」兜底）；BLOCK-53 P1 拖拽落位改 `onPickExternal(path)` 一步直达确认态（仍不绕过确认）；`createPanel` ctx 类型扩展 `mode/onRepick/onSwitchManual/onPickExternal`（新字段均可选，向后兼容）。`createProjectFromPanel` 零改动复用（validateDirectory 对系统面板返回的真实路径是无害二次校验）。首页创建流程（本就选目录优先）与 `createProject` API 零改动。
+
+**门禁**：tsc 0 / LeftPanel vitest 10/10（新增 confirm 模式用例：路径+项目名渲染、onConfirm/onRepick/onSwitchManual 触发、确认态无手输输入框；drop 用例改断言 `onPickExternal`）/ home + RightPanel + CenterPanel 回归 11/11 / docs:check / ui:audit:check。
+
+**实机**：待 dev Electron 实机过目（点 + 直接弹系统面板、选中后确认块展示完整路径与项目名、重新选择/手动输入路径/取消三路、拖拽直达确认态）后转 verified。**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-303: 增量 — 计划模式并入访问档位菜单第四档（移除独立开关，四模式一处切换） (2026-09-07 in_progress)
 
 **用户反馈**：截图 composer 档位下拉（完全访问/项目写/只读模式）：「计划模式 应该放到这里 这几种模式可以切换的」。

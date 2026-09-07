@@ -906,6 +906,21 @@
   word-break: break-all;
 }
 
+/* UI-304 — 确认态：完整路径展示 + 自动项目名（对齐首页 UI-253 确认面板口径） */
+.leftCreateConfirmLabel {
+  margin: 0;
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-secondary, var(--gewu-text, inherit));
+}
+
+.leftCreateConfirmPath {
+  margin: 0;
+  font-size: var(--gewu-font-size-xs);
+  font-family: var(--gewu-font-mono);
+  color: var(--gewu-text);
+  word-break: break-all;
+}
+
 .leftCreateActions {
   display: flex;
   align-items: center;

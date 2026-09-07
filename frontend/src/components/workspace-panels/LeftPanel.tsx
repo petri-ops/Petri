@@ -28,15 +28,22 @@ export interface LeftPanelContext {
   // One-click creators
   creatingProject: boolean;
   creatingConversation: boolean;
-  /** UI-257 — 内联创建项目面板：路径可粘贴/可编辑，绕过系统目录面板限制 */
+  /** UI-304 — 创建项目面板双模式：confirm（系统面板选完目录的确认态）/ manual（手输兜底） */
   createPanel: {
     open: boolean;
+    mode?: 'confirm' | 'manual';
     path: string;
     error: string;
-    onOpen: () => void;
+    onOpen: () => void | Promise<void>;
     onClose: () => void;
     onPathChange: (path: string) => void;
     onConfirm: () => void | Promise<void>;
+    /** UI-304 — 确认态「重新选择」：再开系统目录选择器 */
+    onRepick?: () => void | Promise<void>;
+    /** UI-304 — 切到手输兜底模式 */
+    onSwitchManual?: () => void;
+    /** UI-304 — 外部路径直达确认态（左栏拖拽目录落位），仍不绕过确认 */
+    onPickExternal?: (path: string) => void;
   };
   createConversationForProject: (projectId?: string) => void | Promise<void>;
   /** UI-258 — 更改当前项目工作目录（路径可粘贴/可编辑） */
@@ -128,8 +135,13 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
         setDropHint(res.error || '拖入的路径校验失败');
         return;
       }
-      ctx.createPanel.onOpen();
-      ctx.createPanel.onPathChange(res.data.path);
+      // UI-304 — 直达确认态（fallback 到 onOpen+onPathChange 兼容旧 ctx）
+      if (typeof ctx.createPanel.onPickExternal === 'function') {
+        ctx.createPanel.onPickExternal(res.data.path);
+      } else {
+        ctx.createPanel.onOpen();
+        ctx.createPanel.onPathChange(res.data.path);
+      }
       setDropHint(null);
     } catch (err) {
       setDropHint(err instanceof Error ? err.message : String(err));
@@ -292,8 +304,8 @@ function ProjectTreeHeader({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
           </Link>
           <button
             className={styles.iconBtn}
-            onClick={ctx.createPanel.onOpen}
-            title="新建项目（选择或粘贴工作目录）"
+            onClick={() => void ctx.createPanel.onOpen()}
+            title="新建项目（选择工作目录）"
             aria-expanded={ctx.createPanel.open}
             disabled={ctx.creatingProject}
           >
@@ -301,8 +313,58 @@ function ProjectTreeHeader({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
           </button>
         </div>
       </div>
-      {/* UI-257 — 内联创建面板：路径可粘贴/可编辑（macOS 面板禁用「打开」时的兜底） */}
-      {ctx.createPanel.open && (
+      {/* UI-304 — 创建面板双模式：confirm（系统面板选完目录的确认态，UI-253 口径）
+          / manual（手输兜底，UI-257：macOS 共享目录禁用系统面板「打开」时可用） */}
+      {ctx.createPanel.open && ctx.createPanel.mode === 'confirm' && (
+        <div className={styles.leftCreatePanel} data-testid="left-create-panel">
+          <p className={styles.leftCreateConfirmLabel}>将在以下目录创建项目：</p>
+          <p className={styles.leftCreateConfirmPath} title={ctx.createPanel.path}>
+            {ctx.createPanel.path}
+          </p>
+          <p className={styles.leftCreateConfirmLabel}>
+            项目名：<strong>{ctx.createPanel.path.split(/[\\/]/).pop()?.trim() || '新项目'}</strong>
+          </p>
+          {ctx.createPanel.error && (
+            <p className={styles.leftCreateError} role="alert">{ctx.createPanel.error}</p>
+          )}
+          <div className={styles.leftCreateActions}>
+            <button
+              type="button"
+              className="gewu-btn gewu-btn--sm"
+              onClick={() => void ctx.createPanel.onConfirm()}
+              disabled={ctx.creatingProject || !ctx.createPanel.path.trim()}
+            >
+              {ctx.creatingProject ? '创建中…' : '创建项目'}
+            </button>
+            <button
+              type="button"
+              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              onClick={() => void (ctx.createPanel.onRepick?.())}
+              disabled={ctx.creatingProject}
+            >
+              重新选择…
+            </button>
+            <button
+              type="button"
+              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              onClick={ctx.createPanel.onSwitchManual}
+              disabled={ctx.creatingProject}
+              title="macOS 对部分共享目录会禁用系统选择器，可手动粘贴完整路径"
+            >
+              手动输入路径
+            </button>
+            <button
+              type="button"
+              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              onClick={ctx.createPanel.onClose}
+              disabled={ctx.creatingProject}
+            >
+              取消
+            </button>
+          </div>
+        </div>
+      )}
+      {ctx.createPanel.open && ctx.createPanel.mode !== 'confirm' && (
         <div className={styles.leftCreatePanel} data-testid="left-create-panel">
           <div className={styles.leftCreateRow}>
             <input

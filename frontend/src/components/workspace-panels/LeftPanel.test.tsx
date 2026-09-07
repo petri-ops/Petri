@@ -31,12 +31,16 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext {
     creatingConversation: false,
     createPanel: {
       open: false,
+      mode: 'manual',
       path: '',
       error: '',
       onOpen: vi.fn(),
       onClose: vi.fn(),
       onPathChange: vi.fn(),
       onConfirm: vi.fn(),
+      onRepick: vi.fn(),
+      onSwitchManual: vi.fn(),
+      onPickExternal: vi.fn(),
     },
     createConversationForProject: vi.fn(),
     renameProject: vi.fn(async () => true),
@@ -107,6 +111,39 @@ describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '创建项目' }));
     expect(onConfirm).toHaveBeenCalledTimes(1);
+  });
+
+  // UI-304 — 创建面板双模式：confirm（系统面板选完目录的确认态）
+  it('renders the confirm-mode panel with full path and project name, fires onConfirm/onRepick', () => {
+    const onConfirm = vi.fn();
+    const onRepick = vi.fn();
+    const onSwitchManual = vi.fn();
+    const base = buildCtx('chat');
+    const ctx = {
+      ...base,
+      createPanel: {
+        ...base.createPanel,
+        open: true,
+        mode: 'confirm' as const,
+        path: '/tmp/gewu-picked-ws',
+        onConfirm,
+        onRepick,
+        onSwitchManual,
+      },
+    } as unknown as LeftPanelContext;
+    renderLeftPanel(ctx);
+
+    expect(screen.getByText('将在以下目录创建项目：')).toBeTruthy();
+    expect(screen.getByText('/tmp/gewu-picked-ws')).toBeTruthy();
+    expect(screen.getByText('gewu-picked-ws')).toBeTruthy(); // 项目名取自目录名
+    fireEvent.click(screen.getByRole('button', { name: '创建项目' }));
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: '重新选择…' }));
+    expect(onRepick).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: '手动输入路径' }));
+    expect(onSwitchManual).toHaveBeenCalledTimes(1);
+    // 确认态不渲染手输输入框
+    expect(screen.queryByLabelText('项目工作目录完整路径')).toBeNull();
   });
 
   it('marks plugins quick-action with aria-current="page" when workspaceMode is plugins', () => {
@@ -190,8 +227,9 @@ describe('BLOCK-53 P1 drag-to-create (left panel)', () => {
     fireEvent.drop(wrap, { dataTransfer: { files: [{ name: 'dropped-ws' }] } });
 
     await vi.waitFor(() => {
-      expect(ctx.createPanel.onOpen).toHaveBeenCalledTimes(1);
-      expect(ctx.createPanel.onPathChange).toHaveBeenCalledWith('/tmp/dropped-ws');
+      // UI-304 — 拖拽经 onPickExternal 直达确认态，不绕过确认环节
+      expect(ctx.createPanel.onPickExternal).toHaveBeenCalledWith('/tmp/dropped-ws');
+      expect(ctx.createPanel.onOpen).not.toHaveBeenCalled();
     });
   });
 
@@ -208,6 +246,7 @@ describe('BLOCK-53 P1 drag-to-create (left panel)', () => {
     fireEvent.drop(wrap, { dataTransfer: { files: [{ name: 'note.txt' }] } });
 
     expect(await screen.findByText('该路径不是文件夹')).toBeTruthy();
+    expect(ctx.createPanel.onPickExternal).not.toHaveBeenCalled();
     expect(ctx.createPanel.onOpen).not.toHaveBeenCalled();
     expect(ctx.createPanel.onPathChange).not.toHaveBeenCalled();
   });

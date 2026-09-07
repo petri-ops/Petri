@@ -790,20 +790,56 @@ export function ProjectWorkspace(): React.ReactElement {
     });
   }, [allProjects, searchConversationIndex]);
 
-  const chooseWorkspaceDirectory = useCallback(async () => {
-    const selected = await window.biof3Desktop?.files?.openDirectoryDialog?.();
-    return selected || '';
-  }, []);
-
-  // UI-257 — 内联创建面板：+ 点击先开面板（路径可粘贴/可编辑），不再强制先走系统
-  // 目录面板（macOS 新系统对"文件共享"标记路径会禁用「打开」按钮，面板不可用时可手输）。
+  // UI-304 — 「+」dialog-first：点击直接弹系统目录选择器，选中的文件夹即项目路径；
+  // 确认态面板展示完整路径与项目名（UI-253 口径）一键创建。手输模式保留为兜底
+  // （UI-257：macOS 对"文件共享"标记路径会禁用系统面板「打开」按钮）。
   const [createPanelOpen, setCreatePanelOpen] = useState(false);
+  const [createPanelMode, setCreatePanelMode] = useState<'confirm' | 'manual'>('manual');
   const [createPath, setCreatePath] = useState('');
   const [createError, setCreateError] = useState('');
 
-  const openCreatePanel = useCallback(() => {
+  const pickDirectoryViaDialog = useCallback(async (): Promise<string | null> => {
+    const dialog = window.biof3Desktop?.files?.openDirectoryDialog;
+    if (typeof dialog !== 'function') return null;
+    const selected = await dialog();
+    return selected || null;
+  }, []);
+
+  const openCreatePanel = useCallback(async () => {
+    setCreateError('');
+    const dialog = window.biof3Desktop?.files?.openDirectoryDialog;
+    if (typeof dialog !== 'function') {
+      // 桥缺失（非桌面环境）→ 直接以手输模式开面板，保留可见兜底
+      setCreatePanelMode('manual');
+      setCreatePath('');
+      setCreatePanelOpen(true);
+      return;
+    }
+    const selected = await dialog();
+    if (!selected) return; // 用户取消选择：不开面板
+    setCreatePanelMode('confirm');
+    setCreatePath(selected);
     setCreatePanelOpen(true);
-    setCreatePath('');
+  }, []);
+
+  // UI-304 — 确认态「重新选择」：再开一次系统目录选择器，选中即更新路径
+  const repickCreateDirectory = useCallback(async () => {
+    const selected = await pickDirectoryViaDialog();
+    if (!selected) return;
+    setCreatePath(selected);
+    setCreateError('');
+  }, [pickDirectoryViaDialog]);
+
+  // UI-304 — 外部路径直达确认态（左栏拖拽目录落位；仍不绕过确认环节）
+  const pickExternalDirectory = useCallback((path: string) => {
+    setCreatePanelMode('confirm');
+    setCreatePath(path);
+    setCreateError('');
+    setCreatePanelOpen(true);
+  }, []);
+
+  const switchCreatePanelManual = useCallback(() => {
+    setCreatePanelMode('manual');
     setCreateError('');
   }, []);
 
@@ -1806,15 +1842,19 @@ export function ProjectWorkspace(): React.ReactElement {
     expandedProjects,
     creatingProject,
     creatingConversation,
-    // UI-257 — 内联创建面板（路径可粘贴/可编辑，绕过系统面板限制）
+    // UI-304 — 创建面板 dialog-first：确认态（选完目录）/手输态（兜底）双模式
     createPanel: {
       open: createPanelOpen,
+      mode: createPanelMode,
       path: createPath,
       error: createError,
       onOpen: openCreatePanel,
       onClose: closeCreatePanel,
       onPathChange: setCreatePath,
       onConfirm: createProjectFromPanel,
+      onRepick: repickCreateDirectory,
+      onSwitchManual: switchCreatePanelManual,
+      onPickExternal: pickExternalDirectory,
     },
     createConversationForProject,
     // UI-258 — 更改当前项目工作目录（路径可粘贴/可编辑）
