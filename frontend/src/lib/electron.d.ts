@@ -44,6 +44,34 @@ export interface HarnessCapabilityEntry {
   attempts: number;
 }
 
+// UI-311 — result:* IPC handler 统一 fail-closed 信封（preload 1:1 镜像如实声明）。
+// 拆包单点在 lib/resultBridge.ts，前端消费方仍见裸值契约。
+type ResultIpcEnvelope<T> = { ok: boolean; data?: T; error?: string };
+type ResultRecord = {
+  id: string;
+  projectId: string;
+  type: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
+  name: string;
+  data: unknown;
+  config?: Record<string, unknown>;
+  sourceBranchId: string | null;
+  createdAt: number;
+  updatedAt: number;
+};
+type ResultSummaryRecord = Pick<
+  ResultRecord,
+  'id' | 'projectId' | 'type' | 'name' | 'sourceBranchId' | 'updatedAt'
+>;
+type ResultVersionRecord = {
+  id: string;
+  resultId: string;
+  version: number;
+  data: unknown;
+  config?: Record<string, unknown>;
+  createdAt: number;
+  createdByBranchId: string | null;
+};
+
 declare global {
   interface Window {
     /** BLOCK-61 品牌桥主全局名。 */
@@ -693,50 +721,23 @@ declare global {
       result: {
         create: (params: {
           projectId: string;
-          type: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
+          type: ResultRecord['type'];
           name: string;
           data: unknown;
           config?: Record<string, unknown>;
           sourceBranchId?: string;
-        }) => Promise<{
-          id: string;
-          projectId: string;
-          type: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
-          name: string;
-          data: unknown;
-          config?: Record<string, unknown>;
-          sourceBranchId: string | null;
-          createdAt: number;
-          updatedAt: number;
-        }>;
-        get: (params: { id: string }) => Promise<{
-          id: string;
-          projectId: string;
-          type: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
-          name: string;
-          data: unknown;
-          config?: Record<string, unknown>;
-          sourceBranchId: string | null;
-          createdAt: number;
-          updatedAt: number;
-        } | null>;
+        }) => Promise<ResultIpcEnvelope<ResultRecord>>;
+        get: (params: { id: string }) => Promise<ResultIpcEnvelope<ResultRecord | null>>;
         list: (params: {
           projectId: string;
           options?: {
-            type?: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
+            type?: ResultRecord['type'];
             limit?: number;
             offset?: number;
             sortBy?: 'updatedAt' | 'createdAt' | 'name';
             sortDir?: 'asc' | 'desc';
           };
-        }) => Promise<Array<{
-          id: string;
-          projectId: string;
-          type: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
-          name: string;
-          sourceBranchId: string | null;
-          updatedAt: number;
-        }>>;
+        }) => Promise<ResultIpcEnvelope<ResultSummaryRecord[]>>;
         update: (params: {
           id: string;
           updates: {
@@ -744,36 +745,16 @@ declare global {
             data?: unknown;
             config?: Record<string, unknown>;
           };
-        }) => Promise<{
-          id: string;
-          projectId: string;
-          type: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
-          name: string;
-          data: unknown;
-          config?: Record<string, unknown>;
-          sourceBranchId: string | null;
-          createdAt: number;
-          updatedAt: number;
-        } | null>;
-        delete: (params: { id: string }) => Promise<void>;
+        }) => Promise<ResultIpcEnvelope<ResultRecord | null>>;
+        delete: (params: { id: string }) => Promise<ResultIpcEnvelope<undefined>>;
         byProject: (params: {
           projectId: string;
           options?: {
-            type?: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
+            type?: ResultRecord['type'];
             limit?: number;
             offset?: number;
           };
-        }) => Promise<Array<{
-          id: string;
-          projectId: string;
-          type: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
-          name: string;
-          data: unknown;
-          config?: Record<string, unknown>;
-          sourceBranchId: string | null;
-          createdAt: number;
-          updatedAt: number;
-        }>>;
+        }) => Promise<ResultIpcEnvelope<ResultRecord[]>>;
         // Phase 4: Export conversation to result
         createFromConversation: (params: {
           projectId: string;
@@ -783,64 +764,25 @@ declare global {
             includeMessages?: boolean;
             generateSummary?: boolean;
           };
-        }) => Promise<{
-          id: string;
-          projectId: string;
-          type: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
-          name: string;
-          data: unknown;
-          config?: Record<string, unknown>;
-          sourceBranchId: string | null;
-          createdAt: number;
-          updatedAt: number;
-        }>;
+        }) => Promise<ResultIpcEnvelope<ResultRecord>>;
         version: {
           create: (params: {
             resultId: string;
             data: unknown;
             config?: Record<string, unknown>;
             createdByBranchId?: string;
-          }) => Promise<{
-            id: string;
-            resultId: string;
-            version: number;
-            data: unknown;
-            config?: Record<string, unknown>;
-            createdAt: number;
-            createdByBranchId: string | null;
-          }>;
-          get: (params: { id: string }) => Promise<{
-            id: string;
-            resultId: string;
-            version: number;
-            data: unknown;
-            config?: Record<string, unknown>;
-            createdAt: number;
-            createdByBranchId: string | null;
-          } | null>;
+          }) => Promise<ResultIpcEnvelope<ResultVersionRecord>>;
+          get: (params: { id: string }) => Promise<ResultIpcEnvelope<ResultVersionRecord | null>>;
           // Phase 4: Get version by resultId and version number
-          getByNumber: (params: { resultId: string; version: number }) => Promise<{
-            id: string;
+          getByNumber: (params: {
             resultId: string;
             version: number;
-            data: unknown;
-            config?: Record<string, unknown>;
-            createdAt: number;
-            createdByBranchId: string | null;
-          } | null>;
+          }) => Promise<ResultIpcEnvelope<ResultVersionRecord | null>>;
           list: (params: {
             resultId: string;
             limit?: number;
             offset?: number;
-          }) => Promise<Array<{
-            id: string;
-            resultId: string;
-            version: number;
-            data: unknown;
-            config?: Record<string, unknown>;
-            createdAt: number;
-            createdByBranchId: string | null;
-          }>>;
+          }) => Promise<ResultIpcEnvelope<ResultVersionRecord[]>>;
         };
       };
     };

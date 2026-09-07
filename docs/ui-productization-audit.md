@@ -2157,6 +2157,18 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-311: 修复 — ResultStudio `/project/:id/results` 整页崩溃（result:* IPC 信封契约漂移）(2026-09-08 verified)
+
+**发现**：BLOCK-62 P0 顺带发现并登记 AUDIT-LOG 🟢（2026-09-07）：dev Electron 直达 `/project/:id/results` 整页白屏，`useResultStore` 渲染期 `snapshot.results.map is not a function`，ResultStudioPage 无 error boundary → 整棵 React 树卸载；HEAD 既有、非 BLOCK-62 引入。用户裁决单独立项修复。
+
+**诊断**：三层契约漂移——① `src/ipc/result-handlers.js` 全部 handler 统一返回 fail-closed 信封 `{ ok, data?, error? }`；② `src/preload.js` result 命名空间 1:1 透传信封（镜像注释自证）；③ [electron.d.ts](../frontend/src/lib/electron.d.ts) result 命名空间却按裸值声明（`byProject → Promise<Array<Result>>` 等 11 方法），[resultBridge.ts](../frontend/src/lib/resultBridge.ts) 与 [useResultStore.ts](../frontend/src/hooks/useResultStore.ts) 按裸值消费 → `loadResults` 把信封对象写进 `ResultCache.results`，渲染期 `resultsById` 的 `.map` 即崩。Result Studio 长期 `experimental` 无实机验收，漂移从未暴露；连带 `ResultVersionHistory` 的 `version.list` 同样收到信封（`setVersions(versionList || [])` 拿到的是对象）。全仓仅此两个消费方，无第三方直接摸 `window.*.result`。
+
+**改动**（渲染层 2 文件 / 0 新增 IPC / 0 新依赖 / preload 与 handler 零改动）：① electron.d.ts result 命名空间如实声明信封——模块作用域新增 `ResultIpcEnvelope`/`ResultRecord`/`ResultSummaryRecord`/`ResultVersionRecord` 别名，11 方法签名收敛为 `Promise<ResultIpcEnvelope<…>>`（与 workingTreeReview 等命名空间的信封模式同型）；② [resultBridge.ts](../frontend/src/lib/resultBridge.ts) 作为 result 命名空间唯一拆包点——`unwrap`（ok=true → data，否则抛 handler 错误信息，store 捕获落 error 态）+ `unwrapNullable`（get 类 not found 按契约落 null），11 方法全部走拆包；消费方（useResultStore / ResultVersionHistory）零改动。
+
+**门禁**：新增回归 [resultBridge.test.ts](../frontend/src/lib/resultBridge.test.ts) 6 用例 + [useResultStore.test.tsx](../frontend/src/hooks/useResultStore.test.tsx) 3 用例（信封→裸数组 / 错误信封→error 态不崩 / null projectId 不发起加载）9/9；受影响面定向 vitest（result-studio 全套 + desktopBridge）21 文件 178/178；tsc --noEmit 新增 0 错误（存量 12 处 TS2550 `.at()` 于 HEAD 同败，与本包无关）；ui:audit:check / docs:check。
+
+**实机**（dev Electron CDP，证据 `acceptance/ui-311/results-route-live.{json,png}`）：直达 `/project/p_mtrawlau_7rly/results` —— React root 正常挂载（children=2）、零页面异常、零 `map is not a function`、渲染真实空态页（「项目结果 / 0 个结果 / 暂无结果 / 在 Copilot 中运行分析后会显示在这里」）。**状态**: verified（2026-09-08 dev Electron 实机）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-310: 增量 — BLOCK-62 TitleBar 列体化（P0 地基 / P1a 片段提取 / P1b 列内 header / P2 跨树同步链退役）(2026-09-07 verified)
 
 **背景**：UI-309 三轮修复（live CSS 变量 / `:global` 标记 / 禁 transition）后确认根因是结构性——TitleBar 独立整宽横条用 grid 模拟三列宽、靠跨 DOM 树同步对齐分隔线。用户裁决启动 BLOCK-62 列体化重构（拖拽接缝 spike 手动实测 PASS 后）。本条覆盖 P0–P2 四阶段，plan `docs/block-62-titlebar-columnization-plan.md`。
