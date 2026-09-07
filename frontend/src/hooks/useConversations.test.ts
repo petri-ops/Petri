@@ -169,4 +169,30 @@ describe('useOtherConversations', () => {
     expect(mockedList).toHaveBeenCalledTimes(1);
     expect(mockedList).toHaveBeenCalledWith('active', 'p-b');
   });
+
+  it('promotes a visited (previously current) project into byProjectId on switch', async () => {
+    // UI-306 加映回归：项目作为当前项时，其列表只经 useConversations 进入
+    // sharedCache（byProjectId 没有）。切走后该项目仍在树中展开，effect
+    // 曾因「已缓存」跳过它 → 永远显示「暂无对话」。修复后 effect 对所有
+    // 相关项目收敛 byProjectId ⇄ sharedCache（缓存命中零请求）。
+    mockedList.mockResolvedValueOnce([makeConv('a-1', 'a')]);
+    const current = renderHook(() => useConversations('p-a'));
+    await waitFor(() => expect(current.result.current.loading).toBe(false));
+
+    const { result, rerender } = renderHook(
+      ({ ids, exclude }: { ids: Set<string>; exclude: string }) =>
+        useOtherConversations(ids, exclude),
+      { initialProps: { ids: new Set(['p-a']), exclude: 'p-a' } }
+    );
+    await waitFor(() => {
+      expect(result.current.byProjectId['p-a']).toBeUndefined();
+    });
+
+    // 切到 p-b：p-a 不再是当前项，且已展开 —— 必须从缓存提升，且不重发请求。
+    rerender({ ids: new Set(['p-a']), exclude: 'p-b' });
+    await waitFor(() => {
+      expect(result.current.byProjectId['p-a']).toHaveLength(1);
+    });
+    expect(mockedList).toHaveBeenCalledTimes(1);
+  });
 });

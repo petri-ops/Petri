@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
-import { FolderPicker } from '@/components/desktop/FolderPicker';
 import type { Project } from '@/lib/project-types';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
@@ -33,6 +31,8 @@ export interface LeftPanelContext {
     open: boolean; // 保持为 false
     error: string; // 仅用于显示错误
     onOpen: () => void | Promise<void>;
+    /** UI-282 — 拖拽目录直达创建：路径已由拖拽方校验，直接走创建链 */
+    onPickExternal: (path: string) => void | Promise<void>;
   };
   createConversationForProject: (projectId?: string) => void | Promise<void>;
   renameProject: (projectId: string, name: string) => Promise<boolean>;
@@ -113,13 +113,8 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
         setDropHint(res.error || '拖入的路径校验失败');
         return;
       }
-      // UI-304 — 直达确认态（fallback 到 onOpen+onPathChange 兼容旧 ctx）
-      if (typeof ctx.createPanel.onPickExternal === 'function') {
-        ctx.createPanel.onPickExternal(res.data.path);
-      } else {
-        ctx.createPanel.onOpen();
-        ctx.createPanel.onPathChange(res.data.path);
-      }
+      // UI-282 — 校验通过的拖拽路径直接走创建链（UI-304 后无内联面板可回填）
+      await ctx.createPanel.onPickExternal(res.data.path);
       setDropHint(null);
     } catch (err) {
       setDropHint(err instanceof Error ? err.message : String(err));
@@ -127,7 +122,7 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
   };
 
   return (
-    <aside className={styles.leftCol} style={{ width: ctx.width }}>
+    <aside className={styles.leftCol} style={{ width: `var(--gewu-live-left-width, ${ctx.width}px)` }}>
       <div
         className={styles.leftPanelWrap}
         style={dropActive ? { outline: '1px dashed var(--gewu-accent)', outlineOffset: '-4px' } : undefined}
@@ -167,50 +162,6 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
 // ---------------------------------------------------------------------------
 // Pieces
 // ---------------------------------------------------------------------------
-
-/** UI-259 — 应用内「选择文件夹」按钮：展开 FolderPicker，选中路径写回输入框 */
-function BrowseFolderButton({
-  initialPath,
-  onPick,
-  label = '选择文件夹…',
-  disabled,
-}: {
-  initialPath: string;
-  onPick: (path: string) => void;
-  label?: string;
-  disabled?: boolean;
-}): React.ReactElement {
-  const [open, setOpen] = useState(false);
-  const [browseFrom, setBrowseFrom] = useState('');
-  return (
-    <>
-      <button
-        type="button"
-        className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-        onClick={() => {
-          if (!open) setBrowseFrom(initialPath || '');
-          setOpen((o) => !o);
-        }}
-        aria-expanded={open}
-        disabled={disabled}
-      >
-        {label}
-      </button>
-      {open && (
-        <div className={styles.leftCreatePickerWrap}>
-          <FolderPicker
-            initialPath={browseFrom}
-            onPick={(picked) => {
-              onPick(picked);
-              setOpen(false);
-            }}
-            onCancel={() => setOpen(false)}
-          />
-        </div>
-      )}
-    </>
-  );
-}
 
 function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   const items: Array<{
@@ -276,10 +227,6 @@ function ProjectTreeHeader({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
       <div className={styles.leftPanelHeader}>
         <span className={styles.leftPanelTitle}>项目</span>
         <div className={styles.leftPanelHeaderActions}>
-          {/* UI-258 — 返回工作台（项目列表 + 常驻创建入口） */}
-          <Link to="/" className={styles.iconBtn} title="返回工作台" aria-label="返回工作台">
-            <Icon name="home" size={15} />
-          </Link>
           <button
             className={styles.iconBtn}
             onClick={() => void ctx.createPanel.onOpen()}
@@ -318,6 +265,110 @@ function ProjectTree({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
           }
         />
       ))}
+    </div>
+  );
+}
+
+function ProjectNode({
+  project: p,
+  ctx,
+  isCurrent,
+  isExpanded,
+  conversations: convs,
+}: {
+  project: Project;
+  ctx: LeftPanelContext;
+  isCurrent: boolean;
+  isExpanded: boolean;
+  conversations: ConversationSummary[];
+}): React.ReactElement {
+  const [editingProject, setEditingProject] = React.useState(false);
+  const [projectName, setProjectName] = React.useState(p.name);
+
+  React.useEffect(() => setProjectName(p.name), [p.name]);
+
+  const finishProjectRename = async () => {
+    const name = projectName.trim();
+    if (!name || name === p.name) {
+      setProjectName(p.name);
+      setEditingProject(false);
+      return;
+    }
+    const ok = await ctx.renameProject(p.id, name);
+    if (!ok) setProjectName(p.name);
+    setEditingProject(false);
+  };
+
+  return (
+    <div className={styles.projectTreeNode}>
+      <div
+        className={`${styles.projectTreeRow} ${isCurrent ? styles.projectTreeRowActive : ''}`}
+        onClick={() => {
+          if (!isCurrent) ctx.switchToProject(p.id);
+          ctx.toggleProjectExpand(p.id);
+        }}
+      >
+        <Icon name={isExpanded ? 'chevron-down' : 'chevron-right'} size={12} />
+        <Icon name="folder" size={14} />
+        {editingProject ? (
+          <input
+            className={styles.treeRenameInput}
+            value={projectName}
+            onChange={(event) => setProjectName(event.target.value)}
+            onClick={(event) => event.stopPropagation()}
+            onBlur={() => void finishProjectRename()}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') void finishProjectRename();
+              if (event.key === 'Escape') {
+                setProjectName(p.name);
+                setEditingProject(false);
+              }
+            }}
+            autoFocus
+          />
+        ) : (
+          <button
+            type="button"
+            className={styles.projectTreeName}
+            onDoubleClick={(event) => {
+              event.stopPropagation();
+              setEditingProject(true);
+            }}
+            title="双击重命名项目"
+          >
+            {p.name}
+          </button>
+        )}
+        <button
+          className={styles.projectTreeAddBtn}
+          onClick={(e) => {
+            e.stopPropagation();
+            ctx.createConversationForProject(p.id);
+          }}
+          title="创建新对话"
+          disabled={ctx.creatingConversation}
+        >
+          <Icon name="plus" size={12} />
+        </button>
+        <button
+          className={styles.projectTreeAddBtn}
+          onClick={(event) => {
+            event.stopPropagation();
+            void ctx.archiveProject(p.id);
+          }}
+          title="移入回收站"
+        >
+          <Icon name="trash" size={12} />
+        </button>
+      </div>
+      {isExpanded && (
+        <ul className={styles.convList}>
+          {convs.length === 0 && <li className={styles.convEmpty}>暂无对话</li>}
+          {convs.map((c) => (
+            <ConversationItem key={c.id} conversation={c} projectId={p.id} ctx={ctx} isCurrent={isCurrent} />
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

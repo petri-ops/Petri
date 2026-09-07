@@ -2157,6 +2157,62 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-309: 修复 — 恢复 TitleBar 注册（8f3d55a5 误删）：顶部与侧栏宽度同步 +「+」工具菜单复活 (2026-09-07 verified)
+
+**用户反馈**：「软件顶部和下面的工作区域 左右侧栏 宽度调整不是同步的」；「右侧边栏的+ 点击后没有内容了 应该也是存在bug」。主 Agent 先实测对齐理解后用户确认（「应该是的」）修复。
+
+**诊断**：两个症状同根——`8f3d55a5` 在移除工作目录修改功能时，把 [project-workspace.tsx](../frontend/src/pages/project-workspace.tsx) 的整个 `updateTitleBar` 注册 effect 一并误删（`updateTitleBar` 从此全工程零调用），TitleBar 永远停在 `DEFAULT_TITLE_BAR`：实测顶栏 grid `[241, -, 341]`（默认 240/340+1）vs 实际栏宽 `229 / 344`（拖拽实时变），拖动永不同步；「+」按钮 `onMoreAction=null`、`toolMenuItems=[]` → 点击无任何反应；顶部标签 pills / 结果选择器 / 会话选择器 / 浏览器前进后退同批失效。
+
+**改动**（0 新增 IPC / 0 新依赖）：从 `e689f867` 恢复 `titleBarTitle` memo + 注册 effect（宽度推送 `leftPanelWidth: leftWidth / rightPanelWidth: effectiveRightWidth`、tabs pills、onMoreAction/toolMenuItems 工具菜单、结果选择器、浏览器前进后退、顶栏会话选择器）。修正旧版两处 deps 瑕疵：补 `conversations / activeConvId / handleSwitchConversation`（缺失会让顶栏会话选择器持过期闭包）、去掉未引用的 `project?.workspacePath`。`updateTitleBar` 自带 `titleBarDataEqual` 去重，拖拽过程无多余渲染。
+
+**门禁**：tsc 触碰文件 0 错误 / RightPanel + CenterPanel + useConversations + LeftPanel vitest 22/22 / docs:check 205 / ui:audit:check。
+
+**实机**（dev Electron，证据 `acceptance/ui-309/titlebar-sync-plus-menu.png`）：顶栏 grid `[230, 672, 389]` vs 实际栏宽 `229 / 388`——精确差 1px 拖拽轨，像素级对齐；「+」点击弹出 7 项完整菜单（结果/文件/后端/浏览器/聊天/分析/审阅，当前打开项带勾），顶栏出现「文件 ×」标签 pill、标题恢复项目名。**状态**: verified（2026-09-07 dev Electron 实机）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+**加映（2026-09-07 同日同工作流）— 拖动期一体化**：用户反馈「titlebar 那个分隔线和下面的线不是一体的，有同步层面的延迟」。根因：静止态恢复注册后像素对齐，但拖动中 TitleBar 分隔位置仍走 React 提交链（`leftWidth` state → `updateTitleBar` → `--titlebar-left-span`），比 mousemove 晚一拍，顶栏线与栏边肉眼可见脱节。修法（0 新增 IPC / 0 新依赖）：[useResizableColumns.ts](../frontend/src/hooks/useResizableColumns.ts) 拖动期间在 mousemove 里同步向 `documentElement` 写实时变量 `--gewu-live-left/right-width|span`（松手 cleanup 移除，无缝交回状态驱动）；消费端全部改 `var(--gewu-live-*, 状态值)`——[TitleBar.module.css](../frontend/src/components/desktop/TitleBar.module.css) grid 三处（含 1380/1120 断点）、[LeftPanel.tsx](../frontend/src/components/workspace-panels/LeftPanel.tsx) / [RightPanel.tsx](../frontend/src/components/workspace-panels/RightPanel.tsx) 栏宽、[BottomTerminal.tsx](../frontend/src/components/workspace-panels/BottomTerminal.tsx) `leftOffset/rightOffset`（prop 放宽 `number | string`，[project-workspace.tsx](../frontend/src/pages/project-workspace.tsx) 传 `var(--gewu-live-left/right-span, …)`，终端两竖边随侧栏实时跟随）。**实机**（dev Electron CDP 真实拖拽 mousedown → 中途两轮测量 → mouseup，证据 `acceptance/ui-309/drag-sync-inline.png`）：左 +60/+140 与右 −70/−150 拖动中途顶栏线与栏边 gap 均 ≤0.7px（亚像素，修复前为整拍延迟的可见脱节），松手后 live 变量从 root 移除、宽度状态无缝接管、静止态 gap=0；tsc 触碰文件 0 错误。
+
+## UI-308: 清理 — 左栏移除灰色分隔线 +「返回工作台」入口（视觉降噪） (2026-09-07 verified)
+
+**用户反馈**：「左侧栏这些 灰色的分隔线 我觉得不需要了 影响视觉效果」「返回工作台 按钮也不需要了 相关联的代码能清理的也清理掉 保持干净」。
+
+**改动**（0 新增 IPC / 0 新依赖）：① [project-workspace.module.css](../frontend/src/pages/project-workspace.module.css) 移除左栏三处分隔线——`.leftQuickActions` border-bottom（Skills/项目 之间）、`.leftPanelHeader` border-bottom（项目头部/树 之间）、`.leftPanelFooter` border-top（设置上方），padding 保留间距不变；② [LeftPanel.tsx](../frontend/src/components/workspace-panels/LeftPanel.tsx) 移除项目头部「返回工作台」home 图标按钮（UI-258 引入）及 `react-router-dom` `Link` import（文件内无其他使用）。保留：project-workspace.tsx 两处全屏错误态（项目加载失败/不存在）的「← 返回工作台」链接——侧栏不在的错误页唯一退路，非本条清理范围。CSS 注释同步（UI-258 → UI-308 口径）。
+
+**门禁**：tsc 触碰文件 0 错误 / LeftPanel vitest 4/4（无测试依赖被删按钮）/ docs:check 205 / ui:audit:check。
+
+**实机**（dev Electron，HMR 后 CDP 断言 + 截图 `acceptance/ui-308/left-panel-clean.png`）：`[aria-label=返回工作台]` 不存在；三处容器 computed border 均为 `0px none`；截图可见分隔线消失、项目头部仅剩「+」。**状态**: verified（2026-09-07 dev Electron 实机，证据 `acceptance/ui-308/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-307: 修复 — 项目树切换项目后展开项恒显「暂无对话」（useOtherConversations 跳过已缓存项目） (2026-09-07 verified)
+
+**用户反馈**：「在不同的项目切换的时候 会显示 暂无对话 实际上这个项目下是有内容的」（截图：tinkspace / desktop 展开后显示暂无对话）。
+
+**诊断**：`useOtherConversations` 的 effect 只对「不在 sharedCache 里的项目」取数并写入 `byProjectId`。而项目行点击 = 切换 + 展开（ProjectNode onClick）：**被访问过的项目作为当前项时，其列表只经 `useConversations` 进入 sharedCache，从不进 `byProjectId`**；切走后 effect 又因「已缓存」把它从写入集合里过滤掉 → 每个访问过再离开的已展开项目永远显示「暂无对话」。SQLite 实证（`.biof3-dev-user-data/data/bioF3.db`）：desktop 14 条 + tinkspace 22 条 active 会话，服务端数据完好，纯前端状态断层。
+
+**改动**（0 新增 IPC / 0 新依赖）：[useConversations.ts](../frontend/src/hooks/useConversations.ts) `useOtherConversations` effect 改为对**全部相关项目**收敛 `byProjectId ⇄ sharedCache`（缓存命中由 `loadShared` 短路，零额外请求）；`setByProjectId` 以引用相等判定无变化时 bail-out（返回 `prev`），避免消费方以内联 `new Set` 作 deps 时写→渲染→重跑死循环。[useConversations.test.ts](../frontend/src/hooks/useConversations.test.ts) 新增「访问过的当前项目切走后从缓存提升且不重发请求」回归用例（11/11）。
+
+**门禁**：tsc 触碰文件 0 错误 / useConversations vitest 11/11 / docs:check 205 / ui:audit:check。
+
+**实机**（dev Electron，CDP 驱动真实点击序列 tinkspace → desktop → block52）：最终 DOM 断言 `emptyUnder=[]`（无任何项目显示暂无对话）、`convItems=36`（与 SQLite desktop 14 + tinkspace 22 精确吻合）。**状态**: verified（2026-09-07 dev Electron 实机）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-306: 修复 — 左栏项目树崩溃 `ProjectNode is not defined`（8f3d55a5 误删组件回归） (2026-09-07 verified)
+
+**用户反馈**：「启动项目 看是否异常」→ dev Electron 主日志捕获渲染进程 `Uncaught ReferenceError: ProjectNode is not defined`（`<ProjectTree>` 组件栈），进入项目工作台左栏项目树整树崩溃（React 卸载该子树），应用不可用。
+
+**诊断**：回归由 `8f3d55a5`（「移除工作目录修改功能」）引入——该提交本意只删 `ProjectNode` 内的「设置」（工作目录修改）按钮，实际把整个 `function ProjectNode` 定义删除，而 [LeftPanel.tsx](../frontend/src/components/workspace-panels/LeftPanel.tsx) `<ProjectTree>` 仍渲染 `<ProjectNode>`，全前端无任何定义残留。连带 `tsc --noEmit` 在 HEAD 报 TS2304（LeftPanel.tsx:308）+ TS2339（createPanel 类型已不含 `onPickExternal/onPathChange` 而拖拽落位仍在引用）+ LeftPanel.test.tsx fixture 缺 `createdAt/updatedAt`，与该提交信息宣称的「tsc 0」不符。
+
+**改动**（0 新增 IPC / 0 新依赖）：① 从 `e689f867` 恢复 `ProjectNode` 组件（双击重命名 + 新建对话 + 移入回收站 + 会话展开列表），**不含**已废弃的 workspaceEdit「设置」按钮（遵守 8f3d55a5 的功能裁决）；② 拖拽目录直达创建（UI-282）重新接线——`createPanel` ctx 类型补必选 `onPickExternal(path)`，[project-workspace.tsx](../frontend/src/pages/project-workspace.tsx) 从 `openCreatePanel` 提取 `createProjectFromWorkspacePath(path)`（validateDirectory → createProject → 跳转新项目），「+」对话框选中与拖拽落位共用同一创建链，删除 `onPathChange` 失效 fallback（UI-304 终版后无内联面板可回填）；③ 清理死代码 `BrowseFolderButton` + `FolderPicker` import（唯一消费者是已删的工作目录编辑面板）；④ [LeftPanel.test.tsx](../frontend/src/components/workspace-panels/LeftPanel.test.tsx) fixture 补 `createdAt/updatedAt` + `onPickExternal`，新增 ProjectTree 渲染回归用例（visibleProjects 非空时渲染项目行 + 「创建新对话/移入回收站」按钮）。
+
+**门禁**：tsc 触碰文件 0 错误（另有 12 条 TS2550 `.at()` 既有债务集中在无关测试文件，与本条无关）/ LeftPanel vitest 4/4 / docs:check 205 / ui:audit:check。
+
+**实机**（dev Electron，证据 `acceptance/ui-306/project-tree-ui306.png`）：修复经 Vite HMR + CDP `Page.reload` 后——主日志重载点后渲染进程 0 条 `Uncaught`；CDP `Runtime.evaluate` DOM 断言 `projectTreeRows=6`（zhangdiandian ×2 / block52-p3-09031507 ×2 / tinkspace / desktop 全部渲染），无 error boundary，截图可见左栏项目树完整呈现。**状态**: verified（2026-09-07 dev Electron 实机，证据 `acceptance/ui-306/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-302: 增量 — 主题色（强调色）系统：5 档配色切换（补登） (2026-09-07 verified)
+
+**改动**（实现提交 `1e64a0f` 当日未同步台账，本次 UI-AUDIT-FIX 补登）：[accents.ts](../frontend/src/themes/accents.ts) 5 档主题色定义（teal 默认/blue/violet/rose/amber）+ `localStorage gewu-accent` 持久化 + `data-accent` 注入（teal 默认不设属性）；[custom.css](../frontend/src/styles/custom.css) 5 档 × light/dark 双套 accent token 覆盖（accent/soft/bg/hover/border/surface 六 token）；[AccentControl](../frontend/src/components/desktop/AccentControl.tsx) 色板控件（色板圆点 + 选中勾 + 环形描边）挂载设置面板常规节；[ThemeProvider](../frontend/src/themes/ThemeProvider.tsx) accent 状态 + storage/event 跨窗口同步。0 新增依赖。
+
+**加映**（`c138dba`，同 UI-302 设置面板外观工作流）：设置面板新增「界面字号」调节（[DesktopSettingsPanel](../frontend/src/components/desktop/DesktopSettingsPanel.tsx) + [ThemeProvider](../frontend/src/themes/ThemeProvider.tsx) 字号档位状态 + [global.css](../frontend/src/styles/global.css) 字号 token 化）。
+
+**实机**（随实现提交落盘）：CDP 实机切换紫罗兰 → `data-accent=violet` + `accent=#7c3aed` 持久化，切回 teal 恢复；截图 `acceptance/block-49/ui302-accent-violet.png`。**状态**: verified（2026-09-07 dev Electron 实机，证据 `acceptance/block-49/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-304: 增量 — 左栏「+」创建项目 dialog-first（点 + 直接弹系统文件夹选择器，选中即项目路径） (2026-09-07 in_progress)
 
 **用户反馈**：截图左栏「+」内联创建面板（路径输入框优先 + 选择文件夹按钮）：「点击+ 应该是打开文件夹，打开的文件夹就是创建项目所在的路径了。目前好像不是的，变成了输入路径，再确定，这样很不合理」。

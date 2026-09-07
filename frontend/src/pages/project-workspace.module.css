@@ -774,7 +774,6 @@
   display: grid;
   gap: 2px;
   padding: 0 0 10px;
-  border-bottom: 1px solid var(--gewu-border);
   flex-shrink: 0;
 }
 
@@ -834,7 +833,6 @@
   justify-content: space-between;
   padding: 10px 8px 8px;
   flex-shrink: 0;
-  border-bottom: 1px solid var(--gewu-border);
 }
 
 .leftPanelTitle {
@@ -845,7 +843,7 @@
   color: var(--gewu-text-muted);
 }
 
-/* UI-258 — header 右侧按钮组（工作台入口 + 新建项目） */
+/* UI-308 — header 右侧按钮组（新建项目；返回工作台入口已移除） */
 .leftPanelHeaderActions {
   display: flex;
   align-items: center;
@@ -944,7 +942,6 @@
 .leftPanelFooter {
   flex-shrink: 0;
   padding: 8px 0 0;
-  border-top: 1px solid var(--gewu-border);
 }
 
 .projectTreeNode {

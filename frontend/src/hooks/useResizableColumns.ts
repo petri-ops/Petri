@@ -200,9 +200,18 @@ export function useResizableColumns(
 
       const applyMove = (ev: MouseEvent) => {
         if (which === 'left') {
-          setLeftWidth(Math.max(MIN_LEFT_WIDTH, sl + ev.clientX - startX));
+          const w = Math.max(MIN_LEFT_WIDTH, sl + ev.clientX - startX);
+          setLeftWidth(w);
+          // UI-309 加映 — 拖动期间同步写实时 CSS 变量，让侧栏宽度与 TitleBar
+          // 分隔在同一帧移动（React 提交晚一拍会造成两根线脱节）；松手后
+          // cleanup 移除变量，无缝交回状态驱动。对齐 --gewu-live-result-right-width 先例。
+          document.documentElement.style.setProperty('--gewu-live-left-width', `${w}px`);
+          document.documentElement.style.setProperty('--gewu-live-left-span', `${w + 1}px`);
         } else if (which === 'right') {
-          setRightWidth(Math.max(MIN_RIGHT_WIDTH, sr - (ev.clientX - startX)));
+          const w = Math.max(MIN_RIGHT_WIDTH, sr - (ev.clientX - startX));
+          setRightWidth(w);
+          document.documentElement.style.setProperty('--gewu-live-right-width', `${w}px`);
+          document.documentElement.style.setProperty('--gewu-live-right-span', `${w + 1}px`);
         } else if (which === 'resultRight') {
           pendingResultRightWidth = Math.min(
             clamp.max ?? Number.POSITIVE_INFINITY,
@@ -234,6 +243,11 @@ export function useResizableColumns(
           if (pendingMove) applyMove(pendingMove);
         }
         pendingMove = null;
+        if (which === 'left' || which === 'right') {
+          const rootStyle = document.documentElement.style;
+          rootStyle.removeProperty(which === 'left' ? '--gewu-live-left-width' : '--gewu-live-right-width');
+          rootStyle.removeProperty(which === 'left' ? '--gewu-live-left-span' : '--gewu-live-right-span');
+        }
         if (which === 'resultRight') {
           if (resultResizeFrame !== null) {
             window.cancelAnimationFrame(resultResizeFrame);

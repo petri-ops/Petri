@@ -126,7 +126,7 @@ export function RightPanel({
       {onResize && <div className={styles.resizeHandleV} onMouseDown={onResize} />}
       <aside
         className={styles.rightCol}
-        style={{ width: ctx.width }}
+        style={{ width: `var(--gewu-live-right-width, ${ctx.width}px)` }}
         data-workspace-mode={workspaceMode}
       >
         <div className={styles.resultPanel}>

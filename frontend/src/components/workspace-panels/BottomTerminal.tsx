@@ -9,8 +9,9 @@ import styles from '@/pages/project-workspace.module.css';
 export interface BottomTerminalProps {
   open: boolean;
   height: number;
-  leftOffset: number;
-  rightOffset: number;
+  /** number 或 CSS var() 字符串（UI-309 拖动期实时跟随侧栏宽度） */
+  leftOffset: number | string;
+  rightOffset: number | string;
   workspacePath?: string;
   onResize: (event: React.MouseEvent) => void;
   onClose: () => void;

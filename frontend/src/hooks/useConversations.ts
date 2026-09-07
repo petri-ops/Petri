@@ -219,31 +219,37 @@ export function useOtherConversations(
   );
 
   useEffect(() => {
-    const ids = normalizeProjectIds(projectIds);
-    if (ids.length === 0) return;
+    const relevant = normalizeProjectIds(projectIds).filter(
+      (pid) => pid !== excludeProjectId
+    );
+    if (relevant.length === 0) return;
     let cancelled = false;
     Promise.all(
-      ids
-        .filter((pid) => pid !== excludeProjectId && !sharedCache.has(pid))
-        .map(async (pid): Promise<[string, ConversationSummary[]]> => {
-          try {
-            const list = await loadShared(pid);
-            return [pid, list];
-          } catch {
-            // Network error for an "other" project is non-fatal —
-            // the sidebar can simply show no conversations for it.
-            return [pid, [] as ConversationSummary[]];
-          }
-        })
+      relevant.map(async (pid): Promise<[string, ConversationSummary[]]> => {
+        try {
+          return [pid, await loadShared(pid)];
+        } catch {
+          // Network error for an "other" project is non-fatal —
+          // the sidebar can simply show no conversations for it.
+          return [pid, [] as ConversationSummary[]];
+        }
+      })
     ).then((entries) => {
       if (cancelled) return;
-      if (entries.length === 0) return;
       setByProjectId((prev) => {
+        // Bail out when nothing changed — cached lists are stable
+        // references, so reference equality is a reliable change signal.
+        // Without this, a fresh object every run re-renders the consumer;
+        // with inline Set deps (tests) that re-runs the effect forever.
+        let changed = false;
         const next = { ...prev };
         entries.forEach(([pid, list]) => {
-          next[pid] = list;
+          if (prev[pid] !== list) {
+            next[pid] = list;
+            changed = true;
+          }
         });
-        return next;
+        return changed ? next : prev;
       });
     });
     return () => {

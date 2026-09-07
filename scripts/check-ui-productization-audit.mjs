@@ -46,6 +46,12 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-09-06 4844e88「全量核对收口」不可变提交：frontend 仅触碰
+  // ReviewMode.test.tsx + chat-file-references.test.ts 两个 *test* 文件
+  // （biof3:// → gewu:// 改名回归的测试对齐），无产品 UI surface 变化；
+  // subject `fix:` 未带 UI-###。sync+message 双豁免，不占 UI 条目。
+  // 不重写共享历史。
+  '4844e8855ae5b25ce95e949e784b4cd0d312c1d3',
   // 2026-08-30 BLOCK-30-BACKEND-CONVERGENCE 不可变实现提交 (P1/P2/P4)：
   // 后端收敛与更名（py-server 摘除 / gateway 摘除 / core/r-server →
   // core/biof3-server），前端仅路径级 import 变化。UI 影响补登为 UI-222
@@ -374,6 +380,32 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 2026-09-03 BLOCK-50 审阅删除文件兜底不可变提交 ce43048：台账已由
   // BLOCK-51 收口提交补登为 UI-279（verified）。豁免同提交台账要求。
   'ce43048305c4abb3a565860addc52e8b072a877d',
+  // 2026-09-07 UI-302 主题色系统不可变实现提交 1e64a0f：当日实现未同步台账；
+  // 台账已由本次 UI-AUDIT-FIX 补登为 UI-302（verified，实机证据
+  // acceptance/block-49/）。不重写共享历史。
+  '1e64a0ffc5d3e52e569c815a60c1d52ff49fcbfb',
+  // 2026-09-07 8f3d55a「移除工作目录修改功能」不可变提交：误删 ProjectNode
+  // 组件定义致左栏项目树崩溃（UI surface 回归），当日未同步台账；回归诊断
+  // 与恢复修复已由本次 UI-AUDIT-FIX 补登为 UI-306（verified，证据
+  // acceptance/ui-306/）。不重写共享历史。
+  '8f3d55a5d9b7a4638b0a6bd7a391706e04710e15',
+  // 2026-09-06 4844e88「全量核对收口」不可变提交：frontend 仅触碰
+  // ReviewMode.test.tsx + chat-file-references.test.ts 两个 *test* 文件
+  // （biof3:// → gewu:// 改名回归的测试对齐），无产品 UI surface 变化；
+  // 不占 UI 条目。同时豁免同提交台账要求（subject `fix:` 未带 UI-###）。
+  '4844e8855ae5b25ce95e949e784b4cd0d312c1d3',
+  // 2026-09-07 39f0104「composer 窄态图标化」不可变实现提交：subject 带
+  // UI-301，为 UI-301 多智能体活动面板的加映增量扩展，按 UI-301 同一
+  // 工作流归属登记，不单独占新 UI 条目。豁免同提交台账要求。
+  '39f01040b0e62ddfae1508cfe0efc855e79ae0b7',
+  // 2026-09-07 b2c1879「首页启动卡片文字垂直居中」不可变实现提交：subject
+  // 带 UI-301，CSS-only 加映增量扩展，按 UI-301 同一工作流归属登记，
+  // 不单独占新 UI 条目。豁免同提交台账要求。
+  'b2c1879cc5e1ac88ebcce8d33a64ea4000cefc07',
+  // 2026-09-07 c138dba「设置面板新增界面字号调节」不可变实现提交：subject
+  // 带 UI-302，为 UI-302 设置面板外观工作流（主题色系统之后）的加映增量
+  // 扩展，台账 UI-302 补登条目已并入其加映记录。豁免同提交台账要求。
+  'c138dba836df0c252303e45c6b945006f5eedc8d',
 ])
 // UI-### issue ids: numeric series (UI-001..UI-999) and the named
 // AGENTWB namespace (UI-AGENTWB-001..UI-AGENTWB-999) used by the

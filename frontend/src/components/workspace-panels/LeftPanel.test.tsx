@@ -18,7 +18,12 @@ afterEach(cleanup);
 function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext {
   return {
     width: 280,
-    project: { id: 'project-1', name: 'Project One' },
+    project: {
+      id: 'project-1',
+      name: 'Project One',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    },
     workspacePath: '/tmp/project-one',
     compactWorkspacePath: '/tmp/project-one',
     visibleProjects: [],
@@ -33,6 +38,7 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext {
       open: false, // UI-304 简化版 — 不再需要面板
       error: '',
       onOpen: vi.fn(),
+      onPickExternal: vi.fn(),
     },
     createConversationForProject: vi.fn(),
     renameProject: vi.fn(async () => true),
@@ -89,5 +95,18 @@ describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
     // UI-304 简化版 — 错误会显示在面板中
     const alert = screen.getByRole('alert');
     expect(alert.textContent).toBe('路径无效');
+  });
+
+  it('renders project tree rows for visibleProjects (ProjectNode 回归)', () => {
+    const ctx = buildCtx('chat');
+    ctx.visibleProjects = [ctx.project];
+    render(
+      <MemoryRouter>
+        <LeftPanel ctx={ctx} />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Project One').textContent).toBe('Project One');
+    expect(screen.getByRole('button', { name: /创建新对话/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /移入回收站/ })).toBeTruthy();
   });
 });

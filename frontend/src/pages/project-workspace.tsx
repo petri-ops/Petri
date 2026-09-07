@@ -776,6 +776,118 @@ export function ProjectWorkspace(): React.ReactElement {
     openRightPanel('chat');
   }, [openRightPanel]);
 
+  // TitleBar 注册 —— 8f3d55a5 曾误删整段（宽度同步 / 右侧工具菜单「+」/
+  // 标签 pills / 结果选择器随之全部失效），UI-309 从 e689f867 恢复。
+  const titleBarTitle = useMemo(
+    () => buildResultTitleBarTitle(workspaceMode, project?.name, activeArtifact?.label || activeArtifact?.name),
+    [activeArtifact?.label, activeArtifact?.name, project?.name, workspaceMode],
+  );
+
+  useEffect(() => {
+    updateTitleBar({
+      title: titleBarTitle,
+      leftPanelWidth: leftWidth,
+      rightPanelWidth: effectiveRightWidth,
+      tabs: titleBarTabs,
+      activeTabId: rightTab === 'home' ? null : rightTab,
+      onSelectTab: (tabId) => {
+        if (tabId === 'results') {
+          handleOpenRightResults();
+          return;
+        }
+        setRightTab(tabId as RightPanelMode);
+        setRightToolMenuOpen(false);
+        setRightOpen(true);
+      },
+      onCloseTab: (tabId) => closeRightPanelTab(tabId as RightPanelMode),
+      onMoreAction: () => setRightToolMenuOpen((value) => !value),
+      toolMenuOpen: rightToolMenuOpen,
+      toolMenuItems: RIGHT_PANEL_ITEMS.map((item) => ({
+        id: item.id,
+        label: item.label,
+        icon: item.icon,
+        isOpen: openRightTabs.includes(item.id),
+      })),
+      onSelectToolItem: (tabId) => {
+        if (tabId === 'results') {
+          handleOpenRightResults();
+          setRightToolMenuOpen(false);
+          return;
+        }
+        openRightPanel(tabId as RightPanelMode);
+        setRightToolMenuOpen(false);
+      },
+      resultItems: titleBarResultItems,
+      activeResultId: conversationJobs.some((job) => job.id === activeJobId) ? activeJobId : null,
+      onSelectResult: handleSelectTitleBarResult,
+      canGoBack: rightTab === 'browser' && browserCanGoBack,
+      canGoForward: rightTab === 'browser' && browserCanGoForward,
+      onGoBack:
+        rightTab === 'browser' && browserCanGoBack
+          ? () => dispatchGewuEvent(gewuEvents.browserBack)
+          : null,
+      onGoForward:
+        rightTab === 'browser' && browserCanGoForward
+          ? () => dispatchGewuEvent(gewuEvents.browserForward)
+          : null,
+      // Conversations for TitleBar selector
+      conversations: conversations.map(c => ({
+        id: c.id,
+        title: c.title,
+        parent_id: c.parent_id ?? null,
+      })),
+      activeConvId,
+      onSelectConversation: handleSwitchConversation,
+    });
+    return () => {
+      updateTitleBar({
+        title: 'Gewu',
+        leftPanelWidth: 240,
+        rightPanelWidth: 340,
+        tabs: [],
+        activeTabId: null,
+        onSelectTab: null,
+        onCloseTab: null,
+        onMoreAction: null,
+        toolMenuOpen: false,
+        toolMenuItems: [],
+        onSelectToolItem: null,
+        resultItems: [],
+        activeResultId: null,
+        onSelectResult: null,
+        canGoBack: false,
+        canGoForward: false,
+        onGoBack: null,
+        onGoForward: null,
+      });
+    };
+  }, [
+    activeJobId,
+    closeRightPanelTab,
+    browserCanGoBack,
+    browserCanGoForward,
+    leftWidth,
+    openRightPanel,
+    openRightTabs,
+    project?.name,
+    titleBarTitle,
+    rightTab,
+    effectiveRightWidth,
+    handleOpenRightResults,
+    handleSelectTitleBarResult,
+    rightToolMenuOpen,
+    setRightOpen,
+    setRightToolMenuOpen,
+    setRightTab,
+    titleBarTabs,
+    titleBarResultItems,
+    updateTitleBar,
+    // UI-309：旧版遗漏——缺失会让顶栏会话选择器持有过期闭包
+    conversations,
+    activeConvId,
+    handleSwitchConversation,
+  ]);
+
   const ensureSearchConversationIndex = useCallback(async () => {
     const targets = allProjects.filter((item) => !searchConversationIndex[item.id]);
     if (targets.length === 0) return;
@@ -792,33 +904,23 @@ export function ProjectWorkspace(): React.ReactElement {
   }, [allProjects, searchConversationIndex]);
 
 
-  const openCreatePanel = useCallback(async () => {
+  // UI-282 — 拖拽目录直达创建：路径经校验后直接走创建链（UI-304 后无内联面板）
+  const createProjectFromWorkspacePath = useCallback(async (selected: string) => {
     setCreateError('');
-    const dialog = window.biof3Desktop?.files?.openDirectoryDialog;
-    if (typeof dialog !== 'function') {
-      setCreateError('当前环境不支持原生文件夹选择（请在 Gewu 桌面应用中使用）');
-      return;
-    }
-    
-    const selected = await dialog();
-    if (!selected) return; // 用户取消，什么都不做
-    
-    // 直接创建项目（对齐 Codex）
     const validate = window.biof3Desktop?.files?.validateDirectory;
     if (typeof validate !== 'function') {
       setCreateError('当前环境不支持路径校验');
       return;
     }
-    
+
     setCreatingProject(true);
     try {
       const res = await validate(selected);
       if (!res.ok || !res.data?.path) {
         setCreateError(res.error || '所选路径无效');
-        setCreatingProject(false);
         return;
       }
-      
+
       const finalPath = res.data.path;
       const name = finalPath.split(/[\\/]/).pop()?.trim() || '新项目';
       const created = await createProject({
@@ -826,7 +928,7 @@ export function ProjectWorkspace(): React.ReactElement {
         modality: 'general',
         workspacePath: finalPath,
       });
-      
+
       setAllProjects((prev) => [created, ...prev.filter((item) => item.id !== created.id)]);
       setExpandedProjects((prev) => {
         const next = new Set(prev);
@@ -840,6 +942,21 @@ export function ProjectWorkspace(): React.ReactElement {
       setCreatingProject(false);
     }
   }, [navigate]);
+
+  const openCreatePanel = useCallback(async () => {
+    setCreateError('');
+    const dialog = window.biof3Desktop?.files?.openDirectoryDialog;
+    if (typeof dialog !== 'function') {
+      setCreateError('当前环境不支持原生文件夹选择（请在 Gewu 桌面应用中使用）');
+      return;
+    }
+
+    const selected = await dialog();
+    if (!selected) return; // 用户取消，什么都不做
+
+    // 直接创建项目（对齐 Codex）
+    await createProjectFromWorkspacePath(selected);
+  }, [createProjectFromWorkspacePath]);
 
   const createConversationForProject = useCallback(async (targetProjectId = projectId) => {
     if (!targetProjectId || creatingConversation) return;
@@ -1645,6 +1762,7 @@ export function ProjectWorkspace(): React.ReactElement {
       open: false, // 不再需要面板
       error: createError,
       onOpen: openCreatePanel,
+      onPickExternal: createProjectFromWorkspacePath,
     },
     createConversationForProject,
     renameProject: renameProjectInTree,
@@ -1791,8 +1909,8 @@ export function ProjectWorkspace(): React.ReactElement {
         <BottomTerminal
           open={bottomTerminalOpen}
           height={bottomTerminalHeight}
-          leftOffset={leftOpen ? leftWidth + 1 : 0}
-          rightOffset={rightOpen ? effectiveRightWidth + 1 : 0}
+          leftOffset={leftOpen ? `var(--gewu-live-left-span, ${leftWidth + 1}px)` : 0}
+          rightOffset={rightOpen ? `var(--gewu-live-right-span, ${effectiveRightWidth + 1}px)` : 0}
           workspacePath={project.workspacePath}
           onResize={handleBottomTerminalResize}
           onClose={() => setBottomTerminalOpen(false)}
