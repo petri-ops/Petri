@@ -805,14 +805,19 @@ export function ProjectWorkspace(): React.ReactElement {
     if (typeof dialog === 'function') {
       const selected = await dialog();
       if (selected) {
-        // E41+ 原生面板可用：选中的文件夹即项目路径，直达确认态
+        // 原生面板选中成功：直达确认态
         setCreatePanelMode('confirm');
         setCreatePath(selected);
         setCreatePanelOpen(true);
         return;
       }
+      // 原生面板取消：降级到应用内 FolderPicker（零输入可视化导航）
+      setCreatePanelMode('browse');
+      setCreatePath('');
+      setCreatePanelOpen(true);
+      return;
     }
-    // 系统面板取消 / 桥缺失（含旧 Electron 打包版面板置灰）→ 应用内 FolderPicker 兜底
+    // 桥缺失（非桌面环境或旧版本）：直接应用内 FolderPicker
     setCreatePanelMode('browse');
     setCreatePath('');
     setCreatePanelOpen(true);

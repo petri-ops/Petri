@@ -2173,6 +2173,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+
+
+**UI-304 后续二（2026-09-07，不传 parent window 修复）**：用户反馈 Codex 可以正常选择目录，说明问题不是 macOS 系统 bug，而是调用方式差异。关键修复：**目录选择时不传 parent window**（`dialog.showOpenDialog(null, opts)` 而非 `dialog.showOpenDialog(mainWindow, opts)`）。[file-dialog.js](../src/ipc/file-dialog.js) 改为 `const parent = isDirectory ? null : mainWindow`；文件选择仍传 parent 保持模态行为。**最终 UX（原生面板直接可用，无需兜底）**：「+」→ 原生面板（分栏视图/列表视图均可正常选择）→ 选中直达 confirm → 创建；取消 → 应用内 FolderPicker 作为备选；粘贴路径/拖拽为第三/四通道。撤销 message 引导方案（不需要了）。门禁：tsc 0 / LeftPanel vitest 11/11 / docs:check / ui:audit:check（存量红 5 个旧提交）。
+
 ## UI-303: 增量 — 计划模式并入访问档位菜单第四档（移除独立开关，四模式一处切换） (2026-09-07 in_progress)
 
 **用户反馈**：截图 composer 档位下拉（完全访问/项目写/只读模式）：「计划模式 应该放到这里 这几种模式可以切换的」。

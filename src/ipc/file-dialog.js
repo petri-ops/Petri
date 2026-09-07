@@ -72,7 +72,9 @@ function setupFileDialogIpc({ mainWindow } = {}) {
       if (!isDirectory && Array.isArray(filters) && filters.length > 0) {
         showOpts.filters = filters;
       }
-      const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, showOpts);
+      // UI-304 后续二 — 目录选择不传 parent window（对齐 Codex；传 parent 可能触发分栏视图怪癖）
+      const parent = isDirectory ? null : mainWindow;
+      const { canceled, filePaths } = await dialog.showOpenDialog(parent, showOpts);
       return canceled ? null : filePaths[0];
     } catch (e) {
       console.error("[desktop] open dialog failed:", e.message);
