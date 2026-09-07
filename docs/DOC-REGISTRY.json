@@ -3272,7 +3272,7 @@
       "id": "BLOCK-48-COMPUTER-USE",
       "path": "docs/block-48-computer-use-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-48-computer-use",
       "entrypoint": "docs/README.md",
@@ -3286,10 +3286,10 @@
         "agent-tools",
         "G0"
       ],
-      "notes": "2026-09-03 planned 登记（用户裁决：调研 TRAE computer-use 插件实现后立项，后续为 BioF3 增加同型模块）：TRAE 插件=纯注册壳（能力内置宿主 subagent）；技术方案=AX 语义树 + CGEvent 合成事件双层架构，Swift sidecar 进程（backend-proc-manager 托管，绕开 Electron ABI 教训），agent 工具对标 ide_* 模式七工具（snapshot/click/type/press/scroll/screenshot/wait）+ 授权门；已知坑：Electron AX 懒初始化 kAXErrorCannotComplete / TCC 权限三件套 / Chromium 系 AX 树受限。待 BLOCK-47 收口后用户裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-09-03 planned 登记（用户裁决：调研 TRAE computer-use 插件实现后立项，后续为 BioF3 增加同型模块）：TRAE 插件=纯注册壳（能力内置宿主 subagent）；技术方案=AX 语义树 + CGEvent 合成事件双层架构，Swift sidecar 进程（backend-proc-manager 托管，绕开 Electron ABI 教训），agent 工具对标 ide_* 模式七工具（snapshot/click/type/press/scroll/screenshot/wait）+ 授权门；已知坑：Electron AX 懒初始化 kAXErrorCannotComplete / TCC 权限三件套 / Chromium 系 AX 树受限。待 BLOCK-47 收口后用户裁决启动。G0 开发期常态 · 不外推 packaged/Provider/GA. 【2026-09-08 漂移校正】registry 状态 planned 为存量漂移：plan/提交链（dac1ac52/c2226ccf/449e5c3d）与 acceptance/block-48/ 证据实证 P0–P5 已于 2026-09-06 整包 completed，本条按 Git/acceptance 证据校正。Windows 侧对应能力另立 BLOCK-63。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-03",
       "archivePolicy": "archive_when_superseded",
-      "phase": "PLANNED"
+      "phase": "COMPLETED"
     },
     {
       "id": "BLOCK-49-MULTI-AGENT-SPAWN",
@@ -3639,6 +3639,31 @@
       "registeredAt": "2026-09-07",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-63-WINDOWS-COMPUTER-USE",
+      "path": "docs/block-63-windows-computer-use-research-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-63-windows-computer-use",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-63",
+        "computer-use",
+        "windows",
+        "ui-automation",
+        "uia3",
+        "flaui",
+        "sendinput",
+        "dotnet-sidecar",
+        "agent-tools",
+        "G0"
+      ],
+      "notes": "2026-09-08 planned 登记（用户裁决：BLOCK-48 新增 Windows 侧对应能力，新立项调研）：双层架构对标——UIA3 语义层（Invoke/Value 等控制模式对标 AXPress/SetValue）+ SendInput 合成层（无 per-PID 后台投递，坐标兜底必须前台，架构差异如实登记）+ Windows.Graphics.Capture 按窗口截图；sidecar 选型比选：C#/.NET 8 + FlaUI 5.0（2025-02 v5.0 活跃）主选建议 / Python pywinauto·uiautomation 备选（复用 provisioned runtime）/ WinAppDriver 停滞排除；复用面：computer-use-host stdio 协议 + 8 工具 + 授权门/policy 矩阵平台无关零改动，仅 host 平台门与二进制定位需 win32 分支；已知坑：UAC 完整性边界（提权窗口不可自动化，UIAccess 签名链列非范围）/ Chromium·Electron UIA 懒启用 / legacy Win32 树稀疏 / DPI per-monitor v2 / 锁屏不可达。P0 调研立项完成；实施启动（P1+）待用户显式裁决。0 新 npm 依赖。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-08",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "PLANNED"
     }
   ],
   "lastUpdated": "2026-09-07",
