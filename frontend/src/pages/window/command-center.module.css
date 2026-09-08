@@ -81,6 +81,11 @@
   background: var(--gewu-danger, #ff7a7a);
 }
 
+.statusDot[data-status='cancelled'] {
+  background: var(--gewu-text-secondary, #9aa3b8);
+  opacity: 0.6;
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.35; }
@@ -130,6 +135,83 @@
 
 .tileStatus [data-status='done'] {
   color: var(--gewu-status-success);
+}
+
+.tileStatus [data-status='cancelled'] {
+  color: var(--gewu-text-secondary, #9aa3b8);
+  opacity: 0.7;
+}
+
+/* ── BLOCK-64 P1-a/P1-b ───────────────────────────── */
+
+.projectTag {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--gewu-bg-surface, rgba(154, 163, 184, 0.12));
+  border: 1px solid var(--gewu-border-color, #323848);
+  color: var(--gewu-text-secondary, #9aa3b8);
+  max-width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tileError {
+  font-size: 11px;
+  color: var(--gewu-danger, #ff7a7a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tileActions {
+  display: flex;
+  gap: 6px;
+}
+
+.actionBtn,
+.actionBtnActive,
+.cancelArmBtn {
+  flex: 1;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--gewu-border-color, #323848);
+  background: transparent;
+  color: var(--gewu-text-secondary, #9aa3b8);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.actionBtn:hover {
+  border-color: var(--gewu-accent, #5a9cff);
+  color: var(--gewu-accent, #5a9cff);
+}
+
+.actionBtnActive {
+  border-color: var(--gewu-accent, #5a9cff);
+  color: var(--gewu-accent, #5a9cff);
+}
+
+.cancelArmBtn {
+  border-color: var(--gewu-danger, #ff7a7a);
+  color: var(--gewu-danger, #ff7a7a);
+  font-weight: 600;
+}
+
+.tileLog {
+  margin: 0;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--gewu-bg-surface);
+  border: 1px solid var(--gewu-border-color, #323848);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--gewu-text-secondary, #9aa3b8);
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 180px;
+  overflow: auto;
 }
 
 /* ── P4 agent 详情窗 ─────────────────────────────── */

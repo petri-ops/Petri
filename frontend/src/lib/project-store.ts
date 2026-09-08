@@ -207,6 +207,9 @@ function mapToolJob(j: Record<string, unknown>): ToolJob {
     name: j.name ? String(j.name) : undefined,
     project_id: j.project_id ? String(j.project_id) : null,
     conversationId: conversationId == null ? null : String(conversationId),
+    // BLOCK-64 P1-a：后端 history SELECT 显式返回该列，此前 mapper 漏映射
+    // → 指挥中心/结果库「远程」徽章生产环境永不渲染（测试手工注入掩盖断链）。
+    execution_target_id: j.execution_target_id != null ? String(j.execution_target_id) : null,
   };
 }
 
@@ -214,6 +217,7 @@ function normalizeToolJobStatus(status: unknown): ToolJob['status'] {
   if (status === 'completed' || status === 'done') return 'done';
   if (status === 'failed') return 'failed';
   if (status === 'running') return 'running';
+  if (status === 'cancelled') return 'cancelled';
   return 'pending';
 }
 

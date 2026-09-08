@@ -39,7 +39,7 @@ export interface Project {
 export interface ToolJob {
   id: string;
   tool_id: string;
-  status: 'pending' | 'running' | 'done' | 'failed';
+  status: 'pending' | 'running' | 'done' | 'failed' | 'cancelled';
   created_at: number;
   completed_at?: number;
   error?: string;

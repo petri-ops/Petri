@@ -6,6 +6,7 @@ const {
   reconcileArtifactTruth,
 } = require('../helpers/artifact-truth');
 const { publicRecoveryParams } = require('../helpers/harness-workflow-recovery');
+const { resolveProjectRunLayout } = require('../../shared-backend/project-run-layout');
 
 function selectArtifactResultDir({ job, result, jobsDir = '' } = {}) {
   const persistedResultDir = result?.artifactTruth?.resultDir;
@@ -203,6 +204,48 @@ function createToolsMetadataRoutes({db, getUserId, jobsDir = ''}) {
           completedAt: job.completed_at,
           result: reconciled.result,
         });
+      } catch (e) {
+        res.status(500).json({error: e.message});
+      }
+    });
+
+    // BLOCK-64 P1-b：作业日志只读端点（指挥中心「查日志」动作数据源）。
+    // 真相分层：remote-runner.log = 远程作业实时镜像（run 中即存在）；
+    // run.log = finalize 时统一落盘的 STDOUT/STDERR/EXIT 汇总（本地作业
+    // 运行中不存在 → 诚实返回 no_log_yet，不虚构内容）。
+    app.get('/api/tools/log/:id', async (req, res) => {
+      const uid = getUserId(req);
+      try {
+        const job = await db.prepare('SELECT * FROM tool_jobs WHERE id = ?').get(req.params.id);
+        if (!job) return res.status(404).json({error: 'not_found'});
+        if (job.user_id !== uid && req.user && req.user.role !== 'admin') return res.status(403).json({error: 'forbidden'});
+        const dirs = [];
+        if (job.project_id) {
+          try {
+            const layout = resolveProjectRunLayout({ projectId: job.project_id, toolJobId: job.id, db, skipPermissionCheck: true, ensureDirs: false });
+            if (layout && layout.outputDir) dirs.push(layout.outputDir);
+          } catch { /* 布局解析失败时继续走全局目录 */ }
+        }
+        dirs.push(path.join(jobsDir, job.id, 'output'));
+        const LOG_TAIL_BYTES = 32 * 1024;
+        const pick = (name) => {
+          for (const dir of dirs) {
+            const p = path.join(dir, name);
+            try {
+              if (!fs.existsSync(p)) continue;
+              const buf = fs.readFileSync(p);
+              const truncated = buf.length > LOG_TAIL_BYTES;
+              return { source: name, live: name === 'remote-runner.log', truncated, log: (truncated ? '…（仅显示末尾 32KB）\n' : '') + buf.subarray(Math.max(0, buf.length - LOG_TAIL_BYTES)).toString('utf8') };
+            } catch { continue; }
+          }
+          return null;
+        };
+        const found = pick('remote-runner.log') || pick('run.log');
+        if (!found) {
+          const running = job.status === 'running' || job.status === 'pending';
+          return res.json({ ok: true, source: null, live: false, log: '', note: running ? '作业运行中，日志将在结束时写入 run.log' : '该作业没有可用日志文件' });
+        }
+        res.json({ ok: true, ...found });
       } catch (e) {
         res.status(500).json({error: e.message});
       }
