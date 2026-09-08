@@ -32,6 +32,11 @@ const electronUserDataDir =
   process.env.BIOF3_ELECTRON_USER_DATA_DIR || path.join(projectRoot, '.biof3-dev-user-data');
 const electronLocalDataDir =
   process.env.BIOF3_LOCAL_DATA_DIR || path.join(electronUserDataDir, 'data');
+// biof3-server 与迁移子进程同样按 BIOF3_LOCAL_DATA_DIR 解析 ai-settings.json /
+// credential-store / 数据根。只把它放进 electronEnv 会让后端各自回落到
+// ~/Documents/BioF3-Local（无配置 → 模型列表重置为 deepseek 默认、凭据读空），
+// 必须在 fork 任何子进程前导出，与 Electron 主进程（env-coordinator）同根。
+process.env.BIOF3_LOCAL_DATA_DIR = electronLocalDataDir;
 const electronLogPath = process.env.BIOF3_ELECTRON_LOG_PATH || path.join(os.tmpdir(), 'biof3-electron-main.log');
 const electronErrorLogPath = `${electronLogPath}.error`;
 
@@ -401,13 +406,13 @@ async function main() {
   spawnChild(npmCmd, ['--prefix', 'frontend', 'run', 'dev']);
   await waitForUrl(rendererUrl);
 
-  // biof3-server (and later Electron) both need the same DB. The Electron main
-  // process stores it in ~/Library/Application Support/biof3-local/ (see
-  // env-coordinator.js). We mirror that path here so biof3-server opens the already-
-  // migrated DB instead of its own empty core/biof3-server/bioF3.db.
-  const rServerUserDataDir = process.env.BIOF3_ELECTRON_USER_DATA_DIR ||
-    path.join(os.homedir(), 'Library', 'Application Support', 'biof3-local');
-  process.env.BIOF3_DB_PATH = path.join(rServerUserDataDir, 'bioF3.db');
+  // biof3-server (and later Electron) both need the same DB. env-coordinator
+  // pins the main-process DB to <BIOF3_LOCAL_DATA_DIR>/biof3.db（上面已导出为
+  // electronLocalDataDir）。镜像同一路径，biof3-server 与迁移子进程打开同一个
+  // 已迁移库，而不是各自回落（core/biof3-server/biof3.db 或 macOS 时代的
+  // ~/Library/Application Support/biof3-local/bioF3.db —— 后者在本机会把
+  // 后端指到另一个空库，与主进程分裂）。
+  process.env.BIOF3_DB_PATH = path.join(electronLocalDataDir, 'biof3.db');
 
   // Run pending DB migrations against the shared DB before biof3-server starts.
   // Uses the same BIOF3_BETTER_SQLITE3_ROOT root as main.js:367 so the
