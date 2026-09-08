@@ -202,7 +202,7 @@ const WORKSPACE_TOOL_DEFS = [
     function: {
       name: 'computer_snapshot',
       description:
-        '【macOS】读取当前应用的无障碍语义树，返回可交互元素清单（ref/角色/标题/值/坐标/尺寸）。电脑控制的第一步：先 snapshot 拿到元素 ref，再 click/type 定位操作。默认读前台应用；app 可传 bundleId（如 com.apple.TextEdit）或数字 pid。Electron/Chromium 应用传 axManual:true 规避语义树懒初始化。',
+        '【macOS/Windows】读取当前应用的无障碍语义树，返回可交互元素清单（ref/角色/标题/值/坐标/尺寸）。电脑控制的第一步：先 snapshot 拿到元素 ref，再 click/type 定位操作。默认读前台应用；app 可传 bundleId/进程名（macOS 如 com.apple.TextEdit，Windows 如 notepad）或数字 pid。Electron/Chromium 应用在 macOS 传 axManual:true 规避语义树懒初始化（Windows 端 UIA 客户端连接即暴露，无需此参）。',
       parameters: {
         type: 'object',
         properties: {
@@ -218,7 +218,7 @@ const WORKSPACE_TOOL_DEFS = [
     function: {
       name: 'computer_click',
       description:
-        '【macOS】点击 snapshot 返回的元素（ref）：优先 AXPress 语义动作，自动回退坐标合成点击。需要用户确认（首调返回 ackToken，前端确认卡批准后携 confirm+ackToken 重调）。',
+        '【macOS/Windows】点击 snapshot 返回的元素（ref）：优先语义动作（AXPress/Invoke），自动回退坐标合成点击。需要用户确认（首调返回 ackToken，前端确认卡批准后携 confirm+ackToken 重调）。',
       parameters: {
         type: 'object',
         properties: {
@@ -237,7 +237,7 @@ const WORKSPACE_TOOL_DEFS = [
     function: {
       name: 'computer_type',
       description:
-        '【macOS】向目标应用键入文本（支持中文）。建议先 click 文本框聚焦（传 ref）。需要用户确认（ackToken 两段式）。',
+        '【macOS/Windows】向目标应用键入文本（支持中文）。无换行且带 ref 时优先整体回写（macOS AX SetValue / Windows UIA ValuePattern，后台确定性）；含换行走逐字合成注入（Windows 部分受控宿主可能拦截合成键盘，诚实上报 mode）。建议先 click 文本框聚焦（传 ref）。需要用户确认（ackToken 两段式）。',
       parameters: {
         type: 'object',
         properties: {
@@ -257,12 +257,12 @@ const WORKSPACE_TOOL_DEFS = [
     function: {
       name: 'computer_press',
       description:
-        '【macOS】按键：return/tab/escape/delete/方向键/home/end/pageup/pagedown/F1-F12 等，可带 cmd/shift/alt/ctrl 修饰（如 Cmd+S）。需要用户确认（ackToken 两段式）。',
+        '【macOS/Windows】按键：return/tab/escape/backspace/delete/方向键/home/end/pageup/pagedown/F1-F12/字母数字等。macOS 修饰键 cmd/shift/alt/ctrl；Windows 修饰键 ctrl/alt/shift/win（被拦宿主上修饰键组合诚实拒绝）。需要用户确认（ackToken 两段式）。',
       parameters: {
         type: 'object',
         properties: {
           key: { type: 'string', description: '键名（如 return、escape、left、f4）' },
-          modifiers: { type: 'array', items: { type: 'string', enum: ['cmd', 'shift', 'alt', 'ctrl'] } },
+          modifiers: { type: 'array', items: { type: 'string', enum: ['cmd', 'shift', 'alt', 'ctrl', 'win'] } },
           app: { type: 'string' },
           activate: { type: 'boolean' },
           confirm: { type: 'boolean' },
@@ -277,7 +277,7 @@ const WORKSPACE_TOOL_DEFS = [
     function: {
       name: 'computer_scroll',
       description:
-        '【macOS】在目标位置滚轮滚动（默认前台窗口中心，或 ref 元素处）。需要用户确认（ackToken 两段式）。',
+        '【macOS/Windows】在目标位置滚轮滚动（默认前台窗口中心，或 ref 元素处）。需要用户确认（ackToken 两段式）。',
       parameters: {
         type: 'object',
         properties: {
@@ -297,7 +297,7 @@ const WORKSPACE_TOOL_DEFS = [
     function: {
       name: 'computer_screenshot',
       description:
-        '【macOS】对目标应用窗口截图（遮挡免疫：按窗口取像，被覆盖也可截），PNG 落盘到当前项目工作区 computer-use/ 目录。需要屏幕录制权限（computer_authorize 会诚实报告）。',
+        '【macOS/Windows】对目标应用窗口截图，PNG 落盘到当前项目工作区 computer-use/ 目录。macOS 按窗口取像遮挡免疫、需屏幕录制权限；Windows 无 TCC 权限门。',
       parameters: {
         type: 'object',
         properties: {
@@ -312,7 +312,7 @@ const WORKSPACE_TOOL_DEFS = [
     function: {
       name: 'computer_wait',
       description:
-        '【macOS】等待目标应用出现满足条件的元素（自适应轮询，默认上限 5s）。用于点击/输入后等界面就绪，避免盲重试。只读。',
+        '【macOS/Windows】等待目标应用出现满足条件的元素（自适应轮询，默认上限 5s）。用于点击/输入后等界面就绪，避免盲重试。只读。',
       parameters: {
         type: 'object',
         properties: {
@@ -330,7 +330,7 @@ const WORKSPACE_TOOL_DEFS = [
     function: {
       name: 'computer_authorize',
       description:
-        '【macOS】诚实探测电脑控制所需权限（辅助功能/屏幕录制），未授权时返回系统设置引导路径。使用任何 computer_* 工具前先调用。只读零副作用。',
+        '【macOS/Windows】诚实探测电脑控制可用性：macOS 返回辅助功能/屏幕录制权限态与系统设置引导；Windows 返回平台标识与宿主提权边界（无 TCC 式授权门）。使用任何 computer_* 工具前先调用。只读零副作用。',
       parameters: {
         type: 'object',
         properties: {},

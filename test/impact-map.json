@@ -1129,6 +1129,19 @@
       "scriptRole": "development-smoke"
     },
     {
+      "id": "block63-windows-computer-use-host",
+      "note": "BLOCK-63 P3 编排注册：Windows sidecar 托管（computer-use-host 平台门/双平台定位）+ computer_* 工具 handler 确认门真链。改动即跑 host 契约测试（前置：sidecar 已构建）。",
+      "patterns": [
+        "core/biof3-server/helpers/computer-use-host.js",
+        "core/biof3-server/agent-tools/computer-use-tools.js",
+        "test/block63-computer-host.test.mjs"
+      ],
+      "tests": [
+        "test/block63-computer-host.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "block63-windows-computer-use-sidecar",
       "note": "BLOCK-63 Windows 电脑控制：C#/FlaUI sidecar 源码与协议契约测试。改动即跑契约测试（前置构建：powershell sidecars/computer-use-windows/build.ps1）。 live 脚本 scripts/block63-*.cjs 归 script-block-live-drivers 分类。",
       "patterns": [

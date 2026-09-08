@@ -1,7 +1,11 @@
 'use strict';
 
 // ============================================================
-// BLOCK-48 P3 — computer_* agent 工具面（8 工具，macOS）。
+// BLOCK-48/BLOCK-63 P3 — computer_* agent 工具面（8 工具，macOS + Windows）。
+// 协议参数平台无关：app → target{frontmost|pid|bundleId}（Windows sidecar
+// 把 bundleId 语义映射为进程名）；其余 ref/text/key+modifiers/direction+amount/
+// out/role+textContains+timeoutMs 双平台同形。不支持的平台由 host
+// unsupported_platform 诚实报错。
 //
 // 授权门三件（plan §3，与既有安全体系同构，不新建第二套权限）：
 //   1. policy 契约：控制类（click/type/press/scroll）= action/execution/R2

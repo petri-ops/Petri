@@ -50,7 +50,7 @@ const { decideAgentToolCall } = require(path.join(R_SERVER, 'agent-tools', 'agen
 const { getToolContract, getToolRegistry } = require(path.join(R_SERVER, 'agent-tools', 'registry.js'));
 const computerTools = require(path.join(R_SERVER, 'agent-tools', 'computer-use-tools.js'));
 
-describe('托管：sidecar 协议与健康', () => {
+describe('托管：sidecar 协议与健康', { skip: process.platform !== 'darwin' && 'macOS sidecar 专属（Windows 侧见 block63-computer-host）' }, () => {
   test('二进制定位存在', () => {
     assert.ok(fs.existsSync(defaultSidecarPath()), 'sidecar 未构建');
   });
@@ -160,7 +160,7 @@ describe('政策矩阵：控制类仅完全访问档', () => {
   });
 });
 
-describe('工具 handler：确认门 + 真实 sidecar', () => {
+describe('工具 handler：确认门 + 真实 sidecar', { skip: process.platform !== 'darwin' && 'macOS sidecar 专属（Windows 侧见 block63-computer-host）' }, () => {
   let trusted = false;
 
   before(async () => {

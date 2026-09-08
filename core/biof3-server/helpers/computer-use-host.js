@@ -1,11 +1,12 @@
 'use strict';
 
 // ============================================================
-// BLOCK-48 P3 — Computer Use sidecar 托管：spawn / stdio 行式 JSON 协议 /
+// BLOCK-48/BLOCK-63 P3 — Computer Use sidecar 托管：spawn / stdio 行式 JSON 协议 /
 // 健康管理（死亡即弃，下次请求自动重启一次恢复）/ 超时。
 //
-// 二进制定位：env BIOF3_COMPUTER_USE_SIDECAR 覆盖 > 仓库 sidecars 相对路径。
-// 仅 macOS 支持；未构建诚实报错并附构建指引。单例 getComputerUseHost()
+// 二进制定位：env BIOF3_COMPUTER_USE_SIDECAR 覆盖 > 按平台选仓库 sidecar 相对路径
+// （darwin → sidecars/computer-use；win32 → sidecars/computer-use-windows 单文件发布）。
+// 仅 macOS / Windows 支持；未构建诚实报错并附构建指引。单例 getComputerUseHost()
 // 供 agent 工具处理器共享（sidecar 自身维护最近快照注册表，必须常驻单实例）。
 // ============================================================
 
@@ -25,10 +26,15 @@ class ComputerUseHostError extends Error {
 }
 
 function defaultSidecarPath() {
-  return (
-    process.env.BIOF3_COMPUTER_USE_SIDECAR ||
-    path.resolve(__dirname, '..', '..', '..', 'sidecars', 'computer-use', 'bin', 'gewu-computer-use')
-  );
+  if (process.env.BIOF3_COMPUTER_USE_SIDECAR) return process.env.BIOF3_COMPUTER_USE_SIDECAR;
+  if (process.platform === 'win32') {
+    // Windows：.NET 8 单文件自包含发布产物（build.ps1 → bin/publish/）
+    return path.resolve(
+      __dirname, '..', '..', '..',
+      'sidecars', 'computer-use-windows', 'bin', 'publish', 'gewu-computer-use-windows.exe',
+    );
+  }
+  return path.resolve(__dirname, '..', '..', '..', 'sidecars', 'computer-use', 'bin', 'gewu-computer-use');
 }
 
 class ComputerUseHost {
@@ -47,14 +53,14 @@ class ComputerUseHost {
 
   ensureRunning() {
     if (this.isRunning()) return;
-    if (process.platform !== 'darwin') {
-      throw new ComputerUseHostError('unsupported_platform', 'Computer Use 仅支持 macOS。');
+    if (process.platform !== 'darwin' && process.platform !== 'win32') {
+      throw new ComputerUseHostError('unsupported_platform', 'Computer Use 仅支持 macOS 与 Windows。');
     }
     if (!fs.existsSync(this.binaryPath)) {
-      throw new ComputerUseHostError(
-        'sidecar_not_built',
-        'sidecar 未构建：bash scripts/build-computer-use-sidecar.sh',
-      );
+      const hint = process.platform === 'win32'
+        ? 'powershell sidecars/computer-use-windows/build.ps1'
+        : 'bash scripts/build-computer-use-sidecar.sh';
+      throw new ComputerUseHostError('sidecar_not_built', `sidecar 未构建：${hint}`);
     }
     this.proc = spawn(this.binaryPath, [], { stdio: ['pipe', 'pipe', 'pipe'] });
     this.proc.stderr.on('data', (d) => {
