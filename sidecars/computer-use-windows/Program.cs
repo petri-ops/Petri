@@ -1,11 +1,13 @@
 // ============================================================
-// BLOCK-63 P1 — stdio 行式 JSON 协议循环（与 macOS sidecar 逐字同构）。
+// BLOCK-63 P2 — stdio 行式 JSON 协议循环（与 macOS sidecar 逐字同构）。
 //
 // 请求：{"id": 1, "verb": "snapshot", "params": {...}}
 // 响应：{"id": 1, "ok": true, "data": {...}}
 //     | {"id": 1, "ok": false, "error": {"code": "...", "message": "..."}}
 //
 // 单线程事件循环（无并发状态），EOF 退出。
+// params 在 using 作用域内物化为纯 CLR 字典（JsonElement 是已释放文档的
+// 视图，跨作用域访问即崩——P1 实测踩坑）。
 // ============================================================
 using System.Text.Json;
 using ComputerUseWindows;
@@ -24,20 +26,19 @@ while ((line = reader.ReadLine()) != null)
 
     long id = -1;
     string? verb = null;
-    string? clickRef = null;
+    var paramMap = new Dictionary<string, object?>();
     try
     {
-        // JsonElement 是已释放 JsonDocument 的视图：在 using 作用域内把所需值
-        // 物化为纯 CLR 值，避免跨出作用域后访问已释放文档（P1 实测踩坑）。
         using var doc = JsonDocument.Parse(trimmed);
         var rootEl = doc.RootElement;
         id = rootEl.TryGetProperty("id", out var idEl) && idEl.TryGetInt64(out var i) ? i : -1;
         verb = rootEl.TryGetProperty("verb", out var verbEl) ? verbEl.GetString() : null;
-        if (verb == "click"
-            && rootEl.TryGetProperty("params", out var p)
-            && p.TryGetProperty("ref", out var r))
+        if (rootEl.TryGetProperty("params", out var pEl) && pEl.ValueKind == JsonValueKind.Object)
         {
-            clickRef = r.GetString();
+            foreach (var prop in pEl.EnumerateObject())
+            {
+                paramMap[prop.Name] = Materialize(prop.Value);
+            }
         }
     }
     catch (JsonException)
@@ -48,11 +49,18 @@ while ((line = reader.ReadLine()) != null)
 
     try
     {
+        var p = new Params(paramMap);
         object data = verb switch
         {
             "probe" => service.Probe(),
-            "snapshot" => service.Snapshot(),
-            "click" => service.Click(clickRef),
+            "snapshot" => service.Snapshot(p),
+            "click" => service.Click(p),
+            "type" => service.Type(p),
+            "press" => service.Press(p),
+            "scroll" => service.Scroll(p),
+            "screenshot" => service.Screenshot(p),
+            "wait" => service.Wait(p),
+            "close" => service.Close(p),
             _ => throw new SidecarError("unknown_verb", $"未知动词：{verb}"),
         };
         Emit(id, data: data);
@@ -67,6 +75,18 @@ while ((line = reader.ReadLine()) != null)
     }
 }
 return 0;
+
+static object? Materialize(JsonElement el) => el.ValueKind switch
+{
+    JsonValueKind.String => el.GetString(),
+    JsonValueKind.Number => el.TryGetInt64(out var l) ? l : el.GetDouble(),
+    JsonValueKind.True => true,
+    JsonValueKind.False => false,
+    JsonValueKind.Null => null,
+    JsonValueKind.Object => el.EnumerateObject().ToDictionary(prop => prop.Name, prop => Materialize(prop.Value)),
+    JsonValueKind.Array => el.EnumerateArray().Select(Materialize).ToArray(),
+    _ => el.ToString(),
+};
 
 static void Emit(long id, object? data = null, (string code, string message)? error = null)
 {

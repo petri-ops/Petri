@@ -3644,7 +3644,7 @@
       "id": "BLOCK-63-WINDOWS-COMPUTER-USE",
       "path": "docs/block-63-windows-computer-use-research-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "active",
       "canonical": true,
       "truthDomain": "block-63-windows-computer-use",
       "entrypoint": "docs/README.md",
@@ -3660,7 +3660,7 @@
         "agent-tools",
         "G0"
       ],
-      "notes": "2026-09-08 planned 登记（用户裁决：BLOCK-48 新增 Windows 侧对应能力，新立项调研）：双层架构对标——UIA3 语义层（Invoke/Value 等控制模式对标 AXPress/SetValue）+ SendInput 合成层（无 per-PID 后台投递，坐标兜底必须前台，架构差异如实登记）+ Windows.Graphics.Capture 按窗口截图；sidecar 选型比选：C#/.NET 8 + FlaUI 5.0（2025-02 v5.0 活跃）主选建议 / Python pywinauto·uiautomation 备选（复用 provisioned runtime）/ WinAppDriver 停滞排除；复用面：computer-use-host stdio 协议 + 8 工具 + 授权门/policy 矩阵平台无关零改动，仅 host 平台门与二进制定位需 win32 分支；已知坑：UAC 完整性边界（提权窗口不可自动化，UIAccess 签名链列非范围）/ Chromium·Electron UIA 懒启用 / legacy Win32 树稀疏 / DPI per-monitor v2 / 锁屏不可达。P0 调研立项完成；实施启动（P1+）待用户显式裁决。0 新 npm 依赖。G0 开发期常态 · 不外推 packaged/Provider/GA. 【2026-09-08 P1 收口（completed）】FlaUI 5.0 选型终判确认；sidecar 骨架（probe/snapshot/click）+ 契约 8/8 + 实机 6/6（记事本 snapshot→click 焦点证据 + dev Electron UIA 观测 69 元素）；JsonElement 生命周期 bug 实机抓真修复；Windows 记事本单实例清理纪律升级（hwnd 粒度，P2 落地）。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-09-08 planned 登记（用户裁决：BLOCK-48 新增 Windows 侧对应能力，新立项调研）：双层架构对标——UIA3 语义层（Invoke/Value 等控制模式对标 AXPress/SetValue）+ SendInput 合成层（无 per-PID 后台投递，坐标兜底必须前台，架构差异如实登记）+ Windows.Graphics.Capture 按窗口截图；sidecar 选型比选：C#/.NET 8 + FlaUI 5.0（2025-02 v5.0 活跃）主选建议 / Python pywinauto·uiautomation 备选（复用 provisioned runtime）/ WinAppDriver 停滞排除；复用面：computer-use-host stdio 协议 + 8 工具 + 授权门/policy 矩阵平台无关零改动，仅 host 平台门与二进制定位需 win32 分支；已知坑：UAC 完整性边界（提权窗口不可自动化，UIAccess 签名链列非范围）/ Chromium·Electron UIA 懒启用 / legacy Win32 树稀疏 / DPI per-monitor v2 / 锁屏不可达。P0 调研立项完成；实施启动（P1+）待用户显式裁决。0 新 npm 依赖。G0 开发期常态 · 不外推 packaged/Provider/GA. 【2026-09-08 P1 收口（completed）】FlaUI 5.0 选型终判确认；sidecar 骨架（probe/snapshot/click）+ 契约 8/8 + 实机 6/6（记事本 snapshot→click 焦点证据 + dev Electron UIA 观测 69 元素）；JsonElement 生命周期 bug 实机抓真修复；Windows 记事本单实例清理纪律升级【2026-09-08 P2 收口（completed）】八动词 + close（WM_CLOSE hwnd 粒度）+ axfixture 隔离靶 + 真行为测试 9/9（契约 8/8 维持）。实机重大环境发现：本机宿主安全层静默拦截合成键盘输入（SendInput VK/scancode/Python ctypes 三路径交叉验证全被吞，事件不进 GetAsyncKeyState 异步键态；鼠标注入与 PostMessage WM_CHAR 正常可达）。press 设计升级为诚实降级：SendInput 主路径 + 异步键态探测，被拦回退消息级注入（mode=message_post + sendinputFiltered=true 如实上报），修饰键组合被拦 fail-closed（keyboard_inject_blocked）。次生坑：scan=0 无 WM_CHAR（MapVirtualKey 修复）+ NativeWindowHandle 为 AutomationProperty 包装。WinForms TextBox OnGotFocus SelectAll 坑：测试语义改 click→end→backspace。type 含换行 SendInput 路径在被拦宿主静默无效（P4 注意）。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-08",
       "archivePolicy": "archive_when_superseded",
       "phase": "PLANNED"

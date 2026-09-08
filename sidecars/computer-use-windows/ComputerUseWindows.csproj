@@ -12,11 +12,14 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <AssemblyName>gewu-computer-use-windows</AssemblyName>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <!-- axfixture 子项目不在本程序集内（其 obj 生成文件含同名平台特性，双重编译即崩） -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);axfixture/**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="FlaUI.Core" Version="5.0.0" />
     <PackageReference Include="FlaUI.UIA3" Version="5.0.0" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.10" />
   </ItemGroup>
 
 </Project>

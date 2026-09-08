@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- BLOCK-63 P2 — 隔离靶 app（对标 macOS axfixture）：最小 WinForms 窗口，
+       文本框 + 计数按钮（点击回写 clicked=N）。由测试 spawn/kill，绝不指向
+       用户真实应用。产物不入 git。 -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>axfixture-windows</AssemblyName>
+  </PropertyGroup>
+
+</Project>

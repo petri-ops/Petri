@@ -90,3 +90,5 @@ sidecars/computer-use/.build/
 sidecars/computer-use/bin/
 sidecars/computer-use-windows/bin/
 sidecars/computer-use-windows/obj/
+sidecars/computer-use-windows/axfixture/bin/
+sidecars/computer-use-windows/axfixture/obj/
