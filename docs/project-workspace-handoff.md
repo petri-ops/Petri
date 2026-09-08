@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-09（**BLOCK-65-SUBAGENT-UX 整包收口 completed**（`44050255`，UI-314 verified）：agent 专属窗交互补全（中断/留言队列语义/终态继续派）+ spawn 自动弹出专属窗 + 窗口标题 task 前缀 + SubAgentsBar 升格「全部俯瞰」跨会话面板；真实模型 spawn 链路实机 6 断言全 PASS。同日 BLOCK-64 已收口。**当前无 active 工作包**；BLOCK-62~66 排队包全部清偿。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-09（**BLOCK-65-SUBAGENT-UX 整包收口 completed**（`44050255`，UI-314 verified）：agent 专属窗交互补全（中断/留言队列语义/终态继续派）+ spawn 自动弹出专属窗 + 窗口标题 task 前缀 + SubAgentsBar 升格「全部俯瞰」跨会话面板；真实模型 spawn 链路实机 6 断言全 PASS。同日 BLOCK-64 已收口；**BLOCK-67-SSH-REMOTE-PROJECT 立项**（planned 排队，见 `docs/block-67-ssh-remote-project-plan.md`）。**当前无 active 工作包**；排队候选 BLOCK-67，启动待用户裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## Session Snapshot
 
