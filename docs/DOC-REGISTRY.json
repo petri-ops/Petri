@@ -18,7 +18,7 @@
    "id": "BLOCK-65-SUBAGENT-UX",
    "path": "docs/block-65-subagent-ux-plan.md",
    "kind": "work-package",
-   "status": "active",
+   "status": "completed",
    "canonical": true,
    "truthDomain": "block-65-subagent-ux",
    "entrypoint": "docs/README.md",
@@ -33,7 +33,11 @@
    "notes": "子智能体专属界面全面评估+设计。2026-09-08 用户裁决立项「新开 BLOCK 全面评估」+需求「每个智能体运行时都有专属界面（参考 codex / 模仿 zcode）」。评估随立项交付（plan §2-§4）：运行逻辑事实基线=spawn_agent 进程内直调 runAgentLoop(kind=subagent) 异步派生、tasks+task_events 持久、父会话只见状态行+child_finished 终态通知（中间输出诚实不注入父上下文）、二期三件套 send_message(队列语义)/followup_task/interrupt_agent 后端已实现前端零消费、窗口层 agent 类已多实例（每 taskId 一窗，popped 上限 4）。核心结论=窗口多实例就绪+数据面完备（SSE afterSeq 任意回放）+后端交互闲置，缺口集中在内容层：专属窗只读无交互 / 无自动唤起 / SubAgentsBar 无实时进度 / 4 窗降格无提示 / 重启运行态丢失 / send_message 队列语义需诚实标注 / agent 俯瞰空白（自 BLOCK-64 P2-c 移交并入）。优化四档：P1-a 专属窗交互补全（中断/留言/续派）/ P1-b 自动唤起三选一 / P2-c agent 俯瞰 / P2-d ZCode 式面板 vs 独立窗形态对照。零第二真相；窗口系统零改动；不动 agent-runner 核心。0 新依赖。排队等 UI-305。G0 开发期常态 · 不外推 packaged/Provider/GA.",
    "registeredAt": "2026-09-08",
    "archivePolicy": "archive_when_superseded",
-   "phase": "QUEUED"
+   "phase": "QUEUED",
+   "completedAt": "2026-09-09",
+   "linkedCommits": [
+    "44050255"
+   ]
   },
   {
    "id": "BLOCK-64-COMMAND-CENTER-UX",

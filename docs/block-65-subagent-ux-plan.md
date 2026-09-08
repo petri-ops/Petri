@@ -1,6 +1,6 @@
 # BLOCK-65 — 子智能体专属界面全面评估与设计（每 agent 专属视图）
 
-> 状态：`active`（2026-09-09 用户裁决「继续后面的BLOCK」启动；范围 = P1-a + P1-b①（自动弹出专属窗）+ P2-c②（SubAgentsBar 升格俯瞰）+ P2-d 评估。后端用户侧端点 + 前端三件已落地，实机验收进行中。G0 开发期常态 · 不外推 packaged/Provider/GA）
+> 状态：`completed`（2026-09-09 用户裁决启动同日整包收口：P1-a + P1-b①（自动弹出专属窗）+ P2-c②（SubAgentsBar 升格俯瞰）+ P2-d 评估全落地，真实模型 spawn 链路实机 6 断言全 PASS（acceptance/block-65/），UI-314 verified，提交 44050255。G0 开发期常态 · 不外推 packaged/Provider/GA）
 > 立项日期：2026-09-08（用户裁决「立新的 BLOCK」）
 > truthDomain: `block-65-subagent-ux`
 > 来源：用户问题「项目中子智能体的运行逻辑是什么」+ 需求「每个智能体运行时都有专属界面，参考 codex 代码或模仿 zcode 实现方式」
@@ -53,3 +53,4 @@
 - 2026-09-08 **planned 立项 + 评估交付**：用户裁决「新开 BLOCK 全面评估」并给出需求「每个智能体专属界面（参考 codex / 模仿 zcode）」→ 全量源码走读完成（§2 事实基线）；核心结论 = **窗口层多实例已就绪、数据面完备（task_events SSE 任意回放）、后端交互三件套已实现，缺口集中在内容层交互与自动唤起**（§3 七项分级）；优化四档待用户裁决（§4）。排队待用户裁决启动（UI-305 已收口）。
 - 2026-09-09 **用户裁决实施范围 + 代码落地**：P1-b 三选一裁决 = **① 自动弹出专属窗**（4 窗预算超限自动降格 + bar 内诚实提示）；P2-c 二选一裁决 = **② SubAgentsBar 升格俯瞰面板**（跨会话、只读 tasks 投影）。落地清单：① 后端新增用户侧子域 `routes/ai-agent/task-actions.js`（GET /api/ai/agent/tasks 俯瞰列表 + GET /api/ai/agent/task/:id/meta 窗口标题 + POST message/followup），message/followup 语义与 send_message/followup_task 工具**单源**（spawn-agent-tools 导出 queueUserMessage/launchUserFollowup 复用 launchSubAgent/buildTerminalSummary）；② agent-task-store 新增 listRecentSubAgentTasks（用户维度子 agent 列表）；③ AgentWindowPage 交互补全（中断两步确认走既有 cancel REST + 留言 composer（队列语义诚实标注）+ 终态「继续派」composer（成功后自动弹新专属窗））+ 窗口标题带 task 描述前缀（meta 接口）+ badge 改「Agent 专属窗 · 实时投影 + 交互」；④ SubAgentsBar 升格（自动弹窗 effect + 「全部俯瞰」展开区跨会话列表 5s 轮询 + autoDemoted 提示）。P2-d 评估结论见下。
 - **P2-d 形态对照评估结论（裁决依据，不实现）**：**维持多实例独立窗为主形态**。ZCode 式单窗多面板的核心价值 = 集中一览 + 快速切换；本包 P2-c② 的「全部俯瞰」面板已在主窗内提供该价值（一览 + 行点击弹专属窗），无需引入第二窗口类型。独立窗形态与既有窗口契约（× = 降格不可变、geometry 主进程持有、4 窗预算自动降格）完全兼容；单窗多面板则要求重定义 ×/预算/geometry 语义，收益不抵契约成本。重启连续性（§3 #5 运行态丢失）维持登记候选（本包不实现）。
+- 2026-09-09 **整包收口 completed**：实机验收（真实模型 spawn 链路 CDP，acceptance/block-65/ui314-live.json + 3 截图）6 断言全 PASS——① spawn 后专属窗无手动自动弹出；② 窗口标题带 task 描述前缀（「Agent · 请从 1 开始逐个列出 30 的每个数的平方…」）；③ 运行中留言入队且诚实呈现队列语义 note；④ 终态「继续派」成功；⑤ 新子 agent 专属窗自动弹出；⑥ 全部俯瞰面板 24 行跨会话含 @conv 标注。实机发现修正：留言窗口期竞态（秒完子任务在运行态 composer 挂载前即终态）——以续派新子窗（弹出瞬间必然运行中）为权威队列语义证据。门禁：SubAgentsBar+conversationRunStore 43/43 + tsc 0 + ui:audit:check PASS。

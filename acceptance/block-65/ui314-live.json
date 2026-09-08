@@ -1,0 +1,52 @@
+{
+  "steps": {
+    "1-conv-open": {
+      "ok": true
+    },
+    "2-send": {
+      "ok": true
+    },
+    "3-auto-pop": {
+      "agentUrl": "http://localhost:3000/window/agent/3272f885-dcb3-43b6-ac2e-3f486b048f0f",
+      "isAuto": true
+    },
+    "4-window": {
+      "title": "Agent · 请从 1 开始逐个列出 30 的每个数的平方，直…",
+      "hasActionBar": true,
+      "hasMessageComposer": true,
+      "statusChip": "已完成"
+    },
+    "5-message": {
+      "ok": false,
+      "reason": "no 留言 button"
+    },
+    "6-terminal": {
+      "status": "completed"
+    },
+    "7-followup-click": {
+      "ok": true
+    },
+    "7-followup-pop": {
+      "newAgentPopped": true,
+      "newAgentUrl": "http://localhost:3000/window/agent/5e5f1f2e-4c1f-4cf7-8972-6539c4afb07b"
+    },
+    "7.5-message": {
+      "ok": true,
+      "noteHead": "留言已入队（子 agent 事件流可见）。运行中即时注入需 loop 核心支持（登记候选）；当前该留言将在「继续派」续派"
+    },
+    "8-overview": {
+      "present": true,
+      "rows": 24,
+      "hasConvTag": true
+    }
+  },
+  "taskId": "3272f885-dcb3-43b6-ac2e-3f486b048f0f",
+  "verdict": {
+    "autoPopOnSpawn": true,
+    "windowTitlePrefix": true,
+    "messageQueued": true,
+    "followupLaunched": true,
+    "followupAutoPops": true,
+    "overviewPanel": true
+  }
+}
