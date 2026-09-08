@@ -1257,15 +1257,38 @@ function createGitAdapter(options = {}) {
       if (safe.length === 0) {
         throw new GitAdapterError('paths_required', 'paths is required and must not be empty.');
       }
-      const result = run(['checkout', 'HEAD', '--', ...safe], { allowFailure: true });
-      if (!result.ok) {
-        throw new GitAdapterError(
-          'git_checkout_failed',
-          'git checkout HEAD failed for the requested paths.',
-          { stderr: result.stderr, code: result.code, paths: safe }
-        );
+      // UI-180 实机验收发现缺陷：untracked 文件不在 HEAD，`git checkout HEAD -- <paths>`
+      // 以 "pathspec did not match any file(s) known to git" 整体失败 —— 只要状态列表里
+      // 有任一未跟踪文件，「全部还原」就恒败。先按 tracked / untracked 分区：
+      // tracked 走 checkout HEAD 还原；untracked 直接删除文件（与 BLOCK-20 discard-file
+      // 的 untracked 语义一致 —— UI 确认文案即承诺「未跟踪文件将被删除」）。
+      const ls = run(['ls-files', '-z', '--', ...safe], { allowFailure: true, readOnly: true });
+      const trackedSet = new Set(ls.ok ? ls.stdout.split('\0').filter(Boolean) : []);
+      const tracked = safe.filter((p) => trackedSet.has(p));
+      const untracked = safe.filter((p) => !trackedSet.has(p));
+      if (tracked.length > 0) {
+        const result = run(['checkout', 'HEAD', '--', ...tracked], { allowFailure: true });
+        if (!result.ok) {
+          throw new GitAdapterError(
+            'git_checkout_failed',
+            'git checkout HEAD failed for the requested paths.',
+            { stderr: result.stderr, code: result.code, paths: tracked }
+          );
+        }
       }
-      return { ok: true, reverted: safe };
+      for (const rel of untracked) {
+        const abs = pathModule.join(resolvedWorkTree, rel);
+        try {
+          if (fs.existsSync(abs)) fs.rmSync(abs, { force: true });
+        } catch (e) {
+          throw new GitAdapterError(
+            'untracked_delete_failed',
+            `failed to delete untracked path ${rel}.`,
+            { code: 'fs_error' }
+          );
+        }
+      }
+      return { ok: true, reverted: tracked, deletedUntracked: untracked };
     },
 
     listTrackedFiles({ paths } = {}) {

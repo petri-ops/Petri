@@ -213,6 +213,11 @@ function parseDiffFiles(diffText) {
     }
     if (current.hunks.length > 0) {
       const hunk = current.hunks[current.hunks.length - 1];
+      // 尾部换行切分伪影：split('\n') 在 diff 末尾产生零长度行。真空的 ctx 行在
+      // raw diff 里是单个空格（' '），零长度行只会是伪影 —— 若当作 ctx 吸进 hunk
+      // 会让行数虚增 1，导致 buildReversePatchForReject 产出的反向 patch 被
+      // git apply 以 "patch does not apply" 拒绝（hunk 位于文件末尾时必现）。
+      if (line === '') continue;
       if (line.startsWith('+') && !line.startsWith('+++')) {
         hunk.lines.push({ type: 'add', text: line.slice(1) });
         added += 1;

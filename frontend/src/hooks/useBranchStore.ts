@@ -195,7 +195,8 @@ export function useBranchStore(
       if (!projectId) return;
 
       try {
-        await branchApi.switch(branchId);
+        // UI-P2-001: branch:switch handler 要求 projectId 限定停活范围
+        await branchApi.switch(branchId, projectId);
         const cache = sharedCache.get(projectId);
         if (cache) {
           const next: BranchCache = {

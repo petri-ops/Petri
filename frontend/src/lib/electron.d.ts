@@ -52,6 +52,18 @@ export interface HarnessCapabilityEntry {
 // UI-311 — result:* IPC handler 统一 fail-closed 信封（preload 1:1 镜像如实声明）。
 // 拆包单点在 lib/resultBridge.ts，前端消费方仍见裸值契约。
 type ResultIpcEnvelope<T> = { ok: boolean; data?: T; error?: string };
+
+// UI-P2-001 — branch:* IPC handler 返回的落库行（snake_case SQLite 列，
+// src/database/branch-db.js 原样返回）。camelCase 映射在 lib/branchBridge.ts。
+type BranchRowRecord = {
+  id: string;
+  project_id: string;
+  name: string;
+  parent_branch_id: string | null;
+  created_at: number;
+  updated_at: number;
+  is_active: number | boolean;
+};
 type ResultRecord = {
   id: string;
   projectId: string;
@@ -689,37 +701,18 @@ declare global {
         }>;
       };
       // Phase 1: Branch Tab UI - conversation branch management
+      // UI-P2-001 — branch:* IPC handler 如实声明：统一 fail-closed 信封 +
+      // snake_case 落库行（src/database/branch-db.js 原样返回，不做 camel 映射）。
+      // 拆包 + snake→camel 映射单点在 lib/branchBridge.ts，前端消费方仍见裸
+      // camelCase Branch 契约。参数键以 src/ipc/branch-handlers.js 为准：
+      // switch 需 { branchId, projectId }；delete/rename 用 { id }（非 branchId）。
       branch: {
-        create: (params: { projectId: string; name: string; parentBranchId?: string }) => Promise<{
-          id: string;
-          projectId: string;
-          name: string;
-          parentBranchId: string | null;
-          createdAt: number;
-          updatedAt: number;
-          isActive: boolean;
-        }>;
-        list: (params: { projectId: string }) => Promise<Array<{
-          id: string;
-          projectId: string;
-          name: string;
-          parentBranchId: string | null;
-          createdAt: number;
-          updatedAt: number;
-          isActive: boolean;
-        }>>;
-        switch: (params: { branchId: string }) => Promise<void>;
-        delete: (params: { branchId: string }) => Promise<void>;
-        rename: (params: { branchId: string; newName: string }) => Promise<void>;
-        getActive: (params: { projectId: string }) => Promise<{
-          id: string;
-          projectId: string;
-          name: string;
-          parentBranchId: string | null;
-          createdAt: number;
-          updatedAt: number;
-          isActive: boolean;
-        } | null>;
+        create: (params: { projectId: string; name: string; parentBranchId?: string }) => Promise<ResultIpcEnvelope<BranchRowRecord>>;
+        list: (params: { projectId: string }) => Promise<ResultIpcEnvelope<BranchRowRecord[]>>;
+        switch: (params: { branchId: string; projectId: string }) => Promise<ResultIpcEnvelope<BranchRowRecord>>;
+        delete: (params: { id: string }) => Promise<ResultIpcEnvelope<undefined>>;
+        rename: (params: { id: string; newName: string }) => Promise<ResultIpcEnvelope<BranchRowRecord>>;
+        getActive: (params: { projectId: string }) => Promise<ResultIpcEnvelope<BranchRowRecord | null>>;
       };
       // Phase 2: Result Studio - shared results across branches
       // Phase 4: Added conversation_export type and createFromConversation

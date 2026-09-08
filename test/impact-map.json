@@ -72,6 +72,20 @@
       "classifiesScripts": false
     },
     {
+      "id": "working-tree-review-ipc",
+      "note": "BLOCK-16/20 working tree review IPC（diff 解析 / hunk accept-reject / revert / file-content）。UI-180 实机验收发现 reject 反向 patch 因 phantom 空 ctx 行被 git apply 拒绝，修复后此映射保证回归不被漏测。",
+      "patterns": [
+        "src/ipc/working-tree-review.js"
+      ],
+      "tests": [
+        "test/working-tree-review-hunk-apply.test.mjs",
+        "test/working-tree-review-file-content.test.mjs",
+        "test/working-tree-review-init.test.mjs",
+        "test/git-adapter-block20-per-hunk.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "result-studio",
       "note": "P4R source projection, controlled replay, background materialization and Code tests are owned by P4R; the explicit invariant gates remain listed so a route regression cannot be hidden by the default bundle.",
       "patterns": [
