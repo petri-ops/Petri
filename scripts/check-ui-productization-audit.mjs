@@ -228,6 +228,11 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-09-08 UI-305 P1.1/P1.2 巨型组件拆分（160e0f2c project-workspace 11 内联组件外迁 /
+  // feed10da useProjectTreeState 抽取）：纯重构零行为变化，UI-305 台账 verified 段已由收口
+  // 提交 ebcc5a16 统一补登（P0-P3 整包一段）。豁免同提交台账要求（对齐 0acffcc 先例）。
+  '160e0f2c91c719066a995853c07747ad473cd695',
+  'feed10da6d94c181574a3806d5034996c28eaace',
   // 2026-09-01 BLOCK-33 P1 环境自省 0acffcc 触碰 toolActivity.ts（UI surface），
   // 台账已由后续 UI-AUDIT-FIX（P2 提交）补登为 UI-265（in_progress）。
   // 豁免同提交台账要求。
