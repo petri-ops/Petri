@@ -92,7 +92,7 @@
    "id": "UI-305-FRONTEND-LARGE-FILE-REFACTOR",
    "path": "docs/ui-305-frontend-large-file-refactor-plan.md",
    "kind": "work-package",
-   "status": "planned",
+   "status": "completed",
    "canonical": true,
    "truthDomain": "ui-305-frontend-large-file-refactor",
    "entrypoint": "docs/README.md",
@@ -105,10 +105,17 @@
     "frontend",
     "G0"
    ],
-   "notes": "前端巨型组件拆分清债。2026-09-07 用户裁决立项启动：普查非测试源码 >600 行（project-workspace.tsx 3540 / SimpleChat.tsx 2343 / ReviewMode.tsx 1781 / ResultView.tsx 1609 等），纯重构零行为变化（组件外迁 + hook 抽取，hook 顺序整簇平移），豁免数据/类型/图标类大文件（inventory.ts、electron.d.ts、Icon.tsx），逻辑层 store/client 缓拆按需裁决，Electron 主进程不在范围。P0 SimpleChat（尾部 6 内联组件外迁 + useSummaryRetry + useModelAccessMenus + useConversationResume）→ P1 project-workspace（11 内联组件外迁）→ P2 ReviewMode+ResultView → P3 剩余按收益裁决 + 收口盘点。每阶段定向 vitest + tsc 0 + ui:audit:check + docs:check。0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-09-07 让位 BLOCK-62（单工作包串行；仅立项文档 ab65f4e6，无实现提交，BLOCK-62 已于同日收口，本包转恢复候选（启动需用户裁决））",
+   "notes": "前端巨型组件拆分清债。2026-09-07 用户裁决立项启动：普查非测试源码 >600 行（project-workspace.tsx 3540 / SimpleChat.tsx 2343 / ReviewMode.tsx 1781 / ResultView.tsx 1609 等），纯重构零行为变化（组件外迁 + hook 抽取，hook 顺序整簇平移），豁免数据/类型/图标类大文件（inventory.ts、electron.d.ts、Icon.tsx），逻辑层 store/client 缓拆按需裁决，Electron 主进程不在范围。P0 SimpleChat（尾部 6 内联组件外迁 + useSummaryRetry + useModelAccessMenus + useConversationResume）→ P1 project-workspace（11 内联组件外迁）→ P2 ReviewMode+ResultView → P3 剩余按收益裁决 + 收口盘点。每阶段定向 vitest + tsc 0 + ui:audit:check + docs:check。0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-09-07 让位 BLOCK-62（单工作包串行；仅立项文档 ab65f4e6，无实现提交，BLOCK-62 已于同日收口，本包转恢复候选（启动需用户裁决））. 2026-09-09 registry 漂移修正：BLOCK-62 收口后用户裁决按序推进，P0–P3 于 2026-09-08 同日整包收口（ff2ddfe5 P0 / 160e0f2c P1.1 / feed10da P1.2 / ebcc5a16 P2+P3 整包 completed；证据 acceptance/ui-305/，台账 UI-305 段 verified），本条 status/phase 误留 planned/QUEUED，随本次漂移修正一并 corrected。",
    "registeredAt": "2026-09-07",
    "archivePolicy": "archive_when_superseded",
-   "phase": "QUEUED"
+   "phase": "COMPLETED",
+   "completedAt": "2026-09-08",
+   "linkedCommits": [
+    "ff2ddfe5",
+    "160e0f2c",
+    "feed10da",
+    "ebcc5a16"
+   ]
   },
   {
    "id": "BLOCK-40-CONV-CHANGES-HYDRATION",
@@ -3521,7 +3528,7 @@
    "id": "BLOCK-55-ENGINEERING-PLAN-MODE",
    "path": "docs/block-55-engineering-plan-mode-plan.md",
    "kind": "work-package",
-   "status": "planned",
+   "status": "completed",
    "canonical": true,
    "truthDomain": "block-55-engineering-plan-mode",
    "entrypoint": "docs/README.md",
@@ -3534,10 +3541,14 @@
     "codex-reference",
     "G0"
    ],
-   "notes": "2026-09-03 planned 登记（用户裁决「渐进式 + 参考 codex 取精华」）：渐进式工程计划模式——P1 Spec 轻门（draft 状态 + spec_md + plan 模式开关收写类工具 + 批准三选一弹窗【批准执行/清上下文执行/继续讨论】，不依赖 BLOCK-49）；P2 步骤级 agent 分派（assignee→spawn_agent/wait_agent，依赖 BLOCK-49）；P3 Replan 修订案。codex 精华：二档模式/plan 模式收工具/三选一裁决/轻门不重流程。复用 tool_plan 生命周期+步骤状态机+Harness Workflow 独立不动。建议序：51→52/53/54→49→55。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+   "notes": "2026-09-03 planned 登记（用户裁决「渐进式 + 参考 codex 取精华」）：渐进式工程计划模式——P1 Spec 轻门（draft 状态 + spec_md + plan 模式开关收写类工具 + 批准三选一弹窗【批准执行/清上下文执行/继续讨论】，不依赖 BLOCK-49）；P2 步骤级 agent 分派（assignee→spawn_agent/wait_agent，依赖 BLOCK-49）；P3 Replan 修订案。codex 精华：二档模式/plan 模式收工具/三选一裁决/轻门不重流程。复用 tool_plan 生命周期+步骤状态机+Harness Workflow 独立不动。建议序：51→52/53/54→49→55。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-09-09 registry 漂移修正：2026-09-04 用户裁决「启动55 一次性搞定」→ 同日 P1→P3+实机一次会话收口（9420bab4，UI-289 verified；证据 acceptance/block-55/），本条 status/phase 误留 planned/PLANNED，随本次漂移修正一并 corrected。",
    "registeredAt": "2026-09-03",
    "archivePolicy": "archive_when_superseded",
-   "phase": "PLANNED"
+   "phase": "COMPLETED",
+   "completedAt": "2026-09-04",
+   "linkedCommits": [
+    "9420bab4"
+   ]
   },
   {
    "id": "BLOCK-56-RELIABILITY-DEPTH",
@@ -3633,7 +3644,7 @@
    "id": "BLOCK-59-WINDOW-SYSTEM",
    "path": "docs/block-59-window-system-plan.md",
    "kind": "work-package",
-   "status": "planned",
+   "status": "completed",
    "canonical": true,
    "truthDomain": "block-59-window-system",
    "entrypoint": "docs/README.md",
@@ -3646,10 +3657,17 @@
     "multi-window",
     "G0"
    ],
-   "notes": "2026-09-04 planned 登记（用户裁决立项：子 agent 工作流/分析结果的独立展示窗口，经四轮讨论收敛）：三层架构权重 70/20/10——L1 停靠↔弹出（VS Code auxiliary windows 模式，日常路径）/ L2 指挥中心墙（codex agent command center 模式，多任务俯瞰单例窗）/ L3 边缘活动轨道（原创配件：降格窗口存放处，只读窗口注册表不建第二套真相，与消息轨道同构视觉语言）。核心契约：窗口状态机 docked→popped→railed→closed 三活态一终态，× 永远是降格不是销毁（写死不可变契约），销毁只有轨道显式移除一条路；弹出窗 ≤4 并发上限超限自动降最老。关键裁决：P1 弹出窗一律只读（编辑留在主窗，切掉双窗写冲突）/ 弹出窗不置顶（仅轨道容器 alwaysOnTop）/ 同内容禁止双开=聚焦既有窗 / 位置记忆归主进程+副屏失效回落 / 路由白名单 main 校验 fail-closed。复用 src/main/_window-create.js + 同一 SPA 走路由 + task_events/SSE 链，0 新 npm 依赖。分期 P0 窗口管理器→P1 结果窗→P2 轨道+终端窗（与 BLOCK-54 兼容）→P3 指挥中心（零第二真相只读投影）→P4 agent 窗（依赖 BLOCK-49）。资源四层缓解：懒创建/隐藏保活/≤4 上限/多入口 bundle 备用。排 BLOCK-51 之后可启动。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+   "notes": "2026-09-04 planned 登记（用户裁决立项：子 agent 工作流/分析结果的独立展示窗口，经四轮讨论收敛）：三层架构权重 70/20/10——L1 停靠↔弹出（VS Code auxiliary windows 模式，日常路径）/ L2 指挥中心墙（codex agent command center 模式，多任务俯瞰单例窗）/ L3 边缘活动轨道（原创配件：降格窗口存放处，只读窗口注册表不建第二套真相，与消息轨道同构视觉语言）。核心契约：窗口状态机 docked→popped→railed→closed 三活态一终态，× 永远是降格不是销毁（写死不可变契约），销毁只有轨道显式移除一条路；弹出窗 ≤4 并发上限超限自动降最老。关键裁决：P1 弹出窗一律只读（编辑留在主窗，切掉双窗写冲突）/ 弹出窗不置顶（仅轨道容器 alwaysOnTop）/ 同内容禁止双开=聚焦既有窗 / 位置记忆归主进程+副屏失效回落 / 路由白名单 main 校验 fail-closed。复用 src/main/_window-create.js + 同一 SPA 走路由 + task_events/SSE 链，0 新 npm 依赖。分期 P0 窗口管理器→P1 结果窗→P2 轨道+终端窗（与 BLOCK-54 兼容）→P3 指挥中心（零第二真相只读投影）→P4 agent 窗（依赖 BLOCK-49）。资源四层缓解：懒创建/隐藏保活/≤4 上限/多入口 bundle 备用。排 BLOCK-51 之后可启动。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-09-09 registry 漂移修正：2026-09-05 用户裁决启动 → 同日 P0–P4 一次会话整包收口（c2f2107e，UI-292/293/294/295 verified；加映 6a295d5d/bc0599d0/a99e0305；证据 acceptance/block-59/），本条 status/phase 误留 planned/PLANNED，随本次漂移修正一并 corrected。",
    "registeredAt": "2026-09-04",
    "archivePolicy": "archive_when_superseded",
-   "phase": "PLANNED"
+   "phase": "COMPLETED",
+   "completedAt": "2026-09-05",
+   "linkedCommits": [
+    "c2f2107e",
+    "6a295d5d",
+    "bc0599d0",
+    "a99e0305"
+   ]
   },
   {
    "id": "BLOCK-60-COMPOSER-TOOLBAR",
