@@ -3729,6 +3729,27 @@
       "registeredAt": "2026-09-08",
       "archivePolicy": "archive_when_superseded",
       "phase": "PLANNED"
+    },
+    {
+      "id": "UI-LEDGER-CLOSEOUT",
+      "path": "docs/ui-ledger-closeout-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "ui-ledger-closeout",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "ui-audit",
+        "ledger",
+        "closeout",
+        "cdp",
+        "verification",
+        "G0"
+      ],
+      "notes": "UI 产品化台账剩余 9 项 in_progress 清债。2026-09-08 用户裁决立项。首批 4 项已收口（UI-159/157/158 verified、UI-196 cancelled，提交 4ec8cb07/f4d6850e），in_progress 13→9。核心阻塞=缺「把应用驱动到目标界面」的 harness：CSS Modules 哈希 class 让语义选择器失配（UI-158 假阴性教训），应用停在空会话态时会话列表 DOM 不可达（UI-156/UI-181 取证受阻）。PHASE 0 harness 建设（会话/产物导航 + fixture 工厂）→ PHASE 1 档A（UI-156/UI-181/UI-ATTCH-001 ③④）→ PHASE 2 档B（UI-180/UI-P2-001/UI-183，需 fixture）→ PHASE 3 档C+D（UI-AGENTWB-001/002 需实验 flag、UI-195 需 hunk fixture）→ PHASE 4 台账同步+治理门。纪律：半证据不翻状态、已删除能力置 cancelled（UI-182/UI-196 先例）、选择器先读组件源码、CDP 脚本放仓库外。0 新 npm 依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "registeredAt": "2026-09-08",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "QUEUED"
     }
   ],
   "lastUpdated": "2026-09-08",
