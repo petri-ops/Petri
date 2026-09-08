@@ -12,6 +12,7 @@
 
 const fs = require("fs");
 const { BRAND } = require("./brand");
+const { zoomBy, zoomReset } = require("./_zoom.js");
 
 /**
  * Create the main BrowserWindow with all event handlers attached.
@@ -154,6 +155,31 @@ async function createWindow({
       event.preventDefault();
       const win = getMainWindow();
       if (win && !win.isDestroyed()) win.minimize();
+      return;
+    }
+
+    // ── Keyboard Shortcut: Ctrl/Cmd +/-/0 page zoom ─────────────
+    // The window is frameless, so the Electron View > zoomIn / zoomOut /
+    // resetZoom menu roles never surface (no menu bar is rendered on
+    // Windows/Linux) and their default accelerators are unreachable.
+    // Re-implement them here so keyboard zoom works regardless of menu
+    // visibility. Ctrl/Cmd+wheel is handled in preload.js via window:zoom-by.
+    // NOTE: keep apostrophes out of comments inside this callback - the test
+    // suite extracts it with a naive brace matcher that misreads quotes.
+    if (
+      (input.control || input.meta) &&
+      !input.alt &&
+      (key === "=" || key === "+" || key === "-" || key === "0")
+    ) {
+      event.preventDefault();
+      const win = getMainWindow();
+      if (win && !win.isDestroyed()) {
+        if (key === "0") {
+          zoomReset(win);
+        } else {
+          zoomBy(win, key === "-" ? -1 : 1);
+        }
+      }
       return;
     }
 

@@ -130,6 +130,20 @@ const desktopBridgeSurface = {
       ipcRenderer.on('window:fullscreen-changed', listener);
       return () => ipcRenderer.removeListener('window:fullscreen-changed', listener);
     },
+
+    // 页面缩放（无边框窗口：菜单 Zoom 角色不可达，故显式暴露）。
+    // delta 为 zoomLevel 步长，可为小数（滚轮平滑缩放用），正数放大。
+    zoomBy: (delta) => ipcRenderer.send('window:zoom-by', Number(delta) || 0),
+    zoomReset: () => ipcRenderer.send('window:zoom-reset'),
+    getZoomLevel: () => {
+      try {
+        return Promise.resolve(ipcRenderer.invoke('window:get-zoom')).then((value) =>
+          typeof value === 'number' ? value : 0,
+        );
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    },
   },
 
   // BLOCK-59 窗口系统 — 弹出窗 / 边缘轨道 / 指挥中心。
@@ -445,3 +459,50 @@ const desktopBridgeSurface = {
 contextBridge.exposeInMainWorld('gewu', desktopBridgeSurface);
 // 兼容别名：历史全局名（desktopBridge 读新优先、旧名兜底）
 contextBridge.exposeInMainWorld('biof3Desktop', desktopBridgeSurface);
+
+// ── Ctrl/Cmd + 滚轮 → 页面缩放 ────────────────────────────────
+// 无边框窗口没有菜单栏，Electron 的 zoomIn/zoomOut 菜单角色快捷键不可达，
+// 所以在 preload 里挂全局 wheel 监听：对任何加载本脚本的窗口都生效（含
+// BLOCK-59 弹出窗），且不依赖 React 路由。经 window:zoom-by 驱动主进程缩放。
+// 用 requestAnimationFrame 合并同一帧内的滚轮增量，避免高频事件打爆 IPC。
+(function setupCtrlWheelZoom() {
+  const ZOOM_PER_100PX = 0.5; // 每 100px 滚轮增量对应的 zoomLevel 步进
+  const MAX_STEP = 1;         // 单帧最大步进，防止触控板甩动导致跳变
+
+  if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') {
+    return;
+  }
+
+  let pendingDelta = 0;
+  let scheduled = false;
+
+  const flush = () => {
+    scheduled = false;
+    const deltaY = pendingDelta;
+    pendingDelta = 0;
+    if (!deltaY) return;
+    const raw = (-deltaY / 100) * ZOOM_PER_100PX;
+    const step = Math.max(-MAX_STEP, Math.min(MAX_STEP, raw));
+    if (step) ipcRenderer.send('window:zoom-by', step);
+  };
+
+  window.addEventListener(
+    'wheel',
+    (event) => {
+      // 仅 Ctrl/Cmd 按住时缩放；macOS 触控板双指捏合同样会带 ctrlKey。
+      if (!event.ctrlKey && !event.metaKey) return;
+      // 阻止 Chromium 自身的缩放，避免与我们的步进叠加造成双倍缩放。
+      event.preventDefault();
+      pendingDelta += typeof event.deltaY === 'number' ? event.deltaY : 0;
+      if (scheduled) return;
+      scheduled = true;
+      const raf =
+        typeof window.requestAnimationFrame === 'function'
+          ? window.requestAnimationFrame.bind(window)
+          : (fn) => setTimeout(fn, 16);
+      raf(flush);
+    },
+    // passive:false 才能 preventDefault
+    { passive: false },
+  );
+})();

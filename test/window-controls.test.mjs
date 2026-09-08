@@ -4,6 +4,9 @@ import path from 'node:path';
 import test from 'node:test';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PRELOAD_SOURCE = readFileSync(path.join(ROOT, 'src/preload.js'), 'utf8');
@@ -241,14 +244,18 @@ test('main window is explicitly frameless for renderer-owned controls', () => {
 
 test('window IPC registers exact controls and toggles maximize state', async () => {
   const { registrations, setup } = createIpcMainHarness();
-  // window:toggleFullScreen was added after the original test expectation
+  // window:toggleFullScreen was added after the original test expectation.
+  // window:zoom-by / window:zoom-reset back the Ctrl/Cmd+wheel and keyboard zoom
+  // (the frameless window has no menu bar, so the menu roles are unreachable).
   assert.deepEqual(registrations.on.map(({ channel }) => channel), [
     'window:minimize',
     'window:maximize',
     'window:close',
     'window:toggleFullScreen',
+    'window:zoom-by',
+    'window:zoom-reset',
   ]);
-  assert.deepEqual(registrations.handle.map(({ channel }) => channel), ['window:isMaximized', 'window:isFullScreen', 'app:relaunch']);
+  assert.deepEqual(registrations.handle.map(({ channel }) => channel), ['window:isMaximized', 'window:isFullScreen', 'window:get-zoom', 'app:relaunch']);
 
   const calls = [];
   let maximized = false;
@@ -377,4 +384,87 @@ test('preload projects only the literal true maximize query result and tolerates
   assert.equal(typeof cleanup, 'function');
   assert.equal(added.some(({ channel }) => channel === 'window:maximize-changed'), false);
   cleanup();
+});
+
+test('page zoom helpers clamp to the supported zoomLevel range and skip dead windows', () => {
+  const { zoomBy, zoomReset, ZOOM_MIN, ZOOM_MAX } = require('../src/main/_zoom.js');
+
+  let level = 0;
+  const win = {
+    isDestroyed: () => false,
+    webContents: {
+      getZoomLevel: () => level,
+      setZoomLevel(next) { level = next; },
+    },
+  };
+
+  assert.equal(zoomBy(win, 1), 1, 'one step in');
+  assert.equal(zoomBy(win, 0.5), 1.5, 'fractional steps (wheel zoom) are supported');
+  assert.equal(zoomBy(win, -10), ZOOM_MIN, 'zoom out clamps at ZOOM_MIN');
+  assert.equal(zoomBy(win, 100), ZOOM_MAX, 'zoom in clamps at ZOOM_MAX');
+  assert.equal(zoomReset(win), 0, 'reset returns to 100%');
+
+  const dead = {
+    isDestroyed: () => true,
+    webContents: {
+      getZoomLevel: () => 0,
+      setZoomLevel() { throw new Error('must not touch a destroyed window'); },
+    },
+  };
+  assert.equal(zoomBy(dead, 1), null);
+  assert.equal(zoomReset(dead), null);
+});
+
+test('keyboard accelerator zooms on Ctrl/Cmd +/-/0 and leaves other shortcuts intact', () => {
+  const createWindowSource = extractFunction(WINDOW_CREATE_SOURCE, 'async function createWindow({');
+  const callbackSource = extractArrow(
+    createWindowSource,
+    'mainWindow.webContents.on("before-input-event"',
+  );
+
+  const calls = [];
+  const testMainWindow = {
+    webContents: {
+      send(channel) { calls.push(channel); },
+      reloadIgnoringCache() { calls.push('reloadIgnoringCache'); },
+    },
+    isDestroyed() { return false; },
+    close() { calls.push('close'); },
+    minimize() { calls.push('minimize'); },
+  };
+  const getMainWindow = () => testMainWindow;
+  // zoomBy / zoomReset come from src/main/_zoom.js via a module-scope require,
+  // so the extracted callback needs them injected.
+  const zoomBy = (_win, delta) => { calls.push(`zoom:${delta}`); };
+  const zoomReset = () => { calls.push('zoom:reset'); };
+
+  const callback = vm.runInNewContext(`(${callbackSource})`, {
+    mainWindow: testMainWindow,
+    getMainWindow,
+    process: { platform: 'win32' },
+    console: { log() {} },
+    zoomBy,
+    zoomReset,
+  });
+
+  let prevented = 0;
+  const event = { preventDefault() { prevented += 1; } };
+
+  callback(event, { key: '=', control: true });
+  callback(event, { key: '+', control: true, shift: true });
+  callback(event, { key: '-', control: true });
+  callback(event, { key: '0', control: true });
+  callback(event, { key: '=', meta: true }); // macOS Cmd+= zooms too
+
+  assert.deepEqual(
+    calls,
+    ['zoom:1', 'zoom:1', 'zoom:-1', 'zoom:reset', 'zoom:1'],
+    'zoom keys must drive the zoom helpers',
+  );
+  assert.equal(prevented, 5, 'each zoom key must be prevented from reaching the page');
+
+  // Non-zoom shortcuts must be untouched.
+  calls.length = 0;
+  callback(event, { key: 'r', control: true });
+  assert.deepEqual(calls, ['app:soft-refresh'], 'Ctrl/Cmd+R still triggers soft refresh');
 });

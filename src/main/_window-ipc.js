@@ -9,6 +9,8 @@
 // has no top-level Electron dependency.
 // ============================================================
 
+const { zoomBy, zoomReset } = require("./_zoom.js");
+
 /**
  * Register window-control IPC handlers.
  *
@@ -23,6 +25,13 @@ function setupWindowIpc({ ipcMain, process, app, getMainWindow }) {
     const mainWindow = getMainWindow();
     if (!mainWindow || mainWindow.isDestroyed()) return null;
     return event?.sender === mainWindow.webContents ? mainWindow : null;
+  };
+
+  // Zoom must work in pop-out windows too, so resolve the *owning* window of the
+  // sender webContents instead of restricting to the main window.
+  const resolveSenderWindow = (event) => {
+    const win = event?.sender?.getOwnerBrowserWindow?.();
+    return win && !win.isDestroyed() ? win : null;
   };
 
   // ── Window chrome controls ─────────────────────────────────
@@ -65,6 +74,25 @@ function setupWindowIpc({ ipcMain, process, app, getMainWindow }) {
     } else {
       targetWindow.setFullScreen(!targetWindow.isFullScreen());
     }
+  });
+
+  // ── Page zoom (frameless: menu accelerators unreachable) ─────
+  // Driven by the Ctrl/Cmd+wheel listener registered in preload.js, and by the
+  // Ctrl/Cmd +/-/0 accelerator in _window-create.js. `delta` is a (possibly
+  // fractional) zoomLevel step — positive zooms in.
+  ipcMain.on("window:zoom-by", (event, delta) => {
+    const targetWindow = resolveSenderWindow(event);
+    if (targetWindow) zoomBy(targetWindow, delta);
+  });
+
+  ipcMain.on("window:zoom-reset", (event) => {
+    const targetWindow = resolveSenderWindow(event);
+    if (targetWindow) zoomReset(targetWindow);
+  });
+
+  ipcMain.handle("window:get-zoom", (event) => {
+    const targetWindow = resolveSenderWindow(event);
+    return targetWindow ? targetWindow.webContents.getZoomLevel() : 0;
   });
 
   // ── App relaunch (for runtime install / env refresh) ────────
