@@ -138,3 +138,19 @@
   border-color: var(--gewu-danger);
   color: var(--gewu-danger);
 }
+
+/* ── BLOCK-65 P1-b/P2-c ───────────────────────────── */
+
+.overviewNote {
+  flex-basis: 100%;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--gewu-text-secondary, #9aa3b8);
+}
+
+.rowConv {
+  flex-shrink: 0;
+  font-size: 10px;
+  color: var(--gewu-text-secondary, #9aa3b8);
+  opacity: 0.8;
+}

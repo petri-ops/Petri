@@ -573,6 +573,26 @@ function listChildAgentTasks(parentTaskId) {
   })).filter((task) => task.params?.kind === 'subagent' && task.params?.parentTaskId === parentTaskId);
 }
 
+// BLOCK-65 P2-c：agent 俯瞰面板数据源——该用户最近 N 个子 agent 任务
+// （跨会话；只读投影 tasks 表，零第二真相）。
+function listRecentSubAgentTasks(userId, limit = 50) {
+  if (!userId) return [];
+  const rows = db.prepare(
+    'SELECT * FROM tasks WHERE user_id = ? ORDER BY created_at DESC LIMIT ?'
+  ).all(userId, Math.max(1, Math.min(200, limit)));
+  return rows.map((row) => ({
+    taskId: row.id,
+    params: tryParse(row.params),
+    status: row.status,
+    createdAt: row.created_at,
+    finishedAt: row.finished_at,
+    error: row.error,
+    userId: row.user_id || null,
+    agentStatus: row.agent_status || null,
+    filesChanged: tryParse(row.files_changed_json) || [],
+  })).filter((task) => task.params?.kind === 'subagent');
+}
+
 /**
  * AGENT-CONCURRENCY: cancel a primary agent loop and cascade the cancel to all
  * of its child sub-agent loops (enumerated by parent_loop_run_id). Cancelling a
@@ -778,6 +798,7 @@ module.exports = {
   getAgentTaskEventsSince,
   getRunningChildAgentTasks,
   listChildAgentTasks,
+  listRecentSubAgentTasks,
   markAgentTaskDone,
   markAgentTaskFailed,
   requestAgentTaskCancel,

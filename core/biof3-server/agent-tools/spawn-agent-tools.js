@@ -411,6 +411,102 @@ async function followup_task(args, ctx) {
 }
 
 /**
+ * queueUserMessage — 用户侧留言等价（BLOCK-65 P1-a）：agent 专属窗（用户操作）
+ * 对运行中子 agent 留言。语义与 send_message 工具单源（持久化 parent_message
+ * 事件 + 队列语义：followup_task 续派时注入）；差异仅在归属校验——工具版要求
+ * 调用方是父 loop ctx，本函数面向 HTTP 用户态（子任务真实存在即可）。
+ */
+function queueUserMessage({ childTaskId, message }) {
+  const text = String(message || '').trim();
+  if (!text) return { ok: false, error: 'invalid_arguments', message: 'message 不能为空。' };
+  if (text.length > MAX_TASK_CHARS) return { ok: false, error: 'invalid_arguments', message: `message 过长（> ${MAX_TASK_CHARS} 字符）。` };
+  const child = agentTaskStore.getAgentTask(childTaskId);
+  if (!child) return { ok: false, error: 'not_found', message: '子 agent 不存在。' };
+  if (TERMINAL_TASK_STATUSES.has(child.status)) {
+    return { ok: false, error: 'agent_terminal', message: '子 agent 已结束；请改用「继续派」追加任务（留言将随续派注入）。', status: child.status };
+  }
+  try {
+    agentTaskStore.appendAgentTaskEvent(
+      childTaskId, nextEventSeq(childTaskId), 'parent_message',
+      { message: text, from: 'user_window', at: new Date().toISOString() },
+    );
+  } catch (e) {
+    return { ok: false, error: 'queue_failed', message: '留言入队失败: ' + (e && e.message ? e.message : String(e)) };
+  }
+  return {
+    ok: true,
+    queued: true,
+    note: '留言已入队（子 agent 事件流可见）。运行中即时注入需 loop 核心支持（登记候选）；'
+      + '当前该留言将在「继续派」续派该子 agent 时作为上下文注入。',
+  };
+}
+
+/**
+ * launchUserFollowup — 用户侧续派等价（BLOCK-65 P1-a）：agent 专属窗在子
+ * agent 终态后触发。任务组装语义与 followup_task 工具单源（前次摘要 + 队列
+ * 留言 + 新任务）；父链取原任务 params.parentTaskId（模型/权限继承链一致）。
+ */
+async function launchUserFollowup({ childTaskId, userId, task }) {
+  const taskText = String(task || '').trim();
+  if (!taskText) return { ok: false, error: 'invalid_arguments', message: 'task 不能为空：请给出追加的子任务描述。' };
+  if (taskText.length > MAX_TASK_CHARS) return { ok: false, error: 'invalid_arguments', message: `task 过长（${taskText.length} > ${MAX_TASK_CHARS} 字符）。` };
+  const child = agentTaskStore.getAgentTask(childTaskId);
+  if (!child) return { ok: false, error: 'not_found', message: '子 agent 不存在。' };
+  const parentTaskId = child.params && child.params.parentTaskId;
+  if (!parentTaskId) return { ok: false, error: 'no_parent', message: '该任务没有父派生链，无法续派。' };
+  if (!TERMINAL_TASK_STATUSES.has(child.status)) {
+    return { ok: false, error: 'agent_running', message: '子 agent 仍在运行；请先中断再续派。', status: child.status };
+  }
+  const parentTask = agentTaskStore.getAgentTask(parentTaskId);
+  if (!parentTask) return { ok: false, error: 'parent_gone', message: '父任务已不存在，无法延续派生链。' };
+  const parentParams = parentTask.params || {};
+  const summary = await buildTerminalSummary(child);
+
+  const queued = agentTaskStore.getAgentTaskEventsSince(child.taskId, 0, 1000000)
+    .filter((e) => e.eventType === 'parent_message')
+    .map((e) => {
+      try {
+        const raw = typeof e.payload === 'string' ? JSON.parse(e.payload || '{}') : (e.payload || {});
+        return String(raw.message || '').slice(0, 500);
+      } catch { return ''; }
+    })
+    .filter(Boolean);
+
+  const parts = [
+    `【续派任务】你此前完成了以下任务，现在基于前情继续：`,
+    `原任务：${summary.task}`,
+  ];
+  if (summary.assistantText) parts.push('前次产出摘要：\n' + summary.assistantText);
+  if (queued.length) {
+    parts.push('期间收到消息：\n' + queued.map((m) => '- ' + m).join('\n'));
+  }
+  parts.push(`请在此基础上继续新任务：${taskText}`);
+  const userContent = parts.join('\n\n').slice(0, MAX_TASK_CHARS * 2);
+
+  const model = resolveSpawnModelSettings({ explicitModel: undefined, parentParams });
+  if (model.error) return { ok: false, error: 'invalid_arguments', message: model.error };
+
+  const launched = launchSubAgent({
+    parentTaskId,
+    userId,
+    parentParams,
+    parentContext: parentParams.context || {},
+    userContent,
+    model,
+    spawnSource: 'user:followup',
+  });
+  if (launched.ok === false) return launched;
+  return {
+    ok: true,
+    agentId: launched.agentId,
+    followupOf: child.taskId,
+    status: 'running',
+    queuedMessagesInjected: queued.length,
+    model: launched.model || undefined,
+  };
+}
+
+/**
  * list_agents — 列出当前任务派生的全部子 agent（含终态）。
  */
 async function list_agents(args, ctx) {
@@ -511,6 +607,9 @@ module.exports = {
   followup_task,
   list_agents,
   wait_agent,
+  // BLOCK-65 P1-a：用户侧（HTTP）等价——agent 专属窗留言/续派，语义与工具版单源
+  queueUserMessage,
+  launchUserFollowup,
   // 测试钩子（不进入 registry）
   __test: { clampWaitTimeoutMs, truncateToTokenBudget, resolvePresetByModel },
 };

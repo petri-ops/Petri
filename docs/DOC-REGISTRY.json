@@ -18,7 +18,7 @@
    "id": "BLOCK-65-SUBAGENT-UX",
    "path": "docs/block-65-subagent-ux-plan.md",
    "kind": "work-package",
-   "status": "planned",
+   "status": "active",
    "canonical": true,
    "truthDomain": "block-65-subagent-ux",
    "entrypoint": "docs/README.md",

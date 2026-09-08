@@ -650,6 +650,76 @@ export async function cancelAgentTask(taskId: string): Promise<void> {
   }
 }
 
+// ── BLOCK-65 P1-a/P2-c — agent 专属窗交互 + 俯瞰面板 ─────────
+
+export interface AgentTaskMeta {
+  taskId: string;
+  status: string;
+  agentStatus: string | null;
+  taskText: string;
+  conversationId: string | null;
+  parentTaskId: string | null;
+  createdAt: string | number | null;
+  finishedAt: string | number | null;
+}
+
+export interface AgentTaskOverviewItem extends AgentTaskMeta {
+  spawnSource: string | null;
+  error: string | null;
+}
+
+/** GET /ai/agent/tasks — 用户最近子 agent（跨会话，俯瞰面板数据源） */
+export async function listAgentTasks(limit = 50): Promise<AgentTaskOverviewItem[]> {
+  const resp = await fetch(`${getApiPrefix()}/ai/agent/tasks?limit=${encodeURIComponent(String(limit))}`, {
+    headers: { ...getAuthHeader() },
+  });
+  const body = await resp.json().catch(() => null);
+  if (!resp.ok || body?.ok !== true) {
+    throw new Error(String(body?.message || body?.error || `HTTP ${resp.status}`));
+  }
+  return (body.tasks || []) as AgentTaskOverviewItem[];
+}
+
+/** GET /ai/agent/task/:id/meta — 专属窗标题（task 描述）+ 权威状态 */
+export async function fetchAgentTaskMeta(taskId: string): Promise<AgentTaskMeta> {
+  const resp = await fetch(`${getApiPrefix()}/ai/agent/task/${encodeURIComponent(taskId)}/meta`, {
+    headers: { ...getAuthHeader() },
+  });
+  const body = await resp.json().catch(() => null);
+  if (!resp.ok || body?.ok !== true) {
+    throw new Error(String(body?.message || body?.error || `HTTP ${resp.status}`));
+  }
+  return body as AgentTaskMeta;
+}
+
+/** POST /ai/agent/task/:id/message — 留言（队列语义：续派时注入） */
+export async function sendAgentTaskMessage(taskId: string, message: string): Promise<{ queued: boolean; note: string }> {
+  const resp = await fetch(`${getApiPrefix()}/ai/agent/task/${encodeURIComponent(taskId)}/message`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    body: JSON.stringify({ message }),
+  });
+  const body = await resp.json().catch(() => null);
+  if (!resp.ok || body?.ok !== true) {
+    throw new Error(String(body?.message || body?.error || `HTTP ${resp.status}`));
+  }
+  return { queued: body.queued === true, note: String(body.note || '留言已入队。') };
+}
+
+/** POST /ai/agent/task/:id/followup — 终态后续派（沿用父链/模型/权限） */
+export async function followupAgentTask(taskId: string, task: string): Promise<{ agentId: string; followupOf: string }> {
+  const resp = await fetch(`${getApiPrefix()}/ai/agent/task/${encodeURIComponent(taskId)}/followup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    body: JSON.stringify({ task }),
+  });
+  const body = await resp.json().catch(() => null);
+  if (!resp.ok || body?.ok !== true) {
+    throw new Error(String(body?.message || body?.error || `HTTP ${resp.status}`));
+  }
+  return { agentId: String(body.agentId), followupOf: String(body.followupOf || taskId) };
+}
+
 /** POST /ai/agent 提交，返回 taskId */
 async function submitAgentTask(opts: StreamChatOptions): Promise<string> {
   const { messages, context, conversationId, modelPresetId, modelName, kind, parentTaskId, signal } = opts;

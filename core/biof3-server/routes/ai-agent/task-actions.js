@@ -1,0 +1,114 @@
+'use strict';
+
+/**
+ * routes/ai-agent/task-actions.js — BLOCK-65 P1-a/P2-c 子域
+ *
+ * agent 专属窗（用户态）交互端点，语义与 agent-tools 单源：
+ *   GET  /api/ai/agent/tasks?limit=50      — 用户最近子 agent 任务列表（俯瞰面板）
+ *   GET  /api/ai/agent/task/:taskId/meta   — 单任务元信息（窗口标题 task 描述）
+ *   POST /api/ai/agent/task/:taskId/message  — 留言（队列语义，spawn-agent-tools.queueUserMessage）
+ *   POST /api/ai/agent/task/:taskId/followup — 续派（终态后，spawn-agent-tools.launchUserFollowup）
+ *
+ * 中断不在此处：复用既有 POST /api/ai/agent/task/:taskId/cancel（context.js，级联语义）。
+ */
+
+const agentTaskStore = require('../../agent-task-store');
+const { queueUserMessage, launchUserFollowup } = require('../../agent-tools/spawn-agent-tools');
+
+const STATUS_HTTP = {
+  invalid_arguments: 400,
+  not_found: 404,
+  no_parent: 409,
+  parent_gone: 409,
+  agent_terminal: 409,
+  agent_running: 409,
+  queue_failed: 500,
+};
+
+function fail(res, code, message, httpOverride) {
+  return res.status(httpOverride || STATUS_HTTP[code] || 400).json({ ok: false, error: code, message });
+}
+
+module.exports = {
+  register(app) {
+    // 俯瞰面板数据源：该用户最近子 agent 任务（跨会话，只读 tasks 投影）
+    app.get('/api/ai/agent/tasks', async (req, res) => {
+      const userId = req.user && req.user.id;
+      if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized', message: '未登录' });
+      try {
+        const limit = Number(req.query.limit) || 50;
+        const tasks = agentTaskStore.listRecentSubAgentTasks(userId, limit).map((t) => ({
+          taskId: t.taskId,
+          status: t.status,
+          agentStatus: t.agentStatus,
+          createdAt: t.createdAt,
+          finishedAt: t.finishedAt,
+          error: t.error,
+          conversationId: (t.params && t.params.conversationId) || null,
+          parentTaskId: (t.params && t.params.parentTaskId) || null,
+          spawnSource: (t.params && t.params.spawnSource) || null,
+          taskText: String((t.params && t.params.messages && t.params.messages[0] && t.params.messages[0].content) || '').slice(0, 200),
+        }));
+        return res.json({ ok: true, tasks });
+      } catch (e) {
+        return res.status(500).json({ ok: false, error: 'list_failed', message: e && e.message ? e.message : String(e) });
+      }
+    });
+
+    // 窗口标题数据源：单任务元信息
+    app.get('/api/ai/agent/task/:taskId/meta', async (req, res) => {
+      const userId = req.user && req.user.id;
+      if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized', message: '未登录' });
+      try {
+        const task = agentTaskStore.getAgentTask(req.params.taskId);
+        if (!task) return fail(res, 'not_found', '任务不存在');
+        if (task.userId && task.userId !== userId) return res.status(403).json({ ok: false, error: 'forbidden', message: '无权查看该任务' });
+        return res.json({
+          ok: true,
+          taskId: task.taskId,
+          status: task.status,
+          agentStatus: task.agentStatus,
+          taskText: String((task.params && task.params.messages && task.params.messages[0] && task.params.messages[0].content) || '').slice(0, 200),
+          conversationId: (task.params && task.params.conversationId) || null,
+          parentTaskId: (task.params && task.params.parentTaskId) || null,
+          createdAt: task.createdAt,
+          finishedAt: task.finishedAt,
+        });
+      } catch (e) {
+        return res.status(500).json({ ok: false, error: 'meta_failed', message: e && e.message ? e.message : String(e) });
+      }
+    });
+
+    // 留言（队列语义——运行中不即时注入，续派时作为上下文注入）
+    app.post('/api/ai/agent/task/:taskId/message', async (req, res) => {
+      const userId = req.user && req.user.id;
+      if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized', message: '未登录' });
+      try {
+        const task = agentTaskStore.getAgentTask(req.params.taskId);
+        if (!task) return fail(res, 'not_found', '任务不存在');
+        if (task.userId && task.userId !== userId) return res.status(403).json({ ok: false, error: 'forbidden', message: '无权向该任务留言' });
+        const result = queueUserMessage({ childTaskId: task.taskId, message: req.body && req.body.message });
+        if (!result.ok) return fail(res, result.error, result.message);
+        return res.json(result);
+      } catch (e) {
+        return res.status(500).json({ ok: false, error: 'message_failed', message: e && e.message ? e.message : String(e) });
+      }
+    });
+
+    // 续派（终态后；沿用原任务父链/模型/权限继承）
+    app.post('/api/ai/agent/task/:taskId/followup', async (req, res) => {
+      const userId = req.user && req.user.id;
+      if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized', message: '未登录' });
+      try {
+        const task = agentTaskStore.getAgentTask(req.params.taskId);
+        if (!task) return fail(res, 'not_found', '任务不存在');
+        if (task.userId && task.userId !== userId) return res.status(403).json({ ok: false, error: 'forbidden', message: '无权续派该任务' });
+        const result = await launchUserFollowup({ childTaskId: task.taskId, userId, task: req.body && req.body.task });
+        if (!result.ok) return fail(res, result.error, result.message);
+        return res.json(result);
+      } catch (e) {
+        return res.status(500).json({ ok: false, error: 'followup_failed', message: e && e.message ? e.message : String(e) });
+      }
+    });
+  },
+};

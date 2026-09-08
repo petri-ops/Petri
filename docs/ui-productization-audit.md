@@ -2850,3 +2850,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：定向 vitest 9/9（project-store 3 含 mapper 断链回归 + commandCenterModel 3 + ResultsLibrary 远程徽章 3）；tsc --noEmit 0；实机 `acceptance/block-64/`（ui313-command-center.png + block64-verify.cjs——7 个 fixture 作业：快捷键开窗 / 活跃置顶 / 项目标注 / 远程徽章 / 失败摘要 / run.log 日志含中文 marker / 取消两步确认 → cancelled 灰态，9 断言全 PASS，证据已清理 fixture）。
 
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收完成，9/9 判据全 PASS）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-314: BLOCK-65 增量 — 子智能体专属窗交互补全 + spawn 自动唤起 + SubAgentsBar 升格俯瞰 (2026-09-09 verified)
+
+**来源**：BLOCK-65-SUBAGENT-UX（每 agent 专属界面；P1-b 三选一用户裁决=① 自动弹出专属窗；P2-c 二选一用户裁决=② SubAgentsBar 升格俯瞰面板；P2-d 形态对照评估结论=维持独立窗，见 plan §6）。
+
+**改动**：① **P1-a 专属窗交互补全**（此前只读投影，后端二期三件套全部闲置）——后端新增用户态子域 `routes/ai-agent/task-actions.js`（GET /api/ai/agent/tasks 俯瞰列表 + GET /api/ai/agent/task/:id/meta 窗口标题 + POST message/followup），message/followup 语义与 send_message/followup_task 工具**单源**（spawn-agent-tools 导出 queueUserMessage/launchUserFollowup，复用 launchSubAgent/buildTerminalSummary）；agent-task-store 新增 `listRecentSubAgentTasks`（用户维度子 agent 列表）。AgentWindowPage：中断（两步确认→既有 cancel REST，级联语义）+ 留言 composer（队列语义诚实标注「运行中不即时注入，续派时作为上下文注入」）+ 终态「继续派」composer（沿用父链/模型/权限，成功后自动弹新专属窗）。② **P1-b① 自动唤起**——SubAgentsBar 对新出现运行中子 agent 自动 popOut 专属窗（模块级 Set 每 task 仅一次；4 窗预算超限 popOut 自动降格最旧窗，autoDemoted 返回值驱动 bar 内诚实提示）；窗口标题带 task 描述前缀（meta 接口），badge 改「Agent 专属窗 · 实时投影 + 交互」。③ **P2-c② 俯瞰面板**——SubAgentsBar 升格「全部俯瞰」展开区：跨会话只读 /api/ai/agent/tasks 投影（5s 轮询，活跃置顶，行含会话短 id 标注，点击弹对应专属窗）。0 新依赖。
+
+**门禁**：SubAgentsBar + conversationRunStore 定向 vitest 43/43；tsc --noEmit 0；实机 `acceptance/block-65/`（ui314-live.json + 3 截图——真实模型 spawn 链路：spawn 后专属窗无手动自动弹出 / 标题「Agent · 请从 1 开始逐个列出 30 的每个数的平方…」/ 运行中留言入队含队列语义 note / 终态继续派成功且新子 agent 专属窗自动弹出 / 全部俯瞰 24 行跨会话含 @conv 标注，6 断言全 PASS）。
+
+**状态**: verified（2026-09-09 dev Electron 真实模型 spawn 链路 CDP 验收完成）。G0 开发期常态 · 不外推 packaged / Provider / GA。

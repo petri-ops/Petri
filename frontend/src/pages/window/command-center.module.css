@@ -199,6 +199,43 @@
   font-weight: 600;
 }
 
+/* ── BLOCK-65 P1-a：agent 专属窗交互区 ─────────────── */
+
+.actionBar {
+  display: flex;
+  gap: 6px;
+}
+
+.actionBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.composer {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.composerInput {
+  flex: 1;
+  resize: vertical;
+  min-height: 44px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--gewu-border-color, #323848);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-primary, #e6e9f2);
+  font-size: 12px;
+  line-height: 1.5;
+  font-family: inherit;
+}
+
+.composerInput:focus {
+  outline: none;
+  border-color: var(--gewu-accent, #5a9cff);
+}
+
 .tileLog {
   margin: 0;
   padding: 8px;
