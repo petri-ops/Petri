@@ -1,6 +1,6 @@
 # BLOCK-64 — 指挥中心使用体验全面评估（问题清单 + 优化方向）
 
-> 状态：`planned`（2026-09-08 用户裁决立项「立新的 BLOCK 全面评估指挥中心的使用体验」；评估（P0）已随立项完成并落盘本文档 §2–§4；实施阶段待队列裁决后启动（UI-305 已收口））
+> 状态：`completed`（2026-09-09 用户裁决启动，同日整包收口：P1-a + P1-b + P2-d 全落地，实机 9 断言全 PASS（`acceptance/block-64/`），UI-313 verified，提交 `abc19b62`。P2-c 归 BLOCK-65；P2-d ⑧「三面统一叙事」评估结论 = 不合并（§7 收口记录）。G0 开发期常态 · 不外推 packaged/Provider/GA）
 > 立项日期：2026-09-08（用户裁决「立新的 BLOCK」）
 > truthDomain: `block-64-command-center-ux`
 > 来源：用户问题——指挥中心「是否按项目绑定 / 是否冗余 / 是否使用便捷」等，要求问题查找与优化方向
@@ -66,3 +66,10 @@
 ## 7. 进度记录
 
 - 2026-09-08 **planned 立项 + 评估交付**：用户裁决「立新的 BLOCK 全面评估」→ 全量源码走读 + 11 作业面冗余盘点完成（§2–§3），P0 真 bug 1 项（mapToolJob 断链）+ P1 四项 + P2 三项入清单，优化方向四档（§4）。排队待用户裁决勾选实施范围（UI-305 已收口）。
+- 2026-09-09 **整包收口 completed（P1-a + P1-b + P2-d，提交 `abc19b62`）**：
+  - **P1-a**：① mapToolJob 补 `execution_target_id` 映射 + mapper 级回归（真实 listAllJobs 路径，禁手工注入）——远程徽章复活；② 瓦片项目名标注（listProjects 缓存，降级裸 id）；③ 失败瓦片 error 单行摘要（title 全文）。
+  - **P1-b**：④ 活跃置顶（commandCenterModel.orderJobsForWall：running/pending 分区置顶、区内降序；副标题活跃 X · 历史 Y）；⑤ 瓦片行动作——查日志（新端点 `GET /api/tools/log/:id`：remote-runner.log 实时镜像优先 / run.log finalize 兜底 / 32KB 尾部 / 无文件诚实 no_log_yet；前端 1s 轮询）+ 取消（两步确认 3s 自动解除 → POST /api/tools/cancel）；连带把 `cancelled` 提为一等 ToolJob 状态（此前 mapper 塌缩成 pending，取消后作业会永远以「排队中」挂墙——双端标签 + 灰点样式修正）。
+  - **P2-d**：⑦ Ctrl/Cmd+Shift+C 快捷键（App 根注入，单例 popOut=已开即聚焦）+ 空态引导文案；⑧ 「运行中」三面统一叙事**评估结论：不合并**——tool_jobs（指挥中心/结果库，作业真相）/ task_events（SubAgentsBar，会话内 agent）/ 进程表（ToolActivityDock，pty 进程）三者真相域不同、生命周期不同，强合并需造跨域投影层（第二真相风险），指挥中心已提供作业维度的全局俯瞰入口，维持三分散入口 + 各自语义。
+  - **门禁**：定向 vitest 9/9 + 受影响面（window/project-store/workspace-panels）38/38 + tsc 0 + ui:audit:check PASS；实机 `acceptance/block-64/`（7 fixture 作业：快捷键开窗 / 活跃置顶 / 项目标注 / 远程徽章 / 失败摘要 / run.log 中文 marker / 取消两步确认 → cancelled，9 断言全 PASS + 截图）。
+  - **实机教训**：CBP 输入管线保留 Ctrl+Shift+C（Chromium devtools inspect 同款组合），CDP Input.dispatchKeyEvent 注入被吞——验收改用页面级真实 KeyboardEvent 注入（与 BLOCK-63 宿主拦截同类证据等级）；真实用户键序不受影响。
+  - **遗留登记**：cancel 对无进程归属的 running 作业诚实 409（execution_owner_unavailable，防止误标取消）；agent 维度俯瞰空白按计划移交 BLOCK-65。

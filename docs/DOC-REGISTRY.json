@@ -39,7 +39,7 @@
    "id": "BLOCK-64-COMMAND-CENTER-UX",
    "path": "docs/block-64-command-center-ux-audit-plan.md",
    "kind": "work-package",
-   "status": "planned",
+   "status": "completed",
    "canonical": true,
    "truthDomain": "block-64-command-center-ux",
    "entrypoint": "docs/README.md",
@@ -51,10 +51,14 @@
     "window-system",
     "G0"
    ],
-   "notes": "指挥中心使用体验全面评估+优化。2026-09-08 用户裁决立项「立新的 BLOCK 全面评估」：评估对象=BLOCK-59 P3 多任务俯瞰单例窗（CommandCenterPage，最近 12 tool_jobs 瓦片 5s 轮询只读投影）。评估已随立项交付（plan §2-§3）：跨项目绑定合理但瓦片无项目归属标注；11 个作业面分工基本清晰不冗余，真空白=agent 维度俯瞰（plan 原意未兑现，子 agent 只有会话内内存态 SubAgentsBar）与「运行中」三面（tool_jobs/agent/后台进程）互不相通；便捷性四硬伤。P0 真 bug：mapToolJob 丢弃 execution_target_id → 指挥中心与结果库远程徽章（BLOCK-57 交付）生产永不渲染，测试手工注入掩盖断链。优化四档：P1-a 断链修复+项目标注+error 摘要 / P1-b 活跃作业置顶+日志+取消 / P2-c agent 瓦片接入 / P2-d 快捷键+三面统一叙事评估。零第二真相红线不破；0 新依赖。排队等 UI-305 收口后用户裁决勾选实施范围。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+   "notes": "指挥中心使用体验全面评估+优化。2026-09-08 用户裁决立项「立新的 BLOCK 全面评估」：评估对象=BLOCK-59 P3 多任务俯瞰单例窗（CommandCenterPage，最近 12 tool_jobs 瓦片 5s 轮询只读投影）。评估已随立项交付（plan §2-§3）：跨项目绑定合理但瓦片无项目归属标注；11 个作业面分工基本清晰不冗余，真空白=agent 维度俯瞰（plan …… 2026-09-09 整包收口 completed：P1-a（mapToolJob 断链修复+项目标注+error 摘要）+ P1-b（活跃置顶+/api/tools/log 查日志+取消两步确认+cancelled 一等状态）+ P2-d（Ctrl/Cmd+Shift+C 快捷键+空态引导；三面统一叙事评估=不合并）。UI-313 verified，实机 9 断言全 PASS（acceptance/block-64/），提交 abc19b62。G0 开发期常态 · 不外推 packaged/Provider/GA。",
    "registeredAt": "2026-09-08",
    "archivePolicy": "archive_when_superseded",
-   "phase": "QUEUED"
+   "phase": "QUEUED",
+   "completedAt": "2026-09-09",
+   "linkedCommits": [
+    "abc19b62"
+   ]
   },
   {
    "id": "BLOCK-66-RUNTIME-DECUPLE",
