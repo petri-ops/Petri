@@ -34,7 +34,10 @@ function setupAgentWorkbenchFlagsIpc({ getMainWindow, getAgentWorkbenchFlags, pu
     }
     const agentWorkbenchFlags = getAgentWorkbenchFlags();
     agentWorkbenchFlags.extraRenderers = value === true;
-    publishAgentWorkbenchFlags();
+    // publishAgentWorkbenchFlags 的 ctx 形参是 { getMainWindow, getAgentWorkbenchFlags }；
+    // 此前裸调导致 flag 一落 IPC 就抛 "Cannot destructure property 'getMainWindow'"
+    // —— 设置页开关被 bridge.set 的 rejection 永久回滚，extraRenderers 无法开启。
+    publishAgentWorkbenchFlags({ getMainWindow, getAgentWorkbenchFlags });
     return { ok: true, extraRenderers: agentWorkbenchFlags.extraRenderers };
   });
 }
