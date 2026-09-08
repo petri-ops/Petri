@@ -1,0 +1,104 @@
+{
+  "startedAt": "2026-09-08T04:07:00.044Z",
+  "marker": "BLOCK63-P4 格物验证 1788840420044",
+  "assertions": [
+    {
+      "name": "P4-0 computer_authorize：agent 链路探测（platform=windows / trusted）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"platform\":\"windows\",\"trusted\":true,\"hostElevated\":true,\"hints\":[],\"elevationBoundary\":\"none\",\"verbs\":[\"probe\",\"snapshot\",\"click\",\"type\",\"press\",\"scroll\",\"screenshot\",\"wait\",\"close\"]}"
+    },
+    {
+      "name": "P4-1 目标窗口创建且 hwnd 隔离（不在预存集合）",
+      "pass": true,
+      "detail": "ourHwnd=3016170 pre=[986656]"
+    },
+    {
+      "name": "P4-2 snapshot 读状态（agent 链路语义树 + Document 在位）",
+      "pass": true,
+      "detail": "{\"count\":44,\"roles\":44}"
+    },
+    {
+      "name": "确认卡 job 建立（computer_click）",
+      "pass": true,
+      "detail": "{\"toolJobId\":\"tj_mts5efe6_s2f5\"}"
+    },
+    {
+      "name": "用户批准（模拟前端确认卡，computer_click）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P4-3 click 编辑区落焦（coordinate，确认门两段式）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"mode\":\"coordinate\",\"ref\":\"[e2]\",\"role\":\"Document\",\"name\":\"文本编辑器\",\"point\":{\"x\":979,\"y\":561}}"
+    },
+    {
+      "name": "确认卡 job 建立（computer_type）",
+      "pass": true,
+      "detail": "{\"toolJobId\":\"tj_mts5efi9_y39w\"}"
+    },
+    {
+      "name": "用户批准（模拟前端确认卡，computer_type）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P4-4 type 中文输入（ValuePattern，确认门两段式）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"typed\":29,\"ref\":\"[e2]\",\"mode\":\"value_pattern_setvalue\"}"
+    },
+    {
+      "name": "P4-5 验证：marker 出现在语义树 value",
+      "pass": true,
+      "detail": "{\"value\":\"BLOCK63-P4 格物验证 1788840420044\"}"
+    },
+    {
+      "name": "确认卡 job 建立（computer_press）",
+      "pass": true,
+      "detail": "{\"toolJobId\":\"tj_mts5eg08_zotl\"}"
+    },
+    {
+      "name": "用户批准（模拟前端确认卡，computer_press）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P4-6 press end（确认门两段式，mode 诚实上报）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"key\":\"end\",\"modifiers\":[],\"ref\":\"[e2]\",\"mode\":\"sendinput\"}"
+    },
+    {
+      "name": "P4-7 screenshot 产物落项目工作区（路径白名单）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"out\":\"D:\\\\1.WorkDir\\\\biof3-desktop\\\\computer-use\\\\p4-1788840422876.png\",\"bytes\":24888,\"mode\":\"printwindow_renderfullcontent\"}"
+    },
+    {
+      "name": "P4-8 截图产物为真实 PNG",
+      "pass": true,
+      "detail": "path=D:/1.WorkDir/biof3-desktop/computer-use/p4-1788840422876.png"
+    },
+    {
+      "name": "确认卡 job 建立（computer_click）",
+      "pass": true,
+      "detail": "{\"toolJobId\":\"tj_mts5ehau_jpgs\"}"
+    },
+    {
+      "name": "用户批准（模拟前端确认卡，computer_click）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P4-9 清理：WM_CLOSE hwnd 粒度（未保存提示点不保存 / 窗口留用户）",
+      "pass": true,
+      "detail": "目标窗口已关闭"
+    },
+    {
+      "name": "P4-10 用户既有记事本窗口存活（未关闭未污染）",
+      "pass": true,
+      "detail": "{\"preUser\":1,\"alive\":1,\"afterProcs\":1}"
+    }
+  ],
+  "finishedAt": "2026-09-08T04:07:05.712Z",
+  "allPass": true,
+  "note": "控制类确认卡的用户批准步在 DB 边界模拟（ackToolJob，与 ai-legacy approve REST 同款调用）；本机键盘注入被宿主拦截：press 走消息级回退（mode=message_post 如实上报），type 走 ValuePattern。"
+}

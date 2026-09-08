@@ -259,6 +259,9 @@ internal sealed class AutomationService : IDisposable
     {
         var outPath = p.Str("out");
         if (string.IsNullOrWhiteSpace(outPath)) throw new SidecarError("target_required", "params.out 必填（PNG 绝对路径，白名单由宿主执行）");
+        // GDI+ 落盘要求目录已存在（P4 实机实证：目录缺失即 internal_error）
+        var dir = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(outPath));
+        if (!string.IsNullOrEmpty(dir)) System.IO.Directory.CreateDirectory(dir);
         var hwnd = ResolveHwnd(p);
         var bytes = Capture.CaptureWindowToPng(hwnd, outPath);
         return new Dictionary<string, object?>
@@ -404,6 +407,16 @@ internal sealed class AutomationService : IDisposable
         var target = p.Sub("target");
         if (target.Count > 0)
         {
+            // hwnd 直投（P4 实机教训：Win11 打包记事本一个窗口含多个顶层 hwnd，
+            // frontmost 判据不可靠——hwnd 粒度是 Windows 侧唯一精确语义，P1 纪律升级的延伸）。
+            if (target.TryGetValue("hwnd", out var hv))
+            {
+                long h = hv is long l ? l : hv is int i ? i : hv is double d ? (long)d : -1;
+                if (h <= 0) throw new SidecarError("target_not_found", $"hwnd 非法：{h}");
+                var direct = new IntPtr(h);
+                if (!Native.IsWindow(direct)) throw new SidecarError("target_not_found", $"hwnd {h} 不是存活窗口");
+                return direct;
+            }
             if (Equals(target.GetValueOrDefault("frontmost"), true))
             {
                 var fg = Native.GetForegroundWindow();

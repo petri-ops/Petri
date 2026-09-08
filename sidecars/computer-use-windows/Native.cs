@@ -55,6 +55,9 @@ internal static partial class Native
     internal const uint WM_KEYDOWN = 0x0100;
     internal const uint WM_KEYUP = 0x0101;
 
+    [DllImport("user32.dll")]
+    internal static extern bool IsWindow(IntPtr hwnd);
+
     [StructLayout(LayoutKind.Sequential)]
     internal struct MOUSEINPUT
     {

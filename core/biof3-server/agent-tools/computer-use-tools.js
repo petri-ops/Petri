@@ -41,9 +41,12 @@ function okWrap(result) {
   return { ok: true, ...(result || {}) };
 }
 
-/** args.app：'frontmost'（默认）| bundleId 字符串 | 数字 pid。 */
+/** args.app：'frontmost'（默认）| bundleId 字符串 | 数字 pid；args.hwnd（Windows 直投，
+ * P4 实机教训：Win11 打包记事本一窗多顶层 hwnd，frontmost 不可靠）。 */
 function buildTarget(args) {
   const app = args && args.app;
+  const hwnd = args && args.hwnd;
+  if (Number.isInteger(hwnd) && hwnd > 0) return { hwnd };
   if (!app || app === 'frontmost') return { frontmost: true };
   const asPid = Number(app);
   if (Number.isInteger(asPid) && asPid > 0 && String(asPid) === String(app).trim()) {
