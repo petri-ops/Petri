@@ -2831,7 +2831,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-312: BLOCK-66 增量 — R 运行时硬门摘除：首页全屏引导页改非阻塞引导条 (2026-09-08 in_progress)
+## UI-312: BLOCK-66 增量 — R 运行时硬门摘除：首页全屏引导页改非阻塞引导条 (2026-09-08 verified)
 
 **来源**：BLOCK-66-RUNTIME-DECUPLE（R 硬门摘除，biof3-server 无 R 可用）P2 前端非阻塞化——用户反馈「软件打开需要直接安装 python 和 r 的基础包，这个有些重了」。
 
@@ -2839,4 +2839,4 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：home vitest 4/4（UI-141 门测试重写到新契约：R 缺失 → 首页正常渲染 + 引导条 + 商店 overlay + 无全屏门）；tsc 非 TS2550 0 错误（12 处 TS2550 为 HEAD 存量 lib 问题，与本条无关）；backend-health 定向 9 场景 + tools-executor preflight 单测；实机 `acceptance/block-66/p3-live.json`（A1 无 R 后端启动 health 200 / B1-B2 preflight 商店指引 / C1 vite；GUI 阶段 agent 会话阻塞已登记 guiPhase 手动验收命令）；docs:check / docs:reconcile。
 
-**状态**: in_progress（dev Electron 实机过目后转 verified；手动验收命令见 `acceptance/block-66/p3-live.json` guiPhase.manual）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**状态**: verified（2026-09-08 dev Electron 实机 CDP 验收完成：R 缺失态首页正常渲染工作台 + 顶部非阻塞引导条「R 运行时未安装，依赖 R 的分析无法运行。 去插件商店安装」+ 无全屏「先安装分析运行时」硬门；R 已装态无门无条；biof3-server 无 R 照常 health 200。GUI agent 会话启动问题实为 Node 22 ABI 137 错配，切 Node 24 后 GUI 正常拉起）。G0 开发期常态 · 不外推 packaged / Provider / GA。

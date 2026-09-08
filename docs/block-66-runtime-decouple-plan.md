@@ -1,6 +1,6 @@
 # BLOCK-66 — 运行时解耦：R 硬门摘除，biof3-server 无 R 可用
 
-> 状态：`active`（2026-09-08 P0–P3 完成：P0 摸底/设计确认（B 档用户拍板）→ P1 摘门 + 语义拆分 → P2 前端非阻塞化（UI-312）→ P3 实机（后端两态 + preflight allPass；**GUI 目视验收因 agent 会话无法启动 GUI Electron 留手动验收**，命令见 `acceptance/block-66/p3-live.json` guiPhase.manual；用户实机核对后转 completed）。G0 开发期常态 · 不外推 packaged/Provider/GA）
+> 状态：`active`（2026-09-08 P0–P3 完成：P0 摸底/设计确认（B 档用户拍板）→ P1 摘门 + 语义拆分 → P2 前端非阻塞化（UI-312 verified）→ P3 实机（后端两态 + preflight allPass；**GUI 目视验收已完成**——dev Electron 切 Node 24（ABI 137）后正常拉起，CDP 实测 R 缺失态：首页渲染工作台 + 非阻塞引导条「R 运行时未安装…去插件商店安装」+ 无全屏门；R 已装态无门无条；biof3-server 无 R 照常 health 200）。G0 开发期常态 · 不外推 packaged/Provider/GA）
 > 立项日期：2026-09-08（用户裁决「新开一个 BLOCK」）
 > truthDomain: `block-66-runtime-decouple`
 > 来源：用户反馈「软件打开需要直接安装 python 和 r 的基础包，这个有些重了」「作为一个通用的 agent 不做生物信息任务的情况下是否是必要的」→ 本会话源码评估确认 R 硬门为历史遗留 → 用户裁决立项
