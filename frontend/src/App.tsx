@@ -14,6 +14,7 @@ import { WorkspacePanelsProvider, useWorkspacePanelsContext } from '@/components
 import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
+import { getBridge } from '@/lib/desktopBridge';
 import { CommandPalette, useCommandPalette } from '@/components/copilot/CommandPalette';
 // BLOCK-42 — pending-scroll 全局 Provider（见 AppShell 内注释）
 import { PendingScrollProvider } from '@/lib/pendingScrollContext';
@@ -146,6 +147,20 @@ export default function App(): React.ReactElement {
     document.body.style.paddingLeft = '0';
     document.body.style.boxSizing = 'border-box';
   }, []);
+
+  // BLOCK-64 P2-d — 指挥中心快捷键入口（Ctrl/Cmd+Shift+C）。仅主窗生效；
+  // popOut 语义 = 单例窗已开即聚焦（同内容禁双开契约），重复按无害。
+  useEffect(() => {
+    if (isWindowSurface) return undefined;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || !e.shiftKey) return;
+      if (e.key.toLowerCase() !== 'c') return;
+      e.preventDefault();
+      void getBridge('windowManager')?.popOut('command-center');
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isWindowSurface]);
 
   // BLOCK-59 P1 — 独立窗（弹出结果窗/终端窗/指挥中心）加载同一 SPA 的
   // /window/* 路由：只挂 WindowShell 级 chrome，不挂主窗 Provider 树

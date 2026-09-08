@@ -9,6 +9,7 @@ const STATUS_LABELS: Record<ToolJob['status'], string> = {
   running: '运行中',
   done: '已完成',
   failed: '失败',
+  cancelled: '已取消',
 };
 
 function jobTitle(job: ToolJob): string {

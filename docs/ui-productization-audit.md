@@ -2840,3 +2840,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：home vitest 4/4（UI-141 门测试重写到新契约：R 缺失 → 首页正常渲染 + 引导条 + 商店 overlay + 无全屏门）；tsc 非 TS2550 0 错误（12 处 TS2550 为 HEAD 存量 lib 问题，与本条无关）；backend-health 定向 9 场景 + tools-executor preflight 单测；实机 `acceptance/block-66/p3-live.json`（A1 无 R 后端启动 health 200 / B1-B2 preflight 商店指引 / C1 vite；GUI 阶段 agent 会话阻塞已登记 guiPhase 手动验收命令）；docs:check / docs:reconcile。
 
 **状态**: verified（2026-09-08 dev Electron 实机 CDP 验收完成：R 缺失态首页正常渲染工作台 + 顶部非阻塞引导条「R 运行时未安装，依赖 R 的分析无法运行。 去插件商店安装」+ 无全屏「先安装分析运行时」硬门；R 已装态无门无条；biof3-server 无 R 照常 health 200。GUI agent 会话启动问题实为 Node 22 ABI 137 错配，切 Node 24 后 GUI 正常拉起）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-313: BLOCK-64 增量 — 指挥中心使用体验增强：活跃置顶 + 项目标注 + 日志/取消行动作 + 远程徽章复活 (2026-09-09 verified)
+
+**来源**：BLOCK-64-COMMAND-CENTER-UX（指挥中心使用体验全面评估，plan §3 问题清单 #1–#5/#7 + §4 P1-a/P1-b/P2-d；P2-c agent 俯瞰已移交 BLOCK-65）。
+
+**改动**：① **P0 真 bug 修复**——`project-store.ts` `mapToolJob` 补 `execution_target_id` 映射（后端 history SELECT 显式返回、类型已声明、mapper 漏映射 → 指挥中心与结果库「远程」徽章生产永不渲染；新增 mapper 级回归测试走真实 `listAllJobs` 路径，禁止手工注入 ToolJob）；② 活跃置顶——`commandCenterModel.ts` `orderJobsForWall`（running/pending 分区置顶、区内 created_at 降序，历史不再把活跃作业挤出 12 瓦片墙），副标题改「活跃 X · 历史 Y」；③ 瓦片项目归属标注（project_id → 项目名，`listProjects` 缓存，失败降级裸 id）+ 失败瓦片 `job.error` 单行摘要（title 悬停全文）；④ running/pending 瓦片行动作——「查日志」（新增后端只读端点 `GET /api/tools/log/:id`：remote-runner.log 实时镜像优先、run.log finalize 汇总兜底、32KB 尾部截断、无文件诚实返回 no_log_yet；前端展开区 1s 轮询）+ 「取消」（两步确认 3s 自动解除 → `POST /api/tools/cancel`）；⑤ `cancelled` 提为一等 ToolJob 状态（此前 mapper 塌缩成 pending——取消后的作业会永远以「排队中」活跃态挂墙；补类型 union + 双端标签 + 灰点样式）；⑥ P2-d 快捷键 Ctrl/Cmd+Shift+C 开指挥中心（App 根注入，单例 popOut 语义=已开即聚焦）+ 空态引导文案。
+
+**门禁**：定向 vitest 9/9（project-store 3 含 mapper 断链回归 + commandCenterModel 3 + ResultsLibrary 远程徽章 3）；tsc --noEmit 0；实机 `acceptance/block-64/`（ui313-command-center.png + block64-verify.cjs——7 个 fixture 作业：快捷键开窗 / 活跃置顶 / 项目标注 / 远程徽章 / 失败摘要 / run.log 日志含中文 marker / 取消两步确认 → cancelled 灰态，9 断言全 PASS，证据已清理 fixture）。
+
+**状态**: verified（2026-09-09 dev Electron 实机 CDP 验收完成，9/9 判据全 PASS）。G0 开发期常态 · 不外推 packaged / Provider / GA。
