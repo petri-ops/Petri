@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-09（**UI-LEDGER-CLOSEOUT 整包收口 completed**：台账 in_progress 清零——9 项 + 隐藏拼行 UI-184 实证裁决（verified 8 / cancelled 2）。随包修复 3 项真缺陷 + dev 数据根三分裂（deepseek-chat 重置的根因）。**BLOCK-66 同日回写 completed**。**当前无 active 工作包**；排队候选 BLOCK-64 / BLOCK-65 待用户裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-09（**UI-LEDGER-CLOSEOUT 整包收口 completed**：台账 in_progress 清零——9 项 + 隐藏拼行 UI-184 实证裁决（verified 8 / cancelled 2）。随包修复 3 项真缺陷 + dev 数据根三分裂（deepseek-chat 重置的根因）。**BLOCK-66 同日回写 completed**。**同日 BLOCK-67-SSH-REMOTE-PROJECT 立项**（planned 排队：SSH 远程项目完整形态——项目本体在远程服务器，文件树/对话/终端/审阅体感与本地一致；架构草案+八项设计裁决随立项交付，见 `docs/block-67-ssh-remote-project-plan.md`）。**当前无 active 工作包**；排队候选 BLOCK-64 / BLOCK-65 / BLOCK-67 待用户裁决启动顺序。同日文档漂移修正：registry 三条 planned→completed（BLOCK-55/BLOCK-59/UI-305）+ roadmap BLOCK-60 回写 completed。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## Session Snapshot
 
