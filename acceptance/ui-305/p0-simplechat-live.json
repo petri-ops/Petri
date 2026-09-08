@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-09-07T17:45:08.344Z",
+  "refactor": "UI-305 P0 — SimpleChat 尾部 6 内联组件外迁 + useSummaryRetry/useModelAccessMenus/useConversationResume 抽取，零行为变化",
+  "probe": {
+    "url": "/project/p_mtrawlau_7rly",
+    "rootChildren": 1,
+    "hasSimpleChatShell": true,
+    "hasComposerTextarea": true,
+    "hasMessageList": true,
+    "bodyHead": "工作台\n搜索\n插件\nSkills\n项目\nbiof3-desktop\n新对话\n项目-09-02-16:11\n设置\nbiof3-desktop\n新对话\n\n梳理一下项目内容\n\n本轮 Agent 请求未完成；上游模型响应异常，请稍后重试。\n\n复制\n重新生成\n创建分支\n09-07 21:53\n\n梳理一下项目内容\n\n已完成 19 "
+  },
+  "pageErrors": [],
+  "checks": [
+    {
+      "name": "route-stable",
+      "pass": true,
+      "detail": "/project/p_mtrawlau_7rly"
+    },
+    {
+      "name": "simplechat-shell-mounted",
+      "pass": true,
+      "detail": "outer=true root=1"
+    },
+    {
+      "name": "composer-textarea-present",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "message-list-present",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "no-render-exceptions",
+      "pass": true,
+      "detail": "clean"
+    }
+  ],
+  "allPass": true
+}

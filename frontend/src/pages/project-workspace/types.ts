@@ -14,3 +14,21 @@ export interface ActiveWorkspaceFile {
   size?: number;
   workspaceDir?: string; // 项目根目录绝对路径；BLOCK-19 用于 workspace.writeTextFile 安全写盘
 }
+
+// UI-305 P1 — 文件树条目（原 project-workspace.tsx 内联声明，FileTreeList /
+// FileTreeItem / RightFileTree 共享）。
+export interface FileEntry {
+  name: string;
+  type: 'file' | 'dir';
+  size?: number;
+  modifiedAt?: number;
+}
+
+// UI-305 P1 — 文件树条目（原 project-workspace.tsx 内联声明，FileTreeList /
+// FileTreeItem / RightFileTree 共享）。
+export interface FileEntry {
+  name: string;
+  type: 'file' | 'dir';
+  size?: number;
+  modifiedAt?: number;
+}

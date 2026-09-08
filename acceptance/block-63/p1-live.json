@@ -1,0 +1,37 @@
+{
+  "generatedAt": "2026-09-07T23:55:47.621Z",
+  "sidecar": "sidecars/computer-use-windows（C#/.NET 8 + FlaUI 5.0 UIA3，单文件自包含发布）",
+  "checks": [
+    {
+      "name": "A1 probe",
+      "pass": true,
+      "detail": "{\"platform\":\"windows\",\"trusted\":true,\"hostElevated\":true,\"hints\":[],\"elevationBoundary\":\"none\",\"verbs\":[\"probe\",\"snapsho"
+    },
+    {
+      "name": "A2 notepad snapshot",
+      "pass": true,
+      "detail": "count=69 target=\"total_proteome [2].tsv - Notepad\" roles=Window,Pane,Text,Button,Document,Tab,List,TabItem editor=Document"
+    },
+    {
+      "name": "A3 notepad click",
+      "pass": true,
+      "detail": "{\"mode\":\"coordinate\",\"ref\":\"[e11]\",\"role\":\"Document\",\"name\":\"文本编辑器\",\"point\":{\"x\":1039,\"y\":614}}"
+    },
+    {
+      "name": "A4 focusedRole",
+      "pass": true,
+      "detail": "focusedRole=Document"
+    },
+    {
+      "name": "A5 dev Electron UIA tree",
+      "pass": true,
+      "detail": "elementCount=69（Chromium UIA 客户端连接即暴露；深度优化留 P4）"
+    },
+    {
+      "name": "A6 no internal_error",
+      "pass": true,
+      "detail": "clean"
+    }
+  ],
+  "allPass": true
+}

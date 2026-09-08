@@ -242,3 +242,16 @@ export interface ErrorBannerProps {
   showDetails: boolean;
   technicalDetails?: string;
 }
+// UI-305 P0.1 — Harness 自动校正状态机（原 SimpleChat.tsx 内联声明，随
+// ApprovalCard/ApprovalRepairHint 外迁而移入共享 types）。
+import type {
+  HarnessParamRepair,
+  HarnessRunDiagnostics,
+} from '@/lib/harness-client';
+
+export type ApprovalRepairState =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'ready'; repair: HarnessParamRepair; diagnostics?: HarnessRunDiagnostics | null }
+  | { status: 'skipped'; message: string }
+  | { status: 'error'; message: string };

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- BLOCK-63 P1 — Windows 电脑控制 sidecar（C#/.NET 8 + FlaUI UIA3）。
+       stdio 行式 JSON 协议与 macOS sidecar（sidecars/computer-use/）逐字同构：
+       请求 {id, verb, params} → 响应 {id, ok, data|error}；单线程事件循环，EOF 退出。
+       发布：dotnet publish 单文件自包含到 bin/publish（产物不入 git）。 -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <AssemblyName>gewu-computer-use-windows</AssemblyName>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FlaUI.Core" Version="5.0.0" />
+    <PackageReference Include="FlaUI.UIA3" Version="5.0.0" />
+  </ItemGroup>
+
+</Project>

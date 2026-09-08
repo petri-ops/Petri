@@ -2157,6 +2157,40 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **BLOCK-47 增量修复（2026-09-03 verified）**：修复本条复测发现的纵向越界——[HoverPreviewPopover.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.tsx) 的 `useLayoutEffect` 仅在 anchor 变化时测高，内容（CodeMirrorDiffView 只读 diff）异步膨胀后 top 不重算，60vh 上限时底边越界约 145px。修法：根元素挂 `ResizeObserver`，内容盒高度变化后按同一钳制公式重算 top（保留首帧 useLayoutEffect 防闪跳），单组件 0 新依赖，UI-250/252 两消费方零改动；新增 [HoverPreviewPopover.test.tsx](../frontend/src/components/desktop/WorkingTreeReview/HoverPreviewPopover.test.tsx) 3 用例（首帧钳制 / 膨胀重钳 / 收缩回弹+断开）。门禁：组件+消费方 vitest 50/50、tsc 0、docs:check 187、ui:audit:check。**实机**（dev Electron，证据 `acceptance/block-47/`）：底行场景 src/main.js (+280/−72) 行落位 y≈965，内容膨胀达 60vh 上限 766px 后 RO 重钳 top 942.6→502.6，底边 1268.99 精确贴合 winH-8=1269（修复前按首帧 top 恒定会达 1724，越界 455px）；顶行场景与横向翻转（右缘行浮窗翻左侧）不回归。**状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-305: 增量 — 前端巨型组件拆分 P0–P3（SimpleChat / project-workspace / ReviewMode+ResultView 拆分清债）(2026-09-08 verified)
+
+**背景**：普查基线最大簇之一 `SimpleChat.tsx` 2343 行（文件头注释自证 hook order 敏感），plan `docs/ui-305-frontend-large-file-refactor-plan.md` P0 按风险从低到高拆分；**纯重构零行为变化**，整簇平移不重排。plan 前置门槛（`src/ipc/file-dialog.js` UI-304 遗留先行处置）已由 `770cfcf6` 满足。
+
+**P0.1 组件外迁**：尾部 6 内联渲染组件外迁 `SimpleChat/` 子目录——[LoopStatusPanel.tsx](../frontend/src/components/copilot/SimpleChat/LoopStatusPanel.tsx) / [AgentProgressList.tsx](../frontend/src/components/copilot/SimpleChat/AgentProgressList.tsx) / [ResultEditProgressList.tsx](../frontend/src/components/copilot/SimpleChat/ResultEditProgressList.tsx)（主文件保持再导出，`SimpleChat.progress.test.ts` 导入路径兼容）/ [ErrorBanner.tsx](../frontend/src/components/copilot/SimpleChat/ErrorBanner.tsx) / [ApprovalCard.tsx](../frontend/src/components/copilot/SimpleChat/ApprovalCard.tsx)（ApprovalRepairHint 仅被卡内使用随卡同文件）；连带 `ApprovalRepairState` 状态机类型移入 [types.ts](../frontend/src/components/copilot/SimpleChat/types.ts)（供主组件与 ApprovalCard 共享）。
+
+**P0.2–P0.4 hook 抽取**（均在依赖声明之后调用，簇内 hook 相对顺序保持原样）：[hooks/useSummaryRetry.ts](../frontend/src/components/copilot/SimpleChat/hooks/useSummaryRetry.ts)（5 useState + retrySummary + UX1H 冷却 tick）/ [hooks/useModelAccessMenus.ts](../frontend/src/components/copilot/SimpleChat/hooks/useModelAccessMenus.ts)（4 useState + planMode 派生 + prePlanAccessModeRef + accessModeLabel + modelGroups/selectedSupplierGroup/preferredPresetForSupplier + selectModel；UI-303 第四档活跃簇）/ [hooks/useConversationResume.ts](../frontend/src/components/copilot/SimpleChat/hooks/useConversationResume.ts)（消息重载 / 隐藏期完结对账 / T82 resumable 重连三 effect + 两 guard ref；reconciledRunRef 供既有 useChatStream 复用归本簇所有）。
+
+**P0.5 主渲染 JSX 拆分（Composer/MessageList）**：按 plan 单独裁决，本期 defer（P1 后视状态再议）。
+
+**门禁**：SimpleChat 定向 + 全 copilot 面向 + 消费面板 vitest 32 文件 266/266（含新 UI-311 回归与 P0 前既有 SimpleChat/progress/PlanApprovalCard 网）；tsc --noEmit 非 TS2550 0 错误（顺手修复 UI-311 遗留 TS2353 1 处，见 UI-311 更正）；实机见下；ui:audit:check / docs:check。
+
+**实机**（dev Electron CDP，证据 `acceptance/ui-305/p0-simplechat-live.json`）：整页重载拆分后模块图——`.sc-outer` 壳挂载、composer textarea 与消息列表在位、零渲染异常。**行数**：2343 → 1915（-428；P0 目标 ≤1000 的余量留给 P0.5 JSX 拆分裁决）。**P1（project-workspace.tsx 3464→1855 行，`160e0f2c`+`feed10da`）**：P1.1 尾部 11 内联组件外迁 `pages/project-workspace/`（FileTreeList/FileTreeItem/RightFileTree/WorkspaceFilePreview/BinaryPreviewCard/OfficePreviewPane/PreviewAssets/TextBlock/TerminalPanel/BrowserPanel/EmptyResult；FileEntry 移入子目录 types.ts、markdownSanitizeSchema 随唯一消费方迁入；导出类组件主文件再导出，导入路径零破坏；主文件未用导入精剪）。P1.2 左栏项目树展开 + 会话搜索状态簇抽入 [useProjectTreeState.ts](../frontend/src/pages/project-workspace/useProjectTreeState.ts)（expandedProjects/toggleProjectExpand/expandProject 三处相同内联写法收敛 + searchQuery/searchIndex/ensureSearch；创建/刷新等编排回调留主组件待 P3 裁决）。
+
+**P2（ReviewMode.tsx 1781→1429 + ResultView.tsx 1609→241）**：CommitDiffFileView/ExpandedCommitDetail/UntrackedFilePreview 外迁 `WorkingTreeReview/`，formatCommitDate 并入既有 reviewModeHelpers.ts，共享类型/常量（CommitSuccess/CommitFileViewMode/BlameData/FULLTEXT_LANGUAGE_BY_EXT）随迁至 helpers 导出；ResultArtifactShell（1369 行单组件）外迁 `workspace-panels/`，EmptyAnalysisResult 随壳迁移并保持主文件再导出。
+
+**P3（逐个裁决 + 基线复查）**：DesktopSettingsPanel 934 不动（设置页单一职责低 churn）；ResultStudioChangeSetPanel 717 不动（Result Studio experimental 面，待 RS 复核窗口一并处理）；ChartRenderer 699 不动（内聚渲染器）；home 669 不动（页面组装层）；逻辑层 conversationRunStore 1255 / copilotClient 1144 / useWorkingTreeReview 774 / useSkillStore 743 / data-profile 643 缓拆不动（契约面广、收益低于风险）；LeftPanel / TitleBar 已不再 >600（前置工作模块化后基线自然下降）；豁免清单照旧（inventory.ts / electron.d.ts / Icon.tsx）。ResultArtifactShell 1481 为单内聚组件，进一步拆分登记为后续候选。
+
+**门禁（全阶段累计）**：各阶段受影响定向 vitest 全绿（SimpleChat 28/28、copilot 全面向+消费面板 266/266、project-workspace 关联 48/48+22/22+18/18、WorkingTreeReview 46/46、workspace-panels+result-studio 194/194）；**收口前端全量 vitest 一次：911/914 通过，3 处失败经 stash 基线复核为 HEAD 存量**（ExperimentalFeaturesSection 2 处 Windows 路径 ENOENT + theme-token-contract 1 处 `--gewu-live-*` JS 注入 token 契约，均非本包引入，已登记 AUDIT-LOG 🟢）；ReviewMode 手风琴用例在全量并发下偶发时序 flake（单独复跑 4/4 + 复跑全量通过）；tsc 非 TS2550 0 错误；ui:audit:check / docs:check。
+
+**实机**（dev Electron CDP，逐阶段）：P0 SimpleChat 壳/composer/消息列表零异常（`acceptance/ui-305/p0-simplechat-live.json`）；P1 三栏布局+composer 挂载零异常（`p1-workspace-live.{json,png}`）；P2 `/project/:id/review` 主区挂载零异常（`p2-review-live.json`）。**状态**: verified（2026-09-08 dev Electron 实机；P0.5 主渲染 JSX 拆分按 plan 单独裁决 defer，ResultArtifactShell 进一步拆分登记候选）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-311: 修复 — ResultStudio `/project/:id/results` 整页崩溃（result:* IPC 信封契约漂移）(2026-09-08 verified)
+
+**发现**：BLOCK-62 P0 顺带发现并登记 AUDIT-LOG 🟢（2026-09-07）：dev Electron 直达 `/project/:id/results` 整页白屏，`useResultStore` 渲染期 `snapshot.results.map is not a function`，ResultStudioPage 无 error boundary → 整棵 React 树卸载；HEAD 既有、非 BLOCK-62 引入。用户裁决单独立项修复。
+
+**诊断**：三层契约漂移——① `src/ipc/result-handlers.js` 全部 handler 统一返回 fail-closed 信封 `{ ok, data?, error? }`；② `src/preload.js` result 命名空间 1:1 透传信封（镜像注释自证）；③ [electron.d.ts](../frontend/src/lib/electron.d.ts) result 命名空间却按裸值声明（`byProject → Promise<Array<Result>>` 等 11 方法），[resultBridge.ts](../frontend/src/lib/resultBridge.ts) 与 [useResultStore.ts](../frontend/src/hooks/useResultStore.ts) 按裸值消费 → `loadResults` 把信封对象写进 `ResultCache.results`，渲染期 `resultsById` 的 `.map` 即崩。Result Studio 长期 `experimental` 无实机验收，漂移从未暴露；连带 `ResultVersionHistory` 的 `version.list` 同样收到信封（`setVersions(versionList || [])` 拿到的是对象）。全仓仅此两个消费方，无第三方直接摸 `window.*.result`。
+
+**改动**（渲染层 2 文件 / 0 新增 IPC / 0 新依赖 / preload 与 handler 零改动）：① electron.d.ts result 命名空间如实声明信封——模块作用域新增 `ResultIpcEnvelope`/`ResultRecord`/`ResultSummaryRecord`/`ResultVersionRecord` 别名，11 方法签名收敛为 `Promise<ResultIpcEnvelope<…>>`（与 workingTreeReview 等命名空间的信封模式同型）；② [resultBridge.ts](../frontend/src/lib/resultBridge.ts) 作为 result 命名空间唯一拆包点——`unwrap`（ok=true → data，否则抛 handler 错误信息，store 捕获落 error 态）+ `unwrapNullable`（get 类 not found 按契约落 null），11 方法全部走拆包；消费方（useResultStore / ResultVersionHistory）零改动。
+
+**门禁**：新增回归 [resultBridge.test.ts](../frontend/src/lib/resultBridge.test.ts) 6 用例 + [useResultStore.test.tsx](../frontend/src/hooks/useResultStore.test.tsx) 3 用例（信封→裸数组 / 错误信封→error 态不崩 / null projectId 不发起加载）9/9；受影响面定向 vitest（result-studio 全套 + desktopBridge）21 文件 178/178；tsc --noEmit 存量 12 处 TS2550 `.at()` 于 HEAD 同败（与本包无关）。**更正（2026-09-08）**：本条发布时「新增 0 错误」表述不准确——resultBridge.test.ts 的 stub 桥接类型引入 1 处 TS2353（tsc 复核跑在测试文件创建前，漏检），已于 UI-305 P0 提交修复（stubBridge 参数放宽为 Record<string, unknown>）；ui:audit:check / docs:check。
+
+**实机**（dev Electron CDP，证据 `acceptance/ui-311/results-route-live.{json,png}`）：直达 `/project/p_mtrawlau_7rly/results` —— React root 正常挂载（children=2）、零页面异常、零 `map is not a function`、渲染真实空态页（「项目结果 / 0 个结果 / 暂无结果 / 在 Copilot 中运行分析后会显示在这里」）。**状态**: verified（2026-09-08 dev Electron 实机）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-310: 增量 — BLOCK-62 TitleBar 列体化（P0 地基 / P1a 片段提取 / P1b 列内 header / P2 跨树同步链退役）(2026-09-07 verified)
 
 **背景**：UI-309 三轮修复（live CSS 变量 / `:global` 标记 / 禁 transition）后确认根因是结构性——TitleBar 独立整宽横条用 grid 模拟三列宽、靠跨 DOM 树同步对齐分隔线。用户裁决启动 BLOCK-62 列体化重构（拖拽接缝 spike 手动实测 PASS 后）。本条覆盖 P0–P2 四阶段，plan `docs/block-62-titlebar-columnization-plan.md`。

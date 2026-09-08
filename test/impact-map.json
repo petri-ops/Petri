@@ -479,7 +479,9 @@
         "scripts/build-macos-*.mjs",
         "scripts/build-win-*.mjs",
         "scripts/verify-*.mjs",
-        "scripts/resume-*.mjs"
+        "scripts/resume-*.mjs",
+        "scripts/build-computer-use-sidecar.sh",
+        "scripts/dev/verify-toolchain.mjs"
       ],
       "tests": [
         "test/release-contract.test.mjs",
@@ -1115,13 +1117,30 @@
         "scripts/block48-*.cjs",
         "acceptance/block-55/**",
         "scripts/block55-*.cjs",
-        "scripts/block55-*.mjs"
+        "scripts/block55-*.mjs",
+        "scripts/ui310-*.cjs",
+        "scripts/ui305-*.cjs",
+        "scripts/block63-*.cjs"
       ],
       "tests": [
         "test/test-affected.test.mjs"
       ],
       "classifiesScripts": true,
       "scriptRole": "development-smoke"
+    },
+    {
+      "id": "block63-windows-computer-use-sidecar",
+      "note": "BLOCK-63 Windows 电脑控制：C#/FlaUI sidecar 源码与协议契约测试。改动即跑契约测试（前置构建：powershell sidecars/computer-use-windows/build.ps1）。 live 脚本 scripts/block63-*.cjs 归 script-block-live-drivers 分类。",
+      "patterns": [
+        "sidecars/computer-use-windows/ComputerUseWindows.csproj",
+        "sidecars/computer-use-windows/*.cs",
+        "sidecars/computer-use-windows/build.ps1",
+        "test/block63-sidecar-contract.test.mjs"
+      ],
+      "tests": [
+        "test/block63-sidecar-contract.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

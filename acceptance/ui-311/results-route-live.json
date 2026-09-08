@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-09-07T17:21:55.279Z",
+  "fix": "result:* IPC 信封契约漂移修复（electron.d.ts 如实声明 + resultBridge 单点拆包）",
+  "originalUrl": "http://localhost:3000/project/p_mtrawlau_7rly",
+  "navigatedTo": "http://localhost:3000/project/p_mtrawlau_7rly/results",
+  "probe": {
+    "url": "/project/p_mtrawlau_7rly/results",
+    "rootChildren": 2,
+    "bodyText": "Gewu\n项目结果\n0 个结果\n结果列表\n刷新\n\n暂无结果\n\n在 Copilot 中运行分析后会显示在这里\n\n选择一个结果以查看详情\n\n结果按项目共享，切换分支不会影响结果列表\n\n当前分支:\n无\n(对话隔离，结果共享)",
+    "hasMapError": false
+  },
+  "pageErrors": [],
+  "checks": [
+    {
+      "name": "route-reached",
+      "pass": true,
+      "detail": "/project/p_mtrawlau_7rly/results"
+    },
+    {
+      "name": "root-mounted",
+      "pass": true,
+      "detail": "root.children=2"
+    },
+    {
+      "name": "no-map-crash",
+      "pass": true,
+      "detail": "clean"
+    },
+    {
+      "name": "page-content",
+      "pass": true,
+      "detail": "\"Gewu\\n项目结果\\n0 个结果\\n结果列表\\n刷新\\n\\n暂无结果\\n\\n在 Copilot 中运行分析后会显示在这里\\n\\n选择一个结果以查看详情\\n\\n结果按项目共享，切换分支不会影响结果列表\\n\\n当前分支:\\n无\\n(对话隔离，结果共享)\""
+    }
+  ],
+  "allPass": true
+}
