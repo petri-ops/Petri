@@ -1021,7 +1021,14 @@
         "acceptance/block-46/**",
         "acceptance/block-47/**",
         "acceptance/block-50/**",
-        "acceptance/block-51/**"
+        "acceptance/block-51/**",
+        "acceptance/block-60/**",
+        "acceptance/ui-305/**",
+        "acceptance/ui-306/**",
+        "acceptance/ui-308/**",
+        "acceptance/ui-309/**",
+        "acceptance/ui-310/**",
+        "acceptance/ui-311/**"
       ],
       "classifiesScripts": false
     },
@@ -1120,7 +1127,8 @@
         "scripts/block55-*.mjs",
         "scripts/ui310-*.cjs",
         "scripts/ui305-*.cjs",
-        "scripts/block63-*.cjs"
+        "scripts/block63-*.cjs",
+        "scripts/block63-*.mjs"
       ],
       "tests": [
         "test/test-affected.test.mjs"
@@ -1148,7 +1156,8 @@
         "sidecars/computer-use-windows/ComputerUseWindows.csproj",
         "sidecars/computer-use-windows/*.cs",
         "sidecars/computer-use-windows/build.ps1",
-        "test/block63-sidecar-contract.test.mjs"
+        "test/block63-sidecar-contract.test.mjs",
+        "acceptance/block-63/**"
       ],
       "tests": [
         "test/block63-sidecar-contract.test.mjs"
