@@ -88,3 +88,5 @@ resources/built-in-plugins/**/*.pyc
 # BLOCK-48 computer-use sidecar build artifacts
 sidecars/computer-use/.build/
 sidecars/computer-use/bin/
+sidecars/computer-use-windows/bin/
+sidecars/computer-use-windows/obj/
