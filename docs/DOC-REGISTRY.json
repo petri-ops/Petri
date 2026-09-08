@@ -57,15 +57,15 @@
       "phase": "QUEUED"
     },
     {
-      "id": "BLOCK-63-RUNTIME-DECUPLE",
-      "path": "docs/block-63-runtime-decouple-plan.md",
+      "id": "BLOCK-66-RUNTIME-DECUPLE",
+      "path": "docs/block-66-runtime-decouple-plan.md",
       "kind": "work-package",
       "status": "planned",
       "canonical": true,
-      "truthDomain": "block-63-runtime-decouple",
+      "truthDomain": "block-66-runtime-decouple",
       "entrypoint": "docs/README.md",
       "tags": [
-        "block-63",
+        "block-66",
         "runtime",
         "decouple",
         "backend",
@@ -74,7 +74,7 @@
         "backend-health",
         "G0"
       ],
-      "notes": "运行时解耦——R 硬门摘除。2026-09-08 用户裁决立项：源码评估确认 backend-proc-manager.js startRServer 以 BIOF3_R_HOME 存在为 biof3-server 启动硬门，而 biof3-server 为纯 Node 进程（R 仅 R 类插件执行时 per-task spawn），硬门系 plumber/py-server 时代历史遗留 → 首启强制下载 R（macOS 约531MB/Windows 约627MB）+ 重启才能用任何功能，不做生信的通用用户同样被挡。P0 摸底（启动路径隐藏 R 依赖 / isReady 消费方盘点 / degraded 语义设计裁决）→ P1 摘门（biof3-server 无条件启动 + backend-health 语义拆分，isReady=后端可用、运行时独立字段 additive）→ P2 前端门控非阻塞化（home.tsx 全屏引导页改可跳过 + 设置入口保留 + 文案修正）→ P3 实机收口（无 R/装 R 两态验证，acceptance/block-63/，已装 R 用户零回归）。不动 OSS 安装链与 sha256/sizeBytes fail-closed 校验。范围外另行候选：R runtime 瘦身分层、内嵌安装包（G1+）、装完免重启（P0 后单独裁决）。0 新 npm 依赖。单工作包串行：UI-305 处理中，本包 planned 排队，启动需 UI-305 收口后用户裁决。编号说明：远程交互会话候选曾暂称 BLOCK-63 未立项不占号，届时顺延 BLOCK-64。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "运行时解耦——R 硬门摘除。2026-09-08 用户裁决立项：源码评估确认 backend-proc-manager.js startRServer 以 BIOF3_R_HOME 存在为 biof3-server 启动硬门，而 biof3-server 为纯 Node 进程（R 仅 R 类插件执行时 per-task spawn），硬门系 plumber/py-server 时代历史遗留 → 首启强制下载 R（macOS 约531MB/Windows 约627MB）+ 重启才能用任何功能，不做生信的通用用户同样被挡。P0 摸底（启动路径隐藏 R 依赖 / isReady 消费方盘点 / degraded 语义设计裁决）→ P1 摘门（biof3-server 无条件启动 + backend-health 语义拆分，isReady=后端可用、运行时独立字段 additive）→ P2 前端门控非阻塞化（home.tsx 全屏引导页改可跳过 + 设置入口保留 + 文案修正）→ P3 实机收口（无 R/装 R 两态验证，acceptance/block-63/，已装 R 用户零回归）。不动 OSS 安装链与 sha256/sizeBytes fail-closed 校验。范围外另行候选：R runtime 瘦身分层、内嵌安装包（G1+）、装完免重启（P0 后单独裁决）。0 新 npm 依赖。单工作包串行：UI-305 处理中，本包 planned 排队，启动需 UI-305 收口后用户裁决。编号说明：远程交互会话候选曾暂称 BLOCK-63 未立项不占号，届时顺延 BLOCK-64。G0 开发期常态 · 不外推 packaged/Provider/GA. 2026-09-08 撞车校正：同日另一 agent BLOCK-63-WINDOWS-COMPUTER-USE（Windows 电脑控制，含 P1 实现提交已 push）先占 63，本包 docs-only planned 让位改号 BLOCK-66。",
       "registeredAt": "2026-09-08",
       "archivePolicy": "archive_when_superseded",
       "phase": "QUEUED"

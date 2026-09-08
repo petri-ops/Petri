@@ -1,8 +1,8 @@
-# BLOCK-63 — 运行时解耦：R 硬门摘除，biof3-server 无 R 可用
+# BLOCK-66 — 运行时解耦：R 硬门摘除，biof3-server 无 R 可用
 
 > 状态：`planned`（2026-09-08 用户裁决立项「新开一个 BLOCK 来做这个事情」；单工作包串行排队——UI-305 前端巨型组件拆分处理中，本包启动需 UI-305 收口后用户裁决）
 > 立项日期：2026-09-08（用户裁决「新开一个 BLOCK」）
-> truthDomain: `block-63-runtime-decouple`
+> truthDomain: `block-66-runtime-decouple`
 > 来源：用户反馈「软件打开需要直接安装 python 和 r 的基础包，这个有些重了」「作为一个通用的 agent 不做生物信息任务的情况下是否是必要的」→ 本会话源码评估确认 R 硬门为历史遗留 → 用户裁决立项
 
 ## 1. 问题定位（源码事实基线，2026-09-08 评估实测）
@@ -32,7 +32,7 @@
 - **P0 摸底 / 设计确认**：① biof3-server 启动路径隐藏 R 依赖排查（启动时版本探测 / fail-closed 检查 / 环境变量消费面）；② `backend-health` isReady 消费方盘点（home.tsx / BackendStatusProvider / WorkspaceSummaryCard / desktopBridge / electron.d.ts）；③ degraded 语义与引导页去向的设计裁决（细化 §2）。产出设计评审小节，经用户确认再进 P1。
 - **P1 摘门（主进程）**：`startRServer` 硬门移除（`BIOF3_R_HOME` 缺失照常 spawn biof3-server）+ `backend-health` 语义拆分 + R 类执行路径诚实失败核对（tools-executor 既有 not-ready 路径复用，核对文案与商店指引可达性）+ 定向测试（backend-proc-manager / backend-health）。
 - **P2 前端门控非阻塞化**：home.tsx 引导页改可跳过 + 文案修正；degraded 展示复用既有运行时展示位；`electron.d.ts` additive 更新。
-- **P3 实机收口**：dev Electron 两态实机——无 R 状态（隔离 userData / 空 runtimes 目录：对话 / 文件 / 通用功能可用，R 插件执行诚实指引，无全屏硬门）+ 装 R 后全功能恢复 + 已装 R 用户零回归；证据 `acceptance/block-63/`；台账回写；门禁。
+- **P3 实机收口**：dev Electron 两态实机——无 R 状态（隔离 userData / 空 runtimes 目录：对话 / 文件 / 通用功能可用，R 插件执行诚实指引，无全屏硬门）+ 装 R 后全功能恢复 + 已装 R 用户零回归；证据 `acceptance/block-66/`；台账回写；门禁。
 
 ## 4. 验收
 
@@ -62,4 +62,4 @@
 
 ## 7. 进度记录
 
-- 2026-09-08 **planned 登记**：用户反馈首启强制装 R 过重 → 本会话源码评估确认 R 硬门为历史遗留（`startRServer` 名不副实，biof3-server 为纯 Node 进程，R 仅执行期 per-task spawn）→ 用户裁决「新开一个 BLOCK」。本计划落盘 + DOC-REGISTRY 注册 + roadmap 排队条目。**编号说明**：此前会话讨论中「远程交互会话与文件浏览」候选曾暂称 BLOCK-63，未经立项不占号；本包按立项顺序占用 BLOCK-63，远程会话包届时立项顺延为 BLOCK-64。
+- 2026-09-08 **planned 登记**：用户反馈首启强制装 R 过重 → 本会话源码评估确认 R 硬门为历史遗留（`startRServer` 名不副实，biof3-server 为纯 Node 进程，R 仅执行期 per-task spawn）→ 用户裁决「新开一个 BLOCK」。本计划落盘 + DOC-REGISTRY 注册 + roadmap 排队条目。**编号说明（2026-09-08 撞车校正）**：本包立项时曾登记 BLOCK-63；同日另一 agent 将「Windows 电脑控制」立项为 `BLOCK-63-WINDOWS-COMPUTER-USE` 并已 push（含 P1 实现提交，先占成立）→ 本包为 docs-only planned 登记让位改号 **BLOCK-66**。远程交互会话候选编号另行分配（BLOCK-64/65 已分别被指挥中心 UX / 子智能体 UX 占用）。
