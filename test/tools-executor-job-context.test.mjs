@@ -54,6 +54,36 @@ test('tool executor keeps malformed legacy params bounded instead of losing the 
   assert.equal(_test.hydrateExecutionJob(null), null);
 });
 
+test('BLOCK-66 runtime preflight：binPath 不存在 → 诚实失败 + 商店指引（非 ready）', () => {
+  const { evaluateRuntimePreflight } = _test;
+  // R：binPath 指向不存在的文件 → ready=false + 指引文案
+  const missing = evaluateRuntimePreflight({ binPath: 'Z:/nonexistent/Rscript.exe' }, 'r');
+  assert.equal(missing.ready, false);
+  assert.equal(missing.command, null);
+  assert.ok(missing.reason.includes('R 分析运行时未安装'), missing.reason);
+  assert.ok(missing.reason.includes('插件商店'), '应含商店指引');
+  assert.ok(missing.reason.includes('重启'), '应提示装完需重启');
+  // Python：同路径
+  const missingPy = evaluateRuntimePreflight({ binPath: 'Z:/nonexistent/python.exe' }, 'python');
+  assert.equal(missingPy.ready, false);
+  assert.ok(missingPy.reason.includes('Python 分析运行时未安装'), missingPy.reason);
+  // binPath 真实存在 → ready=true
+  const ok = evaluateRuntimePreflight({ binPath: process.execPath }, 'python');
+  assert.equal(ok.ready, true);
+  assert.equal(ok.command, process.execPath);
+  assert.equal(ok.reason, null);
+  // executor 缺失 → 未找到执行器
+  const noExecutor = evaluateRuntimePreflight(null, 'r');
+  assert.equal(noExecutor.ready, false);
+  assert.ok(noExecutor.reason.includes('未找到'), noExecutor.reason);
+  // BLOCK-66 P3 实机实证：隔离无 R 环境 binPath=null → 仍给商店指引（非"未找到执行器"）
+  const nullBin = evaluateRuntimePreflight({ binPath: null }, 'r');
+  assert.equal(nullBin.ready, false);
+  assert.ok(nullBin.reason.includes('R 分析运行时未安装'), nullBin.reason);
+  assert.ok(nullBin.reason.includes('插件商店'), nullBin.reason);
+  assert.ok(nullBin.reason.includes('Rscript'), nullBin.reason);
+});
+
 test('P6 final output accounting preserves incomplete scans as a measured lower bound', () => {
   const resourceUsage = {
     peak: { outputBytes: 100 },

@@ -60,7 +60,7 @@
       "id": "BLOCK-66-RUNTIME-DECUPLE",
       "path": "docs/block-66-runtime-decouple-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "active",
       "canonical": true,
       "truthDomain": "block-66-runtime-decouple",
       "entrypoint": "docs/README.md",
@@ -116,7 +116,7 @@
         "hydration",
         "G0"
       ],
-      "notes": "2026-09-02 立项（用户裁决，承接 BLOCK-31 收口时登记的 roadmap 候选观察项）：conversationChangesStore 纯内存态，页面 reload 后历史会话「本会话改动」回退全量视图。方案：P1 后端只读端点 GET /api/ai/agent/conversation-changes?conversationId=（agent-task-store 按会话查询 terminal 任务 json_extract(params,'$.conversationId')，跨任务按 path 合并 files_changed_json，含 iteration/tool 归属）；P2 前端 hydrateConversationFileChanges 只填充 live 缺失路径 + AgentChangesCard 挂载/切会话时水合（失败静默回退现状全量）；P3 定向 node --test + vitest + tsc + 门禁；P4 dev Electron 实机四步过验（S1 实时归属 / S2 reload 恢复 / S3 会话 B 隔离 / S4 切回 A 隔离），证据 acceptance/ui-277/（UI-277 verified）。非范围：task_events 回放/hunk 归属/exec 盲区/批量水合/审阅面板改动/后端写路径改动/0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "2026-09-02 立项（用户裁决，承接 BLOCK-31 收口时登记的 roadmap 候选观察项）：conversationChangesStore 纯内存态，页面 reload 后历史会话「本会话改动」回退全量视图。方案：P1 后端只读端点 GET /api/ai/agent/conversation-changes?conversationId=（agent-task-store 按会话查询 terminal 任务 json_extract(params,'$.conversationId')，跨任务按 path 合并 files_changed_json，含 iteration/tool 归属）；P2 前端 hydrateConversationFileChanges 只填充 live 缺失路径 + AgentChangesCard 挂载/切会话时水合（失败静默回退现状全量）；P3 定向 node --test + vitest + tsc + 门禁；P4 dev Electron 实机四步过验（S1 实时归属 / S2 reload 恢复 / S3 会话 B 隔离 / S4 切回 A 隔离），证据 acceptance/ui-277/（UI-277 verified）。非范围：task_events 回放/hunk 归属/exec 盲区/批量水合/审阅面板改动/后端写路径改动/0 新依赖。【2026-09-08 P0–P3 完成（in_progress）】R 硬门摘除落地：startRServer 摘门 + backend-health isReady 语义拆分（additive serverUp）+ tools-executor runtime preflight 商店指引 + home.tsx 门收窄（UI-312 非阻塞引导条）；实机 acceptance/block-66/p3-live.json（无 R 后端启动 + preflight 指引 allPass，GUI 目视 guiPhase.manual 手动验收）。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-02",
       "archivePolicy": "archive_when_superseded",
       "phase": "P0-LAUNCH"

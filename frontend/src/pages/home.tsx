@@ -289,107 +289,31 @@ export default function Home(): React.ReactElement {
   // （检测异常/未知）时不能当成缺失，否则偶发 IPC 异常会错弹配置页。
   const runtimeMissing = backendStatus.loaded && backendStatus.rRuntime === false;
   const backendNotReady = backendStatus.loaded && !backendStatus.isReady && waitedTooLong;
-  const needsSetupGate = runtimeMissing || backendNotReady;
+  // BLOCK-66 P2 — R 缺失不再阻塞：runtimeMissing 只产生非阻塞引导条（runtimeBanner），
+  // 全屏门仅保留「后端服务确实未就绪」场景（backendNotReady）。
+  // 注：R 缺失时主进程 backend:status 仍会返回 isReady=true（BLOCK-66 P1 语义解绑），
+  // 此处 runtimeMissing 只驱动引导条，不影响进入应用。
+  const needsSetupGate = backendNotReady;
 
   if (needsSetupGate && status !== 'ready') {
-    if (storeOpen) {
-      return (
-        <div className={styles.setupStoreShell}>
-          <div className={styles.setupStoreFrame}>
-            <PluginStorePanel onClose={() => setStoreOpen(false)} />
-          </div>
-          {backendStatus.rRuntime && (
-            <div className={styles.setupStoreFooter}>
-              <span>
-                <Icon name="check" size={14} /> R 运行时已就绪，重启应用即可开始分析
-              </span>
-              <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => void handleRelaunch()} disabled={relaunching}>
-                {relaunching ? '正在重启…' : '立即重启应用'}
-              </button>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    // ── 分支 A：后端未就绪（启动中/启动失败），而非缺运行时 ──
-    if (backendNotReady && !runtimeMissing) {
-      return (
-        <section className={styles.setupHome} aria-label="本地分析服务未启动">
-          <div className={styles.setupIcon}>
-            <Icon name="cpu" size={26} />
-          </div>
-          <h1>本地分析服务未就绪</h1>
-          <p className={styles.setupLead}>
-            本次启动中后端服务（R / Python 分析引擎）未在预期时间内连上。
-            这与「是否安装运行时」无关 —— 运行时已安装，只是本次后端没起来。
-          </p>
-
-          <div className={styles.setupChecklist}>
-            <div className={`${styles.setupCheckItem} ${backendStatus.rRuntime ? styles.setupCheckOk : ''}`}>
-              <Icon name={backendStatus.rRuntime ? 'check' : 'cpu'} size={15} />
-              <span className={styles.setupCheckName}>R 运行时</span>
-              <span className={styles.setupCheckMeta}>已安装</span>
-              <span className={styles.setupCheckState}>
-                {backendStatus.rRuntime ? '已安装' : '状态未知'}
-              </span>
-            </div>
-            <div className={`${styles.setupCheckItem} ${backendStatus.pyRuntime ? styles.setupCheckOk : ''}`}>
-              <Icon name={backendStatus.pyRuntime ? 'check' : 'cpu'} size={15} />
-              <span className={styles.setupCheckName}>Python 运行时</span>
-              <span className={styles.setupCheckMeta}>已安装</span>
-              <span className={styles.setupCheckState}>
-                {backendStatus.pyRuntime ? '已安装' : '状态未知'}
-              </span>
-            </div>
-          </div>
-
-          <div className={styles.setupActions}>
-            <button
-              type="button"
-              className={styles.setupPrimary}
-              onClick={() => {
-                setWaitedTooLong(false);
-                setLoadAttempt((value) => value + 1);
-              }}
-            >
-              <Icon name="refresh" size={15} />
-              重试连接
-            </button>
-            <button
-              type="button"
-              className={styles.setupSecondary}
-              onClick={() => void handleRelaunch()}
-              disabled={relaunching}
-            >
-              {relaunching ? '正在重启…' : '重启应用'}
-            </button>
-          </div>
-
-          {backendStatus.downReason && (
-            <p className={styles.setupReason}>{backendStatus.downReason}</p>
-          )}
-        </section>
-      );
-    }
-
-    // ── 分支 B：R 运行时确认缺失 —— 真正的首次配置场景 ──
+    // ── BLOCK-66 P2：门内只剩「后端服务确实未就绪」场景 ──
+    // R 缺失已改为非阻塞引导条（见下方 runtimeBanner），不再整页拦截。
     return (
-      <section className={styles.setupHome} aria-label="首次配置运行时">
+      <section className={styles.setupHome} aria-label="本地分析服务未启动">
         <div className={styles.setupIcon}>
           <Icon name="cpu" size={26} />
         </div>
-        <h1>先安装分析运行时</h1>
+        <h1>本地分析服务未就绪</h1>
         <p className={styles.setupLead}>
-          Gewu 的分析能力依赖 R / Python 运行时。运行时体积较大未随安装包分发，
-          需在插件商店按需下载，装好后即可离线使用。
+          本次启动中后端服务未在预期时间内连上。这与「是否安装分析运行时」无关 ——
+          未安装运行时只是分析功能受限，不影响进入应用与通用功能。
         </p>
 
         <div className={styles.setupChecklist}>
           <div className={`${styles.setupCheckItem} ${backendStatus.rRuntime ? styles.setupCheckOk : ''}`}>
             <Icon name={backendStatus.rRuntime ? 'check' : 'cpu'} size={15} />
             <span className={styles.setupCheckName}>R 运行时</span>
-            <span className={styles.setupCheckMeta}>约 657MB · 必需</span>
+            <span className={styles.setupCheckMeta}>分析功能组件</span>
             <span className={styles.setupCheckState}>
               {backendStatus.rRuntime ? '已安装' : '未安装'}
             </span>
@@ -397,7 +321,7 @@ export default function Home(): React.ReactElement {
           <div className={`${styles.setupCheckItem} ${backendStatus.pyRuntime ? styles.setupCheckOk : ''}`}>
             <Icon name={backendStatus.pyRuntime ? 'check' : 'cpu'} size={15} />
             <span className={styles.setupCheckName}>Python 运行时</span>
-            <span className={styles.setupCheckMeta}>约 503MB · 推荐</span>
+            <span className={styles.setupCheckMeta}>分析功能组件</span>
             <span className={styles.setupCheckState}>
               {backendStatus.pyRuntime ? '已安装' : '未安装'}
             </span>
@@ -408,21 +332,22 @@ export default function Home(): React.ReactElement {
           <button
             type="button"
             className={styles.setupPrimary}
-            onClick={() => setStoreOpen(true)}
+            onClick={() => {
+              setWaitedTooLong(false);
+              setLoadAttempt((value) => value + 1);
+            }}
           >
-            <Icon name="puzzle" size={15} />
-            打开插件商店安装
+            <Icon name="refresh" size={15} />
+            重试连接
           </button>
-          {backendStatus.rRuntime && (
-            <button
-              type="button"
-              className={styles.setupSecondary}
-              onClick={() => void handleRelaunch()}
-              disabled={relaunching}
-            >
-              {relaunching ? '正在重启…' : '重启应用'}
-            </button>
-          )}
+          <button
+            type="button"
+            className={styles.setupSecondary}
+            onClick={() => void handleRelaunch()}
+            disabled={relaunching}
+          >
+            {relaunching ? '正在重启…' : '重启应用'}
+          </button>
         </div>
 
         {backendStatus.downReason && (
@@ -431,6 +356,43 @@ export default function Home(): React.ReactElement {
       </section>
     );
   }
+
+  // BLOCK-66 P2 — 非阻塞引导条：R 缺失只提示不拦截（对话/文件等通用功能不受影响），
+  // 安装入口走插件商店 overlay；装完重启应用即恢复分析功能。
+  const runtimeBanner = runtimeMissing ? (
+    <div className={styles.runtimeBanner} role="status">
+      <Icon name="cpu" size={15} />
+      <span className={styles.runtimeBannerText}>
+        R 分析运行时未安装 —— 对话、文件等通用功能不受影响；运行 R 类分析工具需安装 R 运行时（约 657MB）。
+      </span>
+      <button
+        className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+        type="button"
+        onClick={() => setStoreOpen(true)}
+      >
+        <Icon name="puzzle" size={14} />
+        前往安装
+      </button>
+    </div>
+  ) : null;
+
+  const storeOverlay = storeOpen ? (
+    <div className={`${styles.setupStoreShell} ${styles.setupStoreShellOverlay}`}>
+      <div className={styles.setupStoreFrame}>
+        <PluginStorePanel onClose={() => setStoreOpen(false)} />
+      </div>
+      {backendStatus.rRuntime && (
+        <div className={styles.setupStoreFooter}>
+          <span>
+            <Icon name="check" size={14} /> R 运行时已就绪，重启应用即可开始分析
+          </span>
+          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => void handleRelaunch()} disabled={relaunching}>
+            {relaunching ? '正在重启…' : '立即重启应用'}
+          </button>
+        </div>
+      )}
+    </div>
+  ) : null;
 
   if (status === 'loading') {
     return (
@@ -582,6 +544,8 @@ export default function Home(): React.ReactElement {
     });
     return (
       <section className={styles.workbench} aria-label="项目工作台">
+        {runtimeBanner}
+        {storeOverlay}
         <div className={styles.workbenchHeader}>
           <div className={styles.workbenchIcon}><Icon name="layers" size={24} /></div>
           <h1>工作台</h1>
@@ -660,6 +624,8 @@ export default function Home(): React.ReactElement {
 
   return (
     <section className={styles.emptyHome} aria-label="创建第一个项目">
+      {runtimeBanner}
+      {storeOverlay}
       <div className={styles.emptyHomeIcon}><Icon name="folder" size={22} /></div>
       <h1>创建第一个项目</h1>
       <p>选择工作目录后，将以目录名称创建项目。</p>

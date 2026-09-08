@@ -63,18 +63,34 @@ describe('UI-141 startup gate', () => {
     act(() => vi.advanceTimersByTime(30_000));
 
     expect(screen.getByRole('heading', { name: '本地分析服务未就绪' })).toBeTruthy();
-    expect(screen.getByText(/与「是否安装运行时」无关/)).toBeTruthy();
+    expect(screen.getByText(/与「是否安装分析运行时」无关/)).toBeTruthy();
     expect(screen.getByRole('button', { name: '重试连接' })).toBeTruthy();
     expect(screen.queryByText('先安装分析运行时')).toBeNull();
   });
 
-  it('shows runtime installation only when rRuntime is explicitly false', () => {
-    backendStatus = status({ rRuntime: false, pyRuntime: true });
+  // BLOCK-66 P2 — R 缺失不再整页拦截：首页正常渲染 + 非阻塞引导条 + 商店 overlay。
+  it('keeps home usable with a non-blocking banner when R runtime is missing', async () => {
+    backendStatus = status({ rRuntime: false, pyRuntime: true, isReady: true, rServerUp: true });
+    vi.mocked(listProjects).mockResolvedValue([]);
+    vi.useRealTimers();
     render(<Home />);
 
-    expect(screen.getByRole('heading', { name: '先安装分析运行时' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: '打开插件商店安装' })).toBeTruthy();
+    // 首页正常渲染（status=ready，未被任何全屏门拦截）
+    await screen.findByText('创建第一个项目');
+    // 引导条出现（非阻塞）
+    expect(screen.getByRole('status')).toBeTruthy();
+    expect(screen.getByText(/R 分析运行时未安装/)).toBeTruthy();
+    expect(screen.getByRole('button', { name: '前往安装' })).toBeTruthy();
+    // 全屏门不再出现
+    expect(screen.queryByText('先安装分析运行时')).toBeNull();
     expect(screen.queryByText('本地分析服务未就绪')).toBeNull();
+
+    // 点「前往安装」→ 商店 overlay 打开（不再占据整页）；rRuntime=false 时无重启脚注
+    act(() => {
+      screen.getByRole('button', { name: '前往安装' }).click();
+    });
+    expect(screen.getByText('插件商店')).toBeTruthy();
+    expect(screen.queryByText(/R 运行时已就绪，重启应用即可开始分析/)).toBeNull();
   });
 });
 

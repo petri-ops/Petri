@@ -103,4 +103,31 @@ import {
   console.log('✓ 场景6 isReady 单轨判定通过');
 }
 
+// === 场景 7（BLOCK-66 P1）：R 缺失但 biof3-server 就绪 → isReady=true（语义解绑）===
+{
+  const status = await getBackendStatus({
+    runtimeStatus: { r: { installed: false }, python: { installed: false } },
+    probeHealth: async () => true,
+    procs: { rServer: { killed: false } },
+  });
+  assert.strictEqual(status.rRuntime, false, 'rRuntime 应为 false（R 未装，独立表达）');
+  assert.strictEqual(status.serverUp, true, 'serverUp 应为 true（BLOCK-66 新字段）');
+  assert.strictEqual(status.rServerUp, true, 'rServerUp 兼容字段应与 serverUp 同值');
+  assert.strictEqual(status.isReady, true, 'isReady 应为 true（与 R 解绑，应用全功能可用）');
+  assert.strictEqual(status.downReason, null, 'downReason 应为 null（R 缺失不再是 down 理由）');
+  console.log('✓ 场景7 BLOCK-66 R 缺失但后端就绪通过（isReady 与 R 解绑）');
+}
+
+// === 场景 8（BLOCK-66 P1）：serverUp 新字段在非就绪态也如实表达 ===
+{
+  const status = await getBackendStatus({
+    runtimeStatus: { r: { installed: true }, python: { installed: true } },
+    probeHealth: async () => false,
+    procs: { rServer: { killed: false } },
+  });
+  assert.strictEqual(status.serverUp, false, 'serverUp 应为 false（probe 失败）');
+  assert.strictEqual(status.rServerUp, false, 'rServerUp 兼容字段应与 serverUp 同值');
+  console.log('✓ 场景8 serverUp 字段非就绪态通过');
+}
+
 console.log('\n所有 backend-health 测试通过');

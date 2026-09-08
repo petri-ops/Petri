@@ -204,9 +204,14 @@ const rServerSupervisor = createOwnedBackendSupervisor({
 });
 
 function startRServer(reason = "boot") {
-  if (!process.env.BIOF3_R_HOME || !fs.existsSync(process.env.BIOF3_R_HOME)) {
-    console.warn("[desktop] biof3-server skipped — R runtime not installed");
-    return { ok: false, error: "R runtime not installed" };
+  // BLOCK-66 P1 — R 硬门摘除：biof3-server 是纯 Node 进程，不依赖 R；
+  // R 缺失照常启动，R 类插件执行时由 tools-executor runtime preflight
+  // 诚实失败 + 商店指引（详见 docs/block-66-runtime-decouple-plan.md）。
+  // 函数名 startRServer 为历史遗留（plumber/py-server 时代），保留以减 diff。
+  if (!process.env.BIOF3_R_HOME) {
+    console.log(
+      "[desktop] biof3-server starting without R runtime — R analysis features unavailable until installed",
+    );
   }
 
   const rServerPath = resolveCore("biof3-server", "server.js");

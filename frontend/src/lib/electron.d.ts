@@ -9,7 +9,12 @@ export interface BackendStatus {
    *  "未知"误判成"缺失"，导致偶发 IPC 异常时错弹首次配置引导页。 */
   rRuntime: boolean | null;
   pyRuntime: boolean | null;
+  /** BLOCK-66 P1：历史名，语义 = biof3-server up（与 serverUp 同值，保留兼容）。 */
   rServerUp: boolean;
+  /** BLOCK-66 P1 additive：biof3-server 就绪（与 R 运行时安装状态解绑——
+   *  R 缺失时应用全功能可用，isReady 不再因 rRuntime=false 而为 false）。
+   *  optional：历史 fixture 无需逐个补字段。 */
+  serverUp?: boolean;
   isReady: boolean;
   downReason: string | null;
   /** true once the first backend status read has resolved — lets the UI

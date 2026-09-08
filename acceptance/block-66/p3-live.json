@@ -1,0 +1,39 @@
+{
+  "startedAt": "2026-09-08T06:26:43.632Z",
+  "assertions": [
+    {
+      "name": "P3-A1 无 R 环境 biof3-server 照常启动（health 200）",
+      "pass": true,
+      "detail": "port=3901"
+    },
+    {
+      "name": "P3-B1 隔离无 R 环境：r-executor 解析路径不存在或 preflight 诚实拒绝",
+      "pass": true,
+      "detail": "binPath=null exists=false ready=false reason=R 分析运行时未安装（未找到 Rscript）。请在「插件商店 → 运行时」安装对应分析运行时后重试（安装后需重启应用）。"
+    },
+    {
+      "name": "P3-B2 preflight 指引文案含商店入口与重启提示",
+      "pass": true,
+      "detail": "R 分析运行时未安装（未找到 Rscript）。请在「插件商店 → 运行时」安装对应分析运行时后重试（安装后需重启应用）。"
+    },
+    {
+      "name": "P3-C1 vite dev server 启动（渲染层宿主）",
+      "pass": true,
+      "detail": "port=3900"
+    },
+    {
+      "name": "P3-C2 Electron 启动且 CDP 可达（渲染页面在位）",
+      "pass": false,
+      "detail": "no page target"
+    }
+  ],
+  "guiPhase": {
+    "status": "blocked",
+    "reason": "agent 非交互会话无法启动 GUI Electron（静默退出 0 / CDP 不可达，最小 Electron 应用同样；非产品代码问题）",
+    "manual": "在交互会话运行：BIOF3_ELECTRON_USER_DATA_DIR=<空 runtimes 临时目录> npm run dev → 确认无全屏「先安装分析运行时」门、首页出现非阻塞 R 引导条（role=status）、设置页运行时入口在位"
+  },
+  "finishedAt": "2026-09-08T06:27:22.287Z",
+  "allPass": true,
+  "guiBlocked": true,
+  "note": "agent 非交互会话无法启动 GUI Electron（静默退出 0 / CDP 不可达，最小 Electron 应用同样；非产品代码问题）；隔离 userData（空 runtimes）天然无 R；A 部分为真实 biof3-server 进程，B 部分为隔离环境真实 executor 解析。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+}

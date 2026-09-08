@@ -1128,7 +1128,10 @@
         "scripts/ui310-*.cjs",
         "scripts/ui305-*.cjs",
         "scripts/block63-*.cjs",
-        "scripts/block63-*.mjs"
+        "scripts/block63-*.mjs",
+        "acceptance/block-66/**",
+        "scripts/block66-*.cjs",
+        "scripts/block66-*.mjs"
       ],
       "tests": [
         "test/test-affected.test.mjs"
@@ -1146,6 +1149,20 @@
       ],
       "tests": [
         "test/block63-computer-host.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "block66-runtime-decouple",
+      "note": "BLOCK-66 运行时解耦：R 硬门摘除（biof3-server 无 R 可用）。改动即跑 backend-health 语义拆分测试。",
+      "patterns": [
+        "src/main/backend-proc-manager.js",
+        "src/backend-health.js",
+        "src/ipc/runtime-status.js",
+        "test/backend-health.test.mjs"
+      ],
+      "tests": [
+        "test/backend-health.test.mjs"
       ],
       "classifiesScripts": false
     },

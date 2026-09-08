@@ -548,3 +548,36 @@
   opacity: 0.55;
   transform: none;
 }
+
+/* ── BLOCK-66 P2 — R 运行时非阻塞引导条 + 商店 overlay ── */
+.runtimeBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 10px 14px;
+  border: 1px solid var(--gewu-border);
+  border-left: 3px solid var(--gewu-accent);
+  border-radius: 10px;
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  line-height: 1.5;
+}
+
+.runtimeBannerText {
+  flex: 1;
+  min-width: 0;
+}
+
+.runtimeBanner button {
+  flex: 0 0 auto;
+}
+
+.setupStoreShellOverlay {
+  position: fixed;
+  inset: var(--gewu-titlebar-height) 0 0 0;
+  z-index: 1000;
+  height: auto;
+  background: var(--gewu-bg-base);
+}

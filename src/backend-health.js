@@ -13,6 +13,9 @@
 // （Python 工具仍由 biof3-server 经内嵌 Python 运行时执行）。
 // BLOCK-51 P3: plumberUp 随 plumber 空壳摘除（replot.R 从未存在，
 // plumber 进程从未启动，恒为 false 的死指标）。
+// BLOCK-66 P1: isReady 与 R 运行时解绑 —— biof3-server 纯 Node 无 R 依赖，
+// R 缺失照常启动（isReady 只表达「后端进程可用」）；rRuntime/pyRuntime
+// 独立表达运行时就绪度，R 缺失的诚实失败在 tools-executor runtime preflight。
 
 // A-009: pull every backend port from env-coordinator instead of each
 // file duplicating the per-port fallback literal here. The Electron
@@ -72,26 +75,29 @@ async function getBackendStatus({ runtimeStatus, procs, probeHealth }) {
   const rRuntime = !!runtimeStatus?.r?.installed;
   const pyRuntime = !!runtimeStatus?.python?.installed;
 
-  const rServerAlive = isProcAlive(procs?.rServer);
+  const serverAlive = isProcAlive(procs?.rServer);
 
   const probeH = probeHealth || (() => probeUrl(R_SERVER_HEALTH));
 
   // 只在进程存活时才探测（进程已死则直接 false，省一次网络往返）
-  const rServerUp = rRuntime && rServerAlive && (await probeH());
+  const serverUp = serverAlive && (await probeH());
 
-  // isReady 最低要求 = biof3-server 就绪
-  const isReady = !!rServerUp;
+  // BLOCK-66 P1 — 语义拆分：isReady 表达「后端进程可用」（biof3-server 是唯一
+  // 业务后端，纯 Node 不依赖 R），与 R 运行时安装状态解绑。R 缺失时应用全功能
+  // 可用（R 类插件执行时由 tools-executor runtime preflight 诚实失败 + 指引），
+  // 运行时就绪度由 rRuntime/pyRuntime 字段独立表达（additive，不删任何字段）。
+  // rServerUp 为历史名，语义 = biof3-server up（与 serverUp 同值），保留兼容。
+  const rServerUp = serverUp;
+  const isReady = !!serverUp;
 
   let downReason = null;
-  if (!rRuntime) {
-    downReason = 'R 运行时未安装，请从插件商店安装';
-  } else if (!rServerAlive) {
-    downReason = 'R 后端进程未运行，正在重启…';
-  } else if (!rServerUp) {
-    downReason = 'R 后端未就绪，点此诊断';
+  if (!serverAlive) {
+    downReason = '本地分析服务未运行，正在重启…';
+  } else if (!serverUp) {
+    downReason = '本地分析服务未就绪，点此诊断';
   }
 
-  return { rRuntime, pyRuntime, rServerUp, isReady, downReason };
+  return { rRuntime, pyRuntime, rServerUp, serverUp, isReady, downReason };
 }
 
 module.exports = { getBackendStatus, mergeRuntimeStatusWithConfiguredHomes, probeUrl };

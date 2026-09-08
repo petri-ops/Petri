@@ -49,6 +49,7 @@ function setupRuntimeIpc({ rServerProc } = {}) {
         rRuntime: null,
         pyRuntime: null,
         rServerUp: false,
+        serverUp: false,
         isReady: false,
         downReason: "状态查询失败: " + e.message,
       };

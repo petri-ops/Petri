@@ -2830,3 +2830,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：tsc 0 / ReviewMode vitest 30/30。待 dev Electron 实机过目后转 verified。
 
 **状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-312: BLOCK-66 增量 — R 运行时硬门摘除：首页全屏引导页改非阻塞引导条 (2026-09-08 in_progress)
+
+**来源**：BLOCK-66-RUNTIME-DECUPLE（R 硬门摘除，biof3-server 无 R 可用）P2 前端非阻塞化——用户反馈「软件打开需要直接安装 python 和 r 的基础包，这个有些重了」。
+
+**改动**：home.tsx 启动门收窄——R 运行时确认缺失（runtimeMissing）不再整页拦截，改为首页顶部非阻塞引导条（runtimeBanner：说明对话/文件等通用功能不受影响 + 「前往安装」入口）；全屏门仅保留「后端服务确实未就绪」（backendNotReady）场景并修正文案（「这与是否安装分析运行时无关——未安装运行时只是分析功能受限」，运行时状态如实显示已安装/未安装，移除「约 657MB · 必需」硬性表述）；插件商店由门内嵌改为独立 overlay（`setupStoreShellOverlay`，装 R 后就地提供重启入口）。配套：electron.d.ts BackendStatus 加 `serverUp?`（BLOCK-66 P1 isReady 与 R 解绑，additive optional）；BackendStatusProvider 初始态/DEV 兜底补 serverUp。0 新依赖。
+
+**门禁**：home vitest 4/4（UI-141 门测试重写到新契约：R 缺失 → 首页正常渲染 + 引导条 + 商店 overlay + 无全屏门）；tsc 非 TS2550 0 错误（12 处 TS2550 为 HEAD 存量 lib 问题，与本条无关）；backend-health 定向 9 场景 + tools-executor preflight 单测；实机 `acceptance/block-66/p3-live.json`（A1 无 R 后端启动 health 200 / B1-B2 preflight 商店指引 / C1 vite；GUI 阶段 agent 会话阻塞已登记 guiPhase 手动验收命令）；docs:check / docs:reconcile。
+
+**状态**: in_progress（dev Electron 实机过目后转 verified；手动验收命令见 `acceptance/block-66/p3-live.json` guiPhase.manual）。G0 开发期常态 · 不外推 packaged / Provider / GA。

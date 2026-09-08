@@ -2018,15 +2018,10 @@ function createToolsExecutor({
       const { getExecutor } = require('../../shared-backend/executors');
       const executor = getExecutor(cfg.lang);
       runtimeCommand = executor && executor.binPath;
-      runtimeReady =
-        executor && executor.binPath
-          ? { runtime: cfg.lang || null, ready: true, command: executor.binPath, reason: null }
-          : {
-              runtime: cfg.lang || null,
-              ready: false,
-              command: null,
-              reason: `未找到 ${cfg.lang || 'unknown'} 执行器`,
-            };
+      // BLOCK-66 P1 — runtime preflight：binPath 是路径字符串（executor 解析
+      // 失败会回退 PATH 搜索仍返回字符串），必须 existsSync 校验；R/Python
+      // 运行时未安装时诚实失败 + 商店指引（而非裸 spawn ENOENT）。
+      runtimeReady = evaluateRuntimePreflight(executor, cfg.lang);
       runtimeVersion = runtimeReady.ready && typeof executor.getRuntimeVersion === 'function'
         ? executor.getRuntimeVersion()
         : null;
@@ -2462,10 +2457,38 @@ const R_ERROR_TRANSLATIONS = [
   },
 ];
 
+// BLOCK-66 P1 — runtime preflight：executor.binPath 是路径字符串（executor
+// 解析失败会回退 PATH 搜索仍返回字符串），必须 existsSync 校验；R/Python
+// 运行时未安装时诚实失败 + 商店指引（而非裸 spawn ENOENT）。纯函数便于测试。
+function evaluateRuntimePreflight(executor, lang) {
+  const binPath = executor && executor.binPath;
+  const binExists = !!(binPath && require('node:fs').existsSync(binPath));
+  if (executor && binPath && binExists) {
+    return { runtime: lang || null, ready: true, command: binPath, reason: null };
+  }
+  const label = lang === 'r' ? 'R' : lang === 'python' ? 'Python' : lang || '';
+  if (!executor) {
+    return { runtime: lang || null, ready: false, command: null, reason: `未找到 ${lang || 'unknown'} 执行器` };
+  }
+  // P3 实机实证：隔离无 R 环境下 binPath 可能为 null（PATH 搜索无果），
+  // 此时同样是"运行时未安装"，必须给商店指引而非含糊的"未找到执行器"。
+  const where = binPath
+    ? `可执行文件不存在：${binPath}`
+    : `未找到 ${lang === 'r' ? 'Rscript' : lang === 'python' ? 'python' : '可执行文件'}`;
+  return {
+    runtime: lang || null,
+    ready: false,
+    command: null,
+    reason: `${label} 分析运行时未安装（${where}）。`
+      + '请在「插件商店 → 运行时」安装对应分析运行时后重试（安装后需重启应用）。',
+  };
+}
+
 module.exports = {
   createToolsExecutor,
   _test: {
     isManagedResultDir,
+    evaluateRuntimePreflight,
     resolveUploadedFilePath,
     resolveUploadedFiles,
     writeUploadedFiles,
