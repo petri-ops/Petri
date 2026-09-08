@@ -1,0 +1,14 @@
+[1-fixture] {"branchA":"09824fbf-120b-4409-a22e-aa1dc2ff8f51","branchB":"ad47cf32-5fd0-4e0d-98fa-bb5260e7a867","result":"5a7ccf51-9f81-4186-9657-4a621b2affa3","switchAOk":true}
+[2-loaded] {"href":"http://localhost:3000/project/p_mtrawlau_7rly/results","countText":"1 个结果","itemCount":1,"items":["📋uip2001-fixturetable · 2026/09/09 00:4"],"footerBranch":"uip2001-A","pagePresent":true}
+[3-instrument] {"counters":{},"detailShown":true,"markerTag":"DIV"}
+[4-clickB] {"clicked":true,"ariaPressed":"false"}
+[5-after-switch] {"counters":{},"markerInDom":true,"markerAttr":"1","countText":"1 个结果","itemCount":1,"items":["📋uip2001-fixturetable · 2026/09/09 00:4"],"footerBranch":"uip2001-A","detailStillShown":true,"activeBranchApi":"uip2001-B","href":"http://localhost:3000/project/p_mtrawlau_7rly/results"}
+VERDICT {
+  "noRefetch": true,
+  "domPreserved": true,
+  "resultsStillListed": true,
+  "detailPreserved": true,
+  "branchSwitched": true
+}
+[6-cleanup] {"deleteResultOk":true,"deleteAOk":true,"deleteBOk":true,"branchesLeft":0,"resultsLeft":0}
+UI-P2-001 PASS

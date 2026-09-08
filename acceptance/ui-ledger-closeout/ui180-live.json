@@ -1,0 +1,197 @@
+{
+  "steps": {
+    "baseline": {
+      "url": "http://localhost:3000/review",
+      "rows": [
+        {
+          "path": "acceptance/ui-ledger-closeout/harness-checkpoints.json",
+          "active": false
+        },
+        {
+          "path": "acceptance/ui-ledger-closeout/ui-agentwb-live.json",
+          "active": false
+        },
+        {
+          "path": "acceptance/ui-ledger-closeout/ui-p2001-live.json",
+          "active": false
+        },
+        {
+          "path": ".gitignore",
+          "active": true
+        },
+        {
+          "path": "ui180-wtr-fixture.txt",
+          "active": false
+        }
+      ],
+      "summary": "5 个文件+4−00/5 已审",
+      "progress": "0/5 已审",
+      "mainHeader": ".gitignore",
+      "hunkCount": "1 个 hunk",
+      "commitbox": null,
+      "acceptedWidget": false,
+      "rejectedWidget": false,
+      "emptyState": null
+    },
+    "selectGitignore": {
+      "url": "http://localhost:3000/review",
+      "rows": [
+        {
+          "path": "acceptance/ui-ledger-closeout/harness-checkpoints.json",
+          "active": false
+        },
+        {
+          "path": "acceptance/ui-ledger-closeout/ui-agentwb-live.json",
+          "active": false
+        },
+        {
+          "path": "acceptance/ui-ledger-closeout/ui-p2001-live.json",
+          "active": false
+        },
+        {
+          "path": ".gitignore",
+          "active": true
+        },
+        {
+          "path": "ui180-wtr-fixture.txt",
+          "active": false
+        }
+      ],
+      "summary": "5 个文件+4−00/5 已审",
+      "progress": "0/5 已审",
+      "mainHeader": ".gitignore",
+      "hunkCount": "1 个 hunk",
+      "commitbox": null,
+      "acceptedWidget": false,
+      "rejectedWidget": false,
+      "emptyState": null
+    },
+    "acceptHunk0": {
+      "url": "http://localhost:3000/review",
+      "rows": [
+        {
+          "path": "acceptance/ui-ledger-closeout/harness-checkpoints.json",
+          "active": false
+        },
+        {
+          "path": "acceptance/ui-ledger-closeout/ui-agentwb-live.json",
+          "active": false
+        },
+        {
+          "path": "acceptance/ui-ledger-closeout/ui-p2001-live.json",
+          "active": false
+        },
+        {
+          "path": ".gitignore",
+          "active": true
+        },
+        {
+          "path": "ui180-wtr-fixture.txt",
+          "active": false
+        }
+      ],
+      "summary": "5 个文件+4−01/5 已审",
+      "progress": "1/5 已审",
+      "mainHeader": ".gitignore",
+      "hunkCount": "1 个 hunk",
+      "commitbox": "接受 1拒绝 0提交 (1)",
+      "acceptedWidget": true,
+      "rejectedWidget": false,
+      "emptyState": null
+    },
+    "rejectJustAfter": {
+      "url": "http://localhost:3000/review",
+      "rows": [
+        {
+          "path": "acceptance/ui-ledger-closeout/harness-checkpoints.json",
+          "active": false
+        },
+        {
+          "path": "acceptance/ui-ledger-closeout/ui-agentwb-live.json",
+          "active": false
+        },
+        {
+          "path": "acceptance/ui-ledger-closeout/ui-p2001-live.json",
+          "active": false
+        },
+        {
+          "path": ".gitignore",
+          "active": true
+        },
+        {
+          "path": "ui180-wtr-fixture.txt",
+          "active": false
+        }
+      ],
+      "summary": "5 个文件+4−01/5 已审",
+      "progress": "1/5 已审",
+      "mainHeader": ".gitignore",
+      "hunkCount": "1 个 hunk",
+      "commitbox": "接受 0拒绝 1提交 (1)",
+      "acceptedWidget": false,
+      "rejectedWidget": true,
+      "emptyState": null
+    },
+    "rejectAfterRefresh": {
+      "url": "http://localhost:3000/review",
+      "rows": [
+        {
+          "path": "acceptance/ui-ledger-closeout/harness-checkpoints.json",
+          "active": false
+        },
+        {
+          "path": "acceptance/ui-ledger-closeout/ui-agentwb-live.json",
+          "active": false
+        },
+        {
+          "path": "acceptance/ui-ledger-closeout/ui-p2001-live.json",
+          "active": false
+        },
+        {
+          "path": ".gitignore",
+          "active": true
+        },
+        {
+          "path": "ui180-wtr-fixture.txt",
+          "active": false
+        }
+      ],
+      "summary": "5 个文件+4−01/5 已审",
+      "progress": "1/5 已审",
+      "mainHeader": ".gitignore",
+      "hunkCount": "1 个 hunk",
+      "commitbox": "接受 0拒绝 1提交 (1)",
+      "acceptedWidget": false,
+      "rejectedWidget": true,
+      "emptyState": null
+    },
+    "diskGitignoreHasFixture": false,
+    "hoverUntracked": {
+      "popover": true,
+      "untrackedPreview": true,
+      "head": "ui180-wtr-fixture.txt",
+      "textHead": "?ui180-wtr-fixture.txt+0−09123ui180 untracked fixtureline2 for hover preview"
+    },
+    "revertAll": {
+      "url": "http://localhost:3000/review",
+      "rows": [
+        {
+          "path": "acceptance/ui-ledger-closeout/ui180-live.json",
+          "active": false
+        }
+      ],
+      "summary": "1 个文件+0−00/1 已审",
+      "progress": "0/1 已审",
+      "mainHeader": null,
+      "hunkCount": null,
+      "commitbox": null,
+      "acceptedWidget": false,
+      "rejectedWidget": false,
+      "emptyState": "审阅"
+    },
+    "diskFinal": {
+      "gitignoreHasFixture": false,
+      "fixtureFileExists": false
+    }
+  }
+}

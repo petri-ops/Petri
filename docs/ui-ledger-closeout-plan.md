@@ -1,6 +1,6 @@
 # UI-LEDGER-CLOSEOUT —— UI 产品化台账剩余项清债
 
-状态：**planned**（2026-09-08 用户裁决立项；排队待启动，不抢占当前槽位）
+状态：**completed**（2026-09-09 整包收口：台账 9 项 + 隐藏拼行 UI-184 全部裁决——verified 8 / cancelled 2，台账 in_progress 清零；治理门 ui:audit:check + docs:check + docs:reconcile + tsc 0 全绿。收口记录见 §8）
 关联：本文件是 [`docs/ui-productization-audit.md`](./ui-productization-audit.md) 剩余 `in_progress` 项的收口工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 1. 背景与已完成部分
@@ -70,3 +70,23 @@ grep -E '^\|\s*\*{0,2}UI-[A-Z0-9-]+' docs/ui-productization-audit.md \
 ## 7. 不外推
 
 不外推 packaged / Provider / GA / P7 / notarization / dist staleness G1+；不为凑数降低验收线；不重新激活任何已关闭 BLOCK；0 新 npm 依赖；不改 IPC 契约。
+
+## 8. 收口记录（2026-09-09 completed）
+
+台账 9 项 + 隐藏拼行 UI-184（挤在 UI-183 行 139 拼行内、线级查询漏计）全部给出实证裁决，`in_progress` 清零：
+
+| 项 | 裁决 | 关键证据（acceptance/ui-ledger-closeout/） |
+| --- | --- | --- |
+| UI-180 Working tree diff | verified | 2 缺陷修复（a9df9f95：parseDiffFiles EOF 零长度伪影行 + revertPaths tracked/untracked 分区）后 /review 真链复跑全绿（ui180-live.json） |
+| UI-P2-001 Result Studio 结果共享 | verified | branchBridge 单点拆包修复后：fixture 分支 tab 切换不重取结果 + DOM 保持（ui-p2001-live.json） |
+| UI-183（3 行：WTR hooks ×2 + 聊天错误详情） | verified | /review 长链零 hooks 异常 + fatal fixture 实跑「查看详情」可展开 533 字符 stack（ui183-error-details.json，settings md5 前后一致） |
+| UI-156 Fork Chat | verified | Fork 按钮真实点击 → 会话树新增「新对话 (分支)」血缘（ui156-uiattch-verdict.json） |
+| UI-181 TitleBar 项目名 | verified | harness 检查点：result 标题含项目名后缀、chat 基线无后缀（harness-checkpoints.json） |
+| UI-ATTCH-001 ③④ | verified | 真实 File 对象 DragEvent → 拖拽反馈/双 chip 图标文件名（④）+ 预览弹窗缩放/重置/ESC（③）（ui156-uiattch-verdict.json） |
+| UI-AGENTWB-001/002 | verified | flag IPC 裸调修复（1dc133c3）后 ResultCard chrome + TableRenderer 真实渲染（ui-agentwb-live.json）；meta.resultNodes 生产者仍不存在（契约面 only），以 SQL 注入 fixture 走真实持久化+渲染链 |
+| UI-195 inline-diff widget | **cancelled** | acceptRejectWidget.ts 已随 f57089cb（BLOCK-43 / UI-193 superseded）整文件退休、生产零引用；活路径 = BLOCK-28 hunkControls（UI-182/UI-196 同型先例） |
+| UI-184 SSE 吞流（隐藏拼行） | verified | fatal fixture 实跑即其真链实证：_dispatchSseEvent 同步抛错被入口守卫接住转 onError、ErrorBanner 呈现完整 stack |
+
+随包修复（均为验收过程抓出的真缺陷）：`a9df9f95`（UI-180 ×2 + UI-P2-001 branchBridge）、`1dc133c3`（agent-workbench-flags IPC 裸调 publish —— extraRenderers 开关此前被 bridge.set rejection 永久回滚）、`835332dc`（dev-electron.js 数据根三分裂：BIOF3_LOCAL_DATA_DIR 未导出致后端回落 ~/Documents/BioF3-Local → 模型列表重置 deepseek 默认、用户配置读不到；BIOF3_DB_PATH 钉死 macOS 时代 ~/Library 路径）。
+
+事故记录（如实登记）：PHASE 4 清理脚本曾按标题匹配误删用户会话 conv_240062f9-e01（新对话 (分支)，昨日 UI-156 验证遗留的 fork 拷贝）——已从 WAL 快照恢复全部真实字段（parent_id/timestamps），按 fork 语义以同 id 重建（消息拷贝 4 条 = fork 时点父会话状态）；清理逻辑已改为 id-diff 只删本次新建。

@@ -1,0 +1,17 @@
+{
+  "item": "UI-183 (row 139) — Agent chat 错误「未知错误」无可诊断信息",
+  "date": "2026-09-09",
+  "method": "ui183-fatal3.cjs（fatal fixture：临时把全部 preset 指向不可达 endpoint，跑完恢复）+ dev Electron 真实渲染",
+  "steps": {
+    "bannerAppeared": { "toggleText": "查看详情", "lastAssistantText": "无法连接到服务器，请确保应用已正确启动 / 发生未知错误，请重试或联系支持 / 查看详情" },
+    "detailsExpanded": {
+      "before": "查看详情",
+      "after": "收起详情",
+      "ariaExpanded": "true",
+      "contentLen": 533,
+      "contentHead": "Error: connect ECONNREFUSED 127.0.0.1:9 at _dispatchSseEvent (copilotClient.ts:518) at _handleSseEvent (copilotClient.ts:490) ..."
+    },
+    "settingsRestored": { "md5Before": "1e61b9451038800f3fce6f689d3d7fea", "md5After": "1e61b9451038800f3fce6f689d3d7fea" }
+  },
+  "verdict": "PASS — ErrorBanner + 查看详情/收起 + 原始 stack 技术详情全部可诊断"
+}

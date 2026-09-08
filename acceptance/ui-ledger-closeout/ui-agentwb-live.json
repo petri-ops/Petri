@@ -1,0 +1,8 @@
+[0-create-conv] {"convId":"conv_03b9d299-6d9","title":"UIAWB fixture"}
+[1-insert-message] {"msgId":"msg_uiawb_fixture","nodes":2}
+[2-flag-on] {"ok":true,"invokeResult":{"ok":true,"extraRenderers":true},"readBack":true}
+[3-open-conv] {"clicked":true}
+[4-assert] {"flagNow":true,"articleCount":2,"firstCardHasSuccessVariant":true,"textCardTitle":true,"textCardSubtitle":true,"tableCardTitle":true,"tableHeaderCells":3,"tableBodyCells":6,"numericCellText":true,"nullPlaceholder":true,"tableRegionRole":true}
+VERDICT {"flagOn":true,"resultCardsRendered":true,"chromeVariantApplied":true,"tableRenderer":true,"nullCellHandled":true,"numericCellPresent":true}
+[5-cleanup] {"flagOff":false,"deleteStatus":"ok"}
+UI-AGENTWB-001/002 PASS

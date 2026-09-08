@@ -1,0 +1,19 @@
+{
+  "cp1": {
+    "ok": true,
+    "conversation": "UIAWB fixture",
+    "msgPreview": "UI-AGENTWB-001/002 实机 fixture\n\n复制\n重新生成\n创建分支\n刚刚",
+    "active": true
+  },
+  "cp2": {
+    "url": "http://localhost:3000/project/p_mtrawlau_7rly/result",
+    "onResultPath": true,
+    "canvas": true,
+    "title": "结果 · biof3-desktop"
+  },
+  "chatBaseline": {
+    "url": "http://localhost:3000/project/p_mtrawlau_7rly",
+    "title": "biof3-desktop"
+  },
+  "ok": true
+}

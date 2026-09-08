@@ -1,0 +1,73 @@
+{
+  "steps": {
+    "u156-open-conv": {
+      "ok": true
+    },
+    "u156-fork": {
+      "found": true,
+      "convsBefore": 2,
+      "convsAfter": 3,
+      "branchTitles": [
+        "新对话 (分支)",
+        "新对话",
+        "新对话 (分支)"
+      ]
+    },
+    "uiattch-drag": {
+      "dragging": true,
+      "chips": [
+        {
+          "text": "uiattch-fixture.png",
+          "hasIcon": true,
+          "hasPreviewBtn": true
+        },
+        {
+          "text": "uiattch-fixture-doc.txt",
+          "hasIcon": true,
+          "hasPreviewBtn": false
+        }
+      ],
+      "count": 2
+    },
+    "uiattch-dragging": {
+      "dragging": true
+    },
+    "uiattch-chips": {
+      "count": 2,
+      "chips": [
+        {
+          "text": "uiattch-fixture.png",
+          "hasIcon": true,
+          "hasPreviewBtn": true
+        },
+        {
+          "text": "uiattch-fixture-doc.txt",
+          "hasIcon": true,
+          "hasPreviewBtn": false
+        }
+      ]
+    },
+    "uiattch-preview": {
+      "opened": true,
+      "label0": "100%",
+      "label1": "125%",
+      "filename": "uiattch-fixture.png",
+      "hasReset": true
+    },
+    "uiattch-esc": {
+      "overlayGone": true
+    },
+    "cleanup-forks": []
+  },
+  "verdict": {
+    "forkButtonPresent": true,
+    "forkCreatedBranch": true,
+    "dragFeedback": true,
+    "attachmentChips": true,
+    "docChipNamed": true,
+    "chipsHaveIcons": true,
+    "previewModalOpens": true,
+    "zoomChanged": true,
+    "escCloses": true
+  }
+}
