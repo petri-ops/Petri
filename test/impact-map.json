@@ -1148,7 +1148,9 @@
         "scripts/block66-*.mjs",
         "scripts/ui315-*.cjs",
         "scripts/ui317-*.cjs",
-        "scripts/block68-*.cjs"
+        "scripts/block68-*.cjs",
+        "scripts/block69-*.cjs",
+        "scripts/ui320-*.cjs"
       ],
       "tests": [
         "test/test-affected.test.mjs"
