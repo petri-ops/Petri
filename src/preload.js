@@ -407,6 +407,11 @@ const desktopBridgeSurface = {
     },
   },
 
+  // BLOCK-67 加映（UI-326）— IP+密码 引导连接（密码只在主进程内存中用于一次性装公钥，绝不存储）
+  ssh: {
+    registerHost: (params) => ipcRenderer.invoke('ssh:register-host', params || {}),
+  },
+
   // BLOCK-16 — Working Tree Review Mode
   // BLOCK-20 — Code Review Panel: add listModified / fileHeadContent / splitSideDiff / revertFile / applyInverseHunk
   // BLOCK-20 — per-hunk reject via applyInverseHunk: 前端组装正向 unified diff patch,

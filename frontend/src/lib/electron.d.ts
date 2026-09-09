@@ -433,7 +433,19 @@ declare global {
         onUpdateDownloaded: (cb: () => void) => () => void;
         onError: (cb: (msg: string) => void) => () => void;
       };
-      // BLOCK-16 — Working Tree Review Mode (PR-style diff viewer)
+      /** BLOCK-67 加映（UI-326）— IP+密码 引导连接（一次性装公钥，密码不存储） */
+  ssh: {
+    registerHost: (params: {
+      ip: string;
+      port: number | string;
+      username: string;
+      password: string;
+      alias?: string;
+    }) => Promise<{ ok: boolean; alias?: string; alreadyRegistered?: boolean; error?: string }>;
+
+  };
+
+  // BLOCK-16 — Working Tree Review Mode (PR-style diff viewer)
       // BLOCK-32 — 全方法 params 可携带 projectId（项目级审阅隔离，additive）
       workingTreeReview: {
         status: (params?: { projectId?: string }) => Promise<{

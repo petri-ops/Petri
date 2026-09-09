@@ -2990,3 +2990,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：tsc 0；LeftPanel 定向 vitest 6/6（新增 ssh 行按钮触发回调 / local 行无按钮 2 用例）。**实机**：CDP 探针（`acceptance/ui-325/ui325-live.json`）——REST 创建 ssh 项目 → 树行定位 → 点击远程连接 → toast「远程连接正常：aliyun:/root/gewu-block67-demo」+ 0 console error。
 
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收，aliyun 真实节点）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+
+## UI-326: 创建面板「IP + 密码连接」模式（BLOCK-67 加映）(2026-09-09 in_progress)
+
+**来源**：用户裁决——只有 ~/.ssh/config 别名模式不够，要支持 IP + 端口 + 用户名 + 密码直连。
+
+**设计（D4.1）**：密码**一次性**用于把本机公钥装到服务器 authorized_keys（主进程 node-pty 应答密码提示；StrictHostKeyChecking=accept-new），随后自动写 `~/.ssh/config` 别名（`gewu-<ip>[-<port>]`），后续连接全走 BatchMode 密钥——**密码绝不存储**；幂等安装（grep -qxF || echo，防重复追加密钥）。之后与别名模式同链路（validate → create）。
+
+**改动**：新增 `src/ipc/ssh-host.js`（`ssh:register-host`：输入校验 fail-closed / ensureKeyPair（无密钥自动 ssh-keygen ed25519）/ pty 密码应答状态机（password 提示、yes/no 主机确认、permission denied 分类、3 次重试上限、45s 超时带脱敏输出现场）/ ssh config upsert（同主机幂等、异主机别名冲突拒绝））+ main.js 注册 + preload `ssh.registerHost` + 类型；home 创建面板双模式 tab（别名连接 | IP+密码连接，密码字段 type=password，密码用完即清）。
+
+**门禁**：tsc 0；零网络单测 6/6（输入校验/别名生成/config upsert 四态/密钥生成注入/提示状态机）+ home/LeftPanel 10/10。**实机**：bridge 可用性 + aliyun 真节点 registerHost → ok:true（密钥已授权场景，幂等安装实证：authorized_keys 无重复、config 别名写入 `gewu-47-110-228-168`）+ 面板双模式渲染（IP/端口/用户名/密码字段、密码掩码、按钮禁用态）。**待验**：密码提示交互路径（需一台未装公钥的密码登录主机）——届时转 verified。
+
+**状态**: in_progress（面板与已装钥主机路径实机验证通过；密码提示交互待真实密码主机验证）。G0 开发期常态 · 不外推 packaged / Provider / GA。

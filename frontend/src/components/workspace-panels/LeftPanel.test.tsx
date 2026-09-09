@@ -3,6 +3,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LeftPanel, type LeftPanelContext } from './LeftPanel';
+import type { Project } from '@/lib/project-types';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 
 vi.mock('@/components/copilot/conversationRunStore', () => ({
@@ -132,7 +133,8 @@ describe('BLOCK-67 左栏 ssh 项目标识与远程连接', () => {
     const connectBtn = screen.getByRole('button', { name: /远程连接 · aliyun/ });
     fireEvent.click(connectBtn);
     expect(ctx.sshConnectProject).toHaveBeenCalledTimes(1);
-    expect(ctx.sshConnectProject.mock.calls[0][0].sshHost).toBe('aliyun');
+    const calledWith = (ctx.sshConnectProject as unknown as { mock: { calls: Array<[Project]> } }).mock.calls[0][0];
+    expect(calledWith.sshHost).toBe('aliyun');
   });
 
   it('local 项目树行没有 远程连接 按钮', () => {

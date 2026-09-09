@@ -73,6 +73,7 @@
 - **D4 凭据与安全**：沿用 BLOCK-57 —— 仅 SSH key + BatchMode、known_hosts strict、BioF3 不存密码；远程命令一律 argv 数组 + 路径 shlex 引用，禁止字符串拼 shell；node-agent verbs 白名单固定，不接受自由命令字符串（exec verb 参数同样数组化）。
 - **D5 断线语义**：连接态显式呈现（已连接/重连中/已断开状态条）；断线时读操作显示诚实错误 + 重试，写操作绝不本地暂存后补写（防静默漂移）；重连后树缓存全量失效重验。
 - **D6 平台边界**：~~指挥席 macOS 优先~~ → **修订（2026-09-09 P0 用户裁决）：Windows 指挥席**。依据：本机实测 System32 OpenSSH 10.2 + tar 就绪、`spawn('ssh', argv)` 跨平台无障碍、`os.homedir()/.ssh/config` 解析正常；BLOCK-63 电脑控制已有 Windows 指挥席先例。macOS 转后续兼容面，本包不专门验证。
+- **D4.1 加映（UI-326，2026-09-09 用户裁决）——「IP+密码引导连接」**：密码**只在内存中用于一次性**把本机公钥装到服务器 authorized_keys（pty 应答密码提示；OpenSSH 拒绝 stdin 读密码），随后自动写 `~/.ssh/config` 别名（gewu-<ip>[-port]），之后一切连接走 BatchMode 密钥——「不存密码」语义不破。node-pty 复用，0 新依赖。**实机教训**：装钥命令不得读 stdin（`cat >>` 形态会等 pty EOF 静默挂死）——用 `grep -qxF || echo` 幂等写法（兼防重复追加密钥）；Windows 实机教训（P3 同源）：Electron 主进程 pty 内 ssh 直连会静默挂起，须 cmd.exe /c 包装。
 - **D7 与 ExecutionTarget 的关系**：远程项目的作业默认执行面 = 项目自身 host（tools-executor 远程分支复用）；本地项目行为一行不变；远程项目不再叠加 composer 执行目标 chip（防止双模式回潮，BLOCK-30 教训）。
 - **D8 产物链**：远程执行的科学作业产物按 BLOCK-57 manifest+hash 拉回本地 jobDir，Artifact Truth 仍以本地拉回后为准（跨机可复现红利延续）。
 

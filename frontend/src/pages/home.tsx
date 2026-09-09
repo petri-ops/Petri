@@ -65,6 +65,13 @@ export default function Home(): React.ReactElement {
   const [sshRemotePath, setSshRemotePath] = useState('');
   const [sshValidating, setSshValidating] = useState(false);
   const [sshValidated, setSshValidated] = useState(false);
+  // BLOCK-67 加映（UI-326）— IP+密码 引导模式（密码一次性装公钥，绝不存储）
+  const [sshMode, setSshMode] = useState<'alias' | 'password'>('alias');
+  const [sshIp, setSshIp] = useState('');
+  const [sshPort, setSshPort] = useState('22');
+  const [sshUsername, setSshUsername] = useState('root');
+  const [sshPassword, setSshPassword] = useState('');
+  const [sshRegistering, setSshRegistering] = useState(false);
   // UI-251 — 创建失败可见化（桥缺失/对话框失败/接口报错）
   const [createError, setCreateError] = useState('');
   // UI-253 — 选定工作目录后的创建确认（具体路径可见、可反悔）
@@ -290,16 +297,44 @@ export default function Home(): React.ReactElement {
   }, []);
 
   const confirmCreateSsh = useCallback(async () => {
-    if (creating || sshValidating) return;
-    const alias = sshAlias.trim();
+    if (creating || sshValidating || sshRegistering) return;
     const remotePath = sshRemotePath.trim();
-    if (!alias || !remotePath.startsWith('/')) {
-      setCreateError('请填写 SSH 主机别名与以 / 开头的远程绝对路径');
+    if (!remotePath.startsWith('/')) {
+      setCreateError('请填写以 / 开头的远程绝对路径');
       return;
     }
     setSshValidating(true);
     setCreateError('');
     try {
+      let alias = sshAlias.trim();
+      // UI-326 密码模式：先一次性装公钥 + 生成别名（密码只在主进程内存），再走同一条校验+创建链
+      if (sshMode === 'password') {
+        const ip = sshIp.trim();
+        if (!ip || !/^\d+$/.test(sshPort) || Number(sshPort) < 1 || Number(sshPort) > 65535 || !sshUsername.trim() || !sshPassword) {
+          setCreateError('请完整填写 IP、端口（1-65535）、用户名与密码');
+          return;
+        }
+        setSshRegistering(true);
+        const desktop = (window as unknown as { biof3Desktop?: { ssh?: { registerHost: (p: { ip: string; port: number; username: string; password: string }) => Promise<{ ok: boolean; alias?: string; error?: string }> } } });
+        const bridge = desktop.biof3Desktop?.ssh ?? (window as unknown as { gewu?: { ssh?: { registerHost: (p: { ip: string; port: number; username: string; password: string }) => Promise<{ ok: boolean; alias?: string; error?: string }> } } }).gewu?.ssh;
+        if (!bridge?.registerHost) {
+          setCreateError('当前运行环境不支持密码引导连接（请升级 Gewu 桌面端）');
+          return;
+        }
+        const reg = await bridge.registerHost({ ip, port: Number(sshPort), username: sshUsername.trim(), password: sshPassword });
+        if (!reg.ok || !reg.alias) {
+          setCreateError(`主机注册失败：${reg.error || '未知错误'}`);
+          return;
+        }
+        alias = reg.alias;
+        setSshAlias(alias);
+        // 密码用完即弃
+        setSshPassword('');
+      }
+      if (!alias) {
+        setCreateError('请填写 SSH 主机别名');
+        return;
+      }
       const verdict = await validateSshProject({ alias, remotePath });
       if (!verdict.ok) {
         setCreateError(verdict.retryable
@@ -314,14 +349,18 @@ export default function Home(): React.ReactElement {
       setSshOpen(false);
       setSshAlias('');
       setSshRemotePath('');
+      setSshIp('');
+      setSshPassword('');
+      setSshMode('alias');
       navigate(`/project/${project.id}`, { replace: true });
     } catch (e) {
       setCreateError(`SSH 项目创建失败：${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setSshValidating(false);
+      setSshRegistering(false);
       setCreating(false);
     }
-  }, [creating, navigate, sshAlias, sshRemotePath, sshValidating]);
+  }, [creating, navigate, sshAlias, sshIp, sshMode, sshPort, sshRemotePath, sshRegistering, sshUsername, sshPassword, sshValidating]);
 
   const handleRelaunch = useCallback(async () => {
     if (relaunching) return;
@@ -568,17 +607,85 @@ export default function Home(): React.ReactElement {
               SSH 远程项目…
             </button>
           ) : (
-            <div className={styles.emptyHomeManual} data-testid="ssh-project-panel">
-              <input
-                className={styles.emptyHomeManualInput}
-                type="text"
-                list="block67-ssh-targets"
-                value={sshAlias}
-                onChange={(e) => { setSshAlias(e.target.value); setSshValidated(false); }}
-                placeholder="SSH 主机别名（如 aliyun）"
-                aria-label="SSH 主机别名"
-                style={{ flex: '0 0 10em' }}
-              />
+            <div className={styles.emptyHomeManual} data-testid="ssh-project-panel" style={{ flexWrap: 'wrap', rowGap: 6 }}>
+              {/* UI-326 — 连接模式切换：别名（~/.ssh/config）| IP+密码（一次性装公钥） */}
+              <div style={{ display: 'flex', gap: 6, width: '100%' }} role="tablist" aria-label="SSH 连接方式">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={sshMode === 'alias'}
+                  className={`gewu-btn gewu-btn--sm ${sshMode === 'alias' ? '' : 'gewu-btn--ghost'}`}
+                  onClick={() => { setSshMode('alias'); setSshValidated(false); setCreateError(''); }}
+                >
+                  别名连接
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={sshMode === 'password'}
+                  className={`gewu-btn gewu-btn--sm ${sshMode === 'password' ? '' : 'gewu-btn--ghost'}`}
+                  onClick={() => { setSshMode('password'); setSshValidated(false); setCreateError(''); }}
+                  title="密码只用于一次性安装本机公钥到服务器，之后免密连接；密码不会被保存"
+                >
+                  IP + 密码连接
+                </button>
+              </div>
+              {sshMode === 'alias' ? (
+                <input
+                  className={styles.emptyHomeManualInput}
+                  type="text"
+                  list="block67-ssh-targets"
+                  value={sshAlias}
+                  onChange={(e) => { setSshAlias(e.target.value); setSshValidated(false); }}
+                  placeholder="SSH 主机别名（如 aliyun）"
+                  aria-label="SSH 主机别名"
+                  style={{ flex: '0 0 10em' }}
+                />
+              ) : (
+                <>
+                  <input
+                    className={styles.emptyHomeManualInput}
+                    type="text"
+                    value={sshIp}
+                    onChange={(e) => { setSshIp(e.target.value); setSshValidated(false); }}
+                    placeholder="主机 IP 或域名"
+                    aria-label="主机 IP 或域名"
+                    style={{ flex: '0 0 11em' }}
+                    autoFocus
+                  />
+                  <input
+                    className={styles.emptyHomeManualInput}
+                    type="text"
+                    inputMode="numeric"
+                    value={sshPort}
+                    onChange={(e) => { setSshPort(e.target.value.replace(/[^0-9]/g, '')); setSshValidated(false); }}
+                    placeholder="端口"
+                    aria-label="SSH 端口"
+                    style={{ flex: '0 0 5em' }}
+                  />
+                  <input
+                    className={styles.emptyHomeManualInput}
+                    type="text"
+                    value={sshUsername}
+                    onChange={(e) => { setSshUsername(e.target.value); setSshValidated(false); }}
+                    placeholder="用户名"
+                    aria-label="SSH 用户名"
+                    style={{ flex: '0 0 7em' }}
+                  />
+                  <input
+                    className={styles.emptyHomeManualInput}
+                    type="password"
+                    value={sshPassword}
+                    onChange={(e) => { setSshPassword(e.target.value); setSshValidated(false); }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') setSshOpen(false);
+                    }}
+                    placeholder="密码（仅用于首次装公钥，不保存）"
+                    aria-label="SSH 密码（仅用于首次安装公钥，不会被保存）"
+                    style={{ flex: '1 1 12em' }}
+                  />
+                </>
+              )}
               <datalist id="block67-ssh-targets">
                 {sshTargets.map((t) => (
                   <option key={t.alias} value={t.alias}>{t.registered ? `${t.alias}（已注册）` : t.alias}</option>
@@ -595,22 +702,21 @@ export default function Home(): React.ReactElement {
                 }}
                 placeholder="/srv/remote/project"
                 aria-label="远程项目绝对路径"
-                autoFocus
               />
               <button
                 className="gewu-btn gewu-btn--sm"
                 type="button"
                 onClick={() => void confirmCreateSsh()}
-                disabled={sshValidating || creating || !sshAlias.trim() || !sshRemotePath.trim()}
-                title="先校验远程路径（含 agent 引导部署）再创建"
+                disabled={sshValidating || sshRegistering || creating || !sshRemotePath.trim() || (sshMode === 'alias' ? !sshAlias.trim() : (!sshIp.trim() || !sshPassword))}
+                title={sshMode === 'password' ? '用密码把本机公钥装到服务器（密码不保存），然后校验远程路径并创建项目' : '先校验远程路径（含 agent 引导部署）再创建'}
               >
-                {sshValidating ? '校验中…' : '校验并创建'}
+                {sshRegistering ? '连接主机中…' : sshValidating ? '校验中…' : sshMode === 'password' ? '连接并创建' : '校验并创建'}
               </button>
               <button
                 className="gewu-btn gewu-btn--ghost gewu-btn--sm"
                 type="button"
                 onClick={() => setSshOpen(false)}
-                disabled={sshValidating || creating}
+                disabled={sshValidating || sshRegistering || creating}
               >
                 取消
               </button>

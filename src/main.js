@@ -490,6 +490,9 @@ async function main() {
   });
   setupAutoUpdateIpc({ mainWindow });
   setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs });
+  // BLOCK-67 加映（UI-326）— IP+密码 引导连接（装公钥 + 写 ssh config 别名）
+  const { setupSshHostIpc } = require("./ipc/ssh-host");
+  setupSshHostIpc();
   if (typeof setupFigcodeIpc === "function") {
     setupFigcodeIpc();
   }
