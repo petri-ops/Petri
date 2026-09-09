@@ -3922,6 +3922,27 @@
       "registeredAt": "2026-09-09",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-74-PREVIEW-HEADER-CLEANUP",
+      "path": "docs/block-74-preview-header-cleanup-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-74-preview-header-cleanup",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-74",
+        "file-preview",
+        "auto-save",
+        "shortcut",
+        "header-cleanup",
+        "G0"
+      ],
+      "notes": "文件预览头部减负。2026-09-09 用户裁决：预览/编辑头部「引用到对话/保存/恢复」按钮行没有实际意义，取消；保存走 Ctrl/Cmd+S 快捷键或自动保存（两者都做）。落地：文本/JSON/Markdown 工具条按钮行整体移除（BLOCK-68 不预留空壳先例；仅 Markdown 保留 编辑/预览 tabs）+ 图片「引用到对话」行删除（BLOCK-52 头部触发点随裁决退役，对话内 @文件 引用链不动）+ 自动保存（文本族编辑停顿 1.2s，保存链不变：local workspace IPC / ssh REST PUT + D3 mtime 冲突诚实面）+ Ctrl/Cmd+S 立即保存（容器级 keydown）+ 保存失败红字 alert 行保留（ssh-save-error testid 保留），成功静默。UI 台账 UI-323 实现同提交登记。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "registeredAt": "2026-09-09",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P1-IN-PROGRESS"
     }
   ],
   "lastUpdated": "2026-09-09",

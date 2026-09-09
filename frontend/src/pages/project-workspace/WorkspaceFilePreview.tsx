@@ -24,7 +24,6 @@ import { buildPreviewTable } from '@/lib/file-preview/buildPreviewTable';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { HighlightedCode, codeLanguageForFile } from '@/components/ui/CodeHighlight';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
-import { gewuEvents, subscribeGewuEvent, dispatchGewuEvent } from '@/lib/events';
 import type { DiffRevision, EditorApi } from '@/components/editor/CodeMirror/types';
 import { WorkspaceFilePreviewBridge } from '@/components/editor';
 import { useTheme } from '@/themes/ThemeProvider';
@@ -79,57 +78,9 @@ export function WorkspaceFilePreview({
   const savedMtimeRef = useRef<number | null>(null);
   // BLOCK-21 — Markdown view toggle: 'edit' | 'preview'; resets on file switch
   const [mdView, setMdView] = useState<'edit' | 'preview'>('preview');
-  // BLOCK-52 P1（选中即引用）：编辑器命令面 + 预览容器内选中状态跟踪。
+  // BLOCK-42 — pending-scroll 消费侧挂载（跳转/pulse 联动）
   const editorApiRef = useRef<EditorApi | null>(null);
   const previewBodyRef = useRef<HTMLDivElement | null>(null);
-  const [hasPreviewSelection, setHasPreviewSelection] = useState(false);
-
-  useEffect(() => {
-    const onSelectionChange = () => {
-      const sel = window.getSelection();
-      const host = previewBodyRef.current;
-      if (!sel || sel.isCollapsed || sel.rangeCount === 0 || !host || !sel.anchorNode) {
-        setHasPreviewSelection(false);
-        return;
-      }
-      // CodeMirror 选中会同步到 DOM selection；统一按「选区在预览容器内」判定。
-      setHasPreviewSelection(host.contains(sel.anchorNode) && host.contains(sel.focusNode));
-    };
-    document.addEventListener('selectionchange', onSelectionChange);
-    return () => document.removeEventListener('selectionchange', onSelectionChange);
-  }, []);
-
-  // BLOCK-52 P1（选中即引用）：把选中文字派发给 SimpleChat composer。
-  // CodeMirror 选区优先（带行号）；Markdown 渲染视图等场景退回 DOM selection（无行号）。
-  const handleQuoteSelection = useCallback(() => {
-    if (!file) return;
-    const cmSel = editorApiRef.current?.getSelection();
-    if (cmSel && cmSel.text.trim()) {
-      dispatchGewuEvent(gewuEvents.selectionQuote, {
-        projectId,
-        path: file.path,
-        name: file.name,
-        startLine: cmSel.startLine,
-        endLine: cmSel.endLine,
-        text: cmSel.text,
-      });
-      return;
-    }
-    const domSel = window.getSelection();
-    const host = previewBodyRef.current;
-    const text = domSel?.toString() ?? '';
-    if (
-      domSel && !domSel.isCollapsed && text.trim()
-      && host && domSel.anchorNode && host.contains(domSel.anchorNode)
-    ) {
-      dispatchGewuEvent(gewuEvents.selectionQuote, {
-        projectId,
-        path: file.path,
-        name: file.name,
-        text,
-      });
-    }
-  }, [file, projectId]);
 
   const isImage = isImageFile(file?.name);
   const isText = isTextFile(file?.name);
@@ -146,17 +97,7 @@ export function WorkspaceFilePreview({
     return `${file.url}${separator}workspaceRevision=${refreshVersion}`;
   }, [file?.url, refreshVersion]);
 
-  // BLOCK-52 P2（图片/结果图引用）：把当前预览图片派发给 SimpleChat composer。
-  const handleQuoteImage = useCallback(() => {
-    if (!file || !previewUrl) return;
-    dispatchGewuEvent(gewuEvents.imageQuote, {
-      projectId,
-      kind: 'workspace-file',
-      name: file.name,
-      path: file.path,
-      url: previewUrl,
-    });
-  }, [file, previewUrl, projectId]);
+  // BLOCK-52 P2 头部「引用到对话」按钮已随 BLOCK-74 用户裁决退役（图片引用行删除）。
 
   useEffect(() => {
     let cancelled = false;
@@ -279,11 +220,6 @@ export function WorkspaceFilePreview({
     }
   }, [file, projectId, text]);
 
-  const handleDiscard = useCallback(() => {
-    if (!file) return;
-    setText(textSaved);
-  }, [file, textSaved]);
-
   if (!file) {
     return (
       <div className={styles.workspacePreviewEmpty}>
@@ -303,11 +239,29 @@ export function WorkspaceFilePreview({
     : isText ? 'text'
     : 'binary';
 
+  // BLOCK-74 — 自动保存：文本族编辑停顿 1.2s 后自动落盘（保存链不变：local IPC / ssh REST + D3 冲突诚实面）。
+  // 成功静默（自动保存心智：无声 = 已保存），失败红字 alert 保留（见下方 saveError 渲染）。
+  useEffect(() => {
+    if (status !== 'ready') return;
+    if (text === textSaved) return;
+    if (!(fallbackKind === 'markdown' || fallbackKind === 'text' || fallbackKind === 'json')) return;
+    const timer = window.setTimeout(() => { void handleSaveCurrent(); }, 1200);
+    return () => window.clearTimeout(timer);
+  }, [status, text, textSaved, fallbackKind, handleSaveCurrent]);
+
+  // BLOCK-74 — Ctrl/Cmd+S 立即保存（容器级 keydown：CodeMirror 键盘事件冒泡可达；拦截浏览器默认保存）
+  const handlePreviewKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+      e.preventDefault();
+      if (text !== textSaved) void handleSaveCurrent();
+    }
+  }, [text, textSaved, handleSaveCurrent]);
+
   return (
     <div className={styles.workspacePreview}>
       {openError && <div className={styles.workspacePreviewError}>{openError}</div>}
-      <div className={styles.workspacePreviewBody} ref={previewBodyRef}>
-        {(isMarkdown || fallbackKind === 'text' || fallbackKind === 'json') && (
+      <div className={styles.workspacePreviewBody} ref={previewBodyRef} onKeyDown={handlePreviewKeyDown}>
+        {(isMarkdown || fallbackKind === 'text' || fallbackKind === 'json') && (isMarkdown || saveError) && (
           <div className={styles.workspaceMarkdownDiffToolbar}>
             {isMarkdown && (
               <div className={styles.workspaceMarkdownDiffTabs}>
@@ -329,50 +283,13 @@ export function WorkspaceFilePreview({
                 </button>
               </div>
             )}
-            <div className={styles.workspaceMarkdownDiffActions}>
-              {/* BLOCK-52 P1（选中即引用）：选中预览文字后一键引用到对话 composer */}
-              <button
-                type="button"
-                className={styles.workspaceMarkdownSave}
-                disabled={!hasPreviewSelection}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={handleQuoteSelection}
-                title="把选中文字引用到对话"
-              >
-                引用到对话
-              </button>
-              {text !== textSaved && (
-                <span className={styles.workspaceMarkdownDiffHint}>有未保存修改</span>
-              )}
-              {saveError && (
-                <span
-                  className={styles.workspaceMarkdownDiffHint}
-                  role="alert"
-                  data-testid="ssh-save-error"
-                  style={{ color: 'var(--color-danger, #d54949)' }}
-                >
-                  {saveError}
-                </span>
-              )}
-              <button
-                type="button"
-                className={styles.workspaceMarkdownSave}
-                disabled={text === textSaved}
-                onClick={() => void handleSaveCurrent()}
-                title="保存到文件"
-              >
-                保存
-              </button>
-              <button
-                type="button"
-                className={styles.workspaceMarkdownSave}
-                disabled={text === textSaved}
-                onClick={() => void handleDiscard()}
-                title="放弃修改"
-              >
-                恢复
-              </button>
-            </div>
+            {/* BLOCK-74 — 头部按钮行（引用到对话/保存/恢复）随用户裁决移除：保存走 Ctrl/Cmd+S 与自动保存；
+                仅保存失败时显示诚实错误行（成功静默 = 自动保存心智） */}
+            {saveError && (
+              <div className={styles.workspaceMarkdownDiffHint} role="alert" data-testid="ssh-save-error" style={{ color: 'var(--color-danger, #d54949)' }}>
+                {saveError}
+              </div>
+            )}
           </div>
         )}
         {status === 'loading' && <p className={styles.panelEmpty}>加载预览…</p>}
@@ -402,17 +319,7 @@ export function WorkspaceFilePreview({
         )}
         {status === 'ready' && fallbackKind === 'image' && (
           <>
-            <div className={styles.workspaceMarkdownDiffActions}>
-              {/* BLOCK-52 P2（图片/结果图引用）：把当前预览图片引用到对话 composer */}
-              <button
-                type="button"
-                className={styles.workspaceMarkdownSave}
-                onClick={handleQuoteImage}
-                title="把这张图片引用到对话"
-              >
-                引用到对话
-              </button>
-            </div>
+            {/* BLOCK-74 — 图片头部「引用到对话」行随用户裁决移除 */}
             <button className={styles.workspaceImageButton} onClick={() => setLightboxSrc(previewUrl)}>
               <img src={previewUrl} alt={file.name} className={styles.workspaceImagePreview} />
             </button>

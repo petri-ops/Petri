@@ -2958,3 +2958,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **实机**：`scripts/ui322-hidden-files-live.cjs` 入库 6/6 断言 allPass（`acceptance/ui-322/ui322-live.json` + 截图×2）：B1 toggle 存在默认关/B2 默认态树无 .gitignore/B3 开启后出现且 localStorage=1/B4 偏好持久化/B5 reload 后保持/B6 关闭恢复现状。**工程备注**：dev 栈后台任务被会话监管回收（exit 127，PATH 丢失）——改用 cmd start 分离启动（/tmp/start-dev-stack.cmd 模式，env 完整保留），栈在会话外存活稳定。
 
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-323: 文件预览头部减负 —— 取消按钮行，保存走 Ctrl/Cmd+S + 自动保存（BLOCK-74）(2026-09-09 in_progress)
+
+**来源**：用户 2026-09-09 裁决——预览/编辑头部「引用到对话 / 保存 / 恢复」按钮行「没有实际意义」，取消；「修改后保存使用快捷键 或者自动保存就好啦」。
+
+**改动**：① 文本/JSON/Markdown 预览工具条的 引用到对话（BLOCK-52 P1 头部触发）/「有未保存修改」提示/保存/恢复（BLOCK-20 遗留 discard）按钮行**整体移除**，不预留空壳（BLOCK-68 先例）；仅 Markdown 保留 编辑/预览 tabs；工具条在非 Markdown 且无错误时不再渲染（无空条带）。② 图片预览头部「引用到对话」（BLOCK-52 P2 头部触发）行删除，图片直达。③ **自动保存**：文本族（markdown/text/json）编辑停顿 1.2s 自动落盘；保存链不变（local 走既有 workspace IPC；ssh 走 BLOCK-67 REST PUT + D3 mtime 冲突诚实面）。④ **Ctrl/Cmd+S 立即保存**（预览容器级 keydown，CodeMirror 键盘冒泡可达，preventDefault 浏览器默认）。⑤ 错误诚实面保留：保存失败（409 冲突/502 断线）红字 alert 行如实显示（data-testid="ssh-save-error" 保留），成功静默（自动保存心智：无声 = 已保存）；「恢复/discard」随自动保存语义退役。0 新 npm 依赖。
+
+**门禁**：tsc 0；既有集成测试（WorkspaceFilePreviewBridge/P4.2/ChatCardLinkBridge）无按钮行断言不受影响。
+
+**状态**: in_progress（实现完成，实机 CDP 验收进行中——acceptance/ui-323/ 落盘后转 verified）。G0 开发期常态 · 不外推 packaged / Provider / GA。
