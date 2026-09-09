@@ -267,8 +267,18 @@ function summarizeToolCallForActivity(name, args = {}) {
 function createToolActivityRecorder() {
   const items = [];
 
+  // UI-315 — exec 类工具的完整命令（bounded），随活动快照落库供历史会话
+  // 的终端块回放；非 exec 工具不记录（体积/隐私边界）。
+  const EXEC_TOOL_NAMES = new Set(['workspace_exec', 'workspace_exec_background']);
+  const COMMAND_SNAPSHOT_CHARS = 400;
+  const OUTPUT_SNAPSHOT_CHARS = 2000;
+
   function recordCall({ name, args, traceId, callId, iteration }) {
     const summary = summarizeToolCallForActivity(name, args);
+    const command = EXEC_TOOL_NAMES.has(name)
+      && args && typeof args.command === 'string' && args.command.trim()
+      ? args.command.trim().slice(0, COMMAND_SNAPSHOT_CHARS)
+      : undefined;
     items.push({
       key: callId || `${traceId || 'legacy'}:${name}:${items.length + 1}`,
       callId,
@@ -276,8 +286,38 @@ function createToolActivityRecorder() {
       ...(Number.isFinite(iteration) ? { iteration } : {}),
       name,
       status: 'running',
+      ...(command ? { command } : {}),
       ...summary,
     });
+  }
+
+  /**
+   * UI-315 — exec 输出尾部随活动快照落库（前端 tool_output 增量的服务端
+   * 镜像，cap 2000 字符对齐前端 tail）。按 callId 关联；无匹配项时忽略
+   * （迟到/乱序输出）。
+   */
+  function recordOutput({ name, callId, traceId, text, truncated }) {
+    if (!text) return;
+    let index = callId ? items.findIndex((item) => item.callId === callId) : -1;
+    if (index < 0) {
+      for (let i = items.length - 1; i >= 0; i -= 1) {
+        if (items[i].name === name && items[i].status === 'running') {
+          index = i;
+          break;
+        }
+      }
+    }
+    if (index < 0) return;
+    const existing = items[index];
+    const previous = existing.output && existing.output.tail ? existing.output.tail : '';
+    let tail = previous + text;
+    if (tail.length > OUTPUT_SNAPSHOT_CHARS) {
+      tail = `…${tail.slice(-(OUTPUT_SNAPSHOT_CHARS - 1))}`;
+    }
+    existing.output = {
+      tail,
+      truncated: Boolean(existing.output && existing.output.truncated) || truncated === true,
+    };
   }
 
   function recordResult(event) {
@@ -326,6 +366,9 @@ function createToolActivityRecorder() {
       summary: event.summary,
       actionLabel: existing ? existing.actionLabel : summarizeToolCallForActivity(name).actionLabel,
       actionDetail: existing ? existing.actionDetail : summarizeToolCallForActivity(name).actionDetail,
+      // UI-315 — 终端块：recordCall 捕获的完整命令 + recordOutput 累积的输出尾部
+      command: existing ? existing.command : undefined,
+      output: existing ? existing.output : undefined,
     };
     if (index < 0) items.push(next);
     else items[index] = next;
@@ -333,6 +376,7 @@ function createToolActivityRecorder() {
 
   return {
     recordCall,
+    recordOutput,
     recordResult,
     snapshot: () => items.slice(0, 100),
   };

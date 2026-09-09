@@ -82,6 +82,9 @@ export interface ToolActivityItem {
   actionLabel: string;
   actionDetail?: string;
   output?: ToolActivityOutput;
+  /** UI-315 — exec 类工具的完整命令（bounded 400 字符），驱动对话流内
+   *  终端块（$ 命令 + 输出）的渲染；历史消息经 meta.toolActivities 恢复。 */
+  command?: string;
   /** BLOCK-59 P4 — agent 管理工具（spawn/wait/list）结果携带的子 agent
    *  任务 id；活动行据此提供「详情窗」入口（弹出 agent 独立窗）。 */
   agentRunId?: string;
@@ -121,19 +124,33 @@ export function restoreToolActivities(value: unknown): ToolActivityItem[] {
       iteration: typeof raw.iteration === 'number' && Number.isFinite(raw.iteration)
         ? raw.iteration
         : undefined,
-      name,
-      status,
-      durationMs,
-      sourceTruncated: typeof raw.sourceTruncated === 'boolean' ? raw.sourceTruncated : undefined,
-      previewTruncated: typeof raw.previewTruncated === 'boolean' ? raw.previewTruncated : undefined,
-      truncated: typeof raw.truncated === 'boolean' ? raw.truncated : undefined,
-      terminationReason: typeof raw.terminationReason === 'string' ? raw.terminationReason : undefined,
-      sideEffects,
-      changeDiff: parseChangeDiff(raw.changeDiff),
-      summary: typeof raw.summary === 'string' ? raw.summary : undefined,
-      actionLabel: typeof raw.actionLabel === 'string' ? raw.actionLabel : '已调用',
-      actionDetail: typeof raw.actionDetail === 'string' ? raw.actionDetail : undefined,
-      agentRunId: typeof raw.agentRunId === 'string' ? raw.agentRunId : undefined,
+    name,
+    status,
+    durationMs,
+    sourceTruncated: typeof raw.sourceTruncated === 'boolean' ? raw.sourceTruncated : undefined,
+    previewTruncated: typeof raw.previewTruncated === 'boolean' ? raw.previewTruncated : undefined,
+    truncated: typeof raw.truncated === 'boolean' ? raw.truncated : undefined,
+    terminationReason: typeof raw.terminationReason === 'string' ? raw.terminationReason : undefined,
+    sideEffects,
+    changeDiff: parseChangeDiff(raw.changeDiff),
+    summary: typeof raw.summary === 'string' ? raw.summary : undefined,
+    actionLabel: typeof raw.actionLabel === 'string' ? raw.actionLabel : '已调用',
+    actionDetail: typeof raw.actionDetail === 'string' ? raw.actionDetail : undefined,
+    // UI-315 — 终端块恢复：完整命令 + 流式输出尾部（均为有界形状）
+    command: typeof raw.command === 'string' ? raw.command.slice(0, COMMAND_MAX_CHARS) : undefined,
+    output: (() => {
+      const out = raw.output;
+      if (!out || typeof out !== 'object') return undefined;
+      const tail = typeof (out as Record<string, unknown>).tail === 'string'
+        ? (out as Record<string, unknown>).tail as string
+        : '';
+      if (!tail) return undefined;
+      return {
+        tail: tail.slice(0, OUTPUT_TAIL_CHARS),
+        truncated: (out as Record<string, unknown>).truncated === true,
+      };
+    })(),
+    agentRunId: typeof raw.agentRunId === 'string' ? raw.agentRunId : undefined,
     }];
   });
 }
@@ -151,6 +168,21 @@ function compactDetail(value: unknown): string | undefined {
   const normalized = value.replace(/\s+/g, ' ').trim();
   if (!normalized) return undefined;
   return normalized.length > 140 ? `${normalized.slice(0, 137)}…` : normalized;
+}
+
+/** UI-315 — exec 类工具名单（对话流内以终端块呈现：$ 命令 + 输出）。 */
+export const EXEC_TOOL_NAMES: ReadonlySet<string> = new Set([
+  'workspace_exec',
+  'workspace_exec_background',
+]);
+
+const COMMAND_MAX_CHARS = 400;
+
+function execCommand(name: string, args: Record<string, unknown> = {}): string | undefined {
+  if (!EXEC_TOOL_NAMES.has(name)) return undefined;
+  const command = typeof args.command === 'string' ? args.command.trim() : '';
+  if (!command) return undefined;
+  return command.length > COMMAND_MAX_CHARS ? `${command.slice(0, COMMAND_MAX_CHARS)}…` : command;
 }
 
 /** Convert tool arguments into a safe, user-facing Codex-style activity line. */
@@ -213,6 +245,7 @@ export function mergeToolCallActivity(
         callId: event.callId || current[index].callId,
         traceId: event.traceId || current[index].traceId,
         name: event.name,
+        command: execCommand(event.name, event.args) || current[index].command,
         ...summarizeToolCall(event.name, event.args),
       };
       return next;
@@ -228,6 +261,7 @@ export function mergeToolCallActivity(
       iteration: event.iteration,
       name: event.name,
       status: 'running',
+      command: execCommand(event.name, event.args),
       ...summarizeToolCall(event.name, event.args),
     },
   ];

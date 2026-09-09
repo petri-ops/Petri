@@ -800,8 +800,19 @@ async function runLoop({
           assistantToolActivities.recordCall({ name, args, traceId, callId, iteration: iter + 1 });
           _emit(buildToolCallEvent({ name, args, traceId, callId, iteration: iter + 1 }));
           // BLOCK-33 P3 — workspace_exec 流式输出：增量经 tool_output 事件实时下发
+          // UI-315 — emit 侧镜像进活动快照（输出尾部随 meta 落库，历史终端块可回放）
           const outputStream = createToolOutputStream({
-            name, callId, traceId, iteration: iter + 1, emit: _emit,
+            name, callId, traceId, iteration: iter + 1,
+            emit: (evt) => {
+              _emit(evt);
+              if (evt && evt.event === 'tool_output') {
+                assistantToolActivities.recordOutput({
+                  name, callId, traceId,
+                  text: evt.text,
+                  truncated: evt.truncated === true,
+                });
+              }
+            },
           });
           let envelope = await executeToolCall(name, args, toolCtx, {
             traceId,

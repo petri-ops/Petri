@@ -1333,6 +1333,106 @@
   color: var(--gewu-status-warning-fg);
 }
 
+/* ── UI-315 — exec 工具的原生终端块（$ 命令 + 流式输出，深色等宽） ── */
+.sc-tool-term {
+  align-self: stretch;
+  margin: 4px 0;
+  border: 1px solid var(--gewu-border-subtle);
+  border-radius: 8px;
+  background: var(--gewu-term-bg, #151a22);
+  overflow: hidden;
+}
+
+.sc-tool-term-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
+  cursor: pointer;
+  text-align: left;
+}
+
+.sc-tool-term-head:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.sc-tool-term-badge {
+  display: inline-flex;
+  color: var(--gewu-status-success, #3fb27f);
+}
+
+.sc-tool-term-title {
+  font-weight: 600;
+}
+
+.sc-tool-term-status {
+  color: var(--gewu-text-secondary);
+}
+
+.sc-tool-term-status[data-status='running'] {
+  color: var(--gewu-accent, #5a9cff);
+}
+
+.sc-tool-term-status[data-status='error'],
+.sc-tool-term-status[data-status='denied'] {
+  color: var(--gewu-danger, #ff7a7a);
+}
+
+.sc-tool-term-status[data-status='success'] {
+  color: var(--gewu-status-success, #3fb27f);
+}
+
+.sc-tool-term-duration {
+  margin-left: auto;
+  color: var(--gewu-text-secondary);
+  opacity: 0.8;
+}
+
+.sc-tool-term-body {
+  padding: 8px 10px 10px;
+}
+
+.sc-tool-term-command {
+  margin: 0 0 6px;
+  font-family: var(--gewu-font-mono, monospace);
+  font-size: var(--gewu-font-size-xs);
+  line-height: 1.5;
+  color: #e8edf6;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.sc-tool-term-prompt {
+  color: var(--gewu-status-success, #3fb27f);
+  user-select: none;
+}
+
+.sc-tool-term-output {
+  margin: 0;
+  padding: 8px 10px;
+  max-height: 300px;
+  overflow: auto;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.28);
+  font-family: var(--gewu-font-mono, monospace);
+  font-size: var(--gewu-font-size-xs);
+  line-height: 1.5;
+  color: #c4ccd9;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sc-tool-term-err {
+  margin-top: 6px;
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-danger, #ff7a7a);
+}
+
 /* Approval card */
 .sc-approval-card {
   align-self: stretch;

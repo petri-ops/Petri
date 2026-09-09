@@ -2870,3 +2870,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **状态**: verified（2026-09-09 dev Electron 真实模型 spawn 链路 CDP 验收完成）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 > **UI-314 收口后修正（2026-09-09，用户实测反馈）**：① 空会话误渲染活动条——SubAgentsBar 早退条件被 P2-c 改松（无子 agent 也渲染「子 agent 0 个 / 全部俯瞰」）→ 恢复 `tasks.length === 0` 即隐藏，俯瞰入口仅在已有子 agent 的会话提供；② 预算降格提示常驻 → 6s 自动消退；③ 俯瞰面板未按项目隔离 → 后端 tasks 列表附 `projectId`（经会话归属解析）+ 前端按当前项目过滤 + SimpleChat 传入 projectId；④ 深层回归——`resumeSubAgentTasks` 仅恢复 running，刷新后历史终态子 agent 不进 store，活动条/俯瞰在本会话永久不可见 → 新增 `loadHistoricalSubAgentTasks`（会话打开时从 `/api/ai/agent/tasks?conversationId=` 回填终态快照，幂等、零第二真相）。实机复核：空会话无活动条、有 agent 会话刷新后活动条/俯瞰可达（48 行含 @conv 标注）、API 全部行带 projectId。修正随 BLOCK-65 收口提交链。
+
+## UI-315: 对话流内 exec 原生终端块 —— `$ 命令` + 流式输出（ZCode 式终端呈现） (2026-09-09 verified)
+
+**来源**：用户反馈「模型来跑命令时，ZCode 会直接显示终端的输入和输出，我们的不会——能否优化，原生终端对话框很有感觉」。此前 exec 命令与输出被工具活动摘要条（UI-268 两级折叠）压在两层点击之后，无终端观感。
+
+**改动**：① `toolActivity.ts`——ToolActivityItem 新增 `command` 字段（exec 类 workspace_exec / workspace_exec_background 从 tool_call args 捕获完整命令，bounded 400 字符）；`restoreToolActivities` 恢复 `command` + `output`（尾部 bounded 2000 字符）。② `ToolActivityList.tsx`——exec 类工具渲染原生终端块 `TerminalRow`（默认展开：终端图标 + 状态/耗时头行 + `$ 命令` + 流式输出 `<pre>` 限高 300px 自动滚底；运行中输出增长自动跟随，可折叠）；活动摘要条在 exec 运行中自动展开（用户手动切换后不再代管）；非 exec 工具保持原行式。③ 后端持久化——`tool-events.js` createToolActivityRecorder 新增 command 捕获（recordCall）与 `recordOutput`（输出尾部服务端镜像，cap 2000）；loop-orchestrator / chat.js 的 tool_output emit 侧镜像进活动快照——**历史消息刷新后终端块完整回放**（此前输出仅内存态）。0 新依赖。
+
+**门禁**：toolActivity + ToolActivityList 定向 vitest 19/19（命令捕获 / 输出累积 / 持久化往返 / 截断边界）+ copilot 全目录 250/250 + tsc 0；实机 `acceptance/ui-315/`（真实模型 exec：`$ 命令` 行 + 流式输出 + 错误态/成功态 + 刷新后历史终端块含完整命令与输出尾部回放 + 截图）。
+
+**状态**: verified（2026-09-09 dev Electron 真实模型 exec 链路 CDP 验收完成）。顺带发现登记：Windows 下 PowerShell 中文输出为 GBK 编码，经 UTF-8 读取呈乱码（既有 workspace_exec 编码问题，非本条引入，登记为后续候选）。G0 开发期常态 · 不外推 packaged / Provider / GA。

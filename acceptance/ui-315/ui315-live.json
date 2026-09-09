@@ -1,0 +1,19 @@
+{
+  "steps": {
+    "term": {
+      "cmd": "$ Write-Output \"=== FRESH SESSION node ===\"; & 'C:\\Users\\Admin\\AppData\\Roaming\\fnm\\node-versions\\v24.20.0\\installation\\n",
+      "out": "=== FRESH SESSION node ===\r\nv24.20.0\r\n=== bare node -v ===\r\nv24.20.0\r\n=== verify FNM_DIR ===\r\nC:\\Users\\Admin\\AppData\\Roaming\\fnm\r\n",
+      "status": "success"
+    },
+    "final": {
+      "cmd": "$ Write-Output \"=== FRESH SESSION node ===\"; & 'C:\\Users\\Admin\\AppData\\Roaming\\fnm\\node-versions\\v24.20.0\\installation\\node.exe' -v; Write-O",
+      "out": "=== FRESH SESSION node ===\r\nv24.20.0\r\n=== bare node -v ===\r\nv24.20.0\r\n=== verify FNM_DIR ===\r\nC:\\Users\\Admin\\AppData\\Roaming\\fnm\r\n",
+      "cls": "sc-tool-term sc-tool-term-success"
+    }
+  },
+  "verdict": {
+    "terminalBlockRendered": true,
+    "commandShown": true,
+    "outputShown": true
+  }
+}

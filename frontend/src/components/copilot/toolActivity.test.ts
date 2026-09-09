@@ -260,3 +260,103 @@ describe('tool activity projection', () => {
     expect(mergeToolResultActivity([], waitResult)[0].agentRunId).toBe('task-child-1');
   });
 });
+
+// UI-315 — exec 工具原生终端块：命令捕获 + 流式输出累积 + 持久化往返
+import {
+  EXEC_TOOL_NAMES,
+  mergeToolOutputActivity,
+} from './toolActivity';
+
+describe('exec terminal block (UI-315)', () => {
+  it('captures the full command from workspace_exec tool_call args', () => {
+    const activities = mergeToolCallActivity([], {
+      name: 'workspace_exec',
+      callId: 'call_exec_1',
+      args: { command: 'sed -n \'1,5p\' data/counts.csv | head -3' },
+    });
+    expect(activities[0]?.command).toBe('sed -n \'1,5p\' data/counts.csv | head -3');
+    expect(activities[0]?.actionLabel).toBe('已运行');
+  });
+
+  it('does not capture command for non-exec tools', () => {
+    const activities = mergeToolCallActivity([], {
+      name: 'workspace_read',
+      callId: 'call_read_1',
+      args: { path: 'data/counts.csv' },
+    });
+    expect(activities[0]?.command).toBeUndefined();
+    expect(EXEC_TOOL_NAMES.has('workspace_read')).toBe(false);
+  });
+
+  it('accumulates streamed output into the tail and marks truncation', () => {
+    let items = mergeToolCallActivity([], {
+      name: 'workspace_exec',
+      callId: 'call_exec_2',
+      args: { command: 'grep -c "x" file.txt' },
+    });
+    items = mergeToolOutputActivity(items, {
+      name: 'workspace_exec',
+      callId: 'call_exec_2',
+      text: 'line one\n',
+    });
+    items = mergeToolOutputActivity(items, {
+      name: 'workspace_exec',
+      callId: 'call_exec_2',
+      text: 'line two\n',
+      truncated: true,
+    });
+    expect(items[0]?.output?.tail).toBe('line one\nline two\n');
+    expect(items[0]?.output?.truncated).toBe(true);
+  });
+
+  it('restores command and bounded output from persisted meta (round-trip)', () => {
+    const restored = restoreToolActivities([
+      {
+        key: 'call_exec_3',
+        callId: 'call_exec_3',
+        name: 'workspace_exec',
+        status: 'success',
+        command: 'grep -rn "pattern" src/',
+        output: { tail: 'src/a.ts:1\nsrc/b.ts:2\n', truncated: false },
+      },
+    ]);
+    expect(restored[0]?.command).toBe('grep -rn "pattern" src/');
+    expect(restored[0]?.output?.tail).toBe('src/a.ts:1\nsrc/b.ts:2\n');
+
+    const oversized = restoreToolActivities([
+      {
+        name: 'workspace_exec',
+        status: 'success',
+        command: 'x'.repeat(800),
+        output: { tail: 'y'.repeat(5000), truncated: false },
+      },
+    ]);
+    expect((oversized[0]?.command || '').length).toBeLessThanOrEqual(400);
+    expect((oversized[0]?.output?.tail || '').length).toBeLessThanOrEqual(2000);
+  });
+
+  it('result merge preserves the live-accumulated output tail', () => {
+    let items = mergeToolCallActivity([], {
+      name: 'workspace_exec',
+      callId: 'call_exec_4',
+      args: { command: 'pwd' },
+    });
+    items = mergeToolOutputActivity(items, {
+      name: 'workspace_exec',
+      callId: 'call_exec_4',
+      text: '/project/root\n',
+    });
+    items = mergeToolResultActivity(items, {
+      name: 'workspace_exec',
+      summary: 'ok',
+      toolResult: {
+        callId: 'call_exec_4',
+        tool: 'workspace_exec',
+        status: 'success',
+        durationMs: 120,
+      },
+    } as never);
+    expect(items[0]?.output?.tail).toBe('/project/root\n');
+    expect(items[0]?.status).toBe('success');
+  });
+});

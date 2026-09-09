@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { CodeMirrorDiffView } from '@/components/desktop/WorkingTreeReview/CodeMirrorDiffView';
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import { getBridge } from '@/lib/desktopBridge';
 import {
+  EXEC_TOOL_NAMES,
   formatToolDuration,
   formatToolSideEffects,
   type ToolActivityItem,
@@ -52,9 +53,76 @@ function ReasoningRow({ iteration, text }: { iteration: number; text: string }) 
   );
 }
 
+/**
+ * UI-315 — exec 类工具（workspace_exec / workspace_exec_background）的
+ * 原生终端块：`$ 命令` + 流式输出尾部，等宽深色、默认展开、限高滚动。
+ * 输出增量来自既有 tool_output SSE（BLOCK-33 P3），运行中自动滚底；
+ * 命令随 meta.toolActivities 持久化，历史消息仍可回看命令。
+ */
+function TerminalRow({ activity }: { activity: ToolActivityItem }) {
+  const [open, setOpen] = useState(true);
+  const duration = formatToolDuration(activity.durationMs);
+  const command = activity.command || activity.actionDetail || '';
+  const outputTail = activity.output?.tail || '';
+  const running = activity.status === 'running';
+  const outputRef = useRef<HTMLPreElement | null>(null);
+
+  // 运行中输出增长时自动滚到底部（终态后停止跟随，方便回看）
+  useEffect(() => {
+    if (running && outputRef.current) {
+      outputRef.current.scrollTop = outputRef.current.scrollHeight;
+    }
+  }, [outputTail, running]);
+
+  return (
+    <div className={`sc-tool-term sc-tool-term-${activity.status}`} data-testid="tool-term">
+      <button
+        type="button"
+        className="sc-tool-term-head"
+        data-expanded={open || undefined}
+        aria-expanded={open}
+        aria-label={open ? '收起终端' : '展开终端'}
+        title={open ? '收起终端' : '展开终端'}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="sc-tool-term-badge" aria-hidden="true">
+          <Icon name="terminal" size={12} />
+        </span>
+        <span className="sc-tool-term-title">
+          终端{activity.name === 'workspace_exec_background' ? ' · 后台' : ''}
+        </span>
+        <span className="sc-tool-term-status" data-status={activity.status}>
+          {TOOL_STATUS_LABEL[activity.status]}
+        </span>
+        {duration && <span className="sc-tool-term-duration">{duration}</span>}
+        <span className="sc-tool-row-chevron" aria-hidden="true">
+          <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
+        </span>
+      </button>
+      {open && (
+        <div className="sc-tool-term-body">
+          <pre className="sc-tool-term-command">
+            <span className="sc-tool-term-prompt">$ </span>
+            {command || activity.actionDetail || activity.name}
+          </pre>
+          {(outputTail || running) && (
+            <pre ref={outputRef} className="sc-tool-term-output" data-testid="tool-term-output">
+              {outputTail}
+              {running && !outputTail ? '…' : ''}
+              {activity.output?.truncated ? '\n…（输出已截断）' : ''}
+            </pre>
+          )}
+          {activity.status === 'error' && activity.terminationReason && (
+            <div className="sc-tool-term-err">原因：{activity.terminationReason}</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** UI-272 增补 — 单条工具执行记录：头部一行摘要，点击展开命令输出等详情。 */
-function ActivityRow({ activity }: { activity: ToolActivityItem }) {
-  const [open, setOpen] = useState(false);
+function ActivityRow({ activity }: { activity: ToolActivityItem }) {  const [open, setOpen] = useState(false);
   const duration = formatToolDuration(activity.durationMs);
   const sideEffects = formatToolSideEffects(activity.sideEffects);
   const showReason = activity.status === 'error' || activity.status === 'denied';
@@ -172,6 +240,15 @@ export function ToolActivityList({
   reasoningByIteration?: Record<number, string>;
 }): React.ReactElement {
   const [expanded, setExpanded] = useState(false);
+  const [userToggled, setUserToggled] = useState(false);
+  // UI-315 — exec 命令运行中自动展开活动条（终端块直接可见，ZCode 式）；
+  // 用户手动切换后不再代管展开态。
+  const hasRunningExec = activities.some(
+    (activity) => EXEC_TOOL_NAMES.has(activity.name) && activity.status === 'running'
+  );
+  useEffect(() => {
+    if (hasRunningExec && !userToggled) setExpanded(true);
+  }, [hasRunningExec, userToggled]);
   const running = activities.filter((activity) => activity.status === 'running').length;
   const awaiting = activities.filter((activity) => activity.status === 'awaiting_confirmation').length;
   const attention = activities.filter(
@@ -209,7 +286,10 @@ export function ToolActivityList({
         aria-expanded={expanded}
         aria-label={expanded ? '收起执行记录' : '展开执行记录'}
         title={expanded ? '收起执行记录' : '展开执行记录'}
-        onClick={() => setExpanded((v) => !v)}
+        onClick={() => {
+          setUserToggled(true);
+          setExpanded((v) => !v);
+        }}
       >
         <span className="sc-tool-activity-summary-label">{summary}</span>
         <Icon name="chevron-right" size={14} />
@@ -227,7 +307,12 @@ export function ToolActivityList({
                 {isFirstOfIteration && iterReasoning && (
                   <ReasoningRow iteration={activity.iteration as number} text={iterReasoning} />
                 )}
-                <ActivityRow activity={activity} />
+                {/* UI-315 — exec 类工具以原生终端块呈现（默认展开），其余保持行式 */}
+                {EXEC_TOOL_NAMES.has(activity.name) ? (
+                  <TerminalRow activity={activity} />
+                ) : (
+                  <ActivityRow activity={activity} />
+                )}
               </div>
             );
           })}
