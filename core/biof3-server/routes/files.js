@@ -12,6 +12,7 @@ const config = require('../config');
 const { safeJoinUnder } = require('../../shared-backend/path-safe');
 const { profileData } = require('../../shared-backend/data-profiler');
 const { requireTrustedDesktopOrigin } = require('../helpers/local-request-boundary');
+const workspaceGateway = require('../helpers/workspace-gateway');
 const TEMP_DIR = config.tempDir || '/tmp/biof3-tmp';
 
 // 本地存储适配器
@@ -73,6 +74,12 @@ function getProjectWorkspace(projectId) {
     fs.mkdirSync(project.workspace_path, { recursive: true });
   } catch {}
   return project.workspace_path;
+}
+
+// BLOCK-67：ssh 项目走 Workspace Gateway（远程唯一真值）；local 项目沿用上方现路径（零回归）。
+function getProjectRecord(projectId) {
+  const db = require('../db');
+  return db.getProject(projectId);
 }
 
 function resolveInside(root, relativePath) {
@@ -158,8 +165,30 @@ async function removeUploadedFiles(files) {
 module.exports = function registerFileRoutes(app) {
   // ── 桌面版本地文件服务 ──────────────────────────────────────
   // /api/files/<key> → 从本地 results 目录读取文件并返回
-  app.get('/api/workspaces/:projectId/tree', requireTrustedDesktopOrigin, (req, res) => {
+  app.get('/api/workspaces/:projectId/tree', requireTrustedDesktopOrigin, async (req, res) => {
       try {
+        // BLOCK-67：ssh 项目树 = Gateway fs_list（条目契约与本地同构：name/type/size/mtimeMs）。
+        const project = getProjectRecord(req.params.projectId);
+        if (project && project.workspace_kind === 'ssh') {
+          const { backend, root, error } = workspaceGateway.resolveWorkspaceBackend(project) || {};
+          if (error) return res.status(404).json({ ok: false, error: '项目工作目录不存在' });
+          const abs = workspaceGateway.safeRemoteJoin(root, String(req.query.prefix || ''));
+          if (!abs) return res.status(400).json({ ok: false, error: '非法路径' });
+          try {
+            const rawEntries = await backend.list(abs);
+            const entries = rawEntries.map((e) => ({
+              name: e.name,
+              type: e.type,
+              size: e.type === 'file' ? e.size : undefined,
+              modifiedAt: e.mtimeMs,
+            }));
+            return res.json({ ok: true, entries });
+          } catch (e) {
+            if (e.remoteError === 'not_found') return res.status(404).json({ ok: false, error: '目录不存在' });
+            if (e.classified) return res.status(502).json({ ok: false, error: `远程连接失败: ${e.classified.kind}`, retryable: e.classified.retryable === true });
+            return res.status(500).json({ ok: false, error: e.message });
+          }
+        }
         const root = getProjectWorkspace(req.params.projectId);
         if (!root) return res.status(404).json({ ok: false, error: '项目工作目录不存在' });
         const dir = resolveInside(root, req.query.prefix || '');
@@ -191,8 +220,28 @@ module.exports = function registerFileRoutes(app) {
       }
     });
 
-    app.get('/api/workspaces/:projectId/file', requireTrustedDesktopOrigin, (req, res) => {
+    app.get('/api/workspaces/:projectId/file', requireTrustedDesktopOrigin, async (req, res) => {
       try {
+        // BLOCK-67：ssh 项目预览 = Gateway fs_read（二进制 base64 往返，Content-Type 按扩展名同构）。
+        const project = getProjectRecord(req.params.projectId);
+        if (project && project.workspace_kind === 'ssh') {
+          const { backend, root, error } = workspaceGateway.resolveWorkspaceBackend(project) || {};
+          if (error) return res.status(404).json({ status: 'error', error: '项目工作目录不存在' });
+          const abs = workspaceGateway.safeRemoteJoin(root, String(req.query.path || ''));
+          if (!abs) return res.status(400).json({ status: 'error', error: '非法路径' });
+          try {
+            const info = await backend.stat(abs);
+            if (info.type !== 'file') return res.status(404).json({ status: 'error', error: '文件不存在' });
+            const MAX_PREVIEW_BYTES = 16 * 1024 * 1024;
+            const data = await backend.read(abs, { length: MAX_PREVIEW_BYTES });
+            res.setHeader('Content-Type', contentTypeFor(abs));
+            return res.send(data);
+          } catch (e) {
+            if (e.remoteError === 'not_found') return res.status(404).json({ status: 'error', error: '文件不存在' });
+            if (e.classified) return res.status(502).json({ status: 'error', error: `远程连接失败: ${e.classified.kind}` });
+            return res.status(500).json({ status: 'error', error: e.message });
+          }
+        }
         const root = getProjectWorkspace(req.params.projectId);
         if (!root) return res.status(404).json({ status: 'error', error: '项目工作目录不存在' });
         const target = resolveInside(root, req.query.path || '');
@@ -203,6 +252,34 @@ module.exports = function registerFileRoutes(app) {
         res.send(fs.readFileSync(target));
       } catch (e) {
         res.status(500).json({ status: 'error', error: e.message });
+      }
+    });
+
+    // BLOCK-67：ssh 项目编辑保存（write-through 直写远程；本地项目沿用既有 IPC 通道，此端点不接）。
+    app.put('/api/workspaces/:projectId/file', requireTrustedDesktopOrigin, async (req, res) => {
+      const project = getProjectRecord(req.params.projectId);
+      if (!project || project.workspace_kind !== 'ssh') {
+        return res.status(400).json({ ok: false, error: '仅 SSH 远程项目走 REST 写通道' });
+      }
+      const { backend, root, error } = workspaceGateway.resolveWorkspaceBackend(project) || {};
+      if (error) return res.status(404).json({ ok: false, error: '项目工作目录不存在' });
+      const rel = String(req.query.path || req.body?.path || '');
+      const abs = workspaceGateway.safeRemoteJoin(root, rel);
+      if (!abs) return res.status(400).json({ ok: false, error: '非法路径' });
+      const content = typeof req.body?.content === 'string' ? req.body.content : null;
+      if (content === null) return res.status(400).json({ ok: false, error: '缺少 content' });
+      try {
+        const info = await backend.write(abs, content, {
+          expectedMtimeMs: typeof req.body?.expectedMtimeMs === 'number' ? req.body.expectedMtimeMs : undefined,
+        });
+        return res.json({ ok: true, stat: info });
+      } catch (e) {
+        if (e.code === 'remote_file_changed' || /remote_file_changed/.test(e.message || '')) {
+          return res.status(409).json({ ok: false, error: '文件已被其他端修改，请重新加载后再保存', code: 'remote_file_changed' });
+        }
+        if (e.code === 'fs_write_too_large') return res.status(413).json({ ok: false, error: '文件超过 1MB 写入上限' });
+        if (e.classified) return res.status(502).json({ ok: false, error: `远程连接失败: ${e.classified.kind}` });
+        return res.status(500).json({ ok: false, error: e.message });
       }
     });
 

@@ -195,14 +195,20 @@ router.get('/projects/:id/g0-baseline', (req, res) => {
 });
 
 router.post('/projects', (req, res) => {
-  const { name, description, modality, workspacePath } = req.body;
+  const { name, description, modality, workspacePath, workspaceKind, sshHost, remotePath } = req.body;
   const userId = req.user?.id;
   if (!name) return res.status(400).json({ status: 'error', error: '缺少 name' });
   // Desktop projects may be workflow-neutral (`general`) or carry a domain hint.
   const allowedModalities = ['general', 'single-cell', 'spatial', 'bulk'];
   const m = modality && allowedModalities.includes(modality) ? modality : 'single-cell';
   const ownerId = userId && userId !== '__admin__' ? userId : null;
-  const p = db.createProject({ name, description, modality: m, userId: ownerId, workspacePath });
+  let p;
+  try {
+    // BLOCK-67：ssh 项目（workspaceKind='ssh'）字段校验 fail-closed 在 createProject 内。
+    p = db.createProject({ name, description, modality: m, userId: ownerId, workspacePath, workspaceKind, sshHost, remotePath });
+  } catch (e) {
+    return res.status(400).json({ status: 'error', error: e.message });
+  }
   if (ownerId && !p.user_id) {
     try {
       db.setProjectUserId(p.id, ownerId);
