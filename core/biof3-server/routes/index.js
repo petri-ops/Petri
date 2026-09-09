@@ -32,6 +32,7 @@ module.exports = async function registerRoutes(app) {
     ['AI progress', () => require('./ai-progress')(app)],
     ['Data CRUD', () => { app.use('/api/data', require('../api-data')); }],
     ['Files', () => require('./files')(app)],
+    ['Knowledge', () => require('./knowledge')(app)],
     // Must precede Harness: harness.js retains the legacy
     // GET /api/loop/:loopRunId catch-all, which would otherwise swallow
     // /runs, /session-summary, /iterations, /recovery, etc.

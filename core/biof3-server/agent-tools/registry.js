@@ -52,6 +52,7 @@ const {
   tool_process_stop,
 } = require('./workspace-tools');
 const { tool_system_info } = require('./system-info-tools');
+const { tool_knowledge_search, tool_knowledge_status } = require('./knowledge-tools');
 const {
   tool_computer_snapshot,
   tool_computer_click,
@@ -147,6 +148,9 @@ const HANDLERS = {
   spawn_agent,
   list_agents,
   wait_agent,
+  // BLOCK-69 — 知识空间（双通道混合检索；只读，所有访问档位可用）
+  knowledge_search: tool_knowledge_search,
+  knowledge_status: tool_knowledge_status,
 };
 
 function contract(category, sideEffect, riskTier, resources, estimatedDurationMs) {
@@ -222,6 +226,9 @@ const CONTRACTS = {
   spawn_agent: contract('agent-management', 'state-write', 'R2', ['agent_tasks', 'loop_runs'], 2000),
   list_agents: contract('agent-management', 'none', 'R0', ['agent_tasks'], 500),
   wait_agent: contract('agent-management', 'none', 'R1', ['agent_tasks', 'loop_runs'], 300000),
+  // BLOCK-69 — 知识空间：只读检索（搜索走 embedding 供应商；status 零外部依赖）
+  knowledge_search: contract('retrieval', 'none', 'R0', ['knowledge.index', 'llm.provider'], 2500),
+  knowledge_status: contract('retrieval', 'none', 'R0', ['knowledge.index'], 100),
 };
 
 function cloneJson(value) {

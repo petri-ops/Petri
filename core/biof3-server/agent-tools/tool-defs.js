@@ -1153,6 +1153,31 @@ const TOOL_DEFS = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'knowledge_search',
+      description:
+        '在用户上传的知识空间（知识库）中检索。双通道（语义向量 + 关键词全文）混合检索，返回最相关的知识块。' +
+        '当知识空间启用且对话涉及用户上传的背景资料（基因笔记、方案文档、代码、表格等）时主动使用；可多轮检索、可更换关键词。',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: '检索查询词（关键词或语义短语）' },
+          topK: { type: 'integer', description: '返回块数，默认 3，最大 8' },
+        },
+        required: ['query'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'knowledge_status',
+      description: '查看知识空间状态：是否启用、文档清单与摄取状态（ready/parsing/failed 等）。零副作用。',
+      parameters: { type: 'object', properties: {} },
+    },
+  },
 ];
 
 function getToolDefs() {
