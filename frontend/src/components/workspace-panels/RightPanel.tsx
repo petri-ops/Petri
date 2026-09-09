@@ -26,6 +26,7 @@ import { AnalysisLaunchPanel } from '@/components/workspace-panels/AnalysisLaunc
 import { ReviewMode } from '@/components/desktop/WorkingTreeReview/ReviewMode';
 // BLOCK-68 / UI-317 — 模型 I/O 信息流 dock（原 composer ⋯ 菜单 overlay 迁入）
 import { LlmTranscriptViewer } from '@/components/copilot/LlmTranscriptViewer';
+import { KnowledgeSpacePanel } from './KnowledgeSpacePanel';
 import styles from '@/pages/project-workspace.module.css';
 
 type DispatchSetter<T> = React.Dispatch<React.SetStateAction<T>>;
@@ -238,6 +239,8 @@ export function RightPanel({
                 )}
                 {/* BLOCK-68 / UI-317 — 模型 I/O 信息流 dock（绑当前会话，只读；无会话诚实空态） */}
                 {tab === 'io' && <LlmTranscriptViewer conversationId={ctx.activeConvId} />}
+                {/* BLOCK-69 / UI-318 — 知识空间（大脑：开关+文档+检索测试；启用真相在 DB） */}
+                {tab === 'knowledge' && <KnowledgeSpacePanel />}
               </div>
             ))}
           </div>

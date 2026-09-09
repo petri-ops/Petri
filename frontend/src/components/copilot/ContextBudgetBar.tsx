@@ -7,6 +7,8 @@ export interface TokenBudget {
   messagesDropped: number;
   pct: number;
   trimmed: boolean;
+  /** BLOCK-69 — 知识空间自动召回注入块的估算 token（无注入为 0/缺省） */
+  knowledgeTokens?: number;
   categories?: {
     systemInstructions: number;
     messages: number;
@@ -196,6 +198,15 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
                 {hasData ? `${formatTokens(displayBudget!.messagesTokensUsed)}${messageBudget > 0 ? ` / ${formatTokens(messageBudget)}` : ''}` : '—'}
               </span>
             </div>
+            {/* BLOCK-69 — 知识空间注入块预算透明 */}
+            {(displayBudget?.knowledgeTokens ?? 0) > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#8b5cf6' }}>
+                <span>知识空间</span>
+                <span style={{ fontFamily: 'monospace', color: 'var(--color-text-primary)' }}>
+                  {formatTokens(displayBudget!.knowledgeTokens!)}
+                </span>
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>上下文窗口</span>
               <span style={{ fontFamily: 'monospace', color: 'var(--color-text-primary)' }}>

@@ -164,7 +164,8 @@ module.exports = function mountKnowledge(app) {
           text: String(hit.text || '').slice(0, 600),
         })),
         readyChunks: result.readyChunks,
-        embeddingAvailable: result.embeddingAvailable,
+        // searchKnowledge 未实际尝试嵌入（无 ready chunk 早退）时以凭据检查为准，避免假 true
+        embeddingAvailable: result.readyChunks === 0 ? embeddingAvailable() : result.embeddingAvailable,
         embeddingError: result.embeddingError || null,
       });
     } catch (e) {

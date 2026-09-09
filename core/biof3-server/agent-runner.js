@@ -32,6 +32,8 @@ const callChatProvider =
   });
 const { renderContentPluginsForPrompt } = require('./agent-tools/content-plugins');
 const { buildSiteSnapshotAsync, renderSiteSnapshotForPrompt } = require('./helpers/site-snapshot');
+// BLOCK-69 — 知识空间（自动召回注入 + knowledge_search/status 工具数据面）
+const knowledgeSpace = require('./helpers/knowledge-space');
 const { buildFactsBlockAsync, backgroundExtractFacts } = require('./helpers/user-facts');
 const {
   _getChatSummary,
@@ -413,6 +415,24 @@ async function runAgentLoop({
     }
   } catch {}
 
+  // BLOCK-69 — 知识空间自动召回（D4 轻按需：启用才检索；过阈值才注入，≤3 块；无命中不注入）
+  let knowledgeTokens = 0;
+  try {
+    const latestUserMsg = [...(Array.isArray(messages) ? messages : [])]
+      .reverse()
+      .find((m) => m && m.role === 'user' && typeof m.content === 'string');
+    const cleanQuery = latestUserMsg
+      ? latestUserMsg.content.replace(/^\[[^\]]+\]\s*\n?/, '').trim()
+      : '';
+    if (cleanQuery) {
+      const knowledgeTurn = await knowledgeSpace.buildAgentTurnBlock(cleanQuery);
+      if (knowledgeTurn.block) {
+        systemPrompt += knowledgeTurn.block;
+        knowledgeTokens = Math.ceil(knowledgeTurn.usedChars / 4);
+      }
+    }
+  } catch {}
+
   systemPrompt += '\n\n=== Tool Calling 指南 ===';
   systemPrompt += '\n你可以调用工具来获取真实数据：query / read_page / search';
   systemPrompt += '\n- 用户问"我有什么..."而 system prompt 已经列出 → 不必再 query，直接答';
@@ -584,6 +604,7 @@ async function runAgentLoop({
       messagesTokensUsed: total,
       systemPromptTokens,
       messagesTokens,
+      knowledgeTokens,
       pct,
       trimmed: total > safeCtx,
     });

@@ -16,6 +16,8 @@
 
 const express = require('express');
 const { buildSystemPrompt, localizeToolResult } = require('../../helpers/system-prompt');
+// BLOCK-69 — 知识空间自动召回
+const knowledgeSpace = require('../../helpers/knowledge-space');
 const { appendDesktopAgentInstructions } = require('../../helpers/desktop-agent-prompt');
 const { renderPluginDemoPathsForPrompt } = require('../../helpers/plugin-demo-prompt');
 const { callChatProvider } = require('../../helpers/llm-client');
@@ -387,6 +389,24 @@ module.exports = {
           const activePlan = await getActivePlanForUserAsync(userId, _activeConv && _activeConv.id);
           if (activePlan) {
             systemPrompt += renderActivePlanForPrompt(activePlan);
+          }
+        }
+      } catch {}
+
+      // BLOCK-69 — 知识空间自动召回（D4 轻按需：启用才检索；过阈值才注入，≤3 块）
+      let knowledgeTokens = 0;
+      try {
+        const latestUserMsg = [...(Array.isArray(messages) ? messages : [])]
+          .reverse()
+          .find((m) => m && m.role === 'user' && typeof m.content === 'string');
+        const cleanQuery = latestUserMsg
+          ? latestUserMsg.content.replace(/^\[[^\]]+\]\s*\n?/, '').trim()
+          : '';
+        if (cleanQuery) {
+          const knowledgeTurn = await knowledgeSpace.buildAgentTurnBlock(cleanQuery);
+          if (knowledgeTurn.block) {
+            systemPrompt += knowledgeTurn.block;
+            knowledgeTokens = Math.ceil(knowledgeTurn.usedChars / 4);
           }
         }
       } catch {}

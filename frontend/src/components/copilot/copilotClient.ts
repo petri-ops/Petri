@@ -1094,6 +1094,7 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
       messagesTokens: typeof obj.messagesTokens === 'number' ? obj.messagesTokens : 0,
       pct: typeof obj.pct === 'number' ? obj.pct : 0,
       trimmed: typeof obj.trimmed === 'boolean' ? obj.trimmed : false,
+      knowledgeTokens: typeof obj.knowledgeTokens === 'number' ? obj.knowledgeTokens : 0,
     };
     dispatchGewuEvent(gewuEvents.tokenBudget, detail);
     return;

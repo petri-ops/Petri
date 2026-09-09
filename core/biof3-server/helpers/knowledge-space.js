@@ -409,6 +409,16 @@ function buildPromptBlock(hits, maxChars = INJECT_MAX_CHARS) {
   return { block, usedChars: used };
 }
 
+// ---- D4 轻按需：agent 每 turn 自动召回（启用才检索；无命中不注入任何内容）----
+
+async function buildAgentTurnBlock(query) {
+  const space = getSpace();
+  if (!space || !space.enabled) return { block: '', usedChars: 0, hitCount: 0 };
+  const result = await searchKnowledge({ query, topK: INJECT_TOPK });
+  const { block, usedChars } = buildPromptBlock(result.hits);
+  return { block, usedChars, hitCount: result.hits.length };
+}
+
 // ---- D10 删除语义：单事务清库，两通道同灭；原始文件随后移除 ----
 
 function deleteDocument(docId) {
@@ -477,6 +487,7 @@ module.exports = {
   fuseRank,
   searchKnowledge,
   buildPromptBlock,
+  buildAgentTurnBlock,
   deleteDocument,
   clearSpace,
 };

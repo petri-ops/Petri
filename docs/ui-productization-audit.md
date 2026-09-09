@@ -2910,3 +2910,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：tsc 0；受影响 vitest 292/292（copilot 全目录 + workspace-panels；新增 useAutoFileReferenceRefresh 2 用例：防抖合并触发/卸载清理；LlmTranscriptViewer 用例适配 dock 形态 + 新增无会话空态用例）；ui:audit:check/docs:check PASS。实机 `scripts/block68-ui-live.cjs` 9 断言 allPass（`acceptance/block-68/ui317-live.json` + `ui317-live.png`）：⋯ 按钮不存在 + composer 控件保留 / `projectWorkspaceChanged` 派发无异常 / 工具飞出菜单「模型 I/O」可打开 + llm-tr-dock 渲染当前会话记录 + 新建会话后 dock 随动诚实空态 / home 空态头部四件套删除 + 六卡片无 small。
 
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-318: 知识空间第一版 —— composer 大脑开关 + 右栏 knowledge tab（BLOCK-69 P2）(2026-09-09 in_progress)
+
+**来源**：BLOCK-69-KNOWLEDGE-SPACE（2026-09-09 用户想法提案立项、同日裁决启动）D6 设计裁决：大脑图标 = 知识空间实体入口——composer 工具条独立 icon 开关按钮（启用态高亮，不挂已移除的 ⋯ 菜单）+ 右栏 `RightPanelMode` 增 `'knowledge'` tab（空间开关 + 文档列表 + 多选上传 + 删除/重建索引 + 检索测试框）。
+
+**改动**：`RightPanelMode` union 增 `'knowledge'` + `RIGHT_PANEL_ITEMS` 大脑 icon 项；新增 `KnowledgeSpacePanel`（workspace-panels/，开关/多选上传/2s 状态轮询仅摄取期/文档级删除（单事务两通道同灭）/重建索引/清空空间两步确认（BLOCK-64 先例）/检索测试框 top-k 命中渲染/「打开知识目录」走既有 `files.openPath` IPC（D9 存储可见）/无 DashScope key 诚实空态禁用开关（D7 不假启用））；composer 左区新增 `sc-knowledge-toggle` 大脑开关（`useKnowledgeSpaceToggle` hook：DB 单一真相、乐观切换失败回读、无 key disabled）；`ContextBudgetBar`/`events.ts`/`copilotClient` 透传 `knowledgeTokens` 预算行（注入块预算透明）；`knowledgeClient.ts` 前端 API 封装。0 新 npm 依赖。
+
+**门禁**：tsc 0；定向 vitest 18/18（KnowledgeSpacePanel 4 + useKnowledgeSpace 3 + SimpleChat/RightPanel/progress 11）；后端 knowledge-space 19/19 + agent-tool-registry 9/9。
+
+**状态**: in_progress（实现完成，实机 CDP 验收进行中——acceptance/block-69/ 落盘后转 verified）。G0 开发期常态 · 不外推 packaged / Provider / GA。

@@ -2004,6 +2004,38 @@
   white-space: nowrap;
 }
 
+/* BLOCK-69 / UI-318 — 知识空间大脑开关（composer 左区，独立 icon 开关；启用态高亮） */
+.sc-knowledge-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--gewu-text-tertiary, var(--gewu-text-secondary, #9ca3af));
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.sc-knowledge-toggle:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.10);
+  color: #8b5cf6;
+}
+
+.sc-knowledge-toggle:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sc-knowledge-toggle-on,
+.sc-knowledge-toggle-on:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.14);
+  color: #8b5cf6;
+}
+
 .sc-access-overlay {
   position: fixed;
   inset: 0;

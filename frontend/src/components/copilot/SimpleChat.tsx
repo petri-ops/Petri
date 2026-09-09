@@ -83,6 +83,7 @@ import { useSummaryRetry } from './SimpleChat/hooks/useSummaryRetry';
 import { useModelAccessMenus } from './SimpleChat/hooks/useModelAccessMenus';
 import { useConversationResume } from './SimpleChat/hooks/useConversationResume';
 import { useAutoFileReferenceRefresh } from './SimpleChat/hooks/useAutoFileReferenceRefresh';
+import { useKnowledgeSpaceToggle } from './SimpleChat/hooks/useKnowledgeSpace';
 export { ResultEditProgressList };
 
 // Re-export helpers (so `import { restoreSimpleMessage } from './SimpleChat'` keeps working)
@@ -392,6 +393,9 @@ export function SimpleChat({
     activePreset: activeModel,
     setActive: setActiveModelId,
   } = useAiSettings();
+
+  // BLOCK-69 / UI-318 — 知识空间大脑开关（启用真相在 DB；无 key 禁用不假启用）
+  const knowledgeSpace = useKnowledgeSpaceToggle();
 
   // UI-305 P0.3 — 模型菜单 + 访问档位菜单状态簇（原 322-330 useState/派生 +
   // 1322-1371 分组与 selectModel）整簇抽入 useModelAccessMenus，簇内 hook 相对
@@ -1107,7 +1111,7 @@ export function SimpleChat({
   // BLOCK-20: token budget event listener — updates ContextBudgetButton state
   useEffect(() => {
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent<{ contextWindow: number; messagesTokensUsed: number; systemPromptTokens: number; messagesTokens: number; pct: number; trimmed: boolean }>).detail;
+      const detail = (e as CustomEvent<{ contextWindow: number; messagesTokensUsed: number; systemPromptTokens: number; messagesTokens: number; pct: number; trimmed: boolean; knowledgeTokens?: number }>).detail;
       setTokenBudget({
         contextWindow: detail.contextWindow,
         messagesTokensUsed: detail.messagesTokensUsed,
@@ -1115,6 +1119,7 @@ export function SimpleChat({
         messagesDropped: 0,
         pct: detail.pct,
         trimmed: detail.trimmed,
+        knowledgeTokens: detail.knowledgeTokens,
       });
     };
     window.addEventListener(gewuEvents.tokenBudget, handler);
@@ -1740,6 +1745,23 @@ export function SimpleChat({
                 </div>
                 {/* UI-303 — 独立「计划模式」开关已并入左侧档位菜单第四档，composer 不再承载 */}
                 {/* BLOCK-57 UI-290 + BLOCK-60 — 执行目标选择已迁至 设置→计算与数据（默认执行目标），composer 不再承载 */}
+                {/* BLOCK-69 / UI-318 — 知识空间大脑开关（独立 icon 开关，不挂已移除的 ⋯ 菜单） */}
+                <button
+                  type="button"
+                  className={`sc-knowledge-toggle${knowledgeSpace.enabled ? ' sc-knowledge-toggle-on' : ''}`}
+                  onClick={() => void knowledgeSpace.toggle()}
+                  disabled={knowledgeSpace.busy || !knowledgeSpace.embeddingAvailable}
+                  title={
+                    !knowledgeSpace.embeddingAvailable
+                      ? '知识空间不可用：请先在设置中配置 DashScope key'
+                      : knowledgeSpace.enabled
+                        ? '知识空间已启用：对话自动检索知识库（点击关闭）'
+                        : '启用知识空间：对话自动检索知识库'
+                  }
+                  data-testid="knowledge-composer-toggle"
+                >
+                  <Icon name="brain" size={14} />
+                </button>
               </div>
               <div className="sc-composer-right">
                 {/* BLOCK-68 / UI-317 —— ⋯ 工具菜单整体移除：刷新文件链接改自动化

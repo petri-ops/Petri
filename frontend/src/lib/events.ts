@@ -130,6 +130,8 @@ export interface TokenBudgetDetail {
   messagesTokensUsed: number;
   systemPromptTokens: number;
   messagesTokens: number;
+  /** BLOCK-69 — 知识空间自动召回注入块估算 token（无注入为 0） */
+  knowledgeTokens: number;
   pct: number;
   trimmed: boolean;
 }
