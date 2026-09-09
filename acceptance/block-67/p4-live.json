@@ -1,0 +1,47 @@
+{
+  "startedAt": "2026-09-09T14:29:10.708Z",
+  "assertions": [
+    {
+      "name": "A1a 不可达项目创建（本地 DB 落库成功，不预判网络）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A1b 断线诚实失败：502 + transport 分类 + retryable（33682ms，ConnectTimeout 生效不悬挂）",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"远程连接失败: transport.network\",\"retryable\":true}"
+    },
+    {
+      "name": "A1c 读操作断线同样诚实失败（绝不本地暂存补写）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A2 恢复：可达 alias 下同一路径操作成功（远程唯一真值，无本地漂移副本）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"entries\":[{\"name\":\"data\",\"type\":\"dir\",\"modifiedAt\":1788951719000},{\"name\":\"README.md\",\"type\":\"file\",\"size\":68,\"modifiedAt\":1788964116000}]"
+    },
+    {
+      "name": "A3 路径逃逸全部 fail-closed（tree 4 例 + file 绝对逃逸）",
+      "pass": true,
+      "detail": "file status=400"
+    },
+    {
+      "name": "A4 node-agent 参数白名单：超长/特殊字符拒绝，base64 放行；远端未知 verb 由 agent die(\"unknown_verb\") 兜底",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A4b BatchMode 无凭据/不可达主机 fail-fast（5024ms 内退出，非交互悬挂）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A5 本地项目零回归：tree 200 + REST 写通道按设计拒绝（local 走既有 IPC）",
+      "pass": true,
+      "detail": "tree=200 put=400"
+    }
+  ],
+  "allPass": true,
+  "finishedAt": "2026-09-09T14:30:26.405Z"
+}
