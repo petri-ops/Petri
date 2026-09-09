@@ -1530,8 +1530,9 @@ export function SimpleChat({
           </div>
         )}
 
-        {/* BLOCK-49 加映二 — 子 agent 活动条（模型派生 + 用户后台双源） */}
-        <SubAgentsBar conversationId={conversationId} />
+        {/* BLOCK-49 加映二 — 子 agent 活动条（模型派生 + 用户后台双源）；
+            BLOCK-65 修正：传 projectId 供俯瞰面板按项目隔离 */}
+        <SubAgentsBar conversationId={conversationId} projectId={projectId} />
         <div
           className="sc-input-area"
           style={{ ['--sc-composer-width' as string]: `${composerWidth}px` }}

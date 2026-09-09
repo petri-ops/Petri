@@ -21,6 +21,7 @@ import {
   type ToolActivityItem,
 } from './toolActivity';
 import { fetchLoopRuns } from '@/lib/loop-client';
+import { getPlatformApiPrefix } from '@/lib/authClient';
 import type { LoopPhaseEvent, LoopIterationEvent, LoopRunCompact } from '@/lib/loop-client';
 import { formatErrorForUser } from './errorMessages';
 import { recordConversationFileChange } from './conversationChangesStore';
@@ -1157,6 +1158,70 @@ export async function resumeSubAgentTasks(
       '（恢复后台任务）'
     );
   }
+}
+
+/**
+ * BLOCK-65 修正：会话打开时回填该会话的历史子 agent（含终态）。
+ * resumeSubAgentTasks 只恢复 running 任务——刷新后历史完成态不进 store，
+ * 会让 SubAgentsBar（活动条 +「全部俯瞰」入口）在该会话永久不可见。
+ * 只登记终态快照（running/pending 交由 resume/live 订阅路径），幂等。
+ * 零第二真相：数据来自 /api/ai/agent/tasks（tasks 表只读投影）。
+ */
+export async function loadHistoricalSubAgentTasks(conversationId: string): Promise<void> {
+  if (!conversationId) return;
+  let rows: Array<{
+    taskId: string;
+    status: string;
+    taskText: string;
+    error: string | null;
+    projectId: string | null;
+    parentTaskId: string | null;
+    createdAt: string | number | null;
+    finishedAt: string | number | null;
+  }> = [];
+  try {
+    const resp = await fetch(
+      `${getPlatformApiPrefix()}/ai/agent/tasks?limit=50&conversationId=${encodeURIComponent(conversationId)}`
+    );
+    const body = await resp.json().catch(() => null);
+    if (!resp.ok || body?.ok !== true) return;
+    rows = body.tasks || [];
+  } catch {
+    return;
+  }
+  let changed = false;
+  for (const t of rows) {
+    if (!t.taskId || subTaskRuns.has(t.taskId)) continue;
+    if (t.status === 'running' || t.status === 'pending') continue; // 由 resume/live 路径负责
+    const status: ConversationRunStatus =
+      t.status === 'completed' ? 'done' : t.status === 'failed' ? 'error' : 'stopped';
+    const startedAt = t.createdAt ? new Date(t.createdAt).getTime() : Date.now();
+    const finishedAt = t.finishedAt ? new Date(t.finishedAt).getTime() : undefined;
+    subTaskRuns.set(t.taskId, {
+      conversationId,
+      projectId: t.projectId || '',
+      status,
+      userContent: t.taskText || '（子 agent 任务）',
+      userTs: t.createdAt ? String(t.createdAt) : new Date(startedAt).toISOString(),
+      assistantContent: t.error ? `失败：${t.error}` : '',
+      assistantTs: new Date(startedAt + 1).toISOString(),
+      assistantPending: false,
+      assistantError: status === 'error',
+      progressUpdates: [],
+      resultEditProgress: [],
+      toolActivities: [],
+      pendingApproval: null,
+      startedAt,
+      taskId: t.taskId,
+      parentTaskId: t.parentTaskId ?? undefined,
+      loop: null,
+      processingDurationMs: finishedAt ? Math.max(0, finishedAt - startedAt) : 0,
+      completedAt: finishedAt,
+    });
+    emitSubTask(t.taskId);
+    changed = true;
+  }
+  if (changed) emit(conversationId);
 }
 
 /**

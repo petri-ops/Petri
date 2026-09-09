@@ -666,6 +666,8 @@ export interface AgentTaskMeta {
 export interface AgentTaskOverviewItem extends AgentTaskMeta {
   spawnSource: string | null;
   error: string | null;
+  /** BLOCK-65 修正：会话归属项目（俯瞰面板按项目隔离） */
+  projectId: string | null;
 }
 
 /** GET /ai/agent/tasks — 用户最近子 agent（跨会话，俯瞰面板数据源） */

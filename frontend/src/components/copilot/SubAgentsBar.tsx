@@ -17,6 +17,7 @@
 import React, { useEffect, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import {
+  loadHistoricalSubAgentTasks,
   stopSubAgentTask,
   useSubAgentTasksForConversation,
   type ConversationRunSnapshot,
@@ -56,8 +57,11 @@ function convShort(id: string | null): string {
 
 export function SubAgentsBar({
   conversationId,
+  projectId,
 }: {
   conversationId: string | null | undefined;
+  /** BLOCK-65 修正：俯瞰面板按项目隔离（仅展示本项目会话派生的 agent） */
+  projectId?: string | null;
 }): React.ReactElement | null {
   const tasks = useSubAgentTasksForConversation(conversationId);
   const [open, setOpen] = useState(false);
@@ -66,6 +70,13 @@ export function SubAgentsBar({
   const [overviewError, setOverviewError] = useState('');
   const [autoPopNote, setAutoPopNote] = useState('');
   const windowManager = getBridge('windowManager');
+
+  // BLOCK-65 修正：会话打开时回填历史子 agent（含终态）——否则刷新后
+  // store 为空，活动条与俯瞰入口在本会话永久不可见
+  useEffect(() => {
+    if (!conversationId) return;
+    void loadHistoricalSubAgentTasks(conversationId);
+  }, [conversationId]);
 
   // P1-b① 自动唤起：新运行中任务 → 自动弹专属窗；超限降格诚实提示
   useEffect(() => {
@@ -85,6 +96,13 @@ export function SubAgentsBar({
         .catch(() => {});
     }
   }, [tasks, windowManager]);
+
+  // BLOCK-65 修正：预算提示为瞬态（6s 自动消退），不长期占据输入区
+  useEffect(() => {
+    if (!autoPopNote) return;
+    const timer = window.setTimeout(() => setAutoPopNote(''), 6000);
+    return () => window.clearTimeout(timer);
+  }, [autoPopNote]);
 
   // P2-c② 俯瞰面板：展开时 5s 轮询（只读投影）
   useEffect(() => {
@@ -112,17 +130,23 @@ export function SubAgentsBar({
 
   if (!conversationId) return null;
   const running = tasks.filter((t) => t.status === 'running').length;
+  // BLOCK-65 修正：没用子智能体就不渲染活动条（空态视觉噪声回归——
+  // 「全部俯瞰」入口仅在已有子 agent 活动的会话内提供）
+  if (tasks.length === 0) return null;
 
   const openDetail = (taskId: string) => {
     void windowManager?.popOut('agent', taskId);
   };
 
-  const overviewRows = (overview || []).slice().sort((a, b) => {
-    const aActive = a.status === 'running' || a.status === 'pending' ? 0 : 1;
-    const bActive = b.status === 'running' || b.status === 'pending' ? 0 : 1;
-    if (aActive !== bActive) return aActive - bActive;
-    return String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
-  });
+  // BLOCK-65 修正：俯瞰按项目隔离——仅展示当前项目会话派生的 agent
+  const overviewRows = (overview || [])
+    .filter((t) => !projectId || !t.projectId || t.projectId === projectId)
+    .sort((a, b) => {
+      const aActive = a.status === 'running' || a.status === 'pending' ? 0 : 1;
+      const bActive = b.status === 'running' || b.status === 'pending' ? 0 : 1;
+      if (aActive !== bActive) return aActive - bActive;
+      return String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
+    });
 
   return (
     <div className={styles.bar}>
@@ -196,7 +220,9 @@ export function SubAgentsBar({
           {overviewError && <div className={styles.overviewNote} role="alert">俯瞰列表获取失败：{overviewError}</div>}
           {!overviewError && overview === null && <div className={styles.overviewNote}>加载中…</div>}
           {!overviewError && overview !== null && overviewRows.length === 0 && (
-            <div className={styles.overviewNote}>还没有任何子 agent 记录。</div>
+            <div className={styles.overviewNote}>
+              {projectId ? '当前项目暂无子 agent 记录（其他项目的 agent 不在此显示）。' : '还没有任何子 agent 记录。'}
+            </div>
           )}
           {overviewRows.map((task) => (
             <div

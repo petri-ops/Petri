@@ -2860,3 +2860,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：SubAgentsBar + conversationRunStore 定向 vitest 43/43；tsc --noEmit 0；实机 `acceptance/block-65/`（ui314-live.json + 3 截图——真实模型 spawn 链路：spawn 后专属窗无手动自动弹出 / 标题「Agent · 请从 1 开始逐个列出 30 的每个数的平方…」/ 运行中留言入队含队列语义 note / 终态继续派成功且新子 agent 专属窗自动弹出 / 全部俯瞰 24 行跨会话含 @conv 标注，6 断言全 PASS）。
 
 **状态**: verified（2026-09-09 dev Electron 真实模型 spawn 链路 CDP 验收完成）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+> **UI-314 收口后修正（2026-09-09，用户实测反馈）**：① 空会话误渲染活动条——SubAgentsBar 早退条件被 P2-c 改松（无子 agent 也渲染「子 agent 0 个 / 全部俯瞰」）→ 恢复 `tasks.length === 0` 即隐藏，俯瞰入口仅在已有子 agent 的会话提供；② 预算降格提示常驻 → 6s 自动消退；③ 俯瞰面板未按项目隔离 → 后端 tasks 列表附 `projectId`（经会话归属解析）+ 前端按当前项目过滤 + SimpleChat 传入 projectId；④ 深层回归——`resumeSubAgentTasks` 仅恢复 running，刷新后历史终态子 agent 不进 store，活动条/俯瞰在本会话永久不可见 → 新增 `loadHistoricalSubAgentTasks`（会话打开时从 `/api/ai/agent/tasks?conversationId=` 回填终态快照，幂等、零第二真相）。实机复核：空会话无活动条、有 agent 会话刷新后活动条/俯瞰可达（48 行含 @conv 标注）、API 全部行带 projectId。修正随 BLOCK-65 收口提交链。

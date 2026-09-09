@@ -14,6 +14,7 @@
 
 const agentTaskStore = require('../../agent-task-store');
 const { queueUserMessage, launchUserFollowup } = require('../../agent-tools/spawn-agent-tools');
+const db = require('../../db').getAsyncDatabase();
 
 const STATUS_HTTP = {
   invalid_arguments: 400,
@@ -31,13 +32,15 @@ function fail(res, code, message, httpOverride) {
 
 module.exports = {
   register(app) {
-    // 俯瞰面板数据源：该用户最近子 agent 任务（跨会话，只读 tasks 投影）
+    // 俯瞰面板数据源：该用户最近子 agent 任务（跨会话，只读 tasks 投影）。
+    // BLOCK-65 修正：附 projectId（经会话归属解析），供面板按项目隔离。
     app.get('/api/ai/agent/tasks', async (req, res) => {
       const userId = req.user && req.user.id;
       if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized', message: '未登录' });
       try {
         const limit = Number(req.query.limit) || 50;
-        const tasks = agentTaskStore.listRecentSubAgentTasks(userId, limit).map((t) => ({
+        const conversationId = req.query.conversationId || null;
+        let tasks = agentTaskStore.listRecentSubAgentTasks(userId, limit).map((t) => ({
           taskId: t.taskId,
           status: t.status,
           agentStatus: t.agentStatus,
@@ -49,6 +52,15 @@ module.exports = {
           spawnSource: (t.params && t.params.spawnSource) || null,
           taskText: String((t.params && t.params.messages && t.params.messages[0] && t.params.messages[0].content) || '').slice(0, 200),
         }));
+        if (conversationId) tasks = tasks.filter((t) => t.conversationId === conversationId);
+        const convIds = [...new Set(tasks.map((t) => t.conversationId).filter(Boolean))];
+        const convProject = new Map();
+        if (convIds.length) {
+          const placeholders = convIds.map(() => '?').join(',');
+          const rows = await db.prepare(`SELECT id, project_id FROM copilot_conversations WHERE id IN (${placeholders})`).all(...convIds);
+          for (const r of rows) convProject.set(r.id, r.project_id || null);
+        }
+        for (const t of tasks) t.projectId = t.conversationId ? (convProject.get(t.conversationId) || null) : null;
         return res.json({ ok: true, tasks });
       } catch (e) {
         return res.status(500).json({ ok: false, error: 'list_failed', message: e && e.message ? e.message : String(e) });
