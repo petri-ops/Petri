@@ -232,8 +232,8 @@ module.exports = function registerFileRoutes(app) {
           const abs = workspaceGateway.safeRemoteJoin(root, String(req.query.path || ''));
           if (!abs) return res.status(400).json({ status: 'error', error: '非法路径' });
           try {
-            const info = await backend.stat(abs);
-            if (info.type !== 'file') return res.status(404).json({ status: 'error', error: '文件不存在' });
+            // D2 体感预算：省一次 stat 往返（fs_read 对目录/缺失路径会以
+            // not_found / 空载诚实回退，无需先 stat 验型）。
             const MAX_PREVIEW_BYTES = 16 * 1024 * 1024;
             const data = await backend.read(abs, { length: MAX_PREVIEW_BYTES });
             res.setHeader('Content-Type', contentTypeFor(abs));

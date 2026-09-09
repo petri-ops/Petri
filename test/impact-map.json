@@ -1150,7 +1150,8 @@
         "scripts/ui317-*.cjs",
         "scripts/block68-*.cjs",
         "scripts/block69-*.cjs",
-        "scripts/ui320-*.cjs"
+        "scripts/ui320-*.cjs",
+        "scripts/block67-*.cjs"
       ],
       "tests": [
         "test/test-affected.test.mjs"

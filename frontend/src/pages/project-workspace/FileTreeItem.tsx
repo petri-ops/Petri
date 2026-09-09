@@ -66,6 +66,7 @@ export function FileTreeItem({
             name: entry.name,
             url: fileUrl,
             size: entry.size,
+            modifiedAt: entry.modifiedAt,
             workspaceDir,
             workspaceKind,
           });

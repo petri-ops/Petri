@@ -75,6 +75,8 @@ export function WorkspaceFilePreview({
   const [textSaved, setTextSaved] = useState<string>('');
   // BLOCK-67 — ssh 远程保存的诚实错误面（409 冲突 / 断线 502）
   const [saveError, setSaveError] = useState<string>('');
+  // BLOCK-67 D3 — 远程 mtime 基线（打开时来自树条目，保存成功后滚动为最新）
+  const savedMtimeRef = useRef<number | null>(null);
   // BLOCK-21 — Markdown view toggle: 'edit' | 'preview'; resets on file switch
   const [mdView, setMdView] = useState<'edit' | 'preview'>('preview');
   // BLOCK-52 P1（选中即引用）：编辑器命令面 + 预览容器内选中状态跟踪。
@@ -229,6 +231,7 @@ export function WorkspaceFilePreview({
   useEffect(() => {
     setTextSaved('');
     setMdView('preview');
+    savedMtimeRef.current = null;
   }, [file?.path]);
 
   const handleSaveCurrent = useCallback(async () => {
@@ -236,14 +239,20 @@ export function WorkspaceFilePreview({
     try {
       // BLOCK-67：ssh 项目无本地 workspaceDir —— 保存走 REST PUT 直写远程（write-through，
       // 冲突/断线诚实呈现，不本地暂存）；local 项目沿用既有 IPC 通道（零回归）。
+      // D3 冲突检测：expectedMtimeMs = 打开时的树基线（file.modifiedAt），保存成功后
+      // 滚动为服务端返回的最新 mtime（后续连续保存不再误判自身写入）。
       if (file.workspaceKind === 'ssh') {
         if (!projectId) return;
+        const baseline = savedMtimeRef.current ?? file.modifiedAt;
         const resp = await fetch(
           `${getApiPrefix()}/workspaces/${projectId}/file?path=${encodeURIComponent(file.path)}`,
           {
             method: 'PUT',
             headers: { 'content-type': 'application/json', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
-            body: JSON.stringify({ content: text }),
+            body: JSON.stringify({
+              content: text,
+              ...(typeof baseline === 'number' ? { expectedMtimeMs: baseline } : {}),
+            }),
           }
         );
         if (!resp.ok) {
@@ -251,6 +260,8 @@ export function WorkspaceFilePreview({
           setSaveError(data?.error || `保存失败（HTTP ${resp.status}）`);
           return;
         }
+        const data = await resp.json().catch(() => null);
+        savedMtimeRef.current = data?.stat?.mtimeMs ?? null;
         setSaveError('');
         setTextSaved(text);
         return;

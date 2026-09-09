@@ -15,6 +15,8 @@ export interface ActiveWorkspaceFile {
   workspaceDir?: string; // 项目根目录绝对路径；BLOCK-19 用于 workspace.writeTextFile 安全写盘
   /** BLOCK-67：ssh 项目无本地 workspaceDir，保存改走 REST PUT 直写远程 */
   workspaceKind?: 'local' | 'ssh';
+  /** BLOCK-67：载入时的远程 mtime 基线（保存前冲突检测 D3） */
+  modifiedAt?: number;
 }
 
 // UI-305 P1 — 文件树条目（原 project-workspace.tsx 内联声明，FileTreeList /

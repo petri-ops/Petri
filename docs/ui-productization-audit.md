@@ -2935,15 +2935,17 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-321: SSH 远程项目创建流 + 远程标识（BLOCK-67 P1）(2026-09-09 in_progress)
+## UI-321: SSH 远程项目创建流 + 远程标识（BLOCK-67 P1）(2026-09-09 verified)
 
 **来源**：BLOCK-67-SSH-REMOTE-PROJECT（2026-09-09 用户裁决启动；P0 设计评审 confirmed 含 D6 修订为 Windows 指挥席）。plan §1 目标形态：新建项目可选「SSH 连接」——目标主机（注册表 + ~/.ssh/config 发现候选）+ 远程绝对路径，创建前经 `/api/ssh-projects/validate`（agent 引导部署 + fs_stat 目录验证）fail-closed；项目卡带 SSH·host 徽标。
 
 **改动**：① home 创建控制区新增「SSH 远程项目…」面板（目标别名 datalist 候选 + 远程路径输入 + 「校验并创建」，校验失败/断线 retryable 诚实文案）；② 项目卡 ssh 项目显示 `SSH·{sshHost}` 徽标 + `host:path` 副标题 + cpu 图标；③ `ActiveWorkspaceFile` 增 `workspaceKind`，文件树（RightFileTree/FileTreeList/FileTreeItem）透传，面包屑根名取远程路径末段；④ `WorkspaceFilePreview` 保存路由：ssh 项目走 REST `PUT /api/workspaces/:id/file` 直写远程（write-through + mtime 冲突 409 诚实错误面 `ssh-save-error`），local 项目沿用既有 IPC（零回归）；⑤ project-types/project-store 增 workspaceKind/sshHost/remotePath 映射 + `listSshTargetCandidates`/`validateSshProject` API。0 新 npm 依赖。
 
-**门禁**：tsc 0；定向 vitest home/project-store/RightPanel 8/8；后端路由级零网络测试 block67-routes 7/7（含 local 零回归用例）。实机验收（aliyun 真节点：创建→树展开→预览→编辑保存）待用户将本机 ED25519 公钥加入 authorized_keys 后执行，届时转 verified。
+**门禁**：tsc 0；定向 vitest home/project-store/RightPanel 8/8；后端路由级零网络测试 block67-routes 7/7（含 local 零回归用例）。
 
-**状态**: in_progress（代码完成，实机验收押后至节点凭据就绪）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**实机**：`scripts/block67-p1-live.cjs` 入库 6/6 断言 allPass（`acceptance/block-67/p1-live.json` + 截图×4）——A1 home SSH 入口+面板+目标候选 API（含 ~/.ssh/config 发现）/ A2 校验并创建→进入远程项目工作台（含 agent 引导部署 ~2.8s）/ A3 文件树渲染远程目录 + data/ 懒展开 / A4 远程 markdown 预览首帧 1884ms（≤2000 预算）/ A5a 编辑保存 write-through 直写远程（节点侧 cat 唯一标记对账）/ A5b 节点侧他端修改后 UI 保存 409 冲突诚实呈现 + 远程内容未被覆盖。D2 采样：树展开 P50 ~1.18s（≤1.5s）、预览 ~1.1s（≤2s）均达标。**实机抓真修两处**：① 前端保存链漏传 expectedMtimeMs（D3 冲突检测未接线，节点侧改动被静默覆盖）——树条目 modifiedAt 透传 + 保存基线滚动；② 预览 GET 先 stat 再 read 双 SSH 往返超预算——省 stat（fs_read 对目录/缺失诚实回退）。**验收脚本教训**：home 直达必触发 isInitialEntry 自动跳最近项目（popstate 亦 key='default'），需 shadow history.length 使全局页「返回首页」走 PUSH。
+
+**状态**: verified（2026-09-09 dev Electron 实机 CDP 验收，aliyun 真实节点）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-322: 文件树「显示隐藏文件」开关（BLOCK-73 方案 A）(2026-09-09 verified)
 

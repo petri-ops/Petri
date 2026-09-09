@@ -1,0 +1,44 @@
+{
+  "startedAt": "2026-09-09T11:30:48.618Z",
+  "marker": "block67-marker-1788953448618",
+  "assertions": [
+    {
+      "name": "A1 home 创建区 SSH 入口 + 面板 + 目标候选 API 可用",
+      "pass": true,
+      "detail": "{\"entry\":true,\"panel\":true,\"alias\":true,\"path\":true,\"targetCount\":4,\"targetAliases\":[\"192.168.1.12\",\"aliyun-6022\",\"aliyun\",\"192.168.1.12\"]}"
+    },
+    {
+      "name": "A2 SSH 项目创建成功并进入工作台（创建+校验链 2783ms）",
+      "pass": true,
+      "detail": "{\"url\":\"/project/p_mtu0p8mg_v0bz\",\"error\":\"\"} createMs=2783"
+    },
+    {
+      "name": "A3 文件树渲染远程目录 + data/ 懒展开（树链 4993ms）",
+      "pass": true,
+      "detail": "{\"before\":[\"data\",\"M↓README.md68 B\"],\"after\":[\"data\",\"CSVdemo.csv41 B\",\"M↓README.md68 B\"]} treeMs=4993"
+    },
+    {
+      "name": "A4 远程文件预览渲染（预览首帧 1884ms ≤ 2000 预算）",
+      "pass": true,
+      "detail": "{\"found\":true,\"rendered\":true,\"ms\":1884} wallMs=1886"
+    },
+    {
+      "name": "A5a 编辑保存 write-through 直写远程（节点侧 cat 对账含唯一标记）",
+      "pass": true,
+      "detail": "{\"ui\":{\"editor\":true,\"dirty\":true,\"saved\":true},\"remoteHasMarker\":true}"
+    },
+    {
+      "name": "A5b mtime 冲突 409 诚实呈现 + 节点侧修改未被覆盖（D3）",
+      "pass": true,
+      "detail": "{\"conflict\":true,\"msg\":\"文件已被其他端修改，请重新加载后再保存\"} nodeChangeKept=true"
+    }
+  ],
+  "timing": {
+    "createMs": 2783,
+    "treeMs": 4993,
+    "previewFirstFrameMs": 1884
+  },
+  "cleanup": "{\"status\":404}",
+  "allPass": true,
+  "finishedAt": "2026-09-09T11:31:21.980Z"
+}
