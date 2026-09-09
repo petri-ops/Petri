@@ -311,12 +311,27 @@ function createGitAdapter(options = {}) {
   if (!workTree || typeof workTree !== 'string') {
     throw new GitAdapterError('work_tree_required', 'workTree is required.');
   }
-  const resolvedGitDir = path.resolve(gitDir);
-  const resolvedWorkTree = path.resolve(workTree);
+  // BLOCK-67 P3：remoteSsh 模式——同一 argv 面经 `ssh <alias> git` 在远端执行
+  // （远程 POSIX 路径不做本地 path.resolve；只读链先行，写操作 argv 数组同通道无注入面）。
+  const remoteSsh = options.remoteSsh && options.remoteSsh.alias
+    ? { alias: String(options.remoteSsh.alias).replace(/[^A-Za-z0-9._-]/g, '') }
+    : null;
+  const resolvedGitDir = remoteSsh ? gitDir : path.resolve(gitDir);
+  const resolvedWorkTree = remoteSsh ? workTree : path.resolve(workTree);
   const gitBin = options.gitBin || 'git';
   const allowHooks = options.allowHooks === true;
   const identity = options.identity || null;
-  const scope = { gitDir: resolvedGitDir, workTree: resolvedWorkTree };
+  const scope = { gitDir: resolvedGitDir, workTree: resolvedWorkTree, remote: !!remoteSsh };
+
+  /** 远端执行：ssh <alias> git <argv>（BatchMode；env 不外传，只读语义足够）。 */
+  function execGitArgv(argv, execOptions) {
+    if (!remoteSsh) return execFileSync(gitBin, argv, execOptions);
+    return execFileSync(
+      'ssh',
+      ['-o', 'BatchMode=yes', '-o', 'ConnectTimeout=10', '--', remoteSsh.alias, 'git', ...argv],
+      execOptions
+    );
+  }
 
   /**
    * 执行一条 git 命令。参数以数组传入，不经 shell。
@@ -334,9 +349,9 @@ function createGitAdapter(options = {}) {
     if (runOptions.readOnly) env.GIT_OPTIONAL_LOCKS = '0';
     let stdout = '';
     try {
-      stdout = execFileSync(gitBin, [...prefix, ...args], {
+      stdout = execGitArgv([...prefix, ...args], {
         encoding: 'utf8',
-        cwd: fs.existsSync(resolvedWorkTree) ? resolvedWorkTree : undefined,
+        cwd: remoteSsh ? undefined : (fs.existsSync(resolvedWorkTree) ? resolvedWorkTree : undefined),
         env: { ...env, ...(runOptions.env || {}) },
         input: runOptions.input,
         timeout: runOptions.timeout || 60000,
@@ -382,13 +397,16 @@ function createGitAdapter(options = {}) {
     }
     const env = baseEnv();
     if (runOptions.readOnly) env.GIT_OPTIONAL_LOCKS = '0';
+    const command = remoteSsh
+      ? ['ssh', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=10', '--', remoteSsh.alias, 'git', ...prefix, ...args]
+      : [gitBin, ...prefix, ...args];
     return new Promise((resolve) => {
       const child = execFile(
-        gitBin,
-        [...prefix, ...args],
+        command[0],
+        command.slice(1),
         {
           encoding: 'utf8',
-          cwd: fs.existsSync(resolvedWorkTree) ? resolvedWorkTree : undefined,
+          cwd: remoteSsh ? undefined : (fs.existsSync(resolvedWorkTree) ? resolvedWorkTree : undefined),
           env: { ...env, ...(runOptions.env || {}) },
           timeout: runOptions.timeout || 60000,
           maxBuffer: 32 * 1024 * 1024,

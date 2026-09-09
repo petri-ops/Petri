@@ -2968,3 +2968,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：tsc 0；新增 WorkspaceFilePreview 组件定向测试 3/3（头部按钮行移除断言 / 自动保存防抖后 writeTextFile 收到新内容 / Ctrl+S 立即保存）；既有集成测试（WorkspaceFilePreviewBridge/P4.2/ChatCardLinkBridge）无按钮行断言不受影响。
 
 **实机状态（诚实登记）**：CDP 验收脚本 `scripts/ui323-preview-header-live.cjs` 已入库（可复跑），但与本日并行的 BLOCK-67 P3 会话共享同一主窗且其在制文件（project-workspace.tsx）HMR 高频重挂右栏，验收窗口被持续踩空——按纪律不假标 verified，**保持 in_progress**；待 BLOCK-67 会话空闲后复跑脚本（一次通过即转 verified）。组件级行为证据（3/3）已锁自动保存/Ctrl+S/按钮移除三契约。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-324: 底部终端 SSH 远程化 + 远程审阅数据面（BLOCK-67 P3）(2026-09-09 verified)
+
+**来源**：BLOCK-67-SSH-REMOTE-PROJECT P3（plan §6：终端是远程 shell、审阅是远程 git）。
+
+**改动**：① 底部终端 ssh 项目远程化——`terminal:session-start` 增 ssh 分支（node-pty 挂 `ssh -tt <alias>`，远端 `cd remote_path && exec $SHELL -l`；preload `startSession` 第三参 additive + `useTerminalTabs` sshRef + `BottomTerminal`/`project-workspace` 透传），local 项目路径零改动。**Windows 实机教训**：ssh.exe 作为 conpty 直接 shell 会触发 node-pty `conpty_console_list_agent`（AttachConsole failed）崩掉整个主进程——改经 `cmd.exe /c` 包装。② 远程审阅数据面——git-adapter 增 `remoteSsh` 模式（同一 argv 面经 `ssh <alias> git` 远端执行；remote 路径不本地 path.resolve；run/runAsync 双通道），`working-tree-review` 的 `resolveGitAdapter` 对 ssh 项目注入该适配器；审阅 UI 组件零改动（数据面同构）。
+
+**门禁**：tsc 0；block67 全系零网络 62/62（含 block57 回归 21）。**实机**：`scripts/block67-p3-live.cjs` 4/4 allPass（`acceptance/block-67/p3-live.json` + 截图×3）——SSH 项目创建 / ssh pty 挂通（远端 shell 回显 root@远程主机）/ 终端 pwd=远程项目根（`/root/gewu-block67-demo`，远程工作目录语义实证）/ 远程 git status+diff 数据面（README.md 修改 + remote-dirty-line 出现在 diff）。P4 断线恢复与安全面 8/8（`p4-live.json`：502 transport 分类+retryable / 恢复无漂移 / 路径逃逸 fail-closed / verb 白名单 / BatchMode fail-fast / 本地零回归）。
+
+**状态**: verified（2026-09-09 dev Electron 实机 CDP 验收，aliyun 真实节点）。G0 开发期常态 · 不外推 packaged / Provider / GA。

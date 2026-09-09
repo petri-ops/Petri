@@ -186,6 +186,49 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
         typeof targetPath === "string" && targetPath.trim()
           ? targetPath.trim()
           : "";
+      // BLOCK-67 P3：SSH 远程项目终端 —— pty 直挂 `ssh -tt <alias>`，
+      // 远端先 cd 到项目 remote_path 再进登录 shell（远程唯一工作目录语义）。
+      if (isObject && args.ssh && args.ssh.alias && args.ssh.remotePath) {
+        const alias = String(args.ssh.alias).replace(/[^A-Za-z0-9._-]/g, "");
+        const remotePath = String(args.ssh.remotePath).replace(/[^A-Za-z0-9._\/@ +-]/g, "");
+        const pty = require("node-pty");
+        // Windows 实测教训：ssh.exe 作为 conpty 直接 shell 会让 node-pty 的
+        // conpty_console_list_agent（getConsoleProcessList）崩掉整个主进程——
+        // 改经 cmd.exe 包装（console 归 cmd，ssh 为其子进程）。
+        const isWin = process.platform === "win32";
+        const sshArgv = ["-o", "ConnectTimeout=10", "-tt", alias, `cd "${remotePath}" && exec $SHELL -l`];
+        const proc = isWin
+          ? pty.spawn("cmd.exe", ["/c", "ssh", ...sshArgv], {
+          name: "xterm-256color",
+          cols: 100,
+          rows: 28,
+          cwd: process.env.BIOF3_LOCAL_DATA_DIR || process.env.BIOF3_PROJECT_ROOT || ".",
+          env: { ...process.env, TERM: "xterm-256color", COLORTERM: "truecolor" },
+        })
+          : pty.spawn("ssh", sshArgv, {
+          name: "xterm-256color",
+          cols: 100,
+          rows: 28,
+          cwd: process.env.BIOF3_LOCAL_DATA_DIR || process.env.BIOF3_PROJECT_ROOT || ".",
+          env: { ...process.env, TERM: "xterm-256color", COLORTERM: "truecolor" },
+        });
+        const disposeData = proc.onData((data) =>
+          sendTerminalEvent("terminal:data", { sessionId, data }),
+        );
+        const disposeExit = proc.onExit(({ exitCode, signal }) => {
+          sendTerminalEvent("terminal:exit", { sessionId, code: exitCode, signal });
+          disposeData?.dispose();
+          disposeExit?.dispose();
+          sessions.delete(sessionId);
+        });
+        sessions.set(sessionId, {
+          proc, disposeData, disposeExit,
+          cwd: `${alias}:${remotePath}`,
+          pid: proc.pid,
+          ssh: { alias, remotePath },
+        });
+        return { ok: true, pid: proc.pid, cwd: `${alias}:${remotePath}`, shell: `ssh:${alias}`, sessionId };
+      }
       const cwd =
         requestedCwd && fs.existsSync(requestedCwd)
           ? requestedCwd

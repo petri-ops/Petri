@@ -16,6 +16,8 @@ export interface UseTerminalTabsOptions {
   open: boolean;
   /** 新 tab 的默认 cwd（当前项目 workspace）。 */
   workspacePath?: string;
+  /** BLOCK-67：SSH 远程项目——pty 直挂 ssh（remotePath 为远端工作目录）。 */
+  ssh?: { alias: string; remotePath: string };
   /** 解析后的应用主题；xterm 实例跟随变化（不重建会话）。 */
   theme: TerminalThemeName;
 }
@@ -54,7 +56,7 @@ interface TabEntry {
  *   dispose 实例；卸载（离开页面）时全量 stop（对齐旧单会话行为）。
  */
 export function useTerminalTabs(options: UseTerminalTabsOptions): UseTerminalTabsResult {
-  const { open, theme, workspacePath } = options;
+  const { open, theme, workspacePath, ssh } = options;
   const [tabs, setTabs] = useState<TerminalTab[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [limitNotice, setLimitNotice] = useState<string | null>(null);
@@ -63,6 +65,8 @@ export function useTerminalTabs(options: UseTerminalTabsOptions): UseTerminalTab
   const entriesRef = useRef<Map<string, TabEntry>>(new Map());
   const hostsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const activeIdRef = useRef<string | null>(null);
+  const sshRef = useRef(ssh);
+  sshRef.current = ssh;
   const themeRef = useRef(theme);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
@@ -165,7 +169,7 @@ export function useTerminalTabs(options: UseTerminalTabsOptions): UseTerminalTab
       if (!bridge?.startSession) return;
       ent.started = true; // 同步置位防并发重复启动；失败时回退
       bridge
-        .startSession(tab.cwd, tab.id)
+        .startSession(tab.cwd, tab.id, sshRef.current || undefined)
         .then((result) => {
           if (!result?.ok) {
             ent.started = false;

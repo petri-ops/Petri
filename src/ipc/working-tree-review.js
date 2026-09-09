@@ -55,9 +55,9 @@ async function safeInvoke(body) {
 const PROJECT_WORKSPACE_TTL_MS = 30_000;
 const projectWorkspaceCache = new Map();
 
-async function getProjectWorkspacePath(projectId) {
+async function getProjectInfo(projectId) {
   const cached = projectWorkspaceCache.get(projectId);
-  if (cached && Date.now() - cached.at < PROJECT_WORKSPACE_TTL_MS) return cached.workspacePath;
+  if (cached && Date.now() - cached.at < 60_000) return cached.info;
   const base = `http://127.0.0.1:${getBackendPort('r')}`;
   const res = await fetch(`${base}/api/data/projects`);
   if (!res.ok) {
@@ -68,9 +68,18 @@ async function getProjectWorkspacePath(projectId) {
   if (!project) {
     throw new GitAdapterError('project_not_found', `项目不存在: ${projectId}`, { projectId });
   }
-  const workspacePath = project.workspace_path || null;
-  projectWorkspaceCache.set(projectId, { workspacePath, at: Date.now() });
-  return workspacePath;
+  const info = {
+    workspacePath: project.workspace_path || null,
+    workspaceKind: project.workspace_kind === 'ssh' ? 'ssh' : 'local',
+    sshHost: project.ssh_host || null,
+    remotePath: project.remote_path || null,
+  };
+  projectWorkspaceCache.set(projectId, { info, at: Date.now() });
+  return info;
+}
+
+async function getProjectWorkspacePath(projectId) {
+  return (await getProjectInfo(projectId)).workspacePath;
 }
 
 /**
@@ -82,7 +91,18 @@ async function getProjectWorkspacePath(projectId) {
  */
 async function resolveGitAdapter(projectId) {
   if (projectId) {
-    const workspacePath = await getProjectWorkspacePath(projectId);
+    const projectInfo = await getProjectInfo(projectId);
+    // BLOCK-67 P3：SSH 远程项目审阅——同一 git argv 面经 `ssh <alias> git` 远端执行；
+    // 只读链（status/diff/log/show）先行，写操作（hunk-apply/revert）走同一 argv 通道随后可用。
+    if (projectInfo.workspaceKind === 'ssh' && projectInfo.sshHost && projectInfo.remotePath) {
+      const gitDir = `${projectInfo.remotePath.replace(/\/+$/, '')}/.git`;
+      return createGitAdapter({
+        gitDir,
+        workTree: projectInfo.remotePath,
+        remoteSsh: { alias: projectInfo.sshHost },
+      });
+    }
+    const workspacePath = projectInfo.workspacePath;
     if (!workspacePath || !fs.existsSync(path.join(workspacePath, '.git'))) {
       throw new GitAdapterError(
         'project_workspace_not_git',

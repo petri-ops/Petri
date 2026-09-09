@@ -282,10 +282,14 @@ const desktopBridgeSurface = {
     snapshot: () => ipcRenderer.invoke('terminal:snapshot'),
     openLogDir: () => ipcRenderer.invoke('terminal:open-log-dir'),
     openShell: (targetPath) => ipcRenderer.invoke('terminal:open-shell', targetPath),
-    startSession: (targetPath, sessionId) =>
+    startSession: (targetPath, sessionId, ssh) =>
       ipcRenderer.invoke(
         'terminal:session-start',
-        sessionId ? { sessionId, targetPath } : targetPath
+        ssh
+          ? { sessionId, targetPath, ssh }
+          : sessionId
+            ? { sessionId, targetPath }
+            : targetPath
       ),
     writeSession: (input, sessionId) =>
       ipcRenderer.invoke(

@@ -1837,6 +1837,9 @@ export function ProjectWorkspace(): React.ReactElement {
           leftOffset={leftOpen ? `var(--gewu-live-left-span, ${leftWidth + 1}px)` : 0}
           rightOffset={rightOpen ? `var(--gewu-live-right-span, ${effectiveRightWidth + 1}px)` : 0}
           workspacePath={project.workspacePath}
+          ssh={project.workspaceKind === 'ssh' && project.sshHost && project.remotePath
+            ? { alias: project.sshHost, remotePath: project.remotePath }
+            : undefined}
           onResize={handleBottomTerminalResize}
           onClose={() => setBottomTerminalOpen(false)}
         />

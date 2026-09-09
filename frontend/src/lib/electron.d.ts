@@ -381,7 +381,8 @@ declare global {
         /** BLOCK-54 P2 多 Tab：sessionId 可选（不传 = 旧单会话 default tab）。 */
         startSession: (
           targetPath?: string,
-          sessionId?: string
+          sessionId?: string,
+          ssh?: { alias: string; remotePath: string }
         ) => Promise<{
           ok: boolean;
           pid?: number;

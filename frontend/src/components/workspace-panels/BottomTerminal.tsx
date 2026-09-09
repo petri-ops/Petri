@@ -13,6 +13,8 @@ export interface BottomTerminalProps {
   leftOffset: number | string;
   rightOffset: number | string;
   workspacePath?: string;
+  /** BLOCK-67：SSH 远程项目终端（ssh pty 直挂）。 */
+  ssh?: { alias: string; remotePath: string };
   onResize: (event: React.MouseEvent) => void;
   onClose: () => void;
 }
@@ -31,6 +33,7 @@ export function BottomTerminal({
   leftOffset,
   rightOffset,
   workspacePath,
+  ssh,
   onResize,
   onClose,
 }: BottomTerminalProps): React.ReactElement {
@@ -49,7 +52,7 @@ export function BottomTerminal({
     clear,
     activeRunning,
     runningBy,
-  } = useTerminalTabs({ open, workspacePath, theme: resolvedTheme });
+  } = useTerminalTabs({ open, workspacePath, ssh, theme: resolvedTheme });
 
   const activeTab = tabs.find((t) => t.id === activeId) || null;
 

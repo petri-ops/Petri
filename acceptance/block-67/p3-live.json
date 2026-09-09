@@ -1,0 +1,27 @@
+{
+  "startedAt": "2026-09-09T14:22:27.080Z",
+  "assertions": [
+    {
+      "name": "S1 SSH 项目创建",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mtu6tqef_xsim\",\"name\":\"P3终端审阅-mtu6tqe9\",\"created_at\":\"2026-09-09T14:22:28.071Z\",\"updated_at\":\"2026-09-09T14:22:28.07"
+    },
+    {
+      "name": "A1 ssh pty 挂通（远端 shell 回显，111538ms）",
+      "pass": true,
+      "detail": "(base) root@iZbp13cl15p71npzz3ov4pZ:~/gewu-block67-demo#  "
+    },
+    {
+      "name": "A2 终端 pwd = 远程项目根",
+      "pass": true,
+      "detail": "\"/root/gewu-block67-demo\""
+    },
+    {
+      "name": "A3 远程审阅：远程 git status/diff 数据面（README.md 修改 + remote-dirty-line 在 diff 中）",
+      "pass": true,
+      "detail": "{\"diff\":true,\"readme\":true,\"totalFiles\":1}"
+    }
+  ],
+  "allPass": true,
+  "finishedAt": "2026-09-09T14:25:20.535Z"
+}
