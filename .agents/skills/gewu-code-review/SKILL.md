@@ -28,9 +28,13 @@ description: Use when reviewing code changes, diffs, or commits; auditing a modu
 
 - 每条发现：`file:line` + 现象（引用源码合同原文）+ 建议修法，三者缺一不成立
 - 结论不许超出证据；"看起来完成"不构成评审通过
-- 同类发现第二次出现 → 触发 `$gewu-project-governance` 的"回归→门禁"转化规则
+- **回归→门禁转化（内嵌规则，无需外部文件）**：同一类缺陷第二次出现——无论是 commit 修复、评审发现还是实机验收抓获——必须转化为机械门禁项（定向测试 / harness 检查 / dev-verify flow），并在门禁自身内写明映射关系。判据：重复 ≥2 次 + 后果隐性滞后 + 可机械化，三条全中才转化；一次性事故与状态类事实不转化
 
 ## 产出与时机
 
-- 报告格式见 `references/REVIEW-REPORT-TEMPLATE.md`（表行式，对齐仓库 W1-W5 审计形态）
+- 报告格式见 `references/REVIEW-REPORT-TEMPLATE.md`（表行式：结论先行、每条发现三要素）
 - 时机：跨模块契约 / 新增 IPC 面 / 安全面 / 大体量包，收口前先评审；单会话小增量可自评但须自查本文件六维度
+
+## 独立性
+
+本 skill 自包含：六维度、严重度分级、转化规则、报告模板全部在本文件夹内，执行不要求读取任何外部文件。

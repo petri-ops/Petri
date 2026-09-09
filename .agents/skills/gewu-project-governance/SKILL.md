@@ -88,7 +88,11 @@ Run `references/STAGE-CLOSEOUT-CHECKLIST.md` in order and write ledger entries p
 - `npm run docs:check`: enforce registry schema, paths, canonical truth uniqueness, entrypoints, and managed Markdown coverage.
 - `npm run docs:reconcile`: list unregistered, orphaned, archival, and retained-reference candidates without moving files.
 
-Companion skill: `$gewu-dev-infra` (`.agents/skills/gewu-dev-infra/`) owns the bundled mechanical toolkit (hygiene, dev-verify flows, product-Skill scaffold, delegation template) and its PORTING guide.
+## Scope & independence
+
+- All rules, criteria, checklists, and templates this skill needs are inside this folder — execution requires no external knowledge file.
+- The `docs/` files named above (AUDIT-LOG, DOC-REGISTRY, document-governance, worktree-governance, roadmap, handoff) are the host repo's **operating data** this process reads and updates. They are declared touchpoints, not dependencies on external knowledge: in a host without them, create them at the listed paths (bootstrap) rather than copying them here — copying would create a second source of truth.
+- Mechanical tooling (bundled scripts, dev-verify flows, product-Skill scaffold, delegation template) lives in the sibling `$gewu-dev-infra` skill when present; every step of this skill remains executable as written without it.
 
 ## Choose the smallest sufficient validation scope
 

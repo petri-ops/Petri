@@ -16,7 +16,7 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 ├── scripts/                        # workspace-state / hygiene-check / closeout-gates（位置无关）
 ├── dev-verify/                     # lib.cjs 四原语 + run.cjs 注册表 + flows/ + _template.cjs
 ├── templates/delegation-contract.md# 子 Agent 委派任务书模板
-└── references/PRODUCT-PRINCIPLES.md# 产品原则参考（非 canonical；canonical=AGENTS.md+governance skill）
+└── references/PRODUCT-PRINCIPLES.md# 产品原则自包含速查（宿主有 AGENTS.md/治理 skill 时冲突以宿主为准）
 ```
 
 仓库内由 `package.json` 接线：`npm run state / hygiene:check / closeout / verify`；产品 Skill 工具 `skills:check/scaffold` 是产品轨道（`scripts/skill-scaffold.mjs`），不在本包内。
