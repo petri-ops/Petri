@@ -1151,7 +1151,19 @@
         "scripts/block68-*.cjs",
         "scripts/block69-*.cjs",
         "scripts/ui320-*.cjs",
-        "scripts/block67-*.cjs"
+        "scripts/block67-*.cjs",
+        "scripts/ui322-*.cjs",
+        "scripts/ui323-*.cjs",
+        "acceptance/ui-323/**",
+        "acceptance/block-67/**",
+        "acceptance/block-64/**",
+        "acceptance/block-65/**",
+        "acceptance/block-68/**",
+        "acceptance/block-69/**",
+        "acceptance/ui-315/**",
+        "acceptance/ui-320/**",
+        "acceptance/ui-322/**",
+        "acceptance/ui-ledger-closeout/**"
       ],
       "tests": [
         "test/test-affected.test.mjs"
