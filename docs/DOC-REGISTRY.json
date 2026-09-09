@@ -115,6 +115,29 @@
    "phase": "PLANNED"
   },
   {
+   "id": "BLOCK-68-UI-DECLUTTER",
+   "path": "docs/block-68-ui-declutter-plan.md",
+   "kind": "work-package",
+   "status": "planned",
+   "canonical": true,
+   "truthDomain": "block-68-ui-declutter",
+   "entrypoint": "docs/README.md",
+   "tags": [
+    "block-68",
+    "ui-declutter",
+    "simple-chat",
+    "composer",
+    "right-panel",
+    "llm-transcript",
+    "empty-state",
+    "G0"
+   ],
+   "notes": "聊天工作台界面减负。2026-09-09 用户裁决立项（三条范围即裁决）：① composer ⋯ 菜单「刷新文件链接」入口删除，文件链接解析改自动——订阅既有 gewuEvents.projectWorkspaceChanged（conversationRunStore agent 写档后 / DataIntakeControl 导入后 dispatch，RightFileTree 已是消费者）debounce 后 resetFileReferenceCache + resolveNonce++，不新建第二套文件变更真相；② 「模型 I/O 信息流」（BLOCK-37 P3 / UI-274，只读）从 ⋯ 菜单迁右侧边栏 tab 体系——RightPanelMode 增 'io' 与文件/审阅并列，内容绑 ctx.activeConvId 会话切换随动，无会话诚实空态，LlmTranscriptViewer 抽 dock 形态退役 overlay 外壳；③ 右栏 home 空态（EmptyResult，UI-305 P1 平移件）删头部四件套（闪电图标/开始工作标题/描述行/项目行）+ 六卡片副标题，仅留图标+名称卡片网格。⋯ 菜单两项一删一迁后整体移除不预留空壳，composer 右侧收敛为 预算环|供应商|模型|发送。0 新 npm 依赖，纯 TSX+CSS，一次会话可收口。范围外：composerWidth 弹性逻辑（BLOCK-60 契约）、llm-transcripts 后端数据面（BLOCK-37）、窗口系统（BLOCK-59/65）。排队现状：BLOCK-67-SSH-REMOTE-PROJECT 在前；UI-316 已由并行会话收口（863dd8d2 verified），另有 UI-315 终端块跟进 WIP（ToolActivityList.tsx 未提交）进行中，启动按串行纪律待其落定。UI 台账 UI-317 实现同提交登记。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+   "registeredAt": "2026-09-09",
+   "archivePolicy": "archive_when_superseded",
+   "phase": "PLANNED"
+  },
+  {
    "id": "UI-305-FRONTEND-LARGE-FILE-REFACTOR",
    "path": "docs/ui-305-frontend-large-file-refactor-plan.md",
    "kind": "work-package",
