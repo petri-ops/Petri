@@ -1333,12 +1333,117 @@
   color: var(--gewu-status-warning-fg);
 }
 
-/* ── UI-315 — exec 工具的原生终端块（自带统一暗色主题，覆盖 .sc-msg-body pre 全局样式） ── */
+/* ── UI-315 优化二 — 终端块跟随主题：无边框自由排版，ANSI 明暗双套色板 ── */
+.sc-tool-term {
+  --term-pad: 2px 0 2px 12px;
+  align-self: stretch;
+  margin: 4px 0 6px;
+  padding: var(--term-pad);
+  border-left: 2px solid var(--gewu-border, rgba(127, 127, 127, 0.35));
+  overflow: hidden;
+}
+
+/* 消息体全局 pre 规则不得渗入终端块 */
+.sc-tool-term pre.sc-tool-term-command,
+.sc-tool-term pre.sc-tool-term-output {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+}
+
+.sc-tool-term-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0 0 6px;
+  border: none;
+  background: transparent;
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
+  cursor: pointer;
+  text-align: left;
+}
+
+.sc-tool-term-badge {
+  display: inline-flex;
+  color: var(--gewu-text-secondary);
+}
+
+.sc-tool-term-title {
+  font-weight: 600;
+}
+
+.sc-tool-term-status {
+  color: var(--gewu-text-secondary);
+}
+
+.sc-tool-term-status[data-status='running'] {
+  color: var(--gewu-accent, #5a9cff);
+}
+
+.sc-tool-term-status[data-status='error'],
+.sc-tool-term-status[data-status='denied'] {
+  color: var(--gewu-danger, #ff7a7a);
+}
+
+.sc-tool-term-status[data-status='success'] {
+  color: var(--gewu-status-success);
+}
+
+.sc-tool-term-duration {
+  margin-left: auto;
+  color: var(--gewu-text-secondary);
+  opacity: 0.85;
+}
+
+.sc-tool-term-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sc-tool-term-command,
+.sc-tool-term-output {
+  margin: 0;
+  font-family: var(--gewu-font-mono, monospace);
+  font-size: var(--gewu-font-size-xs);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.sc-tool-term-command {
+  color: var(--gewu-text-primary);
+}
+
+.sc-tool-term-prompt {
+  color: var(--gewu-accent, #5a9cff);
+  user-select: none;
+}
+
+.sc-tool-term-output {
+  color: var(--gewu-text-secondary);
+  max-height: 300px;
+  overflow: auto;
+}
+
+.sc-tool-term-err {
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-danger, #ff7a7a);
+}
+
 .sc-tool-term-spinner {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 2px solid var(--term-accent);
+  border: 2px solid var(--gewu-accent, #5a9cff);
   border-top-color: transparent;
   animation: sc-term-spin 0.8s linear infinite;
 }
@@ -1365,7 +1470,7 @@
   flex-shrink: 0;
   border: none;
   background: transparent;
-  color: var(--term-dim);
+  color: var(--gewu-text-secondary);
   font-size: var(--gewu-font-size-xs);
   cursor: pointer;
   padding: 2px 6px;
@@ -1373,8 +1478,7 @@
 }
 
 .sc-tool-term-copy:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--term-text);
+  color: var(--gewu-accent, #5a9cff);
 }
 
 .sc-tool-term-output-wrap {
@@ -1397,153 +1501,53 @@
   position: absolute;
   bottom: 8px;
   right: 10px;
-  border: 1px solid var(--term-border);
+  border: 1px solid var(--gewu-border-subtle);
   border-radius: 6px;
-  background: var(--term-bg);
-  color: var(--term-text);
+  background: var(--gewu-bg-canvas);
+  color: var(--gewu-text-secondary);
   font-size: var(--gewu-font-size-xs);
   padding: 2px 8px;
   cursor: pointer;
 }
 
-/* ANSI 16 色（暗底调校） */
+/* ANSI 16 色 —— 浅色主题（深色调校，浅底可读） */
 .sc-tool-term .term-bold { font-weight: 600; }
 .sc-tool-term .term-dim { opacity: 0.6; }
 .sc-tool-term .term-ul { text-decoration: underline; }
-.sc-tool-term .term-c0 { color: #5b6270; }
-.sc-tool-term .term-c1 { color: #ff7a7a; }
-.sc-tool-term .term-c2 { color: #4ec98a; }
-.sc-tool-term .term-c3 { color: #e5c07b; }
-.sc-tool-term .term-c4 { color: #6aa5ff; }
-.sc-tool-term .term-c5 { color: #c792ea; }
-.sc-tool-term .term-c6 { color: #59c2d6; }
-.sc-tool-term .term-c7 { color: #d7dee9; }
-.sc-tool-term .term-c8 { color: #7d8598; }
-.sc-tool-term .term-c9 { color: #ff9b9b; }
-.sc-tool-term .term-c10 { color: #7ee2b0; }
-.sc-tool-term .term-c11 { color: #f0d290; }
-.sc-tool-term .term-c12 { color: #91c0ff; }
-.sc-tool-term .term-c13 { color: #d9b3f0; }
-.sc-tool-term .term-c14 { color: #7fd8e8; }
-.sc-tool-term .term-c15 { color: #eef1f7; }
+.sc-tool-term .term-c0 { color: #414653; }
+.sc-tool-term .term-c1 { color: #d13438; }
+.sc-tool-term .term-c2 { color: #0f7b0f; }
+.sc-tool-term .term-c3 { color: #986f0b; }
+.sc-tool-term .term-c4 { color: #0b62c4; }
+.sc-tool-term .term-c5 { color: #7a4dbb; }
+.sc-tool-term .term-c6 { color: #0e7c7b; }
+.sc-tool-term .term-c7 { color: #5b6270; }
+.sc-tool-term .term-c8 { color: #6b7280; }
+.sc-tool-term .term-c9 { color: #d13438; }
+.sc-tool-term .term-c10 { color: #0f7b0f; }
+.sc-tool-term .term-c11 { color: #b25e09; }
+.sc-tool-term .term-c12 { color: #0b62c4; }
+.sc-tool-term .term-c13 { color: #7a4dbb; }
+.sc-tool-term .term-c14 { color: #0e7c7b; }
+.sc-tool-term .term-c15 { color: #414653; }
 
-.sc-tool-term {
-  --term-bg: #141922;
-  --term-border: #2a3140;
-  --term-text: #d7dee9;
-  --term-dim: #8b94a7;
-  --term-accent: #3fb27f;
-  --term-danger: #ff7a7a;
-  align-self: stretch;
-  margin: 4px 0;
-  border: 1px solid var(--term-border);
-  border-radius: 10px;
-  background: var(--term-bg);
-  color: var(--term-text);
-  overflow: hidden;
-}
-
-/* 消息体内的全局 pre 规则（.sc-msg-body pre 白底）不得渗入终端块 */
-.sc-tool-term pre.sc-tool-term-command,
-.sc-tool-term pre.sc-tool-term-output {
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  margin: 0;
-}
-
-.sc-tool-term-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 7px 12px;
-  border: none;
-  background: rgba(255, 255, 255, 0.04);
-  border-bottom: 1px solid var(--term-border);
-  color: var(--term-dim);
-  font-size: var(--gewu-font-size-xs);
-  cursor: pointer;
-  text-align: left;
-}
-
-.sc-tool-term[data-status='success'] .sc-tool-term-head,
-.sc-tool-term-head:hover {
-  background: rgba(255, 255, 255, 0.07);
-}
-
-.sc-tool-term-badge {
-  display: inline-flex;
-  color: var(--term-accent);
-}
-
-.sc-tool-term-title {
-  font-weight: 600;
-}
-
-.sc-tool-term-status {
-  color: var(--term-dim);
-}
-
-.sc-tool-term-status[data-status='running'] {
-  color: var(--gewu-accent, #5a9cff);
-}
-
-.sc-tool-term-status[data-status='error'],
-.sc-tool-term-status[data-status='denied'] {
-  color: var(--term-danger);
-}
-
-.sc-tool-term-status[data-status='success'] {
-  color: var(--term-accent);
-}
-
-.sc-tool-term-duration {
-  margin-left: auto;
-  color: var(--term-dim);
-  opacity: 0.85;
-}
-
-.sc-tool-term-body {
-  padding: 10px 12px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.sc-tool-term-command,
-.sc-tool-term-output {
-  margin: 0;
-  font-family: var(--gewu-font-mono, monospace);
-  font-size: var(--gewu-font-size-xs);
-  line-height: 1.55;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.sc-tool-term-command {
-  color: var(--term-text);
-}
-
-.sc-tool-term-prompt {
-  color: var(--term-accent);
-  user-select: none;
-}
-
-.sc-tool-term-output {
-  padding: 8px 10px;
-  max-height: 300px;
-  overflow: auto;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.32);
-  color: var(--term-dim);
-}
-
-.sc-tool-term-err {
-  font-size: var(--gewu-font-size-xs);
-  color: var(--term-danger);
-}
+/* 深色主题（亮色调校） */
+[data-theme='dark'] .sc-tool-term .term-c0 { color: #6b7280; }
+[data-theme='dark'] .sc-tool-term .term-c1 { color: #ff7a7a; }
+[data-theme='dark'] .sc-tool-term .term-c2 { color: #4ec98a; }
+[data-theme='dark'] .sc-tool-term .term-c3 { color: #e5c07b; }
+[data-theme='dark'] .sc-tool-term .term-c4 { color: #6aa5ff; }
+[data-theme='dark'] .sc-tool-term .term-c5 { color: #c792ea; }
+[data-theme='dark'] .sc-tool-term .term-c6 { color: #59c2d6; }
+[data-theme='dark'] .sc-tool-term .term-c7 { color: #d7dee9; }
+[data-theme='dark'] .sc-tool-term .term-c8 { color: #9aa3b8; }
+[data-theme='dark'] .sc-tool-term .term-c9 { color: #ff9b9b; }
+[data-theme='dark'] .sc-tool-term .term-c10 { color: #7ee2b0; }
+[data-theme='dark'] .sc-tool-term .term-c11 { color: #f0d290; }
+[data-theme='dark'] .sc-tool-term .term-c12 { color: #91c0ff; }
+[data-theme='dark'] .sc-tool-term .term-c13 { color: #d9b3f0; }
+[data-theme='dark'] .sc-tool-term .term-c14 { color: #7fd8e8; }
+[data-theme='dark'] .sc-tool-term .term-c15 { color: #eef1f7; }
 
 
 /* Approval card */
