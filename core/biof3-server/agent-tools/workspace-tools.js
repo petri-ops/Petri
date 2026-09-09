@@ -1609,17 +1609,67 @@ function createWorkspaceTools(options = {}) {
     };
   }
 
+  // ── BLOCK-67 P2：SSH 远程面路由 ──
+  // 项目 workspace_kind === 'ssh' 时，8 工具 + 后台进程三件套路由到 ssh surface；
+  // local 项目原路径零改动（零回归红线）。项目形态取自 DB（创建时定死，D7）。
+  const { createSshWorkspaceSurface } = require('./workspace-ssh-surface');
+  const sshSurface = createSshWorkspaceSurface({
+    getProject: (projectId) => dbProvider().getProject(projectId),
+    authorizeProject,
+    assertProjectG0Compatible,
+    commandVerdict,
+    sensitiveSegments: SENSITIVE_SEGMENTS,
+    dbProvider,
+  });
+
+  async function projectIsSsh(ctx) {
+    const projectId = String((ctx && ctx.projectId) || '').trim();
+    if (!projectId) return false;
+    try {
+      const d = dbProvider();
+      const row = typeof d.getDatabase === 'function'
+        ? d.getDatabase().prepare('SELECT workspace_kind FROM projects WHERE id = ?').get(projectId)
+        : d.getProject(projectId);
+      return row ? row.workspace_kind === 'ssh' : false;
+    } catch {
+      return false;
+    }
+  }
+
+  function routeByWorkspaceKind(sshHandler) {
+    return async (args, ctx, handlerOptions) => {
+      if (await projectIsSsh(ctx)) {
+        return sshHandler(args, ctx, handlerOptions, {
+          buildChange: (rel, before, after) => ({
+            summary: buildChangeSummary(rel, before, after),
+            diff: buildChangeDiff(before, after),
+          }),
+        });
+      }
+      return null; // null = 走本地实现（由包装层处理）
+    };
+  }
+
+  function routed(localImpl, sshHandlerName) {
+    const router = routeByWorkspaceKind(sshSurface[sshHandlerName]);
+    return async (args, ctx, handlerOptions) => {
+      const sshResult = await router(args, ctx, handlerOptions);
+      if (sshResult !== null) return sshResult;
+      return localImpl(args, ctx, handlerOptions);
+    };
+  }
+
   return {
-    listDirectory,
-    findFiles,
-    searchText,
-    readFile,
-    writeFile,
-    replaceText,
-    executeCommand,
-    execBackground,
-    processStatus,
-    processStop,
+    listDirectory: routed(listDirectory, 'listDirectory'),
+    findFiles: routed(findFiles, 'findFiles'),
+    searchText: routed(searchText, 'searchText'),
+    readFile: routed(readFile, 'readFile'),
+    writeFile: routed(writeFile, 'writeFile'),
+    replaceText: routed(replaceText, 'replaceText'),
+    executeCommand: routed(executeCommand, 'executeCommand'),
+    execBackground: routed(execBackground, 'execBackground'),
+    processStatus: routed(processStatus, 'processStatus'),
+    processStop: routed(processStop, 'processStop'),
     preflightTool,
     commandVerdict,
   };

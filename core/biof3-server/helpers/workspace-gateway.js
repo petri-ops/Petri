@@ -27,7 +27,8 @@ function safeRemoteJoin(root, relativePath) {
   const rootSegs = String(root || '').replace(/\\/g, '/').replace(/\/+$/, '').split('/').filter(Boolean);
   if (rootSegs.length === 0) return null;
   const prefix = String(root || '').replace(/\\/g, '/').startsWith('/') ? '/' : '';
-  return `${prefix}${rootSegs.join('/')}/${segments.join('/')}`;
+  const rootPath = `${prefix}${rootSegs.join('/')}`;
+  return segments.length === 0 ? rootPath : `${rootPath}/${segments.join('/')}`;
 }
 
 /** ssh 后端：一次性 ssh + fs verb；语义错误（not_found 等）以 payload error 呈现。 */
@@ -137,6 +138,44 @@ function createSshBackend({ alias }) {
       const [info] = parseJsonLines(await fsOp(['fs_rm', b64(targetPath)]));
       if (!info || info.error) { const e = new Error(info?.error || 'fs_rm_failed'); e.remoteError = info?.error; throw e; }
       return info;
+    },
+    // ── BLOCK-67 P2：find / grep / exec / 进程面 ──
+    async find(dirPath, maxDepth = 6) {
+      return fsOp(['fs_find', b64(dirPath), String(maxDepth)], { timeoutMs: 60000 });
+    },
+    async grep(pattern, targetPath, maxLines = 200) {
+      return fsOp(['fs_grep', b64(pattern), b64(targetPath), String(maxLines)], { timeoutMs: 60000 });
+    },
+    async exec(command, cwd, timeoutS = 120) {
+      // 输出单行 JSON {code,stdout,stderr,truncated}（stdout/stderr 为 base64）
+      const [info] = parseJsonLines(await fsOp(
+        ['exec', b64(command), b64(cwd), String(timeoutS)],
+        { timeoutMs: (timeoutS + 30) * 1000, maxArgLen: 256 * 1024 }
+      ));
+      if (!info || info.error) {
+        const e = new Error(info?.error || 'exec_failed'); e.remoteError = info?.error; throw e;
+      }
+      return {
+        code: info.code,
+        stdout: Buffer.from(String(info.stdout || ''), 'base64').toString('utf8'),
+        stderr: Buffer.from(String(info.stderr || ''), 'base64').toString('utf8'),
+        truncated: info.truncated === true,
+      };
+    },
+    async execBackground(command, cwd, logPath) {
+      const [info] = parseJsonLines(await fsOp(
+        ['exec_bg', b64(command), b64(cwd), b64(logPath)],
+        { timeoutMs: 30000, maxArgLen: 256 * 1024 }
+      ));
+      return { pid: Number.isInteger(info?.pid) ? info.pid : null, error: info?.error };
+    },
+    async processAlive(pid) {
+      const [info] = parseJsonLines(await fsOp(['ps_pid', String(pid)], { timeoutMs: 20000 }));
+      return { alive: info?.alive === true };
+    },
+    async killPid(pid, signal = 'TERM') {
+      const [info] = parseJsonLines(await fsOp(['kill_pid', String(pid), String(signal)], { timeoutMs: 20000 }));
+      return { signaled: info?.signaled === true };
     },
   };
 }
