@@ -4,6 +4,10 @@
  * 按时间倒序列出本会话全部模型调用（时间 / 模型 / 轮次 / tokens / 体积 / 错误标记），
  * 点击展开单条——请求 messages 按角色折叠 + 响应聚合正文（含 reasoning / tool_calls /
  * usage），SSE 帧数与截断标记诚实呈现。严格只读，无重放/编辑/删除。
+ *
+ * BLOCK-68 / UI-317 — 自 ⋯ 菜单 overlay 形态迁为右栏 dock 形态（与文件/审阅并列）：
+ * overlay/dialog 外壳与 Esc/遮罩关闭退役，绑 activeConvId 会话切换内容随动，
+ * 无会话渲染诚实空态。
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -152,11 +156,9 @@ function RecordDetail({ record }: { record: LlmTranscriptRecord }) {
 
 export function LlmTranscriptViewer({
   conversationId,
-  onClose,
 }: {
   conversationId: string | null;
-  onClose: () => void;
-}): React.ReactElement | null {
+}): React.ReactElement {
   const [entries, setEntries] = useState<LlmTranscriptIndexEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -213,41 +215,21 @@ export function LlmTranscriptViewer({
     [conversationId, expandedId, detailCache]
   );
 
-  useEffect(() => {
-    const handler = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
-
-  if (!conversationId) return null;
-
   return (
-    <div className="llm-tr-overlay" role="dialog" aria-label="模型 I/O 信息流">
-      <div className="llm-tr-overlay-mask" onClick={onClose} />
-      <div className="llm-tr-panel">
-        <header className="llm-tr-head">
-          <span className="llm-tr-title">模型 I/O 信息流</span>
-          <span className="llm-tr-sub">本会话全部模型调用的请求与响应原文 · 只读</span>
-          <button
-            type="button"
-            className="llm-tr-close"
-            aria-label="关闭"
-            title="关闭 (Esc)"
-            onClick={onClose}
-          >
-            <Icon name="x" size={14} />
-          </button>
-        </header>
+    <div className="llm-tr-dock" aria-label="模型 I/O 信息流">
+      <header className="llm-tr-head">
+        <span className="llm-tr-title">模型 I/O 信息流</span>
+        <span className="llm-tr-sub">本会话全部模型调用的请求与响应原文 · 只读</span>
+      </header>
 
-        <div className="llm-tr-body">
-          {error && <div className="llm-tr-error-banner">加载失败：{error}</div>}
-          {entries === null && !error && <div className="llm-tr-state">加载中…</div>}
-          {entries !== null && sortedEntries.length === 0 && (
-            <div className="llm-tr-state">本会话暂无模型调用记录</div>
-          )}
-          {sortedEntries.map((entry) => {
+      <div className="llm-tr-body">
+        {!conversationId && <div className="llm-tr-state">当前无会话</div>}
+        {conversationId && error && <div className="llm-tr-error-banner">加载失败：{error}</div>}
+        {conversationId && entries === null && !error && <div className="llm-tr-state">加载中…</div>}
+        {conversationId && entries !== null && sortedEntries.length === 0 && (
+          <div className="llm-tr-state">本会话暂无模型调用记录</div>
+        )}
+        {conversationId && sortedEntries.map((entry) => {
             const expanded = expandedId === entry.id;
             return (
               <div key={entry.id} className={`llm-tr-item${expanded ? ' is-expanded' : ''}`}>
@@ -278,7 +260,6 @@ export function LlmTranscriptViewer({
             );
           })}
         </div>
-      </div>
     </div>
   );
 }

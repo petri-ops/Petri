@@ -65,7 +65,6 @@ import {
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
 // UI-268: 「后台进程」浮窗（持久输出独立小窗口）；工具活动记录改为内联手风琴
 import { ToolActivityDock } from './ToolActivityDock';
-import { LlmTranscriptViewer } from './LlmTranscriptViewer';
 import { MessageRail, type MessageRailItem } from './MessageRail';
 import { ChatScrollbar } from './ChatScrollbar';
 import {
@@ -83,6 +82,7 @@ import { ResultEditProgressList } from './SimpleChat/ResultEditProgressList';
 import { useSummaryRetry } from './SimpleChat/hooks/useSummaryRetry';
 import { useModelAccessMenus } from './SimpleChat/hooks/useModelAccessMenus';
 import { useConversationResume } from './SimpleChat/hooks/useConversationResume';
+import { useAutoFileReferenceRefresh } from './SimpleChat/hooks/useAutoFileReferenceRefresh';
 export { ResultEditProgressList };
 
 // Re-export helpers (so `import { restoreSimpleMessage } from './SimpleChat'` keeps working)
@@ -127,7 +127,7 @@ import { useConversations } from '@/hooks/useConversations';
 import { gewuEvents, dispatchGewuEvent, subscribeGewuEvent } from '@/lib/events';
 import '@/lib/chat-file-references';
 import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-references';
-import { __resetFileReferenceCache, extractFileReferenceCandidates } from '@/lib/chat-file-references';
+import { extractFileReferenceCandidates } from '@/lib/chat-file-references';
 
 // SYSTEM_OPEN_FILE_EXTENSIONS + shouldOpenWithSystemApp moved to ./SimpleChat/types.ts (BLOCK-9.2 PHASE 4).
 
@@ -297,15 +297,12 @@ export function SimpleChat({
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [previewImage, setPreviewImage] = useState<AttachmentFile | null>(null);
   const [loading, setLoading] = useState(false);
-  // T83: transient spinner state for the file-reference refresh button.
-  const [refreshing, setRefreshing] = useState(false);
   const [paramDraft, setParamDraft] = useState<Record<string, string>>({});
   const [approvalRepair, setApprovalRepair] = useState<ApprovalRepairState>({ status: 'idle' });
   // BLOCK-57：远程执行目标——确认卡选择器数据（仅当存在已注册目标时渲染，本机永远是默认）
   // BLOCK-60 — composer 工具栏容器查询窄态（ResizeObserver 只读宽度，不影响弹性宽度逻辑）
   const composerBarRef = useRef<HTMLDivElement | null>(null);
   const [composerNarrow, setComposerNarrow] = useState(false);
-  const [composerMoreOpen, setComposerMoreOpen] = useState(false);
   useEffect(() => {
     const el = composerBarRef.current;
     if (!el || typeof ResizeObserver === 'undefined') return;
@@ -1012,17 +1009,9 @@ export function SimpleChat({
     }
   }, [pendingRevision, planCardBusy, send]);
 
-  // T83: file-reference refresh feedback layer (no core-logic change).
-  const handleRefresh = useCallback(() => {
-    if (refreshing) return;
-    __resetFileReferenceCache();
-    setResolveNonce((value) => value + 1);
-    setRefreshing(true);
-    window.setTimeout(() => setRefreshing(false), 700);
-  }, [refreshing]);
-
-  // BLOCK-37 P3 / UI-274: 会话级「模型 I/O」信息流查看器（按需打开，不常驻）
-  const [ioTranscriptOpen, setIoTranscriptOpen] = useState(false);
+  // BLOCK-68 / UI-317 —— 「刷新文件链接」入口删除后改自动化（hook 外迁可单测）：
+  // 订阅 agent 写档/数据导入信号，debounce 后清解析缓存并 bump resolveNonce。
+  useAutoFileReferenceRefresh(() => setResolveNonce((value) => value + 1));
 
   // Fork: create a new conversation with all messages copied from the current one.
   const handleFork = useCallback(async () => {
@@ -1753,46 +1742,8 @@ export function SimpleChat({
                 {/* BLOCK-57 UI-290 + BLOCK-60 — 执行目标选择已迁至 设置→计算与数据（默认执行目标），composer 不再承载 */}
               </div>
               <div className="sc-composer-right">
-                {/* BLOCK-60 — ⋯ 工具菜单：低频操作常驻 + 窄态收纳计划模式 */}
-                <div className="sc-toolbar-more">
-                  <button
-                    type="button"
-                    className="sc-composer-icon-btn"
-                    title="更多工具"
-                    aria-label="更多工具"
-                    aria-expanded={composerMoreOpen}
-                    onClick={() => setComposerMoreOpen((v) => !v)}
-                  >
-                    <Icon name="more-horizontal" size={16} />
-                  </button>
-                  {composerMoreOpen && (
-                    <>
-                      <div className="sc-access-overlay" onClick={() => setComposerMoreOpen(false)} />
-                      <div className="sc-access-menu sc-toolbar-more-menu">
-                        <div className="sc-menu-section-label">操作</div>
-                        <button
-                          type="button"
-                          className="sc-access-option"
-                          disabled={refreshing}
-                          onClick={() => { setComposerMoreOpen(false); void handleRefresh(); }}
-                        >
-                          <span className="sc-access-option-title">刷新文件链接</span>
-                          <span className="sc-access-option-sub">清除解析缓存并对已落地消息重跑解析</span>
-                        </button>
-                        <button
-                          type="button"
-                          className="sc-access-option"
-                          disabled={!conversationId}
-                          onClick={() => { setComposerMoreOpen(false); setIoTranscriptOpen(true); }}
-                        >
-                          <span className="sc-access-option-title">模型 I/O 信息流</span>
-                          <span className="sc-access-option-sub">本会话模型调用的请求与响应原文（只读）</span>
-                        </button>
-                        {/* UI-303 — 计划模式入口已并入档位菜单，⋯ 窄态收纳项移除；执行目标选择已迁至 设置→计算与数据 */}
-                      </div>
-                    </>
-                  )}
-                </div>
+                {/* BLOCK-68 / UI-317 —— ⋯ 工具菜单整体移除：刷新文件链接改自动化
+                    （订阅 projectWorkspaceChanged），模型 I/O 迁右栏 tab；不预留空壳 */}
                 {/* BLOCK-20: live context-budget ring — UI-301 加映：移到供应商左侧 */}
                 <ContextBudgetButton budget={tokenBudget} activeContextWindow={undefined} />
                 <div className="sc-model-picker-pair">
@@ -1888,14 +1839,6 @@ export function SimpleChat({
 
       {/* UI-268: 「后台进程」浮窗（持久输出独立小窗口） */}
       <ToolActivityDock conversationId={conversationId} projectId={projectId} />
-
-      {/* BLOCK-37 P3 / UI-274: 会话级「模型 I/O」信息流查看器（按需打开，Esc/遮罩关闭） */}
-      {ioTranscriptOpen && (
-        <LlmTranscriptViewer
-          conversationId={conversationId}
-          onClose={() => setIoTranscriptOpen(false)}
-        />
-      )}
 
       {/* Image Preview Modal */}
       {previewImage && (

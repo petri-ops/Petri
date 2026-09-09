@@ -5600,32 +5600,6 @@ body:global(.gewu-resizing-columns) * {
   gap: 8px;
 }
 
-.emptyResultIcon {
-  color: var(--gewu-accent);
-  opacity: 0.35;
-}
-
-.emptyResultTitle {
-  font-size: var(--gewu-font-size-md);
-  font-weight: 700;
-  margin: 0;
-  color: var(--gewu-text);
-}
-
-.emptyResultDesc {
-  font-size: var(--gewu-font-size-body-sm);
-  line-height: 1.5;
-  color: var(--gewu-text-secondary);
-  max-width: 330px;
-  margin: 0;
-}
-
-.emptyResultProject {
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-tertiary);
-  margin: 0;
-}
-
 .emptyResultLaunchpad {
   width: min(100%, 560px);
   display: grid;
@@ -5660,11 +5634,6 @@ body:global(.gewu-resizing-columns) * {
 .emptyResultLaunchCard span {
   font-size: var(--gewu-font-size-body-sm);
   font-weight: 600;
-}
-
-.emptyResultLaunchCard small {
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-tertiary);
 }
 
 .emptyResultLaunchText {

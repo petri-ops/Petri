@@ -1,0 +1,52 @@
+{
+  "startedAt": "2026-09-09T05:58:21.875Z",
+  "assertions": [
+    {
+      "name": "B1 ⋯ 菜单与「更多工具」按钮已移除",
+      "pass": true,
+      "detail": "{\"moreMenu\":false,\"moreBtn\":false,\"send\":true,\"providerBtn\":true,\"modelBtn\":true,\"budgetRing\":false,\"refreshItem\":false,\"ioItemInComposer\":false}"
+    },
+    {
+      "name": "B2 composer 保留 发送/供应商/模型 控件",
+      "pass": true,
+      "detail": "send=true provider=true model=true"
+    },
+    {
+      "name": "B3 菜单项「刷新文件链接 / 模型 I/O」不再出现在 composer",
+      "pass": true,
+      "detail": "refresh=false io=false"
+    },
+    {
+      "name": "B4 projectWorkspaceChanged 派发后应用无异常",
+      "pass": true,
+      "detail": "{\"ok\":true,\"composerStill\":true}"
+    },
+    {
+      "name": "B5 右栏工具菜单含「模型 I/O」且可打开",
+      "pass": true,
+      "detail": "flyout={\"ok\":true} ioClick={\"ok\":true}"
+    },
+    {
+      "name": "B6 llm-tr-dock 渲染当前会话调用记录",
+      "pass": true,
+      "detail": "{\"dock\":true,\"rows\":3,\"headText\":\"模型 I/O 信息流\",\"tabOpen\":true}"
+    },
+    {
+      "name": "B7 会话切换后 dock 内容随动（新会话诚实空态）",
+      "pass": true,
+      "detail": "{\"dock\":true,\"emptyText\":\"本会话暂无模型调用记录\",\"rows\":0}"
+    },
+    {
+      "name": "B8 home 空态：头部四件套已删除",
+      "pass": true,
+      "detail": "{\"empty\":true,\"icon\":0,\"title\":0,\"desc\":0,\"project\":0,\"cards\":6,\"smalls\":0}"
+    },
+    {
+      "name": "B9 home 空态：六卡片仅 图标+名称（无 small 副标题）",
+      "pass": true,
+      "detail": "cards=6 smalls=0"
+    }
+  ],
+  "allPass": true,
+  "finishedAt": "2026-09-09T06:00:11.205Z"
+}

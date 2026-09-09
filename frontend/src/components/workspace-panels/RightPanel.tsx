@@ -24,6 +24,8 @@ import { tools as staticTools } from '@/pages/_data';
 import { AnalysisLaunchPanel } from '@/components/workspace-panels/AnalysisLaunchPanel';
 // BLOCK-28.5 — 审阅并入右侧边栏 tab 体系（复用 dock 紧凑形态，填满 tab 容器）
 import { ReviewMode } from '@/components/desktop/WorkingTreeReview/ReviewMode';
+// BLOCK-68 / UI-317 — 模型 I/O 信息流 dock（原 composer ⋯ 菜单 overlay 迁入）
+import { LlmTranscriptViewer } from '@/components/copilot/LlmTranscriptViewer';
 import styles from '@/pages/project-workspace.module.css';
 
 type DispatchSetter<T> = React.Dispatch<React.SetStateAction<T>>;
@@ -145,7 +147,6 @@ export function RightPanel({
               >
                 {tab === 'home' && (
                   <EmptyResult
-                    project={ctx.project}
                     onOpenResults={ctx.handleOpenRightResults}
                     onOpenTerminal={ctx.handleOpenRightTerminal}
                     onOpenBrowser={ctx.handleOpenRightBrowser}
@@ -235,6 +236,8 @@ export function RightPanel({
                     onClose={() => ctx.closeRightPanelTab('review')}
                   />
                 )}
+                {/* BLOCK-68 / UI-317 — 模型 I/O 信息流 dock（绑当前会话，只读；无会话诚实空态） */}
+                {tab === 'io' && <LlmTranscriptViewer conversationId={ctx.activeConvId} />}
               </div>
             ))}
           </div>

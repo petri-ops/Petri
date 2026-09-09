@@ -81,7 +81,7 @@ export type { ActiveWorkspaceFile } from './project-workspace/types';
 
 export type { ActiveArtifact, JobStats } from '@/components/workspace-panels/ResultView';
 
-export type RightPanelMode = 'home' | 'results' | 'files' | 'terminal' | 'browser' | 'chat' | 'analyze' | 'review';
+export type RightPanelMode = 'home' | 'results' | 'files' | 'terminal' | 'browser' | 'chat' | 'analyze' | 'review' | 'io';
 
 const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconName }> = [
   { id: 'results', label: '结果', icon: 'bar-chart' },
@@ -92,6 +92,8 @@ const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconNa
   { id: 'analyze', label: '分析', icon: 'sparkles' },
   // BLOCK-28.5 — 审阅并入右侧边栏 tab 体系（与其它入口同级，不再是浮层另类）
   { id: 'review', label: '审阅', icon: 'git-branch' },
+  // BLOCK-68 / UI-317 — 模型 I/O 信息流从 composer ⋯ 菜单迁入 tab 体系（绑会话，只读）
+  { id: 'io', label: '模型 I/O', icon: 'list-details' },
 ];
 
 function toCopilotHarnessSummary(index: HarnessIndexSummary | null | undefined): HarnessContextSummary | undefined {

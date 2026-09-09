@@ -96,10 +96,16 @@ afterEach(() => {
   cleanup();
 });
 
-describe('LlmTranscriptViewer (BLOCK-37 P3 / UI-274)', () => {
+describe('LlmTranscriptViewer (BLOCK-37 P3 / UI-274; BLOCK-68 dock 形态)', () => {
+  it('renders honest empty state when no conversation is active', () => {
+    render(<LlmTranscriptViewer conversationId={null} />);
+    expect(screen.getByText('当前无会话')).toBeTruthy();
+    expect(listLlmTranscriptsMock).not.toHaveBeenCalled();
+  });
+
   it('renders empty state when no records', async () => {
     listLlmTranscriptsMock.mockResolvedValue([]);
-    render(<LlmTranscriptViewer conversationId="conv-1" onClose={() => {}} />);
+    render(<LlmTranscriptViewer conversationId="conv-1" />);
     expect(await screen.findByText('本会话暂无模型调用记录')).toBeTruthy();
   });
 
@@ -110,7 +116,7 @@ describe('LlmTranscriptViewer (BLOCK-37 P3 / UI-274)', () => {
       makeEntry({ id: 'rt_old', ts: oldTs }),
       makeEntry({ id: 'rt_new', ts: newTs, error: 'rate_limit' }),
     ]);
-    render(<LlmTranscriptViewer conversationId="conv-1" onClose={() => {}} />);
+    render(<LlmTranscriptViewer conversationId="conv-1" />);
     await waitFor(() => expect(listLlmTranscriptsMock).toHaveBeenCalledWith('conv-1'));
 
     const times = await screen.findAllByText(/09-02/);
@@ -126,7 +132,7 @@ describe('LlmTranscriptViewer (BLOCK-37 P3 / UI-274)', () => {
   it('expands a record on click and shows request/response with role chips', async () => {
     listLlmTranscriptsMock.mockResolvedValue([makeEntry()]);
     fetchLlmTranscriptRecordMock.mockResolvedValue(makeRecord());
-    render(<LlmTranscriptViewer conversationId="conv-1" onClose={() => {}} />);
+    render(<LlmTranscriptViewer conversationId="conv-1" />);
 
     const row = await screen.findByRole('button', { name: /deepseek-chat/ });
     fireEvent.click(row);
@@ -147,7 +153,7 @@ describe('LlmTranscriptViewer (BLOCK-37 P3 / UI-274)', () => {
     fetchLlmTranscriptRecordMock.mockResolvedValue(
       makeRecord({ truncated: true, messagesTruncated: 12 })
     );
-    render(<LlmTranscriptViewer conversationId="conv-1" onClose={() => {}} />);
+    render(<LlmTranscriptViewer conversationId="conv-1" />);
 
     const row = await screen.findByRole('button', { name: /deepseek-chat/ });
     // 索引行上的「截断」chip
@@ -160,18 +166,9 @@ describe('LlmTranscriptViewer (BLOCK-37 P3 / UI-274)', () => {
     expect(screen.getAllByText(/超限未存/).length).toBeGreaterThan(0);
   });
 
-  it('closes on Esc', async () => {
-    listLlmTranscriptsMock.mockResolvedValue([]);
-    const onClose = vi.fn();
-    render(<LlmTranscriptViewer conversationId="conv-1" onClose={onClose} />);
-    await screen.findByText('本会话暂无模型调用记录');
-    fireEvent.keyDown(window, { key: 'Escape' });
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
   it('shows error banner when listing fails', async () => {
     listLlmTranscriptsMock.mockRejectedValue(new Error('HTTP 500'));
-    render(<LlmTranscriptViewer conversationId="conv-1" onClose={() => {}} />);
+    render(<LlmTranscriptViewer conversationId="conv-1" />);
     expect(await screen.findByText(/加载失败：HTTP 500/)).toBeTruthy();
   });
 });

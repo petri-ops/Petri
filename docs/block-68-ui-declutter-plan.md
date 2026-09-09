@@ -1,9 +1,22 @@
 # BLOCK-68 — 聊天工作台界面减负：⋯ 菜单清空 + 模型 I/O 迁右栏 + 空态极简
 
-> 状态：`planned`（2026-09-09 用户裁决立项；启动待用户裁决）
-> 立项日期：2026-09-09
+> 状态：`completed`（2026-09-09 用户裁决启动；P0-P3 一次会话整包收口，UI-317 verified）
+> 立项日期：2026-09-09；启动日期：2026-09-09；收口日期：2026-09-09
 > truthDomain: `block-68-ui-declutter`
 > UI 台账：UI-317（实现提交同一提交内登记）
+> 启动前置核实：UI-315 终端块跟进 WIP 已收口（`97fd9647`，优化三 + 验收脚本入库 + forced 实机 9/9 allPass），§7 串行前置满足
+
+## 8. 收口记录（2026-09-09 整包 completed）
+
+**实现**：§4 改动清单全量落地——① SimpleChat 删 ⋯ 菜单块/`composerMoreOpen`/`handleRefresh`/`refreshing`/`ioTranscriptOpen`/LlmTranscriptViewer overlay 挂载 + `sc-toolbar-more` CSS；新增 `SimpleChat/hooks/useAutoFileReferenceRefresh.ts`（订阅 `projectWorkspaceChanged`，debounce 500ms → 清缓存 + `resolveNonce++`，卸载清理）。② `RightPanelMode` 增 `'io'` + `RIGHT_PANEL_ITEMS` 增「模型 I/O」（icon list-details）；`LlmTranscriptViewer` 重写为 dock 形态（去 overlay/dialog/Esc/关闭按钮，绑 activeConvId，无会话诚实空态），CSS overlay 三件套退役换 `.llm-tr-dock`。③ `EmptyResult` 删头部四件套 + 卡片 `<small>` 副标题（`project` prop 一并移除），CSS `emptyResultIcon/Title/Desc/Project/small` 清理。
+
+**门禁**：tsc 0；受影响 vitest 292/292（copilot 全目录 + workspace-panels；新增 useAutoFileReferenceRefresh 2 用例 + LlmTranscriptViewer dock 适配/无会话空态用例）；docs:check + ui:audit:check PASS。
+
+**实机**：`scripts/block68-ui-live.cjs`（入库）9 断言 allPass，证据 `acceptance/block-68/ui317-live.json` + `ui317-live.png`——B1 ⋯ 按钮与菜单不存在 / B2 composer 保留 发送|供应商|模型 / B3 两菜单项不再出现 / B4 `projectWorkspaceChanged` 派发无异常（自动重解析行为另由 hook 单测覆盖）/ B5 工具飞出菜单「模型 I/O」可打开 / B6 llm-tr-dock 渲染当前会话记录（rows≥1）/ B7 新建会话后 dock 随动诚实空态 / B8 home 空态头部四件套已删 / B9 六卡片无 small。
+
+**验收脚本实施教训**：多窗口并存时（本机存在面板全收起的壳窗口）按 `visibilityState` 选窗口不可靠——壳窗口同样 visible 且有 composer；必须按左栏项目树 + 右栏 `rightCol` 存在性选真主窗。
+
+范围外核查：composerWidth 弹性逻辑零改动；llm-transcripts 后端零改动；RightPanel 其余 tab 与窗口系统零改动。G0 开发期常态 · 不外推 packaged/Provider/GA。
 > 来源：用户 2026-09-09 两条界面减负反馈（composer ⋯ 菜单两项放错位置；右侧边栏空态太啰嗦），裁决原文见 §1
 
 ## 1. 用户裁决（范围即裁决）
