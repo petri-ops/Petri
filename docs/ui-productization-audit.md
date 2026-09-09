@@ -2911,12 +2911,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-318: 知识空间第一版 —— composer 大脑开关 + 右栏 knowledge tab（BLOCK-69 P2）(2026-09-09 in_progress)
+## UI-318: 知识空间第一版 —— composer 大脑开关 + 右栏 knowledge tab（BLOCK-69 P2）(2026-09-09 verified)
 
 **来源**：BLOCK-69-KNOWLEDGE-SPACE（2026-09-09 用户想法提案立项、同日裁决启动）D6 设计裁决：大脑图标 = 知识空间实体入口——composer 工具条独立 icon 开关按钮（启用态高亮，不挂已移除的 ⋯ 菜单）+ 右栏 `RightPanelMode` 增 `'knowledge'` tab（空间开关 + 文档列表 + 多选上传 + 删除/重建索引 + 检索测试框）。
 
-**改动**：`RightPanelMode` union 增 `'knowledge'` + `RIGHT_PANEL_ITEMS` 大脑 icon 项；新增 `KnowledgeSpacePanel`（workspace-panels/，开关/多选上传/2s 状态轮询仅摄取期/文档级删除（单事务两通道同灭）/重建索引/清空空间两步确认（BLOCK-64 先例）/检索测试框 top-k 命中渲染/「打开知识目录」走既有 `files.openPath` IPC（D9 存储可见）/无 DashScope key 诚实空态禁用开关（D7 不假启用））；composer 左区新增 `sc-knowledge-toggle` 大脑开关（`useKnowledgeSpaceToggle` hook：DB 单一真相、乐观切换失败回读、无 key disabled）；`ContextBudgetBar`/`events.ts`/`copilotClient` 透传 `knowledgeTokens` 预算行（注入块预算透明）；`knowledgeClient.ts` 前端 API 封装。0 新 npm 依赖。
+**改动**：`RightPanelMode` union 增 `'knowledge'` + `RIGHT_PANEL_ITEMS` 大脑 icon 项；新增 `KnowledgeSpacePanel`（workspace-panels/，开关/多选上传/摄取期 2s 快刷 + 空闲 10s 慢刷轮询/文档级删除（单事务两通道同灭）/重建索引/清空空间两步确认（BLOCK-64 先例）/检索测试框 top-k 命中渲染/「打开知识目录」走既有 `files.openPath` IPC（D9 存储可见）/无 DashScope key 诚实空态禁用开关（D7 不假启用））；composer 左区新增 `sc-knowledge-toggle` 大脑开关（`useKnowledgeSpaceToggle` hook：DB 单一真相、乐观切换失败回读、无 key disabled）；`ContextBudgetBar`/`events.ts`/`copilotClient` 透传 `knowledgeTokens` 预算行（注入块预算透明）；`knowledgeClient.ts` 前端 API 封装。0 新 npm 依赖。**实机验收抓真修两处**：① `knowledge_search` 工具加空间开关门——原实现关闭开关后 agent 仍可经工具检索命中（违反 plan §6「关闭开关后同问题不再命中」验收语义，真实模型对话实测抓到）；② 面板空闲态 10s 慢轮询——原实现仅在摄取中轮询，外部上传的文档永不出现。
 
-**门禁**：tsc 0；定向 vitest 18/18（KnowledgeSpacePanel 4 + useKnowledgeSpace 3 + SimpleChat/RightPanel/progress 11）；后端 knowledge-space 19/19 + agent-tool-registry 9/9。
+**门禁**：tsc 0；定向 vitest 22/22（KnowledgeSpacePanel 4 + useKnowledgeSpace 3 + SimpleChat/RightPanel/progress 11 + backend knowledge-space 20 之 UI 相关）；后端 knowledge-space 20/20 + agent-tool-registry 9/9。
 
-**状态**: in_progress（实现完成，实机 CDP 验收进行中——acceptance/block-69/ 落盘后转 verified）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**实机**：`scripts/block69-knowledge-live.cjs` 入库（可复跑；fnm Node 24 + DASHSCOPE_API_KEY 环境启动），15/15 断言 allPass（`acceptance/block-69/ui318-live.json` + `ui318-live-*.png`）：S1 上传 md → ready 块数合理（真实 text-embedding-v3 嵌入）；S2 启用后真实模型对话命中知识（回复精确引用《marker-doc.md》「向量+全文」通道内容 42.7）+ 关闭开关后同问题不再命中（工具层诚实拒绝，模型如实转述「知识空间未启用」）；S3 检索测试框双通道 top-k 命中（UI 渲染 2 行）；S4 删除后两通道同灭 + 清空两步确认（rowsBefore 2 → rowsAfter 0）；S5 无 key 诚实空态分支（先前无 key 轮次实测：开关 disabled + 面板 notice + 启用端点 409 + 文档诚实 failed）。
+
+**状态**: verified（2026-09-09 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。

@@ -301,7 +301,13 @@ test('knowledge_search 工具：无嵌入 key 时 FTS 通道仍可用（诚实�
 
   const miss = await tool_knowledge_search({ query: '完全不相关词组查询' }, { userId: 'u_test' });
   assert.deepEqual(miss.hits, []);
+
+  // plan §6 验收语义：开关关闭 = 工具层同样不可见（不返回任何命中）
   ks.setSpaceEnabled(false);
+  const disabled = await tool_knowledge_search({ query: '线粒体基因' }, { userId: 'u_test' });
+  assert.equal(disabled.spaceEnabled, false);
+  assert.deepEqual(disabled.hits, [], 'disabled space → tool returns no hits');
+  assert.ok(/未启用/.test(disabled.message));
 });
 
 test('knowledge_status 工具：状态投影', () => {
@@ -397,4 +403,25 @@ test('reindexDocument: 清旧块重跑管道', async () => {
     .prepare('SELECT COUNT(*) c FROM knowledge_chunks_fts WHERE chunk_id IN (SELECT id FROM knowledge_chunks WHERE doc_id = ?)')
     .get(doc.id).c;
   assert.equal(fts, after, 'FTS rows match chunks after reindex');
+});
+
+// ---------- P2a：agent turn 注入（buildAgentTurnBlock 轻按需语义）----------
+
+test('buildAgentTurnBlock: 空间关闭不注入；开启且有 ready 命中才注入', async () => {
+  // 前置：上一测试留下 reindex-me.txt（ready）。开关当前为 false。
+  ks.setSpaceEnabled(false);
+  const off = await ks.buildAgentTurnBlock('TP3 与 BRCA1 互作');
+  assert.equal(off.block, '', 'space disabled → no injection');
+  assert.equal(off.hitCount, 0);
+
+  ks.setSpaceEnabled(true);
+  const on = await ks.buildAgentTurnBlock('TP3 与 BRCA1 互作');
+  assert.ok(on.block.includes('知识空间检索结果'), 'enabled + hit → injection block');
+  assert.ok(on.hitCount >= 1);
+  assert.ok(on.usedChars > 0);
+
+  // 无命中：启用也不注入任何内容（轻按需）
+  const miss = await ks.buildAgentTurnBlock('完全不相关的查询词组组合');
+  assert.equal(miss.block, '', 'enabled + no hit → no injection');
+  ks.setSpaceEnabled(false);
 });

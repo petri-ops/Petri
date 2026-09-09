@@ -61,15 +61,14 @@ export function KnowledgeSpacePanel() {
     }
   }, []);
 
-  // 轮询：有摄取中文档时 2s 刷新，空闲时停（不为常驻轮询烧窗）
+  // 轮询：摄取期 2s 快刷；空闲 10s 慢刷（外部/其他窗口上传的文档也能及时出现）
   useEffect(() => {
     void refresh();
   }, [refresh]);
 
   useEffect(() => {
     const hasBusy = (state?.documents || []).some((doc) => BUSY_STATUSES.has(doc.status));
-    if (!hasBusy) return;
-    const timer = setInterval(() => void refresh(), 2000);
+    const timer = setInterval(() => void refresh(), hasBusy ? 2000 : 10000);
     return () => clearInterval(timer);
   }, [state?.documents, refresh]);
 

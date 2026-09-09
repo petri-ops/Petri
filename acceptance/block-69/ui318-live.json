@@ -1,0 +1,85 @@
+{
+  "startedAt": "2026-09-09T08:48:46.437Z",
+  "embeddingKeyConfigured": true,
+  "assertions": [
+    {
+      "name": "P0 前置：空间初始关闭且知识 REST 面可达",
+      "pass": true,
+      "detail": "{\"enabled\":false,\"embeddingAvailable\":true}"
+    },
+    {
+      "name": "S5a 有 key：composer 大脑开关可用",
+      "pass": true,
+      "detail": "{\"brain\":true,\"brainDisabled\":false,\"brainTitle\":\"启用知识空间：对话自动检索知识库\"}"
+    },
+    {
+      "name": "S5c 右栏「知识」tab 可打开且 KnowledgeSpacePanel 渲染",
+      "pass": true,
+      "detail": "{\"ok\":true,\"panel\":true}"
+    },
+    {
+      "name": "S5e 面板核心控件齐备（上传/检索测试框）",
+      "pass": true,
+      "detail": "{\"notice\":\"\",\"toggle\":true,\"toggleDisabled\":false,\"upload\":true,\"searchInput\":true}"
+    },
+    {
+      "name": "S2a 有 key：启用成功",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"space\":{\"id\":\"ks_default\",\"name\":\"默认知识空间\",\"enabled\":true}}"
+    },
+    {
+      "name": "S1a 上传端点接受 md 并建档",
+      "pass": true,
+      "detail": "{\"status\":200,\"body\":{\"status\":\"ok\",\"accepted\":[{\"id\":\"kdoc_e6b54308-e5f\",\"name\":\"brca2-acceptance.md\",\"kind\":\"text\",\"size\":229,\"status\":\"uploaded\",\"error\":null,\"chunkCount\":0,\"createdAt\":\"2026-09-09T08:48:54.134Z\",\"updatedAt\":\"2026-09-09T08:48:54.134Z\"}],\"rejected\":[]}}"
+    },
+    {
+      "name": "S3b UI 检索测试框可交互且诚实呈现（不崩）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"note\":\"\",\"hits\":2}"
+    },
+    {
+      "name": "S2c 启用后对话命中知识（回复含标记数值 42.7）",
+      "pass": true,
+      "detail": "reply=依据知识空间检索结果（《marker-doc.md》第 1 块，向量+全文），知识点标记 **ZEBRA-7Q** 对应的数值是 **42.7**。"
+    },
+    {
+      "name": "S2d 关闭开关后同问题不再命中（回复不含 42.7）",
+      "pass": true,
+      "detail": "reply=知识空间当前未启用，无法检索到内容。系统返回：**“知识空间未启用，无法检索”**，因此未能查到标记 ZEBRA-7Q 对应的数值。\n\n如需检索，请在右侧「知识空间」面板先启用该空间。启用后我可以基于上传的知识库内容按要求查询并给出具体数值。"
+    },
+    {
+      "name": "S4c 清空空间两步确认生效（先确认文案后执行清空）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"confirmText\":\"确认清空？\",\"rowsBefore\":2,\"rowsAfter\":0}"
+    }
+  ],
+  "keyDependentAssertions": [
+    {
+      "name": "S1b 上传 md → ready 且块数合理",
+      "pass": true,
+      "status": "verified",
+      "detail": "{\"id\":\"kdoc_e6b54308-e5f\",\"name\":\"brca2-acceptance.md\",\"kind\":\"text\",\"size\":229,\"status\":\"ready\",\"error\":null,\"chunkCount\":2,\"createdAt\":\"2026-09-09T08:48:54.134Z\",\"updatedAt\":\"2026-09-09T08:48:54.437Z\"}"
+    },
+    {
+      "name": "S3 检索测试框 top-k 命中合理（双通道）",
+      "pass": true,
+      "status": "verified",
+      "detail": "[{\"docId\":\"kdoc_e6b54308-e5f\",\"docName\":\"brca2-acceptance.md\",\"seq\":0,\"score\":0.03278688524590164,\"channels\":{\"vector\":0.7805866344823623,\"fts\":1},\"text\":\"# BRCA2 知识库验收样本\\nBRCA2 参与同源重组修复，胚系突变显著提高胰腺癌与乳腺癌风险。\"},{\"docId\":\"kdoc_e6b54308-e5f\",\"docName\":\"brca2-acceptance.md\",\"seq\":1,\"score\":0.03225806451612903,\"channels\":{\"vector\":0.5764174221488398,\"fts\":2},\"text\":\"## 队列说明\\n本样本整理 TCGA 队列 BRCA2 携带者的临床特征，"
+    },
+    {
+      "name": "S4a 删除文档成功（含标记文档）",
+      "pass": true,
+      "status": "verified",
+      "detail": "deleted=2"
+    },
+    {
+      "name": "S4b 删除后两条检索通道均不再命中",
+      "pass": true,
+      "status": "verified",
+      "detail": "0"
+    }
+  ],
+  "blockedCount": 0,
+  "allPass": true,
+  "finishedAt": "2026-09-09T08:49:13.048Z"
+}

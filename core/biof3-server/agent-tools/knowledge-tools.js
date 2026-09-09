@@ -16,33 +16,35 @@ async function tool_knowledge_search(args, ctx) {
   if (!query) {
     return { error: 'query_required', message: 'knowledge_search 需要非空 query。' };
   }
-  const topK = Math.max(1, Math.min(MAX_HITS, (args && args.topK) || ks.INJECT_TOPK));
-  const result = await ks.searchKnowledge({ query, topK });
-
-  if (!result.spaceEnabled && result.hits.length === 0) {
+  // plan §6 验收语义：开关关闭 = 知识库对 agent 整体不可见（自动召回与工具层同门）
+  const space = ks.getSpace();
+  if (!space || !space.enabled) {
     return {
       spaceEnabled: false,
       hits: [],
-      message: '知识空间未启用或无命中。若用户期望检索其上传知识库，请提示在右侧「知识空间」面板启用并上传文档。',
+      message: '知识空间未启用，无法检索。若用户期望检索其上传知识库，请提示在右侧「知识空间」面板启用。',
     };
   }
+  const topK = Math.max(1, Math.min(MAX_HITS, (args && args.topK) || ks.INJECT_TOPK));
+  const result = await ks.searchKnowledge({ query, topK });
+
   if (result.readyChunks === 0) {
     return {
-      spaceEnabled: result.spaceEnabled,
+      spaceEnabled: true,
       hits: [],
-      message: '知识空间当前没有已就绪的文档（尚未上传或仍在摄取中）。',
+      message: '知识空间已启用，但当前没有已就绪的文档（尚未上传或仍在摄取中）。',
     };
   }
   if (!result.embeddingAvailable && result.hits.length === 0) {
     return {
-      spaceEnabled: result.spaceEnabled,
+      spaceEnabled: true,
       embeddingAvailable: false,
       hits: [],
       message: '嵌入模型不可用（DashScope key 未配置或调用失败），仅全文通道可用且本次无命中。',
     };
   }
   return {
-    spaceEnabled: result.spaceEnabled,
+    spaceEnabled: true,
     embeddingAvailable: result.embeddingAvailable,
     readyChunks: result.readyChunks,
     hits: result.hits.map((hit) => ({

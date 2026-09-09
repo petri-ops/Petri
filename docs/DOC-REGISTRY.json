@@ -141,7 +141,7 @@
       "id": "BLOCK-69-KNOWLEDGE-SPACE",
       "path": "docs/block-69-knowledge-space-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-69-knowledge-space",
       "entrypoint": "docs/README.md",
@@ -155,10 +155,10 @@
         "composer",
         "G0"
       ],
-      "notes": "知识空间——智能体的可启用知识库器官。2026-09-09 用户想法提案立项（评估与架构草案随立项交付）：① 独立知识域承载用户上传的既有知识背景（文字/图像/视频/语音/数据库等，格式不设限）；② 可配置解析工具预处理；③ 大脑图标统一入口；④ 启用即对话自动带知识库（RAG）。可行性结论：地基好于预期——embedding 通道已有生产使用（memory-vectors SEMANTIC_SEARCH_v1 + ModelGateway.embed + DashScope text-embedding-v3 1024 维）、agent 工具注册双模式成熟、但 agent 主链路只写记忆不读检索（本包补读面）；缺口=无 PDF/OCR/音视频转录/数据库直读、无知识库 UI。设计裁决 D1-D10（修订 1 回应用户评审四问：是否只向量索引/是否按需/存哪里/能否清除）：独立第三数据域（knowledge_spaces/documents/chunks 三表，不改 memory_vectors 语义，不混项目工作区数据面）/ parser registry + 文档状态机 / 结构感知分块 / 双通道混合检索+按需语义（FTS5 全文 + 向量两路 RRF 融合，不止向量——FTS 负责基因名/代码标识符等精确 token；自动召回过阈值轻按需 ≤3 块 + knowledge_search 深按需，计入 ContextBudgetBar 新增 knowledge 类目——待 P0 评审；better-sqlite3 12.11.1 内建 FTS5/trigram 0 新依赖）/ 多模态分期（P1 文本族 0 新依赖 → P3 PDF/Office/图像 → P4 音视频 ASR+数据库）/ 大脑图标=composer 独立开关（不挂 BLOCK-68 已裁决移除的 ⋯ 菜单）+ RightPanelMode 增 'knowledge' tab / DashScope key 为启用前提无 key 诚实空态 / 暴力扫描万级 chunk 内够用 sqlite-vec 远期 / D9 存储位置可见（原始文件 <LOCAL_DATA_DIR>/knowledge/ + 索引同根 biof3.db，提供「打开知识目录」入口）/ D10 删除语义（文档级删除单事务清除原始文件+分块+向量+全文索引两通道同灭；清空空间两步确认；段落级编辑远期候选）。建议 P0-P2 首包一次会话收口。文件面与 BLOCK-68 相邻（SimpleChat/project-workspace/RightPanel），建议 BLOCK-68 先行；启动顺序待用户裁决。UI 台账 UI-318 实现同提交登记。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "知识空间——智能体的可启用知识库器官。2026-09-09 用户想法提案立项（评估与架构草案随立项交付）：① 独立知识域承载用户上传的既有知识背景（文字/图像/视频/语音/数据库等，格式不设限）；② 可配置解析工具预处理；③ 大脑图标统一入口；④ 启用即对话自动带知识库（RAG）。可行性结论：地基好于预期——embedding 通道已有生产使用（memory-vectors SEMANTIC_SEARCH_v1 + ModelGateway.embed + DashScope text-embedding-v3 1024 维）、agent 工具注册双模式成熟、但 agent 主链路只写记忆不读检索（本包补读面）；缺口=无 PDF/OCR/音视频转录/数据库直读、无知识库 UI。设计裁决 D1-D10（修订 1 回应用户评审四问：是否只向量索引/是否按需/存哪里/能否清除）：独立第三数据域（knowledge_spaces/documents/chunks 三表，不改 memory_vectors 语义，不混项目工作区数据面）/ parser registry + 文档状态机 / 结构感知分块 / 双通道混合检索+按需语义（FTS5 全文 + 向量两路 RRF 融合，不止向量——FTS 负责基因名/代码标识符等精确 token；自动召回过阈值轻按需 ≤3 块 + knowledge_search 深按需，计入 ContextBudgetBar 新增 knowledge 类目——待 P0 评审；better-sqlite3 12.11.1 内建 FTS5/trigram 0 新依赖）/ 多模态分期（P1 文本族 0 新依赖 → P3 PDF/Office/图像 → P4 音视频 ASR+数据库）/ 大脑图标=composer 独立开关（不挂 BLOCK-68 已裁决移除的 ⋯ 菜单）+ RightPanelMode 增 'knowledge' tab / DashScope key 为启用前提无 key 诚实空态 / 暴力扫描万级 chunk 内够用 sqlite-vec 远期 / D9 存储位置可见（原始文件 <LOCAL_DATA_DIR>/knowledge/ + 索引同根 biof3.db，提供「打开知识目录」入口）/ D10 删除语义（文档级删除单事务清除原始文件+分块+向量+全文索引两通道同灭；清空空间两步确认；段落级编辑远期候选）。2026-09-09 用户裁决启动，同日首包 P0-P2 一次会话收口（UI-318 verified，实机 15/15 断言 allPass，acceptance/block-69/）；P3 文档族 / P4 音视频+数据库候选另行裁决。工程事实登记：trigram FTS5 对 UNINDEXED 列的 LIKE/GLOB 谓词被优化劫持恒返回空，删除一律走等值 IN 子查询。UI 台账 UI-318 实现同提交登记。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-09",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH"
+      "phase": "P0-P2-COMPLETED"
     },
     {
       "id": "UI-305-FRONTEND-LARGE-FILE-REFACTOR",
