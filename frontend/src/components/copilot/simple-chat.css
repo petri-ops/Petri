@@ -1510,6 +1510,29 @@
   cursor: pointer;
 }
 
+/* UI-316 — 子智能体行内实时状态 mini chip */
+.sc-tool-agent-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--gewu-border-subtle);
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-secondary);
+}
+
+.sc-tool-agent-status[data-status='running'] {
+  color: var(--gewu-accent);
+  border-color: var(--gewu-accent);
+}
+
+.sc-tool-agent-status[data-status='error'] {
+  color: var(--gewu-danger);
+  border-color: var(--gewu-danger);
+}
+
 /* ANSI 16 色 —— 浅色主题（深色调校，浅底可读） */
 .sc-tool-term .term-bold { font-weight: 600; }
 .sc-tool-term .term-dim { opacity: 0.6; }

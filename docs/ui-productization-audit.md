@@ -2886,3 +2886,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 > **UI-315 优化包增补（2026-09-09，用户裁决「全部做」）**：① **解析强化**——新增零依赖 ANSI SGR 解析器 `ansi.ts`（16 色 + bold/dim/underline，光标/OSC 转义剥除，扩展色参数组整组跳过），终端块输出按片段着色渲染；**Windows 编码修复**——cmd/PowerShell 路径自动注入 UTF-8 输出编码（`chcp 65001` / `[Console]::OutputEncoding`），中文输出乱码根除（实测 PS 中文完美）。② **视觉精修**——头行显示实际 shell 标签（`终端 · powershell`，toolResult 顶层 shellLabel 独立于 data 截断，附 buildToolResultEvent 派生）；运行中 spinner 动画；命令行/输出复制按钮；滚动跟随优化（手动上滚暂停自动滚底 + 「回到底部」悬浮按钮）。③ **默认展开**——含 exec 命令的消息活动条默认展开，终端块直接可见（此前压在两层折叠后）。验证：ansi/toolActivity/ToolActivityList 定向 25/25 + tsc 0；实机真实 exec：`$ node -v` + 输出 `v24.20.0` + `shellLabel: powershell` 落库（meta 查询证实），截图 `acceptance/ui-315/`。遗留登记：cmd 内建 echo 的中文参数乱码为 cmd argv 层局限（chcp 无法根治，模型提示词引导 PS 优先）；交互式命令无 TTY 维持现状。
 
 > **UI-315 优化二（2026-09-09，用户实测反馈「黑底突兀 + 线条边界多余」）**：终端块重写为**主题自适应 + 无边框自由排版**——① 去掉外框/头行分隔线/输出内嵌框全部线条，仅保留 2px 左侧参考线（--gewu-border）标识区块；② 配色全部改用主题令牌（--gewu-text-primary/secondary、--gewu-accent、--gewu-status-success/danger、--gewu-bg-canvas），明暗主题自动适配（硬编码暗底废弃）；③ ANSI 16 色板明暗双套（浅色主题深色调校、深色主题亮色调校，[data-theme] 切换）；④ 复制/回到底部按钮改主题令牌。实机：浅色主题截图 `acceptance/ui-315/ui315-theme-light.png`（终端块融入对话流 + `终端 · powershell` 头行）+ 深色主题 `ui315-theme-dark.png`。遗留：cmd 内建 echo 中文参数乱码为 argv 层局限（模型引导 PS 优先）。
+
+## UI-316: 子智能体单行细条 + 行内 bot 独立标识 + 实时状态 chip (2026-09-09 verified)
+
+**来源**：用户实测反馈——子智能体呈现「占据空间太大」；其工作分布于各会话消息中，应类似文件修改行数变化以内联紧凑行呈现；且「每个子智能体给个图标，代表智能体是独立的，五脏俱全，辅助主智能体完成复杂并行任务」。
+
+**改动**：① **SubAgentsBar 单行细条**——原两条全宽横幅（子 agent 计数行 + 全部俯瞰行）合并为一条 22px 细行：bot 独立图标 + 「子智能体 N 个 · M 运行中」+ 「全部俯瞰」入口；② **ToolActivityList 行内 agent 标识**——agent 管理类工具行（spawn/wait/list/interrupt/send_message/followup）图标改用新增 `bot` 图标（Icon.tsx，Lucide bot，独立智能体「五脏俱全」标识），spawn_agent 行内联该子 agent 实时状态 chip（useSyncExternalStore 订阅会话 store，运行中/已完成/失败/已停止随 child_finished 自动更新）。验证历史回放：刷新后活动列表/终端块/俯瞰面板全部恢复。
+
+**门禁**：conversationRunStore + ToolActivityList 定向 vitest 48/48 + tsc 0 + ui:audit:check/docs:check PASS；实机截图 `acceptance/ui-315/ui316-slim-bar.png`（22px 单行细条 + bot 图标 + 行内 agent 行）。
+
+**状态**: verified（2026-09-09 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。

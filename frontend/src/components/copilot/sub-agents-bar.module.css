@@ -2,17 +2,30 @@
 .bar {
   display: flex;
   flex-direction: column;
+  border-radius: 8px;
   border: 1px solid var(--gewu-border);
   border-radius: 8px;
   background: var(--gewu-bg-subtle);
   overflow: hidden;
 }
 
+.slim {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 8px;
+}
+
+.agentIcon {
+  display: inline-flex;
+  color: var(--gewu-accent);
+}
+
 .summary {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
+  gap: 6px;
+  padding: 3px 6px;
   border: none;
   background: transparent;
   color: var(--gewu-text-secondary);

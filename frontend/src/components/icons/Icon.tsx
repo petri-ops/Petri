@@ -51,6 +51,7 @@ export type IconName =
   | 'trash'
   | 'key'
   | 'cpu'
+  | 'bot'
   | 'sun'
   | 'moon'
   | 'zap'
@@ -432,6 +433,17 @@ const paths: Record<IconName, React.ReactNode> = {
     <>
       <polyline points="4 17 10 11 4 5" />
       <line x1="12" y1="19" x2="20" y2="19" />
+    </>
+  ),
+  // Bot — sub-agent independence marker (Lucide bot)
+  bot: (
+    <>
+      <path d='M12 8V4H8' />
+      <rect width='16' height='12' x='4' y='8' rx='2' />
+      <path d='M2 14h2' />
+      <path d='M20 14h2' />
+      <path d='M15 13v2' />
+      <path d='M9 13v2' />
     </>
   ),
   // Arrow left — back navigation (Lucide arrow-left)

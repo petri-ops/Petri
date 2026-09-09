@@ -150,34 +150,38 @@ export function SubAgentsBar({
 
   return (
     <div className={styles.bar}>
-      <button
-        type="button"
-        className={styles.summary}
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        title="子 agent 活动列表"
-      >
-        <span className={styles.dot} data-status={running > 0 ? 'running' : 'done'} />
-        <span>
-          子 agent {running > 0 ? `${running} 运行中 · ` : ''}{tasks.length} 个
+      {/* UI-316 — 单行细条：bot 图标（独立智能体标识）+ 计数 + 俯瞰入口 */}
+      <div className={styles.slim}>
+        <span className={styles.agentIcon} aria-hidden="true">
+          <Icon name="bot" size={13} />
         </span>
-        <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
-      </button>
-      {windowManager && (
         <button
           type="button"
           className={styles.summary}
-          onClick={() => setOverviewOpen((v) => !v)}
-          aria-expanded={overviewOpen}
-          title="全部 agent 俯瞰（跨会话 · 只读投影）"
-          data-testid="subagents-overview-toggle"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          title="子智能体列表"
         >
-          <span className={styles.dot} data-status="done" />
-          <span>全部俯瞰</span>
-          <Icon name={overviewOpen ? 'chevron-down' : 'chevron-right'} size={12} />
+          <span>
+            子智能体 {running > 0 ? `${running} 运行中 · ` : ''}{tasks.length} 个
+          </span>
+          <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
         </button>
-      )}
-      {autoPopNote && <span className={styles.overviewNote} role="status">{autoPopNote}</span>}
+        {windowManager && (
+          <button
+            type="button"
+            className={styles.summary}
+            onClick={() => setOverviewOpen((v) => !v)}
+            aria-expanded={overviewOpen}
+            title="全部智能体俯瞰（跨会话 · 只读投影）"
+            data-testid="subagents-overview-toggle"
+          >
+            <span>全部俯瞰</span>
+            <Icon name={overviewOpen ? 'chevron-down' : 'chevron-right'} size={12} />
+          </button>
+        )}
+        {autoPopNote && <span className={styles.overviewNote} role="status">{autoPopNote}</span>}
+      </div>
       {open && (
         <div className={styles.list}>
           {tasks.map((task) => (

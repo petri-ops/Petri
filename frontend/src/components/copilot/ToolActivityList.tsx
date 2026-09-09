@@ -1,15 +1,33 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { CodeMirrorDiffView } from '@/components/desktop/WorkingTreeReview/CodeMirrorDiffView';
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import { getBridge } from '@/lib/desktopBridge';
-import { parseAnsiToSpans } from './ansi';
+import { getSubAgentTaskSnapshot, subscribeSubAgentTask } from '@/components/copilot/conversationRunStore';
 import {
   EXEC_TOOL_NAMES,
   formatToolDuration,
   formatToolSideEffects,
   type ToolActivityItem,
 } from './toolActivity';
+
+/** UI-316 — agent 管理类工具（子智能体独立标识 + 行内实时状态）。 */
+const ACTIVITY_AGENT_TOOLS: ReadonlySet<string> = new Set([
+  'spawn_agent',
+  'wait_agent',
+  'list_agents',
+  'interrupt_agent',
+  'send_message',
+  'followup_task',
+]);
+
+const SUB_STATUS_LABEL: Record<string, string> = {
+  running: '运行中',
+  done: '已完成',
+  error: '失败',
+  stopped: '已停止',
+};
+import { parseAnsiToSpans } from './ansi';
 
 /**
  * UI-268 — 会话内工具活动摘要条 + 内联手风琴
@@ -208,7 +226,9 @@ function TerminalRow({ activity }: { activity: ToolActivityItem }) {
 }
 
 /** UI-272 增补 — 单条工具执行记录：头部一行摘要，点击展开命令输出等详情。 */
-function ActivityRow({ activity }: { activity: ToolActivityItem }) {  const [open, setOpen] = useState(false);
+/** UI-272 增补 — 单条工具执行记录：头部一行摘要，点击展开命令输出等详情。 */
+function ActivityRow({ activity }: { activity: ToolActivityItem }) {
+  const [open, setOpen] = useState(false);
   const duration = formatToolDuration(activity.durationMs);
   const sideEffects = formatToolSideEffects(activity.sideEffects);
   const showReason = activity.status === 'error' || activity.status === 'denied';
@@ -218,6 +238,15 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {  const [ope
     if (!activity.agentRunId) return;
     void windowManagerBridge?.popOut('agent', activity.agentRunId);
   };
+  // UI-316 — agent 管理类工具用 bot 图标（独立智能体标识），spawn 行内联
+  // 显示该子 agent 的实时状态（订阅会话 store 自动更新）。
+  const isAgentTool = ACTIVITY_AGENT_TOOLS.has(activity.name);
+  const subSnap = useSyncExternalStore(
+    activity.agentRunId
+      ? (cb) => subscribeSubAgentTask(activity.agentRunId, cb)
+      : () => () => {},
+    () => (activity.agentRunId ? getSubAgentTaskSnapshot(activity.agentRunId) : null)
+  );
   return (
     <div className={`sc-tool-activity sc-tool-activity-${activity.status}`}>
       <button
@@ -230,11 +259,20 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {  const [ope
         onClick={() => setOpen((v) => !v)}
       >
         <span className="sc-tool-activity-icon" aria-hidden="true">
-          <Icon name={activity.status === 'success' ? 'check' : 'wrench'} size={14} />
+          <Icon
+            name={isAgentTool || activity.agentRunId ? 'bot' : activity.status === 'success' ? 'check' : 'wrench'}
+            size={14}
+          />
         </span>
         <span className="sc-tool-activity-action">{activity.actionLabel}</span>
         {activity.actionDetail && (
           <code className="sc-tool-activity-command">{activity.actionDetail}</code>
+        )}
+        {subSnap && (
+          <span className="sc-tool-agent-status" data-status={subSnap.status} title="子智能体实时状态">
+            <Icon name="bot" size={10} />
+            {SUB_STATUS_LABEL[subSnap.status] || subSnap.status}
+          </span>
         )}
         <span className="sc-tool-activity-status">{TOOL_STATUS_LABEL[activity.status]}</span>
         {duration && <span className="sc-tool-activity-duration">{duration}</span>}
