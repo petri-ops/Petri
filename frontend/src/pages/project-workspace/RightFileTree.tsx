@@ -299,6 +299,7 @@ export function RightFileTree({
                   refreshVersion={refreshVersion}
                   depth={0}
                   workspaceDir={project.workspacePath}
+                  workspaceKind={project.workspaceKind}
                 />
               )}
             </div>

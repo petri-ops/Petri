@@ -1397,6 +1397,7 @@ export function ProjectWorkspace(): React.ReactElement {
       name: requestedFilePath.split('/').pop() || requestedFilePath,
       url: workspaceFileUrlFor(projectId, requestedFilePath),
       workspaceDir: project?.workspacePath,
+      workspaceKind: project?.workspaceKind,
     };
     handleOpenWorkspaceFile(file);
     openRightPanel('files');
@@ -1455,6 +1456,7 @@ export function ProjectWorkspace(): React.ReactElement {
         name: detail.name || detail.relativePath.split('/').pop() || detail.relativePath,
         url: workspaceFileUrlFor(projectId || '', detail.relativePath),
         workspaceDir: project?.workspacePath,
+      workspaceKind: project?.workspaceKind,
       };
       handleOpenWorkspaceFile(file);
       openRightPanel('files');

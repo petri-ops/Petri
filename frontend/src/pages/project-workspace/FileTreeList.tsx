@@ -19,6 +19,7 @@ export function FileTreeList({
   refreshVersion,
   depth = 0,
   workspaceDir,
+  workspaceKind,
 }: {
   entries: FileEntry[];
   prefix: string;
@@ -31,6 +32,7 @@ export function FileTreeList({
   refreshVersion: number;
   depth?: number;
   workspaceDir?: string;
+  workspaceKind?: 'local' | 'ssh';
 }): React.ReactElement {
   const orderedEntries = useMemo(
     () => [...entries].sort((left, right) => {
@@ -60,6 +62,7 @@ export function FileTreeList({
             activePath={activePath}
             refreshVersion={refreshVersion}
             workspaceDir={workspaceDir}
+            workspaceKind={workspaceKind}
           />
         );
       })}

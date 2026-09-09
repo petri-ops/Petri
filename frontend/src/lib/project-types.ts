@@ -32,6 +32,12 @@ export interface Project {
   updatedAt: string;
   modality?: ProjectModality;
   workspacePath?: string;
+  /** BLOCK-67：工作区形态。local = 本地目录（缺省）；ssh = 远程项目本体 */
+  workspaceKind?: 'local' | 'ssh';
+  /** BLOCK-67：ssh 项目的 ~/.ssh/config 别名（仅 workspaceKind='ssh'） */
+  sshHost?: string;
+  /** BLOCK-67：ssh 项目的远程绝对路径（仅 workspaceKind='ssh'） */
+  remotePath?: string;
   status?: 'active' | 'archived';
   g0Baseline?: ProjectG0Baseline;
 }

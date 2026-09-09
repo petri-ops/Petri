@@ -62,6 +62,9 @@ export async function createProject(input: {
   description?: string;
   modality?: ProjectModality;
   workspacePath?: string;
+  workspaceKind?: 'local' | 'ssh';
+  sshHost?: string;
+  remotePath?: string;
 }): Promise<Project> {
   const data = await api('/projects', {
     method: 'POST',
@@ -84,6 +87,45 @@ export async function updateProject(
 
 export async function deleteProject(id: string): Promise<void> {
   await api(`/projects/${id}`, { method: 'DELETE' });
+}
+
+// ============================================================
+// BLOCK-67 — SSH 远程项目（创建支持面）
+// ============================================================
+
+export interface SshTargetCandidate {
+  alias: string;
+  label: string;
+  registered: boolean;
+  status?: string;
+}
+
+export async function listSshTargetCandidates(): Promise<SshTargetCandidate[]> {
+  const resp = await fetch(getPlatformApiPrefix() + '/ssh-projects/targets', {
+    headers: authHeaders(),
+  });
+  const data = await resp.json();
+  if (!data.ok) throw new Error(data.error || '请求失败');
+  return (data.targets || []) as SshTargetCandidate[];
+}
+
+export interface SshValidateResult {
+  ok: boolean;
+  error?: string;
+  retryable?: boolean;
+  sampleCount?: number;
+}
+
+/** 创建前校验：远程路径存在且为目录（含 agent 引导部署）；fail-closed。 */
+export async function validateSshProject(input: { alias: string; remotePath: string }): Promise<SshValidateResult> {
+  const resp = await fetch(getPlatformApiPrefix() + '/ssh-projects/validate', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(input),
+  });
+  const data = await resp.json();
+  if (!data.ok) return { ok: false, error: data.error || '校验失败', retryable: data.retryable };
+  return { ok: true, sampleCount: (data.sample || []).length };
 }
 
 export async function setProjectStatus(
@@ -164,6 +206,9 @@ function mapProject(p: Record<string, unknown>): Project {
     updatedAt: String(p.updated_at || ''),
     modality: p.modality ? String(p.modality) : undefined,
     workspacePath: p.workspace_path ? String(p.workspace_path) : undefined,
+    workspaceKind: p.workspace_kind === 'ssh' ? 'ssh' : 'local',
+    sshHost: p.ssh_host ? String(p.ssh_host) : undefined,
+    remotePath: p.remote_path ? String(p.remote_path) : undefined,
     status: p.status === 'archived' ? 'archived' : 'active',
     g0Baseline: baseline ? mapProjectG0Baseline(baseline) : undefined,
   };

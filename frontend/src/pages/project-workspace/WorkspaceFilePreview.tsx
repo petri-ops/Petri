@@ -73,6 +73,8 @@ export function WorkspaceFilePreview({
   const [officeStatus, setOfficeStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
   // BLOCK-20 — tracks the last-saved text so isDirty can compare against it
   const [textSaved, setTextSaved] = useState<string>('');
+  // BLOCK-67 — ssh 远程保存的诚实错误面（409 冲突 / 断线 502）
+  const [saveError, setSaveError] = useState<string>('');
   // BLOCK-21 — Markdown view toggle: 'edit' | 'preview'; resets on file switch
   const [mdView, setMdView] = useState<'edit' | 'preview'>('preview');
   // BLOCK-52 P1（选中即引用）：编辑器命令面 + 预览容器内选中状态跟踪。
@@ -232,17 +234,39 @@ export function WorkspaceFilePreview({
   const handleSaveCurrent = useCallback(async () => {
     if (!file) return;
     try {
+      // BLOCK-67：ssh 项目无本地 workspaceDir —— 保存走 REST PUT 直写远程（write-through，
+      // 冲突/断线诚实呈现，不本地暂存）；local 项目沿用既有 IPC 通道（零回归）。
+      if (file.workspaceKind === 'ssh') {
+        if (!projectId) return;
+        const resp = await fetch(
+          `${getApiPrefix()}/workspaces/${projectId}/file?path=${encodeURIComponent(file.path)}`,
+          {
+            method: 'PUT',
+            headers: { 'content-type': 'application/json', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
+            body: JSON.stringify({ content: text }),
+          }
+        );
+        if (!resp.ok) {
+          const data = await resp.json().catch(() => null);
+          setSaveError(data?.error || `保存失败（HTTP ${resp.status}）`);
+          return;
+        }
+        setSaveError('');
+        setTextSaved(text);
+        return;
+      }
       if (file.workspaceDir) {
         const wbridge = getBridge('workspace');
         if (!wbridge) return;
         const resp = await wbridge.writeTextFile(file.workspaceDir, file.path, text);
         if (!resp.ok) return;
       }
+      setSaveError('');
       setTextSaved(text);
     } catch {
-      // silent
+      setSaveError('保存失败：远程连接异常');
     }
-  }, [file, text]);
+  }, [file, projectId, text]);
 
   const handleDiscard = useCallback(() => {
     if (!file) return;
@@ -308,6 +332,16 @@ export function WorkspaceFilePreview({
               </button>
               {text !== textSaved && (
                 <span className={styles.workspaceMarkdownDiffHint}>有未保存修改</span>
+              )}
+              {saveError && (
+                <span
+                  className={styles.workspaceMarkdownDiffHint}
+                  role="alert"
+                  data-testid="ssh-save-error"
+                  style={{ color: 'var(--color-danger, #d54949)' }}
+                >
+                  {saveError}
+                </span>
               )}
               <button
                 type="button"

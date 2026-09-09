@@ -2934,3 +2934,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **实机**：`scripts/ui320-workbench-live.cjs` 入库 5/5 断言 allPass（`acceptance/ui-320/ui320-live.json` + 截图×2）：左栏工作台区含 知识空间/后端 入口（Skills 同区）/ 右栏飞出菜单仅剩 结果·文件·浏览器·聊天·分析·审阅·模型 I/O（后端·知识已迁出）/ 左栏「知识空间」→ /knowledge 渲染面板+上传+检索框 / 左栏「后端」→ /backend 渲染进程面+全局态回退 meta / composer 大脑开关保留在会话内。
 
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-321: SSH 远程项目创建流 + 远程标识（BLOCK-67 P1）(2026-09-09 in_progress)
+
+**来源**：BLOCK-67-SSH-REMOTE-PROJECT（2026-09-09 用户裁决启动；P0 设计评审 confirmed 含 D6 修订为 Windows 指挥席）。plan §1 目标形态：新建项目可选「SSH 连接」——目标主机（注册表 + ~/.ssh/config 发现候选）+ 远程绝对路径，创建前经 `/api/ssh-projects/validate`（agent 引导部署 + fs_stat 目录验证）fail-closed；项目卡带 SSH·host 徽标。
+
+**改动**：① home 创建控制区新增「SSH 远程项目…」面板（目标别名 datalist 候选 + 远程路径输入 + 「校验并创建」，校验失败/断线 retryable 诚实文案）；② 项目卡 ssh 项目显示 `SSH·{sshHost}` 徽标 + `host:path` 副标题 + cpu 图标；③ `ActiveWorkspaceFile` 增 `workspaceKind`，文件树（RightFileTree/FileTreeList/FileTreeItem）透传，面包屑根名取远程路径末段；④ `WorkspaceFilePreview` 保存路由：ssh 项目走 REST `PUT /api/workspaces/:id/file` 直写远程（write-through + mtime 冲突 409 诚实错误面 `ssh-save-error`），local 项目沿用既有 IPC（零回归）；⑤ project-types/project-store 增 workspaceKind/sshHost/remotePath 映射 + `listSshTargetCandidates`/`validateSshProject` API。0 新 npm 依赖。
+
+**门禁**：tsc 0；定向 vitest home/project-store/RightPanel 8/8；后端路由级零网络测试 block67-routes 7/7（含 local 零回归用例）。实机验收（aliyun 真节点：创建→树展开→预览→编辑保存）待用户将本机 ED25519 公钥加入 authorized_keys 后执行，届时转 verified。
+
+**状态**: in_progress（代码完成，实机验收押后至节点凭据就绪）。G0 开发期常态 · 不外推 packaged / Provider / GA。

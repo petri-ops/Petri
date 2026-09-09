@@ -18,7 +18,7 @@ import { Icon } from '@/components/icons/Icon';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { FolderPicker } from '@/components/desktop/FolderPicker';
-import { createProject, listProjectJobs, listProjects } from '@/lib/project-store';
+import { createProject, listProjectJobs, listProjects, listSshTargetCandidates, validateSshProject, type SshTargetCandidate } from '@/lib/project-store';
 import type { Project, ToolJob } from '@/lib/project-types';
 import styles from './home.module.css';
 
@@ -58,6 +58,13 @@ export default function Home(): React.ReactElement {
   const [creating, setCreating] = useState(false);
   // UI-258 — 空白项目：只填名字创建，工作目录稍后在项目内设置/更换
   const [blankName, setBlankName] = useState('');
+  // BLOCK-67 — SSH 远程项目创建（UI-321）：目标选择 + 远程路径 + 创建前校验
+  const [sshOpen, setSshOpen] = useState(false);
+  const [sshTargets, setSshTargets] = useState<SshTargetCandidate[]>([]);
+  const [sshAlias, setSshAlias] = useState('');
+  const [sshRemotePath, setSshRemotePath] = useState('');
+  const [sshValidating, setSshValidating] = useState(false);
+  const [sshValidated, setSshValidated] = useState(false);
   // UI-251 — 创建失败可见化（桥缺失/对话框失败/接口报错）
   const [createError, setCreateError] = useState('');
   // UI-253 — 选定工作目录后的创建确认（具体路径可见、可反悔）
@@ -267,6 +274,54 @@ export default function Home(): React.ReactElement {
       window.removeEventListener('drop', onDrop);
     };
   }, [acceptDroppedPath]);
+
+  // BLOCK-67（UI-321）— SSH 远程项目创建流：目标发现 → 校验（agent 部署 + 路径验证）→ 创建。
+  // 打开面板时拉目标候选（注册表 + ~/.ssh/config 发现，单一真相在后端）。
+  const openSshPanel = useCallback(async () => {
+    setSshOpen(true);
+    setSshValidated(false);
+    setCreateError('');
+    try {
+      const targets = await listSshTargetCandidates();
+      setSshTargets(targets);
+    } catch (e) {
+      setCreateError(`目标列表获取失败：${e instanceof Error ? e.message : String(e)}`);
+    }
+  }, []);
+
+  const confirmCreateSsh = useCallback(async () => {
+    if (creating || sshValidating) return;
+    const alias = sshAlias.trim();
+    const remotePath = sshRemotePath.trim();
+    if (!alias || !remotePath.startsWith('/')) {
+      setCreateError('请填写 SSH 主机别名与以 / 开头的远程绝对路径');
+      return;
+    }
+    setSshValidating(true);
+    setCreateError('');
+    try {
+      const verdict = await validateSshProject({ alias, remotePath });
+      if (!verdict.ok) {
+        setCreateError(verdict.retryable
+          ? `远程连接失败（可重试）：${verdict.error}`
+          : `远程路径校验失败：${verdict.error}`);
+        return;
+      }
+      setSshValidated(true);
+      setCreating(true);
+      const name = remotePath.split('/').filter(Boolean).pop() || alias;
+      const project = await createProject({ name, modality: 'general', workspaceKind: 'ssh', sshHost: alias, remotePath });
+      setSshOpen(false);
+      setSshAlias('');
+      setSshRemotePath('');
+      navigate(`/project/${project.id}`, { replace: true });
+    } catch (e) {
+      setCreateError(`SSH 项目创建失败：${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setSshValidating(false);
+      setCreating(false);
+    }
+  }, [creating, navigate, sshAlias, sshRemotePath, sshValidating]);
 
   const handleRelaunch = useCallback(async () => {
     if (relaunching) return;
@@ -502,6 +557,66 @@ export default function Home(): React.ReactElement {
               )}
             </>
           )}
+          {/* BLOCK-67 UI-321 — SSH 远程项目：项目本体在远程服务器（对标 ZCode SSH 远程连接形态） */}
+          {!sshOpen ? (
+            <button
+              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              type="button"
+              onClick={() => void openSshPanel()}
+              disabled={creating}
+            >
+              SSH 远程项目…
+            </button>
+          ) : (
+            <div className={styles.emptyHomeManual} data-testid="ssh-project-panel">
+              <input
+                className={styles.emptyHomeManualInput}
+                type="text"
+                list="block67-ssh-targets"
+                value={sshAlias}
+                onChange={(e) => { setSshAlias(e.target.value); setSshValidated(false); }}
+                placeholder="SSH 主机别名（如 aliyun）"
+                aria-label="SSH 主机别名"
+                style={{ flex: '0 0 10em' }}
+              />
+              <datalist id="block67-ssh-targets">
+                {sshTargets.map((t) => (
+                  <option key={t.alias} value={t.alias}>{t.registered ? `${t.alias}（已注册）` : t.alias}</option>
+                ))}
+              </datalist>
+              <input
+                className={styles.emptyHomeManualInput}
+                type="text"
+                value={sshRemotePath}
+                onChange={(e) => { setSshRemotePath(e.target.value); setSshValidated(false); }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') void confirmCreateSsh();
+                  if (e.key === 'Escape') setSshOpen(false);
+                }}
+                placeholder="/srv/remote/project"
+                aria-label="远程项目绝对路径"
+                autoFocus
+              />
+              <button
+                className="gewu-btn gewu-btn--sm"
+                type="button"
+                onClick={() => void confirmCreateSsh()}
+                disabled={sshValidating || creating || !sshAlias.trim() || !sshRemotePath.trim()}
+                title="先校验远程路径（含 agent 引导部署）再创建"
+              >
+                {sshValidating ? '校验中…' : '校验并创建'}
+              </button>
+              <button
+                className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                type="button"
+                onClick={() => setSshOpen(false)}
+                disabled={sshValidating || creating}
+              >
+                取消
+              </button>
+              {sshValidated && <span aria-live="polite" style={{ fontSize: 12, color: 'var(--color-success, #2e9e5b)' }}>路径有效</span>}
+            </div>
+          )}
           {/* UI-258 — 空白项目：只填名字创建，工作目录稍后在项目内设置/更换 */}
           <div className={styles.emptyHomeManual}>
             <input
@@ -560,13 +675,29 @@ export default function Home(): React.ReactElement {
                 type="button"
                 className={styles.workbenchCard}
                 onClick={() => navigate(`/project/${project.id}`)}
-                title={project.workspacePath || project.name}
+                title={project.workspaceKind === 'ssh' ? `${project.sshHost}:${project.remotePath}` : project.workspacePath || project.name}
               >
-                <span className={styles.workbenchCardIcon}><Icon name="folder" size={16} /></span>
+                <span className={styles.workbenchCardIcon}><Icon name={project.workspaceKind === 'ssh' ? 'cpu' : 'folder'} size={16} /></span>
                 <span className={styles.workbenchCardMain}>
-                  <span className={styles.workbenchCardName}>{project.name}</span>
+                  <span className={styles.workbenchCardName}>
+                    {project.name}
+                    {project.workspaceKind === 'ssh' && (
+                      <span
+                        data-testid="ssh-host-badge"
+                        title={`SSH 远程项目 · ${project.sshHost}`}
+                        style={{
+                          marginLeft: 6, fontSize: 10, padding: '1px 6px', borderRadius: 8,
+                          border: '1px solid currentColor', opacity: 0.75, verticalAlign: 'middle',
+                        }}
+                      >
+                        SSH·{project.sshHost}
+                      </span>
+                    )}
+                  </span>
                   <span className={styles.workbenchCardPath}>
-                    {project.workspacePath || '未设置工作目录 · 可在项目内更改'}
+                    {project.workspaceKind === 'ssh'
+                      ? `${project.sshHost}:${project.remotePath}`
+                      : project.workspacePath || '未设置工作目录 · 可在项目内更改'}
                   </span>
                 </span>
                 <span className={styles.workbenchCardDate}>

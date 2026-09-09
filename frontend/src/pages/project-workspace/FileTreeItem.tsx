@@ -23,6 +23,7 @@ export function FileTreeItem({
   activePath,
   refreshVersion,
   workspaceDir,
+  workspaceKind,
 }: {
   entry: FileEntry;
   fullPath: string;
@@ -36,6 +37,7 @@ export function FileTreeItem({
   activePath?: string | null;
   refreshVersion: number;
   workspaceDir?: string;
+  workspaceKind?: 'local' | 'ssh';
 }): React.ReactElement {
   const [children, setChildren] = useState<FileEntry[]>([]);
 
@@ -65,6 +67,7 @@ export function FileTreeItem({
             url: fileUrl,
             size: entry.size,
             workspaceDir,
+            workspaceKind,
           });
         }}
         role="treeitem"
@@ -104,6 +107,7 @@ export function FileTreeItem({
           refreshVersion={refreshVersion}
           depth={depth + 1}
           workspaceDir={workspaceDir}
+          workspaceKind={workspaceKind}
         />
       )}
     </li>
