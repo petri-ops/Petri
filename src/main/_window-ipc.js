@@ -21,12 +21,11 @@ const { zoomBy, zoomReset } = require("./_zoom.js");
  * @param {function} deps.getMainWindow            — () => BrowserWindow|null
  */
 function setupWindowIpc({ ipcMain, process, app, getMainWindow }) {
-  const resolveWindowForSender = (event) => {
-    const mainWindow = getMainWindow();
-    if (!mainWindow || mainWindow.isDestroyed()) return null;
-    return event?.sender === mainWindow.webContents ? mainWindow : null;
-  };
-
+  // Chrome controls (min/max/close) must resolve the *owning* window of the
+  // sender webContents — not just the main window. A second main-class window
+  // (or any window rendering the same chrome) would otherwise have dead
+  // minimize/maximize/close buttons: the IPC resolves to null and the click
+  // is silently dropped (user-visible as an unclosable window).
   // Zoom must work in pop-out windows too, so resolve the *owning* window of the
   // sender webContents instead of restricting to the main window.
   const resolveSenderWindow = (event) => {
@@ -36,11 +35,11 @@ function setupWindowIpc({ ipcMain, process, app, getMainWindow }) {
 
   // ── Window chrome controls ─────────────────────────────────
   ipcMain.on("window:minimize", (event) => {
-    resolveWindowForSender(event)?.minimize();
+    resolveSenderWindow(event)?.minimize();
   });
 
   ipcMain.on("window:maximize", (event) => {
-    const targetWindow = resolveWindowForSender(event);
+    const targetWindow = resolveSenderWindow(event);
     if (!targetWindow) return;
     if (targetWindow.isMaximized()) {
       targetWindow.unmaximize();
@@ -50,22 +49,22 @@ function setupWindowIpc({ ipcMain, process, app, getMainWindow }) {
   });
 
   ipcMain.on("window:close", (event) => {
-    resolveWindowForSender(event)?.close();
+    resolveSenderWindow(event)?.close();
   });
 
   ipcMain.handle("window:isMaximized", (event) => {
-    const targetWindow = resolveWindowForSender(event);
+    const targetWindow = resolveSenderWindow(event);
     return targetWindow ? targetWindow.isMaximized() === true : false;
   });
 
   // ── Fullscreen (macOS simpleFullScreen / cross-platform) ────
   ipcMain.handle("window:isFullScreen", (event) => {
-    const targetWindow = resolveWindowForSender(event);
+    const targetWindow = resolveSenderWindow(event);
     return targetWindow ? targetWindow.isFullScreen() : false;
   });
 
   ipcMain.on("window:toggleFullScreen", (event) => {
-    const targetWindow = resolveWindowForSender(event);
+    const targetWindow = resolveSenderWindow(event);
     if (!targetWindow) return;
     // For frameless windows on macOS, use simpleFullScreen mode which
     // automatically hides the Dock and menu bar

@@ -259,9 +259,7 @@ test('window IPC registers exact controls and toggles maximize state', async () 
 
   const calls = [];
   let maximized = false;
-  const webContents = {};
   const mainWindow = {
-    webContents,
     isDestroyed() { return false; },
     minimize() { calls.push('minimize'); },
     maximize() { calls.push('maximize'); },
@@ -269,6 +267,10 @@ test('window IPC registers exact controls and toggles maximize state', async () 
     close() { calls.push('close'); },
     isMaximized() { return maximized; },
   };
+  // Chrome controls resolve the *owning* window via the sender's
+  // getOwnerBrowserWindow() — the main window owns its own webContents.
+  const webContents = { getOwnerBrowserWindow: () => mainWindow };
+  mainWindow.webContents = webContents;
   setup.setMainWindow(mainWindow);
   const event = { sender: webContents };
 
@@ -291,9 +293,40 @@ test('window IPC registers exact controls and toggles maximize state', async () 
   handler('window:minimize')(undefined);
   assert.deepEqual(calls, callsBeforeForeignSender);
   assert.equal(await isMaximized(foreignEvent), false);
+});
 
-  setup.setMainWindow(null);
-  assert.equal(await isMaximized(event), false);
+test('window chrome controls resolve the owning window so secondary windows are closable', async () => {
+  // BLOCK-68 follow-up regression: a second main-class window rendering the
+  // same chrome must be closable/minimizable by its own controls. The previous
+  // main-window-only scoping resolved every non-main sender to null, leaving
+  // dead close buttons (user-visible as an unclosable window).
+  const { registrations } = createIpcMainHarness();
+  const calls = [];
+  const winA = {
+    isDestroyed() { return false; },
+    minimize() { calls.push('A:minimize'); },
+    close() { calls.push('A:close'); },
+    isMaximized() { return false; },
+  };
+  const winB = {
+    isDestroyed() { return false; },
+    minimize() { calls.push('B:minimize'); },
+    close() { calls.push('B:close'); },
+    isMaximized() { return true; },
+  };
+  const senderA = { getOwnerBrowserWindow: () => winA };
+  const senderB = { getOwnerBrowserWindow: () => winB };
+
+  const handler = (channel) => registrations.on.find((entry) => entry.channel === channel).listener;
+  const isMaximized = registrations.handle.find((entry) => entry.channel === 'window:isMaximized').listener;
+
+  handler('window:minimize')({ sender: senderB });
+  handler('window:close')({ sender: senderB });
+  handler('window:minimize')({ sender: senderA });
+  handler('window:close')({ sender: senderA });
+  assert.deepEqual(calls, ['B:minimize', 'B:close', 'A:minimize', 'A:close']);
+  assert.equal(await isMaximized({ sender: senderB }), true);
+  assert.equal(await isMaximized({ sender: senderA }), false);
 });
 
 test('maximize and unmaximize events send the precise renderer state channel', () => {
