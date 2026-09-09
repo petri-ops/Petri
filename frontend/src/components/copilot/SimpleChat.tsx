@@ -66,7 +66,6 @@ import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
 // UI-268: 「后台进程」浮窗（持久输出独立小窗口）；工具活动记录改为内联手风琴
 import { ToolActivityDock } from './ToolActivityDock';
 import { LlmTranscriptViewer } from './LlmTranscriptViewer';
-import { AgentChangesCard } from './AgentChangesCard';
 import { MessageRail, type MessageRailItem } from './MessageRail';
 import { ChatScrollbar } from './ChatScrollbar';
 import {
@@ -1501,8 +1500,6 @@ export function SimpleChat({
           )}
         </div>
 
-        {/* BLOCK-28.7 — 工作区改动卡片：每文件 ±统计，点击行跳转审阅；BLOCK-31 P3 传入会话 id 做会话作用域 */}
-        <AgentChangesCard conversationId={conversationId} />
 
         {/* BLOCK-55 P1/P3 — 计划批准卡 + 修订批准条（仅在有待批准内容时渲染） */}
         {pendingPlan && (

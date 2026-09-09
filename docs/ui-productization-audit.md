@@ -1680,6 +1680,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 ## UI-216: BLOCK-28.7 — 聊天区「工作区改动」卡片（每文件 ±统计，点击跳审阅） (2026-08-30 verified)
 
+> **2026-09-09 用户裁决移除宿主卡片**：聊天区「工作区改动」卡片整体移除（组件 + SimpleChat 挂载 + 测试）——每文件改动已在对话内工具行（ToolActivityList）与审阅面板（/review 主区 + dock）呈现，卡片在无 agent 活动的会话呈现场景差（空会话显示全局 git 脏态噪音）且关闭 X 不持久（下个任务收尾即弹回）。本条及其上的卡片增量（悬停预览/浮窗自适应/轮次分组）随宿主移除置 **cancelled**；审阅面板与对话内工具行为准。conversationChangesStore（BLOCK-31/40 会话归属索引）暂保留（写路径在 run 流内）。
+
 **用户反馈**：「聊天会话区域会有文件改变的详细信息吗？具体到每个文件的变化数量，点击具体的改变信息后可以跳转到审阅查看？」
 
 **改动范围**：
@@ -2113,6 +2115,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 ## UI-252: BLOCK-29 增量 — 会话区「工作区改动」卡片文件行悬停预览 (2026-08-31 verified)
 
+> **2026-09-09 用户裁决移除宿主卡片**：聊天区「工作区改动」卡片整体移除（组件 + SimpleChat 挂载 + 测试）——每文件改动已在对话内工具行（ToolActivityList）与审阅面板（/review 主区 + dock）呈现，卡片在无 agent 活动的会话呈现场景差（空会话显示全局 git 脏态噪音）且关闭 X 不持久（下个任务收尾即弹回）。本条及其上的卡片增量（悬停预览/浮窗自适应/轮次分组）随宿主移除置 **cancelled**；审阅面板与对话内工具行为准。conversationChangesStore（BLOCK-31/40 会话归属索引）暂保留（写路径在 run 流内）。
+
 **用户反馈**：「会话区这部分的 工作区改动也要可以鼠标悬浮上去就可以有预览的小窗口」（截图：聊天区 AgentChangesCard 文件列表）。
 
 **改动**（0 新增 IPC / 0 新依赖）：`AgentChangesCard` 刷新时保留按文件的完整 diff 数据（原只留统计）；文件行 hover 350ms 弹出 fixed 浮窗——状态徽标 + 完整路径 + +/− 统计 + 只读 diff（复用 `CodeMirrorDiffView` 无操作控件）；二进制/未跟踪文件显示说明文案。交互与 UI-250 一致（移入可停留/移开 120ms 关闭）；点击行仍跳审阅。样式入 `simple-chat.css`（`WorkingTreeReview.css` 已由 App 级引入，CodeMirror 样式全局可用）。
@@ -2146,6 +2150,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-255: BLOCK-29 增量 — 悬停预览浮窗位置/尺寸自适应（不再超出应用边界） (2026-08-31 verified)
+
+> **2026-09-09 用户裁决移除宿主卡片**：聊天区「工作区改动」卡片整体移除（组件 + SimpleChat 挂载 + 测试）——每文件改动已在对话内工具行（ToolActivityList）与审阅面板（/review 主区 + dock）呈现，卡片在无 agent 活动的会话呈现场景差（空会话显示全局 git 脏态噪音）且关闭 X 不持久（下个任务收尾即弹回）。本条及其上的卡片增量（悬停预览/浮窗自适应/轮次分组）随宿主移除置 **cancelled**；审阅面板与对话内工具行为准。conversationChangesStore（BLOCK-31/40 会话归属索引）暂保留（写路径在 run 流内）。
 
 **用户反馈**：「卡片悬停预览出来的内容位置和大小能否自适应 尽可能的不被遮挡 目前这个容易超出软件边界」。
 
@@ -2598,6 +2604,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **状态**: verified。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-273: 本会话改动按执行步骤（agent 迭代轮次）分组归属 (2026-09-02 verified)
+
+> **2026-09-09 用户裁决移除宿主卡片**：聊天区「工作区改动」卡片整体移除（组件 + SimpleChat 挂载 + 测试）——每文件改动已在对话内工具行（ToolActivityList）与审阅面板（/review 主区 + dock）呈现，卡片在无 agent 活动的会话呈现场景差（空会话显示全局 git 脏态噪音）且关闭 X 不持久（下个任务收尾即弹回）。本条及其上的卡片增量（悬停预览/浮窗自适应/轮次分组）随宿主移除置 **cancelled**；审阅面板与对话内工具行为准。conversationChangesStore（BLOCK-31/40 会话归属索引）暂保留（写路径在 run 流内）。
 
 **用户反馈**：「目前 我们有本会话改动的所有文件是集中在一个工作区中的 能否落到每个执行步骤中呢？」——BLOCK-31 P3 的会话改动卡片只列文件清单，改动与执行记录（思考/工具轮次）无法对应；裁决为会话作用域下按 agent 迭代轮次分组展示。
 

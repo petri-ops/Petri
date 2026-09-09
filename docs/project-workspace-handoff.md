@@ -4,6 +4,7 @@
 
 ## Session Snapshot
 
+- **工作区改动卡片移除（2026-09-09，用户裁决）**：聊天区 AgentChangesCard（UI-216/252/255/273 宿主）整体移除——信息与审阅面板 + 对话内工具行重复、空会话呈现场景差、关闭 X 不持久。审阅面板（/review + dock + 首页审阅卡）为改动呈现唯一面；conversationChangesStore 暂保留（写路径在 run 流内）。台账四条置 cancelled 注记。
 - **BLOCK-65 子智能体专属界面整包收口（2026-09-09 completed，`44050255`，UI-314 verified）**：用户裁决 P1-b①=自动弹出专属窗、P2-c②=SubAgentsBar 升格俯瞰。落地：① 后端用户态子域 `routes/ai-agent/task-actions.js`（GET /api/ai/agent/tasks + GET task/:id/meta + POST message/followup），语义与 send_message/followup_task 工具**单源**（spawn-agent-tools 导出 queueUserMessage/launchUserFollowup 复用 launchSubAgent/buildTerminalSummary）；② AgentWindowPage 交互补全（中断两步确认 + 留言队列语义诚实标注 + 终态继续派→自动弹新窗）+ 窗口标题 task 前缀；③ SubAgentsBar 自动弹窗（模块级 Set 去重 + autoDemoted 提示）+「全部俯瞰」跨会话面板（5s 轮询只读 tasks 投影）。P2-d 评估=维持独立窗形态。实机 6 断言全 PASS（`acceptance/block-65/`，真实模型 spawn 链路）。
 
 - **BLOCK-64 指挥中心 UX 整包收口（2026-09-09 completed，`abc19b62`，UI-313 verified）**：P1-a mapToolJob 补 execution_target_id（远程徽章复活；新增 mapper 级回归禁手工注入）+ 瓦片项目标注 + 失败 error 摘要；P1-b 活跃置顶（commandCenterModel.orderJobsForWall）+ 查日志（新只读端点 `GET /api/tools/log/:id`：remote-runner.log 实时优先 / run.log finalize 兜底 / 32KB 尾 / 无文件诚实 no_log_yet）+ 取消两步确认；**cancelled 提为一等 ToolJob 状态**（此前 mapper 塌缩成 pending，取消后作业永远以「排队中」挂墙）；P2-d Ctrl/Cmd+Shift+C 快捷键（App 根注入）+ 空态引导。实机 9 断言全 PASS（`acceptance/block-64/`）。三面统一叙事评估=不合并（tool_jobs/task_events/进程表真相域不同）。**实机教训**：CDP Input 管线保留 Ctrl+Shift+C（Chromium devtools inspect），注入用页面级真实 KeyboardEvent。遗留：agent 俯瞰按计划移交 BLOCK-65。

@@ -103,7 +103,7 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
           )}
           {activity.truncated && activity.status === 'success' && <span>仅显示摘要</span>}
           {/* UI-273 增补 — 写操作展开显示本次操作的实际改动：文件行（点击跳审阅）+ diff 预览，
-              与工作区改动卡片（AgentChangesCard）同构呈现 */}
+              与审阅文件行同构呈现 */}
           {activity.changeDiff ? (
             <div className="sc-tool-changediff">
               <button
