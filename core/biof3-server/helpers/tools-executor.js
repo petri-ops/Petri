@@ -2261,6 +2261,38 @@ function createToolsExecutor({
       });
     }
 
+    // BLOCK-67 D7：SSH 远程项目的作业默认执行面 = 项目自身 host（防 BLOCK-30 双模式
+    // 回潮：显式传了别的目标也一律钉回项目 host，不叠加 composer 分派）。
+    // 目标别名未注册时按 alias 注册（unprobed，探测随首次作业引导）。
+    if (projectId) {
+      try {
+        const sshProject = await dbMod.getAsyncDatabase()
+          .prepare('SELECT workspace_kind, ssh_host FROM projects WHERE id = ?')
+          .get(projectId);
+        if (sshProject && sshProject.workspace_kind === 'ssh' && sshProject.ssh_host) {
+          let hostTarget = await targetRegistry.getByAlias({ alias: sshProject.ssh_host });
+          if (!hostTarget) {
+            const registered = await targetRegistry.register({
+              alias: sshProject.ssh_host,
+              label: `BLOCK-67 SSH 项目默认目标（${projectId}）`,
+            });
+            if (registered.ok) hostTarget = await targetRegistry.getById({ id: registered.id });
+          }
+          if (hostTarget) {
+            executionTargetId = hostTarget.id;
+          } else {
+            return res.status(400).json({
+              ok: false,
+              error: 'ssh_project_target_unavailable',
+              message: `远程项目默认执行目标（${sshProject.ssh_host}）注册失败`,
+            });
+          }
+        }
+      } catch (e) {
+        console.warn('[tools] BLOCK-67 ssh default target resolution failed:', e.message);
+      }
+    }
+
     const jobId = 'job_' + uuidv4().replace(/-/g, '').slice(0, 16);
 
     // Phase 2: 使用项目目录解析器，或兜底到全局目录（历史兼容）

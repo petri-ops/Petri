@@ -113,7 +113,15 @@ function resolveProjectRunLayout(options) {
   }
 
   // 5. 解析 workspace_path
-  const workspaceRoot = project.workspace_path;
+  // BLOCK-67 D7/D8：SSH 远程项目 workspace_path 为 NULL（远程唯一真值）——作业用
+  // 本地 staging 根（仅承载 jobDir：脚本/参数上传源 + 产物拉回落点；Artifact Truth
+  // 依规留本地），不建第二套工作区真相。本地项目语义不变。
+  let workspaceRoot = project.workspace_path;
+  if (!workspaceRoot && project.workspace_kind === 'ssh') {
+    const localDataRoot = process.env.BIOF3_LOCAL_DATA_DIR
+      || path.join(require('os').homedir(), 'Documents', 'BioF3-Local');
+    workspaceRoot = path.join(localDataRoot, 'remote-projects', String(projectId));
+  }
   if (!workspaceRoot) {
     throw new Error(`[project-run-layout] Project workspace_path not set: ${projectId}`);
   }
