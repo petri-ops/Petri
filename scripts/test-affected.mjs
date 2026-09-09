@@ -68,7 +68,9 @@ function runGit(args) {
 
 function listScripts() {
   return execFileSync('rg', ['--files', 'scripts'], { cwd: ROOT, encoding: 'utf8' })
-    .split(/\r?\n/).map((line) => normalizePath(line.trim())).filter((file) => /\.(?:js|mjs|cjs|sh)$/.test(file));
+    .split(/\r?\n/).map((line) => normalizePath(line.trim()))
+    // FILE-TREE-POLICY：scripts/archive/ 是一次性 driver 的归档区，不参与“恰好一规则”分类约束。
+    .filter((file) => /\.(?:js|mjs|cjs|sh)$/.test(file) && !file.startsWith('scripts/archive/'));
 }
 
 function validateMap(map) {
