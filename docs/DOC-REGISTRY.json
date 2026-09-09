@@ -3856,6 +3856,29 @@
     "1dc133c3",
     "835332dc"
    ]
+  },
+  {
+   "id": "BLOCK-70-MOBILE-SYNC",
+   "path": "docs/block-70-mobile-sync-plan.md",
+   "kind": "work-package",
+   "status": "planned",
+   "canonical": true,
+   "truthDomain": "block-70-mobile-sync",
+   "entrypoint": "docs/README.md",
+   "registeredAt": "2026-09-09",
+   "archivePolicy": "archive_when_superseded",
+   "phase": "PLANNED",
+   "tags": [
+    "block-70",
+    "mobile-sync",
+    "wechat-ilink",
+    "bot-gateway",
+    "qr-pairing",
+    "long-polling",
+    "remote-control",
+    "G0"
+   ],
+   "notes": "手机远程同步——微信扫码配对 + 智能体任务远程查看与控制。2026-09-09 用户想法提案立项（机制取证与架构草案随立项交付）：对标本机 ZCode 静态解剖实证——扫码远程同步 = 微信 iLink bot 平台（ilinkai.weixin.qq.com：get_bot_qrcode?bot_type=3 → 手机微信扫码 → get_qrcode_status 轮询 → bot_token+ilink_bot_id）+ 桌面端 bot 运行时（/getupdates 90s 长轮询纯出站收消息、/sendmessage 回复、/sendtyping；provider 注册表 weixin/feishu/webhook 三实现；指令面 /status /new /model /reply + permission.respond 手机批准 + replyMode 推送语义 + transient card 流式进度）。可行性结论：可行且两条路线互补——路线 A 主体=微信 iLink 通道（真远程/纯出站/手机端零安装，协议层 0 新依赖，凭证走 credential-store 成熟模式）；路线 B=LAN 移动 Web 面板（后端 127.0.0.1 零鉴权需新增持有层，P5 候选）。风险=iLink 非公开协议可能变化（错误分类+additive 隔离兜底）、内容经腾讯云（D6 推送语义约束隐私边界：默认只推状态+摘要）。设计裁决 D1-D9（⏳ 待 P0 评审）：D1 进程内 bot-gateway 模块（helpers/bot-gateway/ 四文件，默认关闭诚实空态）；D2 配对 UI 二维码卡 + bot_token 落 credential-store（唯一新依赖倾向 qrcode-generator ⏳）；D3 单一真相红线（只投影既有 conversations/tasks/tool_jobs，不建第二套存储、DB 零新业务表，inbound 映射既有内部函数对标 BLOCK-49 进程内直调先例）；D4 安全边界（一 token 一账号/指令白名单/私聊 only/批准不放大权限对标 BLOCK-48 两段式）；D5 指令面 v1 克制（/status /tasks /new /help，普通文本默认续聊最近会话 ⏳）；D6 replyMode 三档默认 final（不回传文件原文/大产物/密钥面）；D7 手机端就是微信，不自研 App/小程序/移动网页；D8 协议风险兜底（network 退避/auth 失效提示重配/协议变化 fail-closed，借鉴 BLOCK-57 error-classifier）；D9 additive 零行为变化（未配对时既有测试零改动）。阶段：P0 评审+iLink PoC（真实扫码拿 token 脱敏落证据）→ P1 gateway 模块+配对 UI（UI-319）→ P2 查询面 → P3 控制面（手机批准授权门）→ P4 收口 → P5 候选（LAN 面板/飞书/附件）。与候选池 2026-09-06『参考不收多通道网关』的关系：用户显式提议推翻该默认立场，范围收窄为单一手机通道+本地指挥席不变。排队候选 BLOCK-67/68/69 + 本包，启动顺序待用户裁决。G0 开发期常态 · 不外推 packaged/Provider/GA."
   }
  ],
  "lastUpdated": "2026-09-08",
