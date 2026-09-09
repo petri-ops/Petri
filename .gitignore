@@ -93,3 +93,4 @@ sidecars/computer-use-windows/obj/
 sidecars/computer-use-windows/axfixture/bin/
 sidecars/computer-use-windows/axfixture/obj/
 .biof3-isolated*/
+.biof3-tmp-*
