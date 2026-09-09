@@ -47,6 +47,7 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext {
     archiveConversation: vi.fn(async () => true),
     forkConversation: vi.fn(async () => null),
     workspaceMode,
+    sshConnectProject: vi.fn(),
     handleShowSearch: vi.fn(),
     handleShowScheduled: vi.fn(),
     handleShowPlugins: vi.fn(),
@@ -110,5 +111,38 @@ describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
     expect(screen.getByText('Project One').textContent).toBe('Project One');
     expect(screen.getByRole('button', { name: /创建新对话/ })).toBeTruthy();
     expect(screen.getByRole('button', { name: /移入回收站/ })).toBeTruthy();
+  });
+});
+
+// BLOCK-67 加映（UI-325）— ssh 项目树标识 + 「远程连接」入口
+describe('BLOCK-67 左栏 ssh 项目标识与远程连接', () => {
+  it('ssh 项目树行有 远程连接 按钮，点击触发 sshConnectProject', () => {
+    const ctx = buildCtx('chat');
+    ctx.visibleProjects = [{
+      ...ctx.project,
+      workspaceKind: 'ssh',
+      sshHost: 'aliyun',
+      remotePath: '/root/gewu-block67-demo',
+    } as typeof ctx.project];
+    render(
+      <MemoryRouter>
+        <LeftPanel ctx={ctx} />
+      </MemoryRouter>,
+    );
+    const connectBtn = screen.getByRole('button', { name: /远程连接 · aliyun/ });
+    fireEvent.click(connectBtn);
+    expect(ctx.sshConnectProject).toHaveBeenCalledTimes(1);
+    expect(ctx.sshConnectProject.mock.calls[0][0].sshHost).toBe('aliyun');
+  });
+
+  it('local 项目树行没有 远程连接 按钮', () => {
+    const ctx = buildCtx('chat');
+    ctx.visibleProjects = [ctx.project];
+    render(
+      <MemoryRouter>
+        <LeftPanel ctx={ctx} />
+      </MemoryRouter>,
+    );
+    expect(screen.queryByRole('button', { name: /远程连接/ })).toBeNull();
   });
 });

@@ -48,6 +48,9 @@ export interface LeftPanelContext {
   /** Fork an existing conversation and switch to the new one */
   forkConversation: (conversationId: string, title?: string) => Promise<ConversationSummary | null>;
 
+  /** BLOCK-67 加映（UI-325）：ssh 项目「远程连接」——连通性检测 + 诚实反馈（D5 重连入口） */
+  sshConnectProject: (project: Project) => void | Promise<void>;
+
   // Workspace routing
   workspaceMode: WorkspaceMode;
   handleShowSearch: () => void;
@@ -335,7 +338,8 @@ function ProjectNode({
         }}
       >
         <Icon name={isExpanded ? 'chevron-down' : 'chevron-right'} size={12} />
-        <Icon name="folder" size={14} />
+        {/* BLOCK-67 加映（UI-325）：ssh 项目树图标 = globe（对齐 ZCode 远程项目云标语义） */}
+        <Icon name={p.workspaceKind === 'ssh' ? 'globe' : 'folder'} size={14} />
         {editingProject ? (
           <input
             className={styles.treeRenameInput}
@@ -363,6 +367,18 @@ function ProjectNode({
             title="双击重命名项目"
           >
             {p.name}
+          </button>
+        )}
+        {p.workspaceKind === 'ssh' && (
+          <button
+            className={styles.projectTreeAddBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              void ctx.sshConnectProject(p);
+            }}
+            title={`远程连接 · ${p.sshHost}:${p.remotePath}`}
+          >
+            <Icon name="refresh" size={12} />
           </button>
         )}
         <button

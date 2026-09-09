@@ -2980,3 +2980,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **实机回归修复（同日，用户点击 md 复现白屏）**：UI-323 改造把自动保存 `useEffect` 与 Ctrl+S `useCallback` 放在了 `if (!file)` 提前返回**之后**——无文件渲染只注册 N 个 Hook，点击文件首次重渲染变 N+2，React 抛 "Rendered more hooks" 整根卸载白屏。修复：两个 Hook 与其依赖 `fallbackKind` 移到提前返回之前；新增 null→file / file→null 双向 rerender 回归测试 2 用例（组件定向 5/5）。教训固化：重构组件时 Hook 一律置于全部提前返回之前，转换路径用 rerender 用例锁死。
 
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收，aliyun 真实节点）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-325: 左栏项目树 SSH 标识 + 行内「远程连接」入口（BLOCK-67 加映）(2026-09-09 verified)
+
+**来源**：用户实机对齐 ZCode 形态的裁决——SSH 项目标识不该只在创建那一刻出现，左栏项目树上要能一眼识别远程项目，且断线后要有重连入口（补全 plan D5 断线语义的用户侧缺口）。
+
+**改动**：① 左栏项目树行：`workspaceKind === 'ssh'` 的项目用 `globe` 图标替代 folder（ZCode 用云朵，图标库等价物为 globe）；② ssh 项目行 hover 按钮簇首位增「远程连接」按钮（refresh 图标，title=`远程连接 · host:path`），点击调既有 `/api/ssh-projects/validate`（agent 探测 + 远程路径校验）做连通性检测，结果 toast 诚实反馈（成功「远程连接正常：host:path」/ 失败含 retryable 可重试标注）；local 项目行无此按钮（零改动）。克制边界：不做常驻连接状态轮询（检测是手动动作，后续要常驻状态灯另行裁决）。0 新依赖。
+
+**门禁**：tsc 0；LeftPanel 定向 vitest 6/6（新增 ssh 行按钮触发回调 / local 行无按钮 2 用例）。**实机**：CDP 探针（`acceptance/ui-325/ui325-live.json`）——REST 创建 ssh 项目 → 树行定位 → 点击远程连接 → toast「远程连接正常：aliyun:/root/gewu-block67-demo」+ 0 console error。
+
+**状态**: verified（2026-09-09 dev Electron 实机 CDP 验收，aliyun 真实节点）。G0 开发期常态 · 不外推 packaged / Provider / GA。

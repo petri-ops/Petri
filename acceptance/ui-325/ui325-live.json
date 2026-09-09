@@ -1,0 +1,16 @@
+{
+  "date": "2026-09-09",
+  "what": "BLOCK-67 加映 UI-325 —— 左栏项目树 ssh 标识（globe 图标）+ 行内「远程连接」入口（连通性检测 + toast 诚实反馈）",
+  "environment": "dev Electron (fnm Node 24.20, CDP 9222) + aliyun 真实节点",
+  "method": "CDP Runtime.evaluate 实机探针（REST 创建 ssh 项目 → 主窗树行定位 → 点击 远程连接 → 轮询 toast viewport）",
+  "assertions": [
+    { "name": "ssh 项目树行含「远程连接」按钮（title=远程连接 · aliyun:/root/gewu-block67-demo）", "pass": true },
+    { "name": "点击后连通性检测成功，toast 显示「远程连接正常：aliyun:/root/gewu-block67-demo」", "pass": true },
+    { "name": "全程 0 个 renderer console error", "pass": true }
+  ],
+  "related": {
+    "unitTests": "LeftPanel.test.tsx 6/6（ssh 行按钮触发回调 / local 行无此按钮）+ tsc 0",
+    "api": "复用 /api/ssh-projects/validate（agent 探测 + fs_stat 目录校验，P1 已验证）"
+  },
+  "allPass": true
+}

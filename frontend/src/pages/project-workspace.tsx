@@ -14,7 +14,8 @@ import { LeftPanel, type LeftPanelContext } from '@/components/workspace-panels/
 import { RightPanel, type RightPanelContext } from '@/components/workspace-panels/RightPanel';
 import { ColumnHeader } from '@/components/desktop/titlebar/ColumnizedTitleBar';
 import { TitleBar } from '@/components/desktop/TitleBar';
-import { getProject, listProjectJobs, listDatasetsByProject, listProjects, updateProject, createProject, setProjectStatus } from '@/lib/project-store';
+import { getProject, listProjectJobs, listDatasetsByProject, listProjects, updateProject, createProject, setProjectStatus, validateSshProject } from '@/lib/project-store';
+import { useToast } from '@/components/common/ToastProvider';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 import { tools as staticTools } from '@/pages/_data';
@@ -126,6 +127,7 @@ export function ProjectWorkspace(): React.ReactElement {
   const updateTitleBar = shell.updateTitleBar;
   const { projectId, '*': modeSplat } = useParams<{ projectId: string; '*'?: string }>();
   const navigate = useNavigate();
+  const toast = useToast();
   const [searchParams] = useSearchParams();
 
   const [project, setProject] = useState<Project | null>(null);
@@ -911,6 +913,21 @@ export function ProjectWorkspace(): React.ReactElement {
     return true;
   }, [refreshConversations, refreshOtherConversations]);
 
+  // BLOCK-67 加映（UI-325）— ssh 项目「远程连接」：连通性检测（validate = agent 探测 + 路径校验），
+  // 结果 toast 诚实反馈；断线后这就是 D5 的用户侧重连入口。
+  const sshConnectProject = useCallback(async (target: Project) => {
+    if (target.workspaceKind !== 'ssh' || !target.sshHost || !target.remotePath) return;
+    const verdict = await validateSshProject({ alias: target.sshHost, remotePath: target.remotePath });
+    if (verdict.ok) {
+      toast?.success(`远程连接正常：${target.sshHost}:${target.remotePath}`);
+    } else {
+      const msg = verdict.retryable
+        ? `远程连接失败（可重试）：${verdict.error}`
+        : `远程连接失败：${verdict.error}`;
+      toast?.error(msg);
+    }
+  }, [toast]);
+
   const archiveProjectFromTree = useCallback(async (targetProjectId: string) => {
     const archived = await setProjectStatus(targetProjectId, 'archived');
     if (!archived) return false;
@@ -1677,6 +1694,7 @@ export function ProjectWorkspace(): React.ReactElement {
       onOpen: openCreatePanel,
       onPickExternal: createProjectFromWorkspacePath,
     },
+    sshConnectProject: sshConnectProject,
     createConversationForProject,
     renameProject: renameProjectInTree,
     renameConversation: renameConversationInTree,
