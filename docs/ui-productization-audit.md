@@ -2896,3 +2896,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：conversationRunStore + ToolActivityList 定向 vitest 48/48 + tsc 0 + ui:audit:check/docs:check PASS；实机截图 `acceptance/ui-315/ui316-slim-bar.png`（22px 单行细条 + bot 图标 + 行内 agent 行）。
 
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+> **UI-315 优化二（2026-09-09，用户实测反馈「黑底突兀 + 线条边界多余 + 区分度不足」）**：终端块重写为**命令优先 + 主题自适应 + 无边框**——① 折叠行以等宽命令为主体内容（`$ 命令…` 单行省略，hover 见全文），一眼看出跑了什么，状态/耗时右置弱化；② 去掉全部左右边框线（含 .sc-tool-activity 行级左线对本块的渗入），以柔和主题底色（--gewu-bg-subtle）分组区块，明暗主题自动适配；③ 展开态：完整命令 + ANSI 着色输出（限高滚动 + 自动滚底 + 回到底部）+ 复制命令/输出；④ 运行中 spinner。实机：明暗双主题截图 `acceptance/ui-315/ui315-v2-light.png` / `ui315-v2-dark.png`（命令优先折叠行 + 展开输出均验证）。定向 vitest 19/19 + tsc 0。

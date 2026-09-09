@@ -85,13 +85,16 @@ function ReasoningRow({ iteration, text }: { iteration: number; text: string }) 
  *   - 滚动跟随：手动上滚暂停自动滚底 + 「回到底部」悬浮按钮
  */
 function TerminalRow({ activity }: { activity: ToolActivityItem }) {
-  const [open, setOpen] = useState(true);
+  // UI-315 优化二 — 命令即身份：折叠行以等宽命令为主体（一眼看出跑了什么），
+  // 展开后是完整输出；柔和主题底色分组，无左右边框线。
+  const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState('');
   const duration = formatToolDuration(activity.durationMs);
   const command = activity.command || activity.actionDetail || '';
   const outputTail = activity.output?.tail || '';
   const running = activity.status === 'running';
   const outputRef = useRef<HTMLPreElement | null>(null);
+  const outputSpans = parseAnsiToSpans(outputTail);
   const followRef = useRef(true);
   const [showJump, setShowJump] = useState(false);
 
@@ -128,10 +131,18 @@ function TerminalRow({ activity }: { activity: ToolActivityItem }) {
     }
   };
 
-  const outputSpans = parseAnsiToSpans(outputTail);
+  const firstLine = (command.split('\n')[0] || '').slice(0, 120);
+  const multiLine = command.includes('\n');
+  const statusGlyph = running
+    ? null
+    : activity.status === 'success'
+      ? '✓'
+      : activity.status === 'error' || activity.status === 'denied'
+        ? '✕'
+        : '···';
 
   return (
-    <div className={`sc-tool-term sc-tool-term-${activity.status}`} data-testid="tool-term">
+    <div className={`sc-tool-term sc-tool-term-${activity.status}`} data-status={activity.status} data-testid="tool-term">
       <button
         type="button"
         className="sc-tool-term-head"
@@ -148,12 +159,12 @@ function TerminalRow({ activity }: { activity: ToolActivityItem }) {
             <Icon name="terminal" size={12} />
           </span>
         )}
-        <span className="sc-tool-term-title">
-          终端{activity.name === 'workspace_exec_background' ? ' · 后台' : ''}
-          {activity.shellLabel ? ` · ${activity.shellLabel}` : ''}
-        </span>
+        <code className="sc-tool-term-cmd-preview" title={command}>
+          <span className="sc-tool-term-prompt">$ </span>
+          {firstLine}
+        </code>
         <span className="sc-tool-term-status" data-status={activity.status}>
-          {TOOL_STATUS_LABEL[activity.status]}
+          {statusGlyph || '···'}
         </span>
         {duration && <span className="sc-tool-term-duration">{duration}</span>}
         <span className="sc-tool-row-chevron" aria-hidden="true">
@@ -162,19 +173,7 @@ function TerminalRow({ activity }: { activity: ToolActivityItem }) {
       </button>
       {open && (
         <div className="sc-tool-term-body">
-          <div className="sc-tool-term-command">
-            <span className="sc-tool-term-prompt">$ </span>
-            <span className="sc-tool-term-command-text">{command || activity.actionDetail || activity.name}</span>
-            <button
-              type="button"
-              className="sc-tool-term-copy"
-              title="复制命令"
-              aria-label="复制命令"
-              onClick={() => void copyText(command, 'cmd')}
-            >
-              {copied === 'cmd' ? '已复制' : '复制'}
-            </button>
-          </div>
+          {multiLine && <pre className="sc-tool-term-command-full">{command}</pre>}
           {(outputTail || running) && (
             <div className="sc-tool-term-output-wrap">
               <pre
@@ -205,20 +204,21 @@ function TerminalRow({ activity }: { activity: ToolActivityItem }) {
                   ↓ 回到底部
                 </button>
               )}
-              <button
-                type="button"
-                className="sc-tool-term-copy sc-tool-term-copy-out"
-                title="复制输出"
-                aria-label="复制输出"
-                onClick={() => void copyText(outputTail, 'out')}
-              >
-                {copied === 'out' ? '已复制' : '复制输出'}
-              </button>
             </div>
           )}
           {activity.status === 'error' && activity.terminationReason && (
             <div className="sc-tool-term-err">原因：{activity.terminationReason}</div>
           )}
+          <div className="sc-tool-term-actions">
+            <button type="button" className="sc-tool-term-copy" onClick={() => void copyText(command, 'cmd')}>
+              {copied === 'cmd' ? '已复制命令' : '复制命令'}
+            </button>
+            {outputTail && (
+              <button type="button" className="sc-tool-term-copy" onClick={() => void copyText(outputTail, 'out')}>
+                {copied === 'out' ? '已复制输出' : '复制输出'}
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

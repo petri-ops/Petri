@@ -1333,24 +1333,14 @@
   color: var(--gewu-status-warning-fg);
 }
 
-/* ── UI-315 优化二 — 终端块跟随主题：无边框自由排版，ANSI 明暗双套色板 ── */
+/* ── UI-315 优化二 — exec 原生终端块：命令即身份 + 柔和主题底色（无边框线） ── */
 .sc-tool-term {
-  --term-pad: 2px 0 2px 12px;
   align-self: stretch;
-  margin: 4px 0 6px;
-  padding: var(--term-pad);
-  border-left: 2px solid var(--gewu-border, rgba(127, 127, 127, 0.35));
+  margin: 4px 0;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: var(--gewu-bg-subtle);
   overflow: hidden;
-}
-
-/* 消息体全局 pre 规则不得渗入终端块 */
-.sc-tool-term pre.sc-tool-term-command,
-.sc-tool-term pre.sc-tool-term-output {
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  margin: 0;
 }
 
 .sc-tool-term-head {
@@ -1358,7 +1348,7 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 0 0 6px;
+  padding: 2px;
   border: none;
   background: transparent;
   color: var(--gewu-text-secondary);
@@ -1369,11 +1359,35 @@
 
 .sc-tool-term-badge {
   display: inline-flex;
-  color: var(--gewu-text-secondary);
+  color: var(--gewu-accent);
 }
 
-.sc-tool-term-title {
-  font-weight: 600;
+.sc-tool-term-spinner {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--gewu-accent);
+  border-top-color: transparent;
+  animation: sc-term-spin 0.8s linear infinite;
+}
+
+@keyframes sc-term-spin {
+  to { transform: rotate(360deg); }
+}
+
+.sc-tool-term-cmd-preview {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--gewu-font-mono, monospace);
+  color: var(--gewu-text);
+}
+
+.sc-tool-term-prompt {
+  color: var(--gewu-accent);
+  user-select: none;
 }
 
 .sc-tool-term-status {
@@ -1381,20 +1395,19 @@
 }
 
 .sc-tool-term-status[data-status='running'] {
-  color: var(--gewu-accent, #5a9cff);
-}
-
-.sc-tool-term-status[data-status='error'],
-.sc-tool-term-status[data-status='denied'] {
-  color: var(--gewu-danger, #ff7a7a);
+  color: var(--gewu-accent);
 }
 
 .sc-tool-term-status[data-status='success'] {
   color: var(--gewu-status-success);
 }
 
+.sc-tool-term-status[data-status='error'],
+.sc-tool-term-status[data-status='denied'] {
+  color: var(--gewu-danger);
+}
+
 .sc-tool-term-duration {
-  margin-left: auto;
   color: var(--gewu-text-secondary);
   opacity: 0.85;
 }
@@ -1402,41 +1415,74 @@
 .sc-tool-term-body {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  padding: 6px 2px 2px;
 }
 
-.sc-tool-term-command,
-.sc-tool-term-output {
+.sc-tool-term-command-full {
   margin: 0;
   font-family: var(--gewu-font-mono, monospace);
   font-size: var(--gewu-font-size-xs);
-  line-height: 1.55;
+  line-height: 1.5;
+  color: var(--gewu-text-secondary);
   white-space: pre-wrap;
   word-break: break-word;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
 }
 
-.sc-tool-term-command {
-  color: var(--gewu-text-primary);
-}
-
-.sc-tool-term-prompt {
-  color: var(--gewu-accent, #5a9cff);
-  user-select: none;
+.sc-tool-term-output-wrap {
+  position: relative;
 }
 
 .sc-tool-term-output {
-  color: var(--gewu-text-secondary);
+  margin: 0;
+  padding: 8px 10px;
   max-height: 300px;
   overflow: auto;
+  border-radius: 6px;
+  background: var(--gewu-bg-canvas);
+  font-family: var(--gewu-font-mono, monospace);
+  font-size: var(--gewu-font-size-xs);
+  line-height: 1.5;
+  color: var(--gewu-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sc-tool-term-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.sc-tool-term-copy {
+  border: none;
+  background: transparent;
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.sc-tool-term-copy:hover {
+  color: var(--gewu-accent);
+}
+
+.sc-tool-term-jump {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  border: 1px solid var(--gewu-border-subtle);
+  border-radius: 6px;
+  background: var(--gewu-bg-canvas);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
+  padding: 2px 8px;
+  cursor: pointer;
 }
 
 .sc-tool-term-err {
   font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-danger, #ff7a7a);
+  color: var(--gewu-danger);
 }
 
 .sc-tool-term-spinner {
@@ -1459,13 +1505,6 @@
   gap: 6px;
 }
 
-.sc-tool-term-command-text {
-  flex: 1;
-  min-width: 0;
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-
 .sc-tool-term-copy {
   flex-shrink: 0;
   border: none;
@@ -1483,14 +1522,6 @@
 
 .sc-tool-term-output-wrap {
   position: relative;
-}
-
-.sc-tool-term-output-wrap .sc-tool-term-copy-out {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  opacity: 0;
-  transition: opacity 0.15s ease;
 }
 
 .sc-tool-term-output-wrap:hover .sc-tool-term-copy-out {
