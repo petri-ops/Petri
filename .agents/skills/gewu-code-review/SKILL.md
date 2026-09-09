@@ -35,6 +35,16 @@ description: Use when reviewing code changes, diffs, or commits; auditing a modu
 - 报告格式见 `references/REVIEW-REPORT-TEMPLATE.md`（表行式：结论先行、每条发现三要素）
 - 时机：跨模块契约 / 新增 IPC 面 / 安全面 / 大体量包，收口前先评审；单会话小增量可自评但须自查本文件六维度
 
+## AI 跑查（OpenCodeReview，可选外部工具）
+
+收口评审前可用 OpenCodeReview CLI（`ocr`，npx 免装，Apache-2.0）对本次 diff 做一轮 LLM 跑查，产出作为六维度评审的**输入证据**，不替代评审本身。
+
+- **命令**：收口深查 `npx -y @alibaba-group/open-code-review@latest review --from <包起点sha> --to HEAD --effort high -f json -o <仓库外路径>.json`；日常快筛 `--commit <sha>`（默认 effort medium）。报告须引用 session id 或 JSON 路径留痕
+- **消费规则**：ocr 的 severity 只是参考，不是本 skill 的 P1/P2——拟采纳的发现仍须回读源码核对到 `file:line` + 合同原文方可入报告（三要素规则不变）；不采纳的发现如实标注"误报"留痕
+- **降级纪律**：ocr 未安装 / 未配置 key / 网络或模型失败 → 跳过跑查并在报告开头如实声明"本轮未做 AI 跑查及原因"，不阻塞收口；ocr 永不作为 closeout 门禁项（closeout 门禁是秒级确定性步骤，分钟级 LLM 步骤性质不合）
+- **已知边界**：默认过滤 `*.test.*`（测试面不在跑查范围，测试有效性仍靠维度 4 人工）；工具只读 diff 不写仓库（配置与会话落用户主目录 `~/.opencodereview/`，2026-09-09 实测被审仓库 git status 前后一致）
+- 跑查发现的缺陷类重复 ≥2 次时，按上方"回归→门禁转化"规则转化为机械门禁；转化不免除后续跑查
+
 ## 独立性
 
-本 skill 自包含：六维度、严重度分级、转化规则、报告模板全部在本文件夹内，执行不要求读取任何外部文件。
+本 skill 自包含：六维度、严重度分级、转化规则、报告模板全部在本文件夹内，执行不要求读取任何外部文件。AI 跑查（ocr）是可选外部工具，缺失时按其节降级，不影响本 skill 其余部分执行。
