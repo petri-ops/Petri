@@ -2880,3 +2880,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：toolActivity + ToolActivityList 定向 vitest 19/19（命令捕获 / 输出累积 / 持久化往返 / 截断边界）+ copilot 全目录 250/250 + tsc 0；实机 `acceptance/ui-315/`（真实模型 exec：`$ 命令` 行 + 流式输出 + 错误态/成功态 + 刷新后历史终端块含完整命令与输出尾部回放 + 截图）。
 
 **状态**: verified（2026-09-09 dev Electron 真实模型 exec 链路 CDP 验收完成）。顺带发现登记：Windows 下 PowerShell 中文输出为 GBK 编码，经 UTF-8 读取呈乱码（既有 workspace_exec 编码问题，非本条引入，登记为后续候选）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+> **2026-09-09 主题统一修正（用户实测反馈「终端主题不统一」）**：消息体全局规则 `.sc-msg-body pre`（白底+边框）渗入终端块的命令/输出 pre → 白色药丸与暗色卡面割裂、浅色命令文字几乎不可读。修正：终端块自带完整暗色调色板（--term-* 局部变量：bg/border/text/dim/accent/danger），显式覆盖 pre 全局背景/边框，头行/命令/输出/错误统一同一色板。实机浅色主题截图复核：整卡暗色一体、命令行可读（acceptance/ui-315/ui315-theme-unified.png）。

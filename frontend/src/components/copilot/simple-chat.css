@@ -1333,14 +1333,31 @@
   color: var(--gewu-status-warning-fg);
 }
 
-/* ── UI-315 — exec 工具的原生终端块（$ 命令 + 流式输出，深色等宽） ── */
+/* ── UI-315 — exec 工具的原生终端块（自带统一暗色主题，覆盖 .sc-msg-body pre 全局样式） ── */
 .sc-tool-term {
+  --term-bg: #141922;
+  --term-border: #2a3140;
+  --term-text: #d7dee9;
+  --term-dim: #8b94a7;
+  --term-accent: #3fb27f;
+  --term-danger: #ff7a7a;
   align-self: stretch;
   margin: 4px 0;
-  border: 1px solid var(--gewu-border-subtle);
-  border-radius: 8px;
-  background: var(--gewu-term-bg, #151a22);
+  border: 1px solid var(--term-border);
+  border-radius: 10px;
+  background: var(--term-bg);
+  color: var(--term-text);
   overflow: hidden;
+}
+
+/* 消息体内的全局 pre 规则（.sc-msg-body pre 白底）不得渗入终端块 */
+.sc-tool-term pre.sc-tool-term-command,
+.sc-tool-term pre.sc-tool-term-output {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
 }
 
 .sc-tool-term-head {
@@ -1348,22 +1365,24 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 6px 10px;
+  padding: 7px 12px;
   border: none;
   background: rgba(255, 255, 255, 0.04);
-  color: var(--gewu-text-secondary);
+  border-bottom: 1px solid var(--term-border);
+  color: var(--term-dim);
   font-size: var(--gewu-font-size-xs);
   cursor: pointer;
   text-align: left;
 }
 
+.sc-tool-term[data-status='success'] .sc-tool-term-head,
 .sc-tool-term-head:hover {
   background: rgba(255, 255, 255, 0.07);
 }
 
 .sc-tool-term-badge {
   display: inline-flex;
-  color: var(--gewu-status-success, #3fb27f);
+  color: var(--term-accent);
 }
 
 .sc-tool-term-title {
@@ -1371,7 +1390,7 @@
 }
 
 .sc-tool-term-status {
-  color: var(--gewu-text-secondary);
+  color: var(--term-dim);
 }
 
 .sc-tool-term-status[data-status='running'] {
@@ -1380,58 +1399,59 @@
 
 .sc-tool-term-status[data-status='error'],
 .sc-tool-term-status[data-status='denied'] {
-  color: var(--gewu-danger, #ff7a7a);
+  color: var(--term-danger);
 }
 
 .sc-tool-term-status[data-status='success'] {
-  color: var(--gewu-status-success, #3fb27f);
+  color: var(--term-accent);
 }
 
 .sc-tool-term-duration {
   margin-left: auto;
-  color: var(--gewu-text-secondary);
-  opacity: 0.8;
+  color: var(--term-dim);
+  opacity: 0.85;
 }
 
 .sc-tool-term-body {
-  padding: 8px 10px 10px;
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.sc-tool-term-command {
-  margin: 0 0 6px;
-  font-family: var(--gewu-font-mono, monospace);
-  font-size: var(--gewu-font-size-xs);
-  line-height: 1.5;
-  color: #e8edf6;
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-
-.sc-tool-term-prompt {
-  color: var(--gewu-status-success, #3fb27f);
-  user-select: none;
-}
-
+.sc-tool-term-command,
 .sc-tool-term-output {
   margin: 0;
-  padding: 8px 10px;
-  max-height: 300px;
-  overflow: auto;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.28);
   font-family: var(--gewu-font-mono, monospace);
   font-size: var(--gewu-font-size-xs);
-  line-height: 1.5;
-  color: #c4ccd9;
+  line-height: 1.55;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
-.sc-tool-term-err {
-  margin-top: 6px;
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-danger, #ff7a7a);
+.sc-tool-term-command {
+  color: var(--term-text);
 }
+
+.sc-tool-term-prompt {
+  color: var(--term-accent);
+  user-select: none;
+}
+
+.sc-tool-term-output {
+  padding: 8px 10px;
+  max-height: 300px;
+  overflow: auto;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.32);
+  color: var(--term-dim);
+}
+
+.sc-tool-term-err {
+  font-size: var(--gewu-font-size-xs);
+  color: var(--term-danger);
+}
+
 
 /* Approval card */
 .sc-approval-card {
