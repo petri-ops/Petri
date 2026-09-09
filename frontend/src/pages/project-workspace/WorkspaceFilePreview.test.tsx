@@ -117,3 +117,86 @@ describe('BLOCK-74 预览头部减负', () => {
     void view;
   });
 });
+
+// BLOCK-67 实机回归 — 「点击 md 白屏」：hooks 位于 `if (!file)` 提前返回之后，
+// 无文件 → 打开文件的首次重渲染 Hook 数变化，React 抛 "Rendered more hooks" 整窗白屏。
+// 本用例锁死该顺序：同一次挂载内 file 从 null → 有值 必须不抛错且能渲染编辑器。
+describe('UI-323 回归修复：file=null → file 转换不破坏 Hook 顺序', () => {
+  it('先以 file=null 渲染，再打开 md 文件：不抛 Hook 顺序错误且预览可用', async () => {
+    mockPreviewFetch();
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const view = render(
+      <ThemeProvider>
+        <WorkspaceFilePreview
+          file={null}
+          refreshVersion={0}
+          openError=""
+          opening={false}
+          onOpen={() => {}}
+          onDownload={() => {}}
+          projectId="p_x"
+        />
+      </ThemeProvider>,
+    );
+    expect(screen.getByText('选择一个文本、图片或 PDF 文件预览')).toBeTruthy();
+
+    view.rerender(
+      <ThemeProvider>
+        <WorkspaceFilePreview
+          file={mdFile()}
+          refreshVersion={0}
+          openError=""
+          opening={false}
+          onOpen={() => {}}
+          onDownload={() => {}}
+          projectId="p_x"
+        />
+      </ThemeProvider>,
+    );
+    await waitFor(() => expect(screen.getByText('编辑')).toBeTruthy());
+    // 关键断言：重渲染期间没有 "Rendered more hooks" 类错误
+    const hookErrors = errorSpy.mock.calls
+      .map((c) => String(c[0] || ''))
+      .filter((t) => /hooks|Rendered more/.test(t));
+    expect(hookErrors).toEqual([]);
+    errorSpy.mockRestore();
+  });
+
+  it('反向转换（file → null）同样不抛错', async () => {
+    mockPreviewFetch();
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const view = render(
+      <ThemeProvider>
+        <WorkspaceFilePreview
+          file={mdFile()}
+          refreshVersion={0}
+          openError=""
+          opening={false}
+          onOpen={() => {}}
+          onDownload={() => {}}
+          projectId="p_x"
+        />
+      </ThemeProvider>,
+    );
+    await waitFor(() => expect(screen.getByText('编辑')).toBeTruthy());
+    view.rerender(
+      <ThemeProvider>
+        <WorkspaceFilePreview
+          file={null}
+          refreshVersion={0}
+          openError=""
+          opening={false}
+          onOpen={() => {}}
+          onDownload={() => {}}
+          projectId="p_x"
+        />
+      </ThemeProvider>,
+    );
+    expect(screen.getByText('选择一个文本、图片或 PDF 文件预览')).toBeTruthy();
+    const hookErrors = errorSpy.mock.calls
+      .map((c) => String(c[0] || ''))
+      .filter((t) => /hooks|Rendered more/.test(t));
+    expect(hookErrors).toEqual([]);
+    errorSpy.mockRestore();
+  });
+});

@@ -220,15 +220,9 @@ export function WorkspaceFilePreview({
     }
   }, [file, projectId, text]);
 
-  if (!file) {
-    return (
-      <div className={styles.workspacePreviewEmpty}>
-        <Icon name="file" size={18} />
-        <span>选择一个文本、图片或 PDF 文件预览</span>
-      </div>
-    );
-  }
-
+  // BLOCK-74 修复（UI-323 回归）：自动保存 effect 与 Ctrl+S 回调必须在 `if (!file)` 提前返回
+  // 之前注册——否则无文件 → 打开文件的首次渲染 Hook 数从 N 变 N+2，React 抛
+  // "Rendered more hooks" 导致整窗白屏（实机点击 md 复现）。
   const fallbackKind: 'csv' | 'pdf' | 'html' | 'json' | 'markdown' | 'image' | 'text' | 'binary' =
     isCsv ? 'csv'
     : isPdf ? 'pdf'
@@ -256,6 +250,15 @@ export function WorkspaceFilePreview({
       if (text !== textSaved) void handleSaveCurrent();
     }
   }, [text, textSaved, handleSaveCurrent]);
+
+  if (!file) {
+    return (
+      <div className={styles.workspacePreviewEmpty}>
+        <Icon name="file" size={18} />
+        <span>选择一个文本、图片或 PDF 文件预览</span>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.workspacePreview}>

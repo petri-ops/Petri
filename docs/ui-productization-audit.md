@@ -2977,4 +2977,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：tsc 0；block67 全系零网络 62/62（含 block57 回归 21）。**实机**：`scripts/block67-p3-live.cjs` 4/4 allPass（`acceptance/block-67/p3-live.json` + 截图×3）——SSH 项目创建 / ssh pty 挂通（远端 shell 回显 root@远程主机）/ 终端 pwd=远程项目根（`/root/gewu-block67-demo`，远程工作目录语义实证）/ 远程 git status+diff 数据面（README.md 修改 + remote-dirty-line 出现在 diff）。P4 断线恢复与安全面 8/8（`p4-live.json`：502 transport 分类+retryable / 恢复无漂移 / 路径逃逸 fail-closed / verb 白名单 / BatchMode fail-fast / 本地零回归）。
 
+**实机回归修复（同日，用户点击 md 复现白屏）**：UI-323 改造把自动保存 `useEffect` 与 Ctrl+S `useCallback` 放在了 `if (!file)` 提前返回**之后**——无文件渲染只注册 N 个 Hook，点击文件首次重渲染变 N+2，React 抛 "Rendered more hooks" 整根卸载白屏。修复：两个 Hook 与其依赖 `fallbackKind` 移到提前返回之前；新增 null→file / file→null 双向 rerender 回归测试 2 用例（组件定向 5/5）。教训固化：重构组件时 Hook 一律置于全部提前返回之前，转换路径用 rerender 用例锁死。
+
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收，aliyun 真实节点）。G0 开发期常态 · 不外推 packaged / Provider / GA。
