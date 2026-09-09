@@ -12,6 +12,16 @@
  *   log <jobId> <offset>          → runner.log 字节偏移续读
  *   cancel <jobId>                → TERM 运行时进程（收敛由 status/exit 对账）
  *   __run ...                     → 内部 supervisor verb（勿外部调用）
+ *
+ * BLOCK-67 P1 — fs verbs（远程项目工作区文件面）：
+ *   fs_stat <b64path>             → 单行 JSON {type,size,mtimeMs} 或 {error}
+ *   fs_list <b64path>             → 每行一个 JSON 条目（名称/类型/size/mtimeMs）
+ *   fs_read <b64path> [off] [len] → 文件内容 base64（单行，二进制安全）
+ *   fs_write <b64path> <b64data>  → 原子写（tmp+mv），父目录自动 mkdir -p
+ *   fs_mkdir <b64path>            → mkdir -p + JSON stat
+ *   fs_mv <b64src> <b64dst>       → mv（目标父目录 mkdir -p）
+ *   fs_rm <b64path>               → rm -rf（受调用方路径边界约束）
+ * 路径/内容一律 base64 编码传输（字符集落在 AGENT_ARG_RE 白名单内，无 shell 注入面）。
  */
 
 const crypto = require('crypto');
@@ -185,8 +195,95 @@ case "$cmd" in
       echo "cancel_no_process"
     fi
     ;;
+  fs_*)
+    # BLOCK-67 fs verbs 在脚本尾部的第二 case 分发，此处放行。
+    ;;
   *)
     die "unknown_verb"
+    ;;
+esac
+
+# ── BLOCK-67 P1：fs verbs ──────────────────────────────────────────
+# （放在独立 case 之前不行——bash case 已闭合；这里用二次分发）
+fs_decode() { printf '%s' "$1" | base64 -d 2>/dev/null; }
+fs_stat_json() {
+  p="$1"
+  if [ -d "$p" ]; then
+    printf '{"type":"dir","size":0,"mtimeMs":%s}\\n' "$(fs_mtime_ms "$p")"
+  elif [ -f "$p" ]; then
+    sz=$(wc -c < "$p" 2>/dev/null | tr -d ' ')
+    printf '{"type":"file","size":%s,"mtimeMs":%s}\\n' "\${sz:-0}" "$(fs_mtime_ms "$p")"
+  else
+    printf '{"error":"not_found"}\\n'
+  fi
+}
+fs_mtime_ms() {
+  # GNU stat（Linux 节点）优先；无 stat 时回落秒级 date。
+  if command -v stat >/dev/null 2>&1 && stat -c %Y "$1" >/dev/null 2>&1; then
+    echo $(( $(stat -c %Y "$1") * 1000 ))
+  else
+    echo $(( $(date -r "$1" +%s) * 1000 ))
+  fi
+}
+case "$cmd" in
+  fs_stat)
+    [ $# -ge 1 ] || die "fs_stat_usage"
+    fs_stat_json "$(fs_decode "$1")"
+    ;;
+  fs_list)
+    [ $# -ge 1 ] || die "fs_list_usage"
+    d="$(fs_decode "$1")"
+    [ -d "$d" ] || { printf '{"error":"not_found"}\\n'; exit 0; }
+    for f in "$d"/*; do
+      [ -e "$f" ] || continue
+      b="$(basename "$f")"
+      case "$b" in .*|*.tmp.$$) continue ;; esac
+      if [ -d "$f" ]; then
+        printf '{"name":"%s","type":"dir","mtimeMs":%s}\\n' "$b" "$(fs_mtime_ms "$f")"
+      else
+        sz=$(wc -c < "$f" 2>/dev/null | tr -d ' ')
+        printf '{"name":"%s","type":"file","size":%s,"mtimeMs":%s}\\n' "$b" "\${sz:-0}" "$(fs_mtime_ms "$f")"
+      fi
+    done
+    ;;
+  fs_read)
+    [ $# -ge 1 ] || die "fs_read_usage"
+    f="$(fs_decode "$1")"
+    [ -f "$f" ] || { printf '{"error":"not_found"}\\n'; exit 0; }
+    off="\${2:-0}"; len="\${3:-0}"
+    case "$off$len" in ''|*[!0-9]*) die "invalid_offset";; esac
+    if [ "$off" -gt 0 ] || [ "$len" -gt 0 ]; then
+      tail -c +"$((off+1))" "$f" 2>/dev/null | { [ "$len" -gt 0 ] && head -c "$len" || cat; } | base64
+    else
+      base64 "$f"
+    fi
+    ;;
+  fs_write)
+    [ $# -ge 2 ] || die "fs_write_usage"
+    f="$(fs_decode "$1")"
+    mkdir -p "$(dirname "$f")" 2>/dev/null
+    fs_decode "$2" > "$f.tmp.$$" && mv -f "$f.tmp.$$" "$f" || { rm -f "$f.tmp.$$"; die "fs_write_failed"; }
+    fs_stat_json "$f"
+    ;;
+  fs_mkdir)
+    [ $# -ge 1 ] || die "fs_mkdir_usage"
+    d="$(fs_decode "$1")"
+    mkdir -p "$d" 2>/dev/null || die "fs_mkdir_failed"
+    fs_stat_json "$d"
+    ;;
+  fs_mv)
+    [ $# -ge 2 ] || die "fs_mv_usage"
+    s="$(fs_decode "$1")"; t="$(fs_decode "$2")"
+    mkdir -p "$(dirname "$t")" 2>/dev/null
+    mv -f "$s" "$t" 2>/dev/null || die "fs_mv_failed"
+    fs_stat_json "$t"
+    ;;
+  fs_rm)
+    [ $# -ge 1 ] || die "fs_rm_usage"
+    p="$(fs_decode "$1")"
+    [ -e "$p" ] || { printf '{"error":"not_found"}\\n'; exit 0; }
+    rm -rf "$p" 2>/dev/null || die "fs_rm_failed"
+    printf '{"removed":true}\\n'
     ;;
 esac
 `;
