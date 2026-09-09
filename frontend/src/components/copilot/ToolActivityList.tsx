@@ -173,7 +173,19 @@ function TerminalRow({ activity }: { activity: ToolActivityItem }) {
       </button>
       {open && (
         <div className="sc-tool-term-body">
-          {multiLine && <pre className="sc-tool-term-command-full">{command}</pre>}
+          <div className="sc-tool-term-command">
+            <span className="sc-tool-term-prompt">$ </span>
+            <span className="sc-tool-term-command-text">{command}</span>
+            <button
+              type="button"
+              className={`sc-tool-term-copy${copied === 'cmd' ? ' is-copied' : ''}`}
+              title="复制命令"
+              aria-label="复制命令"
+              onClick={() => void copyText(command, 'cmd')}
+            >
+              <Icon name={copied === 'cmd' ? 'check' : 'copy'} size={11} />
+            </button>
+          </div>
           {(outputTail || running) && (
             <div className="sc-tool-term-output-wrap">
               <pre
@@ -194,6 +206,15 @@ function TerminalRow({ activity }: { activity: ToolActivityItem }) {
                 {running && !outputTail ? '…' : ''}
                 {activity.output?.truncated ? '\n…（输出已截断）' : ''}
               </pre>
+              <button
+                type="button"
+                className={`sc-tool-term-copy sc-tool-term-copy-out${copied === 'out' ? ' is-copied' : ''}`}
+                title="复制输出"
+                aria-label="复制输出"
+                onClick={() => void copyText(outputTail, 'out')}
+              >
+                <Icon name={copied === 'out' ? 'check' : 'copy'} size={11} />
+              </button>
               {showJump && (
                 <button
                   type="button"
@@ -209,16 +230,6 @@ function TerminalRow({ activity }: { activity: ToolActivityItem }) {
           {activity.status === 'error' && activity.terminationReason && (
             <div className="sc-tool-term-err">原因：{activity.terminationReason}</div>
           )}
-          <div className="sc-tool-term-actions">
-            <button type="button" className="sc-tool-term-copy" onClick={() => void copyText(command, 'cmd')}>
-              {copied === 'cmd' ? '已复制命令' : '复制命令'}
-            </button>
-            {outputTail && (
-              <button type="button" className="sc-tool-term-copy" onClick={() => void copyText(outputTail, 'out')}>
-                {copied === 'out' ? '已复制输出' : '复制输出'}
-              </button>
-            )}
-          </div>
         </div>
       )}
     </div>

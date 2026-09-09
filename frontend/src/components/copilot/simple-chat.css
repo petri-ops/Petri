@@ -1433,6 +1433,18 @@
   position: relative;
 }
 
+.sc-tool-term-output-wrap .sc-tool-term-copy-out {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.sc-tool-term-output-wrap:hover .sc-tool-term-copy-out {
+  opacity: 1;
+}
+
 .sc-tool-term-output {
   margin: 0;
   padding: 8px 10px;
@@ -1453,15 +1465,6 @@
   gap: 10px;
 }
 
-.sc-tool-term-copy {
-  border: none;
-  background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
-  cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 4px;
-}
 
 .sc-tool-term-copy:hover {
   color: var(--gewu-accent);
@@ -1518,6 +1521,10 @@
 
 .sc-tool-term-copy:hover {
   color: var(--gewu-accent, #5a9cff);
+}
+
+.sc-tool-term-copy.is-copied {
+  color: var(--gewu-status-success);
 }
 
 .sc-tool-term-output-wrap {

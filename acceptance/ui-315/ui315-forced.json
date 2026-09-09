@@ -1,14 +1,67 @@
 {
+  "startedAt": "2026-09-09T05:36:17.947Z",
+  "assertions": [
+    {
+      "name": "A0 composer 在位（textarea + send 按钮）",
+      "pass": true,
+      "detail": "{\"terms\":0,\"composer\":true,\"sendBtn\":true,\"newConvBtn\":false}"
+    },
+    {
+      "name": "A1 forced exec 新终端块出现",
+      "pass": true,
+      "detail": "count 0 → 增量已见"
+    },
+    {
+      "name": "A2 折叠头命令预览含唯一标记",
+      "pass": true,
+      "detail": "$ node -e \"console.log(314159 * 2)\""
+    },
+    {
+      "name": "A3 终态 success + ✓ 状态字形",
+      "pass": true,
+      "detail": "status=success glyph=✓"
+    },
+    {
+      "name": "A4 展开体命令行含 $ 前缀 + 唯一标记（WIP 新增行）",
+      "pass": true,
+      "detail": "cmd=\"node -e \"console.log(314159 * 2)\"\""
+    },
+    {
+      "name": "A5 行内图标复制按钮（命令 + 输出）在位（WIP）",
+      "pass": true,
+      "detail": "cmd=true out=true"
+    },
+    {
+      "name": "A6 输出含 628318（真实执行证据）",
+      "pass": true,
+      "detail": "628318"
+    },
+    {
+      "name": "A7 历史恢复：终端行 + 命令持久化",
+      "pass": true,
+      "detail": "rows=1 cmd=\"node -e \"console.log(314159 * 2)\"\""
+    },
+    {
+      "name": "A8 历史恢复：输出与复制按钮仍可回看",
+      "pass": true,
+      "detail": "628318"
+    }
+  ],
+  "selectorContract": "cc084920 + wip-inline-copy",
   "dom": {
-    "count": 12,
-    "withCmdText": 12,
-    "lastCmd": "node -v",
-    "lastOut": "v24.20.0\r\n",
-    "lastStatus": "已完成"
+    "baselineCount": 0,
+    "cmd": "$ node -e \"console.log(314159 * 2)\"",
+    "output": "628318",
+    "status": "success"
   },
   "verdict": {
     "terminalRendered": true,
     "commandShown": true,
-    "outputOrTerminal": true
-  }
+    "statusGlyph": true,
+    "inlineCopyButtons": true,
+    "outputShown": true,
+    "historyRestored": true
+  },
+  "allPass": true,
+  "finishedAt": "2026-09-09T05:37:20.130Z"
 }
