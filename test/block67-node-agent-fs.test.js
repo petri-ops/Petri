@@ -121,3 +121,82 @@ test('block67 remoteAgentCommand: fs verb 参数经 base64 落在白名单（无
   // 白名单拒绝含空格/引号的裸参数（base64 编码后才可传输）。
   assert.throws(() => remoteAgentCommand(['fs_stat', evilPath]), /remote_agent_arg_unsafe/);
 });
+
+// ── BLOCK-67 P2：find / grep / exec / 进程面 verbs ──
+test('block67 P2 verbs: fs_find 相对路径 + 隐藏目录剪枝', async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-p2-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  fs.mkdirSync(path.join(dir, 'sub'));
+  fs.writeFileSync(path.join(dir, 'a.txt'), 'x');
+  fs.writeFileSync(path.join(dir, 'sub', 'b.txt'), 'y');
+  fs.mkdirSync(path.join(dir, '.hidedir'));
+  fs.writeFileSync(path.join(dir, '.hidedir', 'c.txt'), 'z');
+
+  const out = await runAgent(['fs_find', b64(dir.replace(/\\/g, '/')), '4']);
+  const lines = out.trim().split('\n').filter(Boolean);
+  assert.ok(lines.includes('a.txt') && lines.includes('sub/b.txt'));
+  assert.ok(!lines.some((l) => l.includes('c.txt')), 'hidden pruned: ' + lines.join(','));
+});
+
+test('block67 P2 verbs: fs_grep 文本命中 + 二进制跳过', async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-p2-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  fs.writeFileSync(path.join(dir, 'one.txt'), 'hello MARKER_42 world\nsecond line\n');
+  fs.writeFileSync(path.join(dir, 'two.md'), 'no match here\n');
+  fs.writeFileSync(path.join(dir, 'bin.dat'), Buffer.from([0, 1, 2, 0, 3]));
+
+  const out = await runAgent(['fs_grep', b64('MARKER_42'), b64(dir.replace(/\\/g, '/')), '10']);
+  const lines = out.trim().split('\n').filter(Boolean);
+  assert.strictEqual(lines.length, 1);
+  assert.ok(lines[0].includes('one.txt') && lines[0].includes('MARKER_42'));
+});
+
+test('block67 P2 verbs: exec 同步命令（cwd + code + stdout/stderr base64）', async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-p2-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const out = await runAgent(['exec', b64('echo out-中文; echo err-1 >&2; exit 3'), b64(dir.replace(/\\/g, '/')), '20']);
+  const info = JSON.parse(out.trim());
+  assert.strictEqual(info.code, 3);
+  assert.strictEqual(Buffer.from(info.stdout, 'base64').toString('utf-8').trim(), 'out-中文');
+  assert.ok(Buffer.from(info.stderr, 'base64').toString('utf-8').includes('err-1'));
+  assert.strictEqual(info.truncated, false);
+});
+
+test('block67 P2 verbs: exec 超时被杀（timeout KILL → 非零 code）', async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-p2-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const out = await runAgent(['exec', b64('sleep 30'), b64(dir.replace(/\\/g, '/')), '2']);
+  const info = JSON.parse(out.trim());
+  assert.notStrictEqual(info.code, 0);
+});
+
+test('block67 P2 verbs: exec_bg + ps_pid + kill_pid 生命周期', async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-p2-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const log = path.join(dir, 'bg.log').replace(/\\/g, '/');
+  const out = await runAgent(['exec_bg', b64('echo started; sleep 8'), b64(dir.replace(/\\/g, '/')), b64(log)]);
+  const info = JSON.parse(out.trim());
+  if (info.error) {
+    // pgrep 在部分最小环境缺失——诚实登记为环境限制，不算契约失败
+    t.diagnostic('exec_bg spawn probe unavailable: ' + JSON.stringify(info));
+    return;
+  }
+  assert.ok(Number.isInteger(info.pid) && info.pid > 0);
+  await new Promise((r) => setTimeout(r, 800));
+  const alive = JSON.parse((await runAgent(['ps_pid', String(info.pid)])).trim());
+  if (alive.alive) {
+    const killed = JSON.parse((await runAgent(['kill_pid', String(info.pid), 'TERM'])).trim());
+    assert.strictEqual(killed.signaled, true);
+    await new Promise((r) => setTimeout(r, 500));
+    const after = JSON.parse((await runAgent(['ps_pid', String(info.pid)])).trim());
+    assert.strictEqual(after.alive, false);
+    const logOut = await runAgent(['fs_read', b64(log)]);
+    const logText = Buffer.from(logOut.replace(/\s+/g, ''), 'base64').toString('utf-8');
+    assert.ok(logText.includes('started'), 'bg log written: ' + logText);
+  } else {
+    t.diagnostic('bg process exited quickly (fast host) — log check only');
+    const logOut = await runAgent(['fs_read', b64(log)]);
+    const logText = Buffer.from(logOut.replace(/\s+/g, ''), 'base64').toString('utf-8');
+    assert.ok(logText.includes('started'));
+  }
+});

@@ -195,8 +195,8 @@ case "$cmd" in
       echo "cancel_no_process"
     fi
     ;;
-  fs_*)
-    # BLOCK-67 fs verbs 在脚本尾部的第二 case 分发，此处放行。
+  fs_*|exec|exec_bg|ps_pid|kill_pid)
+    # BLOCK-67 fs/exec verbs 在脚本尾部第二 case 分发，此处放行。
     ;;
   *)
     die "unknown_verb"
@@ -284,6 +284,69 @@ case "$cmd" in
     [ -e "$p" ] || { printf '{"error":"not_found"}\\n'; exit 0; }
     rm -rf "$p" 2>/dev/null || die "fs_rm_failed"
     printf '{"removed":true}\\n'
+    ;;
+  # ── BLOCK-67 P2：find / grep / exec / 进程面 ────────────────────
+  fs_find)
+    # fs_find <b64root> <maxdepth> → 相对路径行（文件优先，跳过隐藏目录）
+    [ $# -ge 1 ] || die "fs_find_usage"
+    r="$(fs_decode "$1")"; md="\${2:-6}"
+    case "$md" in ''|*[!0-9]*) die "invalid_maxdepth";; esac
+    [ -d "$r" ] || { printf '{"error":"not_found"}\\n'; exit 0; }
+    (cd "$r" 2>/dev/null && find . -maxdepth "$md" -path './.*' -prune -o -type f -print 2>/dev/null) | sed 's|^\\./||'
+    ;;
+  fs_grep)
+    # fs_grep <b64pattern> <b64path> <maxLines> → grep -rnI 文本行（跳过二进制）
+    [ $# -ge 2 ] || die "fs_grep_usage"
+    pat="$(fs_decode "$1")"; p="$(fs_decode "$2")"; ml="\${3:-200}"
+    case "$ml" in ''|*[!0-9]*) die "invalid_maxlines";; esac
+    [ -e "$p" ] || { printf '{"error":"not_found"}\\n'; exit 0; }
+    grep -rnI -F -e "$pat" "$p" 2>/dev/null | head -n "$ml"
+    ;;
+  exec)
+    # exec <b64cmd> <b64cwd> <timeoutS> → 单行 JSON {code,stdoutB64,stderrB64,truncated}
+    [ $# -ge 2 ] || die "exec_usage"
+    ec="$(fs_decode "$1")"; ecwd="$(fs_decode "$2")"; eto="\${3:-120}"
+    case "$eto" in ''|*[!0-9]*) die "invalid_timeout";; esac
+    [ -d "$ecwd" ] || die "exec_cwd_missing"
+    outb="$(mktemp)"; errb="$(mktemp)"
+    (cd "$ecwd" && timeout --signal=KILL "$eto" bash -c "$ec" > "$outb" 2> "$errb"); ecode=$?
+    osz=$(wc -c < "$outb" | tr -d ' '); esz=$(wc -c < "$errb" | tr -d ' ')
+    ocap=0; ecap=0
+    if [ "$osz" -gt 65536 ]; then head -c 65536 "$outb" > "$outb.c" && mv -f "$outb.c" "$outb"; ocap=1; fi
+    if [ "$esz" -gt 32768 ]; then head -c 32768 "$errb" > "$errb.c" && mv -f "$errb.c" "$errb"; ecap=1; fi
+    printf '{"code":%s,"stdout":"%s","stderr":"%s","truncated":%s}\\n' \\
+      "$ecode" "$(base64 -w0 "$outb" 2>/dev/null || base64 "$outb" | tr -d '\\n')" \\
+      "$(base64 -w0 "$errb" 2>/dev/null || base64 "$errb" | tr -d '\\n')" \\
+      "$([ "$ocap" -eq 1 ] || [ "$ecap" -eq 1 ] && echo true || echo false)"
+    rm -f "$outb" "$errb"
+    ;;
+  exec_bg)
+    # exec_bg <b64cmd> <b64cwd> <b64log> → 单行 JSON {pid}（detached，日志落 b64log）
+    [ $# -ge 3 ] || die "exec_bg_usage"
+    bc="$(fs_decode "$1")"; bcwd="$(fs_decode "$2")"; blog="$(fs_decode "$3")"
+    [ -d "$bcwd" ] || die "exec_cwd_missing"
+    mkdir -p "$(dirname "$blog")" 2>/dev/null
+    (cd "$bcwd" && setsid nohup bash -c "$bc" >> "$blog" 2>&1 < /dev/null &)
+    for i in 1 2 3 4 5; do
+      bpid=$(pgrep -f "bash -c" -n 2>/dev/null || true)
+      if [ -n "$bpid" ]; then break; fi
+      sleep 0.2
+    done
+    if [ -n "$bpid" ]; then printf '{"pid":%s}\\n' "$bpid"; else printf '{"error":"spawn_failed"}\\n'; fi
+    ;;
+  ps_pid)
+    # ps_pid <pid> → 单行 JSON {alive:boolean}
+    [ $# -ge 1 ] || die "ps_pid_usage"
+    case "$1" in ''|*[!0-9]*) die "invalid_pid";; esac
+    if kill -0 "$1" 2>/dev/null; then printf '{"alive":true}\\n'; else printf '{"alive":false}\\n'; fi
+    ;;
+  kill_pid)
+    # kill_pid <pid> <sig> → 单行 JSON {signaled:boolean}
+    [ $# -ge 1 ] || die "kill_pid_usage"
+    case "$1" in ''|*[!0-9]*) die "invalid_pid";; esac
+    sig="\${2:-TERM}"
+    case "$sig" in ''|*[!A-Z0-9]) die "invalid_signal";; esac
+    if kill -"$sig" "$1" 2>/dev/null; then printf '{"signaled":true}\\n'; else printf '{"signaled":false}\\n'; fi
     ;;
 esac
 `;
