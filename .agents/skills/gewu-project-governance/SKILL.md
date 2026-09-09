@@ -12,6 +12,8 @@ Reference files in this folder (operational detail; this file stays the entry po
 - `references/WORK-PACKAGE-LAUNCH-CHECKLIST.md` — run at launch; any unchecked box means not ready (or an explicit, recorded user waiver).
 - `references/STAGE-CLOSEOUT-CHECKLIST.md` — run at every stage/Goal close, in order.
 - `references/AUDIT-LOG-ENTRY-TEMPLATE.md` — required shape of launch/closeout/audit ledger entries.
+- `references/POSTMORTEM-TEMPLATE.md` — run after any incident; every postmortem must land its lesson somewhere.
+- `references/DEPENDENCY-CHANGE-CHECKLIST.md` — run before proposing any new dependency; default answer is "no".
 
 ## Load the governing context
 
@@ -40,12 +42,14 @@ Run `references/WORK-PACKAGE-LAUNCH-CHECKLIST.md` end to end, then:
 - Update the existing canonical plan instead of creating a progress-note document.
 - Preserve unrelated WIP and avoid broad document moves while another work package is active.
 - Keep acceptance evidence separate from explanatory documentation.
+- Proposing a new dependency? Run `references/DEPENDENCY-CHANGE-CHECKLIST.md` first; the default answer is "no" and additions need a recorded user ruling.
 
 ### Convert recurring defects into gates
 
 - When the same defect class appears a second time — as a commit fix, a review finding, or a live-acceptance catch — convert it into a mechanical gate entry: a targeted test, a harness check, or a `dev-verify` flow. Record the mapping inside the gate itself so the lesson survives agent turnover.
 - Reference precedents: the non-main-window chrome-controls regression (commit `6ab3650b`) belongs in window-system live checks; leftover temp files and dead symlinks belong to `npm run hygiene:check`.
 - Do not solidify one-off incidents or current-state facts into gates. Gates encode process and criteria only; state lives exclusively in canonical documents.
+- Any incident (live-acceptance catch, production regression, environment accident, user-data mishap) gets a postmortem per `references/POSTMORTEM-TEMPLATE.md`; every postmortem must land its lesson (environment discipline, checklist item, or gate) — "recorded only" is not an outcome.
 
 ### Close a Goal or stage
 

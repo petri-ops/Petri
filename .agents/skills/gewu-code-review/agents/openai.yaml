@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gewu 代码评审"
+  short_description: "评审 Gewu 代码变更：契约一致性、单一真相、失败语义、测试有效性、边界安全"
+  default_prompt: "Use $gewu-code-review to review this diff against the six dimensions and grade findings P1/P2/Minor."

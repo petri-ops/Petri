@@ -5,6 +5,7 @@
 
 ## 1. 证据先行（回写之前）
 
+- [ ] 包体量/耦合度值得评审时（跨模块契约、新增 IPC 面、安全面），先跑 `$gewu-code-review` 并处理 P1，再进入收口
 - [ ] plan 里声明的每一条验收门禁，用**当前**证据逐项对账（不追溯旧绿；复用 last-green 须 digest/环境/契约完全一致）
 - [ ] `npm run closeout`（hygiene → docs:check → ui:audit:check → test:changed，fail-fast）+ `--gate` 挂本包专项门禁
 - [ ] 红旗归属判定：并行包在制面/存量漂移导致的红，如实登记归属，**不表述为本包通过，也不算本包失败**
