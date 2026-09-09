@@ -64,6 +64,13 @@ npm run test:files --prefix frontend -- <相关文件>  # 定向前端测试
 
 npm run check        # 全量静态检查 + 所有门禁（默认不跑，留给发布前 / CI）
 npm run test:all:workspace # 全量 Node + 前端测试（默认不跑，留给发布前 / CI）
+
+# 开发基础设施（BLOCK-71）
+npm run state        # 会话状态一键恢复：分支/WIP/AUDIT-LOG 未决项/active 工作包
+npm run hygiene:check   # 工作区卫生：死符号链接 + 临时残留（只报告不代删）
+npm run closeout     # 收口门禁聚合：hygiene → docs → ui-audit → test:changed（fail-fast）
+npm run verify -- <flow> # dev-verify 实机校验 flow（--list 查清单；前置 dev 栈在跑）
+npm run skills:check    # 产品 Skill 契约校验（resources/skills/）
 ```
 
 ## 架构要点

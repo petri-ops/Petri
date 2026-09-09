@@ -1145,7 +1145,10 @@
         "scripts/block63-*.mjs",
         "acceptance/block-66/**",
         "scripts/block66-*.cjs",
-        "scripts/block66-*.mjs"
+        "scripts/block66-*.mjs",
+        "scripts/ui315-*.cjs",
+        "scripts/ui317-*.cjs",
+        "scripts/block68-*.cjs"
       ],
       "tests": [
         "test/test-affected.test.mjs"
@@ -1194,6 +1197,22 @@
         "test/block63-sidecar-contract.test.mjs"
       ],
       "classifiesScripts": false
-    }
+    },
+{
+      "id": "script-dev-infra",
+      "note": "BLOCK-71 开发基础设施沉淀：会话状态/卫生检查/收口聚合/dev-verify 底座/产品 Skill 脚手架。工具自身改动跑 test/dev-verify.test.mjs + 冒烟（npm run state / hygiene:check / skills:check）。",
+      "patterns": [
+            "scripts/workspace-state.mjs",
+            "scripts/hygiene-check.mjs",
+            "scripts/closeout-gates.mjs",
+            "scripts/skill-scaffold.mjs",
+            "scripts/dev-verify/**",
+            "test/dev-verify.test.mjs"
+      ],
+      "tests": [
+            "test/dev-verify.test.mjs"
+      ],
+      "classifiesScripts": true
+}
   ]
 }

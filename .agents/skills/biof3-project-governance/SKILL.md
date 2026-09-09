@@ -33,6 +33,12 @@ Keep one recoverable project truth while preserving code, evidence, user work, a
 - Preserve unrelated WIP and avoid broad document moves while another work package is active.
 - Keep acceptance evidence separate from explanatory documentation.
 
+### Convert recurring defects into gates
+
+- When the same defect class appears a second time — as a commit fix, a review finding, or a live-acceptance catch — convert it into a mechanical gate entry: a targeted test, a harness check, or a `dev-verify` flow. Record the mapping inside the gate itself so the lesson survives agent turnover.
+- Reference precedents: the non-main-window chrome-controls regression (commit `6ab3650b`) belongs in window-system live checks; leftover temp files and dead symlinks belong to `npm run hygiene:check`.
+- Do not solidify one-off incidents or current-state facts into gates. Gates encode process and criteria only; state lives exclusively in canonical documents.
+
 ### Close a Goal or stage
 
 1. Verify every declared acceptance gate with current evidence.

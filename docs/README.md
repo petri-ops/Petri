@@ -11,7 +11,8 @@
 5. [`AUDIT-LOG.md`](./AUDIT-LOG.md) — 每次 Agent 会话优先处理的审计广播台。
 6. [`parallel-development-guide.md`](./parallel-development-guide.md) — 多模块并行开发的冲突风险管控策略；独立模块大胆并行，跨层接口变更必须串行。
 7. [`architecture/gateway-design.md`](./architecture/gateway-design.md) — Backend Gateway 架构设计；统一入口、路由分发与断路器。
-8. [`BioF3-Desktop-Evaluation-Report-2026-08-14.md`](./BioF3-Desktop-Evaluation-Report-2026-08-14.md) — Desktop 评测报告；2026-08-14 评估记录与改进建议。
+8. [`delegation-contract-template.md`](./delegation-contract-template.md) — 主 Agent → 子 Agent（luna_worker/并行会话）委派任务书标准模板；AGENTS.md 委派策略强制字段的填空式落地（BLOCK-71）。
+9. [`BioF3-Desktop-Evaluation-Report-2026-08-14.md`](./BioF3-Desktop-Evaluation-Report-2026-08-14.md) — Desktop 评测报告；2026-08-14 评估记录与改进建议。
 
 ## 长期核心指引
 
