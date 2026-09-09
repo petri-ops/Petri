@@ -1,6 +1,6 @@
 # BLOCK-67 — SSH 远程项目：项目本体在远程服务器的完整工作区形态
 
-> 状态：`active`（2026-09-09 用户裁决启动；P0 设计评审进行中——§5 八项裁决逐项核实代码事实后呈用户确认，含 D6「指挥席 macOS 优先」与当前实机 Windows 的矛盾点显式裁决）
+> 状态：`active`（2026-09-09 用户裁决启动；**P0 设计评审 confirmed**——八项裁决经用户裁决：D1–D5/D7/D8 按原案确认，**D6 修订为「Windows 指挥席」**（实测 ssh/tar 客户端就绪 + spawn argv 跨平台无障碍 + BLOCK-63 先例；macOS 转后续兼容面不专门验证）；节点资产：用户将本机 ED25519 公钥加入 aliyun authorized_keys，P1–P3 以 aliyun 单节点验收，dell 后续再议。当前进行 P1 工作区骨架）
 > 立项日期：2026-09-09（用户裁决「需要立项」）
 > truthDomain: `block-67-ssh-remote-project`
 > 来源：用户需求「创建的项目就是 ssh 连接远程服务器的项目，对话、文件树渲染都要有」（对标 ZCode SSH 远程连接形态）
@@ -72,7 +72,7 @@
 - **D3 真值与缓存**：远程唯一真值；树缓存 read-through 只读；写操作 write-through + 保存前 mtime 冲突检测（他端已改则提示，不静默覆盖）。
 - **D4 凭据与安全**：沿用 BLOCK-57 —— 仅 SSH key + BatchMode、known_hosts strict、BioF3 不存密码；远程命令一律 argv 数组 + 路径 shlex 引用，禁止字符串拼 shell；node-agent verbs 白名单固定，不接受自由命令字符串（exec verb 参数同样数组化）。
 - **D5 断线语义**：连接态显式呈现（已连接/重连中/已断开状态条）；断线时读操作显示诚实错误 + 重试，写操作绝不本地暂存后补写（防静默漂移）；重连后树缓存全量失效重验。
-- **D6 平台边界**：指挥席 macOS 优先（对齐 BLOCK-57 P1 边界）；Windows 指挥席登记后续候选，不在本包范围。
+- **D6 平台边界**：~~指挥席 macOS 优先~~ → **修订（2026-09-09 P0 用户裁决）：Windows 指挥席**。依据：本机实测 System32 OpenSSH 10.2 + tar 就绪、`spawn('ssh', argv)` 跨平台无障碍、`os.homedir()/.ssh/config` 解析正常；BLOCK-63 电脑控制已有 Windows 指挥席先例。macOS 转后续兼容面，本包不专门验证。
 - **D7 与 ExecutionTarget 的关系**：远程项目的作业默认执行面 = 项目自身 host（tools-executor 远程分支复用）；本地项目行为一行不变；远程项目不再叠加 composer 执行目标 chip（防止双模式回潮，BLOCK-30 教训）。
 - **D8 产物链**：远程执行的科学作业产物按 BLOCK-57 manifest+hash 拉回本地 jobDir，Artifact Truth 仍以本地拉回后为准（跨机可复现红利延续）。
 
@@ -119,5 +119,6 @@
 
 ## 10. 进度记录
 
+- 2026-09-09 **P0 设计评审 confirmed**：八项裁决逐项核实代码事实（ssh-transport 全 argv spawn / node-agent verb 白名单 / error-classifier 断线分叉 / tools-executor 远程分支键控 / pullBundle manifest+hash 现成）后呈用户裁决——D1–D5/D7/D8 原案确认；**D6 修订为 Windows 指挥席**（实测 ssh.exe/tar.exe 就绪 + BLOCK-63 先例）。节点资产实测：aliyun:22 TCP 可达但本机公钥未授权（Permission denied (publickey)）、aliyun-6022 超时、dell LAN 不可达——用户裁决将本机 ED25519 公钥（`desktop-n94blo7\admin@DESKTOP-N94BLO7`）加入 aliyun，P1–P3 以 aliyun 单节点验收。P0 出口达成（评审确认），进 P1。
 - 2026-09-09 **启动（planned → active，P0-LAUNCH）**：用户裁决启动 BLOCK-67。当前唯一 active 工作包（串行纪律：BLOCK-72 已收口、无其他 active）。P0 设计评审开工：§5 八项裁决逐项核实代码事实 + D6 平台矛盾点（plan 写 macOS 优先、实机为 Windows，Windows 侧有 BLOCK-63 先例）显式呈用户裁决；真实节点资产 aliyun+dell（BLOCK-57 注册目标）。环境纪律沿用：fnm Node 24.20 / 显式路径 git add / 并行会话 BLOCK-70 文件面零触碰。
 - 2026-09-09 **P0（planned 立项）**：用户裁决「需要立项，直接走完整项目不要走 BLOCK-57 轻量，SSH 体感与使用体验呈现和本地保持一致」→ 本计划落盘并注册 DOC-REGISTRY（planned 排队）。评估随立项交付：与 BLOCK-57 边界（§2）/ 代码事实基线六层缺口（§3）/ 架构草案 Workspace Gateway 双后端（§4）/ P0 设计评审八项裁决清单（§5）/ P0–P5 阶段划分（§6）。下一步：用户裁决启动顺序后进 P0 设计评审确认。G0 开发期常态 · 不外推 packaged/Provider/GA。
