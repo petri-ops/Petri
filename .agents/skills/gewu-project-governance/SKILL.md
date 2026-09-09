@@ -7,6 +7,12 @@ description: Govern Gewu (格物, formerly BioF3) plans, Goals, work packages, c
 
 Keep one recoverable project truth while preserving code, evidence, user work, and active Agent work.
 
+Reference files in this folder (operational detail; this file stays the entry point):
+
+- `references/WORK-PACKAGE-LAUNCH-CHECKLIST.md` — run at launch; any unchecked box means not ready (or an explicit, recorded user waiver).
+- `references/STAGE-CLOSEOUT-CHECKLIST.md` — run at every stage/Goal close, in order.
+- `references/AUDIT-LOG-ENTRY-TEMPLATE.md` — required shape of launch/closeout/audit ledger entries.
+
 ## Load the governing context
 
 1. Read `docs/AUDIT-LOG.md` before mainline work and handle red blockers or green merge items first.
@@ -18,6 +24,8 @@ Keep one recoverable project truth while preserving code, evidence, user work, a
 ## Route the work
 
 ### Start or change a work package
+
+Run `references/WORK-PACKAGE-LAUNCH-CHECKLIST.md` end to end, then:
 
 - Reuse an existing Plan ID when the scope is an increment of that package.
 - Create a new stable ID only for a distinct responsibility and acceptance boundary.
@@ -40,6 +48,8 @@ Keep one recoverable project truth while preserving code, evidence, user work, a
 - Do not solidify one-off incidents or current-state facts into gates. Gates encode process and criteria only; state lives exclusively in canonical documents.
 
 ### Close a Goal or stage
+
+Run `references/STAGE-CLOSEOUT-CHECKLIST.md` in order and write ledger entries per `references/AUDIT-LOG-ENTRY-TEMPLATE.md`, then:
 
 1. Verify every declared acceptance gate with current evidence.
 2. Update the work package, canonical roadmap, handoff, audit ledger, and UI audit when each is in scope.
