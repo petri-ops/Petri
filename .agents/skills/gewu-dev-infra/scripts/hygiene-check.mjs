@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 /**
- * scripts/hygiene-check.mjs — 工作区卫生检查（BLOCK-71-DEV-INFRA-SOLIDIFY）
+ * .agents/skills/gewu-dev-infra/scripts/hygiene-check.mjs — 工作区卫生检查（BLOCK-71）
+ *
+ * canonical 家在 gewu-dev-infra skill 内（自洽可移植工具包）；位置无关：
+ * 向上查找 package.json 定位仓库根。复用到其他仓库见 skill 内 PORTING.md。
  *
  * 检查项（发现即非 0 退出）：
  *   1) 死符号链接：git 跟踪的 symlink（mode 120000），解析目标不存在。
@@ -20,7 +23,15 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = (() => {
+  let dir = path.dirname(fileURLToPath(import.meta.url));
+  for (let i = 0; i < 10; i++) {
+    if (fs.existsSync(path.join(dir, 'package.json'))) return dir;
+    dir = path.dirname(dir);
+  }
+  console.error('[hygiene] 找不到仓库根（向上无 package.json）');
+  process.exit(2);
+})();
 
 const TEMP_PATTERNS = [
   /-tmp\.[a-z0-9]+$/i,

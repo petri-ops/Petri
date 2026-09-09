@@ -2,22 +2,23 @@
 'use strict';
 
 /**
- * scripts/dev-verify/run.cjs — `npm run verify -- <flowId>`：实机校验 flow 注册表（BLOCK-71）
+ * .agents/skills/gewu-dev-infra/dev-verify/run.cjs — `npm run verify -- <flowId>`：实机校验 flow 注册表（BLOCK-71）
  *
- * flow = scripts/dev-verify/flows/*.cjs，导出 { id, description, evidenceDir, run(ctx) }。
+ * canonical 家在 gewu-dev-infra skill 内。flow = 本目录 flows/*.cjs，
+ * 导出 { id, description, evidenceDir, run(ctx) }。
  * ctx = { assert(name, pass, detail), timeoutMs }；flow 返回后 runner 调 finish()
  * 落盘证据 JSON（acceptance/<flow.evidenceDir 或 flow 声明的绝对目录>/<id>-live.json）
  * 并按 allPass 决定退出码（0/1）。
  *
  * 用法：
- *   node scripts/dev-verify/run.cjs --list          列出已注册 flow
- *   node scripts/dev-verify/run.cjs app-health      运行指定 flow
+ *   npm run verify -- --list        列出已注册 flow
+ *   npm run verify -- app-health    运行指定 flow
  */
 const fs = require('node:fs');
 const path = require('node:path');
 const lib = require('./lib.cjs');
 
-const ROOT = path.resolve(__dirname, '..', '..');
+const ROOT = lib.findRepoRoot(__dirname) || process.cwd();
 const FLOWS_DIR = path.join(__dirname, 'flows');
 
 function loadFlows() {

@@ -1198,21 +1198,18 @@
       ],
       "classifiesScripts": false
     },
-{
+    {
       "id": "script-dev-infra",
-      "note": "BLOCK-71 开发基础设施沉淀：会话状态/卫生检查/收口聚合/dev-verify 底座/产品 Skill 脚手架。工具自身改动跑 test/dev-verify.test.mjs + 冒烟（npm run state / hygiene:check / skills:check）。",
+      "note": "BLOCK-71 开发基础设施沉淀：会话状态/卫生检查/收口聚合/dev-verify 底座（canonical 家在 gewu-dev-infra skill 内）。工具自身改动跑 test/dev-verify.test.mjs + 冒烟（npm run state / hygiene:check / skills:check）。",
       "patterns": [
-            "scripts/workspace-state.mjs",
-            "scripts/hygiene-check.mjs",
-            "scripts/closeout-gates.mjs",
-            "scripts/skill-scaffold.mjs",
-            "scripts/dev-verify/**",
-            "test/dev-verify.test.mjs"
+        ".agents/skills/gewu-dev-infra/**",
+        "scripts/skill-scaffold.mjs",
+        "test/dev-verify.test.mjs"
       ],
       "tests": [
-            "test/dev-verify.test.mjs"
+        "test/dev-verify.test.mjs"
       ],
       "classifiesScripts": true
-}
+    }
   ]
 }

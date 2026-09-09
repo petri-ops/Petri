@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 /**
- * scripts/closeout-gates.mjs — `npm run closeout`：收口门禁聚合器（BLOCK-71）
+ * .agents/skills/gewu-dev-infra/scripts/closeout-gates.mjs — `npm run closeout`：收口门禁聚合器（BLOCK-71）
+ *
+ * canonical 家在 gewu-dev-infra skill 内；位置无关：向上查找 package.json 定位仓库根。
+ * hygiene 门禁随包自带；docs / ui-audit / tests 三个门禁按格物仓库约定路径探测，
+ * 目标仓库缺失时如实标 SKIP-with-reason（不算 PASS），见 PORTING.md。
  *
  * 把治理纪律要求收口必跑的门禁按序执行、fail-fast、最后输出证据清单摘要：
  *   1. hygiene   工作区卫生（未知 WIP / 死链 / 临时残留 fail-closed）
@@ -17,10 +21,20 @@
  * 退出码：0 = 全部 PASS；1 = 有 FAIL；2 = 参数错误。
  */
 import { spawnSync } from 'node:child_process';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const SELF_DIR = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = (() => {
+  let dir = SELF_DIR;
+  for (let i = 0; i < 10; i++) {
+    if (fs.existsSync(path.join(dir, 'package.json'))) return dir;
+    dir = path.dirname(dir);
+  }
+  console.error('[closeout] 找不到仓库根（向上无 package.json）');
+  process.exit(2);
+})();
 const NPM = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
 function parseArgs(argv) {
@@ -44,15 +58,23 @@ function parseArgs(argv) {
   return { gates, skips, noTests };
 }
 
+function repoGate(id, title, relScript, args) {
+  const abs = path.join(ROOT, relScript);
+  if (!fs.existsSync(abs)) {
+    return { id, title, skipped: true, reason: `repo gate script missing: ${relScript}` };
+  }
+  return { id, title, cmd: process.execPath, args: [abs, ...args] };
+}
+
 function plan(skips, noTests, extraGates) {
   const fixed = [
-    { id: 'hygiene', title: '工作区卫生（hygiene:check）', cmd: process.execPath, args: [path.join(ROOT, 'scripts', 'hygiene-check.mjs')] },
-    { id: 'docs', title: '文档治理（docs:check）', cmd: process.execPath, args: [path.join(ROOT, 'scripts', 'docs-governance.mjs'), '--check'] },
-    { id: 'ui-audit', title: 'UI 台账（ui:audit:check）', cmd: process.execPath, args: [path.join(ROOT, 'scripts', 'check-ui-productization-audit.mjs')] },
+    { id: 'hygiene', title: '工作区卫生（hygiene:check）', cmd: process.execPath, args: [path.join(SELF_DIR, 'hygiene-check.mjs')] },
+    repoGate('docs', '文档治理（docs:check）', path.join('scripts', 'docs-governance.mjs'), ['--check']),
+    repoGate('ui-audit', 'UI 台账（ui:audit:check）', path.join('scripts', 'check-ui-productization-audit.mjs'), []),
   ];
   const tests = noTests
     ? [{ id: 'tests', title: '影响范围测试（test:changed）', skipped: true }]
-    : [{ id: 'tests', title: '影响范围测试（test:changed）', cmd: process.execPath, args: [path.join(ROOT, 'scripts', 'test-affected.mjs'), '--run'] }];
+    : [repoGate('tests', '影响范围测试（test:changed）', path.join('scripts', 'test-affected.mjs'), ['--run'])];
   const extras = extraGates.map((name) => ({ id: name, title: `专项门禁 npm run ${name}`, cmd: NPM, args: ['run', name] }));
   return [...fixed, ...tests, ...extras].filter((g) => !skips.has(g.id));
 }
@@ -68,7 +90,7 @@ function main() {
     const g = list[i];
     if (g.skipped) {
       results.push({ ...g, status: 'SKIPPED' });
-      console.log(`\n[${i + 1}/${list.length}] ${g.title} — SKIPPED（--no-tests，如实标注）`);
+      console.log(`\n[${i + 1}/${list.length}] ${g.title} — SKIPPED（${g.reason || '--no-tests'}，如实标注，不算 PASS）`);
       continue;
     }
     console.log(`\n[${i + 1}/${list.length}] ${g.title}`);

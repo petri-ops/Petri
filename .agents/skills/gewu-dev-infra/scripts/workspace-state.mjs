@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 /**
- * scripts/workspace-state.mjs — `npm run state`：Agent 会话状态一键恢复（BLOCK-71）
+ * .agents/skills/gewu-dev-infra/scripts/workspace-state.mjs — `npm run state`：Agent 会话状态一键恢复（BLOCK-71）
+ *
+ * canonical 家在 gewu-dev-infra skill 内；位置无关：向上查找 package.json 定位仓库根。
+ * AUDIT-LOG / DOC-REGISTRY 路径为格物仓库约定，目标仓库缺失时对应区块诚实降级。
  *
  * 把治理纪律规定的冷启动阅读顺序（AUDIT-LOG → Git 证据 → canonical registry）
  * 的机械部分压成一条命令，输出单一报告：
@@ -17,7 +20,15 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = (() => {
+  let dir = path.dirname(fileURLToPath(import.meta.url));
+  for (let i = 0; i < 10; i++) {
+    if (fs.existsSync(path.join(dir, 'package.json'))) return dir;
+    dir = path.dirname(dir);
+  }
+  console.error('[state] 找不到仓库根（向上无 package.json）');
+  process.exit(2);
+})();
 
 function runGit(args) {
   try {

@@ -2,8 +2,9 @@
 'use strict';
 
 /**
- * scripts/dev-verify/lib.cjs — 实机校验公共原语（BLOCK-71）
+ * .agents/skills/gewu-dev-infra/dev-verify/lib.cjs — 实机校验公共原语（BLOCK-71）
  *
+ * canonical 家在 gewu-dev-infra skill 内（自洽可移植工具包）。
  * 从 block*-live.cjs 系列反复出现的样板中沉淀的四个原语：
  *   ready   pollTargets()        轮询 CDP /json 直到 dev Electron 就绪
  *   target  selectPageTarget()   按.URL 正则 + 主窗探测选中目标页
@@ -17,12 +18,36 @@
  * 可用 BIOF3_DEBUG_PORT 覆盖。本库只连接既有 dev 栈，不负责启动/重启 Electron
  * （后端代码变更后必须重启 dev Electron——这一步留在人/Agent 手里）。
  *
- * CDP 客户端单源复用 scripts/g0-rs-p7-cdp.cjs 的 CdpClient，不建第二套连接层。
+ * CDP 客户端单源复用宿主仓库 scripts/g0-rs-p7-cdp.cjs 的 CdpClient（按仓库根
+ * 懒解析，不建第二套连接层）；跨仓库复用时按 PORTING.md 提供等价客户端。
  */
 const fs = require('node:fs');
 const path = require('node:path');
 const http = require('node:http');
-const { CdpClient } = require('../g0-rs-p7-cdp.cjs');
+
+function findRepoRoot(start) {
+  let dir = start;
+  for (let i = 0; i < 10; i++) {
+    if (fs.existsSync(path.join(dir, 'package.json'))) return dir;
+    dir = path.dirname(dir);
+  }
+  return null;
+}
+
+const REPO_ROOT = findRepoRoot(__dirname);
+let _cdpClient = null;
+
+/** 懒解析宿主仓库的 CDP 客户端；缺失时给可移植指引而非静默失败。 */
+function loadCdpClient() {
+  if (_cdpClient) return _cdpClient;
+  const rel = path.join('scripts', 'g0-rs-p7-cdp.cjs');
+  try {
+    _cdpClient = require(path.join(REPO_ROOT, rel)).CdpClient;
+  } catch {
+    throw new Error(`cdp_client_missing: ${rel} 未找到 — 跨仓库复用见本 skill 的 PORTING.md（自备等价 CdpClient 或拷贝宿主客户端）`);
+  }
+  return _cdpClient;
+}
 
 const DEFAULT_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
 
@@ -59,6 +84,7 @@ async function pollTargets({ port = DEFAULT_PORT, timeoutMs = 30_000, intervalMs
 
 /** 连接一个 CDP target，返回已连接的 CdpClient。 */
 async function connectTarget(target) {
+  const CdpClient = loadCdpClient();
   return new CdpClient(target.webSocketDebuggerUrl).connect();
 }
 
@@ -146,6 +172,7 @@ function createRun({ name, evidenceDir }) {
 
 module.exports = {
   DEFAULT_PORT,
+  findRepoRoot,
   log,
   fetchJson,
   pollTargets,

@@ -1,6 +1,6 @@
-# dev-verify — 实机校验公共底座（BLOCK-71）
+# dev-verify — 实机校验公共底座（BLOCK-71 · gewu-dev-infra 随包资产）
 
-把 `scripts/block*-live.cjs` 系列反复出现的样板沉淀为四个原语（`lib.cjs`）：
+把 `block*-live.cjs` 系列反复出现的样板沉淀为四个原语（`lib.cjs`）：
 
 | 原语 | 函数 | 作用 |
 | --- | --- | --- |
@@ -11,7 +11,7 @@
 
 ## 新增一个校验 flow
 
-1. 在 `flows/` 下新建 `<id>.cjs`，导出：
+1. 拷贝 `flows/_template.cjs` 为 `flows/<id>.cjs`，导出：
 
 ```js
 module.exports = {
@@ -25,5 +25,5 @@ module.exports = {
 2. 运行：`npm run verify -- my-flow`；清单：`npm run verify -- --list`。
 
 纪律：本底座只连接既有 dev 栈，不启动/重启 Electron（后端代码变更后必须重启
-dev Electron —— 这一步留在人/Agent 手里）；CDP 客户端单源复用
-`scripts/g0-rs-p7-cdp.cjs`，不建第二套连接层。
+dev Electron —— 这一步留在人/Agent 手里）；CDP 客户端按仓库根懒解析宿主
+`scripts/g0-rs-p7-cdp.cjs`（单源复用，不建第二套连接层）；跨仓库复用见 `../PORTING.md`。

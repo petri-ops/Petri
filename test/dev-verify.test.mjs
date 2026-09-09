@@ -9,9 +9,9 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const toPath = (rel) => fileURLToPath(new URL(rel, import.meta.url));
 
-// 直接相对仓库根加载，避免对 CJS 深相对路径的重复推导
-const lib = require(toPath('../scripts/dev-verify/lib.cjs'));
-const { loadFlows } = require(toPath('../scripts/dev-verify/run.cjs'));
+// 直接相对仓库根加载（canonical 家在 gewu-dev-infra skill 内）
+const lib = require(toPath('../.agents/skills/gewu-dev-infra/dev-verify/lib.cjs'));
+const { loadFlows } = require(toPath('../.agents/skills/gewu-dev-infra/dev-verify/run.cjs'));
 
 describe('dev-verify lib.cjs 纯逻辑', () => {
   it('filterPageTargets 只保留命中 URL 正则的 page 目标', () => {
