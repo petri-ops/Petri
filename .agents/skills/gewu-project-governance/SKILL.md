@@ -1,9 +1,9 @@
 ---
-name: biof3-project-governance
-description: Govern BioF3 plans, Goals, work packages, canonical documentation, handoffs, audits, validation scope, stage closeout, archival, and Git worktrees. Use when Codex creates or changes a plan, chooses tests or acceptance gates, completes a task or phase, updates roadmap or handoff state, reconciles documentation, archives or supersedes files, creates or removes a worktree, or is about to claim that a BioF3 work package is complete.
+name: gewu-project-governance
+description: Govern Gewu (格物, formerly BioF3) plans, Goals, work packages, canonical documentation, handoffs, audits, validation scope, stage closeout, archival, and Git worktrees. Use when an agent creates or changes a plan, chooses tests or acceptance gates, completes a task or phase, updates roadmap or handoff state, reconciles documentation, archives or supersedes files, creates or removes a worktree, or is about to claim that a Gewu work package is complete.
 ---
 
-# BioF3 Project Governance
+# Gewu Project Governance（格物项目治理）
 
 Keep one recoverable project truth while preserving code, evidence, user work, and active Agent work.
 
@@ -68,9 +68,13 @@ Keep one recoverable project truth while preserving code, evidence, user work, a
 
 ## Run the deterministic controls
 
+- `npm run state`: aggregate recoverable state (branch/WIP, unresolved audit items, active work packages); presentation layer, not a second truth source.
+- `npm run closeout`: aggregate hygiene → docs:check → ui:audit:check → test:changed with fail-fast; attach work-package gates with `--gate`. A green closeout is necessary but never sufficient — canonical write-backs below still apply.
 - `npm run docs:status`: show registry coverage and current classification.
 - `npm run docs:check`: enforce registry schema, paths, canonical truth uniqueness, entrypoints, and managed Markdown coverage.
 - `npm run docs:reconcile`: list unregistered, orphaned, archival, and retained-reference candidates without moving files.
+
+Companion skill: `$gewu-dev-infra` (`.agents/skills/gewu-dev-infra/`) owns the bundled mechanical toolkit (hygiene, dev-verify flows, product-Skill scaffold, delegation template) and its PORTING guide.
 
 ## Choose the smallest sufficient validation scope
 

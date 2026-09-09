@@ -26,7 +26,7 @@
 
 - canonical: `docs/document-governance.md` §3.2"JSON 输出契约" + §4.5"门禁退出码契约"
 - 计划: `docs/doc-governance-gates-plan.md` §2 GATES-2 / §4 阶段定义
-- skill: `$biof3-project-governance` "Run the deterministic controls"
+- skill: `$gewu-project-governance` "Run the deterministic controls"
 
 ## 后续门禁
 

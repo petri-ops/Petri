@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gewu 项目治理"
+  short_description: "管理 Gewu（格物）计划、文档、交接、Worktree 与阶段收口"
+  default_prompt: "Use $gewu-project-governance to reconcile this Gewu work package and its documentation."

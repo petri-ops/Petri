@@ -13,7 +13,7 @@
  - [`docs/next-steps-roadmap.md`](./docs/next-steps-roadmap.md)
  - [`docs/project-workspace-handoff.md`](./docs/project-workspace-handoff.md)
  - [`docs/DOC-REGISTRY.json`](./docs/DOC-REGISTRY.json) 登记的当前唯一 active 工作包
-4. 创建或修改计划、选择验收范围、阶段收口、归档或处理 Worktree 时，使用 `$biof3-project-governance`。Claude Code 通过 [`.claude/skills/biof3-project-governance`](./.claude/skills/biof3-project-governance) 发现它；canonical 实体仍是 [`.agents/skills/biof3-project-governance/SKILL.md`](./.agents/skills/biof3-project-governance/SKILL.md)。
+4. 创建或修改计划、选择验收范围、阶段收口、归档或处理 Worktree 时，使用 `$gewu-project-governance`。Claude Code 通过 [`.claude/skills/gewu-project-governance`](./.claude/skills/gewu-project-governance) 发现它；canonical 实体仍是 [`.agents/skills/gewu-project-governance/SKILL.md`](./.agents/skills/gewu-project-governance/SKILL.md)。
 
 ## 一致性边界
 

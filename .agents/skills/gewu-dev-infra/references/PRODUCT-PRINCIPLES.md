@@ -1,7 +1,7 @@
 # 产品原则参考（非 canonical 摘要）
 
 > 本文件是 gewu-dev-infra 工具包跨仓库复用时的**原则速查**，为便于脱离本仓库上下文阅读而写。
-> canonical 真相源永远是宿主仓库的 `AGENTS.md` 与 `.agents/skills/biof3-project-governance/`（或目标仓库的对应物）；两者冲突时以 canonical 为准，本文件视为带日期的参考摘要（2026-09-09）。
+> canonical 真相源永远是宿主仓库的 `AGENTS.md` 与 `.agents/skills/gewu-project-governance/`（或目标仓库的对应物）；两者冲突时以 canonical 为准，本文件视为带日期的参考摘要（2026-09-09）。
 
 ## 1. 单一真相红线
 

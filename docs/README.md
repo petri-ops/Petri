@@ -200,7 +200,7 @@
 
 ## 维护规则
 
-- 创建计划、阶段收口、Handoff、归档或 Worktree 操作时使用 `$biof3-project-governance`。
+- 创建计划、阶段收口、Handoff、归档或 Worktree 操作时使用 `$gewu-project-governance`。
 
 - 默认启动上下文只使用“当前开发必读”四项；不要扫描全部 `docs/` 或 `acceptance/` 猜测当前状态。
 
