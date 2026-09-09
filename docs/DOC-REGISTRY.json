@@ -112,7 +112,7 @@
       "notes": "SSH 远程项目——项目本体在远程服务器的完整工作区形态。2026-09-09 用户裁决立项（「直接走完整项目不要走 BLOCK-57 轻量；SSH 的体感和使用体验呈现和本地保持一致」；对标 ZCode SSH 远程连接：创建的项目就是 ssh 连接远程服务器的项目，对话、文件树渲染都要有）。评估随立项交付：与 BLOCK-57 边界（BLOCK-57=本地项目+作业飞出去，本包=项目本体在远程；复用 remote-execution 六文件通道层：ssh-config 解析/ssh-transport BatchMode argv/node-agent verbs/error-classifier/target-registry + aliyun/dell 实机资产）；代码事实基线六层缺口（projects.workspace_path 本地目录 / file:* IPC 本地 fs / agent-tools/workspace-tools.js 8 工具 workspace_list·read·write·replace·find·search·exec·exec_background 本地路径语义 / 终端本地 pty / git-adapter 本地 git / 产物本地 jobDir）；架构草案=Workspace Gateway 双后端（local 平移接入零改动 + ssh 走 BLOCK-57 通道），agent loop/会话/tool_jobs/Artifact Truth 留本地（单一真相红线，否决 loop 派驻远程）；八项设计裁决待 P0 评审确认（D1 thin per-call SSH / D2 体感预算 树展开 P50≤1.5s / D3 远程唯一真值+write-through+冲突检测 / D4 key-only+known_hosts strict+argv 数组+verb 白名单 / D5 断线诚实呈现绝不本地暂存补写 / D6 指挥席 macOS 优先 / D7 远程项目作业默认执行面=自身 host 且不叠加执行目标 chip（防 BLOCK-30 双模式回潮）/ D8 产物 manifest+hash 拉回 Artifact Truth 本地为準）；阶段 P0 评审→P1 工作区骨架+创建流+文件树/预览→P2 对话工具面路由→P3 终端 ssh pty+审阅远程 git→P4 真实节点全链实机→P5 收口。排队现状：BLOCK-64/BLOCK-65 已在排队，启动顺序与是否插队由用户裁决。0 新 npm 依赖倾向。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-09",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P1-COMPLETED"
+      "phase": "P2-COMPLETED"
     },
     {
       "id": "BLOCK-68-UI-DECLUTTER",
