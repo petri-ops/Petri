@@ -197,9 +197,11 @@ module.exports = function registerFileRoutes(app) {
         if (!fs.statSync(dir).isDirectory()) {
           return res.status(400).json({ ok: false, error: '不是目录' });
         }
+        // BLOCK-73：?showHidden=1 时不过滤点开头条目（前端「显示隐藏文件」开关；默认关维持现状体感）
+        const showHiddenEntries = req.query.showHidden === '1';
         const entries = fs
           .readdirSync(dir, { withFileTypes: true })
-          .filter((entry) => !entry.name.startsWith('.'))
+          .filter((entry) => showHiddenEntries || !entry.name.startsWith('.'))
           .map((entry) => {
             const full = path.join(dir, entry.name);
             const stat = fs.statSync(full);

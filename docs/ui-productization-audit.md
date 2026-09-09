@@ -2944,3 +2944,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：tsc 0；定向 vitest home/project-store/RightPanel 8/8；后端路由级零网络测试 block67-routes 7/7（含 local 零回归用例）。实机验收（aliyun 真节点：创建→树展开→预览→编辑保存）待用户将本机 ED25519 公钥加入 authorized_keys 后执行，届时转 verified。
 
 **状态**: in_progress（代码完成，实机验收押后至节点凭据就绪）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-322: 文件树「显示隐藏文件」开关（BLOCK-73 方案 A）(2026-09-09 in_progress)
+
+**来源**：用户 2026-09-09 观察「右侧边栏的文件，好像看不到隐藏文件和隐藏文件夹」——属实：`/workspaces/:id/tree` local 分支服务端硬过滤 `startsWith('.')`，前端无开关；用户确认方案 A（toggle 默认关）。
+
+**改动**：① `routes/files.js` local 分支过滤参数化（`?showHidden=1` 跳过点文件过滤，默认请求行为逐字节不变）；② 右栏文件树工具条新增 eye/eye-off toggle（`data-testid="file-tree-show-hidden"`，`aria-pressed`，默认关）；`fetchDir` 携带参数，`refreshFiles`→`refreshVersion` 链联动 FileTreeItem 子目录整树刷新；偏好持久化 `localStorage['gewu.fileTree.showHidden']`；③ `workspaceKind === 'ssh'` 项目禁用开关并注明（node-agent/workspace-gateway 属并行 BLOCK-67 P1 在制面，按文件面纪律不触碰；路由级契约测试锁定 showHidden 对 ssh 分支 no-op）。审阅面板走 git 通道不受影响。0 新 npm 依赖。
+
+**门禁**：定向 vitest 后端 3/3（block73-hidden-files：默认过滤/showHidden 显示/ssh no-op 契约锁）+ tsc 0 + RightPanel 定向 1/1。
+
+**状态**: in_progress（实现完成，实机 CDP 验收进行中——acceptance/ui-322/ 落盘后转 verified）。G0 开发期常态 · 不外推 packaged / Provider / GA。

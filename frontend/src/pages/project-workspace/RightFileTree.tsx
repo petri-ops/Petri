@@ -36,6 +36,10 @@ export function RightFileTree({
   const [loading, setLoading] = useState(true);
   const [treeOpen, setTreeOpen] = useState(true);
   const [treeWidth, setTreeWidth] = useState(220);
+  // BLOCK-73 / UI-322 — 「显示隐藏文件」开关（方案 A）：默认关维持现状体感；偏好持久化。
+  const [showHidden, setShowHidden] = useState<boolean>(() => {
+    try { return window.localStorage.getItem('gewu.fileTree.showHidden') === '1'; } catch { return false; }
+  });
 
   const [refreshVersion, setRefreshVersion] = useState(0);
   const [previewVersion, setPreviewVersion] = useState(0);
@@ -45,14 +49,15 @@ export function RightFileTree({
 
   const fetchDir = useCallback(async (prefix: string) => {
     try {
+      // BLOCK-73 — showHidden=1 时服务端跳过点文件过滤（ssh 项目 no-op，见服务端分支）
       const resp = await fetch(
-        getApiPrefix() + `/workspaces/${encodeURIComponent(project.id)}/tree?prefix=${encodeURIComponent(prefix)}`
+        getApiPrefix() + `/workspaces/${encodeURIComponent(project.id)}/tree?prefix=${encodeURIComponent(prefix)}${showHidden ? '&showHidden=1' : ''}`
       );
       const data = await resp.json();
       if (data.ok) return data.entries as FileEntry[];
     } catch { /* ignore */ }
     return [];
-  }, [project.id]);
+  }, [project.id, showHidden]);
 
   const refreshFiles = useCallback(async (forcePreview = false) => {
     const rootEntries = await fetchDir('');
@@ -236,6 +241,28 @@ export function RightFileTree({
           {!activeFile && <span className={styles.workspaceBreadcrumbEmpty}>选择文件预览</span>}
         </div>
         <DataIntakeControl projectId={project.id} onAskAgent={onAskAgent} />
+        {/* BLOCK-73 / UI-322 — 「显示隐藏文件」开关（方案 A）：默认关；ssh 项目禁用（node-agent 过滤在 BLOCK-67 面内） */}
+        <button
+          type="button"
+          className={styles.workspaceTreeToggle}
+          onClick={() => {
+            const next = !showHidden;
+            setShowHidden(next);
+            try { window.localStorage.setItem('gewu.fileTree.showHidden', next ? '1' : '0'); } catch { /* ignore */ }
+          }}
+          aria-pressed={showHidden}
+          data-testid="file-tree-show-hidden"
+          disabled={project.workspaceKind === 'ssh'}
+          title={
+            project.workspaceKind === 'ssh'
+              ? '远程项目暂不支持显示隐藏文件（待 BLOCK-67 后续协调）'
+              : showHidden
+                ? '隐藏文件当前可见（点击隐藏）'
+                : '显示隐藏文件'
+          }
+        >
+          <Icon name={showHidden ? 'eye' : 'eye-off'} size={13} />
+        </button>
         <button
           className={styles.workspaceTreeToggle}
           onClick={() => setTreeOpen((value) => !value)}
