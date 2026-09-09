@@ -387,6 +387,21 @@ try {
 try {
   db.exec('ALTER TABLE projects ADD COLUMN workspace_path TEXT');
 } catch {}
+// Migration (BLOCK-67 ssh_remote_v1): 远程项目工作区形态。workspace_kind = 'local'(默认) | 'ssh'；
+// ssh 项目：ssh_host = ~/.ssh/config 别名（assertAlias 白名单），remote_path = 远端绝对路径，
+// workspace_path 保持 NULL（本地不留副本真值，D3 远程唯一真值）。
+try {
+  db.exec("ALTER TABLE projects ADD COLUMN workspace_kind TEXT DEFAULT 'local'");
+} catch {}
+try {
+  db.exec('ALTER TABLE projects ADD COLUMN ssh_host TEXT');
+} catch {}
+try {
+  db.exec('ALTER TABLE projects ADD COLUMN remote_path TEXT');
+} catch {}
+try {
+  db.exec("UPDATE projects SET workspace_kind = 'local' WHERE workspace_kind IS NULL");
+} catch {}
 // Migration (project_trash_v1): soft-delete projects before permanent cleanup.
 try {
   db.exec("ALTER TABLE projects ADD COLUMN status TEXT DEFAULT 'active'");
@@ -516,7 +531,7 @@ const stmts = {
   ),
   getProject: db.prepare('SELECT * FROM projects WHERE id = ?'),
   insertProject: db.prepare(
-    'INSERT INTO projects (id, name, description, created_at, updated_at, modality, workspace_path) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    'INSERT INTO projects (id, name, description, created_at, updated_at, modality, workspace_path, workspace_kind, ssh_host, remote_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
   ),
   updateProject: db.prepare(
     'UPDATE projects SET name = COALESCE(?, name), description = COALESCE(?, description), workspace_path = COALESCE(?, workspace_path), updated_at = ? WHERE id = ?'
@@ -641,6 +656,8 @@ function ensureWorkspaceDir(workspacePath) {
 
 function hydrateProjectWorkspace(project) {
   if (!project) return project;
+  // BLOCK-67：ssh 项目本地不落 workspace_path（远程唯一真值），不补缺省目录。
+  if (project.workspace_kind === 'ssh') return project;
   if (project.workspace_path) {
     ensureWorkspaceDir(project.workspace_path);
     return project;
@@ -651,6 +668,20 @@ function hydrateProjectWorkspace(project) {
   } catch {}
   ensureWorkspaceDir(workspacePath);
   return { ...project, workspace_path: workspacePath };
+}
+
+// BLOCK-67：ssh 项目字段校验（fail-closed）。alias 走 ssh-transport assertAlias 同型白名单；
+// remote_path 必须绝对 POSIX 路径且不含 .. 与控制字符。
+function validateSshProjectFields({ sshHost, remotePath }) {
+  if (typeof sshHost !== 'string' || !/^[A-Za-z0-9._-]{1,128}$/.test(sshHost)) return 'invalid_ssh_host';
+  if (
+    typeof remotePath !== 'string'
+    || !remotePath.startsWith('/')
+    || remotePath.includes('..')
+    || /[\0\r\n]/.test(remotePath)
+    || remotePath.length > 4096
+  ) return 'invalid_remote_path';
+  return null;
 }
 
 function projectBaselineView(row, compatibility) {
@@ -781,12 +812,24 @@ function getProject(id) {
   return hydrateProject(stmts.getProject.get(id) || null, { recordOpen: true });
 }
 
-function createProject({ name, description, modality, userId, workspacePath }) {
+function createProject({ name, description, modality, userId, workspacePath, workspaceKind, sshHost, remotePath }) {
   const id = uid('p');
   const ts = now();
+  // BLOCK-67：ssh 项目 —— workspace 三字段定死不可运行时切换（防双模式回潮），
+  // 本地不建 workspace 目录；local 项目行为与既有逐字节同语义（零回归红线）。
+  if (workspaceKind === 'ssh') {
+    const invalid = validateSshProjectFields({ sshHost, remotePath });
+    if (invalid) {
+      const error = new Error(invalid);
+      error.code = invalid;
+      throw error;
+    }
+    stmts.insertProject.run(id, name, description || '', ts, ts, modality || 'single-cell', null, 'ssh', sshHost, remotePath);
+    return hydrateProject(stmts.getProject.get(id), { createdByCurrent: true, recordOpen: true });
+  }
   const finalWorkspacePath = workspacePath || defaultProjectWorkspacePath({ id, name });
   ensureWorkspaceDir(finalWorkspacePath);
-  stmts.insertProject.run(id, name, description || '', ts, ts, modality || 'single-cell', finalWorkspacePath);
+  stmts.insertProject.run(id, name, description || '', ts, ts, modality || 'single-cell', finalWorkspacePath, 'local', null, null);
   return hydrateProject(stmts.getProject.get(id), {
     createdByCurrent: true,
     recordOpen: true,
@@ -2045,6 +2088,7 @@ module.exports = {
   listProjects,
   getProject,
   createProject,
+  validateSshProjectFields,
   getProjectG0Baseline,
   setProjectUserId,
   setProjectPublic,

@@ -292,12 +292,14 @@ function agentVersionHash(scriptText = BIOF3_AGENT_SH) {
   return crypto.createHash('sha256').update(scriptText).digest('hex').slice(0, 16);
 }
 
-/** 远端固定结构命令（唯一允许进入 ssh 的命令形态；参数走白名单，无 shell 注入面）。 */
-const AGENT_ARG_RE = /^[A-Za-z0-9._@/+:-]+$/;
+/** 远端固定结构命令（唯一允许进入 ssh 的命令形态；参数走白名单，无 shell 注入面）。
+ *  '=' 供 base64 padding 使用（BLOCK-67 fs verbs），双引号内无展开语义。
+ *  maxLen：BLOCK-57 作业 verbs 维持 256；BLOCK-67 fs_write 内容载荷放宽（调用方显式传）。 */
+const AGENT_ARG_RE = /^[A-Za-z0-9._@/+:=-]+$/;
 
-function remoteAgentCommand(verbArgs) {
+function remoteAgentCommand(verbArgs, { maxArgLen = 256 } = {}) {
   const args = verbArgs.map((arg) => {
-    if (typeof arg !== 'string' || !AGENT_ARG_RE.test(arg) || arg.length > 256) {
+    if (typeof arg !== 'string' || !AGENT_ARG_RE.test(arg) || arg.length > maxArgLen) {
       throw new Error(`remote_agent_arg_unsafe: ${String(arg).slice(0, 32)}`);
     }
     return `"${arg}"`;

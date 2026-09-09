@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 
 const require = createRequire(import.meta.url);
-const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/(?=[A-Za-z]:)/, '')), '..');
 const { withSessionExecutionTarget, withSessionExecutionTargetSync } = require(
   path.join(repoRoot, 'core/biof3-server/helpers/remote-execution/session-target.js'),
 );
