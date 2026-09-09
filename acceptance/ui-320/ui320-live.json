@@ -1,0 +1,32 @@
+{
+  "startedAt": "2026-09-09T09:41:07.489Z",
+  "assertions": [
+    {
+      "name": "A1 左栏工作台区含 知识空间/后端 入口（Skills 同区）",
+      "pass": true,
+      "detail": "{\"section\":true,\"knowledge\":true,\"backend\":true,\"skills\":true}"
+    },
+    {
+      "name": "A2 右栏工具面不再含 后端/知识 项（模型 I/O 仍在）",
+      "pass": true,
+      "detail": "{\"hasBackendItem\":false,\"hasKnowledgeItem\":false,\"hasIoItem\":true,\"itemsSample\":[\"结果\",\"文件\",\"浏览器\",\"聊天\",\"分析\",\"审阅\",\"模型 I/O\"]}"
+    },
+    {
+      "name": "A3 左栏「知识空间」→ /knowledge 全局页渲染（面板/上传/检索框齐备）",
+      "pass": true,
+      "detail": "{\"page\":true,\"panel\":true,\"upload\":true,\"searchInput\":true,\"url\":\"/knowledge\"}"
+    },
+    {
+      "name": "A4 左栏「后端」→ /backend 全局页渲染（进程面 + 全局态回退 meta）",
+      "pass": true,
+      "detail": "{\"page\":true,\"refreshBtn\":true,\"shellBtn\":true,\"metaGlobal\":true,\"url\":\"/backend\"}"
+    },
+    {
+      "name": "A5 composer 大脑开关保留在会话内",
+      "pass": true,
+      "detail": "{\"brain\":true,\"composer\":true}"
+    }
+  ],
+  "allPass": true,
+  "finishedAt": "2026-09-09T09:41:18.825Z"
+}

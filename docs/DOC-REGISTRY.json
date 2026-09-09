@@ -3884,7 +3884,7 @@
       "id": "BLOCK-72-WORKBENCH-GLOBAL-ENTRIES",
       "path": "docs/block-72-workbench-global-entries-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-72-workbench-global-entries",
       "entrypoint": "docs/README.md",
@@ -3897,10 +3897,10 @@
         "left-panel",
         "G0"
       ],
-      "notes": "工作台全局入口：知识空间+后端迁出项目工作区。2026-09-09 用户评审 BLOCK-69 收口后裁决「知识、后端应该放在工作台中，它们是全局的」并开工（知识+后端一起，右栏 tab 删）。语义依据：知识空间是设备级全局域（BLOCK-69 D1 单行 default 空间）而管理面却只在项目工作区可达；后端 biof3-server 是全局单进程；左栏工作台区（搜索/插件/Skills）是全局能力区既有先例。落地：/knowledge 与 /backend 全局路由（对标 /skills 先例，带回退头）+ 左栏工作台「知识空间/后端」入口 + 右栏 RightPanelMode 去 knowledge/terminal 两值（不预留空壳，BLOCK-68 先例）+ home 空态后端卡改跳 /backend；composer 大脑开关保留（会话内快捷启停是态，全局页是管理）。组件复用：KnowledgeSpacePanel 零项目依赖原样迁；TerminalPanel project 放宽可选（全局态回退数据根），backendStatus 走既有 BackendStatusProvider。底部终端（BLOCK-54）不动。UI 台账 UI-320 实现同提交登记。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "工作台全局入口：知识空间+后端迁出项目工作区。2026-09-09 用户评审 BLOCK-69 收口后裁决「知识、后端应该放在工作台中，它们是全局的」并开工（知识+后端一起，右栏 tab 删）。语义依据：知识空间是设备级全局域（BLOCK-69 D1 单行 default 空间）而管理面却只在项目工作区可达；后端 biof3-server 是全局单进程；左栏工作台区（搜索/插件/Skills）是全局能力区既有先例。落地：/knowledge 与 /backend 全局路由（对标 /skills 先例，带回退头）+ 左栏工作台「知识空间/后端」入口 + 右栏 RightPanelMode 去 knowledge/terminal 两值（不预留空壳，BLOCK-68 先例）+ home 空态后端卡改跳 /backend；composer 大脑开关保留（会话内快捷启停是态，全局页是管理）。组件复用：KnowledgeSpacePanel 零项目依赖原样迁；TerminalPanel project 放宽可选（全局态回退数据根），backendStatus 走既有 BackendStatusProvider。底部终端（BLOCK-54）不动。2026-09-09 同日一次会话收口（UI-320 verified，实机 5/5 断言 allPass，acceptance/ui-320/）。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-09",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P1-IN-PROGRESS"
+      "phase": "COMPLETED"
     }
   ],
   "lastUpdated": "2026-09-09",

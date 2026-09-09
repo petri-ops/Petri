@@ -2923,12 +2923,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-320: 工作台全局入口 —— 知识空间 + 后端迁出项目工作区（BLOCK-72）(2026-09-09 in_progress)
+## UI-320: 工作台全局入口 —— 知识空间 + 后端迁出项目工作区（BLOCK-72）(2026-09-09 verified)
 
 **来源**：用户 2026-09-09 评审 BLOCK-69 收口后的界面归属裁决——「知识、后端应该放在工作台中，它们是全局的，不是项目或者会话关联的」；开工指令「知识+后端一起，右栏 tab 删」。
 
 **改动**：① `/knowledge` 与 `/backend` 全局路由页（对标 /skills 先例：返回头 + 图标 + 标题副标题，共享 `global-page.module.css` 壳）；② 左栏工作台区新增「知识空间」（brain）/「后端」（cpu）入口（Skills 同款 navigate 直达）；③ 右栏 `RightPanelMode` 去 `'terminal'`/`'knowledge'` 两值 + `RIGHT_PANEL_ITEMS` 删两行 + RightPanel 分支删除（**不预留空壳**，BLOCK-68 先例）；home 空态「后端」卡改跳 /backend（handler 改 navigate，卡片 UI 不变）；④ `TerminalPanel` 的 `project` 放宽可选（仅影响 workspacePath 展示与 openShell cwd，全局态回退「全局 · 数据根目录」与 IPC 内建回落），`backendStatus` 走 App 根既有 `BackendStatusProvider`；⑤ `KnowledgeSpacePanel` 零项目依赖原样复用；composer 大脑开关**保留**（会话内快捷启停是态，全局页是管理）。0 新 npm 依赖。
 
-**门禁**：tsc 0；定向 vitest 30/30（global-pages 2 + LeftPanel 4 + RightPanel 1 + KnowledgeSpacePanel 4 + CenterPanel 6 + home 4 + SimpleChat 系 11 内此前已绿）。
+**门禁**：tsc 0；定向 vitest 30/30（global-pages 2 + LeftPanel 4 + RightPanel 1 + KnowledgeSpacePanel 4 + CenterPanel 6 + home 4 + SimpleChat 系 11 此前已绿）+ docs:check PASS(216) + ui:audit:check PASS。
 
-**状态**: in_progress（实现完成，实机 CDP 验收进行中——acceptance/ui-320/ 落盘后转 verified）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**实机**：`scripts/ui320-workbench-live.cjs` 入库 5/5 断言 allPass（`acceptance/ui-320/ui320-live.json` + 截图×2）：左栏工作台区含 知识空间/后端 入口（Skills 同区）/ 右栏飞出菜单仅剩 结果·文件·浏览器·聊天·分析·审阅·模型 I/O（后端·知识已迁出）/ 左栏「知识空间」→ /knowledge 渲染面板+上传+检索框 / 左栏「后端」→ /backend 渲染进程面+全局态回退 meta / composer 大脑开关保留在会话内。
+
+**状态**: verified（2026-09-09 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。
