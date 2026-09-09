@@ -55,6 +55,9 @@ export interface LeftPanelContext {
   handleShowPlugins: () => void;
   handleShowSettings: () => void;
   handleNavigateToSkills: () => void;
+  /** BLOCK-72 / UI-320 — 全局工作台页入口（知识空间/后端为设备级全局能力，非项目关联） */
+  handleNavigateToKnowledge: () => void;
+  handleNavigateToBackend: () => void;
 
   // Project / conversation switching
   switchToProject: (id: string) => void;
@@ -172,7 +175,7 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
 
 function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   const items: Array<{
-    key: WorkspaceMode | 'skills';
+    key: WorkspaceMode | 'skills' | 'knowledge' | 'backend';
     mode: WorkspaceMode | null;
     label: string;
     icon: Parameters<typeof Icon>[0]['name'];
@@ -202,6 +205,22 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
       icon: 'sparkles',
       onClick: ctx.handleNavigateToSkills,
       title: 'Skills',
+    },
+    {
+      key: 'knowledge',
+      mode: null,
+      label: '知识空间',
+      icon: 'brain',
+      onClick: ctx.handleNavigateToKnowledge,
+      title: '知识空间（全局）',
+    },
+    {
+      key: 'backend',
+      mode: null,
+      label: '后端',
+      icon: 'cpu',
+      onClick: ctx.handleNavigateToBackend,
+      title: '后端进程（全局）',
     },
   ];
 

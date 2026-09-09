@@ -90,7 +90,7 @@ export interface CenterPanelContext {
   // Handlers
   updateWorkspaceMode: (next: WorkspaceMode, replace?: boolean, jobId?: string | null) => void;
   setWorkspaceSearchQuery: (q: string) => void;
-  openRightPanel: (tab: 'home' | 'results' | 'files' | 'terminal' | 'browser' | 'chat' | 'analyze') => void;
+  openRightPanel: (tab: 'home' | 'results' | 'files' | 'browser' | 'chat' | 'analyze' | 'review' | 'io') => void;
   switchToProject: (id: string) => void;
   navigate: (to: string) => void;
   handleSwitchConversation: (convId: string) => void;

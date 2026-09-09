@@ -2922,3 +2922,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **实机**：`scripts/block69-knowledge-live.cjs` 入库（可复跑；fnm Node 24 + DASHSCOPE_API_KEY 环境启动），15/15 断言 allPass（`acceptance/block-69/ui318-live.json` + `ui318-live-*.png`）：S1 上传 md → ready 块数合理（真实 text-embedding-v3 嵌入）；S2 启用后真实模型对话命中知识（回复精确引用《marker-doc.md》「向量+全文」通道内容 42.7）+ 关闭开关后同问题不再命中（工具层诚实拒绝，模型如实转述「知识空间未启用」）；S3 检索测试框双通道 top-k 命中（UI 渲染 2 行）；S4 删除后两通道同灭 + 清空两步确认（rowsBefore 2 → rowsAfter 0）；S5 无 key 诚实空态分支（先前无 key 轮次实测：开关 disabled + 面板 notice + 启用端点 409 + 文档诚实 failed）。
 
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-320: 工作台全局入口 —— 知识空间 + 后端迁出项目工作区（BLOCK-72）(2026-09-09 in_progress)
+
+**来源**：用户 2026-09-09 评审 BLOCK-69 收口后的界面归属裁决——「知识、后端应该放在工作台中，它们是全局的，不是项目或者会话关联的」；开工指令「知识+后端一起，右栏 tab 删」。
+
+**改动**：① `/knowledge` 与 `/backend` 全局路由页（对标 /skills 先例：返回头 + 图标 + 标题副标题，共享 `global-page.module.css` 壳）；② 左栏工作台区新增「知识空间」（brain）/「后端」（cpu）入口（Skills 同款 navigate 直达）；③ 右栏 `RightPanelMode` 去 `'terminal'`/`'knowledge'` 两值 + `RIGHT_PANEL_ITEMS` 删两行 + RightPanel 分支删除（**不预留空壳**，BLOCK-68 先例）；home 空态「后端」卡改跳 /backend（handler 改 navigate，卡片 UI 不变）；④ `TerminalPanel` 的 `project` 放宽可选（仅影响 workspacePath 展示与 openShell cwd，全局态回退「全局 · 数据根目录」与 IPC 内建回落），`backendStatus` 走 App 根既有 `BackendStatusProvider`；⑤ `KnowledgeSpacePanel` 零项目依赖原样复用；composer 大脑开关**保留**（会话内快捷启停是态，全局页是管理）。0 新 npm 依赖。
+
+**门禁**：tsc 0；定向 vitest 30/30（global-pages 2 + LeftPanel 4 + RightPanel 1 + KnowledgeSpacePanel 4 + CenterPanel 6 + home 4 + SimpleChat 系 11 内此前已绿）。
+
+**状态**: in_progress（实现完成，实机 CDP 验收进行中——acceptance/ui-320/ 落盘后转 verified）。G0 开发期常态 · 不外推 packaged / Provider / GA。

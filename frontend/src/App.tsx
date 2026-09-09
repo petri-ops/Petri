@@ -24,6 +24,8 @@ import HomePage from '@/pages/home';
 import { ProjectWorkspace } from '@/pages/project-workspace';
 import { ResultStudioPage } from '@/pages/result-studio/ResultStudioPage';
 import SkillsPage from '@/pages/skills';
+import KnowledgePage from '@/pages/knowledge';
+import BackendPage from '@/pages/backend';
 // BLOCK-28 — main-area code review mode (VS Code SCM style)
 import { ReviewModePage } from '@/pages/review';
 // BLOCK-59 P1 — 独立窗路由面：/window/* 不走主窗 AppShell（无 TitleBar/
@@ -107,6 +109,9 @@ function AppShell(): React.ReactElement {
             <Route path="/" element={<HomePage />} />
             {/* Skills management page */}
             <Route path="/skills" element={<SkillsPage />} />
+            {/* BLOCK-72 / UI-320 — 全局工作台页：知识空间（设备级域）+ 后端（全局单进程） */}
+            <Route path="/knowledge" element={<KnowledgePage />} />
+            <Route path="/backend" element={<BackendPage />} />
             {/* BLOCK-28 — main-area code review mode (VS Code SCM style) */}
             <Route path="/review" element={<ReviewModePage />} />
             {/* Result Studio — standalone results view with branch tabs in TitleBar */}

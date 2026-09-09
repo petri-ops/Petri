@@ -81,12 +81,11 @@ export type { ActiveWorkspaceFile } from './project-workspace/types';
 
 export type { ActiveArtifact, JobStats } from '@/components/workspace-panels/ResultView';
 
-export type RightPanelMode = 'home' | 'results' | 'files' | 'terminal' | 'browser' | 'chat' | 'analyze' | 'review' | 'io' | 'knowledge';
+export type RightPanelMode = 'home' | 'results' | 'files' | 'browser' | 'chat' | 'analyze' | 'review' | 'io';
 
 const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconName }> = [
   { id: 'results', label: '结果', icon: 'bar-chart' },
   { id: 'files', label: '文件', icon: 'folder' },
-  { id: 'terminal', label: '后端', icon: 'cpu' },
   { id: 'browser', label: '浏览器', icon: 'globe' },
   { id: 'chat', label: '聊天', icon: 'sidebar' },
   { id: 'analyze', label: '分析', icon: 'sparkles' },
@@ -94,8 +93,8 @@ const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconNa
   { id: 'review', label: '审阅', icon: 'git-branch' },
   // BLOCK-68 / UI-317 — 模型 I/O 信息流从 composer ⋯ 菜单迁入 tab 体系（绑会话，只读）
   { id: 'io', label: '模型 I/O', icon: 'list-details' },
-  // BLOCK-69 / UI-318 — 知识空间（大脑图标统一入口：开关+文档+检索测试）
-  { id: 'knowledge', label: '知识', icon: 'brain' },
+  // BLOCK-72 / UI-320 — 「后端」「知识空间」迁出右栏：设备级全局能力，入口在左栏工作台
+  // （/backend 与 /knowledge 全局页），右栏不再承载，不预留空壳。
 ];
 
 function toCopilotHarnessSummary(index: HarnessIndexSummary | null | undefined): HarnessContextSummary | undefined {
@@ -679,9 +678,14 @@ export function ProjectWorkspace(): React.ReactElement {
 
   const handleNavigateToSkills = useCallback(() => navigate('/skills'), [navigate]);
 
+  // BLOCK-72 / UI-320 — 全局工作台页入口（知识空间/后端迁出右栏）
+  const handleNavigateToKnowledge = useCallback(() => navigate('/knowledge'), [navigate]);
+  const handleNavigateToBackend = useCallback(() => navigate('/backend'), [navigate]);
+
+  // BLOCK-72 — 右栏「后端」tab 已删除：home 空态「后端」卡与快捷入口改跳全局 /backend 页
   const handleOpenRightTerminal = useCallback(() => {
-    openRightPanel('terminal');
-  }, [openRightPanel]);
+    navigate('/backend');
+  }, [navigate]);
 
   const handleOpenRightResults = useCallback(() => {
     openRightPanel('results');
@@ -1683,6 +1687,8 @@ export function ProjectWorkspace(): React.ReactElement {
     handleShowPlugins,
     handleShowSettings,
     handleNavigateToSkills,
+    handleNavigateToKnowledge,
+    handleNavigateToBackend,
     switchToProject,
     handleSwitchConversation,
     toggleProjectExpand,

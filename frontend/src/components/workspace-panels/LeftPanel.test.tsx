@@ -52,6 +52,8 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext {
     handleShowPlugins: vi.fn(),
     handleShowSettings: vi.fn(),
     handleNavigateToSkills: vi.fn(),
+    handleNavigateToKnowledge: vi.fn(),
+    handleNavigateToBackend: vi.fn(),
     switchToProject: vi.fn(),
     handleSwitchConversation: vi.fn(),
     toggleProjectExpand: vi.fn(),

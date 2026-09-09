@@ -103,7 +103,16 @@ describe('BLOCK-69 KnowledgeSpacePanel', () => {
     expect(screen.getByText(/TP53 参与细胞凋亡调控/)).toBeTruthy();
 
     // 第二次：无命中 → 诚实提示
-    responses[0] = { ...responses[0], body: { ...responses[0].body as object, hits: [], readyChunks: 4 } };
+    responses[0] = {
+      ...responses[0],
+      body: {
+        status: 'ok',
+        hits: [],
+        readyChunks: 4,
+        embeddingAvailable: true,
+        embeddingError: null,
+      },
+    };
     fireEvent.change(screen.getByTestId('knowledge-search-input'), { target: { value: '别的查询' } });
     fireEvent.click(screen.getByTestId('knowledge-search-btn'));
     await waitFor(() => expect(screen.getByText('两条检索通道均无命中。')).toBeTruthy());

@@ -17,7 +17,6 @@ import {
   type ActiveWorkspaceFile,
   EmptyResult,
   RightFileTree,
-  TerminalPanel,
   BrowserPanel,
 } from '@/pages/project-workspace';
 import { tools as staticTools } from '@/pages/_data';
@@ -26,7 +25,6 @@ import { AnalysisLaunchPanel } from '@/components/workspace-panels/AnalysisLaunc
 import { ReviewMode } from '@/components/desktop/WorkingTreeReview/ReviewMode';
 // BLOCK-68 / UI-317 — 模型 I/O 信息流 dock（原 composer ⋯ 菜单 overlay 迁入）
 import { LlmTranscriptViewer } from '@/components/copilot/LlmTranscriptViewer';
-import { KnowledgeSpacePanel } from './KnowledgeSpacePanel';
 import styles from '@/pages/project-workspace.module.css';
 
 type DispatchSetter<T> = React.Dispatch<React.SetStateAction<T>>;
@@ -199,9 +197,6 @@ export function RightPanel({
                     onAskAgent={ctx.handleAskAgent}
                   />
                 )}
-                {tab === 'terminal' && (
-                  <TerminalPanel project={ctx.project} backendStatus={ctx.backendStatus} />
-                )}
                 {tab === 'browser' && (
                   <BrowserPanel
                     initialUrl={ctx.browserUrl}
@@ -239,8 +234,8 @@ export function RightPanel({
                 )}
                 {/* BLOCK-68 / UI-317 — 模型 I/O 信息流 dock（绑当前会话，只读；无会话诚实空态） */}
                 {tab === 'io' && <LlmTranscriptViewer conversationId={ctx.activeConvId} />}
-                {/* BLOCK-69 / UI-318 — 知识空间（大脑：开关+文档+检索测试；启用真相在 DB） */}
-                {tab === 'knowledge' && <KnowledgeSpacePanel />}
+                {/* BLOCK-72 / UI-320 — 「知识空间」「后端」tab 已迁出右栏：设备级全局能力，
+                    管理面在左栏工作台入口的 /knowledge 与 /backend 全局页；不预留空壳。 */}
               </div>
             ))}
           </div>

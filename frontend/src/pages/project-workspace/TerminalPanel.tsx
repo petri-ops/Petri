@@ -11,7 +11,8 @@ export function TerminalPanel({
   project,
   backendStatus,
 }: {
-  project: Project;
+  /** BLOCK-72：全局 /backend 页无项目上下文——project 仅影响 workspacePath 展示与 openShell cwd */
+  project?: Project;
   backendStatus: BackendStatus;
 }): React.ReactElement {
   const [snapshot, setSnapshot] = useState<{
@@ -56,7 +57,7 @@ export function TerminalPanel({
         <div className={styles.terminalPanelTitleWrap}>
           <div className={styles.terminalPanelTitle}>后端</div>
           <div className={styles.terminalPanelMeta}>
-            {project.workspacePath || '当前项目'} · R {backendStatus.rRuntime ? '已就绪' : '未安装'} · Python {backendStatus.pyRuntime ? '已就绪' : '未安装'}
+            {project?.workspacePath || '全局 · 数据根目录'} · R {backendStatus.rRuntime ? '已就绪' : '未安装'} · Python {backendStatus.pyRuntime ? '已就绪' : '未安装'}
           </div>
         </div>
         <div className={styles.terminalPanelActions}>
@@ -73,7 +74,7 @@ export function TerminalPanel({
           <button
             type="button"
             className={styles.terminalPanelActionBtn}
-            onClick={() => window.biof3Desktop?.terminal?.openShell?.(project.workspacePath)}
+            onClick={() => window.biof3Desktop?.terminal?.openShell?.(project?.workspacePath)}
           >
             系统终端
           </button>
