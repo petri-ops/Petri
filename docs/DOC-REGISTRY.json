@@ -3906,7 +3906,7 @@
       "id": "BLOCK-73-HIDDEN-FILES-TOGGLE",
       "path": "docs/block-73-hidden-files-toggle-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-73-hidden-files-toggle",
       "entrypoint": "docs/README.md",
@@ -3918,10 +3918,10 @@
         "right-panel",
         "G0"
       ],
-      "notes": "文件树「显示隐藏文件」开关（方案 A，用户 2026-09-09 确认）。事实基线：右栏文件树经 /workspaces/:id/tree 服务端硬过滤点开头条目（routes/files.js local 分支 startsWith(.) filter），前端无开关；ssh 分支由并行 BLOCK-67 node-agent fs_list bash 侧过滤。落地：工具条 eye/eye-off toggle 默认关（维持现状体感）+ local 分支 ?showHidden=1 参数化跳过过滤 + fetchDir 携带参数 + localStorage gewu.fileTree.showHidden 持久化 + refreshFiles/refreshVersion 链联动整树刷新。范围边界：ssh 项目放开需动 node-agent/workspace-gateway（BLOCK-67 P1 在制面，按文件面纪律不触碰）——UI 对 workspaceKind=ssh 禁用开关并注明，登记 BLOCK-67 后续协调项；.git 特殊保护用户未选，开关开=显示全部点文件。0 新依赖；审阅面板（git 通道）不受影响。UI 台账 UI-322（UI-321 已被 BLOCK-67 P1 占用顺延）实现同提交登记。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "文件树「显示隐藏文件」开关（方案 A，用户 2026-09-09 确认）。事实基线：右栏文件树经 /workspaces/:id/tree 服务端硬过滤点开头条目（routes/files.js local 分支 startsWith(.) filter），前端无开关；ssh 分支由并行 BLOCK-67 node-agent fs_list bash 侧过滤。落地：工具条 eye/eye-off toggle 默认关（维持现状体感）+ local 分支 ?showHidden=1 参数化跳过过滤 + fetchDir 携带参数 + localStorage gewu.fileTree.showHidden 持久化 + refreshFiles/refreshVersion 链联动整树刷新。范围边界：ssh 项目放开需动 node-agent/workspace-gateway（BLOCK-67 P1 在制面，按文件面纪律不触碰）——UI 对 workspaceKind=ssh 禁用开关并注明，登记 BLOCK-67 后续协调项；.git 特殊保护用户未选，开关开=显示全部点文件。0 新依赖；审阅面板（git 通道）不受影响。2026-09-09 同日一次会话收口（UI-322 verified，实机 6/6 断言 allPass，acceptance/ui-322/）。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-09",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P1-IN-PROGRESS"
+      "phase": "COMPLETED"
     }
   ],
   "lastUpdated": "2026-09-09",

@@ -1,0 +1,37 @@
+{
+  "startedAt": "2026-09-09T11:27:59.530Z",
+  "assertions": [
+    {
+      "name": "B1 toggle 存在且默认关（aria-pressed=false）",
+      "pass": true,
+      "detail": "{\"toggle\":true,\"pressed\":\"false\",\"disabled\":false,\"hasGitignore\":false}"
+    },
+    {
+      "name": "B2 默认态树中无 .gitignore（现状体感）",
+      "pass": true,
+      "detail": "{\"toggle\":true,\"pressed\":\"false\",\"disabled\":false,\"hasGitignore\":false}"
+    },
+    {
+      "name": "B3 toggle 开：.gitignore 等点文件出现在树中",
+      "pass": true,
+      "detail": "{\"pressed\":\"true\",\"persisted\":\"1\",\"hasGitignore\":true}"
+    },
+    {
+      "name": "B4 偏好持久化 localStorage=1",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "B5 reload 后偏好保持（仍开且可见）",
+      "pass": true,
+      "detail": "{\"pressed\":\"true\",\"hasGitignore\":true}"
+    },
+    {
+      "name": "B6 toggle 关：点文件消失（恢复现状）",
+      "pass": true,
+      "detail": "{\"pressed\":\"false\",\"hasGitignore\":false}"
+    }
+  ],
+  "allPass": true,
+  "finishedAt": "2026-09-09T11:28:25.957Z"
+}

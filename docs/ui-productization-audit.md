@@ -2945,12 +2945,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: in_progress（代码完成，实机验收押后至节点凭据就绪）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-322: 文件树「显示隐藏文件」开关（BLOCK-73 方案 A）(2026-09-09 in_progress)
+## UI-322: 文件树「显示隐藏文件」开关（BLOCK-73 方案 A）(2026-09-09 verified)
 
 **来源**：用户 2026-09-09 观察「右侧边栏的文件，好像看不到隐藏文件和隐藏文件夹」——属实：`/workspaces/:id/tree` local 分支服务端硬过滤 `startsWith('.')`，前端无开关；用户确认方案 A（toggle 默认关）。
 
 **改动**：① `routes/files.js` local 分支过滤参数化（`?showHidden=1` 跳过点文件过滤，默认请求行为逐字节不变）；② 右栏文件树工具条新增 eye/eye-off toggle（`data-testid="file-tree-show-hidden"`，`aria-pressed`，默认关）；`fetchDir` 携带参数，`refreshFiles`→`refreshVersion` 链联动 FileTreeItem 子目录整树刷新；偏好持久化 `localStorage['gewu.fileTree.showHidden']`；③ `workspaceKind === 'ssh'` 项目禁用开关并注明（node-agent/workspace-gateway 属并行 BLOCK-67 P1 在制面，按文件面纪律不触碰；路由级契约测试锁定 showHidden 对 ssh 分支 no-op）。审阅面板走 git 通道不受影响。0 新 npm 依赖。
 
-**门禁**：定向 vitest 后端 3/3（block73-hidden-files：默认过滤/showHidden 显示/ssh no-op 契约锁）+ tsc 0 + RightPanel 定向 1/1。
+**门禁**：定向 vitest 后端 3/3（block73-hidden-files：默认过滤/showHidden 显示/ssh no-op 契约锁）+ tsc 0 + RightPanel 定向 1/1 + docs:check PASS(217) + ui:audit:check PASS。
 
-**状态**: in_progress（实现完成，实机 CDP 验收进行中——acceptance/ui-322/ 落盘后转 verified）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**实机**：`scripts/ui322-hidden-files-live.cjs` 入库 6/6 断言 allPass（`acceptance/ui-322/ui322-live.json` + 截图×2）：B1 toggle 存在默认关/B2 默认态树无 .gitignore/B3 开启后出现且 localStorage=1/B4 偏好持久化/B5 reload 后保持/B6 关闭恢复现状。**工程备注**：dev 栈后台任务被会话监管回收（exit 127，PATH 丢失）——改用 cmd start 分离启动（/tmp/start-dev-stack.cmd 模式，env 完整保留），栈在会话外存活稳定。
+
+**状态**: verified（2026-09-09 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。
