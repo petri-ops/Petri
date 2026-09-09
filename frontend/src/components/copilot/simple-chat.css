@@ -1334,6 +1334,99 @@
 }
 
 /* ── UI-315 — exec 工具的原生终端块（自带统一暗色主题，覆盖 .sc-msg-body pre 全局样式） ── */
+.sc-tool-term-spinner {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--term-accent);
+  border-top-color: transparent;
+  animation: sc-term-spin 0.8s linear infinite;
+}
+
+@keyframes sc-term-spin {
+  to { transform: rotate(360deg); }
+}
+
+.sc-tool-term-command {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.sc-tool-term-command-text {
+  flex: 1;
+  min-width: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.sc-tool-term-copy {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--term-dim);
+  font-size: var(--gewu-font-size-xs);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.sc-tool-term-copy:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--term-text);
+}
+
+.sc-tool-term-output-wrap {
+  position: relative;
+}
+
+.sc-tool-term-output-wrap .sc-tool-term-copy-out {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.sc-tool-term-output-wrap:hover .sc-tool-term-copy-out {
+  opacity: 1;
+}
+
+.sc-tool-term-jump {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  border: 1px solid var(--term-border);
+  border-radius: 6px;
+  background: var(--term-bg);
+  color: var(--term-text);
+  font-size: var(--gewu-font-size-xs);
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+/* ANSI 16 色（暗底调校） */
+.sc-tool-term .term-bold { font-weight: 600; }
+.sc-tool-term .term-dim { opacity: 0.6; }
+.sc-tool-term .term-ul { text-decoration: underline; }
+.sc-tool-term .term-c0 { color: #5b6270; }
+.sc-tool-term .term-c1 { color: #ff7a7a; }
+.sc-tool-term .term-c2 { color: #4ec98a; }
+.sc-tool-term .term-c3 { color: #e5c07b; }
+.sc-tool-term .term-c4 { color: #6aa5ff; }
+.sc-tool-term .term-c5 { color: #c792ea; }
+.sc-tool-term .term-c6 { color: #59c2d6; }
+.sc-tool-term .term-c7 { color: #d7dee9; }
+.sc-tool-term .term-c8 { color: #7d8598; }
+.sc-tool-term .term-c9 { color: #ff9b9b; }
+.sc-tool-term .term-c10 { color: #7ee2b0; }
+.sc-tool-term .term-c11 { color: #f0d290; }
+.sc-tool-term .term-c12 { color: #91c0ff; }
+.sc-tool-term .term-c13 { color: #d9b3f0; }
+.sc-tool-term .term-c14 { color: #7fd8e8; }
+.sc-tool-term .term-c15 { color: #eef1f7; }
+
 .sc-tool-term {
   --term-bg: #141922;
   --term-border: #2a3140;

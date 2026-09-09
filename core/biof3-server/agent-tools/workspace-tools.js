@@ -1006,6 +1006,8 @@ function createWorkspaceTools(options = {}) {
   function shellInvocation(command, shellPreference) {
     // BLOCK-33 P2 — shell 选择：auto（平台默认）| posix | powershell | cmd。
     // Windows 上 PowerShell 提供现代语法（对象管道、POSIX 风格引号），降低方言陷阱。
+    // UI-315 优化 — Windows 中文环境 PowerShell/cmd 默认输出 GBK，按 UTF-8 解码即乱码：
+    // powershell 注入 [Console]::OutputEncoding=UTF8、cmd 前置 chcp 65001，统一按 UTF-8 出流。
     const preference = String(shellPreference || 'auto').toLowerCase();
     if (preference === 'posix') {
       if (process.platform === 'win32') {
@@ -1018,9 +1020,12 @@ function createWorkspaceTools(options = {}) {
     }
     if (preference === 'powershell') {
       const executable = process.platform === 'win32' ? 'powershell.exe' : 'pwsh';
+      const inner = process.platform === 'win32'
+        ? '[Console]::OutputEncoding=[System.Text.Encoding]::UTF8; ' + command
+        : command;
       return {
         executable,
-        args: ['-NoProfile', '-NonInteractive', '-Command', command],
+        args: ['-NoProfile', '-NonInteractive', '-Command', inner],
       };
     }
     if (preference === 'cmd') {
@@ -1029,13 +1034,13 @@ function createWorkspaceTools(options = {}) {
       }
       return {
         executable: process.env.ComSpec || 'cmd.exe',
-        args: ['/d', '/s', '/c', command],
+        args: ['/d', '/s', '/c', 'chcp 65001>nul & ' + command],
       };
     }
     if (process.platform === 'win32') {
       return {
         executable: process.env.ComSpec || 'cmd.exe',
-        args: ['/d', '/s', '/c', command],
+        args: ['/d', '/s', '/c', 'chcp 65001>nul & ' + command],
       };
     }
     return {

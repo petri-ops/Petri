@@ -1,0 +1,14 @@
+{
+  "dom": {
+    "count": 12,
+    "withCmdText": 12,
+    "lastCmd": "node -v",
+    "lastOut": "v24.20.0\r\n",
+    "lastStatus": "已完成"
+  },
+  "verdict": {
+    "terminalRendered": true,
+    "commandShown": true,
+    "outputOrTerminal": true
+  }
+}

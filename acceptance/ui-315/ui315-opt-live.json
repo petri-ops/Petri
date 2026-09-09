@@ -1,0 +1,12 @@
+{
+  "snapshot": {
+    "count": 0,
+    "running": 0,
+    "items": []
+  },
+  "verdict": {
+    "blocksRendered": false,
+    "shellLabelsShown": false,
+    "chineseNoMojibake": false
+  }
+}

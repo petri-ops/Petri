@@ -85,6 +85,8 @@ export interface ToolActivityItem {
   /** UI-315 — exec 类工具的完整命令（bounded 400 字符），驱动对话流内
    *  终端块（$ 命令 + 输出）的渲染；历史消息经 meta.toolActivities 恢复。 */
   command?: string;
+  /** UI-315 优化 — 实际使用的 shell（powershell/cmd/bash…），头行展示 */
+  shellLabel?: string;
   /** BLOCK-59 P4 — agent 管理工具（spawn/wait/list）结果携带的子 agent
    *  任务 id；活动行据此提供「详情窗」入口（弹出 agent 独立窗）。 */
   agentRunId?: string;
@@ -150,6 +152,7 @@ export function restoreToolActivities(value: unknown): ToolActivityItem[] {
         truncated: (out as Record<string, unknown>).truncated === true,
       };
     })(),
+    shellLabel: typeof raw.shellLabel === 'string' ? raw.shellLabel.slice(0, 24) : undefined,
     agentRunId: typeof raw.agentRunId === 'string' ? raw.agentRunId : undefined,
     }];
   });
@@ -337,6 +340,17 @@ export function mergeToolResultActivity(
   // BLOCK-59 P4 — agent 管理工具结果携带 agentId（子 agent 任务 id），
   // 提取供活动行「详情窗」入口；其余工具 / 既有值原样保留。
   const resultData = result?.data as Record<string, unknown> | undefined;
+  // UI-315 优化 — exec 结果携带实际使用的 shell 可执行路径，派生短标签
+  const resultShellLabel = (() => {
+    const shell = resultData && typeof resultData.shell === 'string' ? resultData.shell : '';
+    if (!shell) return undefined;
+    const base = shell.split(/[\\/|]/).pop() || shell;
+    const lower = base.toLowerCase().replace(/\.exe$/, '');
+    if (lower === 'cmd') return 'cmd';
+    if (lower.startsWith('powershell') || lower === 'pwsh') return 'powershell';
+    if (lower === 'wsl') return 'wsl';
+    return lower.slice(0, 16);
+  })();
   const resultAgentRunId =
     (name === 'spawn_agent' || name === 'wait_agent' || name === 'list_agents') &&
     resultData &&
@@ -364,6 +378,9 @@ export function mergeToolResultActivity(
     summary: event.summary,
     // BLOCK-33 P3 — tool_result 合并时保留运行期累积的流式输出尾部
     output: index >= 0 ? current[index].output : undefined,
+    // UI-315 优化 — exec 终端块：完整命令 + shell 标签（result 事件 data.shell 派生）
+    command: index >= 0 ? current[index].command : undefined,
+    shellLabel: (result && result.shellLabel) || resultShellLabel || (index >= 0 ? current[index].shellLabel : undefined),
     actionLabel: index >= 0 ? current[index].actionLabel : fallbackAction.actionLabel,
     actionDetail: index >= 0 ? current[index].actionDetail : fallbackAction.actionDetail,
     agentRunId: resultAgentRunId || (index >= 0 ? current[index].agentRunId : undefined),

@@ -83,6 +83,11 @@ function buildToolResultEvent(envelope, args = {}, options = {}) {
       data: published.data,
       // UI-273 — 写操作逐行改动（独立于 data，规避 publicData 截断）
       ...(boundedChangeDiff(result) ? { changeDiff: boundedChangeDiff(result) } : {}),
+      // UI-315 优化 — exec 实际使用的 shell 短标签（独立于 data，规避
+      // publicData 把 data 换成 preview 后丢失；前端头行展示）
+      ...(result && typeof result.shell === 'string'
+        ? { shellLabel: shellLabelFromPath(result.shell) }
+        : {}),
     },
   };
 
@@ -264,6 +269,15 @@ function summarizeToolCallForActivity(name, args = {}) {
   }
 }
 
+function shellLabelFromPath(executable) {
+  const base = String(executable || '').split(/[\\/|]/).pop() || '';
+  const lower = base.toLowerCase().replace(/\.exe$/, '');
+  if (lower === 'cmd') return 'cmd';
+  if (lower.startsWith('powershell') || lower === 'pwsh') return 'powershell';
+  if (lower === 'wsl') return 'wsl';
+  return lower.slice(0, 16);
+}
+
 function createToolActivityRecorder() {
   const items = [];
 
@@ -363,6 +377,8 @@ function createToolActivityRecorder() {
             hunks: Array.isArray(result.changeDiff.hunks) ? result.changeDiff.hunks.slice(0, 20) : [],
           }
         : undefined,
+      // UI-315 优化 — exec 实际使用的 shell 标签（头行展示）
+      shellLabel: result.shellLabel || (existing ? existing.shellLabel : undefined),
       summary: event.summary,
       actionLabel: existing ? existing.actionLabel : summarizeToolCallForActivity(name).actionLabel,
       actionDetail: existing ? existing.actionDetail : summarizeToolCallForActivity(name).actionDetail,

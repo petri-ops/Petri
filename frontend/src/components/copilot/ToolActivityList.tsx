@@ -3,6 +3,7 @@ import { Icon } from '@/components/icons/Icon';
 import { CodeMirrorDiffView } from '@/components/desktop/WorkingTreeReview/CodeMirrorDiffView';
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import { getBridge } from '@/lib/desktopBridge';
+import { parseAnsiToSpans } from './ansi';
 import {
   EXEC_TOOL_NAMES,
   formatToolDuration,
@@ -58,21 +59,58 @@ function ReasoningRow({ iteration, text }: { iteration: number; text: string }) 
  * 原生终端块：`$ 命令` + 流式输出尾部，等宽深色、默认展开、限高滚动。
  * 输出增量来自既有 tool_output SSE（BLOCK-33 P3），运行中自动滚底；
  * 命令随 meta.toolActivities 持久化，历史消息仍可回看命令。
+ *
+ * UI-315 优化包 — 解析强化 + 视觉精修：
+ *   - 输出 ANSI SGR 解析着色（其余转义剥除）
+ *   - 头行显示实际使用的 shell（powershell / cmd / bash…）
+ *   - 运行中 spinner；复制命令/输出按钮
+ *   - 滚动跟随：手动上滚暂停自动滚底 + 「回到底部」悬浮按钮
  */
 function TerminalRow({ activity }: { activity: ToolActivityItem }) {
   const [open, setOpen] = useState(true);
+  const [copied, setCopied] = useState('');
   const duration = formatToolDuration(activity.durationMs);
   const command = activity.command || activity.actionDetail || '';
   const outputTail = activity.output?.tail || '';
   const running = activity.status === 'running';
   const outputRef = useRef<HTMLPreElement | null>(null);
+  const followRef = useRef(true);
+  const [showJump, setShowJump] = useState(false);
 
-  // 运行中输出增长时自动滚到底部（终态后停止跟随，方便回看）
+  // 滚动跟随：运行中输出增长时自动滚到底；用户上滚即暂停跟随
   useEffect(() => {
-    if (running && outputRef.current) {
-      outputRef.current.scrollTop = outputRef.current.scrollHeight;
-    }
+    if (!running || !followRef.current || !outputRef.current) return;
+    outputRef.current.scrollTop = outputRef.current.scrollHeight;
   }, [outputTail, running]);
+
+  const handleOutputScroll = () => {
+    const el = outputRef.current;
+    if (!el) return;
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 24;
+    followRef.current = atBottom;
+    setShowJump(!atBottom);
+  };
+
+  const jumpToBottom = () => {
+    const el = outputRef.current;
+    if (!el) return;
+    followRef.current = true;
+    el.scrollTop = el.scrollHeight;
+    setShowJump(false);
+  };
+
+  const copyText = async (text: string, what: string) => {
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(what);
+      window.setTimeout(() => setCopied(''), 1200);
+    } catch {
+      setCopied('');
+    }
+  };
+
+  const outputSpans = parseAnsiToSpans(outputTail);
 
   return (
     <div className={`sc-tool-term sc-tool-term-${activity.status}`} data-testid="tool-term">
@@ -85,11 +123,16 @@ function TerminalRow({ activity }: { activity: ToolActivityItem }) {
         title={open ? '收起终端' : '展开终端'}
         onClick={() => setOpen((v) => !v)}
       >
-        <span className="sc-tool-term-badge" aria-hidden="true">
-          <Icon name="terminal" size={12} />
-        </span>
+        {running ? (
+          <span className="sc-tool-term-spinner" aria-hidden="true" />
+        ) : (
+          <span className="sc-tool-term-badge" aria-hidden="true">
+            <Icon name="terminal" size={12} />
+          </span>
+        )}
         <span className="sc-tool-term-title">
           终端{activity.name === 'workspace_exec_background' ? ' · 后台' : ''}
+          {activity.shellLabel ? ` · ${activity.shellLabel}` : ''}
         </span>
         <span className="sc-tool-term-status" data-status={activity.status}>
           {TOOL_STATUS_LABEL[activity.status]}
@@ -101,16 +144,59 @@ function TerminalRow({ activity }: { activity: ToolActivityItem }) {
       </button>
       {open && (
         <div className="sc-tool-term-body">
-          <pre className="sc-tool-term-command">
+          <div className="sc-tool-term-command">
             <span className="sc-tool-term-prompt">$ </span>
-            {command || activity.actionDetail || activity.name}
-          </pre>
+            <span className="sc-tool-term-command-text">{command || activity.actionDetail || activity.name}</span>
+            <button
+              type="button"
+              className="sc-tool-term-copy"
+              title="复制命令"
+              aria-label="复制命令"
+              onClick={() => void copyText(command, 'cmd')}
+            >
+              {copied === 'cmd' ? '已复制' : '复制'}
+            </button>
+          </div>
           {(outputTail || running) && (
-            <pre ref={outputRef} className="sc-tool-term-output" data-testid="tool-term-output">
-              {outputTail}
-              {running && !outputTail ? '…' : ''}
-              {activity.output?.truncated ? '\n…（输出已截断）' : ''}
-            </pre>
+            <div className="sc-tool-term-output-wrap">
+              <pre
+                ref={outputRef}
+                className="sc-tool-term-output"
+                data-testid="tool-term-output"
+                onScroll={handleOutputScroll}
+              >
+                {outputSpans.length > 0
+                  ? outputSpans.map((span, index) =>
+                      span.cls ? (
+                        <span key={index} className={span.cls}>{span.text}</span>
+                      ) : (
+                        <span key={index}>{span.text}</span>
+                      )
+                    )
+                  : outputTail}
+                {running && !outputTail ? '…' : ''}
+                {activity.output?.truncated ? '\n…（输出已截断）' : ''}
+              </pre>
+              {showJump && (
+                <button
+                  type="button"
+                  className="sc-tool-term-jump"
+                  onClick={jumpToBottom}
+                  title="回到底部（恢复自动跟随）"
+                >
+                  ↓ 回到底部
+                </button>
+              )}
+              <button
+                type="button"
+                className="sc-tool-term-copy sc-tool-term-copy-out"
+                title="复制输出"
+                aria-label="复制输出"
+                onClick={() => void copyText(outputTail, 'out')}
+              >
+                {copied === 'out' ? '已复制' : '复制输出'}
+              </button>
+            </div>
           )}
           {activity.status === 'error' && activity.terminationReason && (
             <div className="sc-tool-term-err">原因：{activity.terminationReason}</div>
@@ -239,10 +325,12 @@ export function ToolActivityList({
   /** UI-272 — 按迭代聚合的模型思考段，展开时展示每次工具调用前的衔接思路。 */
   reasoningByIteration?: Record<number, string>;
 }): React.ReactElement {
-  const [expanded, setExpanded] = useState(false);
+  // UI-315 — 含 exec 命令的消息默认展开活动条：终端块直接可见（ZCode 式），
+  // 无 exec 的消息保持收起摘要；用户手动切换后以手动态为准。
+  const [expanded, setExpanded] = useState(
+    () => activities.some((activity) => EXEC_TOOL_NAMES.has(activity.name))
+  );
   const [userToggled, setUserToggled] = useState(false);
-  // UI-315 — exec 命令运行中自动展开活动条（终端块直接可见，ZCode 式）；
-  // 用户手动切换后不再代管展开态。
   const hasRunningExec = activities.some(
     (activity) => EXEC_TOOL_NAMES.has(activity.name) && activity.status === 'running'
   );
