@@ -2965,6 +2965,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **改动**：① 文本/JSON/Markdown 预览工具条的 引用到对话（BLOCK-52 P1 头部触发）/「有未保存修改」提示/保存/恢复（BLOCK-20 遗留 discard）按钮行**整体移除**，不预留空壳（BLOCK-68 先例）；仅 Markdown 保留 编辑/预览 tabs；工具条在非 Markdown 且无错误时不再渲染（无空条带）。② 图片预览头部「引用到对话」（BLOCK-52 P2 头部触发）行删除，图片直达。③ **自动保存**：文本族（markdown/text/json）编辑停顿 1.2s 自动落盘；保存链不变（local 走既有 workspace IPC；ssh 走 BLOCK-67 REST PUT + D3 mtime 冲突诚实面）。④ **Ctrl/Cmd+S 立即保存**（预览容器级 keydown，CodeMirror 键盘冒泡可达，preventDefault 浏览器默认）。⑤ 错误诚实面保留：保存失败（409 冲突/502 断线）红字 alert 行如实显示（data-testid="ssh-save-error" 保留），成功静默（自动保存心智：无声 = 已保存）；「恢复/discard」随自动保存语义退役。0 新 npm 依赖。
 
-**门禁**：tsc 0；既有集成测试（WorkspaceFilePreviewBridge/P4.2/ChatCardLinkBridge）无按钮行断言不受影响。
+**门禁**：tsc 0；新增 WorkspaceFilePreview 组件定向测试 3/3（头部按钮行移除断言 / 自动保存防抖后 writeTextFile 收到新内容 / Ctrl+S 立即保存）；既有集成测试（WorkspaceFilePreviewBridge/P4.2/ChatCardLinkBridge）无按钮行断言不受影响。
 
-**状态**: in_progress（实现完成，实机 CDP 验收进行中——acceptance/ui-323/ 落盘后转 verified）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**实机状态（诚实登记）**：CDP 验收脚本 `scripts/ui323-preview-header-live.cjs` 已入库（可复跑），但与本日并行的 BLOCK-67 P3 会话共享同一主窗且其在制文件（project-workspace.tsx）HMR 高频重挂右栏，验收窗口被持续踩空——按纪律不假标 verified，**保持 in_progress**；待 BLOCK-67 会话空闲后复跑脚本（一次通过即转 verified）。组件级行为证据（3/3）已锁自动保存/Ctrl+S/按钮移除三契约。G0 开发期常态 · 不外推 packaged / Provider / GA。
