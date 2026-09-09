@@ -16,6 +16,7 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 ├── scripts/                        # workspace-state / hygiene-check / closeout-gates（位置无关）
 ├── dev-verify/                     # lib.cjs 四原语 + run.cjs 注册表 + flows/ + _template.cjs
 ├── templates/delegation-contract.md# 子 Agent 委派任务书模板
+├── references/FILE-TREE-POLICY.md  # 文件树纯净策略（区域生命周期 + scripts 归档判据）
 └── references/PRODUCT-PRINCIPLES.md# 产品原则自包含速查（宿主有 AGENTS.md/治理 skill 时冲突以宿主为准）
 ```
 

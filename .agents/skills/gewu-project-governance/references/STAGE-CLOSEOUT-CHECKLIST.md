@@ -22,6 +22,7 @@
 ## 3. 治理门禁
 
 - [ ] `npm run docs:reconcile`：逐条审阅候选，不自动移动/删除
+- [ ] **归档清债节奏**：本轮至少处理一条 docs:reconcile 归档/孤岛候选（核对入向引用后归档到 docs/archive/，登记 supersedes），或如实声明"本轮零候选/零处理"——不允许只见不清
 - [ ] `npm run docs:check`：绿才能宣称收口
 
 ## 4. AUDIT-LOG 收口条目
