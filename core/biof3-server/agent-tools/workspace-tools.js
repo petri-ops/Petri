@@ -1050,6 +1050,11 @@ function createWorkspaceTools(options = {}) {
   }
 
   async function preflightTool(name, args = {}, ctx = {}) {
+    // BLOCK-67：ssh 项目 preflight 走远程语义（本地 withWorkspace 会因
+    // workspace_path=NULL 直接拒绝，路由 wrapper 根本得不到执行机会）。
+    if (await projectIsSsh(ctx)) {
+      return sshSurface.preflight(name, args, ctx);
+    }
     return withWorkspace(ctx, async ({ root }) => {
       if (name === 'workspace_exec' || name === 'workspace_exec_background') {
         // BLOCK-56 P2 — workspace-write 中间档：前台命令放行（黑名单维持 + cwd
@@ -1630,8 +1635,12 @@ function createWorkspaceTools(options = {}) {
       const row = typeof d.getDatabase === 'function'
         ? d.getDatabase().prepare('SELECT workspace_kind FROM projects WHERE id = ?').get(projectId)
         : d.getProject(projectId);
+      if (process.env.BIOF3_BLOCK67_DEBUG) {
+        console.warn('[block67] projectIsSsh projectId=', projectId, 'row=', JSON.stringify(row));
+      }
       return row ? row.workspace_kind === 'ssh' : false;
-    } catch {
+    } catch (e) {
+      if (process.env.BIOF3_BLOCK67_DEBUG) console.warn('[block67] projectIsSsh error:', e.message);
       return false;
     }
   }

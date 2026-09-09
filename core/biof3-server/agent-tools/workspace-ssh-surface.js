@@ -482,8 +482,49 @@ function createSshWorkspaceSurface({
     }
   }
 
+  // ── preflight（interceptor 在 handler 前的门：ssh 项目用远程语义，返回形状与本地对齐） ──
+  async function preflight(name, args = {}, ctx = {}) {
+    let ws;
+    try { ws = await getRemoteWorkspace(ctx, { requireCompatible: ['workspace_write', 'workspace_replace', 'workspace_exec', 'workspace_exec_background'].includes(name) }); }
+    catch (e) { return errorResult(e.code || 'workspace_unavailable', e.message); }
+    try {
+      if (name === 'workspace_exec' || name === 'workspace_exec_background') {
+        const execAllowed = ctx.accessMode === 'full'
+          || (ctx.accessMode === 'workspace-write' && name === 'workspace_exec');
+        if (!execAllowed) {
+          return errorResult(
+            ctx.accessMode === 'workspace-write' ? 'access_mode_workspace_write' : 'access_mode_read_only',
+            ctx.accessMode === 'workspace-write'
+              ? '项目写模式仅允许前台命令执行；后台进程需要完全访问模式'
+              : '聊天当前处于只读模式，禁止执行命令'
+          );
+        }
+        const command = String(args.command || '').trim();
+        const verdict = commandVerdict(command);
+        if (!verdict.ok) return errorResult('command_blocked', verdict.reason);
+        if (args.cwd != null && String(args.cwd).trim() !== '' && String(args.cwd).trim() !== '.') {
+          const resolved = await resolveRemote(ws.root, ws.backend, String(args.cwd).trim());
+          const st = await ws.backend.stat(resolved.abs);
+          if (st.type !== 'dir') return errorResult('invalid_arguments', `cwd 不是工作区内已存在的目录: ${resolved.relativePath}`);
+        }
+        return { ok: true, commandRisk: 'full_access' };
+      }
+      if (name === 'process_status' || name === 'process_stop') {
+        return { ok: true, commandRisk: 'process_control' };
+      }
+      const resolved = await resolveRemote(ws.root, ws.backend, args.path || '.');
+      let exists = true;
+      try { await ws.backend.stat(resolved.abs); } catch (e) { if (e.remoteError !== 'not_found') throw e; exists = false; }
+      return { ok: true, exists, relativePath: resolved.relativePath };
+    } catch (e) {
+      if (e.remoteError === 'not_found') return { ok: true, exists: false, relativePath: String(args.path || '.') };
+      return remoteErrorToResult(e);
+    }
+  }
+
   return {
     kind: 'ssh',
+    preflight,
     listDirectory,
     readFile,
     writeFile,
