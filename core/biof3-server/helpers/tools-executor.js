@@ -45,6 +45,7 @@ const {
 const { createTargetRegistry } = require('./remote-execution/target-registry');
 const { createRemoteJobRunner, AGENT_SCRIPT_HASH } = require('./remote-execution/remote-job-runner');
 const { createSshDirectRunner } = require('./remote-execution/ssh-direct-runner');
+const { createJobOutputReader } = require('./remote-execution/job-output-reader');
 const { remoteJobDirPath } = require('./remote-execution/ssh-transport');
 
 /**
@@ -957,6 +958,41 @@ function createToolsExecutor({
     const job = req.toolJob;
     if (!job || String(job.id) !== String(req.params.jobId)) {
       return res.status(404).json({ error: 'job_not_found' });
+    }
+
+    // BLOCK-76 P2 — SSH 直跑作业产物读面走 Gateway（服务器 output 为真值，R3/R4）。
+    // 非 ssh 作业 reader 返回 null，本地链逐字节不变（历史只读兼容）。
+    const sshReader = createJobOutputReader({
+      job,
+      getProject: (pid) => {
+        try {
+          return dbMod.getAsyncDatabase().prepare('SELECT id, workspace_kind, ssh_host, remote_path FROM projects WHERE id = ?').get(pid);
+        } catch {
+          return null;
+        }
+      },
+    });
+    if (sshReader) {
+      const filename = String(req.params.filename || '');
+      try {
+        const stat = await sshReader.statFile(filename);
+        if (!stat) return res.status(404).json({ error: 'file_not_found' });
+        const buf = await sshReader.readFile(filename);
+        const theme = normalizeReportTheme(req?.query?.theme);
+        if (theme && isHtmlFile(filename)) {
+          return res.type('html').set('Cache-Control', 'private, no-store').send(injectReportTheme(buf.toString('utf8'), theme));
+        }
+        return res
+          .type(artifactContentTypeHint(filename))
+          .set('Cache-Control', 'private, no-store')
+          .set('Content-Length', String(buf.length))
+          .send(buf);
+      } catch (e) {
+        if (e.code === 'artifact_too_large') {
+          return res.status(409).json({ error: 'artifact_too_large', size: e.size });
+        }
+        return res.status(404).json({ error: 'file_not_found' });
+      }
     }
 
     let layout = null;

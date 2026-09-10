@@ -219,6 +219,20 @@ function createToolsMetadataRoutes({db, getUserId, jobsDir = ''}) {
         const job = await db.prepare('SELECT * FROM tool_jobs WHERE id = ?').get(req.params.id);
         if (!job) return res.status(404).json({error: 'not_found'});
         if (job.user_id !== uid && req.user && req.user.role !== 'admin') return res.status(403).json({error: 'forbidden'});
+        // BLOCK-76 P2 — SSH 直跑作业：日志真值在服务器 output/run.log，Gateway 增量读。
+        try {
+          const { createJobOutputReader } = require('../helpers/remote-execution/job-output-reader');
+          const sshReader = createJobOutputReader({
+            job,
+            getProject: (pid) => db.prepare('SELECT id, workspace_kind, ssh_host, remote_path FROM projects WHERE id = ?').get(pid),
+          });
+          if (sshReader) {
+            const sshLog = await sshReader.readLogTail(32 * 1024).catch(() => null);
+            if (sshLog) return res.json({ ok: true, ...sshLog });
+            const running = job.status === 'running' || job.status === 'pending';
+            return res.json({ ok: true, source: null, live: false, log: '', note: running ? '作业运行中，服务器日志尚未产生输出' : '该作业没有可用日志文件' });
+          }
+        } catch { /* ssh 读面失败回退本地镜像链 */ }
         const dirs = [];
         if (job.project_id) {
           try {
