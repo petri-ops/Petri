@@ -1,6 +1,6 @@
 # BLOCK-78 — 摘要卡片项目化：项目运行时投影（终端/后台任务/智能体/通知/资源随项目绑定）
 
-> 状态：`planned`（2026-09-10 用户裁决立项登记，排队候选；单工作包串行纪律下不并行启动）
+> 状态：`active`（2026-09-10 用户裁决「确保没冲突的情况下 开始干活吧」启动 P1；同日立项）
 > 立项日期：2026-09-10
 > truthDomain: `block-78-summary-card-runtime-projection`
 > 来源：用户对会话摘要卡片的三轮质询与裁决——①「摘要信息是不是没有和项目绑定？本地和远程的项目摘要信息应该不同对吧？智能体是不是应该加到摘要卡片中？」②点名「终端、后台任务、通知、资源详情，当然是随项目绑定的，毕竟本地和远程服务器不同」③「可以再优化一下」，同意按「项目运行时投影」统一抽象登记
@@ -107,4 +107,5 @@
 
 ## 11. 进度记录
 
+- 2026-09-10 **启动 active + P1 主体落地（UI-330 in_progress，`ec451b6e`）**：P0 以本 plan §5 节清单 + 会话裁决视为确认（用户对十项内容逐一过目并裁决「再优化一下」后立项）。**并行裁决**：用户「确保没冲突的情况下 开始干活吧」——与在制 BLOCK-76（另一会话）并行，文件面隔离边界：本包只动 `frontend/src/components/workspace-panels/{WorkspaceSummaryCard,CenterPanel}.tsx` + 新增同目录测试 + 台账/治理文档；`core/**`、`scripts/block76-*`、`acceptance/**`、BLOCK-76 plan 及其 dev 栈零触碰。落地 P1 十项之九（§5 P1①-⑥⑧⑨⑩）：定位收敛（aria-label 项目运行摘要）/失败强调（点击直达最近失败 job）/基线预警（blocked·migration_required·executionAllowed=false → role=alert）/执行位置标注（ssh→远程@host·execution_target_id→远程执行·否则本机）/智能体节（listAgentTasks+projectId 过滤·无内容不渲染·弹专属窗）/终端投影（terminal:listSessions 只读计数·零状态上提）/expanded 项目信息节（位置·形态·会话·数据集·更新；compact 整节降级）/空态指引。**P1 剩余（切片 2）**：注意节的「待审批计划」「后台进程异常退出」两个信号源（需 planApprovals store 与 background-processes 查询接线）。门禁：定向 vitest 9/9 + CenterPanel 6/6 + tsc 0 + ui:audit:check PASS；台账 UI-330 in_progress（实机验收待与 BLOCK-76 收口窗口合做）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 - 2026-09-10 **立项登记（planned）**：用户三轮质询后裁决按「项目运行时投影」抽象立项排队。同轮完成 BLOCK-76 补项登记——`background-processes` 读面缺口（BLOCK-76 P1 直跑后 ssh 项目后台进程不进本地内存表，而该读面不在原 P2 清单内），写入 BLOCK-76 plan §6 P2 读面清单与 §10 进度。本包 P1 十项纯前端条目已按代码事实核实（§4），P2 四项后端/远程真值面依赖 BLOCK-76。**同轮另立 BLOCK-79-TOKEN-SPEED-OBSERVABILITY**（按供应商的 token 输出速率）：本包 P2 若要显示会话级速率，复用其聚合函数与 provider 归因（§7 协同行）。G0 开发期常态 · 不外推 packaged/Provider/GA。
