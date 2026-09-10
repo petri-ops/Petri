@@ -3970,7 +3970,7 @@
       "id": "BLOCK-76-SSH-NATIVE-EXECUTION",
       "path": "docs/block-76-ssh-native-execution-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "active",
       "canonical": true,
       "truthDomain": "block-76-ssh-native-execution",
       "entrypoint": "docs/README.md",
@@ -3982,10 +3982,10 @@
         "block-57-replacement",
         "G0"
       ],
-      "notes": "插件执行架构替换。2026-09-10 用户裁决立项（三选一：保留/清 UI/立项替换，取替换）：插件与 Skills 执行改走纯 SSH 直跑（脚本经 mux 在服务器项目内执行、产物留服务器、结果页经 Gateway 读远程真值），P5 才按清单拆除 BLOCK-57 作业机制（作业上传/拉回/poll；保留 target-registry/validate/mux——UI-326/327 与 D7 依赖）。本地项目零影响，本地结果库历史只读。启动待串行队列。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "notes": "插件执行架构替换。2026-09-10 用户裁决立项（三选一：保留/清 UI/立项替换，取替换）：插件与 Skills 执行改走纯 SSH 直跑（脚本经 mux 在服务器项目内执行、产物留服务器、结果页经 Gateway 读远程真值），P5 才按清单拆除 BLOCK-57 作业机制（作业上传/拉回/poll；保留 target-registry/validate/mux——UI-326/327 与 D7 依赖）。本地项目零影响，本地结果库历史只读。2026-09-10 用户裁决「按顺序推进」启动（active，P0-LAUNCH）。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "archivePolicy": "archive_when_superseded",
       "registeredAt": "2026-09-10",
-      "phase": "PLANNED"
+      "phase": "P0-LAUNCH"
     },
     {
       "id": "BLOCK-77-RESIDENT-TASKS",
