@@ -3080,3 +3080,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **加映六（同日，BLOCK-78 P2-② 项目级成本/Token 汇总落地）**：①后端：ai-usage 新增 `summarizeProjectUsage`（ai_usage 经 conversation_id JOIN copilot_conversations.project_id 归因项目；无会话上下文行不计入；user 过滤与 usage-mine 同所有权口径；`cost_status=unknown` 调用 → 项目口径 partial 诚实降级）+ `idx_ai_usage_conv` 索引（additive）+ `/api/ai/usage-project?projectId=` 端点（401/400/500 齐全；**不改 summarizeAiUsage 既有契约**）；②前端：摘要卡 expanded「项目」节增「成本」行——`¥X · 输入输出 tok 合计`（partial 标「部分估算」；30s 慢刷新；获取失败按 null 处理行不渲染，不伪造用量；零调用不渲染）。**门禁**：新增零网络测试 2/2（归因/user 过滤/无会话排除/partial 口径/空项目零形状）+ 卡片 14/14（成本行渲染与零调用不渲染，fetch stub）+ tsc 0。
 
 **加映七（同日，BLOCK-78 P2-③ 结果库占用落地）**：①后端：新子路由 `routes/harness/project-storage.js` 端点 `GET /api/harness/project-storage?projectId=`——jobs=done 作业数（DB 真值）；local 逐 job 读 result_json.outputPath 递归求 size（walkSize 限深 8/限 5000 文件，超限 truncated 诚实省略；缺失/非法路径跳过计入 skipped）；ssh 单次 `du -sb <remotePath>/results/jobs`（BLOCK-76 R1 布局，safeRemoteJoin+单引号转义，目录缺失=0）；60s TTL 合并缓存 + 失败回 stale 标观测时间/无历史 500（与资源快照同三态纪律）；纯逻辑抽 `helpers/project-storage.js`（walkSize/parseDuOutput/createStorageCache）；②前端：摘要卡 expanded「项目」节增「结果库」行——`X MB · N 作业`（stale 显观测时间；无产物不渲染；60s 慢刷新，失败 null 不伪造）。**门禁**：新增纯逻辑零网络测试 4/4（递归求和/限文件截断/缺失降级/du 解析/TTL 三态）+ 卡片 15/15（结果库行渲染与零产物不渲染，fetch stub）+ tsc 0 + 三 node 语法 0 + test:changed 全覆盖。
+
+## UI-331: 左栏会话行短式相对时间（用户参考图裁决）(2026-09-10 in_progress)
+
+**来源**：用户参考图（ZCode 形态）裁决「左侧项目列表或者会话默认没有时间显示……我觉得挺好的，你看看是否可以优化」——会话行右侧常显短式相对时间（刚刚/N分/N小时/N天/M-D）。
+
+**改动**：① `lib/format.ts` 新增 `formatRelativeShort`（<1min 刚刚 / <60min N分 / <24h N小时 / <7d N天 / 更早 M/D；非法输入空串）；② `LeftPanel.tsx` ConversationItem 在标题后、hover 按钮前插入 `span.convItemTime`（`formatRelativeShort(updated_at)`，`title` 悬停显绝对时间「更新于 MM/DD HH:mm」）；③ `project-workspace.module.css` 新增 `.convItemTime`（11px/muted/不伸缩）+ `.convItemActive .convItemTime`（accent 色随激活态）。行布局 flex 零改动；运行中圆点/分支指示/hover 按钮原位。项目树行（folder/globe）不加时间（参考图仅会话行；项目维度时间属另一决策）。
+
+**门禁**：LeftPanel 定向 14/14（新增 2 用例：刚刚+7小时同屏渲染与 title 计数、3天降级）+ tsc 0。**实机**：随 UI-330 P3 收口窗口合做。
+
+**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。

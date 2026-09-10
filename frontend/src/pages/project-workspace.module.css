@@ -7134,3 +7134,17 @@ body:global(.gewu-resizing-columns) * {
   color: var(--gewu-status-error, #ef4444);
   background: var(--gewu-bg-elevated);
 }
+
+/* UI-331 — 左栏会话行右侧短式相对时间（图1 形态：刚刚/N分/N小时） */
+.convItemTime {
+  flex: 0 0 auto;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--gewu-text-muted);
+  opacity: 0.85;
+}
+
+.convItemActive .convItemTime {
+  color: var(--gewu-accent);
+  opacity: 1;
+}

@@ -106,6 +106,44 @@ describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
     expect(alert.textContent).toBe('路径无效');
   });
 
+// UI-331 — 左栏会话行短式相对时间
+describe('UI-331 左栏会话行相对时间', () => {
+  it('会话行右侧显示短式相对时间（刚刚 / 7小时）', () => {
+    const ctx = buildCtx('chat');
+    const now = Date.now();
+    ctx.visibleProjects = [ctx.project];
+    ctx.expandedProjects = new Set(['project-1']);
+    ctx.conversations = [
+      { id: 'conv_now', title: '刚刚的会话', status: 'active', last_page: null, message_count: 1, created_at: new Date(now).toISOString(), updated_at: new Date(now).toISOString() },
+      { id: 'conv_old', title: '七小时前的会话', status: 'active', last_page: null, message_count: 2, created_at: new Date(now).toISOString(), updated_at: new Date(now - 7 * 3600 * 1000).toISOString() },
+    ] as LeftPanelContext['conversations'];
+    render(
+      <MemoryRouter>
+        <LeftPanel ctx={ctx} />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('刚刚')).toBeTruthy();
+    expect(screen.getByText('7小时')).toBeTruthy();
+    expect(screen.getAllByTitle(/更新于/)).toHaveLength(2);
+  });
+
+  it('会话行时间按天降级（3天前 → 3天）', () => {
+    const ctx = buildCtx('chat');
+    const now = Date.now();
+    ctx.visibleProjects = [ctx.project];
+    ctx.expandedProjects = new Set(['project-1']);
+    ctx.conversations = [
+      { id: 'conv_3d', title: '三天前的会话', status: 'active', last_page: null, message_count: 1, created_at: new Date(now).toISOString(), updated_at: new Date(now - 3 * 24 * 3600 * 1000).toISOString() },
+    ] as LeftPanelContext['conversations'];
+    render(
+      <MemoryRouter>
+        <LeftPanel ctx={ctx} />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('3天')).toBeTruthy();
+  });
+});
+
   it('renders project tree rows for visibleProjects (ProjectNode 回归)', () => {
     const ctx = buildCtx('chat');
     ctx.visibleProjects = [ctx.project];

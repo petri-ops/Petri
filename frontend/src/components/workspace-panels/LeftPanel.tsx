@@ -5,6 +5,7 @@ import { SshCreateInlinePanel } from './LeftSshCreatePanel';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { useConversationRun } from '@/components/copilot/conversationRunStore';
+import { formatDate, formatRelativeShort } from '@/lib/format';
 import styles from '@/pages/project-workspace.module.css';
 
 export interface LeftPanelContext {
@@ -535,6 +536,13 @@ function ConversationItem({
       )}
       {!editing && (
         <>
+          {/* UI-331 — 会话行右侧短式相对时间（图1 形态）；悬停显绝对时间 */}
+          <span
+            className={styles.convItemTime}
+            title={`更新于 ${formatDate(conversation.updated_at)}`}
+          >
+            {formatRelativeShort(conversation.updated_at)}
+          </span>
           <button
             type="button"
             className={styles.convItemForkBtn}
