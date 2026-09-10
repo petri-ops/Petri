@@ -5638,20 +5638,19 @@ body:global(.gewu-resizing-columns) * {
   width: min(100%, 560px);
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  /* UI-329 — 卡片收窄为内容宽度后格内靠左（两列左缘对齐，整洁）；加映（用户裁决）：比首版更窄 */
-  justify-items: start;
+  /* UI-333 — 用户裁决回退 UI-329 两轮收窄/对齐实验：恢复满宽卡片
+     （默认 stretch 铺满格宽），整体感优先于单卡贴内容 */
   gap: 7px;
   margin-top: 8px;
 }
 
 /* UI-301 加映 — 卡片文字垂直居中 + 去外框线（保留底色作分区）
-   UI-329 — 背景收窄：卡片贴内容宽度（fit-content），不再铺满整格占大片空间
-   UI-329 加映（用户裁决）— 去最小宽度、padding 贴文字边；文字左对齐（居中显乱） */
+   UI-333 — UI-329 的 fit-content 收窄实验整体回退，恢复 width:100% 满宽 */
 .emptyResultLaunchCard {
   display: flex;
   align-items: center;
   gap: 10px;
-  width: fit-content;
+  width: 100%;
   min-height: 54px;
   padding: 10px 12px;
   border: none;

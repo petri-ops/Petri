@@ -1195,7 +1195,6 @@
     "scripts/ui322-*.cjs",
     "scripts/ui323-*.cjs",
     "scripts/ui328-*.cjs",
-    "scripts/ui329-*.cjs",
     "acceptance/ui-325/**",
     "acceptance/ui-326/**",
     "acceptance/ui-327/**",
@@ -1320,13 +1319,15 @@
     "core/shared-backend/llm-providers/deepseek.js",
     "core/shared-backend/llm-providers/anthropic.js",
     "frontend/src/components/desktop/DesktopSettingsPanel/sections/UsageResourcePanel.tsx",
-    "frontend/src/components/desktop/DesktopSettingsPanel/types.ts"
+    "frontend/src/components/desktop/DesktopSettingsPanel/types.ts",
+    "scripts/block79-*"
    ],
    "tests": [
     "test/ai-usage-provider.test.mjs"
    ],
    "frontendRelated": true,
-   "classifiesScripts": false
+   "classifiesScripts": true,
+   "scriptRole": "development-smoke"
   }
  ]
 }

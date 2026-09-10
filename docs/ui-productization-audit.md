@@ -3106,3 +3106,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **实机（2026-09-10）**：`scripts/block79-provider-live.cjs` → `acceptance/block-79/provider-live.json` **5/5 allPass**——真实模型推理一轮（网关注入路径）→ usage-mine providers 分组 → 端点数值与库内重算（readonly 独立连接·同 user 过滤·30d 窗口）逐组一致 → embedding 排除实证。
 
 **状态**: verified（2026-09-10 实机数值一致性对账通过）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-333: 右栏空态 launchpad 卡片回退满宽（用户裁决「改回去」）(2026-09-10 verified)
+
+**来源**：用户实机截图裁决——UI-329 两轮收窄实验（fit-content 贴内容 + 左对齐）落地后卡片各自为政、整体不协调（「修改后变得不协调 不好看了 优化一下 改回去」）。
+
+**改动**：仅 `project-workspace.module.css` 两处回退至 UI-329 之前状态——`.emptyResultLaunchpad` 去 `justify-items: start`（恢复默认 stretch 铺满格宽）；`.emptyResultLaunchCard` `width: fit-content` → `width: 100%`（padding 10px 12px 与 text-align: left 已是加映后原值，无需再动）。组件零改动；0 新依赖。UI-329 的实机脚本 `ui329-launchpad-live.cjs` 断言的是已回退设计，按 FILE-TREE-POLICY 归档至 `scripts/archive/` 并同步 impact-map（ui329 模式移除、block79 脚本模式补登）。
+
+**门禁**：tsc 0 + test:changed 全覆盖 + docs/ui 门禁 PASS。
+
+**状态**: verified（用户实机截图即验收基准，回退至其认可的历史形态）。G0 开发期常态 · 不外推 packaged / Provider / GA。
