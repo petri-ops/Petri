@@ -81,6 +81,7 @@
 - 0 新 npm 依赖倾向。
 
 ## 10. 进度记录
+- 2026-09-10 **P1 驻留创建链完成（代码面 + 契约测试 3/3 + 回归绿）**：① tool-defs 增 resident_task_create/list/read 三定义（create: command+intent 必填、success_criteria/failure_handling/cwd 可选）；② workspace-tools 本地实现三方法（create: 复用 execBackground 起进程 + fs 落卡 .gewu/resident/<taskId>.json；list/read 纯读）+ routed 双栈接线（ssh → surface.createResidentTask 等）；③ ssh surface 增同名三方法（exec_bg + gateway 写卡/列卡/读卡）+ preflight（full access + 命令黑名单 + intent 必填）；④ registry 导入/HANDLERS/contract 登记（create=execution R2 5000ms、list/read=none R0）。**回归**：契约测试 3/3 + P2 套件 8/8 重跑全绿（后端已加载 resident 工具）。待 P2：回访循环 + 双通道交接班。G0 开发期常态 · 不外推 packaged/Provider/GA.
 - 2026-09-10 **启动（planned → active，P0-LAUNCH）+ P0 评审稿落盘**：用户裁决「来搞」（队列实际队头——BLOCK-68 注册表漂移已修：plan 文档 09-09 已 completed 而 registry 仍 planned，随本次一并纠正）。P0 评审稿 `docs/block-77-p0-design-review.md`：代码事实（exec_bg/process_status 面、notify.custom 通道、proactive 投影、无会话上下文注入机制、Gateway 双栈写入）+ R1-R5 细化（意图卡文件形态/60s 回访循环/notify 分层/生命周期含 abandoned/只读不自动重启）。待用户确认后进 P1。G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 - 2026-09-10 **立项（planned）**：用户在「agent 驻留服务器持续干活」三档方案中裁决「要做到第二档」→ 本计划落盘并注册 DOC-REGISTRY（planned 排队）。范围=①意图卡 + ②回访循环/交接班 + ③应用内完成通知（移动推送联动 BLOCK-70）；③档真·驻留 agent 明确排除需另立项。启动待用户裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。

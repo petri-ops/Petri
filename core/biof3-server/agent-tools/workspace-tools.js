@@ -1056,6 +1056,21 @@ function createWorkspaceTools(options = {}) {
       return sshSurface.preflight(name, args, ctx);
     }
     return withWorkspace(ctx, async ({ root }) => {
+      if (name === 'resident_task_create') {
+        // BLOCK-77 P1 — 驻留任务创建：长驻后台进程，需完全访问模式（R5）
+        if (ctx.accessMode !== 'full') {
+          return errorResult(
+            ctx.accessMode === 'workspace-write' ? 'access_mode_workspace_write' : 'access_mode_read_only',
+            ctx.accessMode === 'workspace-write'
+              ? '项目写模式仅允许前台命令执行；驻留任务需要完全访问模式'
+              : '聊天当前处于只读模式，禁止执行命令'
+          );
+        }
+        const rcommand = String(args.command || '').trim();
+        const rverdict = commandVerdict(rcommand);
+        if (!rverdict.ok) return errorResult('command_blocked', rverdict.reason);
+        if (!String(args.intent || '').trim()) return errorResult('invalid_arguments', 'intent 不能为空（意图卡核心字段）');
+      }
       if (name === 'workspace_exec' || name === 'workspace_exec_background') {
         // BLOCK-56 P2 — workspace-write 中间档：前台命令放行（黑名单维持 + cwd
         // 限定项目根，下方既有校验不变）；后台进程面维持 full 专属。
@@ -1668,6 +1683,62 @@ function createWorkspaceTools(options = {}) {
     };
   }
 
+  // ── BLOCK-77 P1 — 驻留任务本地实现（意图卡 .gewu/resident/<taskId>.json）──
+  // ssh 走 surface.createResidentTask（exec_bg + gateway 写卡）；本地复用 execBackground
+  //（注册表/日志语义不变）+ fs 落卡。卡片只描述「意图与归属」，执行真相在进程表。
+
+  async function listResidentTasksLocal(args = {}, ctx = {}) {
+    return withWorkspace(ctx, async ({ root }) => {
+      const dir = path.join(root, '.gewu', 'resident');
+      let files = [];
+      try { files = fs.readdirSync(dir).filter((f) => f.endsWith('.json')); } catch { files = []; }
+      const tasks = [];
+      for (const f of files) {
+        try { tasks.push(JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'))); } catch { /* 单卡损坏跳过 */ }
+      }
+      tasks.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+      return { ok: true, count: tasks.length, tasks };
+    });
+  }
+
+  async function readResidentTaskLocal(args = {}, ctx = {}) {
+    return withWorkspace(ctx, async ({ root }) => {
+      const clean = String(args.taskId || '').replace(/[^A-Za-z0-9._-]/g, '');
+      if (!clean || !clean.includes('res_')) return errorResult('invalid_arguments', 'taskId 非法');
+      try {
+        return { ok: true, card: JSON.parse(fs.readFileSync(path.join(root, '.gewu', 'resident', clean + '.json'), 'utf8')) };
+      } catch {
+        return errorResult('resident_task_not_found', '驻留任务不存在: ' + clean);
+      }
+    });
+  }
+
+  async function createResidentTaskLocal(args = {}, ctx = {}) {
+    const bg = await execBackground(args, ctx);
+    if (!bg || bg.ok !== true) return bg;
+    return withWorkspace(ctx, async ({ root }) => {
+      const taskId = 'res_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      const dir = path.join(root, '.gewu', 'resident');
+      fs.mkdirSync(dir, { recursive: true });
+      const card = {
+        taskId,
+        intent: String(args.intent || ''),
+        successCriteria: String(args.successCriteria || ''),
+        failureHandling: String(args.failureHandling || 'notify-only'),
+        command: String(args.command || ''),
+        backingProcess: { processId: bg.processId || bg.id, pid: bg.pid, logPath: bg.logFile || bg.logPath, host: 'local' },
+        projectRoot: root,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        status: 'running',
+        lastCheckAt: null,
+        lastCheckNote: null,
+      };
+      fs.writeFileSync(path.join(dir, taskId + '.json'), JSON.stringify(card, null, 2), 'utf8');
+      return { ok: true, taskId, pid: bg.pid, logPath: bg.logFile || bg.logPath, cardPath: '.gewu/resident/' + taskId + '.json', card };
+    });
+  }
+
   return {
     listDirectory: routed(listDirectory, 'listDirectory'),
     findFiles: routed(findFiles, 'findFiles'),
@@ -1682,6 +1753,9 @@ function createWorkspaceTools(options = {}) {
     // （注册表懒探针语义），local → processStatus 无 id 即会话清单（原语义）。
     processList: routed(processStatus, 'processList'),
     processStop: routed(processStop, 'processStop'),
+    createResidentTask: routed(createResidentTaskLocal, 'createResidentTask'),
+    listResidentTasks: routed(listResidentTasksLocal, 'listResidentTasks'),
+    readResidentTask: routed(readResidentTaskLocal, 'readResidentTask'),
     preflightTool,
     commandVerdict,
   };
@@ -1702,6 +1776,9 @@ module.exports = {
   tool_process_status: defaultTools.processStatus,
   tool_process_list: defaultTools.processList,
   tool_process_stop: defaultTools.processStop,
+  tool_resident_task_create: defaultTools.createResidentTask,
+  tool_resident_task_list: defaultTools.listResidentTasks,
+  tool_resident_task_read: defaultTools.readResidentTask,
   preflightWorkspaceTool: defaultTools.preflightTool,
   _internal: {
     commandVerdict: defaultTools.commandVerdict,

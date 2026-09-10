@@ -50,6 +50,9 @@ const {
   tool_workspace_exec_background,
   tool_process_status,
   tool_process_stop,
+  tool_resident_task_create,
+  tool_resident_task_list,
+  tool_resident_task_read,
 } = require('./workspace-tools');
 const { tool_system_info } = require('./system-info-tools');
 const { tool_knowledge_search, tool_knowledge_status } = require('./knowledge-tools');
@@ -104,6 +107,9 @@ const HANDLERS = {
   workspace_exec_background: tool_workspace_exec_background,
   process_status: tool_process_status,
   process_stop: tool_process_stop,
+  resident_task_create: tool_resident_task_create,
+  resident_task_list: tool_resident_task_list,
+  resident_task_read: tool_resident_task_read,
   system_info: tool_system_info,
   computer_snapshot: tool_computer_snapshot,
   computer_click: tool_computer_click,
@@ -179,6 +185,10 @@ const CONTRACTS = {
   workspace_exec_background: contract('workspace', 'execution', 'R2', ['project.files', 'local.process'], 5000),
   process_status: contract('workspace', 'none', 'R0', ['local.process'], 500),
   process_stop: contract('workspace', 'execution', 'R2', ['local.process'], 5000),
+  // BLOCK-77 P1 — 驻留任务：create 为执行类（R2，启动即返回）；list/read 只读
+  resident_task_create: contract('workspace', 'execution', 'R2', ['project.files', 'local.process'], 5000),
+  resident_task_list: contract('workspace', 'none', 'R0', ['project.files'], 1000),
+  resident_task_read: contract('workspace', 'none', 'R0', ['project.files'], 1000),
   // BLOCK-33 P1 — 环境自省：只读零副作用，不依赖项目工作区（category 非 workspace → 不走 preflight）
   system_info: contract('verification', 'none', 'R0', ['local.process'], 1000),
   // BLOCK-48 P3 — Computer Use（macOS）：快照/授权/等待为只读面；控制类

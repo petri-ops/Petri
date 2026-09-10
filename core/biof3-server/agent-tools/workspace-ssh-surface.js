@@ -536,6 +536,22 @@ function createSshWorkspaceSurface({
       if (name === 'process_status' || name === 'process_stop') {
         return { ok: true, commandRisk: 'process_control' };
       }
+      // BLOCK-77 P1 — 驻留任务创建：后台长驻进程 + 意图卡，需完全访问模式（R5）
+      if (name === 'resident_task_create') {
+        if (ctx.accessMode !== 'full') {
+          return errorResult(
+            ctx.accessMode === 'workspace-write' ? 'access_mode_workspace_write' : 'access_mode_read_only',
+            '驻留任务为长驻后台进程，需要完全访问模式'
+          );
+        }
+        const command = String(args.command || '').trim();
+        const verdict = commandVerdict(command);
+        if (!verdict.ok) return errorResult('command_blocked', verdict.reason);
+        if (!String(args.intent || '').trim()) {
+          return errorResult('invalid_arguments', 'intent 不能为空（意图卡核心字段）');
+        }
+        return { ok: true, commandRisk: 'full_access' };
+      }
       const resolved = await resolveRemote(ws.root, ws.backend, args.path || '.');
       let exists = true;
       try { await ws.backend.stat(resolved.abs); } catch (e) { if (e.remoteError !== 'not_found') throw e; exists = false; }
@@ -543,6 +559,83 @@ function createSshWorkspaceSurface({
     } catch (e) {
       if (e.remoteError === 'not_found') return { ok: true, exists: false, relativePath: String(args.path || '.') };
       return remoteErrorToResult(e);
+    }
+  }
+
+  // ── BLOCK-77 P1 — 驻留任务（意图卡 .gewu/resident/<taskId>.json，服务器真值）──
+  // 卡片只描述「意图与归属」；执行真相仍在 exec_bg 进程 + ps_pid 实探（单一真值红线）。
+  function residentRoot(ws) {
+    return `${ws.root.replace(/\/+$/, '')}/.gewu/resident`;
+  }
+
+  async function createResidentTask(args = {}, ctx = {}) {
+    if (ctx.accessMode !== 'full') {
+      return errorResult('access_mode_read_only', '驻留任务为长驻后台进程，需要完全访问模式');
+    }
+    const intent = String(args.intent || '').trim();
+    if (!intent) return errorResult('invalid_arguments', 'intent 不能为空（意图卡核心字段）');
+    const command = String(args.command || '').trim();
+    if (!command) return errorResult('invalid_arguments', 'command 不能为空');
+
+    // ① 起进程：复用既有 exec_bg 通道（注册表/日志语义不变）
+    const bg = await execBackground({ command, cwd: args.cwd }, ctx);
+    if (!bg || bg.ok !== true) return bg;
+
+    // ② 意图卡一次成型（跨会话交接班凭据）
+    let ws;
+    try { ws = await getRemoteWorkspace(ctx, { requireCompatible: true }); } catch (e) { return errorResult(e.code || 'workspace_unavailable', e.message); }
+    const taskId = `res_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+    const root = ws.root.replace(/\/+$/, '');
+    const dirAbs = `${root}/.gewu/resident`;
+    const card = {
+      taskId,
+      intent,
+      successCriteria: String(args.successCriteria || ''),
+      failureHandling: String(args.failureHandling || 'notify-only'),
+      command,
+      backingProcess: { processId: bg.id, pid: bg.pid, logPath: bg.logFile, host: ws.sshHost },
+      projectRoot: root,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: 'running',
+      lastCheckAt: null,
+      lastCheckNote: null,
+    };
+    try {
+      await ws.backend.mkdir(dirAbs);
+      await ws.backend.write(`${dirAbs}/${taskId}.json`, Buffer.from(JSON.stringify(card, null, 2), 'utf8'));
+    } catch (e) {
+      return { ok: true, taskId, pid: bg.pid, logPath: bg.logFile, cardError: `意图卡写入失败: ${e.message}` };
+    }
+    return { ok: true, taskId, pid: bg.pid, logPath: bg.logFile, cardPath: `.gewu/resident/${taskId}.json`, card };
+  }
+
+  async function listResidentTasks(args = {}, ctx = {}) {
+    let ws;
+    try { ws = await getRemoteWorkspace(ctx, {}); } catch (e) { return errorResult(e.code || 'workspace_unavailable', e.message); }
+    const dir = `${ws.root.replace(/\/+$/, '')}/.gewu/resident`;
+    const entries = await ws.backend.list(dir).catch(() => []);
+    const tasks = [];
+    for (const entry of entries.filter((x) => x.type === 'file' && x.name.endsWith('.json'))) {
+      try {
+        const buf = await ws.backend.read(`${dir}/${entry.name}`);
+        tasks.push(JSON.parse(buf.toString('utf8')));
+      } catch { /* 单卡损坏跳过，不拖垮清单 */ }
+    }
+    tasks.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    return { ok: true, count: tasks.length, tasks };
+  }
+
+  async function readResidentTask(args = {}, ctx = {}) {
+    let ws;
+    try { ws = await getRemoteWorkspace(ctx, {}); } catch (e) { return errorResult(e.code || 'workspace_unavailable', e.message); }
+    const clean = String(args.taskId || '').replace(/[^A-Za-z0-9._-]/g, '');
+    if (!clean || clean.includes('..')) return errorResult('invalid_arguments', 'taskId 非法');
+    try {
+      const buf = await ws.backend.read(`${ws.root.replace(/\/+$/, '')}/.gewu/resident/${clean}.json`);
+      return { ok: true, card: JSON.parse(buf.toString('utf8')) };
+    } catch {
+      return errorResult('resident_task_not_found', `驻留任务不存在: ${clean}`);
     }
   }
 
@@ -560,6 +653,9 @@ function createSshWorkspaceSurface({
     processList,
     processStatus,
     processStop,
+    createResidentTask,
+    listResidentTasks,
+    readResidentTask,
   };
 }
 
