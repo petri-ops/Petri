@@ -49,7 +49,9 @@
     "core/biof3-server/helpers/workspace-gateway.js",
     "frontend/src/hooks/useRuntimeResourceSnapshot.ts",
     "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
-    "frontend/src/components/workspace-panels/CenterPanel.tsx"
+    "frontend/src/components/workspace-panels/CenterPanel.tsx",
+    "scripts/block78-*",
+    "acceptance/block-78/**"
    ],
    "tests": [
     "test/remote-resource-snapshot.test.mjs",
@@ -57,7 +59,8 @@
     "test/block57-remote-execution.test.mjs"
    ],
    "frontendRelated": true,
-   "classifiesScripts": false
+   "classifiesScripts": true,
+   "scriptRole": "development-smoke"
   },
   {
    "id": "frontend-config",

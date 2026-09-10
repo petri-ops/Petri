@@ -1678,6 +1678,9 @@ function createWorkspaceTools(options = {}) {
     executeCommand: routed(executeCommand, 'executeCommand'),
     execBackground: routed(execBackground, 'execBackground'),
     processStatus: routed(processStatus, 'processStatus'),
+    // BLOCK-78 P2-④：REST 读面（浮窗/摘要卡）——ssh → surface.processList
+    // （注册表懒探针语义），local → processStatus 无 id 即会话清单（原语义）。
+    processList: routed(processStatus, 'processList'),
     processStop: routed(processStop, 'processStop'),
     preflightTool,
     commandVerdict,
@@ -1697,6 +1700,7 @@ module.exports = {
   tool_workspace_exec: defaultTools.executeCommand,
   tool_workspace_exec_background: defaultTools.execBackground,
   tool_process_status: defaultTools.processStatus,
+  tool_process_list: defaultTools.processList,
   tool_process_stop: defaultTools.processStop,
   preflightWorkspaceTool: defaultTools.preflightTool,
   _internal: {

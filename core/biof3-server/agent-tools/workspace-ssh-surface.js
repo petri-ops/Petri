@@ -393,6 +393,30 @@ function createSshWorkspaceSurface({
     return `project:${ctx.projectId || 'unknown'}:${ctx.userId || 'unknown'}`;
   }
 
+  // BLOCK-78 P2-④：会话级后台进程清单（REST 浮窗/摘要卡读面）。
+  // 状态为注册表懒探针语义——running 表示「已登记且未观测到退出」，精确
+  // 存活以 process_status 单查（ps_pid 实探）为准；列表不做逐 pid 探测，
+  // 避免浮窗 1s 轮询打满 mux 串行队列。服务重启注册表清空与本地表同语义。
+  function processList(_args = {}, ctx = {}) {
+    const sessionId = bgKey(ctx);
+    const now = Date.now();
+    const processes = [...remoteBackgrounds.values()]
+      .filter((r) => r.session === sessionId)
+      .sort((a, b) => b.startedAt - a.startedAt)
+      .map((r) => ({
+        processId: r.id,
+        pid: r.pid,
+        status: r.status,
+        command: r.command,
+        host: r.host,
+        startedAtIso: new Date(r.startedAt).toISOString(),
+        durationMs: Math.max(0, now - r.startedAt),
+        logPath: r.logRel,
+        source: 'ssh-registry',
+      }));
+    return { ok: true, count: processes.length, processes, source: 'ssh-registry' };
+  }
+
   async function execBackground(args = {}, ctx = {}) {
     if (ctx.accessMode !== 'full' && ctx.accessMode !== 'workspace-write') {
       return errorResult('access_mode_read_only', '聊天当前处于只读模式，禁止执行命令');
@@ -533,6 +557,7 @@ function createSshWorkspaceSurface({
     searchText,
     executeCommand,
     execBackground,
+    processList,
     processStatus,
     processStop,
   };

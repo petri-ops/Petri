@@ -79,7 +79,7 @@ export function WorkspaceSummaryCard({
   const cardVisible = open && visibility !== 'hidden';
   const agentRows = useProjectAgentOverview(project?.id ?? null, cardVisible);
   const terminalSessions = useTerminalSessions(cardVisible);
-  const attention = useConversationAttention(activeConversation?.id ?? null, cardVisible);
+  const attention = useConversationAttention(activeConversation?.id ?? null, project?.id ?? null, cardVisible);
   if (visibility === 'hidden') return null;
 
   // HLE-C4R: derive an honest loop display. Completion/blocked come only from
@@ -630,9 +630,12 @@ function useProjectAgentOverview(projectId: string | null, enabled: boolean): Ag
 
 /** BLOCK-78 P1⑦：会话级注意信号——待确认计划（draft + 待修订，BLOCK-55 链）
  *  与异常退出后台进程（BLOCK-34 表，failed/orphaned 两态算异常，exited 是
- *  正常终态）。信号源不可得按 0 处理，不伪造告警；零待办返回 0 → 不渲染。 */
+ *  正常终态）。信号源不可得按 0 处理，不伪造告警；零待办返回 0 → 不渲染。
+ *  P2-④：listBackgroundProcesses 携带 projectId——后端按项目形态路由
+ *  （ssh 项目读节点注册表，local 读本地表）。 */
 function useConversationAttention(
   conversationId: string | null,
+  projectId: string | null,
   enabled: boolean
 ): { pendingPlans: number; abnormalProcesses: number } {
   const [attention, setAttention] = useState({ pendingPlans: 0, abnormalProcesses: 0 });
@@ -643,7 +646,7 @@ function useConversationAttention(
       void Promise.all([
         fetchDraftPlansForConversation(conversationId).catch(() => []),
         fetchPlansWithPendingRevision(conversationId).catch(() => []),
-        listBackgroundProcesses(conversationId).catch(() => null),
+        listBackgroundProcesses(conversationId, projectId).catch(() => null),
       ]).then(([drafts, revisions, processes]) => {
         if (!alive) return;
         setAttention({
@@ -661,7 +664,7 @@ function useConversationAttention(
       alive = false;
       window.clearInterval(timer);
     };
-  }, [enabled, conversationId]);
+  }, [enabled, conversationId, projectId]);
   return attention;
 }
 

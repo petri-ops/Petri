@@ -162,6 +162,36 @@ test('后台进程三件套 ssh 分支：exec_bg → status → stop', async () 
   assert.strictEqual(stop.ok, true);
 });
 
+test('BLOCK-78 P2-④ processList：会话过滤 + 注册表懒探针语义 + local 不劫持', async () => {
+  const convCtx = { ...sshCtx, conversationId: 'conv-list' };
+  const bg = await tools.execBackground({ command: 'sleep 30' }, convCtx);
+  assert.strictEqual(bg.ok, true);
+
+  const list = await tools.processList({}, convCtx);
+  assert.strictEqual(list.ok, true);
+  assert.strictEqual(list.source, 'ssh-registry');
+  assert.strictEqual(list.count, 1);
+  const row = list.processes[0];
+  assert.strictEqual(row.processId, bg.id);
+  assert.strictEqual(row.status, 'running');
+  assert.strictEqual(row.pid, 4242);
+  assert.strictEqual(typeof row.host, 'string');
+  assert.ok(row.startedAtIso);
+  assert.ok(row.logPath.includes('.biof3-agent-tmp'));
+
+  // 会话隔离（bgKey 语义与本地表同构）：其他会话不可见
+  const other = await tools.processList({}, { ...sshCtx, conversationId: 'conv-other' });
+  assert.strictEqual(other.count, 0);
+
+  // local 项目路由不劫持：走本地表路径返回清单形状
+  const localList = await tools.processList(
+    {},
+    { projectId: localProject.id, userId: 'p2b-user', conversationId: 'conv-list-local' }
+  );
+  assert.strictEqual(localList.ok, true);
+  assert.ok(Array.isArray(localList.processes));
+});
+
 test('local 项目零回归：路由器不劫持（本地 fs 语义原样）', async () => {
   const { writeFileSync } = require('node:fs');
   const localCtx = { projectId: localProject.id, userId: 'p2b-user', accessMode: 'full' };
