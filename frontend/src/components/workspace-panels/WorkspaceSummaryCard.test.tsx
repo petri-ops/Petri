@@ -275,6 +275,27 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     await waitFor(() => expect(screen.queryByText(/个会话运行中/)).toBeNull());
   });
 
+  it('P1.5 环境诚实化：ssh 项目不渲染本机 R/Py 芯片，资源行标注「指挥席本机」', () => {
+    render(
+      <WorkspaceSummaryCard
+        {...baseProps({ project: makeProject({ workspaceKind: 'ssh', sshHost: 'dell' }) })}
+      />
+    );
+    expect(screen.getByText('远程执行 · dell')).toBeTruthy();
+    expect(screen.queryByLabelText('后端运行状态')).toBeNull();
+    expect(screen.getByText('资源 · 指挥席本机')).toBeTruthy();
+    expect(screen.getByText(/dell 远程资源快照待接入/)).toBeTruthy();
+
+    cleanup();
+    render(
+      <WorkspaceSummaryCard
+        {...baseProps({ project: makeProject({ workspaceKind: 'local' }) })}
+      />
+    );
+    expect(screen.getByLabelText('后端运行状态')).toBeTruthy();
+    expect(screen.queryByText(/指挥席本机/)).toBeNull();
+  });
+
   it('空态指引：无数据集提示先上传数据', () => {
     render(<WorkspaceSummaryCard {...baseProps({ datasets: [] })} />);
     expect(screen.getByText(/还没有数据集/)).toBeTruthy();

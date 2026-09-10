@@ -124,6 +124,10 @@ export function WorkspaceSummaryCard({
   const baselineBlocked = !!baseline
     && (baseline.compatibilityStatus === 'blocked' || baseline.executionAllowed === false);
   const baselineMigration = baseline?.compatibilityStatus === 'migration_required';
+  // BLOCK-78 P1.5：ssh 项目运行环境诚实化——资源快照/R-Py 芯片均为本机真值，
+  // 对远程项目一律降级为「指挥席本机」标注，不冒充远程执行机环境。
+  const isSshProject = project?.workspaceKind === 'ssh';
+  const sshHostName = project?.sshHost || 'SSH';
   // BLOCK-78 P1 — 执行位置标注按 workspaceKind 路由真值源（plan §5 P1④）。
   const runningAgentCount = agentRows.filter((t) => t.status === 'running').length;
   const failedAgentRows = agentRows.filter((t) => t.status === 'failed');
@@ -503,25 +507,36 @@ export function WorkspaceSummaryCard({
             <div className={styles.workspacePinnedSummarySectionTitle}>运行环境</div>
           </div>
           <div className={styles.workspacePinnedSummaryEnvironmentCard}>
-            <div className={styles.workspacePinnedSummaryEnvironmentRow}>
-              <span className={styles.workspacePinnedSummaryEnvironmentLabel}>
-                <Icon name="cpu" size={15} /> 计算后端
-              </span>
-              <span className={styles.workspacePinnedSummaryRuntimes} aria-label="后端运行状态">
-                {/* rRuntime/pyRuntime 可为 null（backend:status 查询失败 = 未知）；
-                    状态芯片只做展示，未知按"未就绪"处理，用 === true 归一化。 */}
-                <RuntimeStatusChip
-                  label="R"
-                  runtimeReady={backendStatus.rRuntime === true}
-                  serverUp={backendStatus.rServerUp}
-                  downReason={backendStatus.downReason}
-                />
-                <RuntimeStatusChip
-                  label="Py"
-                  runtimeReady={backendStatus.pyRuntime === true}
-                />
-              </span>
-            </div>
+            {isSshProject ? (
+              <div className={styles.workspacePinnedSummaryEnvironmentRow}>
+                <span className={styles.workspacePinnedSummaryEnvironmentLabel}>
+                  <Icon name="cpu" size={15} /> 计算后端
+                </span>
+                <span className={styles.workspaceLoopMeta}>
+                  远程执行 · {sshHostName}
+                </span>
+              </div>
+            ) : (
+              <div className={styles.workspacePinnedSummaryEnvironmentRow}>
+                <span className={styles.workspacePinnedSummaryEnvironmentLabel}>
+                  <Icon name="cpu" size={15} /> 计算后端
+                </span>
+                <span className={styles.workspacePinnedSummaryRuntimes} aria-label="后端运行状态">
+                  {/* rRuntime/pyRuntime 可为 null（backend:status 查询失败 = 未知）；
+                      状态芯片只做展示，未知按"未就绪"处理，用 === true 归一化。 */}
+                  <RuntimeStatusChip
+                    label="R"
+                    runtimeReady={backendStatus.rRuntime === true}
+                    serverUp={backendStatus.rServerUp}
+                    downReason={backendStatus.downReason}
+                  />
+                  <RuntimeStatusChip
+                    label="Py"
+                    runtimeReady={backendStatus.pyRuntime === true}
+                  />
+                </span>
+              </div>
+            )}
             {terminalSessions.length > 0 && (
               <div className={styles.workspacePinnedSummaryEnvironmentRow}>
                 <span className={styles.workspacePinnedSummaryEnvironmentLabel}>
@@ -532,17 +547,35 @@ export function WorkspaceSummaryCard({
                 </span>
               </div>
             )}
-            <div className={styles.workspacePinnedSummaryEnvironmentRow} data-state={resources?.state || 'unknown'}>
+            {/* BLOCK-78 P1.5（用户实机质询「远程项目为啥显示本机资源」）：
+                ssh 项目的资源快照端点仍是本机真值（P2 才接远程），先诚实
+                标注来源为「指挥席本机」并声明远程快照待接入，不再冒充项目
+                环境；R/Py 芯片同理（本地运行时状态与远程作业无关）不渲染。 */}
+            <div
+              className={styles.workspacePinnedSummaryEnvironmentRow}
+              data-state={isSshProject ? 'unknown' : resources?.state || 'unknown'}
+              title={isSshProject ? '资源读数来自指挥席本机；远程执行机资源快照尚未接入（BLOCK-78 P2）' : undefined}
+            >
               <span className={styles.workspaceResourceSummaryState}>
                 <i />
-                {resources
-                  ? resources.state === 'ready' ? '资源正常' : resources.state === 'warning' ? '资源需注意' : '资源不足'
-                  : resourceError ? '资源不可用' : '资源检查中'}
+                {isSshProject
+                  ? '资源 · 指挥席本机'
+                  : resources
+                    ? resources.state === 'ready' ? '资源正常' : resources.state === 'warning' ? '资源需注意' : '资源不足'
+                    : resourceError ? '资源不可用' : '资源检查中'}
               </span>
-              {resources && (
+              {isSshProject ? (
                 <span className={styles.workspacePinnedSummaryResourceFacts}>
-                  内存 {formatBytes(resources.memory.availableBytes)} · 磁盘 {formatBytes(resources.disk.availableBytes)} · {resources.cpu.logicalCores} 核
+                  {resources
+                    ? `内存 ${formatBytes(resources.memory.availableBytes)} · 磁盘 ${formatBytes(resources.disk.availableBytes)} · ${resources.cpu.logicalCores} 核（${sshHostName} 远程快照待接入）`
+                    : `${sshHostName} 远程资源快照待接入`}
                 </span>
+              ) : (
+                resources && (
+                  <span className={styles.workspacePinnedSummaryResourceFacts}>
+                    内存 {formatBytes(resources.memory.availableBytes)} · 磁盘 {formatBytes(resources.disk.availableBytes)} · {resources.cpu.logicalCores} 核
+                  </span>
+                )
               )}
             </div>
           </div>

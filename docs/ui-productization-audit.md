@@ -3068,3 +3068,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **状态**: in_progress（实现 + 定向测试完成；实机验收待与 BLOCK-76 P2 收口窗口一起做，证据将落 `acceptance/ui-330/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 **加映（同日，P1 切片 2——注意节会话信号源补全，P1 十项全部落地）**：注意节增两会话级信号——①「N 项计划待确认」：`fetchDraftPlansForConversation` + `fetchPlansWithPendingRevision`（BLOCK-55 批准链，draft + 待修订计数，行内提示在会话输入区上方处理）；②「N 个后台进程异常退出」：`listBackgroundProcesses`（BLOCK-34 表）按 `failed`/`orphaned` 两态计异常（`exited` 是正常终态不算），行内提示到会话浮窗查看。新 `useConversationAttention` hook（5s 轮询、信号源不可得按 0 处理不伪造告警、置于提前返回之前），仍绑 activeConversation 会话随动、零待办整行不渲染。组件定向 10/10（新增：两会话信号渲染 + 零待办不渲染）+ tsc 0。实机验收维持待 BLOCK-76 收口窗口合做。
+
+**加映二（同日，用户实机质询「ssh 远程项目为啥资源情况是本地的」→ P1.5 环境诚实化）**：截图坐实 plan §4 登记的本机视角残留——资源快照端点（/api/harness/resource-snapshot）与 R/Py 芯片均为指挥席本机真值，对 dell SSH 项目冒充项目环境。P1.5 处置（远程资源真值仍属 P2，需 mux 新增资源动词）：ssh 项目运行环境节——「计算后端」行改「远程执行 · {sshHost}」（本机 R/Py 芯片不渲染，本地运行时状态与远程作业无关）；资源行改「资源 · 指挥席本机」+ 读数注明「{host} 远程资源快照待接入」，data-state 置 unknown（不显示本机绿点），title 说明来源与 P2 归属。local 项目两行原样零改动。组件定向 11/11（新增 ssh/local 环境诚实化对照用例）+ tsc 0。
