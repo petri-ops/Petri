@@ -1714,12 +1714,15 @@ function createWorkspaceTools(options = {}) {
   }
 
   async function createResidentTaskLocal(args = {}, ctx = {}) {
-    const bg = await execBackground(args, ctx);
-    if (!bg || bg.ok !== true) return bg;
     return withWorkspace(ctx, async ({ root }) => {
       const taskId = 'res_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
       const dir = path.join(root, '.gewu', 'resident');
       fs.mkdirSync(dir, { recursive: true });
+      // 命令包 .exit 标记（绝对路径正斜杠；回访循环读退出码），日志仍走后台日志目录
+      const exitFile = path.join(dir, taskId + '.exit').replace(/\\/g, '/');
+      const wrapped = '( ' + String(args.command || '') + ' ) ; echo $? > "' + exitFile + '"';
+      const bg = await execBackground({ ...args, command: wrapped }, ctx);
+      if (!bg || bg.ok !== true) return bg;
       const card = {
         taskId,
         intent: String(args.intent || ''),

@@ -577,15 +577,19 @@ function createSshWorkspaceSurface({
     const command = String(args.command || '').trim();
     if (!command) return errorResult('invalid_arguments', 'command 不能为空');
 
-    // ① 起进程：复用既有 exec_bg 通道（注册表/日志语义不变）
-    const bg = await execBackground({ command, cwd: args.cwd }, ctx);
+    const taskId = `res_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+    let ws;
+    try { ws = await getRemoteWorkspace(ctx, { requireCompatible: true }); } catch (e) { return errorResult(e.code || 'workspace_unavailable', e.message); }
+    const root = ws.root.replace(/\/+$/, '');
+    const residentDir = `${root}/.gewu/resident`;
+
+    // ① 起进程：复用既有 exec_bg 通道（注册表/日志语义不变）；命令包 .exit
+    //    标记（回访循环读退出码），日志固定进 .gewu/resident/<taskId>.log。
+    const wrapped = `( ${command} ) ; echo $? > .gewu/resident/${taskId}.exit`;
+    const bg = await execBackground({ command: wrapped, cwd: args.cwd, logFile: `.gewu/resident/${taskId}.log` }, ctx);
     if (!bg || bg.ok !== true) return bg;
 
     // ② 意图卡一次成型（跨会话交接班凭据）
-    let ws;
-    try { ws = await getRemoteWorkspace(ctx, { requireCompatible: true }); } catch (e) { return errorResult(e.code || 'workspace_unavailable', e.message); }
-    const taskId = `res_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
-    const root = ws.root.replace(/\/+$/, '');
     const dirAbs = `${root}/.gewu/resident`;
     const card = {
       taskId,

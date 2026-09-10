@@ -612,7 +612,22 @@ async function runAgentLoop({
     console.log('[token-budget-estimation-error]', e && e.message);
   }
 
-  // Build full messages array with system prompt
+  // BLOCK-77 P2 — 驻留任务交接班（双通道 B：agent 会话注入）。
+  // 项目存在 running 驻留任务时，把意图卡摘要追加进 system prompt（零轮询依赖——
+  // 读取走回访循环同款 Gateway 通道；无卡/读失败 = 零注入，不污染 prompt）。
+  try {
+    const b77ProjectId = ctx && ctx.projectId ? String(ctx.projectId) : '';
+    if (b77ProjectId) {
+      const { residentHandoverDigestByProjectId } = require('./helpers/remote-execution/resident-revisit');
+      const digest = await residentHandoverDigestByProjectId({ getAsyncDatabase: () => require('./db').getAsyncDatabase() }, b77ProjectId);
+      if (digest) {
+        systemPrompt += '\n\n=== 驻留任务交接班 ===\n' + digest;
+        systemPrompt += '\n请主动向用户简报以上驻留任务的进度与下一步建议（完成/失败已在通知面提示过的不必重复）。';
+      }
+    }
+  } catch (e) {
+    console.warn('[agent-runner] resident handover inject failed:', e && e.message);
+  }
   const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages];
   const tools = getToolDefs();
 

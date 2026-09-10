@@ -99,6 +99,13 @@ const {
 });
 
 const registerToolsMetadata = createToolsMetadataRoutes({db, getUserId: userId, jobsDir: JOBS_DIR});
+
+// BLOCK-77 P2 — 驻留任务回访循环（60s 可配；交接班/异常/完成的应用内通知）
+require('../helpers/remote-execution/resident-revisit').startResidentRevisitLoop({
+  dbModule: require('../db'),
+  notify,
+  intervalMs: Number(process.env.BIOF3_RESIDENT_INTERVAL_MS) || undefined,
+});
 // BLOCK-57：远程执行目标管理（列表/注册/探测/移除）
 const { registerRemoteTargets } = require('./remote-targets').createRemoteTargetRoutes({ db, getUserId: userId });
 const registerToolsPlatform = createToolsPlatformRoutes({
