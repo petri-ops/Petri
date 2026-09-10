@@ -1252,6 +1252,21 @@
    ],
    "classifiesScripts": true,
    "scriptRole": "development-smoke"
+  },
+  {
+   "id": "block76-ssh-native-execution",
+   "note": "BLOCK-76 P1 SSH 直跑执行链：ssh-direct-runner（gateway 写编排面/exec_bg/.exit 终态/进程组取消）+ tools-executor ssh 分支 + mcp registry 收编。改动即跑 runner 零网络契约测试。",
+   "patterns": [
+    "core/biof3-server/helpers/remote-execution/ssh-direct-runner.js",
+    "test/ssh-direct-runner.test.mjs",
+    "scripts/block76-*.cjs",
+    "acceptance/block-76/**"
+   ],
+   "tests": [
+    "test/ssh-direct-runner.test.mjs"
+   ],
+   "classifiesScripts": true,
+   "scriptRole": "development-smoke"
   }
  ]
 }

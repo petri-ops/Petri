@@ -44,6 +44,7 @@ const {
 } = require('../helpers/process-lifecycle');
 const { createTargetRegistry } = require('./remote-execution/target-registry');
 const { createRemoteJobRunner, AGENT_SCRIPT_HASH } = require('./remote-execution/remote-job-runner');
+const { createSshDirectRunner } = require('./remote-execution/ssh-direct-runner');
 const { remoteJobDirPath } = require('./remote-execution/ssh-transport');
 
 /**
@@ -1501,6 +1502,172 @@ function createToolsExecutor({
   }
 
   /**
+   * BLOCK-76 P1 — SSH 直跑主循环（D1）：gateway 写脚本 → exec_bg 后台直跑 →
+   * ps_pid/.exit 轮询 → 服务器 output/ 清单登记。产物真值在服务器
+   * `results/jobs/<jobId>/output`（R1，与本地项目布局同构），本地 staging 只承载
+   * 编排面（脚本/参数/输入），不再拉回产物（D2）。传输失败 ≠ 作业失败：
+   * unknown 挂起重试，连续 3 次按节点真相诚实失败（与旧远程链同纪律）。
+   */
+  async function runSshDirectToolJob({
+    owner,
+    jobId,
+    jobDir,
+    cfg,
+    sshContext,
+    remoteDispatch,
+    markFailed,
+  }) {
+    let runner;
+    try {
+      runner = createSshDirectRunner({ project: sshContext.project });
+    } catch (e) {
+      await markFailed(jobId, 'SSH 直跑初始化失败：' + e.message, 'setup');
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+      return;
+    }
+    const alias = sshContext.project.ssh_host;
+    const outputRel = `results/jobs/${jobId}/output`;
+
+    owner.phase = 'remote-submitting';
+    const staged = await runner.stage({ jobId, localJobDir: jobDir }).catch((e) => ({
+      ok: false,
+      stage: 'stage',
+      error: { kind: 'ssh_direct_transport', retryable: true, detail: e.message },
+    }));
+    if (!staged.ok) {
+      await markFailed(jobId, 'SSH 直跑编排面上传失败（' + staged.stage + '/' + staged.error.kind + '）：' + (staged.error.detail || ''), 'setup');
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+      return;
+    }
+    const started = await runner.start({ jobId, lang: cfg.lang, runtimeBin: remoteDispatch.runtime.runtimeBin }).catch((e) => ({
+      ok: false,
+      stage: 'start',
+      error: { kind: 'ssh_direct_transport', retryable: true, detail: e.message },
+    }));
+    if (!started.ok) {
+      await markFailed(jobId, 'SSH 直跑启动失败（' + started.stage + '/' + started.error.kind + '）：' + (started.error.detail || ''), 'execute');
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+      return;
+    }
+    const pid = started.pid;
+
+    owner.phase = 'remote-running';
+    let stdoutText = '';
+    const mirrorLogPath = path.join(jobDir, 'output', 'remote-runner.log');
+    const appendLog = (text) => {
+      stdoutText = (stdoutText + text).slice(-REMOTE_LOG_CAP_BYTES);
+      try { fs.appendFileSync(mirrorLogPath, text); } catch {}
+    };
+
+    let logOffset = 0;
+    let unknownCount = 0;
+    let cancelSent = false;
+    for (;;) {
+      await new Promise((resolve) => setTimeout(resolve, HEARTBEAT_INTERVAL_MS));
+      // 日志增量：服务器 run.log 为真值，本地 output/remote-runner.log 仅为运行期镜像缓存（R4）。
+      try {
+        const log = await runner.pullLog({ jobId, offset: logOffset });
+        if (log.chunk && log.chunk.length > 0) {
+          logOffset += log.chunk.length;
+          appendLog(log.chunk.toString('utf8'));
+        }
+      } catch { /* 日志传输失败不影响状态轮询 */ }
+      if (owner.cancelRequested && !cancelSent) {
+        cancelSent = true;
+        await runner.cancel({ pid }).catch(() => {});
+      }
+      let status;
+      try {
+        status = await runner.poll({ jobId, pid });
+      } catch {
+        status = { ok: true, kind: 'unknown' };
+      }
+      if (!status.ok || status.kind === 'unknown') {
+        unknownCount += 1;
+        if (unknownCount >= 3 && !owner.cancelRequested) {
+          await markFailed(jobId, 'SSH 直跑：节点侧连续无应答（进程与退出标记均不可见），诚实失败', 'execute');
+          releaseActiveToolJob(activeToolJobs, jobId, owner);
+          return;
+        }
+        if (owner.cancelRequested && unknownCount >= 2) break; // 取消后进程组已死且无 .exit——按取消收敛
+        continue;
+      }
+      if (status.kind === 'active') {
+        unknownCount = 0;
+        try {
+          await db.prepare("UPDATE tool_jobs SET heartbeat_at=? WHERE id=? AND status='running'").run(Date.now(), jobId);
+        } catch {}
+        owner.lastHeartbeatAt = Date.now();
+        continue;
+      }
+      break; // terminal —— .exit 标记真值
+    }
+
+    // ── 终态收敛（独立于本地 finalizeJobRun：产物面在服务器，本地文件副作用仅日志镜像）──
+    if (owner.cancelRequested) {
+      const cancelledResult = buildCancelledToolResult({
+        existingResult: null,
+        jobId,
+        resourceUsage: REMOTE_RUNNER_SAMPLES,
+        executionProvenance: null,
+        provenanceRef: null,
+      });
+      try {
+        await settleConfirmedToolCancellation({ db, jobId, result: cancelledResult });
+      } catch (error) {
+        console.warn('[tools] ssh-direct cancelled terminal persistence failed:', error.message);
+      }
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+      return;
+    }
+    const exit = await runner.poll({ jobId, pid }).catch(() => ({ ok: true, kind: 'unknown' }));
+    const code = exit.kind === 'terminal' ? exit.code : null;
+    if (!Number.isFinite(code) || code !== 0) {
+      const failedResult = buildFailedToolResult({
+        existingResult: null,
+        jobId,
+        reason: Number.isFinite(code) ? 'nonzero_exit' : 'node_unknown_terminal',
+        exitCode: Number.isFinite(code) ? code : null,
+        resourceUsage: REMOTE_RUNNER_SAMPLES,
+        executionProvenance: null,
+        provenanceRef: null,
+      });
+      try {
+        await db
+          .prepare('UPDATE tool_jobs SET result_json=? WHERE id=? AND status IN (?,?,?)')
+          .run(JSON.stringify(failedResult), jobId, 'pending', 'running', 'failed');
+      } catch (error) {
+        console.warn('[tools] ssh-direct failed terminal persistence failed:', error.message);
+      }
+      await markFailed(jobId, `SSH 直跑脚本退出码 ${Number.isFinite(code) ? code : '未知'}（详见服务器 results/jobs/${jobId}/output/run.log）`, 'execute');
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+      return;
+    }
+    const outputs = await runner.listOutputs({ jobId });
+    const result = {
+      workspaceKind: 'ssh',
+      ssh: { alias, path: sshContext.project.remote_path },
+      outputPath: outputRel,
+      transport: 'gateway-ssh-direct',
+      runtime: { name: cfg.lang || null, version: remoteDispatch.runtime.version, command: remoteDispatch.runtime.runtimeBin },
+      files: outputs.ok
+        ? outputs.outputs.map((f) => ({
+          name: f.name,
+          type: f.name.endsWith('.png') ? 'plot' : f.name.endsWith('.csv') ? 'table' : 'file',
+          url: '/api/tools/file/' + jobId + '/' + f.name,
+          size: f.size,
+        }))
+        : [],
+    };
+    try {
+      await transitionToolJobToCompleted({ db, jobId, result });
+    } catch (error) {
+      console.warn('[tools] ssh-direct completed terminal persistence failed:', error.message);
+    }
+    releaseActiveToolJob(activeToolJobs, jobId, owner);
+  }
+
+  /**
    * 重启恢复（D5.2 启动扫描）：re-attach 节点侧仍在运行的远程作业，走同一
    * 收尾工厂。节点探测失败不标败（连不上≠作业死），留待下次扫描。
    */
@@ -1899,7 +2066,7 @@ function createToolsExecutor({
       };
     }
 
-  async function executeJob(jobId, toolId, jobDir, stagedInputFiles = []) {
+  async function executeJob(jobId, toolId, jobDir, stagedInputFiles = [], sshContext = null) {
     const owner = claimActiveToolJob(activeToolJobs, { jobId, toolId });
     if (!owner) {
       console.warn('[tools] Job ' + jobId + ' already has an active execution owner');
@@ -2127,15 +2294,15 @@ function createToolsExecutor({
       startedAt,
       artifacts,
       executionTarget: remoteDispatch ? {
-        kind: 'ssh-direct',
+        kind: sshContext ? 'ssh-native' : 'ssh-direct',
         targetId: remoteDispatch.target.id,
         alias: remoteDispatch.target.alias,
         nodeOs: remoteDispatch.probeInfo.os || null,
         runtime: { name: cfg.lang || null, version: runtimeVersion, command: runtimeCommand },
-        remoteJobDir: remoteJobDirPath(jobId),
+        remoteJobDir: sshContext ? `results/jobs/${jobId}` : remoteJobDirPath(jobId),
         argmode: remoteDispatch.argmode,
         agentVersion: AGENT_SCRIPT_HASH,
-        transport: 'tar-over-ssh',
+        transport: sshContext ? 'gateway-ssh-direct' : 'tar-over-ssh',
       } : null,
     });
     const hardTimeoutMs = TOOL_LIFECYCLE.hardTimeoutMs;
@@ -2177,6 +2344,19 @@ function createToolsExecutor({
 
     // BLOCK-57：远程执行路径——提交 + 日志流 + 节点真相轮询 + 产物拉回对账，
     // 终态后与本地路径共用同一条 finalizeJobRun 链。
+    // BLOCK-76 P1：SSH 项目的直跑分支优先——产物留服务器、不走作业上传/拉回。
+    if (remoteDispatch && sshContext) {
+      await runSshDirectToolJob({
+        owner,
+        jobId,
+        jobDir,
+        cfg,
+        sshContext,
+        remoteDispatch,
+        markFailed: markJobFailed,
+      });
+      return;
+    }
     if (remoteDispatch) {
       await runRemoteToolJob({
         owner,
@@ -2264,12 +2444,15 @@ function createToolsExecutor({
     // BLOCK-67 D7：SSH 远程项目的作业默认执行面 = 项目自身 host（防 BLOCK-30 双模式
     // 回潮：显式传了别的目标也一律钉回项目 host，不叠加 composer 分派）。
     // 目标别名未注册时按 alias 注册（unprobed，探测随首次作业引导）。
+    let sshContext = null;
     if (projectId) {
+      let sshProjectRow = null;
       try {
         const sshProject = await dbMod.getAsyncDatabase()
-          .prepare('SELECT workspace_kind, ssh_host FROM projects WHERE id = ?')
+          .prepare('SELECT id, workspace_kind, ssh_host, remote_path FROM projects WHERE id = ?')
           .get(projectId);
         if (sshProject && sshProject.workspace_kind === 'ssh' && sshProject.ssh_host) {
+          sshProjectRow = sshProject;
           let hostTarget = await targetRegistry.getByAlias({ alias: sshProject.ssh_host });
           if (!hostTarget) {
             const registered = await targetRegistry.register({
@@ -2290,6 +2473,11 @@ function createToolsExecutor({
         }
       } catch (e) {
         console.warn('[tools] BLOCK-67 ssh default target resolution failed:', e.message);
+      }
+      // BLOCK-76 P1：SSH 项目的作业执行链 = SSH 直跑（gateway 写编排面 + exec_bg 后台直跑，
+      // 产物留服务器 results/jobs/<jobId>/），不再走 BLOCK-57 作业上传/拉回链。
+      if (sshProjectRow) {
+        sshContext = { project: sshProjectRow };
       }
     }
 
@@ -2398,7 +2586,7 @@ function createToolsExecutor({
         projectId || null,
         executionTargetId
       );
-    void executeJob(jobId, toolId, jobDir, uploadResult.entries.map((entry) => entry.filePath))
+    void executeJob(jobId, toolId, jobDir, uploadResult.entries.map((entry) => entry.filePath), sshContext)
       .catch((error) => handleActiveToolJobSetupFailure({
         activeToolJobs,
         jobId,

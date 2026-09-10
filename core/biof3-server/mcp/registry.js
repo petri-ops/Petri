@@ -1309,6 +1309,18 @@ async function runPluginToolRemote({ sessionExecutionTargetId, jobDir, plugin, l
     const target = await registry.getById({ id: sessionExecutionTargetId });
     if (!target) return failWith('执行目标不存在或已被移除');
 
+    // BLOCK-76 P1 收编（R6）：作业归属 SSH 项目 → 直跑内核（产物留服务器 results/jobs/）。
+    // 非 SSH 项目（本地项目显式选远程目标的 BLOCK-57 原语义）维持旧链直到 P5 拆除。
+    let sshProjectRow = null;
+    try {
+      sshProjectRow = dbModule.getAsyncDatabase()
+        .prepare('SELECT p.id, p.workspace_kind, p.ssh_host, p.remote_path FROM projects p JOIN tool_jobs t ON t.project_id = p.id WHERE t.id = ?')
+        .get(toolJobId) || null;
+    } catch { /* project_id 为 null 时自然走旧链 */ }
+    if (sshProjectRow && sshProjectRow.workspace_kind === 'ssh' && sshProjectRow.ssh_host) {
+      return await runPluginToolSshDirect({ sshProjectRow, jobDir, language, toolJobId, budgetMs, target, registry, runner });
+    }
+
     const probe = await registry.probe({ id: target.id });
     if (!probe.ok) return failWith(`执行目标探测失败（${probe.error}）：${probe.detail || ''}`);
     const runtime = runner.resolveRuntime(probe.info, language);
@@ -1403,6 +1415,101 @@ async function runPluginToolRemote({ sessionExecutionTargetId, jobDir, plugin, l
     };
   } catch (error) {
     return failWith(`远程执行异常：${error.message}`);
+  }
+}
+
+/**
+ * BLOCK-76 P1 收编（R6 用户裁决）——聊天/MCP 插件工具的 SSH 直跑内核。
+ * 与 runPluginToolRemote（BLOCK-57 作业链，P5 拆）的区别：脚本经 gateway 写入
+ * 服务器项目 `results/jobs/<jobId>/`，exec_bg 后台直跑，产物留服务器为真值。
+ *
+ * ⚠ 过渡语义（P2 拆除）：finalizePluginRun 的读面仍是本地 output/——P2 把聊天
+ * 结果读面切 Gateway 前，终态后把 output/ 拉回本地 jobDir 仅作渲染过渡
+ * （B76_CHAT_TRANSITIONAL_PULLBACK 常量门）；真值始终在服务器，本地拉回件
+ * 不参与任何真值登记。
+ */
+const B76_CHAT_TRANSITIONAL_PULLBACK = true;
+
+async function runPluginToolSshDirect({ sshProjectRow, jobDir, language, toolJobId, budgetMs, target, registry, runner: legacyRunner }) {
+  const failWith = (message) => ({ err: Object.assign(new Error(message), { code: 1 }), stdout: '', stderr: message });
+  const { createSshDirectRunner } = require('../helpers/remote-execution/ssh-direct-runner');
+  try {
+    const dbModule = require('../db');
+    const runner = createSshDirectRunner({ project: sshProjectRow });
+    // 运行时解析：复用 target registry 探测（与主链同源）
+    const probe = await registry.probe({ id: target.id });
+    if (!probe.ok) return failWith(`执行目标探测失败（${probe.error}）：${probe.detail || ''}`);
+    const runtime = legacyRunner.resolveRuntime(probe.info, language);
+    if (!runtime.ready) return failWith(`${runtime.reason}（目标 ${target.alias}）`);
+
+    const jobId = 'rjob_' + String(toolJobId || ('t' + Date.now())).replace(/[^A-Za-z0-9._-]/g, '').slice(0, 40) + '_' + String(Date.now()).slice(-6);
+    const staged = await runner.stage({ jobId, localJobDir: jobDir });
+    if (!staged.ok) return failWith(`SSH 直跑编排面上传失败：${(staged.error && staged.error.detail) || ''}`);
+    const started = await runner.start({ jobId, lang: language, runtimeBin: runtime.runtimeBin });
+    if (!started.ok) return failWith(`SSH 直跑启动失败：${(started.error && started.error.detail) || ''}`);
+
+    const deadline = Date.now() + budgetMs;
+    let exit = null;
+    while (Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 2000));
+      exit = await runner.poll({ jobId, pid: started.pid });
+      if (exit.kind === 'terminal') break;
+    }
+    if (!exit || exit.kind !== 'terminal') {
+      await runner.cancel({ pid: started.pid }).catch(() => {});
+      return failWith(`远程执行超出同步预算（${Math.round(budgetMs / 1000)}s）；已请求取消节点侧进程。长任务请拆分或使用异步路径（候选）。`);
+    }
+    const code = Number.isFinite(exit.code) ? exit.code : 1;
+
+    let fullLog = '';
+    try {
+      fullLog = (await runner.pullLog({ jobId, offset: 0 })).chunk.toString('utf8');
+    } catch {}
+
+    // 过渡拉回（见 B76_CHAT_TRANSITIONAL_PULLBACK 注释）：仅渲染件，非真值。
+    if (B76_CHAT_TRANSITIONAL_PULLBACK) {
+      try {
+        const localOut = require('fs');
+        const outDir = path.join(jobDir, 'output');
+        localOut.mkdirSync(outDir, { recursive: true });
+        const listing = await runner.listOutputs({ jobId });
+        for (const f of (listing.ok ? listing.outputs : [])) {
+          const buf = await (require('../helpers/workspace-gateway').resolveWorkspaceBackend(sshProjectRow).backend).read(`results/jobs/${jobId}/output/${f.name}`);
+          localOut.writeFileSync(path.join(outDir, f.name), buf);
+        }
+      } catch (e) {
+        console.warn('[mcp-registry] transitional output pullback failed:', e.message);
+      }
+    }
+
+    const executionTarget = {
+      kind: 'ssh-native',
+      targetId: target.id,
+      alias: target.alias,
+      hostname: (probe.info && probe.info.hostname) || null,
+      nodeOs: (probe.info && probe.info.os) || null,
+      runtime: { name: language, version: runtime.version, command: runtime.runtimeBin },
+      remoteJobDir: `results/jobs/${jobId}`,
+      argmode: 'jobdir',
+      agentVersion: AGENT_SCRIPT_HASH,
+      transport: 'gateway-ssh-direct',
+      environment: null,
+    };
+    if (language === 'r') {
+      // P3（真值语义+兼容）承接：R 包清单 provenance 平移到直跑链（服务器侧采集）。
+      executionTarget.environment = null;
+    }
+    const scriptErr = code !== 0
+      ? Object.assign(new Error(`remote script exited ${code}`), { code })
+      : null;
+    return {
+      err: scriptErr,
+      stdout: fullLog,
+      stderr: '',
+      executionTarget,
+    };
+  } catch (error) {
+    return failWith(`SSH 直跑异常：${error.message}`);
   }
 }
 
