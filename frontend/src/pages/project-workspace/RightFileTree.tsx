@@ -106,19 +106,26 @@ export function RightFileTree({
   useEffect(() => {
     if (!active) return;
     void refreshFiles();
-    const timer = window.setInterval(() => {
-      if (!document.hidden) void refreshFiles();
-    }, 2000);
+    // UI-327 加映 — SSH 远程项目不做 2s 轮询（每次都是网络往返，持续刷新造成不稳定感）；
+    // 刷新触发：初始加载 / projectWorkspaceChanged（agent 写档等）/ 手动刷新按钮。
+    // 本地项目保持 2s 轮询原样（本地 fs 轮询零成本）。
+    const isSsh = project.workspaceKind === 'ssh';
+    let timer: number | undefined;
+    if (!isSsh) {
+      timer = window.setInterval(() => {
+        if (!document.hidden) void refreshFiles();
+      }, 2000);
+    }
     const unsubscribe = subscribeGewuEvent(gewuEvents.projectWorkspaceChanged, (detail) => {
       if (detail.projectId === project.id) {
         void refreshFiles(true);
       }
     });
     return () => {
-      window.clearInterval(timer);
+      if (timer) window.clearInterval(timer);
       unsubscribe();
     };
-  }, [active, project.id, refreshFiles]);
+  }, [active, project.id, project.workspaceKind, refreshFiles]);
 
   const toggleDir = useCallback(async (dirPath: string) => {
     setExpandedDirs((prev) => {
@@ -241,6 +248,17 @@ export function RightFileTree({
           {!activeFile && <span className={styles.workspaceBreadcrumbEmpty}>选择文件预览</span>}
         </div>
         <DataIntakeControl projectId={project.id} onAskAgent={onAskAgent} />
+        {/* UI-327 加映 — 手动刷新（ssh 项目取消轮询后，外部变更靠此按钮 / agent 写档事件刷新） */}
+        <button
+          type="button"
+          className={styles.workspaceTreeToggle}
+          onClick={() => void refreshFiles(true)}
+          title="刷新文件树"
+          aria-label="刷新文件树"
+          data-testid="file-tree-refresh"
+        >
+          <Icon name="repeat" size={13} />
+        </button>
         {/* BLOCK-73 / UI-322 — 「显示隐藏文件」开关（方案 A）：默认关；ssh 项目禁用（node-agent 过滤在 BLOCK-67 面内） */}
         <button
           type="button"
