@@ -4006,6 +4006,20 @@
    "archivePolicy": "archive_when_superseded",
    "phase": "P0-REVIEW"
   },
+    {
+      "id": "SESSION-HANDOFF-2026-09-10",
+      "path": "docs/session-handoff-2026-09-10.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "session-handoff-2026-09-10",
+      "entrypoint": "docs/README.md",
+      "tags": ["session-handoff", "2026-09-10", "block-76", "block-77", "G0"],
+      "notes": "2026-09-10 会话交接文档：BLOCK-76 整包 completed + BLOCK-77 P0-P3 完成 P4 受阻（dell 隧道，已切 aliyun 待跑）+ 清债 974/974 + SKILL 沉淀 6 条规则；技术决策与教训 6 条 + 文件索引 + BLOCK-77 P4 恢复指引。",
+      "registeredAt": "2026-09-10",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "REFERENCE"
+    },
   {
    "id": "BLOCK-77-RESIDENT-TASKS",
    "path": "docs/block-77-resident-tasks-plan.md",
