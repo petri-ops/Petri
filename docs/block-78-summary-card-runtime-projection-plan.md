@@ -77,6 +77,7 @@
 
 - **BLOCK-76-SSH-NATIVE-EXECUTION（active）**：P2 依赖其产物/进程读面 Gateway 化成果；background-processes 读面缺口已作为补项登记进 BLOCK-76（见 §11），本包消费其结果，不重复立项。
 - **BLOCK-68-UI-DECLUTTER（completed）**：降噪方向同源，本包每增一节须先证明其消除了用户必看盲区（失败预警/基线阻塞/审批待办属此列；数据集/会话维度属锦上添花，排在最后）。
+- **BLOCK-79-TOKEN-SPEED-OBSERVABILITY（planned）**：本包 P2 若在摘要卡「任务循环」节显示会话级输出速率（`tokens/s`），**复用其按供应商聚合函数与 provider 归因**，不建第二套速率聚合；两包启动顺序后到者复用前者。
 - **BLOCK-77-RESIDENT-TASKS（planned）**：其「完成通知/回访提醒」与本节「注意」聚合为同一应用内通知面，启动顺序后到者复用前者接口，不建第二套通知真相。
 - **BLOCK-65-SUBAGENT-UX（completed）**：智能体节复用其 `listAgentTasks` 项目过滤语义，不新建 agent 查询面。
 
@@ -106,4 +107,4 @@
 
 ## 11. 进度记录
 
-- 2026-09-10 **立项登记（planned）**：用户三轮质询后裁决按「项目运行时投影」抽象立项排队。同轮完成 BLOCK-76 补项登记——`background-processes` 读面缺口（BLOCK-76 P1 直跑后 ssh 项目后台进程不进本地内存表，而该读面不在原 P2 清单内），写入 BLOCK-76 plan §6 P2 读面清单与 §10 进度。本包 P1 十项纯前端条目已按代码事实核实（§4），P2 四项后端/远程真值面依赖 BLOCK-76。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- 2026-09-10 **立项登记（planned）**：用户三轮质询后裁决按「项目运行时投影」抽象立项排队。同轮完成 BLOCK-76 补项登记——`background-processes` 读面缺口（BLOCK-76 P1 直跑后 ssh 项目后台进程不进本地内存表，而该读面不在原 P2 清单内），写入 BLOCK-76 plan §6 P2 读面清单与 §10 进度。本包 P1 十项纯前端条目已按代码事实核实（§4），P2 四项后端/远程真值面依赖 BLOCK-76。**同轮另立 BLOCK-79-TOKEN-SPEED-OBSERVABILITY**（按供应商的 token 输出速率）：本包 P2 若要显示会话级速率，复用其聚合函数与 provider 归因（§7 协同行）。G0 开发期常态 · 不外推 packaged/Provider/GA。
