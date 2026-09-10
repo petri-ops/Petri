@@ -15,14 +15,8 @@ t = t.replace(
 );
 
 // 1) exec_bg 起进程包重试
-const oldS = [
-  '    // ① 起进程：复用既有 exec_bg 通道（注册表/日志语义不变）',
-  '    const bg = await execBackground({ command, cwd: args.cwd }, ctx);',
-].join('\n');
-const newS = [
-  '    // ① 起进程：复用既有 exec_bg 通道（注册表/日志语义不变）+ 传输重试包裹',
-  '    const bg = await withTransportRetry(() => execBackground({ command, cwd: args.cwd }, ctx));',
-].join('\n');
+const oldS = '    const bg = await execBackground({ command: wrapped, cwd: args.cwd, logFile: `.gewu/resident/${taskId}.log` }, ctx);';
+const newS = '    const bg = await withTransportRetry(() => execBackground({ command: wrapped, cwd: args.cwd, logFile: `.gewu/resident/${taskId}.log` }, ctx));';
 if (!t.includes(oldS)) { console.error('S pattern missing'); process.exit(1); }
 t = t.replace(oldS, newS);
 
@@ -31,9 +25,6 @@ const oldW = [
   '    try {',
   '      await ws.backend.mkdir(dirAbs);',
   "      await ws.backend.write(`${dirAbs}/${taskId}.json`, Buffer.from(JSON.stringify(card, null, 2), 'utf8'));",
-  '    } catch (e) {',
-  "      return { ok: true, taskId, pid: bg.pid, logPath: bg.logFile, cardError: `意图卡写入失败: ${e.message}` };",
-  '    }',
 ].join('\n');
 const newW = [
   '    try {',
@@ -41,9 +32,6 @@ const newW = [
   '        await ws.backend.mkdir(dirAbs);',
   "        await ws.backend.write(`${dirAbs}/${taskId}.json`, Buffer.from(JSON.stringify(card, null, 2), 'utf8'));",
   '      });',
-  '    } catch (e) {',
-  "      return { ok: true, taskId, pid: bg.pid, logPath: bg.logFile, cardError: `意图卡写入失败: ${e.message}` };",
-  '    }',
 ].join('\n');
 if (!t.includes(oldW)) { console.error('W pattern missing'); process.exit(1); }
 t = t.replace(oldW, newW);

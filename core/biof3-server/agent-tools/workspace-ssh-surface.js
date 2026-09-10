@@ -13,6 +13,9 @@
 const crypto = require('crypto');
 
 const workspaceGateway = require('../helpers/workspace-gateway');
+// BLOCK-77 P1 — 驻留创建链传输重试（dell 嵌套 ProxyJump 半死隧道实测：mux 首写 30s
+// 超时 → killSession 重建 → 重试即通；与直跑 runner 的 withTransportRetry 同款纪律）
+const { withTransportRetry } = require('../helpers/remote-execution/ssh-direct-runner');
 
 const sha256 = (value) => crypto.createHash('sha256').update(value).digest('hex');
 
@@ -586,7 +589,7 @@ function createSshWorkspaceSurface({
     // ① 起进程：复用既有 exec_bg 通道（注册表/日志语义不变）；命令包 .exit
     //    标记（回访循环读退出码），日志固定进 .gewu/resident/<taskId>.log。
     const wrapped = `( ${command} ) ; echo $? > .gewu/resident/${taskId}.exit`;
-    const bg = await execBackground({ command: wrapped, cwd: args.cwd, logFile: `.gewu/resident/${taskId}.log` }, ctx);
+    const bg = await withTransportRetry(() => execBackground({ command: wrapped, cwd: args.cwd, logFile: `.gewu/resident/${taskId}.log` }, ctx));
     if (!bg || bg.ok !== true) return bg;
 
     // ② 意图卡一次成型（跨会话交接班凭据）
@@ -606,8 +609,10 @@ function createSshWorkspaceSurface({
       lastCheckNote: null,
     };
     try {
-      await ws.backend.mkdir(dirAbs);
-      await ws.backend.write(`${dirAbs}/${taskId}.json`, Buffer.from(JSON.stringify(card, null, 2), 'utf8'));
+      await withTransportRetry(async () => {
+        await ws.backend.mkdir(dirAbs);
+        await ws.backend.write(`${dirAbs}/${taskId}.json`, Buffer.from(JSON.stringify(card, null, 2), 'utf8'));
+      });
     } catch (e) {
       return { ok: true, taskId, pid: bg.pid, logPath: bg.logFile, cardError: `意图卡写入失败: ${e.message}` };
     }
