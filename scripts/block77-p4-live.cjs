@@ -5,7 +5,7 @@
  * BLOCK-77 P4 实机全链验收（两阶段，外层 bash 编排关软件/重开）：
  *
  * phase1:
- *   REST 建 dell SSH 项目 → CDP 真实模型对话（resident_task_create 挂机 sleep）
+ *   REST 建 aliyun SSH 项目 → CDP 真实模型对话（resident_task_create 挂机 sleep）
  *   → 断言意图卡落服务器 + 进程存活 → 记录 taskId/pid → 写状态文件
  * phase2（外层已重启软件 = 重开交接班）:
  *   CDP 真实对话：agent 应主动汇报驻留任务（systemPrompt 注入 digest）
@@ -56,7 +56,7 @@ async function fetchJson(url, opts = {}) {
   try { return { status: r.status, json: JSON.parse(r.body.toString('utf8')) }; } catch { return { status: r.status, json: null }; }
 }
 function sshDell(cmd) {
-  return execFileSync('ssh', ['-o', 'BatchMode=yes', '-o', 'ConnectTimeout=10', 'dell', cmd], { encoding: 'utf8', timeout: 30000, windowsHide: true });
+  return execFileSync('ssh', ['-o', 'BatchMode=yes', '-o', 'ConnectTimeout=10', 'aliyun', cmd], { encoding: 'utf8', timeout: 30000, windowsHide: true });
 }
 
 // CDP 对话驱动（block67-p2-live 同款）
@@ -121,7 +121,7 @@ async function createProject(name) {
   sshDell(`rm -rf ${REMOTE_ROOT} && mkdir -p ${REMOTE_ROOT}`);
   const created = await fetchJson(`${API}/data/projects`, {
     method: 'POST', headers: AUTH,
-    body: JSON.stringify({ name, workspaceKind: 'ssh', sshHost: 'dell', remotePath: REMOTE_ROOT }),
+    body: JSON.stringify({ name, workspaceKind: 'ssh', sshHost: 'aliyun', remotePath: REMOTE_ROOT }),
   });
   const projectId = created.json && created.json.project && created.json.project.id;
   assert('project created', !!projectId, JSON.stringify(created.json || created).slice(0, 120));
@@ -135,7 +135,7 @@ async function main() {
   let projectId = null;
 
   if (PHASE === 'phase1') {
-    // ── ① 建 dell SSH 项目 ──
+    // ── ① 建 aliyun SSH 项目 ──
     projectId = await createProject(`P4驻留-${Date.now()}`);
     if (!projectId) process.exit(1);
     const client = await connectMain(projectId);
@@ -166,7 +166,7 @@ async function main() {
     assert('P4-2 intent card on server (running)', card.status === 'running', `status=${card.status}`);
     let alive = true;
     try { sshDell(`kill -0 ${card.backingProcess.pid}`); } catch { alive = false; }
-    assert('P4-3 backing process alive on dell', alive, `pid=${card.backingProcess.pid}`);
+    assert('P4-3 backing process alive on aliyun', alive, `pid=${card.backingProcess.pid}`);
 
     // ── ④ 交接班 Channel B：同会话追问（systemPrompt 已注入 digest）──
     const followup = await sendAndWaitReply(client, '现在项目里有几个驻留任务？请用 resident_task_list 确认并汇报。');

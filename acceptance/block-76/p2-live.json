@@ -1,15 +1,15 @@
 {
-  "startedAt": "2026-09-10T14:09:23.828Z",
+  "startedAt": "2026-09-10T16:03:03.753Z",
   "assertions": [
     {
       "name": "P2-1 ssh project created",
       "pass": true,
-      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mtvlstek_y5o9\",\"name\":\"P2读面-1789049365714\",\"created_at\":\"2026-09-10T14:09:25.724Z\",\"updated_at\":\"2026-09-1"
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mtvpuznu_my4f\",\"name\":\"P2读面-1789056185600\",\"created_at\":\"2026-09-10T16:03:05.610Z\",\"updated_at\":\"2026-09-1"
     },
     {
       "name": "P2-2 job submitted",
       "pass": true,
-      "detail": "{\"ok\":true,\"jobId\":\"job_f5ca3bd6407a4591\",\"status\":\"pending\",\"isTestRun\":false,\"requestId\":\"ac24df90-e32\"}"
+      "detail": "{\"ok\":true,\"jobId\":\"job_569410863b104d14\",\"status\":\"pending\",\"isTestRun\":false,\"requestId\":\"5b9659da-0f0\"}"
     },
     {
       "name": "P2-3 deseq2 completed on dell (direct chain)",
@@ -29,7 +29,7 @@
     {
       "name": "P2-6 report generated (remote compose)",
       "pass": true,
-      "detail": "{\"ok\":true,\"fileName\":\"final-report.html\",\"sourceName\":\"report.html\",\"generatedAt\":\"2026-09-10T14:10:35.205Z\",\"embeddedAssets\":[],\"theme\":null,\"url\":\"/api/tools"
+      "detail": "{\"ok\":true,\"fileName\":\"final-report.html\",\"sourceName\":\"report.html\",\"generatedAt\":\"2026-09-10T16:04:11.098Z\",\"embeddedAssets\":[],\"theme\":null,\"url\":\"/api/tools"
     },
     {
       "name": "P2-7 report.html written back to server (truth)",
@@ -43,5 +43,5 @@
     }
   ],
   "allPass": true,
-  "finishedAt": "2026-09-10T14:10:45.498Z"
+  "finishedAt": "2026-09-10T16:04:20.593Z"
 }
