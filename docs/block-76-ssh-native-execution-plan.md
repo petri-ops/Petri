@@ -45,7 +45,7 @@
 |---|---|---|
 | **P0 评审** | 以 §4 裁决清单为底，落评审文档（产物布局/读面改造范围/历史兼容语义），用户确认后进 P1 | 评审文档 confirmed |
 | **P1 执行链改造** | tools-executor 增「SSH 直跑」分支（mux exec + 服务器 results/jobs 布局），SSH 项目插件作业切新链；聊天/MCP `runPluginToolRemote` 一并收编新内核 | 真实节点上插件作业服务器直跑成功 |
-| **P2 读面改造（全量）** | 全部读本地产物的端点一次切 Gateway：tools/file、tools/log/stream、tools/report、result-studio revisions artifact/table-page/source、interaction、harness script/delivery/replay、storage gc/preview-budget | 结果页/结果窗/报告/交互查看器在远程项目全部展示服务器产物 |
+| **P2 读面改造（全量）** | 全部读本地产物的端点一次切 Gateway：tools/file、tools/log/stream、tools/report、result-studio revisions artifact/table-page/source、interaction、harness script/delivery/replay、storage gc/preview-budget；**+ 补项 `ai-agent/background-processes`**（会话后台进程表——P1 直跑后 ssh 项目进程在服务器，本地内存表失明，须按 `workspaceKind` 路由：local 读既有内存表零改动 / ssh 读新链进程投影） | 结果页/结果窗/报告/交互查看器/后台进程浮窗在远程项目全部展示服务器真值 |
 | **P3 真值语义 + 兼容** | provenance 环境留痕平移；本地历史结果库只读兼容；Artifact Truth 契约文档更新 | 新旧结果并存可读 |
 | **P4 实机验收** | 真实节点全链：远程项目跑插件 → 产物落服务器 → 结果页展示 → provenance 清单正确 | 验收证据 `acceptance/block-76/` |
 | **P5 拆除 + 收口** | 按 D5 清单拆除 BLOCK-57 作业机制（保留 target-registry/validate/mux）；全量回归；台账回写 | 整包 completed |
@@ -74,6 +74,7 @@
 - 0 新 npm 依赖倾向（复用 mux/Gateway；如需依赖单独裁决）。
 
 ## 10. 进度记录
+- 2026-09-10 **补项登记（用户裁决；与摘要卡片运行时投影关联）**：`background-processes` 读面缺口——BLOCK-34 P3 的 `GET /api/ai/agent/background-processes` 与 UI-268 后台进程浮窗读的是 biof3-server **本地内存表**（`agent-tools/workspace-tools.js` 的 backgroundProcesses，per conversation/sessionKey 隔离），而 P1 已把 ssh 项目 exec_bg 改为服务器直跑（`ssh-direct-runner.js`：`ps_pid`/`.exit` 双信号 + output/ 清单）——ssh 项目的后台进程**不进本地表，浮窗对远程项目整体失明**；且该读面**不在原 R3/P2 读面清单内**（原清单为产物读面）。用户裁决登记为 **P2 补项**：按 `project.workspaceKind` 路由——local 读既有内存表（逐字节零改动）/ ssh 读新链进程投影（`ps_pid` + `.pid`/`.exit` 语义，与 P1 直跑同源），随 P2 读面全量 Gateway 化一并交付，不新增第二套进程真值。关联：`BLOCK-78-SUMMARY-CARD-RUNTIME-PROJECTION`（摘要卡片项目化=运行时投影，planned）主张同一抽象（执行侧数据按项目形态路由真值源）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 - 2026-09-10 **P2 进行中（切片 1/3 提交）**：新增 job-output-reader.js 统一读取器（result_json.workspaceKind=ssh → gateway Buffer 读取，16MB 预算诚实降级；非 ssh 返回 null 本地链零改动）；已接线 /api/tools/file/:jobId/:filename（结果页/结果窗产物壳主链，html 主题注入保留）与 /api/tools/log/:id（服务器 run.log 真值增量读，失败回退本地镜像）。待续切片：result-studio revisions artifact/table-page/source + interaction + harness 回放 + report 生成 + storage gc/preview + 拆聊天过渡拉回（B76_CHAT_TRANSITIONAL_PULLBACK）。
 - 2026-09-10 **P1 收口（dell 实机 7/7 allPass，scripts/block76-p1-live.cjs，acceptance/block-76/p1-live.json）**：用户裁决改用 dell 节点（Linux+bash+Rscript+841 R 包，经 aliyun 反向隧道 6022 可达，运行时完备免装机）——REST 创建 dell SSH 项目 → /api/tools/run 跑真插件 deseq2（demo 数据）→ 直跑链全程：gateway 编排面上传 → exec_bg 后台直跑 → .exit 终态 → completed；result_json=workspaceKind ssh + 相对 outputPath + transport gateway-ssh-direct；服务器 output/ 10+ 真实分析产物（deg_table/heatmap/dispersion 等）+ run.log 真值；本地 staging 零产物拉回（仅 remote-runner.log 镜像缓存）。**实机抓真修二**：① runner 首版传相对路径被 agent 解析到 $HOME（/root/results/jobs/ 误写）——一切 gateway 调用改 safeRemoteJoin(root, rel) 绝对化；② exec_bg 的 pgrep 竞态致 spawn_failed 误报——命令自写 output/.pid 为 pid 真相（pgrep 缺失/竞态均免疫）。聊天旁路收编（runPluginToolSshDirect）与主链同内核同修。进入 P2（读面全量 Gateway 化，含拆聊天过渡拉回）。
 

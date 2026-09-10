@@ -4027,6 +4027,31 @@
    "registeredAt": "2026-09-10",
    "phase": "PLANNED",
    "notes": "长任务驻留与回访通知（用户裁决「第二档」）。①任务意图卡（.gewu/resident/ 描述意图与归属，执行真相仍在 process/job 状态机）②回访循环（本地 60s 检查驻留任务，异常 proactive 提醒，不自动重启）③交接班（重开软件 agent 自动汇报进度）④完成通知（应用内必做；移动推送联动 BLOCK-70 预留接口）。③档真驻留 agent（LLM 上服务器）明确排除另立项。复用 exec_background/process_status/proactive 事件；对本地与 SSH 项目皆可用。启动待串行队列。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+  },
+  {
+   "id": "BLOCK-78-SUMMARY-CARD-RUNTIME-PROJECTION",
+   "path": "docs/block-78-summary-card-runtime-projection-plan.md",
+   "kind": "work-package",
+   "status": "planned",
+   "canonical": true,
+   "truthDomain": "block-78-summary-card-runtime-projection",
+   "entrypoint": "docs/README.md",
+   "tags": [
+    "block-78",
+    "summary-card",
+    "runtime-projection",
+    "workspace-kind",
+    "terminal",
+    "background-tasks",
+    "subagent",
+    "notification",
+    "resource",
+    "G0"
+   ],
+   "archivePolicy": "archive_when_superseded",
+   "registeredAt": "2026-09-10",
+   "phase": "PLANNED",
+   "notes": "摘要卡片项目化=项目运行时投影（用户三轮质询后裁决立项）。起点=会话摘要卡片（WorkspaceSummaryCard）只覆盖半个项目真值：任务/统计/最近分析来自项目级 jobs 查询（listProjectJobs）、任务循环来自 useDurableConversationLoop，而「运行环境」整节是**本机全局**——useBackendStatus 是 App 根全局 Context（本机 Electron 后端）、useRuntimeResourceSnapshot 直打 /api/harness/resource-snapshot 且不带 projectId（biof3-server 所在机器 os 指标）；BLOCK-67 后项目分 local/ssh 两形态，ssh 项目作业跑在服务器却在报本机健康=本机视角残留。用户点名四项必须随项目绑定：终端（useTerminalTabs 已支持 ssh:{alias,remotePath} 直挂远程 shell，绑定已就位但 tab/运行态锁在 BottomTerminal 组件内、卡片零投影）/ 后台任务（ToolActivityDock+background-processes 路由读本地内存表，BLOCK-76 P1 直跑后 ssh 项目进程在服务器→浮窗失明，已登记为 BLOCK-76 补项）/ 通知（现仅 ToastProvider 全局瞬时，无持久通知中心/无项目作用域/无系统通知）/ 资源详情（本机全局；mux 现有动词无资源类→远程真值需新增动词）。智能体（SubAgentsBar/listAgentTasks 数据天然带 projectId，仅存在于聊天侧）。统一抽象=凡执行侧数据一律按 project.workspaceKind 路由真值源，渲染层只认「这个项目的运行时」，不出现第二套本机假设。阶段：P0 定位收敛（眉题「项目摘要」vs aria-label「会话摘要」统一）+compact 三档降级表 → P1 纯前端十项（定位收敛/失败强调 jobStats.failed/基线预警 g0Baseline blocked 高于「空闲」/执行位置标注 ToolJob.execution_target_id+workspaceKind/智能体节/终端投影/注意节（失败·待审批·进程异常·agent 终态聚合，Toaster 保留瞬时层）/会话维度/数据集概览/空态指引）→ P2 后端与远程真值面（ssh 资源真值需 mux 新动词或先诚实标注本机来源、项目级成本汇总、结果库占用依赖 BLOCK-76 P2、background-processes 按 workspaceKind 路由、跨会话持久通知另裁）→ P3 实机验收收口。范围外：通用仪表盘化（宽度预算 26%~32% 非 mini dashboard）/R 包 provenance 摘要（属结果详情层）/不改 Toast 瞬时语义/不动 composerWidth 弹性契约(BLOCK-60)/不动窗口系统。依赖协同：BLOCK-76（读面与进程真值，本包不触碰其在制文件面 core/biof3-server/helpers/remote-execution/*）、BLOCK-68（降噪同源，新增节须先证明消除盲区）、BLOCK-77（通知面复用不建第二真相）、BLOCK-65（agent 查询面复用）。单一真相：纯读面投影，不新建项目/作业/agent/通知状态。G0 开发期常态 · 不外推 packaged/Provider/GA。"
   }
  ],
  "lastUpdated": "2026-09-10",
