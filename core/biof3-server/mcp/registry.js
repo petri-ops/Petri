@@ -1259,7 +1259,33 @@ async function _runPluginScript(
           toolJobId,
           startedAt,
           budgetMs: 280000,
+          resolve,
+          plans,
+          outputDir,
         });
+        // BLOCK-76 P3 — 直跑终态：ssh 作业 result_json 直记服务器真值（已由
+        // runPluginToolSshDirect 持久化），不经本地 finalizePluginRun、无拉回。
+        if (remoteOutcome.directSummary) {
+          if (db && toolJobId) {
+            try {
+              db.updateToolJob(toolJobId, {
+                status: 'completed',
+                resultJson: remoteOutcome.directSummary,
+                completedAt: Date.now(),
+              });
+              if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'completed');
+            } catch (e) {
+              console.warn('[mcp-registry] direct summary persistence failed:', e.message);
+            }
+          }
+          resolve({
+            content: [{ type: 'text', text: JSON.stringify(remoteOutcome.directSummary, null, 2) }],
+            isError: false,
+            _jobDir: jobDir,
+            toolJobId,
+          });
+          return undefined;
+        }
         const finalizeErr = remoteOutcome.err;
         await finalizePluginRun(finalizeErr, remoteOutcome.stdout, remoteOutcome.stderr);
         if (!finalizeErr && remoteOutcome.executionTarget) {
@@ -1294,7 +1320,7 @@ async function _runPluginScript(
  * 上传 bundle → detached start → 轮询节点真相 → 拉回产物 + sha256 对账。
  * 返回与本地 execFile 同形的 (err, stdout, stderr) 三元组，交由共用收尾。
  */
-async function runPluginToolRemote({ sessionExecutionTargetId, jobDir, plugin, language, toolJobId, startedAt, budgetMs }) {
+async function runPluginToolRemote({ sessionExecutionTargetId, jobDir, plugin, language, toolJobId, startedAt, budgetMs, resolve, plans, outputDir }) {
   const REMOTE_SAMPLES = {
     peak: {},
     sampling: { status: 'unavailable', sampleCount: null, reason: 'remote_execution' },
@@ -1318,7 +1344,7 @@ async function runPluginToolRemote({ sessionExecutionTargetId, jobDir, plugin, l
         .get(toolJobId) || null;
     } catch { /* project_id 为 null 时自然走旧链 */ }
     if (sshProjectRow && sshProjectRow.workspace_kind === 'ssh' && sshProjectRow.ssh_host) {
-      return await runPluginToolSshDirect({ sshProjectRow, jobDir, language, toolJobId, budgetMs, target, registry, runner });
+      return await runPluginToolSshDirect({ sshProjectRow, jobDir, plugin, language, toolJobId, budgetMs, target, registry, runner, resolve, plans, outputDir });
     }
 
     const probe = await registry.probe({ id: target.id });
@@ -1419,18 +1445,14 @@ async function runPluginToolRemote({ sessionExecutionTargetId, jobDir, plugin, l
 }
 
 /**
- * BLOCK-76 P1 收编（R6 用户裁决）——聊天/MCP 插件工具的 SSH 直跑内核。
- * 与 runPluginToolRemote（BLOCK-57 作业链，P5 拆）的区别：脚本经 gateway 写入
- * 服务器项目 `results/jobs/<jobId>/`，exec_bg 后台直跑，产物留服务器为真值。
- *
- * ⚠ 过渡语义（P2 拆除）：finalizePluginRun 的读面仍是本地 output/——P2 把聊天
- * 结果读面切 Gateway 前，终态后把 output/ 拉回本地 jobDir 仅作渲染过渡
- * （B76_CHAT_TRANSITIONAL_PULLBACK 常量门）；真值始终在服务器，本地拉回件
- * 不参与任何真值登记。
+ * BLOCK-76 P1 收编（R6 用户裁决）/ P3 远程化终态——聊天/MCP 插件工具的 SSH 直跑内核。
+ * 终态不走本地 finalizePluginRun（其读本地 output/ 构造聊天卡），改由
+ * runPluginToolSshDirect 直构 ssh 语义 summary（result_json 记服务器
+ * results/jobs/<jobId>/output 真值 + files[] 带 /api/tools/file url），
+ * 产物内容经 P2 Gateway 读面按需读取——本地无拉回、无第二真相。
  */
-const B76_CHAT_TRANSITIONAL_PULLBACK = true;
 
-async function runPluginToolSshDirect({ sshProjectRow, jobDir, language, toolJobId, budgetMs, target, registry, runner: legacyRunner }) {
+async function runPluginToolSshDirect({ sshProjectRow, jobDir, plugin, language, toolJobId, budgetMs, target, registry, runner: legacyRunner }) {
   const failWith = (message) => ({ err: Object.assign(new Error(message), { code: 1 }), stdout: '', stderr: message });
   const { createSshDirectRunner } = require('../helpers/remote-execution/ssh-direct-runner');
   try {
@@ -1465,22 +1487,6 @@ async function runPluginToolSshDirect({ sshProjectRow, jobDir, language, toolJob
     try {
       fullLog = (await runner.pullLog({ jobId, offset: 0 })).chunk.toString('utf8');
     } catch {}
-
-    // 过渡拉回（见 B76_CHAT_TRANSITIONAL_PULLBACK 注释）：仅渲染件，非真值。
-    if (B76_CHAT_TRANSITIONAL_PULLBACK) {
-      try {
-        const localOut = require('fs');
-        const outDir = path.join(jobDir, 'output');
-        localOut.mkdirSync(outDir, { recursive: true });
-        const listing = await runner.listOutputs({ jobId });
-        for (const f of (listing.ok ? listing.outputs : [])) {
-          const buf = await (require('../helpers/workspace-gateway').resolveWorkspaceBackend(sshProjectRow).backend).read(`results/jobs/${jobId}/output/${f.name}`);
-          localOut.writeFileSync(path.join(outDir, f.name), buf);
-        }
-      } catch (e) {
-        console.warn('[mcp-registry] transitional output pullback failed:', e.message);
-      }
-    }
 
     const executionTarget = {
       kind: 'ssh-native',
@@ -1518,11 +1524,39 @@ async function runPluginToolSshDirect({ sshProjectRow, jobDir, language, toolJob
     const scriptErr = code !== 0
       ? Object.assign(new Error(`remote script exited ${code}`), { code })
       : null;
+
+    // BLOCK-76 P3 — 直跑终态 summary：result_json 直记 ssh 语义，聊天卡经
+    // /api/tools/file（Gateway 读面）取服务器产物，不再拉回本地（过渡拉回已拆除）。
+    const outputs = await runner.listOutputs({ jobId }).catch(() => ({ ok: false, outputs: [] }));
+    let manifest = null;
+    try {
+      const gwRead = require('../helpers/workspace-gateway').resolveWorkspaceBackend(sshProjectRow).backend;
+      const mb = await gwRead.read(`results/jobs/${jobId}/output/manifest.json`);
+      manifest = JSON.parse(mb.toString('utf8'));
+    } catch {}
+    const directSummary = {
+      workspaceKind: 'ssh',
+      ssh: { alias: target.alias, path: sshProjectRow.remote_path },
+      outputPath: `results/jobs/${jobId}/output`,
+      transport: 'gateway-ssh-direct',
+      tool: { id: plugin.id, version: plugin.version || null, language: language || null },
+      manifest: manifest || undefined,
+      files: (outputs.ok ? outputs.outputs : []).map((f) => ({
+        name: f.name,
+        filename: f.name,
+        type: f.name.endsWith('.png') ? 'plot' : f.name.endsWith('.csv') ? 'table' : 'file',
+        url: `/api/tools/file/${encodeURIComponent(toolJobId)}/${encodeURIComponent(f.name)}`,
+        size: f.size,
+      })),
+      stdout: String(fullLog || '').slice(-2000),
+      executionTarget,
+    };
     return {
       err: scriptErr,
       stdout: fullLog,
       stderr: '',
       executionTarget,
+      directSummary,
     };
   } catch (error) {
     return failWith(`SSH 直跑异常：${error.message}`);
