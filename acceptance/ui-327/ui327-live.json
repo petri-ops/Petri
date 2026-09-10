@@ -1,27 +1,27 @@
 {
-  "startedAt": "2026-09-10T00:28:20.694Z",
+  "startedAt": "2026-09-10T01:26:39.584Z",
   "assertions": [
     {
-      "name": "向导① 连接主机（chip=aliyun）+ 进入浏览步",
+      "name": "向导① 连接主机（chip=aliyun）+ 路径输入预填 /root/ + 候选展示",
       "pass": true,
-      "detail": "{\"step\":\"pick\",\"chip\":\"aliyun\",\"selected\":\"/root/gewu-block67-demo\"}"
+      "detail": "{\"step\":\"pick\",\"chip\":\"aliyun\",\"selected\":\"/root/gewu-block67-demo/\",\"hasCandidate\":true,\"tabSeen\":true}"
     },
     {
-      "name": "向导② 路径浏览进入 gewu-block67-demo",
+      "name": "向导② Tab 补全 /root/ge → /root/gewu-block67-demo/（onKeyDown 链）",
       "pass": true,
-      "detail": "/root/gewu-block67-demo"
+      "detail": "{\"step\":\"pick\",\"chip\":\"aliyun\",\"selected\":\"/root/gewu-block67-demo/\",\"hasCandidate\":true,\"tabSeen\":true}"
     },
     {
       "name": "向导③ 创建项目（API 对账：新 ssh 项目出现）",
       "pass": true,
-      "detail": "{\"id\":\"p_mtusheza_wgsd\",\"name\":\"gewu-block67-demo\"}"
+      "detail": "{\"id\":\"p_mtuukew7_qms0\",\"name\":\"gewu-block67-demo\"}"
     },
     {
       "name": "导航进入新建项目页",
       "pass": true,
-      "detail": "expect /project/p_mtusheza_wgsd"
+      "detail": "expect /project/p_mtuukew7_qms0"
     }
   ],
   "allPass": true,
-  "finishedAt": "2026-09-10T00:28:45.550Z"
+  "finishedAt": "2026-09-10T01:27:04.474Z"
 }

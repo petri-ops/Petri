@@ -153,8 +153,8 @@ describe('BLOCK-67 左栏 ssh 项目标识与远程连接', () => {
   });
 });
 
-describe('UI-327 左栏 globe 行内创建向导', () => {
-  it('别名模式：连接 → sshConnectHost；进入选路径步 → 目录浏览渲染', async () => {
+describe('UI-327 左栏 globe 行内创建向导（终端式路径输入）', () => {
+  it('别名模式：连接 → 进入终端式路径步（输入预填 $HOME/、候选自动加载）', async () => {
     const ctx = buildCtx('chat');
     render(
       <MemoryRouter>
@@ -163,19 +163,46 @@ describe('UI-327 左栏 globe 行内创建向导', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: '新建 SSH 远程项目' }));
     const panel = screen.getByTestId('left-ssh-create-panel');
-    const setVal = (label: string, v: string) => {
-      const input = panel.querySelector(`input[aria-label="${label}"]`) as HTMLInputElement;
+    const setVal = (el: HTMLInputElement, v: string) => {
       const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-      setter?.call(input, v);
-      input.dispatchEvent(new Event('input', { bubbles: true }));
+      setter?.call(el, v);
+      el.dispatchEvent(new Event('input', { bubbles: true }));
     };
-    setVal('SSH 主机别名', 'aliyun');
+    setVal(panel.querySelector('input[aria-label="SSH 主机别名"]') as HTMLInputElement, 'aliyun');
     fireEvent.click(screen.getByText('连接'));
-    await waitFor(() => expect(ctx.sshConnectHost).toHaveBeenCalledWith('aliyun'));
-    await waitFor(() => expect(ctx.sshListDirs).toHaveBeenCalledWith('aliyun', '/root'));
-    await waitFor(() => expect(screen.getByTestId('ssh-connected-chip').textContent).toBe('aliyun'));
-    expect(screen.getByTestId('ssh-selected-path').textContent).toBe('/root');
-    expect(screen.getByText('gewu-block67-demo/')).toBeTruthy();
+    const pathInput = (await waitFor(() => {
+      const el = panel.querySelector('[data-testid="ssh-path-input"]') as HTMLInputElement;
+      expect(el.value).toBe('/root/');
+      return el;
+    })) as HTMLInputElement;
+    expect(ctx.sshListDirs).toHaveBeenCalledWith('aliyun', '/root');
+    await waitFor(() => expect(screen.getByText('/root/gewu-block67-demo/')).toBeTruthy());
+    void pathInput;
+  });
+
+  it('Tab 补全：输入 /root/ge → Tab → 自动完成 /root/gewu-block67-demo/', async () => {
+    const ctx = buildCtx('chat');
+    render(
+      <MemoryRouter>
+        <LeftPanel ctx={ctx} />
+      </MemoryRouter>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '新建 SSH 远程项目' }));
+    const panel = screen.getByTestId('left-ssh-create-panel');
+    fireEvent.click(screen.getByText('连接'));
+    const pathInput = (await waitFor(() => {
+      const el = panel.querySelector('[data-testid="ssh-path-input"]') as HTMLInputElement;
+      expect(el.value).toBe('/root/');
+      return el;
+    })) as HTMLInputElement;
+    const setVal = (v: string) => {
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+      setter?.call(pathInput, v);
+      pathInput.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+    setVal('/root/ge');
+    fireEvent.keyDown(pathInput, { key: 'Tab', bubbles: true, cancelable: true });
+    await waitFor(() => expect(pathInput.value).toBe('/root/gewu-block67-demo/'));
   });
 
   it('IP+密码模式：出现密码字段（type=password）与 IP/端口/用户名', () => {
@@ -194,7 +221,7 @@ describe('UI-327 左栏 globe 行内创建向导', () => {
     expect(panel.querySelector('input[aria-label="SSH 用户名"]')).toBeTruthy();
   });
 
-  it('选路径步：点击「在此目录创建项目」触发 sshCreateAt', async () => {
+  it('在此路径创建项目：尾斜杠归一后触发 sshCreateAt', async () => {
     const ctx = buildCtx('chat');
     render(
       <MemoryRouter>
@@ -203,16 +230,47 @@ describe('UI-327 左栏 globe 行内创建向导', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: '新建 SSH 远程项目' }));
     const panel = screen.getByTestId('left-ssh-create-panel');
-    const setVal = (label: string, v: string) => {
-      const input = panel.querySelector(`input[aria-label="${label}"]`) as HTMLInputElement;
-      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-      setter?.call(input, v);
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-    };
-    setVal('SSH 主机别名', 'aliyun');
+    const aliasInput = panel.querySelector('input[aria-label="SSH 主机别名"]') as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+    setter?.call(aliasInput, 'aliyun');
+    aliasInput.dispatchEvent(new Event('input', { bubbles: true }));
     fireEvent.click(screen.getByText('连接'));
-    await waitFor(() => expect(screen.getByText('在此目录创建项目')).toBeTruthy());
-    fireEvent.click(screen.getByText('在此目录创建项目'));
+    await waitFor(() => expect(screen.getByText('在此路径创建项目')).toBeTruthy());
+    fireEvent.click(screen.getByText('在此路径创建项目'));
     await waitFor(() => expect(ctx.sshCreateAt).toHaveBeenCalledWith({ alias: 'aliyun', remotePath: '/root' }));
+  });
+});
+
+describe('UI-327 Tab 多候选：补全到公共前缀', () => {
+  it('多候选匹配同一前缀时 Tab 补全到公共段，不误选', async () => {
+    const ctx = buildCtx('chat');
+    ctx.sshListDirs = vi.fn(async () => ({
+      ok: true, path: '/root',
+      dirs: [
+        { name: 'gewu-a', path: '/root/gewu-a' },
+        { name: 'gewu-b', path: '/root/gewu-b' },
+      ],
+    }));
+    render(
+      <MemoryRouter>
+        <LeftPanel ctx={ctx} />
+      </MemoryRouter>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '新建 SSH 远程项目' }));
+    const panel = screen.getByTestId('left-ssh-create-panel');
+    fireEvent.click(screen.getByText('连接'));
+    const pathInput = (await waitFor(() => {
+      const el = panel.querySelector('[data-testid="ssh-path-input"]') as HTMLInputElement;
+      expect(el.value).toBe('/root/');
+      return el;
+    })) as HTMLInputElement;
+    const setVal = (v: string) => {
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+      setter?.call(pathInput, v);
+      pathInput.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+    setVal('/root/ge');
+    fireEvent.keyDown(pathInput, { key: 'Tab', bubbles: true, cancelable: true });
+    await waitFor(() => expect(pathInput.value).toBe('/root/gewu-'));
   });
 });

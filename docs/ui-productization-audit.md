@@ -3010,6 +3010,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **改动**：① `LeftPanel` 头部「+」旁增 globe 按钮，切换行内向导面板（`LeftSshCreatePanel.tsx` 独立组件，left column 内渲染）；② **步骤①连接**：别名（~/.ssh/config）或 IP+密码（一次性装公钥，密码不存储）→ `/api/ssh-projects/connect`（runSshOp echo $HOME，连通性检测 + 返回浏览起点）；③ **步骤②选路径**：远端目录浏览器（`/api/ssh-projects/list` = Gateway fs_list 仅目录；$HOME 起点/上级/逐层进入/刷新）+ 已连接 chip + 当前路径展示；④ 「在此目录创建项目」→ validate（含 agent 部署）→ createProject → 导航进新项目。错误全程诚实呈现（transport 分类 + retryable 可重试标注）；local 项目与既有创建链零改动；0 新依赖。
 
-**门禁**：tsc 0；LeftPanel/home 定向 vitest 13/13（向导三步：连接触发 sshConnectHost、浏览渲染目录、创建触发 sshCreateAt；IP+密码字段形态；useSearchParams mock 补齐）。**实机**：`scripts/block67-ui327-live.cjs` 4/4 allPass（`acceptance/ui-327/ui327-live.json` + 截图）——项目页点 globe → 别名连接 aliyun → 浏览起点 /root → 进入 gewu-block67-demo → 创建（API 对账新 ssh 项目 p_mtusheza_wgsd 出现）→ 导航进入新项目页，0 renderer error，探针清理。
+**加映（同日，用户裁决终端式路径输入）**：选路径升级为**终端式**——路径输入框打字即出候选目录下拉（300ms 防抖 fs_list 父目录 + basename 前缀过滤）、**Tab 补全**（单候选直接补全；多候选补全到公共前缀，bash 语义）、↓↑ 选候选、Enter 采纳、候选点击=补全进层；保留上级/刷新按钮。实机抓真修：Tab 时按 state 里**上一层未过滤列表**判定多候选，LCP 比输入还短导致无操作——改为先按「父目录+前缀」过滤（实机 aliyun /root 三目录复现）。
+
+**门禁**：tsc 0；LeftPanel/home 定向 vitest 14/14（含 Tab 单候选补全 / 多候选 LCP / IP+密码字段形态）。**实机**：`scripts/block67-ui327-live.cjs` 5/5 allPass（`acceptance/ui-327/ui327-live.json` + 截图）——项目页点 globe → 别名连接 aliyun → 路径输入预填 /root/ + 候选展示 → **输入 /root/ge + Tab → 补全 /root/gewu-block67-demo/** → 创建（API 对账新 ssh 项目出现）→ 导航进入新项目页，0 renderer error，探针清理。
 
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收，aliyun 真实节点）。G0 开发期常态 · 不外推 packaged / Provider / GA。

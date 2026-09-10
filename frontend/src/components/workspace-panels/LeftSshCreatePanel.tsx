@@ -1,15 +1,38 @@
 // ============================================================
-// UI-327 — 左栏行内 SSH 创建向导（globe 切换）：先连接主机，再浏览远端目录选路径。
+// UI-327 — 左栏行内 SSH 创建向导（globe 切换）。
 // 步骤① connect：别名（~/.ssh/config）或 IP+密码（一次性装公钥，密码不存储）。
-// 步骤② pick：远端目录浏览器（$HOME 起点 / 上级 / 逐层进入）→ 在此目录创建项目。
-// 表单态本地持有；连接/浏览/注册/创建全部走 ctx（单一链路，导航由 ctx.sshCreateAt 完成）。
+// 步骤② pick：终端式路径输入——打字即出候选目录（下方列表）、Tab 补全、
+//        方向键选择、Enter 采纳；从 / 或 $HOME 开始均可。
+// 全部远端访问走 ctx（连接/浏览/注册/创建），导航由 ctx.sshCreateAt 完成。
 // ============================================================
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import type { LeftPanelContext } from './LeftPanel';
 import styles from '@/pages/project-workspace.module.css';
 
 type SshCreateMode = 'alias' | 'password';
+
+/** 最长公共前缀（Tab 多候选时补全到公共段）。 */
+function longestCommonPrefix(paths: string[]): string {
+  if (paths.length === 0) return '';
+  let prefix = paths[0];
+  for (const p of paths.slice(1)) {
+    let i = 0;
+    while (i < prefix.length && i < p.length && prefix[i] === p[i]) i += 1;
+    prefix = prefix.slice(0, i);
+  }
+  return prefix;
+}
+
+/** 把 `/a/b/` 形态输入拆成 listDir 父目录与候选过滤前缀。 */
+function splitInput(input: string): { parent: string; stub: string } | null {
+  const raw = input.replace(/\\/g, '/').replace(/\/{2,}/g, '/');
+  if (!raw.startsWith('/')) return null;
+  if (raw.endsWith('/')) return { parent: raw.replace(/\/+$/, '') || '/', stub: '' };
+  const cut = raw.lastIndexOf('/');
+  if (cut < 0) return null;
+  return { parent: cut === 0 ? '/' : raw.slice(0, cut), stub: raw.slice(cut + 1) };
+}
 
 export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; onClose: () => void }): React.ReactElement {
   const [step, setStep] = useState<'connect' | 'pick'>('connect');
@@ -22,11 +45,14 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  // pick 步骤状态
+  // pick 步骤状态（终端式路径输入）
   const [connectedAlias, setConnectedAlias] = useState('');
-  const [currentPath, setCurrentPath] = useState('');
-  const [dirs, setDirs] = useState<Array<{ name: string; path: string }>>([]);
-  const [dirsLoading, setDirsLoading] = useState(false);
+  const [pathInput, setPathInput] = useState('/');
+  const [candidates, setCandidates] = useState<string[]>([]);
+  const [highlight, setHighlight] = useState(-1);
+  const [candidatesLoading, setCandidatesLoading] = useState(false);
+  const debounceRef = useRef<number | null>(null);
+  const listTokenRef = useRef(0);
 
   const inputStyle: React.CSSProperties = {
     width: '100%',
@@ -36,19 +62,104 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
     fontSize: 12,
   };
 
-  const loadDirs = async (target: { alias: string; path: string }): Promise<void> => {
-    setDirsLoading(true);
+  const createDisabled = busy || !pathInput.trim().startsWith('/');
+
+  /** 拉取候选：对当前输入的父目录做 fs_list，过滤 basename 前缀。
+   *  aliasOverride：连接瞬间 state 尚未滚动，显式传入避免读到陈旧空值。 */
+  const fetchCandidates = async (input: string, aliasOverride?: string): Promise<string[]> => {
+    const parsed = splitInput(input);
+    if (!parsed) {
+      setError('路径必须以 / 开头');
+      return [];
+    }
+    const effectiveAlias = aliasOverride ?? connectedAlias;
+    const token = ++listTokenRef.current;
+    setCandidatesLoading(true);
     setError('');
     try {
-      const r = await ctx.sshListDirs(target.alias, target.path);
+      const r = await ctx.sshListDirs(effectiveAlias, parsed.parent);
+      if (token !== listTokenRef.current) return [];
       if (!r.ok) {
         setError(r.retryable ? `${r.error}（可重试）` : (r.error || '浏览失败'));
-        return;
+        return [];
       }
-      setCurrentPath(r.path || target.path);
-      setDirs(r.dirs || []);
+      const dirs = r.dirs || [];
+      const actualParent = r.path || parsed.parent;
+      const cands = dirs
+        .filter((d) => d.name.startsWith(parsed.stub))
+        .map((d) => ({ path: `${actualParent.replace(/\/+$/, '')}/${d.name}/`, name: d.name }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      setCandidates(cands.map((c) => c.path));
+      setHighlight(-1);
+      return cands.map((c) => c.path);
     } finally {
-      setDirsLoading(false);
+      if (token === listTokenRef.current) setCandidatesLoading(false);
+    }
+  };
+
+  const scheduleCandidates = (input: string): void => {
+    if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    debounceRef.current = window.setTimeout(() => { void fetchCandidates(input); }, 300);
+  };
+
+  useEffect(() => () => { if (debounceRef.current) window.clearTimeout(debounceRef.current); }, []);
+
+  const completeTo = (path: string): void => {
+    setPathInput(path);
+    setCandidates([]);
+    setHighlight(-1);
+    void fetchCandidates(path);
+  };
+
+  const handleTab = async (): Promise<void> => {
+    const parsed = splitInput(pathInput);
+    if (!parsed) { setError('路径必须以 / 开头'); return; }
+    // bash 语义：先按「父目录 + basename 前缀」过滤已加载候选（state 可能是上一层
+    // 的未过滤列表），过滤后为空再发起远端拉取；单候选直接补全，多候选补全到公共前缀。
+    const prefix = `${parsed.parent === '/' ? '' : parsed.parent}/`;
+    let cands = candidates.filter(
+      (c) => c.startsWith(prefix) && c.slice(prefix.length).split('/')[0].startsWith(parsed.stub),
+    );
+    if (cands.length === 0) cands = await fetchCandidates(pathInput);
+    if (cands.length === 0) return;
+    if (cands.length === 1) { completeTo(cands[0]); return; }
+    const lcp = longestCommonPrefix(cands);
+    if (lcp.length > pathInput.length) {
+      setPathInput(lcp);
+      if (lcp.endsWith('/')) { setCandidates([]); void fetchCandidates(lcp); }
+    }
+  };
+
+  const handlePathKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>): Promise<void> => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      (window as unknown as { __tabCompleted?: boolean }).__tabCompleted = true;
+      await handleTab();
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (candidates.length > 0) setHighlight((h) => Math.min(h + 1, candidates.length - 1));
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlight((h) => Math.max(h - 1, -1));
+      return;
+    }
+    if (e.key === 'Enter') {
+      if (highlight >= 0 && highlight < candidates.length) {
+        e.preventDefault();
+        completeTo(candidates[highlight]);
+      } else if (candidates.length === 1) {
+        e.preventDefault();
+        completeTo(candidates[0]);
+      }
+      return;
+    }
+    if (e.key === 'Escape') {
+      setCandidates([]);
+      setHighlight(-1);
     }
   };
 
@@ -74,14 +185,16 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
       } else {
         setConnectedAlias(effectiveAlias);
       }
-      // 连通性检测 + 取远端 $HOME 作为浏览起点（失败如实呈现，可重试）
+      // 连通性检测 + 取远端 $HOME 作为输入起点
       const conn = await ctx.sshConnectHost(effectiveAlias);
       if (!conn.ok) {
         setError(conn.retryable ? `${conn.error}（可重试）` : (conn.error || '连接失败'));
         return;
       }
+      const start = `${(conn.home || '/').replace(/\/+$/, '')}/`;
+      setPathInput(start);
       setStep('pick');
-      await loadDirs({ alias: effectiveAlias, path: conn.home || '/' });
+      void fetchCandidates(start, effectiveAlias);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -89,12 +202,16 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
     }
   };
 
+  /** 创建用规范化路径：去掉尾斜杠（根目录除外）。 */
+  const normalizedCreatePath = pathInput === '/' ? '/' : pathInput.replace(/\/+$/, '') || '/';
+  const parentPath = normalizedCreatePath === '/' ? '/' : normalizedCreatePath.replace(/\/[^/]*$/, '') || '/';
+
   const handleCreate = async (): Promise<void> => {
-    if (busy || !currentPath) return;
+    if (createDisabled) return;
     setBusy(true);
     setError('');
     try {
-      const r = await ctx.sshCreateAt({ alias: connectedAlias, remotePath: currentPath });
+      const r = await ctx.sshCreateAt({ alias: connectedAlias, remotePath: normalizedCreatePath });
       if (!r.ok) {
         setError(r.error || '创建失败');
         return;
@@ -106,8 +223,6 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
       setBusy(false);
     }
   };
-
-  const parentPath = currentPath.replace(/\/[^/]*$/, '') || '/';
 
   return (
     <div
@@ -214,8 +329,8 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
             <button
               type="button"
               className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-              onClick={() => void loadDirs({ alias: connectedAlias, path: parentPath })}
-              disabled={dirsLoading || currentPath === '/'}
+              onClick={() => { const p = parentPath === '/' ? '/' : `${parentPath}/`; setPathInput(p); void fetchCandidates(p); }}
+              disabled={candidatesLoading || normalizedCreatePath === '/'}
               title="返回上级目录"
             >
               上级
@@ -223,60 +338,74 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
             <button
               type="button"
               className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-              onClick={() => void loadDirs({ alias: connectedAlias, path: currentPath })}
-              disabled={dirsLoading}
-              title="刷新"
-              aria-label="刷新目录"
+              onClick={() => { void fetchCandidates(pathInput); }}
+              disabled={candidatesLoading}
+              title="刷新候选"
+              aria-label="刷新候选"
             >
               <Icon name="repeat" size={12} />
             </button>
           </div>
+          <input
+            className={styles.treeRenameInput}
+            style={{ width: '100%', boxSizing: 'border-box', marginBottom: 4, padding: '4px 8px', fontSize: 12, fontFamily: 'monospace' }}
+            type="text"
+            value={pathInput}
+            onChange={(e) => { setPathInput(e.target.value); scheduleCandidates(e.target.value); }}
+            onKeyDown={(e) => void handlePathKeyDown(e)}
+            placeholder="/home/you/project（Tab 补全）"
+            aria-label="远端路径（Tab 补全）"
+            data-testid="ssh-path-input"
+            autoFocus
+          />
           <div
-            style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid var(--gewu-border, rgba(128,128,128,0.25))', borderRadius: 6, marginBottom: 6 }}
-            data-testid="ssh-dir-browser"
+            style={{ maxHeight: 180, overflowY: 'auto', border: '1px solid var(--gewu-border, rgba(128,128,128,0.25))', borderRadius: 6, marginBottom: 4 }}
+            data-testid="ssh-path-candidates"
           >
-            {dirsLoading ? (
-              <p style={{ padding: '8px 10px', fontSize: 12, opacity: 0.7, margin: 0 }}>读取目录…</p>
-            ) : dirs.length === 0 ? (
-              <p style={{ padding: '8px 10px', fontSize: 12, opacity: 0.7, margin: 0 }}>此目录下没有子目录</p>
+            {candidatesLoading ? (
+              <p style={{ padding: '6px 10px', fontSize: 12, opacity: 0.7, margin: 0 }}>读取目录…</p>
+            ) : candidates.length === 0 ? (
+              <p style={{ padding: '6px 10px', fontSize: 12, opacity: 0.7, margin: 0 }}>无候选（继续输入或 Tab 刷新）</p>
             ) : (
-              dirs.map((d) => (
+              candidates.map((cand, idx) => (
                 <button
-                  key={d.path}
+                  key={cand}
                   type="button"
-                  onClick={() => void loadDirs({ alias: connectedAlias, path: d.path })}
-                  title={d.path}
-                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '4px 10px', fontSize: 12, background: 'none', border: 'none', cursor: 'pointer', color: 'inherit' }}
+                  onMouseDown={(e) => { e.preventDefault(); completeTo(cand); }}
+                  onMouseEnter={() => setHighlight(idx)}
+                  title={cand}
+                  style={{
+                    display: 'block', width: '100%', textAlign: 'left', padding: '4px 10px', fontSize: 12,
+                    background: idx === highlight ? 'var(--gewu-accent-weak, rgba(128,0,255,0.12))' : 'none',
+                    border: 'none', cursor: 'pointer', color: 'inherit', fontFamily: 'monospace',
+                  }}
                 >
-                  {d.name}/
+                  {cand}
                 </button>
               ))
             )}
           </div>
-          <p
-            data-testid="ssh-selected-path"
-            style={{ fontSize: 11, opacity: 0.75, margin: '0 0 6px', wordBreak: 'break-all' }}
-            title={currentPath}
-          >
-            {currentPath}
-          </p>
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 4 }}>
             <button
               type="button"
               className="gewu-btn gewu-btn--sm"
               onClick={() => void handleCreate()}
-              disabled={busy || dirsLoading || !currentPath}
-              title={`在 ${currentPath} 创建远程项目`}
+              disabled={createDisabled}
+              title={`在 ${normalizedCreatePath} 创建远程项目`}
             >
-              {busy ? '创建中…' : '在此目录创建项目'}
+              {busy ? '创建中…' : '在此路径创建项目'}
             </button>
             <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={onClose} disabled={busy}>
               取消
             </button>
           </div>
+          <p style={{ fontSize: 11, opacity: 0.65, margin: '6px 0 0' }}>Tab 补全 · ↓↑ 选候选 · Enter 采纳</p>
+          {error && (
+            <p className={styles.leftCreateError} role="alert" style={{ marginTop: 6 }}>{error}</p>
+          )}
         </div>
       )}
-      {error && (
+      {step === 'connect' && error && (
         <p className={styles.leftCreateError} role="alert" style={{ marginTop: 6 }}>{error}</p>
       )}
     </div>
