@@ -1,0 +1,47 @@
+{
+  "startedAt": "2026-09-10T08:50:55.488Z",
+  "assertions": [
+    {
+      "name": "P2-1 ssh project created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mtvaf99f_bwcs\",\"name\":\"P2读面-1789030257305\",\"created_at\":\"2026-09-10T08:50:57.315Z\",\"updated_at\":\"2026-09-1"
+    },
+    {
+      "name": "P2-2 job submitted",
+      "pass": true,
+      "detail": "{\"ok\":true,\"jobId\":\"job_6fcfcfd14d084c91\",\"status\":\"pending\",\"isTestRun\":false,\"requestId\":\"072e45da-b47\"}"
+    },
+    {
+      "name": "P2-3 deseq2 completed on dell (direct chain)",
+      "pass": true,
+      "detail": "status=completed"
+    },
+    {
+      "name": "P2-4 tools/file serves server artifact",
+      "pass": true,
+      "detail": "status=200 bytes=1085 head=\"\\\"baseMean\\\",\\\"log2FoldChange\\\",\\\"lfcSE\\\",\\\"pvalue\\\",\\\"padj\\\",\\\"gene\\\"\\n2\""
+    },
+    {
+      "name": "P2-5 tools/log serves server run.log",
+      "pass": true,
+      "detail": "{\"source\":\"run.log\",\"len\":1767}"
+    },
+    {
+      "name": "P2-6 report generated (remote compose)",
+      "pass": true,
+      "detail": "{\"ok\":true,\"fileName\":\"final-report.html\",\"sourceName\":\"report.html\",\"generatedAt\":\"2026-09-10T08:52:03.142Z\",\"embeddedAssets\":[],\"theme\":null,\"url\":\"/api/tools"
+    },
+    {
+      "name": "P2-7 report.html written back to server (truth)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P2-8 report served via tools/file (gateway read)",
+      "pass": true,
+      "detail": "status=200 bytes=648630"
+    }
+  ],
+  "allPass": true,
+  "finishedAt": "2026-09-10T08:52:13.320Z"
+}

@@ -25,10 +25,12 @@ const STAGE_ROOT = 'results/jobs';
 const EXIT_MARKER = 'output/.exit';
 const PID_MARKER = 'output/.pid';
 const LOG_REL = 'output/run.log';
-// 单个 gateway write 的安全上限（协议硬上限 1MB，留余量给 base64 头部与 JSON 行）。
-const DIRECT_WRITE_LIMIT = 768 * 1024;
-// 分块追加通道：exec 命令参数上限 256KB，base64 膨胀 4/3 后取 160KB 原始块。
-const CHUNK_SIZE = 160 * 1024;
+// 单个 gateway write 的安全上限：Linux MAX_ARG_STRLEN=128KB/参数，b64 膨胀后取 72KB
+// （P2 实测 >98KB 内容经 fs_write 必 E2BIG——gateway 的 1MB cap 形同虚设）。
+const DIRECT_WRITE_LIMIT = 72 * 1024;
+// 分块追加通道：exec 命令参数上限 256KB + MAX_ARG_STRLEN 128KB，
+// 整条命令再 b64 一次（双重膨胀），原始块取 64KB（→85KB b64→122KB 命令 b64→安全）。
+const CHUNK_SIZE = 64 * 1024;
 
 function toPosixRel(...segs) {
   const joined = path.posix.join(...segs.map((s) => String(s).replace(/\\/g, '/')));
@@ -68,7 +70,11 @@ function createSshDirectRunner({ project, gateway = null }) {
    * 写到服务器 `results/jobs/<jobId>/`。>DIRECT_WRITE_LIMIT 的文件走
    * base64 分块追加通道（exec | base64 -d >> file）。
    */
-  async function stage({ jobId, localJobDir }) {
+  async function stage(params) {
+    return withTransportRetry(() => stageOnce(params));
+  }
+
+  async function stageOnce({ jobId, localJobDir }) {
     const rel = jobRel(jobId);
     await gw.mkdir(abs(toPosixRel(rel, 'output')));
     const staged = [];
@@ -105,7 +111,11 @@ function createSshDirectRunner({ project, gateway = null }) {
    * exec_bg 的 pgrep 在部分节点不可靠（竞态/procps 缺失），pid 以命令自写的
    * .pid 文件为准（exec_bg 的 subshell 实际已 setsid 启动，pid=null ≠ 启动失败）。
    */
-  async function start({ jobId, lang, runtimeBin }) {
+  async function start(params) {
+    return withTransportRetry(() => startOnce(params));
+  }
+
+  async function startOnce({ jobId, lang, runtimeBin }) {
     const rel = jobRel(jobId);
     const ext = lang === 'r' ? 'R' : 'py';
     const command = `echo $$ > ${PID_MARKER}; ${runtimeBin} run-script.${ext} "$(pwd)"; echo $? > ${EXIT_MARKER}`;
@@ -211,4 +221,34 @@ function shellQuote(s) {
   return `'${String(s).replace(/'/g, `'\\''`)}'`;
 }
 
-module.exports = { createSshDirectRunner, STAGE_ROOT, EXIT_MARKER, LOG_REL };
+const TRANSPORT_RETRY_ATTEMPTS = 3;
+const TRANSPORT_RETRY_DELAY_MS = 1200;
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function isRetryableError(e) {
+  return !!(e && e.classified && e.classified.retryable === true);
+}
+
+/**
+ * 可重试传输错误（mux 超时/半死连接，classified.retryable=true）的小步退避重试——
+ * 与 remote-job-runner.runSshOpRetry 同纪律（BLOCK-57 D8）。fn 既可抛 retryable
+ * 错误，也可返回 {ok:false,error:{retryable:true}}（第一次失败通常已 killSession，
+ * 重建后的新连接即可用；P2 实测 dell 嵌套 ProxyJump 半死隧道踩坑）。
+ */
+async function withTransportRetry(fn) {
+  let last = null;
+  for (let attempt = 1; attempt <= TRANSPORT_RETRY_ATTEMPTS; attempt += 1) {
+    try {
+      last = await fn();
+    } catch (e) {
+      if (!isRetryableError(e)) throw e;
+      last = { ok: false, stage: 'transport', error: { kind: 'ssh_direct_transport', retryable: true, detail: e.message } };
+    }
+    const retryable = last && last.ok === false && last.error && last.error.retryable === true;
+    if (!retryable) return last;
+    if (attempt < TRANSPORT_RETRY_ATTEMPTS) await sleep(TRANSPORT_RETRY_DELAY_MS * attempt);
+  }
+  return last;
+}
+
+module.exports = { createSshDirectRunner, withTransportRetry, isRetryableError, STAGE_ROOT, EXIT_MARKER, LOG_REL };

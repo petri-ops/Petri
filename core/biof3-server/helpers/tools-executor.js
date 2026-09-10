@@ -962,21 +962,21 @@ function createToolsExecutor({
 
     // BLOCK-76 P2 — SSH 直跑作业产物读面走 Gateway（服务器 output 为真值，R3/R4）。
     // 非 ssh 作业 reader 返回 null，本地链逐字节不变（历史只读兼容）。
-    const sshReader = createJobOutputReader({
-      job,
-      getProject: (pid) => {
-        try {
-          return dbMod.getAsyncDatabase().prepare('SELECT id, workspace_kind, ssh_host, remote_path FROM projects WHERE id = ?').get(pid);
-        } catch {
-          return null;
-        }
-      },
-    });
+    const sshProjectRow = await dbMod.getAsyncDatabase()
+      .prepare('SELECT id, workspace_kind, ssh_host, remote_path FROM projects WHERE id = ?')
+      .get(job.project_id);
+    const sshReader = createJobOutputReader({ job, project: sshProjectRow });
+    const __diagMeta = (() => {
+      try {
+        const m = typeof job.result_json === 'string' ? JSON.parse(job.result_json) : job.result_json;
+        return m ? 'ws=' + m.workspaceKind + ' op=' + (m.outputPath || '') + ' pid=' + job.project_id : 'no-meta';
+      } catch (e) { return 'parse-err'; }
+    })();
     if (sshReader) {
       const filename = String(req.params.filename || '');
       try {
         const stat = await sshReader.statFile(filename);
-        if (!stat) return res.status(404).json({ error: 'file_not_found' });
+        if (!stat) { if (process.env.BIOF3_B76_DEBUG) console.error('[b76-reader] file stat null for', filename); return res.status(404).json({ error: 'file_not_found' }); }
         const buf = await sshReader.readFile(filename);
         const theme = normalizeReportTheme(req?.query?.theme);
         if (theme && isHtmlFile(filename)) {
@@ -1177,6 +1177,45 @@ function createToolsExecutor({
         outputDir = path.resolve(resultDir);
       }
 
+      // BLOCK-76 P2 — SSH 直跑作业：远端产物镜像到临时目录复用本地组装器，
+      // 生成的报告写回服务器 output/（真值在服务器），url 走 tools/file ssh 读面。
+      {
+        const meta = result && typeof result === 'object' ? result : null;
+        if (meta && meta.workspaceKind === 'ssh') {
+          const sshProjectRow = await dbMod.getAsyncDatabase()
+            .prepare('SELECT id, workspace_kind, ssh_host, remote_path FROM projects WHERE id = ?')
+            .get(job.project_id);
+          const { createJobOutputReader } = require('./remote-execution/job-output-reader');
+          const reader = createJobOutputReader({ job, project: sshProjectRow });
+          if (reader) {
+            const os = require('os');
+            const { safeRemoteJoin, resolveWorkspaceBackend } = require('./workspace-gateway');
+            const outputs = await reader.list();
+            const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'b76-report-'));
+            try {
+              for (const f of outputs) {
+                if (f.size > 16 * 1024 * 1024) continue; // 超预算产物不进报告，诚实省略
+                const buf = await reader.readFile(f.name);
+                fs.writeFileSync(path.join(tmp, f.name), buf);
+              }
+              const theme = normalizeReportTheme(req.body?.theme);
+              const report = materializeFinalReport({
+                outputDir: tmp,
+                transformHtml: theme ? (html) => injectReportTheme(html, theme) : undefined,
+              });
+              await reader.writeFile(report.fileName, fs.readFileSync(path.join(tmp, report.fileName)));
+              return res.json({
+                ok: true,
+                ...report,
+                theme,
+                url: `/api/tools/file/${encodeURIComponent(req.params.jobId)}/${report.fileName}`,
+              });
+            } finally {
+              try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
+            }
+          }
+        }
+      }
       if (!outputDir || !fs.existsSync(outputDir)) {
         return res.status(404).json({error: 'job_output_not_found'});
       }

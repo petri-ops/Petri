@@ -222,10 +222,8 @@ function createToolsMetadataRoutes({db, getUserId, jobsDir = ''}) {
         // BLOCK-76 P2 — SSH 直跑作业：日志真值在服务器 output/run.log，Gateway 增量读。
         try {
           const { createJobOutputReader } = require('../helpers/remote-execution/job-output-reader');
-          const sshReader = createJobOutputReader({
-            job,
-            getProject: (pid) => db.prepare('SELECT id, workspace_kind, ssh_host, remote_path FROM projects WHERE id = ?').get(pid),
-          });
+          const sshProjectRow = await db.prepare('SELECT id, workspace_kind, ssh_host, remote_path FROM projects WHERE id = ?').get(job.project_id);
+          const sshReader = createJobOutputReader({ job, project: sshProjectRow });
           if (sshReader) {
             const sshLog = await sshReader.readLogTail(32 * 1024).catch(() => null);
             if (sshLog) return res.json({ ok: true, ...sshLog });
