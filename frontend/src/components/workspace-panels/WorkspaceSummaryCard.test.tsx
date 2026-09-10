@@ -324,6 +324,27 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     await waitFor(() => expect(screen.queryByText(/成本/)).toBeNull());
   });
 
+  it('P2-③ 结果库占用行：有产物渲染字节+作业数，无产物不渲染', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => ({
+      ok: true,
+      status: 200,
+      json: async () => String(url).includes('project-storage')
+        ? { ok: true, jobs: 4, bytes: 100 * 1024 * 1024, observedAt: '2026-09-10T09:00:00.000Z' }
+        : { status: 'error' },
+    })));
+    render(<WorkspaceSummaryCard {...baseProps()} />);
+    expect(await screen.findByText(/100 MB · 4 作业/)).toBeTruthy();
+
+    cleanup();
+    vi.stubGlobal('fetch', vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ ok: true, jobs: 0, bytes: 0, observedAt: '2026-09-10T09:00:00.000Z' }),
+    })));
+    render(<WorkspaceSummaryCard {...baseProps()} />);
+    await waitFor(() => expect(screen.queryByText(/结果库/)).toBeNull());
+  });
+
   it('P1.5 环境诚实化：ssh 项目不渲染本机 R/Py 芯片，资源行标注「指挥席本机」', () => {
     render(
       <WorkspaceSummaryCard
