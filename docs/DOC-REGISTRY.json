@@ -3986,6 +3986,28 @@
       "archivePolicy": "archive_when_superseded",
       "registeredAt": "2026-09-10",
       "phase": "PLANNED"
+    },
+    {
+      "id": "BLOCK-77-RESIDENT-TASKS",
+      "path": "docs/block-77-resident-tasks-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-77-resident-tasks",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "block-77",
+        "resident-tasks",
+        "intent-card",
+        "proactive",
+        "notification",
+        "block-70-liaison",
+        "G0"
+      ],
+      "archivePolicy": "archive_when_superseded",
+      "registeredAt": "2026-09-10",
+      "phase": "PLANNED",
+      "notes": "长任务驻留与回访通知（用户裁决「第二档」）。①任务意图卡（.gewu/resident/ 描述意图与归属，执行真相仍在 process/job 状态机）②回访循环（本地 60s 检查驻留任务，异常 proactive 提醒，不自动重启）③交接班（重开软件 agent 自动汇报进度）④完成通知（应用内必做；移动推送联动 BLOCK-70 预留接口）。③档真驻留 agent（LLM 上服务器）明确排除另立项。复用 exec_background/process_status/proactive 事件；对本地与 SSH 项目皆可用。启动待串行队列。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-09-10",
