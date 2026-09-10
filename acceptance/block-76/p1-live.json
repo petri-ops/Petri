@@ -1,0 +1,43 @@
+{
+  "startedAt": "2026-09-10T06:41:57.702Z",
+  "marker": "B76-1789022517702",
+  "assertions": [
+    {
+      "name": "P1-0 dell node ready (Rscript + project dir)",
+      "pass": true,
+      "detail": "/root/gewu-block76-demo"
+    },
+    {
+      "name": "P1-1 ssh project created (dell)",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mtv5te0a_2hkt\",\"name\":\"P1直跑-B76-1789022517702\",\"created_at\":\"2026-09-10T06:41:58.570Z\",\"updated_at\":\"2026-09-10T06:41:58.570Z\""
+    },
+    {
+      "name": "P1-2 tool job submitted",
+      "pass": true,
+      "detail": "{\"ok\":true,\"jobId\":\"job_60cae0abd5d84689\",\"status\":\"pending\",\"isTestRun\":false,\"requestId\":\"37ff36db-632\"}"
+    },
+    {
+      "name": "P1-3 job reaches terminal (completed)",
+      "pass": true,
+      "detail": "status=completed detail={\"ok\":true,\"id\":\"job_60cae0abd5d84689\",\"toolId\":\"deseq2\",\"status\":\"completed\",\"error\":null,\"name\":\"DESeq2 #3\",\"projectId\":\"p_mtv5te0a_2hkt\",\"conversationId\":null,\"executionTarget\":{\"id\":\"tgt_d0e2ece166bd\",\"alias\":\"dell\"}"
+    },
+    {
+      "name": "P1-4 result_json ssh semantics",
+      "pass": true,
+      "detail": "{\"workspaceKind\":\"ssh\",\"outputPath\":\"results/jobs/job_60cae0abd5d84689/output\",\"transport\":\"gateway-ssh-direct\"}"
+    },
+    {
+      "name": "P1-5 server output dir has artifacts",
+      "pass": true,
+      "detail": "remote output: [coldata_info.csv, deg_table.csv, dispersion_data.csv, dispersion.pdf, dispersion.png, down_genes.csv, heatmap.pdf, heatmap.png, library_size.pdf, library_size.png, manifest.json, ma_plot.pdf, ma_plot.]"
+    },
+    {
+      "name": "P1-6 no artifact pull-back to local staging",
+      "pass": true,
+      "detail": "local output files: [remote-runner.log]"
+    }
+  ],
+  "allPass": true,
+  "finishedAt": "2026-09-10T06:43:01.539Z"
+}

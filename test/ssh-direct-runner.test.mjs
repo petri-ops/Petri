@@ -73,14 +73,15 @@ test('stage：编排面整体上服务器（排除 output/logs），大文件走
 
   const res = await runner.stage({ jobId: 'job_big1', localJobDir: jobDir });
   assert.equal(res.ok, true);
+  // jobRel 恒为相对项目根的语义路径（result_json 面）；gateway 调用才转绝对
   assert.equal(res.jobRel, 'results/jobs/job_big1');
   // mkdir：job 根 + output
-  assert.ok(gw.calls.mkdirs.some((p) => p === 'results/jobs/job_big1/output'));
+  assert.ok(gw.calls.mkdirs.some((p) => p === '/srv/proj/results/jobs/job_big1/output'));
   // 小文件直写
   const wrote = gw.calls.writes.map((w) => w.p);
-  assert.ok(wrote.includes('results/jobs/job_big1/run-script.R'));
-  assert.ok(wrote.includes('results/jobs/job_big1/params.json'));
-  assert.ok(wrote.includes('results/jobs/job_big1/input/counts.csv'));
+  assert.ok(wrote.includes('/srv/proj/results/jobs/job_big1/run-script.R'));
+  assert.ok(wrote.includes('/srv/proj/results/jobs/job_big1/params.json'));
+  assert.ok(wrote.includes('/srv/proj/results/jobs/job_big1/input/counts.csv'));
   // output/ 下旧物不上传
   assert.ok(!wrote.some((p) => p.includes('output/')));
   // 大文件：create + 分块 exec 追加（800KB → 6 块）
@@ -96,9 +97,9 @@ test('start：命令形态 = runtime 跑 run-script + .exit 标记 + 日志重�
   assert.equal(started.ok, true);
   assert.equal(started.pid, 4321);
   const call = gw.calls.execBg[0];
-  assert.equal(call.cwd, 'results/jobs/job_s1');
-  assert.equal(call.logPath, 'results/jobs/job_s1/output/run.log');
-  assert.ok(call.command.startsWith('/usr/bin/Rscript run-script.R "$(pwd)"'));
+  assert.equal(call.cwd, '/srv/proj/results/jobs/job_s1');
+  assert.equal(call.logPath, '/srv/proj/results/jobs/job_s1/output/run.log');
+  assert.ok(call.command.startsWith('echo $$ > output/.pid; /usr/bin/Rscript run-script.R "$(pwd)"'));
   assert.ok(call.command.includes('echo $? > output/.exit'));
 });
 

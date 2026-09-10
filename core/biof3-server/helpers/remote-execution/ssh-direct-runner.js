@@ -13,8 +13,9 @@
  *     因为 agent kill_pid 不接受负 pid）；
  *   - 日志 tail 用 gateway read(offset)（服务器 run.log 为真值，R4）。
  *
- * 所有路径均为相对项目根（remote_path）的 posix 相对路径，经 safeRemoteJoin
- * 约束在项目沙盒内——不触碰项目外任何位置。
+ * 路径纪律：jobRel 恒为相对项目根的 posix 相对路径（result_json 语义面）；
+ * 一切 gateway 调用经 safeRemoteJoin(root, rel) 转绝对路径——P1 首跑实测，
+ * 相对路径会被 agent 解析到 $HOME（/root/results/jobs/…），绝不可直接传。
  */
 
 const path = require('path');
@@ -22,6 +23,7 @@ const { safeRemoteJoin } = require('../workspace-gateway');
 
 const STAGE_ROOT = 'results/jobs';
 const EXIT_MARKER = 'output/.exit';
+const PID_MARKER = 'output/.pid';
 const LOG_REL = 'output/run.log';
 // 单个 gateway write 的安全上限（协议硬上限 1MB，留余量给 base64 头部与 JSON 行）。
 const DIRECT_WRITE_LIMIT = 768 * 1024;
@@ -41,6 +43,7 @@ function createSshDirectRunner({ project, gateway = null }) {
     throw new Error('ssh_direct_requires_ssh_project');
   }
   let gw = gateway;
+  let rootAbs = project.remote_path;
   if (!gw) {
     const { resolveWorkspaceBackend } = require('../workspace-gateway');
     const resolved = resolveWorkspaceBackend(project);
@@ -48,7 +51,13 @@ function createSshDirectRunner({ project, gateway = null }) {
       throw new Error('ssh_direct_backend_unavailable: ' + (resolved.error || 'not_ssh'));
     }
     gw = resolved.backend;
+    rootAbs = resolved.root;
   }
+  const abs = (rel) => {
+    const p = safeRemoteJoin(rootAbs, rel);
+    if (!p) throw new Error('ssh_direct_bad_path: ' + rel);
+    return p;
+  };
 
   function jobRel(jobId) {
     return toPosixRel(STAGE_ROOT, jobId);
@@ -61,15 +70,14 @@ function createSshDirectRunner({ project, gateway = null }) {
    */
   async function stage({ jobId, localJobDir }) {
     const rel = jobRel(jobId);
-    await gw.mkdir(rel);
-    await gw.mkdir(toPosixRel(rel, 'output'));
+    await gw.mkdir(abs(toPosixRel(rel, 'output')));
     const staged = [];
     const failed = [];
     walkLocal(localJobDir, (absPath, relName) => {
       staged.push({ absPath, relName });
     });
     for (const item of staged) {
-      const target = toPosixRel(rel, item.relName);
+      const target = abs(toPosixRel(rel, item.relName));
       const content = require('fs').readFileSync(item.absPath);
       try {
         if (content.length <= DIRECT_WRITE_LIMIT) {
@@ -79,7 +87,7 @@ function createSshDirectRunner({ project, gateway = null }) {
           for (let off = 0; off < content.length; off += CHUNK_SIZE) {
             const chunk = content.subarray(off, Math.min(off + CHUNK_SIZE, content.length));
             const b64 = chunk.toString('base64');
-            await gw.exec(`printf %s ${shellQuote(b64)} | base64 -d >> ${shellQuote(target)}`, '.', 60);
+            await gw.exec(`printf %s ${shellQuote(b64)} | base64 -d >> ${shellQuote(target)}`, rootAbs, 60);
           }
         }
       } catch (e) {
@@ -93,24 +101,32 @@ function createSshDirectRunner({ project, gateway = null }) {
   }
 
   /**
-   * 后台直跑：`<runtimeBin> run-script.<ext> "$(pwd)" ; echo $? > output/.exit`。
-   * exec_bg 的 cwd=jobRel，脚本约定 job_dir=arg1（与本地 R 工具一致）。
-   * 返回 { ok, pid } 或 fail-closed 错误。
+   * 后台直跑：`echo $$ > .pid; <runtimeBin> run-script.<ext> "$(pwd)"; echo $? > .exit`。
+   * exec_bg 的 pgrep 在部分节点不可靠（竞态/procps 缺失），pid 以命令自写的
+   * .pid 文件为准（exec_bg 的 subshell 实际已 setsid 启动，pid=null ≠ 启动失败）。
    */
   async function start({ jobId, lang, runtimeBin }) {
     const rel = jobRel(jobId);
     const ext = lang === 'r' ? 'R' : 'py';
-    const command = `${runtimeBin} run-script.${ext} "$(pwd)" ; echo $? > ${EXIT_MARKER}`;
-    const started = await gw.execBackground(command, rel, toPosixRel(rel, LOG_REL));
-    if (!started.pid) {
-      return { ok: false, stage: 'start', error: { kind: 'ssh_direct_spawn_failed', retryable: true, detail: started.error || 'exec_bg 无 pid' } };
+    const command = `echo $$ > ${PID_MARKER}; ${runtimeBin} run-script.${ext} "$(pwd)"; echo $? > ${EXIT_MARKER}`;
+    const started = await gw.execBackground(command, abs(rel), abs(toPosixRel(rel, LOG_REL)));
+    let pid = Number.isInteger(started.pid) ? started.pid : null;
+    if (!pid) {
+      await new Promise((r) => setTimeout(r, 500));
+      try {
+        pid = parseInt(String(await gw.read(abs(toPosixRel(rel, PID_MARKER)))).trim(), 10);
+        if (!Number.isFinite(pid)) pid = null;
+      } catch { pid = null; }
     }
-    return { ok: true, pid: started.pid, jobRel: rel };
+    if (!pid) {
+      return { ok: false, stage: 'start', error: { kind: 'ssh_direct_spawn_failed', retryable: true, detail: started.error || 'exec_bg 无 pid 且 .pid 标记缺失' } };
+    }
+    return { ok: true, pid, jobRel: rel };
   }
 
   /**
    * 轮询：pid 存活 → active；不存活 → 读 .exit 标记 → terminal(code)；
-   * 标记缺失（重传窗口）→ unknown（调用方重试，连续 unknown 按诚实失败收敛）。
+   * 标记缺失（写入窗口）→ unknown（调用方重试，连续 unknown 按诚实失败收敛）。
    */
   async function poll({ jobId, pid }) {
     const rel = jobRel(jobId);
@@ -122,7 +138,7 @@ function createSshDirectRunner({ project, gateway = null }) {
     }
     if (alive) return { ok: true, kind: 'active' };
     try {
-      const buf = await gw.read(toPosixRel(rel, EXIT_MARKER));
+      const buf = await gw.read(abs(toPosixRel(rel, EXIT_MARKER)));
       const code = parseInt(String(buf).trim(), 10);
       return { ok: true, kind: 'terminal', code: Number.isFinite(code) ? code : null };
     } catch {
@@ -133,7 +149,7 @@ function createSshDirectRunner({ project, gateway = null }) {
   /** 日志增量：stat 取 size，read(offset) 返回新增字节（服务器 run.log 为真值）。 */
   async function pullLog({ jobId, offset }) {
     const rel = jobRel(jobId);
-    const logPath = toPosixRel(rel, LOG_REL);
+    const logPath = abs(toPosixRel(rel, LOG_REL));
     let size = 0;
     try {
       size = Number((await gw.stat(logPath)).size || 0);
@@ -148,7 +164,7 @@ function createSshDirectRunner({ project, gateway = null }) {
   /** 取消：setsid 会话组整体 TERM→KILL（agent kill_pid 不接受负 pid，走 gateway exec）。 */
   async function cancel({ pid }) {
     const groupKill = `kill -TERM -- -${Number(pid)} 2>/dev/null; kill -KILL -- -${Number(pid)} 2>/dev/null; true`;
-    try { await gw.exec(groupKill, '.', 15); } catch { /* 进程组可能已退出 */ }
+    try { await gw.exec(groupKill, rootAbs, 15); } catch { /* 进程组可能已退出 */ }
     try { await gw.killPid(Number(pid), 'KILL'); } catch { /* 尽力而为 */ }
     return { ok: true };
   }
@@ -157,11 +173,11 @@ function createSshDirectRunner({ project, gateway = null }) {
   async function listOutputs({ jobId }) {
     const rel = jobRel(jobId);
     try {
-      const entries = await gw.list(toPosixRel(rel, 'output'));
+      const entries = await gw.list(abs(toPosixRel(rel, 'output')));
       return {
         ok: true,
         outputs: entries
-          .filter((e) => e.type === 'file')
+          .filter((e) => e.type === 'file' && !e.name.startsWith('.'))
           .map((e) => ({ name: e.name, size: Number(e.size || 0) })),
       };
     } catch (e) {
