@@ -24,6 +24,22 @@ const db = require('../../db');
 const pluginLoader = require('../../plugin-loader');
 const mcpRegistry = require('../../mcp/registry');
 const { artifactContentTypeHint } = require('../../helpers/artifact-truth');
+// BLOCK-76 P2 — SSH 项目 Revision 产物走 Gateway 读远程真值（R3）
+const crypto = require('crypto');
+const path = require('path');
+const os = require('os');
+const { safeRemoteJoin, resolveWorkspaceBackend } = require('../../helpers/workspace-gateway');
+
+/** ssh 项目的 Revision 读取上下文；非 ssh 返回 null（本地链不变）。 */
+function sshRevisionReadContext(project, revision) {
+  if (!project || project.workspace_kind !== 'ssh' || !project.ssh_host || !project.remote_path) return null;
+  if (!revision || !revision.outputPath) return null;
+  const resolved = resolveWorkspaceBackend(project);
+  if (resolved.error || !resolved.backend || resolved.backend.kind !== 'ssh') return null;
+  const artifactPath = safeRemoteJoin(resolved.root, revision.outputPath);
+  if (!artifactPath) return null;
+  return { backend: resolved.backend, artifactPath, maxBytes: 64 * 1024 * 1024 };
+}
 const {
   createVerifiedSnapshotReadStream,
   pipeVerifiedSnapshotToResponse,
@@ -203,12 +219,41 @@ module.exports = {
       }
     });
 
-    app.get('/api/result-studio/revisions/:revisionId/table-page', (req, res) => {
+    app.get('/api/result-studio/revisions/:revisionId/table-page', async (req, res) => {
       const revision = options.repo().getRevision(String(req.params.revisionId || '').trim());
       if (!revision) return res.status(404).json({ error: 'revision_not_found' });
       const context = options.projectContext(req, revision.projectId, { git: false });
       if (context.error) return res.status(context.error.status).json({ error: context.error.code });
       if (!TABLE_EXTENSIONS.test(revision.outputPath)) return res.status(415).json({ error: 'revision_not_table' });
+      // BLOCK-76 P2 — ssh 项目：远程表格读入临时文件，复用本地分页解析器（自算 sha 对账）
+      const sshCtx = sshRevisionReadContext(context.project, revision);
+      if (sshCtx) {
+        let tmpPath = null;
+        try {
+          const st = await sshCtx.backend.stat(sshCtx.artifactPath).catch(() => null);
+          if (!st) return res.status(404).json({ error: 'revision_artifact_unavailable' });
+          if (Number(st.size || 0) > 64 * 1024 * 1024) {
+            return res.status(409).json({ error: 'revision_artifact_unavailable', message: 'artifact exceeds remote read budget' });
+          }
+          const buf = await sshCtx.backend.read(sshCtx.artifactPath);
+          const sha = crypto.createHash('sha256').update(buf).digest('hex');
+          if (revision.outputHash && sha !== revision.outputHash) {
+            return res.status(409).json({ error: 'artifact_hash_mismatch' });
+          }
+          tmpPath = path.join(os.tmpdir(), `b76-table-${crypto.randomBytes(6).toString('hex')}${path.extname(revision.outputPath) || '.csv'}`);
+          fs.writeFileSync(tmpPath, buf);
+          return res.json(readTablePage({
+            filePath: tmpPath,
+            expectedSha256: sha,
+            cursor: Number(req.query.cursor || 0),
+            limit: Number(req.query.limit || 100),
+          }));
+        } catch (error) {
+          return res.status(409).json({ error: error.code || 'table_page_failed', message: error.message });
+        } finally {
+          if (tmpPath) { try { fs.rmSync(tmpPath, { force: true }); } catch {} }
+        }
+      }
       try {
         const filePath = resolveWorkspaceFileForRevision(context.project.workspace_path, revision);
         return res.json(readTablePage({
@@ -261,6 +306,27 @@ module.exports = {
       const context = options.projectContext(req, revision.projectId, { git: false });
       if (context.error) return res.status(context.error.status).json({ error: context.error.code });
       try {
+        // BLOCK-76 P2 — ssh 项目：Gateway 读远程产物 + sha256 对账（Buffer 等价发送）
+        const sshCtx = sshRevisionReadContext(context.project, revision);
+        if (sshCtx) {
+          const st = await sshCtx.backend.stat(sshCtx.artifactPath).catch(() => null);
+          if (!st) return res.status(404).json({ error: 'revision_artifact_unavailable' });
+          if (Number(st.size || 0) > sshCtx.maxBytes) {
+            return res.status(409).json({ error: 'revision_artifact_unavailable', message: 'artifact exceeds remote read budget' });
+          }
+          const buf = await sshCtx.backend.read(sshCtx.artifactPath);
+          if (revision.outputHash) {
+            const sha = crypto.createHash('sha256').update(buf).digest('hex');
+            if (sha !== revision.outputHash) {
+              return res.status(409).json({ error: 'revision_artifact_unavailable', message: 'artifact_hash_mismatch' });
+            }
+          }
+          return res
+            .type(artifactContentTypeHint(sshCtx.artifactPath))
+            .set('Cache-Control', 'private, no-store')
+            .set('Content-Length', String(buf.length))
+            .send(buf);
+        }
         const opened = await openVerifiedRevisionArtifact(context.project.workspace_path, revision);
         const stream = createVerifiedSnapshotReadStream(opened);
         stream.once('error', (error) => {
