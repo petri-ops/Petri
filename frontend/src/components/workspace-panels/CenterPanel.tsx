@@ -404,12 +404,16 @@ function SessionFrameView({
               visibility={ctx.summaryVisibility}
               width={ctx.summaryOpenWidth}
               projectName={ctx.project.name}
+              project={ctx.project}
               activeJob={ctx.activeJob}
               workflow={ctx.activeWorkflow}
               recentJobs={ctx.recentJobs}
               liveJobsPreview={ctx.liveJobsPreview}
               jobStats={ctx.jobStats}
               backendStatus={ctx.backendStatus}
+              conversations={ctx.conversations}
+              activeConversation={ctx.conversations.find((c) => c.id === ctx.activeConvId) ?? null}
+              datasets={ctx.datasets}
               loop={durableLoop.loop}
               loopSummary={durableLoop.summary}
               onOpenScheduled={ctx.openScheduledResults}

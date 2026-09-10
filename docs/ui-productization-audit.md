@@ -3047,3 +3047,22 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **状态**: verified（2026-09-10 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 **加映（同日，用户复验裁决「再窄一些贴文字边 + 左对齐」）**：去 `min-width: 148px`、padding 回 `10px 12px`（卡片宽 148→76px，紧贴图标+文字）；`justify-items: center` → `start`（两列左缘垂直对齐，同列左缘偏差实测 0）+ `text-align`/justify-content 回左对齐（用户：居中不整洁）。实机复验 7/7 allPass（探针断言升级：itemWidth≤140 / justify-items start / text-align left / colLeftDeltas=0,0 + 截图）。
+
+## UI-330: 摘要卡片项目化 P1 —— 项目运行时投影（BLOCK-78 P1 主体）(2026-09-10 in_progress)
+
+**来源**：BLOCK-78（用户三轮质询后立项，plan `docs/block-78-summary-card-runtime-projection-plan.md`）。摘要卡片定位收敛为「项目 + 当前会话的运行俯瞰」，执行侧数据按 `project.workspaceKind` 路由真值源。
+
+**改动**（`WorkspaceSummaryCard.tsx` 重写 + `CenterPanel.tsx` 传参，0 新依赖）：
+① 定位收敛：`aria-label` 「会话摘要」→「项目运行摘要」（与眉题「项目摘要」统一）；
+② 失败强调：`jobStats.failed > 0` 渲染「N 个失败任务」警示行，点击直达最近失败 job（无则进全部分析记录）；
+③ 基线预警：`g0Baseline` blocked / `executionAllowed=false` / migration_required 渲染 `role=alert` 阻塞行（含 `compatibilityReason`），高于「空闲」假象；
+④ 执行位置标注：任务行位置段——ssh 项目 `远程 · {sshHost}` / local 带 `execution_target_id`（BLOCK-57 字段）`远程执行` / 否则 `本机`；
+⑤ 智能体节：复用 `listAgentTasks` + projectId 过滤（BLOCK-65 同语义），5s 轮询、无内容整节不渲染，行点击 `windowManager.popOut('agent')` 弹专属窗；
+⑥ 终端投影：复用既有 `terminal:listSessions` IPC（BLOCK-54），只读计数「N 个会话运行中」，零状态上提；
+⑦ 注意节（部分）：失败任务 + 失败智能体并入「需要关注」节（计划审批待办/后台进程异常两个信号源待切片 2）；
+⑧⑨⑩ expanded 档「项目」信息节：位置（本地/SSH·host）· 形态（modality 中文映射）· 会话（当前会话标题 + 共 N 个）· 数据集（N 个 · 总量）· 最近更新；compact 档整节降级不渲染；空任务态按资产状态给指引（无数据集 → 先上传；有数据无会话 → 发起对话）。
+全部新节遵守「无内容不渲染」纪律；新增 `useProjectAgentOverview`/`useTerminalSessions` 两 hook 均置于组件全部提前返回之前（UI-323 教训）。
+
+**门禁**：组件定向 vitest 9/9（新增 `WorkspaceSummaryCard.test.tsx`：定位收敛/失败强调点击直达/基线预警/三种执行位置/智能体项目过滤与空态不渲染/终端有·无会话/空态指引/compact 降级/失败智能体弹窗）+ CenterPanel 受影响 6/6 + `tsc` 0；`test:changed:list` 覆盖确认（frontend-source 规则命中）。
+
+**状态**: in_progress（实现 + 定向测试完成；实机验收待与 BLOCK-76 P2 收口窗口一起做，证据将落 `acceptance/ui-330/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
