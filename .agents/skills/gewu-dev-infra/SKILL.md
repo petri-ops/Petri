@@ -50,6 +50,17 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 
 硬线不变：`verified` 必须有证据背书，断言不可编造——第 1～3 级证据由脚本产出，第 4 级证据 = 自动生成的测试路线 + 人的明确确认记录；无人化降低的是人的参与度，不是证据等级。
 
+### Windows/中文实机脚本纪律（BLOCK-76 实测固化 · 多次踩坑后升格为规则）
+
+本机为 Windows + Git Bash + 中文（GBK 控制台）环境，以下规则防的都是本会话实际炸过的坑：
+
+1. **多行脚本一律落盘执行，禁止内联**。`node -e "…"` / `powershell -Command "…"` 写超过几行的逻辑必炸：bash 双引号先吃 `${…}` 和 `$(…)`，PowerShell 再做第二层解析，转义叠加不可控。正确姿势：`Write` 落盘 `.cjs`/`.ps1` 文件 → `node file` / `powershell -File file` 执行。
+2. **.ps1 必须 ASCII-only**。PowerShell 5.1 对无 BOM 文件按 ANSI/GBK 解析，UTF-8 中文注释会直接炸 here-string 解析器；注释写英文。跨进程传中文数据走 base64（控制台输出编码不可控，GBK/UTF-8 混用必出乱码——例：`block75-enum-windows.ps1` 标题走 b64）。
+3. **spawn/参数长度硬上限**：Windows 进程命令行 ~32KB（thin per-call 大参数必 ENAMETOOLONG）；Linux `MAX_ARG_STRLEN` 128KB/参数（execve E2BIG，且 gateway exec 会把整条命令再 b64 一次——双重膨胀）。大载荷一律 stdin 分块（参照 `ssh-direct-runner` 64KB 块），禁止拼大命令行。
+4. **CDP Input.insertText 在 CodeMirror 场景不达**（焦点不属编辑器时静默丢失，甚至误落聊天输入框）——编辑器注入用已验证配方：`cm.focus()` + `document.execCommand('insertText', …)`（block67-p1-live 同款）。
+5. **Write 产出即校验**：写完脚本先 `node --check`；含嵌套 `${…}` 的模板串若报语法错，改写为字符串拼接（Write 管线对该构造偶发损坏，p1/p4 live 脚本均踩过）。
+6. **验证脚本不信任前台**：原生弹窗受 Windows 前台锁影响不一定是前台窗口——EnumWindows 枚举 + hwnd 直投（`scripts/lib-block75-os.cjs`），sidecar 对后台窗口的 snapshot/type/click 均可用。
+
 ## 保持工作区干净
 
 - `npm run hygiene:check` 报告死符号链接与临时残留；它只报告不代删，处置由人裁决。
