@@ -40,6 +40,26 @@
    "classifiesScripts": false
   },
   {
+   "id": "block78-runtime-projection",
+   "note": "BLOCK-78 摘要卡片项目化：远程资源实时快照——node-agent sys_resource verb（ensureAgent 哈希自动部署）/ gateway sysResource 方法 / harness 资源路由 projectId 路由（additive，无参/local 既有调用零改动）/ 归一化与 TTL 缓存 helper / 前端 hook projectId 参数与卡片 source 驱动。零网络测试锁归一化三态阈值 + TTL fresh/stale/unreachable + agent 脚本 bash 语法与本机执行；实机 dell 读数对账与断连三态归 BLOCK-78 P3 验收。",
+   "patterns": [
+    "core/biof3-server/helpers/remote-resource-snapshot.js",
+    "core/biof3-server/routes/harness/resources.js",
+    "core/biof3-server/helpers/remote-execution/node-agent.js",
+    "core/biof3-server/helpers/workspace-gateway.js",
+    "frontend/src/hooks/useRuntimeResourceSnapshot.ts",
+    "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
+    "frontend/src/components/workspace-panels/CenterPanel.tsx"
+   ],
+   "tests": [
+    "test/remote-resource-snapshot.test.mjs",
+    "test/block67-node-agent-fs.test.js",
+    "test/block57-remote-execution.test.mjs"
+   ],
+   "frontendRelated": true,
+   "classifiesScripts": false
+  },
+  {
    "id": "frontend-config",
    "patterns": [
     "frontend/package.json",

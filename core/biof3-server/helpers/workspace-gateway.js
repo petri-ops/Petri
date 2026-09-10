@@ -194,6 +194,15 @@ function createSshBackend({ alias }) {
       const [info] = parseJsonLines(await fsOp(['kill_pid', String(pid), String(signal)], { timeoutMs: 20000 }));
       return { signaled: info?.signaled === true };
     },
+    // ── BLOCK-78 P2-①：远程资源快照（实时监测轮询面，只读零依赖） ──
+    async sysResource(dirPath) {
+      const args = dirPath ? ['sys_resource', b64(dirPath)] : ['sys_resource'];
+      const [info] = parseJsonLines(await fsOp(args, { timeoutMs: 20000 }));
+      if (!info || info.error) {
+        const e = new Error(info?.error || 'sys_resource_failed'); e.remoteError = info?.error; throw e;
+      }
+      return info;
+    },
   };
 }
 

@@ -75,7 +75,7 @@ export function WorkspaceSummaryCard({
   onOpenScheduled,
   onSelectJob,
 }: WorkspaceSummaryCardProps): React.ReactElement | null {
-  const { snapshot: resources, error: resourceError } = useRuntimeResourceSnapshot();
+  const { snapshot: resources, error: resourceError } = useRuntimeResourceSnapshot(project?.id ?? null);
   const cardVisible = open && visibility !== 'hidden';
   const agentRows = useProjectAgentOverview(project?.id ?? null, cardVisible);
   const terminalSessions = useTerminalSessions(cardVisible);
@@ -128,6 +128,8 @@ export function WorkspaceSummaryCard({
   // 对远程项目一律降级为「指挥席本机」标注，不冒充远程执行机环境。
   const isSshProject = project?.workspaceKind === 'ssh';
   const sshHostName = project?.sshHost || 'SSH';
+  // BLOCK-78 P2-①：远程快照 live = 后端已按 projectId 路由到节点真值。
+  const remoteLive = resources?.source === 'remote';
   // BLOCK-78 P1 — 执行位置标注按 workspaceKind 路由真值源（plan §5 P1④）。
   const runningAgentCount = agentRows.filter((t) => t.status === 'running').length;
   const failedAgentRows = agentRows.filter((t) => t.status === 'failed');
@@ -547,27 +549,32 @@ export function WorkspaceSummaryCard({
                 </span>
               </div>
             )}
-            {/* BLOCK-78 P1.5（用户实机质询「远程项目为啥显示本机资源」）：
-                ssh 项目的资源快照端点仍是本机真值（P2 才接远程），先诚实
-                标注来源为「指挥席本机」并声明远程快照待接入，不再冒充项目
-                环境；R/Py 芯片同理（本地运行时状态与远程作业无关）不渲染。 */}
+            {/* BLOCK-78 P2-①：资源行按快照 source 驱动——remote（mux 探测远程
+                节点真值）显示「资源 · {host}」；ssh 项目探测不可得时诚实降级
+                「指挥席本机」（P1.5 语义，仅剩过渡兜底）；local 项目原样。 */}
             <div
               className={styles.workspacePinnedSummaryEnvironmentRow}
-              data-state={isSshProject ? 'unknown' : resources?.state || 'unknown'}
-              title={isSshProject ? '资源读数来自指挥席本机；远程执行机资源快照尚未接入（BLOCK-78 P2）' : undefined}
+              data-state={resources?.state || 'unknown'}
+              title={isSshProject && !remoteLive ? '资源读数来自指挥席本机；远程快照暂不可达' : undefined}
             >
               <span className={styles.workspaceResourceSummaryState}>
                 <i />
-                {isSshProject
-                  ? '资源 · 指挥席本机'
-                  : resources
-                    ? resources.state === 'ready' ? '资源正常' : resources.state === 'warning' ? '资源需注意' : '资源不足'
-                    : resourceError ? '资源不可用' : '资源检查中'}
+                {remoteLive
+                  ? `资源 · ${resources?.host || sshHostName}`
+                  : isSshProject
+                    ? (resourceError ? `资源 · ${sshHostName}` : '资源 · 指挥席本机')
+                    : resources
+                      ? resources.state === 'ready' ? '资源正常' : resources.state === 'warning' ? '资源需注意' : '资源不足'
+                      : resourceError ? '资源不可用' : '资源检查中'}
               </span>
-              {isSshProject ? (
+              {remoteLive ? (
+                <span className={styles.workspacePinnedSummaryResourceFacts}>
+                  {`内存 ${formatBytes(resources?.memory.availableBytes ?? null)} · 磁盘 ${formatBytes(resources?.disk.availableBytes ?? null)} · ${resources?.cpu.logicalCores ?? '?'} 核${resources?.stale ? ` · 观测于 ${formatObservedAt(resources.observedAt)}` : ''}`}
+                </span>
+              ) : isSshProject ? (
                 <span className={styles.workspacePinnedSummaryResourceFacts}>
                   {resources
-                    ? `内存 ${formatBytes(resources.memory.availableBytes)} · 磁盘 ${formatBytes(resources.disk.availableBytes)} · ${resources.cpu.logicalCores} 核（${sshHostName} 远程快照待接入）`
+                    ? `内存 ${formatBytes(resources.memory.availableBytes)} · 磁盘 ${formatBytes(resources.disk.availableBytes)} · ${resources.cpu.logicalCores} 核（指挥席读数，非 ${sshHostName}）`
                     : `${sshHostName} 远程资源快照待接入`}
                 </span>
               ) : (
@@ -737,6 +744,14 @@ function formatBytes(value: number | null): string {
   if (value == null || !Number.isFinite(value)) return '未知';
   if (value >= 1024 ** 3) return `${(value / 1024 ** 3).toFixed(1)} GB`;
   return `${(value / 1024 ** 2).toFixed(0)} MB`;
+}
+
+/** stale 读数的观测时间（HH:mm:ss）——诚实呈现「这是历史读数」。 */
+function formatObservedAt(observedAt?: string): string {
+  const t = observedAt ? new Date(observedAt) : null;
+  return t && !Number.isNaN(t.getTime())
+    ? t.toLocaleTimeString('zh-CN', { hour12: false })
+    : '未知时间';
 }
 
 function RuntimeStatusChip({

@@ -6,15 +6,29 @@ import { listAgentTasks } from '@/components/copilot/copilotClient';
 import { getBridge } from '@/lib/desktopBridge';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
+import { useRuntimeResourceSnapshot, type RuntimeResourceSnapshot } from '@/hooks/useRuntimeResourceSnapshot';
 
 vi.mock('@/hooks/useRuntimeResourceSnapshot', () => ({
-  useRuntimeResourceSnapshot: () => ({
-    snapshot: null,
-    loading: false,
-    error: '',
-    refresh: async () => {},
-  }),
+  useRuntimeResourceSnapshot: vi.fn(),
 }));
+
+const useRuntimeResourceSnapshotMock = vi.mocked(useRuntimeResourceSnapshot);
+
+function makeSnapshot(overrides: Partial<RuntimeResourceSnapshot> = {}): RuntimeResourceSnapshot {
+  return {
+    schemaVersion: 1,
+    observedAt: '2026-09-10T09:00:00.000Z',
+    expiresAt: '2026-09-10T09:00:15.000Z',
+    state: 'ready',
+    platform: 'linux (ssh:dell)',
+    cpu: { logicalCores: 28, load1m: 0.42 },
+    memory: { totalBytes: 16 * 1024 ** 3, availableBytes: 8 * 1024 ** 3, estimatedBytes: 8 * 1024 ** 3 },
+    disk: { totalBytes: 200 * 1024 ** 3, availableBytes: 100 * 1024 ** 3, usePercent: 50 },
+    runtime: { r: null as unknown as boolean, python: null as unknown as boolean, details: null },
+    activeJobs: 0,
+    ...overrides,
+  };
+}
 
 vi.mock('@/components/copilot/copilotClient', () => ({
   listAgentTasks: vi.fn(),
@@ -109,6 +123,12 @@ beforeEach(() => {
   vi.mocked(fetchDraftPlansForConversation).mockResolvedValue([]);
   vi.mocked(fetchPlansWithPendingRevision).mockResolvedValue([]);
   vi.mocked(listBackgroundProcesses).mockResolvedValue([]);
+  useRuntimeResourceSnapshotMock.mockReturnValue({
+    snapshot: null,
+    loading: false,
+    error: '',
+    refresh: async () => {},
+  });
   getBridgeMock.mockImplementation(((name: string) => {
     if (name === 'terminal') {
       return { listSessions: async () => ({ ok: true, sessions: [] }) };
@@ -294,6 +314,40 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     );
     expect(screen.getByLabelText('后端运行状态')).toBeTruthy();
     expect(screen.queryByText(/指挥席本机/)).toBeNull();
+  });
+
+  it('P2-① 远程资源真值：source=remote 时显示「资源 · host」读数，不再标注待接入', () => {
+    useRuntimeResourceSnapshotMock.mockReturnValue({
+      snapshot: makeSnapshot({ source: 'remote', host: 'dell', stale: false }),
+      loading: false,
+      error: '',
+      refresh: async () => {},
+    });
+    render(
+      <WorkspaceSummaryCard
+        {...baseProps({ project: makeProject({ workspaceKind: 'ssh', sshHost: 'dell' }) })}
+      />
+    );
+    expect(screen.getByText('资源 · dell')).toBeTruthy();
+    expect(screen.getByText(/内存 8\.0 GB · 磁盘 100\.0 GB · 28 核/)).toBeTruthy();
+    expect(screen.queryByText(/待接入/)).toBeNull();
+    expect(screen.queryByText(/指挥席本机/)).toBeNull();
+  });
+
+  it('P2-① stale 降级：历史读数带「观测于」时间戳，不冒充新鲜读数', () => {
+    useRuntimeResourceSnapshotMock.mockReturnValue({
+      snapshot: makeSnapshot({ source: 'remote', host: 'dell', stale: true }),
+      loading: false,
+      error: '',
+      refresh: async () => {},
+    });
+    render(
+      <WorkspaceSummaryCard
+        {...baseProps({ project: makeProject({ workspaceKind: 'ssh', sshHost: 'dell' }) })}
+      />
+    );
+    expect(screen.getByText('资源 · dell')).toBeTruthy();
+    expect(screen.getByText(/观测于/)).toBeTruthy();
   });
 
   it('空态指引：无数据集提示先上传数据', () => {
