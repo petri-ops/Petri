@@ -3026,3 +3026,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：tsc 0；LeftPanel 定向 vitest 12/12（新增：按钮是左栏内容区第一个可交互元素 + 点击触发 handleNavigateToHome）。**实机**：CDP 探针（`scripts/ui328-left-newtask-live.cjs` → `acceptance/ui-328/`）6/6 allPass——按钮存在 + leftPanelWrap 置顶（columnHeader 列级部件不在内容区口径内）+ 点击导航 `/` + 创建区三路径入口齐备 + 项目卡片 30 张照常 + 0 console error；点击前后双截图。
 
 **状态**: verified（2026-09-10 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+
+## UI-329: 右栏空态 launchpad 卡片收窄 + 居中（用户裁决优化点）(2026-09-10 verified)
+
+**来源**：用户实机截图裁决——右栏入口卡（结果/后端/浏览器/文件/侧边聊天/审阅）背景铺满整格占大片空间，文字应居中；「背景变窄了左对齐或居中都可以」。
+
+**改动**：仅 `project-workspace.module.css` 两处——`.emptyResultLaunchpad` 增 `justify-items: center`；`.emptyResultLaunchCard` `width: 100%` → `fit-content`（+min-width 148px 防两字标签过瘪、padding 10 18、justify-content/text-align center）。背景从整格 ~270px 收窄为贴内容 ~148px，文字随内容居中。组件与交互零改动；0 新依赖。
+
+**门禁**：tsc 0；RightPanel 定向 vitest（EmptyResult 消费方）不受影响。**实机**：CDP 探针（`scripts/ui329-launchpad-live.cjs` → `acceptance/ui-329/`）6/6 allPass——6 卡渲染、itemWidth=148（≤220 收窄）、justify-items=center、text-align=center、六标签齐全、同行双卡中点偏差 0（对称居中）、0 console error + 截图。
+
+**状态**: verified（2026-09-10 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。

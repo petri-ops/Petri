@@ -1,0 +1,37 @@
+{
+  "startedAt": "2026-09-10T02:14:26.707Z",
+  "assertions": [
+    {
+      "name": "launchpad 渲染 6 张入口卡",
+      "pass": true,
+      "detail": "{\"n\":6,\"itemWidth\":148,\"justifyItems\":\"center\",\"textAlign\":\"center\",\"labels\":\"结果,后端,浏览器,文件,侧边聊天,审阅\",\"centering\":\"pairMidDelta=0\"}"
+    },
+    {
+      "name": "卡片收窄（fit-content，宽 ≪ 旧整格 ~220px+）",
+      "pass": true,
+      "detail": "itemWidth=148"
+    },
+    {
+      "name": "格内居中生效（justify-items: center）",
+      "pass": true,
+      "detail": "justifyItems=center"
+    },
+    {
+      "name": "文字居中（text-align: center）",
+      "pass": true,
+      "detail": "textAlign=center"
+    },
+    {
+      "name": "六卡标签齐全",
+      "pass": true,
+      "detail": "结果,后端,浏览器,文件,侧边聊天,审阅"
+    },
+    {
+      "name": "0 renderer console error",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "allPass": true,
+  "finishedAt": "2026-09-10T02:14:34.967Z"
+}
