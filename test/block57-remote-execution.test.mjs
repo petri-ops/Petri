@@ -31,16 +31,11 @@ const {
 );
 const {
   buildSshArgv,
-  remoteJobDirPath,
-  assertJobId,
 } = require(
   path.join(repoRoot, 'core/biof3-server/helpers/remote-execution/ssh-transport.js')
 );
 const { createTargetRegistry, newTargetId } = require(
   path.join(repoRoot, 'core/biof3-server/helpers/remote-execution/target-registry.js')
-);
-const { parseSha256SumManifest } = require(
-  path.join(repoRoot, 'core/biof3-server/helpers/remote-execution/remote-job-runner.js')
 );
 const { markUnownedStaleJobs } = require(
   path.join(repoRoot, 'core/biof3-server/helpers/process-lifecycle.js')
@@ -161,27 +156,14 @@ test('transport builds argv-array ssh commands with BatchMode and alias last', (
   assert.equal(argv[sep + 1], 'aliyun');
   assert.equal(argv[sep + 2], 'echo hi');
   assert.throws(() => buildSshArgv('bad host', 'echo'));
-  assert.throws(() => remoteJobDirPath('job;id'));
-  assert.equal(remoteJobDirPath('job_abc'), '$HOME/.biof3-agent/jobs/job_abc');
-  assert.equal(assertJobId('job_abc'), 'job_abc');
+  // BLOCK-76 P5 拆除：remoteJobDirPath/assertJobId（BLOCK-57 作业目录机制）
+  // 已随 D5 清单退役，护栏一并退役；别名安全由 block67 alias 校验测试覆盖。
 });
 
 // ── transfer manifest parsing (D7) ───────────────────────────
 
-test('sha256sum manifest parser keeps relative paths and rejects traversal', () => {
-  const h1 = 'a'.repeat(64);
-  const h2 = 'b'.repeat(64);
-  const entries = parseSha256SumManifest(
-    `${h1}  output/plot.png\n`
-    + `${h2}  output/sub/table.csv\n`
-    + `${'c'.repeat(64)}  ../escape.txt\n`
-    + `${'d'.repeat(64)}  /etc/passwd\n`
-    + 'not-a-hash-line\n'
-  );
-  assert.equal(entries.length, 2);
-  assert.deepEqual(entries[0], { sha256: h1, path: 'output/plot.png' });
-  assert.equal(entries[1].path, 'output/sub/table.csv');
-});
+// BLOCK-76 P5 拆除：parseSha256SumManifest（transfer-manifest 拉回协议）已退役，
+// 解析器及其测试一并退役（产物真值在服务器，无 manifest 对账面）。
 
 // ── target registry CRUD ─────────────────────────────────────
 
