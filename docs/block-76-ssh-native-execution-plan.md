@@ -44,8 +44,8 @@
 | 阶段 | 内容 | 出口 |
 |---|---|---|
 | **P0 评审** | 以 §4 裁决清单为底，落评审文档（产物布局/读面改造范围/历史兼容语义），用户确认后进 P1 | 评审文档 confirmed |
-| **P1 执行链改造** | tools-executor 增「SSH 直跑」分支（mux exec + 服务器结果布局），SSH 项目插件作业切新链 | 真实节点上插件作业服务器直跑成功 |
-| **P2 读取面改造** | 结果页/结果窗/指挥中心产物读面走 Gateway 读远程 | 结果页在远程项目正常展示服务器产物 |
+| **P1 执行链改造** | tools-executor 增「SSH 直跑」分支（mux exec + 服务器 results/jobs 布局），SSH 项目插件作业切新链；聊天/MCP `runPluginToolRemote` 一并收编新内核 | 真实节点上插件作业服务器直跑成功 |
+| **P2 读面改造（全量）** | 全部读本地产物的端点一次切 Gateway：tools/file、tools/log/stream、tools/report、result-studio revisions artifact/table-page/source、interaction、harness script/delivery/replay、storage gc/preview-budget | 结果页/结果窗/报告/交互查看器在远程项目全部展示服务器产物 |
 | **P3 真值语义 + 兼容** | provenance 环境留痕平移；本地历史结果库只读兼容；Artifact Truth 契约文档更新 | 新旧结果并存可读 |
 | **P4 实机验收** | 真实节点全链：远程项目跑插件 → 产物落服务器 → 结果页展示 → provenance 清单正确 | 验收证据 `acceptance/block-76/` |
 | **P5 拆除 + 收口** | 按 D5 清单拆除 BLOCK-57 作业机制（保留 target-registry/validate/mux）；全量回归；台账回写 | 整包 completed |
@@ -75,4 +75,6 @@
 
 ## 10. 进度记录
 
+- 2026-09-10 **P0 设计评审 confirmed（用户三项裁决）**：评审稿 `docs/block-76-p0-design-review.md`（现状八步数据流代码事实 + R1-R6）。用户裁决：**R1 产物布局沿用 `results/jobs` 语义**（result-studio outputPath 相对 workspace 天然同构，读面零分叉）；**R3 读面全量塞 P2**（一次性切完全部本地读面端点，含报告/交互/回放/存储治理，否决分期建议）；**R6 聊天/MCP 旁路 P1 收编**。R2（gateway 写脚本 + exec_bg 后台直跑）/R4（result_json 增量字段 workspaceKind+相对 outputPath，旧绝对路径只读兼容零迁移）/R5（拆除清单化：拆 job-supervisor 链与 uploadBundle/pullBundle，留 target-registry/validate/mux/ensureAgent）随评审稿整体确认。**推论一并确认**：P5 后「本地项目选远程执行目标」的 BLOCK-57 原语义退役（要远程算力应建 SSH 项目）。P0 出口达成，进 P1。
+- 2026-09-10 **启动（planned → active，P0-LAUNCH）**：用户裁决「按顺序推进」（队列首位；无硬前置）。P0 评审开工：代码事实核实（D7 钉 host=handleToolRun 强制钉回项目 host；staging 回落 remote-projects/<id>；结果库=tool_jobs.result_json 绝对路径+磁盘文件，无独立 results 表；读面端点清单 tools/file·log·report + result-studio 全家 + harness 回放；Gateway read 无上限/write 1MB cap；聊天旁路 runPluginToolRemote）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 - 2026-09-10 **立项（planned）**：用户在「清理 BLOCK-57 机制」议题上三选一裁决「立项架构替换」→ 本计划落盘并注册 DOC-REGISTRY（planned 排队）。主 Agent 评估已明确：直接删除会使 SSH 远程项目插件/Skills 执行失败（D7 依赖），故采用「先建新链、验收后拆旧」的软着陆路径。启动待用户裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。

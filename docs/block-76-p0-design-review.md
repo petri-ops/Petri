@@ -1,6 +1,6 @@
-# BLOCK-76 P0 设计评审 —— 纯 SSH 直跑产物留服务器（评审稿 v1）
+# BLOCK-76 P0 设计评审 —— 纯 SSH 直跑产物留服务器（评审稿 v1 · confirmed）
 
-> 状态：`评审中`（2026-09-10 落盘；用户确认各裁决后进 P1）
+> 状态：`confirmed`（2026-09-10 用户三项裁决确认，进 P1）
 > 归属工作包：`docs/block-76-ssh-native-execution-plan.md`（§4 D1–D6 的细化与确认）
 > 事实基线：本文所有「现状」均为 2026-09-10 HEAD 代码事实（已逐文件核实）
 
@@ -26,7 +26,7 @@ Gateway 现状（BLOCK-67）：ssh 后端支持 list/stat/read/write/mkdir/mv/rm
 
 ## 2. 评审裁决（R1–R6，⏳ 待用户确认）
 
-### R1 产物布局：沿用 `results/jobs` 语义（推荐）⏳
+### R1 产物布局：沿用 `results/jobs` 语义✅（2026-09-10 用户确认）
 
 - **推荐 B**：远程产物写 `<remote_path>/results/jobs/<toolJobId>/output/`——与本地项目**同构**。决定性理由：result-studio Revision 的 `outputPath` 本就是相对 workspace 根的相对路径，读面只需把「workspace 根的 fs」换成 Gateway 后端，本地/SSH 一套语义零分叉；且用户在服务器项目树里能看到与本地一致的结果目录。
 - 备选 A `<remote_path>/.gewu-results/<jobId>/`：独立命名空间更「干净」，但 result-studio 相对路径语义要对 SSH 项目特判，读面分叉，且 D5 拆除后旧 `.biof3-agent/jobs` 与新树并存两种远程布局。
@@ -39,11 +39,10 @@ Gateway 现状（BLOCK-67）：ssh 后端支持 list/stat/read/write/mkdir/mv/rm
 - 日志：`fs_read` offset 续读服务器端 `output/run.log`（exec_bg 重定向），本地 `remote-runner.log` 镜像**降级为纯缓存**（见 R4）；
 - 保留 `ensureAgent`（fs/exec verbs 的载体）与 mux 通道；退役 agent 的 job-supervisor 子命令依赖（start/status/manifest/exitinfo）。
 
-### R3 读面改造分期（D3 圈定）⏳
+### R3 读面改造：全量塞 P2✅（2026-09-10 用户裁决，否决分期建议）
 
-- **P2（必备展示链）**：`/api/tools/file/:jobId/:filename`（含 WindowResultPage/ResultArtifactShell）、`/api/tools/log/:id`、result-studio `/revisions/:id/artifact|table-page|source`——覆盖结果页/结果窗主链。
-- **P3（真值语义+兼容）**：`/api/tools/report/:jobId`（远程聚合报告）、`/interaction` 交互快照、harness scientific-task 的 script/delivery/replay、storage gc/preview-budget 的 SSH 适配。
-- 备选「全量塞 P2」：单阶段体量翻倍、验收面膨胀，不推荐。
+- **P2 一次性把全部读本地产物的端点切 Gateway**：`/api/tools/file/:jobId/:filename`、`/api/tools/log/:id`（+stream）、`/api/tools/report/:jobId`、result-studio `/revisions/:id/artifact|table-page|source`、`/interaction`、harness scientific-task 的 script/delivery/replay、storage gc/preview-budget 的 SSH 适配——P3 只剩真值语义与兼容面。
+- 验收面随之并入 P2 出口：结果页/结果窗/报告/交互查看器在远程项目全部正常展示服务器产物。
 
 ### R4 真值语义与日志（D2 细化）✅ 技术面无分歧
 
@@ -56,17 +55,18 @@ Gateway 现状（BLOCK-67）：ssh 后端支持 list/stat/read/write/mkdir/mv/rm
 - **拆**：`runRemoteToolJob`/`adoptRemoteRunningJob`/启动重附扫描/`killLocalToolJob` 远程分支、`uploadBundle`/`pullBundle`/`remoteJobDirPath`、agent job-supervisor 子命令（start/status/log/manifest/exitinfo）及其远端 `$HOME/.biof3-agent/jobs` 布局、`pullOutputs`+transfer-manifest 对账链。
 - **留**：target-registry + execution_targets 表、`routes/ssh-projects.js` targets/connect/list/validate（UI-326/327 向导在用）、mux 通道、node-agent fs/exec verbs、`ensureAgent`、error-classifier、`process-lifecycle.excludeRemoteTargets`（本地孤儿扫描仍需跳过远程作业）。
 
-### R6 聊天/MCP 旁路收编 ⏳
+### R6 聊天/MCP 旁路收编 ✅（2026-09-10 用户确认）
 
 - `runPluginToolRemote`（聊天同步远程直跑）在 P1 一并切新执行内核（同一 SSH 直跑实现），不留两条远程执行真相——否则 P5 拆旧后聊天路径断。
-- 备选「保留旧链仅插件页切换」：制造双真相，违背单一真值红线，不推荐。
 
 ## 3. 风险与实测项（进 P1 前置 acknowledges）
 
 - **大产物读面性能**：gateway read 整文件 base64 无上限——>16MB 产物沿用 `MAX_PREVIEW_BYTES` 预算诚实降级，全量下载体验 P2 实测驱动（必要时 offset/len 分段流）。
 - **>1MB 上传输入**：gateway write 有 1MB cap——大输入文件（counts.csv 等）P1 需分块通道或 exec stdin 管道，实测定。
 - **exec_bg 孤儿语义**：本地孤儿扫描已排除远程作业（excludeRemoteTargets）；新链 ps_pid 轮询语义在 P1 与心跳表对齐。
+- **本地项目 + 显式远程目标的退役**（D5/D6 推论，随裁决一并确认）：P5 拆除作业上传机制后，「本地项目选远程执行目标」的 BLOCK-57 原语义一并退役——要远程算力应建 SSH 项目（D7 自动钉 host）；execution_targets 与 target-registry 保留但只服务 SSH 项目钉定。
 
 ## 4. 确认记录
 
-- 2026-09-10 落盘评审稿 v1（代码事实核实完毕）；R1/R3/R6 + 整体进 P1 待用户确认。
+- 2026-09-10 落盘评审稿 v1（代码事实核实完毕）。
+- 2026-09-10 **用户裁决确认**：R1 沿用 results/jobs 语义 ✅；R3 **全量塞 P2**（用户明确选择一次性切完全部读面，否决分期建议）✅；R6 P1 收编聊天/MCP 旁路 ✅；R2/R4/R5 技术裁决随评审稿整体确认。**P0 出口达成，进 P1。**
