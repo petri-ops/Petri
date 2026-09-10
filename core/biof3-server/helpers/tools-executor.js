@@ -1335,10 +1335,22 @@ function createToolsExecutor({
     }
     try {
       const job = await db
-        .prepare('SELECT user_id, tool_id, created_at, is_test_run FROM tool_jobs WHERE id=?')
+        .prepare('SELECT user_id, tool_id, name, project_id, created_at, is_test_run FROM tool_jobs WHERE id=?')
         .get(jobId);
       if (!job) return;
       if (job.is_test_run) return;
+      // BLOCK-78 P2-⑤：失败终态持久通知（best-effort，绝不阻断作业链路）
+      if (job.project_id) {
+        try {
+          const { getProjectNoticeStore } = require('./project-notice-store');
+          getProjectNoticeStore().insertNotice({
+            projectId: job.project_id,
+            kind: 'job_failed',
+            title: `${job.name || job.tool_id} 失败`,
+            detail: errStr.slice(0, 300),
+          });
+        } catch { /* 通知面故障不影响作业链 */ }
+      }
       let username = null;
       try {
         const u = await db.prepare('SELECT username FROM users WHERE id=?').get(job.user_id);

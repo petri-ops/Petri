@@ -3090,3 +3090,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：LeftPanel 定向 14/14（新增 2 用例：刚刚+7小时同屏渲染与 title 计数、3天降级）+ tsc 0。**实机**：随 UI-330 P3 收口窗口合做。
 
 **状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+**加映八（同日，BLOCK-78 P2-⑤ 跨会话持久通知落地——用户裁决「两个都搞」）**：①存储：新表 `project_notices`（project_id/kind/title/detail/created_at/read_at，项目+时间索引；**事件留痕 + 项目级已读确认**，非第二套作业/agent 状态；read 通知修剪保留 200 条，unread 不修剪）——写点收敛 `markJobFailed` 失败终态（best-effort，绝不阻断作业链；test_run 不产生通知）；②读面：`/api/harness/notices?projectId=&unread=1`（含 unread 计数）+ POST `/seen`（项目级全部已读）；③前端：注意节标题右侧「N 条未读」徽标（accent 色，点击全部标记已读并立刷；仅注意节有未读时出现）。**与投影型信号的本质区别**：失败 job 行随作业状态存在，未读通知跨重启/跨会话存活——重开后知道离开期间发生了什么。**门禁**：新增零网络 2/2（插入/未读计数/项目隔离/全部已读/防御）+ 卡片 16/16（徽标渲染+POST seen）+ tsc 0 + node 语法 0。

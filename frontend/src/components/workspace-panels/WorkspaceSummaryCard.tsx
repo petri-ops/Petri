@@ -83,6 +83,8 @@ export function WorkspaceSummaryCard({
   const attention = useConversationAttention(activeConversation?.id ?? null, project?.id ?? null, cardVisible);
   const projectUsage = useProjectUsage(project?.id ?? null, cardVisible);
   const projectStorage = useProjectStorage(project?.id ?? null, cardVisible);
+  const [noticeRefreshKey, setNoticeRefreshKey] = useState(0);
+  const noticeUnread = useProjectNoticeUnread(project?.id ?? null, cardVisible, noticeRefreshKey);
   if (visibility === 'hidden') return null;
 
   // HLE-C4R: derive an honest loop display. Completion/blocked come only from
@@ -183,10 +185,22 @@ export function WorkspaceSummaryCard({
         {(jobStats.failed > 0
           || failedAgentRows.length > 0
           || attention.pendingPlans > 0
-          || attention.abnormalProcesses > 0) && (
+          || attention.abnormalProcesses > 0
+          || noticeUnread > 0) && (
           <section className={styles.workspacePinnedSummarySection} aria-label="需要关注">
             <div className={styles.workspacePinnedSummarySectionHeading}>
               <div className={styles.workspacePinnedSummarySectionTitle}>需要关注</div>
+              {noticeUnread > 0 && (
+                <button
+                  type="button"
+                  className={styles.workspacePinnedSummaryQueueLabel}
+                  data-testid="notices-unread-badge"
+                  title="跨会话持久通知：点击全部标记已读"
+                  onClick={() => { void markNoticesSeen(project?.id ?? null); setNoticeRefreshKey((k) => k + 1); }}
+                >
+                  {noticeUnread} 条未读
+                </button>
+              )}
             </div>
             {attention.pendingPlans > 0 && (
               <div
@@ -737,6 +751,49 @@ function useProjectStorage(projectId: string | null, enabled: boolean): ProjectS
     };
   }, [enabled, projectId]);
   return storage;
+}
+
+/** BLOCK-78 P2-⑤：跨会话持久通知未读数（失败终态等事件的项目作用域留痕；
+ *  重启/切项目后仍可读——这是它与投影型注意信号的本质区别）。30s 慢轮询 +
+ *  标记已读后立刷。 */
+function useProjectNoticeUnread(projectId: string | null, enabled: boolean, refreshKey: number): number {
+  const [unread, setUnread] = useState(0);
+  useEffect(() => {
+    if (!enabled || !projectId) return;
+    let alive = true;
+    const load = async () => {
+      try {
+        const token = getToken();
+        const resp = await fetch(
+          `${getPlatformApiPrefix()}/harness/notices?projectId=${encodeURIComponent(projectId)}&unread=1`,
+          { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
+        );
+        const body = await resp.json().catch(() => null);
+        if (alive) setUnread(body && body.ok ? Number(body.unread) || 0 : 0);
+      } catch {
+        if (alive) setUnread(0);
+      }
+    };
+    void load();
+    const timer = window.setInterval(load, 30000);
+    return () => {
+      alive = false;
+      window.clearInterval(timer);
+    };
+  }, [enabled, projectId, refreshKey]);
+  return unread;
+}
+
+async function markNoticesSeen(projectId: string | null): Promise<void> {
+  if (!projectId) return;
+  try {
+    const token = getToken();
+    await fetch(`${getPlatformApiPrefix()}/harness/notices/seen`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ projectId }),
+    });
+  } catch { /* 已读标记失败不打扰用户 */ }
 }
 
 /** BLOCK-78 P2-④：会话级注意信号——待确认计划（draft + 待修订，BLOCK-55 链）

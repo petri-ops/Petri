@@ -26,6 +26,7 @@ const context = require('./context');
 const fileReferences = require('./file-references');
 const loop = require('./loop');
 const projectStorage = require('./project-storage');
+const notices = require('./notices');
 
 module.exports = {
   register(app) {
@@ -44,6 +45,7 @@ module.exports = {
     fileReferences.register(app);
     loop.register(app);
     projectStorage.register(app);
+    notices.register(app);
   },
 
   // 子模块 surface（方便测试与子域调试；非注册中心运行时使用）
@@ -56,5 +58,6 @@ module.exports = {
     fileReferences,
     loop,
     projectStorage,
+    notices,
   },
 };

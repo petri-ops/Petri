@@ -7148,3 +7148,18 @@ body:global(.gewu-resizing-columns) * {
   color: var(--gewu-accent);
   opacity: 1;
 }
+
+/* UI-330 加映五 — 注意节未读通知徽标（button 复位 + accent） */
+.noticesUnreadBtn {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--gewu-accent);
+  cursor: pointer;
+  font-size: var(--gewu-font-size-caption);
+  font-weight: 500;
+}
+
+.noticesUnreadBtn:hover {
+  text-decoration: underline;
+}

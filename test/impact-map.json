@@ -60,7 +60,10 @@
     "core/biof3-server/routes/ai-agent/background-processes.js",
     "core/biof3-server/helpers/project-storage.js",
     "core/biof3-server/routes/harness/project-storage.js",
-    "core/biof3-server/routes/harness/index.js"
+    "core/biof3-server/routes/harness/index.js",
+    "core/biof3-server/helpers/project-notices.js",
+    "core/biof3-server/helpers/project-notice-store.js",
+    "core/biof3-server/routes/harness/notices.js"
    ],
    "tests": [
     "test/remote-resource-snapshot.test.mjs",
@@ -68,7 +71,8 @@
     "test/block57-remote-execution.test.mjs",
     "test/ai-usage-project.test.mjs",
     "test/block67-ssh-surface.test.mjs",
-    "test/project-storage.test.mjs"
+    "test/project-storage.test.mjs",
+    "test/project-notices.test.mjs"
    ],
    "frontendRelated": true,
    "classifiesScripts": true,
