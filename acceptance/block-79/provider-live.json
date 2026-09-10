@@ -1,0 +1,32 @@
+{
+  "startedAt": "2026-09-10T12:46:39.128Z",
+  "assertions": [
+    {
+      "name": "A1 real inference via gateway (injection path)",
+      "pass": true,
+      "detail": "error=undefined text=\"收到\" profile=n/a"
+    },
+    {
+      "name": "A2 usage-mine exposes providers array",
+      "pass": true,
+      "detail": "status=200 body={\"status\":\"ok\",\"days\":30,\"calls\":327,\"prompt_tokens\":3797960,\"completion_tokens\":102431,\"cache_read_tokens\":0,\"cache_creation_tokens\":0,\"estimated_cost_cny\":0,\"unknown_cost_calls\":327,\"avg_latency\":33"
+    },
+    {
+      "name": "A3 at least one measurable provider with tps>0",
+      "pass": true,
+      "detail": "[{\"provider\":\"(未归因)\",\"calls\":315,\"inputTokens\":3795383,\"outputTokens\":102431,\"latencyMs\":1080646,\"measurableCalls\":304,\"noUsageCalls\":11,\"tokensPerSecond\":94.8,\"measurable\":true}]"
+    },
+    {
+      "name": "A4 endpoint matches DB recompute (30d, per provider)",
+      "pass": true,
+      "detail": "endpoint=[{\"provider\":\"(未归因)\",\"calls\":315,\"inputTokens\":3795383,\"outputTokens\":102431,\"latencyMs\":1080646,\"measurableCalls\":304,\"noUsageCalls\":11,\"tokensPerSecond\":94.8,\"measurable\":true}] db=[{\"provider\":\"(未归因)\",\"calls\":315,\"inputTokens\":3795383,\"outputTokens\":102431,\"latencyMs\":1080646}]"
+    },
+    {
+      "name": "A5 embedding excluded from groups",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "allPass": true,
+  "finishedAt": "2026-09-10T12:46:40.010Z"
+}

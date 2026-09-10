@@ -1,6 +1,6 @@
 # BLOCK-79 — Token 速度可观测：按供应商的输出速率（统一展示面）
 
-> 状态：`planned`（2026-09-10 用户裁决「增加」立项登记，排队候选；单工作包串行纪律下不并行启动）
+> 状态：`completed`（2026-09-10 立项即整包完成，UI-332 verified，实机 5/5 allPass）
 > 立项日期：2026-09-10
 > truthDomain: `block-79-token-speed-observability`
 > 来源：用户提问「你能否拿到 token/s 这种速度信息呢」→ 主 Agent 核实数据面后给出三档工作量评估 → 用户裁决「统一的 增加，我还是希望你能看到不同供应商的 token 的速度情况的」
@@ -90,4 +90,5 @@
 
 ## 11. 进度记录
 
+- 2026-09-10 **整包完成（UI-332 verified）**：用户「冲 逐个击破」裁决当日完成 P0–P3。**P1 后端**：`ai_usage` additive `provider` 列 + `(provider, ts)` 索引 + `recordAiUsage` 透传 + `model-gateway` chat 循环 attempt 级注入（`telemetry.provider = profile.provider`，fallback 换档即换归因；`!telemetry.provider` 防覆盖调用方显式值）+ deepseek/anthropic usage 记账透传 + `summarizeProviderUsage`（成对聚合 `SUM(completion_tokens)/SUM(latency_ms)`，kind 排除 embedding，`completion_tokens=0` 计 noUsageCalls → measurable=false，旧行 NULL 归「(未归因)」组；**既有 summarizeAiUsage 契约零改动**）+ usage-mine 增 providers 分组段。**P2 前端**：设置页「供应商速率（30 天）」分组区（provider/调用数/输出 tok/s/输出 token/平均延迟；不可算标注；`avg_latency` 首次显性化并标注含 embedding）。**P3 实机**：`block79-provider-live.cjs` 5/5 allPass——真实推理一轮（模型回「收到」）→ providers 分组 → 端点 vs 库内重算（readonly·同 user 过滤）逐组一致。**实机抓环境事实**：脚本直驱网关时必须同时设 `BIOF3_DB_PATH`+`BIOF3_LOCAL_DATA_DIR`（db.js:20 DB_PATH 优先 BIOF3_DB_PATH，缺省回落 core/biof3-server/biof3.db 第二库——不设则归因行落错库，usage-mine 永远读不到）。范围外守住：TTFT/流式实时速率/旧数据回填均未做。G0 开发期常态 · 不外推 packaged/Provider/GA。
 - 2026-09-10 **立项登记（planned）**：用户提问「能否拿到 token/s」→ 主 Agent 核实（`ai_usage` 已含 `completion_tokens` + `latency_ms`；`summarizeAiUsage` 不聚合延迟；`usage-mine` 已返回未使用的 `avg_latency`；缺 TTFT 与流中计数）→ 用户裁决「统一的 增加，要能看到不同供应商的 token 速度」→ 本计划落盘并注册 DOC-REGISTRY。关键设计：速率口径=端到端平均输出速率（下限语义）、provider 归因=网关注入 `profile.provider`（additive 列）、kind 过滤排除 embedding、渠道无 usage 时诚实标注不可算。G0 开发期常态 · 不外推 packaged/Provider/GA。

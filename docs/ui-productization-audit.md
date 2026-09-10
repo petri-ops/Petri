@@ -3103,4 +3103,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：新增 `UsageResourcePanel.test.tsx` 3/3（速率行渲染+平均延迟/不可算标注/空态）+ 后端 `ai-usage-provider` 3/3（provider 落库/成对聚合 80 tok/s 数学/embedding 排除/未归因组/since 窗口）+ tsc 0。
 
-**状态**: in_progress（实机数值一致性对账待 BLOCK-79 P3）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**实机（2026-09-10）**：`scripts/block79-provider-live.cjs` → `acceptance/block-79/provider-live.json` **5/5 allPass**——真实模型推理一轮（网关注入路径）→ usage-mine providers 分组 → 端点数值与库内重算（readonly 独立连接·同 user 过滤·30d 窗口）逐组一致 → embedding 排除实证。
+
+**状态**: verified（2026-09-10 实机数值一致性对账通过）。G0 开发期常态 · 不外推 packaged / Provider / GA。

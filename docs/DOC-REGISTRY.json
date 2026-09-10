@@ -4074,7 +4074,7 @@
    "id": "BLOCK-79-TOKEN-SPEED-OBSERVABILITY",
    "path": "docs/block-79-token-speed-observability-plan.md",
    "kind": "work-package",
-   "status": "planned",
+   "status": "completed",
    "canonical": true,
    "truthDomain": "block-79-token-speed-observability",
    "entrypoint": "docs/README.md",
@@ -4091,8 +4091,9 @@
    ],
    "archivePolicy": "archive_when_superseded",
    "registeredAt": "2026-09-10",
-   "phase": "PLANNED",
-   "notes": "Token 速度可观测：按供应商的输出速率（统一展示面）。用户提问「你能否拿到 token/s」→ 主 Agent 核实数据面：**能，原始数据已在库**——ai_usage 表（core/biof3-server/helpers/ai-usage.js，AI_USAGE_v1）每次 LLM 调用落一行含 completion_tokens + latency_ms，但无人算成速率：summarizeAiUsage 只 SUM token/成本不聚合延迟（喂 /api/ai/loop/summary → 摘要卡任务循环节有 token 有成本无速度）；GET /api/ai/usage-mine 已返回 AVG(latency_ms) AS avg_latency 而设置页 UsageResourcePanel 拿到未显示；缺 TTFT 打点（分不出纯解码速度）与流中 token 计数（做不了实时速率）。用户裁决「统一的 增加，我还是希望你能看到不同供应商的 token 的速度情况的」→ 本包立项。**关键代码事实**：usageArgs（llm-providers/deepseek.js:47）只取 telemetry.{userId,kind,conversationId}+body.model → telemetry 不含 provider（ai-chat.js:132/405）、ai_usage 无 provider 列；但 provider 身份在网关层已知（model-gateway.js 用 profile.provider 取 key + getProvider，实例带 this.providerLabel）→ 最小归因路径=dispatch 前注入 profile.provider 到 telemetry + additive 列。latency_ms=Date.now()-startedAt（请求前打点、流末记账）→ 全链墙钟。kind=chat/chat_turn/embedding/tool_summary_retry → 速率聚合必须过滤 embedding。渠道边界：stream_options include_usage 只对原生 deepseek 加，自定义/Ollama/LM Studio/vLLM 走可移植形状 → completion_tokens 可能为 0，速率不可算须诚实标注。**速率口径**=SUM(completion_tokens)/SUM(latency_ms) = 端到端平均输出速率（含排队+prefill+decode+网络，真实解码速度的下限；禁止称「解码速度」）。阶段：P0 口径与归因裁决 → P1 后端 additive provider 列 + 网关注入 + 新按供应商聚合函数（不改既有 summarizeAiUsage 契约）+ usage-mine 增 provider 分组段 → P2 设置页统一展示面（按供应商分组表：调用数/输出 token/平均延迟/输出 tokens/s/不可算标注；avg_latency 显性化；摘要卡会话级速率与 BLOCK-78 协同、后做者复用聚合函数）→ P3 实机数值一致性对账 + 收口。范围外：TTFT/纯解码速度、流式实时速率（流中无真实 token 数，字符估算属编造边缘）、通用仪表盘图表、旧数据回填（历史行 provider NULL 按未归因呈现）、按项目/会话的速率面板（属 BLOCK-78）。单一真相：ai_usage 仍是唯一用量账本，只加归因列与新聚合读面。0 新 npm 依赖倾向。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+   "phase": "COMPLETED",
+   "notes": "Token 速度可观测：按供应商的输出速率（统一展示面）。用户提问「你能否拿到 token/s」→ 主 Agent 核实数据面：**能，原始数据已在库**——ai_usage 表（core/biof3-server/helpers/ai-usage.js，AI_USAGE_v1）每次 LLM 调用落一行含 completion_tokens + latency_ms，但无人算成速率：summarizeAiUsage 只 SUM token/成本不聚合延迟（喂 /api/ai/loop/summary → 摘要卡任务循环节有 token 有成本无速度）；GET /api/ai/usage-mine 已返回 AVG(latency_ms) AS avg_latency 而设置页 UsageResourcePanel 拿到未显示；缺 TTFT 打点（分不出纯解码速度）与流中 token 计数（做不了实时速率）。用户裁决「统一的 增加，我还是希望你能看到不同供应商的 token 的速度情况的」→ 本包立项。**关键代码事实**：usageArgs（llm-providers/deepseek.js:47）只取 telemetry.{userId,kind,conversationId}+body.model → telemetry 不含 provider（ai-chat.js:132/405）、ai_usage 无 provider 列；但 provider 身份在网关层已知（model-gateway.js 用 profile.provider 取 key + getProvider，实例带 this.providerLabel）→ 最小归因路径=dispatch 前注入 profile.provider 到 telemetry + additive 列。latency_ms=Date.now()-startedAt（请求前打点、流末记账）→ 全链墙钟。kind=chat/chat_turn/embedding/tool_summary_retry → 速率聚合必须过滤 embedding。渠道边界：stream_options include_usage 只对原生 deepseek 加，自定义/Ollama/LM Studio/vLLM 走可移植形状 → completion_tokens 可能为 0，速率不可算须诚实标注。**速率口径**=SUM(completion_tokens)/SUM(latency_ms) = 端到端平均输出速率（含排队+prefill+decode+网络，真实解码速度的下限；禁止称「解码速度」）。阶段：P0 口径与归因裁决 → P1 后端 additive provider 列 + 网关注入 + 新按供应商聚合函数（不改既有 summarizeAiUsage 契约）+ usage-mine 增 provider 分组段 → P2 设置页统一展示面（按供应商分组表：调用数/输出 token/平均延迟/输出 tokens/s/不可算标注；avg_latency 显性化；摘要卡会话级速率与 BLOCK-78 协同、后做者复用聚合函数）→ P3 实机数值一致性对账 + 收口。范围外：TTFT/纯解码速度、流式实时速率（流中无真实 token 数，字符估算属编造边缘）、通用仪表盘图表、旧数据回填（历史行 provider NULL 按未归因呈现）、按项目/会话的速率面板（属 BLOCK-78）。单一真相：ai_usage 仍是唯一用量账本，只加归因列与新聚合读面。0 新 npm 依赖倾向。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+   "completedAt": "2026-09-10"
   }
  ],
  "lastUpdated": "2026-09-10",
