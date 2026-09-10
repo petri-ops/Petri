@@ -1,0 +1,72 @@
+{
+  "startedAt": "2026-09-10T12:07:00.155Z",
+  "assertions": [
+    {
+      "name": "P0 dell ssh project created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mtvhfdj4_ykod\",\"name\":\"B78UI验收-1789042020156\",\"created_at\":\"2026-09-10T12:07:00.160Z\","
+    },
+    {
+      "name": "P0 local project available",
+      "pass": true,
+      "detail": "p_mtkamsfu_3mxo"
+    },
+    {
+      "name": "S1 ssh: card renders",
+      "pass": true,
+      "detail": "{\"card\":true,\"remoteExec\":true,\"resourceRemote\":false,\"chips\":false,\"fallback\":true,\"pendingCost\":true,\"projectInfoSection\":true,\"datasetRow\":true,\"attention\":false}"
+    },
+    {
+      "name": "S1 ssh: 远程执行 · dell",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "S1 ssh: 资源 · dell (节点真值)",
+      "pass": true,
+      "detail": "等待远程快照 fetch 完成（含首击 agent 部署）"
+    },
+    {
+      "name": "S1 ssh: 本机 R/Py 芯片不出现",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "S1 ssh: 指挥席本机兜底不出现（真值已接）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "S2 expanded: 项目信息节 + 数据集行",
+      "pass": true,
+      "detail": "projectInfo=true"
+    },
+    {
+      "name": "S3 local: card renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "S3 local: 本机 R/Py 芯片出现",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "S3 local: 无 远程执行 · dell",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "S3 local: 无 资源 · dell",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "S4 收起摘要概览 → 卡片消失",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "allPass": true,
+  "finishedAt": "2026-09-10T12:07:07.759Z"
+}

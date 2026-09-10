@@ -1,6 +1,6 @@
 # BLOCK-78 — 摘要卡片项目化：项目运行时投影（终端/后台任务/智能体/通知/资源随项目绑定）
 
-> 状态：`active`（2026-09-10 用户裁决「确保没冲突的情况下 开始干活吧」启动 P1；同日立项）
+> 状态：`completed`（2026-09-10 P0–P3 当日完成，UI-330 verified，实机 13/13 allPass）
 > 立项日期：2026-09-10
 > truthDomain: `block-78-summary-card-runtime-projection`
 > 来源：用户对会话摘要卡片的三轮质询与裁决——①「摘要信息是不是没有和项目绑定？本地和远程的项目摘要信息应该不同对吧？智能体是不是应该加到摘要卡片中？」②点名「终端、后台任务、通知、资源详情，当然是随项目绑定的，毕竟本地和远程服务器不同」③「可以再优化一下」，同意按「项目运行时投影」统一抽象登记
@@ -107,6 +107,7 @@
 
 ## 11. 进度记录
 
+- 2026-09-10 **P3 实机收口 completed——整包 completed（UI-330 verified）**：dev 栈带 `--remote-debugging-port=9222` 重启载入全部代码后，`scripts/ui330-card-live.cjs` → `acceptance/block-78/ui330-live.json` **13/13 allPass** + 双截图——S1 ssh 项目：卡片渲染/「远程执行 · dell」/「资源 · dell」节点真值（轮询等读数稳定：首击 ensureAgent 部署 2-3s 属正常过渡态，脚本已固化「等读数稳定再断言」）/本机芯片不出现/指挥席兜底不出现；S2 expanded 项目信息节+数据集行；S3 local 对照：芯片在/无远程字样；S4 收起摘要概览→卡片消失。**验收门对账**：卡片定向 16/16 + block67-ssh-surface 11/11 + 纯逻辑 5/4+2 + block57 13/15（2 红=P5 遗留已 🟢 广播，非本包）+ tsc 0 + test:changed 全覆盖 + ui-audit/docs PASS；UI 台账 UI-330 verified。**P2-⑤ 存量边界**：通知写点当前收敛 job_failed 失败终态，后续 kind 随写点增长。G0 开发期常态 · 不外推 packaged/Provider/GA。
 - 2026-09-10 **P2 整段完成（②③逐个击破落地）**：② 项目级成本/Token 汇总（`07c6280a`+`55c650a4`）+ ③ 结果库占用（`691d6c27`+`0b85d90c`）+ ④ background-processes 路由（`d19a082b`）+ ① 远程资源实时监测实机 10/10（`c00db7ba`）。**⑤ 跨会话持久通知按 plan 默认不做**（需新增项目作用域存储，单独裁决）。**剩余 P3**：UI-330 实机 UI 视角验收（local/ssh 对照 + 折叠三档 + 各节空态，CDP 需带 --remote-debugging-port 重启）→ 整包收口。G0 开发期常态 · 不外推 packaged/Provider/GA。
 - 2026-09-10 **P2-④ 出口达成——background-processes workspaceKind 路由（BLOCK-76 补项兑现，台账 UI-330 加映五）**：①surface 新增 `processList`（remoteBackgrounds 投影，`source:'ssh-registry'`，**懒探针语义**：列表不逐 pid 探测防 1s 轮询打满 mux 队列，精确存活走单查 ps_pid）②workspace-tools `processList: routed(processStatus,'processList')`（local 分支=processStatus 无 id 会话清单原语义）+ 导出 `tool_process_list` ③浮窗 list/log 双端点改接路由版（log 对 ssh 扁平契约做 process 包裹归一 + `process_not_found` 并入 404——顺带修复 ssh 下 log 子路由本就错位）④摘要卡注意节 hook 携带 projectId。门禁：block67-ssh-surface 11/11（新增用例）+ 卡片全绿 + tsc 0 + test:changed 全覆盖。P2 剩余：②成本汇总 ③结果库占用 ⑤持久通知（另裁）。
 - 2026-09-10 **P2-① 出口达成——实机 dell 10/10 allPass（`scripts/block78-resource-live.cjs` → `acceptance/block-78/resource-live.json`，台账 UI-330 加映四）**：首击即证 ensureAgent 新哈希重部署 + verb 生效；对账 free -b/nproc/df -P 逐项通过（dell 112 核/256GB，可用内存差 ~5MB=双读竞态在容差内）；TTL 命中/过期双态实证；不可达 502 + host 回显；本机快照零回归。**P2-① 完成**；P2 剩余（②成本汇总 ③结果库占用 ④background-processes 路由 ⑤持久通知）与 P3 实机收口待续。G0 开发期常态 · 不外推 packaged/Provider/GA。
