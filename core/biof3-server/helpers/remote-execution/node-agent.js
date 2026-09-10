@@ -22,6 +22,11 @@
  *   fs_mv <b64src> <b64dst>       → mv（目标父目录 mkdir -p）
  *   fs_rm <b64path>               → rm -rf（受调用方路径边界约束）
  * 路径/内容一律 base64 编码传输（字符集落在 AGENT_ARG_RE 白名单内，无 shell 注入面）。
+ *
+ * BLOCK-78 P2-① — 资源快照 verb（远程实时监测轮询面）：
+ *   sys_resource [b64path]        → 单行 JSON {memTotalBytes,memAvailableBytes,load1m,cores,
+ *                                    disk:{path,totalBytes,availableBytes,usePercent},hostname}
+ *                                    （path 缺省 $HOME；读 /proc/meminfo·loadavg + df -P，零依赖）
  */
 
 const crypto = require('crypto');
@@ -77,126 +82,8 @@ case "$cmd" in
     command -v sbatch >/dev/null 2>&1 && scheduler=slurm
     echo "scheduler=$scheduler"
     ;;
-  start)
-    [ $# -ge 3 ] || die "start_usage: start <jobId> <runtimeBin> <jobdir|params>"
-    jobId="$1"; runtimeBin="$2"; argmode="$3"
-    valid_job "$jobId"
-    dir="$JOBS_DIR/$jobId"
-    ls "$dir"/run-script.* >/dev/null 2>&1 || die "bundle_missing"
-    [ -f "$dir/params.json" ] || die "params_missing"
-    case "$argmode" in jobdir|params) ;; *) die "invalid_argmode" ;; esac
-    [ -x "$runtimeBin" ] || die "runtime_missing:$runtimeBin"
-    mkdir -p "$dir"
-    setsid nohup bash "$0" __run "$jobId" "$runtimeBin" "$dir" "$argmode" >/dev/null 2>&1 &
-    echo "started"
-    ;;
-  __run)
-    [ $# -ge 4 ] || exit 64
-    jobId="$1"; runtimeBin="$2"; dir="$3"; argmode="$4"; shift 4
-    state="$dir/state.json"; exitfile="$dir/exit.json"
-    rm -f "$exitfile"
-    child=""
-    forward_term() { [ -n "$child" ] && kill -TERM "$child" 2>/dev/null; return 0; }
-    trap forward_term TERM INT
-    script="$(ls "$dir"/run-script.* 2>/dev/null | head -1)"
-    [ -n "$script" ] || exit 65
-    case "$argmode" in
-      jobdir) set -- "$dir" ;;
-      params) set -- --args "$dir/params.json" ;;
-      *) exit 64 ;;
-    esac
-    (
-      cd "$dir" || exit 97
-      exec "$runtimeBin" "$script" "$@"
-    ) > "$dir/runner.log" 2>&1 &
-    child=$!
-    printf '{"jobId":"%s","status":"running","pid":%s,"startedAt":%s,"updatedAt":%s}\\n' \\
-      "$jobId" "$child" "$(now_ms)" "$(now_ms)" | write_atomic "$state"
-    wait "$child"; raw=$?
-    signal=""
-    code=$raw
-    if [ "$raw" -gt 128 ]; then
-      code=$((raw-128))
-      signal="SIG$(kill -l "$raw" 2>/dev/null | tr -d ' ' || echo TERM)"
-    fi
-    # 归拢产物：插件约定把产物写在 jobDir 根目录（脚本/参数/主题/模板之外全部
-    # 视为产物），统一并入 output/ 使拉回协议单一化。
-    mkdir -p "$dir/output" 2>/dev/null
-    for f in "$dir"/*; do
-      [ -f "$f" ] || continue
-      b="$(basename "$f")"
-      case "$b" in
-        run-script.*|params.json|_biof3-theme.R|report-template.html|state.json|exit.json|transfer-manifest.json|provenance.json) continue ;;
-      esac
-      cp -f "$f" "$dir/output/" 2>/dev/null
-    done
-    ( cd "$dir" && find output -type f -print0 2>/dev/null | LC_ALL=C sort -z | xargs -0 sha256sum 2>/dev/null ) \\
-      > "$dir/transfer-manifest.json.tmp" 2>/dev/null
-    mv "$dir/transfer-manifest.json.tmp" "$dir/transfer-manifest.json" 2>/dev/null
-    if [ -n "$signal" ]; then
-      printf '{"jobId":"%s","code":%s,"signal":"%s","at":%s}\\n' "$jobId" "$code" "$signal" "$(now_ms)" | write_atomic "$exitfile"
-    else
-      printf '{"jobId":"%s","code":%s,"signal":null,"at":%s}\\n' "$jobId" "$code" "$(now_ms)" | write_atomic "$exitfile"
-    fi
-    printf '{"jobId":"%s","status":"exited","updatedAt":%s}\\n' "$jobId" "$(now_ms)" | write_atomic "$state"
-    ;;
-  status)
-    [ $# -ge 1 ] || die "status_usage"
-    jobId="$1"; valid_job "$jobId"
-    dir="$JOBS_DIR/$jobId"
-    if [ -f "$dir/exit.json" ]; then
-      echo "terminal"
-      cat "$dir/exit.json"
-    elif [ -f "$dir/state.json" ]; then
-      echo "active"
-      cat "$dir/state.json"
-    else
-      echo "unknown"
-    fi
-    ;;
-  renv)
-    # 环境摘要：R 包名=版本 清单（无 R 时输出空，不视为错误）。
-    if command -v Rscript >/dev/null 2>&1; then
-      Rscript -e 'ip <- installed.packages(); cat(paste(rownames(ip), ip[,"Version"], sep="="), sep="\n")' 2>/dev/null
-    fi
-    exit 0
-    ;;
-  manifest)
-    [ $# -ge 1 ] || die "manifest_usage"
-    jobId="$1"; valid_job "$jobId"
-    file="$JOBS_DIR/$jobId/transfer-manifest.json"
-    [ -f "$file" ] && cat "$file"
-    exit 0
-    ;;
-  exitinfo)
-    [ $# -ge 1 ] || die "exitinfo_usage"
-    jobId="$1"; valid_job "$jobId"
-    file="$JOBS_DIR/$jobId/exit.json"
-    [ -f "$file" ] && cat "$file"
-    exit 0
-    ;;
-  log)
-    [ $# -ge 2 ] || die "log_usage"
-    jobId="$1"; offset="$2"
-    valid_job "$jobId"
-    case "$offset" in ''|*[!0-9]*) die "invalid_offset";; esac
-    file="$JOBS_DIR/$jobId/runner.log"
-    if [ -f "$file" ]; then tail -c +"$((offset+1))" "$file"; fi
-    ;;
-  cancel)
-    [ $# -ge 1 ] || die "cancel_usage"
-    jobId="$1"; valid_job "$jobId"
-    state="$JOBS_DIR/$jobId/state.json"
-    if [ ! -f "$state" ]; then echo "cancel_unknown_job"; exit 0; fi
-    pid=$(grep -o '"pid":[0-9]*' "$state" | head -1 | cut -d: -f2)
-    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
-      kill -TERM "$pid" 2>/dev/null && echo "cancel_term_sent" || echo "cancel_failed"
-    else
-      echo "cancel_no_process"
-    fi
-    ;;
-  fs_*|exec|exec_bg|ps_pid|kill_pid|__mux)
-    # BLOCK-67 fs/exec verbs 在脚本尾部第二 case 分发，此处放行。
+  fs_*|exec|exec_bg|ps_pid|kill_pid|sys_resource|__mux)
+    # BLOCK-67 fs/exec verbs + BLOCK-78 sys_resource 在脚本尾部第二 case 分发，此处放行。
     ;;
   *)
     die "unknown_verb"
@@ -366,6 +253,30 @@ case "$cmd" in
     case "$sig" in ''|*[!A-Z0-9]) die "invalid_signal";; esac
     if kill -"$sig" "$1" 2>/dev/null; then printf '{"signaled":true}\\n'; else printf '{"signaled":false}\\n'; fi
     ;;
+  sys_resource)
+    # BLOCK-78 P2-①：sys_resource [b64path] → 单行 JSON 资源快照。
+    # 只读 /proc 与 df -P（Linux 节点零依赖）；path 缺省 $HOME。load1m/百分比
+    # 以 JSON 数字输出（空值回落 0，不产出非法 JSON）。
+    p="$(fs_decode "\${1:-}")"
+    case "$p" in ''|*..*) p="$HOME" ;; esac
+    [ -d "$p" ] || p="$HOME"
+    mt=0; ma=0
+    eval "$(awk '/^MemTotal/ {printf "mt=%s", $2*1024} /^MemAvailable/ {printf " ma=%s", $2*1024}' /proc/meminfo 2>/dev/null)"
+    l1="$(cut -d' ' -f1 /proc/loadavg 2>/dev/null)"
+    case "$l1" in ''|*[!0-9.]) l1=0 ;; esac
+    cores="$(nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
+    case "$cores" in ''|*[!0-9]*) cores=1 ;; esac
+    dfline="$(df -P "$p" 2>/dev/null | tail -1)"
+    dt="$(printf '%s' "$dfline" | awk '{print $2 * 1024}')"
+    da="$(printf '%s' "$dfline" | awk '{print $4 * 1024}')"
+    du="$(printf '%s' "$dfline" | awk '{if ($2 > 0) printf "%d", ($2 - $4) * 100 / $2; else print "0"}')"
+    case "$dt" in ''|*[!0-9]*) dt=0 ;; esac
+    case "$da" in ''|*[!0-9]*) da=0 ;; esac
+    hn="$(hostname 2>/dev/null | tr -d '"\\' )"
+    [ -n "$hn" ] || hn=unknown
+    printf '{"memTotalBytes":%s,"memAvailableBytes":%s,"load1m":%s,"cores":%s,"disk":{"path":"%s","totalBytes":%s,"availableBytes":%s,"usePercent":%s},"hostname":"%s"}\\n' \\
+      "$mt" "$ma" "$l1" "$cores" "$p" "$dt" "$da" "$du" "$hn"
+    ;;
 esac
 `;
 
@@ -393,8 +304,6 @@ module.exports = {
   AGENT_BIN,
   AGENT_DIR,
   AGENT_ROOT,
-  AGENT_JOBS,
-  JOB_ID_RE,
   agentVersionHash,
   remoteAgentCommand,
 };

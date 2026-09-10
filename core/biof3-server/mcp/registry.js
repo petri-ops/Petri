@@ -1321,136 +1321,40 @@ async function _runPluginScript(
  * 返回与本地 execFile 同形的 (err, stdout, stderr) 三元组，交由共用收尾。
  */
 async function runPluginToolRemote({ sessionExecutionTargetId, jobDir, plugin, language, toolJobId, startedAt, budgetMs, resolve, plans, outputDir }) {
-  const REMOTE_SAMPLES = {
-    peak: {},
-    sampling: { status: 'unavailable', sampleCount: null, reason: 'remote_execution' },
-    peakStatus: 'unavailable',
-  };
   const failWith = (message) => ({ err: Object.assign(new Error(message), { code: 1 }), stdout: '', stderr: message });
 
   try {
-    const runner = createRemoteJobRunner();
     const dbModule = require('../db');
+    const runner = createRemoteJobRunner();
     const registry = createTargetRegistry({ db: dbModule.getAsyncDatabase(), ensureAgent: (dep) => runner.ensureAgent({ alias: dep.alias }) });
     const target = await registry.getById({ id: sessionExecutionTargetId });
     if (!target) return failWith('执行目标不存在或已被移除');
 
-    // BLOCK-76 P1 收编（R6）：作业归属 SSH 项目 → 直跑内核（产物留服务器 results/jobs/）。
-    // 非 SSH 项目（本地项目显式选远程目标的 BLOCK-57 原语义）维持旧链直到 P5 拆除。
+    // BLOCK-76 P3/P5 — 作业归属 SSH 项目 → 直跑内核（产物留服务器 results/jobs/），
+    // 终态由 runPluginToolSshDirect 直构 ssh 语义 summary 并持久化（directSummary 标记）。
     let sshProjectRow = null;
     try {
       sshProjectRow = dbModule.getAsyncDatabase()
         .prepare('SELECT p.id, p.workspace_kind, p.ssh_host, p.remote_path FROM projects p JOIN tool_jobs t ON t.project_id = p.id WHERE t.id = ?')
         .get(toolJobId) || null;
-    } catch { /* project_id 为 null 时自然走旧链 */ }
+    } catch { /* project_id 为 null 时走退役分支 */ }
     if (sshProjectRow && sshProjectRow.workspace_kind === 'ssh' && sshProjectRow.ssh_host) {
       return await runPluginToolSshDirect({ sshProjectRow, jobDir, plugin, language, toolJobId, budgetMs, target, registry, runner, resolve, plans, outputDir });
     }
 
-    const probe = await registry.probe({ id: target.id });
-    if (!probe.ok) return failWith(`执行目标探测失败（${probe.error}）：${probe.detail || ''}`);
-    const runtime = runner.resolveRuntime(probe.info, language);
-    if (!runtime.ready) return failWith(`${runtime.reason}（目标 ${target.alias}）`);
-    // 作业行补记执行目标（徽章/审计数据源；callTool 建行时无此字段）
+    // BLOCK-76 P5 — 非 SSH 项目的显式远程执行目标已随 BLOCK-57 作业机制退役：
+    // 作业上传/产物拉回通道不复存在，远程算力统一走 SSH 项目（D7 自动钉定）。
     try {
-      dbModule.getAsyncDatabase().prepare('UPDATE tool_jobs SET execution_target_id=? WHERE id=?').run(target.id, toolJobId);
-    } catch (e) {
-      console.warn('[mcp-registry] execution_target_id write failed:', e.message);
-    }
-
-    const jobId = 'rjob_' + String(toolJobId || ('t' + Date.now())).replace(/[^A-Za-z0-9._-]/g, '').slice(0, 40) + '_' + String(Date.now()).slice(-6);
-    const submitted = await runner.submit({
-      target, jobId, jobDir, lang: language, argmode: 'jobdir', runtimeBin: runtime.runtimeBin,
-    });
-    if (!submitted.ok) {
-      const kind = (submitted.error && submitted.error.kind) || 'transport.unknown';
-      return failWith(`远程提交失败（${submitted.stage}/${kind}）：${(submitted.error && submitted.error.detail) || ''}`);
-    }
-
-    const deadline = Date.now() + budgetMs;
-    let exitInfo = null;
-    while (Date.now() < deadline) {
-      const status = await runner.pollStatus({ alias: target.alias, jobId });
-      if (status.ok && status.kind === 'terminal') {
-        const exit = await runner.fetchExitInfo({ alias: target.alias, jobId });
-        exitInfo = exit.ok ? exit.info : null;
-        break;
+      if (dbModule.getAsyncDatabase().prepare('UPDATE tool_jobs SET status=? WHERE id=?').run) {
+        dbModule.getAsyncDatabase().prepare('UPDATE tool_jobs SET status=?, error=? WHERE id=?')
+          .run('failed', '远程执行目标已退役（BLOCK-76）：远程算力请创建 SSH 项目', toolJobId);
       }
-      await new Promise((r) => setTimeout(r, 2000));
-    }
-    if (!exitInfo) {
-      await runner.cancel({ alias: target.alias, jobId }).catch(() => {});
-      return failWith(`远程执行超出同步预算（${Math.round(budgetMs / 1000)}s）；已请求取消节点侧作业。长任务请拆分或使用异步路径（候选）。`);
-    }
-
-    const code = Number(exitInfo.code);
-    const pulled = await runner.pullOutputs({ target, jobId, localJobDir: jobDir });
-    let fullLog = '';
-    try {
-      const logOp = await runSshOp({ alias: target.alias, remoteCommand: remoteAgentCommand(['log', jobId, '0']), timeoutMs: 20000 });
-      if (logOp.classified.kind === 'ok') fullLog = logOp.stdout;
     } catch {}
-    if (!pulled.ok && pulled.stage === 'verify') {
-      return { err: Object.assign(new Error(`产物传输完整性校验失败（fail-closed）：${(pulled.error && pulled.error.detail) || ''}`), { code: 1 }), stdout: fullLog, stderr: '' };
-    }
-    if (!pulled.ok && !(Number.isFinite(code) && code !== 0)) {
-      // 成功作业产物传输失败：重试窗口已在 pullOutputs 内；此处诚实失败。
-      return { err: Object.assign(new Error(`产物拉回失败：${(pulled.error && pulled.error.detail) || pulled.stderr || ''}`), { code: 1 }), stdout: fullLog, stderr: '' };
-    }
-
-    // BLOCK-57 P3 — 环境摘要：节点 R 包清单（名=版本）入 provenance，跨机重放
-    // 对账的环境事实。清单仅当语言为 r 时采集（python 环境清单留候选）。
-    const executionTarget = {
-      kind: 'ssh-direct',
-      targetId: target.id,
-      alias: target.alias,
-      hostname: (probe.info && probe.info.hostname) || null,
-      nodeOs: (probe.info && probe.info.os) || null,
-      runtime: { name: language, version: runtime.version, command: runtime.runtimeBin },
-      remoteJobDir: remoteJobDirPath(jobId),
-      argmode: 'jobdir',
-      agentVersion: AGENT_SCRIPT_HASH,
-      transport: 'tar-over-ssh',
-      environment: null,
-    };
-    if (language === 'r') {
-      try {
-        const envOp = await runSshOp({ alias: target.alias, remoteCommand: remoteAgentCommand(['renv']), timeoutMs: 60000 });
-        if (envOp.classified.kind === 'ok' && envOp.stdout.trim()) {
-          const crypto = require('crypto');
-          const packagesText = envOp.stdout.trim();
-          const lines = packagesText.split('\n').filter(Boolean);
-          executionTarget.environment = {
-            packagesCount: lines.length,
-            packagesSha256: crypto.createHash('sha256').update(packagesText).digest('hex'),
-            packagesText,
-          };
-        }
-      } catch (e) {
-        console.warn('[mcp-registry] renv capture failed:', e.message);
-      }
-    }
-    const scriptErr = Number.isFinite(code) && code !== 0
-      ? Object.assign(new Error(`remote script exited ${code}`), { code })
-      : null;
-    return {
-      err: scriptErr,
-      stdout: fullLog,
-      stderr: '',
-      executionTarget,
-    };
+    return failWith('远程执行目标已退役（BLOCK-76）：远程算力请创建 SSH 项目（执行面自动钉定节点）');
   } catch (error) {
     return failWith(`远程执行异常：${error.message}`);
   }
 }
-
-/**
- * BLOCK-76 P1 收编（R6 用户裁决）/ P3 远程化终态——聊天/MCP 插件工具的 SSH 直跑内核。
- * 终态不走本地 finalizePluginRun（其读本地 output/ 构造聊天卡），改由
- * runPluginToolSshDirect 直构 ssh 语义 summary（result_json 记服务器
- * results/jobs/<jobId>/output 真值 + files[] 带 /api/tools/file url），
- * 产物内容经 P2 Gateway 读面按需读取——本地无拉回、无第二真相。
- */
 
 async function runPluginToolSshDirect({ sshProjectRow, jobDir, plugin, language, toolJobId, budgetMs, target, registry, runner: legacyRunner }) {
   const failWith = (message) => ({ err: Object.assign(new Error(message), { code: 1 }), stdout: '', stderr: message });

@@ -1,6 +1,6 @@
 # BLOCK-76 — 插件执行架构替换：纯 SSH 直跑、产物留服务器（拆除 BLOCK-57 双真值机制）
 
-> 状态：`active`（2026-09-10 用户裁决「按顺序推进」启动，P0-LAUNCH；同日立项）
+> 状态：`completed`（2026-09-10 立项即启动、当日 P0-P5 全部收口）
 > 立项日期：2026-09-10
 > truthDomain: `block-76-ssh-native-execution`
 > 来源：用户裁决——BLOCK-67 SSH 远程项目成型后，「作业包上传 + 产物拉回本地结果库」的双真值机制成为历史包袱，产物应以服务器为真值
@@ -74,6 +74,7 @@
 - 0 新 npm 依赖倾向（复用 mux/Gateway；如需依赖单独裁决）。
 
 ## 10. 进度记录
+- 2026-09-10 **P5 拆除 + 整包收口（completed）**：按 D5 清单拆除 BLOCK-57 作业机制——① agent job-supervisor verbs 整块退役（start/__run/status/renv/manifest/exitinfo/log/cancel，agentVersionHash 87747f1deb33d289 自动重部署）；② ssh-transport 退役 streamSshOp/uploadBundle/pullBundle/remoteJobDirPath/assertJobId（保留 runSshOp/buildSshArgv/assertAlias）；③ remote-job-runner 退役 submit/pollStatus/streamLog/cancel/manifest/exitinfo/pullOutputs（保留 ensureAgent/resolveRuntime）；④ tools-executor 退役 runRemoteToolJob + 非 ssh 显式远程目标分派（诚实退役报错：远程算力请创建 SSH 项目），adoptRemoteRunningJob → adoptSshDirectJob（读服务器 .pid/.exit 重启恢复），killLocalToolJob → activeDirectJobs 直跑取消登记；⑤ mcp runPluginToolRemote 旧链体退役（非 ssh 显式目标诚实退役，ssh 项目走直跑内核）。**保留**：target-registry/execution_targets、ssh-projects validate/connect（UI-326/327）、mux 通道、node-agent fs/exec verbs、ensureAgent、error-classifier、excludeRemoteTargets。**回归**：P2 链 8/8 + P4 全链 10/10 重跑全绿；block57 测试 4 失败=better-sqlite3 ABI 环境债（存量登记），11 过含保留面。G0 开发期常态 · 不外推 packaged/Provider/GA.
 - 2026-09-10 **P4 实机全链验收收口（dell 10/10 allPass，scripts/block76-p4-live.cjs，acceptance/block-76/p4-live.json）**：真实节点全链 = SSH 项目创建 → deseq2 直跑 completed → 服务器 24 产物文件真值（deg_table/manifest.json/run.log/report.html 等）→ provenance R 包清单 841 包 + sha256（D4 留痕正确）→ 三读面 Gateway 读出（deg_table/run.log/report）→ 本地 staging 零产物拉回（仅 remote-runner.log 镜像）。§7 验收门对账：全链四断言 ✅ / 本地项目零影响（本地链未触碰）✅ / 治理门禁 docs:check ✅（P5 拆除后全量回归再终验）。**剩余 = P5 拆除 + 整包收口**（按 D5 清单拆 BLOCK-57 作业机制，保留 target-registry/validate/mux/ensureAgent；全量回归；canonical 回写）。G0 开发期常态 · 不外推 packaged/Provider/GA.
 - 2026-09-10 **P3 收口（聊天终态远程化，过渡拉回拆除）**：runPluginToolSshDirect 重构为自带终态持久化——成功路径直构 ssh 语义 summary（result_json 记 workspaceKind/outputPath 相对路径/files[] 带 tools/file url/executionTarget 含服务器 R 包清单），db.updateToolJob completed + plans 同步 + resolve 聊天卡；失败路径回退本地 failureResult（纯元数据，无产物拉回）。runPluginToolRemote 调用方按 directSummary 标记绕过本地 finalizePluginRun——**B76_CHAT_TRANSITIONAL_PULLBACK 过渡拉回常量与逻辑整体删除**，本地无第二真相。interaction（基线快照依赖本地 workspace realpath）与 source 路由的 ssh 适配收敛至 P4 全链验收一并实测核实。回归：dell 实机 P2 链 8/8 全绿。G0 开发期常态 · 不外推 packaged/Provider/GA.
 - 2026-09-10 **P3 进行中（provenance 平移落地）**：ssh-direct-runner 新增 captureREnv（gateway exec 服务器 R 包名册 + sha256，D4/BLOCK-57 P3 语义平移），主链 result_json 与聊天链 executionTarget.environment 双接线；回归 dell 实机 P2 链 8/8 仍全绿。**P3 剩余登记**：① 聊天过渡拉回拆除——finalizePluginRun（mcp/registry.js:987，约 150 行）深度读本地 manifest.json/output 目录构造聊天结果卡，远程化需重写其产物清单构造（唯一真值语义收口件）；② interaction 基线快照机制依赖本地 workspace realpath（workspace_path=NULL 即失败），ssh 适配需 workflow.resolveArtifactPath 的 artifact-truth 记录改造；③ source 路由走 git 投影（BLOCK-67 remoteSsh 适配器可能已覆盖，待 P4 实测核实）；④ storage gc/preview-budget 的 statfsSync 对 ssh 项目已天然降级（disk=null 路径存在）。G0 开发期常态 · 不外推 packaged/Provider/GA.

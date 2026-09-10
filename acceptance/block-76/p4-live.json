@@ -1,15 +1,15 @@
 {
-  "startedAt": "2026-09-10T09:29:45.317Z",
+  "startedAt": "2026-09-10T10:11:34.635Z",
   "assertions": [
     {
       "name": "P4-1 ssh project created (dell)",
       "pass": true,
-      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mtvbt6yp_uvmh\",\"name\":\"P4全链-1789032587132\",\"created_at\":\"2026-09-10T09:29:47.137Z\",\"up"
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mtvdayha_7ib6\",\"name\":\"P4全链-1789035095561\",\"created_at\":\"2026-09-10T10:11:35.566Z\",\"up"
     },
     {
       "name": "P4-2 job submitted",
       "pass": true,
-      "detail": "{\"ok\":true,\"jobId\":\"job_4c999cb8dd2a442d\",\"status\":\"pending\",\"isTestRun\":false,\"requestId\":\"7eb9f8d3-8bc\"}"
+      "detail": "{\"ok\":true,\"jobId\":\"job_2bef143a94b94d09\",\"status\":\"pending\",\"isTestRun\":false,\"requestId\":\"c5859aa0-e64\"}"
     },
     {
       "name": "P4-3 deseq2 completed on dell",
@@ -19,7 +19,7 @@
     {
       "name": "P4-4 result_json ssh semantics",
       "pass": true,
-      "detail": "{\"ws\":\"ssh\",\"op\":\"results/jobs/job_4c999cb8dd2a442d/output\"}"
+      "detail": "{\"ws\":\"ssh\",\"op\":\"results/jobs/job_2bef143a94b94d09/output\"}"
     },
     {
       "name": "P4-5 provenance R env manifest (server truth)",
@@ -44,7 +44,7 @@
     {
       "name": "P4-9 read face: report compose (remote)",
       "pass": true,
-      "detail": "{\"ok\":true,\"fileName\":\"final-report.html\",\"sourceName\":\"report.html\",\"generatedAt\":\"2026-09-10T09:30:55.077Z\",\"embeddedAssets\":[],\"theme\":nu"
+      "detail": "{\"ok\":true,\"fileName\":\"final-report.html\",\"sourceName\":\"report.html\",\"generatedAt\":\"2026-09-10T10:12:42.976Z\",\"embeddedAssets\":[],\"theme\":nu"
     },
     {
       "name": "P4-10 no artifact pull-back (server-only truth)",
@@ -53,5 +53,5 @@
     }
   ],
   "allPass": true,
-  "finishedAt": "2026-09-10T09:31:01.118Z"
+  "finishedAt": "2026-09-10T10:12:48.884Z"
 }

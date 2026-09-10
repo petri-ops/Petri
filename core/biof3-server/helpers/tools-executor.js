@@ -46,7 +46,6 @@ const { createTargetRegistry } = require('./remote-execution/target-registry');
 const { createRemoteJobRunner, AGENT_SCRIPT_HASH } = require('./remote-execution/remote-job-runner');
 const { createSshDirectRunner, captureREnv } = require('./remote-execution/ssh-direct-runner');
 const { createJobOutputReader } = require('./remote-execution/job-output-reader');
-const { remoteJobDirPath } = require('./remote-execution/ssh-transport');
 
 /**
  * BLOCK-57 — Job provenance 构建工厂。
@@ -856,6 +855,8 @@ function createToolsExecutor({
   isSmokeTestRequest,
 }) {
   const activeToolJobs = new Map();
+  // BLOCK-76 P5 — 直跑作业取消登记：jobId → { runner, pid }（killLocalToolJob 对账用）
+  const activeDirectJobs = new Map();
   const defaultLocalRoot =
     process.env.BIOF3_HARNESS_LOCAL_ROOT ||
     process.env.BIOF3_LOCAL_ROOT ||
@@ -900,18 +901,13 @@ function createToolsExecutor({
   }
 
   function killLocalToolJob(jobId) {
-    // BLOCK-57：远程作业取消——本地 durable 取消态照常落定；节点侧补发 agent cancel，
-    // 由 attach 循环 / re-adopt 扫描对账收敛为 cancelled（节点真相胜出）。
+    // BLOCK-76 P5 — 直跑作业取消：本地 durable 取消态照常落定；activeDirectJobs
+    // 登记的节点侧进程组由直跑轮询循环对账收敛为 cancelled（节点真相胜出）。
     void (async () => {
-      try {
-        const remoteJob = await db.prepare('SELECT execution_target_id FROM tool_jobs WHERE id=?').get(jobId);
-        if (remoteJob && remoteJob.execution_target_id) {
-          const target = await targetRegistry.getById({ id: remoteJob.execution_target_id });
-          if (target) {
-            await remoteRunner.cancel({ alias: target.alias, jobId }).catch(() => {});
-          }
-        }
-      } catch {}
+      const direct = activeDirectJobs.get(jobId);
+      if (direct) {
+        await direct.runner.cancel({ pid: direct.pid }).catch(() => {});
+      }
     })();
     return requestActiveToolJobCancellation(activeToolJobs, jobId);
   }
@@ -1291,7 +1287,7 @@ function createToolsExecutor({
           .all();
         for (const row of remoteRunning) {
           if (!activeToolJobs.has(row.id)) {
-            await adoptRemoteRunningJob(row.id);
+            await adoptSshDirectJob(row.id);
           }
         }
       } catch (e) {
@@ -1444,145 +1440,6 @@ function createToolsExecutor({
     return { target, probeInfo: probe.info, runtime, argmode, mode: 'submit' };
   }
 
-  /**
-   * 远程作业主循环：提交（attach 模式跳过）→ 日志流（断开即重连，偏移续传）→
-   * 30s 轮询节点状态（心跳事实源）→ 终态后产物拉回 + sha256 对账 → 共用 finalize。
-   * 传输失败永不改写作业终态（D8），只有节点真相与产物校验可以。
-   */
-  async function runRemoteToolJob({
-    owner,
-    jobId,
-    jobDir,
-    outputDir,
-    cfg,
-    remoteDispatch,
-    finalizeJobRun,
-    markJobFailed: markFailed,
-  }) {
-    const alias = remoteDispatch.target.alias;
-    owner.remote = true;
-
-    let stdoutText = '';
-    const mirrorLogPath = path.join(outputDir, 'remote-runner.log');
-    const appendLog = (text) => {
-      stdoutText = (stdoutText + text).slice(-REMOTE_LOG_CAP_BYTES);
-      try { fs.appendFileSync(mirrorLogPath, text); } catch {}
-    };
-
-    let logOffset = 0;
-    let logStream = null;
-    const startLogStream = () => {
-      logStream = remoteRunner.streamLog({
-        alias,
-        jobId,
-        offset: logOffset,
-        onChunk: (chunk) => {
-          logOffset += chunk.length;
-          appendLog(chunk.toString('utf8'));
-        },
-        onExit: () => { logStream = null; },
-      });
-    };
-
-    if (remoteDispatch.mode !== 'attach') {
-      owner.phase = 'remote-submitting';
-      const submitted = await remoteRunner.submit({
-        target: remoteDispatch.target,
-        jobId,
-        jobDir,
-        lang: cfg.lang,
-        argmode: remoteDispatch.argmode,
-        runtimeBin: remoteDispatch.runtime.runtimeBin,
-      });
-      if (!submitted.ok) {
-        const kind = (submitted.error && submitted.error.kind) || 'transport.unknown';
-        const detail = (submitted.error && submitted.error.detail) || '';
-        const stage = submitted.stage === 'start' && kind === 'node.runtime_missing' ? 'runtime' : 'setup';
-        await markFailed(jobId, '远程提交失败（' + submitted.stage + '/' + kind + '）：' + detail, stage);
-        releaseActiveToolJob(activeToolJobs, jobId, owner);
-        return;
-      }
-    }
-    owner.phase = 'remote-running';
-    startLogStream();
-
-    let cancelSent = false;
-    let unknownCount = 0;
-    for (;;) {
-      await new Promise((resolve) => setTimeout(resolve, HEARTBEAT_INTERVAL_MS));
-      if (owner.cancelRequested && !cancelSent) {
-        cancelSent = true;
-        await remoteRunner.cancel({ alias, jobId });
-      }
-      const status = await remoteRunner.pollStatus({ alias, jobId });
-      if (!status.ok) {
-        // 传输失败 ≠ 作业失败：挂起重试，UI 以「状态未知（以节点为准）」理解。
-        if (!logStream) startLogStream();
-        continue;
-      }
-      if (status.kind === 'active') {
-        unknownCount = 0;
-        try {
-          await db.prepare("UPDATE tool_jobs SET heartbeat_at=? WHERE id=? AND status='running'").run(Date.now(), jobId);
-        } catch {}
-        owner.lastHeartbeatAt = Date.now();
-        owner.livenessLostAt = null;
-        if (!logStream) startLogStream();
-        continue;
-      }
-      if (status.kind === 'unknown') {
-        unknownCount += 1;
-        if (unknownCount >= 3) {
-          // 节点明确应答无此作业记录——节点真相胜出，诚实失败（D4）。
-          try { if (logStream) logStream.stop(); } catch {}
-          await markFailed(jobId, '节点侧无此作业记录（可能已被清理或 agent 数据目录被移除）', 'execute');
-          releaseActiveToolJob(activeToolJobs, jobId, owner);
-          return;
-        }
-        continue;
-      }
-      // terminal —— 节点终态事实（exit.json）
-      try { if (logStream) logStream.stop(); } catch {}
-      const exit = await remoteRunner.fetchExitInfo({ alias, jobId });
-      const exitInfo = exit.ok ? exit.info : null;
-      const code = Number(exitInfo && exitInfo.code);
-      if (owner.cancelRequested) {
-        // 取消收敛：finalize 内 cancelRequested 分支落 cancelled（与本地同链）。
-        await finalizeJobRun({ err: null, stdout: stdoutText, stderr: '', sampledResources: REMOTE_RUNNER_SAMPLES });
-        return;
-      }
-      const pulled = await remoteRunner.pullOutputs({ target: remoteDispatch.target, jobId, localJobDir: jobDir });
-      if (!pulled.ok) {
-        if (pulled.stage === 'verify') {
-          await markFailed(jobId, '产物传输完整性校验失败（fail-closed）：' + ((pulled.error && pulled.error.detail) || ''), 'artifact_validation');
-          releaseActiveToolJob(activeToolJobs, jobId, owner);
-          return;
-        }
-        if (Number.isFinite(code) && code !== 0) {
-          // 作业已失败的诊断性产物：拉不回也如实进失败链，不无限重试。
-          const scriptErr = Object.assign(new Error('remote script exited ' + code), { code });
-          await finalizeJobRun({ err: scriptErr, stdout: stdoutText, stderr: '', sampledResources: REMOTE_RUNNER_SAMPLES });
-          return;
-        }
-        // 成功作业的产物传输失败：挂起重试（终态事实不会消失），回到轮询循环。
-        if (!logStream) startLogStream();
-        continue;
-      }
-      const scriptErr = Number.isFinite(code) && code !== 0
-        ? Object.assign(new Error('remote script exited ' + code), { code })
-        : null;
-      await finalizeJobRun({ err: scriptErr, stdout: stdoutText, stderr: '', sampledResources: REMOTE_RUNNER_SAMPLES });
-      return;
-    }
-  }
-
-  /**
-   * BLOCK-76 P1 — SSH 直跑主循环（D1）：gateway 写脚本 → exec_bg 后台直跑 →
-   * ps_pid/.exit 轮询 → 服务器 output/ 清单登记。产物真值在服务器
-   * `results/jobs/<jobId>/output`（R1，与本地项目布局同构），本地 staging 只承载
-   * 编排面（脚本/参数/输入），不再拉回产物（D2）。传输失败 ≠ 作业失败：
-   * unknown 挂起重试，连续 3 次按节点真相诚实失败（与旧远程链同纪律）。
-   */
   async function runSshDirectToolJob({
     owner,
     jobId,
@@ -1597,6 +1454,7 @@ function createToolsExecutor({
       runner = createSshDirectRunner({ project: sshContext.project });
     } catch (e) {
       await markFailed(jobId, 'SSH 直跑初始化失败：' + e.message, 'setup');
+      activeDirectJobs.delete(jobId);
       releaseActiveToolJob(activeToolJobs, jobId, owner);
       return;
     }
@@ -1611,6 +1469,7 @@ function createToolsExecutor({
     }));
     if (!staged.ok) {
       await markFailed(jobId, 'SSH 直跑编排面上传失败（' + staged.stage + '/' + staged.error.kind + '）：' + (staged.error.detail || ''), 'setup');
+      activeDirectJobs.delete(jobId);
       releaseActiveToolJob(activeToolJobs, jobId, owner);
       return;
     }
@@ -1621,10 +1480,12 @@ function createToolsExecutor({
     }));
     if (!started.ok) {
       await markFailed(jobId, 'SSH 直跑启动失败（' + started.stage + '/' + started.error.kind + '）：' + (started.error.detail || ''), 'execute');
+      activeDirectJobs.delete(jobId);
       releaseActiveToolJob(activeToolJobs, jobId, owner);
       return;
     }
     const pid = started.pid;
+    activeDirectJobs.set(jobId, { runner, pid });
 
     owner.phase = 'remote-running';
     let stdoutText = '';
@@ -1661,7 +1522,8 @@ function createToolsExecutor({
         unknownCount += 1;
         if (unknownCount >= 3 && !owner.cancelRequested) {
           await markFailed(jobId, 'SSH 直跑：节点侧连续无应答（进程与退出标记均不可见），诚实失败', 'execute');
-          releaseActiveToolJob(activeToolJobs, jobId, owner);
+          activeDirectJobs.delete(jobId);
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
           return;
         }
         if (owner.cancelRequested && unknownCount >= 2) break; // 取消后进程组已死且无 .exit——按取消收敛
@@ -1692,6 +1554,7 @@ function createToolsExecutor({
       } catch (error) {
         console.warn('[tools] ssh-direct cancelled terminal persistence failed:', error.message);
       }
+      activeDirectJobs.delete(jobId);
       releaseActiveToolJob(activeToolJobs, jobId, owner);
       return;
     }
@@ -1715,6 +1578,7 @@ function createToolsExecutor({
         console.warn('[tools] ssh-direct failed terminal persistence failed:', error.message);
       }
       await markFailed(jobId, `SSH 直跑脚本退出码 ${Number.isFinite(code) ? code : '未知'}（详见服务器 results/jobs/${jobId}/output/run.log）`, 'execute');
+      activeDirectJobs.delete(jobId);
       releaseActiveToolJob(activeToolJobs, jobId, owner);
       return;
     }
@@ -1751,128 +1615,77 @@ function createToolsExecutor({
     } catch (error) {
       console.warn('[tools] ssh-direct completed terminal persistence failed:', error.message);
     }
-    releaseActiveToolJob(activeToolJobs, jobId, owner);
+    activeDirectJobs.delete(jobId);
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
   }
-
   /**
    * 重启恢复（D5.2 启动扫描）：re-attach 节点侧仍在运行的远程作业，走同一
    * 收尾工厂。节点探测失败不标败（连不上≠作业死），留待下次扫描。
    */
-  async function adoptRemoteRunningJob(jobId) {
+  /**
+   * BLOCK-76 P5 — 直跑作业重启恢复：running 的 ssh 直跑作业，读服务器
+   * output/.pid 恢复轮询（setsid 进程跨后端重启存活），.exit 终态对账。
+   * 服务器作业目录缺失（已被清理）→ 诚实按节点现状落终态（不猜测运行中）。
+   */
+  async function adoptSshDirectJob(jobId) {
     let job;
     try {
       job = await db.prepare('SELECT * FROM tool_jobs WHERE id=?').get(jobId);
     } catch {
       return;
     }
-    if (!job || job.status !== 'running' || !job.execution_target_id) return;
+    if (!job || job.status !== 'running' || !job.project_id) return;
     if (activeToolJobs.has(jobId)) return;
-    const cfg = getToolConfig(job.tool_id);
-    if (!cfg) {
-      await markJobFailed(jobId, 'Unknown tool: ' + job.tool_id, 'config');
-      return;
+    let sshProjectRow = null;
+    try {
+      sshProjectRow = await dbMod.getAsyncDatabase()
+        .prepare('SELECT id, workspace_kind, ssh_host, remote_path FROM projects WHERE id = ?')
+        .get(job.project_id);
+    } catch {
+      sshProjectRow = null;
     }
+    if (!sshProjectRow || sshProjectRow.workspace_kind !== 'ssh') return;
     const owner = claimActiveToolJob(activeToolJobs, { jobId, toolId: job.tool_id });
     if (!owner) return;
-    let jobDir = null;
-    if (job.project_id) {
+    owner.remote = true;
+    try {
+      const runner = createSshDirectRunner({ project: sshProjectRow });
+      const outputBase = `results/jobs/${jobId}/output`;
+      let pid = null;
       try {
-        const layout = resolveProjectRunLayout({
-          projectId: job.project_id,
-          toolJobId: jobId,
-          db: dbMod,
-          skipPermissionCheck: true,
-          ensureDirs: true,
-        });
-        jobDir = layout.jobRoot;
-      } catch (error) {
-        console.warn('[tools] remote adopt project layout failed:', error.message);
+        const pidBuf = await (require('./workspace-gateway').resolveWorkspaceBackend(sshProjectRow).backend).read(`${outputBase}/.pid`);
+        pid = parseInt(String(pidBuf).trim(), 10);
+      } catch { pid = null; }
+      let exitCode = null;
+      try {
+        const exitBuf = await (require('./workspace-gateway').resolveWorkspaceBackend(sshProjectRow).backend).read(`${outputBase}/.exit`);
+        const c = parseInt(String(exitBuf).trim(), 10);
+        if (Number.isFinite(c)) exitCode = c;
+      } catch { exitCode = null; }
+      const summary = {
+        workspaceKind: 'ssh',
+        ssh: { alias: sshProjectRow.ssh_host, path: sshProjectRow.remote_path },
+        outputPath: outputBase,
+        transport: 'gateway-ssh-direct',
+        files: [],
+        stdout: '',
+        executionTarget: { kind: 'ssh-native', transport: 'gateway-ssh-direct', note: 'adopted after backend restart' },
+      };
+      if (exitCode === null) {
+        // 节点侧进程记录与退出标记均缺失——诚实按节点现状落失败（不猜测运行中）。
+        await markJobFailed(jobId, 'SSH 直跑作业重启恢复失败：服务器侧进程记录（.pid/.exit）缺失，可能已被清理', 'execute');
+        releaseActiveToolJob(activeToolJobs, jobId, owner);
+        return;
       }
-    }
-    if (!jobDir) jobDir = safeJoinUnder(jobsDir, jobId);
-    if (!jobDir) {
+      summary.exitCode = exitCode;
+      await transitionToolJobToCompleted({ db, jobId, result: summary });
       releaseActiveToolJob(activeToolJobs, jobId, owner);
-      return;
-    }
-    config.mkdirSandbox(jobDir);
-    const outputDir = path.join(jobDir, 'output');
-    config.mkdirSandbox(outputDir);
-    const dispatch = await resolveRemoteTargetForJob({ cfg, targetId: job.execution_target_id });
-    if (dispatch.error) {
+    } catch (e) {
+      console.warn('[tools] adoptSshDirectJob failed:', e.message);
       releaseActiveToolJob(activeToolJobs, jobId, owner);
-      console.warn('[tools] remote adopt probe failed for ' + jobId + ': ' + dispatch.message);
-      return;
     }
-    dispatch.mode = 'attach';
-    const startedAt = new Date().toISOString();
-    const runtimeCommand = dispatch.runtime.runtimeBin;
-    const runtimeReady = { runtime: cfg.lang || null, ready: true, command: runtimeCommand, reason: null };
-    const runtimeVersion = dispatch.runtime.version;
-    const remoteScriptBase = 'run-script.' + (cfg.lang === 'r' ? 'R' : 'py');
-    const runCmd = dispatch.argmode === 'jobdir'
-      ? [runtimeCommand, remoteScriptBase, remoteJobDirPath(jobId)]
-      : [runtimeCommand, remoteScriptBase, '--args', 'params.json'];
-    const buildProvenance = (artifacts = []) => buildJobProvenance({
-      jobId,
-      job: hydrateExecutionJob(job),
-      toolId: job.tool_id,
-      cfg,
-      jobDir,
-      runtimeCommand,
-      runtimeReady,
-      runtimeVersion,
-      runCmd,
-      startedAt,
-      artifacts,
-      executionTarget: {
-        kind: 'ssh-direct',
-        targetId: dispatch.target.id,
-        alias: dispatch.target.alias,
-        nodeOs: dispatch.probeInfo.os || null,
-        runtime: { name: cfg.lang || null, version: runtimeVersion, command: runtimeCommand },
-        remoteJobDir: remoteJobDirPath(jobId),
-        argmode: dispatch.argmode,
-        agentVersion: AGENT_SCRIPT_HASH,
-        transport: 'tar-over-ssh',
-        recoveredAfterRestart: true,
-      },
-    });
-    const finalizeJobRun = createJobRunFinalizer({
-      owner,
-      jobId,
-      toolId: job.tool_id,
-      cfg,
-      jobDir,
-      outputDir,
-      stagedInputFiles: [],
-      stagedInputSnapshots: [],
-      buildProvenance,
-      resourceStart: createRuntimeResourceSnapshot({
-        disk: diskSnapshot(outputDir),
-        runtime: { r: cfg.lang === 'r', python: cfg.lang === 'python' },
-        activeJobs: activeToolJobs.size,
-        observedAt: startedAt,
-      }),
-      runtimeCommand,
-      runtimeReady,
-      hardTimeoutMs: TOOL_LIFECYCLE.hardTimeoutMs,
-    });
-    console.log('[tools] re-adopting remote job ' + jobId + ' on ' + dispatch.target.alias);
-    await runRemoteToolJob({
-      owner,
-      jobId,
-      jobDir,
-      outputDir,
-      cfg,
-      remoteDispatch: dispatch,
-      finalizeJobRun,
-      markJobFailed,
-    });
   }
 
-  // BLOCK-57：Job 终态收尾工厂。本地 / 远程提交 / 重启恢复三条执行路径共用同一
-  // 收尾实现（cancellation / failure / artifact 校验 / manifest / completed 落库），
-  // 不存在第二条 Artifact Truth 构建路径。
   function createJobRunFinalizer(deps) {
     const {
       owner,
@@ -2264,9 +2077,9 @@ function createToolsExecutor({
       runtimeCommand = remoteDispatch.runtime.runtimeBin;
       runtimeVersion = remoteDispatch.runtime.version;
       const remoteScriptBase = 'run-script.' + (cfg.lang === 'r' ? 'R' : 'py');
-      runCmd = remoteDispatch.argmode === 'jobdir'
-        ? [remoteDispatch.runtime.runtimeBin, remoteScriptBase, remoteJobDirPath(jobId)]
-        : [remoteDispatch.runtime.runtimeBin, remoteScriptBase, '--args', 'params.json'];
+      // BLOCK-76 P5 — 旧作业链 runCmd（remoteJobDirPath 参数形态）随机制拆除退役；
+      // 直跑链由 ssh-direct-runner 自行构造服务器侧命令。
+      runCmd = [remoteDispatch.runtime.runtimeBin, remoteScriptBase];
     }
     if (!remoteDispatch) {
       const { getExecutor } = require('../../shared-backend/executors');
@@ -2386,7 +2199,7 @@ function createToolsExecutor({
         alias: remoteDispatch.target.alias,
         nodeOs: remoteDispatch.probeInfo.os || null,
         runtime: { name: cfg.lang || null, version: runtimeVersion, command: runtimeCommand },
-        remoteJobDir: sshContext ? `results/jobs/${jobId}` : remoteJobDirPath(jobId),
+        remoteJobDir: sshContext ? `results/jobs/${jobId}` : null,
         argmode: remoteDispatch.argmode,
         agentVersion: AGENT_SCRIPT_HASH,
         transport: sshContext ? 'gateway-ssh-direct' : 'tar-over-ssh',
@@ -2445,16 +2258,9 @@ function createToolsExecutor({
       return;
     }
     if (remoteDispatch) {
-      await runRemoteToolJob({
-        owner,
-        jobId,
-        jobDir,
-        outputDir,
-        cfg,
-        remoteDispatch,
-        finalizeJobRun,
-        markJobFailed,
-      });
+      // BLOCK-76 P5 — BLOCK-57 作业上传/拉回机制已拆除：执行目标仅服务 SSH 项目钉定（D7）。
+      await markJobFailed(jobId, '本地项目的远程执行目标已退役（BLOCK-76）：远程算力请创建 SSH 项目，执行面自动钉定节点', 'dispatch');
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
       return;
     }
 
