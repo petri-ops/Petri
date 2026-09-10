@@ -5638,29 +5638,27 @@ body:global(.gewu-resizing-columns) * {
   width: min(100%, 560px);
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  /* UI-329 — 卡片收窄为内容宽度后在格内居中（背景不再铺满整格） */
-  justify-items: center;
+  /* UI-329 — 卡片收窄为内容宽度后格内靠左（两列左缘对齐，整洁）；加映（用户裁决）：比首版更窄 */
+  justify-items: start;
   gap: 7px;
   margin-top: 8px;
 }
 
 /* UI-301 加映 — 卡片文字垂直居中 + 去外框线（保留底色作分区）
-   UI-329 — 背景收窄：卡片贴内容宽度（fit-content），不再铺满整格占大片空间；
-   文字随内容即图标+标签左起（用户裁决：背景变窄后左对齐/居中均可） */
+   UI-329 — 背景收窄：卡片贴内容宽度（fit-content），不再铺满整格占大片空间
+   UI-329 加映（用户裁决）— 去最小宽度、padding 贴文字边；文字左对齐（居中显乱） */
 .emptyResultLaunchCard {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 10px;
   width: fit-content;
   min-height: 54px;
-  min-width: 148px;
-  padding: 10px 18px;
+  padding: 10px 12px;
   border: none;
   border-radius: 11px;
   background: var(--gewu-bg-surface);
   color: var(--gewu-text);
-  text-align: center;
+  text-align: left;
   cursor: pointer;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
   /* UI-215 补充：卡片容器收敛 UA 默认字号（子级文本自带 token） */

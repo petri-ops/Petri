@@ -37,14 +37,10 @@ function fetchJson(url) { return new Promise((res, rej) => { http.get(url, (r) =
     const itemWidth=m.getBoundingClientRect().width;
     const cs=getComputedStyle(m);
     // 居中量测：卡片相对其格子的左右留白（用 offsetLeft 对比同排兄弟）
-    const rowSibs=cards.filter(b=>Math.abs(b.getBoundingClientRect().top-m.getBoundingClientRect().top)<4);
-    let centering='';
-    if(rowSibs.length===2){
-      const a=rowSibs[0].getBoundingClientRect(), b=rowSibs[1].getBoundingClientRect();
-      const gapMid=(a.right+b.left)/2;
-      const rowCenterMid=( (a.left+b.right)/2 );
-      centering='pairMidDelta='+r0(Math.abs(gapMid-rowCenterMid));
-    }
+    // 加映口径：同列卡片左缘对齐（整洁）—— grid 按行流，偶数索引=第1列，奇数=第2列
+    const cols=[[cards[0],cards[2],cards[4]],[cards[1],cards[3],cards[5]]];
+    const deltas=cols.map(col=>Math.max(...col.map(b=>b.getBoundingClientRect().left))-Math.min(...col.map(b=>b.getBoundingClientRect().left)));
+    const centering='colLeftDeltas='+deltas.map(r0).join(',');
     return JSON.stringify({
       n:cards.length,
       itemWidth:r0(itemWidth),
@@ -56,9 +52,10 @@ function fetchJson(url) { return new Promise((res, rej) => { http.get(url, (r) =
   })()`, 60000);
   const s = JSON.parse(probe);
   assert('launchpad 渲染 6 张入口卡', s.n === 6, probe);
-  assert('卡片收窄（fit-content，宽 ≪ 旧整格 ~220px+）', s.itemWidth > 0 && s.itemWidth <= 220, `itemWidth=${s.itemWidth}`);
-  assert('格内居中生效（justify-items: center）', s.justifyItems === 'center', `justifyItems=${s.justifyItems}`);
-  assert('文字居中（text-align: center）', s.textAlign === 'center', `textAlign=${s.textAlign}`);
+  assert('卡片收窄（无最小宽度，贴文字边 ≤140px）', s.itemWidth > 0 && s.itemWidth <= 140, `itemWidth=${s.itemWidth}`);
+  assert('格内靠左生效（justify-items: start）', s.justifyItems === 'start', `justifyItems=${s.justifyItems}`);
+  assert('文字左对齐（text-align: left）', s.textAlign === 'left', `textAlign=${s.textAlign}`);
+  assert('同列卡片左缘对齐（整洁）', /^colLeftDeltas=\d+,\d+$/.test(s.centering) && s.centering.split('=')[1].split(',').every((v) => Number(v) <= 2), s.centering);
   assert('六卡标签齐全', ['结果','后端','浏览器','文件','侧边聊天','审阅'].every((l) => (s.labels || '').includes(l)), s.labels);
 
   const shot = await c.send('Page.captureScreenshot', { format: 'png' });

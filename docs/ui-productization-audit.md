@@ -3037,3 +3037,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：tsc 0；RightPanel 定向 vitest（EmptyResult 消费方）不受影响。**实机**：CDP 探针（`scripts/ui329-launchpad-live.cjs` → `acceptance/ui-329/`）6/6 allPass——6 卡渲染、itemWidth=148（≤220 收窄）、justify-items=center、text-align=center、六标签齐全、同行双卡中点偏差 0（对称居中）、0 console error + 截图。
 
 **状态**: verified（2026-09-10 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+**加映（同日，用户复验裁决「再窄一些贴文字边 + 左对齐」）**：去 `min-width: 148px`、padding 回 `10px 12px`（卡片宽 148→76px，紧贴图标+文字）；`justify-items: center` → `start`（两列左缘垂直对齐，同列左缘偏差实测 0）+ `text-align`/justify-content 回左对齐（用户：居中不整洁）。实机复验 7/7 allPass（探针断言升级：itemWidth≤140 / justify-items start / text-align left / colLeftDeltas=0,0 + 截图）。

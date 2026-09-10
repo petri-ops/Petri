@@ -1,25 +1,30 @@
 {
-  "startedAt": "2026-09-10T02:14:26.707Z",
+  "startedAt": "2026-09-10T02:39:58.206Z",
   "assertions": [
     {
       "name": "launchpad 渲染 6 张入口卡",
       "pass": true,
-      "detail": "{\"n\":6,\"itemWidth\":148,\"justifyItems\":\"center\",\"textAlign\":\"center\",\"labels\":\"结果,后端,浏览器,文件,侧边聊天,审阅\",\"centering\":\"pairMidDelta=0\"}"
+      "detail": "{\"n\":6,\"itemWidth\":76,\"justifyItems\":\"start\",\"textAlign\":\"left\",\"labels\":\"结果,后端,浏览器,文件,侧边聊天,审阅\",\"centering\":\"colLeftDeltas=0,0\"}"
     },
     {
-      "name": "卡片收窄（fit-content，宽 ≪ 旧整格 ~220px+）",
+      "name": "卡片收窄（无最小宽度，贴文字边 ≤140px）",
       "pass": true,
-      "detail": "itemWidth=148"
+      "detail": "itemWidth=76"
     },
     {
-      "name": "格内居中生效（justify-items: center）",
+      "name": "格内靠左生效（justify-items: start）",
       "pass": true,
-      "detail": "justifyItems=center"
+      "detail": "justifyItems=start"
     },
     {
-      "name": "文字居中（text-align: center）",
+      "name": "文字左对齐（text-align: left）",
       "pass": true,
-      "detail": "textAlign=center"
+      "detail": "textAlign=left"
+    },
+    {
+      "name": "同列卡片左缘对齐（整洁）",
+      "pass": true,
+      "detail": "colLeftDeltas=0,0"
     },
     {
       "name": "六卡标签齐全",
@@ -33,5 +38,5 @@
     }
   ],
   "allPass": true,
-  "finishedAt": "2026-09-10T02:14:34.967Z"
+  "finishedAt": "2026-09-10T02:40:06.470Z"
 }
