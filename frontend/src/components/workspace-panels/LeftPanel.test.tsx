@@ -60,6 +60,7 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext {
     handleNavigateToSkills: vi.fn(),
     handleNavigateToKnowledge: vi.fn(),
     handleNavigateToBackend: vi.fn(),
+    handleNavigateToHome: vi.fn(),
     switchToProject: vi.fn(),
     handleSwitchConversation: vi.fn(),
     toggleProjectExpand: vi.fn(),
@@ -272,5 +273,23 @@ describe('UI-327 Tab 多候选：补全到公共前缀', () => {
     setVal('/root/ge');
     fireEvent.keyDown(pathInput, { key: 'Tab', bubbles: true, cancelable: true });
     await waitFor(() => expect(pathInput.value).toBe('/root/gewu-'));
+  });
+});
+
+// UI-328 — 左栏最顶部「新建任务」入口（对齐 ZCode：入口置顶，创建页内再选路径）
+describe('UI-328 左栏顶部新建任务入口', () => {
+  it('「新建任务」是左栏第一个可交互元素，点击回工作台创建页', () => {
+    const ctx = buildCtx('chat');
+    render(
+      <MemoryRouter>
+        <LeftPanel ctx={ctx} />
+      </MemoryRouter>,
+    );
+    const btn = screen.getByRole('button', { name: '新建任务' });
+    // 置顶断言：aside 内第一个 button 就是它（工作台快捷区/项目 header 都在其后）
+    const aside = btn.closest('aside');
+    expect(aside?.querySelector('button')).toBe(btn);
+    fireEvent.click(btn);
+    expect(ctx.handleNavigateToHome).toHaveBeenCalledTimes(1);
   });
 });

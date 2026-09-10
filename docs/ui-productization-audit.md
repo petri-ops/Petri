@@ -3015,3 +3015,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **加映二（同日，用户裁决「先连接再选路径」+ 按钮位置）**：① 「创建项目」按钮移到路径输入框**右侧**（用户裁决）；② 创建成功后同步本地 allProjects——修复创建后左栏树不出现新项目的可见性缺口（用户实机反馈「点击创建没有出现」，实际项目已创建但树未刷新）。**门禁**：tsc 0；LeftPanel/home 定向 vitest 14/14（含 Tab 单候选补全 / 多候选 LCP / IP+密码字段形态）。**实机**：`scripts/block67-ui327-live.cjs` 5/5 allPass（`acceptance/ui-327/ui327-live.json` + 截图）——项目页点 globe → 别名连接 aliyun → 路径输入预填 /root/ + 候选展示 → **输入 /root/ge + Tab → 补全 /root/gewu-block67-demo/** → 创建（API 对账新 ssh 项目出现）→ 导航进入新项目页，0 renderer error，探针清理；加映二后复验：候选点击 + 右侧创建按钮 → 新项目立即出现在左栏树 + 自动进入（ui327-create-beside-input.png）。
 
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收，aliyun 真实节点）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+
+## UI-328: 左栏最顶部「新建任务」入口 → 工作台创建页（BLOCK-67 加映，用户裁决）(2026-09-10 verified)
+
+**来源**：用户裁决——创建新项目只有项目 header 旁一个「+」不够，要像 ZCode 一样在左栏最上面有醒目的「新建任务」入口，点开一个创建页面，页内再选择路径。
+
+**改动**：左栏内容区（leftPanelWrap）最顶部——「工作台」快捷区之前——新增全宽「新建任务」按钮（plus 图标 + 描边卡片样式）→ ctx 新增 `handleNavigateToHome`（对齐既有 handleNavigateTo* 单链路模式）→ 应用内导航 `/` 工作台页（UI-258 既有能力零改动）：项目卡片列表 + 「创建新项目」区——选择工作目录并创建 / 或手动输入路径 + 应用内 FolderPicker（UI-259）/ SSH 远程项目（UI-321/326）/ 空白项目。home 页零改动；0 新依赖。
+
+**门禁**：tsc 0；LeftPanel 定向 vitest 12/12（新增：按钮是左栏内容区第一个可交互元素 + 点击触发 handleNavigateToHome）。**实机**：CDP 探针（`scripts/ui328-left-newtask-live.cjs` → `acceptance/ui-328/`）6/6 allPass——按钮存在 + leftPanelWrap 置顶（columnHeader 列级部件不在内容区口径内）+ 点击导航 `/` + 创建区三路径入口齐备 + 项目卡片 30 张照常 + 0 console error；点击前后双截图。
+
+**状态**: verified（2026-09-10 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。

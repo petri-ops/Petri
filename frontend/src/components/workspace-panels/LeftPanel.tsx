@@ -70,6 +70,8 @@ export interface LeftPanelContext {
   /** BLOCK-72 / UI-320 — 全局工作台页入口（知识空间/后端为设备级全局能力，非项目关联） */
   handleNavigateToKnowledge: () => void;
   handleNavigateToBackend: () => void;
+  /** UI-328 — 左栏顶部「新建任务」：回工作台创建页（页内选本地/手输/SSH 路径） */
+  handleNavigateToHome: () => void;
 
   // Project / conversation switching
   switchToProject: (id: string) => void;
@@ -160,6 +162,18 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
         }}
         onDrop={(e) => void handlePanelDrop(e)}
       >
+        {/* UI-328 — 左栏最顶部「新建任务」（对齐 ZCode New task）：进工作台创建页，页内再选路径 */}
+        <div className={styles.leftNewTaskRow}>
+          <button
+            type="button"
+            className={styles.leftNewTaskBtn}
+            onClick={ctx.handleNavigateToHome}
+            title="新建任务：在工作台选择项目路径（本地目录 / 手动路径 / SSH 远程）"
+          >
+            <Icon name="plus" size={15} />
+            <span>新建任务</span>
+          </button>
+        </div>
         <QuickActions ctx={ctx} />
         <ProjectTreeHeader
           ctx={ctx}

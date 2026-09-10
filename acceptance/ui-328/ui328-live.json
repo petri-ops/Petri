@@ -1,0 +1,37 @@
+{
+  "startedAt": "2026-09-10T02:11:57.860Z",
+  "assertions": [
+    {
+      "name": "左栏「新建任务」按钮存在",
+      "pass": true,
+      "detail": "{\"first\":true,\"title\":\"新建任务：在工作台选择项目路径（本地目录 / 手动路径 / SSH 远程）\"}"
+    },
+    {
+      "name": "按钮置顶（aside 第一个 button）",
+      "pass": true,
+      "detail": "{\"first\":true,\"title\":\"新建任务：在工作台选择项目路径（本地目录 / 手动路径 / SSH 远程）\"}"
+    },
+    {
+      "name": "点击「新建任务」→ 导航到 / 工作台创建页",
+      "pass": true,
+      "detail": "{\"hasCreateArea\":true,\"hasPickBtn\":true,\"hasManual\":true,\"hasSsh\":true,\"cardCount\":30}"
+    },
+    {
+      "name": "创建页内可选路径：选目录/手输路径/SSH 入口齐备",
+      "pass": true,
+      "detail": "{\"hasCreateArea\":true,\"hasPickBtn\":true,\"hasManual\":true,\"hasSsh\":true,\"cardCount\":30}"
+    },
+    {
+      "name": "项目列表卡片照常展示（不丢工作台本体）",
+      "pass": true,
+      "detail": "cards=30"
+    },
+    {
+      "name": "0 renderer console error",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "allPass": true,
+  "finishedAt": "2026-09-10T02:12:07.419Z"
+}
