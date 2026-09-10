@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import type { Project } from '@/lib/project-types';
+import { SshCreateInlinePanel } from './LeftSshCreatePanel';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { useConversationRun } from '@/components/copilot/conversationRunStore';
@@ -50,6 +51,14 @@ export interface LeftPanelContext {
 
   /** BLOCK-67 加映（UI-325）：ssh 项目「远程连接」——连通性检测 + 诚实反馈（D5 重连入口） */
   sshConnectProject: (project: Project) => void | Promise<void>;
+  /** UI-327 向导①：连通性检测（返回远端 $HOME 供路径浏览起点） */
+  sshConnectHost: (alias: string) => Promise<{ ok: boolean; home?: string; error?: string; retryable?: boolean }>;
+  /** UI-327 向导②：浏览远端目录（仅目录条目） */
+  sshListDirs: (alias: string, path: string) => Promise<{ ok: boolean; path?: string; dirs?: Array<{ name: string; path: string }>; error?: string; retryable?: boolean }>;
+  /** UI-327 密码模式①：注册主机（一次性装公钥 + 写别名），密码不存储 */
+  sshRegisterHost: (p: { ip: string; port: string; username: string; password: string }) => Promise<{ ok: boolean; alias?: string; error?: string }>;
+  /** UI-327 向导③：在选定路径创建项目并导航（内部完成 validate + create + navigate） */
+  sshCreateAt: (p: { alias: string; remotePath: string }) => Promise<{ ok: boolean; error?: string }>;
 
   // Workspace routing
   workspaceMode: WorkspaceMode;
@@ -97,6 +106,8 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
   // 用户仍需看到完整路径并点「创建项目」，拖拽不绕过任何确认环节。
   const [dropActive, setDropActive] = useState(false);
   const [dropHint, setDropHint] = useState<string | null>(null);
+  // UI-327 — 左栏行内 SSH 创建面板（globe 按钮切换；不跳首页）
+  const [sshCreateOpen, setSshCreateOpen] = useState(false);
 
   const handlePanelDrop = async (e: React.DragEvent): Promise<void> => {
     e.preventDefault();
@@ -150,7 +161,14 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
         onDrop={(e) => void handlePanelDrop(e)}
       >
         <QuickActions ctx={ctx} />
-        <ProjectTreeHeader ctx={ctx} />
+        <ProjectTreeHeader
+          ctx={ctx}
+          sshCreateOpen={sshCreateOpen}
+          onToggleSshCreate={() => setSshCreateOpen((v) => !v)}
+        />
+        {sshCreateOpen && (
+          <SshCreateInlinePanel ctx={ctx} onClose={() => setSshCreateOpen(false)} />
+        )}
         <ProjectTree ctx={ctx} />
         {dropHint && (
           <p className={styles.leftCreateError} role="alert" style={{ padding: '0 12px' }}>{dropHint}</p>
@@ -250,12 +268,22 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   );
 }
 
-function ProjectTreeHeader({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
+function ProjectTreeHeader({ ctx, sshCreateOpen, onToggleSshCreate }: { ctx: LeftPanelContext; sshCreateOpen: boolean; onToggleSshCreate: () => void }): React.ReactElement {
   return (
     <>
       <div className={styles.leftPanelHeader}>
         <span className={styles.leftPanelTitle}>项目</span>
         <div className={styles.leftPanelHeaderActions}>
+          {/* UI-327 — ssh 创建入口前置到左栏：行内面板，不跳首页 */}
+          <button
+            className={`${styles.iconBtn} ${sshCreateOpen ? styles.iconBtnInactive : ''}`}
+            onClick={onToggleSshCreate}
+            title={sshCreateOpen ? '收起 SSH 远程项目创建' : '新建 SSH 远程项目（IP/密码 或 别名）'}
+            aria-label={sshCreateOpen ? '收起 SSH 远程项目创建' : '新建 SSH 远程项目'}
+            aria-expanded={sshCreateOpen}
+          >
+            <Icon name="globe" size={14} />
+          </button>
           <button
             className={styles.iconBtn}
             onClick={() => void ctx.createPanel.onOpen()}
@@ -521,3 +549,9 @@ function ConversationItem({
     </li>
   );
 }
+
+
+// ============================================================
+// UI-327 — 左栏行内 SSH 创建面板（globe 切换；别名 / IP+密码 双模式）
+// 表单态本地持有；校验/注册/创建/导航全部走 ctx.sshCreate（单一链路）。
+// ============================================================

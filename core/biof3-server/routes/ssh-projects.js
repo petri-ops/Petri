@@ -9,7 +9,8 @@
  * 复用通道层，不建第二套目标真相；错误如实分类（transport.* / not_found / not_a_dir）。
  */
 const { requireTrustedDesktopOrigin } = require('../helpers/local-request-boundary');
-const { resolveWorkspaceBackend, safeRemoteJoin } = require('../helpers/workspace-gateway');
+const workspaceGateway = require('../helpers/workspace-gateway');
+const sshTransport = require('../helpers/remote-execution/ssh-transport');
 const { createTargetRegistry } = require('../helpers/remote-execution/target-registry');
 const { createRemoteJobRunner } = require('../helpers/remote-execution/remote-job-runner');
 
@@ -43,6 +44,43 @@ function createSshProjectsRouter() {
       }
     });
 
+    // UI-327 向导①——连通性检测（返回远端 $HOME 供路径浏览起点）
+    app.post('/api/ssh-projects/connect', requireTrustedDesktopOrigin, async (req, res) => {
+      const alias = String(req.body?.alias || '');
+      if (!/^[A-Za-z0-9._-]{1,128}$/.test(alias)) return res.status(400).json({ ok: false, error: 'invalid_alias' });
+      try {
+        const op = await sshTransport.runSshOp({ alias, remoteCommand: 'echo $HOME', timeoutMs: 20000 });
+        if (op.classified.kind !== 'ok') {
+          return res.status(502).json({ ok: false, error: `连接失败：${op.classified.kind}`, retryable: op.classified.retryable === true });
+        }
+        const home = (op.stdout.trim().split(String.fromCharCode(10)).pop() || '/').trim() || '/';
+        return res.json({ ok: true, home });
+      } catch (e) {
+        res.status(500).json({ ok: false, error: e.message });
+      }
+    });
+
+    // UI-327 向导②——浏览远端目录（仅目录条目，供路径选择器）
+    app.post('/api/ssh-projects/list', requireTrustedDesktopOrigin, async (req, res) => {
+      const alias = String(req.body?.alias || '');
+      const dirPath = String(req.body?.path || '/');
+      if (!/^[A-Za-z0-9._-]{1,128}$/.test(alias)) return res.status(400).json({ ok: false, error: 'invalid_alias' });
+      const abs = workspaceGateway.safeRemoteJoin(dirPath, '');
+      if (!abs) return res.status(400).json({ ok: false, error: 'invalid_path' });
+      try {
+        const { backend } = workspaceGateway.resolveWorkspaceBackend({ workspace_kind: 'ssh', ssh_host: alias, remote_path: abs });
+        const entries = await backend.list(abs);
+        const dirs = entries
+          .filter((e) => e.type === 'dir')
+          .map((e) => ({ name: e.name, path: `${abs.replace(/\/+$/, '')}/${e.name}` }));
+        return res.json({ ok: true, path: abs, dirs });
+      } catch (e) {
+        if (e.remoteError === 'not_found') return res.status(400).json({ ok: false, error: '目录不存在' });
+        if (e.classified) return res.status(502).json({ ok: false, error: `连接失败：${e.classified.kind}`, retryable: e.classified.retryable === true });
+        return res.status(500).json({ ok: false, error: e.message });
+      }
+    });
+
     app.post('/api/ssh-projects/validate', requireTrustedDesktopOrigin, async (req, res) => {
       const alias = String(req.body?.alias || '');
       const remotePath = String(req.body?.remotePath || '');
@@ -51,8 +89,8 @@ function createSshProjectsRouter() {
 
       try {
         // 复用 Gateway ssh 后端（含 ensureAgent 部署）；路径必须已存在且为目录。
-        const { backend } = resolveWorkspaceBackend({ workspace_kind: 'ssh', ssh_host: alias, remote_path: remotePath });
-        const abs = safeRemoteJoin(remotePath, '');
+        const { backend } = workspaceGateway.resolveWorkspaceBackend({ workspace_kind: 'ssh', ssh_host: alias, remote_path: remotePath });
+        const abs = workspaceGateway.safeRemoteJoin(remotePath, '');
         if (!abs) return res.status(400).json({ ok: false, error: 'invalid_remote_path' });
         const stat = await backend.stat(abs);
         if (stat.type !== 'dir') {

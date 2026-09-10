@@ -1,6 +1,6 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LeftPanel, type LeftPanelContext } from './LeftPanel';
 import type { Project } from '@/lib/project-types';
@@ -49,6 +49,10 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext {
     forkConversation: vi.fn(async () => null),
     workspaceMode,
     sshConnectProject: vi.fn(),
+    sshConnectHost: vi.fn(async () => ({ ok: true, home: '/root' })),
+    sshListDirs: vi.fn(async () => ({ ok: true, path: '/root', dirs: [{ name: 'gewu-block67-demo', path: '/root/gewu-block67-demo' }] })),
+    sshRegisterHost: vi.fn(async () => ({ ok: true, alias: 'gewu-1-2-3-4' })),
+    sshCreateAt: vi.fn(async () => ({ ok: true })),
     handleShowSearch: vi.fn(),
     handleShowScheduled: vi.fn(),
     handleShowPlugins: vi.fn(),
@@ -146,5 +150,69 @@ describe('BLOCK-67 左栏 ssh 项目标识与远程连接', () => {
       </MemoryRouter>,
     );
     expect(screen.queryByRole('button', { name: /远程连接/ })).toBeNull();
+  });
+});
+
+describe('UI-327 左栏 globe 行内创建向导', () => {
+  it('别名模式：连接 → sshConnectHost；进入选路径步 → 目录浏览渲染', async () => {
+    const ctx = buildCtx('chat');
+    render(
+      <MemoryRouter>
+        <LeftPanel ctx={ctx} />
+      </MemoryRouter>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '新建 SSH 远程项目' }));
+    const panel = screen.getByTestId('left-ssh-create-panel');
+    const setVal = (label: string, v: string) => {
+      const input = panel.querySelector(`input[aria-label="${label}"]`) as HTMLInputElement;
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+      setter?.call(input, v);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+    setVal('SSH 主机别名', 'aliyun');
+    fireEvent.click(screen.getByText('连接'));
+    await waitFor(() => expect(ctx.sshConnectHost).toHaveBeenCalledWith('aliyun'));
+    await waitFor(() => expect(ctx.sshListDirs).toHaveBeenCalledWith('aliyun', '/root'));
+    await waitFor(() => expect(screen.getByTestId('ssh-connected-chip').textContent).toBe('aliyun'));
+    expect(screen.getByTestId('ssh-selected-path').textContent).toBe('/root');
+    expect(screen.getByText('gewu-block67-demo/')).toBeTruthy();
+  });
+
+  it('IP+密码模式：出现密码字段（type=password）与 IP/端口/用户名', () => {
+    const ctx = buildCtx('chat');
+    render(
+      <MemoryRouter>
+        <LeftPanel ctx={ctx} />
+      </MemoryRouter>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '新建 SSH 远程项目' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'IP + 密码' }));
+    const panel = screen.getByTestId('left-ssh-create-panel');
+    expect((panel.querySelector('input[aria-label^="SSH 密码"]') as HTMLInputElement).type).toBe('password');
+    expect(panel.querySelector('input[aria-label="主机 IP 或域名"]')).toBeTruthy();
+    expect(panel.querySelector('input[aria-label="SSH 端口"]')).toBeTruthy();
+    expect(panel.querySelector('input[aria-label="SSH 用户名"]')).toBeTruthy();
+  });
+
+  it('选路径步：点击「在此目录创建项目」触发 sshCreateAt', async () => {
+    const ctx = buildCtx('chat');
+    render(
+      <MemoryRouter>
+        <LeftPanel ctx={ctx} />
+      </MemoryRouter>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '新建 SSH 远程项目' }));
+    const panel = screen.getByTestId('left-ssh-create-panel');
+    const setVal = (label: string, v: string) => {
+      const input = panel.querySelector(`input[aria-label="${label}"]`) as HTMLInputElement;
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+      setter?.call(input, v);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+    setVal('SSH 主机别名', 'aliyun');
+    fireEvent.click(screen.getByText('连接'));
+    await waitFor(() => expect(screen.getByText('在此目录创建项目')).toBeTruthy());
+    fireEvent.click(screen.getByText('在此目录创建项目'));
+    await waitFor(() => expect(ctx.sshCreateAt).toHaveBeenCalledWith({ alias: 'aliyun', remotePath: '/root' }));
   });
 });

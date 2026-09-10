@@ -1,0 +1,27 @@
+{
+  "startedAt": "2026-09-10T00:28:20.694Z",
+  "assertions": [
+    {
+      "name": "向导① 连接主机（chip=aliyun）+ 进入浏览步",
+      "pass": true,
+      "detail": "{\"step\":\"pick\",\"chip\":\"aliyun\",\"selected\":\"/root/gewu-block67-demo\"}"
+    },
+    {
+      "name": "向导② 路径浏览进入 gewu-block67-demo",
+      "pass": true,
+      "detail": "/root/gewu-block67-demo"
+    },
+    {
+      "name": "向导③ 创建项目（API 对账：新 ssh 项目出现）",
+      "pass": true,
+      "detail": "{\"id\":\"p_mtusheza_wgsd\",\"name\":\"gewu-block67-demo\"}"
+    },
+    {
+      "name": "导航进入新建项目页",
+      "pass": true,
+      "detail": "expect /project/p_mtusheza_wgsd"
+    }
+  ],
+  "allPass": true,
+  "finishedAt": "2026-09-10T00:28:45.550Z"
+}

@@ -14,7 +14,7 @@ import { LeftPanel, type LeftPanelContext } from '@/components/workspace-panels/
 import { RightPanel, type RightPanelContext } from '@/components/workspace-panels/RightPanel';
 import { ColumnHeader } from '@/components/desktop/titlebar/ColumnizedTitleBar';
 import { TitleBar } from '@/components/desktop/TitleBar';
-import { getProject, listProjectJobs, listDatasetsByProject, listProjects, updateProject, createProject, setProjectStatus, validateSshProject } from '@/lib/project-store';
+import { getProject, listProjectJobs, listDatasetsByProject, listProjects, updateProject, createProject, setProjectStatus, validateSshProject, connectSshHost, listSshRemoteDirs } from '@/lib/project-store';
 import { useToast } from '@/components/common/ToastProvider';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
@@ -913,6 +913,41 @@ export function ProjectWorkspace(): React.ReactElement {
     return true;
   }, [refreshConversations, refreshOtherConversations]);
 
+  // UI-327 向导①：连通性检测（runSshOp echo $HOME，经 /api/ssh-projects/connect）
+  const sshConnectHost = useCallback(async (alias: string): Promise<{ ok: boolean; home?: string; error?: string; retryable?: boolean }> => {
+    return connectSshHost(alias);
+  }, []);
+
+  // UI-327 向导②：浏览远端目录（Gateway fs_list，仅目录）
+  const sshListDirs = useCallback(async (alias: string, path: string): Promise<{ ok: boolean; dirs?: Array<{ name: string; path: string }>; error?: string; retryable?: boolean }> => {
+    return listSshRemoteDirs(alias, path);
+  }, []);
+
+  // UI-327 密码模式①：注册主机（一次性装公钥 + 写 ~/.ssh/config 别名；密码不存储）
+  const sshRegisterHost = useCallback(async (p: { ip: string; port: string; username: string; password: string }): Promise<{ ok: boolean; alias?: string; error?: string }> => {
+    const desktop = (window as unknown as { biof3Desktop?: { ssh?: { registerHost: (p: { ip: string; port: number; username: string; password: string }) => Promise<{ ok: boolean; alias?: string; error?: string }> } } });
+    const bridge = desktop.biof3Desktop?.ssh ?? (window as unknown as { gewu?: { ssh?: { registerHost: (p: { ip: string; port: number; username: string; password: string }) => Promise<{ ok: boolean; alias?: string; error?: string }> } } }).gewu?.ssh;
+    if (!bridge?.registerHost) {
+      return { ok: false, error: '当前运行环境不支持密码引导连接（请升级 Gewu 桌面端）' };
+    }
+    if (!p.ip || !p.port || !/^[1-9][0-9]*$/.test(p.port) || Number(p.port) > 65535 || !p.username || !p.password) {
+      return { ok: false, error: '请完整填写 IP、端口（1-65535）、用户名与密码' };
+    }
+    return bridge.registerHost({ ip: p.ip, port: Number(p.port), username: p.username, password: p.password });
+  }, []);
+
+  // UI-327 向导③：在选定路径创建项目并导航（validate 部署 agent + 创建）
+  const sshCreateAt = useCallback(async (p: { alias: string; remotePath: string }): Promise<{ ok: boolean; error?: string }> => {
+    const verdict = await validateSshProject({ alias: p.alias, remotePath: p.remotePath });
+    if (!verdict.ok) {
+      return { ok: false, error: verdict.retryable ? `远程连接失败（可重试）：${verdict.error}` : `远程路径校验失败：${verdict.error}` };
+    }
+    const name = p.remotePath.split('/').filter(Boolean).pop() || p.alias;
+    const project = await createProject({ name, modality: 'general', workspaceKind: 'ssh', sshHost: p.alias, remotePath: p.remotePath });
+    navigate(`/project/${project.id}`, { replace: true });
+    return { ok: true };
+  }, [navigate]);
+
   // BLOCK-67 加映（UI-325）— ssh 项目「远程连接」：连通性检测（validate = agent 探测 + 路径校验），
   // 结果 toast 诚实反馈；断线后这就是 D5 的用户侧重连入口。
   const sshConnectProject = useCallback(async (target: Project) => {
@@ -1695,6 +1730,10 @@ export function ProjectWorkspace(): React.ReactElement {
       onPickExternal: createProjectFromWorkspacePath,
     },
     sshConnectProject: sshConnectProject,
+    sshConnectHost: sshConnectHost,
+    sshListDirs: sshListDirs,
+    sshRegisterHost: sshRegisterHost,
+    sshCreateAt: sshCreateAt,
     createConversationForProject,
     renameProject: renameProjectInTree,
     renameConversation: renameConversationInTree,

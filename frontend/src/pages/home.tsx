@@ -12,8 +12,8 @@
  * PluginStorePanel（纯 IPC，不依赖任何 HTTP 后端），装完就地重启应用。
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
@@ -295,6 +295,18 @@ export default function Home(): React.ReactElement {
       setCreateError(`目标列表获取失败：${e instanceof Error ? e.message : String(e)}`);
     }
   }, []);
+
+  // UI-327 — 左栏 globe 入口落地：/?create=ssh 自动展开 SSH 创建面板（一次性消费后清参）
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sshPanelAutoOpenedRef = useRef(false);
+  useEffect(() => {
+    if (sshPanelAutoOpenedRef.current) return;
+    if (searchParams.get('create') === 'ssh') {
+      sshPanelAutoOpenedRef.current = true;
+      setSearchParams({}, { replace: true });
+      void openSshPanel();
+    }
+  }, [searchParams, setSearchParams, openSshPanel]);
 
   const confirmCreateSsh = useCallback(async () => {
     if (creating || sshValidating || sshRegistering) return;

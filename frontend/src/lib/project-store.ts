@@ -116,6 +116,29 @@ export interface SshValidateResult {
   sampleCount?: number;
 }
 
+// UI-327 向导 —— 先连接、后浏览选路径
+export async function connectSshHost(alias: string): Promise<{ ok: boolean; home?: string; error?: string; retryable?: boolean }> {
+  const resp = await fetch(getPlatformApiPrefix() + '/ssh-projects/connect', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ alias }),
+  });
+  const data = await resp.json();
+  if (!data.ok) return { ok: false, error: data.error || '连接失败', retryable: data.retryable };
+  return { ok: true, home: data.home };
+}
+
+export async function listSshRemoteDirs(alias: string, path: string): Promise<{ ok: boolean; path?: string; dirs?: Array<{ name: string; path: string }>; error?: string; retryable?: boolean }> {
+  const resp = await fetch(getPlatformApiPrefix() + '/ssh-projects/list', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ alias, path }),
+  });
+  const data = await resp.json();
+  if (!data.ok) return { ok: false, error: data.error || '浏览失败', retryable: data.retryable };
+  return { ok: true, path: data.path, dirs: data.dirs };
+}
+
 /** 创建前校验：远程路径存在且为目录（含 agent 引导部署）；fail-closed。 */
 export async function validateSshProject(input: { alias: string; remotePath: string }): Promise<SshValidateResult> {
   const resp = await fetch(getPlatformApiPrefix() + '/ssh-projects/validate', {

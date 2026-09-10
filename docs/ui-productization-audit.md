@@ -3003,3 +3003,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：tsc 0；零网络单测 6/6（输入校验/别名生成/config upsert 四态/密钥生成注入/提示状态机）+ home/LeftPanel 10/10。**实机**：bridge 可用性 + aliyun 真节点 registerHost → ok:true（密钥已授权场景，幂等安装实证：authorized_keys 无重复、config 别名写入 `gewu-47-110-228-168`）+ 面板双模式渲染（IP/端口/用户名/密码字段、密码掩码、按钮禁用态）。**待验**：密码提示交互路径（需一台未装公钥的密码登录主机）——届时转 verified。
 
 **状态**: in_progress（面板与已装钥主机路径实机验证通过；密码提示交互待真实密码主机验证）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-327: 左栏 globe 行内「先连接 → 浏览选路径」创建向导（BLOCK-67 加映）(2026-09-09 verified)
+
+**来源**：用户两轮实机裁决——① ssh 创建入口要前置到左栏项目树旁（对齐 ZCode）；② 点 globe **不跳首页**，就地展开向导；③ 体验改为「**先连接上再选路径**」（类似终端连接：连上之后像 cd 一样浏览远端目录）。
+
+**改动**：① `LeftPanel` 头部「+」旁增 globe 按钮，切换行内向导面板（`LeftSshCreatePanel.tsx` 独立组件，left column 内渲染）；② **步骤①连接**：别名（~/.ssh/config）或 IP+密码（一次性装公钥，密码不存储）→ `/api/ssh-projects/connect`（runSshOp echo $HOME，连通性检测 + 返回浏览起点）；③ **步骤②选路径**：远端目录浏览器（`/api/ssh-projects/list` = Gateway fs_list 仅目录；$HOME 起点/上级/逐层进入/刷新）+ 已连接 chip + 当前路径展示；④ 「在此目录创建项目」→ validate（含 agent 部署）→ createProject → 导航进新项目。错误全程诚实呈现（transport 分类 + retryable 可重试标注）；local 项目与既有创建链零改动；0 新依赖。
+
+**门禁**：tsc 0；LeftPanel/home 定向 vitest 13/13（向导三步：连接触发 sshConnectHost、浏览渲染目录、创建触发 sshCreateAt；IP+密码字段形态；useSearchParams mock 补齐）。**实机**：`scripts/block67-ui327-live.cjs` 4/4 allPass（`acceptance/ui-327/ui327-live.json` + 截图）——项目页点 globe → 别名连接 aliyun → 浏览起点 /root → 进入 gewu-block67-demo → 创建（API 对账新 ssh 项目 p_mtusheza_wgsd 出现）→ 导航进入新项目页，0 renderer error，探针清理。
+
+**状态**: verified（2026-09-09 dev Electron 实机 CDP 验收，aliyun 真实节点）。G0 开发期常态 · 不外推 packaged / Provider / GA。

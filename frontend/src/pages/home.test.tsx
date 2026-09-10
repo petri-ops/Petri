@@ -30,6 +30,8 @@ vi.mock('react-router-dom', () => ({
   useNavigate: () => vi.fn(),
   // UI-258 — home 读取 location.key 区分冷启动自动跳转 / 应用内导航到工作台
   useLocation: () => ({ key: 'default', pathname: '/' }),
+  // UI-327 — ?create=ssh 自动展开面板（默认无参：空 params + 空操作 setter）
+  useSearchParams: () => [new URLSearchParams(), vi.fn()],
 }));
 
 function status(overrides: Partial<BackendStatus>): BackendStatus {
