@@ -39,6 +39,17 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 - 从 `dev-verify/flows/_template.cjs` 拷贝新建 flow，用 `dev-verify/lib.cjs` 原语组装断言（pollTargets / filterPageTargets+selectPageTarget / evalJs / screenshotPng / createRun），跑 `npm run verify -- <flow>`；清单 `npm run verify -- --list`。
 - 主窗判定按项目树+右栏探测，不信任 visibilityState（BLOCK-68 教训）；证据 JSON/PNG 落 `acceptance/`，断言不可编造。
 
+### 无人化验收阶梯（能不用人就不用人 · 确保成功；用户裁决 2026-09-10）
+
+验收方式按阶梯选择，向自动化收敛；升上一级的唯一理由是下一级够不着：
+
+1. **CDP 够得着 → dev-verify flow**：断言/截图/证据 JSON 一律由脚本产出，人不参与操作；人工步骤能写成 flow 的必须写成 flow。
+2. **CDP 够不着 + 失败影响低 → 诚实分级，不凑证据**：台账停留 `in_progress` 或如实标注验证边界（如「dev Electron 边界内 verified」），不得为过门禁补拍形式化截图。
+3. **CDP 够不着 + 失败影响高（原生对话框/覆盖确认/OS 权限等）→ OS 级自动化优先**（UIA / computer-use 脚本化），人工只做脚本建不起来时的最后兜底（兜底姿势见第 4 级）。
+4. **人测兜底 → 自动产出测试路线 + 人测体感确认（用户裁决 2026-09-10）**：自动化全部够不着时，Agent 必须先自动生成详细测试路线（操作步骤、输入内容、每步预期、证据留存点），人照路线实测；人体感成功并明确回复确认「没问题」即通过。该次验收的证据 = 测试路线原文 + 人的确认记录（日期、覆盖断言），登记进台账或 `acceptance/`；确认必须出自人，Agent 不得代答。
+
+硬线不变：`verified` 必须有证据背书，断言不可编造——第 1～3 级证据由脚本产出，第 4 级证据 = 自动生成的测试路线 + 人的明确确认记录；无人化降低的是人的参与度，不是证据等级。
+
 ## 保持工作区干净
 
 - `npm run hygiene:check` 报告死符号链接与临时残留；它只报告不代删，处置由人裁决。
