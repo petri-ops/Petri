@@ -1,6 +1,6 @@
 # BLOCK-77 — 长任务驻留与回访通知：挂机跑、回来接上、完成告诉你
 
-> 状态：`planned`（2026-09-10 用户裁决立项「第二档」；启动按单工作包串行纪律排队）
+> 状态：`active`（2026-09-10 用户裁决「来搞」启动，P0-LAUNCH；同日立项）
 > 立项日期：2026-09-10
 > truthDomain: `block-77-resident-tasks`
 > 来源：用户在 BLOCK-67 收口后提出「agent 驻留服务器持续干活」需求，主 Agent 给出三档方案，用户裁决「要做到第二档」
@@ -81,5 +81,6 @@
 - 0 新 npm 依赖倾向。
 
 ## 10. 进度记录
+- 2026-09-10 **启动（planned → active，P0-LAUNCH）+ P0 评审稿落盘**：用户裁决「来搞」（队列实际队头——BLOCK-68 注册表漂移已修：plan 文档 09-09 已 completed 而 registry 仍 planned，随本次一并纠正）。P0 评审稿 `docs/block-77-p0-design-review.md`：代码事实（exec_bg/process_status 面、notify.custom 通道、proactive 投影、无会话上下文注入机制、Gateway 双栈写入）+ R1-R5 细化（意图卡文件形态/60s 回访循环/notify 分层/生命周期含 abandoned/只读不自动重启）。待用户确认后进 P1。G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 - 2026-09-10 **立项（planned）**：用户在「agent 驻留服务器持续干活」三档方案中裁决「要做到第二档」→ 本计划落盘并注册 DOC-REGISTRY（planned 排队）。范围=①意图卡 + ②回访循环/交接班 + ③应用内完成通知（移动推送联动 BLOCK-70）；③档真·驻留 agent 明确排除需另立项。启动待用户裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。
