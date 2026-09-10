@@ -57,14 +57,18 @@
     "core/biof3-server/routes/harness/harness.js",
     "core/biof3-server/agent-tools/workspace-ssh-surface.js",
     "core/biof3-server/agent-tools/workspace-tools.js",
-    "core/biof3-server/routes/ai-agent/background-processes.js"
+    "core/biof3-server/routes/ai-agent/background-processes.js",
+    "core/biof3-server/helpers/project-storage.js",
+    "core/biof3-server/routes/harness/project-storage.js",
+    "core/biof3-server/routes/harness/index.js"
    ],
    "tests": [
     "test/remote-resource-snapshot.test.mjs",
     "test/block67-node-agent-fs.test.js",
     "test/block57-remote-execution.test.mjs",
     "test/ai-usage-project.test.mjs",
-    "test/block67-ssh-surface.test.mjs"
+    "test/block67-ssh-surface.test.mjs",
+    "test/project-storage.test.mjs"
    ],
    "frontendRelated": true,
    "classifiesScripts": true,

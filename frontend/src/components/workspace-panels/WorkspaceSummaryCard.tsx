@@ -82,6 +82,7 @@ export function WorkspaceSummaryCard({
   const terminalSessions = useTerminalSessions(cardVisible);
   const attention = useConversationAttention(activeConversation?.id ?? null, project?.id ?? null, cardVisible);
   const projectUsage = useProjectUsage(project?.id ?? null, cardVisible);
+  const projectStorage = useProjectStorage(project?.id ?? null, cardVisible);
   if (visibility === 'hidden') return null;
 
   // HLE-C4R: derive an honest loop display. Completion/blocked come only from
@@ -495,6 +496,21 @@ export function WorkspaceSummaryCard({
                   : '暂无数据集'}
               </span>
             </div>
+            {/* BLOCK-78 P2-③：结果库占用（done 作业数 + 产物字节；du/遍历
+                60s TTL；stale 显观测时间；无产物不渲染）。 */}
+            {projectStorage && (projectStorage.jobs > 0 || projectStorage.bytes > 0) && (
+              <div className={styles.workspacePinnedSummaryEnvironmentRow}>
+                <span className={styles.workspacePinnedSummaryEnvironmentLabel}>
+                  <Icon name="database" size={14} /> 结果库
+                </span>
+                <span
+                  className={styles.workspaceLoopMeta}
+                  title="已完成分析的产物占用（限深统计，超限部分诚实省略）"
+                >
+                  {`${formatBytes(projectStorage.bytes)} · ${projectStorage.jobs} 作业${projectStorage.stale ? ` · 观测于 ${formatObservedAt(projectStorage.observedAt)}` : ''}`}
+                </span>
+              </div>
+            )}
             {project?.updatedAt && (
               <div className={styles.workspacePinnedSummaryEnvironmentRow}>
                 <span className={styles.workspacePinnedSummaryEnvironmentLabel}>
@@ -683,6 +699,44 @@ function useProjectUsage(projectId: string | null, enabled: boolean): ProjectUsa
     };
   }, [enabled, projectId]);
   return usage;
+}
+
+/** BLOCK-78 P2-③：结果库占用（done 作业数 + 产物字节；后端 60s TTL 合并
+ *  缓存，local 遍历限深限文件、ssh 单次 du -sb）。获取失败 null → 行不渲染。 */
+interface ProjectStorageSummary {
+  jobs: number;
+  bytes: number;
+  observedAt: string;
+  stale?: boolean;
+}
+
+function useProjectStorage(projectId: string | null, enabled: boolean): ProjectStorageSummary | null {
+  const [storage, setStorage] = useState<ProjectStorageSummary | null>(null);
+  useEffect(() => {
+    if (!enabled || !projectId) return;
+    let alive = true;
+    const load = async () => {
+      try {
+        const token = getToken();
+        const resp = await fetch(
+          `${getPlatformApiPrefix()}/harness/project-storage?projectId=${encodeURIComponent(projectId)}`,
+          { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
+        );
+        const body = await resp.json().catch(() => null);
+        if (!alive) return;
+        setStorage(body && body.ok ? body : null);
+      } catch {
+        if (alive) setStorage(null);
+      }
+    };
+    void load();
+    const timer = window.setInterval(load, 60000);
+    return () => {
+      alive = false;
+      window.clearInterval(timer);
+    };
+  }, [enabled, projectId]);
+  return storage;
 }
 
 /** BLOCK-78 P2-④：会话级注意信号——待确认计划（draft + 待修订，BLOCK-55 链）

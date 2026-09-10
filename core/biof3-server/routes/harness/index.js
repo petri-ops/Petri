@@ -25,6 +25,7 @@ const scientificTask = require('./scientific-task');
 const context = require('./context');
 const fileReferences = require('./file-references');
 const loop = require('./loop');
+const projectStorage = require('./project-storage');
 
 module.exports = {
   register(app) {
@@ -33,7 +34,8 @@ module.exports = {
     }
     // 端点声明顺序与原 routes/harness.js 完全一致（resources → workflow → repair →
     // scientific-task → context → file-references → loop）；保证 Express first-match
-    // 行为不变（route order sensitivity）。
+    // 行为不变（route order sensitivity）。project-storage 为 BLOCK-78 P2-③
+    // 新增端点，无既有顺序约束。
     resources.register(app);
     workflow.register(app);
     repair.register(app);
@@ -41,6 +43,7 @@ module.exports = {
     context.register(app);
     fileReferences.register(app);
     loop.register(app);
+    projectStorage.register(app);
   },
 
   // 子模块 surface（方便测试与子域调试；非注册中心运行时使用）
@@ -52,5 +55,6 @@ module.exports = {
     context,
     fileReferences,
     loop,
+    projectStorage,
   },
 };
