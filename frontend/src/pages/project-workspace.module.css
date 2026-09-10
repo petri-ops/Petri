@@ -6174,6 +6174,8 @@ body:global(.gewu-resizing-columns) * {
   display: flex;
   flex-direction: column;
   background: var(--gewu-surface);
+  /* UI-323 加映 — md 悬浮切换/错误条 overlay 的定位上下文 */
+  position: relative;
 }
 
 .workspacePreviewEmpty {
@@ -6533,49 +6535,42 @@ body:global(.gewu-resizing-columns) * {
 }
 
 /* BLOCK-18 — markdown diff toggle + diff 视图 */
-.workspaceMarkdownDiffToolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 8px;
-  padding: 8px 18px;
-  border-bottom: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-subtle);
-  flex-shrink: 0;
-  box-sizing: border-box;
-}
-
-.workspaceMarkdownDiffTabs {
+/* UI-323 加映（用户裁决 2026-09-10）— md 编辑/预览悬浮切换：不占行，铅笔=去编辑，眼睛=回渲染 */
+.workspaceMdViewToggle {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  z-index: 6;
   display: inline-flex;
-  border: 1px solid var(--gewu-border);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.workspaceMarkdownDiffTab {
-  appearance: none;
-  border: none;
-  background: var(--gewu-bg-surface);
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--gewu-border) 56%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--gewu-surface) 88%, transparent);
   color: var(--gewu-text-secondary);
-  font: inherit;
-  font-size: var(--gewu-font-size-caption);
-  padding: 4px 12px;
   cursor: pointer;
-  transition: background 120ms ease;
 }
 
-.workspaceMarkdownDiffTab + .workspaceMarkdownDiffTab {
-  border-left: 1px solid var(--gewu-border);
+.workspaceMdViewToggle:hover {
+  border-color: var(--gewu-border-strong);
+  background: var(--gewu-surface);
+  color: var(--gewu-text);
 }
 
-.workspaceMarkdownDiffTab:hover {
-  background: var(--gewu-hover);
-}
-
-.workspaceMarkdownDiffTabActive {
-  background: var(--gewu-accent);
-  color: var(--gewu-bg);
+/* 保存失败诚实面（含 ssh 409/502）：悬浮顶部，仅出错时出现，不再占常驻行 */
+.workspaceSaveErrorStrip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  padding: 6px 48px 6px 12px;
+  background: color-mix(in srgb, var(--gewu-danger) 9%, transparent);
+  color: var(--gewu-danger);
+  font-size: var(--gewu-font-size-sm);
 }
 
 .workspaceMarkdownDiffActions {

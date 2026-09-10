@@ -264,37 +264,6 @@ export function WorkspaceFilePreview({
     <div className={styles.workspacePreview}>
       {openError && <div className={styles.workspacePreviewError}>{openError}</div>}
       <div className={styles.workspacePreviewBody} ref={previewBodyRef} onKeyDown={handlePreviewKeyDown}>
-        {(isMarkdown || fallbackKind === 'text' || fallbackKind === 'json') && (isMarkdown || saveError) && (
-          <div className={styles.workspaceMarkdownDiffToolbar}>
-            {isMarkdown && (
-              <div className={styles.workspaceMarkdownDiffTabs}>
-                <button
-                  type="button"
-                  className={`${styles.workspaceMarkdownDiffTab} ${mdView === 'edit' ? styles.workspaceMarkdownDiffTabActive : ''}`}
-                  onClick={() => setMdView('edit')}
-                  aria-pressed={mdView === 'edit'}
-                >
-                  编辑
-                </button>
-                <button
-                  type="button"
-                  className={`${styles.workspaceMarkdownDiffTab} ${mdView === 'preview' ? styles.workspaceMarkdownDiffTabActive : ''}`}
-                  onClick={() => setMdView('preview')}
-                  aria-pressed={mdView === 'preview'}
-                >
-                  预览
-                </button>
-              </div>
-            )}
-            {/* BLOCK-74 — 头部按钮行（引用到对话/保存/恢复）随用户裁决移除：保存走 Ctrl/Cmd+S 与自动保存；
-                仅保存失败时显示诚实错误行（成功静默 = 自动保存心智） */}
-            {saveError && (
-              <div className={styles.workspaceMarkdownDiffHint} role="alert" data-testid="ssh-save-error" style={{ color: 'var(--color-danger, #d54949)' }}>
-                {saveError}
-              </div>
-            )}
-          </div>
-        )}
         {status === 'loading' && <p className={styles.panelEmpty}>加载预览…</p>}
         {status === 'error' && <p className={styles.panelEmpty}>预览失败</p>}
         {status === 'unsupported' && !officePreview && (
@@ -455,6 +424,26 @@ export function WorkspaceFilePreview({
           />
         )}
       </div>
+      {/* UI-323 加映（用户裁决 2026-09-10）：编辑/预览切换收为右上角悬浮图标，工具条行整体退役——
+          预览态铅笔进编辑，编辑态眼睛回渲染；保存失败红字条悬浮顶部（仅出错时出现，不再占常驻行） */}
+      {isMarkdown && status === 'ready' && (
+        <button
+          type="button"
+          className={styles.workspaceMdViewToggle}
+          onClick={() => setMdView(mdView === 'edit' ? 'preview' : 'edit')}
+          aria-pressed={mdView === 'edit'}
+          aria-label={mdView === 'edit' ? '预览' : '编辑'}
+          title={mdView === 'edit' ? '预览' : '编辑'}
+          data-testid="md-view-toggle"
+        >
+          <Icon name={mdView === 'edit' ? 'eye' : 'pencil'} size={14} />
+        </button>
+      )}
+      {saveError && (isMarkdown || fallbackKind === 'text' || fallbackKind === 'json') && (
+        <div className={styles.workspaceSaveErrorStrip} role="alert" data-testid="ssh-save-error">
+          {saveError}
+        </div>
+      )}
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
     </div>
   );

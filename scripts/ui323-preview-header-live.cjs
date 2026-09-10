@@ -3,10 +3,12 @@
 
 /**
  * BLOCK-74 UI-323 实机 CDP 验收：文件预览头部减负 + 自动保存 + Ctrl/Cmd+S。
- *   1) 编辑态预览头部不再有 引用到对话/保存/恢复 按钮（Markdown 保留 编辑/预览 tabs）
+ *   1) 编辑态预览头部不再有 引用到对话/保存/恢复 按钮，也不再有工具条行
+ *      （UI-323 加映 2026-09-10 用户裁决：md 编辑/预览收为右上角悬浮铅笔/眼睛图标，不占行）
  *   2) 自动保存：编辑停顿 ~1.2s 后内容落盘（GET /workspaces/:id/file 可证）
  *   3) Ctrl+S：立即落盘（早于 1.2s 防抖窗口，证明走快捷键链）
- *   4) 结束清理：删除验收暂存文件
+ *   4) 眼睛回预览：编辑器卸载、切换钮回铅笔
+ *   5) 结束清理：删除验收暂存文件
  * 前置：dev Electron（9222）+ 后端（3001）+ biof3-desktop 本地项目（p_mtrawlau_7rly）。
  * 证据：acceptance/ui-323/ui323-live.json + ui323-*.png
  */
@@ -142,10 +144,10 @@ async function runOnce(results, assert) {
   if (!opened) throw new Error('scratch_file_not_found_in_tree');
   log('scratch file opened in preview');
 
-  // Markdown → 等「编辑」tab 出现并进入编辑器
+  // Markdown → 等右上角悬浮切换钮出现（预览态 aria-label=编辑）并进入编辑器
   let editReady = false;
   for (let i = 0; i < 10 && !editReady; i++) {
-    editReady = await evalJS(client, `[...document.querySelectorAll('button')].some((b) => b.textContent.trim() === '编辑')`);
+    editReady = await evalJS(client, `!!document.querySelector('[data-testid="md-view-toggle"][aria-label="编辑"]')`);
     if (!editReady) await new Promise((r) => setTimeout(r, 600));
   }
   if (!editReady) {
@@ -157,44 +159,44 @@ async function runOnce(results, assert) {
     })`).catch((e) => 'diag_err ' + e.message);
     log('DIAG ' + diag);
   }
-  assert('C1a Markdown 编辑 tab 出现', editReady);
+  const toolbarGone = await evalJS(client, `!document.querySelector('[class*="workspaceMarkdownDiffToolbar"]')`).catch(() => false);
+  assert('C1a md 悬浮切换钮出现（aria-label=编辑）且工具条行不存在', editReady && toolbarGone);
   await evalJS(client, `(async () => {
-    const editTab = [...document.querySelectorAll('button')].find((b) => b.textContent.trim() === '编辑');
-    if (editTab) { editTab.click(); await new Promise((r) => setTimeout(r, 800)); }
+    const toggle = document.querySelector('[data-testid="md-view-toggle"]');
+    if (toggle) { toggle.click(); await new Promise((r) => setTimeout(r, 800)); }
     return 'edit';
   })()`);
 
-  // 聚焦 CodeMirror：等 .cm-content 挂载 + 真实鼠标点击内容区（保证编辑器获得焦点）
+  // 聚焦 CodeMirror：等 .cm-content 挂载（JS focus + execCommand 插入，block67-p1-live 同款已验证配方）
   let cmReady = false;
   for (let i = 0; i < 10 && !cmReady; i++) {
-    cmReady = await evalJS(client, `!!document.querySelector('.cm-content')`);
+    cmReady = await evalJS(client, `!!document.querySelector('.cm-content[contenteditable="true"]')`);
     if (!cmReady) await new Promise((r) => setTimeout(r, 600));
   }
   if (!cmReady) throw new Error('codemirror_not_mounted');
-  const rect = JSON.parse(await evalJS(client, `JSON.stringify((() => {
-    const cm = document.querySelector('.cm-content');
-    const r = cm.getBoundingClientRect();
-    return { x: r.x + Math.min(120, r.width / 2), y: r.y + Math.min(40, r.height / 2) };
-  })())`));
-  await client.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: rect.x, y: rect.y, button: 'left', clickCount: 1 });
-  await client.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: rect.x, y: rect.y, button: 'left', clickCount: 1 });
-  await new Promise((r) => setTimeout(r, 300));
 
-  // ── C1：头部按钮行已移除 ──
+  // 插入标记文本（CDP Input.insertText 在本场景不达 editor，改 execCommand 走 beforeinput 链）
+  const inserted = await evalJS(client, `(async () => {
+    const cm = document.querySelector('.cm-content[contenteditable="true"]');
+    cm.focus();
+    await new Promise((r) => setTimeout(r, 200));
+    const ok = document.execCommand('insertText', false, ' autosave-marker-alpha ');
+    await new Promise((r) => setTimeout(r, 300));
+    return JSON.stringify({ ok, head: cm.textContent.slice(0, 100) });
+  })()`);
+  log('insert alpha: ' + inserted);
+
+  // ── C1：头部按钮行已移除（工具条行 + 引用/保存/恢复 + 切换钮呈眼睛/预览态）──
   const header = JSON.parse(await evalJS(client, `JSON.stringify({
     quoteBtns: [...document.querySelectorAll('button')].filter((b) => b.textContent.trim() === '引用到对话').length,
     saveBtn: [...document.querySelectorAll('button')].some((b) => b.textContent.trim() === '保存'),
     restoreBtn: [...document.querySelectorAll('button')].some((b) => b.textContent.trim() === '恢复'),
-    editTab: [...document.querySelectorAll('button')].some((b) => b.textContent.trim() === '编辑'),
-    previewTab: [...document.querySelectorAll('button')].some((b) => b.textContent.trim() === '预览'),
+    toolbarRow: !!document.querySelector('[class*="workspaceMarkdownDiffToolbar"]'),
+    toggleNowPreview: document.querySelector('[data-testid="md-view-toggle"]')?.getAttribute('aria-label') === '预览',
   })`));
-  assert('C1 头部按钮行已移除（引用/保存/恢复不在，编辑/预览 tabs 保留）',
-    header.quoteBtns === 0 && !header.saveBtn && !header.restoreBtn && header.editTab && header.previewTab,
+  assert('C1 头部零按钮行零工具条（编辑态悬浮钮=眼睛/预览）',
+    header.quoteBtns === 0 && !header.saveBtn && !header.restoreBtn && !header.toolbarRow && header.toggleNowPreview,
     JSON.stringify(header));
-
-  // 插入标记文本（CodeMirror 经 beforeinput 接收 CDP insertText）
-  await client.send('Input.insertText', { text: ' autosave-marker-alpha ' });
-  await new Promise((r) => setTimeout(r, 400));
 
   // ── C2：自动保存（停顿 ~1.2s 后落盘；等 2.5s 取证）──
   await new Promise((r) => setTimeout(r, 2500));
@@ -203,7 +205,15 @@ async function runOnce(results, assert) {
     `disk=${JSON.stringify((afterAuto || '').slice(-80))}`);
 
   // ── C3：Ctrl+S 立即保存（0.4s 内取证，早于 1.2s 防抖）──
-  await client.send('Input.insertText', { text: ' ctrl-s-marker-beta ' });
+  await evalJS(client, `(async () => {
+    const cm = document.querySelector('.cm-content[contenteditable="true"]');
+    if (!cm) return 'no_cm';
+    cm.focus();
+    await new Promise((r) => setTimeout(r, 150));
+    document.execCommand('insertText', false, ' ctrl-s-marker-beta ');
+    await new Promise((r) => setTimeout(r, 200));
+    return 'inserted';
+  })()`);
   await new Promise((r) => setTimeout(r, 200));
   await evalJS(client, `(async () => {
     const body = document.querySelector('[class*="workspacePreviewBody"]');
@@ -217,6 +227,18 @@ async function runOnce(results, assert) {
     `disk=${JSON.stringify((afterCtrlS || '').slice(-80))}`);
   await screenshot(client, 'ui323-autosave.png');
 
+  // ── C4：眼睛回预览（编辑器卸载 + 切换钮回铅笔）──
+  await evalJS(client, `(async () => {
+    const t = document.querySelector('[data-testid="md-view-toggle"]');
+    if (t) { t.click(); await new Promise((r) => setTimeout(r, 600)); }
+    return 'toggled';
+  })()`);
+  const backToPreview = JSON.parse(await evalJS(client, `JSON.stringify({
+    cmGone: !document.querySelector('.cm-content'),
+    toggleEdit: document.querySelector('[data-testid="md-view-toggle"]')?.getAttribute('aria-label') === '编辑',
+  })`));
+  assert('C4 眼睛回预览：编辑器卸载 + 切换钮回铅笔', backToPreview.cmGone && backToPreview.toggleEdit, JSON.stringify(backToPreview));
+
   // ── 清理：删暂存文件 + 恢复原页面 ──
   try { fs.rmSync(path.join(WORKSPACE, SCRATCH), { force: true }); } catch {}
   if (originalUrl && !originalUrl.startsWith(TARGET)) {
@@ -225,7 +247,7 @@ async function runOnce(results, assert) {
   }
 
   client.socket.close();
-  return results.assertions.length === 4 && results.assertions.every((a) => a.pass);
+  return results.assertions.length === 5 && results.assertions.every((a) => a.pass);
   }
 }
 

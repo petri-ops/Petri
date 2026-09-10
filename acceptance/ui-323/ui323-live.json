@@ -1,0 +1,32 @@
+{
+  "startedAt": "2026-09-10T04:27:25.506Z",
+  "assertions": [
+    {
+      "name": "C1a md 悬浮切换钮出现（aria-label=编辑）且工具条行不存在",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "C1 头部零按钮行零工具条（编辑态悬浮钮=眼睛/预览）",
+      "pass": true,
+      "detail": "{\"quoteBtns\":0,\"saveBtn\":false,\"restoreBtn\":false,\"toolbarRow\":false,\"toggleNowPreview\":true}"
+    },
+    {
+      "name": "C2 自动保存：编辑停顿后内容落盘（含 marker alpha）",
+      "pass": true,
+      "detail": "disk=\" autosave-marker-alpha # ui323 autosave check\\n\\nbaseline line\\n\""
+    },
+    {
+      "name": "C3 Ctrl+S 立即保存（含 marker beta）",
+      "pass": true,
+      "detail": "disk=\"autosave-marker-alpha  ctrl-s-marker-beta # ui323 autosave check\\n\\nbaseline line\\n\""
+    },
+    {
+      "name": "C4 眼睛回预览：编辑器卸载 + 切换钮回铅笔",
+      "pass": true,
+      "detail": "{\"cmGone\":true,\"toggleEdit\":true}"
+    }
+  ],
+  "allPass": true,
+  "finishedAt": "2026-09-10T04:27:46.667Z"
+}

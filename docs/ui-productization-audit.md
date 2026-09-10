@@ -2959,7 +2959,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-323: 文件预览头部减负 —— 取消按钮行，保存走 Ctrl/Cmd+S + 自动保存（BLOCK-74）(2026-09-09 in_progress)
+## UI-323: 文件预览头部减负 —— 取消按钮行，保存走 Ctrl/Cmd+S + 自动保存（BLOCK-74）(2026-09-09 立项 · 2026-09-10 verified)
 
 **来源**：用户 2026-09-09 裁决——预览/编辑头部「引用到对话 / 保存 / 恢复」按钮行「没有实际意义」，取消；「修改后保存使用快捷键 或者自动保存就好啦」。
 
@@ -2968,6 +2968,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：tsc 0；新增 WorkspaceFilePreview 组件定向测试 3/3（头部按钮行移除断言 / 自动保存防抖后 writeTextFile 收到新内容 / Ctrl+S 立即保存）；既有集成测试（WorkspaceFilePreviewBridge/P4.2/ChatCardLinkBridge）无按钮行断言不受影响。
 
 **实机状态（诚实登记）**：CDP 验收脚本 `scripts/ui323-preview-header-live.cjs` 已入库（可复跑），但与本日并行的 BLOCK-67 P3 会话共享同一主窗且其在制文件（project-workspace.tsx）HMR 高频重挂右栏，验收窗口被持续踩空——按纪律不假标 verified，**保持 in_progress**；待 BLOCK-67 会话空闲后复跑脚本（一次通过即转 verified）。组件级行为证据（3/3）已锁自动保存/Ctrl+S/按钮移除三契约。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+**加映（2026-09-10 用户三选一裁决：悬浮铅笔图标）**：按钮行移除后 md 因「编辑/预览」tabs 仍常驻一条工具条行——头部又回来了。改版：md 切换收为右上角悬浮铅笔（预览态 aria-label=编辑，进 CodeMirror）/ 眼睛（编辑态 aria-label=预览，回渲染）图标钮（data-testid="md-view-toggle"），不占行；工具条行整体退役（`workspaceMarkdownDiffToolbar/Tabs/Tab/TabActive/Hint` CSS 随删，`DiffActions` 保留——ResultArtifactShell 仍用）；保存失败红字条改顶部悬浮 overlay（仅出错时出现，ssh-save-error testid 保留）。组件测试同步 aria-label 定位 + 工具条行消失 + 双向切换断言（5/5）+ tsc 0。**实机抓真修**：验收脚本原用 CDP `Input.insertText`，焦点不在编辑器时不达（且误落聊天输入框）——改 `block67-p1-live` 同款 `cm.focus()` + `document.execCommand('insertText')` 配方。
+
+**实机（2026-09-10）**：`scripts/ui323-preview-header-live.cjs` 5/5 断言 allPass（`acceptance/ui-323/`：ui323-live.json + 截图）：C1a 悬浮钮出现（aria-label=编辑）且工具条行不存在 / C1 编辑态零按钮行零工具条 + 切换钮呈眼睛 / C2 自动保存落盘（marker alpha 对账）/ C3 Ctrl+S 立即落盘（marker beta，早于 1.2s 防抖）/ C4 眼睛回预览（编辑器卸载 + 切换钮回铅笔）。
+
+**状态**: verified（2026-09-10 dev Electron 实机 CDP 验收）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-324: 底部终端 SSH 远程化 + 远程审阅数据面（BLOCK-67 P3）(2026-09-09 verified)
 

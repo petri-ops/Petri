@@ -67,25 +67,29 @@ function mockPreviewFetch() {
 }
 
 describe('BLOCK-74 预览头部减负', () => {
-  it('头部不再有 引用到对话/保存/恢复 按钮；编辑/预览 tabs 保留', async () => {
+  it('头部不再有 引用到对话/保存/恢复；md 切换为悬浮铅笔图标（无工具条行）', async () => {
     mockPreviewFetch();
     renderPreview();
-    await waitFor(() => expect(screen.getByText('编辑')).toBeTruthy());
-    fireEvent.click(screen.getByText('编辑'));
+    // 悬浮切换：预览态 aria-label=编辑（铅笔），点击进编辑器后变 aria-label=预览（眼睛）
+    await waitFor(() => expect(screen.getByLabelText('编辑')).toBeTruthy());
+    expect(document.querySelector('[class*="workspaceMarkdownDiffToolbar"]')).toBeNull();
+    fireEvent.click(screen.getByLabelText('编辑'));
     await waitFor(() => expect(screen.getByTestId('mock-editor')).toBeTruthy());
     expect(screen.queryByText('引用到对话')).toBeNull();
     expect(screen.queryByText('保存')).toBeNull();
     expect(screen.queryByText('恢复')).toBeNull();
-    expect(screen.getByText('编辑')).toBeTruthy();
-    expect(screen.getByText('预览')).toBeTruthy();
+    expect(screen.getByLabelText('预览')).toBeTruthy();
+    // 回预览：眼睛点回去，编辑器卸载
+    fireEvent.click(screen.getByLabelText('预览'));
+    await waitFor(() => expect(screen.queryByTestId('mock-editor')).toBeNull());
   });
 
   it('自动保存：编辑停顿 ~1.2s 后调用保存链（writeTextFile 收到新内容）', async () => {
     writeTextFileMock.mockResolvedValue({ ok: true });
     mockPreviewFetch();
     renderPreview();
-    await waitFor(() => expect(screen.getByText('编辑')).toBeTruthy());
-    fireEvent.click(screen.getByText('编辑'));
+    await waitFor(() => expect(screen.getByLabelText('编辑')).toBeTruthy());
+    fireEvent.click(screen.getByLabelText('编辑'));
     await new Promise((r) => setTimeout(r, 300));
     if (!document.querySelector('[data-testid="mock-editor"]')) {
       console.log('DIAG-HTML', document.body.innerHTML.slice(0, 1200));
@@ -105,8 +109,8 @@ describe('BLOCK-74 预览头部减负', () => {
     writeTextFileMock.mockResolvedValue({ ok: true });
     mockPreviewFetch();
     const view = renderPreview();
-    await waitFor(() => expect(screen.getByText('编辑')).toBeTruthy());
-    fireEvent.click(screen.getByText('编辑'));
+    await waitFor(() => expect(screen.getByLabelText('编辑')).toBeTruthy());
+    fireEvent.click(screen.getByLabelText('编辑'));
     const editor = await waitFor(() => screen.getByTestId('mock-editor'));
     fireEvent.change(editor, { target: { value: '# check.md\n\nshortcut content\n' } });
     const body = document.querySelector('[class*="workspacePreviewBody"]') as HTMLElement;
@@ -153,7 +157,7 @@ describe('UI-323 回归修复：file=null → file 转换不破坏 Hook 顺序',
         />
       </ThemeProvider>,
     );
-    await waitFor(() => expect(screen.getByText('编辑')).toBeTruthy());
+    await waitFor(() => expect(screen.getByLabelText('编辑')).toBeTruthy());
     // 关键断言：重渲染期间没有 "Rendered more hooks" 类错误
     const hookErrors = errorSpy.mock.calls
       .map((c) => String(c[0] || ''))
@@ -178,7 +182,7 @@ describe('UI-323 回归修复：file=null → file 转换不破坏 Hook 顺序',
         />
       </ThemeProvider>,
     );
-    await waitFor(() => expect(screen.getByText('编辑')).toBeTruthy());
+    await waitFor(() => expect(screen.getByLabelText('编辑')).toBeTruthy());
     view.rerender(
       <ThemeProvider>
         <WorkspaceFilePreview
