@@ -3126,3 +3126,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：tsc 0 + desktop 相关定向 80/80（8 文件，含 TitleBar.test）+ docs/ui 门禁 PASS。grep 残留零（仅注释级拆除记录）。
 
 **状态**: verified（Vite 热更用户实机可见；纯移除无新行为面）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-335: 左栏「新建任务」归组至工作台快捷区首位（用户裁决）(2026-09-10 verified)
+
+**来源**：用户实机截图裁决——UI-328 把「新建任务」做成左栏顶部悬浮行（描边卡片），悬在「工作台」分组标签之上显得游离（「这个新建任务应该在工作台内吧」）。
+
+**改动**：移除左栏顶部 `leftNewTaskRow/leftNewTaskBtn` 悬浮行（组件 + 四条孤儿 CSS 一并删，不留空壳）；「新建任务」以 `leftQuickAction` 同款样式进 `QuickActions` items **首位**（工作台分组内：新建任务 → 搜索 → 插件 → Skills → 知识空间 → 后端），行为不变（`handleNavigateToHome` → 工作台创建页）。UI-328 测试更新为归组语义（组内首位 + 点击导航）。
+
+**门禁**：LeftPanel 定向 14/14 + tsc 0。
+
+**状态**: verified（Vite 热更用户实机可见；纯归组零新行为面）。G0 开发期常态 · 不外推 packaged / Provider / GA。

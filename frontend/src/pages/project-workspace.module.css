@@ -856,39 +856,8 @@
   white-space: nowrap;
 }
 
-/* UI-328 — 左栏最顶部「新建任务」入口（对齐 ZCode New task）：进工作台创建页，页内再选路径 */
-.leftNewTaskRow {
-  padding: 8px 8px 0;
-  flex-shrink: 0;
-}
-
-.leftNewTaskBtn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  height: 32px;
-  border: 1px solid var(--gewu-border-color);
-  border-radius: 8px;
-  padding: 0 10px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body-sm);
-  font-weight: 600;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 150ms ease-in-out, border-color 150ms ease-in-out;
-}
-
-.leftNewTaskBtn:hover {
-  background: var(--gewu-hover);
-  border-color: var(--gewu-accent);
-}
-
-.leftNewTaskBtn:focus-visible {
-  outline: 2px solid var(--gewu-border-color, var(--gewu-text-secondary));
-  outline-offset: 2px;
-}
+/* UI-335 — 左栏顶部「新建任务」悬浮行已移除：入口归组至工作台快捷区首位
+   （leftQuickAction 同款样式），孤儿 CSS 随组件移除。 */
 
 .leftPanelHeader {
   display: flex;

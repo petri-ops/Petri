@@ -314,9 +314,9 @@ describe('UI-327 Tab 多候选：补全到公共前缀', () => {
   });
 });
 
-// UI-328 — 左栏最顶部「新建任务」入口（对齐 ZCode：入口置顶，创建页内再选路径）
-describe('UI-328 左栏顶部新建任务入口', () => {
-  it('「新建任务」是左栏第一个可交互元素，点击回工作台创建页', () => {
+// UI-335 — 「新建任务」归组至工作台快捷区首位（UI-328 悬浮行退役）
+describe('UI-335 新建任务在工作台分组内', () => {
+  it('「新建任务」位于工作台快捷区首位，点击回工作台创建页', () => {
     const ctx = buildCtx('chat');
     render(
       <MemoryRouter>
@@ -324,10 +324,11 @@ describe('UI-328 左栏顶部新建任务入口', () => {
       </MemoryRouter>,
     );
     const btn = screen.getByRole('button', { name: '新建任务' });
-    // 置顶断言：aside 内第一个 button 就是它（工作台快捷区/项目 header 都在其后）
-    const aside = btn.closest('aside');
-    expect(aside?.querySelector('button')).toBe(btn);
     fireEvent.click(btn);
     expect(ctx.handleNavigateToHome).toHaveBeenCalledTimes(1);
+    // 归组断言：工作台标签之后、搜索之前
+    const group = btn.closest('[class*="leftQuickActions"]');
+    expect(group?.textContent.indexOf('新建任务')).toBeLessThan(group!.textContent.indexOf('搜索'));
+    expect(group?.textContent).toContain('工作台');
   });
 });

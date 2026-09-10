@@ -163,18 +163,6 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
         }}
         onDrop={(e) => void handlePanelDrop(e)}
       >
-        {/* UI-328 — 左栏最顶部「新建任务」（对齐 ZCode New task）：进工作台创建页，页内再选路径 */}
-        <div className={styles.leftNewTaskRow}>
-          <button
-            type="button"
-            className={styles.leftNewTaskBtn}
-            onClick={ctx.handleNavigateToHome}
-            title="新建任务：在工作台选择项目路径（本地目录 / 手动路径 / SSH 远程）"
-          >
-            <Icon name="plus" size={15} />
-            <span>新建任务</span>
-          </button>
-        </div>
         <QuickActions ctx={ctx} />
         <ProjectTreeHeader
           ctx={ctx}
@@ -211,13 +199,22 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
 
 function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   const items: Array<{
-    key: WorkspaceMode | 'skills' | 'knowledge' | 'backend';
+    key: WorkspaceMode | 'skills' | 'knowledge' | 'backend' | 'newtask';
     mode: WorkspaceMode | null;
     label: string;
     icon: Parameters<typeof Icon>[0]['name'];
     onClick: () => void;
     title: string;
   }> = [
+    {
+      // UI-335 — 「新建任务」移入工作台分组首位（原 UI-328 左栏顶部悬浮行，用户裁决归组）
+      key: 'newtask',
+      mode: null,
+      label: '新建任务',
+      icon: 'plus',
+      onClick: ctx.handleNavigateToHome,
+      title: '新建任务：在工作台选择项目路径（本地目录 / 手动路径 / SSH 远程）',
+    },
     {
       key: 'search',
       mode: 'search',
