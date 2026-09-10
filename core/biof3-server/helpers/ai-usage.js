@@ -33,6 +33,7 @@ sqlite.exec(`
   CREATE INDEX IF NOT EXISTS idx_ai_usage_user_ts ON ai_usage(user_id, ts DESC);
   CREATE INDEX IF NOT EXISTS idx_ai_usage_ts ON ai_usage(ts DESC);
   CREATE INDEX IF NOT EXISTS idx_ai_usage_kind ON ai_usage(kind, ts DESC);
+  CREATE INDEX IF NOT EXISTS idx_ai_usage_conv ON ai_usage(conversation_id);
 `);
 for (const statement of [
   'ALTER TABLE ai_usage ADD COLUMN cache_read_tokens INTEGER DEFAULT 0',
@@ -87,9 +88,46 @@ function summarizeAiUsage({ userId = null, conversationId = null, since = null }
   return { ...row, cacheHitRate: row.inputTokens > 0 ? row.cacheReadTokens / row.inputTokens : 0, costStatus: row.unknownCostCalls > 0 ? 'partial' : 'estimated' };
 }
 
+/**
+ * BLOCK-78 P2-② — 项目级用量聚合（读面；不改 summarizeAiUsage 契约）。
+ * ai_usage 经 conversation_id JOIN copilot_conversations.project_id 归因到
+ * 项目；conversation_id 为空的行（无会话上下文调用）不计入项目口径。
+ */
+function summarizeProjectUsage({ projectId = null, userId = null } = {}) {
+  const empty = {
+    calls: 0, inputTokens: 0, outputTokens: 0, cacheReadTokens: 0,
+    estimatedCostCny: 0, unknownCostCalls: 0, failedCalls: 0,
+    cacheHitRate: 0, costStatus: 'estimated',
+  };
+  if (!projectId) return empty;
+  try {
+    const clauses = ['c.project_id = ?'];
+    const params = [projectId];
+    if (userId) { clauses.push('au.user_id = ?'); params.push(userId); }
+    const row = sqlite.prepare(`SELECT COUNT(*) AS calls,
+      COALESCE(SUM(au.prompt_tokens),0) AS inputTokens,
+      COALESCE(SUM(au.completion_tokens),0) AS outputTokens,
+      COALESCE(SUM(au.cache_read_tokens),0) AS cacheReadTokens,
+      COALESCE(SUM(au.cost_cny),0) AS estimatedCostCny,
+      SUM(CASE WHEN au.cost_status = 'unknown' THEN 1 ELSE 0 END) AS unknownCostCalls,
+      SUM(CASE WHEN au.error_code IS NOT NULL THEN 1 ELSE 0 END) AS failedCalls
+      FROM ai_usage au
+      JOIN copilot_conversations c ON au.conversation_id = c.id
+      WHERE ${clauses.join(' AND ')}`).get(...params);
+    if (!row) return empty;
+    return {
+      ...row,
+      cacheHitRate: row.inputTokens > 0 ? row.cacheReadTokens / row.inputTokens : 0,
+      costStatus: row.unknownCostCalls > 0 ? 'partial' : 'estimated',
+    };
+  } catch (e) {
+    console.warn('[ai-usage] summarizeProjectUsage failed:', e && e.message);
+    return empty;
+  }
+}
+
 // Pricing in CNY per 1M tokens.
-const AI_PRICING = {
-  'deepseek-chat':           {input: 0.5, output: 8.0,  cacheHit: 0.1},
+const AI_PRICING = {  'deepseek-chat':           {input: 0.5, output: 8.0,  cacheHit: 0.1},
   'deepseek-reasoner':       {input: 0.5, output: 8.0,  cacheHit: 0.1},
   'text-embedding-v3':       {input: 0.7, output: 0.0},
 };
@@ -103,6 +141,7 @@ function estimateCostCNY(model, promptTokens, completionTokens) {
 module.exports = {
   recordAiUsage,
   summarizeAiUsage,
+  summarizeProjectUsage,
   estimateCostCNY,
   AI_PRICING,
 };

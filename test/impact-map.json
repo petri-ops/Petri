@@ -51,12 +51,20 @@
     "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
     "frontend/src/components/workspace-panels/CenterPanel.tsx",
     "scripts/block78-*",
-    "acceptance/block-78/**"
+    "acceptance/block-78/**",
+    "core/biof3-server/helpers/ai-usage.js",
+    "core/biof3-server/routes/ai-misc.js",
+    "core/biof3-server/routes/harness/harness.js",
+    "core/biof3-server/agent-tools/workspace-ssh-surface.js",
+    "core/biof3-server/agent-tools/workspace-tools.js",
+    "core/biof3-server/routes/ai-agent/background-processes.js"
    ],
    "tests": [
     "test/remote-resource-snapshot.test.mjs",
     "test/block67-node-agent-fs.test.js",
-    "test/block57-remote-execution.test.mjs"
+    "test/block57-remote-execution.test.mjs",
+    "test/ai-usage-project.test.mjs",
+    "test/block67-ssh-surface.test.mjs"
    ],
    "frontendRelated": true,
    "classifiesScripts": true,

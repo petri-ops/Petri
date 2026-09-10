@@ -68,6 +68,20 @@ module.exports = function mountMisc(app) {
     } catch (e) { res.status(500).json({status:'error', error: e.message}); }
   });
 
+  // BLOCK-78 P2-② — 项目级用量/成本聚合（摘要卡「项目」节消费）。
+  // ai_usage 经 conversation_id JOIN copilot_conversations.project_id 归因；
+  // 只读聚合，零新账本。按 user_id 过滤保持与 usage-mine 同一所有权口径。
+  app.get('/api/ai/usage-project', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({status:'error', error:'未授权'});
+    const projectId = String((req.query && req.query.projectId) || '').trim();
+    if (!projectId) return res.status(400).json({status:'error', error:'projectId 不能为空'});
+    try {
+      const usage = require('../helpers/ai-usage').summarizeProjectUsage({ projectId, userId });
+      res.json({status:'ok', projectId, ...usage});
+    } catch (e) { res.status(500).json({status:'error', error: e.message}); }
+  });
+
   app.get('/api/ai/site-snapshot', (req, res) => {
     const userId = req.user && req.user.id;
     if (!userId) return res.status(401).json({status:'error', error:'未授权'});

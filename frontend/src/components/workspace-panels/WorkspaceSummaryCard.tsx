@@ -15,6 +15,7 @@ import {
 } from '@/components/copilot/planApprovals';
 import { listBackgroundProcesses } from '@/components/copilot/backgroundProcesses';
 import { getBridge } from '@/lib/desktopBridge';
+import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 import { formatDate } from '@/lib/format';
 
 export interface WorkspaceSummaryCardProps {
@@ -80,6 +81,7 @@ export function WorkspaceSummaryCard({
   const agentRows = useProjectAgentOverview(project?.id ?? null, cardVisible);
   const terminalSessions = useTerminalSessions(cardVisible);
   const attention = useConversationAttention(activeConversation?.id ?? null, project?.id ?? null, cardVisible);
+  const projectUsage = useProjectUsage(project?.id ?? null, cardVisible);
   if (visibility === 'hidden') return null;
 
   // HLE-C4R: derive an honest loop display. Completion/blocked come only from
@@ -501,6 +503,21 @@ export function WorkspaceSummaryCard({
                 <span className={styles.workspaceLoopMeta}>{formatDate(project.updatedAt)}</span>
               </div>
             )}
+            {/* BLOCK-78 P2-②：项目级累计成本/Token（ai_usage conversation 归因
+                项目口径；无调用不渲染，partial 估算诚实标注）。 */}
+            {projectUsage && projectUsage.calls > 0 && (
+              <div className={styles.workspacePinnedSummaryEnvironmentRow}>
+                <span className={styles.workspacePinnedSummaryEnvironmentLabel}>
+                  <Icon name="bar-chart" size={14} /> 成本
+                </span>
+                <span
+                  className={styles.workspaceLoopMeta}
+                  title="项目累计 AI 用量（会话归因项目口径；成本为已知价格表估算）"
+                >
+                  {`¥${Number(projectUsage.estimatedCostCny || 0).toFixed(4)} · ${(projectUsage.inputTokens + projectUsage.outputTokens).toLocaleString()} tok${projectUsage.costStatus === 'partial' ? '（部分估算）' : ''}`}
+                </span>
+              </div>
+            )}
           </section>
         )}
 
@@ -628,7 +645,47 @@ function useProjectAgentOverview(projectId: string | null, enabled: boolean): Ag
   return rows;
 }
 
-/** BLOCK-78 P1⑦：会话级注意信号——待确认计划（draft + 待修订，BLOCK-55 链）
+/** BLOCK-78 P2-②：项目级成本/Token 汇总（/api/ai/usage-project，ai_usage
+ *  conversation 归因项目口径的只读聚合）。获取失败按 null 处理 → 行不渲染，
+ *  不伪造用量；30s 慢刷新（成本非实时关键面）。 */
+interface ProjectUsageSummary {
+  calls: number;
+  inputTokens: number;
+  outputTokens: number;
+  estimatedCostCny: number;
+  costStatus: 'partial' | 'estimated';
+}
+
+function useProjectUsage(projectId: string | null, enabled: boolean): ProjectUsageSummary | null {
+  const [usage, setUsage] = useState<ProjectUsageSummary | null>(null);
+  useEffect(() => {
+    if (!enabled || !projectId) return;
+    let alive = true;
+    const load = async () => {
+      try {
+        const token = getToken();
+        const resp = await fetch(
+          `${getPlatformApiPrefix()}/ai/usage-project?projectId=${encodeURIComponent(projectId)}`,
+          { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
+        );
+        const body = await resp.json().catch(() => null);
+        if (!alive) return;
+        setUsage(body && body.status === 'ok' ? body : null);
+      } catch {
+        if (alive) setUsage(null);
+      }
+    };
+    void load();
+    const timer = window.setInterval(load, 30000);
+    return () => {
+      alive = false;
+      window.clearInterval(timer);
+    };
+  }, [enabled, projectId]);
+  return usage;
+}
+
+/** BLOCK-78 P2-④：会话级注意信号——待确认计划（draft + 待修订，BLOCK-55 链）
  *  与异常退出后台进程（BLOCK-34 表，failed/orphaned 两态算异常，exited 是
  *  正常终态）。信号源不可得按 0 处理，不伪造告警；零待办返回 0 → 不渲染。
  *  P2-④：listBackgroundProcesses 携带 projectId——后端按项目形态路由
