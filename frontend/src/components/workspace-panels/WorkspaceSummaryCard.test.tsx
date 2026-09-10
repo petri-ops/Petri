@@ -20,12 +20,23 @@ vi.mock('@/components/copilot/copilotClient', () => ({
   listAgentTasks: vi.fn(),
 }));
 
+vi.mock('@/components/copilot/planApprovals', () => ({
+  fetchDraftPlansForConversation: vi.fn(),
+  fetchPlansWithPendingRevision: vi.fn(),
+}));
+
+vi.mock('@/components/copilot/backgroundProcesses', () => ({
+  listBackgroundProcesses: vi.fn(),
+}));
+
 vi.mock('@/lib/desktopBridge', () => ({
   getBridge: vi.fn(),
 }));
 
 const listAgentTasksMock = vi.mocked(listAgentTasks);
 const getBridgeMock = vi.mocked(getBridge);
+const { fetchDraftPlansForConversation, fetchPlansWithPendingRevision } = await import('@/components/copilot/planApprovals');
+const { listBackgroundProcesses } = await import('@/components/copilot/backgroundProcesses');
 
 function makeJob(overrides: Partial<ToolJob> = {}): ToolJob {
   return {
@@ -95,6 +106,9 @@ function baseProps(overrides: Partial<WorkspaceSummaryCardProps> = {}): Workspac
 
 beforeEach(() => {
   listAgentTasksMock.mockResolvedValue([]);
+  vi.mocked(fetchDraftPlansForConversation).mockResolvedValue([]);
+  vi.mocked(fetchPlansWithPendingRevision).mockResolvedValue([]);
+  vi.mocked(listBackgroundProcesses).mockResolvedValue([]);
   getBridgeMock.mockImplementation(((name: string) => {
     if (name === 'terminal') {
       return { listSessions: async () => ({ ok: true, sessions: [] }) };
@@ -281,8 +295,7 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     expect(screen.queryByLabelText('项目信息')).toBeNull();
   });
 
-  it('失败智能体并入「需要关注」节，点击弹专属窗', async () => {
-    const popOut = vi.fn(async () => ({}));
+  it('失败智能体并入「需要关注」节，点击弹专属窗', async () => {    const popOut = vi.fn(async () => ({}));
     getBridgeMock.mockImplementation(((name: string) => {
       if (name === 'windowManager') return { popOut };
       if (name === 'terminal') return { listSessions: async () => ({ ok: true, sessions: [] }) };
@@ -311,5 +324,41 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     const row = await screen.findByText('1 个失败智能体');
     fireEvent.click(row);
     await waitFor(() => expect(popOut).toHaveBeenCalledWith('agent', 'task_fail'));
+  });
+
+  it('注意节会话信号：待确认计划与异常后台进程计数渲染，零待办不渲染', async () => {
+    vi.mocked(fetchDraftPlansForConversation).mockResolvedValue([
+      { id: 'plan_1', title: 'QC 计划', specMd: null, steps: [], status: 'draft', conversation_id: 'conv_1' },
+    ] as never);
+    vi.mocked(fetchPlansWithPendingRevision).mockResolvedValue([]);
+    vi.mocked(listBackgroundProcesses).mockResolvedValue([
+      {
+        processId: 'proc_1',
+        pid: 999,
+        status: 'failed',
+        command: 'python run.py',
+        startedAtIso: '2026-09-10T07:00:00Z',
+        durationMs: 1200,
+        exitCode: 1,
+      },
+    ]);
+    render(
+      <WorkspaceSummaryCard
+        {...baseProps({ activeConversation: makeConversation() })}
+      />
+    );
+    expect(await screen.findByText('1 项计划待确认')).toBeTruthy();
+    expect(await screen.findByText('1 个后台进程异常退出')).toBeTruthy();
+
+    cleanup();
+    vi.mocked(fetchDraftPlansForConversation).mockResolvedValue([]);
+    vi.mocked(listBackgroundProcesses).mockResolvedValue([]);
+    render(
+      <WorkspaceSummaryCard
+        {...baseProps({ activeConversation: makeConversation() })}
+      />
+    );
+    await waitFor(() => expect(screen.queryByText(/项计划待确认/)).toBeNull());
+    expect(screen.queryByText(/后台进程异常退出/)).toBeNull();
   });
 });

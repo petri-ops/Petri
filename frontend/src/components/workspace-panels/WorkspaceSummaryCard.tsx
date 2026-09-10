@@ -9,6 +9,11 @@ import type { ConversationLoopState } from '@/components/copilot/conversationRun
 import { deriveLoopDisplay, loopDecisionLabel, type LoopSessionSummary } from '@/lib/loop-client';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import { listAgentTasks, type AgentTaskOverviewItem } from '@/components/copilot/copilotClient';
+import {
+  fetchDraftPlansForConversation,
+  fetchPlansWithPendingRevision,
+} from '@/components/copilot/planApprovals';
+import { listBackgroundProcesses } from '@/components/copilot/backgroundProcesses';
 import { getBridge } from '@/lib/desktopBridge';
 import { formatDate } from '@/lib/format';
 
@@ -74,6 +79,7 @@ export function WorkspaceSummaryCard({
   const cardVisible = open && visibility !== 'hidden';
   const agentRows = useProjectAgentOverview(project?.id ?? null, cardVisible);
   const terminalSessions = useTerminalSessions(cardVisible);
+  const attention = useConversationAttention(activeConversation?.id ?? null, cardVisible);
   if (visibility === 'hidden') return null;
 
   // HLE-C4R: derive an honest loop display. Completion/blocked come only from
@@ -165,11 +171,43 @@ export function WorkspaceSummaryCard({
           </div>
         )}
 
-        {(jobStats.failed > 0 || failedAgentRows.length > 0) && (
+        {(jobStats.failed > 0
+          || failedAgentRows.length > 0
+          || attention.pendingPlans > 0
+          || attention.abnormalProcesses > 0) && (
           <section className={styles.workspacePinnedSummarySection} aria-label="需要关注">
             <div className={styles.workspacePinnedSummarySectionHeading}>
               <div className={styles.workspacePinnedSummarySectionTitle}>需要关注</div>
             </div>
+            {attention.pendingPlans > 0 && (
+              <div
+                className={styles.workspacePinnedSummaryTaskRow}
+                title="在会话输入区上方批准或驳回"
+              >
+                <span className={styles.workspacePinnedSummaryActivityIcon} data-status="running">
+                  <Icon name="list-details" size={13} />
+                </span>
+                <span className={styles.workspacePinnedSummaryActivityText}>
+                  <strong>{attention.pendingPlans} 项计划待确认</strong>
+                  <small>在会话输入区上方处理</small>
+                </span>
+              </div>
+            )}
+            {attention.abnormalProcesses > 0 && (
+              <div
+                className={styles.workspacePinnedSummaryTaskRow}
+                data-status="failed"
+                title="在会话的后台进程浮窗查看"
+              >
+                <span className={styles.workspacePinnedSummaryActivityIcon} data-status="failed">
+                  <Icon name="alert-triangle" size={13} />
+                </span>
+                <span className={styles.workspacePinnedSummaryActivityText}>
+                  <strong>{attention.abnormalProcesses} 个后台进程异常退出</strong>
+                  <small>在会话的后台进程浮窗查看</small>
+                </span>
+              </div>
+            )}
             {jobStats.failed > 0 && (
               <button
                 type="button"
@@ -550,9 +588,45 @@ function useProjectAgentOverview(projectId: string | null, enabled: boolean): Ag
   return rows;
 }
 
+/** BLOCK-78 P1⑦：会话级注意信号——待确认计划（draft + 待修订，BLOCK-55 链）
+ *  与异常退出后台进程（BLOCK-34 表，failed/orphaned 两态算异常，exited 是
+ *  正常终态）。信号源不可得按 0 处理，不伪造告警；零待办返回 0 → 不渲染。 */
+function useConversationAttention(
+  conversationId: string | null,
+  enabled: boolean
+): { pendingPlans: number; abnormalProcesses: number } {
+  const [attention, setAttention] = useState({ pendingPlans: 0, abnormalProcesses: 0 });
+  useEffect(() => {
+    if (!enabled || !conversationId) return;
+    let alive = true;
+    const load = () => {
+      void Promise.all([
+        fetchDraftPlansForConversation(conversationId).catch(() => []),
+        fetchPlansWithPendingRevision(conversationId).catch(() => []),
+        listBackgroundProcesses(conversationId).catch(() => null),
+      ]).then(([drafts, revisions, processes]) => {
+        if (!alive) return;
+        setAttention({
+          pendingPlans: (Array.isArray(drafts) ? drafts.length : 0)
+            + (Array.isArray(revisions) ? revisions.length : 0),
+          abnormalProcesses: (processes ?? []).filter(
+            (p) => p.status === 'failed' || p.status === 'orphaned'
+          ).length,
+        });
+      });
+    };
+    void load();
+    const timer = window.setInterval(load, 5000);
+    return () => {
+      alive = false;
+      window.clearInterval(timer);
+    };
+  }, [enabled, conversationId]);
+  return attention;
+}
+
 /** BLOCK-78 P1⑥：终端投影——读既有 terminal:listSessions IPC（BLOCK-54），
- *  只读计数；无会话返回空 → 不渲染。零状态上提。 */
-function useTerminalSessions(
+ *  只读计数；无会话返回空 → 不渲染。零状态上提。 */function useTerminalSessions(
   enabled: boolean
 ): Array<{ sessionId: string; pid: number; cwd: string; running: boolean }> {
   const [sessions, setSessions] = useState<Array<{ sessionId: string; pid: number; cwd: string; running: boolean }>>([]);
