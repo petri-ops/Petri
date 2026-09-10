@@ -129,6 +129,12 @@ beforeEach(() => {
     error: '',
     refresh: async () => {},
   });
+  // 默认零用量（成本行不渲染）；成本行用例内覆写
+  vi.stubGlobal('fetch', vi.fn(async () => ({
+    ok: true,
+    status: 200,
+    json: async () => ({ status: 'ok', calls: 0, inputTokens: 0, outputTokens: 0, estimatedCostCny: 0, costStatus: 'estimated' }),
+  })));
   getBridgeMock.mockImplementation(((name: string) => {
     if (name === 'terminal') {
       return { listSessions: async () => ({ ok: true, sessions: [] }) };
@@ -293,6 +299,29 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     }) as unknown as typeof getBridge);
     render(<WorkspaceSummaryCard {...baseProps()} />);
     await waitFor(() => expect(screen.queryByText(/个会话运行中/)).toBeNull());
+  });
+
+  it('P2-② 成本行：项目累计用量渲染（partial 口径标注；零调用不渲染）', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => ({
+      ok: true,
+      status: 200,
+      json: async () => String(url).includes('usage-project')
+        ? { status: 'ok', calls: 12, inputTokens: 1000, outputTokens: 2000, estimatedCostCny: 0.1234, costStatus: 'partial' }
+        : { status: 'error' },
+    })));
+    render(<WorkspaceSummaryCard {...baseProps()} />);
+    expect(await screen.findByText(/¥0\.1234/)).toBeTruthy();
+    expect(screen.getByText(/3,000 tok/)).toBeTruthy();
+    expect(screen.getByText(/部分估算/)).toBeTruthy();
+
+    cleanup();
+    vi.stubGlobal('fetch', vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ status: 'ok', calls: 0, inputTokens: 0, outputTokens: 0, estimatedCostCny: 0, costStatus: 'estimated' }),
+    })));
+    render(<WorkspaceSummaryCard {...baseProps()} />);
+    await waitFor(() => expect(screen.queryByText(/成本/)).toBeNull());
   });
 
   it('P1.5 环境诚实化：ssh 项目不渲染本机 R/Py 芯片，资源行标注「指挥席本机」', () => {
