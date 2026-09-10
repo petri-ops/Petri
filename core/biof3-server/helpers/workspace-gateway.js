@@ -11,6 +11,7 @@
  */
 
 const sshTransport = require('./remote-execution/ssh-transport');
+const sshMux = require('./remote-execution/ssh-multiplexer');
 const { remoteAgentCommand, AGENT_BIN, AGENT_ROOT } = require('./remote-execution/node-agent');
 
 const b64 = (s) => Buffer.from(String(s), 'utf-8').toString('base64');
@@ -32,10 +33,15 @@ function safeRemoteJoin(root, relativePath) {
 }
 
 /** ssh 后端：一次性 ssh + fs verb；语义错误（not_found 等）以 payload error 呈现。 */
+// D1.1 — agent 部署校验缓存提升到模块级（按 别名+agent版本 键控）：
+// createSshBackend 每请求新建实例，实例级缓存会让每个请求都重跑一次
+// ensureAgent 哈希校验（独立 SSH 连接 ~1s）——实测树延迟不降的真凶。
+const ensuredAgents = new Set(); // `${alias}:${agentHash}`
 function createSshBackend({ alias }) {
-  const ensured = new Set();
   async function ensureAgent() {
-    if (ensured.has(alias)) return;
+    const { agentVersionHash } = require('./remote-execution/node-agent');
+    const key = `${alias}:${agentVersionHash()}`;
+    if (ensuredAgents.has(key)) return;
     const { createRemoteJobRunner } = require('./remote-execution/remote-job-runner');
     const runner = createRemoteJobRunner();
     const deployed = await runner.ensureAgent({ alias });
@@ -44,14 +50,25 @@ function createSshBackend({ alias }) {
       error.classified = deployed.error;
       throw error;
     }
-    ensured.add(alias);
+    ensuredAgents.add(key);
   }
 
   async function fsOp(verbArgs, { timeoutMs = 30000, maxArgLen = 256 } = {}) {
     await ensureAgent();
+    const command = remoteAgentCommand(verbArgs, { maxArgLen });
+    // D1.1 性能优化：默认走单连接多路复用（每操作 ~1 RTT）；BIOF3_SSH_MUX=0 回退 thin per-call
+    if (sshMux.muxEnabled()) {
+      try {
+        const r = await sshMux.runOnMux({ alias, command, timeoutMs });
+        return r.stdout;
+      } catch (e) {
+        if (e && e.classified) throw e;
+        throw e;
+      }
+    }
     const op = await sshTransport.runSshOp({
       alias,
-      remoteCommand: remoteAgentCommand(verbArgs, { maxArgLen }),
+      remoteCommand: command,
       timeoutMs,
     });
     if (op.classified.kind !== 'ok') {

@@ -20,6 +20,8 @@ import { join, resolve } from 'node:path';
 const tempRoot = mkdtempSync(join(tmpdir(), 'block67-gw-'));
 process.env.BIOF3_DB_PATH = join(tempRoot, 'gw.db');
 process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
+// 本文件验证 thin per-call 语义（fake runSshOp）——禁用 D1.1 多路复用（mux 协议另有专项测试）
+process.env.BIOF3_SSH_MUX = '0';
 
 const require = createRequire(import.meta.url);
 {

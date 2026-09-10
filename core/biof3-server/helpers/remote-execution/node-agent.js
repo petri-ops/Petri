@@ -195,7 +195,7 @@ case "$cmd" in
       echo "cancel_no_process"
     fi
     ;;
-  fs_*|exec|exec_bg|ps_pid|kill_pid)
+  fs_*|exec|exec_bg|ps_pid|kill_pid|__mux)
     # BLOCK-67 fs/exec verbs 在脚本尾部第二 case 分发，此处放行。
     ;;
   *)
@@ -225,6 +225,24 @@ fs_mtime_ms() {
     echo $(( $(date -r "$1" +%s) * 1000 ))
   fi
 }
+# __mux：单连接复用循环（性能优化 D1.1）。stdin 每行 = base64(完整命令)；
+# 执行后回送 R	<exit>	<base64 stdout>；stderr 丢弃（fs verbs 语义走 stdout JSON）。
+if [ "$cmd" = "__mux" ]; then
+  while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    decoded=$(printf '%s' "$line" | base64 -d 2>/dev/null) || continue
+    tmper=$(mktemp) || continue
+    out=$(eval "$decoded" 2>"$tmper" < /dev/null)
+    code=$?
+    b64out=$(printf '%s' "$out" | base64 -w0 2>/dev/null || printf '%s' "$out" | base64 | tr -d '
+')
+    printf 'R	%s	%s
+' "$code" "$b64out"
+    rm -f "$tmper"
+  done
+  exit 0
+fi
+
 case "$cmd" in
   fs_stat)
     [ $# -ge 1 ] || die "fs_stat_usage"
