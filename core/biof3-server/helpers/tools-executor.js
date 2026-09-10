@@ -44,7 +44,7 @@ const {
 } = require('../helpers/process-lifecycle');
 const { createTargetRegistry } = require('./remote-execution/target-registry');
 const { createRemoteJobRunner, AGENT_SCRIPT_HASH } = require('./remote-execution/remote-job-runner');
-const { createSshDirectRunner } = require('./remote-execution/ssh-direct-runner');
+const { createSshDirectRunner, captureREnv } = require('./remote-execution/ssh-direct-runner');
 const { createJobOutputReader } = require('./remote-execution/job-output-reader');
 const { remoteJobDirPath } = require('./remote-execution/ssh-transport');
 
@@ -1719,12 +1719,24 @@ function createToolsExecutor({
       return;
     }
     const outputs = await runner.listOutputs({ jobId });
+    // BLOCK-76 P3 — provenance 环境留痕平移：服务器 R 包清单（D4，沿用 BLOCK-57 P3 语义）
+    let environment = null;
+    if (cfg.lang === 'r') {
+      try {
+        const { resolveWorkspaceBackend } = require('./workspace-gateway');
+        const rres = resolveWorkspaceBackend(sshContext.project);
+        if (rres.backend) environment = await captureREnv(rres.backend, rres.root);
+      } catch (e) {
+        console.warn('[tools] ssh-direct R env capture failed:', e.message);
+      }
+    }
     const result = {
       workspaceKind: 'ssh',
       ssh: { alias, path: sshContext.project.remote_path },
       outputPath: outputRel,
       transport: 'gateway-ssh-direct',
       runtime: { name: cfg.lang || null, version: remoteDispatch.runtime.version, command: remoteDispatch.runtime.runtimeBin },
+      environment,
       files: outputs.ok
         ? outputs.outputs.map((f) => ({
           name: f.name,

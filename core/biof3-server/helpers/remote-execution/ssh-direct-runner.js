@@ -198,6 +198,23 @@ function createSshDirectRunner({ project, gateway = null }) {
   return { stage, start, poll, pullLog, cancel, listOutputs, jobRel, kind: 'ssh-direct' };
 }
 
+/**
+ * BLOCK-76 P3 — provenance 环境留痕平移（D4）：从服务器采集 R 包清单
+ * （名册文本 + sha256），跨机重放对账的环境事实（沿用 BLOCK-57 P3 语义）。
+ * 仅 language==='r' 时有意义；gateway exec cwd 用项目根（rootAbs）。
+ */
+async function captureREnv(gw, rootAbs) {
+  const res = await gw.exec('Rscript -e "writeLines(rownames(installed.packages()))"', rootAbs, 90);
+  if (!res || res.code !== 0 || !res.stdout || !res.stdout.trim()) return null;
+  const packagesText = res.stdout.trim();
+  const crypto = require('crypto');
+  return {
+    packagesCount: packagesText.split('\n').filter(Boolean).length,
+    packagesSha256: crypto.createHash('sha256').update(packagesText).digest('hex'),
+    packagesText,
+  };
+}
+
 function walkLocal(dir, cb, prefix = '') {
   const fs = require('fs');
   let entries = [];
@@ -251,4 +268,4 @@ async function withTransportRetry(fn) {
   return last;
 }
 
-module.exports = { createSshDirectRunner, withTransportRetry, isRetryableError, STAGE_ROOT, EXIT_MARKER, LOG_REL };
+module.exports = { createSshDirectRunner, captureREnv, withTransportRetry, isRetryableError, STAGE_ROOT, EXIT_MARKER, LOG_REL };

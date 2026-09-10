@@ -1496,8 +1496,24 @@ async function runPluginToolSshDirect({ sshProjectRow, jobDir, language, toolJob
       environment: null,
     };
     if (language === 'r') {
-      // P3（真值语义+兼容）承接：R 包清单 provenance 平移到直跑链（服务器侧采集）。
-      executionTarget.environment = null;
+      // BLOCK-76 P3 — provenance 环境留痕平移：服务器 R 包清单（gateway exec 采集）
+      try {
+        const gwResolved = require('../helpers/workspace-gateway').resolveWorkspaceBackend(sshProjectRow);
+        if (gwResolved.backend) {
+          const envRes = await gwResolved.backend.exec('Rscript -e "writeLines(rownames(installed.packages()))"', gwResolved.root, 90);
+          if (envRes.code === 0 && envRes.stdout.trim()) {
+            const crypto = require('crypto');
+            const packagesText = envRes.stdout.trim();
+            executionTarget.environment = {
+              packagesCount: packagesText.split('\n').filter(Boolean).length,
+              packagesSha256: crypto.createHash('sha256').update(packagesText).digest('hex'),
+              packagesText,
+            };
+          }
+        }
+      } catch (e) {
+        console.warn('[mcp-registry] ssh-direct renv capture failed:', e.message);
+      }
     }
     const scriptErr = code !== 0
       ? Object.assign(new Error(`remote script exited ${code}`), { code })
