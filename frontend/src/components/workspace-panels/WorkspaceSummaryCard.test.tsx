@@ -345,6 +345,22 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     await waitFor(() => expect(screen.queryByText(/结果库/)).toBeNull());
   });
 
+  it('P2-⑤ 未读通知徽标：渲染计数、点击标记已读（POST seen）', async () => {
+    const seenPost = vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ ok: true, marked: 3 }) }));
+    vi.stubGlobal('fetch', vi.fn(async (url: string, opts?: { method?: string }) => {
+      if (String(url).includes('/harness/notices') && (opts?.method || 'GET') === 'GET') {
+        return { ok: true, status: 200, json: async () => ({ ok: true, unread: 3, notices: [] }) };
+      }
+      if (String(url).includes('/harness/notices/seen')) return seenPost();
+      return { ok: true, status: 200, json: async () => ({ status: 'ok', calls: 0, inputTokens: 0, outputTokens: 0, estimatedCostCny: 0, costStatus: 'estimated' }) };
+    }));
+    render(<WorkspaceSummaryCard {...baseProps()} />);
+    const badge = await screen.findByTestId('notices-unread-badge');
+    expect(badge.textContent).toContain('3 条未读');
+    fireEvent.click(badge);
+    await waitFor(() => expect(seenPost).toHaveBeenCalled());
+  });
+
   it('P1.5 环境诚实化：ssh 项目不渲染本机 R/Py 芯片，资源行标注「指挥席本机」', () => {
     render(
       <WorkspaceSummaryCard
