@@ -44,4 +44,21 @@ export interface UsageSummary {
   unknown_cost_calls: number;
   cache_hit_rate: number;
   cost_status: 'partial' | 'estimated';
+  /** BLOCK-79 — 平均整次调用墙钟延迟（ms；usage-mine 返回，此前未展示） */
+  avg_latency?: number;
+  /** BLOCK-79 — 按供应商的输出速率分组（端到端平均口径） */
+  providers?: ProviderUsageRow[];
+}
+
+/** BLOCK-79 — 单供应商聚合行（summarizeProviderUsage 输出，snake_case 由后端直出） */
+export interface ProviderUsageRow {
+  provider: string;
+  calls: number;
+  inputTokens: number;
+  outputTokens: number;
+  latencyMs: number;
+  measurableCalls: number;
+  noUsageCalls: number;
+  tokensPerSecond: number | null;
+  measurable: boolean;
 }

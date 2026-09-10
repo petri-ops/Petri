@@ -62,6 +62,8 @@ function usageRecord(telemetry, model, startedAt, usage, errorCode) {
     userId: telemetry && telemetry.userId,
     kind: (telemetry && telemetry.kind) || 'agent_iter',
     model,
+    // BLOCK-79 P1 — 供应商归因（网关注入）
+    provider: (telemetry && telemetry.provider) || null,
     promptTokens: (usage && (usage.prompt_tokens || usage.input_tokens)) || 0,
     completionTokens: (usage && (usage.completion_tokens || usage.output_tokens)) || 0,
     latencyMs: Date.now() - startedAt,

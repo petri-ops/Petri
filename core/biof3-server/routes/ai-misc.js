@@ -64,7 +64,10 @@ module.exports = function mountMisc(app) {
       const total = await adb.prepare(`SELECT COUNT(*) AS calls, SUM(prompt_tokens) AS prompt_tokens, SUM(completion_tokens) AS completion_tokens, SUM(COALESCE(cache_read_tokens,0)) AS cache_read_tokens, SUM(COALESCE(cache_creation_tokens,0)) AS cache_creation_tokens, SUM(COALESCE(cost_cny,0)) AS estimated_cost_cny, SUM(CASE WHEN COALESCE(cost_status,'unknown')='unknown' THEN 1 ELSE 0 END) AS unknown_cost_calls, AVG(latency_ms) AS avg_latency FROM ai_usage WHERE user_id=? AND ts >= ?`).get(userId, cutoff);
       total.cache_hit_rate = Number(total.prompt_tokens) > 0 ? Number(total.cache_read_tokens || 0) / Number(total.prompt_tokens) : 0;
       total.cost_status = Number(total.unknown_cost_calls || 0) > 0 ? 'partial' : 'estimated';
-      res.json({status:'ok', days, ...total});
+      // BLOCK-79 P2 — 按供应商的输出速率分组（端到端平均输出速率口径；embedding
+      // 排除；completion=0 的渠道 measurable=false 前端显「不可算」）。
+      const providers = require('../helpers/ai-usage').summarizeProviderUsage({ userId, since: cutoff });
+      res.json({status:'ok', days, ...total, providers});
     } catch (e) { res.status(500).json({status:'error', error: e.message}); }
   });
 

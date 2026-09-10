@@ -50,6 +50,8 @@ function usageArgs(telemetry, body, startedAt, usage, errorCode) {
     userId: telemetry.userId,
     kind: telemetry.kind || 'agent_iter',
     model: (body && body.model) || 'deepseek-chat',
+    // BLOCK-79 P1 — 供应商归因（网关注入 telemetry.provider）
+    provider: (telemetry && telemetry.provider) || null,
     promptTokens: u.prompt_tokens || 0,
     completionTokens: u.completion_tokens || 0,
     latencyMs: Date.now() - startedAt,

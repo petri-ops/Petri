@@ -157,6 +157,11 @@ class ModelGateway {
         continue;
       }
       const { profile, provider, apiKey } = prepared;
+      // BLOCK-79 P1 — 供应商归因注入：遥测携带「本次实际 attempt」的 provider，
+      // 经 provider 层 usageArgs 落 ai_usage.provider（fallback 换档即换归因）。
+      if (telemetry && typeof telemetry === 'object' && !telemetry.provider) {
+        telemetry.provider = profile.provider;
+      }
       const canStream = typeof onEvent === 'function' && typeof provider.chatStream === 'function';
       if (typeof provider.chat !== 'function' && !canStream) {
         lastResult = gatewayError('provider_method_missing', `Provider ${profile.provider} 不支持 chat`, {

@@ -3094,3 +3094,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 **加映八（同日，BLOCK-78 P2-⑤ 跨会话持久通知落地——用户裁决「两个都搞」）**：①存储：新表 `project_notices`（project_id/kind/title/detail/created_at/read_at，项目+时间索引；**事件留痕 + 项目级已读确认**，非第二套作业/agent 状态；read 通知修剪保留 200 条，unread 不修剪）——写点收敛 `markJobFailed` 失败终态（best-effort，绝不阻断作业链；test_run 不产生通知）；②读面：`/api/harness/notices?projectId=&unread=1`（含 unread 计数）+ POST `/seen`（项目级全部已读）；③前端：注意节标题右侧「N 条未读」徽标（accent 色，点击全部标记已读并立刷；仅注意节有未读时出现）。**与投影型信号的本质区别**：失败 job 行随作业状态存在，未读通知跨重启/跨会话存活——重开后知道离开期间发生了什么。**门禁**：新增零网络 2/2（插入/未读计数/项目隔离/全部已读/防御）+ 卡片 16/16（徽标渲染+POST seen）+ tsc 0 + node 语法 0。
+
+## UI-332: 设置页按供应商的 token 速率表（BLOCK-79 P2 统一展示面）(2026-09-10 in_progress)
+
+**来源**：BLOCK-79（用户裁决「统一的 增加，我还是希望你能看到不同供应商的 token 的速度情况的」，plan `docs/block-79-token-speed-observability-plan.md`）。
+
+**改动**：`UsageResourcePanel` 增「供应商速率（30 天）」分组区——每供应商一行：`{provider} · N 次调用` + **输出 tok/s** + `输出 N tok · 平均延迟 X s`；全部供应商平均延迟行（usage-mine 既有 `avg_latency` 首次显性化，标注含 embedding）。**口径诚实**：速率=端到端平均输出速率（输出 token 总数 ÷ 总墙钟时间，解码速度下限，标题注明）；渠道未返回 usage（completion=0）显示「不可算（未返回用量）」而非 0；无记录诚实空态。零新依赖。
+
+**门禁**：新增 `UsageResourcePanel.test.tsx` 3/3（速率行渲染+平均延迟/不可算标注/空态）+ 后端 `ai-usage-provider` 3/3（provider 落库/成对聚合 80 tok/s 数学/embedding 排除/未归因组/since 窗口）+ tsc 0。
+
+**状态**: in_progress（实机数值一致性对账待 BLOCK-79 P3）。G0 开发期常态 · 不外推 packaged / Provider / GA。

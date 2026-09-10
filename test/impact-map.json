@@ -63,7 +63,8 @@
     "core/biof3-server/routes/harness/index.js",
     "core/biof3-server/helpers/project-notices.js",
     "core/biof3-server/helpers/project-notice-store.js",
-    "core/biof3-server/routes/harness/notices.js"
+    "core/biof3-server/routes/harness/notices.js",
+    "scripts/ui330-*"
    ],
    "tests": [
     "test/remote-resource-snapshot.test.mjs",
@@ -1306,6 +1307,26 @@
    ],
    "classifiesScripts": true,
    "scriptRole": "development-smoke"
+  },
+  {
+   "id": "block79-token-speed",
+   "note": "BLOCK-79 按供应商的 token 输出速率：ai_usage provider 归因列（additive）+ model-gateway attempt 级注入 + summarizeProviderUsage 成对聚合（端到端平均输出速率口径·embedding 排除·zero-usage 不可算）+ usage-mine providers 分组段 + 设置页供应商速率表。",
+   "patterns": [
+    "core/biof3-server/helpers/ai-usage.js",
+    "core/biof3-server/routes/ai-misc.js",
+    "core/biof3-server/helpers/project-storage.js",
+    "core/biof3-server/shared-backend/llm-providers/model-gateway.js",
+    "core/shared-backend/llm-providers/model-gateway.js",
+    "core/shared-backend/llm-providers/deepseek.js",
+    "core/shared-backend/llm-providers/anthropic.js",
+    "frontend/src/components/desktop/DesktopSettingsPanel/sections/UsageResourcePanel.tsx",
+    "frontend/src/components/desktop/DesktopSettingsPanel/types.ts"
+   ],
+   "tests": [
+    "test/ai-usage-provider.test.mjs"
+   ],
+   "frontendRelated": true,
+   "classifiesScripts": false
   }
  ]
 }

@@ -40,20 +40,25 @@ for (const statement of [
   'ALTER TABLE ai_usage ADD COLUMN cache_creation_tokens INTEGER DEFAULT 0',
   'ALTER TABLE ai_usage ADD COLUMN cost_cny REAL',
   "ALTER TABLE ai_usage ADD COLUMN cost_status TEXT DEFAULT 'unknown'",
+  // BLOCK-79 P1 — 供应商归因（additive；旧行 NULL = 未归因）
+  'ALTER TABLE ai_usage ADD COLUMN provider TEXT',
 ]) {
   try { sqlite.exec(statement); } catch (_) { /* already migrated */ }
 }
+try { sqlite.exec('CREATE INDEX IF NOT EXISTS idx_ai_usage_provider_ts ON ai_usage(provider, ts DESC)'); } catch (_) {}
+try { sqlite.exec('CREATE INDEX IF NOT EXISTS idx_ai_usage_conv ON ai_usage(conversation_id)'); } catch (_) {}
 
-function recordAiUsage({userId, kind, model, promptTokens, completionTokens, cacheReadTokens, cacheCreationTokens, latencyMs, errorCode, conversationId, costCny, costStatus}) {
+function recordAiUsage({userId, kind, model, provider, promptTokens, completionTokens, cacheReadTokens, cacheCreationTokens, latencyMs, errorCode, conversationId, costCny, costStatus}) {
   try {
     const normalizedCost = Number.isFinite(Number(costCny)) ? Number(costCny) : null;
-    sqlite.prepare(`INSERT INTO ai_usage(user_id, ts, kind, model, prompt_tokens, completion_tokens, latency_ms, cache_read_tokens, cache_creation_tokens, cost_cny, cost_status, error_code, conversation_id)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    sqlite.prepare(`INSERT INTO ai_usage (user_id, ts, kind, model, provider, prompt_tokens, completion_tokens, latency_ms, cache_read_tokens, cache_creation_tokens, cost_cny, cost_status, error_code, conversation_id)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
       .run(
         userId || null,
         new Date().toISOString(),
         kind || 'other',
         model || null,
+        provider || null,
         promptTokens|0,
         completionTokens|0,
         latencyMs|0,
@@ -126,6 +131,50 @@ function summarizeProjectUsage({ projectId = null, userId = null } = {}) {
   }
 }
 
+/**
+ * BLOCK-79 P1 — 按供应商的输出速率聚合（成对口径：tokens/latency 同表求和）。
+ *
+ * - 口径：tokensPerSecond = SUM(completion_tokens) ÷ (SUM(latency_ms)/1000)
+ *   = 端到端平均输出速率（含排队/首 token 前 prefill/网络），是真实解码
+ *   速度的下限；界面禁止称「解码速度」。
+ * - kind 过滤：排除 embedding（无输出 token，污染分母）；其余 LLM 文本
+ *   调用（chat/chat_turn/tool_summary_retry/agent_iter…）全部计入。
+ * - 不可算边界：completion_tokens=0 的调用（渠道未返回 usage）单独计数，
+ *   全组皆如此时 measurable=false，前端显示「不可算」而非 0。
+ * - 旧行 provider 为 NULL → 归入「(未归因)」组。
+ */
+function summarizeProviderUsage({ userId = null, since = null, limit = 20 } = {}) {
+  try {
+    const clauses = ["kind <> 'embedding'"];
+    const params = [];
+    if (since) { clauses.push('ts >= ?'); params.push(since); }
+    if (userId) { clauses.push('user_id = ?'); params.push(userId); }
+    params.push(Math.max(1, Math.min(50, Number(limit) || 20)));
+    const rows = sqlite.prepare(`SELECT COALESCE(provider,'(未归因)') AS provider,
+        COUNT(*) AS calls,
+        COALESCE(SUM(prompt_tokens),0) AS inputTokens,
+        COALESCE(SUM(completion_tokens),0) AS outputTokens,
+        COALESCE(SUM(latency_ms),0) AS latencyMs,
+        SUM(CASE WHEN COALESCE(completion_tokens,0) > 0 THEN 1 ELSE 0 END) AS measurableCalls,
+        SUM(CASE WHEN COALESCE(completion_tokens,0) = 0 THEN 1 ELSE 0 END) AS noUsageCalls
+      FROM ai_usage
+      WHERE ${clauses.join(' AND ')}
+      GROUP BY provider
+      ORDER BY outputTokens DESC
+      LIMIT ?`).all(...params);
+    return rows.map((r) => ({
+      ...r,
+      tokensPerSecond: Number(r.latencyMs) > 0
+        ? Math.round((r.outputTokens / (r.latencyMs / 1000)) * 10) / 10
+        : null,
+      measurable: Number(r.measurableCalls) > 0,
+    }));
+  } catch (e) {
+    console.warn('[ai-usage] summarizeProviderUsage failed:', e && e.message);
+    return [];
+  }
+}
+
 // Pricing in CNY per 1M tokens.
 const AI_PRICING = {  'deepseek-chat':           {input: 0.5, output: 8.0,  cacheHit: 0.1},
   'deepseek-reasoner':       {input: 0.5, output: 8.0,  cacheHit: 0.1},
@@ -142,6 +191,7 @@ module.exports = {
   recordAiUsage,
   summarizeAiUsage,
   summarizeProjectUsage,
+  summarizeProviderUsage,
   estimateCostCNY,
   AI_PRICING,
 };
