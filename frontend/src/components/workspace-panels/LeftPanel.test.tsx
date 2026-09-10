@@ -235,8 +235,8 @@ describe('UI-327 左栏 globe 行内创建向导（终端式路径输入）', ()
     setter?.call(aliasInput, 'aliyun');
     aliasInput.dispatchEvent(new Event('input', { bubbles: true }));
     fireEvent.click(screen.getByText('连接'));
-    await waitFor(() => expect(screen.getByText('在此路径创建项目')).toBeTruthy());
-    fireEvent.click(screen.getByText('在此路径创建项目'));
+    await waitFor(() => expect(screen.getByRole('button', { name: '创建项目' })).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: '创建项目' }));
     await waitFor(() => expect(ctx.sshCreateAt).toHaveBeenCalledWith({ alias: 'aliyun', remotePath: '/root' }));
   });
 });

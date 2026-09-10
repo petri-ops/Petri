@@ -3012,6 +3012,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **加映（同日，用户裁决终端式路径输入）**：选路径升级为**终端式**——路径输入框打字即出候选目录下拉（300ms 防抖 fs_list 父目录 + basename 前缀过滤）、**Tab 补全**（单候选直接补全；多候选补全到公共前缀，bash 语义）、↓↑ 选候选、Enter 采纳、候选点击=补全进层；保留上级/刷新按钮。实机抓真修：Tab 时按 state 里**上一层未过滤列表**判定多候选，LCP 比输入还短导致无操作——改为先按「父目录+前缀」过滤（实机 aliyun /root 三目录复现）。
 
-**门禁**：tsc 0；LeftPanel/home 定向 vitest 14/14（含 Tab 单候选补全 / 多候选 LCP / IP+密码字段形态）。**实机**：`scripts/block67-ui327-live.cjs` 5/5 allPass（`acceptance/ui-327/ui327-live.json` + 截图）——项目页点 globe → 别名连接 aliyun → 路径输入预填 /root/ + 候选展示 → **输入 /root/ge + Tab → 补全 /root/gewu-block67-demo/** → 创建（API 对账新 ssh 项目出现）→ 导航进入新项目页，0 renderer error，探针清理。
+**加映二（同日，用户裁决「先连接再选路径」+ 按钮位置）**：① 「创建项目」按钮移到路径输入框**右侧**（用户裁决）；② 创建成功后同步本地 allProjects——修复创建后左栏树不出现新项目的可见性缺口（用户实机反馈「点击创建没有出现」，实际项目已创建但树未刷新）。**门禁**：tsc 0；LeftPanel/home 定向 vitest 14/14（含 Tab 单候选补全 / 多候选 LCP / IP+密码字段形态）。**实机**：`scripts/block67-ui327-live.cjs` 5/5 allPass（`acceptance/ui-327/ui327-live.json` + 截图）——项目页点 globe → 别名连接 aliyun → 路径输入预填 /root/ + 候选展示 → **输入 /root/ge + Tab → 补全 /root/gewu-block67-demo/** → 创建（API 对账新 ssh 项目出现）→ 导航进入新项目页，0 renderer error，探针清理；加映二后复验：候选点击 + 右侧创建按钮 → 新项目立即出现在左栏树 + 自动进入（ui327-create-beside-input.png）。
 
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收，aliyun 真实节点）。G0 开发期常态 · 不外推 packaged / Provider / GA。

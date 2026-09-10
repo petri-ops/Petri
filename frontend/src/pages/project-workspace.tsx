@@ -944,6 +944,8 @@ export function ProjectWorkspace(): React.ReactElement {
     }
     const name = p.remotePath.split('/').filter(Boolean).pop() || p.alias;
     const project = await createProject({ name, modality: 'general', workspaceKind: 'ssh', sshHost: p.alias, remotePath: p.remotePath });
+    // UI-327 修复：同步本地项目列表，左栏树立即出现新项目（不等重新挂载）
+    setAllProjects((cur) => (cur.some((item) => item.id === project.id) ? cur : [project, ...cur]));
     navigate(`/project/${project.id}`, { replace: true });
     return { ok: true };
   }, [navigate]);

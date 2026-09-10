@@ -346,18 +346,31 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
               <Icon name="repeat" size={12} />
             </button>
           </div>
-          <input
-            className={styles.treeRenameInput}
-            style={{ width: '100%', boxSizing: 'border-box', marginBottom: 4, padding: '4px 8px', fontSize: 12, fontFamily: 'monospace' }}
-            type="text"
-            value={pathInput}
-            onChange={(e) => { setPathInput(e.target.value); scheduleCandidates(e.target.value); }}
-            onKeyDown={(e) => void handlePathKeyDown(e)}
-            placeholder="/home/you/project（Tab 补全）"
-            aria-label="远端路径（Tab 补全）"
-            data-testid="ssh-path-input"
-            autoFocus
-          />
+          {/* UI-327 加映 — 创建按钮置于路径输入框右侧（用户裁决） */}
+          <div style={{ display: 'flex', gap: 6, alignItems: 'stretch' }}>
+            <input
+              className={styles.treeRenameInput}
+              style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', marginBottom: 4, padding: '4px 8px', fontSize: 12, fontFamily: 'monospace' }}
+              type="text"
+              value={pathInput}
+              onChange={(e) => { setPathInput(e.target.value); scheduleCandidates(e.target.value); }}
+              onKeyDown={(e) => void handlePathKeyDown(e)}
+              placeholder="/home/you/project（Tab 补全）"
+              aria-label="远端路径（Tab 补全）"
+              data-testid="ssh-path-input"
+              autoFocus
+            />
+            <button
+              type="button"
+              className="gewu-btn gewu-btn--sm"
+              style={{ marginBottom: 4, whiteSpace: 'nowrap' }}
+              onClick={() => void handleCreate()}
+              disabled={createDisabled}
+              title={`在 ${normalizedCreatePath} 创建远程项目`}
+            >
+              {busy ? '创建中…' : '创建项目'}
+            </button>
+          </div>
           <div
             style={{ maxHeight: 180, overflowY: 'auto', border: '1px solid var(--gewu-border, rgba(128,128,128,0.25))', borderRadius: 6, marginBottom: 4 }}
             data-testid="ssh-path-candidates"
@@ -386,15 +399,6 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
             )}
           </div>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 4 }}>
-            <button
-              type="button"
-              className="gewu-btn gewu-btn--sm"
-              onClick={() => void handleCreate()}
-              disabled={createDisabled}
-              title={`在 ${normalizedCreatePath} 创建远程项目`}
-            >
-              {busy ? '创建中…' : '在此路径创建项目'}
-            </button>
             <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={onClose} disabled={busy}>
               取消
             </button>
