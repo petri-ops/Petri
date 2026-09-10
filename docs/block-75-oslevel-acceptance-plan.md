@@ -1,6 +1,6 @@
 # BLOCK-75 — OS 级验收自动化：原生对话框链路进 dev-verify（无人化阶梯第 3 级做实）
 
-> 状态：`planned`（2026-09-10 用户裁决先立项，后续合适的时候再启动；启动按单工作包串行纪律排队）
+> 状态：`active`（2026-09-10 用户裁决启动——「按顺序走下去」，本包为队列首位且前置 BLOCK-74 收口已满足；同日立项）
 > 立项日期：2026-09-10
 > truthDomain: `block-75-oslevel-acceptance`
 > 来源：dev-infra SKILL.md「无人化验收阶梯」（用户裁决 2026-09-10）第 3 级的落地面工作包
@@ -41,3 +41,7 @@
 
 - 三条断言链实机全绿 + flow 进 verify 注册表 + canonical 回写（plan/registry/roadmap/handoff/AUDIT-LOG）→ `completed`。
 - 若实测发现 sidecar 驱动目标对话框不可行（如对话框处于提权上下文），以 postmortem 落结论：阶梯第 ④ 级（自动测试路线 + 人测确认）继续兜底，本包 `completed` 或 `deferred` 由用户裁决。
+
+## 7. 进度记录
+
+- 2026-09-10 **启动（planned → active，P0-LAUNCH）**：用户裁决「按顺序走下去」（队列首位，前置 BLOCK-74 收口已满足，2026-09-10）。**P0 目标链路确认（代码事实）**：`diagnostic:export`（`src/ipc/diagnostic.js`——设置页「导出诊断日志」真实按钮 `ExportDiagnostic.tsx` → 原生保存框 title「导出诊断日志」/ defaultPath `gewu-diagnostic-<ts>.zip` / ZIP filter → 落盘 zip 可校验；取消返回 `{ok:false,error:'cancelled'}`；Windows 原生覆盖确认由系统对话框自带）；`file:save-dialog` 虽有 IPC 通道但前端零消费方，不选。驱动面确认：sidecar exe 已构建（`bin/publish/gewu-computer-use-windows.exe`），flow 经 `computer-use-host` 单例直调八动词（host 层 screenshot `out` 可直落 acceptance/），触发方式=CDP 调 `window.biof3Desktop.diagnostic.export()`（与按钮同链路，不 await，弹窗期间 evalJs 返回）。下一步：P0 实测探测（sidecar snapshot 能否读到对话框控件面）→ P1 flow 三断言链。

@@ -3948,7 +3948,7 @@
       "id": "BLOCK-75-OSLEVEL-ACCEPTANCE",
       "path": "docs/block-75-oslevel-acceptance-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "active",
       "canonical": true,
       "truthDomain": "block-75-oslevel-acceptance",
       "entrypoint": "docs/README.md",
@@ -3961,10 +3961,10 @@
         "block-63-reuse",
         "G0"
       ],
-      "notes": "OS 级验收自动化。2026-09-10 用户裁决先立项（后续合适的时候再启动）：dev-infra SKILL.md「无人化验收阶梯」（同日裁决：①CDP 够得着→flow ②够不着+低风险→诚实分级不凑证据 ③够不着+高风险→OS 级自动化优先 ④人测兜底=自动产出测试路线+人体感确认即通过）第 3 级做实——原生对话框链路（首个目标=保存对话框：保存落盘/取消不落盘/覆盖确认三条断言链）用 OS 级自动化替代人工。驱动层复用 BLOCK-63 已收口 Windows computer-use sidecar（FlaUI 5.0 UIA3 八动词+hwnd 直投+截图，P4 实机 allPass）零重建；新增量=sidecar 接进 dev-verify flow 形态+目标对话框控件面适配。范围外：packaged/GA（G1+）、macOS/Linux 驱动、产品功能行为变更、CDP 够得着的断言迁移。已知边界沿用 BLOCK-63（UAC 提权/锁屏不可自动化、键盘注入两态）。启动前置 BLOCK-74 收口；P0 先确认目标入口功能。完成语义：三链实机全绿+flow 进 verify 注册表+canonical 回写；sidecar 驱动不可行则 postmortem 落结论（第 4 级兜底继续有效），completed/deferred 由用户裁决。G0 开发期常态 · 不外推 packaged/Provider/GA.",
+      "notes": "OS 级验收自动化。2026-09-10 用户裁决先立项（后续合适的时候再启动）：dev-infra SKILL.md「无人化验收阶梯」（同日裁决：①CDP 够得着→flow ②够不着+低风险→诚实分级不凑证据 ③够不着+高风险→OS 级自动化优先 ④人测兜底=自动产出测试路线+人体感确认即通过）第 3 级做实——原生对话框链路（首个目标=保存对话框：保存落盘/取消不落盘/覆盖确认三条断言链）用 OS 级自动化替代人工。驱动层复用 BLOCK-63 已收口 Windows computer-use sidecar（FlaUI 5.0 UIA3 八动词+hwnd 直投+截图，P4 实机 allPass）零重建；新增量=sidecar 接进 dev-verify flow 形态+目标对话框控件面适配。范围外：packaged/GA（G1+）、macOS/Linux 驱动、产品功能行为变更、CDP 够得着的断言迁移。已知边界沿用 BLOCK-63（UAC 提权/锁屏不可自动化、键盘注入两态）。2026-09-10 用户裁决启动（「按顺序走下去」，前置 BLOCK-74 收口已满足）；P0 目标链路已确认=diagnostic:export（设置页导出诊断日志：真实按钮→原生保存框→落盘 zip 可校验；file:save-dialog 无前端消费方不选）。完成语义：三链实机全绿+flow 进 verify 注册表+canonical 回写；sidecar 驱动不可行则 postmortem 落结论（第 4 级兜底继续有效），completed/deferred 由用户裁决。G0 开发期常态 · 不外推 packaged/Provider/GA.",
       "registeredAt": "2026-09-10",
       "archivePolicy": "archive_when_superseded",
-      "phase": "PLANNED"
+      "phase": "P0-LAUNCH"
     },
     {
       "id": "BLOCK-76-SSH-NATIVE-EXECUTION",
