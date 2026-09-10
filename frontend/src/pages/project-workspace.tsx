@@ -769,14 +769,6 @@ export function ProjectWorkspace(): React.ReactElement {
         rightTab === 'browser' && browserCanGoForward
           ? () => dispatchGewuEvent(gewuEvents.browserForward)
           : null,
-      // Conversations for TitleBar selector
-      conversations: conversations.map(c => ({
-        id: c.id,
-        title: c.title,
-        parent_id: c.parent_id ?? null,
-      })),
-      activeConvId,
-      onSelectConversation: handleSwitchConversation,
     });
     return () => {
       updateTitleBar({

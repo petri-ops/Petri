@@ -3116,3 +3116,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：tsc 0 + test:changed 全覆盖 + docs/ui 门禁 PASS。
 
 **状态**: verified（用户实机截图即验收基准，回退至其认可的历史形态）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-334: 移除标题栏中区会话选择器（用户裁决「除掉这部分」）(2026-09-10 verified)
+
+**来源**：用户实机截图裁决——标题栏中区摘要开关旁的会话选择器（「新对话 ˅」下拉）与左栏项目树下的会话列表（含分支标识）完全重复，「左侧栏项目下已经有分支会话了……请除掉这部分的内容」。
+
+**改动**（BLOCK-68 不留空壳纪律）：① `TitleBarCenterZone.tsx` 移除 convSelector 区块（下拉按钮/遮罩/会话清单/分支徽标）与 `convDropdownOpen` 状态及 `conversations/activeConvId/onSelectConversation` 局部解构，头部注释同步；② `useWorkspacePanels.ts` TitleBarState 移除 `conversations/activeConvId/onSelectConversation` 三字段（DEFAULT_TITLE_BAR 同步；titleBarDataEqual 本就不比较它们）；③ `project-workspace.tsx` updateTitleBar 装配与卸载清理移除三字段（`handleSwitchConversation` 保留——左栏树仍在消费）；④ `TitleBar.module.css` convSelector 九条规则全删（no-drag 列表中一并摘除）。中区保留：项目标题 + 分支 tabs + 结果选择器 + 摘要概览开关。
+
+**门禁**：tsc 0 + desktop 相关定向 80/80（8 文件，含 TitleBar.test）+ docs/ui 门禁 PASS。grep 残留零（仅注释级拆除记录）。
+
+**状态**: verified（Vite 热更用户实机可见；纯移除无新行为面）。G0 开发期常态 · 不外推 packaged / Provider / GA。

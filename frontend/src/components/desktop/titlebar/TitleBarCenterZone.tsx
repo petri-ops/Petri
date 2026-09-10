@@ -7,12 +7,14 @@ import styles from '../TitleBar.module.css';
 import { getFallbackTitle } from './shared';
 
 /**
- * BLOCK-62 P1a — TitleBar 中区片段（标题 + 分支 tabs + 会话选择器 + 结果选择器
- * + 摘要概览开关）。
+ * BLOCK-62 P1a — TitleBar 中区片段（标题 + 分支 tabs + 结果选择器 + 摘要概览开关）。
  *
  * 容器无关：既被 fixed 整条 [TitleBar.tsx](../TitleBar.tsx) 复用，也被 P1b
- * 列级 header-slot 复用。结果菜单 / 会话下拉的开合状态内聚在本组件——同一时刻
- * 只有一个宿主（fixed 条或列级片段）渲染它，不存在双份状态。逻辑与提取前一致。
+ * 列级 header-slot 复用。结果菜单的开合状态内聚在本组件——同一时刻只有一个
+ * 宿主（fixed 条或列级片段）渲染它，不存在双份状态。逻辑与提取前一致。
+ *
+ * UI-334 — 会话选择器（convSelector）整体移除：左栏项目树下已有完整会话
+ * 列表（含分支标识），标题栏下拉为重复入口（用户裁决「除掉这部分」）。
  */
 export function TitleBarCenterZone(): React.ReactElement {
   const location = useLocation();
@@ -24,11 +26,6 @@ export function TitleBarCenterZone(): React.ReactElement {
     onSelectResult,
   } = panels.titleBar;
 
-  const conversations = panels.titleBar.conversations || [];
-  const activeConvId = panels.titleBar.activeConvId;
-  const onSelectConversation = panels.titleBar.onSelectConversation;
-
-  const [convDropdownOpen, setConvDropdownOpen] = useState(false);
   const [resultMenuOpen, setResultMenuOpen] = useState(false);
   const resultTriggerRef = useRef<HTMLButtonElement>(null);
   const resultMenuItemsRef = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -111,56 +108,7 @@ export function TitleBarCenterZone(): React.ReactElement {
         <span className={styles.centerTitleText}>{displayTitle}</span>
       </div>
       <BranchTabsWrapper />
-      {/* Conversation selector — between branch tabs and result picker */}
-      {conversations.length > 0 && (
-        <div className={styles.convSelector}>
-          <button
-            type="button"
-            className={styles.convSelectorBtn}
-            onClick={() => setConvDropdownOpen((o) => !o)}
-            title="切换会话"
-            aria-label="切换会话"
-            aria-expanded={convDropdownOpen}
-          >
-            <Icon name="message-circle" size={13} />
-            <span className={styles.convSelectorText}>
-              {conversations.find((c) => c.id === activeConvId)?.title?.slice(0, 12) ||
-                conversations[0]?.title?.slice(0, 12) ||
-                '会话'}
-            </span>
-            <Icon name={convDropdownOpen ? 'chevron-up' : 'chevron-down'} size={11} />
-          </button>
-          {convDropdownOpen && (
-            <>
-              <button
-                type="button"
-                className={styles.convSelectorOverlay}
-                onClick={() => setConvDropdownOpen(false)}
-                aria-label="关闭会话列表"
-              />
-              <div className={styles.convSelectorDropdown}>
-                {conversations.map((conv) => (
-                  <button
-                    key={conv.id}
-                    type="button"
-                    className={styles.convSelectorItem}
-                    onClick={() => {
-                      onSelectConversation?.(conv.id);
-                      setConvDropdownOpen(false);
-                    }}
-                  >
-                    <Icon name={conv.parent_id ? 'git-branch' : 'message-circle'} size={12} />
-                    <span>{conv.title || '无标题会话'}</span>
-                    {conv.parent_id && (
-                      <span className={styles.convSelectorBadge}>分支</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
+      {/* UI-334 — 会话选择器已移除：左栏项目树下即完整会话列表（含分支） */}
       {activeResult && (
         <div className={styles.resultPicker}>
           <button

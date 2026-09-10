@@ -45,10 +45,6 @@ export interface TitleBarState {
   canGoForward: boolean;
   onGoBack: (() => void) | null;
   onGoForward: (() => void) | null;
-  // Conversations for TitleBar selector
-  conversations?: Array<{ id: string; title: string | null; parent_id: string | null }>;
-  activeConvId?: string | null;
-  onSelectConversation?: (id: string) => void;
 }
 
 export interface WorkspacePanels {
@@ -86,9 +82,6 @@ const DEFAULT_TITLE_BAR: TitleBarState = {
   canGoForward: false,
   onGoBack: null,
   onGoForward: null,
-  conversations: undefined,
-  activeConvId: null,
-  onSelectConversation: undefined,
 };
 
 function titleBarDataEqual(a: TitleBarState, b: TitleBarState): boolean {
