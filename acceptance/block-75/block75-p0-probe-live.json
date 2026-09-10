@@ -1,0 +1,53 @@
+{
+  "name": "block75-p0-probe",
+  "startedAt": "2026-09-10T05:11:46.369Z",
+  "finishedAt": "2026-09-10T05:11:48.910Z",
+  "assertions": [
+    {
+      "name": "p0-1 spa_page_target_present",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mtrawlau_7rly?job=tj_mts5ehau_jpgs"
+    },
+    {
+      "name": "p0-2 diagnostic_bridge_present",
+      "pass": true,
+      "detail": "{\"has\":true}"
+    },
+    {
+      "name": "p0-3 native_save_dialog_found",
+      "pass": true,
+      "detail": "hwnd=265244 title=\"另存为\" elements=139"
+    },
+    {
+      "name": "p0-4 filename_edit_readable",
+      "pass": true,
+      "detail": "{\"role\":\"Edit\",\"name\":\"名称\",\"value\":\"archive_20251118_212921\"}"
+    },
+    {
+      "name": "p0-5 save_button_readable",
+      "pass": true,
+      "detail": "{\"name\":\"保存(S)\"}"
+    },
+    {
+      "name": "p0-6 cancel_button_readable",
+      "pass": true,
+      "detail": "{\"name\":\"取消\"}"
+    },
+    {
+      "name": "p0-7 dialog_screenshot_captured",
+      "pass": true,
+      "detail": "out=D:\\1.WorkDir\\biof3-desktop\\acceptance\\block-75\\p0-dialog.png"
+    },
+    {
+      "name": "p0-8 cancel_clicked",
+      "pass": true,
+      "detail": "{\"mode\":\"invoke\",\"ref\":\"[e109]\",\"role\":\"Button\",\"name\":\"取消\"}"
+    },
+    {
+      "name": "p0-9 export_cancelled_honest",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"cancelled\"}"
+    }
+  ],
+  "allPass": true
+}

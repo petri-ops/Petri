@@ -1,0 +1,98 @@
+{
+  "name": "os-save-dialog",
+  "startedAt": "2026-09-10T05:16:40.189Z",
+  "finishedAt": "2026-09-10T05:16:53.000Z",
+  "assertions": [
+    {
+      "name": "A0 spa_page_target_present",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mtrawlau_7rly?job=tj_mts5ehau_jpgs"
+    },
+    {
+      "name": "A0 diagnostic_bridge_present",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "A1 native_save_dialog_appeared",
+      "pass": true,
+      "detail": "hwnd=592822 type=value_pattern_setvalue"
+    },
+    {
+      "name": "A2 filename_typed_via_value_pattern",
+      "pass": true,
+      "detail": "value_pattern_setvalue"
+    },
+    {
+      "name": "A3 save_writes_file_to_disk",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\biof3-desktop\\.biof3-tmp-block75\\block75-save-2026-09-10T05-16-40.zip (14868 bytes)"
+    },
+    {
+      "name": "A4 saved_content_is_diagnostic_package",
+      "pass": true,
+      "detail": "head=504b0304 zip=true txtFallback=false"
+    },
+    {
+      "name": "A5 ipc_returns_ok_with_path",
+      "pass": true,
+      "detail": "{\"ok\":true,\"path\":\"D:\\\\1.WorkDir\\\\biof3-desktop\\\\.biof3-tmp-block75\\\\block75-save-2026-09-10T05-16-40.zip\"}"
+    },
+    {
+      "name": "B1 dialog_reappeared_for_cancel",
+      "pass": true,
+      "detail": "hwnd=789536"
+    },
+    {
+      "name": "B2 cancel_returns_cancelled",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"cancelled\"}"
+    },
+    {
+      "name": "B3 cancel_writes_nothing_to_disk",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\biof3-desktop\\.biof3-tmp-block75\\block75-cancel-2026-09-10T05-16-40.zip"
+    },
+    {
+      "name": "C1 dialog_reappeared_for_overwrite",
+      "pass": true,
+      "detail": "hwnd=1510414"
+    },
+    {
+      "name": "C2 overwrite_confirm_prompt_appeared",
+      "pass": true,
+      "detail": "hwnd=986022 title=确认另存为"
+    },
+    {
+      "name": "C3 confirm_yes_button_readable",
+      "pass": true,
+      "detail": "\"是(Y)\""
+    },
+    {
+      "name": "C4 yes_replaces_file_content",
+      "pass": true,
+      "detail": "head=504b0304 bytes=14868"
+    },
+    {
+      "name": "C5 yes_ipc_returns_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"path\":\"D:\\\\1.WorkDir\\\\biof3-desktop\\\\.biof3-tmp-block75\\\\block75-overwrite-2026-09-10T05-16-40.zip\"}"
+    },
+    {
+      "name": "C6 overwrite_prompt_again_on_second_save",
+      "pass": true,
+      "detail": "hwnd=1182728"
+    },
+    {
+      "name": "C7 no_branch_returns_cancelled",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"cancelled\"}"
+    },
+    {
+      "name": "C8 no_branch_keeps_file_untouched",
+      "pass": true,
+      "detail": "bytes=14868 mtimeUnchanged=true"
+    }
+  ],
+  "allPass": true
+}

@@ -31,7 +31,9 @@ function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs } = {}) {
       const logDir = getLogDir();
       const { createWriteStream } = fs;
       const zlib = require("zlib");
-      const { redactSensitiveText } = require("./diagnostic-redaction");
+      // 模块本体在 src/diagnostic-redaction.js（BLOCK-75 P0 实测抓真修：BLOCK-9.1 抽取到
+      // src/ipc/ 后相对路径未跟改，`./` 使整条导出链每次 require 即死——dialog 都不弹）。
+      const { redactSensitiveText } = require("../diagnostic-redaction");
 
       // BLOCK-10 S-007: 路径强约束 — diagnostic:export 永远走 user-chosen
       // 保存对话框,绝不接受 renderer 注入的 targetPath。这避免一个被入侵的
