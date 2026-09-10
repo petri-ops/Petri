@@ -1,0 +1,57 @@
+{
+  "startedAt": "2026-09-10T09:29:45.317Z",
+  "assertions": [
+    {
+      "name": "P4-1 ssh project created (dell)",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mtvbt6yp_uvmh\",\"name\":\"P4全链-1789032587132\",\"created_at\":\"2026-09-10T09:29:47.137Z\",\"up"
+    },
+    {
+      "name": "P4-2 job submitted",
+      "pass": true,
+      "detail": "{\"ok\":true,\"jobId\":\"job_4c999cb8dd2a442d\",\"status\":\"pending\",\"isTestRun\":false,\"requestId\":\"7eb9f8d3-8bc\"}"
+    },
+    {
+      "name": "P4-3 deseq2 completed on dell",
+      "pass": true,
+      "detail": "status=completed"
+    },
+    {
+      "name": "P4-4 result_json ssh semantics",
+      "pass": true,
+      "detail": "{\"ws\":\"ssh\",\"op\":\"results/jobs/job_4c999cb8dd2a442d/output\"}"
+    },
+    {
+      "name": "P4-5 provenance R env manifest (server truth)",
+      "pass": true,
+      "detail": "{\"packagesCount\":841,\"sha256\":\"3cc0c3fafc2c3bc5ea16a522523ad590a0f8e75933fad93d2a00f63b165a68b1\"}"
+    },
+    {
+      "name": "P4-6 server output truth (artifacts + manifest + run.log)",
+      "pass": true,
+      "detail": "(24 files)"
+    },
+    {
+      "name": "P4-7 read face: artifact via gateway",
+      "pass": true,
+      "detail": "status=200 bytes=1085"
+    },
+    {
+      "name": "P4-8 read face: server run.log",
+      "pass": true,
+      "detail": "{\"source\":\"run.log\"}"
+    },
+    {
+      "name": "P4-9 read face: report compose (remote)",
+      "pass": true,
+      "detail": "{\"ok\":true,\"fileName\":\"final-report.html\",\"sourceName\":\"report.html\",\"generatedAt\":\"2026-09-10T09:30:55.077Z\",\"embeddedAssets\":[],\"theme\":nu"
+    },
+    {
+      "name": "P4-10 no artifact pull-back (server-only truth)",
+      "pass": true,
+      "detail": "local output: [remote-runner.log]"
+    }
+  ],
+  "allPass": true,
+  "finishedAt": "2026-09-10T09:31:01.118Z"
+}
