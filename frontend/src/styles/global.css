@@ -32,6 +32,7 @@
   --gewu-font-size-xl: calc(1.25rem * var(--gewu-font-scale)); /* 20px 标题 */
   --gewu-font-size-2xl: calc(1.375rem * var(--gewu-font-scale)); /* 22px 大标题 */
   --gewu-font-size-3xl: calc(1.75rem * var(--gewu-font-scale)); /* 28px 页标题 */
+  --gewu-font-size-base: var(--gewu-font-size-body); /* 别名：三档基线（BLOCK-76 清债补契约定义） */
 
   /* 桌面版间距 token — 常用 px 档位，零碎值（3/5/10/14px）保留 */
   --gewu-space-1: 4px;

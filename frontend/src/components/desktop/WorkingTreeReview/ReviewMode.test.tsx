@@ -639,20 +639,23 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     // UI-254 — 右侧常驻文件树与手风琴行同 path，用 data-acc-path 精确定位手风琴行
     const row = document.querySelector<HTMLButtonElement>('[data-acc-path="src/a.py"]');
     expect(row).not.toBeNull();
-    expect(row?.getAttribute('aria-expanded')).toBe('true');
+    // 全量并发下状态刷新可能滞后——切换断言一律 waitFor 轮询（P2 清债稳定化）
     await waitFor(() => {
+      expect(row?.getAttribute('aria-expanded')).toBe('true');
       expect(document.querySelector('.rvw-acc-diff')).not.toBeNull();
     });
 
     // 点击收起
     fireEvent.click(row!);
-    expect(row!.getAttribute('aria-expanded')).toBe('false');
-    expect(document.querySelector('.rvw-acc-diff')).toBeNull();
+    await waitFor(() => {
+      expect(row!.getAttribute('aria-expanded')).toBe('false');
+      expect(document.querySelector('.rvw-acc-diff')).toBeNull();
+    });
 
     // 再次点击展开
     fireEvent.click(row!);
-    expect(row!.getAttribute('aria-expanded')).toBe('true');
     await waitFor(() => {
+      expect(row!.getAttribute('aria-expanded')).toBe('true');
       expect(document.querySelector('.rvw-acc-diff')).not.toBeNull();
     });
   });

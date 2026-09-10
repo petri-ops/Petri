@@ -42,7 +42,18 @@ describe('theme token contract', () => {
       }
     }
 
-    const missing = [...references].filter((token) => !definitions.has(token)).sort();
+    // JS 运行时 setProperty 注入的拖拽期 live token（useResizableColumns），
+    // 无静态定义属预期——白名单见 BLOCK-76 会话 🟢 清债登记（AUDIT-LOG 2026-09-08）。
+    const JS_INJECTED_TOKENS = new Set([
+      '--gewu-live-left-width',
+      '--gewu-live-left-span',
+      '--gewu-live-right-width',
+      '--gewu-live-right-span',
+      '--gewu-live-result-right-width',
+    ]);
+    const missing = [...references]
+      .filter((token) => !definitions.has(token) && !JS_INJECTED_TOKENS.has(token))
+      .sort();
     expect(missing).toEqual([]);
   });
 });

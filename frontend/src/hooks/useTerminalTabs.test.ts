@@ -183,7 +183,7 @@ describe('useTerminalTabs', () => {
     setOpen(true);
     await flush();
     expect(bridge.startSession).toHaveBeenCalledTimes(1);
-    expect(bridge.startSession).toHaveBeenCalledWith('/tmp/proj', 'tab-1');
+    expect(bridge.startSession).toHaveBeenCalledWith('/tmp/proj', 'tab-1', undefined);
     expect(result.current.activeId).toBe('tab-1');
     expect(result.current.activeRunning).toBe(true);
   });
@@ -198,7 +198,7 @@ describe('useTerminalTabs', () => {
     openTabAndAttach(1);
     await flush();
     expect(bridge.startSession).toHaveBeenCalledTimes(2);
-    expect(bridge.startSession).toHaveBeenLastCalledWith('/tmp/proj', 'tab-2');
+    expect(bridge.startSession).toHaveBeenLastCalledWith('/tmp/proj', 'tab-2', undefined);
 
     act(() => result.current.setActive('tab-1'));
     await flush();

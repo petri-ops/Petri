@@ -39,7 +39,9 @@ function readCssSource(): string {
   // Tests run from the frontend/ root; resolve the module CSS source so
   // we can assert the :hover / :focus-visible rules are present without
   // depending on the vite CSS-Modules runtime.
-  const here = fileURLToPath(import.meta.url);
+  // Windows 下 fileURLToPath 产出反斜杠路径——先归一化为正斜杠，
+  // 否则 /[^/]+$/ 会把整条路径当文件名清空（落到 CWD，ENOENT）。
+  const here = fileURLToPath(import.meta.url).replace(/\\/g, '/');
   return readFileSync(
     `${here.replace(/[^/]+$/, '')}ExperimentalFeaturesSection.module.css`,
     'utf8',
