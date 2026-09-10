@@ -1,0 +1,20 @@
+{
+  "phase": "phase1",
+  "startedAt": "2026-09-10T16:31:28.146Z",
+  "finishedAt": "2026-09-10T16:42:03.482Z",
+  "assertions": [
+    {
+      "name": "project created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mtvqviv2_0vau\",\"name\":\"P4驻留-1789057888148\",\"created_at\":\"2026-09-10T16:31:30.110Z\",\"up"
+    },
+    {
+      "name": "P4-1 agent created resident task (model used tool)",
+      "pass": false,
+      "detail": "reply="
+    }
+  ],
+  "allPass": false,
+  "projectId": "p_mtvqviv2_0vau",
+  "taskId": null
+}
