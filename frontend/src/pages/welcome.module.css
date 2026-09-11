@@ -99,59 +99,9 @@
   color: var(--gewu-accent);
 }
 
-.composerTextarea {
-  width: 100%;
-  min-height: 96px;
-  resize: vertical;
-  padding: 10px 12px;
-  border: 1px solid var(--gewu-border-color, transparent);
-  border-radius: 10px;
-  background: var(--gewu-bg);
-  color: var(--gewu-text);
-  font: inherit;
-  font-size: var(--gewu-font-size-body);
-  outline: none;
-}
-
-.composerTextarea:focus {
-  border-color: var(--gewu-accent);
-}
-
-.composerFoot {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.backendHint {
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
-  margin-right: auto;
-}
-
 .errorText {
   color: var(--gewu-danger, #c0392b);
   font-size: var(--gewu-font-size-caption);
-}
-
-.sendBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 16px;
-  border: none;
-  border-radius: 8px;
-  background: var(--gewu-accent);
-  color: #fff;
-  font-weight: 600;
-  font-size: var(--gewu-font-size-body-sm);
-  cursor: pointer;
-}
-
-.sendBtn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
 }
 
 .chips {
@@ -437,4 +387,23 @@
 .dirSuggestion:hover {
   background: var(--gewu-hover);
   color: var(--gewu-accent);
+}
+
+/* UI-341 — 内嵌聊天模块（SimpleChat）挂载区：与 composerCard 同视觉壳，
+   限高避免整页随对话内容无限增长；内部聊天面板撑满挂载区 */
+.chatMount {
+  width: 100%;
+  height: min(52vh, 520px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--gewu-bg-surface);
+  border: 1px solid var(--gewu-border-color, transparent);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+}
+
+.chatMount > :first-child {
+  flex: 1;
+  min-height: 0;
 }

@@ -4,23 +4,27 @@ import { Icon } from '@/components/icons/Icon';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { connectSshHost, createProject, listProjects, listSshRemoteDirs, listSshTargetCandidates, validateSshProject, type SshTargetCandidate } from '@/lib/project-store';
 import type { Project } from '@/lib/project-types';
-import { createConversation } from '@/components/copilot/copilotConversationsClient';
 import { branchApi } from '@/lib/branchBridge';
-import { primeConversationCache } from '@/hooks/useConversations';
 import { FolderPicker } from '@/components/desktop/FolderPicker';
+import { dispatchGewuEvent, gewuEvents } from '@/lib/events';
+import { SimpleChat } from '@/components/copilot/SimpleChat';
 import styles from './welcome.module.css';
 
 /**
- * BLOCK-80 — 欢迎页（ZCode 形态、本项目内容）：时段问候 + 项目/分支选择 +
- * 首问输入框 + 领域快捷 chips。发送 = 创建会话 → sessionStorage 交接首问 →
- * 导航项目工作区由工作区派发 copilotAsk 启动。
+ * BLOCK-80 + UI-341 — 欢迎页（ZCode 形态、本项目内容）：时段问候 + 项目/分支
+ * 选择 + **内嵌真正的聊天模块（SimpleChat）**——用户裁决「不需要重写，调用这个
+ * 模块不就可以了吗」，不再手搓输入框：完全访问/知识空间/模型选择/历史回溯
+ * 全部原生复用。
  *
- * UI-337 — 项目选择器升级为 ZCode 式下拉面板：搜索工作区 + 项目清单（✓ 当前）
- * + 打开文件夹（FolderPicker 选目录 → 命名 → 创建）+ 远程连接（已注册目标别名
- * + 远程路径 → 校验并创建）。「管理项目」独立页面随之取消（入口即面板）。
+ * 首发即建会话：SimpleChat 在 conversationId=null 时 send 自行
+ * createConversationForRun（走 useConversations().create，自动写共享缓存，
+ * 左栏立即可见）并回调 onConversationChange —— 此刻导航进项目工作区；
+ * run 由服务端持有，工作区经 SSE 回放/恢复机制重新挂载，聊天无缝衔接。
+ *
+ * 快捷 chips = 一键直发 starter prompt（copilotAsk 事件，由内嵌 SimpleChat
+ * 消费，无会话时自动建会话）；项目创建流（打开文件夹/远程连接）在下拉面板
+ * 内闭环（UI-337）。
  */
-
-const WELCOME_LAUNCH_KEY = 'gewu.welcomeLaunch';
 
 const QUICK_CHIPS: Array<{ label: string; prompt: string }> = [
   { label: '差异分析', prompt: '请用 DESeq2 对本项目 counts 数据做差异表达分析，并给出火山图与热图。' },
@@ -55,8 +59,6 @@ export default function Welcome(): React.ReactElement {
   const [loaded, setLoaded] = useState(false);
   const [selectedId, setSelectedId] = useState<string>('');
   const [branchName, setBranchName] = useState<string>('');
-  const [draft, setDraft] = useState('');
-  const [launching, setLaunching] = useState(false);
   const [error, setError] = useState('');
   const [hint, setHint] = useState('');
 
@@ -68,78 +70,10 @@ export default function Welcome(): React.ReactElement {
   const [folderPath, setFolderPath] = useState<string | null>(null);
   const [folderName, setFolderName] = useState('');
   const [creatingFolder, setCreatingFolder] = useState(false);
-  // UI-338 加映 — 远程连接「先连接再补全」：连接（connectSshHost 拿 $HOME）→
-  // 路径输入实时联想子目录（listSshRemoteDirs，300ms 防抖）
-  const [sshConnected, setSshConnected] = useState(false);
-  const [sshConnecting, setSshConnecting] = useState(false);
-  const [dirSuggestions, setDirSuggestions] = useState<string[]>([]);
-  const [dirsLoading, setDirsLoading] = useState(false);
-  const dirDebounceRef = useRef<number | null>(null);
   const [sshTargets, setSshTargets] = useState<SshTargetCandidate[]>([]);
   const [sshAlias, setSshAlias] = useState('');
   const [sshRemotePath, setSshRemotePath] = useState('/root');
   const [sshValidating, setSshValidating] = useState(false);
-
-  // UI-338 加映 — 「先连接再补全」
-  function parseRemotePathInput(input: string): { parent: string; stub: string } | null {
-    if (!input.startsWith('/')) return null;
-    const cut = input.lastIndexOf('/');
-    if (cut < 0) return null;
-    return { parent: input.slice(0, cut + 1), stub: input.slice(cut + 1) };
-  }
-
-  async function connectForBrowse() {
-    if (!sshAlias || sshConnecting) return;
-    setSshConnecting(true);
-    setError('');
-    const r = await connectSshHost(sshAlias);
-    setSshConnecting(false);
-    if (!r.ok) {
-      setError(r.error || '连接失败');
-      return;
-    }
-    setSshConnected(true);
-    const home = r.home && !r.home.endsWith('/') ? `${r.home}/` : (r.home || '/');
-    setSshRemotePath(home);
-    void fetchDirSuggestions(home, true);
-  }
-
-  async function fetchDirSuggestions(path: string, force = false) {
-    if ((!sshConnected && !force) || !sshAlias) return;
-    const parsed = parseRemotePathInput(path);
-    if (!parsed) { setDirSuggestions([]); return; }
-    setDirsLoading(true);
-    try {
-      const r = await listSshRemoteDirs(sshAlias, parsed.parent);
-      if (r.ok && r.dirs) {
-        const actualParent = (r.path || parsed.parent).replace(/\/+$/, '');
-        const cands = r.dirs
-          .filter((d) => d.name.startsWith(parsed.stub))
-          .map((d) => `${actualParent}/${d.name}/`);
-        setDirSuggestions(cands);
-      } else {
-        setDirSuggestions([]);
-      }
-    } catch {
-      setDirSuggestions([]);
-    } finally {
-      setDirsLoading(false);
-    }
-  }
-
-  function onRemotePathInput(v: string) {
-    setSshRemotePath(v);
-    if (!sshConnected) return;
-    if (dirDebounceRef.current) window.clearTimeout(dirDebounceRef.current);
-    dirDebounceRef.current = window.setTimeout(() => void fetchDirSuggestions(v), 300);
-  }
-
-  function onAliasInput(v: string) {
-    setSshAlias(v);
-    // 换目标必须重新连接（连接态与旧别名绑定）
-    setSshConnected(false);
-    setDirSuggestions([]);
-  }
 
   useEffect(() => {
     let alive = true;
@@ -157,7 +91,7 @@ export default function Welcome(): React.ReactElement {
       })
       .catch(() => { if (alive) setLoaded(true); });
     return () => { alive = false; };
-  }, []);
+  }, [preselectProjectId]);
 
   // 当前分支徽标（只读展示；切换属变更操作，留在审阅面）
   useEffect(() => {
@@ -178,7 +112,14 @@ export default function Welcome(): React.ReactElement {
     [projects, selectedId]
   );
   const backendReady = backendStatus.serverUp !== false;
-  const canSend = Boolean(selectedProject) && draft.trim().length > 0 && !launching && backendReady;
+  // UI-341 — 内嵌聊天模块
+  const chatMounted = Boolean(selectedProject) && backendReady;
+  // UI-338 加映 — SSH「先连接再补全」状态
+  const [sshConnected, setSshConnected] = useState(false);
+  const [sshConnecting, setSshConnecting] = useState(false);
+  const [dirSuggestions, setDirSuggestions] = useState<string[]>([]);
+  const [dirsLoading, setDirsLoading] = useState(false);
+  const dirDebounceRef = useRef<number | null>(null);
 
   const filteredProjects = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -203,6 +144,9 @@ export default function Welcome(): React.ReactElement {
     setSearch('');
   }
 
+  // UI-338 加映 — 打开文件夹：优先调用系统资源管理器原生对话框
+  // （files.openDirectoryDialog，可新建目录）；无桥环境（纯浏览器态）回落
+  // 应用内 FolderPicker。取消选择则停留当前面板。
   async function openFolderDialogOrFallback() {
     const dialog = window.biof3Desktop?.files?.openDirectoryDialog;
     if (typeof dialog === 'function') {
@@ -308,24 +252,70 @@ export default function Welcome(): React.ReactElement {
     }
   }
 
-  async function launch() {
-    if (!canSend || !selectedProject) return;
-    setLaunching(true);
+  // ── UI-338 加映 — SSH「先连接再补全」处理器 ──
+  function parseRemotePathInput(input: string): { parent: string; stub: string } | null {
+    if (!input.startsWith('/')) return null;
+    const cut = input.lastIndexOf('/');
+    if (cut < 0) return null;
+    return { parent: input.slice(0, cut + 1), stub: input.slice(cut + 1) };
+  }
+
+  async function connectForBrowse() {
+    if (!sshAlias || sshConnecting) return;
+    setSshConnecting(true);
     setError('');
-    try {
-      const conv = await createConversation('新任务', undefined, selectedProject.id);
-      if (!conv) throw new Error('会话创建失败');
-      // 关联修复：REST 建的会话必须写进 useConversations 共享缓存，
-      // 否则左栏/会话种子对它失明（本次事故根因，见 UI-336 加映）
-      primeConversationCache(selectedProject.id, conv);
-      try {
-        sessionStorage.setItem(WELCOME_LAUNCH_KEY, JSON.stringify({ conversationId: conv.id, prompt: draft.trim() }));
-      } catch { /* 存储不可用时仍导航，用户可在工作区手动发送 */ }
-      navigate(`/project/${selectedProject.id}`);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-      setLaunching(false);
+    const r = await connectSshHost(sshAlias);
+    setSshConnecting(false);
+    if (!r.ok) {
+      setError(r.error || '连接失败');
+      return;
     }
+    setSshConnected(true);
+    const home = r.home && !r.home.endsWith('/') ? `${r.home}/` : (r.home || '/');
+    setSshRemotePath(home);
+    void fetchDirSuggestions(home, true);
+  }
+
+  async function fetchDirSuggestions(path: string, force = false) {
+    if ((!sshConnected && !force) || !sshAlias) return;
+    const parsed = parseRemotePathInput(path);
+    if (!parsed) { setDirSuggestions([]); return; }
+    setDirsLoading(true);
+    try {
+      const r = await listSshRemoteDirs(sshAlias, parsed.parent);
+      if (r.ok && r.dirs) {
+        const actualParent = (r.path || parsed.parent).replace(/\/+$/, '');
+        const cands = r.dirs
+          .filter((d) => d.name.startsWith(parsed.stub))
+          .map((d) => `${actualParent}/${d.name}/`);
+        setDirSuggestions(cands);
+      } else {
+        setDirSuggestions([]);
+      }
+    } catch {
+      setDirSuggestions([]);
+    } finally {
+      setDirsLoading(false);
+    }
+  }
+
+  function onRemotePathInput(v: string) {
+    setSshRemotePath(v);
+    if (!sshConnected) return;
+    if (dirDebounceRef.current) window.clearTimeout(dirDebounceRef.current);
+    dirDebounceRef.current = window.setTimeout(() => void fetchDirSuggestions(v), 300);
+  }
+
+  function onAliasInput(v: string) {
+    setSshAlias(v);
+    // 换目标必须重新连接（连接态与旧别名绑定）
+    setSshConnected(false);
+    setDirSuggestions([]);
+  }
+
+  // UI-341 — 快捷 chips 一键直发（copilotAsk 由内嵌 SimpleChat 消费）
+  function launchChip(prompt: string) {
+    dispatchGewuEvent(gewuEvents.copilotAsk, { prompt });
   }
 
   return (
@@ -523,41 +513,33 @@ export default function Welcome(): React.ReactElement {
               </span>
             )}
           </div>
-
-          <textarea
-            className={styles.composerTextarea}
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                void launch();
-              }
-            }}
-            placeholder="描述你的分析任务，Enter 发送，Shift+Enter 换行"
-            rows={4}
-            disabled={!backendReady}
-            aria-label="任务描述"
-          />
-
-          <div className={styles.composerFoot}>
-            {hint && <span className={styles.actionHint}>{hint}</span>}
-            {!backendReady && (
-              <span className={styles.backendHint}>本地分析服务未就绪，启动后即可发送</span>
-            )}
-            {error && <span className={styles.errorText} role="alert">{error}</span>}
-            <button
-              type="button"
-              className={styles.sendBtn}
-              onClick={() => void launch()}
-              disabled={!canSend}
-              title="创建会话并启动首个任务"
-            >
-              <Icon name="send" size={15} />
-              {launching ? '启动中…' : '开始任务'}
-            </button>
-          </div>
         </div>
+
+        {/* UI-341 — 内嵌真正的聊天模块：composer 与工作区同源（完全访问/
+            知识空间/模型选择/历史回溯），首问自动建会话，onConversationChange
+            后导航进工作区（run 在服务端，SSE 回放无缝衔接）。 */}
+        {chatMounted && selectedProject && (
+          <div className={styles.chatMount}>
+            <SimpleChat
+              key={selectedProject.id}
+              projectId={selectedProject.id}
+              conversationId={null}
+              onConversationChange={() => navigate(`/project/${selectedProject.id}`)}
+              ownsCopilotAsk
+            />
+          </div>
+        )}
+        {!backendReady && (
+          <p className={styles.welcomeSub}>本地分析服务未就绪——启动服务后即可在这里直接开始任务。</p>
+        )}
+        {/* UI-341 — error/hint 反馈行：创建失败原因与去重提示（UI-340
+            「已为你切换」）必须可见，内嵌聊天后不再有 composerFoot 承载 */}
+        {error && (
+          <p className={styles.errorText} role="alert">{error}</p>
+        )}
+        {hint && !error && (
+          <p className={styles.actionHint}>{hint}</p>
+        )}
 
         <div className={styles.chips} aria-label="快捷任务">
           {QUICK_CHIPS.map((chip) => (
@@ -565,7 +547,7 @@ export default function Welcome(): React.ReactElement {
               key={chip.label}
               type="button"
               className={styles.chip}
-              onClick={() => setDraft(chip.prompt)}
+              onClick={() => launchChip(chip.prompt)}
               title={chip.prompt}
             >
               {chip.label}

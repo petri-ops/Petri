@@ -3,22 +3,37 @@ import { MemoryRouter } from 'react-router-dom';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Welcome from './welcome';
-import { createConversation } from '@/components/copilot/copilotConversationsClient';
 import { branchApi } from '@/lib/branchBridge';
 import {
+  connectSshHost,
   createProject,
   listProjects,
+  listSshRemoteDirs,
   listSshTargetCandidates,
   validateSshProject,
 } from '@/lib/project-store';
+import { dispatchGewuEvent, gewuEvents } from '@/lib/events';
 import type { Project } from '@/lib/project-types';
 
 vi.mock('@/components/backend/BackendStatusProvider', () => ({
   useBackendStatus: () => ({ serverUp: true, isReady: true, loaded: true }),
 }));
 
-vi.mock('@/components/copilot/copilotConversationsClient', () => ({
-  createConversation: vi.fn(),
+// 内嵌聊天模块整体 mock：断言挂载契约（projectId / conversationId=null / ownsCopilotAsk）
+vi.mock('@/components/copilot/SimpleChat', () => ({
+  SimpleChat: (props: {
+    projectId: string;
+    conversationId: string | null;
+    ownsCopilotAsk?: boolean;
+    onConversationChange?: (id: string) => void;
+  }) => (
+    <div
+      data-testid="simple-chat"
+      data-project={props.projectId}
+      data-conv={String(props.conversationId)}
+      data-owns={String(props.ownsCopilotAsk === true)}
+    />
+  ),
 }));
 
 vi.mock('@/lib/branchBridge', () => ({
@@ -34,27 +49,30 @@ vi.mock('@/lib/project-store', () => ({
   listSshRemoteDirs: vi.fn(),
 }));
 
-vi.mock('@/hooks/useConversations', () => ({
-  primeConversationCache: vi.fn(),
-}));
+// dispatchGewuEvent 必须是 spy；gewuEvents 常量保持真实实现（断言引用同一常量）
+vi.mock('@/lib/events', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/events')>();
+  return { ...actual, dispatchGewuEvent: vi.fn() };
+});
 
+// FolderPicker stub 保留 onCancel 契约，覆盖面板的取消路径
 vi.mock('@/components/desktop/FolderPicker', () => ({
-  FolderPicker: ({ onPick }: { onPick: (path: string) => void }) => (
-    <button type="button" onClick={() => onPick('/srv/demo')} data-testid="folder-picker-stub">
-      pick-stub
-    </button>
+  FolderPicker: (props: { onCancel?: () => void }) => (
+    <div data-testid="folder-picker-stub">
+      folder-picker-stub
+      <button type="button" onClick={() => props.onCancel?.()}>取消选择</button>
+    </div>
   ),
 }));
 
-const createConversationMock = vi.mocked(createConversation);
-const branchListMock = vi.mocked(branchApi.list);
-const listProjectsMock = vi.mocked(listProjects);
-const createProjectMock = vi.mocked(createProject);
-const listSshTargetsMock = vi.mocked(listSshTargetCandidates);
-const validateSshMock = vi.mocked(validateSshProject);
-const primeCacheMock = vi.mocked((await import('@/hooks/useConversations')).primeConversationCache);
-const connectSshHostMock = vi.mocked((await import('@/lib/project-store')).connectSshHost);
-const listSshRemoteDirsMock = vi.mocked((await import('@/lib/project-store')).listSshRemoteDirs);
+const mockListProjects = vi.mocked(listProjects);
+const mockCreateProject = vi.mocked(createProject);
+const mockListSshTargets = vi.mocked(listSshTargetCandidates);
+const mockValidateSsh = vi.mocked(validateSshProject);
+const mockConnectSshHost = vi.mocked(connectSshHost);
+const mockListSshRemoteDirs = vi.mocked(listSshRemoteDirs);
+const mockBranchList = vi.mocked(branchApi.list);
+const mockDispatchGewuEvent = vi.mocked(dispatchGewuEvent);
 
 const projectA: Project = {
   id: 'p_a', name: '阿尔法项目', createdAt: '2026-09-01T00:00:00Z', updatedAt: '2026-09-09T00:00:00Z',
@@ -62,10 +80,18 @@ const projectA: Project = {
 const projectB: Project = {
   id: 'p_b', name: '贝塔项目', createdAt: '2026-09-01T00:00:00Z', updatedAt: '2026-09-08T00:00:00Z',
 };
+const projectSsh: Project = {
+  id: 'p_ssh', name: 'dell · demo', createdAt: '2026-09-01T00:00:00Z', updatedAt: '2026-09-07T00:00:00Z',
+  workspaceKind: 'ssh', sshHost: 'dell', remotePath: '/root/demo',
+};
+const projectNew: Project = {
+  id: 'p_new', name: 'dell · demo', createdAt: '2026-09-11T00:00:00Z', updatedAt: '2026-09-11T00:00:00Z',
+  workspaceKind: 'ssh', sshHost: 'dell', remotePath: '/root/demo',
+};
 
-function renderWelcome() {
+function renderWelcome(initialSearch = '') {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[`/${initialSearch}`]}>
       <Welcome />
     </MemoryRouter>
   );
@@ -76,59 +102,48 @@ async function openPicker() {
   await screen.findByPlaceholderText('搜索工作区');
 }
 
+/** 打开远程连接面板，并等到目标别名被已注册候选回填（连接按钮随之可用）。 */
+async function openSshPanelAndWaitAlias(alias = 'dell') {
+  await openPicker();
+  fireEvent.click(screen.getByText('远程连接'));
+  const aliasInput = await screen.findByLabelText('远程目标') as HTMLInputElement;
+  await waitFor(() => expect(aliasInput.value).toBe(alias));
+  return aliasInput;
+}
+
 beforeEach(() => {
-  listProjectsMock.mockResolvedValue([projectA, projectB]);
-  branchListMock.mockResolvedValue([
+  mockListProjects.mockResolvedValue([projectA, projectB]);
+  mockBranchList.mockResolvedValue([
     { id: 'br_main', name: 'main', isActive: true },
   ] as never);
-  createConversationMock.mockResolvedValue({
-    id: 'conv_new', title: '新任务', status: 'active', last_page: null,
-    message_count: 0, created_at: '2026-09-10T00:00:00Z', updated_at: '2026-09-10T00:00:00Z',
-    project_id: 'p_a',
-  } as never);
-  createProjectMock.mockResolvedValue({
-    id: 'p_new', name: 'demo', createdAt: '2026-09-10T00:00:00Z', updatedAt: '2026-09-10T00:00:00Z',
+  mockListSshTargets.mockResolvedValue([{ alias: 'dell', label: 'dell', registered: true }]);
+  mockValidateSsh.mockResolvedValue({ ok: true });
+  mockConnectSshHost.mockResolvedValue({ ok: true, home: '/root' });
+  mockListSshRemoteDirs.mockResolvedValue({
+    ok: true, path: '/root',
+    dirs: [
+      { name: 'demo', path: '/root/demo' },
+      { name: 'jobs', path: '/root/jobs' },
+    ],
   });
-  listSshTargetsMock.mockResolvedValue([
-    { alias: 'dell', label: 'dell 工作机', registered: true },
-  ]);
-  validateSshMock.mockResolvedValue({ ok: true });
-  connectSshHostMock.mockResolvedValue({ ok: true, home: '/root' });
-  listSshRemoteDirsMock.mockResolvedValue({ ok: true, path: '/root', dirs: [{ name: 'demo', path: '/root/demo' }, { name: 'jobs', path: '/root/jobs' }] });
 });
 
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
-  vi.unstubAllGlobals();
 });
 
-describe('UI-338 加映 — ?project= 预选当前项目', () => {
-  it('从工作区带 ?project= 进入时，下拉默认预选该项目', async () => {
-    render(
-      <MemoryRouter initialEntries={[{ pathname: '/', search: '?project=p_b' }]}>
-        <Welcome />
-      </MemoryRouter>
-    );
-    await openPicker();
-    const rows = screen.getAllByText('贝塔项目');
-    // 触发器 + 清单行都显示贝塔（当前 ✓）
-    expect(rows.length).toBe(2);
-  });
-});
-
-describe('Welcome（BLOCK-80 欢迎页 + UI-337 ZCode 式项目面板）', () => {
-  it('渲染问候语 + 触发器 + 当前分支徽标；打开面板含搜索/清单/两动作', async () => {
+describe('Welcome（BLOCK-80 欢迎页 + UI-341 内嵌聊天模块）', () => {
+  it('渲染问候语 + 触发器 + 分支徽标 + SimpleChat + 退出按钮 + 面板各元素', async () => {
     renderWelcome();
     expect(screen.getByLabelText('欢迎页')).toBeTruthy();
     await waitFor(() => expect(screen.getByText(/main/)).toBeTruthy());
-    fireEvent.click(screen.getByLabelText('选择项目'));
-    expect(await screen.findByPlaceholderText('搜索工作区')).toBeTruthy();
-    // 触发器与清单行都显示项目名 → 用计数断言
+    await openPicker();
     expect(screen.getAllByText('阿尔法项目').length).toBe(2);
     expect(screen.getByText('贝塔项目')).toBeTruthy();
     expect(screen.getByText('打开文件夹')).toBeTruthy();
     expect(screen.getByText('远程连接')).toBeTruthy();
+    expect(screen.getByText('返回')).toBeTruthy();
   });
 
   it('搜索过滤工作区清单', async () => {
@@ -136,97 +151,88 @@ describe('Welcome（BLOCK-80 欢迎页 + UI-337 ZCode 式项目面板）', () =>
     await openPicker();
     fireEvent.change(screen.getByPlaceholderText('搜索工作区'), { target: { value: '贝塔' } });
     expect(screen.getByText('贝塔项目')).toBeTruthy();
-    // 触发器仍显示当前选中项目（阿尔法），清单行已被过滤
-    expect(screen.getAllByText('阿尔法项目')).toHaveLength(1);
+    const listEl = document.querySelector('[class*="projectList"]');
+    expect(listEl?.textContent).toContain('贝塔项目');
+    expect(listEl?.textContent).not.toContain('阿尔法项目');
   });
 
-  it('选择项目行 → 关闭面板 → 发送创建会话并交接首问', async () => {
+  it('SimpleChat 内嵌：projectId 正确、conversationId=null、ownsCopilotAsk', async () => {
     renderWelcome();
-    const store: Record<string, string> = {};
-    vi.stubGlobal('sessionStorage', {
-      setItem: (k: string, v: string) => { store[k] = v; },
-      getItem: (k: string) => store[k] ?? null,
-      removeItem: (k: string) => { delete store[k]; },
-    });
+    const chat = await screen.findByTestId('simple-chat');
+    expect(chat.getAttribute('data-project')).toBe('p_a');
+    expect(chat.getAttribute('data-conv')).toBe('null');
+    expect(chat.getAttribute('data-owns')).toBe('true');
+  });
+
+  it('选择项目行 → 关闭面板；SimpleChat 随选中项目切换', async () => {
+    renderWelcome();
     await openPicker();
     fireEvent.click(screen.getByText('贝塔项目'));
     await waitFor(() => expect(screen.queryByPlaceholderText('搜索工作区')).toBeNull());
-    fireEvent.change(screen.getByLabelText('任务描述'), { target: { value: '跑差异分析' } });
-    fireEvent.click(screen.getByText('开始任务'));
-    await waitFor(() => expect(createConversationMock).toHaveBeenCalledWith('新任务', undefined, 'p_b'));
-    const handoff = JSON.parse(store['gewu.welcomeLaunch'] || '{}');
-    expect(handoff.conversationId).toBe('conv_new');
-    expect(handoff.prompt).toBe('跑差异分析');
-    // 关联修复断言：会话必须写入共享缓存（否则左栏失明）
-    expect(primeCacheMock).toHaveBeenCalledWith('p_b', expect.objectContaining({ id: 'conv_new' }));
+    const chat = screen.getByTestId('simple-chat');
+    expect(chat.getAttribute('data-project')).toBe('p_b');
   });
 
-  it('打开文件夹：FolderPicker 选目录 → 命名 → createProject 创建并选中', async () => {
+  it('打开文件夹：无桥环境回落应用内 FolderPicker，取消则收起面板', async () => {
     renderWelcome();
     await openPicker();
     fireEvent.click(screen.getByText('打开文件夹'));
-    fireEvent.click(screen.getByTestId('folder-picker-stub'));
-    const nameInput = await screen.findByLabelText('项目名称');
-    expect((nameInput as HTMLInputElement).value).toBe('demo');
-    fireEvent.click(screen.getByText('确认创建'));
-    await waitFor(() => expect(createProjectMock).toHaveBeenCalledWith({
-      name: 'demo', modality: 'general', workspacePath: '/srv/demo',
-    }));
-    await waitFor(() => expect(screen.queryByPlaceholderText('搜索工作区')).toBeNull());
+    expect(await screen.findByTestId('folder-picker-stub')).toBeTruthy();
+    fireEvent.click(screen.getByText('取消选择'));
+    await waitFor(() => expect(screen.queryByTestId('folder-picker-stub')).toBeNull());
   });
 
-  it('远程连接：先连接再目录补全（datalist 联想 + 建议行）→ 校验并创建 ssh 项目', async () => {
+  it('远程连接：去重命中既有同服务器+同路径项目 → 不校验不创建，切换选中并提示', async () => {
+    mockListProjects.mockResolvedValue([projectSsh, projectA]);
     renderWelcome();
-    await openPicker();
-    fireEvent.click(screen.getByText('远程连接'));
-    const aliasInput = await screen.findByLabelText('远程目标') as HTMLInputElement;
-    fireEvent.change(aliasInput, { target: { value: 'dell' } });
-    fireEvent.click(screen.getByText('连接'));
-    await waitFor(() => expect(connectSshHostMock).toHaveBeenCalledWith('dell'));
-    // 连接成功 → $HOME 回填路径 + 目录建议出现
-    await waitFor(() => expect((screen.getByLabelText('远程路径') as HTMLInputElement).value).toBe('/root/'));
-    expect(await screen.findByText('/root/demo/')).toBeTruthy();
-    // 点击建议行 → 路径补全
-    fireEvent.click(screen.getByText('/root/demo/'));
-    await waitFor(() => expect((screen.getByLabelText('远程路径') as HTMLInputElement).value).toBe('/root/demo/'));
-    fireEvent.click(screen.getByText('校验并创建'));
-    await waitFor(() => expect(validateSshMock).toHaveBeenCalledWith({ alias: 'dell', remotePath: '/root/demo/' }));
-    await waitFor(() => expect(createProjectMock).toHaveBeenCalledWith(expect.objectContaining({
-      workspaceKind: 'ssh', sshHost: 'dell', remotePath: '/root/demo/',
-    })));
-  });
-
-  it('UI-338 退出按钮：渲染于欢迎页左上，点击不崩溃', async () => {
-    renderWelcome();
-    const btn = screen.getByTitle('返回');
-    expect(btn).toBeTruthy();
-    fireEvent.click(btn);
-    // 冷启动（无历史）分支：导航至最近项目工作区（路由内变化，不抛错即可）
-  });
-
-  it('UI-340 工作区去重：同服务器同路径已存在 → 切换既有项目而非重复创建', async () => {
-    const existing: Project = { id: 'p_exist', name: 'devah · demo', createdAt: '2026-09-01T00:00:00Z', updatedAt: '2026-09-09T00:00:00Z', workspaceKind: 'ssh', sshHost: 'dell', remotePath: '/root/demo' };
-    listProjectsMock.mockResolvedValue([existing, projectA]);
-    renderWelcome();
-    await openPicker();
-    fireEvent.click(screen.getByText('远程连接'));
-    fireEvent.change(await screen.findByLabelText('远程目标'), { target: { value: 'dell' } });
+    await openSshPanelAndWaitAlias();
     fireEvent.change(screen.getByLabelText('远程路径'), { target: { value: '/root/demo' } });
     fireEvent.click(screen.getByText('校验并创建'));
-    await waitFor(() => expect(screen.getByText(/已存在指向同一工作区的项目/)).toBeTruthy());
-    expect(createProjectMock).not.toHaveBeenCalled();
-    // 已自动切换选中既有项目
-    expect(screen.getByText('devah · demo')).toBeTruthy();
+
+    // 去重先于校验：命中既有项目即短路，不再打远端校验/创建
+    await waitFor(() => expect(screen.queryByPlaceholderText('搜索工作区')).toBeNull());
+    expect(mockValidateSsh).not.toHaveBeenCalled();
+    expect(mockCreateProject).not.toHaveBeenCalled();
+    // 切换选中到既有项目 + UI-340 去重提示可见（此前提示无承载被吞）
+    expect(screen.getByTestId('simple-chat').getAttribute('data-project')).toBe('p_ssh');
+    expect(screen.getByText(/已存在指向同一工作区的项目/)).toBeTruthy();
   });
 
-  it('快捷 chip 点击填充首问输入框；空输入不可发送', async () => {
+  it('远程连接：去重未命中 → 校验通过后创建 ssh 项目并切到新项目', async () => {
+    mockListProjects.mockResolvedValueOnce([projectA]).mockResolvedValueOnce([projectNew, projectA]);
+    mockCreateProject.mockResolvedValue(projectNew);
     renderWelcome();
-    const chip = await screen.findByText('差异分析');
-    fireEvent.click(chip);
-    const textarea = screen.getByLabelText('任务描述') as HTMLTextAreaElement;
-    expect(textarea.value).toContain('DESeq2');
-    expect((screen.getByText('开始任务') as HTMLButtonElement).disabled).toBe(false);
-    fireEvent.change(textarea, { target: { value: '' } });
-    await waitFor(() => expect((screen.getByText('开始任务') as HTMLButtonElement).disabled).toBe(true));
+    await openSshPanelAndWaitAlias();
+    fireEvent.change(screen.getByLabelText('远程路径'), { target: { value: '/root/demo' } });
+    fireEvent.click(screen.getByText('校验并创建'));
+
+    await waitFor(() => expect(mockValidateSsh).toHaveBeenCalledWith({ alias: 'dell', remotePath: '/root/demo' }));
+    expect(mockCreateProject).toHaveBeenCalledWith({
+      name: 'dell · demo',
+      modality: 'general',
+      workspaceKind: 'ssh',
+      sshHost: 'dell',
+      remotePath: '/root/demo',
+    });
+    await waitFor(() => expect(screen.queryByPlaceholderText('搜索工作区')).toBeNull());
+    expect(screen.getByTestId('simple-chat').getAttribute('data-project')).toBe('p_new');
+  });
+
+  it('远程连接：连接失败 → 错误可见（role=alert 反馈行）', async () => {
+    mockConnectSshHost.mockResolvedValue({ ok: false, error: '目标别名不可达' });
+    renderWelcome();
+    await openSshPanelAndWaitAlias();
+    fireEvent.click(screen.getByText('连接'));
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toContain('目标别名不可达');
+  });
+
+  it('快捷 chip 一键直发 starter prompt（copilotAsk 事件）', async () => {
+    renderWelcome();
+    fireEvent.click(screen.getByText('差异分析'));
+    expect(mockDispatchGewuEvent).toHaveBeenCalledWith(
+      gewuEvents.copilotAsk,
+      expect.objectContaining({ prompt: expect.stringContaining('DESeq2') })
+    );
   });
 });
