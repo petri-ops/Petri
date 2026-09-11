@@ -3145,6 +3145,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：flow `ui342-endpoint-grid` 升级为**形态自适应**（同一 flow 两套断言）——宽容器验 G1–G5（8 列 / 同行 / 零溢出 / 列宽一致 / 共用 min-width），窄容器验 N1–N5（表头隐藏 / 两轨 / 8 标签显形 / 标签与控件成对 / **不再横向滚动**）。**实机双形态全绿**：宽容器 6/6（container=1180）、窄容器 6/6（container=520，scrollWidth=clientWidth=520）；前端全量 **983/983** + tsc 0；证据 `acceptance/block-81/ui342-endpoint-grid-live.json` + 双形态截图（ui342-endpoint-grid.png 窄态两行式）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-346: 左栏「搜索/插件/定时/设置」欢迎页假死修复——回退最近项目打开模式 (2026-09-11 verified)
+
+**来源**：用户实机反馈（截图）——欢迎页（`/`）点左栏「插件」「搜索」没有正常出现对应页面，原地不动。
+
+**根因**：`AppRailContext.openWorkspaceMode` 的兜底分支在「无工作区 adapter 且无 currentProjectId」时 `navigate('/')`＝**原地 no-op**。档2 左栏上提为应用壳层（`334c4e2d`）后，左栏在欢迎页/全局页可见可点，而该函数的假设还停留在「左栏只存在于 `/project/:id/*` 内」——四个入口（`handleShowSearch` / `handleShowScheduled` / `handleShowPlugins` / `handleShowSettings`，`AppRail.tsx:106-109`）在欢迎页全部假死。BLOCK-72 已把知识空间/后端/Skills 提为全局路由，搜索/插件没有对应全局面，落在兜底分支上。
+
+**修复（最小一致）**：`openWorkspaceMode` 无项目上下文时回退**最近项目**打开同一模式——`allProjects[0]`（`listProjects` ORDER BY updated_at DESC，与欢迎页项目预选同口径）→ `navigate(/project/<id>/<mode>)`；无任何项目时维持 `navigate('/')`。与「项目内点击」打开同一 surface：插件商店是纯 IPC 全局面，搜索面板本就按跨项目设计（回调处理 `pid !== projectId`）。不提全局路由页的原因：搜索面依赖工作区上下文喂跨项目数据（jobs/datasets/会话索引），提页需重接线，收益不匹配。
+
+**门禁**：`tsc` 0；实机 `scripts/ui346-rail-mode-live.cjs` **3/3 allPass**（证据 `acceptance/ui-346/ui346-rail-mode-live.json` + 截图）——V1 欢迎页点「插件」→ `/project/<最新>/plugins` 且商店面板渲染；V2 欢迎页点「搜索」→ `/project/<最新>/search` 且搜索面板渲染；V3 项目内 adapter 路径回归（点「插件」模式切换且项目不变）。`test:changed` 受影响面 29 项 26 过，3 败＝既有 G0-RS P6 证据漂移（非本包）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-345: composer 思考档位控件 + 会话级持久化（BLOCK-81 P2，P3 实机抓真修后 verified）(2026-09-11 verified)
 
 **来源**：BLOCK-81 D1/D4/D5 用户裁决——三档「关闭/标准/高」（标准＝默认且不发任何上游参数）、**会话级**持久化、控件置于 composer 模型选择器旁 + `Ctrl+T` 快捷键。

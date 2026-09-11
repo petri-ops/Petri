@@ -232,9 +232,13 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
       adapterRef.current.updateWorkspaceMode(mode);
       return;
     }
-    if (currentProjectId) navigate(`/project/${currentProjectId}/${mode}`);
-    else navigate('/');
-  }, [currentProjectId, navigate]);
+    // UI-346 — 档2 左栏上提为应用壳层后，欢迎页/全局页也能点「搜索/插件」；
+    // 此前无项目上下文时 navigate('/') 原地不动＝入口假死（用户实机反馈）。
+    // 回退最近项目打开同一模式（listProjects ORDER BY updated_at DESC，
+    // 与欢迎页项目预选同口径；插件商店为纯 IPC 全局面，搜索面本就跨项目）。
+    const targetProjectId = currentProjectId || allProjects[0]?.id || null;
+    navigate(targetProjectId ? `/project/${targetProjectId}/${mode}` : '/');
+  }, [allProjects, currentProjectId, navigate]);
 
   const createConversationForProject = useCallback(async (targetProjectId?: string) => {
     const pid = targetProjectId || currentProjectId;

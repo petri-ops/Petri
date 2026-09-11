@@ -1,0 +1,26 @@
+{
+  "name": "ui346-rail-mode",
+  "startedAt": "2026-09-11T13:41:27.545Z",
+  "finishedAt": "2026-09-11T13:41:40.394Z",
+  "assertions": [
+    {
+      "name": "V1_welcome_plugins_opens",
+      "pass": true,
+      "detail": "欢迎页（/）点「插件」→ /project/p_mtuyje22_9vr4/plugins，插件商店面板已渲染"
+    },
+    {
+      "name": "V2_welcome_search_opens",
+      "pass": true,
+      "detail": "欢迎页（/）点「搜索」→ /project/p_mtuyje22_9vr4/search，搜索面板已渲染"
+    },
+    {
+      "name": "V3_in_project_switch_preserved",
+      "pass": true,
+      "detail": "项目内（/project/p_mtuyje22_9vr4）点「插件」→ /project/p_mtuyje22_9vr4/plugins，项目未变且面板已渲染"
+    }
+  ],
+  "allPass": true,
+  "observations": {
+    "latestProjectId": "p_mtuyje22_9vr4"
+  }
+}
