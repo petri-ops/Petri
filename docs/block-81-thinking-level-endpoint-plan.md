@@ -1,6 +1,8 @@
 # BLOCK-81 — Composer 思考级别（供应商推理档位）+ 供应商设置页 Endpoint 网格修复
 
-> 状态：`active`（2026-09-11 立项；同日用户裁决「冲」→ P0-LAUNCH，先做 UI-342 endpoint 网格修复）
+ > 状态：`active` / **P0–P2 已完成并各自提交，P3 待做**
+> 进度：P0 ✅ UI-342（`5b3b677c`）+ UI-344/D8（`280cb42c`）｜P1 ✅ 映射内核（`78c10b59`）+ 渠道开关 UI-343（`7c55eab4`）+ 接线与去参重试（`c177374b`）｜P2 ✅ composer 档位 UI-345（`824beac0`）｜P3 ⏳ 实机开/关思考对比 + 收口（registry→completed / roadmap / AUDIT-LOG 收口行）
+> 交接起点见 `docs/AUDIT-LOG.md` 首屏与 plan §10 最新两条。
 > 立项日期：2026-09-11
 > truthDomain: `block-81-thinking-level-endpoint`
 > 来源：用户提问「如果用 zcode 会显示供应商模型提供的思考级别，我们的项目没有这种思考级别的选项，你能调研一下怎么回事，可以补充吗？另外供应商的设置界面有细节上的瑕疵——Base URL 输入窗口有些宽了，连通性测试下面有些窄了，导致文字重合。整体再看一下，可以立个新的 block?」

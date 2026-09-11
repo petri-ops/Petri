@@ -4177,7 +4177,7 @@
       ],
       "archivePolicy": "archive_when_superseded",
       "registeredAt": "2026-09-11",
-      "phase": "P0-LAUNCH",
+      "phase": "P2-COMPLETE",
       "notes": "Composer 思考级别（供应商推理档位）+ 供应商设置页 Endpoint 网格修复。用户两截图提问「zcode 会显示供应商模型提供的思考级别，我们项目没有，调研一下可以补充吗」+「设置页 Base URL 过宽、连通性测试列过窄文字重合」→ 裁决「整体再看一下 可以立个新的block?」立项。调研结论①（思考级别原理）：非模型显示，是客户端控件+请求参数映射——OpenAI 兼容 reasoning_effort(low/medium/high)、GLM thinking:{type}、Qwen enable_thinking、Anthropic thinking.budget_tokens、DeepSeek 官方=独立模型 deepseek-reasoner 无参数。我方现状：展示侧 UI-272 已渲染 reasoning_content（copilotClient.ts:1106 流式解析→conversationRunStore reasoningByIteration 聚合）；请求侧全缺（全仓无思考参数，agent reqBody 固定 temperature/max_tokens，ai-agent/chat.js:655）；管道已通——reqBody→网关 {...profile.parameters,...body}(model-gateway.js:181-185)→deepseek chatStream ...(body) 透传(deepseek.js:267-277)，带参即达上游；能力位 capabilities 'reasoning' 已在 MODEL_CAPABILITIES(model-profile.js:18)。可行性=可以补充，量级中小（对标 BLOCK-79）。调研结论②（网格缺陷根因实锤）：表头 8 span(DesktopSettingsPanel.tsx:575-584)+渠道行 8 子元素(:615-747) vs grid-template-columns 仅 7 列(desktop.css:565-572)→连通性测试按钮落 32px 窄列「已连接」溢出重合、删除垃圾桶自动换行独占一行（截图实锤）。修复=显式 8 列+Base URL 2fr 收窄+连通性 ~84px+删除 32px 独立。设计裁决 D1-D7 待 P0 评审：档位集合（建议关闭/标准/高，缺省不发参零行为变化）/协议映射后端单点/容错双保险（仅 reasoning 声明渠道发参+400 去参重试一次）/会话级持久化/composer sc-model-picker-pair 旁档位按钮+Ctrl+T/composerNarrow 图标态/UI-272 展示零改动。阶段：P0 UI-342 网格修复（独立小提交）+D1-D6 裁决 → P1 后端 thinkingLevel 字段+映射+容错+定向测试 → P2 UI-343 composer 控件+会话持久化 → P3 实机开/关思考对比+收口（acceptance/block-81/）。范围外：budget_tokens 数值滑杆、渠道级默认管理面、思考段新展示设计、新 npm 依赖。单一真相：档位仅会话态一处，映射表后端单点；additive 红线=不发参路径请求体零变化。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
