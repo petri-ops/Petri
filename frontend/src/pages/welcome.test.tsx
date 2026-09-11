@@ -34,6 +34,10 @@ vi.mock('@/lib/project-store', () => ({
   listSshRemoteDirs: vi.fn(),
 }));
 
+vi.mock('@/hooks/useConversations', () => ({
+  primeConversationCache: vi.fn(),
+}));
+
 vi.mock('@/components/desktop/FolderPicker', () => ({
   FolderPicker: ({ onPick }: { onPick: (path: string) => void }) => (
     <button type="button" onClick={() => onPick('/srv/demo')} data-testid="folder-picker-stub">
@@ -48,6 +52,7 @@ const listProjectsMock = vi.mocked(listProjects);
 const createProjectMock = vi.mocked(createProject);
 const listSshTargetsMock = vi.mocked(listSshTargetCandidates);
 const validateSshMock = vi.mocked(validateSshProject);
+const primeCacheMock = vi.mocked((await import('@/hooks/useConversations')).primeConversationCache);
 const connectSshHostMock = vi.mocked((await import('@/lib/project-store')).connectSshHost);
 const listSshRemoteDirsMock = vi.mocked((await import('@/lib/project-store')).listSshRemoteDirs);
 
@@ -152,6 +157,8 @@ describe('Welcome（BLOCK-80 欢迎页 + UI-337 ZCode 式项目面板）', () =>
     const handoff = JSON.parse(store['gewu.welcomeLaunch'] || '{}');
     expect(handoff.conversationId).toBe('conv_new');
     expect(handoff.prompt).toBe('跑差异分析');
+    // 关联修复断言：会话必须写入共享缓存（否则左栏失明）
+    expect(primeCacheMock).toHaveBeenCalledWith('p_b', expect.objectContaining({ id: 'conv_new' }));
   });
 
   it('打开文件夹：FolderPicker 选目录 → 命名 → createProject 创建并选中', async () => {

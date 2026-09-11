@@ -32,6 +32,16 @@ import {
 // renderer session so a sidebar collapse + expand doesn't trigger
 // another HTTP roundtrip.
 const sharedCache = new Map<string, ConversationSummary[]>();
+
+/**
+ * BLOCK-80 — 外部（欢迎页首问）创建会话后写入共享缓存：新会话置队首，
+ * 保证工作区挂载时 seeds activeConvId = 新会话、左栏立即可见。
+ * 不走这里直接 REST 建会话 → 缓存不知情 → 左栏/种子全部失明（本次事故根因）。
+ */
+export function primeConversationCache(projectId: string, created: ConversationSummary): void {
+  const next = [created, ...(sharedCache.get(projectId) || [])];
+  sharedCache.set(projectId, next);
+}
 // Track in-flight requests so two components mounting at once
 // (sidebar + chat panel) don't issue parallel fetches.
 const inflight = new Map<string, Promise<ConversationSummary[]>>();

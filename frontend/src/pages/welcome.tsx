@@ -6,6 +6,7 @@ import { connectSshHost, createProject, listProjects, listSshRemoteDirs, listSsh
 import type { Project } from '@/lib/project-types';
 import { createConversation } from '@/components/copilot/copilotConversationsClient';
 import { branchApi } from '@/lib/branchBridge';
+import { primeConversationCache } from '@/hooks/useConversations';
 import { FolderPicker } from '@/components/desktop/FolderPicker';
 import styles from './welcome.module.css';
 
@@ -280,6 +281,9 @@ export default function Welcome(): React.ReactElement {
     try {
       const conv = await createConversation('新任务', undefined, selectedProject.id);
       if (!conv) throw new Error('会话创建失败');
+      // 关联修复：REST 建的会话必须写进 useConversations 共享缓存，
+      // 否则左栏/会话种子对它失明（本次事故根因，见 UI-336 加映）
+      primeConversationCache(selectedProject.id, conv);
       try {
         sessionStorage.setItem(WELCOME_LAUNCH_KEY, JSON.stringify({ conversationId: conv.id, prompt: draft.trim() }));
       } catch { /* 存储不可用时仍导航，用户可在工作区手动发送 */ }
