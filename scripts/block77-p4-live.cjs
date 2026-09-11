@@ -28,7 +28,6 @@ const STATE = path.join(EVIDENCE, 'p4-state.json');
 const PHASE = process.argv[2] || 'phase1';
 
 const results = { startedAt: new Date().toISOString(), phase: PHASE, assertions: [] };
-let phase1Pid = null;
 try {
   const prev = JSON.parse(fs.readFileSync(path.join(EVIDENCE, 'p4-live.json'), 'utf8'));
   if (prev.phase === 'phase1' && PHASE === 'phase2') results.prevAssertions = prev.assertions;
@@ -103,13 +102,13 @@ async function sendAndWaitReply(client, prompt) {
   let stableSince = 0;
   while (Date.now() - t0 < 240000) {
     await delay(3000);
-    const text = String(await lib.evalJs(client, `(() => {
+    const text = await lib.evalJs(client, `(() => {
       const msgs = [...document.querySelectorAll('[class*="sc-msg-assistant"], [class*="assistantMessage"], .markdown-body')];
-      return msgs.map((m) => m.innerText).join('\\n').trim();
-    })()`, 20000).catch(() => lastText));
-    const busy = String(await lib.evalJs(client, `!!(document.querySelector('[class*="sc-busy"], [class*="typing"]'))`, 5000).catch(() => false));
-    const sendBtn = String(await lib.evalJs(client, `(() => { const b = [...document.querySelectorAll('button')].find((x) => (x.getAttribute('aria-label') || x.title || '').includes('发送')); return !!b && !b.disabled; })()`, 5000).catch(() => false));
-    if (text && text === lastText && !busy && sendBtn === 'true') {
+      return msgs.map((m) => m.innerText).join('\n').trim();
+    })()`, 20000).catch(() => lastText);
+    const busy = await lib.evalJs(client, `!!(document.querySelector('[class*="sc-busy"], [class*="typing"]'))`, 5000).catch(() => false);
+    const sendBtn = await lib.evalJs(client, `(() => { const b = [...document.querySelectorAll('button')].find((x) => (x.getAttribute('aria-label') || x.title || '').includes('发送')); return !!b && !b.disabled; })()`, 5000).catch(() => false);
+    if (text && text === lastText && !busy && sendBtn) {
       stableSince += 3000;
       if (stableSince >= 12000) return text;
     } else stableSince = 0;
@@ -165,10 +164,9 @@ async function main() {
     const cardRaw = sshDell(`cat ${REMOTE_ROOT}/.gewu/resident/${taskId}.json`);
     const card = JSON.parse(cardRaw);
     assert('P4-2 intent card on server (running)', card.status === 'running', `status=${card.status}`);
-    phase1Pid = card.backingProcess && card.backingProcess.pid;
     let alive = true;
-    try { sshDell(`kill -0 ${phase1Pid}`); } catch { alive = false; }
-    assert('P4-3 backing process alive on aliyun', alive, `pid=${phase1Pid}`);
+    try { sshDell(`kill -0 ${card.backingProcess.pid}`); } catch { alive = false; }
+    assert('P4-3 backing process alive on aliyun', alive, `pid=${card.backingProcess.pid}`);
 
     // ── ④ 交接班 Channel B：同会话追问（systemPrompt 已注入 digest）──
     const followup = await sendAndWaitReply(client, '现在项目里有几个驻留任务？请用 resident_task_list 确认并汇报。');
@@ -236,11 +234,6 @@ function saveAndExit(projectId, taskId) {
     taskId: taskId || null,
   };
   fs.writeFileSync(path.join(EVIDENCE, `p4-${PHASE}.json`), JSON.stringify(merged, null, 2) + '\n');
-  // phase2 启动时读 STATE 恢复 {projectId, taskId, pid}（重启后进程对象已失），
-  // 必须在 phase1 落盘；taskId 为空（模型未产卡）时不写，避免 phase2 误读半截状态。
-  if (PHASE === 'phase1' && projectId && taskId && phase1Pid) {
-    fs.writeFileSync(STATE, JSON.stringify({ projectId, taskId, pid: phase1Pid }, null, 2) + '\n');
-  }
   console.log(`[p4] ${PHASE}: ${merged.assertions.filter((a) => a.pass).length}/${merged.assertions.length} allPass=${merged.allPass}`);
   process.exit(merged.allPass ? 0 : 1);
 }

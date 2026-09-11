@@ -1,12 +1,12 @@
 {
   "phase": "phase1",
-  "startedAt": "2026-09-10T16:31:28.146Z",
-  "finishedAt": "2026-09-10T16:42:03.482Z",
+  "startedAt": "2026-09-11T00:29:53.564Z",
+  "finishedAt": "2026-09-11T00:33:59.466Z",
   "assertions": [
     {
       "name": "project created",
       "pass": true,
-      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mtvqviv2_0vau\",\"name\":\"P4驻留-1789057888148\",\"created_at\":\"2026-09-10T16:31:30.110Z\",\"up"
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mtw7yr0z_jso2\",\"name\":\"P4驻留-1789086593566\",\"created_at\":\"2026-09-11T00:29:54.131Z\",\"up"
     },
     {
       "name": "P4-1 agent created resident task (model used tool)",
@@ -15,6 +15,6 @@
     }
   ],
   "allPass": false,
-  "projectId": "p_mtvqviv2_0vau",
+  "projectId": "p_mtw7yr0z_jso2",
   "taskId": null
 }

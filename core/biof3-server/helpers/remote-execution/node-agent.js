@@ -231,11 +231,11 @@ case "$cmd" in
     bc="$(fs_decode "$1")"; bcwd="$(fs_decode "$2")"; blog="$(fs_decode "$3")"
     [ -d "$bcwd" ] || die "exec_cwd_missing"
     mkdir -p "$(dirname "$blog")" 2>/dev/null
-    # BLOCK-77 P4 实机抓真修：旧写法 ( cd X && setsid ... & ) 里 & 把整条 AND-list 后台化，
-    # 后台子进程在 cd 阶段攥着 __mux 捕获管道（重定向只在后续简单命令生效），
-    # R 应答被拖到孤儿进程退出才回 → 长 sleep 任务 30s mux 超时（应答=孤儿寿命）。
-    # 重定向提升到后台列表层级 + exec 全脱离，应答立即返回（实机 sleep 2/5/60 对照验证）。
-    ( cd "$bcwd" && exec setsid nohup bash -c "$bc" ) >> "$blog" 2>&1 < /dev/null &
+    # BLOCK-77 P5 修复：& 优先级把整条 cd && setsid ... 后台化时，后台子进程
+    # 攥着 __mux 循环 $() 的捕获管道（>> 只对其后的简单命令生效），$() 等
+    # 管道 EOF——即孤儿进程退出——才返回。重定向提升到后台列表层级 +
+    # exec 全脱离，后台进程不再攥住父进程管道。
+    (cd "$bcwd" && exec setsid nohup bash -c "$bc") >> "$blog" 2>&1 < /dev/null &
     for i in 1 2 3 4 5; do
       bpid=$(pgrep -f "bash -c" -n 2>/dev/null || true)
       if [ -n "$bpid" ]; then break; fi
