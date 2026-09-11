@@ -74,6 +74,16 @@ function appendToolCall(target, delta) {
   }
 }
 
+// BLOCK-82: 思考段字段归一——reasoning_content 优先（DeepSeek 系），
+// 缺失时兜底 reasoning（sensenova 等网关的字段名）；只在 OpenAI 兼容解析入口做，
+// 下游事件/记录面保持 reasoning_content 单一形状。
+function pickReasoningText(source) {
+  if (!source || typeof source !== 'object') return undefined;
+  if (typeof source.reasoning_content === 'string' && source.reasoning_content) return source.reasoning_content;
+  if (typeof source.reasoning === 'string' && source.reasoning) return source.reasoning;
+  return undefined;
+}
+
 class DeepSeekProvider {
   constructor(options = {}) {
     this.providerName = options.name || 'deepseek';
@@ -369,9 +379,10 @@ class DeepSeekProvider {
         // of silently completing with an empty assistant message.
         if (choice.message && typeof choice.message === 'object') {
           const message = choice.message;
-          // UI-272: 非流式信封也可能携带思考内容（reasoning_content）
-          if (typeof message.reasoning_content === 'string' && message.reasoning_content) {
-            emit({ type: 'reasoning_delta', content: message.reasoning_content });
+          // UI-272: 非流式信封也可能携带思考内容（reasoning_content；BLOCK-82: sensenova 系为 reasoning，归一兜底）
+          const envelopeReasoning = pickReasoningText(message);
+          if (envelopeReasoning) {
+            emit({ type: 'reasoning_delta', content: envelopeReasoning });
           }
           if (typeof message.content === 'string' && message.content) {
             const cleanContent = stripLeakedToolMarkup(message.content);
@@ -393,8 +404,10 @@ class DeepSeekProvider {
         const delta = choice.delta || {};
         // UI-272: 模型思考过程（DeepSeek reasoning_content）— 此前被直接丢弃，
         // 导致会话内无法回看工具调用之间的衔接思路
-        if (typeof delta.reasoning_content === 'string' && delta.reasoning_content) {
-          emit({ type: 'reasoning_delta', content: delta.reasoning_content });
+        // BLOCK-82: sensenova 系思考段字段名为 reasoning，归一兜底（reasoning_content 优先）
+        const reasoningText = pickReasoningText(delta);
+        if (reasoningText) {
+          emit({ type: 'reasoning_delta', content: reasoningText });
         }
         if (typeof delta.content === 'string' && delta.content) {
           const cleanDelta = dsmlGuard.push(delta.content);

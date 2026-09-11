@@ -58,11 +58,20 @@ function normalizeResponse(result) {
   const message = choice && choice.message ? choice.message : {};
   return {
     content: typeof message.content === 'string' ? message.content : '',
-    reasoningContent: typeof message.reasoning_content === 'string' ? message.reasoning_content : undefined,
+    // BLOCK-82: reasoning_content 优先，缺失时兜底 reasoning（sensenova 系字段名）
+    reasoningContent: pickReasoningContent(message),
     toolCalls: Array.isArray(message.tool_calls) ? message.tool_calls : undefined,
     finishReason: choice ? choice.finish_reason : undefined,
     usage: result.usage && typeof result.usage === 'object' ? result.usage : undefined,
   };
+}
+
+// BLOCK-82: reasoning_content 优先（DeepSeek 系）；非字符串时兜底 reasoning（sensenova 系）。
+// reasoning_content 为字符串（含空串）时行为与既有契约完全一致。
+function pickReasoningContent(message) {
+  if (typeof message.reasoning_content === 'string') return message.reasoning_content;
+  if (typeof message.reasoning === 'string') return message.reasoning;
+  return undefined;
 }
 
 function clipMessageForBudget(message) {
