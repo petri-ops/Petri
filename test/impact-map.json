@@ -1,1344 +1,1369 @@
 {
- "schema": "biof3/test-impact-map.v1",
- "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
- "rules": [
-  {
-   "id": "governance-docs",
-   "patterns": [
-    "AGENTS.md",
-    "CLAUDE.md",
-    "frontend/AGENTS.md",
-    "docs/**",
-    ".agents/**",
-    ".gitignore"
-   ],
-   "commands": [
-    "docs-check"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "ui-ledger",
-   "patterns": [
-    "docs/ui-productization-audit.md"
-   ],
-   "commands": [
-    "ui-audit"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "frontend-source",
-   "patterns": [
-    "frontend/src/**"
-   ],
-   "commands": [
-    "ui-audit",
-    "frontend-check"
-   ],
-   "frontendRelated": true,
-   "classifiesScripts": false
-  },
-  {
-   "id": "block78-runtime-projection",
-   "note": "BLOCK-78 摘要卡片项目化：远程资源实时快照——node-agent sys_resource verb（ensureAgent 哈希自动部署）/ gateway sysResource 方法 / harness 资源路由 projectId 路由（additive，无参/local 既有调用零改动）/ 归一化与 TTL 缓存 helper / 前端 hook projectId 参数与卡片 source 驱动。零网络测试锁归一化三态阈值 + TTL fresh/stale/unreachable + agent 脚本 bash 语法与本机执行；实机 dell 读数对账与断连三态归 BLOCK-78 P3 验收。",
-   "patterns": [
-    "core/biof3-server/helpers/remote-resource-snapshot.js",
-    "core/biof3-server/routes/harness/resources.js",
-    "core/biof3-server/helpers/remote-execution/node-agent.js",
-    "core/biof3-server/helpers/workspace-gateway.js",
-    "frontend/src/hooks/useRuntimeResourceSnapshot.ts",
-    "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
-    "frontend/src/components/workspace-panels/CenterPanel.tsx",
-    "scripts/block78-*",
-    "acceptance/block-78/**",
-    "core/biof3-server/helpers/ai-usage.js",
-    "core/biof3-server/routes/ai-misc.js",
-    "core/biof3-server/routes/harness/harness.js",
-    "core/biof3-server/agent-tools/workspace-ssh-surface.js",
-    "core/biof3-server/agent-tools/workspace-tools.js",
-    "core/biof3-server/routes/ai-agent/background-processes.js",
-    "core/biof3-server/helpers/project-storage.js",
-    "core/biof3-server/routes/harness/project-storage.js",
-    "core/biof3-server/routes/harness/index.js",
-    "core/biof3-server/helpers/project-notices.js",
-    "core/biof3-server/helpers/project-notice-store.js",
-    "core/biof3-server/routes/harness/notices.js",
-    "scripts/ui330-*"
-   ],
-   "tests": [
-    "test/remote-resource-snapshot.test.mjs",
-    "test/block67-node-agent-fs.test.js",
-    "test/block57-remote-execution.test.mjs",
-    "test/ai-usage-project.test.mjs",
-    "test/block67-ssh-surface.test.mjs",
-    "test/project-storage.test.mjs",
-    "test/project-notices.test.mjs"
-   ],
-   "frontendRelated": true,
-   "classifiesScripts": true,
-   "scriptRole": "development-smoke"
-  },
-  {
-   "id": "frontend-config",
-   "patterns": [
-    "frontend/package.json",
-    "frontend/package-lock.json",
-    "frontend/vite.config.*",
-    "frontend/tsconfig*.json"
-   ],
-   "commands": [
-    "frontend-check",
-    "frontend-all"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "git-backend",
-   "note": "Git backend changes run lifecycle/repository tests; the now-green P4R source/replay invariant is selected by Result Studio production paths rather than every low-level adapter edit.",
-   "patterns": [
-    "core/shared-backend/git-adapter.js",
-    "core/shared-backend/git-repository-binding.js",
-    "core/shared-backend/git-repository-consent-schema.js",
-    "src/migrations/004_git_repository_consent.sql"
-   ],
-   "tests": [
-    "test/git-adapter.test.mjs",
-    "test/result-studio-lifecycle.test.mjs",
-    "test/result-studio-migration.test.mjs",
-    "test/result-studio-repository.test.mjs",
-    "test/result-studio-route-baseline.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "working-tree-review-ipc",
-   "note": "BLOCK-16/20 working tree review IPC（diff 解析 / hunk accept-reject / revert / file-content）。UI-180 实机验收发现 reject 反向 patch 因 phantom 空 ctx 行被 git apply 拒绝，修复后此映射保证回归不被漏测。",
-   "patterns": [
-    "src/ipc/working-tree-review.js"
-   ],
-   "tests": [
-    "test/working-tree-review-hunk-apply.test.mjs",
-    "test/working-tree-review-file-content.test.mjs",
-    "test/working-tree-review-init.test.mjs",
-    "test/git-adapter-block20-per-hunk.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "result-studio",
-   "note": "P4R source projection, controlled replay, background materialization and Code tests are owned by P4R; the explicit invariant gates remain listed so a route regression cannot be hidden by the default bundle.",
-   "patterns": [
-    "core/shared-backend/result-*.js",
-    "core/biof3-server/routes/result-studio.js",
-    "core/biof3-server/agent-tools/result-*.js",
-    "frontend/src/components/result-studio/**",
-    "frontend/src/lib/result-studio-*.ts",
-    "frontend/src/lib/result-edit-agent-bridge.ts",
-    "frontend/src/lib/artifact-selection.ts",
-    "frontend/src/components/result-studio/resultBodyState.ts"
-   ],
-   "tests": [
-    "test/result-edit-controls.test.mjs",
-    "test/result-edit-intent.test.mjs",
-    "test/result-edit-agent-tool.test.mjs",
-    "test/result-studio-agent-binding.test.mjs",
-    "test/result-studio-context.test.mjs",
-    "test/result-studio-contracts.test.mjs",
-    "test/result-studio-repository.test.mjs",
-    "test/result-studio-background.test.mjs",
-    "test/result-studio-route-baseline.test.mjs",
-    "test/result-changeset-service.test.mjs",
-    "test/result-revision-source.test.mjs",
-    "test/result-replay-service.test.mjs",
-    "test/p4r-invariants.test.mjs",
-    "test/result-compare-service.test.mjs",
-    "test/result-studio-lifecycle.test.mjs",
-    "test/result-studio-plugin-sdk.test.mjs",
-    "test/result-studio-qualification.test.mjs",
-    "test/result-studio-table-query.test.mjs",
-    "test/result-selection-tools.test.mjs",
-    "test/artifact-interaction.test.mjs",
-    "test/agent-tool-registry.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "agent-tool-interceptor",
-   "patterns": [
-    "core/biof3-server/agent-tools/agent-tool-interceptor.js"
-   ],
-   "tests": [
-    "test/agent-tool-policy.test.mjs",
-    "test/result-studio-agent-binding.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "result-studio-agent-runtime",
-   "patterns": [
-    "core/biof3-server/agent-runner.js",
-    "core/biof3-server/routes/ai-agent.js",
-    "core/biof3-server/helpers/ai-settings.js",
-    "core/biof3-server/helpers/system-prompt.js"
-   ],
-   "tests": [
-    "test/ai-settings-credential.test.mjs",
-    "test/result-studio-agent-binding.test.mjs",
-    "test/system-prompt-result-context.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "loop",
-   "patterns": [
-    "core/shared-backend/loop-*.js",
-    "core/biof3-server/agent-runner.js",
-    "core/biof3-server/routes/ai-loop.js",
-    "core/biof3-server/routes/loop.js"
-   ],
-   "tests": [
-    "test/loop-contract.test.mjs",
-    "test/loop-repository.test.mjs",
-    "test/loop-controller.test.mjs",
-    "test/loop-controller-integration.test.mjs",
-    "test/loop-validator-registry.test.mjs",
-    "test/loop-validators.test.cjs",
-    "test/loop-failure-diagnoser.test.cjs",
-    "test/loop-repair-strategy.test.cjs",
-    "test/loop-checkpoint.test.cjs",
-    "test/loop-agent-integration.test.mjs",
-    "test/loop-false-success-regression.test.mjs",
-    "test/loop-recovery-integration.test.mjs",
-    "test/loop-durable-resume.test.mjs",
-    "test/loop-api-route.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "scientific-task",
-   "patterns": [
-    "core/shared-backend/scientific-*.js",
-    "core/shared-backend/delivery-manifest.js",
-    "core/shared-backend/execution-provenance.js",
-    "core/shared-backend/artifact-manifest.js",
-    "core/shared-backend/artifact-profiles.js",
-    "core/shared-backend/agent-workflow.js",
-    "test/fixtures/harness-scientific-task/**"
-   ],
-   "tests": [
-    "test/scientific-task-spec.test.mjs",
-    "test/scientific-task-planner.test.mjs",
-    "test/scientific-task-confirmation.test.mjs",
-    "test/scientific-task-persistence.test.mjs",
-    "test/execution-provenance.test.mjs",
-    "test/delivery-manifest.test.mjs",
-    "test/scientific-replay-package.test.mjs",
-    "test/agent-workflow.test.mjs",
-    "test/harness-workflow-fixtures.test.mjs",
-    "test/g0-sdc0-profile-registry.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "sdc1-data-to-first-result",
-   "note": "SDC1-A keeps project-local import, bounded structural profiling, fail-closed readiness, the existing Agent handoff, and its development Electron observer under one focused regression bundle; it does not qualify SDC-2+ or P7. Frontend tests are selected through frontendRelated and run by Vitest.",
-   "patterns": [
-    "core/shared-backend/data-profiler.js",
-    "core/biof3-server/routes/files.js",
-    "frontend/src/lib/data-profile.ts",
-    "frontend/src/components/workspace-panels/DataIntakeControl.tsx",
-    "scripts/g0-sdc1-*",
-    "test/fixtures/sdc1-a/**"
-   ],
-   "tests": [
-    "test/data-profiler.test.mjs",
-    "test/workspace-data-import.test.mjs",
-    "test/g0-sdc1-local-gateway.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "ux1g1-tool-job-conversation",
-   "note": "Conversation-bound ToolJob identity covers migration, creation, approval continuation, plugin execution/retry, ScientificTask/workflow binding, Result Studio derived execution, all job-history projections, and frontend compatibility mapping. Frontend tests are selected through frontendRelated and run by Vitest.",
-   "patterns": [
-    "core/biof3-server/db.js",
-    "core/biof3-server/api-data.js",
-    "core/biof3-server/agent-tools/learning.js",
-    "core/biof3-server/agent-tools/result-edit-tools.js",
-    "core/biof3-server/mcp/registry.js",
-    "core/biof3-server/routes/ai-legacy.js",
-    "core/biof3-server/routes/harness.js",
-    "core/biof3-server/routes/result-studio.js",
-    "core/biof3-server/routes/tools-metadata.js",
-    "frontend/src/lib/project-types.ts",
-    "frontend/src/lib/project-store.ts",
-    "frontend/src/components/copilot/copilotClient.ts",
-    "frontend/src/components/copilot/SimpleChat.tsx"
-   ],
-   "tests": [
-    "test/tool-job-conversation.test.mjs",
-    "test/execution-conversation-threading.test.mjs",
-    "test/scientific-task-persistence.test.mjs",
-    "test/g0-api-route.test.mjs",
-    "test/agent-approval.test.mjs",
-    "test/agent-run-tool.test.mjs",
-    "test/result-selection-tools.test.mjs",
-    "test/result-replay-service.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "ux1g2-conversation-result-switcher",
-   "note": "Current-conversation result discovery and title-bar switching must preserve exact conversation identity, deep-link scope, and the existing Result Studio selection contract. Frontend tests are selected through frontendRelated and run by Vitest.",
-   "patterns": [
-    "frontend/src/pages/project-workspace.tsx",
-    "frontend/src/pages/project-workspace.module.css",
-    "frontend/src/hooks/useConversationJobs.ts",
-    "frontend/src/hooks/useWorkspacePanels.ts",
-    "frontend/src/components/desktop/TitleBar.tsx",
-    "frontend/src/components/desktop/TitleBar.module.css",
-    "frontend/src/lib/project-store.ts",
-    "core/biof3-server/routes/tools-metadata.js"
-   ],
-   "tests": [
-    "test/tool-job-conversation.test.mjs",
-    "test/g0-api-route.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "ux1h-async-tool-surface",
-   "note": "UX1H keeps the real conversation-run timeout shape, successful run_tool presentation, deterministic development Electron airway observation, and its non-qualifying evidence under one focused gate. g0-sdc1 脚本的脚本分类唯一归属 script-g0-maintained（一脚本一分类），其回归覆盖经 sdc1-data-to-first-result 规则选择。",
-   "patterns": [
-    "frontend/src/components/copilot/SimpleChat.tsx",
-    "frontend/src/components/copilot/SimpleChat.test.tsx",
-    "frontend/src/components/copilot/ToolActivityDock.tsx",
-    "frontend/src/components/copilot/ToolActivityDock.test.tsx",
-    "frontend/src/components/copilot/toolSummaryPresentation.ts",
-    "scripts/g0-rs-ux1h-*",
-    "acceptance/g0-rs-ux1h/**"
-   ],
-   "tests": [
-    "test/g0-rs-ux1h-acceptance.test.mjs",
-    "test/g0-sdc1-local-gateway.test.mjs"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "current-result-studio"
-  },
-  {
-   "id": "g0-baseline",
-   "patterns": [
-    "core/shared-backend/g0-*.js",
-    "core/shared-backend/g0/**",
-    "test/g0-*.test.mjs",
-    "test/fixtures/g0-**/**"
-   ],
-   "tests": [
-    "test/g0-baseline.test.mjs",
-    "test/g0-project-baseline.test.mjs",
-    "test/g0-api-route.test.mjs",
-    "test/g0-first-wave.test.mjs",
-    "test/g0-second-wave.test.mjs",
-    "test/g0-third-wave.test.mjs",
-    "test/g0-fourth-wave.test.mjs",
-    "test/g0-fifth-wave.test.mjs",
-    "test/g0-baseline-qualification.test.mjs",
-    "test/g0-qualification-gate.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "provider",
-   "patterns": [
-    "core/shared-backend/llm-*.js",
-    "core/shared-backend/model-*.js",
-    "core/shared-backend/llm-providers/**",
-    "core/biof3-server/agent-tools/vision-tools.js"
-   ],
-   "tests": [
-    "test/model-gateway.test.mjs",
-    "test/model-profile.test.mjs",
-    "test/provider-protocol.test.mjs",
-    "test/provider-streaming.test.mjs",
-    "test/anthropic-provider.test.mjs",
-    "test/harness-provider-eval.test.mjs",
-    "test/agent-provider-boundary.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "diagnostic-redaction",
-   "note": "Agent result and evidence redaction changes must exercise both generic diagnostic scrubbing and Agent tool-result projections.",
-   "patterns": [
-    "core/shared-backend/redaction.js"
-   ],
-   "tests": [
-    "test/diagnostic-redaction.test.mjs",
-    "test/agent-tool-result.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "chf0-critical",
-   "patterns": [
-    "src/main.js",
-    "core/biof3-server/helpers/process-lifecycle.js",
-    "core/biof3-server/helpers/tools-executor.js",
-    "core/biof3-server/routes/files.js",
-    "core/biof3-server/routes/r-compute.js",
-    "core/biof3-server/routes/tools-platform.js",
-    "core/shared-backend/local-request-boundary.js",
-    "resources/built-in-plugins/pca-explorer/**",
-    "resources/built-in-plugins/volcano-plot/**"
-   ],
-   "tests": [
-    "test/g0-chf0-http.test.mjs",
-    "test/g0-chf0-science.test.mjs",
-    "test/g0-chf0-lifecycle.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "block59-window-manager",
-   "note": "BLOCK-59 窗口系统：窗口管理器核心（状态机/注册表/路由白名单/geometry）+ Electron 适配器 IPC 面。改动即跑核心单测（含适配器/preload/main.js 静态契约锁）。",
-   "patterns": [
-    "src/main/_window-manager.js",
-    "src/ipc/window-manager.js"
-   ],
-   "tests": [
-    "test/block59-window-manager.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "block48-computer-use-sidecar",
-   "note": "BLOCK-48 电脑控制：Swift sidecar 源码与协议契约测试。改动即跑契约测试（前置构建：bash scripts/build-computer-use-sidecar.sh）。",
-   "patterns": [
-    "sidecars/computer-use/Package.swift",
-    "sidecars/computer-use/Sources/**",
-    "scripts/build-computer-use-sidecar.sh",
-    "test/block48-sidecar-contract.test.mjs"
-   ],
-   "tests": [
-    "test/block48-sidecar-contract.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "plugin-runtime",
-   "patterns": [
-    "resources/built-in-plugins/**",
-    "core/biof3-server/plugin-loader.js",
-    "core/biof3-server/mcp/**",
-    "core/biof3-server/tool-registry.js",
-    "core/biof3-server/tool-scripts/**",
-    "src/plugin-manager.js"
-   ],
-   "tests": [
-    "test/plugin-sdk.test.mjs",
-    "test/plugin-manifest-schema.test.mjs",
-    "test/plugin-loader-refresh.test.mjs",
-    "test/capability-bundles.test.mjs",
-    "test/capability-bundle-wiring.test.mjs",
-    "test/capability-provisioning.test.mjs",
-    "test/mcp-plugin-autoload.test.mjs",
-    "test/mcp-builtin-discovery.test.mjs",
-    "test/mcp-tool-registry.test.mjs",
-    "test/harness-manifest.test.mjs",
-    "test/harness-tool-template.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "electron-runtime",
-   "patterns": [
-    "src/**",
-    "build/**",
-    "core/biof3-server/db.js",
-    "src/migrations/**",
-    "electron-builder.yml"
-   ],
-   "tests": [
-    "test/mcp-server.test.mjs",
-    "test/mcp-server-autoload.test.mjs",
-    "test/mcp-bin-e2e.test.mjs",
-    "test/mcp-tool-registry.test.mjs",
-    "test/platform-compat.test.mjs",
-    "test/migration-runner.test.mjs",
-    "test/backend-health.test.mjs",
-    "test/credential-store.test.mjs",
-    "test/terminal-multisession-ipc.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "backend-fallback",
-   "patterns": [
-    "core/biof3-server/**",
-    "core/packages/**",
-    "core/shared-backend/storage/**",
-    "core/shared-backend/path-safe.js",
-    "core/shared-backend/local-request-boundary.js"
-   ],
-   "tests": [
-    "test/backend-health.test.mjs",
-    "test/tools-input-validation.test.mjs",
-    "test/tools-executor-job-context.test.mjs",
-    "test/artifact-truth.test.mjs",
-    "test/project-sandbox-compat.test.mjs",
-    "test/project-sandbox-artifacts.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "release-contract",
-   "patterns": [
-    "release-contract.json",
-    "release/**",
-    "scripts/build-r-bundle.mjs",
-    "scripts/fix-r-paths.*",
-    "scripts/install-core-deps.mjs",
-    "scripts/publish-*.mjs",
-    "scripts/publish-*.sh",
-    "scripts/release-*.mjs",
-    "scripts/validate-runtime-first-use.cjs"
-   ],
-   "tests": [
-    "test/release-contract.test.mjs",
-    "test/oss-auto-update.test.mjs",
-    "test/macos-oss-updater.test.mjs",
-    "test/capability-bundles.test.mjs"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "release-runtime"
-  },
-  {
-   "id": "script-provision",
-   "patterns": [
-    "scripts/install-r-tool-dependencies.mjs",
-    "scripts/provision-*.mjs",
-    "scripts/upload-*.mjs"
-   ],
-   "tests": [
-    "test/release-contract.test.mjs",
-    "test/capability-bundles.test.mjs"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "provision"
-  },
-  {
-   "id": "script-build",
-   "patterns": [
-    "scripts/build-macos-*.mjs",
-    "scripts/build-win-*.mjs",
-    "scripts/verify-*.mjs",
-    "scripts/resume-*.mjs",
-    "scripts/build-computer-use-sidecar.sh",
-    "scripts/dev/verify-toolchain.mjs"
-   ],
-   "tests": [
-    "test/release-contract.test.mjs",
-    "test/capability-bundles.test.mjs"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "build-runtime"
-  },
-  {
-   "id": "script-result-current",
-   "patterns": [
-    "scripts/g0-rs-p*.mjs",
-    "scripts/g0-rs-p*.cjs"
-   ],
-   "tests": [
-    "test/result-studio-qualification.test.mjs",
-    "test/result-studio-context.test.mjs",
-    "test/agent-tool-registry.test.mjs"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "current-result-studio"
-  },
-  {
-   "id": "script-result-historical",
-   "patterns": [
-    "scripts/g0-rs6-*",
-    "scripts/g0-rs7-*",
-    "scripts/g0-rs8-*",
-    "scripts/g0-rs9-*"
-   ],
-   "tests": [
-    "test/result-studio-qualification.test.mjs"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "historical-result-studio"
-  },
-  {
-   "id": "script-g0-maintained",
-   "patterns": [
-    "scripts/g0-start-*",
-    "scripts/g0-lf0-*",
-    "scripts/g0-first-*",
-    "scripts/g0-second-*",
-    "scripts/g0-third-*",
-    "scripts/g0-fourth-*",
-    "scripts/g0-fifth-*",
-    "scripts/g0-qualification-*",
-    "scripts/g0-sdc0-*",
-    "scripts/g0-sdc1-*"
-   ],
-   "tests": [
-    "test/g0-baseline.test.mjs",
-    "test/g0-baseline-qualification.test.mjs",
-    "test/g0-qualification-gate.test.mjs"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "maintained-g0"
-  },
-  {
-   "id": "script-harness",
-   "patterns": [
-    "scripts/harness-*.mjs",
-    "scripts/plugin-contract-lint.js",
-    "scripts/scaffold-harness-tool.mjs"
-   ],
-   "tests": [
-    "test/harness-manifest.test.mjs",
-    "test/harness-tool-template.test.mjs",
-    "test/agent-workflow.test.mjs",
-    "test/harness-workflow-fixtures.test.mjs"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "harness"
-  },
-  {
-   "id": "script-governance",
-   "patterns": [
-    "scripts/lib/gate-report-schema.mjs",
-    "scripts/docs-governance.mjs",
-    "scripts/check-*.mjs",
-    "scripts/test-affected.mjs",
-    "scripts/verify-schema.js"
-   ],
-   "tests": [
-    "test/docs-governance.test.mjs",
-    "test/test-affected.test.mjs"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "governance"
-  },
-  {
-   "id": "script-dev-and-smoke",
-   "patterns": [
-    "scripts/dev-*.js",
-    "scripts/dev-*.mjs",
-    "scripts/dev-*.sh",
-    "scripts/golden-path.mjs",
-    "scripts/lib/dev-launch-state.js",
-    "scripts/qa-smoke.mjs"
-   ],
-   "tests": [
-    "test/qa-smoke.test.mjs",
-    "test/run-json.test.mjs",
-    "test/backend-health.test.mjs"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "development-smoke"
-  },
-  {
-   "id": "script-ipc-profiling",
-   "patterns": [
-    "scripts/ipc-backpressure-profile.mjs",
-    "scripts/cdp-wrap.cjs",
-    "scripts/generate-ipc-catalog-md.mjs",
-    "scripts/validate-ipc-catalog.mjs"
-   ],
-   "tests": [
-    "test/backend-health.test.mjs"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "ipc-profiling"
-  },
-  {
-   "id": "script-working-tree-review",
-   "patterns": [
-    "scripts/block-16-working-tree-review.mjs"
-   ],
-   "tests": [
-    "test/docs-governance.test.mjs"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "governance"
-  },
-  {
-   "id": "script-block-20-code-review",
-   "patterns": [
-    "scripts/block-20-code-review-panel.mjs"
-   ],
-   "tests": [
-    "test/git-adapter.test.mjs",
-    "test/git-adapter-block20-per-hunk.test.mjs",
-    "test/system-prompt-rejects.test.mjs",
-    "test/docs-governance.test.mjs"
-   ],
-   "commands": [
-    "docs-check",
-    "ui-audit",
-    "frontend-check"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "governance"
-  },
-  {
-   "id": "perf-probe",
-   "patterns": [
-    "core/biof3-server/helpers/perf-probe.js",
-    "core/biof3-server/routes/perf-probe.js",
-    "core/biof3-server/bootstrap.js",
-    "core/biof3-server/server.js"
-   ],
-   "tests": [
-    "test/perf-probe.test.mjs",
-    "test/backend-health.test.mjs",
-    "test/p4r-capture.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "p4r-capture",
-   "note": "The P4R capture, live journey and renderer producers also match script-result-current, which classifies them. This rule adds their real harness tests so evidence drift cannot hide behind qualification-only checks.",
-   "patterns": [
-    "scripts/g0-rs-p4r-capture.mjs",
-    "scripts/g0-rs-p4r-corpus.mjs",
-    "scripts/g0-rs-p4r-baseline.mjs",
-    "scripts/g0-rs-p4r-acceptance.mjs",
-    "scripts/g0-rs-p4r-product-acceptance.mjs",
-    "scripts/g0-rs-p4r-source-observation.mjs",
-    "scripts/g0-rs-p4r-live-observation.mjs",
-    "scripts/g0-rs-p4r-ui-observation.mjs",
-    "scripts/g0-rs-p4r-ui-driver.cjs"
-   ],
-   "tests": [
-    "test/p4r-capture.test.mjs",
-    "test/p4r-corpus.test.mjs",
-    "test/p4r-baseline.test.mjs",
-    "test/p4r-live-observation.test.mjs",
-    "test/p4r-ui-observation.test.mjs",
-    "test/perf-probe.test.mjs",
-    "test/result-revision-source.test.mjs",
-    "test/result-replay-service.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "p5-real-scientific-editing",
-   "note": "The P5 producer and its source-bound evidence must select the complete focused scientific-editing contract bundle. The producer already has one script classification through script-result-current; this rule adds its direct verifier and every P5 Truth, validator, cohort, replay and scientific-diff regression.",
-   "patterns": [
-    "scripts/g0-rs-p5-acceptance.mjs",
-    "acceptance/g0-result-studio/rs-p5-scientific-editing.json"
-   ],
-   "tests": [
-    "test/g0-rs-p5-acceptance.test.mjs",
-    "test/agent-run-tool.test.mjs",
-    "test/agent-tool-registry.test.mjs",
-    "test/artifact-truth.test.mjs",
-    "test/execution-provenance.test.mjs",
-    "test/git-adapter.test.mjs",
-    "test/result-changeset-service.test.mjs",
-    "test/result-compare-service.test.mjs",
-    "test/result-edit-agent-tool.test.mjs",
-    "test/result-edit-controls.test.mjs",
-    "test/result-edit-intent.test.mjs",
-    "test/result-plugin-validator.test.mjs",
-    "test/result-replay-service.test.mjs",
-    "test/result-revision-replay-package.test.mjs",
-    "test/result-revision-source.test.mjs",
-    "test/result-scientific-compare.test.mjs",
-    "test/result-scientific-rerun.test.mjs",
-    "test/result-selection-tools.test.mjs",
-    "test/result-studio-context.test.mjs",
-    "test/result-studio-lifecycle.test.mjs",
-    "test/result-studio-migration.test.mjs",
-    "test/result-studio-plugin-sdk.test.mjs",
-    "test/result-studio-repository.test.mjs",
-    "test/result-workflow-graph.test.mjs",
-    "test/scientific-replay-package.test.mjs",
-    "test/test-affected.test.mjs",
-    "test/tools-executor-job-context.test.mjs",
-    "test/tools-input-validation.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "p6-ui110-electron-scientific-trace",
-   "note": "The P6 UI-110 producer and source-bound evidence select their direct Electron adapter, context transport, candidate-cohort reopen, artifact-family hydration, and redaction regressions without starting the long trace.",
-   "patterns": [
-    "scripts/g0-rs-p6-ui110-observation.mjs",
-    "scripts/g0-rs-p6-ui110-driver.cjs",
-    "scripts/g0-rs-p6-ui110-local-gateway.mjs",
-    "frontend/src/components/result-studio/activeArtifactProjection.ts",
-    "frontend/src/components/result-studio/activeArtifactProjection.test.ts",
-    "acceptance/g0-result-studio/rs-p6-ui110-electron-scientific-trace.json",
-    "acceptance/g0-result-studio/rs-p6-ui110-electron/**"
-   ],
-   "tests": [
-    "test/g0-rs-p6-ui110-observation.test.mjs",
-    "test/g0-rs-p6-ui110-local-gateway.test.mjs",
-    "test/result-studio-route-baseline.test.mjs",
-    "test/result-studio-agent-binding.test.mjs",
-    "test/result-studio-context.test.mjs",
-    "test/agent-tool-result.test.mjs",
-    "test/diagnostic-redaction.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "p6-service-recovery-pressure-fixture",
-   "note": "The non-qualifying P6-1a synthetic service fixture and its optional checkpoint select source binding, runtime-lease, exact-cohort, lifecycle, background-process and public redaction regressions; this rule does not represent full P6 product acceptance.",
-   "patterns": [
-    "scripts/g0-rs-p6-recovery-acceptance.mjs",
-    "acceptance/g0-result-studio/rs-p6-service-recovery-pressure-checkpoint.json"
-   ],
-   "tests": [
-    "test/g0-rs-p6-recovery-acceptance.test.mjs",
-    "test/result-changeset-service.test.mjs",
-    "test/result-studio-lifecycle.test.mjs",
-    "test/result-studio-background.test.mjs",
-    "test/result-studio-route-baseline.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "p6-runtime-durability-resources",
-   "note": "Exact P6 runtime-lease and resource-accounting paths add their direct lifecycle, persistence and aggregation regressions. Result Studio-named files may also match the shared Result Studio bundle; the standalone sampler must never rely on that broad pattern.",
-   "patterns": [
-    "core/shared-backend/result-studio-runtime-lease.js",
-    "core/shared-backend/result-studio-resource-summary.js",
-    "core/shared-backend/tool-resource-sampler.js"
-   ],
-   "tests": [
-    "test/result-studio-lifecycle.test.mjs",
-    "test/result-studio-background.test.mjs",
-    "test/result-studio-resource-summary.test.mjs",
-    "test/tool-resource-sampler.test.mjs",
-    "test/tools-executor-job-context.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "p6-real-restart-prototype",
-   "note": "The bounded real stop/failure/drift/SIGKILL restart prototype selects its direct fail-closed verdict and opt-in runtime regression without running the expensive scenarios by default.",
-   "patterns": [
-    "scripts/g0-rs-p6-real-restart-prototype.mjs"
-   ],
-   "tests": [
-    "test/g0-rs-p6-real-restart-prototype.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "p6-electron-pressure-prototype",
-   "note": "The development Electron 100k-row, media, long-report and multi-Revision pressure producer, driver and non-closeout checkpoint select their direct source-binding, budget and renderer regression.",
-   "patterns": [
-    "scripts/g0-rs-p6-electron-pressure-prototype.mjs",
-    "scripts/g0-rs-p6-electron-pressure-driver.cjs",
-    "acceptance/g0-result-studio/rs-p6-electron-pressure-multirevision.json"
-   ],
-   "tests": [
-    "test/g0-rs-p6-electron-pressure-prototype.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "p6-recovery-electron-prototype",
-   "note": "The development Electron interruption/relaunch prototype and hardened driver select their direct explanation, recovery-request, process-boundary and sanitizer regression.",
-   "patterns": [
-    "scripts/g0-rs-p6-recovery-electron-prototype.mjs",
-    "scripts/g0-rs-p6-recovery-electron-driver.cjs"
-   ],
-   "tests": [
-    "test/g0-rs-p6-recovery-electron-prototype.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "p6-product-scenarios",
-   "note": "The bounded real resource queue, stale adoption, controlled transport and GC/cold-readback scenarios select their direct evaluator without starting the opt-in live run.",
-   "patterns": [
-    "scripts/g0-rs-p6-product-scenarios.mjs"
-   ],
-   "tests": [
-    "test/g0-rs-p6-product-scenarios.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "p6-canonical-source-binding",
-   "note": "Every source byte eligible for the canonical P6 binding selects the fast recomputing verifier. The bounded broad prefixes are intentional: a future source-map addition inside the same runtime surfaces must fail closed until evidence is refreshed, while the expensive live matrix remains opt-in.",
-   "patterns": [
-    "core/biof3-server/**",
-    "core/shared-backend/**",
-    "frontend/src/**",
-    "frontend/vite.config.ts",
-    "frontend/package.json",
-    "frontend/package-lock.json",
-    "package.json",
-    "package-lock.json",
-    "resources/built-in-plugins/deseq2/**",
-    "resources/built-in-plugins/gene-correlation/**",
-    "resources/built-in-plugins/go-kegg/**",
-    "resources/built-in-plugins/volcano-plot/**",
-    "scripts/g0-rs-p4r-capture.mjs",
-    "scripts/g0-rs-p5-acceptance.mjs",
-    "scripts/g0-rs-p6-*",
-    "src/backend-health.js",
-    "src/migration-runner.js",
-    "src/migrations/001_result_studio.sql",
-    "src/migrations/002_result_workflow_graph.sql",
-    "src/migrations/003_result_ref_transactions.sql",
-    "src/preload.js",
-    "test/**"
-   ],
-   "tests": [
-    "test/g0-rs-p6-product-acceptance.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "p6-product-durability-recovery-performance",
-   "note": "The canonical P6 producer and stored source-bound evidence select the direct recomputing verifier plus every component, durability, resource and private-artifact route regression. The default gate verifies stored observations; only the explicit update command runs the long real matrix.",
-   "patterns": [
-    "scripts/g0-rs-p6-product-acceptance.mjs",
-    "acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json"
-   ],
-   "tests": [
-    "test/g0-chf0-lifecycle.test.mjs",
-    "test/g0-rs-p6-product-acceptance.test.mjs",
-    "test/g0-rs-p6-real-restart-prototype.test.mjs",
-    "test/g0-rs-p6-electron-pressure-prototype.test.mjs",
-    "test/g0-rs-p6-recovery-electron-prototype.test.mjs",
-    "test/g0-rs-p6-product-scenarios.test.mjs",
-    "test/g0-rs-p6-recovery-acceptance.test.mjs",
-    "test/git-adapter.test.mjs",
-    "test/result-changeset-service.test.mjs",
-    "test/result-compare-service.test.mjs",
-    "test/result-ref-transaction.test.mjs",
-    "test/result-selection-tools.test.mjs",
-    "test/result-studio-lifecycle.test.mjs",
-    "test/result-studio-background.test.mjs",
-    "test/result-studio-migration.test.mjs",
-    "test/result-studio-repository.test.mjs",
-    "test/result-studio-resource-summary.test.mjs",
-    "test/result-studio-table-query.test.mjs",
-    "test/tool-resource-sampler.test.mjs",
-    "test/tools-executor-job-context.test.mjs",
-    "test/artifact-truth.test.mjs",
-    "test/result-studio-route-baseline.test.mjs",
-    "test/test-affected.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "p7-honest-product-requalification",
-   "note": "The P7 source-bound producer is the only current Result Studio qualification owner. Default tests verify its independently resolvable fact-bundle contract and packaged CDP adapter; the explicit update gate alone builds and drives the real arm64 package with two configured Provider classes.",
-   "patterns": [
-    "scripts/g0-rs-p7-acceptance.mjs",
-    "scripts/g0-rs-p7-cdp.cjs",
-    "core/shared-backend/result-studio-qualification.js",
-    "core/shared-backend/result-studio-evidence-bundle.js",
-    "acceptance/g0-result-studio/rs-p7-honest-product-requalification.json",
-    "acceptance/g0-result-studio/rs-p7-evidence/**",
-    "acceptance/g0-result-studio/rs-p7-packaged-ui/**"
-   ],
-   "tests": [
-    "test/g0-rs-p7-acceptance.test.mjs",
-    "test/g0-rs-p7-cdp.test.mjs",
-    "test/ai-settings-credential.test.mjs",
-    "test/result-studio-qualification.test.mjs",
-    "test/result-studio-evidence-bundle.test.mjs",
-    "test/result-studio-agent-binding.test.mjs",
-    "test/system-prompt-result-context.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "acceptance-result-studio",
-   "patterns": [
-    "acceptance/g0-result-studio/**"
-   ],
-   "tests": [
-    "test/result-studio-qualification.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "acceptance-harness-loop",
-   "patterns": [
-    "acceptance/harness-loop/**"
-   ],
-   "tests": [
-    "test/loop-fixtures.test.mjs",
-    "test/loop-spt1-acceptance.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "acceptance-script-owned",
-   "note": "Evidence trees with no Node test reader. Their owning npm gate regenerates and verifies them, so changing the stored evidence selects no test. Listed explicitly so a new acceptance/<tree> stays unmapped and fails closed until its verification owner is declared.",
-   "patterns": [
-    "acceptance/g0-living-foundation/**",
-    "acceptance/g0-qualification/**",
-    "acceptance/g0-scientific-data-contract/**",
-    "acceptance/harness-phase7/**",
-    "acceptance/harness-plugin-prototype/**",
-    "acceptance/harness-plugins/**",
-    "acceptance/harness-scientific-task/**",
-    "acceptance/ui-032/**",
-    "acceptance/ui-034/**",
-    "acceptance/MODEL-ANTHROPIC-NATIVE/**",
-    "acceptance/ui-199/**",
-    "acceptance/ui-200/**",
-    "acceptance/ui-128/**",
-    "acceptance/ui-127/**",
-    "acceptance/ui-126/**",
-    "acceptance/ui-111/**",
-    "acceptance/ui-109/**",
-    "acceptance/ui-108/**",
-    "acceptance/ui-103/**",
-    "acceptance/ui-052/**",
-    "acceptance/ui-044/**",
-    "acceptance/ui-042/**",
-    "acceptance/ui-041/**",
-    "acceptance/ui-040/**",
-    "acceptance/ui-039/**",
-    "acceptance/ui-038/**",
-    "acceptance/ui-037/**",
-    "acceptance/ui-036/**",
-    "acceptance/startup-runtime/**",
-    "acceptance/agent-concurrency/**",
-    "acceptance/ui-193/**",
-    "acceptance/ui-194/**",
-    "acceptance/ui-202/**",
-    "acceptance/ui-203/**",
-    "acceptance/ui-204/**",
-    "acceptance/ui-208/**",
-    "acceptance/ui-210/**",
-    "acceptance/ui-212/**",
-    "acceptance/ui-213/**",
-    "acceptance/ui-214/**",
-    "acceptance/ui-215/**",
-    "acceptance/ui-216/**",
-    "acceptance/ui-217/**",
-    "acceptance/ui-218/**",
-    "acceptance/ui-219/**",
-    "acceptance/ui-220/**",
-    "acceptance/ui-221/**",
-    "acceptance/ui-223/**",
-    "acceptance/ui-224/**",
-    "acceptance/ui-225/**",
-    "acceptance/ui-226/**",
-    "acceptance/ui-227/**",
-    "acceptance/ui-228/**",
-    "acceptance/ui-229/**",
-    "acceptance/ui-230/**",
-    "acceptance/ui-231/**",
-    "acceptance/ui-233/**",
-    "acceptance/ui-234/**",
-    "acceptance/ui-235/**",
-    "acceptance/ui-236/**",
-    "acceptance/ui-237/**",
-    "acceptance/ui-238/**",
-    "acceptance/ui-239/**",
-    "acceptance/ui-240/**",
-    "acceptance/ui-241/**",
-    "acceptance/ui-242/**",
-    "acceptance/ui-243/**",
-    "acceptance/ui-244/**",
-    "acceptance/ui-246/**",
-    "acceptance/ui-263/**",
-    "acceptance/ui-264/**",
-    "acceptance/ui-265/**",
-    "acceptance/ui-266/**",
-    "acceptance/ui-267/**",
-    "acceptance/ui-268/**",
-    "acceptance/ui-269/**",
-    "acceptance/ui-270/**",
-    "acceptance/ui-271/**",
-    "acceptance/ui-272/**",
-    "acceptance/ui-273/**",
-    "acceptance/ui-274/**",
-    "acceptance/ui-275/**",
-    "acceptance/ui-276/**",
-    "acceptance/ui-277/**",
-    "acceptance/ui-278/**",
-    "acceptance/agent-stream-disconnected-fix/**",
-    "acceptance/block-45/**",
-    "acceptance/block-46/**",
-    "acceptance/block-47/**",
-    "acceptance/block-50/**",
-    "acceptance/block-51/**",
-    "acceptance/block-60/**",
-    "acceptance/ui-305/**",
-    "acceptance/ui-306/**",
-    "acceptance/ui-308/**",
-    "acceptance/ui-309/**",
-    "acceptance/ui-310/**",
-    "acceptance/ui-311/**"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "acceptance-chf0",
-   "patterns": [
-    "acceptance/g0-critical-crosscut-hardening/**",
-    "scripts/g0-chf0-acceptance.mjs"
-   ],
-   "tests": [
-    "test/g0-chf0-http.test.mjs",
-    "test/g0-chf0-science.test.mjs",
-    "test/g0-chf0-lifecycle.test.mjs"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "critical-crosscut-hardening"
-  },
-  {
-   "id": "ide-git-tools",
-   "note": "Phase 3 IDE MCP git tools (git-diff / git-log / git-show / git-blame) are exercised by the dedicated test files. The new test files are also auto-selected by test-infrastructure through test/**.",
-   "patterns": [
-    "core/biof3-server/mcp/ide-tools/git-diff.js",
-    "core/biof3-server/mcp/ide-tools/git-log.js",
-    "core/biof3-server/mcp/ide-tools/git-show.js",
-    "core/biof3-server/mcp/ide-tools/git-blame.js",
-    "core/biof3-server/mcp/ide-tools/diff-helpers.js",
-    "test/ide-tools-git-diff.test.mjs",
-    "test/ide-tools-git-log.test.mjs",
-    "test/ide-tools-git-show.test.mjs",
-    "test/ide-tools-git-blame.test.mjs"
-   ],
-   "tests": [
-    "test/ide-tools-git-diff.test.mjs",
-    "test/ide-tools-git-log.test.mjs",
-    "test/ide-tools-git-show.test.mjs",
-    "test/ide-tools-git-blame.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "test-infrastructure",
-   "patterns": [
-    "test/**",
-    "test/impact-map.json"
-   ],
-   "tests": [
-    "test/test-affected.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "metadata-config",
-   "patterns": [
-    "package.json",
-    "package-lock.json",
-    "tsconfig*.json",
-    ".github/**",
-    "CHANGELOG.md"
-   ],
-   "commands": [
-    "docs-check"
-   ],
-   "tests": [
-    "test/test-affected.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "script-block-live-drivers",
-   "note": "BLOCK 实机 CDP 驱动与探针（acceptance/block-N 证据采集），一次性证据脚本按 development-smoke 分类。 BLOCK-57 实机 SSH 全链驱动（aliyun 真实节点 + in-app 分派）同分类。",
-   "patterns": [
-    "acceptance/block-49/**",
-    "acceptance/block-52/**",
-    "acceptance/block-53/**",
-    "acceptance/block-54/**",
-    "acceptance/block-56/**",
-    "scripts/block49-*.cjs",
-    "scripts/block49-*.mjs",
-    "scripts/block52-*.cjs",
-    "scripts/block52-*.mjs",
-    "scripts/block54-*.cjs",
-    "scripts/block54-*.mjs",
-    "scripts/block56-*.cjs",
-    "scripts/block56-*.mjs",
-    "acceptance/block-57/**",
-    "scripts/block57-*.cjs",
-    "scripts/block57-*.mjs",
-    "acceptance/block-59/**",
-    "scripts/block59-*.cjs",
-    "acceptance/block-61/**",
-    "scripts/block61-*.cjs",
-    "acceptance/block-48/**",
-    "scripts/block48-*.cjs",
-    "acceptance/block-55/**",
-    "scripts/block55-*.cjs",
-    "scripts/block55-*.mjs",
-    "scripts/ui310-*.cjs",
-    "scripts/ui305-*.cjs",
-    "scripts/block63-*.cjs",
-    "scripts/block63-*.mjs",
-    "acceptance/block-66/**",
-    "scripts/block66-*.cjs",
-    "scripts/block66-*.mjs",
-    "scripts/ui315-*.cjs",
-    "scripts/ui317-*.cjs",
-    "scripts/block68-*.cjs",
-    "scripts/block69-*.cjs",
-    "scripts/ui320-*.cjs",
-    "scripts/block67-*.cjs",
-    "scripts/ui322-*.cjs",
-    "scripts/ui323-*.cjs",
-    "scripts/ui328-*.cjs",
-    "acceptance/ui-325/**",
-    "acceptance/ui-326/**",
-    "acceptance/ui-327/**",
-    "acceptance/ui-328/**",
-    "acceptance/ui-329/**",
-    "acceptance/ui-323/**",
-    "acceptance/block-67/**",
-    "acceptance/block-64/**",
-    "acceptance/block-65/**",
-    "acceptance/block-68/**",
-    "acceptance/block-69/**",
-    "acceptance/ui-315/**",
-    "acceptance/ui-320/**",
-    "acceptance/ui-322/**",
-    "acceptance/ui-ledger-closeout/**"
-   ],
-   "tests": [
-    "test/test-affected.test.mjs"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "development-smoke"
-  },
-  {
-   "id": "block63-windows-computer-use-host",
-   "note": "BLOCK-63 P3 编排注册：Windows sidecar 托管（computer-use-host 平台门/双平台定位）+ computer_* 工具 handler 确认门真链。改动即跑 host 契约测试（前置：sidecar 已构建）。",
-   "patterns": [
-    "core/biof3-server/helpers/computer-use-host.js",
-    "core/biof3-server/agent-tools/computer-use-tools.js",
-    "test/block63-computer-host.test.mjs"
-   ],
-   "tests": [
-    "test/block63-computer-host.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "block66-runtime-decouple",
-   "note": "BLOCK-66 运行时解耦：R 硬门摘除（biof3-server 无 R 可用）。改动即跑 backend-health 语义拆分测试。",
-   "patterns": [
-    "src/main/backend-proc-manager.js",
-    "src/backend-health.js",
-    "src/ipc/runtime-status.js",
-    "test/backend-health.test.mjs"
-   ],
-   "tests": [
-    "test/backend-health.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "block63-windows-computer-use-sidecar",
-   "note": "BLOCK-63 Windows 电脑控制：C#/FlaUI sidecar 源码与协议契约测试。改动即跑契约测试（前置构建：powershell sidecars/computer-use-windows/build.ps1）。 live 脚本 scripts/block63-*.cjs 归 script-block-live-drivers 分类。",
-   "patterns": [
-    "sidecars/computer-use-windows/ComputerUseWindows.csproj",
-    "sidecars/computer-use-windows/*.cs",
-    "sidecars/computer-use-windows/build.ps1",
-    "test/block63-sidecar-contract.test.mjs",
-    "acceptance/block-63/**"
-   ],
-   "tests": [
-    "test/block63-sidecar-contract.test.mjs"
-   ],
-   "classifiesScripts": false
-  },
-  {
-   "id": "script-dev-infra",
-   "note": "BLOCK-71 开发基础设施沉淀：会话状态/卫生检查/收口聚合/dev-verify 底座（canonical 家在 gewu-dev-infra skill 内）。工具自身改动跑 test/dev-verify.test.mjs + 冒烟（npm run state / hygiene:check / skills:check）。",
-   "patterns": [
-    ".agents/skills/gewu-dev-infra/**",
-    "scripts/skill-scaffold.mjs",
-    "test/dev-verify.test.mjs"
-   ],
-   "tests": [
-    "test/dev-verify.test.mjs"
-   ],
-   "classifiesScripts": true
-  },
-  {
-   "id": "block75-oslevel-acceptance",
-   "note": "BLOCK-75 OS 级验收：原生另存为对话框 flow（EnumWindows 定位 + sidecar hwnd 直投）+ P0 抓真修的 diagnostic:export 链（相对 require 漂移）。改动即跑 ipc 相对 require 门禁 + redaction 契约。",
-   "patterns": [
-    "src/ipc/diagnostic.js",
-    "src/diagnostic-redaction.js",
-    "scripts/block75-*.cjs",
-    "scripts/block75-*.ps1",
-    "scripts/lib-block75-os.cjs",
-    ".agents/skills/gewu-dev-infra/dev-verify/flows/os-save-dialog.cjs",
-    "acceptance/block-75/**"
-   ],
-   "tests": [
-    "test/ipc-relative-requires.test.mjs",
-    "test/diagnostic-redaction.test.mjs",
-    "test/dev-verify.test.mjs"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "development-smoke"
-  },
-  {
-   "id": "block76-ssh-native-execution",
-   "note": "BLOCK-76 P1 SSH 直跑执行链：ssh-direct-runner（gateway 写编排面/exec_bg/.exit 终态/进程组取消）+ tools-executor ssh 分支 + mcp registry 收编。改动即跑 runner 零网络契约测试。",
-   "patterns": [
-    "core/biof3-server/helpers/remote-execution/ssh-direct-runner.js",
-    "test/ssh-direct-runner.test.mjs",
-    "scripts/block76-*.cjs",
-    "acceptance/block-76/**"
-   ],
-   "tests": [
-    "test/ssh-direct-runner.test.mjs"
-   ],
-   "classifiesScripts": true,
-   "scriptRole": "development-smoke"
-  },
-  {
-    "id": "block77-resident-tasks",
-    "note": "BLOCK-77 驻留任务：意图卡创建/列举/读取工具与定义契约。改动即跑 block77 契约测试。",
-    "patterns": [
-      "scripts/block77-*.cjs",
-      "acceptance/block-77/**"
-    ],
-    "tests": ["test/block77-resident-tasks.test.mjs"],
-    "classifiesScripts": true,
-    "scriptRole": "development-smoke"
-  },
-  {
-   "id": "block79-token-speed",
-   "note": "BLOCK-79 按供应商的 token 输出速率：ai_usage provider 归因列（additive）+ model-gateway attempt 级注入 + summarizeProviderUsage 成对聚合（端到端平均输出速率口径·embedding 排除·zero-usage 不可算）+ usage-mine providers 分组段 + 设置页供应商速率表。",
-   "patterns": [
-    "core/biof3-server/helpers/ai-usage.js",
-    "core/biof3-server/routes/ai-misc.js",
-    "core/biof3-server/helpers/project-storage.js",
-    "core/biof3-server/shared-backend/llm-providers/model-gateway.js",
-    "core/shared-backend/llm-providers/model-gateway.js",
-    "core/shared-backend/llm-providers/deepseek.js",
-    "core/shared-backend/llm-providers/anthropic.js",
-    "frontend/src/components/desktop/DesktopSettingsPanel/sections/UsageResourcePanel.tsx",
-    "frontend/src/components/desktop/DesktopSettingsPanel/types.ts",
-    "scripts/block79-*"
-   ],
-   "tests": [
-    "test/ai-usage-provider.test.mjs"
-   ],
-   "frontendRelated": true,
-   "classifiesScripts": true,
-   "scriptRole": "development-smoke"
-  }
- ]
+  "schema": "biof3/test-impact-map.v1",
+  "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
+  "rules": [
+    {
+      "id": "governance-docs",
+      "patterns": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "frontend/AGENTS.md",
+        "docs/**",
+        ".agents/**",
+        ".gitignore"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "ui-ledger",
+      "patterns": [
+        "docs/ui-productization-audit.md"
+      ],
+      "commands": [
+        "ui-audit"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "frontend-source",
+      "patterns": [
+        "frontend/src/**"
+      ],
+      "commands": [
+        "ui-audit",
+        "frontend-check"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": false
+    },
+    {
+      "id": "block78-runtime-projection",
+      "note": "BLOCK-78 摘要卡片项目化：远程资源实时快照——node-agent sys_resource verb（ensureAgent 哈希自动部署）/ gateway sysResource 方法 / harness 资源路由 projectId 路由（additive，无参/local 既有调用零改动）/ 归一化与 TTL 缓存 helper / 前端 hook projectId 参数与卡片 source 驱动。零网络测试锁归一化三态阈值 + TTL fresh/stale/unreachable + agent 脚本 bash 语法与本机执行；实机 dell 读数对账与断连三态归 BLOCK-78 P3 验收。",
+      "patterns": [
+        "core/biof3-server/helpers/remote-resource-snapshot.js",
+        "core/biof3-server/routes/harness/resources.js",
+        "core/biof3-server/helpers/remote-execution/node-agent.js",
+        "core/biof3-server/helpers/workspace-gateway.js",
+        "frontend/src/hooks/useRuntimeResourceSnapshot.ts",
+        "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
+        "frontend/src/components/workspace-panels/CenterPanel.tsx",
+        "scripts/block78-*",
+        "acceptance/block-78/**",
+        "core/biof3-server/helpers/ai-usage.js",
+        "core/biof3-server/routes/ai-misc.js",
+        "core/biof3-server/routes/harness/harness.js",
+        "core/biof3-server/agent-tools/workspace-ssh-surface.js",
+        "core/biof3-server/agent-tools/workspace-tools.js",
+        "core/biof3-server/routes/ai-agent/background-processes.js",
+        "core/biof3-server/helpers/project-storage.js",
+        "core/biof3-server/routes/harness/project-storage.js",
+        "core/biof3-server/routes/harness/index.js",
+        "core/biof3-server/helpers/project-notices.js",
+        "core/biof3-server/helpers/project-notice-store.js",
+        "core/biof3-server/routes/harness/notices.js",
+        "scripts/ui330-*"
+      ],
+      "tests": [
+        "test/remote-resource-snapshot.test.mjs",
+        "test/block67-node-agent-fs.test.js",
+        "test/block57-remote-execution.test.mjs",
+        "test/ai-usage-project.test.mjs",
+        "test/block67-ssh-surface.test.mjs",
+        "test/project-storage.test.mjs",
+        "test/project-notices.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
+    },
+    {
+      "id": "frontend-config",
+      "patterns": [
+        "frontend/package.json",
+        "frontend/package-lock.json",
+        "frontend/vite.config.*",
+        "frontend/tsconfig*.json"
+      ],
+      "commands": [
+        "frontend-check",
+        "frontend-all"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "git-backend",
+      "note": "Git backend changes run lifecycle/repository tests; the now-green P4R source/replay invariant is selected by Result Studio production paths rather than every low-level adapter edit.",
+      "patterns": [
+        "core/shared-backend/git-adapter.js",
+        "core/shared-backend/git-repository-binding.js",
+        "core/shared-backend/git-repository-consent-schema.js",
+        "src/migrations/004_git_repository_consent.sql"
+      ],
+      "tests": [
+        "test/git-adapter.test.mjs",
+        "test/result-studio-lifecycle.test.mjs",
+        "test/result-studio-migration.test.mjs",
+        "test/result-studio-repository.test.mjs",
+        "test/result-studio-route-baseline.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "working-tree-review-ipc",
+      "note": "BLOCK-16/20 working tree review IPC（diff 解析 / hunk accept-reject / revert / file-content）。UI-180 实机验收发现 reject 反向 patch 因 phantom 空 ctx 行被 git apply 拒绝，修复后此映射保证回归不被漏测。",
+      "patterns": [
+        "src/ipc/working-tree-review.js"
+      ],
+      "tests": [
+        "test/working-tree-review-hunk-apply.test.mjs",
+        "test/working-tree-review-file-content.test.mjs",
+        "test/working-tree-review-init.test.mjs",
+        "test/git-adapter-block20-per-hunk.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "result-studio",
+      "note": "P4R source projection, controlled replay, background materialization and Code tests are owned by P4R; the explicit invariant gates remain listed so a route regression cannot be hidden by the default bundle.",
+      "patterns": [
+        "core/shared-backend/result-*.js",
+        "core/biof3-server/routes/result-studio.js",
+        "core/biof3-server/agent-tools/result-*.js",
+        "frontend/src/components/result-studio/**",
+        "frontend/src/lib/result-studio-*.ts",
+        "frontend/src/lib/result-edit-agent-bridge.ts",
+        "frontend/src/lib/artifact-selection.ts",
+        "frontend/src/components/result-studio/resultBodyState.ts"
+      ],
+      "tests": [
+        "test/result-edit-controls.test.mjs",
+        "test/result-edit-intent.test.mjs",
+        "test/result-edit-agent-tool.test.mjs",
+        "test/result-studio-agent-binding.test.mjs",
+        "test/result-studio-context.test.mjs",
+        "test/result-studio-contracts.test.mjs",
+        "test/result-studio-repository.test.mjs",
+        "test/result-studio-background.test.mjs",
+        "test/result-studio-route-baseline.test.mjs",
+        "test/result-changeset-service.test.mjs",
+        "test/result-revision-source.test.mjs",
+        "test/result-replay-service.test.mjs",
+        "test/p4r-invariants.test.mjs",
+        "test/result-compare-service.test.mjs",
+        "test/result-studio-lifecycle.test.mjs",
+        "test/result-studio-plugin-sdk.test.mjs",
+        "test/result-studio-qualification.test.mjs",
+        "test/result-studio-table-query.test.mjs",
+        "test/result-selection-tools.test.mjs",
+        "test/artifact-interaction.test.mjs",
+        "test/agent-tool-registry.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "agent-tool-interceptor",
+      "patterns": [
+        "core/biof3-server/agent-tools/agent-tool-interceptor.js"
+      ],
+      "tests": [
+        "test/agent-tool-policy.test.mjs",
+        "test/result-studio-agent-binding.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "result-studio-agent-runtime",
+      "patterns": [
+        "core/biof3-server/agent-runner.js",
+        "core/biof3-server/routes/ai-agent.js",
+        "core/biof3-server/helpers/ai-settings.js",
+        "core/biof3-server/helpers/system-prompt.js"
+      ],
+      "tests": [
+        "test/ai-settings-credential.test.mjs",
+        "test/result-studio-agent-binding.test.mjs",
+        "test/system-prompt-result-context.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "loop",
+      "patterns": [
+        "core/shared-backend/loop-*.js",
+        "core/biof3-server/agent-runner.js",
+        "core/biof3-server/routes/ai-loop.js",
+        "core/biof3-server/routes/loop.js"
+      ],
+      "tests": [
+        "test/loop-contract.test.mjs",
+        "test/loop-repository.test.mjs",
+        "test/loop-controller.test.mjs",
+        "test/loop-controller-integration.test.mjs",
+        "test/loop-validator-registry.test.mjs",
+        "test/loop-validators.test.cjs",
+        "test/loop-failure-diagnoser.test.cjs",
+        "test/loop-repair-strategy.test.cjs",
+        "test/loop-checkpoint.test.cjs",
+        "test/loop-agent-integration.test.mjs",
+        "test/loop-false-success-regression.test.mjs",
+        "test/loop-recovery-integration.test.mjs",
+        "test/loop-durable-resume.test.mjs",
+        "test/loop-api-route.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "scientific-task",
+      "patterns": [
+        "core/shared-backend/scientific-*.js",
+        "core/shared-backend/delivery-manifest.js",
+        "core/shared-backend/execution-provenance.js",
+        "core/shared-backend/artifact-manifest.js",
+        "core/shared-backend/artifact-profiles.js",
+        "core/shared-backend/agent-workflow.js",
+        "test/fixtures/harness-scientific-task/**"
+      ],
+      "tests": [
+        "test/scientific-task-spec.test.mjs",
+        "test/scientific-task-planner.test.mjs",
+        "test/scientific-task-confirmation.test.mjs",
+        "test/scientific-task-persistence.test.mjs",
+        "test/execution-provenance.test.mjs",
+        "test/delivery-manifest.test.mjs",
+        "test/scientific-replay-package.test.mjs",
+        "test/agent-workflow.test.mjs",
+        "test/harness-workflow-fixtures.test.mjs",
+        "test/g0-sdc0-profile-registry.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "sdc1-data-to-first-result",
+      "note": "SDC1-A keeps project-local import, bounded structural profiling, fail-closed readiness, the existing Agent handoff, and its development Electron observer under one focused regression bundle; it does not qualify SDC-2+ or P7. Frontend tests are selected through frontendRelated and run by Vitest.",
+      "patterns": [
+        "core/shared-backend/data-profiler.js",
+        "core/biof3-server/routes/files.js",
+        "frontend/src/lib/data-profile.ts",
+        "frontend/src/components/workspace-panels/DataIntakeControl.tsx",
+        "scripts/g0-sdc1-*",
+        "test/fixtures/sdc1-a/**"
+      ],
+      "tests": [
+        "test/data-profiler.test.mjs",
+        "test/workspace-data-import.test.mjs",
+        "test/g0-sdc1-local-gateway.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "ux1g1-tool-job-conversation",
+      "note": "Conversation-bound ToolJob identity covers migration, creation, approval continuation, plugin execution/retry, ScientificTask/workflow binding, Result Studio derived execution, all job-history projections, and frontend compatibility mapping. Frontend tests are selected through frontendRelated and run by Vitest.",
+      "patterns": [
+        "core/biof3-server/db.js",
+        "core/biof3-server/api-data.js",
+        "core/biof3-server/agent-tools/learning.js",
+        "core/biof3-server/agent-tools/result-edit-tools.js",
+        "core/biof3-server/mcp/registry.js",
+        "core/biof3-server/routes/ai-legacy.js",
+        "core/biof3-server/routes/harness.js",
+        "core/biof3-server/routes/result-studio.js",
+        "core/biof3-server/routes/tools-metadata.js",
+        "frontend/src/lib/project-types.ts",
+        "frontend/src/lib/project-store.ts",
+        "frontend/src/components/copilot/copilotClient.ts",
+        "frontend/src/components/copilot/SimpleChat.tsx"
+      ],
+      "tests": [
+        "test/tool-job-conversation.test.mjs",
+        "test/execution-conversation-threading.test.mjs",
+        "test/scientific-task-persistence.test.mjs",
+        "test/g0-api-route.test.mjs",
+        "test/agent-approval.test.mjs",
+        "test/agent-run-tool.test.mjs",
+        "test/result-selection-tools.test.mjs",
+        "test/result-replay-service.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "ux1g2-conversation-result-switcher",
+      "note": "Current-conversation result discovery and title-bar switching must preserve exact conversation identity, deep-link scope, and the existing Result Studio selection contract. Frontend tests are selected through frontendRelated and run by Vitest.",
+      "patterns": [
+        "frontend/src/pages/project-workspace.tsx",
+        "frontend/src/pages/project-workspace.module.css",
+        "frontend/src/hooks/useConversationJobs.ts",
+        "frontend/src/hooks/useWorkspacePanels.ts",
+        "frontend/src/components/desktop/TitleBar.tsx",
+        "frontend/src/components/desktop/TitleBar.module.css",
+        "frontend/src/lib/project-store.ts",
+        "core/biof3-server/routes/tools-metadata.js"
+      ],
+      "tests": [
+        "test/tool-job-conversation.test.mjs",
+        "test/g0-api-route.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "ux1h-async-tool-surface",
+      "note": "UX1H keeps the real conversation-run timeout shape, successful run_tool presentation, deterministic development Electron airway observation, and its non-qualifying evidence under one focused gate. g0-sdc1 脚本的脚本分类唯一归属 script-g0-maintained（一脚本一分类），其回归覆盖经 sdc1-data-to-first-result 规则选择。",
+      "patterns": [
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/components/copilot/SimpleChat.test.tsx",
+        "frontend/src/components/copilot/ToolActivityDock.tsx",
+        "frontend/src/components/copilot/ToolActivityDock.test.tsx",
+        "frontend/src/components/copilot/toolSummaryPresentation.ts",
+        "scripts/g0-rs-ux1h-*",
+        "acceptance/g0-rs-ux1h/**"
+      ],
+      "tests": [
+        "test/g0-rs-ux1h-acceptance.test.mjs",
+        "test/g0-sdc1-local-gateway.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "current-result-studio"
+    },
+    {
+      "id": "g0-baseline",
+      "patterns": [
+        "core/shared-backend/g0-*.js",
+        "core/shared-backend/g0/**",
+        "test/g0-*.test.mjs",
+        "test/fixtures/g0-**/**"
+      ],
+      "tests": [
+        "test/g0-baseline.test.mjs",
+        "test/g0-project-baseline.test.mjs",
+        "test/g0-api-route.test.mjs",
+        "test/g0-first-wave.test.mjs",
+        "test/g0-second-wave.test.mjs",
+        "test/g0-third-wave.test.mjs",
+        "test/g0-fourth-wave.test.mjs",
+        "test/g0-fifth-wave.test.mjs",
+        "test/g0-baseline-qualification.test.mjs",
+        "test/g0-qualification-gate.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "provider",
+      "patterns": [
+        "core/shared-backend/llm-*.js",
+        "core/shared-backend/model-*.js",
+        "core/shared-backend/llm-providers/**",
+        "core/biof3-server/agent-tools/vision-tools.js"
+      ],
+      "tests": [
+        "test/model-gateway.test.mjs",
+        "test/model-profile.test.mjs",
+        "test/provider-protocol.test.mjs",
+        "test/provider-streaming.test.mjs",
+        "test/anthropic-provider.test.mjs",
+        "test/harness-provider-eval.test.mjs",
+        "test/agent-provider-boundary.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "diagnostic-redaction",
+      "note": "Agent result and evidence redaction changes must exercise both generic diagnostic scrubbing and Agent tool-result projections.",
+      "patterns": [
+        "core/shared-backend/redaction.js"
+      ],
+      "tests": [
+        "test/diagnostic-redaction.test.mjs",
+        "test/agent-tool-result.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "chf0-critical",
+      "patterns": [
+        "src/main.js",
+        "core/biof3-server/helpers/process-lifecycle.js",
+        "core/biof3-server/helpers/tools-executor.js",
+        "core/biof3-server/routes/files.js",
+        "core/biof3-server/routes/r-compute.js",
+        "core/biof3-server/routes/tools-platform.js",
+        "core/shared-backend/local-request-boundary.js",
+        "resources/built-in-plugins/pca-explorer/**",
+        "resources/built-in-plugins/volcano-plot/**"
+      ],
+      "tests": [
+        "test/g0-chf0-http.test.mjs",
+        "test/g0-chf0-science.test.mjs",
+        "test/g0-chf0-lifecycle.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "block59-window-manager",
+      "note": "BLOCK-59 窗口系统：窗口管理器核心（状态机/注册表/路由白名单/geometry）+ Electron 适配器 IPC 面。改动即跑核心单测（含适配器/preload/main.js 静态契约锁）。",
+      "patterns": [
+        "src/main/_window-manager.js",
+        "src/ipc/window-manager.js"
+      ],
+      "tests": [
+        "test/block59-window-manager.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "block48-computer-use-sidecar",
+      "note": "BLOCK-48 电脑控制：Swift sidecar 源码与协议契约测试。改动即跑契约测试（前置构建：bash scripts/build-computer-use-sidecar.sh）。",
+      "patterns": [
+        "sidecars/computer-use/Package.swift",
+        "sidecars/computer-use/Sources/**",
+        "scripts/build-computer-use-sidecar.sh",
+        "test/block48-sidecar-contract.test.mjs"
+      ],
+      "tests": [
+        "test/block48-sidecar-contract.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "plugin-runtime",
+      "patterns": [
+        "resources/built-in-plugins/**",
+        "core/biof3-server/plugin-loader.js",
+        "core/biof3-server/mcp/**",
+        "core/biof3-server/tool-registry.js",
+        "core/biof3-server/tool-scripts/**",
+        "src/plugin-manager.js"
+      ],
+      "tests": [
+        "test/plugin-sdk.test.mjs",
+        "test/plugin-manifest-schema.test.mjs",
+        "test/plugin-loader-refresh.test.mjs",
+        "test/capability-bundles.test.mjs",
+        "test/capability-bundle-wiring.test.mjs",
+        "test/capability-provisioning.test.mjs",
+        "test/mcp-plugin-autoload.test.mjs",
+        "test/mcp-builtin-discovery.test.mjs",
+        "test/mcp-tool-registry.test.mjs",
+        "test/harness-manifest.test.mjs",
+        "test/harness-tool-template.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "electron-runtime",
+      "patterns": [
+        "src/**",
+        "build/**",
+        "core/biof3-server/db.js",
+        "src/migrations/**",
+        "electron-builder.yml"
+      ],
+      "tests": [
+        "test/mcp-server.test.mjs",
+        "test/mcp-server-autoload.test.mjs",
+        "test/mcp-bin-e2e.test.mjs",
+        "test/mcp-tool-registry.test.mjs",
+        "test/platform-compat.test.mjs",
+        "test/migration-runner.test.mjs",
+        "test/backend-health.test.mjs",
+        "test/credential-store.test.mjs",
+        "test/terminal-multisession-ipc.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "backend-fallback",
+      "patterns": [
+        "core/biof3-server/**",
+        "core/packages/**",
+        "core/shared-backend/storage/**",
+        "core/shared-backend/path-safe.js",
+        "core/shared-backend/local-request-boundary.js"
+      ],
+      "tests": [
+        "test/backend-health.test.mjs",
+        "test/tools-input-validation.test.mjs",
+        "test/tools-executor-job-context.test.mjs",
+        "test/artifact-truth.test.mjs",
+        "test/project-sandbox-compat.test.mjs",
+        "test/project-sandbox-artifacts.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "release-contract",
+      "patterns": [
+        "release-contract.json",
+        "release/**",
+        "scripts/build-r-bundle.mjs",
+        "scripts/fix-r-paths.*",
+        "scripts/install-core-deps.mjs",
+        "scripts/publish-*.mjs",
+        "scripts/publish-*.sh",
+        "scripts/release-*.mjs",
+        "scripts/validate-runtime-first-use.cjs"
+      ],
+      "tests": [
+        "test/release-contract.test.mjs",
+        "test/oss-auto-update.test.mjs",
+        "test/macos-oss-updater.test.mjs",
+        "test/capability-bundles.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "release-runtime"
+    },
+    {
+      "id": "script-provision",
+      "patterns": [
+        "scripts/install-r-tool-dependencies.mjs",
+        "scripts/provision-*.mjs",
+        "scripts/upload-*.mjs"
+      ],
+      "tests": [
+        "test/release-contract.test.mjs",
+        "test/capability-bundles.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "provision"
+    },
+    {
+      "id": "script-build",
+      "patterns": [
+        "scripts/build-macos-*.mjs",
+        "scripts/build-win-*.mjs",
+        "scripts/verify-*.mjs",
+        "scripts/resume-*.mjs",
+        "scripts/build-computer-use-sidecar.sh",
+        "scripts/dev/verify-toolchain.mjs"
+      ],
+      "tests": [
+        "test/release-contract.test.mjs",
+        "test/capability-bundles.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "build-runtime"
+    },
+    {
+      "id": "script-result-current",
+      "patterns": [
+        "scripts/g0-rs-p*.mjs",
+        "scripts/g0-rs-p*.cjs"
+      ],
+      "tests": [
+        "test/result-studio-qualification.test.mjs",
+        "test/result-studio-context.test.mjs",
+        "test/agent-tool-registry.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "current-result-studio"
+    },
+    {
+      "id": "script-result-historical",
+      "patterns": [
+        "scripts/g0-rs6-*",
+        "scripts/g0-rs7-*",
+        "scripts/g0-rs8-*",
+        "scripts/g0-rs9-*"
+      ],
+      "tests": [
+        "test/result-studio-qualification.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "historical-result-studio"
+    },
+    {
+      "id": "script-g0-maintained",
+      "patterns": [
+        "scripts/g0-start-*",
+        "scripts/g0-lf0-*",
+        "scripts/g0-first-*",
+        "scripts/g0-second-*",
+        "scripts/g0-third-*",
+        "scripts/g0-fourth-*",
+        "scripts/g0-fifth-*",
+        "scripts/g0-qualification-*",
+        "scripts/g0-sdc0-*",
+        "scripts/g0-sdc1-*"
+      ],
+      "tests": [
+        "test/g0-baseline.test.mjs",
+        "test/g0-baseline-qualification.test.mjs",
+        "test/g0-qualification-gate.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "maintained-g0"
+    },
+    {
+      "id": "script-harness",
+      "patterns": [
+        "scripts/harness-*.mjs",
+        "scripts/plugin-contract-lint.js",
+        "scripts/scaffold-harness-tool.mjs"
+      ],
+      "tests": [
+        "test/harness-manifest.test.mjs",
+        "test/harness-tool-template.test.mjs",
+        "test/agent-workflow.test.mjs",
+        "test/harness-workflow-fixtures.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "harness"
+    },
+    {
+      "id": "script-governance",
+      "patterns": [
+        "scripts/lib/gate-report-schema.mjs",
+        "scripts/docs-governance.mjs",
+        "scripts/check-*.mjs",
+        "scripts/test-affected.mjs",
+        "scripts/verify-schema.js"
+      ],
+      "tests": [
+        "test/docs-governance.test.mjs",
+        "test/test-affected.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "governance"
+    },
+    {
+      "id": "script-dev-and-smoke",
+      "patterns": [
+        "scripts/dev-*.js",
+        "scripts/dev-*.mjs",
+        "scripts/dev-*.sh",
+        "scripts/golden-path.mjs",
+        "scripts/lib/dev-launch-state.js",
+        "scripts/qa-smoke.mjs"
+      ],
+      "tests": [
+        "test/qa-smoke.test.mjs",
+        "test/run-json.test.mjs",
+        "test/backend-health.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
+    },
+    {
+      "id": "script-ipc-profiling",
+      "patterns": [
+        "scripts/ipc-backpressure-profile.mjs",
+        "scripts/cdp-wrap.cjs",
+        "scripts/generate-ipc-catalog-md.mjs",
+        "scripts/validate-ipc-catalog.mjs"
+      ],
+      "tests": [
+        "test/backend-health.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "ipc-profiling"
+    },
+    {
+      "id": "script-working-tree-review",
+      "patterns": [
+        "scripts/block-16-working-tree-review.mjs"
+      ],
+      "tests": [
+        "test/docs-governance.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "governance"
+    },
+    {
+      "id": "script-block-20-code-review",
+      "patterns": [
+        "scripts/block-20-code-review-panel.mjs"
+      ],
+      "tests": [
+        "test/git-adapter.test.mjs",
+        "test/git-adapter-block20-per-hunk.test.mjs",
+        "test/system-prompt-rejects.test.mjs",
+        "test/docs-governance.test.mjs"
+      ],
+      "commands": [
+        "docs-check",
+        "ui-audit",
+        "frontend-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "governance"
+    },
+    {
+      "id": "perf-probe",
+      "patterns": [
+        "core/biof3-server/helpers/perf-probe.js",
+        "core/biof3-server/routes/perf-probe.js",
+        "core/biof3-server/bootstrap.js",
+        "core/biof3-server/server.js"
+      ],
+      "tests": [
+        "test/perf-probe.test.mjs",
+        "test/backend-health.test.mjs",
+        "test/p4r-capture.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "p4r-capture",
+      "note": "The P4R capture, live journey and renderer producers also match script-result-current, which classifies them. This rule adds their real harness tests so evidence drift cannot hide behind qualification-only checks.",
+      "patterns": [
+        "scripts/g0-rs-p4r-capture.mjs",
+        "scripts/g0-rs-p4r-corpus.mjs",
+        "scripts/g0-rs-p4r-baseline.mjs",
+        "scripts/g0-rs-p4r-acceptance.mjs",
+        "scripts/g0-rs-p4r-product-acceptance.mjs",
+        "scripts/g0-rs-p4r-source-observation.mjs",
+        "scripts/g0-rs-p4r-live-observation.mjs",
+        "scripts/g0-rs-p4r-ui-observation.mjs",
+        "scripts/g0-rs-p4r-ui-driver.cjs"
+      ],
+      "tests": [
+        "test/p4r-capture.test.mjs",
+        "test/p4r-corpus.test.mjs",
+        "test/p4r-baseline.test.mjs",
+        "test/p4r-live-observation.test.mjs",
+        "test/p4r-ui-observation.test.mjs",
+        "test/perf-probe.test.mjs",
+        "test/result-revision-source.test.mjs",
+        "test/result-replay-service.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "p5-real-scientific-editing",
+      "note": "The P5 producer and its source-bound evidence must select the complete focused scientific-editing contract bundle. The producer already has one script classification through script-result-current; this rule adds its direct verifier and every P5 Truth, validator, cohort, replay and scientific-diff regression.",
+      "patterns": [
+        "scripts/g0-rs-p5-acceptance.mjs",
+        "acceptance/g0-result-studio/rs-p5-scientific-editing.json"
+      ],
+      "tests": [
+        "test/g0-rs-p5-acceptance.test.mjs",
+        "test/agent-run-tool.test.mjs",
+        "test/agent-tool-registry.test.mjs",
+        "test/artifact-truth.test.mjs",
+        "test/execution-provenance.test.mjs",
+        "test/git-adapter.test.mjs",
+        "test/result-changeset-service.test.mjs",
+        "test/result-compare-service.test.mjs",
+        "test/result-edit-agent-tool.test.mjs",
+        "test/result-edit-controls.test.mjs",
+        "test/result-edit-intent.test.mjs",
+        "test/result-plugin-validator.test.mjs",
+        "test/result-replay-service.test.mjs",
+        "test/result-revision-replay-package.test.mjs",
+        "test/result-revision-source.test.mjs",
+        "test/result-scientific-compare.test.mjs",
+        "test/result-scientific-rerun.test.mjs",
+        "test/result-selection-tools.test.mjs",
+        "test/result-studio-context.test.mjs",
+        "test/result-studio-lifecycle.test.mjs",
+        "test/result-studio-migration.test.mjs",
+        "test/result-studio-plugin-sdk.test.mjs",
+        "test/result-studio-repository.test.mjs",
+        "test/result-workflow-graph.test.mjs",
+        "test/scientific-replay-package.test.mjs",
+        "test/test-affected.test.mjs",
+        "test/tools-executor-job-context.test.mjs",
+        "test/tools-input-validation.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "p6-ui110-electron-scientific-trace",
+      "note": "The P6 UI-110 producer and source-bound evidence select their direct Electron adapter, context transport, candidate-cohort reopen, artifact-family hydration, and redaction regressions without starting the long trace.",
+      "patterns": [
+        "scripts/g0-rs-p6-ui110-observation.mjs",
+        "scripts/g0-rs-p6-ui110-driver.cjs",
+        "scripts/g0-rs-p6-ui110-local-gateway.mjs",
+        "frontend/src/components/result-studio/activeArtifactProjection.ts",
+        "frontend/src/components/result-studio/activeArtifactProjection.test.ts",
+        "acceptance/g0-result-studio/rs-p6-ui110-electron-scientific-trace.json",
+        "acceptance/g0-result-studio/rs-p6-ui110-electron/**"
+      ],
+      "tests": [
+        "test/g0-rs-p6-ui110-observation.test.mjs",
+        "test/g0-rs-p6-ui110-local-gateway.test.mjs",
+        "test/result-studio-route-baseline.test.mjs",
+        "test/result-studio-agent-binding.test.mjs",
+        "test/result-studio-context.test.mjs",
+        "test/agent-tool-result.test.mjs",
+        "test/diagnostic-redaction.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "p6-service-recovery-pressure-fixture",
+      "note": "The non-qualifying P6-1a synthetic service fixture and its optional checkpoint select source binding, runtime-lease, exact-cohort, lifecycle, background-process and public redaction regressions; this rule does not represent full P6 product acceptance.",
+      "patterns": [
+        "scripts/g0-rs-p6-recovery-acceptance.mjs",
+        "acceptance/g0-result-studio/rs-p6-service-recovery-pressure-checkpoint.json"
+      ],
+      "tests": [
+        "test/g0-rs-p6-recovery-acceptance.test.mjs",
+        "test/result-changeset-service.test.mjs",
+        "test/result-studio-lifecycle.test.mjs",
+        "test/result-studio-background.test.mjs",
+        "test/result-studio-route-baseline.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "p6-runtime-durability-resources",
+      "note": "Exact P6 runtime-lease and resource-accounting paths add their direct lifecycle, persistence and aggregation regressions. Result Studio-named files may also match the shared Result Studio bundle; the standalone sampler must never rely on that broad pattern.",
+      "patterns": [
+        "core/shared-backend/result-studio-runtime-lease.js",
+        "core/shared-backend/result-studio-resource-summary.js",
+        "core/shared-backend/tool-resource-sampler.js"
+      ],
+      "tests": [
+        "test/result-studio-lifecycle.test.mjs",
+        "test/result-studio-background.test.mjs",
+        "test/result-studio-resource-summary.test.mjs",
+        "test/tool-resource-sampler.test.mjs",
+        "test/tools-executor-job-context.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "p6-real-restart-prototype",
+      "note": "The bounded real stop/failure/drift/SIGKILL restart prototype selects its direct fail-closed verdict and opt-in runtime regression without running the expensive scenarios by default.",
+      "patterns": [
+        "scripts/g0-rs-p6-real-restart-prototype.mjs"
+      ],
+      "tests": [
+        "test/g0-rs-p6-real-restart-prototype.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "p6-electron-pressure-prototype",
+      "note": "The development Electron 100k-row, media, long-report and multi-Revision pressure producer, driver and non-closeout checkpoint select their direct source-binding, budget and renderer regression.",
+      "patterns": [
+        "scripts/g0-rs-p6-electron-pressure-prototype.mjs",
+        "scripts/g0-rs-p6-electron-pressure-driver.cjs",
+        "acceptance/g0-result-studio/rs-p6-electron-pressure-multirevision.json"
+      ],
+      "tests": [
+        "test/g0-rs-p6-electron-pressure-prototype.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "p6-recovery-electron-prototype",
+      "note": "The development Electron interruption/relaunch prototype and hardened driver select their direct explanation, recovery-request, process-boundary and sanitizer regression.",
+      "patterns": [
+        "scripts/g0-rs-p6-recovery-electron-prototype.mjs",
+        "scripts/g0-rs-p6-recovery-electron-driver.cjs"
+      ],
+      "tests": [
+        "test/g0-rs-p6-recovery-electron-prototype.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "p6-product-scenarios",
+      "note": "The bounded real resource queue, stale adoption, controlled transport and GC/cold-readback scenarios select their direct evaluator without starting the opt-in live run.",
+      "patterns": [
+        "scripts/g0-rs-p6-product-scenarios.mjs"
+      ],
+      "tests": [
+        "test/g0-rs-p6-product-scenarios.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "p6-canonical-source-binding",
+      "note": "Every source byte eligible for the canonical P6 binding selects the fast recomputing verifier. The bounded broad prefixes are intentional: a future source-map addition inside the same runtime surfaces must fail closed until evidence is refreshed, while the expensive live matrix remains opt-in.",
+      "patterns": [
+        "core/biof3-server/**",
+        "core/shared-backend/**",
+        "frontend/src/**",
+        "frontend/vite.config.ts",
+        "frontend/package.json",
+        "frontend/package-lock.json",
+        "package.json",
+        "package-lock.json",
+        "resources/built-in-plugins/deseq2/**",
+        "resources/built-in-plugins/gene-correlation/**",
+        "resources/built-in-plugins/go-kegg/**",
+        "resources/built-in-plugins/volcano-plot/**",
+        "scripts/g0-rs-p4r-capture.mjs",
+        "scripts/g0-rs-p5-acceptance.mjs",
+        "scripts/g0-rs-p6-*",
+        "src/backend-health.js",
+        "src/migration-runner.js",
+        "src/migrations/001_result_studio.sql",
+        "src/migrations/002_result_workflow_graph.sql",
+        "src/migrations/003_result_ref_transactions.sql",
+        "src/preload.js",
+        "test/**"
+      ],
+      "tests": [
+        "test/g0-rs-p6-product-acceptance.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "p6-product-durability-recovery-performance",
+      "note": "The canonical P6 producer and stored source-bound evidence select the direct recomputing verifier plus every component, durability, resource and private-artifact route regression. The default gate verifies stored observations; only the explicit update command runs the long real matrix.",
+      "patterns": [
+        "scripts/g0-rs-p6-product-acceptance.mjs",
+        "acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json"
+      ],
+      "tests": [
+        "test/g0-chf0-lifecycle.test.mjs",
+        "test/g0-rs-p6-product-acceptance.test.mjs",
+        "test/g0-rs-p6-real-restart-prototype.test.mjs",
+        "test/g0-rs-p6-electron-pressure-prototype.test.mjs",
+        "test/g0-rs-p6-recovery-electron-prototype.test.mjs",
+        "test/g0-rs-p6-product-scenarios.test.mjs",
+        "test/g0-rs-p6-recovery-acceptance.test.mjs",
+        "test/git-adapter.test.mjs",
+        "test/result-changeset-service.test.mjs",
+        "test/result-compare-service.test.mjs",
+        "test/result-ref-transaction.test.mjs",
+        "test/result-selection-tools.test.mjs",
+        "test/result-studio-lifecycle.test.mjs",
+        "test/result-studio-background.test.mjs",
+        "test/result-studio-migration.test.mjs",
+        "test/result-studio-repository.test.mjs",
+        "test/result-studio-resource-summary.test.mjs",
+        "test/result-studio-table-query.test.mjs",
+        "test/tool-resource-sampler.test.mjs",
+        "test/tools-executor-job-context.test.mjs",
+        "test/artifact-truth.test.mjs",
+        "test/result-studio-route-baseline.test.mjs",
+        "test/test-affected.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "p7-honest-product-requalification",
+      "note": "The P7 source-bound producer is the only current Result Studio qualification owner. Default tests verify its independently resolvable fact-bundle contract and packaged CDP adapter; the explicit update gate alone builds and drives the real arm64 package with two configured Provider classes.",
+      "patterns": [
+        "scripts/g0-rs-p7-acceptance.mjs",
+        "scripts/g0-rs-p7-cdp.cjs",
+        "core/shared-backend/result-studio-qualification.js",
+        "core/shared-backend/result-studio-evidence-bundle.js",
+        "acceptance/g0-result-studio/rs-p7-honest-product-requalification.json",
+        "acceptance/g0-result-studio/rs-p7-evidence/**",
+        "acceptance/g0-result-studio/rs-p7-packaged-ui/**"
+      ],
+      "tests": [
+        "test/g0-rs-p7-acceptance.test.mjs",
+        "test/g0-rs-p7-cdp.test.mjs",
+        "test/ai-settings-credential.test.mjs",
+        "test/result-studio-qualification.test.mjs",
+        "test/result-studio-evidence-bundle.test.mjs",
+        "test/result-studio-agent-binding.test.mjs",
+        "test/system-prompt-result-context.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "acceptance-result-studio",
+      "patterns": [
+        "acceptance/g0-result-studio/**"
+      ],
+      "tests": [
+        "test/result-studio-qualification.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "acceptance-harness-loop",
+      "patterns": [
+        "acceptance/harness-loop/**"
+      ],
+      "tests": [
+        "test/loop-fixtures.test.mjs",
+        "test/loop-spt1-acceptance.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "acceptance-script-owned",
+      "note": "Evidence trees with no Node test reader. Their owning npm gate regenerates and verifies them, so changing the stored evidence selects no test. Listed explicitly so a new acceptance/<tree> stays unmapped and fails closed until its verification owner is declared.",
+      "patterns": [
+        "acceptance/g0-living-foundation/**",
+        "acceptance/g0-qualification/**",
+        "acceptance/g0-scientific-data-contract/**",
+        "acceptance/harness-phase7/**",
+        "acceptance/harness-plugin-prototype/**",
+        "acceptance/harness-plugins/**",
+        "acceptance/harness-scientific-task/**",
+        "acceptance/ui-032/**",
+        "acceptance/ui-034/**",
+        "acceptance/MODEL-ANTHROPIC-NATIVE/**",
+        "acceptance/ui-199/**",
+        "acceptance/ui-200/**",
+        "acceptance/ui-128/**",
+        "acceptance/ui-127/**",
+        "acceptance/ui-126/**",
+        "acceptance/ui-111/**",
+        "acceptance/ui-109/**",
+        "acceptance/ui-108/**",
+        "acceptance/ui-103/**",
+        "acceptance/ui-052/**",
+        "acceptance/ui-044/**",
+        "acceptance/ui-042/**",
+        "acceptance/ui-041/**",
+        "acceptance/ui-040/**",
+        "acceptance/ui-039/**",
+        "acceptance/ui-038/**",
+        "acceptance/ui-037/**",
+        "acceptance/ui-036/**",
+        "acceptance/startup-runtime/**",
+        "acceptance/agent-concurrency/**",
+        "acceptance/ui-193/**",
+        "acceptance/ui-194/**",
+        "acceptance/ui-202/**",
+        "acceptance/ui-203/**",
+        "acceptance/ui-204/**",
+        "acceptance/ui-208/**",
+        "acceptance/ui-210/**",
+        "acceptance/ui-212/**",
+        "acceptance/ui-213/**",
+        "acceptance/ui-214/**",
+        "acceptance/ui-215/**",
+        "acceptance/ui-216/**",
+        "acceptance/ui-217/**",
+        "acceptance/ui-218/**",
+        "acceptance/ui-219/**",
+        "acceptance/ui-220/**",
+        "acceptance/ui-221/**",
+        "acceptance/ui-223/**",
+        "acceptance/ui-224/**",
+        "acceptance/ui-225/**",
+        "acceptance/ui-226/**",
+        "acceptance/ui-227/**",
+        "acceptance/ui-228/**",
+        "acceptance/ui-229/**",
+        "acceptance/ui-230/**",
+        "acceptance/ui-231/**",
+        "acceptance/ui-233/**",
+        "acceptance/ui-234/**",
+        "acceptance/ui-235/**",
+        "acceptance/ui-236/**",
+        "acceptance/ui-237/**",
+        "acceptance/ui-238/**",
+        "acceptance/ui-239/**",
+        "acceptance/ui-240/**",
+        "acceptance/ui-241/**",
+        "acceptance/ui-242/**",
+        "acceptance/ui-243/**",
+        "acceptance/ui-244/**",
+        "acceptance/ui-246/**",
+        "acceptance/ui-263/**",
+        "acceptance/ui-264/**",
+        "acceptance/ui-265/**",
+        "acceptance/ui-266/**",
+        "acceptance/ui-267/**",
+        "acceptance/ui-268/**",
+        "acceptance/ui-269/**",
+        "acceptance/ui-270/**",
+        "acceptance/ui-271/**",
+        "acceptance/ui-272/**",
+        "acceptance/ui-273/**",
+        "acceptance/ui-274/**",
+        "acceptance/ui-275/**",
+        "acceptance/ui-276/**",
+        "acceptance/ui-277/**",
+        "acceptance/ui-278/**",
+        "acceptance/agent-stream-disconnected-fix/**",
+        "acceptance/block-45/**",
+        "acceptance/block-46/**",
+        "acceptance/block-47/**",
+        "acceptance/block-50/**",
+        "acceptance/block-51/**",
+        "acceptance/block-60/**",
+        "acceptance/ui-305/**",
+        "acceptance/ui-306/**",
+        "acceptance/ui-308/**",
+        "acceptance/ui-309/**",
+        "acceptance/ui-310/**",
+        "acceptance/ui-311/**"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "acceptance-chf0",
+      "patterns": [
+        "acceptance/g0-critical-crosscut-hardening/**",
+        "scripts/g0-chf0-acceptance.mjs"
+      ],
+      "tests": [
+        "test/g0-chf0-http.test.mjs",
+        "test/g0-chf0-science.test.mjs",
+        "test/g0-chf0-lifecycle.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "critical-crosscut-hardening"
+    },
+    {
+      "id": "ide-git-tools",
+      "note": "Phase 3 IDE MCP git tools (git-diff / git-log / git-show / git-blame) are exercised by the dedicated test files. The new test files are also auto-selected by test-infrastructure through test/**.",
+      "patterns": [
+        "core/biof3-server/mcp/ide-tools/git-diff.js",
+        "core/biof3-server/mcp/ide-tools/git-log.js",
+        "core/biof3-server/mcp/ide-tools/git-show.js",
+        "core/biof3-server/mcp/ide-tools/git-blame.js",
+        "core/biof3-server/mcp/ide-tools/diff-helpers.js",
+        "test/ide-tools-git-diff.test.mjs",
+        "test/ide-tools-git-log.test.mjs",
+        "test/ide-tools-git-show.test.mjs",
+        "test/ide-tools-git-blame.test.mjs"
+      ],
+      "tests": [
+        "test/ide-tools-git-diff.test.mjs",
+        "test/ide-tools-git-log.test.mjs",
+        "test/ide-tools-git-show.test.mjs",
+        "test/ide-tools-git-blame.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "test-infrastructure",
+      "patterns": [
+        "test/**",
+        "test/impact-map.json"
+      ],
+      "tests": [
+        "test/test-affected.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "metadata-config",
+      "patterns": [
+        "package.json",
+        "package-lock.json",
+        "tsconfig*.json",
+        ".github/**",
+        "CHANGELOG.md"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "tests": [
+        "test/test-affected.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "script-block-live-drivers",
+      "note": "BLOCK 实机 CDP 驱动与探针（acceptance/block-N 证据采集），一次性证据脚本按 development-smoke 分类。 BLOCK-57 实机 SSH 全链驱动（aliyun 真实节点 + in-app 分派）同分类。",
+      "patterns": [
+        "acceptance/block-49/**",
+        "acceptance/block-52/**",
+        "acceptance/block-53/**",
+        "acceptance/block-54/**",
+        "acceptance/block-56/**",
+        "scripts/block49-*.cjs",
+        "scripts/block49-*.mjs",
+        "scripts/block52-*.cjs",
+        "scripts/block52-*.mjs",
+        "scripts/block54-*.cjs",
+        "scripts/block54-*.mjs",
+        "scripts/block56-*.cjs",
+        "scripts/block56-*.mjs",
+        "acceptance/block-57/**",
+        "scripts/block57-*.cjs",
+        "scripts/block57-*.mjs",
+        "acceptance/block-59/**",
+        "scripts/block59-*.cjs",
+        "acceptance/block-61/**",
+        "scripts/block61-*.cjs",
+        "acceptance/block-48/**",
+        "scripts/block48-*.cjs",
+        "acceptance/block-55/**",
+        "scripts/block55-*.cjs",
+        "scripts/block55-*.mjs",
+        "scripts/ui310-*.cjs",
+        "scripts/ui305-*.cjs",
+        "scripts/block63-*.cjs",
+        "scripts/block63-*.mjs",
+        "acceptance/block-66/**",
+        "scripts/block66-*.cjs",
+        "scripts/block66-*.mjs",
+        "scripts/ui315-*.cjs",
+        "scripts/ui317-*.cjs",
+        "scripts/block68-*.cjs",
+        "scripts/block69-*.cjs",
+        "scripts/ui320-*.cjs",
+        "scripts/block67-*.cjs",
+        "scripts/ui322-*.cjs",
+        "scripts/ui323-*.cjs",
+        "scripts/ui328-*.cjs",
+        "acceptance/ui-325/**",
+        "acceptance/ui-326/**",
+        "acceptance/ui-327/**",
+        "acceptance/ui-328/**",
+        "acceptance/ui-329/**",
+        "acceptance/ui-323/**",
+        "acceptance/block-67/**",
+        "acceptance/block-64/**",
+        "acceptance/block-65/**",
+        "acceptance/block-68/**",
+        "acceptance/block-69/**",
+        "acceptance/ui-315/**",
+        "acceptance/ui-320/**",
+        "acceptance/ui-322/**",
+        "acceptance/ui-ledger-closeout/**"
+      ],
+      "tests": [
+        "test/test-affected.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
+    },
+    {
+      "id": "block63-windows-computer-use-host",
+      "note": "BLOCK-63 P3 编排注册：Windows sidecar 托管（computer-use-host 平台门/双平台定位）+ computer_* 工具 handler 确认门真链。改动即跑 host 契约测试（前置：sidecar 已构建）。",
+      "patterns": [
+        "core/biof3-server/helpers/computer-use-host.js",
+        "core/biof3-server/agent-tools/computer-use-tools.js",
+        "test/block63-computer-host.test.mjs"
+      ],
+      "tests": [
+        "test/block63-computer-host.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "block66-runtime-decouple",
+      "note": "BLOCK-66 运行时解耦：R 硬门摘除（biof3-server 无 R 可用）。改动即跑 backend-health 语义拆分测试。",
+      "patterns": [
+        "src/main/backend-proc-manager.js",
+        "src/backend-health.js",
+        "src/ipc/runtime-status.js",
+        "test/backend-health.test.mjs"
+      ],
+      "tests": [
+        "test/backend-health.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "block63-windows-computer-use-sidecar",
+      "note": "BLOCK-63 Windows 电脑控制：C#/FlaUI sidecar 源码与协议契约测试。改动即跑契约测试（前置构建：powershell sidecars/computer-use-windows/build.ps1）。 live 脚本 scripts/block63-*.cjs 归 script-block-live-drivers 分类。",
+      "patterns": [
+        "sidecars/computer-use-windows/ComputerUseWindows.csproj",
+        "sidecars/computer-use-windows/*.cs",
+        "sidecars/computer-use-windows/build.ps1",
+        "test/block63-sidecar-contract.test.mjs",
+        "acceptance/block-63/**"
+      ],
+      "tests": [
+        "test/block63-sidecar-contract.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "script-dev-infra",
+      "note": "BLOCK-71 开发基础设施沉淀：会话状态/卫生检查/收口聚合/dev-verify 底座（canonical 家在 gewu-dev-infra skill 内）。工具自身改动跑 test/dev-verify.test.mjs + 冒烟（npm run state / hygiene:check / skills:check）。",
+      "patterns": [
+        ".agents/skills/gewu-dev-infra/**",
+        "scripts/skill-scaffold.mjs",
+        "test/dev-verify.test.mjs"
+      ],
+      "tests": [
+        "test/dev-verify.test.mjs"
+      ],
+      "classifiesScripts": true
+    },
+    {
+      "id": "block75-oslevel-acceptance",
+      "note": "BLOCK-75 OS 级验收：原生另存为对话框 flow（EnumWindows 定位 + sidecar hwnd 直投）+ P0 抓真修的 diagnostic:export 链（相对 require 漂移）。改动即跑 ipc 相对 require 门禁 + redaction 契约。",
+      "patterns": [
+        "src/ipc/diagnostic.js",
+        "src/diagnostic-redaction.js",
+        "scripts/block75-*.cjs",
+        "scripts/block75-*.ps1",
+        "scripts/lib-block75-os.cjs",
+        ".agents/skills/gewu-dev-infra/dev-verify/flows/os-save-dialog.cjs",
+        "acceptance/block-75/**"
+      ],
+      "tests": [
+        "test/ipc-relative-requires.test.mjs",
+        "test/diagnostic-redaction.test.mjs",
+        "test/dev-verify.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
+    },
+    {
+      "id": "block76-ssh-native-execution",
+      "note": "BLOCK-76 P1 SSH 直跑执行链：ssh-direct-runner（gateway 写编排面/exec_bg/.exit 终态/进程组取消）+ tools-executor ssh 分支 + mcp registry 收编。改动即跑 runner 零网络契约测试。",
+      "patterns": [
+        "core/biof3-server/helpers/remote-execution/ssh-direct-runner.js",
+        "test/ssh-direct-runner.test.mjs",
+        "scripts/block76-*.cjs",
+        "acceptance/block-76/**"
+      ],
+      "tests": [
+        "test/ssh-direct-runner.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
+    },
+    {
+      "id": "block77-resident-tasks",
+      "note": "BLOCK-77 驻留任务：意图卡创建/列举/读取工具与定义契约。改动即跑 block77 契约测试。",
+      "patterns": [
+        "scripts/block77-*.cjs",
+        "acceptance/block-77/**"
+      ],
+      "tests": [
+        "test/block77-resident-tasks.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
+    },
+    {
+      "id": "block79-token-speed",
+      "note": "BLOCK-79 按供应商的 token 输出速率：ai_usage provider 归因列（additive）+ model-gateway attempt 级注入 + summarizeProviderUsage 成对聚合（端到端平均输出速率口径·embedding 排除·zero-usage 不可算）+ usage-mine providers 分组段 + 设置页供应商速率表。",
+      "patterns": [
+        "core/biof3-server/helpers/ai-usage.js",
+        "core/biof3-server/routes/ai-misc.js",
+        "core/biof3-server/helpers/project-storage.js",
+        "core/biof3-server/shared-backend/llm-providers/model-gateway.js",
+        "core/shared-backend/llm-providers/model-gateway.js",
+        "core/shared-backend/llm-providers/deepseek.js",
+        "core/shared-backend/llm-providers/anthropic.js",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/UsageResourcePanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/types.ts",
+        "scripts/block79-*"
+      ],
+      "tests": [
+        "test/ai-usage-provider.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
+    },
+    {
+      "id": "block81-thinking-level",
+      "note": "BLOCK-81 思考档位：映射内核 core/shared-backend/llm-providers/thinking-level.js + 定向测试（P1）。P2 起 composer 控件与后端注入点改动也归本规则。",
+      "patterns": [
+        "core/shared-backend/llm-providers/thinking-level.js",
+        "test/thinking-level.test.mjs"
+      ],
+      "tests": [
+        "test/thinking-level.test.mjs"
+      ]
+    },
+    {
+      "id": "script-dev-stack",
+      "note": "dev 栈/实机验收编排脚本（BLOCK-77 沉淀的 restart-dev-stack.sh + 窗口尺寸辅助）。非产品代码，改动只需跑脚本冒烟（--check/语法），故 tests 挂 dev-verify 契约测试。",
+      "patterns": [
+        "scripts/restart-dev-stack.sh",
+        "scripts/resize-electron-window.ps1"
+      ],
+      "tests": [
+        "test/dev-debug-scripts.test.mjs"
+      ],
+      "classifiesScripts": true
+    }
+  ]
 }
