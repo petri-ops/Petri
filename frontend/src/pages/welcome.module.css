@@ -1,6 +1,7 @@
 /* BLOCK-80 — 欢迎页（ZCode 形态、本项目内容） */
 
 .welcome {
+  position: relative;
   min-height: 100%;
   display: grid;
   place-items: center;
@@ -372,4 +373,29 @@
 .actionHint {
   font-size: var(--gewu-font-size-caption);
   color: var(--gewu-text-secondary);
+}
+
+/* UI-338 — 欢迎页退出按钮（左上角；有历史后退，冷启动进最近项目） */
+.exitRow {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+}
+
+.exitBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border: 1px solid var(--gewu-border-color, transparent);
+  border-radius: 8px;
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  cursor: pointer;
+}
+
+.exitBtn:hover {
+  color: var(--gewu-accent);
+  border-color: var(--gewu-accent);
 }

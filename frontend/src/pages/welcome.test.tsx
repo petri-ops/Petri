@@ -162,6 +162,14 @@ describe('Welcome（BLOCK-80 欢迎页 + UI-337 ZCode 式项目面板）', () =>
     })));
   });
 
+  it('UI-338 退出按钮：渲染于欢迎页左上，点击不崩溃', async () => {
+    renderWelcome();
+    const btn = screen.getByTitle('返回');
+    expect(btn).toBeTruthy();
+    fireEvent.click(btn);
+    // 冷启动（无历史）分支：导航至最近项目工作区（路由内变化，不抛错即可）
+  });
+
   it('快捷 chip 点击填充首问输入框；空输入不可发送', async () => {
     renderWelcome();
     const chip = await screen.findByText('差异分析');

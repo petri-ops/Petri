@@ -201,6 +201,23 @@ export default function Welcome(): React.ReactElement {
 
   return (
     <div className={styles.welcome} aria-label="欢迎页">
+      {/* UI-338 — 退出按钮：欢迎页无左栏/无其他出口；有历史则后退，
+          冷启动（无历史）进最近项目工作区 */}
+      <div className={styles.exitRow}>
+        <button
+          type="button"
+          className={styles.exitBtn}
+          title="返回"
+          onClick={() => {
+            const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
+            if (idx > 0) navigate(-1);
+            else if (projects[0]) navigate(`/project/${projects[0].id}`);
+          }}
+        >
+          <Icon name="arrow-left" size={14} />
+          <span>返回</span>
+        </button>
+      </div>
       <div className={styles.welcomeInner}>
         <h1 className={styles.greeting}>{greeting()}</h1>
         <p className={styles.welcomeSub}>选择项目，直接开始你的分析任务。</p>
