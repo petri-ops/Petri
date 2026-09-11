@@ -1,0 +1,342 @@
+{
+  "name": "block-81-p3-thinking",
+  "startedAt": "2026-09-11T12:45:18.627Z",
+  "finishedAt": "2026-09-11T12:46:01.995Z",
+  "assertions": [
+    {
+      "name": "P0_composer_ready",
+      "pass": true,
+      "detail": "工作区 composer 就绪（project=p_mtuyje22_9vr4）"
+    },
+    {
+      "name": "P1_capability_declared",
+      "pass": true,
+      "detail": "渠道 deepseek-chat 已在配置中声明 capabilities.reasoning（无需改写）"
+    },
+    {
+      "name": "P2_control_visible",
+      "pass": true,
+      "detail": "档位控件出现（data-level=high，label=高）"
+    },
+    {
+      "name": "R1_default_standard",
+      "pass": true,
+      "detail": "新会话档位控件默认 data-level=standard（默认标准）"
+    },
+    {
+      "name": "R1_ui_body_standard",
+      "pass": true,
+      "detail": "UI 实发请求体 thinkingLevel 全为 standard（实测 [\"standard\"]）"
+    },
+    {
+      "name": "R1_ui_bound_to_conversation",
+      "pass": true,
+      "detail": "发送落到了本轮新建会话 conv_9a4e5873-92e（会话级隔离）"
+    },
+    {
+      "name": "R1_upstream_records_present",
+      "pass": true,
+      "detail": "标准档会话信息流落盘 1 条上游记录"
+    },
+    {
+      "name": "R1_no_reasoning_param",
+      "pass": true,
+      "detail": "标准档全部上游请求体均无思考参数（参数键实测：[[\"max_tokens\",\"temperature\",\"tool_choice\",\"tools\"]]）"
+    },
+    {
+      "name": "R2_control_set_high",
+      "pass": true,
+      "detail": "控件切到高（data-level=high）"
+    },
+    {
+      "name": "R2_ui_body_high",
+      "pass": true,
+      "detail": "UI 实发请求体 thinkingLevel=high（实测 [\"high\"]）——档位控件到请求体不再静默失效"
+    },
+    {
+      "name": "R2_ui_bound_to_conversation",
+      "pass": true,
+      "detail": "发送落到了本轮新建会话 conv_1b3b9f83-37a"
+    },
+    {
+      "name": "R2_reasoning_effort_sent",
+      "pass": true,
+      "detail": "上游请求体实测 reasoning_effort=high（1/1 条记录携带；值=[\"high\"]）"
+    },
+    {
+      "name": "R4_tool_round_param_sent",
+      "pass": true,
+      "detail": "工具轮上游请求体同样携带 reasoning_effort=high（2/2 条记录）"
+    },
+    {
+      "name": "R4_reasoning_row_visible",
+      "pass": true,
+      "detail": "展开「执行记录」后渲染出思考行（meta 思考字数=94，DOM .sc-tool-reasoning=1，展开点击=clicked）"
+    },
+    {
+      "name": "R3_response_captured",
+      "pass": true,
+      "detail": "两轮响应均已捕获（标准 1 条 / 高 1 条上游记录，判定=upstream_accepted_param_no_reasoning_emitted）"
+    }
+  ],
+  "allPass": true,
+  "observations": {
+    "composerModelLabel": null,
+    "targetProfileId": "deepseek-chat",
+    "targetProfileProtocol": "openai-compatible",
+    "targetProfileModel": "deepseek-flash",
+    "responseEvidence": {
+      "standard": {
+        "upstreamCalls": 1,
+        "reasoningChars": 0,
+        "reasoningRowsInDom": 0,
+        "reasoningIterations": [
+          "1"
+        ],
+        "reasoningLengths": {
+          "1": 111
+        },
+        "finishReasons": [
+          "stop"
+        ],
+        "errors": []
+      },
+      "high": {
+        "upstreamCalls": 1,
+        "reasoningChars": 0,
+        "reasoningRowsInDom": 0,
+        "reasoningIterations": [
+          "1"
+        ],
+        "reasoningLengths": {
+          "1": 191
+        },
+        "finishReasons": [
+          "stop"
+        ],
+        "errors": [],
+        "paramDroppedRetryRecords": 0
+      },
+      "verdict": "upstream_accepted_param_no_reasoning_emitted",
+      "upstreamReasoningNote": "响应侧思考段取自上游流式 delta（前端 conversationRunStore 按迭代聚合 → 消息 meta.reasoningByIteration）；信息流落盘的聚合 response.reasoningContent 为空属落盘面事实（agent 路径走 chatStream，聚合体不含 reasoning_content），展示面不受影响。",
+      "toolRound": {
+        "upstreamCalls": 2,
+        "reasoningChars": 94,
+        "reasoningRowsInDomExpanded": 1,
+        "reasoningIterations": [
+          "1"
+        ],
+        "reasoningLengths": {
+          "1": 94
+        },
+        "activityExpandClick": "clicked",
+        "assistantContentPreview": "文件数量=27"
+      }
+    },
+    "rounds": [
+      {
+        "key": "standard",
+        "conversationId": "conv_9a4e5873-92e",
+        "requestedLevel": "standard",
+        "composerLevelBeforeSwitch": "standard",
+        "composerLevelAfterSwitch": "standard",
+        "composerReady": true,
+        "typed": "typed:62",
+        "send": "sent",
+        "uiSentBodies": [
+          {
+            "conversationId": "conv_9a4e5873-92e",
+            "modelPresetId": "deepseek-chat",
+            "thinkingLevel": "standard",
+            "kind": null
+          }
+        ],
+        "boundToConversation": true,
+        "assistantTimedOut": false,
+        "assistantMessageId": "msg_e627ea98-3f0",
+        "assistantContentPreview": "女生有 23 人。",
+        "reasoningIterations": [
+          "1"
+        ],
+        "reasoningLengths": {
+          "1": 111
+        },
+        "reasoningRowsInDom": 0,
+        "activityExpandClick": null,
+        "reasoningRowsInDomExpanded": null,
+        "transcriptFile": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\llm-transcripts\\conv_9a4e5873-92e.jsonl",
+        "upstreamRecords": [
+          {
+            "ts": "2026-09-11T12:45:30.593Z",
+            "attemptIndex": 0,
+            "profileId": "deepseek-chat",
+            "provider": "openai-compatible",
+            "model": "deepseek-flash",
+            "sentParamKeys": [
+              "max_tokens",
+              "temperature",
+              "tool_choice",
+              "tools"
+            ],
+            "reasoningKeys": [],
+            "reasoning_effort": null,
+            "temperature": 0.4,
+            "max_tokens": 16384,
+            "error": null,
+            "finishReason": "stop",
+            "contentLength": 9,
+            "reasoningLength": 0,
+            "reasoningPreview": null,
+            "contentPreview": "女生有 23 人。"
+          }
+        ]
+      },
+      {
+        "key": "high",
+        "conversationId": "conv_1b3b9f83-37a",
+        "requestedLevel": "high",
+        "composerLevelBeforeSwitch": "standard",
+        "composerLevelAfterSwitch": "high",
+        "composerReady": true,
+        "typed": "typed:62",
+        "send": "sent",
+        "uiSentBodies": [
+          {
+            "conversationId": "conv_1b3b9f83-37a",
+            "modelPresetId": "deepseek-chat",
+            "thinkingLevel": "high",
+            "kind": null
+          }
+        ],
+        "boundToConversation": true,
+        "assistantTimedOut": false,
+        "assistantMessageId": "msg_9cfc3304-610",
+        "assistantContentPreview": "女生有 23 人。",
+        "reasoningIterations": [
+          "1"
+        ],
+        "reasoningLengths": {
+          "1": 191
+        },
+        "reasoningRowsInDom": 0,
+        "activityExpandClick": null,
+        "reasoningRowsInDomExpanded": null,
+        "transcriptFile": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\llm-transcripts\\conv_1b3b9f83-37a.jsonl",
+        "upstreamRecords": [
+          {
+            "ts": "2026-09-11T12:45:43.778Z",
+            "attemptIndex": 0,
+            "profileId": "deepseek-chat",
+            "provider": "openai-compatible",
+            "model": "deepseek-flash",
+            "sentParamKeys": [
+              "max_tokens",
+              "reasoning_effort",
+              "temperature",
+              "tool_choice",
+              "tools"
+            ],
+            "reasoningKeys": [
+              "reasoning_effort"
+            ],
+            "reasoning_effort": "high",
+            "temperature": 0.4,
+            "max_tokens": 16384,
+            "error": null,
+            "finishReason": "stop",
+            "contentLength": 9,
+            "reasoningLength": 0,
+            "reasoningPreview": null,
+            "contentPreview": "女生有 23 人。"
+          }
+        ]
+      },
+      {
+        "key": "tool",
+        "conversationId": "conv_e8bcee49-c5d",
+        "requestedLevel": "high",
+        "composerLevelBeforeSwitch": "standard",
+        "composerLevelAfterSwitch": "high",
+        "composerReady": true,
+        "typed": "typed:38",
+        "send": "sent",
+        "uiSentBodies": [
+          {
+            "conversationId": "conv_e8bcee49-c5d",
+            "modelPresetId": "deepseek-chat",
+            "thinkingLevel": "high",
+            "kind": null
+          }
+        ],
+        "boundToConversation": true,
+        "assistantTimedOut": false,
+        "assistantMessageId": "msg_a850e56a-1ff",
+        "assistantContentPreview": "文件数量=27",
+        "reasoningIterations": [
+          "1"
+        ],
+        "reasoningLengths": {
+          "1": 94
+        },
+        "reasoningRowsInDom": 1,
+        "activityExpandClick": "clicked",
+        "reasoningRowsInDomExpanded": 1,
+        "transcriptFile": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\llm-transcripts\\conv_e8bcee49-c5d.jsonl",
+        "upstreamRecords": [
+          {
+            "ts": "2026-09-11T12:45:55.895Z",
+            "attemptIndex": 0,
+            "profileId": "deepseek-chat",
+            "provider": "openai-compatible",
+            "model": "deepseek-flash",
+            "sentParamKeys": [
+              "max_tokens",
+              "reasoning_effort",
+              "temperature",
+              "tool_choice",
+              "tools"
+            ],
+            "reasoningKeys": [
+              "reasoning_effort"
+            ],
+            "reasoning_effort": "high",
+            "temperature": 0.4,
+            "max_tokens": 16384,
+            "error": null,
+            "finishReason": "tool_calls",
+            "contentLength": 0,
+            "reasoningLength": 0,
+            "reasoningPreview": null,
+            "contentPreview": ""
+          },
+          {
+            "ts": "2026-09-11T12:45:56.813Z",
+            "attemptIndex": 0,
+            "profileId": "deepseek-chat",
+            "provider": "openai-compatible",
+            "model": "deepseek-flash",
+            "sentParamKeys": [
+              "max_tokens",
+              "reasoning_effort",
+              "temperature",
+              "tool_choice",
+              "tools"
+            ],
+            "reasoningKeys": [
+              "reasoning_effort"
+            ],
+            "reasoning_effort": "high",
+            "temperature": 0.4,
+            "max_tokens": 16384,
+            "error": null,
+            "finishReason": "stop",
+            "contentLength": 7,
+            "reasoningLength": 0,
+            "reasoningPreview": null,
+            "contentPreview": "文件数量=27"
+          }
+        ]
+      }
+    ]
+  }
+}

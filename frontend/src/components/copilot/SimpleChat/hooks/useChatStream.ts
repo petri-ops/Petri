@@ -243,6 +243,11 @@ export function useChatStream({
     planMode,
     projectId,
     streaming,
+    // BLOCK-81 P3 实机抓真修：`send` 闭包读了 thinkingLevel，漏进依赖数组会让
+    // 「切档位后不刷新页面直接发送」沿用挂载时的旧档位——控件显示「高」而请求体
+    // 仍是 standard（上游收不到 reasoning_effort），档位静默失效。sendRef 经
+    // [send] 同步，此处补齐后自动恢复新鲜。
+    thinkingLevel,
   ]);
 
   // 4. `sendRef` — stable handle for the latest `send`. Used by

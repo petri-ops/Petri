@@ -1,0 +1,136 @@
+{
+  "name": "block-81-p3-channel-probe",
+  "startedAt": "2026-09-11T12:48:16.633Z",
+  "finishedAt": "2026-09-11T12:48:27.819Z",
+  "assertions": [
+    {
+      "name": "PR1_channels_probed",
+      "pass": true,
+      "detail": "已实测 4 个 OpenAI 兼容渠道（不含无凭据渠道）：deepseek-chat, model-1787541766966, model-1787839386594, model-1788504346152"
+    },
+    {
+      "name": "PR2_no_unknown_param_rejection",
+      "pass": true,
+      "detail": "本机无渠道以「未知/非法参数」400 拒绝 reasoning_effort → D3 去参重试的**实机触发路径不可达**，该分支由确定性门禁覆盖（已如实登记，非缺陷）"
+    },
+    {
+      "name": "PR3_reasoning_field_shape",
+      "pass": true,
+      "detail": "上游思考段字段实测形状：[\"reasoning_content\",\"reasoning\"]（我方解析面只认 reasoning_content；其他形状如实登记为观察）"
+    }
+  ],
+  "allPass": true,
+  "observations": {
+    "channels": [
+      {
+        "profileId": "deepseek-chat",
+        "model": "deepseek-flash",
+        "baseUrl": "https://api.deepseek.com",
+        "hasCredential": true,
+        "withoutParam": {
+          "status": 200,
+          "error": null,
+          "reasoningFields": [
+            "reasoning_content"
+          ],
+          "finishReason": "stop",
+          "errorText": null
+        },
+        "withParam": {
+          "status": 200,
+          "error": null,
+          "reasoningFields": [
+            "reasoning_content"
+          ],
+          "finishReason": "stop",
+          "errorText": null
+        },
+        "rejectedParam": false,
+        "paramAccepted": true
+      },
+      {
+        "profileId": "model-1787541766966",
+        "model": "gemini-3.7-flash-tiered",
+        "baseUrl": "https://x1.ninijoker-api.com/v1",
+        "hasCredential": true,
+        "withoutParam": {
+          "status": 200,
+          "error": null,
+          "reasoningFields": [],
+          "finishReason": "stop",
+          "errorText": null
+        },
+        "withParam": {
+          "status": 200,
+          "error": null,
+          "reasoningFields": [],
+          "finishReason": "stop",
+          "errorText": null
+        },
+        "rejectedParam": false,
+        "paramAccepted": true
+      },
+      {
+        "profileId": "model-1787839386594",
+        "model": "GLM-5.3-Flash",
+        "baseUrl": "https://api.scnet.cn/api/llm/v1",
+        "hasCredential": true,
+        "withoutParam": {
+          "status": 431,
+          "error": null,
+          "reasoningFields": [],
+          "finishReason": null,
+          "errorText": "{\"error\":{\"message\":\"Account Suspension\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"431\"},\"request_id\":\"495b2e984d350585-20260911204823822\"}"
+        },
+        "withParam": {
+          "status": 431,
+          "error": null,
+          "reasoningFields": [],
+          "finishReason": null,
+          "errorText": "{\"error\":{\"message\":\"Account Suspension\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"431\"},\"request_id\":\"e0b8b1c51584abae-20260911204823864\"}"
+        },
+        "rejectedParam": false,
+        "paramAccepted": false
+      },
+      {
+        "profileId": "model-1788504346152",
+        "model": "sensenova-6.8-flash-lite",
+        "baseUrl": "https://token.sensenova.cn/v1",
+        "hasCredential": true,
+        "withoutParam": {
+          "status": 200,
+          "error": null,
+          "reasoningFields": [
+            "reasoning"
+          ],
+          "finishReason": "stop",
+          "errorText": null
+        },
+        "withParam": {
+          "status": 200,
+          "error": null,
+          "reasoningFields": [
+            "reasoning"
+          ],
+          "finishReason": "length",
+          "errorText": null
+        },
+        "rejectedParam": false,
+        "paramAccepted": true
+      }
+    ],
+    "summary": {
+      "probedChannels": 4,
+      "acceptedParam": [
+        "deepseek-chat",
+        "model-1787541766966",
+        "model-1788504346152"
+      ],
+      "rejectedParamAsUnknown": [],
+      "reasoningFieldShapesSeen": [
+        "reasoning_content",
+        "reasoning"
+      ]
+    }
+  }
+}
