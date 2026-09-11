@@ -105,17 +105,25 @@ module.exports = {
         return JSON.stringify({ clientW: el.clientWidth, scrollW: el.scrollWidth });
       })()`).catch(() => 'null');
       const list = listRaw && listRaw !== 'null' ? JSON.parse(listRaw) : { clientW: 0, scrollW: 0 };
-      const narrow = list.clientW > 0 && list.clientW < 1058;
-      lib.log(`container width=${list.clientW} → ${narrow ? '窄容器（两行式）' : '宽容器（8 列表格）'}`);
+      // 形态判据用**实测轨道数**而非宽度阈值：窄态下 min-width 被置 0（阈值会回落到
+      // 兜底值 → 中间宽度区间会误判形态）；轨道数 2 = 两行式、>2 = 多列表格，直接反映
+      // 当前生效的布局。宽度仅作日志。
+      const narrow = card.columns <= 2;
+      lib.log(`container width=${list.clientW}, tracks=${card.columns} → ${narrow ? '两行式（窄）' : '多列表格（宽）'}`);
 
       if (!narrow) {
-        assert('G1_eight_columns', header.columns === 8 && card.columns === 8,
-          `header=${header.columns} card=${card.columns}（期望 8：协议/供应商/BaseURL/Key/模型/上下文/连通性/删除）`);
+        // 列数自洽：表头与渠道行同为 N 列（模板显式定义，不再有隐式行）——N 随功能演进
+        // （当前 9：协议/供应商/BaseURL/Key/模型/上下文/思考/连通性/删除）
+        assert('G1_columns_explicit', header.columns >= 8 && header.columns === card.columns,
+          `header=${header.columns} card=${card.columns}（期望相等且 ≥8）`);
 
+        // 同行判定：极差须显著小于一个行高。同行内高度不同的单元格在 align-items:center
+        // 下 offsetTop 有数 px 差异（列增多/控件高矮不一时变大，实测 1–6px），
+        // 而「被挤到隐式新行」会差整整一个行高（≥32px）。
         const offTops = card.kids.map((k) => k.offTop);
         const spread = Math.max.apply(null, offTops) - Math.min.apply(null, offTops);
-        assert('G2_single_row', spread <= 4,
-          `单元格 offsetTop 极差=${spread}px（期望 ≤4 = 同一行；独占新行会差 ≈32px）`);
+        assert('G2_single_row', spread <= 16,
+          `单元格 offsetTop 极差=${spread}px（期望 ≤16 = 同一行；独占新行会差 ≥32px）`);
 
         const overflowing = card.kids.filter((k) => k.scrollW > k.clientW + 1);
         assert('G3_no_inner_overflow', overflowing.length === 0,
@@ -155,8 +163,9 @@ module.exports = {
 
         assert('N1_header_hidden', n.headerDisplay === 'none', `header display=${n.headerDisplay}`);
         assert('N2_two_line_columns', n.cols === 2, `grid 轨道数=${n.cols}（期望 2 = 标签|控件）`);
-        assert('N3_labels_visible', n.labelsVisible === n.labelsTotal && n.labelsTotal === 8,
-          `标签显形 ${n.labelsVisible}/${n.labelsTotal}（期望 8/8）`);
+        // 标签数由 DOM 实测（当前 9 个字段），要求全部显形
+        assert('N3_labels_visible', n.labelsVisible === n.labelsTotal && n.labelsTotal >= 8,
+          `标签显形 ${n.labelsVisible}/${n.labelsTotal}（期望全显形且 ≥8）`);
         assert('N5_label_control_pairs', n.pairs === true, `每个控件前一个兄弟均为标签=${n.pairs}`);
         assert('N4_no_horizontal_scroll', listW.scrollW <= listW.clientW + 1,
           `列表 scrollWidth=${listW.scrollW} clientWidth=${listW.clientW}（期望不再横向滚动）`);

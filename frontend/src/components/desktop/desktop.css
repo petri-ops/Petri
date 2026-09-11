@@ -454,7 +454,7 @@
   margin-bottom: 8px;
   overflow-x: auto;
   /* UI-344（BLOCK-81 D8）—— endpoint 网格的**容器查询上下文**：窄容器
-     （< 表格 min-width 1058px，例如与左右栏共用宽度时）切换到两行式堆叠，
+     （< 表格 min-width 1146px，例如与左右栏共用宽度时）切换到两行式堆叠，
      而非让用户横向滚动。inline-size 让本元素宽度只由父级决定，
      overflow-x 滚动行为不受影响（宽容器下无溢出即无滚动条）。 */
   container-type: inline-size;
@@ -568,11 +568,13 @@
 .gewu-endpoint-list-header,
 .gewu-endpoint-card__grid {
   display: grid;
-  /* UI-342（BLOCK-81 P0）—— **8 列显式定义**（D7）：此前模板只有 7 列，而表头与
+  /* UI-342（BLOCK-81 P0）—— **列数显式定义**：此前模板只有 7 列，而表头与
      渠道行各有 8 个子元素（协议/供应商/Base URL/Key/默认模型/上下文/连通性/删除），
      第 8 个（删除垃圾桶）被挤到隐式新行独占一行、连通性只剩 32px 导致「已连接」
      文字溢出与右列重合（用户截图 + 代码双向印证）。列宽终值：协议/供应商略收窄，
-     Base URL 由 2fr 降至 1.8fr 且下限 240→200px（用户反馈过宽），连通性 32→120px。 */
+     Base URL 由 2fr 降至 1.8fr 且下限 240→200px（用户反馈过宽），连通性 32→120px。
+     **P1 扩展第 9 列「思考」**（渠道级 reasoning 能力位开关，用户裁决「渠道级开关」）：
+     minmax(72px,0.55fr)，位于上下文与连通性之间。 */
   grid-template-columns:
     minmax(120px, 0.8fr)
     minmax(110px, 0.7fr)
@@ -580,13 +582,28 @@
     minmax(170px, 1.1fr)
     minmax(160px, 1.1fr)
     96px
+    72px
     120px
     40px;
   align-items: center;
   gap: 6px;
-  /* 表头与渠道行共用同一最小宽度：容器变窄时两者一起横向滚动（.gewu-model-list
-     overflow-x:auto），避免此前的表头 1040 而渠道行无下限造成的列错位 */
-  min-width: 1060px;
+  /* 表头与渠道行共用同一最小宽度（9 列合计 1088 + 8×6 gap = 1136，取 1146 留余量）：
+     容器变窄时两者一起横向滚动（.gewu-model-list overflow-x:auto），避免此前的
+     表头 1040 而渠道行无下限造成的列错位 */
+  min-width: 1146px;
+}
+
+/* P1 — 渠道级「支持思考档位」开关单元格（第 9 列） */
+.gewu-endpoint-reasoning {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gewu-endpoint-reasoning input {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
 }
 
 /* UI-344（BLOCK-81 D8）—— 单元格自带标签：宽容器隐藏（`display:none` 的元素
@@ -597,7 +614,7 @@
 }
 
 /* 窄容器：两行式堆叠（Chrome 设置页式）——隐藏表头、标签显形、单列成对布局 */
-@container gewu-model-list (max-width: 1058px) {
+@container gewu-model-list (max-width: 1146px) {
   .gewu-endpoint-list-header {
     display: none;
   }
@@ -623,7 +640,8 @@
   }
 
   .gewu-endpoint-card__test,
-  .gewu-endpoint-card__delete {
+  .gewu-endpoint-card__delete,
+  .gewu-endpoint-reasoning {
     justify-self: start;
   }
 }

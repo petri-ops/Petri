@@ -579,6 +579,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                   <span>Key</span>
                   <span>默认模型</span>
                   <span>上下文</span>
+                  <span>思考</span>
                   <span>连通性</span>
                   <span />
                 </div>
@@ -723,6 +724,24 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       aria-label="上下文窗口"
                       title="模型上下文窗口，如 64K、128K、1M；留空则使用默认值"
                     />
+                    <span className="gewu-endpoint-field-label" aria-hidden="true">思考</span>
+                    <label
+                      className="gewu-endpoint-reasoning"
+                      title="声明该渠道支持思考档位：勾选后 composer 的档位控件才会出现，并按协议映射上游参数"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={(profile.capabilities || []).includes('reasoning')}
+                        onChange={(e) => {
+                          const current = profile.capabilities || ['chat', 'streaming', 'tools'];
+                          const next = e.target.checked
+                            ? Array.from(new Set([...current, 'reasoning']))
+                            : current.filter((cap) => cap !== 'reasoning');
+                          updateProfile(profile.id, { capabilities: next });
+                        }}
+                        aria-label={`${profile.label || '自定义渠道'} 支持思考档位`}
+                      />
+                    </label>
                     <span className="gewu-endpoint-field-label" aria-hidden="true">连通性</span>
                     <button
                       type="button"

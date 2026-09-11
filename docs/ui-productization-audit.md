@@ -3145,6 +3145,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：flow `ui342-endpoint-grid` 升级为**形态自适应**（同一 flow 两套断言）——宽容器验 G1–G5（8 列 / 同行 / 零溢出 / 列宽一致 / 共用 min-width），窄容器验 N1–N5（表头隐藏 / 两轨 / 8 标签显形 / 标签与控件成对 / **不再横向滚动**）。**实机双形态全绿**：宽容器 6/6（container=1180）、窄容器 6/6（container=520，scrollWidth=clientWidth=520）；前端全量 **983/983** + tsc 0；证据 `acceptance/block-81/ui342-endpoint-grid-live.json` + 双形态截图（ui342-endpoint-grid.png 窄态两行式）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-343: 渠道级「支持思考档位」声明开关（BLOCK-81 P1 切片2）(2026-09-11 verified)
+
+**来源**：BLOCK-81 P1 实现中撞到 plan 缺口——D3 要求「仅对声明 `capabilities.reasoning` 的渠道发参」，但**设置页此前无处声明该能力位**，照此实现 composer 档位控件将永不出现。用户裁决：**渠道级开关**（而非按模型名推断或默认全开+容错兜底）。
+
+**落地**：endpoint 网格新增**第 9 列「思考」**（位于 上下文 与 连通性 之间）——复选框读写 `profile.capabilities`（勾选→并入 `reasoning`，取消→移除；未设置时以 `['chat','streaming','tools']` 为基线），title 说明「勾选后 composer 档位控件才会出现，并按协议映射上游参数」。列宽 `minmax(72px,0.55fr)`；表头与渠道行 `min-width` 同步 1060→**1146**（9 列合计 1088 + 8×6 gap），容器查询阈值同步 1058→**1146**（必须 ≥ 表格 min-width，否则中间宽度区间会「多列表格但仍横向滚动」）。
+
+**门禁**：flow `ui342-endpoint-grid` 升级为**自适应推导**（列数/标签数/形态判据均从 DOM 实测，不再硬编码 8 列与 1058 阈值；形态判据改用**实测轨道数**——窄态 min-width 被置 0 会让阈值回落造成中间区间误判）；**实机双形态各 6/6**：宽容器 tracks=9 / minWidth=1146 / 零溢出 / 列宽逐列一致；窄容器 tracks=2 / 标签 9/9 显形 / 不再横向滚动。`src/components/desktop` 定向 64/64 + tsc 0。证据 `acceptance/block-81/`。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-342: 供应商设置页 Endpoint 网格修复（8 列显式定义）(2026-09-11 verified)
 
 **来源**：用户截图反馈「供应商的设置界面有细节上的瑕疵——Base URL 输入窗口有些宽了，连通性测试下面有些窄了，导致文字重合；整体再看一下，可以立个新的 block?」→ 立 BLOCK-81，此为 P0（独立小提交）。

@@ -1,7 +1,7 @@
 {
   "name": "ui342-endpoint-grid",
-  "startedAt": "2026-09-11T11:58:36.018Z",
-  "finishedAt": "2026-09-11T11:58:41.407Z",
+  "startedAt": "2026-09-11T12:05:07.021Z",
+  "finishedAt": "2026-09-11T12:05:12.414Z",
   "assertions": [
     {
       "name": "G0_settings_mounted",
@@ -9,14 +9,14 @@
       "detail": "header=true card=true"
     },
     {
-      "name": "G1_eight_columns",
+      "name": "G1_columns_explicit",
       "pass": true,
-      "detail": "header=8 card=8（期望 8：协议/供应商/BaseURL/Key/模型/上下文/连通性/删除）"
+      "detail": "header=9 card=9（期望相等且 ≥8）"
     },
     {
       "name": "G2_single_row",
       "pass": true,
-      "detail": "单元格 offsetTop 极差=1px（期望 ≤4 = 同一行；独占新行会差 ≈32px）"
+      "detail": "单元格 offsetTop 极差=6px（期望 ≤16 = 同一行；独占新行会差 ≥32px）"
     },
     {
       "name": "G3_no_inner_overflow",
@@ -26,12 +26,12 @@
     {
       "name": "G4_columns_aligned",
       "pass": true,
-      "detail": "header=[128,112,289,176,176,96,120,40] card=[128,112,289,176,176,96,120,40]"
+      "detail": "header=[120,110,244,170,160,96,72,120,40] card=[120,110,244,170,160,96,72,120,40]"
     },
     {
       "name": "G5_min_width_shared",
       "pass": true,
-      "detail": "header minWidth=1060 card minWidth=1060"
+      "detail": "header minWidth=1146 card minWidth=1146"
     }
   ],
   "allPass": true
