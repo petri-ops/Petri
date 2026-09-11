@@ -1,8 +1,8 @@
 # BLOCK-81 — Composer 思考级别（供应商推理档位）+ 供应商设置页 Endpoint 网格修复
 
- > 状态：`active` / **P0–P2 已完成并各自提交，P3 待做**
-> 进度：P0 ✅ UI-342（`5b3b677c`）+ UI-344/D8（`280cb42c`）｜P1 ✅ 映射内核（`78c10b59`）+ 渠道开关 UI-343（`7c55eab4`）+ 接线与去参重试（`c177374b`）｜P2 ✅ composer 档位 UI-345（`824beac0`）｜P3 ⏳ 实机开/关思考对比 + 收口（registry→completed / roadmap / AUDIT-LOG 收口行）
-> 交接起点见 `docs/AUDIT-LOG.md` 首屏与 plan §10 最新两条。
+ > 状态：`completed` / **P0–P3 已完成并各自提交（2026-09-11 当日收口）**
+> 进度：P0 ✅ UI-342（`5b3b677c`）+ UI-344/D8（`280cb42c`）｜P1 ✅ 映射内核（`78c10b59`）+ 渠道开关 UI-343（`7c55eab4`）+ 接线与去参重试（`c177374b`）｜P2 ✅ composer 档位 UI-345（`824beac0`）｜P3 ✅ 实机对比 + **实机抓真修（`useChatStream` 档位 stale closure）** + 收口（证据 `acceptance/block-81/`：`block-81-p3-thinking-live.json` 15/15、`block-81-p3-channel-probe-live.json` 3/3）
+> 收口细节与遗留候选见 §11 最新一条；立项来源见 §1。
 > 立项日期：2026-09-11
 > truthDomain: `block-81-thinking-level-endpoint`
 > 来源：用户提问「如果用 zcode 会显示供应商模型提供的思考级别，我们的项目没有这种思考级别的选项，你能调研一下怎么回事，可以补充吗？另外供应商的设置界面有细节上的瑕疵——Base URL 输入窗口有些宽了，连通性测试下面有些窄了，导致文字重合。整体再看一下，可以立个新的 block?」
@@ -105,6 +105,14 @@
 - 启动前置：无 🔴 阻塞；workspace 干净；当前无 active 包。
 
 ## 11. 进度记录
+
+- 2026-09-11 **P3 实机对比 + 收口（整包 completed）**：P3 用真渠道跑通「标准 vs 高」全链并**抓出一个 P1 级实机缺陷**，修复后 15/15 断言 allPass。
+  **① 实机抓真修（本轮最重要的产出）**：P2 交付的 composer 档位控件在「切档位后不刷新页面直接发送」时**静默失效**——`useChatStream.send` 的 `useCallback` 闭包读了 `thinkingLevel` 却漏进依赖数组，导致沿用挂载时的旧档位。实机拦截页面 `fetch` 实证：控件 `data-level=high` 而实发请求体 `thinkingLevel:"standard"`（上游因此收不到 `reasoning_effort`，档位控件等于装饰）。P2 之所以漏掉：其证据取的是「档位落库」（切档后**重进工作区**再发送，闭包恰好在挂载时已是 high），未覆盖「同一挂载内切档即发」这条真实用法。修复＝依赖数组补 `thinkingLevel`（`sendRef` 经 `[send]` 同步自动恢复新鲜）；回归测试 `frontend/src/components/copilot/SimpleChat/hooks/useChatStream.test.ts`（除档位外所有入参保持同一引用以暴露该缺陷——**撤掉修复即 2/2 红**）。
+  **② 全链实证（`scripts/block81-p3-thinking-live.cjs`，证据 `acceptance/block-81/block-81-p3-thinking-live.json`，15/15 allPass）**：三个独立新会话、composer 控件驱动——标准轮（默认档＝standard）UI 实发体 `thinkingLevel=standard` 且**上游请求体零思考参数**；高档轮 UI 实发体 `thinkingLevel=high` 且上游 `requestBody.reasoning_effort="high"`（1/1 条记录）；工具轮同参数（2/2 条记录）并在展开「执行记录」后渲染出思考行（DOM `.sc-tool-reasoning`=1）＝UI-272 展示面实机可见。
+  **③ 上游响应侧诚实登记**：本机渠道（`deepseek-flash` 经 OpenAI 兼容网关）**不因档位改变思考行为**——标准轮 337 字 / 高档轮 117 字 / 工具轮 94 字思考段，档位只被透明转发并被接受（无 400、`finish_reason=stop`）。即「参数确实发出去了」而非「开了思考才思考」；这是渠道行为，非我方缺陷。
+  **④ D3 靶场可用性（`scripts/block81-p3-channel-probe.cjs`，证据 `...-channel-probe-live.json`，3/3 allPass）**：直连实测本机 4 个 OpenAI 兼容渠道各两次（带/不带 `reasoning_effort`）——deepseek / gemini 中转 / sensenova 均 200 接受，GLM/scnet 为 **431 Account Suspension（账户停用，与参数无关，两种情况同样失败）**；**无渠道以「未知/非法参数」400 拒绝** → D3 去参重试的实机触发路径在本机不可达，该分支由确定性门禁（`thinking-level-injection.test.mjs` 6/6，假 provider 断言 400→去参重试一次成功）覆盖，如实登记为「不可达」而非「未验证通过」。
+  **⑤ 观察（本包范围外，登记为后续候选）**：sensenova 渠道思考段字段名为 `reasoning`（非 `reasoning_content`），我方解析面（`copilotClient.ts:1112` / `deepseek.js:396`）只认后者 → 该渠道思考段不会展示；另，思考行只挂在「执行记录」（`ToolActivityList`）内，零工具直答轮虽有 `meta.reasoningByIteration` 但不渲染（既有展示面契约，D6 零改动）。
+  **⑥ 门禁**：前端全量 **991/991**（121 文件，含本包新增 2 条档位透传回归）、`tsc` 0、`docs:check` / `ui:audit:check` / `hygiene:check` 绿；registry → `completed`。G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 - 2026-09-11 **P1 接线完成 + P2 落地（UI-345）**：P1 接线（`c177374b`）—— `/api/ai/agent` 解析档位 → 任务参数（续跑可继承）→ `runAgentLoop`/`loopConfig`/loop-orchestrator config → `llm-client` → **网关唯一注入点**（profile.protocol/capabilities 正在作用域）；anthropic 转换白名单搬运 `thinking`；D3 双保险（能力位门控 + 400 去参重试一次）落地于既有 attempt 循环；确定性门禁 `thinking-level-injection.test.mjs` 6/6。P2（UI-345）—— `thinkingLevel.ts` 会话级持久化 + `SimpleChat` 档位按钮/菜单/`Ctrl+T`/能力位门控（仅声明 reasoning 的渠道显示）；实机验证任务参数 `thinkingLevel:"high"` 落库 + 无残留。**仍待**：P3 收口（真实渠道开/关思考对比证据 + 台账/registry 收口）。G0 开发期常态 · 不外推 packaged/Provider/GA.
 - 2026-09-11 **P1 切片 2：渠道级 reasoning 声明面（UI-343）落地**：用户裁决「渠道级开关」——endpoint 网格新增第 9 列「思考」复选框（读写 `profile.capabilities` 的 `reasoning`），列宽 minmax(72px,0.55fr)，表头/渠道行 min-width 与容器查询阈值同步 1060→1146；flow `ui342-endpoint-grid` 改为自适应推导（列数/标签数/形态判据全部实测，形态用轨道数判定），实机双形态各 6/6。**P1 剩余**：注入点接线（ai-agent/chat.js reqBody + copilot chat 路径）+ 400 去参重试落地。G0 开发期常态 · 不外推 packaged/Provider/GA.
