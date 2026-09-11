@@ -1,0 +1,38 @@
+{
+  "name": "ui342-endpoint-grid",
+  "startedAt": "2026-09-11T11:34:26.175Z",
+  "finishedAt": "2026-09-11T11:34:44.964Z",
+  "assertions": [
+    {
+      "name": "G0_settings_mounted",
+      "pass": true,
+      "detail": "header=true card=true"
+    },
+    {
+      "name": "G1_eight_columns",
+      "pass": true,
+      "detail": "header=8 card=8（期望 8：协议/供应商/BaseURL/Key/模型/上下文/连通性/删除）"
+    },
+    {
+      "name": "G2_single_row",
+      "pass": true,
+      "detail": "单元格 offsetTop 极差=1px（期望 ≤4 = 同一行；独占新行会差 ≈32px）values=339,340,340,340,339,340,340,340"
+    },
+    {
+      "name": "G3_no_inner_overflow",
+      "pass": true,
+      "detail": "溢出单元格=0（期望 0 = 「已连接」等文字不再与邻列重合）"
+    },
+    {
+      "name": "G4_columns_aligned",
+      "pass": true,
+      "detail": "header=[120,110,202,170,160,96,120,40] card=[120,110,202,170,160,96,120,40]"
+    },
+    {
+      "name": "G5_min_width_shared",
+      "pass": true,
+      "detail": "header minWidth=1060 card minWidth=1060（期望相等且 >0）"
+    }
+  ],
+  "allPass": true
+}

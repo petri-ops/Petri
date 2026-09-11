@@ -562,20 +562,28 @@
 .gewu-endpoint-list-header,
 .gewu-endpoint-card__grid {
   display: grid;
+  /* UI-342（BLOCK-81 P0）—— **8 列显式定义**（D7）：此前模板只有 7 列，而表头与
+     渠道行各有 8 个子元素（协议/供应商/Base URL/Key/默认模型/上下文/连通性/删除），
+     第 8 个（删除垃圾桶）被挤到隐式新行独占一行、连通性只剩 32px 导致「已连接」
+     文字溢出与右列重合（用户截图 + 代码双向印证）。列宽终值：协议/供应商略收窄，
+     Base URL 由 2fr 降至 1.8fr 且下限 240→200px（用户反馈过宽），连通性 32→120px。 */
   grid-template-columns:
-    minmax(132px, 0.9fr)
-    minmax(112px, 0.75fr)
-    minmax(240px, 2fr)
-    minmax(176px, 1.25fr)
-    minmax(180px, 1.25fr)
+    minmax(120px, 0.8fr)
+    minmax(110px, 0.7fr)
+    minmax(200px, 1.8fr)
+    minmax(170px, 1.1fr)
+    minmax(160px, 1.1fr)
     96px
-    32px;
+    120px
+    40px;
   align-items: center;
   gap: 6px;
+  /* 表头与渠道行共用同一最小宽度：容器变窄时两者一起横向滚动（.gewu-model-list
+     overflow-x:auto），避免此前的表头 1040 而渠道行无下限造成的列错位 */
+  min-width: 1060px;
 }
 
 .gewu-endpoint-list-header {
-  min-width: 1040px;
   padding: 0 0 6px;
   color: var(--gewu-text-tertiary);
   font-size: var(--gewu-font-size-xs);

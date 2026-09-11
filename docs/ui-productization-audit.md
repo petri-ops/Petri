@@ -3137,6 +3137,18 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified（Vite 热更用户实机可见；纯归组零新行为面）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-342: 供应商设置页 Endpoint 网格修复（8 列显式定义）(2026-09-11 verified)
+
+**来源**：用户截图反馈「供应商的设置界面有细节上的瑕疵——Base URL 输入窗口有些宽了，连通性测试下面有些窄了，导致文字重合；整体再看一下，可以立个新的 block?」→ 立 BLOCK-81，此为 P0（独立小提交）。
+
+**根因（代码 + 截图双向实锤）**：`frontend/src/components/desktop/desktop.css` 中 `.gewu-endpoint-list-header` 与 `.gewu-endpoint-card__grid` 共享的 `grid-template-columns` **只定义了 7 列**，而表头（协议/供应商/Base URL/Key/默认模型/上下文/连通性/空）与渠道行（…/删除按钮）各有 **8 个子元素** → 第 8 个单元格被挤进隐式新行**独占一行**（删除垃圾桶自动换行）、连通性只剩 32px 窄列，「已连接」文字溢出与右缘重合。
+
+**修复（D7 列宽终值，plan §4 内部裁决）**：8 列显式定义——协议 `minmax(120px,0.8fr)` / 供应商 `minmax(110px,0.7fr)` / Base URL `minmax(200px,1.8fr)`（用户反馈过宽：由 2fr 降至 1.8fr、下限 240→200px）/ Key `minmax(170px,1.1fr)` / 默认模型 `minmax(160px,1.1fr)` / 上下文 `96px` / 连通性 `120px`（由 32px 加宽）/ 删除 `40px`；并给表头与渠道行**统一** `min-width: 1060px`（此前只有表头 1040px，渠道行无下限 → 窄容器下两行各自缩放造成列错位）。
+
+**门禁**：新增 dev-verify flow `ui342-endpoint-grid` **实机 6/6 allPass**（G1 表头/渠道行均 8 列 / G2 渠道行 8 单元格同一行（offsetTop 极差 ≤4px；独占新行会差 ≈32px）/ G3 零内容溢出＝文字不重合 / G4 表头与渠道行列宽逐列一致 / G5 两行共用 min-width）；`src/components/desktop` 定向 64/64；tsc 0；docs:check/ui:audit:check PASS。证据 `acceptance/block-81/ui342-endpoint-grid-live.json` + 截图。
+
+**遗留观察（P0 实机发现，待用户裁决）**：设置面板在 `/project/:id/settings` 与左右栏共用宽度（侧栏常驻规则使然，此前进设置会自动收起两侧栏→面板得全宽）；窗口较窄（center < 1060px）时该 8 列表格需横向滚动。处置候选：①仅在设置模式下自动收起**右栏**（左栏常驻不变，符合用户「左栏常驻」规则）②给表格做窄容器自适应（两行式布局）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-336: 工作台页面退役 → ZCode 式欢迎页（BLOCK-80）(2026-09-10 verified)
 
 **来源**：用户裁决——工作台页面（项目卡+创建区）作为「新建任务」落点没有意义，要求模仿 ZCode 欢迎页（问候+项目/分支选择+大输入框+快捷任务），内容与本项目一致、非复刻。
