@@ -17,7 +17,6 @@ vi.mock('@/components/desktop/PluginStorePanel', () => ({ PluginStorePanel: () =
 vi.mock('@/components/desktop/DesktopSettingsPanel', () => ({ DesktopSettingsPanel: () => <div>settings</div> }));
 vi.mock('@/components/workspace-panels/WorkspaceSummaryCard', () => ({ WorkspaceSummaryCard: () => <div>summary</div> }));
 vi.mock('@/components/workspace-panels/ScheduledWorkspacePanel', () => ({ ScheduledWorkspacePanel: () => <div>task</div> }));
-vi.mock('@/components/workspace-panels/WorkspaceSearchPanel', () => ({ WorkspaceSearchPanel: () => <div>search</div> }));
 vi.mock('@/components/workspace-panels/ResultView', () => ({
   ResultView: ({
     mode,
@@ -47,8 +46,8 @@ function context(mode: CenterPanelContext['workspaceMode']): CenterPanelContext 
   return {
     project: { id: 'project-1', name: 'Project One' },
     projectId: 'project-1',
-    allProjects: [], activeConvId: 'conversation-1', conversations: [], projectConversations: {}, searchConversationIndex: {},
-    workspaceMode: mode, workspaceSearchQuery: '',
+    allProjects: [], activeConvId: 'conversation-1', conversations: [], projectConversations: {},
+    workspaceMode: mode,
     // Derived exactly as production does (project-workspace.tsx:932). Hardcoding
     // this to true put the fixture in a state production cannot reach, so the
     // assertion below passed while the conversation was in fact unmounted in
@@ -69,7 +68,7 @@ function context(mode: CenterPanelContext['workspaceMode']): CenterPanelContext 
     activeJobId: 'job-1', pendingArtifactName: null, recentJobs: [], liveJobsPreview: [],
     jobStats: { running: 0, failed: 0, done: 1, pending: 0 }, backendStatus: {} as CenterPanelContext['backendStatus'],
     jobs: [], datasets: [],
-    updateWorkspaceMode: vi.fn(), setWorkspaceSearchQuery: vi.fn(), openRightPanel: vi.fn(), switchToProject: vi.fn(), navigate: vi.fn(),
+    updateWorkspaceMode: vi.fn(), openRightPanel: vi.fn(), switchToProject: vi.fn(), navigate: vi.fn(),
     setActiveConvId: vi.fn(), setActiveJobId: vi.fn(), setActiveArtifact: vi.fn(), setBottomTerminalOpen: vi.fn(),
     setResultAgentDraft: vi.fn(), onResultEditSubmit: vi.fn(),
     setLeftOpen: vi.fn(), setRightOpen: vi.fn(), setSummaryOpen: vi.fn(), handleShowPlugins: vi.fn(), handleOpenResult: vi.fn(),

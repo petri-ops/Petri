@@ -7,6 +7,8 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { Icon, type IconName } from '@/components/icons/Icon';
+// UI-347 — 返回按钮复用定时分析面的同款样式类（工作区模式面统一返回风格）
+import backStyles from '@/pages/project-workspace.module.css';
 import {
   usePluginStore,
   type RemotePlugin,
@@ -15,6 +17,8 @@ import {
 
 interface Props {
   onClose: () => void;
+  /** UI-347 — 返回按钮文案（与各宿主页面返回语义一致；缺省「返回」）。 */
+  backLabel?: string;
 }
 
 type CategoryId = 'all' | 'runtime' | 'tool';
@@ -42,7 +46,7 @@ function getCategoryIcon(info: RemotePlugin): IconName {
   return 'bar-chart';
 }
 
-export function PluginStorePanel({ onClose }: Props): React.ReactElement {
+export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): React.ReactElement {
   const {
     installed,
     remote,
@@ -218,6 +222,18 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
     >
       {/* Header */}
       <div className="gewu-plugin-store__header">
+        {/* UI-347 — 返回风格与其它页面对齐（定时分析面同款左上角文字按钮，
+            替代原右上角 × 关闭） */}
+        <button
+          type="button"
+          className={backStyles.scheduledWorkspaceBack}
+          onClick={onClose}
+          title={backLabel}
+          aria-label={backLabel}
+        >
+          <Icon name="arrow-left" size={14} />
+          <span>{backLabel}</span>
+        </button>
         <span className="gewu-plugin-store__icon">
           <Icon name="puzzle" size={18} />
         </span>
@@ -230,14 +246,6 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <button
-          type="button"
-          className="gewu-plugin-store__close"
-          onClick={onClose}
-          aria-label="关闭"
-        >
-          <Icon name="x" size={16} />
-        </button>
       </div>
 
       {/* Body: sidebar + content */}

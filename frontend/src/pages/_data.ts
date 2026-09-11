@@ -6,7 +6,7 @@
 //   - frontend/src/tools/categories.ts — toolCategories array
 //   - frontend/src/tools/inventory.ts  — tools: Tool[] array
 //
-// Existing consumers (e.g. SimpleChat, WorkspaceSearchPanel, RightPanel,
+// Existing consumers (e.g. SimpleChat, RightPanel,
 // ResultView, AnalysisLaunchPanel, project-workspace) still import from
 // `@/pages/_data` via alias. New code should import directly from
 // `frontend/src/tools/*`.

@@ -53,7 +53,6 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext & { project: P
     sshListDirs: vi.fn(async () => ({ ok: true, path: '/root', dirs: [{ name: 'gewu-block67-demo', path: '/root/gewu-block67-demo' }] })),
     sshRegisterHost: vi.fn(async () => ({ ok: true, alias: 'gewu-1-2-3-4' })),
     sshCreateAt: vi.fn(async () => ({ ok: true })),
-    handleShowSearch: vi.fn(),
     handleShowScheduled: vi.fn(),
     handleShowPlugins: vi.fn(),
     handleShowSettings: vi.fn(),
@@ -70,15 +69,16 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext & { project: P
 }
 
 describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
-  it('marks search quick-action with aria-current="page" when workspaceMode is search', () => {
-    const ctx = buildCtx('search');
+  it('renders workbench quick-actions without the retired search entry (UI-347)', () => {
+    const ctx = buildCtx('chat');
     render(
       <MemoryRouter>
         <LeftPanel ctx={ctx} />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
-    const searchBtn = screen.getByRole('button', { name: /搜索/ });
-    expect(searchBtn.getAttribute('aria-current')).toBe('page');
+    expect(screen.queryByRole('button', { name: /搜索/ })).toBeNull();
+    // 插件入口仍在（UI-346 修复其假死后保留）
+    expect(screen.getByRole('button', { name: /插件/ })).toBeTruthy();
   });
 
   it('calls onOpen when the + button is clicked (UI-304 简化版 - 直接触发原生面板)', () => {
@@ -326,9 +326,9 @@ describe('UI-335 新建任务在工作台分组内', () => {
     const btn = screen.getByRole('button', { name: '新建任务' });
     fireEvent.click(btn);
     expect(ctx.handleNavigateToHome).toHaveBeenCalledTimes(1);
-    // 归组断言：工作台标签之后、搜索之前
+    // 归组断言：工作台标签之后、插件之前（UI-347 起搜索项已退役）
     const group = btn.closest('[class*="leftQuickActions"]');
-    expect(group?.textContent.indexOf('新建任务')).toBeLessThan(group!.textContent.indexOf('搜索'));
+    expect(group?.textContent.indexOf('新建任务')).toBeLessThan(group!.textContent.indexOf('插件'));
     expect(group?.textContent).toContain('工作台');
   });
 });

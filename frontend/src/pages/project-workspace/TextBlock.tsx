@@ -12,9 +12,6 @@ export function TextBlock({ text }: { text?: string }): React.ReactElement | nul
   return <pre className={styles.workspaceOfficeText}>{clipped}</pre>;
 }
 
-// ============================================================
-// WorkspaceSearchPanel — center column global search view
-// ============================================================
 
 
 

@@ -65,7 +65,6 @@ export interface LeftPanelContext {
 
   // Workspace routing
   workspaceMode: WorkspaceMode;
-  handleShowSearch: () => void;
   handleShowScheduled: () => void;
   handleShowPlugins: () => void;
   handleShowSettings: () => void;
@@ -226,14 +225,8 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
       title: '新建任务：在工作台选择项目路径（本地目录 / 手动路径 / SSH 远程）',
     },
     {
-      key: 'search',
-      mode: 'search',
-      label: '搜索',
-      icon: 'search',
-      onClick: ctx.handleShowSearch,
-      title: '搜索项目',
-    },
-    {
+      // UI-347 — 左栏「搜索」入口移除（用户裁决：无实际意义）；搜索面（
+      // WorkspaceSearchPanel + search 模式）一并退役，不预留空壳。
       key: 'plugins',
       mode: 'plugins',
       label: '插件',

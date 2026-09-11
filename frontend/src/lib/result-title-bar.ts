@@ -16,7 +16,7 @@ export function buildResultTitleBarTitle(
   const modeLabel = MODE_LABELS[mode];
   // chat mode (or any unrecognized mode) keeps project identity front-and-center
   // so the user always sees WHICH project they're in. handleOpenResult preserves
-  // 'chat' on auto-open from HomePage; 'scheduled' / 'search' / 'plugins' / null
+  // 'chat' on auto-open from HomePage; 'scheduled' / 'plugins' / null
   // never end up here because ProjectWorkspace normalizes to 'chat' via T85.
   if (!modeLabel) return project;
   // Result/code/compare/history mode: artifact name dominates, project name

@@ -3145,6 +3145,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：flow `ui342-endpoint-grid` 升级为**形态自适应**（同一 flow 两套断言）——宽容器验 G1–G5（8 列 / 同行 / 零溢出 / 列宽一致 / 共用 min-width），窄容器验 N1–N5（表头隐藏 / 两轨 / 8 标签显形 / 标签与控件成对 / **不再横向滚动**）。**实机双形态全绿**：宽容器 6/6（container=1180）、窄容器 6/6（container=520，scrollWidth=clientWidth=520）；前端全量 **983/983** + tsc 0；证据 `acceptance/block-81/ui342-endpoint-grid-live.json` + 双形态截图（ui342-endpoint-grid.png 窄态两行式）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-347: 左栏「搜索」入口退役（代码清理）+ 插件页返回风格统一 (2026-09-11 verified)
+
+**来源**：用户裁决（UI-346 修复后的同日追加）——①「搜索 这个没有实际意义 删除掉 相关代码也清理了」；②「插件 和其它页面返回风格保持一致」（截图：插件商店头部为右上角 × 关闭）。
+
+**① 搜索面整体退役（删值不预留空壳，对标 BLOCK-72 RightPanelMode 先例）**：左栏工作台分组删「搜索」项；`handleShowSearch`（LeftPanel 接口/AppRail/project-workspace 三处）删除；`WorkspaceMode` 类型与 `WORKSPACE_MODES` 集合移除 `'search'`（历史深链 `/project/:id/search` 经 `parseWorkspaceMode` 落 null → chat，fail-closed）；`CenterPanel` 删 search 分支与 `WorkspaceSearchView`；**删除 `WorkspaceSearchPanel.tsx` 组件**及其 190 余行 CSS（`workspaceSearch*`/`searchResult*`）；`useProjectTreeState` 删搜索状态簇（`workspaceSearchQuery`/`searchConversationIndex`/`ensureSearchConversationIndex`，保留项目树展开簇）；相关注释同步。`CommandPalette` 的 `search: 'search'` 仅为图标映射非入口，不动。
+
+**② 插件页返回风格统一**：`PluginStorePanel` 头部右上角 × 关闭（`gewu-plugin-store__close`，CSS 一并删）改为**左上角文字返回按钮**——复用同容器定时分析面的 `scheduledWorkspaceBack` 样式类 + `arrow-left` 图标，文案经新增 `backLabel` prop 按宿主语义注入（工作区模式=「返回对话」与定时分析面逐字一致；home.tsx 首次安装引导层=缺省「返回」）。
+
+**门禁**：`tsc` 0；前端全量 **991/991**（含改写后的 LeftPanel 用例：断言「搜索」入口不存在且「插件」仍在）；实机 `scripts/ui347-search-retire-live.cjs` **4/4 allPass**（证据 `acceptance/ui-347/`）——V1 左栏无「搜索」入口；V2 插件页左上角「返回对话」按钮存在、× 已移除；V3 点返回 → 回对话模式 composer 可见；V4 深链 `/search` fail-closed 以对话渲染。**环境事实（本会话第二次咬人，登记教训）**：Windows 上 Vite 文件监听会**间歇性漏写**（LeftPanel.tsx、PluginStorePanel.tsx 两次磁盘已改而 dev server 模块图陈旧，页面跑旧代码甚至因 import 不在而白屏）——实机验证前对改动文件 `touch` 并核对 Vite 所服务模块内容，或重启 dev 栈。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-346: 左栏「搜索/插件/定时/设置」欢迎页假死修复——回退最近项目打开模式 (2026-09-11 verified)
 
 **来源**：用户实机反馈（截图）——欢迎页（`/`）点左栏「插件」「搜索」没有正常出现对应页面，原地不动。

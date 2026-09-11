@@ -35,7 +35,6 @@ import {
   type JobStats,
 } from '@/components/workspace-panels/ResultView';
 import { ScheduledWorkspacePanel } from '@/components/workspace-panels/ScheduledWorkspacePanel';
-import { WorkspaceSearchPanel } from '@/components/workspace-panels/WorkspaceSearchPanel';
 import { ResultsLibrary } from '@/components/workspace-panels/ResultsLibrary';
 import styles from '@/pages/project-workspace.module.css';
 
@@ -52,11 +51,9 @@ export interface CenterPanelContext {
   activeConvId: string | null;
   conversations: ConversationSummary[];
   projectConversations: Record<string, ConversationSummary[]>;
-  searchConversationIndex: Record<string, ConversationSummary[]>;
 
   // Workspace mode + routing
   workspaceMode: WorkspaceMode;
-  workspaceSearchQuery: string;
   showPinnedSummary: boolean;
 
   // Layout refs
@@ -89,7 +86,6 @@ export interface CenterPanelContext {
 
   // Handlers
   updateWorkspaceMode: (next: WorkspaceMode, replace?: boolean, jobId?: string | null) => void;
-  setWorkspaceSearchQuery: (q: string) => void;
   openRightPanel: (tab: 'home' | 'results' | 'files' | 'browser' | 'chat' | 'analyze' | 'review' | 'io') => void;
   switchToProject: (id: string) => void;
   navigate: (to: string) => void;
@@ -195,9 +191,6 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
       data-return-conversation-ms={returnConversationMs === null ? undefined : returnConversationMs.toFixed(2)}
     >
       {ctx.columnHeader}
-      {workspaceMode === 'search' && (
-        <WorkspaceSearchView ctx={ctx} />
-      )}
       <div
         className={`${styles.workspaceProjectionLayer} ${workspaceMode === 'chat' ? styles.workspaceProjectionLayerActive : ''}`}
         aria-hidden={workspaceMode !== 'chat'}
@@ -295,7 +288,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
       )}
       {workspaceMode === 'plugins' && (
         <div className={styles.workspaceModeSurface}>
-          <PluginStorePanel onClose={() => ctx.updateWorkspaceMode('chat')} />
+          <PluginStorePanel backLabel="返回对话" onClose={() => ctx.updateWorkspaceMode('chat')} />
         </div>
       )}
       {workspaceMode === 'settings' && (
@@ -311,40 +304,6 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
 // Internal helpers — small layout pieces extracted so the parent shell stays
 // flat and easy to scan.
 // ---------------------------------------------------------------------------
-
-function WorkspaceSearchView({ ctx }: { ctx: CenterPanelContext }): React.ReactElement {
-  const flattened = Object.entries({
-    ...ctx.searchConversationIndex,
-    ...ctx.projectConversations,
-    ...(ctx.projectId ? { [ctx.projectId]: ctx.conversations } : {}),
-  }).flatMap(([pid, list]) => list.map((item) => ({ ...item, project_id: item.project_id || pid })));
-
-  return (
-    <WorkspaceSearchPanel
-      query={ctx.workspaceSearchQuery}
-      onQueryChange={ctx.setWorkspaceSearchQuery}
-      projects={ctx.allProjects}
-      currentProjectId={ctx.projectId || ''}
-      conversations={flattened}
-      jobs={ctx.jobs}
-      datasets={ctx.datasets}
-      onOpenProject={(id) => {
-        ctx.switchToProject(id);
-        ctx.updateWorkspaceMode('chat');
-      }}
-      onOpenConversation={(pid, convId) => {
-        if (pid && pid !== ctx.projectId) ctx.navigate(`/project/${pid}`);
-        ctx.updateWorkspaceMode('chat');
-        ctx.setActiveConvId(convId);
-      }}
-      onOpenScheduled={(jobId) => {
-        ctx.setActiveJobId(jobId);
-        ctx.openRightPanel('results');
-      }}
-      onOpenPlugins={ctx.handleShowPlugins}
-    />
-  );
-}
 
 function SessionFrameView({
   ctx,

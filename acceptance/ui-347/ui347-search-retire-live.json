@@ -1,0 +1,42 @@
+{
+  "name": "ui347-search-retire",
+  "startedAt": "2026-09-11T14:16:20.753Z",
+  "finishedAt": "2026-09-11T14:16:30.996Z",
+  "assertions": [
+    {
+      "name": "V1_search_entry_removed",
+      "pass": true,
+      "detail": "左栏「搜索」入口已移除（搜索=false），「插件」入口保留（true）"
+    },
+    {
+      "name": "V2_plugins_back_style",
+      "pass": true,
+      "detail": "插件页渲染（panel=true），左上角「返回对话」返回按钮存在=true，右上角 × 关闭已移除=true"
+    },
+    {
+      "name": "V3_back_returns_to_chat",
+      "pass": true,
+      "detail": "点「返回对话」→ URL=/project/p_mtuyje22_9vr4，composer 可见"
+    },
+    {
+      "name": "V4_search_deeplink_failclosed",
+      "pass": true,
+      "detail": "深链 /project/:id/search → path=/project/p_mtuyje22_9vr4/search，以对话模式渲染（composer=true，模式集合已无 search）"
+    }
+  ],
+  "allPass": true,
+  "observations": {
+    "latestProjectId": "p_mtuyje22_9vr4",
+    "railState": {
+      "search": false,
+      "plugins": true,
+      "scheduled": false
+    },
+    "pluginHeader": {
+      "panel": true,
+      "back": true,
+      "backText": "返回对话",
+      "closeX": false
+    }
+  }
+}

@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-export type WorkspaceMode = 'chat' | 'search' | 'scheduled' | 'result' | 'code' | 'compare' | 'history' | 'plugins' | 'settings';
+// UI-347 — 'search' 已从模式集合移除（左栏入口与搜索面退役）；历史深链
+// /project/:id/search 经 parseWorkspaceMode 落 null → 'chat'（fail-closed）。
+export type WorkspaceMode = 'chat' | 'scheduled' | 'result' | 'code' | 'compare' | 'history' | 'plugins' | 'settings';
 
 export const WORKSPACE_MODES: ReadonlySet<WorkspaceMode> = new Set([
   'chat',
-  'search',
   'scheduled',
   'result',
   'code',

@@ -1373,34 +1373,6 @@
   background: var(--gewu-bg-surface);
 }
 
-.gewu-plugin-store__close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--gewu-text-muted);
-  cursor: pointer;
-  transition:
-    background 0.15s,
-    color 0.15s;
-  flex-shrink: 0;
-}
-
-.gewu-plugin-store__close:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
-}
-
-[data-theme='dark'] .gewu-plugin-store__close:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
-}
-
 /* ---- Body: sidebar + content ---- */
 .gewu-plugin-store__body {
   flex: 1;

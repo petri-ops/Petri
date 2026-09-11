@@ -488,14 +488,8 @@ export function ProjectWorkspace(): React.ReactElement {
     return () => appRail.registerWorkspaceAdapter(null);
   }, [workspaceAdapter, appRail.registerWorkspaceAdapter]);
 
-  // UI-305 P1.2 — 左栏项目树展开 + 会话搜索状态簇整簇抽入 useProjectTreeState，
-  // 零行为变化（调用点在 allProjects 声明之后）。
-  const {
-    workspaceSearchQuery,
-    setWorkspaceSearchQuery,
-    searchConversationIndex,
-    ensureSearchConversationIndex,
-  } = appRail.treeState;
+  // UI-305 P1.2 — 左栏项目树展开簇抽入 useProjectTreeState（UI-347 起搜索
+  // 状态簇已随「搜索」入口退役一并移除，本组件不再消费 treeState）。
   const workspacePath = project?.workspacePath || '';
   const compactWorkspacePath = useMemo(() => {
     if (!workspacePath) return '工作目录初始化中';
@@ -602,9 +596,6 @@ export function ProjectWorkspace(): React.ReactElement {
   // 5s polling timer).
   // Switch conversation
   const handleShowChat = useCallback(() => updateWorkspaceMode('chat'), [updateWorkspaceMode]);
-  const handleShowSearch = useCallback(() => {
-    updateWorkspaceMode('search');
-  }, [updateWorkspaceMode]);
   const handleShowScheduled = useCallback(() => {
     const currentJob = conversationJobs.find((job) => job.id === activeJobId);
     const nextJobId = currentJob?.id || conversationJobs[0]?.id || null;
@@ -837,11 +828,6 @@ export function ProjectWorkspace(): React.ReactElement {
     const unsub = subscribeGewuEvent(gewuEvents.conversationForked, handler);
     return unsub;
   }, [updateWorkspaceMode, refreshConversations, refreshOtherConversations]);
-  useEffect(() => {
-    if (workspaceMode === 'search') {
-      ensureSearchConversationIndex().catch(() => {});
-    }
-  }, [ensureSearchConversationIndex, workspaceMode]);
   const activeJob = useMemo(() => {
     if (!activeConvId || !activeJobId) return null;
     const candidate = conversationJobs.find((job) => job.id === activeJobId)
@@ -1383,9 +1369,7 @@ export function ProjectWorkspace(): React.ReactElement {
     activeConvId,
     conversations,
     projectConversations,
-    searchConversationIndex,
     workspaceMode,
-    workspaceSearchQuery,
     showPinnedSummary,
     centerColRef: centerColRef as React.RefObject<HTMLElement>,
     sessionFrameRef: sessionFrameRef as React.RefObject<HTMLDivElement>,
@@ -1412,7 +1396,6 @@ export function ProjectWorkspace(): React.ReactElement {
     jobs,
     datasets,
     updateWorkspaceMode,
-    setWorkspaceSearchQuery,
     openRightPanel,
     switchToProject,
     navigate,
@@ -1484,7 +1467,6 @@ export function ProjectWorkspace(): React.ReactElement {
     archiveConversation: archiveConversationFromTree,
     forkConversation: forkConversationInTree,
     workspaceMode,
-    handleShowSearch,
     handleShowScheduled,
     handleShowPlugins,
     handleShowSettings,

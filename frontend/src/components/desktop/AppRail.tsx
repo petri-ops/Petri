@@ -103,7 +103,6 @@ export function AppRail(): React.ReactElement {
     sshRegisterHost,
     sshCreateAt,
     workspaceMode,
-    handleShowSearch: () => openWorkspaceMode('search'),
     handleShowScheduled: () => openWorkspaceMode('scheduled'),
     handleShowPlugins: () => openWorkspaceMode('plugins'),
     handleShowSettings: () => openWorkspaceMode('settings'),
