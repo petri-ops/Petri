@@ -2,8 +2,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
-const profiler = await import(resolve(process.cwd(), 'core/shared-backend/data-profiler.js'));
+// Windows 纪律：ESM 动态 import 不能吃绝对路径（ERR_UNSUPPORTED_ESM_URL_SCHEME），
+// 必须转 file:// URL（TEST-INFRA-DEBT 轻量包，与 agent-runner 系测试同修）。
+const profiler = await import(pathToFileURL(resolve(process.cwd(), 'core/shared-backend/data-profiler.js')).href);
 const { profileData } = profiler.default || profiler;
 const FIXTURES = resolve(process.cwd(), 'test/fixtures/sdc');
 

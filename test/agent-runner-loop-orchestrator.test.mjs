@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
@@ -24,7 +24,7 @@ function resolve(...segments) {
 
 describe('agent-runner-loop-orchestrator.test.mjs (BLOCK-14 PHASE 3.1 state machine)', () => {
   it('exports runLoop as the sole public API and preserves PHASE 3.1 contract', async () => {
-    const mod = await import(resolve('core/biof3-server/loop-orchestrator.js'));
+    const mod = await import(pathToFileURL(resolve('core/biof3-server/loop-orchestrator.js')).href);
     assert.strictEqual(typeof mod.runLoop, 'function', 'runLoop must be exported');
     assert.strictEqual(mod.runLoop.constructor.name, 'AsyncFunction', 'runLoop must be async');
 

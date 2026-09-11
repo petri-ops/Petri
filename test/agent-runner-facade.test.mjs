@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -23,7 +23,7 @@ function resolve(...segments) {
 
 describe('agent-runner-facade.test.mjs (BLOCK-14 PHASE 3.1 facade)', () => {
   it('exports exactly the 5 PHASE 3.1 documented APIs (no extras)', async () => {
-    const mod = await import(resolve('core/biof3-server/agent-runner.js'));
+    const mod = await import(pathToFileURL(resolve('core/biof3-server/agent-runner.js')).href);
     const expected = [
       'runAgentLoop',
       'resolveAgentTaskTerminal',
@@ -42,7 +42,7 @@ describe('agent-runner-facade.test.mjs (BLOCK-14 PHASE 3.1 facade)', () => {
   });
 
   it('resolveAgentTaskTerminal error envelope covers all 5 branches', async () => {
-    const { resolveAgentTaskTerminal } = await import(resolve('core/biof3-server/agent-runner.js'));
+    const { resolveAgentTaskTerminal } = await import(pathToFileURL(resolve('core/biof3-server/agent-runner.js')).href);
 
     // branch 1: cancelled takes precedence
     const cancelled = resolveAgentTaskTerminal({
@@ -68,14 +68,22 @@ describe('agent-runner-facade.test.mjs (BLOCK-14 PHASE 3.1 facade)', () => {
     const pending = resolveAgentTaskTerminal({ cancelled: false, fatalError: null, assistantText: 'tiny', pendingApproval: true });
     assert.strictEqual(pending.status, 'completed');
 
-    // branch 5: short assistantText + no fatal → failed sentinel
-    const shortFailed = resolveAgentTaskTerminal({ cancelled: false, fatalError: null, assistantText: 'tiny', pendingApproval: false });
-    assert.strictEqual(shortFailed.status, 'failed');
-    assert.strictEqual(shortFailed.error, 'agent loop 未生成有效回复');
+    // branch 5: BLOCK-49 加映把完成判定放宽为「非空即完成」（原 >20 字符启发式
+    // 把短回答子任务误判 failed，实机两轮触发）。本用例此前仍断言旧启发式
+    // （'tiny' 期望 failed）——该分歧在 Windows 上被本文件的 import 路径错误
+    // 长期掩盖（pathToFileURL 修复后本套件才首次真正执行）。
+    const shortCompleted = resolveAgentTaskTerminal({ cancelled: false, fatalError: null, assistantText: 'tiny', pendingApproval: false });
+    assert.strictEqual(shortCompleted.status, 'completed');
+    assert.strictEqual(shortCompleted.error, null);
+
+    // 空字符串仍判 failed（防御「模型全程无输出」的真失败）。
+    const emptyFailed = resolveAgentTaskTerminal({ cancelled: false, fatalError: null, assistantText: '', pendingApproval: false });
+    assert.strictEqual(emptyFailed.status, 'failed');
+    assert.strictEqual(emptyFailed.error, 'agent loop 未生成有效回复');
   });
 
   it('resolveFailedJobReplacements fail-closed path distinguishes repaired vs unresolved', async () => {
-    const { resolveFailedJobReplacements } = await import(resolve('core/biof3-server/agent-runner.js'));
+    const { resolveFailedJobReplacements } = await import(pathToFileURL(resolve('core/biof3-server/agent-runner.js')).href);
 
     // repaired: same-tool, higher iteration
     const repairedJobs = [
