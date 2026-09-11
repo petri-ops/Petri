@@ -153,6 +153,8 @@
 
 112. [`block-81-thinking-level-endpoint-plan.md`](./block-81-thinking-level-endpoint-plan.md) — 2026-09-11 用户两截图提问立项的工作包（planned 排队）：**Composer 思考级别 + 供应商设置页 Endpoint 网格修复**。调研结论：①ZCode「思考级别 Ctrl+T」= 客户端控件 + 请求参数映射（OpenAI 兼容 `reasoning_effort`、GLM `thinking:{type}`、Qwen `enable_thinking`、Anthropic `thinking.budget_tokens`、DeepSeek 官方=独立模型无参数）；我方展示侧 UI-272 已渲染 `reasoning_content`，请求侧全缺，但网关→provider 透传管道已通（`model-gateway.js:181` + `deepseek.js:267`），补齐=控件+映射+容错，量级中小。②设置页网格 8 内容元素 vs 7 列定义（`desktop.css:565`）——连通性挤 32px 窄列文字重合、删除按钮换行独占一行；修复=显式 8 列 + Base URL 收窄 + 连通性列加宽。设计裁决 D1-D7（档位集合/映射单点/400 容错/会话持久化/控件形态）待 P0 评审。启动待串行队列。
 
+113. [`block-82-thinking-channel-compat-plan.md`](./block-82-thinking-channel-compat-plan.md) — 2026-09-12 立项（active，P0-LAUNCH）：**思考渠道兼容**——BLOCK-81 遗留候选收口。sensenova 上游思考段字段名为 `reasoning` 而我方解析面只认 `reasoning_content`（证据=BLOCK-81 P3 渠道 probe），该渠道思考段整段丢失；且 dev 栈该 profile 未声明 `reasoning` 能力位，思考档位连参数都不发。P1 解析归一 3 处（`deepseek.js` 流式 delta + 非流式信封、`io-transcript.js` 记录面；`reasoning_content` 优先、`reasoning` fallback，下游零改动）+ 契约测试；P2 能力位补声明（probe paramAccepted=true 有据）+ sensenova 真渠道两档实机对比；P3 收口。范围外：思考行渲染位置（用户裁决项）。
+
 ## Branch Conversation 架构
 
 - [branch-data-model.md](./branch-data-model.md) — 分支对话架构后端核心：SQLite 持久化 + IPC handlers + MCP 工具定义。
