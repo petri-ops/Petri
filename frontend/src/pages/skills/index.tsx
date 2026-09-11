@@ -116,10 +116,10 @@ export default function SkillsPage(): React.ReactElement {
             type="button"
             className={styles.retryBtn}
             onClick={handleReturnHome}
-            title="返回首页"
+            title="返回"
           >
             <Icon name="arrow-left" size={14} />
-            <span>返回首页</span>
+            <span>返回</span>
           </button>
         </div>
       </div>
@@ -133,10 +133,11 @@ export default function SkillsPage(): React.ReactElement {
           type="button"
           className={styles.backBtn}
           onClick={handleReturnHome}
-          title="返回首页"
-          aria-label="返回首页"
+          title="返回"
+          aria-label="返回"
         >
           <Icon name="arrow-left" size={16} />
+          <span>返回</span>
         </button>
         <div className={styles.pageIcon}>
           <Icon name="command" size={22} />

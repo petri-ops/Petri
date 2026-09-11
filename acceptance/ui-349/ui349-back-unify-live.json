@@ -1,0 +1,61 @@
+{
+  "name": "ui349-back-unify",
+  "startedAt": "2026-09-11T15:02:50.325Z",
+  "finishedAt": "2026-09-11T15:03:10.618Z",
+  "assertions": [
+    {
+      "name": "F_backend_back",
+      "pass": true,
+      "detail": "backend 返回按钮={\"text\":\"返回\",\"aria\":\"返回\",\"h\":30,\"radius\":\"8px\"}"
+    },
+    {
+      "name": "F_knowledge_back",
+      "pass": true,
+      "detail": "knowledge 返回按钮={\"text\":\"返回\",\"aria\":\"返回\",\"h\":30,\"radius\":\"8px\"}"
+    },
+    {
+      "name": "F_skills_back",
+      "pass": true,
+      "detail": "skills 返回按钮={\"text\":\"返回\",\"aria\":\"返回\",\"h\":30,\"radius\":\"8px\"}"
+    },
+    {
+      "name": "F_plugins_back",
+      "pass": true,
+      "detail": "插件页返回按钮={\"text\":\"返回\",\"aria\":\"返回\",\"h\":30,\"radius\":\"8px\"}"
+    },
+    {
+      "name": "F_all_identical",
+      "pass": true,
+      "detail": "四页返回按钮形态文字一致（text/高度/圆角）：{\"backend\":{\"text\":\"返回\",\"aria\":\"返回\",\"h\":30,\"radius\":\"8px\"},\"knowledge\":{\"text\":\"返回\",\"aria\":\"返回\",\"h\":30,\"radius\":\"8px\"},\"skills\":{\"text\":\"返回\",\"aria\":\"返回\",\"h\":30,\"radius\":\"8px\"},\"plugins\":{\"text\":\"返回\",\"aria\":\"返回\",\"h\":30,\"radius\":\"8px\"}}"
+    }
+  ],
+  "allPass": true,
+  "observations": {
+    "shapes": {
+      "backend": {
+        "text": "返回",
+        "aria": "返回",
+        "h": 30,
+        "radius": "8px"
+      },
+      "knowledge": {
+        "text": "返回",
+        "aria": "返回",
+        "h": 30,
+        "radius": "8px"
+      },
+      "skills": {
+        "text": "返回",
+        "aria": "返回",
+        "h": 30,
+        "radius": "8px"
+      },
+      "plugins": {
+        "text": "返回",
+        "aria": "返回",
+        "h": 30,
+        "radius": "8px"
+      }
+    }
+  }
+}

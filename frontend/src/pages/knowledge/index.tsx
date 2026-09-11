@@ -30,6 +30,7 @@ export default function KnowledgePage(): React.ReactElement {
           aria-label="返回"
         >
           <Icon name="arrow-left" size={16} />
+          <span>返回</span>
         </button>
         <div className={styles.pageIcon}>
           <Icon name="brain" size={20} />

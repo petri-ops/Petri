@@ -288,7 +288,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
       )}
       {workspaceMode === 'plugins' && (
         <div className={styles.workspaceModeSurface}>
-          <PluginStorePanel backLabel="返回对话" onClose={() => ctx.updateWorkspaceMode('chat')} />
+          <PluginStorePanel onClose={() => ctx.updateWorkspaceMode('chat')} />
         </div>
       )}
       {workspaceMode === 'settings' && (

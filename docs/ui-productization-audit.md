@@ -3145,6 +3145,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：flow `ui342-endpoint-grid` 升级为**形态自适应**（同一 flow 两套断言）——宽容器验 G1–G5（8 列 / 同行 / 零溢出 / 列宽一致 / 共用 min-width），窄容器验 N1–N5（表头隐藏 / 两轨 / 8 标签显形 / 标签与控件成对 / **不再横向滚动**）。**实机双形态全绿**：宽容器 6/6（container=1180）、窄容器 6/6（container=520，scrollWidth=clientWidth=520）；前端全量 **983/983** + tsc 0；证据 `acceptance/block-81/ui342-endpoint-grid-live.json` + 双形态截图（ui342-endpoint-grid.png 窄态两行式）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-349: 后端/知识空间/Skills/插件四页返回按钮统一（← 返回）(2026-09-11 verified)
+
+**来源**：用户裁决（UI-348 后追加）——「后端 知识空间 Skills 插件 这些页面中的返回 按钮 能否形式文字 保持统一呢！」。此前三种形态并存：后端/知识空间=30×30 纯图标方块（aria「返回」无文字）、Skills=36×36 纯图标方块（文案「返回首页」）、插件=图标+文字（文案「返回对话」）。
+
+**统一规格（以定时分析面按钮为基准）**：左箭头图标 + 文字「返回」，高 30px、padding 0 10px、gap 8px、1px 边框、8px 圆角、caption 字号，hover 反色——四页同规格同文案。落地：`global-page.module.css` `.backBtn` 重写（图标方块→图标+文字，token 从 `--color-*` 对齐 `--gewu-*`）、backend/knowledge 页头按钮补 `<span>返回</span>`、Skills 两处「返回首页」→「返回」且 `.backBtn`（36×36）同规格重写、`CenterPanel` 去掉插件返回的特例文案 `backLabel="返回对话"`（回落默认「返回」，与 home.tsx 安装引导层一致）。
+
+**门禁**：`tsc` 0；实机 `scripts/ui349-back-unify-live.cjs` **5/5 allPass**（证据 `acceptance/ui-349/`）——四页返回按钮实测 `{text:返回, aria:返回, h:30, radius:8px}` 完全一致。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-348: 右栏「后端」卡删除 + 全局页主题色适配 + 顶栏布局冲突优化 (2026-09-11 verified)
 
 **来源**：用户三条裁决（截图）——①「右侧栏中的 后端 应该删除 这个已经转移到左侧栏」；②「后端和知识空间的 主题色 没有根据设置的自动适配」；③「Skills、知识空间和后端页面的顶层有 Gewu 这块页面有些异常 好像多了分隔线 我觉得应该是布局有些冲突了」。
