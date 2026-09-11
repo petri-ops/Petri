@@ -397,12 +397,13 @@ export function ProjectWorkspace(): React.ReactElement {
     navigate(query ? `${base}?${query}` : base, { replace: true });
   }, [searchParams, projectId, navigate]);
   // Derived summary visibility (semantic + pixel dimensions).
-  const summaryVisibility = useMemo<'hidden' | 'compact' | 'expanded'>(() => {
+  // UI-351 加映（用户裁决「有遮挡就应该悬浮 / 边界加宽」）：只有中栏宽裕
+  // （≥1120px，卡片完全放得下）才钉住展开；一旦会话开始被挤/盖（<1120px）
+  // 即转悬浮层——不再保留 780–1120 的「压缩钉住」中间带。
+  const summaryVisibility = useMemo<'hidden' | 'compact' | 'float' | 'expanded'>(() => {
     if (sessionFrameWidth === 0) return 'expanded';
     if (sessionFrameWidth >= 1120) return 'expanded';
-    if (sessionFrameWidth >= 780) return 'compact';
-    return 'hidden';
-
+    return 'float';
   }, [sessionFrameWidth]);
   // Bottom-terminal drag comes from useResizableColumns above; we clamp
   // the height to the workspace viewport (140-520) inline so the
@@ -877,6 +878,8 @@ export function ProjectWorkspace(): React.ReactElement {
       ? Math.min(312, Math.max(292, Math.round(sessionFrameWidth * 0.26)))
       : Math.min(292, Math.max(276, Math.round(sessionFrameWidth * 0.32)));
   const summaryCardOpen = summaryVisibility !== 'hidden' && summaryOpen;
+  // UI-351 加映② — 摘要卡处于悬浮态（中栏过窄 + 卡片打开）
+  const summaryFloatActive = summaryCardOpen && summaryVisibility === 'float';
   const { workflow: activeWorkflow } = useHarnessWorkflowStatus(
     activeJob?.id,
     !!activeJob && (
@@ -1578,7 +1581,9 @@ export function ProjectWorkspace(): React.ReactElement {
         </div>
       )}
       <div className={styles.workspaceBody}>
-        {compactLayout && (leftOpen || rightOpen) && (
+        {/* UI-351 加映② — 摘要卡悬浮时不再叠加 compact 侧栏遮罩：灰底托着悬浮卡
+            视觉突兀（用户裁决「背景应该取消」）。悬浮卡自身可点、顶栏 toggle 可收起。 */}
+        {compactLayout && (leftOpen || rightOpen) && !summaryFloatActive && (
           <button
             className={styles.panelBackdrop}
             onClick={() => {

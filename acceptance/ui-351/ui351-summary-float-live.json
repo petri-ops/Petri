@@ -1,0 +1,54 @@
+{
+  "name": "ui351-summary-float",
+  "startedAt": "2026-09-11T15:59:12.001Z",
+  "finishedAt": "2026-09-11T15:59:25.683Z",
+  "assertions": [
+    {
+      "name": "V1_wide_pinned_column",
+      "pass": true,
+      "detail": "宽中栏（layout=1609px）卡片为钉住列（pinned=true，悬浮=false）"
+    },
+    {
+      "name": "V2_narrow_auto_float",
+      "pass": true,
+      "detail": "中栏收窄（layout=812px，会话区=812px ≈ 全宽）卡片自动转悬浮（pinned=false，floating=true，会话被挤压=false）"
+    },
+    {
+      "name": "V3_float_card_visible",
+      "pass": true,
+      "detail": "悬浮卡片可见（cardVisible=true，内容预览=项目摘要1.WorkDir空闲任务无活动暂无运行）"
+    },
+    {
+      "name": "V4_restore_pinned",
+      "pass": true,
+      "detail": "窗口恢复后卡片回钉住列（pinned=true，悬浮=false）"
+    }
+  ],
+  "allPass": true,
+  "observations": {
+    "wide": {
+      "layoutW": 1609,
+      "insetW": 1273,
+      "pinned": true,
+      "floating": false,
+      "cardVisible": true,
+      "cardText": "项目摘要1.WorkDir空闲任务无活动暂无运行任务还没有数据集——先上传数据，"
+    },
+    "narrow": {
+      "layoutW": 812,
+      "insetW": 812,
+      "pinned": false,
+      "floating": true,
+      "cardVisible": true,
+      "cardText": "项目摘要1.WorkDir空闲任务无活动暂无运行任务还没有数据集——先上传数据，"
+    },
+    "restored": {
+      "layoutW": 1609,
+      "insetW": 1273,
+      "pinned": true,
+      "floating": false,
+      "cardVisible": true,
+      "cardText": "项目摘要1.WorkDir空闲任务无活动暂无运行任务还没有数据集——先上传数据，"
+    }
+  }
+}

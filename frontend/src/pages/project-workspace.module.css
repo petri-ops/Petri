@@ -1572,6 +1572,52 @@
   align-items: stretch;
   gap: 20px;
   overflow: hidden;
+  /* UI-351 — 悬浮摘要的定位基准 */
+  position: relative;
+}
+
+/* UI-351 — 中栏过窄时摘要卡转悬浮层：不占列宽、盖在会话右上方 */
+.workspaceSummaryFloat {
+  position: absolute;
+  top: 8px;
+  right: 4px;
+  z-index: 40;
+  max-height: calc(100% - 16px);
+  max-width: min(312px, calc(100% - 24px));
+  overflow: auto;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+  /* UI-351 加映 — 悬浮态默认轻微透出下层内容，hover 回到实感（渐进不突兀） */
+  opacity: 0.92;
+  transition: opacity 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  animation: workspaceSummaryFloatIn 0.28s ease-out;
+}
+
+.workspaceSummaryFloat:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+@keyframes workspaceSummaryFloatIn {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspaceSummaryFloat {
+    animation: none;
+    transition: none;
+  }
+}
+
+[data-theme='dark'] .workspaceSummaryFloat {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
 }
 
 .workspaceSessionInset {

@@ -112,4 +112,25 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     expect(ctx.updateWorkspaceMode).toHaveBeenCalledWith('compare', true, 'job-1');
     expect(ctx.updateWorkspaceMode).toHaveBeenCalledWith('history', true, 'job-1');
   });
+
+  // UI-351 — 中栏过窄时摘要卡转悬浮层（绝对定位），不再占列宽也不再整体消失
+  it('renders the summary card in a floating overlay when visibility is float (UI-351)', () => {
+    const ctx = context('chat');
+    ctx.showPinnedSummary = true;
+    ctx.summaryCardOpen = true;
+    ctx.summaryVisibility = 'float';
+    render(<CenterPanel ctx={ctx} />);
+    expect(document.querySelector('[class*="workspaceSummaryFloat"]')).toBeTruthy();
+    expect(document.querySelector('[class*="workspaceSummaryColumn"]')).toBeNull();
+  });
+
+  it('keeps the pinned summary column for compact/expanded visibility (UI-351 回归)', () => {
+    const ctx = context('chat');
+    ctx.showPinnedSummary = true;
+    ctx.summaryCardOpen = true;
+    ctx.summaryVisibility = 'compact';
+    render(<CenterPanel ctx={ctx} />);
+    expect(document.querySelector('[class*="workspaceSummaryColumn"]')).toBeTruthy();
+    expect(document.querySelector('[class*="workspaceSummaryFloat"]')).toBeNull();
+  });
 });

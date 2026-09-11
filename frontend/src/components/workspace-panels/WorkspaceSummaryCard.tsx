@@ -20,7 +20,8 @@ import { formatDate } from '@/lib/format';
 
 export interface WorkspaceSummaryCardProps {
   open: boolean;
-  visibility: 'hidden' | 'compact' | 'expanded';
+  /** UI-351 — 'float'：中栏过窄时卡片转悬浮层（compact 样式 + 绝对定位），不再整体消失 */
+  visibility: 'hidden' | 'compact' | 'float' | 'expanded';
   width?: number;
   projectName: string;
   /** BLOCK-78 P1：项目本体——workspaceKind/sshHost/g0Baseline/modality/updatedAt 派生运行时投影 */
@@ -145,7 +146,7 @@ export function WorkspaceSummaryCard({
   return (
     <aside
       className={`${styles.workspacePinnedSummary} ${
-        visibility === 'compact' ? styles.workspacePinnedSummaryCompactMode : ''
+        visibility === 'compact' || visibility === 'float' ? styles.workspacePinnedSummaryCompactMode : ''
       }`}
       style={width ? { width: `${width}px` } : undefined}
       aria-label="项目运行摘要"

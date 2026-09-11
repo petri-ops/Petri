@@ -65,7 +65,7 @@ export interface CenterPanelContext {
   rightOpen: boolean;
   inputHeight: number;
   summaryCardOpen: boolean;
-  summaryVisibility: 'hidden' | 'compact' | 'expanded';
+  summaryVisibility: 'hidden' | 'compact' | 'float' | 'expanded';
   summaryOpenWidth: number;
   activeJob: ToolJob | null;
   activeWorkflow: HarnessWorkflowJobState | null;
@@ -356,7 +356,34 @@ function SessionFrameView({
             </div>
           </div>
         </div>
-        {ctx.showPinnedSummary && ctx.summaryCardOpen && (
+        {ctx.showPinnedSummary && ctx.summaryCardOpen && ctx.summaryVisibility === 'float' && (
+          <div className={styles.workspaceSummaryFloat} aria-label="项目运行摘要（悬浮）">
+            <WorkspaceSummaryCard
+              open
+              visibility="float" 
+              width={ctx.summaryOpenWidth}
+              projectName={ctx.project.name}
+              project={ctx.project}
+              activeJob={ctx.activeJob}
+              workflow={ctx.activeWorkflow}
+              recentJobs={ctx.recentJobs}
+              liveJobsPreview={ctx.liveJobsPreview}
+              jobStats={ctx.jobStats}
+              backendStatus={ctx.backendStatus}
+              conversations={ctx.conversations}
+              activeConversation={ctx.conversations.find((c) => c.id === ctx.activeConvId) ?? null}
+              datasets={ctx.datasets}
+              loop={durableLoop.loop}
+              loopSummary={durableLoop.summary}
+              onOpenScheduled={ctx.openScheduledResults}
+              onSelectJob={(jobId) => {
+                ctx.setActiveJobId(jobId);
+                ctx.openRightPanel('results');
+              }}
+            />
+          </div>
+        )}
+        {ctx.showPinnedSummary && ctx.summaryCardOpen && ctx.summaryVisibility !== 'float' && (
           <div className={styles.workspaceSummaryColumn}>
             <WorkspaceSummaryCard
               open

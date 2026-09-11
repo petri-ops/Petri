@@ -112,20 +112,37 @@ export function useWorkspaceLayout(): UseWorkspaceLayoutResult {
   }, []);
 
   // Measure session frame dimensions.
+  // UI-351 抓真修：原实现在挂载时 `sessionFrameRef.current` 为 null 就整段
+  // return——此后再无任何测量，sessionFrameWidth 永远停在 0，摘要卡恒按
+  // 'expanded' 钉住（宽度恒 300px），「compact/悬浮随宽度自适应」从未生效。
+  // 改为 rAF 等待 ref 就绪后再挂 RO + resize 监听（ref 晚于 effect 就绪的
+  // 场景：SessionFrameView 在子树条件分支内，挂载顺序晚于本 hook 的 effect）。
   useEffect(() => {
-    const element = sessionFrameRef.current;
-    if (!element) return;
+    let observer: ResizeObserver | null = null;
+    let raf = 0;
+    let cancelled = false;
     const updateSize = () => {
-      const rect = element.getBoundingClientRect();
-      setSessionFrameWidth(rect.width || 0);
-      setSessionFrameHeight(rect.height || 0);
+      const rect = sessionFrameRef.current?.getBoundingClientRect();
+      setSessionFrameWidth(rect?.width || 0);
+      setSessionFrameHeight(rect?.height || 0);
     };
-    updateSize();
-    const observer =
-      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updateSize);
-    observer?.observe(element);
-    window.addEventListener('resize', updateSize);
+    const attach = () => {
+      if (cancelled) return;
+      const element = sessionFrameRef.current;
+      if (!element) {
+        raf = requestAnimationFrame(attach);
+        return;
+      }
+      updateSize();
+      observer =
+        typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updateSize);
+      observer?.observe(element);
+      window.addEventListener('resize', updateSize);
+    };
+    attach();
     return () => {
+      cancelled = true;
+      if (raf) cancelAnimationFrame(raf);
       observer?.disconnect();
       window.removeEventListener('resize', updateSize);
     };

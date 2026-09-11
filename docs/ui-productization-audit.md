@@ -3145,6 +3145,20 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：flow `ui342-endpoint-grid` 升级为**形态自适应**（同一 flow 两套断言）——宽容器验 G1–G5（8 列 / 同行 / 零溢出 / 列宽一致 / 共用 min-width），窄容器验 N1–N5（表头隐藏 / 两轨 / 8 标签显形 / 标签与控件成对 / **不再横向滚动**）。**实机双形态全绿**：宽容器 6/6（container=1180）、窄容器 6/6（container=520，scrollWidth=clientWidth=520）；前端全量 **983/983** + tsc 0；证据 `acceptance/block-81/ui342-endpoint-grid-live.json` + 双形态截图（ui342-endpoint-grid.png 窄态两行式）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-351: 中栏收窄时摘要概览卡自动转悬浮层（+ 测量 hook 抓真修）(2026-09-11 verified)
+
+**来源**：用户裁决（截图）——「摘要概览卡片 随着中间会话区范围变小的时候 应该自动处于悬浮状态 目前不是 需要优化」。
+
+**根因（两层，测量断裂才是真凶）**：① 原逻辑中栏 <780px 时 `summaryVisibility='hidden'` → 卡片**整体卸载消失**，从无悬浮形态；② 更深层：`useWorkspaceLayout` 的测量 effect 在挂载时 `sessionFrameRef.current` 为 null 即整段 return，**此后再无任何测量**——`sessionFrameWidth` 恒为 0 → visibility 恒 'expanded'（卡片内联宽度恒 300px），compact/hidden 阈值自 BLOCK-78 起就从未真正生效（实机内联宽度 300px 实证）。
+
+**修复**：① `summaryVisibility` 增加 **`float`** 档（<780px）：卡片以绝对定位悬浮层（`workspaceSummaryFloat`，top-right、z-index 40、投影阴影、max-height 内滚动）盖在会话右上方——不占列宽、不消失，会话区恢复全宽；`WorkspaceSummaryCard` float 档沿用 compact 紧凑样式。② `useWorkspaceLayout` 测量 effect 改为 **rAF 等待 ref 就绪**后再挂 ResizeObserver + resize 监听（robust against 挂载顺序），一次性修复全部依赖 `sessionFrameWidth` 的阈值逻辑（compact 降级等）。
+
+**门禁**：`tsc` 0；CenterPanel 定向 **8/8**（新增 2 条：float → 悬浮容器且无列容器；compact → 列容器且无悬浮容器）；前端全量 **991/991**（改写后总数）；实机 `scripts/ui351-summary-float-live.cjs` **4/4 allPass**（证据 `acceptance/ui-351/`）——V1 宽中栏（2436px）钉住列；V2 收窄（610px <780）自动转悬浮且会话区=全宽（无挤压）；V3 悬浮卡片可见；V4 窗口恢复回钉住列。`scripts/resize-electron-window.ps1` 补 `-Width/-Height` 参数解析（此前硬编码 narrow=1400 无法覆盖 <780 阈值场景）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+**加映②（用户裁决「悬浮触发边界的背景应该取消，太不好看」）**：实机定位＝compact 布局的侧栏遮罩 `.panelBackdrop`（`--gewu-overlay` 半透明黑、z-index 40）与悬浮卡叠放，灰底托卡视觉突兀。修复＝摘要卡悬浮态（`summaryFloatActive`）下不渲染该遮罩（悬浮卡自身可点、顶栏 toggle 可收起，不依赖遮罩点击关闭）；非悬浮态 compact 遮罩行为不变。实机复验：悬浮态 backdropVisible=false 且卡片保留。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+**加映（同日，用户裁决「边界加宽 + 渐进不突兀」）**：①用户指出 780px 边界太窄——780–1120 的「压缩钉住」中间带卡片已开始挤会话 → **删除该中间带**：只有中栏 ≥1120px（卡片完全放得下）才钉住展开，<1120px（一开始被挤/盖）即转悬浮。实机复验 4/4（812px 中栏即悬浮、会话区全宽）。②悬浮渐进入场动效：`workspaceSummaryFloatIn`（淡入 + 右侧 16px 滑入，0.28s ease-out）；悬浮态默认 opacity 0.92 轻微透出下层、hover 回到 1 并微上浮；`prefers-reduced-motion` 下动画禁用。实机实测 animationName/duration/opacity 全部生效。前端全量 **993/993**。
+
 ## UI-350: 插件商店主按钮跟随主题色（gewu-btn--primary 去 teal 锁定）(2026-09-11 verified)
 
 **来源**：用户裁决（截图对照）——「插件中的按钮颜色 和主题色 也没有保持一致 Skills页面中没有问题」：插件商店「下载安装/安装」为青绿（`--gewu-teal` 静态 token），Skills「执行」为琥珀（随 `[data-accent]`）。

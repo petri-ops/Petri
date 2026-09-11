@@ -20,6 +20,11 @@ foreach ($p in $procs) {
   # container for UI-344 two-line layout verification.
   $w = if ($args -contains 'narrow') { 1400 } else { 3072 }
   $h = if ($args -contains 'narrow') { 1200 } else { 1780 }
+  # UI-351 - support explicit -Width/-Height overrides (physical px)
+  $wi = [array]::IndexOf($args, '-Width')
+  if ($wi -ge 0 -and $wi -lt ($args.Count - 1)) { $w = [int]$args[$wi + 1] }
+  $hi = [array]::IndexOf($args, '-Height')
+  if ($hi -ge 0 -and $hi -lt ($args.Count - 1)) { $h = [int]$args[$hi + 1] }
   [GewuWin]::SetWindowPos($p.MainWindowHandle, [IntPtr]::Zero, 0, 0, $w, $h, 0x0040) | Out-Null
   Write-Output ("resized hwnd=" + $p.MainWindowHandle)
 }
