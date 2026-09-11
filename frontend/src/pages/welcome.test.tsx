@@ -204,6 +204,21 @@ describe('Welcome（BLOCK-80 欢迎页 + UI-337 ZCode 式项目面板）', () =>
     // 冷启动（无历史）分支：导航至最近项目工作区（路由内变化，不抛错即可）
   });
 
+  it('UI-340 工作区去重：同服务器同路径已存在 → 切换既有项目而非重复创建', async () => {
+    const existing: Project = { id: 'p_exist', name: 'devah · demo', createdAt: '2026-09-01T00:00:00Z', updatedAt: '2026-09-09T00:00:00Z', workspaceKind: 'ssh', sshHost: 'dell', remotePath: '/root/demo' };
+    listProjectsMock.mockResolvedValue([existing, projectA]);
+    renderWelcome();
+    await openPicker();
+    fireEvent.click(screen.getByText('远程连接'));
+    fireEvent.change(await screen.findByLabelText('远程目标'), { target: { value: 'dell' } });
+    fireEvent.change(screen.getByLabelText('远程路径'), { target: { value: '/root/demo' } });
+    fireEvent.click(screen.getByText('校验并创建'));
+    await waitFor(() => expect(screen.getByText(/已存在指向同一工作区的项目/)).toBeTruthy());
+    expect(createProjectMock).not.toHaveBeenCalled();
+    // 已自动切换选中既有项目
+    expect(screen.getByText('devah · demo')).toBeTruthy();
+  });
+
   it('快捷 chip 点击填充首问输入框；空输入不可发送', async () => {
     renderWelcome();
     const chip = await screen.findByText('差异分析');

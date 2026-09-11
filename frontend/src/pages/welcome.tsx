@@ -58,6 +58,7 @@ export default function Welcome(): React.ReactElement {
   const [draft, setDraft] = useState('');
   const [launching, setLaunching] = useState(false);
   const [error, setError] = useState('');
+  const [hint, setHint] = useState('');
 
   // UI-337 — 项目下拉面板
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -232,11 +233,37 @@ export default function Welcome(): React.ReactElement {
       .catch(() => setSshTargets([]));
   }
 
+  // UI-340 — 工作区去重：同形态 + 同路径（尾部斜杠归一）视为同一工作区，
+  // 命中既有项目则不重复创建，直接切换选中并提示。
+  function findExistingProject(kind: 'local' | 'ssh', path: string, sshHost?: string): Project | null {
+    const norm = (v: string) => String(v || '').replace(/[\\/]+$/, '');
+    const target = norm(path);
+    return projects.find((p) => {
+      if ((p.workspaceKind || 'local') !== kind) return false;
+      if (kind === 'ssh') return (p.sshHost || '') === (sshHost || '') && norm(p.remotePath || '') === target;
+      return norm(p.workspacePath || '') === target;
+    }) || null;
+  }
+
+  function adoptExisting(existing: Project) {
+    setSelectedId(existing.id);
+    setPickerOpen(false);
+    setPanelSection('none');
+    setFolderPath(null);
+    setHint(`已存在指向同一工作区的项目「${existing.name}」，已为你切换`);
+  }
+
   async function createFromFolder() {
     if (!folderPath || !folderName.trim() || creatingFolder) return;
     setCreatingFolder(true);
     setError('');
+    setHint('');
     try {
+      const existing = findExistingProject('local', folderPath);
+      if (existing) {
+        adoptExisting(existing);
+        return;
+      }
       const project = await createProject({ name: folderName.trim(), modality: 'general', workspacePath: folderPath });
       await refreshProjects(project.id);
       setPickerOpen(false);
@@ -254,7 +281,14 @@ export default function Welcome(): React.ReactElement {
     if (!sshAlias || !sshRemotePath || sshValidating) return;
     setSshValidating(true);
     setError('');
+    setHint('');
     try {
+      // 去重优先：同服务器+同路径已存在项目 → 直接切换，不再造第二个
+      const existing = findExistingProject('ssh', sshRemotePath, sshAlias);
+      if (existing) {
+        adoptExisting(existing);
+        return;
+      }
       const v = await validateSshProject({ alias: sshAlias, remotePath: sshRemotePath });
       if (!v.ok) throw new Error(v.error || '校验失败');
       const project = await createProject({
@@ -507,6 +541,7 @@ export default function Welcome(): React.ReactElement {
           />
 
           <div className={styles.composerFoot}>
+            {hint && <span className={styles.actionHint}>{hint}</span>}
             {!backendReady && (
               <span className={styles.backendHint}>本地分析服务未就绪，启动后即可发送</span>
             )}
