@@ -151,6 +151,8 @@
 
 111. [`block-80-welcome-home-plan.md`](./block-80-welcome-home-plan.md) — 2026-09-10 用户裁决当日完成的欢迎页改造工作包（completed，UI-336 verified）：工作台页面退役——`/` 改为 ZCode 式欢迎页（时段问候 + 项目下拉 + 当前分支徽标（只读）+ 首问输入框 + 领域快捷 chips：差异分析/富集分析/单细胞聚类/报告解读）；`/projects` = 原工作台退役为「项目管理」（项目卡 + 本地/手输/SSH/空白创建流零损失平移；冷启动自动跳最近项目拆除）。首问接力 = createConversation → sessionStorage `gewu.welcomeLaunch` → 工作区会话种子完成即派发 copilotAsk。范围外：分支切换（审阅面）/账号/模板市场。
 
+112. [`block-81-thinking-level-endpoint-plan.md`](./block-81-thinking-level-endpoint-plan.md) — 2026-09-11 用户两截图提问立项的工作包（planned 排队）：**Composer 思考级别 + 供应商设置页 Endpoint 网格修复**。调研结论：①ZCode「思考级别 Ctrl+T」= 客户端控件 + 请求参数映射（OpenAI 兼容 `reasoning_effort`、GLM `thinking:{type}`、Qwen `enable_thinking`、Anthropic `thinking.budget_tokens`、DeepSeek 官方=独立模型无参数）；我方展示侧 UI-272 已渲染 `reasoning_content`，请求侧全缺，但网关→provider 透传管道已通（`model-gateway.js:181` + `deepseek.js:267`），补齐=控件+映射+容错，量级中小。②设置页网格 8 内容元素 vs 7 列定义（`desktop.css:565`）——连通性挤 32px 窄列文字重合、删除按钮换行独占一行；修复=显式 8 列 + Base URL 收窄 + 连通性列加宽。设计裁决 D1-D7（档位集合/映射单点/400 容错/会话持久化/控件形态）待 P0 评审。启动待串行队列。
+
 ## Branch Conversation 架构
 
 - [branch-data-model.md](./branch-data-model.md) — 分支对话架构后端核心：SQLite 持久化 + IPC handlers + MCP 工具定义。
