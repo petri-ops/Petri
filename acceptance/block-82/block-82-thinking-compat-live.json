@@ -1,0 +1,147 @@
+{
+  "name": "block-82-thinking-compat",
+  "startedAt": "2026-09-11T17:35:58.915Z",
+  "finishedAt": "2026-09-11T17:36:16.019Z",
+  "assertions": [
+    {
+      "name": "ENV_api_ready",
+      "pass": true,
+      "detail": "3001 API 就绪"
+    },
+    {
+      "name": "C0_config_capability",
+      "pass": true,
+      "detail": "sensenova(model-1788504346152) capabilities=[\"chat\",\"streaming\",\"tools\",\"reasoning\"] 含 reasoning"
+    },
+    {
+      "name": "RUN_std_accepted",
+      "pass": true,
+      "detail": "standard 轮 POST /api/ai/agent HTTP 200"
+    },
+    {
+      "name": "RUN_std_replied",
+      "pass": true,
+      "detail": "standard 轮 assistant 回复 114 字"
+    },
+    {
+      "name": "RUN_high_accepted",
+      "pass": true,
+      "detail": "high 轮 POST /api/ai/agent HTTP 200"
+    },
+    {
+      "name": "RUN_high_replied",
+      "pass": true,
+      "detail": "high 轮 assistant 回复 137 字"
+    },
+    {
+      "name": "C1_std_no_thinking_param",
+      "pass": true,
+      "detail": "standard 轮 sensenova 1 条上游记录全部零思考参数（sentParamKeys=[[\"max_tokens\",\"temperature\",\"tool_choice\",\"tools\"]]）"
+    },
+    {
+      "name": "C2_high_sends_reasoning_effort",
+      "pass": true,
+      "detail": "high 轮 sensenova 1 条上游记录 reasoning_effort 全为 high（实测=[\"high\"]；会话内辅助调用走默认渠道不涉档位）"
+    },
+    {
+      "name": "C3_high_reasoning_normalized",
+      "pass": true,
+      "detail": "high 轮 sensenova 思考段经归一落库：meta.reasoningByIteration 共 136 字（修复前恒 0——sensenova 字段名 reasoning，旧解析只认 reasoning_content）"
+    },
+    {
+      "name": "C4_std_reasoning_normalized",
+      "pass": true,
+      "detail": "standard 轮（零思考参数）sensenova 思考段同样经归一落库：meta.reasoningByIteration 共 307 字"
+    },
+    {
+      "name": "C5_content_intact",
+      "pass": true,
+      "detail": "两会话 assistant 正文非空（std=114 字 / high=137 字）"
+    }
+  ],
+  "allPass": true,
+  "observations": {
+    "stdRecords": [
+      {
+        "attemptIndex": 0,
+        "profileId": "model-1788504346152",
+        "model": "sensenova-6.8-flash-lite",
+        "sentParamKeys": [
+          "max_tokens",
+          "temperature",
+          "tool_choice",
+          "tools"
+        ],
+        "thinkingKeys": [],
+        "reasoning_effort": null,
+        "error": null,
+        "finishReason": "stop",
+        "contentLength": 116,
+        "reasoningLength": 0,
+        "reasoningPreview": null
+      },
+      {
+        "attemptIndex": 0,
+        "profileId": "deepseek-chat",
+        "model": "deepseek-flash",
+        "sentParamKeys": [
+          "max_tokens",
+          "stream",
+          "temperature"
+        ],
+        "thinkingKeys": [],
+        "reasoning_effort": null,
+        "error": null,
+        "finishReason": "length",
+        "contentLength": 0,
+        "reasoningLength": 51,
+        "reasoningPreview": "我们需要输出一个6到12个字的中文短标题，概括对话核心。不能有标点、引号，直接输出标题文本。用户提问是"
+      }
+    ],
+    "highRecords": [
+      {
+        "attemptIndex": 0,
+        "profileId": "model-1788504346152",
+        "model": "sensenova-6.8-flash-lite",
+        "sentParamKeys": [
+          "max_tokens",
+          "reasoning_effort",
+          "temperature",
+          "tool_choice",
+          "tools"
+        ],
+        "thinkingKeys": [
+          "reasoning_effort"
+        ],
+        "reasoning_effort": "high",
+        "error": null,
+        "finishReason": "stop",
+        "contentLength": 139,
+        "reasoningLength": 0,
+        "reasoningPreview": null
+      },
+      {
+        "attemptIndex": 0,
+        "profileId": "deepseek-chat",
+        "model": "deepseek-flash",
+        "sentParamKeys": [
+          "max_tokens",
+          "stream",
+          "temperature"
+        ],
+        "thinkingKeys": [],
+        "reasoning_effort": null,
+        "error": null,
+        "finishReason": "length",
+        "contentLength": 0,
+        "reasoningLength": 52,
+        "reasoningPreview": "我们需要回答用户：基于提问和助手回答，生成一个6到12个字中文短标题，概括对话核心。不要标点、引号，直接"
+      }
+    ],
+    "stdSensoRounds": 1,
+    "highSensoRounds": 1,
+    "highMetaReasoningChars": 136,
+    "highSensoReasoningCharsInTranscript": 0,
+    "stdMetaReasoningChars": 307
+  }
+}
