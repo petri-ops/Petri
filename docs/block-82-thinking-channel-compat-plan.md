@@ -1,6 +1,6 @@
 # BLOCK-82-THINKING-CHANNEL-COMPAT · 思考渠道兼容（sensenova reasoning 字段归一 + 能力位闭环）
 
-> 状态：`active`（P0-LAUNCH · 2026-09-12）
+> 状态：`completed`（P0–P3 当日完成 · 2026-09-12）
 > 依据：BLOCK-81 遗留候选（`docs/block-81-thinking-level-endpoint-plan.md` notes）+ P3 渠道 probe 实机证据（`acceptance/block-81/block-81-p3-channel-probe-live.json`）
 > truthDomain：`block-82-thinking-channel-compat`
 
@@ -57,6 +57,7 @@ probe 已实测该渠道接受参数，开启有据。
 
 ## 5. 进度记录
 
+- 2026-09-12 **整包收口 completed（P0–P3 当日完成；提交 34a30816 / 3fb91012 / a9078d72 / bf6916a5）**。**P1 解析归一**：`deepseek.js` 流式 delta + 非流式信封（`pickReasoningText`：reasoning_content 优先 / reasoning 兜底）+ `io-transcript.js` `normalizeResponse` 记录面（reasoning_content 为字符串含空串时行为与既有契约完全一致）；下游事件/记录面保持 reasoning_content 单一形状，前端零改动；契约测试 `test/block82-reasoning-field-compat.test.mjs` 5/5（sensenova 形状 / DeepSeek 主路径回归 / 双字段优先级 / 非流式信封 / 记录面），相邻回归 provider-streaming + block37-io-transcript 全绿。**P2 实机验收 11/11 allPass**（`scripts/block82-thinking-compat-live.cjs`，`acceptance/block-82/`，sensenova 真渠道两轮对话）：C0 能力位声明 / C1 standard 零思考参数（BLOCK-81 additive 红线回归）/ C2 high 上游收到 reasoning_effort=high（能力位门控放行）/ C3 high 思考段 136 字归一落库 meta.reasoningByIteration（修复前恒 0）/ C4 standard 思考段 307 字同样归一（默认路径同受益）/ C5 内容主路径零破坏。**能力位**：dev 栈 sensenova profile capabilities 补 `reasoning`（probe paramAccepted=true 有据；运行数据不入库，本行留痕）。**验收脚本抓真两处（断言精度）**：①会话 transcript 为会话级归档（混标题生成等辅助调用，走默认渠道不涉档位）→ 档位断言只看 sensenova 记录；②聚合记录面 message 本就不保留思考段（思考段走事件流路径进 meta）→ 如实登记不虚设断言（首轮曾误把同会话 deepseek 标题记录的 53 字计为 sensenova 思考段，已修正）。**收口门禁**：hygiene ✅ + docs:check 229 ✅ + ui:audit:check ✅ + test:changed 27/29（2 红=P6 canonical evidence 源绑定 `p6_current_source_tree_not_exact` detail=[test/impact-map.json]，HEAD 基线同败 11/2——存量漂移自 TEST-INFRA-DEBT-2 起，重采属 G0-RS 范围，如实登记例外）；impact-map 顺手清三处存量 unknown（dev-verify 探针证据 / block-79 / ui-341，test-affected 16/16 恢复全绿）。范围守住：思考行渲染位置等范围外三项未动。G0 开发期常态 · 不外推 packaged/Provider/GA。
 - 2026-09-12 **立项（P0-LAUNCH）**：用户裁决「规划一下……串起来完成长周期阶段性任务」（休息期授权，
   范围=BLOCK-81 已登记遗留候选，边界清晰无歧义）。代码事实：解析断点 3 处（deepseek.js×2 +
   io-transcript.js×1，全 OpenAI 兼容路径）+ dev 栈 sensenova profile 未声明 reasoning 能力位；

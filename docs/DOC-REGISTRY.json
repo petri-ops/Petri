@@ -4187,7 +4187,7 @@
    "id": "BLOCK-82-THINKING-CHANNEL-COMPAT",
    "path": "docs/block-82-thinking-channel-compat-plan.md",
    "kind": "work-package",
-   "status": "active",
+   "status": "completed",
    "canonical": true,
    "truthDomain": "block-82-thinking-channel-compat",
    "entrypoint": "docs/README.md",
@@ -4203,8 +4203,9 @@
    ],
    "archivePolicy": "archive_when_superseded",
    "registeredAt": "2026-09-12",
-   "phase": "P0-LAUNCH",
-   "notes": "思考渠道兼容（BLOCK-81 遗留候选收口）：sensenova 上游思考段字段名为 reasoning 而我方解析面只认 reasoning_content → 该渠道思考段整段丢失（证据=acceptance/block-81/block-81-p3-channel-probe-live.json PR3）。P1 解析归一 3 处（deepseek.js 流式 delta+非流式信封、io-transcript.js 记录面；reasoning_content 优先、reasoning fallback，后端归一后下游零改动）+ 契约测试；P2 dev 栈 sensenova profile 补 reasoning 能力位（probe paramAccepted=true 有据）+ sensenova 真渠道两档实机对比；P3 收口。范围外：思考行渲染位置（用户裁决项）、GLM 思考参数形状（另有候选）、Anthropic/dashscope 路径。用户休息期授权立项（范围=已登记候选，边界无歧义）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+   "phase": "COMPLETED",
+   "notes": "思考渠道兼容（BLOCK-81 遗留候选收口）P0–P3 当日完成（34a30816/3fb91012/a9078d72/bf6916a5）：sensenova 上游思考段字段名 reasoning 而我方解析面只认 reasoning_content → 该渠道思考段整段丢失（证据=BLOCK-81 P3 probe PR3）。P1 解析归一 3 处（deepseek.js 流式 delta+非流式信封 pickReasoningText、io-transcript.js normalizeResponse；reasoning_content 优先含空串契约不变/reasoning 兜底，后端归一后下游零改动）+ 契约测试 5/5（block82-reasoning-field-compat：sensenova 形状/DeepSeek 回归/双字段优先级/非流式信封/记录面）。P2 能力位闭环（dev 栈 sensenova profile 补 reasoning，probe paramAccepted 有据）+ 真渠道实机 11/11 allPass（scripts/block82-thinking-compat-live.cjs，acceptance/block-82/：C1 standard 零思考参数 additive 红线回归/C2 high 上游收 reasoning_effort=high/C3 思考段 136 字归一落库 meta.reasoningByIteration 修复前恒 0/C4 standard 思考段 307 字同受益/C5 内容零破坏）。验收脚本抓真两处：transcript 会话级归档混辅助调用（档位断言只看 sensenova 记录）；聚合记录面不保留思考段（事件流路径承载，不虚设断言）。收口门禁 hygiene/docs/ui 三绿 + test:changed 27/29（2 红=P6 源绑定存量漂移 HEAD 同败，重采属 G0-RS，例外登记）；impact-map 顺手清三处存量 unknown（dev-verify/block-79/ui-341，test-affected 16/16 全绿）。范围外守住：思考行渲染位置（用户裁决项）、GLM 思考参数形状、Anthropic/dashscope 路径。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+   "completedAt": "2026-09-12"
   }
  ],
  "lastUpdated": "2026-09-12",
