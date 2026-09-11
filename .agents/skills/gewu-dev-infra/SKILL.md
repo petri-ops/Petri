@@ -13,7 +13,7 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 .agents/skills/gewu-dev-infra/
 ├── SKILL.md                        # 本文件：流程入口
 ├── PORTING.md                      # 跨仓库复用指南（拷贝 + package.json 接线 + 可移植性矩阵）
-├── scripts/                        # workspace-state / hygiene-check / closeout-gates（位置无关）
+├── scripts/                        # workspace-state / hygiene-check / closeout-gates / normalize-eol（位置无关）
 ├── dev-verify/                     # lib.cjs 四原语 + run.cjs 注册表 + flows/ + _template.cjs
 ├── templates/delegation-contract.md# 子 Agent 委派任务书模板
 ├── references/FILE-TREE-POLICY.md  # 文件树纯净策略（区域生命周期 + scripts 归档判据）
@@ -60,10 +60,11 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 4. **CDP Input.insertText 在 CodeMirror 场景不达**（焦点不属编辑器时静默丢失，甚至误落聊天输入框）——编辑器注入用已验证配方：`cm.focus()` + `document.execCommand('insertText', …)`（block67-p1-live 同款）。
 5. **Write 产出即校验**：写完脚本先 `node --check`；含嵌套 `${…}` 的模板串若报语法错，改写为字符串拼接（Write 管线对该构造偶发损坏，p1/p4 live 脚本均踩过）。
 6. **验证脚本不信任前台**：原生弹窗受 Windows 前台锁影响不一定是前台窗口——EnumWindows 枚举 + hwnd 直投（`scripts/lib-block75-os.cjs`），sidecar 对后台窗口的 snapshot/type/click 均可用。
+7. **工作区换行漂移是最隐蔽的一类平台坑**（2026-09-11 转化为门禁，同类第二次出现）：Windows 编辑器/工具会把工作区文件写成 CRLF，而 `.gitattributes` 的 `text=auto eol=lf` 让 **git 的内容比对看不见它**——`git diff` 为空，stat 缓存命中时 `git status` 连 `M` 都不显示（本仓库实测曾有 44 个 CRLF 文件静默存在而 status 干净）——漂移只在「读工作区原始字节与 blob 比 SHA」的校验器里现形：2026-08-07 是 `npm run check` 整链（migration SQL / golden fixture / acceptance 证据 SHA），2026-09-11 是 `g0-rs-p6` 的 `sourceMismatches` 恒红并被误登记为「P6 证据未重采」两周。**排查纪律：遇到任何 SHA/逐字节比对的门禁恒红，先查换行漂移（`git ls-files --eol`），别先怀疑证据过期**。检测 `npm run hygiene:check`（检查项 3），归一 `node .agents/skills/gewu-dev-infra/scripts/normalize-eol.mjs --write`（只改写换行字节；对内容与索引一致的文件顺带刷新索引 stat 缓存、不产生提交内容变化，带真实 WIP 的文件跳过、不动你的暂存状态）。
 
 ## 保持工作区干净
 
-- `npm run hygiene:check` 报告死符号链接与临时残留；它只报告不代删，处置由人裁决。
+- `npm run hygiene:check` 报告死符号链接、临时残留与**工作区换行漂移**；它只报告不代删，处置由人裁决（换行归一用 `scripts/normalize-eol.mjs --write`）。
 - 未跟踪的在制文件是别的包的 WIP 时只列出，绝不清理、绝不误入本包提交。
 
 ## 编写产品 Skill（resources/skills/）
