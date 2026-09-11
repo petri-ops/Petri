@@ -143,6 +143,16 @@ import {
   type ChatModelPreset,
 } from '@/hooks/useAiSettings';
 import { CopilotMarkdown } from './copilotMarkdown';
+// BLOCK-81 P2 — 思考档位（会话级持久化 + 词表）
+import {
+  DEFAULT_THINKING_LEVEL,
+  THINKING_LEVEL_LABELS,
+  THINKING_LEVELS,
+  loadThinkingLevel,
+  nextThinkingLevel,
+  saveThinkingLevel,
+  type ThinkingLevel,
+} from './thinkingLevel';
 import {
   formatToolDuration,
   type ToolActivityItem,
@@ -305,6 +315,19 @@ export function SimpleChat({
   // BLOCK-60 — composer 工具栏容器查询窄态（ResizeObserver 只读宽度，不影响弹性宽度逻辑）
   const composerBarRef = useRef<HTMLDivElement | null>(null);
   const [composerNarrow, setComposerNarrow] = useState(false);
+  // BLOCK-81 P2 — 思考档位：会话级态（随会话恢复），默认「标准」＝不发任何上游参数
+  const [thinkingLevel, setThinkingLevel] = useState<ThinkingLevel>(DEFAULT_THINKING_LEVEL);
+  const [thinkingMenuOpen, setThinkingMenuOpen] = useState(false);
+  // 切会话即载入该会话档位（会话级持久化，对齐 composer 草稿同族语义）
+  useEffect(() => {
+    setThinkingLevel(loadThinkingLevel(projectId, conversationId));
+    setThinkingMenuOpen(false);
+  }, [projectId, conversationId]);
+  const applyThinkingLevel = useCallback((next: ThinkingLevel) => {
+    setThinkingLevel(next);
+    saveThinkingLevel(projectId, conversationId, next);
+    setThinkingMenuOpen(false);
+  }, [projectId, conversationId]);
   useEffect(() => {
     const el = composerBarRef.current;
     if (!el || typeof ResizeObserver === 'undefined') return;
@@ -419,6 +442,27 @@ export function SimpleChat({
     preferredPresetForSupplier,
     selectModel,
   } = useModelAccessMenus({ modelPresets, activeModelId, setActiveModelId });
+
+  // 能力位门控（D3 双保险①的 UI 侧）：仅当当前渠道声明 reasoning 才渲染档位控件，
+  // 避免对不支持的渠道出现「假开关」。后端仍会二次门控。
+  const reasoningSupported = Array.isArray(activeModel?.capabilities)
+    && activeModel.capabilities.includes('reasoning');
+  // Ctrl+T 循环档位（对齐 ZCode 习惯）；未声明能力的渠道不响应
+  useEffect(() => {
+    if (!reasoningSupported) return undefined;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
+      if (e.key.toLowerCase() !== 't') return;
+      e.preventDefault();
+      setThinkingLevel((current) => {
+        const next = nextThinkingLevel(current);
+        saveThinkingLevel(projectId, conversationId, next);
+        return next;
+      });
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [reasoningSupported, projectId, conversationId]);
 
   // UI-305 P0.2 — summary retry 状态簇（原 297-303 的 5 个 useState +
   // retrySummary useCallback + UX1H 冷却 tick effect）整簇抽入 useSummaryRetry，
@@ -915,6 +959,7 @@ export function SimpleChat({
     accessMode,
     planMode,
     createConversationForRun,
+    thinkingLevel,
   });
 
   // BLOCK-52 P1（选中即引用）：带引用块的发送包装——发送前把引用块渲染进
@@ -1802,6 +1847,48 @@ export function SimpleChat({
                       <Icon name="chevron-down" size={12} />
                     </button>
                   </div>
+                  {reasoningSupported && (
+                    <div className="sc-model-picker sc-model-picker-footer">
+                      <button
+                        type="button"
+                        className="sc-model-btn sc-thinking-btn"
+                        onClick={() => setThinkingMenuOpen((current) => !current)}
+                        title={`思考档位：${THINKING_LEVEL_LABELS[thinkingLevel]}（Ctrl+T 循环切换）`}
+                        aria-label={`思考档位：${THINKING_LEVEL_LABELS[thinkingLevel]}`}
+                        aria-expanded={thinkingMenuOpen}
+                        data-testid="thinking-level-trigger"
+                        data-level={thinkingLevel}
+                      >
+                        <Icon name="brain" size={14} />
+                        {!composerNarrow && <span>{THINKING_LEVEL_LABELS[thinkingLevel]}</span>}
+                        <Icon name="chevron-down" size={12} />
+                      </button>
+                    </div>
+                  )}
+                  {thinkingMenuOpen && (
+                    <>
+                      <div className="sc-model-overlay" onClick={() => setThinkingMenuOpen(false)} />
+                      <div className="sc-model-menu" role="menu" aria-label="思考档位">
+                        {THINKING_LEVELS.map((level) => (
+                          <button
+                            type="button"
+                            key={level}
+                            className="sc-model-option"
+                            role="menuitemradio"
+                            aria-checked={level === thinkingLevel}
+                            data-testid={`thinking-level-option-${level}`}
+                            onClick={() => applyThinkingLevel(level)}
+                            title={level === 'standard' ? '不发任何思考参数（默认）' : undefined}
+                          >
+                            <span className="sc-model-option-title">{THINKING_LEVEL_LABELS[level]}</span>
+                            <span className="sc-model-option-meta">
+                              {level === thinkingLevel ? '当前使用' : level === 'standard' ? '默认·不发参数' : '点击切换'}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
                   {modelMenuOpen && (
                     <>
                       <div className="sc-model-overlay" onClick={() => setModelMenuOpen(null)} />

@@ -46,6 +46,12 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-09-11 BLOCK-81 P1 接线不可变提交 c177374：frontend 仅
+  // copilotClient / conversationRunStore 两个字段透传（新增可选 thinkingLevel，
+  // 缺省不含＝零 UI 行为变化；真正的控件在 UI-345 落地）。subject 用
+  // `feat(agent):` 未带 UI-###；台账已由后续 UI-345 条目覆盖该接线。
+  // 不重写共享历史。
+  'c177374ba4ee10faf7b7dcab0628198272f8cf70',
   // 2026-09-06 4844e88「全量核对收口」不可变提交：frontend 仅触碰
   // ReviewMode.test.tsx + chat-file-references.test.ts 两个 *test* 文件
   // （biof3:// → gewu:// 改名回归的测试对齐），无产品 UI surface 变化；
@@ -228,6 +234,12 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-09-11 BLOCK-81 P1 接线不可变提交 c177374：frontend 仅
+  // copilotClient / conversationRunStore 两个字段透传（新增可选 thinkingLevel，
+  // 缺省不含＝零 UI 行为变化；真正的控件在 UI-345 落地）。subject 用
+  // `feat(agent):` 未带 UI-###；台账已由后续 UI-345 条目覆盖该接线。
+  // 不重写共享历史。
+  'c177374ba4ee10faf7b7dcab0628198272f8cf70',
   // 2026-09-08 UI-305 P1.1/P1.2 巨型组件拆分（160e0f2c project-workspace 11 内联组件外迁 /
   // feed10da useProjectTreeState 抽取）：纯重构零行为变化，UI-305 台账 verified 段已由收口
   // 提交 ebcc5a16 统一补登（P0-P3 整包一段）。豁免同提交台账要求（对齐 0acffcc 先例）。

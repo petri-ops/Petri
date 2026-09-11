@@ -1366,6 +1366,18 @@
         "test/dev-debug-scripts.test.mjs"
       ],
       "classifiesScripts": true
+    },
+    {
+      "id": "ui345-thinking-level-live",
+      "note": "UI-345 composer 思考档位验收脚本（BLOCK-81 P2）：开启渠道能力位→控件出现→切档→发送→查任务参数档位→复原。",
+      "patterns": [
+        "scripts/ui345-thinking-level-live.cjs",
+        "acceptance/block-81/**"
+      ],
+      "tests": [
+        "test/thinking-level.test.mjs"
+      ],
+      "classifiesScripts": true
     }
   ]
 }

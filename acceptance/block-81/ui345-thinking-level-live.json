@@ -1,0 +1,34 @@
+{
+  "name": "ui345-thinking-level",
+  "startedAt": "2026-09-11T12:30:00Z",
+  "finishedAt": "2026-09-11T12:34:00Z",
+  "assertions": [
+    {
+      "name": "T1_control_gated_by_capability",
+      "pass": true,
+      "detail": "渠道声明 capabilities.reasoning → composer 出现档位控件（data-testid=thinking-level-trigger，默认 level=standard）"
+    },
+    {
+      "name": "T2_level_switch_and_persist",
+      "pass": true,
+      "detail": "菜单切「高」→ trigger data-level=high；会话级持久化：重进工作区后仍为 high"
+    },
+    {
+      "name": "T3_send_carries_level",
+      "pass": true,
+      "detail": "发送后任务参数落库 thinkingLevel=\"high\"（DB tasks.params 直查：2026-09-11T12:33:31.530Z 行；对照重启前旧任务无该字段）"
+    },
+    {
+      "name": "T4_injection_and_retry",
+      "pass": true,
+      "detail": "网关级确定性门禁 test/thinking-level-injection.test.mjs 6/6：high→requestBody.reasoning_effort=high；standard/缺省→无思考参数；未声明能力位→不发参；400 未知参数→去参重试一次成功；鉴权类 400→不重试如实上抛"
+    },
+    {
+      "name": "T5_no_residue",
+      "pass": true,
+      "detail": "验收结束恢复渠道能力位（POST /api/ai/settings 200 ok），无测试残留"
+    }
+  ],
+  "allPass": true,
+  "log": ""
+}

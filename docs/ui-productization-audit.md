@@ -3145,6 +3145,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：flow `ui342-endpoint-grid` 升级为**形态自适应**（同一 flow 两套断言）——宽容器验 G1–G5（8 列 / 同行 / 零溢出 / 列宽一致 / 共用 min-width），窄容器验 N1–N5（表头隐藏 / 两轨 / 8 标签显形 / 标签与控件成对 / **不再横向滚动**）。**实机双形态全绿**：宽容器 6/6（container=1180）、窄容器 6/6（container=520，scrollWidth=clientWidth=520）；前端全量 **983/983** + tsc 0；证据 `acceptance/block-81/ui342-endpoint-grid-live.json` + 双形态截图（ui342-endpoint-grid.png 窄态两行式）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-345: composer 思考档位控件 + 会话级持久化（BLOCK-81 P2）(2026-09-11 verified)
+
+**来源**：BLOCK-81 D1/D4/D5 用户裁决——三档「关闭/标准/高」（标准＝默认且不发任何上游参数）、**会话级**持久化、控件置于 composer 模型选择器旁 + `Ctrl+T` 快捷键。
+
+**落地**：① 新增 `components/copilot/thinkingLevel.ts`——档位词表 + 会话级读写（localStorage `gewu:thinking-level:<proj>:<conv|new>`，与 composer 草稿同族键形），含新会话档位迁移（空会话首发送建会话后档位随迁，否则首轮之后丢档）与 `Ctrl+T` 循环序列（标准→高→关闭），存储不可用时静默降级不影响发送。② `SimpleChat` 新增档位按钮（brain 图标 + 当前档位 + ⌄，`data-testid=thinking-level-trigger`）与三档菜单；`composerNarrow` 下降级为纯图标；`Ctrl+T` 全局监听循环切换。③ **能力位门控（D3 双保险①的 UI 侧）**：仅当当前渠道 `activeModel.capabilities` 含 `reasoning` 才渲染控件——避免对不支持的渠道出现「假开关」；后端网关仍二次门控。④ 档位经 `useChatStream → startConversationRun → copilotClient.submitAgentTask` 随每轮下发（缺省/standard 不含字段＝零行为变化）。
+
+**门禁**：`thinkingLevel.test.ts` 6/6（词表/归一化/会话隔离/迁移/循环/存储不可用降级）+ copilot 全系 273/273 + 前端全量 983/983 + tsc 0。**实机（`scripts/ui345-thinking-level-live.cjs`，证据 `acceptance/block-81/ui345-thinking-level-live.json`）**：开启渠道 `capabilities.reasoning` → 工作区 composer 出现档位控件（默认「标准」）→ 菜单切「高」→ 发送 → **任务参数落库 `thinkingLevel:"high"`**（DB `tasks.params` 直查实证；对照：重启前旧任务无该字段，正是「后端改动需重启 dev 栈」的教训复现）→ 收尾复原渠道能力位无残留。**上游请求体层面的注入与容错**由网关级确定性门禁 `test/thinking-level-injection.test.mjs` 6/6 覆盖（high→`requestBody.reasoning_effort=high`；standard/缺省→无参数；未声明能力位→不发参；400 未知参数→去参重试一次成功；鉴权类 400→不重试如实上抛）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-343: 渠道级「支持思考档位」声明开关（BLOCK-81 P1 切片2）(2026-09-11 verified)
 
 **来源**：BLOCK-81 P1 实现中撞到 plan 缺口——D3 要求「仅对声明 `capabilities.reasoning` 的渠道发参」，但**设置页此前无处声明该能力位**，照此实现 composer 档位控件将永不出现。用户裁决：**渠道级开关**（而非按模型名推断或默认全开+容错兜底）。

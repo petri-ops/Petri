@@ -28,6 +28,9 @@
 // → useCallback(queue) → useEffect(queue drain)).
 // ============================================================
 
+import {
+  migrateThinkingLevel,
+} from '../../thinkingLevel';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 import type { CopilotContext } from '@/lib/copilotContext';
@@ -87,6 +90,8 @@ export interface UseChatStreamArgs {
 
   // SWR-backed conversation creator
   createConversationForRun: (title?: string) => Promise<{ id: string } | null>;
+  /** BLOCK-81 P2 — 会话级思考档位（缺省/standard＝不发任何上游思考参数） */
+  thinkingLevel?: 'off' | 'standard' | 'high';
 }
 
 export interface UseChatStreamReturn {
@@ -143,6 +148,7 @@ export function useChatStream({
   planMode,
   executionTargetId,
   createConversationForRun,
+  thinkingLevel,
 }: UseChatStreamArgs): UseChatStreamReturn {
   // 1. `starting` — transient send-in-progress flag (drives the
   // streaming state alongside the persistent run status).
@@ -175,6 +181,8 @@ export function useChatStream({
         const created = await createConversationForRun('新对话');
         if (!created) return false;
         migrateConversationDraft(projectId, null, created.id);
+        // BLOCK-81 P2 — 档位随新会话落到新键（否则首轮之后丢档）
+        migrateThinkingLevel(projectId, null, created.id);
         targetConversationId = created.id;
         onConversationChange(created.id);
       }
@@ -196,6 +204,8 @@ export function useChatStream({
         messages: tagged,
         modelPresetId: activeModel?.endpointProfileId || activeModelId,
         modelName: activeModel?.model,
+        // BLOCK-81 P2 — 思考档位随本轮下发（后端按 profile 能力位门控后映射上游参数）
+        thinkingLevel,
         context: {
           ...copilotCtxRef.current,
           ...(contextOverride || {}),
