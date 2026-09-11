@@ -22,6 +22,30 @@
     0 18px 42px rgba(0, 0, 0, 0.05);
 }
 
+/* UI-341 加映 — 欢迎页 composer-only 变体：无消息区，壳层交给宿主
+   （welcome.module.css 的对话框容器），自身去边框/阴影/固定高度，宽度
+   跟随宿主而非 860px 居中，composer 顶到容器边缘。只隐藏 sc-messages
+   （空态/建议卡/消息流）——Babel 解析实证 sc-input-area 嵌套在 sc-body
+   内部（1285-1851），隐藏 sc-body 会连 composer 一起藏掉 */
+.sc-root.sc-root-composer-only {
+  height: auto;
+  max-width: none;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.sc-root.sc-root-composer-only .sc-messages {
+  display: none;
+}
+
+.sc-root.sc-root-composer-only .sc-input-area {
+  margin-top: 0;
+  width: 100%;
+}
+
 .sc-model-picker {
   position: relative;
   flex-shrink: 0;

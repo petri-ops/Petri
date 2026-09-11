@@ -19,12 +19,13 @@ vi.mock('@/components/backend/BackendStatusProvider', () => ({
   useBackendStatus: () => ({ serverUp: true, isReady: true, loaded: true }),
 }));
 
-// 内嵌聊天模块整体 mock：断言挂载契约（projectId / conversationId=null / ownsCopilotAsk）
+// 内嵌聊天模块整体 mock：断言挂载契约（projectId / conversationId=null / ownsCopilotAsk / composerOnly）
 vi.mock('@/components/copilot/SimpleChat', () => ({
   SimpleChat: (props: {
     projectId: string;
     conversationId: string | null;
     ownsCopilotAsk?: boolean;
+    composerOnly?: boolean;
     onConversationChange?: (id: string) => void;
   }) => (
     <div
@@ -32,6 +33,7 @@ vi.mock('@/components/copilot/SimpleChat', () => ({
       data-project={props.projectId}
       data-conv={String(props.conversationId)}
       data-owns={String(props.ownsCopilotAsk === true)}
+      data-composer-only={String(props.composerOnly === true)}
     />
   ),
 }));
@@ -156,12 +158,14 @@ describe('Welcome（BLOCK-80 欢迎页 + UI-341 内嵌聊天模块）', () => {
     expect(listEl?.textContent).not.toContain('阿尔法项目');
   });
 
-  it('SimpleChat 内嵌：projectId 正确、conversationId=null、ownsCopilotAsk', async () => {
+  it('SimpleChat 内嵌：projectId 正确、conversationId=null、ownsCopilotAsk、composerOnly', async () => {
     renderWelcome();
     const chat = await screen.findByTestId('simple-chat');
     expect(chat.getAttribute('data-project')).toBe('p_a');
     expect(chat.getAttribute('data-conv')).toBe('null');
     expect(chat.getAttribute('data-owns')).toBe('true');
+    // UI-341 加映 — 欢迎页只保留 composer（无消息流/空态/建议卡）
+    expect(chat.getAttribute('data-composer-only')).toBe('true');
   });
 
   it('选择项目行 → 关闭面板；SimpleChat 随选中项目切换', async () => {

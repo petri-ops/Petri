@@ -342,7 +342,7 @@ export default function Welcome(): React.ReactElement {
         <p className={styles.welcomeSub}>选择项目，直接开始你的分析任务。</p>
 
         <div className={styles.composerCard}>
-          <div className={styles.pickerRow}>
+          <div className={styles.composerTopRow}>
             <div className={styles.pickerWrap}>
               <button
                 type="button"
@@ -513,25 +513,25 @@ export default function Welcome(): React.ReactElement {
               </span>
             )}
           </div>
-        </div>
 
-        {/* UI-341 — 内嵌真正的聊天模块：composer 与工作区同源（完全访问/
-            知识空间/模型选择/历史回溯），首问自动建会话，onConversationChange
-            后导航进工作区（run 在服务端，SSE 回放无缝衔接）。 */}
-        {chatMounted && selectedProject && (
-          <div className={styles.chatMount}>
-            <SimpleChat
-              key={selectedProject.id}
-              projectId={selectedProject.id}
-              conversationId={null}
-              onConversationChange={() => navigate(`/project/${selectedProject.id}`)}
-              ownsCopilotAsk
-            />
-          </div>
-        )}
-        {!backendReady && (
-          <p className={styles.welcomeSub}>本地分析服务未就绪——启动服务后即可在这里直接开始任务。</p>
-        )}
+          {/* UI-341 加映 — 内嵌真正的聊天模块（composer-only 变体：欢迎页
+              不展示消息流/空态/建议卡，只保留输入框与控件行）；项目切换
+              按钮收进对话框左上角（上方 composerTopRow）。 */}
+          {chatMounted && selectedProject && (
+            <div className={styles.chatMount}>
+              <SimpleChat
+                key={selectedProject.id}
+                projectId={selectedProject.id}
+                conversationId={null}
+                onConversationChange={() => navigate(`/project/${selectedProject.id}`)}
+                ownsCopilotAsk
+                composerOnly
+              />
+            </div>
+          )}
+          {!backendReady && (
+            <p className={styles.welcomeSub}>本地分析服务未就绪——启动服务后即可在这里直接开始任务。</p>
+          )}
         {/* UI-341 — error/hint 反馈行：创建失败原因与去重提示（UI-340
             「已为你切换」）必须可见，内嵌聊天后不再有 composerFoot 承载 */}
         {error && (
@@ -540,6 +540,7 @@ export default function Welcome(): React.ReactElement {
         {hint && !error && (
           <p className={styles.actionHint}>{hint}</p>
         )}
+        </div>
 
         <div className={styles.chips} aria-label="快捷任务">
           {QUICK_CHIPS.map((chip) => (

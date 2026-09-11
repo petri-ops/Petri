@@ -253,6 +253,7 @@ export function SimpleChat({
   onConversationChange,
   inputHeight: _inputHeight = 120,
   ownsCopilotAsk = false,
+  composerOnly = false,
 }: SimpleChatProps): React.ReactElement {
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
   const [copiedMessageKey, setCopiedMessageKey] = useState<string | null>(null);
@@ -1281,7 +1282,7 @@ export function SimpleChat({
 
   return (
     <div className="sc-outer" data-rail-body>
-      <div className="sc-root">
+      <div className={`sc-root${composerOnly ? ' sc-root-composer-only' : ''}`}>
         <div className="sc-body">
           <div className="sc-messages" ref={scrollRef}>
           {loading && <div className="sc-loading">加载会话…</div>}
@@ -1857,7 +1858,7 @@ export function SimpleChat({
 
       {/* UI-269 — 右缘自定义滚动条：锚定 sc-outer（会话栏最右边界），与 rail 左右对称；
           隐藏系统原生 thumb，常驻纤细 thumb + 轨道线 */}
-      <ChatScrollbar containerRef={scrollRef} />
+      {!composerOnly && <ChatScrollbar containerRef={scrollRef} />}
 
       {/* UI-268: 「后台进程」浮窗（持久输出独立小窗口） */}
       <ToolActivityDock conversationId={conversationId} projectId={projectId} />

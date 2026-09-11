@@ -1,17 +1,17 @@
 {
   "name": "ui341-welcome-chat",
-  "startedAt": "2026-09-11T04:39:31.072Z",
-  "finishedAt": "2026-09-11T04:39:37.485Z",
+  "startedAt": "2026-09-11T07:50:01.350Z",
+  "finishedAt": "2026-09-11T07:50:08.321Z",
   "assertions": [
     {
       "name": "A1_welcome_rendered",
       "pass": true,
-      "detail": "url=http://localhost:3000/?project=p_mtwgvrc5_cdry"
+      "detail": "url=http://localhost:3000/?project=p_mtwnoqzv_mk8i"
     },
     {
       "name": "A2_chat_embedded",
       "pass": true,
-      "detail": "chatMount=1 scInput=1"
+      "detail": "chatMount=1 scInput=1 visible=true emptyHidden=true"
     },
     {
       "name": "A3_legacy_composer_absent",
@@ -21,17 +21,17 @@
     {
       "name": "A4_project_preselected",
       "pass": true,
-      "detail": "trigger=UI341-验收-1789101571105"
+      "detail": "trigger=UI341-验收-1789113001384"
     },
     {
       "name": "A5_first_question_navigates",
       "pass": true,
-      "detail": "url=http://localhost:3000/project/p_mtwgvrc5_cdry"
+      "detail": "url=http://localhost:3000/project/p_mtwnoqzv_mk8i"
     },
     {
       "name": "A6_conversation_auto_created",
       "pass": true,
-      "detail": "convId=conv_a8332bde-5fa title=新对话 project=p_mtwgvrc5_cdry"
+      "detail": "convId=conv_647f97aa-16b title=新对话 project=p_mtwnoqzv_mk8i"
     },
     {
       "name": "A7_left_panel_shows_conv",

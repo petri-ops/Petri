@@ -96,10 +96,15 @@ module.exports = {
         '  trigger: (document.querySelector(\'button[aria-label="选择项目"]\') || {}).textContent || "",\n' +
         '  mount: document.querySelectorAll(\'[class*="chatMount"]\').length,\n' +
         '  chatInput: document.querySelectorAll(\'[class*="chatMount"] textarea.sc-input\').length,\n' +
+        '  chatInputVisible: (function(){ var t = document.querySelector(\'[class*="chatMount"] textarea.sc-input\'); return !!t && t.offsetParent !== null; })(),\n' +
+        '  emptyStateHidden: (function(){ var e = document.querySelector(\'[class*="chatMount"] .sc-empty\'); return !e || e.offsetParent === null; })(),\n' +
         '  legacy: document.querySelectorAll(\'textarea[aria-label="任务描述"]\').length\n' +
         '})'));
       assert('A1_welcome_rendered', true, 'url=' + (await lib.evalJs(client, 'location.href')));
-      assert('A2_chat_embedded', probe.mount > 0 && probe.chatInput > 0, 'chatMount=' + probe.mount + ' scInput=' + probe.chatInput);
+      // UI-341 加映后 composer-only：DOM 在场且必须**可见**（display:none 的
+      // 元素 querySelector 照样命中——断言必须查 offsetParent），空态/建议卡隐藏
+      assert('A2_chat_embedded', probe.mount > 0 && probe.chatInput > 0 && probe.chatInputVisible && probe.emptyStateHidden,
+        'chatMount=' + probe.mount + ' scInput=' + probe.chatInput + ' visible=' + probe.chatInputVisible + ' emptyHidden=' + probe.emptyStateHidden);
       assert('A3_legacy_composer_absent', probe.legacy === 0, 'legacy 任务描述 textarea count=' + probe.legacy);
       assert('A4_project_preselected', probe.trigger.indexOf('UI341-验收') >= 0, 'trigger=' + probe.trigger.slice(0, 60));
 

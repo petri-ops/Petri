@@ -232,6 +232,12 @@ export interface SimpleChatProps {
    * instance may, so it defaults to false and the owner opts in explicitly.
    */
   ownsCopilotAsk?: boolean;
+  /**
+   * UI-341 加映 — 欢迎页专用变体：只渲染 composer（输入框 + 控件行），跳过
+   * 消息流/空态/建议卡/滚动条。宿主（欢迎页）自带项目切换与快捷 chips，
+   * 无会话内容可展示。默认 false，工作区/右栏用法零变化。
+   */
+  composerOnly?: boolean;
 }
 
 export type PendingApproval = ConversationPendingApproval;

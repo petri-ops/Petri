@@ -44,7 +44,8 @@
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
 }
 
-.pickerRow {
+.pickerRow,
+.composerTopRow {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -389,21 +390,8 @@
   color: var(--gewu-accent);
 }
 
-/* UI-341 — 内嵌聊天模块（SimpleChat）挂载区：与 composerCard 同视觉壳，
-   限高避免整页随对话内容无限增长；内部聊天面板撑满挂载区 */
+/* UI-341 加映 — 内嵌聊天（composer-only 变体）：壳由 composerCard 对话框
+   容器提供，挂载层自身无壳、高度随 composer 自适应 */
 .chatMount {
   width: 100%;
-  height: min(52vh, 520px);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border-radius: 14px;
-  background: var(--gewu-bg-surface);
-  border: 1px solid var(--gewu-border-color, transparent);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
-}
-
-.chatMount > :first-child {
-  flex: 1;
-  min-height: 0;
 }
