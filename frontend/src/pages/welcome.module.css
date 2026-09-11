@@ -37,13 +37,13 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 14px;
-  border-radius: 14px;
-  background: var(--gewu-bg-surface);
+  /* UI-341 加映 — 用户裁决继续弱化包裹感：外壳全去（背景/投影/圆角/内边距），
+     composer 自身卡片成为唯一视觉框，项目切换浮在页面上 */
+  padding: 0;
+  background: transparent;
   border: none;
-  /* UI-341 加映 — 用户裁决：去掉路径选择外侧的边框（对话框壳无边框，
-     保留投影与圆角承载层次） */
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .pickerRow,
