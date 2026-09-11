@@ -129,6 +129,25 @@ export default function Welcome(): React.ReactElement {
     setSearch('');
   }
 
+  async function openFolderDialogOrFallback() {
+    const dialog = window.biof3Desktop?.files?.openDirectoryDialog;
+    if (typeof dialog === 'function') {
+      setPanelSection('folder');
+      try {
+        const picked = await dialog();
+        if (picked) {
+          setFolderPath(picked);
+          setFolderName(baseName(picked));
+        } else {
+          setPanelSection('none'); // 用户取消资源管理器 → 收起
+        }
+        return;
+      } catch { /* 原生对话框失败 → 回落应用内选择器 */ }
+    }
+    setPanelSection('folder');
+    setFolderPicking(true);
+  }
+
   function openSshSection() {
     setPanelSection('ssh');
     listSshTargetCandidates()
@@ -273,16 +292,7 @@ export default function Welcome(): React.ReactElement {
                     <div className={styles.panelActions}>
                       {panelSection === 'folder' ? (
                         <div className={styles.actionForm}>
-                          {!folderPath ? (
-                            <>
-                              <FolderPicker
-                                initialPath=""
-                                pickLabel="选择此文件夹"
-                                onPick={(picked: string) => { setFolderPath(picked); setFolderName(baseName(picked)); }}
-                                onCancel={() => setPanelSection('none')}
-                              />
-                            </>
-                          ) : (
+                          {folderPath ? (
                             <>
                               <input
                                 className={styles.actionInput}
@@ -299,21 +309,38 @@ export default function Welcome(): React.ReactElement {
                                 </button>
                               </div>
                             </>
+                          ) : folderPicking ? (
+                            <>
+                              <FolderPicker
+                                initialPath=""
+                                pickLabel="选择此文件夹"
+                                onPick={(picked: string) => { setFolderPath(picked); setFolderName(baseName(picked)); }}
+                                onCancel={() => setPanelSection('none')}
+                              />
+                            </>
+                          ) : (
+                            <button type="button" className={styles.panelAction} onClick={() => void openFolderDialogOrFallback()}>
+                              <Icon name="folder" size={14} /> 选择文件夹…
+                            </button>
                           )}
                         </div>
                       ) : panelSection === 'ssh' ? (
                         <div className={styles.actionForm}>
-                          <select
+                          {/* UI-338 加映 — 目标别名可输入自动补全（datalist 挂已注册目标） */}
+                          <input
                             className={styles.actionInput}
                             value={sshAlias}
                             onChange={(e) => setSshAlias(e.target.value)}
                             aria-label="远程目标"
-                          >
-                            <option value="">选择已注册目标…</option>
+                            placeholder="输入或选择目标别名"
+                            list="welcome-ssh-targets"
+                            autoComplete="off"
+                          />
+                          <datalist id="welcome-ssh-targets">
                             {sshTargets.map((t) => (
-                              <option key={t.alias} value={t.alias}>{t.alias}（{t.label}）</option>
+                              <option key={t.alias} value={t.alias}>{t.label}</option>
                             ))}
-                          </select>
+                          </datalist>
                           <input
                             className={styles.actionInput}
                             value={sshRemotePath}
@@ -331,7 +358,7 @@ export default function Welcome(): React.ReactElement {
                         </div>
                       ) : (
                         <>
-                          <button type="button" className={styles.panelAction} onClick={() => setPanelSection('folder')}>
+                          <button type="button" className={styles.panelAction} onClick={() => void openFolderDialogOrFallback()}>
                             <Icon name="folder" size={14} /> 打开文件夹
                           </button>
                           <button type="button" className={styles.panelAction} onClick={openSshSection}>
