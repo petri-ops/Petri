@@ -1548,6 +1548,24 @@ export function ProjectWorkspace(): React.ReactElement {
     return true;
   }, [activeConvId]);
 
+  // BLOCK-80 — 欢迎页首问接力：欢迎页创建会话后经 sessionStorage 交接
+  // {conversationId, prompt}；本工作区会话种子完成（activeConvId 就位）即
+  // 派发 copilotAsk 启动首个任务，然后清除交接（一次性）。
+  useEffect(() => {
+    if (!activeConvId) return;
+    try {
+      const raw = sessionStorage.getItem('gewu.welcomeLaunch');
+      if (!raw) return;
+      const launch = JSON.parse(raw) as { conversationId?: string; prompt?: string };
+      if (launch.conversationId !== activeConvId || !launch.prompt) return;
+      sessionStorage.removeItem('gewu.welcomeLaunch');
+      if (isConversationRunning(activeConvId)) return;
+      dispatchGewuEvent(gewuEvents.copilotAsk, { prompt: String(launch.prompt) });
+    } catch {
+      /* 交接损坏即忽略——用户可在工作区手动发送 */
+    }
+  }, [activeConvId]);
+
   // P4R-3: 焦点 Composer 与高级控件在这里汇合。可见 prompt 只包含用户目标/
   // 手动 patch；opaque token + Artifact/Revision/Selection 快照走事件 context，
   // 不进入消息文字。后端仍会重新投影真相并拒绝陈旧 token。

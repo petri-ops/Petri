@@ -13,7 +13,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
@@ -47,10 +47,8 @@ function pickRecentCompletedJob(jobs: ToolJob[], projects: Project[]): ToolJob |
 export default function Home(): React.ReactElement {
   const backendStatus = useBackendStatus();
   const navigate = useNavigate();
-  const location = useLocation();
-  // UI-258 — 应用冷启动（location.key === 'default'）保持自动跳最近项目；
-  // 应用内导航到 / 时渲染工作台（项目列表 + 常驻创建入口）。
-  const isInitialEntry = location.key === 'default';
+  // BLOCK-80 — 本页退役为 /projects「项目管理」（项目卡 + 创建流常驻）；
+  // UI-258 的冷启动自动跳最近项目随欢迎页（/）接位而拆除。
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [projects, setProjects] = useState<Project[]>([]);
   const [targetProjectId, setTargetProjectId] = useState<string | null>(null);
@@ -766,10 +764,9 @@ export default function Home(): React.ReactElement {
     </>
   );
 
-  // UI-258 — 工作台视图：应用内导航到 / 时展示项目列表 + 常驻创建入口；
-  // 冷启动（isInitialEntry）保持原自动跳最近项目行为，不落在这里。
-  // UI-259 — 视觉对齐全局设计语言（radial 渐变 + 图标芯片 + 悬浮卡片，同 setupHome）。
-  if (status === 'ready' && !isInitialEntry && projects.length > 0) {
+  // BLOCK-80 — /projects「项目管理」：工作台视图常显（项目列表 + 创建入口），
+  // 冷启动自动跳最近项目已拆除（落点改为 / 欢迎页）。
+  if (status === 'ready' && projects.length > 0) {
     const sorted = [...projects].sort((a, b) => {
       const bt = new Date(b.updatedAt || b.createdAt || 0).getTime();
       const at = new Date(a.updatedAt || a.createdAt || 0).getTime();
@@ -781,8 +778,8 @@ export default function Home(): React.ReactElement {
         {storeOverlay}
         <div className={styles.workbenchHeader}>
           <div className={styles.workbenchIcon}><Icon name="layers" size={24} /></div>
-          <h1>工作台</h1>
-          <p className={styles.workbenchLead}>选择项目继续，或创建新项目。</p>
+          <h1>项目管理</h1>
+          <p className={styles.workbenchLead}>选择项目继续，或创建新项目（BLOCK-80 起本页为管理面，新建任务请用左栏入口）。</p>
         </div>
         <div className={styles.workbenchBody}>
           <div className={styles.workbenchSectionLabel}>项目 · {sorted.length}</div>

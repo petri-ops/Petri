@@ -4006,20 +4006,26 @@
    "archivePolicy": "archive_when_superseded",
    "phase": "P0-REVIEW"
   },
-    {
-      "id": "SESSION-HANDOFF-2026-09-10",
-      "path": "docs/session-handoff-2026-09-10.md",
-      "kind": "reference",
-      "status": "reference",
-      "canonical": true,
-      "truthDomain": "session-handoff-2026-09-10",
-      "entrypoint": "docs/README.md",
-      "tags": ["session-handoff", "2026-09-10", "block-76", "block-77", "G0"],
-      "notes": "2026-09-10 会话交接文档：BLOCK-76 整包 completed + BLOCK-77 P0-P3 完成 P4 受阻（dell 隧道，已切 aliyun 待跑）+ 清债 974/974 + SKILL 沉淀 6 条规则；技术决策与教训 6 条 + 文件索引 + BLOCK-77 P4 恢复指引。",
-      "registeredAt": "2026-09-10",
-      "archivePolicy": "archive_when_superseded",
-      "phase": "REFERENCE"
-    },
+  {
+   "id": "SESSION-HANDOFF-2026-09-10",
+   "path": "docs/session-handoff-2026-09-10.md",
+   "kind": "reference",
+   "status": "reference",
+   "canonical": true,
+   "truthDomain": "session-handoff-2026-09-10",
+   "entrypoint": "docs/README.md",
+   "tags": [
+    "session-handoff",
+    "2026-09-10",
+    "block-76",
+    "block-77",
+    "G0"
+   ],
+   "notes": "2026-09-10 会话交接文档：BLOCK-76 整包 completed + BLOCK-77 P0-P3 完成 P4 受阻（dell 隧道，已切 aliyun 待跑）+ 清债 974/974 + SKILL 沉淀 6 条规则；技术决策与教训 6 条 + 文件索引 + BLOCK-77 P4 恢复指引。",
+   "registeredAt": "2026-09-10",
+   "archivePolicy": "archive_when_superseded",
+   "phase": "REFERENCE"
+  },
   {
    "id": "BLOCK-77-RESIDENT-TASKS",
    "path": "docs/block-77-resident-tasks-plan.md",
@@ -4042,20 +4048,25 @@
    "phase": "P0-LAUNCH",
    "notes": "长任务驻留与回访通知（用户裁决「第二档」）。①任务意图卡（.gewu/resident/ 描述意图与归属，执行真相仍在 process/job 状态机）②回访循环（本地 60s 检查驻留任务，异常 proactive 提醒，不自动重启）③交接班（重开软件 agent 自动汇报进度）④完成通知（应用内必做；移动推送联动 BLOCK-70 预留接口）。③档真驻留 agent（LLM 上服务器）明确排除另立项。复用 exec_background/process_status/proactive 事件；对本地与 SSH 项目皆可用。2026-09-10 当日 P0–P5 全部收口（completed）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
   },
-    {
-      "id": "BLOCK-77-P0-DESIGN-REVIEW",
-      "path": "docs/block-77-p0-design-review.md",
-      "kind": "reference",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "block-77-p0-design-review",
-      "entrypoint": "docs/README.md",
-      "tags": ["block-77", "p0-design-review", "resident-tasks", "G0"],
-      "notes": "BLOCK-77 P0 设计评审稿 v1：现状代码事实（exec_bg/process_status 面、notify.custom 通道、proactive 投影、无会话上下文注入机制）+ R1-R5（意图卡=项目内 .gewu/resident/<taskId>.json 文件、60s 回访循环、notify 分层通知、生命周期含 abandoned、回访只读不自动重启）。用户确认后进 P1。",
-      "registeredAt": "2026-09-10",
-      "archivePolicy": "archive_when_superseded",
-      "phase": "P0-REVIEW"
-    },
+  {
+   "id": "BLOCK-77-P0-DESIGN-REVIEW",
+   "path": "docs/block-77-p0-design-review.md",
+   "kind": "reference",
+   "status": "active",
+   "canonical": true,
+   "truthDomain": "block-77-p0-design-review",
+   "entrypoint": "docs/README.md",
+   "tags": [
+    "block-77",
+    "p0-design-review",
+    "resident-tasks",
+    "G0"
+   ],
+   "notes": "BLOCK-77 P0 设计评审稿 v1：现状代码事实（exec_bg/process_status 面、notify.custom 通道、proactive 投影、无会话上下文注入机制）+ R1-R5（意图卡=项目内 .gewu/resident/<taskId>.json 文件、60s 回访循环、notify 分层通知、生命周期含 abandoned、回访只读不自动重启）。用户确认后进 P1。",
+   "registeredAt": "2026-09-10",
+   "archivePolicy": "archive_when_superseded",
+   "phase": "P0-REVIEW"
+  },
   {
    "id": "BLOCK-78-SUMMARY-CARD-RUNTIME-PROJECTION",
    "path": "docs/block-78-summary-card-runtime-projection-plan.md",
@@ -4122,6 +4133,27 @@
    "phase": "COMPLETED",
    "notes": "Token 速度可观测：按供应商的输出速率（统一展示面）。用户提问「你能否拿到 token/s」→ 主 Agent 核实数据面：**能，原始数据已在库**——ai_usage 表（core/biof3-server/helpers/ai-usage.js，AI_USAGE_v1）每次 LLM 调用落一行含 completion_tokens + latency_ms，但无人算成速率：summarizeAiUsage 只 SUM token/成本不聚合延迟（喂 /api/ai/loop/summary → 摘要卡任务循环节有 token 有成本无速度）；GET /api/ai/usage-mine 已返回 AVG(latency_ms) AS avg_latency 而设置页 UsageResourcePanel 拿到未显示；缺 TTFT 打点（分不出纯解码速度）与流中 token 计数（做不了实时速率）。用户裁决「统一的 增加，我还是希望你能看到不同供应商的 token 的速度情况的」→ 本包立项。**关键代码事实**：usageArgs（llm-providers/deepseek.js:47）只取 telemetry.{userId,kind,conversationId}+body.model → telemetry 不含 provider（ai-chat.js:132/405）、ai_usage 无 provider 列；但 provider 身份在网关层已知（model-gateway.js 用 profile.provider 取 key + getProvider，实例带 this.providerLabel）→ 最小归因路径=dispatch 前注入 profile.provider 到 telemetry + additive 列。latency_ms=Date.now()-startedAt（请求前打点、流末记账）→ 全链墙钟。kind=chat/chat_turn/embedding/tool_summary_retry → 速率聚合必须过滤 embedding。渠道边界：stream_options include_usage 只对原生 deepseek 加，自定义/Ollama/LM Studio/vLLM 走可移植形状 → completion_tokens 可能为 0，速率不可算须诚实标注。**速率口径**=SUM(completion_tokens)/SUM(latency_ms) = 端到端平均输出速率（含排队+prefill+decode+网络，真实解码速度的下限；禁止称「解码速度」）。阶段：P0 口径与归因裁决 → P1 后端 additive provider 列 + 网关注入 + 新按供应商聚合函数（不改既有 summarizeAiUsage 契约）+ usage-mine 增 provider 分组段 → P2 设置页统一展示面（按供应商分组表：调用数/输出 token/平均延迟/输出 tokens/s/不可算标注；avg_latency 显性化；摘要卡会话级速率与 BLOCK-78 协同、后做者复用聚合函数）→ P3 实机数值一致性对账 + 收口。范围外：TTFT/纯解码速度、流式实时速率（流中无真实 token 数，字符估算属编造边缘）、通用仪表盘图表、旧数据回填（历史行 provider NULL 按未归因呈现）、按项目/会话的速率面板（属 BLOCK-78）。单一真相：ai_usage 仍是唯一用量账本，只加归因列与新聚合读面。0 新 npm 依赖倾向。G0 开发期常态 · 不外推 packaged/Provider/GA。",
    "completedAt": "2026-09-10"
+  },
+  {
+   "id": "BLOCK-80-WELCOME-HOME",
+   "path": "docs/block-80-welcome-home-plan.md",
+   "kind": "work-package",
+   "status": "completed",
+   "canonical": true,
+   "truthDomain": "block-80-welcome-home",
+   "entrypoint": "docs/README.md",
+   "tags": [
+    "block-80",
+    "welcome-home",
+    "home-redesign",
+    "composer",
+    "G0"
+   ],
+   "archivePolicy": "archive_when_superseded",
+   "registeredAt": "2026-09-10",
+   "phase": "COMPLETED",
+   "completedAt": "2026-09-10",
+   "notes": "工作台页面退役：ZCode 式欢迎页（问候+项目/分支+首问直发+领域快捷 chips）。用户裁决「工作台页面没有意义 取消……模仿 ZCode 内容要和我们项目一致 不是复刻」。落地：/ = 欢迎页（时段问候+项目下拉+当前分支徽标（只读，切换留审阅面）+首问输入框+4 领域 chips（差异分析/富集分析/单细胞聚类/报告解读）+管理项目链接）；/projects = 原工作台退役为「项目管理」（项目卡+全部创建流零损失平移）；冷启动自动跳最近项目拆除；新建任务（UI-335）落点即 /。首问接力=createConversation→sessionStorage gewu.welcomeLaunch→工作区 activeConvId 种子完成即派发 copilotAsk。零网络测试 4/4（问候/项目选择/chips 填充/发送创建会话+sessionStorage 交接/空输入禁发）+ home/LeftPanel/卡片回归绿。范围外：分支切换（审阅面）/账号/模板市场。G0 开发期常态 · 不外推 packaged/Provider/GA。"
   }
  ],
  "lastUpdated": "2026-09-10",

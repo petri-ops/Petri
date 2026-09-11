@@ -149,6 +149,8 @@
 
 110. [`block-79-token-speed-observability-plan.md`](./block-79-token-speed-observability-plan.md) — 2026-09-10 用户裁决「增加」立项的 token 速度可观测工作包（planned 排队）：**按供应商看输出速率**，统一在设置页「用量与资源」面板展示。起点事实：`ai_usage` 表（AI_USAGE_v1）已含 `completion_tokens` + `latency_ms`，**数据在库但无人算成速率**——`summarizeAiUsage` 不聚合延迟（摘要卡「任务循环」节有 token 有成本无速度），`GET /api/ai/usage-mine` 已返回 `avg_latency` 而前端未显示；缺 TTFT 与流中 token 计数。落地：网关注入 `profile.provider` → `ai_usage` 加 additive `provider` 列 → 新增按供应商的成对聚合（`SUM(completion_tokens)/SUM(latency_ms)`）→ 面板按供应商分组显示调用数/输出 token/平均延迟/输出 tokens/s。**口径诚实**：该值是端到端平均输出速率（含排队、首 token 前的 prefill、网络），是真实解码速度的下限，界面禁止称「解码速度」；供应商未返回 usage 的渠道（自定义/Ollama/LM Studio/vLLM）显示「不可算」而非 0 或估算。范围外：TTFT/纯解码速度、流式实时速率、旧数据回填、按项目/会话速率（属 BLOCK-78）。不改既有 `summarizeAiUsage` 返回契约。启动待串行队列。
 
+111. [`block-80-welcome-home-plan.md`](./block-80-welcome-home-plan.md) — 2026-09-10 用户裁决当日完成的欢迎页改造工作包（completed，UI-336 verified）：工作台页面退役——`/` 改为 ZCode 式欢迎页（时段问候 + 项目下拉 + 当前分支徽标（只读）+ 首问输入框 + 领域快捷 chips：差异分析/富集分析/单细胞聚类/报告解读）；`/projects` = 原工作台退役为「项目管理」（项目卡 + 本地/手输/SSH/空白创建流零损失平移；冷启动自动跳最近项目拆除）。首问接力 = createConversation → sessionStorage `gewu.welcomeLaunch` → 工作区会话种子完成即派发 copilotAsk。范围外：分支切换（审阅面）/账号/模板市场。
+
 ## Branch Conversation 架构
 
 - [branch-data-model.md](./branch-data-model.md) — 分支对话架构后端核心：SQLite 持久化 + IPC handlers + MCP 工具定义。

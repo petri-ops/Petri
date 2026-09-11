@@ -1,0 +1,177 @@
+/* BLOCK-80 — 欢迎页（ZCode 形态、本项目内容） */
+
+.welcome {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 48px 24px;
+  overflow-y: auto;
+}
+
+.welcomeInner {
+  width: min(720px, 94%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.greeting {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--gewu-text);
+  text-align: center;
+}
+
+.welcomeSub {
+  margin: -10px 0 6px;
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-body);
+  text-align: center;
+}
+
+.composerCard {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--gewu-bg-surface);
+  border: 1px solid var(--gewu-border-color, transparent);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+}
+
+.pickerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pickerLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gewu-text-secondary);
+}
+
+.projectSelect {
+  max-width: 260px;
+  padding: 4px 6px;
+  border: 1px solid var(--gewu-border-color, transparent);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body-sm);
+}
+
+.pickerEmpty {
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-secondary);
+}
+
+.branchChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--gewu-hover);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+}
+
+.manageLink {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: var(--gewu-text-secondary);
+  cursor: pointer;
+  font-size: var(--gewu-font-size-caption);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.manageLink:hover {
+  color: var(--gewu-accent);
+}
+
+.composerTextarea {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  padding: 10px 12px;
+  border: 1px solid var(--gewu-border-color, transparent);
+  border-radius: 10px;
+  background: var(--gewu-bg);
+  color: var(--gewu-text);
+  font: inherit;
+  font-size: var(--gewu-font-size-body);
+  outline: none;
+}
+
+.composerTextarea:focus {
+  border-color: var(--gewu-accent);
+}
+
+.composerFoot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.backendHint {
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  margin-right: auto;
+}
+
+.errorText {
+  color: var(--gewu-danger, #c0392b);
+  font-size: var(--gewu-font-size-caption);
+}
+
+.sendBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--gewu-accent);
+  color: #fff;
+  font-weight: 600;
+  font-size: var(--gewu-font-size-body-sm);
+  cursor: pointer;
+}
+
+.sendBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.chip {
+  padding: 6px 14px;
+  border: 1px solid var(--gewu-border-color, transparent);
+  border-radius: 999px;
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.chip:hover {
+  color: var(--gewu-accent);
+  border-color: var(--gewu-accent);
+}

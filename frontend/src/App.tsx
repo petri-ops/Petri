@@ -19,6 +19,7 @@ import { CommandPalette, useCommandPalette } from '@/components/copilot/CommandP
 // BLOCK-42 — pending-scroll 全局 Provider（见 AppShell 内注释）
 import { PendingScrollProvider } from '@/lib/pendingScrollContext';
 import HomePage from '@/pages/home';
+import WelcomePage from '@/pages/welcome';
 // NOTE: Legacy pages (tools, admin, docs, figcode, single-cell, spatial) have been removed
 // as the desktop application now uses the Agent-based workflow through ProjectWorkspace.
 import { ProjectWorkspace } from '@/pages/project-workspace';
@@ -105,8 +106,9 @@ function AppShell(): React.ReactElement {
               /project/:id/<mode> and /skills routes are intentionally reachable.
               Only the dev-home skip-auto-navigate logic lives in pages/home.tsx. */}
           <Routes>
-            {/* Desktop Agent-based workflow */}
-            <Route path="/" element={<HomePage />} />
+            {/* BLOCK-80 — / 为欢迎页（问候+项目/分支+首问直发）；原工作台（项目卡+创建流）退役至 /projects 项目管理 */}
+            <Route path="/" element={<WelcomePage />} />
+            <Route path="/projects" element={<HomePage />} />
             {/* Skills management page */}
             <Route path="/skills" element={<SkillsPage />} />
             {/* BLOCK-72 / UI-320 — 全局工作台页：知识空间（设备级域）+ 后端（全局单进程） */}

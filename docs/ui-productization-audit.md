@@ -3136,3 +3136,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：LeftPanel 定向 14/14 + tsc 0。
 
 **状态**: verified（Vite 热更用户实机可见；纯归组零新行为面）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-336: 工作台页面退役 → ZCode 式欢迎页（BLOCK-80）(2026-09-10 verified)
+
+**来源**：用户裁决——工作台页面（项目卡+创建区）作为「新建任务」落点没有意义，要求模仿 ZCode 欢迎页（问候+项目/分支选择+大输入框+快捷任务），内容与本项目一致、非复刻。
+
+**改动**：① 新增 `pages/welcome.tsx`+`welcome.module.css`——时段问候语；项目下拉（listProjects 最近排序，尾部「管理项目 / 新建项目…」→ /projects）；当前分支徽标（branchApi.list 只读展示，切换留审阅面）；首问 textarea（Enter 发送/Shift+Enter 换行）+「开始任务」；4 领域快捷 chips（差异分析/富集分析/单细胞聚类/报告解读，点击填充 starter prompt）；后端未就绪诚实禁用+提示。**首问接力**：createConversation(project) → sessionStorage `gewu.welcomeLaunch` {conversationId, prompt} → 导航 /project/:id → 工作区 activeConvId 种子完成即派发 copilotAsk 启动首个任务（一次性，损坏交接静默忽略）。② 路由：`/` = 欢迎页；`/projects` = 原工作台退役为「项目管理」（项目卡+本地/手输/SSH/空白全部创建流零损失平移；冷启动自动跳最近项目拆除——落点改欢迎页）。③ LeftPanel「新建任务」落点即 /。④ 新增 welcome 零网络测试 4/4（问候+项目选择+分支徽标/chips 填充/发送三链（创建会话+sessionStorage 交接）/空输入禁发）。
+
+**门禁**：welcome 4/4 + home 4/4 + LeftPanel 14/14 + 卡片 16/16 + tsc 0 + docs/ui 门禁 PASS。
+
+**状态**: verified（Vite 热更用户实机可见；实机 CDP 证据随 BLOCK-80 验收窗口补采 acceptance/block-80/）。G0 开发期常态 · 不外推 packaged / Provider / GA。
