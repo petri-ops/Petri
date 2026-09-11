@@ -613,6 +613,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 return (
                 <div key={profile.id} className="gewu-model-preset gewu-endpoint-card">
                   <div className="gewu-endpoint-card__grid" role="group" aria-label={`${profile.label || '自定义'} 模型渠道`}>
+                    <span className="gewu-endpoint-field-label" aria-hidden="true">协议</span>
                     <select
                       className="gewu-select"
                       value={profile.provider}
@@ -626,6 +627,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                         <option key={option.value} value={option.value}>{option.label}</option>
                       ))}
                     </select>
+                    <span className="gewu-endpoint-field-label" aria-hidden="true">供应商</span>
                     <input
                       className="gewu-input"
                       value={profile.label}
@@ -633,6 +635,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       placeholder="供应商"
                       aria-label="供应商"
                     />
+                    <span className="gewu-endpoint-field-label" aria-hidden="true">Base URL</span>
                     <input
                       className="gewu-input"
                       value={endpointBaseUrl(profile)}
@@ -643,6 +646,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       aria-label="Base URL"
                       title={endpointBaseUrl(profile)}
                     />
+                    <span className="gewu-endpoint-field-label" aria-hidden="true">Key</span>
                     <div className="gewu-endpoint-key-field">
                       <input
                         type={visibleCredentialIds[id] ? 'text' : 'password'}
@@ -674,6 +678,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                         {copiedCredentialId === id ? <Icon name="check" size={13} /> : <Icon name="copy" size={13} />}
                       </button>
                     </div>
+                    <span className="gewu-endpoint-field-label" aria-hidden="true">默认模型</span>
                     <select
                       className="gewu-select"
                       value={configuredDefault}
@@ -687,6 +692,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       )}
                       {modelOptions.map((model) => <option key={model} value={model}>{model}</option>)}
                     </select>
+                    <span className="gewu-endpoint-field-label" aria-hidden="true">上下文</span>
                     <input
                       type="text"
                       className="gewu-input gewu-input--sm"
@@ -717,6 +723,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       aria-label="上下文窗口"
                       title="模型上下文窗口，如 64K、128K、1M；留空则使用默认值"
                     />
+                    <span className="gewu-endpoint-field-label" aria-hidden="true">连通性</span>
                     <button
                       type="button"
                       className={`gewu-btn gewu-btn--ghost gewu-btn--sm gewu-endpoint-card__test${connectionResult?.ok ? ' is-ok' : connectionResult || profileError ? ' is-error' : ''}`}
@@ -731,6 +738,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       {connectionResult?.ok && <Icon name="check" size={12} />}
                       {connectionLabel}
                     </button>
+                    <span className="gewu-endpoint-field-label" aria-hidden="true">删除</span>
                     <button
                       type="button"
                       className="gewu-endpoint-card__delete"

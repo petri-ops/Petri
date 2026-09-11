@@ -16,7 +16,11 @@ if (-not $procs) { Write-Output "no-electron-window"; exit 1 }
 # the workspace compact breakpoint (max-width: 960px in useWorkspaceLayout.ts).
 foreach ($p in $procs) {
   [GewuWin]::ShowWindow($p.MainWindowHandle, 9) | Out-Null
-  [GewuWin]::SetWindowPos($p.MainWindowHandle, [IntPtr]::Zero, 0, 0, 3072, 1780, 0x0040) | Out-Null
+  # -Width/-Height (physical px) optional: e.g. -Width 1400 to force a narrow
+  # container for UI-344 two-line layout verification.
+  $w = if ($args -contains 'narrow') { 1400 } else { 3072 }
+  $h = if ($args -contains 'narrow') { 1200 } else { 1780 }
+  [GewuWin]::SetWindowPos($p.MainWindowHandle, [IntPtr]::Zero, 0, 0, $w, $h, 0x0040) | Out-Null
   Write-Output ("resized hwnd=" + $p.MainWindowHandle)
 }
 exit 0

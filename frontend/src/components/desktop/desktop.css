@@ -453,6 +453,12 @@
   gap: 2px;
   margin-bottom: 8px;
   overflow-x: auto;
+  /* UI-344（BLOCK-81 D8）—— endpoint 网格的**容器查询上下文**：窄容器
+     （< 表格 min-width 1058px，例如与左右栏共用宽度时）切换到两行式堆叠，
+     而非让用户横向滚动。inline-size 让本元素宽度只由父级决定，
+     overflow-x 滚动行为不受影响（宽容器下无溢出即无滚动条）。 */
+  container-type: inline-size;
+  container-name: gewu-model-list;
 }
 
 .gewu-endpoint-list-actions {
@@ -581,6 +587,45 @@
   /* 表头与渠道行共用同一最小宽度：容器变窄时两者一起横向滚动（.gewu-model-list
      overflow-x:auto），避免此前的表头 1040 而渠道行无下限造成的列错位 */
   min-width: 1060px;
+}
+
+/* UI-344（BLOCK-81 D8）—— 单元格自带标签：宽容器隐藏（`display:none` 的元素
+   不是 grid item → 8 列布局的子元素数不变），窄容器由下方容器查询显形，
+   与控件结成「标签 | 控件」两列。*/
+.gewu-endpoint-field-label {
+  display: none;
+}
+
+/* 窄容器：两行式堆叠（Chrome 设置页式）——隐藏表头、标签显形、单列成对布局 */
+@container gewu-model-list (max-width: 1058px) {
+  .gewu-endpoint-list-header {
+    display: none;
+  }
+
+  /* 卡片自身的 min-width: 1040px（历史为强制横向滚动而设）必须一并解除，
+     否则容器内仍按 1040 布局 → 依旧横向滚动 */
+  .gewu-endpoint-card {
+    min-width: 0;
+  }
+
+  .gewu-endpoint-card__grid {
+    grid-template-columns: minmax(84px, auto) minmax(0, 1fr);
+    min-width: 0;
+    row-gap: 8px;
+    column-gap: 10px;
+  }
+
+  .gewu-endpoint-field-label {
+    display: block;
+    color: var(--gewu-text-tertiary);
+    font-size: var(--gewu-font-size-xs);
+    line-height: 1.2;
+  }
+
+  .gewu-endpoint-card__test,
+  .gewu-endpoint-card__delete {
+    justify-self: start;
+  }
 }
 
 .gewu-endpoint-list-header {

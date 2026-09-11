@@ -3137,6 +3137,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified（Vite 热更用户实机可见；纯归组零新行为面）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-344: 设置页 Endpoint 窄容器两行式自适应（BLOCK-81 D8）(2026-09-11 verified)
+
+**来源**：UI-342 实机核验时发现的副作用——设置面板与左右栏共用宽度（侧栏常驻使然；此前进设置会自动收起两侧栏得全宽），容器 <1058px 时 8 列表格需横向滚动。用户裁决：**改布局而非收起侧栏**（「表格窄容器两行式自适应」）。
+
+**落地（零结构风险的标签方案）**：① 每个单元格前插入自带标签 `<span class="gewu-endpoint-field-label">`（协议/供应商/Base URL/Key/默认模型/上下文/连通性/删除）——宽容器下 `display:none`（**不是 grid item**，8 列布局的子元素数不变），窄容器下显形，与控件结成「标签 | 控件」两列；② `.gewu-model-list` 设 `container-type: inline-size` 成为**容器查询上下文**（宽度由父级决定，`overflow-x:auto` 行为不变）；③ `@container gewu-model-list (max-width: 1058px)` 内：隐藏表头、渠道行改 `minmax(84px,auto) minmax(0,1fr)` 两列 + `min-width:0`，并**一并解除 `.gewu-endpoint-card` 自身的历史 `min-width:1040px`**（该值才是横向滚动的真正来源，首轮修复漏掉它导致 N4 仍红——实机抓出）。
+
+**门禁**：flow `ui342-endpoint-grid` 升级为**形态自适应**（同一 flow 两套断言）——宽容器验 G1–G5（8 列 / 同行 / 零溢出 / 列宽一致 / 共用 min-width），窄容器验 N1–N5（表头隐藏 / 两轨 / 8 标签显形 / 标签与控件成对 / **不再横向滚动**）。**实机双形态全绿**：宽容器 6/6（container=1180）、窄容器 6/6（container=520，scrollWidth=clientWidth=520）；前端全量 **983/983** + tsc 0；证据 `acceptance/block-81/ui342-endpoint-grid-live.json` + 双形态截图（ui342-endpoint-grid.png 窄态两行式）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-342: 供应商设置页 Endpoint 网格修复（8 列显式定义）(2026-09-11 verified)
 
 **来源**：用户截图反馈「供应商的设置界面有细节上的瑕疵——Base URL 输入窗口有些宽了，连通性测试下面有些窄了，导致文字重合；整体再看一下，可以立个新的 block?」→ 立 BLOCK-81，此为 P0（独立小提交）。
