@@ -37,8 +37,23 @@
   overflow: visible;
 }
 
+/* sc-outer 自带 overflow:hidden（为 rail/滚动条定位设计）；composer-only 下
+   模型/供应商选择面板向上弹出会超出其边界被裁剪，必须一并放开。
+   composer-only 下 rail/滚动条不渲染，放开无副作用 */
+.sc-outer.sc-outer-composer-only {
+  height: auto;
+  overflow: visible;
+}
+
 .sc-root.sc-root-composer-only .sc-messages {
   display: none;
+}
+
+/* sc-body 同样 overflow:hidden 且是 composer 的父容器（Babel 树：input-area
+   是 sc-body 子孙）——菜单向上弹出超其顶界即被裁，composer-only 下一并放开
+   （消息区已 display:none，放开无滚动裁剪副作用） */
+.sc-root.sc-root-composer-only .sc-body {
+  overflow: visible;
 }
 
 .sc-root.sc-root-composer-only .sc-input-area {

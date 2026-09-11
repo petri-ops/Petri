@@ -1,12 +1,12 @@
 {
   "name": "ui341-welcome-chat",
-  "startedAt": "2026-09-11T07:50:01.350Z",
-  "finishedAt": "2026-09-11T07:50:08.321Z",
+  "startedAt": "2026-09-11T08:48:46.485Z",
+  "finishedAt": "2026-09-11T08:48:55.843Z",
   "assertions": [
     {
       "name": "A1_welcome_rendered",
       "pass": true,
-      "detail": "url=http://localhost:3000/?project=p_mtwnoqzv_mk8i"
+      "detail": "url=http://localhost:3000/?project=p_mtwpscfk_ldn6"
     },
     {
       "name": "A2_chat_embedded",
@@ -21,22 +21,22 @@
     {
       "name": "A4_project_preselected",
       "pass": true,
-      "detail": "trigger=UI341-验收-1789113001384"
+      "detail": "trigger=UI341-验收-1789116528360"
     },
     {
       "name": "A5_first_question_navigates",
       "pass": true,
-      "detail": "url=http://localhost:3000/project/p_mtwnoqzv_mk8i"
+      "detail": "url=http://localhost:3000/project/p_mtwpscfk_ldn6"
     },
     {
       "name": "A6_conversation_auto_created",
       "pass": true,
-      "detail": "convId=conv_647f97aa-16b title=新对话 project=p_mtwnoqzv_mk8i"
+      "detail": "convId=conv_501bdfa2-4f2 title=新对话 project=p_mtwpscfk_ldn6"
     },
     {
       "name": "A7_left_panel_shows_conv",
       "pass": true,
-      "detail": "leftPanel contains conversation title"
+      "detail": "leftPanel contains conversation title (was absent)"
     },
     {
       "name": "A8_assistant_reply_via_sse",

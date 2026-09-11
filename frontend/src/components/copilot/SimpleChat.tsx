@@ -1281,7 +1281,7 @@ export function SimpleChat({
 
 
   return (
-    <div className="sc-outer" data-rail-body>
+    <div className={`sc-outer${composerOnly ? ' sc-outer-composer-only' : ''}`} data-rail-body>
       <div className={`sc-root${composerOnly ? ' sc-root-composer-only' : ''}`}>
         <div className="sc-body">
           <div className="sc-messages" ref={scrollRef}>

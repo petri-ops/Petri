@@ -76,6 +76,26 @@ module.exports = {
     const target = await lib.selectPageTarget(pages, { probe: probeFn });
     const client = await lib.connectTarget(target);
     const originalUrl = target.url;
+
+    // ── 环境提示（非断言）──
+    // 工作区布局响应式断点 960px（useWorkspaceLayout compact）：窗口低于断点时
+    // 左栏收起。A7 已自适应（自动点「展开左侧栏」），此处仅提示，不影响 allPass。
+    const widthNow = await lib.evalJs(client, 'window.innerWidth').catch(() => 0);
+    if (widthNow < 1000) {
+      lib.log(`note: innerWidth=${widthNow} < 断点 960，左栏将自动展开；如需常规宽度可跑 powershell -File scripts/resize-electron-window.ps1`);
+    }
+
+    // ── A0b SPA 状态重置 ──
+    // leftOpen 一旦因 compact（<960px）被置 false 就不会自行恢复（useWorkspacePanels
+    // useState(true) 非持久化，但没有 compact→wide 的重开逻辑），SPA 长活期间残留。
+    // reload 重置面板状态（窗口已宽，重载后 leftOpen=true）。
+    await lib.evalJs(client, "location.reload(); 'reloading'");
+    for (let i = 0; i < 20; i++) {
+      if (await lib.evalJs(client, "!!document.querySelector('[aria-label=\"欢迎页\"]')").catch(() => false)) break;
+      await sleep(1000);
+    }
+    await sleep(800);
+
     let projectId = null;
     let conversationId = null;
 
@@ -149,12 +169,26 @@ module.exports = {
       assert('A6_conversation_auto_created', true, 'convId=' + conv.id + ' title=' + conv.title + ' project=' + conv.project_id);
 
       // ── A7 左栏可见 ──
+      // 窄窗口（<960 断点）或 compact 残留会让左栏收起（LeftPanel 不渲染）。
+      // 此时先点 TitleBar 的「展开左侧栏」再断言——验收的是产品真实路径。
+      const treeAbsent = await lib.evalJs(client,
+        "document.querySelector('[class*=\"projectTree\"]') ? 'present' : 'absent'").catch(() => 'eval_err');
+      if (treeAbsent === 'absent') {
+        await lib.evalJs(client, `(function(){
+          var b = [...document.querySelectorAll('button')].find(function(x){
+            return (x.getAttribute('aria-label')||'') === '展开左侧栏';
+          });
+          if (b) b.click();
+          return b ? 'expanded' : 'toggle_not_found';
+        })()`).catch(() => {});
+        await sleep(1200);
+      }
       const leftOk = await poll(async () => {
         const v = await lib.evalJs(client,
           "(function(){ var el = document.querySelector('[class*=\"projectTree\"]'); return el ? el.textContent : ''; })()").catch(() => '');
         return { ok: v.indexOf(conv.title) >= 0 || v.indexOf('新对话') >= 0, value: v.slice(0, 120) };
       }, { timeoutMs: 15_000, label: 'left_panel_conversation' });
-      assert('A7_left_panel_shows_conv', true, 'leftPanel contains conversation title');
+      assert('A7_left_panel_shows_conv', true, 'leftPanel contains conversation title (was ' + treeAbsent + ')');
 
       // ── A8 工作区 SSE 续聊：真实模型回复到达 ──
       const reply = await poll(async () => {

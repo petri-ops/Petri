@@ -40,7 +40,9 @@
   padding: 14px;
   border-radius: 14px;
   background: var(--gewu-bg-surface);
-  border: 1px solid var(--gewu-border-color, transparent);
+  border: none;
+  /* UI-341 加映 — 用户裁决：去掉路径选择外侧的边框（对话框壳无边框，
+     保留投影与圆角承载层次） */
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
 }
 

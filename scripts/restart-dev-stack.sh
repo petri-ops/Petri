@@ -19,7 +19,10 @@ export PATH="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installat
 export BIOF3_DB_PATH='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\data\biof3.db'
 export BIOF3_LOCAL_DATA_DIR='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\data'
 
-powershell -NoProfile -Command "Start-Process -FilePath 'C:\Users\Admin\AppData\Roaming\fnm\node-versions\v24.20.0\installation\node.exe' -ArgumentList 'node_modules\electron\cli.js','.','--dev','--remote-debugging-port=9222' -WorkingDirectory 'D:\1.WorkDir\biof3-desktop' -WindowStyle Hidden -RedirectStandardOutput 'D:\1.WorkDir\biof3-desktop\.dev-stack-live.log' -RedirectStandardError 'D:\1.WorkDir\biof3-desktop\.dev-stack-err.log'"
+# -WindowStyle Minimized（最小化的是 node 控制台；Electron GUI 正常显示）。
+# 禁止 Hidden：hidden 启动会让页面 visibilityState=hidden，Chromium 冻结视口
+# （实测 949px）并触发懒渲染跳过——左栏 projectTree 不渲染，验收断言全歪。
+powershell -NoProfile -Command "Start-Process -FilePath 'C:\Users\Admin\AppData\Roaming\fnm\node-versions\v24.20.0\installation\node.exe' -ArgumentList 'node_modules\electron\cli.js','.','--dev','--remote-debugging-port=9222' -WorkingDirectory 'D:\1.WorkDir\biof3-desktop' -WindowStyle Minimized -RedirectStandardOutput 'D:\1.WorkDir\biof3-desktop\.dev-stack-live.log' -RedirectStandardError 'D:\1.WorkDir\biof3-desktop\.dev-stack-err.log'"
 echo "start dispatched"
 
 for i in $(seq 1 36); do
