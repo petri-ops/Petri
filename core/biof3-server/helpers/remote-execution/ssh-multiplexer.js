@@ -21,7 +21,14 @@ const { AGENT_BIN } = require('./node-agent');
 const IDLE_CLOSE_MS = 5 * 60 * 1000;
 const DEFAULT_RUN_TIMEOUT_MS = 30000;
 
+// BIOF3_SSH_MUX_DEBUG=1 时逐事件打 stderr（写/收/解析/超时/断开），P4 实机排插桩。
+const MUX_DEBUG = process.env.BIOF3_SSH_MUX_DEBUG === '1';
+const dbg = (session, msg) => {
+  if (MUX_DEBUG) process.stderr.write(`[mux-dbg ${new Date().toISOString()} ${session.alias}#${session.id}] ${msg}\n`);
+};
+
 const sessions = new Map(); // alias → session
+let sessionSeq = 0;
 
 function muxEnabled() {
   return process.env.BIOF3_SSH_MUX !== '0';
@@ -43,6 +50,7 @@ function createMuxSession({ alias, spawnFn }) {
 
   const session = {
     alias,
+    id: ++sessionSeq,
     child,
     alive: true,
     lastActivity: Date.now(),
@@ -50,25 +58,30 @@ function createMuxSession({ alias, spawnFn }) {
     inflight: Promise.resolve(),
     pending: null, // { resolve, timer }
   };
+  dbg(session, `spawned pid=${child.pid}`);
+  child.on('error', (e) => dbg(session, `child error: ${e.message}`));
 
   session.run = (command, timeoutMs = DEFAULT_RUN_TIMEOUT_MS) => {
     session.lastActivity = Date.now();
     const exec = () => new Promise((resolve, reject) => {
       if (!session.alive) {
+        dbg(session, `run rejected (dead) cmd=${String(command).slice(0, 60)}...`);
         reject(muxError('会话已断开，正在重建连接'));
         return;
       }
+      dbg(session, `write ${Buffer.byteLength(command)}B cmd=${String(command).slice(0, 80)}`);
       session.pending = {
-        resolve: ({ code, stdout }) => { session.pending = null; resolve({ ok: true, code, stdout: String(stdout) }); },
-        reject: (err) => { session.pending = null; reject(err); },
+        resolve: ({ code, stdout }) => { dbg(session, `resolve code=${code} stdout=${String(stdout).length}B`); session.pending = null; resolve({ ok: true, code, stdout: String(stdout) }); },
+        reject: (err) => { dbg(session, `reject: ${err.message}`); session.pending = null; reject(err); },
         timer: setTimeout(() => {
+          dbg(session, `TIMEOUT ${timeoutMs}ms pendingDiscarded`);
           session.pending = null;
           killSession(session);
           reject(muxError('连接超时（会话已重建，可重试）'));
         }, timeoutMs),
       };
       const line = Buffer.from(command, 'utf8').toString('base64');
-      session.child.stdin.write(`${line}\n`);
+      session.child.stdin.write(`${line}\n`, () => dbg(session, 'write flushed to ssh stdin'));
     });
     // 串行化：同一会话上的请求按序执行（协议无请求 id）
     const run = session.inflight.then(exec, exec);
@@ -79,6 +92,7 @@ function createMuxSession({ alias, spawnFn }) {
   session.close = () => killSession(session);
 
   child.stdout.on('data', (chunk) => {
+    dbg(session, `stdout +${chunk.length}B head=${JSON.stringify(chunk.toString('utf8').slice(0, 60))}`);
     session.buffer += chunk.toString('utf8');
     let idx;
     while ((idx = session.buffer.indexOf('\n')) >= 0) {
@@ -91,11 +105,14 @@ function createMuxSession({ alias, spawnFn }) {
         if (session.pending.timer) clearTimeout(session.pending.timer);
         const stdout = Buffer.from(b64 || '', 'base64').toString('utf8');
         session.pending.resolve({ code, stdout });
+      } else {
+        dbg(session, `line discarded pending=${!!session.pending} startsR=${line.startsWith('R\t')} len=${line.length}`);
       }
     }
   });
 
   const die = () => {
+    dbg(session, `died alive=${session.alive}`);
     session.alive = false;
     if (sessions.get(alias) === session) sessions.delete(alias);
     if (session.pending) {
@@ -105,9 +122,9 @@ function createMuxSession({ alias, spawnFn }) {
       p.reject(muxError('连接已断开（可重试）'));
     }
   };
-  child.on('close', die);
-  child.on('exit', die);
-  child.stderr.on('data', () => { /* ssh 自身告警忽略（不进通道） */ });
+  child.on('close', (code, signal) => { dbg(session, `close code=${code} signal=${signal}`); die(); });
+  child.on('exit', (code) => { dbg(session, `exit code=${code}`); die(); });
+  child.stderr.on('data', (c) => { dbg(session, `stderr: ${String(c).trim().slice(0, 200)}`); });
 
   scheduleIdleClose(session);
   sessions.set(alias, session);

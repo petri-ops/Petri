@@ -261,7 +261,13 @@ async function withTransportRetry(fn) {
       if (!isRetryableError(e)) throw e;
       last = { ok: false, stage: 'transport', error: { kind: 'ssh_direct_transport', retryable: true, detail: e.message } };
     }
-    const retryable = last && last.ok === false && last.error && last.error.retryable === true;
+    const retryable = last && last.ok === false && (
+      (last.error && typeof last.error === 'object' && last.error.retryable === true) ||
+      // surface errorResult 形状：error 是消息字符串，retryable 平铺在返回体顶层
+      // （remoteErrorToResult → errorResult(code, msg, { retryable })）。P4 实机抓真修：
+      // 旧判据只认 error.retryable，结果形返回永远 false → 驻留创建链单次 30s 超时即弃。
+      last.retryable === true
+    );
     if (!retryable) return last;
     if (attempt < TRANSPORT_RETRY_ATTEMPTS) await sleep(TRANSPORT_RETRY_DELAY_MS * attempt);
   }

@@ -616,7 +616,7 @@ async function runAgentLoop({
   // 项目存在 running 驻留任务时，把意图卡摘要追加进 system prompt（零轮询依赖——
   // 读取走回访循环同款 Gateway 通道；无卡/读失败 = 零注入，不污染 prompt）。
   try {
-    const b77ProjectId = ctx && ctx.projectId ? String(ctx.projectId) : '';
+    const b77ProjectId = context && context.projectId ? String(context.projectId) : '';
     if (b77ProjectId) {
       const { residentHandoverDigestByProjectId } = require('./helpers/remote-execution/resident-revisit');
       const digest = await residentHandoverDigestByProjectId({ getAsyncDatabase: () => require('./db').getAsyncDatabase() }, b77ProjectId);
