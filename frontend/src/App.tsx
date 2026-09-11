@@ -11,6 +11,8 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
 import { TitleBar } from '@/components/desktop/TitleBar';
 import { WorkspacePanelsProvider, useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
+import { AppRail } from '@/components/desktop/AppRail';
+import { AppRailProvider } from '@/components/desktop/AppRailContext';
 import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
@@ -94,9 +96,15 @@ function AppShell(): React.ReactElement {
             ChatCardLinkBridge）必须在同一 Context 实例内，否则写入端拿到 FALLBACK
             no-op 静默丢弃。Provider 仅一个 useState，全局挂载零副作用。 */}
         <PendingScrollProvider>
+        {/* UI-341 加映三（档 2）——左栏上提为壳层 AppRail：所有主窗页面常驻，
+            不再随 /project/:id 路由消失。main 为 flex 兄弟（高度 100%）。 */}
+        <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+        <AppRail />
         <main
           className="gewu-spa-main"
           style={{
+            flex: 1,
+            minWidth: 0,
             marginTop: 0,
             paddingTop: isColumnizedWorkspace ? 0 : 'var(--gewu-titlebar-height)',
             transition: 'margin-left 0.25s ease',
@@ -126,6 +134,7 @@ function AppShell(): React.ReactElement {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
+        </div>
         <DesktopOnboardingMount />
         <CommandPalette
           open={isOpen}
@@ -187,9 +196,11 @@ export default function App(): React.ReactElement {
 
   return (
     <BackendStatusProvider>
-      <WorkspacePanelsProvider>
-        <AppShell />
-      </WorkspacePanelsProvider>
+      <AppRailProvider>
+        <WorkspacePanelsProvider>
+          <AppShell />
+        </WorkspacePanelsProvider>
+      </AppRailProvider>
     </BackendStatusProvider>
   );
 }

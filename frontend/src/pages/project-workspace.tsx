@@ -3,7 +3,6 @@
 // Three-column layout: left=resources, center=results+agent, right=history+results
 // Collapsible panels. Route: /project/:projectId
 // ============================================================
-
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Icon, type IconName } from '@/components/icons/Icon';
@@ -14,7 +13,7 @@ import { LeftPanel, type LeftPanelContext } from '@/components/workspace-panels/
 import { RightPanel, type RightPanelContext } from '@/components/workspace-panels/RightPanel';
 import { ColumnHeader } from '@/components/desktop/titlebar/ColumnizedTitleBar';
 import { TitleBar } from '@/components/desktop/TitleBar';
-import { getProject, listProjectJobs, listDatasetsByProject, listProjects, updateProject, createProject, setProjectStatus, validateSshProject, connectSshHost, listSshRemoteDirs } from '@/lib/project-store';
+import { getProject, listProjectJobs, listDatasetsByProject } from '@/lib/project-store';
 import { useToast } from '@/components/common/ToastProvider';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
@@ -24,17 +23,14 @@ import {
   isConversationRunning,
   useConversationRun,
 } from '@/components/copilot/conversationRunStore';
-import { listConversations, createConversation, forkConversation, renameConversation, archiveConversation, type ConversationSummary } from '@/components/copilot/copilotConversationsClient';
-import {
-  useConversations,
-  useOtherConversations,
-} from '@/hooks/useConversations';
+import { listConversations } from '@/components/copilot/copilotConversationsClient';
+
 import {
   artifactAfterJobSelection,
   canCommitJobOpen,
   useConversationJobs,
 } from '@/hooks/useConversationJobs';
-import { useResizableColumns } from '@/hooks/useResizableColumns';
+
 import { useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
 import { useRightPanelTabs } from '@/hooks/useRightPanelTabs';
 import { segmentToMode, modeToSegment, type WorkspaceMode } from '@/hooks/useWorkspaceRouting';
@@ -47,6 +43,7 @@ import type { DiffRevision, EditorApi } from '@/components/editor/CodeMirror/typ
 // BLOCK-42 — pending-scroll 消费侧挂载（UI-194）：预览编辑器切 CodeMirror
 import { WorkspaceFilePreviewBridge } from '@/components/editor';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
+import { useAppRail, type WorkspaceAdapter } from '@/components/desktop/AppRailContext';
 import { fileExtension, isImageFile, isTextFile, isMarkdownFile, workspaceFileUrlFor, formatPreviewText } from '@/lib/previewFileUtils';
 import type { ActiveArtifact, JobStats } from '@/components/workspace-panels/ResultView';
 import {
@@ -76,14 +73,10 @@ import {
 import { getBridge } from '@/lib/desktopBridge';
 import styles from './project-workspace.module.css';
 import type { ActiveWorkspaceFile } from './project-workspace/types';
-
 // Re-export for backward compatibility — consumers still import from the page.
 export type { ActiveWorkspaceFile } from './project-workspace/types';
-
 export type { ActiveArtifact, JobStats } from '@/components/workspace-panels/ResultView';
-
 export type RightPanelMode = 'home' | 'results' | 'files' | 'browser' | 'chat' | 'analyze' | 'review' | 'io';
-
 const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconName }> = [
   { id: 'results', label: '结果', icon: 'bar-chart' },
   { id: 'files', label: '文件', icon: 'folder' },
@@ -97,7 +90,6 @@ const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconNa
   // BLOCK-72 / UI-320 — 「后端」「知识空间」迁出右栏：设备级全局能力，入口在左栏工作台
   // （/backend 与 /knowledge 全局页），右栏不再承载，不预留空壳。
 ];
-
 function toCopilotHarnessSummary(index: HarnessIndexSummary | null | undefined): HarnessContextSummary | undefined {
   if (!index) return undefined;
   return {
@@ -121,15 +113,33 @@ function toCopilotHarnessSummary(index: HarnessIndexSummary | null | undefined):
     })),
   };
 }
-
 export function ProjectWorkspace(): React.ReactElement {
   const shell = useWorkspacePanelsContext();
+  const appRail = useAppRail();
+
+  // UI-341 加映三（档 2）——左栏数据/动作已上提 AppRailContext（单一真相）。
+  // 以下别名保持本文件既有引用点零改动。
+  const handleNewConversation = appRail.createConversationForProject;
+  const handleSwitchConversation = appRail.switchConversation;
+  const switchToProject = appRail.switchToProject;
+  const createProjectFromWorkspacePath = appRail.createProjectFromPath;
+  const openCreatePanel = appRail.openCreatePanel;
+  const renameProjectInTree = appRail.renameProjectInTree;
+  const renameConversationInTree = appRail.renameConversationInTree;
+  const sshConnectHost = appRail.sshConnectHost;
+  const sshListDirs = appRail.sshListDirs;
+  const sshRegisterHost = appRail.sshRegisterHost;
+  const sshCreateAt = appRail.sshCreateAt;
+  const sshConnectProject = appRail.sshConnectProject;
+  const archiveProjectFromTree = appRail.archiveProjectFromTree;
+  const archiveConversationFromTree = appRail.archiveConversationFromTree;
+  const forkConversationInTree = appRail.forkConversationInTree;
+  const createConversationForProject = appRail.createConversationForProject;
   const updateTitleBar = shell.updateTitleBar;
   const { projectId, '*': modeSplat } = useParams<{ projectId: string; '*'?: string }>();
   const navigate = useNavigate();
   const toast = useToast();
   const [searchParams] = useSearchParams();
-
   const [project, setProject] = useState<Project | null>(null);
   const [jobs, setJobs] = useState<ToolJob[]>([]);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
@@ -143,7 +153,6 @@ export function ProjectWorkspace(): React.ReactElement {
   const requestedJobId = searchParams.get('job');
   const requestedArtifactName = searchParams.get('artifact');
   const requestedFilePath = searchParams.get('file');
-
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const autoOpenedJobRef = useRef<string | null>(null);
   const openResultRequestSequenceRef = useRef(0);
@@ -181,16 +190,25 @@ export function ProjectWorkspace(): React.ReactElement {
   const pendingArtifactJobIdRef = useRef<string | null>(null);
   const appliedRequestedArtifactKeyRef = useRef<string | null>(null);
   const [pendingArtifactName, setPendingArtifactName] = useState<string | null>(null);
-
   // Conversation state — current project's conversations + active conversation.
   // Plan 1.6 §4.3 — useConversations is the shared SWR hook (cache lives
   // in a module-level Map so SimpleChat and the sidebar read the same list).
+  // UI-341 加映三（档 2）：会话/活跃会话上提到 AppRailContext（壳层左栏与工作区
+  // 共用同一份状态），此处仅按原变量名取用，正文零改动。
   const {
-    list: conversations,
-    refresh: refreshConversations,
-    create: createConversationInProject,
-  } = useConversations(projectId);
-  const [activeConvId, setActiveConvId] = useState<string | null>(null);
+    conversationsApi,
+    conversations,
+    refreshConversations,
+    activeConvId,
+    setActiveConvId,
+  } = {
+    conversationsApi: appRail.conversationsApi,
+    conversations: appRail.conversationsApi.list,
+    refreshConversations: appRail.conversationsApi.refresh,
+    activeConvId: appRail.activeConvId,
+    setActiveConvId: appRail.setActiveConvId,
+  };
+  const createConversationInProject = appRail.conversationsApi.create;
   const {
     jobs: conversationJobs,
     error: conversationJobsError,
@@ -198,23 +216,19 @@ export function ProjectWorkspace(): React.ReactElement {
   } = useConversationJobs(projectId, activeConvId);
   const activeConversationRun = useConversationRun(activeConvId);
   const resultEditBusy = resultEditSubmitting || activeConversationRun?.status === 'running';
-
   useEffect(() => {
     if (!conversationJobsError) return;
     setWorkspaceNotice('当前会话的结果列表暂时无法刷新，已保留上一次可用结果。');
   }, [conversationJobsError]);
-
   useEffect(() => {
     if (!workspaceNotice) return undefined;
     const timer = window.setTimeout(() => setWorkspaceNotice(''), 4_500);
     return () => window.clearTimeout(timer);
   }, [workspaceNotice]);
-
   const bindActiveJob = useCallback((jobId: string | null) => {
     setActiveArtifact((current) => artifactAfterJobSelection(current, activeJobId, jobId));
     setActiveJobId(jobId);
   }, [activeJobId]);
-
   const activeSelectionBindingKey = useMemo(() => {
     const selection = activeArtifact?.selection;
     if (!selection) return '';
@@ -271,7 +285,6 @@ export function ProjectWorkspace(): React.ReactElement {
   const effectiveResultEditControls = resultContextState?.bindingKey === resultContextBindingKey
     ? resultEditControls
     : null;
-
   const resultAgentDraftKey = useMemo(() => {
     if (!activeArtifact) return '';
     return [
@@ -304,15 +317,12 @@ export function ProjectWorkspace(): React.ReactElement {
       return next;
     });
   }, [resultAgentDraftKey]);
-
   // Plan 1.6 §4.3 — optimistic prepend for cross-project creations
   // (sidebar adds a conv under another project without switching pages).
   // useOtherConversations below reads from the shared cache; this seed
   // map is only the "just-created, not yet in cache" delta.
-  const [otherSeed, setOtherSeed] = useState<Record<string, ConversationSummary[]>>({});
-  const [creatingProject, setCreatingProject] = useState(false);
-  const [creatingConversation, setCreatingConversation] = useState(false);
-  const [createError, setCreateError] = useState(''); // UI-304 简化版 — 创建项目错误提示
+  // UI-341 加映三：创建态（creatingProject/creatingConversation/createError）
+  // 已上提到 AppRailContext；otherSeed 为历史遗留「只写不读」死状态，随之上提时删除。
   // §2 dedup: use the App-level Context directly (5s poll), drop the standalone
   // 10s polling hook and the local state sync layer.
   const backendStatus = useBackendStatus();
@@ -330,8 +340,7 @@ export function ProjectWorkspace(): React.ReactElement {
     setBottomTerminalHeight,
     startColumnResize,
     startBottomTerminalResize,
-  } = useResizableColumns();
-
+  } = appRail.resizable;
   const {
     leftOpen,
     setLeftOpen,
@@ -351,7 +360,6 @@ export function ProjectWorkspace(): React.ReactElement {
   // 一起关掉，导致「打开某页面左栏消失、列内 header 随之消失像全屏盖住导航」。
   // 现规则：侧栏只由用户主动点击改变（compact 窄屏浮层模式除外，见
   // useWorkspaceLayout 的 compact 自适应收起/还原）。
-
   const {
     rightTab,
     setRightTab,
@@ -365,19 +373,15 @@ export function ProjectWorkspace(): React.ReactElement {
     // openRightPanel is NOT returned — it lives in project-workspace
     // with compactLayout awareness (setLeftOpen).
   } = useRightPanelTabs();
-
   // Every right-side tool shares one width. Switching to Results must not
   // jump to a separately constrained layout or change the drag feel.
   const effectiveRightWidth = rightWidth;
-
   // BLOCK-22 P4.5: Access PendingScrollContext so we can dispatch pending scroll
   // requests (line scroll + inline-diff) to WorkspaceFilePreviewBridge.
   const { setPendingRequest } = usePendingScroll();
-
   useEffect(() => {
     if (!rightOpen) setRightToolMenuOpen(false);
   }, [rightOpen, setRightToolMenuOpen]);
-
   // T85: legacy `?mode=` deep links (and the 5 direct navigations that still
   // build `?mode=`) are normalized to the URL sub-path form on arrival. Runs
   // whenever `?mode=` is present, so in-place navigations are covered too.
@@ -392,15 +396,14 @@ export function ProjectWorkspace(): React.ReactElement {
     const query = next.toString();
     navigate(query ? `${base}?${query}` : base, { replace: true });
   }, [searchParams, projectId, navigate]);
-
   // Derived summary visibility (semantic + pixel dimensions).
   const summaryVisibility = useMemo<'hidden' | 'compact' | 'expanded'>(() => {
     if (sessionFrameWidth === 0) return 'expanded';
     if (sessionFrameWidth >= 1120) return 'expanded';
     if (sessionFrameWidth >= 780) return 'compact';
     return 'hidden';
-  }, [sessionFrameWidth]);
 
+  }, [sessionFrameWidth]);
   // Bottom-terminal drag comes from useResizableColumns above; we clamp
   // the height to the workspace viewport (140-520) inline so the
   // terminal never eats the entire screen.
@@ -410,7 +413,6 @@ export function ProjectWorkspace(): React.ReactElement {
     },
     [startBottomTerminalResize]
   );
-
   // T85: navigation now pushes the mode into the URL sub-path
   // (`/project/:id/<mode>?job=...`) instead of the `?mode=` query param. The
   // `?job=`/`?artifact=`/`?file=` query params are preserved for deep links.
@@ -441,7 +443,6 @@ export function ProjectWorkspace(): React.ReactElement {
     const query = nextParams.toString();
     navigate(query ? `${base}?${query}` : base, { replace });
   }, [leftOpen, rightOpen, searchParams, navigate, projectId, workspaceMode]);
-
   // openRightPanel: 打开右栏 tab。UI-341 加映二（用户裁决）——不再因 compact
   // 顺手收起左栏：侧栏只由用户主动点击改变。
   const openRightPanel = useCallback((tab: RightPanelMode) => {
@@ -449,39 +450,52 @@ export function ProjectWorkspace(): React.ReactElement {
     setRightTab(tab);
     setRightOpen(true);
   }, []);
-
   // BLOCK-28.7 — 聊天区改动卡片点击：打开审阅 tab（文件选中由 useWorkingTreeReview 监听）
   useEffect(() => {
     return subscribeGewuEvent(gewuEvents.reviewOpenFile, () => {
       openRightPanel('review');
     });
   }, [openRightPanel]);
-
-  const [allProjects, setAllProjects] = useState<Project[]>([]);
+  // 项目列表 / 项目树展开 / 跨项目会话 / 创建态：全部来自 AppRailContext（单一真相）
+  const {
+    allProjects,
+    setAllProjects,
+    expandedProjects,
+    toggleProjectExpand,
+    expandProject,
+    projectConversations,
+    refreshOtherConversations,
+    creatingProject,
+    creatingConversation,
+    createError,
+    setCreateError,
+  } = appRail;
+  // UI-341 加映三（档 2）——壳层左栏动作的工作区副作用适配：切会话清 job/artifact、
+  // 建会话/分支切回 chat、项目改名刷新本页 project 详情。工作区卸载后自动摘除，
+  // 壳层动作退化为纯数据行为（单一真相在 AppRailContext）。
+  const workspaceAdapter = useMemo(() => ({
+    updateWorkspaceMode,
+    clearConversationContext: () => {
+      setActiveJobId(null);
+      setActiveArtifact(null);
+    },
+    onProjectRenamed: (next: Project) => setProject(next),
+    notify: setWorkspaceNotice,
+    reportCreateError: setCreateError,
+  }), [updateWorkspaceMode, setActiveJobId, setActiveArtifact, setProject, setWorkspaceNotice, setCreateError]);
+  useEffect(() => {
+    appRail.registerWorkspaceAdapter(workspaceAdapter);
+    return () => appRail.registerWorkspaceAdapter(null);
+  }, [workspaceAdapter, appRail.registerWorkspaceAdapter]);
 
   // UI-305 P1.2 — 左栏项目树展开 + 会话搜索状态簇整簇抽入 useProjectTreeState，
   // 零行为变化（调用点在 allProjects 声明之后）。
   const {
-    expandedProjects,
-    toggleProjectExpand,
-    expandProject,
     workspaceSearchQuery,
     setWorkspaceSearchQuery,
     searchConversationIndex,
     ensureSearchConversationIndex,
-  } = useProjectTreeState(projectId, allProjects);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const list = await listProjects();
-        if (!cancelled) setAllProjects(list);
-      } catch { /* ignore */ }
-    })();
-    return () => { cancelled = true; };
-  }, []);
-
+  } = appRail.treeState;
   const workspacePath = project?.workspacePath || '';
   const compactWorkspacePath = useMemo(() => {
     if (!workspacePath) return '工作目录初始化中';
@@ -494,7 +508,6 @@ export function ProjectWorkspace(): React.ReactElement {
     if (parts.length <= 4) return displayPath;
     return `.../${parts.slice(-4).join('/')}`;
   }, [workspacePath]);
-
   const titleBarTabs = useMemo(
     () =>
       openRightTabs
@@ -510,7 +523,6 @@ export function ProjectWorkspace(): React.ReactElement {
         }),
     [openRightTabs]
   );
-
   const titleBarResultItems = useMemo(() => conversationJobs.map((job) => {
     const status = job.status === 'done'
       ? '完成'
@@ -530,7 +542,6 @@ export function ProjectWorkspace(): React.ReactElement {
       })}`,
     };
   }), [conversationJobs]);
-
   const handleSelectTitleBarResult = useCallback((jobId: string) => {
     if (!conversationJobs.some((job) => job.id === jobId)) return;
     bindActiveJob(jobId);
@@ -538,23 +549,16 @@ export function ProjectWorkspace(): React.ReactElement {
     openRightPanel('results');
     updateWorkspaceMode('result', true, jobId);
   }, [bindActiveJob, conversationJobs, openRightPanel, setRightOpen, updateWorkspaceMode]);
-
-  const switchToProject = useCallback((id: string) => {
-    if (id !== projectId) navigate(`/project/${id}`);
-  }, [navigate, projectId]);
-
   useEffect(() => {
     setActiveWorkspaceFile(null);
     setOpenWorkspaceFiles([]);
   }, [projectId]);
-
   const handleOpenWorkspaceFile = useCallback((file: ActiveWorkspaceFile) => {
     setOpenWorkspaceFiles((prev) => (
       prev.some((item) => item.path === file.path) ? prev : [...prev, file]
     ));
     setActiveWorkspaceFile(file);
   }, []);
-
   const handleCloseWorkspaceFile = useCallback((pathToClose: string) => {
     setOpenWorkspaceFiles((prev) => {
       const closingIndex = prev.findIndex((item) => item.path === pathToClose);
@@ -566,7 +570,6 @@ export function ProjectWorkspace(): React.ReactElement {
       return next;
     });
   }, []);
-
   // Plan 1.6 §4.3 — the SWR hook already handles initial load + cleanup on
   // projectId change (it seeds from the shared cache and resets state when
   // projectId is null). What it doesn't know about is the auto-select rule
@@ -577,7 +580,6 @@ export function ProjectWorkspace(): React.ReactElement {
     if (conversations.length === 0) return;
     setActiveConvId(conversations[0].id);
   }, [projectId, conversations, activeConvId]);
-
   // Reset active conv when the project changes — hook re-seeds the list.
   // UI-341 实机抓真修：只在 projectId 真正「变化」时清，mount 不清——本组件
   // mount 上该 effect 在会话种子 effect（自动选 conversations[0]）之后执行，
@@ -592,50 +594,13 @@ export function ProjectWorkspace(): React.ReactElement {
     setActiveConvId(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId]);
-
   // Plan 1.6 §4.3 — single source for "other project" conversation lists.
   // Replaces the old per-project useState map that re-fetched on every
   // expansion. Reads / writes the same shared cache as useConversations.
-  const { byProjectId: projectConversations, refresh: refreshOtherConversations } = useOtherConversations(
-    expandedProjects,
-    projectId
-  );
-
   // Create new conversation in current project (Plan 1.6 §4.3 — uses the
   // shared SWR cache so sidebar + chat panel stay consistent without a
   // 5s polling timer).
-  const handleNewConversation = useCallback(
-    async (targetProjectId = projectId) => {
-      if (!targetProjectId) return;
-      updateWorkspaceMode('chat');
-      const conv = await createConversation('新对话', undefined, targetProjectId);
-      if (!conv) return;
-      if (targetProjectId === projectId) {
-        setActiveConvId(conv.id);
-        // Hook already prepends optimistically; refresh keeps us honest if
-        // the server enriched the row with id/timestamps we didn't pre-seed.
-        refreshConversations();
-      } else {
-        // Cross-project creation: prepend into the local seed map so the
-        // next render shows the new conv without an extra fetch.
-        setOtherSeed((seed) => ({
-          ...seed,
-          [targetProjectId]: [conv, ...(seed[targetProjectId] || [])],
-        }));
-        navigate(`/project/${targetProjectId}`);
-      }
-    },
-    [projectId, refreshConversations, navigate, updateWorkspaceMode]
-  );
-
   // Switch conversation
-  const handleSwitchConversation = useCallback((convId: string) => {
-    updateWorkspaceMode('chat');
-    setActiveJobId(null);
-    setActiveArtifact(null);
-    setActiveConvId(convId);
-  }, [updateWorkspaceMode]);
-
   const handleShowChat = useCallback(() => updateWorkspaceMode('chat'), [updateWorkspaceMode]);
   const handleShowSearch = useCallback(() => {
     updateWorkspaceMode('search');
@@ -653,11 +618,8 @@ export function ProjectWorkspace(): React.ReactElement {
   const handleShowSettings = useCallback(() => {
     updateWorkspaceMode('settings');
   }, [updateWorkspaceMode]);
-
   const handleShowPlugins = useCallback(() => updateWorkspaceMode('plugins'), [updateWorkspaceMode]);
-
   const handleNavigateToSkills = useCallback(() => navigate('/skills'), [navigate]);
-
   // BLOCK-72 / UI-320 — 全局工作台页入口（知识空间/后端迁出右栏）
   const handleNavigateToKnowledge = useCallback(() => navigate('/knowledge'), [navigate]);
   const handleNavigateToBackend = useCallback(() => navigate('/backend'), [navigate]);
@@ -666,12 +628,10 @@ export function ProjectWorkspace(): React.ReactElement {
   const handleNavigateToHome = useCallback(() => {
     navigate(projectId ? `/?project=${projectId}` : '/');
   }, [navigate, projectId]);
-
   // BLOCK-72 — 右栏「后端」tab 已删除：home 空态「后端」卡与快捷入口改跳全局 /backend 页
   const handleOpenRightTerminal = useCallback(() => {
     navigate('/backend');
   }, [navigate]);
-
   const handleOpenRightResults = useCallback(() => {
     openRightPanel('results');
     const currentJob = conversationJobs.find((job) => job.id === activeJobId);
@@ -681,20 +641,16 @@ export function ProjectWorkspace(): React.ReactElement {
       updateWorkspaceMode('result', true, nextJobId);
     }
   }, [activeJobId, bindActiveJob, conversationJobs, openRightPanel, updateWorkspaceMode]);
-
   const handleOpenRightBrowser = useCallback(() => {
     openRightPanel('browser');
   }, [openRightPanel]);
-
   const handleOpenRightFiles = useCallback(() => {
     setRightOpen(true);
     openRightPanel('files');
   }, [openRightPanel, setRightOpen]);
-
   const handleOpenRightChat = useCallback(() => {
     openRightPanel('chat');
   }, [openRightPanel]);
-
   // TitleBar 注册 —— 8f3d55a5 曾误删整段（右侧工具菜单「+」/ 标签 pills / 结果
   // 选择器随之全部失效），UI-309 从 e689f867 恢复。BLOCK-62 P2：宽度两字段
   // （leftPanelWidth/rightPanelWidth）已从 TitleBarState 退役——regular 顶栏是
@@ -704,7 +660,6 @@ export function ProjectWorkspace(): React.ReactElement {
     () => buildResultTitleBarTitle(workspaceMode, project?.name, activeArtifact?.label || activeArtifact?.name),
     [activeArtifact?.label, activeArtifact?.name, project?.name, workspaceMode],
   );
-
   useEffect(() => {
     updateTitleBar({
       title: titleBarTitle,
@@ -795,185 +750,17 @@ export function ProjectWorkspace(): React.ReactElement {
     activeConvId,
     handleSwitchConversation,
   ]);
-
-
-
   // UI-282 — 拖拽目录直达创建：路径经校验后直接走创建链（UI-304 后无内联面板）
-  const createProjectFromWorkspacePath = useCallback(async (selected: string) => {
-    setCreateError('');
-    const validate = window.biof3Desktop?.files?.validateDirectory;
-    if (typeof validate !== 'function') {
-      setCreateError('当前环境不支持路径校验');
-      return;
-    }
-
-    setCreatingProject(true);
-    try {
-      const res = await validate(selected);
-      if (!res.ok || !res.data?.path) {
-        setCreateError(res.error || '所选路径无效');
-        return;
-      }
-
-      const finalPath = res.data.path;
-      const name = finalPath.split(/[\\/]/).pop()?.trim() || '新项目';
-      const created = await createProject({
-        name,
-        modality: 'general',
-        workspacePath: finalPath,
-      });
-
-      setAllProjects((prev) => [created, ...prev.filter((item) => item.id !== created.id)]);
-      expandProject(created.id);
-      navigate(`/project/${created.id}`);
-    } catch (err) {
-      setCreateError(err instanceof Error ? err.message : '创建项目失败');
-    } finally {
-      setCreatingProject(false);
-    }
-  }, [navigate]);
-
-  const openCreatePanel = useCallback(async () => {
-    setCreateError('');
-    const dialog = window.biof3Desktop?.files?.openDirectoryDialog;
-    if (typeof dialog !== 'function') {
-      setCreateError('当前环境不支持原生文件夹选择（请在 Gewu 桌面应用中使用）');
-      return;
-    }
-
-    const selected = await dialog();
-    if (!selected) return; // 用户取消，什么都不做
-
-    // 直接创建项目（对齐 Codex）
-    await createProjectFromWorkspacePath(selected);
-  }, [createProjectFromWorkspacePath]);
-
-  const createConversationForProject = useCallback(async (targetProjectId = projectId) => {
-    if (!targetProjectId || creatingConversation) return;
-    updateWorkspaceMode('chat');
-    expandProject(targetProjectId);
-    setCreatingConversation(true);
-    try {
-      const conv = await createConversation('新对话', undefined, targetProjectId);
-      if (!conv) return;
-      if (targetProjectId === projectId) {
-        setActiveConvId(conv.id);
-        await refreshConversations();
-      } else {
-        // Cross-project creation: prepend into the local seed map so the
-        // next render shows the new conv without an extra fetch.
-        setOtherSeed((seed) => ({
-          ...seed,
-          [targetProjectId]: [conv, ...(seed[targetProjectId] || [])],
-        }));
-        navigate(`/project/${targetProjectId}`);
-      }
-    } finally {
-      setCreatingConversation(false);
-    }
-  }, [creatingConversation, navigate, projectId, refreshConversations, updateWorkspaceMode]);
-
-  const renameProjectInTree = useCallback(async (targetProjectId: string, name: string) => {
-    const next = await updateProject(targetProjectId, { name });
-    if (!next) return false;
-    setAllProjects((current) => current.map((item) => item.id === next.id ? next : item));
-    if (targetProjectId === projectId) setProject(next);
-    return true;
-  }, [projectId]);
-
-  const renameConversationInTree = useCallback(async (conversationId: string, title: string) => {
-    const ok = await renameConversation(conversationId, title);
-    if (!ok) return false;
-    await Promise.all([refreshConversations(), refreshOtherConversations()]);
-    return true;
-  }, [refreshConversations, refreshOtherConversations]);
-
   // UI-327 向导①：连通性检测（runSshOp echo $HOME，经 /api/ssh-projects/connect）
-  const sshConnectHost = useCallback(async (alias: string): Promise<{ ok: boolean; home?: string; error?: string; retryable?: boolean }> => {
-    return connectSshHost(alias);
-  }, []);
-
   // UI-327 向导②：浏览远端目录（Gateway fs_list，仅目录）
-  const sshListDirs = useCallback(async (alias: string, path: string): Promise<{ ok: boolean; dirs?: Array<{ name: string; path: string }>; error?: string; retryable?: boolean }> => {
-    return listSshRemoteDirs(alias, path);
-  }, []);
-
   // UI-327 密码模式①：注册主机（一次性装公钥 + 写 ~/.ssh/config 别名；密码不存储）
-  const sshRegisterHost = useCallback(async (p: { ip: string; port: string; username: string; password: string }): Promise<{ ok: boolean; alias?: string; error?: string }> => {
-    const desktop = (window as unknown as { biof3Desktop?: { ssh?: { registerHost: (p: { ip: string; port: number; username: string; password: string }) => Promise<{ ok: boolean; alias?: string; error?: string }> } } });
-    const bridge = desktop.biof3Desktop?.ssh ?? (window as unknown as { gewu?: { ssh?: { registerHost: (p: { ip: string; port: number; username: string; password: string }) => Promise<{ ok: boolean; alias?: string; error?: string }> } } }).gewu?.ssh;
-    if (!bridge?.registerHost) {
-      return { ok: false, error: '当前运行环境不支持密码引导连接（请升级 Gewu 桌面端）' };
-    }
-    if (!p.ip || !p.port || !/^[1-9][0-9]*$/.test(p.port) || Number(p.port) > 65535 || !p.username || !p.password) {
-      return { ok: false, error: '请完整填写 IP、端口（1-65535）、用户名与密码' };
-    }
-    return bridge.registerHost({ ip: p.ip, port: Number(p.port), username: p.username, password: p.password });
-  }, []);
-
   // UI-327 向导③：在选定路径创建项目并导航（validate 部署 agent + 创建）
-  const sshCreateAt = useCallback(async (p: { alias: string; remotePath: string }): Promise<{ ok: boolean; error?: string }> => {
-    const verdict = await validateSshProject({ alias: p.alias, remotePath: p.remotePath });
-    if (!verdict.ok) {
-      return { ok: false, error: verdict.retryable ? `远程连接失败（可重试）：${verdict.error}` : `远程路径校验失败：${verdict.error}` };
-    }
-    const name = p.remotePath.split('/').filter(Boolean).pop() || p.alias;
-    const project = await createProject({ name, modality: 'general', workspaceKind: 'ssh', sshHost: p.alias, remotePath: p.remotePath });
-    // UI-327 修复：同步本地项目列表，左栏树立即出现新项目（不等重新挂载）
-    setAllProjects((cur) => (cur.some((item) => item.id === project.id) ? cur : [project, ...cur]));
-    navigate(`/project/${project.id}`, { replace: true });
-    return { ok: true };
-  }, [navigate]);
-
   // BLOCK-67 加映（UI-325）— ssh 项目「远程连接」：连通性检测（validate = agent 探测 + 路径校验），
   // 结果 toast 诚实反馈；断线后这就是 D5 的用户侧重连入口。
-  const sshConnectProject = useCallback(async (target: Project) => {
-    if (target.workspaceKind !== 'ssh' || !target.sshHost || !target.remotePath) return;
-    const verdict = await validateSshProject({ alias: target.sshHost, remotePath: target.remotePath });
-    if (verdict.ok) {
-      toast?.success(`远程连接正常：${target.sshHost}:${target.remotePath}`);
-    } else {
-      const msg = verdict.retryable
-        ? `远程连接失败（可重试）：${verdict.error}`
-        : `远程连接失败：${verdict.error}`;
-      toast?.error(msg);
-    }
-  }, [toast]);
-
-  const archiveProjectFromTree = useCallback(async (targetProjectId: string) => {
-    const archived = await setProjectStatus(targetProjectId, 'archived');
-    if (!archived) return false;
-    const remaining = allProjects.filter((item) => item.id !== targetProjectId);
-    setAllProjects(remaining);
-    if (targetProjectId === projectId) {
-      navigate(remaining[0] ? `/project/${remaining[0].id}` : '/', { replace: true });
-    }
-    return true;
-  }, [allProjects, navigate, projectId]);
-
-  const archiveConversationFromTree = useCallback(async (conversationId: string) => {
-    const ok = await archiveConversation(conversationId, true);
-    if (!ok) return false;
-    if (conversationId === activeConvId) setActiveConvId(null);
-    await Promise.all([refreshConversations(), refreshOtherConversations()]);
-    return true;
-  }, [activeConvId, refreshConversations, refreshOtherConversations]);
-
-  const forkConversationInTree = useCallback(async (conversationId: string, title?: string) => {
-    const forked = await forkConversation(conversationId, title);
-    if (!forked) return null;
-    updateWorkspaceMode('chat');
-    await Promise.all([refreshConversations(), refreshOtherConversations()]);
-    setActiveConvId(forked.id);
-    return forked;
-  }, [updateWorkspaceMode, refreshConversations, refreshOtherConversations]);
-
-
   // Load conversations for other projects when expanded.
   // Plan 1.6 §4.3 — moved to useOtherConversations hook above; the
   // `projectConversations` variable is now derived from the shared
   // cache + cross-project seed map.
-
   const fetchData = useCallback(async () => {
     if (!projectId) return;
     try {
@@ -1001,7 +788,6 @@ export function ProjectWorkspace(): React.ReactElement {
       setLoading(false);
     }
   }, [projectId]);
-
   useEffect(() => {
     if (!projectId) {
       setCopilotHarnessIndex(null);
@@ -1019,7 +805,6 @@ export function ProjectWorkspace(): React.ReactElement {
       cancelled = true;
     };
   }, [projectId]);
-
   const handleOpenWorkspacePath = useCallback(async () => {
     if (!project?.workspacePath) return;
     const result = await window.biof3Desktop?.files?.openPath?.(project.workspacePath);
@@ -1027,26 +812,21 @@ export function ProjectWorkspace(): React.ReactElement {
       setWorkspaceNotice(result.error || '无法打开工作目录');
     }
   }, [project?.workspacePath]);
-
   useEffect(() => {
     fetchData();
     const id = setInterval(fetchData, 15_000);
     return () => clearInterval(id);
   }, [fetchData]);
-
   useEffect(() => {
     const handler = () => {
       fetchData();
       void refreshConversationJobs();
       refreshConversations();
-      listProjects()
-        .then(setAllProjects)
-        .catch(() => {});
+      // 项目列表刷新由 AppRailProvider 的 softRefresh 订阅负责（单一职责）
     };
     const unsub = subscribeGewuEvent(gewuEvents.softRefresh, handler);
     return unsub;
   }, [fetchData, refreshConversationJobs, refreshConversations]);
-
   // Listen for conversation fork events from SimpleChat (RightPanel or CenterPanel)
   // to refresh the LeftPanel conversation list after a branch is created.
   useEffect(() => {
@@ -1057,13 +837,11 @@ export function ProjectWorkspace(): React.ReactElement {
     const unsub = subscribeGewuEvent(gewuEvents.conversationForked, handler);
     return unsub;
   }, [updateWorkspaceMode, refreshConversations, refreshOtherConversations]);
-
   useEffect(() => {
     if (workspaceMode === 'search') {
       ensureSearchConversationIndex().catch(() => {});
     }
   }, [ensureSearchConversationIndex, workspaceMode]);
-
   const activeJob = useMemo(() => {
     if (!activeConvId || !activeJobId) return null;
     const candidate = conversationJobs.find((job) => job.id === activeJobId)
@@ -1071,7 +849,6 @@ export function ProjectWorkspace(): React.ReactElement {
       || null;
     return candidate?.conversationId === activeConvId ? candidate : null;
   }, [activeConvId, activeJobId, conversationJobs, jobs]);
-
   useEffect(() => {
     if (!activeJob || activeJob.status !== 'done') {
       setActiveJobHarnessIndex(null);
@@ -1089,7 +866,6 @@ export function ProjectWorkspace(): React.ReactElement {
       cancelled = true;
     };
   }, [activeJob?.id, activeJob?.status]);
-
   const jobStats = useMemo(() => {
     let running = 0;
     let failed = 0;
@@ -1103,7 +879,6 @@ export function ProjectWorkspace(): React.ReactElement {
     });
     return { running, failed, done, pending };
   }, [conversationJobs]);
-
   const liveJobsPreview = useMemo(
     () =>
       conversationJobs
@@ -1111,7 +886,6 @@ export function ProjectWorkspace(): React.ReactElement {
         .slice(0, 3),
     [conversationJobs]
   );
-
   const showPinnedSummary = workspaceMode === 'chat' || workspaceMode === 'scheduled';
   const summaryOpenWidth = sessionFrameWidth === 0
     ? 300
@@ -1131,7 +905,6 @@ export function ProjectWorkspace(): React.ReactElement {
     ),
     workflowRefreshKey,
   );
-
   const copilotActiveArtifact = useMemo<NonNullable<CopilotContext['activeArtifact']> | null>(() => {
     if (!activeArtifact) return null;
     const contextToken = effectiveResultContextState?.status === 'ready'
@@ -1159,7 +932,6 @@ export function ProjectWorkspace(): React.ReactElement {
       contextToken,
     };
   }, [activeArtifact, effectiveResultContextState?.contextToken, effectiveResultContextState?.status]);
-
   // 6.3 — Inject project context into SimpleChat (via shared copilot context).
   // Replaces the original useEffect that did an in-place setCopilotContext
   // patch on every render. useSetCopilotContext resets before applying,
@@ -1193,13 +965,11 @@ export function ProjectWorkspace(): React.ReactElement {
         }
       : {}
   );
-
   useEffect(() => {
     setActiveArtifact(null);
     setResultContextState(null);
     setResultEditControls(null);
   }, [activeJobId]);
-
   // G0-RS-P3: 每当打开的结果或其版本变化，就从后端重新投影一次上下文。
   // 这里只提供 job/文件名/revision 线索，坐标齐备与否由后端裁决；
   // 409 时如实记录阻断原因，UI 不把它显示成"Agent 可以直接改"。
@@ -1289,7 +1059,6 @@ export function ProjectWorkspace(): React.ReactElement {
     activeSelectionBindingKey,
     resultContextBindingKey,
   ]);
-
   useEffect(() => {
     if (loading) return;
     if (activeJobId || conversationJobs.length === 0) return;
@@ -1297,14 +1066,12 @@ export function ProjectWorkspace(): React.ReactElement {
     if (!firstJob) return;
     bindActiveJob(firstJob.id);
   }, [activeJobId, bindActiveJob, conversationJobs, loading]);
-
   const normalizeToolStatus = useCallback((status: unknown): ToolJob['status'] => {
     if (status === 'completed' || status === 'done') return 'done';
     if (status === 'failed') return 'failed';
     if (status === 'running') return 'running';
     return 'pending';
   }, []);
-
   const handleOpenResult = useCallback(async (
     jobId: string,
     targetProjectId?: string | null,
@@ -1318,7 +1085,6 @@ export function ProjectWorkspace(): React.ReactElement {
       navigate(`/project/${resolvedTargetProjectId}?mode=${targetMode}&job=${encodeURIComponent(jobId)}`);
       return;
     }
-
     let nextJob = conversationJobs.find((job) => job.id === jobId)
       || jobs.find((job) => job.id === jobId)
       || null;
@@ -1379,15 +1145,12 @@ export function ProjectWorkspace(): React.ReactElement {
       }
     }
   }, [activeConvId, bindActiveJob, conversationJobs, jobs, navigate, normalizeToolStatus, openRightPanel, projectId, setRightOpen, updateWorkspaceMode]);
-
   useEffect(() => {
     autoOpenedJobRef.current = null;
   }, [projectId]);
-
   useEffect(() => {
     if (loading || !projectId) return;
     if (searchParams.get('mode')) return;
-
     if (requestedJobId) {
       const requestKey = requestedArtifactRequestKey({
         projectId,
@@ -1413,11 +1176,8 @@ export function ProjectWorkspace(): React.ReactElement {
       });
       return;
     }
-
     appliedRequestedArtifactKeyRef.current = null;
-
   }, [activeJobId, handleOpenResult, jobs, loading, projectId, requestedArtifactName, requestedJobId, workspaceMode]);
-
   useEffect(() => {
     if (loading || !projectId || !requestedFilePath) return;
     if (activeWorkspaceFile?.path === requestedFilePath) return;
@@ -1431,7 +1191,6 @@ export function ProjectWorkspace(): React.ReactElement {
     handleOpenWorkspaceFile(file);
     openRightPanel('files');
   }, [activeWorkspaceFile?.path, handleOpenWorkspaceFile, loading, openRightPanel, projectId, requestedFilePath]);
-
   useEffect(() => {
     const handler = (detail: { toolJobId: string; projectId?: string | null }) => {
       const d = detail;
@@ -1442,7 +1201,6 @@ export function ProjectWorkspace(): React.ReactElement {
     const unsub = subscribeGewuEvent(gewuEvents.projectOpenResult, handler);
     return unsub;
   }, [handleOpenResult]);
-
   useEffect(() => {
     const handler = (detail: { jobId: string; artifactName: string; projectId?: string | null }) => {
       if (!detail?.jobId || !detail?.artifactName) return;
@@ -1461,7 +1219,6 @@ export function ProjectWorkspace(): React.ReactElement {
     const unsub = subscribeGewuEvent(gewuEvents.projectOpenArtifact, handler);
     return unsub;
   }, [handleOpenResult, navigate, projectId]);
-
   useEffect(() => {
     const handler = (detail: {
       projectId: string;
@@ -1517,7 +1274,6 @@ export function ProjectWorkspace(): React.ReactElement {
     const unsub = subscribeGewuEvent(gewuEvents.projectOpenWorkspaceFile, handler);
     return unsub;
   }, [handleOpenWorkspaceFile, navigate, openRightPanel, projectId, workspacePath, setPendingRequest]);
-
   /** Dispatch a copilot-ask event so the embedded SimpleChat picks it up */
   const handleAskAgent = useCallback((prompt: string, options?: { analysisMode?: boolean }) => {
     if (activeConvId && isConversationRunning(activeConvId)) {
@@ -1528,7 +1284,6 @@ export function ProjectWorkspace(): React.ReactElement {
     dispatchGewuEvent(gewuEvents.copilotAsk, { prompt, analysisMode: options?.analysisMode });
     return true;
   }, [activeConvId]);
-
   // BLOCK-80 — 欢迎页首问接力：欢迎页创建会话后经 sessionStorage 交接
   // {conversationId, prompt}；本工作区会话种子完成（activeConvId 就位）即
   // 派发 copilotAsk 启动首个任务，然后清除交接（一次性）。
@@ -1546,7 +1301,6 @@ export function ProjectWorkspace(): React.ReactElement {
       /* 交接损坏即忽略——用户可在工作区手动发送 */
     }
   }, [activeConvId]);
-
   // P4R-3: 焦点 Composer 与高级控件在这里汇合。可见 prompt 只包含用户目标/
   // 手动 patch；opaque token + Artifact/Revision/Selection 快照走事件 context，
   // 不进入消息文字。后端仍会重新投影真相并拒绝陈旧 token。
@@ -1575,7 +1329,6 @@ export function ProjectWorkspace(): React.ReactElement {
       setResultEditSubmitting(false);
     }
   }, [activeConvId, copilotActiveArtifact, effectiveResultContextState?.contextToken, effectiveResultContextState?.status]);
-
   const openScheduledResults = useCallback(() => {
     const currentJob = conversationJobs.find((job) => job.id === activeJobId);
     const nextJobId = currentJob?.id || conversationJobs[0]?.id || null;
@@ -1586,7 +1339,6 @@ export function ProjectWorkspace(): React.ReactElement {
     setRightOpen(true);
     openRightPanel('results');
   }, [activeJobId, bindActiveJob, conversationJobs, openRightPanel, setRightOpen, updateWorkspaceMode]);
-
   if (loading) {
     return (
       <div className={styles.earlyReturnWrap}>
@@ -1597,7 +1349,6 @@ export function ProjectWorkspace(): React.ReactElement {
       </div>
     );
   }
-
   // 只有"尚未加载到项目"时错误才全屏；已加载项目的轮询瞬时错误走顶部横幅，不卸载整页
   if (error && !project) {
     return (
@@ -1610,7 +1361,6 @@ export function ProjectWorkspace(): React.ReactElement {
       </div>
     );
   }
-
   if (!project) {
     return (
       <div className={styles.earlyReturnWrap}>
@@ -1622,7 +1372,6 @@ export function ProjectWorkspace(): React.ReactElement {
       </div>
     );
   }
-
   // CenterPanel ctx — bundles every piece of state/handler the middle column
   // needs to render its 8 workspaceMode layouts. ProjectWorkspace remains the
   // single source of truth; CenterPanel is a pure renderer.
@@ -1702,7 +1451,6 @@ export function ProjectWorkspace(): React.ReactElement {
     openScheduledResults,
     startColumnResize,
   };
-
   const leftPanelCtx: LeftPanelContext = {
     width: leftWidth,
     columnHeader: compactLayout ? undefined : <ColumnHeader side="left" />,
@@ -1749,7 +1497,6 @@ export function ProjectWorkspace(): React.ReactElement {
     toggleProjectExpand,
     handleOpenWorkspacePath,
   };
-
   const rightPanelCtx: RightPanelContext = {
     width: effectiveRightWidth,
     columnHeader: compactLayout ? undefined : <ColumnHeader side="right" />,
@@ -1799,17 +1546,14 @@ export function ProjectWorkspace(): React.ReactElement {
     setBrowserCanGoBack,
     setBrowserCanGoForward,
   };
-
   // backendStatus.rRuntime 可为 null（状态查询失败 = 未知）。用 `=== false`
   // 严格判定"确认缺失"，避免偶发 IPC 异常时误弹缺失横幅。
   const rRuntimeMissing = backendStatus.rRuntime === false;
   const pyRuntimeMissing = backendStatus.pyRuntime === false;
-
   const showRuntimeBanner =
     backendStatus.loaded &&
     workspaceMode !== 'plugins' &&
     (rRuntimeMissing || pyRuntimeMissing);
-
   let runtimeBannerMessage: string;
   if (rRuntimeMissing && pyRuntimeMissing) {
     runtimeBannerMessage = 'R 与 Python 运行时均未安装，分析功能暂不可用。';
@@ -1818,7 +1562,6 @@ export function ProjectWorkspace(): React.ReactElement {
   } else {
     runtimeBannerMessage = 'Python 运行时未安装，依赖 Python 的分析无法运行。';
   }
-
   return (
     <div className={`${styles.workspaceRoot} ${compactLayout ? styles.workspaceRootCompact : ''}`}>
       {/* BLOCK-62 P1b — compact（≤960px）列变浮层、无「列宽」语义 → fixed 整条
@@ -1866,16 +1609,10 @@ export function ProjectWorkspace(): React.ReactElement {
             aria-label="关闭侧栏"
           />
         )}
-
-        {/* Left column — Project list + conversations (AionUi style)
-            UI-341 加映二 — 常驻挂载（open=false 时宽度收到 0，走 width transition
-            平滑收起），而非条件卸载 */}
-        <LeftPanel ctx={leftPanelCtx} open={leftOpen} />
-        {leftOpen && <div className={styles.resizeHandleV} onMouseDown={startColumnResize('left')} />}
-
+        {/* UI-341 加映三（档 2）——左栏上提为壳层 AppRail（常驻、跨页面），
+            本组件不再渲染左栏；BottomTerminal 亦无需再避让左栏宽度。 */}
         {/* Center column — Simple chat (conversation-driven) */}
         <CenterPanel ctx={centerPanelCtx} />
-
         <RightPanel
           ctx={rightPanelCtx}
           visible={rightOpen}
@@ -1885,7 +1622,7 @@ export function ProjectWorkspace(): React.ReactElement {
         <BottomTerminal
           open={bottomTerminalOpen}
           height={bottomTerminalHeight}
-          leftOffset={leftOpen ? `var(--gewu-live-left-span, ${leftWidth + 1}px)` : 0}
+          leftOffset={0}
           rightOffset={rightOpen ? `var(--gewu-live-right-span, ${effectiveRightWidth + 1}px)` : 0}
           workspacePath={project.workspacePath}
           ssh={project.workspaceKind === 'ssh' && project.sshHost && project.remotePath
@@ -1898,12 +1635,9 @@ export function ProjectWorkspace(): React.ReactElement {
     </div>
   );
 }
-
 // ============================================================
 // FileTreeList — recursive file tree rendering
 // ============================================================
-
-
 // ── UI-305 P1 — 尾部 11 个内联组件外迁 ./project-workspace/ 子目录（零行为变化）──
 // FileTreeList / FileTreeItem / RightFileTree / WorkspaceFilePreview / BinaryPreviewCard /
 // OfficePreviewPane / PreviewAssets / TextBlock / TerminalPanel / BrowserPanel / EmptyResult。

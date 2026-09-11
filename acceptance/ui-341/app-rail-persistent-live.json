@@ -1,0 +1,43 @@
+{
+  "name": "app-rail-persistent",
+  "startedAt": "2026-09-11T11:07:29.673Z",
+  "finishedAt": "2026-09-11T11:07:49.597Z",
+  "assertions": [
+    {
+      "name": "R1_rail_on_skills",
+      "pass": true,
+      "detail": "/skills leftCol=232"
+    },
+    {
+      "name": "R2_rail_on_knowledge",
+      "pass": true,
+      "detail": "/knowledge leftCol=232"
+    },
+    {
+      "name": "R3_rail_on_backend",
+      "pass": true,
+      "detail": "/backend leftCol=232"
+    },
+    {
+      "name": "R4_rail_on_welcome",
+      "pass": true,
+      "detail": "/ leftCol=232"
+    },
+    {
+      "name": "R5_rail_on_projects",
+      "pass": true,
+      "detail": "/projects leftCol=232"
+    },
+    {
+      "name": "R6_rail_on_workspace",
+      "pass": true,
+      "detail": "/project/p_mtuyje22_9vr4 leftCol=232"
+    },
+    {
+      "name": "R7_rail_on_result_mode",
+      "pass": true,
+      "detail": "/project/p_mtuyje22_9vr4/result leftCol=232"
+    }
+  ],
+  "allPass": true
+}

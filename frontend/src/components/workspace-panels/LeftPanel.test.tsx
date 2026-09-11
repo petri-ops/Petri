@@ -16,7 +16,7 @@ vi.mock('@/components/icons/Icon', () => ({
 
 afterEach(cleanup);
 
-function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext {
+function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext & { project: Project } {
   return {
     width: 280,
     project: {
@@ -111,7 +111,7 @@ describe('UI-331 左栏会话行相对时间', () => {
   it('会话行右侧显示短式相对时间（刚刚 / 7小时）', () => {
     const ctx = buildCtx('chat');
     const now = Date.now();
-    ctx.visibleProjects = [ctx.project];
+    ctx.visibleProjects = ctx.project ? [ctx.project] : [];
     ctx.expandedProjects = new Set(['project-1']);
     ctx.conversations = [
       { id: 'conv_now', title: '刚刚的会话', status: 'active', last_page: null, message_count: 1, created_at: new Date(now).toISOString(), updated_at: new Date(now).toISOString() },
@@ -130,7 +130,7 @@ describe('UI-331 左栏会话行相对时间', () => {
   it('会话行时间按天降级（3天前 → 3天）', () => {
     const ctx = buildCtx('chat');
     const now = Date.now();
-    ctx.visibleProjects = [ctx.project];
+    ctx.visibleProjects = ctx.project ? [ctx.project] : [];
     ctx.expandedProjects = new Set(['project-1']);
     ctx.conversations = [
       { id: 'conv_3d', title: '三天前的会话', status: 'active', last_page: null, message_count: 1, created_at: new Date(now).toISOString(), updated_at: new Date(now - 3 * 24 * 3600 * 1000).toISOString() },
@@ -146,7 +146,7 @@ describe('UI-331 左栏会话行相对时间', () => {
 
   it('renders project tree rows for visibleProjects (ProjectNode 回归)', () => {
     const ctx = buildCtx('chat');
-    ctx.visibleProjects = [ctx.project];
+    ctx.visibleProjects = ctx.project ? [ctx.project] : [];
     render(
       <MemoryRouter>
         <LeftPanel ctx={ctx} />
@@ -163,7 +163,7 @@ describe('BLOCK-67 左栏 ssh 项目标识与远程连接', () => {
   it('ssh 项目树行有 远程连接 按钮，点击触发 sshConnectProject', () => {
     const ctx = buildCtx('chat');
     ctx.visibleProjects = [{
-      ...ctx.project,
+      ...(ctx.project as NonNullable<typeof ctx.project>),
       workspaceKind: 'ssh',
       sshHost: 'aliyun',
       remotePath: '/root/gewu-block67-demo',
@@ -182,7 +182,7 @@ describe('BLOCK-67 左栏 ssh 项目标识与远程连接', () => {
 
   it('local 项目树行没有 远程连接 按钮', () => {
     const ctx = buildCtx('chat');
-    ctx.visibleProjects = [ctx.project];
+    ctx.visibleProjects = ctx.project ? [ctx.project] : [];
     render(
       <MemoryRouter>
         <LeftPanel ctx={ctx} />

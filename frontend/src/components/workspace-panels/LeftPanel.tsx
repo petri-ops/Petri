@@ -19,7 +19,9 @@ export interface LeftPanelContext {
   columnHeader?: React.ReactNode;
 
   // Project + workspace
-  project: Project;
+  /** UI-341 加映三：壳层左栏在全局页（Skills/知识空间/后端等）没有当前项目；
+      LeftPanel 本身不消费该字段（仅类型占位），故可选。 */
+  project?: Project;
   workspacePath?: string;
   compactWorkspacePath: string;
 
