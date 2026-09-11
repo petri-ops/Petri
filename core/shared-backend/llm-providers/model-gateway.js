@@ -8,6 +8,8 @@
  */
 
 const { normalizeModelConfig, resolveModelProfile } = require('./model-profile');
+// BLOCK-81 P1 — 思考档位：中性档位→上游参数的单一映射点 + 去参重试判据
+const { thinkingParamsFor, isUnknownParameterError } = require('./thinking-level');
 
 function gatewayError(error, message, details) {
   return { error, message, ...(details || {}) };
@@ -139,7 +141,7 @@ class ModelGateway {
     return event;
   }
 
-  async chat({ role = 'chat', profileId, modelOverride, body, telemetry, onEvent, signal, apiKeyOverride, fallbackWhen, disableFallback } = {}) {
+  async chat({ role = 'chat', profileId, modelOverride, body, telemetry, onEvent, signal, apiKeyOverride, fallbackWhen, disableFallback, thinkingLevel, __dropThinking = false } = {}) {
     const primary = this._prepare(role, profileId, apiKeyOverride);
     if (primary.error) return primary;
     // BLOCK-56 P1 — 任务级降级续跑的任务传 disableFallback: true：
@@ -178,8 +180,19 @@ class ModelGateway {
       } else if (index > 0) {
         this._recordFallback(role, previousProfileId, profile.id, previousReason);
       }
+      // BLOCK-81 P1 / D3 双保险①：仅当 profile 声明 capabilities.reasoning 且档位
+      // 非 standard 时才发思考参数（thinkingParamsFor 内部门控）→ 未启用渠道零行为变化。
+      // __dropThinking：去参重试时置真，跳过注入。
+      const thinkingParams = __dropThinking
+        ? {}
+        : thinkingParamsFor({
+          level: thinkingLevel,
+          protocol: profile.protocol,
+          capabilities: profile.capabilities,
+        });
       const requestBody = {
         ...(profile.parameters || {}),
+        ...thinkingParams,
         ...(body || {}),
         model: index === 0 && modelOverride ? modelOverride : profile.model,
       };
@@ -216,6 +229,31 @@ class ModelGateway {
         framesTruncated: framesOverflow > 0,
         durationMs: Date.now() - startedAt,
       });
+      // BLOCK-81 P1 / D3 双保险②：上游 400 且文案是「未知/非法参数」且本轮确实
+      // 注入了思考参数 → **去参重试一次**（同 profile、禁用 fallback，优先于换档 fallback）。
+      // 覆盖面：网关不认 reasoning_effort / thinking / enable_thinking 的严格实现。
+      const status400 = Number(result && (result.status || result.statusCode)) === 400;
+      if (
+        !emittedOutput
+        && Object.keys(thinkingParams).length > 0
+        && status400
+        && isUnknownParameterError(result && (result.message || result.error))
+      ) {
+        const stripped = await this.chat({
+          role,
+          profileId: profile.id,
+          modelOverride,
+          body,
+          telemetry,
+          onEvent,
+          signal,
+          apiKeyOverride,
+          fallbackWhen,
+          disableFallback: true,
+          __dropThinking: true,
+        });
+        return this._withRouting(stripped, role, profile.id, index > 0 ? previousProfileId : undefined, previousReason);
+      }
       let resultFallbackReason = null;
       if (!emittedOutput && typeof fallbackWhen === 'function') {
         try {

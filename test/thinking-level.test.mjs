@@ -113,3 +113,25 @@ test('去参重试判据：未知/非法参数文案命中，业务错误不误�
   // 「invalid_request_error」类并不等同于参数名未知（避免误剥参数重试）
   assert.equal(isUnknownParameterError({ error: { type: 'invalid_request_error', message: 'messages: at least one message is required' } }), false);
 });
+
+test('Anthropic 协议转换：thinking 必须显式搬运（白名单重建，否则静默丢弃）', () => {
+  const require2 = createRequire(import.meta.url);
+  const { openAIToAnthropicRequest } = require2('../core/shared-backend/llm-providers/protocol-conversion.js');
+  const base = { model: 'claude-x', messages: [{ role: 'user', content: 'hi' }] };
+
+  // high：搬运 enabled + budget_tokens
+  const high = openAIToAnthropicRequest({ ...base, thinking: { type: 'enabled', budget_tokens: 16000 } });
+  assert.deepEqual(high.thinking, { type: 'enabled', budget_tokens: 16000 });
+
+  // off：搬运 disabled
+  const off = openAIToAnthropicRequest({ ...base, thinking: { type: 'disabled' } });
+  assert.deepEqual(off.thinking, { type: 'disabled' });
+
+  // 缺省：不注入 thinking 键（零行为变化）
+  const none = openAIToAnthropicRequest({ ...base });
+  assert.equal('thinking' in none, false);
+
+  // budget 非法值回落默认，避免上游 400
+  const bad = openAIToAnthropicRequest({ ...base, thinking: { type: 'enabled', budget_tokens: 'oops' } });
+  assert.deepEqual(bad.thinking, { type: 'enabled', budget_tokens: 16000 });
+});

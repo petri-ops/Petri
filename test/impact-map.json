@@ -1344,13 +1344,15 @@
     },
     {
       "id": "block81-thinking-level",
-      "note": "BLOCK-81 思考档位：映射内核 core/shared-backend/llm-providers/thinking-level.js + 定向测试（P1）。P2 起 composer 控件与后端注入点改动也归本规则。",
+      "note": "BLOCK-81 思考档位：映射内核 + 协议转换搬运 + 网关注入与去参重试（P1）。",
       "patterns": [
         "core/shared-backend/llm-providers/thinking-level.js",
-        "test/thinking-level.test.mjs"
+        "test/thinking-level.test.mjs",
+        "core/shared-backend/llm-providers/protocol-conversion.js"
       ],
       "tests": [
-        "test/thinking-level.test.mjs"
+        "test/thinking-level.test.mjs",
+        "test/thinking-level-injection.test.mjs"
       ]
     },
     {

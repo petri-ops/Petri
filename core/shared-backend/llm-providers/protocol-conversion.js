@@ -97,6 +97,14 @@ function openAIToAnthropicRequest(body) {
       input_schema: (tool.function && tool.function.parameters) || tool.input_schema || {},
     }));
   }
+  // BLOCK-81 P1 — 思考档位：Anthropic 协议用 thinking:{type,budget_tokens}，本函数是
+  // **白名单重建**（非展开透传），不显式搬运会被静默丢弃 → 档位在 anthropic 渠道失效。
+  if (body.thinking && typeof body.thinking === 'object') {
+    const type = body.thinking.type === 'enabled' ? 'enabled' : 'disabled';
+    result.thinking = type === 'enabled'
+      ? { type, budget_tokens: Number(body.thinking.budget_tokens) || 16000 }
+      : { type };
+  }
   if (body.tool_choice === 'auto') result.tool_choice = { type: 'auto' };
   else if (body.tool_choice === 'required') result.tool_choice = { type: 'any' };
   else if (body.tool_choice && body.tool_choice.function && body.tool_choice.function.name) {

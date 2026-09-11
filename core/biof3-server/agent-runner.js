@@ -331,6 +331,8 @@ async function runAgentLoop({
   parentLoopRunId = null,
   // BLOCK-56 P1 — 降级续跑任务置 true：gateway 关闭请求级 fallback（单级不连环）
   disableProviderFallback = false,
+  // BLOCK-81 P1 — 思考档位（off/standard/high；未传＝standard＝不发参）
+  thinkingLevel = null,
 }) {
   const turnStartedAt = Date.now();
   const isGuest = !userId;
@@ -686,6 +688,8 @@ async function runAgentLoop({
     contextWindow: safeCtx,
     // BLOCK-56 P1 — 降级续跑任务在 loop 内禁用请求级 fallback
     disableProviderFallback,
+    // BLOCK-81 P1 — 思考档位进 loop（网关侧按 profile 能力位门控后映射上游参数）
+    thinkingLevel,
   };
 
   // ---------- Run loop via orchestrator ----------

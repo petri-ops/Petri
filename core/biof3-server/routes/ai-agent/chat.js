@@ -15,7 +15,9 @@
  */
 
 const express = require('express');
-const { buildSystemPrompt, localizeToolResult } = require('../../helpers/system-prompt');
+
+// BLOCK-81 P1 — 思考档位归一（中性档位词表与映射内核同源）
+const { normalizeThinkingLevel } = require('../../../shared-backend/llm-providers/thinking-level');const { buildSystemPrompt, localizeToolResult } = require('../../helpers/system-prompt');
 // BLOCK-69 — 知识空间自动召回
 const knowledgeSpace = require('../../helpers/knowledge-space');
 const { appendDesktopAgentInstructions } = require('../../helpers/desktop-agent-prompt');
@@ -101,7 +103,9 @@ module.exports = {
 
     app.post('/api/ai/agent', express.json({ limit: '256kb' }), async (req, res) => {
       const requestStartedAt = Date.now();
-      const { messages, context, modelPresetId, modelName: requestedModelName } = req.body || {};
+      const { messages, context, modelPresetId, modelName: requestedModelName, thinkingLevel: rawThinkingLevel } = req.body || {};
+      // BLOCK-81 P1 — 中性档位归一（非法/缺失＝null＝standard＝不发任何思考参数）
+      const thinkingLevel = normalizeThinkingLevel(rawThinkingLevel);
       let explicitConvId = req.body && req.body.conversationId;
 
       if (!Array.isArray(messages) || messages.length === 0) {
@@ -225,6 +229,8 @@ module.exports = {
               // BLOCK-49: 派生工具精确继承模型所需（spawn-agent-tools 合成 preset 用）
               profileId: selectedPreset && selectedPreset.id,
               baseUrl: baseUrl || undefined,
+              // BLOCK-81 P1 — 档位随任务参数落库：降级续跑/恢复续跑按任务参数继承
+              thinkingLevel: thinkingLevel || undefined,
             },
           }).taskId;
         } catch (e) {
@@ -254,6 +260,8 @@ module.exports = {
             taskId,
             kind: wantKind,
             parentLoopRunId: parentLoopRunId || null,
+            // BLOCK-81 P1 — 思考档位进 agent loop（网关按 profile 能力位门控）
+            thinkingLevel,
             onEvent: () => {},
             shouldAbort: () => agentTaskStore.isAgentTaskCancellationRequested(taskId),
           }).catch((e) => {

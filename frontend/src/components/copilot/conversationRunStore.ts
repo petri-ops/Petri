@@ -130,6 +130,8 @@ interface StartConversationRunOptions {
    * 供 UI 展示「续跑自 xxx」；不影响事件流订阅逻辑。
    */
   resumeOfTaskId?: string;
+  /** BLOCK-81 P1 — 思考档位（缺省不发参；P2 起由 composer 档位控件提供） */
+  thinkingLevel?: 'off' | 'standard' | 'high';
 }
 
 const runs = new Map<string, ConversationRunSnapshot>();
@@ -760,6 +762,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       context: options.context,
       conversationId,
       modelPresetId: options.modelPresetId,
+      thinkingLevel: options.thinkingLevel,
       modelName: options.modelName,
       signal: ctrl.signal,
       ...callbacks,

@@ -69,6 +69,8 @@ async function callChatProvider(providerName, apiKey, body, telemetry, onEvent, 
     fallbackWhen: options && options.fallbackWhen,
     // BLOCK-56 P1 — 降级续跑任务关闭请求级 fallback（单级不连环）
     disableFallback: !!(options && options.disableFallback),
+    // BLOCK-81 P1 — 思考档位（中性档位随调用链进网关，映射与容错都在网关侧）
+    thinkingLevel: options && options.thinkingLevel,
   });
 }
 

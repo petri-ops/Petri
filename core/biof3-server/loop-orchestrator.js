@@ -128,6 +128,8 @@ async function runLoop({
     context,
     executionPolicy,
     contextWindow,
+    // BLOCK-81 P1 — 思考档位（中性档位；由 /api/ai/agent 透传至此）
+    thinkingLevel,
   } = config;
 
   // ---------- Loop state variables (6 closures) ----------
@@ -671,6 +673,8 @@ async function runLoop({
             modelOverride: modelName,
             // BLOCK-56 P1 — 降级续跑任务关闭请求级 fallback（单级不连环）
             ...(config.disableProviderFallback ? { disableFallback: true } : {}),
+            // BLOCK-81 P1 — 思考档位透传（未设置＝undefined＝不发任何思考参数）
+            ...(thinkingLevel ? { thinkingLevel } : {}),
             ...(protocolRecoveryAttempt ? { fallbackWhen: require('./agent-tools').finalizationFallbackReason } : {}),
           }
         );

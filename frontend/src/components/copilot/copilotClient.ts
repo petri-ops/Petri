@@ -329,6 +329,11 @@ export interface StreamChatOptions {
   kind?: 'primary' | 'subagent';
   /** Parent primary taskId when kind === 'subagent' (server validates ownership). */
   parentTaskId?: string;
+  /**
+   * BLOCK-81 P1 — 思考档位（中性三档）。缺省/undefined＝不发任何思考参数
+   * （服务端按 profile 能力位门控后映射上游参数）。P2 起由 composer 档位控件提供。
+   */
+  thinkingLevel?: 'off' | 'standard' | 'high';
   onDelta: (delta: string) => void;
   /** UI-272 — 模型思考段增量（reasoning_content），按迭代聚合由调用方处理 */
   onReasoning?: (delta: string) => void;
@@ -726,13 +731,13 @@ export async function followupAgentTask(taskId: string, task: string): Promise<{
 
 /** POST /ai/agent 提交，返回 taskId */
 async function submitAgentTask(opts: StreamChatOptions): Promise<string> {
-  const { messages, context, conversationId, modelPresetId, modelName, kind, parentTaskId, signal } = opts;
+  const { messages, context, conversationId, modelPresetId, modelName, kind, parentTaskId, thinkingLevel, signal } = opts;
   // M2-5: 提交前先探测网络，离线时直接抛 OfflineError，避免裸 fetch 报错
   await ensureOnlineOrThrow();
   const resp = await fetch(getApiPrefix() + '/ai/agent', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-    body: JSON.stringify({ messages, context, conversationId, modelPresetId, modelName, kind, parentTaskId }),
+    body: JSON.stringify({ messages, context, conversationId, modelPresetId, modelName, kind, parentTaskId, thinkingLevel }),
     signal,
   });
   if (!resp.ok) {
