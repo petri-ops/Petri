@@ -209,7 +209,12 @@ export function useChatStream({
         },
       });
       if (!started) return false;
+      // UI-341 实机抓真修：空会话发送路径上 migrateConversationDraft 已把
+      // 待发文本迁到新会话键（启动失败时的保底），启动成功后旧键与新会话键
+      // 都必须清除——只清旧键会让已发送文本留在 proj:<convId> 下，工作区
+      // composer 挂载读草稿时把它回填（看起来像没发出去，且易误触发重发）。
       clearConversationDraft(projectId, conversationId);
+      clearConversationDraft(projectId, targetConversationId);
       setInput('');
       historyNavRef.current = INITIAL_NAV_STATE;
       if (taRef.current) taRef.current.style.height = 'auto';

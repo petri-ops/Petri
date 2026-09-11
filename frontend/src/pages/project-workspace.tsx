@@ -603,7 +603,16 @@ export function ProjectWorkspace(): React.ReactElement {
   }, [projectId, conversations, activeConvId]);
 
   // Reset active conv when the project changes — hook re-seeds the list.
+  // UI-341 实机抓真修：只在 projectId 真正「变化」时清，mount 不清——本组件
+  // mount 上该 effect 在会话种子 effect（自动选 conversations[0]）之后执行，
+  // 无条件清会把刚选中的种子当轮抹掉；暖缓存（欢迎页首问链路正是此形态：
+  // SimpleChat 建会话即写入共享缓存再导航）下列表引用不再变化、种子 effect
+  // 不会重跑 → 工作区永远空态而 run 在服务端照跑。冷启动行为不变：缓存空
+  // → fetch 后 conversations 引用变化 → 种子 effect 重跑自行选中。
+  const prevProjectIdRef = useRef(projectId);
   useEffect(() => {
+    if (prevProjectIdRef.current === projectId) return;
+    prevProjectIdRef.current = projectId;
     setActiveConvId(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId]);

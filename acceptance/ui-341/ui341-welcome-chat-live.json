@@ -1,0 +1,63 @@
+{
+  "name": "ui341-welcome-chat",
+  "startedAt": "2026-09-11T04:39:31.072Z",
+  "finishedAt": "2026-09-11T04:39:37.485Z",
+  "assertions": [
+    {
+      "name": "A1_welcome_rendered",
+      "pass": true,
+      "detail": "url=http://localhost:3000/?project=p_mtwgvrc5_cdry"
+    },
+    {
+      "name": "A2_chat_embedded",
+      "pass": true,
+      "detail": "chatMount=1 scInput=1"
+    },
+    {
+      "name": "A3_legacy_composer_absent",
+      "pass": true,
+      "detail": "legacy 任务描述 textarea count=0"
+    },
+    {
+      "name": "A4_project_preselected",
+      "pass": true,
+      "detail": "trigger=UI341-验收-1789101571105"
+    },
+    {
+      "name": "A5_first_question_navigates",
+      "pass": true,
+      "detail": "url=http://localhost:3000/project/p_mtwgvrc5_cdry"
+    },
+    {
+      "name": "A6_conversation_auto_created",
+      "pass": true,
+      "detail": "convId=conv_a8332bde-5fa title=新对话 project=p_mtwgvrc5_cdry"
+    },
+    {
+      "name": "A7_left_panel_shows_conv",
+      "pass": true,
+      "detail": "leftPanel contains conversation title"
+    },
+    {
+      "name": "A8_assistant_reply_via_sse",
+      "pass": true,
+      "detail": "assistant=收到"
+    },
+    {
+      "name": "A8b_workspace_chat_shows_transcript",
+      "pass": true,
+      "detail": "首问与回复均渲染于工作区聊天区"
+    },
+    {
+      "name": "A8c_composer_cleared_after_send",
+      "pass": true,
+      "detail": "composer value=\"\""
+    },
+    {
+      "name": "A9_cleanup_restored",
+      "pass": true,
+      "detail": "conv=true project=true restored=true"
+    }
+  ],
+  "allPass": true
+}
