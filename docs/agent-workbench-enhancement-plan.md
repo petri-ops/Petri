@@ -1,11 +1,47 @@
 # BioF3 Agent 工作台增强计划
 
-> 文档版本：v1.1（增量增强版）
+> 文档版本：v1.2（增量增强版 · 2026-09-12 立项）
 > 创建日期：2026-08-14
-> 修订日期：2026-08-14
-> 状态：planned
+> 修订日期：2026-09-12
+> 状态：**active（P0-LAUNCH）**
 > 负责人：BioF3 Team
 > 目标：在现有 BioF3 Desktop 工作台基础上**渐进式增添** Codex 式 AI 生信协作能力
+
+---
+
+## -1. 2026-09-12 立项登记与现状对账（P0-LAUNCH）
+
+> 本节为 v1.2 立项增量；§0～§11 原有约束与设计继续有效，冲突时以本节对账结论为准。
+
+### 用户裁决与启动来源
+
+用户裁决（2026-09-12，队列候选问答）：在「AGENT-WORKBENCH / G0-RS / G0-SDC / BLOCK-70-MOBILE-SYNC」四个 planned 候选中**选择 AGENT-WORKBENCH 启动**。本包为既有 Plan ID 的增量复活（v1.1 写于 2026-08-14，Phase 1 已由当期会话完成大部分），不新建 ID。
+
+### 现状对账（2026-09-12 逐项核实）
+
+- **Phase 1 已完成七项（不重复开发）**：UI-AGENTWB-001（P1.1 ResultCard 契约层）/ 002（P1.2 表格渲染器）/ 003（P1.3 chart+image 渲染器）＝ verified；UI-AGENTWB-004（A4 SimpleChat 注入桥）/ 005（Chart 交互层 + a11y）/ 006（P1.5 CSV/Markdown 导出）/ 007（flag 生产态切换 Settings + 启动参数）＝ **dev Electron 边界内 verified**（前端 + dev + packaged 三轴）。证据：`docs/agent-workbench-p1-a5-verification-2026-08-15.md`、`docs/agent-workbench-dev-electron-verification-2026-08-15.md`（T-AW-014）、`docs/t-aw-013-packaged-verification-2026-08-15.md`（T-AW-013）。代码在库核实：`frontend/src/components/copilot/ResultCard.tsx`、`extraRenderers.tsx`、`renderers/{Text,Table,Chart,Image}Renderer.tsx` 均存在。
+- **P1.4 参数确认卡片未实现**：无 `ParamConfirmCard.tsx`、无 copilot 下 param/confirm 组件、台账无对应条目（001–007 未覆盖 §5.4）→ 本包 **P1 首项**，按 §5.4 原规格（可选弹窗 + flag 门控 `paramConfirm`，默认关闭零行为变化）。
+- **Phase 2（P2.1–P2.4）与 Phase 3（P3.1–P3.4）需逐项差距重审**：各节规格写于 2026-08-14，此后 BLOCK-66/69/72/73/78/81/82 等包已落地大量相邻能力（知识空间、工作台全局入口、思考档位、摘要卡运行时投影等）。**每项启动前必须先对照当前代码核实「是否已被覆盖 / 缺口收窄后还剩什么 / 是否已无意义」**，裁剪后按剩余缺口串行推进，防重复开发；重审结论登记进本 plan 对应节，不另立进度文档。
+
+### 阶段划分（v1.2 重排）
+
+| 阶段 | 内容 | 出口 |
+| --- | --- | --- |
+| P0-LAUNCH | 立项登记 + 本节现状对账 | 本节落盘 + DOC-REGISTRY active + 台账登记 |
+| P1 | P1.4 参数确认卡片（§5.4，Phase 1 闭环） | flag 门控双向验证（开/关）+ dev Electron 实机断言 |
+| P2 | Phase 2 剩余缺口逐项（P2.1→P2.4 串行，逐项先对账再实现） | 每项独立 UI-### 登记 + 实机证据 |
+| P3 | Phase 3 评估（远期，逐项另行用户裁决后启动） | 不自动启动 |
+
+### 红线与非范围
+
+- §0.1 十条增量强制约束全量有效（非破坏性、feature flag 默认关、向后兼容、§0.2 口径纪律）。
+- Phase 3 各项**不在本轮自动启动**，逐项需用户裁决。
+- G1+ 阶段事项不外推（packaged/Provider/GA 不在本包校验范围）。
+- 与队列其他 planned 包（G0-RS / G0-SDC / BLOCK-70-MOBILE-SYNC）文件面零触碰。
+
+### 环境纪律
+
+当前实机为 **Windows**（v1.1 写于 macOS）：fnm Node 24 + `BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev` 起 dev 栈；`core/**`、`src/main.js` 改动后必须重启 dev 栈再实机验证；实机证据按 G0 纪律为 **dev Electron 边界内**。
 
 ---
 
