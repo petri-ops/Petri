@@ -399,3 +399,42 @@
   color: var(--gewu-accent);
   border-color: var(--gewu-accent);
 }
+
+/* UI-338 加映 — SSH「先连接再补全」 */
+.sshAliasRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sshAliasRow .actionInput {
+  flex: 1;
+  min-width: 0;
+}
+
+.dirSuggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.dirSuggestion {
+  border: none;
+  background: transparent;
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  text-align: left;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dirSuggestion:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-accent);
+}

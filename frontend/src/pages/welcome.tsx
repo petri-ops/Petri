@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
-import { createProject, listProjects, listSshTargetCandidates, validateSshProject, type SshTargetCandidate } from '@/lib/project-store';
+import { connectSshHost, createProject, listProjects, listSshRemoteDirs, listSshTargetCandidates, validateSshProject, type SshTargetCandidate } from '@/lib/project-store';
 import type { Project } from '@/lib/project-types';
 import { createConversation } from '@/components/copilot/copilotConversationsClient';
 import { branchApi } from '@/lib/branchBridge';
@@ -46,6 +46,9 @@ function baseName(p: string): string {
 export default function Welcome(): React.ReactElement {
   const backendStatus = useBackendStatus();
   const navigate = useNavigate();
+  const location = useLocation();
+  // UI-338 加映 — 从工作区「新建任务」进入时，默认预选鼠标所在的项目
+  const preselectProjectId = (location.state as { projectId?: string } | null)?.projectId || '';
   const [projects, setProjects] = useState<Project[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [selectedId, setSelectedId] = useState<string>('');
@@ -62,10 +65,78 @@ export default function Welcome(): React.ReactElement {
   const [folderPath, setFolderPath] = useState<string | null>(null);
   const [folderName, setFolderName] = useState('');
   const [creatingFolder, setCreatingFolder] = useState(false);
+  // UI-338 加映 — 远程连接「先连接再补全」：连接（connectSshHost 拿 $HOME）→
+  // 路径输入实时联想子目录（listSshRemoteDirs，300ms 防抖）
+  const [sshConnected, setSshConnected] = useState(false);
+  const [sshConnecting, setSshConnecting] = useState(false);
+  const [dirSuggestions, setDirSuggestions] = useState<string[]>([]);
+  const [dirsLoading, setDirsLoading] = useState(false);
+  const dirDebounceRef = useRef<number | null>(null);
   const [sshTargets, setSshTargets] = useState<SshTargetCandidate[]>([]);
   const [sshAlias, setSshAlias] = useState('');
   const [sshRemotePath, setSshRemotePath] = useState('/root');
   const [sshValidating, setSshValidating] = useState(false);
+
+  // UI-338 加映 — 「先连接再补全」
+  function parseRemotePathInput(input: string): { parent: string; stub: string } | null {
+    if (!input.startsWith('/')) return null;
+    const cut = input.lastIndexOf('/');
+    if (cut < 0) return null;
+    return { parent: input.slice(0, cut + 1), stub: input.slice(cut + 1) };
+  }
+
+  async function connectForBrowse() {
+    if (!sshAlias || sshConnecting) return;
+    setSshConnecting(true);
+    setError('');
+    const r = await connectSshHost(sshAlias);
+    setSshConnecting(false);
+    if (!r.ok) {
+      setError(r.error || '连接失败');
+      return;
+    }
+    setSshConnected(true);
+    const home = r.home && !r.home.endsWith('/') ? `${r.home}/` : (r.home || '/');
+    setSshRemotePath(home);
+    void fetchDirSuggestions(home, true);
+  }
+
+  async function fetchDirSuggestions(path: string, force = false) {
+    if ((!sshConnected && !force) || !sshAlias) return;
+    const parsed = parseRemotePathInput(path);
+    if (!parsed) { setDirSuggestions([]); return; }
+    setDirsLoading(true);
+    try {
+      const r = await listSshRemoteDirs(sshAlias, parsed.parent);
+      if (r.ok && r.dirs) {
+        const actualParent = (r.path || parsed.parent).replace(/\/+$/, '');
+        const cands = r.dirs
+          .filter((d) => d.name.startsWith(parsed.stub))
+          .map((d) => `${actualParent}/${d.name}/`);
+        setDirSuggestions(cands);
+      } else {
+        setDirSuggestions([]);
+      }
+    } catch {
+      setDirSuggestions([]);
+    } finally {
+      setDirsLoading(false);
+    }
+  }
+
+  function onRemotePathInput(v: string) {
+    setSshRemotePath(v);
+    if (!sshConnected) return;
+    if (dirDebounceRef.current) window.clearTimeout(dirDebounceRef.current);
+    dirDebounceRef.current = window.setTimeout(() => void fetchDirSuggestions(v), 300);
+  }
+
+  function onAliasInput(v: string) {
+    setSshAlias(v);
+    // 换目标必须重新连接（连接态与旧别名绑定）
+    setSshConnected(false);
+    setDirSuggestions([]);
+  }
 
   useEffect(() => {
     let alive = true;
@@ -78,7 +149,7 @@ export default function Welcome(): React.ReactElement {
           return bt - at;
         });
         setProjects(sorted);
-        setSelectedId((cur) => cur || sorted[0]?.id || '');
+        setSelectedId((cur) => cur || preselectProjectId || sorted[0]?.id || '');
         setLoaded(true);
       })
       .catch(() => { if (alive) setLoaded(true); });
@@ -326,28 +397,64 @@ export default function Welcome(): React.ReactElement {
                         </div>
                       ) : panelSection === 'ssh' ? (
                         <div className={styles.actionForm}>
-                          {/* UI-338 加映 — 目标别名可输入自动补全（datalist 挂已注册目标） */}
-                          <input
-                            className={styles.actionInput}
-                            value={sshAlias}
-                            onChange={(e) => setSshAlias(e.target.value)}
-                            aria-label="远程目标"
-                            placeholder="输入或选择目标别名"
-                            list="welcome-ssh-targets"
-                            autoComplete="off"
-                          />
-                          <datalist id="welcome-ssh-targets">
-                            {sshTargets.map((t) => (
-                              <option key={t.alias} value={t.alias}>{t.label}</option>
-                            ))}
-                          </datalist>
+                          {/* UI-338 加映 — 目标别名可输入自动补全（datalist 挂已注册目标）+「连接」先建立会话 */}
+                          <div className={styles.sshAliasRow}>
+                            <input
+                              className={styles.actionInput}
+                              value={sshAlias}
+                              onChange={(e) => onAliasInput(e.target.value)}
+                              aria-label="远程目标"
+                              placeholder="输入或选择目标别名"
+                              list="welcome-ssh-targets"
+                              autoComplete="off"
+                            />
+                            <datalist id="welcome-ssh-targets">
+                              {sshTargets.map((t) => (
+                                <option key={t.alias} value={t.alias}>{t.label}</option>
+                              ))}
+                            </datalist>
+                            {sshConnected ? (
+                              <span className={styles.branchChip} data-testid="ssh-connected-chip">
+                                <Icon name="check" size={12} /> 已连接
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                className={styles.actionPrimary}
+                                onClick={() => void connectForBrowse()}
+                                disabled={!sshAlias || sshConnecting}
+                              >
+                                {sshConnecting ? '连接中…' : '连接'}
+                              </button>
+                            )}
+                          </div>
                           <input
                             className={styles.actionInput}
                             value={sshRemotePath}
-                            onChange={(e) => setSshRemotePath(e.target.value)}
+                            onChange={(e) => onRemotePathInput(e.target.value)}
                             placeholder="远程路径，如 /root/项目目录"
                             aria-label="远程路径"
                           />
+                          {sshConnected && (
+                            <div className={styles.dirSuggestions} aria-label="远程目录建议">
+                              {dirsLoading ? (
+                                <div className={styles.actionHint}>目录读取中…</div>
+                              ) : dirSuggestions.length > 0 ? (
+                                dirSuggestions.slice(0, 8).map((cand) => (
+                                  <button
+                                    key={cand}
+                                    type="button"
+                                    className={styles.dirSuggestion}
+                                    onClick={() => { onRemotePathInput(cand); void fetchDirSuggestions(cand); }}
+                                  >
+                                    {cand}
+                                  </button>
+                                ))
+                              ) : (
+                                <div className={styles.actionHint}>无子目录建议——可直接输入或创建</div>
+                              )}
+                            </div>
+                          )}
                           <div className={styles.actionBtnRow}>
                             <button type="button" className={styles.actionBack} onClick={() => setPanelSection('none')}>返回</button>
                             <button type="button" className={styles.actionPrimary} onClick={() => void createFromSsh()} disabled={!sshAlias || !sshRemotePath || sshValidating}>

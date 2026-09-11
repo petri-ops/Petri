@@ -30,6 +30,8 @@ vi.mock('@/lib/project-store', () => ({
   createProject: vi.fn(),
   listSshTargetCandidates: vi.fn(),
   validateSshProject: vi.fn(),
+  connectSshHost: vi.fn(),
+  listSshRemoteDirs: vi.fn(),
 }));
 
 vi.mock('@/components/desktop/FolderPicker', () => ({
@@ -46,6 +48,8 @@ const listProjectsMock = vi.mocked(listProjects);
 const createProjectMock = vi.mocked(createProject);
 const listSshTargetsMock = vi.mocked(listSshTargetCandidates);
 const validateSshMock = vi.mocked(validateSshProject);
+const connectSshHostMock = vi.mocked((await import('@/lib/project-store')).connectSshHost);
+const listSshRemoteDirsMock = vi.mocked((await import('@/lib/project-store')).listSshRemoteDirs);
 
 const projectA: Project = {
   id: 'p_a', name: '阿尔法项目', createdAt: '2026-09-01T00:00:00Z', updatedAt: '2026-09-09T00:00:00Z',
@@ -84,6 +88,8 @@ beforeEach(() => {
     { alias: 'dell', label: 'dell 工作机', registered: true },
   ]);
   validateSshMock.mockResolvedValue({ ok: true });
+  connectSshHostMock.mockResolvedValue({ ok: true, home: '/root' });
+  listSshRemoteDirsMock.mockResolvedValue({ ok: true, path: '/root', dirs: [{ name: 'demo', path: '/root/demo' }, { name: 'jobs', path: '/root/jobs' }] });
 });
 
 afterEach(() => {
@@ -148,17 +154,24 @@ describe('Welcome（BLOCK-80 欢迎页 + UI-337 ZCode 式项目面板）', () =>
     await waitFor(() => expect(screen.queryByPlaceholderText('搜索工作区')).toBeNull());
   });
 
-  it('远程连接：已注册目标 + 远程路径 → 校验并创建 ssh 项目', async () => {
+  it('远程连接：先连接再目录补全（datalist 联想 + 建议行）→ 校验并创建 ssh 项目', async () => {
     renderWelcome();
     await openPicker();
     fireEvent.click(screen.getByText('远程连接'));
-    const aliasSelect = await screen.findByLabelText('远程目标') as HTMLSelectElement;
-    fireEvent.change(aliasSelect, { target: { value: 'dell' } });
-    fireEvent.change(screen.getByLabelText('远程路径'), { target: { value: '/root/demo' } });
+    const aliasInput = await screen.findByLabelText('远程目标') as HTMLInputElement;
+    fireEvent.change(aliasInput, { target: { value: 'dell' } });
+    fireEvent.click(screen.getByText('连接'));
+    await waitFor(() => expect(connectSshHostMock).toHaveBeenCalledWith('dell'));
+    // 连接成功 → $HOME 回填路径 + 目录建议出现
+    await waitFor(() => expect((screen.getByLabelText('远程路径') as HTMLInputElement).value).toBe('/root/'));
+    expect(await screen.findByText('/root/demo/')).toBeTruthy();
+    // 点击建议行 → 路径补全
+    fireEvent.click(screen.getByText('/root/demo/'));
+    await waitFor(() => expect((screen.getByLabelText('远程路径') as HTMLInputElement).value).toBe('/root/demo/'));
     fireEvent.click(screen.getByText('校验并创建'));
-    await waitFor(() => expect(validateSshMock).toHaveBeenCalledWith({ alias: 'dell', remotePath: '/root/demo' }));
+    await waitFor(() => expect(validateSshMock).toHaveBeenCalledWith({ alias: 'dell', remotePath: '/root/demo/' }));
     await waitFor(() => expect(createProjectMock).toHaveBeenCalledWith(expect.objectContaining({
-      workspaceKind: 'ssh', sshHost: 'dell', remotePath: '/root/demo',
+      workspaceKind: 'ssh', sshHost: 'dell', remotePath: '/root/demo/',
     })));
   });
 

@@ -683,8 +683,11 @@ export function ProjectWorkspace(): React.ReactElement {
   // BLOCK-72 / UI-320 — 全局工作台页入口（知识空间/后端迁出右栏）
   const handleNavigateToKnowledge = useCallback(() => navigate('/knowledge'), [navigate]);
   const handleNavigateToBackend = useCallback(() => navigate('/backend'), [navigate]);
-  // UI-328 — 左栏顶部「新建任务」入口：应用内导航 / 工作台（项目列表 + 页内选路径创建）
-  const handleNavigateToHome = useCallback(() => navigate('/'), [navigate]);
+  // UI-335/336 — 「新建任务」入口：/ 欢迎页（BLOCK-80）；携带当前项目 id 供
+  // 欢迎页默认预选（用户裁决：默认工作区应是鼠标点击所在的工作区）
+  const handleNavigateToHome = useCallback(() => {
+    navigate(projectId ? `/?project=${projectId}` : '/');
+  }, [navigate, projectId]);
 
   // BLOCK-72 — 右栏「后端」tab 已删除：home 空态「后端」卡与快捷入口改跳全局 /backend 页
   const handleOpenRightTerminal = useCallback(() => {
