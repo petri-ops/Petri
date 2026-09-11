@@ -3145,6 +3145,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：flow `ui342-endpoint-grid` 升级为**形态自适应**（同一 flow 两套断言）——宽容器验 G1–G5（8 列 / 同行 / 零溢出 / 列宽一致 / 共用 min-width），窄容器验 N1–N5（表头隐藏 / 两轨 / 8 标签显形 / 标签与控件成对 / **不再横向滚动**）。**实机双形态全绿**：宽容器 6/6（container=1180）、窄容器 6/6（container=520，scrollWidth=clientWidth=520）；前端全量 **983/983** + tsc 0；证据 `acceptance/block-81/ui342-endpoint-grid-live.json` + 双形态截图（ui342-endpoint-grid.png 窄态两行式）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-350: 插件商店主按钮跟随主题色（gewu-btn--primary 去 teal 锁定）(2026-09-11 verified)
+
+**来源**：用户裁决（截图对照）——「插件中的按钮颜色 和主题色 也没有保持一致 Skills页面中没有问题」：插件商店「下载安装/安装」为青绿（`--gewu-teal` 静态 token），Skills「执行」为琥珀（随 `[data-accent]`）。
+
+**根因**：共享主按钮类 `.gewu-btn--primary`（desktop.css）写死 `var(--gewu-teal)` / hover `--gewu-teal-dark`——静态品牌 token，不经主题色级联。
+
+**修复**：`background → var(--gewu-accent)`、hover → `var(--gewu-accent-hover)`（各 accent 档 light/dark 均已定义 hover 值）。影响面=该类的全部宿主：插件商店（安装/下载安装）、设置面板保存/检查更新（ComputeExecution/UpdateChecker）、DesktopOnboarding 引导按钮——**主按钮语义统一为「跟随主题色」**，与 Skills 执行、侧栏 active、进度条（已用 accent token）对齐。卸载红（danger-ghost）为语义色保持不动。
+
+**门禁**：实机 `scripts/ui350-primary-accent-live.cjs` **2/2 allPass**（证据 `acceptance/ui-350/`）——插件商店 35 颗主按钮背景实测 `rgb(217,119,6)` === 当前 accent `#d97706` 解析值，旧青绿 `rgb(15,118,110)` 零残留。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-349: 后端/知识空间/Skills/插件四页返回按钮统一（← 返回）(2026-09-11 verified)
 
 **来源**：用户裁决（UI-348 后追加）——「后端 知识空间 Skills 插件 这些页面中的返回 按钮 能否形式文字 保持统一呢！」。此前三种形态并存：后端/知识空间=30×30 纯图标方块（aria「返回」无文字）、Skills=36×36 纯图标方块（文案「返回首页」）、插件=图标+文字（文案「返回对话」）。

@@ -1,0 +1,62 @@
+{
+  "name": "ui350-primary-accent",
+  "startedAt": "2026-09-11T15:12:27.208Z",
+  "finishedAt": "2026-09-11T15:12:34.387Z",
+  "assertions": [
+    {
+      "name": "V1_install_buttons_follow_accent",
+      "pass": true,
+      "detail": "主按钮（下载安装/安装…共 35 颗）背景 rgb(217, 119, 6) === 主题 accent #d97706 解析值=true，旧青绿残留=false"
+    },
+    {
+      "name": "V2_hover_token_available",
+      "pass": true,
+      "detail": "hover 走 --gewu-accent-hover（各 accent 档均定义）；当前 accent=#d97706"
+    }
+  ],
+  "allPass": true,
+  "observations": {
+    "accent": "#d97706",
+    "accentRgb": "rgb(217, 119, 6)",
+    "bg": "rgb(217, 119, 6)",
+    "match": true,
+    "isOldTeal": false,
+    "labels": [
+      "下载安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装",
+      "安装"
+    ]
+  }
+}

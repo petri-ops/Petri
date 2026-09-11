@@ -1167,12 +1167,14 @@
   cursor: not-allowed;
 }
 
+/* UI-350 — 主按钮跟随主题色（[data-accent]），不再锁死青绿：
+   插件商店安装/设置保存/引导层等全部 primary 同源 */
 .gewu-btn--primary {
-  background: var(--gewu-teal);
+  background: var(--gewu-accent);
   color: #ffffff;
 }
 .gewu-btn--primary:hover:not(:disabled) {
-  background: var(--gewu-teal-dark);
+  background: var(--gewu-accent-hover);
 }
 
 .gewu-btn--ghost {
