@@ -78,22 +78,15 @@ export function useWorkspaceLayout(): UseWorkspaceLayoutResult {
 
   // ── Effects ─────────────────────────────────────────────────────
 
-  // Responsive: collapse panels when viewport goes narrow.
+  // Responsive: 仅记录是否 compact（驱动浮层渲染），不动侧栏开合状态。
   useEffect(() => {
     const media = window.matchMedia('(max-width: 960px)');
-    const syncLayout = (compact: boolean) => {
-      setCompactLayout(compact);
-      // Only touch local state; context state is driven by TitleBar.
-      if (compact && !ctxAvailable) {
-        setLeftOpenLocal(false);
-        setRightOpenLocal(false);
-      }
-    };
+    const syncLayout = (compact: boolean) => setCompactLayout(compact);
     syncLayout(media.matches);
     const onChange = (event: MediaQueryListEvent) => syncLayout(event.matches);
     media.addEventListener('change', onChange);
     return () => media.removeEventListener('change', onChange);
-  }, [ctxAvailable]);
+  }, []);
 
   useEffect(() => {
     const updateViewportWidth = () => setViewportWidth(window.innerWidth);
@@ -102,13 +95,11 @@ export function useWorkspaceLayout(): UseWorkspaceLayoutResult {
     return () => window.removeEventListener('resize', updateViewportWidth);
   }, []);
 
-  // When compact layout triggers, close context panels too.
-  useEffect(() => {
-    if (compactLayout && ctxAvailable) {
-      ctx.setLeftOpen(false);
-      ctx.setRightOpen(false);
-    }
-  }, [compactLayout]);
+  // compactLayout 只驱动「浮层渲染样式」（≤960px 时侧栏变浮层 + backdrop），
+  // **不再自动收起侧栏**（UI-341 加映二 用户裁决 2026-09-11：侧栏常驻打开，
+  // 只由用户主动点击关闭）。原实现在进 compact 时 setLeftOpen/setRightOpen(false)，
+  // 于是窄窗口下每次进入页面都表现为「左栏自己消失 + 页面像全屏盖住导航」，
+  // 且变宽后不还原（状态残留）。
 
   // Measure center column width.
   useEffect(() => {

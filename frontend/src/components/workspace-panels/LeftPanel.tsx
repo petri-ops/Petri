@@ -86,6 +86,9 @@ export interface LeftPanelContext {
 
 export interface LeftPanelProps {
   ctx: LeftPanelContext;
+  /** UI-341 加映二 — 侧栏开关。false 时保持挂载、宽度收到 0（走 .leftCol 的
+      width transition 平滑收起），而非卸载——卸载会让开合瞬时跳变。 */
+  open?: boolean;
 }
 
 /**
@@ -103,7 +106,7 @@ export interface LeftPanelProps {
  *   │  Each project → conversations│
  *   └──────────────────────────────┘
  */
-export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
+export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElement {
   // BLOCK-53 P1 — 拖拽目录直达创建：drop 到左栏 → validateDirectory 校验 →
   // 打开既有内联创建面板（ctx.createPanel）并回填路径。复用 UI-257 既有确认链，
   // 用户仍需看到完整路径并点「创建项目」，拖拽不绕过任何确认环节。
@@ -148,7 +151,12 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
   };
 
   return (
-    <aside className={styles.leftCol} style={{ width: `var(--gewu-live-left-width, ${ctx.width}px)` }}>
+    <aside
+      className={`${styles.leftCol}${open ? '' : ` ${styles.leftColCollapsed}`}`}
+      style={{ width: open ? `var(--gewu-live-left-width, ${ctx.width}px)` : 0 }}
+      aria-hidden={!open}
+      data-gewu-motion="functional"
+    >
       {ctx.columnHeader}
       <div
         className={styles.leftPanelWrap}

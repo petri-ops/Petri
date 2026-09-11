@@ -610,6 +610,13 @@
   transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* UI-341 加映二 — 收起态：宽度由内联 style 收到 0（由上面的 transition 平滑
+   驱动），此处只兜住 min-width 与边框残留 */
+.leftColCollapsed {
+  min-width: 0;
+  border-right-color: transparent;
+}
+
 /* Left panel — project tree (AionUi style) */
 .leftPanelWrap {
   display: flex;
@@ -2853,6 +2860,13 @@ button.workspacePinnedSummaryMetricCard:hover {
   transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* UI-341 加映二 — 收起态：宽度由内联 style 收到 0；min-width:96px 会挡住
+   归零动画，必须覆盖 */
+.rightColCollapsed {
+  min-width: 0;
+  border-left-color: transparent;
+}
+
 /* UI-309 加映 — 拖动期刚性一致：leftCol/rightCol 的 width transition 与
    embeddedTerminal 的 left transition 会让栏体以 0.2s 级缓动「追赶」实时变量，
    而顶栏分隔线随同一变量瞬时移动 → 拖动中肉眼可见两根线脱节。
@@ -3383,13 +3397,18 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   overflow: hidden;
   opacity: 0;
   visibility: hidden;
-  transition: height 0.16s ease, left 0.16s ease, opacity 0.12s ease;
+  /* UI-341 加映二 — left/right 与侧栏 width 同曲线同时长（0.22s），
+     否则侧栏收合时终端边界会以不同节奏「追赶」，肉眼可见错位 */
+  transition: height 0.16s ease, left 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+    right 0.22s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.12s ease;
+  pointer-events: none;
 }
 
 .embeddedTerminalOpen {
   min-height: 140px;
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 .embeddedTerminalResize {

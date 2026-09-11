@@ -200,4 +200,14 @@ ol {
     transition-delay: 0ms !important;
     scroll-behavior: auto !important;
   }
+
+  /* UI-341 加映二 — 功能性布局过渡豁免：侧栏/终端开合是「空间变化的即时反馈」
+     （0.22s 宽/高，无跨屏位移、无缩放、无视差），不属 WCAG 2.3.3 针对的交互动效；
+     被上面的兜底压成 1 微秒会让开合退化为瞬跳（用户实测反馈「不平滑」的根因）。
+     宿主以 data-gewu-motion="functional" 显式标记这三处容器；
+     属性选择器 (0,1,0) 权重高于上方 `*` (0,0,0)，同为 !important 时稳定胜出。 */
+  [data-gewu-motion='functional'] {
+    transition-duration: 0.22s !important;
+    transition-delay: 0ms !important;
+  }
 }

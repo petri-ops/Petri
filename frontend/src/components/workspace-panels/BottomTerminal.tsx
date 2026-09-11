@@ -73,6 +73,7 @@ export function BottomTerminal({
       className={`${styles.embeddedTerminal} ${open ? styles.embeddedTerminalOpen : ''}`}
       style={{ height: open ? height : 0, left: leftOffset, right: rightOffset }}
       aria-hidden={!open}
+      data-gewu-motion="functional"
     >
       <div className={styles.embeddedTerminalResize} onMouseDown={onResize} />
       <div className={styles.embeddedTerminalHeader}>

@@ -120,17 +120,17 @@ export function RightPanel({
     [ctx.setBrowserCanGoBack, ctx.setBrowserCanGoForward],
   );
 
-  if (!visible) {
-    return null;
-  }
-
+  // UI-341 加映二 — 侧栏开合平滑：原实现 !visible 直接 return null（卸载 =
+  // 开合瞬时跳变）。现保持挂载、宽度收到 0，走 .rightCol 的 width transition 平滑收起。
   return (
     <>
-      {onResize && <div className={styles.resizeHandleV} onMouseDown={onResize} />}
+      {visible && onResize && <div className={styles.resizeHandleV} onMouseDown={onResize} />}
       <aside
-        className={styles.rightCol}
-        style={{ width: `var(--gewu-live-right-width, ${ctx.width}px)` }}
+        className={`${styles.rightCol}${visible ? '' : ` ${styles.rightColCollapsed}`}`}
+        style={{ width: visible ? `var(--gewu-live-right-width, ${ctx.width}px)` : 0 }}
         data-workspace-mode={workspaceMode}
+        aria-hidden={!visible}
+        data-gewu-motion="functional"
       >
         {ctx.columnHeader}
         <div className={styles.resultPanel}>

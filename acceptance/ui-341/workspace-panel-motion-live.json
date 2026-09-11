@@ -1,0 +1,38 @@
+{
+  "name": "workspace-panel-motion",
+  "startedAt": "2026-09-11T09:11:39.786Z",
+  "finishedAt": "2026-09-11T09:11:54.324Z",
+  "assertions": [
+    {
+      "name": "P1_result_mode_keeps_left",
+      "pass": true,
+      "detail": "leftCol width=256"
+    },
+    {
+      "name": "P2_settings_keeps_left",
+      "pass": true,
+      "detail": "leftCol width=256"
+    },
+    {
+      "name": "P3_left_collapse_is_animated",
+      "pass": true,
+      "detail": "mounted=true width=0 transition=width dur=0.22"
+    },
+    {
+      "name": "P6_left_restored",
+      "pass": true,
+      "detail": "base=256 reopened=256"
+    },
+    {
+      "name": "P4_right_collapse_is_animated",
+      "pass": true,
+      "detail": "mounted=true width=0 transition=width dur=0.22"
+    },
+    {
+      "name": "P5_terminal_collapse_is_animated",
+      "pass": true,
+      "detail": "mounted=true height=2 transition=height, left, right, opacity dur=0.22"
+    }
+  ],
+  "allPass": true
+}

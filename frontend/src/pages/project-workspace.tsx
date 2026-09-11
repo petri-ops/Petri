@@ -57,7 +57,7 @@ import { buildResultTitleBarTitle } from '@/lib/result-title-bar';
 import {
   summarizeSelectionForAgent,
 } from '@/lib/artifact-selection';
-import { isResultWorkspaceMode, resultFocusTransition } from '@/components/result-studio/resultFocusLayout';
+import { isResultWorkspaceMode } from '@/components/result-studio/resultFocusLayout';
 import {
   fetchResultStudioContext,
   type ResultStudioEditControls,
@@ -346,29 +346,11 @@ export function ProjectWorkspace(): React.ReactElement {
     sessionFrameRef,
     sessionFrameWidth,
   } = useWorkspaceLayout();
-  const resultPanelRestoreRef = useRef<{ leftOpen: boolean; rightOpen: boolean } | null>(null);
-  const resultFocusActiveRef = useRef(false);
-
-  useEffect(() => {
-    const transition = resultFocusTransition(resultFocusActiveRef.current, workspaceMode);
-    if (transition === 'enter') {
-      if (!resultPanelRestoreRef.current) {
-        resultPanelRestoreRef.current = { leftOpen, rightOpen };
-      }
-      resultFocusActiveRef.current = true;
-      setLeftOpen(false);
-      setRightOpen(false);
-      return;
-    }
-    if (transition !== 'exit') return;
-    const restore = resultPanelRestoreRef.current;
-    if (restore) {
-      setLeftOpen(restore.leftOpen);
-      setRightOpen(restore.rightOpen);
-    }
-    resultPanelRestoreRef.current = null;
-    resultFocusActiveRef.current = false;
-  }, [leftOpen, rightOpen, setLeftOpen, setRightOpen, workspaceMode]);
+  // UI-341 加映二（用户裁决 2026-09-11）——侧栏常驻：进入结果族模式
+  // （result/code/compare/history）**不再自动收起左右栏**。原实现把两侧栏
+  // 一起关掉，导致「打开某页面左栏消失、列内 header 随之消失像全屏盖住导航」。
+  // 现规则：侧栏只由用户主动点击改变（compact 窄屏浮层模式除外，见
+  // useWorkspaceLayout 的 compact 自适应收起/还原）。
 
   const {
     rightTab,
@@ -436,12 +418,6 @@ export function ProjectWorkspace(): React.ReactElement {
     const currentIsResult = isResultWorkspaceMode(workspaceMode);
     const nextIsResult = isResultWorkspaceMode(nextMode);
     if (nextIsResult && !currentIsResult) {
-      // Capture the conversation layout before result-opening handlers enqueue
-      // their own panel changes. React batches those setters, so waiting for the
-      // result-mode effect would otherwise remember the already-forced layout.
-      if (!resultPanelRestoreRef.current) {
-        resultPanelRestoreRef.current = { leftOpen, rightOpen };
-      }
       beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.openStart);
     } else if (nextMode === 'chat' && currentIsResult) {
       beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.returnStart);
@@ -466,13 +442,13 @@ export function ProjectWorkspace(): React.ReactElement {
     navigate(query ? `${base}?${query}` : base, { replace });
   }, [leftOpen, rightOpen, searchParams, navigate, projectId, workspaceMode]);
 
-  // openRightPanel: collapses left in compactLayout, opens right tab.
+  // openRightPanel: 打开右栏 tab。UI-341 加映二（用户裁决）——不再因 compact
+  // 顺手收起左栏：侧栏只由用户主动点击改变。
   const openRightPanel = useCallback((tab: RightPanelMode) => {
-    if (compactLayout) setLeftOpen(false);
     setOpenRightTabs((current) => current.includes(tab) ? current : [...current, tab]);
     setRightTab(tab);
     setRightOpen(true);
-  }, [compactLayout]);
+  }, []);
 
   // BLOCK-28.7 — 聊天区改动卡片点击：打开审阅 tab（文件选中由 useWorkingTreeReview 监听）
   useEffect(() => {
@@ -672,18 +648,11 @@ export function ProjectWorkspace(): React.ReactElement {
     }
     updateWorkspaceMode('scheduled', true, nextJobId);
   }, [activeJobId, bindActiveJob, conversationJobs, updateWorkspaceMode]);
-  // Entering settings hides both side rails: settings is a global surface
-  // that doesn't need project context (left: project/chat list) or job
-  // artifacts (right: files/results/browser), so collapsing them gives the
-  // settings panel more room. Leaving settings (back to chat / search /
-  // scheduled / plugins) leaves `leftOpen` / `rightOpen` to the user — we
-  // don't force them back open because they may have intentionally kept
-  // them collapsed.
+  // Entering settings: UI-341 加映二（用户裁决）——设置是全局面，但侧栏常驻规则
+  // 同样适用：不再自动收起左右栏，侧栏只由用户主动点击改变。
   const handleShowSettings = useCallback(() => {
-    setLeftOpen(false);
-    setRightOpen(false);
     updateWorkspaceMode('settings');
-  }, [setLeftOpen, setRightOpen, updateWorkspaceMode]);
+  }, [updateWorkspaceMode]);
 
   const handleShowPlugins = useCallback(() => updateWorkspaceMode('plugins'), [updateWorkspaceMode]);
 
@@ -1898,13 +1867,11 @@ export function ProjectWorkspace(): React.ReactElement {
           />
         )}
 
-        {/* Left column — Project list + conversations (AionUi style) */}
-        {leftOpen && (
-          <>
-            <LeftPanel ctx={leftPanelCtx} />
-            <div className={styles.resizeHandleV} onMouseDown={startColumnResize('left')} />
-          </>
-        )}
+        {/* Left column — Project list + conversations (AionUi style)
+            UI-341 加映二 — 常驻挂载（open=false 时宽度收到 0，走 width transition
+            平滑收起），而非条件卸载 */}
+        <LeftPanel ctx={leftPanelCtx} open={leftOpen} />
+        {leftOpen && <div className={styles.resizeHandleV} onMouseDown={startColumnResize('left')} />}
 
         {/* Center column — Simple chat (conversation-driven) */}
         <CenterPanel ctx={centerPanelCtx} />
