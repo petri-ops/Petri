@@ -1392,6 +1392,51 @@
         "test/thinking-level-injection.test.mjs"
       ],
       "classifiesScripts": true
+    },
+    {
+      "id": "block82-reasoning-field-compat",
+      "note": "BLOCK-82 思考渠道兼容：sensenova 系 reasoning 字段归一（reasoning_content 优先/reasoning 兜底，deepseek.js 流式+非流式信封、io-transcript.js 记录面）+ 真渠道实机验收脚本。",
+      "patterns": [
+        "core/shared-backend/llm-providers/deepseek.js",
+        "core/shared-backend/llm-providers/io-transcript.js",
+        "test/block82-reasoning-field-compat.test.mjs",
+        "scripts/block82-*",
+        "acceptance/block-82/**"
+      ],
+      "tests": [
+        "test/block82-reasoning-field-compat.test.mjs",
+        "test/provider-streaming.test.mjs",
+        "test/block37-llm-io-transcript.test.mjs"
+      ],
+      "classifiesScripts": true
+    },
+    {
+      "id": "dev-verify-probe-evidence",
+      "note": "dev-verify 探针 flow 证据目录（app-health 等环境健康检查产物，非工作包验收证据链）。",
+      "patterns": [
+        "acceptance/dev-verify/**"
+      ],
+      "tests": [],
+      "classifiesScripts": false
+    },
+    {
+      "id": "block79-evidence",
+      "note": "BLOCK-79 token 速率可观测性实机证据目录（收口时漏登记 impact-map，test-affected 存量 unknown；本包顺手清债）。",
+      "patterns": [
+        "acceptance/block-79/**",
+        "scripts/block79-*"
+      ],
+      "tests": [],
+      "classifiesScripts": false
+    },
+    {
+      "id": "ui341-evidence",
+      "note": "UI-341 欢迎页收敛系列实机证据目录（BLOCK-80 时期收口时漏登记 impact-map，test-affected 存量 unknown；本包顺手清债）。",
+      "patterns": [
+        "acceptance/ui-341/**"
+      ],
+      "tests": [],
+      "classifiesScripts": false
     }
   ]
 }
