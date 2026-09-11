@@ -67,6 +67,15 @@
   border-right: 0;
 }
 
+/* UI-348 — 全局独立页顶栏：品牌 chip 与分区线退场（双类名压过基础规则） */
+.leftZone.leftZoneBare {
+  border-right: 0;
+}
+
+.centerTitle.centerTitleBare {
+  border-right: 0;
+}
+
 .trafficZone {
   /* Three self-drawn window control buttons (close / minimize / maximize).
      Each is its own grey capsule — no shared background well — to match the

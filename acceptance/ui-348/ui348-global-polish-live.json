@@ -1,0 +1,38 @@
+{
+  "name": "ui348-global-polish",
+  "startedAt": "2026-09-11T14:48:09.273Z",
+  "finishedAt": "2026-09-11T14:48:33.933Z",
+  "assertions": [
+    {
+      "name": "V1_right_panel_backend_card_removed",
+      "pass": true,
+      "detail": "右栏快捷卡=[\"结果\",\"浏览器\",\"文件\",\"侧边聊天\",\"审阅\"]，「后端」卡已删除=true"
+    },
+    {
+      "name": "V2_knowledge_accent_theme",
+      "pass": true,
+      "detail": "knowledge 页头图标色 fg=rgb(217, 119, 6) bg=rgba(255, 251, 235, 0.78)（硬编码紫已清除=true，当前 accent=#d97706）"
+    },
+    {
+      "name": "V3_knowledge_titlebar_bare",
+      "pass": true,
+      "detail": "knowledge 顶栏品牌 chip 已隐藏（chipGone=true），分区线全部退场（borders=[\"0px\",\"0px\",\"0px\"]）"
+    },
+    {
+      "name": "V2_backend_accent_theme",
+      "pass": true,
+      "detail": "backend 页头图标色 fg=rgb(217, 119, 6) bg=rgba(255, 251, 235, 0.78)（硬编码紫已清除=true，当前 accent=#d97706）"
+    },
+    {
+      "name": "V3_backend_titlebar_bare",
+      "pass": true,
+      "detail": "backend 顶栏品牌 chip 已隐藏（chipGone=true），分区线全部退场（borders=[\"0px\",\"0px\",\"0px\"]）"
+    },
+    {
+      "name": "V4_welcome_chip_untouched",
+      "pass": true,
+      "detail": "欢迎页顶栏品牌 chip 保留（chip=true，text=Gewu）"
+    }
+  ],
+  "allPass": true
+}

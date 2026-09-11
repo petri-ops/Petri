@@ -1,8 +1,9 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { useWorkspacePanelsContext } from '../WorkspacePanelsContext';
 import styles from '../TitleBar.module.css';
-import { getIsDesktop, getIsMac, useDesktopWindowControls } from './shared';
+import { getIsDesktop, getIsMac, isStandalonePagePath, useDesktopWindowControls } from './shared';
 
 /**
  * BLOCK-62 P1a — TitleBar 左区片段（自绘交通灯 + 左栏收起按钮）。
@@ -15,9 +16,11 @@ export function TitleBarLeftZone(): React.ReactElement {
   const win = useDesktopWindowControls();
   const isMac = getIsMac();
   const isDesktop = getIsDesktop();
+  // UI-348 — 全局独立页顶栏左区不画分隔线（默认 span 与壳层左栏宽度错位）
+  const bare = isStandalonePagePath(useLocation().pathname);
 
   return (
-    <div className={styles.leftZone}>
+    <div className={`${styles.leftZone}${bare ? ` ${styles.leftZoneBare}` : ''}`}>
       {isMac && (
         <div className={styles.trafficZone}>
           {isDesktop ? (

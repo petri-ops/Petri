@@ -3145,6 +3145,18 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：flow `ui342-endpoint-grid` 升级为**形态自适应**（同一 flow 两套断言）——宽容器验 G1–G5（8 列 / 同行 / 零溢出 / 列宽一致 / 共用 min-width），窄容器验 N1–N5（表头隐藏 / 两轨 / 8 标签显形 / 标签与控件成对 / **不再横向滚动**）。**实机双形态全绿**：宽容器 6/6（container=1180）、窄容器 6/6（container=520，scrollWidth=clientWidth=520）；前端全量 **983/983** + tsc 0；证据 `acceptance/block-81/ui342-endpoint-grid-live.json` + 双形态截图（ui342-endpoint-grid.png 窄态两行式）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+## UI-348: 右栏「后端」卡删除 + 全局页主题色适配 + 顶栏布局冲突优化 (2026-09-11 verified)
+
+**来源**：用户三条裁决（截图）——①「右侧栏中的 后端 应该删除 这个已经转移到左侧栏」；②「后端和知识空间的 主题色 没有根据设置的自动适配」；③「Skills、知识空间和后端页面的顶层有 Gewu 这块页面有些异常 好像多了分隔线 我觉得应该是布局有些冲突了」。
+
+**① 右栏「后端」卡删除**：BLOCK-72 迁出右栏 tab 时把右栏 home 空态的一张快捷卡改成了跳转 `/backend` 的「后端」卡（`handleOpenRightTerminal`，名不副实的 terminal 遗留）——本次连卡带链删除：`EmptyResult` 删「后端」卡与 `onOpenTerminal` prop、`RightPanel` 删传参与接口字段、project-workspace 删 `handleOpenRightTerminal`。右栏快捷卡剩：结果/浏览器/文件/侧边聊天/审阅。
+
+**② 主题色适配**：知识空间与后端页的紫罗兰是**硬编码**（`#8b5cf6` / `rgba(139,92,246,…)`），对 `[data-accent]` 主题色切换免疫——用户设了非紫主题即错位。改为主题 token `var(--gewu-accent)` / `var(--gewu-accent-surface)`：`global-page.module.css`（页头图标，两页共用）、`KnowledgeSpacePanel.module.css`（启用 pill/搜索聚焦/命中文档标签 4 处）、`simple-chat.css`（composer 知识空间开关 hover/激活态，同属知识空间识别色）。
+
+**③ 顶栏布局冲突**：全局页顶栏的左区分隔线（fixed TitleBar 默认 span 241px）与壳层左栏实际宽度（217px）**错位 24px**，叠上孤立的「📁 Gewu」品牌 chip（fallback title=APP_NAME）和页面自己的「返回+标题」页头，形成三重头部冲突。处理：新增 `isStandalonePagePath`（/skills /knowledge /backend），命中时 `TitleBarCenterZone` 不渲染品牌 chip 与分区线、`TitleBarLeftZone` 分隔线退场（保留左栏收起按钮）——顶栏只剩可拖拽区与窗口控件，页头是唯一身份行。欢迎页/工作区顶栏不受影响（实机 V4 回归）。
+
+**门禁**：`tsc` 0；定向 RightPanel/TitleBar/global-pages 18/18；前端全量 **991/991**；实机 `scripts/ui348-global-polish-live.cjs` **6/6 allPass**（证据 `acceptance/ui-348/`）——V1 右栏无「后端」卡；V2 两页图标色=当前 accent（实测 fg=rgb(217,119,6) 随主题）非硬编码紫；V3 两页顶栏 chip 隐藏且三段 border 全 0；V4 欢迎页 chip 不受影响。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
 ## UI-347: 左栏「搜索」入口退役（代码清理）+ 插件页返回风格统一 (2026-09-11 verified)
 
 **来源**：用户裁决（UI-346 修复后的同日追加）——①「搜索 这个没有实际意义 删除掉 相关代码也清理了」；②「插件 和其它页面返回风格保持一致」（截图：插件商店头部为右上角 × 关闭）。

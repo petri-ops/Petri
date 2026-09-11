@@ -619,10 +619,8 @@ export function ProjectWorkspace(): React.ReactElement {
   const handleNavigateToHome = useCallback(() => {
     navigate(projectId ? `/?project=${projectId}` : '/');
   }, [navigate, projectId]);
-  // BLOCK-72 — 右栏「后端」tab 已删除：home 空态「后端」卡与快捷入口改跳全局 /backend 页
-  const handleOpenRightTerminal = useCallback(() => {
-    navigate('/backend');
-  }, [navigate]);
+  // UI-348 — 右栏「后端」卡已删除（用户裁决）：后端管理面唯一入口 = 左栏工作台的
+  // 全局 /backend 页；原 handleOpenRightTerminal（跳 /backend 的右栏快捷卡）随卡移除。
   const handleOpenRightResults = useCallback(() => {
     openRightPanel('results');
     const currentJob = conversationJobs.find((job) => job.id === activeJobId);
@@ -1520,7 +1518,6 @@ export function ProjectWorkspace(): React.ReactElement {
     handleCloseWorkspaceFile,
     handleOpenResult,
     handleOpenRightResults,
-    handleOpenRightTerminal,
     handleOpenRightBrowser,
     handleOpenRightFiles,
     handleOpenRightChat,

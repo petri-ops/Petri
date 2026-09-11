@@ -75,9 +75,9 @@
 }
 
 .toggleBtnOn {
-  border-color: #8b5cf6;
-  background: rgba(139, 92, 246, 0.12);
-  color: #8b5cf6;
+  border-color: var(--gewu-accent);
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
 }
 
 .spaceMeta {
@@ -256,7 +256,7 @@
 
 .searchInput:focus {
   outline: none;
-  border-color: #8b5cf6;
+  border-color: var(--gewu-accent);
 }
 
 .searchNote {
@@ -288,7 +288,7 @@
 .hitDoc {
   font-size: 10px;
   font-weight: 600;
-  color: #8b5cf6;
+  color: var(--gewu-accent);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

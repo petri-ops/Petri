@@ -24,6 +24,15 @@ export function getIsDesktop(): boolean {
   return typeof window !== 'undefined' && window.biof3Desktop?.isDesktop === true;
 }
 
+/**
+ * UI-348 — 全局独立页判定（/skills /knowledge /backend）：这些页面自带
+ * 「返回 + 图标 + 标题」页头，fixed 顶栏不再渲染品牌 chip 与分区分隔线
+ * （此前顶栏左区分隔线与壳层左栏宽度错位 24px，叠出「多一条线」的布局冲突）。
+ */
+export function isStandalonePagePath(pathname: string): boolean {
+  return /^\/(skills|knowledge|backend)\/?$/.test(pathname);
+}
+
 export function getFallbackTitle(pathname: string): string {
   if (pathname.startsWith('/project/')) return '梳理开发进展';
   if (pathname.startsWith('/tools')) return '分析结果';

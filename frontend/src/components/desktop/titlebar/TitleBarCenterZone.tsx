@@ -4,7 +4,7 @@ import { Icon } from '@/components/icons/Icon';
 import { useWorkspacePanelsContext } from '../WorkspacePanelsContext';
 import { BranchTabsWrapper } from '@/components/branch/BranchTabsWrapper';
 import styles from '../TitleBar.module.css';
-import { getFallbackTitle } from './shared';
+import { getFallbackTitle, isStandalonePagePath } from './shared';
 
 /**
  * BLOCK-62 P1a — TitleBar 中区片段（标题 + 分支 tabs + 结果选择器 + 摘要概览开关）。
@@ -98,6 +98,12 @@ export function TitleBarCenterZone(): React.ReactElement {
       selectResult(itemId);
     }
   };
+
+  // UI-348 — 全局独立页（/skills /knowledge /backend）不渲染品牌 chip 与分区
+  // 分隔线：页面自带「返回+标题」页头，顶栏只留可拖拽区与窗口控件。
+  if (isStandalonePagePath(location.pathname)) {
+    return <div className={`${styles.centerTitle} ${styles.centerTitleBare}`} aria-hidden="true" />;
+  }
 
   const displayTitle = title || getFallbackTitle(location.pathname);
 

@@ -2060,8 +2060,8 @@
 }
 
 .sc-knowledge-toggle:hover:not(:disabled) {
-  background: rgba(139, 92, 246, 0.10);
-  color: #8b5cf6;
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
 }
 
 .sc-knowledge-toggle:disabled {
@@ -2071,8 +2071,8 @@
 
 .sc-knowledge-toggle-on,
 .sc-knowledge-toggle-on:hover:not(:disabled) {
-  background: rgba(139, 92, 246, 0.14);
-  color: #8b5cf6;
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
 }
 
 .sc-access-overlay {

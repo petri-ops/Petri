@@ -9,14 +9,14 @@ import styles from '../project-workspace.module.css';
 
 export function EmptyResult({
   onOpenResults,
-  onOpenTerminal,
   onOpenBrowser,
   onOpenFiles,
   onOpenChat,
   onOpenReview,
 }: {
   onOpenResults?: () => void;
-  onOpenTerminal?: () => void;
+  // UI-348 — 「后端」卡已删除（BLOCK-72 后端管理面在左栏入口的全局 /backend 页，
+  // 右栏不再保留跳转卡；用户裁决：右侧栏中的后端应该删除）
   onOpenBrowser?: () => void;
   onOpenFiles?: () => void;
   onOpenChat?: () => void;
@@ -29,10 +29,6 @@ export function EmptyResult({
         <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenResults} disabled={!onOpenResults}>
           <Icon name="bar-chart" size={16} />
           <span className={styles.emptyResultLaunchText}>结果</span>
-        </button>
-        <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenTerminal} disabled={!onOpenTerminal}>
-          <Icon name="terminal" size={16} />
-          <span className={styles.emptyResultLaunchText}>后端</span>
         </button>
         <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenBrowser} disabled={!onOpenBrowser}>
           <Icon name="globe" size={16} />
