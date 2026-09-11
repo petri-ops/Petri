@@ -3146,3 +3146,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：welcome 4/4 + home 4/4 + LeftPanel 14/14 + 卡片 16/16 + tsc 0 + docs/ui 门禁 PASS。
 
 **状态**: verified（Vite 热更用户实机可见；实机 CDP 证据随 BLOCK-80 验收窗口补采 acceptance/block-80/）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+**加映（同日，UI-337 ZCode 式项目下拉面板——用户裁决「不需要管理项目这个页面……打开文件夹/远程连接要加进来」）**：欢迎页原生 select + 「管理项目…」链接升级为 **ZCode 式下拉面板**——①触发器（📁 项目名 ˅）；②面板 = 搜索工作区（实时过滤）+ 项目清单（folder 图标 + SSH 标签 + ✓ 当前）+ 动作区；③动作区三态：默认（打开文件夹/远程连接）→ **打开文件夹**（内嵌 FolderPicker 选目录 → 项目名称确认（basename 预填）→ createProject 创建并选中）→ **远程连接**（已注册目标下拉（listSshTargetCandidates）+ 远程路径 → validateSshProject 校验 → createProject（workspaceKind ssh·sshHost·remotePath））；「管理项目」独立页面与 /projects 导航入口随之取消（home.tsx 退役为深链/后端未就绪门面保留）。**门禁**：welcome 测试重写 6/6（面板渲染/搜索过滤/选行发送交接/FolderPicker 创建链/ssh 校验创建/chips+禁发）+ tsc 0 + test:changed 全覆盖。

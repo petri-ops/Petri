@@ -2,10 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
-import { listProjects } from '@/lib/project-store';
+import { createProject, listProjects, listSshTargetCandidates, validateSshProject, type SshTargetCandidate } from '@/lib/project-store';
 import type { Project } from '@/lib/project-types';
 import { createConversation } from '@/components/copilot/copilotConversationsClient';
 import { branchApi } from '@/lib/branchBridge';
+import { FolderPicker } from '@/components/desktop/FolderPicker';
 import styles from './welcome.module.css';
 
 /**
@@ -13,8 +14,9 @@ import styles from './welcome.module.css';
  * 首问输入框 + 领域快捷 chips。发送 = 创建会话 → sessionStorage 交接首问 →
  * 导航项目工作区由工作区派发 copilotAsk 启动。
  *
- * 项目创建流（本地/手输/SSH/空白）整体在 /projects「项目管理」（原工作台），
- * 本页下拉尾部「管理项目 / 新建项目…」可达。
+ * UI-337 — 项目选择器升级为 ZCode 式下拉面板：搜索工作区 + 项目清单（✓ 当前）
+ * + 打开文件夹（FolderPicker 选目录 → 命名 → 创建）+ 远程连接（已注册目标别名
+ * + 远程路径 → 校验并创建）。「管理项目」独立页面随之取消（入口即面板）。
  */
 
 const WELCOME_LAUNCH_KEY = 'gewu.welcomeLaunch';
@@ -35,6 +37,12 @@ function greeting(): string {
   return '晚上好，今晚想分析点什么';
 }
 
+function baseName(p: string): string {
+  const norm = String(p || '').replace(/[\\/]+$/, '');
+  const idx = Math.max(norm.lastIndexOf('/'), norm.lastIndexOf('\\'));
+  return idx >= 0 ? norm.slice(idx + 1) : norm;
+}
+
 export default function Welcome(): React.ReactElement {
   const backendStatus = useBackendStatus();
   const navigate = useNavigate();
@@ -45,6 +53,19 @@ export default function Welcome(): React.ReactElement {
   const [draft, setDraft] = useState('');
   const [launching, setLaunching] = useState(false);
   const [error, setError] = useState('');
+
+  // UI-337 — 项目下拉面板
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const [panelSection, setPanelSection] = useState<'none' | 'folder' | 'ssh'>('none');
+  const [folderPicking, setFolderPicking] = useState(false);
+  const [folderPath, setFolderPath] = useState<string | null>(null);
+  const [folderName, setFolderName] = useState('');
+  const [creatingFolder, setCreatingFolder] = useState(false);
+  const [sshTargets, setSshTargets] = useState<SshTargetCandidate[]>([]);
+  const [sshAlias, setSshAlias] = useState('');
+  const [sshRemotePath, setSshRemotePath] = useState('/root');
+  const [sshValidating, setSshValidating] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -85,6 +106,82 @@ export default function Welcome(): React.ReactElement {
   const backendReady = backendStatus.serverUp !== false;
   const canSend = Boolean(selectedProject) && draft.trim().length > 0 && !launching && backendReady;
 
+  const filteredProjects = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return projects;
+    return projects.filter((p) => p.name.toLowerCase().includes(q));
+  }, [projects, search]);
+
+  async function refreshProjects(selectId?: string) {
+    const list = await listProjects();
+    const sorted = [...list].sort((a, b) => {
+      const bt = new Date(b.updatedAt || b.createdAt || 0).getTime();
+      const at = new Date(a.updatedAt || a.createdAt || 0).getTime();
+      return bt - at;
+    });
+    setProjects(sorted);
+    if (selectId) setSelectedId(selectId);
+  }
+
+  function openPicker() {
+    setPickerOpen((o) => !o);
+    setPanelSection('none');
+    setSearch('');
+  }
+
+  function openSshSection() {
+    setPanelSection('ssh');
+    listSshTargetCandidates()
+      .then((targets) => {
+        setSshTargets(targets);
+        const first = targets.find((t) => t.registered) || targets[0];
+        if (first) setSshAlias((cur) => cur || first.alias);
+      })
+      .catch(() => setSshTargets([]));
+  }
+
+  async function createFromFolder() {
+    if (!folderPath || !folderName.trim() || creatingFolder) return;
+    setCreatingFolder(true);
+    setError('');
+    try {
+      const project = await createProject({ name: folderName.trim(), modality: 'general', workspacePath: folderPath });
+      await refreshProjects(project.id);
+      setPickerOpen(false);
+      setPanelSection('none');
+      setFolderPath(null);
+      setFolderName('');
+    } catch (e) {
+      setError(`创建项目失败：${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setCreatingFolder(false);
+    }
+  }
+
+  async function createFromSsh() {
+    if (!sshAlias || !sshRemotePath || sshValidating) return;
+    setSshValidating(true);
+    setError('');
+    try {
+      const v = await validateSshProject({ alias: sshAlias, remotePath: sshRemotePath });
+      if (!v.ok) throw new Error(v.error || '校验失败');
+      const project = await createProject({
+        name: `${sshAlias} · ${baseName(sshRemotePath)}`,
+        modality: 'general',
+        workspaceKind: 'ssh',
+        sshHost: sshAlias,
+        remotePath: sshRemotePath,
+      });
+      await refreshProjects(project.id);
+      setPickerOpen(false);
+      setPanelSection('none');
+    } catch (e) {
+      setError(`远程连接失败：${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setSshValidating(false);
+    }
+  }
+
   async function launch() {
     if (!canSend || !selectedProject) return;
     setLaunching(true);
@@ -102,10 +199,6 @@ export default function Welcome(): React.ReactElement {
     }
   }
 
-  function manageProjects() {
-    navigate('/projects');
-  }
-
   return (
     <div className={styles.welcome} aria-label="欢迎页">
       <div className={styles.welcomeInner}>
@@ -114,42 +207,131 @@ export default function Welcome(): React.ReactElement {
 
         <div className={styles.composerCard}>
           <div className={styles.pickerRow}>
-            <label className={styles.pickerLabel}>
-              <Icon name="folder" size={14} />
-              {loaded && projects.length > 0 ? (
-                <select
-                  className={styles.projectSelect}
-                  value={selectedId}
-                  onChange={(e) => {
-                    if (e.target.value === '__manage__') { navigate('/projects'); return; }
-                    setSelectedId(e.target.value);
-                  }}
-                  aria-label="选择项目"
-                >
-                  {projects.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                  <option value="__manage__">管理项目 / 新建项目…</option>
-                </select>
-              ) : (
-                <span className={styles.pickerEmpty}>
-                  {loaded ? '暂无项目' : '项目加载中…'}
-                </span>
+            <div className={styles.pickerWrap}>
+              <button
+                type="button"
+                className={styles.pickerTrigger}
+                onClick={openPicker}
+                aria-expanded={pickerOpen}
+                aria-label="选择项目"
+              >
+                <Icon name="folder" size={14} />
+                <span>{selectedProject ? selectedProject.name : loaded ? '选择项目' : '项目加载中…'}</span>
+                <Icon name={pickerOpen ? 'chevron-up' : 'chevron-down'} size={12} />
+              </button>
+              {pickerOpen && (
+                <>
+                  <button
+                    type="button"
+                    className={styles.pickerOverlay}
+                    onClick={() => setPickerOpen(false)}
+                    aria-label="关闭项目列表"
+                  />
+                  <div className={styles.projectPanel} role="listbox" aria-label="工作区列表">
+                    <input
+                      className={styles.projectSearch}
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="搜索工作区"
+                      aria-label="搜索工作区"
+                    />
+                    <div className={styles.projectList}>
+                      {filteredProjects.map((p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          className={`${styles.projectRow} ${p.id === selectedId ? styles.projectRowActive : ''}`}
+                          onClick={() => { setSelectedId(p.id); setPickerOpen(false); setPanelSection('none'); }}
+                        >
+                          <Icon name="folder" size={14} />
+                          <span className={styles.projectRowName}>{p.name}</span>
+                          {p.workspaceKind === 'ssh' && <span className={styles.projectRowTag}>SSH</span>}
+                          {p.id === selectedId && <Icon name="check" size={13} />}
+                        </button>
+                      ))}
+                      {filteredProjects.length === 0 && (
+                        <div className={styles.projectRowEmpty}>无匹配工作区</div>
+                      )}
+                    </div>
+                    <div className={styles.panelActions}>
+                      {panelSection === 'folder' ? (
+                        <div className={styles.actionForm}>
+                          {!folderPath ? (
+                            <>
+                              <FolderPicker
+                                initialPath=""
+                                pickLabel="选择此文件夹"
+                                onPick={(picked: string) => { setFolderPath(picked); setFolderName(baseName(picked)); }}
+                                onCancel={() => setPanelSection('none')}
+                              />
+                            </>
+                          ) : (
+                            <>
+                              <input
+                                className={styles.actionInput}
+                                value={folderName}
+                                onChange={(e) => setFolderName(e.target.value)}
+                                placeholder="项目名称"
+                                aria-label="项目名称"
+                              />
+                              <div className={styles.actionPath} title={folderPath}>{folderPath}</div>
+                              <div className={styles.actionBtnRow}>
+                                <button type="button" className={styles.actionBack} onClick={() => { setPanelSection('none'); setFolderPath(null); }}>返回</button>
+                                <button type="button" className={styles.actionPrimary} onClick={() => void createFromFolder()} disabled={!folderName.trim() || creatingFolder}>
+                                  {creatingFolder ? '创建中…' : '确认创建'}
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      ) : panelSection === 'ssh' ? (
+                        <div className={styles.actionForm}>
+                          <select
+                            className={styles.actionInput}
+                            value={sshAlias}
+                            onChange={(e) => setSshAlias(e.target.value)}
+                            aria-label="远程目标"
+                          >
+                            <option value="">选择已注册目标…</option>
+                            {sshTargets.map((t) => (
+                              <option key={t.alias} value={t.alias}>{t.alias}（{t.label}）</option>
+                            ))}
+                          </select>
+                          <input
+                            className={styles.actionInput}
+                            value={sshRemotePath}
+                            onChange={(e) => setSshRemotePath(e.target.value)}
+                            placeholder="远程路径，如 /root/项目目录"
+                            aria-label="远程路径"
+                          />
+                          <div className={styles.actionBtnRow}>
+                            <button type="button" className={styles.actionBack} onClick={() => setPanelSection('none')}>返回</button>
+                            <button type="button" className={styles.actionPrimary} onClick={() => void createFromSsh()} disabled={!sshAlias || !sshRemotePath || sshValidating}>
+                              {sshValidating ? '校验中…' : '校验并创建'}
+                            </button>
+                          </div>
+                          <div className={styles.actionHint}>新主机请用左栏 🌐 远程连接入口注册（IP+密码一键装公钥）。</div>
+                        </div>
+                      ) : (
+                        <>
+                          <button type="button" className={styles.panelAction} onClick={() => setPanelSection('folder')}>
+                            <Icon name="folder" size={14} /> 打开文件夹
+                          </button>
+                          <button type="button" className={styles.panelAction} onClick={openSshSection}>
+                            <Icon name="globe" size={14} /> 远程连接
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </>
               )}
-            </label>
+            </div>
             {branchName && (
               <span className={styles.branchChip} title="当前分支（切换分支请到审阅面）">
                 <Icon name="git-branch" size={13} /> {branchName}
               </span>
             )}
-            <button
-              type="button"
-              className={styles.manageLink}
-              onClick={manageProjects}
-              title="项目列表与创建（本地目录 / 手动路径 / SSH 远程 / 空白项目）"
-            >
-              管理项目…
-            </button>
           </div>
 
           <textarea

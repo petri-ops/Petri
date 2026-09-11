@@ -175,3 +175,201 @@
   color: var(--gewu-accent);
   border-color: var(--gewu-accent);
 }
+
+/* UI-337 — ZCode 式项目下拉面板（搜索 + 清单✓ + 打开文件夹 + 远程连接） */
+
+.pickerWrap {
+  position: relative;
+  display: inline-block;
+}
+
+.pickerTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pickerTrigger:hover {
+  border-color: var(--gewu-border-color, var(--gewu-text-secondary));
+}
+
+.pickerOverlay {
+  position: fixed;
+  inset: 0;
+  border: none;
+  background: transparent;
+  cursor: default;
+  z-index: 30;
+}
+
+.projectPanel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 340px;
+  max-width: 80vw;
+  border-radius: 12px;
+  background: var(--gewu-bg-surface);
+  border: 1px solid var(--gewu-border-color, transparent);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.18);
+  z-index: 31;
+  overflow: hidden;
+}
+
+.projectSearch {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 1px solid var(--gewu-border-color, transparent);
+  background: transparent;
+  color: var(--gewu-text);
+  font: inherit;
+  font-size: var(--gewu-font-size-body-sm);
+  outline: none;
+}
+
+.projectList {
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.projectRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.projectRow:hover {
+  background: var(--gewu-hover);
+}
+
+.projectRowActive {
+  background: var(--gewu-accent-bg, var(--gewu-hover));
+}
+
+.projectRowName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.projectRowTag {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--gewu-hover);
+  color: var(--gewu-text-secondary);
+}
+
+.projectRowEmpty {
+  padding: 10px 12px;
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+}
+
+.panelActions {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--gewu-border-color, transparent);
+  padding: 4px;
+}
+
+.panelAction {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.panelAction:hover {
+  background: var(--gewu-hover);
+}
+
+.actionForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px 4px;
+}
+
+.actionInput {
+  padding: 7px 9px;
+  border: 1px solid var(--gewu-border-color, transparent);
+  border-radius: 8px;
+  background: var(--gewu-bg);
+  color: var(--gewu-text);
+  font: inherit;
+  font-size: var(--gewu-font-size-body-sm);
+  outline: none;
+}
+
+.actionPath {
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actionBtnRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.actionBack {
+  border: none;
+  background: transparent;
+  color: var(--gewu-text-secondary);
+  cursor: pointer;
+  font-size: var(--gewu-font-size-caption);
+}
+
+.actionPrimary {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--gewu-accent);
+  color: #fff;
+  font-weight: 600;
+  font-size: var(--gewu-font-size-caption);
+  cursor: pointer;
+}
+
+.actionPrimary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.actionHint {
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-secondary);
+}

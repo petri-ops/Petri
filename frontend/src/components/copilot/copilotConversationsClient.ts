@@ -62,7 +62,7 @@ export async function listConversations(
 export async function createConversation(
   title?: string,
   lastPage?: string,
-  projectId?: string
+  projectId?: string | null
 ): Promise<ConversationSummary | null> {
   try {
     const resp = await fetch(getApiPrefix() + '/ai/conversations', {
