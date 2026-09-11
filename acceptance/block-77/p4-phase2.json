@@ -1,0 +1,35 @@
+{
+  "phase": "phase2",
+  "startedAt": "2026-09-11T05:51:42.781Z",
+  "finishedAt": "2026-09-11T05:57:30.421Z",
+  "assertions": [
+    {
+      "name": "P4-5 state restored from phase1",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mtwjanlf_gae6\",\"taskId\":\"res_mtwjcu7n_aio9\",\"pid\":4069925}"
+    },
+    {
+      "name": "P4-6 backing process survived app restart",
+      "pass": true,
+      "detail": "pid=4069925 alive=true"
+    },
+    {
+      "name": "P4-7 handover: agent reports resident task after restart",
+      "pass": true,
+      "detail": "reply=**挂机中的驻留任务：1 个。**\n\n| 字段 | 值 |\n|---|---|\n| taskId | `res_mtwjcu7n_aio9` |\n| 意图 | P4 全链验收：挂机 15 分钟探针 |\n| 成功标准 | 900 秒后 p4-done.txt 出现 |\n| 失败处置 | notify-only |\n| 命 | attempts=disabled@05:51:46,disabled@05:51:50,disabled@05:51:54,disabled@05:51:58,disabled@05:52:02,disabled@05:52:06,disabled@05:52:10,disabled@05:52:14,disabled@05:52:18,disabled@05:52:22,disabled@05:52:27,disabled@05:52:31,disabl"
+    },
+    {
+      "name": "P4-8 abnormal exit flipped card to failed (revisit loop)",
+      "pass": true,
+      "detail": "server card status"
+    },
+    {
+      "name": "P4-9 agent reports failure honestly (R5 no auto-restart)",
+      "pass": true,
+      "detail": "reply=**已确认：该驻留任务已失败终止，未达成成功标准。**\n\n意图卡（`.gewu/resident/res_mtwjcu7n_aio9.json`）现况：\n\n| 字段 | 值 |\n|---|---|\n| taskId | `res_mtwjcu7n_aio9` |\n| status | **failed** |\n| la | attempts=disabled@05:55:34,disabled@05:55:39,disabled@05:55:43,disabled@05:55:47,disabled@05:55:51,disabled@05:55:55,disabled@05:55:59,disabled@05:56:03,disabled@05:56:07,disabled@05:56:11,disabled@05:56:15,disabled@05:56:19,disabl"
+    }
+  ],
+  "allPass": true,
+  "projectId": "p_mtwjanlf_gae6",
+  "taskId": null
+}

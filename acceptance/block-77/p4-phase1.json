@@ -1,20 +1,35 @@
 {
   "phase": "phase1",
-  "startedAt": "2026-09-11T00:59:48.073Z",
-  "finishedAt": "2026-09-11T01:08:12.180Z",
+  "startedAt": "2026-09-11T05:47:04.270Z",
+  "finishedAt": "2026-09-11T05:51:06.841Z",
   "assertions": [
     {
       "name": "project created",
       "pass": true,
-      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mtw917zr_y7dj\",\"name\":\"P4驻留-1789088388075\",\"created_at\":\"2026-09-11T00:59:49.047Z\",\"up"
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mtwjanlf_gae6\",\"name\":\"P4驻留-1789105624272\",\"created_at\":\"2026-09-11T05:47:05.331Z\",\"up"
     },
     {
       "name": "P4-1 agent created resident task (model used tool)",
-      "pass": false,
-      "detail": "reply="
+      "pass": true,
+      "detail": "reply=已创建并核实完成。\n\n**taskId：`res_mtwjcu7n_aio9`**\n\n意图卡落盘情况（`.gewu/resident/res_mtwjcu7n_aio9.json`）：\n\n| 字段 | 值 |\n|---|---|\n| intent | P4 全链验收：挂机 15 分钟探针 |\n| successCrit | attempts=disabled@05:47:08,disabled@05:47:12,disabled@05:47:16,disabled@05:47:20,disabled@05:47:24,disabled@05:47:28,disabled@05:47:32,disabled@05:47:36,disabled@05:47:40,disabled@05:47:44,disabled@05:47:49,disabled@05:47:53,disabl"
+    },
+    {
+      "name": "P4-2 intent card on server (running)",
+      "pass": true,
+      "detail": "status=running"
+    },
+    {
+      "name": "P4-3 backing process alive on aliyun",
+      "pass": true,
+      "detail": "pid=4069925"
+    },
+    {
+      "name": "P4-4 handover Channel B: agent reports via resident_task_list",
+      "pass": true,
+      "detail": "reply=**当前项目有 1 个驻留任务。**\n\n`resident_task_list` 返回 `count: 1`：\n\n| 字段 | 值 |\n|---|---|\n| taskId | `res_mtwjcu7n_aio9` |\n| intent | P4 全链验收：挂机 15 分钟探针 |\n| successCriteria | attempts=disabled@05:49:13,disabled@05:49:17,disabled@05:49:21,disabled@05:49:25,disabled@05:49:29,disabled@05:49:33,disabled@05:49:37,disabled@05:49:41,disabled@05:49:45,disabled@05:49:49,disabled@05:49:53,disabled@05:49:57,disabl"
     }
   ],
-  "allPass": false,
-  "projectId": "p_mtw917zr_y7dj",
-  "taskId": null
+  "allPass": true,
+  "projectId": "p_mtwjanlf_gae6",
+  "taskId": "res_mtwjcu7n_aio9"
 }

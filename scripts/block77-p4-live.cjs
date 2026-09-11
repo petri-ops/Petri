@@ -80,7 +80,34 @@ async function connectMain(projectId) {
   return client;
 }
 
-async function sendAndWaitReply(client, prompt) {
+async function listConversationMessages(projectId) {
+  const convs = await fetchJson(`${API}/ai/conversations?status=all&project_id=${encodeURIComponent(projectId)}`, { headers: AUTH });
+  const list = (convs.json && convs.json.conversations) || [];
+  if (!list.length) return { conversationId: null, messages: [] };
+  const conv = list[0];
+  const msgs = await fetchJson(`${API}/ai/conversations/${encodeURIComponent(conv.id)}/messages?limit=100`, { headers: AUTH });
+  return { conversationId: conv.id, messages: (msgs.json && msgs.json.messages) || [] };
+}
+
+// 回复确认改走 REST 真值（2026-09-11 抓真修两处：①原 DOM 抓取选择器对当前
+// SimpleChat 消息类名失效——sc-msg-assistant 只匹配任务循环摘要卡，5+1 轮
+// 全部 reply= 空全是脚本问题而非功能问题；②上一 turn 流式状态未复位时发送
+// 按钮 disabled，先等 UI 空闲再填再点，重试间隔 4s，每次尝试结果记录在案）。
+async function sendAndWaitReply(client, prompt, projectId) {
+  const attempts = [];
+  // ① 等 UI 空闲（发送按钮可用）——上一 turn streaming 未复位时点不动
+  const tIdle = Date.now();
+  while (Date.now() - tIdle < 90000) {
+    const st = await lib.evalJs(client, `(() => {
+      const b = [...document.querySelectorAll('button')].find((x) => (x.getAttribute('aria-label') || x.title || '').includes('发送消息'));
+      return b ? (b.disabled ? 'disabled' : 'ready') : 'no_button';
+    })()`, 5000).catch((e) => 'eval_err:' + String(e.message).slice(0, 40));
+    attempts.push(st + '@' + new Date().toISOString().slice(11, 19));
+    if (st === 'ready') break;
+    await delay(4000);
+  }
+  const baseline = await listConversationMessages(projectId);
+  const baselineAssistant = baseline.messages.filter((m) => m.role === 'assistant').length;
   const sendExpr = `(async () => {
     const ta = document.querySelector('textarea.sc-input');
     if (!ta) return 'no_textarea';
@@ -88,33 +115,41 @@ async function sendAndWaitReply(client, prompt) {
     setter.call(ta, ${JSON.stringify(prompt)});
     ta.dispatchEvent(new Event('input', { bubbles: true }));
     await new Promise((r) => setTimeout(r, 400));
-    const send = [...document.querySelectorAll('button')].find((b) => (b.getAttribute('aria-label') || b.title || '').includes('发送'));
+    const send = [...document.querySelectorAll('button')].find((b) => (b.getAttribute('aria-label') || b.title || '').includes('发送消息'));
     if (!send || send.disabled) return 'send_unavailable';
     send.click();
     return 'sent';
   })()`;
-  for (let a = 0; a < 3; a += 1) {
-    try { if ((await lib.evalJs(client, sendExpr, 10000)) === 'sent') break; } catch { /* retry */ }
-    await delay(1500);
+  let sent = false;
+  for (let a = 0; a < 3 && !sent; a += 1) {
+    try {
+      const r = await lib.evalJs(client, sendExpr, 10000);
+      attempts.push('try' + a + '=' + r);
+      if (r === 'sent') sent = true;
+    } catch (e) { attempts.push('try' + a + '=err:' + String(e.message).slice(0, 40)); }
+    if (!sent) await delay(4000);
   }
+  if (!sent) return { text: '', conversationId: baseline.conversationId, attempts: attempts.join(',') };
+  // ② REST 轮询真值：等新 assistant 消息落库且内容连续两轮（6s）稳定
   const t0 = Date.now();
   let lastText = '';
   let stableSince = 0;
+  let convId = baseline.conversationId;
   while (Date.now() - t0 < 240000) {
     await delay(3000);
-    const text = await lib.evalJs(client, `(() => {
-      const msgs = [...document.querySelectorAll('[class*="sc-msg-assistant"], [class*="assistantMessage"], .markdown-body')];
-      return msgs.map((m) => m.innerText).join('\n').trim();
-    })()`, 20000).catch(() => lastText);
-    const busy = await lib.evalJs(client, `!!(document.querySelector('[class*="sc-busy"], [class*="typing"]'))`, 5000).catch(() => false);
-    const sendBtn = await lib.evalJs(client, `(() => { const b = [...document.querySelectorAll('button')].find((x) => (x.getAttribute('aria-label') || x.title || '').includes('发送')); return !!b && !b.disabled; })()`, 5000).catch(() => false);
-    if (text && text === lastText && !busy && sendBtn) {
+    const snapshot = await listConversationMessages(projectId).catch(() => null);
+    if (!snapshot) continue;
+    convId = snapshot.conversationId || convId;
+    const assistants = snapshot.messages.filter((m) => m.role === 'assistant' && !m.pending);
+    if (assistants.length <= baselineAssistant) { stableSince = 0; lastText = ''; continue; }
+    const latest = String(assistants[assistants.length - 1].content || '').trim();
+    if (latest && latest === lastText) {
       stableSince += 3000;
-      if (stableSince >= 12000) return text;
+      if (stableSince >= 6000) return { text: latest, conversationId: convId, attempts: attempts.join(',') };
     } else stableSince = 0;
-    lastText = text;
+    lastText = latest;
   }
-  return lastText;
+  return { text: lastText, conversationId: convId, attempts: attempts.join(',') };
 }
 
 async function createProject(name) {
@@ -149,10 +184,11 @@ async function main() {
       'failure_handling 填：notify-only',
       '创建完成后告诉我 taskId。',
     ].join('\n');
-    const reply = await sendAndWaitReply(client, prompt);
-    const taskIdMatch = String(reply).match(/res_[0-9a-z_]+/);
+    const reply = await sendAndWaitReply(client, prompt, projectId);
+    const replyText = String(reply.text);
+    const taskIdMatch = replyText.match(/res_[0-9a-z_]+/);
     assert('P4-1 agent created resident task (model used tool)', !!taskIdMatch,
-      `reply=${String(reply).slice(0, 200)}`);
+      `reply=${replyText.slice(0, 160)} | attempts=${reply.attempts || ''}`);
     if (!taskIdMatch) {
       await lib.screenshotPng(client, EVIDENCE, 'p4-no-card.png').catch(() => {});
       saveAndExit(projectId, null);
@@ -169,13 +205,17 @@ async function main() {
     assert('P4-3 backing process alive on aliyun', alive, `pid=${card.backingProcess.pid}`);
 
     // ── ④ 交接班 Channel B：同会话追问（systemPrompt 已注入 digest）──
-    const followup = await sendAndWaitReply(client, '现在项目里有几个驻留任务？请用 resident_task_list 确认并汇报。');
+    const followup = await sendAndWaitReply(client, '现在项目里有几个驻留任务？请用 resident_task_list 确认并汇报。', projectId);
+    const followupText = String(followup.text);
     assert('P4-4 handover Channel B: agent reports via resident_task_list',
-      String(followup).includes(taskId) || /running|进行中|1 个/.test(String(followup)),
-      `reply=${String(followup).slice(0, 200)}`);
+      followupText.includes(taskId) || /running|进行中|1 个/.test(followupText),
+      `reply=${followupText.slice(0, 160)} | attempts=${followup.attempts || ''}`);
     await lib.screenshotPng(client, EVIDENCE, 'p4-phase1-conversation.png').catch(() => {});
 
     // ── ⑤ 关软件（外层 bash 编排 kill 栈）+ 写状态 ──
+    // 2026-09-11 补：STATE 此前由外层 bash 手工维护，脚本自身不写导致复跑缺文件；
+    // 现在 phase1 直接落盘，phase2 复跑自洽。
+    fs.writeFileSync(STATE, JSON.stringify({ projectId, taskId, pid: card.backingProcess.pid }, null, 2) + '\n');
     saveAndExit(projectId, taskId);
   }
 
@@ -194,10 +234,11 @@ async function main() {
 
     // ── ⑦ 交接班 Channel A+B：新会话 → agent 主动汇报 ──
     const client = await connectMain(projectId);
-    const reply = await sendAndWaitReply(client, '项目当前有什么挂机中的驻留任务？请汇报意图和状态。');
+    const reply = await sendAndWaitReply(client, '项目当前有什么挂机中的驻留任务？请汇报意图和状态。', projectId);
+    const replyText = String(reply.text);
     assert('P4-7 handover: agent reports resident task after restart',
-      String(reply).includes(taskId) || /挂机|驻留|P4 全链/.test(String(reply)),
-      `reply=${String(reply).slice(0, 240)}`);
+      replyText.includes(taskId) || /挂机|驻留|P4 全链/.test(replyText),
+      `reply=${replyText.slice(0, 160)} | attempts=${reply.attempts || ''}`);
 
     // ── ⑧ 异常路径：kill 进程 → 回访循环翻转 failed → agent 汇报 ──
     sshDell(`kill -9 ${pid} 2>/dev/null; true`);
@@ -211,9 +252,10 @@ async function main() {
       } catch { /* keep waiting */ }
     }
     assert('P4-8 abnormal exit flipped card to failed (revisit loop)', flipped, 'server card status');
-    const reply2 = await sendAndWaitReply(client, '驻留任务的进程已经终止了，请确认状态并汇报。');
+    const reply2 = await sendAndWaitReply(client, '驻留任务的进程已经终止了，请确认状态并汇报。', projectId);
+    const reply2Text = String(reply2.text);
     assert('P4-9 agent reports failure honestly (R5 no auto-restart)',
-      /failed|失败|异常|终止/.test(String(reply2)), `reply=${String(reply2).slice(0, 200)}`);
+      /failed|失败|异常|终止/.test(reply2Text), `reply=${reply2Text.slice(0, 160)} | attempts=${reply2.attempts || ''}`);
 
     // ── 清理 ──
     try { sshDell(`rm -rf ${REMOTE_ROOT}`); } catch {}
