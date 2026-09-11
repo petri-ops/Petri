@@ -98,6 +98,20 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+describe('UI-338 加映 — ?project= 预选当前项目', () => {
+  it('从工作区带 ?project= 进入时，下拉默认预选该项目', async () => {
+    render(
+      <MemoryRouter initialEntries={[{ pathname: '/', search: '?project=p_b' }]}>
+        <Welcome />
+      </MemoryRouter>
+    );
+    await openPicker();
+    const rows = screen.getAllByText('贝塔项目');
+    // 触发器 + 清单行都显示贝塔（当前 ✓）
+    expect(rows.length).toBe(2);
+  });
+});
+
 describe('Welcome（BLOCK-80 欢迎页 + UI-337 ZCode 式项目面板）', () => {
   it('渲染问候语 + 触发器 + 当前分支徽标；打开面板含搜索/清单/两动作', async () => {
     renderWelcome();

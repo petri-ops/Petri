@@ -48,7 +48,8 @@ export default function Welcome(): React.ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
   // UI-338 加映 — 从工作区「新建任务」进入时，默认预选鼠标所在的项目
-  const preselectProjectId = (location.state as { projectId?: string } | null)?.projectId || '';
+  // （handleNavigateToHome 以 ?project=<id> 查询参数传递；此处从 URL 读取）
+  const preselectProjectId = new URLSearchParams(location.search).get('project') || '';
   const [projects, setProjects] = useState<Project[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [selectedId, setSelectedId] = useState<string>('');
