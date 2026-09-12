@@ -4209,6 +4209,29 @@
       "phase": "COMPLETED",
       "notes": "思考渠道兼容（BLOCK-81 遗留候选收口）P0–P3 当日完成（34a30816/3fb91012/a9078d72/bf6916a5）：sensenova 上游思考段字段名 reasoning 而我方解析面只认 reasoning_content → 该渠道思考段整段丢失（证据=BLOCK-81 P3 probe PR3）。P1 解析归一 3 处（deepseek.js 流式 delta+非流式信封 pickReasoningText、io-transcript.js normalizeResponse；reasoning_content 优先含空串契约不变/reasoning 兜底，后端归一后下游零改动）+ 契约测试 5/5（block82-reasoning-field-compat：sensenova 形状/DeepSeek 回归/双字段优先级/非流式信封/记录面）。P2 能力位闭环（dev 栈 sensenova profile 补 reasoning，probe paramAccepted 有据）+ 真渠道实机 11/11 allPass（scripts/block82-thinking-compat-live.cjs，acceptance/block-82/：C1 standard 零思考参数 additive 红线回归/C2 high 上游收 reasoning_effort=high/C3 思考段 136 字归一落库 meta.reasoningByIteration 修复前恒 0/C4 standard 思考段 307 字同受益/C5 内容零破坏）。验收脚本抓真两处：transcript 会话级归档混辅助调用（档位断言只看 sensenova 记录）；聚合记录面不保留思考段（事件流路径承载，不虚设断言）。收口门禁 hygiene/docs/ui 三绿 + test:changed 27/29（2 红=P6 源绑定存量漂移 HEAD 同败，重采属 G0-RS，例外登记）；impact-map 顺手清三处存量 unknown（dev-verify/block-79/ui-341，test-affected 16/16 全绿）。范围外守住：思考行渲染位置（用户裁决项）、GLM 思考参数形状、Anthropic/dashscope 路径。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "completedAt": "2026-09-12"
+    },
+    {
+      "id": "BLOCK-83-GENERAL-AGENT-BASE",
+      "path": "docs/block-83-general-agent-base-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-83-general-agent-base",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-12",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "PLANNED",
+      "tags": [
+        "block-83",
+        "general-agent-base",
+        "debio",
+        "pluginization",
+        "result-studio",
+        "artifact-workbench",
+        "modular",
+        "G0"
+      ],
+      "notes": "通用 agent 底座化与生信插件化剥离——2026-09-12 两轮用户裁决立项排队：①「生信功能应该作为目前通用 agent 的一个插件存在 如果不需要了 剥离彻底清理掉……模块化思想」；② Result Studio 定位三选一用户同意方向 1＝机制层升格底座「通用产物工作台」（去科学命名/plugin SDK 去 .R 硬编码/validator 钩子化），作为剥离前置。现状盘点（全仓侦察）：pages 已全部通用化、15 生信插件已住插件系统骑 run_tool→tool_job→artifact 通用管道；剩余耦合面＝B 自包含生信模块（tool-registry/tool-scripts 69 文件/inventory.ts 2095 行+7 处通用 import/scientific-task 契约链/r-executor，约 90 后端文件+2200 前端行）/C 灰色（Result Studio 40 文件+8 表机制通用归底座/g0 治理/tools-executor 形态绑定/死代码残留）/D 风险链（finalize gate 科学理由码、db.js:1092 引科学契约、插件契约强制 RS descriptor）。设计裁决 D1-D8 全部 ⏳ 待 P0 评审（改名边界=代码层改 schema 留置/SDK 参数化向后兼容/validator 注入/inventory 替代两案/分发形态改可选安装/extraRenderers 与 AGENT-WORKBENCH 同一契约/剥离验收机械化门禁/P6 源绑定漂移例外登记）。阶段 P0 评审冻结 → P1 RS 通用化 → P2 前端剥离 → P3 后端剥离 → P4 插件系统补全（按需安装+渲染器扩展点）→ P5 收口。范围外：RS 机制层不重构、DB 生信表留置不迁移、15 插件功能不退役只改默认不装、G1+ 不外推。当前 active 槽位归 AGENT-WORKBENCH，本包排队启动需用户裁决。G0 开发期常态 · 不外推 packaged/Provider/GA."
     }
   ],
   "lastUpdated": "2026-09-12",
