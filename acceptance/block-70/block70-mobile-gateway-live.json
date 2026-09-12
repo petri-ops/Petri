@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "acceptanceId": "BLOCK-70-A1-P0-P1-LIVE",
+  "generatedAt": "2026-09-12T20:22:21.174Z",
+  "qualificationEligible": false,
+  "allPass": true,
+  "checks": [
+    {
+      "name": "A1a 关闭态主后端健康",
+      "ok": true,
+      "detail": "{\"status\":\"ok\",\"timestamp\":\"2026-09-12T20:22:20.378Z\",\"version\":\"1.0.0\",\"db_ok\":true}"
+    },
+    {
+      "name": "A1b 关闭态移动端口不监听",
+      "ok": true,
+      "detail": "port 52040 should be closed"
+    },
+    {
+      "name": "A1c 关闭态管理面如实呈现 enabled=false",
+      "ok": true,
+      "detail": "{\"ok\":true,\"enabled\":false,\"port\":52040,\"restartHint\":\"启用/关闭在重启桌面端后生效\",\"lanAddresses\":[\"192.168.0.102\"],\"activeDevices\":0,\"devices\":[],\"pairingPending\":0}"
+    },
+    {
+      "name": "A2 gateway 健康",
+      "ok": true,
+      "detail": "{\"ok\":true,\"service\":\"gewu-mobile-gateway\"}"
+    },
+    {
+      "name": "A3 移动页可达",
+      "ok": true,
+      "detail": "status 200"
+    },
+    {
+      "name": "A4 管理面 status 如实",
+      "ok": true,
+      "detail": "{\"ok\":true,\"enabled\":true,\"port\":52046,\"restartHint\":\"启用/关闭在重启桌面端后生效\",\"lanAddresses\":[\"192.168.0.102\"],\"activeDevices\":0,\"devices\":0,\"pairingPending\":0}"
+    },
+    {
+      "name": "A5a 配对 token 签发",
+      "ok": true,
+      "detail": "{\"ok\":true,\"token\":\"***\",\"expiresAt\":1789244841069,\"urls\":1,\"primaryUrl\":\"http://192.168.0.102:52046/m#0b1b1496ae0082692d20b1bef4c905a2d6c036381e0fb6a0ceee68b265a7d24a\"}"
+    },
+    {
+      "name": "A5b QR SVG 渲染",
+      "ok": true,
+      "detail": "status 200"
+    },
+    {
+      "name": "A6a 手机配对成功",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A6b 一次性 token 重放被拒",
+      "ok": true,
+      "detail": "status 401"
+    },
+    {
+      "name": "A7a Bearer 授权读（conversations 投影）",
+      "ok": true,
+      "detail": "{\"status\":\"ok\",\"conversations\":[]}"
+    },
+    {
+      "name": "A7b ?session= 通道（EventSource 场景）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A7c 无凭证 401",
+      "ok": true,
+      "detail": "status 401"
+    },
+    {
+      "name": "A8a 主后端吊销成功",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A8b 吊销后移动面即刻 401",
+      "ok": true,
+      "detail": "status 401"
+    },
+    {
+      "name": "A9 审计落盘且不含 token",
+      "ok": true,
+      "detail": "exists=true"
+    }
+  ],
+  "notes": {
+    "method": "isolated probe: real biof3-server child processes (off-state + on-state), fresh tmp dataDir, migrations applied",
+    "redaction": "pairing/session tokens never stored in evidence",
+    "honestBoundary": "real-phone scan acceptance pending user; settings-panel CDP assertion pending dev-stack window"
+  }
+}

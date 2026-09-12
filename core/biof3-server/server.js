@@ -332,3 +332,24 @@ app.listen(PORT, '127.0.0.1', () => {
   console.log(`   POST http://localhost:${PORT}/api/run`);
   console.log(`   GET  http://localhost:${PORT}/api/health`);
 });
+
+// ── BLOCK-70：手机远程同步 mobile-gateway（additive，默认关闭）────────────
+// 配置/环境双开关（BIOF3_MOBILE_ENABLED / <dataDir>/mobile/gateway.json）。
+// 关闭态零行为：不监听、不建实例；启动失败不影响主后端。
+try {
+  const { startMobileGateway } = require('./mobile-gateway');
+  const mobileDataDir = process.env.BIOF3_LOCAL_DATA_DIR;
+  if (mobileDataDir) {
+    const gatewayRoutes = (mobileApp) => {
+      require('./routes/ai-conversations')(mobileApp);
+      require('./routes/ai-agent')(mobileApp);
+      require('./routes/tools')(mobileApp);
+    };
+    const gateway = startMobileGateway({ dataDir: mobileDataDir, mountRoutes: gatewayRoutes });
+    if (!gateway.started) console.log('[mobile-gateway] disabled (default off)');
+  } else {
+    console.log('[mobile-gateway] skipped: BIOF3_LOCAL_DATA_DIR not set');
+  }
+} catch (e) {
+  console.warn('[mobile-gateway] failed to start:', e && e.message);
+}

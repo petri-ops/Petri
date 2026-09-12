@@ -1522,6 +1522,23 @@
         "test/domain-neutrality.test.mjs"
       ],
       "classifiesScripts": true
+    },
+    {
+      "id": "block70-mobile-sync",
+      "note": "BLOCK-70 手机远程同步：mobile-gateway 独立 app 实例（配对 token/会话吊销/鉴权限速审计）+ mobile-admin 管理 REST + 设置区「手机远程」（UI-319）+ 移动只读页。改 gateway/admin/设置面板任一文件即跑本套件。",
+      "patterns": [
+        "core/biof3-server/mobile-gateway/**",
+        "core/biof3-server/routes/mobile-admin.js",
+        "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/MobileSync.tsx",
+        "test/block70-*.test.mjs",
+        "scripts/block70-*",
+        "acceptance/block-70/**"
+      ],
+      "tests": [
+        "test/block70-mobile-gateway.test.mjs"
+      ],
+      "classifiesScripts": true
     }
   ]
 }

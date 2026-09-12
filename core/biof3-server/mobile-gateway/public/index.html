@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<title>Gewu · 移动工作区</title>
+<style>
+  :root {
+    --bg: #101216; --card: #191d24; --line: #2a303b; --text: #e8ebf0;
+    --dim: #97a0ae; --accent: #4f8cff; --ok: #3fb96b; --warn: #e0a13c; --err: #e05c5c;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #f4f6f9; --card: #ffffff; --line: #dfe4ec; --text: #1c2230; --dim: #66707f; }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font: 15px/1.5 -apple-system, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; padding-bottom: 64px; }
+  header { position: sticky; top: 0; background: var(--card); border-bottom: 1px solid var(--line); padding: 12px 16px; display: flex; align-items: center; gap: 8px; z-index: 10; }
+  header h1 { font-size: 16px; font-weight: 600; flex: 1; }
+  header .state { font-size: 12px; color: var(--dim); }
+  nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; background: var(--card); border-top: 1px solid var(--line); z-index: 10; }
+  nav button { flex: 1; padding: 12px 0; background: none; border: none; color: var(--dim); font-size: 13px; }
+  nav button.active { color: var(--accent); font-weight: 600; }
+  main { padding: 12px 12px 24px; max-width: 640px; margin: 0 auto; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
+  .card h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; word-break: break-all; }
+  .card p, .card li { font-size: 13px; color: var(--dim); word-break: break-all; }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
+  .s-running { color: var(--ok); border-color: var(--ok); }
+  .s-failed, .s-cancelled { color: var(--err); border-color: var(--err); }
+  .s-completed { color: var(--accent); border-color: var(--accent); }
+  .back { background: none; border: none; color: var(--accent); font-size: 14px; padding: 4px 0 12px; }
+  .empty { text-align: center; color: var(--dim); padding: 48px 16px; font-size: 14px; }
+  pre { white-space: pre-wrap; word-break: break-all; font-size: 13px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; margin: 6px 0; }
+  .screen { max-width: 420px; margin: 80px auto; text-align: center; padding: 0 24px; }
+  .screen h2 { font-size: 18px; margin-bottom: 10px; }
+  .screen p { color: var(--dim); font-size: 14px; margin-bottom: 8px; }
+  .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 76px; background: var(--card); border: 1px solid var(--line); padding: 8px 16px; border-radius: 999px; font-size: 13px; display: none; z-index: 20; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+<script>
+(function () {
+  'use strict';
+  var SESSION_KEY = 'gewu-mobile-session';
+  var app = document.getElementById('app');
+  var state = { tab: 'tasks', tasks: [], conversations: [], detail: null, es: null };
+
+  function toast(msg) {
+    var el = document.getElementById('toast');
+    el.textContent = msg; el.style.display = 'block';
+    setTimeout(function () { el.style.display = 'none'; }, 2400);
+  }
+
+  function sessionToken() { return localStorage.getItem(SESSION_KEY) || ''; }
+
+  function api(path, options) {
+    options = options || {};
+    options.headers = Object.assign({}, options.headers, { Authorization: 'Bearer ' + sessionToken() });
+    return fetch(path, options).then(function (res) {
+      if (res.status === 401) { localStorage.removeItem(SESSION_KEY); renderUnpaired('会话已失效，请回桌面端重新扫码配对'); throw new Error('unauthorized'); }
+      return res.json();
+    });
+  }
+
+  // ── 配对：URL hash 携带一次性 token → 换持久会话 ─────────────────────
+  function tryPairFromHash() {
+    var hash = location.hash || '';
+    var token = hash.charAt(0) === '#' ? hash.slice(1) : '';
+    if (!token) return Promise.resolve(false);
+    return fetch('/m/api/pair', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: token }),
+    }).then(function (res) { return res.json(); }).then(function (data) {
+      history.replaceState(null, '', location.pathname);
+      if (data && data.ok && data.sessionToken) {
+        localStorage.setItem(SESSION_KEY, data.sessionToken);
+        toast('配对成功');
+        return true;
+      }
+      renderUnpaired((data && data.message) || '配对码无效或已过期，请在桌面端重新生成');
+      return true;
+    }).catch(function () { return false; });
+  }
+
+  function statusBadge(status) {
+    var s = String(status || '').toLowerCase();
+    var cls = s === 'running' || s === 'pending' ? 's-running'
+      : s === 'failed' || s === 'cancelled' || s === 'recovery_required' ? 's-failed'
+        : s === 'completed' ? 's-completed' : '';
+    return '<span class="badge ' + cls + '">' + (status || '-') + '</span>';
+  }
+
+  function esc(text) {
+    var div = document.createElement('div');
+    div.textContent = String(text == null ? '' : text);
+    return div.innerHTML;
+  }
+
+  // ── 任务墙 ──────────────────────────────────────────────────────────
+  function loadTasks() {
+    return api('/api/ai/agent/tasks?limit=50').then(function (data) {
+      state.tasks = data.tasks || [];
+      if (state.detail) renderDetail(); else renderTasks();
+    }).catch(function (e) { if (e.message !== 'unauthorized') toast('任务加载失败'); });
+  }
+
+  function renderTasks() {
+    var html = state.tasks.length ? state.tasks.map(function (t) {
+      return '<div class="card" data-task="' + esc(t.taskId) + '">'
+        + '<div class="row"><h3>' + esc(t.taskText || t.taskId) + '</h3>' + statusBadge(t.status) + '</div>'
+        + '<p>' + esc(t.createdAt || '') + (t.agentStatus ? ' · agent: ' + esc(t.agentStatus) : '') + '</p>'
+        + '</div>';
+    }).join('') : '<div class="empty">暂无智能体任务</div>';
+    app.innerHTML = '<main>' + html + '</main>'
+      + navHtml();
+    Array.prototype.forEach.call(app.querySelectorAll('[data-task]'), function (el) {
+      el.addEventListener('click', function () { openTask(el.getAttribute('data-task')); });
+    });
+    bindNav();
+  }
+
+  // ── 任务详情（SSE afterSeq 实时流）──────────────────────────────────
+  function openTask(taskId) {
+    state.detail = { taskId: taskId, lines: [] };
+    renderDetail();
+    if (state.es) { state.es.close(); state.es = null; }
+    try {
+      state.es = new EventSource('/api/ai/agent/task/' + encodeURIComponent(taskId) + '?afterSeq=0&session=' + encodeURIComponent(sessionToken()));
+      state.es.onmessage = function (evt) {
+        var line = evt.data || '';
+        try {
+          var parsed = JSON.parse(evt.data);
+          line = parsed.type ? parsed.type + ': ' + (parsed.content || parsed.message || parsed.preview || '') : evt.data;
+        } catch (e) { /* 纯文本行 */ }
+        state.detail.lines.push(line);
+        var stream = document.getElementById('stream');
+        if (stream) { stream.textContent = state.detail.lines.slice(-200).join('\n'); stream.scrollTop = stream.scrollHeight; }
+      };
+      state.es.onerror = function () { /* 断线由 EventSource 自动重连（afterSeq 由服务端续传） */ };
+    } catch (e) { toast('实时流不可用'); }
+  }
+
+  function renderDetail() {
+    var d = state.detail;
+    app.innerHTML = '<main><button class="back" id="back">‹ 返回任务墙</button>'
+      + '<div class="card"><h3>任务 ' + esc(d.taskId) + '</h3>'
+      + '<pre id="stream">' + esc(d.lines.slice(-200).join('\n')) + '</pre></div></main>' + navHtml();
+    document.getElementById('back').addEventListener('click', function () {
+      if (state.es) { state.es.close(); state.es = null; }
+      state.detail = null;
+      renderTasks();
+    });
+    bindNav();
+  }
+
+  // ── 会话列表 / 阅读 ────────────────────────────────────────────────
+  function loadConversations() {
+    return api('/api/ai/conversations').then(function (data) {
+      state.conversations = data.conversations || [];
+      renderConversations();
+    }).catch(function (e) { if (e.message !== 'unauthorized') toast('会话加载失败'); });
+  }
+
+  function renderConversations() {
+    var html = state.conversations.length ? state.conversations.map(function (c) {
+      return '<div class="card" data-conv="' + esc(c.id) + '">'
+        + '<div class="row"><h3>' + esc(c.title || c.id) + '</h3><span class="badge">' + esc(c.message_count || 0) + ' 条</span></div>'
+        + '<p>' + esc(c.updated_at || '') + '</p></div>';
+    }).join('') : '<div class="empty">暂无会话</div>';
+    app.innerHTML = '<main>' + html + '</main>' + navHtml();
+    Array.prototype.forEach.call(app.querySelectorAll('[data-conv]'), function (el) {
+      el.addEventListener('click', function () { openConversation(el.getAttribute('data-conv')); });
+    });
+    bindNav();
+  }
+
+  function openConversation(id) {
+    api('/api/ai/conversations/' + encodeURIComponent(id) + '/messages').then(function (data) {
+      var messages = data.messages || [];
+      var html = messages.map(function (m) {
+        var role = m.role === 'user' ? '你' : 'Gewu';
+        return '<div class="card"><h3>' + esc(role) + '</h3><p>' + esc(typeof m.content === 'string' ? m.content : JSON.stringify(m.content)).slice(0, 2000) + '</p></div>';
+      }).join('');
+      app.innerHTML = '<main><button class="back" id="back">‹ 返回会话列表</button>' + (html || '<div class="empty">暂无消息</div>') + '</main>' + navHtml();
+      document.getElementById('back').addEventListener('click', renderConversations);
+      bindNav();
+    }).catch(function (e) { if (e.message !== 'unauthorized') toast('会话读取失败'); });
+  }
+
+  function navHtml() {
+    return '<nav>'
+      + '<button data-tab="tasks" class="' + (state.tab === 'tasks' ? 'active' : '') + '">任务</button>'
+      + '<button data-tab="conversations" class="' + (state.tab === 'conversations' ? 'active' : '') + '">会话</button>'
+      + '</nav>';
+  }
+
+  function bindNav() {
+    Array.prototype.forEach.call(app.querySelectorAll('[data-tab]'), function (el) {
+      el.addEventListener('click', function () {
+        state.tab = el.getAttribute('data-tab');
+        if (state.tab === 'tasks') { if (state.detail) renderDetail(); else { renderTasks(); loadTasks(); } }
+        else loadConversations();
+      });
+    });
+  }
+
+  function renderUnpaired(message) {
+    app.innerHTML = '<div class="screen"><h2>尚未配对</h2>'
+      + '<p>' + esc(message || '请在桌面端 Gewu 设置 →「手机远程」生成配对二维码后扫码打开本页。') + '</p>'
+      + '<p>配对码为一次性且 5 分钟内有效。</p></div>';
+  }
+
+  function boot() {
+    tryPairFromHash().then(function (pairedOrRendered) {
+      if (pairedOrRendered) return;
+      if (!sessionToken()) { renderUnpaired(); return; }
+      api('/m/api/health').then(function () {
+        renderTasks();
+        loadTasks();
+      }).catch(function (e) {
+        if (e.message !== 'unauthorized') renderUnpaired('移动网关不可达，请检查网络或桌面端开关');
+      });
+    });
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>

@@ -3323,3 +3323,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **P2 验收方法学（已写入 `scripts/block84-p2-ui-live.cjs` 头注释，供后续复用）**：①origin 必须用 `http://localhost:3000`（与后端白名单口径一致）；②导航必须用 CDP `Page.navigate` 软导航——`location.href` 硬导航会触发欢迎页 auto-navigate 把 URL 弹回 `allProjects[0]`（环境里恰好是不可达的 ssh 项目）；③必须选 `workspace_kind='local'` 项目——ssh 项目远端不可达时工作区加载失败，同样看不到商店页。
 
 **诚实边界**：`tsc` 全量 0 错、`docs:check` PASS(232)、`ui:audit:check` 通过、`hygiene:check` PASS；相邻回归 plugin-sdk 5/5 / manifest-schema / domain-neutrality 2/2 / g0-chf0-http 3/3。**P3 正式阶段收口尚未执行**（`npm run verify -- <flow>` / `npm run closeout` 待跑），故本条状态为 dev Electron 边界内的当前阶段最高证据等级。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-319: 设置区「手机远程」+ 移动只读页（BLOCK-70 扫码直达工作区）(2026-09-13 in_progress，dev 边界内实现完成；真实手机扫码验收待用户)
+
+- **工作包**：BLOCK-70-MOBILE-SYNC（P0 A1 PoC + P1 主体，用户夜间串行授权）。plan `docs/block-70-mobile-sync-plan.md`（修订 1）+ P0 评审稿 `docs/block-70-p0-design-review.md`。
+- **交付面**：①后端 `core/biof3-server/mobile-gateway/`（独立 Express app 实例 + 独立端口 `BIOF3_MOBILE_PORT` 默认 3005，**默认关闭** additive；一次性配对 token（32B hex、5 分钟 TTL、单次使用）→ 持久会话 token（文件制 `<dataDir>/mobile/sessions.json` 只存 sha256）+ 会话鉴权中间件（Bearer / `?session=` 双通道供 EventSource）+ 按 IP 限速 429 + JSONL 审计（只记元数据不记 query/内容）；`server.js` boot 钩子关闭态零行为）②管理 REST `routes/mobile-admin.js`（status/config/pairing token/qr.svg（服务端渲染，前端零新依赖）/devices/revoke，挂主后端本机面）③设置区 `sections/MobileSync.tsx`（三态呈现 + 开关「重启生效」诚实提示 + 配对二维码 + 设备列表/吊销）④移动只读页 `mobile-gateway/public/index.html`（vanilla JS 独立 bundle 不进 Vite 图：任务墙/任务详情 SSE afterSeq/会话列表与阅读/未配对诚实空态）。依赖裁决：`qrcode-generator@1.4.4`（plan §5-D2 预名全包唯一新 npm 依赖，服务端侧，MIT 零传递依赖）——⏳ 待用户追认。
+- **验证（2026-09-13 实现收账）**：
+  ① 契约+回环集成测试 `test/block70-mobile-gateway.test.mjs` **8/8 PASS**（配对单次性/TTL/会话哈希落盘/吊销即时失效跨重启/config 默认关闭/gateway 静态页与 401/限速 429/admin 与 gateway 共享会话真相——吊销即刻切断移动面）；
+  ② **实机隔离探针 `scripts/block70-mobile-gateway-live.mjs` 16/16 ALL PASS**（`acceptance/block-70/block70-mobile-gateway-live.json`，真实起服双态：关闭态 additive 红线=主后端健康+移动端口不监听+管理面如实 enabled=false；启用态全链=gateway 健康/移动页可达/管理面 status 生效值/配对 token+QR SVG/手机配对成功+重放被拒/Bearer 与 ?session= 双通道授权读+无凭证 401/主后端吊销即刻切断/审计落盘不含 token；token 全程脱敏不入证）；
+  ③ 组件测试 `MobileSync.test.tsx` 3/3（三态呈现/配对码渲染与 QR src 契约/吊销请求形状）+ `tsc --noEmit` 0 错 + `test:changed` 343/345（2 红=D8 例外 P6 证据重采属 G0-RS，基线对照存量，与本包无关）。
+- **实机抓真一（安全缺陷，探针 A7 抓出）**：sessionAuth 初版只挂 `/m/api` 前缀，而挂载的既有路由模块注册在 `/api/*`——移动面上既有端点完全裸奔（匿名可读会话列表）。修复＝鉴权中间件改为全局挂载（静态页/配对/健康三公开面之后、mountRoutes 之前），`/api/*` 全覆盖。
+- **实机抓真二**：`express.static` 挂 `/m` 且 `fallthrough:false` 会把 `/m/api/*` 吞成 500（静态中间件匹配前缀后找不到文件直接报错）——修复＝fallthrough 回归默认 true 让请求链穿透。
+- **实机抓真三**：管理面 status/QR 读配置文件值而非生效值（env 启用时 status 显示 enabled:false、QR 指向默认端口）——修复＝admin 统一走 resolveEnabled/resolvePort 生效值，与实际运行的 gateway 一致。（配对单次性/TTL/会话哈希落盘/吊销即时失效跨重启/config 默认关闭/gateway 静态页与 401/限速 429/admin 与 gateway 共享会话真相——吊销即刻切断移动面）；`tsc --noEmit` 0 错；`test:changed:list` unknown=0。**实机抓真一**：`express.static` 挂 `/m` 且 `fallthrough:false` 会把 `/m/api/*` 吞成 500（静态中间件匹配了 `/m/api/probe` 找不到文件直接报错）——修复＝fallthrough 回归默认 true 让 API 链穿透。
+- **诚实边界（未升 verified 的原因）**：dev 栈 CDP 设置区渲染断言与真实手机扫码全链未执行——前者待 dev 栈窗口，后者**CDP 够不着**，按无人化验收阶梯第 2 级如实停留 `in_progress`，待用户照测试路线实测后升级；P2 控制面（发消息/批准/取消）与 P3 aliyun 隧道属后续阶段未实现。G0 开发期常态 · 不外推 packaged/Provider/GA。

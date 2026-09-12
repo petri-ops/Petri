@@ -233,6 +233,7 @@
     "better-sqlite3": "^12.11.1",
     "extract-zip": "^2.0.1",
     "node-pty": "1.1.0-beta34",
+    "qrcode-generator": "^1.4.4",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

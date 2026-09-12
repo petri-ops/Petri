@@ -45,6 +45,8 @@ module.exports = async function registerRoutes(app) {
     ['AI chat', () => require('./ai-chat')(app)],
     ['AI agent', () => require('./ai-agent')(app)],
     ['AI settings', () => require('./ai-settings-api').registerAiSettingsRoutes(app)],
+    // BLOCK-70：手机远程同步管理面（桌面端本机 REST；移动面本体在 mobile-gateway 独立实例）。
+    ['Mobile sync admin', () => require('./mobile-admin')(app)],
   ];
 
   for (const [name, fn] of routes) {
