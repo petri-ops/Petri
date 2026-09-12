@@ -1,8 +1,8 @@
 # BLOCK-84-DOMAIN-PACK-ONECLICK：领域包产品级一键装/卸计划
 
-> 文档版本：v1.2（P1+P2+P3 收口版）
+> 文档版本：v1.3（整包收口版）
 > 创建日期：2026-09-12
-> 状态：**active（P1+P2 已收口 · P3 收口已执行，1 项门禁失败经基线证明为存量债）**
+> 状态：**completed（2026-09-13 整包收口：P1/P2/P3 全部完成，收口门禁 4/4 全绿）**
 > truthDomain：block-84-domain-pack-oneclick
 > 上游：BLOCK-83（已 completed——本包把「环境变量级拔插」升级为「产品级一键」）
 > 收口证据：`acceptance/block-84/block84-pack-oneclick-live.json`（P1 隔离探针双态 20/20）
@@ -213,3 +213,24 @@ db 触碰型套件 `ERR_DLOPEN_FAILED` 整文件失败。切到 `fnm` 的 **Node
 | `scripts/block84-p2-ui-live.cjs` | **6/6 ALL PASS**（P2 CDP 商店 UI） |
 
 **G0 开发期常态 · 不外推 packaged/Provider/GA。**
+
+## 10. 整包收口记录（2026-09-13）
+
+**结论**：BLOCK-84-DOMAIN-PACK-ONECLICK 整包 **completed**。P1（后端）/ P2（前端）/ P3（收口）三阶段全部完成；用户 2026-09-13 授权收口释放 active 槽位。
+
+### 10.1 收口门禁终态（2026-09-13 复跑，Node 24.20.0）
+
+| 门禁 | 结果 |
+| --- | --- |
+| `npm run closeout` | **PASS 4/4 全绿**（hygiene / docs:check / ui:audit:check / test:changed）——P3 时的第 4 项存量债（33 项）已经 TEST-INFRA-DEBT-3（`ce0cff4d`）清零，本次 `test:changed` 转绿 |
+| P1 隔离探针 `scripts/block84-pack-oneclick-live.cjs` | **20/20 ALL PASS**（当前源码重跑，证据刷新 `acceptance/block-84/block84-pack-oneclick-live.json`） |
+| BLOCK-84 契约套件（block84-pack-oneclick + env-coordinator-trusted-origins + env-coordinator-port） | **17/17 PASS** |
+
+**last-green 复用说明**：P3 证据提交（`ec3b675d`）之后仅一个源码提交 `ce0cff4d`（TEST-INFRA-DEBT-3，触碰 `core/shared-backend/capability-bundles.js` 的 R bundle tar 解包），与 pack 装卸路径正交；且 P1 探针与契约套件已在当前源码重跑全绿，P2 CDP 商店 UI 证据（6/6）复用成立。
+
+### 10.2 收口语义
+
+- 交付面：`core/shared-backend/pack-registry.js` + `src/ipc/pack.js`（5 IPC）+ preload `packs.*` + server boot 接线 + `PluginStorePanel` 领域包分区 + `tool-registry.registerDomainToolsFile()`。
+- 证据：P1 隔离探针双态 20/20（含 D13 第二租户）；P2 CDP 商店 UI 6/6（UI-353 verified，dev Electron 边界内）。
+- 范围外维持候选（不视为缺口）：远程包分发、包内单插件粒度管理、自动更新、多包冲突仲裁。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
