@@ -219,8 +219,7 @@ test('BLOCK-70 startMobileGateway stays off unless enabled (additive red line)',
   }
 });
 
-test('BLOCK-70 admin REST and gateway share one session truth (revoke is instant)', async () => {
-  const root = tmpRoot();
+test('BLOCK-70 admin REST and gateway share one session truth (revoke is instant)', async () => {  const root = tmpRoot();
   resetStoresForTest();
   try {
     const express = require('express');
@@ -260,6 +259,60 @@ test('BLOCK-70 admin REST and gateway share one session truth (revoke is instant
     await closeServer(adminServer);
   } finally {
     resetStoresForTest();
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+// ── P2 控制面：批准决定窄口（db 全链归实机探针，此处只验请求形状与鉴权）──
+
+test('BLOCK-70 P2 approvals decide: session required, scope keys required', async () => {
+  const root = tmpRoot();
+  resetStoresForTest();
+  try {
+    const { app, stores } = buildMobileGateway({
+      dataDir: root,
+      mountRoutes: (mobileApp) => { mobileApp.get('/m/api/probe', (_req, res) => res.json({ ok: true })); },
+    });
+    const server = await listen(app);
+    const base = `http://127.0.0.1:${server.address().port}`;
+
+    // 无会话 401（sessionAuth 覆盖控制窄口）
+    assert.equal((await fetch(`${base}/m/api/approvals/some-token/decide`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ approve: true, projectId: null, conversationId: null }),
+    })).status, 401);
+
+    const { sessionToken } = stores.sessions.createSession({ name: 'test' });
+    const auth = { Authorization: `Bearer ${sessionToken}`, 'Content-Type': 'application/json' };
+
+    // 缺 scope 键 → 400（与桌面 REST 同契约；该校验先于任何 db 触碰）
+    const noScope = await fetch(`${base}/m/api/approvals/some-token/decide`, {
+      method: 'POST', headers: auth, body: JSON.stringify({ approve: true }),
+    });
+    assert.equal(noScope.status, 400);
+    assert.deepEqual(await body(noScope), { ok: false, error: 'approval_scope_required', message: '缺少批准范围（projectId/conversationId）' });
+
+    await closeServer(server);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('BLOCK-70 P2 mobile page ships control face (approval/cancel/composer markers)', async () => {
+  const root = tmpRoot();
+  resetStoresForTest();
+  try {
+    const { app } = buildMobileGateway({ dataDir: root, mountRoutes: () => {} });
+    const server = await listen(app);
+    const base = `http://127.0.0.1:${server.address().port}`;
+    const page = await (await fetch(`${base}/m/`)).text();
+    assert.ok(page.includes('/m/api/approvals/'), 'approval decide endpoint must be wired');
+    assert.ok(page.includes('再点一次确认'), 'two-step confirm (D4) must be present');
+    assert.ok(page.includes('/api/ai/agent/task/'), 'task stream/cancel wiring must be present');
+    assert.ok(page.includes("'/api/ai/agent'"), 'composer send must hit the agent endpoint');
+    await closeServer(server);
+  } finally {
     rmSync(root, { recursive: true, force: true });
   }
 });

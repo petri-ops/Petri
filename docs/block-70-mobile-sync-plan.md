@@ -113,7 +113,8 @@
 ## 9.1 实现进度（2026-09-13，夜间串行授权会话）
 
 - **已落地（P0 A1 PoC + P1 主体）**：mobile-gateway 独立 app 实例（默认关闭 additive；一次性配对 token 5min TTL→持久会话 sessions.json 只存 sha256；鉴权中间件全局覆盖挂载读面；限速+审计）；管理 REST（status/config/pairing/qr.svg/devices/revoke）；设置区「手机远程」（UI-319 in_progress）；移动只读页 /m（任务墙/任务详情 SSE/会话阅读）。证据：集成 8/8 + 实机隔离探针 **16/16 ALL PASS**（acceptance/block-70/）+ 组件 3/3 + tsc 0。
-- **诚实边界**：真实手机扫码全链 + dev 栈 CDP 设置区断言未执行（无人化阶梯第 2 级，待用户/待窗口）；P2 控制面、P3 aliyun 隧道未实现。
+- **P2 控制面（同日追加）**：移动页批准卡（两步确认 D4）+ 取消 + composer 发消息；窄口 `/m/api/approvals/:token/decide` 进程内直调 `db.ackToolJob`（与桌面同一函数同一 scope 校验，权限不放大）。集成 10/10 + 实机探针 **28/28 ALL PASS**（B 系列：批准/拒绝双向落库、scope 不匹配 404 权限不放大、吊销后可重配对）。
+- **诚实边界**：真实手机扫码全链与真实模型 E2E（手机发起→桌面执行→手机批准→收终态）+ dev 栈 CDP 设置区断言未执行（无人化阶梯第 2 级，待用户/待窗口）；P3 aliyun 隧道未实现。
 - **⏳ 待用户**：D1-D10 评审追认（docs/block-70-p0-design-review.md）、qrcode-generator 依赖追认、真实手机实测、P2/P3 启动裁决。
 
 ## 10. 修订记录

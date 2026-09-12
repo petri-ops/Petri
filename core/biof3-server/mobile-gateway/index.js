@@ -131,7 +131,10 @@ function buildMobileGateway({
   // 既有 /api/* 路由模块——都必须持有效会话（D4：token 鉴权中间件全覆盖）。
   app.use(sessionAuth);
 
-  // 既有读面路由模块注入（conversations / agent tasks / SSE / tools）。
+  // P2 控制面窄口：批准决定（进程内直调 db.ackToolJob，权限不放大）。
+  require('./control').registerMobileControl(app);
+
+  // 既有读面/控制路由模块注入（conversations / agent tasks / SSE / tools）。
   if (typeof mountRoutes === 'function') {
     mountRoutes(app);
   }

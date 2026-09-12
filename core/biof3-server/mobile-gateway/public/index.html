@@ -37,6 +37,18 @@
   .screen h2 { font-size: 18px; margin-bottom: 10px; }
   .screen p { color: var(--dim); font-size: 14px; margin-bottom: 8px; }
   .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 76px; background: var(--card); border: 1px solid var(--line); padding: 8px 16px; border-radius: 999px; font-size: 13px; display: none; z-index: 20; }
+  .approval { border-color: var(--warn); }
+  .approval h3 { color: var(--warn); }
+  .approval .actions { display: flex; gap: 10px; margin-top: 10px; }
+  .approval .actions button { flex: 1; padding: 10px 0; border-radius: 8px; border: 1px solid var(--line); background: none; color: var(--text); font-size: 14px; }
+  .approval .actions .approve.armed { background: var(--ok); color: #fff; border-color: var(--ok); }
+  .approval .actions .reject.armed { background: var(--err); color: #fff; border-color: var(--err); }
+  .approval .done { margin-top: 10px; font-size: 13px; color: var(--dim); }
+  .composer { position: fixed; left: 0; right: 0; bottom: 52px; background: var(--card); border-top: 1px solid var(--line); padding: 8px 10px; display: flex; gap: 8px; z-index: 10; }
+  .composer input { flex: 1; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; color: var(--text); padding: 10px 12px; font-size: 14px; }
+  .composer button { border: none; border-radius: 8px; background: var(--accent); color: #fff; padding: 0 16px; font-size: 14px; }
+  .composer button:disabled { opacity: 0.5; }
+  .cancelbtn { background: none; border: 1px solid var(--err); color: var(--err); border-radius: 8px; padding: 6px 12px; font-size: 13px; }
 </style>
 </head>
 <body>
@@ -47,22 +59,23 @@
   'use strict';
   var SESSION_KEY = 'gewu-mobile-session';
   var app = document.getElementById('app');
-  var state = { tab: 'tasks', tasks: [], conversations: [], detail: null, es: null };
+  var state = { tab: 'tasks', tasks: [], conversations: [], detail: null };
 
   function toast(msg) {
     var el = document.getElementById('toast');
     el.textContent = msg; el.style.display = 'block';
-    setTimeout(function () { el.style.display = 'none'; }, 2400);
+    setTimeout(function () { el.style.display = 'none'; }, 2600);
   }
 
   function sessionToken() { return localStorage.getItem(SESSION_KEY) || ''; }
 
   function api(path, options) {
     options = options || {};
-    options.headers = Object.assign({}, options.headers, { Authorization: 'Bearer ' + sessionToken() });
+    options.headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers, { Authorization: 'Bearer ' + sessionToken() });
+    if (options.body && typeof options.body !== 'string') options.body = JSON.stringify(options.body);
     return fetch(path, options).then(function (res) {
       if (res.status === 401) { localStorage.removeItem(SESSION_KEY); renderUnpaired('会话已失效，请回桌面端重新扫码配对'); throw new Error('unauthorized'); }
-      return res.json();
+      return res.json().catch(function () { return {}; });
     });
   }
 
@@ -116,49 +129,135 @@
         + '<p>' + esc(t.createdAt || '') + (t.agentStatus ? ' · agent: ' + esc(t.agentStatus) : '') + '</p>'
         + '</div>';
     }).join('') : '<div class="empty">暂无智能体任务</div>';
-    app.innerHTML = '<main>' + html + '</main>'
-      + navHtml();
+    app.innerHTML = '<main>' + html + '</main>' + navHtml();
     Array.prototype.forEach.call(app.querySelectorAll('[data-task]'), function (el) {
       el.addEventListener('click', function () { openTask(el.getAttribute('data-task')); });
     });
     bindNav();
   }
 
-  // ── 任务详情（SSE afterSeq 实时流）──────────────────────────────────
+  // ── 任务详情（SSE afterSeq 实时流 + 批准卡 + 取消）──────────────────
   function openTask(taskId) {
-    state.detail = { taskId: taskId, lines: [] };
+    state.detail = { taskId: taskId, meta: null, lines: [], approval: null, decided: null };
     renderDetail();
     if (state.es) { state.es.close(); state.es = null; }
+    // 任务元信息：批准决定需要 projectId/conversationId scope（D4 权限不放大）。
+    api('/api/ai/agent/task/' + encodeURIComponent(taskId) + '/meta')
+      .then(function (data) {
+        var meta = data && (data.task || data.meta || data);
+        if (state.detail && state.detail.taskId === taskId && meta) {
+          state.detail.meta = meta;
+        }
+      }).catch(function () { /* 元信息缺失时批准卡会以 404 诚实失败 */ });
     try {
       state.es = new EventSource('/api/ai/agent/task/' + encodeURIComponent(taskId) + '?afterSeq=0&session=' + encodeURIComponent(sessionToken()));
       state.es.onmessage = function (evt) {
-        var line = evt.data || '';
-        try {
-          var parsed = JSON.parse(evt.data);
-          line = parsed.type ? parsed.type + ': ' + (parsed.content || parsed.message || parsed.preview || '') : evt.data;
-        } catch (e) { /* 纯文本行 */ }
-        state.detail.lines.push(line);
-        var stream = document.getElementById('stream');
-        if (stream) { stream.textContent = state.detail.lines.slice(-200).join('\n'); stream.scrollTop = stream.scrollHeight; }
+        handleStreamLine(evt.data || '');
       };
       state.es.onerror = function () { /* 断线由 EventSource 自动重连（afterSeq 由服务端续传） */ };
     } catch (e) { toast('实时流不可用'); }
   }
 
+  function handleStreamLine(raw) {
+    var d = state.detail;
+    if (!d) return;
+    var parsed = null;
+    try { parsed = JSON.parse(raw); } catch (e) { /* 纯文本行 */ }
+    if (parsed && parsed.needApproval && parsed.ackToken) {
+      d.approval = {
+        ackToken: parsed.ackToken,
+        toolId: parsed.toolId || 'run_tool',
+        message: parsed.message || '',
+        params: parsed.params ? JSON.stringify(parsed.params).slice(0, 240) : '',
+      };
+      d.decided = null;
+      renderDetail();
+      return;
+    }
+    var line = parsed
+      ? (parsed.type ? parsed.type + ': ' + (parsed.content || parsed.message || parsed.preview || '') : raw)
+      : raw;
+    d.lines.push(line);
+    var stream = document.getElementById('stream');
+    if (stream) { stream.textContent = d.lines.slice(-200).join('\n'); stream.scrollTop = stream.scrollHeight; }
+  }
+
+  function twoStepConfirm(button, onConfirm) {
+    if (button.classList.contains('armed')) { onConfirm(); return; }
+    var label = button.textContent;
+    button.classList.add('armed');
+    button.textContent = '再点一次确认';
+    setTimeout(function () {
+      if (button.isConnected) { button.classList.remove('armed'); button.textContent = label; }
+    }, 3000);
+  }
+
+  function decideApproval(approve) {
+    var d = state.detail;
+    if (!d || !d.approval || d.decided) return;
+    var scope = {
+      projectId: (d.meta && (d.meta.projectId || d.meta.project_id)) || null,
+      conversationId: (d.meta && (d.meta.conversationId || d.meta.conversation_id)) || null,
+    };
+    api('/m/api/approvals/' + encodeURIComponent(d.approval.ackToken) + '/decide', {
+      method: 'POST',
+      body: { approve: approve, projectId: scope.projectId, conversationId: scope.conversationId },
+    }).then(function (data) {
+      if (data && data.ok) {
+        d.decided = approve ? 'approved' : 'rejected';
+        toast(approve ? '已批准，桌面端继续执行' : '已拒绝该操作');
+        renderDetail();
+      } else {
+        toast((data && data.message) || '批准失败（令牌无效或范围不匹配）');
+      }
+    }).catch(function (e) { if (e.message !== 'unauthorized') toast('批准请求失败'); });
+  }
+
+  function cancelTask() {
+    var d = state.detail;
+    if (!d) return;
+    api('/api/ai/agent/task/' + encodeURIComponent(d.taskId) + '/cancel', { method: 'POST', body: {} })
+      .then(function (data) {
+        toast(data && (data.ok || data.status === 'ok') ? '已请求取消，两端状态将一致收敛' : (data && (data.message || data.error)) || '取消请求已发送');
+      }).catch(function (e) { if (e.message !== 'unauthorized') toast('取消请求失败'); });
+  }
+
   function renderDetail() {
     var d = state.detail;
+    var approvalHtml = '';
+    if (d.approval) {
+      var a = d.approval;
+      var doneNote = d.decided === 'approved' ? '<p class="done">✓ 已批准——桌面端继续执行，结果看下方实时流</p>'
+        : d.decided === 'rejected' ? '<p class="done">✓ 已拒绝</p>' : '';
+      approvalHtml = '<div class="card approval"><h3>待批准 · ' + esc(a.toolId) + '</h3>'
+        + (a.message ? '<p>' + esc(a.message) + '</p>' : '')
+        + (a.params ? '<pre>' + esc(a.params) + '</pre>' : '')
+        + (doneNote || '<div class="actions">'
+          + '<button class="approve" id="approve">批准</button>'
+          + '<button class="reject" id="reject">拒绝</button>'
+          + '</div>')
+        + '</div>';
+    }
     app.innerHTML = '<main><button class="back" id="back">‹ 返回任务墙</button>'
-      + '<div class="card"><h3>任务 ' + esc(d.taskId) + '</h3>'
-      + '<pre id="stream">' + esc(d.lines.slice(-200).join('\n')) + '</pre></div></main>' + navHtml();
+      + '<div class="card"><div class="row"><h3>任务 ' + esc(d.taskId) + '</h3>'
+      + '<button class="cancelbtn" id="cancel">取消任务</button></div>'
+      + '<pre id="stream">' + esc(d.lines.slice(-200).join('\n')) + '</pre></div>'
+      + approvalHtml
+      + '</main>' + navHtml();
     document.getElementById('back').addEventListener('click', function () {
       if (state.es) { state.es.close(); state.es = null; }
       state.detail = null;
       renderTasks();
     });
+    document.getElementById('cancel').addEventListener('click', cancelTask);
+    var approveBtn = document.getElementById('approve');
+    var rejectBtn = document.getElementById('reject');
+    if (approveBtn) approveBtn.addEventListener('click', function () { twoStepConfirm(approveBtn, function () { decideApproval(true); }); });
+    if (rejectBtn) rejectBtn.addEventListener('click', function () { twoStepConfirm(rejectBtn, function () { decideApproval(false); }); });
     bindNav();
   }
 
-  // ── 会话列表 / 阅读 ────────────────────────────────────────────────
+  // ── 会话列表 / 阅读 / composer 轻控制 ───────────────────────────────
   function loadConversations() {
     return api('/api/ai/conversations').then(function (data) {
       state.conversations = data.conversations || [];
@@ -172,10 +271,11 @@
         + '<div class="row"><h3>' + esc(c.title || c.id) + '</h3><span class="badge">' + esc(c.message_count || 0) + ' 条</span></div>'
         + '<p>' + esc(c.updated_at || '') + '</p></div>';
     }).join('') : '<div class="empty">暂无会话</div>';
-    app.innerHTML = '<main>' + html + '</main>' + navHtml();
+    app.innerHTML = '<main>' + html + '</main>' + composerHtml() + navHtml();
     Array.prototype.forEach.call(app.querySelectorAll('[data-conv]'), function (el) {
       el.addEventListener('click', function () { openConversation(el.getAttribute('data-conv')); });
     });
+    bindComposer();
     bindNav();
   }
 
@@ -186,10 +286,46 @@
         var role = m.role === 'user' ? '你' : 'Gewu';
         return '<div class="card"><h3>' + esc(role) + '</h3><p>' + esc(typeof m.content === 'string' ? m.content : JSON.stringify(m.content)).slice(0, 2000) + '</p></div>';
       }).join('');
-      app.innerHTML = '<main><button class="back" id="back">‹ 返回会话列表</button>' + (html || '<div class="empty">暂无消息</div>') + '</main>' + navHtml();
+      app.innerHTML = '<main><button class="back" id="back">‹ 返回会话列表</button>' + (html || '<div class="empty">暂无消息</div>') + '</main>'
+        + composerHtml(id) + navHtml();
       document.getElementById('back').addEventListener('click', renderConversations);
+      bindComposer(id);
       bindNav();
     }).catch(function (e) { if (e.message !== 'unauthorized') toast('会话读取失败'); });
+  }
+
+  function composerHtml(conversationId) {
+    return '<div class="composer" data-conv="' + esc(conversationId || '') + '">'
+      + '<input type="text" id="composer-input" placeholder="' + (conversationId ? '发消息…' : '给 Gewu 发消息（新建会话）…') + '">'
+      + '<button id="composer-send">发送</button></div>';
+  }
+
+  function bindComposer(conversationId) {
+    var input = document.getElementById('composer-input');
+    var send = document.getElementById('composer-send');
+    if (!input || !send) return;
+    function submit() {
+      var text = input.value.trim();
+      if (!text || send.disabled) return;
+      send.disabled = true;
+      var body = { messages: [{ role: 'user', content: text }] };
+      if (conversationId) body.conversationId = conversationId;
+      api('/api/ai/agent', { method: 'POST', body: body }).then(function (data) {
+        send.disabled = false;
+        if (data && (data.taskId || (data.ok !== false && data.status === 'ok'))) {
+          input.value = '';
+          toast('任务已启动' + (data.taskId ? '：' + data.taskId : '') + '，桌面端执行中');
+          state.tab = 'tasks';
+          state.detail = null;
+          renderTasks();
+          loadTasks();
+        } else {
+          toast((data && (data.message || data.error)) || '发送失败（请确认桌面端已配置模型）');
+        }
+      }).catch(function (e) { send.disabled = false; if (e.message !== 'unauthorized') toast('发送失败'); });
+    }
+    send.addEventListener('click', submit);
+    input.addEventListener('keydown', function (evt) { if (evt.key === 'Enter') submit(); });
   }
 
   function navHtml() {

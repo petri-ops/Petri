@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
   "acceptanceId": "BLOCK-70-A1-P0-P1-LIVE",
-  "generatedAt": "2026-09-12T20:22:21.174Z",
+  "generatedAt": "2026-09-12T21:50:07.264Z",
   "qualificationEligible": false,
   "allPass": true,
   "checks": [
     {
       "name": "A1a 关闭态主后端健康",
       "ok": true,
-      "detail": "{\"status\":\"ok\",\"timestamp\":\"2026-09-12T20:22:20.378Z\",\"version\":\"1.0.0\",\"db_ok\":true}"
+      "detail": "{\"status\":\"ok\",\"timestamp\":\"2026-09-12T21:50:06.293Z\",\"version\":\"1.0.0\",\"db_ok\":true}"
     },
     {
       "name": "A1b 关闭态移动端口不监听",
       "ok": true,
-      "detail": "port 52040 should be closed"
+      "detail": "port 65511 should be closed"
     },
     {
       "name": "A1c 关闭态管理面如实呈现 enabled=false",
       "ok": true,
-      "detail": "{\"ok\":true,\"enabled\":false,\"port\":52040,\"restartHint\":\"启用/关闭在重启桌面端后生效\",\"lanAddresses\":[\"192.168.0.102\"],\"activeDevices\":0,\"devices\":[],\"pairingPending\":0}"
+      "detail": "{\"ok\":true,\"enabled\":false,\"port\":65511,\"restartHint\":\"启用/关闭在重启桌面端后生效\",\"lanAddresses\":[\"192.168.0.102\"],\"activeDevices\":0,\"devices\":[],\"pairingPending\":0}"
     },
     {
       "name": "A2 gateway 健康",
@@ -33,12 +33,12 @@
     {
       "name": "A4 管理面 status 如实",
       "ok": true,
-      "detail": "{\"ok\":true,\"enabled\":true,\"port\":52046,\"restartHint\":\"启用/关闭在重启桌面端后生效\",\"lanAddresses\":[\"192.168.0.102\"],\"activeDevices\":0,\"devices\":0,\"pairingPending\":0}"
+      "detail": "{\"ok\":true,\"enabled\":true,\"port\":65518,\"restartHint\":\"启用/关闭在重启桌面端后生效\",\"lanAddresses\":[\"192.168.0.102\"],\"activeDevices\":0,\"devices\":0,\"pairingPending\":0}"
     },
     {
       "name": "A5a 配对 token 签发",
       "ok": true,
-      "detail": "{\"ok\":true,\"token\":\"***\",\"expiresAt\":1789244841069,\"urls\":1,\"primaryUrl\":\"http://192.168.0.102:52046/m#0b1b1496ae0082692d20b1bef4c905a2d6c036381e0fb6a0ceee68b265a7d24a\"}"
+      "detail": "{\"ok\":true,\"token\":\"***\",\"expiresAt\":1789250106949,\"urls\":1,\"primaryUrl\":\"http://192.168.0.102:65518/m#ae23914afc3d34201c7afebb51fc7694f34c23409c3d3b610672b92079581f5f\"}"
     },
     {
       "name": "A5b QR SVG 渲染",
@@ -84,6 +84,66 @@
       "name": "A9 审计落盘且不含 token",
       "ok": true,
       "detail": "exists=true"
+    },
+    {
+      "name": "B0 吊销后可重新配对（第二会话）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B1a 发消息无会话 401",
+      "ok": true,
+      "detail": "status 401"
+    },
+    {
+      "name": "B1b 发消息契约校验（会话通过、缺消息 400）",
+      "ok": true,
+      "detail": "status 400 body {\"status\":\"error\",\"error\":\"缺少消息\"}"
+    },
+    {
+      "name": "B2a 取消无会话 401",
+      "ok": true,
+      "detail": "status 401"
+    },
+    {
+      "name": "B2b 取消未知任务结构化 404",
+      "ok": true,
+      "detail": "status 404"
+    },
+    {
+      "name": "B3a 批准无会话 401",
+      "ok": true,
+      "detail": "status 401"
+    },
+    {
+      "name": "B3b 批准缺 scope 400（与桌面 REST 同契约）",
+      "ok": true,
+      "detail": "status 400"
+    },
+    {
+      "name": "B3c scope 不匹配 404（权限不放大）",
+      "ok": true,
+      "detail": "status 404"
+    },
+    {
+      "name": "B3d 手机批准放行",
+      "ok": true,
+      "detail": "status 200 body {\"ok\":true,\"ackStatus\":\"approved\",\"toolJobId\":\"b70_job_approve\"}"
+    },
+    {
+      "name": "B3e 批准落库 ack_status=approved 且 job 状态不被破坏",
+      "ok": true,
+      "detail": "{\"ack_status\":\"approved\",\"status\":\"pending\"}"
+    },
+    {
+      "name": "B4a 手机拒绝成功",
+      "ok": true,
+      "detail": "status 200"
+    },
+    {
+      "name": "B4b 拒绝落库 ack_status=rejected + job failed",
+      "ok": true,
+      "detail": "{\"ack_status\":\"rejected\",\"status\":\"failed\",\"error\":\"用户取消了该重操作\"}"
     }
   ],
   "notes": {

@@ -21,8 +21,12 @@ import { createServer } from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 
 import { applyMigrations, createCaptureEnv, stopServer } from './g0-rs-p4r-capture.mjs';
+
+const require = createRequire(import.meta.url);
+const Database = require('better-sqlite3');
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SERVER_ENTRY = path.join(REPO_ROOT, 'core', 'biof3-server', 'server.js');
@@ -171,6 +175,89 @@ async function main() {
     const auditExists = existsSync(auditPath) && statSync(auditPath).size > 0;
     const auditRaw = auditExists ? readFileSync(auditPath, 'utf8') : '';
     assert('A9 审计落盘且不含 token', auditExists && auditRaw.includes('/m/api/pair') && !auditRaw.includes(paired.sessionToken), `exists=${auditExists}`);
+
+    // ── B 系列：P2 控制面（发消息契约 / 取消 / 批准全链，真实 tool_jobs 行）──
+    // A8 已吊销第一会话；此处再配对第二会话（同时证明吊销后可重新配对、多会话并存）。
+    const pairing2 = await (await fetch(`${mainBase}/api/mobile/pairing/token`, { method: 'POST' })).json();
+    const paired2 = await (await fetch(`${gatewayBase}/m/api/pair`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: pairing2.token }),
+    })).json();
+    assert('B0 吊销后可重新配对（第二会话）', paired2.ok === true && typeof paired2.sessionToken === 'string');
+    const authHeaders = { Authorization: `Bearer ${paired2.sessionToken}`, 'Content-Type': 'application/json' };
+
+    const sendAnon = await fetch(`${gatewayBase}/api/ai/agent`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'user', content: 'hi' }] }),
+    });
+    assert('B1a 发消息无会话 401', sendAnon.status === 401, `status ${sendAnon.status}`);
+    const sendNoMessages = await fetch(`${gatewayBase}/api/ai/agent`, {
+      method: 'POST', headers: authHeaders, body: JSON.stringify({}),
+    });
+    const sendNoMessagesBody = await sendNoMessages.json().catch(() => ({}));
+    assert('B1b 发消息契约校验（会话通过、缺消息 400）', sendNoMessages.status === 400 && sendNoMessagesBody.error === '缺少消息', `status ${sendNoMessages.status} body ${JSON.stringify(sendNoMessagesBody).slice(0, 120)}`);
+
+    const cancelAnon = await fetch(`${gatewayBase}/api/ai/agent/task/nonexistent/cancel`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    assert('B2a 取消无会话 401', cancelAnon.status === 401, `status ${cancelAnon.status}`);
+    const cancelUnknown = await fetch(`${gatewayBase}/api/ai/agent/task/nonexistent/cancel`, { method: 'POST', headers: authHeaders, body: '{}' });
+    assert('B2b 取消未知任务结构化 404', cancelUnknown.status === 404, `status ${cancelUnknown.status}`);
+
+    // 批准全链：向隔离 DB 插入两行 pending tool_job（真实 migrations schema）。
+    const db = new Database(envRoot.paths.BIOF3_DB_PATH);
+    const columns = db.prepare('PRAGMA table_info(tool_jobs)').all();
+    const columnNameSet = new Set(columns.map((column) => column.name));
+    function insertPendingJob(id, ackToken, projectId) {
+      const values = {
+        id,
+        tool_id: 'demo_tool',
+        status: 'pending',
+        ack_token: ackToken,
+        ack_status: 'pending',
+        user_id: 'local',
+        project_id: projectId,
+        created_at: Date.now(),
+      };
+      const usable = Object.keys(values).filter((key) => columnNameSet.has(key));
+      const notNullNoDefault = columns
+        .filter((column) => column.notnull && column.dflt_value === null && !usable.includes(column.name) && column.pk === 0)
+        .map((column) => column.name);
+      if (notNullNoDefault.length > 0) throw new Error(`tool_jobs has unfilled NOT NULL columns: ${notNullNoDefault.join(',')}`);
+      db.prepare(`INSERT INTO tool_jobs (${usable.join(',')}) VALUES (${usable.map(() => '?').join(',')})`)
+        .run(...usable.map((key) => values[key]));
+    }
+    insertPendingJob('b70_job_approve', 'b70_ack_approve', 'p_b70');
+    insertPendingJob('b70_job_reject', 'b70_ack_reject', 'p_b70');
+
+    const decideAnon = await fetch(`${gatewayBase}/m/api/approvals/b70_ack_approve/decide`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ approve: true, projectId: null, conversationId: null }),
+    });
+    assert('B3a 批准无会话 401', decideAnon.status === 401, `status ${decideAnon.status}`);
+
+    const missingScope = await fetch(`${gatewayBase}/m/api/approvals/b70_ack_approve/decide`, {
+      method: 'POST', headers: authHeaders, body: JSON.stringify({ approve: true }),
+    });
+    assert('B3b 批准缺 scope 400（与桌面 REST 同契约）', missingScope.status === 400, `status ${missingScope.status}`);
+
+    const scopeMismatch = await fetch(`${gatewayBase}/m/api/approvals/b70_ack_approve/decide`, {
+      method: 'POST', headers: authHeaders, body: JSON.stringify({ approve: true, projectId: 'p_other', conversationId: null }),
+    });
+    assert('B3c scope 不匹配 404（权限不放大）', scopeMismatch.status === 404, `status ${scopeMismatch.status}`);
+
+    const approveRes = await fetch(`${gatewayBase}/m/api/approvals/b70_ack_approve/decide`, {
+      method: 'POST', headers: authHeaders, body: JSON.stringify({ approve: true, projectId: 'p_b70', conversationId: null }),
+    });
+    const approveBody = await approveRes.json().catch(() => ({}));
+    assert('B3d 手机批准放行', approveRes.status === 200 && approveBody.ok === true && approveBody.ackStatus === 'approved', `status ${approveRes.status} body ${JSON.stringify(approveBody).slice(0, 140)}`);
+    const approvedRow = db.prepare('SELECT ack_status, status FROM tool_jobs WHERE id=?').get('b70_job_approve');
+    assert('B3e 批准落库 ack_status=approved 且 job 状态不被破坏', approvedRow && approvedRow.ack_status === 'approved' && approvedRow.status === 'pending', JSON.stringify(approvedRow));
+
+    const rejectRes = await fetch(`${gatewayBase}/m/api/approvals/b70_ack_reject/decide`, {
+      method: 'POST', headers: authHeaders, body: JSON.stringify({ approve: false, projectId: 'p_b70', conversationId: null }),
+    });
+    assert('B4a 手机拒绝成功', rejectRes.status === 200, `status ${rejectRes.status}`);
+    const rejectedRow = db.prepare('SELECT ack_status, status, error FROM tool_jobs WHERE id=?').get('b70_job_reject');
+    assert('B4b 拒绝落库 ack_status=rejected + job failed', rejectedRow && rejectedRow.ack_status === 'rejected' && rejectedRow.status === 'failed', JSON.stringify(rejectedRow));
+    db.close();
   } finally {
     await stopServer(child);
     if (sessionId) rmSync(path.join(root, 'mobile', 'sessions.json'), { force: true });
