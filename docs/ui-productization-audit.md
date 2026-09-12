@@ -3345,3 +3345,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：`acceptance/ui-354/ui354-titlebar-mobile-live.json` **8/8 ALL PASS**（CDP 驱动真实 dev Electron：双入口在场/齿轮最右 offsetLeft 序/点手机弹层开/QR img 真实加载 naturalWidth>0/设置入口全页唯一/齿轮开设置视图/计算与数据分区含手机远程小节）+ 截图 `titlebar-mobile-popup.png`；vitest TitleBar 15 + LeftPanel 14 + MobileSync 3 全绿；`tsc --noEmit` 0。
 - **实机抓真一（层叠上下文）**：position:fixed 弹层在 TitleBar 的 stacking context 内 z-index 10001 仍被右侧栏盖住左半——fixed 不脱离创建 stacking context 的祖先；修复＝`createPortal(document.body)`。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+### UI-354 修订 1（2026-09-13，用户裁决「手机连接和设置应该在左侧栏最下方 目前被你改动到了右侧栏最上方了」）
+
+- **位置纠正**：双入口从顶栏迁回**左栏最下方**——底部一行 [📱 手机连接（左）][⚙️ 设置（最右）]（对标 ZCode 侧栏底部账户行；初版把截图 2 误读为顶栏）。顶栏三文件完整回退（TitleBarRightZone/useWorkspacePanels/project-workspace + TitleBar.module.css 清类）；`TitleBarState.onShowSettings` 随回退移除（左栏 ctx 本就有 handleShowSettings，无需跨树注入）。
+- **弹层**：手机连接点开的面板 portal 挂 body，锚**左下角**（`sidebarMobileCard`：left 12 / bottom 56），与右栏零遮挡；设置区「计算与数据」分区与弹层共用 `MobileSyncPanel` 不变。
+- **证据刷新**：`acceptance/ui-354/ui354-titlebar-mobile-live.json` **8/8 ALL PASS（修订后断言）**——T2 双入口在左栏且顶栏无残留（回归守卫）/T3 底部坐标序（x<340、y>60% 视高、设置在手机右）/T4 弹层开/T5 QR 真实加载/T6 设置入口全页唯一/T7 设置视图+计算与数据含手机远程小节；截图 `sidebar-mobile-popup.png`。
+
+### UI-354 修订 2（2026-09-13，用户裁决「设置 里面的 手机远程 相关内容就不需要了」）
+
+- **设置页重复入口移除**：`DesktopSettingsPanel` 不再渲染「手机远程」小节（MobileSync 壳删除，仅保留 `MobileSyncPanel` 本体供左栏底部弹层使用）；**手机连接唯一入口 = 左栏底部 [手机连接]**。组件测试改锚 MobileSyncPanel（3/3）；实机脚本 T7b 反转为回归守卫——设置页（含计算与数据分区）不得再出现「手机远程」字样。
+- **脚本韧性**：T4 加 4 次重试（Vite 热更整页 reload 会重置组件状态，两次实机瞬态失败均由此而来，非产品缺陷）；证据刷新 8/8 ALL PASS + 截图 `sidebar-mobile-popup.png`。

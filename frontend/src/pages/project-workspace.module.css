@@ -6988,3 +6988,65 @@ body:global(.gewu-resizing-columns) * {
 .noticesUnreadBtn:hover {
   text-decoration: underline;
 }
+
+/* UI-354 修订 1 — 左栏底部账户行：[手机连接（左）][设置（最右）] + 手机连接弹层 */
+.leftFooterRow {
+  display: flex;
+  gap: 6px;
+  padding: 0 8px 8px;
+}
+
+.leftFooterRow .leftQuickAction {
+  flex: 1;
+  justify-content: center;
+  height: 32px;
+}
+
+.sidebarMobileOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  border: none;
+  background: transparent;
+}
+
+.sidebarMobileCard {
+  position: fixed;
+  left: 12px;
+  bottom: 56px;
+  z-index: 10001;
+  width: 320px;
+  max-height: min(70vh, 560px);
+  overflow: auto;
+  padding: 12px 14px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 12px;
+  background: var(--gewu-bg-elevated);
+  box-shadow: 0 14px 32px color-mix(in srgb, var(--gewu-text) 18%, transparent);
+}
+
+.sidebarMobileCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.leftFooterIconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--gewu-text-secondary);
+  cursor: pointer;
+}
+
+.leftFooterIconBtn:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
+}

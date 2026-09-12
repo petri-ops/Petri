@@ -684,7 +684,6 @@ export function ProjectWorkspace(): React.ReactElement {
       resultItems: titleBarResultItems,
       activeResultId: conversationJobs.some((job) => job.id === activeJobId) ? activeJobId : null,
       onSelectResult: handleSelectTitleBarResult,
-      onShowSettings: handleShowSettings,
       canGoBack: rightTab === 'browser' && browserCanGoBack,
       canGoForward: rightTab === 'browser' && browserCanGoForward,
       onGoBack:
@@ -714,7 +713,6 @@ export function ProjectWorkspace(): React.ReactElement {
         canGoForward: false,
         onGoBack: null,
         onGoForward: null,
-        onShowSettings: null,
       });
     };
   }, [
@@ -736,7 +734,6 @@ export function ProjectWorkspace(): React.ReactElement {
     titleBarTabs,
     titleBarResultItems,
     updateTitleBar,
-    handleShowSettings,
     // UI-309：旧版遗漏——缺失会让顶栏会话选择器持有过期闭包
     conversations,
     activeConvId,

@@ -13,9 +13,9 @@
  *   T4 点击手机图标 → 弹出「手机远程」面板
  *   T5 面板内点「生成配对二维码」→ QR 图出现且真实加载（naturalWidth>0）
  *   T6 左栏底部不再有重复「设置」入口（aria-label="设置" 全页唯一=顶栏齿轮）
- *   T7 点击齿轮 → 设置视图打开（workspaceMode=settings）
+ *   T7 点击设置 → 设置视图打开（workspaceMode=settings）
  *
- * 证据：acceptance/ui-354/ui354-titlebar-mobile-live.json + titlebar-mobile-popup.png
+ * 证据：acceptance/ui-354/ui354-titlebar-mobile-live.json + sidebar-mobile-popup.png
  */
 const fs = require('fs');
 const path = require('path');
@@ -95,31 +95,58 @@ async function main() {
   await cdpCall('Page.navigate', { url: `http://localhost:3000/project/${targetProjectId}` }).catch((e) => console.log('  navErr:', e.message));
   await sleep(12000);
 
-  // T2 两个顶栏入口同时存在
+  // T2 修订 1：两个入口在左栏底部；顶栏不得再有（回归守卫）
   const btns = await cdpEval(`(() => {
-    const phone = document.querySelector('[data-testid="titlebar-mobile-remote"]');
-    const gear = document.querySelector('[data-testid="titlebar-settings"]');
-    return { phone: !!phone, gear: !!gear };
+    const phone = document.querySelector('[data-testid="sidebar-mobile-remote"]');
+    const gear = document.querySelector('[data-testid="sidebar-settings"]');
+    return {
+      phone: !!phone,
+      gear: !!gear,
+      titlebarPhone: !!document.querySelector('[data-testid="titlebar-mobile-remote"]'),
+      titlebarGear: !!document.querySelector('[data-testid="titlebar-settings"]'),
+    };
   })()`);
-  assert('T2_titlebar_buttons_present', btns && btns.phone === true && btns.gear === true, JSON.stringify(btns));
+  assert('T2_sidebar_buttons_present', btns && btns.phone === true && btns.gear === true && btns.titlebarPhone === false && btns.titlebarGear === false, JSON.stringify(btns));
 
-  // T3 位置序：设置齿轮在最右
+  // T3 修订 1：两按钮都在左栏（x < 340）、贴近视口底部（y > 60% 高）、设置在手机右侧
   const order = await cdpEval(`(() => {
-    const gear = document.querySelector('[data-testid="titlebar-settings"]');
-    const phone = document.querySelector('[data-testid="titlebar-mobile-remote"]');
-    const rightToggle = Array.from(document.querySelectorAll('button[aria-label*="右侧栏"], button[title*="右侧栏"]')).pop();
-    const left = (el) => (el ? Math.round(el.getBoundingClientRect().left) : -1);
-    return { gear: left(gear), phone: left(phone), rightToggle: left(rightToggle) };
+    const gear = document.querySelector('[data-testid="sidebar-settings"]');
+    const phone = document.querySelector('[data-testid="sidebar-mobile-remote"]');
+    const rect = (el) => (el ? el.getBoundingClientRect() : null);
+    const g = rect(gear);
+    const p = rect(phone);
+    return {
+      phoneX: p ? Math.round(p.left) : -1,
+      phoneY: p ? Math.round(p.top) : -1,
+      gearX: g ? Math.round(g.left) : -1,
+      gearY: g ? Math.round(g.top) : -1,
+      vh: window.innerHeight,
+    };
   })()`);
-  assert('T3_settings_rightmost', order && order.gear > order.phone && order.phone > order.rightToggle, JSON.stringify(order));
+  assert('T3_bottom_of_left_sidebar',
+    order
+    && order.gearX > order.phoneX
+    && order.phoneX >= 0 && order.phoneX < 340 && order.gearX < 340
+    && order.phoneY > order.vh * 0.6 && order.gearY > order.vh * 0.6,
+    JSON.stringify(order));
 
-  // T4 点击手机图标 → 弹层
-  await cdpEval(`document.querySelector('[data-testid="titlebar-mobile-remote"]').click()`);
-  await sleep(800);
-  const popup = await cdpEval(`(() => {
-    const card = document.querySelector('[data-testid="mobile-remote-popup"]');
-    return card ? { present: true, text: (card.innerText || '').slice(0, 160) } : { present: false };
-  })()`);
+  // T4 点击「手机连接」→ 弹层（带重试：Vite 热更整页 reload 会重置组件状态）
+  let popup = { present: false };
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const clicked = await cdpEval(`(() => {
+      const btn = document.querySelector('[data-testid="sidebar-mobile-remote"]');
+      if (!btn) return false;
+      btn.click();
+      return true;
+    })()`);
+    await sleep(1200);
+    popup = await cdpEval(`(() => {
+      const card = document.querySelector('[data-testid="mobile-remote-popup"]');
+      return card ? { present: true, text: (card.innerText || '').slice(0, 160) } : { present: false };
+    })()`);
+    if (popup.present) break;
+    console.log(`  retry ${attempt + 1}: clicked=${clicked} present=${popup.present}`);
+  }
   assert('T4_mobile_popup_opens', popup && popup.present === true, JSON.stringify(popup));
 
   // T5 面板内生成配对二维码 → img 真实加载
@@ -142,22 +169,22 @@ async function main() {
     if (shot && shot.data) {
       const dir = path.join(ROOT, 'acceptance', 'ui-354');
       fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(path.join(dir, 'titlebar-mobile-popup.png'), Buffer.from(shot.data, 'base64'));
-      console.log('  screenshot saved: acceptance/ui-354/titlebar-mobile-popup.png');
+      fs.writeFileSync(path.join(dir, 'sidebar-mobile-popup.png'), Buffer.from(shot.data, 'base64'));
+      console.log('  screenshot saved: acceptance/ui-354/sidebar-mobile-popup.png');
     }
   } catch (e) { console.log('  screenshot skipped:', e.message); }
 
-  // T6 左栏底部不再有重复设置入口（button[aria-label="设置"] 全页唯一=顶栏齿轮；
-  // 设置视图自身存在非按钮的 aria-label 容器，不计入）
+  // T6 设置入口全页唯一（button[aria-label="设置"]）＝左栏底部那个；设置视图自身的
+  // 非按钮 aria-label 容器不计入
   const settingsCount = await cdpEval(`document.querySelectorAll('button[aria-label="设置"]').length`);
   assert('T6_settings_entry_unique', settingsCount === 1, 'count=' + settingsCount);
 
-  // T7 点击齿轮 → 设置视图打开（默认分区显示设置特有文本），再切到「计算与数据」
-  // 分区验证「手机远程」小节在场（该小节随 UI-319 落在计算与数据分区内）。
+  // T7 点击「设置」→ 设置视图打开（默认分区显示设置特有文本），再切到「计算与数据」
+  // 分区验证「手机远程」小节已不在设置页（UI-354 修订 2：唯一入口=左栏底部弹层）。
   await cdpEval(`(() => {
-    const overlay = document.querySelector('[class*="mobileRemoteOverlay"]');
+    const overlay = document.querySelector('[class*="sidebarMobileOverlay"]');
     if (overlay) overlay.click();
-    document.querySelector('[data-testid="titlebar-settings"]').click();
+    document.querySelector('[data-testid="sidebar-settings"]').click();
     return true;
   })()`);
   await sleep(2500);
@@ -174,9 +201,9 @@ async function main() {
   await sleep(1200);
   const sectionShown = await cdpEval(`(() => {
     const text = document.body.innerText || '';
-    return { mobileRemote: text.includes('手机远程'), compute: text.includes('执行位置与存储')  };
+    return { mobileRemoteAbsent: !text.includes('手机远程'), computeShown: text.includes('执行位置与存储') };
   })()`);
-  assert('T7b_settings_has_mobile_remote_section', sectionShown && sectionShown.mobileRemote === true, JSON.stringify(sectionShown));
+  assert('T7b_settings_no_mobile_remote_section', sectionShown && sectionShown.mobileRemoteAbsent === true && sectionShown.computeShown === true, JSON.stringify(sectionShown));
 
   const allPass = results.every((entry) => entry.ok);
   const evidence = {

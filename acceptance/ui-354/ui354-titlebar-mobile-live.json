@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
   "acceptanceId": "UI-354-TITLEBAR-MOBILE-SETTINGS",
-  "generatedAt": "2026-09-12T22:58:36.046Z",
+  "generatedAt": "2026-09-12T23:12:26.136Z",
   "qualificationEligible": false,
   "allPass": true,
   "checks": [
     {
       "name": "T1_renderer_reachable",
       "ok": true,
-      "detail": "href=http://localhost:3000/project/p_mtkamsfu_3mxo"
+      "detail": "href=http://localhost:3000/project/p_mtkamsfu_3mxo/settings"
     },
     {
-      "name": "T2_titlebar_buttons_present",
+      "name": "T2_sidebar_buttons_present",
       "ok": true,
-      "detail": "{\"phone\":true,\"gear\":true}"
+      "detail": "{\"phone\":true,\"gear\":true,\"titlebarPhone\":false,\"titlebarGear\":false}"
     },
     {
-      "name": "T3_settings_rightmost",
+      "name": "T3_bottom_of_left_sidebar",
       "ok": true,
-      "detail": "{\"gear\":1367,\"phone\":1336,\"rightToggle\":1305}"
+      "detail": "{\"phoneX\":16,\"phoneY\":847,\"gearX\":172,\"gearY\":847,\"vh\":896}"
     },
     {
       "name": "T4_mobile_popup_opens",
       "ok": true,
-      "detail": "{\"present\":true,\"text\":\"手机远程\\n\\n手机扫码后用浏览器直达本机工作区（同 WiFi）。默认关闭，内容只在你的局域网内传输。 端口 3005。\\n\\n关闭手机远程\\n生成配对二维码\\n已启用 · 在线设备 1\\n移动设备 · 最近活跃 2026/9/13 06:39:14\\n吊销\"}"
+      "detail": "{\"present\":true,\"text\":\"手机连接\\n\\n手机扫码后用浏览器直达本机工作区（同 WiFi）。默认关闭，内容只在你的局域网内传输。 端口 3005。\\n\\n关闭手机远程\\n生成配对二维码\\n已启用 · 在线设备 2\\n移动设备 · 最近活跃 2026/9/13 06:39:14\\n吊销\\n移动设备 · 最近活跃 2026/9/13 07:11:47\\n吊销\"}"
     },
     {
       "name": "T5_qr_renders",
@@ -41,9 +41,9 @@
       "detail": "{\"opened\":true}"
     },
     {
-      "name": "T7b_settings_has_mobile_remote_section",
+      "name": "T7b_settings_no_mobile_remote_section",
       "ok": true,
-      "detail": "{\"mobileRemote\":true,\"compute\":true}"
+      "detail": "{\"mobileRemoteAbsent\":true,\"computeShown\":true}"
     }
   ],
   "notes": {

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon } from '@/components/icons/Icon';
+import { MobileSyncPanel } from '@/components/desktop/DesktopSettingsPanel/sections/MobileSync';
 import type { Project } from '@/lib/project-types';
 import { SshCreateInlinePanel } from './LeftSshCreatePanel';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
@@ -185,7 +187,7 @@ export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElem
         {dropHint && (
           <p className={styles.leftCreateError} role="alert" style={{ padding: '0 12px' }}>{dropHint}</p>
         )}
-        {/* UI-354 — 「设置」入口已迁顶栏最右侧（TitleBarRightZone 齿轮）；左栏底部不再保留重复入口 */}
+        <LeftSidebarFooter ctx={ctx} />
       </div>
     </aside>
   );
@@ -194,6 +196,70 @@ export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElem
 // ---------------------------------------------------------------------------
 // Pieces
 // ---------------------------------------------------------------------------
+
+/**
+ * UI-354 修订 1（用户裁决：位置在左侧栏最下方，对标 ZCode 侧栏底部账户行）——
+ * 底部一行两个入口：[手机连接]（左）+ [设置]（最右）。手机连接点开配对面板
+ * （React portal 挂 body，防被相邻栏遮挡）；设置走既有 handleShowSettings。
+ */
+function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
+  const [mobileRemoteOpen, setMobileRemoteOpen] = useState(false);
+  return (
+    <div className={styles.leftPanelFooter}>
+      <div className={styles.leftFooterRow}>
+        <button
+          type="button"
+          className={styles.leftQuickAction}
+          onClick={() => setMobileRemoteOpen((value) => !value)}
+          title="手机连接（扫码直达工作区）"
+          aria-label="手机连接"
+          aria-expanded={mobileRemoteOpen}
+          data-testid="sidebar-mobile-remote"
+        >
+          <Icon name="smartphone" size={15} />
+          <span>手机连接</span>
+        </button>
+        <button
+          type="button"
+          className={`${styles.leftQuickAction} ${ctx.workspaceMode === 'settings' ? styles.leftQuickActionActive : ''}`}
+          onClick={ctx.handleShowSettings}
+          title="设置"
+          aria-label="设置"
+          aria-current={ctx.workspaceMode === 'settings' ? 'page' : undefined}
+          data-testid="sidebar-settings"
+        >
+          <Icon name="settings" size={15} />
+          <span>设置</span>
+        </button>
+      </div>
+      {mobileRemoteOpen && createPortal(
+        <>
+          <button
+            type="button"
+            className={styles.sidebarMobileOverlay}
+            onClick={() => setMobileRemoteOpen(false)}
+            aria-label="关闭手机连接面板"
+          />
+          <div className={styles.sidebarMobileCard} role="dialog" aria-label="手机连接" data-testid="mobile-remote-popup">
+            <div className={styles.sidebarMobileCardHeader}>
+              <strong>手机连接</strong>
+              <button
+                type="button"
+                className={styles.leftFooterIconBtn}
+                onClick={() => setMobileRemoteOpen(false)}
+                aria-label="关闭"
+              >
+                <Icon name="x" size={14} />
+              </button>
+            </div>
+            <MobileSyncPanel />
+          </div>
+        </>,
+        document.body,
+      )}
+    </div>
+  );
+}
 
 function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   const items: Array<{

@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
-import { createPortal } from 'react-dom';
+import React from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { getBridge } from '@/lib/desktopBridge';
 import { useWorkspacePanelsContext } from '../WorkspacePanelsContext';
-import { MobileSyncPanel } from '../DesktopSettingsPanel/sections/MobileSync';
 import styles from '../TitleBar.module.css';
 import { getIsMac, WindowControls } from './shared';
 
@@ -13,15 +11,10 @@ import { getIsMac, WindowControls } from './shared';
  *
  * 容器无关：既被 fixed 整条 [TitleBar.tsx](../TitleBar.tsx) 复用，也被 P1b
  * 列级 header-slot 复用。逻辑与提取前一字不动。
- *
- * UI-354 — 最右侧新增「手机远程」+「设置」：手机图标点开配对面板（对标 ZCode
- * 顶栏「手机图标 → 二维码」直达形态）；设置齿轮由左栏底部迁入（onShowSettings
- * 为 null 的非工作区路由自动隐藏齿轮）。
  */
 export function TitleBarRightZone(): React.ReactElement {
   const panels = useWorkspacePanelsContext();
   const isMac = getIsMac();
-  const [mobileRemoteOpen, setMobileRemoteOpen] = useState(false);
   const {
     tabs,
     activeTabId,
@@ -140,58 +133,7 @@ export function TitleBarRightZone(): React.ReactElement {
         >
           <Icon name="panel-right" size={15} />
         </button>
-
-        {/* UI-354 — 手机远程直达入口 + 设置（最右侧，对标 ZCode 顶栏布局） */}
-        <button
-          type="button"
-          className={styles.iconBtn}
-          onClick={() => setMobileRemoteOpen((value) => !value)}
-          title="手机远程（扫码直达工作区）"
-          aria-label="手机远程"
-          aria-expanded={mobileRemoteOpen}
-          data-testid="titlebar-mobile-remote"
-        >
-          <Icon name="smartphone" size={15} />
-        </button>
-        {panels.titleBar.onShowSettings && (
-          <button
-            type="button"
-            className={styles.iconBtn}
-            onClick={panels.titleBar.onShowSettings}
-            title="设置"
-            aria-label="设置"
-            data-testid="titlebar-settings"
-          >
-            <Icon name="settings" size={15} />
-          </button>
-        )}
       </div>
-
-      {mobileRemoteOpen && createPortal(
-        <>
-          <button
-            type="button"
-            className={styles.mobileRemoteOverlay}
-            onClick={() => setMobileRemoteOpen(false)}
-            aria-label="关闭手机远程面板"
-          />
-          <div className={styles.mobileRemoteCard} role="dialog" aria-label="手机远程" data-testid="mobile-remote-popup">
-            <div className={styles.mobileRemoteCardHeader}>
-              <strong>手机远程</strong>
-              <button
-                type="button"
-                className={styles.iconBtn}
-                onClick={() => setMobileRemoteOpen(false)}
-                aria-label="关闭"
-              >
-                <Icon name="x" size={14} />
-              </button>
-            </div>
-            <MobileSyncPanel />
-          </div>
-        </>,
-        document.body,
-      )}
 
       {!isMac && <WindowControls />}
     </div>

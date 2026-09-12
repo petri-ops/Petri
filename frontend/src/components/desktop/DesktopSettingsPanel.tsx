@@ -55,7 +55,6 @@ import { ExportDiagnostic } from './DesktopSettingsPanel/sections/ExportDiagnost
 import { DataManagement } from './DesktopSettingsPanel/sections/DataManagement';
 import { ComputeExecution } from './DesktopSettingsPanel/sections/ComputeExecution';
 import { RemoteTargets } from './DesktopSettingsPanel/sections/RemoteTargets';
-import { MobileSync } from './DesktopSettingsPanel/sections/MobileSync';
 import { TrashManagement } from './DesktopSettingsPanel/sections/TrashManagement';
 import { HarnessEnvironment } from './DesktopSettingsPanel/sections/HarnessEnvironment';
 
@@ -857,8 +856,6 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         <ComputeExecution />
 
         <RemoteTargets />
-
-        <MobileSync />
 
         <hr className="gewu-section-divider" />
 

@@ -16,7 +16,7 @@ vi.mock('@/lib/authClient', () => ({
   getToken: getTokenMock,
 }));
 
-import { MobileSync } from './MobileSync';
+import { MobileSyncPanel } from './MobileSync';
 
 function fetchJson(payload: unknown, ok = true) {
   return Promise.resolve({ ok, json: () => Promise.resolve(payload) } as Response);
@@ -24,7 +24,7 @@ function fetchJson(payload: unknown, ok = true) {
 
 const msk = () => JSON.stringify({}).length && undefined;
 
-describe('MobileSync 设置区（BLOCK-70 / UI-319）', () => {
+describe('MobileSyncPanel 手机连接面板（BLOCK-70 / UI-354）', () => {
   afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
@@ -39,7 +39,7 @@ describe('MobileSync 设置区（BLOCK-70 / UI-319）', () => {
       });
     });
     vi.stubGlobal('fetch', fetchMock);
-    render(<MobileSync />);
+    render(<MobileSyncPanel />);
     await waitFor(() => expect(screen.getByText(/未启用（开启后需重启桌面端生效）/)).toBeTruthy());
     expect(screen.queryByRole('button', { name: '生成配对二维码' })).toBeNull();
     expect(screen.getByRole('button', { name: '开启手机远程' })).toBeTruthy();
@@ -64,7 +64,7 @@ describe('MobileSync 设置区（BLOCK-70 / UI-319）', () => {
       throw new Error(`unexpected fetch ${url}`);
     });
     vi.stubGlobal('fetch', fetchMock);
-    render(<MobileSync />);
+    render(<MobileSyncPanel />);
     await waitFor(() => expect(screen.getByRole('button', { name: '生成配对二维码' })).toBeTruthy());
     fireEvent.click(screen.getByRole('button', { name: '生成配对二维码' }));
     await waitFor(() => expect(screen.getByAltText('手机配对二维码')).toBeTruthy());
@@ -92,7 +92,7 @@ describe('MobileSync 设置区（BLOCK-70 / UI-319）', () => {
       throw new Error(`unexpected fetch ${url}`);
     });
     vi.stubGlobal('fetch', fetchMock);
-    render(<MobileSync />);
+    render(<MobileSyncPanel />);
     await waitFor(() => expect(screen.getByText(/iOS 设备/)).toBeTruthy());
     fireEvent.click(screen.getByRole('button', { name: '吊销' }));
     await waitFor(() => expect(revokeCalls.length).toBe(1));

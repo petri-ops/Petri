@@ -187,13 +187,3 @@ export function MobileSyncPanel(): React.ReactElement {
     </div>
   );
 }
-
-/** 设置区壳（「计算与数据」分区内的「手机远程」小节标题 + 面板）。 */
-export function MobileSync(): React.ReactElement {
-  return (
-    <div>
-      <h4>手机远程</h4>
-      <MobileSyncPanel />
-    </div>
-  );
-}
