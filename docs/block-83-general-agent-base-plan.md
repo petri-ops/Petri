@@ -3,7 +3,7 @@
 > 文档版本：v1.2（立项评估版 · 修订 2 平台化：生信降格为首个参考领域）
 > 创建日期：2026-09-12
 > 修订日期：2026-09-12
-> 状态：**active（P0 进行中：评审稿已落盘，待用户逐项确认 D1-D14）**
+> 状态：**completed（2026-09-12 P0–P5 整包收口；生信包已独立交付 Diandian-ops/gewu-pack-bio）**
 > truthDomain：block-83-general-agent-base
 > 关联：`agent-workbench-enhancement-plan.md`（active，方向同源）、`g0-result-studio-plan.md`（P6 证据重采归属）
 
@@ -87,7 +87,7 @@ v1.0 现状盘点（§2）与 D1-D11 继续有效，阶段微调（§4）。
 | 4 | **D7 基线销号**：158 → **144 条**（tool-registry 14 条随中性化清零）；远程建仓 ✅（`Diandian-ops/gewu-pack-bio`，用户指定账户，凭据 API 创建+推送） | ✅ 2026-09-12（剩余 144 条=agent-runner 提示词/learning/plan-ui 等代码层残留，属 P4 尾部延续清理+P5 门禁监控对象） |
 
 **D9 包仓库事实（切片 1）**：本地路径 `D:\1.WorkDir\gewu-pack-bio`（与核心仓平级，独立 git 仓，初始提交 `2a51b73`）；包契约 `pack.json` 声明提供物（plugins/scripts/demoData/languages/confirmationHooks/artifactTypes）与所需核心能力；核心侧装卸缝 = `BIOF3_PLUGINS_DIR`（installed 源，需 `plugins/installed.json` 索引，由包内 `tools/generate-installed-index.cjs` 生成）。
-| **P5** | 收口：装包态生信全链回归（装→run_tool 通→卸→零残留）+ **D13 第二租户证明（非生信 demo 包走通全链）** + 纯通用态实机全功能 + 台账五件套回写 | 收口门禁 + D7 硬门 + D13 全链 + 实机证据（acceptance/block-83/） |
+| **P5** ✅ completed（2026-09-12） | 收口对账：D7 硬门（棘轮 2/2，基线 144=延续清理监控面）+ D13 第二租户证明（P4 出口 8/8 内）+ 零生信态实机（catalog=0 诚实空态/runtime 幸存/文件零残留）+ 装卸结构回归（包 15 装载/卸载即回零态）+ 台账五件套回写 | hygiene/docs:check 231/ui-audit/tsc 0/D7 2/2/契约 14/14 全绿 |
 
 ### D7 残留清单（P2 出口盘点，P3 起点）
 
