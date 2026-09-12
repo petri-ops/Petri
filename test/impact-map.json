@@ -1475,7 +1475,8 @@
         "test/domain-neutrality-baseline.json",
         "scripts/d7-baseline.mjs",
         "acceptance/harness-loop/scenarios/**",
-        "scripts/block83-pack-source-check.cjs"
+        "scripts/block83-pack-source-check.cjs",
+        "scripts/tmp-d13-probe.cjs"
       ],
       "tests": [
         "test/block83-task-confirmation-hooks.test.mjs",
@@ -1488,6 +1489,40 @@
         "test/loop-failure-diagnoser.test.cjs",
         "test/loop-fixtures.test.mjs",
         "test/hle-c5r-regression.test.mjs"
+      ],
+      "classifiesScripts": true
+    },
+    {
+      "id": "block84-domain-pack-oneclick",
+      "note": "BLOCK-84 领域包产品级一键装/卸：记录制 pack-registry（installed.json）+ boot 接线（插件源追加 / 领域工具注册）+ Electron IPC（pack:* 5 handlers）+ 商店「领域包」分区 + 一键装/卸实机验收（隔离探针 + CDP UI 双态）。同时覆盖 dev 渲染器 origin 白名单（trusted origins 双变体）与本地请求边界契约。",
+      "patterns": [
+        "core/shared-backend/pack-registry.js",
+        "core/biof3-server/server.js",
+        "core/biof3-server/plugin-loader.js",
+        "core/biof3-server/tool-registry.js",
+        "core/shared-backend/local-request-boundary.js",
+        "src/ipc/pack.js",
+        "src/main/env-coordinator.js",
+        "src/main/_backend-ports.js",
+        "src/preload.js",
+        "frontend/src/components/desktop/PluginStorePanel.tsx",
+        "frontend/vite.config.ts",
+        "test/block84-pack-oneclick.test.mjs",
+        "test/block84-*.test.mjs",
+        "test/env-coordinator-trusted-origins.test.mjs",
+        "test/env-coordinator-port.test.mjs",
+        "scripts/block84-*",
+        "scripts/tmp-block84-probe.cjs",
+        "acceptance/block-84/**"
+      ],
+      "tests": [
+        "test/block84-pack-oneclick.test.mjs",
+        "test/env-coordinator-trusted-origins.test.mjs",
+        "test/env-coordinator-port.test.mjs",
+        "test/plugin-sdk.test.mjs",
+        "test/plugin-manifest-schema.test.mjs",
+        "test/g0-chf0-http.test.mjs",
+        "test/domain-neutrality.test.mjs"
       ],
       "classifiesScripts": true
     }

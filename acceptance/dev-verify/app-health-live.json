@@ -1,0 +1,28 @@
+{
+  "name": "app-health",
+  "startedAt": "2026-09-12T12:26:18.163Z",
+  "finishedAt": "2026-09-12T12:26:18.196Z",
+  "assertions": [
+    {
+      "name": "cdp_targets_listed",
+      "pass": true,
+      "detail": "1 targets"
+    },
+    {
+      "name": "spa_page_target_present",
+      "pass": true,
+      "detail": "http://localhost:3000/"
+    },
+    {
+      "name": "document_title_non_empty",
+      "pass": true,
+      "detail": "Gewu"
+    },
+    {
+      "name": "spa_root_mounted",
+      "pass": true,
+      "detail": "root childElementCount>0=true"
+    }
+  ],
+  "allPass": true
+}

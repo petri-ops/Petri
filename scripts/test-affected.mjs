@@ -67,8 +67,15 @@ function runGit(args) {
 }
 
 function listScripts() {
-  return execFileSync('rg', ['--files', 'scripts'], { cwd: ROOT, encoding: 'utf8' })
-    .split(/\r?\n/).map((line) => normalizePath(line.trim()))
+  // 原生 git 文件树枚举（tracked + untracked，排除 gitignore），不依赖外部 `rg`：
+  // 原实现 `execFileSync('rg', ['--files','scripts'])` 在未安装 ripgrep 的机器上抛
+  // `spawnSync rg ENOENT`，导致 `npm run test:changed` / `npm run closeout` 无法收口。
+  // git 是仓库既有硬依赖（runGit 已用），此处改为等价枚举，跨机可复现。
+  const files = new Set([
+    ...runGit(['ls-files', 'scripts']),
+    ...runGit(['ls-files', '--others', '--exclude-standard', 'scripts']),
+  ]);
+  return [...files]
     // FILE-TREE-POLICY：scripts/archive/ 是一次性 driver 的归档区，不参与“恰好一规则”分类约束。
     .filter((file) => /\.(?:js|mjs|cjs|sh)$/.test(file) && !file.startsWith('scripts/archive/'));
 }
