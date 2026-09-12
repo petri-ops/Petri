@@ -3,7 +3,7 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const { stableStringify } = require('./scientific-task-spec');
+const { stableStringify } = require('./canonical-json');
 const { isSafeRelativePath } = require('./result-studio-contracts');
 
 const EXECUTION_PROVENANCE_VERSION = 1;

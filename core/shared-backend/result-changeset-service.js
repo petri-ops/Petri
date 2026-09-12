@@ -3,7 +3,7 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const { stableStringify } = require('./scientific-task-spec');
+const { stableStringify } = require('./canonical-json');
 const { validateResultEditIntent } = require('./result-edit-intent');
 const { isPathContained } = require('./project-run-layout');
 const { createRuntimeResourceSnapshot } = require('./runtime-resource-snapshot');

@@ -59,7 +59,7 @@ const SCHEMA_STATEMENTS = Object.freeze([
 )`,
 
   // -------------------------------------------------------------------------
-  // 2. ScientificChangeSet v1 — 一次原子修改
+  // 2. ChangeSet v1（原 ScientificChangeSet，BLOCK-83 D1 改名）— 一次原子修改
   // -------------------------------------------------------------------------
   `CREATE TABLE IF NOT EXISTS scientific_change_sets (
   change_set_id TEXT PRIMARY KEY,

@@ -18,7 +18,7 @@
  */
 
 const crypto = require('crypto');
-const { stableStringify } = require('./scientific-task-spec');
+const { stableStringify } = require('./canonical-json');
 
 const RESULT_STUDIO_CONTEXT_VERSION = 1;
 

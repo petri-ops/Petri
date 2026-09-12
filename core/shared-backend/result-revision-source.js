@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { isPathContained } = require('./project-run-layout');
 const { isSafeRelativePath } = require('./result-studio-contracts');
-const { stableStringify } = require('./scientific-task-spec');
+const { stableStringify } = require('./canonical-json');
 const { resolveExecutionInputPath } = require('./execution-provenance');
 
 const MAX_SOURCE_BYTES = 2 * 1024 * 1024;

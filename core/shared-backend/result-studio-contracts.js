@@ -6,7 +6,7 @@
  * G0-RS2 — Result Studio 的四个持久化契约与状态机。
  *
  * 契约：
- * - ScientificChangeSet v1  — 一次原子修改
+ * - ChangeSet v1（原 ScientificChangeSet，BLOCK-83 D1 改名）  — 一次原子修改
  * - ArtifactRevision v1     — 一个产物版本
  * - SelectionContext v1     — 用户在结果上的结构化选择
  * - WorkspaceCheckpoint v1  — 可恢复的工作台状态
@@ -28,7 +28,7 @@
 
 const crypto = require('crypto');
 const path = require('path');
-const { stableStringify } = require('./scientific-task-spec');
+const { stableStringify } = require('./canonical-json');
 
 const RESULT_STUDIO_CONTRACT_VERSION = 1;
 
@@ -142,7 +142,7 @@ function fail(errors, code, message) {
 }
 
 // ---------------------------------------------------------------------------
-// ScientificChangeSet v1
+// ChangeSet v1
 // ---------------------------------------------------------------------------
 
 /**
@@ -151,7 +151,7 @@ function fail(errors, code, message) {
  * @param {object} input
  * @returns {{ ok: boolean, errors: Array, changeSet: object|null }}
  */
-function validateScientificChangeSet(input) {
+function validateChangeSet(input) {
   const errors = [];
   if (!input || typeof input !== 'object' || Array.isArray(input)) {
     return { ok: false, errors: [{ code: 'change_set_invalid', message: 'ChangeSet must be an object.' }], changeSet: null };
@@ -680,7 +680,9 @@ module.exports = {
   MAX_PERSISTED_ENTITY_IDS,
   sha256Hex,
   isSafeRelativePath,
-  validateScientificChangeSet,
+  validateChangeSet,
+  // BLOCK-83 D1 兼容别名（一版后移除）：
+  validateScientificChangeSet: validateChangeSet,
   canTransitionChangeSet,
   validateArtifactRevision,
   validateSelectionContext,

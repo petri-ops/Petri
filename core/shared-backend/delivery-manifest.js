@@ -3,7 +3,7 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const { stableStringify } = require('./scientific-task-spec');
+const { stableStringify } = require('./canonical-json');
 const { buildTruthProjection } = require('./g0-truth-projection');
 
 const DELIVERY_MANIFEST_VERSION = 1;

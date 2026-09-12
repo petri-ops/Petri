@@ -1,6 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
+const { stableValue, stableStringify } = require('./canonical-json');
 const path = require('path');
 const { redactSensitiveValue } = require('./redaction');
 
@@ -58,19 +59,7 @@ function sha256(value) {
   return crypto.createHash('sha256').update(value).digest('hex');
 }
 
-function stableValue(value) {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (!value || typeof value !== 'object') return value;
-  return Object.fromEntries(
-    Object.keys(value)
-      .sort()
-      .map((key) => [key, stableValue(value[key])])
-  );
-}
-
-function stableStringify(value) {
-  return JSON.stringify(stableValue(value));
-}
+// BLOCK-83 D1：stableStringify/stableValue 上提至通用模块 canonical-json（原位 re-export 保持兼容）。
 
 function stringValue(value, fallback = '') {
   return typeof value === 'string' ? value.trim() : fallback;
@@ -514,6 +503,8 @@ function shouldRereadCheckpointSource(request = {}) {
 }
 
 module.exports = {
+  stableStringify,
+  stableValue,
   SCIENTIFIC_TASK_SPEC_VERSION,
   CONVERSATION_CONTEXT_ENVELOPE_VERSION,
   CONTEXT_CHECKPOINT_VERSION,

@@ -17,7 +17,7 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
-const { stableStringify } = require('./scientific-task-spec');
+const { stableStringify } = require('./canonical-json');
 const { isPathContained } = require('./project-run-layout');
 const {
   resolveExecutionInputPath,

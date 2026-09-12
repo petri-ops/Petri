@@ -25,7 +25,7 @@ const {
   canTransitionChangeSet,
   computeCheckpointHash,
   validateArtifactRevision,
-  validateScientificChangeSet,
+  validateChangeSet,
   validateSelectionContext,
   validateWorkspaceCheckpoint,
 } = require('./result-studio-contracts');
@@ -536,7 +536,7 @@ function createResultStudioRepository(db, options = {}) {
      * 轨迹，否则"已采用"就成了可以直接伪造的声明。
      */
     createChangeSet(input) {
-      const validated = validateScientificChangeSet({ ...input, status: 'draft' });
+      const validated = validateChangeSet({ ...input, status: 'draft' });
       if (!validated.ok) {
         throw new ResultStudioRepositoryError('change_set_invalid', 'ChangeSet failed validation.', validated.errors);
       }

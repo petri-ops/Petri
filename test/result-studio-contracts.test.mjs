@@ -27,7 +27,7 @@ const {
   computeCheckpointHash,
   summarizeSelection,
   validateArtifactRevision,
-  validateScientificChangeSet,
+  validateChangeSet,
   validateSelectionContext,
   validateWorkspaceCheckpoint,
 } = require('../core/shared-backend/result-studio-contracts');
@@ -94,7 +94,7 @@ test('RS2 rejects a revision that puts valid into reproducibilityStatus', () => 
 // ---------------------------------------------------------------------------
 
 test('RS2 accepts a well formed change set and stamps the contract version', () => {
-  const result = validateScientificChangeSet(baseChangeSet());
+  const result = validateChangeSet(baseChangeSet());
   assert.equal(result.ok, true, JSON.stringify(result.errors));
   assert.equal(result.changeSet.contractVersion, RESULT_STUDIO_CONTRACT_VERSION);
   assert.equal(result.changeSet.status, 'draft');
@@ -108,26 +108,26 @@ test('RS2 requires identity, base commit and working branch on a change set', ()
     ['baseCommit', '', 'base_commit_invalid'],
     ['workingBranchRef', '', 'working_branch_required'],
   ]) {
-    const result = validateScientificChangeSet(baseChangeSet({ [field]: value }));
+    const result = validateChangeSet(baseChangeSet({ [field]: value }));
     assert.equal(result.ok, false, `${field} should be required`);
     assert.equal(result.errors.some((error) => error.code === code), true, `${field} → ${code}`);
   }
 });
 
 test('RS2 rejects malformed commits and unknown status or origin', () => {
-  assert.equal(validateScientificChangeSet(baseChangeSet({ baseCommit: 'not-a-commit' })).ok, false);
-  assert.equal(validateScientificChangeSet(baseChangeSet({ status: 'finished' })).ok, false);
-  assert.equal(validateScientificChangeSet(baseChangeSet({ createdBy: 'robot' })).ok, false);
+  assert.equal(validateChangeSet(baseChangeSet({ baseCommit: 'not-a-commit' })).ok, false);
+  assert.equal(validateChangeSet(baseChangeSet({ status: 'finished' })).ok, false);
+  assert.equal(validateChangeSet(baseChangeSet({ createdBy: 'robot' })).ok, false);
 });
 
 test('RS2 requires a candidate commit once a change set is adopted', () => {
-  const withoutCandidate = validateScientificChangeSet(baseChangeSet({ status: 'adopted' }));
+  const withoutCandidate = validateChangeSet(baseChangeSet({ status: 'adopted' }));
   assert.equal(withoutCandidate.ok, false);
   assert.equal(
     withoutCandidate.errors.some((error) => error.code === 'adopted_requires_candidate_commit'),
     true
   );
-  const withCandidate = validateScientificChangeSet(
+  const withCandidate = validateChangeSet(
     baseChangeSet({ status: 'adopted', candidateCommit: COMMIT_B, adoptedAt: new Date().toISOString() })
   );
   assert.equal(withCandidate.ok, true, JSON.stringify(withCandidate.errors));
@@ -135,7 +135,7 @@ test('RS2 requires a candidate commit once a change set is adopted', () => {
 
 test('RS2 rejects changed paths that escape the workspace', () => {
   for (const bad of ['../outside.R', '/etc/passwd', 'analysis/../../x.R']) {
-    const result = validateScientificChangeSet(baseChangeSet({ changedPaths: [{ relativePath: bad }] }));
+    const result = validateChangeSet(baseChangeSet({ changedPaths: [{ relativePath: bad }] }));
     assert.equal(result.ok, false, `${bad} must be rejected`);
     assert.equal(result.errors.some((error) => error.code === 'changed_path_invalid'), true);
   }

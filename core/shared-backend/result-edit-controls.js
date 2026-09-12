@@ -7,7 +7,7 @@
  * - 控件**只**由插件 descriptor 的 `parameters` + `parameterImpacts` 投影而来，
  *   不为任何插件手写孤立结果页；descriptor 没声明的参数不会出现控件。
  * - 手动控件与 AI 意图产出**同一种** `parameterPatch`，随后都走既有
- *   `classifyParameterPatch → planResultEdit → ScientificChangeSet`，
+ *   `classifyParameterPatch → planResultEdit → ChangeSet`，
  *   因此 validation / preview / compare / adopt / revert 只有一条路径。
  * - 影响分级只能由受信 descriptor 提升，不能被调用方降级；未知参数保守
  *   落到 `scientific_recompute`（由 result-edit-intent 负责），这里不猜。
