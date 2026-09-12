@@ -22,8 +22,6 @@ const DESKTOP_USER: AuthUser = {
     docs: true,
     blog: true,
     tools: true,
-    'single-cell': true,
-    spatial: true,
     copilot: true,
   },
 };
