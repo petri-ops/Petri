@@ -28,7 +28,8 @@ const {
 
 function getBuiltInManifest() {
   try {
-    const p = path.join(BUILT_IN_PLUGINS_DIR, 'manifest.json');
+    // BLOCK-83 P4：内置发行清单拆分——运行时清单在 resources/runtime/（领域插件清单随领域包交付）。
+    const p = path.join(BUILT_IN_PLUGINS_DIR, '..', 'runtime', 'manifest.json');
     if (fs.existsSync(p)) {
       const parsed = JSON.parse(fs.readFileSync(p, 'utf8'));
       const v = validateManifest(parsed);

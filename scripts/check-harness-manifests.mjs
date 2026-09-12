@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
-const BUILT_IN_DIR = path.join(REPO_ROOT, 'resources', 'built-in-plugins');
+// BLOCK-83 P4：扫描根可由领域包/夹具覆盖（核心仓零内置插件）
+const BUILT_IN_DIR = process.env.BIOF3_HARNESS_MANIFEST_DIR || path.join(REPO_ROOT, 'resources', 'built-in-plugins');
 const require = createRequire(import.meta.url);
 const pluginLoader = require(path.join(REPO_ROOT, 'core', 'biof3-server', 'plugin-loader.js'));
 const { inspectPluginSources } = require(path.join(REPO_ROOT, 'core', 'shared-backend', 'plugin-sdk.js'));

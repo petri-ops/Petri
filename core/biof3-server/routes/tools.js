@@ -38,7 +38,7 @@ const STATIC_DEMO_ENABLED =
   );
 
 try { fs.mkdirSync(JOBS_DIR, {recursive: true}); } catch {}
-try { fs.mkdirSync(SCRIPTS_DIR, {recursive: true}); } catch {}
+// BLOCK-83 P4：legacy 脚本目录不再由核心创建（领域脚本随领域包交付）
 
 function userId(req) { return req.user && (req.user.id || req.user.userId) || null; }
 

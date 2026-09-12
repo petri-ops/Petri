@@ -11,14 +11,14 @@
   "inputs": {
     "counts": {
       "type": "file",
-      "path": "resources/built-in-plugins/deseq2/demo-data/counts.csv",
+      "path": "../gewu-pack-bio/plugins/deseq2/demo-data/counts.csv",
       "description": "基因表达矩阵，列为样本（WT_1, WT_2, KO_1, KO_2），行为基因",
       "format": "csv",
       "required": true
     },
     "metadata": {
       "type": "file",
-      "path": "resources/built-in-plugins/deseq2/demo-data/metadata.csv",
+      "path": "../gewu-pack-bio/plugins/deseq2/demo-data/metadata.csv",
       "description": "样本元数据，包含 sample 列和 condition 列（WT/KO）",
       "format": "csv",
       "required": true

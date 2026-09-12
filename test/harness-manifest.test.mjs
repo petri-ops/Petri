@@ -3,20 +3,25 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { validateHarnessManifests } from '../scripts/check-harness-manifests.mjs';
+import { fileURLToPath } from 'node:url';
+
+// BLOCK-83 P4：核心仓零内置插件——manifest 校验指向中性夹具
+// （env 必须在模块 import 前生效——check 脚本在模块加载期解析 BUILT_IN_DIR）
+process.env.BIOF3_HARNESS_MANIFEST_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'fixtures', 'neutral-plugins');
+const { validateHarnessManifests } = await import('../scripts/check-harness-manifests.mjs');
 
 test('built-in runnable plugins expose normalized Harness manifest v1', () => {
   const result = validateHarnessManifests();
   assert.deepEqual(result.errors, []);
   assert.equal(result.ok, true);
-  assert.ok(result.manifests.length >= 3);
+  assert.ok(result.manifests.length >= 1);
 
-  const volcano = result.manifests.find((manifest) => manifest.id === 'volcano-plot');
-  assert.ok(volcano);
-  assert.equal(volcano.pluginManifestVersion, 1);
-  assert.equal(volcano.artifactSchemaVersion, 1);
-  assert.ok(volcano.artifacts.some((artifact) => artifact.type === 'plot'));
-  assert.ok(volcano.failureModes.some((mode) => mode.code === 'missing_required_columns'));
+  const fixture = result.manifests.find((manifest) => manifest.id === 'sample-metrics');
+  assert.ok(fixture);
+  assert.equal(fixture.pluginManifestVersion, 1);
+  assert.equal(fixture.artifactSchemaVersion, 1);
+  assert.ok(fixture.artifacts.some((artifact) => artifact.type === 'plot'));
+  assert.ok(fixture.failureModes.some((mode) => mode.code === 'missing_input_column'));
 });
 
 test('validateHarnessManifests rejects duplicate failure mode codes', () => {

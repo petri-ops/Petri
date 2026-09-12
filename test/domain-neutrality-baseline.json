@@ -75,8 +75,6 @@
     "core/biof3-server/helpers/permissions.js::单细胞": 1,
     "core/biof3-server/helpers/permissions.js::空间组学": 1,
     "core/biof3-server/helpers/permissions.js::组学": 2,
-    "core/biof3-server/helpers/plugin-demo-prompt.js::deseq2": 1,
-    "core/biof3-server/helpers/plugin-demo-prompt.js::volcano": 1,
     "core/biof3-server/helpers/system-prompt.js::gsea": 1,
     "core/biof3-server/helpers/system-prompt.js::单细胞": 1,
     "core/biof3-server/helpers/tools-assets.js::cellchat": 1,
@@ -106,18 +104,6 @@
     "core/biof3-server/routes/ai-agent/chat.js::wgcna": 3,
     "core/biof3-server/routes/ai-agent/chat.js::单细胞": 3,
     "core/biof3-server/routes/ai-legacy.js::scrna": 1,
-    "core/biof3-server/tool-registry.js::cellchat": 4,
-    "core/biof3-server/tool-registry.js::deseq2": 3,
-    "core/biof3-server/tool-registry.js::go-kegg": 3,
-    "core/biof3-server/tool-registry.js::gsea": 6,
-    "core/biof3-server/tool-registry.js::km-survival": 2,
-    "core/biof3-server/tool-registry.js::scanpy": 1,
-    "core/biof3-server/tool-registry.js::scrna": 1,
-    "core/biof3-server/tool-registry.js::scvi": 5,
-    "core/biof3-server/tool-registry.js::seurat": 4,
-    "core/biof3-server/tool-registry.js::wgcna": 4,
-    "core/biof3-server/tool-registry.js::单细胞": 2,
-    "core/biof3-server/tool-registry.js::组学": 1,
     "core/packages/shared-copilot/actionBus.ts::single-cell": 2,
     "core/packages/shared-copilot/actions.ts::scrna": 2,
     "core/packages/shared-copilot/chat-file-references.ts::h5ad": 1,
@@ -179,5 +165,6 @@
     "src/main/core-utils.js::scanpy": 1,
     "src/main/core-utils.js::seurat": 1,
     "src/main/core-utils.js::wgcna": 1
-  }
+  },
+  "updatedAt": "2026-09-12"
 }

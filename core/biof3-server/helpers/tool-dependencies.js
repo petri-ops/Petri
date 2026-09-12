@@ -13,7 +13,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const DEPENDENCIES_FILE = path.join(__dirname, '..', 'tool-scripts', '_dependencies.json');
+// BLOCK-83 P4：依赖清单随领域包交付（BIOF3_DOMAIN_TOOL_DEPENDENCIES 可覆盖；缺省路径不存在=跳过检查不阻塞）
+const DEPENDENCIES_FILE = process.env.BIOF3_DOMAIN_TOOL_DEPENDENCIES || path.join(__dirname, '..', 'tool-scripts', '_dependencies.json');
 
 let cache = null;
 

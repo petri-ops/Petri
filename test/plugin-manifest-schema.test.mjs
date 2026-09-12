@@ -41,9 +41,10 @@ const require = createRequire(import.meta.url);
   process.on('exit', () => { try { fsx.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
 }
 
-const manifestPath = resolve(repoRoot, 'resources/built-in-plugins/manifest.json');
-const schemaPath = resolve(repoRoot, 'resources/built-in-plugins/manifest.schema.json');
-const placeholdersPath = resolve(repoRoot, 'resources/built-in-plugins/manifest.placeholders.json');
+// BLOCK-83 P4：发行清单拆分——核心仓仅存运行时清单（领域插件清单随领域包）
+const manifestPath = resolve(repoRoot, 'resources/runtime/manifest.json');
+const schemaPath = resolve(repoRoot, 'resources/runtime/manifest.schema.json');
+const placeholdersPath = resolve(repoRoot, 'resources/runtime/manifest.placeholders.json');
 const contractPath = resolve(repoRoot, 'release-contract.json');
 
 console.log(`[plugin-schema] repoRoot=${repoRoot}`);

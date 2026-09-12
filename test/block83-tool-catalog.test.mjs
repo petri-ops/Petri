@@ -9,6 +9,8 @@ const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const catalog = require('../core/biof3-server/routes/tools-catalog');
 const pluginLoader = require('../core/biof3-server/plugin-loader');
+// BLOCK-83 P4：核心仓零内置插件——测试装载中性夹具源
+pluginLoader.loadPluginsFromSources({ builtInDir: path.resolve(root, 'test/fixtures/neutral-plugins') });
 
 test('BLOCK-83 D4 catalog projection maps installed plugin manifests to catalog entries', () => {
   const manifests = pluginLoader.ensurePluginSourcesLoaded();
@@ -16,16 +18,16 @@ test('BLOCK-83 D4 catalog projection maps installed plugin manifests to catalog 
   const entries = manifests.map(catalog._toCatalogEntry).filter(Boolean);
   assert.equal(entries.length, manifests.length);
 
-  const deseq2 = entries.find((entry) => entry.id === 'deseq2');
-  assert.ok(deseq2, 'deseq2 should be part of the projection');
+  const fixture = entries.find((entry) => entry.id === 'sample-metrics');
+  assert.ok(fixture, 'sample-metrics should be part of the projection');
   // 表现层字段：目录投影必须带 color/category/minutes，UI 方可零静态清单渲染。
-  assert.equal(typeof deseq2.title, 'string');
-  assert.equal(typeof deseq2.category, 'string');
-  assert.equal(deseq2.color, '#dc2626');
-  assert.equal(deseq2.language, 'r');
-  assert.ok(Array.isArray(deseq2.inputs) && deseq2.inputs.length > 0);
-  assert.ok(Array.isArray(deseq2.outputs) && deseq2.outputs.length > 0);
-  assert.equal(deseq2.resultStudioAvailable, true);
+  assert.equal(typeof fixture.title, 'string');
+  assert.equal(typeof fixture.category, 'string');
+  assert.equal(fixture.color, '#64748b');
+  assert.equal(fixture.language, 'r');
+  assert.ok(Array.isArray(fixture.inputs) && fixture.inputs.length > 0);
+  assert.ok(Array.isArray(fixture.outputs) && fixture.outputs.length > 0);
+  assert.equal(fixture.resultStudioAvailable, true);
 });
 
 test('BLOCK-83 D4 catalog projection is empty for zero installed plugins (honest empty state)', () => {

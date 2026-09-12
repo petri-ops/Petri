@@ -504,7 +504,7 @@ describe('HLE-C5R-7: Plugin Contract Lint detects contract mismatches', () => {
 
   it('deg-standardizer has outputs defined', async () => {
     const def = JSON.parse(fs.readFileSync(
-      path.join(process.cwd(), 'resources/built-in-plugins/deg-standardizer/tool-definition.json'),
+      path.join(process.cwd(), '..', 'gewu-pack-bio', 'plugins', 'deg-standardizer', 'tool-definition.json'),
       'utf8',
     ));
     // The tool has outputs; the canonical column contract is enforced via the
@@ -517,7 +517,7 @@ describe('HLE-C5R-7: Plugin Contract Lint detects contract mismatches', () => {
 
   it('GSEA tool-definition declares gene_id_type parameter', async () => {
     const def = JSON.parse(fs.readFileSync(
-      path.join(process.cwd(), 'resources/built-in-plugins/gsea/tool-definition.json'),
+      path.join(process.cwd(), '..', 'gewu-pack-bio', 'plugins', 'gsea', 'tool-definition.json'),
       'utf8',
     ));
     // Inputs use 'id' not 'name'

@@ -49,7 +49,9 @@ function percentile(values, p) {
 }
 
 function benchmarkIndex() {
-  const realRoot = path.join(REPO_ROOT, 'resources/built-in-plugins/deseq2/demo-data');
+  const realRoot = process.env.BIOF3_PLUGINS_DIR
+    ? path.join(process.env.BIOF3_PLUGINS_DIR, 'deseq2/demo-data')
+    : path.join(REPO_ROOT, '..', 'gewu-pack-bio', 'plugins', 'deseq2', 'demo-data');
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-hrt0-eval-'));
   const largeRoot = path.join(tempRoot, 'large');
   const cachePath = path.join(tempRoot, 'large-index.json');

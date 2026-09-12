@@ -19,6 +19,10 @@ export PATH="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installat
 export BIOF3_DB_PATH='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\data\biof3.db'
 export BIOF3_LOCAL_DATA_DIR='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\data'
 
+# BLOCK-83 P4：核心仓零内置插件——dev 栈插件源=生信包（BIOF3_PLUGINS_DIR 已设则尊重）
+export BIOF3_PLUGINS_DIR="D:\1.WorkDir\gewu-pack-bio\plugins"
+export BIOF3_DOMAIN_TOOL_REGISTRY="D:\1.WorkDir\gewu-pack-bio\registry\tool-registry.json"
+
 # -WindowStyle Minimized（最小化的是 node 控制台；Electron GUI 正常显示）。
 # 禁止 Hidden：hidden 启动会让页面 visibilityState=hidden，Chromium 冻结视口
 # （实测 949px）并触发懒渲染跳过——左栏 projectTree 不渲染，验收断言全歪。

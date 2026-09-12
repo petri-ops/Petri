@@ -389,8 +389,8 @@
         "core/biof3-server/routes/r-compute.js",
         "core/biof3-server/routes/tools-platform.js",
         "core/shared-backend/local-request-boundary.js",
-        "resources/built-in-plugins/pca-explorer/**",
-        "resources/built-in-plugins/volcano-plot/**"
+        "plugins/pca-explorer/**",
+        "plugins/volcano-plot/**"
       ],
       "tests": [
         "test/g0-chf0-http.test.mjs",
@@ -428,7 +428,7 @@
     {
       "id": "plugin-runtime",
       "patterns": [
-        "resources/built-in-plugins/**",
+        "plugins/**",
         "core/biof3-server/plugin-loader.js",
         "core/biof3-server/mcp/**",
         "core/biof3-server/tool-registry.js",
@@ -883,10 +883,10 @@
         "frontend/package-lock.json",
         "package.json",
         "package-lock.json",
-        "resources/built-in-plugins/deseq2/**",
-        "resources/built-in-plugins/gene-correlation/**",
-        "resources/built-in-plugins/go-kegg/**",
-        "resources/built-in-plugins/volcano-plot/**",
+        "plugins/deseq2/**",
+        "plugins/gene-correlation/**",
+        "plugins/go-kegg/**",
+        "plugins/volcano-plot/**",
         "scripts/g0-rs-p4r-capture.mjs",
         "scripts/g0-rs-p5-acceptance.mjs",
         "scripts/g0-rs-p6-*",
@@ -1126,7 +1126,8 @@
       "id": "test-infrastructure",
       "patterns": [
         "test/**",
-        "test/impact-map.json"
+        "test/impact-map.json",
+        "resources/runtime/**"
       ],
       "tests": [
         "test/test-affected.test.mjs"

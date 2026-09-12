@@ -53,7 +53,7 @@ test('MCP registry honors the same explicit built-in source root as the HTTP ser
   }
 });
 
-test('单细胞步骤已移除：callTool 视为未知工具', async () => {
+test('已退役工具：callTool 视为未知工具', async () => {
   // Scientific analysis is exposed only through installed plugin tools.
   globalThis._biof3Plugins = new Map();
   const result = await callTool('doublet', {});
@@ -61,7 +61,7 @@ test('单细胞步骤已移除：callTool 视为未知工具', async () => {
   assert.match(result.content[0].text, /unknown_tool/i);
 });
 
-test('listTools 只返回插件工具（单细胞步骤已移除）', async () => {
+test('listTools 只返回插件工具', async () => {
   // 清空 + 注册一个 mock 插件（pluginDir 指向临时目录，放真实 tool-definition.json）
   const os = await import('node:os');
   const fs = await import('node:fs');
