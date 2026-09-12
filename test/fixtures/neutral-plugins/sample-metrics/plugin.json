@@ -5,8 +5,55 @@
   "version": "1.0.0",
   "language": "r",
   "description": "核心测试专用的中性分析插件：读样本表，输出汇总表、散点图与报告。不含任何领域语义。",
-  "runtime": { "r": ">=4.1.0" },
-  "platform": ["windows-x64", "macos-arm64", "linux-x64"],
-  "supportedPlatforms": ["windows-x64", "macos-arm64", "linux-x64"],
-  "packages": { "r": {} }
+  "runtime": {
+    "r": ">=4.1.0"
+  },
+  "platform": [
+    "windows-x64",
+    "macos-arm64",
+    "linux-x64"
+  ],
+  "supportedPlatforms": [
+    "windows-x64",
+    "macos-arm64",
+    "linux-x64"
+  ],
+  "packages": {
+    "r": {}
+  },
+  "inputs": [
+    {
+      "id": "samples",
+      "label": "样本指标表",
+      "type": "file",
+      "required": true,
+      "accept": ".csv"
+    }
+  ],
+  "outputs": [
+    {
+      "id": "summary_table",
+      "filename": "summary_table.csv",
+      "type": "table",
+      "label": "分组汇总表"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "summary_table",
+      "type": "table",
+      "filename": "summary_table.csv",
+      "label": "分组汇总表"
+    }
+  ],
+  "failureModes": [
+    {
+      "code": "missing_input_column",
+      "title": "缺少必需输入列",
+      "description": "输入表缺少必需列",
+      "severity": "user_error",
+      "suggestedFix": "请确认 CSV 含 sample_id 与数值列",
+      "detect": "读取输入表时校验必需列"
+    }
+  ]
 }

@@ -29,15 +29,37 @@
     }
   ],
   "outputs": [
-    { "id": "summary_table", "filename": "summary_table.csv", "type": "table", "label": "分组汇总表" },
-    { "id": "scatter", "filename": "scatter.png", "type": "plot", "label": "散点图" },
-    { "id": "report", "filename": "report.html", "type": "report", "label": "汇总报告" }
+    {
+      "id": "summary_table",
+      "filename": "summary_table.csv",
+      "type": "table",
+      "label": "分组汇总表"
+    },
+    {
+      "id": "scatter",
+      "filename": "scatter.png",
+      "type": "plot",
+      "label": "散点图"
+    },
+    {
+      "id": "report",
+      "filename": "report.html",
+      "type": "report",
+      "label": "汇总报告"
+    }
   ],
   "tutorialUrl": "",
   "estimatedMinutes": 1,
   "color": "#64748b",
   "failureModes": [
-    { "code": "missing_input_column", "description": "输入表缺少必需列", "severity": "user_error" }
+    {
+      "code": "missing_input_column",
+      "title": "缺少必需输入列",
+      "description": "输入表缺少必需列",
+      "severity": "user_error",
+      "suggestedFix": "请确认 CSV 含 sample_id 与数值列",
+      "detect": "读取输入表时校验必需列"
+    }
   ],
   "resultStudio": {
     "contractVersion": 1,
@@ -61,32 +83,71 @@
       {
         "inputId": "samples",
         "required": true,
-        "acceptsArtifactTypes": ["table"],
+        "acceptsArtifactTypes": [
+          "table"
+        ],
         "semanticRole": "input_measurements"
       }
     ],
     "parameters": {
-      "group_col": { "type": "text", "default": "group" },
-      "value_floor": { "type": "number", "default": 0, "minimum": 0 }
+      "group_col": {
+        "type": "text",
+        "default": "group"
+      },
+      "value_floor": {
+        "type": "number",
+        "default": 0,
+        "minimum": 0
+      }
     },
     "parameterImpacts": {
       "group_col": "workflow",
       "value_floor": "presentation"
     },
-    "actions": ["filter_rows", "recompute"],
+    "actions": [
+      "filter_rows",
+      "recompute"
+    ],
     "artifacts": [
-      { "id": "summary_table", "type": "table", "filename": "summary_table.csv", "interaction": "interactive" },
-      { "id": "scatter", "type": "plot", "filename": "scatter.png", "interaction": "noninteractive" },
-      { "id": "report", "type": "report", "filename": "report.html", "interaction": "noninteractive" }
+      {
+        "id": "summary_table",
+        "type": "table",
+        "filename": "summary_table.csv",
+        "interaction": "interactive"
+      },
+      {
+        "id": "scatter",
+        "type": "plot",
+        "filename": "scatter.png",
+        "interaction": "noninteractive"
+      },
+      {
+        "id": "report",
+        "type": "report",
+        "filename": "report.html",
+        "interaction": "noninteractive"
+      }
     ],
     "interactionMappings": [
-      { "artifactId": "summary_table", "mode": "table", "entityType": "sample", "idField": "sample_id" }
+      {
+        "artifactId": "summary_table",
+        "mode": "table",
+        "entityType": "sample",
+        "idField": "sample_id"
+      }
     ],
     "validator": {
       "id": "sample_metrics_result_truth_v1",
-      "checks": ["artifact_truth_valid", "script_sha256", "input_sha256", "output_sha256"]
+      "checks": [
+        "artifact_truth_valid",
+        "script_sha256",
+        "input_sha256",
+        "output_sha256"
+      ]
     },
-    "goldenFixture": { "path": "golden-revisions/result-studio-v1.json" },
+    "goldenFixture": {
+      "path": "golden-revisions/result-studio-v1.json"
+    },
     "upgradePolicy": {
       "sameMajor": "compatible_if_contract_digests_match",
       "contractDrift": "migration_required",

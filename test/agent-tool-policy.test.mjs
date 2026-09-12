@@ -26,6 +26,9 @@ const require = createRequire(import.meta.url);
   }
   boot.close();
   process.env.BIOF3_DB_PATH = pth.join(tempDbDir, 'biof3.db');
+  // BLOCK-83 P4：registry 插件源指向中性夹具（sample-metrics 入 HEAVY_TOOLS 后，
+  // dispatch 的 registeredTool 校验需要它可被发现；须在 require 链前生效）。
+  process.env.BIOF3_BUILT_IN_PLUGINS_DIR = pth.resolve(hereDir, 'fixtures', 'neutral-plugins');
   process.on('exit', () => { try { fsx.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
 }
 const {
