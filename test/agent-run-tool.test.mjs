@@ -245,33 +245,48 @@ test('MCP file-input staging contains plugin ids and rejects reserved control fi
 });
 
 test('MCP existing tool_job rejects user/project/conversation/tool identity drift before execution', async () => {
-  const builtInDir = resolve(__dirname, 'fixtures', 'neutral-plugins', 'sample-metrics');
-  globalThis._biof3Plugins = new Map();
-  globalThis._biof3Plugins.set('sample-metrics', {
-    id: 'volcano-plot',
-    version: '1.0.0',
-    language: 'r',
-    pluginDir: builtInDir,
-    scriptPath: path.join(builtInDir, 'scripts'),
-  });
+  // BLOCK-83 P4：核心仓已无生信插件（原 volcano-plot / go-kegg 载体随包移出），
+  // 改用中性夹具 sample-metrics 承载本测试的真实语义——「已存在 tool_job 的身份漂移
+  // 必须在执行前被拒」。
+  //
+  // 两处装配要点（此前失败形态的根因）：
+  // 1. 插件源必须经 BIOF3_BUILT_IN_PLUGINS_DIR 指向中性夹具父目录——旧的
+  //    `globalThis._biof3Plugins` mock 在 BLOCK-83 重构后已淘汰，registry.js 实际走
+  //    `pluginLoader.getPlugin(name)`。
+  // 2. 必须真建 project——身份校验通过后仍会解析项目结果目录，缺 project 会先撞
+  //    `Project not found`，掩盖被测的身份漂移分支。
+  const neutralPluginsDir = resolve(__dirname, 'fixtures', 'neutral-plugins');
+  const previousBuiltInDir = process.env.BIOF3_BUILT_IN_PLUGINS_DIR;
+  process.env.BIOF3_BUILT_IN_PLUGINS_DIR = neutralPluginsDir;
+  // createProject 自行生成 id 并真实落 workspace 目录；本测试只需它存在即可让
+  // 项目结果目录解析通过（workspace 随临时 DB 目录一并清理）。
+  const project = db.createProject({ name: 'MCP identity drift fixture' });
+  const projectId = project.id;
+  // 项目结果目录解析带归属校验（project.user_id === userId，管理员除外），
+  // 归属先钉到 mcp-owner，否则会在解析阶段先撞 Permission denied。
+  db.setProjectUserId(projectId, 'mcp-owner');
+  // 第 4 例考察 tool 身份漂移：job 记为另一 tool，调用方却以 sample-metrics 复用同一 job。
+  // 中性夹具仅一个工具，故用「job.tool_id 与调用工具不一致」承载同一断言分支
+  // （原实现用 volcano-plot / go-kegg 两个插件，语义等价）。
   const job = db.createToolJob({
-    toolId: 'volcano-plot',
+    toolId: 'drifted-tool',
     userId: 'mcp-owner',
-    projectId: 'mcp-project',
+    projectId,
     conversationId: 'mcp-conversation-a',
-    params: { deg_table: '/tmp/does-not-run.csv' },
+    params: { samples: '/tmp/does-not-run.csv' },
     status: 'failed',
   });
   try {
     for (const opts of [
-      { userId: 'mcp-other', projectId: 'mcp-project', conversationId: 'mcp-conversation-a' },
+      { userId: 'mcp-other', projectId, conversationId: 'mcp-conversation-a' },
       { userId: 'mcp-owner', projectId: 'mcp-other', conversationId: 'mcp-conversation-a' },
-      { userId: 'mcp-owner', projectId: 'mcp-project', conversationId: 'mcp-conversation-b' },
-      { userId: 'mcp-owner', projectId: 'mcp-project', conversationId: 'mcp-conversation-a', toolJobId: job.id },
+      { userId: 'mcp-owner', projectId, conversationId: 'mcp-conversation-b' },
+      // user/project/conversation 全同 —— 唯一漂移点是 tool 身份
+      { userId: 'mcp-owner', projectId, conversationId: 'mcp-conversation-a', toolJobId: job.id },
     ]) {
       const result = await callTool(
-        opts.toolJobId ? 'go-kegg' : 'volcano-plot',
-        { deg_table: '/tmp/does-not-run.csv' },
+        'sample-metrics',
+        { samples: '/tmp/does-not-run.csv' },
         { ...opts, toolJobId: job.id },
       );
       assert.equal(result.isError, true);
@@ -280,15 +295,19 @@ test('MCP existing tool_job rejects user/project/conversation/tool identity drif
     assert.equal(db.getToolJob(job.id).status, 'failed');
   } finally {
     db.getDatabase().prepare('DELETE FROM tool_jobs WHERE id=?').run(job.id);
-    globalThis._biof3Plugins = new Map();
+    db.getDatabase().prepare('DELETE FROM projects WHERE id=?').run(projectId);
+    if (previousBuiltInDir === undefined) delete process.env.BIOF3_BUILT_IN_PLUGINS_DIR;
+    else process.env.BIOF3_BUILT_IN_PLUGINS_DIR = previousBuiltInDir;
   }
 });
 
 test('MCP plugin execution fails closed when a new tool_job cannot be persisted', async () => {
-  const builtInDir = resolve(__dirname, '..', 'resources', 'built-in-plugins', 'volcano-plot');
+  // BLOCK-83 P4：同上一测试，载体改用中性夹具（原 resources/built-in-plugins/volcano-plot
+  // 目录已随包移出核心仓，指向它会让测试在到达 fail-closed 断言前就因插件不存在而失败）。
+  const builtInDir = resolve(__dirname, 'fixtures', 'neutral-plugins', 'sample-metrics');
   globalThis._biof3Plugins = new Map();
-  globalThis._biof3Plugins.set('volcano-plot', {
-    id: 'volcano-plot',
+  globalThis._biof3Plugins.set('sample-metrics', {
+    id: 'sample-metrics',
     version: '1.0.0',
     language: 'r',
     pluginDir: builtInDir,
@@ -297,8 +316,8 @@ test('MCP plugin execution fails closed when a new tool_job cannot be persisted'
   const originalCreateToolJob = db.createToolJob;
   db.createToolJob = () => { throw new Error('injected_persistence_failure'); };
   try {
-    const result = await callTool('volcano-plot', {
-      deg_table: '/tmp/does-not-run.csv',
+    const result = await callTool('sample-metrics', {
+      samples: '/tmp/does-not-run.csv',
     }, {
       userId: 'mcp-owner',
       projectId: 'mcp-project',

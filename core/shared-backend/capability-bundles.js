@@ -136,6 +136,17 @@ function normalizeRequiredBundles(pluginCfg) {
 }
 
 /**
+ * 把本地路径归一化为正斜杠形式，供 tar 命令行参数使用。
+ *
+ * 与 `--force-local` 配套：该标志会转义参数中的反斜杠，`C:\tmp\installed` 会被
+ * tar 解析成 `C:\tmp` + `\i` + `nstalled`。正斜杠形式在 Windows bsdtar 与 POSIX
+ * tar 上语义一致，且不含需要转义的字符。
+ */
+function toPosixPath(targetPath) {
+  return String(targetPath).replace(/\\/g, '/');
+}
+
+/**
  * Extract a verified .tar.gz bundle into the library directory mounted by
  * R_LIBS_USER. The archive is trusted only after capability-provisioning has
  * matched its SHA-256 against the descriptor committed in this registry.
@@ -152,7 +163,12 @@ function installTarGzBundle(archivePath, installDir, expected = {}) {
     };
     execFile(
       'tar',
-      ['-xzf', archivePath, '-C', installDir],
+      // Windows 下两道必需处理：
+      // 1. `--force-local`：bsdtar 会把以盘符开头的路径（`C:\...`）当成远端主机规格，
+      //    报 `Cannot connect to C: resolve failed`；POSIX tar 接受该标志为空操作。
+      // 2. 正斜杠归一化：`--force-local` 会转义参数里的反斜杠，`...\installed` 会被
+      //    解析成 `...\i` + `nstalled`，必须先把分隔符换成 `/`。
+      ['--force-local', '-xzf', toPosixPath(archivePath), '-C', toPosixPath(installDir)],
       { timeout: 300000, maxBuffer: 1024 * 1024 },
       (error, _stdout, stderr) => {
         if (error) {

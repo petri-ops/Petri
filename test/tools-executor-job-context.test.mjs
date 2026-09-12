@@ -442,9 +442,14 @@ test('verified snapshot delivery rejects a retained writable fd before sending a
   const originalUnlink = nodeFs.promises.unlink;
   let interceptedSnapshotUnlink = 0;
   const retainedWriterFds = [];
+  // Windows 下 realpathSync 返回反斜杠路径，而 target 由被测代码用正斜杠拼接；
+  // 直接 startsWith 永不命中 → 钩子静默失效（断言 0 !== 1）。统一归一化为 '/' 再比较。
+  const toPosix = (value) => String(value).replaceAll('\\', '/');
+  const snapshotRootPrefix = `${toPosix(realpathSync(root))}/biof3-artifact-stream-`;
   nodeFs.promises.unlink = async (target) => {
-    if (String(target).startsWith(`${realpathSync(root)}/biof3-artifact-stream-`)
-        && String(target).endsWith('/artifact')) {
+    const normalizedTarget = toPosix(target);
+    if (normalizedTarget.startsWith(snapshotRootPrefix)
+        && normalizedTarget.endsWith('/artifact')) {
       interceptedSnapshotUnlink += 1;
       // Model a same-UID process that opens the pathname before unlink and
       // deliberately retains its writable descriptor after the name is gone.

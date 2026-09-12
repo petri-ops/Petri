@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import test, { after } from 'node:test';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { bootstrapTestDb } from './helpers/bootstrap-db.mjs';
@@ -19,7 +20,7 @@ const { registerTaskConfirmationHook } = require('../core/shared-backend/task-co
 const { createScientificTaskConfirmationHook } = require('../core/shared-backend/scientific-task-confirmation');
 registerTaskConfirmationHook(createScientificTaskConfirmationHook());
 const BetterSqlite = require('better-sqlite3');
-const dbModulePath = resolve(new URL('../core/biof3-server/db.js', import.meta.url).pathname);
+const dbModulePath = fileURLToPath(new URL('../core/biof3-server/db.js', import.meta.url));
 
 after(() => {
   if (db.db?.open) db.db.close();
@@ -29,6 +30,21 @@ after(() => {
 function seedLegacyDb(dbPath, { withConversationColumn = false } = {}) {
   const legacy = new BetterSqlite(dbPath);
   legacy.exec(`
+    -- 最小 projects 表：db.js 在模块加载时预编译 listProjects/getProject 等语句
+    -- （core/biof3-server/db.js:527 stmts 段），生产环境由 migration-runner 先建表。
+    -- 本夹具模拟的是「已有 projects 的遗留库」，故必须补上这张表，否则 db.js
+    -- require 期即抛 SqliteError: no such table: projects（与待测迁移逻辑无关）。
+    CREATE TABLE projects (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL DEFAULT '',
+      description TEXT DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at TEXT,
+      updated_at TEXT,
+      modality TEXT DEFAULT 'single-cell',
+      workspace_path TEXT DEFAULT '',
+      workspace_kind TEXT DEFAULT 'local'
+    );
     CREATE TABLE scientific_task_specs (
       task_id TEXT NOT NULL,
       version INTEGER NOT NULL,
@@ -346,7 +362,9 @@ test('all-job history and status projections retain project and conversation ide
   // BLOCK-30 P1: py-server 的 biof3-server-db 桥与 tools-router 契约镜像
   // 断言随独立 Python 后端摘除；tool_jobs 现由 biof3-server 单写入方维护。
 
-  const routeSource = readFileSync(resolve(new URL('../core/biof3-server/routes/tools-metadata.js', import.meta.url).pathname), 'utf8');
-  assert.match(routeSource, /SELECT id, tool_id,[^']*project_id, conversation_id FROM tool_jobs/);
+  const routeSource = readFileSync(fileURLToPath(new URL('../core/biof3-server/routes/tools-metadata.js', import.meta.url)), 'utf8');
+  // 断言目标：该查询必须同时投影 project_id 与 conversation_id（身份保留），
+  // 但不锁死列顺序——后续新增列（如 execution_target_id）不应误伤本断言。
+  assert.match(routeSource, /SELECT id, tool_id,[^']*project_id,[^']*conversation_id[^']*FROM tool_jobs/);
   assert.match(routeSource, /conversationId:\s*job\.conversation_id\s*\|\|\s*null/);
 });

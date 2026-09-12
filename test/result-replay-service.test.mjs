@@ -114,7 +114,16 @@ function writeValidChildReplayPackage(childDir, {
 
 function fixture(context, runChangeSet) {
   const workspaceRoot = mkdtempSync(join(tmpdir(), 'biof3-controlled-replay-'));
-  context.after(() => rmSync(workspaceRoot, { recursive: true, force: true }));
+  // Windows 下 better-sqlite3 连接句柄由模块级单例持有、进程退出前不释放，
+  // after 钩子里 rmSync 临时目录会抛 EPERM（POSIX 无此约束）。清理是尽力而为，
+  // tmpdir 残留无害。
+  context.after(() => {
+    try {
+      rmSync(workspaceRoot, { recursive: true, force: true });
+    } catch (error) {
+      if (error?.code !== 'EPERM' && error?.code !== 'EBUSY') throw error;
+    }
+  });
   const sqlite = new Database(join(workspaceRoot, 'replay.db'));
   context.after(() => sqlite.close());
   ensureResultStudioSchema(sqlite);
@@ -744,11 +753,15 @@ test('P5 cohort ReplayPackage binds and independently validates every per-Job pa
 });
 
 test('P5 HTTP replay preserves generated downstream Artifact lineage through the registered tool boundary', () => {
-  const routeSource = readFileSync(join(import.meta.dirname, '..', 'core/biof3-server/routes/result-studio.js'), 'utf8');
-  const replayRouteStart = routeSource.indexOf("app.post('/api/result-studio/revisions/:revisionId/replay'");
-  const replayRouteEnd = routeSource.indexOf("app.get('/api/result-studio/changesets/:changeSetId/compare'", replayRouteStart);
-  assert.ok(replayRouteStart >= 0 && replayRouteEnd > replayRouteStart, 'controlled replay route is unavailable');
-  const replayRoute = routeSource.slice(replayRouteStart, replayRouteEnd);
+  // result-studio 路由已按域拆分为 routes/result-studio/*.js；replay 在 revisions.js，
+  // compare 在 changesets.js。此处直接读各自文件，不依赖旧的单文件布局。
+  const revisionsSource = readFileSync(
+    join(import.meta.dirname, '..', 'core/biof3-server/routes/result-studio/revisions.js'),
+    'utf8',
+  );
+  const replayRouteStart = revisionsSource.indexOf("app.post('/api/result-studio/revisions/:revisionId/replay'");
+  assert.ok(replayRouteStart >= 0, 'controlled replay route is unavailable');
+  const replayRoute = revisionsSource.slice(replayRouteStart);
   assert.match(replayRoute, /const persistedConversationId = persistedToolJobConversation\(sourceJob\)/);
   assert.match(replayRoute, /const conversationId = persistedConversationId \|\| requestedConversationId/);
   assert.match(replayRoute, /executeJob:\s*async\s*\(\{[\s\S]*?resultStudioInputLineage\s*=\s*null[\s\S]*?\}\)\s*=>/);

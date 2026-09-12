@@ -26,6 +26,21 @@ function tmpDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-bundles-test-'));
 }
 
+/**
+ * 打包临时目录为 tar.gz。
+ *
+ * Windows 自带的 bsdtar 需要两道处理，缺一不可：
+ * 1. `--force-local`：否则 `-czf` 后的 `C:\...` 被当成远端主机规格
+ *    （`Cannot connect to C: resolve failed`）；
+ * 2. 路径正斜杠归一化：`--force-local` 会转义反斜杠，`...\source` 会被拆成
+ *    `...\s` + `ource`。
+ * POSIX tar 接受 `--force-local` 为空操作，两个平台行为一致。
+ */
+function tarGz(archive, source) {
+  const posix = (value) => String(value).replace(/\\/g, '/');
+  execFileSync('tar', ['--force-local', '-czf', posix(archive), '-C', posix(source), '.']);
+}
+
 function sha256Of(content) {
   return crypto.createHash('sha256').update(content).digest('hex');
 }
@@ -245,7 +260,7 @@ test('installTarGzBundle extracts a real bundle archive and requires its marker'
     JSON.stringify({ schemaVersion: 1, bundleId: 'demo' })
   );
   fs.writeFileSync(path.join(source, 'demoPkg', 'DESCRIPTION'), 'Package: demoPkg\n');
-  execFileSync('tar', ['-czf', archive, '-C', source, '.']);
+  tarGz(archive, source);
 
   await bundles.installTarGzBundle(archive, installDir);
 
@@ -263,7 +278,7 @@ test('installTarGzBundle rejects a manifest for a different bundle', async () =>
     path.join(source, 'bundle-manifest.json'),
     JSON.stringify({ schemaVersion: 1, bundleId: 'r-wgcna', bundleVersion: '1.0.0' })
   );
-  execFileSync('tar', ['-czf', archive, '-C', source, '.']);
+  tarGz(archive, source);
 
   await assert.rejects(
     bundles.installTarGzBundle(archive, installDir, {
@@ -285,7 +300,7 @@ test('ensureBundlesForPlugin uses the real tar.gz installer by default', async (
     JSON.stringify({ schemaVersion: 1, bundleId: 'r-enrichment', bundleVersion: '1.0.0' })
   );
   fs.writeFileSync(path.join(source, 'demoPkg', 'DESCRIPTION'), 'Package: demoPkg\n');
-  execFileSync('tar', ['-czf', archive, '-C', source, '.']);
+  tarGz(archive, source);
 
   const original = bundles.getBundleDescriptor;
   bundles.getBundleDescriptor = () => ({

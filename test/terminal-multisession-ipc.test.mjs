@@ -3,6 +3,7 @@ import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 
@@ -20,7 +21,7 @@ const require = createRequire(import.meta.url);
  * 再 require src/ipc/terminal.js 真模块，直接调用注册的 ipcMain.handle。
  */
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const TERMINAL_PATH = path.join(ROOT, 'src/ipc/terminal.js');
 const PLATFORM_COMPAT_PATH = path.join(ROOT, 'src/platform-compat.js');
 const ROOT_REQUIRE = createRequire(path.join(ROOT, 'package.json'));

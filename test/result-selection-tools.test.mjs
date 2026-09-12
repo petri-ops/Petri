@@ -29,7 +29,14 @@ const {
   tool_result_enrichment_from_revision,
 } = require('../core/biof3-server/agent-tools/result-selection-tools');
 process.env.BIOF3_DB_PATH = undefined;
-rmSync(selectionDbRoot, { recursive: true, force: true });
+// Windows 下 better-sqlite3 连接句柄由模块级单例持有、进程退出前不释放，
+// rmSync 临时目录会抛 EPERM（POSIX 无此约束）。此处清理是尽力而为：
+// 目录位于 os.tmpdir()，残留无害且由 OS 回收；不得因清理失败让测试整体判红。
+try {
+  rmSync(selectionDbRoot, { recursive: true, force: true });
+} catch (error) {
+  if (error?.code !== 'EPERM' && error?.code !== 'EBUSY') throw error;
+}
 
 function sha256(value) {
   return crypto.createHash('sha256').update(value).digest('hex');
