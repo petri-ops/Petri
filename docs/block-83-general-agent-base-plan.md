@@ -3,7 +3,7 @@
 > 文档版本：v1.2（立项评估版 · 修订 2 平台化：生信降格为首个参考领域）
 > 创建日期：2026-09-12
 > 修订日期：2026-09-12
-> 状态：**planned（排队候选，启动需用户裁决）**
+> 状态：**active（P0 进行中：评审稿已落盘，待用户逐项确认 D1-D14）**
 > truthDomain：block-83-general-agent-base
 > 关联：`agent-workbench-enhancement-plan.md`（active，方向同源）、`g0-result-studio-plan.md`（P6 证据重采归属）
 
