@@ -1,0 +1,96 @@
+{
+  "id": "sample-metrics",
+  "title": "样本指标汇总（中性夹具）",
+  "subtitle": "核心测试专用：最小合法分析插件",
+  "category": "metrics",
+  "language": "r",
+  "description": "对样本指标表做分组汇总，产出汇总表、散点图与报告。核心机制测试的中性载体，无领域语义。",
+  "inputs": [
+    {
+      "id": "samples",
+      "label": "样本指标表（CSV）",
+      "type": "file",
+      "required": true,
+      "accept": ".csv",
+      "hint": "需含 sample_id 数值列与分组列。"
+    },
+    {
+      "id": "group_col",
+      "label": "分组列名",
+      "type": "text",
+      "default": "group"
+    },
+    {
+      "id": "value_floor",
+      "label": "数值下限",
+      "type": "number",
+      "default": 0,
+      "minimum": 0
+    }
+  ],
+  "outputs": [
+    { "id": "summary_table", "filename": "summary_table.csv", "type": "table", "label": "分组汇总表" },
+    { "id": "scatter", "filename": "scatter.png", "type": "plot", "label": "散点图" },
+    { "id": "report", "filename": "report.html", "type": "report", "label": "汇总报告" }
+  ],
+  "tutorialUrl": "",
+  "estimatedMinutes": 1,
+  "color": "#64748b",
+  "failureModes": [
+    { "code": "missing_input_column", "description": "输入表缺少必需列", "severity": "user_error" }
+  ],
+  "resultStudio": {
+    "contractVersion": 1,
+    "descriptorVersion": 1,
+    "semanticType": "sample_metrics_summary",
+    "entity": {
+      "type": "sample_metric_row",
+      "idField": "sample_id",
+      "fields": {
+        "sample_id": "string",
+        "value": "number",
+        "value_normalized": "number|null"
+      }
+    },
+    "source": {
+      "strategy": "execution_snapshot_per_artifact",
+      "entryPoint": "scripts/sample-metrics.R"
+    },
+    "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R",
+    "inputBindings": [
+      {
+        "inputId": "samples",
+        "required": true,
+        "acceptsArtifactTypes": ["table"],
+        "semanticRole": "input_measurements"
+      }
+    ],
+    "parameters": {
+      "group_col": { "type": "text", "default": "group" },
+      "value_floor": { "type": "number", "default": 0, "minimum": 0 }
+    },
+    "parameterImpacts": {
+      "group_col": "workflow",
+      "value_floor": "presentation"
+    },
+    "actions": ["filter_rows", "recompute"],
+    "artifacts": [
+      { "id": "summary_table", "type": "table", "filename": "summary_table.csv", "interaction": "interactive" },
+      { "id": "scatter", "type": "plot", "filename": "scatter.png", "interaction": "noninteractive" },
+      { "id": "report", "type": "report", "filename": "report.html", "interaction": "noninteractive" }
+    ],
+    "interactionMappings": [
+      { "artifactId": "summary_table", "mode": "table", "entityType": "sample", "idField": "sample_id" }
+    ],
+    "validator": {
+      "id": "sample_metrics_result_truth_v1",
+      "checks": ["artifact_truth_valid", "script_sha256", "input_sha256", "output_sha256"]
+    },
+    "goldenFixture": { "path": "golden-revisions/result-studio-v1.json" },
+    "upgradePolicy": {
+      "sameMajor": "compatible_if_contract_digests_match",
+      "contractDrift": "migration_required",
+      "missingMigration": "read_only_legacy"
+    }
+  }
+}

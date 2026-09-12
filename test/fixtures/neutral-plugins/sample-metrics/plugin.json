@@ -1,0 +1,12 @@
+{
+  "id": "sample-metrics",
+  "pluginManifestVersion": 1,
+  "title": "样本指标汇总（中性夹具）",
+  "version": "1.0.0",
+  "language": "r",
+  "description": "核心测试专用的中性分析插件：读样本表，输出汇总表、散点图与报告。不含任何领域语义。",
+  "runtime": { "r": ">=4.1.0" },
+  "platform": ["windows-x64", "macos-arm64", "linux-x64"],
+  "supportedPlatforms": ["windows-x64", "macos-arm64", "linux-x64"],
+  "packages": { "r": {} }
+}
