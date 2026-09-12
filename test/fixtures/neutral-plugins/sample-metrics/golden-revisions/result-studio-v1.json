@@ -5,13 +5,14 @@
   "descriptorVersion": 1,
   "sourceScriptSha256": "6e8325b5e634bf4a42ae0840fdd6820eeed8d22df2297f85ff5b485c4d9d1ce4",
   "inputBindingDigest": "db04f6a60455bdcfa900eb3776c12ea71cbff8f99fb0b20231874b585ed715e6",
-  "artifactContractDigest": "b7bda9730f1e44fb49911ed4f88a425ae23b5b48fad67f605cea4bc855c270ed",
+  "artifactContractDigest": "9fba29acbdb4f35d20bd4bfa574880fdb3d5314cb055117d467b4812271d0e01",
   "revisionSourceStrategy": "execution_snapshot_per_artifact",
   "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R",
   "fixtureInput": "demo-data/demo-samples.csv",
   "expectedArtifactIds": [
     "summary_table",
     "scatter",
+    "scatter_svg",
     "report"
   ]
 }

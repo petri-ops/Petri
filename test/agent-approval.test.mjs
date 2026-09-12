@@ -28,6 +28,9 @@ const req = createRequire(import.meta.url);
   }
   boot.close();
   process.env.BIOF3_DB_PATH = pth.join(tempDbDir, 'biof3.db');
+  // BLOCK-83 P4：registry 插件源指向中性夹具（sample-metrics 入 HEAVY_TOOLS，
+  // dispatch 的 registeredTool 校验需要它可被发现）。
+  process.env.BIOF3_BUILT_IN_PLUGINS_DIR = pth.resolve(hereDir, 'fixtures', 'neutral-plugins');
   process.on('exit', () => { try { fsx.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
 }
 
@@ -42,9 +45,9 @@ const CTX = {
   projectId: 'agent-approval-project',
   conversationId: 'agent-approval-conversation',
 };
-const DESEQ2_PARAMS = {
-  counts: resolve(__dirname, '..', 'resources', 'built-in-plugins', 'deseq2', 'demo-data', 'demo-counts.csv'),
-  coldata: resolve(__dirname, '..', 'resources', 'built-in-plugins', 'deseq2', 'demo-data', 'demo-coldata.csv'),
+const SAMPLE_PARAMS = {
+  // BLOCK-83 P4：中性夹具（核心仓不含生信 demo 数据）
+  samples: resolve(__dirname, 'fixtures', 'neutral-plugins', 'sample-metrics', 'demo-data', 'demo-samples.csv'),
 };
 
 test('完全访问把项目内可复现分析判定为自动执行', () => {
@@ -67,7 +70,7 @@ test('只读检查请求禁止 run，但允许 list', async () => {
 
   const blocked = await dispatchTool(
     'run_tool',
-    { op: 'run', toolId: 'deseq2', params: { padj_cutoff: 0.05 } },
+    { op: 'run', toolId: 'sample-metrics', params: { padj_cutoff: 0.05 } },
     { ...CTX, allowExecution: policy.allowExecution, executionPolicyReason: policy.reason },
   );
   assert.equal(blocked.ok, false);
@@ -84,10 +87,10 @@ test('明确确认续跑不被只读关键词误拦截', () => {
   assert.equal(policy.allowExecution, true);
 });
 
-test('deseq2 首次 run 返回 needApproval + ackToken', async () => {
-  // 用 deseq2（在 HEAVY_TOOLS 白名单）
+test('sample-metrics 首次 run 返回 needApproval + ackToken', async () => {
+  // 用 sample-metrics（在 HEAVY_TOOLS 白名单，中性夹具插件）
   const r = await learning.tool_run_tool(
-    { op: 'run', toolId: 'deseq2', params: DESEQ2_PARAMS },
+    { op: 'run', toolId: 'sample-metrics', params: SAMPLE_PARAMS },
     CTX
   );
   assert.equal(r.ok, true);
@@ -110,7 +113,7 @@ test('deseq2 首次 run 返回 needApproval + ackToken', async () => {
 
 test('ack(approve) 后 ack_status 变 approved', async () => {
   const r = await learning.tool_run_tool(
-    { op: 'run', toolId: 'deseq2', params: DESEQ2_PARAMS },
+    { op: 'run', toolId: 'sample-metrics', params: SAMPLE_PARAMS },
     CTX
   );
   const job = db.ackToolJob(r.ackToken, true);
@@ -122,12 +125,12 @@ test('ack(approve) 后 ack_status 变 approved', async () => {
 
 test('ack(reject) 后重调 ackToken 返回 user_rejected', async () => {
   const r = await learning.tool_run_tool(
-    { op: 'run', toolId: 'deseq2', params: DESEQ2_PARAMS },
+    { op: 'run', toolId: 'sample-metrics', params: SAMPLE_PARAMS },
     CTX
   );
   db.ackToolJob(r.ackToken, false);
   const r2 = await learning.tool_run_tool(
-    { op: 'run', toolId: 'deseq2', params: DESEQ2_PARAMS, ackToken: r.ackToken },
+    { op: 'run', toolId: 'sample-metrics', params: SAMPLE_PARAMS, ackToken: r.ackToken },
     CTX
   );
   assert.equal(r2.ok, false);
@@ -138,9 +141,9 @@ test('ack(reject) 后重调 ackToken 返回 user_rejected', async () => {
 });
 
 test('approval continuation 只接受同 user/project/conversation/tool/params 且未过期的 capability', async () => {
-  const params = { ...DESEQ2_PARAMS };
+  const params = { ...SAMPLE_PARAMS };
   const job = db.createToolJob({
-    toolId: 'deseq2',
+    toolId: 'sample-metrics',
     userId: 'approval-owner',
     projectId: 'approval-project',
     conversationId: 'approval-conversation',
@@ -164,7 +167,7 @@ test('approval continuation 只接受同 user/project/conversation/tool/params �
   };
   const run = (ctx, overrides = {}) => learning.tool_run_tool({
     op: 'run',
-    toolId: 'deseq2',
+    toolId: 'sample-metrics',
     params: { ...params, ...(overrides.params || {}) },
     ackToken: token,
     ...(overrides.toolId ? { toolId: overrides.toolId } : {}),
@@ -292,7 +295,7 @@ test('Agent 只能把真实 tool_job 中已验证的 artifact 绑定到下游', 
     CTX,
   );
   const job = db.createToolJob({
-    toolId: 'deseq2',
+    toolId: 'sample-metrics',
     userId: CTX.userId,
     status: 'completed',
     params: {},
@@ -328,7 +331,7 @@ test('Agent 只能把真实 tool_job 中已验证的 artifact 绑定到下游', 
   assert.equal(bound.plan.lineage[0].fromToolJobId, job.id);
 
   const foreignJob = db.createToolJob({
-    toolId: 'deseq2',
+    toolId: 'sample-metrics',
     userId: CTX.userId,
     status: 'completed',
     params: {},
@@ -359,7 +362,7 @@ test('workflow run/status/next ignore persisted jobs outside the active conversa
     CTX,
   );
   const foreignJob = db.createToolJob({
-    toolId: 'deseq2',
+    toolId: 'sample-metrics',
     userId: CTX.userId,
     status: 'completed',
     params: {},

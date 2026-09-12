@@ -227,7 +227,7 @@ assert.equal(validateManifest({ version: '1.0.0', plugins: { 'biof3-r-runtime': 
 console.log(`✓ legacy remote Runtime entry normalizes to per-platform artifacts`);
 
 // ── 7. assertAllowedUrl built-in:// is allowed; non-whitelisted host throws ──
-assertAllowedUrl('built-in://volcano-plot');
+assertAllowedUrl('built-in://sample-metrics');
 assertAllowedUrl('https://github.com/x/y.zip');
 let rejected = false;
 try { assertAllowedUrl('https://evil.example.com/x.zip'); }

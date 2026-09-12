@@ -477,23 +477,23 @@ describe('HLE-C5R-7: Plugin Contract Lint detects contract mismatches', () => {
     assert.ok(lint, 'plugin-contract-lint.js must be loadable');
   });
 
-  it('volcano-plot tool-definition declares lfc_col parameter', async () => {
+  it('sample-metrics tool-definition declares value_col parameter', async () => {
     const def = JSON.parse(fs.readFileSync(
-      path.join(process.cwd(), 'resources/built-in-plugins/volcano-plot/tool-definition.json'),
+      path.join(process.cwd(), 'test/fixtures/neutral-plugins/sample-metrics/tool-definition.json'),
       'utf8',
     ));
     // Inputs use 'id' not 'name'
-    const hasLfcCol = def.inputs?.some(i => i.id === 'lfc_col');
-    assert.ok(hasLfcCol, 'volcano-plot must declare lfc_col parameter (id: "lfc_col")');
+    const hasValueCol = def.inputs?.some(i => i.id === 'value_col');
+    assert.ok(hasValueCol, 'sample-metrics must declare value_col parameter (id: "value_col")');
   });
 
-  it('DESeq2 tool-definition has explicit design column preflight check', async () => {
+  it('sample-metrics tool-definition has explicit grouping column preflight inputs', async () => {
     const def = JSON.parse(fs.readFileSync(
-      path.join(process.cwd(), 'resources/built-in-plugins/deseq2/tool-definition.json'),
+      path.join(process.cwd(), 'test/fixtures/neutral-plugins/sample-metrics/tool-definition.json'),
       'utf8',
     ));
     // Inputs use 'id' not 'name'
-    const hasDesignInput = def.inputs?.some(i => i.id === 'design');
+    const hasDesignInput = def.inputs?.some(i => i.id === 'group_col');
     assert.ok(hasDesignInput, 'DESeq2 must have explicit design input in tool-definition');
     // Check failureModes for design_column_missing
     const hasDesignFailure = def.failureModes?.some(f =>

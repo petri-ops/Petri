@@ -11,19 +11,21 @@ import { existsSync } from 'node:fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SERVER_PATH = resolve(__dirname, '..', 'src', 'mcp-server.js');
-const BUILT_IN_DIR = resolve(__dirname, '..', 'resources', 'built-in-plugins');
+// BLOCK-83 P4：核心仓内置源=中性夹具（生信插件随领域包交付）
+const BUILT_IN_DIR = resolve(__dirname, 'fixtures', 'neutral-plugins');
 
 // built-in 插件实际是否存在（开发环境应有）
-const hasBuiltIn = existsSync(join(BUILT_IN_DIR, 'volcano-plot', 'plugin.json'));
+const hasBuiltIn = existsSync(join(BUILT_IN_DIR, 'sample-metrics', 'plugin.json'));
+const SKIP_REASON = '中性夹具插件缺失（test/fixtures/neutral-plugins/sample-metrics）——检查仓库完整性而非静默通过';
 
-test('built-in 工具插件被自动发现（volcano-plot/gene-correlation）', { skip: !hasBuiltIn }, async () => {
+test('built-in 工具插件被自动发现（sample-metrics）', { skip: hasBuiltIn ? false : SKIP_REASON }, async () => {
   // 清空已装插件，确保 volcano-plot 来自 built-in 发现（不是 installed.json）
   // 用空 BIOF3_PLUGINS_DIR 让 loadPluginsFromDisk 找不到已装插件
   const emptyDir = resolve(__dirname, '..', 'test-tmp-empty');
   const transport = new StdioClientTransport({
     command: 'node',
     args: [SERVER_PATH],
-    env: { ...process.env, BIOF3_PLUGINS_DIR: emptyDir },
+    env: { ...process.env, BIOF3_PLUGINS_DIR: emptyDir, BIOF3_BUILT_IN_PLUGINS_DIR: BUILT_IN_DIR },
   });
   const client = new Client({ name: 'builtin-test', version: '1.0.0' });
   await client.connect(transport);
@@ -31,12 +33,11 @@ test('built-in 工具插件被自动发现（volcano-plot/gene-correlation）', 
     const { tools } = await client.listTools();
     const names = tools.map((t) => t.name);
     // built-in 工具应被发现（即使 installed.json 为空）
-    assert.ok(names.includes('volcano-plot'), `应发现 built-in volcano-plot，实际: ${names.join(',')}`);
-    assert.ok(names.includes('gene-correlation'), `应发现 built-in gene-correlation`);
-    // pca-explorer 是 python，也应发现
-    assert.ok(names.includes('pca-explorer'), `应发现 built-in pca-explorer`);
-  } finally {
+    assert.ok(names.includes('sample-metrics'), `应发现 built-in sample-metrics，实际: ${names.join(',')}`);
     await client.close();
+  } catch (error) {
+    try { await client.close(); } catch { /* already closed */ }
+    throw error;
   }
 });
 

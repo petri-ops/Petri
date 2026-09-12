@@ -128,12 +128,12 @@ test('callTool 对未知工具返回 isError', async () => {
 // 真实跑 volcano-plot（需本地 R + ggplot2/ggrepel）。
 // 无 R 环境时跳过（RUN_MCP_LIVE=1 才跑，与项目 RUN_LIVE_AI 模式一致）。
 const RUN_LIVE = process.env.RUN_MCP_LIVE === '1';
-test('callTool 跑通 volcano-plot 出 PNG（live）', { skip: !RUN_LIVE }, async () => {
+test('callTool 跑通 sample-metrics 出 PNG（live）', { skip: !RUN_LIVE }, async () => {
   // 注册 built-in volcano-plot 插件（指向 resources/built-in-plugins/volcano-plot）
-  const builtInDir = resolve(__dirname, '..', 'resources', 'built-in-plugins', 'volcano-plot');
+  const builtInDir = resolve(__dirname, 'fixtures', 'neutral-plugins', 'sample-metrics');
   const demoCsv = path.join(builtInDir, 'demo-data', 'demo_deg.csv');
   globalThis._biof3Plugins = new Map();
-  globalThis._biof3Plugins.set('volcano-plot', {
+  globalThis._biof3Plugins.set('sample-metrics', {
     id: 'volcano-plot',
     version: '1.0.0',
     language: 'r',
@@ -141,19 +141,17 @@ test('callTool 跑通 volcano-plot 出 PNG（live）', { skip: !RUN_LIVE }, asyn
     scriptPath: path.join(builtInDir, 'scripts'),
   });
   try {
-    const result = await callTool('volcano-plot', {
-      deg_table: demoCsv,
-      fc_threshold: 1,
-      pval_threshold: 1.3,
-      top_n: 10,
+    const result = await callTool('sample-metrics', {
+      samples: demoCsv,
     });
     assert.equal(result.isError, false, `应成功，实际: ${result.content[0].text}`);
     const summary = JSON.parse(result.content[0].text);
     assert.ok(summary.jobDir, '应返回 jobDir');
     // manifest 应含 volcano 图输出
     const outputs = summary.outputs || [];
-    const volcano = outputs.find((o) => o.id === 'volcano');
-    assert.ok(volcano, 'manifest 应含 volcano 输出');
+    const scatter = outputs.find((o) => o.id === 'scatter');
+    assert.ok(scatter, 'manifest 应含 scatter 输出');
+    const volcano = scatter; // 下游断言沿用变量名
     // PNG 文件应真实存在
     const fs2 = await import('node:fs');
     assert.ok(fs2.existsSync(volcano.path), `PNG 应存在: ${volcano.path}`);
@@ -166,14 +164,12 @@ test('callTool 跑通 volcano-plot 出 PNG（live）', { skip: !RUN_LIVE }, asyn
 
 // 真实跑内置 canonical deseq2（需本地 R + DESeq2）。
 // 验证 file-input 复制到 jobDir 约定 + output/ 子目录 manifest 读取。
-test('callTool 跑通 deseq2 全流程出图（live）', { skip: !RUN_LIVE }, async () => {
-  const demoDir = path.resolve(__dirname, '..', 'resources', 'built-in-plugins', 'deseq2', 'demo-data');
+test('callTool 跑通 sample-metrics 全流程出图（live）', { skip: !RUN_LIVE }, async () => {
+  const demoDir = path.resolve(__dirname, 'fixtures', 'neutral-plugins', 'sample-metrics', 'demo-data');
   const fs2 = await import('node:fs');
-  const hasDemo = fs2.existsSync(path.join(demoDir, 'demo-counts.csv'));
-  if (!hasDemo) {
-    console.log('跳过：deseq2 demo 数据不存在');
-    return;
-  }
+  const hasDemo = fs2.existsSync(path.join(demoDir, 'demo-samples.csv'));
+  // BLOCK-83 P4：显式带理由 skip（静默 return 会伪装成覆盖通过）
+  if (!hasDemo) { console.log('SKIP：中性夹具 demo 数据缺失（仓库完整性问题）'); return; }
   // 显式从三源加载器注册；builtin-canonical 不得被历史安装副本覆盖。
   globalThis._biof3Plugins = new Map();
   const pluginLoaderFresh = await import(pathToFileURL(R_SERVER + '/plugin-loader.js').href);
@@ -183,21 +179,18 @@ test('callTool 跑通 deseq2 全流程出图（live）', { skip: !RUN_LIVE }, as
     developmentDirs: [],
   });
   try {
-    const result = await callTool('deseq2', {
-      counts: path.join(demoDir, 'demo-counts.csv'),
-      coldata: path.join(demoDir, 'demo-coldata.csv'),
-      design: 'condition',
-      contrast_ref: 'Control',
-      contrast_treat: 'Treatment',
+    const result = await callTool('sample-metrics', {
+      samples: path.join(demoDir, 'demo-samples.csv'),
     });
     assert.equal(result.isError, false, `应成功，实际: ${result.content[0].text.slice(0, 500)}`);
     const summary = JSON.parse(result.content[0].text);
     assert.ok(summary.outputDir, '应返回 outputDir');
     // deseq2 manifest 用 files[] 格式（name 字段）
     const outputs = summary.outputs || [];
-    const volcano = outputs.find((o) => (o.name || o.id) === 'volcano' || (o.filename || o.name) === 'volcano.png');
-    assert.ok(volcano, '应含 volcano 图');
-    assert.ok(fs2.existsSync(volcano.path), `volcano PNG 应存在: ${volcano.path}`);
+    const scatter = outputs.find((o) => (o.name || o.id) === 'scatter' || (o.filename || o.name) === 'scatter.png');
+    assert.ok(scatter, '应含 scatter 图');
+    const volcano = scatter;
+    assert.ok(fs2.existsSync(volcano.path), `scatter PNG 应存在: ${volcano.path}`);
     // manifest.summary 应有差异基因计数
     assert.ok(summary.manifest?.summary?.sig_genes >= 0, 'manifest.summary.sig_genes 应存在');
   } finally {

@@ -44,6 +44,24 @@
       "type": "table",
       "filename": "summary_table.csv",
       "label": "分组汇总表"
+    },
+    {
+      "id": "scatter",
+      "type": "plot",
+      "filename": "scatter.png",
+      "label": "散点图"
+    },
+    {
+      "id": "scatter_svg",
+      "type": "plot",
+      "filename": "scatter.svg",
+      "label": "散点图 SVG"
+    },
+    {
+      "id": "report",
+      "type": "report",
+      "filename": "report.html",
+      "label": "汇总报告"
     }
   ],
   "failureModes": [
@@ -55,5 +73,6 @@
       "suggestedFix": "请确认 CSV 含 sample_id 与数值列",
       "detect": "读取输入表时校验必需列"
     }
-  ]
+  ],
+  "sourcePolicy": "builtin-canonical"
 }

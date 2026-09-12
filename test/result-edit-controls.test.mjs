@@ -10,13 +10,14 @@ const { classifyParameterPatch } = require('../core/shared-backend/result-edit-i
 
 const root = path.join(import.meta.dirname, '..');
 
-function descriptorFor(pluginId) {
-  const file = path.join(root, 'resources/built-in-plugins', pluginId, 'tool-definition.json');
+// BLOCK-83 P4：descriptor 源=中性夹具（展示参数与原重插件同构、命名中性）
+function descriptorFor(pluginId = 'sample-metrics') {
+  const file = path.join(root, 'test/fixtures/neutral-plugins', pluginId, 'tool-definition.json');
   return JSON.parse(fs.readFileSync(file, 'utf8')).resultStudio;
 }
 
 test('RS-P4 control schema is projected only from declared plugin parameters', () => {
-  const descriptor = descriptorFor('volcano-plot');
+  const descriptor = descriptorFor();
   const schema = controls.buildEditControlSchema(descriptor);
   const declared = Object.keys(descriptor.parameters).sort();
   assert.deepEqual(schema.controls.map((c) => c.name), declared);
@@ -28,10 +29,10 @@ test('RS-P4 control schema is projected only from declared plugin parameters', (
 });
 
 test('RS-P4 first control batch covers colour, font, size, legend, label and export', () => {
-  const schema = controls.buildEditControlSchema(descriptorFor('volcano-plot'));
+  const schema = controls.buildEditControlSchema(descriptorFor());
   const presentation = schema.controls.filter((c) => c.group === 'presentation').map((c) => c.name);
   for (const required of [
-    'color_up', 'color_down', 'color_ns',
+    'color_high', 'color_low', 'color_mid',
     'base_font_size', 'label_size',
     'point_size', 'plot_width', 'plot_height',
     'legend_position', 'plot_title', 'export_dpi',
@@ -41,8 +42,8 @@ test('RS-P4 first control batch covers colour, font, size, legend, label and exp
 });
 
 test('RS-P4 colour parameters become colour controls without weakening validation', () => {
-  const schema = controls.buildEditControlSchema(descriptorFor('volcano-plot'));
-  const colour = schema.controls.find((c) => c.name === 'color_up');
+  const schema = controls.buildEditControlSchema(descriptorFor());
+  const colour = schema.controls.find((c) => c.name === 'color_high');
   assert.equal(colour.controlType, 'color');
   assert.equal(colour.impact, 'presentation');
   assert.equal(controls.validateControlValue(colour, '#123abc').ok, true);
@@ -60,7 +61,7 @@ test('RS-P4 a parameter without a declared impact never becomes an editable cont
 });
 
 test('RS-P4 numeric bounds fail closed instead of silently clamping', () => {
-  const schema = controls.buildEditControlSchema(descriptorFor('volcano-plot'));
+  const schema = controls.buildEditControlSchema(descriptorFor());
   const alpha = schema.controls.find((c) => c.name === 'point_alpha');
   assert.equal(alpha.minimum, 0.05);
   assert.equal(alpha.maximum, 1);
@@ -74,7 +75,7 @@ test('RS-P4 numeric bounds fail closed instead of silently clamping', () => {
 });
 
 test('RS-P4 select controls only accept declared options', () => {
-  const schema = controls.buildEditControlSchema(descriptorFor('volcano-plot'));
+  const schema = controls.buildEditControlSchema(descriptorFor());
   const legend = schema.controls.find((c) => c.name === 'legend_position');
   assert.equal(legend.controlType, 'select');
   assert.equal(controls.validateControlValue(legend, 'bottom').ok, true);
@@ -82,22 +83,22 @@ test('RS-P4 select controls only accept declared options', () => {
 });
 
 test('RS-P4 manual and agent submissions produce an identical trusted patch', () => {
-  const descriptor = descriptorFor('volcano-plot');
-  const proposed = { color_up: '#00FF00', label_size: 4 };
+  const descriptor = descriptorFor();
+  const proposed = { color_high: '#00FF00', label_size: 4 };
   const manual = controls.normalizeEditSubmission({ descriptor, proposedValues: proposed, origin: 'manual' });
   const agent = controls.normalizeEditSubmission({ descriptor, proposedValues: proposed, origin: 'agent' });
   assert.deepEqual(manual.patch, agent.patch);
-  assert.deepEqual(manual.patch, { color_up: '#00ff00', label_size: 4 });
+  assert.deepEqual(manual.patch, { color_high: '#00ff00', label_size: 4 });
   assert.equal(manual.classification.editClass, agent.classification.editClass);
   assert.equal(manual.origin, 'manual');
   assert.equal(agent.origin, 'agent');
 });
 
 test('RS-P4 a presentation-only patch never escalates to scientific recompute', () => {
-  const descriptor = descriptorFor('volcano-plot');
+  const descriptor = descriptorFor();
   const result = controls.normalizeEditSubmission({
     descriptor,
-    proposedValues: { color_up: '#00ff00', plot_title: 'Treated vs Control', export_dpi: 600 },
+    proposedValues: { color_high: '#00ff00', plot_title: 'Group A vs Group B', export_dpi: 600 },
   });
   assert.equal(result.ok, true);
   assert.equal(result.classification.editClass, 'presentation_rerender');
@@ -108,10 +109,10 @@ test('RS-P4 a presentation-only patch never escalates to scientific recompute', 
 });
 
 test('RS-P4 a scientific threshold change requires confirmation and reruns science', () => {
-  const descriptor = descriptorFor('volcano-plot');
+  const descriptor = descriptorFor();
   const result = controls.normalizeEditSubmission({
     descriptor,
-    proposedValues: { fc_threshold: 2 },
+    proposedValues: { qc_cutoff: 5 },
   });
   assert.equal(result.classification.editClass, 'scientific_recompute');
   assert.equal(result.classification.requiresScientificConfirmation, true);
@@ -123,8 +124,8 @@ test('RS-P4 a scientific threshold change requires confirmation and reruns scien
 
 test('RS-P4 a workflow parameter is classified as workflow replan, not styling', () => {
   const result = controls.normalizeEditSubmission({
-    descriptor: descriptorFor('deseq2'),
-    proposedValues: { design: 'condition + batch' },
+    descriptor: descriptorFor(),
+    proposedValues: { aggregate_mode: 'median' },
   });
   assert.equal(result.classification.editClass, 'workflow_replan');
   assert.equal(controls.explainEditImpact(result.classification).rerunsScience, true);
@@ -132,8 +133,8 @@ test('RS-P4 a workflow parameter is classified as workflow replan, not styling',
 
 test('RS-P4 an undeclared parameter is rejected, not silently dropped or accepted', () => {
   const result = controls.normalizeEditSubmission({
-    descriptor: descriptorFor('volcano-plot'),
-    proposedValues: { color_up: '#111111', secret_flag: true },
+    descriptor: descriptorFor(),
+    proposedValues: { color_high: '#111111', secret_flag: true },
   });
   assert.equal(result.ok, false);
   assert.deepEqual(result.rejected, ['secret_flag']);
@@ -142,7 +143,7 @@ test('RS-P4 an undeclared parameter is rejected, not silently dropped or accepte
 });
 
 test('RS-P4 the caller cannot downgrade a scientific parameter to presentation', () => {
-  const descriptor = descriptorFor('volcano-plot');
+  const descriptor = descriptorFor();
   const forged = {
     ...descriptor,
     parameterImpacts: { ...descriptor.parameterImpacts },
@@ -151,7 +152,7 @@ test('RS-P4 the caller cannot downgrade a scientific parameter to presentation',
   // 因此这里改的是"如果 descriptor 本身被替换"的场景，用真实 descriptor 对照。
   const trustedResult = controls.normalizeEditSubmission({
     descriptor,
-    proposedValues: { pval_threshold: 2 },
+    proposedValues: { qc_cutoff: 5 },
   });
   assert.equal(trustedResult.classification.editClass, 'scientific_recompute');
   // 直接用 result-edit-intent 复核：模型自称 view_only 也不能降级。
@@ -164,19 +165,19 @@ test('RS-P4 the caller cannot downgrade a scientific parameter to presentation',
 });
 
 test('RS-P4 unchanged values are excluded so no empty ChangeSet is created', () => {
-  const descriptor = descriptorFor('volcano-plot');
+  const descriptor = descriptorFor();
   const result = controls.normalizeEditSubmission({
     descriptor,
-    proposedValues: { color_up: '#dc2626', label_size: 5 },
-    currentValues: { color_up: '#dc2626', label_size: 3 },
+    proposedValues: { color_high: '#c0392b', label_size: 5 },
+    currentValues: { color_high: '#c0392b', label_size: 3 },
   });
   assert.deepEqual(result.changed, ['label_size']);
-  assert.deepEqual(result.unchanged, ['color_up']);
+  assert.deepEqual(result.unchanged, ['color_high']);
   assert.deepEqual(result.patch, { label_size: 5 });
 });
 
 test('RS-P4 an entirely unchanged submission yields no patch and no classification', () => {
-  const descriptor = descriptorFor('volcano-plot');
+  const descriptor = descriptorFor();
   const result = controls.normalizeEditSubmission({
     descriptor,
     proposedValues: { color_up: '#dc2626' },
@@ -191,7 +192,7 @@ test('RS-P4 an entirely unchanged submission yields no patch and no classificati
 });
 
 test('RS-P4 every admitted plugin projects a usable schema with declared impacts only', () => {
-  for (const pluginId of ['deseq2', 'volcano-plot', 'gene-correlation', 'go-kegg']) {
+  for (const pluginId of ['sample-metrics']) {
     const descriptor = descriptorFor(pluginId);
     const schema = controls.buildEditControlSchema(descriptor);
     assert.ok(schema.controls.length > 0, pluginId);
@@ -208,18 +209,18 @@ test('RS-P4 every admitted plugin projects a usable schema with declared impacts
 });
 
 test('P5 heatmap display controls remain presentation-only while calculation controls remain scientific/data', () => {
-  const descriptor = descriptorFor('gene-correlation');
+  const descriptor = descriptorFor();
   const display = controls.normalizeEditSubmission({
     descriptor,
-    proposedValues: { color_low: '#0000ff', cluster_rows: false, show_correlation_values: true },
-    currentValues: { color_low: '#2563eb', cluster_rows: true, show_correlation_values: false },
+    proposedValues: { color_low: '#0000ff', point_size: 3 },
+    currentValues: { color_low: '#2563eb', point_size: 2 },
   });
   assert.equal(display.classification.editClass, 'presentation_rerender');
   assert.equal(display.classification.requiresScientificConfirmation, false);
   const calculation = controls.normalizeEditSubmission({
     descriptor,
-    proposedValues: { top_n: 20, method: 'spearman' },
-    currentValues: { top_n: 30, method: 'pearson' },
+    proposedValues: { qc_cutoff: 5, aggregate_mode: 'median' },
+    currentValues: { qc_cutoff: 3, aggregate_mode: 'mean' },
   });
   assert.equal(calculation.classification.editClass, 'workflow_replan');
   assert.equal(calculation.classification.requiresScientificConfirmation, true);

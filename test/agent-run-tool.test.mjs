@@ -98,7 +98,7 @@ test('P5 Workflow Truth query is not truncated by the 200-row UI listing limit',
   let childJob = null;
   for (let index = 0; index < 205; index += 1) {
     const job = db.createToolJob({
-      toolId: index === 0 ? 'deseq2' : index === 204 ? 'go-kegg' : 'unrelated-job',
+      toolId: index === 0 ? 'sample-metrics' : index === 204 ? 'gene-correlation' : 'unrelated-job',
       projectId,
       params: { index },
       status: 'completed',
@@ -245,9 +245,9 @@ test('MCP file-input staging contains plugin ids and rejects reserved control fi
 });
 
 test('MCP existing tool_job rejects user/project/conversation/tool identity drift before execution', async () => {
-  const builtInDir = resolve(__dirname, '..', 'resources', 'built-in-plugins', 'volcano-plot');
+  const builtInDir = resolve(__dirname, 'fixtures', 'neutral-plugins', 'sample-metrics');
   globalThis._biof3Plugins = new Map();
-  globalThis._biof3Plugins.set('volcano-plot', {
+  globalThis._biof3Plugins.set('sample-metrics', {
     id: 'volcano-plot',
     version: '1.0.0',
     language: 'r',

@@ -1,10 +1,10 @@
 {
   "id": "sample-metrics",
   "title": "样本指标汇总（中性夹具）",
-  "subtitle": "核心测试专用：最小合法分析插件",
+  "subtitle": "核心测试专用：最小合法分析插件（含展示参数全量 descriptor）",
   "category": "metrics",
   "language": "r",
-  "description": "对样本指标表做分组汇总，产出汇总表、散点图与报告。核心机制测试的中性载体，无领域语义。",
+  "description": "对样本指标表做分组汇总，产出汇总表、散点图与报告。核心机制测试的中性载体，无领域语义；RS-P4 控件测试所需的展示参数（颜色/字号/尺寸/图例/标签/导出）与既有重插件同构但命名中性。",
   "inputs": [
     {
       "id": "samples",
@@ -13,6 +13,12 @@
       "required": true,
       "accept": ".csv",
       "hint": "需含 sample_id 数值列与分组列。"
+    },
+    {
+      "id": "value_col",
+      "label": "数值列名",
+      "type": "text",
+      "default": "value"
     },
     {
       "id": "group_col",
@@ -26,6 +32,114 @@
       "type": "number",
       "default": 0,
       "minimum": 0
+    },
+    {
+      "id": "top_n",
+      "label": "展示前 N 项",
+      "type": "number",
+      "default": 10
+    },
+    {
+      "id": "label_items",
+      "label": "是否标注数据点",
+      "type": "text",
+      "default": "none"
+    },
+    {
+      "id": "color_high",
+      "label": "高值颜色",
+      "type": "text",
+      "default": "#c0392b"
+    },
+    {
+      "id": "color_low",
+      "label": "低值颜色",
+      "type": "text",
+      "default": "#2471a3"
+    },
+    {
+      "id": "color_mid",
+      "label": "中值颜色",
+      "type": "text",
+      "default": "#7f8c8d"
+    },
+    {
+      "id": "point_size",
+      "label": "点大小",
+      "type": "number",
+      "default": 2
+    },
+    {
+      "id": "base_font_size",
+      "label": "基础字号",
+      "type": "number",
+      "default": 12
+    },
+    {
+      "id": "plot_title",
+      "label": "图标题",
+      "type": "text",
+      "default": "样本指标"
+    },
+    {
+      "id": "legend_position",
+      "label": "图例位置",
+      "type": "select",
+      "default": "right",
+      "options": [
+        "left",
+        "right",
+        "top",
+        "bottom",
+        "none"
+      ]
+    },
+    {
+      "id": "plot_width",
+      "label": "图宽",
+      "type": "number",
+      "default": 8
+    },
+    {
+      "id": "plot_height",
+      "label": "图高",
+      "type": "number",
+      "default": 6
+    },
+    {
+      "id": "export_dpi",
+      "label": "导出 DPI",
+      "type": "number",
+      "default": 150
+    },
+    {
+      "id": "point_alpha",
+      "label": "点透明度",
+      "type": "number",
+      "default": 0.8
+    },
+    {
+      "id": "label_size",
+      "label": "标签字号",
+      "type": "number",
+      "default": 3
+    },
+    {
+      "id": "qc_cutoff",
+      "label": "质控阈值",
+      "type": "number",
+      "default": 3,
+      "minimum": 0
+    },
+    {
+      "id": "aggregate_mode",
+      "label": "汇总方式",
+      "type": "select",
+      "default": "mean",
+      "options": [
+        "mean",
+        "median"
+      ]
     }
   ],
   "outputs": [
@@ -40,6 +154,12 @@
       "filename": "scatter.png",
       "type": "plot",
       "label": "散点图"
+    },
+    {
+      "id": "scatter_svg",
+      "filename": "scatter.svg",
+      "type": "plot",
+      "label": "散点图 SVG"
     },
     {
       "id": "report",
@@ -59,6 +179,14 @@
       "severity": "user_error",
       "suggestedFix": "请确认 CSV 含 sample_id 与数值列",
       "detect": "读取输入表时校验必需列"
+    },
+    {
+      "code": "sample_mismatch",
+      "title": "样本不匹配",
+      "description": "输入表分组列样本与主表不一致",
+      "severity": "user_error",
+      "suggestedFix": "核对两表样本 ID",
+      "detect": "执行前对齐样本 ID"
     }
   ],
   "resultStudio": {
@@ -90,6 +218,10 @@
       }
     ],
     "parameters": {
+      "value_col": {
+        "type": "text",
+        "default": "value"
+      },
       "group_col": {
         "type": "text",
         "default": "group"
@@ -98,11 +230,106 @@
         "type": "number",
         "default": 0,
         "minimum": 0
+      },
+      "top_n": {
+        "type": "number",
+        "default": 10
+      },
+      "label_items": {
+        "type": "text",
+        "default": "none"
+      },
+      "color_high": {
+        "type": "text",
+        "default": "#c0392b"
+      },
+      "color_low": {
+        "type": "text",
+        "default": "#2471a3"
+      },
+      "color_mid": {
+        "type": "text",
+        "default": "#7f8c8d"
+      },
+      "point_size": {
+        "type": "number",
+        "default": 2
+      },
+      "base_font_size": {
+        "type": "number",
+        "default": 12
+      },
+      "plot_title": {
+        "type": "text",
+        "default": "样本指标"
+      },
+      "legend_position": {
+        "type": "select",
+        "default": "right",
+        "options": [
+          "right",
+          "left",
+          "top",
+          "bottom",
+          "none"
+        ]
+      },
+      "plot_width": {
+        "type": "number",
+        "default": 8
+      },
+      "plot_height": {
+        "type": "number",
+        "default": 6
+      },
+      "export_dpi": {
+        "type": "number",
+        "default": 150
+      },
+      "point_alpha": {
+        "type": "number",
+        "default": 0.8,
+        "minimum": 0.05,
+        "maximum": 1
+      },
+      "label_size": {
+        "type": "number",
+        "default": 3
+      },
+      "qc_cutoff": {
+        "type": "number",
+        "default": 3,
+        "minimum": 0
+      },
+      "aggregate_mode": {
+        "type": "select",
+        "default": "mean",
+        "options": [
+          "mean",
+          "median"
+        ]
       }
     },
     "parameterImpacts": {
-      "group_col": "workflow",
-      "value_floor": "presentation"
+      "value_col": "data",
+      "group_col": "data",
+      "value_floor": "presentation",
+      "top_n": "data",
+      "label_items": "presentation",
+      "color_high": "presentation",
+      "color_low": "presentation",
+      "color_mid": "presentation",
+      "point_size": "presentation",
+      "base_font_size": "presentation",
+      "plot_title": "presentation",
+      "legend_position": "presentation",
+      "plot_width": "presentation",
+      "plot_height": "presentation",
+      "export_dpi": "presentation",
+      "point_alpha": "presentation",
+      "label_size": "presentation",
+      "qc_cutoff": "scientific",
+      "aggregate_mode": "workflow"
     },
     "actions": [
       "filter_rows",
@@ -119,6 +346,12 @@
         "id": "scatter",
         "type": "plot",
         "filename": "scatter.png",
+        "interaction": "noninteractive"
+      },
+      {
+        "id": "scatter_svg",
+        "type": "plot",
+        "filename": "scatter.svg",
         "interaction": "noninteractive"
       },
       {
@@ -142,7 +375,8 @@
         "artifact_truth_valid",
         "script_sha256",
         "input_sha256",
-        "output_sha256"
+        "output_sha256",
+        "finite_statistics"
       ]
     },
     "goldenFixture": {
@@ -152,6 +386,18 @@
       "sameMajor": "compatible_if_contract_digests_match",
       "contractDrift": "migration_required",
       "missingMigration": "read_only_legacy"
+    },
+    "previewResourceModel": {
+      "baseMemoryBytes": 268435456,
+      "inputMemoryMultiplier": 4,
+      "outputDiskMultiplier": 2,
+      "raster": {
+        "widthParameter": "plot_width",
+        "heightParameter": "plot_height",
+        "dpiParameter": "export_dpi",
+        "bytesPerPixel": 4,
+        "workingSetMultiplier": 3
+      }
     }
   }
 }

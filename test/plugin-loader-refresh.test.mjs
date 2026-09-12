@@ -57,6 +57,7 @@ test('loadPluginsFromDisk refreshes changed installed plugin metadata and remove
     globalThis._biof3Plugins = new Map();
 
     pluginLoader.loadPluginsFromDisk(tmpDir);
+    pluginLoader.loadBuiltInPlugins(process.env.BIOF3_BUILT_IN_PLUGINS_DIR);
     let defs = pluginLoader.getAllToolDefinitions();
     assert.equal(defs.length, 1);
     assert.equal(defs[0].description, 'first version');
@@ -106,54 +107,55 @@ test('loadPluginsFromDisk refreshes changed installed plugin metadata and remove
   }
 });
 
-test('legacy disk refresh cannot shadow builtin-canonical DESeq2', () => {
+test('legacy disk refresh cannot shadow builtin-canonical sample-metrics', () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-plugin-canonical-refresh-'));
-  const pluginDir = path.join(tmpDir, 'deseq2');
+  const pluginDir = path.join(tmpDir, 'sample-metrics');
   const scriptsDir = path.join(pluginDir, 'scripts');
   fs.mkdirSync(scriptsDir, { recursive: true });
   fs.writeFileSync(
     path.join(tmpDir, 'installed.json'),
-    JSON.stringify([{ id: 'deseq2', type: 'analysis-plugin' }], null, 2),
+    JSON.stringify([{ id: 'sample-metrics', type: 'analysis-plugin' }], null, 2),
   );
   fs.writeFileSync(
     path.join(pluginDir, 'plugin.json'),
     JSON.stringify({
-      id: 'deseq2',
+      id: 'sample-metrics',
       pluginManifestVersion: 1,
-      title: 'Stale DESeq2',
+      title: 'Stale Sample Metrics',
       version: '0.0.1',
       language: 'r',
     }),
   );
   fs.writeFileSync(
     path.join(pluginDir, 'tool-definition.json'),
-    JSON.stringify({ id: 'deseq2', title: 'Stale DESeq2', inputs: [], outputs: [] }),
+    JSON.stringify({ id: 'sample-metrics', title: 'Stale Sample Metrics', inputs: [], outputs: [] }),
   );
-  fs.writeFileSync(path.join(scriptsDir, 'deseq2.R'), 'stop("stale copy must not run")\n');
+  fs.writeFileSync(path.join(scriptsDir, 'sample-metrics.R'), 'stop("stale copy must not run")\n');
 
   const previousMap = globalThis._biof3Plugins;
   const previousBuiltInDir = process.env.BIOF3_BUILT_IN_PLUGINS_DIR;
   try {
     globalThis._biof3Plugins = new Map();
     process.env.BIOF3_BUILT_IN_PLUGINS_DIR = path.resolve(
-      'resources',
-      'built-in-plugins',
+      'test',
+      'fixtures',
+      'neutral-plugins',
     );
     pluginLoader.loadPluginsFromDisk(tmpDir);
 
-    const selected = pluginLoader.getPlugin('deseq2');
+    const selected = pluginLoader.getPlugin('sample-metrics');
     assert.equal(selected._sourceType, 'builtin');
     assert.equal(selected.sourcePolicy, 'builtin-canonical');
     assert.equal(
-      pluginLoader.getScriptForTool('deseq2'),
-      path.resolve('resources', 'built-in-plugins', 'deseq2', 'scripts', 'deseq2.R'),
+      pluginLoader.getScriptForTool('sample-metrics'),
+      path.resolve('test', 'fixtures', 'neutral-plugins', 'sample-metrics', 'scripts', 'sample-metrics.R'),
     );
     const demoPrompt = renderPluginDemoPathsForPrompt();
     assert.match(
       demoPrompt,
-      /resources[/\\]built-in-plugins[/\\]deseq2[/\\]demo-data[/\\]demo-counts\.csv/,
+      /neutral-plugins[/\\]sample-metrics[/\\]demo-data[/\\]demo-samples\.csv/,
     );
-    assert.doesNotMatch(demoPrompt, /Documents[/\\]BioF3-Local[/\\]plugins[/\\]deseq2/);
+    assert.doesNotMatch(demoPrompt, /Documents[/\\]BioF3-Local[/\\]plugins[/\\]sample-metrics/);
   } finally {
     globalThis._biof3Plugins = previousMap;
     if (previousBuiltInDir === undefined) delete process.env.BIOF3_BUILT_IN_PLUGINS_DIR;

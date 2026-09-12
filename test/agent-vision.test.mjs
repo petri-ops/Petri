@@ -39,16 +39,16 @@ const { callTool } = await import(pathToFileURL(resolve(__dirname, '..', 'core',
 const RUN_LIVE = process.env.RUN_VISION_LIVE === '1';
 
 // 先跑一个 volcano-plot 拿到 toolJobId（live，需 R）
-test('跑 volcano-plot 拿 toolJobId（live 前置）', { skip: !RUN_LIVE }, async () => {
-  const builtInDir = resolve(__dirname, '..', 'resources', 'built-in-plugins', 'volcano-plot');
+test('跑 sample-metrics 拿 toolJobId（live 前置）', { skip: !RUN_LIVE }, async () => {
+  const builtInDir = resolve(__dirname, 'fixtures', 'neutral-plugins', 'sample-metrics');
   const demoCsv = resolve(builtInDir, 'demo-data', 'demo_deg.csv');
   globalThis._biof3Plugins = new Map();
-  globalThis._biof3Plugins.set('volcano-plot', {
+  globalThis._biof3Plugins.set('sample-metrics', {
     id: 'volcano-plot', version: '1.0.0', language: 'r',
     pluginDir: builtInDir, scriptPath: resolve(builtInDir, 'scripts'),
   });
   try {
-    const r = await callTool('volcano-plot', { deg_table: demoCsv, fc_threshold: 1, pval_threshold: 1.3, top_n: 10 }, { userId: 'local-user' });
+    const r = await callTool('sample-metrics', { samples: demoCsv }, { userId: 'local-user' });
     assert.equal(r.isError, false);
     assert.ok(r.toolJobId);
     // 存到全局供下一个测试用
@@ -60,7 +60,7 @@ test('跑 volcano-plot 拿 toolJobId（live 前置）', { skip: !RUN_LIVE }, asy
 
 test('read_image 用 qwen-vl-max 解读火山图（live）', { skip: !RUN_LIVE }, async () => {
   const jobId = globalThis.__visionJobId;
-  if (!jobId) { console.log('跳过：前置 volcano-plot 未跑'); return; }
+  if (!jobId) { console.log('跳过：前置 sample-metrics 未跑'); return; }
   const r = await tool_read_image(
     { toolJobId: jobId, question: '这是火山图吗？描述图的横轴纵轴和差异基因分布。' },
     { userId: 'local-user' }

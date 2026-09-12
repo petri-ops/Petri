@@ -3,13 +3,10 @@
 const path = require('path');
 const pluginLoader = require('../plugin-loader');
 
+// BLOCK-83 P4：demo 提示清单只保留中性夹具（生信插件的 demo 提示随领域包交付）。
 const PROMPT_DEMO_FILES = {
-  'volcano-plot': [
-    ['deg_table', 'demo_deg.csv'],
-  ],
-  deseq2: [
-    ['counts', 'demo-counts.csv'],
-    ['coldata', 'demo-coldata.csv'],
+  'sample-metrics': [
+    ['samples', 'demo-samples.csv'],
   ],
 };
 

@@ -9,10 +9,11 @@ const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sdk = require('../core/shared-backend/result-studio-plugin-sdk');
 const { normalizePluginManifest } = require('../core/biof3-server/plugin-loader');
-const pluginIds = ['deseq2', 'volcano-plot', 'gene-correlation', 'go-kegg'];
+// BLOCK-83 P4：SDK lint 的被测对象=中性夹具插件（生信插件随领域包交付）
+const pluginIds = ['sample-metrics'];
 
-function readPlugin(id) {
-  const pluginDir = path.join(root, 'resources/built-in-plugins', id);
+function readPlugin(id = pluginIds[0]) {
+  const pluginDir = path.join(root, 'test/fixtures/neutral-plugins', id);
   return {
     pluginDir,
     plugin: { ...JSON.parse(fs.readFileSync(path.join(pluginDir, 'plugin.json'))), pluginDir },
@@ -32,7 +33,7 @@ test('RS7 four scientific plugin descriptors pass the fail-closed SDK lint', () 
 });
 
 test('P6 validates the trusted preview resource model and its numeric parameter bindings', () => {
-  const { pluginDir, plugin, toolDefinition } = readPlugin('volcano-plot');
+  const { pluginDir, plugin, toolDefinition } = readPlugin();
   const valid = sdk.lintResultStudioPlugin({ plugin, toolDefinition, pluginDir });
   assert.equal(valid.valid, true, JSON.stringify(valid.errors));
   assert.equal(valid.descriptor.previewResourceModel.raster.dpiParameter, 'export_dpi');
@@ -44,24 +45,6 @@ test('P6 validates the trusted preview resource model and its numeric parameter 
   assert.equal(rejected.valid, false);
   assert.ok(rejected.errors.some((issue) => issue.code === 'preview_resource_raster_parameter_invalid'));
   assert.ok(rejected.errors.some((issue) => issue.code === 'preview_resource_raster_multiplier_invalid'));
-});
-
-test('P5 DESeq2 exposes its reusable VST matrix with a stable non-formal Artifact id', () => {
-  const { toolDefinition } = readPlugin('deseq2');
-  assert.deepEqual(
-    toolDefinition.outputs.find((artifact) => artifact.id === 'vst_matrix'),
-    {
-      id: 'vst_matrix',
-      filename: 'vst_matrix.csv',
-      type: 'data',
-      label: 'VST 矩阵',
-    }
-  );
-  assert.equal(
-    toolDefinition.resultStudio.artifacts.some((artifact) => artifact.id === 'vst_matrix'),
-    false,
-    'intermediate data must not silently expand the formal editable Revision cohort'
-  );
 });
 
 test('RS7 descriptors bind every formal table/plot/report to one exact output filename and interaction contract', () => {
@@ -102,49 +85,49 @@ test('RS7 golden revisions bind script, input and output contract digests', () =
 });
 
 test('RS7 rejects ambiguous formal filenames before Artifact Truth can fall back to same-stem discovery', () => {
-  const { pluginDir, plugin, toolDefinition } = readPlugin('volcano-plot');
+  const { pluginDir, plugin, toolDefinition } = readPlugin();
   const missing = structuredClone(toolDefinition);
-  delete missing.outputs.find((output) => output.id === 'volcano').filename;
+  delete missing.outputs.find((output) => output.id === 'scatter').filename;
   const missingResult = sdk.lintResultStudioPlugin({ plugin, toolDefinition: missing, pluginDir });
   assert.equal(missingResult.valid, false);
   assert.equal(missingResult.errors.some((issue) => issue.code === 'formal_output_filename_invalid'), true);
 
   const drifted = structuredClone(toolDefinition);
-  drifted.outputs.find((output) => output.id === 'volcano').filename = 'volcano.pdf';
+  drifted.outputs.find((output) => output.id === 'scatter').filename = 'scatter.pdf';
   const driftedResult = sdk.lintResultStudioPlugin({ plugin, toolDefinition: drifted, pluginDir });
   assert.equal(driftedResult.valid, false);
   assert.equal(driftedResult.errors.some((issue) => issue.code === 'artifact_filename_mismatch'), true);
 });
 
 test('RS7 fails closed on missing, duplicate, or forged formal interaction metadata', () => {
-  const { pluginDir, plugin, toolDefinition } = readPlugin('gene-correlation');
+  const { pluginDir, plugin, toolDefinition } = readPlugin();
 
   const undeclared = structuredClone(toolDefinition);
-  delete undeclared.resultStudio.artifacts.find((artifact) => artifact.id === 'heatmap').interaction;
+  delete undeclared.resultStudio.artifacts.find((artifact) => artifact.id === 'summary_table').interaction;
   const undeclaredResult = sdk.lintResultStudioPlugin({ plugin, toolDefinition: undeclared, pluginDir });
   assert.equal(undeclaredResult.valid, false);
   assert.equal(undeclaredResult.errors.some((issue) => issue.code === 'artifact_interaction_contract_invalid'), true);
 
   const missingMapping = structuredClone(toolDefinition);
   missingMapping.resultStudio.interactionMappings = missingMapping.resultStudio.interactionMappings
-    .filter((mapping) => mapping.artifactId !== 'heatmap');
+    .filter((mapping) => mapping.artifactId !== 'summary_table');
   const missingMappingResult = sdk.lintResultStudioPlugin({ plugin, toolDefinition: missingMapping, pluginDir });
   assert.equal(missingMappingResult.valid, false);
   assert.equal(missingMappingResult.errors.some((issue) => issue.code === 'interactive_artifact_mapping_count_invalid'), true);
 
   const duplicateMapping = structuredClone(toolDefinition);
   duplicateMapping.resultStudio.interactionMappings.push(structuredClone(
-    duplicateMapping.resultStudio.interactionMappings.find((mapping) => mapping.artifactId === 'heatmap')
+    duplicateMapping.resultStudio.interactionMappings.find((mapping) => mapping.artifactId === 'summary_table')
   ));
   const duplicateMappingResult = sdk.lintResultStudioPlugin({ plugin, toolDefinition: duplicateMapping, pluginDir });
   assert.equal(duplicateMappingResult.valid, false);
   assert.equal(duplicateMappingResult.errors.some((issue) => issue.code === 'interaction_artifact_duplicate'), true);
 
-  const { pluginDir: volcanoDir, plugin: volcanoPlugin, toolDefinition: volcanoDefinition } = readPlugin('volcano-plot');
+  const { pluginDir: volcanoDir, plugin: volcanoPlugin, toolDefinition: volcanoDefinition } = readPlugin();
   const forgedNoninteractive = structuredClone(volcanoDefinition);
   forgedNoninteractive.resultStudio.interactionMappings.push({
-    ...structuredClone(forgedNoninteractive.resultStudio.interactionMappings.find((mapping) => mapping.artifactId === 'volcano')),
-    artifactId: 'volcano_svg',
+    ...structuredClone(forgedNoninteractive.resultStudio.interactionMappings.find((mapping) => mapping.artifactId === 'scatter')),
+    artifactId: 'scatter_svg',
   });
   const forgedResult = sdk.lintResultStudioPlugin({
     plugin: volcanoPlugin,
@@ -166,7 +149,7 @@ test('RS7 rejects incomplete or forged impact metadata before RS4 can trust it',
 });
 
 test('RS7 rejects a descriptor without stable selection or derivation actions', () => {
-  const { pluginDir, plugin, toolDefinition } = readPlugin('gene-correlation');
+  const { pluginDir, plugin, toolDefinition } = readPlugin();
   const invalid = structuredClone(toolDefinition);
   invalid.resultStudio.actions = [];
   const result = sdk.lintResultStudioPlugin({ plugin, toolDefinition: invalid, pluginDir });
@@ -175,7 +158,7 @@ test('RS7 rejects a descriptor without stable selection or derivation actions', 
 });
 
 test('RS7 upgrade policy keeps compatible history readable and fails closed on drift', () => {
-  const { plugin, toolDefinition } = readPlugin('volcano-plot');
+  const { plugin, toolDefinition } = readPlugin();
   const descriptor = toolDefinition.resultStudio;
   const compatibleRevision = {
     pluginVersion: '1.7.0',
@@ -192,7 +175,7 @@ test('RS7 upgrade policy keeps compatible history readable and fails closed on d
 });
 
 test('BLOCK-83 D2 keeps the per-Revision script contract while allowing .R/.py extensions', () => {
-  const { plugin, toolDefinition, pluginDir } = readPlugin('volcano-plot');
+  const { plugin, toolDefinition, pluginDir } = readPlugin();
   const swapTemplate = (template) => {
     const forged = structuredClone(toolDefinition);
     forged.resultStudio.independentScriptPathTemplate = template;

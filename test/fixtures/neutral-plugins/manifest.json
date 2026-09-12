@@ -1,0 +1,27 @@
+{
+  "$schema": "../../../../../resources/built-in-plugins/manifest.schema.json",
+  "version": "1.0.0",
+  "updated": "2026-09-12",
+  "checksumAlgorithm": "sha256",
+  "notes": "BLOCK-83 P4 中性夹具目录的内置清单：仅含核心测试用的中性插件（无任何领域内容）。生信运行时条目（biof3-r-runtime / biof3-py-runtime）属核心运行时发行物，随核心主清单处置，不在此处。",
+  "plugins": {
+    "sample-metrics": {
+      "id": "sample-metrics",
+      "status": "canonical",
+      "title": "样本指标汇总（中性夹具）",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "analysis-plugin",
+      "language": "r",
+      "description": "核心机制测试的最小合法分析插件（领域无关）。",
+      "artifacts": {
+        "windows-x64": {
+          "url": "built-in://sample-metrics",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256"
+    }
+  }
+}
