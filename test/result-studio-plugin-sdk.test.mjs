@@ -190,3 +190,35 @@ test('RS7 upgrade policy keeps compatible history readable and fails closed on d
     status: 'read_only_legacy', reason: 'contract_drift_without_migration',
   });
 });
+
+test('BLOCK-83 D2 keeps the per-Revision script contract while allowing .R/.py extensions', () => {
+  const { plugin, toolDefinition, pluginDir } = readPlugin('volcano-plot');
+  const swapTemplate = (template) => {
+    const forged = structuredClone(toolDefinition);
+    forged.resultStudio.independentScriptPathTemplate = template;
+    return sdk.lintResultStudioPlugin({ plugin, toolDefinition: forged, pluginDir });
+  };
+
+  // 既有 .R 契约继续合法（15 个现存插件零改动）。
+  assert.equal(swapTemplate('analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R').valid, true);
+  // .py 放行：目录契约逐字保持，扩展名按执行侧已有解释器白名单。
+  assert.equal(swapTemplate('analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.py').valid, true);
+  assert.equal(swapTemplate('analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.r').valid, true);
+
+  // fail-closed：目录结构/占位符/扩展名任一漂移都拒绝。
+  const drifts = [
+    'scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R',            // 目录漂移
+    'analysis/scripts/{family}/{revisionId}/{artifactId}.R',             // 占位符漂移
+    'analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.exe', // 未声明解释器的扩展名
+    'analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}',     // 无扩展名
+    'analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R.py',// 双扩展名尾漂移
+  ];
+  for (const template of drifts) {
+    const result = swapTemplate(template);
+    assert.equal(result.valid, false, template);
+    assert.ok(
+      result.errors.some((issue) => issue.code === 'independent_script_contract_invalid'),
+      template,
+    );
+  }
+});

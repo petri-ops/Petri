@@ -85,8 +85,10 @@ function validateResultStudioDescriptor({ plugin = {}, toolDefinition = {}, plug
       fail('source_entry_point_missing', 'source.entryPoint', 'entryPoint must exist inside the plugin');
     }
   }
-  if (descriptor.independentScriptPathTemplate !== 'analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R') {
-    fail('independent_script_contract_invalid', 'independentScriptPathTemplate', 'must use the canonical per-artifact Revision path');
+  // BLOCK-83 D2：per-Revision 目录契约逐字保持，脚本扩展名放宽到执行侧已有解释器的 .R/.py
+  // （解释器派发在 tools-executor 按 tool lang 决定，模板此处只锁目录结构与扩展名）。
+  if (!/^analysis\/scripts\/\{artifactFamilyId\}\/\{revisionId\}\/\{artifactId\}\.(R|r|py)$/.test(descriptor.independentScriptPathTemplate)) {
+    fail('independent_script_contract_invalid', 'independentScriptPathTemplate', 'must use the canonical per-artifact Revision path with an .R or .py script extension');
   }
 
   const boundInputs = new Set();
