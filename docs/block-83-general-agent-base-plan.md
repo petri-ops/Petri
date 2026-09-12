@@ -102,6 +102,22 @@ P2 前端中性化后，核心生产代码（非注释）仍残留的领域词�
 | 注释层若干（`errorMessages.ts` / `SimpleChat.tsx` / `types.ts` / `Icon.tsx` / `App.tsx`） | 领域词出现在注释与图标命名 | P3 随 D7 门禁词表落地时一并清理（注释不计入硬门判定，但建议同步） |
 
 D7 门禁（P3 落地）扫的是**代码 token** 而非注释，因此注释层不计入 fail；上表前三行与 `CopilotPage` 是硬门红灯的真实来源，须在 P3/P4 内销号或显式登记豁免。
+### P4 切片 2 执行计划（29 个依赖内置插件/脚本的测试文件级分类）
+
+> 2026-09-12 全量只读分析产出。分类口径：**A 随包迁出**（断言生信领域语义）/ **B 留核心改中性夹具**（断言核心机制，恰好拿生信插件当例子）/ **C 留核心但需包存在**（核心验收门但需真实插件形态）/ **D 直接删**。
+
+**A 类：随生信包迁出（9 个）** —— cellchat-smoke / celltypist-smoke / seurat-standard-smoke / scanpy-advanced-smoke / scvi-tools-smoke（五个插件包完整性 8 件套 + manifest schema + R/Py 入口）/ deseq2-report（报告模板锚点与脚本 token 替换）/ g0-chf0-science（真跑 volcano-plot.R + pca-explorer.py 的 padj 与 PCA 元数据语义）/ p4r-corpus（真 R 跑通 deseq2→deg→volcano→go-kegg 语料链）/ harness-file-index（按意图排序工具，20 处读三插件描述符）。
+**B 类：留核心改中性夹具（18 个 = 16 测试 + 2 配置）** —— agent-approval / agent-run-tool / agent-tool-policy / agent-vision / block83-task-confirmation-hooks / data-profiler / hle-c5r-regression / mcp-builtin-discovery / mcp-tool-registry / platform-compat / plugin-loader-refresh / plugin-manifest-schema / plugin-schema-strict / result-edit-controls / result-plugin-validator / result-studio-plugin-sdk；配置面 `test/impact-map.json`（4 处 built-in 规则）与 `test/fixtures/harness-scientific-task/tasks.json`（harness 科学任务语料）。
+**C 类：留核心但需包存在（2 个）** —— g0-rs-p5-acceptance（RS-P5 证据卡 + 真起 HTTP 的 live scientific runtime）/ g0-rs-p6-electron-pressure-prototype（P6 压力原型静态契约）。二者 source-binding 列表须删生信路径，live 旅程改「包存在则跑、缺失则**带理由显式 skip**」。
+**D 类：条目级删除 3 处** —— seurat-standard-smoke:257/:264（守卫将被删路径的断言，迁移后 moot）、mcp-tool-registry:56/:64（与 built-in 无关的保留项）。
+
+**执行前置（阻塞全部 B/C）**：新建 `test/fixtures/neutral-plugins/` 中性分析插件包（`plugin.json` + `tool-definition.json` + 脚本 + 合法 `resultStudio` 块 + golden revision），装载型测试统一把 `BIOF3_BUILT_IN_PLUGINS_DIR` 指向它。注意：现成的 `agent-tools/plugins/example-hello/` **不可用**（agent-tool 插件，无 `tool-definition.json`）；可参考的中性形态是 `acceptance/harness-plugin-prototype/`。
+
+**两处额外风险（同一交付面，勿漏）**：① `test/tool-scripts-dependencies.test.mjs` 引用 `core/biof3-server/tool-scripts/`（不经 built-in-plugins，前述 grep 未命中），分类同 C；② **静默跳过反模式**——`mcp-tool-registry.test.mjs:169`（`if (!hasDemo) return`）与 `mcp-builtin-discovery.test.mjs:17`（`skip: !hasBuiltIn`）删除本地插件后会「绿着假过」，必须改为带理由的显式 skip（`p4r-corpus` 顶部注释已明确拒绝该反模式）。
+
+**运行时发行物须拆分别删**：`resources/built-in-plugins/manifest.json`、`manifest.schema.json`、`manifest.placeholders.json` 中 `biof3-r-runtime` / `biof3-py-runtime` 属**核心运行时发行物**，与生信插件条目拆开后保留；仅生信插件条目随包迁出。
+
+**建议顺序**：① 建中性夹具基础设施 → ② 清「1 行级」B（data-profiler / agent-tool-policy / platform-compat / plugin-schema-strict / result-plugin-validator）→ ③ 清中等 B（agent-approval / agent-run-tool / mcp-builtin-discovery / mcp-tool-registry / plugin-loader-refresh / result-edit-controls / result-studio-plugin-sdk / block83-task-confirmation-hooks / plugin-manifest-schema / hle-c5r）→ ④ 迁出 A（先 5 smoke + deseq2-report + g0-chf0-science；p4r-corpus 随语料脚本、harness-file-index 待 `scripts/harness-file-index.mjs` 归属定）→ ⑤ 改 C（涉及证据 hash 刷新，改一次要重跑验收）→ ⑥ 收尾（D 条目删除、impact-map 规则重写、tasks.json 路径更新）。
 ## 5. 范围外与非范围
 
 - 不做 Result Studio 机制层重构（它是保留下来的底座，只改名/解绑/钩子化）。
