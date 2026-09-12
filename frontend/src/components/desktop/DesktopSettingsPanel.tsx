@@ -53,13 +53,10 @@ import { UsageResourcePanel } from './DesktopSettingsPanel/sections/UsageResourc
 import { UpdateChecker } from './DesktopSettingsPanel/sections/UpdateChecker';
 import { ExportDiagnostic } from './DesktopSettingsPanel/sections/ExportDiagnostic';
 import { DataManagement } from './DesktopSettingsPanel/sections/DataManagement';
-import { ComputeExecution } from './DesktopSettingsPanel/sections/ComputeExecution';
 import { RemoteTargets } from './DesktopSettingsPanel/sections/RemoteTargets';
 import { TrashManagement } from './DesktopSettingsPanel/sections/TrashManagement';
 import { HarnessEnvironment } from './DesktopSettingsPanel/sections/HarnessEnvironment';
 
-// DEFAULT_COMPUTE_SETTINGS + normalizeComputeSettings live in ComputeExecution module
-import { DEFAULT_COMPUTE_SETTINGS, normalizeComputeSettings } from './DesktopSettingsPanel/sections/ComputeExecution';
 import {
   MODEL_ROLES,
   providerDefaults,
@@ -851,9 +848,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
           <section className="gewu-settings-section">
             <div className="gewu-settings-section__heading">
               <h3>计算与数据</h3>
-              <p>设置分析任务的执行位置，并查看本地数据占用。</p>
+              <p>管理远程执行目标，并查看本地数据占用。</p>
             </div>
-        <ComputeExecution />
+        {/* UI-355 — 「计算执行」遗留卡移除（BIOF3_COMPUTE_MODE 零读者，BLOCK-30 解耦后即死面）；
+            远程执行目标（SSH）为 BLOCK-57/67 活功能，保留 */}
 
         <RemoteTargets />
 

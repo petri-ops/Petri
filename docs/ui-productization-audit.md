@@ -3356,3 +3356,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 - **设置页重复入口移除**：`DesktopSettingsPanel` 不再渲染「手机远程」小节（MobileSync 壳删除，仅保留 `MobileSyncPanel` 本体供左栏底部弹层使用）；**手机连接唯一入口 = 左栏底部 [手机连接]**。组件测试改锚 MobileSyncPanel（3/3）；实机脚本 T7b 反转为回归守卫——设置页（含计算与数据分区）不得再出现「手机远程」字样。
 - **脚本韧性**：T4 加 4 次重试（Vite 热更整页 reload 会重置组件状态，两次实机瞬态失败均由此而来，非产品缺陷）；证据刷新 8/8 ALL PASS + 截图 `sidebar-mobile-popup.png`。
+
+## UI-355: 设置页移除「计算执行」遗留卡（计算与数据分区瘦身）(2026-09-13 verified，dev Electron 边界内 CDP 2/2)
+
+- **来源**：用户裁决「设置中的 计算与数据 这里面的内容也都不需要了吧 历史遗留」。
+- **甄别（删遗留、留活功能）**：①「计算执行」卡（执行位置 本地/远程集群 下拉 + 保存计算设置）＝**真遗留**——其写入的 `BIOF3_COMPUTE_MODE` 全仓零读者，「远程集群」模式自 BLOCK-30 架构解耦后即死面 → 移除，`sections/ComputeExecution.tsx` 成孤儿文件一并删除（面板对 DEFAULT_COMPUTE_SETTINGS/normalizeComputeSettings 的 import 已先期失配，实测仅 import 行残留）。②「远程执行目标（SSH）」＝**BLOCK-57/60/67 活功能**（dell 目标就绪且为 BLOCK-67 SSH 项目默认目标；后端执行器消费 execution_targets 注册表）→ 保留。
+- **证据**：`acceptance/ui-355/ui355-compute-card-removal-live.json` 2/2 ALL PASS（R2 远程执行目标在 / R3 分区内计算执行+执行位置+保存计算设置字样零命中——断言 scoped 到分区容器，body 级误报来自摘要卡 BLOCK-78 执行位置标注）+ 截图 `compute-section.png`；tsc 0；相关 vitest 48/48。
+- **登记后续清理候选**：`src/ipc/compute-settings.js` 的 BIOF3_COMPUTE_MODE 写入链（IPC handler + preload 桥 + electron.d.ts 字段）已成死代码——preload.js 在 P6 canonical source-binding 内，随 P6 证据重采（G0-RS 线）一并清理，避免单独触发 D8 fail-closed。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

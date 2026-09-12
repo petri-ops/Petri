@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "acceptanceId": "UI-355-COMPUTE-CARD-REMOVAL",
+  "generatedAt": "2026-09-12T23:20:11.190Z",
+  "qualificationEligible": false,
+  "allPass": true,
+  "checks": [
+    {
+      "name": "R2_remote_targets_kept",
+      "ok": true,
+      "detail": "{\"remoteTargets\":true}"
+    },
+    {
+      "name": "R3_legacy_card_gone",
+      "ok": true,
+      "detail": "{\"legacyCardGone\":true,\"legacyDropdownGone\":true}"
+    }
+  ],
+  "notes": {
+    "method": "CDP driven dev Electron (9222), settings → 计算与数据 section inspection"
+  }
+}
