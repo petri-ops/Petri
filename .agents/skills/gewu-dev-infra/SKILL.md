@@ -77,6 +77,8 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 - 按 `templates/delegation-contract.md` 填任务书；哪个区块填不满，说明该任务还不该委派。
 - 子 Agent 的完成声明不构成收口：主 Agent 复核 diff + 复跑验证命令后才可集成宣布。
 
+8. **基线对照的可逆性只对「已提交」内容成立**（2026-09-12 实测丢失一次 P3 改动，同类第二次出现——第一次是 `git stash -u` 卷入他方在制文件）：为判定「某批测试红是不是我引入的」，惯用「把改动回退到基线跑一遍再恢复」。两种回退法的**前提条件不同、危险性也不同**——`git stash` 的前提是工作区干净且无他方在制，`git checkout <base> -- <files>` 的前提是**这些文件的内容已经提交**（否则 HEAD 版即回退目标，恢复时取到的就是旧内容＝真丢）。**纪律**：① 回退前先看 `git status` 全量（不许 `| head` 截断）；② 未提交的改动先落提交或复制到仓库外备份，再回退；③ 恢复后用内容断言核验（如 `grep -c <关键符号>`）而不是只看命令退出码。**优选**：改动已成批提交后，用 `git checkout origin/main -- <本包模块>` + `git checkout HEAD --` 做对照——两侧都是提交内容，双向可逆。
+
 ## 复用到其他仓库
 
 读 [PORTING.md](./PORTING.md)：整目录拷贝 → package.json 四行接线 → 按可移植性矩阵处理降级项。原则速查见 [references/PRODUCT-PRINCIPLES.md](./references/PRODUCT-PRINCIPLES.md)（非 canonical）。
