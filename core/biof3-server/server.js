@@ -66,15 +66,37 @@ try {
     .split(path.delimiter)
     .map((item) => item.trim())
     .filter(Boolean);
-  require('./plugin-loader').loadPluginsFromSources({
-    builtInDir:
+  const packSourcesFromPacks = [];
+  // BLOCK-84：已装领域包接线——packs 记录的每个包追加为 installed 插件源 + 工具注册文件（零包=零行为 additive）。
+  try {
+    const packRegistryModule = require(path.join(__dirname, '..', 'shared-backend', 'pack-registry.js'));
+    const dataDir = process.env.BIOF3_LOCAL_DATA_DIR;
+    if (dataDir) {
+      const toolRegistryModule = require('./tool-registry');
+      for (const installedPack of packRegistryModule.readInstalledPacks(dataDir)) {
+        const packPluginsDir = path.join(installedPack.packRoot, 'plugins');
+        if (fs.existsSync(path.join(packPluginsDir, 'installed.json'))) {
+          console.log('[pack-registry] wiring installed pack: ' + installedPack.packId);
+          packSourcesFromPacks.push({ type: 'installed', root: packPluginsDir, required: false });
+        }
+        toolRegistryModule.registerDomainToolsFile(path.join(installedPack.packRoot, 'registry', 'tool-registry.json'));
+      }
+    }
+  } catch (e) {
+    console.warn('[pack-registry] pack wiring failed:', e.message);
+  }
+
+  // BLOCK-84：三源 + 已装领域包源 = 单次多源装载（避免多次调用互相清除）
+  require('./plugin-loader').loadFromSourcesArray([
+    { type: 'builtin', root:
       process.env.BIOF3_BUILT_IN_PLUGINS_DIR ||
-      path.resolve(__dirname, '..', '..', 'resources', 'built-in-plugins'),
-    installedDir:
+      path.resolve(__dirname, '..', '..', 'resources', 'built-in-plugins') },
+    { type: 'installed', root:
       process.env.BIOF3_PLUGINS_DIR ||
-      path.join(os.homedir(), 'Documents', 'BioF3-Local', 'plugins'),
-    developmentDirs,
-  });
+      path.join(os.homedir(), 'Documents', 'BioF3-Local', 'plugins') },
+    ...developmentDirs.map((root) => ({ type: 'development', root })),
+    ...packSourcesFromPacks,
+  ]);
 } catch (e) {
   console.warn('[server] plugin-loader init failed:', e.message);
 }

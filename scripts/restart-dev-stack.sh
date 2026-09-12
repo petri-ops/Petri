@@ -19,14 +19,15 @@ export PATH="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installat
 export BIOF3_DB_PATH='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\data\biof3.db'
 export BIOF3_LOCAL_DATA_DIR='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\data'
 
-# BLOCK-83 P4：核心仓零内置插件——dev 栈插件源=生信包（BIOF3_PLUGINS_DIR 已设则尊重）
-export BIOF3_PLUGINS_DIR="D:\1.WorkDir\gewu-pack-bio\plugins"
-export BIOF3_DOMAIN_TOOL_REGISTRY="D:\1.WorkDir\gewu-pack-bio\registry\tool-registry.json"
 
 # -WindowStyle Minimized（最小化的是 node 控制台；Electron GUI 正常显示）。
 # 禁止 Hidden：hidden 启动会让页面 visibilityState=hidden，Chromium 冻结视口
 # （实测 949px）并触发懒渲染跳过——左栏 projectTree 不渲染，验收断言全歪。
-powershell -NoProfile -Command "Start-Process -FilePath 'C:\Users\Admin\AppData\Roaming\fnm\node-versions\v24.20.0\installation\node.exe' -ArgumentList 'node_modules\electron\cli.js','.','--dev','--remote-debugging-port=9222' -WorkingDirectory 'D:\1.WorkDir\biof3-desktop' -WindowStyle Minimized -RedirectStandardOutput 'D:\1.WorkDir\biof3-desktop\.dev-stack-live.log' -RedirectStandardError 'D:\1.WorkDir\biof3-desktop\.dev-stack-err.log'"
+# 4) 必须剥离 ELECTRON_RUN_AS_NODE —— 该变量一旦进环境，electron 二进制退化成纯 node，
+#    require('electron') 返路径串、app 变 undefined → main.js:148 requestSingleInstanceLock 崩。
+#    Start-Process 从当前 shell 继承环境，故此处显式清掉（PowerShell -Environment 不可用，改用 Remove-Item Env:）。
+if [ -n "${ELECTRON_RUN_AS_NODE:-}" ]; then unset ELECTRON_RUN_AS_NODE; echo "stripped leaked ELECTRON_RUN_AS_NODE from env"; fi
+powershell -NoProfile -Command "Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue; Start-Process -FilePath 'C:\Users\Admin\AppData\Roaming\fnm\node-versions\v24.20.0\installation\node.exe' -ArgumentList 'node_modules\electron\cli.js','.','--dev','--remote-debugging-port=9222' -WorkingDirectory 'D:\1.WorkDir\biof3-desktop' -WindowStyle Minimized -RedirectStandardOutput 'D:\1.WorkDir\biof3-desktop\.dev-stack-live.log' -RedirectStandardError 'D:\1.WorkDir\biof3-desktop\.dev-stack-err.log'"
 echo "start dispatched"
 
 for i in $(seq 1 36); do

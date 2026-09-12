@@ -1,0 +1,109 @@
+{
+  "ok": true,
+  "total": 20,
+  "passed": 20,
+  "failed": 0,
+  "results": [
+    {
+      "name": "PRE_real_pack_exists",
+      "ok": true,
+      "detail": "D:/1.WorkDir/gewu-pack-bio"
+    },
+    {
+      "name": "PRE_fixture_plugins_exist",
+      "ok": true,
+      "detail": "D:\\1.WorkDir\\biof3-desktop\\test\\fixtures\\neutral-plugins"
+    },
+    {
+      "name": "P4a_zero_wiring_count",
+      "ok": true,
+      "detail": "wiring=0"
+    },
+    {
+      "name": "P4b_zero_catalog_honest",
+      "ok": true,
+      "detail": "catalog=0"
+    },
+    {
+      "name": "P4c_zero_no_error",
+      "ok": true,
+      "detail": "ok=true err=undefined"
+    },
+    {
+      "name": "P1a_install_ok",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "P1b_idempotent_upsert",
+      "ok": true,
+      "detail": "{\"ok\":true,\"updated\":true}"
+    },
+    {
+      "name": "P1c_single_record",
+      "ok": true,
+      "detail": "records=1"
+    },
+    {
+      "name": "P2a_wiring_pack",
+      "ok": true,
+      "detail": "wiring=1"
+    },
+    {
+      "name": "P2b_catalog_15",
+      "ok": true,
+      "detail": "catalog=15"
+    },
+    {
+      "name": "P2c_source_is_installed_plugins",
+      "ok": true,
+      "detail": "source=installed-plugins"
+    },
+    {
+      "name": "P2d_no_error",
+      "ok": true,
+      "detail": "ok=true err=undefined"
+    },
+    {
+      "name": "P5_catalog_pluginDir_nonempty",
+      "ok": true,
+      "detail": "pluginDirMissing=0"
+    },
+    {
+      "name": "P3a_uninstall_ok",
+      "ok": true,
+      "detail": "{\"ok\":true,\"removed\":\"gewu-pack-bio\"}"
+    },
+    {
+      "name": "P3b_record_removed",
+      "ok": true,
+      "detail": "records=0"
+    },
+    {
+      "name": "P3c_pack_files_kept",
+      "ok": true,
+      "detail": "包文件为用户资产，卸载不删"
+    },
+    {
+      "name": "P4d_zero_after_uninstall",
+      "ok": true,
+      "detail": "catalog=0 wiring=0"
+    },
+    {
+      "name": "P6a_fixture_installable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "P6b_fixture_catalog",
+      "ok": true,
+      "detail": "catalog=1 hasBio=false"
+    },
+    {
+      "name": "P6c_fixture_uninstallable",
+      "ok": true,
+      "detail": "un={\"ok\":true,\"removed\":\"gewu-pack-neutral-fixture\"} catalog=0"
+    }
+  ],
+  "capturedAt": "2026-09-12T12:26:29.177Z"
+}

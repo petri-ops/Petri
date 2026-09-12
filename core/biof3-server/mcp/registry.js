@@ -393,13 +393,31 @@ function refreshPluginSources() {
     .split(path.delimiter)
     .map((item) => item.trim())
     .filter(Boolean);
-  return pluginLoader.loadPluginsFromSources({
-    builtInDir,
-    installedDir:
+  // BLOCK-84：已装领域包源并入每次刷新（pack-registry 记录制；零包=零追加）
+  const packSources = [];
+  try {
+    const dataDir = process.env.BIOF3_LOCAL_DATA_DIR;
+    if (dataDir) {
+      const packRegistry = require('../../shared-backend/pack-registry');
+      for (const installedPack of packRegistry.readInstalledPacks(dataDir)) {
+        const packPluginsDir = path.join(installedPack.packRoot, 'plugins');
+        if (fs.existsSync(path.join(packPluginsDir, 'installed.json'))) {
+          packSources.push({ type: 'installed', root: packPluginsDir });
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('[mcp-registry] pack sources read failed:', e.message);
+  }
+  const sources = [
+    { type: 'builtin', root: builtInDir },
+    { type: 'installed', root:
       process.env.BIOF3_PLUGINS_DIR ||
-      path.join(os.homedir(), 'Documents', 'BioF3-Local', 'plugins'),
-    developmentDirs,
-  });
+      path.join(os.homedir(), 'Documents', 'BioF3-Local', 'plugins') },
+    ...developmentDirs.map((root) => ({ type: 'development', root })),
+    ...packSources,
+  ];
+  return pluginLoader.loadFromSourcesArray(sources);
 }
 
 try {

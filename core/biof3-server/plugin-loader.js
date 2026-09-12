@@ -717,6 +717,62 @@ function ensurePluginSourcesLoaded() {
   return getAllPluginManifests();
 }
 
+/**
+ * BLOCK-84：多源单次装载——任意 source 数组一次注册（避免多次调用互相清除 _fromSdkSource）。
+ * sources 元素：{ type: 'builtin'|'installed'|'development', root, required? }
+ */
+function loadFromSourcesArray(sources) {
+  const { inspectPluginSources } = require('../shared-backend/plugin-sdk');
+  const result = inspectPluginSources({ sources, normalizeManifest: normalizePluginManifest });
+  const map = _getPluginsMap();
+  for (const [id, plugin] of map.entries()) {
+    if (plugin && plugin._fromSdkSource) map.delete(id);
+  }
+  let count = 0;
+  for (const candidate of result.candidates) {
+    if (!candidate.valid || !candidate.manifest) continue;
+    const existing = map.get(candidate.manifest.id);
+    const canonicalBuiltIn =
+      candidate.sourceType === 'builtin' &&
+      candidate.plugin &&
+      candidate.plugin.sourcePolicy === 'builtin-canonical';
+    if (
+      existing &&
+      !existing._fromSdkSource &&
+      candidate.sourceType === 'builtin' &&
+      !(canonicalBuiltIn && existing._sourceType !== 'development')
+    ) {
+      continue;
+    }
+    const currentFingerprint = candidate.manifest.execution
+      ? candidate.manifest.execution.scriptFingerprint
+      : undefined;
+    const installedFingerprint = candidate.plugin._installedFingerprint || null;
+    const manifestDrift = !!(
+      installedFingerprint && currentFingerprint && installedFingerprint !== currentFingerprint
+    );
+    // 与 loadPluginsFromSources 同一装配语义：必须补齐 pluginDir/scriptPath/_sourceType
+    // 等运行时字段，否则 getToolDefinition 读 pluginDir 得到 undefined（catalog 投影 500）。
+    map.set(candidate.manifest.id, {
+      ...candidate.plugin,
+      id: candidate.manifest.id,
+      pluginDir: candidate.pluginDir,
+      scriptPath: path.join(candidate.pluginDir, 'scripts'),
+      _sourceType: candidate.sourceType,
+      _installedFingerprint: installedFingerprint,
+      _currentFingerprint: currentFingerprint,
+      _manifestDrift: manifestDrift,
+      _driftReason: manifestDrift ? 'fingerprint_changed' : null,
+      _fromSdkSource: true,
+    });
+    count += 1;
+  }
+  if (count > 0) {
+    logger.info(`[plugin-loader] loaded ${count} plugin(s) from source list`);
+  }
+  return count;
+}
+
 function loadPluginsFromSources({ builtInDir, installedDir, developmentDirs = [] } = {}) {
   const { inspectPluginSources } = require('../shared-backend/plugin-sdk');
   const sources = [];
@@ -784,6 +840,7 @@ module.exports = {
   loadPluginsFromDisk,
   loadBuiltInPlugins,
   loadPluginsFromSources,
+  loadFromSourcesArray,
   resolveDefaultPluginSources,
   ensurePluginSourcesLoaded,
 };

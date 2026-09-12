@@ -34,10 +34,10 @@ function _loadDomainEntries() {
 }
 
 const _domain = _loadDomainEntries();
-const TOOLS = Object.freeze({ ..._domain.TOOLS });
+const TOOLS = { ..._domain.TOOLS };
 
 // Backward compatibility aliases (for old job records / external links)
-const TOOL_ALIASES = Object.freeze({ ..._domain.TOOL_ALIASES });
+const TOOL_ALIASES = { ..._domain.TOOL_ALIASES };
 
 /** Resolve a tool id (handling aliases). Returns the canonical id, or null if unknown. */
 function resolveToolId(toolId) {
@@ -81,7 +81,25 @@ function getToolSizeLimitMB(toolId) {
   return cfg ? (cfg.sizeLimitMB || 100) : 100;
 }
 
+/** 
+ * BLOCK-84：领域包 boot 接线——server 启动时为每个已装包注册其 registry JSON。
+ * 同 id 条目后来者覆盖；TOOL_ALIASES 合并。文件缺失/坏 JSON=跳过不阻塞。
+ */
+function registerDomainToolsFile(filePath) {
+  if (!filePath || !fs.existsSync(filePath)) return { ok: false, error: 'registry_file_missing' };
+  try {
+    const parsed = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    let merged = 0;
+    for (const [id, cfg] of Object.entries(parsed.TOOLS || {})) { TOOLS[id] = cfg; merged += 1; }
+    for (const [alias, target] of Object.entries(parsed.TOOL_ALIASES || {})) { TOOL_ALIASES[alias] = target; }
+    return { ok: true, merged };
+  } catch (error) {
+    return { ok: false, error: 'registry_file_invalid:' + error.message };
+  }
+}
+
 module.exports = {
+  registerDomainToolsFile,
   TOOLS,
   TOOL_ALIASES,
   resolveToolId,

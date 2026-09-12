@@ -475,6 +475,9 @@ async function main() {
    const { setupPluginIpc } = require("./ipc/plugin");
    const { setupAutoUpdateIpc } = require("./ipc/auto-update");
   setupPluginIpc({ mainWindow: () => mainWindow });
+   // BLOCK-84：领域包一键装/卸 IPC（记录制；boot 接线由 server 启动消费）
+   const { registerPackIpc } = require("./ipc/pack");
+   registerPackIpc();
   // Capture procs as a snapshot — IPC handlers fetch a fresh
   // snapshot at invocation time via getProcs() from backend-proc-manager.
   const _procsSnapshot = getProcs();
