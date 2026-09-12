@@ -15,6 +15,16 @@ const path = require('path');
 const crypto = require('crypto');
 const logger = require('../shared-backend/logger');
 const { validateResultStudioDescriptor } = require('../shared-backend/result-studio-plugin-sdk');
+// BLOCK-83 D3 过渡装配：凡装载带 Result Studio descriptor 的插件，即注册科学任务确认钩子——
+// 核心其余层只认钩子注册表（零 RS 插件 = 零注册 = 零确认直通）。P3/P4 生信包建仓后本装配随 scientific-task-* 迁出核心。
+const { registerTaskConfirmationHook } = require('../shared-backend/task-confirmation-hooks');
+let scientificTaskConfirmationHookRegistered = false;
+function ensureScientificTaskConfirmationHookRegistered() {
+  if (scientificTaskConfirmationHookRegistered) return;
+  const { createScientificTaskConfirmationHook } = require('../shared-backend/scientific-task-confirmation');
+  registerTaskConfirmationHook(createScientificTaskConfirmationHook());
+  scientificTaskConfirmationHookRegistered = true;
+}
 
 // 已注册插件 Map（id → { ...meta, pluginDir, scriptPath }）
 let _lastPluginsDir = null;
@@ -304,6 +314,7 @@ function normalizePluginManifest(plugin, def) {
     toolDefinition: toolDef,
     pluginDir: plugin.pluginDir || null,
   });
+  if (resultStudioValidation.valid) ensureScientificTaskConfirmationHookRegistered();
   return {
     pluginManifestVersion: Number(plugin.pluginManifestVersion || toolDef.pluginManifestVersion || 1),
     id,

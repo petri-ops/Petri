@@ -16,6 +16,7 @@ const {
   getCurrentG0Baseline,
   evaluateProjectBaselineCompatibility,
 } = require('../shared-backend/g0-baseline');
+const { runTaskConfirmationHooks } = require('../shared-backend/task-confirmation-hooks');
 
 const DB_PATH = process.env.BIOF3_DB_PATH || path.join(__dirname, 'biof3.db');
 const db = new Database(DB_PATH);
@@ -1089,8 +1090,8 @@ function bindScientificTaskToolJob({ taskId, version = 1, toolJobId }) {
   if (task.status !== 'confirmed') throw new Error('scientific_task_not_confirmed');
   if (!task.confirmation) throw new Error('scientific_task_confirmation_missing');
   if (task.confirmation.userId !== job.user_id) throw new Error('scientific_task_job_user_mismatch');
-  const { validateScientificTaskExecution } = require('../shared-backend/scientific-task-confirmation');
-  const executionGate = validateScientificTaskExecution({
+  // BLOCK-83 D3：执行确认经领域钩子注册表（核心零注册 = 直通）；科学确认由 plugin-loader 装配注册。
+  const executionGate = runTaskConfirmationHooks({
     persistedTask: task,
     projectId: job.project_id,
     toolId: job.tool_id,

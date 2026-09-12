@@ -5,6 +5,7 @@
  */
 const dbMod = require('../db');
 const { withSessionExecutionTarget } = require('../helpers/remote-execution/session-target');
+const { runTaskConfirmationHooks } = require('../../shared-backend/task-confirmation-hooks');
 const sqlite = dbMod.getDatabase();
 // SUGGEST_NEXT_STEPS_BRIDGE_v1 marker
 
@@ -885,8 +886,8 @@ async function tool_run_tool(args, ctx) {
     if (args.scientificTaskRef) {
       const ref = args.scientificTaskRef;
       scientificTask = dbMod.getScientificTaskSpec(ref.taskId, Number(ref.version || 1));
-      const { validateScientificTaskExecution } = require('../../shared-backend/scientific-task-confirmation');
-      const gate = validateScientificTaskExecution({ persistedTask: scientificTask, projectId: trustedProjectId(ctx), toolId, params });
+      // BLOCK-83 D3：执行确认经领域钩子注册表（核心零注册 = 直通）。
+      const gate = runTaskConfirmationHooks({ persistedTask: scientificTask, projectId: trustedProjectId(ctx), toolId, params });
       if (!gate.ok) return gate;
       const taskConversationId = scientificTask && (scientificTask.conversation_id || scientificTask.conversationId || null);
       if (taskConversationId !== trustedConversationId(ctx)) {

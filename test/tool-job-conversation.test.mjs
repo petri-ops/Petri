@@ -13,6 +13,11 @@ process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 bootstrapTestDb();
 const require = createRequire(import.meta.url);
 const db = require('../core/biof3-server/db');
+// BLOCK-83 D3：本文件断言科学任务绑定域行为——按新装配语义，域钩子由测试自行注册
+// （生产环境由 plugin-loader 在装载 RS 插件时注册；零注册 = 直通）。
+const { registerTaskConfirmationHook } = require('../core/shared-backend/task-confirmation-hooks');
+const { createScientificTaskConfirmationHook } = require('../core/shared-backend/scientific-task-confirmation');
+registerTaskConfirmationHook(createScientificTaskConfirmationHook());
 const BetterSqlite = require('better-sqlite3');
 const dbModulePath = resolve(new URL('../core/biof3-server/db.js', import.meta.url).pathname);
 

@@ -95,4 +95,9 @@ function validateScientificTaskExecution({ persistedTask, projectId, toolId, par
   return { ok: true, taskId: persistedTask.task_id, version: persistedTask.version, specHash: persistedTask.spec_hash };
 }
 
-module.exports = { confirmationIssues, createScientificTaskConfirmationPreview, confirmScientificTask, validateScientificTaskExecution };
+// BLOCK-83 D3：领域钩子适配器——经 task-confirmation-hooks 注册表进入，不再被核心层直接 require。
+function createScientificTaskConfirmationHook() {
+  return { id: 'scientific-task-confirmation', validateTaskExecution: validateScientificTaskExecution };
+}
+
+module.exports = { confirmationIssues, createScientificTaskConfirmationPreview, confirmScientificTask, validateScientificTaskExecution, createScientificTaskConfirmationHook };
