@@ -526,7 +526,7 @@
       "id": "AGENT-WORKBENCH",
       "path": "docs/agent-workbench-enhancement-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "agent-workbench-enhancement",
       "entrypoint": "docs/README.md",
@@ -558,9 +558,10 @@
           "milestone": "M5-M6"
         }
       ],
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "registeredAt": "2026-09-12",
-      "notes": "2026-09-12 立项 active（P0-LAUNCH）：用户在队列候选（AGENT-WORKBENCH/G0-RS/G0-SDC/BLOCK-70-MOBILE-SYNC）问答中选择 AGENT-WORKBENCH。现状对账：Phase 1 七项已 verified（UI-AGENTWB-001/002/003 verified；004/005/006/007 dev Electron 边界内 verified，证据 docs/agent-workbench-*-2026-08-15.md 两份+T-AW-013）；P1.4 参数确认卡片未实现（无组件无台账条目）=P1 首项；Phase 2/3 逐项启动前必须对照当前代码差距重审（BLOCK-66/69/72/78 等已落地相邻能力，防重复开发）。阶段：P0 对账立项 → P1 P1.4（§5.4 原规格，flag 默认关）→ P2 Phase2 剩余缺口逐项串行 → P3 Phase3 远期逐项另行用户裁决。红线=§0.1 增量十约束全量有效；他包文件面零触碰。Windows 实机（fnm Node 24 + dev 栈 9222）。G0 开发期常态 · 不外推 packaged/Provider/GA。修订 2（2026-09-12，用户裁决「参数确认卡这个任务取消 不需要确认 agent主导」）：P1.4 整项取消，Phase 1 以 UI-AGENTWB-001~007 七项 verified 即闭环；§5.4 保留作历史设计参考不再实现。边界=只取消可选参数确认卡片，既有写操作/删除/覆盖安全确认（v1.0 路径）不变。状态头=active（P0 完成；P1 已取消；下一步 P2 Phase 2 差距重审）。plan v1.3。修订 3（2026-09-12）：Phase 2/3 八项逐项对账收束（对照当前代码）——已覆盖关闭：P2.1/P2.2 残余（previewRegistry 注册机制=渲染器扩展点、谱系可视化）并入 BLOCK-83；P3.1 多 Agent 已被 BLOCK-49/65 超预期覆盖；P3.2 harness 侧超计划、DSL deferred、DAG 可视化并入 BLOCK-83；P3.4 团队协作维持远期。改属生信包：P2.4 链路推荐、P3.3 生信特化可视化（核心只留交互投影扩展点 artifact-interaction.js）。唯一实做残余=P2.3 Skills（对话内 /skills 触发器/安装卸载管理/agent 推荐 skill/边写边测）转独立小包排 BLOCK-83 P4 之后。本计划增量使命实质完成，待用户确认路线后对账收口。plan v1.4 §-1 修订 3。"
+      "notes": "2026-09-12 立项 active（P0-LAUNCH）：用户在队列候选（AGENT-WORKBENCH/G0-RS/G0-SDC/BLOCK-70-MOBILE-SYNC）问答中选择 AGENT-WORKBENCH。现状对账：Phase 1 七项已 verified（UI-AGENTWB-001/002/003 verified；004/005/006/007 dev Electron 边界内 verified，证据 docs/agent-workbench-*-2026-08-15.md 两份+T-AW-013）；P1.4 参数确认卡片未实现（无组件无台账条目）=P1 首项；Phase 2/3 逐项启动前必须对照当前代码差距重审（BLOCK-66/69/72/78 等已落地相邻能力，防重复开发）。阶段：P0 对账立项 → P1 P1.4（§5.4 原规格，flag 默认关）→ P2 Phase2 剩余缺口逐项串行 → P3 Phase3 远期逐项另行用户裁决。红线=§0.1 增量十约束全量有效；他包文件面零触碰。Windows 实机（fnm Node 24 + dev 栈 9222）。G0 开发期常态 · 不外推 packaged/Provider/GA。修订 2（2026-09-12，用户裁决「参数确认卡这个任务取消 不需要确认 agent主导」）：P1.4 整项取消，Phase 1 以 UI-AGENTWB-001~007 七项 verified 即闭环；§5.4 保留作历史设计参考不再实现。边界=只取消可选参数确认卡片，既有写操作/删除/覆盖安全确认（v1.0 路径）不变。状态头=active（P0 完成；P1 已取消；下一步 P2 Phase 2 差距重审）。plan v1.3。修订 3（2026-09-12）：Phase 2/3 八项逐项对账收束（对照当前代码）——已覆盖关闭：P2.1/P2.2 残余（previewRegistry 注册机制=渲染器扩展点、谱系可视化）并入 BLOCK-83；P3.1 多 Agent 已被 BLOCK-49/65 超预期覆盖；P3.2 harness 侧超计划、DSL deferred、DAG 可视化并入 BLOCK-83；P3.4 团队协作维持远期。改属生信包：P2.4 链路推荐、P3.3 生信特化可视化（核心只留交互投影扩展点 artifact-interaction.js）。唯一实做残余=P2.3 Skills（对话内 /skills 触发器/安装卸载管理/agent 推荐 skill/边写边测）转独立小包排 BLOCK-83 P4 之后。本计划增量使命实质完成，待用户确认路线后对账收口。plan v1.4 §-1 修订 3。收口（2026-09-12，用户裁决「确认」对账路线）：对账收口 completed——Phase 1 七项 verified（A5/T-AW-013/T-AW-014 三份证据）即闭环；P1.4 取消；Phase 2/3 八项归宿落定（三项残余并入 BLOCK-83、两项改属生信包、关闭三项）；唯一实做残余 P2.3 Skills 转独立小包排 BLOCK-83 P4 后。无新实现，不适用实机断言；收口门禁=hygiene/docs/ui 三绿（docs-only）。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "completedAt": "2026-09-12"
     },
     {
       "id": "AGENT-WORKBENCH-P1-A5",
