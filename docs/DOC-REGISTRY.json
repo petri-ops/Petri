@@ -4221,7 +4221,7 @@
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-12",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "P0-EXIT",
       "tags": [
         "block-83",
         "general-agent-base",
@@ -4238,13 +4238,13 @@
       "id": "BLOCK-83-P0-DESIGN-REVIEW",
       "path": "docs/block-83-p0-design-review.md",
       "kind": "reference",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-83-p0-design-review",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-12",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-REVIEW",
+      "phase": "CONFIRMED",
       "tags": [
         "block-83",
         "p0",
@@ -4252,7 +4252,7 @@
         "debio",
         "platform"
       ],
-      "notes": "BLOCK-83 P0 设计评审稿 v1（2026-09-12 落盘）：D1-D14 逐项裁决设想+代码事实（file:line 抽查核实）+建议。P0 出口硬门=用户逐项确认；确认后本稿转 confirmed、BLOCK-83 进 P1（Result Studio 通用化）。"
+      "notes": "BLOCK-83 P0 设计评审稿 v1（2026-09-12 落盘）：D1-D14 逐项裁决设想+代码事实（file:line 抽查核实）+建议。P0 出口硬门=用户逐项确认；确认后本稿转 confirmed、BLOCK-83 进 P1（Result Studio 通用化）。2026-09-12 用户裁决「确认」：D1-D14 全部通过；D9 附带=GitHub 同 org + 首版不发 zip。P0 出口达成。"
     }
   ],
   "lastUpdated": "2026-09-12",
