@@ -1437,6 +1437,31 @@
       ],
       "tests": [],
       "classifiesScripts": false
+    },
+    {
+      "id": "block83-general-agent-base",
+      "note": "BLOCK-83 通用底座化与生信插件化剥离：task-confirmation-hooks 注册表（D3 钩子化）/ result-studio 契约改名（D1）/ SDK 脚本模板放宽（D2）/ canonical-json 上提 + P1 出口实机验收脚本。",
+      "patterns": [
+        "core/shared-backend/task-confirmation-hooks.js",
+        "core/shared-backend/canonical-json.js",
+        "core/shared-backend/scientific-task-confirmation.js",
+        "core/shared-backend/result-studio-contracts.js",
+        "core/shared-backend/result-studio-repository.js",
+        "core/shared-backend/result-studio-schema.js",
+        "core/shared-backend/result-edit-controls.js",
+        "core/biof3-server/plugin-loader.js",
+        "test/block83-task-confirmation-hooks.test.mjs",
+        "test/block83-*.test.mjs",
+        "scripts/block83-*",
+        "acceptance/block-83/**"
+      ],
+      "tests": [
+        "test/block83-task-confirmation-hooks.test.mjs",
+        "test/result-studio-contracts.test.mjs",
+        "test/scientific-task-confirmation.test.mjs",
+        "test/tool-job-conversation.test.mjs"
+      ],
+      "classifiesScripts": true
     }
   ]
 }
