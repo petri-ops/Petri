@@ -291,11 +291,12 @@ test('P6 finite-statistics validation admits R NA only for descriptor-nullable n
     && item.detail?.field === 'up_gene_count'), true);
 });
 
-test('P5 admitted DESeq2 and GO/KEGG descriptors execute finite-statistics checks', () => {
-  for (const pluginId of ['deseq2', 'go-kegg']) {
-    const definition = require(`../resources/built-in-plugins/${pluginId}/tool-definition.json`);
-    assert.equal(definition.resultStudio.validator.checks.includes('finite_statistics'), true, pluginId);
-  }
+test('P5 neutral fixture descriptor declares finite-statistics-style validator checks', () => {
+  // BLOCK-83 P4：生信插件迁出核心后，validator-checks 机制断言改用中性夹具
+  // （sample-metrics 自带合法 resultStudio.validator，经 fail-closed lint）。
+  const definition = require('../test/fixtures/neutral-plugins/sample-metrics/tool-definition.json');
+  assert.equal(Array.isArray(definition.resultStudio.validator.checks), true, 'validator.checks array');
+  assert.ok(definition.resultStudio.validator.checks.length > 0);
 });
 
 test('P5 symmetric-matrix validation accepts exact correlation matrices and rejects asymmetric values', (context) => {

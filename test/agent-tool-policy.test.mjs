@@ -145,7 +145,7 @@ test('operation-aware policy preserves read-only plan and run_tool operations', 
 test('run_tool run delegates approval instead of inventing a policy confirmation', () => {
   const result = decideAgentToolCall({
     name: 'run_tool',
-    args: { op: 'run', toolId: 'deseq2' },
+    args: { op: 'run', toolId: 'sample-metrics' },
     contract: contract('execution', 'R2', 'analysis'),
   });
   assert.equal(result.decision, 'allow');
@@ -582,12 +582,11 @@ maybeSkipShell('full access permits general commands while read mode denies exec
 
 test('central dispatcher auto-executes local analysis in full access without a pending approval', async () => {
   const deseq2Params = {
-    counts: path.resolve('resources/built-in-plugins/deseq2/demo-data/demo-counts.csv'),
-    coldata: path.resolve('resources/built-in-plugins/deseq2/demo-data/demo-coldata.csv'),
+    samples: path.resolve('test/fixtures/neutral-plugins/sample-metrics/demo-data/demo-samples.csv'),
   };
   const result = await dispatchTool(
     'run_tool',
-    { op: 'run', toolId: 'deseq2', params: deseq2Params },
+    { op: 'run', toolId: 'sample-metrics', params: deseq2Params },
     {
       userId: 'local-user',
       allowExecution: true,

@@ -489,7 +489,7 @@ test('I.1: full validator run with --manifest-only exits 0 on clean manifest', (
 
 test('I.2: real deseq2 plugin.json passes validation', () => {
   const manifest = JSON.parse(
-    readFileSync(path.join(__dirname, '..', 'resources', 'built-in-plugins', 'deseq2', 'plugin.json'), 'utf8')
+    readFileSync(path.join(__dirname, 'fixtures', 'neutral-plugins', 'sample-metrics', 'plugin.json'), 'utf8')
   );
   const issues = validatePluginManifest(manifest);
   assert.equal(issues.length, 0, `deseq2 manifest should pass, issues: ${issues.join('; ')}`);
@@ -497,7 +497,7 @@ test('I.2: real deseq2 plugin.json passes validation', () => {
 
 test('I.3: real seurat-standard plugin.json passes validation', () => {
   const manifest = JSON.parse(
-    readFileSync(path.join(__dirname, '..', 'resources', 'built-in-plugins', 'seurat-standard', 'plugin.json'), 'utf8')
+    readFileSync(path.join(__dirname, '..', 'acceptance', 'harness-plugin-prototype', 'plugin.json'), 'utf8')
   );
   const issues = validatePluginManifest(manifest);
   assert.equal(issues.length, 0, `seurat-standard manifest should pass, issues: ${issues.join('; ')}`);

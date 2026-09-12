@@ -619,6 +619,8 @@ function _getRegistry() {
 // 命中白名单的 toolId，run_tool 跑前先落 tool_jobs 待批准，前端确认卡 ack 后才续跑。
 // 白名单标准：多步骤全流程 / 耗时较长 / 不可轻易重跑的工具。单图小工具（volcano-plot 等）不进。
 const HEAVY_TOOLS = new Set([
+  // BLOCK-83 P4：中性夹具插件也走 heavy 确认门（核心机制测试的载体）。
+  'sample-metrics',
   'deseq2',
   'wgcna',
   'ml-feature-select',

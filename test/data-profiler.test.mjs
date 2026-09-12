@@ -71,7 +71,7 @@ test('ranks structural counts-matrix file-role candidates without asserting scie
 
 test('recognizes common condition and replicate suffixes as sample-like matrix headers', async () => {
   const absolutePath = fileURLToPath(new URL(
-    '../resources/built-in-plugins/deseq2/demo-data/demo-counts.csv',
+    '../test/fixtures/neutral-plugins/sample-metrics/demo-data/wide-matrix.csv',
     import.meta.url,
   ));
   const result = await profileData({
