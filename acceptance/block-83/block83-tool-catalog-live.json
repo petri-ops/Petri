@@ -1,7 +1,7 @@
 {
   "name": "block83-tool-catalog",
-  "startedAt": "2026-09-12T03:55:46.027Z",
-  "finishedAt": "2026-09-12T03:55:47.751Z",
+  "startedAt": "2026-09-12T05:16:20.912Z",
+  "finishedAt": "2026-09-12T05:16:22.667Z",
   "assertions": [
     {
       "name": "cdp_targets_listed",
@@ -11,7 +11,7 @@
     {
       "name": "spa_page_target_present",
       "pass": true,
-      "detail": "http://localhost:3000/project/p_mtuyje22_9vr4/chat"
+      "detail": "http://localhost:3000/"
     },
     {
       "name": "C1_workspace_mounted",

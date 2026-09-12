@@ -1473,7 +1473,8 @@
         "test/helpers/domain-scan.mjs",
         "test/domain-neutrality-baseline.json",
         "scripts/d7-baseline.mjs",
-        "acceptance/harness-loop/scenarios/**"
+        "acceptance/harness-loop/scenarios/**",
+        "scripts/block83-pack-source-check.cjs"
       ],
       "tests": [
         "test/block83-task-confirmation-hooks.test.mjs",
