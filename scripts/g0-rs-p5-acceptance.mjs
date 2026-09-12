@@ -45,6 +45,18 @@ const TERMINAL_JOB_STATUSES = new Set(['completed', 'failed', 'cancelled', 'reco
 const VALID_REPLAY_PACKAGE_STATUSES = new Set(['complete', 'partial_history']);
 const JOB_TIMEOUT_MS = 12 * 60 * 1000;
 
+// The bio toolchain (deseq2/volcano/go-kegg fixtures and descriptors) moved to
+// the independent domain pack (BLOCK-83 P4). The P5 live scientific journey
+// runs only when that pack is available next to this repository (or via
+// BIOF3_BIO_PACK_ROOT); without it the gate is an explicit skip, never a
+// silent pass.
+export function findBioPackRoot() {
+  const override = process.env.BIOF3_BIO_PACK_ROOT;
+  if (override) return existsSync(path.join(override, 'pack.json')) ? override : null;
+  const sibling = path.join(ROOT, '..', 'gewu-pack-bio');
+  return existsSync(path.join(sibling, 'pack.json')) ? sibling : null;
+}
+
 // These are the focused Node tests the P5 gate runs.  Keep them in the
 // source-bound evidence as well: an evidence refresh must never silently bind
 // the product while leaving its proof code at another commit.
@@ -132,23 +144,6 @@ export const P5_SOURCE_FILES = Object.freeze({
   resultVersionRoleTest: 'frontend/src/components/result-studio/resultVersionRole.test.ts',
   resultStudioSurfaceTest: 'frontend/src/components/result-studio/ResultStudioSurface.test.tsx',
   resultStudioClient: 'frontend/src/components/result-studio/resultStudioClient.ts',
-  deseq2Manifest: 'resources/built-in-plugins/deseq2/plugin.json',
-  deseq2Descriptor: 'resources/built-in-plugins/deseq2/tool-definition.json',
-  deseq2Script: 'resources/built-in-plugins/deseq2/scripts/deseq2.R',
-  deseq2GoldenRevision: 'resources/built-in-plugins/deseq2/golden-revisions/result-studio-v1.json',
-  volcanoManifest: 'resources/built-in-plugins/volcano-plot/plugin.json',
-  volcanoDescriptor: 'resources/built-in-plugins/volcano-plot/tool-definition.json',
-  volcanoScript: 'resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R',
-  volcanoGoldenRevision: 'resources/built-in-plugins/volcano-plot/golden-revisions/result-studio-v1.json',
-  heatmapManifest: 'resources/built-in-plugins/gene-correlation/plugin.json',
-  heatmapDescriptor: 'resources/built-in-plugins/gene-correlation/tool-definition.json',
-  heatmapScript: 'resources/built-in-plugins/gene-correlation/scripts/gene-correlation.R',
-  heatmapGoldenRevision: 'resources/built-in-plugins/gene-correlation/golden-revisions/result-studio-v1.json',
-  enrichmentManifest: 'resources/built-in-plugins/go-kegg/plugin.json',
-  enrichmentDescriptor: 'resources/built-in-plugins/go-kegg/tool-definition.json',
-  enrichmentScript: 'resources/built-in-plugins/go-kegg/scripts/go-kegg.R',
-  enrichmentGoldenRevision: 'resources/built-in-plugins/go-kegg/golden-revisions/result-studio-v1.json',
-  enrichmentGeneFixture: 'resources/built-in-plugins/go-kegg/demo-data/genes.csv',
   ...P5_GATE_TEST_FILES,
 });
 
@@ -171,11 +166,13 @@ export const P5_NO_SEED_TABLES = Object.freeze([
   'scientific_task_specs',
 ]);
 
+// Tool descriptors live inside the domain pack (pack-relative paths, resolved
+// through findBioPackRoot() at read time).
 const ADMITTED_DESCRIPTOR_FILES = Object.freeze({
-  deseq2: 'resources/built-in-plugins/deseq2/tool-definition.json',
-  'volcano-plot': 'resources/built-in-plugins/volcano-plot/tool-definition.json',
-  'gene-correlation': 'resources/built-in-plugins/gene-correlation/tool-definition.json',
-  'go-kegg': 'resources/built-in-plugins/go-kegg/tool-definition.json',
+  deseq2: 'plugins/deseq2/tool-definition.json',
+  'volcano-plot': 'plugins/volcano-plot/tool-definition.json',
+  'gene-correlation': 'plugins/gene-correlation/tool-definition.json',
+  'go-kegg': 'plugins/go-kegg/tool-definition.json',
 });
 
 function sha256(value) {
@@ -615,8 +612,12 @@ function readSquareMatrix(filePath, expectedSize) {
 }
 
 function buildScientificInput() {
+  const packRoot = findBioPackRoot();
+  if (!packRoot) throw Object.assign(new Error('p5_bio_pack_root_missing'), {
+    detail: { hint: 'set BIOF3_BIO_PACK_ROOT or check out gewu-pack-bio as a sibling directory' },
+  });
   const symbols = readFileSync(
-    path.join(ROOT, 'resources/built-in-plugins/go-kegg/demo-data/genes.csv'),
+    path.join(packRoot, 'plugins/go-kegg/demo-data/genes.csv'),
     'utf8',
   ).split(/\r?\n/).slice(1).map((line) => line.trim().replace(/^"|"$/g, '')).filter(Boolean);
   assert(symbols.length >= 60, 'scientific_symbol_fixture_too_small');
@@ -705,7 +706,9 @@ function admittedFormalArtifactIds(job) {
   const toolId = String(job?.tool_id || job?.toolId || '').trim();
   const descriptorFile = ADMITTED_DESCRIPTOR_FILES[toolId];
   if (!descriptorFile) return null;
-  const descriptor = JSON.parse(readFileSync(path.join(ROOT, descriptorFile), 'utf8'));
+  const packRoot = findBioPackRoot();
+  if (!packRoot) return null;
+  const descriptor = JSON.parse(readFileSync(path.join(packRoot, descriptorFile), 'utf8'));
   const declared = descriptor?.resultStudio?.artifacts;
   const actualIds = new Set((job?.result?.artifacts || []).map((artifact) => artifact?.id).filter(Boolean));
   if (!Array.isArray(declared) || declared.length === 0) return null;
@@ -3074,6 +3077,13 @@ function parseCli(argv) {
 async function main() {
   if (process.argv.includes('--worker')) {
     await runWorkerMain();
+    return;
+  }
+  if (!findBioPackRoot()) {
+    // Explicit skip with reason (BLOCK-83 §P4 C-class semantics): the live
+    // scientific journey needs the independent bio pack; without it this gate
+    // is a skip, never a silent pass and never a fake green.
+    console.log('[G0-RS-P5] SKIP — bio pack not present (expected sibling ../gewu-pack-bio or BIOF3_BIO_PACK_ROOT); live scientific journey not exercised');
     return;
   }
   const result = await captureP5Acceptance(parseCli(process.argv.slice(2)));

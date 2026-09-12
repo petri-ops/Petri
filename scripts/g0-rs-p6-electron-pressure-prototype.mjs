@@ -28,7 +28,10 @@ import { fileURLToPath } from 'node:url';
 
 import {
   createP5LiveScientificRuntime,
+  findBioPackRoot,
 } from './g0-rs-p5-acceptance.mjs';
+
+export { findBioPackRoot };
 import {
   P6_UI110_SOURCE_FILES,
 } from './g0-rs-p6-ui110-observation.mjs';
@@ -86,14 +89,6 @@ const EXTRA_SOURCE_PATHS = Object.freeze([
   'scripts/g0-rs-p6-electron-pressure-prototype.mjs',
   'scripts/g0-rs-p6-electron-pressure-driver.cjs',
   'test/g0-rs-p6-electron-pressure-prototype.test.mjs',
-  'resources/built-in-plugins/volcano-plot/plugin.json',
-  'resources/built-in-plugins/volcano-plot/tool-definition.json',
-  'resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R',
-  'resources/built-in-plugins/go-kegg/plugin.json',
-  'resources/built-in-plugins/go-kegg/tool-definition.json',
-  'resources/built-in-plugins/go-kegg/scripts/go-kegg.R',
-  'resources/built-in-plugins/go-kegg/demo-data/genes.csv',
-  'resources/built-in-plugins/go-kegg/go-kegg-report-template.html',
   'core/biof3-server/helpers/tools-executor.js',
   'core/biof3-server/routes/result-studio.js',
   'core/shared-backend/result-changeset-service.js',
@@ -235,9 +230,16 @@ export function buildVolcanoPressureCsv(rowCount = P6_ELECTRON_PRESSURE_ROWS) {
 }
 
 export function loadGoKeggPressureInput() {
+  const packRoot = findBioPackRoot();
+  if (!packRoot) {
+    throw Object.assign(new Error('p6_pressure_bio_pack_root_missing'), {
+      code: 'p6_pressure_bio_pack_root_missing',
+      detail: { hint: 'set BIOF3_BIO_PACK_ROOT or check out gewu-pack-bio as a sibling directory' },
+    });
+  }
   const inputPath = path.join(
-    ROOT,
-    'resources/built-in-plugins/go-kegg/demo-data/genes.csv',
+    packRoot,
+    'plugins/go-kegg/demo-data/genes.csv',
   );
   const csv = readFileSync(inputPath, 'utf8');
   const rows = csv.trimEnd().split(/\r?\n/);

@@ -14,6 +14,7 @@ import {
   assertSanitizedP6ElectronPressureEvidence,
   buildP6ElectronPressureVerdict,
   buildVolcanoPressureCsv,
+  findBioPackRoot,
   getP6ElectronPressureSourceBinding,
   loadGoKeggPressureInput,
   writeP6ElectronPressureEvidence,
@@ -21,6 +22,9 @@ import {
 import { P6_UI110_SOURCE_FILES } from '../scripts/g0-rs-p6-ui110-observation.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+// Bio fixtures live in the independent domain pack; pack-absent machines skip
+// the pack-dependent producer test with an explicit reason (BLOCK-83 §P4).
+const BIO_PACK_SKIP_REASON = 'bio pack not present (expected sibling ../gewu-pack-bio or BIOF3_BIO_PACK_ROOT); go-kegg pressure fixture unavailable';
 
 function passingObservation(overrides = {}) {
   const base = {
@@ -193,12 +197,6 @@ test('P6 Electron pressure source binding contains its complete UI/runtime ances
     'frontend/src/components/result-studio/ScientificInteractionViewer.tsx',
     'frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx',
     'frontend/src/components/result-studio/resultSurface.ts',
-    'resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R',
-    'resources/built-in-plugins/go-kegg/plugin.json',
-    'resources/built-in-plugins/go-kegg/tool-definition.json',
-    'resources/built-in-plugins/go-kegg/scripts/go-kegg.R',
-    'resources/built-in-plugins/go-kegg/demo-data/genes.csv',
-    'resources/built-in-plugins/go-kegg/go-kegg-report-template.html',
   ]) {
     assert.ok(paths.includes(required), `missing source-bound pressure dependency: ${required}`);
   }
@@ -211,7 +209,9 @@ test('P6 Electron pressure source binding contains its complete UI/runtime ances
   assert.ok(Array.isArray(binding.sourceMismatches));
 });
 
-test('P6 pressure input producers are deterministic and preserve exact requested row counts', () => {
+test('P6 pressure input producers are deterministic and preserve exact requested row counts', {
+  skip: findBioPackRoot() ? false : BIO_PACK_SKIP_REASON,
+}, () => {
   const volcano = buildVolcanoPressureCsv(4);
   assert.equal(volcano, buildVolcanoPressureCsv(4));
   assert.equal(volcano.trimEnd().split('\n').length, 5);

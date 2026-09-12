@@ -223,8 +223,6 @@ test('P5 source binding contains every declared focused test and direct executio
     'core/shared-backend/git-repository-binding.js',
     'core/biof3-server/routes/tools-platform.js',
     'core/biof3-server/plugin-loader.js',
-    'resources/built-in-plugins/deseq2/scripts/deseq2.R',
-    'resources/built-in-plugins/go-kegg/demo-data/genes.csv',
   ]) {
     assert.ok(paths.includes(file), `${file} must be bound to P5 evidence`);
   }

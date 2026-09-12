@@ -394,7 +394,6 @@
       ],
       "tests": [
         "test/g0-chf0-http.test.mjs",
-        "test/g0-chf0-science.test.mjs",
         "test/g0-chf0-lifecycle.test.mjs"
       ],
       "classifiesScripts": false
@@ -719,7 +718,6 @@
       ],
       "tests": [
         "test/p4r-capture.test.mjs",
-        "test/p4r-corpus.test.mjs",
         "test/p4r-baseline.test.mjs",
         "test/p4r-live-observation.test.mjs",
         "test/p4r-ui-observation.test.mjs",
@@ -1094,7 +1092,6 @@
       ],
       "tests": [
         "test/g0-chf0-http.test.mjs",
-        "test/g0-chf0-science.test.mjs",
         "test/g0-chf0-lifecycle.test.mjs"
       ],
       "classifiesScripts": true,
