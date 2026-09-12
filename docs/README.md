@@ -157,6 +157,7 @@
 114. [`block-83-general-agent-base-plan.md`](./block-83-general-agent-base-plan.md) — 2026-09-12 立项当日 P0–P5 整包收口（completed）：**通用 agent 底座化与生信插件化剥离**——用户两轮裁决：生信作为通用 agent 的可卸载插件（不需要即彻底剥离）+ Result Studio 机制层升格底座「通用产物工作台」（去科学命名/SDK 去 .R 硬编码/validator 钩子化，剥离前置）。阶段 P0 评审冻结（D1-D8 待裁决）→ P1 RS 通用化 → P2 前端剥离（解 7 处 import + inventory.ts 退役）→ P3 后端剥离（tool-registry/tool-scripts/scientific-chain）→ P4 插件系统补全（按需安装+渲染器扩展点）→ P5 收口。DB 生信表留置不迁移；15 生信插件改可选安装、功能不退役。启动需用户裁决。
 115. [`block-83-p0-design-review.md`](./block-83-p0-design-review.md) — 2026-09-12 落盘并当日确认（confirmed）的 BLOCK-83 P0 设计评审稿（D1-D14 全部通过；D9 附带=生信包建 GitHub org + 不发 zip）。
 116. [`block-84-domain-pack-oneclick-plan.md`](./block-84-domain-pack-oneclick-plan.md) — 2026-09-12 立项即开工（active，P0-LAUNCH）：**领域包产品级一键装/卸**——插件商店「领域包」分区；安装记录=dataDir/packs/installed.json；boot 接线 additive（零包=零行为）；远程分发 defer。
+117. [`session-handoff-2026-09-13.md`](./session-handoff-2026-09-13.md) — 2026-09-13 会话交接文档（换对话框继续开发用）：G0 阶段纪律铁律 + 当前状态（main 零差量 / HEAD `d5a62b2e` / active BLOCK-84 待释放裁决）+ 两条待裁决遗留（101 项 BLOCK-83 A/C 类测试债、AUDIT-LOG 2 条 🟢）+ 环境硬前置（Node 24 / `ELECTRON_RUN_AS_NODE` / dev 栈端口 / CDP）+ 门禁与定向测试纪律 + 基线对照纪律 + Windows 测试债四类因根 + 并行会话纪律 + 三 skill 入口 + 开工动作。
 
 ## Branch Conversation 架构
 
