@@ -78,6 +78,19 @@ v1.0 现状盘点（§2）与 D1-D11 继续有效，阶段微调（§4）。
 | **P4** | 生信包独立建仓迁移（D9）：插件+scripts+registry 内容+目录数据+R executor+demo+教程整体迁出核心树；核心残留摘除（scientific-task 链、datasets 资源名） | 核心树生信文件零残留 + D7 硬门绿 |
 | **P5** | 收口：装包态生信全链回归（装→run_tool 通→卸→零残留）+ **D13 第二租户证明（非生信 demo 包走通全链）** + 纯通用态实机全功能 + 台账五件套回写 | 收口门禁 + D7 硬门 + D13 全链 + 实机证据（acceptance/block-83/） |
 
+### D7 残留清单（P2 出口盘点，P3 起点）
+
+P2 前端中性化后，核心生产代码（非注释）仍残留的领域词锚点，按归属登记，供 P3（后端剥离）+ D7 门禁落地时逐项销号：
+
+| 位置 | 残留形态 | 归属处置 |
+| --- | --- | --- |
+| `core/biof3-server/api-data.js:202-203` | dataset modality 白名单 `[general, single-cell, spatial, bulk]` + 缺省 `single-cell` | P3：datasets 域面随生信包；核心不约束取值 |
+| `core/biof3-server/db.js:379,382` | `projects.modality` 列 DEFAULT `single-cell` + NULL 回填 | P3/P4：schema 级（additive 纪律——改 DEFAULT 需迁移，随建仓迁移一并裁决） |
+| `frontend/src/pages/project-workspace.tsx:937` | dataset 行 `type: nCells != null ? 'single-cell' : undefined` | P3：数据集体检面随域包（或改中性命名） |
+| `frontend/src/lib/copilotContext.ts:7-15` | `CopilotPage` 的 8 个生信页面枚举 + 路由映射（`copilotContext.ts:177-179`） | P3/P4 候选：web 时代路由残留，有测试覆盖（`copilotContextProvider.test.tsx`），处置需同步改测试 |
+| 注释层若干（`errorMessages.ts` / `SimpleChat.tsx` / `types.ts` / `Icon.tsx` / `App.tsx`） | 领域词出现在注释与图标命名 | P3 随 D7 门禁词表落地时一并清理（注释不计入硬门判定，但建议同步） |
+
+D7 门禁（P3 落地）扫的是**代码 token** 而非注释，因此注释层不计入 fail；上表前三行与 `CopilotPage` 是硬门红灯的真实来源，须在 P3/P4 内销号或显式登记豁免。
 ## 5. 范围外与非范围
 
 - 不做 Result Studio 机制层重构（它是保留下来的底座，只改名/解绑/钩子化）。
