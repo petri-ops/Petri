@@ -39,14 +39,14 @@ export function HarnessEnvironment(): React.ReactElement | null {
 
   return (
     <div className="gewu-data-section">
-      <label className="gewu-field__label">Harness 分析环境</label>
+      <label className="gewu-field__label">运行环境包</label>
       <p className="gewu-field__hint">
-        Harness 自动为内置分析模块准备的运行时和 R 包，无需手动安装。
+        运行分析时按需自动准备的运行时和依赖包（由插件按需声明），无需手动安装。
       </p>
       {loading ? (
         <p className="gewu-field__hint">正在读取…</p>
       ) : capabilities.length === 0 ? (
-        <p className="gewu-field__hint">暂无已预备的分析包（将在首次运行分析时自动获取）。</p>
+        <p className="gewu-field__hint">暂无已安装的包（运行需要它的分析时会自动获取）。</p>
       ) : (
         <div className="gewu-harness-caps">
           {capabilities.map((cap) => (

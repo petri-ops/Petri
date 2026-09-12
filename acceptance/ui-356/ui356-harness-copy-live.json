@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "acceptanceId": "UI-356-HARNESS-COPY",
+  "generatedAt": "2026-09-12T23:32:22.968Z",
+  "qualificationEligible": false,
+  "allPass": true,
+  "checks": [
+    {
+      "name": "C1_new_label_on_screen",
+      "ok": true,
+      "detail": "{\"newLabel\":true,\"oldLabelGone\":true,\"oldCopyGone\":true}"
+    },
+    {
+      "name": "C2_old_copy_absent",
+      "ok": true,
+      "detail": "{\"newLabel\":true,\"oldLabelGone\":true,\"oldCopyGone\":true}"
+    }
+  ],
+  "notes": {
+    "method": "CDP eval on running dev Electron settings view"
+  }
+}

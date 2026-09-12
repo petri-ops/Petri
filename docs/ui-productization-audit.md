@@ -3364,3 +3364,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：`acceptance/ui-355/ui355-compute-card-removal-live.json` 2/2 ALL PASS（R2 远程执行目标在 / R3 分区内计算执行+执行位置+保存计算设置字样零命中——断言 scoped 到分区容器，body 级误报来自摘要卡 BLOCK-78 执行位置标注）+ 截图 `compute-section.png`；tsc 0；相关 vitest 48/48。
 - **登记后续清理候选**：`src/ipc/compute-settings.js` 的 BIOF3_COMPUTE_MODE 写入链（IPC handler + preload 桥 + electron.d.ts 字段）已成死代码——preload.js 在 P6 canonical source-binding 内，随 P6 证据重采（G0-RS 线）一并清理，避免单独触发 D8 fail-closed。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-356: 「Harness 分析环境」文案改版为「运行环境包」（遗留措辞清理，功能零变化）(2026-09-13 verified，dev Electron 边界内 CDP 2/2)
+
+- **来源**：UI-355 同轮设置页体检的裁决——Harness 分区底层链路是活的（gewu-pack-bio 插件 `requiresBundle` → 执行器自动装能力包挂 `R_LIBS_USER`），但文案还是生信时代措辞（「内置分析模块/分析位」）→ 按用户裁决「按你建议的来」改文案保留视图。
+- **改动**：仅文案——label「Harness 分析环境」→「运行环境包」；提示语去「内置分析模块/R 包」改「运行分析时按需自动准备的运行时和依赖包（由插件按需声明）」；空态语同步。数据链（`harnessCapabilities.list` → capability-bundles）零改动。
+- **证据**：`acceptance/ui-356/ui356-harness-copy-live.json` 2/2 ALL PASS（C1 新文案在屏 / C2 旧文案「Harness 分析环境」「内置分析模块」「分析位」零残留）；tsc 0。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
