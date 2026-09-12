@@ -3900,6 +3900,7 @@
       ],
       "notes": "BLOCK-70 P0 设计评审稿（2026-09-13）：plan §4 代码事实基线逐项核对一致（8/8）；D1-D10 逐项评审确认（D2 附 qrcode-generator 依赖裁决 ⏳ 用户追认）；本次会话范围=A1 PoC+P1 主体，真实手机验收留用户；验收门禁预声明四条。",
       "registeredAt": "2026-09-13"
+    },
     {
       "id": "BLOCK-72-WORKBENCH-GLOBAL-ENTRIES",
       "path": "docs/block-72-workbench-global-entries-plan.md",
