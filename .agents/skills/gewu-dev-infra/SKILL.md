@@ -79,6 +79,12 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 
 8. **基线对照的可逆性只对「已提交」内容成立**（2026-09-12 实测丢失一次 P3 改动，同类第二次出现——第一次是 `git stash -u` 卷入他方在制文件）：为判定「某批测试红是不是我引入的」，惯用「把改动回退到基线跑一遍再恢复」。两种回退法的**前提条件不同、危险性也不同**——`git stash` 的前提是工作区干净且无他方在制，`git checkout <base> -- <files>` 的前提是**这些文件的内容已经提交**（否则 HEAD 版即回退目标，恢复时取到的就是旧内容＝真丢）。**纪律**：① 回退前先看 `git status` 全量（不许 `| head` 截断）；② 未提交的改动先落提交或复制到仓库外备份，再回退；③ 恢复后用内容断言核验（如 `grep -c <关键符号>`）而不是只看命令退出码。**优选**：改动已成批提交后，用 `git checkout origin/main -- <本包模块>` + `git checkout HEAD --` 做对照——两侧都是提交内容，双向可逆。
 
+9. **Windows 测试债四类固定因根，先按类判断再动手**（2026-09-12 TEST-INFRA-DEBT-3 清债 33 项固化；这四类几乎覆盖本仓 Windows 侧全部「非我引入」红）：排查任何 Windows 专属失败前，先对号入座，命中即用对应标准修法，不要在测试体里乱猜。
+   - **① tar 盘符陷阱（可能是真实产品缺陷，不只是测试债）**：Windows bsdtar 把以盘符开头的路径参数（`C:\...`）当成**远端主机规格** → `tar (child): Cannot connect to C: resolve failed`。**修法＝`--force-local` + 参数正斜杠归一化，两者必须配套**：`--force-local` 会转义参数里的反斜杠，`...\installed` 被拆成 `...\i` + `nstalled`。POSIX tar 接受 `--force-local` 为空操作（可无条件加）。**关键纪律**：发现测试里的 tar 挂了，**必须回查生产代码有没有同一个 tar 调用**——本仓 `core/shared-backend/capability-bundles.js` 的 `installTarGzBundle` 就是同坑，导致 R 能力包安装在 Windows 上完全不可用（用测试修法掩盖产品缺陷＝漏修）。
+   - **② pathname 双根 ENOENT / Cannot find module**：`new URL('../x', import.meta.url).pathname` 在 Windows 产出 `/D:/...`（前导斜杠 + 反斜杠混用），`resolve()` 拼出 `D:\D:\...`。**修法＝`fileURLToPath()`**；ESM 动态 import 同理用 `pathToFileURL(resolve(...)).href`（直吃 Windows 绝对路径报 `ERR_UNSUPPORTED_ESM_URL_SCHEME`）。
+   - **③ better-sqlite3 EPERM teardown**：模块级单例连接句柄进程退出前不释放 → `rmSync` 临时目录抛 `EPERM/EBUSY`（测试体已通过、after 钩子才炸）。**修法＝teardown try/catch 容忍 EPERM/EBUSY**，不要为它改生产代码的连接生命周期。
+   - **④ 契约漂移伪装成环境债**：路由文件被拆分（测试仍读旧路径，报「route is unavailable」）／表新增列（SQL 精确断言失配）／mock 机制换代（`globalThis._biof3Plugins` 已废，改 `process.env.BIOF3_BUILT_IN_PLUGINS_DIR`）。**判据**：错误信息里出现的**符号名在源码中已不存在或已改名**，即契约漂移而非环境问题——修法是让测试追上契约，不是让契约退回测试。**附**：断言基于「消息文本」而非「决策结构」的测试要特别警惕（本仓 BLOCK-10 S-003 重构后，断言 domain 消息文本等于复活 prompt-injection 漏洞——此类断言应改锚决策结果／中性夹具）。
+
 ## 复用到其他仓库
 
 读 [PORTING.md](./PORTING.md)：整目录拷贝 → package.json 四行接线 → 按可移植性矩阵处理降级项。原则速查见 [references/PRODUCT-PRINCIPLES.md](./references/PRODUCT-PRINCIPLES.md)（非 canonical）。
