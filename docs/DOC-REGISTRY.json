@@ -4254,6 +4254,27 @@
         "platform"
       ],
       "notes": "BLOCK-83 P0 设计评审稿 v1（2026-09-12 落盘）：D1-D14 逐项裁决设想+代码事实（file:line 抽查核实）+建议。P0 出口硬门=用户逐项确认；确认后本稿转 confirmed、BLOCK-83 进 P1（Result Studio 通用化）。2026-09-12 用户裁决「确认」：D1-D14 全部通过；D9 附带=GitHub 同 org + 首版不发 zip。P0 出口达成。"
+    },
+    {
+      "id": "BLOCK-84-DOMAIN-PACK-ONECLICK",
+      "path": "docs/block-84-domain-pack-oneclick-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-84-domain-pack-oneclick",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-12",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "block-84",
+        "domain-pack",
+        "oneclick",
+        "plugin-store",
+        "pack-registry",
+        "G0"
+      ],
+      "notes": "领域包产品级一键装/卸（2026-09-12 用户裁决「是的 需要 产品级 一键」立项即开工）：把 BLOCK-83 的环境变量级拔插升级为插件商店「领域包」分区一键操作。设计裁决：D1 安装记录=dataDir/packs/installed.json（文件制与插件先例同构）/D2 包来源=本地目录选择+兄弟仓发现（远程 defer）/D3 boot 接线=server 读记录追加插件源+tool-registry 文件注册（additive 零包零行为）/D4 卸载=移记录+重启生效提示（不删包文件）/D5 安装校验=pack.json+plugins/installed.json。阶段 P1 后端+契约测试 → P2 商店领域包分区 → P3 实机双态循环+收口。范围外：远程分发/包内单插件粒度/自动更新。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-09-12",
