@@ -8,6 +8,7 @@
 > 收口证据：`acceptance/block-84/block84-pack-oneclick-live.json`（P1 隔离探针双态 20/20）
 > · `acceptance/block-84/block84-p2-ui-live.json`（P2 CDP 商店 UI 6/6）
 > · P3 聚合门禁 `npm run closeout` 3/4 PASS（第 4 项存量债，见 §9.2 逐位对照）
+> 提交：`b0865209`（P1）/ `639a6d9f`（P2）/ `ec3b675d`（P3 收口 + 门禁基建双修）
 
 ---
 
