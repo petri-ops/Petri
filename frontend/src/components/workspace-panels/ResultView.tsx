@@ -19,8 +19,6 @@ import { WorkspaceFileIcon } from '@/components/workspace-panels/WorkspaceFileIc
 import { getProject, listProjectJobs, listDatasetsByProject, listProjects, updateProject, createProject, setProjectStatus } from '@/lib/project-store';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
-import { tools as staticTools } from '@/pages/_data';
-import type { Tool } from '@/pages/_data';
 import { buildPreviewTable } from '@/lib/file-preview/buildPreviewTable';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { HighlightedCode, codeLanguageForFile } from '@/components/ui/CodeHighlight';

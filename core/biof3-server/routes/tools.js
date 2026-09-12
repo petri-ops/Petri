@@ -126,8 +126,13 @@ const registerToolsPlatform = createToolsPlatformRoutes({
   handleLegacyDemoList,
 });
 
+// BLOCK-83 D4：工具目录投影（目录提供者 SPI —— 投影自已装插件，非核心硬编码清单）
+const { createToolsCatalogRoutes } = require('./tools-catalog');
+const registerToolsCatalog = createToolsCatalogRoutes();
+
 module.exports = function registerTools(app) {
   registerToolsMetadata(app);
   registerToolsPlatform(app);
   registerRemoteTargets(app);
+  registerToolsCatalog(app);
 };

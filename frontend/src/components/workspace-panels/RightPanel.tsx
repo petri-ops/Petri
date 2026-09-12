@@ -19,7 +19,7 @@ import {
   RightFileTree,
   BrowserPanel,
 } from '@/pages/project-workspace';
-import { tools as staticTools } from '@/pages/_data';
+import { useToolCatalog } from '@/lib/tool-catalog';
 import { AnalysisLaunchPanel } from '@/components/workspace-panels/AnalysisLaunchPanel';
 // BLOCK-28.5 — 审阅并入右侧边栏 tab 体系（复用 dock 紧凑形态，填满 tab 容器）
 import { ReviewMode } from '@/components/desktop/WorkingTreeReview/ReviewMode';
@@ -119,6 +119,9 @@ export function RightPanel({
     [ctx.setBrowserCanGoBack, ctx.setBrowserCanGoForward],
   );
 
+  // BLOCK-83 D4：分析目录投影自已装插件（零插件 → 诚实空态）。
+  const { tools: catalogTools, loading: catalogLoading } = useToolCatalog();
+
   // UI-341 加映二 — 侧栏开合平滑：原实现 !visible 直接 return null（卸载 =
   // 开合瞬时跳变）。现保持挂载、宽度收到 0，走 .rightCol 的 width transition 平滑收起。
   return (
@@ -217,7 +220,8 @@ export function RightPanel({
                 )}
                 {tab === 'analyze' && (
                   <AnalysisLaunchPanel
-                    tools={staticTools}
+                    tools={catalogTools}
+                    loading={catalogLoading}
                     onLaunch={(tool) => {
                       ctx.handleAskAgent(`请运行「${tool.title}」分析（${tool.category}）。`);
                       ctx.handleOpenRightChat();

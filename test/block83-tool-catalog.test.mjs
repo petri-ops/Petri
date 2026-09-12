@@ -1,0 +1,56 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import test from 'node:test';
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+
+const require = createRequire(import.meta.url);
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const catalog = require('../core/biof3-server/routes/tools-catalog');
+const pluginLoader = require('../core/biof3-server/plugin-loader');
+
+test('BLOCK-83 D4 catalog projection maps installed plugin manifests to catalog entries', () => {
+  const manifests = pluginLoader.ensurePluginSourcesLoaded();
+  assert.ok(manifests.length > 0, 'expected built-in plugins to be discoverable');
+  const entries = manifests.map(catalog._toCatalogEntry).filter(Boolean);
+  assert.equal(entries.length, manifests.length);
+
+  const deseq2 = entries.find((entry) => entry.id === 'deseq2');
+  assert.ok(deseq2, 'deseq2 should be part of the projection');
+  // 表现层字段：目录投影必须带 color/category/minutes，UI 方可零静态清单渲染。
+  assert.equal(typeof deseq2.title, 'string');
+  assert.equal(typeof deseq2.category, 'string');
+  assert.equal(deseq2.color, '#dc2626');
+  assert.equal(deseq2.language, 'r');
+  assert.ok(Array.isArray(deseq2.inputs) && deseq2.inputs.length > 0);
+  assert.ok(Array.isArray(deseq2.outputs) && deseq2.outputs.length > 0);
+  assert.equal(deseq2.resultStudioAvailable, true);
+});
+
+test('BLOCK-83 D4 catalog projection is empty for zero installed plugins (honest empty state)', () => {
+  const entries = [].map(catalog._toCatalogEntry).filter(Boolean);
+  assert.deepEqual(entries, []);
+});
+
+test('BLOCK-83 D4 catalog entry defaults are honest when a manifest omits optional fields', () => {
+  const entry = catalog._toCatalogEntry({ id: 'bare-tool' });
+  assert.equal(entry.id, 'bare-tool');
+  assert.equal(entry.title, 'bare-tool');
+  assert.equal(entry.category, 'analysis');
+  assert.equal(entry.color, null);
+  assert.equal(entry.estimatedMinutes, null);
+  assert.equal(entry.comingSoon, false);
+  assert.equal(entry.resultStudioAvailable, false);
+  assert.deepEqual(entry.inputs, []);
+  // 非对象 / 无 id 的 manifest 不产生条目（fail-closed 投影）。
+  assert.equal(catalog._toCatalogEntry(null), null);
+  assert.equal(catalog._toCatalogEntry({}), null);
+});
+
+test('BLOCK-83 D4 catalog route registers a GET endpoint and reports its source', () => {
+  const routes = [];
+  const app = { get: (route) => routes.push(route) };
+  catalog.createToolsCatalogRoutes()(app);
+  assert.deepEqual(routes, ['/api/tools/catalog']);
+});

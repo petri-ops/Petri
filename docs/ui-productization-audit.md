@@ -3277,3 +3277,17 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **加映三（同日，用户三则反馈：点 Skills/知识空间/后端/新建任务 左栏都被覆盖 → 用户裁决「直接上档 2」）**：**左栏上提为应用壳层（档 2）**。根因是架构性的——左栏此前渲染在 `ProjectWorkspace` 内部，于是「有没有左栏」被绑在「是不是 `/project/:id/*` 路由」上：左栏工作台 8 个入口里 搜索/插件/设置 做成了工作区模式（左栏在），而 新建任务/Skills/知识空间/后端 跳独立全局路由（左栏整个消失）——同一左栏一半常驻一半消失。落地：新增 `components/desktop/AppRailContext.tsx`（**应用级单一真相**：项目列表/项目树展开/当前项目会话/跨项目会话/当前会话 id/创建态 + 左右栏宽与底栏高 `useResizableColumns` 单实例 + 项目会话的建/改名/归档/分支/切换 + SSH 五连 + 工作区模式导航）与 `components/desktop/AppRail.tsx`（壳层左栏，构建 `LeftPanelContext`）；`App.tsx` 挂 `AppRailProvider` 并把 `<AppRail/>` 作为 `main` 的 flex 兄弟（`height:100vh`）；`ProjectWorkspace` 改为消费同一 provider（本地同名别名，正文零改动）、**不再渲染左栏**、底栏左偏移归零、并以 **adapter 适配槽**回接工作区专属副作用（切会话清 job/artifact、建会话/分支切 chat、项目改名刷新本页详情；卸载即摘除 → 壳层动作自动降级为纯数据行为）。**「新建任务」语义**（用户裁决）：工作区内＝新建会话并聚焦输入框；「新建项目」交给项目区 `+` 与内联创建面板（不再跳欢迎页）。**右栏与底栏终端不上提**（判据「没有项目时它是什么样」：文件/审阅/结果/模型 I/O 无项目即空壳 → 上下文级，留工作区）。**顺手清理**：`otherSeed` 为「只写不读」死状态（跨项目乐观前置从未被消费），随上提删除。**门禁**：新增 dev-verify flow `app-rail-persistent`（7 断言：/skills /knowledge /backend / 欢迎页 /projects 工作区 /result 结果模式 左栏均常驻 >100px）**实机 7/7 allPass**（证据 acceptance/ui-341/app-rail-persistent-live.json + skills-with-rail.png）；既有 flow `workspace-panel-motion` 6/6 无回归；前端全量 **983/983** + tsc 0 + docs:check PASS(228) + hygiene PASS。**遗留**：壳层左栏与工作区左栏目前是同一组件在壳层单点渲染（工作区已不渲染），跨页面切换无 remount 闪烁；如实测发现紧凑模式（<960）浮层样式需在壳层补一套，登记后续候选。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
+
+## UI-352: 分析入口目录改由「插件投影」供给（工具目录 SPI 落地 + 诚实空态）(2026-09-12 verified，dev Electron 边界内)
+
+**来源**：BLOCK-83 D4 裁决（用户「生信作为独立存在随时彻底清理 + 通用基座扩展其它垂直领域」）——核心不再内置领域工具清单，目录必须投影自「已装插件」；零领域包安装时不得伪造条目。
+
+**改动**：①后端新增 `GET /api/tools/catalog`（`core/biof3-server/routes/tools-catalog.js`）——投影自 `plugin-loader` 的已装插件 manifest（与 MCP `listTools` 同源），零插件→空目录；`normalizePluginManifest` additive 透传表现层字段 `color/tutorialUrl/demoDataUrl/comingSoon`；`ensurePluginSourcesLoaded` 惰性源加载供非启动期消费者。②前端新增 `frontend/src/lib/tool-catalog.ts`（fetch + 进程内缓存 + `useToolCatalog`/`lookupToolById`）。③6 处消费方迁移：`RightPanel`（列表供 `AnalysisLaunchPanel`）、`AnalysisLaunchPanel`（渲染 + **诚实空态** `data-testid="analysis-launch-empty"`）、`ResultArtifactShell`（按 tool_id 查目录）、`SimpleChat`（参数修复回退 manifest）、`WindowResultPage`（语言反推）；`ResultView`/`project-workspace` 两处**死引用**清理。④**整目录退役**：`frontend/src/tools/{inventory.ts(2,095 行), registry.ts, categories.ts}` + `pages/_data.ts` 全删（全仓零残留引用实证）。⑤死代码清理：`ProjectModality` 去领域字面量（→自由文本）、`WorkspaceSummaryCard.modalityLabel` 去领域标签表（保留 `general`→「通用」+ 原样 fallback）。
+
+**门禁**：`tsc` 0；前端受影响 **30/30**（RightPanel/WorkspaceSummaryCard/SimpleChat/window 目录）；后端插件族 **20/20**（catalog 4/4、plugin-loader-refresh、plugin-sdk、mcp-builtin-discovery、mcp-plugin-autoload、mcp-tool-registry）；`docs:check` 231 + `hygiene` 绿。
+
+**实机（dev Electron 边界内）**：dev-verify flow `block83-tool-catalog` **8/8 allPass**（证据 `acceptance/block-83/block83-tool-catalog-live.json` + png）——C1 工作区挂载；C2 页面内端点 200 且 `count=15 source=installed-plugins`；C3 顶栏「展开更多工具」→ 菜单「分析」→ 面板头「分析入口」；**C4 渲染卡片数 15 === 端点 count 15**；**C5 首卡标题与 API 条目逐字一致**（＝UI 由目录驱动而非静态清单）；C6 目录非空时空态不误现。
+
+**实机抓真一（测试选择器精度）**：flow 首版 C4 报 `rendered=79 endpoint=15`——`[class*="analysisLaunchCard"]` 子串选择器连带命中 5 个嵌套子类（Card/Main/Title/Desc/Meta），产品无缺陷；改列表项 `[class*="analysisLaunchCards"] > li` 精确计数后 8/8。
+
+**诚实边界**：空目录态由契约测试覆盖（`test/block83-tool-catalog.test.mjs` 4/4；实机环境装全 15 插件，无法构造零插件场景）；`CopilotPage` 领域枚举（web 时代路由映射、有测试覆盖）本轮不动，登记 P3/P4 候选。G0 开发期常态 · 不外推 packaged / Provider / GA。

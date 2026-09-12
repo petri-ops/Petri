@@ -185,7 +185,7 @@ import type { ResultNode } from './types';
 import './simple-chat.css';
 import { Icon, type IconName } from '@/components/icons/Icon';
 import { HighlightedCode } from '@/components/ui/CodeHighlight';
-import { tools as staticTools } from '@/pages/_data';
+import { lookupToolById } from '@/lib/tool-catalog';
 import { INITIAL_NAV_STATE, stepHistoryNavigation } from './chatHistoryNav';
 import {
   clearConversationDraft,
@@ -582,9 +582,11 @@ export function SimpleChat({
     (async () => {
       try {
         const remoteManifest = await fetchHarnessToolManifest(pendingApproval.toolId || '');
-        const fallbackManifest = staticTools.find((tool) => tool.id === pendingApproval.toolId) as
-          | HarnessToolManifest
-          | undefined;
+        // BLOCK-83 D4：目录投影自插件；未安装该插件时无回退 manifest（保持既有跳过语义）。
+        const catalogTool = await lookupToolById(pendingApproval.toolId);
+        const fallbackManifest: HarnessToolManifest | undefined = catalogTool
+          ? { id: catalogTool.id, title: catalogTool.title, inputs: catalogTool.inputs }
+          : undefined;
         const manifest = remoteManifest || fallbackManifest || null;
         if (!manifest) {
           if (!cancelled) {

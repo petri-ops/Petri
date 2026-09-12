@@ -341,6 +341,11 @@ function normalizePluginManifest(plugin, def) {
         : [],
     failureModes: mergedFailureModes.map(_normalizeFailureMode).filter(Boolean),
     estimatedMinutes: toolDef.estimatedMinutes || plugin.estimatedMinutes || null,
+    // BLOCK-83 D4：目录投影所需的表现层字段透传（additive；缺省由前端兜底）。
+    color: toolDef.color || plugin.color || null,
+    tutorialUrl: toolDef.tutorialUrl || plugin.tutorialUrl || null,
+    demoDataUrl: toolDef.demoDataUrl || plugin.demoDataUrl || null,
+    comingSoon: toolDef.comingSoon === true || plugin.comingSoon === true,
     // Optional Result Studio descriptor. Absence is meaningful: RS4 must then
     // classify unknown parameter edits as scientific recomputation.
     resultStudio: resultStudioValidation.valid ? resultStudioValidation.descriptor : null,
@@ -677,6 +682,41 @@ function loadBuiltInPlugins(builtInDir) {
   }
 }
 
+// BLOCK-83 D4：默认插件源解析（与 server.js 启动路径同源），供目录投影等
+// 非启动期消费者惰性加载使用，避免各处重复实现三源发现。
+function resolveDefaultPluginSources() {
+  const path = require('path');
+  const os = require('os');
+  const developmentDirs = String(process.env.BIOF3_DEVELOPMENT_PLUGIN_DIRS || '')
+    .split(path.delimiter)
+    .map((item) => item.trim())
+    .filter(Boolean);
+  return {
+    builtInDir:
+      process.env.BIOF3_BUILT_IN_PLUGINS_DIR ||
+      path.resolve(__dirname, '..', '..', 'resources', 'built-in-plugins'),
+    installedDir:
+      process.env.BIOF3_PLUGINS_DIR ||
+      path.join(os.homedir(), 'Documents', 'BioF3-Local', 'plugins'),
+    developmentDirs,
+  };
+}
+
+let _defaultSourcesLoaded = false;
+function ensurePluginSourcesLoaded() {
+  if (_defaultSourcesLoaded || getAllPluginManifests().length > 0) {
+    _defaultSourcesLoaded = true;
+    return getAllPluginManifests();
+  }
+  _defaultSourcesLoaded = true;
+  try {
+    loadPluginsFromSources(resolveDefaultPluginSources());
+  } catch (error) {
+    logger.warn('[plugin-loader] default source load failed: ' + (error && error.message));
+  }
+  return getAllPluginManifests();
+}
+
 function loadPluginsFromSources({ builtInDir, installedDir, developmentDirs = [] } = {}) {
   const { inspectPluginSources } = require('../shared-backend/plugin-sdk');
   const sources = [];
@@ -744,4 +784,6 @@ module.exports = {
   loadPluginsFromDisk,
   loadBuiltInPlugins,
   loadPluginsFromSources,
+  resolveDefaultPluginSources,
+  ensurePluginSourcesLoaded,
 };

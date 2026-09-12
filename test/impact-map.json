@@ -1453,13 +1453,24 @@
         "test/block83-task-confirmation-hooks.test.mjs",
         "test/block83-*.test.mjs",
         "scripts/block83-*",
-        "acceptance/block-83/**"
+        "acceptance/block-83/**",
+        "core/biof3-server/routes/tools-catalog.js",
+        "frontend/src/lib/tool-catalog.ts",
+        "core/biof3-server/routes/tools.js",
+        "core/biof3-server/server.js",
+        "frontend/src/components/workspace-panels/AnalysisLaunchPanel.tsx",
+        "frontend/src/components/workspace-panels/RightPanel.tsx",
+        "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
+        "frontend/src/pages/window/WindowResultPage.tsx",
+        "frontend/src/lib/project-types.ts",
+        "test/block83-tool-catalog.test.mjs"
       ],
       "tests": [
         "test/block83-task-confirmation-hooks.test.mjs",
         "test/result-studio-contracts.test.mjs",
         "test/scientific-task-confirmation.test.mjs",
-        "test/tool-job-conversation.test.mjs"
+        "test/tool-job-conversation.test.mjs",
+        "test/block83-tool-catalog.test.mjs"
       ],
       "classifiesScripts": true
     }

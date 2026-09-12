@@ -4,7 +4,9 @@
 // Replaces module-specific project stores with a unified interface.
 // ============================================================
 
-export type ProjectModality = 'single-cell' | 'spatial' | 'general' | string;
+/** BLOCK-83 D1：项目形态标签为自由文本——核心不约束取值，领域包自行登记约定
+ * （历史 'single-cell' / 'spatial' 取值不再出现在核心里）。 */
+export type ProjectModality = string;
 
 export interface ProjectG0Baseline {
   recordVersion: number;

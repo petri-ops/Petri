@@ -1,0 +1,48 @@
+{
+  "name": "block83-tool-catalog",
+  "startedAt": "2026-09-12T03:55:46.027Z",
+  "finishedAt": "2026-09-12T03:55:47.751Z",
+  "assertions": [
+    {
+      "name": "cdp_targets_listed",
+      "pass": true,
+      "detail": "1 targets"
+    },
+    {
+      "name": "spa_page_target_present",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mtuyje22_9vr4/chat"
+    },
+    {
+      "name": "C1_workspace_mounted",
+      "pass": true,
+      "detail": "{\"tree\":true,\"right\":true}"
+    },
+    {
+      "name": "C2_catalog_endpoint",
+      "pass": true,
+      "detail": "{\"status\":200,\"ok\":true,\"count\":15,\"source\":\"installed-plugins\",\"first\":{\"id\":\"cellchat\",\"title\":\"CellChat 细胞通讯推断\",\"category\":\"single-cell\",\"color\":\"#16a34a\"}}"
+    },
+    {
+      "name": "C3_analyze_panel_opens",
+      "pass": true,
+      "detail": "trigger=clicked cards=15"
+    },
+    {
+      "name": "C4_cards_from_catalog",
+      "pass": true,
+      "detail": "rendered=15 endpoint=15"
+    },
+    {
+      "name": "C5_titles_match",
+      "pass": true,
+      "detail": "ui=\"CellChat 细胞通讯推断\" api=\"CellChat 细胞通讯推断\""
+    },
+    {
+      "name": "C6_empty_state_absent",
+      "pass": true,
+      "detail": "empty=false"
+    }
+  ],
+  "allPass": true
+}

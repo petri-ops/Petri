@@ -6,7 +6,7 @@ import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { Icon, type IconName } from '@/components/icons/Icon';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
-import { tools as staticTools } from '@/pages/_data';
+import { findCatalogTool, useToolCatalog } from '@/lib/tool-catalog';
 import { buildPreviewTable } from '@/lib/file-preview/buildPreviewTable';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
@@ -223,9 +223,11 @@ export function ResultArtifactShell({
   const [replayPackageMessage, setReplayPackageMessage] = useState('');
   const [artifactSwitchMs, setArtifactSwitchMs] = useState<number | null>(null);
 
+  // BLOCK-83 D4：工具 manifest 从插件目录投影取，不再依赖核心静态清单。
+  const { tools: catalogTools } = useToolCatalog();
   const tool = useMemo(
-    () => (job ? staticTools.find((t) => t.id === job.tool_id) || null : null),
-    [job?.tool_id]
+    () => (job ? findCatalogTool(catalogTools, job.tool_id) : null),
+    [job?.tool_id, catalogTools]
   );
   const lang: 'r' | 'python' = tool?.language === 'python' ? 'python' : 'r';
   const effectiveJobStatus: ToolJob['status'] = workflow?.jobStatus === 'completed'

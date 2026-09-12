@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { WindowShell } from '@/components/window/WindowShell';
 import { getApiPrefix, getToken } from '@/lib/authClient';
-import { tools } from '@/tools/inventory';
+import { useToolCatalog } from '@/lib/tool-catalog';
 import { buildPreviewTable } from '@/lib/file-preview/buildPreviewTable';
 import { formatPreviewText } from '@/lib/previewFileUtils';
 import {
@@ -24,7 +24,6 @@ import {
   type ResultArtifactRecord,
 } from '@/lib/result-manifest';
 import { resolveResultViewerAdapter } from '@/components/result-studio/resultSurface';
-import type { Tool } from '@/tools/registry';
 import styles from '@/components/window/window-shell.module.css';
 
 interface JobStatusPayload {
@@ -61,10 +60,12 @@ export function WindowResultPage(): React.ReactElement {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState('');
 
+  // BLOCK-83 D4：语言反推与目录读取同为插件投影（零插件时回落 'r'，仅影响请求前缀）。
+  const { tools: catalogTools } = useToolCatalog();
   const lang: 'r' | 'python' = useMemo(() => {
-    const tool: Tool | undefined = tools.find((t) => t.id === status?.toolId);
+    const tool = catalogTools.find((t) => t.id === status?.toolId);
     return tool?.language === 'python' ? 'python' : 'r';
-  }, [status?.toolId]);
+  }, [status?.toolId, catalogTools]);
 
   const buildUrl = useCallback(
     (name: string) => {
@@ -76,7 +77,7 @@ export function WindowResultPage(): React.ReactElement {
     [jobId, lang],
   );
 
-  // 状态自举：/api/tools/status 为语言无关端点，toolId 经静态注册表反推 lang。
+  // 状态自举：/api/tools/status 为语言无关端点，toolId 经插件目录反推 lang。
   useEffect(() => {
     if (!jobId) {
       setStatusError('窗口键不合法（期望 result:jobId:artifactName）');

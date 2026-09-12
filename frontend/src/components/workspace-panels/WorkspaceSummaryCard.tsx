@@ -887,7 +887,8 @@ function emptyTaskHint(datasets: Dataset[], conversations: ConversationSummary[]
 }
 
 function modalityLabel(modality: string): string {
-  return { 'single-cell': '单细胞', spatial: '空间', general: '通用' }[modality] || modality;
+  // BLOCK-83 D1：不再内置领域标签表；仅 'general' 有核心语义，其余原样显示。
+  return modality === 'general' ? '通用' : modality;
 }
 
 function agentTaskStatusLabel(status: string): string {
