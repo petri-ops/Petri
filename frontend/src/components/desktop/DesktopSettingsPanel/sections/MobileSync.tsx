@@ -35,12 +35,11 @@ function authHeaders(): Record<string, string> {
 }
 
 /**
- * BLOCK-70（UI-319）·「手机远程」：扫码 → 手机浏览器直达工作区。
- * 移动面本体是 mobile-gateway 独立实例（默认关闭）；本区负责
+ * UI-354 · 手机远程面板本体（设置区与顶栏弹层共用）。
+ * 移动面本体是 mobile-gateway 独立实例（默认关闭）；本面板负责
  * 开关（重启生效，诚实提示）/ 配对二维码（服务端渲染 SVG）/ 设备吊销。
- * 样式跟随设置面板全局 button/hint 约定（RemoteTargets 同款，不另立类名体系）。
  */
-export function MobileSync(): React.ReactElement {
+export function MobileSyncPanel(): React.ReactElement {
   const [status, setStatus] = useState<MobileStatus | null>(null);
   const [pairing, setPairing] = useState<PairingInfo | null>(null);
   const [busy, setBusy] = useState(false);
@@ -127,7 +126,6 @@ export function MobileSync(): React.ReactElement {
 
   return (
     <div data-testid="mobile-sync-panel">
-      <h4>手机远程</h4>
       <p className="gewu-field__hint">
         手机扫码后用浏览器直达本机工作区（同 WiFi）。默认关闭，内容只在你的局域网内传输。
         {status ? ` 端口 ${status.port}。` : ''}
@@ -186,6 +184,16 @@ export function MobileSync(): React.ReactElement {
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+/** 设置区壳（「计算与数据」分区内的「手机远程」小节标题 + 面板）。 */
+export function MobileSync(): React.ReactElement {
+  return (
+    <div>
+      <h4>手机远程</h4>
+      <MobileSyncPanel />
     </div>
   );
 }

@@ -185,18 +185,7 @@ export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElem
         {dropHint && (
           <p className={styles.leftCreateError} role="alert" style={{ padding: '0 12px' }}>{dropHint}</p>
         )}
-        <div className={styles.leftPanelFooter}>
-          <button
-            type="button"
-            className={`${styles.leftQuickAction} ${ctx.workspaceMode === 'settings' ? styles.leftQuickActionActive : ''}`}
-            onClick={ctx.handleShowSettings}
-            title="设置"
-            aria-current={ctx.workspaceMode === 'settings' ? 'page' : undefined}
-          >
-            <Icon name="settings" size={15} />
-            <span>设置</span>
-          </button>
-        </div>
+        {/* UI-354 — 「设置」入口已迁顶栏最右侧（TitleBarRightZone 齿轮）；左栏底部不再保留重复入口 */}
       </div>
     </aside>
   );

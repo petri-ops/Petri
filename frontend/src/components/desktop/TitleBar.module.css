@@ -719,3 +719,37 @@
     padding-left: 4px;
   }
 }
+
+/* UI-354 — 手机远程弹层（顶栏手机图标点开的配对面板） */
+.mobileRemoteOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  border: none;
+  background: transparent;
+  -webkit-app-region: no-drag;
+}
+
+.mobileRemoteCard {
+  position: fixed;
+  top: 44px;
+  right: 10px;
+  z-index: 10001;
+  width: 320px;
+  max-height: min(70vh, 560px);
+  overflow: auto;
+  padding: 12px 14px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 12px;
+  background: var(--gewu-bg-elevated);
+  box-shadow: 0 14px 32px color-mix(in srgb, var(--gewu-text) 18%, transparent);
+  -webkit-app-region: no-drag;
+}
+
+.mobileRemoteCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 14px;
+}

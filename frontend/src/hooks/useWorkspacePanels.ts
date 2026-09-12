@@ -45,6 +45,8 @@ export interface TitleBarState {
   canGoForward: boolean;
   onGoBack: (() => void) | null;
   onGoForward: (() => void) | null;
+  // UI-354 —— 顶栏右侧设置入口（左栏底部的「设置」随本入口迁入顶栏；null=非工作区路由隐藏齿轮）
+  onShowSettings: (() => void) | null;
 }
 
 export interface WorkspacePanels {
@@ -82,6 +84,7 @@ const DEFAULT_TITLE_BAR: TitleBarState = {
   canGoForward: false,
   onGoBack: null,
   onGoForward: null,
+  onShowSettings: null,
 };
 
 function titleBarDataEqual(a: TitleBarState, b: TitleBarState): boolean {
