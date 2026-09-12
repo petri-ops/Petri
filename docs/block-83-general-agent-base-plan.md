@@ -75,16 +75,16 @@ v1.0 现状盘点（§2）与 D1-D11 继续有效，阶段微调（§4）。
 | **P1** ✅ completed（2026-09-12） | Result Studio 通用化：D1 改名 + D2 去 `.R` 绑定 + D3 钩子化，三切片落地 | 实机 4/4 allPass（acceptance/block-83/）+ 契约测试 7/7+11/11+30/30 |
 | **P2** ✅ completed（2026-09-12） | 前端领域中性化：目录提供者 SPI（后端自插件投影）+ 6 处消费方迁移 + `tools/` 目录整体退役（inventory 2,095 行 / registry / categories / _data） | tsc 0 + 受影响 vitest 30/30 + 实机 flow 8/8 allPass（acceptance/block-83/） |
 | **P3** ✅ completed（2026-09-12，D10 缝已立/R 档案迁出归 P4） | 核心扩展点定型：D12 注册表驱动「需用户输入」分类（核心不再硬编码领域错误码）+ 理由码/故障类别词表中性化（存量兼容）+ **D7 领域中性化棘轮门禁**（扫核心生产代码，只拦新增/恶化）+ D10 语言描述符 SPI 缝（表现层 6 处中性化；7 处行为分支=R 档案本体随 P4 迁出） | 门禁 2/2 + loop 族 283 测试全绿 + 负例验证门禁会咬（注入领域词即红） |
-| **P4** 🔄 进行中（切片 1 ✅ / 切片 2-4 待办） | 生信包独立建仓迁移（D9）：核心树生信文件零残留 + D7 硬门绿 | 见下表 |
+| **P4** ✅ completed（2026-09-12，四切片全部落地） | 生信包独立建仓迁移（D9）+ 核心树生信内容删除 + D7 基线销号 | **出口实机 8/8 allPass**（acceptance/block-83/block83-p4-exit-live.json：零生信态 catalog=0 / runtime 清单幸存 / 核心文件零残留 / 生信包装载 15 / D13 第二租户装载无混入） |
 
 **P4 切片进度**
 
 | 切片 | 内容 | 状态 |
 | --- | --- | --- |
 | 1 | **包骨架 + 装卸缝实证**：独立包仓库建立（`gewu-pack-bio`，本地 git 首提交 268 文件/6.3MB，含 `pack.json` 契约 + 15 插件 + 69 脚本 + demo 数据 + 安装索引生成器）；**核心以包为唯一插件源跑通**（内置目录移走 → dev 栈 15 插件全部来自包 + 目录 flow 8/8 allPass） | ✅ 2026-09-12 |
-| 2 | **核心树内删除生信内容** + 29 个依赖 `resources/built-in-plugins` 的测试改为「包存在则跑、缺失则 skip」或用仓内夹具 | 待办 |
+| 2 | **核心树内删除生信内容**（314 文件：built-in-plugins/tool-scripts/tool-demo-data/tool-demo-results/image/demo-data）+ B 类 16 测试全数迁移（前置+2a+2b 三批）+ manifest 运行时拆分（`resources/runtime/`）+ tool-registry 中性化（空表+env 注入）+ tasks/scenario 路径改包 + 静默跳过反模式修复 + D 条目清理 | ✅ 2026-09-12 |
 | 3 | **注册链随包化**：D10 余 7 处行为分支 + R 档案（`r-executor`/`r-libs-resolver`/运行时探测）+ scientific-task 契约链随包注册；`biof3://` URI 与 datasets 资源名清理 | 待办 |
-| 4 | **D7 基线销号**：`test/domain-neutrality-baseline.json` 158 条随删除逐项清零；远程建仓与推送（**阻塞：本机无 gh CLI / 无 GH token，远程建仓需用户操作**） | 待办 |
+| 4 | **D7 基线销号**：158 → **144 条**（tool-registry 14 条随中性化清零）；远程建仓 ✅（`Diandian-ops/gewu-pack-bio`，用户指定账户，凭据 API 创建+推送） | ✅ 2026-09-12（剩余 144 条=agent-runner 提示词/learning/plan-ui 等代码层残留，属 P4 尾部延续清理+P5 门禁监控对象） |
 
 **D9 包仓库事实（切片 1）**：本地路径 `D:\1.WorkDir\gewu-pack-bio`（与核心仓平级，独立 git 仓，初始提交 `2a51b73`）；包契约 `pack.json` 声明提供物（plugins/scripts/demoData/languages/confirmationHooks/artifactTypes）与所需核心能力；核心侧装卸缝 = `BIOF3_PLUGINS_DIR`（installed 源，需 `plugins/installed.json` 索引，由包内 `tools/generate-installed-index.cjs` 生成）。
 | **P5** | 收口：装包态生信全链回归（装→run_tool 通→卸→零残留）+ **D13 第二租户证明（非生信 demo 包走通全链）** + 纯通用态实机全功能 + 台账五件套回写 | 收口门禁 + D7 硬门 + D13 全链 + 实机证据（acceptance/block-83/） |

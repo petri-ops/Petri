@@ -1,0 +1,55 @@
+{
+  "generatedAt": "2026-09-12T09:28:11.526Z",
+  "block": "BLOCK-83-P4-EXIT",
+  "env": {
+    "node": "C:\\Users\\Admin\\AppData\\Roaming\\fnm\\node-versions\\v24.20.0\\installation\\node.exe",
+    "method": "isolated child probes (plugin-loader 单例不可重入)"
+  },
+  "totals": {
+    "pass": 8,
+    "fail": 0,
+    "all": 8
+  },
+  "results": [
+    {
+      "name": "PRE_pack_installed_json",
+      "ok": true,
+      "detail": "D:/1.WorkDir/gewu-pack-bio/plugins"
+    },
+    {
+      "name": "PRE_fixture_installed_json",
+      "ok": true,
+      "detail": "D:\\1.WorkDir\\biof3-desktop\\test\\fixtures\\neutral-plugins"
+    },
+    {
+      "name": "Z1_catalog_empty_honest",
+      "ok": true,
+      "detail": "loaded=0 catalog=0"
+    },
+    {
+      "name": "Z3_runtime_manifest_survives",
+      "ok": true,
+      "detail": "runtime=biof3-r-runtime,biof3-py-runtime"
+    },
+    {
+      "name": "Z4_zero_bio_files_in_core",
+      "ok": true,
+      "detail": "residue=0"
+    },
+    {
+      "name": "D13_1_bio_pack_loads_15",
+      "ok": true,
+      "detail": "loaded=15 catalog=15"
+    },
+    {
+      "name": "D13_2_second_tenant_loads",
+      "ok": true,
+      "detail": "loaded=1 hasSample=true"
+    },
+    {
+      "name": "D13_3_no_bio_leak_into_tenant",
+      "ok": true,
+      "detail": "tenant loaded=1"
+    }
+  ]
+}

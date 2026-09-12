@@ -1,0 +1,10 @@
+[
+  {
+    "id": "sample-metrics",
+    "version": "1.0.0",
+    "installedAt": "2026-09-12T09:24:59.529Z",
+    "platform": "windows-x64",
+    "language": "r",
+    "type": "analysis-plugin"
+  }
+]
