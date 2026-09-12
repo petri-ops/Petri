@@ -210,6 +210,15 @@ const desktopBridgeSurface = {
     checkUpdates: () => ipcRenderer.invoke('plugin:check-updates'),
   },
 
+  // BLOCK-84：领域包一键装/卸桥（记录制；装/卸后需重启生效）
+  packs: {
+    listInstalled: () => ipcRenderer.invoke('pack:list-installed'),
+    listAvailable: () => ipcRenderer.invoke('pack:list-available'),
+    installFromDialog: () => ipcRenderer.invoke('pack:install-from-dialog'),
+    installPath: (packRoot) => ipcRenderer.invoke('pack:install-path', packRoot),
+    uninstall: (packId) => ipcRenderer.invoke('pack:uninstall', packId),
+  },
+
   // M2-9：content-plugin 文档桥（docs.tsx 运行时拉取已装教程插件）
   contentPlugins: {
     list: () => ipcRenderer.invoke('content-plugin:list'),

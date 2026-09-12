@@ -211,6 +211,14 @@ declare global {
           Array<{ id: string; currentVersion: string; latestVersion: string }>
         >;
       };
+      // BLOCK-84：领域包一键装/卸桥
+      packs: {
+        listInstalled: () => Promise<Array<{ packId: string; packRoot: string; version: string; installedAt: string }>>;
+        listAvailable: () => Promise<Array<{ packId: string; name: string; nameEn?: string | null; version: string; description: string; packRoot: string; installed: boolean }>>;
+        installFromDialog: () => Promise<{ ok: boolean; canceled?: boolean; pack?: { packId: string }; error?: string }>;
+        installPath: (packRoot: string) => Promise<{ ok: boolean; pack?: { packId: string }; error?: string }>;
+        uninstall: (packId: string) => Promise<{ ok: boolean; removed?: string; error?: string }>;
+      };
       // G0-RS: Skills discovery & execution bridge
       skills: {
         discover: () => Promise<{

@@ -15,6 +15,10 @@ import {
   type UpdateInfo,
 } from '@/hooks/usePluginStore';
 
+// BLOCK-84：领域包一键装/卸（记录制；装/卸后需重启生效）
+interface InstalledPack { packId: string; packRoot: string; version: string; installedAt: string }
+interface AvailablePack { packId: string; name: string; nameEn?: string | null; version: string; description: string; packRoot: string; installed: boolean }
+
 interface Props {
   onClose: () => void;
   /** UI-347 — 返回按钮文案（与各宿主页面返回语义一致；缺省「返回」）。 */
@@ -67,6 +71,74 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
   const [activeCategory, setActiveCategory] = useState<CategoryId>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  // BLOCK-84：领域包
+  const [availablePacks, setAvailablePacks] = useState<AvailablePack[]>([]);
+  const [installedPacks, setInstalledPacks] = useState<InstalledPack[]>([]);
+  const [packBusy, setPackBusy] = useState<string | null>(null);
+  const [packNotice, setPackNotice] = useState<string | null>(null);
+
+  // IPC 契约（src/ipc/pack.js）：list-installed / list-available 统一返回
+  // `{ ok, packs: [...] }`，不是裸数组。早期实现按裸数组解包，导致 state 被塞进
+  // 一个普通对象（.length === undefined），`length > 0` 恒为 false，
+  // 「领域包」分区因此永不渲染——数据链路全通却看不见卡片（P2 实机抓真）。
+  type PacksEnvelope<T> = { ok?: boolean; packs?: T[] };
+  const unpackPacks = <T,>(payload: unknown): T[] => {
+    if (Array.isArray(payload)) return payload as T[];
+    const env = payload as PacksEnvelope<T> | null;
+    return env && Array.isArray(env.packs) ? env.packs : [];
+  };
+
+  const refreshPacks = React.useCallback(async () => {
+    try {
+      const bridge = (window as unknown as {
+        biof3Desktop?: { packs?: {
+          listInstalled: () => Promise<PacksEnvelope<InstalledPack> | InstalledPack[]>;
+          listAvailable: () => Promise<PacksEnvelope<AvailablePack> | AvailablePack[]>;
+        } };
+      }).biof3Desktop;
+      if (!bridge?.packs) return;
+      const [inst, avail] = await Promise.all([bridge.packs.listInstalled(), bridge.packs.listAvailable()]);
+      setInstalledPacks(unpackPacks<InstalledPack>(inst));
+      setAvailablePacks(unpackPacks<AvailablePack>(avail));
+    } catch {
+      // 桥缺失（web shim）时整区不渲染，由 availablePacks 空态兜底
+    }
+  }, []);
+
+  React.useEffect(() => { void refreshPacks(); }, [refreshPacks]);
+
+  async function handlePackInstall(pack: AvailablePack) {
+    setPackBusy(pack.packId);
+    setPackNotice(null);
+    try {
+      const bridge = (window as unknown as {
+        biof3Desktop?: { packs?: { installPath: (root: string) => Promise<{ ok: boolean; error?: string }> } };
+      }).biof3Desktop;
+      const result = await bridge?.packs?.installPath(pack.packRoot);
+      if (result?.ok) setPackNotice(`「${pack.name}」已安装——重启应用后生效`);
+      else setPackNotice(`安装失败：${result?.error ?? '未知错误'}`);
+      await refreshPacks();
+    } finally {
+      setPackBusy(null);
+    }
+  }
+
+  async function handlePackUninstall(pack: AvailablePack) {
+    setPackBusy(pack.packId);
+    setPackNotice(null);
+    try {
+      const bridge = (window as unknown as {
+        biof3Desktop?: { packs?: { uninstall: (id: string) => Promise<{ ok: boolean; error?: string }> } };
+      }).biof3Desktop;
+      const result = await bridge?.packs?.uninstall(pack.packId);
+      if (result?.ok) setPackNotice(`「${pack.name}」已卸载——重启应用后回到纯通用态`);
+      else setPackNotice(`卸载失败：${result?.error ?? '未知错误'}`);
+      await refreshPacks();
+    } finally {
+      setPackBusy(null);
+    }
+  }
 
   // Use useMemo from the hook perspective: the hook already
   // memoizes via useState snapshot; useMemo only needed for
@@ -292,6 +364,100 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
               {!runtimeStatus!.r.installed && ' R'}
               {!runtimeStatus!.python.installed && ' Python'} —
               大部分工具无法使用，请先安装「运行时」分类中的基础环境。
+            </div>
+          )}
+
+          {/* BLOCK-84：领域包分区——整包一键装/卸（记录制，重启生效） */}
+          {(availablePacks.length > 0 || installedPacks.length > 0) && (activeCategory === 'all') && (
+            <div className="gewu-plugin-store__packs" data-testid="domain-packs-section">
+              <div className="gewu-plugin-store__packs-header">
+                <strong>领域包</strong>
+                <span style={{ fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-text-tertiary)' }}>
+                  整包安装/卸载一组领域能力（分析插件 + 脚本 + 工具目录）；装/卸后需重启应用生效
+                </span>
+              </div>
+              {packNotice && (
+                <div role="status" style={{ padding: '6px 0', color: 'var(--gewu-text-secondary)' }}>{packNotice}</div>
+              )}
+              {(() => {
+                const packBridge = (window as unknown as {
+                  biof3Desktop?: { packs?: { installFromDialog: () => Promise<{ ok: boolean; canceled?: boolean; pack?: { packId: string }; error?: string }> } };
+                }).biof3Desktop?.packs;
+                return packBridge ? (
+                  <button
+                    type="button"
+                    className="gewu-btn gewu-btn--primary"
+                    style={{ marginBottom: 8 }}
+                    disabled={packBusy !== null}
+                    onClick={async () => {
+                      setPackBusy('__dialog__');
+                      setPackNotice(null);
+                      try {
+                        const result = await packBridge.installFromDialog();
+                        if (result?.canceled) return;
+                        if (result?.ok) setPackNotice('已安装——重启应用后生效');
+                        else if (result?.error) setPackNotice(`安装失败：${result.error}`);
+                        await refreshPacks();
+                      } finally {
+                        setPackBusy(null);
+                      }
+                    }}
+                  >
+                    从目录安装领域包…
+                  </button>
+                ) : null;
+              })()}
+              {(() => {
+                const knownById = new Map<string, AvailablePack>();
+                for (const p of availablePacks) knownById.set(p.packId, p);
+                for (const p of installedPacks) {
+                  if (!knownById.has(p.packId)) {
+                    knownById.set(p.packId, {
+                      packId: p.packId, name: p.packId, version: p.version,
+                      description: '', packRoot: p.packRoot, installed: true,
+                    });
+                  }
+                }
+                return [...knownById.values()].map((pack) => (
+                  <div
+                    key={pack.packId}
+                    className="gewu-plugin-store__pack-card"
+                    data-testid={`domain-pack-${pack.packId}`}
+                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', border: '1px solid var(--gewu-border, rgba(128,128,128,0.25))', borderRadius: 8, marginBottom: 8 }}
+                  >
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600 }}>
+                        {pack.name} <span style={{ color: 'var(--gewu-text-tertiary)', fontWeight: 400 }}>v{pack.version}</span>
+                        {pack.installed && (
+                          <span style={{ marginLeft: 8, fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-accent, #3b82f6)' }}>已安装</span>
+                        )}
+                      </div>
+                      <div style={{ color: 'var(--gewu-text-tertiary)', fontSize: 'var(--gewu-font-size-caption, 12px)' }}>
+                        {pack.description || pack.packId}
+                      </div>
+                    </div>
+                    {pack.installed ? (
+                      <button
+                        type="button"
+                        className="gewu-btn"
+                        disabled={packBusy !== null}
+                        onClick={() => handlePackUninstall(pack)}
+                      >
+                        {packBusy === pack.packId ? '处理中…' : '卸载'}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="gewu-btn gewu-btn--primary"
+                        disabled={packBusy !== null}
+                        onClick={() => handlePackInstall(pack)}
+                      >
+                        {packBusy === pack.packId ? '处理中…' : '一键安装'}
+                      </button>
+                    )}
+                  </div>
+                ));
+              })()}
             </div>
           )}
 

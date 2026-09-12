@@ -1,0 +1,46 @@
+{
+  "ok": true,
+  "total": 6,
+  "passed": 6,
+  "failed": 0,
+  "targetProjectId": "p_mtkamsfu_3mxo",
+  "storeUrl": "http://localhost:3000/project/p_mtkamsfu_3mxo/plugins",
+  "href": "http://localhost:3000/project/p_mtkamsfu_3mxo/plugins",
+  "cards": [
+    "domain-pack-gewu-pack-bio"
+  ],
+  "bridgeInstalled": 1,
+  "results": [
+    {
+      "name": "U1_page_reachable",
+      "ok": true,
+      "detail": "href=http://localhost:3000/project/p_mtuyje22_9vr4/chat"
+    },
+    {
+      "name": "U2_store_reached",
+      "ok": true,
+      "detail": "href=http://localhost:3000/project/p_mtkamsfu_3mxo/plugins errorScreen=false"
+    },
+    {
+      "name": "U3_domain_packs_section_visible",
+      "ok": true,
+      "detail": "sectionExists=true"
+    },
+    {
+      "name": "U4_pack_card_present",
+      "ok": true,
+      "detail": "cards=[\"domain-pack-gewu-pack-bio\"]"
+    },
+    {
+      "name": "U5_bridge_matches_section",
+      "ok": true,
+      "detail": "bridgeInstalled=1 section=true"
+    },
+    {
+      "name": "U6_restart_hint_present",
+      "ok": true,
+      "detail": "has重启=true"
+    }
+  ],
+  "capturedAt": "2026-09-12T12:26:44.263Z"
+}

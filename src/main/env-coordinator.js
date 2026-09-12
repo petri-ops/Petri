@@ -215,6 +215,51 @@ function getBackendPorts() {
   };
 }
 
+/**
+ * 计算注入给子进程（biof3-server）的 BIOF3_TRUSTED_DESKTOP_ORIGINS 白名单。
+ *
+ * 这个集合是后端的 CORS / untrusted-origin 判据（消费方：
+ * core/shared-backend/local-request-boundary.js）。CORS 按精确 origin 匹配，
+ * 因此渲染页面实际所在 origin 必须逐字命中，否则后端返回的 200 会被浏览器
+ * 按同源策略丢弃 —— 渲染进程只看到 `TypeError: Failed to fetch`，而上游
+ * 代码往往把这个失败吞成"资源不存在"，最终给用户一个与真实原因无关的错误屏。
+ *
+ * 必须把 dev URL 的 localhost / 127.0.0.1 两个变体都写入：
+ *   - dev 模式 backendPorts.renderer 恒为 null（见 _backend-ports.js：dev 不起
+ *     :3002 渲染服务器，页面由 Vite dev server 提供），所以 dev 白名单只能由
+ *     rendererDevUrl 推导，没有第二条补录路径；
+ *   - Vite 监听地址随配置漂移（vite.config.ts 显式 host:'127.0.0.1' 时页面就
+ *     可能落在 127.0.0.1:<port>），只写 localhost 变体会让 127.0.0.1 页面静默
+ *     失联（2026-09-12 BLOCK-84 P2 实机抓真：页面跑在 127.0.0.1:3000，
+ *     后端只信 localhost:3000 → 商店页显示「项目不存在或无权访问」）。
+ *
+ * @param {{existing?: string, isDev?: boolean, rendererDevUrl?: string, rendererPort?: number|null}} input
+ * @returns {Set<string>}
+ */
+function computeTrustedRendererOrigins({ existing, isDev, rendererDevUrl, rendererPort } = {}) {
+  const trusted = new Set(
+    String(existing || "")
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean),
+  );
+  if (isDev) {
+    try {
+      const devOrigin = new URL(rendererDevUrl);
+      trusted.add(devOrigin.origin);
+      const port = devOrigin.port || (devOrigin.protocol === 'https:' ? '443' : '80');
+      for (const host of ['localhost', '127.0.0.1']) {
+        trusted.add(`http://${host}:${port}`);
+      }
+    } catch {}
+  }
+  if (rendererPort) {
+    trusted.add(`http://localhost:${rendererPort}`);
+    trusted.add(`http://127.0.0.1:${rendererPort}`);
+  }
+  return trusted;
+}
+
 function setupDesktopEnv(backendPorts) {
   process.env.BIOF3_DESKTOP = "1";
   process.env.BIOF3_SITE_DIR = resolveResource("build");
@@ -273,21 +318,12 @@ function setupDesktopEnv(backendPorts) {
     process.env.BIOF3_RENDERER_PORT = String(backendPorts.renderer);
     process.env.BIOF3_RENDERER_ORIGIN = `http://localhost:${backendPorts.renderer}`;
   }
-  const trustedRendererOrigins = new Set(
-    String(process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS || "")
-      .split(",")
-      .map((value) => value.trim())
-      .filter(Boolean),
-  );
-  if (isDevModeLocal()) {
-    try {
-      trustedRendererOrigins.add(new URL(rendererDevUrl).origin);
-    } catch {}
-  }
-  if (backendPorts.renderer) {
-    trustedRendererOrigins.add(`http://localhost:${backendPorts.renderer}`);
-    trustedRendererOrigins.add(`http://127.0.0.1:${backendPorts.renderer}`);
-  }
+  const trustedRendererOrigins = computeTrustedRendererOrigins({
+    existing: process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS,
+    isDev: isDevModeLocal(),
+    rendererDevUrl,
+    rendererPort: backendPorts.renderer,
+  });
   process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS = [...trustedRendererOrigins].join(",");
   // Child servers run in separate Node processes and cannot see Electron's
   // in-memory plugin registry. Give them the exact packaged/dev built-in root
@@ -301,4 +337,9 @@ function setupDesktopEnv(backendPorts) {
   _applyComputeSettings(_loadComputeSettings());
 }
 
-module.exports = { setupDesktopEnv, getBackendPort, getBackendPorts };
+module.exports = {
+  setupDesktopEnv,
+  getBackendPort,
+  getBackendPorts,
+  computeTrustedRendererOrigins,
+};

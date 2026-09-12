@@ -20,13 +20,17 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
 
+// Windows 上必须把绝对路径转成 file:// URL 才能交给 ESM loader；
+// 直接传 `D:\...` 会让 Node 把 `d:` 当成未知 scheme 并抛
+// ERR_UNSUPPORTED_ESM_URL_SCHEME，本套件因此在 Windows 上从未真正执行过
+// （2026-09-12 BLOCK-84 定向回归时发现并修复）。
 const { getBackendPort, getBackendPorts } = await import(
-  path.join(root, 'src/main/env-coordinator.js')
+  pathToFileURL(path.join(root, 'src/main/env-coordinator.js')).href
 );
 
 // The env-var keys we own. Save + restore around every test so we

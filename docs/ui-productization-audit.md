@@ -3291,3 +3291,35 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **实机抓真一（测试选择器精度）**：flow 首版 C4 报 `rendered=79 endpoint=15`——`[class*="analysisLaunchCard"]` 子串选择器连带命中 5 个嵌套子类（Card/Main/Title/Desc/Meta），产品无缺陷；改列表项 `[class*="analysisLaunchCards"] > li` 精确计数后 8/8。
 
 **诚实边界**：空目录态由契约测试覆盖（`test/block83-tool-catalog.test.mjs` 4/4；实机环境装全 15 插件，无法构造零插件场景）；`CopilotPage` 领域枚举（web 时代路由映射、有测试覆盖）本轮不动，登记 P3/P4 候选。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+## UI-353: 插件商店「领域包」分区（产品级一键装/卸）(2026-09-12 verified，dev Electron 边界内：P1 后端双态 + P2 前端 UI 均已实机)
+
+**来源**：BLOCK-84 用户裁决（原话「是的 需要 产品级 一键」）——领域包装/卸从「环境变量级」升级为商店内产品级一键操作，卸载即回纯通用态（核心零改动，沿用 BLOCK-83 已验收语义）。
+
+**改动**：①前端 `PluginStorePanel.tsx` 新增「领域包」分区（`data-testid="domain-packs-section"`，仅 `activeCategory === 'all'` 时渲染）——每包卡片（`data-testid="domain-pack-${packId}"`：名称/版本/提供物摘要/状态 + 一键安装/卸载按钮 + 「重启后生效」诚实提示）+「从目录安装领域包…」入口；桥缺失时整区不渲染。②`frontend/src/lib/electron.d.ts` 增 `packs` 命名空间类型（`listInstalled` / `listAvailable` / `installFromDialog` / `installPath` / `uninstall`）。③`src/preload.js` 增 `packs.*` 桥（1:1 转发 `pack:*` IPC）。④`src/ipc/pack.js` 5 个 handler。
+
+**后端配套（P1）**：`core/shared-backend/pack-registry.js`（记录制装卸核心：`validatePackDir` fail-closed / `installPack` 幂等 upsert / `uninstallPack` 仅移记录不删包 / `discoverAvailablePacks` 兄弟仓探测）+ `core/biof3-server/server.js` boot 接线（已装包 → 插件源追加 + `registerDomainToolsFile`）+ `tool-registry.js` 叠加注册 + `plugin-loader.js` `loadFromSourcesArray()` 多源单次装载。
+
+**门禁**：契约测试 `test/block84-pack-oneclick.test.mjs` **5/5**；相邻回归 `plugin-loader-refresh` / `block83-hooks` / `mcp-tool-registry` 合计 **14 项 12 过 0 败 2 跳过**；`docs:check` 232 绿。
+
+**实机（dev Electron 边界内，后端链路，双态循环）**：装 gewu-pack-bio → 重启 → ①`[pack-registry] wiring installed pack: gewu-pack-bio` 出现；②`loaded 15 plugin(s)`；③`GET /api/tools/catalog` → `ok=true, count=15, source=installed-plugins`。卸 → 重启 → ①wiring 计数 **0**；②无插件装载日志（诚实空态）；③`GET /api/tools/catalog` → `ok=true, count=0, catalog=[]`。卸载后包文件 `D:\1.WorkDir\gewu-pack-bio` 完好（D4 用户资产保护语义实证）。
+
+**实机抓真一（本包最重要产出，P1 真缺陷）**：BLOCK-84 新增的 `loadFromSourcesArray()` 只把裸 `candidate.manifest` 塞进插件 Map，**丢了 `pluginDir`/`scriptPath`/`_sourceType` 等运行时装配字段**（既有 `loadPluginsFromSources()` 用的是 `{...candidate.plugin, pluginDir, scriptPath, ...}` 展开式）。后果：`getToolDefinition(pluginId)` 读 `plugin.pluginDir` 得 `undefined` → `path.join` 抛 `ERR_INVALID_ARG_TYPE` → `getAllPluginManifests()` 崩 → `GET /api/tools/catalog` 恒 500（**已装态与零态均崩**）。修复＝对齐既有装配语义补齐四字段。**该缺陷此前被「15 插件加载成功」的日志掩盖**——装载计数与目录投影是两条独立链路，前者绿不代表后者可用。
+
+**实机抓真二（环境前提）**：`scripts/restart-dev-stack.sh` 未剥离 `ELECTRON_RUN_AS_NODE`，该变量一旦从宿主 shell 继承（值为 `1`）会使 electron 二进制退化成纯 node → `app` 为 undefined → `src/main.js:148` `requestSingleInstanceLock` 崩、dev 栈静默起不来（表现为 180s 就绪轮询 TIMEOUT 且端口 PID 不变）。修复＝脚本启动前显式 `unset` + PowerShell 侧 `Remove-Item Env:` 双保险。
+
+**P1 收口证据（2026-09-12）**：`acceptance/block-84/block84-pack-oneclick-live.json` —— 隔离探针双态 **20/20 ALL PASS**（零态诚实 P4a–P4c / 幂等安装 P1a–P1c / 接线生效 P2a–P2d / catalog 字段完整性 P5 / 卸载仅移记录 P3a–P3c / 回零态 P4d / D13 第二租户夹具可装可卸 P6a–P6c）。
+
+**实机抓真三（P2 前端主缺陷，IPC 契约漂移）**：`PluginStorePanel.refreshPacks()` 的 TS 声明是 `listInstalled: () => Promise<InstalledPack[]>`（裸数组），实现里也直接把返回值 `setState`。但 `src/ipc/pack.js` 的实际契约是 **`{ ok: true, packs: [...] }`**（与同文件 `installPath`/`uninstall` 的 `{ok, error}` 同族，设计一致）。后果：state 被塞进一个普通对象 → `installedPacks.length === undefined` → 分区渲染条件 `availablePacks.length > 0 || installedPacks.length > 0` 恒 false → **「领域包」分区永不渲染**。诊断难点：桥数据、catalog 端点、项目 API 全部返回正常（`listInstalled` 实测 `{ok:true,packs:[1 项]}`），静态读代码也看不出问题——只有把"返回形态"和"消费形态"对起来才能发现。修复＝加 `unpackPacks()` 归一化（同时兼容裸数组与信封），避免未来契约再动时回归。
+
+**实机抓真四（P2 环境根因，dev 渲染器 origin 白名单）**：dev 模式 `backendPorts.renderer` 恒为 `null`（`src/main/_backend-ports.js`：`isDevMode ? null : reserveAvailablePort(3002)`），故 `src/main/env-coordinator.js` 的 trusted-origins 只能由 `rendererDevUrl` 推导；旧实现只 `add(new URL(rendererDevUrl).origin)` **一个值**。当页面跑在 `http://127.0.0.1:3000`（`frontend/vite.config.ts` 显式 `host:'127.0.0.1'` 后即如此）而白名单只有 `http://localhost:3000` 时 → 后端 CORS 拒绝（curl 实测：带 `Origin: localhost:3000` 有 `Access-Control-Allow-Origin`，带 `Origin: 127.0.0.1:3000` **无该头**）→ **浏览器按同源策略丢弃那个 200 响应** → 渲染进程 `fetch` 抛 `TypeError: Failed to fetch` → `frontend/src/lib/project-store.ts` 的 `getProject` `catch` 吞错返回 `null` → `pages/project-workspace.tsx:760` 全屏 **「项目不存在或无权访问」**（文案与真实原因完全无关）。**诊断难点**：CDP `Network.responseReceived` 能看到该请求 **status 200**，只有渲染进程侧 `fetch` 会失败——"看网络面板"会得出"后端一切正常"的错误结论。修复＝抽出纯函数 `computeTrustedRendererOrigins()`，dev 下写入 `localhost`/`127.0.0.1` **双变体**。
+
+**P2 收口证据（2026-09-12）**：`acceptance/block-84/block84-p2-ui-live.json` —— CDP 驱动商店 UI **6/6 ALL PASS**（U1 页面可达 / U2 商店页可达且非错误屏 `errorScreen=false` / U3 `domain-packs-section` 可见 / U4 `domain-pack-gewu-pack-bio` 卡片存在 / U5 桥 `bridgeInstalled=1` 与分区渲染一致 / U6 含「重启」诚实提示）。
+
+**新增契约测试**：`test/env-coordinator-trusted-origins.test.mjs` **7/7**（含真实消费方 `core/shared-backend/local-request-boundary.js` 的集成断言：计算出的每个 origin 都必须被判可信，且 `http://evil.example.com` 仍被拒）。`test/impact-map.json` 增 `block84-domain-pack-oneclick` 规则（17 patterns / 7 tests），改动面不再 fail-closed 走全量。
+
+**顺带偿还的测试债**：`test/env-coordinator-port.test.mjs` 用 `import(path.join(root, ...))` 传 Windows 绝对路径，Node 把 `d:` 当未知 scheme 抛 `ERR_UNSUPPORTED_ESM_URL_SCHEME` —— **该套件在 Windows 上从未真正执行过**。改 `pathToFileURL().href` 后 **5/5** 全绿。
+
+**P2 验收方法学（已写入 `scripts/block84-p2-ui-live.cjs` 头注释，供后续复用）**：①origin 必须用 `http://localhost:3000`（与后端白名单口径一致）；②导航必须用 CDP `Page.navigate` 软导航——`location.href` 硬导航会触发欢迎页 auto-navigate 把 URL 弹回 `allProjects[0]`（环境里恰好是不可达的 ssh 项目）；③必须选 `workspace_kind='local'` 项目——ssh 项目远端不可达时工作区加载失败，同样看不到商店页。
+
+**诚实边界**：`tsc` 全量 0 错、`docs:check` PASS(232)、`ui:audit:check` 通过、`hygiene:check` PASS；相邻回归 plugin-sdk 5/5 / manifest-schema / domain-neutrality 2/2 / g0-chf0-http 3/3。**P3 正式阶段收口尚未执行**（`npm run verify -- <flow>` / `npm run closeout` 待跑），故本条状态为 dev Electron 边界内的当前阶段最高证据等级。G0 开发期常态 · 不外推 packaged / Provider / GA。

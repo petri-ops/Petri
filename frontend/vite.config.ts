@@ -193,6 +193,9 @@ export default defineConfig({
   server: {
     port: 3000,
     strictPort: true,
+    // 显式绑 IPv4：Vite 5 缺省走 localhost 可能只监听 [::1]，
+    // 而 Electron 主进程按 127.0.0.1 连接 → ERR_CONNECTION_REFUSED（dev 栈起不来的隐性坑）。
+    host: '127.0.0.1',
     warmup: {
       clientFiles: [
         './index.html',
