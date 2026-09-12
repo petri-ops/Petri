@@ -357,11 +357,11 @@ describe('HLE-C2: Validator, Diagnoser, Repair Integration', () => {
 
     it('diagnoseFailure handles SCIENTIFIC_DESIGN_MISSING reason_code correctly', () => {
       const diagnosis = diagnoseFailure(
-        { reason_code: 'SCIENTIFIC_DESIGN_MISSING', error: 'no design' },
+        { reason_code: 'USER_INPUT_REQUIRED', error: 'no design' },
         {}
       );
-      // Reason code mapping exists: 'scientific_design_missing' maps to 'require_user'
-      assert.equal(diagnosis.faultType, 'scientific_design_missing');
+      // Reason code mapping exists: 'user_input_required' maps to 'require_user'
+      assert.equal(diagnosis.faultType, 'user_input_required');
       assert.equal(diagnosis.defaultBehavior, 'require_user');
       assert.equal(diagnosis.classificationMethod, 'reason_code');
     });

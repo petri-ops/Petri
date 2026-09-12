@@ -39,7 +39,7 @@
         "goalGapIds": [],
         "proposedAction": {"type": "wait_for_user", "question": "metadata 列名不匹配。当前 metadata 的哪些列对应 counts 的列名？请指明 group 列。"},
         "decision": "wait",
-        "decisionReasonCode": "SCIENTIFIC_DESIGN_MISSING",
+        "decisionReasonCode": "USER_INPUT_REQUIRED",
         "publicConclusion": "等待用户提供样本分组映射。"
       }
     ]

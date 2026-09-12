@@ -79,6 +79,7 @@ const {
 // 此处曾错误地从 ./agent-tools 解构，得到 undefined，导致任何工具调用
 // 在 localizeToolResult(envelope.data) 处抛 "not a function"，agent task 整体 failed。
 const { localizeToolResult } = require('./helpers/system-prompt');
+const { isUserInputRequiredError } = require('../shared-backend/task-confirmation-hooks');
 const {
   createResultEditProgressRecorder,
   finalizeResultEditProgress,
@@ -424,12 +425,7 @@ async function runLoop({
                 : 'failed'
           ),
           error: job?.error || resultData.error || resultData.message || null,
-          requiresUserInput: [
-            'missing_required_file_inputs',
-            'scientific_task_not_confirmed',
-            'scientific_task_params_changed',
-            'scientific_task_tool_changed',
-          ].includes(resultData.error),
+          requiresUserInput: isUserInputRequiredError(resultData.error),
           finished_at: job?.completed_at || null,
         };
       });
@@ -451,7 +447,7 @@ async function runLoop({
       const requiresUserInput = runToolJobs.some((job) => job.requiresUserInput);
       decision = requiresUserInput ? 'wait' : 'retry';
       reasonCode = requiresUserInput
-        ? REASON_CODES.SCIENTIFIC_DESIGN_MISSING
+        ? REASON_CODES.USER_INPUT_REQUIRED
         : REASON_CODES.TRANSIENT_RUNTIME_RETRY;
       publicConclusion = requiresUserInput
         ? '执行前置条件不完整，未创建非法 Job；需要补齐关键输入或科学确认。'
@@ -941,12 +937,7 @@ async function runLoop({
             jobTruth,
             error: jobTruth?.error || resultData.error || resultData.message || null,
             reasonCode: resultData.reasonCode || resultData.reason_code || null,
-            requiresUserInput: [
-              'missing_required_file_inputs',
-              'scientific_task_not_confirmed',
-              'scientific_task_params_changed',
-              'scientific_task_tool_changed',
-            ].includes(resultData.error),
+            requiresUserInput: isUserInputRequiredError(resultData.error),
           };
         });
 
@@ -1103,7 +1094,7 @@ async function runLoop({
           publicConclusion = `检测到假成功：任务失败但产生了文件（${falseSuccessJobs.length} 个）。已验证结果不完整，禁止宣称完成。`;
         } else if (requiresUserDecision) {
           decision = 'wait';
-          decisionReasonCode = REASON_CODES.SCIENTIFIC_DESIGN_MISSING;
+          decisionReasonCode = REASON_CODES.USER_INPUT_REQUIRED;
           publicConclusion = '关键输入或科学设计尚未确认；系统未创建非法 Job，等待补齐必要信息。';
         } else if (unresolvedFailedJobs.length > 0) {
           decision = 'retry';

@@ -1463,14 +1463,29 @@
         "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
         "frontend/src/pages/window/WindowResultPage.tsx",
         "frontend/src/lib/project-types.ts",
-        "test/block83-tool-catalog.test.mjs"
+        "test/block83-tool-catalog.test.mjs",
+        "core/shared-backend/script-host-languages.js",
+        "core/shared-backend/loop-contract.js",
+        "core/shared-backend/loop-failure-diagnoser.js",
+        "core/shared-backend/loop-repair-strategy.js",
+        "core/biof3-server/loop-orchestrator.js",
+        "test/domain-neutrality.test.mjs",
+        "test/helpers/domain-scan.mjs",
+        "test/domain-neutrality-baseline.json",
+        "scripts/d7-baseline.mjs",
+        "acceptance/harness-loop/scenarios/**"
       ],
       "tests": [
         "test/block83-task-confirmation-hooks.test.mjs",
         "test/result-studio-contracts.test.mjs",
         "test/scientific-task-confirmation.test.mjs",
         "test/tool-job-conversation.test.mjs",
-        "test/block83-tool-catalog.test.mjs"
+        "test/block83-tool-catalog.test.mjs",
+        "test/domain-neutrality.test.mjs",
+        "test/block83-script-host-languages.test.mjs",
+        "test/loop-failure-diagnoser.test.cjs",
+        "test/loop-fixtures.test.mjs",
+        "test/hle-c5r-regression.test.mjs"
       ],
       "classifiesScripts": true
     }

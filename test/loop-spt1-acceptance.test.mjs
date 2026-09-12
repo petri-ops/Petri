@@ -310,11 +310,11 @@ describe('HLE-C5: SPT-1 Three-Track Production Acceptance', () => {
       assert.equal(iter2.decisionReasonCode, 'INPUT_FORMAT_MISMATCH');
     });
 
-    it('sequence 3 is wait (SCIENTIFIC_DESIGN_MISSING)', () => {
+    it('sequence 3 is wait (USER_INPUT_REQUIRED)', () => {
       const iter3 = trajectory[2];
       assert.equal(iter3.sequence, 3);
       assert.equal(iter3.decision, 'wait');
-      assert.equal(iter3.decisionReasonCode, 'SCIENTIFIC_DESIGN_MISSING');
+      assert.equal(iter3.decisionReasonCode, 'USER_INPUT_REQUIRED');
     });
 
     it('blocking → LoopRun loopStatus = waiting_for_user', () => {
@@ -352,7 +352,7 @@ describe('HLE-C5: SPT-1 Three-Track Production Acceptance', () => {
         iterations: [],
         activeJobs: [],
         validatorResults: [],
-        failedJob: { toolJobId: 'g', status: 'failed', reason_code: 'SCIENTIFIC_DESIGN_MISSING', error: 'no design' },
+        failedJob: { toolJobId: 'g', status: 'failed', reason_code: 'USER_INPUT_REQUIRED', error: 'no design' },
         runtimeReady: true,
         userConfirmationRequired: true,
       };

@@ -97,7 +97,16 @@ function validateScientificTaskExecution({ persistedTask, projectId, toolId, par
 
 // BLOCK-83 D3：领域钩子适配器——经 task-confirmation-hooks 注册表进入，不再被核心层直接 require。
 function createScientificTaskConfirmationHook() {
-  return { id: 'scientific-task-confirmation', validateTaskExecution: validateScientificTaskExecution };
+  return {
+    id: 'scientific-task-confirmation',
+    validateTaskExecution: validateScientificTaskExecution,
+    // BLOCK-83 D12：领域错误码由域包声明，核心不再硬编码这些名字。
+    userInputErrorCodes: [
+      'scientific_task_not_confirmed',
+      'scientific_task_params_changed',
+      'scientific_task_tool_changed',
+    ],
+  };
 }
 
 module.exports = { confirmationIssues, createScientificTaskConfirmationPreview, confirmScientificTask, validateScientificTaskExecution, createScientificTaskConfirmationHook };

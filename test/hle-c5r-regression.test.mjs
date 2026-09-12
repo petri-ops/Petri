@@ -369,34 +369,34 @@ describe('HLE-C5R-4: Workflow DAG enforces typed artifact binding', () => {
 // ===========================================================================
 
 describe('HLE-C5R-5: Repair boundary enforces strict allow/block', () => {
-  it('scientific_design_missing blocks replan_subgraph', () => {
-    const boundary = repairBoundaryCheck('replan_subgraph', 'scientific_design_missing', 'replan');
-    assert.strictEqual(boundary.allowed, false, 'replan_subgraph must be blocked for scientific_design_missing');
+  it('user_input_required blocks replan_subgraph', () => {
+    const boundary = repairBoundaryCheck('replan_subgraph', 'user_input_required', 'replan');
+    assert.strictEqual(boundary.allowed, false, 'replan_subgraph must be blocked for user_input_required');
     assert.ok(boundary.reason?.includes('Scientific design'), 'Must mention scientific decision');
   });
 
-  it('scientific_design_missing blocks substitute_data', () => {
-    const boundary = repairBoundaryCheck('substitute_data', 'scientific_design_missing', 'substitute');
+  it('user_input_required blocks substitute_data', () => {
+    const boundary = repairBoundaryCheck('substitute_data', 'user_input_required', 'substitute');
     assert.strictEqual(boundary.allowed, false, 'substitute_data must be blocked');
   });
 
-  it('scientific_design_missing blocks padj_threshold_relax', () => {
-    const boundary = repairBoundaryCheck('padj_threshold_relax', 'scientific_design_missing', 'relax');
+  it('user_input_required blocks padj_threshold_relax', () => {
+    const boundary = repairBoundaryCheck('padj_threshold_relax', 'user_input_required', 'relax');
     assert.strictEqual(boundary.allowed, false, 'padj_threshold_relax must be blocked');
   });
 
-  it('scientific_design_missing blocks delete_outliers', () => {
-    const boundary = repairBoundaryCheck('delete_outliers', 'scientific_design_missing', 'delete');
+  it('user_input_required blocks delete_outliers', () => {
+    const boundary = repairBoundaryCheck('delete_outliers', 'user_input_required', 'delete');
     assert.strictEqual(boundary.allowed, false, 'delete_outliers must be blocked');
   });
 
-  it('scientific_design_missing blocks add_samples', () => {
-    const boundary = repairBoundaryCheck('add_samples', 'scientific_design_missing', 'add');
+  it('user_input_required blocks add_samples', () => {
+    const boundary = repairBoundaryCheck('add_samples', 'user_input_required', 'add');
     assert.strictEqual(boundary.allowed, false, 'add_samples must be blocked');
   });
 
-  it('scientific_design_missing blocks method_substitution', () => {
-    const boundary = repairBoundaryCheck('method_substitution', 'scientific_design_missing', 'method');
+  it('user_input_required blocks method_substitution', () => {
+    const boundary = repairBoundaryCheck('method_substitution', 'user_input_required', 'method');
     assert.strictEqual(boundary.allowed, false, 'method_substitution must be blocked');
   });
 

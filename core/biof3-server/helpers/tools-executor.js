@@ -25,6 +25,10 @@ const {
   resolveProjectRunLayout,
 } = require('../../shared-backend/project-run-layout');
 const { resolveRLibsForPlugin } = require('../../shared-backend/r-libs-resolver');
+// BLOCK-83 D10：语言描述符 SPI——宿主按描述符取扩展名/标签/命令名，不再硬编码语言分支。
+const {
+  scriptExtensionFor, interpreterLabel, missingRuntimeCommandName,
+} = require('../../shared-backend/script-host-languages');
 const { ensureBundlesForPlugin } = require('../../shared-backend/capability-bundles');
 const { createExecutionProvenance, attachProvenanceToResult } = require('../../shared-backend/execution-provenance');
 const { collectExecutionInputs, writeArtifactManifest } = require('../../shared-backend/artifact-manifest');
@@ -83,7 +87,7 @@ function buildJobProvenance({
       jobDir,
     }),
     runtime: { name: cfg.lang || null, command: runtimeCommand, version: runtimeVersion, ready: runtimeReady?.ready },
-    runScriptPath: path.join(jobDir, 'run-script.' + (cfg.lang === 'r' ? 'R' : 'py')),
+    runScriptPath: path.join(jobDir, 'run-script.' + scriptExtensionFor(cfg.lang)),
     command: { executable: runCmd[0], args: runCmd.slice(1), cwd: jobDir },
     artifacts,
     startedAt,
@@ -2026,12 +2030,12 @@ function createToolsExecutor({
       return;
     }
 
-    const scriptPath = path.join(jobDir, 'run-script.' + (cfg.lang === 'r' ? 'R' : 'py'));
+    const scriptPath = path.join(jobDir, 'run-script.' + scriptExtensionFor(cfg.lang));
 
     try {
       fs.copyFileSync(
         scriptSrc,
-        path.join(jobDir, 'run-script.' + (cfg.lang === 'r' ? 'R' : 'py'))
+        path.join(jobDir, 'run-script.' + scriptExtensionFor(cfg.lang))
       );
       // 报告模板：插件自带模板优先；内置插件可复用 biof3-server 旧模板。
       const templateCandidates = cfg._isPlugin
@@ -2088,7 +2092,7 @@ function createToolsExecutor({
       runtimeReady = { runtime: cfg.lang || null, ready: true, command: remoteDispatch.runtime.runtimeBin, reason: null };
       runtimeCommand = remoteDispatch.runtime.runtimeBin;
       runtimeVersion = remoteDispatch.runtime.version;
-      const remoteScriptBase = 'run-script.' + (cfg.lang === 'r' ? 'R' : 'py');
+      const remoteScriptBase = 'run-script.' + scriptExtensionFor(cfg.lang);
       // BLOCK-76 P5 — 旧作业链 runCmd（remoteJobDirPath 参数形态）随机制拆除退役；
       // 直跑链由 ssh-direct-runner 自行构造服务器侧命令。
       runCmd = [remoteDispatch.runtime.runtimeBin, remoteScriptBase];
@@ -2591,7 +2595,7 @@ function evaluateRuntimePreflight(executor, lang) {
   if (executor && binPath && binExists) {
     return { runtime: lang || null, ready: true, command: binPath, reason: null };
   }
-  const label = lang === 'r' ? 'R' : lang === 'python' ? 'Python' : lang || '';
+  const label = interpreterLabel(lang);
   if (!executor) {
     return { runtime: lang || null, ready: false, command: null, reason: `未找到 ${lang || 'unknown'} 执行器` };
   }
@@ -2599,7 +2603,7 @@ function evaluateRuntimePreflight(executor, lang) {
   // 此时同样是"运行时未安装"，必须给商店指引而非含糊的"未找到执行器"。
   const where = binPath
     ? `可执行文件不存在：${binPath}`
-    : `未找到 ${lang === 'r' ? 'Rscript' : lang === 'python' ? 'python' : '可执行文件'}`;
+    : `未找到 ${missingRuntimeCommandName(lang)}`;
   return {
     runtime: lang || null,
     ready: false,

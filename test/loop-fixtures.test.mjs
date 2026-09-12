@@ -285,7 +285,7 @@ describe('spt1-blocking.json Schema and Blocking Decision', () => {
     const scenario = readJson(scenarioPath);
     const waitIter = scenario.expectedTrajectory.iterations.find((i) => i.decision === 'wait');
     assert.ok(waitIter, 'Should have a wait iteration');
-    assert.strictEqual(waitIter.decisionReasonCode, 'SCIENTIFIC_DESIGN_MISSING');
+    assert.strictEqual(waitIter.decisionReasonCode, 'USER_INPUT_REQUIRED');
     assert.ok(waitIter.proposedAction.question);
   });
 

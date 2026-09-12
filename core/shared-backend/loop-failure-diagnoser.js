@@ -76,11 +76,11 @@ const FAULT_TYPES = {
     repairStrategies: ['replan_subgraph', 'compare_method_candidates'],
     message: 'Method preconditions not met (requires redesign or alternative)',
   },
-  scientific_design_missing: {
-    faultType: 'scientific_design_missing',
+  user_input_required: {
+    faultType: 'user_input_required',
     defaultBehavior: 'require_user',
     repairStrategies: ['ask_user_design'],
-    message: 'Scientific design ambiguous (contrast, pairing, batch, statistical unit)',
+    message: 'Blocked pending user input',
   },
   resource_pressure: {
     faultType: 'resource_pressure',
@@ -151,10 +151,10 @@ const DIAGNOSIS_RULES = [
   [/method.*precondition|precondition.*not met|assumptions.*violated/i, 'method_not_applicable', ['compare_method_candidates'], 'Method preconditions not met'],
   [/insufficient.*(samples|data|replicates|cells)|not enough.*(data|samples|replicates)|requires.*(samples|cells|replicates)/i, 'method_not_applicable', ['replan_subgraph'], 'Insufficient data for method'],
 
-  // SCIENTIFIC_DESIGN_MISSING
-  [REASON_CODES.SCIENTIFIC_DESIGN_MISSING, 'scientific_design_missing', [], 'Scientific design ambiguous'],
-  [/contrast.*not specified|contrast.*missing|define.*contrast/i, 'scientific_design_missing', ['ask_user_design'], 'Contrast not specified'],
-  [/batch.*effect|batch.*confound|paired.*missing/i, 'scientific_design_missing', ['ask_user_design'], 'Batch effect or pairing design ambiguous'],
+  // USER_INPUT_REQUIRED（原 SCIENTIFIC_DESIGN_MISSING，BLOCK-83 D12 中性化）
+  [REASON_CODES.USER_INPUT_REQUIRED, 'user_input_required', [], 'Scientific design ambiguous'],
+  [/contrast.*not specified|contrast.*missing|define.*contrast/i, 'user_input_required', ['ask_user_design'], 'Contrast not specified'],
+  [/batch.*effect|batch.*confound|paired.*missing/i, 'user_input_required', ['ask_user_design'], 'Batch effect or pairing design ambiguous'],
 
   // RESOURCE_PRESSURE
   [/out of memory|OOM|memory limit|killed.*memory/i, 'resource_pressure', ['reduce_resource_request', 'chunk_workflow'], 'Out of memory'],
@@ -246,7 +246,9 @@ function mapReasonCodeToFaultType(reasonCode, error, context) {
     [REASON_CODES.TRANSIENT_RUNTIME_RETRY]: 'transient_runtime',
     [REASON_CODES.ARTIFACT_VALIDATION_FAILED]: 'artifact_invalid',
     [REASON_CODES.METHOD_NOT_APPLICABLE]: 'method_not_applicable',
-    [REASON_CODES.SCIENTIFIC_DESIGN_MISSING]: 'scientific_design_missing',
+    [REASON_CODES.USER_INPUT_REQUIRED]: 'user_input_required',
+    // 存量兼容：BLOCK-83 之前持久化的任务记录仍带旧值。
+    SCIENTIFIC_DESIGN_MISSING: 'user_input_required',
   };
 
   const faultType = map[reasonCode];

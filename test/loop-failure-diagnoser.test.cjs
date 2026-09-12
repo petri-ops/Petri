@@ -199,10 +199,10 @@ describe('FD-6 artifact_invalid', () => {
 });
 
 // ---------------------------------------------------------------------------
-// FD-7: method_not_applicable + scientific_design_missing
+// FD-7: method_not_applicable + user_input_required
 // ---------------------------------------------------------------------------
 
-describe('FD-7 method_not_applicable / scientific_design_missing', () => {
+describe('FD-7 method_not_applicable / user_input_required', () => {
   it('classifies METHOD_NOT_APPLICABLE', () => {
     const d = diagnoseFailure({ reason_code: 'METHOD_NOT_APPLICABLE' });
     assert.strictEqual(d.faultType, 'method_not_applicable');
@@ -215,14 +215,14 @@ describe('FD-7 method_not_applicable / scientific_design_missing', () => {
   });
 
   it('classifies SCIENTIFIC_DESIGN_MISSING', () => {
-    const d = diagnoseFailure({ reason_code: 'SCIENTIFIC_DESIGN_MISSING' });
-    assert.strictEqual(d.faultType, 'scientific_design_missing');
+    const d = diagnoseFailure({ reason_code: 'USER_INPUT_REQUIRED' });
+    assert.strictEqual(d.faultType, 'user_input_required');
     assert.strictEqual(d.confidence, 1.0);
   });
 
   it('classifies contrast not specified', () => {
     const d = diagnoseFailure({ error: 'contrast not specified: please define treatment vs control' });
-    assert.strictEqual(d.faultType, 'scientific_design_missing');
+    assert.strictEqual(d.faultType, 'user_input_required');
   });
 
   it('method_not_applicable requires user', () => {
@@ -340,7 +340,7 @@ describe('FD-11 listing and utilities', () => {
     assert.strictEqual(list.length, 10);
     const ids = list.map((f) => f.faultType);
     assert.ok(ids.includes('transient_runtime'));
-    assert.ok(ids.includes('scientific_design_missing'));
+    assert.ok(ids.includes('user_input_required'));
     assert.ok(ids.includes('external_side_effect'));
   });
 

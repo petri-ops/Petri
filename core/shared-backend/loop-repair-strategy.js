@@ -99,8 +99,8 @@ const REPAIR_BOUNDARY_BLOCK = new Set([
  * @returns {{ allowed: boolean, reason?: string }}
  */
 function repairBoundaryCheck(strategyId, faultType, actionDescription) {
-  // HLE-C5R: Block data/scientific modification for scientific_design_missing
-  if (faultType === 'scientific_design_missing') {
+  // HLE-C5R: 需用户输入时禁止数据/方法被自动修改（BLOCK-83 D12 中性化 faultType）
+  if (faultType === 'user_input_required') {
     const prohibited = [
       'replan_subgraph',       // changes contrast/method
       'substitute_data',       // generates/replaces data
@@ -604,14 +604,14 @@ const REPAIR_STRATEGIES = Object.freeze([
   {
     strategyId: 'replan_subgraph',
     version: '1.0.0',
-    faultTypes: ['method_not_applicable', 'scientific_design_missing'],
+    faultTypes: ['method_not_applicable', 'user_input_required'],
     name: 'Replan affected subgraph',
     description: 'Redesign the affected DAG subgraph with alternative method or clearer design.',
     safetyLevel: 'risky',
     costMultiplier: 2.0,
 
     applicability(diagnosis, context) {
-      if (!['method_not_applicable', 'scientific_design_missing'].includes(diagnosis.faultType)) {
+      if (!['method_not_applicable', 'user_input_required'].includes(diagnosis.faultType)) {
         return { applicable: false, reason: 'not method/design fault type' };
       }
       return { applicable: true };
@@ -636,8 +636,8 @@ const REPAIR_STRATEGIES = Object.freeze([
         invalidatedArtifactIds: context.parentArtifactIds || [],
         preservedArtifactIds: [],
         isActionable: false,
-        requiresUserAuth: diagnosis.faultType === 'scientific_design_missing',
-        publicMessage: diagnosis.faultType === 'scientific_design_missing'
+        requiresUserAuth: diagnosis.faultType === 'user_input_required',
+        publicMessage: diagnosis.faultType === 'user_input_required'
           ? '需要确认实验设计（contrast、配对、批次），无法自动继续。'
           : '方法前提不满足，需要重新设计受影响的子图。',
         costMultiplier: 2.0,
