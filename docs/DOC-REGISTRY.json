@@ -3911,7 +3911,14 @@
       "canonical": true,
       "truthDomain": "mobile-tunnel-aliyun-setup",
       "entrypoint": "docs/README.md",
-      "tags": ["block-70", "mobile-sync", "aliyun", "reverse-tunnel", "self-signed", "G0"],
+      "tags": [
+        "block-70",
+        "mobile-sync",
+        "aliyun",
+        "reverse-tunnel",
+        "self-signed",
+        "G0"
+      ],
       "notes": "BLOCK-70 P3 aliyun 反向隧道一次性配置指引（无域名/IP 版）：自签证书 + nginx 443 反代（SSE 关缓冲）+ 安全组放行 + 桌面端面板配置 + 验证与排障 + ZeroSSL IP 证书升级路径。属用户运维操作文档（plan 范围外条款：aliyun 运维不自动化）。",
       "registeredAt": "2026-09-13",
       "archivePolicy": "retain_stable_path"
@@ -4027,7 +4034,7 @@
       "id": "BLOCK-76-P0-DESIGN-REVIEW",
       "path": "docs/block-76-p0-design-review.md",
       "kind": "reference",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-76-p0-design-review",
       "entrypoint": "docs/README.md",
@@ -4037,10 +4044,9 @@
         "ssh-native-execution",
         "G0"
       ],
-      "notes": "BLOCK-76 P0 设计评审稿 v1。现状架构八步数据流代码事实（D7 钉 host/staging 回落/uploadBundle 执行/拉回对账/result_json 即结果库/读面端点清单/Gateway 能力边界/聊天 MCP 旁路）+ 裁决 R1-R6：R1 产物布局推荐沿用 results/jobs 语义（result-studio outputPath 相对 workspace 天然同构）、R2 gateway 写脚本+exec_bg 后台直跑、R3 读面分期（P2 必备展示链/P3 交互回放导出）、R4 result_json 增量字段 workspaceKind+outputPath 相对化（旧作业绝对路径只读兼容零迁移）、R5 拆除清单化（拆 job-supervisor 链/留 target-registry+validate+mux+ensureAgent）、R6 聊天 MCP 旁路 P1 收编进新内核。用户确认后进 P1。",
+      "notes": "BLOCK-76 P0 设计评审稿 v1。现状架构八步数据流代码事实（D7 钉 host/staging 回落/uploadBundle 执行/拉回对账/result_json 即结果库/读面端点清单/Gateway 能力边界/聊天 MCP 旁路）+ 裁决 R1-R6：R1 产物布局推荐沿用 results/jobs 语义（result-studio outputPath 相对 workspace 天然同构）、R2 gateway 写脚本+exec_bg 后台直跑、R3 读面分期（P2 必备展示链/P3 交互回放导出）、R4 result_json 增量字段 workspaceKind+outputPath 相对化（旧作业绝对路径只读兼容零迁移）、R5 拆除清单化（拆 job-supervisor 链/留 target-registry+validate+mux+ensureAgent）、R6 聊天 MCP 旁路 P1 收编进新内核。用户确认后进 P1。 [2026-09-13 状态修正：原 active/phase=P0-REVIEW 但归属工作包已 completed（BLOCK-76/77 整包收口），评审稿状态随之改 completed 并去除 phase；本文档为过程产物，保留路径供追溯。]",
       "registeredAt": "2026-09-10",
-      "archivePolicy": "archive_when_superseded",
-      "phase": "P0-REVIEW"
+      "archivePolicy": "archive_when_superseded"
     },
     {
       "id": "SESSION-HANDOFF-2026-09-10",
@@ -4088,7 +4094,7 @@
       "id": "BLOCK-77-P0-DESIGN-REVIEW",
       "path": "docs/block-77-p0-design-review.md",
       "kind": "reference",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-77-p0-design-review",
       "entrypoint": "docs/README.md",
@@ -4098,10 +4104,9 @@
         "resident-tasks",
         "G0"
       ],
-      "notes": "BLOCK-77 P0 设计评审稿 v1：现状代码事实（exec_bg/process_status 面、notify.custom 通道、proactive 投影、无会话上下文注入机制）+ R1-R5（意图卡=项目内 .gewu/resident/<taskId>.json 文件、60s 回访循环、notify 分层通知、生命周期含 abandoned、回访只读不自动重启）。用户确认后进 P1。",
+      "notes": "BLOCK-77 P0 设计评审稿 v1：现状代码事实（exec_bg/process_status 面、notify.custom 通道、proactive 投影、无会话上下文注入机制）+ R1-R5（意图卡=项目内 .gewu/resident/<taskId>.json 文件、60s 回访循环、notify 分层通知、生命周期含 abandoned、回访只读不自动重启）。用户确认后进 P1。 [2026-09-13 状态修正：原 active/phase=P0-REVIEW 但归属工作包已 completed（BLOCK-76/77 整包收口），评审稿状态随之改 completed 并去除 phase；本文档为过程产物，保留路径供追溯。]",
       "registeredAt": "2026-09-10",
-      "archivePolicy": "archive_when_superseded",
-      "phase": "P0-REVIEW"
+      "archivePolicy": "archive_when_superseded"
     },
     {
       "id": "BLOCK-78-SUMMARY-CARD-RUNTIME-PROJECTION",
@@ -4329,8 +4334,25 @@
       "registeredAt": "2026-09-13",
       "archivePolicy": "archive_when_superseded",
       "phase": "REFERENCE"
+    },
+    {
+      "id": "GIT-SYNC-AGENT-FLOW-EVAL-2026-09-13",
+      "path": "docs/git-sync-agent-flow-eval-2026-09-13.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "audit",
+        "git-sync",
+        "agent-flow",
+        "governance-hygiene",
+        "G0"
+      ],
+      "notes": "2026-09-13 只读评估：Git 仓库同步（分支/tag/提交规范）+ 智能体系统交互流程（恢复链/门禁覆盖/易漂移事实复制面）。结论=同步健康、流程成熟，发现 3 处治理元数据静默漂移（AUDIT-LOG 待处理项纯度 27% / DOC-REGISTRY 2 条 orphan active / 易漂移事实 23 处复制），均不影响功能。处置建议分级待用户裁决；同日 A-1/A-2/A-3/B-1 全执行收口（待处理项 28→8 行 / orphan active 降级 / 单 active 工作包与 orphan 评审双门禁落地 test/docs-governance.test.mjs 6/6），见 AUDIT-LOG 最近处理记录 2026-09-13 治理元数据条。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "registeredAt": "2026-09-13"
     }
   ],
   "lastUpdated": "2026-09-13",
-  "documentCount": 233
+  "documentCount": 236
 }

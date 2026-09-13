@@ -90,6 +90,7 @@ function auditLogState() {
   const unresolved = [];
   for (const line of lines.slice(headingIdx + 1)) {
     if (line.startsWith('## ')) break;
+    if (line.trimStart().startsWith('>')) continue; // 区段纪律等 blockquote 说明行不是条目
     if (line.includes('✅')) continue;
     if (line.includes('无 🔴 阻塞项')) continue; // 总结行「当前无 🔴 阻塞项…」不是条目
     if (/(🔴|🟢)/.test(line)) {

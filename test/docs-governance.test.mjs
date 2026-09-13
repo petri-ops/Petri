@@ -78,6 +78,76 @@ test('validator reports duplicate identities and invalid lifecycle state', async
   assert.equal(codes.has('DUPLICATE_TRUTH_DOMAIN'), true);
 });
 
+test('validator enforces at most one active work package (document-governance §2.1)', async (context) => {
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-doc-single-active-'));
+  context.after(() => fs.rm(tempRoot, { recursive: true, force: true }));
+  await fs.mkdir(path.join(tempRoot, 'docs'), { recursive: true });
+  await fs.writeFile(path.join(tempRoot, 'docs', 'wp-a.md'), '# WP A\n', 'utf8');
+  await fs.writeFile(path.join(tempRoot, 'docs', 'wp-b.md'), '# WP B\n', 'utf8');
+
+  const documents = [
+    { id: 'WP-A', path: 'docs/wp-a.md', kind: 'work-package', status: 'active', canonical: false, archivePolicy: 'archive_when_superseded' },
+    { id: 'WP-B', path: 'docs/wp-b.md', kind: 'work-package', status: 'planned', canonical: false, archivePolicy: 'archive_when_superseded' },
+  ];
+  const coverage = { managedRoots: ['docs'], excludedPrefixes: [], requireRegistration: false };
+
+  const single = await validateDocumentRegistry(
+    { schemaVersion: 1, coverage, documents },
+    { rootDir: tempRoot },
+  );
+  assert.equal(single.some((item) => item.code === 'MULTIPLE_ACTIVE_WORK_PACKAGES'), false);
+
+  const bothActive = await validateDocumentRegistry(
+    {
+      schemaVersion: 1,
+      coverage,
+      documents: documents.map((document) => (document.id === 'WP-B' ? { ...document, status: 'active' } : document)),
+    },
+    { rootDir: tempRoot },
+  );
+  const violation = bothActive.find((item) => item.code === 'MULTIPLE_ACTIVE_WORK_PACKAGES');
+  assert.equal(typeof violation?.message, 'string');
+  assert.match(violation.message, /WP-A/);
+  assert.match(violation.message, /WP-B/);
+});
+
+test('validator flags active review artefacts whose owning work package is retired', async (context) => {
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-doc-orphan-review-'));
+  context.after(() => fs.rm(tempRoot, { recursive: true, force: true }));
+  await fs.mkdir(path.join(tempRoot, 'docs'), { recursive: true });
+  await fs.writeFile(path.join(tempRoot, 'docs', 'wp-c.md'), '# WP C\n', 'utf8');
+  await fs.writeFile(path.join(tempRoot, 'docs', 'review.md'), '# Review\n', 'utf8');
+
+  const coverage = { managedRoots: ['docs'], excludedPrefixes: [], requireRegistration: false };
+  const documents = (reviewStatus) => [
+    { id: 'WP-C', path: 'docs/wp-c.md', kind: 'work-package', status: 'completed', canonical: false, archivePolicy: 'archive_when_superseded' },
+    {
+      id: 'WP-C-P0-REVIEW',
+      path: 'docs/review.md',
+      kind: 'reference',
+      status: reviewStatus,
+      phase: 'P0-REVIEW',
+      supersedes: ['WP-C'],
+      canonical: false,
+      archivePolicy: 'archive_when_superseded',
+    },
+  ];
+
+  const issues = await validateDocumentRegistry(
+    { schemaVersion: 1, coverage, documents: documents('active') },
+    { rootDir: tempRoot },
+  );
+  const orphan = issues.find((item) => item.code === 'ORPHAN_ACTIVE_REVIEW');
+  assert.equal(typeof orphan?.message, 'string');
+  assert.match(orphan.message, /WP-C/);
+
+  const downgraded = await validateDocumentRegistry(
+    { schemaVersion: 1, coverage, documents: documents('completed') },
+    { rootDir: tempRoot },
+  );
+  assert.equal(downgraded.some((item) => item.code === 'ORPHAN_ACTIVE_REVIEW'), false);
+});
+
 test('validator rejects path traversal even when normalization would return inside the repository', async (context) => {
   const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-doc-path-'));
   context.after(() => fs.rm(tempRoot, { recursive: true, force: true }));

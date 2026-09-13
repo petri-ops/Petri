@@ -376,6 +376,49 @@ export async function validateDocumentRegistry(registry, options = {}) {
     }
   }
 
+  // SINGLE_ACTIVE_WORK_PACKAGE: document-governance.md §2.1 mandates strictly serial
+  // development — at most one work package may be `active` at a time. `npm run state`
+  // already treats `kind === 'work-package' && status === 'active'` as the authoritative
+  // active-package signal, so this gate makes the same invariant fail loudly instead of
+  // letting drift accumulate silently (see docs/git-sync-agent-flow-eval-2026-09-13.md D-2).
+  const activeWorkPackages = normalizedDocuments.filter(
+    (document) => document.kind === 'work-package' && document.status === 'active',
+  );
+  if (activeWorkPackages.length > 1) {
+    issues.push(issue(
+      'MULTIPLE_ACTIVE_WORK_PACKAGES',
+      `at most one work package may be active (found ${activeWorkPackages.length}): ${activeWorkPackages.map((d) => d.id || '<invalid id>').join(', ')}. Close out or downgrade the extras — see docs/document-governance.md §2.1.`,
+    ));
+  }
+
+  // ORPHAN_ACTIVE_REVIEW: a design-review / process artefact must not stay `active`
+  // once its owning work package has been retired. Leaving `phase: P0-REVIEW` behind
+  // makes state recovery believe a review stage is still running.
+  const retiredOwnerStatuses = new Set(['completed', 'superseded', 'archived']);
+  const documentById = new Map(
+    normalizedDocuments.filter((document) => document.id).map((document) => [document.id, document]),
+  );
+  for (const document of normalizedDocuments) {
+    if (document.status !== 'active') continue;
+    const ownerIds = [
+      ...(Array.isArray(document.supersedes) ? document.supersedes : []),
+      ...(Array.isArray(document.supersededBy) ? document.supersededBy : []),
+      ...(Array.isArray(document.relatedWorkPackages) ? document.relatedWorkPackages : []),
+    ];
+    const retiredOwner = ownerIds.find((ownerId) => {
+      const owner = documentById.get(ownerId);
+      return owner && retiredOwnerStatuses.has(owner.status);
+    });
+    if (retiredOwner) {
+      issues.push(issue(
+        'ORPHAN_ACTIVE_REVIEW',
+        `status is active but its owning work package ${retiredOwner} is already retired; downgrade this document and drop any stale phase.`,
+        document.id || null,
+        document.path,
+      ));
+    }
+  }
+
   return issues;
 }
 
