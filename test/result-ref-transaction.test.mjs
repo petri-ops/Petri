@@ -89,7 +89,15 @@ function revisionInput({ changeSetId, revisionId, familyId, artifactId, sourceCo
 function makeFixture(context, { families = ['family_a'] } = {}) {
   const root = mkdtempSync(join(tmpdir(), 'biof3-p6-ref-tx-'));
   const dbPath = join(root, 'result-studio.db');
-  context.after(() => rmSync(root, { recursive: true, force: true }));
+  context.after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch (error) {
+      // Windows：被测服务可能仍持有 SQLite/文件句柄；EPERM/EBUSY 交由 OS 清理临时目录
+      if (error && (error.code === 'EPERM' || error.code === 'EBUSY')) return;
+      throw error;
+    }
+  });
   const db = new Database(dbPath);
   context.after(() => { try { db.close(); } catch { /* already closed */ } });
   ensureResultStudioSchema(db);

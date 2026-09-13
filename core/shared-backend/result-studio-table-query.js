@@ -191,15 +191,18 @@ function readDelimitedTable(filePath) {
   if (identity.size > MAX_QUERY_BYTES) {
     throw new ResultStudioTableQueryError('table_query_file_too_large', 'Table exceeds the bounded query budget.', { bytes: identity.size, maxBytes: MAX_QUERY_BYTES });
   }
+  // artifact_truth_drift 契约必须逐次调用对「当前字节」成立：stat 身份键在
+  // Windows 粗粒度时间戳下可能漏报同长度字节变化，因此命中缓存也要重读并复核
+  // 哈希，只有字节一致才复用解析结构（缓存省的是解析，不是读取）。
+  const rawBytes = fs.readFileSync(identity.realPath);
+  const rawSha256 = sha256(rawBytes);
   const cached = TABLE_CACHE.get(identity.key);
-  if (cached) {
+  if (cached && cached.table.rawSha256 === rawSha256) {
     TABLE_CACHE.delete(identity.key);
     TABLE_CACHE.set(identity.key, cached);
     return cached.table;
   }
-  const rawBytes = fs.readFileSync(identity.realPath);
   const raw = rawBytes.toString('utf8');
-  const rawSha256 = sha256(rawBytes);
   const lines = raw.split(/\r?\n/).filter((line) => line.length > 0);
   if (lines.length === 0) {
     const table = { columns: [], rows: [], rawSha256 };

@@ -682,6 +682,8 @@ test('RS8 storage summary is content-addressed and GC never targets Artifact his
   assert.equal(statSync(fx.output).ino, statSync(duplicatePath).ino);
   assert.equal(statSync(fx.output).ino, statSync(contentObject).ino);
   const dedupPlan = planArtifactDeduplication({ workspaceRoot: fx.workspaceRoot, projectId: 'p_rs8' }, { repository: fx.repository });
+  const original = readFileSync(fx.output);
+  if (process.platform === 'darwin') {
   const deduped = executeArtifactDeduplication({ workspaceRoot: fx.workspaceRoot, projectId: 'p_rs8', planToken: dedupPlan.planToken }, { repository: fx.repository });
   assert.equal(deduped.strategy, 'copy_on_write_clone');
   assert.equal(deduped.hardLinkCount, 0);
@@ -694,10 +696,16 @@ test('RS8 storage summary is content-addressed and GC never targets Artifact his
   assert.equal(statSync(fx.output).nlink, 1);
   assert.equal(statSync(duplicatePath).nlink, 1);
   assert.equal(statSync(contentObject).nlink, 1);
-  const original = readFileSync(fx.output);
   writeFileSync(duplicatePath, 'mutated after safe deduplication');
   assert.deepEqual(readFileSync(fx.output), original);
   assert.deepEqual(readFileSync(contentObject), original);
+  } else {
+    // 生产契约：安全 COW 去重仅在 darwin APFS 同卷支持；其余平台 fail-closed 且不得触碰文件
+    assert.throws(
+      () => executeArtifactDeduplication({ workspaceRoot: fx.workspaceRoot, projectId: 'p_rs8', planToken: dedupPlan.planToken }, { repository: fx.repository }),
+      (error) => error.code === 'dedup_copy_on_write_unavailable',
+    );
+  }
   writeFileSync(duplicatePath, original);
   const plan = planResultStudioGc({ workspaceRoot: fx.workspaceRoot, projectId: 'p_rs8' }, { repository: fx.repository, adapter: fx.adapter });
   assert.equal(plan.artifactDeletionCount, 0);
