@@ -80,6 +80,7 @@ test('BLOCK-70 P3 tunnel state machine connects, reconnects with backoff, stops 
     const manager = getTunnelManager(root, {
       now: () => clock,
       spawnProcess,
+      killStale: () => [],
       backoffSteps: [10, 20],
       stableConnectedMs: 100,
     });
@@ -131,6 +132,7 @@ test('BLOCK-70 P3 admin REST round-trips tunnel config through the shared manage
     const seeded = getTunnelManager(root, {
       now: () => clock,
       spawnProcess: fakeProcessFactory(spawned),
+      killStale: () => [],
       backoffSteps: [10],
       stableConnectedMs: 50,
     });
@@ -190,3 +192,23 @@ test('BLOCK-70 P3 admin REST round-trips tunnel config through the shared manage
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+
+// ── P3 清场纯函数：按签名挑孤儿、豁免在册孩子 ──────────────────────────
+const { selectStaleSshPids } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/tunnel.js'));
+
+test('BLOCK-70 P3 stale ssh selection matches signature exactly and honours exclusions', () => {
+  const entries = [
+    { pid: 100, commandline: 'ssh -N -R 127.0.0.1:2233:127.0.0.1:3005 aliyun' },
+    { pid: 101, commandline: 'ssh -N -R 127.0.0.1:9999:127.0.0.1:3005 aliyun' },
+    { pid: 102, commandline: 'ssh root@aliyun' },
+    { pid: 103, commandline: 'ssh -N -R 127.0.0.1:22330:127.0.0.1:30050 aliyun' },
+  ];
+  assert.deepEqual(selectStaleSshPids(entries, '127.0.0.1:2233:127.0.0.1:3005'), [100],
+    'only the exact tunnel signature is stale; prefix-similar and unrelated ssh must not match');
+  assert.deepEqual(
+    selectStaleSshPids(entries, '127.0.0.1:2233:127.0.0.1:3005', [100]), [],
+    'excluded (current manager child) must never be selected');
+  assert.deepEqual(selectStaleSshPids([], 'x'), []);
+  assert.deepEqual(selectStaleSshPids([{ pid: 1 }, { pid: 2, commandline: 42 }], 'x'), []);
+});

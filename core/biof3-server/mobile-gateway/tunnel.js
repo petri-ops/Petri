@@ -27,6 +27,59 @@ function tunnelConfigPath(dataDir) {
   return path.join(dataDir, 'mobile', 'tunnel.json');
 }
 
+/**
+ * 纯函数：从进程清单里挑出「命令行含本隧道签名」的孤儿 ssh pid。
+ * entries = [{pid, commandline}]；excludePids = 当前管理器在册孩子，绝杀不得。
+ */
+function selectStaleSshPids(entries, signature, excludePids = []) {
+  const exclude = new Set(excludePids);
+  return (Array.isArray(entries) ? entries : [])
+    .filter((entry) => entry
+      && Number.isInteger(entry.pid) && entry.pid > 0
+      && !exclude.has(entry.pid)
+      && typeof entry.commandline === 'string'
+      && entry.commandline.includes(signature))
+    .map((entry) => entry.pid);
+}
+
+/**
+ * 跨代清场：历史服务进程被树杀逃逸后遗留的孤儿 ssh 会一直占用远端端口，
+ * 新隧道永远 bind 失败互抖——spawn 前按「-R 签名」把所有孤儿清光。
+ * 只按精确签名匹配（remote:local 端口对），绝不误伤别的 ssh 用途。
+ */
+function killStaleTunnelProcesses(dataDir, config, excludePids = []) {
+  const signature = `127.0.0.1:${config.remotePort}:127.0.0.1:${config.localPort}`;
+  try {
+    let entries = [];
+    if (process.platform === 'win32') {
+      const ps = "Get-CimInstance Win32_Process -Filter \"Name='ssh.exe'\" | Select-Object ProcessId, CommandLine | ConvertTo-Json -Compress";
+      const encoded = Buffer.from(ps, 'utf16le').toString('base64');
+      const out = require('node:child_process').execSync(
+        `powershell -NoProfile -EncodedCommand ${encoded}`,
+        { encoding: 'utf8', timeout: 10000, stdio: ['ignore', 'pipe', 'ignore'] });
+      const trimmed = String(out).trim();
+      if (trimmed) {
+        const parsed = JSON.parse(trimmed);
+        entries = Array.isArray(parsed) ? parsed : [parsed];
+      }
+    } else {
+      const out = require('node:child_process').execSync(
+        'ps -eo pid=,args=', { encoding: 'utf8', timeout: 5000, stdio: ['ignore', 'pipe', 'ignore'] });
+      entries = out.split(/\r?\n/).filter(Boolean).map((line) => {
+        const match = line.match(/^\s*(\d+)\s+(.*)$/);
+        return match ? { pid: Number(match[1]), commandline: match[2] } : null;
+      }).filter(Boolean);
+    }
+    const stalePids = selectStaleSshPids(entries, signature, excludePids);
+    for (const pid of stalePids) {
+      try { process.kill(pid); } catch { /* 已死即目标达成 */ }
+    }
+    return stalePids;
+  } catch {
+    return [];
+  }
+}
+
 function normalizeTunnelConfig(raw) {
   const host = typeof raw?.host === 'string' ? raw.host.trim() : '';
   const remotePort = Number.isInteger(raw?.remotePort) && raw.remotePort > 0 && raw.remotePort < 65536
@@ -100,6 +153,7 @@ function createTunnelManager({
   dataDir,
   now = () => Date.now(),
   spawnProcess = (args) => require('node:child_process').spawn(args[0], args.slice(1), { stdio: 'ignore' }),
+  killStale = killStaleTunnelProcesses,
   backoffSteps = RECONNECT_BACKOFF_MS,
   stableConnectedMs = STABLE_CONNECTED_MS,
 } = {}) {
@@ -111,6 +165,16 @@ function createTunnelManager({
   let backoffIndex = 0;
   let reconnectTimer = null;
   let stopped = true;
+  // 全量跟踪：Windows 上 exit 事件偶发丢失会留下活孤儿，只杀「最后一个孩子」
+  // 不够——新孩子出生前必须杀光所有旧孩子，保证任一时刻至多一条隧道。
+  const liveChildren = new Set();
+
+  function killAllTracked() {
+    for (const proc of liveChildren) {
+      try { proc.kill(); } catch { /* 已死 */ }
+    }
+    liveChildren.clear();
+  }
 
   function setState(next) {
     state = next;
@@ -120,21 +184,29 @@ function createTunnelManager({
   function spawnTunnel() {
     const args = buildSshArgs(config);
     setState('connecting');
-    child = spawnProcess(args);
+    killStale(dataDir, config, [...liveChildren].map((proc) => proc.pid));
+    killAllTracked();
+    const proc = spawnProcess(args);
+    child = proc;
     const startedAt = now();
-    child.on('error', (error) => {
+    liveChildren.add(proc);
+    proc.on('error', (error) => {
       lastError = String(error && error.message).slice(0, 200);
     });
-    child.on('exit', (code) => {
-      child = null;
+    proc.on('exit', (code) => {
+      liveChildren.delete(proc);
+      if (child === proc) child = null;
       if (stopped || !config.enabled) return;
+      // Windows 上 exit 事件可能迟到/乱序：只要还有任一活孩子（哪怕不是当前
+      // 指针指向的），说明隧道在它手里正常工作，绝不能触发重连去杀它。
+      if (liveChildren.size > 0) return;
       lastError = `ssh exited (code=${code == null ? 'signal' : code})`;
       setState('reconnecting');
       const delay = backoffSteps[Math.min(backoffIndex, backoffSteps.length - 1)];
       backoffIndex += 1;
       reconnectTimer = setTimeout(() => {
         reconnectTimer = null;
-        if (!stopped && config.enabled) spawnTunnel();
+        if (!stopped && config.enabled && liveChildren.size === 0) spawnTunnel();
       }, delay);
       if (reconnectTimer.unref) reconnectTimer.unref();
     });
@@ -204,7 +276,8 @@ function createTunnelManager({
     stop() {
       stopped = true;
       if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
-      if (child) { try { child.kill(); } catch {} child = null; }
+      killAllTracked();
+      child = null;
     },
   };
 
@@ -230,6 +303,7 @@ module.exports = {
   readTunnelConfig,
   writeTunnelConfig,
   buildSshArgs,
+  selectStaleSshPids,
   getTunnelManager,
   resetTunnelManagersForTest,
   createTunnelManager,
