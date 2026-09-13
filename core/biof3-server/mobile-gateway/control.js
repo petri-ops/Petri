@@ -14,8 +14,52 @@
  */
 
 function registerMobileControl(app) {
-  app.post('/m/api/approvals/:token/decide', (req, res) => {
-    const body = req.body && typeof req.body === 'object' ? req.body : {};
+  // 移动总览：跨项目会话 + 最近分析作业 + 智能体任务，一次拉全。
+  // 桌面 /api/ai/conversations 不带 projectId 时只回无项目归属会话（桌面
+  // 契约如此），移动页需要全量投影——此缺口由本端点补齐（单一真相：同一 db）。
+  app.get('/m/api/overview', (req, res) => {
+    const userId = req.user && req.user.id;
+    const db = require('../db').getDatabase();
+    let conversations = [];
+    let toolJobs = [];
+    let agentTasks = [];
+    const problems = [];
+    try {
+      conversations = db.prepare(`
+        SELECT c.id, c.title, c.message_count, c.updated_at, c.project_id,
+               p.name AS project_name
+        FROM copilot_conversations c
+        LEFT JOIN projects p ON p.id = c.project_id
+        WHERE c.status = 'active'
+        ORDER BY c.updated_at DESC
+        LIMIT 100
+      `).all();
+    } catch (e) { problems.push(`conversations: ${e.message}`); }
+    try {
+      toolJobs = db.prepare(`
+        SELECT j.id, j.tool_id, j.name, j.status, j.error, j.created_at, j.completed_at,
+               j.project_id, p.name AS project_name
+        FROM tool_jobs j
+        LEFT JOIN projects p ON p.id = j.project_id
+        ORDER BY j.created_at DESC
+        LIMIT 30
+      `).all();
+    } catch (e) { problems.push(`toolJobs: ${e.message}`); }
+    try {
+      const store = require('../agent-task-store');
+      agentTasks = (store.listRecentSubAgentTasks(userId, 20) || []).map((t) => ({
+        taskId: t.taskId,
+        status: t.status,
+        agentStatus: t.agentStatus,
+        createdAt: t.createdAt,
+        conversationId: (t.params && t.params.conversationId) || null,
+        taskText: String((t.params && t.params.messages && t.params.messages[0] && t.params.messages[0].content) || '').slice(0, 160),
+      }));
+    } catch (e) { problems.push(`agentTasks: ${e.message}`); }
+    res.json({ ok: true, conversations, toolJobs, agentTasks, problems });
+  });
+
+  app.post('/m/api/approvals/:token/decide', (req, res) => {    const body = req.body && typeof req.body === 'object' ? req.body : {};
     // 与桌面 REST 同一契约：scope 两键必须显式提供（值可为 null）。
     if (!Object.prototype.hasOwnProperty.call(body, 'projectId')
         || !Object.prototype.hasOwnProperty.call(body, 'conversationId')) {

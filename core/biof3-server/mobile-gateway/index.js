@@ -119,7 +119,9 @@ function buildMobileGateway({
       return;
     }
     req.mobileSession = { id: session.id, name: session.name };
-    req.user = { id: 'local' };
+    // 与桌面完全相同的身份对象（auth.js LOCAL_USER）——路由按 user_id 过滤的
+    // 数据面才可能与桌面同源同门（id 必须一字不差，'local-user'）。
+    req.user = require('../auth').LOCAL_USER;
     next();
   }
 

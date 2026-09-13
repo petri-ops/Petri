@@ -114,22 +114,43 @@
     return div.innerHTML;
   }
 
-  // ── 任务墙 ──────────────────────────────────────────────────────────
+  // ── 总览（/m/api/overview 一次拉全：会话+分析作业+智能体任务）────────
+  function loadOverview() {
+    return api('/m/api/overview').then(function (data) {
+      state.overview = {
+        conversations: data.conversations || [],
+        toolJobs: data.toolJobs || [],
+        agentTasks: data.agentTasks || [],
+      };
+    }).catch(function (e) { if (e.message !== 'unauthorized') toast('总览加载失败'); });
+  }
+
+  // ── 任务墙（智能体任务 + 分析作业）─────────────────────────────────
   function loadTasks() {
-    return api('/api/ai/agent/tasks?limit=50').then(function (data) {
-      state.tasks = data.tasks || [];
+    return loadOverview().then(function () {
       if (state.detail) renderDetail(); else renderTasks();
-    }).catch(function (e) { if (e.message !== 'unauthorized') toast('任务加载失败'); });
+    });
   }
 
   function renderTasks() {
-    var html = state.tasks.length ? state.tasks.map(function (t) {
+    var o = state.overview || { agentTasks: [], toolJobs: [] };
+    var agentHtml = o.agentTasks.length ? o.agentTasks.map(function (t) {
       return '<div class="card" data-task="' + esc(t.taskId) + '">'
         + '<div class="row"><h3>' + esc(t.taskText || t.taskId) + '</h3>' + statusBadge(t.status) + '</div>'
         + '<p>' + esc(t.createdAt || '') + (t.agentStatus ? ' · agent: ' + esc(t.agentStatus) : '') + '</p>'
         + '</div>';
     }).join('') : '<div class="empty">暂无智能体任务</div>';
-    app.innerHTML = '<main>' + html + '</main>' + navHtml();
+    var jobHtml = o.toolJobs.length ? o.toolJobs.map(function (j) {
+      return '<div class="card">'
+        + '<div class="row"><h3>' + esc(j.name || j.tool_id || j.id) + '</h3>' + statusBadge(j.status) + '</div>'
+        + '<p>' + esc(j.project_name || '') + (j.completed_at ? ' · ' + esc(j.completed_at) : '') + '</p>'
+        + (j.error ? '<p>' + esc(String(j.error).slice(0, 160)) + '</p>' : '')
+        + '</div>';
+    }).join('') : '<div class="empty">暂无分析作业</div>';
+    app.innerHTML = '<main>'
+      + '<h3 style="margin:4px 0 8px">智能体任务</h3>' + agentHtml
+      + '<h3 style="margin:14px 0 8px">分析作业</h3>' + jobHtml
+      + '</main>' + navHtml();
     Array.prototype.forEach.call(app.querySelectorAll('[data-task]'), function (el) {
       el.addEventListener('click', function () { openTask(el.getAttribute('data-task')); });
     });
@@ -259,17 +280,17 @@
 
   // ── 会话列表 / 阅读 / composer 轻控制 ───────────────────────────────
   function loadConversations() {
-    return api('/api/ai/conversations').then(function (data) {
-      state.conversations = data.conversations || [];
+    return loadOverview().then(function () {
+      state.conversations = state.overview.conversations;
       renderConversations();
-    }).catch(function (e) { if (e.message !== 'unauthorized') toast('会话加载失败'); });
+    });
   }
 
   function renderConversations() {
     var html = state.conversations.length ? state.conversations.map(function (c) {
       return '<div class="card" data-conv="' + esc(c.id) + '">'
         + '<div class="row"><h3>' + esc(c.title || c.id) + '</h3><span class="badge">' + esc(c.message_count || 0) + ' 条</span></div>'
-        + '<p>' + esc(c.updated_at || '') + '</p></div>';
+        + '<p>' + esc(c.project_name ? '📁 ' + c.project_name + ' · ' : '') + esc(c.updated_at || '') + '</p></div>';
     }).join('') : '<div class="empty">暂无会话</div>';
     app.innerHTML = '<main>' + html + '</main>' + composerHtml() + navHtml();
     Array.prototype.forEach.call(app.querySelectorAll('[data-conv]'), function (el) {

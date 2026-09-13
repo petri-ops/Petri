@@ -152,7 +152,7 @@ test('BLOCK-70 gateway: static page, pairing, session auth, revocation, audit', 
     // 授权访问：header 与 ?session= 双通道（EventSource 场景）
     const probe = await body(await fetch(`${base}/m/api/probe`, { headers: { Authorization: `Bearer ${pairRes.sessionToken}` } }));
     assert.equal(probe.ok, true);
-    assert.equal(probe.user, 'local');
+    assert.equal(probe.user, 'local-user', 'session identity must be the real LOCAL_USER');
     const probeQuery = await body(await fetch(`${base}/m/api/probe?session=${encodeURIComponent(pairRes.sessionToken)}`));
     assert.equal(probeQuery.ok, true);
 
