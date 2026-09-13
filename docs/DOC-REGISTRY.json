@@ -4353,6 +4353,24 @@
       ],
       "notes": "2026-09-13 只读评估：Git 仓库同步（分支/tag/提交规范）+ 智能体系统交互流程（恢复链/门禁覆盖/易漂移事实复制面）。结论=同步健康、流程成熟，发现 3 处治理元数据静默漂移（AUDIT-LOG 待处理项纯度 27% / DOC-REGISTRY 2 条 orphan active / 易漂移事实 23 处复制），均不影响功能。处置建议分级待用户裁决；同日 A-1/A-2/A-3/B-1 全执行收口（待处理项 28→8 行 / orphan active 降级 / 单 active 工作包与 orphan 评审双门禁落地 test/docs-governance.test.mjs 6/6），见 AUDIT-LOG 最近处理记录 2026-09-13 治理元数据条。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "registeredAt": "2026-09-13"
+    },
+    {
+      "id": "BLOCK-85-FEDERATION-P0-DESIGN-REVIEW",
+      "path": "docs/block-85-federation-p0-design-review.md",
+      "kind": "reference",
+      "status": "active",
+      "phase": "P0-REVIEW",
+      "supersedes": [],
+      "canonical": false,
+      "archivePolicy": "archive_when_superseded",
+      "tags": [
+        "block-85",
+        "federation",
+        "design-review",
+        "P0"
+      ],
+      "notes": "格物联邦 P0 设计评审：两个格物软件实例互派任务（分析作业级+Agent 委托级），D1-D8 待用户裁决。SSH 节点方案作废。",
+      "registeredAt": "2026-09-13"
     }
   ],
   "lastUpdated": "2026-09-13",
