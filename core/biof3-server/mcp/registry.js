@@ -1515,9 +1515,15 @@ function resolveResultStudioScriptOverride({ override, plugin, projectId, dbModu
   const SAFE_REALPATH_TIMEOUT_MS = 5000;
   const { spawnSync } = require('child_process');
 
+  // 路径必须经 argv 传递：内嵌进 -e 字符串时 Windows 反斜杠会被 JS 转义吃掉
+  // （\1/\r/\t 等），realpath 在 Windows 上恒失败——ChangeSet 脚本桥整体不可用。
   const realpathResult = spawnSync(
     process.execPath,
-    ['-e', `try{console.log(require('fs').realpathSync('${inputPath.replace(/'/g, "\\'")}'))}catch(e){process.exit(1)}`],
+    [
+      '-e',
+      "try{console.log(require('fs').realpathSync(process.argv[1]))}catch(e){process.exit(1)}",
+      inputPath,
+    ],
     { timeout: SAFE_REALPATH_TIMEOUT_MS, encoding: 'utf8' }
   );
   if (realpathResult.status !== 0 || realpathResult.error) {
@@ -1535,7 +1541,11 @@ function resolveResultStudioScriptOverride({ override, plugin, projectId, dbModu
     }
     const allowedRealpathResult = spawnSync(
       process.execPath,
-      ['-e', `try{console.log(require('fs').realpathSync('${allowedRoot.replace(/'/g, "\\'")}'))}catch(e){process.exit(1)}`],
+      [
+        '-e',
+        "try{console.log(require('fs').realpathSync(process.argv[1]))}catch(e){process.exit(1)}",
+        allowedRoot,
+      ],
       { timeout: SAFE_REALPATH_TIMEOUT_MS, encoding: 'utf8' }
     );
     if (allowedRealpathResult.status !== 0 || allowedRealpathResult.error) {

@@ -545,26 +545,37 @@ export function inspectP6StoppedWorkerProcessGroupOutput(output, {
   trustedRuntimeExecutablePaths = trustedRuntimePaths,
   trustedRuntimeExecCommandPaths = [],
 } = {}) {
+  // ps 输出恒为 posix 分隔符；本函数实跑平台是 Unix，但纯函数测试也要能在
+  // Windows 运行——path.join/resolve 会产出反斜杠（且 resolve('/tmp/x') 会补
+  // 盘符）。比对前统一归一 posix，并为 resolve 变体同时保留原始路径变体。
+  const toComparablePath = (value) => String(value || '').split(path.sep).join('/');
+  const rawWorkspaceRoot = String(workspaceRoot || '');
   const expectedJobDir = path.join(
-    path.resolve(workspaceRoot || ''), 'results', 'jobs', candidateJobId || '',
+    path.resolve(rawWorkspaceRoot), 'results', 'jobs', candidateJobId || '',
   );
   const expectedRunScript = path.join(
     expectedJobDir, 'run-script.R',
   );
-  const trustedRuntimePathSet = new Set(trustedRuntimePaths.map(String));
+  const expectedJobDirPosix = toComparablePath(path.join(
+    rawWorkspaceRoot, 'results', 'jobs', candidateJobId || '',
+  ));
+  const expectedRunScriptPosix = `${expectedJobDirPosix}/run-script.R`;
+  const trustedRuntimePathSet = new Set(trustedRuntimePaths.map(toComparablePath));
   const trustedRuntimeExecutablePathSet = new Set(
-    trustedRuntimeExecutablePaths.map(String),
+    trustedRuntimeExecutablePaths.map(toComparablePath),
   );
   const trustedRuntimeExecCommandPathSet = new Set(
-    trustedRuntimeExecCommandPaths.map(String),
+    trustedRuntimeExecCommandPaths.map(toComparablePath),
   );
   const expectedRunScriptPathSet = new Set([
     expectedRunScript,
-    ...expectedRunScriptPaths.map(String),
+    expectedRunScriptPosix,
+    ...expectedRunScriptPaths.map(toComparablePath),
   ]);
   const expectedJobDirPathSet = new Set([
     expectedJobDir,
-    ...expectedJobDirPaths.map(String),
+    expectedJobDirPosix,
+    ...expectedJobDirPaths.map(toComparablePath),
   ]);
   const groupMembers = String(output || '').split('\n').flatMap((line) => {
     const match = line.trim().match(/^(\d+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(.+)$/);
@@ -583,18 +594,20 @@ export function inspectP6StoppedWorkerProcessGroupOutput(output, {
     // command substring: a helper named Rscript, or a later --note containing
     // run-script.R, must never impersonate the candidate runtime.
     const argv = member.command.trim().split(/\s+/);
-    const kernelExecutablePath = String(runtimeExecutablePathsByPid[member.pid] || '');
+    const kernelExecutablePath = toComparablePath(
+      runtimeExecutablePathsByPid[member.pid] || '',
+    );
     const rscriptShapeExact = argv.length === 3
-      && trustedRuntimePathSet.has(argv[0])
-      && expectedRunScriptPathSet.has(argv[1])
-      && expectedJobDirPathSet.has(argv[2]);
+      && trustedRuntimePathSet.has(toComparablePath(argv[0]))
+      && expectedRunScriptPathSet.has(toComparablePath(argv[1]))
+      && expectedJobDirPathSet.has(toComparablePath(argv[2]));
     const execRShapeExact = argv.length === 6
-      && trustedRuntimeExecCommandPathSet.has(argv[0])
+      && trustedRuntimeExecCommandPathSet.has(toComparablePath(argv[0]))
       && argv[1] === '--no-echo'
       && argv[2] === '--no-restore'
-      && [...expectedRunScriptPathSet].some((runScript) => argv[3] === `--file=${runScript}`)
+      && [...expectedRunScriptPathSet].some((runScript) => toComparablePath(argv[3]) === `--file=${runScript}`)
       && argv[4] === '--args'
-      && expectedJobDirPathSet.has(argv[5]);
+      && expectedJobDirPathSet.has(toComparablePath(argv[5]));
     return member.ppid === workerPid
       && member.pid !== workerPid
       && /^T/.test(member.state)
