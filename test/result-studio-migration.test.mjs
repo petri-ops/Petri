@@ -19,7 +19,7 @@
 
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
@@ -55,7 +55,15 @@ const MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '001_result_studio.sql');
 const WORKFLOW_GRAPH_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '002_result_workflow_graph.sql');
 const REF_TRANSACTION_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '003_result_ref_transactions.sql');
 const REPOSITORY_CONSENT_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '004_git_repository_consent.sql');
-const LATEST_MIGRATION_VERSION = 8;
+// runner 真相=src/migrations/ 内全部 .sql 的数字前缀；此处同源推导，
+// 避免新增迁移（如 009_knowledge_space）时硬编码版本号静默漂移。
+const LATEST_MIGRATION_VERSION = Math.max(
+  0,
+  ...readdirSync(REAL_MIGRATIONS_DIR)
+    .filter((f) => f.endsWith('.sql'))
+    .map((f) => parseInt(f, 10))
+    .filter((n) => Number.isFinite(n)),
+);
 
 // 收集本文件所有临时目录，统一在「文件级」after 钩子里清理。
 // 文件级钩子在所有 test 级 after 钩子（含各用例的 db.close）之后运行，
@@ -185,16 +193,21 @@ test('RS2 runner installs the schema into an empty database', async (context) =>
   context.after(() => { try { db.close(); } catch { /* noop */ } });
   assert.equal(inspectResultStudioSchema(db).complete, true);
   const applied = db.prepare('SELECT version FROM schema_migrations ORDER BY version').all().map((r) => r.version);
-  assert.deepEqual(applied, [
+  // 期望集合同源推导自迁移目录，并点名校验四个 RS 专属 schema 版本确实就位
+  const expectedVersions = readdirSync(REAL_MIGRATIONS_DIR)
+    .filter((f) => f.endsWith('.sql'))
+    .map((f) => parseInt(f, 10))
+    .filter((n) => Number.isFinite(n))
+    .sort((a, b) => a - b);
+  assert.deepEqual(applied, expectedVersions);
+  for (const named of [
     RESULT_STUDIO_MIGRATION_VERSION,
     RESULT_WORKFLOW_GRAPH_MIGRATION_VERSION,
     RESULT_REF_TRANSACTION_MIGRATION_VERSION,
     GIT_REPOSITORY_CONSENT_MIGRATION_VERSION,
-    5,
-    6,
-    7,
-    8,
-  ]);
+  ]) {
+    assert.equal(applied.includes(named), true, `missing named migration ${named}`);
+  }
 });
 
 test('RS2 runner upgrades an existing database without touching its tables', async (context) => {
