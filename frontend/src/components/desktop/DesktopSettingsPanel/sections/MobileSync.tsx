@@ -1,8 +1,28 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
+import styles from './MobileSync.module.css';
 
 // 配对码后端 TTL 5 分钟；面板按固定 4 分钟自动续码，保持「打开即可扫」。
 const PAIRING_AUTO_REFRESH_MS = 4 * 60 * 1000;
+
+function formatRelativeTime(iso: string): string {
+  const delta = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(delta) || delta < 0) return '刚刚';
+  const minutes = Math.floor(delta / 60_000);
+  if (minutes < 1) return '刚刚';
+  if (minutes < 60) return `${minutes} 分钟前`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} 小时前`;
+  return `${Math.floor(hours / 24)} 天前`;
+}
+
+function linkHost(url: string): string {
+  try {
+    return new URL(url).host;
+  } catch {
+    return url;
+  }
+}
 
 interface MobileDevice {
   id: string;
@@ -61,7 +81,7 @@ export function MobileSyncPanel(): React.ReactElement {
   const [tunnelPublicUrl, setTunnelPublicUrl] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [revokedExpanded, setRevokedExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
   const statusRef = useRef<MobileStatus | null>(null);
   statusRef.current = status;
 
@@ -142,23 +162,6 @@ export function MobileSyncPanel(): React.ReactElement {
     }
   }, [status]);
 
-  const createPairing = useCallback(async () => {
-    setBusy(true);
-    try {
-      const response = await fetch(`${getPlatformApiPrefix()}/mobile/pairing/token`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({}),
-      });
-      const data = await response.json();
-      if (data.ok) setPairing(data);
-    } catch {
-      setError('配对码生成失败');
-    } finally {
-      setBusy(false);
-    }
-  }, []);
-
   const revokeDevice = useCallback(async (id: string) => {
     setBusy(true);
     try {
@@ -225,150 +228,171 @@ export function MobileSyncPanel(): React.ReactElement {
     }
   }, [tunnelHost, tunnelPublicUrl, refresh]);
 
-  return (
-    <div data-testid="mobile-sync-panel">
-      <p className="gewu-field__hint">
-        手机扫码后用浏览器直达本机工作区（同 WiFi）。默认关闭，内容只在你的局域网内传输。
-        {status ? ` 端口 ${status.port}。` : ''}
-      </p>
+  // 修订 4：复制配对链接（不再裸露展示长 token URL）。
+  const copyLink = useCallback(async () => {
+    if (!pairing) return;
+    try {
+      await navigator.clipboard.writeText(pairing.primaryUrl);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setError('复制失败，请手动复制');
+    }
+  }, [pairing]);
 
+  return (
+    <div className={styles.msPanel} data-testid="mobile-sync-panel">
+      <div className={styles.topRow}>
+        <span className={styles.statusPill}>
+          <span className={`${styles.statusDot} ${status?.enabled ? styles.statusDotOn : ''}`} />
+          {status?.enabled ? '手机远程已开启' : '手机远程未开启'}
+        </span>
+        {status && (
+          <button
+            type="button"
+            className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+            disabled={busy}
+            onClick={toggleEnabled}
+          >
+            {status.enabled ? '关闭' : '开启'}
+          </button>
+        )}
+      </div>
+      {!status && <p className="gewu-field__hint">正在读取状态…</p>}
+      {status && !status.enabled && (
+        <p className="gewu-field__hint">开启后需重启桌面端生效。内容只在你的局域网内传输，端口 {status.port}。</p>
+      )}
       {error && <p className="gewu-field__hint" role="alert">{error}</p>}
 
-      {status && (
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <button type="button" disabled={busy} onClick={toggleEnabled}>
-            {status.enabled ? '关闭手机远程' : '开启手机远程'}
-          </button>
-          {status.enabled && (
-            <button type="button" disabled={busy} onClick={createPairing}>
-              重新生成配对码
-            </button>
-          )}
-          <span className="gewu-field__hint">
-            {status.enabled
-              ? `已启用 · 在线设备 ${status.activeDevices}`
-              : '未启用（开启后需重启桌面端生效）'}
-          </span>
-        </div>
-      )}
-
-      {pairing && (
-        <div style={{ marginTop: 10 }}>
-          <img
-            data-testid="mobile-pairing-qr"
-            src={`${getPlatformApiPrefix()}/mobile/pairing/qr.svg?token=${encodeURIComponent(pairing.token)}`}
-            alt="手机配对二维码"
-            width={180}
-            height={180}
-            style={{ display: 'block', borderRadius: 8, border: '1px solid var(--gewu-line, #2a303b)' }}
-          />
-          <p className="gewu-field__hint">已启用状态下面板常驻出码（自动续期）。一次性配对码，5 分钟内有效、仅可使用一次；已配对手机重扫码直接复用原会话，不会新增记录。</p>
-          <code className="gewu-field__hint">{pairing.primaryUrl}</code>
-        </div>
-      )}
-
-      {status && (() => {
-        const activeDevices = status.devices.filter((device) => !device.revoked);
-        const revokedDevices = status.devices.filter((device) => device.revoked);
-        return (
-          <>
-            {activeDevices.length > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-                <span className="gewu-field__hint">活跃设备 {activeDevices.length}</span>
+      {status?.enabled && (
+        <>
+          <div className={styles.qrCard}>
+            <div className={styles.qrImageWrap}>
+              {pairing ? (
+                <img
+                  data-testid="mobile-pairing-qr"
+                  className={styles.qrImage}
+                  src={`${getPlatformApiPrefix()}/mobile/pairing/qr.svg?token=${encodeURIComponent(pairing.token)}`}
+                  alt="手机配对二维码"
+                />
+              ) : (
+                <div className={styles.qrImage} aria-label="二维码生成中" />
+              )}
+            </div>
+            <p className={styles.qrHint}>
+              手机扫码直达工作区
+              <br />
+              已配对手机重扫直接进入，不会新增设备
+            </p>
+            {pairing && (
+              <div className={styles.linkRow}>
+                <span className={styles.linkHost} title={pairing.primaryUrl}>{linkHost(pairing.primaryUrl)}</span>
                 <button
                   type="button"
-                  data-testid="mobile-revoke-all"
-                  disabled={busy}
-                  onClick={() => { void revokeAllDevices(); }}
+                  data-testid="mobile-copy-link"
+                  className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                  onClick={() => { void copyLink(); }}
                 >
-                  全部吊销
+                  {copied ? '已复制' : '复制链接'}
                 </button>
               </div>
             )}
-            <ul style={{ listStyle: 'none', margin: '4px 0 0', padding: 0 }}>
-              {activeDevices.map((device) => (
-                <li key={device.id} data-testid="mobile-device-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, padding: '4px 0' }}>
-                  <span className="gewu-field__hint">
-                    {device.name}
-                    {' · 最近活跃 '}
-                    {new Date(device.lastSeenAt).toLocaleString()}
-                  </span>
-                  <button type="button" disabled={busy} onClick={() => { void revokeDevice(device.id); }}>
-                    吊销
-                  </button>
-                </li>
-              ))}
-            </ul>
-            {revokedDevices.length > 0 && (
-              <div style={{ marginTop: 6 }}>
-                <button
-                  type="button"
-                  data-testid="mobile-revoked-toggle"
-                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
-                  className="gewu-field__hint"
-                  onClick={() => setRevokedExpanded((prev) => !prev)}
-                >
-                  {revokedExpanded ? '▾' : '▸'} 已吊销 {revokedDevices.length} 台（历史记录）
-                </button>
-                {revokedExpanded && (
-                  <ul style={{ listStyle: 'none', margin: '4px 0 0', padding: 0 }}>
-                    {revokedDevices.map((device) => (
-                      <li key={device.id} style={{ padding: '2px 0' }}>
-                        <span className="gewu-field__hint" style={{ opacity: 0.65 }}>
-                          {device.name}
-                          {' · 最近活跃 '}
-                          {new Date(device.lastSeenAt).toLocaleString()}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+          </div>
+
+          <div className={styles.sectionHead}>
+            <span>活跃设备 {status.activeDevices}</span>
+            {status.devices.some((device) => !device.revoked) && (
+              <button
+                type="button"
+                data-testid="mobile-revoke-all"
+                className="gewu-btn gewu-btn--danger-ghost gewu-btn--sm"
+                disabled={busy}
+                onClick={() => { void revokeAllDevices(); }}
+              >
+                全部吊销
+              </button>
             )}
-          </>
-        );
-      })()}
+          </div>
+
+          {(() => {
+            const activeDevices = status.devices.filter((device) => !device.revoked);
+            if (activeDevices.length === 0) {
+              return <p className={styles.emptyHint}>还没有设备连接 · 手机扫码后这里会显示</p>;
+            }
+            return (
+              <ul className={styles.deviceList}>
+                {activeDevices.map((device) => (
+                  <li key={device.id} className={styles.deviceRow} data-testid="mobile-device-row">
+                    <span className={styles.deviceName}>{device.name}</span>
+                    <span className={styles.deviceMeta}>{formatRelativeTime(device.lastSeenAt)}</span>
+                    <button
+                      type="button"
+                      className="gewu-btn gewu-btn--danger-ghost gewu-btn--sm"
+                      disabled={busy}
+                      onClick={() => { void revokeDevice(device.id); }}
+                    >
+                      吊销
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            );
+          })()}
+        </>
+      )}
 
       {tunnel && (
-        <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--gewu-line, #2a303b)' }} data-testid="mobile-tunnel-section">
-          <h4>真远程（反向隧道）</h4>
-          <p className="gewu-field__hint">
-            通过你自己的 SSH 服务器（如 aliyun）中转，不在同一 WiFi 也能用。桌面端只发出站连接；
-            服务器侧需一次性配置反代（HTTPS），见部署指引。
-          </p>
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginTop: 6 }}>
-            <input
-              type="text"
-              value={tunnelHost}
-              onChange={(event) => setTunnelHost(event.target.value)}
-              placeholder="SSH 主机别名（~/.ssh/config 的 Host，如 aliyun）"
-              style={{ flex: '1 1 180px', minWidth: 0 }}
-            />
-            <button type="button" disabled={busy} onClick={() => { void saveTunnel({ enabled: !tunnel.enabled }); }}>
-              {tunnel.enabled ? '停用隧道' : '启用隧道'}
-            </button>
-            <span className="gewu-field__hint">
-              {tunnel.state === 'connected' ? '✓ 已连接·公网可用'
-                : tunnel.state === 'connecting' ? '连接中…'
-                  : tunnel.state === 'reconnecting' ? `断开，重连中${tunnel.lastError ? `（${tunnel.lastError}）` : ''}`
+        <div className={styles.tunnelSection} data-testid="mobile-tunnel-section">
+          <div className={styles.tunnelHead}>
+            <h4 className={styles.tunnelTitle}>真远程</h4>
+            <span
+              className={[
+                styles.tunnelBadge,
+                tunnel.state === 'connected' ? styles.tunnelBadgeOn : '',
+                tunnel.state === 'reconnecting' || tunnel.state === 'connecting' ? styles.tunnelBadgeWarn : '',
+              ].join(' ')}
+            >
+              {tunnel.state === 'connected' ? '● 已连接 · 公网可用'
+                : tunnel.state === 'connecting' ? '连接中'
+                  : tunnel.state === 'reconnecting' ? `重连中${tunnel.lastError ? ` · ${tunnel.lastError}` : ''}`
                     : '未启用'}
             </span>
           </div>
+          <p className={styles.tunnelHint}>
+            通过你自己的 SSH 服务器中转，不在同一 WiFi 也能用。桌面端只发出站连接。
+          </p>
           <input
             type="text"
+            className={styles.tunnelInput}
+            value={tunnelHost}
+            onChange={(event) => setTunnelHost(event.target.value)}
+            placeholder="SSH 主机别名（如 aliyun）"
+          />
+          <input
+            type="text"
+            className={styles.tunnelInput}
             value={tunnelPublicUrl}
             onChange={(event) => setTunnelPublicUrl(event.target.value)}
-            placeholder="公网地址（如 https://112.120.48.126，服务器反代配置好后填）"
-            style={{ width: '100%', marginTop: 6 }}
+            placeholder="公网地址（反代配置好后填）"
           />
-          <button
-            type="button"
-            disabled={busy}
-            style={{ marginTop: 6 }}
-            onClick={() => { void saveTunnel({}); }}
-          >
-            保存隧道配置
-          </button>
+          <div className={styles.tunnelActions}>
+            <button
+              type="button"
+              className="gewu-btn gewu-btn--primary gewu-btn--sm"
+              disabled={busy}
+              onClick={() => { void saveTunnel({}); }}
+            >
+              保存配置
+            </button>
+            <button
+              type="button"
+              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              disabled={busy}
+              onClick={() => { void saveTunnel({ enabled: !tunnel.enabled }); }}
+            >
+              {tunnel.enabled ? '停用隧道' : '启用隧道'}
+            </button>
+          </div>
         </div>
       )}
     </div>
