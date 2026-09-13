@@ -15,6 +15,7 @@
 
 const express = require('express');
 const fs = require('node:fs');
+const { readFileSync } = require('node:fs');
 const path = require('node:path');
 
 const { getStores } = require('./pairing');
@@ -108,11 +109,17 @@ function buildMobileGateway({
     res.json({ ok: true, sessionId, sessionToken });
   });
 
-  // 会话鉴权：Authorization: Bearer <token> 或（EventSource 场景）?session=<token>。
+  // 会话鉴权：token 来源优先级 = gw_session cookie（桌面投影 SPA 同源自动携带，
+  // 其 Bearer 是无会话语义的 'desktop-local' 常量）> Bearer 头 / ?session=
+  // （EventSource 与外部 API 客户端）。
   function sessionAuth(req, res, next) {
     const header = req.headers.authorization || '';
     const bearer = header.startsWith('Bearer ') ? header.slice(7) : '';
-    const token = bearer || String(req.query.session || '');
+    const cookieToken = String((req.headers.cookie || '')
+      .split(/;\s*/)
+      .find((pair) => pair.startsWith('gw_session='))
+      ?.split('=').slice(1).join('=') || '');
+    const token = cookieToken || bearer || String(req.query.session || '');
     const session = stores.sessions.authenticate(token);
     if (!session) {
       res.status(401).json({ ok: false, error: 'session_invalid', message: '会话无效或已被吊销' });
@@ -125,12 +132,46 @@ function buildMobileGateway({
     next();
   }
 
+  function issueSessionCookie(res, sessionToken) {
+    res.setHeader('Set-Cookie', `gw_session=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
+  }
+
   app.get('/m/api/health', (_req, res) => {
     res.json({ ok: true, service: 'gewu-mobile-gateway' });
   });
 
-  // 会话鉴权：公开面（静态页 / 配对 / 健康）之外的一切端点——包括挂载的
-  // 既有 /api/* 路由模块——都必须持有效会话（D4：token 鉴权中间件全覆盖）。
+  // ── UI-357 桌面投影（用户裁决「整个软件桌面原封不动的过来」）────────
+  // /app?token=<一次性配对码> → 服务端兑换会话 + 下发 cookie → 302 /app/。
+  // SPA 静态服务 + index.html 注入 window.biof3Desktop 身份/后端垫片；
+  // /api/* 走全量路由注册表（sessionAuth 会话门内）——手机获得与桌面
+  // 同源同门的完整 API。Electron 专属能力（终端/窗口控制等）经 Proxy 垫片
+  // 诚实降级为 no-op。
+  const desktopDist = path.join(__dirname, '..', '..', '..', 'frontend', 'dist');
+  const desktopIndex = path.join(desktopDist, 'index.html');
+  const desktopAvailable = () => fs.existsSync(desktopIndex);
+  console.log(`[mobile-gateway] desktop projection: dist=${desktopDist} available=${desktopAvailable()}`);
+
+  app.get('/pair', (req, res) => {
+    if (!desktopAvailable()) {
+      res.status(501).send('desktop projection unavailable: frontend/dist not built (npm run build:spa)');
+      return;
+    }
+    const token = String(req.query.token || '');
+    const redeemed = token ? stores.pairing.redeem(token) : null;
+    if (redeemed) {
+      const { sessionToken } = stores.sessions.createSession({ name: '桌面投影' });
+      issueSessionCookie(res, sessionToken);
+    }
+    const hasCookie = String(req.headers.cookie || '').includes('gw_session=');
+    if (!redeemed && !hasCookie) {
+      res.redirect('/m');
+      return;
+    }
+    res.redirect('/');
+  });
+
+  // 会话鉴权：公开面（静态页 / 配对 / 健康 / app 兑换入口）之外的一切端点
+  // ——包括挂载的全量 /api/* 路由——都必须持有效会话（D4）。
   app.use(sessionAuth);
 
   // P2 控制面窄口：批准决定（进程内直调 db.ackToolJob，权限不放大）。
@@ -141,12 +182,46 @@ function buildMobileGateway({
     mountRoutes(app);
   }
 
+  // 桌面投影：全量路由注册表（异步注册，落在 sessionAuth 之后=会话门内）
+  // + SPA 静态服务 + 客户端路由 fallback + 身份/后端垫片注入。
+  if (desktopAvailable()) {
+    try { require('../routes')(app); } catch (e) {
+      console.warn('[mobile-gateway] full route registry failed:', e && e.message);
+    }
+    const shimArr = [
+      '<script>window.__errs=[];window.addEventListener("error",function(e){window.__errs.push(String(e&&e.message||e))});</script>',
+      '<script>(function(){',
+      '  var base={backendConfig:{rApiBase:"/api"},isDesktop:true,platform:"win32",__projection:true};',
+      '  var mk=function(){var f=function(){return p;};var p=new Proxy(f,{get:function(t,k){if(k===Symbol.toPrimitive){return function(){return "";};}if(k==="then"){return function(res,rej){return Promise.resolve(undefined).then(res,rej);};}return p;},apply:function(){return p;}});return p;};',
+      '  window.biof3Desktop=new Proxy(base,{get:function(t,k){if(k in t){return t[k];}return mk();}});',
+      '})();</script>',
+    ];
+    const shim = shimArr.join('');
+    let injectedIndex = null;
+    try {
+      injectedIndex = readFileSync(desktopIndex, 'utf8').replace('<head>', '<head>' + shim);
+      console.log(`[mobile-gateway] desktop projection ready (${desktopDist})`);
+    } catch (e) {
+      console.warn(`[mobile-gateway] desktop index inject failed: ${e && e.message} :: ${desktopIndex}`);
+    }
+    const sendIndex = (res) => {
+      if (injectedIndex) res.type('html').send(injectedIndex);
+      else res.status(404).send('dist index missing');
+    };
+    app.use(express.static(desktopDist, { index: false }));
+    // SPA 客户端路由 fallback：非 /api、/m、/pair 的 GET 一律回 index.html
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api/') || req.path.startsWith('/m') || req.path === '/pair') return next();
+      sendIndex(res);
+    });
+  }
+
   // eslint-disable-next-line no-unused-vars
   app.use((error, req, res, next) => {
     res.status(500).json({ ok: false, error: 'mobile_gateway_error', message: '移动网关内部错误' });
   });
 
-  return { app, stores, audit };
+  return { app, stores, audit, desktopAvailable };
 }
 
 /**

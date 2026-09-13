@@ -236,7 +236,7 @@ test('BLOCK-70 admin REST and gateway share one session truth (revoke is instant
 
     const pairToken = await body(await fetch(`${adminBase}/api/mobile/pairing/token`, { method: 'POST' }));
     assert.equal(pairToken.ok, true);
-    assert.match(pairToken.primaryUrl, /\/m#/);
+    assert.match(pairToken.primaryUrl, /\/pair\?token=/);
 
     const { app, stores } = buildMobileGateway({ dataDir: root, mountRoutes: (mobileApp) => mobileApp.get('/m/api/probe', (_req, res) => res.json({ ok: true })) });
     const server = await listen(app);
