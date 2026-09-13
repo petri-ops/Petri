@@ -1590,33 +1590,25 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
     runtime = await createP5LiveScientificRuntime({
       verbose,
       beforeStart({ root: disposableRoot, env }) {
-        // BLOCK-83/84 后领域插件唯一来源=已安装领域包：server 启动时读
-        // <BIOF3_LOCAL_DATA_DIR>/packs/installed.json → 追加包 plugins 源 +
-        // 注册领域工具表。隔离运行时按同一接线：dataDir 指向一次性根并
-        // 落安装记录。包缺失显式失败，绝不静默降级为无领域工具的空转。
+        // drift 原型需要「可变异的隔离 built-ins 副本」（builtin-canonical 优先源）：
+        // 核心目录已随 BLOCK-83 删除，改从领域包 plugins 拷贝；包装载
+        // （dataDir + installed.json）已由 runtime 默认接线完成，此处不重复。
         const coreBuiltIns = path.join(ROOT, 'resources/built-in-plugins');
-        if (existsSync(coreBuiltIns)) {
-          const isolatedBuiltIns = path.join(disposableRoot, 'built-in-plugins');
-          cpSync(coreBuiltIns, isolatedBuiltIns, { recursive: true });
-          env.BIOF3_BUILT_IN_PLUGINS_DIR = isolatedBuiltIns;
-          return;
-        }
-        const packRoot = findBioPackRoot();
-        if (!packRoot) {
-          throw Object.assign(new Error('p6_restart_bio_pack_root_missing'), {
-            code: 'p6_restart_bio_pack_root_missing',
-            detail: { hint: 'set BIOF3_BIO_PACK_ROOT or check out gewu-pack-bio as a sibling directory' },
-          });
-        }
-        env.BIOF3_LOCAL_DATA_DIR = disposableRoot;
-        const { installPack } = require('../core/shared-backend/pack-registry.js');
-        const installed = installPack(disposableRoot, packRoot);
-        if (!installed.ok) {
-          throw Object.assign(new Error('p6_restart_bio_pack_install_failed'), {
-            code: 'p6_restart_bio_pack_install_failed',
-            detail: { error: installed.error, packRoot },
-          });
-        }
+        const source = existsSync(coreBuiltIns)
+          ? coreBuiltIns
+          : (() => {
+            const packRoot = findBioPackRoot();
+            if (!packRoot) {
+              throw Object.assign(new Error('p6_restart_bio_pack_root_missing'), {
+                code: 'p6_restart_bio_pack_root_missing',
+                detail: { hint: 'set BIOF3_BIO_PACK_ROOT or check out gewu-pack-bio as a sibling directory' },
+              });
+            }
+            return path.join(packRoot, 'plugins');
+          })();
+        const isolatedBuiltIns = path.join(disposableRoot, 'built-in-plugins');
+        cpSync(source, isolatedBuiltIns, { recursive: true });
+        env.BIOF3_BUILT_IN_PLUGINS_DIR = isolatedBuiltIns;
       },
     });
     root = runtime.root;

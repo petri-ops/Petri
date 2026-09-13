@@ -1588,6 +1588,28 @@ export async function createP5LiveScientificRuntime({
     'p5_live_runtime_port_invalid');
   const { root, env } = createCaptureEnv({ port: requestedPort });
   env.R_POOL_ENABLED = 'false';
+  // BLOCK-83/84：核心 resources/built-in-plugins 已删除，领域插件唯一来源=
+  // 已安装领域包——server 启动读 <BIOF3_LOCAL_DATA_DIR>/packs/installed.json
+  // 追加包插件源并注册领域工具表。运行时在此做默认接线（一次性 dataDir +
+  // 安装记录）；beforeStart 钩子（如 drift 原型的隔离副本）仍可覆盖。
+  if (!existsSync(path.join(ROOT, 'resources', 'built-in-plugins'))) {
+    const packRoot = findBioPackRoot();
+    if (!packRoot) {
+      throw Object.assign(new Error('p5_live_bio_pack_root_missing'), {
+        code: 'p5_live_bio_pack_root_missing',
+        detail: { hint: 'set BIOF3_BIO_PACK_ROOT or check out gewu-pack-bio as a sibling directory' },
+      });
+    }
+    env.BIOF3_LOCAL_DATA_DIR = root;
+    const { installPack } = require('../core/shared-backend/pack-registry.js');
+    const installed = installPack(root, packRoot);
+    if (!installed.ok) {
+      throw Object.assign(new Error('p5_live_bio_pack_install_failed'), {
+        code: 'p5_live_bio_pack_install_failed',
+        detail: { error: installed.error, packRoot },
+      });
+    }
+  }
   let server = null;
   let closed = false;
   let closePromise = null;
