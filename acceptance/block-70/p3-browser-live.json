@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "acceptanceId": "BLOCK-70-P3-BROWSER-LIVE",
+  "generatedAt": "2026-09-13T03:34:28.509Z",
+  "qualificationEligible": false,
+  "allPass": true,
+  "method": "ZCode IAB 浏览器（390x844 手机视口）真实渲染 http://127.0.0.1:3005/m（与手机同一条 gateway 代码路径）",
+  "checks": [
+    {
+      "name": "B1 配对",
+      "pass": true,
+      "detail": "hash 携带一次性 token → 「配对成功」toast，会话 token 落 localStorage"
+    },
+    {
+      "name": "B2 任务墙真实数据",
+      "pass": true,
+      "detail": "分析作业区渲染 DESeq2 #11~#26（completed/failed 状态与 error 摘要齐全），智能体任务区诚实空态"
+    },
+    {
+      "name": "B3 跨项目会话列表",
+      "pass": true,
+      "detail": "15 个会话全部可见，带 📁 项目名徽章（1.WorkDir/gewu-desktop/biof3-desktop/devah）与消息数"
+    },
+    {
+      "name": "B4 会话消息阅读",
+      "pass": true,
+      "detail": "「R脚本绘制2×2面板图」（10 条）完整渲染用户消息与 Gewu 长回复（含 biof3:// 产物链接文本）"
+    },
+    {
+      "name": "B5 composer 轻控制在场",
+      "pass": true,
+      "detail": "会话视图底部输入框+发送按钮渲染（未实发消息，避免污染真实会话数据；发送链路由 P2 验证覆盖）"
+    }
+  ],
+  "notes": {
+    "honestBoundary": [
+      "浏览器走 LAN HTTP 路径（与手机同一 gateway 代码路径）；公网 TLS 段已由 curl 独立验证（health/移动页 200）",
+      "真机蜂窝网络 + 自签证书警告点击 + 手机 UA 呈现，仍待用户真机实测",
+      "截图表面超时（IAB 面板问题），证据以 DOM innerText 事实为准"
+    ]
+  }
+}
