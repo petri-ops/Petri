@@ -1429,11 +1429,13 @@
       "id": "G0-RS",
       "path": "docs/g0-result-studio-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "active",
       "canonical": false,
       "truthDomain": "g0-result-studio",
       "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "lastUpdated": "2026-09-13"
     },
     {
       "id": "G0-RS-UX1H",

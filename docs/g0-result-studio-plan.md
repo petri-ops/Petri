@@ -1,8 +1,8 @@
 # G0 Result Studio — 意图驱动、可编辑、Git-backed 的科研结果工作台计划
 
-最后更新：2026-08-04
+最后更新：2026-09-13
 
-状态：`UX1G-2 completed / P7 deferred / implemented_unverified`（当前会话多分析结果入口已完成短闭环；未扩大到 Result Viewer 或资格重验）
+状态：`G0-RS-P6-REFRESH active（2026-09-13 用户裁决「可以的 冲」重启）`——本增量：P6 canonical evidence 重采（红因实锤=存储证据 508999c 仍绑定 18 个 BLOCK-83 已迁包插件文件 → `p6_stored_source_map_invalid`）+ compute-settings 死 IPC 链清理（UI-355 处方，重采前顺手删）+ p4r corpus 链包感知化（独立阶段，需真实 R 运行时）；P7 维持 `deferred`，Result Studio 维持 `implemented_unverified / experimental`。历史状态：`UX1G-2 completed`（当前会话多分析结果入口已完成短闭环；未扩大到 Result Viewer 或资格重验）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
