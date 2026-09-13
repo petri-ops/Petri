@@ -1434,7 +1434,7 @@
       "truthDomain": "g0-result-studio",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "P1-WINDOWS-PREP-COMPLETED",
       "lastUpdated": "2026-09-13"
     },
     {

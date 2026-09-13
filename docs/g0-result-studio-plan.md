@@ -2,7 +2,7 @@
 
 最后更新：2026-09-13
 
-状态：`G0-RS-P6-REFRESH active（2026-09-13 用户裁决「可以的 冲」重启）`——本增量：P6 canonical evidence 重采（红因实锤=存储证据 508999c 仍绑定 18 个 BLOCK-83 已迁包插件文件 → `p6_stored_source_map_invalid`）+ compute-settings 死 IPC 链清理（UI-355 处方，重采前顺手删）+ p4r corpus 链包感知化（独立阶段，需真实 R 运行时）；P7 维持 `deferred`，Result Studio 维持 `implemented_unverified / experimental`。历史状态：`UX1G-2 completed`（当前会话多分析结果入口已完成短闭环；未扩大到 Result Viewer 或资格重验）
+状态：`G0-RS-P6-REFRESH active（P1 Windows 侧完成，live capture 待 macOS 指挥席执行）`——P1 已交付：compute-settings 死链删除（UI-355 清偿）+ P6 全量套件 Windows 回绿 + 途中 7 个真实 Windows 产品缺陷修复（truth-drift 缓存窗口 / SEC-001 脚本桥 argv 传递 / 11 处门禁主入口守卫静默空转+扫描门 / 迁移契约同源推导 / COW 平台分支 / EPERM teardown / ps 解析器 posix 归一）+ 采集链迁包欠账（BLOCK-84 包装载接线 + R_HOME 注入）+ **Windows 首次 R 4.5.2 运行时引导（真实 volcano-plot 作业端到端 completed）**。**平台边界**：spawnEditWorker checkpoint-hold 为 POSIX-only 设计（SIGSTOP/ps T 态/lsof），Windows 化需单独立项；**live capture 下一步=macOS 指挥席 `git pull && npm run g0:result-studio:p6:update`**。历史状态：`UX1G-2 completed`（多分析结果入口短闭环）；P7 维持 `deferred`，Result Studio 维持 `implemented_unverified / experimental`
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
