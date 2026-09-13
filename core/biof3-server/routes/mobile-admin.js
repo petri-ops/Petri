@@ -76,17 +76,18 @@ module.exports = function registerMobileAdmin(app, { dataDir } = {}) {
     res.json({ ok: true, tunnel });
   });
 
-  // 配对 URL 序：隧道已连接且配了公网地址 → 公网优先，LAN 兜底（P3 真远程）。
+  // 配对 URL 序（P3.5 桌面投影，用户裁决「整个软件桌面原封不动的过来」）：
+  // 隧道 connected + 公网地址 → 主推 /pair（兑换 cookie → 完整桌面 SPA）；
+  // LAN 兜底仍是 /m 轻量页。其余情况 /pair 走本机。
   function pairingUrlsFor(token) {
     const port = resolvePort({ dataDir: dir });
     const lan = lanAddresses().map((ip) => `http://${ip}:${port}/m#${token}`);
     const tunnel = getTunnelManager(dir).status();
     if (tunnel.enabled && tunnel.state === 'connected' && tunnel.publicUrl) {
-      const publicUrl = `${tunnel.publicUrl.replace(/\/+$/, '')}/m#${token}`;
+      const publicUrl = `${tunnel.publicUrl.replace(/\/+$/, '')}/pair?token=${token}`;
       return [publicUrl, ...lan];
     }
-    if (lan.length === 0) lan.push(`http://127.0.0.1:${port}/m#${token}`);
-    return lan;
+    return [`http://127.0.0.1:${port}/pair?token=${token}`, ...lan];
   }
 
   app.post('/api/mobile/config', express.json({ limit: '4kb' }), (req, res) => {
