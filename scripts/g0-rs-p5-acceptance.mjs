@@ -23,6 +23,7 @@ import {
 } from 'node:fs';
 import { createRequire } from 'node:module';
 import { createServer } from 'node:net';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -1610,6 +1611,17 @@ export async function createP5LiveScientificRuntime({
       });
     }
   }
+  // R 运行时：隔离 dataDir 没有已装运行时；按主栈 env-coordinator 同语义
+  // （BIOF3_R_HOME=<数据根>/runtimes/R）从开发机候选根解析，命中即注入，
+  // 让 r-executor 的 binPath 直接命中内嵌运行时而非 PATH 兜底。
+  const rBinName = process.platform === 'win32' ? 'Rscript.exe' : 'Rscript';
+  const rHomeCandidates = [
+    process.env.BIOF3_LOCAL_DATA_DIR ? path.join(process.env.BIOF3_LOCAL_DATA_DIR, 'runtimes', 'R') : null,
+    path.join(ROOT, '.biof3-dev-user-data', 'data', 'runtimes', 'R'),
+    path.join(os.homedir(), 'Documents', 'BioF3-Local', 'runtimes', 'R'),
+  ].filter(Boolean);
+  const rHomeResolved = rHomeCandidates.find((dir) => existsSync(path.join(dir, 'bin', rBinName)));
+  if (rHomeResolved) env.BIOF3_R_HOME = rHomeResolved;
   let server = null;
   let closed = false;
   let closePromise = null;
