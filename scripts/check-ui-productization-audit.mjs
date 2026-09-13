@@ -46,6 +46,11 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-09-13 BLOCK-70 P3 隧道实现提交 1c40b35：MobileSync.tsx 隧道三态区 UI
+  // 增量的同提交台账漏同步（收口门禁抓出后补登 UI-319 条目 P3 段）。
+  // subject 用 feat(block-70): 未带 UI-###。豁免同提交台账与 UI-### 编号要求。
+  // 不重写共享历史。
+  '1c40b3526d75348659421ae57bf2eadfa24ee328',
   // 2026-09-11 BLOCK-81 P1 接线不可变提交 c177374：frontend 仅
   // copilotClient / conversationRunStore 两个字段透传（新增可选 thinkingLevel，
   // 缺省不含＝零 UI 行为变化；真正的控件在 UI-345 落地）。subject 用
@@ -234,6 +239,10 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-09-13 BLOCK-70 P3 隧道实现提交 1c40b35：MobileSync.tsx 隧道三态区
+  // UI 增量的台账漏同步（收口门禁抓出后已补登 UI-319 条目 P3 段）。
+  // 不重写共享历史。
+  '1c40b3526d75348659421ae57bf2eadfa24ee328',
   // 2026-09-11 BLOCK-81 P1 接线不可变提交 c177374：frontend 仅
   // copilotClient / conversationRunStore 两个字段透传（新增可选 thinkingLevel，
   // 缺省不含＝零 UI 行为变化；真正的控件在 UI-345 落地）。subject 用

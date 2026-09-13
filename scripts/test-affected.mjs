@@ -152,7 +152,16 @@ function printPlan(plan, json) {
   }
 }
 
-function runProcess(command, args) { return spawnSync(command, args, { cwd: ROOT, stdio: 'inherit' }).status ?? 1; }
+function runProcess(command, args) {
+  // Windows：spawnSync 无 shell 时拒绝执行 npm.cmd（Node CVE 修复后的 EINVAL），
+  // 门禁步骤会静默失败——win32 对 npm 加 shell:true（参数全部为简单旗标，
+  // 无引号注入面）；树非干净且计划含 docs/ui 门禁时必现，树干净时计划为空
+  // 从不触发，故此前未暴露。
+  const needsShell = process.platform === 'win32' && command === 'npm';
+  const options = { cwd: ROOT, stdio: 'inherit' };
+  if (needsShell) options.shell = true;
+  return spawnSync(command, args, options).status ?? 1;
+}
 
 export function runPlan(plan) {
   if (plan.unknown.length) return 2;

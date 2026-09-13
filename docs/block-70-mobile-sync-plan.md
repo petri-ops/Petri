@@ -1,6 +1,6 @@
 # BLOCK-70 — 手机远程同步（Mobile Sync）：扫码 → 手机浏览器直达工作区
 
-> 状态：`active`（P0-LAUNCH；2026-09-13 P0 A1 PoC + P1 主体已实现并实机收账，真实手机扫码验收待用户，P2/P3 串行待裁决）
+> 状态：**completed（2026-09-13 P0–P4 全部收口：真机实测用户确认「挺好 成功啦」；P5 候选另行裁决）**
 > 立项日期：2026-09-09
 > truthDomain: `block-70-mobile-sync`
 > UI 台账：UI-319（实现同提交登记）
@@ -76,8 +76,8 @@
 | P0 | 设计评审 + A1 PoC：`mobile-gateway` 最小监听 + 一次性 token + QR 卡（真实手机扫码打开只读任务页） | `acceptance/block-70/p0-poc.json` + 截图（token 脱敏） |
 | P1 | 移动 Web 只读面：任务墙 + 任务详情实时流（SSE afterSeq 续传）+ 会话列表/阅读 + 设置区「手机远程」（配对/设备管理/吊销，UI-319） | 手机实机断言；桌面零行为变化回归 |
 | P2 | 控制面：composer 轻控制（发消息/批准卡两步确认/取消）+ 权限不放大验证 | 手机发起→桌面执行→手机批准→手机收终态 |
-| P3 | A2 真远程：ssh -R 出站隧道 + aliyun 反代配置模板 + QR 切公网 URL + 断线重连与三态呈现 | 真机 4G/外网扫码全链 |
-| P4 | 收口：实机全链断言脚本 + 门禁 + 台账/registry/roadmap 回写 | `acceptance/block-70/` 全套证据 |
+| P3 | ✅ completed（2026-09-13）：tunnel.js 隧道管理器（出站 ssh -R 钉回环/四态/退避重连）+ REST + 面板隧道配置 + QR 公网优先 + aliyun 反代落地（代办：nginx+自签证书+443）；实机探针 8/8（aliyun 回环 curl 端到端）+ 120s 稳定 connected + **真机实测用户确认「挺好 成功啦」** | `acceptance/block-70/block70-tunnel-live.json` |
+| P4 | ✅ completed（2026-09-13）：closeout 门禁绿（hygiene/docs/ui-audit/test:changed）+ UI-319 verified（真机用户确认）+ canonical 五件套回写 | `acceptance/block-70/` 全套 |
 | P5 候选 | Bot Channel（微信 iLink/飞书，机制取证已在 git 历史修订 0 版）→ 需另行用户裁决；多端会话/附件下载/Web Push | 另行立项 |
 
 ## 7. 验收门（启动时可按实际裁剪范围调整）

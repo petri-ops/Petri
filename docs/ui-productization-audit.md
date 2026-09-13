@@ -3324,7 +3324,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **诚实边界**：`tsc` 全量 0 错、`docs:check` PASS(232)、`ui:audit:check` 通过、`hygiene:check` PASS；相邻回归 plugin-sdk 5/5 / manifest-schema / domain-neutrality 2/2 / g0-chf0-http 3/3。**P3 正式阶段收口尚未执行**（`npm run verify -- <flow>` / `npm run closeout` 待跑），故本条状态为 dev Electron 边界内的当前阶段最高证据等级。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-319: 设置区「手机远程」+ 移动只读页（BLOCK-70 扫码直达工作区）(2026-09-13 in_progress，dev 边界内实现完成；真实手机扫码验收待用户)
+## UI-319: 设置区「手机远程」+ 移动只读页（BLOCK-70 扫码直达工作区）(2026-09-13 **verified**：真机实测用户确认「挺好 成功啦」+ 自动化证据全套)
 
 - **工作包**：BLOCK-70-MOBILE-SYNC（P0 A1 PoC + P1 主体，用户夜间串行授权）。plan `docs/block-70-mobile-sync-plan.md`（修订 1）+ P0 评审稿 `docs/block-70-p0-design-review.md`。
 - **交付面**：①后端 `core/biof3-server/mobile-gateway/`（独立 Express app 实例 + 独立端口 `BIOF3_MOBILE_PORT` 默认 3005，**默认关闭** additive；一次性配对 token（32B hex、5 分钟 TTL、单次使用）→ 持久会话 token（文件制 `<dataDir>/mobile/sessions.json` 只存 sha256）+ 会话鉴权中间件（Bearer / `?session=` 双通道供 EventSource）+ 按 IP 限速 429 + JSONL 审计（只记元数据不记 query/内容）；`server.js` boot 钩子关闭态零行为）②管理 REST `routes/mobile-admin.js`（status/config/pairing token/qr.svg（服务端渲染，前端零新依赖）/devices/revoke，挂主后端本机面）③设置区 `sections/MobileSync.tsx`（三态呈现 + 开关「重启生效」诚实提示 + 配对二维码 + 设备列表/吊销）④移动只读页 `mobile-gateway/public/index.html`（vanilla JS 独立 bundle 不进 Vite 图：任务墙/任务详情 SSE afterSeq/会话列表与阅读/未配对诚实空态）。依赖裁决：`qrcode-generator@1.4.4`（plan §5-D2 预名全包唯一新 npm 依赖，服务端侧，MIT 零传递依赖）——⏳ 待用户追认。
@@ -3336,7 +3336,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **实机抓真二**：`express.static` 挂 `/m` 且 `fallthrough:false` 会把 `/m/api/*` 吞成 500（静态中间件匹配前缀后找不到文件直接报错）——修复＝fallthrough 回归默认 true 让请求链穿透。
 - **实机抓真三**：管理面 status/QR 读配置文件值而非生效值（env 启用时 status 显示 enabled:false、QR 指向默认端口）——修复＝admin 统一走 resolveEnabled/resolvePort 生效值，与实际运行的 gateway 一致。（配对单次性/TTL/会话哈希落盘/吊销即时失效跨重启/config 默认关闭/gateway 静态页与 401/限速 429/admin 与 gateway 共享会话真相——吊销即刻切断移动面）；`tsc --noEmit` 0 错；`test:changed:list` unknown=0。**实机抓真一**：`express.static` 挂 `/m` 且 `fallthrough:false` 会把 `/m/api/*` 吞成 500（静态中间件匹配了 `/m/api/probe` 找不到文件直接报错）——修复＝fallthrough 回归默认 true 让 API 链穿透。
 - **P2 控制面（2026-09-13 追加实现）**：移动页升级为控制面——任务详情页批准卡（SSE `needApproval` 事件驱动：工具名+目标摘要+脱敏 params，**两步确认**按钮 D4）+ 取消任务按钮 + 会话页/全局 composer 发消息（POST `/api/ai/agent` 复用 chat.js 路由）。后端新增窄口 `mobile-gateway/control.js` `POST /m/api/approvals/:token/decide`——进程内直调 `db.ackToolJob`（与桌面确认卡 `routes/ai-legacy.js` 的 `POST /api/ai/run-tool-ack/:token` **同一函数同一 scope 校验，权限不放大**；不发 HTTP 自调用，对标 BLOCK-49 直调先例）。验证：集成测试 10/10 + **实机隔离探针 28/28 ALL PASS**（新增 B 系列：吊销后可重新配对/发消息 401+契约 400/取消 401+结构化 404/批准无会话 401+缺 scope 400+**scope 不匹配 404 权限不放大**+批准放行落库 ack_status=approved 且 job 不被破坏+拒绝落库 rejected+failed）。`acceptance/block-70/block70-mobile-gateway-live.json`。
-- **诚实边界（未升 verified 的原因）**：「手机发起→桌面执行（真实模型）→手机批准→手机收终态」全链与 dev 栈 CDP 设置区断言未执行（前者需真实 LLM 环境）——前者待 dev 栈窗口，后者**CDP 够不着**，按无人化验收阶梯第 2 级如实停留 `in_progress`，待用户照测试路线实测后升级；P2 控制面（发消息/批准/取消）与 P3 aliyun 隧道属后续阶段未实现。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- **实现提交对账（UI-357 桌面投影 / P3 隧道 UI 归入本条目）**：P2 控制面 = 3c3bdb17；P3 隧道三态呈现与公网 QR 切换 = 1c40b35（该提交含 MobileSync.tsx 隧道区 UI 增量，同提交台账漏同步——已补登本段并按 c177374 先例登记 LEGACY 豁免）；桌面投影 = 79fea4a5。「手机发起→桌面执行（真实模型）→手机批准→手机收终态」全链与 dev 栈 CDP 设置区断言未执行（前者需真实 LLM 环境）——前者待 dev 栈窗口，后者**CDP 够不着**，按无人化验收阶梯第 2 级如实停留 `in_progress`，待用户照测试路线实测后升级；P2 控制面（发消息/批准/取消）与 P3 aliyun 隧道属后续阶段未实现。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-354: 顶栏最右侧「手机远程 + 设置」双入口（对标 ZCode 顶栏布局）(2026-09-13 verified，dev Electron 边界内 CDP 8/8)
 
