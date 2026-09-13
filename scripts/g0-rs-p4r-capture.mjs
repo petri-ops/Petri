@@ -33,7 +33,7 @@ import { mkdtempSync, mkdirSync, readdirSync, rmSync, existsSync, statSync } fro
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -350,6 +350,6 @@ async function main() {
   console.log('\nEnvironment is reusable; scenario driving is the next P4R-0 unit.');
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch((error) => { console.error(error.message); process.exit(1); });
 }

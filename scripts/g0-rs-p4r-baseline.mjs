@@ -294,6 +294,6 @@ async function main() {
   if (result.kept) console.log(`\n  remove when done:  rm -rf ${result.root}`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch((error) => { console.error(error.message); process.exit(1); });
 }

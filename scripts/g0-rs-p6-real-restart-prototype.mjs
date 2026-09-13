@@ -22,7 +22,7 @@ import {
 } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { startServer, stopServer } from './g0-rs-p4r-capture.mjs';
 import {
@@ -2141,7 +2141,7 @@ async function main() {
   if (!result.passed) process.exitCode = 1;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch((error) => {
     console.error(`[G0-RS-P6 real restart prototype] FAIL - ${error.code || error.message}`);
     if (process.argv.includes('--verbose')) {

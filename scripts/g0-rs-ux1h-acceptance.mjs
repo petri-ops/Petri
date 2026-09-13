@@ -12,7 +12,7 @@ import {
 } from 'node:fs';
 import { createServer } from 'node:net';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import {
   assertSanitizedP5Evidence,
@@ -483,7 +483,7 @@ export async function observeUx1h({
 }
 
 const args = new Set(process.argv.slice(2));
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   observeUx1h({
     writeEvidence: args.has('--write'),
     keep: args.has('--keep'),

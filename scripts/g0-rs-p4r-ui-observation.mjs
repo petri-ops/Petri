@@ -30,7 +30,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { createCaptureEnv, startServer, stopServer } from './g0-rs-p4r-capture.mjs';
 import { generateCorpus } from './g0-rs-p4r-corpus.mjs';
@@ -373,7 +373,7 @@ async function main() {
   if (!result.passed) process.exitCode = 1;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch((error) => {
     console.error(error.stack || error.message);
     process.exitCode = 1;

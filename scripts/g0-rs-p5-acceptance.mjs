@@ -24,7 +24,7 @@ import {
 import { createRequire } from 'node:module';
 import { createServer } from 'node:net';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import {
   applyMigrations,
@@ -3092,7 +3092,7 @@ async function main() {
   if (!passed) process.exitCode = 1;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch((error) => {
     console.error(`[G0-RS-P5] FAIL — ${error.message}`);
     if (process.argv.includes('--verbose')) {
