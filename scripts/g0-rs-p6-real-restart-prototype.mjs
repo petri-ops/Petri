@@ -28,6 +28,7 @@ import { startServer, stopServer } from './g0-rs-p4r-capture.mjs';
 import {
   P5_WORKER_CHECKPOINT_HOLD_MARKER,
   createP5LiveScientificRuntime,
+  findBioPackRoot,
 } from './g0-rs-p5-acceptance.mjs';
 
 const require = createRequire(import.meta.url);
@@ -1590,7 +1591,23 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
       verbose,
       beforeStart({ root: disposableRoot, env }) {
         const isolatedBuiltIns = path.join(disposableRoot, 'built-in-plugins');
-        cpSync(path.join(ROOT, 'resources/built-in-plugins'), isolatedBuiltIns, { recursive: true });
+        // BLOCK-83 迁包后核心 resources/built-in-plugins 已删除；领域插件以
+        // gewu-pack-bio 为唯一来源（pack 的 plugins/ 与旧 built-ins 同构，含
+        // manifest.json）。缺失时显式失败，绝不静默降级为无领域工具的空转。
+        const coreBuiltIns = path.join(ROOT, 'resources/built-in-plugins');
+        const source = existsSync(coreBuiltIns)
+          ? coreBuiltIns
+          : (() => {
+            const packRoot = findBioPackRoot();
+            if (!packRoot) {
+              throw Object.assign(new Error('p6_restart_bio_pack_root_missing'), {
+                code: 'p6_restart_bio_pack_root_missing',
+                detail: { hint: 'set BIOF3_BIO_PACK_ROOT or check out gewu-pack-bio as a sibling directory' },
+              });
+            }
+            return path.join(packRoot, 'plugins');
+          })();
+        cpSync(source, isolatedBuiltIns, { recursive: true });
         env.BIOF3_BUILT_IN_PLUGINS_DIR = isolatedBuiltIns;
       },
     });
