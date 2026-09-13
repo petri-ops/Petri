@@ -52,16 +52,15 @@ function killStaleTunnelProcesses(dataDir, config, excludePids = []) {
   try {
     let entries = [];
     if (process.platform === 'win32') {
-      const ps = "Get-CimInstance Win32_Process -Filter \"Name='ssh.exe'\" | Select-Object ProcessId, CommandLine | ConvertTo-Json -Compress";
-      const encoded = Buffer.from(ps, 'utf16le').toString('base64');
+      // 随包 .ps1：免 EncodedCommand/引号转义（BLOCK-76 教训：内联 PS 必炸）
+      const psPath = path.join(__dirname, 'list-ssh-pids.ps1');
       const out = require('node:child_process').execSync(
-        `powershell -NoProfile -EncodedCommand ${encoded}`,
+        `powershell -NoProfile -ExecutionPolicy Bypass -File "${psPath}" "${signature}"`,
         { encoding: 'utf8', timeout: 10000, stdio: ['ignore', 'pipe', 'ignore'] });
-      const trimmed = String(out).trim();
-      if (trimmed) {
-        const parsed = JSON.parse(trimmed);
-        entries = Array.isArray(parsed) ? parsed : [parsed];
-      }
+      entries = String(out).split(/\r?\n/).filter(Boolean).map((line) => ({
+        pid: Number(line.trim()),
+        commandline: signature,
+      }));
     } else {
       const out = require('node:child_process').execSync(
         'ps -eo pid=,args=', { encoding: 'utf8', timeout: 5000, stdio: ['ignore', 'pipe', 'ignore'] });
@@ -304,6 +303,7 @@ module.exports = {
   writeTunnelConfig,
   buildSshArgs,
   selectStaleSshPids,
+  killStaleTunnelProcesses,
   getTunnelManager,
   resetTunnelManagersForTest,
   createTunnelManager,
