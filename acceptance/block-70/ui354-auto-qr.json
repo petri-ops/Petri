@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "acceptanceId": "UI-354-ADDENDUM4-AUTO-QR",
+  "generatedAt": "2026-09-13T12:01:15.873Z",
+  "allPass": true,
+  "checks": [
+    {
+      "name": "面板挂载（mobile-sync-panel）",
+      "ok": true
+    },
+    {
+      "name": "已启用（自动出码前置）",
+      "ok": true
+    },
+    {
+      "name": "自动出码（QR 无需手动点击）",
+      "ok": true
+    }
+  ]
+}

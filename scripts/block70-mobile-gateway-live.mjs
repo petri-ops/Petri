@@ -137,7 +137,8 @@ async function main() {
     assert('A4 管理面 status 如实', status.ok === true && status.enabled === true && status.port === mobilePort, JSON.stringify({ ...status, devices: (status.devices || []).length }));
 
     const pairing = await (await fetch(`${mainBase}/api/mobile/pairing/token`, { method: 'POST' })).json();
-    assert('A5a 配对 token 签发', pairing.ok === true && /^http:\/\/.+\/m#/.test(pairing.primaryUrl), JSON.stringify({ ...pairing, token: '***', urls: pairing.urls?.length }));
+    // 4bd0f0bd 起配对 URL 双形态：LAN 直连 = /m#t=（移动页）；隧道 connected = /pair?token=（桌面投影入口）
+    assert('A5a 配对 token 签发', pairing.ok === true && /^http:\/\/.+\/(m#|pair\?token=)/.test(pairing.primaryUrl), JSON.stringify({ ...pairing, token: '***', urls: pairing.urls?.length }));
     const qr = await fetch(`${mainBase}/api/mobile/pairing/qr.svg?token=${encodeURIComponent(pairing.token)}`);
     assert('A5b QR SVG 渲染', qr.status === 200 && (qr.headers.get('content-type') || '').includes('image/svg+xml'), `status ${qr.status}`);
 
@@ -213,7 +214,9 @@ async function main() {
         status: 'pending',
         ack_token: ackToken,
         ack_status: 'pending',
-        user_id: 'local',
+        // 必须与 auth.js LOCAL_USER.id 一字不差（09766808 修正 'local'→'local-user'
+        // 后本探针未重采，decide 范围校验曾因此失配 404）
+        user_id: 'local-user',
         project_id: projectId,
         created_at: Date.now(),
       };

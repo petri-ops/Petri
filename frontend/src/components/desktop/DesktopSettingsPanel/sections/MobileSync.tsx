@@ -1,5 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
+
+// 配对码后端 TTL 5 分钟；面板按固定 4 分钟自动续码，保持「打开即可扫」。
+const PAIRING_AUTO_REFRESH_MS = 4 * 60 * 1000;
 
 interface MobileDevice {
   id: string;
@@ -58,6 +61,9 @@ export function MobileSyncPanel(): React.ReactElement {
   const [tunnelPublicUrl, setTunnelPublicUrl] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [revokedExpanded, setRevokedExpanded] = useState(false);
+  const statusRef = useRef<MobileStatus | null>(null);
+  statusRef.current = status;
 
   const refresh = useCallback(async () => {
     try {
@@ -87,13 +93,33 @@ export function MobileSyncPanel(): React.ReactElement {
     void refresh();
   }, [refresh]);
 
-  // 配对码有效期到点自动清场（一次性 + 5 分钟 TTL 在后端强制）。
+  // 加映 4：面板打开且已启用 → 自动生成并常驻续码（不再要求手动点击）；
+  // 卸载/停用即停。手动「重新生成」按钮保留为即时换码入口。
   useEffect(() => {
-    if (!pairing) return;
-    const wait = Math.max(0, pairing.expiresAt - Date.now());
-    const timer = window.setTimeout(() => setPairing(null), wait);
-    return () => window.clearTimeout(timer);
-  }, [pairing]);
+    if (!status?.enabled) return undefined;
+    let cancelled = false;
+    let timer: number | undefined;
+    const generate = async () => {
+      if (cancelled) return;
+      try {
+        const response = await fetch(`${getPlatformApiPrefix()}/mobile/pairing/token`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({}),
+        });
+        const data = await response.json();
+        if (!cancelled && data.ok) setPairing(data);
+      } catch {
+        /* 静默：下一轮续码或手动重试 */
+      }
+      if (!cancelled) timer = window.setTimeout(generate, PAIRING_AUTO_REFRESH_MS);
+    };
+    void generate();
+    return () => {
+      cancelled = true;
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
+  }, [status?.enabled]);
 
   const toggleEnabled = useCallback(async () => {
     if (!status) return;
@@ -149,6 +175,27 @@ export function MobileSyncPanel(): React.ReactElement {
     }
   }, [refresh]);
 
+  // 加映 4：一键吊销全部活跃设备（逐个调用既有吊销端点，权限语义不变）。
+  const revokeAllDevices = useCallback(async () => {
+    const active = (statusRef.current?.devices ?? []).filter((device) => !device.revoked);
+    if (active.length === 0) return;
+    setBusy(true);
+    try {
+      for (const device of active) {
+        await fetch(`${getPlatformApiPrefix()}/mobile/devices/${encodeURIComponent(device.id)}/revoke`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({}),
+        });
+      }
+      await refresh();
+    } catch {
+      setError('批量吊销失败');
+    } finally {
+      setBusy(false);
+    }
+  }, [refresh]);
+
   // P3 — 反向隧道配置保存（enabled 切换 + host/publicUrl 编辑）。
   const saveTunnel = useCallback(async (patch: { enabled?: boolean }) => {
     setBusy(true);
@@ -194,7 +241,7 @@ export function MobileSyncPanel(): React.ReactElement {
           </button>
           {status.enabled && (
             <button type="button" disabled={busy} onClick={createPairing}>
-              生成配对二维码
+              重新生成配对码
             </button>
           )}
           <span className="gewu-field__hint">
@@ -208,36 +255,79 @@ export function MobileSyncPanel(): React.ReactElement {
       {pairing && (
         <div style={{ marginTop: 10 }}>
           <img
+            data-testid="mobile-pairing-qr"
             src={`${getPlatformApiPrefix()}/mobile/pairing/qr.svg?token=${encodeURIComponent(pairing.token)}`}
             alt="手机配对二维码"
             width={180}
             height={180}
             style={{ display: 'block', borderRadius: 8, border: '1px solid var(--gewu-line, #2a303b)' }}
           />
-          <p className="gewu-field__hint">一次性配对码，5 分钟内有效、仅可使用一次。手机相机扫码打开移动页。</p>
+          <p className="gewu-field__hint">已启用状态下面板常驻出码（自动续期）。一次性配对码，5 分钟内有效、仅可使用一次；已配对手机重扫码直接复用原会话，不会新增记录。</p>
           <code className="gewu-field__hint">{pairing.primaryUrl}</code>
         </div>
       )}
 
-      {status && status.devices.length > 0 && (
-        <ul style={{ listStyle: 'none', margin: '10px 0 0', padding: 0 }}>
-          {status.devices.map((device) => (
-            <li key={device.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, padding: '4px 0' }}>
-              <span className="gewu-field__hint">
-                {device.name}
-                {device.revoked ? '（已吊销）' : ''}
-                {' · 最近活跃 '}
-                {new Date(device.lastSeenAt).toLocaleString()}
-              </span>
-              {!device.revoked && (
-                <button type="button" disabled={busy} onClick={() => { void revokeDevice(device.id); }}>
-                  吊销
+      {status && (() => {
+        const activeDevices = status.devices.filter((device) => !device.revoked);
+        const revokedDevices = status.devices.filter((device) => device.revoked);
+        return (
+          <>
+            {activeDevices.length > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+                <span className="gewu-field__hint">活跃设备 {activeDevices.length}</span>
+                <button
+                  type="button"
+                  data-testid="mobile-revoke-all"
+                  disabled={busy}
+                  onClick={() => { void revokeAllDevices(); }}
+                >
+                  全部吊销
                 </button>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+              </div>
+            )}
+            <ul style={{ listStyle: 'none', margin: '4px 0 0', padding: 0 }}>
+              {activeDevices.map((device) => (
+                <li key={device.id} data-testid="mobile-device-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, padding: '4px 0' }}>
+                  <span className="gewu-field__hint">
+                    {device.name}
+                    {' · 最近活跃 '}
+                    {new Date(device.lastSeenAt).toLocaleString()}
+                  </span>
+                  <button type="button" disabled={busy} onClick={() => { void revokeDevice(device.id); }}>
+                    吊销
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {revokedDevices.length > 0 && (
+              <div style={{ marginTop: 6 }}>
+                <button
+                  type="button"
+                  data-testid="mobile-revoked-toggle"
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                  className="gewu-field__hint"
+                  onClick={() => setRevokedExpanded((prev) => !prev)}
+                >
+                  {revokedExpanded ? '▾' : '▸'} 已吊销 {revokedDevices.length} 台（历史记录）
+                </button>
+                {revokedExpanded && (
+                  <ul style={{ listStyle: 'none', margin: '4px 0 0', padding: 0 }}>
+                    {revokedDevices.map((device) => (
+                      <li key={device.id} style={{ padding: '2px 0' }}>
+                        <span className="gewu-field__hint" style={{ opacity: 0.65 }}>
+                          {device.name}
+                          {' · 最近活跃 '}
+                          {new Date(device.lastSeenAt).toLocaleString()}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </>
+        );
+      })()}
 
       {tunnel && (
         <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--gewu-line, #2a303b)' }} data-testid="mobile-tunnel-section">

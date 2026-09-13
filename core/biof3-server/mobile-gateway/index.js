@@ -20,10 +20,17 @@ const path = require('node:path');
 
 const { getStores } = require('./pairing');
 const { readConfig, resolveEnabled, resolvePort, lanAddresses } = require('./config');
+const crypto = require('node:crypto');
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 240;
 const AUDIT_MAX_LINE_BYTES = 4 * 1024;
+// 会话 cookie 长效：一次认证长期有效，除非用户主动吊销/关闭（加映 4）。
+const SESSION_COOKIE_MAX_AGE = 365 * 24 * 60 * 60;
+// 同名设备记录区分用短尾缀（无登录态下不做设备指纹，代价可接受）。
+function pairShortId() {
+  return crypto.randomBytes(2).toString('hex');
+}
 
 function createAuditWriter(auditPath) {
   return function audit(entry) {
@@ -94,6 +101,8 @@ function buildMobileGateway({
   app.use(express.json({ limit: '64kb' }));
 
   // 配对：一次性 token 换持久会话 token（无需既有会话）。
+  // 加映 4：请求已带有效会话（cookie/Bearer）时直接复用，不再新建——
+  // 同一手机重复扫码/重开配对链接不应堆积设备记录。
   app.post('/m/api/pair', (req, res) => {
     const token = String(req.body?.token || '');
     const redeemed = stores.pairing.redeem(token);
@@ -101,25 +110,37 @@ function buildMobileGateway({
       res.status(401).json({ ok: false, error: 'pair_token_invalid', message: '配对码无效或已过期，请在桌面端重新生成' });
       return;
     }
+    const existingToken = readCookieToken(req) || bearerToken(req);
+    const existingSession = existingToken ? stores.sessions.authenticate(existingToken) : null;
+    if (existingSession) {
+      res.json({ ok: true, sessionId: existingSession.id, sessionToken: existingToken, reused: true });
+      return;
+    }
     const userAgent = String(req.headers['user-agent'] || '');
-    const name = /iphone|ipad/i.test(userAgent) ? 'iOS 设备'
+    const baseName = /iphone|ipad/i.test(userAgent) ? 'iOS 设备'
       : /android/i.test(userAgent) ? 'Android 设备'
         : '移动设备';
-    const { sessionId, sessionToken } = stores.sessions.createSession({ name });
+    const { sessionId, sessionToken } = stores.sessions.createSession({ name: `${baseName}-${pairShortId()}` });
     res.json({ ok: true, sessionId, sessionToken });
   });
 
   // 会话鉴权：token 来源优先级 = gw_session cookie（桌面投影 SPA 同源自动携带，
   // 其 Bearer 是无会话语义的 'desktop-local' 常量）> Bearer 头 / ?session=
   // （EventSource 与外部 API 客户端）。
-  function sessionAuth(req, res, next) {
-    const header = req.headers.authorization || '';
-    const bearer = header.startsWith('Bearer ') ? header.slice(7) : '';
-    const cookieToken = String((req.headers.cookie || '')
+  function readCookieToken(req) {
+    return String((req.headers.cookie || '')
       .split(/;\s*/)
       .find((pair) => pair.startsWith('gw_session='))
       ?.split('=').slice(1).join('=') || '');
-    const token = cookieToken || bearer || String(req.query.session || '');
+  }
+
+  function bearerToken(req) {
+    const header = String(req.headers.authorization || '');
+    return header.startsWith('Bearer ') ? header.slice(7) : '';
+  }
+
+  function sessionAuth(req, res, next) {
+    const token = readCookieToken(req) || bearerToken(req) || String(req.query.session || '');
     const session = stores.sessions.authenticate(token);
     if (!session) {
       res.status(401).json({ ok: false, error: 'session_invalid', message: '会话无效或已被吊销' });
@@ -133,7 +154,7 @@ function buildMobileGateway({
   }
 
   function issueSessionCookie(res, sessionToken) {
-    res.setHeader('Set-Cookie', `gw_session=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
+    res.setHeader('Set-Cookie', `gw_session=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_MAX_AGE}`);
   }
 
   app.get('/m/api/health', (_req, res) => {
@@ -159,8 +180,16 @@ function buildMobileGateway({
     const token = String(req.query.token || '');
     const redeemed = token ? stores.pairing.redeem(token) : null;
     if (redeemed) {
-      const { sessionToken } = stores.sessions.createSession({ name: '桌面投影' });
-      issueSessionCookie(res, sessionToken);
+      // 加映 4：已有有效会话直接复用（刷新长效 cookie），不再每次扫码新建——
+      // 同一手机重复扫码/重开配对链接不应堆积设备记录。
+      const existingToken = readCookieToken(req) || bearerToken(req);
+      const existingSession = existingToken ? stores.sessions.authenticate(existingToken) : null;
+      if (existingSession) {
+        issueSessionCookie(res, existingToken);
+      } else {
+        const { sessionToken } = stores.sessions.createSession({ name: `桌面投影-${pairShortId()}` });
+        issueSessionCookie(res, sessionToken);
+      }
     }
     const hasCookie = String(req.headers.cookie || '').includes('gw_session=');
     if (!redeemed && !hasCookie) {

@@ -3357,12 +3357,21 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **设置页重复入口移除**：`DesktopSettingsPanel` 不再渲染「手机远程」小节（MobileSync 壳删除，仅保留 `MobileSyncPanel` 本体供左栏底部弹层使用）；**手机连接唯一入口 = 左栏底部 [手机连接]**。组件测试改锚 MobileSyncPanel（3/3）；实机脚本 T7b 反转为回归守卫——设置页（含计算与数据分区）不得再出现「手机远程」字样。
 - **脚本韧性**：T4 加 4 次重试（Vite 热更整页 reload 会重置组件状态，两次实机瞬态失败均由此而来，非产品缺陷）；证据刷新 8/8 ALL PASS + 截图 `sidebar-mobile-popup.png`。
 
+### UI-354 修订 3（2026-09-13，用户反馈「这些记录没有意义 打开应该直接出来二维码 一次认证不应该有时间限制 除非主动变更」）
+
+- **面板自动出码**：`MobileSyncPanel` 已启用状态下打开即自动生成配对码并每 4 分钟自动续期（`PAIRING_AUTO_REFRESH_MS`），不再要求手动点击；「重新生成配对码」保留为即时换码入口。
+- **一次认证长期有效（后端）**：`/m/api/pair` 与 `/pair` 兑换时请求已带有效会话（cookie/Bearer）→ **复用原会话**（`reused:true` / 复发同 token），不再每次扫码新建设备记录；无既有会话才新建，名称带 4 hex 短尾缀（`移动设备-ab12`）便于区分；会话 cookie `Max-Age` 30 天 → **1 年**。吊销即时失效语义不变（安全红线不动：吊销/401/审计/IP 限速全保留）。
+- **设备列表分区**：活跃设备（行内吊销 + 「全部吊销」一键批量）与已吊销（默认折叠为计数行，点击展开历史）。
+- **证据**：集成测试 `test/block70-mobile-gateway.test.mjs` 11/11（新增加映 4 专项：复用不增记录/短尾缀/一年 cookie/302）；组件 3/3（自动出码/折叠/全部吊销）；实机隔离探针 `scripts/block70-mobile-gateway-live.mjs` **28/28 ALL PASS**（`acceptance/block-70/block70-mobile-gateway-live.json`）；CDP 实机 `acceptance/block-70/ui354-auto-qr.json` 3/3（真实 dev Electron 面板挂载+已启用态+QR 无需点击出现）。
+- **顺带修两处探针存量漂移**（基线 stash 对照坐实非本批引入）：①种子行 `user_id:'local'` 未随 09766808 身份修正同步（'local-user'）→ B3/B4 批准链 5 红；②A5a 断言未随 4bd0f0bd 配对 URL 主推 /pair 双形态同步 → 隧道 connected 时误报。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-355: 设置页移除「计算执行」遗留卡（计算与数据分区瘦身）(2026-09-13 verified，dev Electron 边界内 CDP 2/2)
 
 - **来源**：用户裁决「设置中的 计算与数据 这里面的内容也都不需要了吧 历史遗留」。
 - **甄别（删遗留、留活功能）**：①「计算执行」卡（执行位置 本地/远程集群 下拉 + 保存计算设置）＝**真遗留**——其写入的 `BIOF3_COMPUTE_MODE` 全仓零读者，「远程集群」模式自 BLOCK-30 架构解耦后即死面 → 移除，`sections/ComputeExecution.tsx` 成孤儿文件一并删除（面板对 DEFAULT_COMPUTE_SETTINGS/normalizeComputeSettings 的 import 已先期失配，实测仅 import 行残留）。②「远程执行目标（SSH）」＝**BLOCK-57/60/67 活功能**（dell 目标就绪且为 BLOCK-67 SSH 项目默认目标；后端执行器消费 execution_targets 注册表）→ 保留。
 - **证据**：`acceptance/ui-355/ui355-compute-card-removal-live.json` 2/2 ALL PASS（R2 远程执行目标在 / R3 分区内计算执行+执行位置+保存计算设置字样零命中——断言 scoped 到分区容器，body 级误报来自摘要卡 BLOCK-78 执行位置标注）+ 截图 `compute-section.png`；tsc 0；相关 vitest 48/48。
-- **登记后续清理候选**：`src/ipc/compute-settings.js` 的 BIOF3_COMPUTE_MODE 写入链（IPC handler + preload 桥 + electron.d.ts 字段）已成死代码——preload.js 在 P6 canonical source-binding 内，随 P6 证据重采（G0-RS 线）一并清理，避免单独触发 D8 fail-closed。
+- **登记后续清理候选**：`src/ipc/compute-settings.js` 的 BIOF3_COMPUTE_MODE 写入链（IPC handler + preload 桥 + electron.d.ts 字段）已成死代码——preload.js 在 P6 canonical source-binding 内，随 P6 证据重采（G0-RS 线）一并清理，避免单独触发 D8 fail-closed。**→ 已兑现（2026-09-13 G0-RS P1，提交 `cd9781c`）**：死链 8 处删除零残留（含本行所指全部文件），UI-355 台账锚定注记同提交补记。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-356: 「Harness 分析环境」文案改版为「运行环境包」（遗留措辞清理，功能零变化）(2026-09-13 verified，dev Electron 边界内 CDP 2/2)

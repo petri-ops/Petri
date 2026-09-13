@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
   "acceptanceId": "BLOCK-70-A1-P0-P1-LIVE",
-  "generatedAt": "2026-09-12T21:50:07.264Z",
+  "generatedAt": "2026-09-13T11:45:35.318Z",
   "qualificationEligible": false,
   "allPass": true,
   "checks": [
     {
       "name": "A1a 关闭态主后端健康",
       "ok": true,
-      "detail": "{\"status\":\"ok\",\"timestamp\":\"2026-09-12T21:50:06.293Z\",\"version\":\"1.0.0\",\"db_ok\":true}"
+      "detail": "{\"status\":\"ok\",\"timestamp\":\"2026-09-13T11:45:34.549Z\",\"version\":\"1.0.0\",\"db_ok\":true}"
     },
     {
       "name": "A1b 关闭态移动端口不监听",
       "ok": true,
-      "detail": "port 65511 should be closed"
+      "detail": "port 51089 should be closed"
     },
     {
       "name": "A1c 关闭态管理面如实呈现 enabled=false",
       "ok": true,
-      "detail": "{\"ok\":true,\"enabled\":false,\"port\":65511,\"restartHint\":\"启用/关闭在重启桌面端后生效\",\"lanAddresses\":[\"192.168.0.102\"],\"activeDevices\":0,\"devices\":[],\"pairingPending\":0}"
+      "detail": "{\"ok\":true,\"enabled\":false,\"port\":51089,\"restartHint\":\"启用/关闭在重启桌面端后生效\",\"lanAddresses\":[\"192.168.0.102\"],\"activeDevices\":0,\"devices\":[],\"pairingPending\":0,\"tunne"
     },
     {
       "name": "A2 gateway 健康",
@@ -33,12 +33,12 @@
     {
       "name": "A4 管理面 status 如实",
       "ok": true,
-      "detail": "{\"ok\":true,\"enabled\":true,\"port\":65518,\"restartHint\":\"启用/关闭在重启桌面端后生效\",\"lanAddresses\":[\"192.168.0.102\"],\"activeDevices\":0,\"devices\":0,\"pairingPending\":0}"
+      "detail": "{\"ok\":true,\"enabled\":true,\"port\":62995,\"restartHint\":\"启用/关闭在重启桌面端后生效\",\"lanAddresses\":[\"192.168.0.102\"],\"activeDevices\":0,\"devices\":0,\"pairingPending\":0,\"tunnel\":{\"configured\":false,\"enabled\":false,\"state\":\"disabled\",\"host\":\"\",\"remotePort\":2233,\"localPort\":3005,\"publicUrl\":\"\",\"lastError\":\"\",\"pid\":nul"
     },
     {
       "name": "A5a 配对 token 签发",
       "ok": true,
-      "detail": "{\"ok\":true,\"token\":\"***\",\"expiresAt\":1789250106949,\"urls\":1,\"primaryUrl\":\"http://192.168.0.102:65518/m#ae23914afc3d34201c7afebb51fc7694f34c23409c3d3b610672b92079581f5f\"}"
+      "detail": "{\"ok\":true,\"token\":\"***\",\"expiresAt\":1789300235211,\"urls\":2,\"primaryUrl\":\"http://127.0.0.1:62995/pair?token=8f32e7ca9bf7954b82af81de58bf0923c4bc61fb69d41e90d1cf419374b52756\"}"
     },
     {
       "name": "A5b QR SVG 渲染",

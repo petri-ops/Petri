@@ -316,3 +316,88 @@ test('BLOCK-70 P2 mobile page ships control face (approval/cancel/composer marke
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+// ── 加映 4（2026-09-13 用户反馈）：一次认证长期有效，重复扫码不再堆积设备 ──
+
+test('BLOCK-70 加映4: pair reuses a valid session instead of minting a new one', async () => {
+  const root = tmpRoot();
+  resetStoresForTest();
+  try {
+    const express = require('express');
+    const adminApp = express();
+    adminApp.use(express.json({ limit: '4kb' }));
+    require(path.join(ROOT, 'core/biof3-server/routes/mobile-admin.js'))(adminApp, { dataDir: root });
+    const adminServer = await listen(adminApp);
+    const adminBase = `http://127.0.0.1:${adminServer.address().port}`;
+
+    const { app, stores } = buildMobileGateway({
+      dataDir: root,
+      mountRoutes: (mobileApp) => mobileApp.get('/m/api/probe', (_req, res) => res.json({ ok: true })),
+    });
+    const server = await listen(app);
+    const base = `http://127.0.0.1:${server.address().port}`;
+
+    // 首次配对：新会话 + 1 年长效 cookie
+    const token1 = stores.pairing.issue().token;
+    const first = await body(await fetch(`${base}/m/api/pair`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: token1 }),
+    }));
+    assert.equal(first.ok, true);
+    assert.equal(first.reused, undefined, 'first pair must create a session');
+    assert.match(first.sessionId, /^mdev_/);
+
+    const status1 = await body(await fetch(`${adminBase}/api/mobile/status`));
+    assert.equal(status1.activeDevices, 1);
+
+    // 同一携带有效会话再次兑换：复用原会话（reused=true），不新增记录
+    const token2 = stores.pairing.issue().token;
+    const second = await body(await fetch(`${base}/m/api/pair`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${first.sessionToken}` },
+      body: JSON.stringify({ token: token2 }),
+    }));
+    assert.equal(second.ok, true);
+    assert.equal(second.reused, true);
+    assert.equal(second.sessionId, first.sessionId, 'must reuse the existing valid session');
+    const status2 = await body(await fetch(`${adminBase}/api/mobile/status`));
+    assert.equal(status2.activeDevices, 1, 're-pairing must not mint a new device record');
+
+    // 无既有会话的新兑换：新会话名带短尾缀（同名设备可区分）
+    const token3 = stores.pairing.issue().token;
+    const third = await body(await fetch(`${base}/m/api/pair`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: token3 }),
+    }));
+    assert.equal(third.ok, true);
+    assert.notEqual(third.sessionId, first.sessionId);
+    const status3 = await body(await fetch(`${adminBase}/api/mobile/status`));
+    const created = status3.devices.find((d) => d.id === third.sessionId);
+    assert.ok(created, 'new session visible in admin status');
+    assert.doesNotMatch(created.name, /^移动设备$/, 'bare name must carry a distinguishing suffix');
+
+    // 桌面投影 /pair：有效 cookie + 新 token → 复用会话，Set-Cookie 长效
+    // （依赖 frontend/dist 已构建；未构建的干净树跳过该段，不假红）
+    if (existsSync(path.join(ROOT, 'frontend', 'dist', 'index.html'))) {
+      const token4 = stores.pairing.issue().token;
+      const desktopPair = await fetch(`${base}/pair?token=${encodeURIComponent(token4)}`, {
+        headers: { Cookie: `gw_session=${first.sessionToken}` },
+        redirect: 'manual',
+      });
+      assert.equal(desktopPair.status, 302, '/pair must redirect after pairing');
+      const setCookie = desktopPair.headers.get('set-cookie') || '';
+      assert.match(setCookie, /Max-Age=31536000/, 'session cookie must be one year');
+      assert.ok(setCookie.includes(`gw_session=${first.sessionToken}`), 'cookie must reuse the existing session token');
+      const status4 = await body(await fetch(`${adminBase}/api/mobile/status`));
+      assert.equal(status4.activeDevices, 2, 'desktop re-pair must reuse the session, not mint a third record');
+    }
+
+    await closeServer(server);
+    await closeServer(adminServer);
+  } finally {
+    resetStoresForTest();
+    rmSync(root, { recursive: true, force: true });
+  }
+});
