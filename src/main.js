@@ -449,7 +449,6 @@ async function main() {
   // BLOCK-9.1 PHASE 1: low-risk setup functions moved to src/ipc/*.js
   const { setupTelemetryIpc } = require("./ipc/telemetry");
   const { setupHarnessCapabilitiesIpc } = require("./ipc/harness-capabilities");
-  const { setupComputeSettingsIpc } = require("./ipc/compute-settings");
   const { setupAiSettingsIpc } = require("./ipc/ai-settings");
   const { setupFileDialogIpc } = require("./ipc/file-dialog");
   const { setupDataManagementIpc } = require("./ipc/data-management");
@@ -457,7 +456,6 @@ async function main() {
   const { setupWorkingTreeReviewIpc } = require("./ipc/working-tree-review");
   const { setupResultIpc } = require("./ipc/result-handlers");
   setupAiSettingsIpc({ mainWindow: () => mainWindow });
-  setupComputeSettingsIpc();
   setupTelemetryIpc();
   setupHarnessCapabilitiesIpc();
   setupFileDialogIpc({ mainWindow });

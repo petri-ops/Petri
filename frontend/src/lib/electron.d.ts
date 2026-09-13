@@ -29,13 +29,6 @@ export interface TelemetryPayload {
   errorSummary?: string;
 }
 
-export interface ComputeSettings {
-  computeMode: 'local' | 'remote';
-  remoteComputeUrl: string;
-  remoteComputeToken: string;
-  remoteComputeName: string;
-}
-
 /** Stage 3 M1: one entry from the Harness provisioning ledger. */
 export interface HarnessCapabilityEntry {
   capabilityId: string;
@@ -173,10 +166,6 @@ declare global {
         getCredential: (credentialId: string) => Promise<{ ok: boolean; apiKey: string; error?: string }>;
         test: (providerOrProfile: string | Record<string, unknown>, apiKey: string) => Promise<{ ok: boolean; message: string }>;
         listModels: (providerOrProfile: string | Record<string, unknown>, apiKey: string) => Promise<{ ok: boolean; models: string[]; message: string }>;
-      };
-      computeSettings: {
-        get: () => Promise<ComputeSettings>;
-        save: (settings: ComputeSettings) => Promise<{ ok: boolean; error?: string; restartRequired?: boolean }>;
       };
       /** Stage 3 M1: read-only view of Harness-provisioned capabilities (runtimes/bundles). */
       harnessCapabilities: {

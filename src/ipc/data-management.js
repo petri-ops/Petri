@@ -67,12 +67,6 @@ function setupDataManagementIpc() {
           breakdown["ai-settings.json"] = fs.statSync(aiPath).size;
         } catch {}
       }
-      const computePath = path.join(dataDir, "compute-settings.json");
-      if (fs.existsSync(computePath)) {
-        try {
-          breakdown["compute-settings.json"] = fs.statSync(computePath).size;
-        } catch {}
-      }
       const total = Object.values(breakdown).reduce((a, b) => a + b, 0);
       return { ok: true, dataDir, total, breakdown };
     } catch (e) {

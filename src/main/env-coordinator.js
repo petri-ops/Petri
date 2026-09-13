@@ -13,12 +13,6 @@
 //   4. Backend ports env injection (process.env.R_SERVER_PORT etc.)
 //   5. Trusted renderer origins (CSP allowlist)
 //   6. Built-in plugins dir env
-//   7. Compute settings apply (local vs remote default)
-//
-// `_applyComputeSettings` and `_loadComputeSettings` are imported
-// from src/ipc/compute-settings.js (they were extracted there in
-// BLOCK-9.1 PHASE 1, but the call site stayed in setupDesktopEnv
-// which lived in main.js — so we import them here).
 //
 // Required inputs:
 //   - backendPorts { r, renderer }（BLOCK-30 P2：gateway/python 已摘除；
@@ -37,7 +31,6 @@ const fs = require("fs");
 const { app } = require("electron");
 const { resolveLocalDirName } = require("./brand");
 const { getBuiltInPluginsDir } = require("../platform-compat");
-const { _applyComputeSettings, _loadComputeSettings } = require("../ipc/compute-settings");
 
 // Re-define IS_DEV locally (mirror of main.js logic)
 // In main.js IS_DEV = !app.isPackaged. We keep the same rule.
@@ -332,9 +325,6 @@ function setupDesktopEnv(backendPorts) {
     projectRoot: getProjectRootLocal(),
     resourcesPath: process.resourcesPath,
   });
-
-  // 计算执行配置：默认本地优先；若用户已保存远端集群配置，则一并注入
-  _applyComputeSettings(_loadComputeSettings());
 }
 
 module.exports = {

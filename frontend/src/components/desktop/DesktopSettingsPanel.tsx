@@ -14,7 +14,6 @@ import {
   type ChatModelPreset,
 } from '@/hooks/useAiSettings';
 import { useAutoUpdate } from '@/hooks/useAutoUpdate';
-import type { ComputeSettings } from '@/lib/electron';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 import { useRuntimeResourceSnapshot } from '@/hooks/useRuntimeResourceSnapshot';
 import { ExperimentalFeaturesSection } from '@/components/settings/ExperimentalFeaturesSection';

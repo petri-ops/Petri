@@ -184,12 +184,6 @@ const desktopBridgeSurface = {
     listModels: (providerOrProfile, apiKey) => ipcRenderer.invoke('ai-settings:list-models', providerOrProfile, apiKey),
   },
 
-  // 计算执行配置
-  computeSettings: {
-    get: () => ipcRenderer.invoke('compute-settings:get'),
-    save: (settings) => ipcRenderer.invoke('compute-settings:save', settings),
-  },
-
   // Harness 能力预备 — Stage 3 M1：只读，展示已自备的运行时/包 bundle
   harnessCapabilities: {
     list: () => ipcRenderer.invoke('harness-capabilities:list'),
