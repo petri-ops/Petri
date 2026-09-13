@@ -160,6 +160,7 @@
 117. [`session-handoff-2026-09-13.md`](./session-handoff-2026-09-13.md) — 2026-09-13 会话交接文档（换对话框继续开发用）：G0 阶段纪律铁律 + 当前状态（main 零差量 / HEAD `d5a62b2e` / active BLOCK-84 待释放裁决）+ 两条待裁决遗留（101 项 BLOCK-83 A/C 类测试债、AUDIT-LOG 2 条 🟢）+ 环境硬前置（Node 24 / `ELECTRON_RUN_AS_NODE` / dev 栈端口 / CDP）+ 门禁与定向测试纪律 + 基线对照纪律 + Windows 测试债四类因根 + 并行会话纪律 + 三 skill 入口 + 开工动作。
 118. [`block-70-mobile-sync-plan.md`](./block-70-mobile-sync-plan.md) — 2026-09-09 立项（2026-09-13 启动 active，P0-LAUNCH）：**手机远程同步**——扫码 → 手机浏览器直达工作区（路线 A：A1 同 WiFi 直连 mobile-gateway + A2 aliyun 反向隧道 P3）。
 119. [`block-70-p0-design-review.md`](./block-70-p0-design-review.md) — 2026-09-13 落盘的 BLOCK-70 P0 设计评审稿（plan §4 代码事实 8/8 核对一致；D1-D10 确认；qrcode-generator 依赖裁决 ⏳ 待用户追认；真实手机扫码验收留用户）。
+120. [`mobile-tunnel-aliyun-setup.md`](./guides/mobile-tunnel-aliyun-setup.md) — BLOCK-70 P3 aliyun 反向隧道一次性配置指引（无域名/IP 版：自签证书 + nginx 443 反代 SSE 关缓冲 + 安全组 + 面板配置 + 排障 + ZeroSSL IP 证书升级路径）。
 
 ## Branch Conversation 架构
 

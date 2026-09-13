@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "acceptanceId": "BLOCK-70-P3-TUNNEL-LIVE",
+  "generatedAt": "2026-09-13T00:16:26.843Z",
+  "qualificationEligible": false,
+  "allPass": true,
+  "checks": [
+    {
+      "name": "T1_tunnel_defaults_disabled",
+      "ok": true,
+      "detail": "{\"configured\":false,\"enabled\":false,\"state\":\"disabled\",\"host\":\"\",\"remotePort\":2233,\"localPort\":3005,\"publicUrl\":\"\",\"lastError\":\"\",\"pid\":null,\"stateSinceTs\":1789258563037}"
+    },
+    {
+      "name": "T2a_config_applied",
+      "ok": true,
+      "detail": "{\"configured\":true,\"enabled\":true,\"state\":\"connecting\",\"host\":\"aliyun\",\"remotePort\":63052,\"localPort\":63051,\"publicUrl\":\"https://112.120.48.126\",\"lastError\":\"\",\"pid\":32276,\"stateSinceTs\":1789258563333}"
+    },
+    {
+      "name": "T2_tunnel_connected",
+      "ok": true,
+      "detail": "{\"configured\":true,\"enabled\":true,\"state\":\"connected\",\"host\":\"aliyun\",\"remotePort\":63052,\"localPort\":63051,\"publicUrl\":\"https://112.120.48.126\",\"lastError\":\"\",\"pid\":32276,\"stateSinceTs\":1789258573551}"
+    },
+    {
+      "name": "T3_end_to_end_through_tunnel",
+      "ok": true,
+      "detail": "{\"ok\":true,\"service\":\"gewu-mobile-gateway\"}"
+    },
+    {
+      "name": "T4_protected_route_401_via_tunnel",
+      "ok": true,
+      "detail": "401"
+    },
+    {
+      "name": "T5_pairing_prefers_public_url",
+      "ok": true,
+      "detail": "https://112.120.48.126/m#***"
+    },
+    {
+      "name": "T6_auto_reconnect_after_kill",
+      "ok": true,
+      "detail": "{\"configured\":true,\"enabled\":true,\"state\":\"connected\",\"host\":\"aliyun\",\"remotePort\":63052,\"localPort\":63051,\"publicUrl\":\"https://112.120.48.126\",\"lastError\":\"\",\"pid\":32276,\"stateSinceTs\":1789258573551}"
+    },
+    {
+      "name": "T7_disable_stops_tunnel",
+      "ok": true,
+      "detail": "{\"configured\":false,\"enabled\":false,\"state\":\"disabled\",\"host\":\"\",\"remotePort\":2233,\"localPort\":3005,\"publicUrl\":\"\",\"lastError\":\"\",\"pid\":null,\"stateSinceTs\":1789258585817}"
+    }
+  ],
+  "notes": {
+    "method": "real ssh -R reverse tunnel to user aliyun host; end-to-end via remote loopback curl (nginx not required for this proof)",
+    "redaction": "pairing tokens masked in evidence",
+    "honestBoundary": "public 443 exposure requires aliyun-side reverse proxy (self-signed TLS) + security-group; real-phone external-network scan pending user"
+  }
+}

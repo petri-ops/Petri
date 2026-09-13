@@ -1533,6 +1533,12 @@
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/MobileSync.tsx",
         "test/block70-*.test.mjs",
         "scripts/block70-*",
+        "scripts/ui354-*",
+        "scripts/ui355-*",
+        "scripts/ui356-*",
+        "acceptance/ui-354/**",
+        "acceptance/ui-355/**",
+        "acceptance/ui-356/**",
         "acceptance/block-70/**"
       ],
       "tests": [

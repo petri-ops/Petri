@@ -27,6 +27,17 @@ interface PairingInfo {
   primaryUrl: string;
 }
 
+interface TunnelStatus {
+  configured: boolean;
+  enabled: boolean;
+  state: 'disabled' | 'connecting' | 'connected' | 'reconnecting';
+  host: string;
+  remotePort: number;
+  localPort: number;
+  publicUrl: string;
+  lastError: string;
+}
+
 function authHeaders(): Record<string, string> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   const token = getToken();
@@ -42,6 +53,9 @@ function authHeaders(): Record<string, string> {
 export function MobileSyncPanel(): React.ReactElement {
   const [status, setStatus] = useState<MobileStatus | null>(null);
   const [pairing, setPairing] = useState<PairingInfo | null>(null);
+  const [tunnel, setTunnel] = useState<TunnelStatus | null>(null);
+  const [tunnelHost, setTunnelHost] = useState('');
+  const [tunnelPublicUrl, setTunnelPublicUrl] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,6 +69,17 @@ export function MobileSyncPanel(): React.ReactElement {
       }
     } catch {
       setError('无法读取手机远程状态');
+    }
+    try {
+      const response = await fetch(`${getPlatformApiPrefix()}/mobile/tunnel`, { headers: authHeaders() });
+      const data = await response.json();
+      if (data.ok) {
+        setTunnel(data.tunnel);
+        setTunnelHost((prev) => prev || data.tunnel.host || '');
+        setTunnelPublicUrl((prev) => prev || data.tunnel.publicUrl || '');
+      }
+    } catch {
+      /* 隧道状态读取失败不阻塞主面板 */
     }
   }, []);
 
@@ -124,6 +149,35 @@ export function MobileSyncPanel(): React.ReactElement {
     }
   }, [refresh]);
 
+  // P3 — 反向隧道配置保存（enabled 切换 + host/publicUrl 编辑）。
+  const saveTunnel = useCallback(async (patch: { enabled?: boolean }) => {
+    setBusy(true);
+    try {
+      const response = await fetch(`${getPlatformApiPrefix()}/mobile/tunnel/config`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          ...patch,
+          host: tunnelHost.trim(),
+          publicUrl: tunnelPublicUrl.trim(),
+        }),
+      });
+      const data = await response.json();
+      if (data.ok) {
+        setTunnel(data.tunnel);
+        setTunnelHost(data.tunnel.host || '');
+        setTunnelPublicUrl(data.tunnel.publicUrl || '');
+        await refresh();
+      } else {
+        setError(data.message || '隧道配置保存失败');
+      }
+    } catch {
+      setError('隧道配置保存失败');
+    } finally {
+      setBusy(false);
+    }
+  }, [tunnelHost, tunnelPublicUrl, refresh]);
+
   return (
     <div data-testid="mobile-sync-panel">
       <p className="gewu-field__hint">
@@ -183,6 +237,49 @@ export function MobileSyncPanel(): React.ReactElement {
             </li>
           ))}
         </ul>
+      )}
+
+      {tunnel && (
+        <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--gewu-line, #2a303b)' }} data-testid="mobile-tunnel-section">
+          <h4>真远程（反向隧道）</h4>
+          <p className="gewu-field__hint">
+            通过你自己的 SSH 服务器（如 aliyun）中转，不在同一 WiFi 也能用。桌面端只发出站连接；
+            服务器侧需一次性配置反代（HTTPS），见部署指引。
+          </p>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginTop: 6 }}>
+            <input
+              type="text"
+              value={tunnelHost}
+              onChange={(event) => setTunnelHost(event.target.value)}
+              placeholder="SSH 主机别名（~/.ssh/config 的 Host，如 aliyun）"
+              style={{ flex: '1 1 180px', minWidth: 0 }}
+            />
+            <button type="button" disabled={busy} onClick={() => { void saveTunnel({ enabled: !tunnel.enabled }); }}>
+              {tunnel.enabled ? '停用隧道' : '启用隧道'}
+            </button>
+            <span className="gewu-field__hint">
+              {tunnel.state === 'connected' ? '✓ 已连接·公网可用'
+                : tunnel.state === 'connecting' ? '连接中…'
+                  : tunnel.state === 'reconnecting' ? `断开，重连中${tunnel.lastError ? `（${tunnel.lastError}）` : ''}`
+                    : '未启用'}
+            </span>
+          </div>
+          <input
+            type="text"
+            value={tunnelPublicUrl}
+            onChange={(event) => setTunnelPublicUrl(event.target.value)}
+            placeholder="公网地址（如 https://112.120.48.126，服务器反代配置好后填）"
+            style={{ width: '100%', marginTop: 6 }}
+          />
+          <button
+            type="button"
+            disabled={busy}
+            style={{ marginTop: 6 }}
+            onClick={() => { void saveTunnel({}); }}
+          >
+            保存隧道配置
+          </button>
+        </div>
       )}
     </div>
   );

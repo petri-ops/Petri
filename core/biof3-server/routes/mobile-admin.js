@@ -17,6 +17,7 @@ const path = require('node:path');
 const qrcode = require('qrcode-generator');
 
 const { getStores } = require('../mobile-gateway/pairing');
+const { writeTunnelConfig, readTunnelConfig, getTunnelManager } = require('../mobile-gateway/tunnel');
 const { writeConfig, lanAddresses, resolveEnabled, resolvePort } = require('../mobile-gateway/config');
 
 function resolveDataDir() {
@@ -43,8 +44,50 @@ module.exports = function registerMobileAdmin(app, { dataDir } = {}) {
       activeDevices: active.length,
       devices: stores.sessions.list(),
       pairingPending: stores.pairing.pendingCount(),
+      tunnel: getTunnelManager(dir).status(),
     });
   });
+
+  // ── BLOCK-70 P3 — aliyun 反向隧道（A2 真远程）────────────────────
+  // GET  /api/mobile/tunnel         四态：disabled/connecting/connected/reconnecting
+  // POST /api/mobile/tunnel/config  {host(ssh 别名), remotePort, localPort, publicUrl, enabled}
+  app.get('/api/mobile/tunnel', (_req, res) => {
+    res.json({ ok: true, tunnel: getTunnelManager(dir).status() });
+  });
+
+  app.post('/api/mobile/tunnel/config', express.json({ limit: '4kb' }), (req, res) => {
+    const body = req.body || {};
+    const host = typeof body.host === 'string' ? body.host.trim() : '';
+    if (host && !/^[A-Za-z0-9._-]{1,120}$/.test(host)) {
+      res.status(400).json({ ok: false, error: 'invalid_host', message: 'SSH 主机别名必须是 ~/.ssh/config 里的 Host 名（字母数字._-）' });
+      return;
+    }
+    if (body.enabled === true && !host && !readTunnelConfig(dir).host) {
+      res.status(400).json({ ok: false, error: 'host_required', message: '启用隧道前请先填写 SSH 主机别名' });
+      return;
+    }
+    const tunnel = getTunnelManager(dir).apply({
+      enabled: typeof body.enabled === 'boolean' ? body.enabled : undefined,
+      host,
+      remotePort: body.remotePort,
+      localPort: body.localPort,
+      publicUrl: body.publicUrl,
+    });
+    res.json({ ok: true, tunnel });
+  });
+
+  // 配对 URL 序：隧道已连接且配了公网地址 → 公网优先，LAN 兜底（P3 真远程）。
+  function pairingUrlsFor(token) {
+    const port = resolvePort({ dataDir: dir });
+    const lan = lanAddresses().map((ip) => `http://${ip}:${port}/m#${token}`);
+    const tunnel = getTunnelManager(dir).status();
+    if (tunnel.enabled && tunnel.state === 'connected' && tunnel.publicUrl) {
+      const publicUrl = `${tunnel.publicUrl.replace(/\/+$/, '')}/m#${token}`;
+      return [publicUrl, ...lan];
+    }
+    if (lan.length === 0) lan.push(`http://127.0.0.1:${port}/m#${token}`);
+    return lan;
+  }
 
   app.post('/api/mobile/config', express.json({ limit: '4kb' }), (req, res) => {
     const next = writeConfig(dir, {
@@ -55,10 +98,8 @@ module.exports = function registerMobileAdmin(app, { dataDir } = {}) {
   });
 
   app.post('/api/mobile/pairing/token', express.json({ limit: '4kb' }), (req, res) => {
-    const port = resolvePort({ dataDir: dir });
     const { token, expiresAt } = getStores(dir).pairing.issue();
-    const urls = lanAddresses().map((ip) => `http://${ip}:${port}/m#${token}`);
-    if (urls.length === 0) urls.push(`http://127.0.0.1:${port}/m#${token}`);
+    const urls = pairingUrlsFor(token);
     res.json({ ok: true, token, expiresAt, urls, primaryUrl: urls[0] });
   });
 
@@ -69,9 +110,7 @@ module.exports = function registerMobileAdmin(app, { dataDir } = {}) {
       res.status(400).type('text/plain').send('invalid pairing token');
       return;
     }
-    const port = resolvePort({ dataDir: dir });
-    const urls = lanAddresses().map((ip) => `http://${ip}:${port}/m#${token}`);
-    const url = urls[0] || `http://127.0.0.1:${port}/m#${token}`;
+    const url = pairingUrlsFor(token)[0];
     const qr = qrcode(0, 'M');
     qr.addData(url);
     qr.make();
