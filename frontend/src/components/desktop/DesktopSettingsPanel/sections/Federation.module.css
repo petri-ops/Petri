@@ -1,0 +1,130 @@
+/* BLOCK-85 格物联邦 — 协作节点面板（视觉沿用 MobileSync 修订 4 风格） */
+
+.fedPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 264px;
+  max-width: 340px;
+  font-size: var(--font-size-body, 13px);
+  color: var(--gewu-text);
+}
+
+.fedHint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--gewu-text-tertiary);
+}
+
+.addCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--gewu-border, #e4e4e7);
+  border-radius: 12px;
+  background: var(--gewu-bg-subtle);
+}
+
+.addTitle {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.addInput {
+  width: 100%;
+  font-size: 12px;
+  padding: 8px 9px;
+  border: 1px solid var(--gewu-border, #e4e4e7);
+  border-radius: 8px;
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
+  font-family: var(--font-mono, ui-monospace, monospace);
+}
+
+.addInput::placeholder {
+  color: var(--gewu-text-muted);
+}
+
+.addRow {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.peerList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.peerCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--gewu-border, #e4e4e7);
+  border-radius: 10px;
+  background: var(--gewu-bg-surface);
+}
+
+.peerDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--gewu-text-muted);
+  flex: none;
+}
+
+.peerDotOn {
+  background: #10b981;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #10b981 18%, transparent);
+}
+
+.peerDotOff {
+  background: #ef4444;
+}
+
+.peerMain {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.peerName {
+  font-size: 12.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.peerMeta {
+  font-size: 11px;
+  color: var(--gewu-text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.emptyState {
+  font-size: 12px;
+  color: var(--gewu-text-muted);
+  text-align: center;
+  padding: 14px 8px;
+  border: 1px dashed var(--gewu-border, #e4e4e7);
+  border-radius: 10px;
+}
+
+.errorText {
+  margin: 0;
+  font-size: 12px;
+  color: #dc2626;
+}

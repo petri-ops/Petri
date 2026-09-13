@@ -47,6 +47,8 @@ module.exports = async function registerRoutes(app) {
     ['AI settings', () => require('./ai-settings-api').registerAiSettingsRoutes(app)],
     // BLOCK-70：手机远程同步管理面（桌面端本机 REST；移动面本体在 mobile-gateway 独立实例）。
     ['Mobile sync admin', () => require('./mobile-admin')(app)],
+    // BLOCK-85：格物联邦协作节点管理面（指挥席侧；对端执行面本体在对端格物的 gateway）。
+    ['Federation admin', () => require('./federation-admin')(app)],
   ];
 
   for (const [name, fn] of routes) {

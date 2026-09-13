@@ -203,6 +203,32 @@ function buildMobileGateway({
   // ——包括挂载的全量 /api/* 路由——都必须持有效会话（D4）。
   app.use(sessionAuth);
 
+  // ── BLOCK-85 格物联邦（D1/D3）：对端格物经此端点握手本机节点能力 ──
+  // 会话门内（配对后才能读）；指挥席用兑换到的会话 Bearer 调用。
+  const os = require('node:os');
+  app.get('/federation/api/health', (_req, res) => {
+    let executors = { r: false, python: false };
+    try {
+      const { getExecutor } = require('../../shared-backend/executors');
+      for (const lang of ['r', 'python']) {
+        const executor = getExecutor(lang);
+        executors[lang] = Boolean(executor && executor.binPath && fs.existsSync(executor.binPath));
+      }
+    } catch { /* 执行器探测失败诚实报 false */ }
+    res.json({
+      ok: true,
+      service: 'gewu-federation',
+      protocol: 1,
+      node: {
+        name: os.hostname(),
+        platform: process.platform,
+        arch: process.arch,
+      },
+      gewuVersion: process.env.npm_package_version || '0.0.1-rc.7',
+      executors,
+    });
+  });
+
   // P2 控制面窄口：批准决定（进程内直调 db.ackToolJob，权限不放大）。
   require('./control').registerMobileControl(app);
 

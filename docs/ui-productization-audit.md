@@ -3338,6 +3338,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **P2 控制面（2026-09-13 追加实现）**：移动页升级为控制面——任务详情页批准卡（SSE `needApproval` 事件驱动：工具名+目标摘要+脱敏 params，**两步确认**按钮 D4）+ 取消任务按钮 + 会话页/全局 composer 发消息（POST `/api/ai/agent` 复用 chat.js 路由）。后端新增窄口 `mobile-gateway/control.js` `POST /m/api/approvals/:token/decide`——进程内直调 `db.ackToolJob`（与桌面确认卡 `routes/ai-legacy.js` 的 `POST /api/ai/run-tool-ack/:token` **同一函数同一 scope 校验，权限不放大**；不发 HTTP 自调用，对标 BLOCK-49 直调先例）。验证：集成测试 10/10 + **实机隔离探针 28/28 ALL PASS**（新增 B 系列：吊销后可重新配对/发消息 401+契约 400/取消 401+结构化 404/批准无会话 401+缺 scope 400+**scope 不匹配 404 权限不放大**+批准放行落库 ack_status=approved 且 job 不被破坏+拒绝落库 rejected+failed）。`acceptance/block-70/block70-mobile-gateway-live.json`。
 - **实现提交对账（UI-357 桌面投影 / P3 隧道 UI 归入本条目）**：P2 控制面 = 3c3bdb17；P3 隧道三态呈现与公网 QR 切换 = 1c40b35（该提交含 MobileSync.tsx 隧道区 UI 增量，同提交台账漏同步——已补登本段并按 c177374 先例登记 LEGACY 豁免）；桌面投影 = 79fea4a5。「手机发起→桌面执行（真实模型）→手机批准→手机收终态」全链与 dev 栈 CDP 设置区断言未执行（前者需真实 LLM 环境）——前者待 dev 栈窗口，后者**CDP 够不着**，按无人化验收阶梯第 2 级如实停留 `in_progress`，待用户照测试路线实测后升级；P2 控制面（发消息/批准/取消）与 P3 aliyun 隧道属后续阶段未实现。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-358: 「协作节点」面板——格物联邦 P1 联邦通道（左栏底部第三入口，2026-09-13 verified，dev Electron 边界内 CDP）
+
+- **来源**：BLOCK-85 格物联邦（用户裁决「确认」D1–D8 + 「都要」双粒度）。P1 交付=联邦通道：对端格物 `/federation/api/health` 握手端点（挂 mobile-gateway 会话门内：节点名/平台/格物版本/执行器就绪/协议版本）+ 指挥席侧 `federation-peers.js` 节点注册表（`<dataDir>/federation/peers.json`，指挥席保管会话凭证；对端 sessions.json 仍只存 hash）+ `/api/federation/peers` REST（pair/probe/list/delete）+ `FederationPanel` 协作面板 + 左栏底部第三入口（CPU 图标，与手机连接并列）。
+- **配对流程（D2 零新机制）**：对端格物「手机连接」面板生成配对码 → 本端「协作节点」面板粘贴链接 → 兑换会话 + 握手 → 落盘；同 baseUrl 重配对 upsert 不重复。
+- **证据**：集成探针 `test/federation.test.mjs` 1/1（真实双实例：配对→握手→探测→**对端吊销即 401**→重配对 upsert→删除→坏输入）；tsc 0；实机 CDP `acceptance/block-85/p1-federation-panel.png`（左栏三入口 + 弹层面板/输入/提交/空态全渲染）。
+- **实机抓真**：express.json 双重解析（测试 app 级 + admin 路由级）消费已耗尽 stream → 500——测试挂法对齐生产（app 不挂全局 json）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-354: 顶栏最右侧「手机远程 + 设置」双入口（对标 ZCode 顶栏布局）(2026-09-13 verified，dev Electron 边界内 CDP 8/8)
 
 - **来源**：用户裁决「设置移动到最右侧 手机远程的页面 放到 设置的左侧 类似于 zcode 的效果」+ ZCode 顶栏截图对照（手机图标在设置齿轮左侧）。
@@ -3346,7 +3354,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **实机抓真一（层叠上下文）**：position:fixed 弹层在 TitleBar 的 stacking context 内 z-index 10001 仍被右侧栏盖住左半——fixed 不脱离创建 stacking context 的祖先；修复＝`createPortal(document.body)`。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-### UI-354 修订 1（2026-09-13，用户裁决「手机连接和设置应该在左侧栏最下方 目前被你改动到了右侧栏最上方了」）
+## UI-354 修订 1（2026-09-13，用户裁决「手机连接和设置应该在左侧栏最下方 目前被你改动到了右侧栏最上方了」）
 
 - **位置纠正**：双入口从顶栏迁回**左栏最下方**——底部一行 [📱 手机连接（左）][⚙️ 设置（最右）]（对标 ZCode 侧栏底部账户行；初版把截图 2 误读为顶栏）。顶栏三文件完整回退（TitleBarRightZone/useWorkspacePanels/project-workspace + TitleBar.module.css 清类）；`TitleBarState.onShowSettings` 随回退移除（左栏 ctx 本就有 handleShowSettings，无需跨树注入）。
 - **弹层**：手机连接点开的面板 portal 挂 body，锚**左下角**（`sidebarMobileCard`：left 12 / bottom 56），与右栏零遮挡；设置区「计算与数据」分区与弹层共用 `MobileSyncPanel` 不变。

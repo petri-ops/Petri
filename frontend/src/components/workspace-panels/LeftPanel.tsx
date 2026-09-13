@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from '@/components/icons/Icon';
 import { MobileSyncPanel } from '@/components/desktop/DesktopSettingsPanel/sections/MobileSync';
+import { FederationPanel } from '@/components/desktop/DesktopSettingsPanel/sections/Federation';
 import type { Project } from '@/lib/project-types';
 import { SshCreateInlinePanel } from './LeftSshCreatePanel';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
@@ -204,6 +205,7 @@ export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElem
  */
 function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   const [mobileRemoteOpen, setMobileRemoteOpen] = useState(false);
+  const [federationOpen, setFederationOpen] = useState(false);
   return (
     <div className={styles.leftPanelFooter}>
       <div className={styles.leftFooterRow}>
@@ -218,6 +220,18 @@ function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
         >
           <Icon name="smartphone" size={15} />
           <span>手机连接</span>
+        </button>
+        <button
+          type="button"
+          className={styles.leftQuickAction}
+          onClick={() => setFederationOpen((value) => !value)}
+          title="协作节点（与其他电脑的格物互派任务）"
+          aria-label="协作节点"
+          aria-expanded={federationOpen}
+          data-testid="sidebar-federation"
+        >
+          <Icon name="cpu" size={15} />
+          <span>协作节点</span>
         </button>
         <button
           type="button"
@@ -253,6 +267,31 @@ function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
               </button>
             </div>
             <MobileSyncPanel />
+          </div>
+        </>,
+        document.body,
+      )}
+      {federationOpen && createPortal(
+        <>
+          <button
+            type="button"
+            className={styles.sidebarMobileOverlay}
+            onClick={() => setFederationOpen(false)}
+            aria-label="关闭协作节点面板"
+          />
+          <div className={styles.sidebarMobileCard} role="dialog" aria-label="协作节点" data-testid="federation-popup">
+            <div className={styles.sidebarMobileCardHeader}>
+              <strong>协作节点</strong>
+              <button
+                type="button"
+                className={styles.leftFooterIconBtn}
+                onClick={() => setFederationOpen(false)}
+                aria-label="关闭"
+              >
+                <Icon name="x" size={14} />
+              </button>
+            </div>
+            <FederationPanel />
           </div>
         </>,
         document.body,
