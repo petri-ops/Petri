@@ -4,7 +4,7 @@
 > 安全模型：家里电脑**不开任何入站端口**；桌面端只发起出站 `ssh -R`（钉 aliyun 回环）；
 > 公网只有 aliyun 的 443（TLS 在 aliyun 终结）。以下均为**你自己的服务器**上的一次性操作。
 >
-> 本指引按 `root@112.120.48.126`（ECS Ubuntu，`~/.ssh/config` 别名 `aliyun`）示例；IP 换成你的。
+> 本指引按 `root@47.110.228.168`（ECS Ubuntu，`~/.ssh/config` 别名 `aliyun`）示例；IP 换成你的。
 
 ## ① 生成自签证书（IP 版，无域名）
 
@@ -13,8 +13,8 @@ ssh aliyun
 mkdir -p /etc/nginx/ssl
 openssl req -x509 -nodes -newkey rsa:2048 -days 825 \
   -keyout /etc/nginx/ssl/gewu.key -out /etc/nginx/ssl/gewu.crt \
-  -subj "/CN=112.120.48.126" \
-  -addext "subjectAltName=IP:112.120.48.126"
+  -subj "/CN=47.110.228.168" \
+  -addext "subjectAltName=IP:47.110.228.168"
 ```
 
 > 手机首次打开会弹「您的连接不是私密连接」——点「高级 → 继续访问」一次即可。
@@ -32,7 +32,7 @@ apt update && apt install -y nginx
 ```nginx
 server {
     listen 443 ssl;
-    server_name 112.120.48.126;
+    server_name 47.110.228.168;
 
     ssl_certificate     /etc/nginx/ssl/gewu.crt;
     ssl_certificate_key /etc/nginx/ssl/gewu.key;
@@ -73,7 +73,7 @@ nginx -t && systemctl reload nginx
 打开 Gewu 设置 →「计算与数据」→「手机连接」面板（或左栏底部「手机连接」）：
 
 - SSH 主机别名：`aliyun`
-- 公网地址：`https://112.120.48.126`
+- 公网地址：`https://47.110.228.168`
 - 点「启用隧道」→ 状态变 **✓ 已连接·公网可用**
 - 点「生成配对二维码」→ 此时二维码内容自动切换为公网地址
 
@@ -81,11 +81,11 @@ nginx -t && systemctl reload nginx
 
 ```bash
 # 本机验证公网入口（-k 跳过自签校验）
-curl -k https://112.120.48.126/m/api/health
+curl -k https://47.110.228.168/m/api/health
 # 期望：{"ok":true,"service":"gewu-mobile-gateway"}
 ```
 
-手机（任意网络）浏览器打开 `https://112.120.48.126/m` → 警告页点继续 →
+手机（任意网络）浏览器打开 `https://47.110.228.168/m` → 警告页点继续 →
 应显示「尚未配对」诚实空态 → 回桌面扫码即通。
 
 ## 排障
