@@ -4325,7 +4325,7 @@
         "block-83",
         "G0"
       ],
-      "notes": "2026-09-13 会话交接文档（换对话框继续开发用）：G0 阶段纪律铁律 + 当前状态（main 零差量 / HEAD d5a62b2e / active BLOCK-84 待释放裁决）+ 两条待裁决遗留（101 项 BLOCK-83 A/C 类债、AUDIT-LOG 2 条 🟢）+ Node24/ELECTRON_RUN_AS_NODE/dev 栈/CDP 环境硬前置 + 门禁与定向测试纪律 + 基线对照纪律 + Windows 测试债四类因根 + 并行会话纪律 + 三 skill 入口 + 开工动作。",
+      "notes": "2026-09-13 会话交接文档（晚间更新）：当晚成果（BLOCK-84 收口/遗留 A 清债/ABI 销号/BLOCK-70 P0–P4 整包 completed 真机验证）+ 当前无 active 工作包 + 下阶段计划（BLOCK-70 P5 候选/G0-RS/G0-SDC/挂账事项）+ 手机远程速查（公网入口/面板/吊销/孤儿清理）+ 环境硬前置 + 门禁与纪律 + 开工动作。",
       "registeredAt": "2026-09-13",
       "archivePolicy": "archive_when_superseded",
       "phase": "REFERENCE"
