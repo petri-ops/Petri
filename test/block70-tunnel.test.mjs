@@ -38,7 +38,7 @@ function fakeProcessFactory(spawned) {
 test('BLOCK-70 P3 tunnel config defaults and validation', () => {
   const root = tmpRoot();
   try {
-    assert.deepEqual(readTunnelConfig(root), { enabled: false, host: '', remotePort: 2233, localPort: 3005, publicUrl: '' });
+    assert.deepEqual(readTunnelConfig(root), { enabled: false, host: '', remotePort: 2233, localPort: 3005, publicUrl: '', profiles: [] });
     const next = writeTunnelConfig(root, { enabled: true, host: 'aliyun', remotePort: 2210, publicUrl: 'https://112.120.48.126' });
     assert.equal(next.enabled, true);
     assert.equal(next.host, 'aliyun');

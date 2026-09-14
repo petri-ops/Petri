@@ -61,6 +61,22 @@ interface TunnelStatus {
   lastError: string;
 }
 
+// BLOCK-87 — 中转服务器档案（配过的服务器存档，切换免重填）
+interface TunnelProfile {
+  name: string;
+  host: string;
+  publicUrl: string;
+  remotePort: number;
+}
+
+// BLOCK-87 — 中转服务器档案（配过的服务器存档，切换免重填）
+interface TunnelProfile {
+  name: string;
+  host: string;
+  publicUrl: string;
+  remotePort: number;
+}
+
 function authHeaders(): Record<string, string> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   const token = getToken();
@@ -77,6 +93,7 @@ export function MobileSyncPanel(): React.ReactElement {
   const [status, setStatus] = useState<MobileStatus | null>(null);
   const [pairing, setPairing] = useState<PairingInfo | null>(null);
   const [tunnel, setTunnel] = useState<TunnelStatus | null>(null);
+  const [profiles, setProfiles] = useState<TunnelProfile[]>([]);
   const [tunnelHost, setTunnelHost] = useState('');
   const [tunnelPublicUrl, setTunnelPublicUrl] = useState('');
   const [busy, setBusy] = useState(false);
@@ -101,6 +118,7 @@ export function MobileSyncPanel(): React.ReactElement {
       const data = await response.json();
       if (data.ok) {
         setTunnel(data.tunnel);
+        setProfiles(Array.isArray(data.profiles) ? data.profiles : []);
         setTunnelHost((prev) => prev || data.tunnel.host || '');
         setTunnelPublicUrl((prev) => prev || data.tunnel.publicUrl || '');
       }
@@ -200,7 +218,7 @@ export function MobileSyncPanel(): React.ReactElement {
   }, [refresh]);
 
   // P3 — 反向隧道配置保存（enabled 切换 + host/publicUrl 编辑）。
-  const saveTunnel = useCallback(async (patch: { enabled?: boolean }) => {
+  const saveTunnel = useCallback(async (patch: { enabled?: boolean; profileSave?: string }) => {
     setBusy(true);
     try {
       const response = await fetch(`${getPlatformApiPrefix()}/mobile/tunnel/config`, {
@@ -361,13 +379,36 @@ export function MobileSyncPanel(): React.ReactElement {
           <p className={styles.tunnelHint}>
             通过你自己的 SSH 服务器中转，不在同一 WiFi 也能用。桌面端只发出站连接。
           </p>
-          <input
-            type="text"
-            className={styles.tunnelInput}
-            value={tunnelHost}
-            onChange={(event) => setTunnelHost(event.target.value)}
-            placeholder="SSH 主机别名（如 aliyun）"
-          />
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input
+              type="text"
+              className={styles.tunnelInput}
+              style={{ flex: 1 }}
+              value={tunnelHost}
+              onChange={(event) => setTunnelHost(event.target.value)}
+              placeholder="SSH 主机别名（如 aliyun）"
+            />
+            {profiles.length > 0 && (
+              <select
+                className={styles.tunnelInput}
+                style={{ width: 'auto', cursor: 'pointer' }}
+                value=""
+                onChange={(event) => {
+                  const target = profiles.find((p) => p.name === event.target.value);
+                  if (target) {
+                    setTunnelHost(target.host);
+                    setTunnelPublicUrl(target.publicUrl || '');
+                  }
+                }}
+                data-testid="tunnel-profile-select"
+              >
+                <option value="">已存服务器…</option>
+                {profiles.map((profile) => (
+                  <option key={profile.name} value={profile.name}>{profile.name}</option>
+                ))}
+              </select>
+            )}
+          </div>
           <input
             type="text"
             className={styles.tunnelInput}
@@ -383,6 +424,15 @@ export function MobileSyncPanel(): React.ReactElement {
               onClick={() => { void saveTunnel({}); }}
             >
               保存配置
+            </button>
+            <button
+              type="button"
+              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              disabled={busy || !tunnelHost.trim()}
+              onClick={() => { void saveTunnel({ profileSave: tunnelHost.trim() }); }}
+              data-testid="tunnel-profile-save"
+            >
+              存为档案
             </button>
             <button
               type="button"

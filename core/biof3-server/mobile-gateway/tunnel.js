@@ -17,6 +17,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { spawn: cpSpawn } = require('node:child_process');
 
 const TUNNEL_CONFIG_VERSION = 1;
 const RECONNECT_BACKOFF_MS = Object.freeze([1000, 2000, 5000, 10000, 30000]);
@@ -87,12 +88,25 @@ function normalizeTunnelConfig(raw) {
     ? raw.localPort : 3005;
   let publicUrl = typeof raw?.publicUrl === 'string' ? raw.publicUrl.trim() : '';
   if (publicUrl && !/^https:\/\/[A-Za-z0-9.:_-]+$/.test(publicUrl)) publicUrl = '';
+  // BLOCK-87 — 中转服务器档案：配过的服务器存档，切换免重填。
+  let profiles = Array.isArray(raw?.profiles) ? raw.profiles : [];
+  profiles = profiles
+    .map((p) => ({
+      name: typeof p?.name === 'string' ? p.name.trim().slice(0, 40) : '',
+      host: typeof p?.host === 'string' && HOST_PATTERN.test(p.host) ? p.host : '',
+      publicUrl: typeof p?.publicUrl === 'string' && /^https:\/\/[A-Za-z0-9.:_-]+$/.test(p.publicUrl.trim()) ? p.publicUrl.trim() : '',
+      remotePort: Number.isInteger(p?.remotePort) && p.remotePort > 0 && p.remotePort < 65536 ? p.remotePort : 2233,
+    }))
+    .filter((p) => p.name && p.host);
+  const seen = new Set();
+  profiles = profiles.filter((p) => (seen.has(p.name) ? false : (seen.add(p.name), true)));
   return {
     enabled: raw?.enabled === true,
     host: HOST_PATTERN.test(host) ? host : '',
     remotePort,
     localPort,
     publicUrl,
+    profiles,
   };
 }
 
@@ -180,11 +194,25 @@ function createTunnelManager({
     stateSinceTs = now();
   }
 
+  // 独立 spawn（不走可注入的 spawnProcess——那是隧道 ssh 专用 mock 点）
+  function remotePortSweep() {
+    if (!config.host) return;
+    try {
+      const sweep = cpSpawn('ssh', [
+        '-o', 'ConnectTimeout=10', '-o', 'BatchMode=yes', config.host,
+        'pid=$(ss -tlnp "sport = :' + config.remotePort + '" 2>/dev/null | grep -oP "pid=\\K[0-9]+" | head -1); if [ -n "$pid" ]; then kill "$pid"; fi; true',
+      ], { stdio: 'ignore' });
+      sweep.on('error', () => { /* ssh 不可用尽力而为 */ });
+      if (typeof sweep.unref === 'function') sweep.unref();
+    } catch { /* 尽力而为 */ }
+  }
+
   function spawnTunnel() {
     const args = buildSshArgs(config);
     setState('connecting');
     killStale(dataDir, config, [...liveChildren].map((proc) => proc.pid));
     killAllTracked();
+    remotePortSweep();
     const proc = spawnProcess(args);
     child = proc;
     const startedAt = now();

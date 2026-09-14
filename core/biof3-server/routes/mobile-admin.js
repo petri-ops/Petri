@@ -52,7 +52,7 @@ module.exports = function registerMobileAdmin(app, { dataDir } = {}) {
   // GET  /api/mobile/tunnel         四态：disabled/connecting/connected/reconnecting
   // POST /api/mobile/tunnel/config  {host(ssh 别名), remotePort, localPort, publicUrl, enabled}
   app.get('/api/mobile/tunnel', (_req, res) => {
-    res.json({ ok: true, tunnel: getTunnelManager(dir).status() });
+    res.json({ ok: true, tunnel: getTunnelManager(dir).status(), profiles: readTunnelConfig(dir).profiles });
   });
 
   app.post('/api/mobile/tunnel/config', express.json({ limit: '4kb' }), (req, res) => {
@@ -65,6 +65,40 @@ module.exports = function registerMobileAdmin(app, { dataDir } = {}) {
     if (body.enabled === true && !host && !readTunnelConfig(dir).host) {
       res.status(400).json({ ok: false, error: 'host_required', message: '启用隧道前请先填写 SSH 主机别名' });
       return;
+    }
+    // BLOCK-87 — 中转服务器档案：存当前为档案 / 应用档案切换。
+    if (typeof body.profileSave === 'string' && body.profileSave.trim()) {
+      const current = readTunnelConfig(dir);
+      if (!current.host) {
+        res.status(400).json({ ok: false, error: 'nothing_to_save', message: '当前没有已配置的服务器' });
+        return;
+      }
+      const profiles = current.profiles.filter((p) => p.name !== body.profileSave.trim());
+      profiles.push({
+        name: body.profileSave.trim().slice(0, 40),
+        host: current.host,
+        publicUrl: current.publicUrl || '',
+        remotePort: current.remotePort,
+      });
+      writeTunnelConfig(dir, { profiles });
+    }
+    if (typeof body.profileApply === 'string' && body.profileApply.trim()) {
+      const target = readTunnelConfig(dir).profiles.find((p) => p.name === body.profileApply.trim());
+      if (!target) {
+        res.status(404).json({ ok: false, error: 'profile_not_found' });
+        return;
+      }
+      const tunnel = getTunnelManager(dir).apply({
+        host: target.host,
+        publicUrl: target.publicUrl || '',
+        remotePort: target.remotePort,
+      });
+      res.json({ ok: true, tunnel, applied: target.name });
+      return;
+    }
+    if (typeof body.profileDelete === 'string' && body.profileDelete.trim()) {
+      const current = readTunnelConfig(dir);
+      writeTunnelConfig(dir, { profiles: current.profiles.filter((p) => p.name !== body.profileDelete.trim()) });
     }
     const tunnel = getTunnelManager(dir).apply({
       enabled: typeof body.enabled === 'boolean' ? body.enabled : undefined,
