@@ -1235,6 +1235,8 @@
         "acceptance/ui-370/**",
         "acceptance/ui-371/**",
         "acceptance/block-85/**",
+        "scripts/block85-*.cjs",
+        "scripts/block85-*.mjs",
         "acceptance/block-87/**",
         "scripts/ui368-*.cjs",
         "scripts/ui369-*.cjs",
