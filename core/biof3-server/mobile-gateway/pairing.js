@@ -86,9 +86,10 @@ function createPairingStore({ now = () => Date.now() } = {}) {
 /**
  * 设备会话：持久化 <dataDir>/mobile/sessions.json，只存 token hash。
  */
-function createSessionStore({ dataDir, now = () => Date.now() } = {}) {
+function createSessionStore({ dataDir, now = () => Date.now(), persistDebounceMs = 30_000 } = {}) {
   const sessionsPath = path.join(dataDir, 'mobile', 'sessions.json');
   let cache = null;
+  let persistTimer = null;
 
   function load() {
     if (cache) return cache;
@@ -110,6 +111,27 @@ function createSessionStore({ dataDir, now = () => Date.now() } = {}) {
     const tmp = `${sessionsPath}.tmp`;
     fs.writeFileSync(tmp, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
     fs.renameSync(tmp, sessionsPath);
+  }
+
+  /**
+   * BLOCK-87 实测性能修复：authenticate 原来每个请求都 persist()——手机加载
+   * 一个页面要过数百个请求（模块/资产也过会话门），每个都全量序列化 + 双同步
+   * 写盘，网关事件循环被磁盘刷满（用户实测「点击频繁时刷新很慢」的根因）。
+   * lastSeenAt 是装饰性元数据：内存即时更新，落盘按 debounce 合并；
+   * 安全相关写（创建/吊销）仍立即同步落盘。进程退出丢窗口内的 lastSeenAt
+   * 更新可接受。
+   */
+  function persistSoon() {
+    if (persistTimer) return;
+    persistTimer = setTimeout(() => {
+      persistTimer = null;
+      try {
+        persist();
+      } catch {
+        // 下一次脏标记再试（装饰性元数据，fail-open）
+      }
+    }, persistDebounceMs);
+    persistTimer.unref?.();
   }
 
   /**
@@ -138,7 +160,7 @@ function createSessionStore({ dataDir, now = () => Date.now() } = {}) {
     const session = load().sessions.find((entry) => entry.tokenHash === hash);
     if (!session || session.revoked) return null;
     session.lastSeenAt = new Date(now()).toISOString();
-    persist();
+    persistSoon();
     return session;
   }
 

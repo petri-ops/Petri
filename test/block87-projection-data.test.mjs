@@ -1,16 +1,17 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const { buildMobileGateway } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/index.js'));
-const { resetStoresForTest } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/pairing.js'));
+const { resetStoresForTest, createSessionStore } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/pairing.js'));
 const registerProjectionDataRoutes = require(path.join(ROOT, 'core/biof3-server/routes/projection-data.js'));
 
 function tmpRoot() {
@@ -171,6 +172,114 @@ test('BLOCK-87 projection data routes sit behind the gateway session gate', asyn
     const body = await res.json();
     assert.equal(body.ok, true);
 
+    await closeServer(server);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+// ── BLOCK-87 性能修复：会话落盘节流（用户实测「点击频繁时刷新很慢」根因）
+// authenticate 原来每请求全量 persist()——模块/资产也过会话门，一次页面加载
+// 数百请求 × 全量序列化双同步写盘，网关事件循环被磁盘刷满。
+test('BLOCK-87 session store throttles persist on authenticate (lastSeenAt)', async () => {
+  const root = tmpRoot();
+  try {
+    const store = createSessionStore({ dataDir: root, persistDebounceMs: 25 });
+    const { sessionToken } = store.createSession({ name: 'throttle-probe' });
+    const file = () => readFileSync(store.sessionsPath, 'utf8');
+    const before = file();
+
+    // 多次 authenticate：内存即时更新，但磁盘在 debounce 窗口内不写
+    for (let i = 0; i < 5; i += 1) {
+      assert.ok(store.authenticate(sessionToken));
+    }
+    assert.equal(file(), before, 'authenticate must not hit disk within the debounce window');
+
+    // debounce 到期后合并落盘（lastSeenAt 更新最终可见）
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    const after = file();
+    assert.ok(JSON.parse(after).sessions[0].lastSeenAt >= JSON.parse(before).sessions[0].lastSeenAt);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+// ── BLOCK-87 性能修复：Vite 代理条件请求透传（304 重验证）+ 文本模块 gzip ──
+// 原实现对代理响应强制 no-store——手机每次刷新全量重拉整张模块图 × 隧道 RTT。
+test('BLOCK-87 gateway proxies Vite modules with 304 revalidation and gzip', async (t) => {
+  const distIndex = path.join(ROOT, 'frontend', 'dist', 'index.html');
+  if (!existsSync(distIndex)) {
+    t.skip('frontend/dist not built — desktop projection proxy block not registered');
+    return;
+  }
+  const root = tmpRoot();
+  resetStoresForTest();
+  const upstreamHits = [];
+  const MODULE_BODY = `export const x = ${JSON.stringify('y'.repeat(4096))};\n`;
+  const upstream = http.createServer((req, res) => {
+    upstreamHits.push({ inm: req.headers['if-none-match'] || null });
+    if (req.headers['if-none-match'] === '"mod-v1"') {
+      res.writeHead(304, { ETag: '"mod-v1"' });
+      res.end();
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8', ETag: '"mod-v1"' });
+    res.end(MODULE_BODY);
+  });
+  await new Promise((resolve) => upstream.listen(0, '127.0.0.1', resolve));
+  const upstreamUrl = `http://127.0.0.1:${upstream.address().port}`;
+  const prevRenderer = process.env.BIOF3_RENDERER_DEV_URL;
+  process.env.BIOF3_RENDERER_DEV_URL = upstreamUrl;
+  try {
+    const { app, stores } = buildMobileGateway({ dataDir: root });
+    const server = await listen(app);
+    const base = `http://127.0.0.1:${server.address().port}`;
+    const { sessionToken } = stores.sessions.createSession({ name: 'perf-probe' });
+    const auth = { Authorization: `Bearer ${sessionToken}`, 'Accept-Encoding': 'gzip' };
+
+    // 首拉：200 + gzip 头（文本模块 >1KB）+ 不再强制 no-store。
+    // 注：undici fetch 对 Content-Encoding: gzip 透明解码，body 比较用原文。
+    const first = await fetch(`${base}/src/mod.js`, { headers: auth });
+    assert.equal(first.status, 200);
+    assert.equal(first.headers.get('content-encoding'), 'gzip', 'text module must be gzipped');
+    assert.ok(first.headers.get('cache-control') !== 'no-cache, no-store', 'modules must not be forced no-store');
+    assert.equal(await first.text(), MODULE_BODY);
+
+    // 条件再拉：If-None-Match 透传给上游 → 304 透传回客户端
+    const second = await fetch(`${base}/src/mod.js`, { headers: { ...auth, 'If-None-Match': '"mod-v1"' } });
+    assert.equal(second.status, 304, 'conditional revalidation must pass through as 304');
+    assert.equal(upstreamHits.at(-1).inm, '"mod-v1"', 'If-None-Match must be forwarded to upstream');
+
+    await closeServer(server);
+  } finally {
+    if (prevRenderer === undefined) delete process.env.BIOF3_RENDERER_DEV_URL;
+    else process.env.BIOF3_RENDERER_DEV_URL = prevRenderer;
+    upstream.closeAllConnections?.();
+    upstream.close();
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+// ── BLOCK-87 性能修复：dist 哈希资产不可变缓存 ───────────────────────────
+test('BLOCK-87 dist hashed assets are served immutable', async (t) => {
+  const distDir = path.join(ROOT, 'frontend', 'dist', 'assets');
+  if (!existsSync(distDir)) {
+    t.skip('frontend/dist/assets not built');
+    return;
+  }
+  const root = tmpRoot();
+  resetStoresForTest();
+  try {
+    const { app, stores } = buildMobileGateway({ dataDir: root });
+    const server = await listen(app);
+    const base = `http://127.0.0.1:${server.address().port}`;
+    const { sessionToken } = stores.sessions.createSession({ name: 'asset-probe' });
+    const asset = readdirSync(distDir).find((f) => f.endsWith('.js')) || readdirSync(distDir)[0];
+    const res = await fetch(`${base}/assets/${asset}`, {
+      headers: { Authorization: `Bearer ${sessionToken}` },
+    });
+    assert.ok([200, 304].includes(res.status));
+    assert.match(res.headers.get('cache-control') || '', /immutable/, 'hashed assets must be immutable');
     await closeServer(server);
   } finally {
     rmSync(root, { recursive: true, force: true });

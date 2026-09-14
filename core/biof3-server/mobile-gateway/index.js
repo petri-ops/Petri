@@ -17,6 +17,7 @@ const express = require('express');
 const fs = require('node:fs');
 const { readFileSync } = require('node:fs');
 const path = require('node:path');
+const zlib = require('node:zlib');
 
 const { getStores } = require('./pairing');
 const { readConfig, resolveEnabled, resolvePort, lanAddresses } = require('./config');
@@ -354,29 +355,64 @@ function buildMobileGateway({
         res.status(404).send('dist index missing (npm run build:spa)');
       }
     };
-    app.use(express.static(desktopDist, { index: false }));
+    // dist 哈希资产内容寻址：永久缓存（Vite 不可达落 dist 时刷新不再全量重拉）
+    app.use(express.static(desktopDist, {
+      index: false,
+      setHeaders: (res, filePath) => {
+        if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+      },
+    }));
     // BLOCK-87 — dev 模式投影走 Vite 热更源（源码改动手机即时跟随，无需手动
     // build:spa；生产/无 Vite 时走 dist）。窄代理：只接管 /（首页 HTML，注垫片）
     // 与 Vite 专有路径（/@、/node_modules/、/src/）；/assets 构建产物不误代理。
+    // BLOCK-87 实测性能修复（用户「点击频繁时刷新很慢」）：①条件请求透传——
+    // 原实现对所有代理响应强制 no-store，手机每次刷新都全量重拉整张模块图
+    // （数百模块 × 隧道 RTT）；现透传 If-None-Match/If-Modified-Since 让 Vite
+    // 的 ETag 304 生效，未变更模块只回 tiny 304。②文本模块 gzip——隧道流量
+    // 降 ~70%。HTML 仍 no-store（垫片注入必须即时新鲜）。
     const viteDevBase = process.env.BIOF3_RENDERER_DEV_URL || 'http://127.0.0.1:3000';
     const isViteOwnedPath = (p) => p === '/' || p.startsWith('/@') || p.startsWith('/node_modules/') || p.startsWith('/src/');
+    const acceptsGzip = (req) => String(req.headers['accept-encoding'] || '').includes('gzip');
+    const isTextLike = (contentType) => /text\/|application\/(javascript|json|xml|wasm)/.test(contentType);
     app.get('*', async (req, res, next) => {
       if (req.path.startsWith('/api/') || req.path.startsWith('/m') || req.path === '/pair') return next();
       if (!isViteOwnedPath(req.path)) return next();
       try {
+        const conditional = {};
+        if (req.headers['if-none-match']) conditional['If-None-Match'] = req.headers['if-none-match'];
+        if (req.headers['if-modified-since']) conditional['If-Modified-Since'] = req.headers['if-modified-since'];
         const upstream = await fetch(viteDevBase + req.originalUrl, {
-          headers: { Accept: req.headers.accept || '*/*' },
+          headers: { Accept: req.headers.accept || '*/*', ...conditional },
           signal: AbortSignal.timeout(8000),
         });
         const contentType = upstream.headers.get('content-type') || '';
+        if (upstream.status === 304) {
+          res.setHeader('Cache-Control', 'no-cache');
+          const etag = upstream.headers.get('etag');
+          if (etag) res.setHeader('ETag', etag);
+          res.status(304).end();
+          return;
+        }
         const buf = Buffer.from(await upstream.arrayBuffer());
         res.setHeader('Content-Type', contentType);
-        res.setHeader('Cache-Control', 'no-cache, no-store');
         if (contentType.includes('text/html')) {
+          res.setHeader('Cache-Control', 'no-cache, no-store');
           res.status(upstream.status).send(buf.toString('utf8').replace('<head>', '<head>' + shim));
-        } else {
-          res.status(upstream.status).send(buf);
+          return;
         }
+        res.setHeader('Cache-Control', upstream.headers.get('cache-control') || 'no-cache');
+        const etag = upstream.headers.get('etag');
+        if (etag) res.setHeader('ETag', etag);
+        if (acceptsGzip(req) && isTextLike(contentType) && buf.length > 1024) {
+          const gz = zlib.gzipSync(buf);
+          res.setHeader('Content-Encoding', 'gzip');
+          res.setHeader('Content-Length', String(gz.length));
+          res.status(upstream.status).end(gz);
+          return;
+        }
+        res.status(upstream.status).send(buf);
         return;
       } catch { /* Vite 不可达 → 落回 dist */ }
       next();
