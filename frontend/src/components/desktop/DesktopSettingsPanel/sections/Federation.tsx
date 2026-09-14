@@ -45,6 +45,10 @@ export function FederationPanel(): React.ReactElement {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [invite, setInvite] = useState<{ token: string; primaryUrl: string } | null>(null);
+  const [inviteBusy, setInviteBusy] = useState(false);
+  const [inviteCopied, setInviteCopied] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
@@ -140,11 +144,47 @@ export function FederationPanel(): React.ReactElement {
     }
   }, [refresh]);
 
+  // UI-358 修订 3：出码能力上收协作成员 tab——手机连接与协作节点共用同一
+  // 配对机制（mobile-gateway token），「在另一台电脑生成配对码」不该依赖对方
+  // 碰巧打开「我的设备」tab。一个码两种用途：手机扫码=本机工作区会话；
+  // 粘贴到对端格物=本机成为对端的协作节点。
+  const generateInvite = useCallback(async () => {
+    setInviteBusy(true);
+    try {
+      const response = await fetch(`${getPlatformApiPrefix()}/mobile/pairing/token`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({}),
+      });
+      const data = await response.json();
+      if (data.ok && data.primaryUrl) {
+        setInvite({ token: data.token, primaryUrl: data.primaryUrl });
+        setInviteCopied(false);
+      } else {
+        setError(data.message || '生成配对码失败');
+      }
+    } catch {
+      setError('生成配对码请求失败');
+    } finally {
+      setInviteBusy(false);
+    }
+  }, []);
+
+  const copyInvite = useCallback(async () => {
+    if (!invite) return;
+    try {
+      await navigator.clipboard.writeText(invite.primaryUrl);
+      setInviteCopied(true);
+    } catch {
+      setError('复制失败，请手动选中链接复制');
+    }
+  }, [invite]);
+
   return (
     <div className={styles.fedPanel} data-testid="federation-panel">
       <p className={styles.fedHint}>
         把另一台电脑上的格物添加为协作节点，之后可以把分析任务或 AI 工作委托给它执行。
-        在对端格物打开「手机连接」面板生成配对码，把配对链接粘贴到这里。
+        粘贴对端的配对链接；对端没有现成配对码时，让对方在「联邦 · 本机配对码」生成。
       </p>
 
       {error && <p className={styles.errorText} role="alert">{error}</p>}
@@ -173,9 +213,73 @@ export function FederationPanel(): React.ReactElement {
         </div>
       </div>
 
+      <div className={styles.addCard} data-testid="federation-invite">
+        <h4 className={styles.addTitle}>本机配对码</h4>
+        {!inviteOpen ? (
+          <>
+            <p className={styles.fedHint}>
+              发给另一台电脑的格物（粘贴到它的「协作成员」），本机即成为它的协作节点；手机扫码则进入本机工作区。
+            </p>
+            <div className={styles.addRow}>
+              <button
+                type="button"
+                className="gewu-btn gewu-btn--sm"
+                disabled={inviteBusy}
+                onClick={() => { setInviteOpen(true); void generateInvite(); }}
+                data-testid="federation-invite-toggle"
+              >
+                生成本机配对码
+              </button>
+            </div>
+          </>
+        ) : invite ? (
+          <>
+            <div className={styles.inviteQrWrap}>
+              <img
+                data-testid="federation-invite-qr"
+                className={styles.inviteQr}
+                alt="本机配对二维码"
+                src={`${getPlatformApiPrefix()}/mobile/pairing/qr.svg?token=${encodeURIComponent(invite.token)}`}
+              />
+            </div>
+            <div className={styles.inviteLinkRow}>
+              <span
+                className={styles.inviteLink}
+                data-testid="federation-invite-link"
+                title={invite.primaryUrl}
+              >
+                {invite.primaryUrl}
+              </span>
+              <button
+                type="button"
+                className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                onClick={() => { void copyInvite(); }}
+                data-testid="federation-invite-copy"
+              >
+                {inviteCopied ? '已复制' : '复制链接'}
+              </button>
+              <button
+                type="button"
+                className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                disabled={inviteBusy}
+                onClick={() => { void generateInvite(); }}
+                data-testid="federation-invite-regen"
+              >
+                重新生成
+              </button>
+            </div>
+            <p className={styles.fedHint}>
+              一个码两种用途：手机扫码＝进入本机工作区；粘贴到另一台格物＝添加本机为协作节点。约 5 分钟有效，过期点「重新生成」。
+            </p>
+          </>
+        ) : (
+          <p className={styles.fedHint}>配对码生成中…</p>
+        )}
+      </div>
+
       {peers && peers.length === 0 && (
         <div className={styles.emptyState} data-testid="federation-empty">
-          还没有协作节点 · 在另一台电脑的格物里生成配对码开始
+          还没有协作节点 · 把本机配对码发给对方，或把对方的链接粘贴到上面
         </div>
       )}
 

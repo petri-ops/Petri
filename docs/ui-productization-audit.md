@@ -3469,6 +3469,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **tab 分页替代堆叠**：弹层高度有限，上下堆叠把协作成员压出视口 → 改 tab 双页切换（默认「我的设备」），两区互斥渲染保持弹层紧凑。
 - **证据**：`tsc --noEmit` 0 + 实机断言（初始 devices 独显 / 切 tab 后 peers 独显）；**未落独立截图证据文件**（断言式取证）。
 
+### UI-358 修订 3（2026-09-15，用户质询「手机连接和协作两回事 但配对码只在手机连接页面」→ 裁决「现在改」）
+
+- **出码能力上收协作成员 tab**：`FederationPanel` 新增「本机配对码」块——首次双机配对不再依赖对方碰巧打开「我的设备」tab（原空态只会说「在另一台电脑的格物里生成配对码」，实测踩中语义错位）。复用同一 `POST /mobile/pairing/token` 机制零后端改动：QR + 完整链接 + 复制 + 重新生成（testid 族 `federation-invite-*`）；空态文案改双向（「把本机配对码发给对方，或把对方的链接粘贴到上面」）；顶部提示撤已退役的「手机连接」措辞。
+- **一个码两种用途显性化**：邀请块与「我的设备」二维码说明均标注「手机扫码＝进入本机工作区；粘贴到另一台格物＝添加本机为协作节点；约 5 分钟有效」。
+- **证据**：`tsc --noEmit` 0 + 前端全量 vitest 128 文件 1030/1030 + 实机 CDP `scripts/ui358-r3-invite-code-live.cjs` **8/8 allPass**（邀请块在场/双向空态/点开即出码 LAN 链接/复制+重新生成轮转 token/双用途说明/设备 tab 协作用途文案；截图 `acceptance/block-85/ui358-r3-invite-code.png`）。
+
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-354: 顶栏最右侧「手机远程 + 设置」双入口（对标 ZCode 顶栏布局）(2026-09-13 verified，dev Electron 边界内 CDP 8/8)

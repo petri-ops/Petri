@@ -128,3 +128,34 @@
   font-size: 12px;
   color: #dc2626;
 }
+
+/* UI-358 修订 3：本机配对码（协作成员 tab 内直接出码） */
+.inviteQrWrap {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.inviteQr {
+  width: 148px;
+  height: 148px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--gewu-border, #e4e4e7);
+}
+
+.inviteLinkRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inviteLink {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--gewu-text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

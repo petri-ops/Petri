@@ -1,0 +1,48 @@
+{
+  "name": "ui358-r3-invite-code-live",
+  "startedAt": "2026-09-14T23:36:41.872Z",
+  "finishedAt": "2026-09-14T23:36:43.761Z",
+  "assertions": [
+    {
+      "name": "invite_block_present",
+      "pass": true,
+      "detail": "本机配对码块在场"
+    },
+    {
+      "name": "empty_state_two_way",
+      "pass": true,
+      "detail": "空态双向文案: 还没有协作节点 · 把本机配对码发给对方，或把对方的链接粘贴到上面"
+    },
+    {
+      "name": "invite_qr_and_link",
+      "pass": true,
+      "detail": "点开后 QR 就场（≤8s）"
+    },
+    {
+      "name": "invite_link_pair_shape",
+      "pass": true,
+      "detail": "链接为 LAN 配对链接: http://192.168.0.102:3005/pair?token=9cde447f0345cf5962e07b8"
+    },
+    {
+      "name": "invite_copy_and_regen_present",
+      "pass": true,
+      "detail": "复制 + 重新生成按钮在场"
+    },
+    {
+      "name": "invite_regen_rotates_token",
+      "pass": true,
+      "detail": "重新生成轮转 token"
+    },
+    {
+      "name": "dual_use_caption",
+      "pass": true,
+      "detail": "邀请块含双用途说明"
+    },
+    {
+      "name": "devices_qr_hint_dual_use",
+      "pass": true,
+      "detail": "我的设备二维码说明含协作节点用途"
+    }
+  ],
+  "allPass": true
+}

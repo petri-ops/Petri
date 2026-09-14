@@ -301,6 +301,8 @@ export function MobileSyncPanel(): React.ReactElement {
               手机扫码直达工作区
               <br />
               已配对手机重扫直接进入，不会新增设备
+              <br />
+              此链接也可粘贴到另一台电脑的格物，将本机添加为它的协作节点
             </p>
             {pairing && (
               <div className={styles.linkRow}>
