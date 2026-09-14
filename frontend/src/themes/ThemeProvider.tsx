@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 export type ResolvedTheme = 'light' | 'dark';
@@ -76,6 +77,67 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
   const [fontScale, setFontScaleState] = useState<number>(readFontScale);
   const [accent, setAccentState] = useState<AccentId>(readAccent);
 
+  // BLOCK-86 L1 — 多端偏好同步：服务端 /api/user/prefs 为权威源，
+  // localStorage 仅作启动缓存。任何端修改，其余端（桌面/手机投影）
+  // 经轮询 + 回前台拉取应用。
+  const prefsApi = React.useCallback(() => `${getPlatformApiPrefix()}/user/prefs`, []);
+  const prefsHeaders = React.useCallback((): Record<string, string> => {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    try {
+      const token = getToken();
+      if (token) headers.Authorization = `Bearer ${token}`;
+    } catch { /* 非 authClient 场景忽略 */ }
+    return headers;
+  }, []);
+
+  const applyRemotePrefs = useCallback((prefs: { theme?: string; fontScale?: number; accent?: string }) => {
+    if (prefs.theme === 'light' || prefs.theme === 'dark' || prefs.theme === 'system') {
+      setPreferenceState(prefs.theme);
+      try { localStorage.setItem(THEME_STORAGE_KEY, prefs.theme); } catch { /* 保留内存 */ }
+    }
+    if (typeof prefs.fontScale === 'number') {
+      const clamped = Math.min(FONT_SCALE_MAX, Math.max(FONT_SCALE_MIN, prefs.fontScale));
+      setFontScaleState(clamped);
+      try { localStorage.setItem(FONT_SCALE_STORAGE_KEY, String(clamped)); } catch { /* 保留内存 */ }
+    }
+    if (typeof prefs.accent === 'string' && prefs.accent) {
+      setAccentState(prefs.accent as AccentId);
+      try { localStorage.setItem(ACCENT_STORAGE_KEY, prefs.accent); } catch { /* 保留内存 */ }
+    }
+  }, []);
+
+  const pushPrefs = useCallback((patch: Record<string, unknown>) => {
+    try {
+      void fetch(prefsApi(), { method: 'PUT', headers: prefsHeaders(), body: JSON.stringify(patch) }).catch(() => {});
+    } catch { /* 同步失败不影响本端生效 */ }
+  }, [prefsApi, prefsHeaders]);
+
+  // 拉取服务端偏好：挂载时 + 每 15s + 回前台时（跨端应用）
+  useEffect(() => {
+    let last = '';
+    const pull = async () => {
+      try {
+        const response = await fetch(prefsApi(), { headers: prefsHeaders() });
+        const data = await response.json();
+        if (data?.ok && data.prefs) {
+          const signature = JSON.stringify(data.prefs);
+          if (signature !== last) {
+            last = signature;
+            applyRemotePrefs(data.prefs);
+          }
+        }
+      } catch { /* 服务端不可达时保持本地 */ }
+    };
+    void pull();
+    const timer = window.setInterval(() => { void pull(); }, 15_000);
+    const onVisible = () => { if (document.visibilityState === 'visible') void pull(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [applyRemotePrefs, prefsApi, prefsHeaders]);
+
   const setPreference = useCallback((next: ThemePreference) => {
     setPreferenceState(next);
     try {
@@ -83,12 +145,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
     } catch {
       // Keep the in-memory preference when persistence is unavailable.
     }
-  }, []);
+    pushPrefs({ theme: next });
+  }, [pushPrefs]);
 
   const setAccent = useCallback((next: AccentId) => {
     setAccentState(next);
     try { localStorage.setItem(ACCENT_STORAGE_KEY, next); } catch { /* 保留内存 */ }
-  }, []);
+    pushPrefs({ accent: next });
+  }, [pushPrefs]);
 
   const setFontScale = useCallback((scale: number) => {
     const clamped = Math.min(FONT_SCALE_MAX, Math.max(FONT_SCALE_MIN, scale));
@@ -98,7 +162,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
     } catch {
       /* 保留内存偏好 */
     }
-  }, []);
+    pushPrefs({ fontScale: clamped });
+  }, [pushPrefs]);
 
   useEffect(() => {
     const media = window.matchMedia?.('(prefers-color-scheme: dark)');

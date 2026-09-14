@@ -49,6 +49,8 @@ module.exports = async function registerRoutes(app) {
     ['Mobile sync admin', () => require('./mobile-admin')(app)],
     // BLOCK-85：格物联邦协作节点管理面（指挥席侧；对端执行面本体在对端格物的 gateway）。
     ['Federation admin', () => require('./federation-admin')(app)],
+    // BLOCK-86 L1：多端用户偏好（主题/字号/强调色服务端化——全端同步）。
+    ['User prefs', () => require('./user-prefs')(app)],
   ];
 
   for (const [name, fn] of routes) {
