@@ -1,0 +1,36 @@
+{
+  "name": "ui369-natural-restart",
+  "startedAt": "2026-09-14T12:50:09.955Z",
+  "finishedAt": "2026-09-14T12:50:27.217Z",
+  "assertions": [
+    {
+      "name": "N1 新窗口自然重启后渲染出 AppRail 项目树",
+      "pass": true,
+      "detail": "treeScroll=true"
+    },
+    {
+      "name": "N2 后端就绪",
+      "pass": true,
+      "detail": "apiReady@+5690ms"
+    },
+    {
+      "name": "N3 项目列表无需手动刷新即就位",
+      "pass": true,
+      "detail": "rows=5 firstRows@+5691ms"
+    },
+    {
+      "name": "N4 列表项数与后端一致",
+      "pass": true,
+      "detail": "rows=5 api=5"
+    }
+  ],
+  "allPass": true,
+  "mode": "natural",
+  "trace": {
+    "apiReadyMs": 5690,
+    "firstRowsMs": 5691
+  },
+  "rowsSeen": 5,
+  "apiCount": 5,
+  "screenshot": "ui369-natural-after.png"
+}

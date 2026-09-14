@@ -8,12 +8,23 @@
 set -u
 cd "$(dirname "$0")/.." || exit 2
 
-taskkill //IM electron.exe //F >/dev/null 2>&1
+# 5) taskkill 参数必须走 MSYS_NO_PATHCONV=1 + 单斜杠（2026-09-14 实测沉淀）：
+#    Git Bash 下 `taskkill //IM x //F` 会把 `//IM` 原样传给原生程序 → 
+#    「错误: 无效参数/选项 - '//IM'」→ **杀进程整段静默空操作**（旧 Electron 实例
+#    仍持单实例锁 → 新实例起来即退 → 本脚本看起来"重启成功"其实什么都没发生，
+#    最后必然 TIMEOUT）。加 MSYS_NO_PATHCONV=1 后 `/IM` /`/F` 原样透传，行为正确。
+taskkill_ms() { MSYS_NO_PATHCONV=1 taskkill "$@" >/dev/null 2>&1 || true; }
+taskkill_ms /IM electron.exe /F
 occ=$(netstat -ano | grep ':3001' | grep LISTENING | awk '{print $5}' | head -1)
-if [ -n "${occ:-}" ]; then echo "kill stale backend on 3001 (pid $occ)"; taskkill //PID "$occ" //F >/dev/null 2>&1; fi
+if [ -n "${occ:-}" ]; then echo "kill stale backend on 3001 (pid $occ)"; taskkill_ms /PID "$occ" /F; fi
 occ9=$(netstat -ano | grep ':9222' | grep LISTENING | awk '{print $5}' | head -1)
-if [ -n "${occ9:-}" ]; then echo "kill stale cdp on 9222 (pid $occ9)"; taskkill //PID "$occ9" //F >/dev/null 2>&1; fi
+if [ -n "${occ9:-}" ]; then echo "kill stale cdp on 9222 (pid $occ9)"; taskkill_ms /PID "$occ9" /F; fi
 sleep 2
+# 6) 清场后置断言：杀没生效则立刻报错，不允许再次"静默不重启"。
+for p in 3001 9222; do
+  left=$(netstat -ano | grep ":$p" | grep LISTENING | head -1 || true)
+  if [ -n "$left" ]; then echo "ABORT: port $p still held after kill — 清场失败，拒绝继续（$left）"; exit 3; fi
+done
 
 export PATH="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installation:$PATH"
 export BIOF3_DB_PATH='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\data\biof3.db'
@@ -33,7 +44,10 @@ echo "start dispatched"
 for i in $(seq 1 36); do
   sleep 5
   pages=$(curl -s http://127.0.0.1:9222/json/list 2>/dev/null | grep -c '"type": "page"' || true)
-  code=$(curl -s -o /dev/null -w '%{http_code}' -H 'Authorization: Bearer desktop-local' 'http://127.0.0.1:3001/api/data/projects' 2>/dev/null || echo 000)
+  # 7) 就绪判定不许带 `-o /dev/null`（2026-09-14 实测沉淀）：本机 Git Bash 下
+  #    `curl -o /dev/null` exit=23（写 NUL 失败）→ 配合 `|| echo 000` 会把结果拼成
+  #    `200000`，于是 `= "200"` 永不成立 → 明明就绪也必然 TIMEOUT。改为读末行 http_code。
+  code=$(curl -s -H 'Authorization: Bearer desktop-local' 'http://127.0.0.1:3001/api/data/projects' -w '\n%{http_code}' 2>/dev/null | tail -n1)
   echo "t+$((i*5))s pages=${pages} api=${code}"
   if [ "${pages:-0}" -ge 1 ] 2>/dev/null && [ "${code}" = "200" ]; then
     # 数据面对账：连到的库必须非空（防再次连错库）

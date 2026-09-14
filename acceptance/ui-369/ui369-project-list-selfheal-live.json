@@ -1,0 +1,239 @@
+{
+  "name": "ui369-project-list-selfheal",
+  "startedAt": "2026-09-14T12:45:44.972Z",
+  "finishedAt": "2026-09-14T12:45:53.243Z",
+  "assertions": [
+    {
+      "name": "A1 阻断生效：解除瞬间 DOM 项目行 == 0（无旁路回填）",
+      "pass": true,
+      "detail": "rows@release=0"
+    },
+    {
+      "name": "A2 重试链推进：阻断期内 /api/data/projects 被拦截次数 >= 2",
+      "pass": true,
+      "detail": "paused=5 times=[0, 0, 2, 2, 2011]ms"
+    },
+    {
+      "name": "A3 无手势自愈：解除后项目行自动 > 0（脚本零点击/零 reload/零 soft-refresh）",
+      "pass": true,
+      "detail": "recoverAt=+7082ms rows=5"
+    },
+    {
+      "name": "A4 收敛落点：恢复到首拍失败间隔落在第 3 拍窗口 6000–10000ms",
+      "pass": true,
+      "detail": "recoveryMs=7082 (期望 ≈7000)"
+    },
+    {
+      "name": "A5 数据真实：DOM 项目名与后端 API 返回一致且非空",
+      "pass": true,
+      "detail": "dom=[YST|1.WorkDir|biof3|devah|gewu-desktop] api=5 项"
+    },
+    {
+      "name": "A6 壳层在场：AppRail 项目树容器在 DOM（排除整块未渲染的假绿）",
+      "pass": true,
+      "detail": "treeScroll=true"
+    }
+  ],
+  "allPass": true,
+  "mode": "forced",
+  "method": "CDP Fetch.failRequest on *data/projects*（等价后端不可达的 catch 分支）",
+  "blockPattern": "*data/projects*",
+  "releaseAfterMs": 3500,
+  "pausedCount": 5,
+  "pausedOffsetsMs": [
+    0,
+    0,
+    2,
+    2,
+    2011
+  ],
+  "rowsAtRelease": 0,
+  "recoveryMs": 7082,
+  "expectedTick3Ms": 7000,
+  "domNames": [
+    "YST",
+    "1.WorkDir",
+    "biof3",
+    "devah",
+    "gewu-desktop"
+  ],
+  "apiProjectCount": 5,
+  "samples": [
+    {
+      "tMs": 329,
+      "rows": 0,
+      "path": "/",
+      "readyState": "loading"
+    },
+    {
+      "tMs": 597,
+      "rows": 0,
+      "path": "/",
+      "readyState": "interactive"
+    },
+    {
+      "tMs": 857,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 1120,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 1385,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 1638,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 1901,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 2167,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 2432,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 2696,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 2961,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 3216,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 3477,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 3741,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 3992,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 4257,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 4519,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 4786,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 5050,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 5312,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 5577,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 5844,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 6106,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 6373,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 6641,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 6901,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 7164,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 7430,
+      "rows": 0,
+      "path": "/",
+      "readyState": "complete"
+    },
+    {
+      "tMs": 7693,
+      "rows": 5,
+      "path": "/",
+      "readyState": "complete"
+    }
+  ],
+  "screenshot": "ui369-selfheal-after.png",
+  "note": "脚本自身零用户手势：无点击、无 reload 调用、无 gewu:soft-refresh 派发"
+}

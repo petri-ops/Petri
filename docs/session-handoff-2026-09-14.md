@@ -57,3 +57,16 @@
    - **新增 `acceptance/<dir>/` 必须同步 impact-map**（test-affected 元测试会红，🟡存量已销号一次别再犯）
    - **隧道配置 API**：`POST /api/mobile/tunnel/config` 不带 host 会清空 host/publicUrl（本轮踩过已恢复）——调用必须带全参数
 5. 提交纪律：`git add <明确路径>` 不用 -A；收口跑 `npm run closeout`；UI 过程提交同提交带 UI-### 台账，否则收口时 LEGACY 豁免登记
+
+## 五、同日第三轮补记（UI-369 竞态复验收口）
+
+- **UI-369 升 `verified`**：`AppRailContext` 首载退避重试（0/2/5/10/15s）经**双证**落地——见 `docs/ui-productization-audit.md` UI-369 段与 `acceptance/ui-369/`。
+  - 探针 `scripts/ui369-project-list-selfheal-live.cjs`：`--mode=forced`（主证据·确定性，CDP `Fetch.failRequest` 阻断 `*data/projects*`）**6/6 allPass**；`--mode=natural`（自然重启观测，需外部触发重启）**4/4 allPass**。
+  - 关键因果链：拦截 5 次且第 2 拍偏移 **+2011ms**（证明首载失败后确实发生第 2 次尝试）→ 阻断期 DOM 项目行恒 **0**（无旁路回填）→ 解除后**零手势**回填 5 行，落点 **+7082ms**（退避第 3 拍 = 2000+5000 = 7000ms）。
+  - 残留边界（如实登记）：退避窗口约 32s，后端就绪超过该窗口仍需手动刷新。
+- **本轮抓真并修掉 dev 基建两处静默失效**（`scripts/restart-dev-stack.sh`，非产品代码，门禁分类 `script-dev-stack`）：
+  1. `taskkill //IM electron.exe //F` 在 Git Bash 下 `//IM` 被**原样透传** → `错误: 无效参数/选项 - //IM` → **杀进程整段静默空操作**：旧 Electron 仍持 `requestSingleInstanceLock` → 新实例起来即退 → 脚本看似「重启成功」实则什么都没发生（实测 PID 前后完全不变）→ 必然 TIMEOUT。**从此不要相信该脚本的「重启」语义而不核对 PID。** 修 = `MSYS_NO_PATHCONV=1 taskkill /IM …` 函数封装 + 清场后置断言（端口仍被占即 `exit 3` fail-closed）。
+  2. 就绪判定 `curl -s -o /dev/null -w %{http_code}` 在本机 **exit=23**（写 NUL 失败）→ 配合兜底 `echo 000` 把结果拼成 `200000` → 与 `"200"` 比较永不成立 → 明明就绪也判 TIMEOUT。修 = 读末行 `%{http_code}`。修后实测 **READY@t+5s**（api=200 projects=5）。
+- **环境事实（下个 Agent 必读）**：**从 agent 工具 shell 启动的 Electron 会随该命令的作业生命周期被回收**——`Start-Process`（canonical 脚本方式）拉起的实例在命令结束后数十秒内消失（日志显示启动完全正常、无崩溃错误，服务已在 3001/3005 监听）。绕过手段 WMI 进程创建（`Invoke-CimMethod Win32_Process Create`）与 `cmd` 均**被本机安全策略拦截**。**结论：长驻 dev 栈必须由用户自身终端启动**；agent 内只能用长驻后台任务临时持有（会随会话/任务结束消失）。
+- **治理待办（下次会话启动先做）**：`docs/AUDIT-LOG.md` 已达 **51KB > 50KB** 的滚动归档阈值 → 按「广播规则」先归档再进主线。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

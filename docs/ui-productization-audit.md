@@ -3338,12 +3338,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **P2 控制面（2026-09-13 追加实现）**：移动页升级为控制面——任务详情页批准卡（SSE `needApproval` 事件驱动：工具名+目标摘要+脱敏 params，**两步确认**按钮 D4）+ 取消任务按钮 + 会话页/全局 composer 发消息（POST `/api/ai/agent` 复用 chat.js 路由）。后端新增窄口 `mobile-gateway/control.js` `POST /m/api/approvals/:token/decide`——进程内直调 `db.ackToolJob`（与桌面确认卡 `routes/ai-legacy.js` 的 `POST /api/ai/run-tool-ack/:token` **同一函数同一 scope 校验，权限不放大**；不发 HTTP 自调用，对标 BLOCK-49 直调先例）。验证：集成测试 10/10 + **实机隔离探针 28/28 ALL PASS**（新增 B 系列：吊销后可重新配对/发消息 401+契约 400/取消 401+结构化 404/批准无会话 401+缺 scope 400+**scope 不匹配 404 权限不放大**+批准放行落库 ack_status=approved 且 job 不被破坏+拒绝落库 rejected+failed）。`acceptance/block-70/block70-mobile-gateway-live.json`。
 - **实现提交对账（UI-357 桌面投影 / P3 隧道 UI 归入本条目）**：P2 控制面 = 3c3bdb17；P3 隧道三态呈现与公网 QR 切换 = 1c40b35（该提交含 MobileSync.tsx 隧道区 UI 增量，同提交台账漏同步——已补登本段并按 c177374 先例登记 LEGACY 豁免）；桌面投影 = 79fea4a5。「手机发起→桌面执行（真实模型）→手机批准→手机收终态」全链与 dev 栈 CDP 设置区断言未执行（前者需真实 LLM 环境）——前者待 dev 栈窗口，后者**CDP 够不着**，按无人化验收阶梯第 2 级如实停留 `in_progress`，待用户照测试路线实测后升级；P2 控制面（发消息/批准/取消）与 P3 aliyun 隧道属后续阶段未实现。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-369: 左栏项目列表首载自愈——dev 栈重启竞态退避重试（2026-09-14 in_progress，BLOCK-87 伴随缺陷修复；竞态实机复验待下次自然重启）
+## UI-369: 左栏项目列表首载自愈——dev 栈重启竞态退避重试（2026-09-14 verified，BLOCK-87 伴随缺陷修复；竞态复验落地=确定性 + 自然重启双证）
 
 - **来源**：用户「项目列表怎么又没有了」——实测复现：桌面窗口左栏 AppRail 壳在而项目区全空（YST/1.WorkDir 等全部不在 DOM）。根因：`AppRailContext` 首载 `listProjects()` 只试一次，catch 保持空数组**且再无重试**（catch 注释「不制造空树假象」只对刷新失败成立，首载失败即永久空白）；触发场景=dev 栈重启竞态（Electron 窗口先于后端 3001 就绪，首次 fetch 抛错）。当场实证：页面内派发 `gewu:soft-refresh` 列表立即回填（数据面无恙，纯首载无重试缺陷）。
 - **交付面**：首载改为退避重试（0/2/5/10/15s 共 5 次，unmounted 取消；成功即停；失败仍保持既有列表语义）；软刷新/手动刷新路径不变。
-- **证据**：回归门 `AppRailContext.test.tsx` **2/2**（首载失败→退避后第二次成功→列表填充；成功后不再重试）+ `tsc --noEmit` 0 + 重启后实机观测 t+2s 列表就位（YST/1.WorkDir 在场，本轮竞态未触发、常规路径无回归）。
-- **边界**：竞态本身未被修复后实机复现（概率性）——退避窗口约 32s，后端就绪超过该窗口仍需手动刷新（残留边界如实登记）；retry 语义由机械门固化，下次自然重启可观测升级。
+- **证据（2026-09-14 竞态复验，`scripts/ui369-project-list-selfheal-live.cjs` 双模式，证据 `acceptance/ui-369/`）**：① **确定性 forced 6/6 allPass**——以 CDP `Fetch.failRequest` 在 `*data/projects*` 上构造「后端不可达」窗口（与真实竞态在 fetch reject → catch → 进下一拍退避的代码路径上等价），窗口刻意跨过第 1、2 拍后解除：阻断期 DOM 项目行恒 **0**（无旁路回填）· 拦截 **5** 次且含第 2 拍偏移 **+2011ms**（=「首载失败后确实发生了第 2 次尝试」的直接证据）· 解除后**零手势自动回填** 5 行，恢复落点 **+7082ms** vs 退避第 3 拍 2000+5000=**7000ms**（误差 <2%）· DOM 项目名与后端 API 5 项逐名一致（YST/1.WorkDir/biof3/devah/gewu-desktop）。② **自然重启 natural 4/4 allPass**——`scripts/restart-dev-stack.sh` 真实重启后新窗口：后端 200 与项目行 5 行**同刻**到场（+5690ms / +5691ms），**无需手动刷新**，项数与 API 一致。③ 回归门 `AppRailContext.test.tsx` 2/2 + `tsc --noEmit` 0。
+- **边界**：退避窗口约 32s，后端就绪超过该窗口仍需手动刷新（残留边界如实登记，不随本次复验收窄）；forced 模式用请求拦截构造失败窗口（触发方式与冷启窗口不同，挂载路径与被测 effect 相同），natural 模式为该路径的真实重启复核。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-368: 投影手机端左栏单一入口——标题栏左上直接开合抽屉（2026-09-14 in_progress，BLOCK-87-L3-2；手机端实机待用户复测后升级 verified）
