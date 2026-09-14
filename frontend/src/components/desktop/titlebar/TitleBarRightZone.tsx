@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { getBridge } from '@/lib/desktopBridge';
 import { useWorkspacePanelsContext } from '../WorkspacePanelsContext';
@@ -10,11 +11,25 @@ import { getIsMac, WindowControls } from './shared';
  * 右侧栏 / 指挥中心开关 + 非 mac 自绘窗口控件）。
  *
  * 容器无关：既被 fixed 整条 [TitleBar.tsx](../TitleBar.tsx) 复用，也被 P1b
- * 列级 header-slot 复用。逻辑与提取前一字不动。
+ * 列级 header-slot 复用。
+ *
+ * UI-359 — 路由上下文裁剪：右栏 tab pills 与「底部终端/右侧栏」两个开关只在
+ * 工作区路由（/project/:id/*，results 除外——该子路径为独立 ResultStudio 页，
+ * 无右栏/底部终端）渲染；其余路由这些面板不存在，不再渲染点了无可见效果的
+ * 死开关。指挥中心（全局弹窗入口）与窗口控件恒在。
  */
 export function TitleBarRightZone(): React.ReactElement {
   const panels = useWorkspacePanelsContext();
+  const location = useLocation();
   const isMac = getIsMac();
+  const workspacePanelsAvailable = (() => {
+    const path = location.pathname.replace(/\/+$/, '') || '/';
+    const m = path.match(/^\/project\/[^/]+(?:\/(.*))?$/);
+    return !!m && m[1] !== 'results';
+  })();
+  // 快捷键监听器挂 ProjectWorkspace（useWorkspacePanelShortcuts），提示跟随平台记法。
+  const rightToggleHint = isMac ? '（⌘⇧B）' : '（Ctrl+Shift+B）';
+  const terminalToggleHint = isMac ? '（⌘`）' : '（Ctrl+`）';
   const {
     tabs,
     activeTabId,
@@ -28,7 +43,7 @@ export function TitleBarRightZone(): React.ReactElement {
 
   return (
     <div className={`${styles.rightZone} ${!panels.rightOpen ? styles.rightZoneCollapsed : ''}`}>
-      {panels.rightOpen && (
+      {panels.rightOpen && workspacePanelsAvailable && (
         <div className={styles.tabsRail}>
           {tabs.map((tab) => {
             const active = tab.id === activeTabId;
@@ -115,24 +130,28 @@ export function TitleBarRightZone(): React.ReactElement {
             <Icon name="cpu" size={15} />
           </button>
         )}
-        <button
-          type="button"
-          className={`${styles.iconBtn} ${!panels.bottomTerminalOpen ? styles.iconBtnInactive : ''}`}
-          onClick={panels.toggleBottomTerminal}
-          title={panels.bottomTerminalOpen ? '收起底部终端' : '展开底部终端'}
-          aria-label={panels.bottomTerminalOpen ? '收起底部终端' : '展开底部终端'}
-        >
-          <Icon name="panel-bottom" size={15} />
-        </button>
-        <button
-          type="button"
-          className={`${styles.iconBtn} ${!panels.rightOpen ? styles.iconBtnInactive : ''}`}
-          onClick={panels.toggleRight}
-          title={panels.rightOpen ? '收起右侧栏' : '展开右侧栏'}
-          aria-label={panels.rightOpen ? '收起右侧栏' : '展开右侧栏'}
-        >
-          <Icon name="panel-right" size={15} />
-        </button>
+        {workspacePanelsAvailable && (
+          <button
+            type="button"
+            className={`${styles.iconBtn} ${!panels.bottomTerminalOpen ? styles.iconBtnInactive : ''}`}
+            onClick={panels.toggleBottomTerminal}
+            title={`${panels.bottomTerminalOpen ? '收起底部终端' : '展开底部终端'}${terminalToggleHint}`}
+            aria-label={panels.bottomTerminalOpen ? '收起底部终端' : '展开底部终端'}
+          >
+            <Icon name="panel-bottom" size={15} />
+          </button>
+        )}
+        {workspacePanelsAvailable && (
+          <button
+            type="button"
+            className={`${styles.iconBtn} ${!panels.rightOpen ? styles.iconBtnInactive : ''}`}
+            onClick={panels.toggleRight}
+            title={`${panels.rightOpen ? '收起右侧栏' : '展开右侧栏'}${rightToggleHint}`}
+            aria-label={panels.rightOpen ? '收起右侧栏' : '展开右侧栏'}
+          >
+            <Icon name="panel-right" size={15} />
+          </button>
+        )}
       </div>
 
       {!isMac && <WindowControls />}

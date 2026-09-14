@@ -1,0 +1,112 @@
+{
+  "name": "ui359-titlebar-context",
+  "startedAt": "2026-09-14T06:14:09.205Z",
+  "finishedAt": "2026-09-14T06:14:25.599Z",
+  "assertions": [
+    {
+      "name": "V1_workspace_toggles_present",
+      "pass": true,
+      "detail": "工作区路由两开关在场且 title 带 Ctrl 提示（terminal=展开底部终端 / 展开底部终端（Ctrl+`），right=收起右侧栏 / 收起右侧栏（Ctrl+Shift+B））"
+    },
+    {
+      "name": "V2_ctrl_backtick_opens_terminal",
+      "pass": true,
+      "detail": "Ctrl+` 后底部终端展开（aria=收起底部终端，实际=收起底部终端）"
+    },
+    {
+      "name": "V3_ctrl_shift_b_collapses_right",
+      "pass": true,
+      "detail": "Ctrl+Shift+B 后右侧栏收起（aria=展开右侧栏，实际=展开右侧栏）"
+    },
+    {
+      "name": "V3b_shortcuts_restore_state",
+      "pass": true,
+      "detail": "再按一次恢复原态（right=收起右侧栏，terminal=展开底部终端）"
+    },
+    {
+      "name": "V4_home_dead_toggles_absent",
+      "pass": true,
+      "detail": "欢迎页死开关不在场且窗口控件符合平台（terminal=null，right=null，win最小化=true，platform=Win32）"
+    },
+    {
+      "name": "V5_skills_dead_toggles_absent",
+      "pass": true,
+      "detail": "/skills 死开关不在场（terminal=null，right=null）"
+    },
+    {
+      "name": "V6_results_dead_toggles_absent",
+      "pass": true,
+      "detail": "/results 死开关不在场（terminal=null，right=null）"
+    }
+  ],
+  "allPass": true,
+  "observations": {
+    "pid": "p_mtuyje22_9vr4",
+    "ws": {
+      "terminal": {
+        "label": "展开底部终端",
+        "title": "展开底部终端（Ctrl+`）"
+      },
+      "right": {
+        "label": "收起右侧栏",
+        "title": "收起右侧栏（Ctrl+Shift+B）"
+      },
+      "winMin": true,
+      "platform": "Win32"
+    },
+    "afterTerm": {
+      "terminal": {
+        "label": "收起底部终端",
+        "title": "收起底部终端（Ctrl+`）"
+      },
+      "right": {
+        "label": "收起右侧栏",
+        "title": "收起右侧栏（Ctrl+Shift+B）"
+      },
+      "winMin": true,
+      "platform": "Win32"
+    },
+    "afterRight": {
+      "terminal": {
+        "label": "收起底部终端",
+        "title": "收起底部终端（Ctrl+`）"
+      },
+      "right": {
+        "label": "展开右侧栏",
+        "title": "展开右侧栏（Ctrl+Shift+B）"
+      },
+      "winMin": true,
+      "platform": "Win32"
+    },
+    "restored": {
+      "terminal": {
+        "label": "展开底部终端",
+        "title": "展开底部终端（Ctrl+`）"
+      },
+      "right": {
+        "label": "收起右侧栏",
+        "title": "收起右侧栏（Ctrl+Shift+B）"
+      },
+      "winMin": true,
+      "platform": "Win32"
+    },
+    "home": {
+      "terminal": null,
+      "right": null,
+      "winMin": true,
+      "platform": "Win32"
+    },
+    "skills": {
+      "terminal": null,
+      "right": null,
+      "winMin": true,
+      "platform": "Win32"
+    },
+    "results": {
+      "terminal": null,
+      "right": null,
+      "winMin": true,
+      "platform": "Win32"
+    }
+  }
+}

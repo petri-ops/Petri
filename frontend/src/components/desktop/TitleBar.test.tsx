@@ -290,6 +290,59 @@ describe('TitleBar desktop window controls', () => {
   });
 });
 
+describe('TitleBar workspace-context windowTools (UI-359)', () => {
+  function renderAt(initialPath: string) {
+    return render(
+      <MemoryRouter initialEntries={[initialPath]}>
+        <WorkspacePanelsProvider>
+          <TitleBar />
+        </WorkspacePanelsProvider>
+      </MemoryRouter>,
+    );
+  }
+
+  it('hides bottom-terminal and right-panel toggles on non-workspace routes', () => {
+    vi.stubGlobal('biof3Desktop', undefined);
+    renderAt('/');
+
+    // 非工作区路由没有右栏/底部终端，渲染死开关只会产生「点了没反应」。
+    expect(screen.queryByRole('button', { name: '展开右侧栏' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '收起右侧栏' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '展开底部终端' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '收起底部终端' })).toBeNull();
+  });
+
+  it('keeps the toggles on workspace routes with shortcut hints in titles', () => {
+    vi.stubGlobal('biof3Desktop', undefined);
+    renderAt('/project/p1/chat');
+
+    // 桌面默认 rightOpen=true → 右侧栏按钮呈「收起」态；终端默认收起 → 「展开」态。
+    const rightToggle = screen.getByRole('button', { name: '收起右侧栏' });
+    expect(rightToggle.getAttribute('title')).toContain('Ctrl+Shift+B');
+    const terminalToggle = screen.getByRole('button', { name: '展开底部终端' });
+    expect(terminalToggle.getAttribute('title')).toContain('Ctrl+`');
+  });
+
+  it('hides the toggles on the standalone Result Studio route', () => {
+    vi.stubGlobal('biof3Desktop', undefined);
+    renderAt('/project/p1/results');
+
+    expect(screen.queryByRole('button', { name: '收起右侧栏' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '展开底部终端' })).toBeNull();
+  });
+
+  it('keeps window controls on non-workspace routes while windowTools is trimmed', () => {
+    const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
+    vi.stubGlobal('biof3Desktop', bridge);
+    renderAt('/');
+
+    // 裁剪只针对面板开关；非 mac 自绘窗口控件必须恒在。
+    expect(screen.getByRole('button', { name: '最小化' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '最大化' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '关闭' })).toBeTruthy();
+  });
+});
+
 describe('TitleBar web fallback', () => {
   it('renders a placeholder and never calls IPC when biof3Desktop is unavailable', () => {
     vi.stubGlobal('biof3Desktop', undefined);

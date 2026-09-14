@@ -31,6 +31,7 @@ import {
 } from '@/hooks/useConversationJobs';
 
 import { useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
+import { useWorkspacePanelShortcuts } from '@/hooks/useWorkspacePanelShortcuts';
 import { useRightPanelTabs } from '@/hooks/useRightPanelTabs';
 import { segmentToMode, modeToSegment, type WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { isDirectRecoveryAction, useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
@@ -354,6 +355,9 @@ export function ProjectWorkspace(): React.ReactElement {
     sessionFrameRef,
     sessionFrameWidth,
   } = useWorkspaceLayout();
+  // UI-359 — Ctrl/Cmd+` 开合底部终端、Ctrl/Cmd+Shift+B 开合右侧栏
+  // （VS Code 肌肉记忆）。挂在本组件内=只在面板存在的路由生效。
+  useWorkspacePanelShortcuts();
   // UI-341 加映二（用户裁决 2026-09-11）——侧栏常驻：进入结果族模式
   // （result/code/compare/history）**不再自动收起左右栏**。原实现把两侧栏
   // 一起关掉，导致「打开某页面左栏消失、列内 header 随之消失像全屏盖住导航」。
