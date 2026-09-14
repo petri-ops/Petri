@@ -206,6 +206,7 @@ export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElem
  */
 function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   const [federationOpen, setFederationOpen] = useState(false);
+  const [federationTab, setFederationTab] = useState<'devices' | 'peers'>('devices');
   return (
     <div className={styles.leftPanelFooter}>
       <div className={styles.leftFooterRow}>
@@ -254,13 +255,34 @@ function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
                 <Icon name="x" size={14} />
               </button>
             </div>
-            <div data-testid="federation-section-devices">
-              <MobileSyncPanel />
+            <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+              {([
+                ['devices', '我的设备'],
+                ['peers', '协作成员'],
+              ] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`${styles.leftQuickAction} ${federationTab === key ? styles.leftQuickActionActive : ''}`}
+                  style={{ flex: 1, justifyContent: 'center' }}
+                  onClick={() => setFederationTab(key)}
+                  aria-pressed={federationTab === key}
+                  data-testid={`federation-tab-${key}`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
-            <div style={{ height: 1, background: 'var(--gewu-border, #e4e4e7)', margin: '12px 0' }} />
-            <div data-testid="federation-section-peers">
-              <FederationPanel />
-            </div>
+            {federationTab === 'devices' && (
+              <div data-testid="federation-section-devices">
+                <MobileSyncPanel />
+              </div>
+            )}
+            {federationTab === 'peers' && (
+              <div data-testid="federation-section-peers">
+                <FederationPanel />
+              </div>
+            )}
           </div>
         </>,
         document.body,
