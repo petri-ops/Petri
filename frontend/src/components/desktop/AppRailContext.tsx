@@ -154,8 +154,26 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
   }, []);
 
   useEffect(() => {
-    void refreshProjects();
-  }, [refreshProjects]);
+    // BLOCK-87 实测修复：首载只试一次曾致「项目列表没有了」（用户复现「又没有了」）
+    // ——dev 栈重启竞态下窗口先于后端就绪，首次 fetch 抛错后 catch 保持空数组
+    // 且再无重试，列表永久空白。首载带退避重试（约 0/2/5/10/15s 共 5 次）；
+    // 读取失败仍保持既有列表不制造空树假象（软刷新/手动刷新路径不变）。
+    let cancelled = false;
+    const backoffMs = [0, 2000, 5000, 10000, 15000];
+    (async () => {
+      for (const wait of backoffMs) {
+        if (cancelled) return;
+        if (wait) await new Promise((resolve) => setTimeout(resolve, wait));
+        if (cancelled) return;
+        try {
+          const list = await listProjects();
+          if (!cancelled) setAllProjects(list);
+          return;
+        } catch { /* 后端未就绪/瞬断：退避后重试 */ }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // 软刷新（其它面改了项目/会话后）
   useEffect(() => subscribeGewuEvent(gewuEvents.softRefresh, () => { void refreshProjects(); }), [refreshProjects]);

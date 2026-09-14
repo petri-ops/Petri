@@ -3338,6 +3338,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **P2 控制面（2026-09-13 追加实现）**：移动页升级为控制面——任务详情页批准卡（SSE `needApproval` 事件驱动：工具名+目标摘要+脱敏 params，**两步确认**按钮 D4）+ 取消任务按钮 + 会话页/全局 composer 发消息（POST `/api/ai/agent` 复用 chat.js 路由）。后端新增窄口 `mobile-gateway/control.js` `POST /m/api/approvals/:token/decide`——进程内直调 `db.ackToolJob`（与桌面确认卡 `routes/ai-legacy.js` 的 `POST /api/ai/run-tool-ack/:token` **同一函数同一 scope 校验，权限不放大**；不发 HTTP 自调用，对标 BLOCK-49 直调先例）。验证：集成测试 10/10 + **实机隔离探针 28/28 ALL PASS**（新增 B 系列：吊销后可重新配对/发消息 401+契约 400/取消 401+结构化 404/批准无会话 401+缺 scope 400+**scope 不匹配 404 权限不放大**+批准放行落库 ack_status=approved 且 job 不被破坏+拒绝落库 rejected+failed）。`acceptance/block-70/block70-mobile-gateway-live.json`。
 - **实现提交对账（UI-357 桌面投影 / P3 隧道 UI 归入本条目）**：P2 控制面 = 3c3bdb17；P3 隧道三态呈现与公网 QR 切换 = 1c40b35（该提交含 MobileSync.tsx 隧道区 UI 增量，同提交台账漏同步——已补登本段并按 c177374 先例登记 LEGACY 豁免）；桌面投影 = 79fea4a5。「手机发起→桌面执行（真实模型）→手机批准→手机收终态」全链与 dev 栈 CDP 设置区断言未执行（前者需真实 LLM 环境）——前者待 dev 栈窗口，后者**CDP 够不着**，按无人化验收阶梯第 2 级如实停留 `in_progress`，待用户照测试路线实测后升级；P2 控制面（发消息/批准/取消）与 P3 aliyun 隧道属后续阶段未实现。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-369: 左栏项目列表首载自愈——dev 栈重启竞态退避重试（2026-09-14 in_progress，BLOCK-87 伴随缺陷修复；竞态实机复验待下次自然重启）
+
+- **来源**：用户「项目列表怎么又没有了」——实测复现：桌面窗口左栏 AppRail 壳在而项目区全空（YST/1.WorkDir 等全部不在 DOM）。根因：`AppRailContext` 首载 `listProjects()` 只试一次，catch 保持空数组**且再无重试**（catch 注释「不制造空树假象」只对刷新失败成立，首载失败即永久空白）；触发场景=dev 栈重启竞态（Electron 窗口先于后端 3001 就绪，首次 fetch 抛错）。当场实证：页面内派发 `gewu:soft-refresh` 列表立即回填（数据面无恙，纯首载无重试缺陷）。
+- **交付面**：首载改为退避重试（0/2/5/10/15s 共 5 次，unmounted 取消；成功即停；失败仍保持既有列表语义）；软刷新/手动刷新路径不变。
+- **证据**：回归门 `AppRailContext.test.tsx` **2/2**（首载失败→退避后第二次成功→列表填充；成功后不再重试）+ `tsc --noEmit` 0 + 重启后实机观测 t+2s 列表就位（YST/1.WorkDir 在场，本轮竞态未触发、常规路径无回归）。
+- **边界**：竞态本身未被修复后实机复现（概率性）——退避窗口约 32s，后端就绪超过该窗口仍需手动刷新（残留边界如实登记）；retry 语义由机械门固化，下次自然重启可观测升级。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-368: 投影手机端左栏单一入口——标题栏左上直接开合抽屉（2026-09-14 in_progress，BLOCK-87-L3-2；手机端实机待用户复测后升级 verified）
 
 - **来源**：用户手机截图裁决「适配很不理想，为什么左侧还需要多一个目录展开按钮？左上角的左侧展开栏就直接控制左侧栏的展开和收缩」——复核实锤：L3 首版投影手机端有两个并存的「展开左侧」控制：标题栏左上按钮走 `panels.toggleLeft`（该形态下无感）+ App.tsx 另一套本地状态的浮动 ☰（真正开抽屉），语义打架；顶栏右端还渲染垫片 no-op 的桌面窗口控件（— □ ×）。
