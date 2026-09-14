@@ -173,6 +173,23 @@ const WORKSPACE_TOOL_DEFS = [
   {
     type: 'function',
     function: {
+      name: 'delegate_to_gewu_node',
+      description:
+        'BLOCK-85 格物联邦委托：把一段工作委托给协作成员（另一台电脑上的格物）的 AI agent 独立执行。对方 agent 在它自己的机器与环境里干活，本工具等待其完成后返回执行回执（状态 + 对方 agent 的回复摘要）。适用于「让另一台电脑上的格物去做某事」；普通分析任务优先用 run_tool（本机执行）。委托最长等待约 10 分钟（可调 1-30）。',
+      parameters: {
+        type: 'object',
+        properties: {
+          peerId: { type: 'string', description: '协作成员 ID（gpeer_ 开头，来自联邦协作成员列表）' },
+          task: { type: 'string', description: '要委托给对方 agent 的工作描述（写清楚目的与期望产出，对方的 AI 会自主执行）' },
+          timeoutMinutes: { type: 'integer', description: '最长等待分钟数，默认 10，范围 1-30' },
+        },
+        required: ['peerId', 'task'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'resident_task_create',
       description:
         'BLOCK-77 驻留任务创建：后台启动长时命令（复用 workspace_exec_background 通道）并在项目 .gewu/resident/ 一次成型落盘「意图卡」（taskId/意图/成功标准/失败处置/backing pid/日志路径/状态机）。意图卡是跨会话交接班凭据：软件重开后可经 resident_task_list/read 读取续接。软件关闭不影响已在服务器/本机 detached 运行的进程。需完全访问模式。',

@@ -107,9 +107,14 @@ function closeServer(server) {
 
 test('agent registry pairs every model-visible definition with one handler and contract', () => {
   const registry = getToolRegistry();
-  // 53 = 40（上次同步于 BLOCK-49 时代，此前已漂移至 51）+ 2（BLOCK-69 knowledge_search/knowledge_status）。新增工具时同步此数。
-  assert.equal(registry.length, 53);
-  assert.equal(new Set(registry.map((entry) => entry.definition.function.name)).size, 53);
+  // 数量同源断言：工具集随工作包增长（BLOCK-69/77/78/85…），硬编码数字已两次漂移。
+  // 改为与 defs 总数对齐 + 去重断言；三表失配仍由 buildToolRegistry 的互查 throw 覆盖。
+  const defCount = (() => {
+    const { TOOL_DEFS } = require('../core/biof3-server/agent-tools/tool-defs.js');
+    return TOOL_DEFS.length;
+  })();
+  assert.equal(registry.length, defCount);
+  assert.equal(new Set(registry.map((entry) => entry.definition.function.name)).size, defCount);
 
   for (const entry of registry) {
     assert.equal(typeof entry.handler, 'function');

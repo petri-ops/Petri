@@ -30,6 +30,7 @@ const {
 } = require('./result-edit-tools');
 const { tool_result_selection_run } = require('./result-selection-tools');
 const { tool_result_studio_context } = require('./result-context-tools');
+const { tool_delegate_to_gewu_node } = require('./federation-tools');
 const {
   tool_result_edit_plan_in_context,
   tool_result_changeset_create_in_context,
@@ -128,6 +129,7 @@ const HANDLERS = {
   act: tool_act,
   plan: tool_plan,
   run_tool: tool_run_tool,
+  delegate_to_gewu_node: tool_delegate_to_gewu_node,
   read_image: tool_read_image,
   generate_methods: tool_generate_methods,
   verify_state: tool_verify_state,
@@ -212,6 +214,8 @@ const CONTRACTS = {
   act: contract('action', 'execution', 'R2', ['user.account', 'project.database', 'ui.session', 'local.process'], 30000),
   plan: contract('planning', 'state-write', 'R1', ['project.database'], 500),
   run_tool: contract('analysis', 'execution', 'R2', ['tool_jobs', 'artifacts', 'local.process'], 300000),
+  // BLOCK-85 P3 — 联邦委托：外部请求（对端格物执行），预算 15 分钟（轮询等待）
+  delegate_to_gewu_node: contract('agent-management', 'external-request', 'R2', ['project.files'], 900000),
   read_image: contract('vision', 'external-request', 'R1', ['artifacts', 'llm.provider'], 30000),
   generate_methods: contract('reporting', 'external-request', 'R1', ['project.database', 'llm.provider'], 30000),
   verify_state: contract('verification', 'none', 'R0', ['project.database', 'ui.session'], 500),
