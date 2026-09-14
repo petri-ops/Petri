@@ -58,7 +58,7 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext & { project: P
     handleShowSettings: vi.fn(),
     handleNavigateToSkills: vi.fn(),
     handleNavigateToKnowledge: vi.fn(),
-    handleNavigateToBackend: vi.fn(),
+    // UI-366 — handleNavigateToBackend 随 /backend 页退役移除
     handleNavigateToHome: vi.fn(),
     switchToProject: vi.fn(),
     handleSwitchConversation: vi.fn(),

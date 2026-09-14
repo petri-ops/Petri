@@ -41,19 +41,11 @@ export function parseWorkspaceRoute(pathname: string): { mode: WorkspaceMode } |
 }
 
 /**
- * UI-360 — 该工作区模式是否有右侧栏消费：settings 是占满中栏的
- * 全屏工作面（DesktopSettingsPanel），右侧栏在此模式无消费，随模式隐藏；
- * rightOpen 用户偏好状态保持不丢，回到其余模式即恢复。
- * UI-364 — plugins 已独立页化（/plugins），不再是工作区模式。
- */
-export function modeUsesRightRail(mode: WorkspaceMode): boolean {
-  return mode !== 'settings';
-}
-
-/**
  * UI-360 — 该工作区模式是否有摘要概览卡消费：摘要卡只在 chat / scheduled
  * 会话布局内渲染（project-workspace `showPinnedSummary` 同口径），顶栏的
  * 「展开摘要概览」开关在其余模式/路由是死开关。
+ * UI-365 — modeUsesRightRail 随 settings 模式退役而移除：工作区模式
+ * （chat/scheduled/结果族）全部有右栏消费，右栏开合只由路由与用户偏好决定。
  */
 export function modeUsesSummaryCard(mode: WorkspaceMode): boolean {
   return mode === 'chat' || mode === 'scheduled';
@@ -64,9 +56,10 @@ export function modeUsesSummaryCard(mode: WorkspaceMode): boolean {
  * 「返回 + 图标 + 标题」页头，fixed 顶栏不再渲染品牌 chip 与分区分隔线
  * （此前顶栏左区分隔线与壳层左栏宽度错位 24px，叠出「多一条线」的布局冲突）。
  * UI-364 — /plugins 插件商店独立页并入同形态。
+ * UI-365 — /settings 设置独立页并入同形态。
  */
 export function isStandalonePagePath(pathname: string): boolean {
-  return /^\/(skills|knowledge|backend|plugins)\/?$/.test(pathname);
+  return /^\/(skills|knowledge|backend|plugins|settings)\/?$/.test(pathname);
 }
 
 export function getFallbackTitle(pathname: string): string {

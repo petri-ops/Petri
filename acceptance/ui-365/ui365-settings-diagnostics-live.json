@@ -1,0 +1,81 @@
+{
+  "name": "ui365-settings-diagnostics",
+  "startedAt": "2026-09-14T08:16:49.798Z",
+  "finishedAt": "2026-09-14T08:17:07.944Z",
+  "assertions": [
+    {
+      "name": "V1_settings_standalone_page",
+      "pass": true,
+      "detail": "点设置落 /settings 独立页（path=/settings，panel=true，aside=false，rail=null）"
+    },
+    {
+      "name": "V2_diagnostics_section",
+      "pass": true,
+      "detail": "运行时与诊断分区切换成功且本地服务诊断面板在场（navHit=clicked，title=true，localSvc=true）"
+    },
+    {
+      "name": "V3_backend_entry_removed",
+      "pass": true,
+      "detail": "左栏工作台无「后端」入口（backendQuickAction=false）"
+    },
+    {
+      "name": "V4_legacy_settings_deeplink_chat",
+      "pass": true,
+      "detail": "旧 settings 深链回 chat 语义（path=/project/p_mtuyje22_9vr4/settings，摘要开关=true，右栏开关=true）"
+    },
+    {
+      "name": "V5_backend_route_retired",
+      "pass": true,
+      "detail": "/backend 重定向 /（path=/）"
+    }
+  ],
+  "allPass": true,
+  "observations": {
+    "pid": "p_mtuyje22_9vr4",
+    "settings": {
+      "path": "/settings",
+      "settingsPanel": true,
+      "workspaceAside": false,
+      "railWidth": null,
+      "diagNav": true,
+      "diagTitle": true,
+      "localSvc": true,
+      "backendQuickAction": false
+    },
+    "diag": {
+      "path": "/settings",
+      "settingsPanel": true,
+      "workspaceAside": false,
+      "railWidth": null,
+      "diagNav": true,
+      "diagTitle": true,
+      "localSvc": true,
+      "backendQuickAction": false
+    },
+    "home": {
+      "path": "/",
+      "settingsPanel": false,
+      "workspaceAside": false,
+      "railWidth": null,
+      "diagNav": false,
+      "diagTitle": false,
+      "localSvc": false,
+      "backendQuickAction": false
+    },
+    "legacy": {
+      "path": "/project/p_mtuyje22_9vr4/settings",
+      "summaryToggle": true,
+      "rightToggle": true
+    },
+    "redirected": {
+      "path": "/",
+      "settingsPanel": false,
+      "workspaceAside": false,
+      "railWidth": null,
+      "diagNav": false,
+      "diagTitle": false,
+      "localSvc": false,
+      "backendQuickAction": false
+    }
+  }
+}

@@ -347,22 +347,21 @@ describe('TitleBar workspace-context windowTools (UI-359)', () => {
     expect(screen.getByRole('button', { name: '展开摘要概览' })).toBeTruthy();
   });
 
-  // UI-364 — plugins 模式退役（插件商店独立页 /plugins）：历史深链
-  // /project/:id/plugins fail-closed 回 chat（UI-347 search 先例）；
-  // settings 全屏工作面仍裁剪右栏开关与摘要开关。
-  it('treats the legacy plugins deep link as chat and keeps settings-mode trimming', () => {
+  // UI-364/365 — plugins / settings 模式均退役（独立页化 /plugins /settings）：
+  // 历史深链 /project/:id/{plugins,settings} fail-closed 回 chat（UI-347 search 先例），
+  // 工作区 chrome 全量在场（模式裁剪随模式退役一并消失）。
+  it('treats legacy plugins and settings deep links as chat', () => {
     vi.stubGlobal('biof3Desktop', undefined);
     const { unmount } = renderAt('/project/p1/plugins');
 
-    // 深链回退 chat：右栏开关与摘要开关均在场（chat 语义）
     expect(screen.getByRole('button', { name: '收起右侧栏' })).toBeTruthy();
     expect(screen.getByRole('button', { name: '展开摘要概览' })).toBeTruthy();
 
     unmount();
     renderAt('/project/p1/settings');
 
-    expect(screen.queryByRole('button', { name: '收起右侧栏' })).toBeNull();
-    expect(screen.queryByRole('button', { name: '展开摘要概览' })).toBeNull();
+    expect(screen.getByRole('button', { name: '收起右侧栏' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '展开摘要概览' })).toBeTruthy();
     expect(screen.getByRole('button', { name: '展开底部终端' })).toBeTruthy();
   });
 

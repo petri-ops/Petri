@@ -1,0 +1,14 @@
+/* UI-365 — 设置独立页（与 /skills /plugins 同形态：设备级能力不绑项目） */
+.settingsPage {
+  height: calc(100vh - var(--gewu-titlebar-height));
+  padding: 16px 20px 20px;
+  background: var(--gewu-bg-surface);
+  display: flex;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.settingsPage > * {
+  flex: 1;
+  min-width: 0;
+}

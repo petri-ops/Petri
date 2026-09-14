@@ -74,7 +74,7 @@ export interface LeftPanelContext {
   handleNavigateToSkills: () => void;
   /** BLOCK-72 / UI-320 — 全局工作台页入口（知识空间/后端为设备级全局能力，非项目关联） */
   handleNavigateToKnowledge: () => void;
-  handleNavigateToBackend: () => void;
+  // UI-366 — handleNavigateToBackend 随 /backend 页退役移除
   /** UI-328 — 左栏顶部「新建任务」：回工作台创建页（页内选本地/手输/SSH 路径） */
   handleNavigateToHome: () => void;
 
@@ -225,13 +225,14 @@ function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
         {/* UI-362 — 指挥中心入口已迁入右栏 tab 体系（项目绑定俯瞰，与结果/审阅
             同级；用户裁决「应该像右侧边栏中的结果文件审阅一样」）。UI-361 曾短暂
             落位于此，全局独立窗仍由 Ctrl/Cmd+Shift+C 承载。 */}
+        {/* UI-365 — 设置入口独立页化（/settings）：设备级能力不绑项目，
+            工作态高亮随 settings 模式退役一并移除 */}
         <button
           type="button"
-          className={`${styles.leftQuickAction} ${ctx.workspaceMode === 'settings' ? styles.leftQuickActionActive : ''}`}
+          className={styles.leftQuickAction}
           onClick={ctx.handleShowSettings}
           title="设置"
           aria-label="设置"
-          aria-current={ctx.workspaceMode === 'settings' ? 'page' : undefined}
           data-testid="sidebar-settings"
         >
           <Icon name="settings" size={15} />
@@ -341,14 +342,7 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
       onClick: ctx.handleNavigateToKnowledge,
       title: '知识空间（全局）',
     },
-    {
-      key: 'backend',
-      mode: null,
-      label: '后端',
-      icon: 'cpu',
-      onClick: ctx.handleNavigateToBackend,
-      title: '后端进程（全局）',
-    },
+    // UI-366 — 「后端」入口退役：诊断并入设置「运行时与诊断」分区
   ];
 
   return (

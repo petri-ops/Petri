@@ -17,6 +17,7 @@ export type SettingsSection =
   | 'models'
   | 'compute'
   | 'usage'
+  | 'diagnostics'
   | 'experimental'
   | 'maintenance';
 
@@ -30,6 +31,9 @@ export const SETTINGS_SECTIONS: Array<{
   { id: 'models', label: '模型接口', description: 'URL、模型与 Key', icon: 'brain' },
   { id: 'compute', label: '计算与数据', description: '执行位置与存储', icon: 'cpu' },
   { id: 'usage', label: '用量与资源', description: '成本、缓存与机器状态', icon: 'cpu' },
+  // UI-366 — 原全局「后端」页（/backend，BLOCK-72/UI-320）并入本分区：
+  // 进程快照 / R·Python 运行时状态 / 日志，设备级诊断不绑项目。
+  { id: 'diagnostics', label: '运行时与诊断', description: '本地服务、R/Python 运行时与日志', icon: 'cpu' },
   { id: 'experimental', label: '实验特性', description: 'Agent 工作台等实验开关', icon: 'flag' },
   { id: 'maintenance', label: '隐私与维护', description: '反馈、诊断与更新', icon: 'wrench' },
 ];

@@ -5,7 +5,9 @@ import { useSearchParams } from 'react-router-dom';
 // /project/:id/search 经 parseWorkspaceMode 落 null → 'chat'（fail-closed）。
 // UI-364 — 'plugins' 同口径移除（插件商店独立页化 /plugins；插件装卸是
 // 设备级能力，与项目无语义绑定），历史深链 /project/:id/plugins → 'chat'。
-export type WorkspaceMode = 'chat' | 'scheduled' | 'result' | 'code' | 'compare' | 'history' | 'settings';
+// UI-365 — 'settings' 同口径移除（设置独立页化 /settings），历史深链
+// /project/:id/settings → 'chat'。
+export type WorkspaceMode = 'chat' | 'scheduled' | 'result' | 'code' | 'compare' | 'history';
 
 export const WORKSPACE_MODES: ReadonlySet<WorkspaceMode> = new Set([
   'chat',
@@ -14,7 +16,6 @@ export const WORKSPACE_MODES: ReadonlySet<WorkspaceMode> = new Set([
   'code',
   'compare',
   'history',
-  'settings',
 ]);
 
 export function parseWorkspaceMode(raw: string | null | undefined): WorkspaceMode | null {

@@ -54,8 +54,10 @@ export function TerminalPanel({
   return (
     <div className={styles.terminalPanel}>
       <div className={styles.terminalPanelHead}>
-        <div className={styles.terminalPanelTitleWrap}>
-          <div className={styles.terminalPanelTitle}>后端</div>
+          <div className={styles.terminalPanelTitleWrap}>
+            {/* UI-366 — 「后端」词汇退休：本地单进程 + 内嵌运行时架构下，
+                面向用户说「本地服务 / 运行时」，不再说后端 */}
+            <div className={styles.terminalPanelTitle}>本地服务</div>
           <div className={styles.terminalPanelMeta}>
             {project?.workspacePath || '全局 · 数据根目录'} · R {backendStatus.rRuntime ? '已就绪' : '未安装'} · Python {backendStatus.pyRuntime ? '已就绪' : '未安装'}
           </div>

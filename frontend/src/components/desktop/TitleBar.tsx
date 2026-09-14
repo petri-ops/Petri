@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useWorkspacePanelsContext } from './WorkspacePanelsContext';
 import styles from './TitleBar.module.css';
-import { getIsMac, handleTitleBarDoubleClick, modeUsesRightRail, parseWorkspaceRoute } from './titlebar/shared';
+import { getIsMac, handleTitleBarDoubleClick, parseWorkspaceRoute } from './titlebar/shared';
 import { TitleBarLeftZone } from './titlebar/TitleBarLeftZone';
 import { TitleBarCenterZone } from './titlebar/TitleBarCenterZone';
 import { TitleBarRightZone } from './titlebar/TitleBarRightZone';
@@ -37,10 +37,10 @@ export function TitleBar({ leftPanelWidth = 240, rightPanelWidth = 340 }: TitleB
   // maximize / close). 56px only covered windowTools, so once WindowControls
   // render the centered summary button slid under the minimize button.
   const collapsedRightRail = isMac ? 80 : 196;
-  // UI-360 — compact 固定条的右栏 grid span 与右栏实际在场状态对齐：
-  // plugins/settings 模式右栏物理隐藏，按收起宽计算（与列体化 header 同语义）。
+  // UI-360/UI-365 — compact 固定条的右栏 grid span 与右栏实际在场状态对齐：
+  // 非工作区路由（settings 模式已独立页化）右栏不在场，按收起宽计算。
   const workspaceRoute = parseWorkspaceRoute(location.pathname);
-  const rightRailVisible = !!workspaceRoute && panels.rightOpen && modeUsesRightRail(workspaceRoute.mode);
+  const rightRailVisible = !!workspaceRoute && panels.rightOpen;
   const leftSpan = panels.leftOpen ? leftPanelWidth + resizeRail : collapsedLeftRail;
   const rightSpan = rightRailVisible ? rightPanelWidth + resizeRail : collapsedRightRail;
   const titleBarStyle = {

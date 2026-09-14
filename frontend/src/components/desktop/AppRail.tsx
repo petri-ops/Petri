@@ -104,13 +104,13 @@ export function AppRail(): React.ReactElement {
     sshCreateAt,
     workspaceMode,
     handleShowScheduled: () => openWorkspaceMode('scheduled'),
-    // UI-364 — 插件商店独立页化：设备级能力不绑项目，不再经工作区模式
-    // （原 openWorkspaceMode('plugins') 会隐式激活当前项目）
+    // UI-364/365 — 插件与设置独立页化：设备级能力不绑项目，不再经工作区模式
+    // （原 openWorkspaceMode 会隐式激活当前项目）
     handleShowPlugins: () => navigate('/plugins'),
-    handleShowSettings: () => openWorkspaceMode('settings'),
+    handleShowSettings: () => navigate('/settings'),
     handleNavigateToSkills: () => navigate('/skills'),
     handleNavigateToKnowledge: () => navigate('/knowledge'),
-    handleNavigateToBackend: () => navigate('/backend'),
+    // UI-366 — 后端页退役：诊断并入设置「运行时与诊断」分区，一级入口移除
     handleNavigateToHome: handleNewTask,
     switchToProject,
     handleSwitchConversation: switchConversation,

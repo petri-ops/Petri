@@ -28,8 +28,8 @@ import { ProjectWorkspace } from '@/pages/project-workspace';
 import { ResultStudioPage } from '@/pages/result-studio/ResultStudioPage';
 import SkillsPage from '@/pages/skills';
 import PluginsPage from '@/pages/plugins';
+import SettingsPage from '@/pages/settings';
 import KnowledgePage from '@/pages/knowledge';
-import BackendPage from '@/pages/backend';
 // BLOCK-28 — main-area code review mode (VS Code SCM style)
 import { ReviewModePage } from '@/pages/review';
 // BLOCK-59 P1 — 独立窗路由面：/window/* 不走主窗 AppShell（无 TitleBar/
@@ -178,9 +178,11 @@ function AppShell(): React.ReactElement {
             <Route path="/skills" element={<SkillsPage />} />
             {/* UI-364 — 插件商店独立页（设备级能力，不绑项目；与 /skills 同形态） */}
             <Route path="/plugins" element={<PluginsPage />} />
-            {/* BLOCK-72 / UI-320 — 全局工作台页：知识空间（设备级域）+ 后端（全局单进程） */}
+            {/* UI-365 — 设置独立页（设备级能力，不绑项目；与 /skills 同形态） */}
+            <Route path="/settings" element={<SettingsPage />} />
+            {/* BLOCK-72 / UI-320 → UI-366 — 知识空间保留全局页；「后端」页退役，
+                诊断并入设置「运行时与诊断」分区 */}
             <Route path="/knowledge" element={<KnowledgePage />} />
-            <Route path="/backend" element={<BackendPage />} />
             {/* BLOCK-28 — main-area code review mode (VS Code SCM style) */}
             <Route path="/review" element={<ReviewModePage />} />
             {/* Result Studio — standalone results view with branch tabs in TitleBar */}

@@ -55,6 +55,9 @@ import { DataManagement } from './DesktopSettingsPanel/sections/DataManagement';
 import { RemoteTargets } from './DesktopSettingsPanel/sections/RemoteTargets';
 import { TrashManagement } from './DesktopSettingsPanel/sections/TrashManagement';
 import { HarnessEnvironment } from './DesktopSettingsPanel/sections/HarnessEnvironment';
+// UI-366 — 原全局「后端」页诊断面板并入「运行时与诊断」分区
+import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
+import { TerminalPanel } from '@/pages/project-workspace';
 
 import {
   MODEL_ROLES,
@@ -65,6 +68,7 @@ import {
 
 export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const [activeSection, setActiveSection] = useState<SettingsSection>('general');
+  const backendStatus = useBackendStatus();
   const [settings, setSettings] = useState<Record<string, unknown>>({});
   const [loadingModels, setLoadingModels] = useState<Record<string, boolean>>({});
   const [availableModels, setAvailableModels] = useState<Record<string, string[]>>({});
@@ -876,6 +880,17 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
               <p>查看模型成本、缓存命中和当前机器容量，不保存原始数据或密钥。</p>
             </div>
             <UsageResourcePanel />
+          </section>
+        )}
+
+        {/* UI-366 — 原全局「后端」页（/backend，BLOCK-72/UI-320）并入本分区 */}
+        {activeSection === 'diagnostics' && (
+          <section className="gewu-settings-section">
+            <div className="gewu-settings-section__heading">
+              <h3>运行时与诊断</h3>
+              <p>本地服务进程、R / Python 运行时状态与日志（设备级，不关联项目）。</p>
+            </div>
+            <TerminalPanel backendStatus={backendStatus} />
           </section>
         )}
 

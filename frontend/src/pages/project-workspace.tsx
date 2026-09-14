@@ -611,18 +611,17 @@ export function ProjectWorkspace(): React.ReactElement {
     }
     updateWorkspaceMode('scheduled', true, nextJobId);
   }, [activeJobId, bindActiveJob, conversationJobs, updateWorkspaceMode]);
-  // Entering settings: UI-341 加映二（用户裁决）——设置是全局面，但侧栏常驻规则
-  // 同样适用：不再自动收起左右栏，侧栏只由用户主动点击改变。
+  // UI-365 — 设置独立页化（/settings）：设备级能力不绑项目，不再切工作区模式。
   const handleShowSettings = useCallback(() => {
-    updateWorkspaceMode('settings');
-  }, [updateWorkspaceMode]);
+    navigate('/settings');
+  }, [navigate]);
   // UI-364 — 插件商店独立页化（/plugins）：运行时缺失横幅与左栏入口都
   // 跳独立页，不再切工作区模式（设备级能力不绑项目）。
   const handleShowPlugins = useCallback(() => navigate('/plugins'), [navigate]);
   const handleNavigateToSkills = useCallback(() => navigate('/skills'), [navigate]);
   // BLOCK-72 / UI-320 — 全局工作台页入口（知识空间/后端迁出右栏）
   const handleNavigateToKnowledge = useCallback(() => navigate('/knowledge'), [navigate]);
-  const handleNavigateToBackend = useCallback(() => navigate('/backend'), [navigate]);
+  // UI-366 — handleNavigateToBackend 随 /backend 页退役移除（诊断并入设置）
   // UI-335/336 — 「新建任务」入口：/ 欢迎页（BLOCK-80）；携带当前项目 id 供
   // 欢迎页默认预选（用户裁决：默认工作区应是鼠标点击所在的工作区）
   const handleNavigateToHome = useCallback(() => {
@@ -880,12 +879,10 @@ export function ProjectWorkspace(): React.ReactElement {
     [conversationJobs]
   );
   const showPinnedSummary = workspaceMode === 'chat' || workspaceMode === 'scheduled';
-  // UI-360 — plugins / settings 是占满中栏的全屏工作面；UI-364 后仅 settings
-  // （plugins 已独立页化 /plugins）。右栏在此模式无消费 → 物理隐藏（宽 0、
-  // aria-hidden，面板保持挂载不丢 tab 状态）；rightOpen 用户偏好不变，
-  // 回到 chat / 结果族即恢复。BottomTerminal 让位与 compact 遮罩同口径。
-  const rightRailUsable = workspaceMode !== 'settings';
-  const rightRailVisible = rightOpen && rightRailUsable;
+  // UI-360 曾按 plugins/settings 模式隐藏右栏；UI-364/365 两个模式均已独立
+  // 页化退役，工作区模式全部有右栏消费 → 右栏只由路由（UI-359）与用户偏好
+  // （rightOpen）决定。
+  const rightRailVisible = rightOpen;
   const summaryOpenWidth = sessionFrameWidth === 0
     ? 300
     : summaryVisibility === 'expanded'
@@ -1487,7 +1484,6 @@ export function ProjectWorkspace(): React.ReactElement {
     handleShowSettings,
     handleNavigateToSkills,
     handleNavigateToKnowledge,
-    handleNavigateToBackend,
     handleNavigateToHome,
     switchToProject,
     handleSwitchConversation,

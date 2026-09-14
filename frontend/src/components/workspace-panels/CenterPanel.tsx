@@ -5,7 +5,6 @@ import {
   useConversationRun,
 } from '@/components/copilot/conversationRunStore';
 import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop';
-import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
@@ -285,11 +284,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
           />
         </SessionFrameView>
       )}
-      {workspaceMode === 'settings' && (
-        <div className={styles.workspaceModeSurface}>
-          <DesktopSettingsPanel onClose={() => ctx.updateWorkspaceMode('chat')} />
-        </div>
-      )}
+      {/* UI-365 — settings 模式退役：DesktopSettingsPanel 独立页化 /settings */}
     </main>
   );
 }

@@ -3,11 +3,11 @@ import { useLocation } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { useWorkspacePanelsContext } from '../WorkspacePanelsContext';
 import styles from '../TitleBar.module.css';
-import { getIsMac, modeUsesRightRail, parseWorkspaceRoute, WindowControls } from './shared';
+import { getIsMac, parseWorkspaceRoute, WindowControls } from './shared';
 
 /**
  * BLOCK-62 P1a — TitleBar 右区片段（右栏标签 pills +「+」工具菜单 + 底部终端 /
- * 右侧栏 / 指挥中心开关 + 非 mac 自绘窗口控件）。
+ * 右侧栏开关 + 非 mac 自绘窗口控件）。
  *
  * 容器无关：既被 fixed 整条 [TitleBar.tsx](../TitleBar.tsx) 复用，也被 P1b
  * 列级 header-slot 复用。
@@ -15,19 +15,17 @@ import { getIsMac, modeUsesRightRail, parseWorkspaceRoute, WindowControls } from
  * UI-359 — 路由上下文裁剪：右栏 tab pills 与「底部终端/右侧栏」两个开关只在
  * 工作区路由（/project/:id/*，results 除外——该子路径为独立 ResultStudio 页，
  * 无右栏/底部终端）渲染；其余路由这些面板不存在，不再渲染点了无可见效果的
- * 死开关。指挥中心（全局弹窗入口）与窗口控件恒在。
+ * 死开关。窗口控件恒在。
  *
- * UI-360 — 模式上下文裁剪：plugins / settings 是占满中栏的全屏工作面，右侧栏
- * 随模式隐藏（见 modeUsesRightRail），「右侧栏」开关与右栏 tab pills 一并裁剪，
- * 「底部终端」仍可用（终端与模式无关）。
+ * UI-361/362 — 指挥中心入口迁入右栏 tab 体系（原 windowTools cpu 按钮移除）。
+ * UI-365 — modeUsesRightRail 随 settings 模式退役移除：右栏开合只由路由
+ * 与用户偏好决定。
  */
 export function TitleBarRightZone(): React.ReactElement {
   const panels = useWorkspacePanelsContext();
   const location = useLocation();
   const isMac = getIsMac();
-  const workspaceRoute = parseWorkspaceRoute(location.pathname);
-  const workspacePanelsAvailable = !!workspaceRoute;
-  const rightRailUsable = !!workspaceRoute && modeUsesRightRail(workspaceRoute.mode);
+  const workspacePanelsAvailable = !!parseWorkspaceRoute(location.pathname);
   // 快捷键监听器挂 ProjectWorkspace（useWorkspacePanelShortcuts），提示跟随平台记法。
   const rightToggleHint = isMac ? '（⌘⇧B）' : '（Ctrl+Shift+B）';
   const terminalToggleHint = isMac ? '（⌘`）' : '（Ctrl+`）';
@@ -44,7 +42,7 @@ export function TitleBarRightZone(): React.ReactElement {
 
   return (
     <div className={`${styles.rightZone} ${!panels.rightOpen ? styles.rightZoneCollapsed : ''}`}>
-      {panels.rightOpen && rightRailUsable && (
+      {panels.rightOpen && workspacePanelsAvailable && (
         <div className={styles.tabsRail}>
           {tabs.map((tab) => {
             const active = tab.id === activeTabId;
@@ -134,7 +132,7 @@ export function TitleBarRightZone(): React.ReactElement {
             <Icon name="panel-bottom" size={15} />
           </button>
         )}
-        {rightRailUsable && (
+        {workspacePanelsAvailable && (
           <button
             type="button"
             className={`${styles.iconBtn} ${!panels.rightOpen ? styles.iconBtnInactive : ''}`}
