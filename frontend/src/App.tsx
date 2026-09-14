@@ -13,6 +13,7 @@ import { TitleBar } from '@/components/desktop/TitleBar';
 import { WorkspacePanelsProvider, useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { AppRail } from '@/components/desktop/AppRail';
 import { AppRailProvider } from '@/components/desktop/AppRailContext';
+import { isProjectionMobile } from '@/components/desktop/titlebar/shared';
 import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
@@ -86,19 +87,18 @@ function AppShell(): React.ReactElement {
     const m = path.match(/^\/project\/[^/]+(?:\/(.*))?$/);
     return !!m && m[1] !== 'results';
   })();
-  // BLOCK-87 L3 — 投影+窄屏（手机浏览器）：壳层 AppRail 转浮层，开合由
-  // TitleBar 左上「展开/收起左侧栏」按钮驱动（用户裁决：不需要额外 ☰ 按钮，
-  // 点开滑出、再点收回）。桌面端恒 false 不受影响（UI-341 常驻裁决仅针对
-  // 桌面窗口）。
-  const projectionMobile = (() => {
-    try {
-      return document.documentElement.getAttribute('data-projection') === '1'
-        && window.matchMedia('(max-width: 767px)').matches;
-    } catch {
-      return false;
-    }
-  })();
-  const [railOverlayOpen, setRailOverlayOpen] = useState(false);
+  // BLOCK-87 L3 — 投影+窄屏（手机浏览器）：壳层 AppRail 转抽屉浮层。
+  // L3-2（用户裁决「左上角的左侧展开栏就直接控制左侧栏的展开和收缩」）：
+  // 撤掉独立 ☰ 浮层按钮——标题栏左上「展开/收起左侧栏」（panels.toggleLeft）
+  // 直接开合抽屉，leftOpen 在该形态下即抽屉开合单一真相；leftOpen 初始值
+  // 已由 useWorkspacePanels 在投影窄屏下置 false（手机首屏不被抽屉盖住）。
+  // 桌面端恒 false 不受影响（UI-341 常驻裁决仅针对桌面窗口）。
+  const projectionMobile = isProjectionMobile();
+  const { setLeftOpen } = panels;
+  useEffect(() => {
+    // 路由变化即收起抽屉（点导航项跳转后不残留遮罩；含挂载首帧的兜底收起）
+    if (projectionMobile) setLeftOpen(false);
+  }, [projectionMobile, setLeftOpen, location.pathname]);
 
   return (
     <>
@@ -115,45 +115,24 @@ function AppShell(): React.ReactElement {
         {/* UI-341 加映三（档 2）——左栏上提为壳层 AppRail：所有主窗页面常驻，
             不再随 /project/:id 路由消失。main 为 flex 兄弟（高度 100%）。 */}
         <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-        {projectionMobile && (
+        {projectionMobile && panels.leftOpen && (
           <>
             <button
               type="button"
-              aria-label="打开导航"
-              data-testid="projection-rail-toggle"
-              onClick={() => setRailOverlayOpen(true)}
+              aria-label="关闭导航"
+              onClick={() => setLeftOpen(false)}
+              style={{ position: 'fixed', inset: 0, zIndex: 78, background: 'rgba(24,24,27,0.4)', border: 'none', cursor: 'default' }}
+            />
+            <div
               style={{
-                position: 'fixed', top: 54, left: 10, zIndex: 60,
-                width: 40, height: 40, borderRadius: 10,
-                border: '1px solid var(--gewu-border, #e4e4e7)',
-                background: 'var(--gewu-bg-elevated, #fff)',
-                color: 'var(--gewu-text)', fontSize: 18, lineHeight: 1,
-                boxShadow: 'var(--gewu-shadow-menu)',
-                cursor: 'pointer',
+                position: 'fixed', top: 0, bottom: 0, left: 0, zIndex: 79,
+                width: 'min(300px, 86vw)', overflowY: 'auto', height: '100%',
+                background: 'var(--gewu-bg-surface)', boxShadow: 'var(--gewu-shadow-menu)',
               }}
+              data-testid="projection-rail-overlay"
             >
-              ☰
-            </button>
-            {railOverlayOpen && (
-              <>
-                <button
-                  type="button"
-                  aria-label="关闭导航"
-                  onClick={() => setRailOverlayOpen(false)}
-                  style={{ position: 'fixed', inset: 0, zIndex: 78, background: 'rgba(24,24,27,0.4)', border: 'none', cursor: 'default' }}
-                />
-                <div
-                  style={{
-                    position: 'fixed', top: 0, bottom: 0, left: 0, zIndex: 79,
-                    width: 'min(300px, 86vw)', overflowY: 'auto', height: '100%',
-                    background: 'var(--gewu-bg-surface)', boxShadow: 'var(--gewu-shadow-menu)',
-                  }}
-                  data-testid="projection-rail-overlay"
-                >
-                  <AppRail />
-                </div>
-              </>
-            )}
+              <AppRail />
+            </div>
           </>
         )}
         {(!projectionMobile) && <AppRail />}

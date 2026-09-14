@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { useWorkspacePanelsContext } from '../WorkspacePanelsContext';
 import styles from '../TitleBar.module.css';
-import { getIsMac, parseWorkspaceRoute, WindowControls } from './shared';
+import { getIsMac, getIsProjection, parseWorkspaceRoute, WindowControls } from './shared';
 
 /**
  * BLOCK-62 P1a — TitleBar 右区片段（右栏标签 pills +「+」工具菜单 + 底部终端 /
@@ -145,7 +145,9 @@ export function TitleBarRightZone(): React.ReactElement {
         )}
       </div>
 
-      {!isMac && <WindowControls />}
+      {/* BLOCK-87 L3-2 — 投影环境（手机/平板浏览器）下窗口控件是垫片 no-op
+          死按钮（截图实证：— □ × 常驻手机顶栏右端），一律隐藏。 */}
+      {!isMac && !getIsProjection() && <WindowControls />}
     </div>
   );
 }

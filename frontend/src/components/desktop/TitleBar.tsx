@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useWorkspacePanelsContext } from './WorkspacePanelsContext';
 import styles from './TitleBar.module.css';
-import { getIsMac, handleTitleBarDoubleClick, parseWorkspaceRoute } from './titlebar/shared';
+import { getIsMac, handleTitleBarDoubleClick, isProjectionMobile, parseWorkspaceRoute } from './titlebar/shared';
 import { TitleBarLeftZone } from './titlebar/TitleBarLeftZone';
 import { TitleBarCenterZone } from './titlebar/TitleBarCenterZone';
 import { TitleBarRightZone } from './titlebar/TitleBarRightZone';
@@ -41,8 +41,11 @@ export function TitleBar({ leftPanelWidth = 240, rightPanelWidth = 340 }: TitleB
   // 非工作区路由（settings 模式已独立页化）右栏不在场，按收起宽计算。
   const workspaceRoute = parseWorkspaceRoute(location.pathname);
   const rightRailVisible = !!workspaceRoute && panels.rightOpen;
-  const leftSpan = panels.leftOpen ? leftPanelWidth + resizeRail : collapsedLeftRail;
-  const rightSpan = rightRailVisible ? rightPanelWidth + resizeRail : collapsedRightRail;
+  // BLOCK-87 L3-2 — 投影手机端左侧栏=App 壳层覆盖式抽屉（leftOpen 被征用为
+  // 抽屉开合），覆盖层不推挤顶栏布局：左右 span 恒按收起宽计算。
+  const projectionMobile = isProjectionMobile();
+  const leftSpan = !projectionMobile && panels.leftOpen ? leftPanelWidth + resizeRail : collapsedLeftRail;
+  const rightSpan = !projectionMobile && rightRailVisible ? rightPanelWidth + resizeRail : collapsedRightRail;
   const titleBarStyle = {
     ['--titlebar-left-span' as string]: `${leftSpan}px`,
     ['--titlebar-right-span' as string]: `${rightSpan}px`,

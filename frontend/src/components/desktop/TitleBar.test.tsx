@@ -191,6 +191,52 @@ describe('TitleBar desktop window controls', () => {
     expect(order).toEqual(['subscribe', 'query']);
   });
 
+  // BLOCK-87 L3-2 — 投影环境（手机/平板浏览器）下的顶栏适配
+  describe('TitleBar projection environment', () => {
+  it('hides desktop window controls when the page is a phone projection', () => {
+    // 手机投影（data-projection 垫片标志）：Windows 窗口控件（最小化/最大化/
+    // 关闭）在浏览器里是垫片 no-op 死按钮，必须整体隐藏。
+    document.documentElement.setAttribute('data-projection', '1');
+    try {
+      const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
+      vi.stubGlobal('biof3Desktop', bridge);
+      renderTitleBar();
+      expect(screen.queryByRole('button', { name: '最小化' })).toBeNull();
+      expect(screen.queryByRole('button', { name: '关闭' })).toBeNull();
+    } finally {
+      document.documentElement.removeAttribute('data-projection');
+    }
+  });
+
+  it('keeps window controls on a real Windows desktop (no projection flag)', () => {
+    const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
+    vi.stubGlobal('biof3Desktop', bridge);
+    renderTitleBar();
+    expect(screen.getByRole('button', { name: '最小化' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '关闭' })).toBeTruthy();
+  });
+
+  it('isProjectionMobile only fires with the projection flag and a narrow viewport', async () => {
+    const { isProjectionMobile } = await import('./titlebar/shared');
+    // jsdom 无 matchMedia：无投影标志时短路 false（不触 matchMedia）；
+    // 有标志 + matchMedia 窄屏命中才为 true；matchMedia 缺失 fail-closed 回 false。
+    expect(isProjectionMobile()).toBe(false);
+    document.documentElement.setAttribute('data-projection', '1');
+    try {
+      const original = window.matchMedia;
+      window.matchMedia = ((query: string) => ({ matches: query.includes('767'), media: query, onchange: null, addEventListener: vi.fn(), removeEventListener: vi.fn(), addListener: vi.fn(), removeListener: vi.fn(), dispatchEvent: vi.fn() })) as unknown as typeof window.matchMedia;
+      expect(isProjectionMobile()).toBe(true);
+      window.matchMedia = ((query: string) => ({ matches: false, media: query, onchange: null, addEventListener: vi.fn(), removeEventListener: vi.fn(), addListener: vi.fn(), removeListener: vi.fn(), dispatchEvent: vi.fn() })) as unknown as typeof window.matchMedia;
+      expect(isProjectionMobile()).toBe(false);
+      delete (window as { matchMedia?: unknown }).matchMedia;
+      expect(isProjectionMobile()).toBe(false);
+      window.matchMedia = original;
+    } finally {
+      document.documentElement.removeAttribute('data-projection');
+    }
+  });
+});
+
   it('keeps live maximize events authoritative over a late initial query result', async () => {
     let onMaximizeChanged: ((isMaximized: boolean) => void) | undefined;
     const initialQuery = deferred<boolean>();

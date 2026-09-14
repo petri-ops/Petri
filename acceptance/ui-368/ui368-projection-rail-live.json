@@ -1,0 +1,33 @@
+{
+  "name": "ui368-projection-rail",
+  "startedAt": "2026-09-14T11:27:55.624Z",
+  "finishedAt": "2026-09-14T11:28:02.057Z",
+  "assertions": [
+    {
+      "name": "V1_no_hamburger_drawer_closed",
+      "pass": true,
+      "detail": "无 ☰ 浮层、抽屉收起、左上开关在场（projection=1，oldHamburger=false，overlay=false，leftToggle=true，viewport=390）"
+    },
+    {
+      "name": "V2_titlebar_toggle_opens_drawer",
+      "pass": true,
+      "detail": "左上按钮开抽屉（overlay=true，railContent=true，label=收起左侧栏，span=146px）"
+    },
+    {
+      "name": "V3_backdrop_closes_drawer",
+      "pass": true,
+      "detail": "遮罩收回抽屉（overlay=false，label=展开左侧栏）"
+    },
+    {
+      "name": "V4_nav_closes_drawer",
+      "pass": true,
+      "detail": "抽屉导航后自动收起（navHit=clicked，path=/skills，overlay=false，projection=1，label=展开左侧栏，oldHamburger=false，leftToggle=true）"
+    },
+    {
+      "name": "V5_window_controls_hidden",
+      "pass": true,
+      "detail": "投影下窗口控件隐藏（minimized=false）"
+    }
+  ],
+  "allPass": true
+}

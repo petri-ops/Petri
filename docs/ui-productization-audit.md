@@ -3338,6 +3338,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **P2 控制面（2026-09-13 追加实现）**：移动页升级为控制面——任务详情页批准卡（SSE `needApproval` 事件驱动：工具名+目标摘要+脱敏 params，**两步确认**按钮 D4）+ 取消任务按钮 + 会话页/全局 composer 发消息（POST `/api/ai/agent` 复用 chat.js 路由）。后端新增窄口 `mobile-gateway/control.js` `POST /m/api/approvals/:token/decide`——进程内直调 `db.ackToolJob`（与桌面确认卡 `routes/ai-legacy.js` 的 `POST /api/ai/run-tool-ack/:token` **同一函数同一 scope 校验，权限不放大**；不发 HTTP 自调用，对标 BLOCK-49 直调先例）。验证：集成测试 10/10 + **实机隔离探针 28/28 ALL PASS**（新增 B 系列：吊销后可重新配对/发消息 401+契约 400/取消 401+结构化 404/批准无会话 401+缺 scope 400+**scope 不匹配 404 权限不放大**+批准放行落库 ack_status=approved 且 job 不被破坏+拒绝落库 rejected+failed）。`acceptance/block-70/block70-mobile-gateway-live.json`。
 - **实现提交对账（UI-357 桌面投影 / P3 隧道 UI 归入本条目）**：P2 控制面 = 3c3bdb17；P3 隧道三态呈现与公网 QR 切换 = 1c40b35（该提交含 MobileSync.tsx 隧道区 UI 增量，同提交台账漏同步——已补登本段并按 c177374 先例登记 LEGACY 豁免）；桌面投影 = 79fea4a5。「手机发起→桌面执行（真实模型）→手机批准→手机收终态」全链与 dev 栈 CDP 设置区断言未执行（前者需真实 LLM 环境）——前者待 dev 栈窗口，后者**CDP 够不着**，按无人化验收阶梯第 2 级如实停留 `in_progress`，待用户照测试路线实测后升级；P2 控制面（发消息/批准/取消）与 P3 aliyun 隧道属后续阶段未实现。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-368: 投影手机端左栏单一入口——标题栏左上直接开合抽屉（2026-09-14 in_progress，BLOCK-87-L3-2；手机端实机待用户复测后升级 verified）
+
+- **来源**：用户手机截图裁决「适配很不理想，为什么左侧还需要多一个目录展开按钮？左上角的左侧展开栏就直接控制左侧栏的展开和收缩」——复核实锤：L3 首版投影手机端有两个并存的「展开左侧」控制：标题栏左上按钮走 `panels.toggleLeft`（该形态下无感）+ App.tsx 另一套本地状态的浮动 ☰（真正开抽屉），语义打架；顶栏右端还渲染垫片 no-op 的桌面窗口控件（— □ ×）。
+- **交付面**：①撤掉浮动 ☰ 按钮与 `railOverlayOpen` 本地状态——投影手机端 `leftOpen` 被征用为抽屉开合单一真相，标题栏左上按钮零改动直接开合 AppRail 抽屉（遮罩点击收回）；②路由变化即收起抽屉（点导航项跳转后不残留遮罩；同路由点击不关——与「当前页」语义一致）；③`isProjectionMobile()`/`getIsProjection()` 沉淀进 titlebar/shared 单一解析源（App 与 TitleBar 共读）；④投影手机端顶栏左右 span 恒按收起宽计算（抽屉是覆盖层不推挤布局）；⑤投影环境隐藏 WindowControls（浏览器里是垫片 no-op 死按钮）。
+- **证据**：vitest 定向 **38/38**（TitleBar 25/25：投影隐藏窗口控件 + 真桌面保留 + isProjectionMobile 三态锚定）+ `tsc --noEmit` 0 + 实机 CDP `scripts/ui368-projection-rail-live.cjs` **5/5 allPass 连续两轮**（手机视口 390×844 + data-projection 标志：默认无 ☰ 抽屉收起/左上按钮开抽屉且 span 恒 146px/遮罩收回/跨路由导航自动收起/窗口控件隐藏），证据 `acceptance/ui-368/`；impact-map 补 `acceptance/ui-368/**`、`scripts/ui368-*.cjs`。
+- **边界**：探针以标志注入模拟投影（主进程 will-navigate 守卫禁止窗口内跨源导航 + 本 Electron CDP 不执行 addScriptToEvaluateOnNewDocument，实测）——「手机首屏抽屉默认收起」由 `useWorkspacePanels` 初始化语义（`useState(!projectionNarrow)`）保证；手机端真实链路复测（真实 shim + 配对 cookie）待用户，按无人化验收阶梯如实停留 `in_progress`。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-367: 插件商店手机端投影同源 + 网关限流 API 面收敛（2026-09-14 in_progress，BLOCK-87-L4-2；手机端实机待用户复测后升级 verified）
 
 - **来源**：用户手机实测双反馈「总是 rate_limited」+「手机端插件商店与桌面不一致（缺领域包/运行时，图证）」——复核实锤两根因：①限速器挂在网关所有中间件最前且**静态资源/Vite 热更模块全部计数**（dev 冷启动数百请求直打满 240/分/IP，经隧道全设备共享 127.0.0.1 一个 IP）；②L4 第一批投影桥 `plugins.listInstalled` 误包 `{ok,packs}` 信封（桌面 IPC `plugin:list-installed` 契约=裸数组）且缺 `listRemote`——`usePluginStore` 整段取数失败，手机插件商店全空；`window.biof3Desktop.packs` 在投影下是垫片 Proxy（解析为 undefined），领域包分区永不渲染。

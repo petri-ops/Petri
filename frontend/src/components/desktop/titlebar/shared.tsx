@@ -26,6 +26,29 @@ export function getIsDesktop(): boolean {
 }
 
 /**
+ * BLOCK-87 — 投影环境（手机/平板浏览器经 gateway 投影访问）。标志由投影垫片
+ * 在 <head> 最前同步设置（先于 React 挂载，勿用 window 标志——React 挂载后
+ * 读不到）。此形态下桌面窗口控件（最小化/最大化/关闭）是死按钮，一律隐藏。
+ */
+export function getIsProjection(): boolean {
+  return typeof document !== 'undefined'
+    && document.documentElement.getAttribute('data-projection') === '1';
+}
+
+/**
+ * BLOCK-87 L3 — 投影 + 窄屏（≤767px 手机浏览器）：壳层 AppRail 转抽屉浮层，
+ * 标题栏左上「展开/收起左侧栏」按钮直接开合（L3-2 用户裁决：撤掉独立 ☰，
+ * 左上唯一入口）。jsdom 无 matchMedia 时 fail-closed 回 false（桌面语义）。
+ */
+export function isProjectionMobile(): boolean {
+  try {
+    return getIsProjection() && window.matchMedia('(max-width: 767px)').matches;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * UI-359/360 — 工作区路由解析（`/project/:id/*` 单一事实源）。
  *
  * 返回 null = 工作区面板不存在的路由：非 project 路由（/、/projects、/skills、
