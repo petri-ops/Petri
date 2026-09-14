@@ -13,7 +13,7 @@
  * - centerColWidth               — measured from ResizeObserver
  * - sessionFrameWidth/Height     — measured from ResizeObserver
  */
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 
 export interface UseWorkspaceLayoutResult {
@@ -35,7 +35,11 @@ export interface UseWorkspaceLayoutResult {
 
   // Measured refs (for passing to children who observe them)
   centerColRef: React.RefObject<HTMLElement | null>;
-  sessionFrameRef: React.RefObject<HTMLDivElement | null>;
+  /**
+   * UI-371 — 会话框测量 ref，**回调式**（可直接传给任意多个元素的 `ref=`）。
+   * 每次节点挂载都会重新挂 ResizeObserver 并立刻测量；实例卸载时按连通性自清理。
+   */
+  sessionFrameRef: React.Ref<HTMLDivElement>;
   centerColWidth: number;
   sessionFrameWidth: number;
   sessionFrameHeight: number;
@@ -74,7 +78,8 @@ export function useWorkspaceLayout(): UseWorkspaceLayoutResult {
   const [sessionFrameWidth, setSessionFrameWidth] = useState(0);
   const [sessionFrameHeight, setSessionFrameHeight] = useState(0);
   const centerColRef = useRef<HTMLElement | null>(null);
-  const sessionFrameRef = useRef<HTMLDivElement | null>(null);
+  const sessionFrameNodesRef = useRef<Set<HTMLDivElement>>(new Set());
+  const sessionFrameObserverRef = useRef<ResizeObserver | null>(null);
 
   // ── Effects ─────────────────────────────────────────────────────
 
@@ -117,36 +122,69 @@ export function useWorkspaceLayout(): UseWorkspaceLayoutResult {
   // 'expanded' 钉住（宽度恒 300px），「compact/悬浮随宽度自适应」从未生效。
   // 改为 rAF 等待 ref 就绪后再挂 RO + resize 监听（ref 晚于 effect 就绪的
   // 场景：SessionFrameView 在子树条件分支内，挂载顺序晚于本 hook 的 effect）。
-  useEffect(() => {
-    let observer: ResizeObserver | null = null;
-    let raf = 0;
-    let cancelled = false;
-    const updateSize = () => {
-      const rect = sessionFrameRef.current?.getBoundingClientRect();
-      setSessionFrameWidth(rect?.width || 0);
-      setSessionFrameHeight(rect?.height || 0);
-    };
-    const attach = () => {
-      if (cancelled) return;
-      const element = sessionFrameRef.current;
-      if (!element) {
-        raf = requestAnimationFrame(attach);
-        return;
+  //
+  // UI-371 — 上述 rAF 修法仍有两个真实缺陷（实机实证，非推测）：
+  //   ① **共用 refObject 被两处挂载**：`SessionFrameView` 在两个互斥分支各渲染一个
+  //      实例（chat 那个常驻、scheduled 那个条件挂载），而两者 `ref={ctx.sessionFrameRef}`
+  //      共用同一个 refObject。scheduled 实例卸载时 React 对该元素调用 `ref(null)` →
+  //      refObject.current 被置空；**常驻的 chat 实例并不会被重新赋值**（它没有重挂）
+  //      → `sessionFrameRef.current === null` → 之后每次测量都写 0 →
+  //      `summaryVisibility` 恒 'expanded'：摘要卡恒按钉住列渲染并被
+  //      `max-width: calc(100% - 24px)` 挤成窄条，float/compact 形态彻底失效。
+  //   ② **RO 只 observe 一次**：节点被替换/重挂后观察的是已移除的旧节点，永不触发
+  //      → 尺寸冻在旧值，面板开合/分支切换都不再重测（只有 window resize 能救）。
+  // 修法：测量 ref 改**回调式** + 活节点集合：
+  //   · 每次节点挂载都 observe 并立刻测量（不再依赖 rAF 轮询与「只挂一次」）；
+  //   · 回调收到 null（有实例卸载）时按 `isConnected` 自清理，绕开「回调拿不到是哪个
+  //     节点卸载」的限制（仍连通的节点留待 RO 触发时再清，无副作用）；
+  //   · 宽度取「所有已挂载会话框的最大值」——chat/scheduled 两实例并存时只有一个可见，
+  //     隐藏的那个是 display:none（宽度 0），故最大值即当前可见会话框宽度；
+  //   · 0 宽不写入状态（切模式瞬间/离开工作区），避免把摘要卡瞬时误判为 'expanded'。
+  const measureSessionFrames = useCallback(() => {
+    const nodes = sessionFrameNodesRef.current;
+    const observer = sessionFrameObserverRef.current;
+    let width = 0;
+    let height = 0;
+    for (const node of Array.from(nodes)) {
+      if (!node.isConnected) {
+        observer?.unobserve(node);
+        nodes.delete(node);
+        continue;
       }
-      updateSize();
-      observer =
-        typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updateSize);
-      observer?.observe(element);
-      window.addEventListener('resize', updateSize);
-    };
-    attach();
-    return () => {
-      cancelled = true;
-      if (raf) cancelAnimationFrame(raf);
-      observer?.disconnect();
-      window.removeEventListener('resize', updateSize);
-    };
+      const rect = node.getBoundingClientRect();
+      if (rect.width > width) {
+        width = rect.width;
+        height = rect.height;
+      }
+    }
+    if (width > 0) {
+      setSessionFrameWidth(width);
+      setSessionFrameHeight(height);
+    }
   }, []);
+
+  const sessionFrameRef = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      sessionFrameNodesRef.current.add(node);
+      if (typeof ResizeObserver !== 'undefined') {
+        if (!sessionFrameObserverRef.current) {
+          sessionFrameObserverRef.current = new ResizeObserver(measureSessionFrames);
+        }
+        sessionFrameObserverRef.current.observe(node);
+      }
+    }
+    measureSessionFrames();
+  }, [measureSessionFrames]);
+
+  useEffect(() => {
+    window.addEventListener('resize', measureSessionFrames);
+    return () => {
+      window.removeEventListener('resize', measureSessionFrames);
+      sessionFrameObserverRef.current?.disconnect();
+      sessionFrameObserverRef.current = null;
+      sessionFrameNodesRef.current.clear();
+    };
+  }, [measureSessionFrames]);
 
   return {
     leftOpen,

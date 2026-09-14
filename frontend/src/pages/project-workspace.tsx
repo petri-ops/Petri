@@ -1384,7 +1384,7 @@ export function ProjectWorkspace(): React.ReactElement {
     workspaceMode,
     showPinnedSummary,
     centerColRef: centerColRef as React.RefObject<HTMLElement>,
-    sessionFrameRef: sessionFrameRef as React.RefObject<HTMLDivElement>,
+    sessionFrameRef: sessionFrameRef as React.Ref<HTMLDivElement>,
     bottomTerminalOpen,
     bottomTerminalHeight,
     leftOpen,

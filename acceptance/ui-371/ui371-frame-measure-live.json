@@ -1,0 +1,99 @@
+{
+  "name": "ui371-frame-measure",
+  "startedAt": "2026-09-14T13:52:55.317Z",
+  "finishedAt": "2026-09-14T13:53:04.812Z",
+  "assertions": [
+    {
+      "name": "A1 不派发 resize，仅改会话框宽度 → 形态自动跟随（float）",
+      "pass": true,
+      "detail": "host=float frame=700px"
+    },
+    {
+      "name": "A2 同上改为 1300px（≥1120）→ 形态自动转 column",
+      "pass": true,
+      "detail": "host=column frame=1300px"
+    },
+    {
+      "name": "A3 移除覆盖后回到自然基线形态（仍不派发 resize）",
+      "pass": true,
+      "detail": "baseline=float now=float"
+    },
+    {
+      "name": "A4 模式往返 + 测量触发后宽度不被写成 0（形态仍随宽度）",
+      "pass": true,
+      "detail": "host=float frame=700px frameCount=1"
+    },
+    {
+      "name": "A5 采集完成时会话框宽度与注入值一致（700px）",
+      "pass": true,
+      "detail": "frame=700px"
+    }
+  ],
+  "allPass": true,
+  "cases": {
+    "baseline": {
+      "path": "/project/p_mtkamsfu_3mxo/chat",
+      "host": "float",
+      "frameCount": 1,
+      "visibleFrameWidth": 1015,
+      "frameWidths": [
+        1015
+      ],
+      "cardInlineWidth": "292px"
+    },
+    "a1_float": {
+      "path": "/project/p_mtkamsfu_3mxo/chat",
+      "host": "float",
+      "frameCount": 1,
+      "visibleFrameWidth": 700,
+      "frameWidths": [
+        700
+      ],
+      "cardInlineWidth": "276px"
+    },
+    "a2_column": {
+      "path": "/project/p_mtkamsfu_3mxo/chat",
+      "host": "column",
+      "frameCount": 1,
+      "visibleFrameWidth": 1300,
+      "frameWidths": [
+        1300
+      ],
+      "cardInlineWidth": "312px"
+    },
+    "a3_restored": {
+      "path": "/project/p_mtkamsfu_3mxo/chat",
+      "host": "float",
+      "frameCount": 1,
+      "visibleFrameWidth": 1015,
+      "frameWidths": [
+        1015
+      ],
+      "cardInlineWidth": "292px"
+    },
+    "a4_in_scheduled": {
+      "path": "/project/p_mtkamsfu_3mxo/scheduled",
+      "host": "float",
+      "frameCount": 2,
+      "visibleFrameWidth": 700,
+      "frameWidths": [
+        0,
+        700
+      ],
+      "cardInlineWidth": "276px"
+    },
+    "a4_after_roundtrip": {
+      "path": "/project/p_mtkamsfu_3mxo/chat",
+      "host": "float",
+      "frameCount": 1,
+      "visibleFrameWidth": 700,
+      "frameWidths": [
+        700
+      ],
+      "cardInlineWidth": "276px"
+    }
+  },
+  "injectCss": "[class*=\"workspaceSessionFrame\"]{flex:0 0 <w>px !important;width:<w>px !important;}",
+  "note": "A1–A3 全程不派发 resize（旧实现 RO 已死则形态不变）；A4 为缺陷①的现场重现路径（scheduled 实例卸载 + 一次测量触发）",
+  "userReport": "用户问询「sessionFrameWidth 会在窗口尺寸/分支切换后失联，导致摘要卡形态恒 pinned」"
+}

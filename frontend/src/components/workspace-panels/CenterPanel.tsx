@@ -56,7 +56,8 @@ export interface CenterPanelContext {
 
   // Layout refs
   centerColRef: React.RefObject<HTMLElement>;
-  sessionFrameRef: React.RefObject<HTMLDivElement>;
+  /** UI-371 — 回调式测量 ref（可同时传给 chat / scheduled 两个 SessionFrameView 实例）。 */
+  sessionFrameRef: React.Ref<HTMLDivElement>;
   bottomTerminalOpen: boolean;
   bottomTerminalHeight: number;
   leftOpen: boolean;

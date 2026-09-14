@@ -84,3 +84,12 @@
   - **像素级判定内置**：脚本自带极简 PNG 解码（zlib inflate + 5 种 filter），逐列统计「卡片右缘向右的连续非白列宽」，修复前 5px / 修复后 ≤1px。
 - **同轮发现（已另立 AUDIT-LOG 🟡 待评估，未修）**：`frontend/src/hooks/useWorkspaceLayout.ts:120-149` 的测量 effect 只在挂载时 attach 一次；`.workspaceSessionFrame` 被响应式分支替换/重挂后，RO 仍观察已移除的旧节点（不再触发），`updateSize` 又只在 `window resize` 时重读 → `sessionFrameWidth` 冻在旧值或 0，`summaryVisibility` 恒 `expanded`（卡片恒钉住并被 `max-width: calc(100% - 24px)` 挤成窄条，float/compact 形态不再生效）。实测卡死实例：窗口 706px 而 frame 实测 1138px。**临时缓解=任意一次 `window resize`**。修复方向：改 callback ref（节点挂载即 re-attach + 立刻测量），需专项验收。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 七、同日第五轮补记（UI-371 会话框测量改回调 ref）
+
+- **UI-371 verified**：用户问询「`sessionFrameWidth` 失联致摘要卡形态恒 pinned」→ 复核确认缺陷真实存在并当日修复。详见 `docs/ui-productization-audit.md` UI-371 段 / AUDIT-LOG 处理记录 / `acceptance/ui-371/`。
+  - **两条根因**：① `SessionFrameView` 在 chat（常驻）/ scheduled（条件挂载）两个互斥分支**共用同一个 refObject** → scheduled 实例卸载时 React 对它调 `ref(null)` 把 `current` 置空，而常驻的 chat 实例不会重新赋值 → 此后每次测量都写 0 → `summaryVisibility`（阈值 1120）恒 `expanded`（卡片恒钉住并被 `max-width: calc(100% - 24px)` 挤成窄条）；② 测量 effect `deps: []` 只在挂载时 `observe` 一次 → 节点替换后 RO 观察的是已移除的旧节点、永不触发 → 尺寸冻在旧值（只有 `window resize` 能救，这就是「拖一下窗口边就恢复」的原因）。
+  - **修法**：`frontend/src/hooks/useWorkspaceLayout.ts` 的 `sessionFrameRef` 改**回调式**（`React.Ref<HTMLDivElement>`，可同时挂多个实例）——节点挂载即重新 `observe` 并立刻测量；回调收到 null 时按 `isConnected` 自清理；宽度取所有已挂载会话框的**最大值**（并存时只有一个是可见的，隐藏实例 `display:none` 宽度 0）；**0 宽不写入状态**（切模式瞬间不再误判 `expanded`）。顺带删除 UI-351 的 rAF 轮询挂载 hack。`CenterPanel.tsx` / `project-workspace.tsx` 的 `sessionFrameRef` 类型放宽为 `React.Ref<HTMLDivElement>`。
+  - **门禁**：新回归门 `frontend/src/hooks/useWorkspaceLayout.test.tsx` 5/5（**变异校验：临时回退 HEAD 版 hook → A1/A2/A4 三条变红**，A2 报 `expected '0' to be '700'`）；实机 `scripts/ui371-frame-measure-live.cjs` 5/5（A1–A3 全程**不派发 resize**、仅改会话框宽度即自动跟随形态；A4 走 scheduled↔chat 往返 + 一次测量触发后宽度仍 700px）。
+- **可复用的实机手法**：应用内路由跳转（触发条件分支挂载/卸载）用 `history.pushState` + 手工派发 `new PopStateEvent('popstate')`——react-router 监听 popstate，可在**不整页刷新**的前提下驱动组件分支切换。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
