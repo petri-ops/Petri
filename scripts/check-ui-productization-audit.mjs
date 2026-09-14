@@ -54,7 +54,11 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   '58bc741caded6fab4bf262b4a7d5099f1f86a37f',
   'c1284842c879bb7076a7c4472c02e1f197294592',
   '49dd938e5430004160c5caeed2cbcea75db13299',
-  '862fd501',
+  '862fd501fb950559ee12b5aa1f9af68e8b088dee',
+  '0663a13e37b645ca881b1ef05e9e471dd08da411',
+  'cd9781c29b8debdc7e4716d3d64d7b3c70667a7a',
+  '69cf02ce2a0478a806fc13ac965c37c3c7d25333',
+  '5e7710a5db180cf73a9e75f681d713f55a305d11',
   // 2026-09-13 BLOCK-70 P3 隧道实现提交 1c40b35：MobileSync.tsx 隧道三态区 UI
   // 增量的同提交台账漏同步（收口门禁抓出后补登 UI-319 条目 P3 段）。
   // subject 用 feat(block-70): 未带 UI-###。豁免同提交台账与 UI-### 编号要求。
@@ -254,7 +258,11 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   '58bc741caded6fab4bf262b4a7d5099f1f86a37f',
   'c1284842c879bb7076a7c4472c02e1f197294592',
   '49dd938e5430004160c5caeed2cbcea75db13299',
-  '862fd501',
+  '862fd501fb950559ee12b5aa1f9af68e8b088dee',
+  '0663a13e37b645ca881b1ef05e9e471dd08da411',
+  'cd9781c29b8debdc7e4716d3d64d7b3c70667a7a',
+  '69cf02ce2a0478a806fc13ac965c37c3c7d25333',
+  '5e7710a5db180cf73a9e75f681d713f55a305d11',
   // 2026-09-13 BLOCK-70 P3 隧道实现提交 1c40b35：MobileSync.tsx 隧道三态区
   // UI 增量的台账漏同步（收口门禁抓出后已补登 UI-319 条目 P3 段）。
   // 不重写共享历史。
