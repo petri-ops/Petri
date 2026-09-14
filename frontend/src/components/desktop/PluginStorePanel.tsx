@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { Icon, type IconName } from '@/components/icons/Icon';
+import { getBridge } from '@/lib/desktopBridge';
 // UI-347 — 返回按钮复用定时分析面的同款样式类（工作区模式面统一返回风格）
 import backStyles from '@/pages/project-workspace.module.css';
 import {
@@ -91,14 +92,13 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
 
   const refreshPacks = React.useCallback(async () => {
     try {
-      const bridge = (window as unknown as {
-        biof3Desktop?: { packs?: {
-          listInstalled: () => Promise<PacksEnvelope<InstalledPack> | InstalledPack[]>;
-          listAvailable: () => Promise<PacksEnvelope<AvailablePack> | AvailablePack[]>;
-        } };
-      }).biof3Desktop;
-      if (!bridge?.packs) return;
-      const [inst, avail] = await Promise.all([bridge.packs.listInstalled(), bridge.packs.listAvailable()]);
+      // BLOCK-87 L4-2：桥解析走 getBridge 单点——桌面=IPC 桥，投影=gateway
+      // HTTP 桥（手机端领域包/运行时与桌面同源）；普通 web 无桥返回 null。
+      // 直接读 window.biof3Desktop 在投影下拿到的是垫片 Proxy（解析为
+      // undefined），曾是手机端领域包分区空白的根因之一。
+      const bridge = getBridge('packs');
+      if (!bridge) return;
+      const [inst, avail] = await Promise.all([bridge.listInstalled(), bridge.listAvailable()]);
       setInstalledPacks(unpackPacks<InstalledPack>(inst));
       setAvailablePacks(unpackPacks<AvailablePack>(avail));
     } catch {
@@ -112,10 +112,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
     setPackBusy(pack.packId);
     setPackNotice(null);
     try {
-      const bridge = (window as unknown as {
-        biof3Desktop?: { packs?: { installPath: (root: string) => Promise<{ ok: boolean; error?: string }> } };
-      }).biof3Desktop;
-      const result = await bridge?.packs?.installPath(pack.packRoot);
+      const result = await getBridge('packs')?.installPath(pack.packRoot);
       if (result?.ok) setPackNotice(`「${pack.name}」已安装——重启应用后生效`);
       else setPackNotice(`安装失败：${result?.error ?? '未知错误'}`);
       await refreshPacks();
@@ -128,10 +125,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
     setPackBusy(pack.packId);
     setPackNotice(null);
     try {
-      const bridge = (window as unknown as {
-        biof3Desktop?: { packs?: { uninstall: (id: string) => Promise<{ ok: boolean; error?: string }> } };
-      }).biof3Desktop;
-      const result = await bridge?.packs?.uninstall(pack.packId);
+      const result = await getBridge('packs')?.uninstall(pack.packId);
       if (result?.ok) setPackNotice(`「${pack.name}」已卸载——重启应用后回到纯通用态`);
       else setPackNotice(`卸载失败：${result?.error ?? '未知错误'}`);
       await refreshPacks();
@@ -380,9 +374,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
                 <div role="status" style={{ padding: '6px 0', color: 'var(--gewu-text-secondary)' }}>{packNotice}</div>
               )}
               {(() => {
-                const packBridge = (window as unknown as {
-                  biof3Desktop?: { packs?: { installFromDialog: () => Promise<{ ok: boolean; canceled?: boolean; pack?: { packId: string }; error?: string }> } };
-                }).biof3Desktop?.packs;
+                const packBridge = getBridge('packs');
                 return packBridge ? (
                   <button
                     type="button"

@@ -1230,6 +1230,8 @@
         "acceptance/ui-363/**",
         "acceptance/ui-364/**",
         "acceptance/ui-365/**",
+        "acceptance/block-85/**",
+        "acceptance/block-87/**",
         "acceptance/ui-325/**",
         "acceptance/ui-326/**",
         "acceptance/ui-327/**",

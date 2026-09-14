@@ -23,7 +23,14 @@ const { readConfig, resolveEnabled, resolvePort, lanAddresses } = require('./con
 const crypto = require('node:crypto');
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-const RATE_LIMIT_MAX_REQUESTS = 240;
+// BLOCK-87 实测修正：投影 SPA 自带大量轮询器（摘要卡 5s×多路、会话对账 5s、
+// 偏好 15s…），且经隧道时全部设备共享 127.0.0.1 一个 IP——240/分 必然误伤
+// 正常使用（用户实测「总是 rate_limited」）。限速目的（D4）是保护 API 面不被
+// 爆破/刷量，不是限制页面资产：静态资源与 Vite 热更模块不计数，只计 API 面。
+const RATE_LIMIT_MAX_REQUESTS = 600;
+// 计入限速的 API 前缀（其余路径——/m 静态页、投影 SPA 资产、Vite 代理——
+// 仍过 sessionAuth 会话门，只是不消耗限速配额）。
+const RATE_LIMITED_PREFIXES = ['/api/', '/m/api/', '/federation/'];
 const AUDIT_MAX_LINE_BYTES = 4 * 1024;
 // 会话 cookie 长效：一次认证长期有效，除非用户主动吊销/关闭（加映 4）。
 const SESSION_COOKIE_MAX_AGE = 365 * 24 * 60 * 60;
@@ -49,6 +56,8 @@ function createRateLimiter({ windowMs = RATE_LIMIT_WINDOW_MS, max = RATE_LIMIT_M
   const hits = new Map(); // ip -> [timestamps]
   setInterval(() => hits.clear(), windowMs).unref?.();
   return function rateLimit(req, res, next) {
+    const isApi = RATE_LIMITED_PREFIXES.some((prefix) => req.path.startsWith(prefix));
+    if (!isApi) return next();
     const ip = req.ip || req.socket?.remoteAddress || 'unknown';
     const stamps = (hits.get(ip) || []).filter((ts) => now() - ts < windowMs);
     if (stamps.length >= max) {

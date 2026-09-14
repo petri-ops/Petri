@@ -102,7 +102,9 @@ export function getBridge<K extends DesktopBridgeName>(
     if (projectionBridge) return projectionBridge as DesktopBridgeHandle<K>;
   }
   // BLOCK-87 L4 — 投影环境数据页（Skills/插件商店）：IPC 数据面切 HTTP。
-  if (name === 'skills' || name === 'plugins') {
+  // L4-2 扩面：插件目录/已装列表（plugins）、领域包（packs）、运行时状态
+  // （runtime）一并对齐桌面 IPC 契约，插件商店手机端与桌面同源。
+  if (name === 'skills' || name === 'plugins' || name === 'packs' || name === 'runtime') {
     const dataBridge = getProjectionDataBridge(name);
     if (dataBridge) return dataBridge as DesktopBridgeHandle<K>;
   }
