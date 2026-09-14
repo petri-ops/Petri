@@ -303,6 +303,7 @@
         "frontend/src/components/desktop/titlebar/TitleBarCenterZone.tsx",
         "frontend/src/components/desktop/titlebar/ColumnizedTitleBar.tsx",
         "frontend/src/components/desktop/titlebar/shared.tsx",
+        "frontend/src/components/workspace-panels/LeftPanel.tsx",
         "frontend/src/lib/project-store.ts",
         "core/biof3-server/routes/tools-metadata.js"
       ],
@@ -1206,6 +1207,7 @@
         "scripts/ui351-*.cjs",
         "scripts/ui359-*.cjs",
         "scripts/ui360-*.cjs",
+        "scripts/ui361-*.cjs",
         "acceptance/ui-346/**",
         "acceptance/ui-347/**",
         "acceptance/ui-348/**",
@@ -1214,6 +1216,7 @@
         "acceptance/ui-351/**",
         "acceptance/ui-359/**",
         "acceptance/ui-360/**",
+        "acceptance/ui-361/**",
         "acceptance/ui-325/**",
         "acceptance/ui-326/**",
         "acceptance/ui-327/**",

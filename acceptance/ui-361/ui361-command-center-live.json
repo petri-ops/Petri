@@ -1,0 +1,51 @@
+{
+  "name": "ui361-command-center",
+  "startedAt": "2026-09-14T07:03:14.882Z",
+  "finishedAt": "2026-09-14T07:03:29.358Z",
+  "assertions": [
+    {
+      "name": "V1_titlebar_entry_removed",
+      "pass": true,
+      "detail": "欢迎页顶栏右区无指挥中心按钮（titlebarEntry=false）"
+    },
+    {
+      "name": "V2a_rail_entry_on_home",
+      "pass": true,
+      "detail": "欢迎页左栏底部有指挥中心入口且带快捷键提示（title=指挥中心（Ctrl+Shift+C））"
+    },
+    {
+      "name": "V2b_rail_entry_persistent",
+      "pass": true,
+      "detail": "工作区 chat 左栏底部入口在场且顶栏无入口；/skills 亦常驻（chat rail=true，chat titlebar=false，skills rail=true）"
+    },
+    {
+      "name": "V3_command_center_window_pops_out",
+      "pass": true,
+      "detail": "点击后指挥中心独立窗弹出（url=http://localhost:3000/window/command-center）"
+    },
+    {
+      "name": "V4_command_center_closable",
+      "pass": true,
+      "detail": "指挥中心窗可关闭（残留=false）"
+    }
+  ],
+  "allPass": true,
+  "observations": {
+    "pid": "p_mtuyje22_9vr4",
+    "home": {
+      "titlebarEntry": false,
+      "railEntry": true,
+      "railTitle": "指挥中心（Ctrl+Shift+C）"
+    },
+    "chat": {
+      "titlebarEntry": false,
+      "railEntry": true,
+      "railTitle": "指挥中心（Ctrl+Shift+C）"
+    },
+    "skills": {
+      "titlebarEntry": false,
+      "railEntry": true,
+      "railTitle": "指挥中心（Ctrl+Shift+C）"
+    }
+  }
+}

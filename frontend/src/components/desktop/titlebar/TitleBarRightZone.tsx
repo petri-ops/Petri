@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
-import { getBridge } from '@/lib/desktopBridge';
 import { useWorkspacePanelsContext } from '../WorkspacePanelsContext';
 import styles from '../TitleBar.module.css';
 import { getIsMac, modeUsesRightRail, parseWorkspaceRoute, WindowControls } from './shared';
@@ -120,18 +119,10 @@ export function TitleBarRightZone(): React.ReactElement {
       )}
 
       <div className={styles.windowTools}>
-        {/* BLOCK-59 P3 — 指挥中心入口（多任务俯瞰单例窗，随开随关） */}
-        {getBridge('windowManager') && (
-          <button
-            type="button"
-            className={styles.iconBtn}
-            onClick={() => void getBridge('windowManager')!.popOut('command-center')}
-            title="打开指挥中心（全部作业实时俯瞰）"
-            aria-label="打开指挥中心"
-          >
-            <Icon name="cpu" size={15} />
-          </button>
-        )}
+        {/* UI-361 — 指挥中心入口迁入壳层左栏底部（LeftSidebarFooter）：
+            它是全局单例窗（跨项目/会话的全部作业俯瞰），不属于列级 chrome，
+            原先在右栏 header 里视觉上像右栏的附属控件。快捷键 Ctrl/Cmd+Shift+C
+            仍为全局（App.tsx）。 */}
         {workspacePanelsAvailable && (
           <button
             type="button"

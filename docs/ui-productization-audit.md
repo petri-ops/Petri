@@ -3338,6 +3338,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **P2 控制面（2026-09-13 追加实现）**：移动页升级为控制面——任务详情页批准卡（SSE `needApproval` 事件驱动：工具名+目标摘要+脱敏 params，**两步确认**按钮 D4）+ 取消任务按钮 + 会话页/全局 composer 发消息（POST `/api/ai/agent` 复用 chat.js 路由）。后端新增窄口 `mobile-gateway/control.js` `POST /m/api/approvals/:token/decide`——进程内直调 `db.ackToolJob`（与桌面确认卡 `routes/ai-legacy.js` 的 `POST /api/ai/run-tool-ack/:token` **同一函数同一 scope 校验，权限不放大**；不发 HTTP 自调用，对标 BLOCK-49 直调先例）。验证：集成测试 10/10 + **实机隔离探针 28/28 ALL PASS**（新增 B 系列：吊销后可重新配对/发消息 401+契约 400/取消 401+结构化 404/批准无会话 401+缺 scope 400+**scope 不匹配 404 权限不放大**+批准放行落库 ack_status=approved 且 job 不被破坏+拒绝落库 rejected+failed）。`acceptance/block-70/block70-mobile-gateway-live.json`。
 - **实现提交对账（UI-357 桌面投影 / P3 隧道 UI 归入本条目）**：P2 控制面 = 3c3bdb17；P3 隧道三态呈现与公网 QR 切换 = 1c40b35（该提交含 MobileSync.tsx 隧道区 UI 增量，同提交台账漏同步——已补登本段并按 c177374 先例登记 LEGACY 豁免）；桌面投影 = 79fea4a5。「手机发起→桌面执行（真实模型）→手机批准→手机收终态」全链与 dev 栈 CDP 设置区断言未执行（前者需真实 LLM 环境）——前者待 dev 栈窗口，后者**CDP 够不着**，按无人化验收阶梯第 2 级如实停留 `in_progress`，待用户照测试路线实测后升级；P2 控制面（发消息/批准/取消）与 P3 aliyun 隧道属后续阶段未实现。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-361: 指挥中心入口迁入壳层左栏底部（全局动作与列级 chrome 分层）（2026-09-14 verified，dev Electron 边界内 CDP 5/5）
+
+- **来源**：用户质询「指挥中心这个图标是不是应该和会话绑定而不是全局通用？并且不应该出现在右侧栏上层？」——复核实锤：指挥中心**本来就是全局**（BLOCK-59 P3 跨项目/会话的全部作业俯瞰单例窗，快捷键 Ctrl/Cmd+Shift+C 注册在 App.tsx），不该与会话绑定；但它的入口按钮挂在 TitleBarRightZone windowTools 里——右栏展开时渲染在**右栏列 header**（视觉上像右栏的附属控件），全局动作被列级 chrome 承载，层级错位（与本会话 UI-359/360 同一类分层问题）；且与左栏底部联邦入口撞 `cpu` 图标。
+- **交付面**：①入口从 TitleBarRightZone 迁入 LeftSidebarFooter 底部工具行——[联邦][指挥中心][设置]，壳层常驻、跨路由稳定位（符合其全局语义）；②换 `command` 图标消除与联邦 cpu 撞车；③title 带平台快捷键提示（Ctrl+Shift+C / ⌘⇧C）；④无 windowManager 桥（web 回退）自动隐藏；快捷键全局绑定不变。
+- **证据**：vitest 定向 **38/38**（LeftPanel 16：新增无桥不渲染/有桥渲染于底部行+点击调 popOut('command-center')+联邦·设置同行归组断言；TitleBar 22 回归）+ `tsc --noEmit` 0 + 实机 CDP `scripts/ui361-command-center-live.cjs` **5/5 allPass**（顶栏入口三路由均消失 / 左栏底部三路由常驻带 Ctrl 提示 / 点击后 /window/command-center 独立窗真实弹出 / 可关闭无残留），证据 `acceptance/ui-361/ui361-command-center-live.json`。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-360: 顶栏摘要开关按模式裁剪 + 插件/设置全屏工作面收起右侧栏（2026-09-14 verified，dev Electron 边界内 CDP 5/5）
 
 - **来源**：用户质询「新建任务、插件点开的内容不应该展开右侧栏和顶层摘要按钮吧？Skills/知识空间/后端都没有」——复核实锤两层根因：①顶栏「展开摘要概览」开关（TitleBarCenterZone）无条件渲染，只有 `/skills /knowledge /backend` 走 `isStandalonePagePath` bare 分支跳过，而摘要卡 `showPinnedSummary` 只在 chat/scheduled 存在 → 欢迎页（新建任务落点 `/`）与 plugins/settings 模式上是死开关；②「插件」入口 = `openWorkspaceMode('plugins')`，PluginStorePanel 占满中栏但 RightPanel 无条件随渲染 → 右栏在无消费的全屏工作面上白占宽度。
