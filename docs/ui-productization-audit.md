@@ -3371,20 +3371,22 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：退避窗口约 32s，后端就绪超过该窗口仍需手动刷新（残留边界如实登记，不随本次复验收窄）；forced 模式用请求拦截构造失败窗口（触发方式与冷启窗口不同，挂载路径与被测 effect 相同），natural 模式为该路径的真实重启复核。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-368: 投影手机端左栏单一入口——标题栏左上直接开合抽屉（2026-09-14 in_progress，BLOCK-87-L3-2；手机端实机待用户复测后升级 verified）
+## UI-368: 投影手机端左栏单一入口——标题栏左上直接开合抽屉（2026-09-14 verified，BLOCK-87-L3-2；用户手机真机复测确认）
 
 - **来源**：用户手机截图裁决「适配很不理想，为什么左侧还需要多一个目录展开按钮？左上角的左侧展开栏就直接控制左侧栏的展开和收缩」——复核实锤：L3 首版投影手机端有两个并存的「展开左侧」控制：标题栏左上按钮走 `panels.toggleLeft`（该形态下无感）+ App.tsx 另一套本地状态的浮动 ☰（真正开抽屉），语义打架；顶栏右端还渲染垫片 no-op 的桌面窗口控件（— □ ×）。
 - **交付面**：①撤掉浮动 ☰ 按钮与 `railOverlayOpen` 本地状态——投影手机端 `leftOpen` 被征用为抽屉开合单一真相，标题栏左上按钮零改动直接开合 AppRail 抽屉（遮罩点击收回）；②路由变化即收起抽屉（点导航项跳转后不残留遮罩；同路由点击不关——与「当前页」语义一致）；③`isProjectionMobile()`/`getIsProjection()` 沉淀进 titlebar/shared 单一解析源（App 与 TitleBar 共读）；④投影手机端顶栏左右 span 恒按收起宽计算（抽屉是覆盖层不推挤布局）；⑤投影环境隐藏 WindowControls（浏览器里是垫片 no-op 死按钮）。
 - **证据**：vitest 定向 **38/38**（TitleBar 25/25：投影隐藏窗口控件 + 真桌面保留 + isProjectionMobile 三态锚定）+ `tsc --noEmit` 0 + 实机 CDP `scripts/ui368-projection-rail-live.cjs` **5/5 allPass 连续两轮**（手机视口 390×844 + data-projection 标志：默认无 ☰ 抽屉收起/左上按钮开抽屉且 span 恒 146px/遮罩收回/跨路由导航自动收起/窗口控件隐藏），证据 `acceptance/ui-368/`；impact-map 补 `acceptance/ui-368/**`、`scripts/ui368-*.cjs`。
-- **边界**：探针以标志注入模拟投影（主进程 will-navigate 守卫禁止窗口内跨源导航 + 本 Electron CDP 不执行 addScriptToEvaluateOnNewDocument，实测）——「手机首屏抽屉默认收起」由 `useWorkspacePanels` 初始化语义（`useState(!projectionNarrow)`）保证；手机端真实链路复测（真实 shim + 配对 cookie）待用户，按无人化验收阶梯如实停留 `in_progress`。
+- **升级证据（2026-09-14 用户手机真机复测，无人化阶梯第 4 级）**：测试路线=待执行验收包 §9.1（`docs/session-handoff-2026-09-14.md`）；用户按路线复测「投影手机端左栏单一入口」判定（无悬浮 ☰、标题栏左上按钮直接开合抽屉、遮罩收回、跨路由自动收起）通过并裁决升 verified。
+- **边界**：探针以标志注入模拟投影（主进程 will-navigate 守卫禁止窗口内跨源导航 + 本 Electron CDP 不执行 addScriptToEvaluateOnNewDocument，实测）——「手机首屏抽屉默认收起」由 `useWorkspacePanels` 初始化语义（`useState(!projectionNarrow)`）保证。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-367: 插件商店手机端投影同源 + 网关限流 API 面收敛（2026-09-14 in_progress，BLOCK-87-L4-2；手机端实机待用户复测后升级 verified）
+## UI-367: 插件商店手机端投影同源 + 网关限流 API 面收敛（2026-09-14 verified，BLOCK-87-L4-2；用户手机真机复测确认）
 
 - **来源**：用户手机实测双反馈「总是 rate_limited」+「手机端插件商店与桌面不一致（缺领域包/运行时，图证）」——复核实锤两根因：①限速器挂在网关所有中间件最前且**静态资源/Vite 热更模块全部计数**（dev 冷启动数百请求直打满 240/分/IP，经隧道全设备共享 127.0.0.1 一个 IP）；②L4 第一批投影桥 `plugins.listInstalled` 误包 `{ok,packs}` 信封（桌面 IPC `plugin:list-installed` 契约=裸数组）且缺 `listRemote`——`usePluginStore` 整段取数失败，手机插件商店全空；`window.biof3Desktop.packs` 在投影下是垫片 Proxy（解析为 undefined），领域包分区永不渲染。
 - **交付面**：①限速只计 API 面（`/api/`、`/m/api/`、`/federation/`；静态页/投影资产/Vite 代理仍过会话门但不消耗配额）+ 上限 240→600（投影 SPA 轮询器密集：摘要卡 5s×多路/会话对账 5s/偏好 15s）；②core 投影端点扩面 `routes/projection-data.js`：GET `/api/plugins/catalog`（resources/runtime/manifest.json 与桌面 getBuiltInManifest 同文件）+ GET `/api/runtime/status`（executors 探测，federation health 同款）+ GET `/api/packs/installed|available`（pack-registry 同源，与桌面 pack:list-* 同 dataDir）；③投影桥对齐 IPC 契约：`listInstalled` 回裸数组、补 `listRemote`、新增 `packsBridge`/`runtimeBridge`（desktopBridge 拦截名扩 packs/runtime）；写操作（安装/卸载）投影下诚实禁用（错误信息指向桌面端）；④`PluginStorePanel` 三处 `window.biof3Desktop.packs` 直读改 `getBridge('packs')` 单点解析（桌面=IPC 不变，投影=HTTP，web=null 整区隐藏如前）。
 - **证据**：node 集成 `test/block87-projection-data.test.mjs` **3/3**（限速 API 面收敛：API 3 次后 429 而静态页 8 连发不 429；四端点沙盒契约：catalog/runtime/packs 读面与已装标记；投影端点挂 gateway 落会话门内无会话 401）+ block70 回归 **11/11** + vitest 定向 **30/30**（新增 projectionDataBridges 9：IPC 形状锚定/诚实禁用/降级）+ `tsc --noEmit` 0；impact-map 补 `acceptance/block-85/**`、`acceptance/block-87/**` 映射（🟡存量预告项兑现，`test:changed` 存量红清零）。
-- **边界**：手机端实机验收（插件商店与桌面同源呈现、限流不再误伤）待用户日常使用复测，按无人化验收阶梯如实停留 `in_progress`；运行时装卸/领域包装卸/插件安装仍为桌面端动作（写面诚实禁用）；运行时目录卡片「已安装」徽章 id 不匹配（gewu-\* vs biof3-\*）为桌面既有显示语义，两端一致不单修。
+- **升级证据（2026-09-14 用户手机真机复测，无人化阶梯第 4 级）**：测试路线=待执行验收包 §9.1（`docs/session-handoff-2026-09-14.md`）；用户按路线复测「插件商店与桌面一致（含领域包/运行时分区）」与「频繁点击/刷新不再 rate_limited、二次刷新秒级」判定通过并裁决升 verified。
+- **边界**：运行时装卸/领域包装卸/插件安装仍为桌面端动作（写面诚实禁用）；运行时目录卡片「已安装」徽章 id 不匹配（gewu-\* vs biof3-\*）为桌面既有显示语义，两端一致不单修。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-365: 设置独立页化 /settings——settings 模式退役（2026-09-14 verified，dev Electron 边界内 CDP）
