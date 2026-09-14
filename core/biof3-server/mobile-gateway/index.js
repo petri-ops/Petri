@@ -252,16 +252,16 @@ function buildMobileGateway({
       '})();</script>',
     ];
     const shim = shimArr.join('');
-    let injectedIndex = null;
-    try {
-      injectedIndex = readFileSync(desktopIndex, 'utf8').replace('<head>', '<head>' + shim);
-      console.log(`[mobile-gateway] desktop projection ready (${desktopDist})`);
-    } catch (e) {
-      console.warn(`[mobile-gateway] desktop index inject failed: ${e && e.message} :: ${desktopIndex}`);
-    }
+    // 每次请求读盘注入（index.html 仅数 KB）：dist 重建后投影即时生效——
+    // 曾因启动时一次性缓存旧 index.html，引用已删除的旧 hash 资产 → 手机
+    // 投影停留在旧界面/白屏（BLOCK-85 双真机实测抓真）。
     const sendIndex = (res) => {
-      if (injectedIndex) res.type('html').send(injectedIndex);
-      else res.status(404).send('dist index missing');
+      try {
+        const injected = readFileSync(desktopIndex, 'utf8').replace('<head>', '<head>' + shim);
+        res.type('html').send(injected);
+      } catch {
+        res.status(404).send('dist index missing (npm run build:spa)');
+      }
     };
     app.use(express.static(desktopDist, { index: false }));
     // SPA 客户端路由 fallback：非 /api、/m、/pair 的 GET 一律回 index.html
