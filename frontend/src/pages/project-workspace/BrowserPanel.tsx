@@ -91,7 +91,10 @@ export function BrowserPanel({
     webview.style.border = '0';
     webview.style.display = 'flex';
     webview.setAttribute('partition', 'persist:gewu-browser');
-    webview.setAttribute('allowpopups', 'true');
+    // SEC-HARDEN — 撤掉 allowpopups（Electron 官方安全清单 #11：`<webview>` 不应允许
+    // 自建窗口；默认立场就是不允许）。guest 的 window.open 因此不再生效；主进程
+    // src/main/security-hardening.js 另在「每个 webContents」上装了 setWindowOpenHandler
+    // 作为纵深防御（一律 deny，http(s) 交系统浏览器）。
     webview.src = startUrlRef.current;
 
     const syncState = () => {

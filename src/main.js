@@ -52,6 +52,14 @@ const { setupWindowIpc } = require("./main/_window-ipc.js");
 const { setupAppMenu } = require("./main/_app-menu.js");
 const { startSpaServer } = require("./main/_spa-server.js");
 const { createWindow } = require("./main/_window-create.js");
+// SEC-HARDEN — 安全专项收口（AUDIT-LOG 代码复审余项 ③ 附带项）：
+// webview 加固（清单 #11/#12）+ 权限默认收紧（清单 #5）。模块加载期即注册
+// web-contents-created（必须在任何 webContents 创建之前）；权限策略在
+// main() 内 setupDesktopEnv() 之后（受信 origin 环境变量此时才写入）。
+const {
+  applyPermissionPolicy,
+  applyWebContentsHardening,
+} = require("./main/security-hardening.js");
 
 // Guard: core-utils.js requires Electron app; skip if not in Electron env
 let agentWorkbenchFlags = { extraRenderers: false };
@@ -359,6 +367,16 @@ async function main() {
   const { setupDesktopEnv } = require("./main/env-coordinator");
   setupDesktopEnv(backendPorts);
 
+  // SEC-HARDEN 清单 #5：权限默认拒绝（Electron 未装 handler 时是「自动批准一切」）。
+  // 必须晚于 setupDesktopEnv——受信渲染 origin 由它写入 BIOF3_TRUSTED_DESKTOP_ORIGINS。
+  // 传 app 是为了用 'session-created' 覆盖分区 session（webview 的 persist:gewu-browser
+  // 不共享 defaultSession，只装默认 session 会漏掉 guest）。
+  try {
+    applyPermissionPolicy({ session, app, log: console });
+  } catch (error) {
+    console.warn("[security] 权限策略装配失败（继续启动，但权限策略未生效）:", error?.message || error);
+  }
+
   // M1-4 (H3)：启动 biof3-server 前跑 db migration，防升级 schema 错乱。
   // Migration must use the same selected Node boundary as biof3-server. Loading
   // better-sqlite3 inside Electron would require a different native ABI and
@@ -539,6 +557,9 @@ if (process.argv.includes("--dev")) {
 }
 
 app.whenReady().then(main);
+
+// 必须在任何 webContents 创建前注册（模块加载期同步执行；main() 在 whenReady 后才创建窗口）。
+applyWebContentsHardening({ app, shell, log: console });
 
 app.on("window-all-closed", () => {
   // Product contract: closing Gewu stops the local application and every

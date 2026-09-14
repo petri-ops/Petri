@@ -93,3 +93,21 @@
   - **门禁**：新回归门 `frontend/src/hooks/useWorkspaceLayout.test.tsx` 5/5（**变异校验：临时回退 HEAD 版 hook → A1/A2/A4 三条变红**，A2 报 `expected '0' to be '700'`）；实机 `scripts/ui371-frame-measure-live.cjs` 5/5（A1–A3 全程**不派发 resize**、仅改会话框宽度即自动跟随形态；A4 走 scheduled↔chat 往返 + 一次测量触发后宽度仍 700px）。
 - **可复用的实机手法**：应用内路由跳转（触发条件分支挂载/卸载）用 `history.pushState` + 手工派发 `new PopStateEvent('popstate')`——react-router 监听 popstate，可在**不整页刷新**的前提下驱动组件分支切换。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 八、同日第六轮补记（SEC-HARDEN 主进程安全加固 + 代码复审余项 ③④ 收口）
+
+- **用户裁决**：「清两个低危安全/健壮性余项」（代码复审 ③ main.js webPreferences / ④ 无句柄失活 job 不杀进程）。按承诺先做只读排查，结论如下。
+- **④ = 设计决策，不改（销号附论证）**：`core/biof3-server/helpers/process-lifecycle.js:231-266` 的 `markUnownedStaleJobs` 在**无进程句柄**时只改 DB 状态、刻意不发信号——代码内已有完整论证（job 记录可能是孤儿、PID 可能被复用、进程可能属别的 job → SIGKILL 会误杀无关进程，属安全违规），DB error 文案也如实告知用户「进程归属无法证明，未发送信号」；而**有句柄**的路径 `recoverStaleActiveJobs` 确实会 terminate 子进程。「有句柄才杀」是正确分界。
+- **③ = 字面项已满足，真残留是对齐官方安全清单的三处缺口**：三个 BrowserWindow（`src/main/_window-create.js` / `src/ipc/window-manager.js` ×2）均已显式 `contextIsolation:true / nodeIntegration:false / sandbox:true / webSecurity:true`；但：
+  - **#5 未设权限处理器** → 官方文档原文：「By default, Electron will automatically approve all permission requests unless the developer has manually configured a custom handler.」本应用有加载**任意外部 URL** 的 `<webview>`（结果浏览器面板），等于任意站点可无提示拿摄像头/麦克风/定位/屏幕捕获。
+  - **#11 `<webview allowpopups="true">`** → 官方清单明令避免（默认立场就是不允许）。
+  - **#12 未校验 webview webPreferences/params** → 渲染层（含被注入页面）可创建带任意 `preload`/`partition` 的 webview。
+- **交付**：新 `src/main/security-hardening.js` + `src/main.js` 装配（**模块加载期**注册 `web-contents-created`；`whenReady` + `setupDesktopEnv` 后装配权限策略）+ `frontend/src/pages/project-workspace/BrowserPanel.tsx` 撤 `allowpopups`。策略：webview 附着前删 `preload(URL)`、强制 `sandbox/contextIsolation/webSecurity=true`、`nodeIntegration=false`；partition 白名单 `persist:gewu-browser`；src 限 http(s)；每个 webContents 的 `setWindowOpenHandler` 一律 deny（http(s) 交系统浏览器，非 http(s) 丢弃）；权限**默认拒绝**，仅受信渲染 origin（`BIOF3_TRUSTED_DESKTOP_ORIGINS`）放行 `clipboard-sanitized-write` / `openExternal`。
+- **实机门抓出我自己两个真缺陷（下个 Agent 勿回退）**：
+  1. **只装 `defaultSession` 会漏掉 webview 的分区 session** —— `persist:gewu-browser` 不共享默认 session，实测 guest 内 `geolocation` 仍 `granted`。修=另挂 `app.on('session-created')` 给此后每个 session 都装（幂等）。
+  2. **check handler 的 `requestingOrigin` 可能为空**（Chromium 对剪贴板写等检查不一定带来源）—— 只按它判会把自家 UI 的复制按钮误杀。修=回退 `webContents.getURL()`，两者都取不到才拒（安全侧失败）。
+  - 另记一条**探针坑**：CDP `Runtime.evaluate` 无用户手势且页面可能失焦，Chromium 对这种 `navigator.clipboard.writeText` 本身就报 `Write permission denied`（与权限策略无关）→ **不能用「无手势写入成败」当判据**；正确取证=①`navigator.permissions.query({name:'clipboard-write'})` 的状态 ②`Input.dispatchMouseEvent` 真实点击驱动的端到端复制。
+- **门禁**：`test/security-hardening.test.mjs` **17/17**；实机 `scripts/sec-harden-live.cjs` **8/8**（S1 自家 geolocation=denied／S2 剪贴板权限 granted／S2b 真实点击复制 ok／S3 白名单 webview 正常加载／S4 野 partition 被拦／S5 file: 被拦／S6 guest 权限也 denied／S7 allowpopups 已撤）；根 `test:changed` 99/105（2 红=P6 存量基线）；前端 `test:changed` 1/1。证据 `acceptance/sec-harden/`。
+- **副作用（如实登记，一行可回退）**：撤 `allowpopups` 后，结果浏览器面板内 `target=_blank` 链接不再弹窗（正常链接点击不受影响，面板自带地址栏）。若要恢复，需同时保留主进程的 deny 处理器（它已保证 guest 无法自建窗口）。
+- **治理待办（已第二次提示，仍未做）**：`docs/AUDIT-LOG.md` 现 **58.5KB**，远超 50KB 滚动归档阈值 → 下次会话启动必须先归档再进主线。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

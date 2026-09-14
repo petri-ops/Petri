@@ -1,0 +1,99 @@
+{
+  "name": "sec-harden",
+  "startedAt": "2026-09-14T14:10:03.388Z",
+  "finishedAt": "2026-09-14T14:10:12.126Z",
+  "assertions": [
+    {
+      "name": "S1 受信 origin：geolocation 权限被拒（未装 handler 时 Electron 默认批准）",
+      "pass": true,
+      "detail": "state=denied"
+    },
+    {
+      "name": "S2 受信 origin：剪贴板写权限层放行（未被 allowlist 误拒）",
+      "pass": true,
+      "detail": "state=granted"
+    },
+    {
+      "name": "S2b 受信 origin：真实点击驱动的复制端到端成功（复制按钮未被误伤）",
+      "pass": true,
+      "detail": "click=ok hasFocus=true"
+    },
+    {
+      "name": "S3 白名单 partition + http src：webview 正常附着并加载（浏览器面板未被误伤）",
+      "pass": true,
+      "detail": "settled=attached url=http://127.0.0.1:3001/api/health"
+    },
+    {
+      "name": "S4 非白名单 partition：guest 未创建（被 will-attach-webview 拦下）",
+      "pass": true,
+      "detail": "settled=timeout err=The WebView must be attached to the DOM and the dom-ready event emitted before this method can be called."
+    },
+    {
+      "name": "S5 非 http(s) src（file:）：guest 未创建",
+      "pass": true,
+      "detail": "settled=timeout err=The WebView must be attached to the DOM and the dom-ready event emitted before this method can be called."
+    },
+    {
+      "name": "S6 guest（非受信 origin 127.0.0.1:3001）：权限同样被拒",
+      "pass": true,
+      "detail": "guestGeo=denied"
+    },
+    {
+      "name": "S7 BrowserPanel 源码已无 allowpopups（清单 #11）",
+      "pass": true,
+      "detail": "allowpopups=false"
+    }
+  ],
+  "allPass": true,
+  "probe": {
+    "href": "http://localhost:3000/",
+    "origin": "http://localhost:3000",
+    "geolocationState": "denied",
+    "hasFocus": true,
+    "clipboardWritePermission": "granted",
+    "probeButton": {
+      "x": 68,
+      "y": 24
+    },
+    "allowed": {
+      "label": "allowlisted",
+      "settled": "attached",
+      "url": "http://127.0.0.1:3001/api/health",
+      "guestId": 3,
+      "err": null,
+      "guestGeolocation": "denied"
+    },
+    "badPartition": {
+      "label": "bad_partition",
+      "settled": "timeout",
+      "url": null,
+      "guestId": null,
+      "err": "The WebView must be attached to the DOM and the dom-ready event emitted before this method can be called.",
+      "guestGeolocation": null
+    },
+    "badScheme": {
+      "label": "file_scheme",
+      "settled": "timeout",
+      "url": null,
+      "guestId": null,
+      "err": "The WebView must be attached to the DOM and the dom-ready event emitted before this method can be called.",
+      "guestGeolocation": null
+    },
+    "clipboardClick": {
+      "result": "ok",
+      "clickedAt": 1789395011524
+    }
+  },
+  "browserPanel": "frontend/src/pages/project-workspace/BrowserPanel.tsx",
+  "note": "src/main/** 改动需重启 Electron 生效；本脚本只断言，不负责重启",
+  "changes": [
+    "src/main/security-hardening.js（新）",
+    "src/main.js 装配（模块期 web-contents-created + whenReady 后权限策略）",
+    "frontend/src/pages/project-workspace/BrowserPanel.tsx 撤 allowpopups"
+  ],
+  "officialChecklist": [
+    "#5 setPermissionRequestHandler",
+    "#11 no allowpopups",
+    "#12 verify webview options"
+  ]
+}

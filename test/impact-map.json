@@ -1580,6 +1580,20 @@
         "test/block70-mobile-gateway.test.mjs"
       ],
       "classifiesScripts": true
+    },
+    {
+      "id": "sec-hardening",
+      "note": "SEC-HARDEN 主进程安全加固（webview 守卫 + 权限默认收紧，Electron 官方安全清单 #5/#11/#12）与其实机验收驱动。改动只跑该专项契约测试。",
+      "patterns": [
+        "src/main/security-hardening.js",
+        "test/security-hardening.test.mjs",
+        "scripts/sec-harden-*.cjs",
+        "acceptance/sec-harden/**"
+      ],
+      "tests": [
+        "test/security-hardening.test.mjs"
+      ],
+      "classifiesScripts": true
     }
   ]
 }

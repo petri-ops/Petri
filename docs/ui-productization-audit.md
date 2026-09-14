@@ -3338,6 +3338,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **P2 控制面（2026-09-13 追加实现）**：移动页升级为控制面——任务详情页批准卡（SSE `needApproval` 事件驱动：工具名+目标摘要+脱敏 params，**两步确认**按钮 D4）+ 取消任务按钮 + 会话页/全局 composer 发消息（POST `/api/ai/agent` 复用 chat.js 路由）。后端新增窄口 `mobile-gateway/control.js` `POST /m/api/approvals/:token/decide`——进程内直调 `db.ackToolJob`（与桌面确认卡 `routes/ai-legacy.js` 的 `POST /api/ai/run-tool-ack/:token` **同一函数同一 scope 校验，权限不放大**；不发 HTTP 自调用，对标 BLOCK-49 直调先例）。验证：集成测试 10/10 + **实机隔离探针 28/28 ALL PASS**（新增 B 系列：吊销后可重新配对/发消息 401+契约 400/取消 401+结构化 404/批准无会话 401+缺 scope 400+**scope 不匹配 404 权限不放大**+批准放行落库 ack_status=approved 且 job 不被破坏+拒绝落库 rejected+failed）。`acceptance/block-70/block70-mobile-gateway-live.json`。
 - **实现提交对账（UI-357 桌面投影 / P3 隧道 UI 归入本条目）**：P2 控制面 = 3c3bdb17；P3 隧道三态呈现与公网 QR 切换 = 1c40b35（该提交含 MobileSync.tsx 隧道区 UI 增量，同提交台账漏同步——已补登本段并按 c177374 先例登记 LEGACY 豁免）；桌面投影 = 79fea4a5。「手机发起→桌面执行（真实模型）→手机批准→手机收终态」全链与 dev 栈 CDP 设置区断言未执行（前者需真实 LLM 环境）——前者待 dev 栈窗口，后者**CDP 够不着**，按无人化验收阶梯第 2 级如实停留 `in_progress`，待用户照测试路线实测后升级；P2 控制面（发消息/批准/取消）与 P3 aliyun 隧道属后续阶段未实现。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-372: 结果浏览器面板撤 `allowpopups`（SEC-HARDEN 清单 #11；副作用如实登记）(2026-09-14 verified，dev Electron 边界内)
+
+- **来源**：用户裁决「清两个低危安全/健壮性余项」（AUDIT-LOG 代码复审余项 ③④）。③ 的字面项（主进程 webPreferences 显式声明）复核后已满足，真残留是对齐 Electron 官方安全清单的三处缺口，其中 #11 落在前端：结果浏览器面板动态创建 `<webview>` 时设了 `allowpopups="true"`。
+- **交付**：`frontend/src/pages/project-workspace/BrowserPanel.tsx` 撤掉 `setAttribute('allowpopups', 'true')`（官方清单第 11 条：`<webview>` 不应被允许自建 `BrowserWindow`，默认立场就是不允许）。主进程侧另在**每个 webContents**（含 guest）装 `setWindowOpenHandler` 一律 deny，http(s) 交系统浏览器作为纵深防御（`src/main/security-hardening.js`）。
+- **副作用（如实登记，一行可回退）**：撤除后**面板内 `target="_blank"` 链接不再弹窗**（点它无反应）；普通链接点击/地址栏导航完全不受影响（`allowpopups` 只影响 `window.open` 一类新窗口，不影响同页导航）。若要恢复「外链进系统浏览器」，可把该属性加回——但**必须同时保留**主进程的 deny 处理器，它才是「guest 不可能自建窗口」的真正保证。
+- **证据**：实机 `scripts/sec-harden-live.cjs`（`acceptance/sec-harden/`，**8/8 allPass**）——S7 断言源码已无 `allowpopups` 调用；S3 断言白名单 partition + http(s) src 的 webview **仍正常附着并加载**（面板未被误伤，实测 `getURL()` = `/api/health`）；S4 野 partition 被 `will-attach-webview` 拦下（guest 未创建）；S5 `file:` scheme 被拦；S6 guest（非受信 origin）权限被拒。契约门 `test/security-hardening.test.mjs` 17/17。
+- **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）。「无弹窗」这一行为本身未做自动化断言（Electron 未提供可断言的 popup 计数接口），证据链是「源码已撤 + 面板未被误伤 + guest 无自建窗口能力（handler 一律 deny）」。
+- G0 开发期常态 · 不外推 packaged/Provider/GA.
 ## UI-371: 会话框测量改回调 ref——摘要卡形态不再「恒 pinned」（用户问询 sessionFrameWidth 失联）(2026-09-14 verified，dev Electron 边界内)
 
 - **来源**：用户问询「`sessionFrameWidth` 会在窗口尺寸/分支切换后失联，导致摘要卡形态恒 pinned 是啥意思」→ 实机复核确认缺陷真实存在（UI-370 验收期间已遇到卡死实例：窗口 706px 而 frame 实测 1138px；一次 reload 后为 0）。
