@@ -1,8 +1,8 @@
 # G0 Result Studio — 意图驱动、可编辑、Git-backed 的科研结果工作台计划
 
-最后更新：2026-09-13
+最后更新：2026-09-15
 
-状态：`G0-RS-P6-REFRESH active（P1 Windows 侧完成，live capture 待 macOS 指挥席执行）`——P1 已交付：compute-settings 死链删除（UI-355 清偿）+ P6 全量套件 Windows 回绿 + 途中 7 个真实 Windows 产品缺陷修复（truth-drift 缓存窗口 / SEC-001 脚本桥 argv 传递 / 11 处门禁主入口守卫静默空转+扫描门 / 迁移契约同源推导 / COW 平台分支 / EPERM teardown / ps 解析器 posix 归一）+ 采集链迁包欠账（BLOCK-84 包装载接线 + R_HOME 注入）+ **Windows 首次 R 4.5.2 运行时引导（真实 volcano-plot 作业端到端 completed）**。**平台边界**：spawnEditWorker checkpoint-hold 为 POSIX-only 设计（SIGSTOP/ps T 态/lsof），Windows 化需单独立项；**live capture 下一步=macOS 指挥席 `git pull && npm run g0:result-studio:p6:update`**。历史状态：`UX1G-2 completed`（多分析结果入口短闭环）；P7 维持 `deferred`，Result Studio 维持 `implemented_unverified / experimental`
+状态：`G0-RS-P6-REFRESH active（P6 重采 completed @ macOS 指挥席 2026-09-15：`p6:update` 全套件 365 测试 0 红 + live capture 10/10 canonical checks，证据锚定 `e2ec798c`（`f62ab036`）；剩 p4r corpus 包感知化待用户裁决启动——R 运行时侧已就绪，改造本身未动）`——实机抓真三件：①核心树 `resources/built-in-plugins/` 残留仅含 `__pycache__/*.pyc` 的目录（BLOCK-83 清核幸存、git 不可见）骗过 runtime 接线 `existsSync` 开关跳过包装载 → Unknown tool volcano-plot，已移出；②迁包后 `_biof3-theme.R` 两头落空（核心 `tool-scripts/` 已删、包 build 约定未兑现）→ 六 R 插件作业目录缺主题文件，包仓 `b2d0e91` 兑现复制并推送；③BLOCK-84 多源装载 installed 后置覆盖 builtin——drift 原型「升级隔离副本」被真包遮蔽（replay 恒 200）→ 冷启窗口隐藏包装载记录（`e2ec798c`），`pluginUpgradeBlocksReplayOnly` 转绿。环境事实：本机 `~/Documents/BioF3-Local/runtimes/R` 为半成品拷贝（Rscript 委派框架 R，checkpoint-hold 身份契约不过）→ 换符号链接指 `/Library/Frameworks/R.framework/Resources`（R 4.5.2）。P1（Windows 侧收尾：死链删除 + 套件回绿 + 7 缺陷修复 + 包装载接线 + R 首次引导）已交付。历史状态：`UX1G-2 completed`（多分析结果入口短闭环）；P7 维持 `deferred`，Result Studio 维持 `implemented_unverified / experimental`
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
