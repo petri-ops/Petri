@@ -4392,6 +4392,23 @@
         "G0"
       ],
       "notes": "领域包全生命周期（2026-09-14 用户裁决「选择方案1」+「新开 工作包 等其它任务完成后 再来集中处理」立项排队）：装=整包可用（记录+运行时联动安装）；卸=干干净净（requires.runtimes 契约推导+三档数据策略+卸载报告）。P1 编排/P2 商店与核心 UI 领域感知/P3 verify flow。增量 A（清单迁包/D10/钩子迁包）另行立项。"
+    },
+    {
+      "id": "SESSION-HANDOFF-2026-09-14",
+      "path": "docs/session-handoff-2026-09-14.md",
+      "kind": "handoff",
+      "status": "active",
+      "canonical": false,
+      "archivePolicy": "archive_when_superseded",
+      "tags": [
+        "handoff",
+        "block-85",
+        "block-87",
+        "block-88",
+        "g0-rs"
+      ],
+      "notes": "多端同步(BLOCK-87 收口)+联邦(BLOCK-85 P0-P4 待双真机验收)+BLOCK-88 排队交接",
+      "registeredAt": "2026-09-14"
     }
   ],
   "lastUpdated": "2026-09-14",
