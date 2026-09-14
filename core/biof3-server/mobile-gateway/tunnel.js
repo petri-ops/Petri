@@ -17,7 +17,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { spawn: cpSpawn } = require('node:child_process');
+const { spawn: cpSpawn, spawnSync: cpSpawnSync } = require('node:child_process');
 
 const TUNNEL_CONFIG_VERSION = 1;
 const RECONNECT_BACKOFF_MS = Object.freeze([1000, 2000, 5000, 10000, 30000]);
@@ -194,16 +194,16 @@ function createTunnelManager({
     stateSinceTs = now();
   }
 
-  // 独立 spawn（不走可注入的 spawnProcess——那是隧道 ssh 专用 mock 点）
+  // 独立同步清场（不走可注入的 spawnProcess——那是隧道 ssh 专用 mock 点）。
+  // 必须阻塞等待完成：异步清场会与正式 ssh 竞态（清场未完成新连接已抢跑绑
+  // 端口失败 → 255 循环）。
   function remotePortSweep() {
     if (!config.host) return;
     try {
-      const sweep = cpSpawn('ssh', [
+      cpSpawnSync('ssh', [
         '-o', 'ConnectTimeout=10', '-o', 'BatchMode=yes', config.host,
-        'pid=$(ss -tlnp "sport = :' + config.remotePort + '" 2>/dev/null | grep -oP "pid=\\K[0-9]+" | head -1); if [ -n "$pid" ]; then kill "$pid"; fi; true',
-      ], { stdio: 'ignore' });
-      sweep.on('error', () => { /* ssh 不可用尽力而为 */ });
-      if (typeof sweep.unref === 'function') sweep.unref();
+        'pid=$(ss -tlnp "sport = :' + config.remotePort + '" 2>/dev/null | grep -oP "pid=\\K[0-9]+" | head -1); if [ -n "$pid" ]; then kill "$pid"; fi; sleep 1; true',
+      ], { timeout: 25_000, stdio: 'ignore' });
     } catch { /* 尽力而为 */ }
   }
 
