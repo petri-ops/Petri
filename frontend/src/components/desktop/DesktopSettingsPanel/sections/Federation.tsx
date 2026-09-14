@@ -103,6 +103,28 @@ export function FederationPanel(): React.ReactElement {
     }
   }, [refresh]);
 
+  const openProjection = useCallback(async (peerId: string) => {
+    setBusy(true);
+    setError(null);
+    try {
+      const response = await fetch(`${getPlatformApiPrefix()}/federation/peers/${encodeURIComponent(peerId)}/projection-url`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({}),
+      });
+      const data = await response.json();
+      if (data.ok && data.url) {
+        window.open(data.url, '_blank', 'noopener');
+      } else {
+        setError(data.message || '无法获取对端界面链接');
+      }
+    } catch {
+      setError('获取界面链接失败');
+    } finally {
+      setBusy(false);
+    }
+  }, []);
+
   const removePeer = useCallback(async (peerId: string) => {
     setBusy(true);
     try {
@@ -174,6 +196,15 @@ export function FederationPanel(): React.ReactElement {
                     {probeBad ? ` · ${peer.lastProbe?.error || '离线'}` : ''}
                   </span>
                 </div>
+                <button
+                  type="button"
+                  className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                  disabled={busy}
+                  onClick={() => { void openProjection(peer.peerId); }}
+                  data-testid="federation-open-ui"
+                >
+                  界面
+                </button>
                 <button
                   type="button"
                   className="gewu-btn gewu-btn--ghost gewu-btn--sm"

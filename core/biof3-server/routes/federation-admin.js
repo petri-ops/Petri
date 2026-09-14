@@ -94,6 +94,31 @@ module.exports = function registerFederationAdmin(app, { dataDir } = {}) {
     res.json({ ok: true, removed: req.params.id });
   });
 
+  // 「打开界面」：向对端索取一次性配对链接（对端 gateway 会话门内的
+  // mobile/pairing 端点），浏览器打开即见对端完整桌面投影（P3.5 复用）。
+  app.post('/api/federation/peers/:id/projection-url', async (req, res) => {
+    const peer = getPeer(dir, req.params.id);
+    if (!peer) {
+      res.status(404).json({ ok: false, error: 'peer_not_found' });
+      return;
+    }
+    try {
+      const forwarded = await forwardJson(peer, '/api/mobile/pairing/token', {
+        method: 'POST',
+        body: {},
+        timeoutMs: 15_000,
+      });
+      const url = forwarded.data?.primaryUrl || forwarded.data?.urls?.[0];
+      if (forwarded.status !== 200 || !url) {
+        res.status(502).json({ ok: false, error: 'projection_url_failed', peerStatus: forwarded.status });
+        return;
+      }
+      res.json({ ok: true, peerId: peer.peerId, peerName: peer.name, url });
+    } catch (error) {
+      res.status(504).json({ ok: false, error: error.name === 'AbortError' ? 'peer_timeout' : 'peer_unreachable' });
+    }
+  });
+
   // ── BLOCK-85 P2 作业级联邦（D3）：指挥席把作业转发给对端格物执行 ──
   // 对端以它自己的本地身份跑（POST /api/tools/run，会话门内全量路由已挂）；
   // 任务真值在对端，指挥席拿到对端 jobId 后按需查状态/拉产物。
