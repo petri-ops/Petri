@@ -83,6 +83,17 @@ function AppShell(): React.ReactElement {
     const m = path.match(/^\/project\/[^/]+(?:\/(.*))?$/);
     return !!m && m[1] !== 'results';
   })();
+  // BLOCK-87 L3 — 投影+窄屏（手机浏览器）：壳层 AppRail 转浮层（汉堡唤出），
+  // 中栏全屏。桌面端恒 false 不受影响（UI-341 常驻裁决仅针对桌面窗口）。
+  const projectionMobile = (() => {
+    try {
+      return (window.biof3Desktop as { __projection?: boolean } | undefined)?.__projection === true
+        && window.matchMedia('(max-width: 767px)').matches;
+    } catch {
+      return false;
+    }
+  })();
+  const [railOverlayOpen, setRailOverlayOpen] = useState(false);
 
   return (
     <>
@@ -99,7 +110,49 @@ function AppShell(): React.ReactElement {
         {/* UI-341 加映三（档 2）——左栏上提为壳层 AppRail：所有主窗页面常驻，
             不再随 /project/:id 路由消失。main 为 flex 兄弟（高度 100%）。 */}
         <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-        <AppRail />
+        {projectionMobile && (
+          <button
+            type="button"
+            aria-label="打开导航"
+            data-testid="projection-rail-toggle"
+            onClick={() => setRailOverlayOpen(true)}
+            style={{
+              position: 'fixed', top: 52, left: 10, zIndex: 60,
+              width: 38, height: 38, borderRadius: 10,
+              border: '1px solid var(--gewu-border, #e4e4e7)',
+              background: 'var(--gewu-bg-elevated, #fff)',
+              color: 'var(--gewu-text)', fontSize: 18, lineHeight: 1,
+              boxShadow: 'var(--gewu-shadow-menu)',
+              cursor: 'pointer',
+            }}
+          >
+            ☰
+          </button>
+        )}
+        {projectionMobile ? (
+          railOverlayOpen && (
+            <>
+              <button
+                type="button"
+                aria-label="关闭导航"
+                onClick={() => setRailOverlayOpen(false)}
+                style={{ position: 'fixed', inset: 0, zIndex: 78, background: 'rgba(24,24,27,0.4)', border: 'none', cursor: 'default' }}
+              />
+              <div
+                style={{
+                  position: 'fixed', top: 0, bottom: 0, left: 0, zIndex: 79,
+                  width: 'min(300px, 86vw)', overflowY: 'auto',
+                  background: 'var(--gewu-bg-surface)', boxShadow: 'var(--gewu-shadow-menu)',
+                }}
+                data-testid="projection-rail-overlay"
+              >
+                <AppRail />
+              </div>
+            </>
+          )
+        ) : (
+          <AppRail />
+        )}
         <main
           className="gewu-spa-main"
           style={{
