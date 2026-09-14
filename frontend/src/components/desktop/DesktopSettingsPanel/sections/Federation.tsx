@@ -23,6 +23,9 @@ function authHeaders(): Record<string, string> {
   return headers;
 }
 
+// 与 MobileSync 同语义：配对码后端 TTL 5 分钟，面板挂载即自动出码并按 4 分钟常驻续码。
+const PAIRING_AUTO_REFRESH_MS = 4 * 60 * 1000;
+
 function platformLabel(peer: FederationPeer): string {
   const p = peer.platform === 'darwin' ? 'macOS'
     : peer.platform === 'win32' ? 'Windows'
@@ -45,7 +48,6 @@ export function FederationPanel(): React.ReactElement {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [inviteOpen, setInviteOpen] = useState(false);
   const [invite, setInvite] = useState<{ token: string; primaryUrl: string } | null>(null);
   const [inviteBusy, setInviteBusy] = useState(false);
   const [inviteCopied, setInviteCopied] = useState(false);
@@ -148,6 +150,7 @@ export function FederationPanel(): React.ReactElement {
   // 配对机制（mobile-gateway token），「在另一台电脑生成配对码」不该依赖对方
   // 碰巧打开「我的设备」tab。一个码两种用途：手机扫码=本机工作区会话；
   // 粘贴到对端格物=本机成为对端的协作节点。
+  // 用户复看追加：默认自动生成 + 4 分钟常驻续码（同「我的设备」体验），置于粘贴卡上方。
   const generateInvite = useCallback(async () => {
     setInviteBusy(true);
     try {
@@ -170,6 +173,33 @@ export function FederationPanel(): React.ReactElement {
     }
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    let timer: number | undefined;
+    const generate = async () => {
+      if (cancelled) return;
+      try {
+        const response = await fetch(`${getPlatformApiPrefix()}/mobile/pairing/token`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({}),
+        });
+        const data = await response.json();
+        if (!cancelled && data.ok && data.primaryUrl) {
+          setInvite({ token: data.token, primaryUrl: data.primaryUrl });
+        }
+      } catch {
+        /* 静默：下一轮续码或手动「重新生成」 */
+      }
+      if (!cancelled) timer = window.setTimeout(generate, PAIRING_AUTO_REFRESH_MS);
+    };
+    void generate();
+    return () => {
+      cancelled = true;
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
+  }, []);
+
   const copyInvite = useCallback(async () => {
     if (!invite) return;
     try {
@@ -190,49 +220,9 @@ export function FederationPanel(): React.ReactElement {
       {error && <p className={styles.errorText} role="alert">{error}</p>}
       {notice && <p className="gewu-field__hint" role="status">{notice}</p>}
 
-      <div className={styles.addCard}>
-        <h4 className={styles.addTitle}>添加协作节点</h4>
-        <input
-          type="text"
-          className={styles.addInput}
-          value={pairUrl}
-          onChange={(event) => setPairUrl(event.target.value)}
-          placeholder="粘贴对端配对链接（http://…:3005/pair?token=…）"
-          data-testid="federation-pair-input"
-        />
-        <div className={styles.addRow}>
-          <button
-            type="button"
-            className="gewu-btn gewu-btn--primary gewu-btn--sm"
-            disabled={busy || !pairUrl.trim()}
-            onClick={() => { void addPeer(); }}
-            data-testid="federation-pair-submit"
-          >
-            配对
-          </button>
-        </div>
-      </div>
-
       <div className={styles.addCard} data-testid="federation-invite">
         <h4 className={styles.addTitle}>本机配对码</h4>
-        {!inviteOpen ? (
-          <>
-            <p className={styles.fedHint}>
-              发给另一台电脑的格物（粘贴到它的「协作成员」），本机即成为它的协作节点；手机扫码则进入本机工作区。
-            </p>
-            <div className={styles.addRow}>
-              <button
-                type="button"
-                className="gewu-btn gewu-btn--sm"
-                disabled={inviteBusy}
-                onClick={() => { setInviteOpen(true); void generateInvite(); }}
-                data-testid="federation-invite-toggle"
-              >
-                生成本机配对码
-              </button>
-            </div>
-          </>
-        ) : invite ? (
+        {invite ? (
           <>
             <div className={styles.inviteQrWrap}>
               <img
@@ -269,12 +259,35 @@ export function FederationPanel(): React.ReactElement {
               </button>
             </div>
             <p className={styles.fedHint}>
-              一个码两种用途：手机扫码＝进入本机工作区；粘贴到另一台格物＝添加本机为协作节点。约 5 分钟有效，过期点「重新生成」。
+              一个码两种用途：手机扫码＝进入本机工作区；粘贴到另一台格物＝添加本机为协作节点。自动续码，也可点「重新生成」立即换新。
             </p>
           </>
         ) : (
-          <p className={styles.fedHint}>配对码生成中…</p>
+          <p className={styles.fedHint} data-testid="federation-invite-loading">配对码生成中…</p>
         )}
+      </div>
+
+      <div className={styles.addCard}>
+        <h4 className={styles.addTitle}>添加协作节点</h4>
+        <input
+          type="text"
+          className={styles.addInput}
+          value={pairUrl}
+          onChange={(event) => setPairUrl(event.target.value)}
+          placeholder="粘贴对端配对链接（http://…:3005/pair?token=…）"
+          data-testid="federation-pair-input"
+        />
+        <div className={styles.addRow}>
+          <button
+            type="button"
+            className="gewu-btn gewu-btn--primary gewu-btn--sm"
+            disabled={busy || !pairUrl.trim()}
+            onClick={() => { void addPeer(); }}
+            data-testid="federation-pair-submit"
+          >
+            配对
+          </button>
+        </div>
       </div>
 
       {peers && peers.length === 0 && (

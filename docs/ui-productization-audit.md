@@ -3473,7 +3473,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 - **出码能力上收协作成员 tab**：`FederationPanel` 新增「本机配对码」块——首次双机配对不再依赖对方碰巧打开「我的设备」tab（原空态只会说「在另一台电脑的格物里生成配对码」，实测踩中语义错位）。复用同一 `POST /mobile/pairing/token` 机制零后端改动：QR + 完整链接 + 复制 + 重新生成（testid 族 `federation-invite-*`）；空态文案改双向（「把本机配对码发给对方，或把对方的链接粘贴到上面」）；顶部提示撤已退役的「手机连接」措辞。
 - **一个码两种用途显性化**：邀请块与「我的设备」二维码说明均标注「手机扫码＝进入本机工作区；粘贴到另一台格物＝添加本机为协作节点；约 5 分钟有效」。
-- **证据**：`tsc --noEmit` 0 + 前端全量 vitest 128 文件 1030/1030 + 实机 CDP `scripts/ui358-r3-invite-code-live.cjs` **8/8 allPass**（邀请块在场/双向空态/点开即出码 LAN 链接/复制+重新生成轮转 token/双用途说明/设备 tab 协作用途文案；截图 `acceptance/block-85/ui358-r3-invite-code.png`）。
+- **同轮用户复看追加（位置 + 自动化）**：本机配对码块移到「添加协作节点」粘贴卡**上方**（`compareDocumentPosition` 断言）；去掉手动开关，挂载即**默认自动生成**并按 4 分钟常驻续码（与「我的设备」同语义，`PAIRING_AUTO_REFRESH_MS`），保留「重新生成」立即换新。
+- **证据**：`tsc --noEmit` 0 + 前端全量 vitest 128 文件 1030/1030 + 实机 CDP `scripts/ui358-r3-invite-code-live.cjs` **8/8 allPass**（块位次在粘贴卡上方/双向空态/切 tab 自动出码≤10s 无手动点击/LAN 链接/复制+重新生成轮转 token/双用途说明/设备 tab 协作用途文案；截图 `acceptance/block-85/ui358-r3-invite-code.png`）。
 
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 

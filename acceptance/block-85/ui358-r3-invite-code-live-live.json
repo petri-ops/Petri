@@ -1,12 +1,12 @@
 {
   "name": "ui358-r3-invite-code-live",
-  "startedAt": "2026-09-14T23:36:41.872Z",
-  "finishedAt": "2026-09-14T23:36:43.761Z",
+  "startedAt": "2026-09-14T23:46:17.461Z",
+  "finishedAt": "2026-09-14T23:46:19.347Z",
   "assertions": [
     {
-      "name": "invite_block_present",
+      "name": "invite_block_above_add_card",
       "pass": true,
-      "detail": "本机配对码块在场"
+      "detail": "本机配对码块位于添加卡上方"
     },
     {
       "name": "empty_state_two_way",
@@ -14,14 +14,14 @@
       "detail": "空态双向文案: 还没有协作节点 · 把本机配对码发给对方，或把对方的链接粘贴到上面"
     },
     {
-      "name": "invite_qr_and_link",
+      "name": "invite_autogen_on_tab_open",
       "pass": true,
-      "detail": "点开后 QR 就场（≤8s）"
+      "detail": "切 tab 后自动出码（≤10s，无手动点击）"
     },
     {
       "name": "invite_link_pair_shape",
       "pass": true,
-      "detail": "链接为 LAN 配对链接: http://192.168.0.102:3005/pair?token=9cde447f0345cf5962e07b8"
+      "detail": "链接为 LAN 配对链接: http://192.168.0.102:3005/pair?token=d0608ed3f835c1871acca9d"
     },
     {
       "name": "invite_copy_and_regen_present",

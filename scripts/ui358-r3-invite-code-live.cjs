@@ -26,9 +26,15 @@ async function main() {
   }
   await evalJs(client, `document.querySelector('[data-testid="federation-tab-peers"]')?.click(); 'ok'`);
 
-  // 1. 邀请块在场 + 空态双向文案（列表/空态异步加载，等待任一渲染完成）
-  run.assert('invite_block_present',
-    await evalJs(client, `!!document.querySelector('[data-testid="federation-invite"]')`), '本机配对码块在场');
+  // 1. 邀请块在场（位于粘贴卡上方）+ 空态双向文案（列表/空态异步加载，等待任一渲染完成）
+  const inviteBeforeAdd = await evalJs(client, `(() => {
+    const panel = document.querySelector('[data-testid="federation-panel"]');
+    const invite = panel?.querySelector('[data-testid="federation-invite"]');
+    const add = panel?.querySelector('[data-testid="federation-pair-input"]');
+    if (!invite || !add) return false;
+    return invite.compareDocumentPosition(add) & Node.DOCUMENT_POSITION_FOLLOWING ? true : false;
+  })()`);
+  run.assert('invite_block_above_add_card', inviteBeforeAdd === true, '本机配对码块位于添加卡上方');
   let emptyText = '';
   for (let i = 0; i < 20 && !emptyText; i++) {
     await new Promise((r) => setTimeout(r, 400));
@@ -36,14 +42,13 @@ async function main() {
   }
   run.assert('empty_state_two_way', /本机配对码发给对方/.test(emptyText), '空态双向文案: ' + emptyText.slice(0, 40));
 
-  // 2. 点开即出码：QR + 链接 + 复制 + 重新生成
-  await evalJs(client, `document.querySelector('[data-testid="federation-invite-toggle"]').click(); 'ok'`);
+  // 2. 切 tab 即自动出码（默认自动生成，无需手动点击）：QR + 链接 + 复制 + 重新生成
   let qrUp = false;
-  for (let i = 0; i < 20 && !qrUp; i++) {
+  for (let i = 0; i < 25 && !qrUp; i++) {
     await new Promise((r) => setTimeout(r, 400));
     qrUp = await evalJs(client, `!!document.querySelector('[data-testid="federation-invite-qr"]')`);
   }
-  run.assert('invite_qr_and_link', qrUp, '点开后 QR 就场（≤8s）');
+  run.assert('invite_autogen_on_tab_open', qrUp, '切 tab 后自动出码（≤10s，无手动点击）');
   const link1 = await evalJs(client, `document.querySelector('[data-testid="federation-invite-link"]')?.textContent || ''`);
   run.assert('invite_link_pair_shape', /\/pair\?token=/.test(link1) && !/127\.0\.0\.1|localhost/.test(link1),
     '链接为 LAN 配对链接: ' + link1.slice(0, 60));
