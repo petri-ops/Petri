@@ -161,6 +161,7 @@
 118. [`block-70-mobile-sync-plan.md`](./block-70-mobile-sync-plan.md) — 2026-09-09 立项（2026-09-13 启动 active，P0-LAUNCH）：**手机远程同步**——扫码 → 手机浏览器直达工作区（路线 A：A1 同 WiFi 直连 mobile-gateway + A2 aliyun 反向隧道 P3）。
 119. [`block-70-p0-design-review.md`](./block-70-p0-design-review.md) — 2026-09-13 落盘的 BLOCK-70 P0 设计评审稿（plan §4 代码事实 8/8 核对一致；D1-D10 确认；qrcode-generator 依赖裁决 ⏳ 待用户追认；真实手机扫码验收留用户）。
 120. [`mobile-tunnel-aliyun-setup.md`](./guides/mobile-tunnel-aliyun-setup.md) — BLOCK-70 P3 aliyun 反向隧道一次性配置指引（无域名/IP 版：自签证书 + nginx 443 反代 SSE 关缓冲 + 安全组 + 面板配置 + 排障 + ZeroSSL IP 证书升级路径）。
+121. [`block-86-domain-pack-lifecycle-plan.md`](./block-86-domain-pack-lifecycle-plan.md) — 2026-09-14 立项（planned 排队，等在制任务收口后用户裁决启动）：**领域包全生命周期——运行时托管 + 插件化契约**——生信包=R/Python 基础环境+15 分析插件+脚本+演示数据+钩子+工具目录整包；装=记录+运行时联动安装，卸=requires.runtimes 契约推导清运行时+三档数据策略+卸载报告；商店 pack 卡片唯一入口+核心 UI 领域感知。增量 A（运行时清单迁包/D10 语言档案/钩子迁包）另行立项。
 
 ## Branch Conversation 架构
 

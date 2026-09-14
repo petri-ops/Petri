@@ -4371,8 +4371,29 @@
       ],
       "notes": "格物联邦 P0 设计评审：两个格物软件实例互派任务（分析作业级+Agent 委托级），D1-D8 待用户裁决。SSH 节点方案作废。",
       "registeredAt": "2026-09-13"
+    },
+    {
+      "id": "BLOCK-86-DOMAIN-PACK-LIFECYCLE",
+      "path": "docs/block-86-domain-pack-lifecycle-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-86-domain-pack-lifecycle",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-14",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "PLANNED-QUEUED",
+      "tags": [
+        "block-86",
+        "domain-pack",
+        "plugin-store",
+        "pack-registry",
+        "debio",
+        "G0"
+      ],
+      "notes": "领域包全生命周期（2026-09-14 用户裁决「选择方案1」+「新开 工作包 等其它任务完成后 再来集中处理」立项排队）：装=整包可用（记录+运行时联动安装）；卸=干干净净（requires.runtimes 契约推导+三档数据策略+卸载报告）。P1 编排/P2 商店与核心 UI 领域感知/P3 verify flow。增量 A（清单迁包/D10/钩子迁包）另行立项。"
     }
   ],
-  "lastUpdated": "2026-09-13",
-  "documentCount": 236
+  "lastUpdated": "2026-09-14",
+  "documentCount": 237
 }
