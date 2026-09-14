@@ -1580,7 +1580,13 @@
 .workspaceSummaryFloat {
   position: absolute;
   top: 8px;
-  right: 4px;
+  /* UI-370 — 必须贴齐会话区右缘（原 right:4px）：
+     本层带 box-shadow(0 12px 32px rgba(15,23,42,.18))，而祖先
+     .workspaceSessionLayout/.workspaceSessionContent 是 overflow:hidden。
+     留 4px 内缩时阴影右侧几乎全被裁掉，只剩 4px 一条贯穿全卡高的灰带
+     （用户实测「每次摘要图都有」）。贴齐后右侧让位给裁切区 → 灰带消失，
+     只剩卡片自身 1px 边框；左/下阴影不受影响仍呈悬浮感。 */
+  right: 0;
   z-index: 40;
   max-height: calc(100% - 16px);
   max-width: min(312px, calc(100% - 24px));
@@ -1598,10 +1604,23 @@
   transform: translateY(-1px);
 }
 
+/* UI-370 — 悬浮宿主里卡片铺满外层（撤掉卡片自身的 24px 右预留）。
+   `.workspacePinnedSummary` 的 `max-width: calc(100% - 24px)` 是给「钉住列」宿主
+   预留右边距的，而本层是 shrink-to-fit（宽度由卡片内容反推），两者互为循环依赖：
+   Chromium 的解析结果随可用宽度漂移，宽宿主下会残留 24px 右侧缝（卡片右缘贴不齐）。
+   悬浮态改为 `max-width: 100%`：卡片按自身声明宽度（内联 summaryOpenWidth）铺满外层，
+   宽度不再自我循环 → 恒贴齐会话区右缘。窄布局由外层 max-width 统一夹紧。 */
+.workspaceSummaryFloat .workspacePinnedSummary {
+  max-width: 100%;
+}
+
+/* UI-370 — 入场位移方向修正：原 `translateX(16px)`（自右往左滑）在 right:0 贴齐后
+   起点有 16px 落在祖先 overflow 裁切区外，首帧被切；且注释本就写「右滑」。
+   改为自左往右滑入：起点完全落在可见区内，与注释语义一致，也不再被裁切。 */
 @keyframes workspaceSummaryFloatIn {
   from {
     opacity: 0;
-    transform: translateX(16px);
+    transform: translateX(-16px);
   }
   to {
     opacity: 1;
@@ -1768,7 +1787,13 @@
   min-width: 0;
   min-height: 0;
   padding-top: 8px;
-  padding-right: 4px;
+  /* UI-370 — 钉住列同样贴齐会话区右缘（原 padding-right:4px + 卡片靠左，
+     使卡片右缘距会话区右缘 28px，与标题栏右区/输入区不在同一条线上）。
+     flex + flex-end 让卡片右对齐到内容右缘；去掉 4px 内缩消除多余缝。 */
+  padding-right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   overflow: hidden;
 }
 

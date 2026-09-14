@@ -1,0 +1,77 @@
+{
+  "name": "ui370-summary-card-edge",
+  "startedAt": "2026-09-14T13:36:34.502Z",
+  "finishedAt": "2026-09-14T13:37:34.340Z",
+  "assertions": [
+    {
+      "name": "A1 悬浮形态：卡片右缘贴齐会话区右缘（gap = 0px；修复前 4px）",
+      "pass": true,
+      "detail": "gap=0 cardRight=915 layoutRight=915"
+    },
+    {
+      "name": "A2 悬浮形态：卡片右缘无灰带（连续非白列 ≤ 1px = 卡片边框；修复前 5px）",
+      "pass": true,
+      "detail": "band=0px"
+    },
+    {
+      "name": "A3 钉住列形态：卡片右缘贴齐会话区右缘（gap = 0px；修复前 28px）",
+      "pass": true,
+      "detail": "gap=0 cardRight=895 layoutRight=895"
+    },
+    {
+      "name": "A4 钉住列形态：卡片右缘无灰带（连续非白列 ≤ 1px）",
+      "pass": true,
+      "detail": "band=0px"
+    },
+    {
+      "name": "A5 祖先裁切前提仍成立（A2/A4 测的是裁切后的可见结果）",
+      "pass": true,
+      "detail": "float=true column=true"
+    }
+  ],
+  "allPass": true,
+  "cases": {
+    "float": {
+      "vw": 1604,
+      "mode": "float",
+      "cardRight": 915.0033264160156,
+      "cardTop": 45.988948822021484,
+      "cardHeight": 312.1206970214844,
+      "cardWidth": 275.9963684082031,
+      "layoutRight": 915.0033264160156,
+      "gap": 0,
+      "cssRight": "0px",
+      "columnPadR": null,
+      "cardMaxWidth": "100%",
+      "ancestorClipped": true,
+      "imgWidth": 2000,
+      "scale": 1.247,
+      "bandWidthPx": 0,
+      "screenshot": "ui370-edge-float.png",
+      "overrideCss": "[class*=\"workspaceSessionFrame\"]{flex:0 0 700px !important;width:700px !important;}"
+    },
+    "column": {
+      "vw": 1604,
+      "mode": "column",
+      "cardRight": 895.0030212402344,
+      "cardTop": 45.988948822021484,
+      "cardHeight": 541.0250854492188,
+      "cardWidth": 287.9917907714844,
+      "layoutRight": 895.0030517578125,
+      "gap": 0,
+      "cssRight": null,
+      "columnPadR": "0px",
+      "cardMaxWidth": "calc(100% - 24px)",
+      "ancestorClipped": true,
+      "imgWidth": 2000,
+      "scale": 1.247,
+      "bandWidthPx": 0,
+      "screenshot": "ui370-edge-column.png",
+      "overrideCss": "[class*=\"workspaceSessionFrame\"]{flex:0 0 1300px !important;width:1300px !important;}[class*=\"workspaceSessionLayout\"]{transform:translateX(-620px) !important;}"
+    }
+  },
+  "rootCause": "shadow(0 12px 32px rgba(15,23,42,.18)) + 祖先 overflow:hidden + float right:4px → 仅剩 4px 阴影残渣",
+  "fix": "float right:0 + 悬浮宿主卡片 max-width:100% + 钉住列 padding-right:0/flex-end + 动画 translateX(-16px)",
+  "userReport": "用户截图指认摘要卡右缘灰带「每次摘要图都有，影响视觉效果」",
+  "modeDriveNote": "形态经会话框宽度覆盖触发（App 自身响应式逻辑），CDP 视口模拟在本 Electron 下不可靠"
+}

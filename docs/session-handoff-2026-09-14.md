@@ -70,3 +70,15 @@
 - **环境事实（下个 Agent 必读）**：**从 agent 工具 shell 启动的 Electron 会随该命令的作业生命周期被回收**——`Start-Process`（canonical 脚本方式）拉起的实例在命令结束后数十秒内消失（日志显示启动完全正常、无崩溃错误，服务已在 3001/3005 监听）。绕过手段 WMI 进程创建（`Invoke-CimMethod Win32_Process Create`）与 `cmd` 均**被本机安全策略拦截**。**结论：长驻 dev 栈必须由用户自身终端启动**；agent 内只能用长驻后台任务临时持有（会随会话/任务结束消失）。
 - **治理待办（下次会话启动先做）**：`docs/AUDIT-LOG.md` 已达 **51KB > 50KB** 的滚动归档阈值 → 按「广播规则」先归档再进主线。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 六、同日第四轮补记（UI-370 摘要卡右缘灰带收口）
+
+- **UI-370 verified**：摘要卡右缘那条 4px 全高灰带已根除，且悬浮/钉住两态统一贴齐会话区右缘。详见 `docs/ui-productization-audit.md` UI-370 段与 `acceptance/ui-370/`（含消融四态对比图）。
+  - **根因**：`.workspaceSummaryFloat` 的 `box-shadow(0 12px 32px rgba(15,23,42,.18))` 被祖先 `.workspaceSessionLayout`/`.workspaceSessionContent` 的 `overflow: hidden` 裁切，`right: 4px` 使阴影右侧只剩 4px 可见 → 全高灰带。消融实证：基线 5 列连续非白 → `box-shadow:none` 与 `right:0` 均降为 1 列 → 解除祖先 overflow 则阴影完整铺开 17 列渐变。
+  - **交付 4 处 CSS**（均在 `frontend/src/pages/project-workspace.module.css`）：float `right: 4px → 0`；新增 `.workspaceSummaryFloat .workspacePinnedSummary { max-width: 100% }`（撤掉与 shrink-to-fit 互为循环依赖的 24px 右预留）；钉住列 `padding-right: 4px → 0` + `display:flex; align-items:flex-end`；入场动画 `translateX(16px) → translateX(-16px)`。
+- **实机验收方法（新沉淀，下个 Agent 可直接用）**：`scripts/ui370-summary-card-edge-live.cjs`。
+  - **形态无法用视口模拟驱动**：`summaryVisibility` 由 `sessionFrameWidth`（RO 实测）+1120 阈值决定，而 CDP `Emulation.setDeviceMetricsOverride` 在本 Electron 下不会可靠触发该测量（形态卡住不切）。
+  - **正确姿势**：① 会话框是 flex 项（`flex: 1` → `flex-basis: 0%`），只设 `width` 无效，必须 `flex: 0 0 <w>px !important`；② 注入后补一次 `window.dispatchEvent(new Event('resize'))` —— 该 hook 的 resize 监听会重读会话框宽度，正是 App 自己的重测入口；③ 钉住列用例再加 `transform: translateX(-620px)` 把卡片移入视口可见区（布局右缘/裁切边界不变，几何断言不受影响）。
+  - **像素级判定内置**：脚本自带极简 PNG 解码（zlib inflate + 5 种 filter），逐列统计「卡片右缘向右的连续非白列宽」，修复前 5px / 修复后 ≤1px。
+- **同轮发现（已另立 AUDIT-LOG 🟡 待评估，未修）**：`frontend/src/hooks/useWorkspaceLayout.ts:120-149` 的测量 effect 只在挂载时 attach 一次；`.workspaceSessionFrame` 被响应式分支替换/重挂后，RO 仍观察已移除的旧节点（不再触发），`updateSize` 又只在 `window resize` 时重读 → `sessionFrameWidth` 冻在旧值或 0，`summaryVisibility` 恒 `expanded`（卡片恒钉住并被 `max-width: calc(100% - 24px)` 挤成窄条，float/compact 形态不再生效）。实测卡死实例：窗口 706px 而 frame 实测 1138px。**临时缓解=任意一次 `window resize`**。修复方向：改 callback ref（节点挂载即 re-attach + 立刻测量），需专项验收。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
