@@ -346,6 +346,32 @@ function buildMobileGateway({
       }
     };
     app.use(express.static(desktopDist, { index: false }));
+    // BLOCK-87 — dev 模式投影走 Vite 热更源（源码改动手机即时跟随，无需手动
+    // build:spa；生产/无 Vite 时走 dist）。窄代理：只接管 /（首页 HTML，注垫片）
+    // 与 Vite 专有路径（/@、/node_modules/、/src/）；/assets 构建产物不误代理。
+    const viteDevBase = process.env.BIOF3_RENDERER_DEV_URL || 'http://127.0.0.1:3000';
+    const isViteOwnedPath = (p) => p === '/' || p.startsWith('/@') || p.startsWith('/node_modules/') || p.startsWith('/src/');
+    app.get('*', async (req, res, next) => {
+      if (req.path.startsWith('/api/') || req.path.startsWith('/m') || req.path === '/pair') return next();
+      if (!isViteOwnedPath(req.path)) return next();
+      try {
+        const upstream = await fetch(viteDevBase + req.originalUrl, {
+          headers: { Accept: req.headers.accept || '*/*' },
+          signal: AbortSignal.timeout(8000),
+        });
+        const contentType = upstream.headers.get('content-type') || '';
+        const buf = Buffer.from(await upstream.arrayBuffer());
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Cache-Control', 'no-cache, no-store');
+        if (contentType.includes('text/html')) {
+          res.status(upstream.status).send(buf.toString('utf8').replace('<head>', '<head>' + shim));
+        } else {
+          res.status(upstream.status).send(buf);
+        }
+        return;
+      } catch { /* Vite 不可达 → 落回 dist */ }
+      next();
+    });
     // SPA 客户端路由 fallback：非 /api、/m、/pair 的 GET 一律回 index.html
     app.get('*', (req, res, next) => {
       if (req.path.startsWith('/api/') || req.path.startsWith('/m') || req.path === '/pair') return next();
