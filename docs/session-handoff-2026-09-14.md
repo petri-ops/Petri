@@ -111,3 +111,81 @@
 - **副作用（如实登记，一行可回退）**：撤 `allowpopups` 后，结果浏览器面板内 `target=_blank` 链接不再弹窗（正常链接点击不受影响，面板自带地址栏）。若要恢复，需同时保留主进程的 deny 处理器（它已保证 guest 无法自建窗口）。
 - **治理待办（已第二次提示，仍未做）**：`docs/AUDIT-LOG.md` 现 **58.5KB**，远超 50KB 滚动归档阈值 → 下次会话启动必须先归档再进主线。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 九、待执行验收包（手机复测 / Mac 双真机 / Mac P6 重采）
+
+> 本包由主 Agent 于 2026-09-14 22:45 出具，Windows 侧前置条件已实测。执行者=用户（手机 + Mac）。
+
+### 9.1 手机复测 UI-367 / UI-368（Windows 侧前置已验）
+
+**Windows 侧前置（主 Agent 已实测）**：隧道 `connected`（aliyun:2233，publicUrl `https://47.110.228.168`）；投影端点 `/api/plugins/catalog`、`/api/runtime/status`、`/api/packs/installed` 均 200；Vite :3000 在跑（源码改动手机即时跟随）。公网 `/health` 未配对时 401 属预期（会话门）。
+
+**步骤**
+1. 手机：若上次已配对（会话 cookie 1 年），直接刷新页面即可；若提示未授权 → 桌面 设置 →「手机连接」→ 生成配对码 → 手机打开二维码里的 `primaryUrl`。
+2. 逐项复测下面三条（对应 UI-367/UI-368 的台账待验面）。
+
+| # | 验什么 | 判定标准 | 对应条目 |
+| --- | --- | --- | --- |
+| ① | 插件商店与桌面一致 | 手机端「插件商店」能看到与桌面同样的分区与条目，**含「领域包」与「运行时」分区**（此前手机端整片为空） | UI-367 |
+| ② | 频繁点击/刷新速度 | 手机反复切换页面/刷新，**不再出现 `rate_limited`**；二次刷新应在秒级（首屏之后资源走 304） | UI-367 + GW-PERF |
+| ③ | 左栏开合单一入口 | 投影手机端**没有多余的悬浮 ☰**；点标题栏左上按钮直接开合左栏抽屉，点遮罩收回，跨路由跳转自动收起 | UI-368 |
+
+3. 反馈格式：三条各给 ✅/❌；不通过的那条附截图（或描述现象）。主 Agent 据此把 UI-367/368 升 `verified`，或按现象续修。
+
+### 9.2 Mac 双真机 BLOCK-85 验收（联邦协作 closeout 的最后一步）
+
+**前置事实**：实现面已在仓库（`core/shared-backend/federation-peers.js`、`routes/federation-admin.js`、`agent-tools/federation-tools.js`、`federation-terminal.js`、前端 `sections/Federation.tsx`，测试 `test/federation*.test.mjs` ×3）。两端跑同一份 main（双向对称 D8）。
+
+**Mac 侧（一次性粘贴）**
+```bash
+cd <Mac 上的 biof3-desktop>
+git pull --ff-only                 # 拉到 663547c2 或更新
+node -v                            # 必须是 v24.x；若否：fnm use 24（或 fnm install 24）
+# 首次/依赖有变动时再执行：npm ci
+npm run build:spa
+npm run dev
+```
+
+**配对（Mac 出码 → Windows 配对）**
+1. Mac 格物 设置 →「手机连接」→ 生成配对码 → 复制其中**局域网链接**：`http://<Mac-IP>:3005/pair?token=…`。
+   ⚠️ **不要用公网链接**：aliyun 隧道 remotePort 2233 已被 Windows 侧占用；Mac 若也启用会冲突。**Mac 不要开隧道**即可（不开隧道时面板 primaryUrl 就是 LAN 链接）。
+2. Windows 格物 设置 →「联邦」→ 粘贴该链接 → 点「配对」。
+3. 节点应出现在协作节点列表 → 点探测/刷新确认在线（握手返回对端机型/版本）。
+
+**判定标准（closeout 依据）**
+| # | 验什么 | 通过标准 |
+| --- | --- | --- |
+| F1 | 配对成功 | Windows「联邦」列表出现 Mac 节点，状态在线；`<dataDir>/federation/peers.json` 有该节点 |
+| F2 | 作业跨机真跑 | 从 Windows 以 `fed:<peerId>` 为目标派一个真实分析作业 → **对端（Mac）本地库记录 running→completed**（真值在对端），Windows 侧看到镜射状态与终态 |
+| F3 | 产物回流 | 对端产物可经指挥席拉取/查看（`GET /api/federation/peers/:id/jobs/:jobId/file/:filename`） |
+| F4 | 反向对称 | Mac 侧粘 Windows 的配对链接（Windows 出码那侧用 LAN）→ Mac 也能向 Windows 派任务 |
+
+**失败对照（都不是产品缺陷，按此排查）**
+- 配对 400 `url_required` → 链接没粘全；配对失败 → 配对 token **一次性且会过期**，重新生成再粘。
+- 探测失败 → 两台机是否同一局域网 / Mac 防火墙是否放行 3005。
+- 作业失败含 `runtime` 字样 → 对端没装该运行时（对端 runtime preflight 诚实失败，属预期）。
+- **禁项**：不要在 Mac 上启用 aliyun 隧道（2233 端口冲突）；不要动 Windows 侧隧道配置（`POST /api/mobile/tunnel/config` 不带 host 会清空 host/publicUrl——本轮已踩过）。
+
+**验收通过后由主 Agent 补**：BLOCK-85 plan 阶段状态 + registry `P0-REVIEW → completed` + closeout 笔录 + `acceptance/block-85/` 补 JSON 证据。
+> ⚠️ **已知治理漂移（如实登记）**：`docs/DOC-REGISTRY.json` 里 BLOCK-85 仍登记为唯一文档 = P0 评审稿且 `status: active / phase: P0-REVIEW`，而实现面早已落地；`acceptance/block-85/` 目前只有 4 张 PNG、无 JSON 证据。属"实现超前于登记"，本条收口时一并补齐。
+
+### 9.3 Mac G0-RS P6 证据重采（当前 `test:changed` 那 2 红的唯一来历）
+
+```bash
+cd <Mac 上的 biof3-desktop>
+git pull --ff-only
+node -v                                        # v24.x
+npm run g0:result-studio:p6:update             # syntax + P6 全量套件 + 前端 + 重采写证据
+```
+
+- **为什么必须在 Mac**：P6 采集链含 POSIX-only 的 checkpoint-hold 设计（Windows 化属单独立项）。
+- **判定**：命令末尾应显示证据已写入（更新 `acceptance/g0-result-studio/` 下的 P6 证据 JSON）；随后回 Windows `git pull` + `npm run g0:result-studio:p6` 应**全绿**。
+- **回传**：Mac 上 `git add acceptance/g0-result-studio/ && git commit -m "test(g0-rs): P6 evidence re-capture on macOS" && git push`。
+- **背景**：本日 UI-369/370/371 + SEC-HARDEN 的提交改动了源文件与 `test/impact-map.json`，P6 存储证据的源绑定按设计 fail-closed（这正是 `test:changed` 余 2 红的原因）——本次重采会一并带走。
+- **禁项**：不得手改/伪造 evidence JSON；2 红是 fail-closed 的设计行为，必须真采。
+
+### 9.4 执行顺序建议
+
+1. 先做 9.1（手机，最快，Windows 侧无需改动）；
+2. 再做 9.2 + 9.3（同一台 Mac 上一次 `git pull` 后连做，省一轮同步）；
+3. 三件都完成后回报，主 Agent 收口：UI-367/368 升 verified + BLOCK-85 closeout 五件套 + P6 门禁转绿。
