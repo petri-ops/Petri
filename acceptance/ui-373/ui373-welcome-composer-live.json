@@ -1,0 +1,26 @@
+{
+  "name": "ui373-welcome-composer",
+  "startedAt": "2026-09-14T23:46:36.832Z",
+  "finishedAt": "2026-09-14T23:46:43.644Z",
+  "assertions": [
+    {
+      "name": "A1 欢迎页输入框常驻：composer 挂载且触发器保持「选择项目」（不预选工作区）",
+      "pass": true,
+      "detail": "composer=true trigger=\"选择项目\" branch=false"
+    },
+    {
+      "name": "A2 未选项目发送被守卫拦截：下拉面板展开 + 提示行出现 + 输入保留",
+      "pass": true,
+      "detail": "pickerOpen=true hint=shown textKept=true"
+    },
+    {
+      "name": "A3 选中后草稿随选中迁移（换挂载不丢字）且触发器切换到所选项目",
+      "pass": true,
+      "detail": "trigger=\"YST\" textCarried=true"
+    }
+  ],
+  "allPass": true,
+  "draftText": "ui373 探针草稿——未选项目先键入",
+  "note": "A4 首载竞态退避自愈由单测门 welcome.test.tsx 覆盖（fake timers），实机不重启后端不复演",
+  "userReport": "用户截图指认「软件刚启动的初始界面只有选择项目没有输入框，按理应该是图2（但不应该确定的工作区）」"
+}

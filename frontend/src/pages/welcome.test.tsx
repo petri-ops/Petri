@@ -1,6 +1,6 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Welcome from './welcome';
 import { branchApi } from '@/lib/branchBridge';
@@ -19,13 +19,14 @@ vi.mock('@/components/backend/BackendStatusProvider', () => ({
   useBackendStatus: () => ({ serverUp: true, isReady: true, loaded: true }),
 }));
 
-// 内嵌聊天模块整体 mock：断言挂载契约（projectId / conversationId=null / ownsCopilotAsk / composerOnly）
+// 内嵌聊天模块整体 mock：断言挂载契约（projectId / conversationId=null / ownsCopilotAsk / composerOnly / sendGuard）
 vi.mock('@/components/copilot/SimpleChat', () => ({
   SimpleChat: (props: {
     projectId: string;
     conversationId: string | null;
     ownsCopilotAsk?: boolean;
     composerOnly?: boolean;
+    sendGuard?: () => string | null;
     onConversationChange?: (id: string) => void;
   }) => (
     <div
@@ -34,7 +35,11 @@ vi.mock('@/components/copilot/SimpleChat', () => ({
       data-conv={String(props.conversationId)}
       data-owns={String(props.ownsCopilotAsk === true)}
       data-composer-only={String(props.composerOnly === true)}
-    />
+      data-send-guard={String(typeof props.sendGuard === 'function')}
+    >
+      {/* 模拟 composer 发送路径：宿主守卫的侧效应（展开选择器/提示）由此触发 */}
+      <button type="button" onClick={() => { props.sendGuard?.(); }}>模拟发送</button>
+    </div>
   ),
 }));
 
@@ -135,17 +140,38 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-describe('Welcome（BLOCK-80 欢迎页 + UI-341 内嵌聊天模块）', () => {
-  it('渲染问候语 + 触发器 + 分支徽标 + SimpleChat + 退出按钮 + 面板各元素', async () => {
+describe('Welcome（BLOCK-80 欢迎页 + UI-341 内嵌聊天模块 + UI-373 不预选常驻 composer）', () => {
+  it('冷启动不预选工作区：选择器「选择项目」、composer 常驻挂载且守卫在位；面板各元素就位', async () => {
     renderWelcome();
     expect(screen.getByLabelText('欢迎页')).toBeTruthy();
-    await waitFor(() => expect(screen.getByText(/main/)).toBeTruthy());
+    // UI-373 — 输入框常驻：未选项目（projectId=''）也挂载，sendGuard 在位
+    const chat = await screen.findByTestId('simple-chat');
+    expect(chat.getAttribute('data-project')).toBe('');
+    expect(chat.getAttribute('data-conv')).toBe('null');
+    expect(chat.getAttribute('data-owns')).toBe('true');
+    expect(chat.getAttribute('data-composer-only')).toBe('true');
+    expect(chat.getAttribute('data-send-guard')).toBe('true');
+    // 冷启动不自动选中最近项目（用户裁决「不应该确定的工作区」）：无分支徽标
+    await waitFor(() => expect(screen.getByLabelText('选择项目').textContent).toContain('选择项目'));
+    expect(screen.queryByText(/main/)).toBeNull();
     await openPicker();
-    expect(screen.getAllByText('阿尔法项目').length).toBe(2);
+    expect(screen.getByText('阿尔法项目')).toBeTruthy();
     expect(screen.getByText('贝塔项目')).toBeTruthy();
     expect(screen.getByText('打开文件夹')).toBeTruthy();
     expect(screen.getByText('远程连接')).toBeTruthy();
     expect(screen.getByText('返回')).toBeTruthy();
+  });
+
+  it('选中项目后：分支徽标出现、守卫撤下（?project= 显式预选路径不受影响）', async () => {
+    renderWelcome('?project=p_a');
+    // 显式查询参数预选：加载完成即选中 p_a（分支徽标 main 出现）。
+    // 注意 key 换挂载会替换 DOM 节点，须在 waitFor 内重查而非持有旧引用。
+    await waitFor(() => expect(screen.getByTestId('simple-chat').getAttribute('data-project')).toBe('p_a'));
+    expect(screen.getByTestId('simple-chat').getAttribute('data-send-guard')).toBe('false');
+    await waitFor(() => expect(screen.getByText(/main/)).toBeTruthy());
+    await openPicker();
+    // 触发器显示所选项目名 + 列表行 → 同名出现两次
+    expect(screen.getAllByText('阿尔法项目').length).toBe(2);
   });
 
   it('搜索过滤工作区清单', async () => {
@@ -158,14 +184,26 @@ describe('Welcome（BLOCK-80 欢迎页 + UI-341 内嵌聊天模块）', () => {
     expect(listEl?.textContent).not.toContain('阿尔法项目');
   });
 
-  it('SimpleChat 内嵌：projectId 正确、conversationId=null、ownsCopilotAsk、composerOnly', async () => {
+  it('未选项目时发送被守卫拦截：展开选择器并给出提示（Enter/copilotAsk 两路径共用守卫）', async () => {
     renderWelcome();
-    const chat = await screen.findByTestId('simple-chat');
-    expect(chat.getAttribute('data-project')).toBe('p_a');
-    expect(chat.getAttribute('data-conv')).toBe('null');
-    expect(chat.getAttribute('data-owns')).toBe('true');
-    // UI-341 加映 — 欢迎页只保留 composer（无消息流/空态/建议卡）
-    expect(chat.getAttribute('data-composer-only')).toBe('true');
+    await screen.findByTestId('simple-chat');
+    // mock 内「模拟发送」按钮 = 调用宿主 sendGuard，覆盖 composer Enter 与
+    // 快捷 chips copilotAsk 直发两条路径的同一拦截点
+    fireEvent.click(screen.getByText('模拟发送'));
+    expect(await screen.findByPlaceholderText('搜索工作区')).toBeTruthy();
+    expect(screen.getByText(/先选择一个项目/)).toBeTruthy();
+  });
+
+  it('未选项目态键入的草稿随选中迁移（key 换挂载不丢字）', async () => {
+    window.localStorage.setItem('gewu:composer-draft::new', '未发送的草稿文本');
+    renderWelcome();
+    await openPicker();
+    fireEvent.click(screen.getByText('贝塔项目'));
+    await waitFor(() => expect(screen.queryByPlaceholderText('搜索工作区')).toBeNull());
+    // 迁移目标键 (p_b, new) 有文本、来源空项目键已清
+    expect(window.localStorage.getItem('gewu:composer-draft:p_b:new')).toBe('未发送的草稿文本');
+    expect(window.localStorage.getItem('gewu:composer-draft::new')).toBeNull();
+    window.localStorage.clear();
   });
 
   it('选择项目行 → 关闭面板；SimpleChat 随选中项目切换', async () => {
@@ -175,6 +213,7 @@ describe('Welcome（BLOCK-80 欢迎页 + UI-341 内嵌聊天模块）', () => {
     await waitFor(() => expect(screen.queryByPlaceholderText('搜索工作区')).toBeNull());
     const chat = screen.getByTestId('simple-chat');
     expect(chat.getAttribute('data-project')).toBe('p_b');
+    expect(chat.getAttribute('data-send-guard')).toBe('false');
   });
 
   it('打开文件夹：无桥环境回落应用内 FolderPicker，取消则收起面板', async () => {
@@ -238,5 +277,46 @@ describe('Welcome（BLOCK-80 欢迎页 + UI-341 内嵌聊天模块）', () => {
       gewuEvents.copilotAsk,
       expect.objectContaining({ prompt: expect.stringContaining('DESeq2') })
     );
+  });
+});
+
+describe('Welcome 首载退避重试（UI-373 · UI-369 同族：dev 栈重启竞态）', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    cleanup();
+    vi.clearAllMocks();
+  });
+
+  it('首载 listProjects 失败 → 退避期如实显示「项目加载中…」，第二次尝试成功即就位', async () => {
+    mockListProjects
+      .mockRejectedValueOnce(new Error('backend not ready yet'))
+      .mockResolvedValueOnce([projectA, projectB]);
+
+    renderWelcome();
+    // 第一次尝试（t=0）失败：不给出假空态，保持「项目加载中…」
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+    expect(mockListProjects).toHaveBeenCalledTimes(1);
+    expect(screen.getByLabelText('选择项目').textContent).toContain('项目加载中');
+
+    // 跨过第一段退避（2s）→ 第二次成功 → 选择器就位、列表可开
+    await act(async () => { await vi.advanceTimersByTimeAsync(2_000); });
+    expect(mockListProjects).toHaveBeenCalledTimes(2);
+    expect(screen.getByLabelText('选择项目').textContent).toContain('选择项目');
+    fireEvent.click(screen.getByLabelText('选择项目'));
+    expect(screen.getByText('阿尔法项目')).toBeTruthy();
+    expect(screen.getByText('贝塔项目')).toBeTruthy();
+  });
+
+  it('首载成功后不再重试', async () => {
+    renderWelcome();
+    await act(async () => { await vi.advanceTimersByTimeAsync(100); });
+    expect(screen.getByLabelText('选择项目').textContent).toContain('选择项目');
+    const calls = mockListProjects.mock.calls.length;
+    await act(async () => { await vi.advanceTimersByTimeAsync(30_000); });
+    expect(mockListProjects.mock.calls.length).toBe(calls);
   });
 });

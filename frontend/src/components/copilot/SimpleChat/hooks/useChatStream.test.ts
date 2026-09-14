@@ -125,3 +125,53 @@ describe('useChatStream 思考档位透传（BLOCK-81 P3）', () => {
     expect(lastRunOptions()?.thinkingLevel).toBe('standard');
   });
 });
+
+describe('useChatStream 发送守卫（UI-373 欢迎页未选项目拦截）', () => {
+  it('sendGuard 返回非空时拦截：不建会话不启动 run，文本退回输入框保留', async () => {
+    const guard = vi.fn(() => 'no-project');
+    const createConversationForRun = vi.fn(async () => ({ id: 'conv_new' }));
+    const setInput = vi.fn();
+    const { result } = renderHook((props: UseChatStreamArgs) => useChatStream(props), {
+      initialProps: makeArgs({ conversationId: null, sendGuard: guard, createConversationForRun, setInput }),
+    });
+
+    let accepted: boolean | undefined;
+    await act(async () => {
+      accepted = await result.current.send('帮我分析这批数据');
+    });
+    expect(accepted).toBe(false);
+    expect(guard).toHaveBeenCalledTimes(1);
+    // 拦截在一切副作用之前：不建会话、不启动 run、不清输入（文本退回输入框）
+    expect(createConversationForRun).not.toHaveBeenCalled();
+    expect(startConversationRunMock).not.toHaveBeenCalled();
+    expect(setInput).toHaveBeenCalledWith('帮我分析这批数据');
+  });
+
+  it('sendGuard 返回 null 时放行，行为与无守卫一致', async () => {
+    const guard = vi.fn(() => null);
+    const { result } = renderHook((props: UseChatStreamArgs) => useChatStream(props), {
+      initialProps: makeArgs({ conversationId: null, sendGuard: guard }),
+    });
+
+    let accepted: boolean | undefined;
+    await act(async () => {
+      accepted = await result.current.send('正常发送');
+    });
+    expect(accepted).toBe(true);
+    expect(guard).toHaveBeenCalledTimes(1);
+    expect(startConversationRunMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('守卫缺席（undefined）时零变化——工作区/右栏用法不受影响', async () => {
+    const { result } = renderHook((props: UseChatStreamArgs) => useChatStream(props), {
+      initialProps: makeArgs({ conversationId: null }),
+    });
+
+    let accepted: boolean | undefined;
+    await act(async () => {
+      accepted = await result.current.send('无守卫路径');
+    });
+    expect(accepted).toBe(true);
+    expect(startConversationRunMock).toHaveBeenCalledTimes(1);
+  });
+});

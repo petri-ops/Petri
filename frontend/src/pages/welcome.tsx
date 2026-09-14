@@ -8,6 +8,11 @@ import { branchApi } from '@/lib/branchBridge';
 import { FolderPicker } from '@/components/desktop/FolderPicker';
 import { dispatchGewuEvent, gewuEvents } from '@/lib/events';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
+import {
+  clearConversationDraft,
+  loadConversationDraft,
+  saveConversationDraft,
+} from '@/components/copilot/conversationDraft';
 import styles from './welcome.module.css';
 
 /**
@@ -15,6 +20,11 @@ import styles from './welcome.module.css';
  * 选择 + **内嵌真正的聊天模块（SimpleChat）**——用户裁决「不需要重写，调用这个
  * 模块不就可以了吗」，不再手搓输入框：完全访问/知识空间/模型选择/历史回溯
  * 全部原生复用。
+ *
+ * UI-373 — 冷启动不预选工作区（用户裁决「不应该确定的工作区」）：选择器保持
+ * 「选择项目」，**输入框常驻**可先行键入；未选项目时发送被 sendGuard 拦截
+ * （展开选择器 + 提示），已键入草稿随选中迁移不丢失。首载 listProjects 带
+ * 退避重试（UI-369 同族：dev 栈重启竞态曾致「选择项目 + 无输入框」死态）。
  *
  * 首发即建会话：SimpleChat 在 conversationId=null 时 send 自行
  * createConversationForRun（走 useConversations().create，自动写共享缓存，
@@ -48,6 +58,18 @@ function baseName(p: string): string {
   return idx >= 0 ? norm.slice(idx + 1) : norm;
 }
 
+/**
+ * UI-373 — 未选项目态（projectId=''）下键入的 composer 草稿随选中迁移。
+ * SimpleChat 以 key=selectedId 换挂载，新实例挂载即读 (目标项目, null) 草稿，
+ * 故迁移必须在新挂载读取之前同步完成（调用点：选中动作处理器 / 首次解析）。
+ */
+function carryNoProjectDraft(targetId: string) {
+  const carried = loadConversationDraft('', null);
+  if (!carried) return;
+  if (!loadConversationDraft(targetId, null)) saveConversationDraft(targetId, null, carried);
+  clearConversationDraft('', null);
+}
+
 export default function Welcome(): React.ReactElement {
   const backendStatus = useBackendStatus();
   const navigate = useNavigate();
@@ -76,21 +98,37 @@ export default function Welcome(): React.ReactElement {
   const [sshValidating, setSshValidating] = useState(false);
 
   useEffect(() => {
-    let alive = true;
-    listProjects()
-      .then((list) => {
-        if (!alive) return;
-        const sorted = [...list].sort((a, b) => {
-          const bt = new Date(b.updatedAt || b.createdAt || 0).getTime();
-          const at = new Date(a.updatedAt || a.createdAt || 0).getTime();
-          return bt - at;
-        });
-        setProjects(sorted);
-        setSelectedId((cur) => cur || preselectProjectId || sorted[0]?.id || '');
-        setLoaded(true);
-      })
-      .catch(() => { if (alive) setLoaded(true); });
-    return () => { alive = false; };
+    // UI-373 — 首载退避重试（UI-369 AppRail 同族缺陷）：dev 栈重启竞态下窗口
+    // 先于后端就绪，单发 listProjects 抛错曾致「选择项目 + 无输入框」死态且再
+    // 无重试（左栏已自愈而本页没有）。退避 0/2/5/10/15s，成功即停，unmount
+    // 取消；退避窗口耗尽仍失败则如实给出空态。
+    // 冷启动不再自动选中最近项目（用户裁决「不应该确定的工作区」）：仅显式
+    // ?project= 预选生效，选择器保持「选择项目」，输入框常驻可先行键入。
+    let cancelled = false;
+    const backoffMs = [0, 2000, 5000, 10000, 15000];
+    (async () => {
+      for (const wait of backoffMs) {
+        if (cancelled) return;
+        if (wait) await new Promise((resolve) => setTimeout(resolve, wait));
+        if (cancelled) return;
+        try {
+          const list = await listProjects();
+          if (cancelled) return;
+          const sorted = [...list].sort((a, b) => {
+            const bt = new Date(b.updatedAt || b.createdAt || 0).getTime();
+            const at = new Date(a.updatedAt || a.createdAt || 0).getTime();
+            return bt - at;
+          });
+          setProjects(sorted);
+          if (preselectProjectId) carryNoProjectDraft(preselectProjectId);
+          setSelectedId((cur) => cur || preselectProjectId || '');
+          setLoaded(true);
+          return;
+        } catch { /* 后端未就绪/瞬断：退避后重试 */ }
+      }
+      if (!cancelled) setLoaded(true);
+    })();
+    return () => { cancelled = true; };
   }, [preselectProjectId]);
 
   // 当前分支徽标（只读展示；切换属变更操作，留在审阅面）
@@ -112,8 +150,26 @@ export default function Welcome(): React.ReactElement {
     [projects, selectedId]
   );
   const backendReady = backendStatus.serverUp !== false;
-  // UI-341 — 内嵌聊天模块
-  const chatMounted = Boolean(selectedProject) && backendReady;
+  // UI-373 — 输入框常驻（backendReady 即挂载）：未选项目时选择器显示「选择项目」，
+  // composer 仍可先行键入（发送由 sendGuard 拦截并展开选择器）；此前
+  // `Boolean(selectedProject) && backendReady` 让冷启动页面退化成纯选择器。
+  const chatMounted = backendReady;
+
+  // UI-373 — 选中动作统一入口：未选项目态键入的草稿在此同步迁移（先于
+  // key 换挂载读取），所有选中路径（行点击/去重收编/创建后切换）走这里。
+  function selectProject(id: string) {
+    if (!selectedId) carryNoProjectDraft(id);
+    setSelectedId(id);
+  }
+
+  // UI-373 — 未选项目时拦截发送：展开选择器并提示，输入保留不消费
+  // （覆盖输入框 Enter 与快捷 chips 的 copilotAsk 直发两条路径）。
+  function guardNoProjectSend(): string {
+    setPickerOpen(true);
+    setHint('先选择一个项目，再开始任务。');
+    return 'no-project';
+  }
+
   // UI-338 加映 — SSH「先连接再补全」状态
   const [sshConnected, setSshConnected] = useState(false);
   const [sshConnecting, setSshConnecting] = useState(false);
@@ -135,7 +191,7 @@ export default function Welcome(): React.ReactElement {
       return bt - at;
     });
     setProjects(sorted);
-    if (selectId) setSelectedId(selectId);
+    if (selectId) selectProject(selectId);
   }
 
   function openPicker() {
@@ -190,7 +246,7 @@ export default function Welcome(): React.ReactElement {
   }
 
   function adoptExisting(existing: Project) {
-    setSelectedId(existing.id);
+    selectProject(existing.id);
     setPickerOpen(false);
     setPanelSection('none');
     setFolderPath(null);
@@ -377,7 +433,7 @@ export default function Welcome(): React.ReactElement {
                           key={p.id}
                           type="button"
                           className={`${styles.projectRow} ${p.id === selectedId ? styles.projectRowActive : ''}`}
-                          onClick={() => { setSelectedId(p.id); setPickerOpen(false); setPanelSection('none'); }}
+                          onClick={() => { selectProject(p.id); setPickerOpen(false); setPanelSection('none'); }}
                         >
                           <Icon name="folder" size={14} />
                           <span className={styles.projectRowName}>{p.name}</span>
@@ -516,16 +572,20 @@ export default function Welcome(): React.ReactElement {
 
           {/* UI-341 加映 — 内嵌真正的聊天模块（composer-only 变体：欢迎页
               不展示消息流/空态/建议卡，只保留输入框与控件行）；项目切换
-              按钮收进对话框左上角（上方 composerTopRow）。 */}
-          {chatMounted && selectedProject && (
+              按钮收进对话框左上角（上方 composerTopRow）。
+              UI-373 — 输入框常驻：未选项目时 projectId=''（内部按空项目
+              待机，不拉会话），发送由 sendGuard 拦截并展开选择器；选中后
+              key 换挂载切换到该项目，未发送的草稿随选中迁移不丢失。 */}
+          {chatMounted && (
             <div className={styles.chatMount}>
               <SimpleChat
-                key={selectedProject.id}
-                projectId={selectedProject.id}
+                key={selectedId || 'none'}
+                projectId={selectedId}
                 conversationId={null}
-                onConversationChange={() => navigate(`/project/${selectedProject.id}`)}
+                onConversationChange={() => navigate(`/project/${selectedId}`)}
                 ownsCopilotAsk
                 composerOnly
+                sendGuard={selectedProject ? undefined : guardNoProjectSend}
               />
             </div>
           )}

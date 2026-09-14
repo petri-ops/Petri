@@ -238,6 +238,12 @@ export interface SimpleChatProps {
    * 无会话内容可展示。默认 false，工作区/右栏用法零变化。
    */
   composerOnly?: boolean;
+  /**
+   * UI-373 — 发送前置守卫：返回非空字符串 = 拦截本次发送（Enter 与
+   * copilotAsk 快捷 chips 均覆盖）；展开项目选择器等侧效应由守卫自身负责。
+   * 缺省不拦截，工作区/右栏用法零变化。
+   */
+  sendGuard?: () => string | null;
 }
 
 export type PendingApproval = ConversationPendingApproval;

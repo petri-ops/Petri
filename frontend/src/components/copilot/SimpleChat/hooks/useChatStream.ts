@@ -92,6 +92,12 @@ export interface UseChatStreamArgs {
   createConversationForRun: (title?: string) => Promise<{ id: string } | null>;
   /** BLOCK-81 P2 — 会话级思考档位（缺省/standard＝不发任何上游思考参数） */
   thinkingLevel?: 'off' | 'standard' | 'high';
+  /**
+   * UI-373 — 发送前置守卫：返回非空字符串 = 拦截本次发送（侧效应由守卫自身
+   * 负责，如欢迎页未选项目时展开项目选择器）。守卫在空文本/streaming 检查
+   * 之后、建会话之前执行，覆盖 Enter / copilotAsk（快捷 chips）全部发送路径。
+   */
+  sendGuard?: () => string | null;
 }
 
 export interface UseChatStreamReturn {
@@ -149,6 +155,7 @@ export function useChatStream({
   executionTargetId,
   createConversationForRun,
   thinkingLevel,
+  sendGuard,
 }: UseChatStreamArgs): UseChatStreamReturn {
   // 1. `starting` — transient send-in-progress flag (drives the
   // streaming state alongside the persistent run status).
@@ -173,6 +180,13 @@ export function useChatStream({
   ): Promise<boolean> => {
     const trimmed = text.trim();
     if (!trimmed || streaming) return false;
+    // UI-373 — 宿主发送守卫（欢迎页：未选项目不得建会话）。拦截时把文本退回
+    // 输入框保留（copilotAsk 直发路径的 chip prompt 不再凭空丢失；Enter 路径
+    // 本就等于当前输入，无损），展开选择器等侧效应由守卫自身负责。
+    if (sendGuard?.()) {
+      setInput(text);
+      return false;
+    }
     setStarting(true);
 
     try {
@@ -242,6 +256,8 @@ export function useChatStream({
     onConversationChange,
     planMode,
     projectId,
+    // UI-373 — 守卫闭包须新鲜（宿主按选中态切换守卫）
+    sendGuard,
     streaming,
     // BLOCK-81 P3 实机抓真修：`send` 闭包读了 thinkingLevel，漏进依赖数组会让
     // 「切档位后不刷新页面直接发送」沿用挂载时的旧档位——控件显示「高」而请求体

@@ -264,6 +264,7 @@ export function SimpleChat({
   inputHeight: _inputHeight = 120,
   ownsCopilotAsk = false,
   composerOnly = false,
+  sendGuard,
 }: SimpleChatProps): React.ReactElement {
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
   const [copiedMessageKey, setCopiedMessageKey] = useState<string | null>(null);
@@ -962,6 +963,8 @@ export function SimpleChat({
     planMode,
     createConversationForRun,
     thinkingLevel,
+    // UI-373 — 未选项目等宿主侧发送拦截（欢迎页）
+    sendGuard,
   });
 
   // BLOCK-52 P1（选中即引用）：带引用块的发送包装——发送前把引用块渲染进
