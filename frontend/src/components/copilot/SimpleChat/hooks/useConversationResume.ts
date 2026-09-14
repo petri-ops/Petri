@@ -79,6 +79,28 @@ export function useConversationResume({
     };
   }, [activeRun, conversationId, refreshConversations, setMessages]);
 
+  // BLOCK-87 L2 — 多端消息实时镜像：手机投影（或协作成员）发的消息，
+  // 桌面正开着该会话时 5 秒内出现。无本地活跃 run 时对账式整体重建
+  // （与上方 completed-run 对账同写法）；有 run 时跳过（本地流式快照优先，
+  // run 完结由上方 effect 对账）。无变化保持原引用避免无谓重渲染。
+  useEffect(() => {
+    if (!conversationId) return;
+    if (activeRun && activeRun.status === 'running') return;
+    const timer = setInterval(async () => {
+      if (document.visibilityState === 'hidden') return;
+      try {
+        const persisted = await getConversationMessages(conversationId, 200);
+        setMessages((current) => {
+          const next = persisted.map(restoreSimpleMessage);
+          const unchanged = next.length === current.length
+            && next.every((m, i) => m.role === current[i]?.role && m.content === current[i]?.content);
+          return unchanged ? current : next;
+        });
+      } catch { /* 单次轮询失败静默，下一轮继续 */ }
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [conversationId, activeRun, setMessages]);
+
   // T82 — recover an in-progress agent task after a refresh / Electron restart.
   // On conversation mount, if a prior run left a resumable task in localStorage
   // (findResumableAgentTask), reconnect its SSE and rebuild the live snapshot so
