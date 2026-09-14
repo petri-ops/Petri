@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getBridge } from '@/lib/desktopBridge';
 import { BRAND } from '@/lib/brand';
 import { Icon } from '@/components/icons/Icon';
+import { segmentToMode, type WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import styles from '../TitleBar.module.css';
 
 /**
@@ -22,6 +23,40 @@ export function getIsMac(): boolean {
 
 export function getIsDesktop(): boolean {
   return typeof window !== 'undefined' && window.biof3Desktop?.isDesktop === true;
+}
+
+/**
+ * UI-359/360 — 工作区路由解析（`/project/:id/*` 单一事实源）。
+ *
+ * 返回 null = 工作区面板不存在的路由：非 project 路由（/、/projects、/skills、
+ * /knowledge、/backend）与 `/project/:id/results`（独立 ResultStudio 页）。
+ * mode 经 segmentToMode 解析（chat 为默认落地模式，未知段 fail-closed 回 chat），
+ * 供顶栏各 zone 按模式裁剪只在对应模式存在的控件（死开关治理）。
+ */
+export function parseWorkspaceRoute(pathname: string): { mode: WorkspaceMode } | null {
+  const path = pathname.replace(/\/+$/, '') || '/';
+  const m = path.match(/^\/project\/[^/]+(?:\/(.*))?$/);
+  if (!m || m[1] === 'results') return null;
+  return { mode: segmentToMode(m[1]) };
+}
+
+/**
+ * UI-360 — 该工作区模式是否有右侧栏消费：plugins / settings 是占满中栏的
+ * 全屏工作面（PluginStorePanel / DesktopSettingsPanel），右侧栏（结果/浏览器/
+ * 文件/侧边聊天/审阅）在这两个模式无消费，随模式隐藏；rightOpen 用户偏好
+ * 状态保持不丢，回到其余模式即恢复。
+ */
+export function modeUsesRightRail(mode: WorkspaceMode): boolean {
+  return mode !== 'plugins' && mode !== 'settings';
+}
+
+/**
+ * UI-360 — 该工作区模式是否有摘要概览卡消费：摘要卡只在 chat / scheduled
+ * 会话布局内渲染（project-workspace `showPinnedSummary` 同口径），顶栏的
+ * 「展开摘要概览」开关在其余模式/路由是死开关。
+ */
+export function modeUsesSummaryCard(mode: WorkspaceMode): boolean {
+  return mode === 'chat' || mode === 'scheduled';
 }
 
 /**

@@ -1,6 +1,7 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { useWorkspacePanelsContext } from '../WorkspacePanelsContext';
-import { getIsMac, handleTitleBarDoubleClick } from './shared';
+import { getIsMac, handleTitleBarDoubleClick, modeUsesRightRail, parseWorkspaceRoute } from './shared';
 import { TitleBarLeftZone } from './TitleBarLeftZone';
 import { TitleBarCenterZone } from './TitleBarCenterZone';
 import { TitleBarRightZone } from './TitleBarRightZone';
@@ -23,7 +24,14 @@ import styles from './ColumnizedTitleBar.module.css';
  */
 export function ColumnHeader({ side }: { side: 'left' | 'center' | 'right' }): React.ReactElement {
   const panels = useWorkspacePanelsContext();
+  const location = useLocation();
   const isMac = getIsMac();
+  // UI-360 — 右栏随 plugins/settings 模式物理隐藏（aside 宽 0、header 随之），
+  // 此时右区片段必须内联进中列 header 右缘，否则窗口控件/终端开关不可达。
+  const rightRailVisible = (() => {
+    const ws = parseWorkspaceRoute(location.pathname);
+    return !!ws && panels.rightOpen && modeUsesRightRail(ws.mode);
+  })();
 
   return (
     <header
@@ -41,7 +49,7 @@ export function ColumnHeader({ side }: { side: 'left' | 'center' | 'right' }): R
           <div className={styles.mainZone}>
             <TitleBarCenterZone />
           </div>
-          {!panels.rightOpen && (
+          {!rightRailVisible && (
             <div className={styles.inlineZone}>
               <TitleBarRightZone />
             </div>

@@ -4,7 +4,7 @@ import { Icon } from '@/components/icons/Icon';
 import { useWorkspacePanelsContext } from '../WorkspacePanelsContext';
 import { BranchTabsWrapper } from '@/components/branch/BranchTabsWrapper';
 import styles from '../TitleBar.module.css';
-import { getFallbackTitle, isStandalonePagePath } from './shared';
+import { getFallbackTitle, isStandalonePagePath, modeUsesSummaryCard, parseWorkspaceRoute } from './shared';
 
 /**
  * BLOCK-62 P1a — TitleBar 中区片段（标题 + 分支 tabs + 结果选择器 + 摘要概览开关）。
@@ -105,6 +105,14 @@ export function TitleBarCenterZone(): React.ReactElement {
     return <div className={`${styles.centerTitle} ${styles.centerTitleBare}`} aria-hidden="true" />;
   }
 
+  // UI-360 — 摘要概览开关只在工作区路由的 chat / scheduled 模式渲染
+  // （摘要卡 showPinnedSummary 同口径）；欢迎页 / 独立页与 plugins/settings
+  // 等全屏工作面无摘要卡，开关是死开关。
+  const summaryToggleAvailable = (() => {
+    const ws = parseWorkspaceRoute(location.pathname);
+    return !!ws && modeUsesSummaryCard(ws.mode);
+  })();
+
   const displayTitle = title || getFallbackTitle(location.pathname);
 
   return (
@@ -190,16 +198,21 @@ export function TitleBarCenterZone(): React.ReactElement {
           )}
         </div>
       )}
-      <button
-        type="button"
-        className={styles.iconBtn}
-        onClick={panels.toggleSummary}
-        title={panels.summaryOpen ? '收起摘要概览' : '展开摘要概览'}
-        aria-label={panels.summaryOpen ? '收起摘要概览' : '展开摘要概览'}
-        aria-pressed={panels.summaryOpen}
-      >
-        <Icon name="list-details" size={15} />
-      </button>
+      {/* UI-360 — 摘要概览开关只在工作区路由的 chat / scheduled 模式渲染
+          （摘要卡 showPinnedSummary 同口径）；欢迎页 / 独立页与 plugins/settings
+          等全屏工作面无摘要卡，开关是死开关。 */}
+      {summaryToggleAvailable && (
+        <button
+          type="button"
+          className={styles.iconBtn}
+          onClick={panels.toggleSummary}
+          title={panels.summaryOpen ? '收起摘要概览' : '展开摘要概览'}
+          aria-label={panels.summaryOpen ? '收起摘要概览' : '展开摘要概览'}
+          aria-pressed={panels.summaryOpen}
+        >
+          <Icon name="list-details" size={15} />
+        </button>
+      )}
     </div>
   );
 }

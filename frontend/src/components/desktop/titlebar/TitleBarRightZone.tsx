@@ -4,7 +4,7 @@ import { Icon } from '@/components/icons/Icon';
 import { getBridge } from '@/lib/desktopBridge';
 import { useWorkspacePanelsContext } from '../WorkspacePanelsContext';
 import styles from '../TitleBar.module.css';
-import { getIsMac, WindowControls } from './shared';
+import { getIsMac, modeUsesRightRail, parseWorkspaceRoute, WindowControls } from './shared';
 
 /**
  * BLOCK-62 P1a — TitleBar 右区片段（右栏标签 pills +「+」工具菜单 + 底部终端 /
@@ -17,16 +17,18 @@ import { getIsMac, WindowControls } from './shared';
  * 工作区路由（/project/:id/*，results 除外——该子路径为独立 ResultStudio 页，
  * 无右栏/底部终端）渲染；其余路由这些面板不存在，不再渲染点了无可见效果的
  * 死开关。指挥中心（全局弹窗入口）与窗口控件恒在。
+ *
+ * UI-360 — 模式上下文裁剪：plugins / settings 是占满中栏的全屏工作面，右侧栏
+ * 随模式隐藏（见 modeUsesRightRail），「右侧栏」开关与右栏 tab pills 一并裁剪，
+ * 「底部终端」仍可用（终端与模式无关）。
  */
 export function TitleBarRightZone(): React.ReactElement {
   const panels = useWorkspacePanelsContext();
   const location = useLocation();
   const isMac = getIsMac();
-  const workspacePanelsAvailable = (() => {
-    const path = location.pathname.replace(/\/+$/, '') || '/';
-    const m = path.match(/^\/project\/[^/]+(?:\/(.*))?$/);
-    return !!m && m[1] !== 'results';
-  })();
+  const workspaceRoute = parseWorkspaceRoute(location.pathname);
+  const workspacePanelsAvailable = !!workspaceRoute;
+  const rightRailUsable = !!workspaceRoute && modeUsesRightRail(workspaceRoute.mode);
   // 快捷键监听器挂 ProjectWorkspace（useWorkspacePanelShortcuts），提示跟随平台记法。
   const rightToggleHint = isMac ? '（⌘⇧B）' : '（Ctrl+Shift+B）';
   const terminalToggleHint = isMac ? '（⌘`）' : '（Ctrl+`）';
@@ -43,7 +45,7 @@ export function TitleBarRightZone(): React.ReactElement {
 
   return (
     <div className={`${styles.rightZone} ${!panels.rightOpen ? styles.rightZoneCollapsed : ''}`}>
-      {panels.rightOpen && workspacePanelsAvailable && (
+      {panels.rightOpen && rightRailUsable && (
         <div className={styles.tabsRail}>
           {tabs.map((tab) => {
             const active = tab.id === activeTabId;
@@ -141,7 +143,7 @@ export function TitleBarRightZone(): React.ReactElement {
             <Icon name="panel-bottom" size={15} />
           </button>
         )}
-        {workspacePanelsAvailable && (
+        {rightRailUsable && (
           <button
             type="button"
             className={`${styles.iconBtn} ${!panels.rightOpen ? styles.iconBtnInactive : ''}`}

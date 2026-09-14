@@ -331,6 +331,41 @@ describe('TitleBar workspace-context windowTools (UI-359)', () => {
     expect(screen.queryByRole('button', { name: '展开底部终端' })).toBeNull();
   });
 
+  // UI-360 — 摘要卡只在 chat / scheduled 模式存在，欢迎页/独立工作面不开关。
+  it('hides the summary toggle on the welcome page', () => {
+    vi.stubGlobal('biof3Desktop', undefined);
+    renderAt('/');
+
+    expect(screen.queryByRole('button', { name: '展开摘要概览' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '收起摘要概览' })).toBeNull();
+  });
+
+  it('keeps the summary toggle on chat-mode workspace routes', () => {
+    vi.stubGlobal('biof3Desktop', undefined);
+    renderAt('/project/p1/chat');
+
+    expect(screen.getByRole('button', { name: '展开摘要概览' })).toBeTruthy();
+  });
+
+  // UI-360 — plugins / settings 全屏工作面无右栏消费：右栏开关与 tab pills
+  // 随右栏隐藏；底部终端与模式无关，保留。
+  it('hides the right-panel toggle and summary toggle on plugins and settings modes', () => {
+    vi.stubGlobal('biof3Desktop', undefined);
+    const { unmount } = renderAt('/project/p1/plugins');
+
+    expect(screen.queryByRole('button', { name: '收起右侧栏' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '展开右侧栏' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '展开摘要概览' })).toBeNull();
+    expect(screen.getByRole('button', { name: '展开底部终端' })).toBeTruthy();
+
+    unmount();
+    renderAt('/project/p1/settings');
+
+    expect(screen.queryByRole('button', { name: '收起右侧栏' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '展开摘要概览' })).toBeNull();
+    expect(screen.getByRole('button', { name: '展开底部终端' })).toBeTruthy();
+  });
+
   it('keeps window controls on non-workspace routes while windowTools is trimmed', () => {
     const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
     vi.stubGlobal('biof3Desktop', bridge);

@@ -875,6 +875,12 @@ export function ProjectWorkspace(): React.ReactElement {
     [conversationJobs]
   );
   const showPinnedSummary = workspaceMode === 'chat' || workspaceMode === 'scheduled';
+  // UI-360 — plugins / settings 是占满中栏的全屏工作面（PluginStorePanel /
+  // DesktopSettingsPanel），右侧栏在这两个模式无消费 → 物理隐藏（宽 0、
+  // aria-hidden，面板保持挂载不丢 tab 状态）；rightOpen 用户偏好不变，
+  // 回到 chat / 结果族即恢复。BottomTerminal 让位与 compact 遮罩同口径。
+  const rightRailUsable = workspaceMode !== 'plugins' && workspaceMode !== 'settings';
+  const rightRailVisible = rightOpen && rightRailUsable;
   const summaryOpenWidth = sessionFrameWidth === 0
     ? 300
     : summaryVisibility === 'expanded'
@@ -1586,7 +1592,7 @@ export function ProjectWorkspace(): React.ReactElement {
       <div className={styles.workspaceBody}>
         {/* UI-351 加映② — 摘要卡悬浮时不再叠加 compact 侧栏遮罩：灰底托着悬浮卡
             视觉突兀（用户裁决「背景应该取消」）。悬浮卡自身可点、顶栏 toggle 可收起。 */}
-        {compactLayout && (leftOpen || rightOpen) && !summaryFloatActive && (
+        {compactLayout && (leftOpen || rightRailVisible) && !summaryFloatActive && (
           <button
             className={styles.panelBackdrop}
             onClick={() => {
@@ -1602,7 +1608,7 @@ export function ProjectWorkspace(): React.ReactElement {
         <CenterPanel ctx={centerPanelCtx} />
         <RightPanel
           ctx={rightPanelCtx}
-          visible={rightOpen}
+          visible={rightRailVisible}
           workspaceMode={workspaceMode}
           onResize={startColumnResize('right')}
         />
@@ -1610,7 +1616,7 @@ export function ProjectWorkspace(): React.ReactElement {
           open={bottomTerminalOpen}
           height={bottomTerminalHeight}
           leftOffset={0}
-          rightOffset={rightOpen ? `var(--gewu-live-right-span, ${effectiveRightWidth + 1}px)` : 0}
+          rightOffset={rightRailVisible ? `var(--gewu-live-right-span, ${effectiveRightWidth + 1}px)` : 0}
           workspacePath={project.workspacePath}
           ssh={project.workspaceKind === 'ssh' && project.sshHost && project.remotePath
             ? { alias: project.sshHost, remotePath: project.remotePath }

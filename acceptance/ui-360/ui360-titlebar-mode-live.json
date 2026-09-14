@@ -1,0 +1,76 @@
+{
+  "name": "ui360-titlebar-mode",
+  "startedAt": "2026-09-14T06:49:52.623Z",
+  "finishedAt": "2026-09-14T06:50:13.890Z",
+  "assertions": [
+    {
+      "name": "V1_home_summary_toggle_absent",
+      "pass": true,
+      "detail": "欢迎页摘要开关/右栏开关/右栏均不在场（summary=false，rightToggle=false，rail=null）"
+    },
+    {
+      "name": "V2_chat_full_chrome",
+      "pass": true,
+      "detail": "chat 模式摘要开关在场、右栏可见（railWidth=269，mode=chat）"
+    },
+    {
+      "name": "V3_plugins_rail_and_summary_trimmed",
+      "pass": true,
+      "detail": "plugins 模式摘要开关/右栏开关不在场、右栏收起（railWidth=0，ariaHidden=true，mode=plugins，terminal=true）"
+    },
+    {
+      "name": "V4_chat_rail_restored",
+      "pass": true,
+      "detail": "回到 chat 右栏恢复可见（railWidth=269）"
+    },
+    {
+      "name": "V5_skills_unchanged",
+      "pass": true,
+      "detail": "/skills 摘要开关与右栏不在场（基线保持）"
+    }
+  ],
+  "allPass": true,
+  "observations": {
+    "pid": "p_mtuyje22_9vr4",
+    "home": {
+      "summary": false,
+      "rightToggle": false,
+      "terminalToggle": false,
+      "railWidth": null,
+      "railHidden": null,
+      "railMode": null
+    },
+    "chat": {
+      "summary": true,
+      "rightToggle": true,
+      "terminalToggle": true,
+      "railWidth": 269,
+      "railHidden": false,
+      "railMode": "chat"
+    },
+    "plugins": {
+      "summary": false,
+      "rightToggle": false,
+      "terminalToggle": true,
+      "railWidth": 0,
+      "railHidden": true,
+      "railMode": "plugins"
+    },
+    "restored": {
+      "summary": true,
+      "rightToggle": true,
+      "terminalToggle": true,
+      "railWidth": 269,
+      "railHidden": false,
+      "railMode": "chat"
+    },
+    "skills": {
+      "summary": false,
+      "rightToggle": false,
+      "terminalToggle": false,
+      "railWidth": null,
+      "railHidden": null,
+      "railMode": null
+    }
+  }
+}
