@@ -99,8 +99,19 @@ function titleBarDataEqual(a: TitleBarState, b: TitleBarState): boolean {
 }
 
 export function useWorkspacePanels(): WorkspacePanels {
-  const [leftOpen, setLeftOpen] = useState(true);
-  const [rightOpen, setRightOpen] = useState(true);
+  // BLOCK-87 L3 — 投影+窄屏（手机浏览器）初始收起两侧栏：中栏全屏，
+  // 侧栏经顶栏按钮展开为浮层（compactLayout 机制已有）。桌面端不受影响
+  // （无 __projection 标志；UI-341「侧栏常驻」裁决仅针对桌面窗口）。
+  const projectionNarrow = (() => {
+    try {
+      const projection = (window.biof3Desktop as { __projection?: boolean } | undefined)?.__projection === true;
+      return projection && window.matchMedia('(max-width: 767px)').matches;
+    } catch {
+      return false;
+    }
+  })();
+  const [leftOpen, setLeftOpen] = useState(!projectionNarrow);
+  const [rightOpen, setRightOpen] = useState(!projectionNarrow);
   const [bottomTerminalOpen, setBottomTerminalOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [titleBar, setTitleBar] = useState<TitleBarState>(DEFAULT_TITLE_BAR);
