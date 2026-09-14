@@ -199,12 +199,12 @@ export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElem
 // ---------------------------------------------------------------------------
 
 /**
- * UI-354 修订 1（用户裁决：位置在左侧栏最下方，对标 ZCode 侧栏底部账户行）——
- * 底部一行两个入口：[手机连接]（左）+ [设置]（最右）。手机连接点开配对面板
- * （React portal 挂 body，防被相邻栏遮挡）；设置走既有 handleShowSettings。
+ * UI-354 修订 1（用户裁决：位置在左侧栏最下方）→ BLOCK-85 UI 收敛（用户裁决
+ * 「协作节点和手机连接是不是应该合并到一起呢 放到 联邦？」）——底部一行两个
+ * 入口：[联邦]（左，手机接入 + 协作成员两区）+ [设置]（最右）。弹层 portal 挂
+ * body 防遮挡；设置走既有 handleShowSettings。
  */
 function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
-  const [mobileRemoteOpen, setMobileRemoteOpen] = useState(false);
   const [federationOpen, setFederationOpen] = useState(false);
   return (
     <div className={styles.leftPanelFooter}>
@@ -212,26 +212,14 @@ function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
         <button
           type="button"
           className={styles.leftQuickAction}
-          onClick={() => setMobileRemoteOpen((value) => !value)}
-          title="手机连接（扫码直达工作区）"
-          aria-label="手机连接"
-          aria-expanded={mobileRemoteOpen}
-          data-testid="sidebar-mobile-remote"
-        >
-          <Icon name="smartphone" size={15} />
-          <span>手机连接</span>
-        </button>
-        <button
-          type="button"
-          className={styles.leftQuickAction}
           onClick={() => setFederationOpen((value) => !value)}
-          title="协作节点（与其他电脑的格物互派任务）"
-          aria-label="协作节点"
+          title="联邦（手机连接 · 协作成员）"
+          aria-label="联邦"
           aria-expanded={federationOpen}
           data-testid="sidebar-federation"
         >
           <Icon name="cpu" size={15} />
-          <span>协作节点</span>
+          <span>联邦</span>
         </button>
         <button
           type="button"
@@ -246,42 +234,17 @@ function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
           <span>设置</span>
         </button>
       </div>
-      {mobileRemoteOpen && createPortal(
-        <>
-          <button
-            type="button"
-            className={styles.sidebarMobileOverlay}
-            onClick={() => setMobileRemoteOpen(false)}
-            aria-label="关闭手机连接面板"
-          />
-          <div className={styles.sidebarMobileCard} role="dialog" aria-label="手机连接" data-testid="mobile-remote-popup">
-            <div className={styles.sidebarMobileCardHeader}>
-              <strong>手机连接</strong>
-              <button
-                type="button"
-                className={styles.leftFooterIconBtn}
-                onClick={() => setMobileRemoteOpen(false)}
-                aria-label="关闭"
-              >
-                <Icon name="x" size={14} />
-              </button>
-            </div>
-            <MobileSyncPanel />
-          </div>
-        </>,
-        document.body,
-      )}
       {federationOpen && createPortal(
         <>
           <button
             type="button"
             className={styles.sidebarMobileOverlay}
             onClick={() => setFederationOpen(false)}
-            aria-label="关闭协作节点面板"
+            aria-label="关闭联邦面板"
           />
-          <div className={styles.sidebarMobileCard} role="dialog" aria-label="协作节点" data-testid="federation-popup">
+          <div className={styles.sidebarMobileCard} role="dialog" aria-label="联邦" data-testid="federation-popup">
             <div className={styles.sidebarMobileCardHeader}>
-              <strong>协作节点</strong>
+              <strong>联邦</strong>
               <button
                 type="button"
                 className={styles.leftFooterIconBtn}
@@ -291,7 +254,13 @@ function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
                 <Icon name="x" size={14} />
               </button>
             </div>
-            <FederationPanel />
+            <div data-testid="federation-section-devices">
+              <MobileSyncPanel />
+            </div>
+            <div style={{ height: 1, background: 'var(--gewu-border, #e4e4e7)', margin: '12px 0' }} />
+            <div data-testid="federation-section-peers">
+              <FederationPanel />
+            </div>
           </div>
         </>,
         document.body,
