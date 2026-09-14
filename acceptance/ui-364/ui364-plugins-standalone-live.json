@@ -1,0 +1,42 @@
+{
+  "name": "ui364-plugins-standalone",
+  "startedAt": "2026-09-14T07:29:03.776Z",
+  "finishedAt": "2026-09-14T07:29:13.854Z",
+  "assertions": [
+    {
+      "name": "V1_plugins_standalone_page",
+      "pass": true,
+      "detail": "点插件落在 /plugins 独立页：商店面板在场、无工作区右栏（path=/plugins，store=true，aside=false，rail=null）"
+    },
+    {
+      "name": "V2_back_button_present",
+      "pass": true,
+      "detail": "独立页含返回按钮（back=true）"
+    },
+    {
+      "name": "V3_legacy_deeplink_falls_back_chat",
+      "pass": true,
+      "detail": "旧深链回 chat 工作区（path=/project/p_mtuyje22_9vr4/plugins，mode=chat，rail=489）"
+    }
+  ],
+  "allPass": true,
+  "observations": {
+    "pid": "p_mtuyje22_9vr4",
+    "plugins": {
+      "path": "/plugins",
+      "store": true,
+      "backBtn": true,
+      "workspaceAside": false,
+      "railWidth": null,
+      "railMode": null
+    },
+    "legacy": {
+      "path": "/project/p_mtuyje22_9vr4/plugins",
+      "store": false,
+      "backBtn": false,
+      "workspaceAside": true,
+      "railWidth": 489,
+      "railMode": "chat"
+    }
+  }
+}

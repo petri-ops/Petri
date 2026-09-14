@@ -3338,6 +3338,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **P2 控制面（2026-09-13 追加实现）**：移动页升级为控制面——任务详情页批准卡（SSE `needApproval` 事件驱动：工具名+目标摘要+脱敏 params，**两步确认**按钮 D4）+ 取消任务按钮 + 会话页/全局 composer 发消息（POST `/api/ai/agent` 复用 chat.js 路由）。后端新增窄口 `mobile-gateway/control.js` `POST /m/api/approvals/:token/decide`——进程内直调 `db.ackToolJob`（与桌面确认卡 `routes/ai-legacy.js` 的 `POST /api/ai/run-tool-ack/:token` **同一函数同一 scope 校验，权限不放大**；不发 HTTP 自调用，对标 BLOCK-49 直调先例）。验证：集成测试 10/10 + **实机隔离探针 28/28 ALL PASS**（新增 B 系列：吊销后可重新配对/发消息 401+契约 400/取消 401+结构化 404/批准无会话 401+缺 scope 400+**scope 不匹配 404 权限不放大**+批准放行落库 ack_status=approved 且 job 不被破坏+拒绝落库 rejected+failed）。`acceptance/block-70/block70-mobile-gateway-live.json`。
 - **实现提交对账（UI-357 桌面投影 / P3 隧道 UI 归入本条目）**：P2 控制面 = 3c3bdb17；P3 隧道三态呈现与公网 QR 切换 = 1c40b35（该提交含 MobileSync.tsx 隧道区 UI 增量，同提交台账漏同步——已补登本段并按 c177374 先例登记 LEGACY 豁免）；桌面投影 = 79fea4a5。「手机发起→桌面执行（真实模型）→手机批准→手机收终态」全链与 dev 栈 CDP 设置区断言未执行（前者需真实 LLM 环境）——前者待 dev 栈窗口，后者**CDP 够不着**，按无人化验收阶梯第 2 级如实停留 `in_progress`，待用户照测试路线实测后升级；P2 控制面（发消息/批准/取消）与 P3 aliyun 隧道属后续阶段未实现。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-364: 插件商店独立页化 /plugins——设备级能力解绑项目（2026-09-14 verified，dev Electron 边界内 CDP 3/3）
+
+- **来源**：用户质询「插件适合项目绑定的吗？我希望解绑，应该和 Skills 一样的界面效果，目前点开左侧就自动选择了某个项目」——复核实锤：插件装卸是**设备级能力**（BLOCK-84 装卸记录在 `dataDir/packs/installed.json`，boot 全局接线），与项目无语义绑定；工作区 `plugins` 模式只是历史包装，且 `openWorkspaceMode` 经当前项目导航 → 点「插件」隐式激活项目并带出整套工作区 chrome。
+- **交付面**：①新独立页 `/plugins`（`pages/plugins/`，与 /skills 同形态：整页承载 PluginStorePanel——纯 IPC、零项目依赖，含返回按钮）；②`WorkspaceMode` 移除 `'plugins'`（UI-347「search」先例：历史深链 /project/:id/plugins fail-closed 回 chat）；③左栏「插件」快捷动作与工作区运行时缺失横幅「去插件商店安装」均改跳 /plugins；④`isStandalonePagePath` 并入 /plugins（顶栏中区 bare 化，UI-360 的模式裁剪自动生效）；`modeUsesRightRail`/`rightRailUsable`/`showRuntimeBanner` 同步去掉 plugins 分支；CenterPanel 移除 plugins 工作面分支。
+- **证据**：vitest 定向 **47/47**（TitleBar 深链回退断言按新语义更新：/project/:id/plugins → chat 语义全量在场）+ `tsc --noEmit` 0 + 实机 CDP `scripts/ui364-plugins-standalone-live.cjs` **3/3 allPass**（左栏点插件落 /plugins 独立页：商店面板在场、无工作区右栏/aside；返回按钮在场；旧深链回 chat 工作区右栏恢复），证据 `acceptance/ui-364/ui364-plugins-standalone-live.json`。
+- **边界**：home 项目管理页与 ResultView 运行时缺失回退内的 PluginStorePanel 浮层保持原状（组件自包含，均无项目绑定语义）；BLOCK-86-DOMAIN-PACK-LIFECYCLE P2 商店改版在本独立页形态上进行。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-362: 指挥中心入口右栏 tab 化——项目绑定俯瞰，与结果/文件/审阅同级（2026-09-14 verified，dev Electron 边界内 CDP 3/3）
 
 - **来源**：用户对 UI-361 落位的再裁决「指挥中心目前的位置不对，应该像右侧边栏中的结果、文件、审阅一样，项目绑定的哦」——入口形态从「左栏底部全局按钮」改为「右栏 tab + 项目绑定内容」；UI-361 的层级批评（全局动作不得挂在右栏列 header）仍成立，本条目是其形态收束。

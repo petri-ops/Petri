@@ -296,7 +296,8 @@ function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
 
 function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   const items: Array<{
-    key: WorkspaceMode | 'skills' | 'knowledge' | 'backend' | 'newtask';
+    // UI-364 — 'plugins' 从 WorkspaceMode 联合移入独立页 key 联合（/plugins 独立页）
+    key: WorkspaceMode | 'skills' | 'knowledge' | 'backend' | 'newtask' | 'plugins';
     mode: WorkspaceMode | null;
     label: string;
     icon: Parameters<typeof Icon>[0]['name'];
@@ -315,8 +316,10 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
     {
       // UI-347 — 左栏「搜索」入口移除（用户裁决：无实际意义）；搜索面（
       // WorkspaceSearchPanel + search 模式）一并退役，不预留空壳。
+      // UI-364 — 插件商店独立页化（/plugins）：设备级能力不绑项目，
+      // 不再挂工作区 mode（原 mode: 'plugins' 用于工作态高亮，已无意义）。
       key: 'plugins',
-      mode: 'plugins',
+      mode: null,
       label: '插件',
       icon: 'puzzle',
       onClick: ctx.handleShowPlugins,

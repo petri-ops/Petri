@@ -5,7 +5,6 @@ import {
   useConversationRun,
 } from '@/components/copilot/conversationRunStore';
 import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop';
-import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
@@ -285,11 +284,6 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
             onBackToChat={() => ctx.updateWorkspaceMode('chat')}
           />
         </SessionFrameView>
-      )}
-      {workspaceMode === 'plugins' && (
-        <div className={styles.workspaceModeSurface}>
-          <PluginStorePanel onClose={() => ctx.updateWorkspaceMode('chat')} />
-        </div>
       )}
       {workspaceMode === 'settings' && (
         <div className={styles.workspaceModeSurface}>

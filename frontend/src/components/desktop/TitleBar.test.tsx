@@ -347,16 +347,16 @@ describe('TitleBar workspace-context windowTools (UI-359)', () => {
     expect(screen.getByRole('button', { name: '展开摘要概览' })).toBeTruthy();
   });
 
-  // UI-360 — plugins / settings 全屏工作面无右栏消费：右栏开关与 tab pills
-  // 随右栏隐藏；底部终端与模式无关，保留。
-  it('hides the right-panel toggle and summary toggle on plugins and settings modes', () => {
+  // UI-364 — plugins 模式退役（插件商店独立页 /plugins）：历史深链
+  // /project/:id/plugins fail-closed 回 chat（UI-347 search 先例）；
+  // settings 全屏工作面仍裁剪右栏开关与摘要开关。
+  it('treats the legacy plugins deep link as chat and keeps settings-mode trimming', () => {
     vi.stubGlobal('biof3Desktop', undefined);
     const { unmount } = renderAt('/project/p1/plugins');
 
-    expect(screen.queryByRole('button', { name: '收起右侧栏' })).toBeNull();
-    expect(screen.queryByRole('button', { name: '展开右侧栏' })).toBeNull();
-    expect(screen.queryByRole('button', { name: '展开摘要概览' })).toBeNull();
-    expect(screen.getByRole('button', { name: '展开底部终端' })).toBeTruthy();
+    // 深链回退 chat：右栏开关与摘要开关均在场（chat 语义）
+    expect(screen.getByRole('button', { name: '收起右侧栏' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '展开摘要概览' })).toBeTruthy();
 
     unmount();
     renderAt('/project/p1/settings');

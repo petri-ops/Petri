@@ -41,13 +41,13 @@ export function parseWorkspaceRoute(pathname: string): { mode: WorkspaceMode } |
 }
 
 /**
- * UI-360 — 该工作区模式是否有右侧栏消费：plugins / settings 是占满中栏的
- * 全屏工作面（PluginStorePanel / DesktopSettingsPanel），右侧栏（结果/浏览器/
- * 文件/侧边聊天/审阅）在这两个模式无消费，随模式隐藏；rightOpen 用户偏好
- * 状态保持不丢，回到其余模式即恢复。
+ * UI-360 — 该工作区模式是否有右侧栏消费：settings 是占满中栏的
+ * 全屏工作面（DesktopSettingsPanel），右侧栏在此模式无消费，随模式隐藏；
+ * rightOpen 用户偏好状态保持不丢，回到其余模式即恢复。
+ * UI-364 — plugins 已独立页化（/plugins），不再是工作区模式。
  */
 export function modeUsesRightRail(mode: WorkspaceMode): boolean {
-  return mode !== 'plugins' && mode !== 'settings';
+  return mode !== 'settings';
 }
 
 /**
@@ -63,9 +63,10 @@ export function modeUsesSummaryCard(mode: WorkspaceMode): boolean {
  * UI-348 — 全局独立页判定（/skills /knowledge /backend）：这些页面自带
  * 「返回 + 图标 + 标题」页头，fixed 顶栏不再渲染品牌 chip 与分区分隔线
  * （此前顶栏左区分隔线与壳层左栏宽度错位 24px，叠出「多一条线」的布局冲突）。
+ * UI-364 — /plugins 插件商店独立页并入同形态。
  */
 export function isStandalonePagePath(pathname: string): boolean {
-  return /^\/(skills|knowledge|backend)\/?$/.test(pathname);
+  return /^\/(skills|knowledge|backend|plugins)\/?$/.test(pathname);
 }
 
 export function getFallbackTitle(pathname: string): string {

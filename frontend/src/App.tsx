@@ -27,6 +27,7 @@ import WelcomePage from '@/pages/welcome';
 import { ProjectWorkspace } from '@/pages/project-workspace';
 import { ResultStudioPage } from '@/pages/result-studio/ResultStudioPage';
 import SkillsPage from '@/pages/skills';
+import PluginsPage from '@/pages/plugins';
 import KnowledgePage from '@/pages/knowledge';
 import BackendPage from '@/pages/backend';
 // BLOCK-28 — main-area code review mode (VS Code SCM style)
@@ -175,6 +176,8 @@ function AppShell(): React.ReactElement {
             <Route path="/projects" element={<HomePage />} />
             {/* Skills management page */}
             <Route path="/skills" element={<SkillsPage />} />
+            {/* UI-364 — 插件商店独立页（设备级能力，不绑项目；与 /skills 同形态） */}
+            <Route path="/plugins" element={<PluginsPage />} />
             {/* BLOCK-72 / UI-320 — 全局工作台页：知识空间（设备级域）+ 后端（全局单进程） */}
             <Route path="/knowledge" element={<KnowledgePage />} />
             <Route path="/backend" element={<BackendPage />} />

@@ -616,7 +616,9 @@ export function ProjectWorkspace(): React.ReactElement {
   const handleShowSettings = useCallback(() => {
     updateWorkspaceMode('settings');
   }, [updateWorkspaceMode]);
-  const handleShowPlugins = useCallback(() => updateWorkspaceMode('plugins'), [updateWorkspaceMode]);
+  // UI-364 — 插件商店独立页化（/plugins）：运行时缺失横幅与左栏入口都
+  // 跳独立页，不再切工作区模式（设备级能力不绑项目）。
+  const handleShowPlugins = useCallback(() => navigate('/plugins'), [navigate]);
   const handleNavigateToSkills = useCallback(() => navigate('/skills'), [navigate]);
   // BLOCK-72 / UI-320 — 全局工作台页入口（知识空间/后端迁出右栏）
   const handleNavigateToKnowledge = useCallback(() => navigate('/knowledge'), [navigate]);
@@ -878,11 +880,11 @@ export function ProjectWorkspace(): React.ReactElement {
     [conversationJobs]
   );
   const showPinnedSummary = workspaceMode === 'chat' || workspaceMode === 'scheduled';
-  // UI-360 — plugins / settings 是占满中栏的全屏工作面（PluginStorePanel /
-  // DesktopSettingsPanel），右侧栏在这两个模式无消费 → 物理隐藏（宽 0、
+  // UI-360 — plugins / settings 是占满中栏的全屏工作面；UI-364 后仅 settings
+  // （plugins 已独立页化 /plugins）。右栏在此模式无消费 → 物理隐藏（宽 0、
   // aria-hidden，面板保持挂载不丢 tab 状态）；rightOpen 用户偏好不变，
   // 回到 chat / 结果族即恢复。BottomTerminal 让位与 compact 遮罩同口径。
-  const rightRailUsable = workspaceMode !== 'plugins' && workspaceMode !== 'settings';
+  const rightRailUsable = workspaceMode !== 'settings';
   const rightRailVisible = rightOpen && rightRailUsable;
   const summaryOpenWidth = sessionFrameWidth === 0
     ? 300
@@ -1546,7 +1548,6 @@ export function ProjectWorkspace(): React.ReactElement {
   const pyRuntimeMissing = backendStatus.pyRuntime === false;
   const showRuntimeBanner =
     backendStatus.loaded &&
-    workspaceMode !== 'plugins' &&
     (rRuntimeMissing || pyRuntimeMissing);
   let runtimeBannerMessage: string;
   if (rRuntimeMissing && pyRuntimeMissing) {

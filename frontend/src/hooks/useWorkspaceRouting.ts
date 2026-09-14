@@ -3,7 +3,9 @@ import { useSearchParams } from 'react-router-dom';
 
 // UI-347 — 'search' 已从模式集合移除（左栏入口与搜索面退役）；历史深链
 // /project/:id/search 经 parseWorkspaceMode 落 null → 'chat'（fail-closed）。
-export type WorkspaceMode = 'chat' | 'scheduled' | 'result' | 'code' | 'compare' | 'history' | 'plugins' | 'settings';
+// UI-364 — 'plugins' 同口径移除（插件商店独立页化 /plugins；插件装卸是
+// 设备级能力，与项目无语义绑定），历史深链 /project/:id/plugins → 'chat'。
+export type WorkspaceMode = 'chat' | 'scheduled' | 'result' | 'code' | 'compare' | 'history' | 'settings';
 
 export const WORKSPACE_MODES: ReadonlySet<WorkspaceMode> = new Set([
   'chat',
@@ -12,7 +14,6 @@ export const WORKSPACE_MODES: ReadonlySet<WorkspaceMode> = new Set([
   'code',
   'compare',
   'history',
-  'plugins',
   'settings',
 ]);
 

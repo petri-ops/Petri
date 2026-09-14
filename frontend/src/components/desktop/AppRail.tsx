@@ -104,7 +104,9 @@ export function AppRail(): React.ReactElement {
     sshCreateAt,
     workspaceMode,
     handleShowScheduled: () => openWorkspaceMode('scheduled'),
-    handleShowPlugins: () => openWorkspaceMode('plugins'),
+    // UI-364 — 插件商店独立页化：设备级能力不绑项目，不再经工作区模式
+    // （原 openWorkspaceMode('plugins') 会隐式激活当前项目）
+    handleShowPlugins: () => navigate('/plugins'),
     handleShowSettings: () => openWorkspaceMode('settings'),
     handleNavigateToSkills: () => navigate('/skills'),
     handleNavigateToKnowledge: () => navigate('/knowledge'),
