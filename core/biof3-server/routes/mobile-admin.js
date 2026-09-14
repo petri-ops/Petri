@@ -78,16 +78,22 @@ module.exports = function registerMobileAdmin(app, { dataDir } = {}) {
 
   // 配对 URL 序（P3.5 桌面投影，用户裁决「整个软件桌面原封不动的过来」）：
   // 隧道 connected + 公网地址 → 主推 /pair（兑换 cookie → 完整桌面 SPA）；
-  // LAN 兜底仍是 /m 轻量页。其余情况 /pair 走本机。
+  // 配对 URL 序（P3.5 桌面投影 + BLOCK-85 跨设备配对）：
+  // 优先序 = 公网（隧道 connected）> 局域网地址 > 本机回环（仅本机自用兜底）。
+  // 统一 /pair?token= 形态（浏览器打开即完整界面投影；移动页 /m 在投影内可达）。
+  // 修因：跨设备配对时 primary 曾是 127.0.0.1——对端拿到的是它自己的回环，
+  // 根本连不上（BLOCK-85 双真机实测抓真）。
   function pairingUrlsFor(token) {
     const port = resolvePort({ dataDir: dir });
-    const lan = lanAddresses().map((ip) => `http://${ip}:${port}/m#${token}`);
+    const lan = lanAddresses().map((ip) => `http://${ip}:${port}/pair?token=${token}`);
+    const loopback = `http://127.0.0.1:${port}/pair?token=${token}`;
     const tunnel = getTunnelManager(dir).status();
     if (tunnel.enabled && tunnel.state === 'connected' && tunnel.publicUrl) {
       const publicUrl = `${tunnel.publicUrl.replace(/\/+$/, '')}/pair?token=${token}`;
-      return [publicUrl, ...lan];
+      return [publicUrl, ...lan, loopback];
     }
-    return [`http://127.0.0.1:${port}/pair?token=${token}`, ...lan];
+    if (lan.length > 0) return [lan[0], ...lan.slice(1), loopback];
+    return [loopback];
   }
 
   app.post('/api/mobile/config', express.json({ limit: '4kb' }), (req, res) => {

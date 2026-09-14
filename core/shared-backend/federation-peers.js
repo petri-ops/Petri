@@ -58,8 +58,13 @@ function parsePairingUrl(rawUrl) {
   let token = parsed.searchParams.get('token') || '';
   if (!token) {
     const hash = parsed.hash.replace(/^#/, '');
-    const hashParams = new URLSearchParams(hash);
-    token = hashParams.get('t') || hashParams.get('token') || '';
+    if (hash && !hash.includes('=')) {
+      // 旧移动页形态：/m#<裸token>
+      token = hash;
+    } else {
+      const hashParams = new URLSearchParams(hash);
+      token = hashParams.get('t') || hashParams.get('token') || '';
+    }
   }
   if (!token || !/^https?:$/.test(parsed.protocol)) return null;
   const base = `${parsed.protocol}//${parsed.host}`;
