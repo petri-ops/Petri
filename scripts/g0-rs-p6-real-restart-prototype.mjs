@@ -16,6 +16,7 @@ import {
   existsSync,
   readFileSync,
   realpathSync,
+  renameSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -1803,6 +1804,19 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
     invariant(indexedPlugin, 'p6_drift_plugin_index_missing');
     indexedPlugin.version = '2.0.0';
     writeFileSync(builtInManifestPath, `${JSON.stringify(builtInManifest, null, 2)}\n`);
+    // BLOCK-84 多源语义：真包源（<dataDir>/packs/installed.json → sibling pack）
+    // 以 installed 候选后置覆盖 builtin 候选，本原型「升级隔离副本」的版本漂移
+    // 会被真包 1.0.0 遮蔽（replay 恒 200，pluginUpgradeBlocksReplayOnly 恒红）。
+    // drift 冷启窗口＝隔离副本即全部插件世界：暂时隐藏包装载记录，冷启段结束恢复。
+    // 根目录随弃置 runtime 清理，异常路径无跨 run 残留。
+    const packInstalledJsonPath = path.join(
+      runtime.env.BIOF3_LOCAL_DATA_DIR, 'packs', 'installed.json');
+    const packInstalledJsonHidden = `${packInstalledJsonPath}.drift-cold-window`;
+    let packSourceHidden = false;
+    if (existsSync(packInstalledJsonPath)) {
+      renameSync(packInstalledJsonPath, packInstalledJsonHidden);
+      packSourceHidden = true;
+    }
     coldServer = await startServer(runtime.env, verbose
       ? { onLog: (channel, line) => console.error(`[p6-drift-cold:${channel}] ${line}`) }
       : {});
@@ -1861,6 +1875,10 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
       runtime.project.id,
       currentRevisionIds,
     );
+    if (packSourceHidden) {
+      renameSync(packInstalledJsonHidden, packInstalledJsonPath);
+      packSourceHidden = false;
+    }
     const observation = {
       prototype: 'real_product_drift_noncanonical',
       dirtyGitDetected,
