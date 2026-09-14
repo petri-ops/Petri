@@ -21,6 +21,7 @@ import {
 } from '@/pages/project-workspace';
 import { useToolCatalog } from '@/lib/tool-catalog';
 import { AnalysisLaunchPanel } from '@/components/workspace-panels/AnalysisLaunchPanel';
+import { CommandCenterJobsWall } from '@/pages/window/CommandCenterJobsWall';
 // BLOCK-28.5 — 审阅并入右侧边栏 tab 体系（复用 dock 紧凑形态，填满 tab 容器）
 import { ReviewMode } from '@/components/desktop/WorkingTreeReview/ReviewMode';
 // BLOCK-68 / UI-317 — 模型 I/O 信息流 dock（原 composer ⋯ 菜单 overlay 迁入）
@@ -153,6 +154,14 @@ export function RightPanel({
                     onOpenFiles={ctx.handleOpenRightFiles}
                     onOpenChat={ctx.handleOpenRightChat}
                     onOpenReview={() => ctx.openRightPanel('review')}
+                    onOpenJobs={() => ctx.openRightPanel('jobs')}
+                  />
+                )}
+                {/* UI-362 — 指挥中心 tab：项目绑定俯瞰（瓦片墙按当前项目过滤） */}
+                {tab === 'jobs' && ctx.projectId && (
+                  <CommandCenterJobsWall
+                    projectId={ctx.projectId}
+                    emptyText="本项目暂无作业——运行一个分析后，瓦片会出现在这里。"
                   />
                 )}
                 {tab === 'results' && ctx.projectId && (

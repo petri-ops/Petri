@@ -3452,6 +3452,15 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   color: var(--gewu-text-terminal-strong);
 }
 
+/* UI-363 — tab 行右侧动作区（清空/关闭面板/上限提示），替代原独立 header 行 */
+.embeddedTerminalTabActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
 .embeddedTerminalNotice {
   padding: 1px 7px;
   border-radius: 999px;

@@ -26,6 +26,9 @@ export interface BottomTerminalProps {
  *   本组件只负责布局、tab 条与清空/关闭面板等 affordance。
  * - 打开面板且无 tab 时自动开第一个（保持旧单终端「打开即用」体验）。
  * - 上限 4：后端 terminal.js 与前端 terminalTabs.ts 双端同值，第 5 个诚实拒绝。
+ * - UI-363（用户裁决：外层「终端 新标签/清空/×」标题行冗余）——砍掉独立
+ *   header，对标 VS Code 面板单行布局：tab 与「+」居左，清空/关闭面板居右。
+ *   面板开关仍可经顶栏「底部终端」toggle 与 Ctrl/Cmd+`。
  */
 export function BottomTerminal({
   open,
@@ -50,11 +53,8 @@ export function BottomTerminal({
     limitNotice,
     dismissLimitNotice,
     clear,
-    activeRunning,
     runningBy,
   } = useTerminalTabs({ open, workspacePath, ssh, theme: resolvedTheme });
-
-  const activeTab = tabs.find((t) => t.id === activeId) || null;
 
   // 打开面板且尚无任何 tab → 自动开第一个（懒启动，此刻才拉起 pty）。
   useEffect(() => {
@@ -76,28 +76,6 @@ export function BottomTerminal({
       data-gewu-motion="functional"
     >
       <div className={styles.embeddedTerminalResize} onMouseDown={onResize} />
-      <div className={styles.embeddedTerminalHeader}>
-        <div>
-          <span
-            aria-hidden
-            className={styles.embeddedTerminalStatusDot}
-            data-running={activeRunning ? 'true' : 'false'}
-          />
-          <span>终端</span>
-          <small>{activeTab ? terminalTabSubtitle(activeTab) || '新标签' : '未连接'}</small>
-          {limitNotice ? (
-            <span className={styles.embeddedTerminalNotice} role="status">
-              {limitNotice}
-            </span>
-          ) : null}
-        </div>
-        <div>
-          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={clear}>清空</button>
-          <button className="gewu-btn gewu-btn--icon" type="button" onClick={onClose} aria-label="关闭终端面板">
-            <Icon name="x" size={13} />
-          </button>
-        </div>
-      </div>
       <div className={styles.embeddedTerminalTabs} role="tablist" aria-label="终端标签">
         {tabs.map((tab) => {
           const isActive = tab.id === activeId;
@@ -157,6 +135,17 @@ export function BottomTerminal({
         >
           <Icon name="plus" size={12} />
         </button>
+        <div className={styles.embeddedTerminalTabActions}>
+          {limitNotice ? (
+            <span className={styles.embeddedTerminalNotice} role="status">
+              {limitNotice}
+            </span>
+          ) : null}
+          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={clear}>清空</button>
+          <button className="gewu-btn gewu-btn--icon" type="button" onClick={onClose} aria-label="关闭终端面板" title="关闭终端面板">
+            <Icon name="x" size={13} />
+          </button>
+        </div>
       </div>
       <div className={styles.embeddedTerminalBody}>
         {tabs.map((tab) => (

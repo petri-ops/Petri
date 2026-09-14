@@ -1,0 +1,40 @@
+{
+  "name": "ui362-command-center-tab",
+  "startedAt": "2026-09-14T07:16:00.243Z",
+  "finishedAt": "2026-09-14T07:16:09.780Z",
+  "assertions": [
+    {
+      "name": "V1_legacy_entries_removed",
+      "pass": true,
+      "detail": "左栏底部与顶栏均无指挥中心入口（rail=false，titlebar=false）"
+    },
+    {
+      "name": "V2_jobs_tab_opens_wall",
+      "pass": true,
+      "detail": "工具菜单含指挥中心（menuHit=clicked），点击后 tab pill 在场且瓦片墙挂载（pill=true，wall=true）"
+    },
+    {
+      "name": "V3_global_window_via_shortcut",
+      "pass": true,
+      "detail": "Ctrl+Shift+C 弹出全局指挥中心独立窗（url=http://localhost:3000/window/command-center）"
+    }
+  ],
+  "allPass": true,
+  "observations": {
+    "pid": "p_mtuyje22_9vr4",
+    "base": {
+      "railEntry": false,
+      "titlebarEntry": false,
+      "toolMenu": true,
+      "jobsPill": false,
+      "wallMounted": false
+    },
+    "after": {
+      "railEntry": false,
+      "titlebarEntry": false,
+      "toolMenu": true,
+      "jobsPill": true,
+      "wallMounted": true
+    }
+  }
+}

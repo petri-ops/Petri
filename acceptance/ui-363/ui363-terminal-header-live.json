@@ -1,0 +1,42 @@
+{
+  "name": "ui363-terminal-header",
+  "startedAt": "2026-09-14T07:16:45.683Z",
+  "finishedAt": "2026-09-14T07:16:52.464Z",
+  "assertions": [
+    {
+      "name": "V1_legacy_header_removed",
+      "pass": true,
+      "detail": "外层 header 不在场（legacyHeader=false）"
+    },
+    {
+      "name": "V2_actions_in_tab_row_and_visible",
+      "pass": true,
+      "detail": "清空/关闭面板居于 tab 行且面板可见（clearInRow=true，closeInRow=true，height=298）"
+    },
+    {
+      "name": "V3_toggle_still_closes",
+      "pass": true,
+      "detail": "再按 Ctrl+` 面板收起（style.height=0px，rect=2）"
+    }
+  ],
+  "allPass": true,
+  "observations": {
+    "pid": "p_mtuyje22_9vr4",
+    "open": {
+      "legacyHeader": false,
+      "clearInRow": true,
+      "closeInRow": true,
+      "panelHeight": 298,
+      "panelStyleHeight": "298px",
+      "hostVisible": true
+    },
+    "closed": {
+      "legacyHeader": false,
+      "clearInRow": true,
+      "closeInRow": true,
+      "panelHeight": 2,
+      "panelStyleHeight": "0px",
+      "hostVisible": true
+    }
+  }
+}

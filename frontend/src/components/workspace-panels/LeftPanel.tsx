@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from '@/components/icons/Icon';
-import { getBridge } from '@/lib/desktopBridge';
-import { getIsMac } from '@/components/desktop/titlebar/shared';
 import { MobileSyncPanel } from '@/components/desktop/DesktopSettingsPanel/sections/MobileSync';
 import { FederationPanel } from '@/components/desktop/DesktopSettingsPanel/sections/Federation';
 import type { Project } from '@/lib/project-types';
@@ -224,22 +222,9 @@ function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
           <Icon name="cpu" size={15} />
           <span>联邦</span>
         </button>
-        {/* UI-361 — 指挥中心入口从顶栏右区迁入壳层左栏底部：全局单例窗
-            （跨项目/会话的全部作业俯瞰）与列级 chrome 分层；command 图标
-            避免与联邦的 cpu 撞车。快捷键 Ctrl/Cmd+Shift+C 仍为全局。 */}
-        {getBridge('windowManager') && (
-          <button
-            type="button"
-            className={styles.leftQuickAction}
-            onClick={() => void getBridge('windowManager')!.popOut('command-center')}
-            title={`指挥中心${getIsMac() ? '（⌘⇧C）' : '（Ctrl+Shift+C）'}`}
-            aria-label="指挥中心"
-            data-testid="sidebar-command-center"
-          >
-            <Icon name="command" size={15} />
-            <span>指挥中心</span>
-          </button>
-        )}
+        {/* UI-362 — 指挥中心入口已迁入右栏 tab 体系（项目绑定俯瞰，与结果/审阅
+            同级；用户裁决「应该像右侧边栏中的结果文件审阅一样」）。UI-361 曾短暂
+            落位于此，全局独立窗仍由 Ctrl/Cmd+Shift+C 承载。 */}
         <button
           type="button"
           className={`${styles.leftQuickAction} ${ctx.workspaceMode === 'settings' ? styles.leftQuickActionActive : ''}`}
