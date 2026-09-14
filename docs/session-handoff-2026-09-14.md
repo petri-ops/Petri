@@ -73,6 +73,8 @@
 
 ## 六、同日第四轮补记（UI-370 摘要卡右缘灰带收口）
 
+- **提交与推送状态**：`aa9de687`（UI-369 竞态复验 + dev 基建两处静默失效修复）与 `f29d4a61`（UI-370 摘要卡右缘灰带）**均已推送 origin/main**（`5fcbf985..f29d4a61 main -> main`；`HEAD == origin/main`，工作区干净）。当日一度因代理 `127.0.0.1:7897` 未启动而只能本地提交，网络恢复后补推。
+
 - **UI-370 verified**：摘要卡右缘那条 4px 全高灰带已根除，且悬浮/钉住两态统一贴齐会话区右缘。详见 `docs/ui-productization-audit.md` UI-370 段与 `acceptance/ui-370/`（含消融四态对比图）。
   - **根因**：`.workspaceSummaryFloat` 的 `box-shadow(0 12px 32px rgba(15,23,42,.18))` 被祖先 `.workspaceSessionLayout`/`.workspaceSessionContent` 的 `overflow: hidden` 裁切，`right: 4px` 使阴影右侧只剩 4px 可见 → 全高灰带。消融实证：基线 5 列连续非白 → `box-shadow:none` 与 `right:0` 均降为 1 列 → 解除祖先 overflow 则阴影完整铺开 17 列渐变。
   - **交付 4 处 CSS**（均在 `frontend/src/pages/project-workspace.module.css`）：float `right: 4px → 0`；新增 `.workspaceSummaryFloat .workspacePinnedSummary { max-width: 100% }`（撤掉与 shrink-to-fit 互为循环依赖的 24px 右预留）；钉住列 `padding-right: 4px → 0` + `display:flex; align-items:flex-end`；入场动画 `translateX(16px) → translateX(-16px)`。
