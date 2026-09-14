@@ -1,7 +1,7 @@
 # 审计广播台 (AUDIT-LOG)
 
 > 本文件只保存需要主 Agent 看见的活跃广播与最近处理记录。
-> 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-09-13.md)· 上一档：[through-2026-09-12](./archive/checkpoints/audit-log-through-2026-09-12.md)（更早前史：[through-2026-07-26](./archive/checkpoints/audit-log-through-2026-07-26.md)、[2026-08-pre18](./archive/audit-log-2026-08-pre18.md)）。
+> 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-09-13.md) · 上一档：[through-2026-09-12](./archive/checkpoints/audit-log-through-2026-09-12.md)（更早前史：[through-2026-07-26](./archive/checkpoints/audit-log-through-2026-07-26.md)、[2026-08-pre18](./archive/audit-log-2026-08-pre18.md)）。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 > 入口直链（registry `entrypoint` 指向本台的 canonical 文档，归档轮转不得切断发现路径）：[block-14-left-panel-qa-fix-closeout](./block-14-left-panel-qa-fix-closeout.md) · [block-15-architecture-perf-plan](./block-15-architecture-perf-plan.md) · [block-22-codemirror-inline-diff-plan](./block-22-codemirror-inline-diff-plan.md)
 
