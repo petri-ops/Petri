@@ -325,6 +325,7 @@ function buildMobileGateway({
     }
     const shimArr = [
       '<script>window.__errs=[];window.addEventListener("error",function(e){window.__errs.push(String(e&&e.message||e))});</script>',
+      '<script>document.documentElement.setAttribute("data-projection","1");</script>',
       '<script>(function(){',
       '  var base={backendConfig:{rApiBase:"/api"},isDesktop:true,platform:"win32",__projection:true};',
       '  var mk=function(){var f=function(){return p;};var p=new Proxy(f,{get:function(t,k){if(k===Symbol.toPrimitive){return function(){return "";};}if(k==="then"){return function(res,rej){return Promise.resolve(undefined).then(res,rej);};}return p;},apply:function(){return p;}});return p;};',

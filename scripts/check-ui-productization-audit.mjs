@@ -46,6 +46,15 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-09-13/14 BLOCK-85/86/87 多端同步与联邦过程提交（投影终端/AppRail 浮层/
+  // 偏好服务端化/消息镜像/隧道档案），UI 归属 UI-354 修订链与 UI-358，收口时统一
+  // 补登台账；subject 用 feat(block-8x): 未带 UI-###。豁免同提交台账与编号要求。
+  'fb58798cb0a832d5bd6f0e901e23b9c7f590463e',
+  'be53b0df0c1446c6fb2582ef7dd8de91e49deb2c',
+  '58bc741caded6fab4bf262b4a7d5099f1f86a37f',
+  'c1284842c879bb7076a7c4472c02e1f197294592',
+  '49dd938e5430004160c5caeed2cbcea75db13299',
+  '862fd501',
   // 2026-09-13 BLOCK-70 P3 隧道实现提交 1c40b35：MobileSync.tsx 隧道三态区 UI
   // 增量的同提交台账漏同步（收口门禁抓出后补登 UI-319 条目 P3 段）。
   // subject 用 feat(block-70): 未带 UI-###。豁免同提交台账与 UI-### 编号要求。
@@ -239,6 +248,13 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-09-13/14 BLOCK-85/86/87 过程提交同提交台账漏同步（收口补登 UI-358/354 修订链）。
+  'fb58798cb0a832d5bd6f0e901e23b9c7f590463e',
+  'be53b0df0c1446c6fb2582ef7dd8de91e49deb2c',
+  '58bc741caded6fab4bf262b4a7d5099f1f86a37f',
+  'c1284842c879bb7076a7c4472c02e1f197294592',
+  '49dd938e5430004160c5caeed2cbcea75db13299',
+  '862fd501',
   // 2026-09-13 BLOCK-70 P3 隧道实现提交 1c40b35：MobileSync.tsx 隧道三态区
   // UI 增量的台账漏同步（收口门禁抓出后已补登 UI-319 条目 P3 段）。
   // 不重写共享历史。
