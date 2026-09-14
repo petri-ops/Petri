@@ -229,6 +229,86 @@ function buildMobileGateway({
     });
   });
 
+  // ── BLOCK-85 P4 投影终端（node-pty 会话 + SSE 下行 / POST 上行）──
+  // 会话门内；会话驻留 core 进程，手机锁屏断流回来可重连重放（环形缓冲）。
+  const terminalEngine = require('../federation-terminal').createTerminalEngine();
+
+  app.get('/m/api/terminal', (_req, res) => {
+    if (!terminalEngine.available) {
+      res.status(501).json({ ok: false, error: 'terminal_unavailable', message: terminalEngine.reason });
+      return;
+    }
+    res.json({ ok: true, sessions: terminalEngine.list() });
+  });
+
+  app.post('/m/api/terminal/start', express.json({ limit: '8kb' }), (req, res) => {
+    if (!terminalEngine.available) {
+      res.status(501).json({ ok: false, error: 'terminal_unavailable', message: terminalEngine.reason });
+      return;
+    }
+    const result = terminalEngine.start({ cwd: req.body?.cwd });
+    res.status(result.error ? 400 : 200).json({ ok: !result.error, ...result });
+  });
+
+  app.post('/m/api/terminal/:id/input', express.json({ limit: '64kb' }), (req, res) => {
+    const session = terminalEngine.getSession(req.params.id);
+    if (!session) {
+      res.status(404).json({ ok: false, error: 'session_not_found' });
+      return;
+    }
+    const data = req.body?.data;
+    if (typeof data !== 'string') {
+      res.status(400).json({ ok: false, error: 'data_required' });
+      return;
+    }
+    res.json(terminalEngine.write(session, data));
+  });
+
+  app.post('/m/api/terminal/:id/resize', express.json({ limit: '2kb' }), (req, res) => {
+    const session = terminalEngine.getSession(req.params.id);
+    if (!session) {
+      res.status(404).json({ ok: false, error: 'session_not_found' });
+      return;
+    }
+    res.json(terminalEngine.resize(session, req.body?.cols, req.body?.rows));
+  });
+
+  app.post('/m/api/terminal/:id/kill', (req, res) => {
+    const session = terminalEngine.getSession(req.params.id);
+    if (!session) {
+      res.status(404).json({ ok: false, error: 'session_not_found' });
+      return;
+    }
+    res.json(terminalEngine.kill(session));
+  });
+
+  // SSE 下行：连接即重放环形缓冲，此后实时推送；terminal:exit 后保留至 TTL。
+  app.get('/m/api/terminal/:id/stream', (req, res) => {
+    const session = terminalEngine.getSession(req.params.id);
+    if (!session) {
+      res.status(404).json({ ok: false, error: 'session_not_found' });
+      return;
+    }
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders && res.flushHeaders();
+    const send = (event, payload) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
+    };
+    const replay = terminalEngine.ringText(session);
+    if (replay) send('terminal:replay', { data: replay, exited: session.exited });
+    const unsubscribe = terminalEngine.subscribe(session, send);
+    if (session.exited) send('terminal:exit', { exitCode: session.exitCode });
+    const ping = setInterval(() => {
+      try { res.write(': ping\n\n'); } catch { /* closed */ }
+    }, 15_000);
+    req.on('close', () => {
+      clearInterval(ping);
+      unsubscribe();
+    });
+  });
+
   // P2 控制面窄口：批准决定（进程内直调 db.ackToolJob，权限不放大）。
   require('./control').registerMobileControl(app);
 

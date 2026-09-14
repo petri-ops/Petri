@@ -1,0 +1,132 @@
+/**
+ * BLOCK-85 P4 — 投影终端 HTTP 桥。
+ *
+ * 桌面投影（手机浏览器）里没有 Electron 终端桥——本模块在投影环境下
+ * 以同一形状提供真终端：startSession/writeSession/resizeSession/stopSession
+ * + onData/onExit，内部走 gateway /m/api/terminal/*（SSE 下行 + POST 上行，
+ * node-pty 会话驻留 core 进程，手机锁屏重连经环形缓冲重放）。
+ * 消费方（useTerminalTabs）零改动——getBridge('terminal') 在投影环境
+ * 自动切换到本桥。
+ */
+import { getToken } from '@/lib/authClient';
+
+interface ProjectionTerminalBridge {
+  startSession: (cwd: string | null, tabId: string, ssh?: unknown) => Promise<{ ok: boolean; sessionId?: string; error?: string }>;
+  writeSession: (data: string, tabId: string) => void;
+  resizeSession: (cols: number, rows: number, tabId: string) => void;
+  stopSession: (tabId: string) => void;
+  onData: (handler: (payload: { sessionId: string; data: string }) => void) => () => void;
+  onExit: (handler: (payload: { sessionId: string; exitCode?: number | null }) => void) => () => void;
+}
+
+const sessionByTab = new Map<string, string>(); // tabId -> gateway sessionId
+const sourceByTab = new Map<string, EventSource>();
+const dataHandlers = new Set<(payload: { sessionId: string; data: string }) => void>();
+const exitHandlers = new Set<(payload: { sessionId: string; exitCode?: number | null }) => void>();
+
+function authHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const token = getToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
+
+function attachStream(tabId: string, sessionId: string) {
+  if (sourceByTab.has(tabId)) return;
+  const token = getToken();
+  const url = `/m/api/terminal/${encodeURIComponent(sessionId)}/stream${token ? `?session=${encodeURIComponent(token)}` : ''}`;
+  const source = new EventSource(url);
+  source.addEventListener('terminal:data', (event) => {
+    try {
+      const payload = JSON.parse((event as MessageEvent).data);
+      for (const handler of dataHandlers) handler({ sessionId: tabId, data: payload.data });
+    } catch { /* 忽略坏帧 */ }
+  });
+  source.addEventListener('terminal:exit', (event) => {
+    try {
+      const payload = JSON.parse((event as MessageEvent).data);
+      for (const handler of exitHandlers) handler({ sessionId: tabId, exitCode: payload.exitCode });
+    } catch { /* 忽略坏帧 */ }
+    source.close();
+    sourceByTab.delete(tabId);
+  });
+  source.onerror = () => {
+    // EventSource 自动重连；环形缓冲会在重连时重放
+  };
+  sourceByTab.set(tabId, source);
+}
+
+const bridge: ProjectionTerminalBridge = {
+  async startSession(cwd, tabId, ssh) {
+    if (ssh) {
+      return { ok: false, error: '投影终端暂不支持远程（SSH）会话，请在本机投影中使用' };
+    }
+    try {
+      const response = await fetch('/m/api/terminal/start', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ cwd }),
+      });
+      const data = await response.json();
+      if (!data.ok || !data.sessionId) {
+        return { ok: false, error: data.message || data.error || '终端启动失败' };
+      }
+      sessionByTab.set(tabId, data.sessionId);
+      attachStream(tabId, data.sessionId);
+      return { ok: true, sessionId: data.sessionId };
+    } catch (error) {
+      return { ok: false, error: error instanceof Error ? error.message : '终端通道连接失败' };
+    }
+  },
+
+  writeSession(data, tabId) {
+    const sessionId = sessionByTab.get(tabId);
+    if (!sessionId) return;
+    void fetch(`/m/api/terminal/${encodeURIComponent(sessionId)}/input`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ data }),
+    }).catch(() => { /* 瞬时失败由 xterm 光标状态体现 */ });
+  },
+
+  resizeSession(cols, rows, tabId) {
+    const sessionId = sessionByTab.get(tabId);
+    if (!sessionId) return;
+    void fetch(`/m/api/terminal/${encodeURIComponent(sessionId)}/resize`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ cols, rows }),
+    }).catch(() => {});
+  },
+
+  stopSession(tabId) {
+    const sessionId = sessionByTab.get(tabId);
+    sourceByTab.get(tabId)?.close();
+    sourceByTab.delete(tabId);
+    sessionByTab.delete(tabId);
+    if (!sessionId) return;
+    void fetch(`/m/api/terminal/${encodeURIComponent(sessionId)}/kill`, {
+      method: 'POST',
+      headers: authHeaders(),
+    }).catch(() => {});
+  },
+
+  onData(handler) {
+    dataHandlers.add(handler);
+    return () => dataHandlers.delete(handler);
+  },
+
+  onExit(handler) {
+    exitHandlers.add(handler);
+    return () => exitHandlers.delete(handler);
+  },
+};
+
+export function isProjectionEnv(): boolean {
+  return typeof window !== 'undefined'
+    && !!(window.biof3Desktop as { __projection?: boolean } | undefined)?.__projection;
+}
+
+export function getProjectionTerminalBridge(): ProjectionTerminalBridge | null {
+  return isProjectionEnv() ? bridge : null;
+}

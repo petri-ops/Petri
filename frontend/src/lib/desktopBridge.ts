@@ -47,6 +47,7 @@
 // ============================================================
 
 import type {} from '@/lib/electron'; // ensure the global Window augmentation is loaded
+import { getProjectionTerminalBridge } from '@/lib/projectionTerminalBridge';
 
 /** Strongly-typed handle to the desktop IPC bridge, narrowing
  *  the optional `window.biof3Desktop` declared in electron.d.ts. */
@@ -93,6 +94,12 @@ export function getBridge<K extends DesktopBridgeName>(
   if (typeof window === 'undefined') return null;
   const desktop = window.gewu ?? window.biof3Desktop;
   if (!desktop) return null;
+  // BLOCK-85 P4 — 投影环境终端：浏览器没有 Electron 终端桥，切换到
+  // gateway HTTP 通道（同形接口，node-pty 会话驻留 core 进程）。
+  if (name === 'terminal') {
+    const projectionBridge = getProjectionTerminalBridge();
+    if (projectionBridge) return projectionBridge as DesktopBridgeHandle<K>;
+  }
   // electron.d.ts marks every sub-bridge as required (no
   // `?`), but the bridge surface can still be incomplete in
   // older builds. Returning null in that case keeps callers
