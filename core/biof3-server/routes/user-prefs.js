@@ -14,7 +14,8 @@ const fs = require('fs');
 const path = require('node:path');
 
 const THEMES = new Set(['system', 'light', 'dark']);
-const ACCENTS = new Set(['teal', 'violet', 'rose', 'amber', 'sky', 'lime']);
+// 与 frontend/src/themes/accents.ts 的 AccentId 集合一字不差（曾漏 blue）
+const ACCENTS = new Set(['teal', 'blue', 'violet', 'rose', 'amber']);
 
 function prefsFile(dataDir) {
   return path.join(dataDir, 'user-prefs.json');
