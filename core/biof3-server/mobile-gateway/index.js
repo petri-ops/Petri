@@ -246,7 +246,7 @@ function buildMobileGateway({
       res.status(501).json({ ok: false, error: 'terminal_unavailable', message: terminalEngine.reason });
       return;
     }
-    const result = terminalEngine.start({ cwd: req.body?.cwd });
+    const result = terminalEngine.start({ cwd: req.body?.cwd, ssh: req.body?.ssh });
     res.status(result.error ? 400 : 200).json({ ok: !result.error, ...result });
   });
 
@@ -337,6 +337,7 @@ function buildMobileGateway({
     // 投影停留在旧界面/白屏（BLOCK-85 双真机实测抓真）。
     const sendIndex = (res) => {
       try {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         const injected = readFileSync(desktopIndex, 'utf8').replace('<head>', '<head>' + shim);
         res.type('html').send(injected);
       } catch {

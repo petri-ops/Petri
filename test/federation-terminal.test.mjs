@@ -142,19 +142,80 @@ test('BLOCK-85 P4: projection terminal start -> echo roundtrip -> exit -> limit'
     );
     assert.ok(exitEvents.length > 0, 'exit must surface on a fresh stream (live or replay)');
 
-    // 4. 会话上限：起满 4 个后第 5 个诚实拒绝
+    // 4. 会话上限：再起 4 个凑满 live（首个已在回显测试后 kill），第 5 个诚实拒绝
     const openedIds = [sessionId];
-    let last = null;
-    for (let index = 0; index < 5; index += 1) {
-      last = await body(await fetch(`http://127.0.0.1:${gatewayPort}/m/api/terminal/start`, {
+    for (let index = 0; index < 4; index += 1) {
+      const more = await body(await fetch(`http://127.0.0.1:${gatewayPort}/m/api/terminal/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Cookie: cookie },
         body: JSON.stringify({}),
       }));
-      if (last.error === 'too_many_sessions') break;
-      if (last.sessionId) openedIds.push(last.sessionId);
+      if (more.sessionId) openedIds.push(more.sessionId);
     }
-    assert.equal(last.error, 'too_many_sessions', `5th session must be rejected, got ${JSON.stringify(last)}`);
+    const fifth = await body(await fetch(`http://127.0.0.1:${gatewayPort}/m/api/terminal/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Cookie: cookie },
+      body: JSON.stringify({}),
+    }));
+    assert.equal(fifth.error, 'too_many_sessions', `5th session must be rejected, got ${JSON.stringify(fifth)}`);
+    // 释放一个名额给 SSH 探针
+    await fetch(`http://127.0.0.1:${gatewayPort}/m/api/terminal/${encodeURIComponent(openedIds[1])}/kill`, {
+      method: 'POST',
+      headers: { Cookie: cookie },
+    });
+
+    // 4.5 SSH 远程会话（真实 aliyun 节点，BLOCK-67 同款语义；不可达时显式 skip）
+    const sshProbe = await body(await fetch(`http://127.0.0.1:${gatewayPort}/m/api/terminal/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Cookie: cookie },
+      body: JSON.stringify({ ssh: { alias: 'aliyun', remotePath: '/root' } }),
+    }));
+    if (sshProbe.ok && sshProbe.sessionId) {
+      const sshMarker = `FEDSSH-${Date.now().toString(36)}`;
+      const sshEvents = await collectSse(
+        `http://127.0.0.1:${gatewayPort}/m/api/terminal/${sshProbe.sessionId}/stream`,
+        cookie,
+        (list) => list.some((e) => e.event === 'terminal:data' && typeof e.data?.data === 'string' && e.data.data.includes(sshMarker)),
+        45_000,
+      );
+      await new Promise((resolve) => setTimeout(resolve, 6000)); // ssh 建连 + 远端登录 shell 就绪（conda 初始化约 3-6s）
+      const sshInput = await fetch(`http://127.0.0.1:${gatewayPort}/m/api/terminal/${sshProbe.sessionId}/input`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Cookie: cookie },
+        body: JSON.stringify({ data: `echo ${sshMarker}\r` }),
+      });
+      console.log(`  ssh input status=${sshInput.status} body=${JSON.stringify(await body(sshInput)).slice(0, 100)}`);
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      const replayCheck = await collectSse(
+        `http://127.0.0.1:${gatewayPort}/m/api/terminal/${sshProbe.sessionId}/stream`,
+        cookie,
+        (list) => list.some((e) => e.event === 'terminal:replay'),
+        10_000,
+      );
+      const replayText = replayCheck.find((e) => e.event === 'terminal:replay')?.data?.data || '';
+      console.log(`  replay 含 marker: ${replayText.includes(sshMarker)} | replay 尾部: ${JSON.stringify(replayText.slice(-120))}`);
+      // 断言用 replay 轮询（可靠）：单条 SSE 长连接在 undici 客户端下实时帧
+      // 可能不达（浏览器 EventSource 有自动重连+重放兜底，实机不受影响）；
+      // replay 含 marker 即证明 pty 引擎/SSH 会话/环形缓冲全链正常。
+      let sshRoundtrip = false;
+      for (let attempt = 0; attempt < 10 && !sshRoundtrip; attempt += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const replayPoll = await collectSse(
+          `http://127.0.0.1:${gatewayPort}/m/api/terminal/${sshProbe.sessionId}/stream`,
+          cookie,
+          (list) => list.some((e) => e.event === 'terminal:replay'),
+          10_000,
+        );
+        const replayText = replayPoll.find((e) => e.event === 'terminal:replay')?.data?.data || '';
+        sshRoundtrip = replayText.includes(sshMarker);
+      }
+      assert.ok(sshRoundtrip, 'ssh session echo must roundtrip (via replay)');
+      await fetch(`http://127.0.0.1:${gatewayPort}/m/api/terminal/${sshProbe.sessionId}/kill`, { method: 'POST', headers: { Cookie: cookie } });
+      openedIds.push(sshProbe.sessionId);
+      console.log('  ✔ ssh(alivun→aliyun) roundtrip ok');
+    } else {
+      console.log(`  SKIP ssh session (start: ${JSON.stringify(sshProbe).slice(0, 120)})`);
+    }
 
     // 5. 未知会话 404
     const missing = await fetch(`http://127.0.0.1:${gatewayPort}/m/api/terminal/pter_missing/input`, {

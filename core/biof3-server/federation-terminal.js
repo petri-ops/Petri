@@ -79,13 +79,12 @@ function createTerminalEngine() {
       }));
     },
 
-    /** 起新 pty 会话。返回 { sessionId } 或 { error }。 */
-    start({ cwd } = {}) {
+    /** 起新 pty 会话。ssh={alias,remotePath} 时挂 ssh -tt 远程会话（桌面壳 terminal.js 同款语义）。返回 { sessionId } 或 { error }。 */
+    start({ cwd, ssh } = {}) {
       const live = [...sessions.values()].filter((s) => !s.exited).length;
       if (live >= MAX_SESSIONS) {
         return { error: 'too_many_sessions', message: `终端会话已达上限（${MAX_SESSIONS}），请先关闭空闲会话` };
       }
-      const shell = shellFor(process.platform);
       const id = `pter_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
       const session = {
         pty: null,
@@ -98,13 +97,33 @@ function createTerminalEngine() {
       };
       let ptyProc;
       try {
-        ptyProc = ptyModule.spawn(shell.file, shell.args, {
-          name: 'xterm-256color',
-          cols: 80,
-          rows: 24,
-          cwd: cwd && typeof cwd === 'string' && cwd.trim() ? cwd.trim() : os.homedir(),
-          env: { ...process.env, TERM: 'xterm-256color' },
-        });
+        if (ssh && ssh.alias && ssh.remotePath) {
+          // BLOCK-67/P3 桌面壳同款：Windows 下 ssh.exe 直挂 conpty 会崩
+          // conpty_console_list_agent——经 cmd.exe /c 包装（console 归 cmd）。
+          const alias = String(ssh.alias).replace(/[^A-Za-z0-9._-]/g, '');
+          const remotePath = String(ssh.remotePath).replace(/[^A-Za-z0-9._/@ +-]/g, '');
+          const sshArgv = ['-o', 'ConnectTimeout=10', '-tt', alias, `cd "${remotePath}" && exec $SHELL -l`];
+          ptyProc = process.platform === 'win32'
+            ? ptyModule.spawn('cmd.exe', ['/c', 'ssh', ...sshArgv], {
+              name: 'xterm-256color', cols: 100, rows: 28,
+              cwd: os.homedir(),
+              env: { ...process.env, TERM: 'xterm-256color', COLORTERM: 'truecolor' },
+            })
+            : ptyModule.spawn('ssh', sshArgv, {
+              name: 'xterm-256color', cols: 100, rows: 28,
+              cwd: os.homedir(),
+              env: { ...process.env, TERM: 'xterm-256color', COLORTERM: 'truecolor' },
+            });
+        } else {
+          const shell = shellFor(process.platform);
+          ptyProc = ptyModule.spawn(shell.file, shell.args, {
+            name: 'xterm-256color',
+            cols: 80,
+            rows: 24,
+            cwd: cwd && typeof cwd === 'string' && cwd.trim() ? cwd.trim() : os.homedir(),
+            env: { ...process.env, TERM: 'xterm-256color' },
+          });
+        }
       } catch (error) {
         return { error: 'pty_spawn_failed', message: error.message };
       }

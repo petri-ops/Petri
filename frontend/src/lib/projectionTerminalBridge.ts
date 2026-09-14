@@ -58,14 +58,15 @@ function attachStream(tabId: string, sessionId: string) {
 
 const bridge: ProjectionTerminalBridge = {
   async startSession(cwd, tabId, ssh) {
-    if (ssh) {
-      return { ok: false, error: '投影终端暂不支持远程（SSH）会话，请在本机投影中使用' };
-    }
+    const sshInfo = ssh as { alias?: string; remotePath?: string } | undefined;
     try {
       const response = await fetch('/m/api/terminal/start', {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({ cwd }),
+        body: JSON.stringify({
+          cwd,
+          ssh: sshInfo?.alias && sshInfo?.remotePath ? { alias: sshInfo.alias, remotePath: sshInfo.remotePath } : undefined,
+        }),
       });
       const data = await response.json();
       if (!data.ok || !data.sessionId) {
