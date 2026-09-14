@@ -48,6 +48,7 @@
 
 import type {} from '@/lib/electron'; // ensure the global Window augmentation is loaded
 import { getProjectionTerminalBridge } from '@/lib/projectionTerminalBridge';
+import { getProjectionDataBridge } from '@/lib/projectionDataBridges';
 
 /** Strongly-typed handle to the desktop IPC bridge, narrowing
  *  the optional `window.biof3Desktop` declared in electron.d.ts. */
@@ -99,6 +100,11 @@ export function getBridge<K extends DesktopBridgeName>(
   if (name === 'terminal') {
     const projectionBridge = getProjectionTerminalBridge();
     if (projectionBridge) return projectionBridge as DesktopBridgeHandle<K>;
+  }
+  // BLOCK-87 L4 — 投影环境数据页（Skills/插件商店）：IPC 数据面切 HTTP。
+  if (name === 'skills' || name === 'plugins') {
+    const dataBridge = getProjectionDataBridge(name);
+    if (dataBridge) return dataBridge as DesktopBridgeHandle<K>;
   }
   // electron.d.ts marks every sub-bridge as required (no
   // `?`), but the bridge surface can still be incomplete in

@@ -51,6 +51,8 @@ module.exports = async function registerRoutes(app) {
     ['Federation admin', () => require('./federation-admin')(app)],
     // BLOCK-86 L1：多端用户偏好（主题/字号/强调色服务端化——全端同步）。
     ['User prefs', () => require('./user-prefs')(app)],
+    // BLOCK-87 L4：投影页面数据 HTTP 化（Skills 清单 / 已装插件——投影环境替代 IPC）。
+    ['Projection data', () => require('./projection-data')(app)],
   ];
 
   for (const [name, fn] of routes) {
