@@ -1,0 +1,41 @@
+{
+  "name": "block85-mac-pairing-code",
+  "startedAt": "2026-09-14T18:55:01.722Z",
+  "finishedAt": "2026-09-14T18:55:02.399Z",
+  "assertions": [
+    {
+      "name": "federation_popup_open",
+      "pass": true,
+      "detail": "弹层在场"
+    },
+    {
+      "name": "pairing_qr_present",
+      "pass": true,
+      "detail": "自动出码 QR 在场（≤15s）"
+    },
+    {
+      "name": "backend_pairing_url_shape",
+      "pass": true,
+      "detail": "后端直取配对链接形状"
+    },
+    {
+      "name": "pairing_token_extracted",
+      "pass": true,
+      "detail": "QR src 提取 token"
+    },
+    {
+      "name": "primary_url_pair_shape",
+      "pass": true,
+      "detail": "primaryUrl 为配对链接: http://192.168.0.102:3005/pair?token=dbcb199f565e8ae9f841fcbc8609b1d9eae391d06bab7a17abeb8e4baf8abd87"
+    },
+    {
+      "name": "primary_url_lan_not_loopback",
+      "pass": true,
+      "detail": "BLOCK-85-HOTFIX 契约：primary 走 LAN 不吃 127.0.0.1"
+    }
+  ],
+  "allPass": true,
+  "primaryUrl": "http://192.168.0.102:3005/pair?token=dbcb199f565e8ae9f841fcbc8609b1d9eae391d06bab7a17abeb8e4baf8abd87",
+  "lan": "192.168.0.102",
+  "gatewayPort": 3005
+}
