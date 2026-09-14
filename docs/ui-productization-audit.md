@@ -3451,6 +3451,24 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **实机抓真**：express.json 双重解析（测试 app 级 + admin 路由级）消费已耗尽 stream → 500——测试挂法对齐生产（app 不挂全局 json）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+### UI-358 增补：协作节点「界面」按钮——一键打开对端完整桌面投影（2026-09-14，BLOCK-85-P2.5-UI，提交 `0663a13e`）
+
+- **来源**：用户裁决「排进去」。成员行新增「界面」按钮：指挥席经联邦会话调对端 `/api/mobile/pairing/token`（gateway 会话门内全量路由已含该端点）索取一次性配对链接 → `window.open` 打开对端**完整桌面投影**（P3.5 复用，浏览器即见对端完整格物界面）。
+- **交付面**：`core/biof3-server/routes/federation-admin.js`（+25 行，对端配对链接代理端点）+ `frontend/src/components/DesktopSettingsPanel/sections/Federation.tsx`（+31 行，成员行「界面」按钮）。
+- **证据**：`tsc --noEmit` 0 + `node --check` + `docs:check` PASS。**该提交未附实机验收证据**（无 CDP 断言、无截图）→ 按台账纪律记 `in_progress`，待 dev 栈实机过目后升级。
+
+### UI-358 修订 1（2026-09-14，用户裁决「协作节点和手机连接是不是应该合并到一起呢 放到 联邦？」，提交 `69cf02ce`）
+
+- **入口收敛（去历史叠加，非重构）**：`LeftSidebarFooter` 单入口「联邦」（cpu 图标）+ portal 弹层**两区**——`federation-section-devices`（`MobileSyncPanel`：手机接入 / 出码 / 真远程）+ `federation-section-peers`（`FederationPanel`：协作成员 / 配对 / 界面 / 分派），分隔线相隔；旧「手机连接」独立入口移除（`sidebar-mobile-remote` testid 退役，UI-354 历史验收脚本随之过时属**历史证据**，不重跑）。组件本体零改动，纯入口收敛。
+- **证据**：`tsc --noEmit` 0 + CDP 实机 `acceptance/block-85/federation-merged-panel.png`（弹层两区 / QR 自动出码 / 设备行 / 真远程徽章全渲染，旧入口零残留）。
+
+### UI-358 修订 2（2026-09-14，用户反馈「是不是应该分多个页面不是上半区和下半区」，提交 `5e7710a5`）
+
+- **tab 分页替代堆叠**：弹层高度有限，上下堆叠把协作成员压出视口 → 改 tab 双页切换（默认「我的设备」），两区互斥渲染保持弹层紧凑。
+- **证据**：`tsc --noEmit` 0 + 实机断言（初始 devices 独显 / 切 tab 后 peers 独显）；**未落独立截图证据文件**（断言式取证）。
+
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-354: 顶栏最右侧「手机远程 + 设置」双入口（对标 ZCode 顶栏布局）(2026-09-13 verified，dev Electron 边界内 CDP 8/8)
 
 - **来源**：用户裁决「设置移动到最右侧 手机远程的页面 放到 设置的左侧 类似于 zcode 的效果」+ ZCode 顶栏截图对照（手机图标在设置齿轮左侧）。
@@ -3492,7 +3510,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **来源**：用户裁决「设置中的 计算与数据 这里面的内容也都不需要了吧 历史遗留」。
 - **甄别（删遗留、留活功能）**：①「计算执行」卡（执行位置 本地/远程集群 下拉 + 保存计算设置）＝**真遗留**——其写入的 `BIOF3_COMPUTE_MODE` 全仓零读者，「远程集群」模式自 BLOCK-30 架构解耦后即死面 → 移除，`sections/ComputeExecution.tsx` 成孤儿文件一并删除（面板对 DEFAULT_COMPUTE_SETTINGS/normalizeComputeSettings 的 import 已先期失配，实测仅 import 行残留）。②「远程执行目标（SSH）」＝**BLOCK-57/60/67 活功能**（dell 目标就绪且为 BLOCK-67 SSH 项目默认目标；后端执行器消费 execution_targets 注册表）→ 保留。
 - **证据**：`acceptance/ui-355/ui355-compute-card-removal-live.json` 2/2 ALL PASS（R2 远程执行目标在 / R3 分区内计算执行+执行位置+保存计算设置字样零命中——断言 scoped 到分区容器，body 级误报来自摘要卡 BLOCK-78 执行位置标注）+ 截图 `compute-section.png`；tsc 0；相关 vitest 48/48。
-- **登记后续清理候选**：`src/ipc/compute-settings.js` 的 BIOF3_COMPUTE_MODE 写入链（IPC handler + preload 桥 + electron.d.ts 字段）已成死代码——preload.js 在 P6 canonical source-binding 内，随 P6 证据重采（G0-RS 线）一并清理，避免单独触发 D8 fail-closed。**→ 已兑现（2026-09-13 G0-RS P1，提交 `cd9781c`）**：死链 8 处删除零残留（含本行所指全部文件），UI-355 台账锚定注记同提交补记。
+- **登记后续清理候选**：`src/ipc/compute-settings.js` 的 BIOF3_COMPUTE_MODE 写入链（IPC handler + preload 桥 + electron.d.ts 字段）已成死代码——preload.js 在 P6 canonical source-binding 内，随 P6 证据重采（G0-RS 线）一并清理，避免单独触发 D8 fail-closed。**→ 已兑现（2026-09-13 G0-RS P1，提交 `cd9781c`）**：死链 8 处删除零残留（含本行所指全部文件）。**归注**：本锚定注记由后续提交 `8add3395` 补记——`cd9781c` 自身触碰 `DesktopSettingsPanel.tsx` / `electron.d.ts` 等 UI surface 文件但未同提交改台账文件，按 LEGACY 豁免登记（不重写共享历史）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-356: 「Harness 分析环境」文案改版为「运行环境包」（遗留措辞清理，功能零变化）(2026-09-13 verified，dev Electron 边界内 CDP 2/2)
