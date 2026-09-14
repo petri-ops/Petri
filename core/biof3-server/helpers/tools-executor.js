@@ -2324,6 +2324,65 @@ function createToolsExecutor({
     return null;
   }
 
+  // BLOCK-85 P2.5 — 格物联邦作业分派（executionTargetId=`fed:<peerId>`）。
+  // 对端以它自己的本地身份跑（它的 LOCAL_USER、它的执行器、它的 Artifact 真值）；
+  // 本端返回对端 job 投影（federated:true + peerId/peerName），真值不在本端。
+  function resolveFederationDataDir() {
+    return process.env.BIOF3_LOCAL_DATA_DIR
+      || process.env.LOCAL_DATA_DIR
+      || path.join(require('os').homedir(), 'Documents', 'BioF3-Local');
+  }
+
+  async function federatedToolRun(req, res, { toolId, files, projectId, params, peerId }) {
+    const federation = require('../../shared-backend/federation-peers');
+    const peer = federation.getPeer(resolveFederationDataDir(), peerId);
+    if (!peer) {
+      return res.status(400).json({
+        ok: false,
+        error: 'unknown_federation_peer',
+        message: '协作节点不存在或已移除：' + peerId,
+      });
+    }
+    const token = federation.getPeerToken(resolveFederationDataDir(), peerId) || '';
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 120_000);
+    try {
+      const upstream = await fetch(`${peer.baseUrl}/api/tools/run`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ toolId, files, projectId, params }),
+        signal: controller.signal,
+      });
+      const data = await upstream.json().catch(() => ({}));
+      if (upstream.status === 401) {
+        return res.status(409).json({
+          ok: false,
+          error: 'federation_session_invalid',
+          message: `协作节点「${peer.name}」的会话已失效，请重新配对`,
+          peerId,
+        });
+      }
+      if (upstream.status !== 200) {
+        return res.status(502).json({
+          ok: false,
+          error: 'federation_run_failed',
+          message: `协作节点「${peer.name}」执行失败（${upstream.status}）`,
+          peerError: data,
+        });
+      }
+      return res.json({ ok: true, federated: true, peerId, peerName: peer.name, job: data });
+    } catch (error) {
+      const offline = error.name === 'AbortError';
+      return res.status(504).json({
+        ok: false,
+        error: offline ? 'federation_timeout' : 'federation_unreachable',
+        message: offline ? `协作节点「${peer.name}」作业提交超时` : `无法连接协作节点「${peer.name}」`,
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   async function handleToolRun(req, res) {
     const uid = forwardedToolRunUserId(req);
     if (!uid) return res.status(401).json({ error: 'login_required' });
@@ -2341,6 +2400,12 @@ function createToolsExecutor({
       delete rest.executionTargetId;
       params = rest;
       executionTargetId = typeof raw === 'string' && raw.trim() ? raw.trim() : null;
+    }
+    // BLOCK-85 P2.5：`fed:<peerId>` 前缀 = 格物联邦节点——作业转发对端，
+    // 对端以它自己的本地身份跑（D3：真值在对端，指挥席拿到对端 job 投影）。
+    if (executionTargetId && executionTargetId.startsWith('fed:')) {
+      const peerId = executionTargetId.slice(4);
+      return federatedToolRun(req, res, { toolId, files, projectId, params, peerId });
     }
     if (executionTargetId && !(await targetRegistry.getById({ id: executionTargetId }))) {
       return res.status(400).json({
