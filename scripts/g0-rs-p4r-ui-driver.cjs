@@ -645,9 +645,23 @@ async function clickButtonByText(webContents, text) {
   `, true);
 }
 
+// keyboardTrace 结尾的 window.hide() 之后，合成器会对隐藏窗口停帧——capturePage
+// 走 viz CopyOutputRequest 直接拒绝 UnknownVizError（Chromium CopyOutputResult
+// Status，跨域无栈）。矩阵段（hide 之前）连捕 6 次不受影响。韧性回退：临时
+// 显示窗口恢复帧产出再捕；不改变 DOM/语义态，窗口运行结束即销毁。
+async function capturePageResilient(window) {
+  try {
+    return await window.webContents.capturePage();
+  } catch (error) {
+    window.show();
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return window.webContents.capturePage();
+  }
+}
+
 async function captureFailureScreenshot(window, outputDir, kind) {
   const snapshot = await semanticSnapshot(window.webContents);
-  const png = (await window.webContents.capturePage()).toPNG();
+  const png = (await capturePageResilient(window)).toPNG();
   const screenshot = `failure-${kind}.png`;
   writeFileSync(path.join(outputDir, screenshot), png);
   return {
