@@ -3,6 +3,15 @@
  *
  * 内容与 PluginStoreModal 相同，但渲染为浮动面板而非全屏遮罩模态。
  * 左侧分类导航 + 右侧卡片网格。
+ *
+ * BLOCK-86 P2 (UI-374) — 商店改版：pack 卡片成为唯一领域入口——
+ *   ① 独立「运行时」分类收编进包视图（运行时作为包卡片的可展开子项渲染）；
+ *   ② 包卡片展开显示功能模块清单（分析插件/脚本/演示数据计数）与运行时子项
+ *      （状态/体积/进度），子项安装进度走 pack:install-progress 订阅；
+ *   ③ 卸载走三档确认弹层（uninstallPlan 数据源：运行时回收体积/共享保留/
+ *      包源目录默认保留可选删；用户数据永不触碰）；
+ *   ④ 包交付的插件在「分析工具」分类可见并标注来源包；
+ *   ⑤ 「必需」提示只在「包已装而运行时缺」时出现（无包不提运行时）。
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
@@ -17,8 +26,35 @@ import {
 } from '@/hooks/usePluginStore';
 
 // BLOCK-84：领域包一键装/卸（记录制；装/卸后需重启生效）
-interface InstalledPack { packId: string; packRoot: string; version: string; installedAt: string }
-interface AvailablePack { packId: string; name: string; nameEn?: string | null; version: string; description: string; packRoot: string; installed: boolean }
+// BLOCK-86 P1/P2：契约（requiresRuntimes）+ 内容概要（contents）
+interface RuntimeRequirement { pluginId: string; version?: string }
+interface PackContents {
+  pluginCount: number;
+  plugins: Array<{ id: string; language: string | null; version: string | null }>;
+  pluginIds: string[];
+  scriptCount: number;
+  demoDataCount: number;
+}
+interface InstalledPack {
+  packId: string; name?: string; packRoot: string; version: string; installedAt: string;
+  requiresRuntimes?: RuntimeRequirement[];
+  contents?: PackContents;
+}
+interface AvailablePack {
+  packId: string; name: string; nameEn?: string | null; version: string; description: string; packRoot: string; installed: boolean;
+  requiresRuntimes?: RuntimeRequirement[];
+  contents?: PackContents;
+}
+interface UninstallPlan {
+  ok: boolean;
+  runtimes?: {
+    removable: Array<{ pluginId: string; installed: boolean; sizeBytes: number | null }>;
+    retained: Array<{ pluginId: string; requiredBy: string[] }>;
+  };
+  packSource?: { dir: string | null; exists: boolean; sizeBytes: number | null };
+  userDataPolicy?: string;
+  error?: string;
+}
 
 interface Props {
   onClose: () => void;
@@ -26,7 +62,7 @@ interface Props {
   backLabel?: string;
 }
 
-type CategoryId = 'all' | 'runtime' | 'tool';
+type CategoryId = 'all' | 'tool';
 
 interface Category {
   id: CategoryId;
@@ -35,9 +71,9 @@ interface Category {
   filter: (id: string, info: RemotePlugin) => boolean;
 }
 
+// UI-374 — 独立「运行时」分类收编进包视图：运行时不再单列，改在包卡片内渲染
 const CATEGORIES: Category[] = [
   { id: 'all', label: '全部', icon: 'puzzle', filter: () => true },
-  { id: 'runtime', label: '运行时', icon: 'cpu', filter: (_, info) => info.type === 'runtime' },
   {
     id: 'tool',
     label: '分析工具',
@@ -78,6 +114,15 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
   const [installedPacks, setInstalledPacks] = useState<InstalledPack[]>([]);
   const [packBusy, setPackBusy] = useState<string | null>(null);
   const [packNotice, setPackNotice] = useState<string | null>(null);
+  // UI-374 — 包卡片展开态 + 包安装的运行时进度（pack:install-progress）+ 卸载三档确认
+  const [expandedPackId, setExpandedPackId] = useState<string | null>(null);
+  const [packRuntimeProgress, setPackRuntimeProgress] = useState<
+    Record<string, { ratio: number; received: number; total: number }>
+  >({});
+  const [confirmPack, setConfirmPack] = useState<AvailablePack | null>(null);
+  const [confirmPlan, setConfirmPlan] = useState<UninstallPlan | null>(null);
+  const [confirmDeleteRuntimes, setConfirmDeleteRuntimes] = useState(true);
+  const [confirmDeletePackSource, setConfirmDeletePackSource] = useState(false);
 
   // IPC 契约（src/ipc/pack.js）：list-installed / list-available 统一返回
   // `{ ok, packs: [...] }`，不是裸数组。早期实现按裸数组解包，导致 state 被塞进
@@ -108,26 +153,98 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
 
   React.useEffect(() => { void refreshPacks(); }, [refreshPacks]);
 
+  // UI-374 — 包安装的运行时下载进度（主进程 → pack:install-progress → 这里）
+  React.useEffect(() => {
+    const bridge = getBridge('packs');
+    if (!bridge?.onInstallProgress) return undefined;
+    return bridge.onInstallProgress((payload) => {
+      setPackRuntimeProgress((prev) => ({ ...prev, [payload.pluginId]: payload.progress }));
+    });
+  }, []);
+
+  function runtimeTitleOf(pluginId: string): string {
+    const info = remote.plugins?.[pluginId];
+    return info?.title || pluginId;
+  }
+
+  function runtimeSizeLabelOf(pluginId: string): string {
+    const size = remote.plugins?.[pluginId]?.size;
+    const label = formatSize(size);
+    return label ? `约 ${label}` : '';
+  }
+
   async function handlePackInstall(pack: AvailablePack) {
     setPackBusy(pack.packId);
     setPackNotice(null);
+    setPackRuntimeProgress({});
     try {
       const result = await getBridge('packs')?.installPath(pack.packRoot);
-      if (result?.ok) setPackNotice(`「${pack.name}」已安装——重启应用后生效`);
-      else setPackNotice(`安装失败：${result?.error ?? '未知错误'}`);
+      if (result?.ok) {
+        const runtimeResults = result.runtimes ?? [];
+        const failed = runtimeResults.filter((r) => !r.ok);
+        const installedNow = runtimeResults.filter((r) => r.ok && !r.skipped);
+        let notice = `「${pack.name}」已安装`;
+        if (installedNow.length > 0) {
+          notice += `；运行时 ${installedNow.map((r) => runtimeTitleOf(r.pluginId)).join('、')} 已就绪`;
+        }
+        if (failed.length > 0) {
+          notice += `；运行时 ${failed.map((r) => runtimeTitleOf(r.pluginId)).join('、')} 安装失败（${failed.map((r) => r.error || '未知错误').join('；')}），可稍后在包卡片内补装`;
+        }
+        setPackNotice(`${notice}——重启应用后生效`);
+      } else {
+        setPackNotice(`安装失败：${result?.error ?? '未知错误'}`);
+      }
       await refreshPacks();
+      setExpandedPackId(pack.packId);
     } finally {
       setPackBusy(null);
+      setPackRuntimeProgress({});
     }
   }
 
-  async function handlePackUninstall(pack: AvailablePack) {
+  // UI-374 — 卸载两段式：先取契约推导的影响预览（三档数据源），确认后执行
+  async function beginPackUninstall(pack: AvailablePack) {
+    setPackNotice(null);
+    const bridge = getBridge('packs');
+    if (!bridge?.uninstallPlan) {
+      // 投影桥（HTTP）未提供 plan 通道：退化为直接卸载（记录级，零破坏性）
+      await handlePackUninstall(pack, {});
+      return;
+    }
+    const plan = await bridge.uninstallPlan(pack.packId);
+    if (!plan?.ok) {
+      setPackNotice(`获取卸载方案失败：${plan?.error ?? '未知错误'}`);
+      return;
+    }
+    setConfirmDeleteRuntimes(true);
+    setConfirmDeletePackSource(false);
+    setConfirmPlan(plan);
+    setConfirmPack(pack);
+  }
+
+  async function handlePackUninstall(pack: AvailablePack, options: { deleteRuntimes?: boolean; deletePackSource?: boolean }) {
     setPackBusy(pack.packId);
     setPackNotice(null);
     try {
-      const result = await getBridge('packs')?.uninstall(pack.packId);
-      if (result?.ok) setPackNotice(`「${pack.name}」已卸载——重启应用后回到纯通用态`);
-      else setPackNotice(`卸载失败：${result?.error ?? '未知错误'}`);
+      const result = await getBridge('packs')?.uninstall(pack.packId, options);
+      if (result?.ok) {
+        const removedRuntimeTitles = (result.removed?.runtimes ?? [])
+          .filter((r) => r.ok && !r.skipped)
+          .map((r) => runtimeTitleOf(r.pluginId));
+        const keptDir = result.kept?.packSourceDir;
+        let notice = `「${pack.name}」已卸载`;
+        if (removedRuntimeTitles.length > 0) {
+          notice += `；已释放运行时 ${removedRuntimeTitles.join('、')}`;
+        }
+        if (result.removed?.packSourceDir) {
+          notice += '；包源目录已删除';
+        } else if (keptDir) {
+          notice += `；包源目录保留在 ${keptDir}`;
+        }
+        setPackNotice(`${notice}——重启应用后回到纯通用态`);
+      } else {
+        setPackNotice(`卸载失败：${result?.error ?? '未知错误'}`);
+      }
       await refreshPacks();
     } finally {
       setPackBusy(null);
@@ -227,11 +344,27 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
   const pyRuntimeInstalled = runtimeStatus
     ? runtimeStatus.python.installed
     : installedIds.has('gewu-py-runtime');
-  const needRuntimeHint =
-    runtimeStatus && (!runtimeStatus.r.installed || !runtimeStatus.python.installed);
+  // UI-374 — 缺失提示领域感知：只在「包已装而运行时缺」时出现（无包不提运行时），
+  // 文案挂包名。runtimeStatus 为 null（检测未知）时维持既有语义：不提示。
+  const packsRequiringRuntimes = useMemo(() => {
+    const byId = new Map<string, string>();
+    for (const p of [...installedPacks, ...availablePacks.map(({ packId, name }) => ({ packId, name }))] as Array<{ packId: string; name?: string }>) {
+      if (!byId.has(p.packId)) byId.set(p.packId, p.name || p.packId);
+    }
+    return installedPacks
+      .filter((p) => Array.isArray(p.requiresRuntimes) && p.requiresRuntimes.length > 0)
+      .map((p) => byId.get(p.packId) || p.packId);
+  }, [installedPacks, availablePacks]);
+  const missingRuntimeNames = runtimeStatus
+    ? [
+        !runtimeStatus.r.installed ? 'R' : null,
+        !runtimeStatus.python.installed ? 'Python' : null,
+      ].filter((v): v is string => Boolean(v))
+    : [];
+  const needRuntimeHint = missingRuntimeNames.length > 0 && packsRequiringRuntimes.length > 0;
 
   const categoryCounts = useMemo(() => {
-    const counts: Record<CategoryId, number> = { all: 0, runtime: 0, tool: 0 };
+    const counts: Record<CategoryId, number> = { all: 0, tool: 0 };
     for (const [id, info] of remoteEntries) {
       counts.all++;
       for (const cat of CATEGORIES) {
@@ -256,10 +389,26 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
     });
   }, [remoteEntries, activeCategory, searchQuery]);
 
+  // UI-374 — 包交付的插件（已装包），在「分析工具」分类可见并标注来源包
+  const packDeliveredPlugins = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const rows: Array<{ id: string; language: string | null; version: string | null; fromPack: string }> = [];
+    for (const pack of installedPacks) {
+      for (const plugin of pack.contents?.plugins ?? []) {
+        if (q) {
+          const hit = plugin.id.toLowerCase().includes(q);
+          if (!hit) continue;
+        }
+        rows.push({ ...plugin, fromPack: pack.name || pack.packId });
+      }
+    }
+    return rows;
+  }, [installedPacks, searchQuery]);
+
   const installedCount = installed.length;
   const availableCount = remoteEntries.filter(([id]) => !installedIds.has(id)).length;
 
-  function formatSize(bytes?: number): string {
+  function formatSize(bytes?: number | null): string {
     if (!bytes) return '';
     if (bytes >= 1024 * 1024 * 1024) return (bytes / 1024 / 1024 / 1024).toFixed(1) + 'GB';
     if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(0) + 'MB';
@@ -352,22 +501,22 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
             </div>
           )}
 
+          {/* UI-374 — 有包缺运行时才提示，且文案挂包名；无包不提运行时 */}
           {needRuntimeHint && (
             <div className="gewu-plugin-store__hint">
-              ⚠️ 未安装基础运行时：
-              {!runtimeStatus!.r.installed && ' R'}
-              {!runtimeStatus!.python.installed && ' Python'} —
-              大部分工具无法使用，请先安装「运行时」分类中的基础环境。
+              ⚠️ 已安装领域包 {packsRequiringRuntimes.map((n) => `「${n}」`).join('、')} 需要
+              {' '}{missingRuntimeNames.join(' 与 ')} 运行时——请在本页领域包卡片内补装，否则对应分析工具无法使用。
             </div>
           )}
 
-          {/* BLOCK-84：领域包分区——整包一键装/卸（记录制，重启生效） */}
+          {/* BLOCK-84：领域包分区——整包一键装/卸（记录制，重启生效）
+              UI-374：pack 卡片 = 唯一领域入口（运行时子项收编进卡片） */}
           {(availablePacks.length > 0 || installedPacks.length > 0) && (activeCategory === 'all') && (
             <div className="gewu-plugin-store__packs" data-testid="domain-packs-section">
               <div className="gewu-plugin-store__packs-header">
                 <strong>领域包</strong>
                 <span style={{ fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-text-tertiary)' }}>
-                  整包安装/卸载一组领域能力（分析插件 + 脚本 + 工具目录）；装/卸后需重启应用生效
+                  整包安装/卸载一组领域能力（分析插件 + 脚本 + 运行时）；装/卸后需重启应用生效
                 </span>
               </div>
               {packNotice && (
@@ -384,6 +533,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
                     onClick={async () => {
                       setPackBusy('__dialog__');
                       setPackNotice(null);
+                      setPackRuntimeProgress({});
                       try {
                         const result = await packBridge.installFromDialog();
                         if (result?.canceled) return;
@@ -392,6 +542,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
                         await refreshPacks();
                       } finally {
                         setPackBusy(null);
+                        setPackRuntimeProgress({});
                       }
                     }}
                   >
@@ -405,167 +556,234 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
                 for (const p of installedPacks) {
                   if (!knownById.has(p.packId)) {
                     knownById.set(p.packId, {
-                      packId: p.packId, name: p.packId, version: p.version,
+                      packId: p.packId, name: p.name || p.packId, version: p.version,
                       description: '', packRoot: p.packRoot, installed: true,
+                      requiresRuntimes: p.requiresRuntimes,
+                      contents: p.contents,
                     });
                   }
                 }
-                return [...knownById.values()].map((pack) => (
-                  <div
-                    key={pack.packId}
-                    className="gewu-plugin-store__pack-card"
-                    data-testid={`domain-pack-${pack.packId}`}
-                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', border: '1px solid var(--gewu-border, rgba(128,128,128,0.25))', borderRadius: 8, marginBottom: 8 }}
-                  >
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 600 }}>
-                        {pack.name} <span style={{ color: 'var(--gewu-text-tertiary)', fontWeight: 400 }}>v{pack.version}</span>
-                        {pack.installed && (
-                          <span style={{ marginLeft: 8, fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-accent, #3b82f6)' }}>已安装</span>
+                return [...knownById.values()].map((pack) => {
+                  const expanded = expandedPackId === pack.packId;
+                  const requiredRuntimes = pack.requiresRuntimes ?? [];
+                  const contents = pack.contents;
+                  return (
+                    <div
+                      key={pack.packId}
+                      className="gewu-plugin-store__pack-card"
+                      data-testid={`domain-pack-${pack.packId}`}
+                      style={{ border: '1px solid var(--gewu-border, rgba(128,128,128,0.25))', borderRadius: 8, marginBottom: 8 }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px' }}>
+                        <button
+                          type="button"
+                          aria-expanded={expanded}
+                          aria-label={expanded ? `收起 ${pack.name} 详情` : `展开 ${pack.name} 详情`}
+                          onClick={() => setExpandedPackId(expanded ? null : pack.packId)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--gewu-text-tertiary)', display: 'flex' }}
+                        >
+                          <Icon name={expanded ? 'chevron-up' : 'chevron-down'} size={14} />
+                        </button>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 600 }}>
+                            {pack.name} <span style={{ color: 'var(--gewu-text-tertiary)', fontWeight: 400 }}>v{pack.version}</span>
+                            {pack.installed && (
+                              <span style={{ marginLeft: 8, fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-accent, #3b82f6)' }}>已安装</span>
+                            )}
+                          </div>
+                          <div style={{ color: 'var(--gewu-text-tertiary)', fontSize: 'var(--gewu-font-size-caption, 12px)' }}>
+                            {contents
+                              ? `${contents.pluginCount} 个分析插件 · ${contents.scriptCount} 个脚本模块 · ${contents.demoDataCount} 个演示数据集`
+                              : (pack.description || pack.packId)}
+                          </div>
+                        </div>
+                        {pack.installed ? (
+                          <button
+                            type="button"
+                            className="gewu-btn"
+                            disabled={packBusy !== null}
+                            onClick={() => void beginPackUninstall(pack)}
+                          >
+                            {packBusy === pack.packId ? '处理中…' : '卸载'}
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="gewu-btn gewu-btn--primary"
+                            disabled={packBusy !== null}
+                            onClick={() => void handlePackInstall(pack)}
+                          >
+                            {packBusy === pack.packId ? '处理中…' : '一键安装'}
+                          </button>
                         )}
                       </div>
-                      <div style={{ color: 'var(--gewu-text-tertiary)', fontSize: 'var(--gewu-font-size-caption, 12px)' }}>
-                        {pack.description || pack.packId}
-                      </div>
+                      {/* UI-374 — 展开区：运行时子项（状态/体积/进度）随契约渲染 */}
+                      {expanded && requiredRuntimes.length > 0 && (
+                        <div style={{ borderTop: '1px dashed var(--gewu-border, rgba(128,128,128,0.25))', padding: '8px 12px 10px 36px' }} data-testid={`pack-runtimes-${pack.packId}`}>
+                          <div style={{ fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-text-tertiary)', marginBottom: 6 }}>
+                            运行时基础环境（随包安装）
+                          </div>
+                          {requiredRuntimes.map((req) => {
+                            const rtInstalled = isPluginInstalled(req.pluginId);
+                            const sizeLabel = runtimeSizeLabelOf(req.pluginId);
+                            const prog = pack.installed
+                              ? packRuntimeProgress[req.pluginId]
+                              : undefined;
+                            const missingButRequired = pack.installed && !rtInstalled;
+                            return (
+                              <div key={req.pluginId} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 0' }}>
+                                <Icon name="cpu" size={14} />
+                                <span style={{ flex: 1, minWidth: 0 }}>
+                                  {runtimeTitleOf(req.pluginId)}
+                                  <span style={{ color: 'var(--gewu-text-tertiary)', marginLeft: 8, fontSize: 'var(--gewu-font-size-caption, 12px)' }}>
+                                    {sizeLabel}
+                                    {req.version ? ` · ${req.version}` : ''}
+                                  </span>
+                                  {rtInstalled && (
+                                    <span style={{ color: 'var(--gewu-text-tertiary)', marginLeft: 8, fontSize: 'var(--gewu-font-size-caption, 12px)' }}>✓ 已安装</span>
+                                  )}
+                                  {missingButRequired && (
+                                    <span style={{ color: 'var(--gewu-warning, #d97706)', marginLeft: 8, fontSize: 'var(--gewu-font-size-caption, 12px)' }}>
+                                      必需 · 缺失
+                                    </span>
+                                  )}
+                                </span>
+                                {pack.installed && !rtInstalled && (
+                                  <button
+                                    type="button"
+                                    className="gewu-btn gewu-btn--primary gewu-btn--sm"
+                                    disabled={installing === req.pluginId}
+                                    onClick={() => void handleInstall(req.pluginId, true)}
+                                  >
+                                    {installing === req.pluginId ? '安装中…' : '补装'}
+                                  </button>
+                                )}
+                                {pack.installed && !rtInstalled && prog && prog.total > 0 && (
+                                  <div className="gewu-plugin-store__progress" style={{ width: 120 }}>
+                                    <div className="gewu-plugin-store__progress-text">
+                                      {(prog.ratio * 100).toFixed(0)}%
+                                    </div>
+                                    <div className="gewu-plugin-store__progress-bar">
+                                      <div style={{ width: `${prog.ratio * 100}%` }} />
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                    {pack.installed ? (
-                      <button
-                        type="button"
-                        className="gewu-btn"
-                        disabled={packBusy !== null}
-                        onClick={() => handlePackUninstall(pack)}
-                      >
-                        {packBusy === pack.packId ? '处理中…' : '卸载'}
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        className="gewu-btn gewu-btn--primary"
-                        disabled={packBusy !== null}
-                        onClick={() => handlePackInstall(pack)}
-                      >
-                        {packBusy === pack.packId ? '处理中…' : '一键安装'}
-                      </button>
-                    )}
-                  </div>
-                ));
+                  );
+                });
               })()}
             </div>
           )}
 
-          {filteredEntries.length === 0 && !error && (
+          {/* UI-374 — 卸载三档确认弹层（uninstallPlan 契约推导数据源） */}
+          {confirmPack && confirmPlan && (
+            <div
+              role="dialog"
+              aria-label="确认卸载领域包"
+              data-testid="pack-uninstall-confirm"
+              style={{
+                position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10,
+              }}
+            >
+              <div style={{
+                background: 'var(--gewu-bg, #fff)', borderRadius: 10, padding: 18,
+                width: 'min(520px, 92%)', border: '1px solid var(--gewu-border, rgba(128,128,128,0.25))',
+                boxShadow: '0 12px 32px rgba(15,23,42,0.18)',
+              }}>
+                <div style={{ fontWeight: 600, marginBottom: 8 }}>卸载「{confirmPack.name}」</div>
+                <div style={{ fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-text-secondary)', marginBottom: 10 }}>
+                  卸载后需重启应用生效。请确认以下处置（可逐项勾选）：
+                </div>
+                <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '6px 0', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={confirmDeleteRuntimes}
+                    onChange={(e) => setConfirmDeleteRuntimes(e.target.checked)}
+                  />
+                  <span>
+                    删除运行时基础环境
+                    {(confirmPlan.runtimes?.removable ?? []).filter((r) => r.installed).length > 0 && (
+                      <span style={{ color: 'var(--gewu-text-tertiary)' }}>
+                        （{confirmPlan.runtimes!.removable.filter((r) => r.installed).map((r) => runtimeTitleOf(r.pluginId)).join('、')}
+                        {(() => {
+                          const total = confirmPlan.runtimes!.removable.reduce((acc, r) => acc + (r.sizeBytes || 0), 0);
+                          const label = formatSize(total);
+                          return label ? `，约回收 ${label}` : '';
+                        })()}
+                        ）
+                      </span>
+                    )}
+                    {(confirmPlan.runtimes?.removable ?? []).length === 0 && (
+                      <span style={{ color: 'var(--gewu-text-tertiary)' }}>（本包契约未声明运行时）</span>
+                    )}
+                    {(confirmPlan.runtimes?.retained ?? []).length > 0 && (
+                      <span style={{ color: 'var(--gewu-text-tertiary)' }}>
+                        ；{confirmPlan.runtimes!.retained.map((r) => `${runtimeTitleOf(r.pluginId)} 被其他包共享，将保留`).join('；')}
+                      </span>
+                    )}
+                  </span>
+                </label>
+                <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '6px 0', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={confirmDeletePackSource}
+                    onChange={(e) => setConfirmDeletePackSource(e.target.checked)}
+                  />
+                  <span>
+                    同时删除包源目录
+                    {confirmPlan.packSource?.dir && (
+                      <span style={{ color: 'var(--gewu-text-tertiary)', wordBreak: 'break-all' }}>
+                        （{confirmPlan.packSource.dir}
+                        {confirmPlan.packSource.sizeBytes ? `，约 ${formatSize(confirmPlan.packSource.sizeBytes)}` : ''}）
+                      </span>
+                    )}
+                    <div style={{ color: 'var(--gewu-text-tertiary)' }}>内含分析插件、脚本与演示数据；默认保留</div>
+                  </span>
+                </label>
+                <div style={{ padding: '8px 0', color: 'var(--gewu-text-secondary)', fontSize: 'var(--gewu-font-size-caption, 12px)' }}>
+                  {confirmPlan.userDataPolicy || 'results、项目文件与数据库不受影响'}——用户数据永不删除。
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                  <button
+                    type="button"
+                    className="gewu-btn"
+                    onClick={() => { setConfirmPack(null); setConfirmPlan(null); }}
+                  >
+                    取消
+                  </button>
+                  <button
+                    type="button"
+                    className="gewu-btn gewu-btn--danger-ghost"
+                    disabled={packBusy !== null}
+                    data-testid="pack-uninstall-confirm-execute"
+                    onClick={async () => {
+                      const pack = confirmPack;
+                      const options = { deleteRuntimes: confirmDeleteRuntimes, deletePackSource: confirmDeletePackSource };
+                      setConfirmPack(null);
+                      setConfirmPlan(null);
+                      if (pack) await handlePackUninstall(pack, options);
+                    }}
+                  >
+                    确认卸载
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {filteredEntries.length === 0 && packDeliveredPlugins.length === 0 && !error && (
             <div className="gewu-empty">
               {searchQuery ? `没有匹配「${searchQuery}」的插件` : '此分类暂无插件'}
             </div>
           )}
 
-          {/* Runtime 用列表样式 */}
-          {activeCategory === 'all' || activeCategory === 'runtime' ? (
-            <div className="gewu-plugin-store__runtime-list">
-              {filteredEntries
-                .filter(([, info]) => info.type === 'runtime')
-                .map(([id, info]) => {
-                  const isInstalled = isPluginInstalled(id);
-                  return (
-                    <div
-                      key={id}
-                      className={`gewu-plugin-store__runtime-item ${isInstalled ? 'installed' : ''}`}
-                    >
-                      <span className="gewu-plugin-store__runtime-icon">
-                        <Icon name="cpu" size={22} />
-                      </span>
-                      <div className="gewu-plugin-store__runtime-main">
-                        <div className="gewu-plugin-store__runtime-name">
-                          {info.title || id}
-                          {isInstalled && (
-                            <span className="gewu-plugin-store__badge-ok">✓ 已安装</span>
-                          )}
-                          {isInstalled && isPluginDrifted(id) && (
-                            <span className="gewu-plugin-store__badge-drift">已变更</span>
-                          )}
-                        </div>
-                        <div className="gewu-plugin-store__runtime-meta">
-                          {info.version && <span>v{info.version}</span>}
-                          {info.language && <span>[{info.language}]</span>}
-                          {info.size && <span>{formatSize(info.size)}</span>}
-                          <span className="gewu-plugin-store__badge-required">必需</span>
-                        </div>
-                        {info.description && (
-                          <div className="gewu-plugin-store__runtime-desc">{info.description}</div>
-                        )}
-                      </div>
-                      <div className="gewu-plugin-store__runtime-action">
-                        {isInstalled ? (
-                          <div className="gewu-plugin-store__action-stack">
-                            {updateMap.has(id) && (
-                              <button
-                                type="button"
-                                className="gewu-btn gewu-btn--primary gewu-btn--sm"
-                                onClick={() => handleUpdate(id)}
-                                disabled={updatingId === id}
-                              >
-                                {updatingId === id
-                                  ? '更新中…'
-                                  : `更新到 v${updateMap.get(id)!.latestVersion}`}
-                              </button>
-                            )}
-                            {installing === id &&
-                              installProgress[id] &&
-                              installProgress[id].total > 0 && (
-                                <div className="gewu-plugin-store__progress">
-                                  <div className="gewu-plugin-store__progress-text">
-                                    {(installProgress[id].ratio * 100).toFixed(0)}% ·{' '}
-                                    {(installProgress[id].received / 1024 / 1024).toFixed(0)}/
-                                    {(installProgress[id].total / 1024 / 1024).toFixed(0)}MB
-                                  </div>
-                                  <div className="gewu-plugin-store__progress-bar">
-                                    <div style={{ width: `${installProgress[id].ratio * 100}%` }} />
-                                  </div>
-                                </div>
-                              )}
-                            <button
-                              type="button"
-                              className="gewu-btn gewu-btn--danger-ghost gewu-btn--sm"
-                              onClick={() => handleUninstall(id)}
-                              disabled={uninstalling === id}
-                            >
-                              {uninstalling === id ? '卸载中…' : '卸载'}
-                            </button>
-                          </div>
-                        ) : (
-                          <>
-                            {installing === id &&
-                              installProgress[id] &&
-                              installProgress[id].total > 0 && (
-                                <div className="gewu-plugin-store__progress">
-                                  <div className="gewu-plugin-store__progress-text">
-                                    {(installProgress[id].ratio * 100).toFixed(0)}% ·{' '}
-                                    {(installProgress[id].received / 1024 / 1024).toFixed(0)}/
-                                    {(installProgress[id].total / 1024 / 1024).toFixed(0)}MB
-                                  </div>
-                                  <div className="gewu-plugin-store__progress-bar">
-                                    <div style={{ width: `${installProgress[id].ratio * 100}%` }} />
-                                  </div>
-                                </div>
-                              )}
-                            <button
-                              type="button"
-                              className="gewu-btn gewu-btn--primary gewu-btn--sm"
-                              onClick={() => handleInstall(id, true)}
-                              disabled={installing === id}
-                            >
-                              {installing === id ? '安装中…' : '下载安装'}
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          ) : null}
-
-          {/* 非 Runtime 插件用卡片网格 */}
+          {/* 非 Runtime 插件用卡片网格（UI-374：运行时不再单独渲染，收编进包卡片） */}
           {(() => {
             const cardEntries = filteredEntries.filter(([, info]) => info.type !== 'runtime');
             if (cardEntries.length === 0) return null;
@@ -681,6 +899,37 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
               </div>
             );
           })()}
+
+          {/* UI-374 — 包交付的插件：标注来源包，随包装卸（无独立安装按钮） */}
+          {packDeliveredPlugins.length > 0 && (
+            <div style={{ marginTop: 14 }} data-testid="pack-delivered-plugins">
+              <div style={{ fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-text-tertiary)', marginBottom: 6 }}>
+                来自已安装领域包（随包装卸，重启生效）
+              </div>
+              <div className="gewu-plugin-store__grid">
+                {packDeliveredPlugins.map((plugin) => (
+                  <div key={`${plugin.fromPack}:${plugin.id}`} className="gewu-plugin-card installed">
+                    <div className="gewu-plugin-card__top">
+                      <span className="gewu-plugin-card__icon">
+                        <Icon name="bar-chart" size={20} />
+                      </span>
+                      <div className="gewu-plugin-card__name" title={plugin.id}>
+                        {plugin.id}
+                      </div>
+                      <span className="gewu-plugin-card__badge">✓</span>
+                    </div>
+                    <div className="gewu-plugin-card__desc">来源包：{plugin.fromPack}</div>
+                    <div className="gewu-plugin-card__meta">
+                      {plugin.version && <span>v{plugin.version}</span>}
+                      {plugin.language && (
+                        <span className={`lang-${plugin.language}`}>{plugin.language}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

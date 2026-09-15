@@ -285,24 +285,41 @@ function setupDesktopEnv(backendPorts) {
   }
 
   // R/Python Runtime 解析（三级优先）
+  // BLOCK-86 P2 — 领域感知：只有已装领域包契约声明运行时，缺失才提示「去商店装」；
+  // 无包时纯通用态根本无运行时消费者（backend-proc-manager 无 R 照常启动），
+  // 提示降到中性 debug，不再制造「缺了东西」的心理暗示。
+  const packRequiresRuntimes = (() => {
+    try {
+      const packRegistry = require("../../core/shared-backend/pack-registry");
+      return packRegistry
+        .readInstalledPacks(userDataDir)
+        .some((p) => Array.isArray(p.requiresRuntimes) && p.requiresRuntimes.length > 0);
+    } catch {
+      return false;
+    }
+  })();
   const rHome = resolveRuntimeLocal("r", userDataDir);
   if (rHome) {
     process.env.BIOF3_R_HOME = rHome;
     console.log("[desktop] R runtime:", rHome);
-  } else {
+  } else if (packRequiresRuntimes) {
     console.warn(
       '[desktop] R runtime not installed — install "R 运行时" from plugin store',
     );
+  } else {
+    console.log("[desktop] R runtime not present (no installed domain pack requires it)");
   }
 
   const pyHome = resolveRuntimeLocal("python", userDataDir);
   if (pyHome) {
     process.env.BIOF3_PY_HOME = pyHome;
     console.log("[desktop] Python runtime:", pyHome);
-  } else {
+  } else if (packRequiresRuntimes) {
     console.warn(
       '[desktop] Python runtime not installed — install "Python 运行时" from plugin store',
     );
+  } else {
+    console.log("[desktop] Python runtime not present (no installed domain pack requires it)");
   }
 
   process.env.R_SERVER_PORT = String(backendPorts.r);

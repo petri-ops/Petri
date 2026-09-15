@@ -3338,6 +3338,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **P2 控制面（2026-09-13 追加实现）**：移动页升级为控制面——任务详情页批准卡（SSE `needApproval` 事件驱动：工具名+目标摘要+脱敏 params，**两步确认**按钮 D4）+ 取消任务按钮 + 会话页/全局 composer 发消息（POST `/api/ai/agent` 复用 chat.js 路由）。后端新增窄口 `mobile-gateway/control.js` `POST /m/api/approvals/:token/decide`——进程内直调 `db.ackToolJob`（与桌面确认卡 `routes/ai-legacy.js` 的 `POST /api/ai/run-tool-ack/:token` **同一函数同一 scope 校验，权限不放大**；不发 HTTP 自调用，对标 BLOCK-49 直调先例）。验证：集成测试 10/10 + **实机隔离探针 28/28 ALL PASS**（新增 B 系列：吊销后可重新配对/发消息 401+契约 400/取消 401+结构化 404/批准无会话 401+缺 scope 400+**scope 不匹配 404 权限不放大**+批准放行落库 ack_status=approved 且 job 不被破坏+拒绝落库 rejected+failed）。`acceptance/block-70/block70-mobile-gateway-live.json`。
 - **实现提交对账（UI-357 桌面投影 / P3 隧道 UI 归入本条目）**：P2 控制面 = 3c3bdb17；P3 隧道三态呈现与公网 QR 切换 = 1c40b35（该提交含 MobileSync.tsx 隧道区 UI 增量，同提交台账漏同步——已补登本段并按 c177374 先例登记 LEGACY 豁免）；桌面投影 = 79fea4a5。「手机发起→桌面执行（真实模型）→手机批准→手机收终态」全链与 dev 栈 CDP 设置区断言未执行（前者需真实 LLM 环境）——前者待 dev 栈窗口，后者**CDP 够不着**，按无人化验收阶梯第 2 级如实停留 `in_progress`，待用户照测试路线实测后升级；P2 控制面（发消息/批准/取消）与 P3 aliyun 隧道属后续阶段未实现。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-374: 商店领域包改版——pack 卡片唯一领域入口 + 核心 UI 无包不提运行时（BLOCK-86 P2）(2026-09-15 in_progress，dev Electron 边界内；P3 实机后升 verified)
+
+- **来源**：BLOCK-86 plan §2 目标 4/5（用户裁决方案1 完整形态）：「核心界面无包时不出现任何领域概念」「pack 卡片成为唯一领域入口」。
+- **交付面**：① `PluginStorePanel` 收编独立「运行时」分类——运行时改在领域包卡片**可展开子项**渲染（状态/约体积/`必需 · 缺失` 章/补装按钮 + `pack:install-progress` 进度条）；② 包卡片折叠态显示内容概要（N 分析插件 · N 脚本模块 · N 演示数据集，`describePackContents` 只读统计 + IPC 富化）；③ 卸载两段式——`pack:uninstall-plan` 契约推导预览 → **三档确认弹层**（删运行时标回收体积[默认勾选]/包源目录默认保留可选删[删前护栏校验 pack.json]/用户数据永不触碰固定说明），执行走 BLOCK-86 P1 编排；④ 包交付插件在「分析工具」分类可见并**标注来源包**（无独立安装按钮，随包管理）；⑤ 领域感知门控四处——home 非阻塞引导条 / 工作台缺失横幅 / DesktopOnboarding「准备运行时」步骤 / env-coordinator boot warn，全部改为 `listPacksRequiringRuntimes()` 门控（新 `frontend/src/lib/domainPack.ts` 单点）：**无包不提运行时**，有包缺运行时才提示且文案挂包名；DesktopOnboarding 无包时收成单步欢迎流（运行时 tip 换领域能力扩展说明）。
+- **证据**：新建 `PluginStorePanel.test.tsx` **9/9**（分类收编负例/运行时子项缺失章/进度事件驱动/弹层三档缺省勾选与显式传参/取消勾选不触碰运行时/提示正例挂包名/**无包不提示负例**/来源包标注/模块清单行）+ 契约测试 `pack-registry.test.mjs` **+1**（contents 只读统计，下划线共享件不计）+ home.test 更新为领域感知契约（stub packs 桥）+ 相邻 34/34 + tsc 0。**P3 实机断言后升 verified**（剩余：真实装/卸循环 + 工作台回纯通用态）。
+- **边界**：投影端（HTTP 桥）暂无 uninstallPlan/contents 富化通道——手机端商店退化为记录级卸载、隐藏计数行（getBridge 空值兜底），桌面先行，投影对齐登记 BLOCK-87 L4 候选。dev Electron 边界内；packaged 未验（G0 常态）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-373: 欢迎页冷启动不预选工作区 + 输入框常驻（用户截图「初始界面只有选择项目没有输入框，按理应该是图2 但不应该确定的工作区」）(2026-09-15 verified，dev Electron 边界内)
 
 - **来源**：用户两张截图对比：软件刚启动的初始界面只有「选择项目」选择器、无输入框（图1），预期是有输入框和模型控件行的形态（图2）**但不应预先确定工作区**。

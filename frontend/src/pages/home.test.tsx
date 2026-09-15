@@ -71,17 +71,31 @@ describe('UI-141 startup gate', () => {
   });
 
   // BLOCK-66 P2 — R 缺失不再整页拦截：首页正常渲染 + 非阻塞引导条 + 商店 overlay。
+  // BLOCK-86 P2 — 领域感知：只有已装领域包声明运行时才出提示（stub packs 桥供给）。
   it('keeps home usable with a non-blocking banner when R runtime is missing', async () => {
     backendStatus = status({ rRuntime: false, pyRuntime: true, isReady: true, rServerUp: true });
     vi.mocked(listProjects).mockResolvedValue([]);
+    Object.defineProperty(window, 'biof3Desktop', {
+      configurable: true,
+      value: {
+        packs: {
+          listInstalled: vi.fn(async () => ({
+            ok: true,
+            packs: [{ packId: 'gewu-pack-bio', name: '格物 · 生信分析包', packRoot: '/p', version: '0.1.0', installedAt: 'x', requiresRuntimes: [{ pluginId: 'biof3-r-runtime' }] }],
+          })),
+        },
+      },
+    });
     vi.useRealTimers();
     render(<Home />);
 
     // 首页正常渲染（status=ready，未被任何全屏门拦截）
     await screen.findByText('创建第一个项目');
-    // 引导条出现（非阻塞）
-    expect(screen.getByRole('status')).toBeTruthy();
-    expect(screen.getByText(/R 分析运行时未安装/)).toBeTruthy();
+    // 引导条出现（非阻塞），文案挂包名
+    await screen.findByRole('status');
+    const bannerText = screen.getByText(/已安装领域包/).textContent ?? '';
+    expect(bannerText).toContain('格物 · 生信分析包');
+    expect(bannerText).toContain('需要 R 运行时');
     expect(screen.getByRole('button', { name: '前往安装' })).toBeTruthy();
     // 全屏门不再出现
     expect(screen.queryByText('先安装分析运行时')).toBeNull();
@@ -93,6 +107,9 @@ describe('UI-141 startup gate', () => {
     });
     expect(screen.getByText('插件商店')).toBeTruthy();
     expect(screen.queryByText(/R 运行时已就绪，重启应用即可开始分析/)).toBeNull();
+
+    // 还原 window 桥 stub（防泄漏到后续 describe）
+    Object.defineProperty(window, 'biof3Desktop', { configurable: true, value: undefined });
   });
 });
 

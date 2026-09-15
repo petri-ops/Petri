@@ -16,11 +16,13 @@
  * 约束：仅 useState/useCallback；运行时状态复用 useBackendStatus()。
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Icon, type IconName } from '@/components/icons/Icon';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import { loadReleaseTagline } from '@/lib/releaseContract';
+// BLOCK-86 P2 — 运行时步骤领域感知：无包不提运行时
+import { listPacksRequiringRuntimes } from '@/lib/domainPack';
 import './desktop.css';
 
 const ONBOARDING_FLAG = 'gewu-onboarding-completed';
@@ -28,16 +30,28 @@ const ONBOARDING_FLAG = 'gewu-onboarding-completed';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const MODE_FLAG = 'gewu-onboarding-mode';
 
-type Step = 0 | 1;
-
-const STEPS: Array<{ title: string; icon: IconName }> = [
-  { title: '欢迎', icon: 'sparkles' },
-  { title: '准备运行时', icon: 'cpu' },
-];
-
 export function DesktopOnboarding(): React.ReactElement | null {
-  const [step, setStep] = useState<Step>(0);
+  const [step, setStep] = useState(0);
   const backend = useBackendStatus();
+  // BLOCK-86 P2 — 领域感知：只有已装领域包声明运行时，才保留「准备运行时」步骤
+  // 与欢迎页的运行时提示；无包（含桥缺失/加载中）一律收成单步欢迎流。
+  const [packRequiresRuntimes, setPackRequiresRuntimes] = useState<boolean | null>(null);
+  useEffect(() => {
+    let alive = true;
+    listPacksRequiringRuntimes()
+      .then((packs) => { if (alive) setPackRequiresRuntimes(packs.length > 0); })
+      .catch(() => { if (alive) setPackRequiresRuntimes(false); });
+    return () => { alive = false; };
+  }, []);
+
+  const runtimeStepVisible = packRequiresRuntimes === true;
+  const steps: Array<{ title: string; icon: IconName }> = runtimeStepVisible
+    ? [{ title: '欢迎', icon: 'sparkles' }, { title: '准备运行时', icon: 'cpu' }]
+    : [{ title: '欢迎', icon: 'sparkles' }];
+  const maxStep = steps.length - 1;
+
+  // 领域判定未落地前不渲染（首启一次性 100ms 级，避免运行时步骤闪现）
+  if (packRequiresRuntimes === null) return null;
 
   // 运行时是否就绪：任一已装即视为"有运行时"
   // backend.rRuntime 可为 null（状态查询失败 = 未知）；引导页只做展示，
@@ -56,8 +70,8 @@ export function DesktopOnboarding(): React.ReactElement | null {
     dispatchGewuEvent(gewuEvents.onboardingDone);
   }, []);
 
-  const next = useCallback(() => setStep((s) => (s < 1 ? ((s + 1) as Step) : s)), []);
-  const prev = useCallback(() => setStep((s) => (s > 0 ? ((s - 1) as Step) : s)), []);
+  const next = useCallback(() => setStep((s) => (s < maxStep ? s + 1 : s)), [maxStep]);
+  const prev = useCallback(() => setStep((s) => (s > 0 ? s - 1 : s)), []);
 
   // deprecated: 读取旧 key 用于后续清理判断；当前 UI 已不使用。
   // 返回值仅用于 console，不入 state，避免触发额外渲染。
@@ -75,7 +89,7 @@ export function DesktopOnboarding(): React.ReactElement | null {
       <div className="gewu-onboarding">
         {/* 进度指示器 */}
         <div className="gewu-onboarding__steps">
-          {STEPS.map((s, i) => (
+          {steps.map((s, i) => (
             <div
               key={s.title}
               className={`gewu-onboarding__step ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`}
@@ -90,8 +104,8 @@ export function DesktopOnboarding(): React.ReactElement | null {
 
         {/* 步骤内容 */}
         <div className="gewu-onboarding__body">
-          {step === 0 && <StepWelcome />}
-          {step === 1 && (
+          {step === 0 && <StepWelcome showRuntimeTip={runtimeStepVisible} />}
+          {runtimeStepVisible && step === 1 && (
             <StepRuntime
               rOk={rOk}
               pyOk={pyOk}
@@ -120,7 +134,7 @@ export function DesktopOnboarding(): React.ReactElement | null {
                 上一步
               </button>
             )}
-            {step < 1 ? (
+            {step < maxStep ? (
               <button
                 type="button"
                 className="gewu-btn gewu-btn--primary gewu-btn--sm"
@@ -147,20 +161,32 @@ export function DesktopOnboarding(): React.ReactElement | null {
 }
 
 // ── Step 1: 欢迎 ─────────────────────────────────────────────
-function StepWelcome(): React.ReactElement {
+function StepWelcome({ showRuntimeTip }: { showRuntimeTip: boolean }): React.ReactElement {
   const tagline = loadReleaseTagline();
   return (
     <div className="gewu-onboarding__step-content">
       <h2 className="gewu-onboarding__title">欢迎来到 Gewu</h2>
       <p className="gewu-onboarding__subtitle">{tagline}</p>
       <div className="gewu-onboarding__plugin-tips">
-        <div className="gewu-onboarding__tip">
-          <Icon name="cpu" size={18} />
-          <div>
-            <strong>R / Python 运行时</strong>
-            <p>所有分析的基础，下一步会帮你检测是否已就绪。</p>
+        {/* BLOCK-86 P2 — 无包不提运行时：只有已装领域包声明运行时才保留该提示，
+            否则换成领域包扩展说明 */}
+        {showRuntimeTip ? (
+          <div className="gewu-onboarding__tip">
+            <Icon name="cpu" size={18} />
+            <div>
+              <strong>R / Python 运行时</strong>
+              <p>所有分析的基础，下一步会帮你检测是否已就绪。</p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="gewu-onboarding__tip">
+            <Icon name="puzzle" size={18} />
+            <div>
+              <strong>领域能力扩展</strong>
+              <p>需要分析能力时，可在插件商店安装领域包——装完即得对应工具与环境。</p>
+            </div>
+          </div>
+        )}
         <div className="gewu-onboarding__tip">
           <Icon name="sparkles" size={18} />
           <div>

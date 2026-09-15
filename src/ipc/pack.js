@@ -29,8 +29,23 @@ function forwardRuntimeProgress(event, pluginId, progress) {
 }
 
 function registerPackIpc() {
+  // BLOCK-86 P2 — 内容概要只读统计（缺目录如实计 0，绝不抛错阻断商店渲染）
+  function enrichContents(packRegistry, packRoot) {
+    try {
+      return packRegistry.describePackContents(packRoot);
+    } catch {
+      return { pluginCount: 0, pluginIds: [], scriptCount: 0, demoDataCount: 0 };
+    }
+  }
+
   ipcMain.handle('pack:list-installed', async () => {
-    return { ok: true, packs: require('../../core/shared-backend/pack-registry').readInstalledPacks(getDataDir()) };
+    const packRegistry = require('../../core/shared-backend/pack-registry');
+    const packs = packRegistry.readInstalledPacks(getDataDir());
+    // 记录含 packRoot——即使包源稍后被删，卸载前也能展示模块清单
+    return {
+      ok: true,
+      packs: packs.map((p) => ({ ...p, contents: enrichContents(packRegistry, p.packRoot) })),
+    };
   });
 
   ipcMain.handle('pack:list-available', async () => {
@@ -40,7 +55,11 @@ function registerPackIpc() {
     const installedIds = new Set(installed.map((p) => p.packId));
     return {
       ok: true,
-      packs: available.map((p) => ({ ...p, installed: installedIds.has(p.packId) })),
+      packs: available.map((p) => ({
+        ...p,
+        installed: installedIds.has(p.packId),
+        contents: enrichContents(packRegistry, p.packRoot),
+      })),
     };
   });
 

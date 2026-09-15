@@ -14,6 +14,8 @@ import { RightPanel, type RightPanelContext } from '@/components/workspace-panel
 import { ColumnHeader } from '@/components/desktop/titlebar/ColumnizedTitleBar';
 import { TitleBar } from '@/components/desktop/TitleBar';
 import { getProject, listProjectJobs, listDatasetsByProject } from '@/lib/project-store';
+// BLOCK-86 P2 — 运行时提示领域感知门控（无包不提运行时）
+import { listPacksRequiringRuntimes } from '@/lib/domainPack';
 import { useToast } from '@/components/common/ToastProvider';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
@@ -1540,18 +1542,31 @@ export function ProjectWorkspace(): React.ReactElement {
   };
   // backendStatus.rRuntime 可为 null（状态查询失败 = 未知）。用 `=== false`
   // 严格判定"确认缺失"，避免偶发 IPC 异常时误弹缺失横幅。
+  // BLOCK-86 P2 — 领域感知：只有已装领域包声明运行时才提示（无包不提运行时），
+  // 文案挂包名。
   const rRuntimeMissing = backendStatus.rRuntime === false;
   const pyRuntimeMissing = backendStatus.pyRuntime === false;
+  const [runtimeDemandPacks, setRuntimeDemandPacks] = useState<string[]>([]);
+  useEffect(() => {
+    let alive = true;
+    listPacksRequiringRuntimes()
+      .then((packs) => { if (alive) setRuntimeDemandPacks(packs.map((p) => p.name)); })
+      .catch(() => { /* 桥缺失 = 无包态 = 不提示 */ });
+    return () => { alive = false; };
+  }, []);
+  const runtimeDemandSuffix =
+    runtimeDemandPacks.length > 0 ? `（已安装领域包 ${runtimeDemandPacks.map((n) => `「${n}」`).join('、')} 需要）` : '';
   const showRuntimeBanner =
     backendStatus.loaded &&
+    runtimeDemandPacks.length > 0 &&
     (rRuntimeMissing || pyRuntimeMissing);
   let runtimeBannerMessage: string;
   if (rRuntimeMissing && pyRuntimeMissing) {
-    runtimeBannerMessage = 'R 与 Python 运行时均未安装，分析功能暂不可用。';
+    runtimeBannerMessage = `R 与 Python 运行时均未安装，分析功能暂不可用${runtimeDemandSuffix}。`;
   } else if (rRuntimeMissing) {
-    runtimeBannerMessage = 'R 运行时未安装，依赖 R 的分析无法运行。';
+    runtimeBannerMessage = `R 运行时未安装，依赖 R 的分析无法运行${runtimeDemandSuffix}。`;
   } else {
-    runtimeBannerMessage = 'Python 运行时未安装，依赖 Python 的分析无法运行。';
+    runtimeBannerMessage = `Python 运行时未安装，依赖 Python 的分析无法运行${runtimeDemandSuffix}。`;
   }
   return (
     <div className={`${styles.workspaceRoot} ${compactLayout ? styles.workspaceRootCompact : ''}`}>

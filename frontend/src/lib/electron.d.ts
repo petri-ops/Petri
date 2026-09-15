@@ -201,12 +201,43 @@ declare global {
         >;
       };
       // BLOCK-84：领域包一键装/卸桥
+      // BLOCK-86 P1/P2：requires.runtimes 契约 + contents 内容概要 +
+      // uninstallPlan 卸载影响预览 + uninstall 三档显式勾选 + 安装进度订阅
       packs: {
-        listInstalled: () => Promise<Array<{ packId: string; packRoot: string; version: string; installedAt: string }>>;
-        listAvailable: () => Promise<Array<{ packId: string; name: string; nameEn?: string | null; version: string; description: string; packRoot: string; installed: boolean }>>;
-        installFromDialog: () => Promise<{ ok: boolean; canceled?: boolean; pack?: { packId: string }; error?: string }>;
-        installPath: (packRoot: string) => Promise<{ ok: boolean; pack?: { packId: string }; error?: string }>;
-        uninstall: (packId: string) => Promise<{ ok: boolean; removed?: string; error?: string }>;
+        listInstalled: () => Promise<Array<{
+          packId: string; packRoot: string; version: string; installedAt: string;
+          name?: string;
+          requiresRuntimes?: Array<{ pluginId: string; version?: string }>;
+          contents?: { pluginCount: number; plugins: Array<{ id: string; language: string | null; version: string | null }>; pluginIds: string[]; scriptCount: number; demoDataCount: number };
+        }>>;
+        listAvailable: () => Promise<Array<{
+          packId: string; name: string; nameEn?: string | null; version: string; description: string; packRoot: string; installed: boolean;
+          requiresRuntimes?: Array<{ pluginId: string; version?: string }>;
+          contents?: { pluginCount: number; plugins: Array<{ id: string; language: string | null; version: string | null }>; pluginIds: string[]; scriptCount: number; demoDataCount: number };
+        }>>;
+        installFromDialog: () => Promise<{ ok: boolean; canceled?: boolean; pack?: { packId: string }; runtimes?: Array<{ pluginId: string; ok: boolean; skipped?: string; error?: string }>; requiresRestart?: boolean; error?: string }>;
+        installPath: (packRoot: string) => Promise<{ ok: boolean; pack?: { packId: string }; runtimes?: Array<{ pluginId: string; ok: boolean; skipped?: string; error?: string }>; requiresRestart?: boolean; error?: string }>;
+        uninstallPlan: (packId: string) => Promise<{
+          ok: boolean;
+          packId?: string;
+          requiresRuntimes?: Array<{ pluginId: string; version?: string }>;
+          runtimes?: {
+            removable: Array<{ pluginId: string; installed: boolean; sizeBytes: number | null }>;
+            retained: Array<{ pluginId: string; requiredBy: string[] }>;
+          };
+          packSource?: { dir: string | null; exists: boolean; sizeBytes: number | null };
+          userDataPolicy?: string;
+          error?: string;
+        }>;
+        uninstall: (packId: string, options?: { deleteRuntimes?: boolean; deletePackSource?: boolean }) => Promise<{
+          ok: boolean;
+          packId?: string;
+          removed?: { record: boolean; runtimes: Array<{ pluginId: string; ok: boolean; skipped?: string; error?: string }>; packSourceDir?: string };
+          kept?: { packSourceDir?: string | null; userDataPolicy: string; packSourceError?: string };
+          requiresRestart?: boolean;
+          error?: string;
+        }>;
+        onInstallProgress: (callback: (payload: { pluginId: string; progress: { ratio: number; received: number; total: number } }) => void) => () => void;
       };
       // G0-RS: Skills discovery & execution bridge
       skills: {

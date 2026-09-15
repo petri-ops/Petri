@@ -18,6 +18,8 @@ import { Icon } from '@/components/icons/Icon';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { FolderPicker } from '@/components/desktop/FolderPicker';
+// BLOCK-86 P2 — 运行时提示领域感知门控（无包不提运行时）
+import { listPacksRequiringRuntimes } from '@/lib/domainPack';
 import { createProject, listProjectJobs, listProjects, listSshTargetCandidates, validateSshProject, type SshTargetCandidate } from '@/lib/project-store';
 import type { Project, ToolJob } from '@/lib/project-types';
 import styles from './home.module.css';
@@ -77,6 +79,16 @@ export default function Home(): React.ReactElement {
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [storeOpen, setStoreOpen] = useState(false);
   const [relaunching, setRelaunching] = useState(false);
+  // BLOCK-86 P2 — 运行时提示领域感知：无包不提运行时（banner 只在有已装领域包
+  // 声明运行时时出现，文案挂包名）
+  const [runtimeDemandPacks, setRuntimeDemandPacks] = useState<string[]>([]);
+  React.useEffect(() => {
+    let alive = true;
+    listPacksRequiringRuntimes().then((packs) => {
+      if (alive) setRuntimeDemandPacks(packs.map((p) => p.name));
+    }).catch(() => { /* 桥缺失 = 无包态 = 不提示 */ });
+    return () => { alive = false; };
+  }, []);
   // 后端就绪等待超时 —— 避免"永远转圈"的无出路状态
   const [waitedTooLong, setWaitedTooLong] = useState(false);
 
@@ -463,11 +475,13 @@ export default function Home(): React.ReactElement {
 
   // BLOCK-66 P2 — 非阻塞引导条：R 缺失只提示不拦截（对话/文件等通用功能不受影响），
   // 安装入口走插件商店 overlay；装完重启应用即恢复分析功能。
-  const runtimeBanner = runtimeMissing ? (
+  // BLOCK-86 P2 — 领域感知：只有已装领域包声明运行时才提示（无包不提运行时），文案挂包名。
+  const runtimeBanner = runtimeMissing && runtimeDemandPacks.length > 0 ? (
     <div className={styles.runtimeBanner} role="status">
       <Icon name="cpu" size={15} />
       <span className={styles.runtimeBannerText}>
-        R 分析运行时未安装 —— 对话、文件等通用功能不受影响；运行 R 类分析工具需安装 R 运行时（约 657MB）。
+        已安装领域包 {runtimeDemandPacks.map((n) => `「${n}」`).join('、')} 需要 R 运行时 ——
+        对话、文件等通用功能不受影响；运行 R 类分析工具需安装 R 运行时（约 657MB）。
       </span>
       <button
         className="gewu-btn gewu-btn--ghost gewu-btn--sm"

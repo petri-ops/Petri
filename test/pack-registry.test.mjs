@@ -305,6 +305,37 @@ test('BLOCK-86 uninstall plan: 预览含运行时在位状态/体积与包源信
   assert.equal(plan.userDataPolicy, 'results、项目文件与数据库不受影响');
 });
 
+// ── 内容概要（P2 商店「功能模块」行数据源） ─────────────────────
+
+test('BLOCK-86 contents: 只读统计插件/脚本/演示数据，缺目录如实计 0', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block86-ct-'));
+  // 空目录：三项全 0
+  const empty = packRegistry.describePackContents(dir);
+  assert.deepEqual(
+    { ...empty, plugins: empty.plugins.length },
+    { pluginCount: 0, plugins: 0, pluginIds: [], scriptCount: 0, demoDataCount: 0 },
+  );
+  // 造齐三件：2 插件（1 R 1 Python）+ 2 脚本目录 + 1 演示数据目录 + 下划线杂项不计
+  fs.mkdirSync(path.join(dir, 'plugins'));
+  fs.writeFileSync(path.join(dir, 'plugins', 'installed.json'), JSON.stringify([
+    { id: 'deseq2', language: 'r', version: '1.0.0' },
+    { id: 'celltypist', language: 'python', version: '1.0.0' },
+  ]));
+  fs.mkdirSync(path.join(dir, 'scripts', 'deseq2'), { recursive: true });
+  fs.mkdirSync(path.join(dir, 'scripts', 'ml-classifier'));
+  fs.writeFileSync(path.join(dir, 'scripts', '_shared.R'), 'x');
+  fs.mkdirSync(path.join(dir, 'demo-data', 'counts'), { recursive: true });
+  const c = packRegistry.describePackContents(dir);
+  assert.equal(c.pluginCount, 2);
+  assert.deepEqual(c.pluginIds, ['deseq2', 'celltypist']);
+  assert.deepEqual(c.plugins, [
+    { id: 'deseq2', language: 'r', version: '1.0.0' },
+    { id: 'celltypist', language: 'python', version: '1.0.0' },
+  ]);
+  assert.equal(c.scriptCount, 2, '下划线前缀共享件不计入脚本模块');
+  assert.equal(c.demoDataCount, 1);
+});
+
 // ── 真包集成（兄弟仓；环境缺失时诚实 skip） ─────────────────────
 
 test('BLOCK-86 contract: 兄弟仓真包声明 R/Python 运行时（跨仓协调落点）', { skip: !fs.existsSync(SIBLING_PACK) && 'sibling pack repo absent' }, () => {

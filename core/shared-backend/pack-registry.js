@@ -122,6 +122,8 @@ function installPack(dataDir, packRoot) {
   const existing = packs.findIndex((p) => p.packId === validated.pack.packId);
   const record = {
     packId: validated.pack.packId,
+    // BLOCK-86 P2 — 显示名随记录存档（缺失提示文案挂包名用；旧记录无此字段回退 packId）
+    name: validated.pack.name,
     packRoot: validated.pack.packRoot,
     version: validated.pack.version,
     // BLOCK-86 P1 — 契约随记录存档：卸载编排由它推导（不重读包源也能推导）
@@ -169,6 +171,33 @@ function computeRuntimeRemovalPlan(dataDir, packId) {
   return { ok: true, packId, removable, retained };
 }
 
+/**
+ * BLOCK-86 P2 — 包内容清单概要（商店包卡片「功能模块」行与「分析工具」来源标注的数据源）。
+ * 全部只读统计：缺目录/缺索引如实计 0，不抛错。
+ */
+function describePackContents(packRoot) {
+  const result = { pluginCount: 0, plugins: [], pluginIds: [], scriptCount: 0, demoDataCount: 0 };
+  try {
+    const index = JSON.parse(fs.readFileSync(path.join(packRoot, 'plugins', 'installed.json'), 'utf-8'));
+    if (Array.isArray(index)) {
+      result.plugins = index
+        .filter((item) => item && typeof item.id === 'string')
+        .map((item) => ({ id: item.id, language: item.language || null, version: item.version || null }));
+      result.pluginIds = result.plugins.map((p) => p.id);
+      result.pluginCount = result.plugins.length;
+    }
+  } catch { /* 索引缺失 = 0 */ }
+  try {
+    result.scriptCount = fs.readdirSync(path.join(packRoot, 'scripts'), { withFileTypes: true })
+      .filter((e) => e.isDirectory() && !e.name.startsWith('_')).length;
+  } catch { /* 目录缺失 = 0 */ }
+  try {
+    result.demoDataCount = fs.readdirSync(path.join(packRoot, 'demo-data'), { withFileTypes: true })
+      .filter((e) => e.isDirectory() && !e.name.startsWith('_')).length;
+  } catch { /* 目录缺失 = 0 */ }
+  return result;
+}
+
 module.exports = {
   packsRecordFile,
   readInstalledPacks,
@@ -176,6 +205,7 @@ module.exports = {
   normalizeRequiresRuntimes,
   validatePackDir,
   discoverAvailablePacks,
+  describePackContents,
   installPack,
   uninstallPack,
   computeRuntimeRemovalPlan,
