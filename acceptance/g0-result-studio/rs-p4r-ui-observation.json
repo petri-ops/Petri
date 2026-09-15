@@ -5,7 +5,7 @@
   "classification": "development_real_renderer_non_provider_non_packaged",
   "privacy": "fixture_labels_counts_timings_bounded_dom_digests_and_screenshot_hashes_only",
   "captureMode": "single_parent_disposable_real_corpus_backend_vite_electron_chromium",
-  "sourceCommit": "35a0760cf98c5865574507e03521795231307442",
+  "sourceCommit": "813cc2282fb5884ad4ea3b2420c1a800644a1e2c",
   "sourceFiles": {
     "observation": "scripts/g0-rs-p4r-ui-observation.mjs",
     "driver": "scripts/g0-rs-p4r-ui-driver.cjs",
@@ -38,109 +38,109 @@
     "theme": "frontend/src/themes/ThemeProvider.tsx"
   },
   "sourceHashes": {
-    "observation": "4fbc32af629d5680322fa3f652d4b12fc3e97ff7a9183536f15ff7871d9a673b",
-    "driver": "1b6bfbc4c9bea690c7749f46019c1bfaee6295c5a6595aae09dad96f118ee431",
+    "observation": "0f5bee91f4bd6c202029d811439bcb2cd9089b9c518ec9ac40fd02e5078fab17",
+    "driver": "cf13b1989bfdba391eba382b5c17a01456ed5f78120c954b68131d7ddcd23fc7",
     "observationTest": "07e8802e09117f5593bbb0b585430ea92fa5918dcba1eedfba2a7027072a2e83",
-    "liveProducer": "7fe88df4e806719834e7ff4a37cc4402450db560fd32429f338f31bafedd69be",
-    "corpus": "359e202832c117f12c6e041706e0028caaaf4c063df3d97511be982ab703bf11",
-    "capture": "99f9eb3fe4efa643e5a87925098dfdd815664b703907b90333e9e240edd317ac",
-    "packageScripts": "1e7f71e9fe0bed784930198260bbd0b081e8a11234af1e9ae7e27a56ef350669",
-    "impactMap": "073cda5d914a50e7c3214b70f96dbd1294e0680c15364c0042d201ea0e6ce0c2",
-    "background": "0c8d74472ca99bf505967a1c3d0c4179e1d07dc0a81c6c3e301b251e93db0e16",
-    "backgroundChild": "06209a3cd696af000f39d234eda29472583bf79b7fc45fb98e21d93c39bdf62d",
-    "workspace": "a74cb05e0223af51e5957d27d89ec142e2f3724ca0edf446d131d0ae7cdcf3f6",
-    "workspaceStyles": "e8650ac918218c8e02864da9b1421bbef7262ec9da4d5a09d77cef23b52d5d06",
-    "resultSurface": "fe026c47d099e4cc84e95b7133810620ee67bbdafcfd815ba322fb47ed03a545",
-    "resultSurfaceStyles": "51de03642417669b94637447c27e6f18e3e38d328dcec5867779bac138c95254",
-    "resultComposerStyles": "96bfc4dff032898ff544364d85c7c86984701bc16ccf254864a504a3c11a8bb2",
-    "resultComposer": "5c0508cb07254b660ba9b5c63553011617dde37f7db26053329f8d97e8c5e9e1",
-    "resultEditPanelStyles": "5b95b407f4517132af63aea5c20be403cd16cff9db13b6d799040b366c5b308a",
-    "resultEditPanel": "9a1387cbb775978e1f5b325c079affe3700d298424cd60911eb87caf415af650",
-    "changeReview": "2e58d70c6f301baf21e418754aa103f8d2138241809e9b13b6b843359416716b",
-    "changeReviewStyles": "48e87b854af64d41ea12bcef504896d4d94a51bb02f51433e22bf5303b14376c",
-    "changeReviewTest": "40282a57ccda17431f6926137033ca9028396545323aa07324c6f00e9925783c",
-    "codeView": "6534f49cf39a42c0e7ef303e91e20346e4f51990151ae1aa357070f0f305e855",
-    "codeViewStyles": "d51a9a7addb03ad51bada5c6eb8789d8d4df50d89dbd4ada5fca0c4a1d6ab9a9",
-    "resultStudioClient": "0654d1409bf95dc03739d5cd72acc21e7643ded409eabf488d66b94ba5a7fe08",
-    "interactionClient": "8a74968cef56b917742fe932c7f0bf33d74465ac3fcea6f78ca1cf1c52df4c79",
-    "scientificViewer": "2150ff1a3a3a497b1f7ea911fd42d00d5521d29d2b746f707cf8917b069ee816",
-    "scientificViewerStyles": "660894b5ebb58440da200a7ff061787647ab7f054f0615478b3eaa193a716330",
-    "scientificViewerTest": "fe066e5457f5a4ca67163aef75b9552c3ead6d3ed57866168467649d2d63da51",
-    "theme": "0815c6f466e38e4767d4fd094dc32438e5cbb4587fe0b87601bf3b1d1ebe9ded"
+    "liveProducer": "9c882d75ef3b5fb9099f2342e0b7a85bf184ba369ebf7acbc524d5ace97dfaac",
+    "corpus": "1bc41cfcaa7723183b70e7b79eb468b9823a3e42ba3bbf1c000e36e9fa90fd7a",
+    "capture": "8fe85ccf0041b048a2b5c56cd4d937b7d4a42c19d1e7821682b37f25ce263364",
+    "packageScripts": "f00078e3b96240b24485bd19c1f4bbb848fde29e697223ad74b900e95e796be3",
+    "impactMap": "f46b5bd2023933ed943c39c72fc239356c165833b719b70e55c19d7a96d3827c",
+    "background": "1baf5c0f05c230fe56119d392bc457db8a077efb398c5cfd52ad094c0126c485",
+    "backgroundChild": "ffad383c919fb5343bdae0bf035b512d397fecd062d09c59b8a89fa005d1df81",
+    "workspace": "f62310fbeb9e1da6601d5a43348bbeb9510e58a9bcfa887e6b201271a3992d8e",
+    "workspaceStyles": "1dad2de637e8561db9d7f56c3a33fd6d94387708dc9606c164f6e01800e57a73",
+    "resultSurface": "62d24d164704ecd67710ac3cbee8e419013f210b3300133c67ebf7a26555f0cb",
+    "resultSurfaceStyles": "9da646b55f2b704568e1aadc05d919102c3675ca1f912c1922006aca0af729ef",
+    "resultComposerStyles": "95518f44d6a822ad06e218e894204a2d68fdacf5ca2ecf840f70d759968dedd9",
+    "resultComposer": "45bd0662e7865308ab6e6615a5e5b66681dfe128f1d2fc62ef0e1bfc742df201",
+    "resultEditPanelStyles": "c2676e0c867660df2fbd986ad7dd886eaa7db0a3610b35c7bb06890d6a1e5a2f",
+    "resultEditPanel": "700c11de6fff7fb97a7923235baf443e940436827680c6ad0a99cbba93d4cae7",
+    "changeReview": "4dcf85612a763679863b1436599090e638770cc8ecde731dac95e8f374668a75",
+    "changeReviewStyles": "245428e9750daa2a8bc59a534125ca5a1571f32dd1f0bde0e9cdffd215ff1069",
+    "changeReviewTest": "bf90c49f1a1115e91245e5603d449d3201a1d391422fe916a4854e9d81ff65d8",
+    "codeView": "6b401f8583da465feb38bd276489d7aa45afe3b1aa6d1bfb673889b3f3171c86",
+    "codeViewStyles": "a064e51a01503e8d26a153b1d17aefeada1fc139ea99c057465ae931639a29f3",
+    "resultStudioClient": "54b8ec755742244649206c07a62e1853442113d83c16710c05b16fcf06beb21c",
+    "interactionClient": "41bb303c788a544e292e715e3e34b103ae0f0aaf538ca3b9ec83bcf601940b74",
+    "scientificViewer": "b98d1a3adaaf208eb514259028b7bf67990344d71e96b8875238114255559c9e",
+    "scientificViewerStyles": "50fafba77d91f1cde17a146dbb86f782c9ba08cb2f926cf935ac1392da7c2ac1",
+    "scientificViewerTest": "541e366bce1477548d73f1c266188086b1dfc16692cb610796dff1a74d13ba4c",
+    "theme": "bad42150e9ffc4880246e45614ee48ce221434e65d4573025f53158b5a5e790e"
   },
   "sourceCommitMatchesSourceHashes": true,
   "sourceMismatches": [],
   "renderer": {
     "schemaVersion": 1,
-    "renderer": "Electron 30.5.1 / Chromium 124.0.6367.243",
+    "renderer": "Electron 41.10.7 / Chromium 146.0.7680.216",
     "initialResult": {
       "theme": "dark",
       "viewport": {
         "innerWidth": 1440,
-        "innerHeight": 859,
+        "innerHeight": 853,
         "clientWidth": 1440,
         "scrollWidth": 1440
       },
       "canvas": {
         "width": 858,
-        "height": 821,
+        "height": 815,
         "mode": "result",
         "firstVisibleMs": null
       },
       "bodyVisible": true,
       "degradationVisible": false,
       "composerState": "ready",
-      "versionKind": "ordinal",
-      "truthKind": "valid",
-      "visiblePrimaryActionCount": 3,
+      "versionKind": "missing",
+      "truthKind": "missing",
+      "visiblePrimaryActionCount": 0,
       "activeElement": {
         "tag": "body",
         "ariaLabel": null,
-        "textDigest": "246299a76806479c8673e74c4d83aa67c0ad365a162a624822a20190cad1b1e8"
+        "textDigest": "e5b97250dcf61238a7a036d1cf7779e3a57e752bb86965809c49a156dc7df5e9"
       },
       "internalLeakFlags": {
         "absolutePath": false,
         "credential": false,
         "rawInternalId": false
       },
-      "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf"
+      "titleDigest": null
     },
     "openResult": {
-      "feedbackMs": 7.528,
-      "firstContentVisibleMs": 3.6,
-      "domSha256": "0f843d5b73608adea99fd5c7789e37213b92213def2eae6ece09a55e26a87e98",
+      "feedbackMs": 7.498,
+      "firstContentVisibleMs": 3.9,
+      "domSha256": "9b9a263a75d9f36c1207847c4a6a64f8aa109ddb4ab0905979aa743f824f0635",
       "draftPreserved": true,
       "draftDigest": "4cf115d02c95fb9bbab5a4da44039112dda3bb61d316249ee9d5fe0a27f18e4f",
       "theme": "dark",
       "viewport": {
         "innerWidth": 1440,
-        "innerHeight": 859,
+        "innerHeight": 853,
         "clientWidth": 1440,
         "scrollWidth": 1440
       },
       "canvas": {
         "width": 858,
-        "height": 821,
+        "height": 815,
         "mode": "result",
-        "firstVisibleMs": 3.6
+        "firstVisibleMs": 3.9
       },
       "bodyVisible": true,
       "degradationVisible": false,
       "composerState": "ready",
-      "versionKind": "ordinal",
-      "truthKind": "valid",
-      "visiblePrimaryActionCount": 3,
+      "versionKind": "missing",
+      "truthKind": "missing",
+      "visiblePrimaryActionCount": 0,
       "activeElement": {
         "tag": "body",
         "ariaLabel": null,
-        "textDigest": "246299a76806479c8673e74c4d83aa67c0ad365a162a624822a20190cad1b1e8"
+        "textDigest": "e5b97250dcf61238a7a036d1cf7779e3a57e752bb86965809c49a156dc7df5e9"
       },
       "internalLeakFlags": {
         "absolutePath": false,
         "credential": false,
         "rawInternalId": false
       },
-      "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf"
+      "titleDigest": null
     },
     "matrix": [
       {
@@ -151,38 +151,38 @@
           "height": 900
         },
         "screenshot": "light-1440.png",
-        "screenshotSha256": "f842b57311e0097777984591041af0fede6810fe35e1c3c841304ed802c3b29c",
-        "screenshotBytes": 481794,
-        "domSha256": "13e3d7f46a827f761e666d3b9a25ba32493b141e20186796de418696ef57b98a",
+        "screenshotSha256": "8dca428ffb93e33a616ea71bc55cb52cd7faba075196757df43a0cbd199799cf",
+        "screenshotBytes": 303066,
+        "domSha256": "d8c8b246ac6733b1c82c68d80b8c28750bef7cb5009b8131ee7cb6e3ebf50268",
         "viewport": {
           "innerWidth": 1440,
-          "innerHeight": 872,
+          "innerHeight": 868,
           "clientWidth": 1440,
           "scrollWidth": 1440
         },
         "canvas": {
           "width": 858,
-          "height": 834,
+          "height": 830,
           "mode": "result",
-          "firstVisibleMs": 3.6
+          "firstVisibleMs": 3.9
         },
         "bodyVisible": true,
         "degradationVisible": false,
         "composerState": "ready",
-        "versionKind": "ordinal",
-        "truthKind": "valid",
-        "visiblePrimaryActionCount": 3,
+        "versionKind": "missing",
+        "truthKind": "missing",
+        "visiblePrimaryActionCount": 0,
         "activeElement": {
           "tag": "body",
           "ariaLabel": null,
-          "textDigest": "246299a76806479c8673e74c4d83aa67c0ad365a162a624822a20190cad1b1e8"
+          "textDigest": "e5b97250dcf61238a7a036d1cf7779e3a57e752bb86965809c49a156dc7df5e9"
         },
         "internalLeakFlags": {
           "absolutePath": false,
           "credential": false,
           "rawInternalId": false
         },
-        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf",
+        "titleDigest": null,
         "pageHorizontalOverflow": false
       },
       {
@@ -193,38 +193,38 @@
           "height": 900
         },
         "screenshot": "light-1024.png",
-        "screenshotSha256": "d92c1e0666ecb69d15d48c721c41df518791e2add5904cd430c5798485eb314b",
-        "screenshotBytes": 412752,
-        "domSha256": "0968f2f15a3a3297b3305e1f25d88b3c96a67dc430662847efb64e746b2a90f8",
+        "screenshotSha256": "618e11eda3f5611cba6304a1a8fa92603e82ba4131b0fae5a26b1981217c00c5",
+        "screenshotBytes": 191997,
+        "domSha256": "693a486cac1e335f37e634242224d9f744a5cf987fdaf1e99d13d0b2ee6092c7",
         "viewport": {
           "innerWidth": 1024,
-          "innerHeight": 872,
+          "innerHeight": 868,
           "clientWidth": 1024,
           "scrollWidth": 1024
         },
         "canvas": {
-          "width": 683,
-          "height": 834,
+          "width": 442,
+          "height": 830,
           "mode": "result",
-          "firstVisibleMs": 3.6
+          "firstVisibleMs": 3.9
         },
         "bodyVisible": true,
         "degradationVisible": false,
         "composerState": "ready",
-        "versionKind": "ordinal",
-        "truthKind": "valid",
-        "visiblePrimaryActionCount": 3,
+        "versionKind": "missing",
+        "truthKind": "missing",
+        "visiblePrimaryActionCount": 0,
         "activeElement": {
           "tag": "body",
           "ariaLabel": null,
-          "textDigest": "fffbe14de210ae0879c9dba18f591d562eb1be27bd94e705012e63c7fbd2b084"
+          "textDigest": "e5b97250dcf61238a7a036d1cf7779e3a57e752bb86965809c49a156dc7df5e9"
         },
         "internalLeakFlags": {
           "absolutePath": false,
           "credential": false,
           "rawInternalId": false
         },
-        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf",
+        "titleDigest": null,
         "pageHorizontalOverflow": false
       },
       {
@@ -235,38 +235,38 @@
           "height": 900
         },
         "screenshot": "light-820.png",
-        "screenshotSha256": "2700e1e22ee66dee2c3f079d01904aec555374897372786fd8455bf32de4a522",
-        "screenshotBytes": 353633,
-        "domSha256": "7205206a48615fbb29c5dc35d8712dfa3b8e2831ad9b47245fc58e81f5c54fe4",
+        "screenshotSha256": "fdc83a7af55a82276e951640cfb65aa57477cad3ad7053e0312ea3bb1844ff0e",
+        "screenshotBytes": 148152,
+        "domSha256": "e2f480dbbc798a46a5616d12b22d0da0b4a48ee608de99bf843e7d5d291e7705",
         "viewport": {
           "innerWidth": 820,
-          "innerHeight": 872,
+          "innerHeight": 868,
           "clientWidth": 820,
           "scrollWidth": 820
         },
         "canvas": {
           "width": 820,
-          "height": 834,
+          "height": 830,
           "mode": "result",
-          "firstVisibleMs": 3.6
+          "firstVisibleMs": 3.9
         },
         "bodyVisible": true,
         "degradationVisible": false,
         "composerState": "ready",
-        "versionKind": "ordinal",
-        "truthKind": "valid",
-        "visiblePrimaryActionCount": 3,
+        "versionKind": "missing",
+        "truthKind": "missing",
+        "visiblePrimaryActionCount": 0,
         "activeElement": {
           "tag": "body",
           "ariaLabel": null,
-          "textDigest": "d6654c22ee696611e818d0e8c0192835cab87e794cdcac3e24ab0f4608abfa8a"
+          "textDigest": "3ea748be1d570d6b2dd3b4a3e942fef3c3c5e540f71060ed02198c9fa7e42a7f"
         },
         "internalLeakFlags": {
           "absolutePath": false,
           "credential": false,
           "rawInternalId": false
         },
-        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf",
+        "titleDigest": null,
         "pageHorizontalOverflow": false
       },
       {
@@ -277,38 +277,38 @@
           "height": 900
         },
         "screenshot": "dark-1440.png",
-        "screenshotSha256": "947d7cb2bbb0e599b89f01386ea2773daa943dba4e238b9c46700f1fa7b09e06",
-        "screenshotBytes": 484525,
-        "domSha256": "55b7eb16f0369ac8ae86441d430d98d2468ea8cafad8348a297be0ba6de8ef8e",
+        "screenshotSha256": "a2a74753d35d3aa5e3e70df5bb85f4aa05975a9a46d89c2c0cdad2e8a71d2ad5",
+        "screenshotBytes": 300860,
+        "domSha256": "21e68a58255ab03edbecb5001f81d4adfdb943f9974125cac721015ae4761419",
         "viewport": {
           "innerWidth": 1440,
-          "innerHeight": 872,
+          "innerHeight": 868,
           "clientWidth": 1440,
           "scrollWidth": 1440
         },
         "canvas": {
           "width": 858,
-          "height": 834,
+          "height": 830,
           "mode": "result",
-          "firstVisibleMs": 3.6
+          "firstVisibleMs": 3.9
         },
         "bodyVisible": true,
         "degradationVisible": false,
         "composerState": "ready",
-        "versionKind": "ordinal",
-        "truthKind": "valid",
-        "visiblePrimaryActionCount": 3,
+        "versionKind": "missing",
+        "truthKind": "missing",
+        "visiblePrimaryActionCount": 0,
         "activeElement": {
           "tag": "body",
           "ariaLabel": null,
-          "textDigest": "246299a76806479c8673e74c4d83aa67c0ad365a162a624822a20190cad1b1e8"
+          "textDigest": "e5b97250dcf61238a7a036d1cf7779e3a57e752bb86965809c49a156dc7df5e9"
         },
         "internalLeakFlags": {
           "absolutePath": false,
           "credential": false,
           "rawInternalId": false
         },
-        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf",
+        "titleDigest": null,
         "pageHorizontalOverflow": false
       },
       {
@@ -319,38 +319,38 @@
           "height": 900
         },
         "screenshot": "dark-1024.png",
-        "screenshotSha256": "bc2938d196d2b989a76ebb34aa03bb864e655c42ee0e7ef5fcb66e8e3fc773bd",
-        "screenshotBytes": 409046,
-        "domSha256": "ee238555db32b8eeaa17162e54a11fe6ec3f402b21be0a4d4c5ae25db1759346",
+        "screenshotSha256": "59fb17a9d2e79fa97f70dddbdf27d7facde7733619a895d561c493fa5d89fc3a",
+        "screenshotBytes": 195121,
+        "domSha256": "2e346d1b3c52b909b9387534bffb1cd46d0a9bad6910e01fb878422734eeaeb9",
         "viewport": {
           "innerWidth": 1024,
-          "innerHeight": 872,
+          "innerHeight": 868,
           "clientWidth": 1024,
           "scrollWidth": 1024
         },
         "canvas": {
-          "width": 683,
-          "height": 834,
+          "width": 442,
+          "height": 830,
           "mode": "result",
-          "firstVisibleMs": 3.6
+          "firstVisibleMs": 3.9
         },
         "bodyVisible": true,
         "degradationVisible": false,
         "composerState": "ready",
-        "versionKind": "ordinal",
-        "truthKind": "valid",
-        "visiblePrimaryActionCount": 3,
+        "versionKind": "missing",
+        "truthKind": "missing",
+        "visiblePrimaryActionCount": 0,
         "activeElement": {
           "tag": "body",
           "ariaLabel": null,
-          "textDigest": "fffbe14de210ae0879c9dba18f591d562eb1be27bd94e705012e63c7fbd2b084"
+          "textDigest": "e5b97250dcf61238a7a036d1cf7779e3a57e752bb86965809c49a156dc7df5e9"
         },
         "internalLeakFlags": {
           "absolutePath": false,
           "credential": false,
           "rawInternalId": false
         },
-        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf",
+        "titleDigest": null,
         "pageHorizontalOverflow": false
       },
       {
@@ -361,58 +361,58 @@
           "height": 900
         },
         "screenshot": "dark-820.png",
-        "screenshotSha256": "a11dfedf8ac5e27a7611809b7d4d46d6a46a917a51fbd479c968bb2526a71006",
-        "screenshotBytes": 352242,
-        "domSha256": "80f4ef903ab743138fb242368f100d4bcde17d3441b78a57e4c4a93e3ee46f9d",
+        "screenshotSha256": "f82a61252f2b4761b2d942690a7c9be601fa4920a350692eba1ae65660992478",
+        "screenshotBytes": 139249,
+        "domSha256": "c58bc9a6f6aabfbbb282ebe1fae4980bb39cb68d49b68aac6f3fde0450ea5361",
         "viewport": {
           "innerWidth": 820,
-          "innerHeight": 872,
+          "innerHeight": 868,
           "clientWidth": 820,
           "scrollWidth": 820
         },
         "canvas": {
           "width": 820,
-          "height": 834,
+          "height": 830,
           "mode": "result",
-          "firstVisibleMs": 3.6
+          "firstVisibleMs": 3.9
         },
         "bodyVisible": true,
         "degradationVisible": false,
         "composerState": "ready",
-        "versionKind": "ordinal",
-        "truthKind": "valid",
-        "visiblePrimaryActionCount": 3,
+        "versionKind": "missing",
+        "truthKind": "missing",
+        "visiblePrimaryActionCount": 0,
         "activeElement": {
           "tag": "body",
           "ariaLabel": null,
-          "textDigest": "d6654c22ee696611e818d0e8c0192835cab87e794cdcac3e24ab0f4608abfa8a"
+          "textDigest": "3ea748be1d570d6b2dd3b4a3e942fef3c3c5e540f71060ed02198c9fa7e42a7f"
         },
         "internalLeakFlags": {
           "absolutePath": false,
           "credential": false,
           "rawInternalId": false
         },
-        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf",
+        "titleDigest": null,
         "pageHorizontalOverflow": false
       }
     ],
     "modeTrace": [
       {
         "mode": "code",
-        "feedbackMs": 13.168,
-        "domSha256": "bd360ab13681af6a877373d693e947f7b5442d81711ef36e7610dd94cac9a3b6",
+        "feedbackMs": 11.191,
+        "domSha256": "d990989dbb33748c24cf465b2e32242cbd8a9b8272d3d0c238115f89242fc83f",
         "theme": "dark",
         "viewport": {
           "innerWidth": 820,
-          "innerHeight": 872,
+          "innerHeight": 868,
           "clientWidth": 820,
           "scrollWidth": 820
         },
         "canvas": {
           "width": 820,
-          "height": 834,
+          "height": 830,
           "mode": "code",
-          "firstVisibleMs": 3.6
+          "firstVisibleMs": 3.9
         },
         "bodyVisible": false,
         "degradationVisible": false,
@@ -423,7 +423,7 @@
         "activeElement": {
           "tag": "body",
           "ariaLabel": null,
-          "textDigest": "d6654c22ee696611e818d0e8c0192835cab87e794cdcac3e24ab0f4608abfa8a"
+          "textDigest": "deadf4881b1c0c1525f1af96fc3d74d4803091d23e04c87b2ad7c656dbd51c1a"
         },
         "internalLeakFlags": {
           "absolutePath": false,
@@ -434,20 +434,20 @@
       },
       {
         "mode": "compare",
-        "feedbackMs": 5.149,
-        "domSha256": "f379cf225986cacce9470c0444e4b8ada7b15250478bbf93d360be989493ba9c",
+        "feedbackMs": 15.193,
+        "domSha256": "09ed9165fa6259f509c207277bfae6a743bdc27e362a20302e9fdfc50e1420e9",
         "theme": "dark",
         "viewport": {
           "innerWidth": 820,
-          "innerHeight": 872,
+          "innerHeight": 868,
           "clientWidth": 820,
           "scrollWidth": 820
         },
         "canvas": {
           "width": 820,
-          "height": 834,
+          "height": 830,
           "mode": "compare",
-          "firstVisibleMs": 3.6
+          "firstVisibleMs": 3.9
         },
         "bodyVisible": false,
         "degradationVisible": false,
@@ -458,7 +458,7 @@
         "activeElement": {
           "tag": "body",
           "ariaLabel": null,
-          "textDigest": "d6654c22ee696611e818d0e8c0192835cab87e794cdcac3e24ab0f4608abfa8a"
+          "textDigest": "693e4c55dcaa7ff05e44e2d725c7197436df2c9b97a3c24ac66be52226fcab0c"
         },
         "internalLeakFlags": {
           "absolutePath": false,
@@ -469,20 +469,20 @@
       },
       {
         "mode": "history",
-        "feedbackMs": 2.914,
-        "domSha256": "c8473a6d82d7898a60f3d336d4f2be7ef2fee7cf402a6c2cb146de4c18ff4393",
+        "feedbackMs": 8.141,
+        "domSha256": "32282bf162fc6004a1194ba1c81bc698a8bcc2303134ca1c5517058b3d5bdbee",
         "theme": "dark",
         "viewport": {
           "innerWidth": 820,
-          "innerHeight": 872,
+          "innerHeight": 868,
           "clientWidth": 820,
           "scrollWidth": 820
         },
         "canvas": {
           "width": 820,
-          "height": 834,
+          "height": 830,
           "mode": "history",
-          "firstVisibleMs": 3.6
+          "firstVisibleMs": 3.9
         },
         "bodyVisible": false,
         "degradationVisible": false,
@@ -493,7 +493,7 @@
         "activeElement": {
           "tag": "body",
           "ariaLabel": null,
-          "textDigest": "d6654c22ee696611e818d0e8c0192835cab87e794cdcac3e24ab0f4608abfa8a"
+          "textDigest": "7becc2bd7e80b3370bf7a11a42863bd2ccdf5e6450febf3dbc89d7efcc8f9e32"
         },
         "internalLeakFlags": {
           "absolutePath": false,
@@ -504,61 +504,61 @@
       },
       {
         "mode": "result",
-        "feedbackMs": 18.154,
-        "domSha256": "cd8fe46ed7ef44b18a11e1c01ce231d629850d69697d1adcf827e42ad0a9de0e",
+        "feedbackMs": 9.235,
+        "domSha256": "c58bc9a6f6aabfbbb282ebe1fae4980bb39cb68d49b68aac6f3fde0450ea5361",
         "theme": "dark",
         "viewport": {
           "innerWidth": 820,
-          "innerHeight": 872,
+          "innerHeight": 868,
           "clientWidth": 820,
           "scrollWidth": 820
         },
         "canvas": {
           "width": 820,
-          "height": 834,
+          "height": 830,
           "mode": "result",
-          "firstVisibleMs": 3.6
+          "firstVisibleMs": 3.9
         },
         "bodyVisible": true,
         "degradationVisible": false,
         "composerState": "ready",
-        "versionKind": "ordinal",
-        "truthKind": "valid",
-        "visiblePrimaryActionCount": 1,
+        "versionKind": "missing",
+        "truthKind": "missing",
+        "visiblePrimaryActionCount": 0,
         "activeElement": {
           "tag": "body",
           "ariaLabel": null,
-          "textDigest": "d6654c22ee696611e818d0e8c0192835cab87e794cdcac3e24ab0f4608abfa8a"
+          "textDigest": "3ea748be1d570d6b2dd3b4a3e942fef3c3c5e540f71060ed02198c9fa7e42a7f"
         },
         "internalLeakFlags": {
           "absolutePath": false,
           "credential": false,
           "rawInternalId": false
         },
-        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf"
+        "titleDigest": null
       }
     ],
     "keyboard": {
       "steps": [
         {
           "tag": "button",
+          "ariaLabel": "返回对话",
+          "textDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "tag": "select",
+          "ariaLabel": "切换当前结果",
+          "textDigest": "3049e1a4ee20555cb271afa683519b2929cb900909940fd994d8c7c9cba391a3"
+        },
+        {
+          "tag": "button",
+          "ariaLabel": null,
+          "textDigest": "bb7ef73495dd8a74eead9a021f2739832271393fe393708fe5c50f995749649f"
+        },
+        {
+          "tag": "button",
           "ariaLabel": null,
           "textDigest": "e6f04ffbaa424001e9716a18813eab4adf46f4e54528f5613915ee7d4d6453ca"
-        },
-        {
-          "tag": "button",
-          "ariaLabel": null,
-          "textDigest": "20a7f192800652ea7f87451110f3fd8af66270dbb7349e94161eca1144da13c2"
-        },
-        {
-          "tag": "button",
-          "ariaLabel": null,
-          "textDigest": "bb58d709f19dedbfee7df2daac0722e4cac43ba4c8c19186e232f020b0de7042"
-        },
-        {
-          "tag": "button",
-          "ariaLabel": "询问 Agent",
-          "textDigest": "6c676241b8e284e56373c89d4a92fbae30f7d7c52e612496bd7e6f3b1b701f9c"
         }
       ],
       "modeEnterActivated": true,
@@ -569,7 +569,7 @@
     },
     "lifecycle": {
       "compareVisible": true,
-      "compareDigest": "638f5accc246f22af8751b2aa21a9d86ec51a1027c2c8a597e99bf6a809ad11d",
+      "compareDigest": "d663d043e45afc5e22e3fb831d611884d5be7fdc1f9d1f7c946ef25047419fd3",
       "adoptedVersionKind": "ordinal",
       "adopted": true,
       "undone": true,
@@ -583,35 +583,18 @@
       "resultRecovered": true,
       "composerRecovered": true,
       "versionRecovered": true,
-      "beforeDigest": "638b803320d6a4e304518ebe33ece41bcae25c310ed0554a70b50a99980331ed",
-      "afterDigest": "112489339bbeda8313928ac221adb1b4215c2ce26d6e695340e2836da622eea7"
+      "beforeDigest": "c0bb5a56c6ff37a0701f49039eebb104f738561a3bdecc0dfce6473bdfc15ae9",
+      "afterDigest": "df331ebde09146b61d940bc5660cbc0a062a4fceb8ab75f4342be08481758992"
     },
     "failures": [
-      {
-        "kind": "interaction",
-        "bodyPreserved": true,
-        "pageHorizontalOverflow": false,
-        "domSha256": "04a98030b6ce3c7c78a3be6452b8cfa9fb4b0d4e6a2b56c59d2213a7f0cea62f",
-        "screenshot": "failure-interaction.png",
-        "screenshotSha256": "47cea98dcd969debf57bdfe427a57d160748a27cf7615b6ee99ca38424ba2f7d",
-        "screenshotBytes": 265578,
-        "degradationVisible": true,
-        "internalLeakFlags": {
-          "absolutePath": false,
-          "credential": false,
-          "rawInternalId": false
-        },
-        "actionable": true,
-        "recovered": true
-      },
       {
         "kind": "versions",
         "bodyPreserved": true,
         "pageHorizontalOverflow": false,
-        "domSha256": "30cdcfb8d37b1db63ba9f54cc871d5a6e9986bed3e9d088acc403f90b0337b53",
+        "domSha256": "d44d320aecca2f7a709be5cfef90192e37fbbfa6b55dcccb2b4da7c7950b5446",
         "screenshot": "failure-versions.png",
-        "screenshotSha256": "51e36e794392701f10ce9ba70f784433911f4d89583c6c4cfc04acc3ae6ba452",
-        "screenshotBytes": 282120,
+        "screenshotSha256": "ff3890c8017d2f59f7261dcdb9137ed8e67e7f795d5ef2541ad6fb8fb0bb1054",
+        "screenshotBytes": 128733,
         "degradationVisible": true,
         "internalLeakFlags": {
           "absolutePath": false,
@@ -625,10 +608,10 @@
         "kind": "storage",
         "bodyPreserved": true,
         "pageHorizontalOverflow": false,
-        "domSha256": "f9c4fe0e33179a5d7f3bc3288cd48065f20dc7881b11d34c40b8dd1aed268f96",
+        "domSha256": "570d85f0ca64564e88782e2e6d91132f6bd88cf31c46e61604604f6068b3d578",
         "screenshot": "failure-storage.png",
-        "screenshotSha256": "4e96df2f8b8cbb9b294025c72461852b060be5920513daa5260df2c0a317578e",
-        "screenshotBytes": 289574,
+        "screenshotSha256": "d074e0ffccfe49256a0f56363ff940891e1b5f90f8b3358618e12231877a2cae",
+        "screenshotBytes": 139263,
         "degradationVisible": true,
         "internalLeakFlags": {
           "absolutePath": false,
@@ -642,10 +625,10 @@
         "kind": "code",
         "bodyPreserved": true,
         "pageHorizontalOverflow": false,
-        "domSha256": "f44428d772cdb8ff400e4c720b764d6b66bb73578664f3b70ebf85ab6d4c4f8b",
+        "domSha256": "326ad8e23a407ef5ed19c0414ff9d082b7860210ed855f6be9ab05b0d2a23c31",
         "screenshot": "failure-code.png",
-        "screenshotSha256": "4e96df2f8b8cbb9b294025c72461852b060be5920513daa5260df2c0a317578e",
-        "screenshotBytes": 289574,
+        "screenshotSha256": "a51f9d8fb2ef569b296a5d52ad0b2084eb569c30b26c00f4b75f44ce18f90f4a",
+        "screenshotBytes": 129730,
         "degradationVisible": true,
         "internalLeakFlags": {
           "absolutePath": false,
@@ -659,10 +642,10 @@
         "kind": "context",
         "bodyPreserved": true,
         "pageHorizontalOverflow": false,
-        "domSha256": "4cafe9d0078fc680c836aad7cf474892b3fce30f3a55f58f008215b2e0f9e850",
+        "domSha256": "de6660bdb2d329112457ea49cd2d36cc4f090ea901f813909c2f671ea818c31e",
         "screenshot": "failure-context.png",
-        "screenshotSha256": "6f015e55d20764993fb724881a513b1291cb0d0440b8a054db3a893c04aa5a7a",
-        "screenshotBytes": 277784,
+        "screenshotSha256": "41157c6ef7e46b6798df872048d84355be453cfafa56486878708c279d60aa67",
+        "screenshotBytes": 129258,
         "degradationVisible": true,
         "internalLeakFlags": {
           "absolutePath": false,
@@ -676,6 +659,24 @@
         "recoveredComposerState": "ready"
       }
     ],
+    "interactionQuiet": {
+      "kind": "interaction-quiet",
+      "bodyPreserved": true,
+      "pageHorizontalOverflow": false,
+      "domSha256": "df331ebde09146b61d940bc5660cbc0a062a4fceb8ab75f4342be08481758992",
+      "screenshot": "failure-interaction-quiet.png",
+      "screenshotSha256": "68d14627cb1a6b1702094985fd4f089deb164a98652537f55f4d041b2bbdb175",
+      "screenshotBytes": 141176,
+      "degradationVisible": false,
+      "internalLeakFlags": {
+        "absolutePath": false,
+        "credential": false,
+        "rawInternalId": false
+      },
+      "quietByContract": true,
+      "imagePreserved": true,
+      "recovered": true
+    },
     "allMatrixStatesCaptured": true,
     "allScreenshotsDistinct": true,
     "noHorizontalOverflow": true,
@@ -688,11 +689,11 @@
     "serviceRestartPassed": true,
     "visibleFeedbackBudget": {
       "targetMs": 100,
-      "observedModeSwitchMaxMs": 18.154,
+      "observedModeSwitchMaxMs": 15.193,
       "modeSwitchPassed": true,
-      "openResultFeedbackMs": 7.528,
+      "openResultFeedbackMs": 7.498,
       "openResultFeedbackPassed": true,
-      "firstContentVisibleMs": 3.6,
+      "firstContentVisibleMs": 3.9,
       "firstContentPassed": true
     },
     "passed": true
