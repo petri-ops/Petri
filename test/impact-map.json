@@ -1210,6 +1210,7 @@
         "scripts/ui349-*.cjs",
         "scripts/ui350-*.cjs",
         "scripts/ui351-*.cjs",
+        "scripts/ui358-*.cjs",
         "scripts/ui359-*.cjs",
         "scripts/ui360-*.cjs",
         "scripts/ui361-*.cjs",
@@ -1544,6 +1545,7 @@
         "frontend/src/components/desktop/PluginStorePanel.tsx",
         "frontend/vite.config.ts",
         "test/block84-pack-oneclick.test.mjs",
+        "test/pack-registry.test.mjs",
         "test/block84-*.test.mjs",
         "test/env-coordinator-trusted-origins.test.mjs",
         "test/env-coordinator-port.test.mjs",
@@ -1552,6 +1554,7 @@
         "acceptance/block-84/**"
       ],
       "tests": [
+        "test/pack-registry.test.mjs",
         "test/block84-pack-oneclick.test.mjs",
         "test/env-coordinator-trusted-origins.test.mjs",
         "test/env-coordinator-port.test.mjs",

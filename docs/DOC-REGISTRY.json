@@ -1429,13 +1429,13 @@
       "id": "G0-RS",
       "path": "docs/g0-result-studio-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "planned",
       "canonical": false,
       "truthDomain": "g0-result-studio",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P1-WINDOWS-PREP-COMPLETED",
-      "lastUpdated": "2026-09-13"
+      "phase": "P2-P4R-QUEUED",
+      "lastUpdated": "2026-09-15"
     },
     {
       "id": "G0-RS-UX1H",
@@ -4376,13 +4376,13 @@
       "id": "BLOCK-86-DOMAIN-PACK-LIFECYCLE",
       "path": "docs/block-86-domain-pack-lifecycle-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "active",
       "canonical": true,
       "truthDomain": "block-86-domain-pack-lifecycle",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-14",
       "archivePolicy": "archive_when_superseded",
-      "phase": "PLANNED-QUEUED",
+      "phase": "P1",
       "tags": [
         "block-86",
         "domain-pack",

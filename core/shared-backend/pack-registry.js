@@ -8,6 +8,9 @@
  * 本模块只管记录与校验；boot 接线（插件源追加 + tool-registry 注册）由 server 启动时消费记录完成。
  *
  * 包契约（pack.json）：packId 必填；plugins/installed.json 必须存在（可装载性硬证据）。
+ * BLOCK-86 P1 — `requires.runtimes` 契约：数据驱动声明依赖的运行时插件
+ * （[{ pluginId, version? }]），装卸编排由契约推导（src/pack-lifecycle.js），
+ * 本模块只做形状校验与记录，不写死任何领域/运行时字样。
  */
 
 const fs = require('fs');
@@ -34,6 +37,30 @@ function writeInstalledPacks(dataDir, packs) {
   fs.writeFileSync(file, JSON.stringify(packs, null, 2) + '\n', 'utf-8');
 }
 
+/**
+ * BLOCK-86 P1 — 归一化 `requires.runtimes` 契约声明。
+ * 合法形态：缺省 = []；数组，每项 { pluginId: 非空字符串, version?: 字符串 }。
+ * 字段存在但形状错误 → 拒绝（fail loudly，不静默忽略包作者的笔误）。
+ * 返回 { ok: true, runtimes } 或 { ok: false, error: 'pack_requires_runtimes_invalid' }。
+ */
+function normalizeRequiresRuntimes(requires) {
+  if (!requires || requires.runtimes === undefined) return { ok: true, runtimes: [] };
+  if (!Array.isArray(requires.runtimes)) return { ok: false, error: 'pack_requires_runtimes_invalid' };
+  const runtimes = [];
+  for (const item of requires.runtimes) {
+    if (!item || typeof item !== 'object' || typeof item.pluginId !== 'string' || !item.pluginId.trim()) {
+      return { ok: false, error: 'pack_requires_runtimes_invalid' };
+    }
+    if (item.version !== undefined && typeof item.version !== 'string') {
+      return { ok: false, error: 'pack_requires_runtimes_invalid' };
+    }
+    runtimes.push(item.version !== undefined
+      ? { pluginId: item.pluginId, version: item.version }
+      : { pluginId: item.pluginId });
+  }
+  return { ok: true, runtimes };
+}
+
 /** 校验一个包目录：pack.json 契约 + 可装载性硬证据。返回 { ok, pack?, error? }。 */
 function validatePackDir(packRoot) {
   const packJsonPath = path.join(packRoot, 'pack.json');
@@ -52,6 +79,8 @@ function validatePackDir(packRoot) {
   if (!fs.existsSync(path.join(packRoot, 'plugins', 'installed.json'))) {
     return { ok: false, error: 'pack_plugins_index_missing' };
   }
+  const runtimes = normalizeRequiresRuntimes(pack.requires);
+  if (!runtimes.ok) return runtimes;
   return {
     ok: true,
     pack: {
@@ -61,6 +90,7 @@ function validatePackDir(packRoot) {
       version: pack.version || '0.0.0',
       description: pack.description || '',
       provides: pack.provides || {},
+      requiresRuntimes: runtimes.runtimes,
       packRoot: path.resolve(packRoot),
     },
   };
@@ -94,6 +124,8 @@ function installPack(dataDir, packRoot) {
     packId: validated.pack.packId,
     packRoot: validated.pack.packRoot,
     version: validated.pack.version,
+    // BLOCK-86 P1 — 契约随记录存档：卸载编排由它推导（不重读包源也能推导）
+    requiresRuntimes: validated.pack.requiresRuntimes,
     installedAt: new Date().toISOString(),
   };
   if (existing >= 0) packs[existing] = record;
@@ -111,12 +143,40 @@ function uninstallPack(dataDir, packId) {
   return { ok: true, removed: packId };
 }
 
+/**
+ * BLOCK-86 P1 — 卸载运行时移除计划（纯记录推导，主进程编排层的输入）。
+ * 可移除 = 本包契约声明 且 不被任何其他已装包声明（运行时槽位按声明共享，
+ * 单领域包前提下 removable 恒等于其全部声明，多包时诚实保留共享项）。
+ * 返回 { ok, packId, removable: [pluginId], retained: [{ pluginId, requiredBy }] }
+ * 或 { ok:false, error:'pack_not_installed' }。
+ * 契约负例保障：无 requires.runtimes 的包 → removable 恒 []（编排层绝不触碰运行时）。
+ */
+function computeRuntimeRemovalPlan(dataDir, packId) {
+  const packs = readInstalledPacks(dataDir);
+  const target = packs.find((p) => p.packId === packId);
+  if (!target) return { ok: false, error: 'pack_not_installed' };
+  const declared = Array.isArray(target.requiresRuntimes) ? target.requiresRuntimes : [];
+  const removable = [];
+  const retained = [];
+  for (const item of declared) {
+    const others = packs
+      .filter((p) => p.packId !== packId)
+      .filter((p) => Array.isArray(p.requiresRuntimes) && p.requiresRuntimes.some((r) => r.pluginId === item.pluginId))
+      .map((p) => p.packId);
+    if (others.length > 0) retained.push({ pluginId: item.pluginId, requiredBy: others });
+    else removable.push(item.pluginId);
+  }
+  return { ok: true, packId, removable, retained };
+}
+
 module.exports = {
   packsRecordFile,
   readInstalledPacks,
   writeInstalledPacks,
+  normalizeRequiresRuntimes,
   validatePackDir,
   discoverAvailablePacks,
   installPack,
   uninstallPack,
+  computeRuntimeRemovalPlan,
 };

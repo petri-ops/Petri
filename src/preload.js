@@ -205,12 +205,21 @@ const desktopBridgeSurface = {
   },
 
   // BLOCK-84：领域包一键装/卸桥（记录制；装/卸后需重启生效）
+  // BLOCK-86 P1：卸载走契约推导编排——uninstallPlan 给确认弹层供数据（运行时
+  // 回收体积/共享保留/包源），uninstall 的 options 三档显式勾选（缺省全保留）；
+  // onInstallProgress 订阅运行时下载进度（main → pack:install-progress）。
   packs: {
     listInstalled: () => ipcRenderer.invoke('pack:list-installed'),
     listAvailable: () => ipcRenderer.invoke('pack:list-available'),
     installFromDialog: () => ipcRenderer.invoke('pack:install-from-dialog'),
     installPath: (packRoot) => ipcRenderer.invoke('pack:install-path', packRoot),
-    uninstall: (packId) => ipcRenderer.invoke('pack:uninstall', packId),
+    uninstallPlan: (packId) => ipcRenderer.invoke('pack:uninstall-plan', packId),
+    uninstall: (packId, options) => ipcRenderer.invoke('pack:uninstall', packId, options),
+    onInstallProgress: (callback) => {
+      const listener = (_event, payload) => callback(payload);
+      ipcRenderer.on('pack:install-progress', listener);
+      return () => ipcRenderer.removeListener('pack:install-progress', listener);
+    },
   },
 
   // M2-9：content-plugin 文档桥（docs.tsx 运行时拉取已装教程插件）
