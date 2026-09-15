@@ -4409,8 +4409,29 @@
       ],
       "notes": "多端同步(BLOCK-87 收口)+联邦(BLOCK-85 P0-P4 待双真机验收)+BLOCK-88 排队交接",
       "registeredAt": "2026-09-14"
+    },
+    {
+      "id": "SESSION-HANDOFF-2026-09-15",
+      "path": "docs/session-handoff-2026-09-15.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "session-handoff-2026-09-15",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "session-handoff",
+        "2026-09-15",
+        "G0-RS",
+        "P4R-CORPUS",
+        "P6-recapture",
+        "closeout"
+      ],
+      "notes": "2026-09-15 会话交接文档（换 Agent 继续）：G0-RS P2 P4R-CORPUS 当日收口 completed（corpus 链包感知化 + 证据链全绿 + 两笔存量债清偿）+ 剩余整包 closeout 三步（P6 重采两处预修 / ui observation 3001 端口窗口 / 回写五件套）+ 源绑定纪律与两条同类二次教训。",
+      "registeredAt": "2026-09-15",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "REFERENCE"
     }
   ],
   "lastUpdated": "2026-09-14",
-  "documentCount": 237
+  "documentCount": 240
 }
