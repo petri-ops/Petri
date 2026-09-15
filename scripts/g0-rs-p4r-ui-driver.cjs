@@ -213,18 +213,37 @@ async function captureState(window, outputDir, label, theme, width, height) {
   };
 }
 
-async function clickMode(webContents, label) {
-  const clicked = await webContents.executeJavaScript(`
-    (() => {
-      const nav = document.querySelector('nav[aria-label="结果视图"]');
-      const button = nav && [...nav.querySelectorAll('button')]
-        .find((item) => (item.textContent || '').trim() === ${JSON.stringify(label)});
-      if (!button) return false;
-      button.click();
-      return true;
-    })()
-  `, true);
-  if (!clicked) throw new Error(`mode button not found: ${label}`);
+async function clickMode(webContents, label, timeoutMs = 15_000) {
+  // 模式切换器的在场性跟随交互绑定清单（versionFamilyId ← boundInteractionManifest），
+  // 绑定 refetch 的窗口内 nav 会瞬时消失，所以点击必须有界重试而不是一次性判定。
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const clicked = await webContents.executeJavaScript(`
+      (() => {
+        const nav = document.querySelector('nav[aria-label="结果视图"]');
+        const button = nav && [...nav.querySelectorAll('button')]
+          .find((item) => (item.textContent || '').trim() === ${JSON.stringify(label)});
+        if (!button) return false;
+        button.click();
+        return true;
+      })()
+    `, true);
+    if (clicked) return;
+    if (Date.now() >= deadline) {
+      const diagnostics = await webContents.executeJavaScript(`
+        (() => ({
+          navPresent: Boolean(document.querySelector('nav[aria-label="结果视图"]')),
+          navButtons: [...(document.querySelector('nav[aria-label="结果视图"]')?.querySelectorAll('button') || [])]
+            .map((item) => (item.textContent || '').trim()),
+          canvasMode: document.querySelector('[aria-label="结果主画布"]')?.getAttribute('data-mode') || null,
+          bodyHead: (document.body.innerText || '').replace(/\\s+/g, ' ').slice(0, 400),
+        }))()
+      `, true).catch(() => null);
+      console.error(`[p4r-ui-driver] mode button missing: ${JSON.stringify(diagnostics)}`);
+      throw new Error(`mode button not found: ${label}`);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
 }
 
 async function sendTrustedKey(webContents, {
