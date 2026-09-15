@@ -1,0 +1,38 @@
+{
+  "name": "ui379-delegated-retest",
+  "startedAt": "2026-09-15T13:05:29.401Z",
+  "finishedAt": "2026-09-15T13:05:30.477Z",
+  "assertions": [
+    {
+      "name": "welcome: #root rendered (not unmounted)",
+      "pass": true,
+      "detail": "children=2"
+    },
+    {
+      "name": "welcome: body has visible copy",
+      "pass": true,
+      "detail": "textLen=156"
+    },
+    {
+      "name": "project: #root rendered after loading flip",
+      "pass": true,
+      "detail": "children=1"
+    },
+    {
+      "name": "project: left loading state (hooks-count flip survived)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project: workspace has real copy",
+      "pass": true,
+      "detail": "textLen=224"
+    }
+  ],
+  "allPass": true,
+  "provenance": "user ruled 「你来」 delegating this retest to the session; dev Electron real stack, real full-page navigations",
+  "fixes": [
+    "UI-379 ① welcome blank (DesktopOnboarding hooks order)",
+    "UI-379 ② project white (ProjectWorkspace runtime banner hooks order)"
+  ]
+}
