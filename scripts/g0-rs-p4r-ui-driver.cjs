@@ -325,10 +325,21 @@ async function keyboardTrace(window) {
     5_000,
   );
   await clickMode(wc, '结果');
-  // 焦点归一化：Enter/程序化点击后 activeElement 可能已随 DOM 卸载漂移，首个 Tab
-  // 只做归一化不前进（旧证据期 steps[0] 曾直接落在 body）。blur 后首个 Tab 即
-  // 前进到第一个可聚焦元素，4 步 trace 语义才是「连续 Tab 到交互元素」。
-  await wc.executeJavaScript(`document.activeElement && document.activeElement.blur()`, true);
+  // 焦点播种：steps 在每次 Tab **前**采样，语义=「每次 Tab 前焦点停在交互元素」。
+  // 旧结构下 代码 按钮跨模式存活、焦点保持；现结构切回 result 后 contextBar 卸载
+  // 把焦点抖落回 body（steps[0]=body，判据必红）。先确定性播到画布内首个可交互
+  // 元素，再走 4 步 Tab trace。
+  const focusSeeded = await wc.executeJavaScript(`
+    (() => {
+      const seed = document.querySelector('[aria-label="结果主画布"] button, [aria-label="结果主画布"] a, [aria-label="结果主画布"] select, [aria-label="结果主画布"] textarea, [aria-label="结果主画布"] input')
+        || [...document.querySelectorAll('button')]
+          .find((item) => (item.getAttribute('aria-label') || '') === '返回对话');
+      if (!seed) return false;
+      seed.focus();
+      return document.activeElement === seed;
+    })()
+  `, true);
+  if (!focusSeeded) throw new Error('could not seed focus inside the Result Studio canvas');
   await new Promise((resolve) => setTimeout(resolve, 80));
 
   const steps = [];
