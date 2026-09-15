@@ -14,7 +14,7 @@ import type { ActiveWorkspaceFile, FileEntry } from './types';
 import { FileTreeList } from './FileTreeList';
 import { WorkspaceFilePreview } from './WorkspaceFilePreview';
 import { FileTreeContextMenu, FileTreeDialogHost, type FileTreeDialog, type FileTreeMenuAction, type FileTreeMenuTarget } from './FileTreeOpsOverlay';
-import { fsMove, fsCopy, joinPath, uniqueTargetName, type DraggedTreeItem } from './fileOps';
+import { fsImportFrom, fsMkdir, fsMove, fsCopy, fsUpload, joinPath, uniqueTargetName, type DraggedTreeItem } from './fileOps';
 
 export function RightFileTree({
   project,
@@ -52,6 +52,31 @@ export function RightFileTree({
   // BLOCK-89 / UI-378 — 文件操作（右键菜单 + 拖拽）状态
   const [menuTarget, setMenuTarget] = useState<FileTreeMenuTarget | null>(null);
   const [dialog, setDialog] = useState<FileTreeDialog | null>(null);
+// BLOCK-90 — OS 拖入目录递归走树（ssh 分片上传用；本地项目走服务端 fs_cp 递归，不走这里）。
+interface OsWalkItem { file: File; relPath: string; }
+
+async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWalkItem[]> {
+  if (entry.isFile) {
+    return new Promise((resolve) => (entry as FileSystemFileEntry).file(
+      (file) => resolve([{ file, relPath: `${prefix}${entry.name}` }]),
+      () => resolve([]),
+    ));
+  }
+  const reader = (entry as FileSystemDirectoryEntry).createReader();
+  const out: OsWalkItem[] = [];
+  for (;;) {
+    const batch: FileSystemEntry[] = await new Promise((resolve) => reader.readEntries(
+      (items) => resolve(items as FileSystemEntry[]),
+      () => resolve([]),
+    ));
+    if (batch.length === 0) break;
+    for (const child of batch) {
+      for (const item of await walkOsEntry(child, `${prefix}${entry.name}/`)) out.push(item);
+    }
+  }
+  return out;
+}
+
   const [opsError, setOpsError] = useState('');
 
   const fetchDir = useCallback(async (prefix: string) => {
@@ -202,6 +227,106 @@ export function RightFileTree({
     const op = copy ? fsCopy : fsMove;
     await runTreeOp(() => op(project.id, item.path, toPath));
   }, [fetchDir, project.id, runTreeOp]);
+
+  // ── BLOCK-90 — OS 拖入导入 ──────────────────────────────────────────
+  // 工作区窗口级 drop 接管（home 页 BLOCK-53 的姊妹面：/ =拖目录建项目，/project =导入文件）。
+  // 落点：文件树目录行（data-tree-dir）=该目录，其余=根目录；重名 uniqueTargetName 自动 -2。
+  // 本地项目：pathForFile（webUtils）取绝对路径 → fs/import-from 服务端拷贝（文件/目录递归）。
+  // ssh 项目：源在桌面机、工作区在远端 → renderer 64KB 分片读 + fs/upload 串行追加；
+  // 目录经 webkitGetAsEntry 递归走树逐个 mkdir+upload。
+  const pathForOf = useCallback((file: File): string | null => {
+    const pathFor = window.biof3Desktop?.files?.pathForFile;
+    if (typeof pathFor === 'function') {
+      try { const p = pathFor(file); if (p) return p; } catch { /* fall through */ }
+    }
+    return (file as File & { path?: string }).path || null;
+  }, []);
+
+  const uploadOsFile = useCallback(async (file: File, toPath: string) => {
+    const CHUNK = 64 * 1024;
+    if (file.size === 0) {
+      await fsUpload(project.id, toPath, '', 0);
+      return;
+    }
+    for (let offset = 0; offset < file.size; offset += CHUNK) {
+      const buf = new Uint8Array(await file.slice(offset, offset + CHUNK).arrayBuffer());
+      let binary = '';
+      for (let i = 0; i < buf.length; i += 0x8000) {
+        binary += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+      }
+      await fsUpload(project.id, toPath, btoa(binary), offset);
+    }
+  }, [project.id]);
+
+  const importFromOsDrop = useCallback(async (
+    items: Array<{ file: File; entry: FileSystemEntry | null; sourcePath?: string | null }>,
+    targetDir: string,
+  ) => {
+    for (const { file, entry, sourcePath } of items) {
+      try {
+        const dirEntries = await fetchDir(targetDir);
+        const base = uniqueTargetName(dirEntries, entry?.isDirectory ? entry.name : file.name);
+        const root = joinPath(targetDir, base);
+        if (project.workspaceKind === 'ssh') {
+          if (entry && entry.isDirectory) {
+            await fsMkdir(project.id, root);
+            for (const item of await walkOsEntry(entry, '')) {
+              await uploadOsFile(item.file, `${root}/${item.relPath}`.replace(/\/{2,}/g, '/'));
+            }
+          } else {
+            await uploadOsFile(file, root);
+          }
+        } else {
+          // 测试缝：DataTransfer 显式携带源路径时优先（CDP 自动化用；真实拖入走
+          // webUtils。该值与直调 fs/import-from REST 等权，无新增特权面）。
+          const abs = sourcePath
+            || (typeof pathForOf === 'function' ? pathForOf(file) : null)
+            || (file as File & { path?: string }).path
+            || null;
+          if (!abs) throw new Error('无法解析拖入项的磁盘路径');
+          await fsImportFrom(project.id, abs, root);
+        }
+      } catch (error) {
+        setOpsError(`${file.name}: ${(error as Error).message || '导入失败'}`);
+      }
+    }
+    notifyTreeChanged();
+  }, [fetchDir, notifyTreeChanged, project.workspaceKind, uploadOsFile]);
+
+  useEffect(() => {
+    const hasExternalFiles = (event: DragEvent) => Array.from(event.dataTransfer?.types || []).includes('Files');
+    const prevent = (event: DragEvent) => {
+      if (!hasExternalFiles(event)) return;
+      event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+    };
+    const onDrop = (event: DragEvent) => {
+      if (!hasExternalFiles(event)) return;
+      event.preventDefault();
+      // Chromium 默认行为是导航到拖入文件路径；上面 preventDefault 已接管。
+      const hit = document.elementFromPoint(event.clientX, event.clientY);
+      const dirRow = hit && (hit as Element).closest('[data-tree-dir]');
+      const targetDir = (dirRow && dirRow.getAttribute('data-tree-dir')) || '';
+      const droppedFiles = Array.from(event.dataTransfer?.files || []);
+      const droppedEntries = Array.from(event.dataTransfer?.items || []).map((item) => {
+        const anyItem = item as DataTransferItem & { webkitGetAsEntry?: () => FileSystemEntry | null };
+        return typeof anyItem.webkitGetAsEntry === 'function' ? anyItem.webkitGetAsEntry() : null;
+      });
+      const seamPath = event.dataTransfer?.getData('application/x-gewu-source-path') || null;
+      const paired = droppedFiles.map((file, index) => ({
+        file,
+        entry: droppedEntries[index] ?? null,
+        sourcePath: seamPath && droppedFiles.length === 1 ? seamPath : null,
+      }));
+      if (paired.length > 0) void importFromOsDrop(paired, targetDir);
+    };
+    window.addEventListener('dragover', prevent);
+    window.addEventListener('drop', onDrop);
+    return () => {
+      window.removeEventListener('dragover', prevent);
+      window.removeEventListener('drop', onDrop);
+    };
+  }, [importFromOsDrop]);
 
   const activePreviewUrl = useMemo(() => {
     if (!activeFile?.url) return '';

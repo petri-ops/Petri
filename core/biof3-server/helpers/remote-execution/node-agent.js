@@ -21,6 +21,8 @@
  *   fs_mkdir <b64path>            → mkdir -p + JSON stat
  *   fs_mv <b64src> <b64dst>       → mv（目标父目录 mkdir -p）
  *   fs_cp <b64src> <b64dst>       → cp -R（目标父目录 mkdir -p；源缺失 not_found；目标已存在 already_exists）
+ *   fs_append <b64path> <b64data> <offset> → 追加分片（BLOCK-90 上传；前置校验当前 size===offset，
+ *                                             防乱序/并发交叉；父目录 mkdir -p；offset_mismatch 显式报错）
  *   fs_rm <b64path>               → rm -rf（受调用方路径边界约束）
  * 路径/内容一律 base64 编码传输（字符集落在 AGENT_ARG_RE 白名单内，无 shell 注入面）。
  *
@@ -194,6 +196,19 @@ case "$cmd" in
     mkdir -p "$(dirname "$t")" 2>/dev/null
     cp -R "$s" "$t" 2>/dev/null || die "fs_cp_failed"
     fs_stat_json "$t"
+    ;;
+  fs_append)
+    # BLOCK-90：分片追加写入。offset 完整性前置校验（当前 size 必须等于 offset），
+    # 客户端串行分片；乱序/并发交叉/断点错位一律 offset_mismatch，不做静默容错。
+    [ $# -ge 3 ] || die "fs_append_usage"
+    f="$(fs_decode "$1")"; off="$3"
+    case "$off" in ''|*[!0-9]*) die "invalid_offset";; esac
+    mkdir -p "$(dirname "$f")" 2>/dev/null
+    cur=0
+    if [ -f "$f" ]; then cur=$(wc -c < "$f" 2>/dev/null | tr -d ' '); fi
+    [ "$cur" = "$off" ] || die "offset_mismatch"
+    fs_decode "$2" >> "$f" || die "fs_append_failed"
+    fs_stat_json "$f"
     ;;
   fs_rm)
     [ $# -ge 1 ] || die "fs_rm_usage"

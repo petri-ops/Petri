@@ -6,7 +6,7 @@
 // ============================================================
 import { getApiPrefix } from '@/lib/authClient';
 
-export type FileOpAction = 'move' | 'copy' | 'delete' | 'mkdir';
+export type FileOpAction = 'move' | 'copy' | 'delete' | 'mkdir' | 'upload' | 'import-from';
 
 export interface FsEntry {
   name: string;
@@ -56,6 +56,16 @@ export function fsDelete(projectId: string, paths: string[]) {
 
 export function fsMkdir(projectId: string, path: string) {
   return fsOp(projectId, 'mkdir', { path });
+}
+
+// BLOCK-90 — OS 拖入导入：分片上传（ssh/本地同构，64KB 二进制/片，b64 后 <128KB argv 上限）。
+export function fsUpload(projectId: string, toPath: string, dataB64: string, offset: number) {
+  return fsOp(projectId, 'upload', { toPath, dataB64, offset });
+}
+
+// BLOCK-90 — 本地项目专属：服务端从桌面绝对路径拷入工作区（文件/目录递归，无 1MB 上限）。
+export function fsImportFrom(projectId: string, sourceAbsolutePath: string, toPath: string) {
+  return fsOp(projectId, 'import-from', { sourceAbsolutePath, toPath });
 }
 
 /** `a/b.txt` → { parent: 'a', name: 'b.txt' }；根级 `b.txt` → { parent: '', name: 'b.txt' }。 */

@@ -151,6 +151,16 @@ function createSshBackend({ alias }) {
       if (!info || info.error) { const e = new Error(info?.error || 'fs_mv_failed'); e.remoteError = info?.error; throw e; }
       return info;
     },
+    // BLOCK-90：分片追加（fs_append）。dataB64 为单分片载荷（≤64KB 二进制，
+    // b64 后 <128KB argv 上限，调用方显式放宽 maxArgLen）；offset 由 agent 前置校验。
+    async append(filePath, dataB64, offset) {
+      const [info] = parseJsonLines(await fsOp(
+        ['fs_append', b64(filePath), dataB64, String(offset)],
+        { maxArgLen: 100_000 },
+      ));
+      if (!info || info.error) { const e = new Error(info?.error || 'fs_append_failed'); e.remoteError = info?.error; throw e; }
+      return info;
+    },
     // BLOCK-89：复制（node-agent fs_cp = cp -R；目标已存在由 agent 显式 already_exists）
     async cp(srcPath, dstPath) {
       const [info] = parseJsonLines(await fsOp(['fs_cp', b64(srcPath), b64(dstPath)]));
@@ -283,6 +293,17 @@ function createLocalBackend() {
       await fsp.mkdir(require('path').dirname(dstPath), { recursive: true });
       await fsp.cp(srcPath, dstPath, { recursive: true, force: false, errorOnExist: true });
       return this.stat(dstPath);
+    },
+    // BLOCK-90：分片追加（与 ssh fs_append 同契约：offset===当前 size 才可追加）。
+    async append(filePath, chunkBuffer, offset) {
+      let current = 0;
+      try { current = (await fsp.stat(filePath)).size; } catch { current = 0; }
+      if (current !== offset) {
+        const e = new Error('offset_mismatch'); e.remoteError = 'offset_mismatch'; throw e;
+      }
+      await fsp.mkdir(require('path').dirname(filePath), { recursive: true });
+      await fsp.appendFile(filePath, chunkBuffer);
+      return this.stat(filePath);
     },
     async rm(targetPath) {
       await fsp.rm(targetPath, { recursive: true, force: true });

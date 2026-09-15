@@ -432,6 +432,79 @@ module.exports = function registerFileRoutes(app) {
       }
     });
 
+    // ── BLOCK-90：OS 拖入导入（upload 分片 / import-from 本地路径拷贝）──────
+    // fs/upload：renderer 把桌面文件分片（64KB 二进制/片，b64 后 <128KB argv 上限）
+    // 串行上传，local/ssh 双后端同构。offset 完整性：0 时目标须不存在（409
+    // target_already_exists），>0 时当前 size 必须===offset（409 offset_mismatch）。
+    app.post('/api/workspaces/:projectId/fs/upload', requireTrustedDesktopOrigin, async (req, res) => {
+      const ctx = requireFsContext(req, res);
+      if (!ctx) return;
+      const toPath = String(req.body?.toPath || '');
+      const dataB64 = String(req.body?.dataB64 || '');
+      const offset = Number(req.body?.offset);
+      if (!toPath || !Number.isInteger(offset) || offset < 0) {
+        return res.status(400).json({ ok: false, error: '缺少 toPath/offset' });
+      }
+      if (!/^[A-Za-z0-9+/=]*$/.test(dataB64)) {
+        return res.status(400).json({ ok: false, error: 'dataB64 非法' });
+      }
+      const chunk = Buffer.from(dataB64, 'base64');
+      if (chunk.length > 96 * 1024) {
+        return res.status(400).json({ ok: false, error: '分片超过 96KB 上限' });
+      }
+      const target = fsEntryOr404(ctx, res, toPath);
+      if (!target) return;
+      try {
+        if (offset === 0 && (await fsPathExists(ctx.backend, target))) {
+          return res.status(409).json({ ok: false, error: '目标已存在', code: 'target_already_exists' });
+        }
+        const entry = await ctx.backend.append(target, ctx.project.workspace_kind === 'ssh' ? dataB64 : chunk, offset);
+        return res.json({ ok: true, entry });
+      } catch (e) {
+        if (e && e.remoteError === 'offset_mismatch') {
+          return res.status(409).json({ ok: false, error: '分片偏移与当前文件大小不一致', code: 'offset_mismatch' });
+        }
+        const mapped = fsOpError(e);
+        if (mapped) return res.status(mapped.status).json(mapped.body);
+        return res.status(500).json({ ok: false, error: e.message });
+      }
+    });
+
+    // fs/import-from：本地项目专属——服务端从桌面绝对路径拷入工作区（文件/目录
+    // 递归，无 1MB 上限）。ssh 项目源文件在桌面机、工作区在远端，走 fs/upload，
+    // 此处显式拒绝（诚实边界，plan D2）。
+    app.post('/api/workspaces/:projectId/fs/import-from', requireTrustedDesktopOrigin, async (req, res) => {
+      const ctx = requireFsContext(req, res);
+      if (!ctx) return;
+      if (ctx.project.workspace_kind === 'ssh') {
+        return res.status(400).json({ ok: false, error: '远程项目暂不支持外部路径导入，请使用分片上传', code: 'import_requires_local' });
+      }
+      const sourceAbsolutePath = String(req.body?.sourceAbsolutePath || '');
+      const toPath = String(req.body?.toPath || '');
+      if (!path.isAbsolute(sourceAbsolutePath) || !toPath) {
+        return res.status(400).json({ ok: false, error: '缺少 sourceAbsolutePath/toPath' });
+      }
+      const target = fsEntryOr404(ctx, res, toPath);
+      if (!target) return;
+      try {
+        await fs.promises.stat(sourceAbsolutePath);
+        if (await fsPathExists(ctx.backend, target)) {
+          return res.status(409).json({ ok: false, error: '目标已存在', code: 'target_already_exists' });
+        }
+        await fs.promises.mkdir(path.dirname(target), { recursive: true });
+        await fs.promises.cp(sourceAbsolutePath, target, { recursive: true, force: false, errorOnExist: true });
+        return res.json({ ok: true, entry: await ctx.backend.stat(target) });
+      } catch (e) {
+        if (e && e.code === 'ENOENT') {
+          return res.status(404).json({ ok: false, error: '源路径不存在' });
+        }
+        if (e && e.code === 'EEXIST') {
+          return res.status(409).json({ ok: false, error: '目标已存在', code: 'target_already_exists' });
+        }
+        return res.status(500).json({ ok: false, error: e.message });
+      }
+    });
+
     app.post('/api/workspaces/:projectId/profile', requireTrustedDesktopOrigin, async (req, res) => {
       const root = getProjectWorkspace(req.params.projectId);
       if (!root) return res.status(404).json({ ok: false, error: '项目工作目录不存在' });

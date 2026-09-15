@@ -62,8 +62,14 @@ export function FileTreeItem({
 
   const handleDragStart = useCallback((event: React.DragEvent) => {
     event.dataTransfer.setData(DRAG_MIME, JSON.stringify({ path: fullPath, name: entry.name, type: entry.type }));
+    // BLOCK-90 — OS 拖出导出：本地项目文件行附带 DownloadURL，拖到 Finder/桌面即落盘。
+    // 树内 drop 读的是上方内部 MIME，互不影响；ssh（文件在远端）与目录不启用。
+    if (entry.type === 'file' && workspaceKind === 'local' && workspaceDir) {
+      const absolute = `file://${workspaceDir}/${fullPath}`;
+      event.dataTransfer.setData('DownloadURL', `application/octet-stream:${entry.name}:${absolute}`);
+    }
     event.dataTransfer.effectAllowed = 'copyMove';
-  }, [entry.name, entry.type, fullPath]);
+  }, [entry.name, entry.type, fullPath, workspaceDir, workspaceKind]);
 
   const handleDragEnter = useCallback((event: React.DragEvent) => {
     if (!isDropTarget || !event.dataTransfer.types.includes(DRAG_MIME)) return;
@@ -102,6 +108,7 @@ export function FileTreeItem({
     <li className={styles.fileTreeNode} role="none">
       <button
         type="button"
+        data-tree-dir={isDropTarget ? fullPath : undefined}
         className={`${styles.fileTreeRow} ${isActive ? styles.fileTreeRowActive : ''} ${dropActive ? styles.fileTreeRowDropTarget : ''}`}
         style={{ paddingLeft: 5 + depth * 16 }}
         draggable={Boolean(onDropToDir)}

@@ -1620,6 +1620,7 @@
       ],
       "tests": [
         "test/workspace-file-ops.test.mjs",
+        "test/workspace-os-import.test.mjs",
         "test/block67-node-agent-fs.test.js",
         "test/block67-routes.test.mjs",
         "test/block73-hidden-files.test.mjs",
