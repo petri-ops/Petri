@@ -1551,7 +1551,8 @@
         "test/env-coordinator-port.test.mjs",
         "scripts/block84-*",
         "scripts/tmp-block84-probe.cjs",
-        "acceptance/block-84/**"
+        "acceptance/block-84/**",
+        "acceptance/block-86/**"
       ],
       "tests": [
         "test/pack-registry.test.mjs",
