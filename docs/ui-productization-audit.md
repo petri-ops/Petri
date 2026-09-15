@@ -3349,11 +3349,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
-## UI-380: 工作区 OS 拖入导入 + 本地文件拖出导出（BLOCK-90，外部文件可达文件树）(2026-09-15 in_progress，dev Electron 边界内)
+## UI-380: 工作区 OS 拖入导入 + 本地文件拖出导出（BLOCK-90，外部文件可达文件树）(2026-09-15 verified，dev Electron 边界内)
 
 - **来源**：用户实测 BLOCK-89 拖拽后指认缺口——「文件 外部也可以到这里」「文件中的内容拖拽出来也要实现」（OS 拖入/拖出均系 BLOCK-89 显式非范围项，本包转正）。
 - **交付面**：①工作区窗口级 drop 接管（dragover/drop preventDefault 防 Chromium 导航劫持；与 home 页 BLOCK-53 拖目录建项目按路由分区）②落点定位：文件树目录行（`data-tree-dir`）=导入该目录，其余=根目录，重名 `uniqueTargetName` 自动 -2 ③本地项目：`pathForFile`（webUtils）→ 新 REST `fs/import-from` 服务端拷贝（文件/目录递归，无 1MB 上限）④ssh 项目：64KB 分片读 + 新 REST `fs/upload` 串行追加（node-agent 新 `fs_append`，offset 完整性=size===offset，乱序 409 `offset_mismatch`），目录 `webkitGetAsEntry` 递归走树逐个 mkdir+upload ⑤拖出导出：本地项目文件行 dragStart 附 `DownloadURL`（拖到 Finder/桌面即落盘），树内互拖 MIME 不受影响。
-- **证据**：路由级契约 `test/workspace-os-import.test.mjs` 8/8（分片拼装逐字节一致/offset 错位 409/超限 400/import-from 文件+目录递归/409 冲突/ssh 拒绝 import_requires_local/gateway append 单元）+ tsc 0。**尚无用户视角实机拖拽验收**——webUtils 真路径只有真实 OS 拖入可取，按台账纪律停留 `in_progress`，待用户真拖验收升 `verified`。
+- **证据**：路由级契约 `test/workspace-os-import.test.mjs` 8/8（分片拼装逐字节一致/offset 错位 409/超限 400/import-from 文件+目录递归/409 冲突/ssh 拒绝 import_requires_local/gateway append 单元）+ tsc 0 + 自动化实机探针 `scripts/block90-os-import-live.cjs` **4/4 allPass**（drop 接管/导入落树/拖出 DownloadURL/树内 MIME 保持，`acceptance/block-90/block90-os-import-live-live.json`）+ **ssh 真实远端链路验证**：P4驻留（ssh/aliyun 真节点）拖入意外完成 64KB 分片 → gateway ssh 后端 → node-agent fs_append 真远端落盘（逐字节正确，残留已清理）。
+- **用户视角验收（2026-09-15 当日）**：用户真实 Finder 拖入 + 树内文件拖回桌面实测，回复「都测试了 可以」→ 升 `verified`。
 - **边界**：ssh 拖出导出（需物化本地临时副本）与聊天框拖入发 AI 为非范围另行候选；G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-379: React hooks 顺序违规两例——首启整页空白 + 项目页全白（G0-RS P6 渲染层实机抓真）(2026-09-15 verified，dev Electron 边界内)

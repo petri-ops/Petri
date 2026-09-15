@@ -2,7 +2,7 @@
 
 最后更新：2026-09-15
 
-状态：`active（P0-LAUNCH 当日立项即开工；用户裁决「本地 + SSH 全量」+ 追加「文件中的内容拖拽出来也要实现」）`
+状态：`completed（2026-09-15 P0–P3 当日完成：P0 立项（用户裁决「本地 + SSH 全量」+ 追加拖出导出）→ P1 后端双端点 + 契约 8/8 → P2 前端接线 tsc 0 → P3 自动化探针 4/4 + 用户真拖验收「都测试了 可以」→ UI-380 verified 当日闭环）`
 
 计划编号：`BLOCK-90-OS-DRAG-IMPORT`
 
@@ -29,11 +29,11 @@
 
 | 阶段 | 内容 | 状态 |
 | --- | --- | --- |
-| P0 | 立项登记三件套（plan/registry/roadmap）+ UI-380 预登记 | in_progress |
-| P1 | 后端：node-agent `fs_append` + gateway `append`×2 + REST `fs/upload`、`fs/import-from` + 路由级契约测试 | pending |
-| P2 | 前端：窗口级 drop 接管 + 落点定位 + 双向 dragStart + UI-380 | pending |
-| P3 | 实机：CDP 合成路径导入 e2e（自动化）+ **用户真拖验收**（webUtils 真路径只有真拖可取）+ DownloadURL 真拖出 | pending |
-| closeout | 五件套 + 四门 | pending |
+| P0 | 立项登记三件套（plan/registry/roadmap）+ UI-380 预登记 | ✅ |
+| P1 | 后端：node-agent `fs_append` + gateway `append`×2 + REST `fs/upload`、`fs/import-from` + 路由级契约测试 8/8 | ✅ |
+| P2 | 前端：窗口级 drop 接管 + 落点定位 + 双向 dragStart + UI-380 | ✅ |
+| P3 | 实机：CDP 合成路径导入 e2e 4/4 + ssh 真远端链路（aliyun）+ 用户真拖验收「都测试了 可以」 | ✅ |
+| closeout | 五件套 + 四门 | ✅ |
 
 ## 3. 非范围
 

@@ -4437,12 +4437,12 @@
       "id": "BLOCK-90-OS-DRAG-IMPORT",
       "path": "docs/block-90-os-drag-import-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": false,
       "truthDomain": "block-90-os-drag-import",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P1-IN-PROGRESS",
+      "phase": "COMPLETED",
       "lastUpdated": "2026-09-15"
     },
     {
