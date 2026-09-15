@@ -641,6 +641,17 @@ export function startConversationRun(options: StartConversationRunOptions): bool
         if (agentId) {
           recordModelSubAgent(conversationId, options.projectId, agentId, taskText);
           pendingSpawnTaskText.delete(callKey);
+          // UI-382 — 把子智能体 id 回写到 spawn_agent 工具行：行展开后内联
+          // 子智能体实况卡（ToolActivityList 按 activity.agentRunId 渲染），
+          // 让「派了谁」紧挨「派发动作」本身。
+          replaceRun(conversationId, (current) => ({
+            ...current,
+            toolActivities: current.toolActivities.map((activityItem) =>
+              activityItem.callId && event.toolResult?.callId && activityItem.callId === event.toolResult.callId
+                ? { ...activityItem, agentRunId: agentId }
+                : activityItem,
+            ),
+          }));
         }
       }
       replaceRun(conversationId, (current) => ({
