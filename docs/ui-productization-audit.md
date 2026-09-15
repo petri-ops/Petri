@@ -3349,6 +3349,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-379: React hooks 顺序违规两例——首启整页空白 + 项目页全白（G0-RS P6 渲染层实机抓真）(2026-09-15 in_progress，dev Electron 边界内)
+
+- **来源**：G0-RS P4R ui/P6 重采链实机抓真——「整页空白」级故障两例，同族根因=组件级早退与新增 hook 的相对顺序错位（首渲染与二次渲染 hook 数不一致 → React「Rendered more hooks…」卸载整棵树）。**编号注记**：原草编 UI-378，与 BLOCK-89 文件树文件操作（本台 UI-378，已先行推送）撞号，分叉收编时重编号为 UI-379。
+- **交付面 ①（首启整页空白，`8e68e016`）**：`DesktopOnboarding` 的 `if (packRequiresRuntimes === null) return null` 排在 3 个 `useCallback` 之前 → 首渲染 3 hook、判定落地后 6 hook → 整树卸载（`#root` 空）。守卫移到全部 hook 之后；同类隐患顺手清一处：`UpdateChecker` 桥判定早退排在 `useAutoUpdate()` 之前 → 改无条件调用。
+- **交付面 ②（项目页全白，`f3719f69`）**：BLOCK-86 P2 把运行时横幅的 `useState`/`useEffect` 追加在 `ProjectWorkspace` 三个组件级早退（`if (loading)` / `if (error && !project)` / `if (!project)`）**之后** → 首渲染 164 hook、加载完成后 165 hook → 深链 `/project/:id` 必现整树卸载。整块上移到早退之前。BLOCK-89 P3 曾独立重发现同一回归并同法上移，分叉收编两修合一。
+- **证据**：回归门 `DesktopOnboarding.test.tsx` 4/4 + `UpdateChecker.test.tsx` 2/2（可逆对照：早退放回 hooks 之前 → 4/4 红，同一条 React 错误）+ 源级回归门 `project-workspace.hook-order.test.ts` 2/2（锁定「全部 hook 先于第一个组件级早退」）+ 前端 `tsc --noEmit` 0 + P6 live capture 10/10（两修复后重采，证据 `acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json`）。实现提交同提交台账漏同步已按 LEGACY 先例登记豁免（`check-ui-productization-audit.mjs`）。
+- **边界**：harness 实机证据 + 单测证据齐备，**尚无用户视角实机复测**——按台账纪律如实停留 `in_progress`，拿到用户复测证据才升 `verified`。教训已沉淀：新增 hook 一律写在组件体 hook 段内（早退之上）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-377: 投影商店 contents 富化对齐——手机端包卡片计数行补齐（UI-374 边界遗留）(2026-09-15 verified，dev Electron 边界内)
 
 - **来源**：UI-374 边界登记——投影 HTTP 桥缺 contents 富化，手机端包卡片退化为隐藏计数行。

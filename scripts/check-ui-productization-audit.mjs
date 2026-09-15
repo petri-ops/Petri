@@ -252,6 +252,12 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-09-15 UI-378 两处 React hooks 顺序修复（25005849 首启整页空白 /
+  // 5f0172a6 项目页全白）同提交台账漏同步，G0-RS 整包收口时补登 UI-378 条目
+  // （in_progress，待用户视角实机复测升 verified）。豁免同提交台账要求；
+  // 不重写共享历史。
+  '2500584913155588479e246c83d387bb9c5c8973',
+  '5f0172a68e5de9b1a8e3bd73aad1b1f03513336a',
   // 2026-09-13/14 BLOCK-85/86/87 过程提交同提交台账漏同步（收口补登 UI-358/354 修订链）。
   'fb58798cb0a832d5bd6f0e901e23b9c7f590463e',
   'be53b0df0c1446c6fb2582ef7dd8de91e49deb2c',

@@ -660,6 +660,39 @@ async function captureFailureScreenshot(window, outputDir, kind) {
   };
 }
 
+// UI-122 起图像交互失败为渐进增强的静默降级（resultSurface.shouldSurfaceInteractionFailure
+// 只对 table 报错；图像「failed discovery must leave the static plot quiet and usable」）。
+// 旧契约（图像也出「重试交互能力」可行动恢复）已不存在——旧驱动在深链 volcano PNG 上等
+// 重试按钮恒超时。本段按现契约断言：交互端点被拦时主体图像保持可见、无重试按钮、
+// 无降级横幅、composer 仍就绪；解阻后重载恢复。
+async function interactionQuietDegradationTrace(window, blocked, outputDir) {
+  const wc = window.webContents;
+  const routeFragment = '/api/result-studio/interaction';
+  blocked.add(routeFragment);
+  await wc.reload();
+  await waitFor(wc, `Boolean(document.querySelector('[aria-label="结果主画布"]'))`, 'interaction quiet canvas');
+  await waitFor(wc, `Boolean(document.querySelector('[aria-label="结果主画布"] img, [aria-label="结果主画布"] [role="img"]'))`, 'interaction quiet primary image');
+  await waitFor(wc, `document.querySelector('[aria-label="用 Agent 修改当前结果"]')?.getAttribute('data-state') === 'ready'`, 'interaction quiet composer');
+  const observation = await captureFailureScreenshot(window, outputDir, 'interaction-quiet');
+  const quietState = await wc.executeJavaScript(`
+    (() => ({
+      retryButtonPresent: Boolean([...document.querySelectorAll('button')]
+        .find((item) => (item.textContent || '').trim() === '重试交互能力')),
+      degradationVisible: Boolean(document.querySelector('[role="alert"], [data-state="blocked"], [data-state="unavailable"]')),
+    }))()
+  `, true);
+  blocked.delete(routeFragment);
+  await wc.reload();
+  await waitFor(wc, `Boolean(document.querySelector('[aria-label="结果主画布"] img, [aria-label="结果主画布"] [role="img"]'))`, 'interaction recovery primary image');
+  await waitFor(wc, `document.querySelector('[aria-label="用 Agent 修改当前结果"]')?.getAttribute('data-state') === 'ready'`, 'interaction recovery composer');
+  return {
+    ...observation,
+    quietByContract: !quietState.retryButtonPresent && !quietState.degradationVisible,
+    imagePreserved: observation.bodyPreserved,
+    recovered: true,
+  };
+}
+
 async function retryableFailureTrace(window, blocked, outputDir, {
   kind,
   routeFragment,
@@ -879,13 +912,7 @@ async function run() {
   checkpoint('service_restart_captured');
 
   const failures = [];
-  failures.push(await retryableFailureTrace(window, blocked, config.outputDir, {
-    kind: 'interaction',
-    routeFragment: '/api/result-studio/interaction',
-    retryLabel: '重试交互能力',
-    waitForPrimaryBody: true,
-    recoveredExpression: `![...document.querySelectorAll('button')].some((item) => (item.textContent || '').trim() === '重试交互能力')`,
-  }));
+  const interactionQuiet = await interactionQuietDegradationTrace(window, blocked, config.outputDir);
   failures.push(await retryableFailureTrace(window, blocked, config.outputDir, {
     kind: 'versions',
     routeFragment: '/api/result-studio/changesets?',
@@ -929,15 +956,19 @@ async function run() {
     composerReadyEverywhere: initialResult.composerState === 'ready'
       && openResult.composerState === 'ready'
       && matrix.every((item) => item.composerState === 'ready'),
-    noSensitiveProjection: [initialResult, openResult, ...matrix, ...modeTrace, ...failures]
+    noSensitiveProjection: [initialResult, openResult, ...matrix, ...modeTrace, ...failures, interactionQuiet]
       .every((item) => Object.values(item.internalLeakFlags || {}).every((flag) => !flag)),
     primaryActionBudgetMet: [...matrix, ...modeTrace].every((item) => item.visiblePrimaryActionCount <= 3),
-    secondaryFailureRecoveryPassed: failures.length === 5
+    secondaryFailureRecoveryPassed: failures.length === 4
       && failures.every((item) => item.bodyPreserved
         && item.actionable
         && item.recovered
         && item.degradationVisible
-        && !item.pageHorizontalOverflow),
+        && !item.pageHorizontalOverflow)
+      && interactionQuiet.quietByContract
+      && interactionQuiet.imagePreserved
+      && interactionQuiet.recovered
+      && !interactionQuiet.pageHorizontalOverflow,
     continuousLifecyclePassed: openResult.draftPreserved
       && lifecycle.compareVisible
       && lifecycle.adopted
