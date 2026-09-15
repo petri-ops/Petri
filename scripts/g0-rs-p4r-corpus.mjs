@@ -34,7 +34,7 @@
  */
 
 import { spawn } from 'node:child_process';
-import { existsSync, rmSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -153,12 +153,26 @@ async function runStepsInChild() {
   // needs a users row this disposable database does not have.
   db.setProjectUserId(project.id, CORPUS_USER);
 
+  // The admitted-plugin validator pins explicit inputs inside the project
+  // workspace (result-plugin-validator.js exactProjectFile), so pack demo files
+  // are staged into <workspace>/inputs and those copies are what the params
+  // reference. Byte-identical copies: the provenance hashes still match.
+  const workspacePath = project.workspacePath || project.workspace_path;
+  if (!workspacePath) throw new Error('corpus project has no workspace path');
+  const inputsDir = path.join(workspacePath, 'inputs');
+  mkdirSync(inputsDir, { recursive: true });
+  const stagedInputs = Object.fromEntries(Object.entries(inputs).map(([key, sourcePath]) => {
+    const dest = path.join(inputsDir, path.basename(sourcePath));
+    copyFileSync(sourcePath, dest);
+    return [key, dest];
+  }));
+
   const steps = selectSteps({ withEnrichment: spec.withEnrichment });
   const outputs = {};
   const records = [];
 
   for (const step of steps) {
-    const params = step.params({ repoRoot: REPO_ROOT, inputs, outputs });
+    const params = step.params({ repoRoot: REPO_ROOT, inputs: stagedInputs, outputs });
     const startedAt = Date.now();
     // accessMode 'full' is required for HEAVY_TOOLS (deseq2); it is the
     // documented delegation boundary for local reproducible analysis and still
