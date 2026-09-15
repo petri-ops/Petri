@@ -213,34 +213,42 @@ async function captureState(window, outputDir, label, theme, width, height) {
   };
 }
 
-async function clickMode(webContents, label, timeoutMs = 15_000) {
-  // 模式切换器的在场性跟随交互绑定清单（versionFamilyId ← boundInteractionManifest），
-  // 绑定 refetch 的窗口内 nav 会瞬时消失，所以点击必须有界重试而不是一次性判定。
+async function clickMode(webContents, labels, timeoutMs = 15_000) {
+  // 模式切换按钮存在两组现契约文案：CompactResultNavigator（result 模式下唯一
+  // nav）用短标签「审查/历史」；ResultStudioContextBar（仅非 result 模式挂载，
+  // CenterPanel contextBar 槽）用长标签「审查修改/版本历史」。contextBar 随模式
+  // 挂载/卸载，且两条 nav 同为 aria-label="结果视图"，所以点击必须跨全部 nav
+  // 做「标签变体 × 有界重试」，不能只查第一条 nav 或单一文案。
+  const wanted = Array.isArray(labels) ? labels : [labels];
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     const clicked = await webContents.executeJavaScript(`
       (() => {
-        const nav = document.querySelector('nav[aria-label="结果视图"]');
-        const button = nav && [...nav.querySelectorAll('button')]
-          .find((item) => (item.textContent || '').trim() === ${JSON.stringify(label)});
-        if (!button) return false;
-        button.click();
-        return true;
+        const wanted = ${JSON.stringify(wanted)};
+        for (const nav of document.querySelectorAll('nav[aria-label="结果视图"]')) {
+          const button = [...nav.querySelectorAll('button')]
+            .find((item) => wanted.includes((item.textContent || '').trim()));
+          if (button) {
+            button.click();
+            return true;
+          }
+        }
+        return false;
       })()
     `, true);
     if (clicked) return;
     if (Date.now() >= deadline) {
       const diagnostics = await webContents.executeJavaScript(`
         (() => ({
-          navPresent: Boolean(document.querySelector('nav[aria-label="结果视图"]')),
-          navButtons: [...(document.querySelector('nav[aria-label="结果视图"]')?.querySelectorAll('button') || [])]
-            .map((item) => (item.textContent || '').trim()),
+          navs: [...document.querySelectorAll('nav[aria-label="结果视图"]')].map((nav) => ({
+            buttons: [...nav.querySelectorAll('button')].map((item) => (item.textContent || '').trim()),
+          })),
           canvasMode: document.querySelector('[aria-label="结果主画布"]')?.getAttribute('data-mode') || null,
           bodyHead: (document.body.innerText || '').replace(/\\s+/g, ' ').slice(0, 400),
         }))()
       `, true).catch(() => null);
       console.error(`[p4r-ui-driver] mode button missing: ${JSON.stringify(diagnostics)}`);
-      throw new Error(`mode button not found: ${label}`);
+      throw new Error(`mode button not found: ${wanted.join('/')}`);
     }
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
@@ -440,9 +448,9 @@ async function candidateLifecycleTrace(window) {
   const wc = window.webContents;
   // 版本/变更面板（含「采用此版本」）只在 compare/history 模式挂载
   // （ResultArtifactShell: mode === 'compare' || 'history'；result 模式右栏是产物
-  // 详情）。先切「审查修改」再等候选——曾在 result 模式下等按钮，面板搬移后
+  // 详情）。先切「审查」再等候选——曾在 result 模式下等按钮，面板搬移后
   // 该等待恒超时。
-  await clickMode(wc, '审查修改');
+  await clickMode(wc, ['审查', '审查修改']);
   await waitFor(
     wc,
     `document.querySelector('[aria-label="结果主画布"]')?.getAttribute('data-mode') === 'compare'`,
@@ -473,7 +481,7 @@ async function candidateLifecycleTrace(window) {
     'candidate undo',
   );
 
-  await clickMode(wc, '版本历史');
+  await clickMode(wc, ['历史', '版本历史']);
   await waitFor(
     wc,
     `document.querySelector('[aria-label="结果主画布"]')?.getAttribute('data-mode') === 'history'`,
@@ -795,7 +803,12 @@ async function run() {
   checkpoint('matrix_captured');
 
   const modeTrace = [];
-  for (const [mode, label] of [['code', '代码'], ['compare', '审查修改'], ['history', '版本历史'], ['result', '结果']]) {
+  for (const [mode, label] of [
+    ['code', '代码'],
+    ['compare', ['审查', '审查修改']],
+    ['history', ['历史', '版本历史']],
+    ['result', '结果'],
+  ]) {
     const startedAt = performance.now();
     await clickMode(window.webContents, label);
     await waitFor(

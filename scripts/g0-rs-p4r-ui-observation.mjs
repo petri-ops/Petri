@@ -235,7 +235,13 @@ async function runElectron(configPath, resultPath, { onSpawn, onRestartRequest }
     const persisted = existsSync(resultPath)
       ? JSON.parse(readFileSync(resultPath, 'utf8'))
       : null;
-    throw new Error(`Electron observation failed (${JSON.stringify(exit)}): ${persisted?.error || stderr.join('').slice(-4_000)}`);
+    // 失败时同时回显 driver 落盘 error 与 stderr（含 clickMode 的 nav 诊断摘要），
+    // 否则「阶段首段即失败」只能靠猜——曾经把 stderr 短路吞掉，定位多花一轮。
+    const stderrTail = stderr.join('').trimEnd().slice(-4_000);
+    throw new Error(
+      `Electron observation failed (${JSON.stringify(exit)}): ${persisted?.error || 'no persisted result'}`
+      + (stderrTail ? `\n[driver stderr tail]\n${stderrTail}` : ''),
+    );
   }
   if (!existsSync(resultPath)) throw new Error('Electron observation exited without a result');
   return JSON.parse(readFileSync(resultPath, 'utf8'));
