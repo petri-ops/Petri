@@ -2,6 +2,8 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { ToolActivityList } from './ToolActivityList';
+import { groupToolActivities } from './toolActivity';
+import assert from 'node:assert/strict';
 import { gewuEvents } from '@/lib/events';
 import type { ToolActivityItem } from './toolActivity';
 
@@ -145,5 +147,52 @@ describe('ToolActivityList (UI-271 内联手风琴)', () => {
       window.removeEventListener(gewuEvents.reviewOpenFile, listener);
     }
     expect(seen).toEqual([{ filePath: 'src/u273.ts' }]);
+  });
+});
+
+describe('ToolActivityList (UI-383 常规只读折叠)', () => {
+  it('groupToolActivities：连续只读成功项归并，非常规/迭代变化断开', () => {
+    const read = (key: string, iteration?: number): ToolActivityItem => ({
+      key,
+      name: 'workspace_read',
+      status: 'success',
+      actionLabel: '已读取',
+      actionDetail: 'a.md',
+      iteration,
+    });
+    const failedRead: ToolActivityItem = { ...read('fail'), status: 'error' };
+    const exec: ToolActivityItem = { ...read('exec'), name: 'workspace_exec', actionLabel: '已运行' };
+    const groups = groupToolActivities([
+      read('r1'), read('r2'), read('r3', 2), failedRead, read('r4', 2), exec, read('r5', 2),
+    ]);
+    assert.equal(groups.filter((g) => g.kind === 'routine').length, 4);
+    // r1,r2 同为无迭代 → 一组；r3 带迭代 2 → 断开成新组
+    assert.equal(groups[0].items.length, 2);
+    assert.equal(groups[1].items[0].iteration, 2);
+    assert.equal(groups[2].items[0].status, 'error');
+  });
+
+  it('折叠阈值 ≥3：少于 3 项的常规组保持逐条渲染', () => {
+    const read = (key: string): ToolActivityItem => ({
+      key, name: 'workspace_read', status: 'success', actionLabel: '已读取', actionDetail: 'a.md',
+    });
+    render(<ToolActivityList activities={[read('a'), read('b')]} />);
+    fireEvent.click(screen.getByRole('button', { name: '展开执行记录' }));
+    expect(screen.queryByText(/常规读取：/)).toBeNull();
+    expect(screen.getAllByText(/a\.md/).length).toBe(2);
+  });
+
+  it('≥3 项连续只读折叠为汇总行，点击展开逐条', () => {
+    const reads = ['a', 'b', 'c', 'd'].map((key) => ({
+      key, name: 'workspace_read', status: 'success' as const, actionLabel: '已读取', actionDetail: `${key}.md`,
+    }));
+    render(<ToolActivityList activities={reads} />);
+    fireEvent.click(screen.getByRole('button', { name: '展开执行记录' }));
+    const summary = screen.getByText(/常规读取：读取 4 · 全部成功/);
+    expect(summary).toBeTruthy();
+    expect(screen.queryByText('a.md')).toBeNull();
+    fireEvent.click(summary);
+    expect(screen.getByText('a.md')).toBeTruthy();
+    expect(screen.getByText('d.md')).toBeTruthy();
   });
 });

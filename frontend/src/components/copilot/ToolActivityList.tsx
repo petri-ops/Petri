@@ -8,6 +8,7 @@ import {
   EXEC_TOOL_NAMES,
   formatToolDuration,
   formatToolSideEffects,
+  groupToolActivities,
   type ToolActivityItem,
 } from './toolActivity';
 
@@ -418,6 +419,8 @@ export function ToolActivityList({
     () => activities.some((activity) => EXEC_TOOL_NAMES.has(activity.name))
   );
   const [userToggled, setUserToggled] = useState(false);
+  // UI-383 — 常规只读组折叠状态（组键 = 首项 key；默认折叠，点击就地展开逐条）
+  const [unfoldedRoutineGroups, setUnfoldedRoutineGroups] = useState<Set<string>>(new Set());
   const hasRunningExec = activities.some(
     (activity) => EXEC_TOOL_NAMES.has(activity.name) && activity.status === 'running'
   );
@@ -471,23 +474,58 @@ export function ToolActivityList({
       </button>
       {expanded && (
         <div className="sc-tool-activity-inline">
-          {activities.map((activity) => {
-            const iterationKey = activity.iteration ?? -1;
-            const iterReasoning =
-              activity.iteration != null ? reasoningByIteration?.[activity.iteration] : undefined;
-            const isFirstOfIteration = !renderedIterations.has(iterationKey);
-            if (isFirstOfIteration) renderedIterations.add(iterationKey);
+          {groupToolActivities(activities).map((group) => {
+            const first = group.items[0];
+            const firstIterationKey = first.iteration ?? -1;
+            const firstIterReasoning =
+              first.iteration != null ? reasoningByIteration?.[first.iteration] : undefined;
+            const groupStartsIteration = !renderedIterations.has(firstIterationKey);
+            if (groupStartsIteration) renderedIterations.add(firstIterationKey);
+            const groupKey = `routine-group:${first.key}`;
+            const folded = group.kind === 'routine' && group.items.length >= 3
+              && !unfoldedRoutineGroups.has(groupKey);
+            if (folded) {
+              const labelCounts = group.items.reduce<Record<string, number>>((counts, item) => {
+                const label = item.actionLabel.replace(/^已/, '') || '处理';
+                counts[label] = (counts[label] || 0) + 1;
+                return counts;
+              }, {});
+              const label = Object.entries(labelCounts)
+                .map(([action, count]) => `${action} ${count}`)
+                .join(' · ');
+              return (
+                <div key={groupKey}>
+                  {groupStartsIteration && firstIterReasoning && (
+                    <ReasoningRow iteration={first.iteration as number} text={firstIterReasoning} />
+                  )}
+                  <button
+                    type="button"
+                    className="sc-tool-routine-group"
+                    title="常规读取已折叠；点击展开逐条记录"
+                    onClick={() => setUnfoldedRoutineGroups((prev) => new Set(prev).add(groupKey))}
+                  >
+                    <Icon name="chevron-right" size={12} />
+                    <span>常规读取：{label} · 全部成功</span>
+                    <span className="sc-tool-routine-group-note">点击展开</span>
+                  </button>
+                </div>
+              );
+            }
             return (
-              <div key={activity.key}>
-                {isFirstOfIteration && iterReasoning && (
-                  <ReasoningRow iteration={activity.iteration as number} text={iterReasoning} />
+              <div key={groupKey}>
+                {groupStartsIteration && firstIterReasoning && (
+                  <ReasoningRow iteration={first.iteration as number} text={firstIterReasoning} />
                 )}
-                {/* UI-315 — exec 类工具以原生终端块呈现（默认展开），其余保持行式 */}
-                {EXEC_TOOL_NAMES.has(activity.name) ? (
-                  <TerminalRow activity={activity} />
-                ) : (
-                  <ActivityRow activity={activity} />
-                )}
+                {group.items.map((activity) => (
+                  <div key={activity.key}>
+                    {/* UI-315 — exec 类工具以原生终端块呈现（默认展开），其余保持行式 */}
+                    {EXEC_TOOL_NAMES.has(activity.name) ? (
+                      <TerminalRow activity={activity} />
+                    ) : (
+                      <ActivityRow activity={activity} />
+                    )}
+                  </div>
+                ))}
               </div>
             );
           })}

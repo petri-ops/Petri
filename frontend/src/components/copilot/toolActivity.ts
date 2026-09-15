@@ -412,3 +412,43 @@ export function formatToolSideEffects(sideEffects?: ToolSideEffects): string | n
     : '';
   return `${sideEffects.type} · ${sideEffects.riskTier}${resources}`;
 }
+
+/** UI-383 — 常规只读工具：成功时折叠为汇总行（错误/运行中/等待确认仍独立可见）。 */
+export const ROUTINE_READ_TOOLS: ReadonlySet<string> = new Set([
+  'workspace_read',
+  'workspace_list',
+  'workspace_find',
+  'workspace_search',
+  'system_info',
+]);
+
+export function isRoutineReadActivity(activity: ToolActivityItem): boolean {
+  return ROUTINE_READ_TOOLS.has(activity.name) && activity.status === 'success';
+}
+
+export interface ToolActivityGroup {
+  kind: 'activity' | 'routine';
+  items: ToolActivityItem[];
+}
+
+/**
+ * UI-383 — 连续的常规只读成功项归并为一组（同迭代内；跨迭代/遇非常规项即断开）。
+ * 折叠渲染阈值（≥3 项）由视图层决定。
+ */
+export function groupToolActivities(activities: ToolActivityItem[]): ToolActivityGroup[] {
+  const groups: ToolActivityGroup[] = [];
+  let current: ToolActivityGroup | null = null;
+  let currentIteration: number | undefined;
+  for (const activity of activities) {
+    const routine = isRoutineReadActivity(activity);
+    const iterChanged = activity.iteration !== currentIteration;
+    if (routine && current && current.kind === 'routine' && !iterChanged) {
+      current.items.push(activity);
+      continue;
+    }
+    currentIteration = activity.iteration;
+    current = { kind: routine ? 'routine' : 'activity', items: [activity] };
+    groups.push(current);
+  }
+  return groups;
+}
