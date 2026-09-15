@@ -22,6 +22,9 @@ const POLL_MS = 100;
 const controlLines = [];
 const controlWaiters = [];
 let controlBuffer = '';
+// 失败诊断：catch 落盘时带上最后一个通过 checkpoint，否则「阶段首段即失败」
+// 只能靠栈帧猜（页面世界抛来的跨域异常连栈帧都没有，如 UnknownVizError）。
+let driverLastStage = 'starting';
 
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', (chunk) => {
@@ -818,6 +821,7 @@ async function run() {
   const config = readConfig();
   mkdirSync(config.outputDir, { recursive: true });
   const checkpoint = (stage) => {
+    driverLastStage = stage;
     writeFileSync(config.resultPath, `${JSON.stringify({ schemaVersion: 1, passed: false, stage })}\n`);
   };
   checkpoint('starting');
@@ -1018,6 +1022,7 @@ app.whenReady()
       writeFileSync(config.resultPath, `${JSON.stringify({
         schemaVersion: 1,
         passed: false,
+        stage: driverLastStage,
         error: error && error.message ? error.message : String(error),
       }, null, 2)}\n`);
     } catch {

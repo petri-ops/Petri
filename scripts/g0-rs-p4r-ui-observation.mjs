@@ -239,7 +239,7 @@ async function runElectron(configPath, resultPath, { onSpawn, onRestartRequest }
     // 否则「阶段首段即失败」只能靠猜——曾经把 stderr 短路吞掉，定位多花一轮。
     const stderrTail = stderr.join('').trimEnd().slice(-4_000);
     throw new Error(
-      `Electron observation failed (${JSON.stringify(exit)}): ${persisted?.error || 'no persisted result'}`
+      `Electron observation failed (${JSON.stringify(exit)}) at stage ${persisted?.stage || 'unknown'}: ${persisted?.error || 'no persisted result'}`
       + (stderrTail ? `\n[driver stderr tail]\n${stderrTail}` : ''),
     );
   }
