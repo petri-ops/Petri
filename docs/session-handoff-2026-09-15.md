@@ -1,7 +1,7 @@
 # 交接提示词 · 新会话继续开发（2026-09-15 · 第二轮：G0-RS 整包 closeout 尾声）
 
 > **✅ 本文件使命已完成（2026-09-15 第二轮会话收口）**：p4r ui observation 重采已通过
-> （`rs-p4r-ui-observation.json` passed=true 锚定 `813cc228`，驱动连随 7 关渲染层契约漂移，
+> （`rs-p4r-ui-observation.json` passed=true 锚定 `834a4b42`，驱动连随 7 关渲染层契约漂移，
 > 全程非产品缺陷），整包 closeout 五件套与门禁已走完，G0-RS → completed。
 > 状态真相见 `docs/next-steps-roadmap.md` / `docs/project-workspace-handoff.md` 头部与
 > `docs/g0-result-studio-plan.md` 状态头；下文仅供追溯，勿按其「剩余工作」重跑。
@@ -33,12 +33,12 @@
 | # | 提交 | 内容 |
 | --- | --- | --- |
 | 1 | `6ddbb645` | **P6 重采前置：live 链封存态包感知化**。封存态实锤 = `plugins/` 只剩 deseq2，而 volcano-plot/go-kegg/gene-correlation 是 `pluginOnly` 工具、插件不在装载面 → 探针实测 `job failed「Unknown tool: volcano-plot」`、CATALOG 只剩 1。四处复用 `g0-rs-p4r-pack.mjs` 包感知层：p6-pressure 的 go-kegg 供能数据改 `locatePackPluginDir`（可逆对照：撤改动 → ENOENT 红，改后 7/7 绿）；p5-acceptance 的 `buildScientificInput` + `ADMITTED_DESCRIPTOR_FILES` 改包内 dormant 感知 + `createP5LiveScientificRuntime` 在隔离根装配封存插件运行副本（`BIOF3_DEVELOPMENT_PLUGIN_DIRS` + `BIOF3_DOMAIN_TOOL_REGISTRY`）；restart 原型的 drift 隔离 built-ins 副本改「包 manifest + 活跃插件 + 运行副本」且冷启窗口开发源指向副本本身；p6-ui110 描述符从已删的 `resources/built-in-plugins/` 改包内定位 |
-| 2 | `25005849` | **UI-378 ①首启整页空白**：`DesktopOnboarding` 的 `if (packRequiresRuntimes === null) return null` 排在 3 个 `useCallback` 之前 → 首渲染 3 个 hook、判定落地后 6 个 → React 抛「Rendered more hooks…」卸载整棵树（`#root` 空）。守卫移到全部 hook 之后。同类隐患顺手清一处：`UpdateChecker` 的桥判定早退排在 `useAutoUpdate()` 之前 → 改无条件调用。新增两个回归门，可逆对照：早退放回 hooks 之前 → 4/4 红（同一条 React 错误） |
-| 3 | `5f0172a6` | **UI-378 ②项目页全白（P6 渲染层直接真因）**：BLOCK-86 P2 把运行时横幅的 `useState`/`useEffect` 追加在 `ProjectWorkspace` 三个组件级早退（`if (loading)` / `if (error && !project)` / `if (!project)`）**之后** → 首渲染早退 164 个 hook、加载完成后 165 个 → React 卸载整棵树，深链 `/project/:id` 必现。整块上移到早退之前；新增源级回归门 `frontend/src/pages/project-workspace.hook-order.test.ts`（锁定「全部 hook 先于第一个组件级早退」） |
+| 2 | `8e68e016` | **UI-378 ①首启整页空白**：`DesktopOnboarding` 的 `if (packRequiresRuntimes === null) return null` 排在 3 个 `useCallback` 之前 → 首渲染 3 个 hook、判定落地后 6 个 → React 抛「Rendered more hooks…」卸载整棵树（`#root` 空）。守卫移到全部 hook 之后。同类隐患顺手清一处：`UpdateChecker` 的桥判定早退排在 `useAutoUpdate()` 之前 → 改无条件调用。新增两个回归门，可逆对照：早退放回 hooks 之前 → 4/4 红（同一条 React 错误） |
+| 3 | `f3719f69` | **UI-378 ②项目页全白（P6 渲染层直接真因）**：BLOCK-86 P2 把运行时横幅的 `useState`/`useEffect` 追加在 `ProjectWorkspace` 三个组件级早退（`if (loading)` / `if (error && !project)` / `if (!project)`）**之后** → 首渲染早退 164 个 hook、加载完成后 165 个 → React 卸载整棵树，深链 `/project/:id` 必现。整块上移到早退之前；新增源级回归门 `frontend/src/pages/project-workspace.hook-order.test.ts`（锁定「全部 hook 先于第一个组件级早退」） |
 | 4 | `d86cfec8` | **p4r ui 链①**：corpus 目标 Job 走 `tool_run_tool` 直提、`conversation_id=NULL`，渲染层自 UI-123 起对深链做会话归属 fail-closed 校验（`project-workspace.tsx:1130`）→ 画布永不挂载。harness 侧补绑定：agent child 建会话后把目标 Job 绑到该会话（`UPDATE tool_jobs … AND conversation_id IS NULL`，`changes!==1` fail-closed） |
 | 5 | `25437c34` | **p4r ui 链②**：驱动仍派发旧品牌事件 `biof3:project-open-artifact` / `biof3:project-open-result` / `biof3:theme-change`，BLOCK-61 改名后应用只认 `gewu:*`（`frontend/src/lib/events.ts`、`ThemeProvider`）→ 事件无人监听，重开结果等待超时 |
 | 6 | `0b9d256c` | **p4r ui 链③**：（a）补 `dismissOnboarding`（fresh userData 下引导浮层盖住工作区、污染截图）——必须放在画布等待**之后**调用（React 挂载引导晚于 `loadURL`，过早探测会误判「无引导」）；（b）版本/变更面板（含「采用此版本」）现只在 `compare/history` 模式挂载（`ResultArtifactShell.tsx:1378`），驱动却仍在 `result` 模式等按钮 → 先切「审查修改」再等候选 |
-| 7 | `db26530a` | **P6 重采证据刷新**：7 条 live 链全跑，canonical **10/10**；`componentCheckCounts` = stop 5 / executionFailure 7 / drift 7 / restart 11 / electronRecovery 15 / electronPressure 26 / productScenarios 6；`sourceCommit=5f0172a6`、`sourceCommitMatchesSourceHashes=true`、`sourceBindingStableDuringCapture=true`）。D8 例外族的 `p6_stored_current_source_hash_mismatch`（SimpleChat.tsx）**已消解** |
+| 7 | `a74870fa` | **P6 重采证据刷新**：7 条 live 链全跑，canonical **10/10**；`componentCheckCounts` = stop 5 / executionFailure 7 / drift 7 / restart 11 / electronRecovery 15 / electronPressure 26 / productScenarios 6；`sourceCommit=f3719f69`、`sourceCommitMatchesSourceHashes=true`、`sourceBindingStableDuringCapture=true`）。D8 例外族的 `p6_stored_current_source_hash_mismatch`（SimpleChat.tsx）**已消解** |
 | 8 | `ba840ef4` | p4r ui 驱动 `clickMode` 改有界重试（15s/250ms）+ 失败时把 `navPresent/navButtons/canvasMode/bodyHead` 打到 stderr |
 
 **已跑门的结论**（可复现）：
@@ -84,7 +84,7 @@
 
 - 自绑定脚本改完必须**先提交再重跑**，否则工作区≠HEAD 必红（本轮 `p6_stored_current_source_tree_not_exact` 就是这么来的）。
 - 三份 P4R 证据（perf / source-obs / live）绑定 desktop `1357c4c4`（祖先有效）+ 包 `21d610c`；只动 docs/ 不会破绑定。
-- P6 证据现已锚定 `5f0172a6`（本轮后续提交不含 P6 绑定文件，绑定仍成立）。
+- P6 证据现已锚定 `f3719f69`（本轮后续提交不含 P6 绑定文件，绑定仍成立）。
 - Electron 实机链前置：独占总线端口 + **不能有其他 Electron 实例**（`src/main.js` 有 `requestSingleInstanceLock`，dev 栈在跑时 harness Electron 起来即退）。
 
 ### 六、本轮沉淀的教训（值得沿用）
