@@ -18,7 +18,7 @@
 2. ✅ `G0-START` 审计通过（10/10，2026-07-24）。
 3. ✅ `G0-LF0` 已建立 Constitution、Baseline Registry、版本身份和 Support Matrix（2026-07-24）。
 
-启动边界：本计划已于 2026-07-25 完成 `SDC-0` Profile Registry 与版本治理。`SDC1-A Data-to-first-result slice` 已于 2026-08-04 以实现检查点 `bd15777` 和 source-bound 开发态 Electron 证据收口。`SDC-1` 与 `SDC-2` 已于 2026-08-06 以 fixture 覆盖 + `frontend/src/lib/data-profile.test.ts` + `scripts/check-sdc-complete.mjs` 收口，canonical evidence 为 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json`。单工作包串行不变；SDC-3～SDC-7 与 P7 不自动启动。
+启动边界：本计划已于 2026-07-25 完成 `SDC-0` Profile Registry 与版本治理。`SDC1-A Data-to-first-result slice` 已于 2026-08-04 以实现检查点 `bd15777` 和 source-bound 开发态 Electron 证据收口。`SDC-1` 与 `SDC-2` 已于 2026-08-06 以 fixture 覆盖 + `frontend/src/lib/data-profile.test.ts` + `scripts/check-sdc-complete.mjs` 收口，canonical evidence 为 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json`。单工作包串行不变；SDC-3～SDC-7 与 P7 不自动启动。**2026-09-15 用户裁决：SDC 不在本阶段推进**——BLOCK-83 后架构前提已变（生信能力迁领域包 gewu-pack-bio、核心领域中性化），SDC-3～SDC-7 的归属（核心 vs 领域包）与范围（与 Result Studio/Agent 工作台重叠面）需先做 P0 归属对账才可重启；本阶段不排期、不列为队列候选。
 
 ## 1. 决策结论
 

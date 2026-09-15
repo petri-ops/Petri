@@ -1461,11 +1461,12 @@
       "id": "G0-SDC",
       "path": "docs/g0-scientific-data-contract-plan.md",
       "kind": "living-plan",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "g0-scientific-data-contract",
       "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
+      "archivePolicy": "retain_stable_path",
+      "notes": "2026-09-15 用户裁决：SDC 不在本阶段推进、移出队列候选——BLOCK-83 后架构前提已变（生信迁领域包、核心中性化），SDC-3～7 重启前须先做 P0 归属对账（核心 vs 领域包 + 与 Result Studio/Agent 工作台重叠面）。SDC-0/SDC1-A/SDC-1/SDC-2 维持已收口事实不变。"
     },
     {
       "id": "GATE-REPORT-SCHEMAS",
