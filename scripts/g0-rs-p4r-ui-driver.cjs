@@ -521,6 +521,28 @@ async function candidateLifecycleTrace(window) {
     })()
   `, true);
   if (!restored) throw new Error('v2 restore action is unavailable');
+  // 与采纳同族：UI-305 起 restore 也经 onRevisionActivated 跳回 result 模式，
+  // history 面板卸载——旧契约是面板原地刷新出「当前 v3」。等跳转（或原地刷新）
+  // 落定后切回「历史」等「当前 v3」。
+  await waitFor(
+    wc,
+    `document.querySelector('[aria-label="结果主画布"]')?.getAttribute('data-mode') === 'result'
+      || [...document.querySelectorAll('[aria-label="Result Studio 版本与变更"] span')]
+        .some((item) => (item.textContent || '').trim() === '当前 v3')`,
+    'post-restore projection',
+  );
+  const postRestoreMode = await wc.executeJavaScript(
+    `document.querySelector('[aria-label="结果主画布"]')?.getAttribute('data-mode') || null`,
+    true,
+  );
+  if (postRestoreMode === 'result') {
+    await clickMode(wc, ['历史', '版本历史']);
+    await waitFor(
+      wc,
+      `document.querySelector('[aria-label="结果主画布"]')?.getAttribute('data-mode') === 'history'`,
+      'post-restore history reentry',
+    );
+  }
   await waitFor(
     wc,
     `[...document.querySelectorAll('[aria-label="Result Studio 版本与变更"] span')]
