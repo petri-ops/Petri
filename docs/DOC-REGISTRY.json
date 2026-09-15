@@ -1429,12 +1429,12 @@
       "id": "G0-RS",
       "path": "docs/g0-result-studio-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "active",
       "canonical": false,
       "truthDomain": "g0-result-studio",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P2-P4R-QUEUED",
+      "phase": "P2-P4R-CORPUS",
       "lastUpdated": "2026-09-15"
     },
     {
