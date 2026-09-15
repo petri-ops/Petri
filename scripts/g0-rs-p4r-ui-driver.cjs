@@ -468,6 +468,28 @@ async function candidateLifecycleTrace(window) {
         .find((item) => (item.textContent || '').trim() === '采用此版本'))
   `, true);
   if (!await clickButtonByText(wc, '采用此版本')) throw new Error('candidate adopt action is unavailable');
+  // UI-305 起采纳后产品契约=onRevisionActivated 自动跳回 result 模式展示已采用
+  // 版本，compare 面板随之卸载（旧捕获时面板原地翻转状态，故旧驱动在 compare
+  // 原地等「撤销本次采用」）。等跳转落定后切回「审查」，面板重挂时 adopted
+  // change set 为首选选中项，「撤销本次采用」在场。
+  await waitFor(
+    wc,
+    `document.querySelector('[aria-label="结果主画布"]')?.getAttribute('data-mode') === 'result'
+      || Boolean([...document.querySelectorAll('button')].find((item) => (item.textContent || '').trim() === '撤销本次采用'))`,
+    'post-adopt projection',
+  );
+  const postAdoptMode = await wc.executeJavaScript(
+    `document.querySelector('[aria-label="结果主画布"]')?.getAttribute('data-mode') || null`,
+    true,
+  );
+  if (postAdoptMode === 'result') {
+    await clickMode(wc, ['审查', '审查修改']);
+    await waitFor(
+      wc,
+      `document.querySelector('[aria-label="结果主画布"]')?.getAttribute('data-mode') === 'compare'`,
+      'post-adopt compare reentry',
+    );
+  }
   await waitFor(
     wc,
     `Boolean([...document.querySelectorAll('button')].find((item) => (item.textContent || '').trim() === '撤销本次采用'))`,
