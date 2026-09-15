@@ -511,3 +511,50 @@ describe('TitleBar result selector', () => {
     expect(screen.queryByRole('menu', { name: '结果列表' })).toBeNull();
   });
 });
+
+describe('TitleBar route-aware dividers (UI-377)', () => {
+  function renderAt(initialPath: string) {
+    return render(
+      <MemoryRouter initialEntries={[initialPath]}>
+        <WorkspacePanelsProvider>
+          <TitleBar />
+        </WorkspacePanelsProvider>
+      </MemoryRouter>,
+    );
+  }
+
+  it('drops the center-title right divider on non-workspace routes（右栏不在场不挂悬空线）', () => {
+    vi.stubGlobal('biof3Desktop', undefined);
+    renderAt('/');
+    const center = document.querySelector('[class*="centerTitle"]') as HTMLElement;
+    expect(center).toBeTruthy();
+    expect(center.className).toContain('centerTitleNoDivider');
+  });
+
+  it('keeps the center-title right divider on workspace routes with the right rail open', () => {
+    vi.stubGlobal('biof3Desktop', undefined);
+    renderAt('/project/p1/chat');
+    const center = document.querySelector('[class*="centerTitle"]') as HTMLElement;
+    expect(center).toBeTruthy();
+    // 桌面默认 rightOpen=true → 工作区右栏在场 → 分隔线保留
+    expect(center.className).not.toContain('centerTitleNoDivider');
+  });
+
+  it('drops the window-controls left divider when windowTools is empty (non-workspace route)', () => {
+    const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
+    vi.stubGlobal('biof3Desktop', bridge);
+    renderAt('/');
+    const wc = document.querySelector('[class*="windowControls"]') as HTMLElement;
+    expect(wc).toBeTruthy();
+    expect(wc.className).toContain('windowControlsNoDivider');
+  });
+
+  it('keeps the window-controls left divider on workspace routes (toggles present)', () => {
+    const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
+    vi.stubGlobal('biof3Desktop', bridge);
+    renderAt('/project/p1/chat');
+    const wc = document.querySelector('[class*="windowControls"]') as HTMLElement;
+    expect(wc).toBeTruthy();
+    expect(wc.className).not.toContain('windowControlsNoDivider');
+  });
+});

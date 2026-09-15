@@ -3338,6 +3338,15 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **P2 控制面（2026-09-13 追加实现）**：移动页升级为控制面——任务详情页批准卡（SSE `needApproval` 事件驱动：工具名+目标摘要+脱敏 params，**两步确认**按钮 D4）+ 取消任务按钮 + 会话页/全局 composer 发消息（POST `/api/ai/agent` 复用 chat.js 路由）。后端新增窄口 `mobile-gateway/control.js` `POST /m/api/approvals/:token/decide`——进程内直调 `db.ackToolJob`（与桌面确认卡 `routes/ai-legacy.js` 的 `POST /api/ai/run-tool-ack/:token` **同一函数同一 scope 校验，权限不放大**；不发 HTTP 自调用，对标 BLOCK-49 直调先例）。验证：集成测试 10/10 + **实机隔离探针 28/28 ALL PASS**（新增 B 系列：吊销后可重新配对/发消息 401+契约 400/取消 401+结构化 404/批准无会话 401+缺 scope 400+**scope 不匹配 404 权限不放大**+批准放行落库 ack_status=approved 且 job 不被破坏+拒绝落库 rejected+failed）。`acceptance/block-70/block70-mobile-gateway-live.json`。
 - **实现提交对账（UI-357 桌面投影 / P3 隧道 UI 归入本条目）**：P2 控制面 = 3c3bdb17；P3 隧道三态呈现与公网 QR 切换 = 1c40b35（该提交含 MobileSync.tsx 隧道区 UI 增量，同提交台账漏同步——已补登本段并按 c177374 先例登记 LEGACY 豁免）；桌面投影 = 79fea4a5。「手机发起→桌面执行（真实模型）→手机批准→手机收终态」全链与 dev 栈 CDP 设置区断言未执行（前者需真实 LLM 环境）——前者待 dev 栈窗口，后者**CDP 够不着**，按无人化验收阶梯第 2 级如实停留 `in_progress`，待用户照测试路线实测后升级；P2 控制面（发消息/批准/取消）与 P3 aliyun 隧道属后续阶段未实现。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-375: 标题栏悬空分隔线清理——分隔线改路由感知（用户截图「红框内部有些灰色分隔线多余」）(2026-09-15 verified，dev Electron 边界内)
+
+- **来源**：用户截图指认欢迎页标题栏红框内多条灰色竖向分隔线多余，要求从结构层面清理并保持布局稳定。
+- **根因（CDP 实测定位，非猜测）**：三条分隔线中两条是「列边界语义」残留，渲染条件用的是**全局 `rightOpen` 偏好**而非「被分隔对象在该路由真实在场」——① `.centerTitle` border-right：欢迎页右栏不在场（rightSpan 收成窗口控件区），但全局 rightOpen=true（工作区残留偏好）→ 分隔线悬空挂在标题区右缘；② `.windowControls` border-left：非工作区路由 windowTools 两个开关被 UI-359 裁掉后为空，分隔线左边没有可分隔的对象。第三条（leftZone 右缘）与左栏边缘连续，非冗余，保留。
+- **交付面**：① `TitleBarCenterZone` 分隔线条件改 `rightRailPresent = 工作区路由 && rightOpen && !投影手机`（与容器 rightSpan 同口径）；② `WindowControls` 增 `divider` prop（默认 true），`TitleBarRightZone` 按 `workspacePanelsAvailable` 传参 + 新 `.windowControlsNoDivider`。布局零变化（仅 1px border 条件化，宽度/padding 不动）。
+- **证据**：`TitleBar.test.tsx` **29/29**（新增 UI-377 分隔线 4 断言：非工作区撤中区右缘线/工作区右栏在场保留/非工作区撤窗口控件左缘线/工作区保留）+ tsc 0 + **CDP 实机双侧对照**：欢迎页 `/` centerTitle br=0px、windowControls bl=0px（两条悬空线消失，leftZone 线保留与侧栏连续）；工作区路由 centerTitle br 与 windowControls bl 均在（分隔语义恢复），各元素 x/width 与修复前一致（布局稳定）。
+- **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-374: 商店领域包改版——pack 卡片唯一领域入口 + 核心 UI 无包不提运行时（BLOCK-86 P2）(2026-09-15 in_progress，dev Electron 边界内；P3 实机后升 verified)
 
 - **来源**：BLOCK-86 plan §2 目标 4/5（用户裁决方案1 完整形态）：「核心界面无包时不出现任何领域概念」「pack 卡片成为唯一领域入口」。

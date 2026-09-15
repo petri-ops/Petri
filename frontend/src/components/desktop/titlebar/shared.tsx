@@ -187,7 +187,7 @@ export function useDesktopWindowControls(): DesktopWindowControls {
  * the preload already exposes (`minimize`, `maximize` [toggles], `close`,
  * `isMaximized`).
  */
-export function WindowControls(): React.ReactElement {
+export function WindowControls({ divider = true }: { divider?: boolean } = {}): React.ReactElement {
   const bridge = getBridge('window');
   const [isMaximized, setIsMaximized] = useState<boolean>(false);
 
@@ -208,7 +208,7 @@ export function WindowControls(): React.ReactElement {
   if (!bridge) return <></>;
 
   return (
-    <div className={styles.windowControls}>
+    <div className={`${styles.windowControls} ${!divider ? styles.windowControlsNoDivider : ''}`}>
       <button
         type="button"
         className={styles.winBtn}

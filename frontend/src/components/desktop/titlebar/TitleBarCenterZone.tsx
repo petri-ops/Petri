@@ -4,7 +4,7 @@ import { Icon } from '@/components/icons/Icon';
 import { useWorkspacePanelsContext } from '../WorkspacePanelsContext';
 import { BranchTabsWrapper } from '@/components/branch/BranchTabsWrapper';
 import styles from '../TitleBar.module.css';
-import { getFallbackTitle, isStandalonePagePath, modeUsesSummaryCard, parseWorkspaceRoute } from './shared';
+import { getFallbackTitle, isProjectionMobile, isStandalonePagePath, modeUsesSummaryCard, parseWorkspaceRoute } from './shared';
 
 /**
  * BLOCK-62 P1a — TitleBar 中区片段（标题 + 分支 tabs + 结果选择器 + 摘要概览开关）。
@@ -113,10 +113,16 @@ export function TitleBarCenterZone(): React.ReactElement {
     return !!ws && modeUsesSummaryCard(ws.mode);
   })();
 
+  // UI-377 — 中区右缘分隔线只在「右栏真的在场」时渲染（工作区路由 + 右栏开 +
+  // 非投影手机）。此前只看全局 rightOpen 偏好：欢迎页/独立页右栏并不在场，
+  // 一条悬空分隔线挂在标题区右缘（用户截图指认「灰色分隔线多余」）。
+  const rightRailPresent =
+    !!parseWorkspaceRoute(location.pathname) && panels.rightOpen && !isProjectionMobile();
+
   const displayTitle = title || getFallbackTitle(location.pathname);
 
   return (
-    <div className={`${styles.centerTitle} ${!panels.rightOpen ? styles.centerTitleNoDivider : ''}`}>
+    <div className={`${styles.centerTitle} ${!rightRailPresent ? styles.centerTitleNoDivider : ''}`}>
       <div className={styles.centerTitleMain}>
         <Icon name="folder" size={15} />
         <span className={styles.centerTitleText}>{displayTitle}</span>

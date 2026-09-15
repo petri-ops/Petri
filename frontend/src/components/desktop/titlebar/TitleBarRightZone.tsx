@@ -146,8 +146,10 @@ export function TitleBarRightZone(): React.ReactElement {
       </div>
 
       {/* BLOCK-87 L3-2 — 投影环境（手机/平板浏览器）下窗口控件是垫片 no-op
-          死按钮（截图实证：— □ × 常驻手机顶栏右端），一律隐藏。 */}
-      {!isMac && !getIsProjection() && <WindowControls />}
+          死按钮（截图实证：— □ × 常驻手机顶栏右端），一律隐藏。
+          UI-377 — 非工作区路由 windowTools 为空，windowControls 左缘分隔线
+          无所分隔（悬空线），随路由撤下。 */}
+      {!isMac && !getIsProjection() && <WindowControls divider={workspacePanelsAvailable} />}
     </div>
   );
 }

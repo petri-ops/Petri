@@ -654,6 +654,11 @@
   height: 100%;
 }
 
+/* UI-377 — 非工作区路由 windowTools 为空，左缘分隔线无所分隔，撤下 */
+.windowControlsNoDivider {
+  border-left: 0;
+}
+
 .winBtn {
   display: flex;
   align-items: center;
