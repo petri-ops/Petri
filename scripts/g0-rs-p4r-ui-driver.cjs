@@ -325,6 +325,11 @@ async function keyboardTrace(window) {
     5_000,
   );
   await clickMode(wc, '结果');
+  // 焦点归一化：Enter/程序化点击后 activeElement 可能已随 DOM 卸载漂移，首个 Tab
+  // 只做归一化不前进（旧证据期 steps[0] 曾直接落在 body）。blur 后首个 Tab 即
+  // 前进到第一个可聚焦元素，4 步 trace 语义才是「连续 Tab 到交互元素」。
+  await wc.executeJavaScript(`document.activeElement && document.activeElement.blur()`, true);
+  await new Promise((resolve) => setTimeout(resolve, 80));
 
   const steps = [];
   for (let index = 0; index < 4; index += 1) {
@@ -332,6 +337,19 @@ async function keyboardTrace(window) {
     wc.sendInputEvent({ type: 'keyDown', keyCode: 'Tab' });
     wc.sendInputEvent({ type: 'keyUp', keyCode: 'Tab' });
     await new Promise((resolve) => setTimeout(resolve, 60));
+  }
+  // UI-122 起图像交互为渐进增强：绑定不再自动投影散点，需显式「进入交互选择」
+  // （旧契约绑定即出散点，scatterAvailable 恒真）。先开交互预览再验键盘操作。
+  const interactionToggled = await wc.executeJavaScript(`
+    (() => {
+      const button = document.querySelector('[aria-label="进入交互选择"]');
+      if (!button) return false;
+      button.click();
+      return true;
+    })()
+  `, true);
+  if (interactionToggled) {
+    await waitFor(wc, `Boolean(document.querySelector('[aria-label="可选择科学散点图"]'))`, 'interactive scatter viewer', 10_000);
   }
   const scatter = await wc.executeJavaScript(`
     (() => {
@@ -622,12 +640,23 @@ async function serviceRestartTrace(window, canonicalUrl) {
     'post-restart Agent context',
   );
   const after = await semanticSnapshot(wc);
+  // 现契约 result 模式画布不再自带版本 header（flatten 后版本投影移到 compare/
+  // history 的版本面板）——重启后版本可恢复性改经「审查」面板验「当前 v3」，
+  // 验完回「结果」保持后续故障矩阵的深链 result 形态。
+  await clickMode(wc, ['审查', '审查修改']);
+  await waitFor(
+    wc,
+    `[...document.querySelectorAll('[aria-label="Result Studio 版本与变更"] span')]
+      .some((item) => (item.textContent || '').trim() === '当前 v3')`,
+    'post-restart version panel',
+  );
+  await clickMode(wc, '结果');
   return {
     sameWebContents: wc.id === webContentsId,
     backendWasUnreachable: unreachable === true,
     resultRecovered: after.bodyVisible,
     composerRecovered: after.composerState === 'ready',
-    versionRecovered: after.versionKind === 'ordinal',
+    versionRecovered: true,
     beforeDigest: digest(JSON.stringify(before)),
     afterDigest: digest(JSON.stringify(after)),
   };
@@ -939,6 +968,7 @@ async function run() {
     routeFragment: '/api/result-studio/changesets?',
     retryLabel: '重试版本',
     prepare: () => clickMode(window.webContents, ['审查', '审查修改']),
+    verifyPrimaryBody: true,
   }));
   failures.push(await retryableFailureTrace(window, blocked, config.outputDir, {
     kind: 'storage',
@@ -949,6 +979,7 @@ async function run() {
       await clickMode(window.webContents, '结果');
       await clickMode(window.webContents, ['审查', '审查修改']);
     },
+    verifyPrimaryBody: true,
   }));
   failures.push(await retryableFailureTrace(window, blocked, config.outputDir, {
     kind: 'code',
@@ -976,6 +1007,7 @@ async function run() {
     lifecycle,
     serviceRestart,
     failures,
+    interactionQuiet,
     allMatrixStatesCaptured: matrix.length === 6,
     allScreenshotsDistinct: new Set(screenshotHashes).size === screenshotHashes.length,
     noHorizontalOverflow: matrix.every((item) => !item.pageHorizontalOverflow),
