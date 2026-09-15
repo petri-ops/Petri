@@ -2,39 +2,49 @@
   "schemaVersion": 1,
   "workPackage": "G0-RS-P4R-5",
   "qualificationEligible": false,
-  "sourceCommit": "f5c50db85f137b85caddd45b99b7dbe7ced94303",
+  "sourceCommit": "4072c4e08e6dfc75023d7adab15280fe96611199",
   "sourceFiles": {
     "observation": "scripts/g0-rs-p4r-source-observation.mjs",
     "corpus": "scripts/g0-rs-p4r-corpus.mjs",
-    "routes": "core/r-server/routes/result-studio.js",
+    "routes": "core/biof3-server/routes/result-studio.js",
     "sourceProjection": "core/shared-backend/result-revision-source.js",
-    "replayService": "core/shared-backend/result-replay-service.js",
-    "deseq2Definition": "resources/built-in-plugins/deseq2/tool-definition.json",
-    "deseq2Script": "resources/built-in-plugins/deseq2/scripts/deseq2.R",
-    "volcanoDefinition": "resources/built-in-plugins/volcano-plot/tool-definition.json",
-    "volcanoScript": "resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R",
-    "correlationDefinition": "resources/built-in-plugins/gene-correlation/tool-definition.json",
-    "correlationScript": "resources/built-in-plugins/gene-correlation/scripts/gene-correlation.R",
-    "enrichmentDefinition": "resources/built-in-plugins/go-kegg/tool-definition.json",
-    "enrichmentScript": "resources/built-in-plugins/go-kegg/scripts/go-kegg.R"
+    "replayService": "core/shared-backend/result-replay-service.js"
   },
   "sourceHashes": {
-    "observation": "97aa4943855fd349b035c4ab08c5d265a3ca2e25e7ac34b837325ac8832423fa",
-    "corpus": "359e202832c117f12c6e041706e0028caaaf4c063df3d97511be982ab703bf11",
-    "routes": "1f3c93c8ddf9f4fbfb098fdd5c3a276b249f6e72d7beac2ecafc607b6e9acbd3",
-    "sourceProjection": "28004e2c885f5762028afcaead8c3c2c10fcd7ef1010be4dac03fa226c76482d",
-    "replayService": "f372bf8a348c868652a93b410374aa32c5079435defb709deeb74e317631b0a7",
-    "deseq2Definition": "085143916e4ace65656888430c7931639506eed6c31c52a2584d21fd2733f0ee",
-    "deseq2Script": "7c8b1cacdd3c7cb70cc45e841bb6620e7acdeba36a0d138752e69d988035fd4a",
-    "volcanoDefinition": "66604b604c81e053ede710dec9db3e124a12800563d9c66746767bdd7b36585b",
-    "volcanoScript": "f80012c9b61351ee783ee9a5b85c6c6b14fbcabe35e0c44629a9e7681cab81fd",
-    "correlationDefinition": "e14278ea8aadafc021690265d3685f3326c21492f39e94c519b198eedbec7afa",
-    "correlationScript": "17a39ae1ab7cc96b89ccc22075bc2c8b667dbb840ccad136bd22c42ccd2467a5",
-    "enrichmentDefinition": "e8d54b3aab301f2f36da7eae74258b512a0c3cdfc66668e3af7f1b398a0ff790",
-    "enrichmentScript": "a6b5103ca1d281daa2a0dae59591dde0bf05552191057eb517f74f81ba5d90db"
+    "observation": "d6e23d49fc3ed10aac1fa36d35da6153ca4c04de6f4883f3afcd1faaf3740ec5",
+    "corpus": "1bc41cfcaa7723183b70e7b79eb468b9823a3e42ba3bbf1c000e36e9fa90fd7a",
+    "routes": "f69fa7b8b1f48176d29c4ec46865ed1ac587172368a64b9c37c12d8a870e221f",
+    "sourceProjection": "95b7bcca6fc532e6fc455c042d9ba0fa1217aa9b666a96037a5790c8bcefd0eb",
+    "replayService": "94c50a4533d8328b592bf2f515418f92fc809259990540760e127b484c9e1e96"
   },
   "sourceCommitMatchesSourceHashes": true,
   "sourceMismatches": [],
+  "pack": {
+    "root": "/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/gewu-pack-bio",
+    "commit": "21d610cd7214fcedc736c7ad7244918181073983",
+    "files": {
+      "deseq2Definition": "plugins/deseq2/tool-definition.json",
+      "deseq2Script": "plugins/deseq2/scripts/deseq2.R",
+      "volcanoDefinition": "plugins.dormant/volcano-plot/tool-definition.json",
+      "volcanoScript": "plugins.dormant/volcano-plot/scripts/volcano-plot.R",
+      "correlationDefinition": "plugins.dormant/gene-correlation/tool-definition.json",
+      "correlationScript": "plugins.dormant/gene-correlation/scripts/gene-correlation.R",
+      "enrichmentDefinition": "plugins.dormant/go-kegg/tool-definition.json",
+      "enrichmentScript": "plugins.dormant/go-kegg/scripts/go-kegg.R"
+    },
+    "hashes": {
+      "deseq2Definition": "3795547abb88e7307255b4a062840a34052390550596631311b83a861a8cc4f5",
+      "deseq2Script": "7c6bac471c53137bb69bfd6e112dffb71a0ade47cbea525b421bce15b9326dbb",
+      "volcanoDefinition": "7bed4bca98b614540f39fb8ffe5a6f2ef15eee7554e7b0acf95c03a5f0c9f97b",
+      "volcanoScript": "ed50739c762e9fc8d4ae4d1532aa0e52a9af6e98cbcc1514fe29d4f8d5ba2c29",
+      "correlationDefinition": "8101fd1cba19b1cb376544bcb39727a98551d972262fc33a9e2772ae94d06218",
+      "correlationScript": "6d4806556b99ca903cdc47bb038e97448eed711344015ae856a1986cd6de762c",
+      "enrichmentDefinition": "667632831ee88fba75d9869d399ca534e451c57f708a10fb3c4f72353c158f6f",
+      "enrichmentScript": "517e86b6fed5af13aa8da8eca95cab70cfc73c3469aa8129a2f28fe58a4464ed"
+    },
+    "commitMatchesSourceHashes": true,
+    "mismatches": []
+  },
   "projectBound": true,
   "executionTruthChain": [
     "run_tool",
@@ -49,9 +59,9 @@
       "artifact": "deg_table.csv",
       "status": "verified",
       "sourceStatus": 200,
-      "sourceSha256": "7c8b1cacdd3c7cb70cc45e841bb6620e7acdeba36a0d138752e69d988035fd4a",
+      "sourceSha256": "7c6bac471c53137bb69bfd6e112dffb71a0ade47cbea525b421bce15b9326dbb",
       "sourceScope": "artifact_specific_materialization",
-      "reproductionStatus": "unavailable",
+      "reproductionStatus": "available",
       "formalJobCompleted": true
     },
     {
@@ -59,7 +69,7 @@
       "artifact": "volcano.png",
       "status": "verified",
       "sourceStatus": 200,
-      "sourceSha256": "f80012c9b61351ee783ee9a5b85c6c6b14fbcabe35e0c44629a9e7681cab81fd",
+      "sourceSha256": "ed50739c762e9fc8d4ae4d1532aa0e52a9af6e98cbcc1514fe29d4f8d5ba2c29",
       "sourceScope": "artifact_specific_materialization",
       "reproductionStatus": "available",
       "formalJobCompleted": true
@@ -69,7 +79,7 @@
       "artifact": "heatmap.png",
       "status": "verified",
       "sourceStatus": 200,
-      "sourceSha256": "17a39ae1ab7cc96b89ccc22075bc2c8b667dbb840ccad136bd22c42ccd2467a5",
+      "sourceSha256": "6d4806556b99ca903cdc47bb038e97448eed711344015ae856a1986cd6de762c",
       "sourceScope": "artifact_specific_materialization",
       "reproductionStatus": "available",
       "formalJobCompleted": true
@@ -79,9 +89,9 @@
       "artifact": "go_bp_results.csv",
       "status": "verified",
       "sourceStatus": 200,
-      "sourceSha256": "a6b5103ca1d281daa2a0dae59591dde0bf05552191057eb517f74f81ba5d90db",
+      "sourceSha256": "517e86b6fed5af13aa8da8eca95cab70cfc73c3469aa8129a2f28fe58a4464ed",
       "sourceScope": "artifact_specific_materialization",
-      "reproductionStatus": "unavailable",
+      "reproductionStatus": "available",
       "formalJobCompleted": true
     }
   ],

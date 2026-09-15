@@ -1434,7 +1434,7 @@
       "truthDomain": "g0-result-studio",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P2-P4R-CORPUS",
+      "phase": "P2-COMPLETED",
       "lastUpdated": "2026-09-15"
     },
     {
