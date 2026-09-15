@@ -1,0 +1,31 @@
+{
+  "name": "block90-os-import-live",
+  "startedAt": "2026-09-15T15:09:14.081Z",
+  "finishedAt": "2026-09-15T15:09:16.139Z",
+  "assertions": [
+    {
+      "name": "drop event dispatched through window takeover",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "imported file appears in workspace tree",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drag-out: file row exposes DownloadURL",
+      "pass": true,
+      "detail": "\"application/octet-stream:dragout-sample.txt:file:///Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/workspaces/block9"
+    },
+    {
+      "name": "drag-out: internal tree MIME still present (tree moves unaffected)",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "allPass": true,
+  "sourcePath": "/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/block90-source-1789484954081.csv",
+  "importedName": "block90-imported-1789484954082.csv",
+  "provenance": "synthetic drop via documented test seam (application/x-gewu-source-path); real webUtils path needs user drag"
+}
