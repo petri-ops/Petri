@@ -7,6 +7,8 @@ import {
   resolveUx1hElectronPath,
 } from '../scripts/g0-rs-ux1h-acceptance.mjs';
 import { buildSdc1GatewayResponse } from '../scripts/g0-sdc1-local-gateway.mjs';
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 test('resolves the UX1H Electron executable for Windows and POSIX', () => {
   assert.match(resolveUx1hElectronPath('/repo', 'win32').replaceAll('\\', '/'),
@@ -19,7 +21,13 @@ function responseBody(messages) {
   return { messages };
 }
 
-test('observes the checked-in airway fixture shape and groups exactly', () => {
+test('observes the checked-in airway fixture shape and groups exactly', (t) => {
+  // BLOCK-91 — fixture 在生成机的 tmp/（gitignore scratch，不入库）。跨机环境
+  // 按既有先例（BLOCK-83 遗留 A：包存在则跑、缺失显式 skip）显式跳过，不伪装通过。
+  const countsFixture = fileURLToPath(new URL('../tmp/airway-test/airway_counts_symbol.csv', import.meta.url));
+  if (!existsSync(countsFixture)) {
+    return t.skip('airway fixture lives on the generating machine (tmp/ scratch)');
+  }
   const dataset = observeAirwayDataset();
   assert.equal(dataset.featureRows, 34_889);
   assert.equal(dataset.sampleColumns, 8);

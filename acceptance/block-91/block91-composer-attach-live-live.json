@@ -1,0 +1,30 @@
+{
+  "name": "block91-composer-attach-live",
+  "startedAt": "2026-09-15T15:57:23.735Z",
+  "finishedAt": "2026-09-15T15:57:25.443Z",
+  "assertions": [
+    {
+      "name": "composer: dropped file becomes attachment chip",
+      "pass": true,
+      "detail": "chips=1"
+    },
+    {
+      "name": "send triggered with attachment",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "attachment stored under .chat-attachments/ (real remote chain)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "sent message contains attachment reference line",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "allPass": true,
+  "projectId": "p_mtw8183q_2txr",
+  "provenance": "synthetic drop with real File handle; upload + reference composition through real send pipeline"
+}

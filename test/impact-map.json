@@ -1633,6 +1633,27 @@
       "frontendRelated": true,
       "classifiesScripts": true,
       "scriptRole": "development-smoke"
+    },
+    {
+      "id": "block91-composer-attach-export",
+      "note": "BLOCK-91 聊天附件真实接入（composer 附件孤儿缺陷修复 + fs/upload 落 .chat-attachments + 消息引用注入）+ 拖入图片 dataUrl 对齐 + 上限/无项目守卫 + ssh 拖出 DownloadURL（FileTreeItem 预览同源 URL）。",
+      "patterns": [
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/components/copilot/SimpleChat/attachments.ts",
+        "frontend/src/components/copilot/SimpleChat/attachmentUpload.ts",
+        "frontend/src/components/copilot/SimpleChat/attachmentUpload.test.ts",
+        "frontend/src/pages/project-workspace/FileTreeItem.tsx",
+        "scripts/block91-*",
+        "acceptance/block-91/**"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/SimpleChat/attachmentUpload.test.ts",
+        "frontend/src/components/copilot/SimpleChat.test.tsx",
+        "frontend/src/components/copilot/SimpleChat.progress.test.ts"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
     }
   ]
 }

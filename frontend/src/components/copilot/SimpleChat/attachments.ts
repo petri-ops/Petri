@@ -21,6 +21,21 @@ export interface AttachmentFile {
   size: number;
   dataUrl?: string;
   previewUrl?: string;
+  /** BLOCK-91 — 拖入文件的原始句柄（发送前由 uploadAttachment 读取内容）。 */
+  file?: File;
+}
+
+/** 单附件大小上限（10MB）——超限诚实拒收（BLOCK-91，与 attachmentUpload 上传校验同源）。 */
+export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
+/** 单次消息附件数量上限。 */
+export const MAX_ATTACHMENTS = 8;
+
+/** 附件大小校验：超限返回报错文案。 */
+export function validateAttachmentSize(size: number, name: string): string | null {
+  if (size > MAX_ATTACHMENT_BYTES) {
+    return `${name} 超过 10MB 附件上限`;
+  }
+  return null;
 }
 
 /** Drag-over guard: only flip the dragging flag when real Files are being dragged. */
@@ -63,15 +78,45 @@ export function onDrop(
   const files = Array.from(e.dataTransfer.files);
   if (files.length === 0) return;
 
-  const newAttachments: AttachmentFile[] = files.map((file) => ({
-    id: `att-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-    name: file.name,
-    type: file.type,
-    size: file.size,
-    previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
-  }));
+  // BLOCK-91 — 上限守卫 + 拖入文件保留原始句柄（发送前由 uploadAttachment 读取）；
+  // 图片异步读取 dataUrl（与粘贴行为对齐，此前拖入图片无内容载荷、发送即丢失）。
+  const newAttachments: AttachmentFile[] = [];
+  for (const file of files) {
+    const tooBig = validateAttachmentSize(file.size, file.name);
+    if (tooBig) {
+      console.warn('[attachments]', tooBig);
+      continue;
+    }
+    newAttachments.push({
+      id: `att-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
+      file,
+    });
+  }
+  if (newAttachments.length === 0) return;
 
-  setAttachments((prev) => [...prev, ...newAttachments]);
+  setAttachments((prev) => {
+    const room = Math.max(0, MAX_ATTACHMENTS - prev.length);
+    if (newAttachments.length > room) {
+      console.warn('[attachments]', `附件数量超出上限 ${MAX_ATTACHMENTS}，已截断`);
+      return [...prev, ...newAttachments.slice(0, room)];
+    }
+    return [...prev, ...newAttachments];
+  });
+
+  for (const att of newAttachments) {
+    if (att.file && att.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string;
+        setAttachments((prev) => prev.map((item) => (item.id === att.id ? { ...item, dataUrl } : item)));
+      };
+      reader.readAsDataURL(att.file);
+    }
+  }
 }
 
 /** Paste: read clipboard image items as data URLs and append them to the attachment list. */

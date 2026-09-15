@@ -62,11 +62,16 @@ export function FileTreeItem({
 
   const handleDragStart = useCallback((event: React.DragEvent) => {
     event.dataTransfer.setData(DRAG_MIME, JSON.stringify({ path: fullPath, name: entry.name, type: entry.type }));
-    // BLOCK-90 — OS 拖出导出：本地项目文件行附带 DownloadURL，拖到 Finder/桌面即落盘。
-    // 树内 drop 读的是上方内部 MIME，互不影响；ssh（文件在远端）与目录不启用。
-    if (entry.type === 'file' && workspaceKind === 'local' && workspaceDir) {
-      const absolute = `file://${workspaceDir}/${fullPath}`;
-      event.dataTransfer.setData('DownloadURL', `application/octet-stream:${entry.name}:${absolute}`);
+    // BLOCK-90/91 — OS 拖出导出：文件行附带 DownloadURL，拖到 Finder/桌面即落盘。
+    // 本地项目用 file:// 直连（即时）；ssh 项目用预览同源 HTTP URL（落盘时服务端流式
+    // 下载，无需物化本地副本——plan D5）。树内 drop 读的是上方内部 MIME，互不影响。
+    if (entry.type === 'file') {
+      if (workspaceKind === 'local' && workspaceDir) {
+        const absolute = `file://${workspaceDir}/${fullPath}`;
+        event.dataTransfer.setData('DownloadURL', `application/octet-stream:${entry.name}:${absolute}`);
+      } else if (fileUrl) {
+        event.dataTransfer.setData('DownloadURL', `application/octet-stream:${entry.name}:${fileUrl}`);
+      }
     }
     event.dataTransfer.effectAllowed = 'copyMove';
   }, [entry.name, entry.type, fullPath, workspaceDir, workspaceKind]);

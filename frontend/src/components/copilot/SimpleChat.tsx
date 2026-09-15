@@ -62,6 +62,11 @@ import {
   openImagePreview,
   closeImagePreview,
 } from './SimpleChat/attachments';
+import {
+  ATTACHMENT_DIR,
+  composeAttachmentReferenceLines,
+  uploadAttachment,
+} from './SimpleChat/attachmentUpload';
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
 // UI-268: 「后台进程」浮窗（持久输出独立小窗口）；工具活动记录改为内联手风琴
 import { ToolActivityDock } from './ToolActivityDock';
@@ -271,6 +276,8 @@ export function SimpleChat({
   const [input, setInput] = useState('');
   const [queuedPrompts, setQueuedPrompts] = useState<string[]>([]);
   const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
+  // BLOCK-91 — 附件发送失败/守卫提示（诚实可见，不再静默丢弃）。
+  const [attachmentNotice, setAttachmentNotice] = useState<string | null>(null);
   // BLOCK-52 P1（选中即引用）: 右栏预览选中文字 → 引用块，随下一条消息发送。
   const [selectionRefs, setSelectionRefs] = useState<SelectionReference[]>([]);
   const selectionRefsRef = useRef<SelectionReference[]>([]);
@@ -971,17 +978,44 @@ export function SimpleChat({
   // 消息正文，接受成功后清空引用块；被守卫拦截（空文本 / 运行中）时保留待重试。
   // BLOCK-52 P2：图片引用卡同管道——artifact 元数据合成进正文，成功后一并清空。
   const sendWithRefs = useCallback(async (text: string): Promise<boolean> => {
+    // BLOCK-91 — 附件真实接入：发送前上传到工作区 .chat-attachments/，
+    // 消息追加引用行（模型按路径读取，与 imageRefs 同构）。无项目（欢迎页）
+    // 诚实报错——不再静默丢弃附件。
+    let attachmentBlock = '';
+    if (attachments.length > 0) {
+      if (!projectId) {
+        setAttachmentNotice('附件需在项目工作区中使用；请先选择项目再发送附件');
+        return false;
+      }
+      try {
+        const refs = [];
+        for (const att of attachments) {
+          refs.push(await uploadAttachment(projectId, att));
+        }
+        attachmentBlock = composeAttachmentReferenceLines(refs);
+      } catch (error) {
+        setAttachmentNotice((error as Error).message || '附件上传失败');
+        return false;
+      }
+    }
     const composed = composeMessageWithImageReferences(
       composeMessageWithSelectionReferences(text, selectionRefsRef.current),
       imageRefsRef.current,
-    );
+    ) + attachmentBlock;
     const ok = await send(composed);
     if (ok) {
       setSelectionRefs([]);
       setImageRefs([]);
+      if (attachments.length > 0) {
+        for (const att of attachments) {
+          if (att.previewUrl && !att.dataUrl) URL.revokeObjectURL(att.previewUrl);
+        }
+        setAttachments([]);
+        setAttachmentNotice(null);
+      }
     }
     return ok;
-  }, [send]);
+  }, [send, attachments, projectId]);
 
   // BLOCK-55 P1/P3 — run 结束 / 会话切换后拉取待批准 draft 计划与待批准修订案。
   // 拉取失败静默降级（批准卡缺席不影响普通对话）。
@@ -1617,6 +1651,10 @@ export function SimpleChat({
             onDrop={handleDrop}
             onPaste={handlePaste}
           >
+            {/* BLOCK-91 — 附件守卫/失败提示 */}
+            {attachmentNotice && (
+              <div className="sc-attachment-notice" role="alert">{attachmentNotice}</div>
+            )}
             {/* Attachments preview */}
             {attachments.length > 0 && (
               <div className="sc-attachments">
