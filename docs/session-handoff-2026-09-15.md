@@ -1,7 +1,7 @@
 # 交接提示词 · 新会话继续开发（2026-09-15 · 第二轮：G0-RS 整包 closeout 尾声）
 
 > **✅ 本文件使命已完成（2026-09-15 第二轮会话收口）**：p4r ui observation 重采已通过
-> （`rs-p4r-ui-observation.json` passed=true 锚定 `834a4b42`，驱动连随 7 关渲染层契约漂移，
+> （`rs-p4r-ui-observation.json` passed=true 锚定 `6b3c68bf`，驱动连随 7 关渲染层契约漂移，
 > 全程非产品缺陷），整包 closeout 五件套与门禁已走完，G0-RS → completed。
 > 状态真相见 `docs/next-steps-roadmap.md` / `docs/project-workspace-handoff.md` 头部与
 > `docs/g0-result-studio-plan.md` 状态头；下文仅供追溯，勿按其「剩余工作」重跑。
