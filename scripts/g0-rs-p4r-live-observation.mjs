@@ -443,6 +443,7 @@ async function runCorpusChildMain() {
     records: corpus.records,
     outputs: corpus.outputs,
     projectId: corpus.projectId,
+    pack: corpus.pack,
     ok: corpus.ok,
     kept: true,
   })}\n`);
