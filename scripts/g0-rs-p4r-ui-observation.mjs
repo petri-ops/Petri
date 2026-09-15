@@ -170,6 +170,29 @@ function alignDisposableDesktopIdentity(databasePath, projectId) {
   }
 }
 
+/**
+ * UX1G-1 会话归属契约：渲染层对深链结果做 fail-closed 校验，`conversation_id`
+ * 为空的 Job 会被「这个旧结果没有可信的会话归属」拒绝，结果画布永不挂载
+ * （UI-123 起的产品语义，晚于本链上一次成功捕获）。corpus 目标 Job 走
+ * `tool_run_tool` 直提、天然无会话；这里把它绑到 agent child 已建立的同一会话
+ * （context-envelope 预检用的就是它），与 P6 restart 原型的做法一致。
+ */
+function bindCorpusTargetConversation(databasePath, jobId, conversationId) {
+  const Database = require(require.resolve('better-sqlite3', {
+    paths: [path.join(repoRoot, 'core/biof3-server'), repoRoot],
+  }));
+  const sqlite = new Database(databasePath);
+  try {
+    const update = sqlite.prepare(
+      'update tool_jobs set conversation_id=? where id=? and conversation_id is null',
+    ).run(conversationId, jobId);
+    if (update.changes !== 1) throw new Error('corpus target conversation bind failed');
+    return true;
+  } finally {
+    sqlite.close();
+  }
+}
+
 async function runElectron(configPath, resultPath, { onSpawn, onRestartRequest } = {}) {
   const stderr = [];
   let stdoutBuffer = '';
@@ -302,6 +325,8 @@ export async function observeP4RUi({ writeEvidence = false, keep = false } = {})
       },
     });
     const conversationId = agentCandidate.conversationId;
+    if (!conversationId) throw new Error('agent child did not report its conversation');
+    bindCorpusTargetConversation(path.join(root, 'biof3.db'), record.toolJobId, conversationId);
     const contextPreflight = await fetch(
       `${backend.baseUrl}/api/result-studio/context-envelope?projectId=${encodeURIComponent(corpus.projectId)}&conversationId=${encodeURIComponent(conversationId)}&jobId=${encodeURIComponent(record.toolJobId)}&artifact=${encodeURIComponent(artifact)}${revisionId ? `&revisionId=${encodeURIComponent(revisionId)}` : ''}`,
     );
