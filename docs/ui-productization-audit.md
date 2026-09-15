@@ -3338,6 +3338,15 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **P2 控制面（2026-09-13 追加实现）**：移动页升级为控制面——任务详情页批准卡（SSE `needApproval` 事件驱动：工具名+目标摘要+脱敏 params，**两步确认**按钮 D4）+ 取消任务按钮 + 会话页/全局 composer 发消息（POST `/api/ai/agent` 复用 chat.js 路由）。后端新增窄口 `mobile-gateway/control.js` `POST /m/api/approvals/:token/decide`——进程内直调 `db.ackToolJob`（与桌面确认卡 `routes/ai-legacy.js` 的 `POST /api/ai/run-tool-ack/:token` **同一函数同一 scope 校验，权限不放大**；不发 HTTP 自调用，对标 BLOCK-49 直调先例）。验证：集成测试 10/10 + **实机隔离探针 28/28 ALL PASS**（新增 B 系列：吊销后可重新配对/发消息 401+契约 400/取消 401+结构化 404/批准无会话 401+缺 scope 400+**scope 不匹配 404 权限不放大**+批准放行落库 ack_status=approved 且 job 不被破坏+拒绝落库 rejected+failed）。`acceptance/block-70/block70-mobile-gateway-live.json`。
 - **实现提交对账（UI-357 桌面投影 / P3 隧道 UI 归入本条目）**：P2 控制面 = 3c3bdb17；P3 隧道三态呈现与公网 QR 切换 = 1c40b35（该提交含 MobileSync.tsx 隧道区 UI 增量，同提交台账漏同步——已补登本段并按 c177374 先例登记 LEGACY 豁免）；桌面投影 = 79fea4a5。「手机发起→桌面执行（真实模型）→手机批准→手机收终态」全链与 dev 栈 CDP 设置区断言未执行（前者需真实 LLM 环境）——前者待 dev 栈窗口，后者**CDP 够不着**，按无人化验收阶梯第 2 级如实停留 `in_progress`，待用户照测试路线实测后升级；P2 控制面（发消息/批准/取消）与 P3 aliyun 隧道属后续阶段未实现。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-377: 投影商店 contents 富化对齐——手机端包卡片计数行补齐（UI-374 边界遗留）(2026-09-15 verified，dev Electron 边界内)
+
+- **来源**：UI-374 边界登记——投影 HTTP 桥缺 contents 富化，手机端包卡片退化为隐藏计数行。
+- **交付面**：`core/biof3-server/routes/projection-data.js` 两条只读路由（/api/packs/installed、/api/packs/available）补 `describePackContents` 富化（与桌面 pack:list-* 同源同兜底），投影桥 `projectionDataBridges.ts` 是透传实现**零改动**自动受益——手机端包卡片计数行（N 分析插件 · N 脚本模块 · N 演示数据集）与运行时子项（requiresRuntimes 本就随记录透传）补齐。
+- **设计决策（uninstall-plan 不对齐，销号附论证）**：投影端写面按 BLOCK-84 既定设计诚实禁用（「投影环境暂不支持卸载领域包，请在桌面端操作」）——给手机端配 uninstall-plan 只会产出「弹了确认框也执行不了」的死胡同 UX；桌面三档弹层 + 执行全链保持在桌面（PACK-86 P1 编排）。
+- **证据**：`block87-projection-data.test.mjs` **6/6**（夹具补脚本/演示数据目录，两路由断言 contents.pluginCount/scriptCount/demoDataCount 富化）+ 既有断言零破坏。
+- **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-376: 欢迎页标题栏 bare 化——品牌回退标题「Gewu」与左区悬空分隔线清理（用户截图「Gewu 和旁边的灰色分隔线没有实际意义」）(2026-09-15 verified，dev Electron 边界内)
 
 - **来源**：用户截图指认欢迎页标题栏的「📁 Gewu」标题与其旁的灰色分隔线无实际意义，要求了解布局后清理。
@@ -3362,7 +3371,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **交付面**：① `PluginStorePanel` 收编独立「运行时」分类——运行时改在领域包卡片**可展开子项**渲染（状态/约体积/`必需 · 缺失` 章/补装按钮 + `pack:install-progress` 进度条）；② 包卡片折叠态显示内容概要（N 分析插件 · N 脚本模块 · N 演示数据集，`describePackContents` 只读统计 + IPC 富化）；③ 卸载两段式——`pack:uninstall-plan` 契约推导预览 → **三档确认弹层**（删运行时标回收体积[默认勾选]/包源目录默认保留可选删[删前护栏校验 pack.json]/用户数据永不触碰固定说明），执行走 BLOCK-86 P1 编排；④ 包交付插件在「分析工具」分类可见并**标注来源包**（无独立安装按钮，随包管理）；⑤ 领域感知门控四处——home 非阻塞引导条 / 工作台缺失横幅 / DesktopOnboarding「准备运行时」步骤 / env-coordinator boot warn，全部改为 `listPacksRequiringRuntimes()` 门控（新 `frontend/src/lib/domainPack.ts` 单点）：**无包不提运行时**，有包缺运行时才提示且文案挂包名；DesktopOnboarding 无包时收成单步欢迎流（运行时 tip 换领域能力扩展说明）。
 - **P3 实机抓真修（验收链抓出）**：运行时「在位」判定不能只看插件安装记录——本机 R 由链外供给（手动放置），installed.json 无记录，导致商店子项误标「必需 · 缺失」、卸载预览无回收体积、装卸编排误触发 657MB 重下载（OSS 404 兜底未重装成功）。修=runtimeStatus（目录+可执行探测）+清单 language 映射双判据（`isRuntimePresent`/`locateRuntime`），skip 语义区分 `already_installed`/`runtime_present`。
 - **证据**：`PluginStorePanel.test.tsx` **9/9**（分类收编负例/子项缺失章/进度事件/弹层三档缺省与显式传参/无包不提示负例/来源包标注/模块清单行）+ 契约测试 `pack-registry.test.mjs` **+2**（runtime_present 防误下载/contents 统计）+ home.test 领域感知契约 + 相邻回归 + tsc 0。**P3 实机 `npm run verify -- pack-lifecycle` 24/24 allPass**（`acceptance/block-86/`）：封存负例（celltypist 不在目录）/真装编排 runtime_present skip/记录升级契约形态/商店五点改版/三档弹层真实回收体积（R 约 796MB）/R 运行时+包源双保护/真实 R 工具 deseq2 **completed**/现场恢复。
-- **边界**：投影端（HTTP 桥）暂无 uninstallPlan/contents 富化通道——手机端商店退化为记录级卸载、隐藏计数行（getBridge 空值兜底），桌面先行，投影对齐登记 BLOCK-87 L4 候选。dev Electron 边界内；packaged 未验（G0 常态）。
+- **边界**：contents 富化已对齐投影（UI-377）；uninstall-plan 保持桌面-only（投影写面按 BLOCK-84 设计诚实禁用，配置弹死胡同 UX 不做）。dev Electron 边界内；packaged 未验（G0 常态）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 ## UI-373: 欢迎页冷启动不预选工作区 + 输入框常驻（用户截图「初始界面只有选择项目没有输入框，按理应该是图2 但不应该确定的工作区」）(2026-09-15 verified，dev Electron 边界内)

@@ -104,11 +104,26 @@ module.exports = function registerProjectionDataRoutes(app) {
     res.json({ ok: true, runtime: status });
   });
 
+  // BLOCK-86 收口对齐 — 内容概要富化（与桌面 pack:list-* 的 enrichContents 同源）：
+  // 手机端包卡片因此能看到「N 分析插件 · N 脚本模块 · N 演示数据集」计数行。
+  // 缺目录/统计失败如实计 0，绝不抛错阻断商店渲染。
+  function enrichPackContents(packRegistry, packRoot) {
+    try {
+      return packRegistry.describePackContents(packRoot);
+    } catch {
+      return { pluginCount: 0, plugins: [], pluginIds: [], scriptCount: 0, demoDataCount: 0 };
+    }
+  }
+
   // 领域包安装记录（与桌面 pack:list-installed 同一 dataDir/packs/installed.json）
   app.get('/api/packs/installed', (_req, res) => {
     try {
       const packRegistry = require('../../shared-backend/pack-registry');
-      res.json({ ok: true, packs: packRegistry.readInstalledPacks(resolveDataDir()) });
+      const packs = packRegistry.readInstalledPacks(resolveDataDir());
+      res.json({
+        ok: true,
+        packs: packs.map((p) => ({ ...p, contents: enrichPackContents(packRegistry, p.packRoot) })),
+      });
     } catch (error) {
       res.status(500).json({ ok: false, error: 'packs_list_failed', message: error.message });
     }
@@ -120,7 +135,14 @@ module.exports = function registerProjectionDataRoutes(app) {
       const packRegistry = require('../../shared-backend/pack-registry');
       const available = packRegistry.discoverAvailablePacks({ projectRoot: resolveRepoRoot() });
       const installedIds = new Set(packRegistry.readInstalledPacks(resolveDataDir()).map((p) => p.packId));
-      res.json({ ok: true, packs: available.map((p) => ({ ...p, installed: installedIds.has(p.packId) })) });
+      res.json({
+        ok: true,
+        packs: available.map((p) => ({
+          ...p,
+          installed: installedIds.has(p.packId),
+          contents: enrichPackContents(packRegistry, p.packRoot),
+        })),
+      });
     } catch (error) {
       res.status(500).json({ ok: false, error: 'packs_available_failed', message: error.message });
     }

@@ -93,7 +93,9 @@ test('BLOCK-87 projection data: catalog, runtime status, packs read plane', asyn
     const packRoot = path.join(sandbox, 'proj', 'gewu-pack-bio');
     mkdirSync(path.join(packRoot, 'plugins'), { recursive: true });
     writeFileSync(path.join(packRoot, 'pack.json'), JSON.stringify({ packId: 'gewu-pack-bio', name: '格物 · 生信分析包', version: '0.1.0', description: 'bio pack' }));
-    writeFileSync(path.join(packRoot, 'plugins', 'installed.json'), '[]');
+    writeFileSync(path.join(packRoot, 'plugins', 'installed.json'), JSON.stringify([{ id: 'deseq2', language: 'r', version: '1.0.0' }]));
+    mkdirSync(path.join(packRoot, 'scripts', 'deseq2'), { recursive: true });
+    mkdirSync(path.join(packRoot, 'demo-data', 'counts'), { recursive: true });
     mkdirSync(path.join(dataDir, 'packs'), { recursive: true });
     writeFileSync(
       path.join(dataDir, 'packs', 'installed.json'),
@@ -129,10 +131,15 @@ test('BLOCK-87 projection data: catalog, runtime status, packs read plane', asyn
     assert.equal(installed.ok, true);
     assert.equal(installed.packs.length, 1);
     assert.equal(installed.packs[0].packId, 'gewu-pack-bio');
+    // BLOCK-86 收口对齐 — contents 富化（手机端包卡片计数行数据源）
+    assert.equal(installed.packs[0].contents.pluginCount, 1, JSON.stringify(installed.packs[0].contents));
+    assert.equal(installed.packs[0].contents.scriptCount, 1);
+    assert.equal(installed.packs[0].contents.demoDataCount, 1);
     const available = await getJson('/api/packs/available');
     assert.equal(available.ok, true);
     assert.equal(available.packs.length, 1);
     assert.equal(available.packs[0].installed, true, 'sibling pack must be flagged installed');
+    assert.equal(available.packs[0].contents.pluginCount, 1, 'available 路由同样富化 contents');
 
     await closeServer(server);
   } finally {
