@@ -35,6 +35,10 @@ export { findBioPackRoot };
 import {
   P6_UI110_SOURCE_FILES,
 } from './g0-rs-p6-ui110-observation.mjs';
+// BLOCK-86 把 14 插件封存进包仓 plugins.dormant/（deseq2 是唯一活跃插件），
+// go-kegg 供能数据因此不再位于 plugins/go-kegg/。这里复用 P4R 包感知层那唯一的
+// dormant 感知定位（plugins/ 优先 → plugins.dormant/ 兜底），勿另起炉灶。
+import { locatePackPluginDir } from './g0-rs-p4r-pack.mjs';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -238,8 +242,9 @@ export function loadGoKeggPressureInput() {
     });
   }
   const inputPath = path.join(
-    packRoot,
-    'plugins/go-kegg/demo-data/genes.csv',
+    locatePackPluginDir(packRoot, 'go-kegg'),
+    'demo-data',
+    'genes.csv',
   );
   const csv = readFileSync(inputPath, 'utf8');
   const rows = csv.trimEnd().split(/\r?\n/);

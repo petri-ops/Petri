@@ -15,6 +15,7 @@ import {
   cpSync,
   existsSync,
   readFileSync,
+  readdirSync,
   realpathSync,
   renameSync,
   rmSync,
@@ -1592,24 +1593,47 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
       verbose,
       beforeStart({ root: disposableRoot, env }) {
         // drift 原型需要「可变异的隔离 built-ins 副本」（builtin-canonical 优先源）：
-        // 核心目录已随 BLOCK-83 删除，改从领域包 plugins 拷贝；包装载
+        // 核心目录已随 BLOCK-83 删除，改从领域包拷贝；包装载
         // （dataDir + installed.json）已由 runtime 默认接线完成，此处不重复。
-        const coreBuiltIns = path.join(ROOT, 'resources/built-in-plugins');
-        const source = existsSync(coreBuiltIns)
-          ? coreBuiltIns
-          : (() => {
-            const packRoot = findBioPackRoot();
-            if (!packRoot) {
-              throw Object.assign(new Error('p6_restart_bio_pack_root_missing'), {
-                code: 'p6_restart_bio_pack_root_missing',
-                detail: { hint: 'set BIOF3_BIO_PACK_ROOT or check out gewu-pack-bio as a sibling directory' },
-              });
-            }
-            return path.join(packRoot, 'plugins');
-          })();
+        //
+        // BLOCK-86 封存态：包 plugins/ 只剩 deseq2（manifest.json 仍索引 15 个），
+        // 被封存的 volcano-plot 只在 harness 的封存插件运行副本里
+        // （BIOF3_DEVELOPMENT_PLUGIN_DIRS，由 createP5LiveScientificRuntime 装配）。
+        // 副本因此 = 包 plugins/ 的 manifest + 包 plugins/ 的活跃插件 + 运行副本里的
+        // 封存插件，冷启窗口的「隔离副本即全部插件世界」语义保持不变。
+        const coreBuiltIns = path.join(ROOT, 'resources', 'built-in-plugins');
         const isolatedBuiltIns = path.join(disposableRoot, 'built-in-plugins');
-        cpSync(source, isolatedBuiltIns, { recursive: true });
+        if (existsSync(coreBuiltIns)) {
+          cpSync(coreBuiltIns, isolatedBuiltIns, { recursive: true });
+        } else {
+          const packRoot = findBioPackRoot();
+          if (!packRoot) {
+            throw Object.assign(new Error('p6_restart_bio_pack_root_missing'), {
+              code: 'p6_restart_bio_pack_root_missing',
+              detail: { hint: 'set BIOF3_BIO_PACK_ROOT or check out gewu-pack-bio as a sibling directory' },
+            });
+          }
+          cpSync(path.join(packRoot, 'plugins'), isolatedBuiltIns, { recursive: true });
+          const stagedDirs = String(env.BIOF3_DEVELOPMENT_PLUGIN_DIRS || '')
+            .split(path.delimiter)
+            .map((entry) => entry.trim())
+            .filter(Boolean);
+          for (const stagedDir of stagedDirs) {
+            if (!existsSync(stagedDir)) continue;
+            for (const entry of readdirSync(stagedDir, { withFileTypes: true })) {
+              if (!entry.isDirectory()) continue;
+              cpSync(
+                path.join(stagedDir, entry.name),
+                path.join(isolatedBuiltIns, entry.name),
+                { recursive: true, force: true },
+              );
+            }
+          }
+        }
         env.BIOF3_BUILT_IN_PLUGINS_DIR = isolatedBuiltIns;
+        // 副本即全部插件世界：冷启重放必须只看到副本本身，否则运行副本里的
+        // 封存插件（1.0.0）会以后置开发源遮蔽副本里被升级的 2.0.0。
+        env.BIOF3_DEVELOPMENT_PLUGIN_DIRS = isolatedBuiltIns;
       },
     });
     root = runtime.root;

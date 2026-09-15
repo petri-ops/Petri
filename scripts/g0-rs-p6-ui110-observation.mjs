@@ -37,8 +37,10 @@ import { fileURLToPath } from 'node:url';
 import {
   P5_SOURCE_FILES,
   createP5LiveScientificRuntime,
+  findBioPackRoot,
   prepareP5LiveScientificBaselines,
 } from './g0-rs-p5-acceptance.mjs';
+import { locatePackPluginDir } from './g0-rs-p4r-pack.mjs';
 import {
   P6_UI110_GATEWAY_CLASSIFICATION,
   startP6Ui110LocalGateway,
@@ -57,12 +59,27 @@ const VITE_PATH = path.join(ROOT, 'frontend/node_modules/vite/bin/vite.js');
 const ELECTRON_PATH = path.join(ROOT, 'node_modules/.bin/electron');
 const LOCAL_RUNTIMES_ENV = 'BIOF3_P6_LOCAL_RUNTIMES_DIR';
 const SHA256_PATTERN = /^[a-f0-9]{64}$/;
-const ADMITTED_DESCRIPTOR_FILES = Object.freeze({
-  deseq2: 'resources/built-in-plugins/deseq2/tool-definition.json',
-  'go-kegg': 'resources/built-in-plugins/go-kegg/tool-definition.json',
-  'volcano-plot': 'resources/built-in-plugins/volcano-plot/tool-definition.json',
-  'gene-correlation': 'resources/built-in-plugins/gene-correlation/tool-definition.json',
-});
+// Descriptors live inside the domain pack. The old `resources/built-in-plugins/`
+// paths died with BLOCK-83 (pack migration), and BLOCK-86 sealed 14 of the 15
+// plugins into the pack's plugins.dormant/ — so resolution must go through the
+// pack layer's dormant-aware locatePackPluginDir().
+const ADMITTED_DESCRIPTOR_TOOLS = Object.freeze([
+  'deseq2',
+  'go-kegg',
+  'volcano-plot',
+  'gene-correlation',
+]);
+
+function admittedDescriptorFile(toolId) {
+  if (!ADMITTED_DESCRIPTOR_TOOLS.includes(toolId)) return null;
+  const packRoot = findBioPackRoot();
+  if (!packRoot) return null;
+  try {
+    return path.join(locatePackPluginDir(packRoot, toolId), 'tool-definition.json');
+  } catch {
+    return null;
+  }
+}
 
 export const P6_UI110_REQUIRED_CAPABILITY = Object.freeze({
   capabilityId: 'r-enrichment',
@@ -623,9 +640,9 @@ export function verifyP6Ui110ArtifactBytes({ workspaceRoot, revision, job }) {
 
 function admittedFormalArtifactIds(job) {
   const toolId = String(job?.tool_id || job?.toolId || '').trim();
-  const relative = ADMITTED_DESCRIPTOR_FILES[toolId];
-  if (!relative) return null;
-  const descriptor = JSON.parse(readFileSync(path.join(ROOT, relative), 'utf8'));
+  const descriptorFile = admittedDescriptorFile(toolId);
+  if (!descriptorFile) return null;
+  const descriptor = JSON.parse(readFileSync(descriptorFile, 'utf8'));
   const result = parseJson(job?.result_json, job?.result || {});
   const actualIds = new Set((result?.artifacts || []).map((artifact) => artifact?.id).filter(Boolean));
   const declared = descriptor?.resultStudio?.artifacts;
@@ -764,9 +781,9 @@ function normalizedJobParams(job) {
 
 function effectiveDeclaredJobParams(job) {
   const params = { ...normalizedJobParams(job) };
-  const definitionPath = ADMITTED_DESCRIPTOR_FILES[job?.tool_id];
+  const definitionPath = admittedDescriptorFile(job?.tool_id);
   if (!definitionPath) return params;
-  const definition = parseJson(readFileSync(path.join(ROOT, definitionPath), 'utf8'), {});
+  const definition = parseJson(readFileSync(definitionPath, 'utf8'), {});
   const declared = definition?.resultStudio?.parameters || {};
   for (const [name, schema] of Object.entries(declared)) {
     if (!Object.hasOwn(params, name) && schema && Object.hasOwn(schema, 'default')) {

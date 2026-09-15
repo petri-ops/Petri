@@ -34,6 +34,10 @@ import {
   startServer,
   stopServer,
 } from './g0-rs-p4r-capture.mjs';
+import {
+  locatePackPluginDir,
+  stagePackPlugins,
+} from './g0-rs-p4r-pack.mjs';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -167,14 +171,30 @@ export const P5_NO_SEED_TABLES = Object.freeze([
   'scientific_task_specs',
 ]);
 
-// Tool descriptors live inside the domain pack (pack-relative paths, resolved
-// through findBioPackRoot() at read time).
-const ADMITTED_DESCRIPTOR_FILES = Object.freeze({
-  deseq2: 'plugins/deseq2/tool-definition.json',
-  'volcano-plot': 'plugins/volcano-plot/tool-definition.json',
-  'gene-correlation': 'plugins/gene-correlation/tool-definition.json',
-  'go-kegg': 'plugins/go-kegg/tool-definition.json',
-});
+// Tool descriptors live inside the domain pack (resolved through
+// findBioPackRoot() at read time).  BLOCK-86 sealed 14 of the 15 plugins into
+// the pack's plugins.dormant/ (deseq2 is the only active one), so locating a
+// descriptor by a fixed `plugins/<tool>/` path is a dead path — the pack layer's
+// locatePackPluginDir() is the single dormant-aware lookup (plugins/ first,
+// plugins.dormant/ fallback).
+export const P5_LIVE_DOMAIN_TOOL_IDS = Object.freeze([
+  'deseq2',
+  'volcano-plot',
+  'gene-correlation',
+  'go-kegg',
+]);
+
+/** Absolute descriptor path for a live domain tool, or null when it is not
+ * locatable (no pack, or the tool is absent from both pack plugin areas). */
+function admittedDescriptorFile(toolId) {
+  const packRoot = findBioPackRoot();
+  if (!packRoot) return null;
+  try {
+    return path.join(locatePackPluginDir(packRoot, toolId), 'tool-definition.json');
+  } catch {
+    return null;
+  }
+}
 
 function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
@@ -618,7 +638,7 @@ function buildScientificInput() {
     detail: { hint: 'set BIOF3_BIO_PACK_ROOT or check out gewu-pack-bio as a sibling directory' },
   });
   const symbols = readFileSync(
-    path.join(packRoot, 'plugins/go-kegg/demo-data/genes.csv'),
+    path.join(locatePackPluginDir(packRoot, 'go-kegg'), 'demo-data', 'genes.csv'),
     'utf8',
   ).split(/\r?\n/).slice(1).map((line) => line.trim().replace(/^"|"$/g, '')).filter(Boolean);
   assert(symbols.length >= 60, 'scientific_symbol_fixture_too_small');
@@ -705,11 +725,10 @@ export function allCandidateRevisionsValid(created) {
 
 function admittedFormalArtifactIds(job) {
   const toolId = String(job?.tool_id || job?.toolId || '').trim();
-  const descriptorFile = ADMITTED_DESCRIPTOR_FILES[toolId];
+  if (!P5_LIVE_DOMAIN_TOOL_IDS.includes(toolId)) return null;
+  const descriptorFile = admittedDescriptorFile(toolId);
   if (!descriptorFile) return null;
-  const packRoot = findBioPackRoot();
-  if (!packRoot) return null;
-  const descriptor = JSON.parse(readFileSync(path.join(packRoot, descriptorFile), 'utf8'));
+  const descriptor = JSON.parse(readFileSync(descriptorFile, 'utf8'));
   const declared = descriptor?.resultStudio?.artifacts;
   const actualIds = new Set((job?.result?.artifacts || []).map((artifact) => artifact?.id).filter(Boolean));
   if (!Array.isArray(declared) || declared.length === 0) return null;
@@ -1610,6 +1629,18 @@ export async function createP5LiveScientificRuntime({
         detail: { error: installed.error, packRoot },
       });
     }
+    // BLOCK-86 封存态：包内装载语义只认 plugins/（deseq2 唯一活跃插件），
+    // 而 P5/P6 live 链要跑的真实科学流程用的是被封存的 volcano-plot /
+    // gene-correlation / go-kegg。产品侧按用户裁决不装载它们，因此 harness 在
+    // 隔离根内装配一份「运行副本」并以只读开发源注入（与 P4R corpus 同一配方：
+    // 复制而非符号链接——候选发现用 readdirSync().isDirectory()，符号链接会被
+    // 静默跳过）。包仓零改动，产品装载语义零改动。
+    env.BIOF3_DEVELOPMENT_PLUGIN_DIRS = stagePackPlugins({
+      captureRoot: root,
+      toolIds: P5_LIVE_DOMAIN_TOOL_IDS,
+      packRoot,
+    });
+    env.BIOF3_DOMAIN_TOOL_REGISTRY = path.join(packRoot, 'registry', 'tool-registry.json');
   }
   // R 运行时：隔离 dataDir 没有已装运行时；按主栈 env-coordinator 同语义
   // （BIOF3_R_HOME=<数据根>/runtimes/R）从开发机候选根解析，命中即注入，
