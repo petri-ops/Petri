@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "planId": "G0-RS-P6",
   "evidenceClass": "real_local_product_durability_recovery_pressure_non_qualifying",
-  "capturedAt": "2026-09-15T15:33:06.874Z",
+  "capturedAt": "2026-09-15T16:17:14.784Z",
   "classification": {
     "stage": "G0-RS-P6",
     "scope": "local_durability_recovery_performance_and_product_explainability",
@@ -18,7 +18,7 @@
   "providerBoundary": "controlled_loopback_503_429_only_real_provider_excluded_to_p7",
   "packagedBoundary": "development_electron_only_packaged_app_excluded_to_p7",
   "checkpointInterruptionBoundary": "macos_development_posix_sigstop_process_group_windows_not_exercised",
-  "sourceCommit": "852fa227f0598cbafad2b03a2bf189bf8feeb8f5",
+  "sourceCommit": "c9535452c707310f367bb8d03cba21755f761303",
   "sourceFiles": {
     "core/biof3-server/agent-runner.js": "core/biof3-server/agent-runner.js",
     "core/biof3-server/agent-tools/learning.js": "core/biof3-server/agent-tools/learning.js",
@@ -292,7 +292,7 @@
     "core/shared-backend/tool-resource-sampler.js": "3eee5a4a491595e1c2b037cf2a04eee0b2234be8557ba035309c658b5ccb4c77",
     "frontend/package-lock.json": "cc22a578188b429be7e51dc90afefbfe1810161bcd5e82a95235219a6f30dfaf",
     "frontend/package.json": "b63786f4ac7996ff7b4714162670bb36abf5aff768737c75d1916a0f76938cdf",
-    "frontend/src/components/copilot/SimpleChat.tsx": "3cd1432a7c42fe234721dd195ce89b69b06fdece54abeb6ab859c5a45983be47",
+    "frontend/src/components/copilot/SimpleChat.tsx": "9402244dfbaa17db47f087549a580702cef303fa72b73be1c90408eacfcdce48",
     "frontend/src/components/copilot/conversationRunStore.test.ts": "fd878667605e1672428a33dbf5b85dff4870d46d8952a40bc7b8c159601cbacb",
     "frontend/src/components/copilot/conversationRunStore.ts": "6b5bc8bc29a9f93131f063f539e5b621f623e0179736b1d8a5c3effe670f232b",
     "frontend/src/components/copilot/copilotClient.test.ts": "d98deec53983f3214f71f42bf89a566b26226362670c9947a545449b205debaf",
@@ -369,7 +369,7 @@
     "test/g0-rs-p6-ui110-local-gateway.test.mjs": "89d4962e4f71f5d8b7fab135c62a3ae25399298afde269bc587207628c7d683a",
     "test/g0-rs-p6-ui110-observation.test.mjs": "6e4e7cd7adee7f7dc797219b11effe5af069d62a37335f32ff6b69ad15355a5c",
     "test/git-adapter.test.mjs": "95979ca82bc88250c3d53eb006f98e557ff782bb086b06514a68148429e4b593",
-    "test/impact-map.json": "6e8e4187986fb73c31e69b2320f9ea3bb7bec31f2a13f2d73870a787533ead5a",
+    "test/impact-map.json": "86edc6fe9867e7770cb9cf36b4c3b24a1cba59a520b4180a5ce0fe703c0c25a9",
     "test/result-changeset-service.test.mjs": "2767f8981c2656a171f663fc05b55e0732afb7c85a24b5a9f2bd640682d5897b",
     "test/result-compare-service.test.mjs": "34cd328e01ceff14ac761859f4b5fdbab35cca0d231ea8d92cbd391a9ecb0cce",
     "test/result-edit-agent-tool.test.mjs": "3d2566dfd06682a2b9bc3e3c3dc7bb95646c388183ffa5b3bad818b57749cff4",
@@ -399,7 +399,7 @@
     "test/tools-executor-job-context.test.mjs": "ec79a82bfd3cdad0abee8a24811fc80fbce8a348f2b30d4e7a5c061161d1876e",
     "test/tools-input-validation.test.mjs": "e87819e32114dc2a61c9447b38077f6d776c4c6cf9f2e581a69c86ac834d96b9"
   },
-  "sourceBindingDigest": "d7ac3e74e03aa0abf567e4b0201dca990f6f4d0a214c9f4a70611644b27d7994",
+  "sourceBindingDigest": "8e6e8011fb300aca9a23cb7a185c19cd21eb837c995371d01e4e01aa9a988060",
   "sourceCommitMatchesSourceHashes": true,
   "sourceBindingStableDuringCapture": true,
   "observations": {
@@ -841,7 +841,7 @@
           "backendStatus": {
             "checkCount": 2,
             "everyCheckReady": true,
-            "maxDurationMs": 31.233250000000226
+            "maxDurationMs": 33.5395410000001
           },
           "isolatedCompatibility": {
             "aiSettingsReadCount": 1,
@@ -944,7 +944,7 @@
           "backendStatus": {
             "checkCount": 2,
             "everyCheckReady": true,
-            "maxDurationMs": 31.321916999999985
+            "maxDurationMs": 37.068333999999936
           },
           "isolatedCompatibility": {
             "aiSettingsReadCount": 1,
@@ -1001,8 +1001,8 @@
             "semanticDigest": "a6ed2ece325da737419dc832c482e9e423839ce8e51bbf45d97ac7cb4846bf6c",
             "visual": {
               "label": "reopened-ready",
-              "sha256": "dfe46011a7e9bb1a526f2ea170881b6f35891fe1ebc55137915d2c275fa7463b",
-              "bytes": 191056,
+              "sha256": "09d681165bfdc4c8c0afbce5f4c84bfe99b240f14cc1674f167c42629be0ba49",
+              "bytes": 191130,
               "nonblank": true
             },
             "recoveryControlAbsent": true
@@ -1037,7 +1037,7 @@
           "backendStatus": {
             "checkCount": 2,
             "everyCheckReady": true,
-            "maxDurationMs": 31.33116700000005
+            "maxDurationMs": 31.070582999999942
           },
           "isolatedCompatibility": {
             "aiSettingsReadCount": 1,
@@ -1088,7 +1088,7 @@
         "revisionIntegrityStatus": null
       },
       "performance": {
-        "restartRestoreMs": 1902.8710419999989,
+        "restartRestoreMs": 2062.186375000005,
         "budgets": {
           "restartRestoreMs": 5000
         }
@@ -1201,10 +1201,10 @@
         ],
         "immutableMutationRejected": true,
         "immutableDigestStable": true,
-        "immutableLedgerDigest": "89e98f35612f3c3e33c4ceff57e8a677a9c9f8518c99faf7a26d94fb3d506cb7",
+        "immutableLedgerDigest": "84049d98652cfbe407bd6a1f0b0c06229ff8e34109ecc781cf7b2f6c53e60576",
         "currentRevisionCount": 6,
         "realJobBackedCohortCount": 2,
-        "realJobBackedCohortDigest": "92f4051c806b39485ad9425f58717554e66a38cc32628a5c24ab7b640bf0df03"
+        "realJobBackedCohortDigest": "8db50a7b2f31f97b246e67817af3511ce557dbc4297727942923fd17eb3c3073"
       },
       "renderer": {
         "schemaVersion": 1,
@@ -1212,35 +1212,35 @@
         "table": {
           "totalRows": 100000,
           "visibleRows": 18,
-          "navigationMs": 536.029833,
-          "canvasFirstVisibleMs": 536.029833,
+          "navigationMs": 525.064375,
+          "canvasFirstVisibleMs": 525.064375,
           "productCanvasFirstVisibleMs": null,
-          "scrollFeedbackMs": 7.100000008940697,
+          "scrollFeedbackMs": 8.600000008940697,
           "scrollChanged": true,
-          "selectionFeedbackMs": 9,
+          "selectionFeedbackMs": 9.200000002980232,
           "selectionChanged": true,
-          "sortFeedbackMs": 5.299999997019768,
+          "sortFeedbackMs": 4.299999997019768,
           "sortChanged": true,
-          "filterFeedbackMs": 8.5,
-          "filterQueryCompleteMs": 724.8999999910593,
+          "filterFeedbackMs": 4,
+          "filterQueryCompleteMs": 729.2000000029802,
           "filterChanged": true,
           "filterQueryChanged": true,
           "filterMatchedSummaryChanged": true,
           "filterFirstVisibleRowChanged": true,
-          "virtualPageLoadMs": 44.5,
+          "virtualPageLoadMs": 57.20000000298023,
           "virtualPageChanged": true,
-          "screenshotSha256": "500941b405e25ed922709d84b328c14935004ef99237b2dcec88f074526c3398",
-          "screenshotBytes": 258625,
+          "screenshotSha256": "26e228a16b60ff6958114ae5aa3e0fa8cc082566317cf6250a008e7b2c173574",
+          "screenshotBytes": 258496,
           "width": 2880,
           "height": 1706
         },
         "media": {
           "png": {
-            "loadMs": 113.58695799999987,
+            "loadMs": 112.67149999999992,
             "switch": {
-              "feedbackMs": 9.800000011920929,
-              "productMetricMs": 1.3,
-              "wallFeedbackMs": 9.800000011920929,
+              "feedbackMs": 9.600000008940697,
+              "productMetricMs": 1.6,
+              "wallFeedbackMs": 9.600000008940697,
               "changed": true
             },
             "rendered": true,
@@ -1257,17 +1257,17 @@
             "height": 1706
           },
           "svg": {
-            "loadMs": 105.77483299999994,
+            "loadMs": 118.26229200000034,
             "exportLinkPresent": true,
             "exportHrefMatched": true,
             "bytes": 42686780,
             "validSvgRoot": true,
-            "fetchMs": 104.59999999403954,
+            "fetchMs": 112.69999998807907,
             "switch": {
               "changed": true,
-              "feedbackMs": 104.59999999403954,
+              "feedbackMs": 112.69999998807907,
               "productMetricMs": null,
-              "wallFeedbackMs": 104.59999999403954
+              "wallFeedbackMs": 112.69999998807907
             },
             "sourceKind": "tool_file",
             "sourceTargetMatched": true,
@@ -1278,7 +1278,7 @@
             "height": 1706
           },
           "report": {
-            "loadMs": 482.47533299999986,
+            "loadMs": 492.99024999999983,
             "iframeVisible": true,
             "iframeWidth": 858,
             "iframeHeight": 716,
@@ -1294,14 +1294,14 @@
               "rawInternalId": false
             },
             "textCharacters": 1283,
-            "screenshotSha256": "ddc1152cc64a2c84bf9d7a18a11994501dc9d2e35d5f0ba7e9ee4b6b9411dd6e",
-            "screenshotBytes": 382935,
+            "screenshotSha256": "15981cfb148b2ceb8451af4de9e362c73bc6beac2c22b3496dacab04fda86324",
+            "screenshotBytes": 382847,
             "width": 2880,
             "height": 1706
           }
         },
         "compare": {
-          "openMs": 522.1672919999996,
+          "openMs": 626.7361669999996,
           "progressiveRows": 204,
           "progressivePages": [
             {
@@ -1310,88 +1310,88 @@
             },
             {
               "rows": 104,
-              "loadMs": 816.6944999999996
+              "loadMs": 726.1959159999997
             },
             {
               "rows": 154,
-              "loadMs": 906.4587089999995
+              "loadMs": 905.4773330000007
             },
             {
               "rows": 204,
-              "loadMs": 172.45058400000016
+              "loadMs": 191.5101249999998
             }
           ],
-          "screenshotSha256": "a7f96ad25bfb26e539c969c069c3a3d7222920e4be481996552ae45c6f77f4ec",
-          "screenshotBytes": 589987,
+          "screenshotSha256": "9a089d2904ba969b1324acacfec6108feb1317e53fa64133fff228a4cc560e1d",
+          "screenshotBytes": 589226,
           "width": 2880,
           "height": 1706
         },
         "history": {
           "firstPageVersions": 100,
-          "firstPageMs": 26.964916999999332,
+          "firstPageMs": 26.417583999999806,
           "afterPaginationVersions": 123,
-          "paginationMs": 114.15587499999947,
-          "screenshotSha256": "eaaa383a0d083ea2cde0fa39a64584bd7a5183c335abc6d1dec042af7fde159d",
-          "screenshotBytes": 426808,
+          "paginationMs": 112.51158399999986,
+          "screenshotSha256": "7a2b0714eb5bea00fc9d8020695779303b49d08dc319b2b118b99abe3943973f",
+          "screenshotBytes": 426811,
           "width": 2880,
           "height": 1706
         },
         "memory": {
-          "baselinePostGcBytes": 17596372,
-          "peakRawUsedBytes": 33092772,
-          "peakRawGrowthBytes": 15496400,
-          "peakPostGcUsedBytes": 21303036,
-          "peakPostGcGrowthBytes": 3706664,
-          "peakWorkingSetBytes": 1195245568,
+          "baselinePostGcBytes": 17597404,
+          "peakRawUsedBytes": 33879084,
+          "peakRawGrowthBytes": 16281680,
+          "peakPostGcUsedBytes": 20607420,
+          "peakPostGcGrowthBytes": 3010016,
+          "peakWorkingSetBytes": 1170554880,
           "samples": [
             {
               "stage": "table_baseline",
-              "rawUsedBytes": 21632004,
-              "postGcUsedBytes": 17596372,
-              "heapTotalBytes": 18808832,
-              "workingSetBytes": 280920064
+              "rawUsedBytes": 21977428,
+              "postGcUsedBytes": 17597404,
+              "heapTotalBytes": 18546688,
+              "workingSetBytes": 280428544
             },
             {
               "stage": "table_interactions",
-              "rawUsedBytes": 21698148,
-              "postGcUsedBytes": 17494428,
-              "heapTotalBytes": 18284544,
-              "workingSetBytes": 266960896
+              "rawUsedBytes": 21489564,
+              "postGcUsedBytes": 17487136,
+              "heapTotalBytes": 18546688,
+              "workingSetBytes": 265748480
             },
             {
               "stage": "png",
-              "rawUsedBytes": 19280088,
-              "postGcUsedBytes": 17424464,
-              "heapTotalBytes": 18808832,
-              "workingSetBytes": 289603584
+              "rawUsedBytes": 19300004,
+              "postGcUsedBytes": 17401992,
+              "heapTotalBytes": 18546688,
+              "workingSetBytes": 288899072
             },
             {
               "stage": "svg",
-              "rawUsedBytes": 17445452,
-              "postGcUsedBytes": 17420752,
-              "heapTotalBytes": 18546688,
-              "workingSetBytes": 333496320
+              "rawUsedBytes": 17473688,
+              "postGcUsedBytes": 17449008,
+              "heapTotalBytes": 18022400,
+              "workingSetBytes": 332939264
             },
             {
               "stage": "report",
-              "rawUsedBytes": 33092772,
-              "postGcUsedBytes": 17819468,
-              "heapTotalBytes": 19759104,
-              "workingSetBytes": 380436480
+              "rawUsedBytes": 33879084,
+              "postGcUsedBytes": 17812768,
+              "heapTotalBytes": 19496960,
+              "workingSetBytes": 383090688
             },
             {
               "stage": "compare",
-              "rawUsedBytes": 25498468,
-              "postGcUsedBytes": 21303036,
-              "heapTotalBytes": 22380544,
-              "workingSetBytes": 1195245568
+              "rawUsedBytes": 24862232,
+              "postGcUsedBytes": 20607420,
+              "heapTotalBytes": 22118400,
+              "workingSetBytes": 1170554880
             },
             {
               "stage": "history",
-              "rawUsedBytes": 25102896,
-              "postGcUsedBytes": 20232760,
-              "heapTotalBytes": 21856256,
-              "workingSetBytes": 1132494848
+              "rawUsedBytes": 24397480,
+              "postGcUsedBytes": 19534308,
+              "heapTotalBytes": 21069824,
+              "workingSetBytes": 1128841216
             }
           ]
         },
@@ -1488,7 +1488,7 @@
         "backendStatus": {
           "checkCount": 6,
           "everyCheckReady": true,
-          "maxDurationMs": 33.022249999999985
+          "maxDurationMs": 34.03958299999999
         },
         "isolatedCompatibility": {
           "aiSettingsReadCount": 3,
@@ -1648,11 +1648,11 @@
           "seededTables": [],
           "digest": "dd575ac9ca406c00c2ac2330ee6cab12b7f642b4c042a55fe38ac87f09ec3cb9"
         },
-        "projectDigest": "d000198161a0d86786c7d1c8917518d6106ea62c92d41fa4ecce9ded89874ec8",
+        "projectDigest": "47cf2c4929576005098d18672f06c0975320639d5db30d30bdc39d2ff979064b",
         "resourceBudget": {
           "classification": "real_product_changeset_preflight_no_seed",
-          "sourceBaselineJobDigest": "d3b0acd433bb6b3dd36ebcf0bd297bb2537e564465aa8bad5b77ef4c1d628980",
-          "sourceBaselineRevisionDigest": "7599918c9a918b96072bc77b077dde1e41ec7bcd6b9ae98af51ef7d347f18a19",
+          "sourceBaselineJobDigest": "2cb991d40ffd4495d5c46cae78b7b67e59745a23673009c7a39d68a5ca5736cf",
+          "sourceBaselineRevisionDigest": "e2cea3efcca07ffe8279ea32574ad483d95b2f5fe477238e9d1a7bf57cd1e822",
           "sourceScientificParametersUnchanged": true,
           "memoryBlocked": {
             "error": "preview_resource_budget_blocked",
@@ -1669,7 +1669,7 @@
               "inputBytes": 6914,
               "sourceOutputBytes": 230288,
               "sourceOutputMeasurement": "complete_descriptor_artifacts",
-              "selectedRevisionDigest": "7599918c9a918b96072bc77b077dde1e41ec7bcd6b9ae98af51ef7d347f18a19",
+              "selectedRevisionDigest": "e2cea3efcca07ffe8279ea32574ad483d95b2f5fe477238e9d1a7bf57cd1e822",
               "downstreamOutputBytes": 0,
               "historicalRssBytes": null,
               "rasterBytes": 2304000000,
@@ -1708,7 +1708,7 @@
               "inputBytes": 6914,
               "sourceOutputBytes": 230288,
               "sourceOutputMeasurement": "complete_descriptor_artifacts",
-              "selectedRevisionDigest": "7599918c9a918b96072bc77b077dde1e41ec7bcd6b9ae98af51ef7d347f18a19",
+              "selectedRevisionDigest": "e2cea3efcca07ffe8279ea32574ad483d95b2f5fe477238e9d1a7bf57cd1e822",
               "downstreamOutputBytes": 0,
               "historicalRssBytes": null,
               "rasterBytes": 12600000,
@@ -1760,8 +1760,8 @@
             "realToolExecution": true,
             "previewReadyCount": 2,
             "changeSetDigests": [
-              "2584dd0f3ede2804e29f8d04b7015c222cec79c76575bf3fa805e746cb24d0c5",
-              "e43c8c9afe7ab2ec4c8bb9914241d525431fe195f32467f2c38209cd819a9b85"
+              "6a8a24fb74bbac4e38ecd87596ce496b91ecd4f2277f2d5e672f6d60d37e0a9b",
+              "ec6f4dbc33ec2aad2b99b61f14631996e071342d626c0cd57fd9f1a7b0662473"
             ]
           }
         },
@@ -1774,10 +1774,10 @@
           "firstCandidateRemainsPreviewReady": true,
           "secondCandidateRemainsAdopted": true,
           "adoptedCohortCurrent": true,
-          "firstCandidateDigest": "2584dd0f3ede2804e29f8d04b7015c222cec79c76575bf3fa805e746cb24d0c5",
-          "secondCandidateDigest": "e43c8c9afe7ab2ec4c8bb9914241d525431fe195f32467f2c38209cd819a9b85",
-          "stateDigestBeforeFailure": "c806e0599c5b033da526c9addb0e3e0604f44ac7413b29dab444f9f5635b0d42",
-          "stateDigestAfterFailure": "c806e0599c5b033da526c9addb0e3e0604f44ac7413b29dab444f9f5635b0d42"
+          "firstCandidateDigest": "6a8a24fb74bbac4e38ecd87596ce496b91ecd4f2277f2d5e672f6d60d37e0a9b",
+          "secondCandidateDigest": "ec6f4dbc33ec2aad2b99b61f14631996e071342d626c0cd57fd9f1a7b0662473",
+          "stateDigestBeforeFailure": "f8eb860336526232056a5dcaecaef06a02d1cd727ef146ad80cdba4e382b714f",
+          "stateDigestAfterFailure": "f8eb860336526232056a5dcaecaef06a02d1cd727ef146ad80cdba4e382b714f"
         },
         "gcColdReadback": {
           "classification": "real_product_http_gc_then_managed_git_gc_and_same_disk_cold_boot",
@@ -1795,15 +1795,15 @@
             "stderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
           },
           "before": {
-            "ledgerDigest": "af4235798d3f24b7456700b9987f1e1f95292039b191426f12c7f659906f5d5a",
-            "revisionDigest": "b71ceb935880d17993f071fefdbd1275a07733067b117ef7f69f84eb4a277271",
-            "changeSetDigest": "3a05bb6c7f629f7081ad1556153fff8a91191955ac520d65d54c16e9bc4ae7b7",
-            "checkpointDigest": "4b904ed486f581a867119344cc1bd3cc26c5af5b5c54bc84854d05b678dff68f",
-            "jobDigest": "eb03416ade368d5f7aec672c853c800130ed05e587425ea9a8057513e842f139",
-            "physicalDigest": "7f8ec1c6474d4f90345ac33639976f48da61f65c6bbf17256bb23d446fd1c68c",
+            "ledgerDigest": "13a93196ebc6ac490ed40132461bb35f76f9486332e962c48dbcde6bfdf12cf2",
+            "revisionDigest": "76e124473ccf29798386f00c0810b10b7311c9bd21246d1df9fd5907af7040f8",
+            "changeSetDigest": "17ba649883ecf8af3b4ec6ecb20e9b88703c47001c7d0bddf1bfc44182b4f190",
+            "checkpointDigest": "42f7e3219f0f5de49702634b6e9aaae70e9bcd5456ea93d19036ca8492a86bb3",
+            "jobDigest": "5f5340543fb9fa42143a5c5b466d6f2d4f0781a04cf86517a65fc21e83b67733",
+            "physicalDigest": "6a272fa5dd5ef874b7c3721850bc4cf31d731f1082390b8f9344e6f144b3e803",
             "physicalHashesExact": true,
-            "sourceDigest": "e6db48da9e46ac2a2eda8cafbe727519b124cb3c43c5c6fbab5cced99d433519",
-            "historyDigest": "1106bc9b71411c7c5576a2255663a3c58a83efd881437cd1eeb461a9053881eb",
+            "sourceDigest": "442063177f4625a2229e4a048f1525154e3b4b95c99824fb3b4652ff8d1121aa",
+            "historyDigest": "3192d0b4874db4caf888c6ba14c9d569b51e638227172ee779bd63d4e94d79d7",
             "revisionCount": 19,
             "changeSetCount": 6,
             "checkpointCount": 6,
@@ -1813,21 +1813,21 @@
             "previewRevisionCount": 3,
             "previewChangeSetCount": 1,
             "checkpointHashesExact": true,
-            "historyCurrentRevisionDigest": "89eccb7cf3b0e016a4006582746fc0e27a5662722edfb70c7e29638060ad0486",
+            "historyCurrentRevisionDigest": "0c43f06be90eb06c28fc34985d8567430642654d7878cecd4e916ff100559304",
             "historyRevisionCount": 3,
             "workspaceStatus": null,
             "workspaceBlockingIssueCount": 0
           },
           "after": {
-            "ledgerDigest": "af4235798d3f24b7456700b9987f1e1f95292039b191426f12c7f659906f5d5a",
-            "revisionDigest": "b71ceb935880d17993f071fefdbd1275a07733067b117ef7f69f84eb4a277271",
-            "changeSetDigest": "3a05bb6c7f629f7081ad1556153fff8a91191955ac520d65d54c16e9bc4ae7b7",
-            "checkpointDigest": "4b904ed486f581a867119344cc1bd3cc26c5af5b5c54bc84854d05b678dff68f",
-            "jobDigest": "eb03416ade368d5f7aec672c853c800130ed05e587425ea9a8057513e842f139",
-            "physicalDigest": "7f8ec1c6474d4f90345ac33639976f48da61f65c6bbf17256bb23d446fd1c68c",
+            "ledgerDigest": "13a93196ebc6ac490ed40132461bb35f76f9486332e962c48dbcde6bfdf12cf2",
+            "revisionDigest": "76e124473ccf29798386f00c0810b10b7311c9bd21246d1df9fd5907af7040f8",
+            "changeSetDigest": "17ba649883ecf8af3b4ec6ecb20e9b88703c47001c7d0bddf1bfc44182b4f190",
+            "checkpointDigest": "42f7e3219f0f5de49702634b6e9aaae70e9bcd5456ea93d19036ca8492a86bb3",
+            "jobDigest": "5f5340543fb9fa42143a5c5b466d6f2d4f0781a04cf86517a65fc21e83b67733",
+            "physicalDigest": "6a272fa5dd5ef874b7c3721850bc4cf31d731f1082390b8f9344e6f144b3e803",
             "physicalHashesExact": true,
-            "sourceDigest": "e6db48da9e46ac2a2eda8cafbe727519b124cb3c43c5c6fbab5cced99d433519",
-            "historyDigest": "1106bc9b71411c7c5576a2255663a3c58a83efd881437cd1eeb461a9053881eb",
+            "sourceDigest": "442063177f4625a2229e4a048f1525154e3b4b95c99824fb3b4652ff8d1121aa",
+            "historyDigest": "3192d0b4874db4caf888c6ba14c9d569b51e638227172ee779bd63d4e94d79d7",
             "revisionCount": 19,
             "changeSetCount": 6,
             "checkpointCount": 6,
@@ -1837,7 +1837,7 @@
             "previewRevisionCount": 3,
             "previewChangeSetCount": 1,
             "checkpointHashesExact": true,
-            "historyCurrentRevisionDigest": "89eccb7cf3b0e016a4006582746fc0e27a5662722edfb70c7e29638060ad0486",
+            "historyCurrentRevisionDigest": "0c43f06be90eb06c28fc34985d8567430642654d7878cecd4e916ff100559304",
             "historyRevisionCount": 3,
             "workspaceStatus": null,
             "workspaceBlockingIssueCount": 0
@@ -1909,6 +1909,6 @@
     "electronPressure": 26,
     "productScenarios": 6
   },
-  "durationMs": 178813,
+  "durationMs": 180147,
   "passed": true
 }
