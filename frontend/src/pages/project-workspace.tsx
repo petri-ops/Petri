@@ -1339,9 +1339,19 @@ export function ProjectWorkspace(): React.ReactElement {
     setRightOpen(true);
     openRightPanel('results');
   }, [activeJobId, bindActiveJob, conversationJobs, openRightPanel, setRightOpen, updateWorkspaceMode]);
-  // BLOCK-89 P3 实机抓真修（BLOCK-86 P2 d893f0ebe 回归）：这对钩子原位于下方
-  // `if (loading) return` 早退之后——loading 翻转后的重渲染钩子计数变多，
-  // React 直接卸载整根（工作区路由白屏）。钩子必须在一切早退之前，上移至此。
+  // backendStatus.rRuntime 可为 null（状态查询失败 = 未知）。用 `=== false`
+  // 严格判定"确认缺失"，避免偶发 IPC 异常时误弹缺失横幅。
+  // BLOCK-86 P2 — 领域感知：只有已装领域包声明运行时才提示（无包不提运行时），
+  // 文案挂包名。
+  //
+  // hooks 顺序纪律（P6 渲染层实机抓真）：本块曾排在下方 `if (loading)` /
+  // `if (!project)` 早退之后——首渲染（项目加载中）早退只调到前面的 hook，
+  // 项目加载完成后的下一渲染才第一次走到这里 → React 抛
+  // 「Rendered more hooks than during the previous render」卸载整棵树（页面全白）。
+  // useState/useEffect 必须先于一切组件级早退。
+  // （BLOCK-89 P3 曾独立重发现同一回归并同法上移，分叉收编两修合一。）
+  const rRuntimeMissing = backendStatus.rRuntime === false;
+  const pyRuntimeMissing = backendStatus.pyRuntime === false;
   const [runtimeDemandPacks, setRuntimeDemandPacks] = useState<string[]>([]);
   useEffect(() => {
     let alive = true;
@@ -1350,6 +1360,20 @@ export function ProjectWorkspace(): React.ReactElement {
       .catch(() => { /* 桥缺失 = 无包态 = 不提示 */ });
     return () => { alive = false; };
   }, []);
+  const runtimeDemandSuffix =
+    runtimeDemandPacks.length > 0 ? `（已安装领域包 ${runtimeDemandPacks.map((n) => `「${n}」`).join('、')} 需要）` : '';
+  const showRuntimeBanner =
+    backendStatus.loaded &&
+    runtimeDemandPacks.length > 0 &&
+    (rRuntimeMissing || pyRuntimeMissing);
+  let runtimeBannerMessage: string;
+  if (rRuntimeMissing && pyRuntimeMissing) {
+    runtimeBannerMessage = `R 与 Python 运行时均未安装，分析功能暂不可用${runtimeDemandSuffix}。`;
+  } else if (rRuntimeMissing) {
+    runtimeBannerMessage = `R 运行时未安装，依赖 R 的分析无法运行${runtimeDemandSuffix}。`;
+  } else {
+    runtimeBannerMessage = `Python 运行时未安装，依赖 Python 的分析无法运行${runtimeDemandSuffix}。`;
+  }
   if (loading) {
     return (
       <div className={styles.earlyReturnWrap}>
@@ -1551,26 +1575,6 @@ export function ProjectWorkspace(): React.ReactElement {
     setBrowserCanGoBack,
     setBrowserCanGoForward,
   };
-  // backendStatus.rRuntime 可为 null（状态查询失败 = 未知）。用 `=== false`
-  // 严格判定"确认缺失"，避免偶发 IPC 异常时误弹缺失横幅。
-  // BLOCK-86 P2 — 领域感知：只有已装领域包声明运行时才提示（无包不提运行时），
-  // 文案挂包名。
-  const rRuntimeMissing = backendStatus.rRuntime === false;
-  const pyRuntimeMissing = backendStatus.pyRuntime === false;
-  const runtimeDemandSuffix =
-    runtimeDemandPacks.length > 0 ? `（已安装领域包 ${runtimeDemandPacks.map((n) => `「${n}」`).join('、')} 需要）` : '';
-  const showRuntimeBanner =
-    backendStatus.loaded &&
-    runtimeDemandPacks.length > 0 &&
-    (rRuntimeMissing || pyRuntimeMissing);
-  let runtimeBannerMessage: string;
-  if (rRuntimeMissing && pyRuntimeMissing) {
-    runtimeBannerMessage = `R 与 Python 运行时均未安装，分析功能暂不可用${runtimeDemandSuffix}。`;
-  } else if (rRuntimeMissing) {
-    runtimeBannerMessage = `R 运行时未安装，依赖 R 的分析无法运行${runtimeDemandSuffix}。`;
-  } else {
-    runtimeBannerMessage = `Python 运行时未安装，依赖 Python 的分析无法运行${runtimeDemandSuffix}。`;
-  }
   return (
     <div className={`${styles.workspaceRoot} ${compactLayout ? styles.workspaceRootCompact : ''}`}>
       {/* BLOCK-62 P1b — compact（≤960px）列变浮层、无「列宽」语义 → fixed 整条
