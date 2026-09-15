@@ -1616,7 +1616,11 @@
         "frontend/src/pages/project-workspace/RightFileTree.tsx",
         "frontend/src/pages/project-workspace/*",
         "scripts/block89-*",
-        "acceptance/block-89/**"
+        "scripts/block90-*",
+        "scripts/ui379-*",
+        "acceptance/block-89/**",
+        "acceptance/block-90/**",
+        "acceptance/ui-379/**"
       ],
       "tests": [
         "test/workspace-file-ops.test.mjs",
