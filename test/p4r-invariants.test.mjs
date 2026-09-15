@@ -31,6 +31,7 @@ import {
   stopServer,
 } from '../scripts/g0-rs-p4r-capture.mjs';
 import { generateCorpus } from '../scripts/g0-rs-p4r-corpus.mjs';
+import { buildPackEnv } from '../scripts/g0-rs-p4r-pack.mjs';
 
 const require = createRequire(import.meta.url);
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -116,6 +117,9 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
     const corpus = await generateCorpus({ keep: true, quiet: true });
     if (!corpus.ok) throw new Error(`corpus failed: ${JSON.stringify(corpus.records)}`);
     const { env } = createCaptureEnv({ port: 0, root: corpus.root });
+    // BLOCK-83/86 package awareness: replay verifies the exact source plugin,
+    // so the server must see the pack sources the corpus child ran with.
+    Object.assign(env, buildPackEnv({ captureRoot: corpus.root, toolIds: corpus.pack.stagedToolIds }).env);
     const { createServer } = await import('node:net');
     const port = await new Promise((resolve, reject) => {
       const probe = createServer();

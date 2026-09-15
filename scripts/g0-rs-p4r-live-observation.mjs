@@ -33,6 +33,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { createCaptureEnv, startServer, stopServer } from './g0-rs-p4r-capture.mjs';
+import { buildPackEnv } from './g0-rs-p4r-pack.mjs';
 import { generateCorpus } from './g0-rs-p4r-corpus.mjs';
 
 const require = createRequire(import.meta.url);
@@ -585,6 +586,10 @@ export async function captureLiveObservation({
     injectFailure('after_corpus', faultAt);
 
     const { env } = createCaptureEnv({ root: corpus.root, port: await freePort() });
+    // BLOCK-83/86 package awareness: the server must see the same pack sources
+    // the corpus child ran with, or its replay/verify routes resolve plugins
+    // from an empty core tree.
+    Object.assign(env, buildPackEnv({ captureRoot: corpus.root, toolIds: corpus.pack.stagedToolIds }).env);
     let backend = await startServer(env);
     lifecycle.setBackend(backend);
     const timings = {};

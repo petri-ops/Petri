@@ -34,6 +34,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { createCaptureEnv, startServer, stopServer } from './g0-rs-p4r-capture.mjs';
 import { generateCorpus } from './g0-rs-p4r-corpus.mjs';
+import { buildPackEnv } from './g0-rs-p4r-pack.mjs';
 import { runAgentChild } from './g0-rs-p4r-live-observation.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -275,6 +276,9 @@ export async function observeP4RUi({ writeEvidence = false, keep = false } = {})
 
     const { env } = createCaptureEnv({ port: BACKEND_PORT, root });
     env.R_SERVER_PORT = String(BACKEND_PORT);
+    // BLOCK-83/86 package awareness: keep the server and the agent child on the
+    // same pack sources the corpus child ran with (empty core tree otherwise).
+    Object.assign(env, buildPackEnv({ captureRoot: root, toolIds: corpus.pack.stagedToolIds }).env);
     backend = await startServer(env);
 
     const interaction = await fetch(

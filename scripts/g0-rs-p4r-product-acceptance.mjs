@@ -145,7 +145,6 @@ const sourceFiles = {
   performanceObservationEvidence: 'acceptance/g0-result-studio/rs-p4r-performance.json',
   liveObservationEvidence: 'acceptance/g0-result-studio/rs-p4r-live-observation.json',
   uiObservationEvidence: 'acceptance/g0-result-studio/rs-p4r-ui-observation.json',
-  goKeggDefinition: 'resources/built-in-plugins/go-kegg/tool-definition.json',
 };
 
 /**
@@ -444,10 +443,11 @@ function inspect(verification, observation) {
       sourceObservation?.passed === true
         && sourceObservation?.allFourVerified === true
         && sourceObservation?.sourceCommitMatchesSourceHashes === true
+        && sourceObservation?.pack?.commitMatchesSourceHashes === true
         && Array.isArray(sourceObservation?.observations)
         && sourceObservation.observations.length === 4
         && sourceObservation.observations.every((entry) => entry.status === 'verified' && entry.formalJobCompleted === true),
-      [sourceFiles.sourceObservation, sourceFiles.sourceObservationEvidence, sourceFiles.goKeggDefinition],
+      [sourceFiles.sourceObservation, sourceFiles.sourceObservationEvidence],
       'The isolated real run_tool → tool_job → Artifact Truth chain produced formal DESeq2, standalone volcano, heatmap and GO-BP artifacts, then created and read each exact Revision source projection. The observation is source-bound and non-qualifying.'),
 
     // ── P4R-6 ────────────────────────────────────────────────────────────

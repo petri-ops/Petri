@@ -725,7 +725,8 @@
         "scripts/g0-rs-p4r-source-observation.mjs",
         "scripts/g0-rs-p4r-live-observation.mjs",
         "scripts/g0-rs-p4r-ui-observation.mjs",
-        "scripts/g0-rs-p4r-ui-driver.cjs"
+        "scripts/g0-rs-p4r-ui-driver.cjs",
+        "scripts/g0-rs-p4r-pack.mjs"
       ],
       "tests": [
         "test/p4r-capture.test.mjs",

@@ -33,6 +33,7 @@ import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import {
   createCaptureEnv,
@@ -42,6 +43,7 @@ import {
   stopServer,
 } from './g0-rs-p4r-capture.mjs';
 import { generateCorpus } from './g0-rs-p4r-corpus.mjs';
+import { buildPackEnv } from './g0-rs-p4r-pack.mjs';
 
 const require = createRequire(import.meta.url);
 
@@ -203,6 +205,8 @@ export async function captureBaseline({ keep = false, quiet = false, onLog } = {
 
     // 2. Boot the server against the same root, with the probe armed.
     const { env } = createCaptureEnv({ port: 0, root });
+    // BLOCK-83/86 package awareness: same pack sources as the corpus child.
+    Object.assign(env, buildPackEnv({ captureRoot: root, toolIds: corpus.pack.stagedToolIds }).env);
     const port = await import('node:net').then(({ createServer }) => new Promise((resolve, reject) => {
       const probe = createServer();
       probe.on('error', reject);

@@ -39,16 +39,10 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { applyMigrations, createCaptureEnv, inspectTables } from './g0-rs-p4r-capture.mjs';
+import { buildPackEnv, resolveBioPackRoot, resolvePackCorpusInputs } from './g0-rs-p4r-pack.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SELF = fileURLToPath(import.meta.url);
-
-/** Real inputs shipped with the repo. Not synthetic, not user data. */
-export const CORPUS_INPUTS = Object.freeze({
-  counts: 'core/biof3-server/tool-demo-data/deseq2/demo-counts.csv',
-  coldata: 'core/biof3-server/tool-demo-data/deseq2/demo-coldata.csv',
-  enrichmentGenes: 'resources/built-in-plugins/go-kegg/demo-data/genes.csv',
-});
 
 /**
  * Ordered corpus steps. Each declares how its params are built, because the
@@ -63,9 +57,9 @@ export const CORPUS_STEPS = Object.freeze([
     toolId: 'deseq2',
     heavy: true,
     describes: 'differential expression table plus volcano/heatmap/pca renders',
-    params: ({ repoRoot }) => ({
-      counts: path.join(repoRoot, CORPUS_INPUTS.counts),
-      coldata: path.join(repoRoot, CORPUS_INPUTS.coldata),
+    params: ({ inputs }) => ({
+      counts: inputs.counts,
+      coldata: inputs.coldata,
       design: 'condition',
       contrast_ref: 'Control',
       contrast_treat: 'Treatment',
@@ -99,8 +93,8 @@ export const CORPUS_STEPS = Object.freeze([
     describes: 'GO-BP enrichment table and dotplot through the go-kegg plugin',
     // Uses real human gene symbols: the deseq2 demo genes are synthetic
     // (Gene1..Gene2000) and would enrich to nothing.
-    params: ({ repoRoot }) => ({
-      deg_table: path.join(repoRoot, CORPUS_INPUTS.enrichmentGenes),
+    params: ({ inputs }) => ({
+      deg_table: inputs.enrichmentGenes,
       species: 'human',
       gene_id_type: 'SYMBOL',
       // P4R-5 needs one formal enrichment Artifact from the go-kegg plugin,
@@ -134,6 +128,12 @@ async function runStepsInChild() {
   const { tool_run_tool: runTool } = require(path.join(REPO_ROOT, 'core', 'biof3-server', 'agent-tools', 'learning.js'));
   const db = require(path.join(REPO_ROOT, 'core', 'biof3-server', 'db.js'));
 
+  // Package-aware inputs: the demo CSVs live in the bio domain pack since
+  // BLOCK-83. resolveBioPackRoot() honors BIOF3_BIO_PACK_ROOT, which the parent
+  // may have set — the spawned env inherits it, so parent and child resolve the
+  // same pack.
+  const inputs = resolvePackCorpusInputs(resolveBioPackRoot());
+
   // A project is REQUIRED, not cosmetic. Every Result Studio route
   // (interaction, context-envelope, changesets, workspace/status) validates a
   // projectId and rejects with 400/404 without one, so a project-less corpus
@@ -158,7 +158,7 @@ async function runStepsInChild() {
   const records = [];
 
   for (const step of steps) {
-    const params = step.params({ repoRoot: REPO_ROOT, outputs });
+    const params = step.params({ repoRoot: REPO_ROOT, inputs, outputs });
     const startedAt = Date.now();
     // accessMode 'full' is required for HEAVY_TOOLS (deseq2); it is the
     // documented delegation boundary for local reproducible analysis and still
@@ -233,6 +233,12 @@ export async function generateCorpus({ root: reuseRoot, keep = false, withEnrich
   // A caller that will later boot a server must pass its own root, so the corpus
   // and the server share one disposable environment.
   const { root, env } = createCaptureEnv({ port: 0, root: reuseRoot });
+  // BLOCK-83/86 package awareness: stage the plugins these steps need from the
+  // bio domain pack and point the child at the pack's tool registry. Fails
+  // closed when the pack (or a required plugin) is absent.
+  const toolIds = selectSteps({ withEnrichment }).map((step) => step.toolId);
+  const pack = buildPackEnv({ captureRoot: root, toolIds });
+  Object.assign(env, pack.env);
   try {
     await applyMigrations(env.BIOF3_DB_PATH, { quiet });
     const tables = inspectTables(env.BIOF3_DB_PATH);
@@ -241,7 +247,7 @@ export async function generateCorpus({ root: reuseRoot, keep = false, withEnrich
     const { records, outputs, projectId } = await runCorpusSteps(env, { withEnrichment, onLog });
     const failed = records.filter((record) => !record.ok);
 
-    return { root, env, tables, records, outputs, projectId, ok: failed.length === 0 && records.length > 0, kept: keep };
+    return { root, env, tables, records, outputs, projectId, pack: { root: pack.packRoot, stagedToolIds: pack.stagedToolIds }, ok: failed.length === 0 && records.length > 0, kept: keep };
   } finally {
     if (!keep && existsSync(root)) rmSync(root, { recursive: true, force: true });
   }
@@ -268,6 +274,7 @@ async function main() {
   } else {
     console.log('G0-RS-P4R-0 baseline corpus');
     console.log(`  disposable root : ${result.kept ? result.root : '(removed)'}`);
+    console.log(`  bio pack        : ${result.pack.root} (staged: ${result.pack.stagedToolIds.join(', ')})`);
     for (const record of result.records) {
       const status = record.ok ? 'ok  ' : 'FAIL';
       console.log(`  ${status} ${record.toolId.padEnd(18)} ${String(record.durationMs).padStart(7)}ms  ${record.artifactCount} artifacts${record.error ? `  ${record.error}` : ''}`);

@@ -15,27 +15,32 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generateCorpus } from './g0-rs-p4r-corpus.mjs';
 import { createCaptureEnv, startServer, stopServer } from './g0-rs-p4r-capture.mjs';
+import { buildPackEnv, resolveBioPackRoot } from './g0-rs-p4r-pack.mjs';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const evidencePath = path.join(rootDir, 'acceptance/g0-result-studio/rs-p4r-source-observation.json');
+/** 桌面仓文件：commit 绑定（git show 对账）。 */
 const sourceFiles = Object.freeze({
   observation: 'scripts/g0-rs-p4r-source-observation.mjs',
   corpus: 'scripts/g0-rs-p4r-corpus.mjs',
   routes: 'core/biof3-server/routes/result-studio.js',
   sourceProjection: 'core/shared-backend/result-revision-source.js',
   replayService: 'core/shared-backend/result-replay-service.js',
-  deseq2Definition: 'resources/built-in-plugins/deseq2/tool-definition.json',
-  deseq2Script: 'resources/built-in-plugins/deseq2/scripts/deseq2.R',
-  volcanoDefinition: 'resources/built-in-plugins/volcano-plot/tool-definition.json',
-  volcanoScript: 'resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R',
-  correlationDefinition: 'resources/built-in-plugins/gene-correlation/tool-definition.json',
-  correlationScript: 'resources/built-in-plugins/gene-correlation/scripts/gene-correlation.R',
-  enrichmentDefinition: 'resources/built-in-plugins/go-kegg/tool-definition.json',
-  enrichmentScript: 'resources/built-in-plugins/go-kegg/scripts/go-kegg.R',
+});
+/** 插件定义/脚本自 BLOCK-83 起随领域包交付：包相对路径绑定，包 commit+哈希留痕。 */
+const packSourceFiles = Object.freeze({
+  deseq2Definition: 'plugins/deseq2/tool-definition.json',
+  deseq2Script: 'plugins/deseq2/scripts/deseq2.R',
+  volcanoDefinition: 'plugins/volcano-plot/tool-definition.json',
+  volcanoScript: 'plugins/volcano-plot/scripts/volcano-plot.R',
+  correlationDefinition: 'plugins/gene-correlation/tool-definition.json',
+  correlationScript: 'plugins/gene-correlation/scripts/gene-correlation.R',
+  enrichmentDefinition: 'plugins/go-kegg/tool-definition.json',
+  enrichmentScript: 'plugins/go-kegg/scripts/go-kegg.R',
 });
 const hash = (value) => createHash('sha256').update(value).digest('hex');
 
-function sourceBinding() {
+function sourceBinding(packRoot) {
   const sourceCommit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: rootDir, encoding: 'utf8' }).trim();
   const sourceHashes = Object.fromEntries(Object.entries(sourceFiles).map(([key, file]) => [
     key,
@@ -45,12 +50,29 @@ function sourceBinding() {
     const shown = spawnSync('git', ['show', `${sourceCommit}:${file}`], { cwd: rootDir });
     return shown.status !== 0 || hash(shown.stdout) !== sourceHashes[key];
   }).map(([, file]) => file);
+  const packCommit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: packRoot, encoding: 'utf8' }).trim();
+  const packHashes = Object.fromEntries(Object.entries(packSourceFiles).map(([key, file]) => [
+    key,
+    hash(readFileSync(path.join(packRoot, file))),
+  ]));
+  const packMismatches = Object.entries(packSourceFiles).filter(([key, file]) => {
+    const shown = spawnSync('git', ['show', `${packCommit}:${file}`], { cwd: packRoot });
+    return shown.status !== 0 || hash(shown.stdout) !== packHashes[key];
+  }).map(([, file]) => file);
   return {
     sourceCommit,
     sourceFiles,
     sourceHashes,
     sourceCommitMatchesSourceHashes: mismatches.length === 0,
     sourceMismatches: mismatches,
+    pack: {
+      root: packRoot,
+      commit: packCommit,
+      files: packSourceFiles,
+      hashes: packHashes,
+      commitMatchesSourceHashes: packMismatches.length === 0,
+      mismatches: packMismatches,
+    },
   };
 }
 
@@ -77,6 +99,8 @@ async function observe() {
   try {
     const corpus = await generateCorpus({ root, keep: true, withEnrichment: true, quiet: true });
     if (!corpus.ok) throw new Error(`corpus_incomplete:${JSON.stringify(corpus.records)}`);
+    // BLOCK-83/86 package awareness: server sees the pack sources the corpus child ran with.
+    Object.assign(env, buildPackEnv({ captureRoot: root, toolIds: corpus.pack.stagedToolIds }).env);
     env.R_SERVER_PORT = String(await freePort());
     server = await startServer(env);
     const d = corpus.outputs.deseq2 || {};
@@ -127,7 +151,9 @@ async function observe() {
         formalJobCompleted: record.ok === true,
       });
     }
-    const binding = sourceBinding();
+    const packRoot = resolveBioPackRoot();
+    if (!packRoot) throw new Error('bio pack not found (BIOF3_BIO_PACK_ROOT or sibling gewu-pack-bio)');
+    const binding = sourceBinding(packRoot);
     const result = {
       schemaVersion: 1,
       workPackage: 'G0-RS-P4R-5',
@@ -138,7 +164,9 @@ async function observe() {
       observations,
       allFourVerified: observations.length === 4 && observations.every((item) => item.status === 'verified'),
     };
-    result.passed = result.allFourVerified && result.sourceCommitMatchesSourceHashes;
+    result.passed = result.allFourVerified
+      && result.sourceCommitMatchesSourceHashes
+      && result.pack.commitMatchesSourceHashes;
     mkdirSync(path.dirname(evidencePath), { recursive: true });
     writeFileSync(evidencePath, `${JSON.stringify(result, null, 2)}\n`);
     return result;
