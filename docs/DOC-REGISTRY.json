@@ -1429,12 +1429,12 @@
       "id": "G0-RS",
       "path": "docs/g0-result-studio-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "planned",
       "canonical": false,
       "truthDomain": "g0-result-studio",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P2-COMPLETED",
+      "phase": "P2-P4R-QUEUED",
       "lastUpdated": "2026-09-15"
     },
     {
@@ -4411,6 +4411,28 @@
       "registeredAt": "2026-09-14"
     },
     {
+      "id": "BLOCK-89-WORKSPACE-FILE-OPS",
+      "path": "docs/block-89-workspace-file-ops-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-89-workspace-file-ops",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-15",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "block-89",
+        "workspace",
+        "file-tree",
+        "file-ops",
+        "ssh-gateway",
+        "UI-378",
+        "G0"
+      ],
+      "notes": "工作区文件树全能力文件操作（2026-09-15 用户裁决「新开一个全新的工作包 本地和远程都具备全能性能力 不要有区分 你来适配」立项即开工）：REST fs/move|copy|delete|mkdir 双后端同构（gateway 补 cp：local fsp.cp / node-agent fs_cp）+ 前端右键菜单+拖拽 UI-378 + 删除统一确认后直接删。0 新依赖。"
+    },
+    {
       "id": "SESSION-HANDOFF-2026-09-15",
       "path": "docs/session-handoff-2026-09-15.md",
       "kind": "reference",
@@ -4426,12 +4448,12 @@
         "P6-recapture",
         "closeout"
       ],
-      "notes": "2026-09-15 会话交接文档（换 Agent 继续）：G0-RS P2 P4R-CORPUS 当日收口 completed（corpus 链包感知化 + 证据链全绿 + 两笔存量债清偿）+ 剩余整包 closeout 三步（P6 重采两处预修 / ui observation 3001 端口窗口 / 回写五件套）+ 源绑定纪律与两条同类二次教训。",
+      "notes": "2026-09-15 会话交接文档（换 Agent 继续）：G0-RS P2 P4R-CORPUS 当日收口 completed，整包余 closeout 一环。",
       "registeredAt": "2026-09-15",
       "archivePolicy": "archive_when_superseded",
       "phase": "REFERENCE"
     }
   ],
-  "lastUpdated": "2026-09-14",
-  "documentCount": 240
+  "lastUpdated": "2026-09-15",
+  "documentCount": 241
 }
