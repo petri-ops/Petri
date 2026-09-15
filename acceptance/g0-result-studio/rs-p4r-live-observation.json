@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "workPackage": "G0-RS-P4R-6",
   "evidenceClass": "live_local_continuous_journey_non_qualifying",
-  "capturedAt": "2026-09-15T05:33:16.285Z",
+  "capturedAt": "2026-09-15T06:06:59.069Z",
   "qualificationEligible": false,
   "providerBoundary": {
     "realProviderUsed": false,
@@ -22,7 +22,7 @@
     "promptsOrResultValuesPersisted": false,
     "credentialsPersisted": false
   },
-  "sourceCommit": "a1b30ac2f0b36c32f2478ebb7fd7cda859acacea",
+  "sourceCommit": "1357c4c4bbed9c469549e0391c4c9b311439cc95",
   "sourceFiles": {
     "producer": "scripts/g0-rs-p4r-live-observation.mjs",
     "producerTest": "test/p4r-live-observation.test.mjs",
@@ -140,23 +140,23 @@
     "conversationMessageCount": 2,
     "sourceSha256": "ed50739c762e9fc8d4ae4d1532aa0e52a9af6e98cbcc1514fe29d4f8d5ba2c29",
     "adoptedArtifactSha256": "50a0438301b20338a93c235207eefaca61137072eccb0b689592aefeb22d379a",
-    "sourceTruthDigest": "4090dfa6484d806f25d829dcf5fae682db0591a843f62ff97274917d72709d97",
-    "changeSetTruthDigest": "03a9e77ca7eebf10be63c32cb8c384a7f8d05740b10e7f73387db6c525784691",
+    "sourceTruthDigest": "32c2c18642b6e84fc67f854ea266ffd009c754d09688ea699b2dcfbd7db33e9e",
+    "changeSetTruthDigest": "46e9b92a3176982c7f58d5bbaefe0b4b3e76b8dc598b9da7cc97f85685fe673c",
     "conversationTruthDigest": "5bbc0d55f0702e8380f02b52a4201c2826739476cccb5132fe5baccf30c0b2df",
     "publicProgressPhaseCount": 4,
     "backendStartCount": 2,
     "disposableDesktopIdentityChanged": true,
     "timingsMs": {
-      "openResultMs": 892.725,
-      "agentEditMs": 2045.918,
-      "compareMs": 151.326,
-      "codeOpenMs": 51.674,
-      "adoptMs": 240.853,
-      "replayPreflightMs": 57.068,
-      "replayConfirmMs": 1957.358,
-      "revertMs": 49.85
+      "openResultMs": 1132.83,
+      "agentEditMs": 2809.929,
+      "compareMs": 203.898,
+      "codeOpenMs": 68.746,
+      "adoptMs": 312.398,
+      "replayPreflightMs": 82.518,
+      "replayConfirmMs": 2522.443,
+      "revertMs": 48.365
     },
-    "totalDurationMs": 20502
+    "totalDurationMs": 23562
   },
   "checks": {
     "realCorpusCompleted": true,

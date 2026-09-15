@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P4R-0/P4R-6",
-  "sourceCommit": "4072c4e08e6dfc75023d7adab15280fe96611199",
+  "sourceCommit": "1357c4c4bbed9c469549e0391c4c9b311439cc95",
   "captureMode": "real_chain_corpus_plus_server_request_waterfall_and_event_loop_histogram_in_disposable_root",
   "qualificationEligible": false,
   "qualificationReason": "P4R-6 closes the frozen server event-loop budget using the canonical Git/SQLite services in an isolated background process. Client layout and journey evidence is separate, and Provider/packaged Result Studio qualification remains reserved for P7.",
@@ -116,7 +116,7 @@
   "baselineObservation": {
     "captureMode": "real_run_tool_chain_in_disposable_root_with_env_gated_probe",
     "calibration": {
-      "gitSpawnMedianMs": 18.226,
+      "gitSpawnMedianMs": 13.263,
       "pathEntries": 38,
       "invokedUnderNpm": true
     },
@@ -125,17 +125,17 @@
     "corpus": [
       {
         "toolId": "deseq2",
-        "durationMs": 9412,
+        "durationMs": 8384,
         "artifactCount": 23
       },
       {
         "toolId": "volcano-plot",
-        "durationMs": 1621,
+        "durationMs": 1406,
         "artifactCount": 5
       },
       {
         "toolId": "gene-correlation",
-        "durationMs": 821,
+        "durationMs": 574,
         "artifactCount": 3
       }
     ],
@@ -144,107 +144,107 @@
         "id": "job-status",
         "role": "render-blocking",
         "status": 200,
-        "totalMs": 14.02,
-        "coldMs": 14.02,
-        "warmMs": 9.918,
+        "totalMs": 9.851,
+        "coldMs": 9.851,
+        "warmMs": 6.853,
         "warmSamplesMs": [
-          7.65,
-          9.918,
-          12.515
+          6.661,
+          6.853,
+          7.482
         ],
-        "warmSpreadMs": 4.865,
-        "oneTimeCostMs": 4.102,
+        "warmSpreadMs": 0.821,
+        "oneTimeCostMs": 2.998,
         "bytes": 80143
       },
       {
         "id": "artifact-bytes",
         "role": "render-blocking",
         "status": 200,
-        "totalMs": 16.459,
-        "coldMs": 16.459,
-        "warmMs": 11.391,
+        "totalMs": 17.335,
+        "coldMs": 17.335,
+        "warmMs": 7.139,
         "warmSamplesMs": [
-          8.598,
-          11.391,
-          13.811
+          6.177,
+          7.139,
+          12.062
         ],
-        "warmSpreadMs": 5.213,
-        "oneTimeCostMs": 5.068,
+        "warmSpreadMs": 5.885,
+        "oneTimeCostMs": 10.196,
         "bytes": 145980
       },
       {
         "id": "interaction",
         "role": "secondary",
         "status": 200,
-        "totalMs": 1385.94,
-        "coldMs": 1385.94,
-        "warmMs": 12.047,
+        "totalMs": 1083.7,
+        "coldMs": 1083.7,
+        "warmMs": 7.977,
         "warmSamplesMs": [
-          11.041,
-          12.047,
-          18.584
+          7.942,
+          7.977,
+          9.045
         ],
-        "warmSpreadMs": 7.543,
-        "oneTimeCostMs": 1373.893,
+        "warmSpreadMs": 1.103,
+        "oneTimeCostMs": 1075.723,
         "bytes": 46194
       },
       {
         "id": "context-envelope",
         "role": "secondary",
         "status": 409,
-        "totalMs": 12.847,
-        "coldMs": 12.847,
-        "warmMs": 4.26,
+        "totalMs": 5.571,
+        "coldMs": 5.571,
+        "warmMs": 1.734,
         "warmSamplesMs": [
-          4.225,
-          4.26,
-          5.231
+          1.704,
+          1.734,
+          2.326
         ],
-        "warmSpreadMs": 1.006,
-        "oneTimeCostMs": 8.587,
+        "warmSpreadMs": 0.622,
+        "oneTimeCostMs": 3.837,
         "bytes": 188
       },
       {
         "id": "changesets",
         "role": "secondary",
         "status": 200,
-        "totalMs": 4.257,
-        "coldMs": 4.257,
-        "warmMs": 2.325,
+        "totalMs": 3.62,
+        "coldMs": 3.62,
+        "warmMs": 1.162,
         "warmSamplesMs": [
-          2.228,
-          2.325,
-          4.943
+          1.061,
+          1.162,
+          2.368
         ],
-        "warmSpreadMs": 2.715,
-        "oneTimeCostMs": 1.932,
+        "warmSpreadMs": 1.307,
+        "oneTimeCostMs": 2.458,
         "bytes": 5758
       },
       {
         "id": "workspace-status",
         "role": "secondary",
         "status": 200,
-        "totalMs": 71.103,
-        "coldMs": 71.103,
-        "warmMs": 76.57,
+        "totalMs": 55.847,
+        "coldMs": 55.847,
+        "warmMs": 54.147,
         "warmSamplesMs": [
-          75.448,
-          76.57,
-          101.55
+          53.165,
+          54.147,
+          55.963
         ],
-        "warmSpreadMs": 26.102,
-        "oneTimeCostMs": -5.467,
+        "warmSpreadMs": 2.798,
+        "oneTimeCostMs": 1.7,
         "bytes": 863
       }
     ],
-    "renderBlockingTotalMs": 30.479,
+    "renderBlockingTotalMs": 27.186,
     "slowestRequest": "interaction",
     "eventLoop": {
       "resolutionMs": 10,
-      "samples": 180,
-      "minMs": 9.208,
-      "meanMs": 10.973,
-      "maxMs": 20.627,
+      "samples": 138,
+      "minMs": 9.175,
+      "meanMs": 10.751,
+      "maxMs": 17.564,
       "percentilesOmitted": "sample count too low for p95/p99 to be meaningful"
     },
     "unmeasured": [
@@ -274,43 +274,45 @@
     {
       "id": "job-status",
       "baselineWarmMs": 2.229,
-      "currentWarmMs": 9.918,
-      "deltaPct": 345
+      "currentWarmMs": 6.853,
+      "deltaPct": 207.4
     },
     {
       "id": "artifact-bytes",
       "baselineWarmMs": 2.174,
-      "currentWarmMs": 11.391,
-      "deltaPct": 424
+      "currentWarmMs": 7.139,
+      "deltaPct": 228.4
     },
     {
       "id": "interaction",
       "baselineWarmMs": 9.9,
-      "currentWarmMs": 12.047,
-      "deltaPct": 21.7
+      "currentWarmMs": 7.977,
+      "deltaPct": -19.4
     },
     {
       "id": "changesets",
       "baselineWarmMs": 42.102,
-      "currentWarmMs": 2.325,
-      "deltaPct": -94.5
+      "currentWarmMs": 1.162,
+      "deltaPct": -97.2
     },
     {
       "id": "workspace-status",
       "baselineWarmMs": 64.862,
-      "currentWarmMs": 76.57,
-      "deltaPct": 18.1
+      "currentWarmMs": 54.147,
+      "deltaPct": -16.5
     }
   ],
   "budgetStatus": {
     "eventLoopMaxMs": "met",
-    "observedMaxMs": 20.627,
+    "observedMaxMs": 17.564,
     "attributedTo": "interaction",
-    "steadyStateWorstMs": 76.57,
+    "steadyStateWorstMs": 54.147,
     "steadyStateWorstRoute": "workspace-status",
     "oneTimeDominated": [
+      "artifact-bytes",
       "interaction",
-      "context-envelope"
+      "context-envelope",
+      "changesets"
     ],
     "note": "Current implementation is within the frozen block budget.",
     "absoluteTimingsAreLoadSensitive": true,
@@ -445,14 +447,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-09-15T05:27:19.299Z",
+    "generatedAt": "2026-09-15T06:04:24.312Z",
     "commands": [
       {
         "label": "probe-and-harness",
         "command": "node --test test/perf-probe.test.mjs test/p4r-capture.test.mjs test/p4r-baseline.test.mjs test/result-studio-background.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "bda7a270894ce488d56e1464a415d9ecbdce59d3031f468843282722bdf64830",
+        "stdoutSha256": "e3a13383a94d0ff830f8221255e3330438dc49780bc29ce55a7cfb59d44bf3ff",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -460,7 +462,7 @@
         "command": "node --test test/test-affected.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "4ca2b97911778041d6f36e033301f175bf20e3226f2a64ee352c51bd28e36b37",
+        "stdoutSha256": "538754ff89dea852e7fcc4740cebab78242dc46a5426900e6896af0936c98352",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -475,7 +477,7 @@
   },
   "executionTruth": "run_tool -> tool_job -> artifact_truth",
   "passed": true,
-  "generatedAt": "2026-09-15T05:27:19.299Z",
+  "generatedAt": "2026-09-15T06:04:24.312Z",
   "privacyClean": true,
   "sourceCommitReachable": true,
   "sourceCommitMatchesSourceHashes": true,
