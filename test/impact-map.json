@@ -1603,6 +1603,31 @@
         "test/security-hardening.test.mjs"
       ],
       "classifiesScripts": true
+    },
+    {
+      "id": "block89-workspace-file-ops",
+      "note": "BLOCK-89 工作区文件操作：REST fs/move|copy|delete|mkdir 双后端同构（workspace-gateway local fsp.cp / node-agent fs_cp=cp -R 哈希自动部署）+ 路径边界/409 冲突/classified 502 诚实映射 + 前端 UI-378 右键菜单与拖拽（FileTreeItem/RightFileTree/弹层）。契约测试锁 local 真 fs 全链 + ssh fake backend 透传与错误映射 + agent verb bash 行为；P3 实机走 dev-verify flow workspace-file-ops。",
+      "patterns": [
+        "core/biof3-server/routes/files.js",
+        "core/biof3-server/helpers/workspace-gateway.js",
+        "core/biof3-server/helpers/remote-execution/node-agent.js",
+        "frontend/src/pages/project-workspace/FileTreeItem.tsx",
+        "frontend/src/pages/project-workspace/FileTreeList.tsx",
+        "frontend/src/pages/project-workspace/RightFileTree.tsx",
+        "frontend/src/pages/project-workspace/*",
+        "scripts/block89-*",
+        "acceptance/block-89/**"
+      ],
+      "tests": [
+        "test/workspace-file-ops.test.mjs",
+        "test/block67-node-agent-fs.test.js",
+        "test/block67-routes.test.mjs",
+        "test/block73-hidden-files.test.mjs",
+        "test/workspace-data-import.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
     }
   ]
 }

@@ -103,6 +103,54 @@ test('block67 fs verbs: mkdir / mv / rm 链路', async (t) => {
   assert.ok(!fs.existsSync(path.join(dir, 'x')));
 });
 
+test('block89 fs_cp: 文件复制 + 目录递归复制 + 目标父目录自动建', async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block89-cp-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const posix = (p) => p.replace(/\\/g, '/');
+
+  // 文件复制：目标父目录不存在 → 自动建
+  const srcFile = path.join(dir, 'a.txt');
+  fs.writeFileSync(srcFile, 'copy me');
+  const dstFile = path.join(dir, 'nested', 'b.txt');
+  const cpOut = await runAgent(['fs_cp', b64(posix(srcFile)), b64(posix(dstFile))]);
+  assert.strictEqual(JSON.parse(cpOut).type, 'file');
+  assert.ok(fs.existsSync(dstFile));
+  assert.strictEqual(fs.readFileSync(dstFile, 'utf-8'), 'copy me');
+  assert.ok(fs.existsSync(srcFile), 'copy keeps source');
+
+  // 目录递归复制
+  fs.mkdirSync(path.join(dir, 'srcdir', 'inner'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'srcdir', 'inner', 'deep.txt'), 'd');
+  const dstDir = path.join(dir, 'dstdir');
+  const cpDirOut = await runAgent(['fs_cp', b64(posix(path.join(dir, 'srcdir'))), b64(posix(dstDir))]);
+  assert.strictEqual(JSON.parse(cpDirOut).type, 'dir');
+  assert.strictEqual(fs.readFileSync(path.join(dstDir, 'inner', 'deep.txt'), 'utf-8'), 'd');
+});
+
+test('block89 fs_cp: already_exists 显式报错 + not_found 诚实语义', async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block89-cp-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const posix = (p) => p.replace(/\\/g, '/');
+
+  fs.writeFileSync(path.join(dir, 'a.txt'), 'A');
+  fs.writeFileSync(path.join(dir, 'b.txt'), 'B');
+
+  // 目标已存在 → die already_exists（exit 64）
+  await assert.rejects(
+    () => runAgent(['fs_cp', b64(posix(path.join(dir, 'a.txt'))), b64(posix(path.join(dir, 'b.txt')))]),
+    (err) => {
+      assert.strictEqual(err.code, 64);
+      assert.ok(/already_exists/.test(String(err.stderr)));
+      return true;
+    }
+  );
+  assert.strictEqual(fs.readFileSync(path.join(dir, 'b.txt'), 'utf-8'), 'B', 'existing target untouched');
+
+  // 源缺失 → 单行 JSON not_found
+  const nfOut = await runAgent(['fs_cp', b64(posix(path.join(dir, 'nope'))), b64(posix(path.join(dir, 'x.txt')))]);
+  assert.strictEqual(JSON.parse(nfOut).error, 'not_found');
+});
+
 test('block67 fs verbs: not_found 诚实语义（stat/list/read/rm）', async (t) => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-fs-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));

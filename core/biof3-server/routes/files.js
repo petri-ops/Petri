@@ -285,6 +285,153 @@ module.exports = function registerFileRoutes(app) {
       }
     });
 
+    // ── BLOCK-89：工作区文件操作（move/copy/delete/mkdir）──────────────
+    // 本地/ssh 双后端同构（workspaceGateway 透传），前端零感知 workspaceKind。
+    // 路径边界：local=resolveInside（safeJoinUnder+realpath）/ ssh=safeRemoteJoin。
+    // 冲突语义单一：目标已存在 → 409 target_already_exists（D4）。
+    function requireFsContext(req, res) {
+      const project = getProjectRecord(req.params.projectId);
+      if (!project) {
+        res.status(404).json({ ok: false, error: '项目工作目录不存在' });
+        return null;
+      }
+      const { backend, root, error } = workspaceGateway.resolveWorkspaceBackend(project) || {};
+      if (error || !backend || !root) {
+        res.status(404).json({ ok: false, error: '项目工作目录不存在' });
+        return null;
+      }
+      const resolve = (rel) => (project.workspace_kind === 'ssh'
+        ? workspaceGateway.safeRemoteJoin(root, rel)
+        : resolveInside(root, rel));
+      return { project, backend, resolve };
+    }
+
+    function fsEntryOr404(ctx, res, rel) {
+      const target = ctx.resolve(rel);
+      if (!target) {
+        res.status(400).json({ ok: false, error: '非法路径' });
+        return null;
+      }
+      return target;
+    }
+
+    async function fsPathExists(backend, target) {
+      try {
+        await backend.stat(target);
+        return true;
+      } catch (e) {
+        // not_found 才算「不存在」；classified/连接错误如实上抛（否则 ssh 断线会被误报成 404）
+        if (e && (e.remoteError === 'not_found' || e.code === 'ENOENT')) return false;
+        throw e;
+      }
+    }
+
+    function fsOpError(e) {
+      if (e && (e.remoteError === 'not_found' || e.code === 'ENOENT')) {
+        return { status: 404, body: { ok: false, error: '路径不存在' } };
+      }
+      if (e && e.code === 'EEXIST') {
+        return { status: 409, body: { ok: false, error: '目标已存在', code: 'target_already_exists' } };
+      }
+      if (e && e.classified) {
+        return { status: 502, body: { ok: false, error: `远程连接失败: ${e.classified.kind}`, retryable: e.classified.retryable === true } };
+      }
+      return null;
+    }
+
+    /** move/copy 共用主体：源存在校验 → 目标冲突 409 → 后端 op。 */
+    async function handleFsTransfer(req, res, op) {
+      const ctx = requireFsContext(req, res);
+      if (!ctx) return;
+      const fromPath = String(req.body?.fromPath || '');
+      const toPath = String(req.body?.toPath || '');
+      if (!fromPath || !toPath) {
+        return res.status(400).json({ ok: false, error: '缺少 fromPath/toPath' });
+      }
+      const src = fsEntryOr404(ctx, res, fromPath);
+      if (!src) return;
+      const dst = fsEntryOr404(ctx, res, toPath);
+      if (!dst) return;
+      const norm = (p) => String(p).replace(/\\/g, '/').replace(/\/+$/, '');
+      if (norm(dst) === norm(src) || norm(dst).startsWith(`${norm(src)}/`)) {
+        return res.status(400).json({ ok: false, error: '目标不能与源相同或位于源内部' });
+      }
+      try {
+        if (!(await fsPathExists(ctx.backend, src))) {
+          return res.status(404).json({ ok: false, error: '源路径不存在' });
+        }
+        if (await fsPathExists(ctx.backend, dst)) {
+          return res.status(409).json({ ok: false, error: '目标已存在', code: 'target_already_exists' });
+        }
+        const entry = await ctx.backend[op](src, dst);
+        return res.json({ ok: true, entry });
+      } catch (e) {
+        const mapped = fsOpError(e);
+        if (mapped) return res.status(mapped.status).json(mapped.body);
+        return res.status(500).json({ ok: false, error: e.message });
+      }
+    }
+
+    app.post('/api/workspaces/:projectId/fs/move', requireTrustedDesktopOrigin, async (req, res) => {
+      await handleFsTransfer(req, res, 'mv');
+    });
+
+    app.post('/api/workspaces/:projectId/fs/copy', requireTrustedDesktopOrigin, async (req, res) => {
+      await handleFsTransfer(req, res, 'cp');
+    });
+
+    app.post('/api/workspaces/:projectId/fs/delete', requireTrustedDesktopOrigin, async (req, res) => {
+      const ctx = requireFsContext(req, res);
+      if (!ctx) return;
+      const paths = Array.isArray(req.body?.paths) ? req.body.paths.map((p) => String(p || '')) : [];
+      if (paths.length === 0 || paths.length > 50) {
+        return res.status(400).json({ ok: false, error: '请提供 1 到 50 个相对路径' });
+      }
+      const targets = [];
+      for (const rel of paths) {
+        const target = fsEntryOr404(ctx, res, rel);
+        if (!target) return;
+        targets.push(target);
+      }
+      try {
+        for (const target of targets) {
+          if (!(await fsPathExists(ctx.backend, target))) {
+            return res.status(404).json({ ok: false, error: '路径不存在', path: target });
+          }
+        }
+        for (const target of targets) {
+          await ctx.backend.rm(target);
+        }
+        return res.json({ ok: true, removed: targets.length });
+      } catch (e) {
+        const mapped = fsOpError(e);
+        if (mapped) return res.status(mapped.status).json(mapped.body);
+        return res.status(500).json({ ok: false, error: e.message });
+      }
+    });
+
+    app.post('/api/workspaces/:projectId/fs/mkdir', requireTrustedDesktopOrigin, async (req, res) => {
+      const ctx = requireFsContext(req, res);
+      if (!ctx) return;
+      const rel = String(req.body?.path || '');
+      if (!rel) {
+        return res.status(400).json({ ok: false, error: '缺少 path' });
+      }
+      const target = fsEntryOr404(ctx, res, rel);
+      if (!target) return;
+      try {
+        if (await fsPathExists(ctx.backend, target)) {
+          return res.status(409).json({ ok: false, error: '目标已存在', code: 'target_already_exists' });
+        }
+        const entry = await ctx.backend.mkdir(target);
+        return res.json({ ok: true, entry });
+      } catch (e) {
+        const mapped = fsOpError(e);
+        if (mapped) return res.status(mapped.status).json(mapped.body);
+        return res.status(500).json({ ok: false, error: e.message });
+      }
+    });
+
     app.post('/api/workspaces/:projectId/profile', requireTrustedDesktopOrigin, async (req, res) => {
       const root = getProjectWorkspace(req.params.projectId);
       if (!root) return res.status(404).json({ ok: false, error: '项目工作目录不存在' });

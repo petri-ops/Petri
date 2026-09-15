@@ -1,7 +1,7 @@
 /**
  * BLOCK-67 P1 — Workspace Gateway（设计评审 §4 唯一新抽象）
  *
- * 一个文件面接口（list/read/write/stat/mkdir/mv/rm）× 两个后端：
+ * 一个文件面接口（list/read/write/stat/mkdir/mv/cp/rm）× 两个后端：
  *   local → 本地 fs（现路径语义平移，零回归红线：不开 ssh 项目时代码路径与现状同语义）
  *   ssh   → BLOCK-57 通道（runSshOp + node-agent fs verbs + ensureAgent 部署）
  *
@@ -151,6 +151,12 @@ function createSshBackend({ alias }) {
       if (!info || info.error) { const e = new Error(info?.error || 'fs_mv_failed'); e.remoteError = info?.error; throw e; }
       return info;
     },
+    // BLOCK-89：复制（node-agent fs_cp = cp -R；目标已存在由 agent 显式 already_exists）
+    async cp(srcPath, dstPath) {
+      const [info] = parseJsonLines(await fsOp(['fs_cp', b64(srcPath), b64(dstPath)]));
+      if (!info || info.error) { const e = new Error(info?.error || 'fs_cp_failed'); e.remoteError = info?.error; throw e; }
+      return info;
+    },
     async rm(targetPath) {
       const [info] = parseJsonLines(await fsOp(['fs_rm', b64(targetPath)]));
       if (!info || info.error) { const e = new Error(info?.error || 'fs_rm_failed'); e.remoteError = info?.error; throw e; }
@@ -270,6 +276,12 @@ function createLocalBackend() {
     async mv(srcPath, dstPath) {
       await fsp.mkdir(require('path').dirname(dstPath), { recursive: true });
       await fsp.rename(srcPath, dstPath);
+      return this.stat(dstPath);
+    },
+    // BLOCK-89：复制（force:false + errorOnExist → 目标已存在抛 EEXIST，与 ssh fs_cp already_exists 同语义）
+    async cp(srcPath, dstPath) {
+      await fsp.mkdir(require('path').dirname(dstPath), { recursive: true });
+      await fsp.cp(srcPath, dstPath, { recursive: true, force: false, errorOnExist: true });
       return this.stat(dstPath);
     },
     async rm(targetPath) {

@@ -20,6 +20,7 @@
  *   fs_write <b64path> <b64data>  → 原子写（tmp+mv），父目录自动 mkdir -p
  *   fs_mkdir <b64path>            → mkdir -p + JSON stat
  *   fs_mv <b64src> <b64dst>       → mv（目标父目录 mkdir -p）
+ *   fs_cp <b64src> <b64dst>       → cp -R（目标父目录 mkdir -p；源缺失 not_found；目标已存在 already_exists）
  *   fs_rm <b64path>               → rm -rf（受调用方路径边界约束）
  * 路径/内容一律 base64 编码传输（字符集落在 AGENT_ARG_RE 白名单内，无 shell 注入面）。
  *
@@ -181,6 +182,17 @@ case "$cmd" in
     s="$(fs_decode "$1")"; t="$(fs_decode "$2")"
     mkdir -p "$(dirname "$t")" 2>/dev/null
     mv -f "$s" "$t" 2>/dev/null || die "fs_mv_failed"
+    fs_stat_json "$t"
+    ;;
+  fs_cp)
+    # BLOCK-89：复制。与 fs_mv 同构（父目录 mkdir -p）；目标已存在显式报错
+    # （REST 层先 409 预检，此处 die 是双后端一致的纵深防御）。
+    [ $# -ge 2 ] || die "fs_cp_usage"
+    s="$(fs_decode "$1")"; t="$(fs_decode "$2")"
+    [ -e "$s" ] || { printf '{"error":"not_found"}\\n'; exit 0; }
+    [ -e "$t" ] && die "already_exists"
+    mkdir -p "$(dirname "$t")" 2>/dev/null
+    cp -R "$s" "$t" 2>/dev/null || die "fs_cp_failed"
     fs_stat_json "$t"
     ;;
   fs_rm)
