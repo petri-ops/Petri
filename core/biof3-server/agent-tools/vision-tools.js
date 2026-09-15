@@ -15,6 +15,7 @@ const path = require('path');
 const dbMod = require('../db');
 const config = require('../config');
 const { callVision } = require('../helpers/llm-client');
+const workspaceGateway = require('../helpers/workspace-gateway');
 
 const IMAGE_EXT_RE = /\.(png|jpg|jpeg|svg)$/i;
 const IMAGE_MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml' };
@@ -32,6 +33,43 @@ function resolveWorkspaceImagePath(ctx, relativePath) {
   }
   const project = dbMod.getProject(projectId);
   if (!project) return { error: 'project_not_found', message: `项目 ${projectId} 不存在` };
+
+  // BLOCK-91：ssh 项目走 gateway（root=remote_path，backend.stat/read 远端读图）。
+  // 此前仅支持本地 workspace_path——ssh 项目的附件图「定不住工作区路径」即此缺口。
+  if (project.workspace_kind === 'ssh') {
+    const { backend, root, error } = workspaceGateway.resolveWorkspaceBackend(project) || {};
+    if (error || !backend || !root) {
+      return { error: 'workspace_unavailable', message: '远程工作区不可用' };
+    }
+    const trimmed = String(relativePath || '').trim();
+    if (!trimmed) return { error: 'missing_filePath', message: '需要 filePath（workspace 相对路径）' };
+    const target = workspaceGateway.safeRemoteJoin(root, trimmed);
+    if (!target) return { error: 'path_escape', message: '路径逃逸出当前项目工作区' };
+    if (!IMAGE_EXT_RE.test(target)) {
+      return { error: 'not_an_image', message: 'filePath 必须指向 png/jpg/jpeg/svg 图片' };
+    }
+    return {
+      fileName: path.posix.basename(target),
+      sshRead: async () => {
+        try {
+          const stat = await backend.stat(target);
+          if (stat && stat.size > MAX_IMAGE_BYTES) {
+            return { error: 'image_too_large', message: `${trimmed} ${(stat.size/1024/1024).toFixed(1)}MB 超 4MB 上限` };
+          }
+          return await backend.read(target);
+        } catch (e) {
+          if (e && e.remoteError === 'not_found') {
+            return { error: 'file_not_found', message: `${trimmed} 在远程工作区中不存在` };
+          }
+          if (e && e.classified) {
+            return { error: 'file_unreadable', message: `远程连接失败: ${e.classified.kind}` };
+          }
+          return { error: 'file_unreadable', message: `无法读取 ${trimmed}: ${e.message}` };
+        }
+      },
+    };
+  }
+
   if (!project.workspace_path || !path.isAbsolute(project.workspace_path)) {
     return { error: 'workspace_unavailable', message: '项目工作区路径未配置或不是绝对路径' };
   }
@@ -96,11 +134,17 @@ async function tool_read_image(args, ctx) {
 
   let imgPath = null;
   let targetName = null;
+  let sshReadFn = null;
   if (filePath) {
     const resolved = resolveWorkspaceImagePath(ctx, filePath);
     if (resolved.error) return resolved;
-    imgPath = resolved.imgPath;
-    targetName = resolved.fileName;
+    if (resolved.sshRead) {
+      sshReadFn = resolved.sshRead;
+      targetName = resolved.fileName;
+    } else {
+      imgPath = resolved.imgPath;
+      targetName = resolved.fileName;
+    }
   } else {
     const job = dbMod.getToolJob(toolJobId);
     if (!job) return { error: 'job_not_found', message: `tool_job ${toolJobId} 不存在` };
@@ -143,10 +187,20 @@ async function tool_read_image(args, ctx) {
     if (!imgPath) return { error: 'file_not_found', message: `${targetName} 在 ${jobDir} 下不存在` };
   }
 
-  const ext = path.extname(imgPath).toLowerCase();
+  let buf;
+  if (sshReadFn) {
+    const readResult = await sshReadFn();
+    if (readResult && readResult.error) return readResult;
+    buf = readResult;
+    if (!(buf && buf.length > 0)) {
+      return { error: 'file_unreadable', message: `${targetName} 远端读取为空` };
+    }
+  } else {
+    buf = fs.readFileSync(imgPath);
+  }
+  const ext = path.extname(imgPath || targetName).toLowerCase();
   const mimeType = IMAGE_MIME[ext] || 'image/png';
 
-  const buf = fs.readFileSync(imgPath);
   if (buf.length > MAX_IMAGE_BYTES) {
     return { error: 'image_too_large', message: `${targetName} ${(buf.length/1024/1024).toFixed(1)}MB 超 4MB 上限` };
   }

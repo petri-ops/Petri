@@ -1,0 +1,17 @@
+{
+  "name": "block91-ssh-read-image-fix",
+  "startedAt": "2026-09-15T22:42:41.345Z",
+  "provenance": "user acceptance caught read_image workspace-path gap on ssh projects; fix verified by direct tool invocation with the user-uploaded image on the aliyun remote",
+  "scenario": {
+    "project": "p_mtw8183q_2txr (P4驻留, ssh/aliyun 真远端)",
+    "attachment": ".chat-attachments/1789511797649-微信图片_20260209161007_160_23.jpg",
+    "before": "resolveWorkspaceImagePath 仅支持本地 workspace_path（ssh 项目无本地路径 → workspace_unavailable，即用户验收报「读图通道定不住工作区路径」）",
+    "fix": "ssh 分支走 workspaceGateway.resolveWorkspaceBackend：safeRemoteJoin 边界 + backend.stat 尺寸预检（4MB 上限）+ backend.read 远端读图 → vision provider 解读"
+  },
+  "assertion": {
+    "ok": true,
+    "fileName": "1789511797649-微信图片_20260209161007_160_23.jpg",
+    "visionDescription": "一个戴着潜水镜的DNA双螺旋结构。"
+  },
+  "allPass": true
+}
