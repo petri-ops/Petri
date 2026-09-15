@@ -15,7 +15,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generateCorpus } from './g0-rs-p4r-corpus.mjs';
 import { createCaptureEnv, startServer, stopServer } from './g0-rs-p4r-capture.mjs';
-import { buildPackEnv, resolveBioPackRoot } from './g0-rs-p4r-pack.mjs';
+import { buildPackEnv, locatePackPluginDir, resolveBioPackRoot } from './g0-rs-p4r-pack.mjs';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const evidencePath = path.join(rootDir, 'acceptance/g0-result-studio/rs-p4r-source-observation.json');
@@ -27,17 +27,24 @@ const sourceFiles = Object.freeze({
   sourceProjection: 'core/shared-backend/result-revision-source.js',
   replayService: 'core/shared-backend/result-replay-service.js',
 });
-/** 插件定义/脚本自 BLOCK-83 起随领域包交付：包相对路径绑定，包 commit+哈希留痕。 */
-const packSourceFiles = Object.freeze({
-  deseq2Definition: 'plugins/deseq2/tool-definition.json',
-  deseq2Script: 'plugins/deseq2/scripts/deseq2.R',
-  volcanoDefinition: 'plugins/volcano-plot/tool-definition.json',
-  volcanoScript: 'plugins/volcano-plot/scripts/volcano-plot.R',
-  correlationDefinition: 'plugins/gene-correlation/tool-definition.json',
-  correlationScript: 'plugins/gene-correlation/scripts/gene-correlation.R',
-  enrichmentDefinition: 'plugins/go-kegg/tool-definition.json',
-  enrichmentScript: 'plugins/go-kegg/scripts/go-kegg.R',
-});
+/** 插件定义/脚本自 BLOCK-83 起随领域包交付：按 dormant 感知定位解析为包相对路径
+ * （封存态下 volcano-plot 等在 plugins.dormant/），绑定走包 commit+哈希对账。 */
+function resolvePackBindingPaths(packRoot) {
+  const rel = (toolId, ...parts) => {
+    const dir = locatePackPluginDir(packRoot, toolId);
+    return path.relative(packRoot, path.join(dir, ...parts));
+  };
+  return {
+    deseq2Definition: rel('deseq2', 'tool-definition.json'),
+    deseq2Script: rel('deseq2', 'scripts', 'deseq2.R'),
+    volcanoDefinition: rel('volcano-plot', 'tool-definition.json'),
+    volcanoScript: rel('volcano-plot', 'scripts', 'volcano-plot.R'),
+    correlationDefinition: rel('gene-correlation', 'tool-definition.json'),
+    correlationScript: rel('gene-correlation', 'scripts', 'gene-correlation.R'),
+    enrichmentDefinition: rel('go-kegg', 'tool-definition.json'),
+    enrichmentScript: rel('go-kegg', 'scripts', 'go-kegg.R'),
+  };
+}
 const hash = (value) => createHash('sha256').update(value).digest('hex');
 
 function sourceBinding(packRoot) {
@@ -51,6 +58,7 @@ function sourceBinding(packRoot) {
     return shown.status !== 0 || hash(shown.stdout) !== sourceHashes[key];
   }).map(([, file]) => file);
   const packCommit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: packRoot, encoding: 'utf8' }).trim();
+  const packSourceFiles = resolvePackBindingPaths(packRoot);
   const packHashes = Object.fromEntries(Object.entries(packSourceFiles).map(([key, file]) => [
     key,
     hash(readFileSync(path.join(packRoot, file))),
