@@ -13,6 +13,8 @@ import styles from '../project-workspace.module.css';
 import type { ActiveWorkspaceFile, FileEntry } from './types';
 import { FileTreeList } from './FileTreeList';
 import { WorkspaceFilePreview } from './WorkspaceFilePreview';
+import { FileTreeContextMenu, FileTreeDialogHost, type FileTreeDialog, type FileTreeMenuAction, type FileTreeMenuTarget } from './FileTreeOpsOverlay';
+import { fsMove, fsCopy, joinPath, uniqueTargetName, type DraggedTreeItem } from './fileOps';
 
 export function RightFileTree({
   project,
@@ -46,6 +48,11 @@ export function RightFileTree({
   const [openError, setOpenError] = useState('');
   const [opening, setOpening] = useState(false);
   const activeFileSignatureRef = useRef<string | null>(null);
+
+  // BLOCK-89 / UI-378 — 文件操作（右键菜单 + 拖拽）状态
+  const [menuTarget, setMenuTarget] = useState<FileTreeMenuTarget | null>(null);
+  const [dialog, setDialog] = useState<FileTreeDialog | null>(null);
+  const [opsError, setOpsError] = useState('');
 
   const fetchDir = useCallback(async (prefix: string) => {
     try {
@@ -139,6 +146,62 @@ export function RightFileTree({
   const handleOpenFile = useCallback((file: ActiveWorkspaceFile) => {
     onOpenFile(file);
   }, [onOpenFile]);
+
+  // ── BLOCK-89 / UI-378 文件操作（本地/ssh 双后端同构，前端零感知 workspaceKind）──
+  const notifyTreeChanged = useCallback(() => {
+    dispatchGewuEvent(gewuEvents.projectWorkspaceChanged, { projectId: project.id, source: 'manual' });
+  }, [project.id]);
+
+  const closeOverlays = useCallback(() => {
+    setMenuTarget(null);
+    setDialog(null);
+  }, []);
+
+  const runTreeOp = useCallback(async (fn: () => Promise<unknown>) => {
+    setOpsError('');
+    try {
+      await fn();
+      notifyTreeChanged();
+      return true;
+    } catch (error) {
+      setOpsError((error as Error).message || '文件操作失败');
+      return false;
+    }
+  }, [notifyTreeChanged]);
+
+  const handleRowContextMenu = useCallback((event: React.MouseEvent, entry: FileEntry, fullPath: string) => {
+    setOpsError('');
+    setMenuTarget({ x: event.clientX, y: event.clientY, entry, fullPath });
+  }, []);
+
+  const handleMenuAction = useCallback((action: FileTreeMenuAction) => {
+    if (!menuTarget) return;
+    const { entry, fullPath } = menuTarget;
+    setMenuTarget(null);
+    if (action === 'mkdir') {
+      setDialog({ kind: 'mkdir', parent: entry?.type === 'dir' ? fullPath : '' });
+      return;
+    }
+    if (!entry) return;
+    if (action === 'rename') setDialog({ kind: 'rename', path: fullPath, name: entry.name });
+    else if (action === 'move') setDialog({ kind: 'target', action: 'move', path: fullPath, name: entry.name });
+    else if (action === 'copy') setDialog({ kind: 'target', action: 'copy', path: fullPath, name: entry.name });
+    else if (action === 'delete') {
+      setDialog({
+        kind: 'delete',
+        targets: [{ path: fullPath, name: entry.name, isDir: entry.type === 'dir' }],
+      });
+    }
+  }, [menuTarget]);
+
+  // 拖拽落点：目标目录预检唯一名（冲突自动 -2 后缀）后走 move/copy
+  const handleDropToDir = useCallback(async (item: DraggedTreeItem, targetDir: string, copy: boolean) => {
+    setOpsError('');
+    const entries = await fetchDir(targetDir);
+    const toPath = joinPath(targetDir, uniqueTargetName(entries, item.name));
+    const op = copy ? fsCopy : fsMove;
+    await runTreeOp(() => op(project.id, item.path, toPath));
+  }, [fetchDir, project.id, runTreeOp]);
 
   const activePreviewUrl = useMemo(() => {
     if (!activeFile?.url) return '';
@@ -345,12 +408,39 @@ export function RightFileTree({
                   depth={0}
                   workspaceDir={project.workspacePath}
                   workspaceKind={project.workspaceKind}
+                  onRowContextMenu={handleRowContextMenu}
+                  onDropToDir={(item, targetDir, copy) => { void handleDropToDir(item, targetDir, copy); }}
                 />
               )}
             </div>
           </aside>
         )}
       </div>
+      {opsError && (
+        <p className={styles.fileTreeOpsError} role="alert" data-testid="file-tree-ops-error">
+          <Icon name="alert-circle" size={12} />
+          {opsError}
+        </p>
+      )}
+      {menuTarget && (
+        <FileTreeContextMenu
+          target={menuTarget}
+          onAction={handleMenuAction}
+          onClose={() => setMenuTarget(null)}
+        />
+      )}
+      {dialog && (
+        <FileTreeDialogHost
+          dialog={dialog}
+          projectId={project.id}
+          fetchDir={fetchDir}
+          onDone={() => {
+            closeOverlays();
+            notifyTreeChanged();
+          }}
+          onClose={() => setDialog(null)}
+        />
+      )}
     </div>
   );
 }

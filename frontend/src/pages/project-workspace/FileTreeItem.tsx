@@ -24,6 +24,8 @@ export function FileTreeItem({
   refreshVersion,
   workspaceDir,
   workspaceKind,
+  onRowContextMenu,
+  onDropToDir,
 }: {
   entry: FileEntry;
   fullPath: string;
@@ -38,8 +40,14 @@ export function FileTreeItem({
   refreshVersion: number;
   workspaceDir?: string;
   workspaceKind?: 'local' | 'ssh';
+  /** UI-378 — 行右键菜单（宿主接管定位与动作分发） */
+  onRowContextMenu?: (event: React.MouseEvent, entry: FileEntry, fullPath: string) => void;
+  /** UI-378 — 拖拽落点：拖到目录行上释放（copy=true 时为复制，默认移动） */
+  onDropToDir?: (item: { path: string; name: string; type: 'file' | 'dir' }, targetDir: string, copy: boolean) => void;
 }): React.ReactElement {
   const [children, setChildren] = useState<FileEntry[]>([]);
+  const [dropActive, setDropActive] = useState(false);
+  const dragDepthRef = useRef(0);
 
   useEffect(() => {
     if (isExpanded && entry.type === 'dir') {
@@ -49,13 +57,67 @@ export function FileTreeItem({
 
   const fileUrl = fileUrlFor(fullPath);
   const isActive = entry.type === 'file' && activePath === fullPath;
+  const DRAG_MIME = 'application/x-gewu-tree-item';
+  const isDropTarget = entry.type === 'dir' && Boolean(onDropToDir);
+
+  const handleDragStart = useCallback((event: React.DragEvent) => {
+    event.dataTransfer.setData(DRAG_MIME, JSON.stringify({ path: fullPath, name: entry.name, type: entry.type }));
+    event.dataTransfer.effectAllowed = 'copyMove';
+  }, [entry.name, entry.type, fullPath]);
+
+  const handleDragEnter = useCallback((event: React.DragEvent) => {
+    if (!isDropTarget || !event.dataTransfer.types.includes(DRAG_MIME)) return;
+    dragDepthRef.current += 1;
+    setDropActive(true);
+  }, [isDropTarget]);
+
+  const handleDragOver = useCallback((event: React.DragEvent) => {
+    if (!isDropTarget || !event.dataTransfer.types.includes(DRAG_MIME)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = event.ctrlKey ? 'copy' : 'move';
+  }, [isDropTarget]);
+
+  const handleDragLeave = useCallback((event: React.DragEvent) => {
+    if (!isDropTarget || !event.dataTransfer.types.includes(DRAG_MIME)) return;
+    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+    if (dragDepthRef.current === 0) setDropActive(false);
+  }, [isDropTarget]);
+
+  const handleDrop = useCallback((event: React.DragEvent) => {
+    if (!isDropTarget) return;
+    event.preventDefault();
+    event.stopPropagation();
+    dragDepthRef.current = 0;
+    setDropActive(false);
+    const raw = event.dataTransfer.getData(DRAG_MIME);
+    if (!raw || !onDropToDir) return;
+    try {
+      const item = JSON.parse(raw) as { path: string; name: string; type: 'file' | 'dir' };
+      if (item.path === fullPath) return;
+      onDropToDir(item, fullPath, event.ctrlKey);
+    } catch { /* 外部拖拽或载荷损坏：忽略 */ }
+  }, [isDropTarget, fullPath, onDropToDir]);
 
   return (
     <li className={styles.fileTreeNode} role="none">
       <button
         type="button"
-        className={`${styles.fileTreeRow} ${isActive ? styles.fileTreeRowActive : ''}`}
+        className={`${styles.fileTreeRow} ${isActive ? styles.fileTreeRowActive : ''} ${dropActive ? styles.fileTreeRowDropTarget : ''}`}
         style={{ paddingLeft: 5 + depth * 16 }}
+        draggable={Boolean(onDropToDir)}
+        onDragStart={onDropToDir ? handleDragStart : undefined}
+        onDragEnter={isDropTarget ? handleDragEnter : undefined}
+        onDragOver={isDropTarget ? handleDragOver : undefined}
+        onDragLeave={isDropTarget ? handleDragLeave : undefined}
+        onDrop={isDropTarget ? handleDrop : undefined}
+        onContextMenu={
+          onRowContextMenu
+            ? (event) => {
+                event.preventDefault();
+                onRowContextMenu(event, entry, fullPath);
+              }
+            : undefined
+        }
         onClick={() => {
           if (entry.type === 'dir') {
             onToggleDir(fullPath);
@@ -109,6 +171,8 @@ export function FileTreeItem({
           depth={depth + 1}
           workspaceDir={workspaceDir}
           workspaceKind={workspaceKind}
+          onRowContextMenu={onRowContextMenu}
+          onDropToDir={onDropToDir}
         />
       )}
     </li>

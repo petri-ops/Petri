@@ -20,6 +20,8 @@ export function FileTreeList({
   depth = 0,
   workspaceDir,
   workspaceKind,
+  onRowContextMenu,
+  onDropToDir,
 }: {
   entries: FileEntry[];
   prefix: string;
@@ -33,6 +35,8 @@ export function FileTreeList({
   depth?: number;
   workspaceDir?: string;
   workspaceKind?: 'local' | 'ssh';
+  onRowContextMenu?: (event: React.MouseEvent, entry: FileEntry, fullPath: string) => void;
+  onDropToDir?: (item: { path: string; name: string; type: 'file' | 'dir' }, targetDir: string, copy: boolean) => void;
 }): React.ReactElement {
   const orderedEntries = useMemo(
     () => [...entries].sort((left, right) => {
@@ -63,6 +67,8 @@ export function FileTreeList({
             refreshVersion={refreshVersion}
             workspaceDir={workspaceDir}
             workspaceKind={workspaceKind}
+            onRowContextMenu={onRowContextMenu}
+            onDropToDir={onDropToDir}
           />
         );
       })}
