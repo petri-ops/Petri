@@ -50,8 +50,11 @@ export function DesktopOnboarding(): React.ReactElement | null {
     : [{ title: '欢迎', icon: 'sparkles' }];
   const maxStep = steps.length - 1;
 
-  // 领域判定未落地前不渲染（首启一次性 100ms 级，避免运行时步骤闪现）
-  if (packRequiresRuntimes === null) return null;
+  // 领域判定未落地前不渲染（首启一次性 100ms 级，避免运行时步骤闪现）。
+  // 注意：该早退必须放在**全部 hook 之后**（见下方 JSX 前守卫）——曾放在此处，
+  // 首渲染只调 3 个 hook、判定落地后再渲染却调 6 个（新增 3 个 useCallback），
+  // React 直接抛「Rendered more hooks than during the previous render」卸载整棵树，
+  // 首启（onboarding 未完成）表现为整页空白（P6 渲染层实机抓真）。
 
   // 运行时是否就绪：任一已装即视为"有运行时"
   // backend.rRuntime 可为 null（状态查询失败 = 未知）；引导页只做展示，
@@ -83,6 +86,10 @@ export function DesktopOnboarding(): React.ReactElement | null {
       return null;
     }
   })();
+
+  // 领域判定未落地前不渲染（首启一次性 100ms 级，避免运行时步骤闪现）。
+  // 位置纪律：必须在全部 hook 之后，否则 hook 调用次数在两次渲染间变化 → React 抛错。
+  if (packRequiresRuntimes === null) return null;
 
   return (
     <div className="gewu-onboarding-overlay" role="dialog" aria-label="首次启动引导">
