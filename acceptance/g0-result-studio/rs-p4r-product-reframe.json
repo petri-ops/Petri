@@ -30,8 +30,8 @@
     "centerPanel": "859955c25e2a27075802015d6870aed11f311e5b96cf82def2f4f8c3da3c7ea3",
     "rightPanel": "64b7db9d901c17bb610ba307ad0cc4b21fb5d708ff94c20912f11963b88e1598",
     "rightPanelSpec": "c445bfbbce9e86c8983e0c7d94409990d1417d836a1a660fb171a95f948d44df",
-    "projectWorkspace": "f62310fbeb9e1da6601d5a43348bbeb9510e58a9bcfa887e6b201271a3992d8e",
-    "projectWorkspaceStyle": "1dad2de637e8561db9d7f56c3a33fd6d94387708dc9606c164f6e01800e57a73",
+    "projectWorkspace": "78f2fc1ef485b01157895666fb9648a5c8b24b1e6144e3d7cc17425cb43cde61",
+    "projectWorkspaceStyle": "ad07fc176fbda23e24a720180934684f8bf80b9cebd4100bdaf0ba6fa61b7472",
     "resultAgentComposer": "45bd0662e7865308ab6e6615a5e5b66681dfe128f1d2fc62ef0e1bfc742df201",
     "resultAgentComposerStyle": "95518f44d6a822ad06e218e894204a2d68fdacf5ca2ecf840f70d759968dedd9",
     "resultAgentComposerSpec": "4d0c32fed7dc7dc972c3916c72f0af526523bcf1cebfe7a1c3a89b3974c502d4",
@@ -96,7 +96,7 @@
     "resultEditAgentToolSpec": "3d2566dfd06682a2b9bc3e3c3dc7bb95646c388183ffa5b3bad818b57749cff4",
     "agentToolPolicySpec": "a9f5a1da7611d139aaee73d925b1666d82c418c3467bd8490a9072f090ca2c7b",
     "agentToolRegistrySpec": "6c631572417edded1a56807ad61a45aff58d6d726ed95137de6dcf56473309e7",
-    "impactMap": "f46b5bd2023933ed943c39c72fc239356c165833b719b70e55c19d7a96d3827c",
+    "impactMap": "c391a637316e1ffb4e93ab2c71a1d40e3121a0b6dab901bf390af8d6bca8624f",
     "impactMapSpec": "0280a7d87d2321f3fb7c97e7a053ac22e607eed58a1c6a11c8ac4da6e49df274",
     "packageScripts": "f00078e3b96240b24485bd19c1f4bbb848fde29e697223ad74b900e95e796be3",
     "acceptanceScript": "f61165ed944f6060f007a7a6a09a17ab4bc76067798a28a809ec72acd7fe1209",
@@ -111,7 +111,7 @@
     "uiDriver": "cf13b1989bfdba391eba382b5c17a01456ed5f78120c954b68131d7ddcd23fc7",
     "performanceObservationEvidence": "5b1fcae4e263859b7acefa1e8fdae346df6db4d3b7639ac6b1960f779d8f1bfc",
     "liveObservationEvidence": "b76f36381dd4d8e594676b6bb4165aa4ea29685fb96e1b97cd676437199b3d0f",
-    "uiObservationEvidence": "073a1f0119914d1b03900bdd25f74bfae969a2d735075e503895ac79854844c3"
+    "uiObservationEvidence": "4235a994dd75ef3171dbcfcf42a18b2eca4b08d6af5306b7dcb3e46d72631944"
   },
   "frozenBaseline": {
     "capturedAtCommit": "e1f841c8ada919250c01f5cde76586ef2375bdc6",
@@ -120,7 +120,7 @@
   "observation": {
     "revisionCount": 5,
     "calibration": {
-      "gitSpawnMedianMs": 13.056,
+      "gitSpawnMedianMs": 13.38,
       "pathEntries": 38,
       "invokedUnderNpm": true
     },
@@ -129,68 +129,68 @@
         "id": "job-status",
         "role": "render-blocking",
         "status": 200,
-        "coldMs": 9.934,
-        "warmMs": 6.421,
-        "warmSpreadMs": 0.459,
-        "oneTimeCostMs": 3.513
+        "coldMs": 9.723,
+        "warmMs": 6.416,
+        "warmSpreadMs": 0.391,
+        "oneTimeCostMs": 3.307
       },
       {
         "id": "artifact-bytes",
         "role": "render-blocking",
         "status": 200,
-        "coldMs": 12.482,
-        "warmMs": 8.002,
-        "warmSpreadMs": 3.509,
-        "oneTimeCostMs": 4.48
+        "coldMs": 9.923,
+        "warmMs": 7.974,
+        "warmSpreadMs": 2.276,
+        "oneTimeCostMs": 1.949
       },
       {
         "id": "interaction",
         "role": "secondary",
         "status": 200,
-        "coldMs": 1032.665,
-        "warmMs": 7.458,
-        "warmSpreadMs": 1.295,
-        "oneTimeCostMs": 1025.207
+        "coldMs": 1060.986,
+        "warmMs": 8.03,
+        "warmSpreadMs": 1.732,
+        "oneTimeCostMs": 1052.956
       },
       {
         "id": "context-envelope",
         "role": "secondary",
         "status": 409,
-        "coldMs": 4.765,
-        "warmMs": 1.718,
-        "warmSpreadMs": 0.633,
-        "oneTimeCostMs": 3.047
+        "coldMs": 4.573,
+        "warmMs": 2.242,
+        "warmSpreadMs": 0.716,
+        "oneTimeCostMs": 2.331
       },
       {
         "id": "changesets",
         "role": "secondary",
         "status": 200,
-        "coldMs": 3.531,
-        "warmMs": 1.127,
-        "warmSpreadMs": 0.515,
-        "oneTimeCostMs": 2.404
+        "coldMs": 3.669,
+        "warmMs": 1.165,
+        "warmSpreadMs": 0.31,
+        "oneTimeCostMs": 2.504
       },
       {
         "id": "workspace-status",
         "role": "secondary",
         "status": 200,
-        "coldMs": 51.171,
-        "warmMs": 51.209,
-        "warmSpreadMs": 1.577,
-        "oneTimeCostMs": -0.038
+        "coldMs": 49.169,
+        "warmMs": 49.602,
+        "warmSpreadMs": 1.681,
+        "oneTimeCostMs": -0.433
       }
     ],
     "eventLoop": {
-      "samples": 128,
-      "maxMs": 13.738
+      "samples": 134,
+      "maxMs": 15.811
     }
   },
   "improvementVsBaseline": [
     {
       "id": "job-status",
       "baselineWarmMs": 2.229,
-      "currentWarmMs": 6.421,
-      "deltaPct": 188.1,
+      "currentWarmMs": 6.416,
+      "deltaPct": 187.8,
       "baselineWarmSpawnEquivalents": null,
       "currentWarmSpawnEquivalents": null,
       "calibratedDeltaPct": null
@@ -198,8 +198,8 @@
     {
       "id": "artifact-bytes",
       "baselineWarmMs": 2.174,
-      "currentWarmMs": 8.002,
-      "deltaPct": 268.1,
+      "currentWarmMs": 7.974,
+      "deltaPct": 266.8,
       "baselineWarmSpawnEquivalents": null,
       "currentWarmSpawnEquivalents": null,
       "calibratedDeltaPct": null
@@ -207,8 +207,8 @@
     {
       "id": "interaction",
       "baselineWarmMs": 9.9,
-      "currentWarmMs": 7.458,
-      "deltaPct": -24.7,
+      "currentWarmMs": 8.03,
+      "deltaPct": -18.9,
       "baselineWarmSpawnEquivalents": null,
       "currentWarmSpawnEquivalents": null,
       "calibratedDeltaPct": null
@@ -216,8 +216,8 @@
     {
       "id": "changesets",
       "baselineWarmMs": 42.102,
-      "currentWarmMs": 1.127,
-      "deltaPct": -97.3,
+      "currentWarmMs": 1.165,
+      "deltaPct": -97.2,
       "baselineWarmSpawnEquivalents": null,
       "currentWarmSpawnEquivalents": null,
       "calibratedDeltaPct": null
@@ -225,11 +225,11 @@
     {
       "id": "workspace-status",
       "baselineWarmMs": 64.862,
-      "currentWarmMs": 51.209,
-      "deltaPct": -21,
+      "currentWarmMs": 49.602,
+      "deltaPct": -23.5,
       "baselineWarmSpawnEquivalents": 6.785,
-      "currentWarmSpawnEquivalents": 3.922,
-      "calibratedDeltaPct": -42.2
+      "currentWarmSpawnEquivalents": 3.707,
+      "calibratedDeltaPct": -45.4
     }
   ],
   "unmeasured": {
@@ -434,14 +434,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-09-15T11:43:21.968Z",
+    "generatedAt": "2026-09-15T12:29:25.051Z",
     "frontend": {
       "command": "npm run test:files --prefix frontend -- 19 specs",
       "exitCode": 0,
       "filesPassed": 19,
       "testsPassed": 175,
       "specCount": 19,
-      "stdoutSha256": "03ea32d18ea21aff8f80c2a34758feed825890e8ed020ee3bdbac31230e6cb48"
+      "stdoutSha256": "5e05cd6154ce020909bafdd571159f7aaf2a59f8c2ad0cb1ca23c66d1da0af43"
     },
     "node": {
       "command": "node --test --test-concurrency=1 12 specs",
@@ -449,14 +449,14 @@
       "specCount": 12,
       "testsObserved": 196,
       "testsPassed": 196,
-      "stdoutSha256": "aff854c051990c31571a3d286c08a4f448d445ab835a3abed3bdbe565f79b780"
+      "stdoutSha256": "852aab0b644bda9ba235664254783a7d9af44dcc3193b2249c09cfff71323336"
     }
   },
   "passed": true,
-  "sourceCommit": "482985b4b8116ac3cb9c42b3c806b99f128728bf",
+  "sourceCommit": "fa0dd1bfddae498464fec260b4eb4452bf0f3a0a",
   "sourceCommitReachable": true,
   "sourceCommitMatchesSourceHashes": true,
   "sourceCommitMismatches": [],
-  "generatedAt": "2026-09-15T11:43:21.968Z",
+  "generatedAt": "2026-09-15T12:29:25.051Z",
   "privacyClean": true
 }
