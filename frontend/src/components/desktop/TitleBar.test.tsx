@@ -64,8 +64,9 @@ function renderTitleBarWithResults(
   activeResultId: string | null,
   onSelectResult: (id: string) => void,
 ) {
+  // UI-376 — 结果选择器是工作区语境（欢迎页已 bare），渲染在工作区路由
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={['/project/p1/chat']}>
       <WorkspacePanelsProvider>
         <ResultStateHarness
           resultItems={resultItems}
@@ -523,12 +524,19 @@ describe('TitleBar route-aware dividers (UI-377)', () => {
     );
   }
 
-  it('drops the center-title right divider on non-workspace routes（右栏不在场不挂悬空线）', () => {
+  it('welcome route goes fully bare: no brand title, no zone dividers (UI-376)', () => {
     vi.stubGlobal('biof3Desktop', undefined);
     renderAt('/');
+    // UI-376 — 欢迎页并入独立页 bare 形态：品牌回退标题（「Gewu」）与左区
+    // 分隔线都不渲染（页面自带「返回 + 问候」页头）
     const center = document.querySelector('[class*="centerTitle"]') as HTMLElement;
     expect(center).toBeTruthy();
-    expect(center.className).toContain('centerTitleNoDivider');
+    expect(center.className).toContain('centerTitleBare');
+    expect(center.textContent).not.toContain('Gewu');
+    const left = document.querySelector('[class*="leftZone"]') as HTMLElement;
+    expect(left.className).toContain('leftZoneBare');
+    // 左栏开合按钮保留（bare 只撤边框与标题）
+    expect(screen.getByRole('button', { name: '收起左侧栏' })).toBeTruthy();
   });
 
   it('keeps the center-title right divider on workspace routes with the right rail open', () => {

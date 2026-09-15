@@ -80,9 +80,12 @@ export function modeUsesSummaryCard(mode: WorkspaceMode): boolean {
  * （此前顶栏左区分隔线与壳层左栏宽度错位 24px，叠出「多一条线」的布局冲突）。
  * UI-364 — /plugins 插件商店独立页并入同形态。
  * UI-365 — /settings 设置独立页并入同形态。
+ * UI-376 — / 欢迎页并入同形态：页面自带「返回 + 问候」页头，顶栏的品牌回退
+ * 标题（「Gewu」）与左区分隔线（与左栏边缘错位 ~13px 的悬空线）均无意义
+ * （用户截图指认「Gewu 和旁边的灰色分隔线没有实际意义」）。
  */
 export function isStandalonePagePath(pathname: string): boolean {
-  return /^\/(skills|knowledge|backend|plugins|settings)\/?$/.test(pathname);
+  return pathname === '/' || /^\/(skills|knowledge|backend|plugins|settings)\/?$/.test(pathname);
 }
 
 export function getFallbackTitle(pathname: string): string {
