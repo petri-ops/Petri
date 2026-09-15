@@ -1339,6 +1339,17 @@ export function ProjectWorkspace(): React.ReactElement {
     setRightOpen(true);
     openRightPanel('results');
   }, [activeJobId, bindActiveJob, conversationJobs, openRightPanel, setRightOpen, updateWorkspaceMode]);
+  // BLOCK-89 P3 实机抓真修（BLOCK-86 P2 d893f0ebe 回归）：这对钩子原位于下方
+  // `if (loading) return` 早退之后——loading 翻转后的重渲染钩子计数变多，
+  // React 直接卸载整根（工作区路由白屏）。钩子必须在一切早退之前，上移至此。
+  const [runtimeDemandPacks, setRuntimeDemandPacks] = useState<string[]>([]);
+  useEffect(() => {
+    let alive = true;
+    listPacksRequiringRuntimes()
+      .then((packs) => { if (alive) setRuntimeDemandPacks(packs.map((p) => p.name)); })
+      .catch(() => { /* 桥缺失 = 无包态 = 不提示 */ });
+    return () => { alive = false; };
+  }, []);
   if (loading) {
     return (
       <div className={styles.earlyReturnWrap}>
@@ -1546,14 +1557,6 @@ export function ProjectWorkspace(): React.ReactElement {
   // 文案挂包名。
   const rRuntimeMissing = backendStatus.rRuntime === false;
   const pyRuntimeMissing = backendStatus.pyRuntime === false;
-  const [runtimeDemandPacks, setRuntimeDemandPacks] = useState<string[]>([]);
-  useEffect(() => {
-    let alive = true;
-    listPacksRequiringRuntimes()
-      .then((packs) => { if (alive) setRuntimeDemandPacks(packs.map((p) => p.name)); })
-      .catch(() => { /* 桥缺失 = 无包态 = 不提示 */ });
-    return () => { alive = false; };
-  }, []);
   const runtimeDemandSuffix =
     runtimeDemandPacks.length > 0 ? `（已安装领域包 ${runtimeDemandPacks.map((n) => `「${n}」`).join('、')} 需要）` : '';
   const showRuntimeBanner =

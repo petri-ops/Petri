@@ -1,8 +1,9 @@
 # BLOCK-89-WORKSPACE-FILE-OPS 工作包计划 — 工作区文件树全能力文件操作（本地/远程全对齐）
 
-> 状态：active / P0-LAUNCH（2026-09-15 立项即开工）
+> 状态：completed / 整包收口（2026-09-15，P0–P3 一次会话完成；P3 实机 14/14 allPass，证据 `acceptance/block-89/`）
 > 用户裁决原话：「我觉得要新开一个全新的工作包  本地和远程都具备全能性能力  不要有区分  你来适配 能否做到呢」
 > 评估结论已向用户呈报：**能做到**——gateway 文件面 list/read/write/stat/mkdir/mv/rm 两后端已就绪，唯一缺口 cp（双后端各补一个薄方法）+ REST 暴露 + 前端交互层。
+> §6 门禁对账（收口实测）：契约测试 21/21（workspace-file-ops 9 + node-agent fs 含 fs_cp）+ 相邻 block67-routes/block73/data-import 11 过 1 skip；前端 fileOps 7/7 + 受影响面 57/57 + tsc 0；实机 flow `workspace-file-ops` 14/14 allPass；hygiene/docs:check 240/ui:audit PASS；test:changed 聚合被既有 scratch `obs.tmp.cjs`（非本包文件面）卡分类冲突，按其指引定向直跑全部 9 项受影响 Node 测试 + 前端受影响面（2 红=P6 源绑定 D8 例外基线 HEAD 同败，重采属 G0-RS）。
 
 ## 0. 责任边界与 Plan ID
 

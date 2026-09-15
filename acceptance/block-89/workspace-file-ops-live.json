@@ -1,0 +1,78 @@
+{
+  "name": "workspace-file-ops",
+  "startedAt": "2026-09-15T06:47:02.814Z",
+  "finishedAt": "2026-09-15T06:47:16.591Z",
+  "assertions": [
+    {
+      "name": "A0a_backend_rest_healthy",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "A0b_app_page_ready",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "A0c_temp_project_created",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mu2b764s_dncw\",\"workspacePath\":\"D:\\\\1.WorkDir\\\\biof3-desktop\\\\.biof3-dev-user-data\\\\data\\\\projects\\\\block89---1789454822859-mu2b764s\"}"
+    },
+    {
+      "name": "A1_rest_mkdir",
+      "pass": true,
+      "detail": "{\"ok\":true,\"entry\":{\"type\":\"dir\",\"size\":0,\"mtimeMs\":1789454822876.7256}}"
+    },
+    {
+      "name": "A2_rest_move_file",
+      "pass": true,
+      "detail": "mv={\"ok\":true,\"entry\":{\"type\":\"file\",\"size\":15,\"mtimeMs\":1789454822893.725}} raw=file:b.txt"
+    },
+    {
+      "name": "A3_rest_copy_dir_recursive",
+      "pass": true,
+      "detail": "cp={\"ok\":true,\"entry\":{\"type\":\"dir\",\"size\":0,\"mtimeMs\":1789454822955.982}} copied=file:b.txt"
+    },
+    {
+      "name": "A4_rest_delete_batch",
+      "pass": true,
+      "detail": "del={\"ok\":true,\"removed\":2} rest="
+    },
+    {
+      "name": "A5_rest_conflict_409",
+      "pass": true,
+      "detail": "status=409 code=target_already_exists"
+    },
+    {
+      "name": "A6_rest_escape_400",
+      "pass": true,
+      "detail": "status=400"
+    },
+    {
+      "name": "A7_ui_context_menu_delete",
+      "pass": true,
+      "detail": "menu=dispatched tree_has=datasets,datasets-copy,conflict.txt"
+    },
+    {
+      "name": "A8_ui_mkdir_via_menu",
+      "pass": true,
+      "detail": "mkdir dialog closed + datasets/ui-made-dir on REST tree (raw,ui-made-dir)"
+    },
+    {
+      "name": "A9_ui_drag_move",
+      "pass": true,
+      "detail": "drop=dropped movedTo=datasets/drag-me.txt rootCleared=true"
+    },
+    {
+      "name": "A10_ui_ctrl_drag_copy",
+      "pass": true,
+      "detail": "drop=dropped_ctrl（复制 = 源保留于根 + 落点 datasets/ctrl-drag.txt）"
+    },
+    {
+      "name": "A99_cleanup_restored",
+      "pass": true,
+      "detail": "临时项目已删除 + 页面导航还原"
+    }
+  ],
+  "allPass": true
+}

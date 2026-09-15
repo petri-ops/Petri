@@ -3338,13 +3338,15 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **P2 控制面（2026-09-13 追加实现）**：移动页升级为控制面——任务详情页批准卡（SSE `needApproval` 事件驱动：工具名+目标摘要+脱敏 params，**两步确认**按钮 D4）+ 取消任务按钮 + 会话页/全局 composer 发消息（POST `/api/ai/agent` 复用 chat.js 路由）。后端新增窄口 `mobile-gateway/control.js` `POST /m/api/approvals/:token/decide`——进程内直调 `db.ackToolJob`（与桌面确认卡 `routes/ai-legacy.js` 的 `POST /api/ai/run-tool-ack/:token` **同一函数同一 scope 校验，权限不放大**；不发 HTTP 自调用，对标 BLOCK-49 直调先例）。验证：集成测试 10/10 + **实机隔离探针 28/28 ALL PASS**（新增 B 系列：吊销后可重新配对/发消息 401+契约 400/取消 401+结构化 404/批准无会话 401+缺 scope 400+**scope 不匹配 404 权限不放大**+批准放行落库 ack_status=approved 且 job 不被破坏+拒绝落库 rejected+failed）。`acceptance/block-70/block70-mobile-gateway-live.json`。
 - **实现提交对账（UI-357 桌面投影 / P3 隧道 UI 归入本条目）**：P2 控制面 = 3c3bdb17；P3 隧道三态呈现与公网 QR 切换 = 1c40b35（该提交含 MobileSync.tsx 隧道区 UI 增量，同提交台账漏同步——已补登本段并按 c177374 先例登记 LEGACY 豁免）；桌面投影 = 79fea4a5。「手机发起→桌面执行（真实模型）→手机批准→手机收终态」全链与 dev 栈 CDP 设置区断言未执行（前者需真实 LLM 环境）——前者待 dev 栈窗口，后者**CDP 够不着**，按无人化验收阶梯第 2 级如实停留 `in_progress`，待用户照测试路线实测后升级；P2 控制面（发消息/批准/取消）与 P3 aliyun 隧道属后续阶段未实现。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-378: 工作区文件树文件操作——右键菜单 + 拖拽移动/复制 + 删除确认（BLOCK-89 P2）(2026-09-15 in_progress)
+## UI-378: 工作区文件树文件操作——右键菜单 + 拖拽移动/复制 + 删除确认（BLOCK-89 P2/P3）(2026-09-15 verified，dev Electron 边界内)
 
 - **来源**：BLOCK-89-WORKSPACE-FILE-OPS（用户裁决「本地和远程都具备全能性能力 不要有区分 你来适配」）P2 阶段。
 - **交付面**：右栏文件树从只读升级为可管理——①行级右键菜单（重命名/移动到…/复制到…/删除/新建文件夹；树空白区=仅新建文件夹）`FileTreeOpsOverlay.tsx`；②删除确认弹层（目录警示「连同全部内容一起删除，不可撤销」）；③重命名/新建输入弹层（空名/路径分隔符/同名校验）；④「移动到…/复制到…」目录选择器（面包屑上行+逐层下钻，懒加载）；⑤HTML5 拖拽：行 draggable，拖到目录行高亮释放=移动、Ctrl+拖=复制，落点预检同名自动 `-2` 后缀（对齐服务端 import 房风）；⑥操作成功派发 `projectWorkspaceChanged`（source=manual）驱动既有刷新链，不建第二真相；错误行内 toast 化展示（含 409 已存在/404 不存在/远程连接失败透传）。后端=REST `fs/move|copy|delete|mkdir` 双后端同构（P1），前端零感知 workspaceKind。
 - **测试纪律注记**：Ctrl+拖的 ctrlKey 分支在 happy-dom 无法经事件注入（DragEvent 修饰键不落地，测试环境限制），组件测试覆盖「复制到…」菜单链（同一 REST 面的产品入口），Ctrl+拖分支由 P3 实机（真 Chromium CDP）断言。
 - **证据（P2）**：`fileOps.test.tsx` **7/7**（纯函数 3 + 集成 4：删除链/重命名/拖拽自动后缀/复制选择器链，均断言 POST 体与事件派发）+ 相邻 RightPanel/CenterPanel 16/16 + tsc 0。**集成测试抓真 1 处**：弹层链 onDone 原接线漏 `notifyTreeChanged`（对话框完成的操作树不刷新）——已修复并由删除/复制两用例的「事件派发」断言锁定回归。
-- **边界**：实机验收（P3 dev-verify flow `workspace-file-ops`）未跑，按纪律停留 in_progress；OS 拖入/拖出、新建空文件、投影文件树为非范围。
+- **实机（P3）**：dev-verify flow `workspace-file-ops` **14/14 allPass**（`acceptance/block-89/workspace-file-ops-live.json`）——REST 面 mkdir/move/copy（目录递归）/delete 批量 + 409 target_already_exists（目标不被破坏）+ 400 越界；UI 面（真 Chromium + 临时项目 + 清理还原）右键菜单删除确认链 / 菜单新建文件夹（弹层关闭 + REST + 展开渲染三重核对）/ **拖拽移动**（页内真 DragEvent + DataTransfer 构造）/ **Ctrl+拖复制**（源保留 + 落点出现）。
+- **实机抓真修（非本包引入，BLOCK-86 P2 `d893f0ebe` 回归，如实归属）**：P3 首跑即撞工作区路由整根白屏——`project-workspace.tsx` 的 `runtimeDemandPacks` useState+useEffect 被加在 `if (loading) return` 早退**之后**，loading 翻转后重渲染钩子计数变多 → React 卸载整根（main 自 2026-09-15 09:22 起工作区路由不可用；BLOCK-86 P3 验收只走 /plugins 独立路由故未踩到）。修复=这对钩子上移至一切早退之前（附注释锚点）。**诊断留痕**：基线对照两轮（组件级回退被旧 Vite HMR 污染误判「与改动无关」→ 全树回退至 44d21195 于全新 Vite 上复现同位崩溃才定罪）；教训=白屏类分诊必须先排除 HMR 会话伪崩溃再做基线对照，且对照环境（Vite 进程）必须与被测环境同样干净。
+- **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 ## UI-377: 投影商店 contents 富化对齐——手机端包卡片计数行补齐（UI-374 边界遗留）(2026-09-15 verified，dev Electron 边界内)
