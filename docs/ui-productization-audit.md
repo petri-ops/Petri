@@ -3349,11 +3349,19 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
-## UI-381: 聊天附件真实接入发送管线 + 拖入图片对齐 + ssh 拖出导出（BLOCK-91）(2026-09-15 in_progress，dev Electron 边界内)
+## UI-382: 子智能体实况卡内联到工具调用时间线（spawn 点即归宿，不再沉底）(2026-09-15 in_progress，dev Electron 边界内)
+
+- **来源**：用户截图指认——图片解析派发的子智能体状态卡沉在页面最底部条带（SubAgentsBar），与其派发源头（工具调用行「已调用 read_image · 已完成 8.7s · 影响：…」）分离，视线割裂；裁决「他应该出现在这些信息的附近」。
+- **交付面**：`ToolActivityList` 展开体——带 `agentRunId` 的工具行内联子智能体实况卡（派发描述截断 + 实时状态 + 详情窗/中断动作），头部既有状态 chip 保持；底部 SubAgentsBar 保留聚合/俯瞰角色（跨会话入口）。
+- **证据**：tsc 0 + 相邻测试；**尚无用户视角确认**——待用户在真实会话中展开工具行复看后升 `verified`。
+- **边界**：底部条带不删（聚合/跨会话俯瞰角色保留）；Agent 专属窗行为不变。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-381: 聊天附件真实接入发送管线 + 拖入图片对齐 + ssh 拖出导出（BLOCK-91）(2026-09-15 verified，dev Electron 边界内)
 
 - **来源**：用户指认三项（ssh 拖出导出 / 聊天输入框拖入 / 拖入图片优化）。立项侦察实锤**真实缺陷**：聊天附件（拖入/粘贴）状态是孤儿——仅进展示条，发送路径从不读取，附件被静默丢弃；且拖入图片只存预览 URL 无内容载荷（粘贴有 dataUrl），行为不一致。
 - **交付面**：①附件发送前上传到工作区 `.chat-attachments/`（复用 BLOCK-90 `fs/upload` 分片，local/ssh 双后端同构），消息追加 `[附件: …]` 引用行（模型按路径读取，与 imageRefs 同构，聊天 API 零改动）②拖入图片异步读 dataUrl 对齐粘贴 + 文件句柄保留 ③上限守卫（单附件 10MB / 单次 8 个，诚实报错）④欢迎页无项目守卫（附件需在项目工作区中使用）⑤ssh 项目文件行拖出 DownloadURL 改用预览同源 HTTP URL（后端流式下载，免物化本地副本，plan D5 替代原假设）。
-- **证据**：单测 `attachmentUpload.test.ts` 5/5 + 相邻回归 SimpleChat 三套件 19/19 + tsc 0 + 实机探针 `scripts/block91-composer-attach-live.cjs` **4/4 allPass**（composer 合成 drop → 附件 chip → 发送 → `.chat-attachments/` 落 P4驻留 aliyun 真远端 + 消息含引用行；`acceptance/block-91/`）+ ssh 行拖出 DownloadURL 断言（HTTP URL 已附带）。**尚无用户视角真拖发送验收**——停留 `in_progress`，待用户实测升 `verified`。
+- **证据**：单测 `attachmentUpload.test.ts` 5/5 + 相邻回归 SimpleChat 三套件 19/19 + tsc 0 + 实机探针 `scripts/block91-composer-attach-live.cjs` **4/4 allPass**（composer 合成 drop → 附件 chip → 发送 → `.chat-attachments/` 落 P4驻留 aliyun 真远端 + 消息含引用行；`acceptance/block-91/`）+ ssh 行拖出 DownloadURL 断言（HTTP URL 已附带）。
+- **用户视角验收（2026-09-15 当日）**：用户真拖图片进 composer → 发送 → agent 经 read_image 读取并完整解读（潜水镜 DNA 双螺旋插画）；首测抓出 read_image ssh 缺口当日修复（461c8431）后复测通过，回复「非常棒」并附成功截图 → 升 `verified`。
 - **边界**：附件在历史消息富预览 / Data Profiler 联动 / 移动投影附件面为非范围。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-380: 工作区 OS 拖入导入 + 本地文件拖出导出（BLOCK-90，外部文件可达文件树）(2026-09-15 verified，dev Electron 边界内)

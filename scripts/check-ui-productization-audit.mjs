@@ -46,6 +46,11 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-09-15 BLOCK-91 聊天附件真实接入实现提交 c9535452：主体前端改动
+  // （SimpleChat 附件管线 + FileTreeItem ssh 拖出），subject 用
+  // feat(block-91): 未带 UI-###；台账已由后续 UI-381 条目统一登记覆盖。
+  // 豁免同提交编号要求，不重写共享历史。
+  'c9535452c707310f367bb8d03cba21755f761303',
   // 2026-09-13/14 BLOCK-85/86/87 多端同步与联邦过程提交（投影终端/AppRail 浮层/
   // 偏好服务端化/消息镜像/隧道档案），UI 归属 UI-354 修订链与 UI-358，收口时统一
   // 补登台账；subject 用 feat(block-8x): 未带 UI-###。豁免同提交台账与编号要求。

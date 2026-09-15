@@ -3,7 +3,7 @@ import { Icon } from '@/components/icons/Icon';
 import { CodeMirrorDiffView } from '@/components/desktop/WorkingTreeReview/CodeMirrorDiffView';
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import { getBridge } from '@/lib/desktopBridge';
-import { getSubAgentTaskSnapshot, subscribeSubAgentTask } from '@/components/copilot/conversationRunStore';
+import { getSubAgentTaskSnapshot, stopSubAgentTask, subscribeSubAgentTask } from '@/components/copilot/conversationRunStore';
 import {
   EXEC_TOOL_NAMES,
   formatToolDuration,
@@ -294,7 +294,45 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
       {open && (
         <div className="sc-tool-activity-body sc-tool-activity-detail">
           <span className="sc-tool-activity-tool">{activity.name}</span>
-          {activity.agentRunId && windowManagerBridge && (
+          {activity.agentRunId && subSnap && (
+            // UI-382 — 子智能体实况卡内联到派发源头（工具调用时间线），
+            // 不再只沉在底部聚合条；详情窗/中断动作随卡就地可达。
+            <div className="sc-tool-subagent-inline" data-status={subSnap.status}>
+              <div className="sc-tool-subagent-line">
+                <Icon name="bot" size={12} />
+                <span className="sc-tool-subagent-desc" title={subSnap.userContent}>
+                  {(subSnap.userContent || '').replace(/\s+/g, ' ').trim().slice(0, 80) || '（无描述）'}
+                </span>
+                <span className="sc-tool-agent-status" data-status={subSnap.status}>
+                  <Icon name="bot" size={10} />
+                  {SUB_STATUS_LABEL[subSnap.status] || subSnap.status}
+                </span>
+              </div>
+              <div className="sc-tool-subagent-actions">
+                {windowManagerBridge && (
+                  <button
+                    type="button"
+                    className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                    onClick={openAgentWindow}
+                    title="弹出 agent 详情独立窗（实时工作流 + 终态摘要，只读投影）"
+                  >
+                    详情窗
+                  </button>
+                )}
+                {subSnap.status === 'running' && (
+                  <button
+                    type="button"
+                    className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                    onClick={() => stopSubAgentTask(activity.agentRunId)}
+                    title="中断该子智能体"
+                  >
+                    中断
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+          {activity.agentRunId && windowManagerBridge && !subSnap && (
             <button
               type="button"
               className="gewu-btn gewu-btn--ghost gewu-btn--sm"

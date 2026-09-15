@@ -1600,6 +1600,41 @@
   color: var(--gewu-text-secondary);
 }
 
+/* UI-382 — 子智能体实况卡内联在工具行展开体（派发源头即归宿） */
+.sc-tool-subagent-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  margin: 4px 0 2px;
+  border: 1px solid var(--sc-border, rgba(128, 128, 128, 0.25));
+  border-radius: 8px;
+  background: color-mix(in srgb, currentColor 4%, transparent);
+}
+
+.sc-tool-subagent-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1 1 240px;
+}
+
+.sc-tool-subagent-desc {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.sc-tool-subagent-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .sc-tool-agent-status[data-status='running'] {
   color: var(--gewu-accent);
   border-color: var(--gewu-accent);
