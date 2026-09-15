@@ -931,15 +931,24 @@ async function run() {
 
   const failures = [];
   const interactionQuiet = await interactionQuietDegradationTrace(window, blocked, config.outputDir);
+  // 版本/存储重试按钮挂在 compare/history 模式才装载的版本面板上（UI-305 后
+  // result 模式右栏是产物详情，reload 落回深链 result 模式面板不挂载）——
+  // prepare 先把面板带起来，让被拦拉取在其挂载期失败、按契约出可行动恢复。
   failures.push(await retryableFailureTrace(window, blocked, config.outputDir, {
     kind: 'versions',
     routeFragment: '/api/result-studio/changesets?',
     retryLabel: '重试版本',
+    prepare: () => clickMode(window.webContents, ['审查', '审查修改']),
   }));
   failures.push(await retryableFailureTrace(window, blocked, config.outputDir, {
     kind: 'storage',
     routeFragment: '/api/result-studio/workspace/status',
     retryLabel: '重试存储状态',
+    prepare: async () => {
+      // workspace 状态只在面板挂载时拉一次：先切走再切回，强制重挂 + 被拦重拉。
+      await clickMode(window.webContents, '结果');
+      await clickMode(window.webContents, ['审查', '审查修改']);
+    },
   }));
   failures.push(await retryableFailureTrace(window, blocked, config.outputDir, {
     kind: 'code',
