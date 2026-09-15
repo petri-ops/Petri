@@ -422,6 +422,18 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
     return installedIds.has(pluginId);
   }
 
+  // UI-374 — 运行时在位判定：安装记录不可信（运行时可由链外供给——手动放置/
+  // 系统解析，plugin installed.json 里没有记录），以 runtimeStatus 的目录+
+  // 可执行探测为准，经清单 language 映射。
+  function isRuntimePresent(pluginId: string): boolean {
+    const info = remote.plugins?.[pluginId];
+    if (runtimeStatus) {
+      if (info?.language === 'r') return runtimeStatus.r.installed;
+      if (info?.language === 'python') return runtimeStatus.python.installed;
+    }
+    return installedIds.has(pluginId);
+  }
+
   function isPluginDrifted(pluginId: string): boolean {
     if (pluginId === 'gewu-r-runtime' || pluginId === 'gewu-py-runtime') {
       return !!installedById.get(pluginId)?.manifestDrift;
@@ -624,7 +636,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
                             运行时基础环境（随包安装）
                           </div>
                           {requiredRuntimes.map((req) => {
-                            const rtInstalled = isPluginInstalled(req.pluginId);
+                            const rtInstalled = isRuntimePresent(req.pluginId);
                             const sizeLabel = runtimeSizeLabelOf(req.pluginId);
                             const prog = pack.installed
                               ? packRuntimeProgress[req.pluginId]

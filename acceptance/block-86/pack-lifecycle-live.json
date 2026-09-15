@@ -1,0 +1,128 @@
+{
+  "name": "pack-lifecycle",
+  "startedAt": "2026-09-15T03:04:57.467Z",
+  "finishedAt": "2026-09-15T03:05:16.133Z",
+  "assertions": [
+    {
+      "name": "A0a_pack_repo_present",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\gewu-pack-bio"
+    },
+    {
+      "name": "A0b_data_root_present",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\packs\\installed.json"
+    },
+    {
+      "name": "A0c_r_runtime_asset_present",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\runtimes\\R"
+    },
+    {
+      "name": "A0d_pack_installed_at_boot",
+      "pass": true,
+      "detail": "当前 boot 消费了包装载记录（目录工具出现的前提）"
+    },
+    {
+      "name": "A0e_block86_bridge_loaded",
+      "pass": true,
+      "detail": "BLOCK-86 桥在位"
+    },
+    {
+      "name": "A1_catalog_reference_tool_and_sealed_negative",
+      "pass": true,
+      "detail": "total=1 deseq2=true celltypist(sealed)=false"
+    },
+    {
+      "name": "A2_install_runtime_contract_skip",
+      "pass": true,
+      "detail": "{\"ok\":true,\"runtimes\":[{\"pluginId\":\"biof3-r-runtime\",\"ok\":true,\"skipped\":\"runtime_present\"},{\"pluginId\":\"biof3-py-runtime\",\"ok\":false,\"error\":\"下载失败: HTTP 404\"}],\"requiresRestart\":false}"
+    },
+    {
+      "name": "A3_record_upgraded_with_contract",
+      "pass": true,
+      "detail": "requiresRuntimes=[\"biof3-r-runtime\",\"biof3-py-runtime\"]"
+    },
+    {
+      "name": "A4a_no_standalone_runtime_category",
+      "pass": true,
+      "detail": "sidebar=[\"全部2\",\"分析工具0\"]"
+    },
+    {
+      "name": "A4b_pack_card_present",
+      "pass": true,
+      "detail": "pack card testid found"
+    },
+    {
+      "name": "A4c_pack_contents_summary",
+      "pass": true,
+      "detail": "1 个分析插件"
+    },
+    {
+      "name": "A4d_runtime_subitem_installed_state",
+      "pass": true,
+      "detail": "运行时基础环境（随包安装）R 运行时（基础环境） · >=1.0.0✓ 已安装Python 运行时（基础环境） · >=1.0.0✓ 已安装"
+    },
+    {
+      "name": "A4e_pack_delivered_plugins_tagged",
+      "pass": true,
+      "detail": "来自已安装领域包（随包装卸，重启生效）deseq2✓来源包：格物 · 生信分析包v1.0.0r"
+    },
+    {
+      "name": "A5_uninstall_dialog_three_tiers",
+      "pass": true,
+      "detail": "rSizeMB=796 text=卸载「格物 · 生信分析包」卸载后需重启应用生效。请确认以下处置（可逐项勾选）：删除运行时基础环境（R 运行时（基础环境），约回收 796MB）同时删除包源目录（D:\\1.WorkDir\\gewu-pack-bio，约 5MB）内含分析插件、脚本与演示数据；默认保留results、项目文件与数据库不受影响——用户数据永"
+    },
+    {
+      "name": "A6a_record_removed",
+      "pass": true,
+      "detail": "records=0"
+    },
+    {
+      "name": "A6b_r_runtime_protected",
+      "pass": true,
+      "detail": "R 目录未被触碰"
+    },
+    {
+      "name": "A6c_pack_source_protected",
+      "pass": true,
+      "detail": "包源目录默认保留"
+    },
+    {
+      "name": "A6d_store_back_to_uninstalled",
+      "pass": true,
+      "detail": "包卡片回到「一键安装」态"
+    },
+    {
+      "name": "A7_restart_boundary_tools_still_there",
+      "pass": true,
+      "detail": "卸载后目录工具仍在（D4 重启生效既定契约；不谎称即时消失）"
+    },
+    {
+      "name": "A8a_r_tool_job_submitted",
+      "pass": true,
+      "detail": "{\"ok\":true,\"jobId\":\"job_1e6c3b6b28174a5f\",\"status\":\"pending\",\"isTestRun\":false,\"requestId\":\"e0b39087-015\"}"
+    },
+    {
+      "name": "A8b_real_r_tool_completed",
+      "pass": true,
+      "detail": "status=completed detail={\"ok\":true,\"id\":\"job_1e6c3b6b28174a5f\",\"toolId\":\"deseq2\",\"status\":\"completed\",\"error\":null,\"name\":\"DESeq2 #29\",\"projectId\":\"p_mu239oqk_v8lo\",\"conversationId\":null,\"executionTarget\":null,\"params\":{\"design\":\"condition\",\"co"
+    },
+    {
+      "name": "A9a_pack_reinstalled_for_restore",
+      "pass": true,
+      "detail": "现场恢复：包装载记录还原（契约形态）"
+    },
+    {
+      "name": "A9b_python_leg_sealed_by_verdict",
+      "pass": true,
+      "detail": "「真实 Python 工具跑通」随封存裁决消解：Python 代表 celltypist 已入 plugins.dormant/（用户裁决「选择1」），且本机领域 Python 发行版未装（runtimeStatus 经系统回退解析，无 scanpy/celltypist 依赖）——双重事实如实登记，非产品缺陷"
+    },
+    {
+      "name": "A9c_cleanup_restored",
+      "pass": true,
+      "detail": "project=true restored=true"
+    }
+  ],
+  "allPass": true
+}

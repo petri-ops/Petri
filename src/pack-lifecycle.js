@@ -19,6 +19,7 @@
  */
 
 const path = require('path');
+const fs = require('fs');
 
 function createPackLifecycle(deps = {}) {
   const registry = deps.registry || require('../core/shared-backend/pack-registry');
@@ -34,12 +35,42 @@ function createPackLifecycle(deps = {}) {
     || ((dir) => require('./plugin/io').dirSize(dir));
   const rmDir = deps.rmDir
     || ((dir) => require('fs').rmSync(dir, { recursive: true, force: true }));
+  // BLOCK-86 P3 实机抓真 — 运行时在位判定不能只看插件安装记录：运行时可能由
+  // 链外供给（手动放置/系统解析，如本机 R），plugin installed.json 里没有记录。
+  // 补两条判据：runtimeStatus（R/Python 目录+可执行探测）+ 清单 language 映射。
+  const getRuntimeStatus = deps.getRuntimeStatus
+    || (() => require('./plugin/runtime').getRuntimeStatus());
+  const getManifestLanguage = deps.getManifestLanguage
+    || (async (pluginId) => {
+      const manifest = await require('./plugin-manager').getRemoteManifest();
+      return (manifest.plugins && manifest.plugins[pluginId] && manifest.plugins[pluginId].language) || null;
+    });
 
   // 与 src/plugin/uninstall.js uninstallRuntime 的目录约定保持一致（仅用于
   // 体积预估；删除动作永远由 uninstallRuntime 单点执行，此处不做任何删除）。
-  function runtimeDirFor(plug) {
-    const runtimeName = plug && plug.language === 'r' ? 'R' : 'Python';
+  function runtimeDirFor(lang) {
+    const runtimeName = lang === 'r' ? 'R' : 'Python';
     return path.join(runtimesDir(), runtimeName);
+  }
+
+  // BLOCK-86 P3 实机抓真 — 运行时在位判定不能只看插件安装记录：运行时可能由
+  // 链外供给（手动放置/系统解析，如本机 R），plugin installed.json 里没有记录。
+  // 返回 { plug（记录 plug 或按语言合成的最小 plug）, recordPresent,
+  // statusPresent（runtimeStatus 目录+可执行探测）, lang }。
+  async function locateRuntime(pluginId, installed) {
+    const plug = installed.find((p) => p && p.id === pluginId) || null;
+    let lang = plug && plug.language;
+    if (!lang) {
+      try { lang = await getManifestLanguage(pluginId); } catch { lang = null; }
+    }
+    const status = (() => { try { return getRuntimeStatus(); } catch { return null; } })();
+    const entry = status && status[lang === 'r' ? 'r' : 'python'];
+    return {
+      plug: plug || (lang ? { id: pluginId, language: lang } : null),
+      recordPresent: Boolean(plug),
+      statusPresent: Boolean(entry && entry.installed),
+      lang: lang || null,
+    };
   }
 
   /**
@@ -54,9 +85,14 @@ function createPackLifecycle(deps = {}) {
     const installed = getInstalledPlugins() || [];
     const runtimes = [];
     for (const item of declared) {
-      const existing = installed.find((p) => p && (p.id === item.pluginId));
-      if (existing) {
+      const located = await locateRuntime(item.pluginId, installed);
+      if (located.recordPresent) {
         runtimes.push({ pluginId: item.pluginId, ok: true, skipped: 'already_installed' });
+        continue;
+      }
+      if (located.statusPresent) {
+        // 链外供给的运行时（目录+可执行在位但无安装记录）同样不重装
+        runtimes.push({ pluginId: item.pluginId, ok: true, skipped: 'runtime_present' });
         continue;
       }
       try {
@@ -78,30 +114,31 @@ function createPackLifecycle(deps = {}) {
   /**
    * 卸载影响预览（确认弹层的数据源，主进程富化体积/在位状态）。
    * 返回 { ok, packId, requiresRuntimes, runtimes: { removable, retained },
-   *        packSource: { dir, exists, sizeBytes }, report: { removed, kept } 说明骨架 }。
+   *        packSource: { dir, exists, sizeBytes }, userDataPolicy }。
    */
-  function buildUninstallPlan(dataDir, packId) {
+  async function buildUninstallPlan(dataDir, packId) {
     const plan = registry.computeRuntimeRemovalPlan(dataDir, packId);
     if (!plan.ok) return plan;
     const record = registry.readInstalledPacks(dataDir).find((p) => p.packId === packId);
     const installed = getInstalledPlugins() || [];
-    const removable = plan.removable.map((pluginId) => {
-      const plug = installed.find((p) => p && p.id === pluginId);
+    const removable = [];
+    for (const pluginId of plan.removable) {
+      const located = await locateRuntime(pluginId, installed);
       let sizeBytes = null;
-      if (plug) {
-        try { sizeBytes = dirSize(runtimeDirFor(plug)); } catch { sizeBytes = null; }
+      if (located.statusPresent || located.plug) {
+        try { sizeBytes = dirSize(runtimeDirFor(located.lang)); } catch { sizeBytes = null; }
       }
-      return {
+      removable.push({
         pluginId,
-        installed: Boolean(plug),
-        sizeBytes: Number.isFinite(sizeBytes) ? sizeBytes : null,
-      };
-    });
+        installed: located.statusPresent,
+        sizeBytes: Number.isFinite(sizeBytes) && sizeBytes > 0 ? sizeBytes : null,
+      });
+    }
     const dir = record ? record.packRoot : null;
     let packSource = { dir, exists: false, sizeBytes: null };
     if (dir) {
       try {
-        packSource = { dir, exists: require('fs').existsSync(dir), sizeBytes: null };
+        packSource = { dir, exists: fs.existsSync(dir), sizeBytes: null };
         if (packSource.exists) packSource.sizeBytes = dirSize(dir);
       } catch { /* 体积统计失败如实留空 */ }
     }
@@ -137,13 +174,14 @@ function createPackLifecycle(deps = {}) {
     if (deleteRuntimes) {
       const installed = getInstalledPlugins() || [];
       for (const pluginId of plan.removable) {
-        const plug = installed.find((p) => p && p.id === pluginId);
-        if (!plug) {
+        const located = await locateRuntime(pluginId, installed);
+        if (!located.statusPresent && !located.recordPresent) {
           removed.runtimes.push({ pluginId, ok: true, skipped: 'not_installed' });
           continue;
         }
         try {
-          await uninstallRuntime(pluginId, plug);
+          // located.plug 兜底为按语言合成的最小 plug（链外供给的运行时）
+          await uninstallRuntime(pluginId, located.plug);
           removed.runtimes.push({ pluginId, ok: true });
         } catch (error) {
           removed.runtimes.push({ pluginId, ok: false, error: error && error.message });

@@ -1,10 +1,10 @@
 # BLOCK-86-DOMAIN-PACK-LIFECYCLE — 领域包全生命周期：运行时托管 + 插件化契约
 
-**状态**：`active`（P1 契约与装卸编排进行中；2026-09-15 用户裁决原话「1」启动）
+**状态**：`completed`（2026-09-15 整包收口 P0–P3；启动裁决原话「1」，封存裁决原话「选择1 开始这个」）
 **立项**：2026-09-14（planned 排队）→ **启动**：2026-09-15（P0 激活对账完成：§1 代码事实全量复核零漂移）
 **前置**：BLOCK-83（completed，SPI 基座 + D7 棘轮）、BLOCK-84（completed，记录制一键装/卸 + 商店领域包分区）
 **包仓**：Diandian-ops/gewu-pack-bio（本地兄弟仓 `../gewu-pack-bio`）
-**plan 版本**：v1.1（2026-09-15 启动；v1.0 立项登记 2026-09-14）
+**plan 版本**：v1.2（2026-09-15 封存裁决+收口；v1.1 启动；v1.0 立项）
 
 ## 0. 用户裁决留痕
 
@@ -108,5 +108,6 @@
 
 ## 修订记录
 
+- v1.2（2026-09-15）：**测试纪律定型（用户裁决原话「选择1 开始这个」）**——封存 14 插件至包仓 `plugins.dormant/`（git mv，加载器只扫 `plugins/`，核心零改动），保留 `deseq2` 唯一活跃参考实现；日常/大变动只测 deseq2 + BLOCK-86 契约套件，15 插件全量矩阵推迟到「软件版本成型」里程碑（时点用户裁决）；`plugins.dormant/README.md` 登记单插件激活适配 checklist。§5.3 门禁随之修订：「真实 Python 工具跑通」随 Python 代表（celltypist）封存而消解（本机亦无领域 Python 运行时，双重事实）；「真实 R 工具跑通」= deseq2（已在本验收链内）。
 - v1.1（2026-09-15）：启动 active（用户裁决原话「1」）。P0 激活对账：§1 全部锚点复核零漂移（pack-registry/installPack:88/uninstallPack:106、uninstall.js uninstallRuntime:107、plugin.js installPlugin 可直调、PluginStorePanel needRuntimeHint 均在位）；运行时清单 pluginId 确认 = `biof3-r-runtime` / `biof3-py-runtime`（manifest v2.0.0）；P2 商店改版预登记 UI-374。
 - v1.0（2026-09-14）：立项登记（planned 排队）。依据 2026-09-14 插件商店现状核实 + 用户四轮裁决（§0）。

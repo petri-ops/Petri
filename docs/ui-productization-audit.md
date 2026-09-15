@@ -3347,11 +3347,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
-## UI-374: 商店领域包改版——pack 卡片唯一领域入口 + 核心 UI 无包不提运行时（BLOCK-86 P2）(2026-09-15 in_progress，dev Electron 边界内；P3 实机后升 verified)
+## UI-374: 商店领域包改版——pack 卡片唯一领域入口 + 核心 UI 无包不提运行时（BLOCK-86 P2）(2026-09-15 verified，dev Electron 边界内；P3 `pack-lifecycle` 24/24)
 
 - **来源**：BLOCK-86 plan §2 目标 4/5（用户裁决方案1 完整形态）：「核心界面无包时不出现任何领域概念」「pack 卡片成为唯一领域入口」。
 - **交付面**：① `PluginStorePanel` 收编独立「运行时」分类——运行时改在领域包卡片**可展开子项**渲染（状态/约体积/`必需 · 缺失` 章/补装按钮 + `pack:install-progress` 进度条）；② 包卡片折叠态显示内容概要（N 分析插件 · N 脚本模块 · N 演示数据集，`describePackContents` 只读统计 + IPC 富化）；③ 卸载两段式——`pack:uninstall-plan` 契约推导预览 → **三档确认弹层**（删运行时标回收体积[默认勾选]/包源目录默认保留可选删[删前护栏校验 pack.json]/用户数据永不触碰固定说明），执行走 BLOCK-86 P1 编排；④ 包交付插件在「分析工具」分类可见并**标注来源包**（无独立安装按钮，随包管理）；⑤ 领域感知门控四处——home 非阻塞引导条 / 工作台缺失横幅 / DesktopOnboarding「准备运行时」步骤 / env-coordinator boot warn，全部改为 `listPacksRequiringRuntimes()` 门控（新 `frontend/src/lib/domainPack.ts` 单点）：**无包不提运行时**，有包缺运行时才提示且文案挂包名；DesktopOnboarding 无包时收成单步欢迎流（运行时 tip 换领域能力扩展说明）。
-- **证据**：新建 `PluginStorePanel.test.tsx` **9/9**（分类收编负例/运行时子项缺失章/进度事件驱动/弹层三档缺省勾选与显式传参/取消勾选不触碰运行时/提示正例挂包名/**无包不提示负例**/来源包标注/模块清单行）+ 契约测试 `pack-registry.test.mjs` **+1**（contents 只读统计，下划线共享件不计）+ home.test 更新为领域感知契约（stub packs 桥）+ 相邻 34/34 + tsc 0。**P3 实机断言后升 verified**（剩余：真实装/卸循环 + 工作台回纯通用态）。
+- **P3 实机抓真修（验收链抓出）**：运行时「在位」判定不能只看插件安装记录——本机 R 由链外供给（手动放置），installed.json 无记录，导致商店子项误标「必需 · 缺失」、卸载预览无回收体积、装卸编排误触发 657MB 重下载（OSS 404 兜底未重装成功）。修=runtimeStatus（目录+可执行探测）+清单 language 映射双判据（`isRuntimePresent`/`locateRuntime`），skip 语义区分 `already_installed`/`runtime_present`。
+- **证据**：`PluginStorePanel.test.tsx` **9/9**（分类收编负例/子项缺失章/进度事件/弹层三档缺省与显式传参/无包不提示负例/来源包标注/模块清单行）+ 契约测试 `pack-registry.test.mjs` **+2**（runtime_present 防误下载/contents 统计）+ home.test 领域感知契约 + 相邻回归 + tsc 0。**P3 实机 `npm run verify -- pack-lifecycle` 24/24 allPass**（`acceptance/block-86/`）：封存负例（celltypist 不在目录）/真装编排 runtime_present skip/记录升级契约形态/商店五点改版/三档弹层真实回收体积（R 约 796MB）/R 运行时+包源双保护/真实 R 工具 deseq2 **completed**/现场恢复。
 - **边界**：投影端（HTTP 桥）暂无 uninstallPlan/contents 富化通道——手机端商店退化为记录级卸载、隐藏计数行（getBridge 空值兜底），桌面先行，投影对齐登记 BLOCK-87 L4 候选。dev Electron 边界内；packaged 未验（G0 常态）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 

@@ -35,6 +35,14 @@ function makeFixturePack(dir, { packId, requires } = {}) {
   return dir;
 }
 
+function makeLifecycle(extra = {}) {
+  return createPackLifecycle({
+    getRuntimeStatus: () => ({ r: { installed: true }, python: { installed: false } }),
+    getManifestLanguage: async (id) => (id === 'runtime-alpha' ? 'r' : id === 'runtime-beta' ? 'python' : null),
+    ...extra,
+  });
+}
+
 const RUNTIME_A = { pluginId: 'runtime-alpha' };
 const RUNTIME_B = { pluginId: 'runtime-beta', version: '>=1.0.0' };
 
@@ -158,8 +166,10 @@ test('BLOCK-86 orchestration install: 记录落库 + 契约推导逐个装运行
   });
   const installedRuntimeIds = [];
   const progressCalls = [];
-  const lifecycle = createPackLifecycle({
+  const lifecycle = makeLifecycle({
     getInstalledPlugins: () => [],
+    getRuntimeStatus: () => ({ r: { installed: false }, python: { installed: false } }),
+    getManifestLanguage: async (id) => (id === 'runtime-alpha' ? 'r' : 'python'),
     installPlugin: async (pluginId, onProgress) => {
       installedRuntimeIds.push(pluginId);
       if (onProgress) onProgress({ percent: 50 });
@@ -176,13 +186,31 @@ test('BLOCK-86 orchestration install: 记录落库 + 契约推导逐个装运行
   assert.equal(packRegistry.readInstalledPacks(dataDir).length, 1);
 });
 
+test('BLOCK-86 orchestration install: 链外供给的运行时（无安装记录但在位）→ skip runtime_present 不重装', async () => {
+  const dataDir = tempDataDir();
+  const dir = makeFixturePack(fs.mkdtempSync(path.join(os.tmpdir(), 'block86-o8-')), {
+    packId: 'p_ext', requires: { runtimes: [RUNTIME_A] },
+  });
+  const installCalls = [];
+  const lifecycle = makeLifecycle({
+    getInstalledPlugins: () => [], // 安装记录里没有——本机 R 由链外供给的实机形态
+    getRuntimeStatus: () => ({ r: { installed: true }, python: { installed: false } }),
+    getManifestLanguage: async (pluginId) => (pluginId === 'runtime-alpha' ? 'r' : 'python'),
+    installPlugin: async (pluginId) => { installCalls.push(pluginId); },
+  });
+  const res = await lifecycle.installPackWithRuntimes(dataDir, dir);
+  assert.equal(res.ok, true);
+  assert.deepEqual(res.runtimes, [{ pluginId: 'runtime-alpha', ok: true, skipped: 'runtime_present' }]);
+  assert.deepEqual(installCalls, [], '在位运行时绝不重装（防 657MB 误下载）');
+});
+
 test('BLOCK-86 orchestration install: 已装运行时 skip 不重装；运行时失败不回滚记录、如实上报', async () => {
   const dataDir = tempDataDir();
   const dir = makeFixturePack(fs.mkdtempSync(path.join(os.tmpdir(), 'block86-o2-')), {
     packId: 'p_mixed', requires: { runtimes: [RUNTIME_A, RUNTIME_B] },
   });
   const installCalls = [];
-  const lifecycle = createPackLifecycle({
+  const lifecycle = makeLifecycle({
     getInstalledPlugins: () => fakeInstalled(['runtime-alpha']),
     installPlugin: async (pluginId) => {
       installCalls.push(pluginId);
@@ -206,7 +234,7 @@ test('BLOCK-86 orchestration uninstall 负例：缺省选项只删记录，运�
   });
   packRegistry.installPack(dataDir, dir);
   let uninstallRuntimeCalls = 0;
-  const lifecycle = createPackLifecycle({
+  const lifecycle = makeLifecycle({
     getInstalledPlugins: () => fakeInstalled(['runtime-alpha']),
     uninstallRuntime: async () => { uninstallRuntimeCalls += 1; },
   });
@@ -232,7 +260,7 @@ test('BLOCK-86 orchestration uninstall: deleteRuntimes 只卸「本包声明且�
   packRegistry.installPack(dataDir, dirA);
   packRegistry.installPack(dataDir, dirB);
   const uninstalled = [];
-  const lifecycle = createPackLifecycle({
+  const lifecycle = makeLifecycle({
     getInstalledPlugins: () => fakeInstalled(['runtime-alpha', 'runtime-beta']),
     uninstallRuntime: async (pluginId) => { uninstalled.push(pluginId); },
   });
@@ -248,7 +276,7 @@ test('BLOCK-86 orchestration uninstall: deleteRuntimes 对无契约包是 no-op�
   const dir = makeFixturePack(fs.mkdtempSync(path.join(os.tmpdir(), 'block86-o5-')), { packId: 'p_plain' });
   packRegistry.installPack(dataDir, dir);
   let uninstallRuntimeCalls = 0;
-  const lifecycle = createPackLifecycle({
+  const lifecycle = makeLifecycle({
     getInstalledPlugins: () => fakeInstalled(['runtime-alpha']),
     uninstallRuntime: async () => { uninstallRuntimeCalls += 1; },
   });
@@ -262,7 +290,7 @@ test('BLOCK-86 orchestration uninstall: deletePackSource 护栏——只删含 p
   const dataDir = tempDataDir();
   const dir = makeFixturePack(fs.mkdtempSync(path.join(os.tmpdir(), 'block86-o6-')), { packId: 'p_src' });
   packRegistry.installPack(dataDir, dir);
-  const lifecycle = createPackLifecycle({ getInstalledPlugins: () => [] });
+  const lifecycle = makeLifecycle({ getInstalledPlugins: () => [] });
 
   // 护栏正例：记录指向、含 pack.json → 真删
   const ok = await lifecycle.executeUninstall(dataDir, 'p_src', { deletePackSource: true });
@@ -283,18 +311,18 @@ test('BLOCK-86 orchestration uninstall: deletePackSource 护栏——只删含 p
   fs.rmSync(dangerous, { recursive: true, force: true });
 });
 
-test('BLOCK-86 uninstall plan: 预览含运行时在位状态/体积与包源信息（确认弹层数据源）', () => {
+test('BLOCK-86 uninstall plan: 预览含运行时在位状态/体积与包源信息（确认弹层数据源）', async () => {
   const dataDir = tempDataDir();
   const dir = makeFixturePack(fs.mkdtempSync(path.join(os.tmpdir(), 'block86-o7-')), {
     packId: 'p_view', requires: { runtimes: [RUNTIME_A] },
   });
   packRegistry.installPack(dataDir, dir);
-  const lifecycle = createPackLifecycle({
+  const lifecycle = makeLifecycle({
     getInstalledPlugins: () => fakeInstalled(['runtime-alpha']),
     runtimesDir: () => path.join(dataDir, 'runtimes'),
     dirSize: (d) => (d.endsWith(path.join('runtimes', 'R')) ? 657224393 : 0),
   });
-  const plan = lifecycle.buildUninstallPlan(dataDir, 'p_view');
+  const plan = await lifecycle.buildUninstallPlan(dataDir, 'p_view');
   assert.equal(plan.ok, true);
   assert.equal(plan.runtimes.removable.length, 1);
   assert.equal(plan.runtimes.removable[0].pluginId, 'runtime-alpha');

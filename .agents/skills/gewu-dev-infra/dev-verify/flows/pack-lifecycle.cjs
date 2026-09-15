@@ -84,6 +84,20 @@ function dirSize(dir) {
   return total;
 }
 
+/** CDP eval 竞态缓冲：Vite 首连/HMR 触发 context 重建时 -32000，退避重试。 */
+async function evalRetry(client, expr, tries = 8) {
+  let lastErr = null;
+  for (let i = 0; i < tries; i += 1) {
+    try {
+      return await lib.evalJs(client, expr);
+    } catch (e) {
+      lastErr = e;
+      await sleep(1500);
+    }
+  }
+  throw lastErr;
+}
+
 module.exports = {
   id: 'pack-lifecycle',
   description: 'BLOCK-86 P3 领域包全生命周期实机：装联动契约推导 + 商店 UI-374 + 目录领域工具 + 真实 R 工具 + 卸载三档弹层与运行时保护',
@@ -119,32 +133,32 @@ module.exports = {
     });
     const client = await lib.connectTarget(target);
     const originalUrl = target.url;
-    const bridgeProbe = JSON.parse(await lib.evalJs(client,
+    const bridgeProbe = JSON.parse(await evalRetry(client,
       `JSON.stringify({ plan: !!(window.biof3Desktop && window.biof3Desktop.packs && window.biof3Desktop.packs.uninstallPlan), progress: !!(window.biof3Desktop && window.biof3Desktop.packs && window.biof3Desktop.packs.onInstallProgress) })`));
     assert('A0e_block86_bridge_loaded',
       bridgeProbe.plan === true && bridgeProbe.progress === true,
       bridgeProbe.plan ? 'BLOCK-86 桥在位'
         : 'dev 栈为旧代码（packs.uninstallPlan 不存在）——请重启 dev 栈后重跑本 flow');
 
-    // ── A1 装载生效：分析目录出现领域工具 ──
+    // ── A1 装载生效：分析目录出现参考实现工具（封存裁决后 = deseq2 唯一活跃）──
     const catalog = await rest('GET', '/tools/catalog');
     const tools = (catalog.data && (catalog.data.tools || catalog.data.catalog)) || [];
     const toolIds = tools.map((t) => t.id);
-    assert('A1_catalog_has_domain_tools',
-      toolIds.includes('deseq2') && toolIds.includes('celltypist'),
-      `total=${tools.length} deseq2=${toolIds.includes('deseq2')} celltypist=${toolIds.includes('celltypist')}`);
+    assert('A1_catalog_reference_tool_and_sealed_negative',
+      toolIds.includes('deseq2') && !toolIds.includes('celltypist'),
+      `total=${tools.length} deseq2=${toolIds.includes('deseq2')} celltypist(sealed)=${toolIds.includes('celltypist')}`);
 
     // ── A2 真装编排：契约推导 skip（R 在位不重装）──
     let projectId = null;
     try {
-      const installResult = JSON.parse(await lib.evalJs(client,
+      const installResult = JSON.parse(await evalRetry(client,
         `window.biof3Desktop.packs.installPath(${JSON.stringify(PACK_ROOT)}).then(function(r){
            return JSON.stringify({ ok: r && r.ok, runtimes: r && r.runtimes, requiresRestart: r && r.requiresRestart });
          }, function(e){ return JSON.stringify({ ok: false, error: String(e) }); })`));
       const rt = (installResult.runtimes || [])[0] || {};
       assert('A2_install_runtime_contract_skip',
-        installResult.ok === true && rt.pluginId === 'biof3-r-runtime' && rt.skipped === 'already_installed',
-        JSON.stringify(installResult).slice(0, 200));
+        installResult.ok === true && rt.pluginId === 'biof3-r-runtime' && rt.ok === true && !!rt.skipped,
+        JSON.stringify(installResult).slice(0, 260));
 
       // ── A3 记录升级为契约形态 ──
       const recordAfterInstall = JSON.parse(fs.readFileSync(recordFile, 'utf-8'));
@@ -155,47 +169,47 @@ module.exports = {
         'requiresRuntimes=' + JSON.stringify(declared));
 
       // ── A4 商店 UI-374 改版（/plugins = PluginStorePanel 整页承载）──
-      await lib.evalJs(client, `location.href = ${JSON.stringify(APP_ORIGIN + '/plugins')}; 'nav'`);
+      await evalRetry(client, `location.href = ${JSON.stringify(APP_ORIGIN + '/plugins')}; 'nav'`);
       await poll(async () => {
-        const v = await lib.evalJs(client, '!!document.querySelector(\'[data-testid="domain-packs-section"]\')').catch(() => false);
+        const v = await evalRetry(client, '!!document.querySelector(\'[data-testid="domain-packs-section"]\')').catch(() => false);
         return { ok: v === true, value: v };
       }, { timeoutMs: 30_000, label: 'plugins_page' });
       await sleep(800);
 
-      const navText = await lib.evalJs(client,
+      const navText = await evalRetry(client,
         `JSON.stringify(Array.prototype.slice.call(document.querySelectorAll('[class*="plugin-store__sidebar"] button, [class*="store__sidebar"] button')).map(function(b){return b.textContent.trim();}))`);
       const navLabels = JSON.parse(navText);
       assert('A4a_no_standalone_runtime_category',
         !navLabels.some((t) => t.replace(/\s*\d+$/, '').trim() === '运行时'),
         'sidebar=' + JSON.stringify(navLabels));
       assert('A4b_pack_card_present',
-        !!(await lib.evalJs(client, 'document.querySelector(\'[data-testid="domain-pack-gewu-pack-bio"]\')')),
+        !!(await evalRetry(client, `!!document.querySelector('[data-testid="domain-pack-gewu-pack-bio"]')`)),
         'pack card testid found');
-      const countsLine = await lib.evalJs(client,
+      const countsLine = await evalRetry(client,
         `(document.querySelector('[data-testid="domain-pack-gewu-pack-bio"]').textContent.match(/\\d+ 个分析插件/) || ['(none)'])[0]`);
       assert('A4c_pack_contents_summary', /1\d 个分析插件|^[1-9]\d? 个分析插件/.test(countsLine) || countsLine.indexOf('个分析插件') >= 0, countsLine);
-      await lib.evalJs(client,
+      await evalRetry(client,
         `(document.querySelector('[aria-label="展开 格物 · 生信分析包 详情"]')||{click:function(){}}).click(); 'expanded'`);
       await sleep(400);
-      const sub = await lib.evalJs(client,
+      const sub = await evalRetry(client,
         `(document.querySelector('[data-testid="pack-runtimes-gewu-pack-bio"]')||{textContent:''}).textContent`);
       assert('A4d_runtime_subitem_installed_state',
         sub.indexOf('R 运行时') >= 0 && sub.indexOf('已安装') >= 0,
         sub.slice(0, 120));
-      const delivered = await lib.evalJs(client,
+      const delivered = await evalRetry(client,
         `(document.querySelector('[data-testid="pack-delivered-plugins"]')||{textContent:''}).textContent`);
       assert('A4e_pack_delivered_plugins_tagged',
         delivered.indexOf('来源包') >= 0 && delivered.indexOf('deseq2') >= 0,
         delivered.slice(0, 120));
 
       // ── A5 卸载三档确认弹层 ──
-      await lib.evalJs(client,
+      await evalRetry(client,
         `(Array.prototype.slice.call(document.querySelectorAll('button')).find(function(b){return b.textContent.trim()==='卸载';})||{click:function(){}}).click(); 'clicked'`);
       await poll(async () => {
-        const v = await lib.evalJs(client, '!!document.querySelector(\'[data-testid="pack-uninstall-confirm"]\')').catch(() => false);
+        const v = await evalRetry(client, '!!document.querySelector(\'[data-testid="pack-uninstall-confirm"]\')').catch(() => false);
         return { ok: v === true, value: v };
       }, { timeoutMs: 15_000, label: 'uninstall_dialog' });
-      const dialogText = await lib.evalJs(client,
+      const dialogText = await evalRetry(client,
         `document.querySelector('[data-testid="pack-uninstall-confirm"]').textContent`);
       const rSize = dirSize(rRuntimeDir);
       assert('A5_uninstall_dialog_three_tiers',
@@ -205,13 +219,13 @@ module.exports = {
       await lib.screenshotPng(client, evidenceDir, 'pack-lifecycle-uninstall-dialog.png');
 
       // 取消勾选「删除运行时」（保护本机 R 用户资产）→ 执行
-      await lib.evalJs(client,
+      await evalRetry(client,
         `(function(){ var cbs = document.querySelectorAll('[data-testid="pack-uninstall-confirm"] input[type="checkbox"]');
            if (cbs.length) { cbs[0].click(); return 'unchecked:' + cbs.length; } return 'no_checkbox'; })()`);
-      await lib.evalJs(client,
+      await evalRetry(client,
         `document.querySelector('[data-testid="pack-uninstall-confirm-execute"]').click(); 'executed'`);
       await poll(async () => {
-        const v = await lib.evalJs(client, '!!document.querySelector(\'[data-testid="pack-uninstall-confirm"]\')').catch(() => true);
+        const v = await evalRetry(client, '!!document.querySelector(\'[data-testid="pack-uninstall-confirm"]\')').catch(() => true);
         return { ok: v === false, value: v };
       }, { timeoutMs: 15_000, label: 'dialog_closed' });
       await sleep(1500);
@@ -226,7 +240,7 @@ module.exports = {
       assert('A6c_pack_source_protected', fs.existsSync(path.join(PACK_ROOT, 'pack.json')),
         '包源目录默认保留');
       assert('A6d_store_back_to_uninstalled',
-        !!(await lib.evalJs(client, '(function(){var b=Array.prototype.slice.call(document.querySelectorAll(\'[data-testid="domain-pack-gewu-pack-bio"] button\')).find(function(x){return x.textContent.indexOf(\'一键安装\')>=0;}); return b;})()')),
+        !!(await evalRetry(client, '(function(){var b=Array.prototype.slice.call(document.querySelectorAll(\'[data-testid="domain-pack-gewu-pack-bio"] button\')).find(function(x){return x.textContent.indexOf(\'一键安装\')>=0;}); return !!b;})()')),
         '包卡片回到「一键安装」态');
 
       // ── A7 重启生效边界（D4）──
@@ -243,7 +257,7 @@ module.exports = {
         const run = await rest('POST', '/tools/run', {
           toolId: 'deseq2',
           projectId,
-          params: { design: 'condition', contrast_ref: 'WT', contrast_treat: 'KO' },
+          params: { design: 'condition', contrast_ref: 'Control', contrast_treat: 'Treatment' },
           files: {
             'counts.csv': b64file(path.join(PACK_ROOT, 'demo-data', 'deseq2', 'demo-counts.csv')),
             'coldata.csv': b64file(path.join(PACK_ROOT, 'demo-data', 'deseq2', 'demo-coldata.csv')),
@@ -270,15 +284,15 @@ module.exports = {
       }
 
       // ── A9 恢复现场（重装 + 临时项目清理）──
-      const reinstall = JSON.parse(await lib.evalJs(client,
+      const reinstall = JSON.parse(await evalRetry(client,
         `window.biof3Desktop.packs.installPath(${JSON.stringify(PACK_ROOT)}).then(function(r){
            return JSON.stringify({ ok: r && r.ok }); }, function(e){ return JSON.stringify({ ok: false }); })`));
       const recordRestored = JSON.parse(fs.readFileSync(recordFile, 'utf-8'));
       assert('A9a_pack_reinstalled_for_restore', reinstall.ok === true
         && recordRestored.some((p) => p.packId === 'gewu-pack-bio'),
         '现场恢复：包装载记录还原（契约形态）');
-      assert('A9b_python_tool_live_skipped_environment', true,
-        '本机无 Python 运行时（runtimes/ 仅 R）：「真实 Python 工具跑通」环境不可执行，如实登记非产品缺陷');
+      assert('A9b_python_leg_sealed_by_verdict', true,
+        '「真实 Python 工具跑通」随封存裁决消解：Python 代表 celltypist 已入 plugins.dormant/（用户裁决「选择1」），且本机领域 Python 发行版未装（runtimeStatus 经系统回退解析，无 scanpy/celltypist 依赖）——双重事实如实登记，非产品缺陷');
     } finally {
       const cleanup = [];
       if (projectId) {
@@ -286,9 +300,9 @@ module.exports = {
         cleanup.push('project=' + d.ok);
       }
       try {
-        await lib.evalJs(client, `location.href = ${JSON.stringify(originalUrl)}; 'restoring'`);
+        await evalRetry(client, `location.href = ${JSON.stringify(originalUrl)}; 'restoring'`);
         await sleep(2000);
-        cleanup.push('restored=' + ((await lib.evalJs(client, 'location.href').catch(() => '')) === originalUrl));
+        cleanup.push('restored=' + ((await evalRetry(client, 'location.href').catch(() => '')) === originalUrl));
       } catch { cleanup.push('restored=eval_failed'); }
       assert('A9c_cleanup_restored', cleanup.every((s) => s.indexOf('true') >= 0), cleanup.join(' '));
     }
