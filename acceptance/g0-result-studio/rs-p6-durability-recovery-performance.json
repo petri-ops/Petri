@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "planId": "G0-RS-P6",
   "evidenceClass": "real_local_product_durability_recovery_pressure_non_qualifying",
-  "capturedAt": "2026-09-14T23:03:37.236Z",
+  "capturedAt": "2026-09-15T08:12:41.713Z",
   "classification": {
     "stage": "G0-RS-P6",
     "scope": "local_durability_recovery_performance_and_product_explainability",
@@ -18,7 +18,7 @@
   "providerBoundary": "controlled_loopback_503_429_only_real_provider_excluded_to_p7",
   "packagedBoundary": "development_electron_only_packaged_app_excluded_to_p7",
   "checkpointInterruptionBoundary": "macos_development_posix_sigstop_process_group_windows_not_exercised",
-  "sourceCommit": "e2ec798cae203f5fd7b447ea1b1d81480180acf4",
+  "sourceCommit": "5f0172a68e5de9b1a8e3bd73aad1b1f03513336a",
   "sourceFiles": {
     "core/biof3-server/agent-runner.js": "core/biof3-server/agent-runner.js",
     "core/biof3-server/agent-tools/learning.js": "core/biof3-server/agent-tools/learning.js",
@@ -292,7 +292,7 @@
     "core/shared-backend/tool-resource-sampler.js": "3eee5a4a491595e1c2b037cf2a04eee0b2234be8557ba035309c658b5ccb4c77",
     "frontend/package-lock.json": "cc22a578188b429be7e51dc90afefbfe1810161bcd5e82a95235219a6f30dfaf",
     "frontend/package.json": "b63786f4ac7996ff7b4714162670bb36abf5aff768737c75d1916a0f76938cdf",
-    "frontend/src/components/copilot/SimpleChat.tsx": "1e12bb9894de2f51c41d99ddda5dcbb210d06e2b931781c8db05ee727d94b3fd",
+    "frontend/src/components/copilot/SimpleChat.tsx": "3cd1432a7c42fe234721dd195ce89b69b06fdece54abeb6ab859c5a45983be47",
     "frontend/src/components/copilot/conversationRunStore.test.ts": "fd878667605e1672428a33dbf5b85dff4870d46d8952a40bc7b8c159601cbacb",
     "frontend/src/components/copilot/conversationRunStore.ts": "6b5bc8bc29a9f93131f063f539e5b621f623e0179736b1d8a5c3effe670f232b",
     "frontend/src/components/copilot/copilotClient.test.ts": "d98deec53983f3214f71f42bf89a566b26226362670c9947a545449b205debaf",
@@ -330,31 +330,31 @@
     "frontend/src/lib/result-edit-agent-bridge.ts": "6b22b00071f759986a8860951fb86adc0c4ec6f9e3e8a7f6827d2b1aed85ab9a",
     "frontend/src/lib/result-studio-interaction-client.ts": "41bb303c788a544e292e715e3e34b103ae0f0aaf538ca3b9ec83bcf601940b74",
     "frontend/src/pages/project-workspace.module.css": "1dad2de637e8561db9d7f56c3a33fd6d94387708dc9606c164f6e01800e57a73",
-    "frontend/src/pages/project-workspace.tsx": "0021694ed854ff6fb3af25b534f3c5ceb547bf98f916099a7901f8ab556f0519",
+    "frontend/src/pages/project-workspace.tsx": "f62310fbeb9e1da6601d5a43348bbeb9510e58a9bcfa887e6b201271a3992d8e",
     "frontend/vite.config.ts": "7a3eeb42b3364f4beb30edfd6855e246114e3d90d1d515b92bfca52616b7df64",
     "package-lock.json": "4297b4cdca446d4bab473f7c4c0b72ce4b99e57881a97049dcceb9e121dbb184",
     "package.json": "f00078e3b96240b24485bd19c1f4bbb848fde29e697223ad74b900e95e796be3",
     "scripts/g0-rs-p4r-capture.mjs": "8fe85ccf0041b048a2b5c56cd4d937b7d4a42c19d1e7821682b37f25ce263364",
-    "scripts/g0-rs-p5-acceptance.mjs": "261729944f129c2f7c200c057e7fb04af8601c45156c369561e5fe3fc3e512e6",
+    "scripts/g0-rs-p5-acceptance.mjs": "8ec2ba34533b3e1eb8077f99594df63d7040b94c6595ab19cb47e880cbeba615",
     "scripts/g0-rs-p6-electron-pressure-driver.cjs": "7915c201b97ee4dbbbc37fbc1d28d3520bd175ca1ac9100b6d1eeffdf5c6ff6b",
-    "scripts/g0-rs-p6-electron-pressure-prototype.mjs": "b2829d4d501e1082d6cd29a794af3a82865f84c1d10913b723c2bd658dd68df1",
+    "scripts/g0-rs-p6-electron-pressure-prototype.mjs": "152528938e2452444a2f2673b5f878f0ec8d2333b6486fda696c36d2050d5178",
     "scripts/g0-rs-p6-product-acceptance.mjs": "875080f440f9c9863a7769cbd7ee9f625b08509ed914a06ee0f7e4bb1dc6fdb1",
     "scripts/g0-rs-p6-product-scenarios.mjs": "315f265122017476b5ef668d742782e708c9a99281e96f927f4f72f0eb734396",
-    "scripts/g0-rs-p6-real-restart-prototype.mjs": "670c7687eccbe581d0ec977397858cfdee60634ed8325cbf3a274750380e9e49",
+    "scripts/g0-rs-p6-real-restart-prototype.mjs": "d3b6388a0ef841bcb177841aadd8701d4cc5cb8593623e7c489a7ea4ea39adf6",
     "scripts/g0-rs-p6-recovery-acceptance.mjs": "98b74f4e09a643b44dea291612f29488c46d2fa060c993bc81a0fb619751aa85",
     "scripts/g0-rs-p6-recovery-electron-driver.cjs": "bd6a41386d9666c0b207570b687d00df79e04effe9395f96220faacc6996c4de",
     "scripts/g0-rs-p6-recovery-electron-prototype.mjs": "1bc5448b548ef5571979f045720ac80f195d3e62c41017f1f894a31bcf3abb07",
     "scripts/g0-rs-p6-ui110-driver.cjs": "cc289c9819b7bd1bbf7228f416f1dc6a2a2d4922be76585a2fb946d6a8c81e6a",
     "scripts/g0-rs-p6-ui110-local-gateway.mjs": "129383885397d0e183063d255341438ca91df37feec7a8dca8aa84d8e80ab1a0",
-    "scripts/g0-rs-p6-ui110-observation.mjs": "8c583616e60b3f5536a9d6bfa28d519fa2f5a87d4f8c4070d98ab74ad4fe8170",
+    "scripts/g0-rs-p6-ui110-observation.mjs": "eb0eca28fe68a82864d1fae1b9e565d9f0f69dd8caed867a5bdfa1f056424eb6",
     "src/backend-health.js": "0d4a7e96b6be621584e0bf44a10c3e24e4af39bc51de0a0d6ed99fbe12e0a7e0",
     "src/migration-runner.js": "4c9826cc08fa1e7eb4c4daed9c700987273dbaa3ea26dbb43010ba563ec76080",
     "src/migrations/001_result_studio.sql": "f6346ddb80d73d6a92a3cbdaf091c6d6b58cfaab9717fd0b2d8edca78c9723e0",
     "src/migrations/002_result_workflow_graph.sql": "0033abb0ffca505c7cf6169ae838f4d986835d074baff4732159958b15602fb3",
     "src/migrations/003_result_ref_transactions.sql": "a3f18fb245eea4809523e395b2fc7418833c52f9d35b3cb3734e81a1d23ad604",
-    "src/preload.js": "2ec79fdfbe6c2593045c6abc070bcc4bbc54669b7c2b51ca628f5bea9b5903b1",
+    "src/preload.js": "25949177649c757d52d6d141f7fd24cbb6ab2c5bcb4f8e07233a6e80c3a988d5",
     "test/agent-run-tool.test.mjs": "bb6758efe7a839c9cf8979c18132a09ffe32794c6206dccba90027d91706603c",
-    "test/agent-tool-registry.test.mjs": "28554bfcda2edfc19147f07a3537aa0b24339c257854489c2ce66878334bd75b",
+    "test/agent-tool-registry.test.mjs": "6c631572417edded1a56807ad61a45aff58d6d726ed95137de6dcf56473309e7",
     "test/artifact-truth.test.mjs": "9ee035e55d5bd64c44c7ea3305d3bb4702281c7250243f2d93c98b6fb8fdc649",
     "test/diagnostic-redaction.test.mjs": "62a55c15a2b3ad6a431c743653b6f1107ffa9f00ce66e51c7037640ad189d624",
     "test/execution-provenance.test.mjs": "914a53721e6edf4e391c5439e21b4ffde6683145e74543029923b7e98b1f3fd3",
@@ -369,7 +369,7 @@
     "test/g0-rs-p6-ui110-local-gateway.test.mjs": "89d4962e4f71f5d8b7fab135c62a3ae25399298afde269bc587207628c7d683a",
     "test/g0-rs-p6-ui110-observation.test.mjs": "6e4e7cd7adee7f7dc797219b11effe5af069d62a37335f32ff6b69ad15355a5c",
     "test/git-adapter.test.mjs": "95979ca82bc88250c3d53eb006f98e557ff782bb086b06514a68148429e4b593",
-    "test/impact-map.json": "088df89cf125514e000d11e22d58ed651f47fc161b4dadbde50a690191c68ee5",
+    "test/impact-map.json": "f46b5bd2023933ed943c39c72fc239356c165833b719b70e55c19d7a96d3827c",
     "test/result-changeset-service.test.mjs": "2767f8981c2656a171f663fc05b55e0732afb7c85a24b5a9f2bd640682d5897b",
     "test/result-compare-service.test.mjs": "34cd328e01ceff14ac761859f4b5fdbab35cca0d231ea8d92cbd391a9ecb0cce",
     "test/result-edit-agent-tool.test.mjs": "3d2566dfd06682a2b9bc3e3c3dc7bb95646c388183ffa5b3bad818b57749cff4",
@@ -399,7 +399,7 @@
     "test/tools-executor-job-context.test.mjs": "ec79a82bfd3cdad0abee8a24811fc80fbce8a348f2b30d4e7a5c061161d1876e",
     "test/tools-input-validation.test.mjs": "e87819e32114dc2a61c9447b38077f6d776c4c6cf9f2e581a69c86ac834d96b9"
   },
-  "sourceBindingDigest": "de11f28b0298911fae6d88530eb2fe58035deaa8c73b250007f3c8cbf45ed2f8",
+  "sourceBindingDigest": "a94c89abd79d4d0ae55f81f9a5f67225ce9ee900f46668ce16e984f3a1ecc89a",
   "sourceCommitMatchesSourceHashes": true,
   "sourceBindingStableDuringCapture": true,
   "observations": {
@@ -804,8 +804,8 @@
             "semanticDigest": "4ebaca00427394e473c85d2bbbe4323e42b71488736bb993f5aa0aca35621566",
             "visual": {
               "label": "active-before-crash",
-              "sha256": "9543932961ea1791c15d671e177344d0397607cadb3ee4eac70a4368007ff536",
-              "bytes": 328301,
+              "sha256": "280994df71cd60d882165a68b1f9b13eb293ee06b6a0ee40ce3f913868244a78",
+              "bytes": 196964,
               "nonblank": true
             },
             "recoveryControlAbsent": true
@@ -841,7 +841,7 @@
           "backendStatus": {
             "checkCount": 2,
             "everyCheckReady": true,
-            "maxDurationMs": 28.674332999999933
+            "maxDurationMs": 43.97841699999981
           },
           "isolatedCompatibility": {
             "aiSettingsReadCount": 1,
@@ -881,8 +881,8 @@
             "semanticDigest": "3236a365eb107d5f2e4987f1e2c1cd6c5c1e1c0ac09e28ddefaddc650b35f324",
             "visual": {
               "label": "before-recovery",
-              "sha256": "1d6df8a41d09b56be08979b2417f3a8f8d1b10757dfb685fe9fe842623c7879e",
-              "bytes": 303729,
+              "sha256": "01ef0f451613f5dbcb0640a16cf2a67dd018734a417d5cfbba2341bc84ba8753",
+              "bytes": 219775,
               "nonblank": true
             }
           },
@@ -906,8 +906,8 @@
             "semanticDigest": "a6ed2ece325da737419dc832c482e9e423839ce8e51bbf45d97ac7cb4846bf6c",
             "visual": {
               "label": "after-recovery",
-              "sha256": "b9b8a42381dcc79b23ffd37770b18b3fe95eb3089abbbefc439b4bf72cb9eb84",
-              "bytes": 270495,
+              "sha256": "debcf33990870d7ca4617bd6afb2e846592cfb91cac0b7cbd91d0109f55f7fdb",
+              "bytes": 187829,
               "nonblank": true
             },
             "recoveryControlAbsent": true
@@ -944,7 +944,7 @@
           "backendStatus": {
             "checkCount": 2,
             "everyCheckReady": true,
-            "maxDurationMs": 28.478375000000028
+            "maxDurationMs": 31.21741700000007
           },
           "isolatedCompatibility": {
             "aiSettingsReadCount": 1,
@@ -1001,8 +1001,8 @@
             "semanticDigest": "a6ed2ece325da737419dc832c482e9e423839ce8e51bbf45d97ac7cb4846bf6c",
             "visual": {
               "label": "reopened-ready",
-              "sha256": "b9b8a42381dcc79b23ffd37770b18b3fe95eb3089abbbefc439b4bf72cb9eb84",
-              "bytes": 270495,
+              "sha256": "debcf33990870d7ca4617bd6afb2e846592cfb91cac0b7cbd91d0109f55f7fdb",
+              "bytes": 187829,
               "nonblank": true
             },
             "recoveryControlAbsent": true
@@ -1037,7 +1037,7 @@
           "backendStatus": {
             "checkCount": 2,
             "everyCheckReady": true,
-            "maxDurationMs": 26.871125000000006
+            "maxDurationMs": 28.815042000000005
           },
           "isolatedCompatibility": {
             "aiSettingsReadCount": 1,
@@ -1088,7 +1088,7 @@
         "revisionIntegrityStatus": null
       },
       "performance": {
-        "restartRestoreMs": 1853.9953339999993,
+        "restartRestoreMs": 1962.6227080000099,
         "budgets": {
           "restartRestoreMs": 5000
         }
@@ -1169,12 +1169,12 @@
           {
             "toolClass": "go_bp_report",
             "peakStatus": "measured",
-            "sampleCount": 11
+            "sampleCount": 13
           },
           {
             "toolClass": "go_bp_report",
             "peakStatus": "measured",
-            "sampleCount": 55
+            "sampleCount": 62
           }
         ]
       },
@@ -1201,10 +1201,10 @@
         ],
         "immutableMutationRejected": true,
         "immutableDigestStable": true,
-        "immutableLedgerDigest": "696e4dfc6a1cbbae2f9dc307306e4bc8f008403ce2a399a36df810419163fbd0",
+        "immutableLedgerDigest": "69bd8b0068c3d78701a2406dd283ff44981856a1e5bce32e28e35dce0658ec86",
         "currentRevisionCount": 6,
         "realJobBackedCohortCount": 2,
-        "realJobBackedCohortDigest": "29a1ad427e3d61830f021394b810d62fccf7f33abd67f4caa1e8763a230699d3"
+        "realJobBackedCohortDigest": "d60231b5231cdaea02eb94d34295689bb5f5a3dac4bf195b994226eb7c34f6cf"
       },
       "renderer": {
         "schemaVersion": 1,
@@ -1212,35 +1212,35 @@
         "table": {
           "totalRows": 100000,
           "visibleRows": 18,
-          "navigationMs": 476.544791,
-          "canvasFirstVisibleMs": 476.544791,
+          "navigationMs": 608.736083,
+          "canvasFirstVisibleMs": 608.736083,
           "productCanvasFirstVisibleMs": null,
-          "scrollFeedbackMs": 7.199999999254942,
+          "scrollFeedbackMs": 2.5,
           "scrollChanged": true,
-          "selectionFeedbackMs": 9,
+          "selectionFeedbackMs": 10.299999997019768,
           "selectionChanged": true,
-          "sortFeedbackMs": 5.699999999254942,
+          "sortFeedbackMs": 4.199999995529652,
           "sortChanged": true,
-          "filterFeedbackMs": 8,
-          "filterQueryCompleteMs": 692,
+          "filterFeedbackMs": 8.5,
+          "filterQueryCompleteMs": 675.7000000029802,
           "filterChanged": true,
           "filterQueryChanged": true,
           "filterMatchedSummaryChanged": true,
           "filterFirstVisibleRowChanged": true,
-          "virtualPageLoadMs": 39.5,
+          "virtualPageLoadMs": 47,
           "virtualPageChanged": true,
-          "screenshotSha256": "fb24a1d93745d2c0f3eb002216855e58594e7bc29801784a110998cadcc51dbb",
-          "screenshotBytes": 337677,
+          "screenshotSha256": "80db79e4a60ba7f61f9a84e6ff4d589752858e97e42fe2de8af265981403b59f",
+          "screenshotBytes": 251630,
           "width": 2880,
           "height": 1706
         },
         "media": {
           "png": {
-            "loadMs": 111.0773750000003,
+            "loadMs": 111.7135000000003,
             "switch": {
-              "feedbackMs": 8.100000001490116,
-              "productMetricMs": 1.3,
-              "wallFeedbackMs": 8.100000001490116,
+              "feedbackMs": 9,
+              "productMetricMs": 1.5,
+              "wallFeedbackMs": 9,
               "changed": true
             },
             "rendered": true,
@@ -1251,34 +1251,34 @@
             "sourceKind": "tool_file",
             "sourceTargetMatched": true,
             "artifactTargetMatched": true,
-            "screenshotSha256": "c981ae3ee86554507bed06077c067a99965ba91ca2cb72320f78f9aad7b54e88",
-            "screenshotBytes": 1100387,
+            "screenshotSha256": "49761cc33bf645118a2d6813b020957060bcc95ee9779a2006fc5739e1d33c70",
+            "screenshotBytes": 1014388,
             "width": 2880,
             "height": 1706
           },
           "svg": {
-            "loadMs": 108.82499999999982,
+            "loadMs": 110.34537500000033,
             "exportLinkPresent": true,
             "exportHrefMatched": true,
             "bytes": 42686780,
             "validSvgRoot": true,
-            "fetchMs": 104.19999999925494,
+            "fetchMs": 105.19999999552965,
             "switch": {
               "changed": true,
-              "feedbackMs": 104.19999999925494,
+              "feedbackMs": 105.19999999552965,
               "productMetricMs": null,
-              "wallFeedbackMs": 104.19999999925494
+              "wallFeedbackMs": 105.19999999552965
             },
             "sourceKind": "tool_file",
             "sourceTargetMatched": true,
             "artifactTargetMatched": true,
-            "screenshotSha256": "03dfab998661e6259945ce6863d16147e7579207307588f5b00b6b813642cec4",
-            "screenshotBytes": 1102293,
+            "screenshotSha256": "861c9564c90781079bef83565f76007ce56fcc74c751a2e4994038b8a92a7e9b",
+            "screenshotBytes": 1016455,
             "width": 2880,
             "height": 1706
           },
           "report": {
-            "loadMs": 425.07787499999995,
+            "loadMs": 465.0329579999998,
             "iframeVisible": true,
             "iframeWidth": 858,
             "iframeHeight": 716,
@@ -1294,14 +1294,14 @@
               "rawInternalId": false
             },
             "textCharacters": 4246,
-            "screenshotSha256": "fb3c92006d84c6535ca6bde3d1b389b2b854261b301176944318d72293550dfb",
-            "screenshotBytes": 439301,
+            "screenshotSha256": "e70f678ce304667337361a61eda6e2842849e587aaf1a927e2fcd55d4596811b",
+            "screenshotBytes": 380644,
             "width": 2880,
             "height": 1706
           }
         },
         "compare": {
-          "openMs": 518.2702079999999,
+          "openMs": 522.5850419999997,
           "progressiveRows": 204,
           "progressivePages": [
             {
@@ -1310,88 +1310,88 @@
             },
             {
               "rows": 104,
-              "loadMs": 722.0256660000005
+              "loadMs": 796.1310000000003
             },
             {
               "rows": 154,
-              "loadMs": 896.2477079999999
+              "loadMs": 892.5863329999993
             },
             {
               "rows": 204,
-              "loadMs": 106.99308299999939
+              "loadMs": 107.2051249999995
             }
           ],
-          "screenshotSha256": "e5c81ec6a160114507ac03cd4e79e778cb71c5af8fb99841ed3fd118d9eedb5d",
-          "screenshotBytes": 671363,
+          "screenshotSha256": "1d96920df869cfa7ce33fc962c3915d89c12db3a085639a62c3127506493da90",
+          "screenshotBytes": 582021,
           "width": 2880,
           "height": 1706
         },
         "history": {
           "firstPageVersions": 100,
-          "firstPageMs": 24.402541999999812,
+          "firstPageMs": 25.862875000000713,
           "afterPaginationVersions": 123,
-          "paginationMs": 112.42604200000005,
-          "screenshotSha256": "dfb6328f5184fc648752bce1455e0e430faba777aa35864d750cd58b9a16ae2c",
-          "screenshotBytes": 506844,
+          "paginationMs": 104.85533300000043,
+          "screenshotSha256": "a65d47570a307618637e598a68f6a627ccf9ec17b90993c4a38ed2cd83a34b9d",
+          "screenshotBytes": 419511,
           "width": 2880,
           "height": 1706
         },
         "memory": {
-          "baselinePostGcBytes": 17501116,
-          "peakRawUsedBytes": 33670076,
-          "peakRawGrowthBytes": 16168960,
-          "peakPostGcUsedBytes": 21262976,
-          "peakPostGcGrowthBytes": 3761860,
-          "peakWorkingSetBytes": 1198850048,
+          "baselinePostGcBytes": 17472264,
+          "peakRawUsedBytes": 33237556,
+          "peakRawGrowthBytes": 15765292,
+          "peakPostGcUsedBytes": 21218600,
+          "peakPostGcGrowthBytes": 3746336,
+          "peakWorkingSetBytes": 1186742272,
           "samples": [
             {
               "stage": "table_baseline",
-              "rawUsedBytes": 21388628,
-              "postGcUsedBytes": 17501116,
-              "heapTotalBytes": 19070976,
-              "workingSetBytes": 277331968
+              "rawUsedBytes": 21709040,
+              "postGcUsedBytes": 17472264,
+              "heapTotalBytes": 18808832,
+              "workingSetBytes": 279363584
             },
             {
               "stage": "table_interactions",
-              "rawUsedBytes": 21944212,
-              "postGcUsedBytes": 17411244,
+              "rawUsedBytes": 21285624,
+              "postGcUsedBytes": 17381520,
               "heapTotalBytes": 18284544,
-              "workingSetBytes": 264208384
+              "workingSetBytes": 264830976
             },
             {
               "stage": "png",
-              "rawUsedBytes": 19228364,
-              "postGcUsedBytes": 17316180,
-              "heapTotalBytes": 18546688,
-              "workingSetBytes": 287571968
+              "rawUsedBytes": 18484344,
+              "postGcUsedBytes": 17289800,
+              "heapTotalBytes": 18808832,
+              "workingSetBytes": 288964608
             },
             {
               "stage": "svg",
-              "rawUsedBytes": 18098092,
-              "postGcUsedBytes": 17365036,
-              "heapTotalBytes": 18022400,
-              "workingSetBytes": 330366976
+              "rawUsedBytes": 17364080,
+              "postGcUsedBytes": 17338640,
+              "heapTotalBytes": 18284544,
+              "workingSetBytes": 332185600
             },
             {
               "stage": "report",
-              "rawUsedBytes": 33670076,
-              "postGcUsedBytes": 17745208,
-              "heapTotalBytes": 19496960,
-              "workingSetBytes": 380157952
+              "rawUsedBytes": 33237556,
+              "postGcUsedBytes": 17710168,
+              "heapTotalBytes": 19234816,
+              "workingSetBytes": 381321216
             },
             {
               "stage": "compare",
-              "rawUsedBytes": 25477548,
-              "postGcUsedBytes": 21262976,
-              "heapTotalBytes": 23166976,
-              "workingSetBytes": 1198850048
+              "rawUsedBytes": 25430376,
+              "postGcUsedBytes": 21218600,
+              "heapTotalBytes": 22642688,
+              "workingSetBytes": 1186742272
             },
             {
               "stage": "history",
-              "rawUsedBytes": 24942612,
-              "postGcUsedBytes": 20166848,
+              "rawUsedBytes": 24844896,
+              "postGcUsedBytes": 20123960,
               "heapTotalBytes": 22118400,
-              "workingSetBytes": 1136558080
+              "workingSetBytes": 1126170624
             }
           ]
         },
@@ -1488,7 +1488,7 @@
         "backendStatus": {
           "checkCount": 6,
           "everyCheckReady": true,
-          "maxDurationMs": 28.233833000000004
+          "maxDurationMs": 33.88441599999999
         },
         "isolatedCompatibility": {
           "aiSettingsReadCount": 3,
@@ -1648,16 +1648,17 @@
           "seededTables": [],
           "digest": "dd575ac9ca406c00c2ac2330ee6cab12b7f642b4c042a55fe38ac87f09ec3cb9"
         },
-        "projectDigest": "e1f83a0cda96956218898f9ada13bcafc916f709f63f2f8abbc948c218b8dc58",
+        "projectDigest": "318d062333c65dac292dcfc5fb5ade24b755730047b4dd9f7fc01692f4c21a54",
         "resourceBudget": {
           "classification": "real_product_changeset_preflight_no_seed",
-          "sourceBaselineJobDigest": "6fcf4990b8637a80a13b9d390fd928de576372050c5dfaae40c4d74df533280b",
-          "sourceBaselineRevisionDigest": "51a25105c9271e48c51db5125eaa4f97e70c0d2d6e846be1dd9ac5d5f3d2fb14",
+          "sourceBaselineJobDigest": "75af849685fca881f1f6678f65134fb8ecfefa8e0874bbbb010640090b01c348",
+          "sourceBaselineRevisionDigest": "336f6221d0b15e1954612f157156acac7675570b55e3293d2457d485c1b84aa1",
           "sourceScientificParametersUnchanged": true,
           "memoryBlocked": {
             "error": "preview_resource_budget_blocked",
             "decision": "blocked",
             "reasons": [
+              "resource_snapshot_unavailable",
               "memory_budget_exceeded"
             ],
             "scientificParametersChanged": false,
@@ -1669,7 +1670,7 @@
               "inputBytes": 6914,
               "sourceOutputBytes": 230288,
               "sourceOutputMeasurement": "complete_descriptor_artifacts",
-              "selectedRevisionDigest": "51a25105c9271e48c51db5125eaa4f97e70c0d2d6e846be1dd9ac5d5f3d2fb14",
+              "selectedRevisionDigest": "336f6221d0b15e1954612f157156acac7675570b55e3293d2457d485c1b84aa1",
               "downstreamOutputBytes": 0,
               "historicalRssBytes": null,
               "rasterBytes": 2304000000,
@@ -1708,7 +1709,7 @@
               "inputBytes": 6914,
               "sourceOutputBytes": 230288,
               "sourceOutputMeasurement": "complete_descriptor_artifacts",
-              "selectedRevisionDigest": "51a25105c9271e48c51db5125eaa4f97e70c0d2d6e846be1dd9ac5d5f3d2fb14",
+              "selectedRevisionDigest": "336f6221d0b15e1954612f157156acac7675570b55e3293d2457d485c1b84aa1",
               "downstreamOutputBytes": 0,
               "historicalRssBytes": null,
               "rasterBytes": 12600000,
@@ -1760,8 +1761,8 @@
             "realToolExecution": true,
             "previewReadyCount": 2,
             "changeSetDigests": [
-              "c85480219f80974aee393b25ea8c7f8bd70158c0bbf565acb12c097db77bfdc7",
-              "cadf73335f35f752c32baf010d73c7aff53afa92be71215e62ccf07e8e73a77c"
+              "e05925e2c1ce245f3b17da053f78f2d2b6abb1fcd1c30cf1a62198df87b6de8b",
+              "f3529be39ba7ac37f71c65860aa3ea92bc7b3025669294ce383ecc450c3bb538"
             ]
           }
         },
@@ -1774,10 +1775,10 @@
           "firstCandidateRemainsPreviewReady": true,
           "secondCandidateRemainsAdopted": true,
           "adoptedCohortCurrent": true,
-          "firstCandidateDigest": "cadf73335f35f752c32baf010d73c7aff53afa92be71215e62ccf07e8e73a77c",
-          "secondCandidateDigest": "c85480219f80974aee393b25ea8c7f8bd70158c0bbf565acb12c097db77bfdc7",
-          "stateDigestBeforeFailure": "8296b679d59942b141d6633e451edea1eef19d031a054ffc7b07c0094abe12bb",
-          "stateDigestAfterFailure": "8296b679d59942b141d6633e451edea1eef19d031a054ffc7b07c0094abe12bb"
+          "firstCandidateDigest": "f3529be39ba7ac37f71c65860aa3ea92bc7b3025669294ce383ecc450c3bb538",
+          "secondCandidateDigest": "e05925e2c1ce245f3b17da053f78f2d2b6abb1fcd1c30cf1a62198df87b6de8b",
+          "stateDigestBeforeFailure": "3a7d8fffa453e4603ac40358844f0462973a6e827a169f484a271562a9b5e258",
+          "stateDigestAfterFailure": "3a7d8fffa453e4603ac40358844f0462973a6e827a169f484a271562a9b5e258"
         },
         "gcColdReadback": {
           "classification": "real_product_http_gc_then_managed_git_gc_and_same_disk_cold_boot",
@@ -1791,19 +1792,19 @@
           "gitGc": {
             "exitCode": 0,
             "signal": null,
-            "durationMs": 96,
+            "durationMs": 99,
             "stderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
           },
           "before": {
-            "ledgerDigest": "09b0d0b0ee937bf3a1de9aa69b80baae6cf594d234fc221c0999de84a5287900",
-            "revisionDigest": "f2a475b818ea8d7970a0f19c6d72a0b2713ed7c074ba6a9a2c36551f6cee06d2",
-            "changeSetDigest": "3ab876712a3992d3b8ee05c73661b2377fcbc928b81f9a09eda5c6ee9b9cd245",
-            "checkpointDigest": "9ccf85d24abc75f5bfcc926a10142b32acc400ea17059c952c589d29be422744",
-            "jobDigest": "f6aa732e81da652ffc37bb2ca33652235b155b3dde4c001459192a6df22337ec",
-            "physicalDigest": "a41689836af7a1f51d37b1cefd8e67c411329bf36118135faee96960084a4615",
+            "ledgerDigest": "8e83e00bead0817079b1e45481d47fb3bf4beaf30579ef34978bd6b91de10840",
+            "revisionDigest": "7b5cd9dee9945075aea29eaf5bda337376da41d099ecd24f7241b359e1b80b6c",
+            "changeSetDigest": "1cfc62dc2eada7a6efc13f6f030c83f44a91cbd96e7b3982f6d97dfc83f2262f",
+            "checkpointDigest": "c4661facd1e48daad4120363288482a901d7afcf3a4fc07036605df1706abf0d",
+            "jobDigest": "0505fb1c5052683282e096cc043eb55773c88aa271822b3bfcd1320a22f3fad8",
+            "physicalDigest": "8be00a0332646704777daa56fcc0214e2e6b3f1d18fc639b1bdbb4585b02d3c9",
             "physicalHashesExact": true,
-            "sourceDigest": "c7173ac642def3990e812b7d54caad5b7d806409d9ef61764a270d76558a9004",
-            "historyDigest": "9116d3b394e96d51d6550c35fbc16d1e5ac987d282c6950838dd6f6520c6b885",
+            "sourceDigest": "30480fcfd58835eaa147334dbd810fffb2dd07904e2615c90bcd4566dcae8b0c",
+            "historyDigest": "58b8c82770bfb687e5ec025761ed2218bdf0c0063c9c98fbdc0a75cf63b68d5d",
             "revisionCount": 19,
             "changeSetCount": 6,
             "checkpointCount": 6,
@@ -1813,21 +1814,21 @@
             "previewRevisionCount": 3,
             "previewChangeSetCount": 1,
             "checkpointHashesExact": true,
-            "historyCurrentRevisionDigest": "5fd0014bc0865de3320eb1bc3f30e8cc5d50ef7dac97c68ec5db02ea5709cdd2",
+            "historyCurrentRevisionDigest": "a2b3c18dab9e09d37bd3f918d2e5b4130bbbb34c098da67e4113eaab38408eb4",
             "historyRevisionCount": 3,
             "workspaceStatus": null,
             "workspaceBlockingIssueCount": 0
           },
           "after": {
-            "ledgerDigest": "09b0d0b0ee937bf3a1de9aa69b80baae6cf594d234fc221c0999de84a5287900",
-            "revisionDigest": "f2a475b818ea8d7970a0f19c6d72a0b2713ed7c074ba6a9a2c36551f6cee06d2",
-            "changeSetDigest": "3ab876712a3992d3b8ee05c73661b2377fcbc928b81f9a09eda5c6ee9b9cd245",
-            "checkpointDigest": "9ccf85d24abc75f5bfcc926a10142b32acc400ea17059c952c589d29be422744",
-            "jobDigest": "f6aa732e81da652ffc37bb2ca33652235b155b3dde4c001459192a6df22337ec",
-            "physicalDigest": "a41689836af7a1f51d37b1cefd8e67c411329bf36118135faee96960084a4615",
+            "ledgerDigest": "8e83e00bead0817079b1e45481d47fb3bf4beaf30579ef34978bd6b91de10840",
+            "revisionDigest": "7b5cd9dee9945075aea29eaf5bda337376da41d099ecd24f7241b359e1b80b6c",
+            "changeSetDigest": "1cfc62dc2eada7a6efc13f6f030c83f44a91cbd96e7b3982f6d97dfc83f2262f",
+            "checkpointDigest": "c4661facd1e48daad4120363288482a901d7afcf3a4fc07036605df1706abf0d",
+            "jobDigest": "0505fb1c5052683282e096cc043eb55773c88aa271822b3bfcd1320a22f3fad8",
+            "physicalDigest": "8be00a0332646704777daa56fcc0214e2e6b3f1d18fc639b1bdbb4585b02d3c9",
             "physicalHashesExact": true,
-            "sourceDigest": "c7173ac642def3990e812b7d54caad5b7d806409d9ef61764a270d76558a9004",
-            "historyDigest": "9116d3b394e96d51d6550c35fbc16d1e5ac987d282c6950838dd6f6520c6b885",
+            "sourceDigest": "30480fcfd58835eaa147334dbd810fffb2dd07904e2615c90bcd4566dcae8b0c",
+            "historyDigest": "58b8c82770bfb687e5ec025761ed2218bdf0c0063c9c98fbdc0a75cf63b68d5d",
             "revisionCount": 19,
             "changeSetCount": 6,
             "checkpointCount": 6,
@@ -1837,7 +1838,7 @@
             "previewRevisionCount": 3,
             "previewChangeSetCount": 1,
             "checkpointHashesExact": true,
-            "historyCurrentRevisionDigest": "5fd0014bc0865de3320eb1bc3f30e8cc5d50ef7dac97c68ec5db02ea5709cdd2",
+            "historyCurrentRevisionDigest": "a2b3c18dab9e09d37bd3f918d2e5b4130bbbb34c098da67e4113eaab38408eb4",
             "historyRevisionCount": 3,
             "workspaceStatus": null,
             "workspaceBlockingIssueCount": 0
@@ -1909,6 +1910,6 @@
     "electronPressure": 26,
     "productScenarios": 6
   },
-  "durationMs": 167233,
+  "durationMs": 313855,
   "passed": true
 }
