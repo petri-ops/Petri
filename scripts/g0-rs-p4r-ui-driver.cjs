@@ -419,16 +419,20 @@ async function reopenResultTrace(window, requestedOutcome) {
 
 async function candidateLifecycleTrace(window) {
   const wc = window.webContents;
-  await waitFor(
-    wc,
-    `Boolean([...document.querySelectorAll('button')].find((item) => (item.textContent || '').trim() === '采用此版本'))`,
-    'deterministic Agent candidate',
-  );
+  // 版本/变更面板（含「采用此版本」）只在 compare/history 模式挂载
+  // （ResultArtifactShell: mode === 'compare' || 'history'；result 模式右栏是产物
+  // 详情）。先切「审查修改」再等候选——曾在 result 模式下等按钮，面板搬移后
+  // 该等待恒超时。
   await clickMode(wc, '审查修改');
   await waitFor(
     wc,
     `document.querySelector('[aria-label="结果主画布"]')?.getAttribute('data-mode') === 'compare'`,
     'candidate compare',
+  );
+  await waitFor(
+    wc,
+    `Boolean([...document.querySelectorAll('button')].find((item) => (item.textContent || '').trim() === '采用此版本'))`,
+    'deterministic Agent candidate',
   );
   const compare = await semanticSnapshot(wc);
   const compareActionable = await wc.executeJavaScript(`
@@ -690,6 +694,22 @@ async function contextFailureTrace(window, blocked, outputDir, canonicalUrl) {
   };
 }
 
+// 首启引导浮层关闭（与 g0-rs-p6-recovery-electron-driver 同法）：
+// fresh userData 下 DesktopOnboarding 必现，点「跳过引导」写入完成标记。
+async function dismissOnboarding(webContents) {
+  await waitFor(webContents, `
+    (() => {
+      const dialog = document.querySelector('[role="dialog"][aria-label="首次启动引导"]');
+      if (!dialog) return true;
+      const button = [...dialog.querySelectorAll('button')]
+        .find((item) => (item.textContent || '').trim() === '跳过引导' && !item.disabled);
+      if (!button) return false;
+      button.click();
+      return true;
+    })()
+  `, 'onboarding');
+}
+
 async function run() {
   const config = readConfig();
   mkdirSync(config.outputDir, { recursive: true });
@@ -722,6 +742,10 @@ async function run() {
     `Boolean(document.querySelector('[aria-label="结果主画布"]'))`,
     'Result Studio canvas',
   );
+  // 首启引导浮层（fresh userData 必现）：必须在画布等待**之后**关——React 挂载
+  // 引导晚于 loadURL 返回，过早探测会误判「无引导」。不关掉会盖住工作区、污染
+  // 矩阵截图并拦截语义点击。与 P6 recovery 驱动同法：点「跳过引导」落完成标记。
+  await dismissOnboarding(window.webContents);
   await waitFor(
     window.webContents,
     `Boolean(document.querySelector('[aria-label="结果主画布"] img, [aria-label="结果主画布"] table, [aria-label="结果主画布"] iframe, [aria-label="结果主画布"] pre, [aria-label="结果主画布"] [role="img"]'))`,
