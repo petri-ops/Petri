@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 import type { CopilotContext } from '@/lib/copilotContext';
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import {
@@ -18,99 +18,57 @@ import {
   mergeToolCallActivity,
   mergeToolOutputActivity,
   mergeToolResultActivity,
-  type ToolActivityItem,
 } from './toolActivity';
-import { fetchLoopRuns } from '@/lib/loop-client';
-import { getPlatformApiPrefix } from '@/lib/authClient';
-import type { LoopPhaseEvent, LoopIterationEvent, LoopRunCompact } from '@/lib/loop-client';
 import { formatErrorForUser } from './errorMessages';
 import { recordConversationFileChange } from './conversationChangesStore';
+import {
+  clearConversationNotices,
+  pushChildFinishedNotice,
+  setFallbackNotice,
+} from './conversationRunStore/conversationNotices';
+import {
+  clearConversationRunListeners,
+  emitConversationRun as emit,
+  subscribeConversationRun,
+} from './conversationRunStore/runListeners';
+import { mergeLoopIteration, mergeLoopPhase } from './conversationRunStore/loopProjection';
+import {
+  __resetSubAgentTaskStoresForTests,
+  recordModelSubAgent,
+  resumeSubAgentTasks,
+  settleModelSubAgent,
+} from './conversationRunStore/subAgentTasks';
+import type { ConversationRunSnapshot } from './conversationRunStore/types';
 
-export interface ConversationPendingApproval {
-  ackToken: string;
-  toolJobId?: string;
-  toolId?: string;
-  message?: string;
-  params?: Record<string, unknown>;
-}
-
-export type ConversationRunStatus = 'running' | 'done' | 'error' | 'stopped';
-
-/**
- * HLE-C4R: durable-loop projection carried alongside the transient run.
- * Sourced ONLY from backend loop_phase / loop_iteration SSE events; the UI
- * never derives loop completion itself. Iterations are deduped by iterationId
- * so SSE + API replay merge idempotently.
- */
-export interface ConversationLoopState {
-  loopRunId: string;
-  /** last phase the backend announced: started | resumed | cancelled | blocked | completed | ... */
-  phase: string;
-  automationMode?: string;
-  executionIntent?: 'task_draft' | 'task_execute';
-  /** most recent public conclusion (phase or iteration), safe to display. */
-  latestConclusion?: string;
-  /** true once the backend reports the run was interrupted and needs recovery. */
-  recoveryRequired: boolean;
-  /** per-turn iterations, ordered by sequence, deduped by iterationId. */
-  iterations: LoopIterationEvent[];
-  /** last decision the controller made this run. */
-  lastDecision?: string;
-}
-
-export interface ConversationRunSnapshot {
-  conversationId: string;
-  projectId: string;
-  status: ConversationRunStatus;
-  userContent: string;
-  userTs: string;
-  historyLastUserTs?: string;
-  assistantContent: string;
-  assistantTs: string;
-  assistantPending: boolean;
-  assistantError: boolean;
-  statusMessage?: string;
-  /** UI-AGENTWB-### / chat-error-rendering: raw stack trace of the last
-   *  assistant error (tool / harness / Python worker crash). The chat
-   *  surface forwards this to ErrorBanner's `technicalDetails` slot so the
-   *  "查看详情" disclosure becomes available — without it the user only
-   *  sees the humanised userMessage ("发生未知错误") and has no way to
-   *  reach the underlying `ModuleNotFoundError` / worker exit code / SSE
-   *  failure that triggered it.
-   */
-  technicalDetails?: string;
-  /** UI-AGENTWB-### / chat-error-rendering: classifier code for the last
-   *  assistant error (UNKNOWN / TOOL_ERROR / INTERNAL_ERROR / etc). Lets
-   *  the UI show a stable category without re-classifying on every render.
-   */
-  errorCode?: string;
-  progressUpdates: Array<{ iteration: number; content: string }>;
-  resultEditProgress: ResultEditProgressEvent[];
-  /** Opaque click-time scope used only to prevent progress crossing results. */
-  resultContextToken?: string;
-  toolActivities: ToolActivityItem[];
-  pendingApproval: ConversationPendingApproval | null;
-  processingDurationMs?: number;
-  startedAt: number;
-  completedAt?: number;
-  taskId?: string;
-  /** AGENT-CONCURRENCY: when set, this run is a sub-agent child of the primary task with this id. */
-  parentTaskId?: string;
-  /** HLE-C4R: live durable-loop projection (null until the backend starts a LoopRun). */
-  loop?: ConversationLoopState | null;
-  /** UI-272 — 按迭代聚合的模型思考段（reasoning_content），流式累积；done 后随消息展示并经后端 meta 持久化。 */
-  reasoningByIteration?: Record<number, string>;
-  /** BLOCK-38 P2 — 服务中断被清扫标记的任务可续跑（SSE error 事件 resumable 标记），UI 据此显示「继续执行」。 */
-  resumable?: boolean;
-  /** BLOCK-38 P2 — 服务中断时间（后端清扫写入 interrupted_at）。 */
-  interruptedAt?: string;
-  /** BLOCK-38 P2 — 续跑已发起后被续跑的原 taskId（审计链展示用）。 */
-  resumeOfTaskId?: string;
-  /** BLOCK-56 P1 — 模型降级提示（请求级/任务级首次发生时记录），UI 任务条显示「已降级到 X 模型」。 */
-  modelFallbackNotice?: string;
-  /** BLOCK-93 P2 — spawn 显式角色（服务端 agent-roles 注册表 key；未指定为 undefined → UI 文本推断兜底）。 */
-  agentRole?: string;
-}
+// BLOCK-92 家法：原 import 路径保留 re-export 兼容层——消费方与测试零改动。
+// 类型与子 agent 子系统的实现分别在 conversationRunStore/ 子模块中。
+export type {
+  ChildFinishedNotice,
+  ConversationLoopState,
+  ConversationPendingApproval,
+  ConversationRunSnapshot,
+  ConversationRunStatus,
+} from './conversationRunStore/types';
+export {
+  getConversationFallbackNotice,
+  getChildFinishedNotices,
+} from './conversationRunStore/conversationNotices';
+export { subscribeConversationRun } from './conversationRunStore/runListeners';
+export {
+  clearSubAgentTask,
+  getSubAgentTaskSnapshot,
+  isSubAgentTaskRunning,
+  listSubAgentTasksForConversation,
+  loadHistoricalSubAgentTasks,
+  resumeSubAgentTasks,
+  startSubAgentTask,
+  stopSubAgentTask,
+  subscribeSubAgentTask,
+  subscribeSubAgentTasksForConversation,
+  useSubAgentTask,
+  useSubAgentTasksForConversation,
+} from './conversationRunStore/subAgentTasks';
+export type { StartSubAgentTaskOptions } from './conversationRunStore/subAgentTasks';
 
 interface StartConversationRunOptions {
   conversationId: string;
@@ -138,130 +96,15 @@ interface StartConversationRunOptions {
 
 const runs = new Map<string, ConversationRunSnapshot>();
 const controllers = new Map<string, AbortController>();
-const listeners = new Map<string, Set<() => void>>();
-// BLOCK-56 P1 / UI-287 — 模型降级提示按会话保留。run 终态后的对账会清掉 run
-// 快照（clearConversationRun），notice 若只挂在 run 上，在「降级后数秒内完成」
-// 的场景存活 <300ms，用户不可见；持久化消息也不携带该字段。改为会话级独立
-// 存储，附着到最后一条助手消息渲染，下一次 run 开始时清除。
-const fallbackNotices = new Map<string, { message: string; ts: string }>();
-
-// BLOCK-49 加映 — proactive：子 agent 终态通知（会话级，下一次 run 开始清除）
-export interface ChildFinishedNotice {
-  childTaskId: string;
-  status: string;
-  summaryHead: string;
-  ts: string;
-}
-const childFinishedNotices = new Map<string, ChildFinishedNotice[]>();
-
-/** BLOCK-49 加映 — 当前会话累计的子 agent 终态通知（下一次 run 开始清除）。 */
-export function getChildFinishedNotices(conversationId: string): ChildFinishedNotice[] {
-  return childFinishedNotices.get(conversationId) ?? [];
-}
-
-function pushChildFinishedNotice(conversationId: string, notice: ChildFinishedNotice): void {
-  const list = childFinishedNotices.get(conversationId) ?? [];
-  list.push(notice);
-  // 上限保护：单会话累计最多 10 条（超出丢最旧）
-  childFinishedNotices.set(conversationId, list.slice(-10));
-}
 
 // BLOCK-49 加映二 —— 模型 spawn_agent 派生的子 agent 登记（活动面板数据源）。
 // spawn 的 task 文本从 tool_call args 捕获（tool_result 只有 agentId），
 // 按 callId 关联到 tool_result。BLOCK-93 P2：args.role 一并捕获（显式角色）。
 const pendingSpawnTaskText = new Map<string, { taskText: string; role?: string }>();
 
-/** 模型 spawn_agent 派生：登记 running 快照（面板可见；已存在则跳过）。 */
-function recordModelSubAgent(
-  conversationId: string,
-  projectId: string | undefined,
-  taskId: string,
-  userContent: string,
-  role?: string,
-): void {
-  if (!taskId || subTaskRuns.has(taskId)) return;
-  const startedAt = Date.now();
-  subTaskRuns.set(taskId, {
-    conversationId,
-    projectId: projectId || '',
-    status: 'running',
-    userContent,
-    userTs: new Date(startedAt).toISOString(),
-    assistantContent: '',
-    assistantTs: new Date(startedAt + 1).toISOString(),
-    assistantPending: true,
-    assistantError: false,
-    progressUpdates: [],
-    resultEditProgress: [],
-    toolActivities: [],
-    pendingApproval: null,
-    startedAt,
-    taskId,
-    parentTaskId: undefined,
-    // BLOCK-93 P2 — 显式角色（spawn role；未指定为 undefined → UI 走文本推断兜底）
-    agentRole: role || undefined,
-  });
-  emitSubTask(taskId);
-}
-
-/** 子 agent 终态落账（child_finished）：running → 终态；页面刷新后无登记时建终态条目。 */
-function settleModelSubAgent(conversationId: string, projectId: string | undefined, info: { childTaskId: string; status: string; summaryHead: string }): void {
-  const statusMap: Record<string, ConversationRunStatus> = {
-    completed: 'done',
-    failed: 'error',
-    cancelled: 'stopped',
-  };
-  const target = statusMap[info.status] ?? 'done';
-  const existing = subTaskRuns.get(info.childTaskId);
-  if (existing && existing.status !== 'running') return; // 已终态，幂等
-  const completedAt = Date.now();
-  const snapshot: ConversationRunSnapshot = existing
-    ? {
-        ...existing,
-        status: target,
-        assistantContent: info.summaryHead,
-        assistantPending: false,
-        assistantError: info.status === 'failed',
-        processingDurationMs: Math.max(0, completedAt - existing.startedAt),
-        completedAt,
-      }
-    : {
-        conversationId,
-        projectId: projectId || '',
-        status: target,
-        userContent: '(页面刷新前派生的子 agent)',
-        userTs: new Date(completedAt).toISOString(),
-        assistantContent: info.summaryHead,
-        assistantTs: new Date(completedAt).toISOString(),
-        assistantPending: false,
-        assistantError: info.status === 'failed',
-        progressUpdates: [],
-        resultEditProgress: [],
-        toolActivities: [],
-        pendingApproval: null,
-        startedAt: completedAt,
-        completedAt,
-        taskId: info.childTaskId,
-      };
-  subTaskRuns.set(info.childTaskId, snapshot);
-  emitSubTask(info.childTaskId);
-}
-
-/**
- * BLOCK-56 P1 / UI-287 — 当前会话待展示的降级提示（请求级 + 任务级共用）。
- * 无提示返回 null。run 清理 / 页面刷新后仍可读，直到下一次 run 开始。
- */
-export function getConversationFallbackNotice(conversationId: string): string | null {
-  return fallbackNotices.get(conversationId)?.message ?? null;
-}
-
-function setFallbackNotice(conversationId: string, message: string): void {
-  fallbackNotices.set(conversationId, { message, ts: new Date().toISOString() });
-}
-
-function emit(conversationId: string): void {
-  listeners.get(conversationId)?.forEach((listener) => listener());
-}
+// BLOCK-56 P1 / UI-287 — 模型降级提示按会话保留（会话级独立存储，
+// 见 conversationRunStore/conversationNotices.ts）。
+// BLOCK-49 加映 — 子 agent 终态通知同理（同模块）。
 
 function replaceRun(
   conversationId: string,
@@ -273,71 +116,10 @@ function replaceRun(
   emit(conversationId);
 }
 
-/**
- * HLE-C4R: fold a loop_phase event into the durable-loop projection. Pure.
- * Never derives completion — it only records the phase the backend announced.
- */
-function mergeLoopPhase(
-  current: ConversationLoopState | null | undefined,
-  info: LoopPhaseEvent
-): ConversationLoopState {
-  const loopRunId = info.loopRunId || current?.loopRunId || '';
-  return {
-    loopRunId,
-    phase: info.phase || current?.phase || 'running',
-    automationMode: info.automationMode || current?.automationMode,
-    executionIntent: info.executionIntent || current?.executionIntent,
-    latestConclusion: info.publicConclusion || current?.latestConclusion,
-    recoveryRequired: current?.recoveryRequired ?? false,
-    iterations: current?.iterations || [],
-    lastDecision: current?.lastDecision,
-  };
-}
-
-/**
- * HLE-C4R: fold a loop_iteration event into the projection. Pure + idempotent:
- * iterations dedupe by iterationId and stay ordered by sequence ASC, so an SSE
- * event and a later API replay of the same iteration merge to one entry.
- */
-function mergeLoopIteration(
-  current: ConversationLoopState | null | undefined,
-  info: LoopIterationEvent
-): ConversationLoopState {
-  const loopRunId = info.loopRunId || current?.loopRunId || '';
-  const prior = current?.iterations || [];
-  const withoutDup = prior.filter((it) => it.iterationId !== info.iterationId);
-  const iterations = [...withoutDup, info].sort((a, b) => (a.sequence || 0) - (b.sequence || 0));
-  return {
-    loopRunId,
-    phase: current?.phase || 'running',
-    automationMode: current?.automationMode,
-    executionIntent: current?.executionIntent,
-    latestConclusion: info.publicConclusion || current?.latestConclusion,
-    recoveryRequired: current?.recoveryRequired ?? false,
-    iterations,
-    lastDecision: info.decision || current?.lastDecision,
-  };
-}
-
 export function getConversationRunSnapshot(
   conversationId: string | null | undefined
 ): ConversationRunSnapshot | null {
   return conversationId ? runs.get(conversationId) || null : null;
-}
-
-export function subscribeConversationRun(
-  conversationId: string | null | undefined,
-  listener: () => void
-): () => void {
-  if (!conversationId) return () => {};
-  const current = listeners.get(conversationId) || new Set<() => void>();
-  current.add(listener);
-  listeners.set(conversationId, current);
-  return () => {
-    const active = listeners.get(conversationId);
-    active?.delete(listener);
-    if (active?.size === 0) listeners.delete(conversationId);
-  };
 }
 
 export function useConversationRun(
@@ -376,10 +158,8 @@ export function startConversationRun(options: StartConversationRunOptions): bool
   const { conversationId } = options;
   if (!conversationId || isConversationRunning(conversationId)) return false;
 
-  // BLOCK-56 P1 / UI-287 — 新 run 开始，上一轮降级提示自然消失
-  fallbackNotices.delete(conversationId);
-  // BLOCK-49 加映 — 子 agent 终态通知同理清除
-  childFinishedNotices.delete(conversationId);
+  // 新 run 开始，上一轮降级提示与子 agent 终态通知自然消失（BLOCK-56 / BLOCK-49）
+  clearConversationNotices(conversationId);
 
   const startedAt = Date.now();
   const ctrl = new AbortController();
@@ -840,415 +620,8 @@ export function __resetConversationRunsForTests(): void {
   controllers.forEach((controller) => controller.abort());
   controllers.clear();
   runs.clear();
-  listeners.clear();
-  subTaskRuns.clear();
-  subTaskListeners.clear();
-  subTaskConvListeners.clear();
-}
-
-// ===========================================================================
-// AGENT-CONCURRENCY: parallel sub-agent task subsystem.
-// Each sub-agent streams independently under its own taskId while the primary
-// conversation loop is busy, so the user can run extra background work without
-// blocking the main thread of the conversation. The primary run path above is
-// intentionally left intact.
-// ===========================================================================
-const subTaskRuns = new Map<string, ConversationRunSnapshot>();
-const subTaskListeners = new Map<string, Set<() => void>>();
-const subTaskConvListeners = new Map<string, Set<() => void>>();
-
-function emitSubTask(taskId: string): void {
-  subTaskListeners.get(taskId)?.forEach((listener) => listener());
-  const convId = subTaskRuns.get(taskId)?.conversationId;
-  if (convId) subTaskConvListeners.get(convId)?.forEach((listener) => listener());
-}
-
-function replaceSubTask(
-  taskId: string,
-  update: (current: ConversationRunSnapshot) => ConversationRunSnapshot
-): void {
-  const current = subTaskRuns.get(taskId);
-  if (!current) return;
-  subTaskRuns.set(taskId, update(current));
-  emitSubTask(taskId);
-}
-
-export function getSubAgentTaskSnapshot(taskId: string | null | undefined): ConversationRunSnapshot | null {
-  return taskId ? subTaskRuns.get(taskId) || null : null;
-}
-
-export function subscribeSubAgentTask(taskId: string | null | undefined, listener: () => void): () => void {
-  if (!taskId) return () => {};
-  const current = subTaskListeners.get(taskId) || new Set<() => void>();
-  current.add(listener);
-  subTaskListeners.set(taskId, current);
-  return () => {
-    const active = subTaskListeners.get(taskId);
-    active?.delete(listener);
-    if (active?.size === 0) subTaskListeners.delete(taskId);
-  };
-}
-
-export function useSubAgentTask(taskId: string | null | undefined): ConversationRunSnapshot | null {
-  const subscribe = useCallback((listener: () => void) => subscribeSubAgentTask(taskId, listener), [taskId]);
-  const getSnapshot = useCallback(() => getSubAgentTaskSnapshot(taskId), [taskId]);
-  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-}
-
-export function isSubAgentTaskRunning(taskId: string | null | undefined): boolean {
-  return getSubAgentTaskSnapshot(taskId)?.status === 'running';
-}
-
-export function subscribeSubAgentTasksForConversation(
-  conversationId: string | null | undefined,
-  listener: () => void
-): () => void {
-  if (!conversationId) return () => {};
-  const current = subTaskConvListeners.get(conversationId) || new Set<() => void>();
-  current.add(listener);
-  subTaskConvListeners.set(conversationId, current);
-  return () => {
-    const active = subTaskConvListeners.get(conversationId);
-    active?.delete(listener);
-    if (active?.size === 0) subTaskConvListeners.delete(conversationId);
-  };
-}
-
-export function useSubAgentTasksForConversation(conversationId: string | null | undefined): ConversationRunSnapshot[] {
-  const [list, setList] = useState(() => listSubAgentTasksForConversation(conversationId));
-  useEffect(() => {
-    setList(listSubAgentTasksForConversation(conversationId));
-    return subscribeSubAgentTasksForConversation(conversationId, () => {
-      setList(listSubAgentTasksForConversation(conversationId));
-    });
-  }, [conversationId]);
-  return list;
-}
-
-export function listSubAgentTasksForConversation(conversationId: string | null | undefined): ConversationRunSnapshot[] {
-  if (!conversationId) return [];
-  return [...subTaskRuns.values()]
-    .filter((s) => s.conversationId === conversationId)
-    .sort((a, b) => a.startedAt - b.startedAt);
-}
-
-export interface StartSubAgentTaskOptions {
-  conversationId: string;
-  projectId: string;
-  userContent: string;
-  messages: ChatMessage[];
-  context: CopilotContext;
-  parentTaskId: string;
-  modelPresetId?: string;
-  modelName?: string;
-}
-
-export function startSubAgentTask(options: StartSubAgentTaskOptions): void {
-  const { conversationId, projectId, userContent, messages, context, parentTaskId, modelPresetId, modelName } = options;
-  if (!conversationId || !parentTaskId) return;
-  const startedAt = Date.now();
-  let currentTaskId: string | undefined;
-  let assistantAcc = '';
-
-  const finishSub = (status: 'done' | 'error', error?: Error) => {
-    if (!currentTaskId) return;
-    if (subTaskRuns.get(currentTaskId)?.status !== 'running') return;
-    const formattedError = error ? formatErrorForUser(error) : null;
-    replaceSubTask(currentTaskId, (c) => ({
-      ...c,
-      status,
-      assistantContent: error && formattedError ? formattedError.userMessage : c.assistantContent,
-      assistantPending: false,
-      assistantError: status === 'error',
-      processingDurationMs: Math.max(0, Date.now() - c.startedAt),
-      completedAt: Date.now(),
-    }));
-  };
-
-  void streamChat({
-    messages,
-    context,
-    conversationId,
-    modelPresetId,
-    modelName,
-    kind: 'subagent',
-    parentTaskId,
-    onTaskStarted: (taskId) => {
-      currentTaskId = taskId;
-      subTaskRuns.set(taskId, {
-        conversationId,
-        projectId,
-        status: 'running',
-        userContent,
-        userTs: new Date(startedAt).toISOString(),
-        assistantContent: '',
-        assistantTs: new Date(startedAt + 1).toISOString(),
-        assistantPending: true,
-        assistantError: false,
-        progressUpdates: [],
-        resultEditProgress: [],
-        toolActivities: [],
-        pendingApproval: null,
-        startedAt,
-        taskId,
-        parentTaskId,
-      });
-      emitSubTask(taskId);
-    },
-    onAgentStatus: (status) => {
-      if (!currentTaskId) return;
-      replaceSubTask(currentTaskId, (c) => ({
-        ...c,
-        statusMessage: status.message,
-        assistantPending: true,
-      }));
-    },
-    onAgentProgress: (progress) => {
-      if (!currentTaskId) return;
-      assistantAcc = '';
-      replaceSubTask(currentTaskId, (c) => {
-        const duplicate = c.progressUpdates.some(
-          (item) => item.iteration === progress.iteration && item.content === progress.content
-        );
-        return {
-          ...c,
-          progressUpdates: duplicate ? c.progressUpdates : [...c.progressUpdates, progress].slice(-50),
-          assistantContent: '',
-          assistantPending: true,
-          statusMessage: undefined,
-        };
-      });
-    },
-    onResultEditProgress: (progress) => {
-      if (!currentTaskId) return;
-      replaceSubTask(currentTaskId, (c) => {
-        const withoutSameSequence = c.resultEditProgress.filter(
-          (item) => item.changeSetId !== progress.changeSetId || item.sequence !== progress.sequence
-        );
-        return {
-          ...c,
-          resultEditProgress: [...withoutSameSequence, progress]
-            .sort((a, b) => a.sequence - b.sequence)
-            .slice(-30),
-          statusMessage: '正在处理结果修改',
-          assistantPending: true,
-        };
-      });
-    },
-    onDelta: (delta) => {
-      if (!currentTaskId) return;
-      assistantAcc += delta;
-      replaceSubTask(currentTaskId, (c) => ({
-        ...c,
-        assistantContent: assistantAcc,
-        assistantPending: false,
-        statusMessage: undefined,
-      }));
-    },
-    onToolCall: (event) => {
-      if (!currentTaskId) return;
-      replaceSubTask(currentTaskId, (c) => ({
-        ...c,
-        toolActivities: mergeToolCallActivity(c.toolActivities, event),
-      }));
-    },
-    onToolOutput: (event) => {
-      if (!currentTaskId) return;
-      replaceSubTask(currentTaskId, (c) => ({
-        ...c,
-        toolActivities: mergeToolOutputActivity(c.toolActivities, event),
-      }));
-    },
-    onToolResult: (event) => {
-      if (!currentTaskId) return;
-      replaceSubTask(currentTaskId, (c) => ({
-        ...c,
-        toolActivities: mergeToolResultActivity(c.toolActivities, event),
-        pendingApproval:
-          event.name === 'run_tool' && event.needApproval && event.ackToken
-            ? {
-                ackToken: event.ackToken,
-                toolJobId: event.toolJobId,
-                toolId: event.toolId,
-                message: event.message,
-                params: event.params,
-              }
-            : c.pendingApproval,
-      }));
-    },
-    onDone: () => finishSub('done'),
-    onError: (error) => finishSub('error', error),
-  });
-}
-
-/**
- * AGENT-CONCURRENCY: 重订阅一个已存在（崩溃/刷新前仍在跑）的 sub-agent task。
- * 不重新提交，直接订阅其后端事件流并写入 subTaskRuns 状态，避免孤儿化。
- */
-function subscribeSubAgentResumed(
-  taskId: string,
-  conversationId: string,
-  projectId: string,
-  parentTaskId: string | null | undefined,
-  userContent = '（恢复后台任务）'
-): void {
-  const startedAt = Date.now();
-  let assistantAcc = '';
-  const finish = (status: 'done' | 'error', error?: Error) => {
-    const cur = subTaskRuns.get(taskId);
-    if (!cur || cur.status !== 'running') return;
-    const formattedError = error ? formatErrorForUser(error) : null;
-    replaceSubTask(taskId, (c) => ({
-      ...c,
-      status,
-      assistantContent: error && formattedError ? formattedError.userMessage : c.assistantContent,
-      assistantPending: false,
-      assistantError: status === 'error',
-      processingDurationMs: Math.max(0, Date.now() - c.startedAt),
-      completedAt: Date.now(),
-    }));
-  };
-  subTaskRuns.set(taskId, {
-    conversationId,
-    projectId,
-    status: 'running',
-    userContent,
-    userTs: new Date(startedAt).toISOString(),
-    assistantContent: '',
-    assistantTs: new Date(startedAt + 1).toISOString(),
-    assistantPending: true,
-    assistantError: false,
-    progressUpdates: [],
-    resultEditProgress: [],
-    toolActivities: [],
-    pendingApproval: null,
-    startedAt,
-    taskId,
-    parentTaskId: parentTaskId ?? undefined,
-    loop: null,
-  });
-  emitSubTask(taskId);
-  void subscribeAgentTask(
-    taskId,
-    {
-      messages: [],
-      conversationId,
-      onDelta: (delta) => {
-        assistantAcc += delta;
-        replaceSubTask(taskId, (c) => ({
-          ...c,
-          assistantContent: assistantAcc,
-          assistantPending: false,
-        }));
-      },
-      onDone: () => finish('done'),
-      onError: (error) => finish('error', error),
-    },
-    0
-  ).catch(() => finish('error', new Error('订阅失败')));
-}
-
-/**
- * AGENT-CONCURRENCY: 会话重开 / 应用重启时，从后端 loop_runs 找回仍 running
- * 的 sub-agent run 并重订阅其事件流，避免孤儿化。loop_runs 是权威来源，
- * 覆盖 localStorage 之外的恢复场景（与 copilotClient.findResumableSubAgentTasks 互补）。
- */
-export async function resumeSubAgentTasks(
-  conversationId: string,
-  projectId?: string
-): Promise<void> {
-  if (!conversationId) return;
-  let runs: LoopRunCompact[] = [];
-  try {
-    runs = await fetchLoopRuns({ conversationId, projectId });
-  } catch {
-    return;
-  }
-  const subRuns = runs.filter(
-    (run) =>
-      run.loopStatus === 'running' &&
-      (run.kind === 'subagent' || (run.kind == null && !!run.parentLoopRunId)) &&
-      !!run.taskId &&
-      run.conversationId === conversationId &&
-      typeof run.projectId === 'string' &&
-      run.projectId.length > 0 &&
-      (!projectId || run.projectId === projectId)
-  );
-  for (const run of subRuns) {
-    const taskId = run.taskId as string;
-    if (subTaskRuns.has(taskId)) continue;
-    subscribeSubAgentResumed(
-      taskId,
-      conversationId,
-      run.projectId,
-      run.parentLoopRunId,
-      '（恢复后台任务）'
-    );
-  }
-}
-
-/**
- * BLOCK-65 修正：会话打开时回填该会话的历史子 agent（含终态）。
- * resumeSubAgentTasks 只恢复 running 任务——刷新后历史完成态不进 store，
- * 会让摘要卡「智能体」节（UI-386 起的项目级聚合唯一入口）在该会话永久不可见。
- * 只登记终态快照（running/pending 交由 resume/live 订阅路径），幂等。
- * 零第二真相：数据来自 /api/ai/agent/tasks（tasks 表只读投影）。
- */
-export async function loadHistoricalSubAgentTasks(conversationId: string): Promise<void> {
-  if (!conversationId) return;
-  let rows: Array<{
-    taskId: string;
-    status: string;
-    taskText: string;
-    error: string | null;
-    projectId: string | null;
-    parentTaskId: string | null;
-    createdAt: string | number | null;
-    finishedAt: string | number | null;
-  }> = [];
-  try {
-    const resp = await fetch(
-      `${getPlatformApiPrefix()}/ai/agent/tasks?limit=50&conversationId=${encodeURIComponent(conversationId)}`
-    );
-    const body = await resp.json().catch(() => null);
-    if (!resp.ok || body?.ok !== true) return;
-    rows = body.tasks || [];
-  } catch {
-    return;
-  }
-  let changed = false;
-  for (const t of rows) {
-    if (!t.taskId || subTaskRuns.has(t.taskId)) continue;
-    if (t.status === 'running' || t.status === 'pending') continue; // 由 resume/live 路径负责
-    const status: ConversationRunStatus =
-      t.status === 'completed' ? 'done' : t.status === 'failed' ? 'error' : 'stopped';
-    const startedAt = t.createdAt ? new Date(t.createdAt).getTime() : Date.now();
-    const finishedAt = t.finishedAt ? new Date(t.finishedAt).getTime() : undefined;
-    subTaskRuns.set(t.taskId, {
-      conversationId,
-      projectId: t.projectId || '',
-      status,
-      userContent: t.taskText || '（子 agent 任务）',
-      userTs: t.createdAt ? String(t.createdAt) : new Date(startedAt).toISOString(),
-      assistantContent: t.error ? `失败：${t.error}` : '',
-      assistantTs: new Date(startedAt + 1).toISOString(),
-      assistantPending: false,
-      assistantError: status === 'error',
-      progressUpdates: [],
-      resultEditProgress: [],
-      toolActivities: [],
-      pendingApproval: null,
-      startedAt,
-      taskId: t.taskId,
-      parentTaskId: t.parentTaskId ?? undefined,
-      loop: null,
-      processingDurationMs: finishedAt ? Math.max(0, finishedAt - startedAt) : 0,
-      completedAt: finishedAt,
-    });
-    emitSubTask(t.taskId);
-    changed = true;
-  }
-  if (changed) emit(conversationId);
+  clearConversationRunListeners();
+  __resetSubAgentTaskStoresForTests();
 }
 
 /**
@@ -1313,35 +686,5 @@ export async function resumeOrphanAgentTasks(
   const primaryTaskId = findResumableAgentTask(conversationId, projectId);
   if (primaryTaskId && !isConversationRunning(conversationId)) {
     resumeConversationRun(primaryTaskId, conversationId, projectId);
-  }
-}
-
-export function stopSubAgentTask(taskId: string | null | undefined): void {
-  if (!taskId) return;
-  const current = subTaskRuns.get(taskId);
-  if (!current || current.status !== 'running') return;
-  const completedAt = Date.now();
-  replaceSubTask(taskId, (c) => ({
-    ...c,
-    status: 'stopped',
-    assistantContent: c.assistantContent.trim()
-      ? c.assistantContent
-      : '后台任务已停止，已完成的部分结论和工具记录已保留。',
-    assistantPending: false,
-    assistantError: false,
-    processingDurationMs: Math.max(0, completedAt - c.startedAt),
-    completedAt,
-  }));
-  if (current.taskId) {
-    void cancelAgentTask(current.taskId).catch(() => {});
-  }
-}
-
-export function clearSubAgentTask(taskId: string | null | undefined): void {
-  if (!taskId) return;
-  const convId = subTaskRuns.get(taskId)?.conversationId;
-  if (subTaskRuns.delete(taskId)) {
-    if (convId) subTaskConvListeners.get(convId)?.forEach((listener) => listener());
-    emitSubTask(taskId);
   }
 }
