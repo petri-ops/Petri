@@ -82,6 +82,10 @@ import {
 } from '@/components/result-studio/resultSurface';
 import { getBridge } from '@/lib/desktopBridge';
 import styles from '@/pages/project-workspace.module.css';
+// BLOCK-92 Wave B-2 — 状态簇外迁（./ResultArtifactShell/，纯搬运零行为变化）。
+import { useArtifactRecovery } from './ResultArtifactShell/useArtifactRecovery';
+import { useResultReportActions } from './ResultArtifactShell/useResultReportActions';
+import { useArtifactInteractionSelection } from './ResultArtifactShell/useArtifactInteractionSelection';
 import { fileExtension, isImageFile, isTextFile, isMarkdownFile, workspaceFileUrlFor, formatPreviewText } from '@/lib/previewFileUtils';
 import {
   toArtifactRevision,
@@ -159,9 +163,6 @@ export function ResultArtifactShell({
   const bodyJobRef = useRef<string | null>(null);
   const activeBodyJobRef = useRef<string | null>(job?.id ?? null);
   activeBodyJobRef.current = job?.id ?? null;
-  // Which artifact the interaction manifest belongs to, so the manifest effect
-  // can tell an artifact change from an unrelated dependency change.
-  const manifestArtifactRef = useRef<string | null>(null);
   // P4R-2: result↔chat scroll preservation. `.resultView` is the scroll
   // container; the result projection layer unmounts in chat mode, so the
   // position is held in the module-level memory keyed by job id and restored
@@ -185,7 +186,6 @@ export function ResultArtifactShell({
     reason: string | null;
   }>({ key: '', status: 'checking', reason: null });
   // RS3：交互清单由后端基于完整文件判定（稳定 ID 列、可选维度），前端只消费。
-  const [interactionRevision, setInteractionRevision] = useState<ArtifactRevision | null>(null);
   // P4R-4: a historical Revision can share its Job with a later restored
   // Revision. Keep the clicked identity as disposable view state and pass it
   // explicitly to the interaction route; do not infer it from job+artifact.
@@ -193,34 +193,7 @@ export function ResultArtifactShell({
   useEffect(() => {
     setViewedRevision((current) => revisionAfterJobSelection(current, job?.id ?? null));
   }, [job?.id]);
-  const [interactionManifest, setInteractionManifest] = useState<ArtifactInteractionManifest | null>(null);
-  const [interactionBackingTable, setInteractionBackingTable] = useState<ResultTableQuery | null>(null);
-  const [interactionError, setInteractionError] = useState('');
-  const [interactionRetryVersion, setInteractionRetryVersion] = useState(0);
-  const [artifactSelection, setArtifactSelection] = useState<ArtifactSelection | null>(null);
-  const [selectionError, setSelectionError] = useState('');
-  const [interactionPreviewKey, setInteractionPreviewKey] = useState<string | null>(null);
-  // SelectionContext 是 SQLite 真相的乐观投影。连续点击必须按发生顺序写入，
-  // 且保存/删除失败时回到最后一次真正提交的选择，不能把未落库状态交给 Agent。
-  const selectionMutationEpochRef = useRef(0);
-  const selectionMutationVersionRef = useRef(0);
-  const selectionMutationQueueRef = useRef<Promise<void>>(Promise.resolve());
-  const visibleSelectionRef = useRef<ArtifactSelection | null>(null);
-  const committedSelectionRef = useRef<ArtifactSelection | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-
-  const [pendingRecovery, setPendingRecovery] = useState<{
-    actionId: string;
-    label: string;
-    token: string;
-  } | null>(null);
-  const [recoveryBusy, setRecoveryBusy] = useState(false);
-  const [recoveryError, setRecoveryError] = useState('');
-  const [reportGenerating, setReportGenerating] = useState(false);
-  const [finalReportUrl, setFinalReportUrl] = useState('');
-  const [reportGenerationError, setReportGenerationError] = useState('');
-  const [replayPackageBusy, setReplayPackageBusy] = useState(false);
-  const [replayPackageMessage, setReplayPackageMessage] = useState('');
   const [artifactSwitchMs, setArtifactSwitchMs] = useState<number | null>(null);
 
   // BLOCK-83 D4：工具 manifest 从插件目录投影取，不再依赖核心静态清单。
@@ -271,7 +244,8 @@ export function ResultArtifactShell({
       setPreviewText(null);
       setPreviewData(null);
       setPreviewLoading(false);
-      setInteractionError('');
+      // interactionError 的清空由 useArtifactInteractionSelection 的绑定键
+      // 变更路径覆盖（job→null 亦改变绑定键，行为与拆分前一致）。
       return;
     }
 
@@ -485,6 +459,22 @@ export function ResultArtifactShell({
     () => artifacts.find((artifact) => /(^|\/)final-report\.html$/i.test(artifact.name)) || null,
     [artifacts]
   );
+  // BLOCK-92 Wave B-2 — 报告/复现包簇外迁（./ResultArtifactShell/useResultReportActions.ts）。
+  const {
+    reportGenerating,
+    finalReportUrl,
+    reportGenerationError,
+    replayPackageBusy,
+    replayPackageMessage,
+    generateFinalReport,
+    exportReplayPackage,
+  } = useResultReportActions({
+    job,
+    lang,
+    buildUrl,
+    materializedReportArtifact,
+    resolvedTheme,
+  });
   const preferredArtifactName =
     activeArtifact && activeArtifact.jobId === job?.id ? activeArtifact.name : '';
   const selectedArtifact = useMemo(() => {
@@ -534,12 +524,41 @@ export function ResultArtifactShell({
         preview: selectedArtifact.preview,
       })
     : 'binary';
-  const interactionBindingKey = `${viewedRevision?.revisionId || 'current'}::${viewedRevision?.toolJobId || job?.id || ''}::${selectedArtifactName}`;
-  const interactionIsBound = manifestArtifactRef.current === interactionBindingKey;
-  const boundInteractionManifest = interactionIsBound ? interactionManifest : null;
-  const boundInteractionRevision = interactionIsBound ? interactionRevision : null;
-  const boundInteractionBackingTable = interactionIsBound ? interactionBackingTable : null;
-  const boundArtifactSelection = interactionIsBound ? artifactSelection : null;
+  // BLOCK-92 Wave B-2 — 交互清单与选择状态簇外迁
+  // （./ResultArtifactShell/useArtifactInteractionSelection.ts，纯搬运零行为变化；
+  // interactionBindingKey/manifestArtifactRef/选择变更队列随之内聚）。
+  const {
+    interactionBindingKey,
+    interactionPreviewKey,
+    setInteractionPreviewKey,
+    boundInteractionManifest,
+    boundInteractionRevision,
+    boundInteractionBackingTable,
+    boundArtifactSelection,
+    interactionError,
+    selectionError,
+    setInteractionRetryVersion,
+    handleSelectionChange,
+    resetInteractionSelection,
+  } = useArtifactInteractionSelection({
+    project,
+    conversationId,
+    job,
+    effectiveJobStatus,
+    lang,
+    selectedArtifactName,
+    viewedRevision,
+    viewerAdapter,
+  });
+  // BLOCK-92 Wave B-2 — 恢复动作簇外迁（./ResultArtifactShell/useArtifactRecovery.ts）。
+  const {
+    recoveryAction,
+    recoveryBusy,
+    pendingRecovery,
+    recoveryError,
+    requestRecovery,
+    resolveRecovery,
+  } = useArtifactRecovery({ job, workflow, onAskAgent, onWorkflowChanged });
   const usesInteractiveViewer = Boolean(
     boundInteractionManifest?.interactionMode && boundInteractionManifest.interactionMode !== 'read_only',
   );
@@ -578,18 +597,6 @@ export function ResultArtifactShell({
     });
     if (duration !== null) setArtifactSwitchMs(duration);
   }, [selectedArtifactName]);
-
-  useEffect(() => {
-    setPendingRecovery(null);
-    setRecoveryError('');
-    setFinalReportUrl('');
-    setReportGenerationError('');
-  }, [job?.id]);
-
-  useEffect(() => {
-    if (!materializedReportArtifact) return;
-    setFinalReportUrl(materializedReportArtifact.url || buildUrl(materializedReportArtifact.name));
-  }, [buildUrl, materializedReportArtifact]);
 
   useEffect(() => {
     if (!selectedArtifactName || navSections.length === 0) return;
@@ -633,137 +640,8 @@ export function ResultArtifactShell({
     }
   }, [artifacts, onPendingArtifactConsumed, pendingArtifactName]);
 
-  // RS3：交互清单只能由后端基于**完整文件**产出。浏览器侧只有 buildPreviewTable
-  // 解析出的前 40 行样本，用它判定"哪一列是稳定实体 ID"会在 10 万行表上出错。
-  // artifact 一变就重取，并清空上一份选择——旧选择属于旧 artifact，不能顺延。
-  useEffect(() => {
-    const epoch = selectionMutationEpochRef.current + 1;
-    selectionMutationEpochRef.current = epoch;
-    // 只在 artifact 真的换了时才清空。这个 effect 的依赖还包含 conversationId
-    // 与 effectiveJobStatus，因此 artifact 没变也会重跑；而下面的 catch 是空的，
-    // 于是一次刷新失败就会永久丢掉交互视图——次级失败降级了主体能力。
-    // 清空本身的理由（旧选择属于旧 artifact）依然成立，只是收窄到它真正适用的条件。
-    // 见 components/result-studio/resultBodyState.ts。
-    if (manifestArtifactRef.current !== interactionBindingKey) {
-      manifestArtifactRef.current = interactionBindingKey;
-      setInteractionManifest(null);
-      setInteractionRevision(null);
-      setInteractionBackingTable(null);
-      setInteractionError('');
-      setArtifactSelection(null);
-      visibleSelectionRef.current = null;
-      committedSelectionRef.current = null;
-      setSelectionError('');
-    }
-    if (!job || effectiveJobStatus !== 'done' || !selectedArtifactName) return;
-    if (!shouldRequestArtifactInteraction(viewerAdapter)) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        setInteractionError('');
-        const data = await fetchArtifactInteraction({
-          language: lang,
-          jobId: viewedRevision?.toolJobId || job.id,
-          artifact: selectedArtifactName,
-          revisionId: viewedRevision?.revisionId || null,
-        });
-        if (cancelled) return;
-        if (data?.manifest) {
-          setInteractionManifest(data.manifest);
-          setInteractionRevision(toArtifactRevision(data.revision));
-          setInteractionBackingTable(data.backingTable || null);
-          const restored = await restoreResultStudioSelection({
-            language: lang,
-            projectId: project.id,
-            conversationId,
-            artifactId: data.manifest.artifactId,
-            revisionId: data.manifest.revisionId,
-            selectionDurable: data.manifest.selectionDurable,
-          });
-          if (!cancelled && selectionMutationEpochRef.current === epoch) {
-            visibleSelectionRef.current = restored;
-            committedSelectionRef.current = restored;
-            setArtifactSelection(restored);
-          }
-        }
-      } catch {
-        if (!cancelled && shouldSurfaceInteractionFailure(viewerAdapter)) {
-          // 次级交互失败不能清空主体结果；明确告诉用户当前降级及恢复动作。
-          setInteractionError('交互能力暂不可用；请查看下方产物状态。');
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-      if (selectionMutationEpochRef.current === epoch) selectionMutationEpochRef.current += 1;
-    };
-  }, [conversationId, effectiveJobStatus, interactionBindingKey, interactionRetryVersion, job?.id, lang, project.id, selectedArtifactName, viewedRevision, viewerAdapter]);
-
-  const handleSelectionChange = useCallback((next: ArtifactSelection | null) => {
-    const epoch = selectionMutationEpochRef.current;
-    const version = selectionMutationVersionRef.current + 1;
-    selectionMutationVersionRef.current = version;
-    const previousVisible = visibleSelectionRef.current;
-    setSelectionError('');
-    if (!next) {
-      visibleSelectionRef.current = null;
-      setArtifactSelection(null);
-      if (!previousVisible?.selectionId) return;
-      selectionMutationQueueRef.current = selectionMutationQueueRef.current
-        .catch(() => undefined)
-        .then(async () => {
-          try {
-            await deleteResultStudioSelection({ language: lang, selectionId: previousVisible.selectionId! });
-            if (selectionMutationEpochRef.current !== epoch) return;
-            committedSelectionRef.current = null;
-          } catch (error) {
-            if (selectionMutationEpochRef.current !== epoch
-                || selectionMutationVersionRef.current !== version) return;
-            const rollback = committedSelectionRef.current;
-            visibleSelectionRef.current = rollback;
-            setArtifactSelection(rollback);
-            setSelectionError(error instanceof Error ? error.message : '清除选择失败');
-          }
-        });
-      return;
-    }
-    const randomId = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-      ? crypto.randomUUID()
-      : `${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const selectionId = previousVisible?.selectionId
-      || committedSelectionRef.current?.selectionId
-      || `sel_${randomId}`;
-    const optimistic = { ...next, selectionId, compatibility: 'compatible' as const };
-    visibleSelectionRef.current = optimistic;
-    setArtifactSelection(optimistic);
-    selectionMutationQueueRef.current = selectionMutationQueueRef.current
-      .catch(() => undefined)
-      .then(async () => {
-        try {
-          const saved = await saveResultStudioSelection({
-            language: lang,
-            selection: optimistic,
-            selectionId,
-            projectId: project.id,
-            conversationId,
-          });
-          if (selectionMutationEpochRef.current !== epoch) return;
-          const committed = { ...saved, compatibility: 'compatible' as const };
-          committedSelectionRef.current = committed;
-          if (selectionMutationVersionRef.current === version) {
-            visibleSelectionRef.current = committed;
-            setArtifactSelection(committed);
-          }
-        } catch (error) {
-          if (selectionMutationEpochRef.current !== epoch
-              || selectionMutationVersionRef.current !== version) return;
-          const rollback = committedSelectionRef.current;
-          visibleSelectionRef.current = rollback;
-          setArtifactSelection(rollback);
-          setSelectionError(error instanceof Error ? error.message : '保存选择失败');
-        }
-      });
-  }, [conversationId, lang, project.id]);
+  // BLOCK-92 Wave B-2 — 交互清单重取 effect 与选择变更队列已随
+  // useArtifactInteractionSelection 外迁（含乐观投影/失败回滚语义，逐行平移）。
 
   useEffect(() => {
     if (!job || effectiveJobStatus !== 'done' || (!selectedArtifact && !viewedRevision)) {
@@ -1024,105 +902,8 @@ export function ResultArtifactShell({
     artifactPickerGroups,
     selectedArtifactName,
   )?.option || null;
-  const recoveryAction = workflow?.nextActions?.[0] || null;
-  const actionRunsDirectly = isDirectRecoveryAction(recoveryAction?.id);
-
-  const requestRecovery = async () => {
-    if (!job || !recoveryAction) return;
-    if (!actionRunsDirectly) {
-      onAskAgent(
-        `请处理任务 ${job.id} 的 ${recoveryAction.label}。先说明原因和拟采取的操作，得到我确认后再执行。`,
-      );
-      return;
-    }
-    setRecoveryBusy(true);
-    setRecoveryError('');
-    try {
-      const response = await runHarnessWorkflowAction({
-        jobId: job.id,
-        actionId: recoveryAction.id,
-      });
-      if (!response.confirmationToken) throw new Error('未获得恢复确认凭证');
-      setPendingRecovery({
-        actionId: recoveryAction.id,
-        label: recoveryAction.label,
-        token: response.confirmationToken,
-      });
-    } catch (error) {
-      setRecoveryError(error instanceof Error ? error.message : '恢复请求失败');
-    } finally {
-      setRecoveryBusy(false);
-    }
-  };
-
-  const resolveRecovery = async (confirm: boolean) => {
-    if (!job || !pendingRecovery) return;
-    setRecoveryBusy(true);
-    setRecoveryError('');
-    try {
-      await runHarnessWorkflowAction({
-        jobId: job.id,
-        actionId: pendingRecovery.actionId,
-        confirmationToken: pendingRecovery.token,
-        confirm,
-      });
-      setPendingRecovery(null);
-      if (confirm) onWorkflowChanged?.();
-    } catch (error) {
-      setRecoveryError(error instanceof Error ? error.message : '恢复操作失败');
-    } finally {
-      setRecoveryBusy(false);
-    }
-  };
-
-  const generateFinalReport = async () => {
-    if (!job) return;
-    setReportGenerating(true);
-    setReportGenerationError('');
-    try {
-      const token = getToken();
-      const response = await fetch(`${getApiPrefix(lang)}/tools/report/${encodeURIComponent(job.id)}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? {Authorization: `Bearer ${token}`} : {}),
-        },
-        body: JSON.stringify({ theme: resolvedTheme }),
-      });
-      const data = await response.json();
-      if (!response.ok || !data.ok || !data.fileName) throw new Error(data.message || data.error || '报告生成失败');
-      setFinalReportUrl(buildUrl(data.fileName));
-    } catch (error) {
-      setReportGenerationError(error instanceof Error ? error.message : '报告生成失败');
-    } finally {
-      setReportGenerating(false);
-    }
-  };
-
-  const exportReplayPackage = async () => {
-    if (!job) return;
-    setReplayPackageBusy(true);
-    setReplayPackageMessage('');
-    try {
-      const token = getToken();
-      const response = await fetch(`${getApiPrefix(lang)}/harness/scientific-task-by-job/${encodeURIComponent(job.id)}/replay-package`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({}),
-      });
-      const data = await response.json();
-      if (!response.ok || !data.ok) throw new Error(data.error || '复现包导出失败');
-      const completeness = data.replayPackageRef?.status === 'complete' ? '完整历史' : '历史部分可用';
-      setReplayPackageMessage(`复现包已写入项目结果目录 · ${completeness}`);
-    } catch (error) {
-      setReplayPackageMessage(error instanceof Error ? error.message : '复现包导出失败');
-    } finally {
-      setReplayPackageBusy(false);
-    }
-  };
+  // BLOCK-92 Wave B-2 — 恢复动作/报告生成/复现包导出回调已随
+  // useArtifactRecovery / useResultReportActions 外迁。
 
   const workflowBar = shouldShowWorkflowBar({
     hasWorkflow: Boolean(workflow),
@@ -1371,17 +1152,13 @@ export function ResultArtifactShell({
           onRevisionViewed={(revision) => {
             if (!revision.toolJobId) return;
             setViewedRevision(revision);
-            setArtifactSelection(null);
-            visibleSelectionRef.current = null;
-            committedSelectionRef.current = null;
+            resetInteractionSelection();
             onModeChange?.('result', job.id);
           }}
           onRevisionActivated={(revision) => {
             if (!revision.toolJobId) return;
             setViewedRevision(revision);
-            setArtifactSelection(null);
-            visibleSelectionRef.current = null;
-            committedSelectionRef.current = null;
+            resetInteractionSelection();
             onModeChange?.('result', revision.toolJobId);
             dispatchGewuEvent(gewuEvents.projectOpenArtifact, {
               projectId: project.id,
