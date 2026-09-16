@@ -17,6 +17,13 @@ import { CodeMirrorEditor } from '@/components/editor';
 import type { DiffRevision } from '@/components/editor/CodeMirror/types';
 import { WorkspaceFileIcon } from '@/components/workspace-panels/WorkspaceFileIcon';
 import { useWorkingTreeReview, type CommitInfo, type DiffFile, type DiffResult } from './useWorkingTreeReview';
+// BLOCK-92 Wave B-3 — 界面逻辑簇外迁（./useReviewModeState.ts，纯搬运零行为变化）。
+import {
+  useDockAccordion,
+  useGitInitPrompt,
+  useGitWriteOps,
+  useHoverPreview,
+} from './useReviewModeState';
 import { CodeMirrorDiffView } from './CodeMirrorDiffView';
 import { HoverPreviewPopover } from './HoverPreviewPopover';
 import { CodeReviewDrawer } from './CodeReviewDrawer';
@@ -71,141 +78,31 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   const textareaRef = useRef<HTMLInputElement>(null);
 
   // ============================================================
-  // BLOCK-41 — git 写操作三期（staged 提交框 / 真实分支切换 / push-pull）
+  // BLOCK-41 — git 写操作 UI 簇（staged 提交框 / 真实分支切换 / push-pull）
+  // 已外迁 ./useReviewModeState.ts useGitWriteOps（调用点在 stagedFiles 就位后）。
   // ============================================================
-  const [stagedCommitMsg, setStagedCommitMsg] = useState('');
-  const [stagedCommitError, setStagedCommitError] = useState<string | null>(null);
-  const [stagedCommitting, setStagedCommitting] = useState(false);
-  const [checkoutError, setCheckoutError] = useState<{ message: string; conflicts: string[] } | null>(null);
-  const [syncBusy, setSyncBusy] = useState<'push' | 'pull' | null>(null);
-
-  // 改动分区挂载时取分支列表 + 远程同步状态（切换选择器与 push/pull 徽标消费）
-  useEffect(() => {
-    if (review.historyView !== 'changes') return;
-    void review.loadBranches();
-    void review.loadRemoteStatus();
-  }, [review.historyView]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================
-  // BLOCK-53 P2 — 非 git 工作区一次性引导（UI-283）：
-  // 空态里给「初始化 git 仓库」入口（内联二次确认，明示将创建 .git +
-  // 全量初始提交）；dismiss 记一次性（localStorage 按 projectId，对齐
-  // codex 信任屏「每目录只弹一次」哲学）。init 成功后 refresh 让空态
-  // 自动切换为正常审阅视图；非 git 诚实空态仍是引导后的稳态兜底。
+  // BLOCK-53 P2 — 非 git 工作区一次性引导（UI-283）状态簇已外迁
+  // ./useReviewModeState.ts useGitInitPrompt（dismiss 一次性记忆 + init 链）。
   // ============================================================
-  const [gitInitBusy, setGitInitBusy] = useState(false);
-  const [gitInitConfirmOpen, setGitInitConfirmOpen] = useState(false);
-  const [gitInitMessage, setGitInitMessage] = useState<string | null>(null);
-  const [gitInitDismissed, setGitInitDismissed] = useState(false);
-
-  useEffect(() => {
-    try {
-      setGitInitDismissed(
-        window.localStorage.getItem(`gewu.gitinit.dismissed.${projectId || 'default'}`) === '1'
-        || window.localStorage.getItem(`biof3.gitinit.dismissed.${projectId || 'default'}`) === '1',
-      );
-    } catch {
-      // localStorage 不可用（私有模式等）时按「未 dismiss」处理，引导仍可用
-      setGitInitDismissed(false);
-    }
-  }, [projectId]);
-
-  const dismissGitInitPrompt = useCallback(() => {
-    setGitInitDismissed(true);
-    try {
-      // projectId 缺席（异常路由）时也按一次性记忆处理，用兜底 key
-      window.localStorage.setItem(`gewu.gitinit.dismissed.${projectId || 'default'}`, '1');
-    } catch {
-      // ignore：记忆失败仅影响「不再弹」，本次 dismiss 仍然生效
-    }
-  }, [projectId]);
-
-  const handleGitInit = useCallback(async () => {
-    if (gitInitBusy) return;
-    if (!projectId) {
-      setGitInitMessage('无法定位当前项目（缺少路由参数），请从项目工作台进入审阅。');
-      return;
-    }
-    setGitInitBusy(true);
-    setGitInitMessage(null);
-    try {
-      const bridge = getBridge('workingTreeReview');
-      const res = await bridge?.initRepository?.({ projectId });
-      if (!res || !res.ok) {
-        setGitInitMessage(res?.message || res?.error || 'git 初始化失败');
-        return;
-      }
-      if (res.data?.warning) {
-        // init 已成功但初始提交未完成（如 git 身份未配置）——如实展示，审阅已可用
-        setGitInitMessage(res.data.warning);
-        return;
-      }
-      setGitInitConfirmOpen(false);
-      await review.refresh();
-    } catch (e) {
-      setGitInitMessage(e instanceof Error ? e.message : String(e));
-    } finally {
-      setGitInitBusy(false);
-    }
-  }, [gitInitBusy, projectId, review]);
-
-
-  const handleStagedCommit = async () => {
-    const msg = stagedCommitMsg.trim();
-    if (!msg || stagedCommitting) return;
-    setStagedCommitting(true);
-    setStagedCommitError(null);
-    try {
-      const res = await review.commitIndex(msg);
-      setCommitSuccess({ commit: res.commit, files: stagedFiles.map((f) => f.path), message: msg });
-      setStagedCommitMsg('');
-    } catch (e) {
-      setStagedCommitError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setStagedCommitting(false);
-    }
-  };
+  const {
+    gitInitBusy,
+    gitInitConfirmOpen,
+    setGitInitConfirmOpen,
+    gitInitMessage,
+    gitInitDismissed,
+    dismissGitInitPrompt,
+    handleGitInit,
+  } = useGitInitPrompt({ projectId, refresh: review.refresh });
 
   const currentBranchName = review.branches?.find((b) => b.current)?.name ?? null;
 
-  const handleCheckoutBranch = async (name: string) => {
-    setCheckoutError(null);
-    const res = await review.checkoutBranch(name);
-    if (!res.ok) {
-      setCheckoutError({ message: res.message ?? '切换分支失败。', conflicts: res.conflicts ?? [] });
-    }
-  };
-
-  // BLOCK-29.1 — dock 手风琴：每文件一行，点击展开/收起行内 diff。
-  // selectedFilePath 变化（聊天卡片跳转等）时自动展开对应行。
-  const [expandedPaths, setExpandedPaths] = useState<Set<string>>(() => new Set());
-  useEffect(() => {
-    const target = review.selectedFilePath;
-    if (!target) return;
-    setExpandedPaths((prev) => (prev.has(target) ? prev : new Set(prev).add(target)));
-  }, [review.selectedFilePath]);
-  const toggleAccordionRow = (path: string) => {
-    setExpandedPaths((prev) => {
-      const next = new Set(prev);
-      if (next.has(path)) next.delete(path);
-      else next.add(path);
-      return next;
-    });
-    review.setSelectedFilePath(path);
-  };
-
-  // UI-248 — 批量展开/收起全部文件行内差异：
-  // 展开时同时打开全部目录分组，保证行在树中可见；收起只清行内 diff，不动目录分组。
-  const changeFilePaths = (review.status?.files ?? []).map((f) => f.path);
-  const anyFileExpanded = changeFilePaths.some((p) => expandedPaths.has(p));
-  const toggleExpandAllFiles = () => {
-    if (anyFileExpanded) {
-      setExpandedPaths(new Set());
-      return;
-    }
-    setCollapsedDirs({});
-    setExpandedPaths(new Set(changeFilePaths));
-  };
+  // BLOCK-29.1 — dock 手风琴簇已外迁 ./useReviewModeState.ts useDockAccordion。
+  const { expandedPaths, toggleAccordionRow, anyFileExpanded, toggleExpandAllFiles } = useDockAccordion({
+    review,
+    setCollapsedDirs,
+  });
 
   // UI-254 — 右侧文件树点击：展开/收起左侧行内 diff，并把该行滚入视野
   const openFileFromTree = (path: string) => {
@@ -217,43 +114,9 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
     }, 60);
   };
 
-  // UI-250/UI-255 — 文件行悬停浮动预览：hover 350ms 后弹出只读 diff/内容
-  // （与审阅详情同源同渲染；UI-255 起位置/尺寸由 HoverPreviewPopover 实测自适应，不再超出应用窗口）
-  const [hoverPreview, setHoverPreview] = useState<{ path: string; anchor: DOMRect } | null>(null);
-  const hoverOpenTimer = useRef<number | null>(null);
-  const hoverCloseTimer = useRef<number | null>(null);
-
-  const cancelHoverTimers = useCallback(() => {
-    if (hoverOpenTimer.current !== null) {
-      window.clearTimeout(hoverOpenTimer.current);
-      hoverOpenTimer.current = null;
-    }
-    if (hoverCloseTimer.current !== null) {
-      window.clearTimeout(hoverCloseTimer.current);
-      hoverCloseTimer.current = null;
-    }
-  }, []);
-
-  const scheduleHoverClose = useCallback(() => {
-    if (hoverOpenTimer.current !== null) {
-      window.clearTimeout(hoverOpenTimer.current);
-      hoverOpenTimer.current = null;
-    }
-    if (hoverCloseTimer.current !== null) window.clearTimeout(hoverCloseTimer.current);
-    hoverCloseTimer.current = window.setTimeout(() => setHoverPreview(null), 120);
-  }, []);
-
-  const scheduleHoverPreview = useCallback((path: string, el: HTMLElement) => {
-    if (hoverCloseTimer.current !== null) {
-      window.clearTimeout(hoverCloseTimer.current);
-      hoverCloseTimer.current = null;
-    }
-    if (hoverOpenTimer.current !== null) window.clearTimeout(hoverOpenTimer.current);
-    hoverOpenTimer.current = window.setTimeout(() => {
-      hoverOpenTimer.current = null;
-      setHoverPreview({ path, anchor: el.getBoundingClientRect() });
-    }, 350);
-  }, []);
+  // UI-250/UI-255 — 文件行悬停浮动预览簇已外迁 ./useReviewModeState.ts useHoverPreview
+  //（与审阅详情同源同渲染；UI-255 起位置/尺寸由 HoverPreviewPopover 实测自适应）。
+  const { hoverPreview, cancelHoverTimers, scheduleHoverClose, scheduleHoverPreview } = useHoverPreview();
 
   const exitReviewMode = () => {
     if (window.history.length > 1) navigate(-1);
@@ -338,6 +201,24 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   const statusFiles = review.status?.files ?? [];
   const stagedFiles = statusFiles.filter((f) => f.staged);
   const unstagedFiles = statusFiles.filter((f) => !f.staged);
+  // BLOCK-92 Wave B-3 — git 写操作 UI 簇外迁（./useReviewModeState.ts useGitWriteOps：
+  // staged 提交框状态与提交链、真实分支切换错误、push/pull 忙态、分支/远程状态加载）。
+  const {
+    stagedCommitMsg,
+    setStagedCommitMsg,
+    stagedCommitError,
+    setStagedCommitError,
+    stagedCommitting,
+    handleStagedCommit,
+    checkoutError,
+    handleCheckoutBranch,
+    syncBusy,
+    setSyncBusy,
+  } = useGitWriteOps({
+    review,
+    stagedFilePaths: stagedFiles,
+    onCommitSuccess: setCommitSuccess,
+  });
   const stagedGroups = useMemo(() => groupFilesByDirectory(stagedFiles), [review.status]); // eslint-disable-line react-hooks/exhaustive-deps
   const unstagedGroups = useMemo(() => groupFilesByDirectory(unstagedFiles), [review.status]); // eslint-disable-line react-hooks/exhaustive-deps
   const fileGroups = useMemo(() => groupFilesByDirectory(statusFiles), [review.status]); // eslint-disable-line react-hooks/exhaustive-deps
