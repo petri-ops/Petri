@@ -81,7 +81,7 @@ function createMuxSession({ alias, addressFamily, spawnFn }) {
       }
       dbg(session, `write ${Buffer.byteLength(command)}B cmd=${String(command).slice(0, 80)}`);
       session.pending = {
-        resolve: ({ code, stdout }) => { dbg(session, `resolve code=${code} stdout=${String(stdout).length}B`); session.pending = null; resolve({ ok: true, code, stdout: String(stdout) }); },
+        resolve: ({ code, stdout, stderr }) => { dbg(session, `resolve code=${code} stdout=${String(stdout).length}B`); session.pending = null; resolve({ ok: true, code, stdout: String(stdout), stderr: String(stderr || '') }); },
         reject: (err) => { dbg(session, `reject: ${err.message}`); session.pending = null; reject(err); },
         timer: setTimeout(() => {
           dbg(session, `TIMEOUT ${timeoutMs}ms pendingDiscarded`);
@@ -111,10 +111,20 @@ function createMuxSession({ alias, addressFamily, spawnFn }) {
       if (session.pending && line.startsWith('R\t')) {
         const parts = line.split('\t');
         const code = Number(parts[1]);
-        const b64 = parts.slice(2).join('\t');
+        // BLOCK-96 F3 — envelope R\t<code>\t<b64 stdout>\t<b64 stderr>；
+        // 旧 3 字段形态（无 stderr）兼容解析。
+        let stdoutB64;
+        let stderrB64 = '';
+        if (parts.length >= 4) {
+          stdoutB64 = parts[2];
+          stderrB64 = parts[3];
+        } else {
+          stdoutB64 = parts.slice(2).join('\t');
+        }
         if (session.pending.timer) clearTimeout(session.pending.timer);
-        const stdout = Buffer.from(b64 || '', 'base64').toString('utf8');
-        session.pending.resolve({ code, stdout });
+        const stdout = Buffer.from(stdoutB64 || '', 'base64').toString('utf8');
+        const stderr = stderrB64 ? Buffer.from(stderrB64, 'base64').toString('utf8') : '';
+        session.pending.resolve({ code, stdout, stderr });
       } else {
         dbg(session, `line discarded pending=${!!session.pending} startsR=${line.startsWith('R\t')} len=${line.length}`);
       }
@@ -165,25 +175,26 @@ function scheduleIdleClose(session) {
 }
 
 /** 取（或建）alias 的会话。 */
-function getMuxSession({ alias, addressFamily, spawnFn, openTimeoutMs = 20000 }) {
+function getMuxSession({ alias, addressFamily, spawnFn }) {
   const key = sessionKey({ alias, addressFamily });
   const existing = sessions.get(key);
   if (existing && existing.alive) return existing;
-  return createMuxSession({ alias, addressFamily, spawnFn, openTimeoutMs });
+  return createMuxSession({ alias, addressFamily, spawnFn });
 }
 
 /**
  * 在复用连接上执行一条 agent 命令。
- * 返回 { ok: true, code, stdout }；失败抛 { classified } 形状错误（与 runSshOp 对齐）。
+ * 返回 { ok, code, stdout, stderr }；失败抛 { classified } 形状错误（与 runSshOp 对齐）。
+ * stderr 为 BLOCK-96 F3 envelope 第 4 字段（die 原因回传；旧 agent 无此字段时为空）。
  */
 async function runOnMux({ alias, command, timeoutMs = DEFAULT_RUN_TIMEOUT_MS, spawnFn, addressFamily }) {
   const session = getMuxSession({ alias, addressFamily, spawnFn });
   const r = await session.run(command, timeoutMs);
   if (r.code !== 0) {
-    // 远端 agent die（exit 64 等）——非 transport 错误，语义交由调用方解析 stdout
-    return { ok: true, code: r.code, stdout: r.stdout };
+    // 远端 agent die（exit 64 等）——非 transport 错误，语义交由调用方解析 stdout/stderr
+    return { ok: true, code: r.code, stdout: r.stdout, stderr: r.stderr };
   }
-  return { ok: true, code: 0, stdout: r.stdout };
+  return { ok: true, code: 0, stdout: r.stdout, stderr: r.stderr };
 }
 
 function closeAll() {

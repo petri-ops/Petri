@@ -108,23 +108,35 @@ function createSshBackend({ alias, addressFamily } = {}) {
     ensuredAgents.add(key);
   }
 
+  // BLOCK-96 F3 — agent die（exit 64）经 stderr 回传显式错误码：
+  // "agent_error: <code>" → e.remoteError，替代空 stdout + 硬编码兜底猜测。
+  function dieError(r) {
+    const m = /agent_error:\s*([A-Za-z0-9_.-]+)/.exec(String(r.stderr || ''));
+    const code = m ? m[1] : 'agent_failed';
+    const e = new Error(code);
+    e.remoteError = code;
+    e.agentExit = r.code;
+    return e;
+  }
+
   async function fsOp(verbArgs, { timeoutMs = 30000, maxArgLen = 256 } = {}) {
     await ensureAgent();
     const command = remoteAgentCommand(verbArgs, { maxArgLen });
     // D1.1 性能优化：默认走单连接多路复用（每操作 ~1 RTT）；BIOF3_SSH_MUX=0 回退 thin per-call
     if (sshMux.muxEnabled()) {
+      let r;
       try {
-        const r = await sshMux.runOnMux({ alias, command, timeoutMs, addressFamily: af });
-        return r.stdout;
+        r = await sshMux.runOnMux({ alias, command, timeoutMs, addressFamily: af });
       } catch (e) {
         // BLOCK-96 F1 — 会话死亡/超时（transport.network）：幂等只读 verb 透明
         // 重建重试一次（runOnMux 内部懒重建会话）；其余原样上抛。
         if (!(e && e.classified && e.classified.kind === 'transport.network') || !IDEMPOTENT_READ_VERBS.has(verbArgs[0])) {
           throw e;
         }
-        const r = await sshMux.runOnMux({ alias, command, timeoutMs, addressFamily: af });
-        return r.stdout;
+        r = await sshMux.runOnMux({ alias, command, timeoutMs, addressFamily: af });
       }
+      if (r.code !== 0) throw dieError(r);
+      return r.stdout;
     }
     const op = await sshTransport.runSshOp({
       alias,
@@ -132,11 +144,15 @@ function createSshBackend({ alias, addressFamily } = {}) {
       timeoutMs,
       addressFamily: af,
     });
+    // BLOCK-96 F3 — die（exit 64 → remote.command_failed）转显式 remoteError，
+    // 不再误标为传输层失败。
+    if (op.classified.kind === 'remote.command_failed') throw dieError(op);
     if (op.classified.kind !== 'ok') {
       const error = new Error(`ssh_transport: ${op.classified.kind}`);
       error.classified = op.classified;
       throw error;
     }
+    if (op.code !== 0) throw dieError(op);
     return op.stdout;
   }
 

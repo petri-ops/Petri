@@ -46,12 +46,26 @@ const JOB_ID_RE = /^[A-Za-z0-9._-]{1,64}$/;
 
 const BIOF3_AGENT_SH = `#!/usr/bin/env bash
 # biof3-agent — BioF3 BLOCK-57 daemonless node agent (P1)
+# BLOCK-96 F3 错误契约：LC_ALL=C（字节语义稳定，非 UTF-8 文件名不再咬文本工具）
+# + pipefail（管道失败不再静默；fs_list/fs_find/fs_grep 等尽力而为管道显式 || true）。
+# die() 统一以 "agent_error: <code>" 写 stderr + exit 64；__mux envelope 第 4 字段
+# 回传 stderr(b64)，gateway 据此转 remoteError（替代空 stdout + 兜底猜测）。
+# 错误码表：
+#   usage 族        <verb>_usage（参数缺失）
+#   invalid 族      invalid_offset / invalid_timeout / invalid_pid / invalid_signal /
+#                   invalid_maxdepth / invalid_maxlines / invalid_job_id
+#   failed 族       fs_write_failed / fs_mkdir_failed / fs_mv_failed / fs_cp_failed /
+#                   fs_append_failed / spawn_failed / stat_failed / exec_cwd_missing
+#   already_exists  fs_cp 目标已存在
+#   offset_mismatch fs_append 分片偏移与当前 size 不一致
+#   unknown_verb    未注册 verb
 set -u
+set -o pipefail
+export LC_ALL=C
 AGENT_VERSION="BIOF3_AGENT_V1"
 AGENT_HOME="\${BIOF3_AGENT_HOME:-$HOME/.biof3-agent}"
 JOBS_DIR="$AGENT_HOME/jobs"
 die() { echo "agent_error: $*" >&2; exit 64; }
-now_ms() { date +%s%3N 2>/dev/null || echo $(( $(date +%s) * 1000 )); }
 write_atomic() { tmp="$1.tmp.$$"; cat > "$tmp" && mv "$tmp" "$1"; }
 valid_job() { case "$1" in ''|*[!A-Za-z0-9._-]*) die "invalid_job_id";; esac; }
 
@@ -105,7 +119,9 @@ fs_stat_json() {
     printf '{"type":"dir","size":0,"mtimeMs":%s}\\n' "$(fs_mtime_ms "$p")"
   elif [ -f "$p" ]; then
     sz=$(wc -c < "$p" 2>/dev/null | tr -d ' ')
-    printf '{"type":"file","size":%s,"mtimeMs":%s}\\n' "\${sz:-0}" "$(fs_mtime_ms "$p")"
+    # BLOCK-96 F3 — wc|tr 失败不再静默产出 size:0（pipefail + 显式断言）
+    case "$sz" in ''|*[!0-9]*) die "stat_failed" ;; esac
+    printf '{"type":"file","size":%s,"mtimeMs":%s}\\n' "$sz" "$(fs_mtime_ms "$p")"
   else
     printf '{"error":"not_found"}\\n'
   fi
@@ -125,12 +141,16 @@ if [ "$cmd" = "__mux" ]; then
     [ -z "$line" ] && continue
     decoded=$(printf '%s' "$line" | base64 -d 2>/dev/null) || continue
     tmper=$(mktemp) || continue
-    out=$(eval "$decoded" 2>"$tmper" < /dev/null)
+    out=$(eval "$decoded" 2>"$tmper")
     code=$?
     b64out=$(printf '%s' "$out" | base64 -w0 2>/dev/null || printf '%s' "$out" | base64 | tr -d '
 ')
-    printf 'R	%s	%s
-' "$code" "$b64out"
+    # BLOCK-96 F3 — die 原因（stderr）经 envelope 第 4 字段回传（b64），
+    # 替代「mktemp 捕获后 rm 丢弃」——客户端从此能区分 fs_write_failed/already_exists 等。
+    errb=$(base64 -w0 < "$tmper" 2>/dev/null || base64 < "$tmper" | tr -d '
+')
+    printf 'R	%s	%s	%s
+' "$code" "$b64out" "$errb"
     rm -f "$tmper"
   done
   exit 0
@@ -153,7 +173,7 @@ case "$cmd" in
     [ $# -ge 1 ] || die "fs_list_usage"
     d="$(fs_decode "$1")"
     [ -d "$d" ] || { printf '{"error":"not_found"}\\n'; exit 0; }
-    find -L "$d" -maxdepth 1 -mindepth 1 ! -name '.*' ! -name "*.tmp.$$" -printf '%y\\t%s\\t%T@\\t%f\\0' 2>/dev/null | base64 | tr -d '\\n'
+    find -L "$d" -maxdepth 1 -mindepth 1 ! -name '.*' ! -name "*.tmp.$$" -printf '%y\\t%s\\t%T@\\t%f\\0' 2>/dev/null | base64 | tr -d '\\n' || true
     printf '\\n'
     ;;
   fs_read)
@@ -163,7 +183,8 @@ case "$cmd" in
     off="\${2:-0}"; len="\${3:-0}"
     case "$off$len" in ''|*[!0-9]*) die "invalid_offset";; esac
     if [ "$off" -gt 0 ] || [ "$len" -gt 0 ]; then
-      tail -c +"$((off+1))" "$f" 2>/dev/null | { [ "$len" -gt 0 ] && head -c "$len" || cat; } | base64
+      # pipefail 下 head 提前关闭会让 tail 吃 SIGPIPE（141）——截断是本 verb 的正常语义
+      tail -c +"$((off+1))" "$f" 2>/dev/null | { [ "$len" -gt 0 ] && head -c "$len" || cat; } | base64 || true
     else
       base64 "$f"
     fi
@@ -226,7 +247,7 @@ case "$cmd" in
     r="$(fs_decode "$1")"; md="\${2:-6}"
     case "$md" in ''|*[!0-9]*) die "invalid_maxdepth";; esac
     [ -d "$r" ] || { printf '{"error":"not_found"}\\n'; exit 0; }
-    (cd "$r" 2>/dev/null && find . -maxdepth "$md" -path './.*' -prune -o -type f -print 2>/dev/null) | sed 's|^\\./||'
+    (cd "$r" 2>/dev/null && find . -maxdepth "$md" -path './.*' -prune -o -type f -print 2>/dev/null) | sed 's|^\\./||' || true
     ;;
   fs_grep)
     # fs_grep <b64pattern> <b64path> <maxLines> → grep -rnI 文本行（跳过二进制）
@@ -234,7 +255,7 @@ case "$cmd" in
     pat="$(fs_decode "$1")"; p="$(fs_decode "$2")"; ml="\${3:-200}"
     case "$ml" in ''|*[!0-9]*) die "invalid_maxlines";; esac
     [ -e "$p" ] || { printf '{"error":"not_found"}\\n'; exit 0; }
-    grep -rnI -F -e "$pat" "$p" 2>/dev/null | head -n "$ml"
+    grep -rnI -F -e "$pat" "$p" 2>/dev/null | head -n "$ml" || true
     ;;
   exec)
     # exec <b64cmd> <b64cwd> <timeoutS> → 单行 JSON {code,stdoutB64,stderrB64,truncated}

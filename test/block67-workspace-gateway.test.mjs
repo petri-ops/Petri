@@ -196,6 +196,43 @@ test('ssh 后端: mux 会话死亡对幂等只读 verb 透明重试一次；写�
   assert.strictEqual(writeCalls, 1, 'write verbs never auto-retry');
 });
 
+test('ssh 后端: agent die 经 stderr 回传显式错误码，thin 不误标 transport（BLOCK-96 F3）', async (t) => {
+  const muxModule = require('../core/biof3-server/helpers/remote-execution/ssh-multiplexer');
+  const actual = require('../core/biof3-server/helpers/remote-execution/ssh-transport');
+  const origRunOnMux = muxModule.runOnMux;
+  const origRunSshOp = actual.runSshOp;
+  const origMuxEnv = process.env.BIOF3_SSH_MUX;
+  const runner = require('../core/biof3-server/helpers/remote-execution/remote-job-runner');
+  const origCreate = runner.createRemoteJobRunner;
+  runner.createRemoteJobRunner = () => ({ ensureAgent: async () => ({ ok: true }) });
+  t.after(() => {
+    muxModule.runOnMux = origRunOnMux;
+    actual.runSshOp = origRunSshOp;
+    if (origMuxEnv === undefined) delete process.env.BIOF3_SSH_MUX; else process.env.BIOF3_SSH_MUX = origMuxEnv;
+    runner.createRemoteJobRunner = origCreate;
+  });
+
+  // mux 路径：envelope code=64 + stderr "agent_error: <code>" → remoteError
+  process.env.BIOF3_SSH_MUX = '1';
+  muxModule.runOnMux = async () => ({ ok: true, code: 64, stdout: '', stderr: 'agent_error: already_exists\n' });
+  const backend = gateway.createSshBackend({ alias: 'die-host' });
+  await assert.rejects(
+    () => backend.cp('/x/a', '/x/b'),
+    (e) => e.remoteError === 'already_exists' && e.agentExit === 64,
+  );
+
+  // thin 路径：exit 64 被分类器标为 remote.command_failed → 转 remoteError，不再误标 transport
+  process.env.BIOF3_SSH_MUX = '0';
+  actual.runSshOp = async () => ({
+    code: 64, stdout: '', stderr: 'agent_error: fs_write_failed', timedOut: false,
+    classified: { kind: 'remote.command_failed', retryable: false, detail: 'agent_error: fs_write_failed' },
+  });
+  await assert.rejects(
+    () => backend.write('/x/w.txt', 'data'),
+    (e) => e.remoteError === 'fs_write_failed' && e.agentExit === 64 && !e.classified,
+  );
+});
+
 test('createProject: ssh 字段 fail-closed + 落库形态', () => {
   assert.throws(() => db.createProject({ name: 'bad1', workspaceKind: 'ssh', sshHost: 'bad host!', remotePath: '/x' }), /invalid_ssh_host/);
   assert.throws(() => db.createProject({ name: 'bad2', workspaceKind: 'ssh', sshHost: 'aliyun', remotePath: 'relative' }), /invalid_remote_path/);

@@ -69,6 +69,19 @@ test('mux 会话: exec verb 单行 JSON 透传', async () => {
   assert.ok(Buffer.from(inner.stdout, 'base64').toString('utf-8').includes('mux-echo-31337'));
 });
 
+test('mux 会话: die 错误码经 envelope stderr 字段回传（BLOCK-96 F3）', async () => {
+  const session = mux.getMuxSession({ alias: 'test', spawnFn: localSpawn });
+  // fs_cp 目标已存在 → die already_exists（exit 64）：envelope 第 4 字段携带 stderr(b64)
+  const aMd = join(fakeHome, 'proj', 'a.md').replace(/\\/g, '/');
+  const r = await session.run(remoteAgentCommand([
+    'fs_cp',
+    Buffer.from(aMd).toString('base64'),
+    Buffer.from(aMd).toString('base64'),
+  ]), 20000);
+  assert.strictEqual(r.code, 64);
+  assert.ok(r.stderr.includes('agent_error: already_exists'), JSON.stringify(r.stderr));
+});
+
 test('runOnMux: 非零 exit 仍返回 stdout（语义交调用方）+ muxEnabled 开关', async () => {
   const r = await mux.runOnMux({ alias: 'test', command: remoteAgentCommand(['fs_stat', Buffer.from('/nope/xyz').toString('base64')]), spawnFn: localSpawn, timeoutMs: 20000 });
   assert.strictEqual(r.code, 0); // agent fs_stat not_found 走 stdout JSON、exit 0

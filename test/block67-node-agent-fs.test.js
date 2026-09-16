@@ -74,6 +74,20 @@ test('block67 fs verbs: list 含目录排序语义条目与隐藏文件过滤（
   assert.strictEqual(dirEntry.type, 'dir');
 });
 
+test('block67 fs verbs: die 显式错误码经 stderr（already_exists；BLOCK-96 F3 错误契约）', async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-fs-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  fs.writeFileSync(path.join(dir, 'a.txt'), 'x');
+  await assert.rejects(
+    () => runAgent([
+      'fs_cp',
+      b64(path.join(dir, 'a.txt').replace(/\\/g, '/')),
+      b64(path.join(dir, 'a.txt').replace(/\\/g, '/')),
+    ]),
+    (e) => /agent_error: already_exists/.test(e.stderr || ''),
+  );
+});
+
 test('block67 fs verbs: fs_read 偏移+长度窗口', async (t) => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-fs-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));

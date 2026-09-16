@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-16T08:59:19.153Z",
+  "generatedAt": "2026-09-16T09:27:38.296Z",
   "alias": "wsl",
   "baseline": {
     "firstConnectBeforeMs": 21200,
@@ -11,7 +11,7 @@
       "name": "first_connect",
       "passed": true,
       "detail": {
-        "ms": 330,
+        "ms": 338,
         "baselineMs": 21200,
         "classified": "ok"
       }
@@ -34,7 +34,7 @@
       "name": "fs_list_500_cold",
       "passed": true,
       "detail": {
-        "ms": 20,
+        "ms": 25,
         "entries": 500,
         "baselineMs": 2600
       }
