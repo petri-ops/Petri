@@ -4548,7 +4548,7 @@
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-16",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P2-WAVE-A-COMPLETED",
+      "phase": "P3-WAVE-B-COMPLETED",
       "tags": [
         "block-92",
         "code-modularization",

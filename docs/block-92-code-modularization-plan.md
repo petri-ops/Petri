@@ -1,7 +1,7 @@
 # BLOCK-92-CODE-MODULARIZATION 工作包计划（巨型文件模块化二期）
 
 **最后更新**：2026-09-16
-**状态**：`active`（P2 Wave A copilot 族已收口：3 提交 834b18a9 / c1590d8c / 0a67e84b——conversationRunStore.ts 1347→690 五子模块、copilotClient.ts 1226→220 六子模块、SimpleChat.tsx 2024→1584 六 hook/纯函数簇（主 JSX 按 §5 风险条留 UI-38x 复看窗口后）；原路径 re-export 兼容零消费方改动。门禁=tsc 0 + Wave A 受影响面 22 文件 202 测试全绿（拆前基线 118+33+51 逐项对账）+ 棘轮绿（台账总行数 33296→31193）。下一阶段 P3 Wave B（8 文件，plan §4）。）
+**状态**：`active`（P3 Wave B 页面/面板族已收口：8 提交 53eb2e6e / 87c618c6 / 3f8ba2f3 / 465b0a3c / 910fa6b0 / 2eeffb51 / 162e5a5d / 9fa0947d——project-workspace 1695→1160、ResultArtifactShell 1469→1246、ReviewMode 1429→1310 + useWorkingTreeReview 774→633、DesktopSettingsPanel 973→616、PluginStorePanel 971→789、home 895→739、useSkillStore 743→536、ResultStudioChangeSetPanel 717→530。P2 Wave A copilot 族已收口（3 提交，copilot 族 1347/1226/2024→690/220/1584）。门禁模式：每文件 tsc 0 + 受影响面定向 vitest 拆前基线逐项对账 + 棘轮 --check 绿；台账总行数 33296→29083。**归属更正**：B-5/B-6/B-7 提交信息所记「三套件存量红」实为门禁 shell cwd 伪影（vitest 误从仓库根运行丢 '@/' 别名），自 frontend/ 复验 27/27 全绿，非测试债。下一阶段 P4 Wave C（core 9 文件：拆前必须先存各文件受影响 Node 套件基线，g0-chf0-science 存量红家族逐项对照归属，D8 例外按先例登记归 G0-RS）。）
 **Plan ID**：`BLOCK-92-CODE-MODULARIZATION`
 **用户裁决原话**：「需要新建一个block用来优化项目代码  主要目的是让巨大代码文件模块化 你能安排一下吗 一定要确保没问题」（2026-09-16）
 **家法先例**：`docs/block-9-mega-file-refactor-plan.md`（一期：project-workspace.tsx 3222→4 文件、`_data.ts` 2157→3 文件、buildPreviewTable 抽取）+ `docs/block-9-1-main-js-split-plan.md`（main.js 2450→611 装配器 + `src/ipc/` 域模块），两者均 2026-08-16 当日收口 completed。
