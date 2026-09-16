@@ -32,6 +32,16 @@
 - **新增**（DeepSeek 远程看不到传输层，未覆盖）：IPv6 黑洞（首连慢主根因）；特殊文件名坏 JSON 静默丢文件；mux 死后无透明重试；die 原因经 mux 永久不可见；30s 超时杀整条会话的悬崖（大目录 fs_list 必现）。
 - **范围修正**：单操作 mux RTT 健康（fs_stat 15ms / sys_resource 23ms），「每操作 1.1s」是 BLOCK-67 之前的历史；**问题不在传输架构，在脚本 O(N) fork + 连接面黑洞 + 错误契约**。
 
+### 0.3 probe 的 r/python 探测=生信时代残留（2026-09-16 用户追问，P0 裁决项）
+
+用户原话：「关于 probe 那个呢 是不是不需要进行Rscript探测呀 毕竟这首先是个通用agent 不需要 R和python领域包的解释器」。代码事实（file:line 实证）：
+
+- **probe 的 r/python 结果几乎喂死代码**：现役 SSH 项目插件工具链 `ssh-direct-runner.js` **零消费** probe/resolveRuntime（运行时执行时直取 captureREnv）；唯一实质消费方 `mcp/registry.js:1384-1386`（runPluginToolRemote legacy 分支）在 **BLOCK-76 P5 已退役**（非 SSH 项目远程目标直接 fail「远程执行目标已退役」）。
+- 剩余活消费=纯展示：`RemoteTargets.tsx:52-56,181` 管理页徽标（`R x.y / Python z` 或「无 R/Python」）；os/hostname 仍被作业元数据使用（通用价值，保留）。
+- 调用方硬编码：`target-registry.js` probe 固定传 `['probe', 'r', 'python']`；agent verb 本身已参数化（`probe <lang...>`，未装节点 `command -v` 秒退 ~2ms，装了 R 的节点 `Rscript --version` 真启动 R 0.2-0.8s）。
+- **家法同向性**：BLOCK-83 D7 领域中性化（核心零领域运行时依赖，D7 棘轮在扫）+ BLOCK-86 运行时在位判定已改「包 `requires.runtimes` 契约推导」（本地侧 runtimeStatus 已如此，P3 抓真修过）——SSH 侧 probe 硬编码 r/python 是 BLOCK-57/67 生信时代残留，`scheduler=slurm` 检测同为 HPC 时代产物。
+- **P0 裁决候选**（终态方向=「核心不问节点有没有 R，装了需要 R 的包才问」）：①调用方默认去 lang（`['probe']`，连通性+os/hostname 保留）；②管理页 R/Python/slurm 徽标移除（未来由已装包 `requires.runtimes` 声明驱动再显式出现）；③agent verb 参数化形态保留（零成本，领域包远程运行时声明可复用）；④registry.js legacy 死分支顺手清。台账 F1-F5 表述不变，P0 若纳入为 F6 再同步登记。
+
 ## 1. 五工作面（每面独立可验收、独立提交）
 
 ### F1 连接面（首次连接慢的直接根因）
@@ -85,7 +95,7 @@
 
 | 阶段 | 内容 | 验收门禁 |
 | --- | --- | --- |
-| P0 | 设计评审：五工作面逐项代码事实复核 + 用户裁决 F1 产品级方案（仅配置指引 vs 传输层参数）与 F2 分页协议 | 评审结论回写本文件 + 用户确认 |
+| P0 | 设计评审：五工作面逐项代码事实复核 + 用户裁决 F1 产品级方案（仅配置指引 vs 传输层参数）、F2 分页协议、**§0.3 probe r/python 探测退役切面（调用方去 lang / UI 徽标 / slurm / 死分支清理，是否立 F6）** | 评审结论回写本文件 + 用户确认 |
 | P1 | F1 连接面 + F2 列表面（用户两大感受的直接根因先行） | block67 族契约测试扩展全绿（特殊文件名夹具 + 大目录分页夹具）+ 实机 WSL 计时对照（首连 21.2s→<1s、fs_list 2.6s→<0.1s @500 文件）+ 证据落 `acceptance/block-96/` |
 | P2 | F3 错误契约（die 回传 + pipefail + LC_ALL=C + 错误码表） | 错误注入契约测试（写失败/坏 offset/越界显式错误码，无静默 size=0）+ block67 契约族全绿 |
 | P3 | F4 进程面（pidfile + starttime 身份 + 进程组清理） | block77 resident 契约扩展全绿 + WSL 实机孤儿清零断言 |
