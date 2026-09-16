@@ -1,8 +1,8 @@
 # BLOCK-93-AGENT-OPTIMIZATION — 子智能体专职化与彻底优化
 
-最后更新：2026-09-16
+最后更新：2026-09-16（用户裁决按队列序推进 → active/P0-LAUNCH。启动登记：用户裁决原话「很棒 按顺序 逐个推进」（队列序=BLOCK-93 → 92 → 95 → 94）。spawn 链代码事实复核：spawn_agent args={task,model?,instructions?}（spawn-agent-tools.js:110）→ launchSubAgent → createAgentTask params 落库（:189-204，role 元数据 additive 落点）；followup_task/launchUserFollowup 续派两链共用 launchSubAgent（角色继承落点）；前端三处 inferAgentCategory 消费=ToolActivityList/AgentRunPanel/WorkspaceSummaryCard。P0 裁决项呈用户：①角色集定义与注册表存放位置 ②R4 只读白名单取舍）
 
-状态：`planned（2026-09-16 立项登记，排队不占 active 槽位；用户裁决「专职化可以立一个智能体功能相关的新 block 后面是针对智能体的彻底优化」；启动需用户裁决）`
+状态：`active（P0-LAUNCH——P0 设计评审裁决中；P1 角色注册表+spawn role 参数 → P2 UI 联动 → P3 实机+收口，见 §3）`
 
 计划编号：`BLOCK-93-AGENT-OPTIMIZATION`
 
