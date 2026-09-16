@@ -1673,7 +1673,8 @@
       "commands": [
         "docs-check"
       ],
-      "classifiesScripts": false
+      "classifiesScripts": true,
+      "scriptRole": "governance"
     },
     {
       "id": "block96-ssh-channel-perf",
