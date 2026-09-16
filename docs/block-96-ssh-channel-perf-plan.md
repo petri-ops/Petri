@@ -1,8 +1,8 @@
 # BLOCK-96-SSH-CHANNEL-PERF — SSH 远程通道效率与稳定性优化（连接面 / 列表面 / 错误契约 / 进程面 / 可观测）
 
-最后更新：2026-09-16
+最后更新：2026-09-16（用户裁决启动整包 → active/P0-LAUNCH；启动前置核对过（无 🔴/active 槽位空/git 净，scratch obs.tmp.cjs 当日清）+ 四处承重代码事实当日抽查与 HEAD 一致：node-agent fs_list L141 / gateway parseJsonLines 静默 null L88 / target-registry probe 硬编码 L108 / registry.js 退役分支 L1368）
 
-状态：`planned（2026-09-16 立项登记，排队不占 active 槽位；启动需用户裁决）`
+状态：`active（2026-09-16 用户裁决启动——候选问答「planned 队列从哪个工作包开始推进？」裁决选「BLOCK-96 SSH 通道 (Recommended)」；阶段 P0 评审 → P1 F1+F2 → P2 F3 → P3 F4 → P4 F5+收口，见 §4）`
 
 计划编号：`BLOCK-96-SSH-CHANNEL-PERF`
 
