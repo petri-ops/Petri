@@ -1,8 +1,8 @@
 # BLOCK-96-SSH-CHANNEL-PERF — SSH 远程通道效率与稳定性优化（连接面 / 列表面 / 错误契约 / 进程面 / 可观测）
 
-最后更新：2026-09-16（**P1 收口**：F6 probe 退役（3fa74ea3）+ F2 列表面（f4b74ca8）+ F1 连接面（037de763）+ 实机证据 7/7 allPass（`acceptance/block-96/block96-p1-live.json`）——首连 330ms（黑洞基线 21200ms）、fs_list@500 cold 20ms / warm 15ms（基线 2600ms）、六个特殊文件名（引号/反斜杠/换行/制表符/空格/中文）逐字回填、分页数学与 truncated 标记正确、mux 写列一致；契约 9 套件 73/73 绿（含 mux 透明重试单测 + 特殊文件名/分页夹具固化）；tsc 0 + vitest 36 过；UI-388/389 台账同批登记。**实现期抓真 1 处**：__mux 循环 `out=$(eval ...)` 命令替换剥 NUL 字节——fs_list 改 agent 侧 base64 单行先行（管道直连不过替换），NUL 协议经 mux 全链路存活）。此前：P0 三裁决落定（F1 传输层参数化 / F2 一期含前端游标 / §0.3 立 F6 全做）；用户裁决启动整包 → active/P0-LAUNCH；四处承重代码事实当日抽查与 HEAD 一致）
+最后更新：2026-09-16（**整包收口 completed（P0–P4 当日完成，active 槽位清空）**。交付六工作面：F1 连接面（addressFamily 传输层参数化 + probe 握手计时 + mux 幂等只读透明重试）/ F2 列表面（fs_list 单 fork NUL 记录协议 + 服务端分页 + 前端树游标加载「加载更多」）/ F3 错误契约（die 原因经 mux envelope 第 4 字段回传 + pipefail + LC_ALL=C + 错误码表 + 死代码清理）/ F4 进程面（exec_bg pidfile 身份替代 pgrep 猜测 + ps_pid starttime 校验防 PID 复用 + kill_pid 进程组击杀 + exec 看门狗组杀）/ F5 可观测（verb 日志门控 BIOF3_SSH_VERB_LOG + fs_grep 排除集）/ F6 probe 领域探测退役。**对照数字（WSL 真节点）**：首连 330ms←基线 21200ms；fs_list@500 warm 15ms←基线 2600ms（cold 21ms）；六类特殊文件名（引号/反斜杠/换行/制表符/空格/中文）逐字回填；分页契约与 truncated 标记正确；exec 超时孤儿 orphansAfter=0。**门禁**：契约 12 套件 104 项 0 fail（7 环境跳过）；tsc 0 + vitest 36 过；`npm run closeout` 四门全绿；dev-verify flow `block96-ssh-channel` 3/3 allPass；UI-388/389 台账同提交登记；e48b631/5170e53 台账缺口按 BLOCK-91 先例补登豁免清单。**实现期抓真 3 处**：①__mux 循环 bash $() 剥 NUL——fs_list 改 agent 侧 base64 单行先行；②非 Linux 节点无 setsid——exec/exec_bg 降级路径；③live 脚本 mux 句柄吊住事件循环——closeAll+显式 exit。**评估项五条结论回写（无悬置）**：sftp 大文件/probe TTL 缓存/__mux 并发/IDLE_CLOSE=不做（依据见 F5）；addressFamily setter UI=deferred 遗留候选。G0 开发期常态 · 不外推 packaged/Provider/GA）
 
-状态：`active（P1 已收口；P2 F3 错误契约（die 回传/pipefail/LC_ALL=C/错误码表）待做 → P3 F4 进程面 → P4 F5 可观测+评估项结论+整包收口，见 §4）`
+状态：`completed（2026-09-16 P0–P4 一次会话完成，六工作面 F1–F6 全收口；提交链 2a487b14→12e91068→3fdf5df2→78a58b71→7122bdc5→b5635947→收口提交）`
 
 计划编号：`BLOCK-96-SSH-CHANNEL-PERF`
 
@@ -77,9 +77,14 @@
 
 ### F5 可观测 + 评估项收口
 
-- **verb 级结构化日志**（门控开关，默认关）：每 verb 一行 JSON（verb/耗时/exit/字节数/是否截断/是否分页）——「感觉不稳定」从此可归因。
-- **fs_grep 默认排除集**：`--exclude-dir` 默认 `.git/node_modules/target` 等，maxLines 只限输出不限工的问题缓解。
-- **评估项**（须有结论，做/不做 + 依据，不允许悬置）：大文件 fs_read 改 sftp/scp 通道；probe 结果按节点 TTL 缓存（仅装 R 节点有收益）；`__mux` 请求 id + 并发分派（架构级，一期保持串行语义）。
+- **verb 级结构化日志（已实现）**：`BIOF3_SSH_VERB_LOG=1` 门控（默认关），每 verb 一行 JSON（channel/verb/ms/exit/bytes/ts）——「感觉不稳定」从此可归因；门控测试锁定缺省静默。
+- **fs_grep 默认排除集（已实现）**：`--exclude-dir` 默认 `.git/node_modules/target`。
+- **评估项结论（2026-09-16 P4 逐条裁决，不允许悬置）**：
+  - 大文件 fs_read 改 sftp/scp 通道 → **不做**：fs_read 已有 offset/length 窗口 + BLOCK-90/91 64KB 分片上传/下载通道覆盖大文件路径；16MB 预览上限内单口直读 RTT 实测 15ms 级；引入 sftp 子通道=第二传输码路径，收益不抵复杂度。
+  - probe 结果按节点 TTL 缓存 → **不做**：F6 后 probe 已不在热路径（用户触发一次性 + 无 lang 模式 `command -v` 毫秒级回）；DB `last_probe_json` 已是持久缓存语义；TTL 反而引入第二真相。
+  - `__mux` 请求 id + 并发分派 → **不做（留待有真实并发场景再立项）**：保持 block67「无请求 id 串行」契约；实测单操作 RTT 15-25ms 健康，无并发需求证据；架构级改动在 G0 无实证收益。
+  - IDLE_CLOSE 与轮询协调 → **不做**：10s sys_resource 轮询本身持续刷新 lastActivity 天然保活；无轮询订阅时空闲 5min 关闭是正确资源回收。
+  - addressFamily 目标级 setter UI → **deferred（遗留候选）**：参数化管线已全通（transport/mux/gateway + `projects.ssh_address_family` 读取）；wsl 黑洞已由用户侧 `~/.ssh/config AddressFamily inet` 即效治理；setter 需触 UI-327 项目创建向导 + IPC + DB 迁移，按 G0 最小充分原则另立增量。
 
 ## 2. 非范围（exclusions，写死）
 
@@ -103,10 +108,10 @@
 | 阶段 | 内容 | 验收门禁 |
 | --- | --- | --- |
 | P0 | **已收口（2026-09-16）**：五工作面逐项代码事实复核（四处承重事实当日抽查与 HEAD 一致）+ 三裁决落定——F1=传输层参数化 / F2=一期直做前端游标 / §0.3=立 F6 全做 | 评审结论已回写本文件 + 用户确认（候选问答三问三答） |
-| P1 | F6 probe 退役（独立提交）→ F1 连接面（addressFamily 参数 + 握手计时 + mux 幂等只读透明重试 + IDLE_CLOSE 评估结论）→ F2 列表面（fs_list 批量化 + JSON 转义 + 服务端分页 + **前端树游标加载**） | block67 族契约测试扩展全绿（特殊文件名夹具 + 大目录分页夹具）+ 前端 tsc/定向 vitest + 实机 WSL 计时对照（首连 21.2s→<1s、fs_list 2.6s→<0.1s @500 文件）+ 证据落 `acceptance/block-96/` |
-| P2 | F3 错误契约（die 回传 + pipefail + LC_ALL=C + 错误码表） | 错误注入契约测试（写失败/坏 offset/越界显式错误码，无静默 size=0）+ block67 契约族全绿 |
-| P3 | F4 进程面（pidfile + starttime 身份 + 进程组清理） | block77 resident 契约扩展全绿 + WSL 实机孤儿清零断言 |
-| P4 | F5 可观测 + 评估项结论登记 + 整包收口 | verb 日志门控测试 + 评估项逐条结论回写 + `npm run closeout` + dev-verify 实机 flow allPass |
+| P1 | **已收口（2026-09-16）**：F6 probe 退役（12e91068/UI-388）→ F1 连接面（同提交）→ F2 列表面（3fdf5df2/UI-389，含前端树游标加载）；实现期抓真 1 处=__mux 循环 bash $() 剥 NUL，fs_list 改 agent 侧 base64 单行先行 | 契约 9 套件 73/73 绿（特殊文件名夹具+分页夹具）+ 前端 tsc 0/vitest 36 过 + 实机 WSL 计时对照（首连 330ms←21200ms、fs_list@500 warm 15ms←2600ms）落 `acceptance/block-96/` |
+| P2 | **已收口（2026-09-16）**：F3 错误契约（78a58b71）——die 原因经 mux envelope 第 4 字段回传 + pipefail（截断型管道显式 \|\| true）+ LC_ALL=C + 错误码表 + 死代码清理（now_ms/openTimeoutMs） | 错误注入契约测试（die→remoteError 显式码/thin 不误标 transport）+ block67 契约族全绿 77/77 |
+| P3 | **已收口（2026-09-16）**：F4 进程面（7122bdc5）——exec_bg pidfile 身份（pid+starttime）+ ps_pid starttime 校验（PID 复用防误判）+ kill_pid 进程组击杀 + exec 看门狗组杀 | block77 resident 契约 47/47 绿 + WSL 实机孤儿清零断言（exec 超时孙进程组杀 orphansAfter=0） |
+| P4 | **已收口（2026-09-16）**：F5 可观测（verb 日志门控 BIOF3_SSH_VERB_LOG + fs_grep 排除集）+ dev-verify flow `block96-ssh-channel` 注册 + 评估项五条逐条结论（见 F5，无悬置）+ 整包收口 | verb 日志门控测试 + dev-verify flow 3/3 allPass + `npm run closeout` 四门 |
 
 **完成语义**：整包 `completed` = 已启动工作面全部收口 + 实机对照数字落 `acceptance/block-96/`（新目录必配 impact-map）；评估项须有「做/不做 + 依据」结论；未启动工作面必须经用户显式裁决 `deferred` 并回写本状态头。
 

@@ -4437,13 +4437,13 @@
       "id": "BLOCK-96-SSH-CHANNEL-PERF",
       "path": "docs/block-96-ssh-channel-perf-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-96-ssh-channel-perf",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-16",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "block-96",
         "ssh",
@@ -4452,7 +4452,7 @@
         "performance",
         "stability"
       ],
-      "notes": "SSH 远程通道效率与稳定性优化（用户裁决立项 2026-09-16「效率…稳定性…感受到不稳定 还有首次连接有些慢 需要新建一个block用来优化」；本会话 WSL 真节点实测取证，附 DeepSeek 静态分析作参考输入并独立复核=印证4/修正3/新增5）：F1 连接面（IPv6(::1) 黑洞新建 ssh 恒 21.2s、-4 实测 247ms、ConnectTimeout 未封顶；mux 死亡透明重试）+ F2 列表面（fs_list 逐条目 fork 500 文件 2.6s vs 批量 stat 6.3ms 约 410×、特殊文件名坏 JSON 静默丢文件、大目录分页+truncated）+ F3 错误契约（die 原因经 mux 回传/pipefail 拒绝静默 size=0/LC_ALL=C）+ F4 进程面（exec_bg pidfile+starttime 身份/进程组清理/timeout 孙进程存活实测治理）+ F5 可观测（verb 耗时日志门控）与评估项（sftp 大文件/probe 缓存/__mux 并发化须有结论）。红线=先修正确性再谈性能、性能宣称须前后对照数字。非范围=BLOCK-92/93/94/95 文件面、前端刷新 UX、__mux 并发化一期实现、0 新依赖。用户侧立即可做缓解=~/.ssh/config Host wsl 加 AddressFamily inet。2026-09-16 用户裁决启动整包（active/P0-LAUNCH，P0=设计评审+三裁决项：F1 产品级方案 / F2 分页协议 / §0.3 probe 退役是否立 F6）。",
+      "notes": "SSH 远程通道效率与稳定性优化（用户裁决立项 2026-09-16「效率…稳定性…感受到不稳定 还有首次连接有些慢 需要新建一个block用来优化」；本会话 WSL 真节点实测取证，附 DeepSeek 静态分析作参考输入并独立复核=印证4/修正3/新增5）：F1 连接面（IPv6(::1) 黑洞新建 ssh 恒 21.2s、-4 实测 247ms、ConnectTimeout 未封顶；mux 死亡透明重试）+ F2 列表面（fs_list 逐条目 fork 500 文件 2.6s vs 批量 stat 6.3ms 约 410×、特殊文件名坏 JSON 静默丢文件、大目录分页+truncated）+ F3 错误契约（die 原因经 mux 回传/pipefail 拒绝静默 size=0/LC_ALL=C）+ F4 进程面（exec_bg pidfile+starttime 身份/进程组清理/timeout 孙进程存活实测治理）+ F5 可观测（verb 耗时日志门控）与评估项（sftp 大文件/probe 缓存/__mux 并发化须有结论）。红线=先修正确性再谈性能、性能宣称须前后对照数字。非范围=BLOCK-92/93/94/95 文件面、前端刷新 UX、__mux 并发化一期实现、0 新依赖。用户侧立即可做缓解=~/.ssh/config Host wsl 加 AddressFamily inet。2026-09-16 P0–P4 一次会话整包收口 completed：六工作面 F1-F6 全收口；WSL 实机首连 330ms←21200ms、fs_list@500 warm 15ms←2600ms、特殊文件名六类逐字回填、exec 超时孤儿清零；契约 12 套件 104 项 0 fail + closeout 四门全绿 + dev-verify flow block96-ssh-channel 3/3；UI-388/389 同提交登记。评估项五条结论回写（addressFamily setter UI=deferred 遗留候选）。",
       "lastUpdated": "2026-09-16"
     },
     {

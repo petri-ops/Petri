@@ -257,6 +257,12 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-09-16 UI-387 追加定稿两次样式微调（e48b631 彩色 emoji 无外框、
+  // 5170e53 显式清除 button 默认边框——用户反馈「为什么还有外边框」）。
+  // 同提交台账漏同步；UI-387 条目已含该定稿说明（BLOCK-96 收口时按 BLOCK-91
+  // 先例补登豁免）。不重写共享历史。
+  'e48b6312ab4fdaf070df2142767037e33c966c23',
+  '5170e53cddb7d435272a4c8d3ce13a8ce42a49b6',
   // 2026-09-16 UI-382 后续增量提交 716c876：conversationRunStore spawn_agent
   // 结果回写 agentId 到工具行（展开体按其内联实况卡）。UI-382 条目已由先导
   // 提交 124354cb 登记，本次为同一工作流后续增量，收口门禁抓出后补登台账。
