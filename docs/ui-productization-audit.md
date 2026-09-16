@@ -3359,8 +3359,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 ## UI-382: 子智能体实况卡内联到工具调用时间线（spawn 点即归宿，不再沉底）(2026-09-15 in_progress，dev Electron 边界内)
 
 - **来源**：用户截图指认——图片解析派发的子智能体状态卡沉在页面最底部条带（SubAgentsBar），与其派发源头（工具调用行「已调用 read_image · 已完成 8.7s · 影响：…」）分离，视线割裂；裁决「他应该出现在这些信息的附近」。
-- **交付面**：`ToolActivityList` 展开体——带 `agentRunId` 的工具行内联子智能体实况卡（派发描述截断 + 实时状态 + 详情窗/中断动作），头部既有状态 chip 保持；底部 SubAgentsBar 保留聚合/俯瞰角色（跨会话入口）。
-- **证据**：tsc 0 + 相邻测试；**尚无用户视角确认**——待用户在真实会话中展开工具行复看后升 `verified`。
+- **交付面**：`ToolActivityList` 展开体——带 `agentRunId` 的工具行内联子智能体实况卡（派发描述截断 + 实时状态 + 详情窗/中断动作），头部既有状态 chip 保持；底部 SubAgentsBar 保留聚合/俯瞰角色（跨会话入口）。**后续增量（716c8762，收口门禁抓出后补登）**：`conversationRunStore` 在 spawn_agent 结果到达时把 agentId 回写到对应工具行（`activity.agentRunId`），展开体据此渲染内联实况卡——派生卡与派发行可靠关联。
+- **证据**：tsc 0 + 相邻测试（716c8762：卡片渲染有 ToolActivityList.test 回归全绿背书）；**尚无用户视角确认**——待用户在真实会话中展开工具行复看后升 `verified`。
 - **边界**：底部条带不删（聚合/跨会话俯瞰角色保留）；Agent 专属窗行为不变。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-381: 聊天附件真实接入发送管线 + 拖入图片对齐 + ssh 拖出导出（BLOCK-91）(2026-09-15 verified，dev Electron 边界内)

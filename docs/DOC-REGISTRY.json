@@ -4437,13 +4437,13 @@
       "id": "BLOCK-91-COMPOSER-ATTACH-EXPORT",
       "path": "docs/block-91-composer-attach-export-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": false,
       "truthDomain": "block-91-composer-attach-export",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P1-IN-PROGRESS",
-      "lastUpdated": "2026-09-15"
+      "phase": "COMPLETED",
+      "lastUpdated": "2026-09-16"
     },
     {
       "id": "BLOCK-90-OS-DRAG-IMPORT",

@@ -257,6 +257,11 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-09-16 UI-382 后续增量提交 716c876：conversationRunStore spawn_agent
+  // 结果回写 agentId 到工具行（展开体按其内联实况卡）。UI-382 条目已由先导
+  // 提交 124354cb 登记，本次为同一工作流后续增量，收口门禁抓出后补登台账。
+  // 豁免同提交台账要求；不重写共享历史。
+  '716c876297987d9d99deff04e75a219c871f8545',
   // 2026-09-15 UI-379 两处 React hooks 顺序修复（8e68e016 首启整页空白 /
   // f3719f69 项目页全白，原哈希 25005849/5f0172a6 经 BLOCK-89 分叉 rebase 收编
   // 重写；台账草编 UI-378 撞号后重编号 UI-379）同提交台账漏同步，收口时补登。
