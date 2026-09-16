@@ -1,7 +1,7 @@
 # BLOCK-92-CODE-MODULARIZATION 工作包计划（巨型文件模块化二期）
 
-**最后更新**：2026-09-16
-**状态**：`active`（P3 Wave B 页面/面板族已收口：8 提交 53eb2e6e / 87c618c6 / 3f8ba2f3 / 465b0a3c / 910fa6b0 / 2eeffb51 / 162e5a5d / 9fa0947d——project-workspace 1695→1160、ResultArtifactShell 1469→1246、ReviewMode 1429→1310 + useWorkingTreeReview 774→633、DesktopSettingsPanel 973→616、PluginStorePanel 971→789、home 895→739、useSkillStore 743→536、ResultStudioChangeSetPanel 717→530。P2 Wave A copilot 族已收口（3 提交，copilot 族 1347/1226/2024→690/220/1584）。门禁模式：每文件 tsc 0 + 受影响面定向 vitest 拆前基线逐项对账 + 棘轮 --check 绿；台账总行数 33296→29083。**归属更正**：B-5/B-6/B-7 提交信息所记「三套件存量红」实为门禁 shell cwd 伪影（vitest 误从仓库根运行丢 '@/' 别名），自 frontend/ 复验 27/27 全绿，非测试债。下一阶段 P4 Wave C（core 9 文件：拆前必须先存各文件受影响 Node 套件基线，g0-chf0-science 存量红家族逐项对照归属，D8 例外按先例登记归 G0-RS）。）
+**最后更新**：2026-09-17
+**状态**：`active`（P4 Wave C core 族已收口：9 文件 9 提交 ffa8a89c / d934b1ca / 06ac5c12 / 752f7ec6 / 5256925a / 4762d388 / fcc374c9 / 66b51958 / 72e0b08e——result-changeset-service 2783→780、tools-executor 2711→1870、db 2194→1477、result-studio-repository 2009→1774、workspace-tools 1800→1521、mcp/registry 1699→958、result-studio-lifecycle 1692→946、result-replay-service 1630→741、git-adapter 1549→1253（实测 @ 72e0b08e；core 9 文件 18067→11320）。全部纯搬运 re-export 兼容零行为变更；每文件拆前受影响 Node 套件基线逐项对账 + 棘轮 --check 绿，台账总行数 33296→22336。**附带修复**：C-9 引用面复跑暴露 P1 映射缺口——impact-map block92 规则缺 `classifiesScripts: true`（code-size-ledger.mjs 0 分类命中，test-affected fail-closed 16 红），已补齐转绿。D8 例外（g0-rs-p6 3 红=P6 源绑定 stored_hash 族）按先例登记归 G0-RS 勿修。下一阶段 P5 Wave D（src/ipc/working-tree-review.js 966 拆分 + IPC 常量集中〔旧 9.6〕+ M2 棘轮接入收口门禁）→ P6 整包收口。）
 **Plan ID**：`BLOCK-92-CODE-MODULARIZATION`
 **用户裁决原话**：「需要新建一个block用来优化项目代码  主要目的是让巨大代码文件模块化 你能安排一下吗 一定要确保没问题」（2026-09-16）
 **家法先例**：`docs/block-9-mega-file-refactor-plan.md`（一期：project-workspace.tsx 3222→4 文件、`_data.ts` 2157→3 文件、buildPreviewTable 抽取）+ `docs/block-9-1-main-js-split-plan.md`（main.js 2450→611 装配器 + `src/ipc/` 域模块），两者均 2026-08-16 当日收口 completed。
