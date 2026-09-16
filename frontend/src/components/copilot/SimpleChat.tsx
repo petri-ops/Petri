@@ -163,7 +163,6 @@ import {
   type ToolActivityItem,
 } from './toolActivity';
 import { ToolActivityList } from './ToolActivityList';
-import { SubAgentsBar } from './SubAgentsBar';
 import { resolveToolSummaryPresentation } from './toolSummaryPresentation';
 import {
   clearConversationPendingApproval,
@@ -174,6 +173,7 @@ import {
   resumeConversationRun,
   resumeInterruptedConversation,
   useConversationRun,
+  useSubAgentTasksForConversation,
   resumeOrphanAgentTasks,
   type ConversationPendingApproval,
   type ConversationLoopState,
@@ -261,6 +261,9 @@ import { ContextBudgetButton, type TokenBudget } from './ContextBudgetBar';
 // The type is imported at the top of the file alongside the handler helpers
 // and re-exported from this file's header for any consumer that previously
 // reached for AttachmentFile via the SimpleChat path.
+
+// UI-386 — spawn 自动唤起去重表（模块级：跨 SimpleChat 实例/重挂载每 task 只切一次）
+const autoOpenedSubAgents = new Set<string>();
 
 export function SimpleChat({
   projectId,
@@ -390,6 +393,19 @@ export function SimpleChat({
     if (!conversationId) return;
     void resumeOrphanAgentTasks(conversationId, projectId);
   }, [conversationId, projectId]);
+  // UI-386 — spawn 自动唤起（自已退役的聊天区聚合条迁入）：
+  // 新运行中子 agent → 派发 agentOpenInRail，右栏「智能体」tab 自动切过去。
+  // 模块级 Set 保证每 task 只切一次（多 SimpleChat 实例/重挂载不重复）。
+  const subTasksForAutoOpen = useSubAgentTasksForConversation(conversationId);
+  useEffect(() => {
+    for (const t of subTasksForAutoOpen) {
+      if (t.status !== 'running') continue;
+      const id = t.taskId || '';
+      if (!id || autoOpenedSubAgents.has(id)) continue;
+      autoOpenedSubAgents.add(id);
+      dispatchGewuEvent(gewuEvents.agentOpenInRail, { runId: id });
+    }
+  }, [subTasksForAutoOpen]);
   const durableLoop = useDurableConversationLoop(projectId, conversationId, activeRun?.loop);
   const pendingApproval = activeRun?.pendingApproval || null;
 
@@ -1606,9 +1622,8 @@ export function SimpleChat({
           </div>
         )}
 
-        {/* BLOCK-49 加映二 — 子 agent 活动条（模型派生 + 用户后台双源）；
-            BLOCK-65 修正：传 projectId 供俯瞰面板按项目隔离 */}
-        <SubAgentsBar conversationId={conversationId} projectId={projectId} />
+        {/* UI-386 — 聊天区子智能体聚合条退役：聚合/历史图标化进摘要卡「智能体」节，
+            实时状态由时间线内联卡 + 右栏「智能体」tab 承载 */}
         <div
           className="sc-input-area"
           style={{ ['--sc-composer-width' as string]: `${composerWidth}px` }}

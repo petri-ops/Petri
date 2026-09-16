@@ -2193,6 +2193,48 @@ button.workspacePinnedSummaryMetricCard:hover {
   color: var(--gewu-status-error-fg);
 }
 
+/* UI-386 — 项目历史智能体图标带：每任务一枚状态色图标（悬停任务描述，
+   点击进右栏「智能体」详情），超出 8 条折进 +N 计数。 */
+.workspacePinnedSummaryAgentStrip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.workspacePinnedSummaryAgentChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  border: 1px solid var(--gewu-border, rgba(128, 128, 128, 0.35));
+  background: transparent;
+  color: var(--gewu-text-secondary);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.workspacePinnedSummaryAgentChip:hover {
+  background: rgba(128, 128, 128, 0.12);
+}
+
+.workspacePinnedSummaryAgentChip[data-status='running'] {
+  color: var(--gewu-status-success-fg);
+}
+
+.workspacePinnedSummaryAgentChip[data-status='failed'] {
+  color: var(--gewu-status-error-fg);
+}
+
+.workspacePinnedSummaryAgentMore {
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text-tertiary);
+  padding: 0 2px;
+}
+
 .workspacePinnedSummarySectionTitle {
   padding: 0;
   font-size: var(--gewu-font-size-xs);

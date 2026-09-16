@@ -99,9 +99,9 @@ export const gewuEvents = {
 
   /**
    * UI-385：打开子智能体实时详情（右栏「智能体」tab 承载，不再弹独立窗）。
-   * 由工具行内联卡「详情」按钮 / SubAgentsBar（活动条行 + 俯瞰行 + spawn
-   * 自动唤起）/ AgentRunPanel 续派派发；project-workspace 订阅后切右栏 tab
-   * 并把面板切到 detail.runId。
+   * 由工具行内联卡「详情」按钮 / SimpleChat spawn 自动唤起 / 摘要卡「智能体」
+   * 节图标 / AgentRunPanel 续派派发；project-workspace 订阅后切右栏 tab 并把
+   * 面板切到 detail.runId。
    */
   agentOpenInRail: 'gewu:agent-open-in-rail',
 } as const;

@@ -411,27 +411,25 @@ export function WorkspaceSummaryCard({
                 {runningAgentCount > 0 ? `${runningAgentCount} 运行中 · ` : ''}{agentRows.length} 个
               </span>
             </div>
-            <div className={styles.workspacePinnedSummaryHistory}>
-              {agentRows.slice(0, 3).map((task) => (
+            {/* UI-386 — 项目历史智能体图标带（每任务一枚状态色图标，悬停见任务描述，
+                点击进右栏「智能体」详情；超出 8 条折进 +N 计数） */}
+            <div className={styles.workspacePinnedSummaryAgentStrip}>
+              {agentRows.slice(0, 8).map((task) => (
                 <button
                   key={task.taskId}
                   type="button"
-                  className={styles.workspacePinnedSummaryHistoryItem}
+                  className={styles.workspacePinnedSummaryAgentChip}
+                  data-status={agentTaskStatusKey(task.status)}
+                  title={`${headText(task.taskText, 48)} · ${agentTaskStatusLabel(task.status)}`}
+                  aria-label={`智能体 ${headText(task.taskText, 36)}（${agentTaskStatusLabel(task.status)}）`}
                   onClick={() => openAgentWindow(task)}
                 >
-                  <span
-                    className={styles.workspacePinnedSummaryActivityIcon}
-                    data-status={agentTaskStatusKey(task.status)}
-                  >
-                    <Icon name={task.status === 'failed' ? 'flag' : 'bot'} size={13} />
-                  </span>
-                  <span className={styles.workspacePinnedSummaryActivityText}>
-                    <strong>{headText(task.taskText, 36)}</strong>
-                    <small>{agentTaskStatusLabel(task.status)}</small>
-                  </span>
-                  <Icon name="chevron-right" size={13} />
+                  <Icon name={task.status === 'failed' ? 'flag' : 'bot'} size={14} />
                 </button>
               ))}
+              {agentRows.length > 8 && (
+                <span className={styles.workspacePinnedSummaryAgentMore}>+{agentRows.length - 8}</span>
+              )}
             </div>
           </section>
         )}

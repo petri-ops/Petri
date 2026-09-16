@@ -1177,7 +1177,7 @@ export async function resumeSubAgentTasks(
 /**
  * BLOCK-65 修正：会话打开时回填该会话的历史子 agent（含终态）。
  * resumeSubAgentTasks 只恢复 running 任务——刷新后历史完成态不进 store，
- * 会让 SubAgentsBar（活动条 +「全部俯瞰」入口）在该会话永久不可见。
+ * 会让摘要卡「智能体」节（UI-386 起的项目级聚合唯一入口）在该会话永久不可见。
  * 只登记终态快照（running/pending 交由 resume/live 订阅路径），幂等。
  * 零第二真相：数据来自 /api/ai/agent/tasks（tasks 表只读投影）。
  */

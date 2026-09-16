@@ -262,8 +262,9 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     const first = render(<WorkspaceSummaryCard {...baseProps()} />);
     expect(await screen.findByLabelText('智能体')).toBeTruthy();
     expect(screen.getByText(/1 运行中 · 1 个/)).toBeTruthy();
-    expect(screen.getByText(/跑一遍 QC 流程/)).toBeTruthy();
-    expect(screen.queryByText(/别的项目的任务/)).toBeNull();
+    // UI-386 — 智能体节改图标带：任务文本经 aria-label/悬停提示承载
+    expect(screen.getByLabelText(/智能体 跑一遍 QC 流程/)).toBeTruthy();
+    expect(screen.queryByLabelText(/智能体 别的项目的任务/)).toBeNull();
 
     first.unmount();
     listAgentTasksMock.mockResolvedValue([]);
