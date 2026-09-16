@@ -8,22 +8,21 @@
 // 生效；BLOCK-93（智能体专职化）落地 spawn 角色参数后，显式角色将取代
 // 文本推断成为第一优先数据源。
 // ============================================================
-import type { IconName } from '@/components/icons/Icon';
-
 export interface AgentCategory {
   key: 'search' | 'collect' | 'organize' | 'read' | 'analysis' | 'general';
   label: string;
-  icon: IconName;
+  /** 彩色 emoji 图标（用户裁决：比单色线条图标生动直观）。 */
+  emoji: string;
 }
 
 /** 类别表：顺序即关键词首匹配优先级（具体在前，通用兜底在最后）。 */
 export const AGENT_CATEGORIES: readonly AgentCategory[] = [
-  { key: 'search', label: '检索', icon: 'search', },
-  { key: 'collect', label: '搜集', icon: 'globe' },
-  { key: 'organize', label: '整理', icon: 'folder' },
-  { key: 'read', label: '读取', icon: 'file' },
-  { key: 'analysis', label: '分析', icon: 'bar-chart' },
-  { key: 'general', label: '通用', icon: 'bot' },
+  { key: 'search', label: '检索', emoji: '🔍' },
+  { key: 'collect', label: '搜集', emoji: '🌐' },
+  { key: 'organize', label: '整理', emoji: '📁' },
+  { key: 'read', label: '读取', emoji: '📄' },
+  { key: 'analysis', label: '分析', emoji: '📊' },
+  { key: 'general', label: '通用', emoji: '🤖' },
 ] as const;
 
 const KEYWORDS: ReadonlyArray<readonly string[]> = [

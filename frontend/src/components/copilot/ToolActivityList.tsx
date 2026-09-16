@@ -300,8 +300,8 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
             // 不再只沉在底部聚合条；详情窗/中断动作随卡就地可达。
             <div className="sc-tool-subagent-inline" data-status={subSnap.status}>
               <div className="sc-tool-subagent-line">
-                {/* UI-387 — 图标=职能类别（任务文本推断），形状回答「它是谁」 */}
-                <Icon name={inferAgentCategory(subSnap.userContent).icon} size={12} />
+                {/* UI-387 — emoji=职能类别（任务文本推断），形状回答「它是谁」 */}
+                <span aria-hidden="true">{inferAgentCategory(subSnap.userContent).emoji}</span>
                 <span className="sc-tool-subagent-desc" title={subSnap.userContent}>
                   {(subSnap.userContent || '').replace(/\s+/g, ' ').trim().slice(0, 80) || '（无描述）'}
                 </span>

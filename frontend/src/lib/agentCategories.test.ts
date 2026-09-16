@@ -19,12 +19,12 @@ describe('agentCategories — 子智能体职能类别推断（UI-387）', () =>
     expect(inferAgentCategory('').key).toBe('general');
     expect(inferAgentCategory(null)).toBe(AGENT_CATEGORIES[AGENT_CATEGORIES.length - 1]);
     expect(inferAgentCategory('跑一遍 QC 流程').key).toBe('general');
-    expect(inferAgentCategory('跑一遍 QC 流程').icon).toBe('bot');
+    expect(inferAgentCategory('跑一遍 QC 流程').emoji).toBe('🤖');
   });
 
-  it('类别表带图标与中文标签，且通用类兜底唯一', () => {
+  it('类别表带 emoji 图标与中文标签，且通用类兜底唯一', () => {
     for (const c of AGENT_CATEGORIES) {
-      expect(c.icon).toBeTruthy();
+      expect(c.emoji).toBeTruthy();
       expect(c.label).toBeTruthy();
     }
     expect(AGENT_CATEGORIES[AGENT_CATEGORIES.length - 1].key).toBe('general');

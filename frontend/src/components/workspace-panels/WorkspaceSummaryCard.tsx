@@ -415,27 +415,37 @@ export function WorkspaceSummaryCard({
             {/* UI-386 — 项目历史智能体图标带（每任务一枚状态色图标，悬停见任务描述，
                 点击进右栏「智能体」详情；超出 8 条折进 +N 计数） */}
             <div className={styles.workspacePinnedSummaryAgentStrip}>
-              {agentRows.slice(0, 8).map((task) => {
-                // UI-387 — 形状=职能（类别推断），颜色=状态，两维度不混用
-                const category = inferAgentCategory(task.taskText);
+              {(() => {
+                // UI-387 — 彩色 emoji 无外框；运行状态靠位置表达：运行中组排最前
+                //（与历史组之间细分隔线），其后按时间倒序；职能由 emoji 形状区分。
+                const running = agentRows.filter((t) => t.status === 'running').slice(0, 8);
+                const rest = agentRows.filter((t) => t.status !== 'running').slice(0, Math.max(0, 8 - running.length));
+                const chip = (task: AgentTaskOverviewItem) => {
+                  const category = inferAgentCategory(task.taskText);
+                  return (
+                    <button
+                      key={task.taskId}
+                      type="button"
+                      className={styles.workspacePinnedSummaryAgentChip}
+                      data-category={category.key}
+                      title={`${headText(task.taskText, 48)} · ${category.label} · ${agentTaskStatusLabel(task.status)}`}
+                      aria-label={`智能体 ${headText(task.taskText, 36)}（${agentTaskStatusLabel(task.status)}）`}
+                      onClick={() => openAgentWindow(task)}
+                    >
+                      <span className={styles.workspacePinnedSummaryAgentEmoji} aria-hidden="true">{category.emoji}</span>
+                    </button>
+                  );
+                };
+                const hasRunning = running.length > 0;
+                const hasRest = rest.length > 0;
                 return (
-                <button
-                  key={task.taskId}
-                  type="button"
-                  className={styles.workspacePinnedSummaryAgentChip}
-                  data-status={agentTaskStatusKey(task.status)}
-                  data-category={category.key}
-                  title={`${headText(task.taskText, 48)} · ${category.label} · ${agentTaskStatusLabel(task.status)}`}
-                  aria-label={`智能体 ${headText(task.taskText, 36)}（${agentTaskStatusLabel(task.status)}）`}
-                  onClick={() => openAgentWindow(task)}
-                >
-                  <Icon name={category.icon} size={14} />
-                </button>
+                  <>
+                    {running.map(chip)}
+                    {hasRunning && hasRest && <span className={styles.workspacePinnedSummaryAgentDivider} aria-hidden="true" />}
+                    {rest.map(chip)}
+                  </>
                 );
-              })}
-              {agentRows.length > 8 && (
-                <span className={styles.workspacePinnedSummaryAgentMore}>+{agentRows.length - 8}</span>
-              )}
+              })()}
             </div>
           </section>
         )}

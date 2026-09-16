@@ -2203,6 +2203,7 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .workspacePinnedSummaryAgentChip {
+  /* UI-387 — 彩色 emoji 图标无外框；运行状态靠位置表达（运行中排最前） */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2210,23 +2211,27 @@ button.workspacePinnedSummaryMetricCard:hover {
   height: 26px;
   flex-shrink: 0;
   border-radius: 6px;
-  border: 1px solid var(--gewu-border, rgba(128, 128, 128, 0.35));
   background: transparent;
-  color: var(--gewu-text-secondary);
   cursor: pointer;
   transition: background 0.15s ease;
+}
+
+.workspacePinnedSummaryAgentEmoji {
+  font-size: 15px;
+  line-height: 1;
 }
 
 .workspacePinnedSummaryAgentChip:hover {
   background: rgba(128, 128, 128, 0.12);
 }
 
-.workspacePinnedSummaryAgentChip[data-status='running'] {
-  color: var(--gewu-status-success-fg);
-}
-
-.workspacePinnedSummaryAgentChip[data-status='failed'] {
-  color: var(--gewu-status-error-fg);
+/* 运行组与历史组分隔线（位置即状态：线前=运行中，线后=已结束） */
+.workspacePinnedSummaryAgentDivider {
+  width: 1px;
+  height: 16px;
+  flex-shrink: 0;
+  margin: 0 4px;
+  background: var(--gewu-border, rgba(128, 128, 128, 0.35));
 }
 
 .workspacePinnedSummaryAgentMore {

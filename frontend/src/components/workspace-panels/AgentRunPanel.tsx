@@ -242,7 +242,7 @@ export function AgentRunPanel({
       <div className={styles.agentStatusRow}>
         {/* UI-387 — 面板头带职能图标（类别推断）+ 任务描述 */}
         <span className={shellStyles.statusChip} data-status="done" title={`职能：${inferAgentCategory(taskText).label}`}>
-          <Icon name={inferAgentCategory(taskText).icon} size={12} />
+          <span aria-hidden="true">{inferAgentCategory(taskText).emoji}</span>
         </span>
         <span className={styles.agentStatusLine} title={taskText}>
           {taskText ? taskText.replace(/\s+/g, ' ').trim().slice(0, 40) : `Agent ${runId.slice(0, 8)}`}
