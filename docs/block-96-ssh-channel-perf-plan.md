@@ -1,8 +1,8 @@
 # BLOCK-96-SSH-CHANNEL-PERF — SSH 远程通道效率与稳定性优化（连接面 / 列表面 / 错误契约 / 进程面 / 可观测）
 
-最后更新：2026-09-16（用户裁决启动整包 → active/P0-LAUNCH；启动前置核对过（无 🔴/active 槽位空/git 净，scratch obs.tmp.cjs 当日清）+ 四处承重代码事实当日抽查与 HEAD 一致：node-agent fs_list L141 / gateway parseJsonLines 静默 null L88 / target-registry probe 硬编码 L108 / registry.js 退役分支 L1368）
+最后更新：2026-09-16（**P0 设计评审三裁决落定**：①F1 产品级方案=**传输层参数化**（目标配置可选 `addressFamily`，传输层按目标注入 `-o AddressFamily=inet` 不全局注入 + 连通性检测带握手计时 >2s 黑洞提示）；②F2 分页=**一期直做前端游标**（服务端 limit+truncated + 前端树游标加载一步到位，用户显式裁决扩大原「仅服务端一期」倾向，非范围条款同步修订）；③§0.3 probe r/python 探测退役=**立 F6 全做**（调用方去 lang / 管理页徽标移除 / verb 参数化形态保留 / registry.js 死分支顺手清）。本日早前：用户裁决启动整包 → active/P0-LAUNCH；启动前置核对过（无 🔴/active 槽位空/git 净，scratch obs.tmp.cjs 当日清）+ 四处承重代码事实当日抽查与 HEAD 一致：node-agent fs_list L141 / gateway parseJsonLines 静默 null L88 / target-registry probe 硬编码 L108 / registry.js 退役分支 L1368）
 
-状态：`active（2026-09-16 用户裁决启动——候选问答「planned 队列从哪个工作包开始推进？」裁决选「BLOCK-96 SSH 通道 (Recommended)」；阶段 P0 评审 → P1 F1+F2 → P2 F3 → P3 F4 → P4 F5+收口，见 §4）`
+状态：`active（P1 进行中——F6 probe 退役 + F1 连接面 + F2 列表面（含前端游标）→ P2 F3 → P3 F4 → P4 F5+收口，见 §4）`
 
 计划编号：`BLOCK-96-SSH-CHANNEL-PERF`
 
@@ -42,7 +42,7 @@
 - **家法同向性**：BLOCK-83 D7 领域中性化（核心零领域运行时依赖，D7 棘轮在扫）+ BLOCK-86 运行时在位判定已改「包 `requires.runtimes` 契约推导」（本地侧 runtimeStatus 已如此，P3 抓真修过）——SSH 侧 probe 硬编码 r/python 是 BLOCK-57/67 生信时代残留，`scheduler=slurm` 检测同为 HPC 时代产物。
 - **P0 裁决候选**（终态方向=「核心不问节点有没有 R，装了需要 R 的包才问」）：①调用方默认去 lang（`['probe']`，连通性+os/hostname 保留）；②管理页 R/Python/slurm 徽标移除（未来由已装包 `requires.runtimes` 声明驱动再显式出现）；③agent verb 参数化形态保留（零成本，领域包远程运行时声明可复用）；④registry.js legacy 死分支顺手清。台账 F1-F5 表述不变，P0 若纳入为 F6 再同步登记。
 
-## 1. 五工作面（每面独立可验收、独立提交）
+## 1. 六工作面（每面独立可验收、独立提交；F6=2026-09-16 P0 用户裁决新增）
 
 ### F1 连接面（首次连接慢的直接根因）
 
@@ -54,7 +54,14 @@
 
 - **fs_list 批量化**：逐条目 fork 改单进程（`find -maxdepth 1 -printf` 或批量 `stat`），O(N) fork → O(1)；保留 dotfile 过滤与排序契约。
 - **JSON 名字转义修复**：名称/路径输出做 JSON 转义（引号/反斜杠/控制字符），配套**特殊文件名契约夹具**（引号/反斜杠/空格/Unicode），坏行静默丢文件从此绝迹。
-- **大目录服务端分页 + 显式截断标记**：fs_list/fs_find 增加 limit/offset 与 `truncated:true`，替代「撞 30s 超时杀会话」；gateway 分页协议与前端树适配（前端增量在本包只做协议配合）。
+- **大目录服务端分页 + 显式截断标记**：fs_list/fs_find 增加 limit/offset 与 `truncated:true`，替代「撞 30s 超时杀会话」；gateway 分页协议与前端树适配。**P0 裁决（2026-09-16）：前端树游标加载一期直做，不在只做协议配合**。
+
+### F6 probe 领域探测退役（2026-09-16 P0 用户裁决「立 F6 全做」，§0.3 升格）
+
+- 调用方默认去 lang：`target-registry.js` probe 固定传 `['probe', 'r', 'python']` → `['probe']`（连通性 + os/hostname 保留，通用价值）。
+- 管理页 R/Python/slurm 徽标移除（`RemoteTargets.tsx`）——未来由已装包 `requires.runtimes` 声明驱动再显式出现（BLOCK-86 契约推导同向）。
+- agent verb 参数化形态保留（`probe <lang...>` 零成本，领域包远程运行时声明可复用）。
+- `mcp/registry.js` runPluginToolRemote legacy 死分支顺手清（BLOCK-76 已退役面）。
 
 ### F3 错误契约（可诊断性）
 
@@ -77,7 +84,7 @@
 ## 2. 非范围（exclusions，写死）
 
 - **BLOCK-95 信息流面零触碰**；**BLOCK-92 拆分面零触碰**（落点文件 node-agent 341 行 / ssh-multiplexer 193 行均 <700 不在其清单；workspace-gateway 若届时入清单，撞期即停手上报，BLOCK-95 §6 同款）；**BLOCK-93 文件面零触碰**；
-- 前端树的刷新频率/重试 UX 策略不属本包（F2 只做协议配合，前端增量另行评估）；
+- 前端树的刷新频率/重试 UX 策略不属本包（F2 前端增量**仅游标加载**，经 2026-09-16 P0 用户裁决纳入一期；其余前端面仍不在范围）；
 - aliyun 公网 RTT 属网络物理现实，不属代码缺陷（本会话 agent 沙箱内无法复测 aliyun 连通性，已如实登记，不据此下结论）；
 - `__mux` 并发化、大文件 sftp 通道一期仅评估不实现；
 - 0 新依赖预期；若评估引入须走 `DEPENDENCY-CHANGE-CHECKLIST` + 用户裁决；
@@ -95,8 +102,8 @@
 
 | 阶段 | 内容 | 验收门禁 |
 | --- | --- | --- |
-| P0 | 设计评审：五工作面逐项代码事实复核 + 用户裁决 F1 产品级方案（仅配置指引 vs 传输层参数）、F2 分页协议、**§0.3 probe r/python 探测退役切面（调用方去 lang / UI 徽标 / slurm / 死分支清理，是否立 F6）** | 评审结论回写本文件 + 用户确认 |
-| P1 | F1 连接面 + F2 列表面（用户两大感受的直接根因先行） | block67 族契约测试扩展全绿（特殊文件名夹具 + 大目录分页夹具）+ 实机 WSL 计时对照（首连 21.2s→<1s、fs_list 2.6s→<0.1s @500 文件）+ 证据落 `acceptance/block-96/` |
+| P0 | **已收口（2026-09-16）**：五工作面逐项代码事实复核（四处承重事实当日抽查与 HEAD 一致）+ 三裁决落定——F1=传输层参数化 / F2=一期直做前端游标 / §0.3=立 F6 全做 | 评审结论已回写本文件 + 用户确认（候选问答三问三答） |
+| P1 | F6 probe 退役（独立提交）→ F1 连接面（addressFamily 参数 + 握手计时 + mux 幂等只读透明重试 + IDLE_CLOSE 评估结论）→ F2 列表面（fs_list 批量化 + JSON 转义 + 服务端分页 + **前端树游标加载**） | block67 族契约测试扩展全绿（特殊文件名夹具 + 大目录分页夹具）+ 前端 tsc/定向 vitest + 实机 WSL 计时对照（首连 21.2s→<1s、fs_list 2.6s→<0.1s @500 文件）+ 证据落 `acceptance/block-96/` |
 | P2 | F3 错误契约（die 回传 + pipefail + LC_ALL=C + 错误码表） | 错误注入契约测试（写失败/坏 offset/越界显式错误码，无静默 size=0）+ block67 契约族全绿 |
 | P3 | F4 进程面（pidfile + starttime 身份 + 进程组清理） | block77 resident 契约扩展全绿 + WSL 实机孤儿清零断言 |
 | P4 | F5 可观测 + 评估项结论登记 + 整包收口 | verb 日志门控测试 + 评估项逐条结论回写 + `npm run closeout` + dev-verify 实机 flow allPass |
@@ -107,7 +114,7 @@
 
 - **agent 重部署时窗**：脚本哈希变更 → 各目标下次操作自动重传（ensureAgent 已有幂等重传）；运行中作业不受影响（jobs 面不改动）；多目标滚动窗口内新旧 agent 并存属预期，gateway 以本地哈希为准重传收敛；
 - **exec_bg/ps_pid 语义变化**是 block77 消费方的行为变更：P3 必须先跑 block77 全量契约对账，红禁静默；
-- **fs_list 分页是 gateway 与前端树的跨层契约**：一期先服务端 limit+truncated（前端不传参 = 全量，行为兼容），前端游标化列为评估项；
+- **fs_list 分页是 gateway 与前端树的跨层契约**：P0 裁决（2026-09-16）一期即含前端树游标加载；服务端仍保证「不传参 = 全量」行为兼容，游标参数缺失时旧客户端零破坏；
 - **测量环境边界**：本会话基线取自本机 WSL（IPv6 黑洞 21.2s 为 Windows OpenSSH 行为）；aliyun/其他远端不打 `-4`（IPv4 字面量）不受黑洞影响，RTT 成本如实按网络现实记录；
 - **诚实边界**：G0 开发期常态 · 不外推 packaged/Provider/GA。
 
