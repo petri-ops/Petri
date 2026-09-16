@@ -20,6 +20,8 @@ import {
   type ToolCallEvent,
   type ToolResultEvent,
 } from '@/components/copilot/copilotClient';
+import { inferAgentCategory } from '@/lib/agentCategories';
+import { Icon } from '@/components/icons/Icon';
 import styles from '@/pages/window/command-center.module.css';
 import shellStyles from '@/components/window/window-shell.module.css';
 
@@ -58,6 +60,7 @@ export function AgentRunPanel({
   onSpawnedAgent?: (agentId: string) => void;
 }): React.ReactElement {
   const [runState, setRunState] = useState<RunState>('running');
+  const [taskText, setTaskText] = useState('');
   const [statusLine, setStatusLine] = useState('事件流连接中…');
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [summary, setSummary] = useState('');
@@ -83,6 +86,7 @@ export function AgentRunPanel({
     void fetchAgentTaskMeta(runId)
       .then((meta) => {
         if (!alive) return;
+        setTaskText(String(meta.taskText || ''));
         setRunState(runStateFromStatus(meta.status));
       })
       .catch(() => {});
@@ -236,6 +240,13 @@ export function AgentRunPanel({
   return (
     <div className={styles.agentBody}>
       <div className={styles.agentStatusRow}>
+        {/* UI-387 — 面板头带职能图标（类别推断）+ 任务描述 */}
+        <span className={shellStyles.statusChip} data-status="done" title={`职能：${inferAgentCategory(taskText).label}`}>
+          <Icon name={inferAgentCategory(taskText).icon} size={12} />
+        </span>
+        <span className={styles.agentStatusLine} title={taskText}>
+          {taskText ? taskText.replace(/\s+/g, ' ').trim().slice(0, 40) : `Agent ${runId.slice(0, 8)}`}
+        </span>
         <span className={shellStyles.statusChip} data-status={runState === 'running' ? 'running' : runState === 'failed' ? 'failed' : 'done'}>
           {STATE_LABEL[runState]}
         </span>

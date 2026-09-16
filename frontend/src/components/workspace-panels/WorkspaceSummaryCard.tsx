@@ -4,6 +4,7 @@ import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import type { ToolJob, Project, Dataset } from '@/lib/project-types';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { BackendStatus } from '@/lib/electron';
+import { inferAgentCategory } from '@/lib/agentCategories';
 import styles from '@/pages/project-workspace.module.css';
 import { useRuntimeResourceSnapshot } from '@/hooks/useRuntimeResourceSnapshot';
 import type { ConversationLoopState } from '@/components/copilot/conversationRunStore';
@@ -414,19 +415,24 @@ export function WorkspaceSummaryCard({
             {/* UI-386 — 项目历史智能体图标带（每任务一枚状态色图标，悬停见任务描述，
                 点击进右栏「智能体」详情；超出 8 条折进 +N 计数） */}
             <div className={styles.workspacePinnedSummaryAgentStrip}>
-              {agentRows.slice(0, 8).map((task) => (
+              {agentRows.slice(0, 8).map((task) => {
+                // UI-387 — 形状=职能（类别推断），颜色=状态，两维度不混用
+                const category = inferAgentCategory(task.taskText);
+                return (
                 <button
                   key={task.taskId}
                   type="button"
                   className={styles.workspacePinnedSummaryAgentChip}
                   data-status={agentTaskStatusKey(task.status)}
-                  title={`${headText(task.taskText, 48)} · ${agentTaskStatusLabel(task.status)}`}
+                  data-category={category.key}
+                  title={`${headText(task.taskText, 48)} · ${category.label} · ${agentTaskStatusLabel(task.status)}`}
                   aria-label={`智能体 ${headText(task.taskText, 36)}（${agentTaskStatusLabel(task.status)}）`}
                   onClick={() => openAgentWindow(task)}
                 >
-                  <Icon name={task.status === 'failed' ? 'flag' : 'bot'} size={14} />
+                  <Icon name={category.icon} size={14} />
                 </button>
-              ))}
+                );
+              })}
               {agentRows.length > 8 && (
                 <span className={styles.workspacePinnedSummaryAgentMore}>+{agentRows.length - 8}</span>
               )}
