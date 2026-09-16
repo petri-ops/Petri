@@ -259,12 +259,26 @@ case "$cmd" in
     ;;
   exec)
     # exec <b64cmd> <b64cwd> <timeoutS> → 单行 JSON {code,stdoutB64,stderrB64,truncated}
+    # BLOCK-96 F4 — timeout 换看门狗进程组击杀：setsid 会话 PGID=PID，超时
+    # kill -- -PGID 把孙进程一并收敛（旧 timeout 只杀直接子 bash，孙进程实测存活累积）。
     [ $# -ge 2 ] || die "exec_usage"
     ec="$(fs_decode "$1")"; ecwd="$(fs_decode "$2")"; eto="\${3:-120}"
     case "$eto" in ''|*[!0-9]*) die "invalid_timeout";; esac
     [ -d "$ecwd" ] || die "exec_cwd_missing"
     outb="$(mktemp)"; errb="$(mktemp)"
-    (cd "$ecwd" && timeout --signal=KILL "$eto" bash -c "$ec" > "$outb" 2> "$errb"); ecode=$?
+    if command -v setsid >/dev/null 2>&1; then
+      # BLOCK-96 F4 — setsid 会话 + 看门狗进程组击杀：PGID=PID，超时孙进程一并收敛
+      ( cd "$ecwd" && exec setsid bash -c "$ec" ) > "$outb" 2> "$errb" &
+      ebg=$!
+      ( sleep "$eto" && kill -KILL -- "-$ebg" 2>/dev/null ) &
+      watchdog=$!
+      wait "$ebg"; ecode=$?
+      kill "$watchdog" 2>/dev/null
+      wait "$watchdog" 2>/dev/null
+    else
+      # 无 setsid（非 Linux 节点）回落 timeout：孙进程组杀不可用，语义同旧版
+      ( cd "$ecwd" && timeout --signal=KILL "$eto" bash -c "$ec" > "$outb" 2> "$errb" ); ecode=$?
+    fi
     osz=$(wc -c < "$outb" | tr -d ' '); esz=$(wc -c < "$errb" | tr -d ' ')
     ocap=0; ecap=0
     if [ "$osz" -gt 65536 ]; then head -c 65536 "$outb" > "$outb.c" && mv -f "$outb.c" "$outb"; ocap=1; fi
@@ -276,36 +290,60 @@ case "$cmd" in
     rm -f "$outb" "$errb"
     ;;
   exec_bg)
-    # exec_bg <b64cmd> <b64cwd> <b64log> → 单行 JSON {pid}（detached，日志落 b64log）
+    # exec_bg <b64cmd> <b64cwd> <b64log> → 单行 JSON {pid,starttime}（detached，日志落 b64log）
+    # BLOCK-96 F4 — pidfile 身份替代 pgrep -f "bash -c" -n 猜测（并发 spawn 即错）：
+    # 内层 bash 落 <log>.pid = "<pid> <starttime>"（/proc stat 第 22 字段），
+    # exec 链（setsid→nohup→bash→exec 用户命令）全程同一 pid，starttime 不变。
     [ $# -ge 3 ] || die "exec_bg_usage"
     bc="$(fs_decode "$1")"; bcwd="$(fs_decode "$2")"; blog="$(fs_decode "$3")"
     [ -d "$bcwd" ] || die "exec_cwd_missing"
     mkdir -p "$(dirname "$blog")" 2>/dev/null
-    # BLOCK-77 P5 修复：& 优先级把整条 cd && setsid ... 后台化时，后台子进程
-    # 攥着 __mux 循环 $() 的捕获管道（>> 只对其后的简单命令生效），$() 等
-    # 管道 EOF——即孤儿进程退出——才返回。重定向提升到后台列表层级 +
-    # exec 全脱离，后台进程不再攥住父进程管道。
-    (cd "$bcwd" && exec setsid nohup bash -c "$bc") >> "$blog" 2>&1 < /dev/null &
-    for i in 1 2 3 4 5; do
-      bpid=$(pgrep -f "bash -c" -n 2>/dev/null || true)
-      if [ -n "$bpid" ]; then break; fi
-      sleep 0.2
+    pidfile="$blog.pid"
+    rm -f "$pidfile"
+    if command -v setsid >/dev/null 2>&1; then SESSION_PREFIX="setsid nohup"; else SESSION_PREFIX="nohup"; fi
+    ( cd "$bcwd" && BIOF3_BG_CMD="$bc" BIOF3_BG_PIDFILE="$pidfile" exec $SESSION_PREFIX bash -c 'st=$(cat "/proc/$$/stat"); rest=\${st##*) }; arr=(\$rest); printf "%s %s\\n" "\$\$" "\${arr[19]}" > "\$BIOF3_BG_PIDFILE"; exec bash -c "\$BIOF3_BG_CMD"' ) >> "$blog" 2>&1 < /dev/null &
+    bpid=''
+    for i in 1 2 3 4 5 6 7 8 9 10; do
+      [ -s "$pidfile" ] && { read -r bpid bstart < "$pidfile"; break; }
+      sleep 0.1
     done
-    if [ -n "$bpid" ]; then printf '{"pid":%s}\\n' "$bpid"; else printf '{"error":"spawn_failed"}\\n'; fi
+    case "$bpid" in
+      ''|*[!0-9]*) printf '{"error":"spawn_failed"}\\n' ;;
+      *) printf '{"pid":%s,"starttime":"%s"}\\n' "$bpid" "$bstart" ;;
+    esac
     ;;
   ps_pid)
-    # ps_pid <pid> → 单行 JSON {alive:boolean}
+    # ps_pid <pid> [starttime] → 单行 JSON {alive:boolean[,reused,starttime]}
+    # BLOCK-96 F4 — 带 starttime 时做 /proc stat 第 22 字段身份校验：
+    # PID 复用（旧 pid 被回收他进程占用）不再误判存活；缺省保持 kill -0 语义。
     [ $# -ge 1 ] || die "ps_pid_usage"
     case "$1" in ''|*[!0-9]*) die "invalid_pid";; esac
-    if kill -0 "$1" 2>/dev/null; then printf '{"alive":true}\\n'; else printf '{"alive":false}\\n'; fi
+    if [ $# -ge 2 ]; then
+      st=$(cat "/proc/$1/stat" 2>/dev/null)
+      if [ -z "$st" ]; then printf '{"alive":false}\\n'; else
+        rest=\${st##*) }
+        arr=($rest)
+        if [ "\${arr[19]}" = "$2" ]; then
+          printf '{"alive":true,"starttime":"%s"}\\n' "\${arr[19]}"
+        else
+          printf '{"alive":false,"reused":true,"starttime":"%s"}\\n' "\${arr[19]}"
+        fi
+      fi
+    elif kill -0 "$1" 2>/dev/null; then printf '{"alive":true}\\n'; else printf '{"alive":false}\\n'; fi
     ;;
   kill_pid)
     # kill_pid <pid> <sig> → 单行 JSON {signaled:boolean}
+    # BLOCK-96 F4 — 先试进程组击杀（exec_bg 的 setsid 会话 PGID=PID，孙进程一并
+    # 收敛）；无该进程组（非 setsid 的普通 pid）回落单进程 kill。
     [ $# -ge 1 ] || die "kill_pid_usage"
     case "$1" in ''|*[!0-9]*) die "invalid_pid";; esac
     sig="\${2:-TERM}"
     case "$sig" in ''|*[!A-Z0-9]) die "invalid_signal";; esac
-    if kill -"$sig" "$1" 2>/dev/null; then printf '{"signaled":true}\\n'; else printf '{"signaled":false}\\n'; fi
+    if kill -"$sig" -- "-$1" 2>/dev/null || kill -"$sig" -- "$1" 2>/dev/null; then
+      printf '{"signaled":true}\\n'
+    else
+      printf '{"signaled":false}\\n'
+    fi
     ;;
   sys_resource)
     # BLOCK-78 P2-①：sys_resource [b64path] → 单行 JSON 资源快照。

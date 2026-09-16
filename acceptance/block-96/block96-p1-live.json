@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-16T09:27:38.296Z",
+  "generatedAt": "2026-09-16T09:46:04.133Z",
   "alias": "wsl",
   "baseline": {
     "firstConnectBeforeMs": 21200,
@@ -11,7 +11,7 @@
       "name": "first_connect",
       "passed": true,
       "detail": {
-        "ms": 338,
+        "ms": 339,
         "baselineMs": 21200,
         "classified": "ok"
       }
@@ -34,7 +34,7 @@
       "name": "fs_list_500_cold",
       "passed": true,
       "detail": {
-        "ms": 25,
+        "ms": 21,
         "entries": 500,
         "baselineMs": 2600
       }
@@ -72,9 +72,43 @@
       "detail": {
         "entries": 501
       }
+    },
+    {
+      "name": "exec_bg_pidfile_identity",
+      "passed": true,
+      "detail": {
+        "pid": 17805,
+        "starttime": "1177054"
+      }
+    },
+    {
+      "name": "ps_pid_starttime_alive",
+      "passed": true,
+      "detail": {
+        "alive": true,
+        "reused": false,
+        "starttime": "1177054"
+      }
+    },
+    {
+      "name": "kill_pid_group_reaps",
+      "passed": true,
+      "detail": {
+        "signaled": true,
+        "alive": false
+      }
+    },
+    {
+      "name": "exec_timeout_grandchild_reaped",
+      "passed": true,
+      "detail": {
+        "code": 137,
+        "orphansBefore": "0",
+        "orphansAfter": "0"
+      }
     }
   ],
   "allPass": true,
-  "stage": "P1 (F1 连接面 + F2 列表面 + F6 probe 退役)",
+  "stage": "P1 (F1/F2/F6) + P3 (F4 进程面)",
   "head": "0.0.1-rc.7"
 }

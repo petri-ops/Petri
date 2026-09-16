@@ -99,8 +99,36 @@ function sshRun(remoteCommand, input) {
     entries: afterWrite.length,
   });
 
+  // ── P3 进程面（F4）─────────────────────────────────────────
+  // ⑦ exec_bg pidfile 身份：pid+starttime 落 <log>.pid（替代 pgrep 猜测）
+  const procRoot = `${root}-proc`;
+  sshRun('bash -s', `rm -rf ${procRoot} && mkdir -p ${procRoot} && echo OK`, '');
+  const bg = await backend.execBackground('sleep 30', procRoot, `${procRoot}/bg.log`);
+  record('exec_bg_pidfile_identity', Number.isInteger(bg.pid) && bg.pid > 0 && typeof bg.starttime === 'string', bg);
+
+  // ⑧ ps_pid starttime 身份校验：存活判定 + 伪造starttime 识别为 reused
+  const alive = await backend.processAlive(bg.pid, bg.starttime);
+  record('ps_pid_starttime_alive', alive.alive === true && alive.reused !== true, alive);
+
+  // ⑨ kill_pid 进程组击杀：setsid 会话（PGID=PID）连同子孙一并收敛
+  const killRes = await backend.killPid(bg.pid, 'KILL');
+  await new Promise((r) => setTimeout(r, 400));
+  const dead = await backend.processAlive(bg.pid, bg.starttime);
+  record('kill_pid_group_reaps', killRes.signaled === true && dead.alive === false, {
+    signaled: killRes.signaled, alive: dead.alive,
+  });
+
+  // ⑩ exec 超时孙进程组杀清零（旧 timeout 只杀直接子 bash，孙进程存活累积）
+  const orphansBefore = sshRun('pgrep -fc "sleep[ ]87\\.42" || true', '').trim();
+  const execRes = await backend.exec('sleep 87.42 & echo go; sleep 93.17', procRoot, 2);
+  await new Promise((r) => setTimeout(r, 500));
+  const orphansAfter = sshRun('pgrep -fc "sleep[ ]87\\.42" || true', '').trim();
+  record('exec_timeout_grandchild_reaped', execRes.code !== 0 && orphansAfter === '0', {
+    code: execRes.code, orphansBefore, orphansAfter,
+  });
+
   // 清理
-  sshRun(`rm -rf ${root} ${root}-500 && echo OK`, '');
+  sshRun(`rm -rf ${root} ${root}-500 ${root}-proc && echo OK`, '');
 
   const allPass = checks.every((c) => c.passed);
   const evidence = {
@@ -109,7 +137,7 @@ function sshRun(remoteCommand, input) {
     baseline,
     checks,
     allPass,
-    stage: 'P1 (F1 连接面 + F2 列表面 + F6 probe 退役)',
+    stage: 'P1 (F1/F2/F6) + P3 (F4 进程面)',
     head: require('../package.json').version,
   };
   fs.mkdirSync(path.dirname(OUT), { recursive: true });

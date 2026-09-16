@@ -86,7 +86,11 @@ after(async () => {
       // 清理失败不影响测试结果
     }
   }
-  await fs.rm(sandboxRoot, { recursive: true, force: true });
+  // Windows：detached 进程 cwd 句柄释放有竞态——清理尽力而为（EBUSY/EPERM 容忍，
+  // TEST-INFRA-DEBT-3 Windows teardown 同款纪律），残留临时目录不影响判定。
+  try {
+    await fs.rm(sandboxRoot, { recursive: true, force: true });
+  } catch { /* 尽力而为 */ }
 });
 
 test('工具定义暴露后台进程三件套', () => {

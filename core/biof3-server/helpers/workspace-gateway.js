@@ -271,11 +271,24 @@ function createSshBackend({ alias, addressFamily } = {}) {
         ['exec_bg', b64(command), b64(cwd), b64(logPath)],
         { timeoutMs: 30000, maxArgLen: 256 * 1024 }
       ));
-      return { pid: Number.isInteger(info?.pid) ? info.pid : null, error: info?.error };
+      // BLOCK-96 F4 — additive starttime（/proc stat 第 22 字段，PID 复用身份校验用）
+      return {
+        pid: Number.isInteger(info?.pid) ? info.pid : null,
+        starttime: typeof info?.starttime === 'string' ? info.starttime : undefined,
+        error: info?.error,
+      };
     },
-    async processAlive(pid) {
-      const [info] = parseJsonLines(await fsOp(['ps_pid', String(pid)], { timeoutMs: 20000 }));
-      return { alive: info?.alive === true };
+    async processAlive(pid, expectedStarttime) {
+      // BLOCK-96 F4 — 带 expectedStarttime 时 agent 做 /proc starttime 身份校验
+      // （PID 复用不再误判存活）；缺省保持 kill -0 语义（存量调用方零变化）。
+      const args = ['ps_pid', String(pid)];
+      if (expectedStarttime) args.push(String(expectedStarttime));
+      const [info] = parseJsonLines(await fsOp(args, { timeoutMs: 20000 }));
+      return {
+        alive: info?.alive === true,
+        reused: info?.reused === true,
+        starttime: typeof info?.starttime === 'string' ? info.starttime : undefined,
+      };
     },
     async killPid(pid, signal = 'TERM') {
       const [info] = parseJsonLines(await fsOp(['kill_pid', String(pid), String(signal)], { timeoutMs: 20000 }));
