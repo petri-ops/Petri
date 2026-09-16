@@ -2203,14 +2203,20 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .workspacePinnedSummaryAgentChip {
-  /* UI-387 — 彩色 emoji 图标无外框；运行状态靠位置表达（运行中排最前） */
+  /* UI-387 — 彩色 emoji 图标无任何边框/底色（用户裁决）：裸 emoji + 悬停微底色。
+     appearance/border 必须显式清除，否则 button 默认样式会画出深色方框。 */
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+  padding: 0;
+  margin: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 26px;
   height: 26px;
   flex-shrink: 0;
-  border-radius: 6px;
   background: transparent;
   cursor: pointer;
   transition: background 0.15s ease;
