@@ -4548,14 +4548,14 @@
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-16",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P4-WAVE-C-COMPLETED",
+      "phase": "P5-WAVE-D-COMPLETED",
       "tags": [
         "block-92",
         "code-modularization",
         "refactor",
         "mega-file"
       ],
-      "notes": "巨型文件模块化二期（BLOCK-9/9.1 家法延续，用户裁决立项 2026-09-16）：前端 12 + core 9 + src 1 共 22 文件拆分 + 行数台账/棘轮两机制交付。纯代码组织 0 行为变更、0 新依赖、re-export 兼容。Wave A/B/C 已收口（台账 33296→22336）；余 P5 Wave D + P6 整包收口。",
+      "notes": "巨型文件模块化二期（BLOCK-9/9.1 家法延续，用户裁决立项 2026-09-16）：前端 12 + core 9 + src 1 共 22 文件拆分 + 行数台账/棘轮 + IPC 通道注册表三机制交付。纯代码组织 0 行为变更、0 新依赖、re-export 兼容。Wave A/B/C/D 已收口（台账 33296→22004，棘轮已入 closeout）；余 P6 整包收口。",
       "lastUpdated": "2026-09-17"
     },
     {
