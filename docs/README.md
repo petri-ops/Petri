@@ -164,6 +164,7 @@
 120. [`mobile-tunnel-aliyun-setup.md`](./guides/mobile-tunnel-aliyun-setup.md) — BLOCK-70 P3 aliyun 反向隧道一次性配置指引（无域名/IP 版：自签证书 + nginx 443 反代 SSE 关缓冲 + 安全组 + 面板配置 + 排障 + ZeroSSL IP 证书升级路径）。
 121. [`block-86-domain-pack-lifecycle-plan.md`](./block-86-domain-pack-lifecycle-plan.md) — 2026-09-14 立项（planned 排队，等在制任务收口后用户裁决启动）：**领域包全生命周期——运行时托管 + 插件化契约**——生信包=R/Python 基础环境+15 分析插件+脚本+演示数据+钩子+工具目录整包；装=记录+运行时联动安装，卸=requires.runtimes 契约推导清运行时+三档数据策略+卸载报告；商店 pack 卡片唯一入口+核心 UI 领域感知。增量 A（运行时清单迁包/D10 语言档案/钩子迁包）另行立项。
 122. [`block-89-workspace-file-ops-plan.md`](./block-89-workspace-file-ops-plan.md) — 2026-09-15 立项即开工（active，P0-LAUNCH）：**工作区文件树全能力文件操作（本地/SSH 全对齐）**——REST fs/move|copy|delete|mkdir 双后端同构（gateway 补 cp：local fsp.cp / node-agent fs_cp 自动部署）+ 前端右键菜单+拖拽 UI-378 + 删除统一确认后直接删；刷新走 projectWorkspaceChanged；非范围：OS 拖入/拖出、新建空文件、投影文件树。0 新依赖。
+123. [`block-92-code-modularization-plan.md`](./block-92-code-modularization-plan.md) — 2026-09-16 立项（planned 排队，启动门槛=UI-386 在制 WIP 收编 + 用户裁决）：**巨型文件模块化二期**（BLOCK-9/9.1 家法延续）——前端 12 + core 9 + src 1 共 22 个 ≥700 行产品文件的分波拆分（Wave A copilot 族 / Wave B 页面面板族 / Wave C core 族 / Wave D src+IPC 常量集中）+ 行数台账与棘轮两机制交付；纯代码组织 0 行为变更、0 新依赖、re-export 向后兼容；loop-orchestrator（行数门）与 UI-386 文件面零触碰。
 
 ## Branch Conversation 架构
 
