@@ -3349,6 +3349,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-384: 工具行详情显示只读结果内容——读取/查找/列目录/搜索输出块点亮 + UI-382 两处持久化修复（用户裁决「行 都修」）(2026-09-16 in_progress，dev Electron 边界内)
+
+- **来源**：用户复看 UI-383/382 时指认「读取和查找是不是不返回什么信息？为什么不显示内容」——实锤渲染缺口：`workspace_read/list/find/search` 一次性返回无流式增量，行详情输出块（`activity.output`）只接 `tool_output` 事件，而该通道服务端仅 `workspace_exec` 接线；`tool_result.data` 内容前端合并时被丢弃。
+- **交付面**：①服务端 `buildResultOutputText` 四工具格式化（读取=路径/行区间头行+内容；列目录=条目清单；查找/搜索=命中统计+逐条，1500 字符有界+截断标注，空结果诚实标注）+ `emitReadOnlyResultOutput` 走 exec 同款 `tool_output` 事件 + `recordOutput` 快照镜像（随 meta 落库，历史会话回放）；loop-orchestrator 结果下发前镜像发射，前端零改动。②同批修复 UI-382 两个实机抓真边界缺陷（用户裁决「都修」）：`recordResult` 从 spawn/wait/list agent 结果提取 agentId 随快照落库（此前 agentRunId 只在前端内存回写，5s 对账/重载后内联卡丢绑）；`child_finished` payload 补 `event` 字段（前端 task 模式拍平后按 `payload.event` 分发，字段缺失致 `onChildFinished` 永不触发、聚合条恒「运行中」）。
+- **证据**：契约 `block34-tool-activities-persist` 10/10（镜像格式化/1500 截断/agentRunId 提取/输出随快照存活/非目标工具不镜像）+ `toolActivity.test` 15/15（回程保留 agentRunId/output）+ loop 族与 agent 族 9 文件 145 项 138 过 3 红全为存量基线（continuation guard ×2 + run_tool approval truthful，stash 对照归属非本批）+ tsc 0。实机 dev Electron 真轮次：读文件行输出块 live 与重载回放均在（`[读取 datasets/raw/b.txt · 第 1-1 行 / 共 1 行] block89 move me`）；spawn 轮重载后内联实况卡完整回渲染（派发描述 + 已完成 chip + 详情窗按钮）、行头 chip 终态「已完成」、聚合条无「运行中」残留。**尚无用户视角确认——待用户复看后升 `verified`**。
+- **边界**：子智能体聚合条历史回放由既有 `loadHistoricalSubAgentTasks` 承接；continuation guard 存量红已另立 🟡 待裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-383: 工具时间线常规只读操作折叠——低信息量平铺改为可展开汇总（用户反馈「呈现这些没啥意义」）(2026-09-15 in_progress，dev Electron 边界内)
 
 - **来源**：用户截图指认——一条消息的工具时间线平铺 24 行毫秒级读取/查找/目录操作，「呈现这些好像没啥意义」；头部统计已说明「做了什么」，平铺只重复「怎么做的」。
@@ -3360,7 +3367,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 - **来源**：用户截图指认——图片解析派发的子智能体状态卡沉在页面最底部条带（SubAgentsBar），与其派发源头（工具调用行「已调用 read_image · 已完成 8.7s · 影响：…」）分离，视线割裂；裁决「他应该出现在这些信息的附近」。
 - **交付面**：`ToolActivityList` 展开体——带 `agentRunId` 的工具行内联子智能体实况卡（派发描述截断 + 实时状态 + 详情窗/中断动作），头部既有状态 chip 保持；底部 SubAgentsBar 保留聚合/俯瞰角色（跨会话入口）。**后续增量（716c8762，收口门禁抓出后补登）**：`conversationRunStore` 在 spawn_agent 结果到达时把 agentId 回写到对应工具行（`activity.agentRunId`），展开体据此渲染内联实况卡——派生卡与派发行可靠关联。
-- **证据**：tsc 0 + 相邻测试（716c8762：卡片渲染有 ToolActivityList.test 回归全绿背书）；**尚无用户视角确认**——待用户在真实会话中展开工具行复看后升 `verified`。
+- **证据**：tsc 0 + 相邻测试（716c8762：卡片渲染有 ToolActivityList.test 回归全绿背书）；2026-09-16 用户裁决「都修」后两处实机抓真边界缺陷已修（agentRunId 随服务端快照落库 + child_finished payload 补 event 字段，重载后内联卡完整回渲染，详见 UI-384 条目同批证据）；**尚无用户视角确认**——待用户在真实会话中展开工具行复看后升 `verified`。
 - **边界**：底部条带不删（聚合/跨会话俯瞰角色保留）；Agent 专属窗行为不变。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-381: 聊天附件真实接入发送管线 + 拖入图片对齐 + ssh 拖出导出（BLOCK-91）(2026-09-15 verified，dev Electron 边界内)

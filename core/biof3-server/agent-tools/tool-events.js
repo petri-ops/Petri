@@ -177,8 +177,7 @@ function buildToolOutputEvent({ name, callId, traceId, iteration, text, truncate
  * 总量封顶 TOOL_OUTPUT_MAX_CHARS。返回 onOutput(chunk) 回调（chunk 形如
  * { stream: 'stdout' | 'stderr', text }) 与 flush()（命令结束后冲刷剩余缓冲）。
  * 非 workspace_exec 工具或未提供 emit 时返回 no-op。
- */
-function createToolOutputStream({ name, callId, traceId, iteration, emit, intervalMs = TOOL_OUTPUT_INTERVAL_MS, maxChars = TOOL_OUTPUT_MAX_CHARS }) {
+ */function createToolOutputStream({ name, callId, traceId, iteration, emit, intervalMs = TOOL_OUTPUT_INTERVAL_MS, maxChars = TOOL_OUTPUT_MAX_CHARS }) {
   if (!emit || name !== 'workspace_exec' || !callId) {
     return { onOutput: () => {}, flush: () => {} };
   }
@@ -234,6 +233,99 @@ function createToolOutputStream({ name, callId, traceId, iteration, emit, interv
   };
 
   return { onOutput, flush };
+}
+
+// ===== UI-384 — 只读工具结果内容镜像 =====
+// workspace_read/list/find/search 是一次性返回（无流式增量），此前行详情输出块
+// 恒空——模型收到了内容但前端没有任何渲染。这里把结果格式化为有界纯文本尾部，
+// 由 loop-orchestrator 走与 exec 相同的 tool_output 事件 + 活动快照镜像
+// （recordOutput），前端零改动点亮行详情输出块，历史会话可回放。
+
+const RESULT_OUTPUT_TOOLS = new Set(['workspace_read', 'workspace_list', 'workspace_find', 'workspace_search']);
+const RESULT_OUTPUT_MAX_CHARS = 1500;
+
+function formatResultBytes(sizeBytes) {
+  const n = Number(sizeBytes);
+  if (!Number.isFinite(n) || n < 0) return '';
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function truncateResultText(text) {
+  if (text.length <= RESULT_OUTPUT_MAX_CHARS) return { text, truncated: false };
+  return { text: `${text.slice(0, RESULT_OUTPUT_MAX_CHARS)}\n…（内容已截断）`, truncated: true };
+}
+
+/**
+ * 把只读工具的一次性结果格式化为用户可读的输出尾部文本。
+ * 返回 { text, truncated }；非目标工具 / 错误结果返回 undefined。
+ */
+function buildResultOutputText(name, result) {
+  if (!RESULT_OUTPUT_TOOLS.has(name)) return undefined;
+  if (!result || typeof result !== 'object' || result.ok !== true) return undefined;
+  let body = '';
+  if (name === 'workspace_read') {
+    const total = Number.isFinite(result.totalLines) ? result.totalLines : '?';
+    const head = `[读取 ${result.path || ''} · 第 ${result.startLine ?? '?'}-${result.endLine ?? '?'} 行 / 共 ${total} 行]`;
+    const content = String(result.content ?? '');
+    body = content.length > 0 ? `${head}\n${content}` : `${head}\n（空文件或空区间）`;
+  } else if (name === 'workspace_list') {
+    const entries = Array.isArray(result.entries) ? result.entries : [];
+    const lines = entries.map((e) => {
+      if (!e || typeof e !== 'object') return '';
+      const size = e.type === 'file' && Number.isFinite(e.sizeBytes) ? `（${formatResultBytes(e.sizeBytes)}）` : '';
+      return `- ${e.name || e.path || '?'}${e.type === 'directory' ? '/' : ''}${size}`;
+    }).filter(Boolean);
+    body = `[目录 ${result.path || '.'}${result.truncated ? ' · 已截断' : ''}]\n${lines.length > 0 ? lines.join('\n') : '（空目录）'}`;
+  } else if (name === 'workspace_find') {
+    const matches = Array.isArray(result.matches) ? result.matches : [];
+    const lines = matches.map((m) => {
+      if (!m || typeof m !== 'object') return '';
+      const size = Number.isFinite(m.sizeBytes) ? `（${formatResultBytes(m.sizeBytes)}）` : '';
+      return `- ${m.path || '?'}${size}`;
+    }).filter(Boolean);
+    const scanned = Number.isFinite(result.filesScanned) ? ` · 扫描 ${result.filesScanned} 个文件` : '';
+    body = `[查找 ${result.pattern || '*'} · 命中 ${matches.length}${result.truncated ? '（已截断）' : ''}${scanned}]\n${lines.length > 0 ? lines.join('\n') : '（无匹配）'}`;
+  } else if (name === 'workspace_search') {
+    const matches = Array.isArray(result.matches) ? result.matches : [];
+    const lines = matches.map((m) => {
+      if (!m || typeof m !== 'object') return '';
+      return `${m.path || '?'}:${m.line ?? '?'}: ${String(m.text || '').slice(0, 200)}`;
+    }).filter(Boolean);
+    const scanned = Number.isFinite(result.filesScanned) ? ` · 扫描 ${result.filesScanned} 个文件` : '';
+    body = `[搜索 "${result.query || ''}" · 命中 ${matches.length}${result.truncated ? '（已截断）' : ''}${scanned}]\n${lines.length > 0 ? lines.join('\n') : '（无匹配）'}`;
+  }
+  if (!body) return undefined;
+  return truncateResultText(body);
+}
+
+/**
+ * UI-384 — 只读结果内容镜像发射器：buildResultOutputText 的结果走 tool_output
+ * 事件 + recordOutput 快照镜像（与 exec 流式输出同一管道；前端行详情输出块
+ * 点亮，随 meta 落库历史可回放）。内部 fail-safe：任何异常不阻塞工具结果下发。
+ * 返回 true 表示已发射。
+ */
+function emitReadOnlyResultOutput({ name, result, callId, traceId, iteration, emit, recordOutput }) {
+  try {
+    const output = buildResultOutputText(name, result);
+    if (!output || !output.text) return false;
+    const evt = buildToolOutputEvent({
+      name,
+      callId,
+      traceId,
+      ...(Number.isFinite(iteration) ? { iteration } : {}),
+      text: output.text,
+      truncated: output.truncated === true,
+    });
+    emit(evt);
+    if (typeof recordOutput === 'function') {
+      recordOutput({ name, callId, traceId, text: evt.text, truncated: evt.truncated === true });
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** Safe, compact activity details suitable for conversation metadata. */
@@ -349,6 +441,14 @@ function createToolActivityRecorder() {
       }
     }
     const existing = index >= 0 ? items[index] : null;
+    // UI-382 — spawn/wait/list agent 结果携带 agentId：随活动快照落库，
+    // 历史重建（5s 对账/重载）后内联实况卡与「详情窗」入口才能恢复。
+    const resultAgentData = result.data && typeof result.data === 'object' ? result.data : null;
+    const resultAgentRunId =
+      (name === 'spawn_agent' || name === 'wait_agent' || name === 'list_agents')
+      && resultAgentData && typeof resultAgentData.agentId === 'string'
+        ? resultAgentData.agentId
+        : undefined;
     const next = {
       key: existing ? existing.key : (result.callId || `${result.traceId || 'legacy'}:${name}:${items.length + 1}`),
       toolJobId: event.toolJobId || (existing && existing.toolJobId),
@@ -379,6 +479,8 @@ function createToolActivityRecorder() {
         : undefined,
       // UI-315 优化 — exec 实际使用的 shell 标签（头行展示）
       shellLabel: result.shellLabel || (existing ? existing.shellLabel : undefined),
+      // UI-382 — 子智能体任务 id（展开行内联实况卡 / 详情窗入口按它渲染）
+      agentRunId: resultAgentRunId || (existing ? existing.agentRunId : undefined),
       summary: event.summary,
       actionLabel: existing ? existing.actionLabel : summarizeToolCallForActivity(name).actionLabel,
       actionDetail: existing ? existing.actionDetail : summarizeToolCallForActivity(name).actionDetail,
@@ -401,9 +503,12 @@ function createToolActivityRecorder() {
 module.exports = {
   TOOL_OUTPUT_INTERVAL_MS,
   TOOL_OUTPUT_MAX_CHARS,
+  RESULT_OUTPUT_TOOLS,
   buildToolCallEvent,
   buildToolOutputEvent,
   buildToolResultEvent,
+  buildResultOutputText,
+  emitReadOnlyResultOutput,
   createToolOutputStream,
   summarizeToolCallForActivity,
   createToolActivityRecorder,

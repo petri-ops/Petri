@@ -836,6 +836,10 @@ async function runAgentLoop({
           const ownEvents = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000);
           const seq = (ownEvents.length ? ownEvents[ownEvents.length - 1].seq : 0) + 1;
           agentTaskStore.appendAgentTaskEvent(parentTaskId, seq, 'child_finished', {
+            // UI-382 — 前端 task 模式拍平 {seq, eventType, payload} 后按 payload.event
+            // 分发（copilotClient `_dispatchSseEvent`），payload 必须自带 event 字段，
+            // 否则 onChildFinished 永不触发、子智能体聚合条停在「运行中」。
+            event: 'child_finished',
             childTaskId: taskId,
             status: terminal.status,
             summaryHead: String(assistantText || terminal.error || '').slice(0, 200),

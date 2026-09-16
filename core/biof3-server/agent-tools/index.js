@@ -43,6 +43,8 @@ const {
   buildToolCallEvent,
   buildToolOutputEvent,
   buildToolResultEvent,
+  buildResultOutputText,
+  emitReadOnlyResultOutput,
   createToolOutputStream,
   createToolActivityRecorder,
 } = require('./tool-events');
@@ -66,6 +68,8 @@ module.exports = {
   buildToolCallEvent,
   buildToolOutputEvent,
   buildToolResultEvent,
+  buildResultOutputText,
+  emitReadOnlyResultOutput,
   createToolOutputStream,
   createToolActivityRecorder,
   MAX_AGENT_ITERS,

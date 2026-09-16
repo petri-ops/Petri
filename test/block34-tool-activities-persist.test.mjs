@@ -193,3 +193,141 @@ describe('BLOCK-34 P1 behavior: recorder snapshot lands in copilot_messages.meta
     assert.strictEqual(evtRead.toolResult.changeDiff, undefined);
   });
 });
+
+describe('UI-384 — 只读工具结果内容镜像（行详情输出块数据源）', () => {
+  const { buildResultOutputText, RESULT_OUTPUT_TOOLS } = require(resolve('core/biof3-server/agent-tools/tool-events'));
+
+  it('workspace_read：头行（路径/行区间/总行数）+ 内容；空内容诚实标注', () => {
+    const out = buildResultOutputText('workspace_read', {
+      ok: true, path: 'datasets/raw/b.txt', content: 'block89 move me',
+      startLine: 1, endLine: 1, totalLines: 1, sizeBytes: 15, truncated: false,
+    });
+    assert.ok(out.text.startsWith('[读取 datasets/raw/b.txt · 第 1-1 行 / 共 1 行]'));
+    assert.ok(out.text.includes('block89 move me'));
+    assert.strictEqual(out.truncated, false);
+
+    const empty = buildResultOutputText('workspace_read', {
+      ok: true, path: 'a.txt', content: '', startLine: 1, endLine: 1, totalLines: 0,
+    });
+    assert.ok(empty.text.includes('（空文件或空区间）'));
+  });
+
+  it('workspace_list / workspace_find / workspace_search：条目行 + 命中统计 + 空结果', () => {
+    const list = buildResultOutputText('workspace_list', {
+      ok: true, path: '.', truncated: false,
+      entries: [
+        { name: 'datasets', path: 'datasets', type: 'directory' },
+        { name: 'conflict.txt', path: 'conflict.txt', type: 'file', sizeBytes: 4 },
+      ],
+    });
+    assert.ok(list.text.startsWith('[目录 .]'));
+    assert.ok(list.text.includes('- datasets/'));
+    assert.ok(list.text.includes('- conflict.txt（4 B）'));
+
+    const listEmpty = buildResultOutputText('workspace_list', { ok: true, path: 'empty-dir', entries: [] });
+    assert.ok(listEmpty.text.includes('（空目录）'));
+
+    const find = buildResultOutputText('workspace_find', {
+      ok: true, pattern: '**/*block*', matches: [{ path: 'a.txt', sizeBytes: 8 }],
+      filesScanned: 12, truncated: false,
+    });
+    assert.ok(find.text.startsWith('[查找 **/*block* · 命中 1 · 扫描 12 个文件]'));
+    assert.ok(find.text.includes('- a.txt（8 B）'));
+
+    const findNone = buildResultOutputText('workspace_find', {
+      ok: true, pattern: '*.zzz', matches: [], filesScanned: 3, truncated: false,
+    });
+    assert.ok(findNone.text.includes('命中 0'));
+    assert.ok(findNone.text.includes('（无匹配）'));
+
+    const search = buildResultOutputText('workspace_search', {
+      ok: true, query: 'move', matches: [{ path: 'b.txt', line: 1, text: 'block89 move me' }],
+      filesScanned: 3, truncated: false,
+    });
+    assert.ok(search.text.startsWith('[搜索 "move" · 命中 1'));
+    assert.ok(search.text.includes('b.txt:1: block89 move me'));
+  });
+
+  it('超长内容截断（1500 字符上限 + truncated 标记）', () => {
+    const out = buildResultOutputText('workspace_read', {
+      ok: true, path: 'big.txt', content: 'x'.repeat(4000),
+      startLine: 1, endLine: 100, totalLines: 400,
+    });
+    assert.strictEqual(out.truncated, true);
+    assert.ok(out.text.length <= 1600);
+    assert.ok(out.text.includes('（内容已截断）'));
+  });
+
+  it('非目标工具 / 错误结果返回 undefined（不镜像）', () => {
+    assert.strictEqual(buildResultOutputText('workspace_exec', { ok: true }), undefined);
+    assert.strictEqual(buildResultOutputText('spawn_agent', { ok: true, agentId: 't1' }), undefined);
+    assert.strictEqual(
+      buildResultOutputText('workspace_read', { ok: false, error: 'not_a_file', message: '目标不是文件' }),
+      undefined
+    );
+    assert.ok(RESULT_OUTPUT_TOOLS.has('workspace_read'));
+    assert.ok(RESULT_OUTPUT_TOOLS.has('workspace_list'));
+    assert.ok(RESULT_OUTPUT_TOOLS.has('workspace_find'));
+    assert.ok(RESULT_OUTPUT_TOOLS.has('workspace_search'));
+  });
+});
+
+describe('UI-382 — agentRunId 随活动快照落库（历史重建后内联实况卡可恢复）', () => {
+  it('recordResult 从 spawn/wait/list agent 结果提取 agentId 存入快照', () => {
+    const { createToolActivityRecorder } = require(resolve('core/biof3-server/agent-tools'));
+    const { buildToolResultEvent } = require(resolve('core/biof3-server/agent-tools/tool-events'));
+
+    const recorder = createToolActivityRecorder();
+    recorder.recordCall({ name: 'spawn_agent', args: { task: '统计文件数' }, traceId: 'tr', callId: 'call_s1', iteration: 1 });
+    const evt = buildToolResultEvent({
+      contractVersion: '1', traceId: 'tr', callId: 'call_s1', tool: 'spawn_agent',
+      status: 'success', durationMs: 3, data: { ok: true, agentId: 'task-child-9' },
+    });
+    recorder.recordResult({ ...evt, iteration: 1 });
+    const snap = recorder.snapshot();
+    assert.strictEqual(snap[0].agentRunId, 'task-child-9');
+
+    // wait_agent / list_agents 同族
+    const recorder2 = createToolActivityRecorder();
+    for (const [callId, tool] of [['call_w', 'wait_agent'], ['call_l', 'list_agents']]) {
+      recorder2.recordCall({ name: tool, args: {}, traceId: 'tr', callId, iteration: 1 });
+      const e = buildToolResultEvent({
+        contractVersion: '1', traceId: 'tr', callId, tool,
+        status: 'success', durationMs: 3, data: { ok: true, agentId: `child-${callId}` },
+      });
+      recorder2.recordResult({ ...e, iteration: 1 });
+    }
+    const snap2 = recorder2.snapshot();
+    assert.strictEqual(snap2[0].agentRunId, 'child-call_w');
+    assert.strictEqual(snap2[1].agentRunId, 'child-call_l');
+  });
+
+  it('非 agent 工具的 data.agentId 不误提取；recordOutput 内容镜像随快照存活', () => {
+    const { createToolActivityRecorder } = require(resolve('core/biof3-server/agent-tools'));
+    const { buildToolOutputEvent, buildToolResultEvent } = require(resolve('core/biof3-server/agent-tools/tool-events'));
+
+    const recorder = createToolActivityRecorder();
+    recorder.recordCall({ name: 'run_tool', args: { toolId: 'deseq2' }, traceId: 'tr', callId: 'call_r', iteration: 1 });
+    const evt = buildToolResultEvent({
+      contractVersion: '1', traceId: 'tr', callId: 'call_r', tool: 'run_tool',
+      status: 'success', durationMs: 900, data: { ok: true, agentId: 'not-a-child' },
+    });
+    recorder.recordResult({ ...evt, iteration: 1 });
+    assert.strictEqual(recorder.snapshot()[0].agentRunId, undefined);
+
+    // UI-384 镜像：recordOutput（与 exec 同管道）→ 快照携带输出尾部
+    const outEvt = buildToolOutputEvent({
+      name: 'workspace_read', callId: 'call_rd', traceId: 'tr', iteration: 1,
+      text: '[读取 b.txt]\nblock89 move me',
+    });
+    recorder.recordCall({ name: 'workspace_read', args: { path: 'b.txt' }, traceId: 'tr', callId: 'call_rd', iteration: 2 });
+    recorder.recordOutput({ name: 'workspace_read', callId: 'call_rd', traceId: 'tr', text: outEvt.text });
+    recorder.recordResult({
+      toolResult: { tool: 'workspace_read', callId: 'call_rd', status: 'success', durationMs: 6 },
+      summary: 'ok',
+    });
+    const item = recorder.snapshot().find((i) => i.callId === 'call_rd');
+    assert.ok(item.output, 'output tail must persist with snapshot');
+    assert.ok(item.output.tail.includes('block89 move me'));
+  });
+});

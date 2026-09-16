@@ -64,6 +64,7 @@ const {
   runAgentToolCallBatch,
   buildToolCallEvent,
   buildToolResultEvent,
+  emitReadOnlyResultOutput,
   createToolOutputStream,
   replaceToolResultData,
   serializeToolResultForModel,
@@ -828,6 +829,15 @@ async function runLoop({
           }
           resultEditCompletionGuard.recordToolResult(name, result);
           envelope = replaceToolResultData(envelope, result);
+
+          // UI-384 — 只读结果内容镜像：read/list/find/search 结果格式化为有界
+          // 文本尾部，走 exec 同款 tool_output 事件 + recordOutput 快照镜像
+          // （前端行详情输出块点亮；随 meta 落库，历史会话可回放）。内部 fail-safe。
+          emitReadOnlyResultOutput({
+            name, result, callId, traceId, iteration: iter + 1,
+            emit: _emit,
+            recordOutput: assistantToolActivities.recordOutput,
+          });
 
           let ackInfo = null;
           if (result && result.ackToken && result._ackPromise) {

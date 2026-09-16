@@ -360,3 +360,37 @@ describe('exec terminal block (UI-315)', () => {
     expect(items[0]?.status).toBe('success');
   });
 });
+
+describe('UI-382/UI-384 — 持久化快照回程保留 agentRunId 与输出尾部', () => {
+  it('restoreToolActivities 保留 agentRunId 与 output.tail（重建后内联实况卡数据源）', () => {
+    const persisted = [{
+      key: 'call_spawn_1',
+      callId: 'call_spawn_1',
+      name: 'spawn_agent',
+      status: 'success',
+      durationMs: 3,
+      actionLabel: '已调用',
+      actionDetail: 'spawn_agent',
+      agentRunId: 'task-child-9',
+    }];
+    expect(restoreToolActivities(persisted)).toEqual([expect.objectContaining({
+      name: 'spawn_agent',
+      agentRunId: 'task-child-9',
+    })]);
+
+    const persistedRead = [{
+      key: 'call_read_1',
+      callId: 'call_read_1',
+      name: 'workspace_read',
+      status: 'success',
+      durationMs: 6,
+      actionLabel: '已读取',
+      actionDetail: 'datasets/raw/b.txt',
+      output: { tail: '[读取 datasets/raw/b.txt · 第 1-1 行 / 共 1 行]\nblock89 move me', truncated: false },
+    }];
+    expect(restoreToolActivities(persistedRead)).toEqual([expect.objectContaining({
+      name: 'workspace_read',
+      output: { tail: expect.stringContaining('block89 move me'), truncated: false },
+    })]);
+  });
+});
