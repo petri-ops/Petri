@@ -14,8 +14,6 @@ import { RightPanel, type RightPanelContext } from '@/components/workspace-panel
 import { ColumnHeader } from '@/components/desktop/titlebar/ColumnizedTitleBar';
 import { TitleBar } from '@/components/desktop/TitleBar';
 import { getProject, listProjectJobs, listDatasetsByProject } from '@/lib/project-store';
-// BLOCK-86 P2 — 运行时提示领域感知门控（无包不提运行时）
-import { listPacksRequiringRuntimes } from '@/lib/domainPack';
 import { useToast } from '@/components/common/ToastProvider';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
@@ -41,85 +39,35 @@ import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import type { CopilotContext, HarnessContextSummary } from '@/lib/copilotContext';
 import { gewuEvents, subscribeGewuEvent, dispatchGewuEvent } from '@/lib/events';
 import { usePendingScroll } from '@/lib/pendingScrollContext';
-import type { DiffRevision, EditorApi } from '@/components/editor/CodeMirror/types';
-// BLOCK-42 — pending-scroll 消费侧挂载（UI-194）：预览编辑器切 CodeMirror
-import { WorkspaceFilePreviewBridge } from '@/components/editor';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { useAppRail, type WorkspaceAdapter } from '@/components/desktop/AppRailContext';
-import { fileExtension, isImageFile, isTextFile, isMarkdownFile, workspaceFileUrlFor, formatPreviewText } from '@/lib/previewFileUtils';
 import type { ActiveArtifact, JobStats } from '@/components/workspace-panels/ResultView';
 import {
   fetchHarnessIndex,
   type HarnessIndexSummary,
 } from '@/lib/harness-client';
 import { buildResultTitleBarTitle } from '@/lib/result-title-bar';
-import {
-  summarizeSelectionForAgent,
-} from '@/lib/artifact-selection';
 import { isResultWorkspaceMode } from '@/components/result-studio/resultFocusLayout';
-import {
-  fetchResultStudioContext,
-  type ResultStudioEditControls,
-} from '@/lib/result-studio-interaction-client';
 import type { ResultEditSubmission } from '@/components/result-studio/ResultEditPanel';
 import {
-  buildResultEditCopilotAsk,
-  isResultStudioContextToken,
-} from '@/lib/result-edit-agent-bridge';
-import {
   beginResultSurfaceMeasure,
-  requestedArtifactRequestKey,
   RESULT_SURFACE_PERFORMANCE_MARKS,
-  shouldApplyRequestedArtifact,
 } from '@/components/result-studio/resultSurface';
-import { getBridge } from '@/lib/desktopBridge';
 import styles from './project-workspace.module.css';
 import type { ActiveWorkspaceFile } from './project-workspace/types';
 // Re-export for backward compatibility — consumers still import from the page.
 export type { ActiveWorkspaceFile } from './project-workspace/types';
 export type { ActiveArtifact, JobStats } from '@/components/workspace-panels/ResultView';
-export type RightPanelMode = 'home' | 'results' | 'files' | 'browser' | 'chat' | 'analyze' | 'review' | 'io' | 'jobs' | 'agent';
-const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconName }> = [
-  { id: 'results', label: '结果', icon: 'bar-chart' },
-  { id: 'files', label: '文件', icon: 'folder' },
-  { id: 'browser', label: '浏览器', icon: 'globe' },
-  { id: 'chat', label: '聊天', icon: 'sidebar' },
-  { id: 'analyze', label: '分析', icon: 'sparkles' },
-  // BLOCK-28.5 — 审阅并入右侧边栏 tab 体系（与其它入口同级，不再是浮层另类）
-  { id: 'review', label: '审阅', icon: 'git-branch' },
-  // UI-362 — 指挥中心 tab 化（用户裁决：入口应像结果/文件/审阅一样项目绑定）：
-  // 瓦片墙按当前项目过滤；全局俯瞰仍由 Ctrl/Cmd+Shift+C 独立窗承载。
-  { id: 'jobs', label: '指挥中心', icon: 'command' },
-  // BLOCK-68 / UI-317 — 模型 I/O 信息流从 composer ⋯ 菜单迁入 tab 体系（绑会话，只读）
-  { id: 'io', label: '模型 I/O', icon: 'list-details' },
-  // UI-385 — 子智能体实时详情迁入右栏（原独立专属窗退役）：中断/留言/续派交互完整保留
-  { id: 'agent', label: '智能体', icon: 'bot' },
-  // BLOCK-72 / UI-320 — 「后端」「知识空间」迁出右栏：设备级全局能力，入口在左栏工作台
-  // （/backend 与 /knowledge 全局页），右栏不再承载，不预留空壳。
-];
-function toCopilotHarnessSummary(index: HarnessIndexSummary | null | undefined): HarnessContextSummary | undefined {
-  if (!index) return undefined;
-  return {
-    fileCount: index.fileCount || 0,
-    truncated: index.truncated,
-    byKind: index.byKind,
-    byRole: index.byRole,
-    entries: (index.entries || []).slice(0, 24).map((entry) => ({
-      relativePath: entry.relativePath,
-      kind: entry.kind,
-      role: entry.role,
-      readable: entry.readable,
-      table: entry.table
-        ? {
-            headers: (entry.table.headers || []).slice(0, 12),
-            columnCount: entry.table.columnCount,
-            rowSampleCount: entry.table.rowSampleCount,
-            matrixOrientation: entry.table.matrixOrientation,
-          }
-        : undefined,
-    })),
-  };
-}
+// BLOCK-92 Wave B-1 — 右栏 tab 词表/常量外迁 ./project-workspace/rightPanelTabs.ts（原路径 re-export 兼容）。
+export type { RightPanelMode } from './project-workspace/rightPanelTabs';
+import { RIGHT_PANEL_ITEMS, type RightPanelMode } from './project-workspace/rightPanelTabs';
+// BLOCK-92 Wave B-1 — 状态/派生/事件簇外迁（纯搬运零行为变化）。
+import { toCopilotHarnessSummary } from './project-workspace/copilotHarnessSummary';
+import { useWorkspaceFileTabs } from './project-workspace/useWorkspaceFileTabs';
+import { useRuntimeDemandBanner } from './project-workspace/useRuntimeDemandBanner';
+import { useWorkspaceTitleBar } from './project-workspace/useWorkspaceTitleBar';
+import { useResultStudioEditContext } from './project-workspace/useResultStudioEditContext';
+import { useWorkspaceOpenEffects } from './project-workspace/useWorkspaceOpenEffects';
 export function ProjectWorkspace(): React.ReactElement {
   const shell = useWorkspacePanelsContext();
   const appRail = useAppRail();
@@ -164,29 +112,20 @@ export function ProjectWorkspace(): React.ReactElement {
   const autoOpenedJobRef = useRef<string | null>(null);
   const openResultRequestSequenceRef = useRef(0);
   const [activeArtifact, setActiveArtifact] = useState<ActiveArtifact | null>(null);
-  const [activeWorkspaceFile, setActiveWorkspaceFile] = useState<ActiveWorkspaceFile | null>(null);
-  // G0-RS-P3: Agent 上下文就绪状态。真相来自后端 context-envelope 投影，
-  // 前端不自行判断"坐标是否齐备"，也不把缺失坐标伪装成可用。
-  const [resultContextState, setResultContextState] = useState<{
-    status: 'ready' | 'blocked' | 'loading';
-    bindingKey: string;
-    contextToken?: string | null;
-    reason?: string | null;
-    selectionUsable?: boolean;
-    selectionCompatibility?: 'compatible' | 'stale' | 'invalid' | null;
-    publicPhases?: string[];
-  } | null>(null);
-  // G0-RS-P4: Schema 驱动控件与该 Job 真实执行过的参数值。两者都由后端
-  // descriptor 投影，前端不合成控件也不用默认值冒充"当前生效值"。
-  const [resultEditControls, setResultEditControls] = useState<ResultStudioEditControls | null>(null);
-  const [resultEditSubmitting, setResultEditSubmitting] = useState(false);
-  // P4R-3: result Composer drafts live above the conditional result surface,
-  // keyed by exact result/revision/selection so result↔chat does not discard a
-  // draft and a draft can never silently move onto a different context.
-  const [resultAgentDrafts, setResultAgentDrafts] = useState<Record<string, string>>({});
+  // BLOCK-92 Wave B-1 — 工作区文件 tab 状态簇外迁（./project-workspace/useWorkspaceFileTabs.ts）。
+  const {
+    openWorkspaceFiles,
+    activeWorkspaceFile,
+    setActiveWorkspaceFile,
+    handleOpenWorkspaceFile,
+    handleCloseWorkspaceFile,
+  } = useWorkspaceFileTabs(projectId);
+  // G0-RS-P4/G0-RS-P3 的 Result Studio 编辑上下文状态簇
+  // （resultContextState/resultEditControls/resultEditSubmitting/resultAgentDrafts）
+  // 外迁至 ./project-workspace/useResultStudioEditContext.ts，调用点在
+  // activeConversationRun 就位之后（见下）。
   const [browserCanGoBack, setBrowserCanGoBack] = useState(false);
   const [browserCanGoForward, setBrowserCanGoForward] = useState(false);
-  const [openWorkspaceFiles, setOpenWorkspaceFiles] = useState<ActiveWorkspaceFile[]>([]);
   const [copilotHarnessIndex, setCopilotHarnessIndex] = useState<HarnessIndexSummary | null>(null);
   const [activeJobHarnessIndex, setActiveJobHarnessIndex] = useState<HarnessIndexSummary | null>(null);
   const [workflowRefreshKey, setWorkflowRefreshKey] = useState(0);
@@ -222,7 +161,26 @@ export function ProjectWorkspace(): React.ReactElement {
     refresh: refreshConversationJobs,
   } = useConversationJobs(projectId, activeConvId);
   const activeConversationRun = useConversationRun(activeConvId);
-  const resultEditBusy = resultEditSubmitting || activeConversationRun?.status === 'running';
+  // BLOCK-92 Wave B-1 — Result Studio 编辑上下文簇外迁
+  // （./project-workspace/useResultStudioEditContext.ts：绑定键/上下文投影/
+  // 草稿/copilotActiveArtifact/handleResultEditSubmit，纯搬运零行为变化）。
+  const {
+    resultEditBusy,
+    effectiveResultContextState,
+    effectiveResultEditControls,
+    resultAgentDraft,
+    setResultAgentDraft,
+    copilotActiveArtifact,
+    handleResultEditSubmit,
+  } = useResultStudioEditContext({
+    projectId,
+    activeConvId,
+    activeArtifact,
+    setActiveArtifact,
+    activeJobId,
+    activeConversationRun,
+    setWorkspaceNotice,
+  });
   useEffect(() => {
     if (!conversationJobsError) return;
     setWorkspaceNotice('当前会话的结果列表暂时无法刷新，已保留上一次可用结果。');
@@ -236,94 +194,6 @@ export function ProjectWorkspace(): React.ReactElement {
     setActiveArtifact((current) => artifactAfterJobSelection(current, activeJobId, jobId));
     setActiveJobId(jobId);
   }, [activeJobId]);
-  const activeSelectionBindingKey = useMemo(() => {
-    const selection = activeArtifact?.selection;
-    if (!selection) return '';
-    return JSON.stringify({
-      selectionId: activeArtifact?.selectionId || null,
-      entityIdsHash: selection.entityIdsHash,
-      filterHash: selection.filterHash || null,
-      fields: selection.fields,
-      sort: selection.sort,
-      compatibility: selection.compatibility || null,
-      createdAt: selection.createdAt,
-    });
-  }, [
-    activeArtifact?.selectionId,
-    activeArtifact?.selection?.entityIdsHash,
-    activeArtifact?.selection?.filterHash,
-    activeArtifact?.selection?.fields,
-    activeArtifact?.selection?.sort,
-    activeArtifact?.selection?.compatibility,
-    activeArtifact?.selection?.createdAt,
-  ]);
-  const resultContextBindingKey = useMemo(() => {
-    if (!projectId || !activeArtifact) return '';
-    return [
-      projectId,
-      activeConvId || '',
-      activeArtifact.jobId,
-      activeArtifact.name,
-      activeArtifact.revisionId || '',
-      activeArtifact.artifactFamilyId || '',
-      activeSelectionBindingKey,
-    ].join('\u0000');
-  }, [
-    projectId,
-    activeConvId,
-    activeArtifact?.jobId,
-    activeArtifact?.name,
-    activeArtifact?.revisionId,
-    activeArtifact?.artifactFamilyId,
-    activeSelectionBindingKey,
-  ]);
-  const effectiveResultContextState = !activeArtifact
-    ? null
-    : resultContextState?.bindingKey === resultContextBindingKey
-      ? resultContextState
-      : !activeConvId
-        ? {
-            status: 'blocked' as const,
-            bindingKey: resultContextBindingKey,
-            contextToken: null,
-            reason: '请先创建或选择一个 Agent 会话，再修改当前结果。',
-          }
-        : { status: 'loading' as const, bindingKey: resultContextBindingKey, contextToken: null };
-  const effectiveResultEditControls = resultContextState?.bindingKey === resultContextBindingKey
-    ? resultEditControls
-    : null;
-  const resultAgentDraftKey = useMemo(() => {
-    if (!activeArtifact) return '';
-    return [
-      projectId || '',
-      activeConvId || '',
-      activeArtifact.jobId,
-      activeArtifact.name,
-      activeArtifact.revisionId || '',
-      activeArtifact.artifactFamilyId || '',
-      activeArtifact.selectionId || '',
-      activeSelectionBindingKey,
-    ].join('\u0000');
-  }, [
-    projectId,
-    activeConvId,
-    activeArtifact?.jobId,
-    activeArtifact?.name,
-    activeArtifact?.revisionId,
-    activeArtifact?.artifactFamilyId,
-    activeArtifact?.selectionId,
-    activeSelectionBindingKey,
-  ]);
-  const resultAgentDraft = resultAgentDraftKey ? resultAgentDrafts[resultAgentDraftKey] || '' : '';
-  const setResultAgentDraft = useCallback((draft: string) => {
-    if (!resultAgentDraftKey) return;
-    setResultAgentDrafts((current) => {
-      const next = { ...current, [resultAgentDraftKey]: draft };
-      const keys = Object.keys(next);
-      for (const key of keys.slice(0, Math.max(0, keys.length - 24))) delete next[key];
-      return next;
-    });
-  }, [resultAgentDraftKey]);
   // Plan 1.6 §4.3 — optimistic prepend for cross-project creations
   // (sidebar adds a conv under another project without switching pages).
   // useOtherConversations below reads from the shared cache; this seed
@@ -523,40 +393,6 @@ export function ProjectWorkspace(): React.ReactElement {
     if (parts.length <= 4) return displayPath;
     return `.../${parts.slice(-4).join('/')}`;
   }, [workspacePath]);
-  const titleBarTabs = useMemo(
-    () =>
-      openRightTabs
-        .filter((tab) => tab !== 'home')
-        .map((tab) => {
-          const item = RIGHT_PANEL_ITEMS.find((candidate) => candidate.id === tab);
-          return {
-            id: tab,
-            label: item?.label || tab,
-            icon: item?.icon || 'folder',
-            closable: true,
-          };
-        }),
-    [openRightTabs]
-  );
-  const titleBarResultItems = useMemo(() => conversationJobs.map((job) => {
-    const status = job.status === 'done'
-      ? '完成'
-      : job.status === 'failed'
-        ? '失败'
-        : job.status === 'running'
-          ? '运行中'
-          : '排队中';
-    return {
-      id: job.id,
-      label: job.name || job.tool_id || '分析结果',
-      status: `${status} · ${new Date(job.created_at).toLocaleTimeString('zh-CN', {
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-      })}`,
-    };
-  }), [conversationJobs]);
   const handleSelectTitleBarResult = useCallback((jobId: string) => {
     if (!conversationJobs.some((job) => job.id === jobId)) return;
     bindActiveJob(jobId);
@@ -564,27 +400,6 @@ export function ProjectWorkspace(): React.ReactElement {
     openRightPanel('results');
     updateWorkspaceMode('result', true, jobId);
   }, [bindActiveJob, conversationJobs, openRightPanel, setRightOpen, updateWorkspaceMode]);
-  useEffect(() => {
-    setActiveWorkspaceFile(null);
-    setOpenWorkspaceFiles([]);
-  }, [projectId]);
-  const handleOpenWorkspaceFile = useCallback((file: ActiveWorkspaceFile) => {
-    setOpenWorkspaceFiles((prev) => (
-      prev.some((item) => item.path === file.path) ? prev : [...prev, file]
-    ));
-    setActiveWorkspaceFile(file);
-  }, []);
-  const handleCloseWorkspaceFile = useCallback((pathToClose: string) => {
-    setOpenWorkspaceFiles((prev) => {
-      const closingIndex = prev.findIndex((item) => item.path === pathToClose);
-      const next = prev.filter((item) => item.path !== pathToClose);
-      setActiveWorkspaceFile((current) => {
-        if (current?.path !== pathToClose) return current;
-        return next[Math.min(Math.max(closingIndex, 0), next.length - 1)] || null;
-      });
-      return next;
-    });
-  }, []);
   // Plan 1.6 §4.3 — the SWR hook already handles initial load + cleanup on
   // projectId change (it seeds from the shared cache and resets state when
   // projectId is null). What it doesn't know about is the auto-select rule
@@ -662,105 +477,34 @@ export function ProjectWorkspace(): React.ReactElement {
   const handleOpenRightChat = useCallback(() => {
     openRightPanel('chat');
   }, [openRightPanel]);
-  // TitleBar 注册 —— 8f3d55a5 曾误删整段（右侧工具菜单「+」/ 标签 pills / 结果
-  // 选择器随之全部失效），UI-309 从 e689f867 恢复。BLOCK-62 P2：宽度两字段
-  // （leftPanelWidth/rightPanelWidth）已从 TitleBarState 退役——regular 顶栏是
-  // 列内 ColumnHeader（宽=aside 宽，同 commit），compact/loading/error 的 fixed
-  // 条宽度改由本页 props 同树直传，不再每拖拽帧跨树推送 context。
   const titleBarTitle = useMemo(
     () => buildResultTitleBarTitle(workspaceMode, project?.name, activeArtifact?.label || activeArtifact?.name),
     [activeArtifact?.label, activeArtifact?.name, project?.name, workspaceMode],
   );
-  useEffect(() => {
-    updateTitleBar({
-      title: titleBarTitle,
-      tabs: titleBarTabs,
-      activeTabId: rightTab === 'home' ? null : rightTab,
-      onSelectTab: (tabId) => {
-        if (tabId === 'results') {
-          handleOpenRightResults();
-          return;
-        }
-        setRightTab(tabId as RightPanelMode);
-        setRightToolMenuOpen(false);
-        setRightOpen(true);
-      },
-      onCloseTab: (tabId) => closeRightPanelTab(tabId as RightPanelMode),
-      onMoreAction: () => setRightToolMenuOpen((value) => !value),
-      toolMenuOpen: rightToolMenuOpen,
-      toolMenuItems: RIGHT_PANEL_ITEMS.map((item) => ({
-        id: item.id,
-        label: item.label,
-        icon: item.icon,
-        isOpen: openRightTabs.includes(item.id),
-      })),
-      onSelectToolItem: (tabId) => {
-        if (tabId === 'results') {
-          handleOpenRightResults();
-          setRightToolMenuOpen(false);
-          return;
-        }
-        openRightPanel(tabId as RightPanelMode);
-        setRightToolMenuOpen(false);
-      },
-      resultItems: titleBarResultItems,
-      activeResultId: conversationJobs.some((job) => job.id === activeJobId) ? activeJobId : null,
-      onSelectResult: handleSelectTitleBarResult,
-      canGoBack: rightTab === 'browser' && browserCanGoBack,
-      canGoForward: rightTab === 'browser' && browserCanGoForward,
-      onGoBack:
-        rightTab === 'browser' && browserCanGoBack
-          ? () => dispatchGewuEvent(gewuEvents.browserBack)
-          : null,
-      onGoForward:
-        rightTab === 'browser' && browserCanGoForward
-          ? () => dispatchGewuEvent(gewuEvents.browserForward)
-          : null,
-    });
-    return () => {
-      updateTitleBar({
-        title: 'Gewu',
-        tabs: [],
-        activeTabId: null,
-        onSelectTab: null,
-        onCloseTab: null,
-        onMoreAction: null,
-        toolMenuOpen: false,
-        toolMenuItems: [],
-        onSelectToolItem: null,
-        resultItems: [],
-        activeResultId: null,
-        onSelectResult: null,
-        canGoBack: false,
-        canGoForward: false,
-        onGoBack: null,
-        onGoForward: null,
-      });
-    };
-  }, [
-    activeJobId,
-    closeRightPanelTab,
-    browserCanGoBack,
-    browserCanGoForward,
-    openRightPanel,
-    openRightTabs,
-    project?.name,
+  // TitleBar 注册 effect 簇已外迁 ./project-workspace/useWorkspaceTitleBar.ts
+  // （BLOCK-92 Wave B-1，含 titleBarTabs/titleBarResultItems 派生；纯搬运零行为变化）。
+  useWorkspaceTitleBar({
+    updateTitleBar,
+    projectName: project?.name,
     titleBarTitle,
     rightTab,
-    handleOpenRightResults,
-    handleSelectTitleBarResult,
     rightToolMenuOpen,
-    setRightOpen,
-    setRightToolMenuOpen,
-    setRightTab,
-    titleBarTabs,
-    titleBarResultItems,
-    updateTitleBar,
-    // UI-309：旧版遗漏——缺失会让顶栏会话选择器持有过期闭包
+    openRightTabs,
+    activeJobId,
+    conversationJobs,
+    browserCanGoBack,
+    browserCanGoForward,
     conversations,
     activeConvId,
     handleSwitchConversation,
-  ]);
+    handleOpenRightResults,
+    handleSelectTitleBarResult,
+    openRightPanel,
+    closeRightPanelTab,
+    setRightOpen,
+    setRightTab,
+    setRightToolMenuOpen,
+  });
   // UI-282 — 拖拽目录直达创建：路径经校验后直接走创建链（UI-304 后无内联面板）
   // UI-327 向导①：连通性检测（runSshOp echo $HOME，经 /api/ssh-projects/connect）
   // UI-327 向导②：浏览远端目录（Gateway fs_list，仅目录）
@@ -917,33 +661,7 @@ export function ProjectWorkspace(): React.ReactElement {
     ),
     workflowRefreshKey,
   );
-  const copilotActiveArtifact = useMemo<NonNullable<CopilotContext['activeArtifact']> | null>(() => {
-    if (!activeArtifact) return null;
-    const contextToken = effectiveResultContextState?.status === 'ready'
-      && isResultStudioContextToken(effectiveResultContextState.contextToken)
-      ? effectiveResultContextState.contextToken
-      : null;
-    return {
-      jobId: activeArtifact.jobId,
-      toolId: activeArtifact.toolId,
-      name: activeArtifact.name,
-      type: activeArtifact.type,
-      label: activeArtifact.label,
-      url: activeArtifact.url,
-      revisionId: activeArtifact.revisionId,
-      artifactFamilyId: activeArtifact.artifactFamilyId,
-      entityType: activeArtifact.entityType,
-      idField: activeArtifact.idField,
-      selectionId: activeArtifact.selection?.compatibility === 'compatible'
-        ? activeArtifact.selectionId
-        : null,
-      selection: activeArtifact.selection?.compatibility === 'compatible'
-        ? summarizeSelectionForAgent(activeArtifact.selection)
-        : null,
-      selectionCompatibility: activeArtifact.selection?.compatibility || null,
-      contextToken,
-    };
-  }, [activeArtifact, effectiveResultContextState?.contextToken, effectiveResultContextState?.status]);
+  // BLOCK-92 Wave B-1 — copilotActiveArtifact 派生已随 useResultStudioEditContext 外迁。
   // 6.3 — Inject project context into SimpleChat (via shared copilot context).
   // Replaces the original useEffect that did an in-place setCopilotContext
   // patch on every render. useSetCopilotContext resets before applying,
@@ -977,100 +695,8 @@ export function ProjectWorkspace(): React.ReactElement {
         }
       : {}
   );
-  useEffect(() => {
-    setActiveArtifact(null);
-    setResultContextState(null);
-    setResultEditControls(null);
-  }, [activeJobId]);
-  // G0-RS-P3: 每当打开的结果或其版本变化，就从后端重新投影一次上下文。
-  // 这里只提供 job/文件名/revision 线索，坐标齐备与否由后端裁决；
-  // 409 时如实记录阻断原因，UI 不把它显示成"Agent 可以直接改"。
-  useEffect(() => {
-    if (!projectId || !activeArtifact?.jobId || !activeArtifact.name) {
-      setResultContextState(null);
-      setResultEditControls(null);
-      return;
-    }
-    if (!activeConvId) {
-      setResultContextState({
-        status: 'blocked',
-        bindingKey: resultContextBindingKey,
-        contextToken: null,
-        reason: '请先创建或选择一个 Agent 会话，再修改当前结果。',
-      });
-      setResultEditControls(null);
-      return;
-    }
-    let cancelled = false;
-    setResultContextState({ status: 'loading', bindingKey: resultContextBindingKey, contextToken: null });
-    setResultEditControls(null);
-    fetchResultStudioContext({
-      language: 'r',
-      projectId,
-      conversationId: activeConvId,
-      jobId: activeArtifact.jobId,
-      artifact: activeArtifact.name,
-      revisionId: activeArtifact.revisionId ?? null,
-    })
-      .then((result) => {
-        if (cancelled) return;
-        if (result.status === 'blocked') {
-          setResultContextState({
-            status: 'blocked',
-            bindingKey: resultContextBindingKey,
-            contextToken: null,
-            reason: result.diagnostics[0]?.message || null,
-          });
-          setResultEditControls(null);
-          return;
-        }
-        const contextToken = result.agentView?.contextToken ?? null;
-        if (!isResultStudioContextToken(contextToken)) {
-          setResultContextState({
-            status: 'blocked',
-            bindingKey: resultContextBindingKey,
-            contextToken: null,
-            reason: '本地服务没有返回可验证的结果上下文，请刷新后重试。',
-          });
-          setResultEditControls(null);
-          return;
-        }
-        setResultContextState({
-          status: 'ready',
-          bindingKey: resultContextBindingKey,
-          contextToken,
-          selectionUsable: result.agentView?.selectionState.usableByAgent === true,
-          selectionCompatibility: result.agentView?.selectionState.compatibility ?? null,
-          publicPhases: result.agentView?.publicPhases || [],
-        });
-        // G0-RS-P4: 控件 schema 与 Agent 可见参数出自同一后端投影。
-        setResultEditControls(result.editControls ?? null);
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setResultContextState({
-            status: 'blocked',
-            bindingKey: resultContextBindingKey,
-            contextToken: null,
-            reason: '无法连接本地服务读取结果上下文。',
-          });
-          setResultEditControls(null);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    projectId,
-    activeConvId,
-    activeArtifact?.jobId,
-    activeArtifact?.name,
-    activeArtifact?.revisionId,
-    activeArtifact?.artifactFamilyId,
-    activeArtifact?.selectionId,
-    activeSelectionBindingKey,
-    resultContextBindingKey,
-  ]);
+  // BLOCK-92 Wave B-1 — Result Studio 上下文重投影两个 effect 已随
+  // useResultStudioEditContext 外迁（activeJobId 重置 + fetchResultStudioContext）。
   useEffect(() => {
     if (loading) return;
     if (activeJobId || conversationJobs.length === 0) return;
@@ -1157,146 +783,34 @@ export function ProjectWorkspace(): React.ReactElement {
       }
     }
   }, [activeConvId, bindActiveJob, conversationJobs, jobs, navigate, normalizeToolStatus, openRightPanel, projectId, setRightOpen, updateWorkspaceMode]);
-  useEffect(() => {
-    autoOpenedJobRef.current = null;
-  }, [projectId]);
-  useEffect(() => {
-    if (loading || !projectId) return;
-    if (searchParams.get('mode')) return;
-    if (requestedJobId) {
-      const requestKey = requestedArtifactRequestKey({
-        projectId,
-        jobId: requestedJobId,
-        artifactName: requestedArtifactName,
-      });
-      if (!requestKey) appliedRequestedArtifactKeyRef.current = null;
-      if (shouldApplyRequestedArtifact(appliedRequestedArtifactKeyRef.current, requestKey)) {
-        appliedRequestedArtifactKeyRef.current = requestKey;
-        pendingArtifactNameRef.current = requestedArtifactName;
-        pendingArtifactJobIdRef.current = requestedJobId;
-        setPendingArtifactName(requestedArtifactName);
-      }
-      if (
-        activeJobId === requestedJobId &&
-        (workspaceMode === 'result' || workspaceMode === 'code' || workspaceMode === 'compare' || workspaceMode === 'history' || workspaceMode === 'chat')
-      ) return;
-      if (autoOpenedJobRef.current === requestedJobId) return;
-      autoOpenedJobRef.current = requestedJobId;
-      void handleOpenResult(requestedJobId, projectId, {
-        preserveWorkspaceMode: workspaceMode === 'chat' || workspaceMode === 'history',
-        workspaceMode,
-      });
-      return;
-    }
-    appliedRequestedArtifactKeyRef.current = null;
-  }, [activeJobId, handleOpenResult, jobs, loading, projectId, requestedArtifactName, requestedJobId, workspaceMode]);
-  useEffect(() => {
-    if (loading || !projectId || !requestedFilePath) return;
-    if (activeWorkspaceFile?.path === requestedFilePath) return;
-    const file: ActiveWorkspaceFile = {
-      path: requestedFilePath,
-      name: requestedFilePath.split('/').pop() || requestedFilePath,
-      url: workspaceFileUrlFor(projectId, requestedFilePath),
-      workspaceDir: project?.workspacePath,
-      workspaceKind: project?.workspaceKind,
-    };
-    handleOpenWorkspaceFile(file);
-    openRightPanel('files');
-  }, [activeWorkspaceFile?.path, handleOpenWorkspaceFile, loading, openRightPanel, projectId, requestedFilePath]);
-  useEffect(() => {
-    const handler = (detail: { toolJobId: string; projectId?: string | null }) => {
-      const d = detail;
-      if (d?.toolJobId) {
-        handleOpenResult(d.toolJobId, d.projectId || null);
-      }
-    };
-    const unsub = subscribeGewuEvent(gewuEvents.projectOpenResult, handler);
-    return unsub;
-  }, [handleOpenResult]);
-  useEffect(() => {
-    const handler = (detail: { jobId: string; artifactName: string; projectId?: string | null }) => {
-      if (!detail?.jobId || !detail?.artifactName) return;
-      const targetProjectId = detail.projectId || projectId;
-      pendingArtifactNameRef.current = detail.artifactName;
-      pendingArtifactJobIdRef.current = detail.jobId;
-      setPendingArtifactName(detail.artifactName);
-      if (targetProjectId && targetProjectId !== projectId) {
-        navigate(
-          `/project/${encodeURIComponent(targetProjectId)}?mode=chat&job=${encodeURIComponent(detail.jobId)}&artifact=${encodeURIComponent(detail.artifactName)}`,
-        );
-        return;
-      }
-      void handleOpenResult(detail.jobId, targetProjectId || null, { preserveWorkspaceMode: true });
-    };
-    const unsub = subscribeGewuEvent(gewuEvents.projectOpenArtifact, handler);
-    return unsub;
-  }, [handleOpenResult, navigate, projectId]);
-  // UI-385 — 指挥中心独立窗下钻 relay（agent/result 独立窗退役）：主窗 preload
-  // 收到 window:relay-to-main 后回调，这里转派既有 projectOpenArtifact 处理链
-  // （跨项目自动导航；单一事实走同一条结果打开链路）。
-  useEffect(() => {
-    const wm = getBridge('windowManager');
-    if (!wm?.onRelayToMain) return;
-    return wm.onRelayToMain((payload) => {
-      if (payload?.type !== gewuEvents.projectOpenArtifact) return;
-      dispatchGewuEvent(gewuEvents.projectOpenArtifact, payload.detail as { jobId: string; artifactName: string; projectId?: string | null });
-    });
-  }, []);
-  useEffect(() => {
-    const handler = (detail: {
-      projectId: string;
-      relativePath: string;
-      name?: string;
-      openWithSystemApp?: boolean;
-      line?: number;
-      column?: number;
-      diffRevision?: { filePath: string; originalText: string; modifiedText: string };
-    }) => {
-      if (!detail?.projectId || !detail?.relativePath) return;
-      if (detail.projectId !== projectId) {
-        // Cross-project workspace files are out of scope for the desktop
-        // workspace (each project has its own file tree); the chat host
-        // can decide to navigate or surface a toast.
-        navigate(`/project/${encodeURIComponent(detail.projectId)}?mode=chat&file=${encodeURIComponent(detail.relativePath)}`);
-        return;
-      }
-      const file: ActiveWorkspaceFile = {
-        path: detail.relativePath,
-        name: detail.name || detail.relativePath.split('/').pop() || detail.relativePath,
-        url: workspaceFileUrlFor(projectId || '', detail.relativePath),
-        workspaceDir: project?.workspacePath,
-      workspaceKind: project?.workspaceKind,
-      };
-      handleOpenWorkspaceFile(file);
-      openRightPanel('files');
-      // BLOCK-22 P4.5: Dispatch pending scroll request so WorkspaceFilePreviewBridge
-      // can scroll to the target line and/or enter inline-diff mode.
-      if (detail.line !== undefined) {
-        const diffRevision: DiffRevision | undefined = detail.diffRevision
-          ? {
-              filePath: detail.diffRevision.filePath,
-              originalText: detail.diffRevision.originalText,
-              modifiedText: detail.diffRevision.modifiedText,
-            }
-          : undefined;
-        setPendingRequest({
-          filePath: detail.relativePath,
-          line: detail.line,
-          column: detail.column,
-          diffRevision,
-          // BLOCK-42 P4：事件驱动的跳转（聊天卡片/审阅联动）补 pulse 高亮，
-          // 与 highlight:true 简写（3000ms）及 WTR review 跳行行为一致。
-          pulseMs: 3000,
-          timestamp: Date.now(),
-        });
-      }
-      if (detail.openWithSystemApp && workspacePath) {
-        void getBridge('files')?.openWorkspaceFile(workspacePath, detail.relativePath);
-      }
-    };
-    const unsub = subscribeGewuEvent(gewuEvents.projectOpenWorkspaceFile, handler);
-    return unsub;
-  }, [handleOpenWorkspaceFile, navigate, openRightPanel, projectId, workspacePath, setPendingRequest]);
+  // BLOCK-92 Wave B-1 — 结果/文件打开事件 effects 簇外迁
+  // （./project-workspace/useWorkspaceOpenEffects.ts：URL 请求参数自动打开、
+  // projectOpenResult/projectOpenArtifact/独立窗 relay/projectOpenWorkspaceFile）。
+  useWorkspaceOpenEffects({
+    projectId,
+    project,
+    workspacePath,
+    loading,
+    workspaceMode,
+    requestedJobId,
+    requestedArtifactName,
+    requestedFilePath,
+    searchParams,
+    activeJobId,
+    jobs,
+    activeWorkspaceFilePath: activeWorkspaceFile?.path,
+    openResultRequestSequenceRef,
+    autoOpenedJobRef,
+    appliedRequestedArtifactKeyRef,
+    pendingArtifactNameRef,
+    pendingArtifactJobIdRef,
+    setPendingArtifactName,
+    handleOpenResult,
+    handleOpenWorkspaceFile,
+    openRightPanel,
+    navigate,
+    setPendingRequest,
+  });
   /** Dispatch a copilot-ask event so the embedded SimpleChat picks it up */
   const handleAskAgent = useCallback((prompt: string, options?: { analysisMode?: boolean }) => {
     if (activeConvId && isConversationRunning(activeConvId)) {
@@ -1324,34 +838,7 @@ export function ProjectWorkspace(): React.ReactElement {
       /* 交接损坏即忽略——用户可在工作区手动发送 */
     }
   }, [activeConvId]);
-  // P4R-3: 焦点 Composer 与高级控件在这里汇合。可见 prompt 只包含用户目标/
-  // 手动 patch；opaque token + Artifact/Revision/Selection 快照走事件 context，
-  // 不进入消息文字。后端仍会重新投影真相并拒绝陈旧 token。
-  const handleResultEditSubmit = useCallback((submission: ResultEditSubmission) => {
-    if (!activeConvId || isConversationRunning(activeConvId)) {
-      setWorkspaceNotice('当前 Agent 仍在处理上一条请求；完成或停止后可继续修改结果。');
-      return false;
-    }
-    setResultEditSubmitting(true);
-    try {
-      const detail = buildResultEditCopilotAsk({
-        submission,
-        activeArtifact: copilotActiveArtifact,
-        currentContextToken: effectiveResultContextState?.status === 'ready'
-          ? effectiveResultContextState.contextToken
-          : null,
-      });
-      if (!detail) {
-        setWorkspaceNotice('当前结果上下文已经变化，请等待上下文刷新后再提交。');
-        return false;
-      }
-      setWorkspaceNotice('');
-      dispatchGewuEvent(gewuEvents.copilotAsk, detail);
-      return true;
-    } finally {
-      setResultEditSubmitting(false);
-    }
-  }, [activeConvId, copilotActiveArtifact, effectiveResultContextState?.contextToken, effectiveResultContextState?.status]);
+  // BLOCK-92 Wave B-1 — handleResultEditSubmit 已随 useResultStudioEditContext 外迁。
   const openScheduledResults = useCallback(() => {
     const currentJob = conversationJobs.find((job) => job.id === activeJobId);
     const nextJobId = currentJob?.id || conversationJobs[0]?.id || null;
@@ -1373,30 +860,9 @@ export function ProjectWorkspace(): React.ReactElement {
   // 「Rendered more hooks than during the previous render」卸载整棵树（页面全白）。
   // useState/useEffect 必须先于一切组件级早退。
   // （BLOCK-89 P3 曾独立重发现同一回归并同法上移，分叉收编两修合一。）
-  const rRuntimeMissing = backendStatus.rRuntime === false;
-  const pyRuntimeMissing = backendStatus.pyRuntime === false;
-  const [runtimeDemandPacks, setRuntimeDemandPacks] = useState<string[]>([]);
-  useEffect(() => {
-    let alive = true;
-    listPacksRequiringRuntimes()
-      .then((packs) => { if (alive) setRuntimeDemandPacks(packs.map((p) => p.name)); })
-      .catch(() => { /* 桥缺失 = 无包态 = 不提示 */ });
-    return () => { alive = false; };
-  }, []);
-  const runtimeDemandSuffix =
-    runtimeDemandPacks.length > 0 ? `（已安装领域包 ${runtimeDemandPacks.map((n) => `「${n}」`).join('、')} 需要）` : '';
-  const showRuntimeBanner =
-    backendStatus.loaded &&
-    runtimeDemandPacks.length > 0 &&
-    (rRuntimeMissing || pyRuntimeMissing);
-  let runtimeBannerMessage: string;
-  if (rRuntimeMissing && pyRuntimeMissing) {
-    runtimeBannerMessage = `R 与 Python 运行时均未安装，分析功能暂不可用${runtimeDemandSuffix}。`;
-  } else if (rRuntimeMissing) {
-    runtimeBannerMessage = `R 运行时未安装，依赖 R 的分析无法运行${runtimeDemandSuffix}。`;
-  } else {
-    runtimeBannerMessage = `Python 运行时未安装，依赖 Python 的分析无法运行${runtimeDemandSuffix}。`;
-  }
+  // BLOCK-92 Wave B-1 — 横幅状态簇外迁（./project-workspace/useRuntimeDemandBanner.ts，
+  // 调用点保持先于一切组件级早退的纪律）。
+  const { showRuntimeBanner, runtimeBannerMessage } = useRuntimeDemandBanner(backendStatus);
   if (loading) {
     return (
       <div className={styles.earlyReturnWrap}>
