@@ -18,6 +18,7 @@
  */
 
 const agentTaskStore = require('../agent-task-store');
+const agentRoles = require('./agent-roles');
 const {
   getAiSettings,
   getChatModelPreset,
@@ -148,6 +149,11 @@ async function spawn_agent(args, ctx) {
   const model = resolveSpawnModelSettings({ explicitModel: args && args.model, parentParams });
   if (model.error) return fail('invalid_arguments', model.error);
 
+  // BLOCK-93 P1 — 角色专职化：role 可选参数（注册表校验，未知 fail-closed；
+  // 未传＝通用缺省，零行为变化）。
+  const roleCheck = agentRoles.resolveRoleOrError(args && args.role);
+  if (!roleCheck.ok) return roleCheck.fail;
+
   const userContent = instructions ? `${taskText}\n\n${instructions}` : taskText;
 
   return launchSubAgent({
@@ -157,6 +163,7 @@ async function spawn_agent(args, ctx) {
     parentContext,
     userContent,
     model,
+    role: roleCheck.role,
     spawnSource: 'tool:spawn_agent',
   });
 }
@@ -164,15 +171,19 @@ async function spawn_agent(args, ctx) {
 /**
  * launchSubAgent — 创建子 agent 任务 + 并发槽 + 异步启动 loop。
  * BLOCK-49 二期：从 spawn_agent 抽取核心，spawn_agent / followup_task 共用。
- * @returns {{ok:true, agentId:string, model?:string} | {ok:false, error, message, ...}}
+ * BLOCK-93 P1：role（可选角色 key）随 params 落库 + 注册表指令片段注入 system prompt。
+ * @returns {{ok:true, agentId:string, model?:string, role?:string} | {ok:false, error, message, ...}}
  */
-function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, userContent, model, spawnSource }) {
+function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, userContent, model, role, spawnSource }) {
   const context = { ...(parentContext || {}) };
   if (model.accessModeHint && !context.accessMode) context.accessMode = model.accessModeHint;
   const preset = model.preset;
   const providerName = (preset && preset.provider) || parentParams.providerName || getChatProviderName();
   const providerLabel = parentParams.providerLabel || providerName;
   const modelName = (preset && preset.model) || parentParams.modelName;
+  // BLOCK-93 P1 — prompt 软约束：注册表指令片段（未知 key 时 renderRoleDirective
+  // 返回 null＝零注入；上游已做 fail-closed 校验，此处是纵深）
+  const roleDirective = role ? agentRoles.renderRoleDirective(role) : null;
 
   // 会话复用：与 chat.js subagent 分支一致，子 agent 挂在父会话下
   let _activeConv = null;
@@ -200,6 +211,7 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
         kind: 'subagent',
         parentTaskId,
         spawnSource,
+        ...(role ? { role } : {}),
       },
     }).taskId;
   } catch (e) {
@@ -243,6 +255,8 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
       taskId,
       kind: 'subagent',
       parentLoopRunId,
+      // BLOCK-93 P1 — 角色软约束注入（未传＝null＝零变化）
+      roleDirective: roleDirective || null,
       onEvent: () => {},
       shouldAbort: () => agentTaskStore.isAgentTaskCancellationRequested(taskId),
       // BLOCK-56 P1 单级不连环：子 agent 内禁用请求级 fallback
@@ -253,7 +267,7 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
     });
   });
 
-  return { ok: true, agentId: taskId, status: 'running', kind: 'subagent', model: modelName || undefined };
+  return { ok: true, agentId: taskId, status: 'running', kind: 'subagent', model: modelName || undefined, ...(role ? { role } : {}) };
 }
 
 // ── BLOCK-49 二期：运行中协作三件套 ──────────────────────────
@@ -390,6 +404,12 @@ async function followup_task(args, ctx) {
   const model = resolveSpawnModelSettings({ explicitModel: args && args.model, parentParams });
   if (model.error) return fail('invalid_arguments', model.error);
 
+  // BLOCK-93 P1 — 续派角色继承：显式 args.role 覆盖 > 原子 agent 角色 > 通用缺省
+  const roleCheck = agentRoles.resolveRoleOrError(
+    (args && args.role) || (childFull.params && childFull.params.role) || ''
+  );
+  if (!roleCheck.ok) return roleCheck.fail;
+
   const launched = launchSubAgent({
     parentTaskId,
     userId,
@@ -397,6 +417,7 @@ async function followup_task(args, ctx) {
     parentContext: parentParams.context || {},
     userContent,
     model,
+    role: roleCheck.role,
     spawnSource: 'tool:followup_task',
   });
   if (launched.ok === false) return launched;
@@ -407,6 +428,7 @@ async function followup_task(args, ctx) {
     status: 'running',
     queuedMessagesInjected: queued.length,
     model: launched.model || undefined,
+    ...(roleCheck.role ? { role: roleCheck.role } : {}),
   };
 }
 
@@ -486,6 +508,10 @@ async function launchUserFollowup({ childTaskId, userId, task }) {
   const model = resolveSpawnModelSettings({ explicitModel: undefined, parentParams });
   if (model.error) return { ok: false, error: 'invalid_arguments', message: model.error };
 
+  // BLOCK-93 P1 — 用户侧续派同样继承原子 agent 角色（无显式覆盖入参）
+  const roleCheck = agentRoles.resolveRoleOrError((child.params && child.params.role) || '');
+  if (!roleCheck.ok) return { ok: false, error: 'invalid_arguments', message: roleCheck.fail.message };
+
   const launched = launchSubAgent({
     parentTaskId,
     userId,
@@ -493,6 +519,7 @@ async function launchUserFollowup({ childTaskId, userId, task }) {
     parentContext: parentParams.context || {},
     userContent,
     model,
+    role: roleCheck.role,
     spawnSource: 'user:followup',
   });
   if (launched.ok === false) return launched;
@@ -503,6 +530,7 @@ async function launchUserFollowup({ childTaskId, userId, task }) {
     status: 'running',
     queuedMessagesInjected: queued.length,
     model: launched.model || undefined,
+    ...(roleCheck.role ? { role: roleCheck.role } : {}),
   };
 }
 
@@ -520,6 +548,8 @@ async function list_agents(args, ctx) {
       status: t.status,
       agentStatus: t.agentStatus,
       task: String(t.params && t.params.messages && t.params.messages[0] && t.params.messages[0].content || '').slice(0, 120),
+      // BLOCK-93 P1 — 角色透出（未指定角色的历史任务不带此字段）
+      ...(t.params && t.params.role ? { role: t.params.role } : {}),
       createdAt: t.createdAt,
       finishedAt: t.finishedAt || undefined,
       error: t.error || undefined,
@@ -583,6 +613,8 @@ async function wait_agent(args, ctx) {
 async function buildTerminalSummary(task) {
   const base = {
     task: String(task.params && task.params.messages && task.params.messages[0] && task.params.messages[0].content || '').slice(0, 120),
+    // BLOCK-93 P1 — 角色随摘要回父（父上下文可感知子 agent 专职面）
+    ...(task.params && task.params.role ? { role: task.params.role } : {}),
     error: task.error || undefined,
     filesChanged: Array.isArray(task.filesChanged) ? task.filesChanged.slice(0, SUMMARY_FILES_LIMIT) : [],
     filesChangedTruncated: Array.isArray(task.filesChanged) && task.filesChanged.length > SUMMARY_FILES_LIMIT,

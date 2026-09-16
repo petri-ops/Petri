@@ -333,6 +333,8 @@ async function runAgentLoop({
   disableProviderFallback = false,
   // BLOCK-81 P1 — 思考档位（off/standard/high；未传＝standard＝不发参）
   thinkingLevel = null,
+  // BLOCK-93 P1 — 子智能体角色软约束指令片段（spawn 链自注册表渲染；未传＝零注入）
+  roleDirective = null,
 }) {
   const turnStartedAt = Date.now();
   const isGuest = !userId;
@@ -376,6 +378,12 @@ async function runAgentLoop({
     providerLabel,
     model: modelName,
   });
+
+  // BLOCK-93 P1 — 子智能体角色专职约束（注册表指令片段，prompt 级软约束；
+  // 紧跟基础 system prompt 之后，后续增量块仍在其后追加）
+  if (roleDirective) {
+    systemPrompt += '\n\n=== 子智能体角色专职约束 ===\n' + roleDirective;
+  }
 
   if (isGuest) {
     systemPrompt += '\n\n=== 当前用户：未登录访客 ===';

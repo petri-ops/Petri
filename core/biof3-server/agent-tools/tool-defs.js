@@ -1167,13 +1167,21 @@ const TOOL_DEFS = [
       description:
         '派生一个子智能体异步执行独立子任务。子智能体拥有自己的思考和工具调用能力，' +
         '权限与当前会话一致（继承只读/项目写/完全访问），完成后用 wait_agent 获取结果摘要。' +
-        '适合可并行的独立子任务（如分别分析多个文件、分别跑多个校验）。子 agent 不能再派生子 agent。',
+        '适合可并行的独立子任务（如分别分析多个文件、分别跑多个校验）。子 agent 不能再派生子 agent。' +
+        '可用 role 指定专职角色（检索/搜集/整理/读取/分析/测试/写作/规划/修复等，注入对应职责指令）；未指定时按任务内容自动推断。',
       parameters: {
         type: 'object',
         properties: {
           task: {
             type: 'string',
             description: '子智能体要完成的任务描述，应清晰、自包含（子 agent 看不到当前对话历史）',
+          },
+          role: {
+            type: 'string',
+            enum: ['search', 'collect', 'organize', 'read', 'analysis', 'general', 'test', 'write', 'plan', 'fix'],
+            description:
+              '可选，子智能体的专职角色：search=检索 collect=搜集 organize=整理 read=读取 analysis=分析 ' +
+              'general=通用 test=测试 write=写作 plan=规划 fix=修复（注入对应职责指令，软约束）',
           },
           model: {
             type: 'string',
