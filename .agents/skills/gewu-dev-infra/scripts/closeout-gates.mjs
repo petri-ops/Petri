@@ -95,7 +95,9 @@ function main() {
     }
     console.log(`\n[${i + 1}/${list.length}] ${g.title}`);
     const t0 = Date.now();
-    const r = spawnSync(g.cmd, g.args, { cwd: ROOT, stdio: 'inherit' });
+    // npm.cmd（win32）属 .cmd 批处理：新版 Node 禁止无 shell 直接 spawn（EINVAL），
+    // 专项门禁经 npm 转发时必须带 shell；固定门禁走 process.execPath 不受影响。
+    const r = spawnSync(g.cmd, g.args, { cwd: ROOT, stdio: 'inherit', shell: g.cmd === NPM });
     const dur = ((Date.now() - t0) / 1000).toFixed(1);
     const status = r.status === 0 ? 'PASS' : `FAIL(exit ${r.status ?? 'signal'})`;
     results.push({ ...g, status, dur });
