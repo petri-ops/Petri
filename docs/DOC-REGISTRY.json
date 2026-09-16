@@ -4434,6 +4434,27 @@
       "notes": "工作区文件树全能力文件操作（2026-09-15 用户裁决「新开一个全新的工作包 本地和远程都具备全能性能力 不要有区分 你来适配」立项即开工，同日整包收口）：REST fs/move|copy|delete|mkdir 双后端同构（gateway 补 cp：local fsp.cp / node-agent fs_cp）+ 前端 UI-378 右键菜单/拖拽/弹层 verified + 删除统一确认后直接删。P3 实机 flow 14/14 allPass；实机抓真修 BLOCK-86 P2 钩子早退回归（d893f0ebe）。"
     },
     {
+      "id": "BLOCK-95-SESSION-IO",
+      "path": "docs/block-95-session-io-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-95-session-io",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-16",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-PLANNED",
+      "tags": [
+        "block-95",
+        "session-io",
+        "context-management",
+        "token-economy",
+        "chat-stream"
+      ],
+      "notes": "会话信息流 I/O 优化（用户裁决立项 2026-09-16「优化 信息流 I/O 主要目的是让每个session的连贯性好看易读 还有一个方面是性能 省token」，参考 Anthropic《Maximizing the value of your Claude Code sessions》2026-08-14 成本模型产品化）：A 面 连贯易读（A1 长会话游标加载修最旧 200 条缺陷/A2 流式渲染局部更新/A3 自动滚动守卫/A4 语义分段/A5 压缩与续接可视化）+ B 面 上下文经济（B1 历史拼装权收归后端/B2 会话级 rolling compaction——视图层投影、DB 原文不动/B3 prompt cache 感知——ai_usage 实测基线先行/B4 启动载荷瘦身评估/B5 工具输出整形）。红线=压缩诚实可见、度量先行。非范围=BLOCK-92 拆分面、BLOCK-93 文件面、BLOCK-94 召回质量、项目级摘要粒度。planned 排队不占 active 槽位；启动需用户裁决。",
+      "lastUpdated": "2026-09-16"
+    },
+    {
       "id": "BLOCK-94-KNOWLEDGE-SPACE-PRO",
       "path": "docs/block-94-knowledge-space-pro-plan.md",
       "kind": "work-package",
