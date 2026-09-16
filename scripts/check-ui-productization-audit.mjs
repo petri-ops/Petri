@@ -46,6 +46,14 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-09-16 BLOCK-92 P2 Wave A copilot 族巨型文件模块化拆分（834b18a
+  // conversationRunStore / c1590d8 copilotClient / 0a67e84 SimpleChat）：
+  // 纯重构零行为变化（UI-305 家法），subject 用 refactor(block-92): 未带
+  // UI-###；台账已由收口提交统一补登 UI-391 条目。豁免同提交台账与编号
+  // 要求，不重写共享历史。
+  '834b18a930794a5d4d68ad2f98f648f39080ec94',
+  'c1590d8cb018d5da2afa18549a63f54bf892ed33',
+  '0a67e84b8e46618b82279327a6d0c742591debe8',
   // 2026-09-15 BLOCK-91 聊天附件真实接入实现提交 c9535452：主体前端改动
   // （SimpleChat 附件管线 + FileTreeItem ssh 拖出），subject 用
   // feat(block-91): 未带 UI-###；台账已由后续 UI-381 条目统一登记覆盖。
@@ -257,6 +265,13 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-09-16 BLOCK-92 P2 Wave A copilot 族巨型文件模块化拆分（834b18a
+  // conversationRunStore / c1590d8 copilotClient / 0a67e84 SimpleChat）：
+  // 纯重构零行为变化，UI-391 台账条目已由 BLOCK-92 Wave A 收口提交统一
+  // 补登（对齐 UI-305 160e0f2c 先例）。豁免同提交台账要求；不重写共享历史。
+  '834b18a930794a5d4d68ad2f98f648f39080ec94',
+  'c1590d8cb018d5da2afa18549a63f54bf892ed33',
+  '0a67e84b8e46618b82279327a6d0c742591debe8',
   // 2026-09-16 UI-387 追加定稿两次样式微调（e48b631 彩色 emoji 无外框、
   // 5170e53 显式清除 button 默认边框——用户反馈「为什么还有外边框」）。
   // 同提交台账漏同步；UI-387 条目已含该定稿说明（BLOCK-96 收口时按 BLOCK-91

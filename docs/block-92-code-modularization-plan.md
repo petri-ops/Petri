@@ -1,7 +1,7 @@
 # BLOCK-92-CODE-MODULARIZATION 工作包计划（巨型文件模块化二期）
 
 **最后更新**：2026-09-16
-**状态**：`active`（2026-09-16 用户裁决「很棒 按顺序 逐个推进」队列序启动——启动门槛两条均满足：UI-386 WIP 已收编 9778bff9 + 用户显式裁决；P1 机制先行进行中，见 §4）
+**状态**：`active`（P2 Wave A copilot 族已收口：3 提交 834b18a9 / c1590d8c / 0a67e84b——conversationRunStore.ts 1347→690 五子模块、copilotClient.ts 1226→220 六子模块、SimpleChat.tsx 2024→1584 六 hook/纯函数簇（主 JSX 按 §5 风险条留 UI-38x 复看窗口后）；原路径 re-export 兼容零消费方改动。门禁=tsc 0 + Wave A 受影响面 22 文件 202 测试全绿（拆前基线 118+33+51 逐项对账）+ 棘轮绿（台账总行数 33296→31193）。下一阶段 P3 Wave B（8 文件，plan §4）。）
 **Plan ID**：`BLOCK-92-CODE-MODULARIZATION`
 **用户裁决原话**：「需要新建一个block用来优化项目代码  主要目的是让巨大代码文件模块化 你能安排一下吗 一定要确保没问题」（2026-09-16）
 **家法先例**：`docs/block-9-mega-file-refactor-plan.md`（一期：project-workspace.tsx 3222→4 文件、`_data.ts` 2157→3 文件、buildPreviewTable 抽取）+ `docs/block-9-1-main-js-split-plan.md`（main.js 2450→611 装配器 + `src/ipc/` 域模块），两者均 2026-08-16 当日收口 completed。
