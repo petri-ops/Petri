@@ -15,7 +15,10 @@
  *
  * BLOCK-67 P1 — fs verbs（远程项目工作区文件面）：
  *   fs_stat <b64path>             → 单行 JSON {type,size,mtimeMs} 或 {error}
- *   fs_list <b64path>             → 每行一个 JSON 条目（名称/类型/size/mtimeMs）
+ *   fs_list <b64path>             → BLOCK-96 F2：单行 base64(NUL 记录流)，记录 =
+ *                                   `<type>\t<size>\t<mtime_s>\t<name>\0`（type ∈ d/f）。
+ *                                   单 fork 批量化；名称零转义二进制安全；base64 先行
+ *                                   是因 __mux 经 bash $() 转发会剥 NUL。排序归 gateway。
  *   fs_read <b64path> [off] [len] → 文件内容 base64（单行，二进制安全）
  *   fs_write <b64path> <b64data>  → 原子写（tmp+mv），父目录自动 mkdir -p
  *   fs_mkdir <b64path>            → mkdir -p + JSON stat
@@ -139,20 +142,19 @@ case "$cmd" in
     fs_stat_json "$(fs_decode "$1")"
     ;;
   fs_list)
+    # BLOCK-96 F2 — 单进程批量化：旧实现逐条目 fork（basename/wc/tr/stat×2 串行，
+    # 500 文件实测 2.6~2.7s，5000 文件外推撞 30s mux 超时杀会话）。find -printf
+    # 一次 fork 产出 type/size/mtime；记录以 NUL 结尾——文件名唯一不可能出现的
+    # 字节就是 NUL，因此名称无需任何转义即二进制安全（引号/反斜杠/换行/非 UTF-8
+    # 字节全部免疫，gateway 解码后按 NUL 切记录、按前三个 \t 切字段）。
+    # 输出先 base64 成单行再回传：__mux 循环经 out=$(eval ...) 命令替换转发，
+    # bash 命令替换会剥 NUL 字节——必须在此处编好码（find|base64 管道直连不过替换）。
+    # 隐藏文件与同会话 .tmp.$$ 过滤保留；排序契约由 gateway 承担。
     [ $# -ge 1 ] || die "fs_list_usage"
     d="$(fs_decode "$1")"
     [ -d "$d" ] || { printf '{"error":"not_found"}\\n'; exit 0; }
-    for f in "$d"/*; do
-      [ -e "$f" ] || continue
-      b="$(basename "$f")"
-      case "$b" in .*|*.tmp.$$) continue ;; esac
-      if [ -d "$f" ]; then
-        printf '{"name":"%s","type":"dir","mtimeMs":%s}\\n' "$b" "$(fs_mtime_ms "$f")"
-      else
-        sz=$(wc -c < "$f" 2>/dev/null | tr -d ' ')
-        printf '{"name":"%s","type":"file","size":%s,"mtimeMs":%s}\\n' "$b" "\${sz:-0}" "$(fs_mtime_ms "$f")"
-      fi
-    done
+    find -L "$d" -maxdepth 1 -mindepth 1 ! -name '.*' ! -name "*.tmp.$$" -printf '%y\\t%s\\t%T@\\t%f\\0' 2>/dev/null | base64 | tr -d '\\n'
+    printf '\\n'
     ;;
   fs_read)
     [ $# -ge 1 ] || die "fs_read_usage"

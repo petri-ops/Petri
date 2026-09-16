@@ -13,6 +13,7 @@ export function FileTreeList({
   expandedDirs,
   onToggleDir,
   onFetchDir,
+  onFetchDirPage,
   fileUrlFor,
   onOpenFile,
   activePath,
@@ -28,6 +29,8 @@ export function FileTreeList({
   expandedDirs: Set<string>;
   onToggleDir: (path: string) => void;
   onFetchDir: (prefix: string) => Promise<FileEntry[]>;
+  /** BLOCK-96 F2 — 游标分页（可选；缺省回退 onFetchDir 全量） */
+  onFetchDirPage?: (prefix: string, offset: number) => Promise<{ entries: FileEntry[]; total: number; truncated: boolean }>;
   fileUrlFor: (path: string) => string;
   onOpenFile: (file: ActiveWorkspaceFile) => void;
   activePath?: string | null;
@@ -61,6 +64,7 @@ export function FileTreeList({
             expandedDirs={expandedDirs}
             onToggleDir={onToggleDir}
             onFetchDir={onFetchDir}
+            onFetchDirPage={onFetchDirPage}
             fileUrlFor={fileUrlFor}
             onOpenFile={onOpenFile}
             activePath={activePath}

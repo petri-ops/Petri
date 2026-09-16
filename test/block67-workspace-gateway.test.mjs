@@ -87,11 +87,22 @@ test('ssh 后端: 命令构造走 base64 fs verbs（fake runSshOp，零网络）
   const calls = [];
   const actual = require('../core/biof3-server/helpers/remote-execution/ssh-transport');
   const original = actual.runSshOp;
-  // ssh-transport 导出对象属性可替换（module.exports 对象字面量）。
+  // BLOCK-96 F2 契约：fs_list 载荷 = 单行 base64(NUL 记录流 <type>\t<size>\t<mtime>\t<name>\0)。
+  // 夹具含特殊文件名（引号/反斜杠/换行/制表符）——NUL 记录协议下必须原样存活，
+  // 旧 printf JSON「坏行静默丢文件」缺陷由此回归锁定。
+  const fakeListRecords = [
+    'f\t2\t1\tb.md',
+    'd\t0\t1\tadir',
+    'f\t7\t1\tquo"te.txt',
+    'f\t7\t1\tback\\slash.txt',
+    'f\t7\t1\tnew\nline.txt',
+    'f\t7\t1\tta\tb.txt',
+  ].map((r) => `${r}\0`).join('');
+  const fakeListPayload = Buffer.from(fakeListRecords, 'utf8').toString('base64');
   actual.runSshOp = async (params) => {
     calls.push(params);
     const stdout = params.remoteCommand.includes('"fs_list"')
-      ? '{"name":"b.md","type":"file","size":2,"mtimeMs":1}\n{"name":"adir","type":"dir","mtimeMs":1}\n'
+      ? fakeListPayload
       : params.remoteCommand.includes('"fs_read"')
         ? Buffer.from('hello 远程').toString('base64')
         : '{"type":"file","size":9,"mtimeMs":123}';
@@ -107,7 +118,22 @@ test('ssh 后端: 命令构造走 base64 fs verbs（fake runSshOp，零网络）
   t.after(() => { runner.createRemoteJobRunner = origCreate; });
 
   const entries = await backend.list('/remote/proj');
-  assert.deepStrictEqual(entries.map((e) => e.name), ['adir', 'b.md']); // 目录优先
+  assert.strictEqual(entries[0].name, 'adir'); // 目录优先
+  assert.strictEqual(entries.length, 6);
+  assert.strictEqual(entries.find((e) => e.name === 'b.md').size, 2);
+  // 特殊文件名逐字回填（含名称内制表符——前三个 \t 是字段分隔，其余归名称）
+  for (const hostile of ['quo"te.txt', 'back\\slash.txt', 'new\nline.txt', 'ta\tb.txt']) {
+    assert.ok(entries.some((e) => e.name === hostile), `hostile name survives: ${JSON.stringify(hostile)}`);
+  }
+  // BLOCK-96 F2 — 服务端分页切片契约（total/truncated 显式标记）
+  const page = await backend.listPage('/remote/proj', { limit: 2, offset: 1 });
+  assert.strictEqual(page.total, 6);
+  assert.strictEqual(page.entries.length, 2);
+  assert.strictEqual(page.truncated, true);
+  const full = await backend.listPage('/remote/proj', { limit: 0 });
+  assert.strictEqual(full.entries.length, 6);
+  assert.strictEqual(full.truncated, false);
+
   const content = await backend.read('/remote/proj/b.md');
   assert.strictEqual(content.toString('utf-8'), 'hello 远程');
   await backend.write('/remote/proj/b.md', 'x');
@@ -129,6 +155,45 @@ test('ssh 后端: transport 失败诚实抛出（分类信息保留）', async (
 
   const backend = gateway.createSshBackend({ alias: 'dell' });
   await assert.rejects(() => backend.list('/x'), (e) => e.classified?.kind === 'transport.network');
+});
+
+test('ssh 后端: mux 会话死亡对幂等只读 verb 透明重试一次；写类不重试（BLOCK-96 F1）', async (t) => {
+  const muxModule = require('../core/biof3-server/helpers/remote-execution/ssh-multiplexer');
+  const origRunOnMux = muxModule.runOnMux;
+  const origMuxEnv = process.env.BIOF3_SSH_MUX;
+  process.env.BIOF3_SSH_MUX = '1';
+  const runner = require('../core/biof3-server/helpers/remote-execution/remote-job-runner');
+  const origCreate = runner.createRemoteJobRunner;
+  runner.createRemoteJobRunner = () => ({ ensureAgent: async () => ({ ok: true }) });
+  t.after(() => {
+    muxModule.runOnMux = origRunOnMux;
+    if (origMuxEnv === undefined) delete process.env.BIOF3_SSH_MUX; else process.env.BIOF3_SSH_MUX = origMuxEnv;
+    runner.createRemoteJobRunner = origCreate;
+  });
+
+  const muxError = () => Object.assign(new Error('ssh_mux: 连接已断开'), { classified: { kind: 'transport.network', retryable: true } });
+  const okPayload = (records) => ({ ok: true, code: 0, stdout: Buffer.from(records, 'utf8').toString('base64') });
+
+  // 幂等只读（fs_list）：首次死亡 → 重建重试成功
+  let listCalls = 0;
+  muxModule.runOnMux = async () => {
+    listCalls += 1;
+    if (listCalls === 1) throw muxError();
+    return okPayload('f\t2\t1\tok.txt\0');
+  };
+  const backend = gateway.createSshBackend({ alias: 'retry-host' });
+  const entries = await backend.list('/x');
+  assert.strictEqual(listCalls, 2, 'retried exactly once');
+  assert.deepStrictEqual(entries.map((e) => e.name), ['ok.txt']);
+
+  // 写类（fs_write）：死亡即诚实失败，不自动重试
+  let writeCalls = 0;
+  muxModule.runOnMux = async () => {
+    writeCalls += 1;
+    throw muxError();
+  };
+  await assert.rejects(() => backend.write('/x/w.txt', 'data'), (e) => e.classified?.kind === 'transport.network');
+  assert.strictEqual(writeCalls, 1, 'write verbs never auto-retry');
 });
 
 test('createProject: ssh 字段 fail-closed + 落库形态', () => {

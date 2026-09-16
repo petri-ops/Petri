@@ -175,14 +175,22 @@ module.exports = function registerFileRoutes(app) {
           const abs = workspaceGateway.safeRemoteJoin(root, String(req.query.prefix || ''));
           if (!abs) return res.status(400).json({ ok: false, error: '非法路径' });
           try {
-            const rawEntries = await backend.list(abs);
-            const entries = rawEntries.map((e) => ({
+            // BLOCK-96 F2 — ?limit=N 分页（不传 = 全量，响应形状逐字节兼容）；
+            // truncated 显式标记而非静默截断。前端游标加载按 offset 续拉。
+            const limit = Number(req.query.limit || 0);
+            const offset = Number(req.query.offset || 0);
+            const mapEntry = (e) => ({
               name: e.name,
               type: e.type,
               size: e.type === 'file' ? e.size : undefined,
               modifiedAt: e.mtimeMs,
-            }));
-            return res.json({ ok: true, entries });
+            });
+            if (limit > 0) {
+              const page = await backend.listPage(abs, { limit, offset });
+              return res.json({ ok: true, entries: page.entries.map(mapEntry), total: page.total, truncated: page.truncated });
+            }
+            const rawEntries = await backend.list(abs);
+            return res.json({ ok: true, entries: rawEntries.map(mapEntry) });
           } catch (e) {
             if (e.remoteError === 'not_found') return res.status(404).json({ ok: false, error: '目录不存在' });
             if (e.classified) return res.status(502).json({ ok: false, error: `远程连接失败: ${e.classified.kind}`, retryable: e.classified.retryable === true });
@@ -216,6 +224,13 @@ module.exports = function registerFileRoutes(app) {
             if (a.type !== b.type) return a.type === 'dir' ? -1 : 1;
             return a.name.localeCompare(b.name);
           });
+        // BLOCK-96 F2 — 与 ssh 分支同契约的分页切片（不传 limit = 全量）。
+        const limit = Number(req.query.limit || 0);
+        const offset = Number(req.query.offset || 0);
+        if (limit > 0) {
+          const page = workspaceGateway.paginateEntries(entries, { limit, offset });
+          return res.json({ ok: true, entries: page.entries, total: page.total, truncated: page.truncated });
+        }
         res.json({ ok: true, entries });
       } catch (e) {
         res.status(500).json({ ok: false, error: e.message });

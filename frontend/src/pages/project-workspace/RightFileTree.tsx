@@ -16,6 +16,12 @@ import { WorkspaceFilePreview } from './WorkspaceFilePreview';
 import { FileTreeContextMenu, FileTreeDialogHost, type FileTreeDialog, type FileTreeMenuAction, type FileTreeMenuTarget } from './FileTreeOpsOverlay';
 import { fsImportFrom, fsMkdir, fsMove, fsCopy, fsUpload, joinPath, uniqueTargetName, type DraggedTreeItem } from './fileOps';
 
+// BLOCK-96 F2 — 树游标分页：每目录限量拉取，截断目录尾部出现「加载更多」。
+// 文件操作/签名对账仍走全量 fetchDir（唯一名预检与 mtime 签名不能吃截断）。
+const TREE_DIR_PAGE_LIMIT = 200;
+
+type DirPage = { entries: FileEntry[]; total: number; truncated: boolean };
+
 export function RightFileTree({
   project,
   active,
@@ -91,9 +97,40 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     return [];
   }, [project.id, showHidden]);
 
+  // BLOCK-96 F2 — 分页拉取（服务端 limit+truncated；不传 limit 的全量走 fetchDir）
+  const fetchDirPage = useCallback(async (prefix: string, offset: number): Promise<DirPage> => {
+    try {
+      const resp = await fetch(
+        getApiPrefix() + `/workspaces/${encodeURIComponent(project.id)}/tree?prefix=${encodeURIComponent(prefix)}${showHidden ? '&showHidden=1' : ''}&limit=${TREE_DIR_PAGE_LIMIT}&offset=${offset}`
+      );
+      const data = await resp.json();
+      if (data.ok) {
+        return { entries: (data.entries || []) as FileEntry[], total: Number(data.total || 0), truncated: data.truncated === true };
+      }
+    } catch { /* ignore */ }
+    return { entries: [], total: 0, truncated: false };
+  }, [project.id, showHidden]);
+
+  // 根目录分页续拉（子目录的加载更多在 FileTreeItem 内）
+  const [rootMore, setRootMore] = useState<{ total: number; done: number } | null>(null);
+  const [rootLoadingMore, setRootLoadingMore] = useState(false);
+
+  const loadMoreRoot = useCallback(async () => {
+    if (!rootMore || rootLoadingMore) return;
+    setRootLoadingMore(true);
+    try {
+      const page = await fetchDirPage('', rootMore.done);
+      setTree((prev) => [...prev, ...page.entries]);
+      setRootMore(page.truncated ? { total: page.total, done: rootMore.done + page.entries.length } : null);
+    } finally {
+      setRootLoadingMore(false);
+    }
+  }, [rootMore, rootLoadingMore, fetchDirPage]);
+
   const refreshFiles = useCallback(async (forcePreview = false) => {
-    const rootEntries = await fetchDir('');
-    setTree(rootEntries);
+    const rootPage = await fetchDirPage('', 0);
+    setTree(rootPage.entries);
+    setRootMore(rootPage.truncated ? { total: rootPage.total, done: rootPage.entries.length } : null);
     setLoading(false);
     setRefreshVersion((value) => value + 1);
 
@@ -101,7 +138,8 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     const segments = activeFile.path.split('/').filter(Boolean);
     const fileName = segments.pop() || activeFile.name;
     const parent = segments.join('/');
-    const entries = parent ? await fetchDir(parent) : rootEntries;
+    // 签名对账走全量（活动文件可能位于分页尾部之外，截断会造成假 missing）
+    const entries = await fetchDir(parent);
     const current = entries.find((entry) => entry.type === 'file' && entry.name === fileName);
     const signature = current
       ? `${current.size ?? -1}:${current.modifiedAt ?? -1}`
@@ -111,7 +149,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     if (forcePreview || (previous !== null && previous !== signature)) {
       setPreviewVersion((value) => value + 1);
     }
-  }, [activeFile?.name, activeFile?.path, fetchDir]);
+  }, [activeFile?.name, activeFile?.path, fetchDir, fetchDirPage]);
 
   useEffect(() => {
     activeFileSignatureRef.current = null;
@@ -524,6 +562,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
                   expandedDirs={expandedDirs}
                   onToggleDir={toggleDir}
                   onFetchDir={fetchDir}
+                  onFetchDirPage={fetchDirPage}
                   fileUrlFor={(path) =>
                     getApiPrefix() + `/workspaces/${encodeURIComponent(project.id)}/file?path=${encodeURIComponent(path)}`
                   }
@@ -536,6 +575,17 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
                   onRowContextMenu={handleRowContextMenu}
                   onDropToDir={(item, targetDir, copy) => { void handleDropToDir(item, targetDir, copy); }}
                 />
+              )}
+              {treeOpen && rootMore && (
+                <button
+                  type="button"
+                  className={styles.fileTreeLoadMore}
+                  onClick={() => { void loadMoreRoot(); }}
+                  disabled={rootLoadingMore}
+                  data-testid="file-tree-load-more-root"
+                >
+                  {rootLoadingMore ? '加载中…' : `加载更多（剩余 ${rootMore.total - rootMore.done} 项）`}
+                </button>
               )}
             </div>
           </aside>

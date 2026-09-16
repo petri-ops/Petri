@@ -1,8 +1,8 @@
 # BLOCK-96-SSH-CHANNEL-PERF — SSH 远程通道效率与稳定性优化（连接面 / 列表面 / 错误契约 / 进程面 / 可观测）
 
-最后更新：2026-09-16（**P0 设计评审三裁决落定**：①F1 产品级方案=**传输层参数化**（目标配置可选 `addressFamily`，传输层按目标注入 `-o AddressFamily=inet` 不全局注入 + 连通性检测带握手计时 >2s 黑洞提示）；②F2 分页=**一期直做前端游标**（服务端 limit+truncated + 前端树游标加载一步到位，用户显式裁决扩大原「仅服务端一期」倾向，非范围条款同步修订）；③§0.3 probe r/python 探测退役=**立 F6 全做**（调用方去 lang / 管理页徽标移除 / verb 参数化形态保留 / registry.js 死分支顺手清）。本日早前：用户裁决启动整包 → active/P0-LAUNCH；启动前置核对过（无 🔴/active 槽位空/git 净，scratch obs.tmp.cjs 当日清）+ 四处承重代码事实当日抽查与 HEAD 一致：node-agent fs_list L141 / gateway parseJsonLines 静默 null L88 / target-registry probe 硬编码 L108 / registry.js 退役分支 L1368）
+最后更新：2026-09-16（**P1 收口**：F6 probe 退役（3fa74ea3）+ F2 列表面（f4b74ca8）+ F1 连接面（037de763）+ 实机证据 7/7 allPass（`acceptance/block-96/block96-p1-live.json`）——首连 330ms（黑洞基线 21200ms）、fs_list@500 cold 20ms / warm 15ms（基线 2600ms）、六个特殊文件名（引号/反斜杠/换行/制表符/空格/中文）逐字回填、分页数学与 truncated 标记正确、mux 写列一致；契约 9 套件 73/73 绿（含 mux 透明重试单测 + 特殊文件名/分页夹具固化）；tsc 0 + vitest 36 过；UI-388/389 台账同批登记。**实现期抓真 1 处**：__mux 循环 `out=$(eval ...)` 命令替换剥 NUL 字节——fs_list 改 agent 侧 base64 单行先行（管道直连不过替换），NUL 协议经 mux 全链路存活）。此前：P0 三裁决落定（F1 传输层参数化 / F2 一期含前端游标 / §0.3 立 F6 全做）；用户裁决启动整包 → active/P0-LAUNCH；四处承重代码事实当日抽查与 HEAD 一致）
 
-状态：`active（P1 进行中——F6 probe 退役 + F1 连接面 + F2 列表面（含前端游标）→ P2 F3 → P3 F4 → P4 F5+收口，见 §4）`
+状态：`active（P1 已收口；P2 F3 错误契约（die 回传/pipefail/LC_ALL=C/错误码表）待做 → P3 F4 进程面 → P4 F5 可观测+评估项结论+整包收口，见 §4）`
 
 计划编号：`BLOCK-96-SSH-CHANNEL-PERF`
 

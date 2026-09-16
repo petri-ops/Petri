@@ -3356,6 +3356,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：tsc 0；实机 WSL 首连 330ms（黑洞基线 21.2s，`acceptance/block-96/block96-p1-live.json`）。
 - **边界**：settings 页信息展示；addressFamily 目标级 setter UI 为后续增量（传输层/gateway/mux 参数化管线已通）。
 
+## UI-389: 文件树大目录游标加载——截断显式「加载更多」（BLOCK-96 F2）(2026-09-16 in_progress，dev Electron 边界内)
+
+- **来源**：BLOCK-96 F2 P0 裁决「一期直做前端游标」——大目录不再静默全量拉取渲染，替代「大目录撞 30s 超时杀会话」悬崖的产品面。
+- **交付面**：树每目录限量 200 条（服务端 limit/offset/truncated 契约，不传参全量逐字节兼容）；截断目录尾部出现「加载更多（剩余 N 项）」行（根目录/子目录同机制）；文件操作唯一名预检与活动文件 mtime 签名对账走全量不受截断影响。
+- **证据**：契约 9 套件 73/73（含分页数学与特殊文件名夹具）+ tsc 0 + vitest fileOps/LeftPanel/workspace/RightPanel 36 过；实机 WSL 500 文件分页断言过（`acceptance/block-96/`）。
+- **边界**：无虚拟化（200 条分页即渲染护栏）；ssh 树无轮询策略不变。G0 开发期常态 · 不外推 packaged/Provider/GA.
 ## UI-387: 子智能体职能图标区分——形状=职能、颜色=状态（用户复看提案 + 裁决「1」）(2026-09-16 in_progress，dev Electron 边界内)
 
 - **来源**：用户复看摘要卡图标带时指认「智能体都是一样的图标，应该不同形状或配色」并追问「要不要分类专职」；评估后拆两层——图标区分（推断式）立即做，专职化立 BLOCK-93（角色注册表 + spawn role 参数 prompt 软约束 + 只读白名单评估，排队启动需裁决）。

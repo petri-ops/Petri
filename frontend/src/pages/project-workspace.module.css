@@ -7378,3 +7378,26 @@ body:global(.gewu-resizing-columns) * {
   background: var(--gewu-hover);
   color: var(--gewu-text);
 }
+
+/* BLOCK-96 F2 — 大目录游标加载「加载更多」行 */
+.fileTreeLoadMore {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--gewu-text-secondary, #888);
+  font-size: 12px;
+  text-align: left;
+  padding: 4px 0 6px 21px;
+  cursor: pointer;
+}
+
+.fileTreeLoadMore:hover {
+  color: var(--gewu-text, #333);
+  text-decoration: underline;
+}
+
+.fileTreeLoadMore:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

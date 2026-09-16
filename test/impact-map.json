@@ -1635,6 +1635,34 @@
       "scriptRole": "development-smoke"
     },
     {
+      "id": "block96-ssh-channel-perf",
+      "note": "BLOCK-96 SSH 通道效率稳定性：fs_list 单 fork NUL 记录协议 + 服务端分页 + 前端游标加载 + mux 幂等只读透明重试 + addressFamily 传输层参数化 + probe 握手计时/F6 领域探测退役。",
+      "patterns": [
+        "core/biof3-server/helpers/remote-execution/node-agent.js",
+        "core/biof3-server/helpers/remote-execution/ssh-multiplexer.js",
+        "core/biof3-server/helpers/remote-execution/ssh-transport.js",
+        "core/biof3-server/helpers/remote-execution/target-registry.js",
+        "core/biof3-server/helpers/workspace-gateway.js",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/RemoteTargets.tsx",
+        "frontend/src/pages/project-workspace/RightFileTree.tsx",
+        "frontend/src/pages/project-workspace/FileTreeList.tsx",
+        "frontend/src/pages/project-workspace/FileTreeItem.tsx",
+        "scripts/block96-*",
+        "acceptance/block-96/**"
+      ],
+      "tests": [
+        "test/block67-node-agent-fs.test.js",
+        "test/block67-workspace-gateway.test.mjs",
+        "test/block67-ssh-mux.test.mjs",
+        "test/block57-remote-execution.test.mjs",
+        "test/block67-ssh-surface.test.mjs",
+        "test/block67-routes.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
+    },
+    {
       "id": "block91-composer-attach-export",
       "note": "BLOCK-91 聊天附件真实接入（composer 附件孤儿缺陷修复 + fs/upload 落 .chat-attachments + 消息引用注入）+ 拖入图片 dataUrl 对齐 + 上限/无项目守卫 + ssh 拖出 DownloadURL（FileTreeItem 预览同源 URL）。",
       "patterns": [

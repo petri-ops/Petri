@@ -17,6 +17,8 @@ import { join } from 'node:path';
 const require = createRequire(import.meta.url);
 const { BIOF3_AGENT_SH, agentVersionHash, remoteAgentCommand } = require('../core/biof3-server/helpers/remote-execution/node-agent');
 const mux = require('../core/biof3-server/helpers/remote-execution/ssh-multiplexer');
+// BLOCK-96 F2 — fs_list 契约断言经 gateway 解码（stdout = 单行 base64(NUL 记录流)）
+const { parseListEntries } = require('../core/biof3-server/helpers/workspace-gateway');
 
 // 临时 HOME 部署 agent（与远端布局一致）
 const fakeHome = mkdtempSync(join(tmpdir(), 'b67-mux-'));
@@ -42,7 +44,9 @@ test('mux 会话: fs verbs 在复用连接上往返（list/write/read）', async
   await session.run(remoteAgentCommand(['fs_write', Buffer.from(root + '/a.md').toString('base64'), Buffer.from('# 内容甲').toString('base64')], { maxArgLen: 2 * 1024 * 1024 }), 20000);
 
   const listRaw = await session.run(remoteAgentCommand(['fs_list', Buffer.from(root).toString('base64')]), 20000);
-  assert.ok(listRaw.stdout.includes('a.md'), listRaw.stdout);
+  // BLOCK-96 F2 — stdout 为单行 base64(NUL 记录流)；解码后名称可见
+  const listNames = parseListEntries(listRaw.stdout).map((e) => e.name);
+  assert.ok(listNames.includes('a.md'), JSON.stringify(listNames));
 
   const readRaw = await session.run(remoteAgentCommand(['fs_read', Buffer.from(root + '/a.md').toString('base64')]), 20000);
   const content = Buffer.from(readRaw.stdout.replace(/\s+/g, ''), 'base64').toString('utf-8');

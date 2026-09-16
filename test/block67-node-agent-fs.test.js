@@ -52,17 +52,20 @@ test('block67 fs verbs: write → stat → read 往返（UTF-8 中文）', async
   assert.strictEqual(decoded, content);
 });
 
-test('block67 fs verbs: list 含目录排序语义条目与隐藏文件过滤', async (t) => {
+test('block67 fs verbs: list 含目录排序语义条目与隐藏文件过滤（BLOCK-96 F2 NUL 记录协议）', async (t) => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-fs-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   fs.writeFileSync(path.join(dir, 'a.txt'), 'aaa');
+  fs.writeFileSync(path.join(dir, 'space name.txt'), 'x');
   fs.mkdirSync(path.join(dir, 'bdir'));
   fs.writeFileSync(path.join(dir, '.hidden'), 'x');
 
   const out = await runAgent(['fs_list', b64(dir.replace(/\\/g, '/'))]);
-  const entries = out.trim().split('\n').filter(Boolean).map((l) => JSON.parse(l));
+  // BLOCK-96 F2 — stdout = 单行 base64(NUL 记录流)；解析契约归 gateway parseListEntries
+  const { parseListEntries } = require('../core/biof3-server/helpers/workspace-gateway');
+  const entries = parseListEntries(out);
   const names = entries.map((e) => e.name);
-  assert.ok(names.includes('a.txt') && names.includes('bdir'));
+  assert.ok(names.includes('a.txt') && names.includes('bdir') && names.includes('space name.txt'));
   assert.ok(!names.includes('.hidden'));
   const fileEntry = entries.find((e) => e.name === 'a.txt');
   assert.strictEqual(fileEntry.type, 'file');

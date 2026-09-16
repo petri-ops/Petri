@@ -1,0 +1,80 @@
+{
+  "generatedAt": "2026-09-16T08:59:19.153Z",
+  "alias": "wsl",
+  "baseline": {
+    "firstConnectBeforeMs": 21200,
+    "fsList500BeforeMs": 2600,
+    "note": "立项日（2026-09-16）WSL 同节点实测基线；节点侧已先加 AddressFamily inet 缓解"
+  },
+  "checks": [
+    {
+      "name": "first_connect",
+      "passed": true,
+      "detail": {
+        "ms": 330,
+        "baselineMs": 21200,
+        "classified": "ok"
+      }
+    },
+    {
+      "name": "hostile_names_roundtrip",
+      "passed": true,
+      "detail": {
+        "names": [
+          "a\"b.txt",
+          "back\\slash.txt",
+          "newline\nname.txt",
+          "space name.txt",
+          "tab\tname.txt",
+          "中文测试.txt"
+        ]
+      }
+    },
+    {
+      "name": "fs_list_500_cold",
+      "passed": true,
+      "detail": {
+        "ms": 20,
+        "entries": 500,
+        "baselineMs": 2600
+      }
+    },
+    {
+      "name": "fs_list_500_warm",
+      "passed": true,
+      "detail": {
+        "ms": 15,
+        "entries": 500,
+        "baselineMs": 2600
+      }
+    },
+    {
+      "name": "pagination_contract",
+      "passed": true,
+      "detail": {
+        "total": 500,
+        "entries": 50,
+        "truncated": false
+      }
+    },
+    {
+      "name": "pagination_truncated_flag",
+      "passed": true,
+      "detail": {
+        "total": 500,
+        "entries": 200,
+        "truncated": true
+      }
+    },
+    {
+      "name": "mux_write_list_consistency",
+      "passed": true,
+      "detail": {
+        "entries": 501
+      }
+    }
+  ],
+  "allPass": true,
+  "stage": "P1 (F1 连接面 + F2 列表面 + F6 probe 退役)",
+  "head": "0.0.1-rc.7"
+}

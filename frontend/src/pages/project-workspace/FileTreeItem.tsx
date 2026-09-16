@@ -18,6 +18,7 @@ export function FileTreeItem({
   expandedDirs,
   onToggleDir,
   onFetchDir,
+  onFetchDirPage,
   fileUrlFor,
   onOpenFile,
   activePath,
@@ -34,6 +35,8 @@ export function FileTreeItem({
   expandedDirs: Set<string>;
   onToggleDir: (path: string) => void;
   onFetchDir: (prefix: string) => Promise<FileEntry[]>;
+  /** BLOCK-96 F2 — 游标分页（可选；缺省回退 onFetchDir 全量，行为兼容） */
+  onFetchDirPage?: (prefix: string, offset: number) => Promise<{ entries: FileEntry[]; total: number; truncated: boolean }>;
   fileUrlFor: (path: string) => string;
   onOpenFile: (file: ActiveWorkspaceFile) => void;
   activePath?: string | null;
@@ -46,14 +49,34 @@ export function FileTreeItem({
   onDropToDir?: (item: { path: string; name: string; type: 'file' | 'dir' }, targetDir: string, copy: boolean) => void;
 }): React.ReactElement {
   const [children, setChildren] = useState<FileEntry[]>([]);
+  // BLOCK-96 F2 — 目录子项游标分页状态：truncated 时尾部出现「加载更多」
+  const [more, setMore] = useState<{ total: number; done: number } | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [dropActive, setDropActive] = useState(false);
   const dragDepthRef = useRef(0);
 
+  const loadDir = useCallback(async (offset: number, append: boolean) => {
+    if (onFetchDirPage) {
+      const page = await onFetchDirPage(fullPath, offset);
+      setChildren((prev) => (append ? [...prev, ...page.entries] : page.entries));
+      setMore(page.truncated ? { total: page.total, done: offset + page.entries.length } : null);
+      return;
+    }
+    setChildren(await onFetchDir(fullPath));
+    setMore(null);
+  }, [onFetchDir, onFetchDirPage, fullPath]);
+
   useEffect(() => {
     if (isExpanded && entry.type === 'dir') {
-      onFetchDir(fullPath).then(setChildren);
+      void loadDir(0, false);
     }
-  }, [isExpanded, entry.type, fullPath, onFetchDir, refreshVersion]);
+  }, [isExpanded, entry.type, fullPath, loadDir, refreshVersion]);
+
+  const handleLoadMore = useCallback(() => {
+    if (!more || loadingMore) return;
+    setLoadingMore(true);
+    void loadDir(more.done, true).finally(() => setLoadingMore(false));
+  }, [more, loadingMore, loadDir]);
 
   const fileUrl = fileUrlFor(fullPath);
   const isActive = entry.type === 'file' && activePath === fullPath;
@@ -176,6 +199,7 @@ export function FileTreeItem({
           expandedDirs={expandedDirs}
           onToggleDir={onToggleDir}
           onFetchDir={onFetchDir}
+          onFetchDirPage={onFetchDirPage}
           fileUrlFor={fileUrlFor}
           onOpenFile={onOpenFile}
           activePath={activePath}
@@ -186,6 +210,18 @@ export function FileTreeItem({
           onRowContextMenu={onRowContextMenu}
           onDropToDir={onDropToDir}
         />
+      )}
+      {isExpanded && entry.type === 'dir' && more && (
+        <button
+          type="button"
+          className={styles.fileTreeLoadMore}
+          style={{ paddingLeft: 21 + depth * 16 }}
+          onClick={handleLoadMore}
+          disabled={loadingMore}
+          data-testid="file-tree-load-more"
+        >
+          {loadingMore ? '加载中…' : `加载更多（剩余 ${more.total - more.done} 项）`}
+        </button>
       )}
     </li>
   );

@@ -16,6 +16,54 @@ const { remoteAgentCommand, AGENT_BIN, AGENT_ROOT } = require('./remote-executio
 
 const b64 = (s) => Buffer.from(String(s), 'utf-8').toString('base64');
 
+/** BLOCK-96 F2 — fs_list 载荷解析：agent 输出单行 base64(NUL 记录流)，记录 =
+ *  `<type>\t<size>\t<mtime_s>\t<name>\0`。NUL 是文件名唯一不可能出现的字节，
+ *  因此名称零转义、对引号/反斜杠/换行/非 UTF-8 字节二进制安全；旧 printf JSON
+ *  「坏行静默丢文件」缺陷由此绝迹。base64 先行是因 __mux 经 bash $() 转发会剥
+ *  NUL（agent 侧管道编码，不经 $()）。错误哨兵（{"error":...}，如 not_found）
+ *  明文先行短路；排序契约=目录优先 + localeCompare（与 local 后端同构）。 */
+function parseListEntries(text) {
+  const raw = String(text || '');
+  const trimmed = raw.trim();
+  if (trimmed.startsWith('{"error"')) {
+    let code = 'remote_error';
+    try { code = JSON.parse(trimmed).error || code; } catch { /* 保持兜底码 */ }
+    const e = new Error(code); e.remoteError = code; throw e;
+  }
+  const decoded = Buffer.from(trimmed.replace(/\s+/g, ''), 'base64').toString('utf8');
+  return decoded.split('\0')
+    .filter(Boolean)
+    .map((record) => {
+      const t1 = record.indexOf('\t');
+      const t2 = t1 >= 0 ? record.indexOf('\t', t1 + 1) : -1;
+      const t3 = t2 >= 0 ? record.indexOf('\t', t2 + 1) : -1;
+      if (t3 < 0) return null;
+      const type = record.slice(0, t1) === 'd' ? 'dir' : 'file';
+      const size = Number(record.slice(t1 + 1, t2));
+      const mtimeMs = Math.round(Number(record.slice(t2 + 1, t3)) * 1000);
+      const name = record.slice(t3 + 1);
+      if (!name || !Number.isFinite(size) || !Number.isFinite(mtimeMs)) return null;
+      return type === 'dir'
+        ? { name, type, mtimeMs, modifiedAt: mtimeMs }
+        : { name, type, size, mtimeMs, modifiedAt: mtimeMs };
+    })
+    .filter((entry) => entry !== null)
+    .sort((a, b) => {
+      if (a.type !== b.type) return a.type === 'dir' ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+}
+
+/** BLOCK-96 F2 — 服务端分页切片：不传 limit = 全量（行为兼容）；limit>0 时
+ *  返回 { entries, total, truncated }，truncated 显式标记而非静默截断。 */
+function paginateEntries(entries, { limit = 0, offset = 0 } = {}) {
+  const total = entries.length;
+  const start = Number.isFinite(offset) && offset > 0 ? Math.floor(offset) : 0;
+  const size = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 0;
+  const sliced = size > 0 ? entries.slice(start, start + size) : entries.slice(start);
+  return { entries: sliced, total, truncated: size > 0 && start + sliced.length < total };
+}
+
 /**
  * POSIX 风格相对路径拼接与边界校验（两后端共用；.. / 绝对路径 / 反斜杠拒绝）。
  * 返回以 '/' 连接的相对路径，或 null（非法）。
@@ -37,7 +85,14 @@ function safeRemoteJoin(root, relativePath) {
 // createSshBackend 每请求新建实例，实例级缓存会让每个请求都重跑一次
 // ensureAgent 哈希校验（独立 SSH 连接 ~1s）——实测树延迟不降的真凶。
 const ensuredAgents = new Set(); // `${alias}:${agentHash}`
-function createSshBackend({ alias }) {
+// BLOCK-96 F1 — 幂等只读 verb 集合：mux 会话死亡/超时后可透明重建重试一次；
+// 写类 verb 不自动重试（诚实失败优先，防重复写副作用）。
+const IDEMPOTENT_READ_VERBS = new Set(['fs_stat', 'fs_list', 'fs_read', 'sys_resource']);
+function createSshBackend({ alias, addressFamily } = {}) {
+  // P0 裁决（2026-09-16）— 传输层参数化：仅接受显式枚举值，其余视为自动
+  // （不注入，交由 ~/.ssh/config 与系统默认地址族序决定）。
+  const af = addressFamily === 'inet' || addressFamily === 'inet6' ? addressFamily : undefined;
+
   async function ensureAgent() {
     const { agentVersionHash } = require('./remote-execution/node-agent');
     const key = `${alias}:${agentVersionHash()}`;
@@ -59,17 +114,23 @@ function createSshBackend({ alias }) {
     // D1.1 性能优化：默认走单连接多路复用（每操作 ~1 RTT）；BIOF3_SSH_MUX=0 回退 thin per-call
     if (sshMux.muxEnabled()) {
       try {
-        const r = await sshMux.runOnMux({ alias, command, timeoutMs });
+        const r = await sshMux.runOnMux({ alias, command, timeoutMs, addressFamily: af });
         return r.stdout;
       } catch (e) {
-        if (e && e.classified) throw e;
-        throw e;
+        // BLOCK-96 F1 — 会话死亡/超时（transport.network）：幂等只读 verb 透明
+        // 重建重试一次（runOnMux 内部懒重建会话）；其余原样上抛。
+        if (!(e && e.classified && e.classified.kind === 'transport.network') || !IDEMPOTENT_READ_VERBS.has(verbArgs[0])) {
+          throw e;
+        }
+        const r = await sshMux.runOnMux({ alias, command, timeoutMs, addressFamily: af });
+        return r.stdout;
       }
     }
     const op = await sshTransport.runSshOp({
       alias,
       remoteCommand: command,
       timeoutMs,
+      addressFamily: af,
     });
     if (op.classified.kind !== 'ok') {
       const error = new Error(`ssh_transport: ${op.classified.kind}`);
@@ -94,17 +155,11 @@ function createSshBackend({ alias }) {
     kind: 'ssh',
     alias,
     async list(dirPath) {
-      const lines = parseJsonLines(await fsOp(['fs_list', b64(dirPath)]));
-      if (lines.length === 1 && lines[0].error) {
-        const e = new Error(lines[0].error); e.remoteError = lines[0].error; throw e;
-      }
-      // 与本地树同构排序：目录在前、名称 localeCompare。
-      return lines
-        .filter((entry) => typeof entry.name === 'string')
-        .sort((a, b) => {
-          if (a.type !== b.type) return a.type === 'dir' ? -1 : 1;
-          return a.name.localeCompare(b.name);
-        });
+      return parseListEntries(await fsOp(['fs_list', b64(dirPath)]));
+    },
+    // BLOCK-96 F2 — 分页列表（{ entries, total, truncated }）；不传 limit = 全量。
+    async listPage(dirPath, opts) {
+      return paginateEntries(await this.list(dirPath), opts);
     },
     async stat(filePath) {
       const [info] = parseJsonLines(await fsOp(['fs_stat', b64(filePath)]));
@@ -247,6 +302,10 @@ function createLocalBackend() {
         return a.name.localeCompare(b.name);
       });
     },
+    // BLOCK-96 F2 — 分页列表（与 ssh 后端同契约；不传 limit = 全量）。
+    async listPage(dirPath, opts) {
+      return paginateEntries(await this.list(dirPath), opts);
+    },
     async stat(filePath) {
       const stat = await fsp.stat(filePath);
       return {
@@ -321,7 +380,12 @@ function resolveWorkspaceBackend(project) {
   if (!project) return { error: 'project_not_found' };
   if (project.workspace_kind === 'ssh') {
     if (!project.ssh_host || !project.remote_path) return { error: 'ssh_project_misconfigured' };
-    return { backend: createSshBackend({ alias: project.ssh_host }), root: project.remote_path };
+    // BLOCK-96 F1 — 目标可选地址族（projects.ssh_address_family：inet|inet6，
+    // 空值=自动）。传输层按目标注入，不全局注入以免破坏 IPv6-only 远端。
+    return {
+      backend: createSshBackend({ alias: project.ssh_host, addressFamily: project.ssh_address_family }),
+      root: project.remote_path,
+    };
   }
   if (!project.workspace_path) return { error: 'workspace_missing' };
   return { backend: createLocalBackend(), root: project.workspace_path };
@@ -332,6 +396,8 @@ module.exports = {
   createSshBackend,
   createLocalBackend,
   resolveWorkspaceBackend,
+  parseListEntries,
+  paginateEntries,
   AGENT_BIN,
   AGENT_ROOT,
 };
