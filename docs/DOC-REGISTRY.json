@@ -4455,6 +4455,28 @@
       "lastUpdated": "2026-09-16"
     },
     {
+      "id": "BLOCK-96-SSH-CONNECTION-PERF",
+      "path": "docs/block-96-ssh-connection-perf-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-96-ssh-connection-perf",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-16",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-PLANNED",
+      "tags": [
+        "block-96",
+        "ssh",
+        "remote-execution",
+        "connection-reuse",
+        "resilience",
+        "performance"
+      ],
+      "notes": "SSH 远端连接性能与韧性加固（用户裁决立项 2026-09-16「如果没有的话 我觉得 可以新开一个block 这个性能上是需要优化的」；前置=会话内连接延迟/韧性核对，确认无专门包且最大杠杆缺失）。六工作面：W1 跨操作连接复用（ControlMaster/ControlPersist——现状每操作新建握手 ~1s，__mux 仅单操作内复用；坑：ControlPath 长度/套接字残留/MaxSessions/Windows 不支持降级）+ W2 长连接保活（ServerAliveInterval/CountMax——现状零保活，长流可被静默回收）+ W3 断线自动重连对账编排（基石已备：远端 state.json/exit.json + 偏移续读，缺编排；模式对齐 BLOCK-39）+ W4 重试增强（抖动+封顶；现状已线性递增且按 retryable 门控）+ W5 目标级健康探测熔断 + W6 连接状态可见性与高级参数（ProxyJump）。红线=度量先行（无前后对账数字不宣称）、断线诚实（D5 继承）、幂等与安全边界不动、诚实降级。非范围=node-agent verb 协议语义、BLOCK-57/67 已交付 D 裁决、BLOCK-92/93/94/95 文件面、VS Code 式远端大脑架构、worktree、新依赖、agent 零安装性质。planned 排队；启动需用户裁决。",
+      "lastUpdated": "2026-09-16"
+    },
+    {
       "id": "BLOCK-94-KNOWLEDGE-SPACE-PRO",
       "path": "docs/block-94-knowledge-space-pro-plan.md",
       "kind": "work-package",
