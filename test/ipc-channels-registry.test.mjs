@@ -115,3 +115,15 @@ test('consumers hold no hand-written channel literals (literal reflux guard)', (
   }
   assert.deepEqual(offenders, [], 'hand-written channel literals reappeared in consumers');
 });
+
+test('every consumer can resolve its channels require (path guard — src/ vs src/main/ 深度差异)', () => {
+  const broken = [];
+  for (const rel of CONSUMERS) {
+    const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+    const m = text.match(/const CHANNELS = require\('([^']+)'\)/);
+    assert.ok(m, `${rel} 缺少 CHANNELS require`);
+    const resolved = path.resolve(path.join(ROOT, path.dirname(rel)), m[1] + '.js');
+    if (!fs.existsSync(resolved)) broken.push(`${rel}: require('${m[1]}') -> ${resolved}`);
+  }
+  assert.deepEqual(broken, [], 'unresolvable channels require');
+});

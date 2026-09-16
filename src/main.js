@@ -11,7 +11,7 @@
  * 5. 创建 webview 窗口加载内嵌静态站
  * 6. 外部链接走系统浏览器
  */
-const CHANNELS = require('./channels');
+const CHANNELS = require('./ipc/channels');
 
 const {
   app,

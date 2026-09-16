@@ -8,7 +8,7 @@
 // BrowserWindow is passed via parameter injection so the module
 // has no top-level Electron dependency.
 // ============================================================
-const CHANNELS = require('./channels');
+const CHANNELS = require('../ipc/channels');
 
 const { zoomBy, zoomReset } = require("./_zoom.js");
 

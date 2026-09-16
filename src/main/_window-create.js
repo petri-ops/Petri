@@ -9,7 +9,7 @@
 // parameter injection to avoid top-level dependencies.
 // mainWindow is managed via getter/setter to avoid top-level shared state.
 // ============================================================
-const CHANNELS = require('./channels');
+const CHANNELS = require('../ipc/channels');
 
 const fs = require("fs");
 const { BRAND } = require("./brand");
