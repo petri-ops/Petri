@@ -26,6 +26,8 @@ import { CommandCenterJobsWall } from '@/pages/window/CommandCenterJobsWall';
 import { ReviewMode } from '@/components/desktop/WorkingTreeReview/ReviewMode';
 // BLOCK-68 / UI-317 — 模型 I/O 信息流 dock（原 composer ⋯ 菜单 overlay 迁入）
 import { LlmTranscriptViewer } from '@/components/copilot/LlmTranscriptViewer';
+// UI-385 — 子智能体实时详情面板（原独立专属窗迁入右栏）
+import { AgentRunPanel } from '@/components/workspace-panels/AgentRunPanel';
 import styles from '@/pages/project-workspace.module.css';
 
 type DispatchSetter<T> = React.Dispatch<React.SetStateAction<T>>;
@@ -40,6 +42,10 @@ export interface RightPanelContext {
   project: Project;
   projectId?: string;
   activeConvId: string | null;
+  /** UI-385 — 右栏「智能体」tab 当前展示的子 agent 任务 id（agentOpenInRail 事件写入）。 */
+  agentRunId?: string | null;
+  /** UI-385 — 续派成功后切换面板到新 agent。 */
+  onAgentRunSwitch?: (runId: string) => void;
 
   // Tab state
   openRightTabs: RightPanelMode[];
@@ -245,6 +251,18 @@ export function RightPanel({
                 )}
                 {/* BLOCK-68 / UI-317 — 模型 I/O 信息流 dock（绑当前会话，只读；无会话诚实空态） */}
                 {tab === 'io' && <LlmTranscriptViewer conversationId={ctx.activeConvId} />}
+                {/* UI-385 — 子智能体实时详情（原独立专属窗迁入：中断/留言/续派完整保留；
+                    未选中 agent 时诚实空态，入口=工具行内联卡「详情」/活动条/俯瞰行点击） */}
+                {tab === 'agent' && (
+                  ctx.agentRunId ? (
+                    <AgentRunPanel
+                      runId={ctx.agentRunId}
+                      onSpawnedAgent={(runId) => ctx.onAgentRunSwitch?.(runId)}
+                    />
+                  ) : (
+                    <div className={styles.panelEmpty}>尚未选择子智能体——在会话工具行或活动条中打开详情。</div>
+                  )
+                )}
                 {/* BLOCK-72 / UI-320 — 「知识空间」「后端」tab 已迁出右栏：设备级全局能力，
                     管理面在左栏工作台入口的 /knowledge 与 /backend 全局页；不预留空壳。 */}
               </div>

@@ -167,6 +167,15 @@ const desktopBridgeSurface = {
       ipcRenderer.on('window:state-changed', listener);
       return () => ipcRenderer.removeListener('window:state-changed', listener);
     },
+    /** UI-385 — 独立窗下钻通道：把载荷转发到主窗（右栏打开结果/智能体）。 */
+    openResultInMainWindow: (payload) => ipcRenderer.invoke('window:open-result-in-main', payload),
+    /** UI-385 — 主窗接收 relay（白名单类型 → DOM CustomEvent，与 lib/events 同名）。 */
+    onRelayToMain: (callback) => {
+      if (typeof callback !== 'function') return () => {};
+      const listener = (_event, payload) => callback(payload);
+      ipcRenderer.on('window:relay-to-main', listener);
+      return () => ipcRenderer.removeListener('window:relay-to-main', listener);
+    },
   },
 
   // 应用级控制 — 装完运行时后需整体重启（BIOF3_R_HOME 在 main 启动时固化，

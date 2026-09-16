@@ -4,15 +4,14 @@
 // 数据源：conversationRunStore 的 subTaskRuns（用户 runInBackground +
 // 模型 spawn_agent 双源登记；child_finished 终态落账）。
 // 行内操作：中断（运行中，stopSubAgentTask 走既有 cancel REST）+
-// 详情窗（BLOCK-59 P4 agent 详情窗弹出）。
+// 详情（UI-385：右栏「智能体」tab 承载，独立窗退役）。
 //
-// BLOCK-65：
-//   - P1-b① 自动唤起：新出现的运行中子 agent 自动弹出专属窗（模块级
-//     Set 保证每 task 只弹一次；4 窗预算超限时 popOut 自动降格最旧窗并
-//     返回 autoDemoted——bar 内诚实提示，不重复弹）。
+// UI-385（原 BLOCK-65 窗口机制退役）：
+//   - 自动唤起：新运行中子 agent → 派发 agentOpenInRail，右栏「智能体」
+//     tab 自动切换（模块级 Set 保证每 task 只切一次）。
 //   - P2-c② 俯瞰面板：SubAgentsBar 升格——「全部俯瞰」展开区只读
 //     /api/ai/agent/tasks（用户维度、跨会话、tasks 表投影，零第二真相），
-//     5s 轮询，行点击弹对应专属窗。
+//     5s 轮询，行点击切右栏详情。
 // ============================================================
 import React, { useEffect, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
@@ -23,7 +22,7 @@ import {
   type ConversationRunSnapshot,
 } from '@/components/copilot/conversationRunStore';
 import { listAgentTasks, type AgentTaskOverviewItem } from '@/components/copilot/copilotClient';
-import { getBridge } from '@/lib/desktopBridge';
+import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import styles from './sub-agents-bar.module.css';
 
 const STATUS_LABEL: Record<ConversationRunSnapshot['status'], string> = {
@@ -42,8 +41,8 @@ const OVERVIEW_STATUS_LABEL: Record<string, string> = {
   cancelled: '已取消',
 };
 
-// P1-b①：每 task 只自动弹一次（模块级，跨 SubAgentsBar 重挂载保持）
-const autoPopped = new Set<string>();
+// UI-385：每 task 只自动切一次右栏详情（模块级，跨 SubAgentsBar 重挂载保持）
+const autoOpened = new Set<string>();
 
 function head(text: string): string {
   const t = (text || '').replace(/\s+/g, ' ').trim();
@@ -68,8 +67,6 @@ export function SubAgentsBar({
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [overview, setOverview] = useState<AgentTaskOverviewItem[] | null>(null);
   const [overviewError, setOverviewError] = useState('');
-  const [autoPopNote, setAutoPopNote] = useState('');
-  const windowManager = getBridge('windowManager');
 
   // BLOCK-65 修正：会话打开时回填历史子 agent（含终态）——否则刷新后
   // store 为空，活动条与俯瞰入口在本会话永久不可见
@@ -78,31 +75,20 @@ export function SubAgentsBar({
     void loadHistoricalSubAgentTasks(conversationId);
   }, [conversationId]);
 
-  // P1-b① 自动唤起：新运行中任务 → 自动弹专属窗；超限降格诚实提示
+  // UI-385 自动唤起：新运行中任务 → 右栏「智能体」tab 自动切换（不再弹独立窗）
   useEffect(() => {
-    if (!windowManager) return;
     for (const t of tasks) {
       if (t.status !== 'running') continue;
       const id = t.taskId || '';
-      if (!id || autoPopped.has(id)) continue;
-      autoPopped.add(id);
-      void windowManager
-        .popOut('agent', id)
-        .then((r) => {
-          if (r && r.autoDemoted) {
-            setAutoPopNote('专属窗预算已满（4），最旧弹出窗已自动降格到边缘活动轨道。');
-          }
-        })
-        .catch(() => {});
+      if (!id || autoOpened.has(id)) continue;
+      autoOpened.add(id);
+      dispatchGewuEvent(gewuEvents.agentOpenInRail, { runId: id });
     }
-  }, [tasks, windowManager]);
+  }, [tasks]);
 
-  // BLOCK-65 修正：预算提示为瞬态（6s 自动消退），不长期占据输入区
-  useEffect(() => {
-    if (!autoPopNote) return;
-    const timer = window.setTimeout(() => setAutoPopNote(''), 6000);
-    return () => window.clearTimeout(timer);
-  }, [autoPopNote]);
+  const openDetail = (taskId: string) => {
+    dispatchGewuEvent(gewuEvents.agentOpenInRail, { runId: taskId });
+  };
 
   // P2-c② 俯瞰面板：展开时 5s 轮询（只读投影）
   useEffect(() => {
@@ -134,10 +120,6 @@ export function SubAgentsBar({
   // 「全部俯瞰」入口仅在已有子 agent 活动的会话内提供）
   if (tasks.length === 0) return null;
 
-  const openDetail = (taskId: string) => {
-    void windowManager?.popOut('agent', taskId);
-  };
-
   // BLOCK-65 修正：俯瞰按项目隔离——仅展示当前项目会话派生的 agent
   const overviewRows = (overview || [])
     .filter((t) => !projectId || !t.projectId || t.projectId === projectId)
@@ -167,20 +149,17 @@ export function SubAgentsBar({
           </span>
           <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
         </button>
-        {windowManager && (
-          <button
-            type="button"
-            className={styles.summary}
-            onClick={() => setOverviewOpen((v) => !v)}
-            aria-expanded={overviewOpen}
-            title="全部智能体俯瞰（跨会话 · 只读投影）"
-            data-testid="subagents-overview-toggle"
-          >
-            <span>全部俯瞰</span>
-            <Icon name={overviewOpen ? 'chevron-down' : 'chevron-right'} size={12} />
-          </button>
-        )}
-        {autoPopNote && <span className={styles.overviewNote} role="status">{autoPopNote}</span>}
+        <button
+          type="button"
+          className={styles.summary}
+          onClick={() => setOverviewOpen((v) => !v)}
+          aria-expanded={overviewOpen}
+          title="全部智能体俯瞰（跨会话 · 只读投影）"
+          data-testid="subagents-overview-toggle"
+        >
+          <span>全部俯瞰</span>
+          <Icon name={overviewOpen ? 'chevron-down' : 'chevron-right'} size={12} />
+        </button>
       </div>
       {open && (
         <div className={styles.list}>
@@ -193,17 +172,15 @@ export function SubAgentsBar({
               <span className={styles.rowStatus} data-status={task.status}>
                 {STATUS_LABEL[task.status]}
               </span>
-              {windowManager && (
-                <button
-                  type="button"
-                  className={styles.rowBtn}
-                  onClick={() => void windowManager.popOut('agent', task.taskId || '')}
-                  title="弹出 agent 详情窗（实时工作流 + 摘要）"
-                  aria-label="打开详情窗"
-                >
-                  <Icon name="eye" size={12} />
-                </button>
-              )}
+              <button
+                type="button"
+                className={styles.rowBtn}
+                onClick={() => openDetail(task.taskId || '')}
+                title="在右侧栏「智能体」面板查看详情（实时工作流 + 摘要）"
+                aria-label="打开详情"
+              >
+                <Icon name="eye" size={12} />
+              </button>
               {task.status === 'running' && (
                 <button
                   type="button"
@@ -249,17 +226,15 @@ export function SubAgentsBar({
               <span className={styles.rowStatus} data-status={task.status === 'completed' ? 'done' : task.status === 'failed' ? 'error' : task.status === 'running' ? 'running' : 'stopped'}>
                 {OVERVIEW_STATUS_LABEL[task.status] || task.status}
               </span>
-              {windowManager && (
-                <button
-                  type="button"
-                  className={styles.rowBtn}
-                  onClick={() => openDetail(task.taskId)}
-                  title="弹出 agent 专属窗"
-                  aria-label="打开专属窗"
-                >
-                  <Icon name="eye" size={12} />
-                </button>
-              )}
+              <button
+                type="button"
+                className={styles.rowBtn}
+                onClick={() => openDetail(task.taskId)}
+                title="在右侧栏「智能体」面板查看详情"
+                aria-label="打开详情"
+              >
+                <Icon name="eye" size={12} />
+              </button>
             </div>
           ))}
         </div>

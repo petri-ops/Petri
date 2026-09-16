@@ -3349,6 +3349,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-385: 子智能体详情迁入右栏「智能体」tab + agent/result 独立窗退役（用户裁决「1」启动）(2026-09-16 in_progress，dev Electron 边界内)
+
+- **来源**：用户复看 UI-382 时提出「子智能体点击应该嵌入右侧栏，不需要弹窗；桌面最右侧的悬浮结果展示也没必要了，都应展示在右侧栏」——Agent 评估合理（延续 BLOCK-68 io tab / UI-362 tab 化 / UI-382 内联的「浮动面→停靠面」收敛路线），用户裁决「1」启动三步走。
+- **交付面**：①右栏新增「智能体」tab（`RightPanelMode 'agent'`）+ 新组件 `AgentRunPanel`（自 AgentWindowPage 提取：SSE 订阅 + 中断两步确认/留言队列/继续派交互完整保留；续派改经 `onSpawnedAgent` 回调切面板）；②事件 `agentOpenInRail` 统一四个入口（工具行内联卡「详情」/活动条行/俯瞰行/spawn 自动唤起——每 task 只自动切一次）；③退役 agent/result 两类独立窗：App 路由与页面删除（AgentWindowPage/WindowResultPage）、`_window-manager` 白名单移除两 kind（route_not_allowed fail-closed）、ResultArtifactShell「弹出」按钮移除；④指挥中心下钻改走新增 `window:open-result-in-main` relay（单一白名单事件类型 + sender 校验，主窗经既有 projectOpenArtifact 链右栏打开，跨项目自动导航）。终端/指挥中心独立窗不动。
+- **证据**：契约 `block59-window-manager` 38/38（退役类型 route_not_allowed 锁 + terminal 夹具迁移 + 顺手修 UI-362 漂移的 listAllJobs/TitleBar 两处陈旧断言）+ 前端受影响 9 套件 103/103（含 WorkspaceSummaryCard 点击改断言事件派发）+ tsc 0；实机 dev Electron 真轮次：spawn 后 CDP 目标列表 **无任何 /window/agent 新目标**（弹窗退役生效）、右栏智能体 tab 自动打开、面板操作/工作流/摘要三节完整渲染（`acceptance` 截图 ui385-agent-rail-tab.png）。**尚无用户视角确认——待用户复看后升 `verified`**。
+- **边界**：windowManager 本体保留（terminal/command-center/工作树审查仍在用）；「智能体」tab 单实例（多 agent 靠活动条/俯瞰切换）；投影面不受影响（windowManager 桌面专属本就隐藏）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-384: 工具行详情显示只读结果内容——读取/查找/列目录/搜索输出块点亮 + UI-382 两处持久化修复（用户裁决「行 都修」）(2026-09-16 in_progress，dev Electron 边界内)
 
 - **来源**：用户复看 UI-383/382 时指认「读取和查找是不是不返回什么信息？为什么不显示内容」——实锤渲染缺口：`workspace_read/list/find/search` 一次性返回无流式增量，行详情输出块（`activity.output`）只接 `tool_output` 事件，而该通道服务端仅 `workspace_exec` 接线；`tool_result.data` 内容前端合并时被丢弃。

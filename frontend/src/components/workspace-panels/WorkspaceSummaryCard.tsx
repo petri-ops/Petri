@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
+import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import type { ToolJob, Project, Dataset } from '@/lib/project-types';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { BackendStatus } from '@/lib/electron';
@@ -641,11 +642,11 @@ export function WorkspaceSummaryCard({
 }
 
 function openAgentWindow(task: AgentTaskOverviewItem): void {
-  const windowManager = getBridge('windowManager');
+  // UI-385 — 子智能体详情改由右栏「智能体」tab 承载（独立窗退役）
   try {
-    void Promise.resolve(windowManager?.popOut?.('agent', task.taskId)).catch(() => {});
+    dispatchGewuEvent(gewuEvents.agentOpenInRail, { runId: task.taskId });
   } catch {
-    /* 弹窗通道不可用时静默——卡片是只读投影，不承担交互失败语义 */
+    /* 事件通道不可用时静默——卡片是只读投影，不承担交互失败语义 */
   }
 }
 

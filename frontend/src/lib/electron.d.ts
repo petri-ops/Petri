@@ -122,6 +122,14 @@ declare global {
         restore: (id: string) => Promise<{ ok: boolean; state?: string; autoDemoted?: string | null; code?: string; error?: string }>;
         /** railed → closed：唯一的销毁路径（仅轨道内显式移除）。 */
         remove: (id: string) => Promise<{ ok: boolean; state?: string; code?: string; error?: string }>;
+        /** UI-385 — 独立窗下钻通道：把载荷转发到主窗（右栏打开结果/智能体）。 */
+        openResultInMainWindow: (payload: { type: string; detail?: unknown }) => Promise<{
+          ok: boolean;
+          code?: string;
+          error?: string;
+        }>;
+        /** UI-385 — 主窗接收 relay（仅白名单类型会被主进程转发）。 */
+        onRelayToMain: (callback: (payload: { type: string; detail?: unknown }) => void) => () => void;
         snapshot: () => Promise<{
           ok: boolean;
           snapshot?: {

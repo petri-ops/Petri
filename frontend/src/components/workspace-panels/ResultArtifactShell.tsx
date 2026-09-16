@@ -147,7 +147,7 @@ export function ResultArtifactShell({
 }): React.ReactElement {
   const { resolvedTheme } = useTheme();
   // BLOCK-59 P1 — 弹出独立窗入口（仅桌面桥可用时渲染；浏览器内为 null）
-  const windowManagerBridge = getBridge('windowManager');
+  // UI-385 — 结果独立窗退役：windowManager 桥不再使用（结果统一右栏承载）
   const [result, setResult] = useState<JobResult | null>(null);
   // P0-3：结果请求的网络/服务错误必须与"确实没有结果文件"区分开，
   // 否则网络抖动会被谎报为"分析已完成，但未生成可视化结果文件"。
@@ -1179,21 +1179,7 @@ export function ResultArtifactShell({
       {selectedArtifactName && (
         <span className={styles.resultReportTechnicalName}>{selectedArtifactName}</span>
       )}
-      {/* BLOCK-59 P1 — 结果弹出独立窗（只读聚焦；× 降格进活动轨道不销毁） */}
-      {windowManagerBridge && (
-        <button
-          className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-          type="button"
-          disabled={!selectedArtifactName}
-          onClick={() => {
-            beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.artifactStart);
-            void windowManagerBridge!.popOut('result', `${job.id}:${selectedArtifactName}`);
-          }}
-          title="把当前结果弹出为独立窗口（只读；× 降格进边缘活动轨道）"
-        >
-          弹出
-        </button>
-      )}
+      {/* UI-385 — 结果独立窗（「弹出」按钮）退役：结果统一由右栏承载 */}
       {selectedDisplayGroup && selectedDisplayGroup.variants.length > 1 && (
         <div className={styles.resultReportExportLinks}>
           {selectedDisplayGroup.variants

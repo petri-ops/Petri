@@ -62,18 +62,18 @@ function makeCore(overrides = {}) {
 describe('状态机：三活态一终态', () => {
   test('docked → popped（首次弹出 = created）', () => {
     const core = makeCore();
-    const r = core.popOut({ type: 'result', key: 'art_1' });
+    const r = core.popOut({ type: 'terminal', key: 'art_1' });
     assert.equal(r.ok, true);
     assert.equal(r.action, 'created');
-    assert.equal(r.id, 'result:art_1');
-    const entry = core.getSnapshot().entries.find((e) => e.id === 'result:art_1');
+    assert.equal(r.id, 'terminal:art_1');
+    const entry = core.getSnapshot().entries.find((e) => e.id === 'terminal:art_1');
     assert.equal(entry.state, 'popped');
   });
 
   test('同内容禁双开：popped 再弹出 = focused（不建第二窗）', () => {
     const core = makeCore();
-    core.popOut({ type: 'result', key: 'art_1' });
-    const r2 = core.popOut({ type: 'result', key: 'art_1' });
+    core.popOut({ type: 'terminal', key: 'art_1' });
+    const r2 = core.popOut({ type: 'terminal', key: 'art_1' });
     assert.equal(r2.ok, true);
     assert.equal(r2.action, 'focused');
     assert.equal(core.getSnapshot().entries.length, 1, '注册表不产生第二条目');
@@ -93,38 +93,38 @@ describe('状态机：三活态一终态', () => {
 
   test('× 语义：popped → railed（降格不是销毁）', () => {
     const core = makeCore();
-    core.popOut({ type: 'result', key: 'art_1' });
-    const r = core.minimizeToRail('result:art_1');
+    core.popOut({ type: 'terminal', key: 'art_1' });
+    const r = core.minimizeToRail('terminal:art_1');
     assert.equal(r.ok, true);
     assert.equal(r.state, 'railed');
-    const entry = core.getSnapshot().entries.find((e) => e.id === 'result:art_1');
+    const entry = core.getSnapshot().entries.find((e) => e.id === 'terminal:art_1');
     assert.equal(entry.state, 'railed', '条目仍在注册表（保活）');
   });
 
   test('railed → popped：restoreFromRail 回记忆态', () => {
     const core = makeCore();
-    core.popOut({ type: 'result', key: 'art_1' });
-    core.minimizeToRail('result:art_1');
-    const r = core.restoreFromRail('result:art_1');
+    core.popOut({ type: 'terminal', key: 'art_1' });
+    core.minimizeToRail('terminal:art_1');
+    const r = core.restoreFromRail('terminal:art_1');
     assert.equal(r.ok, true);
     assert.equal(r.state, 'popped');
   });
 
   test('popped → docked：returnToDock 收回（状态零丢失由渲染层持有）', () => {
     const core = makeCore();
-    core.popOut({ type: 'result', key: 'art_1' });
-    const r = core.returnToDock('result:art_1');
+    core.popOut({ type: 'terminal', key: 'art_1' });
+    const r = core.returnToDock('terminal:art_1');
     assert.equal(r.ok, true);
     assert.equal(r.state, 'docked');
-    const entry = core.getSnapshot().entries.find((e) => e.id === 'result:art_1');
+    const entry = core.getSnapshot().entries.find((e) => e.id === 'terminal:art_1');
     assert.equal(entry.state, 'docked', '条目保留（docked）');
   });
 
   test('railed → closed：remove 是唯一销毁路径，条目终结', () => {
     const core = makeCore();
-    core.popOut({ type: 'result', key: 'art_1' });
-    core.minimizeToRail('result:art_1');
-    const r = core.remove('result:art_1');
+    core.popOut({ type: 'terminal', key: 'art_1' });
+    core.minimizeToRail('terminal:art_1');
+    const r = core.remove('terminal:art_1');
     assert.equal(r.ok, true);
     assert.equal(r.state, 'closed');
     assert.equal(core.getSnapshot().entries.length, 0, '终态后条目离开注册表');
@@ -132,23 +132,23 @@ describe('状态机：三活态一终态', () => {
 
   test('非法转移全部拒绝：remove 仅限 railed；restore/return 仅限对应态', () => {
     const core = makeCore();
-    core.popOut({ type: 'result', key: 'art_1' });
+    core.popOut({ type: 'terminal', key: 'art_1' });
     // popped 态：remove / restore 非法
-    assert.equal(core.remove('result:art_1').ok, false, 'popped 不可直接销毁（契约）');
-    assert.equal(core.restoreFromRail('result:art_1').ok, false);
-    core.minimizeToRail('result:art_1');
+    assert.equal(core.remove('terminal:art_1').ok, false, 'popped 不可直接销毁（契约）');
+    assert.equal(core.restoreFromRail('terminal:art_1').ok, false);
+    core.minimizeToRail('terminal:art_1');
     // railed 态：returnToDock / 二次 minimize 非法
-    assert.equal(core.returnToDock('result:art_1').ok, false);
-    assert.equal(core.minimizeToRail('result:art_1').ok, false);
+    assert.equal(core.returnToDock('terminal:art_1').ok, false);
+    assert.equal(core.minimizeToRail('terminal:art_1').ok, false);
     // docked 态：minimize / remove / restore 非法
-    core.restoreFromRail('result:art_1');
-    core.returnToDock('result:art_1');
-    assert.equal(core.minimizeToRail('result:art_1').ok, false);
-    assert.equal(core.remove('result:art_1').ok, false);
-    assert.equal(core.restoreFromRail('result:art_1').ok, false);
+    core.restoreFromRail('terminal:art_1');
+    core.returnToDock('terminal:art_1');
+    assert.equal(core.minimizeToRail('terminal:art_1').ok, false);
+    assert.equal(core.remove('terminal:art_1').ok, false);
+    assert.equal(core.restoreFromRail('terminal:art_1').ok, false);
     // 未知 id
-    assert.equal(core.minimizeToRail('result:nope').ok, false);
-    assert.equal(core.remove('result:nope').ok, false);
+    assert.equal(core.minimizeToRail('terminal:nope').ok, false);
+    assert.equal(core.remove('terminal:nope').ok, false);
   });
 });
 
@@ -156,17 +156,17 @@ describe('弹出上限 ≤4 与自动降格', () => {
   test(`第 ${MAX_POPPED_WINDOWS + 1} 个弹出自动降格最老的`, () => {
     const core = makeCore();
     for (let i = 1; i <= MAX_POPPED_WINDOWS; i++) {
-      core.popOut({ type: 'result', key: `art_${i}` });
+      core.popOut({ type: 'terminal', key: `art_${i}` });
     }
     assert.equal(core.getSnapshot().entries.filter((e) => e.state === 'popped').length, MAX_POPPED_WINDOWS);
-    const r = core.popOut({ type: 'result', key: 'art_5' });
+    const r = core.popOut({ type: 'terminal', key: 'art_5' });
     assert.equal(r.ok, true);
     assert.equal(r.action, 'created');
-    assert.equal(r.autoDemoted, 'result:art_1', '最老的弹出窗被自动降入轨道');
+    assert.equal(r.autoDemoted, 'terminal:art_1', '最老的弹出窗被自动降入轨道');
     const states = Object.fromEntries(
       core.getSnapshot().entries.map((e) => [e.id, e.state]),
     );
-    assert.equal(states['result:art_1'], 'railed', '被降格窗口保活在轨道');
+    assert.equal(states['terminal:art_1'], 'railed', '被降格窗口保活在轨道');
     assert.equal(
       core.getSnapshot().entries.filter((e) => e.state === 'popped').length,
       MAX_POPPED_WINDOWS,
@@ -177,12 +177,12 @@ describe('弹出上限 ≤4 与自动降格', () => {
   test('restore 在满员时同样自动降格最老', () => {
     const core = makeCore();
     for (let i = 1; i <= MAX_POPPED_WINDOWS; i++) {
-      core.popOut({ type: 'result', key: `art_${i}` });
+      core.popOut({ type: 'terminal', key: `art_${i}` });
     }
-    core.minimizeToRail('result:art_1');
+    core.minimizeToRail('terminal:art_1');
     // 此刻 popped = 3；再弹 2 个补满 4，然后 restore art_1
-    core.popOut({ type: 'result', key: 'art_6' });
-    const r = core.popOut({ type: 'result', key: 'art_1' });
+    core.popOut({ type: 'terminal', key: 'art_6' });
+    const r = core.popOut({ type: 'terminal', key: 'art_1' });
     assert.equal(r.ok, true);
     assert.equal(r.action, 'restored');
     assert.ok(r.autoDemoted, '满员 restore 触发自动降格');
@@ -196,11 +196,18 @@ describe('弹出上限 ≤4 与自动降格', () => {
 // ── 2. 路由白名单 fail-closed ───────────────────────────────────
 
 describe('路由白名单（fail-closed）', () => {
-  test('注册表内类型 + 合法键通过', () => {
-    assert.equal(validateContent({ type: 'result', key: 'art_1' }).ok, true);
+  test('注册表内类型 + 合法键通过；UI-385 退役类型 fail-closed', () => {
+    assert.equal(validateContent({ type: 'terminal', key: 'art_1' }).ok, true);
     assert.equal(validateContent({ type: 'terminal', key: 'default' }).ok, true);
-    assert.equal(validateContent({ type: 'agent', key: 'task_9f' }).ok, true);
     assert.equal(validateContent({ type: 'command-center' }).ok, true);
+    // UI-385 — result/agent 独立窗退役：类型已从白名单移除（路由 fail-closed，
+    // 结果/子智能体详情统一由主窗右栏承载）。
+    const retired = validateContent({ type: 'result', key: 'art_1' });
+    assert.equal(retired.ok, false);
+    assert.equal(retired.code, 'route_not_allowed');
+    const retiredAgent = validateContent({ type: 'agent', key: 'task_9f' });
+    assert.equal(retiredAgent.ok, false);
+    assert.equal(retiredAgent.code, 'route_not_allowed');
   });
 
   test('未知类型拒绝', () => {
@@ -223,26 +230,25 @@ describe('路由白名单（fail-closed）', () => {
 
   test('非法键 fail-closed：路径穿越 / 斜杠 / 空 / 超长 / 非字符串', () => {
     for (const key of ['../settings', 'a/b', '', '   ', '.', '..', '%2e%2e', 'a b', 'a?b', 'a#b', `k${'x'.repeat(200)}`, null, 42, {}]) {
-      const v = validateContent({ type: 'result', key });
+      const v = validateContent({ type: 'terminal', key });
       assert.equal(v.ok, false, `键 ${JSON.stringify(key)} 应被拒绝`);
       assert.equal(v.code, 'invalid_key');
     }
   });
 
   test('非 ASCII 产物名是合法键（路由经 encodeURIComponent 保安全）', () => {
-    const v = validateContent({ type: 'result', key: '火山图.png' });
+    const v = validateContent({ type: 'terminal', key: '火山图.png' });
     assert.equal(v.ok, true, '中文产物名应放行');
-    assert.equal(buildRouteForId('result:火山图.png'), `/window/result/${encodeURIComponent('火山图.png')}`);
-    assert.ok(!buildRouteForId('result:火山图.png').includes('火山'), '路由中不得出现原始非 ASCII 段');
+    assert.equal(buildRouteForId('terminal:火山图.png'), `/window/terminal/${encodeURIComponent('火山图.png')}`);
+    assert.ok(!buildRouteForId('terminal:火山图.png').includes('火山'), '路由中不得出现原始非 ASCII 段');
   });
 
   test('构建出的路由全部落在白名单模式内', () => {
-    assert.equal(buildRouteForId('result:art_1'), '/window/result/art_1');
+    assert.equal(buildRouteForId('terminal:art_1'), '/window/terminal/art_1');
     assert.equal(buildRouteForId('terminal:default'), '/window/terminal/default');
-    assert.equal(buildRouteForId('agent:task_9f'), '/window/agent/task_9f');
     assert.equal(buildRouteForId('command-center:'), '/window/command-center');
     // 键经 encodeURIComponent，特殊字符不产生路径段
-    assert.equal(buildRouteForId('result:a.b-c_d:e'), '/window/result/a.b-c_d%3Ae');
+    assert.equal(buildRouteForId('terminal:a.b-c_d:e'), '/window/terminal/a.b-c_d%3Ae');
     assert.equal(buildRouteForId('rail:'), null, '内部类型不产生路由');
   });
 });
@@ -252,35 +258,35 @@ describe('路由白名单（fail-closed）', () => {
 describe('geometry：主进程持有 + 持久化 + 副屏失效回落', () => {
   test('recordGeometry 仅 popped 态可记录且校验形状', () => {
     const core = makeCore();
-    assert.equal(core.recordGeometry('result:none', { x: 1, y: 1, w: 10, h: 10 }).ok, false);
-    core.popOut({ type: 'result', key: 'art_1' });
-    assert.equal(core.recordGeometry('result:art_1', { x: 10, y: 20, w: 800, h: 600, displayId: 1 }).ok, true);
-    assert.equal(core.recordGeometry('result:art_1', { x: 'a', y: 1, w: 10, h: 10 }).ok, false);
-    assert.equal(core.recordGeometry('result:art_1', { x: 1, y: 1, w: -5, h: 10 }).ok, false);
-    core.minimizeToRail('result:art_1');
-    assert.equal(core.recordGeometry('result:art_1', { x: 1, y: 1, w: 10, h: 10 }).ok, false, 'railed 态不接受 geometry');
+    assert.equal(core.recordGeometry('terminal:none', { x: 1, y: 1, w: 10, h: 10 }).ok, false);
+    core.popOut({ type: 'terminal', key: 'art_1' });
+    assert.equal(core.recordGeometry('terminal:art_1', { x: 10, y: 20, w: 800, h: 600, displayId: 1 }).ok, true);
+    assert.equal(core.recordGeometry('terminal:art_1', { x: 'a', y: 1, w: 10, h: 10 }).ok, false);
+    assert.equal(core.recordGeometry('terminal:art_1', { x: 1, y: 1, w: -5, h: 10 }).ok, false);
+    core.minimizeToRail('terminal:art_1');
+    assert.equal(core.recordGeometry('terminal:art_1', { x: 1, y: 1, w: 10, h: 10 }).ok, false, 'railed 态不接受 geometry');
   });
 
   test('弹出新窗回落主屏级联默认位（无记忆时）', () => {
     const core = makeCore();
     // mainBounds 取左上角，避开工作区下缘钳制区（钳制由边界专项用例覆盖）
     const mainBounds = { x: 0, y: 0 };
-    core.popOut({ type: 'result', key: 'art_1' });
-    const r1 = core.resolveLaunchBounds('result:art_1', { displays: DISPLAYS, mainBounds });
+    core.popOut({ type: 'terminal', key: 'art_1' });
+    const r1 = core.resolveLaunchBounds('terminal:art_1', { displays: DISPLAYS, mainBounds });
     assert.equal(r1.reusedMemory, false);
-    assert.equal(r1.bounds.w, 960);
-    assert.equal(r1.bounds.h, 680);
+    assert.equal(r1.bounds.w, 880);
+    assert.equal(r1.bounds.h, 600);
     assert.equal(r1.displayId, 1, '回落主屏');
-    core.popOut({ type: 'result', key: 'art_2' });
-    const r2 = core.resolveLaunchBounds('result:art_2', { displays: DISPLAYS, mainBounds });
+    core.popOut({ type: 'terminal', key: 'art_2' });
+    const r2 = core.resolveLaunchBounds('terminal:art_2', { displays: DISPLAYS, mainBounds });
     assert.ok(r2.bounds.x > r1.bounds.x && r2.bounds.y > r1.bounds.y, '级联偏移递增');
   });
 
   test('记忆位置有效且显示器存在 → 复用记忆', () => {
     const core = makeCore();
-    core.popOut({ type: 'result', key: 'art_1' });
-    core.recordGeometry('result:art_1', { x: 1500, y: 100, w: 800, h: 600, displayId: 2 });
-    const r = core.resolveLaunchBounds('result:art_1', { displays: DISPLAYS });
+    core.popOut({ type: 'terminal', key: 'art_1' });
+    core.recordGeometry('terminal:art_1', { x: 1500, y: 100, w: 800, h: 600, displayId: 2 });
+    const r = core.resolveLaunchBounds('terminal:art_1', { displays: DISPLAYS });
     assert.equal(r.reusedMemory, true);
     assert.equal(r.bounds.x, 1500);
     assert.equal(r.displayId, 2);
@@ -288,9 +294,9 @@ describe('geometry：主进程持有 + 持久化 + 副屏失效回落', () => {
 
   test('副屏失效（displayId 不在当前列表）→ 回落主屏并钳制进工作区', () => {
     const core = makeCore();
-    core.popOut({ type: 'result', key: 'art_1' });
-    core.recordGeometry('result:art_1', { x: 5000, y: 100, w: 800, h: 600, displayId: 99 });
-    const r = core.resolveLaunchBounds('result:art_1', { displays: DISPLAYS, mainBounds: null });
+    core.popOut({ type: 'terminal', key: 'art_1' });
+    core.recordGeometry('terminal:art_1', { x: 5000, y: 100, w: 800, h: 600, displayId: 99 });
+    const r = core.resolveLaunchBounds('terminal:art_1', { displays: DISPLAYS, mainBounds: null });
     assert.equal(r.reusedMemory, false);
     assert.equal(r.displayId, 1);
     const wa = DISPLAYS[0].workArea;
@@ -305,13 +311,13 @@ describe('geometry：主进程持有 + 持久化 + 副屏失效回落', () => {
         saved = s;
       },
     });
-    coreA.popOut({ type: 'result', key: 'art_1' });
-    coreA.recordGeometry('result:art_1', { x: 33, y: 44, w: 700, h: 500, displayId: 1 });
-    assert.ok(saved && saved.geometry['result:art_1'], 'saveState 被调用且带记忆');
+    coreA.popOut({ type: 'terminal', key: 'art_1' });
+    coreA.recordGeometry('terminal:art_1', { x: 33, y: 44, w: 700, h: 500, displayId: 1 });
+    assert.ok(saved && saved.geometry['terminal:art_1'], 'saveState 被调用且带记忆');
 
     const coreB = makeCore({ loadState: () => saved });
-    coreB.popOut({ type: 'result', key: 'art_1' });
-    const r = coreB.resolveLaunchBounds('result:art_1', { displays: DISPLAYS });
+    coreB.popOut({ type: 'terminal', key: 'art_1' });
+    const r = coreB.resolveLaunchBounds('terminal:art_1', { displays: DISPLAYS });
     assert.equal(r.reusedMemory, true);
     assert.deepEqual(
       { x: r.bounds.x, y: r.bounds.y, w: r.bounds.w, h: r.bounds.h },
@@ -324,17 +330,17 @@ describe('geometry：主进程持有 + 持久化 + 副屏失效回落', () => {
       loadState: () => ({
         version: 1,
         geometry: {
-          'result:good': { x: 1, y: 2, w: 300, h: 200, displayId: 1 },
-          'result:bad': { x: 'nope', y: 2, w: 300, h: 200 },
+          'terminal:good': { x: 1, y: 2, w: 300, h: 200, displayId: 1 },
+          'terminal:bad': { x: 'nope', y: 2, w: 300, h: 200 },
           'garbage-key': { x: 1, y: 2, w: 300, h: 200 },
-          'result:negative': { x: 1, y: 2, w: -3, h: 200 },
+          'terminal:negative': { x: 1, y: 2, w: -3, h: 200 },
         },
       }),
     });
-    core.popOut({ type: 'result', key: 'good' });
-    assert.equal(core.resolveLaunchBounds('result:good', { displays: DISPLAYS }).reusedMemory, true);
-    core.popOut({ type: 'result', key: 'bad' });
-    assert.equal(core.resolveLaunchBounds('result:bad', { displays: DISPLAYS }).reusedMemory, false);
+    core.popOut({ type: 'terminal', key: 'good' });
+    assert.equal(core.resolveLaunchBounds('terminal:good', { displays: DISPLAYS }).reusedMemory, true);
+    core.popOut({ type: 'terminal', key: 'bad' });
+    assert.equal(core.resolveLaunchBounds('terminal:bad', { displays: DISPLAYS }).reusedMemory, false);
   });
 
   test('isValidGeometry / clampBoundsToWorkArea 纯函数边界', () => {
@@ -353,25 +359,22 @@ describe('事件与契约细节', () => {
     const core = makeCore();
     const events = [];
     core.subscribe((e) => events.push(e));
-    core.popOut({ type: 'result', key: 'art_1' });
-    core.minimizeToRail('result:art_1');
-    core.remove('result:art_1');
+    core.popOut({ type: 'terminal', key: 'art_1' });
+    core.minimizeToRail('terminal:art_1');
+    core.remove('terminal:art_1');
     assert.deepEqual(
       events.map((e) => e.kind),
       ['upsert', 'upsert', 'remove'],
       'popOut / minimize 各发一次 upsert；remove 后无 upsert',
     );
-    assert.equal(events.at(-1).id, 'result:art_1');
+    assert.equal(events.at(-1).id, 'terminal:art_1');
   });
 
-  test('static 类 railed 条目带 5min fadeAfter；persistent 不淡出', () => {
+  test('persistent 类 railed 条目不淡出（UI-385 后 static 类暂无承载者，机制保留）', () => {
     const core = makeCore();
-    core.popOut({ type: 'result', key: 'art_1' });
     core.popOut({ type: 'terminal', key: 'default' });
-    core.minimizeToRail('result:art_1');
     core.minimizeToRail('terminal:default');
     const entries = Object.fromEntries(core.getSnapshot().entries.map((e) => [e.id, e]));
-    assert.equal(entries['result:art_1'].fadeAfter, entries['result:art_1'].railedAt + RAIL_STATIC_FADE_MS);
     assert.equal(entries['terminal:default'].fadeAfter, null);
   });
 
@@ -390,7 +393,7 @@ describe('事件与契约细节', () => {
       throw new Error('boom');
     });
     core.subscribe((e) => seen.push(e.kind));
-    core.popOut({ type: 'result', key: 'art_1' });
+    core.popOut({ type: 'terminal', key: 'art_1' });
     assert.equal(seen.length, 1);
   });
 });
@@ -484,12 +487,19 @@ describe('适配器与 preload 静态契约', () => {
       'utf8',
     );
     assert.match(ccSrc, /closeBehavior="close"/, '指挥中心 × = 直接关闭（plan §4.1 无状态单例）');
-    assert.match(ccSrc, /listAllJobs/, '瓦片只读既有 REST 真相（零第二真相）');
-    const titleBarSrc = fs.readFileSync(
-      path.join(__dirname, '..', 'frontend', 'src', 'components', 'desktop', 'TitleBar.tsx'),
+    // UI-362 瓦片墙核心提取至 CommandCenterJobsWall（CommandCenterPage 委托渲染）
+    const wallSrc = fs.readFileSync(
+      path.join(__dirname, '..', 'frontend', 'src', 'pages', 'window', 'CommandCenterJobsWall.tsx'),
       'utf8',
     );
-    assert.match(titleBarSrc, /popOut\('command-center'\)/, 'TitleBar 指挥中心入口存在');
+    assert.match(wallSrc, /listAgentTasks|listAllJobs|tools\/history/, '瓦片只读既有 REST 真相（零第二真相）');
+    assert.doesNotMatch(wallSrc, /popOut\('result'/, 'UI-385 — 结果独立窗退役：下钻走主窗右栏 relay');
+    // UI-362 — 指挥中心入口迁至右栏 tab + App 全局快捷键（TitleBar 按钮已退役）
+    const appSrc = fs.readFileSync(
+      path.join(__dirname, '..', 'frontend', 'src', 'App.tsx'),
+      'utf8',
+    );
+    assert.match(appSrc, /popOut\('command-center'\)/, '指挥中心快捷键入口存在（Ctrl/Cmd+Shift+C）');
   });
 
   test('preload 暴露 windowManager 桥段', () => {

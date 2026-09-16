@@ -33,15 +33,8 @@ const RAIL_STATIC_FADE_MS = 5 * 60 * 1000;
 const KEY_PATTERN = /^[^\/\\?#"'\s\u0000-\u001f\u007f%]{1,128}$/;
 
 const CONTENT_TYPES = {
-  result: {
-    routePrefix: "/window/result",
-    closeBehavior: "rail", // × → rail
-    railClass: "static", // 5min fade candidate in the rail
-    restore: "route", // restore = route reload
-    singleton: false,
-    title: "结果",
-    defaultBounds: { width: 960, height: 680 },
-  },
+  // UI-385 — result/agent 独立窗已退役：结果/子智能体详情统一在主窗右栏
+  // 承载（RightPanelMode 'results' / 'agent'）；终端与指挥中心独立窗保留。
   terminal: {
     routePrefix: "/window/terminal",
     closeBehavior: "rail",
@@ -50,15 +43,6 @@ const CONTENT_TYPES = {
     singleton: false,
     title: "终端",
     defaultBounds: { width: 880, height: 600 },
-  },
-  agent: {
-    routePrefix: "/window/agent",
-    closeBehavior: "rail",
-    railClass: "persistent",
-    restore: "task", // restorable while the task state lives
-    singleton: false,
-    title: "Agent",
-    defaultBounds: { width: 960, height: 680 },
   },
   "command-center": {
     routePrefix: "/window/command-center",

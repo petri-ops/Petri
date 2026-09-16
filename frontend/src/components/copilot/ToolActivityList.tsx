@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { CodeMirrorDiffView } from '@/components/desktop/WorkingTreeReview/CodeMirrorDiffView';
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
-import { getBridge } from '@/lib/desktopBridge';
 import { getSubAgentTaskSnapshot, stopSubAgentTask, subscribeSubAgentTask } from '@/components/copilot/conversationRunStore';
 import {
   EXEC_TOOL_NAMES,
@@ -244,11 +243,11 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
   const duration = formatToolDuration(activity.durationMs);
   const sideEffects = formatToolSideEffects(activity.sideEffects);
   const showReason = activity.status === 'error' || activity.status === 'denied';
-  // BLOCK-59 P4 — 子 agent 活动行「详情窗」入口（agent 独立窗：实时工作流 + 终态摘要）
-  const windowManagerBridge = getBridge('windowManager');
-  const openAgentWindow = () => {
+  // UI-385 — 子 agent 详情改由右栏「智能体」tab 承载（独立窗退役）：派发
+  // agentOpenInRail 事件，project-workspace 切 tab 并把面板指到该 runId。
+  const openAgentDetail = () => {
     if (!activity.agentRunId) return;
-    void windowManagerBridge?.popOut('agent', activity.agentRunId);
+    dispatchGewuEvent(gewuEvents.agentOpenInRail, { runId: activity.agentRunId });
   };
   // UI-316 — agent 管理类工具用 bot 图标（独立智能体标识），spawn 行内联
   // 显示该子 agent 的实时状态（订阅会话 store 自动更新）。
@@ -310,16 +309,14 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
                 </span>
               </div>
               <div className="sc-tool-subagent-actions">
-                {windowManagerBridge && (
-                  <button
-                    type="button"
-                    className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-                    onClick={openAgentWindow}
-                    title="弹出 agent 详情独立窗（实时工作流 + 终态摘要，只读投影）"
-                  >
-                    详情窗
-                  </button>
-                )}
+                <button
+                  type="button"
+                  className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                  onClick={openAgentDetail}
+                  title="在右侧栏「智能体」面板查看实时工作流 + 终态摘要"
+                >
+                  详情
+                </button>
                 {subSnap.status === 'running' && (
                   <button
                     type="button"
@@ -333,14 +330,14 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
               </div>
             </div>
           )}
-          {activity.agentRunId && windowManagerBridge && !subSnap && (
+          {activity.agentRunId && !subSnap && (
             <button
               type="button"
               className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-              onClick={openAgentWindow}
-              title="弹出 agent 详情独立窗（实时工作流 + 终态摘要，只读投影）"
+              onClick={openAgentDetail}
+              title="在右侧栏「智能体」面板查看实时工作流 + 终态摘要"
             >
-              详情窗
+              详情
             </button>
           )}
           {activity.truncated && activity.status === 'success' && <span>仅显示摘要</span>}

@@ -171,8 +171,12 @@ export function CommandCenterJobsWall({
         setDrillNote(`作业 ${job.name || job.id} 无产物可下钻`);
         return;
       }
-      const pop = await wm.popOut('result', `${job.id}:${artifactName}`);
-      if (!pop?.ok) setDrillNote(pop?.error || '下钻失败');
+      // UI-385 — 结果独立窗退役：下钻转发主窗右栏打开（跨项目自动导航）
+      const pop = await wm.openResultInMainWindow({
+        type: 'gewu:project-open-artifact',
+        detail: { jobId: job.id, artifactName, projectId: job.project_id || null },
+      });
+      if (!pop?.ok) setDrillNote(pop?.error || pop?.code || '下钻失败');
     } catch (e) {
       setDrillNote(e instanceof Error ? e.message : '下钻失败');
     }

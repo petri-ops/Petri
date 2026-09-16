@@ -78,7 +78,7 @@ import type { ActiveWorkspaceFile } from './project-workspace/types';
 // Re-export for backward compatibility — consumers still import from the page.
 export type { ActiveWorkspaceFile } from './project-workspace/types';
 export type { ActiveArtifact, JobStats } from '@/components/workspace-panels/ResultView';
-export type RightPanelMode = 'home' | 'results' | 'files' | 'browser' | 'chat' | 'analyze' | 'review' | 'io' | 'jobs';
+export type RightPanelMode = 'home' | 'results' | 'files' | 'browser' | 'chat' | 'analyze' | 'review' | 'io' | 'jobs' | 'agent';
 const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconName }> = [
   { id: 'results', label: '结果', icon: 'bar-chart' },
   { id: 'files', label: '文件', icon: 'folder' },
@@ -92,6 +92,8 @@ const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconNa
   { id: 'jobs', label: '指挥中心', icon: 'command' },
   // BLOCK-68 / UI-317 — 模型 I/O 信息流从 composer ⋯ 菜单迁入 tab 体系（绑会话，只读）
   { id: 'io', label: '模型 I/O', icon: 'list-details' },
+  // UI-385 — 子智能体实时详情迁入右栏（原独立专属窗退役）：中断/留言/续派交互完整保留
+  { id: 'agent', label: '智能体', icon: 'bot' },
   // BLOCK-72 / UI-320 — 「后端」「知识空间」迁出右栏：设备级全局能力，入口在左栏工作台
   // （/backend 与 /knowledge 全局页），右栏不再承载，不预留空壳。
 ];
@@ -463,6 +465,16 @@ export function ProjectWorkspace(): React.ReactElement {
   useEffect(() => {
     return subscribeGewuEvent(gewuEvents.reviewOpenFile, () => {
       openRightPanel('review');
+    });
+  }, [openRightPanel]);
+  // UI-385 — 右栏「智能体」tab：子智能体详情不再弹独立窗。工具行内联卡 /
+  // SubAgentsBar（活动条 + 俯瞰 + spawn 自动唤起）/ 续派统一派发本事件，
+  // 这里切 tab 并把面板指到该 runId。
+  const [agentTabRunId, setAgentTabRunId] = useState<string | null>(null);
+  useEffect(() => {
+    return subscribeGewuEvent(gewuEvents.agentOpenInRail, (detail) => {
+      setAgentTabRunId(detail.runId);
+      openRightPanel('agent');
     });
   }, [openRightPanel]);
   // 项目列表 / 项目树展开 / 跨项目会话 / 创建态：全部来自 AppRailContext（单一真相）
@@ -1219,6 +1231,17 @@ export function ProjectWorkspace(): React.ReactElement {
     const unsub = subscribeGewuEvent(gewuEvents.projectOpenArtifact, handler);
     return unsub;
   }, [handleOpenResult, navigate, projectId]);
+  // UI-385 — 指挥中心独立窗下钻 relay（agent/result 独立窗退役）：主窗 preload
+  // 收到 window:relay-to-main 后回调，这里转派既有 projectOpenArtifact 处理链
+  // （跨项目自动导航；单一事实走同一条结果打开链路）。
+  useEffect(() => {
+    const wm = getBridge('windowManager');
+    if (!wm?.onRelayToMain) return;
+    return wm.onRelayToMain((payload) => {
+      if (payload?.type !== gewuEvents.projectOpenArtifact) return;
+      dispatchGewuEvent(gewuEvents.projectOpenArtifact, payload.detail as { jobId: string; artifactName: string; projectId?: string | null });
+    });
+  }, []);
   useEffect(() => {
     const handler = (detail: {
       projectId: string;
@@ -1533,6 +1556,8 @@ export function ProjectWorkspace(): React.ReactElement {
     project: project as Project,
     projectId,
     activeConvId,
+    // UI-385 — 右栏「智能体」tab 数据源（agentOpenInRail 事件写入）
+    agentRunId: agentTabRunId,
     openRightTabs,
     rightTab,
     rightToolMenuOpen,

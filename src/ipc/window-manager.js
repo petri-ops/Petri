@@ -478,6 +478,26 @@ function setupWindowManagerIpc({
     return created.ok ? result : created;
   });
 
+  // ── UI-385 — 子智能体/结果独立窗退役后的下钻通道 ──────────────
+  // 指挥中心等独立窗不再弹 result 窗：调用本 handler 把载荷转发到主窗，
+  // 由主窗渲染层（preload relay → gewu:project-open-artifact）在右栏打开。
+  // 只放行单一白名单事件类型（SEC-HARDEN：不做成通用事件注入通道）。
+  ipcMain.handle("window:open-result-in-main", (_event, payload) => {
+    const scope = resolveSenderScope(_event);
+    if (!scope) return { ok: false, code: "sender_not_allowed" };
+    const type = payload && payload.type;
+    if (type !== "gewu:project-open-artifact") {
+      return { ok: false, code: "type_not_allowed" };
+    }
+    const main = getMainWindow();
+    if (!main || main.isDestroyed()) return { ok: false, code: "main_window_unavailable" };
+    if (main.isMinimized()) main.restore();
+    main.show();
+    main.focus();
+    main.webContents.send("window:relay-to-main", payload);
+    return { ok: true };
+  });
+
   ipcMain.handle("window:return", (event, payload) => {
     const scope = resolveSenderScope(event);
     const id = typeof payload === "string" ? payload : payload?.id;

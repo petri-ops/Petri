@@ -436,12 +436,17 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     expect(screen.queryByLabelText('项目信息')).toBeNull();
   });
 
-  it('失败智能体并入「需要关注」节，点击弹专属窗', async () => {    const popOut = vi.fn(async () => ({}));
+  it('失败智能体并入「需要关注」节，点击派发右栏智能体详情事件（UI-385 独立窗退役）', async () => {
     getBridgeMock.mockImplementation(((name: string) => {
-      if (name === 'windowManager') return { popOut };
+      if (name === 'windowManager') return { popOut: vi.fn(async () => ({})) };
       if (name === 'terminal') return { listSessions: async () => ({ ok: true, sessions: [] }) };
       return {};
     }) as unknown as typeof getBridge);
+    const dispatched: CustomEvent[] = [];
+    const dispatchSpy = vi.spyOn(window, 'dispatchEvent').mockImplementation(((ev: Event) => {
+      if (ev instanceof CustomEvent && ev.type === 'gewu:agent-open-in-rail') dispatched.push(ev);
+      return true;
+    }) as unknown as typeof window.dispatchEvent);
     listAgentTasksMock.mockResolvedValue([
       {
         taskId: 'task_fail',
@@ -464,7 +469,11 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     );
     const row = await screen.findByText('1 个失败智能体');
     fireEvent.click(row);
-    await waitFor(() => expect(popOut).toHaveBeenCalledWith('agent', 'task_fail'));
+    await waitFor(() => {
+      const ev = dispatched.find((e) => (e.detail as { runId?: string })?.runId === 'task_fail');
+      expect(ev).toBeTruthy();
+    });
+    dispatchSpy.mockRestore();
   });
 
   it('注意节会话信号：待确认计划与异常后台进程计数渲染，零待办不渲染', async () => {

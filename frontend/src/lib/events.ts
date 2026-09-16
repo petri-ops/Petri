@@ -96,6 +96,14 @@ export const gewuEvents = {
    * 发送时图片进附件区、artifact 元数据合成进消息文本供模型读取。
    */
   imageQuote: 'gewu:image-quote',
+
+  /**
+   * UI-385：打开子智能体实时详情（右栏「智能体」tab 承载，不再弹独立窗）。
+   * 由工具行内联卡「详情」按钮 / SubAgentsBar（活动条行 + 俯瞰行 + spawn
+   * 自动唤起）/ AgentRunPanel 续派派发；project-workspace 订阅后切右栏 tab
+   * 并把面板切到 detail.runId。
+   */
+  agentOpenInRail: 'gewu:agent-open-in-rail',
 } as const;
 
 export interface ConversationForkedDetail {
@@ -176,6 +184,11 @@ export interface ProjectOpenArtifactDetail {
   projectId?: string | null;
 }
 
+/** UI-385: 右栏「智能体」tab 打开载荷（runId = 子 agent 任务 id）。 */
+export interface AgentOpenInRailDetail {
+  runId: string;
+}
+
 /**
  * Payload for `projectOpenWorkspaceFile`. `projectId` is required and must
  * be validated by the host before opening — the resolver never trusts
@@ -226,6 +239,7 @@ export type GewuEventMap = {
   [gewuEvents.tokenBudget]: TokenBudgetDetail;
   [gewuEvents.reviewOpenFile]: ReviewOpenFileDetail;
   [gewuEvents.agentBackgroundProcess]: AgentBackgroundProcessDetail;
+  [gewuEvents.agentOpenInRail]: AgentOpenInRailDetail;
   [gewuEvents.selectionQuote]: SelectionQuoteDetail;
   [gewuEvents.imageQuote]: ImageQuoteDetail;
 };
