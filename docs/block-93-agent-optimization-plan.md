@@ -1,8 +1,8 @@
 # BLOCK-93-AGENT-OPTIMIZATION — 子智能体专职化与彻底优化
 
-最后更新：2026-09-16（用户裁决按队列序推进 → active/P0-LAUNCH。启动登记：用户裁决原话「很棒 按顺序 逐个推进」（队列序=BLOCK-93 → 92 → 95 → 94）。spawn 链代码事实复核：spawn_agent args={task,model?,instructions?}（spawn-agent-tools.js:110）→ launchSubAgent → createAgentTask params 落库（:189-204，role 元数据 additive 落点）；followup_task/launchUserFollowup 续派两链共用 launchSubAgent（角色继承落点）；前端三处 inferAgentCategory 消费=ToolActivityList/AgentRunPanel/WorkspaceSummaryCard。P0 裁决项呈用户：①角色集定义与注册表存放位置 ②R4 只读白名单取舍）
+最后更新：2026-09-16（**整包收口 completed（P0–P3 一次会话完成，active 槽位清空）**。P0 三裁决（用户问答）：①R1=服务端注册表 + 扩展角色集十角色；②R4=仅 prompt 软约束（硬白名单留后续候选）；③扩展清单=六基础 + test🧪/write✍️/plan🗺️/fix🔧。**交付**：`agent-roles.js` 服务端注册表（key/label/description/directive 单一事实源）；spawn_agent 可选 role 参数（枚举对齐、未知 fail-closed）→ params.role 落库 → renderRoleDirective 注入 runAgentLoop system prompt（additive roleDirective 参数，未传零注入）；followup_task/launchUserFollowup 续派角色继承（显式覆盖 > 原角色 > 通用）；list_agents/wait_agent 摘要透出 role；前端三处（内联实况卡/右栏面板头/摘要卡图标带）显式 role 第一优先、文本推断兜底（resolveAgentCategory 统一入口），agentCategories 扩展四类+关键词。**门禁**：block93-agent-roles 契约 12 断言（落库/注入/fail-closed/additive 红线/继承/透出）+ block93-role-prompt 实机级 2/2（真实 agent-runner + mock 上游捕获 system prompt 断言【角色：检索】与零注入，两轮真实链路收敛 completed）+ 邻接 block49/agent-tool 套件全绿 + 前端 vitest 89 过 + tsc 0；UI-390 同提交登记；impact-map block93 规则。提交链 62d04b68→7c9cf64a→86563e21→收口提交。G0 开发期常态 · 不外推 packaged/Provider/GA）
 
-状态：`active（P0-LAUNCH——P0 设计评审裁决中；P1 角色注册表+spawn role 参数 → P2 UI 联动 → P3 实机+收口，见 §3）`
+状态：`completed（2026-09-16 P0–P3 一次会话完成；R5 优化候选池保留——多子智能体并发观看切换、历史回放聚合条重建、角色专属验收探针等逐项另评）`
 
 计划编号：`BLOCK-93-AGENT-OPTIMIZATION`
 
