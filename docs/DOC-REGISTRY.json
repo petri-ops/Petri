@@ -4434,6 +4434,26 @@
       "notes": "工作区文件树全能力文件操作（2026-09-15 用户裁决「新开一个全新的工作包 本地和远程都具备全能性能力 不要有区分 你来适配」立项即开工，同日整包收口）：REST fs/move|copy|delete|mkdir 双后端同构（gateway 补 cp：local fsp.cp / node-agent fs_cp）+ 前端 UI-378 右键菜单/拖拽/弹层 verified + 删除统一确认后直接删。P3 实机 flow 14/14 allPass；实机抓真修 BLOCK-86 P2 钩子早退回归（d893f0ebe）。"
     },
     {
+      "id": "BLOCK-94-KNOWLEDGE-SPACE-PRO",
+      "path": "docs/block-94-knowledge-space-pro-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-94-knowledge-space-pro",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-16",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-PLANNED",
+      "tags": [
+        "block-94",
+        "knowledge-space",
+        "rag",
+        "professionalization"
+      ],
+      "notes": "知识空间专业化升级（BLOCK-69 v1 后继 v2 载体，用户裁决立项 2026-09-16「专业 易用 能力全面」）：六工作面=F1 可靠底盘（摄取队列启动恢复/嵌入模型一致性防护/召回挂点去重/列表分页）+ F2 格式（PDF 兑现 BLOCK-69 P3 断层，新依赖须 DEPENDENCY-CHANGE-CHECKLIST 裁决）+ F3 摄取易用（拖拽上传/逐文件错误聚合）+ F4 管理面（文档预览/批量删除重试）+ F5 检索引用溯源（聊天 citation 卡/过滤高亮/knowledge_read 评估）+ F6 规模化（向量扫描警戒指标/无 key 诚实降级；sqlite-vec 仅评估）。非范围=音视频/数据库直读（P4 线）、多空间、手机投影；BLOCK-93 文件面零触碰。planned 排队不占 active 槽位；启动需用户裁决。",
+      "lastUpdated": "2026-09-16"
+    },
+    {
       "id": "BLOCK-93-AGENT-OPTIMIZATION",
       "path": "docs/block-93-agent-optimization-plan.md",
       "kind": "work-package",

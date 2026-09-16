@@ -166,6 +166,7 @@
 122. [`block-89-workspace-file-ops-plan.md`](./block-89-workspace-file-ops-plan.md) — 2026-09-15 立项即开工（active，P0-LAUNCH）：**工作区文件树全能力文件操作（本地/SSH 全对齐）**——REST fs/move|copy|delete|mkdir 双后端同构（gateway 补 cp：local fsp.cp / node-agent fs_cp 自动部署）+ 前端右键菜单+拖拽 UI-378 + 删除统一确认后直接删；刷新走 projectWorkspaceChanged；非范围：OS 拖入/拖出、新建空文件、投影文件树。0 新依赖。
 123. [`block-92-code-modularization-plan.md`](./block-92-code-modularization-plan.md) — 2026-09-16 立项（planned 排队，启动门槛=UI-386 在制 WIP 收编 + 用户裁决）：**巨型文件模块化二期**（BLOCK-9/9.1 家法延续）——前端 12 + core 9 + src 1 共 22 个 ≥700 行产品文件的分波拆分（Wave A copilot 族 / Wave B 页面面板族 / Wave C core 族 / Wave D src+IPC 常量集中）+ 行数台账与棘轮两机制交付；纯代码组织 0 行为变更、0 新依赖、re-export 向后兼容；loop-orchestrator（行数门）与 UI-386 文件面零触碰。
 124. [`block-93-agent-optimization-plan.md`](./block-93-agent-optimization-plan.md) — 2026-09-16 立项（planned 排队，启动需用户裁决）：**子智能体专职化与彻底优化**（UI-387 职能图标推断已交付为前置）——角色注册表（检索/搜集/整理/读取/分析/通用）+ spawn_agent 可选 role 参数（prompt 软约束）+ UI 三处角色展示 + 只读角色工具白名单（评估项）+ 优化候选池；一期不做硬工具白名单。
+125. [`block-94-knowledge-space-pro-plan.md`](./block-94-knowledge-space-pro-plan.md) — 2026-09-16 立项（planned 排队，启动需用户裁决）：**知识空间专业化升级**（BLOCK-69 v1 后继 v2 载体，用户裁决目标「专业 易用 能力全面」）——六工作面：F1 可靠底盘（摄取队列启动恢复/嵌入模型一致性防护/召回挂点去重/列表分页）+ F2 格式能力（PDF 兑现 BLOCK-69 P3 断层；新依赖走 DEPENDENCY-CHANGE-CHECKLIST 裁决）+ F3 摄取易用（拖拽上传/逐文件错误聚合）+ F4 管理面（文档预览/批量删除重试）+ F5 检索引用溯源（聊天 citation 卡/过滤高亮/knowledge_read 评估）+ F6 规模化（向量扫描警戒指标/无 key 诚实降级，sqlite-vec 仅评估）；非范围=音视频/数据库直读（P4 线）、多空间、手机投影；BLOCK-93 文件面零触碰。
 
 ## Branch Conversation 架构
 
