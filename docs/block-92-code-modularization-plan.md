@@ -1,7 +1,7 @@
 # BLOCK-92-CODE-MODULARIZATION 工作包计划（巨型文件模块化二期）
 
 **最后更新**：2026-09-16
-**状态**：`planned`（2026-09-16 立项登记，排队不占 active 槽位；对标 BLOCK-86 planned 先例）
+**状态**：`active`（2026-09-16 用户裁决「很棒 按顺序 逐个推进」队列序启动——启动门槛两条均满足：UI-386 WIP 已收编 9778bff9 + 用户显式裁决；P1 机制先行进行中，见 §4）
 **Plan ID**：`BLOCK-92-CODE-MODULARIZATION`
 **用户裁决原话**：「需要新建一个block用来优化项目代码  主要目的是让巨大代码文件模块化 你能安排一下吗 一定要确保没问题」（2026-09-16）
 **家法先例**：`docs/block-9-mega-file-refactor-plan.md`（一期：project-workspace.tsx 3222→4 文件、`_data.ts` 2157→3 文件、buildPreviewTable 抽取）+ `docs/block-9-1-main-js-split-plan.md`（main.js 2450→611 装配器 + `src/ipc/` 域模块），两者均 2026-08-16 当日收口 completed。
