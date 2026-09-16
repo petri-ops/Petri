@@ -20,7 +20,7 @@ import {
   type ToolCallEvent,
   type ToolResultEvent,
 } from '@/components/copilot/copilotClient';
-import { inferAgentCategory } from '@/lib/agentCategories';
+import { resolveAgentCategory } from '@/lib/agentCategories';
 import { Icon } from '@/components/icons/Icon';
 import styles from '@/pages/window/command-center.module.css';
 import shellStyles from '@/components/window/window-shell.module.css';
@@ -61,6 +61,8 @@ export function AgentRunPanel({
 }): React.ReactElement {
   const [runState, setRunState] = useState<RunState>('running');
   const [taskText, setTaskText] = useState('');
+  // BLOCK-93 P2 — 显式 spawn role（meta 拉取；未指定=空 → 文本推断兜底）
+  const [taskRole, setTaskRole] = useState('');
   const [statusLine, setStatusLine] = useState('事件流连接中…');
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [summary, setSummary] = useState('');
@@ -87,6 +89,7 @@ export function AgentRunPanel({
       .then((meta) => {
         if (!alive) return;
         setTaskText(String(meta.taskText || ''));
+        setTaskRole(String((meta as { role?: string }).role || ''));
         setRunState(runStateFromStatus(meta.status));
       })
       .catch(() => {});
@@ -241,8 +244,8 @@ export function AgentRunPanel({
     <div className={styles.agentBody}>
       <div className={styles.agentStatusRow}>
         {/* UI-387 — 面板头带职能图标（类别推断）+ 任务描述 */}
-        <span className={shellStyles.statusChip} data-status="done" title={`职能：${inferAgentCategory(taskText).label}`}>
-          <span aria-hidden="true">{inferAgentCategory(taskText).emoji}</span>
+        <span className={shellStyles.statusChip} data-status="done" title={`职能：${resolveAgentCategory(taskRole, taskText).label}`}>
+          <span aria-hidden="true">{resolveAgentCategory(taskRole, taskText).emoji}</span>
         </span>
         <span className={styles.agentStatusLine} title={taskText}>
           {taskText ? taskText.replace(/\s+/g, ' ').trim().slice(0, 40) : `Agent ${runId.slice(0, 8)}`}

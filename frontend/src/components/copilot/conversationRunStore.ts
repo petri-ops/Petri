@@ -108,6 +108,8 @@ export interface ConversationRunSnapshot {
   resumeOfTaskId?: string;
   /** BLOCK-56 P1 — 模型降级提示（请求级/任务级首次发生时记录），UI 任务条显示「已降级到 X 模型」。 */
   modelFallbackNotice?: string;
+  /** BLOCK-93 P2 — spawn 显式角色（服务端 agent-roles 注册表 key；未指定为 undefined → UI 文本推断兜底）。 */
+  agentRole?: string;
 }
 
 interface StartConversationRunOptions {
@@ -166,11 +168,17 @@ function pushChildFinishedNotice(conversationId: string, notice: ChildFinishedNo
 
 // BLOCK-49 加映二 —— 模型 spawn_agent 派生的子 agent 登记（活动面板数据源）。
 // spawn 的 task 文本从 tool_call args 捕获（tool_result 只有 agentId），
-// 按 callId 关联到 tool_result。
-const pendingSpawnTaskText = new Map<string, string>();
+// 按 callId 关联到 tool_result。BLOCK-93 P2：args.role 一并捕获（显式角色）。
+const pendingSpawnTaskText = new Map<string, { taskText: string; role?: string }>();
 
 /** 模型 spawn_agent 派生：登记 running 快照（面板可见；已存在则跳过）。 */
-function recordModelSubAgent(conversationId: string, projectId: string | undefined, taskId: string, userContent: string): void {
+function recordModelSubAgent(
+  conversationId: string,
+  projectId: string | undefined,
+  taskId: string,
+  userContent: string,
+  role?: string,
+): void {
   if (!taskId || subTaskRuns.has(taskId)) return;
   const startedAt = Date.now();
   subTaskRuns.set(taskId, {
@@ -190,6 +198,8 @@ function recordModelSubAgent(conversationId: string, projectId: string | undefin
     startedAt,
     taskId,
     parentTaskId: undefined,
+    // BLOCK-93 P2 — 显式角色（spawn role；未指定为 undefined → UI 走文本推断兜底）
+    agentRole: role || undefined,
   });
   emitSubTask(taskId);
 }
@@ -612,9 +622,11 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     },
     onToolCall: (event: ToolCallEvent) => {
       // BLOCK-49 加映二 —— spawn_agent 的 task 文本按 callId 缓存（面板行标题）
+      // BLOCK-93 P2 — args.role 一并缓存（显式角色 → 快照 → 内联卡图标）
       if (event.name === 'spawn_agent' && event.callId) {
         const taskText = typeof event.args?.task === 'string' ? event.args.task : '';
-        if (taskText) pendingSpawnTaskText.set(event.callId, taskText);
+        const role = typeof event.args?.role === 'string' ? event.args.role : undefined;
+        if (taskText || role) pendingSpawnTaskText.set(event.callId, { taskText, role });
       }
       replaceRun(conversationId, (current) => ({
         ...current,
@@ -637,9 +649,10 @@ export function startConversationRun(options: StartConversationRunOptions): bool
         const spawnData = event.toolResult?.data as { agentId?: unknown } | undefined;
         const agentId = spawnData && typeof spawnData.agentId === 'string' ? spawnData.agentId : null;
         const callKey = event.toolResult?.callId || '';
-        const taskText = pendingSpawnTaskText.get(callKey) || '子 agent';
+        const pending = pendingSpawnTaskText.get(callKey);
+        const taskText = pending?.taskText || '子 agent';
         if (agentId) {
-          recordModelSubAgent(conversationId, options.projectId, agentId, taskText);
+          recordModelSubAgent(conversationId, options.projectId, agentId, taskText, pending?.role);
           pendingSpawnTaskText.delete(callKey);
           // UI-382 — 把子智能体 id 回写到 spawn_agent 工具行：行展开后内联
           // 子智能体实况卡（ToolActivityList 按 activity.agentRunId 渲染），

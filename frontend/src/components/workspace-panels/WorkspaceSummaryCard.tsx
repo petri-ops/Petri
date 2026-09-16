@@ -4,7 +4,7 @@ import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import type { ToolJob, Project, Dataset } from '@/lib/project-types';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { BackendStatus } from '@/lib/electron';
-import { inferAgentCategory } from '@/lib/agentCategories';
+import { resolveAgentCategory } from '@/lib/agentCategories';
 import styles from '@/pages/project-workspace.module.css';
 import { useRuntimeResourceSnapshot } from '@/hooks/useRuntimeResourceSnapshot';
 import type { ConversationLoopState } from '@/components/copilot/conversationRunStore';
@@ -421,7 +421,8 @@ export function WorkspaceSummaryCard({
                 const running = agentRows.filter((t) => t.status === 'running').slice(0, 8);
                 const rest = agentRows.filter((t) => t.status !== 'running').slice(0, Math.max(0, 8 - running.length));
                 const chip = (task: AgentTaskOverviewItem) => {
-                  const category = inferAgentCategory(task.taskText);
+                  // BLOCK-93 P2 — 显式 spawn role 第一优先，文本推断兜底
+                  const category = resolveAgentCategory(task.role, task.taskText);
                   return (
                     <button
                       key={task.taskId}

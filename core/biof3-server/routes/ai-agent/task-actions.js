@@ -51,6 +51,7 @@ module.exports = {
           parentTaskId: (t.params && t.params.parentTaskId) || null,
           spawnSource: (t.params && t.params.spawnSource) || null,
           taskText: String((t.params && t.params.messages && t.params.messages[0] && t.params.messages[0].content) || '').slice(0, 200),
+          ...(t.params && t.params.role ? { role: t.params.role } : {}),
         }));
         if (conversationId) tasks = tasks.filter((t) => t.conversationId === conversationId);
         const convIds = [...new Set(tasks.map((t) => t.conversationId).filter(Boolean))];
@@ -81,6 +82,7 @@ module.exports = {
           status: task.status,
           agentStatus: task.agentStatus,
           taskText: String((task.params && task.params.messages && task.params.messages[0] && task.params.messages[0].content) || '').slice(0, 200),
+          ...(task.params && task.params.role ? { role: task.params.role } : {}),
           conversationId: (task.params && task.params.conversationId) || null,
           parentTaskId: (task.params && task.params.parentTaskId) || null,
           createdAt: task.createdAt,

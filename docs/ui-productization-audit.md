@@ -3349,6 +3349,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-390: 子智能体显式角色展示——spawn role 贯通三处图标（BLOCK-93 P2）(2026-09-16 in_progress，dev Electron 边界内)
+
+- **来源**：BLOCK-93 P0 裁决（服务端角色注册表 + 扩展角色集十角色：六基础 search/collect/organize/read/analysis/general + 四扩展 test🧪/write✍️/plan🗺️/fix🔧；R4 仅 prompt 软约束）。
+- **交付面**：spawn_agent 新增可选 role 参数（枚举与注册表对齐，未知 fail-closed）；角色指令片段注入子 agent system prompt（软约束）；role 随 params 落库、followup 续派继承（显式可覆盖）、list_agents/wait_agent 摘要透出；前端三处（内联实况卡/右栏面板头/摘要卡图标带）**显式 role 第一优先、文本推断降级兜底**（resolveAgentCategory 统一入口），agentCategories 扩展四类 + 关键词推断。
+- **证据**：契约 block93-agent-roles（12 断言：落库/注入/fail-closed/additive 红线/继承/透出）+ role-prompt 实机级 2/2（真实 agent-runner + mock 上游捕获 system prompt 断言角色片段与零注入）+ 前端 vitest 79 过 + tsc 0。
+- **边界**：R4 硬白名单留后续候选；角色色仍由状态表达（形状=职能不变）。G0 开发期常态 · 不外推 packaged/Provider/GA.
 ## UI-388: 远程目标管理页首连握手提示——IPv6 黑洞可归因（BLOCK-96 F1；含 F6 R/Python/slurm 徽标退役）(2026-09-16 in_progress，dev Electron 边界内)
 
 - **来源**：BLOCK-96 F1 P0 裁决「传输层参数化」配套展示面——probe 增加首连握手计时，>2s 判定疑似地址族黑洞（IPv6 ::1 先挂满超时才回落 IPv4，ConnectTimeout 封不住）。

@@ -1635,6 +1635,35 @@
       "scriptRole": "development-smoke"
     },
     {
+      "id": "block93-agent-roles",
+      "note": "BLOCK-93 子智能体专职化：角色注册表 + spawn_agent role 参数 + prompt 软约束注入 + 续派继承 + 前端三处显式角色展示。",
+      "patterns": [
+        "core/biof3-server/agent-tools/agent-roles.js",
+        "core/biof3-server/agent-tools/spawn-agent-tools.js",
+        "core/biof3-server/agent-tools/tool-defs.js",
+        "core/biof3-server/agent-runner.js",
+        "core/biof3-server/routes/ai-agent/task-actions.js",
+        "frontend/src/lib/agentCategories.ts",
+        "frontend/src/components/copilot/conversationRunStore.ts",
+        "frontend/src/components/copilot/ToolActivityList.tsx",
+        "frontend/src/components/workspace-panels/AgentRunPanel.tsx",
+        "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
+        "scripts/block93-*",
+        "acceptance/block-93/**"
+      ],
+      "tests": [
+        "test/block93-agent-roles.test.mjs",
+        "test/block93-role-prompt.test.mjs",
+        "test/block49-phase2-tools.test.mjs",
+        "test/block49-addendum-terminal.test.mjs",
+        "test/agent-tool-policy.test.mjs",
+        "test/agent-tool-registry.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
+    },
+    {
       "id": "block96-ssh-channel-perf",
       "note": "BLOCK-96 SSH 通道效率稳定性：fs_list 单 fork NUL 记录协议 + 服务端分页 + 前端游标加载 + mux 幂等只读透明重试 + addressFamily 传输层参数化 + probe 握手计时/F6 领域探测退役。",
       "patterns": [

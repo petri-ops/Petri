@@ -668,6 +668,8 @@ export interface AgentTaskMeta {
   parentTaskId: string | null;
   createdAt: string | number | null;
   finishedAt: string | number | null;
+  /** BLOCK-93 P2 — spawn 显式角色（agent-roles 注册表 key；未指定不带此字段） */
+  role?: string;
 }
 
 export interface AgentTaskOverviewItem extends AgentTaskMeta {
