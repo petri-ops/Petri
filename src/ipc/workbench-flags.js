@@ -1,3 +1,4 @@
+const CHANNELS = require('./channels');
 // ============================================================
 // IPC handler: agent-workbench-flags channel
 //
@@ -11,7 +12,7 @@
 
 const { ipcMain } = require("electron");
 
-const AGENT_WORKBENCH_FLAG_CHANNEL = "gewu:agent-workbench-flags";
+const AGENT_WORKBENCH_FLAG_CHANNEL = CHANNELS.gewu.agentWorkbenchFlags;
 const AGENT_WORKBENCH_FLAG_NAME = "extraRenderers";
 
 function parseAgentWorkbenchFlags(argv = process.argv, env = process.env) {

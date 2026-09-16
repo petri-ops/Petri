@@ -11,6 +11,7 @@
  * 5. 创建 webview 窗口加载内嵌静态站
  * 6. 外部链接走系统浏览器
  */
+const CHANNELS = require('./channels');
 
 const {
   app,
@@ -225,7 +226,7 @@ function setupSkillsIpc() {
   };
 
   // 规整化 bridge 返回值，保证前端 contract 严格 `{ ok, ... }`
-  ipcMain.handle("skills:discover", async (event) => {
+  ipcMain.handle(CHANNELS.skills.discover, async (event) => {
     if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
     try {
       const sdk = _getSkillsSDK({ ..._skillsCtx, getMainWindow: () => mainWindow });
@@ -237,7 +238,7 @@ function setupSkillsIpc() {
     }
   });
 
-  ipcMain.handle("skills:execute", async (event, skillId, params) => {
+  ipcMain.handle(CHANNELS.skills.execute, async (event, skillId, params) => {
     if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
     try {
       const sdk = _getSkillsSDK({ ..._skillsCtx, getMainWindow: () => mainWindow });
@@ -305,7 +306,7 @@ function setupSkillsIpc() {
     }
   });
 
-  ipcMain.handle("skills:getExecution", async (event, executionId) => {
+  ipcMain.handle(CHANNELS.skills.getExecution, async (event, executionId) => {
     if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
     try {
       if (!executionId) return { ok: false, error: "executionId required" };
@@ -337,7 +338,7 @@ function setupSkillsIpc() {
     }
   });
 
-  ipcMain.handle("skills:cancel", async (event, executionId) => {
+  ipcMain.handle(CHANNELS.skills.cancel, async (event, executionId) => {
     if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, cancelled: false, error: "unauthorized" };
     try {
       if (!executionId) return { ok: false, cancelled: false, error: "executionId required" };

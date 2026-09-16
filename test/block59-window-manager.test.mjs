@@ -405,18 +405,21 @@ describe('适配器与 preload 静态契约', () => {
   const PRELOAD = path.join(__dirname, '..', 'src', 'preload.js');
 
   test('适配器注册 plan §4.3 全部 IPC 通道', () => {
+    // BLOCK-92 Wave D2：通道名唯一真源迁 src/ipc/channels.js；锁注册表值 + 适配器引用。
+    const registry = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'channels.js'), 'utf8');
     const src = fs.readFileSync(ADAPTER, 'utf8');
-    for (const channel of [
-      'window:pop-out',
-      'window:return',
-      'window:minimize',
-      'window:restore',
-      'window:remove',
-      'window:snapshot',
-      'window:self',
-      'window:state-changed',
+    for (const [channel, key] of [
+      ['window:pop-out', 'popOut'],
+      ['window:return', 'return'],
+      ['window:minimize', 'minimize'],
+      ['window:restore', 'restore'],
+      ['window:remove', 'remove'],
+      ['window:snapshot', 'snapshot'],
+      ['window:self', 'self'],
+      ['window:state-changed', 'stateChanged'],
     ]) {
-      assert.ok(src.includes(`'${channel}'`) || src.includes(`"${channel}"`), `缺少通道 ${channel}`);
+      assert.ok(registry.includes(`'${channel}'`), `注册表缺通道 ${channel}`);
+      assert.ok(src.includes(`CHANNELS.window.${key}`), `适配器未引用 CHANNELS.window.${key}`);
     }
   });
 
@@ -444,13 +447,13 @@ describe('适配器与 preload 静态契约', () => {
     assert.match(src, /setIgnoreMouseEvents\(true, \{ forward: true \}\)/, '条带外点击穿透');
     assert.match(src, /skipTaskbar: true/, '轨道不进任务栏');
     assert.match(src, /focusable: false/, '轨道不抢键盘焦点');
-    assert.match(src, /window:rail-mouse/, '渲染层穿透切换 IPC 存在');
+    assert.match(src, /CHANNELS\.window\.railMouse/, '渲染层穿透切换 IPC 存在');
   });
 
   test('加映二契约：轨道窗加宽容纳 hover 卡 + 降格瞬间快照 + thumbnail IPC', () => {
     const src = fs.readFileSync(ADAPTER, 'utf8');
     assert.match(src, /RAIL_WINDOW_WIDTH = 364/, '轨道窗 364px（预览区 336 + 条带 28），卡片不再被裁剪');
-    assert.match(src, /window:thumbnail/, 'thumbnail IPC 存在（轨道卡内容预览）');
+    assert.match(src, /CHANNELS\.window\.thumbnail/, 'thumbnail IPC 存在（轨道卡内容预览）');
     assert.match(src, /capturePage\(\)/, '降格瞬间内容快照（capturePage）');
     assert.match(src, /thumbnails\.delete\(id\)/, '快照随条目终结清理');
     // 快照必须在降格（hide）之前采集——可见态 capturePage 才可靠

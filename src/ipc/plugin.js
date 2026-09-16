@@ -1,3 +1,4 @@
+const CHANNELS = require('./channels');
 // ============================================================
 // IPC handlers: plugin:* (8 handlers), content-plugin:* (3 handlers)
 //
@@ -23,7 +24,7 @@ function setupPluginIpc(options = {}) {
   // to `listInstalledPlugins` (which doesn't exist), causing the
   // try/catch to silently swallow the error and return `[]`.
   // Restored to the actual export names from plugin-manager.
-  ipcMain.handle("plugin:list-installed", async (event) => {
+  ipcMain.handle(CHANNELS.plugin.listInstalled, async (event) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { getInstalledPlugins } = require("../plugin-manager");
@@ -34,7 +35,7 @@ function setupPluginIpc(options = {}) {
     }
   });
 
-  ipcMain.handle("plugin:list-remote", async (event) => {
+  ipcMain.handle(CHANNELS.plugin.listRemote, async (event) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { getRemoteManifest } = require("../plugin-manager");
@@ -45,7 +46,7 @@ function setupPluginIpc(options = {}) {
     }
   });
 
-  ipcMain.handle("plugin:check-updates", async (event) => {
+  ipcMain.handle(CHANNELS.plugin.checkUpdates, async (event) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { checkUpdates } = require("../plugin-manager");
@@ -56,7 +57,7 @@ function setupPluginIpc(options = {}) {
     }
   });
 
-  ipcMain.handle("plugin:install", async (event, pluginId) => {
+  ipcMain.handle(CHANNELS.plugin.install, async (event, pluginId) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { installPlugin } = require("../plugin-manager");
@@ -66,7 +67,7 @@ function setupPluginIpc(options = {}) {
     }
   });
 
-  ipcMain.handle("plugin:uninstall", async (event, pluginId) => {
+  ipcMain.handle(CHANNELS.plugin.uninstall, async (event, pluginId) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { uninstallPlugin } = require("../plugin-manager");
@@ -78,7 +79,7 @@ function setupPluginIpc(options = {}) {
 
   // ── M2-9：content-plugin 文档桥 ──────────────────────────────
   // docs.tsx 运行时通过这些 IPC 拉取已装 content-plugin 的文档树与正文
-  ipcMain.handle("content-plugin:list", async (event) => {
+  ipcMain.handle(CHANNELS.contentPlugin.list, async (event) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { listAllContentPlugins } = require("../plugin-manager");
@@ -89,7 +90,7 @@ function setupPluginIpc(options = {}) {
     }
   });
 
-  ipcMain.handle("content-plugin:list-docs", async (event, pluginId) => {
+  ipcMain.handle(CHANNELS.contentPlugin.listDocs, async (event, pluginId) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { listContentPluginDocs } = require("../plugin-manager");
@@ -101,7 +102,7 @@ function setupPluginIpc(options = {}) {
   });
 
   ipcMain.handle(
-    "content-plugin:read",
+    CHANNELS.contentPlugin.read,
     async (event, pluginId, relativePath) => {
       const deny = assertSender(event); if (deny) return deny;
       try {

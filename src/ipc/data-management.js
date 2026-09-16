@@ -1,3 +1,4 @@
+const CHANNELS = require('./channels');
 // ============================================================
 // IPC handlers: data:info, data:open-dir
 //
@@ -36,7 +37,7 @@ function setupDataManagementIpc() {
   }
 
   // 返回数据目录路径 + 各子目录大小（runtimes / plugins / results / uploads / logs / db）
-  ipcMain.handle("data:info", async () => {
+  ipcMain.handle(CHANNELS.data.info, async () => {
     try {
       const dataDir = process.env.BIOF3_LOCAL_DATA_DIR;
       if (!dataDir) return { ok: false, error: "数据目录未配置" };
@@ -75,7 +76,7 @@ function setupDataManagementIpc() {
   });
 
   // 在系统文件管理器中打开数据目录
-  ipcMain.handle("data:open-dir", async () => {
+  ipcMain.handle(CHANNELS.data.openDir, async () => {
     try {
       const dataDir = process.env.BIOF3_LOCAL_DATA_DIR;
       if (!dataDir) return { ok: false, error: "数据目录未配置" };

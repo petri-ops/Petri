@@ -8,6 +8,7 @@
 // BrowserWindow is passed via parameter injection so the module
 // has no top-level Electron dependency.
 // ============================================================
+const CHANNELS = require('./channels');
 
 const { zoomBy, zoomReset } = require("./_zoom.js");
 
@@ -34,11 +35,11 @@ function setupWindowIpc({ ipcMain, process, app, getMainWindow }) {
   };
 
   // ── Window chrome controls ─────────────────────────────────
-  ipcMain.on("window:minimize", (event) => {
+  ipcMain.on(CHANNELS.window.minimize, (event) => {
     resolveSenderWindow(event)?.minimize();
   });
 
-  ipcMain.on("window:maximize", (event) => {
+  ipcMain.on(CHANNELS.window.maximize, (event) => {
     const targetWindow = resolveSenderWindow(event);
     if (!targetWindow) return;
     if (targetWindow.isMaximized()) {
@@ -48,22 +49,22 @@ function setupWindowIpc({ ipcMain, process, app, getMainWindow }) {
     }
   });
 
-  ipcMain.on("window:close", (event) => {
+  ipcMain.on(CHANNELS.window.close, (event) => {
     resolveSenderWindow(event)?.close();
   });
 
-  ipcMain.handle("window:isMaximized", (event) => {
+  ipcMain.handle(CHANNELS.window.isMaximized, (event) => {
     const targetWindow = resolveSenderWindow(event);
     return targetWindow ? targetWindow.isMaximized() === true : false;
   });
 
   // ── Fullscreen (macOS simpleFullScreen / cross-platform) ────
-  ipcMain.handle("window:isFullScreen", (event) => {
+  ipcMain.handle(CHANNELS.window.isFullScreen, (event) => {
     const targetWindow = resolveSenderWindow(event);
     return targetWindow ? targetWindow.isFullScreen() : false;
   });
 
-  ipcMain.on("window:toggleFullScreen", (event) => {
+  ipcMain.on(CHANNELS.window.toggleFullScreen, (event) => {
     const targetWindow = resolveSenderWindow(event);
     if (!targetWindow) return;
     // For frameless windows on macOS, use simpleFullScreen mode which
@@ -79,17 +80,17 @@ function setupWindowIpc({ ipcMain, process, app, getMainWindow }) {
   // Driven by the Ctrl/Cmd+wheel listener registered in preload.js, and by the
   // Ctrl/Cmd +/-/0 accelerator in _window-create.js. `delta` is a (possibly
   // fractional) zoomLevel step — positive zooms in.
-  ipcMain.on("window:zoom-by", (event, delta) => {
+  ipcMain.on(CHANNELS.window.zoomBy, (event, delta) => {
     const targetWindow = resolveSenderWindow(event);
     if (targetWindow) zoomBy(targetWindow, delta);
   });
 
-  ipcMain.on("window:zoom-reset", (event) => {
+  ipcMain.on(CHANNELS.window.zoomReset, (event) => {
     const targetWindow = resolveSenderWindow(event);
     if (targetWindow) zoomReset(targetWindow);
   });
 
-  ipcMain.handle("window:get-zoom", (event) => {
+  ipcMain.handle(CHANNELS.window.getZoom, (event) => {
     const targetWindow = resolveSenderWindow(event);
     return targetWindow ? targetWindow.webContents.getZoomLevel() : 0;
   });
@@ -97,7 +98,7 @@ function setupWindowIpc({ ipcMain, process, app, getMainWindow }) {
   // ── App relaunch (for runtime install / env refresh) ────────
   // BIOF3_R_HOME env is fixed at startup; a partial biof3-server restart
   // would still read stale values — require full app relaunch.
-  ipcMain.handle("app:relaunch", async () => {
+  ipcMain.handle(CHANNELS.app.relaunch, async () => {
     try {
       app.relaunch();
       app.exit(0);

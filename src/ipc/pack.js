@@ -1,4 +1,5 @@
 'use strict';
+const CHANNELS = require('./channels');
 
 /**
  * IPC handlers: pack:* — 领域包一键装/卸（BLOCK-84）+ 契约推导生命周期编排（BLOCK-86 P1）。
@@ -23,7 +24,7 @@ const lifecycle = createPackLifecycle();
 function forwardRuntimeProgress(event, pluginId, progress) {
   try {
     if (event && event.sender && !event.sender.isDestroyed()) {
-      event.sender.send('pack:install-progress', { pluginId, progress });
+      event.sender.send(CHANNELS.pack.installProgress, { pluginId, progress });
     }
   } catch { /* 发起方已关闭：进度无处可送，忽略 */ }
 }
@@ -38,7 +39,7 @@ function registerPackIpc() {
     }
   }
 
-  ipcMain.handle('pack:list-installed', async () => {
+  ipcMain.handle(CHANNELS.pack.listInstalled, async () => {
     const packRegistry = require('../../core/shared-backend/pack-registry');
     const packs = packRegistry.readInstalledPacks(getDataDir());
     // 记录含 packRoot——即使包源稍后被删，卸载前也能展示模块清单
@@ -48,7 +49,7 @@ function registerPackIpc() {
     };
   });
 
-  ipcMain.handle('pack:list-available', async () => {
+  ipcMain.handle(CHANNELS.pack.listAvailable, async () => {
     const packRegistry = require('../../core/shared-backend/pack-registry');
     const available = packRegistry.discoverAvailablePacks({ projectRoot: process.env.BIOF3_PROJECT_ROOT || path.resolve(__dirname, '..', '..') });
     const installed = packRegistry.readInstalledPacks(getDataDir());
@@ -64,7 +65,7 @@ function registerPackIpc() {
   });
 
   // 一键安装：主进程弹目录选择框（选中含 pack.json 的目录）
-  ipcMain.handle('pack:install-from-dialog', async (event) => {
+  ipcMain.handle(CHANNELS.pack.installFromDialog, async (event) => {
     const result = await dialog.showOpenDialog({
       title: '选择领域包目录（含 pack.json）',
       properties: ['openDirectory'],
@@ -78,7 +79,7 @@ function registerPackIpc() {
   });
 
   // 一键安装（已知路径，如兄弟仓自动发现条目）
-  ipcMain.handle('pack:install-path', async (event, packRoot) => {
+  ipcMain.handle(CHANNELS.pack.installPath, async (event, packRoot) => {
     if (!packRoot || typeof packRoot !== 'string') return { ok: false, error: 'pack_root_required' };
     return lifecycle.installPackWithRuntimes(getDataDir(), packRoot, {
       onRuntimeProgress: (pluginId, progress) => forwardRuntimeProgress(event, pluginId, progress),
@@ -86,13 +87,13 @@ function registerPackIpc() {
   });
 
   // BLOCK-86 P1 — 卸载影响预览：确认弹层三档数据源（运行时回收体积/共享保留/包源）
-  ipcMain.handle('pack:uninstall-plan', async (_event, packId) => {
+  ipcMain.handle(CHANNELS.pack.uninstallPlan, async (_event, packId) => {
     if (!packId || typeof packId !== 'string') return { ok: false, error: 'pack_id_required' };
     return lifecycle.buildUninstallPlan(getDataDir(), packId);
   });
 
   // 卸载执行：deleteRuntimes / deletePackSource 缺省 false（破坏性动作必须显式勾选）
-  ipcMain.handle('pack:uninstall', async (_event, packId, options) => {
+  ipcMain.handle(CHANNELS.pack.uninstall, async (_event, packId, options) => {
     if (!packId || typeof packId !== 'string') return { ok: false, error: 'pack_id_required' };
     const opts = options && typeof options === 'object' ? options : {};
     return lifecycle.executeUninstall(getDataDir(), packId, {

@@ -16,6 +16,7 @@
 // _mapSkillRuntimeStatus is loaded from src/_mapSkillRuntimeStatus.js
 // (plain Node module, safe for node --check in non-Electron context).
 // ============================================================
+const CHANNELS = require('./channels');
 
 const { _mapSkillRuntimeStatus } = require("../_mapSkillRuntimeStatus");
 
@@ -60,7 +61,7 @@ function _publishSkillProgress({ getMainWindow }, executionId, payload) {
   const mainWindow = getMainWindow();
   if (!mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isDestroyed()) return;
   try {
-    mainWindow.webContents.send("skills:progress", { executionId, ...payload });
+    mainWindow.webContents.send(CHANNELS.skills.progress, { executionId, ...payload });
   } catch (e) {
     // webContents.send errors (e.g. main window closing) must not bubble to poller tick
     if (typeof console !== "undefined" && console.warn) {

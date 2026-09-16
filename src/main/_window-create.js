@@ -9,6 +9,7 @@
 // parameter injection to avoid top-level dependencies.
 // mainWindow is managed via getter/setter to avoid top-level shared state.
 // ============================================================
+const CHANNELS = require('./channels');
 
 const fs = require("fs");
 const { BRAND } = require("./brand");
@@ -200,7 +201,7 @@ async function createWindow({
     console.log("[desktop] soft refresh requested");
     const win = getMainWindow();
     if (win && !win.isDestroyed()) {
-      win.webContents.send("app:soft-refresh");
+      win.webContents.send(CHANNELS.app.softRefresh);
     }
   });
 
@@ -275,7 +276,7 @@ async function createWindow({
     ) {
       return;
     }
-    win.webContents.send("window:maximize-changed", isMaximized);
+    win.webContents.send(CHANNELS.window.maximizeChanged, isMaximized);
   };
   mainWindow.on("maximize", () => publishMaximizedState(true));
   mainWindow.on("unmaximize", () => publishMaximizedState(false));
@@ -287,23 +288,23 @@ async function createWindow({
     mainWindow.on("enter-simple-full-screen", () => {
       const win = getMainWindow();
       if (!win || win.isDestroyed() || !win.webContents || win.webContents.isDestroyed()) return;
-      win.webContents.send("window:fullscreen-changed", true);
+      win.webContents.send(CHANNELS.window.fullscreenChanged, true);
     });
     mainWindow.on("leave-simple-full-screen", () => {
       const win = getMainWindow();
       if (!win || win.isDestroyed() || !win.webContents || win.webContents.isDestroyed()) return;
-      win.webContents.send("window:fullscreen-changed", false);
+      win.webContents.send(CHANNELS.window.fullscreenChanged, false);
     });
   } else {
     mainWindow.on("enter-full-screen", () => {
       const win = getMainWindow();
       if (!win || win.isDestroyed() || !win.webContents || win.webContents.isDestroyed()) return;
-      win.webContents.send("window:fullscreen-changed", true);
+      win.webContents.send(CHANNELS.window.fullscreenChanged, true);
     });
     mainWindow.on("leave-full-screen", () => {
       const win = getMainWindow();
       if (!win || win.isDestroyed() || !win.webContents || win.webContents.isDestroyed()) return;
-      win.webContents.send("window:fullscreen-changed", false);
+      win.webContents.send(CHANNELS.window.fullscreenChanged, false);
     });
   }
 

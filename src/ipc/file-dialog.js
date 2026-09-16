@@ -1,3 +1,4 @@
+const CHANNELS = require('./channels');
 // ============================================================
 // IPC handlers: file:save-dialog, file:open-dialog,
 //               file:open-path, file:open-workspace-file
@@ -39,7 +40,7 @@ const ALLOWED_OPEN_EXTENSIONS = Object.freeze([
 ]);
 
 function setupFileDialogIpc({ mainWindow } = {}) {
-  ipcMain.handle("file:save-dialog", async (event, defaultName) => {
+  ipcMain.handle(CHANNELS.file.saveDialog, async (event, defaultName) => {
     if (!mainWindow) return null;
     try {
       const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
@@ -52,7 +53,7 @@ function setupFileDialogIpc({ mainWindow } = {}) {
     }
   });
 
-  ipcMain.handle("file:open-dialog", async (event, optionsOrFilters) => {
+  ipcMain.handle(CHANNELS.file.openDialog, async (event, optionsOrFilters) => {
     if (!mainWindow) return null;
     try {
       const isOptions =
@@ -84,7 +85,7 @@ function setupFileDialogIpc({ mainWindow } = {}) {
 
   // UI-257 — 手动输入路径校验：目录选择面板被系统禁用「打开」时的兜底通道。
   // 校验存在 + 是目录，返回 realpath；不做 TCC/共享限制探测（交由创建失败可见化）。
-  ipcMain.handle("file:validate-directory", async (_event, targetPath) => {
+  ipcMain.handle(CHANNELS.file.validateDirectory, async (_event, targetPath) => {
     try {
       if (typeof targetPath !== "string" || !targetPath.trim()) {
         return { ok: false, error: "路径为空" };
@@ -105,7 +106,7 @@ function setupFileDialogIpc({ mainWindow } = {}) {
 
   // UI-259 — 应用内文件夹浏览：系统目录面板对共享路径禁用「打开」时的兜底通道。
   // 列出目标目录下的一级子目录（隐藏项跳过），供 FolderPicker 组件导航选择。
-  ipcMain.handle("file:list-directory", async (_event, dirPath) => {
+  ipcMain.handle(CHANNELS.file.listDirectory, async (_event, dirPath) => {
     try {
       const raw = typeof dirPath === "string" ? dirPath.trim() : "";
       const target = raw || os.homedir();
@@ -135,7 +136,7 @@ function setupFileDialogIpc({ mainWindow } = {}) {
     }
   });
 
-  ipcMain.handle("file:open-path", async (_event, targetPath) => {
+  ipcMain.handle(CHANNELS.file.openPath, async (_event, targetPath) => {
     try {
       if (!targetPath || typeof targetPath !== "string") {
         return { ok: false, error: "invalid path" };
@@ -158,7 +159,7 @@ function setupFileDialogIpc({ mainWindow } = {}) {
     }
   });
 
-  ipcMain.handle("file:open-workspace-file", async (_event, workspacePath, relativePath) => {
+  ipcMain.handle(CHANNELS.file.openWorkspaceFile, async (_event, workspacePath, relativePath) => {
     try {
       if (
         typeof workspacePath !== "string" ||
@@ -193,7 +194,7 @@ function setupFileDialogIpc({ mainWindow } = {}) {
    * @param {string} relativePath  必须相对路径（path.isAbsolute 校验）
    * @param {string} content       必须 string
    */
-  ipcMain.handle("workspace:write-text-file", async (_event, workspacePath, relativePath, content) => {
+  ipcMain.handle(CHANNELS.workspace.writeTextFile, async (_event, workspacePath, relativePath, content) => {
     try {
       if (
         typeof workspacePath !== "string" ||

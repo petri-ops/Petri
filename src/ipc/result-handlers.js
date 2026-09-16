@@ -1,3 +1,4 @@
+const CHANNELS = require('./channels');
 // ============================================================
 // IPC handlers: Result (Shared Results)
 // 
@@ -47,7 +48,7 @@ function setupResultIpc(options = {}) {
   const assertSender = createSenderGuard(options.mainWindow);
   // ── Result CRUD ────────────────────────────────────────────
 
-  ipcMain.handle('result:create', async (event, {
+  ipcMain.handle(CHANNELS.result.create, async (event, {
     projectId,
     type,
     name,
@@ -82,7 +83,7 @@ function setupResultIpc(options = {}) {
 
   // Phase 3: Create result with automatic branch binding
   // Automatically uses the active branch as sourceBranchId
-  ipcMain.handle('result:createWithBranch', async (event, {
+  ipcMain.handle(CHANNELS.result.createWithBranch, async (event, {
     projectId,
     type,
     name,
@@ -125,7 +126,7 @@ function setupResultIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('result:get', async (event, { id }) => {
+  ipcMain.handle(CHANNELS.result.get, async (event, { id }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!id) {
@@ -141,7 +142,7 @@ function setupResultIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('result:list', async (event, { projectId, options }) => {
+  ipcMain.handle(CHANNELS.result.list, async (event, { projectId, options }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!projectId) {
@@ -154,7 +155,7 @@ function setupResultIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('result:update', async (event, { id, updates }) => {
+  ipcMain.handle(CHANNELS.result.update, async (event, { id, updates }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!id) {
@@ -173,7 +174,7 @@ function setupResultIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('result:delete', async (event, { id }) => {
+  ipcMain.handle(CHANNELS.result.delete, async (event, { id }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!id) {
@@ -191,7 +192,7 @@ function setupResultIpc(options = {}) {
 
   // ── Project Results (full objects) ──────────────────────────
 
-  ipcMain.handle('result:byProject', async (event, { projectId, options }) => {
+  ipcMain.handle(CHANNELS.result.byProject, async (event, { projectId, options }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!projectId) {
@@ -206,7 +207,7 @@ function setupResultIpc(options = {}) {
 
   // ── Result Versions ─────────────────────────────────────────
 
-  ipcMain.handle('result:version:create', async (event, {
+  ipcMain.handle(CHANNELS.result.versionCreate, async (event, {
     resultId,
     data,
     config,
@@ -235,7 +236,7 @@ function setupResultIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('result:version:get', async (event, { id }) => {
+  ipcMain.handle(CHANNELS.result.versionGet, async (event, { id }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!id) {
@@ -252,7 +253,7 @@ function setupResultIpc(options = {}) {
   });
 
   // Phase 4: Get version by resultId and version number
-  ipcMain.handle('result:version:getByNumber', async (event, { resultId, version }) => {
+  ipcMain.handle(CHANNELS.result.versionGetByNumber, async (event, { resultId, version }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!resultId || version === undefined) {
@@ -269,7 +270,7 @@ function setupResultIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('result:version:list', async (event, { resultId, limit, offset }) => {
+  ipcMain.handle(CHANNELS.result.versionList, async (event, { resultId, limit, offset }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!resultId) {
@@ -294,7 +295,7 @@ function setupResultIpc(options = {}) {
    * @param {boolean} [options.includeMessages=true] - Include full message history
    * @param {boolean} [options.generateSummary=true] - Generate AI-free summary
    */
-  ipcMain.handle('result:createFromConversation', async (event, {
+  ipcMain.handle(CHANNELS.result.createFromConversation, async (event, {
     projectId,
     branchId,
     options = {},

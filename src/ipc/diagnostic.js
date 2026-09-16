@@ -1,3 +1,4 @@
+const CHANNELS = require('./channels');
 // ============================================================
 // IPC handler: diagnostic:export
 //
@@ -25,7 +26,7 @@ function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs } = {}) {
   // BLOCK-10 S-007 / BLOCK-3 invariant: capture a live getter so the guard
   // tracks window replacement (app.on('activate') recreates mainWindow).
   const assertSender = createSenderGuard(typeof mainWindow === "function" ? mainWindow : () => mainWindow);
-  ipcMain.handle("diagnostic:export", async (event, requestedTargetPath) => {
+  ipcMain.handle(CHANNELS.diagnostic.export, async (event, requestedTargetPath) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const logDir = getLogDir();

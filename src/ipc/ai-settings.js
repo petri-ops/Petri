@@ -1,3 +1,4 @@
+const CHANNELS = require('./channels');
 // ============================================================
 // IPC handlers: ai-settings:get, ai-settings:save,
 //               ai-settings:get-credential, ai-settings:test,
@@ -29,7 +30,7 @@ function setupAiSettingsIpc(options = {}) {
   // BLOCK-10 S-004: assertTrustedSender helper, additive alongside BLOCK-3.
   const { createSenderGuard } = require("./_sender-guard");
   const assertSender = createSenderGuard(options.mainWindow);
-  ipcMain.handle("ai-settings:get", async (event) => {
+  ipcMain.handle(CHANNELS.aiSettings.get, async (event) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { getAiSettings } = require(
@@ -41,7 +42,7 @@ function setupAiSettingsIpc(options = {}) {
     }
   });
 
-  ipcMain.handle("ai-settings:save", async (event, settings) => {
+  ipcMain.handle(CHANNELS.aiSettings.save, async (event, settings) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { saveAiSettings } = require(
@@ -54,7 +55,7 @@ function setupAiSettingsIpc(options = {}) {
     }
   });
 
-  ipcMain.handle("ai-settings:get-credential", async (event, credentialId) => {
+  ipcMain.handle(CHANNELS.aiSettings.getCredential, async (event, credentialId) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { getApiKey } = require(
@@ -67,7 +68,7 @@ function setupAiSettingsIpc(options = {}) {
     }
   });
 
-  ipcMain.handle("ai-settings:test", async (event, providerOrProfile, apiKey) => {
+  ipcMain.handle(CHANNELS.aiSettings.test, async (event, providerOrProfile, apiKey) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { testApiKey } = require(
@@ -79,7 +80,7 @@ function setupAiSettingsIpc(options = {}) {
     }
   });
 
-  ipcMain.handle("ai-settings:list-models", async (event, providerOrProfile, apiKey) => {
+  ipcMain.handle(CHANNELS.aiSettings.listModels, async (event, providerOrProfile, apiKey) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { listAvailableModels } = require(

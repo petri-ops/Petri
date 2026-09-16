@@ -1,3 +1,4 @@
+const CHANNELS = require('./channels');
 // ============================================================
 // IPC handlers: window:pop-out, window:return, window:minimize,
 //               window:restore, window:remove, window:snapshot,
@@ -184,7 +185,7 @@ function setupWindowManagerIpc({
     }
     for (const win of targets) {
       try {
-        win.webContents.send("window:state-changed", payload);
+        win.webContents.send(CHANNELS.window.stateChanged, payload);
       } catch {}
     }
   };
@@ -274,7 +275,7 @@ function setupWindowManagerIpc({
   };
 
   // 渲染层 hover 条带/hover 卡时切换点击穿透（P2 plan §5）
-  ipcMain.on("window:rail-mouse", (event, payload) => {
+  ipcMain.on(CHANNELS.window.railMouse, (event, payload) => {
     const rec = windows.get(RAIL_CONTENT_ID);
     if (!rec || rec.win.isDestroyed() || event.sender !== rec.win.webContents) return;
     try {
@@ -433,7 +434,7 @@ function setupWindowManagerIpc({
 
   // ── IPC surface (plan §4.3, additive) ─────────────────────────
 
-  ipcMain.handle("window:pop-out", (_event, payload) => {
+  ipcMain.handle(CHANNELS.window.popOut, (_event, payload) => {
     const scope = resolveSenderScope(_event);
     if (!scope) return { ok: false, code: "sender_not_allowed" };
     const verdict = core.resolveContent(payload || {});
@@ -482,11 +483,11 @@ function setupWindowManagerIpc({
   // 指挥中心等独立窗不再弹 result 窗：调用本 handler 把载荷转发到主窗，
   // 由主窗渲染层（preload relay → gewu:project-open-artifact）在右栏打开。
   // 只放行单一白名单事件类型（SEC-HARDEN：不做成通用事件注入通道）。
-  ipcMain.handle("window:open-result-in-main", (_event, payload) => {
+  ipcMain.handle(CHANNELS.window.openResultInMain, (_event, payload) => {
     const scope = resolveSenderScope(_event);
     if (!scope) return { ok: false, code: "sender_not_allowed" };
     const type = payload && payload.type;
-    if (type !== "gewu:project-open-artifact") {
+    if (type !== "gewu:project-open-artifact") {  // 协议类型 tag，真源=frontend/src/lib/events.ts（SEC-HARDEN 白名单）
       return { ok: false, code: "type_not_allowed" };
     }
     const main = getMainWindow();
@@ -494,11 +495,11 @@ function setupWindowManagerIpc({
     if (main.isMinimized()) main.restore();
     main.show();
     main.focus();
-    main.webContents.send("window:relay-to-main", payload);
+    main.webContents.send(CHANNELS.window.relayToMain, payload);
     return { ok: true };
   });
 
-  ipcMain.handle("window:return", (event, payload) => {
+  ipcMain.handle(CHANNELS.window.return, (event, payload) => {
     const scope = resolveSenderScope(event);
     const id = typeof payload === "string" ? payload : payload?.id;
     if (!scope || !id || !isMutationAllowed(scope, id)) {
@@ -520,7 +521,7 @@ function setupWindowManagerIpc({
     return result;
   });
 
-  ipcMain.handle("window:minimize", async (event, payload) => {
+  ipcMain.handle(CHANNELS.window.minimize, async (event, payload) => {
     const scope = resolveSenderScope(event);
     const id = typeof payload === "string" ? payload : payload?.id;
     if (!scope || !id || !isMutationAllowed(scope, id)) {
@@ -535,7 +536,7 @@ function setupWindowManagerIpc({
     return result;
   });
 
-  ipcMain.handle("window:restore", (event, payload) => {
+  ipcMain.handle(CHANNELS.window.restore, (event, payload) => {
     const scope = resolveSenderScope(event);
     const id = typeof payload === "string" ? payload : payload?.id;
     if (!scope || !id || !isMutationAllowed(scope, id)) {
@@ -548,7 +549,7 @@ function setupWindowManagerIpc({
     return ensurePoppedWindow(id, spec, result);
   });
 
-  ipcMain.handle("window:remove", (event, payload) => {
+  ipcMain.handle(CHANNELS.window.remove, (event, payload) => {
     const scope = resolveSenderScope(event);
     const id = typeof payload === "string" ? payload : payload?.id;
     if (!scope || !id || !isMutationAllowed(scope, id)) {
@@ -573,12 +574,12 @@ function setupWindowManagerIpc({
     return result;
   });
 
-  ipcMain.handle("window:snapshot", (event) => {
+  ipcMain.handle(CHANNELS.window.snapshot, (event) => {
     if (!resolveSenderScope(event)) return { ok: false, code: "sender_not_allowed" };
     return { ok: true, snapshot: core.getSnapshot() };
   });
 
-  ipcMain.handle("window:self", (event) => {
+  ipcMain.handle(CHANNELS.window.self, (event) => {
     const scope = resolveSenderScope(event);
     if (!scope) return { ok: false, code: "sender_not_allowed" };
     return {
@@ -589,7 +590,7 @@ function setupWindowManagerIpc({
 
   // BLOCK-59 加映二 —— 轨道 hover 卡内容预览：降格瞬间快照（不可用时
   // ok:false，卡回退纯文本）。仅受信 sender 可读。
-  ipcMain.handle("window:thumbnail", (event, payload) => {
+  ipcMain.handle(CHANNELS.window.thumbnail, (event, payload) => {
     if (!resolveSenderScope(event)) return { ok: false, code: "sender_not_allowed" };
     const id = typeof payload === "string" ? payload : payload?.id;
     const dataUrl = id ? thumbnails.get(id) : null;

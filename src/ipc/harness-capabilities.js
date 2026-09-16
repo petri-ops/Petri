@@ -1,3 +1,4 @@
+const CHANNELS = require('./channels');
 // ============================================================
 // IPC handler: harness-capabilities:list
 //
@@ -28,7 +29,7 @@ function resolveCore(...parts) {
 }
 
 function setupHarnessCapabilitiesIpc() {
-  ipcMain.handle("harness-capabilities:list", async () => {
+  ipcMain.handle(CHANNELS.harnessCapabilities.list, async () => {
     try {
       const cp = require(resolveCore("shared-backend", "capability-provisioning.js"));
       return { ok: true, capabilities: cp.listProvisionedCapabilities() };

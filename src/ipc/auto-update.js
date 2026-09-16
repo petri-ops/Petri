@@ -1,3 +1,4 @@
+const CHANNELS = require('./channels');
 // ============================================================
 // IPC handlers: updater:check, updater:download, updater:install
 // (3 handlers + 3 disabled stubs for non-darwin/dev mode)
@@ -18,15 +19,15 @@ function setupAutoUpdateIpc({ mainWindow } = {}) {
   const isDevMode = !app.isPackaged;
 
   if (process.platform !== "darwin" || isDevMode || !app.isPackaged) {
-    ipcMain.handle("updater:check", async () => ({
+    ipcMain.handle(CHANNELS.updater.check, async () => ({
       ok: false,
       error: "auto-update is available in packaged macOS builds only",
     }));
-    ipcMain.handle("updater:download", async () => ({
+    ipcMain.handle(CHANNELS.updater.download, async () => ({
       ok: false,
       error: "auto-update disabled",
     }));
-    ipcMain.handle("updater:install", async () => ({
+    ipcMain.handle(CHANNELS.updater.install, async () => ({
       ok: false,
       error: "auto-update disabled",
     }));
@@ -41,20 +42,20 @@ function setupAutoUpdateIpc({ mainWindow } = {}) {
     openPath: (target) => shell.openPath(target),
     onProgress: (progress) => {
       if (mainWindow) {
-        mainWindow.webContents.send("updater:download-progress", progress);
+        mainWindow.webContents.send(CHANNELS.updater.downloadProgress, progress);
       }
     },
   });
 
-  ipcMain.handle("updater:check", async () => {
+  ipcMain.handle(CHANNELS.updater.check, async () => {
     try {
       const result = await updater.check();
       _updateInfo = result.info || null;
       if (mainWindow) {
         mainWindow.webContents.send(
           result.hasUpdate
-            ? "updater:update-available"
-            : "updater:update-not-available",
+            ? CHANNELS.updater.updateAvailable
+            : CHANNELS.updater.updateNotAvailable,
           _updateInfo,
         );
       }
@@ -65,25 +66,25 @@ function setupAutoUpdateIpc({ mainWindow } = {}) {
     }
   });
 
-  ipcMain.handle("updater:download", async () => {
+  ipcMain.handle(CHANNELS.updater.download, async () => {
     try {
       await updater.download();
-      if (mainWindow) mainWindow.webContents.send("updater:update-downloaded");
+      if (mainWindow) mainWindow.webContents.send(CHANNELS.updater.updateDownloaded);
       return { ok: true };
     } catch (e) {
       console.error("[updater] download failed:", e.message);
-      if (mainWindow) mainWindow.webContents.send("updater:error", e.message);
+      if (mainWindow) mainWindow.webContents.send(CHANNELS.updater.error, e.message);
       return { ok: false, error: e.message };
     }
   });
 
-  ipcMain.handle("updater:install", async () => {
+  ipcMain.handle(CHANNELS.updater.install, async () => {
     try {
       await updater.install();
       return { ok: true };
     } catch (e) {
       console.error("[updater] open installer failed:", e.message);
-      if (mainWindow) mainWindow.webContents.send("updater:error", e.message);
+      if (mainWindow) mainWindow.webContents.send(CHANNELS.updater.error, e.message);
       return { ok: false, error: e.message };
     }
   });

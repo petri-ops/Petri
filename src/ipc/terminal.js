@@ -1,3 +1,4 @@
+const CHANNELS = require('./channels');
 // ============================================================
 // IPC handlers: terminal:snapshot, terminal:open-log-dir,
 //               terminal:open-shell, terminal:session-start,
@@ -83,7 +84,7 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
     }
   };
 
-  ipcMain.handle("terminal:snapshot", async () => {
+  ipcMain.handle(CHANNELS.terminal.snapshot, async () => {
     try {
       const logDir = getLogDir();
       // Snapshot the procs at handler invocation time so a stale
@@ -113,7 +114,7 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
     }
   });
 
-  ipcMain.handle("terminal:open-log-dir", async () => {
+  ipcMain.handle(CHANNELS.terminal.openLogDir, async () => {
     try {
       const logDir = getLogDir();
       if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
@@ -124,7 +125,7 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
     }
   });
 
-  ipcMain.handle("terminal:open-shell", async (_event, targetPath) => {
+  ipcMain.handle(CHANNELS.terminal.openShell, async (_event, targetPath) => {
     try {
       const cwd =
         typeof targetPath === "string" && targetPath.trim()
@@ -166,7 +167,7 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
 
   // BLOCK-54 P2 — args 兼容两种形态：string（旧，targetPath，default tab）/
   // { sessionId, targetPath }（新）。
-  ipcMain.handle("terminal:session-start", async (_event, args) => {
+  ipcMain.handle(CHANNELS.terminal.sessionStart, async (_event, args) => {
     try {
       const isObject = args && typeof args === "object";
       const sessionId = normalizeSessionId(isObject ? args.sessionId : null);
@@ -213,10 +214,10 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
           env: { ...process.env, TERM: "xterm-256color", COLORTERM: "truecolor" },
         });
         const disposeData = proc.onData((data) =>
-          sendTerminalEvent("terminal:data", { sessionId, data }),
+          sendTerminalEvent(CHANNELS.terminal.data, { sessionId, data }),
         );
         const disposeExit = proc.onExit(({ exitCode, signal }) => {
-          sendTerminalEvent("terminal:exit", { sessionId, code: exitCode, signal });
+          sendTerminalEvent(CHANNELS.terminal.exit, { sessionId, code: exitCode, signal });
           disposeData?.dispose();
           disposeExit?.dispose();
           sessions.delete(sessionId);
@@ -243,10 +244,10 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
         env: { ...process.env, TERM: "xterm-256color", COLORTERM: "truecolor" },
       });
       const disposeData = proc.onData((data) =>
-        sendTerminalEvent("terminal:data", { sessionId, data }),
+        sendTerminalEvent(CHANNELS.terminal.data, { sessionId, data }),
       );
       const disposeExit = proc.onExit(({ exitCode, signal }) => {
-        sendTerminalEvent("terminal:exit", { sessionId, code: exitCode, signal });
+        sendTerminalEvent(CHANNELS.terminal.exit, { sessionId, code: exitCode, signal });
         disposeData?.dispose();
         disposeExit?.dispose();
         sessions.delete(sessionId);
@@ -265,7 +266,7 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
   });
 
   // BLOCK-54 P2 — input 兼容两种形态：string（旧，default tab）/ { sessionId, text }。
-  ipcMain.handle("terminal:session-write", async (_event, input) => {
+  ipcMain.handle(CHANNELS.terminal.sessionWrite, async (_event, input) => {
     const isObject = input && typeof input === "object";
     const sessionId = normalizeSessionId(isObject ? input.sessionId : null);
     const text = isObject ? String(input.text ?? "") : typeof input === "string" ? input : "";
@@ -280,7 +281,7 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
 
   // BLOCK-54 P2 — dimensions 兼容两种形态：{ cols, rows }（旧，default）/
   // { cols, rows, sessionId }。
-  ipcMain.handle("terminal:session-resize", async (_event, dimensions) => {
+  ipcMain.handle(CHANNELS.terminal.sessionResize, async (_event, dimensions) => {
     const sessionId = normalizeSessionId(dimensions && typeof dimensions === "object" ? dimensions.sessionId : null);
     const session = sessions.get(sessionId);
     if (!session) return { ok: false, error: "终端会话未启动" };
@@ -292,7 +293,7 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
 
   // BLOCK-54 P2 — args 兼容三种形态：undefined（旧，default）/ string sessionId /
   // { sessionId }。
-  ipcMain.handle("terminal:session-stop", async (_event, args) => {
+  ipcMain.handle(CHANNELS.terminal.sessionStop, async (_event, args) => {
     const sessionId = normalizeSessionId(
       typeof args === "string" ? args : args && typeof args === "object" ? args.sessionId : null
     );
@@ -302,7 +303,7 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
   });
 
   // BLOCK-54 P2 — tab 清单（id/cwd/pid/存活），供 renderer 恢复与展示。
-  ipcMain.handle("terminal:session-list", async () => {
+  ipcMain.handle(CHANNELS.terminal.sessionList, async () => {
     const list = [...sessions.entries()].map(([sessionId, session]) => ({
       sessionId,
       pid: session.pid,

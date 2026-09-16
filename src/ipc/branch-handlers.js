@@ -1,3 +1,4 @@
+const CHANNELS = require('./channels');
 // ============================================================
 // IPC handlers: Branch Conversation
 //
@@ -38,7 +39,7 @@ function setupBranchIpc(options = {}) {
   const assertSender = createSenderGuard(options.mainWindow);
   // ── Project Handlers ────────────────────────────────────────
 
-  ipcMain.handle('branch:project:create', async (event, { id, name }) => {
+  ipcMain.handle(CHANNELS.branch.projectCreate, async (event, { id, name }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!id || !name) {
@@ -51,7 +52,7 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('branch:project:get', async (event, { id }) => {
+  ipcMain.handle(CHANNELS.branch.projectGet, async (event, { id }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const project = getProject(id);
@@ -64,7 +65,7 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('branch:project:update', async (event, { id, name }) => {
+  ipcMain.handle(CHANNELS.branch.projectUpdate, async (event, { id, name }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!id || !name) {
@@ -80,7 +81,7 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('branch:project:list', async (event) => {
+  ipcMain.handle(CHANNELS.branch.projectList, async (event) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const projects = listProjects();
@@ -92,7 +93,7 @@ function setupBranchIpc(options = {}) {
 
   // ── Branch Handlers ─────────────────────────────────────────
 
-  ipcMain.handle('branch:create', async (event, { projectId, name, parentBranchId }) => {
+  ipcMain.handle(CHANNELS.branch.create, async (event, { projectId, name, parentBranchId }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!projectId || !name) {
@@ -106,7 +107,7 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('branch:get', async (event, { id }) => {
+  ipcMain.handle(CHANNELS.branch.get, async (event, { id }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const branch = getBranch(id);
@@ -119,7 +120,7 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('branch:list', async (event, { projectId }) => {
+  ipcMain.handle(CHANNELS.branch.list, async (event, { projectId }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!projectId) {
@@ -132,7 +133,7 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('branch:switch', async (event, { branchId, projectId }) => {
+  ipcMain.handle(CHANNELS.branch.switch, async (event, { branchId, projectId }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!branchId || !projectId) {
@@ -148,7 +149,7 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('branch:active', async (event, { projectId }) => {
+  ipcMain.handle(CHANNELS.branch.active, async (event, { projectId }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!projectId) {
@@ -161,7 +162,7 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('branch:delete', async (event, { id }) => {
+  ipcMain.handle(CHANNELS.branch.delete, async (event, { id }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!id) {
@@ -177,7 +178,7 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('branch:rename', async (event, { id, newName }) => {
+  ipcMain.handle(CHANNELS.branch.rename, async (event, { id, newName }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!id || !newName) {
@@ -193,7 +194,7 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('branch:children', async (event, { parentBranchId }) => {
+  ipcMain.handle(CHANNELS.branch.children, async (event, { parentBranchId }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!parentBranchId) {
@@ -208,7 +209,7 @@ function setupBranchIpc(options = {}) {
 
   // ── Message Handlers ────────────────────────────────────────
 
-  ipcMain.handle('message:append', async (event, { branchId, role, content, metadata }) => {
+  ipcMain.handle(CHANNELS.message.append, async (event, { branchId, role, content, metadata }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!branchId || !role || !content) {
@@ -225,7 +226,7 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('message:list', async (event, { branchId, limit, offset }) => {
+  ipcMain.handle(CHANNELS.message.list, async (event, { branchId, limit, offset }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!branchId) {
@@ -238,7 +239,7 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('message:get', async (event, { id }) => {
+  ipcMain.handle(CHANNELS.message.get, async (event, { id }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const message = getMessage(id);
@@ -251,7 +252,7 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('message:count', async (event, { branchId }) => {
+  ipcMain.handle(CHANNELS.message.count, async (event, { branchId }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!branchId) {
@@ -264,7 +265,7 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('message:delete', async (event, { id }) => {
+  ipcMain.handle(CHANNELS.message.delete, async (event, { id }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!id) {
@@ -280,7 +281,7 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle('message:clear', async (event, { branchId }) => {
+  ipcMain.handle(CHANNELS.message.clear, async (event, { branchId }) => {
     const deny = assertSender(event); if (deny) return deny;
     try {
       if (!branchId) {

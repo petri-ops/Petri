@@ -1,3 +1,4 @@
+const CHANNELS = require('./channels');
 // ============================================================
 // IPC handlers: runtime:status, backend:status
 //
@@ -15,7 +16,7 @@
 const { ipcMain } = require("electron");
 
 function setupRuntimeIpc({ rServerProc } = {}) {
-  ipcMain.handle("runtime:status", async () => {
+  ipcMain.handle(CHANNELS.runtime.status, async () => {
     try {
       const { getRuntimeStatus } = require("../plugin-manager");
       const { mergeRuntimeStatusWithConfiguredHomes } = require("../backend-health");
@@ -27,7 +28,7 @@ function setupRuntimeIpc({ rServerProc } = {}) {
 
   // M1-1：后端就绪感知层——聚合 runtime:status + health 探测 + 子进程存活
   // 渲染进程通过 window.biof3Desktop.backend.status() 调用，5s 轮询
-  ipcMain.handle("backend:status", async () => {
+  ipcMain.handle(CHANNELS.backend.status, async () => {
     try {
       const { getRuntimeStatus } = require("../plugin-manager");
       const {

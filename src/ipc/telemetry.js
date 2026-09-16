@@ -1,3 +1,4 @@
+const CHANNELS = require('./channels');
 // ============================================================
 // IPC handler: telemetry:report
 //
@@ -12,7 +13,7 @@
 const { ipcMain } = require("electron");
 
 function setupTelemetryIpc() {
-  ipcMain.handle("telemetry:report", async (_event, payload) => {
+  ipcMain.handle(CHANNELS.telemetry.report, async (_event, payload) => {
     try {
       const { reportError } = require("../telemetry");
       return await reportError(payload);

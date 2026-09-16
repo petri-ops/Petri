@@ -1,3 +1,4 @@
+const CHANNELS = require('./channels');
 /**
  * BLOCK-67 加映（UI-326）— ssh:register-host
  *
@@ -108,7 +109,7 @@ function nextPromptAction(buffer) {
 function setupSshHostIpc() {
   const { ipcMain } = require("electron");
 
-  ipcMain.handle("ssh:register-host", async (_event, params) => {
+  ipcMain.handle(CHANNELS.ssh.registerHost, async (_event, params) => {
     try {
       const invalid = validateRegisterInput(params || {});
       if (invalid) return { ok: false, error: invalid };
