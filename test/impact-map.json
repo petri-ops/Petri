@@ -1664,6 +1664,18 @@
       "scriptRole": "development-smoke"
     },
     {
+      "id": "block92-code-modularization",
+      "note": "BLOCK-92 巨型文件模块化二期：行数台账/棘轮（scripts/code-size-ledger.mjs 清单驱动）+ 22 文件分波拆分。台账与基线变更属治理工具面。",
+      "patterns": [
+        "scripts/code-size-ledger.mjs",
+        "acceptance/block-92/**"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "block96-ssh-channel-perf",
       "note": "BLOCK-96 SSH 通道效率稳定性：fs_list 单 fork NUL 记录协议 + 服务端分页 + 前端游标加载 + mux 幂等只读透明重试 + addressFamily 传输层参数化 + probe 握手计时/F6 领域探测退役。",
       "patterns": [
