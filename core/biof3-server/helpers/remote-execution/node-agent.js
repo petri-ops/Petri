@@ -255,7 +255,8 @@ case "$cmd" in
     pat="$(fs_decode "$1")"; p="$(fs_decode "$2")"; ml="\${3:-200}"
     case "$ml" in ''|*[!0-9]*) die "invalid_maxlines";; esac
     [ -e "$p" ] || { printf '{"error":"not_found"}\\n'; exit 0; }
-    grep -rnI -F -e "$pat" "$p" 2>/dev/null | head -n "$ml" || true
+    # BLOCK-96 F5 — 默认排除 .git/node_modules/target（maxLines 限输出，不再全工扫描）
+    grep -rnI -F -e "$pat" --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=target "$p" 2>/dev/null | head -n "$ml" || true
     ;;
   exec)
     # exec <b64cmd> <b64cwd> <timeoutS> → 单行 JSON {code,stdoutB64,stderrB64,truncated}

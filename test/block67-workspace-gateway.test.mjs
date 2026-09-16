@@ -196,6 +196,48 @@ test('ssh 后端: mux 会话死亡对幂等只读 verb 透明重试一次；写�
   assert.strictEqual(writeCalls, 1, 'write verbs never auto-retry');
 });
 
+test('ssh 后端: F5 verb 日志门控——BIOF3_SSH_VERB_LOG=1 输出结构化行，缺省静默', async (t) => {
+  const muxModule = require('../core/biof3-server/helpers/remote-execution/ssh-multiplexer');
+  const origRunOnMux = muxModule.runOnMux;
+  const origMuxEnv = process.env.BIOF3_SSH_MUX;
+  const origVerbLog = process.env.BIOF3_SSH_VERB_LOG;
+  process.env.BIOF3_SSH_MUX = '1';
+  delete process.env.BIOF3_SSH_VERB_LOG;
+  const runner = require('../core/biof3-server/helpers/remote-execution/remote-job-runner');
+  const origCreate = runner.createRemoteJobRunner;
+  runner.createRemoteJobRunner = () => ({ ensureAgent: async () => ({ ok: true }) });
+  muxModule.runOnMux = async () => ({ ok: true, code: 0, stdout: 'f\t1\t1\tok.txt\0', stderr: '' });
+  t.after(() => {
+    muxModule.runOnMux = origRunOnMux;
+    if (origMuxEnv === undefined) delete process.env.BIOF3_SSH_MUX; else process.env.BIOF3_SSH_MUX = origMuxEnv;
+    if (origVerbLog === undefined) delete process.env.BIOF3_SSH_VERB_LOG; else process.env.BIOF3_SSH_VERB_LOG = origVerbLog;
+    runner.createRemoteJobRunner = origCreate;
+    process.stderr.write = origWrite;
+  });
+
+  const backend = gateway.createSshBackend({ alias: 'log-host' });
+  await backend.list('/x');
+
+  // 缺省静默：无日志输出
+  const origWrite = process.stderr.write;
+  let captured = '';
+  process.stderr.write = (chunk) => { captured += String(chunk); return true; };
+  await backend.list('/x');
+  assert.strictEqual(captured, '', 'silent by default');
+
+  // 开启后：每 verb 一行 JSON（channel/verb/ms/exit/bytes）
+  process.env.BIOF3_SSH_VERB_LOG = '1';
+  await backend.list('/x');
+  process.stderr.write = origWrite;
+  const line = captured.trim().split('\n').filter(Boolean).pop();
+  assert.ok(line, 'verb log line emitted');
+  const parsed = JSON.parse(line);
+  assert.strictEqual(parsed.channel, 'ssh-verb');
+  assert.strictEqual(parsed.verb, 'fs_list');
+  assert.strictEqual(parsed.exit, 0);
+  assert.ok(typeof parsed.ms === 'number' && typeof parsed.bytes === 'number');
+});
+
 test('ssh 后端: agent die 经 stderr 回传显式错误码，thin 不误标 transport（BLOCK-96 F3）', async (t) => {
   const muxModule = require('../core/biof3-server/helpers/remote-execution/ssh-multiplexer');
   const actual = require('../core/biof3-server/helpers/remote-execution/ssh-transport');

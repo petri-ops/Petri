@@ -143,8 +143,11 @@ function sshRun(remoteCommand, input) {
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.writeFileSync(OUT, JSON.stringify(evidence, null, 2));
   console.log(`\n${allPass ? 'ALL PASS' : 'FAILED'} → ${OUT}`);
-  process.exitCode = allPass ? 0 : 1;
+  // mux 会话的子进程/stdio 句柄会吊住事件循环——显式关闭后硬退出，保证可被 flow/CI 消费
+  require('../core/biof3-server/helpers/remote-execution/ssh-multiplexer').closeAll();
+  process.exit(allPass ? 0 : 1);
 })().catch((e) => {
   console.error('LIVE PROBE ERROR:', e.message);
-  process.exitCode = 1;
+  try { require('../core/biof3-server/helpers/remote-execution/ssh-multiplexer').closeAll(); } catch {}
+  process.exit(1);
 });

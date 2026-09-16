@@ -119,9 +119,24 @@ function createSshBackend({ alias, addressFamily } = {}) {
     return e;
   }
 
+  // BLOCK-96 F5 — verb 级结构化日志（BIOF3_SSH_VERB_LOG=1 开启，默认关）：
+  // 每 verb 一行 JSON（channel/verb/ms/exit/bytes）——「感觉不稳定」从此可归因。
+  function verbLog(verb, startedAt, code, stdout) {
+    if (process.env.BIOF3_SSH_VERB_LOG !== '1') return;
+    process.stderr.write(`${JSON.stringify({
+      channel: 'ssh-verb',
+      verb,
+      ms: Date.now() - startedAt,
+      exit: code,
+      bytes: Buffer.byteLength(String(stdout)),
+      ts: new Date().toISOString(),
+    })}\n`);
+  }
+
   async function fsOp(verbArgs, { timeoutMs = 30000, maxArgLen = 256 } = {}) {
     await ensureAgent();
     const command = remoteAgentCommand(verbArgs, { maxArgLen });
+    const startedAt = Date.now();
     // D1.1 性能优化：默认走单连接多路复用（每操作 ~1 RTT）；BIOF3_SSH_MUX=0 回退 thin per-call
     if (sshMux.muxEnabled()) {
       let r;
@@ -133,8 +148,10 @@ function createSshBackend({ alias, addressFamily } = {}) {
         if (!(e && e.classified && e.classified.kind === 'transport.network') || !IDEMPOTENT_READ_VERBS.has(verbArgs[0])) {
           throw e;
         }
+        verbLog(verbArgs[0], startedAt, 'retry', '');
         r = await sshMux.runOnMux({ alias, command, timeoutMs, addressFamily: af });
       }
+      verbLog(verbArgs[0], startedAt, r.code, r.stdout);
       if (r.code !== 0) throw dieError(r);
       return r.stdout;
     }
@@ -146,6 +163,7 @@ function createSshBackend({ alias, addressFamily } = {}) {
     });
     // BLOCK-96 F3 — die（exit 64 → remote.command_failed）转显式 remoteError，
     // 不再误标为传输层失败。
+    verbLog(verbArgs[0], startedAt, op.classified.kind === 'ok' ? op.code : op.classified.kind, op.stdout);
     if (op.classified.kind === 'remote.command_failed') throw dieError(op);
     if (op.classified.kind !== 'ok') {
       const error = new Error(`ssh_transport: ${op.classified.kind}`);

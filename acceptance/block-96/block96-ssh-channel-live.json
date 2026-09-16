@@ -1,0 +1,23 @@
+{
+  "name": "block96-ssh-channel",
+  "startedAt": "2026-09-16T10:06:07.059Z",
+  "finishedAt": "2026-09-16T10:06:12.973Z",
+  "assertions": [
+    {
+      "name": "live_probe_executed",
+      "pass": true,
+      "detail": "PASS  exec_timeout_grandchild_reaped  {\"code\":137,\"orphansBefore\":\"0\",\"orphansAfter\":\"0\"} |  | ALL PASS → D:\\1.WorkDir\\biof3-desktop\\acceptance\\block-96\\block96-p1-live.json"
+    },
+    {
+      "name": "live_probe_all_pass",
+      "pass": true,
+      "detail": "first_connect:ok hostile_names_roundtrip:ok fs_list_500_cold:ok fs_list_500_warm:ok pagination_contract:ok pagination_truncated_flag:ok mux_write_list_consistency:ok exec_bg_pidfile_identity:ok ps_pid_starttime_alive:ok kill_pid_group_reaps:ok exec_timeout_grandchild_reaped:ok"
+    },
+    {
+      "name": "baseline_compare_recorded",
+      "pass": true,
+      "detail": "首连基线 21200ms"
+    }
+  ],
+  "allPass": true
+}
