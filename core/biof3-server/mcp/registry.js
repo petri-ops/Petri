@@ -1362,11 +1362,11 @@ async function runPluginToolRemote({ sessionExecutionTargetId, jobDir, plugin, l
 
     // BLOCK-76 P5 — 非 SSH 项目的显式远程执行目标已随 BLOCK-57 作业机制退役：
     // 作业上传/产物拉回通道不复存在，远程算力统一走 SSH 项目（D7 自动钉定）。
+    // BLOCK-96 F6 — 该分支只保留诚实失败守卫（历史远程目标行绝不落本地执行），
+    // 冗余的 prepare().run 真值检查已清。
     try {
-      if (dbModule.getAsyncDatabase().prepare('UPDATE tool_jobs SET status=? WHERE id=?').run) {
-        dbModule.getAsyncDatabase().prepare('UPDATE tool_jobs SET status=?, error=? WHERE id=?')
-          .run('failed', '远程执行目标已退役（BLOCK-76）：远程算力请创建 SSH 项目', toolJobId);
-      }
+      dbModule.getAsyncDatabase().prepare('UPDATE tool_jobs SET status=?, error=? WHERE id=?')
+        .run('failed', '远程执行目标已退役（BLOCK-76）：远程算力请创建 SSH 项目', toolJobId);
     } catch {}
     return failWith('远程执行目标已退役（BLOCK-76）：远程算力请创建 SSH 项目（执行面自动钉定节点）');
   } catch (error) {

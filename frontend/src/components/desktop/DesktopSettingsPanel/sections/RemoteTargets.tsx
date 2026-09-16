@@ -12,11 +12,8 @@ import { getToken } from '@/lib/authClient';
 
 interface TargetProbeInfo {
   os?: string;
-  r?: string;
-  rversion?: string;
-  python?: string;
-  pythonversion?: string;
-  scheduler?: string;
+  /** BLOCK-96 F1 — 首连握手毫秒数（仅 >2000 时由服务端记录） */
+  handshakeMs?: number;
 }
 
 interface RegisteredTarget {
@@ -48,12 +45,14 @@ function authHeaders(): Record<string, string> {
 }
 
 function describeProbe(info: TargetProbeInfo | null): string {
+  // BLOCK-96 F6 — 领域运行时徽标（R/Python/slurm）退役：运行时在位改由已装包
+  // requires.runtimes 契约驱动（BLOCK-86），目标管理页只保留通用连通性信息。
   if (!info || !info.os) return '未探测';
-  const runtimes = [
-    info.r && info.r !== 'missing' ? `R ${info.rversion || '?'}` : null,
-    info.python && info.python !== 'missing' ? `Python ${info.pythonversion || '?'}` : null,
-  ].filter(Boolean);
-  return `${info.os} · ${runtimes.length ? runtimes.join(' / ') : '无 R/Python'}${info.scheduler && info.scheduler !== 'none' ? ` · ${info.scheduler}` : ''}`;
+  // BLOCK-96 F1 — 首连握手 >2s：疑似 IPv6(::1) 地址族黑洞（ConnectTimeout 封不住）。
+  if (info.handshakeMs && info.handshakeMs > 2000) {
+    return `${info.os} · 首连 ${(info.handshakeMs / 1000).toFixed(1)}s ⚠`;
+  }
+  return info.os;
 }
 
 const DEFAULT_TARGET_STORAGE_KEY = 'gewu.executionTargetId';
@@ -177,7 +176,15 @@ export function RemoteTargets(): React.ReactElement {
             >
               {target.status === 'ready' ? '就绪' : target.status === 'unreachable' ? '不可达' : '未探测'}
             </span>
-            <span className="gewu-field__hint" style={{ flex: 1, textAlign: 'right' }}>
+            <span
+              className="gewu-field__hint"
+              style={{ flex: 1, textAlign: 'right' }}
+              title={
+                target.lastProbe?.handshakeMs && target.lastProbe.handshakeMs > 2000
+                  ? '首连握手偏慢：疑似 IPv6 地址族黑洞（::1 先挂满超时才回落 IPv4）。可在该主机的 ~/.ssh/config 中加一行 `AddressFamily inet` 立即缓解。'
+                  : undefined
+              }
+            >
               {describeProbe(target.lastProbe)}
             </span>
             <button

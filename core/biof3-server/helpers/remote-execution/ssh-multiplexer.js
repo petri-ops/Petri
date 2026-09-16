@@ -27,19 +27,28 @@ const dbg = (session, msg) => {
   if (MUX_DEBUG) process.stderr.write(`[mux-dbg ${new Date().toISOString()} ${session.alias}#${session.id}] ${msg}\n`);
 };
 
-const sessions = new Map(); // alias → session
+const sessions = new Map(); // sessionKey → session
 let sessionSeq = 0;
 
 function muxEnabled() {
   return process.env.BIOF3_SSH_MUX !== '0';
 }
 
-function createMuxSession({ alias, spawnFn }) {
+// BLOCK-96 F1 — 会话按 别名+地址族 键控：同一别名不同 AddressFamily 注入
+// 各自独立会话，互不串扰。
+function sessionKey({ alias, addressFamily }) {
+  return `${addressFamily || 'auto'}|${alias}`;
+}
+
+function createMuxSession({ alias, addressFamily, spawnFn }) {
   const doSpawn = spawnFn || ((args) => {
     const sshBin = process.platform === 'win32' ? 'ssh.exe' : 'ssh';
     return spawn(sshBin, args, { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
   });
   const child = doSpawn([
+    ...(addressFamily === 'inet' || addressFamily === 'inet6'
+      ? ['-o', `AddressFamily=${addressFamily}`]
+      : []),
     '-o', 'BatchMode=yes',
     '-o', 'ServerAliveInterval=15',
     '-o', 'ServerAliveCountMax=4',
@@ -50,6 +59,7 @@ function createMuxSession({ alias, spawnFn }) {
 
   const session = {
     alias,
+    key: sessionKey({ alias, addressFamily }),
     id: ++sessionSeq,
     child,
     alive: true,
@@ -114,7 +124,7 @@ function createMuxSession({ alias, spawnFn }) {
   const die = () => {
     dbg(session, `died alive=${session.alive}`);
     session.alive = false;
-    if (sessions.get(alias) === session) sessions.delete(alias);
+    if (sessions.get(session.key) === session) sessions.delete(session.key);
     if (session.pending) {
       if (session.pending.timer) clearTimeout(session.pending.timer);
       const p = session.pending;
@@ -127,7 +137,7 @@ function createMuxSession({ alias, spawnFn }) {
   child.stderr.on('data', (c) => { dbg(session, `stderr: ${String(c).trim().slice(0, 200)}`); });
 
   scheduleIdleClose(session);
-  sessions.set(alias, session);
+  sessions.set(session.key, session);
   return session;
 }
 
@@ -139,7 +149,7 @@ function muxError(message) {
 
 function killSession(session) {
   session.alive = false;
-  if (sessions.get(session.alias) === session) sessions.delete(session.alias);
+  if (sessions.get(session.key) === session) sessions.delete(session.key);
   try { session.child.kill(); } catch {}
 }
 
@@ -155,18 +165,19 @@ function scheduleIdleClose(session) {
 }
 
 /** 取（或建）alias 的会话。 */
-function getMuxSession({ alias, spawnFn, openTimeoutMs = 20000 }) {
-  const existing = sessions.get(alias);
+function getMuxSession({ alias, addressFamily, spawnFn, openTimeoutMs = 20000 }) {
+  const key = sessionKey({ alias, addressFamily });
+  const existing = sessions.get(key);
   if (existing && existing.alive) return existing;
-  return createMuxSession({ alias, spawnFn, openTimeoutMs });
+  return createMuxSession({ alias, addressFamily, spawnFn, openTimeoutMs });
 }
 
 /**
  * 在复用连接上执行一条 agent 命令。
  * 返回 { ok: true, code, stdout }；失败抛 { classified } 形状错误（与 runSshOp 对齐）。
  */
-async function runOnMux({ alias, command, timeoutMs = DEFAULT_RUN_TIMEOUT_MS, spawnFn }) {
-  const session = getMuxSession({ alias, spawnFn });
+async function runOnMux({ alias, command, timeoutMs = DEFAULT_RUN_TIMEOUT_MS, spawnFn, addressFamily }) {
+  const session = getMuxSession({ alias, addressFamily, spawnFn });
   const r = await session.run(command, timeoutMs);
   if (r.code !== 0) {
     // 远端 agent die（exit 64 等）——非 transport 错误，语义交由调用方解析 stdout

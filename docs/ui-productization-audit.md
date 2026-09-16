@@ -3349,6 +3349,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-388: 远程目标管理页首连握手提示——IPv6 黑洞可归因（BLOCK-96 F1；含 F6 R/Python/slurm 徽标退役）(2026-09-16 in_progress，dev Electron 边界内)
+
+- **来源**：BLOCK-96 F1 P0 裁决「传输层参数化」配套展示面——probe 增加首连握手计时，>2s 判定疑似地址族黑洞（IPv6 ::1 先挂满超时才回落 IPv4，ConnectTimeout 封不住）。
+- **交付面**：target-registry probe 记录 handshakeMs（>2000 落 last_probe_json）；RemoteTargets 探测结果显示「os · 首连 X.Xs ⚠」+ 悬停指引（~/.ssh/config 加 AddressFamily inet 即效缓解）。R/Python/slurm 徽标同步退役（F6 裁决：运行时在位改由已装包 requires.runtimes 契约驱动，BLOCK-86 同向）。
+- **证据**：tsc 0；实机 WSL 首连 330ms（黑洞基线 21.2s，`acceptance/block-96/block96-p1-live.json`）。
+- **边界**：settings 页信息展示；addressFamily 目标级 setter UI 为后续增量（传输层/gateway/mux 参数化管线已通）。
+
 ## UI-387: 子智能体职能图标区分——形状=职能、颜色=状态（用户复看提案 + 裁决「1」）(2026-09-16 in_progress，dev Electron 边界内)
 
 - **来源**：用户复看摘要卡图标带时指认「智能体都是一样的图标，应该不同形状或配色」并追问「要不要分类专职」；评估后拆两层——图标区分（推断式）立即做，专职化立 BLOCK-93（角色注册表 + spawn role 参数 prompt 软约束 + 只读白名单评估，排队启动需裁决）。

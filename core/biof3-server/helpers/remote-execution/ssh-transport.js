@@ -19,11 +19,20 @@ function assertAlias(alias) {
   return alias;
 }
 
+// BLOCK-96 F1 — 目标级地址族参数化（P0 裁决）：仅显式 inet/inet6 时注入
+// `-o AddressFamily=...`；缺省不注入（不全局干预，IPv6-only 远端不受影响，
+// 地址族序仍由用户 ~/.ssh/config 与系统默认决定）。
+function addressFamilyOptions(addressFamily) {
+  if (addressFamily !== 'inet' && addressFamily !== 'inet6') return [];
+  return ['-o', `AddressFamily=${addressFamily}`];
+}
+
 // 返回 ssh 的参数（不含命令名本身——调用方统一 spawn('ssh', args)）。
 // BIOF3_SSH_DEBUG=1 时注入 -v（诊断用，不改变连接语义）。
-function buildSshArgv(alias, remoteCommand) {
+function buildSshArgv(alias, remoteCommand, { addressFamily } = {}) {
   return [
     ...(process.env.BIOF3_SSH_DEBUG ? ['-v'] : []),
+    ...addressFamilyOptions(addressFamily),
     '-o', 'BatchMode=yes',
     '-o', `ConnectTimeout=${SSH_CONNECT_TIMEOUT_S}`,
     '--',
@@ -36,9 +45,9 @@ function buildSshArgv(alias, remoteCommand) {
  * 一次性 ssh 操作。远端命令自身的非零退出（如 runtime_missing）不是传输错误，
  * 分类器据此分叉（remote.command_failed vs transport.*）。
  */
-function runSshOp({ alias, remoteCommand, timeoutMs = 30000 } = {}) {
+function runSshOp({ alias, remoteCommand, timeoutMs = 30000, addressFamily } = {}) {
   return new Promise((resolve) => {
-    const child = spawn('ssh', buildSshArgv(alias, remoteCommand), {
+    const child = spawn('ssh', buildSshArgv(alias, remoteCommand, { addressFamily }), {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     let stdout = '';

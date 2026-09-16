@@ -91,8 +91,9 @@ function createTargetRegistry({ db, ensureAgent }) {
   }
 
   /**
-   * 探测：agent probe（os / 运行时 / 调度器）。结果持久化 last_probe_json。
-   * 传输失败如实返回分类结果，不猜测节点能力。
+   * 探测：agent probe（os / hostname / 调度器，通用面）。领域运行时探测（r/python）
+   * 已随 BLOCK-96 F6 退役——运行时在位改由领域包 requires.runtimes 契约推导（BLOCK-86）。
+   * 结果持久化 last_probe_json。传输失败如实返回分类结果，不猜测节点能力。
    */
   async function probe({ id }) {
     const target = await getById({ id });
@@ -105,7 +106,9 @@ function createTargetRegistry({ db, ensureAgent }) {
         return { ok: false, error: deployed.error.kind, detail: deployed.error.detail };
       }
     }
-    const op = await runSshOp({ alias: target.alias, remoteCommand: remoteAgentCommand(['probe', 'r', 'python']), timeoutMs: 20000 });
+    const startedAt = Date.now();
+    const op = await runSshOp({ alias: target.alias, remoteCommand: remoteAgentCommand(['probe']), timeoutMs: 20000 });
+    const handshakeMs = Date.now() - startedAt;
     if (op.classified.kind !== 'ok') {
       await db.prepare("UPDATE execution_targets SET status='unreachable', last_probe_at=? WHERE id=?")
         .run(Date.now(), target.id);
@@ -117,9 +120,12 @@ function createTargetRegistry({ db, ensureAgent }) {
       if (eq <= 0) continue;
       info[line.slice(0, eq)] = line.slice(eq + 1);
     }
+    // BLOCK-96 F1 — 首连握手计时：>2s 提示疑似地址族黑洞（IPv6 ::1 先挂满超时
+    // 才回落 IPv4 的典型症状，ConnectTimeout 封不住）。落 last_probe_json 供管理页提示。
+    if (handshakeMs > 2000) info.handshakeMs = handshakeMs;
     await db.prepare('UPDATE execution_targets SET status=?, last_probe_json=?, last_probe_at=? WHERE id=?')
       .run('ready', JSON.stringify(info), Date.now(), target.id);
-    return { ok: true, targetId: target.id, alias: target.alias, info };
+    return { ok: true, targetId: target.id, alias: target.alias, info, handshakeMs };
   }
 
   return {
