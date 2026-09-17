@@ -4459,13 +4459,13 @@
       "id": "BLOCK-95-SESSION-IO",
       "path": "docs/block-95-session-io-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-95-session-io",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-16",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "block-95",
         "session-io",
@@ -4473,7 +4473,7 @@
         "token-economy",
         "chat-stream"
       ],
-      "notes": "会话信息流 I/O 优化（用户裁决立项 2026-09-16「优化 信息流 I/O 主要目的是让每个session的连贯性好看易读 还有一个方面是性能 省token」，参考 Anthropic《Maximizing the value of your Claude Code sessions》2026-08-14 成本模型产品化）：A 面 连贯易读（A1 长会话游标加载修最旧 200 条缺陷/A2 流式渲染局部更新/A3 自动滚动守卫/A4 语义分段/A5 压缩与续接可视化）+ B 面 上下文经济（B1 历史拼装权收归后端/B2 会话级 rolling compaction——视图层投影、DB 原文不动/B3 prompt cache 感知——ai_usage 实测基线先行/B4 启动载荷瘦身评估/B5 工具输出整形）。红线=压缩诚实可见、度量先行。非范围=BLOCK-92 拆分面、BLOCK-93 文件面、BLOCK-94 召回质量、项目级摘要粒度。planned 排队不占 active 槽位；启动需用户裁决。 2026-09-17 启动 active（P0-LAUNCH，立项销号）：用户裁决队列序 BLOCK-95 先行（AskUserQuestion 选「1 · BLOCK-95 会话 I/O」）。P0=六工作面逐项代码事实复核（BLOCK-92 Wave A 拆分后 plan 摸底行号须重定位）+ 评审结论回写 plan + 用户裁决优先级/B1 增量协议/B4 取舍，裁决后 P1→P6 串行（plan §5）。",
+      "notes": "会话信息流 I/O 优化（用户裁决立项 2026-09-16「优化 信息流 I/O 主要目的是让每个session的连贯性好看易读 还有一个方面是性能 省token」，参考 Anthropic《Maximizing the value of your Claude Code sessions》2026-08-14 成本模型产品化）：A 面 连贯易读（A1 长会话游标加载修最旧 200 条缺陷/A2 流式渲染局部更新/A3 自动滚动守卫/A4 语义分段/A5 压缩与续接可视化）+ B 面 上下文经济（B1 历史拼装权收归后端/B2 会话级 rolling compaction——视图层投影、DB 原文不动/B3 prompt cache 感知——ai_usage 实测基线先行/B4 启动载荷瘦身评估/B5 工具输出整形）。红线=压缩诚实可见、度量先行。非范围=BLOCK-92 拆分面、BLOCK-93 文件面、BLOCK-94 召回质量、项目级摘要粒度。planned 排队不占 active 槽位；启动需用户裁决。 2026-09-17 启动 active（P0-LAUNCH，立项销号）：用户裁决队列序 BLOCK-95 先行（AskUserQuestion 选「1 · BLOCK-95 会话 I/O」）。P0=六工作面逐项代码事实复核（BLOCK-92 Wave A 拆分后 plan 摸底行号须重定位）+ 评审结论回写 plan + 用户裁决优先级/B1 增量协议/B4 取舍，裁决后 P1→P6 串行（plan §5）。 2026-09-17 整包收口 completed（P0-P6 当日一次会话）：六面全收口；A1 长会话游标加载/A3 滚动守卫/A4 话题分段/B1 拼装收归/B2 会话压缩(-47.6%)/B3 cache 修复(96.8%)/A2 useMemo+帧率实测；B4/B5 评估有结论。两开关默认关；UI-394 待复看。",
       "lastUpdated": "2026-09-17"
     },
     {

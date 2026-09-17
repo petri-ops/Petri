@@ -1755,7 +1755,8 @@
         "test/block95-b2-compaction.test.mjs",
         "test/block95-b3-cache-fields.test.mjs",
         "scripts/block95-b3-cache-baseline.cjs",
-        "scripts/block95-b2-compaction-live.cjs"
+        "scripts/block95-b2-compaction-live.cjs",
+        "scripts/block95-a2-frame-live.cjs"
       ],
       "tests": [
         "test/block95-messages-cursor.test.mjs",
