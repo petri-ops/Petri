@@ -1,0 +1,29 @@
+{
+  "name": "block95-a2-frame-live",
+  "startedAt": "2026-09-17T06:03:14.239Z",
+  "finishedAt": "2026-09-17T06:03:45.851Z",
+  "assertions": [
+    {
+      "name": "open_conversation",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "streaming_render_budget",
+      "pass": true,
+      "detail": "recalc=0ms layout=0ms script=303.8ms in 25s window"
+    },
+    {
+      "name": "dom_node_budget",
+      "pass": true,
+      "detail": "nodes=1985"
+    }
+  ],
+  "allPass": true,
+  "renderMetrics": {
+    "layoutMs": 0,
+    "recalcMs": 0,
+    "scriptMs": 303.8,
+    "domNodes": 1985
+  }
+}

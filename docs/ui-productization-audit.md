@@ -3356,6 +3356,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：契约 test/block95-messages-cursor.test.mjs 4/4（最新窗口翻转/游标两批拼接全量不重不漏/fork 同 ts 分页/404+limit 钳制）+ useConversationResume 6/6（分页信封/loadOlder prepend/mergeKeepOlderPrefix 保留前缀）+ copilot 全套 37 文件 293 过 + tsc 0 + theme-token-contract 4/4（新样式全 --gewu-* token）；实机 scripts/block95-p1-live.cjs **8/8 allPass**（250 条真会话：首屏=最新窗口 B95消息-50 / 补页后首条=B95消息-0 且 250 条全量可达 / 视口保持 scrollTop=3205 不归零 / 回底浮标现+点+消失 / 分隔卡位置=B95消息-162 前），证据 acceptance/block-95/（json+2 截图）。**实机抓真修**：prepend 视口保持 rAF 早于 React commit 致 delta 恒 0 → 改 useLayoutEffect（commit 后绘制前同步调整）。
 - **附带抓真**：useConversationResume 主加载 effect deps 含调用方 setter（不稳定引用时 effect 重跑→setState→重渲染→死循环），deps 收窄 [conversationId] + setter 经 ref 读取。
 - **边界**：A2 渲染性能/B4/B5 归 P5；实机长会话真轮次已随 P1 收口（8/8）。
+- **P5 增补（A2，同条目 UI-394）**：displayMessages 派生链 useMemo 化（composer keystroke/菜单开合不再全量重拼 250+ 条）；实机流式观测 25s 窗口 recalc+layout≈0ms、script 303.8ms（1.2%）、DOM 1985 节点——虚拟化有据 deferred。
 - **P3 增补（B2/A5，同条目）**：会话级 rolling compaction（BIOF3_SESSION_COMPACTION 默认关）+ 信息流顶部压缩诚实标记卡「更早 N 条已折叠为摘要参与对话（此处仍显示原文）」；DB 原文永不改（契约+实机双证）；实机 token 对账 46297→24258（-47.6%）；标记卡实机截图 acceptance/block-95/block95-a5-compaction-notice.png。G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 ## UI-393: 设置页头改「← 返回」——移除页面级关闭钮，与 Skills/知识空间页头同形 (2026-09-17 verified，dev Electron 边界内；用户复看确认)

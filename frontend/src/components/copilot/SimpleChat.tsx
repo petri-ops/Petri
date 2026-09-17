@@ -552,8 +552,17 @@ export function SimpleChat({
   // BLOCK-92 Wave A-3 — 消息列表派生纯函数外迁（./SimpleChat/displayMessages.ts）：
   // baseDisplayMessages（run/loop 投影合并）→ displayMessages（会话级降级/子 agent
   // 终态 notice 附着），语义与拆分前的两个渲染期 IIFE 逐行一致。
-  const baseDisplayMessages = buildBaseDisplayMessages({ activeRun, conversationId, messages, durableLoop });
-  const displayMessages = applyConversationNotices({ base: baseDisplayMessages, activeRun, conversationId });
+  // BLOCK-95 A2 — 派生链 useMemo 化：此前每次 render（含 composer 输入 keystroke、
+  // 菜单开合等无关 state 变化）都全量重拼 250+ 条历史；useMemo 后仅
+  // messages/activeRun/durableLoop 变化（真数据变化）才重算。
+  const baseDisplayMessages = useMemo(
+    () => buildBaseDisplayMessages({ activeRun, conversationId, messages, durableLoop }),
+    [activeRun, conversationId, messages, durableLoop]
+  );
+  const displayMessages = useMemo(
+    () => applyConversationNotices({ base: baseDisplayMessages, activeRun, conversationId }),
+    [baseDisplayMessages, activeRun, conversationId]
+  );
   const standaloneDurableLoop = durableLoop.loop && !displayMessages.some((message) => message.loop)
     ? durableLoop.loop
     : null;
