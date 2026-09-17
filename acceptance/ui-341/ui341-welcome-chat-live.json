@@ -1,12 +1,12 @@
 {
   "name": "ui341-welcome-chat",
-  "startedAt": "2026-09-17T00:01:26.836Z",
-  "finishedAt": "2026-09-17T00:01:48.536Z",
+  "startedAt": "2026-09-17T00:37:24.661Z",
+  "finishedAt": "2026-09-17T00:38:05.891Z",
   "assertions": [
     {
       "name": "A1_welcome_rendered",
       "pass": true,
-      "detail": "url=http://localhost:3000/?project=p_mu4rlb4j_qmo9"
+      "detail": "url=http://localhost:3000/?project=p_mu4svz5u_72mb"
     },
     {
       "name": "A2_chat_embedded",
@@ -21,17 +21,17 @@
     {
       "name": "A4_project_preselected",
       "pass": true,
-      "detail": "trigger=UI341-验收-1789603288717"
+      "detail": "trigger=UI341-验收-1789605466044"
     },
     {
       "name": "A5_first_question_navigates",
       "pass": true,
-      "detail": "url=http://localhost:3000/project/p_mu4rlb4j_qmo9"
+      "detail": "url=http://localhost:3000/project/p_mu4svz5u_72mb"
     },
     {
       "name": "A6_conversation_auto_created",
       "pass": true,
-      "detail": "convId=conv_ccc91be6-c56 title=新对话 project=p_mu4rlb4j_qmo9"
+      "detail": "convId=conv_23c293db-197 title=新对话 project=p_mu4svz5u_72mb"
     },
     {
       "name": "A9_cleanup_restored",
@@ -41,7 +41,7 @@
     {
       "name": "flow_completed_without_exception",
       "pass": false,
-      "detail": "poll_timeout: left_panel_conversation :: \"UI341-验收-1789603288717devahBLOCK89-验收-1789454695634BLOCK89-验收-1789454614138BLOCK89-验收-1789454500143BLOCK89-验收-1789453847\""
+      "detail": "poll_timeout: left_panel_conversation :: \"UI341-验收-1789605466044devahBLOCK89-验收-1789454695634BLOCK89-验收-1789454614138BLOCK89-验收-1789454500143BLOCK89-验收-1789453847\""
     }
   ],
   "allPass": false
