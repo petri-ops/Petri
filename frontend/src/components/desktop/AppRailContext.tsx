@@ -178,6 +178,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
   // 软刷新（其它面改了项目/会话后）
   useEffect(() => subscribeGewuEvent(gewuEvents.softRefresh, () => { void refreshProjects(); }), [refreshProjects]);
 
+
   const treeState = useProjectTreeState(currentProjectId, allProjects);
   const {
     expandedProjects,
@@ -204,6 +205,18 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
   const { byProjectId: projectConversations, refresh: refreshOtherConversations } = useOtherConversations(
     expandedProjects,
     currentProjectId
+  );
+  // 会话创建即时刷新（用户反馈「新建聊天左侧项目列表不实时更新」）：中栏发送首条消息
+  // 或子 agent 后端建会话时，创建方广播 conversationCreated——这里立即拉取当前项目与
+  // 其它已展开项目的会话列表（force 绕过共享缓存），左栏秒级出现新会话。
+  useEffect(
+    () =>
+      subscribeGewuEvent(gewuEvents.conversationCreated, (detail) => {
+        void refreshConversations();
+        void refreshOtherConversations();
+        void detail;
+      }),
+    [refreshConversations, refreshOtherConversations]
   );
 
   const [creatingProject, setCreatingProject] = useState(false);

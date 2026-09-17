@@ -34,7 +34,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 import type { CopilotContext } from '@/lib/copilotContext';
-import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
+import { gewuEvents, subscribeGewuEvent , dispatchGewuEvent } from '@/lib/events';
 import { readBrandStorage } from '@/lib/brand';
 import { copilotContextOverrideForAsk } from '@/lib/result-edit-agent-bridge';
 import { INITIAL_NAV_STATE, type HistoryNavState } from '@/components/copilot/chatHistoryNav';
@@ -199,6 +199,16 @@ export function useChatStream({
         migrateThinkingLevel(projectId, null, created.id);
         targetConversationId = created.id;
         onConversationChange(created.id);
+        // 广播新会话（AppRailContext 订阅后即时刷新左栏项目树——用户反馈「左侧列表不实时更新」）
+        try {
+          dispatchGewuEvent(gewuEvents.conversationCreated, {
+            conversationId: created.id,
+            title: (created as { title?: string }).title,
+            projectId: projectId || null,
+          });
+        } catch {
+          // 事件总线失败不阻塞发送
+        }
       }
       if (isConversationRunning(targetConversationId)) return false;
 

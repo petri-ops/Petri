@@ -111,6 +111,13 @@ export const gewuEvents = {
    * 并 refreshConversations 让 DB（last_topic_shift_at）成为持久真值。
    */
   conversationTopicShift: 'gewu:conversation-topic-shift',
+
+  /**
+   * BLOCK-95 后继（用户反馈「新建聊天左侧项目列表不实时更新」）——新会话创建后
+   * 由创建方派发（useChatStream 前端创建 / conversationRunStore 后端 SSE onConversation），
+   * AppRailContext 订阅后立即刷新左栏项目树会话列表。
+   */
+  conversationCreated: 'gewu:conversation-created',
 } as const;
 
 export interface ConversationForkedDetail {
@@ -126,6 +133,13 @@ export interface ConversationTopicShiftDetail {
   reason: string;
   /** 检测命中时间（ISO，本地接收时刻）。 */
   at: string;
+}
+
+/** 会话创建事件载荷。 */
+export interface ConversationCreatedDetail {
+  conversationId: string;
+  title?: string;
+  projectId?: string | null;
 }
 
 /**
@@ -258,6 +272,7 @@ export type GewuEventMap = {
   [gewuEvents.selectionQuote]: SelectionQuoteDetail;
   [gewuEvents.imageQuote]: ImageQuoteDetail;
   [gewuEvents.conversationTopicShift]: ConversationTopicShiftDetail;
+  [gewuEvents.conversationCreated]: ConversationCreatedDetail;
 };
 
 /** BLOCK-34 P3: 后台进程启动事件载荷。 */

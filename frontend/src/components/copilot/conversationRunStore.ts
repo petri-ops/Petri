@@ -282,6 +282,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     | 'onLoopPhase'
     | 'onLoopIteration'
     | 'onTopicShift'
+    | 'onConversation'
     | 'onDone'
     | 'onError'
     | 'onStreamReconnecting'
@@ -531,6 +532,19 @@ export function startConversationRun(options: StartConversationRunOptions): bool
           conversationId,
           reason: info.reason,
           at: new Date().toISOString(),
+        });
+      } catch {
+        // 事件总线失败不阻塞流处理
+      }
+    },
+    // 会话创建 SSE 事件（后端 getOrCreateActiveConversation 新建时发）→ 广播给
+    // 左栏项目树即时刷新（子 agent / copilotAsk / 联邦委托等后端建会话路径）。
+    onConversation: (info) => {
+      try {
+        dispatchGewuEvent(gewuEvents.conversationCreated, {
+          conversationId: info.conversationId,
+          title: info.title,
+          projectId: options.projectId ?? null,
         });
       } catch {
         // 事件总线失败不阻塞流处理

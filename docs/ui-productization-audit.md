@@ -3349,6 +3349,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-396: 新建会话左栏项目树即时刷新 (2026-09-17 in_progress，dev Electron 端到端实测 275ms)
+
+- **来源**：用户反馈「通过新建任务新建了一个聊天 发了个 hello 发现左侧项目列表并没有实时更新 过了比较久才出现」。
+- **根因**：会话创建的两条路径（中栏发送首条消息时 useChatStream 前端创建 / 子 agent 等后端 getOrCreateActiveConversation 创建）都**不广播**——左栏 AppRailContext 的 useConversations 实例只有自己创建时才刷新（另一实例的 setList 不跨组件传播）；后端 SSE conversation 事件同样无人接线（同 UI-395 topic_shift 断链模式）。左栏只能等低频兜底，故「比较久才出现」。
+- **修复**：双路广播——① useChatStream.send 创建成功后 dispatch `conversationCreated`（前端创建路径）；② conversationRunStore 接线 SSE onConversation → 同事件（后端创建路径，覆盖子 agent/联邦委托）；③ AppRailContext 订阅 → 立即 refreshConversations + refreshOtherConversations（force 绕过共享缓存，当前项目与已展开项目都刷新）。
+- **证据**：端到端实测（新项目无会话 → composer 发送 hello → 左栏出现「新对话」）**275ms**；事件监听器到达断言通过；tsc 0 + copilot/desktop 392 测试过。截图 Temp gewu-probe/shots/block95/uiconv-live-final.png。
+- **边界**：归档/删除/改名会话的左栏刷新走既有链（本包不触碰）；跨端镜像（BLOCK-87 5s 轮询）不变。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-395: 代码查看器行号栏归位海军蓝 + 去分隔线 (2026-09-17 in_progress，dev Electron 实机修复待用户确认)
 
 - **来源**：用户截图反馈「右侧栏文件树打开脚本文档：第一行和左侧行数颜色和主内容区颜色不一致，不是海军蓝？？？行数和主内容区中间有个分隔线，这个不需要可以把分隔线取消，直接行数字和内容即可」。
