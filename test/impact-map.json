@@ -1168,6 +1168,8 @@
         "scripts/ui400-*",
         "acceptance/ui-399/**",
         "acceptance/ui-400/**",
+        "acceptance/ui-392/**",
+        "acceptance/ui-393/**",
         "acceptance/block-49/**",
         "acceptance/block-52/**",
         "acceptance/block-53/**",
