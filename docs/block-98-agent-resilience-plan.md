@@ -1,6 +1,6 @@
 # BLOCK-98-AGENT-RESILIENCE — Agent 长任务韧性：上下文三层压缩 + 摘要注入 + 防呆 + 输入插队
 
-> 状态：**planned / P0-PLANNED**（planned 排队，不占 active 槽位；**启动需用户裁决排期**）
+> 状态：**active / P0-LAUNCH**（2026-09-17 启动，用户裁决原话「继续推工作」+ AskUserQuestion 选「BLOCK-98 智能体韧性 (Recommended)」；启动门槛两条均已满足=BLOCK-97 当日收口 + 工作区净）
 > 立项日期：2026-09-17 · 行号基线：`8bf67dd1`（工作区另有 BLOCK-97 在制 WIP，见 §0 启动门槛）
 > 用户裁决原话：「整理成一个 BLOCK 立项候选」「要全面深挖 尽可能通过这些机制的嵌入让gewu项目变得更稳重」（2026-09-17，在「ZCode 是如何做到长任务不中断」技术解剖会话上）
 
