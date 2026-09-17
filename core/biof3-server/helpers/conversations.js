@@ -68,6 +68,24 @@ try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN last_topic_shift
 try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN parent_id TEXT'); } catch {}
 try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN branch_color TEXT'); } catch {}
 
+// BLOCK-95 B2 — 会话级 rolling compaction 存储（视图层投影；copilot_messages 原文永不动）。
+// covers_rowid：已折叠为摘要的最大 copilot_messages.rowid；其余消息原样参与 LLM 视图。
+try {
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS conversation_compaction (
+      conversation_id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      summary TEXT NOT NULL,
+      covers_rowid INTEGER NOT NULL,
+      covers_count INTEGER NOT NULL,
+      source_tokens INTEGER NOT NULL DEFAULT 0,
+      model TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+  `);
+} catch {}
+
 function _newConvId() { return 'conv_' + uuidv4().slice(0, 12); }
 function _newMsgId() { return 'msg_' + uuidv4().slice(0, 12); }
 

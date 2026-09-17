@@ -143,7 +143,46 @@ module.exports = function mountConversations(app) {
         const { _rid, ...rest } = r;
         return {...rest, meta: r.meta_json ? (() => { try { return JSON.parse(r.meta_json); } catch { return null; } })() : null};
       });
-      res.json({status:'ok', messages: items, hasMore, nextBefore, windowOffset, total: windowOffset + items.length});
+      // BLOCK-95 B2/A5 — 压缩留痕诚实可见：会话存在 compaction 记录时随信封下发，
+      // 前端在信息流展示「上下文压缩视图」标记卡（DB 原文始终可见）。
+      let compaction = null;
+      try {
+        const cRow = await adb.prepare('SELECT summary, covers_count, source_tokens, updated_at FROM conversation_compaction WHERE conversation_id=?').get(req.params.id);
+        if (cRow) {
+          compaction = {
+            summary: cRow.summary,
+            coversCount: cRow.covers_count,
+            sourceTokens: cRow.source_tokens,
+            updatedAt: cRow.updated_at,
+          };
+        }
+      } catch {}
+      res.json({status:'ok', messages: items, hasMore, nextBefore, windowOffset, total: windowOffset + items.length, compaction});
+    } catch (e) { res.status(500).json({status:'error', error: e.message}); }
+  });
+
+  // BLOCK-95 B2 — 手动触发会话压缩（同步等待摘要生成；开关关时诚实 409）。
+  app.post('/api/ai/conversations/:id/compact', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({status:'error', error:'未授权'});
+    const { isSessionCompactionEnabled, compactConversationNow } = require('../helpers/conversation-compaction');
+    if (!isSessionCompactionEnabled(process.env)) {
+      return res.status(409).json({status:'error', error:'session compaction disabled'});
+    }
+    try {
+      const conv = await adb.prepare('SELECT id FROM copilot_conversations WHERE id=? AND user_id=?').get(req.params.id, userId);
+      if (!conv) return res.status(404).json({status:'error', error:'not_found'});
+      const sqliteSync = dbMod.getDatabase();
+      const result = await compactConversationNow({ userId, conversationId: req.params.id, sqlite: sqliteSync });
+      if (!result.ok) {
+        return res.json({status:'ok', compacted:false, reason: result.reason});
+      }
+      res.json({status:'ok', compacted:true, compaction: {
+        summary: result.compaction.summary,
+        coversCount: result.compaction.covers_count,
+        sourceTokens: result.compaction.source_tokens,
+        updatedAt: result.compaction.updated_at,
+      }, detail: result.detail});
     } catch (e) { res.status(500).json({status:'error', error: e.message}); }
   });
 

@@ -87,6 +87,12 @@ const {
 const { inferExecutionPolicy } = require('../../helpers/agent-execution-policy');
 // BLOCK-95 B1 — 历史拼装权收归后端（开关灰度，默认关）
 const { isServerHistoryAssemblyEnabled, assembleServerHistory } = require('../../helpers/history-assembly');
+// BLOCK-95 B2 — 会话级 rolling compaction（视图层投影，DB 原文不动；开关默认关）
+const {
+  isSessionCompactionEnabled,
+  applyCompactionView,
+  maybeCompactInBackground,
+} = require('../../helpers/conversation-compaction');
 const {
   _gatherAnalysisContextForMethods,
   _renderMethodsParagraph,
@@ -209,13 +215,40 @@ module.exports = {
         // BLOCK-95 B1 — 历史拼装权收归后端（开关灰度，默认关；实现与契约见
         // helpers/history-assembly.js）。开关开时 effectiveMessages 为 DB 拼装版，
         // createAgentTask params 与 runAgentLoop 从此同源（resume/续跑链一致）。
+        // BLOCK-95 B2 — 拼装后应用会话 compaction 投影（默认关；仅拼装开时生效），
+        // 并做后台增量压缩检查（不阻塞请求路径；压缩留痕经 messages 信封诚实可见）。
         let effectiveMessages = messages;
         if (isServerHistoryAssemblyEnabled(process.env) && _activeConv && _activeConv.id) {
+          const _convIdForAssembly = _activeConv.id;
+          const adbLocal = dbMod.getAsyncDatabase();
           effectiveMessages = await assembleServerHistory({
-            conversationId: _activeConv.id,
+            conversationId: _convIdForAssembly,
             incomingMessages: messages,
-            adb: dbMod.getAsyncDatabase(),
+            adb: adbLocal,
           });
+          if (isSessionCompactionEnabled(process.env)) {
+            try {
+              const sqliteLocal = dbMod.getDatabase();
+              const compactionRow = sqliteLocal.prepare('SELECT * FROM conversation_compaction WHERE conversation_id=?').get(_convIdForAssembly) || null;
+              if (compactionRow && Array.isArray(effectiveMessages) && effectiveMessages.length > 0) {
+                // 拼装行带 rowid 用于投影切分（历史部分全部 < covers_rowid 时整体替换为摘要）
+                const assembledRows = await adbLocal.prepare(
+                  "SELECT rowid, role, content FROM copilot_messages WHERE conversation_id=? AND role IN ('user','assistant') ORDER BY rowid ASC"
+                ).all(_convIdForAssembly);
+                // 尾部本轮 user 与拼装版对齐（同 assembleServerHistory 的回填语义）
+                const incomingLastUser = [...messages].reverse().find((m) => m && m.role === 'user');
+                if (incomingLastUser && assembledRows.length > 0 && assembledRows[assembledRows.length - 1].role === 'user') {
+                  const original = String(incomingLastUser.content || '');
+                  const lastRow = assembledRows[assembledRows.length - 1];
+                  if (lastRow.content !== original) lastRow.content = original;
+                }
+                effectiveMessages = applyCompactionView(assembledRows, compactionRow);
+              }
+              maybeCompactInBackground({ userId, conversationId: _convIdForAssembly, sqlite: sqliteLocal });
+            } catch (e) {
+              try { console.warn('[block95-b2] compaction view skipped:', e && e.message); } catch {}
+            }
+          }
         }
 
         let taskId;

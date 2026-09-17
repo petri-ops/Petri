@@ -540,7 +540,7 @@ export function SimpleChat({
   // UI-305 P0.4 — 会话恢复/对账簇（原 609-668 三个 effect：消息重载、
   // 隐藏期完结对账、T82 resumable 重连）整簇抽入 useConversationResume，
   // 零行为变化。
-  const { reconciledRunRef, older } = useConversationResume({
+  const { reconciledRunRef, older, compaction } = useConversationResume({
     conversationId,
     projectId,
     activeRun,
@@ -1028,6 +1028,16 @@ export function SimpleChat({
         <div className="sc-body">
           <div className="sc-messages" ref={scrollRef} onScroll={handleMessagesScroll}>
           {older.loadingMore && <div className="sc-loading-older">加载更早消息…</div>}
+          {/* BLOCK-95 B2/A5 — 压缩诚实可见：LLM 视图中更早上下文已折叠为摘要（本界面仍显示原文） */}
+          {compaction && !composerOnly && displayMessages.length > 0 && (
+            <div className="sc-compaction-notice" role="status" title={compaction.summary}>
+              <Icon name="layers" size={13} />
+              <span>
+                上下文压缩视图：更早的 {compaction.coversCount} 条消息已折叠为摘要参与对话
+                <span className="sc-compaction-notice-sub">（此处仍显示原文 · {compaction.sourceTokens} tokens 已压缩）</span>
+              </span>
+            </div>
+          )}
           {loading && <div className="sc-loading">加载会话…</div>}
           {!loading && displayMessages.length === 0 && (
             <div className="sc-empty">

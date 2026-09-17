@@ -16,6 +16,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   getConversationMessages,
   getConversationMessagesPage,
+  type ConversationCompactionInfo,
 } from '../../copilotConversationsClient';
 import {
   clearConversationRun,
@@ -67,11 +68,15 @@ export function useConversationResume({
 }): {
   reconciledRunRef: React.MutableRefObject<string | null>;
   older: OlderMessagesState;
+  /** BLOCK-95 B2/A5 — 会话压缩留痕（诚实可见；null=未压缩）。 */
+  compaction: ConversationCompactionInfo | null;
 } {
   // A1 — 分页游标 state（conversationId 切换时由主加载重置）。
   const [olderMeta, setOlderMeta] = useState<{ hasMore: boolean; nextBefore: number | null; windowOffset: number }>(
     { hasMore: false, nextBefore: null, windowOffset: 0 }
   );
+  // B2/A5 — 会话压缩留痕（信封字段；null=未压缩）。
+  const [compaction, setCompaction] = useState<ConversationCompactionInfo | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const loadingMoreRef = useRef(false);
 
@@ -87,6 +92,7 @@ export function useConversationResume({
   useEffect(() => {
     setMessagesRef.current([]);
     setOlderMeta({ hasMore: false, nextBefore: null, windowOffset: 0 });
+    setCompaction(null);
     if (!conversationId) {
       setLoadingRef.current(false);
       return;
@@ -104,6 +110,7 @@ export function useConversationResume({
         nextBefore: page ? page.nextBefore : null,
         windowOffset: page ? page.windowOffset : 0,
       });
+      setCompaction(page ? page.compaction || null : null);
       setLoadingRef.current(false);
     })();
     return () => { cancelled = true; };
@@ -221,5 +228,6 @@ export function useConversationResume({
       loadingMore,
       loadOlder,
     },
+    compaction,
   };
 }

@@ -95,6 +95,14 @@ export async function getConversationMessages(
   }
 }
 
+/** BLOCK-95 B2/A5 — 会话压缩留痕（诚实可见；DB 原文始终可见）。 */
+export interface ConversationCompactionInfo {
+  summary: string;
+  coversCount: number;
+  sourceTokens: number;
+  updatedAt: string;
+}
+
 /** BLOCK-95 A1 — 分页信封：最新窗口 + 向上游标。before=上一页响应的 nextBefore。 */
 export interface ConversationMessagesPage {
   messages: ConversationMessage[];
@@ -103,6 +111,8 @@ export interface ConversationMessagesPage {
   /** 本批第一条（最旧）在全量消息中的 0-based 序号；fork-from-message 的
    *  untilIndex 由「窗口内 index」换算为「全量 index」时使用。 */
   windowOffset: number;
+  /** BLOCK-95 B2/A5 — 会话压缩视图留痕（无压缩为 null）。 */
+  compaction?: ConversationCompactionInfo | null;
 }
 
 export async function getConversationMessagesPage(
@@ -123,6 +133,7 @@ export async function getConversationMessagesPage(
       hasMore: Boolean(data.hasMore),
       nextBefore: typeof data.nextBefore === 'number' ? data.nextBefore : null,
       windowOffset: typeof data.windowOffset === 'number' ? data.windowOffset : 0,
+      compaction: data.compaction || null,
     };
   } catch {
     return null;

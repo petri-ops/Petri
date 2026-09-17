@@ -1,0 +1,59 @@
+{
+  "name": "block95-b2-compaction-live",
+  "startedAt": "2026-09-17T05:46:50.592Z",
+  "finishedAt": "2026-09-17T05:46:59.675Z",
+  "assertions": [
+    {
+      "name": "s1_seeded_heavy_conversation",
+      "pass": true,
+      "detail": "rows=40"
+    },
+    {
+      "name": "s2_turn1_posted",
+      "pass": true,
+      "detail": "status=completed taskId=5cf1ab6f-5bec-4a83-ab34-608a0f7872bb"
+    },
+    {
+      "name": "s2_compaction_recorded",
+      "pass": true,
+      "detail": "covers=29 srcTokens=15089"
+    },
+    {
+      "name": "s2_baseline_tokens_captured",
+      "pass": true,
+      "detail": "promptTokensBefore=46297"
+    },
+    {
+      "name": "s3_turn2_settled",
+      "pass": true,
+      "detail": "status=completed"
+    },
+    {
+      "name": "s3_summary_leads_second_request",
+      "pass": true,
+      "detail": "secondReqMessages=16"
+    },
+    {
+      "name": "s3_tokens_reduced",
+      "pass": true,
+      "detail": "before=46297 after=24258 saved=22039"
+    },
+    {
+      "name": "redline_source_messages_immutable",
+      "pass": true,
+      "detail": "before=40 after=44"
+    }
+  ],
+  "allPass": true,
+  "conversationId": "conv_b95_b2_mu53xg82",
+  "tokenLedger": {
+    "promptTokensBefore": 46297,
+    "promptTokensAfter": 24258,
+    "saved": 22039
+  },
+  "compaction": {
+    "coversCount": 29,
+    "sourceTokens": 15089,
+    "summaryHead": "- B2消息-0 至 B2消息-28 为交替问答，内容高度重复，均围绕“数据清洗的参数选择、聚类分辨率对比、差异表达阈值约定”展开。\n- 按时间顺序看，这些消息未引入具体参数值、文件路径、软件名、样本/基因/细胞类型等实体，也未形成关键决定"
+  }
+}

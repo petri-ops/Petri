@@ -3950,3 +3950,22 @@
 .sc-jump-bottom:hover {
   background: var(--gewu-hover);
 }
+
+/* B2/A5 — 压缩诚实可见标记卡（信息流顶部） */
+.sc-compaction-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 4px 0 2px;
+  padding: 8px 12px;
+  border: 1px dashed var(--gewu-border-strong);
+  border-radius: 10px;
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-body-sm);
+  cursor: help;
+}
+
+.sc-compaction-notice-sub {
+  color: var(--gewu-text-muted, var(--gewu-text-tertiary));
+}
