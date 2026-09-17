@@ -3349,6 +3349,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-393: 设置页头改「← 返回」——移除页面级关闭钮，与 Skills/知识空间页头同形 (2026-09-17 in_progress，dev Electron 边界内)
+
+- **来源**：用户裁决「设置 这里 去掉右侧的 关闭按钮 之后在左侧加上 返回 按钮 和Skills 知识空间 风格UI 保持一致」。
+- **交付面**：DesktopSettingsPanel 头部右侧 × 关闭按钮退役，左侧加「← 返回」胶囊（样式单一真源=global-page.module.css .backBtn，与 Skills/知识空间页头逐字节同款）；onClose 语义即离开设置不改调用方；desktop.css 孤儿 __close 规则随组件移除不留空壳。窗口标题栏右上角的系统关闭钮为窗口控件（全页共有）不动。
+- **证据**：实机 /settings 探针 back=true/close(页面级)=false + 截图 acceptance/ui-393/settings-back-header.png（亮色模式下返回胶囊自适应正确）；tsc 0；ui:audit/docs:check 绿。
+- **边界**：仅设置页头部形态；DesktopSettingsPanel 消费方仅 /settings 一处，无其它调用面受影响。G0 开发期常态 · 不外推 packaged/Provider/GA.
 ## UI-392: 夜间模式悬停高亮色族统一——工作台四项背景「发灰」系统性修复 (2026-09-17 in_progress，dev Electron 边界内)
 
 - **来源**：用户实测反馈「工作台四项（新建任务/插件/Skills/知识空间）夜间模式背景色未和软件保持一致」+ 裁决「分析一下 系统性修复」。

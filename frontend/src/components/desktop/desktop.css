@@ -275,35 +275,8 @@
   color: var(--gewu-text-tertiary);
 }
 
-.gewu-desktop-panel__close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: none;
-  border-radius: 7px;
-  background: transparent;
-  color: var(--gewu-text-muted);
-  cursor: pointer;
-  transition:
-    background 0.15s,
-    color 0.15s;
-  flex-shrink: 0;
-  /* UI-215 补充：纯图标按钮收敛 UA 默认字号到 token */
-  font-size: var(--gewu-font-size-caption);
-}
-
-.gewu-desktop-panel__close:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
-}
-
-[data-theme='dark'] .gewu-desktop-panel__close:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
-}
+/* UI-393 — __close 关闭按钮已退役：设置页头改「← 返回」（样式单一真源
+   global-page.module.css .backBtn），孤儿规则随组件移除，不留空壳。 */
 
 /* ---- 面板 Body ---- */
 .gewu-desktop-panel__body {

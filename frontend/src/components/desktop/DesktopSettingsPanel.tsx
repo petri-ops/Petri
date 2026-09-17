@@ -19,6 +19,8 @@ import {
 } from '@/lib/model-provider-options';
 import { parseContextWindow, formatContextWindow } from '@/lib/format-context-window';
 import { ExperimentalFeaturesSection } from '@/components/settings/ExperimentalFeaturesSection';
+// UI-393 — 返回按钮样式单一真源（与 Skills/知识空间页头同款 backBtn）
+import backStyles from '@/pages/global-page.module.css';
 
 
 // ── BLOCK-9.2 PHASE 1: types + helpers + section subcomponents ──
@@ -117,6 +119,18 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   return (
     <div className="gewu-desktop-panel" role="dialog" aria-label="设置">
       <div className="gewu-desktop-panel__header">
+        {/* UI-393 — × 关闭按钮退役，左侧「← 返回」对齐 Skills/知识空间页头形态
+            （backBtn 样式单一真源=global-page.module.css，onClose 语义即离开设置） */}
+        <button
+          type="button"
+          className={backStyles.backBtn}
+          onClick={onClose}
+          aria-label="返回"
+          title="返回"
+        >
+          <Icon name="arrow-left" size={16} />
+          <span>返回</span>
+        </button>
         <span className="gewu-desktop-panel__icon">
           <Icon name="settings" size={18} />
         </span>
@@ -124,14 +138,6 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
           <h2 className="gewu-desktop-panel__title">设置</h2>
           <p className="gewu-desktop-panel__subtitle">{activeSectionMeta.description}</p>
         </div>
-        <button
-          type="button"
-          className="gewu-desktop-panel__close"
-          onClick={onClose}
-          aria-label="关闭"
-        >
-          <Icon name="x" size={16} />
-        </button>
       </div>
 
       <div className="gewu-settings-layout">
