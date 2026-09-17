@@ -4602,8 +4602,29 @@
       "registeredAt": "2026-09-15",
       "archivePolicy": "archive_when_superseded",
       "phase": "REFERENCE"
+    },
+    {
+      "id": "BLOCK-97-AGENT-TODO-CARD",
+      "path": "docs/block-97-agent-todo-card-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-97-agent-todo-card",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-17",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-PLANNED",
+      "tags": [
+        "block-97",
+        "agent-todo",
+        "summary-card",
+        "tool-events",
+        "sse",
+        "workspace-ui"
+      ],
+      "notes": "Agent 任务清单（todo）工具+摘要卡实时渲染（2026-09-17 立项候选登记，排队不占 active 槽位，启动需用户裁决排期）。来源=用户见编码 agent 任务清单进度卡（编号条目做完一条勾一条）后裁决诉求「放到我们摘要卡片中……agent 把工作拆成编号条目，做完一条勾一条」。三件套=todo_write 内部工具（agent-tools 范本 BLOCK-55 plan 工具）+ 系统提示词注入使用纪律 + 摘要卡「任务清单」节（WorkspaceSummaryCard 任务循环与任务进度之间）；事件管道零新增（task_events seq→SSE 断线续传→agentTaskStream→conversationRunStore）；持久化首选 task_events 事件重放（P0 定案）。与既有「任务进度」Harness 固定流水线 rail 并存不合并；不改 BLOCK-55 审批流；0 新依赖。行号基线 2026-09-17 HEAD fc0142dc，启动 P0 必须重定位。"
     }
   ],
-  "lastUpdated": "2026-09-15",
+  "lastUpdated": "2026-09-17",
   "documentCount": 241
 }
