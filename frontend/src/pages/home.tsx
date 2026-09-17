@@ -589,7 +589,7 @@ export default function Home(): React.ReactElement {
               >
                 取消
               </button>
-              {sshValidated && <span aria-live="polite" style={{ fontSize: 12, color: 'var(--color-success, #2e9e5b)' }}>路径有效</span>}
+              {sshValidated && <span aria-live="polite" style={{ fontSize: 12, color: 'var(--gewu-status-success)' }}>路径有效</span>}
             </div>
           )}
           {/* UI-258 — 空白项目：只填名字创建，工作目录稍后在项目内设置/更换 */}

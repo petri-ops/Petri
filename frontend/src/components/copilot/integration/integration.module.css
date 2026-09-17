@@ -16,7 +16,7 @@
   padding: 0;
   margin: 0;
   font: inherit;
-  color: var(--color-link, #0066cc);
+  color: var(--gewu-accent);
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -24,11 +24,11 @@
 }
 
 .chatCardLink:hover {
-  color: var(--color-link-hover, #0052a3);
+  color: var(--gewu-accent-hover);
 }
 
 .chatCardLink:focus {
-  outline: 2px solid var(--color-link, #0066cc);
+  outline: 2px solid var(--gewu-accent);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -44,7 +44,7 @@
   border: 1px solid var(--gewu-border, rgba(0, 0, 0, 0.12));
   border-radius: 4px;
   padding: 4px 8px;
-  color: var(--color-link, #0066cc);
+  color: var(--gewu-accent);
   cursor: pointer;
   text-decoration: none;
   font: inherit;
@@ -58,6 +58,6 @@
 }
 
 .chatCardLinkFloating:focus {
-  outline: 2px solid var(--color-link, #0066cc);
+  outline: 2px solid var(--gewu-accent);
   outline-offset: 2px;
 }

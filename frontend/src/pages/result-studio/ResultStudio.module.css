@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--color-bg-primary);
+  background: var(--gewu-bg-surface);
 }
 
 .header {
@@ -13,8 +13,8 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-sm) var(--spacing-md);
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-subtle);
 }
 
 .projectInfo {
@@ -25,12 +25,12 @@
 
 .projectLabel {
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--gewu-text);
 }
 
 .resultCount {
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 /* Content area */
@@ -43,10 +43,10 @@
 /* Sidebar */
 .sidebar {
   width: 280px;
-  border-right: 1px solid var(--color-border);
+  border-right: 1px solid var(--gewu-border);
   display: flex;
   flex-direction: column;
-  background: var(--color-bg-secondary);
+  background: var(--gewu-bg-subtle);
 }
 
 .sidebarHeader {
@@ -54,7 +54,7 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-sm) var(--spacing-md);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--gewu-border);
 }
 
 .sidebarHeader h2 {
@@ -67,14 +67,14 @@
   padding: var(--spacing-xs) var(--spacing-sm);
   font-size: var(--font-size-sm);
   background: transparent;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--gewu-border);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background var(--transition-fast);
 }
 
 .refreshButton:hover {
-  background: var(--color-bg-hover);
+  background: var(--gewu-hover);
 }
 
 .refreshButton:disabled {
@@ -99,12 +99,12 @@
 }
 
 .resultItem:hover {
-  background: var(--color-bg-hover);
+  background: var(--gewu-hover);
 }
 
 .resultItemActive {
-  background: var(--color-bg-active);
-  border: 1px solid var(--color-primary);
+  background: var(--gewu-hover);
+  border: 1px solid var(--gewu-accent);
 }
 
 .resultIcon {
@@ -121,7 +121,7 @@
 .resultName {
   font-size: var(--font-size-sm);
   font-weight: 500;
-  color: var(--color-text-primary);
+  color: var(--gewu-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -129,7 +129,7 @@
 
 .resultMeta {
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 /* Detail view */
@@ -146,12 +146,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .hint {
   font-size: var(--font-size-sm);
-  color: var(--color-text-tertiary);
+  color: var(--gewu-text-tertiary);
   margin-top: var(--spacing-xs);
 }
 
@@ -168,7 +168,7 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-md);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--gewu-border);
   flex-wrap: wrap;
   gap: var(--spacing-sm);
 }
@@ -195,21 +195,21 @@
   padding: var(--spacing-xs) var(--spacing-sm);
   font-size: var(--font-size-sm);
   background: transparent;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--gewu-border);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  color: var(--color-text-primary);
+  color: var(--gewu-text);
   transition: all var(--transition-fast);
 }
 
 .actionButton:hover {
-  background: var(--color-bg-hover);
+  background: var(--gewu-hover);
 }
 
 .actionButton.danger:hover {
-  background: var(--color-error-bg);
-  border-color: var(--color-error);
-  color: var(--color-error);
+  background: var(--gewu-status-error-bg);
+  border-color: var(--gewu-danger);
+  color: var(--gewu-danger);
 }
 
 .detailBody {
@@ -233,13 +233,13 @@
 
 .detailMeta dt {
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .detailMeta dd {
   margin: 0;
   font-size: var(--font-size-base);
-  color: var(--color-text-primary);
+  color: var(--gewu-text);
 }
 
 .dataPreview {
@@ -250,13 +250,13 @@
   font-size: var(--font-size-sm);
   font-weight: 600;
   margin: 0 0 var(--spacing-sm) 0;
-  color: var(--color-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .dataBlock {
   padding: var(--spacing-md);
-  background: var(--color-bg-tertiary);
-  border: 1px solid var(--color-border);
+  background: var(--gewu-bg-elevated);
+  border: 1px solid var(--gewu-border);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
@@ -268,8 +268,8 @@
 /* Footer */
 .footer {
   padding: var(--spacing-xs) var(--spacing-md);
-  border-top: 1px solid var(--color-border);
-  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-subtle);
 }
 
 .branchIndicator {
@@ -280,29 +280,29 @@
 }
 
 .branchLabel {
-  color: var(--color-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .branchName {
   font-weight: 500;
-  color: var(--color-text-primary);
+  color: var(--gewu-text);
 }
 
 .isolationNote {
-  color: var(--color-text-tertiary);
+  color: var(--gewu-text-tertiary);
 }
 
 /* States */
 .loading {
   padding: var(--spacing-md);
   text-align: center;
-  color: var(--color-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .error {
   padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--color-error-bg);
-  color: var(--color-error);
+  background: var(--gewu-status-error-bg);
+  color: var(--gewu-danger);
   font-size: var(--font-size-sm);
   border-radius: var(--radius-sm);
   margin: var(--spacing-xs);
@@ -311,15 +311,15 @@
 .emptyState {
   padding: var(--spacing-lg);
   text-align: center;
-  color: var(--color-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 /* Version History */
 .versionHistory {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--gewu-border);
   border-radius: var(--radius-sm);
   min-width: 180px;
-  background: var(--color-bg-primary);
+  background: var(--gewu-bg-surface);
 }
 
 .versionHeader {
@@ -332,18 +332,18 @@
   font-size: var(--font-size-sm);
   background: transparent;
   border: none;
-  color: var(--color-text-primary);
+  color: var(--gewu-text);
   transition: background var(--transition-fast);
 }
 
 .versionHeader:hover {
-  background: var(--color-bg-hover);
+  background: var(--gewu-hover);
 }
 
 .expandIcon {
   font-size: var(--gewu-font-size-xs);
   transition: transform var(--transition-fast);
-  color: var(--color-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .expandIcon.expanded {
@@ -351,7 +351,7 @@
 }
 
 .versionList {
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--gewu-border);
   max-height: 200px;
   overflow-y: auto;
 }
@@ -362,7 +362,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid var(--gewu-border-subtle);
   transition: background var(--transition-fast);
 }
 
@@ -371,11 +371,11 @@
 }
 
 .versionItem:hover {
-  background: var(--color-bg-hover);
+  background: var(--gewu-hover);
 }
 
 .versionItem.active {
-  background: var(--color-bg-active);
+  background: var(--gewu-hover);
 }
 
 .versionNumber {
@@ -389,7 +389,7 @@
 .currentBadge {
   font-size: var(--gewu-font-size-xs);
   font-weight: normal;
-  background: var(--color-primary);
+  background: var(--gewu-accent);
   color: white;
   padding: 1px 4px;
   border-radius: 2px;
@@ -397,12 +397,12 @@
 
 .versionMeta {
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  color: var(--gewu-text-secondary);
 }
 
 .emptyVersions {
   padding: var(--spacing-md);
   text-align: center;
-  color: var(--color-text-tertiary);
+  color: var(--gewu-text-tertiary);
   font-size: var(--font-size-sm);
 }

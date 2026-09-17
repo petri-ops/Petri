@@ -5,8 +5,8 @@
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
-  background: var(--color-bg-primary, #fff);
-  color: var(--color-text-primary);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
 }
 
 .header {
@@ -14,7 +14,7 @@
   align-items: center;
   gap: 10px;
   padding: 12px 18px;
-  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  border-bottom: 1px solid var(--gewu-border);
   flex-shrink: 0;
 }
 
@@ -68,7 +68,7 @@
 
 .subtitle {
   font-size: var(--gewu-font-size-xs, 12px);
-  color: var(--color-text-tertiary, #9ca3af);
+  color: var(--gewu-text-tertiary);
 }
 
 .body {

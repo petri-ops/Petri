@@ -161,12 +161,12 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
             bottom: '100%',
             right: 0,
             marginBottom: '6px',
-            background: 'var(--color-bg-elevated, #fff)',
-            border: '1px solid var(--color-border, #e5e7eb)',
+            background: 'var(--gewu-bg-elevated)',
+            border: '1px solid var(--gewu-border)',
             borderRadius: '10px',
             padding: '10px 12px',
             fontSize: 'var(--gewu-font-size-caption)',
-            color: 'var(--color-text-primary, #111827)',
+            color: 'var(--gewu-text)',
             boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
             whiteSpace: 'nowrap',
             zIndex: 200,
@@ -177,7 +177,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
             <span style={{ fontWeight: 600, fontSize: 'var(--gewu-font-size-caption)' }}>上下文用量</span>
             <span style={{ fontSize: 'var(--gewu-font-size-sm)', color, fontWeight: 600 }}>
               {hasData ? `${pct}%` : '待机'}
-              {isIdle && lastBudget && <span style={{ fontSize: 'var(--gewu-font-size-xs)', color: 'var(--color-text-tertiary, #9ca3af)', fontWeight: 400 }}> · 上次</span>}
+              {isIdle && lastBudget && <span style={{ fontSize: 'var(--gewu-font-size-xs)', color: 'var(--gewu-text-tertiary)', fontWeight: 400 }}> · 上次</span>}
             </span>
           </div>
 
@@ -191,10 +191,10 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
             }} />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: 'var(--gewu-font-size-sm)', color: 'var(--color-text-secondary, #6b7280)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: 'var(--gewu-font-size-sm)', color: 'var(--gewu-text-secondary)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>消息 tokens</span>
-              <span style={{ fontFamily: 'monospace', color: 'var(--color-text-primary)' }}>
+              <span style={{ fontFamily: 'monospace', color: 'var(--gewu-text)' }}>
                 {hasData ? `${formatTokens(displayBudget!.messagesTokensUsed)}${messageBudget > 0 ? ` / ${formatTokens(messageBudget)}` : ''}` : '—'}
               </span>
             </div>
@@ -202,19 +202,19 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
             {(displayBudget?.knowledgeTokens ?? 0) > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', color: '#8b5cf6' }}>
                 <span>知识空间</span>
-                <span style={{ fontFamily: 'monospace', color: 'var(--color-text-primary)' }}>
+                <span style={{ fontFamily: 'monospace', color: 'var(--gewu-text)' }}>
                   {formatTokens(displayBudget!.knowledgeTokens!)}
                 </span>
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>上下文窗口</span>
-              <span style={{ fontFamily: 'monospace', color: 'var(--color-text-primary)' }}>
+              <span style={{ fontFamily: 'monospace', color: 'var(--gewu-text)' }}>
                 {contextWindow > 0 ? formatTokens(contextWindow) : '—'}
               </span>
             </div>
             {contextWindow === 0 && (
-              <div style={{ fontSize: 'var(--gewu-font-size-xs)', color: 'var(--color-text-tertiary, #9ca3af)', marginTop: '2px' }}>
+              <div style={{ fontSize: 'var(--gewu-font-size-xs)', color: 'var(--gewu-text-tertiary)', marginTop: '2px' }}>
                 模型上下文窗口未知，可在设置中配置
               </div>
             )}
@@ -222,7 +222,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>保留消息</span>
-                  <span style={{ fontFamily: 'monospace', color: 'var(--color-text-primary)' }}>
+                  <span style={{ fontFamily: 'monospace', color: 'var(--gewu-text)' }}>
                     {displayBudget!.messagesKept} 条
                   </span>
                 </div>
@@ -236,14 +236,14 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
             ) : (
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>状态</span>
-                <span style={{ fontFamily: 'monospace', color: 'var(--color-text-primary)' }}>待机</span>
+                <span style={{ fontFamily: 'monospace', color: 'var(--gewu-text)' }}>待机</span>
               </div>
             )}
           </div>
 
           {displayBudget?.categories && (
-            <div style={{ marginTop: '8px', borderTop: '1px solid var(--color-border, #e5e7eb)', paddingTop: '8px' }}>
-              <div style={{ fontWeight: 600, fontSize: 'var(--gewu-font-size-sm)', marginBottom: '6px', color: 'var(--color-text-secondary, #6b7280)' }}>
+            <div style={{ marginTop: '8px', borderTop: '1px solid var(--gewu-border)', paddingTop: '8px' }}>
+              <div style={{ fontWeight: 600, fontSize: 'var(--gewu-font-size-sm)', marginBottom: '6px', color: 'var(--gewu-text-secondary)' }}>
                 用量分布（占上下文窗口）
               </div>
               {([
@@ -256,7 +256,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
                 const catPct = contextWindow > 0 ? (catValue / contextWindow) * 100 : 0;
                 return (
                   <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <span style={{ width: '60px', fontSize: 'var(--gewu-font-size-xs)', color: 'var(--color-text-secondary, #6b7280)', flexShrink: 0 }}>{label}</span>
+                    <span style={{ width: '60px', fontSize: 'var(--gewu-font-size-xs)', color: 'var(--gewu-text-secondary)', flexShrink: 0 }}>{label}</span>
                     <div style={{ flex: 1, height: '4px', background: '#e5e7eb', borderRadius: '2px' }}>
                       <div style={{
                         width: `${Math.min(catPct, 100)}%`,
@@ -265,7 +265,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
                         borderRadius: '2px',
                       }} />
                     </div>
-                    <span style={{ width: '45px', fontSize: 'var(--gewu-font-size-xs)', fontFamily: 'monospace', textAlign: 'right', color: 'var(--color-text-primary)', flexShrink: 0 }}>
+                    <span style={{ width: '45px', fontSize: 'var(--gewu-font-size-xs)', fontFamily: 'monospace', textAlign: 'right', color: 'var(--gewu-text)', flexShrink: 0 }}>
                       {formatTokens(catValue)}
                     </span>
                   </div>

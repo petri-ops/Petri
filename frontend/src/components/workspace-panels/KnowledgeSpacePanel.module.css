@@ -8,14 +8,14 @@
   height: 100%;
   overflow-y: auto;
   font-size: var(--gewu-font-size-sm);
-  color: var(--color-text-primary);
+  color: var(--gewu-text);
 }
 
 .header {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--color-text-primary);
+  color: var(--gewu-text);
 }
 
 .title {
@@ -26,15 +26,15 @@
 .headerNote {
   margin-left: auto;
   font-size: var(--gewu-font-size-xs);
-  color: var(--color-text-tertiary, #9ca3af);
+  color: var(--gewu-text-tertiary);
 }
 
 .notice {
   padding: 8px 10px;
-  border: 1px solid var(--color-border, #e5e7eb);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  background: var(--color-bg-subtle, #f9fafb);
-  color: var(--color-text-secondary, #6b7280);
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-secondary);
   font-size: var(--gewu-font-size-xs);
   line-height: 1.5;
 }
@@ -61,10 +61,10 @@
   align-items: center;
   gap: 6px;
   padding: 5px 12px;
-  border: 1px solid var(--color-border, #e5e7eb);
+  border: 1px solid var(--gewu-border);
   border-radius: 999px;
   background: transparent;
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--gewu-text-secondary);
   font-size: var(--gewu-font-size-sm);
   cursor: pointer;
 }
@@ -82,7 +82,7 @@
 
 .spaceMeta {
   font-size: var(--gewu-font-size-xs);
-  color: var(--color-text-tertiary, #9ca3af);
+  color: var(--gewu-text-tertiary);
 }
 
 .toolbar {
@@ -97,10 +97,10 @@
   align-items: center;
   gap: 5px;
   padding: 5px 10px;
-  border: 1px solid var(--color-border, #e5e7eb);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  background: var(--color-bg-elevated, #fff);
-  color: var(--color-text-primary);
+  background: var(--gewu-bg-elevated);
+  color: var(--gewu-text);
   font-size: var(--gewu-font-size-xs);
   cursor: pointer;
 }
@@ -118,7 +118,7 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--gewu-text-secondary);
   font-size: var(--gewu-font-size-xs);
   cursor: pointer;
 }
@@ -137,9 +137,9 @@
 
 .empty {
   padding: 14px 10px;
-  border: 1px dashed var(--color-border, #e5e7eb);
+  border: 1px dashed var(--gewu-border);
   border-radius: 8px;
-  color: var(--color-text-tertiary, #9ca3af);
+  color: var(--gewu-text-tertiary);
   font-size: var(--gewu-font-size-xs);
   text-align: center;
   line-height: 1.6;
@@ -150,7 +150,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 8px;
-  border: 1px solid var(--color-border, #e5e7eb);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
 }
 
@@ -172,7 +172,7 @@
 
 .docStatus {
   font-size: 10px;
-  color: var(--color-text-tertiary, #9ca3af);
+  color: var(--gewu-text-tertiary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -190,7 +190,7 @@
   flex-shrink: 0;
   font-size: 10px;
   font-family: monospace;
-  color: var(--color-text-tertiary, #9ca3af);
+  color: var(--gewu-text-tertiary);
 }
 
 .docActions {
@@ -208,7 +208,7 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--gewu-text-secondary);
   cursor: pointer;
 }
 
@@ -225,7 +225,7 @@
 .searchBox {
   margin-top: auto;
   padding-top: 8px;
-  border-top: 1px solid var(--color-border, #e5e7eb);
+  border-top: 1px solid var(--gewu-border);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -234,7 +234,7 @@
 .searchTitle {
   font-weight: 600;
   font-size: var(--gewu-font-size-xs);
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--gewu-text-secondary);
 }
 
 .searchRow {
@@ -246,10 +246,10 @@
   flex: 1;
   min-width: 0;
   padding: 5px 8px;
-  border: 1px solid var(--color-border, #e5e7eb);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  background: var(--color-bg-elevated, #fff);
-  color: var(--color-text-primary);
+  background: var(--gewu-bg-elevated);
+  color: var(--gewu-text);
   font-size: var(--gewu-font-size-xs);
   font-family: inherit;
 }
@@ -261,7 +261,7 @@
 
 .searchNote {
   font-size: var(--gewu-font-size-xs);
-  color: var(--color-text-tertiary, #9ca3af);
+  color: var(--gewu-text-tertiary);
 }
 
 .hitList {
@@ -272,7 +272,7 @@
 
 .hitRow {
   padding: 6px 8px;
-  border: 1px solid var(--color-border, #e5e7eb);
+  border: 1px solid var(--gewu-border);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -298,12 +298,12 @@
   flex-shrink: 0;
   font-size: 10px;
   font-family: monospace;
-  color: var(--color-text-tertiary, #9ca3af);
+  color: var(--gewu-text-tertiary);
 }
 
 .hitText {
   font-size: var(--gewu-font-size-xs);
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--gewu-text-secondary);
   line-height: 1.5;
   word-break: break-word;
 }
