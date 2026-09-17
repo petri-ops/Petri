@@ -14,7 +14,7 @@ Reference files in this folder (operational detail; this file stays the entry po
 - `references/AUDIT-LOG-ENTRY-TEMPLATE.md` — required shape of launch/closeout/audit ledger entries.
 - `references/POSTMORTEM-TEMPLATE.md` — run after any incident; every postmortem must land its lesson somewhere.
 - `references/DEPENDENCY-CHANGE-CHECKLIST.md` — run before proposing any new dependency; default answer is "no".
-- `references/TASK-FORM-TAXONOMY.md` — classify a piece of work into the right form (BLOCK / UI / lightweight / special / batch / reconciliation…) before registering it; routing questions, BLOCK-vs-UI track criteria, the open pattern library, and form-migration rules.
+- `references/TASK-FORM-TAXONOMY.md` — classify a piece of work into the right form (BLOCK / UI / lightweight / special / batch / reconciliation…) before registering it; routing questions, BLOCK-vs-UI track criteria, the open pattern library, form-migration rules, and a porting checklist (§6) for transplanting the taxonomy to another host repo.
 
 ## Load the governing context
 
