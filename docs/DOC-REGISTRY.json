@@ -4645,8 +4645,28 @@
         "request-resilience"
       ],
       "notes": "Agent 长任务韧性：移植 ZCode 三层上下文压缩（microcompact 本地工具结果清理/auto-compact 结构化摘要+转写路径回查/reactive 超限兜底）+ 防呆三件套（rapid-refill 防抖/连续失败熔断/原地重试）+ 输入插队队列 + api_retry 遥测。升级基座=BLOCK-95 B2 单层压缩（不推倒重来，DB 原文不动红线延续）。机制解剖底稿=plan §3（2026-09-17 对 ZCode 本体 bundle+db 实测取证）。六工作面 M1-M6，设计裁决项 D1-D7 预置推荐齐。2026-09-17 立项登记 planned（不占 active 槽位）；启动门槛=BLOCK-97 收口 + 用户裁决（文件面重叠 agent-runner.js/conversationRunStore/CenterPanel/impact-map）。0 新依赖。"
+    },
+    {
+      "id": "BLOCK-88-ENGINEER-COLLAB",
+      "path": "docs/block-88-engineer-collab-p0-design-review.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-88-engineer-collab",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-18",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-REVIEW",
+      "tags": [
+        "block-88",
+        "engineer-collab",
+        "identity",
+        "federation"
+      ],
+      "notes": "工程师协作立项评审（2026-09-18 用户裁决「开始 BLOCK-88 立项评审」；概念源自 2026-09-14 f52e7d87 用户裁决「可以的 非常棒」）：联邦主体=不同的工程师。三层缺口=①配对带身份②任务归属隔离（tasks.user_id 列已存在）③项目授权边界。代码底座=users DAO/tasks.user_id/peers 注册表/mobile-gateway 配对会话全套。裁决点 D1-D8（D1 身份模型推荐轻量声明身份不动单管理员；D7 顺序依赖=BLOCK-85 双真机收口先行，88 不占 active 槽位）。非范围=协同编辑/合并/账号密码体系/中继拓扑。",
+      "lastUpdated": "2026-09-18"
     }
   ],
   "lastUpdated": "2026-09-18",
-  "documentCount": 251
+  "documentCount": 252
 }
