@@ -14,6 +14,7 @@ Reference files in this folder (operational detail; this file stays the entry po
 - `references/AUDIT-LOG-ENTRY-TEMPLATE.md` — required shape of launch/closeout/audit ledger entries.
 - `references/POSTMORTEM-TEMPLATE.md` — run after any incident; every postmortem must land its lesson somewhere.
 - `references/DEPENDENCY-CHANGE-CHECKLIST.md` — run before proposing any new dependency; default answer is "no".
+- `references/TASK-FORM-TAXONOMY.md` — classify a piece of work into the right form (BLOCK / UI / lightweight / special / batch / reconciliation…) before registering it; routing questions, BLOCK-vs-UI track criteria, the open pattern library, and form-migration rules.
 
 ## Load the governing context
 
@@ -27,7 +28,7 @@ Reference files in this folder (operational detail; this file stays the entry po
 
 ### Start or change a work package
 
-Run `references/WORK-PACKAGE-LAUNCH-CHECKLIST.md` end to end, then:
+Classify the work form first per `references/TASK-FORM-TAXONOMY.md` (three routing questions → main track BLOCK/UI or an auxiliary form); register it in the matching ledger with that form's anchor. For BLOCK forms, run `references/WORK-PACKAGE-LAUNCH-CHECKLIST.md` end to end, then:
 
 - Reuse an existing Plan ID when the scope is an increment of that package.
 - Create a new stable ID only for a distinct responsibility and acceptance boundary.
