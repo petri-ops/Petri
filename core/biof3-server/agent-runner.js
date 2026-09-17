@@ -441,6 +441,15 @@ async function runAgentLoop({
   const knowledgeInjection = await knowledgeSpace.buildTurnInjection(systemPrompt, messages);
   systemPrompt = knowledgeInjection.systemPrompt;
   const knowledgeTokens = knowledgeInjection.knowledgeTokens;
+  // BLOCK-94 F5 — 引用溯源：注入了哪些知识块即发射专用事件（经 _emit 持久化 task_events，
+  // 重载后全量重放可重建；前端在助手回答上方渲染「知识溯源」条）
+  if (Array.isArray(knowledgeInjection.citations) && knowledgeInjection.citations.length > 0) {
+    _emit({
+      event: 'knowledge_citations',
+      taskId,
+      citations: knowledgeInjection.citations,
+    });
+  }
 
   systemPrompt += '\n\n=== Tool Calling 指南 ===';
   systemPrompt += '\n你可以调用工具来获取真实数据：query / read_page / search';

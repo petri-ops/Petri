@@ -50,6 +50,9 @@ export interface KnowledgeSearchResult {
   readyChunks: number;
   embeddingAvailable: boolean;
   embeddingError: string | null;
+  /** BLOCK-94 F5：FTS MATCH 语法失败降级 LIKE 时诚实标注 */
+  ftsDegraded?: boolean;
+  docId?: string | null;
 }
 
 export interface KnowledgeSearchResponse extends KnowledgeSearchResult {
@@ -149,11 +152,15 @@ export async function clearKnowledgeSpace(): Promise<void> {
   await jsonOrThrow(resp);
 }
 
-export async function searchKnowledge(query: string, topK?: number): Promise<KnowledgeSearchResponse> {
+export async function searchKnowledge(
+  query: string,
+  topK?: number,
+  docId?: string
+): Promise<KnowledgeSearchResponse> {
   const resp = await fetch(`${getApiPrefix()}/knowledge/search`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, topK }),
+    body: JSON.stringify({ query, topK, docId: docId || undefined }),
   });
   return jsonOrThrow<KnowledgeSearchResponse>(resp);
 }

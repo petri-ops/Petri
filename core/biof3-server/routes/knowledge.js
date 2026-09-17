@@ -251,14 +251,19 @@ module.exports = function mountKnowledge(app) {
     }
   });
 
-  // 检索测试框（D6：摄取质量可自证）
+  // 检索测试框（D6：摄取质量可自证；BLOCK-94 F5：docId 过滤 + 降级诚实标注）
   app.post('/api/knowledge/search', express.json({ limit: '16kb' }), async (req, res) => {
     try {
-      const { query, topK } = req.body || {};
-      const result = await ks.searchKnowledge({ query, topK: topK || ks.INJECT_TOPK });
+      const { query, topK, docId } = req.body || {};
+      const result = await ks.searchKnowledge({
+        query,
+        topK: topK || ks.INJECT_TOPK,
+        docId: docId ? String(docId) : undefined,
+      });
       res.json({
         status: 'ok',
         query: result.query,
+        docId: result.docId,
         hits: result.hits.map((hit) => ({
           docId: hit.docId,
           docName: hit.docName,
@@ -268,6 +273,7 @@ module.exports = function mountKnowledge(app) {
           text: String(hit.text || '').slice(0, 600),
         })),
         readyChunks: result.readyChunks,
+        ftsDegraded: !!result.ftsDegraded,
         // searchKnowledge 未实际尝试嵌入（无 ready chunk 早退）时以凭据检查为准，避免假 true
         embeddingAvailable: result.readyChunks === 0 ? embeddingAvailable() : result.embeddingAvailable,
         embeddingError: result.embeddingError || null,

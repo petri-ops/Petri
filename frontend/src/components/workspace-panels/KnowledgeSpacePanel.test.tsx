@@ -69,7 +69,8 @@ describe('BLOCK-69 KnowledgeSpacePanel', () => {
     ]);
     render(<KnowledgeSpacePanel />);
     await waitFor(() => expect(screen.getAllByTestId('knowledge-doc-row').length).toBe(2));
-    expect(screen.getByText(/基因笔记\.md/)).toBeTruthy();
+    // BLOCK-94 F5 起：ready 文档名同时出现在文档按钮与检索过滤下拉 → 用 testid 断言
+    expect(screen.getAllByTestId('knowledge-doc-name')[0].textContent).toContain('基因笔记.md');
     expect(screen.getByText(/就绪 · 4 块/)).toBeTruthy();
     expect(screen.getByText(/失败 · knowledge_parser_planned_not_implemented/)).toBeTruthy();
   });
@@ -100,7 +101,10 @@ describe('BLOCK-69 KnowledgeSpacePanel', () => {
     fireEvent.click(screen.getByTestId('knowledge-search-btn'));
     await waitFor(() => expect(screen.getByTestId('knowledge-search-hits')).toBeTruthy());
     expect(screen.getByText(/基因笔记\.md · 第 1 块/)).toBeTruthy();
-    expect(screen.getByText(/TP53 参与细胞凋亡调控/)).toBeTruthy();
+    // F5 命中高亮会把文本拆分为多个 <mark>/文本片段 → 用容器 textContent 断言
+    const hitsText = screen.getByTestId('knowledge-search-hits').textContent || '';
+    expect(hitsText).toContain('TP53');
+    expect(hitsText).toContain('参与细胞凋亡调控');
 
     // 第二次：无命中 → 诚实提示
     responses[0] = {

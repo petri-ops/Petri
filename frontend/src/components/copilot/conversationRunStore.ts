@@ -8,6 +8,7 @@ import {
   streamChat,
   subscribeAgentTask,
   type AgentTaskTodoItem,
+  type KnowledgeCitation,
   type ChatMessage,
   type ToolCallEvent,
   type ToolOutputEvent,
@@ -15,7 +16,7 @@ import {
   type ResultEditProgressEvent,
   type StreamChatOptions,
 } from './copilotClient';
-export type { AgentTaskTodoItem } from './copilotClient';
+export type { AgentTaskTodoItem, KnowledgeCitation } from './copilotClient';
 import {
   mergeToolCallActivity,
   mergeToolOutputActivity,
@@ -35,11 +36,23 @@ import {
   setConversationTodoList,
   subscribeConversationTodo,
 } from './conversationRunStore/conversationTodos';
+import {
+  clearConversationCitations,
+  clearConversationCitationsForTests,
+  getConversationCitations,
+  setConversationCitations,
+  subscribeConversationCitations,
+} from './conversationRunStore/conversationCitations';
 export {
   getConversationTodoList,
   subscribeConversationTodo,
 } from './conversationRunStore/conversationTodos';
+export {
+  getConversationCitations,
+  subscribeConversationCitations,
+} from './conversationRunStore/conversationCitations';
 export { clearConversationTodosForTests as __resetConversationTodosForTests };
+export { clearConversationCitationsForTests as __resetConversationCitationsForTests };
 import {
   clearConversationRunListeners,
   emitConversationRun as emit,
@@ -165,6 +178,21 @@ export function useConversationTodoList(
   return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }
 
+/** BLOCK-94 / UI-402 — 当前会话知识溯源（会话级存储订阅；knowledge_citations 数据源）。 */
+export function useConversationCitations(
+  conversationId: string | null | undefined
+): KnowledgeCitation[] {
+  const subscribe = useCallback(
+    (listener: () => void) => subscribeConversationCitations(conversationId, listener),
+    [conversationId]
+  );
+  const getSnapshot = useCallback(
+    () => getConversationCitations(conversationId),
+    [conversationId]
+  );
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+}
+
 export function isConversationRunning(conversationId: string | null | undefined): boolean {
   return getConversationRunSnapshot(conversationId)?.status === 'running';
 }
@@ -191,6 +219,8 @@ export function startConversationRun(options: StartConversationRunOptions): bool
   // 任务清单同清除（BLOCK-97 生命周期=单次任务运行）
   clearConversationNotices(conversationId);
   clearConversationTodo(conversationId);
+  // BLOCK-94 / UI-402 — 知识溯源同生命周期（单次任务运行）
+  clearConversationCitations(conversationId);
 
   const startedAt = Date.now();
   const ctrl = new AbortController();
@@ -311,6 +341,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     | 'onToolOutput'
     | 'onToolResult'
     | 'onTaskTodo'
+    | 'onKnowledgeCitations'
     | 'onInputQueued'
     | 'onLoopPhase'
     | 'onLoopIteration'
@@ -607,6 +638,18 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     // 下一轮 run 开始清除；摘要卡经 useConversationTodoList 订阅实时勾选）
     onTaskTodo: (items) => {
       setConversationTodoList(conversationId, items);
+    },
+    // BLOCK-94 / UI-402 — 知识溯源条（注入块清单；会话级存储，run 终态后仍可见）。
+    // 防御：条目必须能标识文档（docName/docId 之一为字符串），否则过滤掉不炸流。
+    onKnowledgeCitations: (info) => {
+      const citations = (Array.isArray(info && info.citations) ? info.citations : []).filter(
+        (c) =>
+          c &&
+          typeof c === 'object' &&
+          (typeof (c as { docName?: unknown }).docName === 'string' ||
+            typeof (c as { docId?: unknown }).docId === 'string')
+      );
+      setConversationCitations(conversationId, citations);
     },
     onDone: () => finish('done'),
     onError: (error, info) => finish('error', error, info),

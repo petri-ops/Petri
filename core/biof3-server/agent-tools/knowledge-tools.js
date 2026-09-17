@@ -7,6 +7,7 @@
  */
 
 const ks = require('../helpers/knowledge-space');
+const { getDatabase } = require('../db');
 
 const MAX_HITS = 8;
 const HIT_TEXT_CHARS = 700;
@@ -77,4 +78,39 @@ function tool_knowledge_status() {
   };
 }
 
-module.exports = { tool_knowledge_search, tool_knowledge_status };
+// BLOCK-94 F5（D6 裁决=做）：按文档深读——knowledge_search 命中后可整篇读取指定文档的分块原文。
+// 只读检索：category=retrieval / sideEffect=none / R0。
+const READ_MAX_CHUNKS = 50;
+const READ_CHUNK_CHARS = 800;
+
+async function tool_knowledge_read(args) {
+  const docId = String((args && args.docId) || '').trim();
+  if (!docId) {
+    return { error: 'doc_id_required', message: 'knowledge_read 需要 docId（可先经 knowledge_search 命中结果获取）。' };
+  }
+  const space = ks.getSpace();
+  if (!space || !space.enabled) {
+    return {
+      spaceEnabled: false,
+      message: '知识空间未启用，无法读取。若用户期望检索其上传知识库，请提示在右侧「知识空间」面板启用。',
+    };
+  }
+  const doc = ks.getDocument(docId);
+  if (!doc || doc.space_id !== ks.SPACE_ID) {
+    return { error: 'knowledge_document_not_found', message: `文档不存在：${docId}` };
+  }
+  if (doc.status !== 'ready') {
+    return { error: 'knowledge_document_not_ready', message: `文档尚未就绪（当前状态：${doc.status}）。` };
+  }
+  const rows = getDatabase()
+    .prepare('SELECT seq, text FROM knowledge_chunks WHERE doc_id = ? ORDER BY seq ASC LIMIT ?')
+    .all(docId, READ_MAX_CHUNKS);
+  return {
+    spaceEnabled: true,
+    document: { id: doc.id, name: doc.name, chunks: doc.chunk_count },
+    truncated: doc.chunk_count > rows.length ? rows.length : undefined,
+    chunks: rows.map((row) => ({ seq: row.seq, text: String(row.text || '').slice(0, READ_CHUNK_CHARS) })),
+  };
+}
+
+module.exports = { tool_knowledge_search, tool_knowledge_status, tool_knowledge_read };

@@ -645,3 +645,76 @@ test('F3 粘贴文本: createDocument 走同一条摄取管道（txt 路由）',
   assert.equal(done.status, 'ready');
   ks.deleteDocument(doc.id);
 });
+
+// ---------- BLOCK-94 P4：F5 检索过滤 / 降级诚实化 / citations / knowledge_read ----------
+
+test('F5 检索过滤: docId 限定命中范围（他文档命中不可达）', async () => {
+  const target = await ingest.createDocument({
+    name: 'filter-target.txt',
+    buffer: Buffer.from('过滤目标文档：TP53 与细胞凋亡的核心机制笔记。', 'utf8'),
+    autoIngest: false,
+  });
+  await ingest.ingestDocument(target.id, { embed: async (t) => t.map(() => makeVec(23)) });
+
+  const filtered = await ks.searchKnowledge({
+    query: 'TP53 细胞凋亡',
+    embed: async () => [makeVec(24)],
+    docId: target.id,
+  });
+  assert.equal(filtered.docId, target.id, 'echoes the filter');
+  assert.ok(filtered.hits.every((h) => h.docId === target.id), 'all hits within the filtered doc');
+  assert.ok(filtered.hits.length >= 1, 'filtered doc reachable');
+
+  const others = await ks.searchKnowledge({
+    query: 'TP53 细胞凋亡',
+    embed: async () => [makeVec(24)],
+    docId: 'doc_absent',
+  });
+  assert.equal(others.hits.length, 0, 'unknown/other doc filter → honest empty');
+  assert.equal(others.readyChunks, 0, 'readyChunks scoped to the filter');
+  ks.deleteDocument(target.id);
+});
+
+test('F5 降级诚实化: 纯符号查询 ftsDegraded 标注（不再静默）', async () => {
+  const r = await ks.searchKnowledge({ query: '!!!###', embed: NO_VEC });
+  assert.equal(r.ftsDegraded, true, 'MATCH syntax failure is surfaced honestly');
+});
+
+test('F5 citations: buildTurnInjection 返回注入块清单（溯源数据源）', async () => {
+  ks.setSpaceEnabled(true);
+  const on = await ks.buildTurnInjection('BASE', [{ role: 'user', content: 'TP3 与 BRCA1 互作' }], {
+    embed: async () => [],
+  });
+  assert.ok(Array.isArray(on.citations), 'citations array returned');
+  assert.ok(on.citations.length >= 1, 'injected hits exposed for tracing');
+  assert.ok(on.citations.every((c) => typeof c.docName === 'string' && typeof c.seq === 'number'), 'citation shape');
+
+  const miss = await ks.buildTurnInjection('BASE', [{ role: 'user', content: '毫不相关的查询词语组合' }], {
+    embed: async () => [],
+  });
+  assert.equal(miss.citations.length, 0, 'no hit → no citations');
+  ks.setSpaceEnabled(false);
+});
+
+test('F5 knowledge_read: 按 docId 深读分块原文（未就绪/未知 fail-closed）', async () => {
+  const { tool_knowledge_read } = require('../core/biof3-server/agent-tools/knowledge-tools.js');
+  const doc = await ingest.createDocument({
+    name: 'read-me.txt',
+    buffer: Buffer.from('整篇深读目标：TP53 通路要点，含多个分块。', 'utf8'),
+    autoIngest: false,
+  });
+  await ingest.ingestDocument(doc.id, { embed: async (t) => t.map(() => makeVec(25)) });
+  ks.setSpaceEnabled(true);
+
+  const out = await tool_knowledge_read({ docId: doc.id });
+  assert.equal(out.spaceEnabled, true);
+  assert.equal(out.document.id, doc.id);
+  assert.ok(out.chunks.length >= 1 && out.chunks[0].text.length > 0, 'chunk text returned');
+
+  const missing = await tool_knowledge_read({ docId: 'doc_none' });
+  assert.equal(missing.error, 'knowledge_document_not_found');
+  const noId = await tool_knowledge_read({});
+  assert.equal(noId.error, 'doc_id_required');
+  ks.setSpaceEnabled(false);
+  ks.deleteDocument(doc.id);
+});

@@ -57,7 +57,7 @@ const {
   tool_resident_task_read,
 } = require('./workspace-tools');
 const { tool_system_info } = require('./system-info-tools');
-const { tool_knowledge_search, tool_knowledge_status } = require('./knowledge-tools');
+const { tool_knowledge_search, tool_knowledge_status, tool_knowledge_read } = require('./knowledge-tools');
 const {
   tool_computer_snapshot,
   tool_computer_click,
@@ -162,6 +162,8 @@ const HANDLERS = {
   // BLOCK-69 — 知识空间（双通道混合检索；只读，所有访问档位可用）
   knowledge_search: tool_knowledge_search,
   knowledge_status: tool_knowledge_status,
+  // BLOCK-94 F5 — 按文档深读（只读；配合 knowledge_search 命中结果溯源全文）
+  knowledge_read: tool_knowledge_read,
 };
 
 function contract(category, sideEffect, riskTier, resources, estimatedDurationMs) {
@@ -249,6 +251,7 @@ const CONTRACTS = {
   // BLOCK-69 — 知识空间：只读检索（搜索走 embedding 供应商；status 零外部依赖）
   knowledge_search: contract('retrieval', 'none', 'R0', ['knowledge.index', 'llm.provider'], 2500),
   knowledge_status: contract('retrieval', 'none', 'R0', ['knowledge.index'], 100),
+  knowledge_read: contract('retrieval', 'none', 'R0', ['knowledge.index'], 800),
 };
 
 function cloneJson(value) {

@@ -231,12 +231,13 @@ function splitQueryTokens(query) {
     .filter(Boolean);
 }
 
-function ftsSearch(query, limit) {
+function ftsSearchRaw(query, limit) {
   const tokens = splitQueryTokens(query);
   const ftsTokens = tokens.filter((t) => !isShortToken(t));
   const shortTokens = tokens.filter(isShortToken);
   const hits = [];
   const seen = new Set();
+  let matchFailed = false;
   const pushRows = (rows) => {
     for (const row of rows) {
       if (seen.has(row.chunk_id)) continue;
@@ -255,7 +256,8 @@ function ftsSearch(query, limit) {
         .all(ftsQueryFromTokens(ftsTokens), limit);
       pushRows(rows);
     } catch {
-      // MATCH 语法不可解析（纯符号等）→ 降级 LIKE
+      // MATCH 语法不可解析（纯符号等）→ 降级 LIKE；BLOCK-94 F5 起诚实标注不再静默
+      matchFailed = true;
     }
   }
   if (shortTokens.length) {
@@ -274,7 +276,11 @@ function ftsSearch(query, limit) {
       if (hits.length >= limit) break;
     }
   }
-  return hits.slice(0, limit);
+  return { hits: hits.slice(0, limit), matchFailed };
+}
+
+function ftsSearch(query, limit) {
+  return ftsSearchRaw(query, limit).hits;
 }
 
 // ---- RRF 融合 ----
@@ -329,7 +335,7 @@ function staleEmbeddingStats() {
   return { staleChunks: row ? row.chunks : 0, staleDocs: row ? row.docs : 0 };
 }
 
-async function searchKnowledge({ query, topK = INJECT_TOPK, embed } = {}) {
+async function searchKnowledge({ query, topK = INJECT_TOPK, embed, docId } = {}) {
   const q = String(query || '').trim();
   const space = getSpace();
   const base = {
@@ -338,16 +344,22 @@ async function searchKnowledge({ query, topK = INJECT_TOPK, embed } = {}) {
     readyChunks: 0,
     hits: [],
     embeddingAvailable: true,
+    // BLOCK-94 F5：FTS MATCH 语法失败（纯符号查询等）降级 LIKE 时诚实标注
+    ftsDegraded: false,
+    // BLOCK-94 F5：按文档过滤（可选）
+    docId: docId ? String(docId) : null,
   };
   if (!q || [...q].length < QUERY_MIN_CHARS) return base;
 
+  const docFilter = base.docId ? ' AND k.doc_id = ?' : '';
+  const docParams = base.docId ? [base.docId] : [];
   const totalRow = sqlite
     .prepare(
       `SELECT COUNT(*) AS c FROM knowledge_chunks k
        JOIN knowledge_documents d ON d.id = k.doc_id
-       WHERE k.space_id = ? AND d.status = 'ready'`
+       WHERE k.space_id = ? AND d.status = 'ready'${docFilter}`
     )
-    .get(SPACE_ID);
+    .get(SPACE_ID, ...docParams);
   base.readyChunks = totalRow ? totalRow.c : 0;
   base.staleEmbedding = staleEmbeddingStats();
   if (base.readyChunks === 0) return base;
@@ -372,9 +384,9 @@ async function searchKnowledge({ query, topK = INJECT_TOPK, embed } = {}) {
                 d.name AS docName
          FROM knowledge_chunks k
          JOIN knowledge_documents d ON d.id = k.doc_id
-         WHERE k.space_id = ? AND d.status = 'ready' AND k.embedding IS NOT NULL AND k.model = ?`
+         WHERE k.space_id = ? AND d.status = 'ready' AND k.embedding IS NOT NULL AND k.model = ?${docFilter}`
       )
-      .all(SPACE_ID, EMBEDDING_MODEL);
+      .all(SPACE_ID, EMBEDDING_MODEL, ...docParams);
     vectorHits = rows
       .map((row) => ({
         chunkId: row.chunkId,
@@ -390,17 +402,20 @@ async function searchKnowledge({ query, topK = INJECT_TOPK, embed } = {}) {
   }
 
   // FTS 通道：只索引 ready 文档（写入侧保证；查询侧联表再校验一次）
-  const ftsRaw = ftsSearch(q, FTS_TOPK);
+  const ftsRaw = ftsSearchRaw(q, FTS_TOPK);
+  // BLOCK-94 F5 降级诚实化：MATCH 语法失败，或查询不含任何字母/数字/CJK（纯符号、无索引可用词）
+  base.ftsDegraded =
+    ftsRaw.matchFailed || splitQueryTokens(q).every((t) => !/[\p{L}\p{N}]/u.test(t));
   const ftsHits = [];
-  for (const hit of ftsRaw) {
+  for (const hit of ftsRaw.hits) {
     const row = sqlite
       .prepare(
         `SELECT k.id AS chunkId, k.doc_id AS docId, k.seq AS seq, k.text AS text, d.name AS docName
          FROM knowledge_chunks k
          JOIN knowledge_documents d ON d.id = k.doc_id
-         WHERE k.id = ? AND d.status = 'ready'`
+         WHERE k.id = ? AND d.status = 'ready'${docFilter}`
       )
-      .get(hit.chunkId);
+      .get(hit.chunkId, ...docParams);
     if (row) {
       ftsHits.push({ ...row, channels: { fts: hit.channels.fts } });
     }
@@ -439,12 +454,19 @@ function buildPromptBlock(hits, maxChars = INJECT_MAX_CHARS) {
 
 // ---- D4 轻按需：agent 每 turn 自动召回（启用才检索；无命中不注入任何内容）----
 
-async function buildAgentTurnBlock(query, { embed } = {}) {
+async function buildAgentTurnBlock(query, { embed, docId } = {}) {
   const space = getSpace();
-  if (!space || !space.enabled) return { block: '', usedChars: 0, hitCount: 0 };
-  const result = await searchKnowledge({ query, topK: INJECT_TOPK, embed });
+  if (!space || !space.enabled) return { block: '', usedChars: 0, hitCount: 0, hits: [] };
+  const result = await searchKnowledge({ query, topK: INJECT_TOPK, embed, docId });
   const { block, usedChars } = buildPromptBlock(result.hits);
-  return { block, usedChars, hitCount: result.hits.length };
+  // BLOCK-94 F5：citations 溯源数据（注入了哪些块），前端渲染「知识溯源」条
+  const hits = result.hits.map((h) => ({
+    docId: h.docId,
+    docName: h.docName,
+    seq: h.seq,
+    channels: h.channels,
+  }));
+  return { block, usedChars, hitCount: result.hits.length, hits };
 }
 
 // ---- BLOCK-94 F1 挂点收敛：agent-runner 与 ai-agent/chat 的同构注入逻辑单源化 ----
@@ -453,6 +475,7 @@ async function buildAgentTurnBlock(query, { embed } = {}) {
 
 async function buildTurnInjection(systemPrompt, messages, { embed } = {}) {
   let knowledgeTokens = 0;
+  let citations = [];
   try {
     const latestUserMsg = [...(Array.isArray(messages) ? messages : [])]
       .reverse()
@@ -465,10 +488,11 @@ async function buildTurnInjection(systemPrompt, messages, { embed } = {}) {
       if (knowledgeTurn.block) {
         systemPrompt += knowledgeTurn.block;
         knowledgeTokens = Math.ceil(knowledgeTurn.usedChars / 4);
+        citations = knowledgeTurn.hits || [];
       }
     }
   } catch {}
-  return { systemPrompt, knowledgeTokens };
+  return { systemPrompt, knowledgeTokens, citations };
 }
 
 // ---- D10 删除语义：单事务清库，两通道同灭；原始文件随后移除 ----

@@ -4,6 +4,7 @@ import {
   resultEditProgressForContext,
   useConversationRun,
   useConversationTodoList,
+  useConversationCitations,
 } from '@/components/copilot/conversationRunStore';
 import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
@@ -311,6 +312,8 @@ function SessionFrameView({
   const activeRun = useConversationRun(ctx.activeConvId);
   // BLOCK-97 — 任务清单（会话级存储：run 终态后末次清单保留，下一轮开始清除）
   const todoList = useConversationTodoList(ctx.activeConvId);
+  // BLOCK-94 / UI-402 — 知识溯源（本轮注入的知识块，摘要卡节渲染）
+  const citations = useConversationCitations(ctx.activeConvId);
   const durableLoop = useDurableConversationLoop(
     ctx.project.id,
     ctx.activeConvId,
@@ -369,6 +372,7 @@ function SessionFrameView({
               loop={durableLoop.loop}
               loopSummary={durableLoop.summary}
               todoList={todoList}
+              citations={citations}
               onOpenScheduled={ctx.openScheduledResults}
               onSelectJob={(jobId) => {
                 ctx.setActiveJobId(jobId);
@@ -397,6 +401,7 @@ function SessionFrameView({
               loop={durableLoop.loop}
               loopSummary={durableLoop.summary}
               todoList={todoList}
+              citations={citations}
               onOpenScheduled={ctx.openScheduledResults}
               onSelectJob={(jobId) => {
                 ctx.setActiveJobId(jobId);

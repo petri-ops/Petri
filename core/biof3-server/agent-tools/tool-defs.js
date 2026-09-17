@@ -1285,6 +1285,21 @@ const TOOL_DEFS = [
       parameters: { type: 'object', properties: {} },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'knowledge_read',
+      description:
+        '按文档整篇读取知识空间中已就绪文档的分块原文（配合 knowledge_search 命中结果溯源全文）。',
+      parameters: {
+        type: 'object',
+        properties: {
+          docId: { type: 'string', description: '文档 ID（来自 knowledge_search 命中结果的 docId 或 knowledge_status 清单）' },
+        },
+        required: ['docId'],
+      },
+    },
+  },
 ];
 
 function getToolDefs() {

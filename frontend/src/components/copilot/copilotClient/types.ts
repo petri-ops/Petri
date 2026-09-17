@@ -118,6 +118,14 @@ export interface AgentTaskTodoItem {
   status: 'pending' | 'in_progress' | 'completed';
 }
 
+/** BLOCK-94 / UI-402 — 知识溯源：本轮自动召回注入了哪些知识块（事件快照）。 */
+export interface KnowledgeCitation {
+  docId?: string;
+  docName?: string;
+  seq?: number;
+  channels?: { vector?: number; fts?: number };
+}
+
 export interface StreamChatOptions {
   messages: ChatMessage[];
   context?: CopilotContext;
@@ -192,6 +200,8 @@ export interface StreamChatOptions {
   onToolResult?: (e: ToolResultEvent) => void;
   /** BLOCK-97 — todo_write 成功回执后的整单清单快照（task_todo 事件） */
   onTaskTodo?: (items: AgentTaskTodoItem[]) => void;
+  /** BLOCK-94 / UI-402 — 知识溯源条（自动召回注入的块清单，诚实可见） */
+  onKnowledgeCitations?: (info: { citations: KnowledgeCitation[] }) => void;
   /** BLOCK-98 M4 — 用户消息插队入队通知（运行中 steer） */
   onInputQueued?: (info: { text: string; depth: number }) => void;
   /** Server announces (or creates) the active conversation */

@@ -173,7 +173,8 @@ test('schema-first loading does not capture partial act helper exports', () => {
       const { getToolDefs } = require('./core/biof3-server/agent-tools/tool-defs.js');
       const planTools = require('./core/biof3-server/agent-tools/plan-ui-tools.js');
       const actTools = require('./core/biof3-server/agent-tools/act-tools.js');
-      if (getToolDefs().length !== 58) throw new Error('unexpected tool count');
+      // BLOCK-94 F5：knowledge_read 注册，工具总数 58 → 59
+      if (getToolDefs().length !== 59) throw new Error('unexpected tool count');
       if (!actTools.testFilterExpr('5', '>3')) throw new Error('filter helper unavailable');
       const context = {};
       const result = await planTools.actOpenFigcodePlot({ figcardId: 'volcano' }, context);
@@ -261,7 +262,8 @@ test('OpenAI-compatible outbound JSON contains Provider schema only', async () =
       { baseUrl }
     );
     assert.equal(result.choices[0].message.content, 'ok');
-    assert.equal(receivedBody.tools.length, 58);
+    // BLOCK-94 F5：knowledge_read 注册，工具总数 58 → 59
+    assert.equal(receivedBody.tools.length, 59);
     const keys = collectKeys(receivedBody.tools);
     for (const key of INTERNAL_CONTRACT_KEYS) assert.equal(keys.has(key), false, `${key} leaked`);
   } finally {

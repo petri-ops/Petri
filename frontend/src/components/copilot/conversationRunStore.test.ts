@@ -32,6 +32,8 @@ vi.mock('@/lib/loop-client', async (importOriginal) => {
 import {
   __resetConversationRunsForTests,
   __resetConversationTodosForTests,
+  __resetConversationCitationsForTests,
+  getConversationCitations,
   clearConversationRun,
   getConversationRunSnapshot,
   getConversationTodoList,
@@ -1039,5 +1041,71 @@ describe('BLOCK-97 task_todo projection (conversation-level store)', () => {
     // 下一轮 run 开始 → 清除（生命周期=单次 agent 任务运行）
     start('conv-todo-2', '第二轮');
     expect(getConversationTodoList('conv-todo-2')).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// BLOCK-94 / UI-402: knowledge_citations 知识溯源投影
+// ---------------------------------------------------------------------------
+
+describe('BLOCK-94 knowledge_citations projection (conversation-level store)', () => {
+  beforeEach(() => {
+    __resetConversationRunsForTests();
+    __resetConversationCitationsForTests();
+    streamChatMock.mockReset();
+    streamChatMock.mockResolvedValue(undefined);
+  });
+
+  it('projects knowledge_citations into the conversation store, replacing wholesale', () => {
+    start('conv-cite', '这段结论哪来的');
+    const callbacks = streamChatMock.mock.calls[0][0];
+
+    callbacks.onKnowledgeCitations?.({
+      citations: [
+        { docId: 'kdoc_a', docName: '基因笔记.md', seq: 0, channels: { vector: 0.82 } },
+        { docId: 'kdoc_b', docName: '方案.pdf', seq: 2, channels: { fts: 1 } },
+      ],
+    });
+    expect(getConversationCitations('conv-cite')).toHaveLength(2);
+    expect(getConversationCitations('conv-cite')[0]).toMatchObject({ docName: '基因笔记.md', seq: 0 });
+
+    // 整单替换：下一轮注入覆盖上一轮
+    callbacks.onKnowledgeCitations?.({
+      citations: [{ docId: 'kdoc_c', docName: '新文档.md', seq: 1, channels: {} }],
+    });
+    expect(getConversationCitations('conv-cite')).toHaveLength(1);
+    expect(getConversationCitations('conv-cite')[0]?.docName).toBe('新文档.md');
+  });
+
+  it('survives run stop/reconciliation; clears only when the next run starts', () => {
+    start('conv-cite-2', '第一轮');
+    streamChatMock.mock.calls[0][0].onKnowledgeCitations?.({
+      citations: [{ docName: '旧文档', seq: 0 }],
+    });
+    expect(getConversationCitations('conv-cite-2')).toHaveLength(1);
+
+    // run 终态/对账清理快照后，末次溯源仍可见（「这段结论哪来的」可持续对照）
+    stopConversationRun('conv-cite-2');
+    clearConversationRun('conv-cite-2');
+    expect(getConversationRunSnapshot('conv-cite-2')).toBeNull();
+    expect(getConversationCitations('conv-cite-2')).toHaveLength(1);
+
+    // 下一轮 run 开始 → 清除（生命周期=单次 agent 任务运行）
+    start('conv-cite-2', '第二轮');
+    expect(getConversationCitations('conv-cite-2')).toEqual([]);
+  });
+
+  it('defends against malformed citations (filters non-object entries)', () => {
+    start('conv-cite-3', 'run');
+    const callbacks = streamChatMock.mock.calls[0][0];
+    callbacks.onKnowledgeCitations?.({
+      citations: [
+        { docName: 'ok.md', seq: 0 },
+        null,
+        'garbage',
+        { seq: 'not-a-number' },
+      ],
+    } as never);
+    expect(getConversationCitations('conv-cite-3')).toHaveLength(1);
   });
 });

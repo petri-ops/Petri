@@ -41,6 +41,35 @@ function formatBytes(bytes: number): string {
   return `${bytes} B`;
 }
 
+// BLOCK-94 F5：查询分词（≥2 字符片段）用于命中高亮
+function splitQueryTokens(query: string): string[] {
+  return String(query || '')
+    .trim()
+    .split(/[\s,，。;；!？?·、\n]+/)
+    .map((t) => t.trim())
+    .filter((t) => t.length >= 2);
+}
+
+function HighlightedText({ text, tokens }: { text: string; tokens: string[] }) {
+  if (!tokens.length || !text) return <>{text}</>;
+  const escaped = tokens
+    .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .sort((a, b) => b.length - a.length);
+  let re: RegExp;
+  try {
+    re = new RegExp(`(${escaped.join('|')})`, 'gi');
+  } catch {
+    return <>{text}</>;
+  }
+  const parts = text.split(re);
+  const isHit = new RegExp(`^(?:${escaped.join('|')})$`, 'i');
+  return (
+    <>
+      {parts.map((part, i) => (part && isHit.test(part) ? <mark key={i} className={styles.hitMark}>{part}</mark> : <React.Fragment key={i}>{part}</React.Fragment>))}
+    </>
+  );
+}
+
 export function KnowledgeSpacePanel() {
   const [state, setState] = useState<KnowledgeSpaceState | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -49,9 +78,12 @@ export function KnowledgeSpacePanel() {
   const [uploading, setUploading] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchDocId, setSearchDocId] = useState('');
   const [searching, setSearching] = useState(false);
   const [searchHits, setSearchHits] = useState<KnowledgeHit[] | null>(null);
   const [searchNote, setSearchNote] = useState<string | null>(null);
+  const [searchDegraded, setSearchDegraded] = useState(false);
+  const [searchTokens, setSearchTokens] = useState<string[]>([]);
   // BLOCK-94 F3 摄取易用：拖拽上传 + 逐文件错误聚合 + 粘贴文本入库
   const [dragActive, setDragActive] = useState(false);
   const [uploadReport, setUploadReport] = useState<{ accepted: number; rejected: Array<{ name: string; error: string }> } | null>(null);
@@ -284,10 +316,13 @@ export function KnowledgeSpacePanel() {
     if (!query || searching) return;
     setSearching(true);
     setSearchNote(null);
+    setSearchDegraded(false);
+    setSearchTokens(splitQueryTokens(query));
     try {
-      const result = await searchKnowledge(query);
+      const result = await searchKnowledge(query, undefined, searchDocId || undefined);
       setSearchHits(result.hits);
-      if (result.readyChunks === 0) setSearchNote('知识库中还没有就绪的文档。');
+      setSearchDegraded(!!result.ftsDegraded);
+      if (result.readyChunks === 0) setSearchNote('知识库中没有匹配范围下的就绪分块（可能过滤条件过窄或尚未上传）。');
       else if (result.hits.length === 0 && !result.embeddingAvailable) setSearchNote('嵌入模型不可用，仅全文通道检索且本次无命中。');
       else if (result.hits.length === 0) setSearchNote('两条检索通道均无命中。');
     } catch (e) {
@@ -296,7 +331,10 @@ export function KnowledgeSpacePanel() {
     } finally {
       setSearching(false);
     }
-  }, [searchQuery, searching]);
+  }, [searchQuery, searchDocId, searching]);
+
+  // BLOCK-94 F5：检索测试框的文档过滤下拉数据源（ready 文档）
+  const filterableDocs = documents.filter((d) => d.status === 'ready');
 
   return (
     <div
@@ -583,6 +621,19 @@ export function KnowledgeSpacePanel() {
 
       <div className={styles.searchBox}>
         <div className={styles.searchTitle}>检索测试</div>
+        {filterableDocs.length > 0 && (
+          <select
+            className={styles.searchFilter}
+            value={searchDocId}
+            onChange={(e) => setSearchDocId(e.target.value)}
+            data-testid="knowledge-search-doc-filter"
+          >
+            <option value="">全部文档</option>
+            {filterableDocs.map((d) => (
+              <option key={d.id} value={d.id}>{d.name}</option>
+            ))}
+          </select>
+        )}
         <div className={styles.searchRow}>
           <input
             className={styles.searchInput}
@@ -605,6 +656,11 @@ export function KnowledgeSpacePanel() {
           </button>
         </div>
         {searchNote && <div className={styles.searchNote}>{searchNote}</div>}
+        {searchDegraded && (
+          <div className={styles.searchNote} data-testid="knowledge-search-degraded">
+            查询语法无法进入全文索引（纯符号或过短），已降级为子串匹配。
+          </div>
+        )}
         {searchHits && searchHits.length > 0 && (
           <div className={styles.hitList} data-testid="knowledge-search-hits">
             {searchHits.map((hit) => (
@@ -617,7 +673,9 @@ export function KnowledgeSpacePanel() {
                     {hit.channels.fts != null ? '全文' : ''}
                   </span>
                 </div>
-                <div className={styles.hitText}>{hit.text.slice(0, 220)}{hit.text.length > 220 ? '…' : ''}</div>
+                <div className={styles.hitText}>
+                  <HighlightedText text={hit.text.slice(0, 220) + (hit.text.length > 220 ? '…' : '')} tokens={searchTokens} />
+                </div>
               </div>
             ))}
           </div>

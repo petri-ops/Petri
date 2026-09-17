@@ -3349,6 +3349,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-402: 知识空间专业化六面批次——检索溯源/预览/批量/PDF/拖拽/分页 (BLOCK-94，2026-09-18 in_progress，契约+组件测试绿、P6 实机后翻 verified)
+
+- **来源**：BLOCK-94-KNOWLEDGE-SPACE-PRO（用户裁决立项 2026-09-16「专业 易用 能力全面」+ 夜间队列授权）。
+- **交付面**：①F5 知识溯源——agent-runner 注入时发射 `knowledge_citations` 专用事件（经 _emit 持久化 task_events，重放可重建）→ agentTaskStream 分发 → 会话级存储（conversationCitations，run 终态后仍可见、下一轮清除）→ 摘要卡「知识溯源」节（WorkspaceCitationsSection：文档+块号+命中通道）；②F5 检索过滤+高亮+降级诚实化——/search docId 过滤、面板文档过滤下拉、命中 token 高亮（mark）、纯符号查询 ftsDegraded 提示不再静默；③F5 knowledge_read 工具（按文档深读分块原文，retrieval/none/R0）；④F4 文档预览（preview 端点分块全文+打开原文件）+批量删除/失败批量重试；⑤F3 拖拽上传+逐文件错误聚合+粘贴文本入库；⑥F1 面板分页「加载更多」+嵌入模型失配横幅。
+- **门禁**：knowledge 契约 33/33；agent-tool-registry 9/9（工具总数 58→59）；面板 8/8；conversationRunStore 48/48；CenterPanel 8/8；tsc 0；theme 4/4（门禁抓真：自造 --gewu-brand 未定义 token 已改回 --gewu-accent）。P6 实机（block94-knowledge live flow + 真实轮次溯源命中）后翻 verified。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-401: 运行中插队消息排队可见——steer 通道前端接线 (BLOCK-98 P4，2026-09-17 verified，dev Electron 真轮次实机)
 
 - **来源**：BLOCK-98 M4 输入插队（用户裁决 ZCode「边跑边补充需求」机制移植：运行中消息不拒绝而是入队，下一轮请求注入）。

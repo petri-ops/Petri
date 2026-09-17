@@ -18,6 +18,7 @@ export { getApiPrefix, getAuthHeader } from './copilotClient/apiBase';
 export { OfflineError, checkOnline, isOfflineError } from './copilotClient/offline';
 export type {
   AgentTaskTodoItem,
+  KnowledgeCitation,
   ChatMessage,
   ResultEditProgressEvent,
   StreamChatOptions,

@@ -245,6 +245,7 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
     onToolOutput,
     onToolResult,
     onTaskTodo,
+    onKnowledgeCitations,
     onInputQueued,
     onConversation,
     onTopicShift,
@@ -374,6 +375,31 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
   if (obj.event === 'task_todo') {
     // BLOCK-97 — 任务清单整单快照（todo_write 成功回执后由 agent-runner 广播）
     onTaskTodo?.(parseTaskTodoEvent(obj));
+    return;
+  }
+  if (obj.event === 'knowledge_citations') {
+    // BLOCK-94 / UI-402 — 知识溯源（自动召回注入块清单；防御式解析不炸流）
+    const citations = Array.isArray(obj.citations)
+      ? obj.citations
+          .map((c: any) =>
+            c && typeof c === 'object'
+              ? {
+                  docId: typeof c.docId === 'string' ? c.docId : undefined,
+                  docName: typeof c.docName === 'string' ? c.docName : undefined,
+                  seq: typeof c.seq === 'number' ? c.seq : undefined,
+                  channels:
+                    c.channels && typeof c.channels === 'object'
+                      ? {
+                          vector: typeof c.channels.vector === 'number' ? c.channels.vector : undefined,
+                          fts: typeof c.channels.fts === 'number' ? c.channels.fts : undefined,
+                        }
+                      : undefined,
+                }
+              : null
+          )
+          .filter(Boolean)
+      : [];
+    onKnowledgeCitations?.({ citations });
     return;
   }
   if (obj.event === 'done') {

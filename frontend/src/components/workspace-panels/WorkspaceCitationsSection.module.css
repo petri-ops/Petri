@@ -1,0 +1,50 @@
+/* BLOCK-94 / UI-402 — 摘要卡「知识溯源」节。
+   颜色全部走 --gewu-* token（亮暗双主题天然成立）；禁 slate 字面量与裸色值
+   （theme-token-contract 门禁）；section 底座复用 project-workspace.module.css
+   的 workspacePinnedSummarySection 族，不在此重复。 */
+
+.count {
+  font-size: 11px;
+  color: var(--gewu-text-tertiary);
+}
+
+.list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  min-width: 0;
+}
+
+.doc {
+  color: var(--gewu-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.seq {
+  flex: none;
+  color: var(--gewu-text-secondary);
+}
+
+.channel {
+  flex: none;
+  font-size: 10px;
+  color: var(--gewu-text-tertiary);
+  border: 1px solid var(--gewu-border);
+  border-radius: 4px;
+  padding: 0 4px;
+}

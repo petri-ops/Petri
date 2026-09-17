@@ -5,8 +5,9 @@ import type { ToolJob, Project, Dataset } from '@/lib/project-types';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { BackendStatus } from '@/lib/electron';
 import { resolveAgentCategory } from '@/lib/agentCategories';
-import type { AgentTaskTodoItem } from '@/components/copilot/copilotClient';
+import type { AgentTaskTodoItem, KnowledgeCitation } from '@/components/copilot/copilotClient';
 import { WorkspaceTodoSection } from './WorkspaceTodoSection';
+import { WorkspaceCitationsSection } from './WorkspaceCitationsSection';
 import styles from '@/pages/project-workspace.module.css';
 import { useRuntimeResourceSnapshot } from '@/hooks/useRuntimeResourceSnapshot';
 import type { ConversationLoopState } from '@/components/copilot/conversationRunStore';
@@ -41,6 +42,8 @@ export interface WorkspaceSummaryCardProps {
   loopSummary?: LoopSessionSummary | null;
   /** BLOCK-97 — 当前会话 run 的任务清单快照（task_todo 投影；无清单不渲染该节） */
   todoList?: AgentTaskTodoItem[] | null;
+  /** BLOCK-94 / UI-402 — 知识溯源节（本轮注入的知识块清单） */
+  citations?: KnowledgeCitation[] | null;
   /** BLOCK-78 P1：会话与数据资产概览（ctx 已有，零新取数） */
   conversations: ConversationSummary[];
   activeConversation: ConversationSummary | null;
@@ -78,6 +81,7 @@ export function WorkspaceSummaryCard({
   loop,
   loopSummary,
   todoList,
+  citations,
   conversations,
   activeConversation,
   datasets,
@@ -386,6 +390,9 @@ export function WorkspaceSummaryCard({
 
         {/* BLOCK-97 — 任务清单节：agent todo_write 快照，位于任务循环与任务进度之间 */}
         {todoList && todoList.length > 0 && <WorkspaceTodoSection items={todoList} />}
+
+        {/* BLOCK-94 — 知识溯源节：本轮自动召回注入的知识块，位于任务清单之后 */}
+        {citations && citations.length > 0 && <WorkspaceCitationsSection citations={citations} />}
 
         {workflow && (
           <section className={styles.workspacePinnedSummarySection}>
