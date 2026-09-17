@@ -1,0 +1,48 @@
+{
+  "name": "ui400-batch-live",
+  "startedAt": "2026-09-17T13:34:01.324Z",
+  "finishedAt": "2026-09-17T13:34:13.090Z",
+  "assertions": [
+    {
+      "name": "W0_pdf_uploaded",
+      "pass": true,
+      "detail": "HTTP 409 {\"ok\":false,\"error\":\"目标已存在\",\"code\":\"target_already_exists\"}"
+    },
+    {
+      "name": "V0_files_tab_opened",
+      "pass": true,
+      "detail": "clicked_files_tab"
+    },
+    {
+      "name": "W3_context_ring_initial",
+      "pass": true,
+      "detail": "{\"found\":true,\"hasDash\":false,\"svg\":true}"
+    },
+    {
+      "name": "W4_tree_resize_handle",
+      "pass": true,
+      "detail": "resize handle present (320px clamp removed)"
+    },
+    {
+      "name": "W1_pdf_file_found",
+      "pass": true,
+      "detail": "pdf:1:预览 ui400-sample.pdf"
+    },
+    {
+      "name": "W1_pdf_object_rendered",
+      "pass": true,
+      "detail": "{\"present\":true,\"w\":467,\"h\":960}"
+    },
+    {
+      "name": "W2_download_button_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "W2_download_landed",
+      "pass": true,
+      "detail": "added=[\"ui400-sample-2.pdf\"] dir=C:\\Users\\Admin\\Downloads"
+    }
+  ],
+  "allPass": true
+}

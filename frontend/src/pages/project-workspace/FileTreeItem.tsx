@@ -10,6 +10,9 @@ import type { ActiveWorkspaceFile, FileEntry } from './types';
 import { FileTreeList } from './FileTreeList';
 import { isCsvFile, isPdfFile, isHtmlFile, isJsonFile, withReportTheme, detectOfficeKind, fallbackKindForExtension, formatSize } from './helpers';
 
+// UI-400-3 — 树内拖拽内部 MIME 协议常量导出：RightFileTree 根目录落点复用同一协议
+export const TREE_DRAG_MIME = 'application/x-gewu-tree-item';
+
 export function FileTreeItem({
   entry,
   fullPath,
@@ -80,7 +83,7 @@ export function FileTreeItem({
 
   const fileUrl = fileUrlFor(fullPath);
   const isActive = entry.type === 'file' && activePath === fullPath;
-  const DRAG_MIME = 'application/x-gewu-tree-item';
+  const DRAG_MIME = TREE_DRAG_MIME;
   const isDropTarget = entry.type === 'dir' && Boolean(onDropToDir);
 
   const handleDragStart = useCallback((event: React.DragEvent) => {

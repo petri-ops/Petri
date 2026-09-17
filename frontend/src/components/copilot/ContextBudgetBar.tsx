@@ -115,12 +115,11 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
   const messageBudget = contextWindow > 0 ? contextWindow - 8192 : 0;
 
   // Content: ring only (no label)
+  // UI-400-5 — 初始/待机也渲染 0% 空环，不再显示「—」占位（用户裁决：哪怕初始状态也该有 0%）
   const buttonContent = hasData ? (
     <Ring pct={pct} color={color} />
-  ) : contextWindow > 0 ? (
-    <Ring pct={0} color="#9ca3af" />
   ) : (
-    <span style={{ fontSize: 'var(--gewu-font-size-sm)', color: '#9ca3af', fontFamily: 'monospace' }}>—</span>
+    <Ring pct={0} color="#9ca3af" />
   );
 
   return (

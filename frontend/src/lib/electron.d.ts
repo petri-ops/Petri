@@ -369,6 +369,11 @@ declare global {
           workspacePath: string,
           relativePath: string
         ) => Promise<{ ok: boolean; error?: string }>;
+        /** UI-400-2 — 导出/下载：主进程保存对话框 + 受限本机来源流式写盘。 */
+        downloadFromUrl: (
+          url: string,
+          name: string
+        ) => Promise<{ ok: boolean; path?: string; canceled?: boolean; error?: string }>;
         /** BLOCK-53 P1 — 拖拽目录直达：把拖入窗口的 File 对象解析为磁盘绝对路径（拿不到返回 null）。 */
         pathForFile: (file: File) => string | null;
       };

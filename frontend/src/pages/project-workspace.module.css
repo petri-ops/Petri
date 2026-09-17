@@ -7410,3 +7410,84 @@ body:global(.gewu-resizing-columns) * {
   margin-right: 6px;
   flex-shrink: 0;
 }
+
+/* ============================================================
+   UI-400 批次增量（2026-09-17）
+   ============================================================ */
+/* UI-400-3 — 根目录落点高亮：树内拖拽悬停于背景/非目录行时整面板描边 */
+.workspaceFileTreeRootDropActive {
+  outline: 2px dashed var(--gewu-accent);
+  outline-offset: -2px;
+}
+
+/* UI-400-6 — Markdown 预览目录（TOC）：左上角悬浮开关 + 左侧悬浮面板 */
+.workspaceMdTocToggle {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-secondary);
+  cursor: pointer;
+}
+.workspaceMdTocToggle:hover {
+  border-color: var(--gewu-border-strong);
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
+}
+.workspaceMdTocToggle[aria-pressed='true'] {
+  color: var(--gewu-accent);
+  border-color: var(--gewu-accent);
+}
+.workspaceMdTocPanel {
+  position: absolute;
+  top: 42px;
+  left: 10px;
+  bottom: 14px;
+  width: 220px;
+  z-index: 5;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px 6px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 10px;
+  background: var(--gewu-bg-subtle);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+.workspaceMdTocItem {
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-size: var(--gewu-font-size-sm, 12px);
+  color: var(--gewu-text-secondary);
+  padding: 3px 8px;
+  border-radius: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.workspaceMdTocItem:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
+}
+.workspaceMdTocItem[data-level='1'] {
+  font-weight: 600;
+  color: var(--gewu-text);
+}
+.workspaceMdTocItem[data-level='2'] {
+  padding-left: 16px;
+}
+.workspaceMdTocItem[data-level='3'] {
+  padding-left: 26px;
+  color: var(--gewu-text-tertiary);
+}

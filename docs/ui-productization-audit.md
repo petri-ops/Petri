@@ -3349,6 +3349,18 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-400: 文件体验六项批次——PDF 预览/导出下载/拖拽到根/树宽放开/上下文环初始态/MD 目录 (2026-09-17 verified，dev Electron + WSL 真节点实机 8/8 allPass)
+
+- **来源**：用户六项反馈①「文件中 PDF 不能预览查看」②「文件没有导出按钮，ssh 连接的文件内容不能下载到本地和通过选中拖拽到本地（但拖拽上传可以）」③「通过拖拽不能在路径区域内移动文件，需要点具体文件夹的名字而不是展开区域，没办法拖拽移动到根路径」④「拖拽文件树的宽度有最大限制吗 能否优化或者不限制」⑤「会话区域的上下文用量图标默认是 - 我希望有内容哪怕初始状态也应该是 0%」⑥「md 文件预览没有目录按钮 悬挂在左侧 点击可以隐藏也可以展开」。
+- **修复①PDF**：主窗口 webPreferences 缺 `plugins: true`，Chromium PDF 查看器被禁 → `<object type=application/pdf>` 空白。加一行启用（src/main/_window-create.js）。
+- **修复②导出/下载**：预览头部新增「下载到本地」按钮（data-testid=file-download，本地/ssh 同一通道）；新增 IPC 通道 `file:download-from-url`（channels+preload+file-dialog 三层，通道注册表守护 22/22）——主进程静默落 Downloads（重名自动 -2 后缀）+ 流式写盘 + 来源白名单（仅 127.0.0.1/localhost 的 http(s)）。blob 下载路线实证不可用（Electron 以 GUID.tmp 落盘无文件名）作为兜底保留。树行 OS 拖出导出（BLOCK-91 DownloadURL）原样在。
+- **修复③拖拽到根**：树面板容器新增根目录落点（TREE_DRAG_MIME 协议常量自 FileTreeItem 导出）——拖到背景空区/文件行/非目录行 = 移动（Ctrl=复制）到根路径，拖拽悬停整面板 accent 描边高亮；目录行自身 drop 仍 stopPropagation 精确落该目录。
+- **修复④树宽**：移除 JS 侧 320px 钳制（仅保留 96px 最小值），上限交给容器 `maxWidth: 65%` 兜底。
+- **修复⑤上下文环**：ContextBudgetBar 无数据分支不再渲染「—」占位，统一渲染 SVG 圆环（待机=0% 空环灰）；详情气泡头部待机也显示 `0%`，消息 tokens 初始显示 0。
+- **新增⑥MD 目录**：WorkspaceFilePreview 解析 1-3 级标题（跳过 ``` 围栏），左上角悬浮开关（panel-left 图标，aria-pressed）+ 左侧悬浮目录面板（层级缩进、悬停高亮、点击平滑滚动到对应标题，跳转按渲染 DOM h1-h3 顺序对齐）；文件切换自动复位展开态。
+- **证据**：实机 `scripts/ui400-batch-live.cjs` **8/8 allPass**（`acceptance/ui-400/`，ssh 真节点 SingleCell 项目）——W0 经 BLOCK-90 fs/upload 上传最小合法 PDF（幂等 409 接受）；W1 点击后 `<object>` 实渲染 467×960px（旧代码空白）；W2 点击下载按钮 → Downloads 落盘 `ui400-sample-2.pdf`（含重名 -2 后缀实证）；W3 上下文按钮 svg 环在场且无「—」；W4 拖拽把手在场；+右栏「文件」tab 自动开启步骤。ipc-channels-registry 22/22 + security-hardening 全过 + 前端六套件 63/63 + tsc 0 + theme-token-contract 4/4（新增 CSS 全 --gewu-* token）。
+- **边界**：下载为静默落 Downloads（另存为走「系统应用打开后另存」）；OS 级拖出导出沿用 BLOCK-91 DownloadURL 未动；本地项目轮询/其余预览类型零改动。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-399: SSH 文件树切换文件不再整树重拉 (2026-09-17 verified，dev Electron + WSL 真节点实机 5/5 allPass)
 
 - **来源**：用户反馈「ssh 连接的情况下每次点击一个文件打开预览，这个路径对应的文件都会重新刷新一遍……切换文件就能看到路径文件刷新重新打开一遍，使用体验不好 需要优化？？？」。

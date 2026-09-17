@@ -57,6 +57,7 @@ const CHANNELS = {
     openDialog: 'file:open-dialog',
     openPath: 'file:open-path',
     openWorkspaceFile: 'file:open-workspace-file',
+    downloadFromUrl: 'file:download-from-url',
     saveDialog: 'file:save-dialog',
     validateDirectory: 'file:validate-directory',
   },

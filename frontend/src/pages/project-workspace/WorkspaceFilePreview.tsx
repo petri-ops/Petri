@@ -44,6 +44,22 @@ import { BinaryPreviewCard } from './BinaryPreviewCard';
 import { OfficePreviewPane } from './OfficePreviewPane';
 import { isCsvFile, isPdfFile, isHtmlFile, isJsonFile, withReportTheme, detectOfficeKind, fallbackKindForExtension, formatSize } from './helpers';
 
+// UI-400-6 — Markdown 目录解析：1-3 级标题，跳过 ```/~~~ 围栏内伪标题。
+// 点击跳转按 DOM 顺序对齐（渲染后的 h1-h3 顺序即解析顺序），不做 id 注入。
+function parseMdHeadings(text: string): Array<{ level: 1 | 2 | 3; text: string }> {
+  const items: Array<{ level: 1 | 2 | 3; text: string }> = [];
+  let inFence = false;
+  for (const raw of text.split('\n')) {
+    const line = raw.trimEnd();
+    if (/^\s*(```|~~~)/.test(line)) { inFence = !inFence; continue; }
+    if (inFence) continue;
+    const m = /^(#{1,3})\s+(.+?)\s*#*\s*$/.exec(line);
+    if (!m) continue;
+    items.push({ level: m[1].length as 1 | 2 | 3, text: m[2].replace(/`/g, '').trim() });
+  }
+  return items;
+}
+
 export function WorkspaceFilePreview({
   file,
   refreshVersion,
@@ -78,6 +94,8 @@ export function WorkspaceFilePreview({
   const savedMtimeRef = useRef<number | null>(null);
   // BLOCK-21 — Markdown view toggle: 'edit' | 'preview'; resets on file switch
   const [mdView, setMdView] = useState<'edit' | 'preview'>('preview');
+  // UI-400-6 — MD 预览左侧悬浮目录开关（默认展开，点击隐藏/再展开）
+  const [mdTocOpen, setMdTocOpen] = useState(true);
   // BLOCK-42 — pending-scroll 消费侧挂载（跳转/pulse 联动）
   const editorApiRef = useRef<EditorApi | null>(null);
   const previewBodyRef = useRef<HTMLDivElement | null>(null);
@@ -173,7 +191,20 @@ export function WorkspaceFilePreview({
     setTextSaved('');
     setMdView('preview');
     savedMtimeRef.current = null;
+    setMdTocOpen(true);
   }, [file?.path]);
+
+  // UI-400-6 — MD 目录：预览态解析 1-3 级标题；跳转按渲染 DOM 的 h1-h3 顺序对齐
+  const mdTocItems = useMemo(
+    () => (isMarkdown && mdView === 'preview' && status === 'ready' ? parseMdHeadings(text) : []),
+    [isMarkdown, mdView, status, text]
+  );
+  const jumpToMdHeading = useCallback((index: number) => {
+    const nodes = previewBodyRef.current?.querySelectorAll(
+      '.workspaceMarkdownPreview h1, .workspaceMarkdownPreview h2, .workspaceMarkdownPreview h3'
+    );
+    nodes?.[index]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   const handleSaveCurrent = useCallback(async () => {
     if (!file) return;
@@ -443,6 +474,38 @@ export function WorkspaceFilePreview({
         <div className={styles.workspaceSaveErrorStrip} role="alert" data-testid="ssh-save-error">
           {saveError}
         </div>
+      )}
+      {/* UI-400-6 — MD 预览左侧悬浮目录：开关悬挂左上角，点击隐藏/再展开，条目点击平滑跳转 */}
+      {isMarkdown && status === 'ready' && mdView === 'preview' && mdTocItems.length > 0 && (
+        <>
+          <button
+            type="button"
+            className={styles.workspaceMdTocToggle}
+            onClick={() => setMdTocOpen((v) => !v)}
+            aria-pressed={mdTocOpen}
+            aria-label="文档目录"
+            title={mdTocOpen ? '隐藏目录' : '展开目录'}
+            data-testid="md-toc-toggle"
+          >
+            <Icon name="panel-left" size={14} />
+          </button>
+          {mdTocOpen && (
+            <nav className={styles.workspaceMdTocPanel} aria-label="文档目录">
+              {mdTocItems.map((item, index) => (
+                <button
+                  key={`${item.text}-${index}`}
+                  type="button"
+                  className={styles.workspaceMdTocItem}
+                  data-level={item.level}
+                  title={item.text}
+                  onClick={() => jumpToMdHeading(index)}
+                >
+                  {item.text}
+                </button>
+              ))}
+            </nav>
+          )}
+        </>
       )}
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
     </div>

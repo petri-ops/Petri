@@ -16,6 +16,7 @@ import { FileTreeList } from './FileTreeList';
 import { WorkspaceFilePreview } from './WorkspaceFilePreview';
 import { FileTreeContextMenu, FileTreeDialogHost, type FileTreeDialog, type FileTreeMenuAction, type FileTreeMenuTarget } from './FileTreeOpsOverlay';
 import { fsImportFrom, fsMkdir, fsMove, fsCopy, fsUpload, joinPath, uniqueTargetName, type DraggedTreeItem } from './fileOps';
+import { TREE_DRAG_MIME } from './FileTreeItem';
 
 // BLOCK-96 F2 — 树游标分页：每目录限量拉取，截断目录尾部出现「加载更多」。
 // 文件操作/签名对账仍走全量 fetchDir（唯一名预检与 mtime 签名不能吃截断）。
@@ -65,6 +66,10 @@ export function RightFileTree({
   // BLOCK-89 / UI-378 — 文件操作（右键菜单 + 拖拽）状态
   const [menuTarget, setMenuTarget] = useState<FileTreeMenuTarget | null>(null);
   const [dialog, setDialog] = useState<FileTreeDialog | null>(null);
+  // UI-400-3 — 根目录落点：拖到树面板背景/文件行/非目录区 = 移动（Ctrl=复制）到根路径。
+  // 此前只有目录行接受 drop（还需精准压在那一行上），没有「拖到根」的任何落点。
+  const [rootDropActive, setRootDropActive] = useState(false);
+  const rootDragDepthRef = useRef(0);
 // BLOCK-90 — OS 拖入目录递归走树（ssh 分片上传用；本地项目走服务端 fs_cp 递归，不走这里）。
 interface OsWalkItem { file: File; relPath: string; }
 
@@ -279,6 +284,37 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     await runTreeOp(() => op(project.id, item.path, toPath));
   }, [fetchDir, project.id, runTreeOp]);
 
+  // UI-400-3 — 根目录落点（树面板容器级）：目录行自身接受 drop 并 stopPropagation，
+  // 冒泡到这里的只有背景空区/文件行/非目录行 → 语义=移动（Ctrl=复制）到根路径。
+  const handleRootDragEnter = useCallback((event: React.DragEvent) => {
+    if (!event.dataTransfer.types.includes(TREE_DRAG_MIME)) return;
+    rootDragDepthRef.current += 1;
+    setRootDropActive(true);
+  }, []);
+  const handleRootDragOver = useCallback((event: React.DragEvent) => {
+    if (!event.dataTransfer.types.includes(TREE_DRAG_MIME)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = event.ctrlKey ? 'copy' : 'move';
+  }, []);
+  const handleRootDragLeave = useCallback((event: React.DragEvent) => {
+    if (!event.dataTransfer.types.includes(TREE_DRAG_MIME)) return;
+    rootDragDepthRef.current = Math.max(0, rootDragDepthRef.current - 1);
+    if (rootDragDepthRef.current === 0) setRootDropActive(false);
+  }, []);
+  const handleRootDrop = useCallback((event: React.DragEvent) => {
+    if (!event.dataTransfer.types.includes(TREE_DRAG_MIME)) return;
+    event.preventDefault();
+    rootDragDepthRef.current = 0;
+    setRootDropActive(false);
+    const raw = event.dataTransfer.getData(TREE_DRAG_MIME);
+    if (!raw) return;
+    try {
+      const item = JSON.parse(raw) as { path: string; name: string; type: 'file' | 'dir' };
+      if (!item.path || !item.path.includes('/')) return; // 已在根目录
+      void handleDropToDir(item, '', event.ctrlKey);
+    } catch { /* 载荷损坏：忽略 */ }
+  }, [handleDropToDir]);
+
   // ── BLOCK-90 — OS 拖入导入 ──────────────────────────────────────────
   // 工作区窗口级 drop 接管（home 页 BLOCK-53 的姊妹面：/ =拖目录建项目，/project =导入文件）。
   // 落点：文件树目录行（data-tree-dir）=该目录，其余=根目录；重名 uniqueTargetName 自动 -2。
@@ -404,15 +440,38 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     }
   }, [activeFile, project.workspacePath]);
 
-  const downloadActiveFile = useCallback(() => {
+  // UI-400-2 — 导出/下载到本地：优先走主进程 IPC（保存对话框 + 流式写盘，
+  // Electron 对 blob 下载会以 GUID.tmp 落盘且无文件名）；桥能力缺失时兜底
+  // fetch→blob objectURL（浏览器等非 Electron 场景）。
+  const downloadActiveFile = useCallback(async () => {
     if (!activeFile || !activePreviewUrl) return;
-    const link = document.createElement('a');
-    link.href = activePreviewUrl;
-    link.download = activeFile.name;
-    link.rel = 'noopener';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    const filesBridge = getBridge('files');
+    if (filesBridge?.downloadFromUrl) {
+      setOpsError('');
+      try {
+        const result = await filesBridge.downloadFromUrl(activePreviewUrl, activeFile.name);
+        if (result && result.ok === false && !result.canceled) {
+          setOpsError(`下载失败：${result.error || '未知错误'}`);
+        }
+        return;
+      } catch { /* 桥异常落兜底 */ }
+    }
+    try {
+      const resp = await fetch(activePreviewUrl);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = activeFile.name;
+      link.rel = 'noopener';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    } catch (error) {
+      setOpsError(`下载失败：${(error as Error).message || '未知错误'}`);
+    }
   }, [activeFile, activePreviewUrl]);
 
   const breadcrumbSegments = useMemo(
@@ -440,7 +499,9 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     const startX = event.clientX;
     const startWidth = treeWidth;
     const onMove = (moveEvent: MouseEvent) => {
-      setTreeWidth(Math.min(320, Math.max(96, startWidth - (moveEvent.clientX - startX))));
+      // UI-400-4 — 放开 320px 上限：只保留 96px 最小值，上限交给容器 maxWidth:65%
+      // （用户反馈：文件树宽度有最大限制，能否不限制）
+      setTreeWidth(Math.max(96, startWidth - (moveEvent.clientX - startX)));
     };
     const onUp = () => {
       document.removeEventListener('mousemove', onMove);
@@ -534,6 +595,18 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
           <button
             type="button"
             className={styles.workspaceTreeToggle}
+            onClick={downloadActiveFile}
+            title="下载到本地"
+            aria-label="下载到本地"
+            data-testid="file-download"
+          >
+            <Icon name="download" size={13} />
+          </button>
+        )}
+        {activeFile && (
+          <button
+            type="button"
+            className={styles.workspaceTreeToggle}
             onClick={() => onCloseFile(activeFile.path)}
             title={openFiles.length > 1 ? `关闭当前文件（另有 ${openFiles.length - 1} 个已打开文件）` : '关闭当前文件'}
             aria-label="关闭当前文件"
@@ -565,7 +638,13 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
               onMouseDown={startTreeResize}
               title="拖拽调整文件树宽度"
             />
-            <div className={styles.workspaceFileTreePane}>
+            <div
+              className={`${styles.workspaceFileTreePane} ${rootDropActive ? styles.workspaceFileTreeRootDropActive : ''}`}
+              onDragEnter={handleRootDragEnter}
+              onDragOver={handleRootDragOver}
+              onDragLeave={handleRootDragLeave}
+              onDrop={handleRootDrop}
+            >
               {loading ? (
                 <p className={styles.panelEmpty}>加载文件树…</p>
               ) : tree.length === 0 ? (

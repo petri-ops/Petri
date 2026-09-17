@@ -89,6 +89,9 @@ async function createWindow({
       webviewTag: true,
       sandbox: true,
       webSecurity: true,
+      // UI-400-1 — 启用 Chromium PDF 查看器插件：文件预览的 <object type="application/pdf">
+      // 此前因插件禁用渲染空白（用户报告「文件中 PDF 不能预览查看」）。
+      plugins: true,
     },
   });
 
