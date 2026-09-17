@@ -63,6 +63,8 @@ export interface SimpleMessage {
   pending?: boolean;
   error?: boolean;
   ts?: string;
+  /** BLOCK-95 A1 — 持久化消息的 DB id（msg_*）；run 投影的临时消息无此字段。 */
+  id?: string;
   toolActivities?: ToolActivityItem[];
   processingDurationMs?: number;
   statusMessage?: string;
@@ -155,6 +157,7 @@ export function restoreSimpleMessage(message: ConversationMessage): SimpleMessag
     summaryUnavailable: presentation.summaryUnavailable,
     retryToolJobId: presentation.retryToolJobId,
     ts: message.ts,
+    id: message.id,
     toolActivities,
     progressUpdates: restoreProgressUpdates(meta.progressUpdates),
     resultEditProgress: restoreResultEditProgressEvents(meta.resultEditProgress),

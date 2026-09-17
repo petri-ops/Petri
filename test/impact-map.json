@@ -1729,6 +1729,27 @@
       "frontendRelated": true,
       "classifiesScripts": true,
       "scriptRole": "development-smoke"
+    },
+    {
+      "id": "block95-session-io",
+      "note": "BLOCK-95 会话信息流 I/O 优化：A1 游标加载（ai-conversations 路由 messages 端点游标协议 + copilotConversationsClient 分页信封 + useConversationResume 分页簇）+ A3 滚动守卫（SimpleChat 回底浮标）+ A4 话题小节分隔（conversationRunStore onTopicShift→gewu 事件→SimpleChat 分隔卡）。P2-P5 面落地时续登记。",
+      "patterns": [
+        "core/biof3-server/routes/ai-conversations.js",
+        "frontend/src/components/copilot/copilotConversationsClient.ts",
+        "frontend/src/components/copilot/SimpleChat/hooks/useConversationResume.ts",
+        "frontend/src/components/copilot/SimpleChat/hooks/useConversationResume.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/types.ts",
+        "frontend/src/lib/events.ts",
+        "frontend/src/components/copilot/conversationRunStore.ts",
+        "test/block95-messages-cursor.test.mjs",
+        "acceptance/block-95/**"
+      ],
+      "tests": [
+        "test/block95-messages-cursor.test.mjs"
+      ],
+      "commands": [],
+      "classifiesScripts": true,
+      "scriptRole": "product"
     }
   ]
 }

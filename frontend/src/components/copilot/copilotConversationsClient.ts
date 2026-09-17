@@ -95,6 +95,40 @@ export async function getConversationMessages(
   }
 }
 
+/** BLOCK-95 A1 — 分页信封：最新窗口 + 向上游标。before=上一页响应的 nextBefore。 */
+export interface ConversationMessagesPage {
+  messages: ConversationMessage[];
+  hasMore: boolean;
+  nextBefore: number | null;
+  /** 本批第一条（最旧）在全量消息中的 0-based 序号；fork-from-message 的
+   *  untilIndex 由「窗口内 index」换算为「全量 index」时使用。 */
+  windowOffset: number;
+}
+
+export async function getConversationMessagesPage(
+  id: string,
+  limit = 200,
+  before?: number | null
+): Promise<ConversationMessagesPage | null> {
+  try {
+    let url =
+      getApiPrefix() + '/ai/conversations/' + encodeURIComponent(id) + '/messages?limit=' + limit;
+    if (before) url += '&before=' + before;
+    const resp = await fetch(url, { headers: getAuthHeader() });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (data.status !== 'ok') return null;
+    return {
+      messages: data.messages || [],
+      hasMore: Boolean(data.hasMore),
+      nextBefore: typeof data.nextBefore === 'number' ? data.nextBefore : null,
+      windowOffset: typeof data.windowOffset === 'number' ? data.windowOffset : 0,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function renameConversation(id: string, title: string): Promise<boolean> {
   try {
     const resp = await fetch(

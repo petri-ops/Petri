@@ -3349,6 +3349,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-394: 会话信息流三件——长会话游标加载 + 回到底部浮标 + 话题小节分隔 (2026-09-17 in_progress，dev Electron 实机验证中)
+
+- **来源**：BLOCK-95-SESSION-IO P1（用户裁决原话「需要新建一个block用来优化 信息流 I/O 主要目的是让每个session的连贯性好看易读 还有一个方面是性能 省token」+ 队列序启动裁决「1 · BLOCK-95 会话 I/O」）。
+- **交付面**：① A1 长会话游标加载——messages 端点默认窗口翻转为「最新 limit 条」（修复 ASC+LIMIT 拿最旧 200 条、长会话看不到最近消息的真缺陷），rowid keyset 游标（fork 同 ts 会话 ts 游标会丢页）+ hasMore/nextBefore/windowOffset 信封；前端 useConversationResume 主加载走分页信封 + loadOlder 向上补页（prepend 后视口位置保持）+ 对账/镜像重建链 mergeKeepOlderPrefix 保留已加载旧页；windowOffset 顺带修复 fork-from-message 长会话 index 错位（现存缺陷顺手销号）。② A3 滚动守卫——用户上翻距底 >120px 即暂停自动滚底，浮标「回到底部」（锚定输入区顶缘 bottom:100%）一键回底恢复跟随；发送消息/切换会话视为回底意图。③ A4 话题小节分隔——接通断裂的 topic_shift 前端消费链（onTopicShift 原无人订阅、dismissTopicShift 原无调用方）：conversationRunStore 转发 SSE 事件 → gewu 事件总线 → SimpleChat 分隔卡渲染（持久真值=DB last_topic_shift_at，会话切换后由列表行重建）。
+- **证据**：契约 test/block95-messages-cursor.test.mjs 4/4（最新窗口翻转/游标两批拼接全量不重不漏/fork 同 ts 分页/404+limit 钳制）+ useConversationResume 6/6（分页信封/loadOlder prepend/mergeKeepOlderPrefix 保留前缀）+ copilot 全套 37 文件 293 过 + tsc 0 + theme-token-contract 4/4（新样式全 --gewu-* token）。
+- **附带抓真**：useConversationResume 主加载 effect deps 含调用方 setter（不稳定引用时 effect 重跑→setState→重渲染→死循环），deps 收窄 [conversationId] + setter 经 ref 读取。
+- **边界**：A2 渲染性能/B4/B5 归 P5；压缩可视化归 P3（A5 与 B2 绑定交付）；实机长会话真轮次归 P1 收口门禁。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-393: 设置页头改「← 返回」——移除页面级关闭钮，与 Skills/知识空间页头同形 (2026-09-17 verified，dev Electron 边界内；用户复看确认)
 
 - **来源**：用户裁决「设置 这里 去掉右侧的 关闭按钮 之后在左侧加上 返回 按钮 和Skills 知识空间 风格UI 保持一致」。

@@ -119,9 +119,31 @@ module.exports = function mountConversations(app) {
       const conv = await adb.prepare('SELECT id FROM copilot_conversations WHERE id=? AND user_id=?').get(req.params.id, userId);
       if (!conv) return res.status(404).json({status:'error', error:'not_found'});
       const limit = Math.max(1, Math.min(500, parseInt(req.query.limit) || 100));
-      const rows = await adb.prepare('SELECT id, role, content, meta_json, ts FROM copilot_messages WHERE conversation_id=? ORDER BY ts ASC LIMIT ?').all(req.params.id, limit);
-      const items = rows.map(r => ({...r, meta: r.meta_json ? (() => { try { return JSON.parse(r.meta_json); } catch { return null; } })() : null}));
-      res.json({status:'ok', messages: items});
+      // BLOCK-95 A1 — 游标分页：默认返回最新 limit 条（修复旧语义「最旧 limit 条」
+      // 导致长会话看不到最近消息）；?before=<rowid> 向上取更旧一页。
+      // 游标用 rowid 而非 ts：fork 会话全部消息同 ts（同 now 批量插入），ts 游标会丢页。
+      const before = req.query.before ? Math.max(1, parseInt(req.query.before, 10) || 0) : 0;
+      const pageSql = 'SELECT id, role, content, meta_json, ts, rowid AS _rid FROM copilot_messages WHERE conversation_id=?'
+        + (before ? ' AND rowid < ?' : '')
+        + ' ORDER BY rowid DESC LIMIT ?';
+      const pageArgs = before ? [req.params.id, before, limit + 1] : [req.params.id, limit + 1];
+      const rows = await adb.prepare(pageSql).all(...pageArgs);
+      const hasMore = rows.length > limit;
+      const page = rows.slice(0, limit);
+      page.reverse(); // 展示序 = 时间升序
+      let windowOffset = 0;
+      let nextBefore = null;
+      if (page.length > 0) {
+        const minRid = page[0]._rid;
+        if (hasMore) nextBefore = minRid;
+        const cnt = await adb.prepare('SELECT COUNT(*) AS c FROM copilot_messages WHERE conversation_id=? AND rowid < ?').get(req.params.id, minRid);
+        windowOffset = cnt.c;
+      }
+      const items = page.map(r => {
+        const { _rid, ...rest } = r;
+        return {...rest, meta: r.meta_json ? (() => { try { return JSON.parse(r.meta_json); } catch { return null; } })() : null};
+      });
+      res.json({status:'ok', messages: items, hasMore, nextBefore, windowOffset, total: windowOffset + items.length});
     } catch (e) { res.status(500).json({status:'error', error: e.message}); }
   });
 

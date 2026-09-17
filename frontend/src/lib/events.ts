@@ -104,6 +104,13 @@ export const gewuEvents = {
    * 面板切到 detail.runId。
    */
   agentOpenInRail: 'gewu:agent-open-in-rail',
+
+  /**
+   * BLOCK-95 A4 — 后端 topic_shift 检测命中（SSE onTopicShift）时由
+   * conversationRunStore 派发；SimpleChat 订阅后即时插入话题小节分隔，
+   * 并 refreshConversations 让 DB（last_topic_shift_at）成为持久真值。
+   */
+  conversationTopicShift: 'gewu:conversation-topic-shift',
 } as const;
 
 export interface ConversationForkedDetail {
@@ -111,6 +118,14 @@ export interface ConversationForkedDetail {
   newConversationId: string;
   /** Project ID of the forked conversation */
   projectId: string;
+}
+
+/** BLOCK-95 A4 — 话题转移事件载荷。 */
+export interface ConversationTopicShiftDetail {
+  conversationId: string;
+  reason: string;
+  /** 检测命中时间（ISO，本地接收时刻）。 */
+  at: string;
 }
 
 /**
@@ -242,6 +257,7 @@ export type GewuEventMap = {
   [gewuEvents.agentOpenInRail]: AgentOpenInRailDetail;
   [gewuEvents.selectionQuote]: SelectionQuoteDetail;
   [gewuEvents.imageQuote]: ImageQuoteDetail;
+  [gewuEvents.conversationTopicShift]: ConversationTopicShiftDetail;
 };
 
 /** BLOCK-34 P3: 后台进程启动事件载荷。 */

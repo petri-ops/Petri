@@ -281,6 +281,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     | 'onToolResult'
     | 'onLoopPhase'
     | 'onLoopIteration'
+    | 'onTopicShift'
     | 'onDone'
     | 'onError'
     | 'onStreamReconnecting'
@@ -520,6 +521,19 @@ export function startConversationRun(options: StartConversationRunOptions): bool
             // 事件总线失败不阻塞工具结果处理
           }
         }
+      }
+    },
+    // BLOCK-95 A4 — 话题转移检测命中 → 事件总线广播（SimpleChat 插小节分隔 +
+    // refreshConversations 固化到 DB 真值）。store 不持有该状态（低频一次性信号）。
+    onTopicShift: (info) => {
+      try {
+        dispatchGewuEvent(gewuEvents.conversationTopicShift, {
+          conversationId,
+          reason: info.reason,
+          at: new Date().toISOString(),
+        });
+      } catch {
+        // 事件总线失败不阻塞流处理
       }
     },
     onLoopPhase: (info) => {

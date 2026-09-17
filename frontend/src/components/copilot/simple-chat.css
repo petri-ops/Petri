@@ -3886,3 +3886,67 @@
   background: var(--gewu-accent-soft, var(--gewu-bg-subtle));
   color: var(--gewu-accent);
 }
+
+/* ============================================================
+ * BLOCK-95 P1 — A1 游标加载 / A3 滚动守卫 / A4 话题小节分隔
+ * 颜色全部走 --gewu-* token（gewu-css-theme 铁律：禁裸色值/禁遗留家族）
+ * ============================================================ */
+
+/* A1 — 向上补页顶部加载指示 */
+.sc-loading-older {
+  text-align: center;
+  padding: 10px 0 2px;
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-body-sm);
+}
+
+/* A4 — 话题小节分隔卡：轻量胶囊，随消息流左对齐呼吸感 */
+.sc-topic-shift {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  margin: 6px 0 2px;
+  padding: 4px 12px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 999px;
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-body-sm);
+}
+
+.sc-topic-shift-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 420px;
+}
+
+/* A3 — 回到底部浮标：锚定输入区顶缘（bottom:100%），不随消息滚动 */
+.sc-input-area {
+  position: relative;
+}
+
+.sc-jump-bottom {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--gewu-border-strong);
+  border-radius: 999px;
+  background: var(--gewu-bg-elevated);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body-sm);
+  box-shadow: var(--gewu-shadow-menu);
+  cursor: pointer;
+  z-index: 6;
+}
+
+.sc-jump-bottom:hover {
+  background: var(--gewu-hover);
+}

@@ -383,6 +383,7 @@ export function SimpleChat({
   // without polling. The hook loads once on mount; `refresh` is invoked
   // after server-driven onConversation events append a new conv.
   const {
+    list: conversationList,
     refresh: refreshConversations,
     create: createConversationForRun,
   } = useConversations(projectId);
@@ -539,7 +540,7 @@ export function SimpleChat({
   // UI-305 P0.4 — 会话恢复/对账簇（原 609-668 三个 effect：消息重载、
   // 隐藏期完结对账、T82 resumable 重连）整簇抽入 useConversationResume，
   // 零行为变化。
-  const { reconciledRunRef } = useConversationResume({
+  const { reconciledRunRef, older } = useConversationResume({
     conversationId,
     projectId,
     activeRun,
@@ -568,15 +569,90 @@ export function SimpleChat({
     [lastAssistantContent]
   );
 
-  // Auto-scroll to bottom
+  // BLOCK-95 A3 — 自动滚底守卫：用户上翻离开底部后不再强制跟随，浮标一键回底；
+  // 发送消息 / 切换会话视为「回到底部」意图，恢复跟随。
+  const atBottomRef = useRef(true);
+  const [showJumpToBottom, setShowJumpToBottom] = useState(false);
+  // BLOCK-95 A1 — 向上补页时记录滚动高度，prepend 渲染后恢复视口位置。
+  const prependAnchorRef = useRef<number | null>(null);
+  // older 每次渲染都是新对象，onScroll 高频路径经 ref 读取。
+  const olderRef = useRef(older);
+  olderRef.current = older;
+
+  const scrollToBottom = useCallback((smooth = false) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    atBottomRef.current = true;
+    setShowJumpToBottom(false);
+    el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
+  }, []);
+
   useEffect(() => {
-    if (scrollRef.current) {
+    if (scrollRef.current && atBottomRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [activeRun, durableLoop.loop, messages]);
 
+  // 切换会话：重置跟随态（新会话加载完成后自动滚到底）。
+  useEffect(() => {
+    atBottomRef.current = true;
+    setShowJumpToBottom(false);
+  }, [conversationId]);
+
+  // BLOCK-95 A1+A3 — 会话区滚动：距顶 <360px 触发向上补页（prepend 后恢复视口），
+  // 同时更新跟随态与回底浮标。
+  const handleMessagesScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const distToBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    atBottomRef.current = distToBottom < 120;
+    setShowJumpToBottom(distToBottom > 600);
+    const olderState = olderRef.current;
+    if (el.scrollTop < 360 && olderState.hasMore && !olderState.loadingMore) {
+      prependAnchorRef.current = el.scrollHeight;
+      void olderState.loadOlder().then((appended) => {
+        const anchor = prependAnchorRef.current;
+        prependAnchorRef.current = null;
+        if (!appended || anchor == null) return;
+        requestAnimationFrame(() => {
+          const el2 = scrollRef.current;
+          if (el2) el2.scrollTop += el2.scrollHeight - anchor;
+        });
+      });
+    }
+  }, []);
+
+  // BLOCK-95 A4 — 话题转移小节分隔：持久真值=DB last_topic_shift_at（会话列表行），
+  // 运行中 SSE onTopicShift 经事件总线即时补充并触发 refreshConversations 固化。
+  const [liveTopicShift, setLiveTopicShift] = useState<{ at: string; reason: string } | null>(null);
+  useEffect(() => {
+    setLiveTopicShift(null);
+  }, [conversationId]);
+  useEffect(() => {
+    return subscribeGewuEvent(gewuEvents.conversationTopicShift, (detail) => {
+      if (detail.conversationId !== conversationId) return;
+      setLiveTopicShift({ at: detail.at, reason: detail.reason });
+      void refreshConversations();
+    });
+  }, [conversationId, refreshConversations]);
+
   // UI-262 — 左缘用户消息导航条（构建逻辑外迁至 ./SimpleChat/displayMessages.ts）。
   const railItems = useMemo(() => buildRailItems(displayMessages), [displayMessages]);
+
+  // BLOCK-95 A4 — 话题小节分隔位置：转移时刻之后的第一条 user 消息。仅持久化
+  // 消息（有 id）参与判断——run 投影的临时 user 消息 ts 是发送时刻，晚于检测
+  // 完成时刻，会被误标；index 以 displayMessages 计，与渲染 map 直接对齐。
+  const activeConversationMeta = conversationList.find((c) => c.id === conversationId);
+  const topicShiftAt = liveTopicShift?.at || activeConversationMeta?.last_topic_shift_at || null;
+  const topicShiftReason = liveTopicShift?.reason || activeConversationMeta?.last_topic_shift_reason || '';
+  const topicShiftIndex = useMemo(() => {
+    if (!topicShiftAt) return -1;
+    const atMs = Date.parse(topicShiftAt);
+    if (Number.isNaN(atMs)) return -1;
+    return displayMessages.findIndex(
+      (m) => m.role === 'user' && m.id && m.ts && Date.parse(m.ts) >= atMs
+    );
+  }, [displayMessages, topicShiftAt]);
 
   const handleRailJump = useCallback((index: number) => {
     const container = scrollRef.current;
@@ -758,6 +834,9 @@ export function SimpleChat({
       composeMessageWithSelectionReferences(text, selectionRefsRef.current),
       imageRefsRef.current,
     ) + attachmentBlock;
+    // A3 — 用户主动发送 = 回到底部意图，恢复自动跟随。
+    atBottomRef.current = true;
+    setShowJumpToBottom(false);
     const ok = await send(composed);
     if (ok) {
       setSelectionRefs([]);
@@ -944,7 +1023,8 @@ export function SimpleChat({
     <div className={`sc-outer${composerOnly ? ' sc-outer-composer-only' : ''}`} data-rail-body>
       <div className={`sc-root${composerOnly ? ' sc-root-composer-only' : ''}`}>
         <div className="sc-body">
-          <div className="sc-messages" ref={scrollRef}>
+          <div className="sc-messages" ref={scrollRef} onScroll={handleMessagesScroll}>
+          {older.loadingMore && <div className="sc-loading-older">加载更早消息…</div>}
           {loading && <div className="sc-loading">加载会话…</div>}
           {!loading && displayMessages.length === 0 && (
             <div className="sc-empty">
@@ -963,6 +1043,12 @@ export function SimpleChat({
             const messageActivities = m.toolActivities || [];
             return (
               <React.Fragment key={key}>
+                {i === topicShiftIndex && (
+                  <div className="sc-topic-shift" role="separator" aria-label="话题转换">
+                    <Icon name="layers" size={13} />
+                    <span className="sc-topic-shift-label">话题转换{topicShiftReason ? ` · ${topicShiftReason}` : ''}</span>
+                  </div>
+                )}
                 <div className={`sc-msg sc-msg-${m.role}`}>
                   <div className="sc-msg-avatar">
                     {m.role === 'user' ? (
@@ -1116,13 +1202,13 @@ export function SimpleChat({
                         <button
                           type="button"
                           className="sc-msg-action"
-                          onClick={() => void handleForkAt(i)}
+                          onClick={() => void handleForkAt(older.windowOffset + i)}
                           disabled={forkingAtIndex !== null}
                           title={`以此消息为终点创建分支（新分支将包含从开始到这条回复的所有消息）`}
                           aria-label="创建分支"
                         >
                           <Icon name="git-branch" size={14} />
-                          {forkingAtIndex === i ? '创建中…' : '创建分支'}
+                          {forkingAtIndex === older.windowOffset + i ? '创建中…' : '创建分支'}
                         </button>
                         {/* UI-271 增补：回复时间移至操作行「创建分支」右侧 */}
                         <span className="sc-msg-action-divider" aria-hidden="true" />
@@ -1188,6 +1274,19 @@ export function SimpleChat({
           className="sc-input-area"
           style={{ ['--sc-composer-width' as string]: `${composerWidth}px` }}
         >
+          {/* BLOCK-95 A3 — 回到底部浮标：锚定输入区顶缘（bottom:100%），用户上翻且
+              距底 >600px 时出现，点击回底并恢复自动跟随 */}
+          {showJumpToBottom && !composerOnly && (
+            <button
+              type="button"
+              className="sc-jump-bottom"
+              onClick={() => scrollToBottom(true)}
+              aria-label="回到底部"
+            >
+              <Icon name="chevron-down" size={14} />
+              回到底部
+            </button>
+          )}
           {/* Slash command panel */}
           {slashOpen && (
             <div className="sc-slash-panel" ref={slashPanelRef}>
