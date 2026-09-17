@@ -1,6 +1,6 @@
 # BLOCK-98-AGENT-RESILIENCE — Agent 长任务韧性：上下文三层压缩 + 摘要注入 + 防呆 + 输入插队
 
-> 状态：**active / P0-LAUNCH**（2026-09-17 启动，用户裁决原话「继续推工作」+ AskUserQuestion 选「BLOCK-98 智能体韧性 (Recommended)」；启动门槛两条均已满足=BLOCK-97 当日收口 + 工作区净）
+> 状态：**completed（2026-09-17 P0–P5 一次会话整包收口）**；实机 block98-resilience-live 8/8 allPass；两开关维持默认关、翻默认经用户裁决呈报中（§6 P5）；UI-401 verified
 > 立项日期：2026-09-17 · 行号基线：`8bf67dd1`（工作区另有 BLOCK-97 在制 WIP，见 §0 启动门槛）
 > 用户裁决原话：「整理成一个 BLOCK 立项候选」「要全面深挖 尽可能通过这些机制的嵌入让gewu项目变得更稳重」（2026-09-17，在「ZCode 是如何做到长任务不中断」技术解剖会话上）
 
@@ -125,3 +125,13 @@
 ## §9 完成语义
 
 六工作面 M1–M6 逐面收口；§7 门禁全绿 + 两开关翻默认经用户显式裁决；canonical 回写（本 plan §6/§7 + roadmap + handoff + AUDIT-LOG + impact-map + ui-productization-audit 如涉 UI）；`docs:reconcile` + `docs:check` 过；registry `active → completed`。遗留候选（checkpoint/rewind、编排引擎、定时自动化、drain 细粒度）登记于此节保留 discoverable，不另立文档。
+
+
+## §10 收口记录（2026-09-17，P0–P5 一次会话）
+
+- **提交链**：183fd963（启动）→ 77b84029（P0 结论+P1 microcompact）→ edc81406（P2 摘要升级）→ [P3] 防呆+reactive+遥测 → [P4] 插队队列 → [P5] 本收口提交（台账/registry/roadmap/AUDIT-LOG）。
+- **门禁对账（§7）**：①契约=microcompact 7 用例（20+ 断言）+ compaction-upgrade 5（公式表驱动/legacy 兼容）+ resilience-state 8（熔断/reactive 上限/分类/裁剪边界/遥测列）全绿；②实机=block98-resilience-live **8/8 allPass**（acceptance/block-98/）——运行中 steer 端到端零丢失（模型原样复述插入标记）+ 排队可见 + 遥测四列；③红线=原文零触碰（P1 投影副本+P2 视图层，测试锁定）+ A5 兼容（B2 回归全绿）；④邻接=block97/34/93/agent-tool-registry/agent-run-tool 全绿 + tsc 0 + theme 4/4；⑤治理=docs:check/ui-audit/closeout 全绿 + 棘轮（agent-runner 接线净增~35 行，不在台账 22 文件内）。
+- **未验证范围（如实）**：reactive/熔断路径实机未触发（真超限需 98K+ token 轮次，契约测试覆盖全部分支）；microcompact 实机自动触发未达（默认 64K 窗口阈值 ~57K，契约覆盖）；composer 运行中发送自动改走 steer 未接线（登记 UI 候选）。
+- **翻默认呈报（P5）**：`BIOF3_AGENT_RESILIENCE` 现默认关；B2 `BIOF3_SESSION_COMPACTION` 悬置——两开关翻默认待用户显式裁决。
+- 遗留候选（§9 延续）：checkpoint/rewind、workflow 编排引擎、定时自动化、drain 细粒度、composer-steer 自动接线、模型跨边界回查转写。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

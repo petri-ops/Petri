@@ -1,0 +1,48 @@
+{
+  "name": "block98-resilience-live",
+  "startedAt": "2026-09-17T16:05:29.103Z",
+  "finishedAt": "2026-09-17T16:05:51.456Z",
+  "assertions": [
+    {
+      "name": "V0_on_target_project",
+      "pass": true,
+      "detail": "pathname=/project/p_mu5emekx_g13p"
+    },
+    {
+      "name": "V1_composer_sent",
+      "pass": true,
+      "detail": "typed"
+    },
+    {
+      "name": "V1_send_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "V1_task_created",
+      "pass": true,
+      "detail": "taskId=6ac49bae-7911-4229-b97f-2281d56848d5"
+    },
+    {
+      "name": "W1_steer_accepted",
+      "pass": true,
+      "detail": "HTTP 200 {\"ok\":true,\"queued\":true,\"depth\":1,\"note\":\"已排队，将在当前步骤结束后加入\"}"
+    },
+    {
+      "name": "W1_queued_visible",
+      "pass": true,
+      "detail": "queued notice visible in UI"
+    },
+    {
+      "name": "W1_steer_injection_zero_loss",
+      "pass": true,
+      "detail": "final reply contains steer marker (端到端零丢失): 消息，原文如下（原样复述）：插队标记青色河马（请在最后复述这句）本轮共调用 todo_write 9 次（写入 4 条 pending → 逐条 in_progress → completed），未调用任何其他工具。复制重新生成创建分支刚刚"
+    },
+    {
+      "name": "W2_telemetry_columns",
+      "pass": true,
+      "detail": "cols=attempt,retryable,context_exceeded,cancelled_by_user"
+    }
+  ],
+  "allPass": true
+}

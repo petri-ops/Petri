@@ -1686,6 +1686,36 @@
       "scriptRole": "governance"
     },
     {
+      "id": "block98-agent-resilience",
+      "note": "BLOCK-98 Agent 长任务韧性：microcompact 视图层折叠 + 阈值公式化 9 章节摘要 + 防呆状态机 + reactive 原地重试 + ai_usage 韧性遥测列 + 输入插队队列（steer 路由/loop 边界注入/前端排队可见）。",
+      "patterns": [
+        "core/biof3-server/helpers/agent-resilience.js",
+        "core/biof3-server/helpers/conversation-compaction.js",
+        "core/biof3-server/helpers/ai-usage.js",
+        "core/biof3-server/agent-runner.js",
+        "core/biof3-server/routes/ai-agent/chat.js",
+        "core/biof3-server/routes/ai-agent/task-actions.js",
+        "frontend/src/components/copilot/copilotClient/types.ts",
+        "frontend/src/components/copilot/copilotClient/agentTaskStream.ts",
+        "frontend/src/components/copilot/conversationRunStore/**",
+        "frontend/src/components/copilot/ContextBudgetBar.tsx",
+        "scripts/block98-*",
+        "acceptance/block-98/**"
+      ],
+      "tests": [
+        "test/block98-microcompact.test.mjs",
+        "test/block98-compaction-upgrade.test.mjs",
+        "test/block98-resilience-state.test.mjs",
+        "test/block97-agent-todo.test.mjs",
+        "test/block95-b2-compaction.test.mjs",
+        "test/block95-b1-history-assembly.test.mjs",
+        "test/ipc-channels-registry.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
+    },
+    {
       "id": "block97-agent-todo-card",
       "note": "BLOCK-97 智能体待办卡：todo_write 内部工具 + task_todo 专用事件（agent-runner emitAssistant 通道发射）+ 提示词纪律注入 + 摘要卡「任务清单」节（conversationTodos 会话级存储实时勾选）。",
       "patterns": [

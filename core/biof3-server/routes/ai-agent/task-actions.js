@@ -1,6 +1,6 @@
 'use strict';
 
-const resilienceMod = require('../helpers/agent-resilience');
+const resilienceMod = require('../../helpers/agent-resilience');
 
 /**
  * routes/ai-agent/task-actions.js — BLOCK-65 P1-a/P2-c 子域

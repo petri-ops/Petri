@@ -3349,6 +3349,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-401: 运行中插队消息排队可见——steer 通道前端接线 (BLOCK-98 P4，2026-09-17 verified，dev Electron 真轮次实机)
+
+- **来源**：BLOCK-98 M4 输入插队（用户裁决 ZCode「边跑边补充需求」机制移植：运行中消息不拒绝而是入队，下一轮请求注入）。
+- **交付面**：agentTaskStream 新增 input_queued 事件分支（onInputQueued）→ conversationRunStore 状态条显示「已排队 N 条补充输入，将在当前步骤结束后加入」——插队诚实可见（plan §8 红线：用户以为立即生效的歧义由明示消除）。
+- **后端通道**：新 POST /ai/agent/task/:id/steer（primary 任务运行中入队；子 agent 留言语义原样保留）→ agent-resilience 进程内队列（20 条上限）→ agent-runner 请求边界 drain 注入 user 消息（loop-orchestrator 零触碰）；入队同时 appendAgentTaskEvent(input_queued) 走 SSE。
+- **证据**：实机 scripts/block98-resilience-live.cjs 8/8 allPass（acceptance/block-98/）——运行中 steer 入队 HTTP 200 + 状态条可见 + 最终回复原样复述插入标记（端到端零丢失）。
+- **边界**：composer 运行中发送自动改走 steer 通道未接线（当前经 API/后续 UI-### 接入）；队列进程内（重启消失=诚实降级为重新发送）。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-400: 文件体验六项批次——PDF 预览/导出下载/拖拽到根/树宽放开/上下文环初始态/MD 目录 (2026-09-17 verified，dev Electron + WSL 真节点实机 8/8 allPass)
 
 - **来源**：用户六项反馈①「文件中 PDF 不能预览查看」②「文件没有导出按钮，ssh 连接的文件内容不能下载到本地和通过选中拖拽到本地（但拖拽上传可以）」③「通过拖拽不能在路径区域内移动文件，需要点具体文件夹的名字而不是展开区域，没办法拖拽移动到根路径」④「拖拽文件树的宽度有最大限制吗 能否优化或者不限制」⑤「会话区域的上下文用量图标默认是 - 我希望有内容哪怕初始状态也应该是 0%」⑥「md 文件预览没有目录按钮 悬挂在左侧 点击可以隐藏也可以展开」。
