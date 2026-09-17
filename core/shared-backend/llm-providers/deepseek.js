@@ -44,6 +44,9 @@ function requestModule(endpoint) {
   return endpoint.protocol === 'http:' ? http : https;
 }
 
+// BLOCK-95 B3 — cache 字段提取（兼容原始/归一 usage 形状）
+const { extractCacheFields: cacheFieldsOf } = require('./protocol-usage');
+
 function usageArgs(telemetry, body, startedAt, usage, errorCode) {
   const u = usage || {};
   return {
@@ -54,6 +57,8 @@ function usageArgs(telemetry, body, startedAt, usage, errorCode) {
     provider: (telemetry && telemetry.provider) || null,
     promptTokens: u.prompt_tokens || 0,
     completionTokens: u.completion_tokens || 0,
+    // BLOCK-95 B3 — prompt cache 字段落库（原恒 0 断链，见 protocol-usage.extractCacheFields）
+    ...(cacheFieldsOf(usage)),
     latencyMs: Date.now() - startedAt,
     errorCode: errorCode || null,
     conversationId: telemetry.conversationId,

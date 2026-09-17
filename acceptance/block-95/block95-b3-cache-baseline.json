@@ -1,0 +1,403 @@
+{
+  "generatedAt": "2026-09-17T05:56:46.537Z",
+  "db": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\biof3.db",
+  "note": "BLOCK-95 B3 度量先行：prompt cache 基线。B1 后端拼装 + B2 compaction 落地后，前缀稳定性（工具定义→系统提示→对话）是 cache 命中的前提；本报告为翻默认裁决的对账底稿。",
+  "overall": {
+    "calls": 813,
+    "promptTokens": 9612283,
+    "cacheReadTokens": 31104,
+    "cacheHitRate": 0.0032
+  },
+  "groups": [
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-flash",
+      "kind": "agent_iter",
+      "calls": 285,
+      "promptTokens": 5479564,
+      "completionTokens": 149083,
+      "cacheReadTokens": 30976,
+      "cacheCreationTokens": 789,
+      "avgPrompt": 19226.540350877192,
+      "cacheHitRate": 0.0057
+    },
+    {
+      "provider": null,
+      "model": "deepseek-v4-flash-vision-exp",
+      "kind": "agent_iter",
+      "calls": 164,
+      "promptTokens": 2884488,
+      "completionTokens": 57584,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 17588.341463414636,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "deepseek-flash",
+      "kind": "agent_iter",
+      "calls": 25,
+      "promptTokens": 518652,
+      "completionTokens": 18196,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 20746.08,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "sensenova-6.8-flash-lite",
+      "kind": "agent_iter",
+      "calls": 7,
+      "promptTokens": 166595,
+      "completionTokens": 2725,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 23799.285714285714,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-chat",
+      "kind": "agent_iter",
+      "calls": 10,
+      "promptTokens": 146501,
+      "completionTokens": 1127,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 14650.1,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "deepseek-v4-flash-vision-exp",
+      "kind": "chat_summary",
+      "calls": 26,
+      "promptTokens": 127012,
+      "completionTokens": 20556,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 4885.076923076923,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-flash",
+      "kind": "session_compaction",
+      "calls": 2,
+      "promptTokens": 46625,
+      "completionTokens": 1394,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 23312.5,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "deepseek-chat",
+      "kind": "agent_iter",
+      "calls": 2,
+      "promptTokens": 46410,
+      "completionTokens": 135,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 23205,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-flash",
+      "kind": "user_fact_extraction",
+      "calls": 23,
+      "promptTokens": 34488,
+      "completionTokens": 11984,
+      "cacheReadTokens": 128,
+      "cacheCreationTokens": 701,
+      "avgPrompt": 1499.4782608695652,
+      "cacheHitRate": 0.0037
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-flash",
+      "kind": "chat_summary",
+      "calls": 3,
+      "promptTokens": 32689,
+      "completionTokens": 2336,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 10896.333333333334,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "deepseek-v4-flash-vision-exp",
+      "kind": "user_fact_extraction",
+      "calls": 21,
+      "promptTokens": 31734,
+      "completionTokens": 7285,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 1511.142857142857,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "deepseek-v4-flash-vision-exp",
+      "kind": "conversation_title",
+      "calls": 68,
+      "promptTokens": 23680,
+      "completionTokens": 2116,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 348.2352941176471,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "text-embedding-v3",
+      "kind": "embedding",
+      "calls": 41,
+      "promptTokens": 22060,
+      "completionTokens": 0,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 538.0487804878048,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-flash",
+      "kind": "conversation_title",
+      "calls": 64,
+      "promptTokens": 17546,
+      "completionTokens": 1733,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 274.15625,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "deepseek-v4-flash",
+      "kind": "agent_iter",
+      "calls": 2,
+      "promptTokens": 16692,
+      "completionTokens": 249,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 8346,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "deepseek-v4-flash-vision-exp",
+      "kind": "topic_shift",
+      "calls": 12,
+      "promptTokens": 11337,
+      "completionTokens": 853,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 944.75,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-flash",
+      "kind": "topic_shift",
+      "calls": 6,
+      "promptTokens": 4612,
+      "completionTokens": 519,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 768.6666666666666,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "text-embedding-v3",
+      "kind": "knowledge_ingest",
+      "calls": 21,
+      "promptTokens": 802,
+      "completionTokens": 0,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 38.19047619047619,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "deepseek-flash",
+      "kind": "conversation_title",
+      "calls": 2,
+      "promptTokens": 517,
+      "completionTokens": 17,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 258.5,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "text-embedding-v3",
+      "kind": "knowledge_search",
+      "calls": 20,
+      "promptTokens": 279,
+      "completionTokens": 0,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 13.95,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "deepseek-chat-MODEL-NOT-EXIST-ui183",
+      "kind": "conversation_title",
+      "calls": 2,
+      "promptTokens": 0,
+      "completionTokens": 0,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 0,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "deepseek-chat-MODEL-NOT-EXIST-ui183",
+      "kind": "topic_shift",
+      "calls": 1,
+      "promptTokens": 0,
+      "completionTokens": 0,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 0,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "deepseek-chat-MODEL-NOT-EXIST-ui183",
+      "kind": "user_fact_extraction",
+      "calls": 1,
+      "promptTokens": 0,
+      "completionTokens": 0,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 0,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "deepseek-v4-flash",
+      "kind": "conversation_title",
+      "calls": 1,
+      "promptTokens": 0,
+      "completionTokens": 0,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 0,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "ui183-no-such-model-xyz",
+      "kind": "agent_iter",
+      "calls": 2,
+      "promptTokens": 0,
+      "completionTokens": 0,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 0,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": null,
+      "model": "ui183-no-such-model-xyz",
+      "kind": "conversation_title",
+      "calls": 1,
+      "promptTokens": 0,
+      "completionTokens": 0,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 0,
+      "cacheHitRate": 0
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "GLM-5.3-Flash",
+      "kind": "agent_iter",
+      "calls": 1,
+      "promptTokens": 0,
+      "completionTokens": 0,
+      "cacheReadTokens": 0,
+      "cacheCreationTokens": 0,
+      "avgPrompt": 0,
+      "cacheHitRate": 0
+    }
+  ],
+  "brokenLinkCandidates": [
+    {
+      "provider": null,
+      "model": "deepseek-v4-flash-vision-exp",
+      "kind": "agent_iter",
+      "calls": 164,
+      "promptTokens": 2884488,
+      "suspicion": "cache-capable model but cache_read_tokens===0"
+    },
+    {
+      "provider": null,
+      "model": "deepseek-flash",
+      "kind": "agent_iter",
+      "calls": 25,
+      "promptTokens": 518652,
+      "suspicion": "cache-capable model but cache_read_tokens===0"
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-chat",
+      "kind": "agent_iter",
+      "calls": 10,
+      "promptTokens": 146501,
+      "suspicion": "cache-capable model but cache_read_tokens===0"
+    },
+    {
+      "provider": null,
+      "model": "deepseek-v4-flash-vision-exp",
+      "kind": "chat_summary",
+      "calls": 26,
+      "promptTokens": 127012,
+      "suspicion": "cache-capable model but cache_read_tokens===0"
+    },
+    {
+      "provider": null,
+      "model": "deepseek-chat",
+      "kind": "agent_iter",
+      "calls": 2,
+      "promptTokens": 46410,
+      "suspicion": "cache-capable model but cache_read_tokens===0"
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-flash",
+      "kind": "chat_summary",
+      "calls": 3,
+      "promptTokens": 32689,
+      "suspicion": "cache-capable model but cache_read_tokens===0"
+    },
+    {
+      "provider": null,
+      "model": "deepseek-v4-flash",
+      "kind": "agent_iter",
+      "calls": 2,
+      "promptTokens": 16692,
+      "suspicion": "cache-capable model but cache_read_tokens===0"
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "GLM-5.3-Flash",
+      "kind": "agent_iter",
+      "calls": 1,
+      "promptTokens": 0,
+      "suspicion": "cache-capable model but cache_read_tokens===0"
+    }
+  ]
+}

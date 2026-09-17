@@ -1,12 +1,12 @@
 {
   "name": "block95-b1-diff-live",
-  "startedAt": "2026-09-17T05:33:05.169Z",
-  "finishedAt": "2026-09-17T05:33:11.196Z",
+  "startedAt": "2026-09-17T05:56:37.400Z",
+  "finishedAt": "2026-09-17T05:56:46.453Z",
   "assertions": [
     {
       "name": "s1_post_task_created",
       "pass": true,
-      "detail": "taskId=69f6eb25-e5f0-4b9b-aa76-6fe5201c8d66 conv=conv_b95_b1_mu53frbo"
+      "detail": "taskId=62f95c9f-ed27-402f-b9fa-e74e011dff62 conv=conv_b95_b1_mu54a10b"
     },
     {
       "name": "s1_task_settled",
@@ -35,7 +35,7 @@
     }
   ],
   "allPass": true,
-  "conversationId": "conv_b95_b1_mu53frbo",
-  "taskId": "69f6eb25-e5f0-4b9b-aa76-6fe5201c8d66",
+  "conversationId": "conv_b95_b1_mu54a10b",
+  "taskId": "62f95c9f-ed27-402f-b9fa-e74e011dff62",
   "note": "B1 开态实机：LLM 实际收到的 messages 与 DB 拼装逐字对账（开关=BIOF3_SERVER_HISTORY_ASSEMBLY=1）"
 }

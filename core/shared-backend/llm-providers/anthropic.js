@@ -57,6 +57,9 @@ async function readBoundedResponseText(response) {
   return text + decoder.decode();
 }
 
+// BLOCK-95 B3 — cache 字段提取（兼容原始/归一 usage 形状）
+const { extractCacheFields: cacheFieldsOf } = require('./protocol-usage');
+
 function usageRecord(telemetry, model, startedAt, usage, errorCode) {
   return {
     userId: telemetry && telemetry.userId,
@@ -66,6 +69,8 @@ function usageRecord(telemetry, model, startedAt, usage, errorCode) {
     provider: (telemetry && telemetry.provider) || null,
     promptTokens: (usage && (usage.prompt_tokens || usage.input_tokens)) || 0,
     completionTokens: (usage && (usage.completion_tokens || usage.output_tokens)) || 0,
+    // BLOCK-95 B3 — prompt cache 字段落库（原恒 0 断链）
+    ...(usage ? cacheFieldsOf(usage) : { cacheReadTokens: 0, cacheCreationTokens: 0 }),
     latencyMs: Date.now() - startedAt,
     errorCode: errorCode || null,
     conversationId: telemetry && telemetry.conversationId,

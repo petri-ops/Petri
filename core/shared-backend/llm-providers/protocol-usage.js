@@ -22,4 +22,25 @@ function normalizeUsage(rawUsage) {
   return { input, output, cacheRead, cacheCreation };
 }
 
-module.exports = { normalizeUsage };
+/**
+ * BLOCK-95 B3 — 从原始或已归一的 usage 形状提取 prompt cache 字段。
+ * 兼容：OpenAI prompt_tokens_details.cached_tokens / DeepSeek prompt_cache_hit_tokens /
+ * Anthropic cache_read_input_tokens / stream-aggregate 归一后的 cache_read_tokens。
+ * 断链后果（实测）：ai_usage.cache_read_tokens 恒 0，cache 命中率无法度量。
+ */
+function extractCacheFields(usage) {
+  const u = usage && typeof usage === 'object' ? usage : {};
+  const cacheReadTokens = positiveNumber(
+    u.cache_read_tokens ??
+      u.cache_read_input_tokens ??
+      u.prompt_cache_hit_tokens ??
+      (u.prompt_tokens_details && u.prompt_tokens_details.cached_tokens) ??
+      u.cached_tokens
+  );
+  const cacheCreationTokens = positiveNumber(
+    u.cache_creation_tokens ?? u.cache_creation_input_tokens ?? u.prompt_cache_miss_tokens
+  );
+  return { cacheReadTokens, cacheCreationTokens };
+}
+
+module.exports = { normalizeUsage, extractCacheFields };
