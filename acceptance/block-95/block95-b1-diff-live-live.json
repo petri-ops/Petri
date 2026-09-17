@@ -1,0 +1,41 @@
+{
+  "name": "block95-b1-diff-live",
+  "startedAt": "2026-09-17T05:33:05.169Z",
+  "finishedAt": "2026-09-17T05:33:11.196Z",
+  "assertions": [
+    {
+      "name": "s1_post_task_created",
+      "pass": true,
+      "detail": "taskId=69f6eb25-e5f0-4b9b-aa76-6fe5201c8d66 conv=conv_b95_b1_mu53frbo"
+    },
+    {
+      "name": "s1_task_settled",
+      "pass": true,
+      "detail": "status=completed"
+    },
+    {
+      "name": "s1_db_row_count_includes_turn_user",
+      "pass": true,
+      "detail": "rows=4"
+    },
+    {
+      "name": "s1_transcript_found",
+      "pass": true,
+      "detail": "records=2"
+    },
+    {
+      "name": "s1_request_matches_db_assembly",
+      "pass": true,
+      "detail": "llm=3 expected=3 first={\"role\":\"user\",\"content\":\"第一问：用一句话说明什么是 RAG\"}"
+    },
+    {
+      "name": "s1_tail_is_original_incoming",
+      "pass": true,
+      "detail": "tail=第二问（带引用原文）：[引用: demo.md]\n那向量检索呢？"
+    }
+  ],
+  "allPass": true,
+  "conversationId": "conv_b95_b1_mu53frbo",
+  "taskId": "69f6eb25-e5f0-4b9b-aa76-6fe5201c8d66",
+  "note": "B1 开态实机：LLM 实际收到的 messages 与 DB 拼装逐字对账（开关=BIOF3_SERVER_HISTORY_ASSEMBLY=1）"
+}

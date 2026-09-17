@@ -29,6 +29,9 @@ done
 export PATH="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installation:$PATH"
 export BIOF3_DB_PATH='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\data\biof3.db'
 export BIOF3_LOCAL_DATA_DIR='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\data'
+# BLOCK-95 B1 灰度开关：默认空=关；调用方 BIOF3_SERVER_HISTORY_ASSEMBLY=1 bash scripts/restart-dev-stack.sh 开启
+export BIOF3_SERVER_HISTORY_ASSEMBLY="${BIOF3_SERVER_HISTORY_ASSEMBLY:-}"
+if [ -n "${BIOF3_SERVER_HISTORY_ASSEMBLY}" ]; then echo "block95-b1: server history assembly ON (grayscale)"; fi
 
 
 # -WindowStyle Minimized（最小化的是 node 控制台；Electron GUI 正常显示）。

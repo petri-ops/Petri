@@ -2,7 +2,7 @@
 
 最后更新：2026-09-16
 
-状态：`active（2026-09-17 P0 完成：六面 11 处承重代码复核零失实〔§1.1〕；用户三裁决=①按 plan 全序 P1→P6 串行 ②B1 开关灰度〔diff 对账+三链路契约全绿后默认开〕③B4 只评估不动码。P1=A1+A3+A4 进行中）`
+状态：`active（2026-09-17 P0/P1/P2 完成：P1=A1+A3+A4 实机 8/8〔UI-394 in_progress〕；P2=B1 后端拼装开关 BIOF3_SERVER_HISTORY_ASSEMBLY 默认关，契约 6/6 + 实机 diff 对账 6/6 allPass〔增量形态请求下 LLM 收到 DB 全量拼装逐字一致〕，翻默认待 P6 用户裁决；下一阶段 P3=B2 会话级 compaction + A5 压缩可视化）`
 
 计划编号：`BLOCK-95-SESSION-IO`
 

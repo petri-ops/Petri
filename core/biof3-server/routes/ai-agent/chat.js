@@ -85,6 +85,8 @@ const {
   projectResultStudioToolContext,
 } = require('../../agent-tools/result-context-binding');
 const { inferExecutionPolicy } = require('../../helpers/agent-execution-policy');
+// BLOCK-95 B1 — 历史拼装权收归后端（开关灰度，默认关）
+const { isServerHistoryAssemblyEnabled, assembleServerHistory } = require('../../helpers/history-assembly');
 const {
   _gatherAnalysisContextForMethods,
   _renderMethodsParagraph,
@@ -204,6 +206,18 @@ module.exports = {
           }
         } catch {}
 
+        // BLOCK-95 B1 — 历史拼装权收归后端（开关灰度，默认关；实现与契约见
+        // helpers/history-assembly.js）。开关开时 effectiveMessages 为 DB 拼装版，
+        // createAgentTask params 与 runAgentLoop 从此同源（resume/续跑链一致）。
+        let effectiveMessages = messages;
+        if (isServerHistoryAssemblyEnabled(process.env) && _activeConv && _activeConv.id) {
+          effectiveMessages = await assembleServerHistory({
+            conversationId: _activeConv.id,
+            incomingMessages: messages,
+            adb: dbMod.getAsyncDatabase(),
+          });
+        }
+
         let taskId;
         try {
           // BLOCK-10-audit-closeout: createAgentTask returns the FULL inserted
@@ -218,7 +232,8 @@ module.exports = {
             agentStatus: 'running',
             userId,
             params: {
-              messages,
+              // B1 — 开关开时为后端 DB 拼装版（resume/续跑链从此同源）
+              messages: effectiveMessages,
               context,
               conversationId: _activeConv && _activeConv.id,
               providerName,
@@ -246,7 +261,8 @@ module.exports = {
 
         setImmediate(() => {
           runAgentLoop({
-            messages,
+            // B1 — 开关开时为后端 DB 拼装版；关时与旧链路逐字同源
+            messages: effectiveMessages,
             context,
             userId,
             conversationId: _activeConv && _activeConv.id,

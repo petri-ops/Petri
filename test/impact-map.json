@@ -1732,7 +1732,7 @@
     },
     {
       "id": "block95-session-io",
-      "note": "BLOCK-95 会话信息流 I/O 优化：A1 游标加载（ai-conversations 路由 messages 端点游标协议 + copilotConversationsClient 分页信封 + useConversationResume 分页簇）+ A3 滚动守卫（SimpleChat 回底浮标）+ A4 话题小节分隔（conversationRunStore onTopicShift→gewu 事件→SimpleChat 分隔卡）。P2-P5 面落地时续登记。",
+      "note": "BLOCK-95 会话信息流 I/O 优化：A1 游标加载（ai-conversations 路由 messages 端点游标协议 + copilotConversationsClient 分页信封 + useConversationResume 分页簇）+ A3 滚动守卫（SimpleChat 回底浮标）+ A4 话题小节分隔（conversationRunStore onTopicShift→gewu 事件→SimpleChat 分隔卡）。P2=B1 历史拼装收归后端（helpers/history-assembly.js 开关灰度）+ 实机 diff 对账脚本已登记。P3-P5 面落地时续登记。",
       "patterns": [
         "core/biof3-server/routes/ai-conversations.js",
         "frontend/src/components/copilot/copilotConversationsClient.ts",
@@ -1742,10 +1742,16 @@
         "frontend/src/lib/events.ts",
         "frontend/src/components/copilot/conversationRunStore.ts",
         "test/block95-messages-cursor.test.mjs",
-        "acceptance/block-95/**"
+        "acceptance/block-95/**",
+        "core/biof3-server/routes/ai-agent/chat.js",
+        "core/biof3-server/helpers/history-assembly.js",
+        "test/block95-b1-history-assembly.test.mjs",
+        "scripts/block95-p1-live.cjs",
+        "scripts/block95-b1-diff-live.cjs"
       ],
       "tests": [
-        "test/block95-messages-cursor.test.mjs"
+        "test/block95-messages-cursor.test.mjs",
+        "test/block95-b1-history-assembly.test.mjs"
       ],
       "commands": [],
       "classifiesScripts": true,
