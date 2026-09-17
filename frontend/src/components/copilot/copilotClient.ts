@@ -17,6 +17,7 @@ import type { StreamChatOptions } from './copilotClient/types';
 export { getApiPrefix, getAuthHeader } from './copilotClient/apiBase';
 export { OfflineError, checkOnline, isOfflineError } from './copilotClient/offline';
 export type {
+  AgentTaskTodoItem,
   ChatMessage,
   ResultEditProgressEvent,
   StreamChatOptions,

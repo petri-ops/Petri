@@ -982,3 +982,50 @@ describe('BLOCK-49 加映二 — 模型派生子 agent 活动面板数据源', (
     expect(entry?.assistantContent).toBe('第一次');
   });
 });
+
+// ---------------------------------------------------------------------------
+// BLOCK-97: task_todo 任务清单投影
+// ---------------------------------------------------------------------------
+
+describe('BLOCK-97 task_todo projection', () => {
+  beforeEach(() => {
+    __resetConversationRunsForTests();
+    streamChatMock.mockReset();
+    streamChatMock.mockResolvedValue(undefined);
+  });
+
+  it('projects task_todo snapshots into the run todoList, replacing wholesale', () => {
+    start('conv-todo', '做多步任务');
+    const callbacks = streamChatMock.mock.calls[0][0];
+
+    callbacks.onTaskTodo?.([
+      { id: '1', content: '重建索引', status: 'completed' },
+      { id: '2', content: '跑通冒烟测试', status: 'in_progress' },
+    ]);
+    expect(getConversationRunSnapshot('conv-todo')?.todoList).toEqual([
+      { id: '1', content: '重建索引', status: 'completed' },
+      { id: '2', content: '跑通冒烟测试', status: 'in_progress' },
+    ]);
+
+    // 整单幂等替换：新快照整体覆盖，不合并
+    callbacks.onTaskTodo?.([
+      { id: '1', content: '重建索引', status: 'completed' },
+      { id: '2', content: '跑通冒烟测试', status: 'completed' },
+      { id: '3', content: '写收口报告', status: 'pending' },
+    ]);
+    expect(getConversationRunSnapshot('conv-todo')?.todoList?.length).toBe(3);
+    expect(
+      getConversationRunSnapshot('conv-todo')?.todoList?.every((it) => it.status !== 'in_progress')
+    ).toBe(true);
+  });
+
+  it('new run starts without a todoList (lifecycle = single agent run)', () => {
+    start('conv-todo-2', '第一轮');
+    streamChatMock.mock.calls[0][0].onTaskTodo?.([{ id: '1', content: '旧清单', status: 'pending' }]);
+    expect(getConversationRunSnapshot('conv-todo-2')?.todoList?.length).toBe(1);
+
+    stopConversationRun('conv-todo-2');
+    start('conv-todo-2', '第二轮');
+    expect(getConversationRunSnapshot('conv-todo-2')?.todoList).toBeUndefined();
+  });
+});

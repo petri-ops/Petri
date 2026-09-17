@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { WorkspaceSummaryCard, type WorkspaceSummaryCardProps } from './WorkspaceSummaryCard';
 import { listAgentTasks } from '@/components/copilot/copilotClient';
+import type { AgentTaskTodoItem } from '@/components/copilot/copilotClient';
 import { getBridge } from '@/lib/desktopBridge';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
@@ -511,5 +512,50 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     );
     await waitFor(() => expect(screen.queryByText(/项计划待确认/)).toBeNull());
     expect(screen.queryByText(/后台进程异常退出/)).toBeNull();
+  });
+});
+
+describe('WorkspaceSummaryCard 任务清单节 (BLOCK-97 / UI-398)', () => {
+  const todoItems: AgentTaskTodoItem[] = [
+    { id: '1', content: '重建索引', status: 'completed' },
+    { id: '2', content: '跑通冒烟测试', status: 'in_progress' },
+    { id: '3', content: '写收口报告', status: 'pending' },
+  ];
+
+  it('渲染编号条目、进度计数与三态 data-status', () => {
+    render(<WorkspaceSummaryCard {...baseProps({ todoList: todoItems })} />);
+    const section = screen.getByLabelText('任务清单');
+    expect(section).toBeTruthy();
+    expect(screen.getByText('1/3')).toBeTruthy();
+    const rows = section.querySelectorAll('li');
+    expect(rows.length).toBe(3);
+    expect(rows[0].getAttribute('data-status')).toBe('completed');
+    expect(rows[1].getAttribute('data-status')).toBe('in_progress');
+    expect(rows[2].getAttribute('data-status')).toBe('pending');
+    expect(rows[0].textContent).toContain('1.');
+    expect(rows[0].textContent).toContain('重建索引');
+    expect(rows[1].textContent).toContain('跑通冒烟测试');
+    expect(rows[2].textContent).toContain('写收口报告');
+  });
+
+  it('无清单（undefined / 空数组）不渲染该节', () => {
+    const { container: empty } = render(
+      <WorkspaceSummaryCard {...baseProps({ todoList: [] })} />
+    );
+    expect(empty.querySelector('[aria-label="任务清单"]')).toBeNull();
+    cleanup();
+    const { container: absent } = render(<WorkspaceSummaryCard {...baseProps()} />);
+    expect(absent.querySelector('[aria-label="任务清单"]')).toBeNull();
+  });
+
+  it('全部完成时进度计数置 done 态', () => {
+    render(
+      <WorkspaceSummaryCard
+        {...baseProps({ todoList: [{ id: '1', content: '唯一一步', status: 'completed' }] })}
+      />
+    );
+    expect(screen.getByText('1/1')).toBeTruthy();
+    const progress = screen.getByLabelText('任务清单').querySelector('span[data-done]');
+    expect(progress?.getAttribute('data-done')).toBe('true');
   });
 });

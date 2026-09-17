@@ -3349,6 +3349,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-398: 摘要卡「任务清单」节——agent todo_write 清单实时渲染 (BLOCK-97 P2，2026-09-17 in_progress，dev Electron 边界内待实机)
+
+- **来源**：BLOCK-97-AGENT-TODO-CARD（用户见编码 agent 任务清单进度卡后裁决诉求「放到我们摘要卡片中……agent 把工作拆成编号条目，做完一条勾一条」）。
+- **交付面**：WorkspaceSummaryCard 在「任务循环」与「任务进度」之间新增「任务清单」节——编号条目 + 状态符号（✓ 完成 / ▸ 进行中 / ○ 未开始）+ 完成删除线 + 进行中高亮 + 标题行进度计数 `n/m`（全完成转 accent）；空清单整节不渲染（无内容不渲染纪律）。渲染逻辑独立子组件 `WorkspaceTodoSection.tsx`（+专用 CSS module，全 --gewu-* token 亮暗双态），WorkspaceSummaryCard 不推高行数棘轮基线。
+- **数据链**：后端 todo_write 成功回执 → agent-runner emitToolResult 包裹点 `_emit({event:'task_todo', items})`（task_events 持久化，afterSeq=0 重放可重建）→ agentTaskStream 分派（parseTaskTodoEvent 防御式解析）→ conversationRunStore `todoList` 投影（新 run 自然清空=生命周期单次任务运行）→ CenterPanel 传 prop。提示词纪律注入（agent-runner，BLOCK-93 additive 同型）：多步任务先拆清单、开工置 in_progress、完成即勾。
+- **证据**：契约测试 block97-agent-todo 6/6（registry 契约/provider 投影无泄漏/归一化/fail-closed/事件发射判定）+ P1 门禁五套件 51 过；组件测试 WorkspaceSummaryCard 19（新增三态渲染/无清单不渲染/全完成态）+ conversationRunStore 45（新增整单替换投影/新 run 清空）+ 邻接 98/98 + tsc 0 + theme-token-contract 4/4。
+- **边界**：仅摘要卡承载（会话流内嵌 todo 卡=非范围另行裁决）；不改 BLOCK-55 审批流；spawn 子 agent 的清单不进主卡片。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-397: 远程连接不再闲置主动断连 + SSH 呼吸灯红绿灯 (2026-09-17 verified，dev Electron + WSL 真节点闲置 6 分钟存活实测；用户复看确认「可以的 很棒 升verified」)
 
 - **来源**：用户三连问「远程连接的项目是不是长时间不操作会断连？会有自动重连吗？还是说能做到不主动断连？」+ 追加「给远程连接一个呼吸灯 红色断联 绿色连接 黄色连接中」。

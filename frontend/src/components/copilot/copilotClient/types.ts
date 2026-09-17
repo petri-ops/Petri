@@ -111,6 +111,13 @@ export interface ResultEditProgressEvent {
   revisionId?: string;
 }
 
+/** BLOCK-97 — 任务清单条目（todo_write 整单快照，task_todo 事件承载） */
+export interface AgentTaskTodoItem {
+  id: string;
+  content: string;
+  status: 'pending' | 'in_progress' | 'completed';
+}
+
 export interface StreamChatOptions {
   messages: ChatMessage[];
   context?: CopilotContext;
@@ -183,6 +190,8 @@ export interface StreamChatOptions {
   onToolOutput?: (e: ToolOutputEvent) => void;
   /** Tool call returned */
   onToolResult?: (e: ToolResultEvent) => void;
+  /** BLOCK-97 — todo_write 成功回执后的整单清单快照（task_todo 事件） */
+  onTaskTodo?: (items: AgentTaskTodoItem[]) => void;
   /** Server announces (or creates) the active conversation */
   onConversation?: (info: { conversationId: string; title?: string }) => void;
   /** Server detected the user has pivoted to a new topic mid-conversation */

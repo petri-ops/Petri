@@ -365,6 +365,7 @@ function SessionFrameView({
               datasets={ctx.datasets}
               loop={durableLoop.loop}
               loopSummary={durableLoop.summary}
+              todoList={activeRun?.todoList}
               onOpenScheduled={ctx.openScheduledResults}
               onSelectJob={(jobId) => {
                 ctx.setActiveJobId(jobId);
@@ -392,6 +393,7 @@ function SessionFrameView({
               datasets={ctx.datasets}
               loop={durableLoop.loop}
               loopSummary={durableLoop.summary}
+              todoList={activeRun?.todoList}
               onOpenScheduled={ctx.openScheduledResults}
               onSelectJob={(jobId) => {
                 ctx.setActiveJobId(jobId);

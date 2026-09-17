@@ -14,6 +14,7 @@ import {
   type ResultEditProgressEvent,
   type StreamChatOptions,
 } from './copilotClient';
+export type { AgentTaskTodoItem } from './copilotClient';
 import {
   mergeToolCallActivity,
   mergeToolOutputActivity,
@@ -279,6 +280,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     | 'onToolCall'
     | 'onToolOutput'
     | 'onToolResult'
+    | 'onTaskTodo'
     | 'onLoopPhase'
     | 'onLoopIteration'
     | 'onTopicShift'
@@ -560,6 +562,13 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       replaceRun(conversationId, (current) => ({
         ...current,
         loop: mergeLoopIteration(current.loop, info),
+      }));
+    },
+    // BLOCK-97 — 任务清单整单快照投影（task_todo 事件；摘要卡「任务清单」节数据源）
+    onTaskTodo: (items) => {
+      replaceRun(conversationId, (current) => ({
+        ...current,
+        todoList: items,
       }));
     },
     onDone: () => finish('done'),

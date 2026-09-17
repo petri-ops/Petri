@@ -13,7 +13,7 @@ import {
   parseToolOutputEvent,
   parseToolResultEvent,
 } from './parse';
-import type { StreamChatOptions } from './types';
+import type { AgentTaskTodoItem, StreamChatOptions } from './types';
 
 /**
  * BLOCK-39: 订阅断线信号（typed）。仅三类来源：fetch 网络 reject（后端不可达）、
@@ -195,6 +195,24 @@ async function subscribeAgentTaskOnce(
   return lastSeq;
 }
 
+/** BLOCK-97 — task_todo 整单快照解析（防御式：畸形条目降级/过滤，不炸流） */
+function parseTaskTodoEvent(obj: any): AgentTaskTodoItem[] {
+  if (!Array.isArray(obj.items)) return [];
+  const items: AgentTaskTodoItem[] = [];
+  for (let i = 0; i < obj.items.length; i++) {
+    const raw = obj.items[i];
+    if (!raw || typeof raw !== 'object') continue;
+    const content = typeof raw.content === 'string' ? raw.content.trim() : '';
+    if (!content) continue;
+    items.push({
+      id: typeof raw.id === 'string' && raw.id ? raw.id : String(i + 1),
+      content,
+      status: raw.status === 'in_progress' || raw.status === 'completed' ? raw.status : 'pending',
+    });
+  }
+  return items;
+}
+
 /** 处理单个 SSE 事件对象（原 streamChat 的解析逻辑，task/legacy 共用） */
 function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
   // UI-AGENTWB-###: SSE dispatch used to inline helpers (e.g.
@@ -226,6 +244,7 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
     onToolCall,
     onToolOutput,
     onToolResult,
+    onTaskTodo,
     onConversation,
     onTopicShift,
     onLoopPhase,
@@ -341,6 +360,11 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
   }
   if (obj.event === 'tool_result') {
     onToolResult?.(parseToolResultEvent(obj));
+    return;
+  }
+  if (obj.event === 'task_todo') {
+    // BLOCK-97 — 任务清单整单快照（todo_write 成功回执后由 agent-runner 广播）
+    onTaskTodo?.(parseTaskTodoEvent(obj));
     return;
   }
   if (obj.event === 'done') {
