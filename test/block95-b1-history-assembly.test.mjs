@@ -58,13 +58,22 @@ after(async () => {
   delete process.env.BIOF3_DB_PATH;
 });
 
-test('开关判定：默认关，1/true 开，其他值关', () => {
+test('开关判定：默认开（2026-09-18 裁决），0/false 强关，非强制值不覆盖', () => {
   const { isServerHistoryAssemblyEnabled } = assembly;
-  assert.equal(isServerHistoryAssemblyEnabled({}), false);
-  assert.equal(isServerHistoryAssemblyEnabled({ BIOF3_SERVER_HISTORY_ASSEMBLY: '1' }), true);
-  assert.equal(isServerHistoryAssemblyEnabled({ BIOF3_SERVER_HISTORY_ASSEMBLY: 'true' }), true);
-  assert.equal(isServerHistoryAssemblyEnabled({ BIOF3_SERVER_HISTORY_ASSEMBLY: 'yes' }), false);
-  assert.equal(isServerHistoryAssemblyEnabled(undefined), false);
+  // 隔离持久化杂质：指向空临时目录，确保走到「默认值」分支
+  const prevDir = process.env.BIOF3_LOCAL_DATA_DIR;
+  process.env.BIOF3_LOCAL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-b1-flag-'));
+  try {
+    assert.equal(isServerHistoryAssemblyEnabled({}), true);
+    assert.equal(isServerHistoryAssemblyEnabled({ BIOF3_SERVER_HISTORY_ASSEMBLY: '1' }), true);
+    assert.equal(isServerHistoryAssemblyEnabled({ BIOF3_SERVER_HISTORY_ASSEMBLY: 'true' }), true);
+    assert.equal(isServerHistoryAssemblyEnabled({ BIOF3_SERVER_HISTORY_ASSEMBLY: 'yes' }), true, '非强制值不覆盖 → 默认开');
+    assert.equal(isServerHistoryAssemblyEnabled({ BIOF3_SERVER_HISTORY_ASSEMBLY: '0' }), false, 'kill-switch 强关');
+    assert.equal(isServerHistoryAssemblyEnabled(undefined), true);
+  } finally {
+    if (prevDir === undefined) delete process.env.BIOF3_LOCAL_DATA_DIR;
+    else process.env.BIOF3_LOCAL_DATA_DIR = prevDir;
+  }
 });
 
 test('拼装 = DB 历史 + 本轮 user 原文回填', async () => {

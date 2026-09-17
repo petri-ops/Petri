@@ -4,7 +4,8 @@
  * helpers/agent-resilience.js — BLOCK-98 Agent 长任务韧性（M1 microcompact 起步）。
  *
  * agent-runner 行数门（1250）零触碰：全部新逻辑下沉本文件，runner 只留接线。
- * 开关（D6）：BIOF3_AGENT_RESILIENCE=1/true（默认关，收口时用户裁决翻默认）。
+ * 开关（D6）：BIOF3_AGENT_RESILIENCE——2026-09-18 用户裁决翻默认开（feature-flags 单一真相，
+ * 设置页可切换）；环境变量 =1/true 强制开、=0/false 强制关（kill-switch）。
  *
  * M1 microcompact（三层压缩第 0 层，本地零模型成本）：LLM 请求视图中旧工具结果
  * 按组折叠为占位符。触发=估算 token ≥ min(窗口×0.9, 窗口−2000)；只折叠连续
@@ -24,8 +25,9 @@ const MIN_GROUP_TOOLS = 2;
 const KEEP_RECENT_GROUPS = 5;
 
 function isResilienceEnabled(env) {
-  const raw = (env && env[RESILIENCE_ENV]) || '';
-  return raw === '1' || raw === 'true';
+  // BLOCK-98 灰度收编：解析权在 feature-flags（env 强制 > 设置页持久化 > 默认开）
+  const { resolveFlag } = require('./feature-flags');
+  return resolveFlag('agent_resilience', env);
 }
 
 function isFolded(content) {

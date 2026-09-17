@@ -10,7 +10,8 @@
  *   - 阈值自动（后台异步，请求路径零延迟）+ 手动触发（POST /:id/compact 同步）。
  *
  * 视图语义：rowid <= covers_rowid 的历史 turns 以摘要参与 LLM 视图（其后消息原样）。
- * 开关：BIOF3_SESSION_COMPACTION=1/true（默认关）；仅在 B1 后端拼装（BIOF3_SERVER_HISTORY_ASSEMBLY）
+ * 开关：BIOF3_SESSION_COMPACTION——2026-09-18 用户裁决翻默认开（feature-flags 单一真相，设置页可切换；
+ * 环境变量 =1/true 强制开、=0/false 强制关）；仅在 B1 后端拼装（BIOF3_SERVER_HISTORY_ASSEMBLY）
  * 生效时应用——拼装权在后端是投影的架构前提。
  */
 
@@ -24,8 +25,9 @@ const KEEP_RECENT = 12;
 const SUMMARY_SOURCE_CHAR_BUDGET = 60000;
 
 function isSessionCompactionEnabled(env) {
-  const raw = (env && env[COMPACTION_ENV]) || '';
-  return raw === '1' || raw === 'true';
+  // BLOCK-95 B2 灰度收编：解析权在 feature-flags（env 强制 > 设置页持久化 > 默认开）
+  const { resolveFlag } = require('./feature-flags');
+  return resolveFlag('session_compaction', env);
 }
 
 /**

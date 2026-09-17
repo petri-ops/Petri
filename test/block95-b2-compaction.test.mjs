@@ -83,9 +83,17 @@ after(async () => {
   delete process.env.BIOF3_SESSION_COMPACTION;
 });
 
-test('开关判定：默认关', () => {
-  assert.equal(compaction.isSessionCompactionEnabled({}), false);
-  assert.equal(compaction.isSessionCompactionEnabled({ BIOF3_SESSION_COMPACTION: '1' }), true);
+test('开关判定：默认开（2026-09-18 裁决），0 强关', () => {
+  const prevDir = process.env.BIOF3_LOCAL_DATA_DIR;
+  process.env.BIOF3_LOCAL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-b2-flag-'));
+  try {
+    assert.equal(compaction.isSessionCompactionEnabled({}), true);
+    assert.equal(compaction.isSessionCompactionEnabled({ BIOF3_SESSION_COMPACTION: '1' }), true);
+    assert.equal(compaction.isSessionCompactionEnabled({ BIOF3_SESSION_COMPACTION: '0' }), false);
+  } finally {
+    if (prevDir === undefined) delete process.env.BIOF3_LOCAL_DATA_DIR;
+    else process.env.BIOF3_LOCAL_DATA_DIR = prevDir;
+  }
 });
 
 test('planCompaction：消息数不足不折叠；超限按 KEEP_RECENT 切分且 token 有值', () => {
@@ -159,6 +167,14 @@ test('messages 信封带 compaction 字段；compact 端点开关关时 409', as
   assert.equal(msgs.compaction.coversCount > 0, true);
   assert.ok(msgs.compaction.summary.length > 0);
 
+  // 开关 env 强制关 → 409（kill-switch 路径；默认已翻开，2026-09-18 裁决）
+  const prev = process.env.BIOF3_SESSION_COMPACTION;
+  process.env.BIOF3_SESSION_COMPACTION = '0';
   const compact = await apiPost(`/api/ai/conversations/${CONV}/compact`);
-  assert.equal(compact.status, 409); // 开关默认关
+  assert.equal(compact.status, 409);
+  // 开关默认开（删 env 走默认）→ 端点可用，不再 409
+  if (prev === undefined) delete process.env.BIOF3_SESSION_COMPACTION;
+  else process.env.BIOF3_SESSION_COMPACTION = prev;
+  const compactOn = await apiPost(`/api/ai/conversations/${CONV}/compact`);
+  assert.notEqual(compactOn.status, 409);
 });

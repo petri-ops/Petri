@@ -592,7 +592,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
           <section className="gewu-settings-section">
             <div className="gewu-settings-section__heading">
               <h3>实验特性</h3>
-              <p>这些开关在开发态已验证，但默认关闭；打开前请确认你的使用场景。</p>
+              <p>长会话与长任务开关已实机验证并默认开启（2026-09-18 裁决）；其余实验开关默认关闭，打开前请确认你的使用场景。</p>
             </div>
             <ExperimentalFeaturesSection bridge={window.biof3?.agentWorkbenchFlags} />
           </section>

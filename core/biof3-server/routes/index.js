@@ -34,6 +34,7 @@ module.exports = async function registerRoutes(app) {
     ['Files', () => require('./files')(app)],
     ['SSH projects', () => require('./ssh-projects')(app)],
     ['Knowledge', () => require('./knowledge')(app)],
+    ['Feature flags', () => require('./feature-flags')(app)],
     // Must precede Harness: harness.js retains the legacy
     // GET /api/loop/:loopRunId catch-all, which would otherwise swallow
     // /runs, /session-summary, /iterations, /recovery, etc.

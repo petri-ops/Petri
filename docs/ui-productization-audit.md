@@ -3349,6 +3349,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-403: 灰度开关翻默认开 + 设置页可视化开关（BLOCK-95 B1/B2 + BLOCK-98 收编，2026-09-18 verified，用户裁决+REST/CDP 实机）
+
+- **来源**：用户 2026-09-18 裁决「翻默认+设置页开关」（此前 BLOCK-95/98 收口时呈报待裁决的灰度项）。
+- **交付面**：①三开关默认值翻转（SERVER_HISTORY_ASSEMBLY/SESSION_COMPACTION/AGENT_RESILIENCE 默认开）；②**feature-flags 单一真相**（`helpers/feature-flags.js`：env 强制覆盖 =1/true、=0/false kill-switch > 设置页持久化 `<dataDir>/feature-flags.json` > 默认值；三处 isEnabled 解析权收编、签名不变）；③REST `GET/POST /api/feature-flags`（env 锁定时 POST 409 诚实拒绝）；④设置页「实验特性」分区新增「长会话与长任务（已实机验证）」三开关行（env 锁定诚实标注+禁用）。
+- **门禁**：feature-flags 契约 5/5（默认开/env 强制/持久化优先级/快照投影/fail-closed）；存量开关族 40/40（b1/b2/b3/b98 六文件，四处「默认关」断言同步为新契约并隔离持久化杂质）；设置组件 14/14；tsc 0；theme 4/4。
+- **实机**：REST 链路 4/4（默认全开/关持久化/开往返/未知 key 400 拒绝）；CDP 设置页三开关行渲染且默认「已开启」（`acceptance/ui-403/ui403-settings-flags.png`）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-402: 知识空间专业化六面批次——检索溯源/预览/批量/PDF/拖拽/分页 (BLOCK-94，2026-09-18 verified，dev Electron 真实嵌入+真实模型轮次实机 18/18 allPass + 跨重启恢复)
 
 - **来源**：BLOCK-94-KNOWLEDGE-SPACE-PRO（用户裁决立项 2026-09-16「专业 易用 能力全面」+ 夜间队列授权）。

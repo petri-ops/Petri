@@ -93,3 +93,19 @@
     text-align: left;
   }
 }
+
+/* UI-403 — 后端灰度开关行 */
+.serverFlags {
+  display: grid;
+  gap: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--gewu-border, var(--gewu-border-color, #2a3545));
+}
+
+.envLockError {
+  padding: 8px 10px;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 8px;
+  color: var(--gewu-danger, #ef4444);
+  font-size: var(--gewu-font-size-caption);
+}

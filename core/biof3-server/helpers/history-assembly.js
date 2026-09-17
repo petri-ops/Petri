@@ -3,7 +3,8 @@
 /**
  * helpers/history-assembly.js — BLOCK-95 B1 历史拼装权收归后端。
  *
- * 开关（BIOF3_SERVER_HISTORY_ASSEMBLY=1/true，默认关）打开时，LLM 请求历史由
+ * 开关（BIOF3_SERVER_HISTORY_ASSEMBLY）：2026-09-18 用户裁决翻默认开（feature-flags 单一真相，
+ * 设置页可切换）；环境变量 =1/true 强制开、=0/false 强制关（kill-switch）。打开时，LLM 请求历史由
  * DB（copilot_messages）拼装，前端上报的 messages 只提供「本轮 user 原文」：
  *   - 历史轮次与 DB 完全同源（前端展示层本就 restore 自 DB；无错误轮次会话
  *     与旧链路的前端全量上报逐字一致——契约测试 block95-b1-history-assembly 锁定）；
@@ -16,8 +17,9 @@
 const SERVER_HISTORY_ASSEMBLY_ENV = 'BIOF3_SERVER_HISTORY_ASSEMBLY';
 
 function isServerHistoryAssemblyEnabled(env) {
-  const raw = (env && env[SERVER_HISTORY_ASSEMBLY_ENV]) || '';
-  return raw === '1' || raw === 'true';
+  // BLOCK-95 B1 灰度收编：解析权在 feature-flags（env 强制 > 设置页持久化 > 默认开）
+  const { resolveFlag } = require('./feature-flags');
+  return resolveFlag('server_history_assembly', env);
 }
 
 /**

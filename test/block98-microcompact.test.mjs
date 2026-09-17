@@ -8,6 +8,9 @@
 
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
@@ -63,14 +66,31 @@ function withEnv(fn) {
   }
 }
 
-test('开关默认关：超阈值也不折叠（maybeMicrocompactBody 原样返回）', () => {
-  delete process.env.BIOF3_AGENT_RESILIENCE;
-  const messages = longConversation(10);
-  const body = { messages, model: 'm' };
-  const out = maybeMicrocompactBody(body, { contextWindow: 100 });
-  assert.equal(out, body, 'must return the same body reference when disabled');
-  assert.equal(isResilienceEnabled({}), false);
-  assert.equal(isResilienceEnabled({ BIOF3_AGENT_RESILIENCE: '1' }), true);
+test('开关默认开（2026-09-18 裁决）：超阈值折叠；0/false 强关时原样返回', () => {
+  const prev = process.env.BIOF3_AGENT_RESILIENCE;
+  const prevDir = process.env.BIOF3_LOCAL_DATA_DIR;
+  process.env.BIOF3_LOCAL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-b98-flag-'));
+  try {
+    // 默认开：超阈值（contextWindow=100）触发 microcompact
+    delete process.env.BIOF3_AGENT_RESILIENCE;
+    const messages = longConversation(10);
+    const body = { messages, model: 'm' };
+    const out = maybeMicrocompactBody(body, { contextWindow: 100 });
+    assert.notEqual(out, body, 'default-on folds beyond threshold');
+    assert.equal(isResilienceEnabled({}), true);
+    // kill-switch 强关：原样返回（同一 body 引用）
+    process.env.BIOF3_AGENT_RESILIENCE = '0';
+    assert.equal(isResilienceEnabled({ BIOF3_AGENT_RESILIENCE: '0' }), false);
+    const messages2 = longConversation(10);
+    const body2 = { messages: messages2, model: 'm' };
+    const out2 = maybeMicrocompactBody(body2, { contextWindow: 100 });
+    assert.equal(out2, body2, 'must return the same body reference when disabled via kill-switch');
+  } finally {
+    if (prev === undefined) delete process.env.BIOF3_AGENT_RESILIENCE;
+    else process.env.BIOF3_AGENT_RESILIENCE = prev;
+    if (prevDir === undefined) delete process.env.BIOF3_LOCAL_DATA_DIR;
+    else process.env.BIOF3_LOCAL_DATA_DIR = prevDir;
+  }
 });
 
 test('阈值公式：min(窗口×0.9, 窗口−2000) 表驱动', () => {
