@@ -2,7 +2,7 @@
 
 最后更新：2026-09-16
 
-状态：`active（2026-09-17 启动 P0-LAUNCH；用户裁决队列序 BLOCK-95 先行。P0=六工作面逐项代码事实复核〔BLOCK-92 Wave A 拆分后行号须重定位〕+ 评审结论回写本文件 + 用户裁决优先级/B1 增量协议/B4 取舍）`
+状态：`active（2026-09-17 P0 完成：六面 11 处承重代码复核零失实〔§1.1〕；用户三裁决=①按 plan 全序 P1→P6 串行 ②B1 开关灰度〔diff 对账+三链路契约全绿后默认开〕③B4 只评估不动码。P1=A1+A3+A4 进行中）`
 
 计划编号：`BLOCK-95-SESSION-IO`
 
@@ -21,6 +21,25 @@ Claude Code 把这些做成**给用户的手动杠杆**（/clear //compact //rew
 ## 1. 两目标 → 六工作面（2026-09-16 代码摸底证据）
 
 用户目标「连贯性好看易读 + 性能省 token」映射为 A/B 两个面共六工作面。每面独立可验收、独立提交；优先级与裁剪在 P0 评审由用户裁决。
+
+### §1.1 P0 代码事实复核记录（2026-09-17，启动日逐项抽查）
+
+六工作面 11 处承重代码**全部实证在位，零失实**。BLOCK-92 Wave A 拆分致 3 处行号漂移，P1 起以本节为准：
+
+| 面 | plan 摸底行号 | 复核实证（HEAD=8d98194e） | 结论 |
+| --- | --- | --- | --- |
+| A1 | ai-conversations.js:121-122 / useConversationResume.ts:45 | `ORDER BY ts ASC LIMIT ?` 在 **L122**；拉 200 条在 useConversationResume.ts **三处 L45/65/92**（主加载 + 对账镜像两处，plan 只记一处——P1 须三处同改） | 成立，发现新增 |
+| A2 | SimpleChat.tsx L693-792 / L1401-1576 | BLOCK-92 Wave A-3 后派生链外迁 displayMessages.ts（buildBaseDisplayMessages/applyConversationNotices），SimpleChat.tsx **L551-556** 每次 render 全量重拼；全量重渲染主体不变 | 成立，行号更新 |
+| A3 | SimpleChat.tsx:809-813 | scrollTop=scrollHeight 直写在 **L574**，无上翻守卫 | 成立，行号更新 |
+| A4 | conversations.js:163-205 / conversation-adapter.js:192 | topic_shift 检测 helpers/conversations.js **L166-192**、投递 adapter **L192**；渲染仍平铺 | 成立 |
+| A5 | resume.js:36-49 | buildProgressDigest **L36**，两处续接链调用 | 成立 |
+| B1 | useChatStream.ts:206-211 | 前端全量上报 **L206-208**（messagesRef map role/content） | 成立 |
+| B2 | message-trimmer.js:123-211 / loop-orchestrator.js:561-600 | trimMessagesToBudget **L123**（SUMMARY_TRIGGER_DROP=5 合成提示非 LLM 摘要 L29/L184）；85% 熔断 loop-orchestrator **L561-572** | 成立 |
+| B3 | ai_usage cache 字段 / loop-orchestrator.js:637 | cache_read/creation 列 ai-usage.js **L26-27/39-40**；model_fallback 事件 **L632-637** | 成立 |
+| B4 | agent-runner.js:400 / L438-553 | renderSiteSnapshotForPrompt(snap, 3500) 在 **L408**；system-prompt.js 静态预缓存在（L8/L17） | 成立，行号更新 |
+| B5 | conversations.js:100 | content 硬截 30000 在 helpers/conversations.js **L100** | 成立 |
+
+**P0 用户裁决（2026-09-17，AskUserQuestion 三项）**：①推进顺序=**按 plan 全序 P1→P6 串行**；②B1 切换方式=**开关灰度**（新链路开关落地默认关 → 同会话请求体 io-transcript diff 对账逐字一致 + resume/fork/多端镜像三链路契约全绿 → 才默认开；可回退）；③B4=**只评估不动码**（量化 token 账落 acceptance，结论回写本文件；不动工具指南内容，省 token 主力靠 B1/B2/B3）。
 
 ### A 面：信息流连贯易读（呈现面）
 
