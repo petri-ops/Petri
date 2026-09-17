@@ -1,5 +1,7 @@
 'use strict';
 
+const resilienceMod = require('../helpers/agent-resilience');
+
 /**
  * routes/ai-agent/task-actions.js — BLOCK-65 P1-a/P2-c 子域
  *
@@ -32,7 +34,31 @@ function fail(res, code, message, httpOverride) {
 
 module.exports = {
   register(app) {
-    // 俯瞰面板数据源：该用户最近子 agent 任务（跨会话，只读 tasks 投影）。
+    // BLOCK-98 M4 — 输入插队：primary 任务运行中用户消息入队（下一轮模型请求注入）。
+  // 子 agent 仍走 queueUserMessage 留言语义（followup 注入，原样保留）。
+  app.post('/api/ai/agent/task/:taskId/steer', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized', message: '未登录' });
+    const task = agentTaskStore.getAgentTask(req.params.taskId);
+    if (!task) return res.status(404).json({ ok: false, error: 'not_found', message: '任务不存在' });
+    if (task.user_id && task.user_id !== userId) return res.status(403).json({ ok: false, error: 'forbidden', message: '无权访问该任务' });
+    const text = String((req.body && req.body.message) || '').trim();
+    if (!text) return res.status(400).json({ ok: false, error: 'invalid_arguments', message: 'message 不能为空' });
+    const enq = resilienceMod.enqueueUserInput(task.taskId, text);
+    if (!enq.ok) return res.status(400).json({ ok: false, ...enq });
+    try {
+      const events = agentTaskStore.getAgentTaskEventsSince(task.taskId, 0, 1000000);
+      const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
+      agentTaskStore.appendAgentTaskEvent(
+        task.taskId, seq,
+        'input_queued',
+        { event: 'input_queued', text: text.slice(0, 300), depth: enq.depth, at: new Date().toISOString() }
+      );
+    } catch { /* SSE 可见性失败不阻塞入队 */ }
+    return res.json({ ok: true, queued: true, depth: enq.depth, note: '已排队，将在当前步骤结束后加入' });
+  });
+
+  // 俯瞰面板数据源：该用户最近子 agent 任务（跨会话，只读 tasks 投影）。
     // BLOCK-65 修正：附 projectId（经会话归属解析），供面板按项目隔离。
     app.get('/api/ai/agent/tasks', async (req, res) => {
       const userId = req.user && req.user.id;

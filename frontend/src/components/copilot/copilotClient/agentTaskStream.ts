@@ -245,6 +245,7 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
     onToolOutput,
     onToolResult,
     onTaskTodo,
+    onInputQueued,
     onConversation,
     onTopicShift,
     onLoopPhase,
@@ -360,6 +361,14 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
   }
   if (obj.event === 'tool_result') {
     onToolResult?.(parseToolResultEvent(obj));
+    return;
+  }
+  if (obj.event === 'input_queued') {
+    // BLOCK-98 M4 — 插队消息入队通知（排队深度展示，诚实可见）
+    onInputQueued?.({
+      text: typeof obj.text === 'string' ? obj.text : '',
+      depth: typeof obj.depth === 'number' ? obj.depth : 0,
+    });
     return;
   }
   if (obj.event === 'task_todo') {

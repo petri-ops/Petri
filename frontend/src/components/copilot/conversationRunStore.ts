@@ -311,6 +311,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     | 'onToolOutput'
     | 'onToolResult'
     | 'onTaskTodo'
+    | 'onInputQueued'
     | 'onLoopPhase'
     | 'onLoopIteration'
     | 'onTopicShift'
@@ -592,6 +593,13 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       replaceRun(conversationId, (current) => ({
         ...current,
         loop: mergeLoopIteration(current.loop, info),
+      }));
+    },
+    // BLOCK-98 M4 — 插队入队通知 → 状态条诚实可见
+    onInputQueued: (info) => {
+      replaceRun(conversationId, (current) => ({
+        ...current,
+        statusMessage: `已排队 ${info.depth} 条补充输入，将在当前步骤结束后加入`,
       }));
     },
     // BLOCK-97 — 任务清单整单快照（task_todo 事件；单真值在会话级

@@ -720,6 +720,16 @@ async function runAgentLoop({
   const resilientCallChatProvider = async (providerName, apiKey, body, telemetry, onEvent, options) => {
     const callOnce = (reqBody) => baseCallChatProvider(providerName, apiKey, reqBody, telemetry, onEvent, options);
     const projected = agentResilience.maybeMicrocompactBody(body, { contextWindow: safeCtx });
+    // BLOCK-98 M4 — 输入插队：每次模型请求边界排空队列，用户 steer 消息以
+    // user 角色追加到请求尾部（下轮生效；事件流已发 input_queued 供前端可见）。
+    const pendingInputs = agentResilience.drainUserInput(taskId);
+    if (pendingInputs.length > 0 && Array.isArray(projected.messages)) {
+      projected.messages = [
+        ...projected.messages,
+        ...pendingInputs.map((text) => ({ role: 'user', content: `[用户插入] ${text}` })),
+      ];
+      try { console.log('[block98-steer] injected', pendingInputs.length, 'queued user message(s)'); } catch {}
+    }
     try {
       return await callOnce(projected);
     } catch (err) {

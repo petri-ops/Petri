@@ -314,6 +314,36 @@ function recordRetryUsage({ userId, conversationId, model, attempt, contextExcee
 }
 
 
+
+// ── M4：输入插队队列（进程内；与 ZCode session_input 的 admitted→promoted 同型）──
+// 任务运行中用户消息不拒绝而是入队，下一次模型请求边界 drain 注入。
+// 队列生命周期=单次运行（任务终态由调用方清空；进程重启队列消失=诚实降级为留言）。
+const pendingInputQueues = new Map();
+
+function enqueueUserInput(taskId, text) {
+  const id = String(taskId || '');
+  const t = String(text || '').trim();
+  if (!id || !t) return { ok: false, error: 'invalid_arguments' };
+  let q = pendingInputQueues.get(id);
+  if (!q) { q = []; pendingInputQueues.set(id, q); }
+  if (q.length >= 20) return { ok: false, error: 'queue_full', message: '排队消息过多（>20），请稍候再发' };
+  q.push(t.slice(0, 8000));
+  return { ok: true, queued: true, depth: q.length };
+}
+
+function drainUserInput(taskId) {
+  const id = String(taskId || '');
+  const q = pendingInputQueues.get(id);
+  if (!q || q.length === 0) return [];
+  pendingInputQueues.delete(id);
+  return q;
+}
+
+function pendingInputCount(taskId) {
+  const q = pendingInputQueues.get(String(taskId || ''));
+  return q ? q.length : 0;
+}
+
 module.exports = {
   RESILIENCE_ENV,
   MICROCOMPACT_PLACEHOLDER,
@@ -339,4 +369,10 @@ module.exports = {
   classifyContextExceeded,
   reactiveTrim,
   recordRetryUsage,
+
+  // ── M4：输入插队队列（steering；运行中用户消息下一轮请求注入）────────────
+
+  enqueueUserInput,
+  drainUserInput,
+  pendingInputCount,
 };

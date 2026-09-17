@@ -192,6 +192,8 @@ export interface StreamChatOptions {
   onToolResult?: (e: ToolResultEvent) => void;
   /** BLOCK-97 — todo_write 成功回执后的整单清单快照（task_todo 事件） */
   onTaskTodo?: (items: AgentTaskTodoItem[]) => void;
+  /** BLOCK-98 M4 — 用户消息插队入队通知（运行中 steer） */
+  onInputQueued?: (info: { text: string; depth: number }) => void;
   /** Server announces (or creates) the active conversation */
   onConversation?: (info: { conversationId: string; title?: string }) => void;
   /** Server detected the user has pivoted to a new topic mid-conversation */
