@@ -59,7 +59,7 @@
   gap: 4px;
   padding: 4px 10px;
   border-radius: 20px;
-  background: var(--gewu-bg-canvas);
+  background: var(--gewu-bg-subtle);
   border: 1px solid var(--gewu-border);
 }
 
@@ -99,7 +99,7 @@
   padding: 0 36px;
   border: 1px solid var(--gewu-border);
   border-radius: 9px;
-  background: var(--gewu-bg-canvas);
+  background: var(--gewu-input-bg);
   color: var(--gewu-text);
   font-size: var(--gewu-font-size-body-sm);
   outline: none;
@@ -134,7 +134,7 @@
 }
 
 .clearButton:hover {
-  background: var(--gewu-bg-canvas);
+  background: var(--gewu-hover);
   color: var(--gewu-text-secondary);
 }
 
@@ -252,7 +252,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background: var(--gewu-bg-canvas);
+  background: var(--gewu-bg-subtle);
   margin-bottom: 12px;
 }
 
@@ -278,7 +278,7 @@
   padding: 16px;
   border: 1px solid var(--gewu-border);
   border-radius: 12px;
-  background: var(--gewu-bg-canvas);
+  background: var(--gewu-bg-subtle);
   transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
               transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
