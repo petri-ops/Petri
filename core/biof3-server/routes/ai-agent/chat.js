@@ -1055,6 +1055,9 @@ module.exports = {
               const toolResultEvent = buildToolResultEvent(envelope, args, { iteration: iter + 1 });
               assistantToolActivities.recordResult(toolResultEvent);
               sseSend(toolResultEvent);
+              // BLOCK-97 P1 — legacy 直连 SSE 路径同款 task_todo 广播（主路径在
+              // agent-runner emitToolResult 包裹点；本路径无 task_events 持久化）
+              require('../../agent-tools/todo-tools').maybeEmitTaskTodo(toolResultEvent, sseSend);
               if (ackInfo) {
                 const ackResult = await ackInfo;
                 if (ackResult && ackResult.timedOut) {

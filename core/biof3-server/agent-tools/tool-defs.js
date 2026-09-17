@@ -700,6 +700,45 @@ const TOOL_DEFS = [
       },
     },
   },
+  // BLOCK-97 P1 — 任务清单（todo）：agent 多步任务的编号清单维护，
+  // 摘要卡「任务清单」节实时渲染（整单幂等替换，做完一条勾一条）
+  {
+    type: 'function',
+    function: {
+      name: 'todo_write',
+      description:
+        '任务清单维护——把多步任务拆成编号清单并在执行中实时勾选，清单会显示在会话摘要卡中供用户查看进度。\n' +
+        '使用纪律：\n' +
+        '- 接到多步任务（约 ≥3 步）时先用本工具写清单再开工；简单问答不用。\n' +
+        '- 每条 content 用一句话可验证的动词短语（如「跑通登录冒烟测试」），不塞实现细节。\n' +
+        '- 开工某条前将其置 in_progress，完成立即置 completed；计划变化时整单重发（增删改条目）。\n' +
+        '- 整单幂等替换：每次调用都提交完整清单（1-20 条），按执行顺序排列。',
+      parameters: {
+        type: 'object',
+        properties: {
+          items: {
+            type: 'array',
+            description: '完整清单（整单替换）',
+            minItems: 1,
+            maxItems: 20,
+            items: {
+              type: 'object',
+              properties: {
+                content: { type: 'string', description: '一句话条目（≤300 字符）' },
+                status: {
+                  type: 'string',
+                  enum: ['pending', 'in_progress', 'completed'],
+                  description: 'pending=未开始 / in_progress=进行中 / completed=已完成',
+                },
+              },
+              required: ['content', 'status'],
+            },
+          },
+        },
+        required: ['items'],
+      },
+    },
+  },
   // RUN_TOOL_v1 — 跑 BioF3 分析工具（deseq2/volcano-plot 等），真实执行出图
   {
     type: 'function',

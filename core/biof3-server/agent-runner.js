@@ -31,6 +31,7 @@ const callChatProvider =
     return result;
   });
 const { renderContentPluginsForPrompt } = require('./agent-tools/content-plugins');
+const { maybeEmitTaskTodo } = require('./agent-tools/todo-tools');
 const { buildSiteSnapshotAsync, renderSiteSnapshotForPrompt } = require('./helpers/site-snapshot');
 // BLOCK-69 — 知识空间（自动召回注入 + knowledge_search/status 工具数据面）
 const knowledgeSpace = require('./helpers/knowledge-space');
@@ -385,6 +386,15 @@ async function runAgentLoop({
     systemPrompt += '\n\n=== 子智能体角色专职约束 ===\n' + roleDirective;
   }
 
+  // BLOCK-97 P1 — 任务清单使用纪律（todo_write；additive 追加，BLOCK-93 同型。
+  // 工具全集对所有 agent 会话常开，故无条件注入；简单问答靠纪律文本自身豁免）
+  systemPrompt +=
+    '\n\n=== 任务清单使用纪律（todo_write） ===' +
+    '\n- 接到多步任务（约 ≥3 步）时，先把工作拆成编号清单并用 todo_write 整单写入，再开始执行；简单问答不要使用清单。' +
+    '\n- 开工某条前将其置 in_progress；完成立即置 completed（做完一条勾一条）。' +
+    '\n- 计划变化时整单重发（增删改条目），保持清单与实际进度一致。' +
+    '\n- 条目用一句话可验证的动词短语，不塞实现细节；清单是给用户看的进度承诺。';
+
   if (isGuest) {
     systemPrompt += '\n\n=== 当前用户：未登录访客 ===';
     systemPrompt +=
@@ -720,7 +730,12 @@ async function runAgentLoop({
     messages: fullMessages,
     toolCtx,
     shouldAbort,
-    emitToolResult: (evt) => _emit(evt),
+    emitToolResult: (evt) => {
+      _emit(evt);
+      // BLOCK-97 P1 — todo_write 成功回执后广播整单快照（task_todo 专用事件，
+      // 与 tool_result 同链经 _emit 持久化 task_events；前端摘要卡按此投影）
+      maybeEmitTaskTodo(evt, _emit);
+    },
     emitAssistant: (evt) => _emit(evt),
     emitDone: () => _emit({ event: 'done' }),
     callChatProvider,

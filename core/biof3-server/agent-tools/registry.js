@@ -12,6 +12,7 @@ const { TOOL_DEFS } = require('./tool-defs');
 const { tool_query, tool_read_page, tool_search } = require('./query-tools');
 const { tool_act } = require('./act-tools');
 const { tool_plan } = require('./plan-ui-tools');
+const { tool_todo_write } = require('./todo-tools');
 const {
   tool_run_tool,
   tool_generate_methods,
@@ -128,6 +129,8 @@ const HANDLERS = {
   search: tool_search,
   act: tool_act,
   plan: tool_plan,
+  // BLOCK-97 — 任务清单维护（整单幂等替换；快照经 task_todo 事件广播）
+  todo_write: tool_todo_write,
   run_tool: tool_run_tool,
   delegate_to_gewu_node: tool_delegate_to_gewu_node,
   read_image: tool_read_image,
@@ -213,6 +216,9 @@ const CONTRACTS = {
   search: contract('retrieval', 'external-request', 'R1', ['project.database', 'plugin.content', 'llm.provider'], 30000),
   act: contract('action', 'execution', 'R2', ['user.account', 'project.database', 'ui.session', 'local.process'], 30000),
   plan: contract('planning', 'state-write', 'R1', ['project.database'], 500),
+  // BLOCK-97 — 任务清单：任务运行内的临时 UI 态（事件流承载，非用户数据表），
+  // 与 plan 同族 state-write/R1；不设 userId 门（访客会话可用，见 todo-tools.js 头注）
+  todo_write: contract('planning', 'state-write', 'R1', ['ui.session'], 200),
   run_tool: contract('analysis', 'execution', 'R2', ['tool_jobs', 'artifacts', 'local.process'], 300000),
   // BLOCK-85 P3 — 联邦委托：外部请求（对端格物执行），预算 15 分钟（轮询等待）
   delegate_to_gewu_node: contract('agent-management', 'external-request', 'R2', ['project.files'], 900000),
