@@ -3355,7 +3355,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **根因**：会话创建的两条路径（中栏发送首条消息时 useChatStream 前端创建 / 子 agent 等后端 getOrCreateActiveConversation 创建）都**不广播**——左栏 AppRailContext 的 useConversations 实例只有自己创建时才刷新（另一实例的 setList 不跨组件传播）；后端 SSE conversation 事件同样无人接线（同 UI-395 topic_shift 断链模式）。左栏只能等低频兜底，故「比较久才出现」。
 - **修复**：双路广播——① useChatStream.send 创建成功后 dispatch `conversationCreated`（前端创建路径）；② conversationRunStore 接线 SSE onConversation → 同事件（后端创建路径，覆盖子 agent/联邦委托）；③ AppRailContext 订阅 → 立即 refreshConversations + refreshOtherConversations（force 绕过共享缓存，当前项目与已展开项目都刷新）。
 - **证据**：端到端实测（新项目无会话 → composer 发送 hello → 左栏出现「新对话」）**275ms**；事件监听器到达断言通过；tsc 0 + copilot/desktop 392 测试过。截图 Temp gewu-probe/shots/block95/uiconv-live-final.png。
-- **边界**：归档/删除/改名会话的左栏刷新走既有链（本包不触碰）；跨端镜像（BLOCK-87 5s 轮询）不变。G0 开发期常态 · 不外推 packaged/Provider/GA.
+- **增补（同日，用户再反馈「创建了 db 左侧项目栏没马上更新」）**：**项目**创建同样零广播——且 softRefresh 事件全仓只有两个订阅方（AppRail refreshProjects / project-workspace）**没有任何派发方**（死订阅）。修复=四个项目创建点统一在成功后 dispatch softRefresh（home.tsx 空白创建/拖拽确认、useHomeCreateFlows SSH、AppRailContext 本地目录+SSH 树建〔后两处本就 setAllProjects 即时，补广播让 project-workspace 等订阅方一致〕）。端到端实测：页面内 REST 创建项目+广播 → 左栏项目列表 **268ms** 出现「db 实时验证」。430 测试+tsc 0。G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 ## UI-395: 代码查看器行号栏归位海军蓝 + 去分隔线 (2026-09-17 in_progress，dev Electron 实机修复待用户确认)
 

@@ -7,6 +7,7 @@ import {
   validateSshProject,
   type SshTargetCandidate,
 } from '@/lib/project-store';
+import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 
 // BLOCK-92 Wave B-6 — 首页创建流状态簇外迁（原 home.tsx 内联，纯搬运零行为变化）：
 // BLOCK-67/UI-321 SSH 远程项目创建流、UI-257 手动路径兜底 + UI-259 应用内选目录、
@@ -134,6 +135,12 @@ export function useHomeSshProject(options: {
       const name = remotePath.split('/').filter(Boolean).pop() || alias;
       const project = await createProject({ name, modality: 'general', workspaceKind: 'ssh', sshHost: alias, remotePath });
       setSshOpen(false);
+      // 项目创建广播（softRefresh → AppRail 刷新左栏项目列表，用户反馈「创建项目左栏不更新」）
+      try {
+        dispatchGewuEvent(gewuEvents.softRefresh, undefined);
+      } catch {
+        // 事件总线失败不阻塞导航
+      }
       setSshAlias('');
       setSshRemotePath('');
       setSshIp('');

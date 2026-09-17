@@ -42,7 +42,7 @@ import type { Project } from '@/lib/project-types';
 import { useConversations, useOtherConversations } from '@/hooks/useConversations';
 import { useProjectTreeState } from '@/pages/project-workspace/useProjectTreeState';
 import { useResizableColumns } from '@/hooks/useResizableColumns';
-import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
+import { gewuEvents, subscribeGewuEvent , dispatchGewuEvent } from '@/lib/events';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 
 /** 工作区在场时才成立的副作用（工作区挂载时注册，卸载即摘除）。 */
@@ -310,6 +310,12 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
       const name = finalPath.split(/[\\/]/).pop()?.trim() || '新项目';
       const created = await createProject({ name, modality: 'general', workspacePath: finalPath });
       setAllProjects((prev) => [created, ...prev.filter((item) => item.id !== created.id)]);
+      // 项目创建广播（softRefresh → AppRail 刷新左栏项目列表，用户反馈「创建项目左栏不更新」）
+      try {
+        dispatchGewuEvent(gewuEvents.softRefresh, undefined);
+      } catch {
+        // 事件总线失败不阻塞导航
+      }
       expandProject(created.id);
       navigate(`/project/${created.id}`);
     } catch (err) {
@@ -400,6 +406,12 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
     }
     const name = p.remotePath.split('/').filter(Boolean).pop() || p.alias;
     const created = await createProject({ name, modality: 'general', workspaceKind: 'ssh', sshHost: p.alias, remotePath: p.remotePath });
+      // 项目创建广播（softRefresh → AppRail 刷新左栏项目列表，用户反馈「创建项目左栏不更新」）
+      try {
+        dispatchGewuEvent(gewuEvents.softRefresh, undefined);
+      } catch {
+        // 事件总线失败不阻塞导航
+      }
     setAllProjects((cur) => (cur.some((item) => item.id === created.id) ? cur : [created, ...cur]));
     navigate(`/project/${created.id}`, { replace: true });
     return { ok: true };

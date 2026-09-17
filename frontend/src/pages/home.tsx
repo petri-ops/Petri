@@ -30,6 +30,7 @@ import {
   useHomeSshProject,
   useManualPathFlow,
 } from './home/useHomeCreateFlows';
+import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 
 export default function Home(): React.ReactElement {
   const backendStatus = useBackendStatus();
@@ -185,6 +186,12 @@ export default function Home(): React.ReactElement {
       const name = blankName.trim() || `项目-${new Date().toISOString().slice(5, 16).replace('T', '-')}`;
       const project = await createProject({ name, modality: 'general' });
       setBlankName('');
+      // 项目创建广播（softRefresh → AppRail 刷新左栏项目列表，用户反馈「创建项目左栏不更新」）
+      try {
+        dispatchGewuEvent(gewuEvents.softRefresh, undefined);
+      } catch {
+        // 事件总线失败不阻塞导航
+      }
       navigate(`/project/${project.id}`, { replace: true });
     } catch (e) {
       setCreateError(`创建项目失败：${e instanceof Error ? e.message : String(e)}`);
@@ -204,6 +211,12 @@ export default function Home(): React.ReactElement {
         workspacePath: pendingWorkspace.path,
       });
       setPendingWorkspace(null);
+      // 项目创建广播（softRefresh → AppRail 刷新左栏项目列表，用户反馈「创建项目左栏不更新」）
+      try {
+        dispatchGewuEvent(gewuEvents.softRefresh, undefined);
+      } catch {
+        // 事件总线失败不阻塞导航
+      }
       navigate(`/project/${project.id}`, { replace: true });
     } catch (e) {
       setCreateError(`创建项目失败：${e instanceof Error ? e.message : String(e)}`);
