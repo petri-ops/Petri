@@ -48,18 +48,20 @@ export function KnowledgeSpacePanel() {
   const [searching, setSearching] = useState(false);
   const [searchHits, setSearchHits] = useState<KnowledgeHit[] | null>(null);
   const [searchNote, setSearchNote] = useState<string | null>(null);
+  // BLOCK-94 F1 分页：首屏 50 篇，「加载更多」按 50 递增（服务端钳制 200）
+  const [docLimit, setDocLimit] = useState(50);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const refresh = useCallback(async () => {
     try {
-      const next = await fetchKnowledgeSpace();
+      const next = await fetchKnowledgeSpace({ docLimit });
       setState(next);
       setLoadError(null);
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : String(e));
     }
-  }, []);
+  }, [docLimit]);
 
   // 轮询：摄取期 2s 快刷；空闲 10s 慢刷（外部/其他窗口上传的文档也能及时出现）
   useEffect(() => {
@@ -84,6 +86,9 @@ export function KnowledgeSpacePanel() {
   const enabled = !!state?.space?.enabled;
   const embeddingAvailable = state ? state.embeddingAvailable : true;
   const documents = state?.documents || [];
+  const documentsTotal = state?.documentsTotal ?? documents.length;
+  const documentsHasMore = !!state?.documentsHasMore;
+  const staleEmbedding = state?.staleEmbedding;
 
   const handleToggle = useCallback(async () => {
     setActionError(null);
@@ -199,6 +204,13 @@ export function KnowledgeSpacePanel() {
         </div>
       )}
 
+      {state && staleEmbedding && staleEmbedding.staleChunks > 0 && (
+        <div className={styles.notice} data-testid="knowledge-stale-embedding">
+          嵌入模型已变更：{staleEmbedding.staleDocs} 篇文档的 {staleEmbedding.staleChunks} 个旧向量已被隔离（不影响全文检索），
+          建议对这些文档执行「重建索引」。
+        </div>
+      )}
+
       {state && (
         <div className={styles.spaceRow}>
           <button
@@ -212,7 +224,7 @@ export function KnowledgeSpacePanel() {
             {enabled ? '已启用' : '未启用'}
           </button>
           <span className={styles.spaceMeta}>
-            {documents.length} 篇文档 · {documents.filter((d) => d.status === 'ready').length} 篇就绪
+            {documentsTotal} 篇文档 · {documents.filter((d) => d.status === 'ready').length} 篇就绪
             {state.queueDepth > 0 ? ` · 摄取中 ${state.queueDepth}` : ''}
           </span>
         </div>
@@ -293,6 +305,18 @@ export function KnowledgeSpacePanel() {
             </div>
           </div>
         ))}
+        {documentsHasMore && (
+          <div className={styles.loadMoreRow}>
+            <button
+              type="button"
+              className={styles.ghostBtn}
+              onClick={() => setDocLimit((l) => l + 50)}
+              data-testid="knowledge-load-more"
+            >
+              加载更多（已显示 {documents.length} / {documentsTotal}）
+            </button>
+          </div>
+        )}
       </div>
 
       <div className={styles.searchBox}>

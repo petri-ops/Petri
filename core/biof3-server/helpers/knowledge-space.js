@@ -81,6 +81,19 @@ function listDocuments() {
     .all(SPACE_ID);
 }
 
+// BLOCK-94 F1 分页：面板/REST 列表面可分页（内部全量路径沿用 listDocuments）
+function listDocumentsPage({ limit, offset } = {}) {
+  const lim = Math.max(1, Math.min(Number.parseInt(limit, 10) || 50, 200));
+  const off = Math.max(0, Number.parseInt(offset, 10) || 0);
+  const documents = sqlite
+    .prepare('SELECT * FROM knowledge_documents WHERE space_id = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?')
+    .all(SPACE_ID, lim, off);
+  const total = sqlite
+    .prepare('SELECT COUNT(*) AS c FROM knowledge_documents WHERE space_id = ?')
+    .get(SPACE_ID).c;
+  return { documents, total, hasMore: off + documents.length < total, limit: lim, offset: off };
+}
+
 function getDocument(id) {
   return sqlite.prepare('SELECT * FROM knowledge_documents WHERE id = ?').get(id) || null;
 }
@@ -302,6 +315,20 @@ function fuseRank(vectorHits, ftsHits, topK) {
 
 // ---- 检索入口 ----
 
+// BLOCK-94 F1 嵌入模型一致性：向量 chunk 记录产出模型；换嵌入模型后旧向量隔离并计数暴露（提示重建）
+function staleEmbeddingStats() {
+  const row = sqlite
+    .prepare(
+      `SELECT COUNT(*) AS chunks, COUNT(DISTINCT k.doc_id) AS docs
+       FROM knowledge_chunks k
+       JOIN knowledge_documents d ON d.id = k.doc_id
+       WHERE k.space_id = ? AND d.status = 'ready' AND k.embedding IS NOT NULL
+         AND (k.model IS NULL OR k.model != ?)`
+    )
+    .get(SPACE_ID, EMBEDDING_MODEL);
+  return { staleChunks: row ? row.chunks : 0, staleDocs: row ? row.docs : 0 };
+}
+
 async function searchKnowledge({ query, topK = INJECT_TOPK, embed } = {}) {
   const q = String(query || '').trim();
   const space = getSpace();
@@ -322,6 +349,7 @@ async function searchKnowledge({ query, topK = INJECT_TOPK, embed } = {}) {
     )
     .get(SPACE_ID);
   base.readyChunks = totalRow ? totalRow.c : 0;
+  base.staleEmbedding = staleEmbeddingStats();
   if (base.readyChunks === 0) return base;
 
   const embedFn = embed || embedTexts;
@@ -335,7 +363,7 @@ async function searchKnowledge({ query, topK = INJECT_TOPK, embed } = {}) {
     base.embeddingError = e && e.message ? e.message : String(e);
   }
 
-  // 向量通道：只扫 ready 文档的 chunk，过阈值留 top
+  // 向量通道：只扫 ready 文档、当前嵌入模型产出的 chunk（旧模型向量隔离，防跨模型错误相似度）
   let vectorHits = [];
   if (queryVec) {
     const rows = sqlite
@@ -344,9 +372,9 @@ async function searchKnowledge({ query, topK = INJECT_TOPK, embed } = {}) {
                 d.name AS docName
          FROM knowledge_chunks k
          JOIN knowledge_documents d ON d.id = k.doc_id
-         WHERE k.space_id = ? AND d.status = 'ready' AND k.embedding IS NOT NULL`
+         WHERE k.space_id = ? AND d.status = 'ready' AND k.embedding IS NOT NULL AND k.model = ?`
       )
-      .all(SPACE_ID);
+      .all(SPACE_ID, EMBEDDING_MODEL);
     vectorHits = rows
       .map((row) => ({
         chunkId: row.chunkId,
@@ -411,12 +439,36 @@ function buildPromptBlock(hits, maxChars = INJECT_MAX_CHARS) {
 
 // ---- D4 轻按需：agent 每 turn 自动召回（启用才检索；无命中不注入任何内容）----
 
-async function buildAgentTurnBlock(query) {
+async function buildAgentTurnBlock(query, { embed } = {}) {
   const space = getSpace();
   if (!space || !space.enabled) return { block: '', usedChars: 0, hitCount: 0 };
-  const result = await searchKnowledge({ query, topK: INJECT_TOPK });
+  const result = await searchKnowledge({ query, topK: INJECT_TOPK, embed });
   const { block, usedChars } = buildPromptBlock(result.hits);
   return { block, usedChars, hitCount: result.hits.length };
+}
+
+// ---- BLOCK-94 F1 挂点收敛：agent-runner 与 ai-agent/chat 的同构注入逻辑单源化 ----
+// 纯去重零行为变更：取最新 user 消息（剥 [附件…] 前缀）→ 启用且命中才拼接注入块。
+// embed 可注入供契约测试；任何内部失败静默零注入（与原两处 catch {} 语义一致）。
+
+async function buildTurnInjection(systemPrompt, messages, { embed } = {}) {
+  let knowledgeTokens = 0;
+  try {
+    const latestUserMsg = [...(Array.isArray(messages) ? messages : [])]
+      .reverse()
+      .find((m) => m && m.role === 'user' && typeof m.content === 'string');
+    const cleanQuery = latestUserMsg
+      ? latestUserMsg.content.replace(/^\[[^\]]+\]\s*\n?/, '').trim()
+      : '';
+    if (cleanQuery) {
+      const knowledgeTurn = await buildAgentTurnBlock(cleanQuery, { embed });
+      if (knowledgeTurn.block) {
+        systemPrompt += knowledgeTurn.block;
+        knowledgeTokens = Math.ceil(knowledgeTurn.usedChars / 4);
+      }
+    }
+  } catch {}
+  return { systemPrompt, knowledgeTokens };
 }
 
 // ---- D10 删除语义：单事务清库，两通道同灭；原始文件随后移除 ----
@@ -477,8 +529,10 @@ module.exports = {
   getSpace,
   setSpaceEnabled,
   listDocuments,
+  listDocumentsPage,
   getDocument,
   setDocumentStatus,
+  staleEmbeddingStats,
   chunkText,
   embedTexts,
   cosineSim,
@@ -488,6 +542,7 @@ module.exports = {
   searchKnowledge,
   buildPromptBlock,
   buildAgentTurnBlock,
+  buildTurnInjection,
   deleteDocument,
   clearSpace,
 };

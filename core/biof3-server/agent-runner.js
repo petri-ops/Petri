@@ -437,22 +437,10 @@ async function runAgentLoop({
   } catch {}
 
   // BLOCK-69 — 知识空间自动召回（D4 轻按需：启用才检索；过阈值才注入，≤3 块；无命中不注入）
-  let knowledgeTokens = 0;
-  try {
-    const latestUserMsg = [...(Array.isArray(messages) ? messages : [])]
-      .reverse()
-      .find((m) => m && m.role === 'user' && typeof m.content === 'string');
-    const cleanQuery = latestUserMsg
-      ? latestUserMsg.content.replace(/^\[[^\]]+\]\s*\n?/, '').trim()
-      : '';
-    if (cleanQuery) {
-      const knowledgeTurn = await knowledgeSpace.buildAgentTurnBlock(cleanQuery);
-      if (knowledgeTurn.block) {
-        systemPrompt += knowledgeTurn.block;
-        knowledgeTokens = Math.ceil(knowledgeTurn.usedChars / 4);
-      }
-    }
-  } catch {}
+  // BLOCK-94 F1 挂点收敛：注入逻辑单源 buildTurnInjection（纯去重零行为变更）
+  const knowledgeInjection = await knowledgeSpace.buildTurnInjection(systemPrompt, messages);
+  systemPrompt = knowledgeInjection.systemPrompt;
+  const knowledgeTokens = knowledgeInjection.knowledgeTokens;
 
   systemPrompt += '\n\n=== Tool Calling 指南 ===';
   systemPrompt += '\n你可以调用工具来获取真实数据：query / read_page / search';

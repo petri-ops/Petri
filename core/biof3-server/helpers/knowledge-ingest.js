@@ -31,10 +31,10 @@ const MIN_CHUNK_FOR_EMBED = 1;
 let _queue = Promise.resolve();
 let _queueDepth = 0;
 
-function enqueueIngest(docId) {
+function enqueueIngest(docId, { embed } = {}) {
   _queueDepth += 1;
   _queue = _queue
-    .then(() => ingestDocument(docId))
+    .then(() => ingestDocument(docId, { embed }))
     .catch((e) => {
       console.log('[knowledge-ingest] queue item failed:', docId, e && e.message);
     })
@@ -182,6 +182,46 @@ async function reindexDocument(docId) {
   return ks.getDocument(docId);
 }
 
+// ---- BLOCK-94 F1 可靠底盘：启动恢复 + 失败批量重试 ----
+
+// 队列为进程内 promise 链：重启后 uploaded/parsing/chunking/embedding 中间态文档会永久卡住。
+// 服务启动时（mountKnowledge）调用：中间态文档按 updated_at 升序（先来先摄）自动重排入队。
+// 原始文件缺失的会在管道内诚实转 failed（knowledge_raw_file_missing / 读文件失败）。
+function recoverInterruptedIngest({ embed } = {}) {
+  const rows = sqlite
+    .prepare(
+      `SELECT id FROM knowledge_documents
+       WHERE space_id = ? AND status IN ('uploaded', 'parsing', 'chunking', 'embedding')
+       ORDER BY updated_at ASC`
+    )
+    .all(ks.SPACE_ID);
+  for (const row of rows) enqueueIngest(row.id, { embed });
+  if (rows.length > 0) {
+    console.log(`[knowledge-ingest] boot recovery: requeued ${rows.length} interrupted document(s)`);
+  }
+  return { requeued: rows.length, docIds: rows.map((r) => r.id), settled: _queue };
+}
+
+// failed 文档批量重试（含解析器就绪后的 PDF 等历史失败）。原始文件缺失的逐项诚实跳过。
+function retryFailedDocuments({ embed } = {}) {
+  const rows = sqlite
+    .prepare(`SELECT id FROM knowledge_documents WHERE space_id = ? AND status = 'failed' ORDER BY updated_at ASC`)
+    .all(ks.SPACE_ID);
+  const skipped = [];
+  let requeued = 0;
+  for (const row of rows) {
+    const doc = ks.getDocument(row.id);
+    const rawPath = doc ? doc.raw_path || path.join(ks.docDir(row.id), doc.name) : null;
+    if (!rawPath || !fs.existsSync(rawPath)) {
+      skipped.push({ id: row.id, reason: 'knowledge_raw_file_missing' });
+      continue;
+    }
+    enqueueIngest(row.id, { embed });
+    requeued += 1;
+  }
+  return { requeued, skipped, settled: _queue };
+}
+
 module.exports = {
   EMBED_BATCH_SIZE,
   MAX_DOCUMENT_BYTES,
@@ -190,5 +230,7 @@ module.exports = {
   reindexDocument,
   enqueueIngest,
   ingestQueueDepth,
+  recoverInterruptedIngest,
+  retryFailedDocuments,
   safeDocFilename,
 };

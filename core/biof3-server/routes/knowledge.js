@@ -44,10 +44,17 @@ function docView(doc) {
 }
 
 module.exports = function mountKnowledge(app) {
-  // 空间总览：空间行 + 文档清单 + 嵌入可用性 + 存储位置（D9）
+  // BLOCK-94 F1 启动恢复：重启后中间态文档（uploaded/parsing/chunking/embedding）自动重排入队
+  ingest.recoverInterruptedIngest();
+
+  // 空间总览：空间行 + 文档清单（分页）+ 嵌入可用性 + 存储位置（D9）+ 嵌入模型失配统计
   app.get('/api/knowledge/space', async (req, res) => {
     try {
       const space = ks.getSpace();
+      const page = ks.listDocumentsPage({
+        limit: req.query.docLimit,
+        offset: req.query.docOffset,
+      });
       res.json({
         status: 'ok',
         space: space
@@ -58,7 +65,13 @@ module.exports = function mountKnowledge(app) {
               embeddingModel: space.embedding_model,
             }
           : null,
-        documents: ks.listDocuments().map(docView),
+        documents: page.documents.map(docView),
+        documentsTotal: page.total,
+        documentsHasMore: page.hasMore,
+        documentsLimit: page.limit,
+        documentsOffset: page.offset,
+        // BLOCK-94 F1：换嵌入模型后旧模型向量被隔离，>0 时前端提示重建
+        staleEmbedding: ks.staleEmbeddingStats(),
         embeddingAvailable: embeddingAvailable(),
         knowledgeDir: ks.knowledgeRoot(),
         queueDepth: ingest.ingestQueueDepth(),
@@ -110,10 +123,34 @@ module.exports = function mountKnowledge(app) {
     });
   });
 
-  // 摄取状态（前端轮询）
+  // 摄取状态（前端轮询；BLOCK-94 F1 分页）
   app.get('/api/knowledge/documents', async (req, res) => {
     try {
-      res.json({ status: 'ok', documents: ks.listDocuments().map(docView), queueDepth: ingest.ingestQueueDepth() });
+      const page = ks.listDocumentsPage({ limit: req.query.limit, offset: req.query.offset });
+      res.json({
+        status: 'ok',
+        documents: page.documents.map(docView),
+        total: page.total,
+        hasMore: page.hasMore,
+        limit: page.limit,
+        offset: page.offset,
+        queueDepth: ingest.ingestQueueDepth(),
+      });
+    } catch (e) {
+      res.status(500).json({ status: 'error', error: e.message });
+    }
+  });
+
+  // BLOCK-94 F1：failed 文档批量重试（原始文件缺失的逐项诚实跳过）
+  app.post('/api/knowledge/documents/retry-failed', async (req, res) => {
+    try {
+      const result = ingest.retryFailedDocuments();
+      res.json({
+        status: 'ok',
+        requeued: result.requeued,
+        skipped: result.skipped,
+        queueDepth: ingest.ingestQueueDepth(),
+      });
     } catch (e) {
       res.status(500).json({ status: 'error', error: e.message });
     }

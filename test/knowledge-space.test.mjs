@@ -108,7 +108,8 @@ function insertReadyDoc(docId, name, chunks) {
         `INSERT INTO knowledge_chunks (id, doc_id, space_id, seq, text, embedding, dim, model, created_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`
       )
-      .run(chunkId, docId, ks.SPACE_ID, seq, text, vec || null, vec ? ks.EMBEDDING_DIM : null, vec ? 'test-model' : null);
+      // BLOCK-94 F1 模型隔离：向量通道只认当前嵌入模型产出的 chunk，夹具同产线形状
+      .run(chunkId, docId, ks.SPACE_ID, seq, text, vec || null, vec ? ks.EMBEDDING_DIM : null, vec ? ks.EMBEDDING_MODEL : null);
     sqlite.prepare('INSERT INTO knowledge_chunks_fts (chunk_id, text) VALUES (?, ?)').run(chunkId, text);
   });
 }
@@ -423,5 +424,162 @@ test('buildAgentTurnBlock: 空间关闭不注入；开启且有 ready 命中才�
   // 无命中：启用也不注入任何内容（轻按需）
   const miss = await ks.buildAgentTurnBlock('完全不相关的查询词组组合');
   assert.equal(miss.block, '', 'enabled + no hit → no injection');
+  ks.setSpaceEnabled(false);
+});
+
+// ---------- BLOCK-94 P1 可靠底盘：启动恢复 / 模型一致性 / 分页 / 挂点收敛 ----------
+
+test('F1 启动恢复: 中间态文档重启后重排入队，最终全部落到终态（无永久卡死）', async () => {
+  // 两份中间态夹具：一份原始文件在位（管道可走通），一份原始文件缺失（诚实 failed）
+  const okDir = ks.docDir('doc_recover_ok');
+  fs.mkdirSync(okDir, { recursive: true });
+  fs.writeFileSync(path.join(okDir, 'recover.txt'), '重启恢复夹具：包含 TP53 与细胞凋亡关键词的长文本内容，确保能分出块。');
+  const insertIntermediate = (docId, name, status, rawPath) => {
+    sqlite
+      .prepare(
+        `INSERT INTO knowledge_documents (id, space_id, name, kind, size, status, raw_path, created_at, updated_at)
+         VALUES (?, ?, ?, 'text', 100, ?, ?, datetime('now'), datetime('now'))`
+      )
+      .run(docId, ks.SPACE_ID, name, status, rawPath);
+  };
+  insertIntermediate('doc_recover_ok', 'recover.txt', 'parsing', path.join(okDir, 'recover.txt'));
+  insertIntermediate('doc_recover_lost', 'lost.txt', 'embedding', path.join(okDir, 'gone.txt'));
+
+  // embed 注入：契约测试不依赖网络（生产路径不传 → 真实嵌入）
+  const fakeEmbed = async (texts) => texts.map((t) => blendVec(makeVec(9), makeVec(t.length), 0.98));
+  const recovery = ingest.recoverInterruptedIngest({ embed: fakeEmbed });
+  assert.equal(recovery.requeued, 2, 'both intermediate docs requeued');
+  await recovery.settled;
+
+  const afterOk = ks.getDocument('doc_recover_ok');
+  const afterLost = ks.getDocument('doc_recover_lost');
+  assert.equal(afterOk.status, 'ready', 'with-raw doc re-ingests to ready');
+  assert.equal(afterLost.status, 'failed', 'missing-raw doc fails honestly');
+  assert.equal(
+    sqlite
+      .prepare(
+        `SELECT COUNT(*) c FROM knowledge_documents
+         WHERE space_id = ? AND status IN ('uploaded','parsing','chunking','embedding')`
+      )
+      .get(ks.SPACE_ID).c,
+    0,
+    'no document left in intermediate state after boot recovery'
+  );
+  ks.deleteDocument('doc_recover_ok');
+  ks.deleteDocument('doc_recover_lost');
+});
+
+test('F1 失败批量重试: failed 文档重排入队，原始文件缺失逐项诚实跳过', async () => {
+  const doc = await ingest.createDocument({
+    name: 'retry-me.txt',
+    buffer: Buffer.from('需要批量重试的失败文档内容，讨论 BRCA1 与 TP53 互作机制。', 'utf8'),
+    autoIngest: false,
+  });
+  await ingest.ingestDocument(doc.id, { embed: async () => null });
+  assert.equal(ks.getDocument(doc.id).status, 'failed');
+
+  const missingDir = ks.docDir('doc_retry_lost');
+  fs.mkdirSync(missingDir, { recursive: true });
+  sqlite
+    .prepare(
+      `INSERT INTO knowledge_documents (id, space_id, name, kind, size, status, raw_path, created_at, updated_at)
+       VALUES (?, ?, ?, 'text', 100, 'failed', ?, datetime('now'), datetime('now'))`
+    )
+    .run('doc_retry_lost', ks.SPACE_ID, 'lost.txt', path.join(missingDir, 'gone.txt'));
+
+  const fakeEmbed = async (texts) => texts.map(() => makeVec(13));
+  const result = ingest.retryFailedDocuments({ embed: fakeEmbed });
+  assert.ok(result.requeued >= 1, 'failed doc with raw file requeued');
+  assert.ok(result.skipped.some((s) => s.id === 'doc_retry_lost'), 'missing-raw skip is honest and itemized');
+  await result.settled;
+  assert.equal(ks.getDocument(doc.id).status, 'ready', 'retried doc reaches ready with injected embed');
+  ks.deleteDocument(doc.id);
+  ks.deleteDocument('doc_retry_lost');
+});
+
+test('F1 嵌入模型一致性: 旧模型向量隔离出向量通道（FTS 仍可达），失配计数暴露', async () => {
+  const qVec = makeVec(21);
+  insertReadyDoc('doc_stale_model', '旧模型笔记', [
+    [0, '免疫组化染色流程中 TP53 抗体孵育条件需要严格控制。', toBuf(qVec)],
+  ]);
+  // 夹具写入的是当前模型（insertReadyDoc 已对齐产线）——手动改成旧模型制造失配
+  sqlite.prepare('UPDATE knowledge_chunks SET model = ? WHERE doc_id = ?').run('text-embedding-v1', 'doc_stale_model');
+
+  const stats = ks.staleEmbeddingStats();
+  assert.ok(stats.staleChunks >= 1, `stale chunks counted, got ${stats.staleChunks}`);
+  assert.ok(stats.staleDocs >= 1, 'stale docs counted');
+
+  // 同一查询向量、模型失配 → 向量通道必须放行该 chunk 为零命中；FTS 关键词通道仍可达
+  const r = await ks.searchKnowledge({ query: '免疫组化 TP53 孵育', embed: async () => [qVec] });
+  const staleHit = r.hits.find((h) => h.docId === 'doc_stale_model');
+  if (staleHit) {
+    assert.equal(staleHit.channels.vector, undefined, 'stale-model chunk must not enter vector channel');
+    assert.ok(staleHit.channels.fts != null, 'FTS channel still reaches stale doc');
+  }
+  assert.ok(r.staleEmbedding && r.staleEmbedding.staleChunks >= 1, 'searchKnowledge base exposes stale stats');
+  ks.deleteDocument('doc_stale_model');
+});
+
+test('F1 模型匹配: 当前模型向量照常进入向量通道（隔离不误伤）', async () => {
+  const qVec = makeVec(31);
+  insertReadyDoc('doc_fresh_model', '新模型笔记', [
+    [0, '单细胞转录组聚类分析使用 Leiden 算法分辨细胞亚群。', toBuf(qVec)],
+  ]);
+  const r = await ks.searchKnowledge({ query: '单细胞 聚类', embed: async () => [qVec] });
+  const hit = r.hits.find((h) => h.docId === 'doc_fresh_model');
+  assert.ok(hit, 'fresh-model doc searchable');
+  assert.ok(hit.channels.vector != null, 'current-model chunk enters vector channel');
+  ks.deleteDocument('doc_fresh_model');
+});
+
+test('F1 分页: listDocumentsPage 返回 total/hasMore，参数钳制与越界诚实', async () => {
+  const total = sqlite.prepare('SELECT COUNT(*) c FROM knowledge_documents WHERE space_id = ?').get(ks.SPACE_ID).c;
+  assert.ok(total >= 1, 'docs exist from earlier tests');
+
+  const page1 = ks.listDocumentsPage({ limit: 2, offset: 0 });
+  assert.equal(page1.documents.length, 2);
+  assert.equal(page1.total, total);
+  assert.equal(page1.hasMore, total > 2, 'hasMore reflects remainder');
+
+  const last = ks.listDocumentsPage({ limit: 2, offset: Math.floor(total / 2) * 2 });
+  assert.ok(last.documents.length >= 0);
+  assert.equal(last.hasMore, false, 'no remainder beyond last page');
+
+  const over = ks.listDocumentsPage({ limit: 2, offset: total + 10 });
+  assert.equal(over.documents.length, 0, 'offset beyond total → honest empty');
+  assert.equal(over.hasMore, false);
+
+  const clamped = ks.listDocumentsPage({ limit: 99999 });
+  assert.ok(clamped.limit <= 200, 'limit clamped to 200');
+  assert.equal(clamped.documents.length, total, 'full page within clamp');
+});
+
+test('F1 挂点收敛: buildTurnInjection 单源注入（关/开/附件前缀/无命中）', async () => {
+  ks.setSpaceEnabled(false);
+  const noEmbed = async () => [];
+  const off = await ks.buildTurnInjection('BASE', [{ role: 'user', content: 'TP53 细胞凋亡机制' }], { embed: noEmbed });
+  assert.equal(off.systemPrompt, 'BASE', 'space disabled → prompt unchanged');
+  assert.equal(off.knowledgeTokens, 0);
+
+  // reindex-me.txt（前面测试留下的 ready 文档）FTS 可命中；embed 注入空数组 → 只走 FTS 通道（不依赖网络）
+  ks.setSpaceEnabled(true);
+  const on = await ks.buildTurnInjection(
+    'BASE',
+    [
+      { role: 'assistant', content: '先前回复' },
+      { role: 'user', content: '[附件: notes.txt]\nTP3 与 BRCA1 互作' },
+    ],
+    { embed: noEmbed }
+  );
+  assert.ok(on.systemPrompt.startsWith('BASE'), 'original prompt preserved as prefix');
+  assert.ok(on.systemPrompt.includes('知识空间检索结果'), 'attachment prefix stripped and injection appended');
+  assert.ok(on.knowledgeTokens > 0, 'token accounting flows through single source');
+
+  const miss = await ks.buildTurnInjection('BASE', [{ role: 'user', content: '毫不相关的查询词语组合' }]);
+  assert.equal(miss.systemPrompt, 'BASE', 'no hit → unchanged');
+  assert.equal(miss.knowledgeTokens, 0);
+
+  const noUser = await ks.buildTurnInjection('BASE', [{ role: 'assistant', content: '只有助手消息' }]);
+  assert.equal(noUser.systemPrompt, 'BASE', 'no user message → unchanged');
   ks.setSpaceEnabled(false);
 });

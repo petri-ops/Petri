@@ -26,6 +26,13 @@ export interface KnowledgeSpaceState {
   embeddingAvailable: boolean;
   knowledgeDir: string;
   queueDepth: number;
+  /** BLOCK-94 F1 分页（服务端默认 docLimit=50） */
+  documentsTotal?: number;
+  documentsHasMore?: boolean;
+  documentsLimit?: number;
+  documentsOffset?: number;
+  /** BLOCK-94 F1 嵌入模型失配统计：>0 时旧模型向量已隔离，提示重建 */
+  staleEmbedding?: { staleChunks: number; staleDocs: number };
 }
 
 export interface KnowledgeHit {
@@ -57,9 +64,24 @@ async function jsonOrThrow<T>(resp: Response): Promise<T> {
   return body as T;
 }
 
-export async function fetchKnowledgeSpace(): Promise<KnowledgeSpaceState> {
-  const resp = await fetch(`${getApiPrefix()}/knowledge/space`);
+export async function fetchKnowledgeSpace(
+  params?: { docLimit?: number; docOffset?: number }
+): Promise<KnowledgeSpaceState> {
+  const query = new URLSearchParams();
+  if (params?.docLimit != null) query.set('docLimit', String(params.docLimit));
+  if (params?.docOffset != null) query.set('docOffset', String(params.docOffset));
+  const qs = query.toString();
+  const resp = await fetch(`${getApiPrefix()}/knowledge/space${qs ? `?${qs}` : ''}`);
   return jsonOrThrow<KnowledgeSpaceState>(resp);
+}
+
+/** BLOCK-94 F1：failed 文档批量重试（原始文件缺失的逐项诚实跳过） */
+export async function retryFailedKnowledgeDocuments(): Promise<{
+  requeued: number;
+  skipped: Array<{ id: string; reason: string }>;
+}> {
+  const resp = await fetch(`${getApiPrefix()}/knowledge/documents/retry-failed`, { method: 'POST' });
+  return jsonOrThrow(resp);
 }
 
 export async function setKnowledgeSpaceEnabled(enabled: boolean): Promise<void> {
