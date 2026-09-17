@@ -3349,6 +3349,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-395: 代码查看器行号栏归位海军蓝 + 去分隔线 (2026-09-17 in_progress，dev Electron 实机修复待用户确认)
+
+- **来源**：用户截图反馈「右侧栏文件树打开脚本文档：第一行和左侧行数颜色和主内容区颜色不一致，不是海军蓝？？？行数和主内容区中间有个分隔线，这个不需要可以把分隔线取消，直接行数字和内容即可」。
+- **根因**（CodeMirrorEditor.module.css）：`.cm-gutters` 用了 `--gewu-bg-elevated`（浮层色 #1d2945）——违反 gewu-css-theme 铁律 4「层级方向」（gutter 与主内容是同一平面，不该用弹层抬升色），暗色下比内容区浅一档即「不是海军蓝」；`border-right` 分隔线为多余装饰。附带：CodeMirror 默认 `.cm-activeLine/.cm-activeLineGutter` 浅灰高亮在海军蓝上脱节。
+- **修复**：gutter `background-color: transparent`（直接吃父面底色，亮暗主题天然与内容一致）+ `border-right: none`（用户裁决移除）；活动行/活动行号统一 `var(--gewu-hover)`（白蓝低透明，亮暗双态自适应）。
+- **证据**：实机 afterSign.js（用户截图同文件）computed style 取证 gutterBg=rgba(0,0,0,0)/borderRight=0px/activeLineBg=rgba(230,237,243,0.07)；截图 acceptance 不留（Temp ui395-after.png）；theme-token-contract 4/4。
+- **边界**：仅代码查看器 gutter 面；亮色模式 gutter 透明随父面同样成立。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-394: 会话信息流四件——长会话游标加载 + 回到底部浮标 + 话题小节分隔 + 压缩诚实标记卡 (2026-09-17 verified，dev Electron 边界内；用户复看截图确认「好的 按照你的建议来」)
 
 - **来源**：BLOCK-95-SESSION-IO P1（用户裁决原话「需要新建一个block用来优化 信息流 I/O 主要目的是让每个session的连贯性好看易读 还有一个方面是性能 省token」+ 队列序启动裁决「1 · BLOCK-95 会话 I/O」）。

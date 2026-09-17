@@ -25,8 +25,16 @@
 }
 
 .cmEditor :global(.cm-gutters) {
-  background-color: var(--gewu-bg-elevated, transparent);
-  border-right: 1px solid var(--gewu-border, rgba(0, 0, 0, 0.08));
+  /* UI-395 — 行号栏与主内容同一平面：transparent 直接吃父面底色（曾用 --gewu-bg-elevated
+     浮层色，暗色下比内容区浅一档＝「不是海军蓝」根因）；分隔线按用户裁决移除（行号与内容直接相连）。 */
+  background-color: transparent;
+  border-right: none;
+}
+
+.cmEditor :global(.cm-activeLine),
+.cmEditor :global(.cm-activeLineGutter) {
+  /* UI-395 — CodeMirror 默认活动行浅灰在海军蓝上脱节，统一走 --gewu-hover（亮暗双态自适应）。 */
+  background-color: var(--gewu-hover);
 }
 
 /* ===== P1 unified diff 主题 ===== */
