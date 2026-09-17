@@ -1,8 +1,8 @@
 # BLOCK-94-KNOWLEDGE-SPACE-PRO — 知识空间专业化升级
 
-最后更新：2026-09-16
+最后更新：2026-09-18（夜间会话：P0 评审完成（事实重定位 + D1-D6 预置推荐先行留痕 §7），active 进入 P1）
 
-状态：`planned（2026-09-16 立项登记，排队不占 active 槽位；启动需用户裁决）`
+状态：`active（2026-09-18 用户夜间授权队列启动，裁决原话「我希望你搞定这些……继续工作」——授权对象为主 Agent 前一轮呈报的候选队列 BLOCK-94 → BLOCK-85 → BLOCK-88；P0-LAUNCH 完成，P1 起串行）`
 
 计划编号：`BLOCK-94-KNOWLEDGE-SPACE-PRO`
 
@@ -115,3 +115,29 @@
 - 每工作面门禁实况数字（定向测试 x/x / tsc / 实机断言数）记入本文件状态头与 AUDIT-LOG 行；
 - UI-### 台账行与 `acceptance/block-94/` 实机证据一一对应，impact-map 同步登记；
 - 依赖裁决逐项留痕（用户裁决原话）；`npm run docs:check` 与 `npm run ui:audit:check` 收口必绿。
+
+## 7. P0 评审记录（2026-09-18 夜间会话，事实重定位 + 裁决留痕）
+
+### 7.1 事实重定位（plan 基线 2026-09-16 → HEAD f9a237c6）
+
+- **knowledge 域零漂移**：六文件行数与 §1 基线逐字一致（knowledge-ingest 194 / knowledge-parsers 126 / knowledge-space 493 / routes/knowledge 175 / knowledge-tools 80 / KnowledgeSpacePanel 344）——F1～F6 在 knowledge 域内的全部锚点有效。
+- **注入挂点漂移（F1 收敛目标确认）**：`agent-runner.js` L420-436 → **L440-457**（`buildAgentTurnBlock` 调用 L449）；`routes/ai-agent/chat.js` L405-417 → **L460-471**（调用 L469）。两处逐字同构（含 `[附件]` 前缀清洗正则与 `catch {}` 吞错）→ 收敛为单一实现，纯去重零行为变更。
+- **相邻在制面新事实**（影响落点，不改变范围）：
+  - `agent-runner.js` 已被 BLOCK-95（游标加载）/ BLOCK-97（task_todo 事件）/ BLOCK-98（resilience 包裹 callChatProvider + steer 注入）连续改动——F1 只动 systemPrompt 知识注入段，不触碰 provider 调用边界；**loop-orchestrator 1241 行门零触碰红线延续**。
+  - `SimpleChat.tsx` 已被 BLOCK-92 Wave A 拆分（2024→1584 行 + `SimpleChat/` 子目录 hooks/纯函数）——F5 citation 卡落点改走新模块结构（`displayMessages.ts` / hooks / `conversationRunStore/`），不再膨胀主文件。
+  - UI-400 已裁决引入 **pdfjs-dist 4.10.38**（frontend，用户裁决引依赖 + checklist 四问留痕台账）→ F2 复用该已裁决依赖，server 侧为同一依赖的安装位置补充。
+
+### 7.2 裁决项 D1-D6（呈问未应答，按预置推荐先行、可逆、留痕待晨间追认——先例 BLOCK-97/98 P0）
+
+- **D1 范围与顺序**：六工作面全启动，按 §4 P1→P6 串行，不裁剪。依据：用户目标「专业 易用 能力全面」三全 + 夜间队列授权。
+- **D2 F2 PDF 依赖**：**pdfjs-dist 4.10.38 复用**（UI-400 已裁决依赖，同族同版本；DEPENDENCY-CHANGE-CHECKLIST 四问补答：①替代方案 pdf-parse=新家族拒 / 系统 pdftotext=外部运行时依赖拒 / 自研=plan §0 已判不可行；②license Apache-2.0、Mozilla 维护，UI-400 已核；③影响面=server 侧按需 lazy require，不进前端 bundle；④退出成本=knowledge-parsers 单 parser entry + 单层封装，删一个文件节点即退）。版本钉扎精确 `4.10.38` 与 frontend 一致。
+- **D3 F6 sqlite-vec**：仅评估报告，不引入（plan §0 写死，无裁决空间）。
+- **D4 F3 URL 摄取 / 粘贴文本**：URL 网页摄取**评估结论=本期不做**（网页抓取+HTML 抽取属新依赖与新攻击面，登记 deferred）；粘贴文本直入库**做**（零依赖，随 P2 交付）。
+- **D5 F4 标签/分组**：评估结论=本期不做分组 UI（与非范围「多空间改造」边界一致）；批量操作全做。
+- **D6 F5 knowledge_read 工具**：P4 现场按 SimpleChat 触碰面实况评估，预置倾向=做（REST 面已有等价物，工具注册 additive 成本低）。
+
+### 7.3 环境事实与风险对账
+
+- Mac 环境：Node v24.16.0 ✓（better-sqlite3 ABI 匹配）；dev DB 已存在（`.biof3-dev-user-data/`，2026-09-15 Mac 会话所建），`dashscope_configured: true` + `embed_provider: "dashscope"` → **真实嵌入通道实机可用**。
+- dev 栈：`BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev`；core/** 变更须重启 dev 栈。
+- 存量基线对账：loop/agent 族 continuation guard 2 红（🟡 2026-09-16 登记）——F1 动 agent-runner/chat.js **动前存定向基线、动后逐项归属**，禁把存量红记成本包引入。

@@ -4502,21 +4502,21 @@
       "id": "BLOCK-94-KNOWLEDGE-SPACE-PRO",
       "path": "docs/block-94-knowledge-space-pro-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "active",
       "canonical": true,
       "truthDomain": "block-94-knowledge-space-pro",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-16",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-PLANNED",
+      "phase": "P1-RELIABLE-BASE",
       "tags": [
         "block-94",
         "knowledge-space",
         "rag",
         "professionalization"
       ],
-      "notes": "知识空间专业化升级（BLOCK-69 v1 后继 v2 载体，用户裁决立项 2026-09-16「专业 易用 能力全面」）：六工作面=F1 可靠底盘（摄取队列启动恢复/嵌入模型一致性防护/召回挂点去重/列表分页）+ F2 格式（PDF 兑现 BLOCK-69 P3 断层，新依赖须 DEPENDENCY-CHANGE-CHECKLIST 裁决）+ F3 摄取易用（拖拽上传/逐文件错误聚合）+ F4 管理面（文档预览/批量删除重试）+ F5 检索引用溯源（聊天 citation 卡/过滤高亮/knowledge_read 评估）+ F6 规模化（向量扫描警戒指标/无 key 诚实降级；sqlite-vec 仅评估）。非范围=音视频/数据库直读（P4 线）、多空间、手机投影；BLOCK-93 文件面零触碰。planned 排队不占 active 槽位；启动需用户裁决。",
-      "lastUpdated": "2026-09-16"
+      "notes": "知识空间专业化升级（BLOCK-69 v1 后继 v2 载体，用户裁决立项 2026-09-16「专业 易用 能力全面」）：六工作面=F1 可靠底盘（摄取队列启动恢复/嵌入模型一致性防护/召回挂点去重/列表分页）+ F2 格式（PDF 兑现 BLOCK-69 P3 断层，新依赖须 DEPENDENCY-CHANGE-CHECKLIST 裁决）+ F3 摄取易用（拖拽上传/逐文件错误聚合）+ F4 管理面（文档预览/批量删除重试）+ F5 检索引用溯源（聊天 citation 卡/过滤高亮/knowledge_read 评估）+ F6 规模化（向量扫描警戒指标/无 key 诚实降级；sqlite-vec 仅评估）。非范围=音视频/数据库直读（P4 线）、多空间、手机投影；BLOCK-93 文件面零触碰。planned 排队不占 active 槽位；启动需用户裁决。 2026-09-18 启动 active（用户夜间授权队列原话「我希望你搞定这些……继续工作」）：P0 评审完成（事实重定位：knowledge 域零漂移、注入挂点漂移至 agent-runner L449 / chat.js L469、D1-D6 预置推荐先行留痕 plan §7——PDF 复用已裁决 pdfjs-dist 4.10.38 / sqlite-vec 仅评估 / URL 摄取与分组 UI 不做）。P1 可靠底盘 → P6 整包收口串行。",
+      "lastUpdated": "2026-09-18"
     },
     {
       "id": "BLOCK-93-AGENT-OPTIMIZATION",
@@ -4647,6 +4647,6 @@
       "notes": "Agent 长任务韧性：移植 ZCode 三层上下文压缩（microcompact 本地工具结果清理/auto-compact 结构化摘要+转写路径回查/reactive 超限兜底）+ 防呆三件套（rapid-refill 防抖/连续失败熔断/原地重试）+ 输入插队队列 + api_retry 遥测。升级基座=BLOCK-95 B2 单层压缩（不推倒重来，DB 原文不动红线延续）。机制解剖底稿=plan §3（2026-09-17 对 ZCode 本体 bundle+db 实测取证）。六工作面 M1-M6，设计裁决项 D1-D7 预置推荐齐。2026-09-17 立项登记 planned（不占 active 槽位）；启动门槛=BLOCK-97 收口 + 用户裁决（文件面重叠 agent-runner.js/conversationRunStore/CenterPanel/impact-map）。0 新依赖。"
     }
   ],
-  "lastUpdated": "2026-09-17",
+  "lastUpdated": "2026-09-18",
   "documentCount": 251
 }
