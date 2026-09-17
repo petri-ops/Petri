@@ -38,7 +38,8 @@ test('initRepositoryAt: fresh directory → git init + full initial commit', asy
     // 真实仓库状态：初始提交包含全部文件
     const { execFileSync } = await import('node:child_process');
     const log = execFileSync('git', ['-C', dir, 'log', '--oneline'], { encoding: 'utf-8' });
-    assert.match(log, /Initial commit \(BioF3\)/);
+    // BLOCK-61 品牌改名后初始提交信息为 Gewu（源码 repository-init.js 为唯一真值）
+    assert.match(log, /Initial commit \(Gewu\)/);
     const files = execFileSync('git', ['-C', dir, 'ls-files'], { encoding: 'utf-8' });
     assert.match(files, /hello\.txt/);
     assert.match(files, /nested\/data\.csv/);
