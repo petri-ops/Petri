@@ -4542,20 +4542,20 @@
       "id": "BLOCK-92-CODE-MODULARIZATION",
       "path": "docs/block-92-code-modularization-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-92-code-modularization",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-16",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P5-WAVE-D-COMPLETED",
+      "phase": "COMPLETED",
       "tags": [
         "block-92",
         "code-modularization",
         "refactor",
         "mega-file"
       ],
-      "notes": "巨型文件模块化二期（BLOCK-9/9.1 家法延续，用户裁决立项 2026-09-16）：前端 12 + core 9 + src 1 共 22 文件拆分 + 行数台账/棘轮 + IPC 通道注册表三机制交付。纯代码组织 0 行为变更、0 新依赖、re-export 兼容。Wave A/B/C/D 已收口（台账 33296→22004，棘轮已入 closeout）；余 P6 整包收口。",
+      "notes": "巨型文件模块化二期（BLOCK-9/9.1 家法延续，用户裁决立项 2026-09-16）：22/22 文件拆分 + 三机制（行数台账/棘轮入 closeout/IPC 通道注册表）全部交付。台账 33296→22004（-34%）。实机 ui341 A7 例外登记 🟡 待裁决（其余全绿）。",
       "lastUpdated": "2026-09-17"
     },
     {

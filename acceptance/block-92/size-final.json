@@ -1,0 +1,139 @@
+{
+  "schema": "biof3/block92-size-ledger.v1",
+  "head": "ref: refs/heads/main",
+  "files": [
+    {
+      "path": "frontend/src/components/copilot/conversationRunStore.ts",
+      "wave": "A",
+      "module": "W-03",
+      "lines": 690
+    },
+    {
+      "path": "frontend/src/components/copilot/copilotClient.ts",
+      "wave": "A",
+      "module": "W-03",
+      "lines": 220
+    },
+    {
+      "path": "frontend/src/components/copilot/SimpleChat.tsx",
+      "wave": "A",
+      "module": "W-03",
+      "lines": 1584
+    },
+    {
+      "path": "frontend/src/pages/project-workspace.tsx",
+      "wave": "B",
+      "module": "W-02",
+      "lines": 1161
+    },
+    {
+      "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
+      "wave": "B",
+      "module": "W-04",
+      "lines": 1246
+    },
+    {
+      "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
+      "wave": "B",
+      "module": "W-04",
+      "lines": 1310
+    },
+    {
+      "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+      "wave": "B",
+      "module": "W-01",
+      "lines": 616
+    },
+    {
+      "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
+      "wave": "B",
+      "module": "W-01",
+      "lines": 789
+    },
+    {
+      "path": "frontend/src/pages/home.tsx",
+      "wave": "B",
+      "module": "W-02",
+      "lines": 740
+    },
+    {
+      "path": "frontend/src/components/desktop/WorkingTreeReview/useWorkingTreeReview.ts",
+      "wave": "B",
+      "module": "W-04",
+      "lines": 633
+    },
+    {
+      "path": "frontend/src/hooks/useSkillStore.ts",
+      "wave": "B",
+      "module": "W-02",
+      "lines": 531
+    },
+    {
+      "path": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx",
+      "wave": "B",
+      "module": "W-04",
+      "lines": 530
+    },
+    {
+      "path": "core/shared-backend/result-changeset-service.js",
+      "wave": "C",
+      "module": "W-04",
+      "lines": 780
+    },
+    {
+      "path": "core/biof3-server/helpers/tools-executor.js",
+      "wave": "C",
+      "module": "P-03",
+      "lines": 1870
+    },
+    {
+      "path": "core/biof3-server/db.js",
+      "wave": "C",
+      "module": "P-01",
+      "lines": 1477
+    },
+    {
+      "path": "core/shared-backend/result-studio-repository.js",
+      "wave": "C",
+      "module": "W-04",
+      "lines": 1774
+    },
+    {
+      "path": "core/biof3-server/agent-tools/workspace-tools.js",
+      "wave": "C",
+      "module": "P-03",
+      "lines": 1521
+    },
+    {
+      "path": "core/biof3-server/mcp/registry.js",
+      "wave": "C",
+      "module": "P-02",
+      "lines": 958
+    },
+    {
+      "path": "core/shared-backend/result-studio-lifecycle.js",
+      "wave": "C",
+      "module": "W-04",
+      "lines": 946
+    },
+    {
+      "path": "core/shared-backend/result-replay-service.js",
+      "wave": "C",
+      "module": "W-04",
+      "lines": 741
+    },
+    {
+      "path": "core/shared-backend/git-adapter.js",
+      "wave": "C",
+      "module": "P-01",
+      "lines": 1253
+    },
+    {
+      "path": "src/ipc/working-tree-review.js",
+      "wave": "D",
+      "module": "P-01",
+      "lines": 634
+    }
+  ],
+  "total": 22004
+}

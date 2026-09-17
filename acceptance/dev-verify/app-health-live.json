@@ -1,7 +1,7 @@
 {
   "name": "app-health",
-  "startedAt": "2026-09-12T12:26:18.163Z",
-  "finishedAt": "2026-09-12T12:26:18.196Z",
+  "startedAt": "2026-09-17T00:00:09.229Z",
+  "finishedAt": "2026-09-17T00:00:09.263Z",
   "assertions": [
     {
       "name": "cdp_targets_listed",
