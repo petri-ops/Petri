@@ -14,7 +14,7 @@
    - F6：scaleStats 规模观测（SCAN_WARN_THRESHOLD=50000）；**sqlite-vec 评估=不引入**（bench 实测 5k=7.3ms/20k=28.6ms/50k=69ms/次，scripts/knowledge-vector-bench.cjs 可复现）。
    - 实机：`scripts/block94-knowledge-live.cjs` **18/18 allPass**（真实 DashScope 嵌入摄取+双通道检索+真实模型轮次 citations 端到端+CDP 面板/摘要卡）+ 跨重启恢复 4/4；acceptance/block-94/。
    - 门禁：契约 34/34+工具 9/9+前端批 88/88+tsc 0+theme 4/4（抓真：自造 --gewu-brand 未定义 token）；UI-402 verified；flow `block94-knowledge`；impact-map block94 规则。
-3. **存量归属登记**：agent-runner-loop-orchestrator「emitToolResult must forward via _emit」1 红=BLOCK-97 emitAssistant 单通道有意契约变更后测试未同步（动前基线已红）——🟡 待用户裁决清债方向。
+3. **存量红当夜清偿**：agent-runner-loop-orchestrator「emitToolResult must forward via _emit」1 红（BLOCK-97 单通道契约变更后测试未同步）——语义已由 BLOCK-97 交接明载（emitToolResult 死参/emitAssistant 单通道/双挂 maybeEmitTaskTodo），当夜机械同步测试断言至已发布契约，3/3 绿；无语义裁决悬置。
 4. **D1-D6 预置推荐先行留痕**（plan §7.2，呈问未应答按推荐先行可逆，待晨间追认）：PDF 复用 pdfjs-dist/sqlite-vec 不引入/URL 摄取不做/粘贴入库做/分组 UI 不做/knowledge_read 做。
 
 ## 2026-09-17 Windows 会话总账（换机前全量交接）

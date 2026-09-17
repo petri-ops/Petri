@@ -16,7 +16,7 @@
 | --- | --- |
 | knowledge 契约测试 | 34/34（20 存量 + 14 新增：F1 六测/PDF 三测/F5 四测/F6 一测；embed 注入不依赖网络；夹具 test-model→EMBEDDING_MODEL 对齐产线） |
 | agent-tool-registry | 9/9（工具总数 58→59 计数断言同步，knowledge_read 注册） |
-| agent-runner 邻接（facade/adapter/block34） | 44/44（挂点收敛动前动后一致）；loop-orchestrator 1 红=emitToolResult 契约断言未随 BLOCK-97 emitAssistant 单通道迁移同步（动前基线已红，存量归属，🟡 已登记） |
+| agent-runner 邻接（facade/adapter/block34） | 44/44（挂点收敛动前动后一致）；loop-orchestrator「emitToolResult must forward via _emit」1 红=BLOCK-97 单通道契约变更后测试未同步（动前基线已红，存量归属）；**当夜已机械同步测试至已发布契约（双挂 maybeEmitTaskTodo），复跑 3/3 绿** |
 | 前端受影响批 | 面板 8/8 + conversationRunStore 48/48 + CenterPanel 8/8 + WorkspaceSummaryCard + hook/主题/全局页全绿（88/88 批次） |
 | tsc / theme | 0 / 4/4（theme 门禁抓真 1 件：自造 --gewu-brand 未定义 token，改回 --gewu-accent） |
 | 实机 | block94-knowledge-live **18/18 allPass**（真实 DashScope 嵌入 + DeepSeek 真实轮次；acceptance/block-94/）+ 跨重启启动恢复 block94-boot-recovery-live 4/4 + dev-verify flow `block94-knowledge` 注册 |

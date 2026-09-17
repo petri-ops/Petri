@@ -116,8 +116,20 @@ describe('agent-runner-loop-orchestrator.test.mjs (BLOCK-14 PHASE 3.1 state mach
 
     // Emit helpers in facade must forward through the _emit closure that wraps
     // onEvent + task_events persistence.
-    assert.ok(inner.includes('emitToolResult: (evt) => _emit(evt)'), 'emitToolResult must forward via _emit');
-    assert.ok(inner.includes('emitAssistant: (evt) => _emit(evt)'), 'emitAssistant must forward via _emit');
+    // BLOCK-97 契约同步（2026-09-18 机械修正）：loop-orchestrator 的 emitToolResult
+    // 形参实为死参——tool_result 等全部事件走 _emit→emitAssistant 单通道；两通道
+    // 均双挂 maybeEmitTaskTodo（task_todo 事件随 tool_result 成功回执广播，
+    // block97-todo-live P3 实机抓真定案）。旧断言锚单行字面量已随实现过期。
+    // 剥行注释再扁平（通道体内有 BLOCK-97 注释）
+    const innerFlat = inner.replace(/\/\/.*$/gm, '').replace(/\s+/g, ' ');
+    assert.ok(
+      innerFlat.includes('emitToolResult: (evt) => { _emit(evt); maybeEmitTaskTodo(evt, _emit); }'),
+      'emitToolResult must forward via _emit + task_todo broadcast (BLOCK-97 single-channel contract)',
+    );
+    assert.ok(
+      innerFlat.includes('emitAssistant: (evt) => { _emit(evt); maybeEmitTaskTodo(evt, _emit); }'),
+      'emitAssistant must forward via _emit + task_todo broadcast',
+    );
     assert.ok(inner.includes("emitDone: () => _emit({ event: 'done' })"), 'emitDone must emit a done event');
   });
 });
