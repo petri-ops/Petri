@@ -33,6 +33,8 @@ export interface KnowledgeSpaceState {
   documentsOffset?: number;
   /** BLOCK-94 F1 嵌入模型失配统计：>0 时旧模型向量已隔离，提示重建 */
   staleEmbedding?: { staleChunks: number; staleDocs: number };
+  /** BLOCK-94 F6 规模观测指标（向量通道暴力扫描警戒） */
+  scale?: { readyChunks: number; scanWarnThreshold: number; scanWarning: boolean };
 }
 
 export interface KnowledgeHit {

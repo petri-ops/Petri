@@ -137,6 +137,7 @@ export function KnowledgeSpacePanel() {
   const documentsTotal = state?.documentsTotal ?? documents.length;
   const documentsHasMore = !!state?.documentsHasMore;
   const staleEmbedding = state?.staleEmbedding;
+  const scale = state?.scale;
   const failedCount = documents.filter((d) => d.status === 'failed').length;
 
   const handleToggle = useCallback(async () => {
@@ -357,6 +358,18 @@ export function KnowledgeSpacePanel() {
       {state && !embeddingAvailable && (
         <div className={styles.notice} data-testid="knowledge-embed-unavailable">
           配置 DashScope key（设置 → 模型）后可启用知识空间的语义检索。当前无法启用。
+        </div>
+      )}
+
+      {state && enabled && !embeddingAvailable && (
+        <div className={styles.notice} data-testid="knowledge-degraded-fts">
+          嵌入模型当前不可用，自动召回降级为仅全文通道（仍可用，语义检索暂不可达）。
+        </div>
+      )}
+
+      {state && scale && scale.scanWarning && (
+        <div className={styles.notice} data-testid="knowledge-scale-warning">
+          规模警戒：就绪分块 {scale.readyChunks} 已超过向量扫描观测阈值 {scale.scanWarnThreshold}（检索仍可用，性能评估见 BLOCK-94 plan §8）。
         </div>
       )}
 

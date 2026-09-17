@@ -42,6 +42,9 @@ const CHUNK_OVERLAP_CHARS = 120;
 const CHUNK_MIN_CHARS = 40;
 // 短于该长度的查询不做检索（省一次无效 embedding）
 const QUERY_MIN_CHARS = 2;
+// BLOCK-94 F6 规模化：向量通道为暴力全表扫描（JS cosine），chunk 数观测警戒阈值。
+// 超阈值只告警不阻断（诚实观测）；sqlite-vec/ANN 引入与否属依赖裁决（plan §8 评估报告）。
+const SCAN_WARN_THRESHOLD = 50000;
 
 const DOC_STATUS = ['uploaded', 'parsing', 'chunking', 'embedding', 'ready', 'failed'];
 
@@ -319,6 +322,23 @@ function fuseRank(vectorHits, ftsHits, topK) {
     }));
 }
 
+// BLOCK-94 F6 规模化：规模观测指标（ready chunk 数 + 扫描警戒阈值判定）
+function scaleStats() {
+  const row = sqlite
+    .prepare(
+      `SELECT COUNT(*) AS c FROM knowledge_chunks k
+       JOIN knowledge_documents d ON d.id = k.doc_id
+       WHERE k.space_id = ? AND d.status = 'ready'`
+    )
+    .get(SPACE_ID);
+  const readyChunks = row ? row.c : 0;
+  return {
+    readyChunks,
+    scanWarnThreshold: SCAN_WARN_THRESHOLD,
+    scanWarning: readyChunks > SCAN_WARN_THRESHOLD,
+  };
+}
+
 // ---- 检索入口 ----
 
 // BLOCK-94 F1 嵌入模型一致性：向量 chunk 记录产出模型；换嵌入模型后旧向量隔离并计数暴露（提示重建）
@@ -557,6 +577,8 @@ module.exports = {
   getDocument,
   setDocumentStatus,
   staleEmbeddingStats,
+  scaleStats,
+  SCAN_WARN_THRESHOLD,
   chunkText,
   embedTexts,
   cosineSim,

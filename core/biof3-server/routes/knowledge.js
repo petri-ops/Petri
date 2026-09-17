@@ -74,6 +74,8 @@ module.exports = function mountKnowledge(app) {
         documentsOffset: page.offset,
         // BLOCK-94 F1：换嵌入模型后旧模型向量被隔离，>0 时前端提示重建
         staleEmbedding: ks.staleEmbeddingStats(),
+        // BLOCK-94 F6：规模观测指标（向量通道暴力扫描警戒）
+        scale: ks.scaleStats(),
         embeddingAvailable: embeddingAvailable(),
         knowledgeDir: ks.knowledgeRoot(),
         queueDepth: ingest.ingestQueueDepth(),

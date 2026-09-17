@@ -718,3 +718,13 @@ test('F5 knowledge_read: 按 docId 深读分块原文（未就绪/未知 fail-cl
   ks.setSpaceEnabled(false);
   ks.deleteDocument(doc.id);
 });
+
+// ---------- BLOCK-94 P5：F6 规模化观测 ----------
+
+test('F6 规模观测: scaleStats 返回 readyChunks 与扫描警戒判定', () => {
+  const stats = ks.scaleStats();
+  assert.equal(typeof stats.readyChunks, 'number');
+  assert.equal(stats.scanWarnThreshold, ks.SCAN_WARN_THRESHOLD);
+  assert.equal(stats.scanWarning, stats.readyChunks > ks.SCAN_WARN_THRESHOLD, 'warn only beyond threshold');
+  assert.ok(stats.readyChunks >= 0);
+});

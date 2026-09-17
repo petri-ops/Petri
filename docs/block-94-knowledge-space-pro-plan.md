@@ -141,3 +141,20 @@
 - Mac 环境：Node v24.16.0 ✓（better-sqlite3 ABI 匹配）；dev DB 已存在（`.biof3-dev-user-data/`，2026-09-15 Mac 会话所建），`dashscope_configured: true` + `embed_provider: "dashscope"` → **真实嵌入通道实机可用**。
 - dev 栈：`BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev`；core/** 变更须重启 dev 栈。
 - 存量基线对账：loop/agent 族 continuation guard 2 红（🟡 2026-09-16 登记）——F1 动 agent-runner/chat.js **动前存定向基线、动后逐项归属**，禁把存量红记成本包引入。
+
+## 8. F6 规模化评估报告（2026-09-18，实测基线 + 结论登记）
+
+### 8.1 实测基线（`scripts/knowledge-vector-bench.cjs`，可复现；dim=1024，BLOB 载入 + JS cosine，复刻 searchKnowledge 向量通道）
+
+| ready chunks | 单次全表扫描 |
+| --- | --- |
+| 5,000 | 7.3 ms |
+| 20,000 | 28.6 ms |
+| 50,000 | 69.0 ms |
+
+### 8.2 结论
+
+1. **向量扫描警戒指标**：`scaleStats()` 交付（readyChunks / SCAN_WARN_THRESHOLD=50,000 / scanWarning），/space 总览透出，面板超阈值显示警戒行。观测用途，不阻断。
+2. **sqlite-vec / ANN 评估结论 = 本期不引入（deferred）**：50k chunk（阈值量级）单次扫描仅 69ms，桌面场景每轮一次完全可接受；线性外推到 ~50 万 chunk 才会逼近 0.7s 量级。引入 sqlite-vec 属新原生依赖（ABI/打包/迁移成本），当前无性能证据支撑——待 readyChunks 常态化超过 50k 阈值且有真实卡顿报告再立项，届时 vec0 表与现有 Float32 BLOB 的迁移路径需单独设计。
+3. **无 key 诚实降级**：三层已齐——启用门 409（v1 既有）、摄取失败转 failed 含 honest error（v1 既有）、**新增**：已启用但 key 失效时面板显示「自动召回降级为仅全文通道」提示（`knowledge-degraded-fts`），已入库文档始终只读可见。
+4. 嵌入多 provider 抽象：维持非范围（plan §2），仅此登记。
