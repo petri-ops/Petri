@@ -164,6 +164,10 @@
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
+/* UI-392 — 特异性对齐 infima：infima 暗色默认用 html[data-theme='dark']（0,1,1），
+   单写 [data-theme='dark']（0,1,0）时本仓 ifm-* 覆盖全部是死字（emphasis 系
+   曾恒为 infima 中性灰）。双选择器兼顾根挂载与子树挂载两种主题作用域。 */
+html[data-theme='dark'],
 [data-theme='dark'] {
   --ifm-color-primary: #25c2a0;
   --ifm-color-primary-dark: #21af90;
