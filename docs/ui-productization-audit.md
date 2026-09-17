@@ -3349,7 +3349,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
-## UI-397: 远程连接不再闲置主动断连 + SSH 呼吸灯红绿灯 (2026-09-17 in_progress，dev Electron + WSL 真节点验证中)
+## UI-397: 远程连接不再闲置主动断连 + SSH 呼吸灯红绿灯 (2026-09-17 verified，dev Electron + WSL 真节点闲置 6 分钟存活实测；用户复看确认「可以的 很棒 升verified」)
 
 - **来源**：用户三连问「远程连接的项目是不是长时间不操作会断连？会有自动重连吗？还是说能做到不主动断连？」+ 追加「给远程连接一个呼吸灯 红色断联 绿色连接 黄色连接中」。
 - **现状核实（代码事实）**：SSH 长连接配 ServerAliveInterval=15s 心跳（网络层闲置不会被动断）；但 mux 有 **5 分钟空闲主动关闭**（IDLE_CLOSE_MS）——闲置回来必重连（懒重建 ~1s+），写类操作还会诚实失败需手动重试＝用户体感的「断了」。自动重连已有：懒重建 + 只读 verb（fs_stat/fs_list/fs_read/sys_resource）透明重试一次（BLOCK-96 F1）。
@@ -3358,7 +3358,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：ping 端点 dell 真节点 47-49ms；实机截图右栏「● 已连接」+左栏四 SSH 项目灯（alive 5/dead 1→30s 自愈，HMR 暂态如实登记）；mux/host 契约 11/11；430+ 测试+tsc 0。闲置 6 分钟存活实测 **PASS（闲置后探活 57ms，连接全程存活）**；另有 ServerAliveCountMax 4→2（死连接判死 60s→30s，透明重试更快接管）；mux 契约 11/11。
 - **边界**：写类操作断连不自动重试（诚实失败原则不变）；30s 探活仅 SSH 项目且页面可见时发起。G0 开发期常态 · 不外推 packaged/Provider/GA.
 
-## UI-396: 新建会话左栏项目树即时刷新 (2026-09-17 in_progress，dev Electron 端到端实测 275ms)
+## UI-396: 新建会话/项目左栏项目树即时刷新 (2026-09-17 verified，dev Electron 端到端实测 275ms/268ms；用户复看确认「可以的 很棒 升verified」)
 
 - **来源**：用户反馈「通过新建任务新建了一个聊天 发了个 hello 发现左侧项目列表并没有实时更新 过了比较久才出现」。
 - **根因**：会话创建的两条路径（中栏发送首条消息时 useChatStream 前端创建 / 子 agent 等后端 getOrCreateActiveConversation 创建）都**不广播**——左栏 AppRailContext 的 useConversations 实例只有自己创建时才刷新（另一实例的 setList 不跨组件传播）；后端 SSE conversation 事件同样无人接线（同 UI-395 topic_shift 断链模式）。左栏只能等低频兜底，故「比较久才出现」。
@@ -3366,7 +3366,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：端到端实测（新项目无会话 → composer 发送 hello → 左栏出现「新对话」）**275ms**；事件监听器到达断言通过；tsc 0 + copilot/desktop 392 测试过。截图 Temp gewu-probe/shots/block95/uiconv-live-final.png。
 - **增补（同日，用户再反馈「创建了 db 左侧项目栏没马上更新」）**：**项目**创建同样零广播——且 softRefresh 事件全仓只有两个订阅方（AppRail refreshProjects / project-workspace）**没有任何派发方**（死订阅）。修复=四个项目创建点统一在成功后 dispatch softRefresh（home.tsx 空白创建/拖拽确认、useHomeCreateFlows SSH、AppRailContext 本地目录+SSH 树建〔后两处本就 setAllProjects 即时，补广播让 project-workspace 等订阅方一致〕）。端到端实测：页面内 REST 创建项目+广播 → 左栏项目列表 **268ms** 出现「db 实时验证」。430 测试+tsc 0。G0 开发期常态 · 不外推 packaged/Provider/GA.
 
-## UI-395: 代码查看器行号栏归位海军蓝 + 去分隔线 (2026-09-17 in_progress，dev Electron 实机修复待用户确认)
+## UI-395: 代码查看器行号栏归位海军蓝 + 去分隔线 + 语法高亮断链修复与全量扩充 (2026-09-17 verified，dev Electron 边界内；用户复看确认「可以的 很棒 升verified」)
 
 - **来源**：用户截图反馈「右侧栏文件树打开脚本文档：第一行和左侧行数颜色和主内容区颜色不一致，不是海军蓝？？？行数和主内容区中间有个分隔线，这个不需要可以把分隔线取消，直接行数字和内容即可」。
 - **根因**（CodeMirrorEditor.module.css）：`.cm-gutters` 用了 `--gewu-bg-elevated`（浮层色 #1d2945）——违反 gewu-css-theme 铁律 4「层级方向」（gutter 与主内容是同一平面，不该用弹层抬升色），暗色下比内容区浅一档即「不是海军蓝」；`border-right` 分隔线为多余装饰。附带：CodeMirror 默认 `.cm-activeLine/.cm-activeLineGutter` 浅灰高亮在海军蓝上脱节。
