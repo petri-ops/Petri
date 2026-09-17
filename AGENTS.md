@@ -159,6 +159,8 @@ desktop/
 - 会话启动/收口/实机验收/工作区卫生/产品 Skill 编写/子 Agent 委派等日常开发实践，使用 `$gewu-dev-infra`（canonical：[`.agents/skills/gewu-dev-infra/SKILL.md`](.agents/skills/gewu-dev-infra/SKILL.md)，BLOCK-71 沉淀；自洽工具包——脚本/模板/原则随包携带，跨仓库复用见包内 PORTING.md，委派任务书模板在包内 `templates/`）。
 - 评审代码变更/审查 diff/写审计报告时，使用 `$gewu-code-review`（canonical：[`.agents/skills/gewu-code-review/SKILL.md`](.agents/skills/gewu-code-review/SKILL.md)，BLOCK-71 沉淀；六维度评审 + P1/P2/Minor 分级 + 表行式报告模板；P1 修复后方可收口）。
 
+- 新建页面/组件、写样式、暗色模式与主题色工作、排查「颜色不一致」反馈，或评审涉及 CSS 的 diff 时，使用 `$gewu-css-theme`（canonical：[`.agents/skills/gewu-css-theme/SKILL.md`](.agents/skills/gewu-css-theme/SKILL.md)，UI-392/393 沉淀；海军蓝 token 阶梯 + 禁零定义/禁 slate 字面量 + infima 特异性战争规则 + 页头标准件；机械化门禁=theme-token-contract.test.ts，写样式后必跑）。
+
 - 项目当前文档从 [`docs/README.md`](docs/README.md) 进入；完整规则见 [`docs/document-governance.md`](docs/document-governance.md)，机器目录见 [`docs/DOC-REGISTRY.json`](docs/DOC-REGISTRY.json)。
 
 - 未运行 `npm run docs:reconcile` 并通过 `npm run docs:check`，不得宣布工作包 `completed`、`qualified`、`verified` 或已归档收口。

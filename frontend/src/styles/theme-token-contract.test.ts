@@ -56,4 +56,56 @@ describe('theme token contract', () => {
       .sort();
     expect(missing).toEqual([]);
   });
+
+  // UI-392 — 海军蓝家族统一后的防回潮门禁（规范见 .agents/skills/gewu-css-theme）。
+
+  it('holds no legacy undefined --color-* token references (零定义家族禁回潮)', () => {
+    const offenders: string[] = [];
+    for (const file of walk(srcRoot)) {
+      const text = stripComments(fs.readFileSync(file, 'utf8'));
+      if (/var\(--color-/.test(text)) offenders.push(path.relative(srcRoot, file));
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it('holds no slate-family color literals (navy 家族外禁回潮)', () => {
+    const FORBIDDEN = [/rgba\(148,\s*163,\s*184/i, /#0f172a\b/i, /#1b1b1d\b/i, /#334155\b/i];
+    // 豁免清单（带理由）：light 终端主题在白底上用近黑文字/ANSI 色，属浅色面
+    // 正当用色，非暗色 navy 家族管辖范围。
+    const ALLOWED_FILES = new Map([['themes/terminal-themes.ts', new Set(['#0f172a\\b'])]]);
+    const offenders: string[] = [];
+    for (const file of walk(srcRoot)) {
+      const rel = path.relative(srcRoot, file);
+      const allowed = ALLOWED_FILES.get(rel.replaceAll('\\', '/')) || new Set<string>();
+      const text = stripComments(fs.readFileSync(file, 'utf8'));
+      for (const pattern of FORBIDDEN) {
+        if (pattern.test(text) && !allowed.has(pattern.source)) {
+          offenders.push(`${rel} :: ${pattern}`);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it('dark token-definition blocks in styles/ out-rank infima (html 前缀特异性)', () => {
+    // infima 暗色默认用 html[data-theme='dark']（0,1,1）；本仓 styles/ 下的
+    // 暗色定义块若只写 [data-theme='dark']（0,1,0）即为死字（UI-392 根因二：
+    // --ifm-background-color/emphasis 系曾整块失效）。多行 selector 组
+    // （逗号续行）需整组包含 html 前缀。
+    const stylesDir = path.join(srcRoot, 'styles');
+    const offenders: string[] = [];
+    for (const file of walk(stylesDir)) {
+      const text = stripComments(fs.readFileSync(file, 'utf8'));
+      for (const match of text.matchAll(
+        /(?:^|\n)((?:[^\n{}]*,\n)*[^\n{}]*\[data-theme='dark'\][^\n{}]*)\s*\{([^{}]*)\}/g,
+      )) {
+        const selectorGroup = match[1];
+        const body = match[2];
+        if (body.includes('--ifm-') && !selectorGroup.includes("html[data-theme='dark']")) {
+          offenders.push(`${path.relative(srcRoot, file)} :: ${selectorGroup.trim().slice(0, 60)}`);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
 });
