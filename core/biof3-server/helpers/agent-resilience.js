@@ -77,12 +77,14 @@ function microcompactMessages(messages, opts = {}) {
   const { countMessages } = require('./token-estimator');
   const estimate = countMessages(messages);
   const threshold = window > 0 ? Math.min(window * 0.9, window - 2000) : Infinity;
-  if (estimate < threshold) return { ...empty, triggered: false };
+  // opts.force=true：reactive 裁剪路径强制折叠（不看触发阈值，keepRecentGroups 可为 0）
+  if (!opts.force && estimate < threshold) return { ...empty, triggered: false };
 
   const groups = toolGroups(messages);
   if (groups.length === 0) return { ...empty, triggered: true };
-  // 保留最近 KEEP_RECENT_GROUPS 组（组按出现顺序，取尾部）
-  const foldTargets = groups.slice(0, Math.max(0, groups.length - KEEP_RECENT_GROUPS));
+  // 保留最近 KEEP_RECENT_GROUPS 组（组按出现顺序，取尾部）；reactive 可覆盖为全量折叠
+  const keepCount = Number(opts.keepRecentGroups != null ? opts.keepRecentGroups : KEEP_RECENT_GROUPS);
+  const foldTargets = groups.slice(0, Math.max(0, groups.length - keepCount));
   if (foldTargets.length === 0) return { ...empty, triggered: true, groups: groups.length };
 
   const foldSet = new Set();
@@ -185,6 +187,133 @@ function continuationLines(transcriptPath) {
   return lines.join('\n');
 }
 
+
+// ── M3：防呆状态机 + reactive 原地重试 + M5 遥测（纯函数优先，runner 只接线）──
+
+const CIRCUIT_FAILURE_LIMIT = 3;
+const CIRCUIT_COOLDOWN_MS = 10 * 60 * 1000;
+const REACTIVE_USE_LIMIT = 3;
+
+/** 单次 agent 运行的韧性状态（runner 创建、随 run 生命周期）。 */
+function createResilienceState() {
+  return {
+    compactionFailures: 0,
+    circuitOpenUntil: 0,
+    reactiveUses: 0,
+    contextExceededCount: 0,
+  };
+}
+
+/** 连续压缩失败 ≥3 → 熔断 10 分钟（防「压缩失败→重试」死循环）。 */
+function recordCompactionFailure(state, now = Date.now()) {
+  state.compactionFailures = (state.compactionFailures || 0) + 1;
+  if (state.compactionFailures >= CIRCUIT_FAILURE_LIMIT) {
+    state.circuitOpenUntil = now + CIRCUIT_COOLDOWN_MS;
+    state.compactionFailures = 0;
+  }
+  return state;
+}
+
+function compactionAllowed(state, now = Date.now()) {
+  return !state || (state.circuitOpenUntil || 0) <= now;
+}
+
+/** reactive（超限原地重试）单 run 最多 3 次（防「重试→再超限」循环）。 */
+function recordReactiveUse(state) {
+  state.reactiveUses = (state.reactiveUses || 0) + 1;
+  return state;
+}
+
+function reactiveAllowed(state) {
+  return !state || (state.reactiveUses || 0) < REACTIVE_USE_LIMIT;
+}
+
+/**
+ * context-exceeded 错误分类：对 provider 抛错（message/Body/body 字符串）
+ * 做多族模式匹配（OpenAI/Anthropic/常见网关措辞）。
+ */
+function classifyContextExceeded(err) {
+  const text = String((err && (err.message || err.body)) || err || '');
+  if (!text) return false;
+  const patterns = [
+    /context[_ ]length[_ ]exceeded/i,
+    /maximum context length/i,
+    /context window/i,
+    /too many tokens/i,
+    /prompt is too long/i,
+    /input length and `max_tokens` exceed context limit/i,
+    /request too large/i,
+    /exceed[s]? (the )?(maximum|context)/i,
+    /content length limit/i,
+  ];
+  return patterns.some((re) => re.test(text));
+}
+
+/**
+ * reactive 原地裁剪：两段降载——(1) 全量折叠工具组（不看最近保留窗）；
+ * (2) 仍超则从最老消息起整块丢弃（切点必须落在 user / assistant 载体上，
+ * 绝不产生孤儿 tool 结果），直到 ≤ target 或只剩保底尾部。
+ * @returns {{messages: Array, dropped: number, foldedAll: boolean}|null} null=无法再裁
+ */
+function reactiveTrim(messages, opts = {}) {
+  if (!Array.isArray(messages) || messages.length < 3) return null;
+  const window = Number(opts.contextWindow) || 0;
+  const { countMessages, countTokens } = require('./token-estimator');
+  const target = Math.max(1000, Math.floor((window || 64000) * 0.6));
+
+  // 第 1 段：全量折叠——reactive 是兜底，不受 M1 成组约束，所有未折叠工具
+  // 结果直接折叠为占位符（保留 tool_call_id/name 协议字段）。
+  let foldedCount = 0;
+  let current = messages.map((m) => {
+    if (m && m.role === 'tool' && !isFolded(m.content)) {
+      foldedCount += 1;
+      const len = typeof m.content === 'string' ? m.content.length : 0;
+      return { ...m, content: `${MICROCOMPACT_PLACEHOLDER}（工具 ${m.name || (m.tool_call_id || 'unknown')}，原 ${len} 字符）` };
+    }
+    return m;
+  });
+  if (foldedCount > 0 && countMessages(current) <= target) {
+    return { messages: current, dropped: 0, foldedAll: true };
+  }
+
+  // 第 2 段：整块丢弃（保底至少保留 system + 最后 2 条）
+  const tokens = messages.map((m) => countTokens(String(m.content || '')) + 4);
+  const total = tokens.reduce((a, b) => a + b, 0);
+  if (total <= target) return { messages: current, dropped: 0, foldedAll: foldedCount > 0 };
+  let acc = 0;
+  let cut = 1; // 跳过 system
+  const minKeep = Math.min(messages.length - 1, 2);
+  const limit = messages.length - minKeep;
+  for (let i = 1; i <= limit; i++) {
+    acc += tokens[i];
+    cut = i + 1;
+    if (total - acc <= target) break;
+  }
+  // 切点推进到合法边界（user 或 assistant 载体；不可落在 tool 结果中间）
+  while (cut < messages.length && messages[cut] && messages[cut].role === 'tool') cut++;
+  if (cut >= messages.length) return null;
+  // system 头必须保留（切点从其后算起）；dropped 与长度差一致（system 不计入）
+  return { messages: [messages[0], ...current.slice(cut)], dropped: cut - 1, foldedAll: foldedCount > 0 };
+}
+
+/** M5 遥测：reactive 重试事件落 ai_usage（additive 列）。 */
+function recordRetryUsage({ userId, conversationId, model, attempt, contextExceeded, error }) {
+  try {
+    const { recordAiUsage } = require('./ai-usage');
+    recordAiUsage({
+      userId: userId || null,
+      kind: 'llm_retry',
+      model: model || null,
+      conversationId: conversationId || null,
+      errorCode: contextExceeded ? 'context_exceeded' : String(error || 'unknown').slice(0, 120),
+      attempt: Number(attempt) || 0,
+      retryable: 1,
+      contextExceeded: contextExceeded ? 1 : 0,
+    });
+  } catch { /* 遥测失败不阻塞主链 */ }
+}
+
+
 module.exports = {
   RESILIENCE_ENV,
   MICROCOMPACT_PLACEHOLDER,
@@ -199,4 +328,15 @@ module.exports = {
   transcriptPathFor,
   SUMMARY_NINE_SECTION_PROMPT,
   continuationLines,
+
+  // ── M3+M5：防呆状态机 / context-exceeded 分类 / reactive 原地重试 ─────────
+
+  createResilienceState,
+  recordCompactionFailure,
+  compactionAllowed,
+  recordReactiveUse,
+  reactiveAllowed,
+  classifyContextExceeded,
+  reactiveTrim,
+  recordRetryUsage,
 };

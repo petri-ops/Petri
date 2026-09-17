@@ -712,18 +712,37 @@ async function runAgentLoop({
   };
 
   // ---------- Run loop via orchestrator ----------
-  // BLOCK-98 M1 — microcompact 接线（helpers/agent-resilience.js；开关
+  // BLOCK-98 M1+M3+M5 — 韧性接线（helpers/agent-resilience.js；开关
   // BIOF3_AGENT_RESILIENCE 默认关）。包裹点在此而非 loop-orchestrator：
-  // 请求体 messages 投影替换（副本），loop 运行时数组与 DB 原文零触碰。
-  const resilientCallChatProvider = (providerName, apiKey, body, telemetry, onEvent, options) =>
-    baseCallChatProvider(
-      providerName,
-      apiKey,
-      agentResilience.maybeMicrocompactBody(body, { contextWindow: safeCtx }),
-      telemetry,
-      onEvent,
-      options
-    );
+  // ①M1 microcompact 请求体投影（副本替换）；②M3 context-exceeded 分类→
+  // reactive 原地裁剪重试一次（run 内防呆上限 3 次）；③M5 重试遥测落 ai_usage。
+  const resilienceState = agentResilience.createResilienceState();
+  const resilientCallChatProvider = async (providerName, apiKey, body, telemetry, onEvent, options) => {
+    const callOnce = (reqBody) => baseCallChatProvider(providerName, apiKey, reqBody, telemetry, onEvent, options);
+    const projected = agentResilience.maybeMicrocompactBody(body, { contextWindow: safeCtx });
+    try {
+      return await callOnce(projected);
+    } catch (err) {
+      const convId = _activeConv && _activeConv.id;
+      if (
+        agentResilience.isResilienceEnabled(process.env) &&
+        agentResilience.reactiveAllowed(resilienceState) &&
+        agentResilience.classifyContextExceeded(err)
+      ) {
+        resilienceState.contextExceededCount += 1;
+        agentResilience.recordReactiveUse(resilienceState);
+        agentResilience.recordRetryUsage({
+          userId, conversationId: convId, modelName, attempt: 1, contextExceeded: true, error: err,
+        });
+        try { console.log('[block98-reactive] context-exceeded → 原地裁剪重试, run 使用次数=', resilienceState.reactiveUses); } catch {}
+        const trimmed = agentResilience.reactiveTrim(Array.isArray(projected.messages) ? projected.messages : [], { contextWindow: safeCtx });
+        if (trimmed) {
+          return callOnce({ ...projected, messages: trimmed.messages });
+        }
+      }
+      throw err;
+    }
+  };
 
   const {
     assistantText,

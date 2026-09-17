@@ -42,17 +42,22 @@ for (const statement of [
   "ALTER TABLE ai_usage ADD COLUMN cost_status TEXT DEFAULT 'unknown'",
   // BLOCK-79 P1 — 供应商归因（additive；旧行 NULL = 未归因）
   'ALTER TABLE ai_usage ADD COLUMN provider TEXT',
+  // BLOCK-98 M5 — 请求韧性遥测（additive；旧行 0/NULL = 未标记）
+  'ALTER TABLE ai_usage ADD COLUMN attempt INTEGER DEFAULT 0',
+  'ALTER TABLE ai_usage ADD COLUMN retryable INTEGER DEFAULT 0',
+  'ALTER TABLE ai_usage ADD COLUMN context_exceeded INTEGER DEFAULT 0',
+  'ALTER TABLE ai_usage ADD COLUMN cancelled_by_user INTEGER DEFAULT 0',
 ]) {
   try { sqlite.exec(statement); } catch (_) { /* already migrated */ }
 }
 try { sqlite.exec('CREATE INDEX IF NOT EXISTS idx_ai_usage_provider_ts ON ai_usage(provider, ts DESC)'); } catch (_) {}
 try { sqlite.exec('CREATE INDEX IF NOT EXISTS idx_ai_usage_conv ON ai_usage(conversation_id)'); } catch (_) {}
 
-function recordAiUsage({userId, kind, model, provider, promptTokens, completionTokens, cacheReadTokens, cacheCreationTokens, latencyMs, errorCode, conversationId, costCny, costStatus}) {
+function recordAiUsage({userId, kind, model, provider, promptTokens, completionTokens, cacheReadTokens, cacheCreationTokens, latencyMs, errorCode, conversationId, costCny, costStatus, attempt, retryable, contextExceeded, cancelledByUser}) {
   try {
     const normalizedCost = Number.isFinite(Number(costCny)) ? Number(costCny) : null;
-    sqlite.prepare(`INSERT INTO ai_usage (user_id, ts, kind, model, provider, prompt_tokens, completion_tokens, latency_ms, cache_read_tokens, cache_creation_tokens, cost_cny, cost_status, error_code, conversation_id)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    sqlite.prepare(`INSERT INTO ai_usage (user_id, ts, kind, model, provider, prompt_tokens, completion_tokens, latency_ms, cache_read_tokens, cache_creation_tokens, cost_cny, cost_status, error_code, conversation_id, attempt, retryable, context_exceeded, cancelled_by_user)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
       .run(
         userId || null,
         new Date().toISOString(),
@@ -68,6 +73,10 @@ function recordAiUsage({userId, kind, model, provider, promptTokens, completionT
         costStatus || (normalizedCost == null ? 'unknown' : 'estimated'),
         errorCode || null,
         conversationId || null,
+        attempt|0,
+        retryable ? 1 : 0,
+        contextExceeded ? 1 : 0,
+        cancelledByUser ? 1 : 0,
       );
   } catch (e) {
     console.warn('[ai-usage] insert failed:', e && e.message);
