@@ -41,6 +41,7 @@ import {
 import styles from '../project-workspace.module.css';
 import type { ActiveWorkspaceFile } from './types';
 import { BinaryPreviewCard } from './BinaryPreviewCard';
+import { WorkspacePdfPreview } from './WorkspacePdfPreview';
 import { OfficePreviewPane } from './OfficePreviewPane';
 import { isCsvFile, isPdfFile, isHtmlFile, isJsonFile, withReportTheme, detectOfficeKind, fallbackKindForExtension, formatSize } from './helpers';
 
@@ -329,18 +330,9 @@ export function WorkspaceFilePreview({
           </>
         )}
         {status === 'ready' && fallbackKind === 'pdf' && (
-          <object
-            data={previewUrl}
-            type="application/pdf"
-            className={styles.workspacePdfObject}
-            aria-label={file.name}
-          >
-            <iframe
-              src={previewUrl}
-              title={file.name}
-              className={styles.workspacePdfIframe}
-            />
-          </object>
+          /* UI-400-1 — Electron 内置 PDF 查看器结构性损坏（chrome://resources 被扩展
+             CSP 拦截），改 pdfjs-dist 本地渲染；依赖只经由 WorkspacePdfPreview 一层 */
+          <WorkspacePdfPreview url={previewUrl} name={file.name} />
         )}
         {status === 'ready' && fallbackKind === 'html' && (
           <iframe

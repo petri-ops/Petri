@@ -23,6 +23,14 @@ const {
   net,
   Menu,
 } = require("electron");
+
+// UI-400-1 抓真（2026-09-17）——Windows 原生窗口遮挡追踪对无边框窗口（frame:false）
+// 会误报「已遮挡」→ document.visibilityState=hidden → Chromium PDF 查看器在
+// hidden frame 冻结渲染（用户实拍 PDF 预览整块空白；窗口明明在前台）。
+// VS Code 同款正解：禁用 CalculateNativeWinOcclusion。仅 Windows 生效。
+if (process.platform === "win32") {
+  app.commandLine.appendSwitch("disable-features", "CalculateNativeWinOcclusion");
+}
 const path = require("path");
 const fs = require("fs");
 const nodeNet = require("net");
