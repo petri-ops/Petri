@@ -2,7 +2,7 @@
 
 最后更新：2026-09-17
 
-状态：`planned（2026-09-17 立项候选登记，排队不占 active 槽位；启动排期需用户裁决——当前 active=BLOCK-95-SESSION-IO，候选队列=BLOCK-94 / BLOCK-97 / BLOCK-85 Mac 双真机 / BLOCK-88）`
+状态：`active（2026-09-17 启动，用户裁决原话「接下来开整 BLOCK-97 智能体待办卡」；P0 复核完成、D1-D4 按 §4 预置推荐落定，P1 后端进行中）`
 
 计划编号：`BLOCK-97-AGENT-TODO-CARD`
 
@@ -13,6 +13,13 @@
 应用内 agent 执行多步任务时维护一份结构化任务清单（编号条目 + 完成状态）；清单变更实时流入工作台摘要卡，渲染为「任务清单」进度节。用户在会话进行中即可看到 agent 拆解的步骤与勾选进度。
 
 ## 1. 事实基线（2026-09-17 只读勘察；行号写于当日 HEAD `fc0142dc`，启动时 P0 必须重定位）
+
+> **P0 复核结论（2026-09-17，HEAD `54337ca5`）**：全锚点重定位完成，漂移极小——
+> ① 任务循环节 L350-383、任务进度节 L385 起（原 L349-380/L382-405 基本不变）；
+> ② tool-events.js tool_call L44 / tool_result L64（原 L42/L53）；helpers/conversations.js meta_json L39（原 L34）；其余锚点（CenterPanel:311、agent-runner `_emit` L364、registry HANDLERS L100 / CONTRACTS L178 / validateContract L273 / TOOL_REGISTRY L361、task_events L271、events.js afterSeq L28、plan-ui-tools L14）与原基线一致或 ±1 行；
+> ③ **新增承重事实**：`_emit` 双通道实证（agent-runner.js:364-375 onEvent + appendAgentTaskEvent 全量持久化）→ 专用事件零管道新增且重放可回；agent-runner.js:723 `emitToolResult` 包裹点=task_todo 事件发射位（该文件 874 行有余量，loop-orchestrator 1241 行门零触碰）；systemPrompt 组装在 agent-runner.js:376-412，additive 追加块先例=L385 角色指令；
+> ④ 重载恢复=subscribeAgentTaskOnce `afterSeq=0` 全量重放（resume/fallback 两路径实证），事件重放方案重载可重建清单；已完结会话普通重载不显示清单=§3 范围内语义；
+> ⑤ WorkspaceSummaryCard.tsx 现约 1001 行（棘轮管辖），CenterPanel.tsx:351/378 两处渲染分支均需传 todo 投影 prop；前端 agentTaskStream.ts if-链分派在 L248-362（tool_call L332 / tool_result L342）；UI 台账下一号=UI-398。
 
 | 环节 | 现状 | 插入点 |
 | --- | --- | --- |
@@ -42,10 +49,11 @@
 
 ## 4. 设计决策预置（启动后 P0 评审确认）
 
-- D1 持久化：task_events 事件重放（推荐，零迁移） vs 独立表 `copilot_todos`（跨重启直查，与摘要卡 5s 轮询风格一致）。
-- D2 事件形态：直接消费 todo_write 的 tool_call/tool_result（零改动） vs 专用 `task_todo` 事件类型（前端分派更干净，两端各加一支）。
-- D3 todo 状态是否随迭代快照落 loop_iterations 观测面——默认不做。
-- D4 UI-### 号分配：前端增量实施时取 ui-productization-audit 台账下一号，实施提交同台账行登记。
+- D1 持久化：**✅ P0 定案（2026-09-17）=task_events 事件重放**（零迁移；重载经 afterSeq=0 重放重建）。原选项对比：独立表 `copilot_todos`（跨重启直查）落选——新迁移+双真相同步成本，且升级属纯增量可后补。
+- D2 事件形态：**✅ P0 定案（2026-09-17）=专用 `task_todo` 事件类型**（发射位=agent-runner.js emitToolResult 包裹点检测 todo_write 成功回执后 `_emit`；前端 agentTaskStream 分派加一支）。原选项对比：直接消费 tool_call/tool_result 落选——前端耦合工具出入参 schema、受工具 UI 显隐策略影响。
+- D3 todo 状态是否随迭代快照落 loop_iterations 观测面——**✅ P0 定案：不做**（默认维持）。
+- D4 UI-### 号分配：**✅ P0 定案=UI-398**（前端增量实施提交同台账行登记）。
+- 裁决留痕：D1/D2 呈问（AskUserQuestion）未应答，按本文件 §4 预置推荐先行（用户放权惯例）；两项均低耦合可逆，用户事后否决的改造成本=前端消费端局部/D1 增量表，如实登记于此备查。
 
 ## 5. 阶段草案（启动后串行）
 
