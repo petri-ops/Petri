@@ -123,6 +123,28 @@ module.exports = function mountKnowledge(app) {
     });
   });
 
+  // BLOCK-94 F3：粘贴文本直接入库（D4 裁决=做；URL 网页摄取评估结论=本期不做）
+  app.post('/api/knowledge/documents/paste', express.json({ limit: '2mb' }), async (req, res) => {
+    try {
+      const text = String((req.body && req.body.text) || '');
+      if (!text.trim()) {
+        return res.status(400).json({ status: 'error', error: '粘贴内容为空' });
+      }
+      const rawName = String((req.body && req.body.name) || '').trim();
+      const baseName = rawName || `粘贴文本-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '')}`;
+      const name = baseName.toLowerCase().endsWith('.txt') ? baseName : `${baseName}.txt`;
+      const doc = await ingest.createDocument({
+        name,
+        buffer: Buffer.from(text, 'utf8'),
+        mime: 'text/plain',
+      });
+      res.json({ status: 'ok', document: docView(doc) });
+    } catch (e) {
+      const code = e.message === 'knowledge_document_too_large' ? 413 : 500;
+      res.status(code).json({ status: 'error', error: e.message });
+    }
+  });
+
   // 摄取状态（前端轮询；BLOCK-94 F1 分页）
   app.get('/api/knowledge/documents', async (req, res) => {
     try {

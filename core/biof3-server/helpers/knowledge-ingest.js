@@ -92,11 +92,14 @@ async function ingestDocument(docId, { embed } = {}) {
   if (!doc) throw new Error('knowledge_document_not_found');
 
   try {
-    // parsing：读原始文件 + 解析器路由
+    // parsing：读原始文件 + 解析器路由（BLOCK-94 F2 起 PDF 等异步解析器，await 兼容同步解析器）
     ks.setDocumentStatus(docId, 'parsing');
     const rawPath = doc.raw_path || path.join(ks.docDir(docId), doc.name);
     const buffer = fs.readFileSync(rawPath);
-    const parsed = parseDocument(buffer, doc.name);
+    const parsed = await parseDocument(buffer, doc.name);
+    if (parsed.kind && parsed.kind !== doc.kind) {
+      sqlite.prepare('UPDATE knowledge_documents SET kind = ? WHERE id = ?').run(parsed.kind, docId);
+    }
 
     // chunking：结构感知分块
     ks.setDocumentStatus(docId, 'chunking');

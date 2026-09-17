@@ -84,6 +84,16 @@ export async function retryFailedKnowledgeDocuments(): Promise<{
   return jsonOrThrow(resp);
 }
 
+/** BLOCK-94 F3：粘贴文本直接入库（服务端补 .txt 后缀） */
+export async function pasteKnowledgeDocument(name: string, text: string): Promise<{ document: KnowledgeDoc }> {
+  const resp = await fetch(`${getApiPrefix()}/knowledge/documents/paste`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, text }),
+  });
+  return jsonOrThrow(resp);
+}
+
 export async function setKnowledgeSpaceEnabled(enabled: boolean): Promise<void> {
   const resp = await fetch(`${getApiPrefix()}/knowledge/space`, {
     method: 'POST',

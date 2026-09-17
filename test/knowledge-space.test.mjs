@@ -557,8 +557,7 @@ test('F1 分页: listDocumentsPage 返回 total/hasMore，参数钳制与越界�
 test('F1 挂点收敛: buildTurnInjection 单源注入（关/开/附件前缀/无命中）', async () => {
   ks.setSpaceEnabled(false);
   const noEmbed = async () => [];
-  const off = await ks.buildTurnInjection('BASE', [{ role: 'user', content: 'TP53 细胞凋亡机制' }], { embed: noEmbed });
-  assert.equal(off.systemPrompt, 'BASE', 'space disabled → prompt unchanged');
+  const off = await ks.buildTurnInjection('BASE', [{ role: 'user', content: 'TP53 细胞凋亡机制' }], { embed: noEmbed });  assert.equal(off.systemPrompt, 'BASE', 'space disabled → prompt unchanged');
   assert.equal(off.knowledgeTokens, 0);
 
   // reindex-me.txt（前面测试留下的 ready 文档）FTS 可命中；embed 注入空数组 → 只走 FTS 通道（不依赖网络）
@@ -582,4 +581,67 @@ test('F1 挂点收敛: buildTurnInjection 单源注入（关/开/附件前缀/�
   const noUser = await ks.buildTurnInjection('BASE', [{ role: 'assistant', content: '只有助手消息' }]);
   assert.equal(noUser.systemPrompt, 'BASE', 'no user message → unchanged');
   ks.setSpaceEnabled(false);
+});
+
+// ---------- BLOCK-94 P2：F2 PDF 解析 + F3 粘贴入库 ----------
+
+// 构造最小合法 PDF（xref 偏移精确；lines 每行一个 Tj 文本对象）
+function buildMinimalPdf(lines) {
+  const escape = (s) => s.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+  const contentStream = `BT /F1 14 Tf 72 720 Td ${lines.map((l, i) => `${i > 0 ? '0 -20 Td ' : ''}(${escape(l)}) Tj`).join(' ')} ET`;
+  const objs = [];
+  objs[1] = '1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n';
+  objs[2] = '2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n';
+  objs[3] = '3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n';
+  objs[4] = `4 0 obj\n<< /Length ${contentStream.length} >>\nstream\n${contentStream}\nendstream\nendobj\n`;
+  objs[5] = '5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n';
+  let pdf = '%PDF-1.4\n';
+  const offsets = [];
+  for (let i = 1; i <= 5; i++) {
+    offsets[i] = pdf.length;
+    pdf += objs[i];
+  }
+  const xrefStart = pdf.length;
+  pdf += 'xref\n0 6\n0000000000 65535 f \n';
+  for (let i = 1; i <= 5; i++) pdf += `${String(offsets[i]).padStart(10, '0')} 00000 n \n`;
+  pdf += `trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+  return Buffer.from(pdf, 'latin1');
+}
+
+test('F2 PDF: 文本层 PDF 摄取 ready（kind=pdf，文本可检索），.pdf 移出 fail-closed 清单', async () => {
+  const { checkSupported } = require('../core/biof3-server/helpers/knowledge-parsers.js');
+  checkSupported('paper.pdf');
+
+  const pdf = buildMinimalPdf(['TP53 regulates cell cycle arrest.', 'BRCA1 mediates homologous recombination repair.']);
+  const doc = await ingest.createDocument({ name: 'tp53-paper.pdf', buffer: pdf, mime: 'application/pdf', autoIngest: false });
+  const done = await ingest.ingestDocument(doc.id, { embed: async (t) => t.map(() => makeVec(17)) });
+  assert.equal(done.status, 'ready');
+  assert.equal(done.kind, 'pdf', 'doc kind corrected to pdf after parse');
+  assert.ok(done.chunk_count >= 1, 'extracted text produced chunks');
+
+  const ftsHit = ks.ftsSearch('homologous recombination', 5);
+  assert.ok(ftsHit.some((h) => h.chunkId.startsWith(doc.id)), 'PDF text reachable via FTS channel');
+  ks.deleteDocument(doc.id);
+});
+
+test('F2 PDF: 扫描件（无文本层）诚实 failed，不静默入库', async () => {
+  const pdf = buildMinimalPdf([]);
+  const contentStreamOnly = pdf;
+  const doc = await ingest.createDocument({ name: 'scanned.pdf', buffer: contentStreamOnly, mime: 'application/pdf', autoIngest: false });
+  const done = await ingest.ingestDocument(doc.id, { embed: async (t) => t.map(() => makeVec(18)) });
+  assert.equal(done.status, 'failed', 'no text layer → failed');
+  assert.ok(/empty/.test(done.error || ''), `honest empty error, got: ${done.error}`);
+  ks.deleteDocument(doc.id);
+});
+
+test('F3 粘贴文本: createDocument 走同一条摄取管道（txt 路由）', async () => {
+  const doc = await ingest.createDocument({
+    name: '粘贴文本-测试.txt',
+    buffer: Buffer.from('粘贴入库的内容，讨论细胞凋亡与 TP53 通路。', 'utf8'),
+    mime: 'text/plain',
+    autoIngest: false,
+  });
+  const done = await ingest.ingestDocument(doc.id, { embed: async (t) => t.map(() => makeVec(19)) });
+  assert.equal(done.status, 'ready');
+  ks.deleteDocument(doc.id);
 });

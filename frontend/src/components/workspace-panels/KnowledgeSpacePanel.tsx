@@ -48,6 +48,13 @@ export function KnowledgeSpacePanel() {
   const [searching, setSearching] = useState(false);
   const [searchHits, setSearchHits] = useState<KnowledgeHit[] | null>(null);
   const [searchNote, setSearchNote] = useState<string | null>(null);
+  // BLOCK-94 F3 摄取易用：拖拽上传 + 逐文件错误聚合 + 粘贴文本入库
+  const [dragActive, setDragActive] = useState(false);
+  const [uploadReport, setUploadReport] = useState<{ accepted: number; rejected: Array<{ name: string; error: string }> } | null>(null);
+  const [pasteOpen, setPasteOpen] = useState(false);
+  const [pasteName, setPasteName] = useState('');
+  const [pasteText, setPasteText] = useState('');
+  const [pasting, setPasting] = useState(false);
   // BLOCK-94 F1 分页：首屏 50 篇，「加载更多」按 50 递增（服务端钳制 200）
   const [docLimit, setDocLimit] = useState(50);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -101,16 +108,16 @@ export function KnowledgeSpacePanel() {
     await refresh();
   }, [enabled, refresh]);
 
-  const handleUpload = useCallback(async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
+  const handleUpload = useCallback(async (files: FileList | File[] | null) => {
+    const list = files ? Array.from(files) : [];
+    if (list.length === 0) return;
     setUploading(true);
     setActionError(null);
+    setUploadReport(null);
     try {
-      const result = await uploadKnowledgeDocuments(Array.from(files));
-      const rejectedCount = result.rejected.length;
-      if (rejectedCount > 0) {
-        setActionError(`${rejectedCount} 个文件被拒绝：${result.rejected[0].error}`);
-      }
+      const result = await uploadKnowledgeDocuments(list);
+      // BLOCK-94 F3：逐文件结果聚合（部分失败不再只显示第一个错误）
+      setUploadReport({ accepted: result.accepted.length, rejected: result.rejected });
     } catch (e) {
       setActionError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -119,6 +126,44 @@ export function KnowledgeSpacePanel() {
     }
     await refresh();
   }, [refresh]);
+
+  const handlePaste = useCallback(async () => {
+    if (!pasteText.trim() || pasting) return;
+    setPasting(true);
+    setActionError(null);
+    setUploadReport(null);
+    try {
+      const { pasteKnowledgeDocument } = await import('@/lib/knowledgeClient');
+      await pasteKnowledgeDocument(pasteName.trim(), pasteText);
+      setPasteOpen(false);
+      setPasteName('');
+      setPasteText('');
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setPasting(false);
+    }
+    await refresh();
+  }, [pasteName, pasteText, pasting, refresh]);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragActive(false);
+      if (e.dataTransfer?.files?.length) void handleUpload(e.dataTransfer.files);
+    },
+    [handleUpload]
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(false);
+  }, []);
 
   const handleDelete = useCallback(async (doc: KnowledgeDoc) => {
     setBusyDocId(doc.id);
@@ -187,7 +232,13 @@ export function KnowledgeSpacePanel() {
   }, [searchQuery, searching]);
 
   return (
-    <div className={styles.panel} data-testid="knowledge-panel">
+    <div
+      className={`${styles.panel} ${dragActive ? styles.dropActive : ''}`}
+      data-testid="knowledge-panel"
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+    >
       <div className={styles.header}>
         <Icon name="brain" size={16} />
         <span className={styles.title}>{state?.space?.name || '知识空间'}</span>
@@ -245,10 +296,19 @@ export function KnowledgeSpacePanel() {
           ref={fileInputRef}
           type="file"
           multiple
-          accept=".txt,.md,.markdown,.mdx,.rst,.log,.csv,.tsv,.json,.jsonl,.yaml,.yml,.toml,.ini,.xml,.html,.htm,.js,.mjs,.cjs,.ts,.tsx,.jsx,.py,.r,.rmd,.ipynb,.sh,.bash,.zsh,.bat,.ps1,.sql,.css,.java,.c,.h,.cpp,.hpp,.go,.rs,.rb,.php,.lua,.pl,.m,.swift,.kt,.scala"
+          accept=".txt,.md,.markdown,.mdx,.rst,.log,.csv,.tsv,.json,.jsonl,.yaml,.yml,.toml,.ini,.xml,.html,.htm,.js,.mjs,.cjs,.ts,.tsx,.jsx,.py,.r,.rmd,.ipynb,.sh,.bash,.zsh,.bat,.ps1,.sql,.css,.java,.c,.h,.cpp,.hpp,.go,.rs,.rb,.php,.lua,.pl,.m,.swift,.kt,.scala,.pdf"
           style={{ display: 'none' }}
           onChange={(e) => void handleUpload(e.target.files)}
         />
+        <button
+          type="button"
+          className={styles.ghostBtn}
+          onClick={() => setPasteOpen((v) => !v)}
+          data-testid="knowledge-paste-toggle"
+        >
+          <Icon name="pencil" size={13} />
+          粘贴文本
+        </button>
         <button type="button" className={styles.ghostBtn} onClick={handleOpenDir} title={state?.knowledgeDir || ''}>
           <Icon name="folder" size={13} />
           打开知识目录
@@ -266,11 +326,61 @@ export function KnowledgeSpacePanel() {
         )}
       </div>
 
+      {pasteOpen && (
+        <div className={styles.pasteBox} data-testid="knowledge-paste-box">
+          <input
+            className={styles.pasteName}
+            placeholder="文档名（可留空自动命名）"
+            value={pasteName}
+            onChange={(e) => setPasteName(e.target.value)}
+            data-testid="knowledge-paste-name"
+          />
+          <textarea
+            className={styles.pasteText}
+            placeholder="粘贴文本内容，入库后走同一条摄取管道（分块 + 嵌入 + 全文索引）"
+            value={pasteText}
+            onChange={(e) => setPasteText(e.target.value)}
+            rows={6}
+            data-testid="knowledge-paste-text"
+          />
+          <div className={styles.pasteActions}>
+            <button
+              type="button"
+              className={styles.primaryBtn}
+              disabled={pasting || !pasteText.trim()}
+              onClick={() => void handlePaste()}
+              data-testid="knowledge-paste-submit"
+            >
+              {pasting ? '入库中…' : '确认入库'}
+            </button>
+            <button type="button" className={styles.ghostBtn} onClick={() => setPasteOpen(false)}>
+              取消
+            </button>
+          </div>
+        </div>
+      )}
+
+      {uploadReport && uploadReport.rejected.length > 0 && (
+        <div className={styles.errorBox} data-testid="knowledge-upload-report">
+          上传完成：{uploadReport.accepted} 个成功，{uploadReport.rejected.length} 个被拒绝
+          <ul className={styles.rejectedList}>
+            {uploadReport.rejected.map((r, i) => (
+              <li key={`${r.name}-${i}`}>{r.name}：{r.error}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {uploadReport && uploadReport.rejected.length === 0 && (
+        <div className={styles.notice} data-testid="knowledge-upload-report-ok">
+          上传完成：{uploadReport.accepted} 个文档已进入摄取队列。
+        </div>
+      )}
+
       {actionError && <div className={styles.errorBox}>{actionError}</div>}
 
       <div className={styles.docList} data-testid="knowledge-doc-list">
         {documents.length === 0 && (
-          <div className={styles.empty}>还没有文档。上传 txt / md / 代码 / csv 等文本文件开始构建知识库。</div>
+          <div className={styles.empty}>还没有文档。上传 / 拖入 txt、md、代码、csv、pdf 等文件，或粘贴文本，开始构建知识库。</div>
         )}
         {documents.map((doc) => (
           <div key={doc.id} className={styles.docRow} data-testid="knowledge-doc-row">

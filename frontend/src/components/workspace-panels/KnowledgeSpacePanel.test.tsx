@@ -59,8 +59,8 @@ describe('BLOCK-69 KnowledgeSpacePanel', () => {
               createdAt: '2026-09-09T00:00:00Z', updatedAt: '2026-09-09T00:00:00Z',
             },
             {
-              id: 'kdoc_b', name: 'bad.pdf', kind: 'text', size: 10,
-              status: 'failed', error: 'knowledge_parser_planned_not_implemented:.pdf（该格式解析属 P3/P4，本期未实现）',
+              id: 'kdoc_b', name: 'bad.docx', kind: 'text', size: 10,
+              status: 'failed', error: 'knowledge_parser_planned_not_implemented:.docx（该格式解析属 P4 线，本期未实现）',
               chunkCount: 0, createdAt: '2026-09-09T00:00:00Z', updatedAt: '2026-09-09T00:00:00Z',
             },
           ],
@@ -139,5 +139,67 @@ describe('BLOCK-69 KnowledgeSpacePanel', () => {
       const calls2 = (fetchMock.mock.calls as unknown[][]).filter((call) => String(call[0]).includes('clear'));
       expect(calls2.length).toBe(1);
     });
+  });
+
+  it('BLOCK-94 F3：上传逐文件错误聚合（部分失败不再只显示第一个）', async () => {
+    const responses = [
+      {
+        match: /knowledge\/documents$/,
+        body: {
+          status: 'ok',
+          accepted: [{ document: { id: 'kdoc_ok', name: 'ok.txt', kind: 'text', size: 5, status: 'uploaded', error: null, chunkCount: 0, createdAt: '', updatedAt: '' } }],
+          rejected: [
+            { name: 'bad1.exe', error: 'knowledge_parser_unsupported:.exe（P1 文本族 + PDF 之外）' },
+            { name: 'bad2.docx', error: 'knowledge_parser_planned_not_implemented:.docx（该格式解析属 P4 线，本期未实现）' },
+          ],
+        },
+      },
+      { match: /knowledge\/space/, body: spaceState() },
+    ];
+    mockFetchSequence(responses);
+    render(<KnowledgeSpacePanel />);
+    await waitFor(() => expect(screen.getByTestId('knowledge-upload')).toBeTruthy());
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    expect(input).toBeTruthy();
+    const file1 = new File(['x'], 'bad1.exe');
+    const file2 = new File(['y'], 'ok.txt');
+    const file3 = new File(['z'], 'bad2.docx');
+    fireEvent.change(input, { target: { files: [file1, file2, file3] } });
+    await waitFor(() => expect(screen.getByTestId('knowledge-upload-report')).toBeTruthy());
+    const report = screen.getByTestId('knowledge-upload-report').textContent || '';
+    expect(report).toContain('1 个成功');
+    expect(report).toContain('2 个被拒绝');
+    expect(report).toContain('bad1.exe');
+    expect(report).toContain('bad2.docx');
+    expect(report).toContain('knowledge_parser_unsupported:.exe');
+  });
+
+  it('BLOCK-94 F3：粘贴文本入库（开箱/输入/提交/关箱）', async () => {
+    const responses = [
+      {
+        match: /knowledge\/documents\/paste/,
+        body: { status: 'ok', document: { id: 'kdoc_paste', name: '笔记.txt', kind: 'text', size: 12, status: 'uploaded', error: null, chunkCount: 0, createdAt: '', updatedAt: '' } },
+      },
+      { match: /knowledge\/space/, body: spaceState() },
+    ];
+    const fetchMock = mockFetchSequence(responses);
+    render(<KnowledgeSpacePanel />);
+    await waitFor(() => expect(screen.getByTestId('knowledge-paste-toggle')).toBeTruthy());
+    fireEvent.click(screen.getByTestId('knowledge-paste-toggle'));
+    expect(screen.getByTestId('knowledge-paste-box')).toBeTruthy();
+    fireEvent.change(screen.getByTestId('knowledge-paste-name'), { target: { value: '笔记' } });
+    fireEvent.change(screen.getByTestId('knowledge-paste-text'), { target: { value: '粘贴的知识内容，讨论 TP53。' } });
+    fireEvent.click(screen.getByTestId('knowledge-paste-submit'));
+    await waitFor(() => {
+      const calls = (fetchMock.mock.calls as unknown[][]).filter((call) => String(call[0]).includes('/paste'));
+      expect(calls.length).toBe(1);
+    });
+    const pasteCall = (fetchMock.mock.calls as unknown[][]).find((call) => String(call[0]).includes('/paste'));
+    const init = (pasteCall ? pasteCall[1] : undefined) as RequestInit | undefined;
+    const body = JSON.parse(String((init && init.body) || '{}'));
+    expect(body.name).toBe('笔记');
+    expect(body.text).toContain('TP53');
+    // 成功后收起粘贴箱
+    await waitFor(() => expect(screen.queryByTestId('knowledge-paste-box')).toBeNull());
   });
 });

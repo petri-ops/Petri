@@ -45,6 +45,56 @@
   padding: 6px 0 2px;
 }
 
+/* BLOCK-94 F3：拖拽上传反馈（accent 描边对齐 BLOCK-90 房风） */
+.dropActive {
+  outline: 2px dashed var(--gewu-accent);
+  outline-offset: -3px;
+  border-radius: 8px;
+}
+
+.pasteBox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 8px;
+  background: var(--gewu-bg-subtle);
+}
+
+.pasteName {
+  padding: 6px 8px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  background: var(--gewu-bg-elevated);
+  color: var(--gewu-text-primary);
+  font-size: var(--gewu-font-size-sm);
+}
+
+.pasteText {
+  padding: 8px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  background: var(--gewu-bg-elevated);
+  color: var(--gewu-text-primary);
+  font-family: inherit;
+  font-size: var(--gewu-font-size-sm);
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.pasteActions {
+  display: flex;
+  gap: 8px;
+}
+
+.rejectedList {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-secondary);
+}
+
 .errorBox {
   padding: 8px 10px;
   border: 1px solid rgba(239, 68, 68, 0.35);
