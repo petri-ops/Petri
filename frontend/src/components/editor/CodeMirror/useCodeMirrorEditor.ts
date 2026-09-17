@@ -34,6 +34,7 @@ import {
 import { tags as t } from '@lezer/highlight';
 
 import { loadLanguage } from './extensions/languageLoader';
+import { createFallbackLanguage } from './extensions/fallbackLanguage';
 import { createUnifiedDiffExtension, type DiffViewOptions } from './extensions/unifiedDiff';
 import { createScrollToLineApi, scrollToLineExtension } from './extensions/scrollToLine';
 import type {
@@ -272,8 +273,9 @@ export function useCodeMirrorEditor(
         if (cancelled) return;
         const compartment = langCompartmentRef.current;
         if (!compartment || !viewRef.current) return;
+        // UI-395 — 未识别格式走通用保底高亮（用户裁决：常见格式都要有，保底通用）
         viewRef.current.dispatch({
-          effects: compartment.reconfigure(langExt ? [langExt] : []),
+          effects: compartment.reconfigure(langExt ? [langExt] : [createFallbackLanguage()]),
         });
       });
     }
@@ -311,7 +313,7 @@ export function useCodeMirrorEditor(
     loadLanguage(language).then((langExt) => {
       if (cancelled || !viewRef.current) return;
       viewRef.current!.dispatch({
-        effects: compartment.reconfigure(langExt ? [langExt] : []),
+        effects: compartment.reconfigure(langExt ? [langExt] : [createFallbackLanguage()]),
       });
     });
     return () => {

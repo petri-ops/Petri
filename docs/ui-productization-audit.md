@@ -3356,6 +3356,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **修复**：gutter `background-color: transparent`（直接吃父面底色，亮暗主题天然与内容一致）+ `border-right: none`（用户裁决移除）；活动行/活动行号统一 `var(--gewu-hover)`（白蓝低透明，亮暗双态自适应）。
 - **证据**：实机 afterSign.js（用户截图同文件）computed style 取证 gutterBg=rgba(0,0,0,0)/borderRight=0px/activeLineBg=rgba(230,237,243,0.07)；截图 acceptance 不留（Temp ui395-after.png）；theme-token-contract 4/4。
 - **边界**：仅代码查看器 gutter 面；亮色模式 gutter 透明随父面同样成立。G0 开发期常态 · 不外推 packaged/Provider/GA.
+- **增补（同日，用户追问「.js 代码高亮没有完全支持？常见格式都要有，保底通用高亮」）**：**抓出 P0 起即断链的真缺陷**——@codemirror/lang-* 全家族为 named 工厂导出（javascript()/python()…）而 languageLoader.resolveExtension 只认 mod.default → **恒返回 null，所有语言高亮从未真正工作过**。修复=named 工厂解析（ts/mts/cts/tsx 以 typescript/jsx 选项启用）+ 新增通用保底 tokenizer fallbackLanguage.ts（字符串/注释/数字/关键字/类型/函数调用名，零依赖，未识别格式不再纯白）。实机 afterSign.js：const 着色 rgb(251,146,60)、视口 30 token 着色；tsc 0+52 测试过。常见格式扩充（css/html/sql/c/cpp/java/go/rust/legacy-modes 等新依赖）按 DEPENDENCY-CHANGE-CHECKLIST 呈用户裁决。
 
 ## UI-394: 会话信息流四件——长会话游标加载 + 回到底部浮标 + 话题小节分隔 + 压缩诚实标记卡 (2026-09-17 verified，dev Electron 边界内；用户复看截图确认「好的 按照你的建议来」)
 

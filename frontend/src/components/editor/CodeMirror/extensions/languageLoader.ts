@@ -2,63 +2,78 @@
  * BLOCK-22-CODEMIRROR-INLINE-DIFF — languageLoader
  *
  * 按文件路径（或语言标识）懒加载 `@codemirror/lang-*` 语言包。
- * 返回 `LanguageSupport | null`：
- * - `LanguageSupport`：可直接作为 CodeMirror extension
- * - `null`：未知扩展名 → 调用方走基础高亮（fallback）
+ * 返回 `LanguageSupport | null`：null = 无该语言包（调用方走通用保底高亮）。
  *
- * P0 阶段完整实现：兜底机制要可用。
- *
- * 设计要点：
- * 1. 动态 `import()`：不强制把所有语言包拉入初始 bundle
- * 2. 缓存：同一 filePath / language 不重复 import
- * 3. null 兜底：识别不了的扩展名返回 null，由编辑器走无高亮路径
+ * UI-395 后继（2026-09-17 用户反馈「.js 没有高亮，常见格式都要有，保底通用高亮」）：
+ * - **修复 P0 起即断链的解析**：@codemirror/lang-* 全家族均为 named 工厂导出
+ *   （`javascript()` / `python()` …），**没有 default 导出**——旧实现只认
+ *   `mod.default`，恒返回 null，所有语言高亮从未真正工作过。
+ * - ts/mts/cts/tsx/jsx 以对应选项启用（typescript/jsx 语法）。
  */
 
 import type { Extension } from '@codemirror/state';
 
-type LoaderResult = Extension;
-type Loader = () => Promise<{ default: (...args: unknown[]) => LoaderResult }>;
+interface LanguageSpec {
+  mod: Promise<unknown>;
+  /** @codemirror/lang-* 包内的 named 工厂函数名。 */
+  factory: string;
+  /** 工厂选项（javascript({typescript, jsx})）。 */
+  options?: Record<string, boolean>;
+}
 
-/**
- * 扩展名 → 动态 loader。
- *
- * 兜底规则：
- * - `.py` → lang-python
- * - `.js` / `.jsx` / `.mjs` / `.cjs` / `.ts` / `.tsx` → lang-javascript
- * - `.json` / `.jsonl` → lang-json
- * - `.md` / `.markdown` → lang-markdown
- * - `.yml` / `.yaml` → lang-yaml
- * - 其它 → null（无语法高亮，仅基础配色）
- *
- * 注：动态 import 返回的模块形态在不同 CM 包之间不完全一致（部分包 default
- * 是 factory，部分包直接导出对象）。下面的 cast 只为过 TS 类型检查，运行时
- * 通过 `.default(...)` 触发实际高亮。
- */
-const EXTENSION_LOADERS: Record<string, () => Promise<unknown>> = {
-  py: () => import('@codemirror/lang-python'),
-  js: () => import('@codemirror/lang-javascript'),
-  jsx: () => import('@codemirror/lang-javascript'),
-  mjs: () => import('@codemirror/lang-javascript'),
-  cjs: () => import('@codemirror/lang-javascript'),
-  ts: () => import('@codemirror/lang-javascript'),
-  tsx: () => import('@codemirror/lang-javascript'),
-  json: () => import('@codemirror/lang-json'),
-  jsonl: () => import('@codemirror/lang-json'),
-  md: () => import('@codemirror/lang-markdown'),
-  markdown: () => import('@codemirror/lang-markdown'),
-  yml: () => import('@codemirror/lang-yaml'),
-  yaml: () => import('@codemirror/lang-yaml'),
+const JS = () => import('@codemirror/lang-javascript');
+const PY = () => import('@codemirror/lang-python');
+const JSONL = () => import('@codemirror/lang-json');
+const MD = () => import('@codemirror/lang-markdown');
+const YML = () => import('@codemirror/lang-yaml');
+
+/** 与包内 named 工厂同名。 */
+const FACTORIES = {
+  js: JS,
+  py: PY,
+  json: JSONL,
+  md: MD,
+  yaml: YML,
 };
 
-const LANGUAGE_LOADERS: Record<string, () => Promise<unknown>> = {
-  python: () => import('@codemirror/lang-python'),
-  javascript: () => import('@codemirror/lang-javascript'),
-  typescript: () => import('@codemirror/lang-javascript'),
-  jsx: () => import('@codemirror/lang-javascript'),
-  tsx: () => import('@codemirror/lang-javascript'),
-  json: () => import('@codemirror/lang-json'),
-  markdown: () => import('@codemirror/lang-markdown'),
-  yaml: () => import('@codemirror/lang-yaml'),
+function spec(mod: Promise<unknown>, factory: string, options?: Record<string, boolean>): LanguageSpec {
+  return { mod, factory, options };
+}
+
+const TS_SPEC = () => spec(JS(), 'javascript', { typescript: true });
+const TSX_SPEC = () => spec(JS(), 'javascript', { typescript: true, jsx: true });
+const JSX_SPEC = () => spec(JS(), 'javascript', { jsx: true });
+const JS_SPEC = () => spec(JS(), 'javascript');
+
+/** 扩展名 → 语言包 spec。 */
+const EXTENSION_SPECS: Record<string, () => LanguageSpec> = {
+  py: () => spec(PY(), 'python'),
+  js: JS_SPEC,
+  mjs: JS_SPEC,
+  cjs: JS_SPEC,
+  jsx: JSX_SPEC,
+  ts: TS_SPEC,
+  mts: TS_SPEC,
+  cts: TS_SPEC,
+  tsx: TSX_SPEC,
+  json: () => spec(JSONL(), 'json'),
+  jsonl: () => spec(JSONL(), 'json'),
+  md: () => spec(MD(), 'markdown'),
+  markdown: () => spec(MD(), 'markdown'),
+  yml: () => spec(YML(), 'yaml'),
+  yaml: () => spec(YML(), 'yaml'),
+};
+
+/** 语言标识 → 语言包 spec（扩展名未命中时查此表）。 */
+const LANGUAGE_SPECS: Record<string, () => LanguageSpec> = {
+  python: () => spec(PY(), 'python'),
+  javascript: JS_SPEC,
+  typescript: TS_SPEC,
+  jsx: JSX_SPEC,
+  tsx: TSX_SPEC,
+  json: () => spec(JSONL(), 'json'),
+  markdown: () => spec(MD(), 'markdown'),
+  yaml: () => spec(YML(), 'yaml'),
 };
 
 const cache = new Map<string, Promise<Extension | null>>();
@@ -69,25 +84,29 @@ function fileExtensionLower(name: string): string {
   return name.slice(idx + 1).toLowerCase();
 }
 
-async function resolveExtension(loader: () => Promise<unknown>): Promise<Extension | null> {
+async function resolveSpec(sp: LanguageSpec): Promise<Extension | null> {
   try {
-    const mod = await loader();
+    const mod = (await sp.mod) as Record<string, unknown>;
     if (!mod || typeof mod !== 'object') return null;
-    const def = (mod as { default?: unknown }).default;
-    if (typeof def !== 'function') return null;
-    const result = (def as (...args: unknown[]) => unknown)();
-    return (result ?? []) as Extension;
+    // @codemirror/lang-* 家族为 named 工厂导出（无 default）——按 factory 名取。
+    const factory = mod[sp.factory];
+    if (typeof factory === 'function') {
+      return ((factory as (o?: unknown) => unknown)(sp.options) ?? null) as Extension | null;
+    }
+    // 兼容 default 工厂形态（防家族未来改导出方式）。
+    if (typeof mod['default'] === 'function') {
+      return ((mod['default'] as (o?: unknown) => unknown)(sp.options) ?? null) as Extension | null;
+    }
+    return null;
   } catch {
     return null;
   }
 }
 
 /**
- * 加载语言 extension。返回 null 表示无可用高亮。
+ * 加载语言 extension。返回 null 表示无该语言包（走通用保底高亮）。
  *
  * @param input 文件名（`a/b/foo.py`）或语言标识（`python` / `ts`）。
- *              注意：输入识别通过 `fileExtensionLower` 提取扩展名；
- *              如果扩展名未命中，再尝试当语言名查表。
  */
 export async function loadLanguage(input: string): Promise<Extension | null> {
   if (!input) return null;
@@ -95,14 +114,13 @@ export async function loadLanguage(input: string): Promise<Extension | null> {
   const cached = cache.get(key);
   if (cached) return cached;
 
-  const loader = EXTENSION_LOADERS[fileExtensionLower(key)] ?? LANGUAGE_LOADERS[key.toLowerCase()];
-  if (!loader) {
-    // 标记为不可加载，避免反复字符串处理
+  const make = EXTENSION_SPECS[fileExtensionLower(key)] ?? LANGUAGE_SPECS[key.toLowerCase()];
+  if (!make) {
     cache.set(key, Promise.resolve(null));
     return null;
   }
 
-  const promise = resolveExtension(loader);
+  const promise = resolveSpec(make());
   cache.set(key, promise);
   return promise;
 }
