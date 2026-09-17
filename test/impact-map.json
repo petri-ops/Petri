@@ -1767,6 +1767,24 @@
       "commands": [],
       "classifiesScripts": true,
       "scriptRole": "product"
+    },
+    {
+      "id": "ui397-ssh-link-status",
+      "note": "UI-397 远程连接不再闲置主动断连（mux 移除 IDLE_CLOSE）+ SSH 呼吸灯（ssh-ping 端点 + useSshHeartbeat 30s 探活 + SshStatusDot 红绿灯）。",
+      "patterns": [
+        "core/biof3-server/helpers/remote-execution/ssh-multiplexer.js",
+        "core/biof3-server/routes/files.js",
+        "core/biof3-server/helpers/workspace-gateway.js",
+        "frontend/src/hooks/useSshHeartbeat.ts",
+        "frontend/src/components/workspace-panels/SshStatusDot.tsx",
+        "frontend/src/components/workspace-panels/SshStatusDot.module.css"
+      ],
+      "tests": [
+        "test/block67-ssh-mux.test.mjs"
+      ],
+      "commands": [],
+      "classifiesScripts": true,
+      "scriptRole": "product"
     }
   ]
 }

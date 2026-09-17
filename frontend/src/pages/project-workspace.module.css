@@ -7401,3 +7401,12 @@ body:global(.gewu-resizing-columns) * {
   opacity: 0.6;
   cursor: default;
 }
+
+/* UI-397 — SSH 项目行呼吸灯容器（行内右侧，不触发行点击） */
+.projectTreeSshDot {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  margin-right: 6px;
+  flex-shrink: 0;
+}

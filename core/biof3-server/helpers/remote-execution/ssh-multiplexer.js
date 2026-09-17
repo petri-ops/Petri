@@ -10,15 +10,15 @@
  *
  * 语义与安全性：
  * - 命令仍由 remoteAgentCommand 构造（argv 白名单 + 引号），mux 仅做转发；
- * - BatchMode + ServerAliveInterval 保活；会话死亡 → 丢弃，下次操作懒重建；
- * - 空闲 5 分钟自动关闭；app 退出时 stdin EOF 使远端循环自然结束；
+ * - BatchMode + ServerAliveInterval 保活（15s 心跳）；会话死亡 → 丢弃，下次操作懒重建；
+ * - UI-397（用户反馈「闲置回来总要重连」）：移除空闲 5 分钟主动关闭——保活维持长连接，
+ *   不主动断连；app 退出时 stdin EOF 使远端循环自然结束；
  * - BIOF3_SSH_MUX=0 可整体禁用（回退 thin per-call）。
  */
 
 const { spawn } = require('child_process');
 const { AGENT_BIN } = require('./node-agent');
 
-const IDLE_CLOSE_MS = 5 * 60 * 1000;
 const DEFAULT_RUN_TIMEOUT_MS = 30000;
 
 // BIOF3_SSH_MUX_DEBUG=1 时逐事件打 stderr（写/收/解析/超时/断开），P4 实机排插桩。
@@ -146,7 +146,6 @@ function createMuxSession({ alias, addressFamily, spawnFn }) {
   child.on('exit', (code) => { dbg(session, `exit code=${code}`); die(); });
   child.stderr.on('data', (c) => { dbg(session, `stderr: ${String(c).trim().slice(0, 200)}`); });
 
-  scheduleIdleClose(session);
   sessions.set(session.key, session);
   return session;
 }
@@ -161,17 +160,6 @@ function killSession(session) {
   session.alive = false;
   if (sessions.get(session.key) === session) sessions.delete(session.key);
   try { session.child.kill(); } catch {}
-}
-
-function scheduleIdleClose(session) {
-  const t = setInterval(() => {
-    if (!session.alive) { clearInterval(t); return; }
-    if (Date.now() - session.lastActivity > IDLE_CLOSE_MS) {
-      clearInterval(t);
-      killSession(session);
-    }
-  }, 60 * 1000);
-  if (typeof t.unref === 'function') t.unref();
 }
 
 /** 取（或建）alias 的会话。 */
@@ -210,5 +198,4 @@ module.exports = {
   createMuxSession,
   runOnMux,
   closeAll,
-  IDLE_CLOSE_MS,
 };

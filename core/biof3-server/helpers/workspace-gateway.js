@@ -195,8 +195,9 @@ function createSshBackend({ alias, addressFamily } = {}) {
     async listPage(dirPath, opts) {
       return paginateEntries(await this.list(dirPath), opts);
     },
-    async stat(filePath) {
-      const [info] = parseJsonLines(await fsOp(['fs_stat', b64(filePath)]));
+    async stat(filePath, opts) {
+      // UI-397 — opts.timeoutMs：探活等短超时场景（默认仍 30s）
+      const [info] = parseJsonLines(await fsOp(['fs_stat', b64(filePath)], { timeoutMs: (opts && opts.timeoutMs) || undefined }));
       if (!info || info.error) {
         const e = new Error(info?.error || 'not_found'); e.remoteError = info?.error || 'not_found'; throw e;
       }

@@ -272,6 +272,24 @@ module.exports = function registerFileRoutes(app) {
       }
     });
 
+    // UI-397 — SSH 连接探活（呼吸灯数据源）：轻量 fs_stat 走 mux 长连接，
+    // {ok:true, ms} = 绿；失败/超时 = 红。前端心跳 30s 轮询 + 手动重试共用。
+    app.get('/api/workspaces/:projectId/ssh-ping', requireTrustedDesktopOrigin, async (req, res) => {
+      const project = getProjectRecord(req.params.projectId);
+      if (!project || project.workspace_kind !== 'ssh') {
+        return res.status(400).json({ ok: false, error: '仅 SSH 远程项目提供探活' });
+      }
+      const { backend, root, error } = workspaceGateway.resolveWorkspaceBackend(project) || {};
+      if (error) return res.status(404).json({ ok: false, error: '项目工作目录不存在' });
+      const startedAt = Date.now();
+      try {
+        await backend.stat(root, { timeoutMs: 8000 });
+        return res.json({ ok: true, ms: Date.now() - startedAt });
+      } catch (e) {
+        return res.json({ ok: false, ms: Date.now() - startedAt, error: String(e.message || e).slice(0, 120) });
+      }
+    });
+
     // BLOCK-67：ssh 项目编辑保存（write-through 直写远程；本地项目沿用既有 IPC 通道，此端点不接）。
     app.put('/api/workspaces/:projectId/file', requireTrustedDesktopOrigin, async (req, res) => {
       const project = getProjectRecord(req.params.projectId);

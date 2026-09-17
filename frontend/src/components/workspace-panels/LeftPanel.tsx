@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from '@/components/icons/Icon';
+import { SshStatusDot } from './SshStatusDot';
 import { MobileSyncPanel } from '@/components/desktop/DesktopSettingsPanel/sections/MobileSync';
 import { FederationPanel } from '@/components/desktop/DesktopSettingsPanel/sections/Federation';
 import type { Project } from '@/lib/project-types';
@@ -496,6 +497,12 @@ function ProjectNode({
           >
             {p.name}
           </button>
+        )}
+        {/* UI-397 — 远程项目连接呼吸灯（绿在线/黄连接中/红断联，点击手动重试） */}
+        {p.workspaceKind === 'ssh' && !editingProject && (
+          <span className={styles.projectTreeSshDot} onClick={(e) => e.stopPropagation()}>
+            <SshStatusDot projectId={p.id} />
+          </span>
         )}
         {p.workspaceKind === 'ssh' && (
           <button
