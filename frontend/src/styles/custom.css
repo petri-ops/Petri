@@ -191,7 +191,7 @@
   --gewu-surface: var(--gewu-bg-surface);
   --gewu-surface-alt: var(--gewu-bg-subtle);
   --gewu-surface-translucent: color-mix(in srgb, var(--gewu-bg-surface) 84%, transparent);
-  --gewu-surface-hover: rgba(148, 163, 184, 0.18);
+  --gewu-surface-hover: rgba(230, 237, 243, 0.09);
   --gewu-border-subtle: color-mix(in srgb, var(--gewu-border) 68%, transparent);
   --gewu-input-bg: var(--gewu-bg-surface);
   --gewu-overlay: rgba(2, 6, 23, 0.6);
@@ -214,7 +214,7 @@
   --gewu-accent-soft: rgba(45, 212, 191, 0.20);
   --gewu-accent-bg: rgba(45, 212, 191, 0.14);
   --gewu-border-color: var(--gewu-border);
-  --gewu-hover: rgba(148, 163, 184, 0.14);
+  --gewu-hover: rgba(230, 237, 243, 0.07);
   --gewu-surface-dim: #111a2e;
   --gewu-accent-hover: #14b8a6;
   --gewu-danger: #f87171;

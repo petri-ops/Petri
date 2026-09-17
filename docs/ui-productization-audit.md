@@ -3349,6 +3349,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-392: 夜间模式悬停高亮色族统一——工作台四项背景「发灰」系统性修复 (2026-09-17 in_progress，dev Electron 边界内)
+
+- **来源**：用户实测反馈「工作台四项（新建任务/插件/Skills/知识空间）夜间模式背景色未和软件保持一致」+ 裁决「分析一下 系统性修复」。
+- **根因**（像素级取证 + token 审计）：暗色主题悬停 token --gewu-hover: rgba(148,163,184,0.14) 为无彩 slate 灰，叠在海军蓝 surface（#111a2e）上产生 #242D42/#263043 发灰高亮条，与全 app navy（#182339/#1d2945）+ teal 强调（accent-bg）色族脱节；另有 --gewu-surface-dim 双定义冲突（global.css #0f172a slate-900 vs custom.css #111a2e navy）。
+- **修复（系统性，改 token 不改组件）**：custom.css 暗色 --gewu-hover → rgba(230,237,243,0.07)、--gewu-surface-hover → rgba(230,237,243,0.09)（navy 同族提亮，41 处 hover 全部对齐）；global.css 暗色 --gewu-surface-dim → var(--gewu-bg-surface) 消除双暗底。亮色模式不动。
+- **证据**：实测新 hover 合成色 #20293C（navy 同族克制提亮）vs 旧 #263043（发灰）；theme-token-contract 1/1；CDP 实机截图对照（Temp 对比图，acceptance 不留）。token 热更经 Vite HMR 实证。
+- **边界**：亮色模式零改动；不改任何组件结构；hover 语义（灰阶提亮而非 teal 强调，teal 保留给选中态）不变。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-391: BLOCK-92 Wave A copilot 族巨型文件模块化拆分（纯重构零行为变化）(2026-09-16 in_progress，dev Electron 边界内)
 
 - **来源**：BLOCK-92-CODE-MODULARIZATION P2（用户裁决「很棒 按顺序 逐个推进」队列序；UI-305 拆分家法延续，一文件一提交）。

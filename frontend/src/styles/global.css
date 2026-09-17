@@ -51,7 +51,9 @@
 [data-theme='dark'] {
   --ifm-background-color: #0f172a;
   --ifm-background-surface-color: #0f172a;
-  --gewu-surface-dim: #0f172a;
+  /* UI-392 — 暗色 surface-dim 单一真源在 custom.css（#111a2e 海军蓝族）；
+     原字面量 #0f172a（slate-900）与之冲突构成双暗底，改引用消除分歧 */
+  --gewu-surface-dim: var(--gewu-bg-surface);
 }
 
 * {
