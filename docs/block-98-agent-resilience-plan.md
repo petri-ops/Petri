@@ -75,6 +75,15 @@
 | BLOCK-97 task_todo 在制（工作区 WIP）：`agent-tools/todo-tools.js` + conversationRunStore/conversationTodos.ts | 并行会话持有 | M2 摘要模板「待办任务」章节将来可引用 task_todo 状态（P0 对齐） |
 | dev-verify flow 框架 + closeout 五门 + D7/D8 例外家法 | scripts/dev-verify | M6 验收载体 |
 
+## §4.1 P0 结论（2026-09-17，HEAD e2ec7c36 重定位 + 四项勘察 + D1-D7 落定）
+
+- **§4 重定位**：agent-runner 现 958 行（runAgentLoop 结构未变，BLOCK-97 emitAssistant 接线在其内）；loop-orchestrator 仍 1241 行（本包零触碰达成，M1 接线点改在 agent-runner callChatProvider 包裹——比 plan 预想的 loop 内更优：请求体投影副本替换，loop 行数门与运行时数组双零触碰）。B2/token-estimator/ai_usage/dev-verify 承重面与 §4 一致。
+- **勘察①llm-transcripts**：`<DATA_DIR>/llm-transcripts/<conversationId>.jsonl`（BLOCK-37，model-gateway 落盘+轮转）现成可复用——M2 摘要内写转写路径面向**用户/审计可见**；模型经工具回查=能力缺口（路径在 DATA_DIR 不在项目工作区内，workspace 工具读不到），诚实登记为远期候选，摘要 9 章节自包含为主。
+- **勘察②provider 窗口真值**：`getContextWindow(modelName, provider, baseUrl, apiKey, preset)`（token-estimator，agent-runner token_budget 已用）+ `model_profiles[].contextWindow`——D3 公式直接接此真值，无需新建。
+- **勘察③ai-bridge 错误分类现状=无**：128 行全 `catch {}` 静默，无结构化分类——M3/M5 的 context-exceeded/retryable 判定为新建（P3 落 agent-resilience.js，从 provider 抛错信息分类）。
+- **勘察④run 中用户消息现状**：`POST task/:id/message` 留言通道**仅子 agent 且不注入运行中循环**（源码自述「运行中即时注入需 loop 核心支持（登记候选）」，续派时才注入）；primary 任务无通道——M4=留言队列升级为运行中注入（task_events 入队 + loop 轮边界 drain）。
+- **D1-D7 落定**：全部按 §5 预置推荐（plan 自带「未应答按推荐先行留痕」授权，用户放权惯例；可逆、有总开关）。分组语义适配结论：ZCode「连续 ≥5 条」按本仓 assistant(tool_calls)+tool 交替格式适配为「同一调用批次内 ≥2 条工具结果成组」（语义等价：成组才折、零散不折），已回写 §4。
+
 ## §5 设计裁决项（P0 呈报，预置推荐先行可逆留痕）
 
 | # | 裁决项 | 预置推荐 |

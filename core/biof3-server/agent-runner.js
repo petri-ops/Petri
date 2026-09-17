@@ -20,7 +20,8 @@ const { buildSystemPrompt, localizeToolResult, loadWorkingTreeRejectEntries } = 
 const { appendDesktopAgentInstructions } = require('./helpers/desktop-agent-prompt');
 const { renderPluginDemoPathsForPrompt } = require('./helpers/plugin-demo-prompt');
 const llmClient = require('./helpers/llm-client');
-const callChatProvider =
+const agentResilience = require('./helpers/agent-resilience');
+const baseCallChatProvider =
   llmClient.callChatProvider ||
   (async (_providerName, apiKey, body, telemetry, onEvent, options) => {
     const result = await llmClient.callDeepSeek(apiKey, body, telemetry, options);
@@ -711,6 +712,19 @@ async function runAgentLoop({
   };
 
   // ---------- Run loop via orchestrator ----------
+  // BLOCK-98 M1 — microcompact 接线（helpers/agent-resilience.js；开关
+  // BIOF3_AGENT_RESILIENCE 默认关）。包裹点在此而非 loop-orchestrator：
+  // 请求体 messages 投影替换（副本），loop 运行时数组与 DB 原文零触碰。
+  const resilientCallChatProvider = (providerName, apiKey, body, telemetry, onEvent, options) =>
+    baseCallChatProvider(
+      providerName,
+      apiKey,
+      agentResilience.maybeMicrocompactBody(body, { contextWindow: safeCtx }),
+      telemetry,
+      onEvent,
+      options
+    );
+
   const {
     assistantText,
     // BLOCK-34 P1 — 工具活动快照随消息落库（此前传 null 导致任务完成后
@@ -744,7 +758,7 @@ async function runAgentLoop({
       maybeEmitTaskTodo(evt, _emit);
     },
     emitDone: () => _emit({ event: 'done' }),
-    callChatProvider,
+    callChatProvider: resilientCallChatProvider,
     config: loopConfig,
     conversationState: {
       conversationId,
