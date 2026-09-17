@@ -3349,13 +3349,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
-## UI-393: 设置页头改「← 返回」——移除页面级关闭钮，与 Skills/知识空间页头同形 (2026-09-17 in_progress，dev Electron 边界内)
+## UI-393: 设置页头改「← 返回」——移除页面级关闭钮，与 Skills/知识空间页头同形 (2026-09-17 verified，dev Electron 边界内；用户复看确认)
 
 - **来源**：用户裁决「设置 这里 去掉右侧的 关闭按钮 之后在左侧加上 返回 按钮 和Skills 知识空间 风格UI 保持一致」。
 - **交付面**：DesktopSettingsPanel 头部右侧 × 关闭按钮退役，左侧加「← 返回」胶囊（样式单一真源=global-page.module.css .backBtn，与 Skills/知识空间页头逐字节同款）；onClose 语义即离开设置不改调用方；desktop.css 孤儿 __close 规则随组件移除不留空壳。窗口标题栏右上角的系统关闭钮为窗口控件（全页共有）不动。
 - **证据**：实机 /settings 探针 back=true/close(页面级)=false + 截图 acceptance/ui-393/settings-back-header.png（亮色模式下返回胶囊自适应正确）；tsc 0；ui:audit/docs:check 绿。
 - **边界**：仅设置页头部形态；DesktopSettingsPanel 消费方仅 /settings 一处，无其它调用面受影响。G0 开发期常态 · 不外推 packaged/Provider/GA.
-## UI-392: 夜间模式悬停高亮色族统一——工作台四项背景「发灰」系统性修复 (2026-09-17 in_progress，dev Electron 边界内)
+## UI-392: 夜间模式悬停高亮色族统一——工作台四项背景「发灰」系统性修复 (2026-09-17 verified，dev Electron 边界内；用户复看确认暗色全页扫描+亮色回归无异议)
 
 - **来源**：用户实测反馈「工作台四项（新建任务/插件/Skills/知识空间）夜间模式背景色未和软件保持一致」+ 裁决「分析一下 系统性修复」。
 - **根因**（像素级取证 + token 审计）：暗色主题悬停 token --gewu-hover: rgba(148,163,184,0.14) 为无彩 slate 灰，叠在海军蓝 surface（#111a2e）上产生 #242D42/#263043 发灰高亮条，与全 app navy（#182339/#1d2945）+ teal 强调（accent-bg）色族脱节；另有 --gewu-surface-dim 双定义冲突（global.css #0f172a slate-900 vs custom.css #111a2e navy）。
