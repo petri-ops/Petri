@@ -3349,6 +3349,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-399: SSH 文件树切换文件不再整树重拉 (2026-09-17 verified，dev Electron + WSL 真节点实机 5/5 allPass)
+
+- **来源**：用户反馈「ssh 连接的情况下每次点击一个文件打开预览，这个路径对应的文件都会重新刷新一遍……切换文件就能看到路径文件刷新重新打开一遍，使用体验不好 需要优化？？？」。
+- **根因**：RightFileTree 的 `refreshFiles` useCallback 依赖 `activeFile?.path`（签名对账逻辑读取活动文件）→ 每次点击文件其身份变化 → 初始加载 effect（`[project.id, refreshFiles]`）重跑：`setLoading(true)` 闪屏 + 根目录分页重拉 + `refreshVersion++` 令**所有已展开目录**逐个 `loadDir`——ssh 下每次点开文件 = N 个目录的网络往返整树刷新，且与该 effect 注释自述的刷新触发面（初始加载/projectWorkspaceChanged/手动按钮）矛盾。本地项目因 2s 轮询本就频繁刷新反而掩盖。
+- **修复**：最新值 ref 模式（`activeFileRef` 渲染时赋值）→ `refreshFiles` 改读 ref、依赖收窄为 `[fetchDir, fetchDirPage]` 身份稳定 → 两个 effect 不再因切文件重跑；签名对账（agent 改档后预览自动刷新 previewVersion 链）经 ref 保持原语义；刷新触发面收敛回注释意图（初始加载/面板激活/projectWorkspaceChanged/手动按钮；ssh 无轮询）。
+- **证据**：实机 `scripts/ui399-tree-refresh-live.cjs` **5/5 allPass**（`acceptance/ui-399/`）——WSL 真节点 ssh 项目 SingleCell，清空资源计时后点击 `cellannot.xlsx`→`CellChat_V2_plot.R`：`/tree` 请求**每次点击 0 增长**（旧代码每次 +2~4），预览内容请求恰好 2 次；组件回归 `RightFileTree.refresh.test.tsx`（切 A/切 B 计数恒 2、事件触发才 +2 且签名目录 `prefix=src` 正确）；邻接 fileOps/WorkspaceFilePreview/RightPanel 14/14 + tsc 0。
+- **边界**：仅前端触发面修复；`/tree` 内容端点、分页、签名对账语义零改动；本地项目轮询行为不变。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-398: 摘要卡「任务清单」节——agent todo_write 清单实时渲染 (BLOCK-97 P2/P3，2026-09-17 verified，dev Electron 真轮次实机 10/10 allPass)
 
 - **来源**：BLOCK-97-AGENT-TODO-CARD（用户见编码 agent 任务清单进度卡后裁决诉求「放到我们摘要卡片中……agent 把工作拆成编号条目，做完一条勾一条」）。

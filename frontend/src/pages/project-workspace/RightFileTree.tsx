@@ -55,6 +55,12 @@ export function RightFileTree({
   const [openError, setOpenError] = useState('');
   const [opening, setOpening] = useState(false);
   const activeFileSignatureRef = useRef<string | null>(null);
+  // UI-399 — 最新活动文件引用：refreshFiles 读 ref 而非闭包捕获，身份保持稳定。
+  // 此前 refreshFiles 依赖 activeFile?.path，切换文件 → 身份变 → 初始加载 effect
+  // 重跑（setLoading(true) 闪屏 + 整树重拉 + refreshVersion++ 令所有已展开目录
+  // 重新 loadDir）——ssh 项目下每次点开文件都是 N 个目录的网络往返刷新。
+  const activeFileRef = useRef<ActiveWorkspaceFile | null>(activeFile);
+  activeFileRef.current = activeFile;
 
   // BLOCK-89 / UI-378 — 文件操作（右键菜单 + 拖拽）状态
   const [menuTarget, setMenuTarget] = useState<FileTreeMenuTarget | null>(null);
@@ -135,9 +141,12 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     setLoading(false);
     setRefreshVersion((value) => value + 1);
 
-    if (!activeFile?.path) return;
-    const segments = activeFile.path.split('/').filter(Boolean);
-    const fileName = segments.pop() || activeFile.name;
+    // UI-399 — 活动文件签名对账读 ref（闭包版依赖 activeFile 使本函数身份
+    // 随切换文件变化，曾导致每次点开文件整树重拉，见上方 activeFileRef 注释）。
+    const currentFile = activeFileRef.current;
+    if (!currentFile?.path) return;
+    const segments = currentFile.path.split('/').filter(Boolean);
+    const fileName = segments.pop() || currentFile.name;
     const parent = segments.join('/');
     // 签名对账走全量（活动文件可能位于分页尾部之外，截断会造成假 missing）
     const entries = await fetchDir(parent);
@@ -150,7 +159,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     if (forcePreview || (previous !== null && previous !== signature)) {
       setPreviewVersion((value) => value + 1);
     }
-  }, [activeFile?.name, activeFile?.path, fetchDir, fetchDirPage]);
+  }, [fetchDir, fetchDirPage]);
 
   useEffect(() => {
     activeFileSignatureRef.current = null;
@@ -169,6 +178,8 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     }
   }, [activeFile?.path]);
 
+  // UI-399 — 仅初始加载/切换项目时整树重拉并置 loading；refreshFiles 身份稳定后
+  // 此 effect 不再因切换文件重跑（此前每次点开文件都闪屏+整树重拉，ssh 下体验差）。
   useEffect(() => {
     setLoading(true);
     void refreshFiles();
@@ -178,7 +189,8 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     if (!active) return;
     void refreshFiles();
     // UI-327 加映 — SSH 远程项目不做 2s 轮询（每次都是网络往返，持续刷新造成不稳定感）；
-    // 刷新触发：初始加载 / projectWorkspaceChanged（agent 写档等）/ 手动刷新按钮。
+    // 刷新触发：面板激活 / projectWorkspaceChanged（agent 写档等）/ 手动刷新按钮。
+    // 切换文件不触发树刷新（UI-399：树没变，只有预览内容请求）。
     // 本地项目保持 2s 轮询原样（本地 fs 轮询零成本）。
     const isSsh = project.workspaceKind === 'ssh';
     let timer: number | undefined;

@@ -1,0 +1,33 @@
+{
+  "name": "ui399-tree-refresh-live",
+  "startedAt": "2026-09-17T12:51:43.150Z",
+  "finishedAt": "2026-09-17T12:51:53.919Z",
+  "assertions": [
+    {
+      "name": "V1_file_rows_present",
+      "pass": true,
+      "detail": "rows=12"
+    },
+    {
+      "name": "V2_click_file_A",
+      "pass": true,
+      "detail": "clicked:预览 cellannot.xlsx"
+    },
+    {
+      "name": "V3_click_file_B",
+      "pass": true,
+      "detail": "clicked:预览 CellChat_V2_plot.R"
+    },
+    {
+      "name": "V4_zero_tree_refetch_on_switch",
+      "pass": true,
+      "detail": "tree requests after click A=0, after click B=0（旧代码每次点击 +2~4）"
+    },
+    {
+      "name": "V5_preview_content_loaded",
+      "pass": true,
+      "detail": "content requests=2"
+    }
+  ],
+  "allPass": true
+}
