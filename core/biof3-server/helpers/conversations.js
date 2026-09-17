@@ -86,6 +86,17 @@ try {
   `);
 } catch {}
 
+/** UI-404 — 会话标题查询（智能体详情面板「父会话」标注数据源）。 */
+function getConversationTitle(conversationId) {
+  if (!conversationId) return null;
+  try {
+    const row = sqlite.prepare('SELECT title FROM copilot_conversations WHERE id=?').get(String(conversationId));
+    return row ? String(row.title || '') : null;
+  } catch {
+    return null;
+  }
+}
+
 function _newConvId() { return 'conv_' + uuidv4().slice(0, 12); }
 function _newMsgId() { return 'msg_' + uuidv4().slice(0, 12); }
 
@@ -239,6 +250,7 @@ module.exports = {
   getOrCreateActiveConversation,
   appendMessageToConversation,
   getAssistantMessageByTaskId,
+  getConversationTitle,
   _maybeAutoTitleConversation,
   _maybeDetectTopicShift,
 };

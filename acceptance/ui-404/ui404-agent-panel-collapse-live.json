@@ -1,0 +1,38 @@
+{
+  "name": "ui404-agent-panel-collapse",
+  "startedAt": "2026-09-17T23:06:56.861Z",
+  "finishedAt": "2026-09-17T23:09:04.270Z",
+  "assertions": [
+    {
+      "name": "V1_composer_typed",
+      "pass": true,
+      "detail": "typed"
+    },
+    {
+      "name": "V2_composer_sent",
+      "pass": true,
+      "detail": "sent"
+    },
+    {
+      "name": "V3_subagent_chip_visible",
+      "pass": false,
+      "detail": "chip=false"
+    },
+    {
+      "name": "V4_terminal_actions_collapsed",
+      "pass": true,
+      "detail": "aria-expanded=false"
+    },
+    {
+      "name": "V5_timeline_count_summary",
+      "pass": true,
+      "detail": "实时工作流（工具调用时间线）· 0 次调用"
+    },
+    {
+      "name": "V6_parent_conversation_line",
+      "pass": true,
+      "detail": "父会话：任务创建失败附件首行复述"
+    }
+  ],
+  "allPass": false
+}

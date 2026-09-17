@@ -61,6 +61,7 @@ export function AgentRunPanel({
 }): React.ReactElement {
   const [runState, setRunState] = useState<RunState>('running');
   const [taskText, setTaskText] = useState('');
+  const [conversationTitle, setConversationTitle] = useState('');
   // BLOCK-93 P2 — 显式 spawn role（meta 拉取；未指定=空 → 文本推断兜底）
   const [taskRole, setTaskRole] = useState('');
   const [statusLine, setStatusLine] = useState('事件流连接中…');
@@ -71,6 +72,10 @@ export function AgentRunPanel({
   const [actionNote, setActionNote] = useState('');
   const [actionError, setActionError] = useState('');
   const [interruptArmed, setInterruptArmed] = useState(false);
+  // UI-404 — 分区折叠：运行中默认展开（时间线/中断是实时价值），终态默认收起（回看场景主展示需求+终态摘要）；
+  // 用户点击后 override 记忆本次挂载内的选择。
+  const [actionsOpenOverride, setActionsOpenOverride] = useState<boolean | null>(null);
+  const [timelineOpenOverride, setTimelineOpenOverride] = useState<boolean | null>(null);
   const [messageDraft, setMessageDraft] = useState('');
   const [messageSending, setMessageSending] = useState(false);
   const [followupDraft, setFollowupDraft] = useState('');
@@ -89,6 +94,7 @@ export function AgentRunPanel({
       .then((meta) => {
         if (!alive) return;
         setTaskText(String(meta.taskText || ''));
+        setConversationTitle(String((meta as { conversationTitle?: string }).conversationTitle || ''));
         setTaskRole(String((meta as { role?: string }).role || ''));
         setRunState(runStateFromStatus(meta.status));
       })
@@ -240,6 +246,12 @@ export function AgentRunPanel({
 
   const timelineView = useMemo(() => timeline.slice(-MAX_TIMELINE), [timeline]);
 
+  // UI-404 — 折叠派生：override ?? (运行中展开 / 终态收起)
+  const running = runState === 'running';
+  const actionsOpen = actionsOpenOverride ?? running;
+  const timelineOpen = timelineOpenOverride ?? running;
+  const failedCalls = timeline.filter((t) => t.status === 'error' || t.status === 'denied').length;
+
   return (
     <div className={styles.agentBody}>
       <div className={styles.agentStatusRow}>
@@ -247,107 +259,137 @@ export function AgentRunPanel({
         <span className={shellStyles.statusChip} data-status="done" title={`职能：${resolveAgentCategory(taskRole, taskText).label}`}>
           <span aria-hidden="true">{resolveAgentCategory(taskRole, taskText).emoji}</span>
         </span>
-        <span className={styles.agentStatusLine} title={taskText}>
-          {taskText ? taskText.replace(/\s+/g, ' ').trim().slice(0, 40) : `Agent ${runId.slice(0, 8)}`}
+        <span className={styles.agentTaskTextFull} title={taskText}>
+          {taskText ? taskText.replace(/\s+/g, ' ').trim() : `Agent ${runId.slice(0, 8)}`}
         </span>
         <span className={shellStyles.statusChip} data-status={runState === 'running' ? 'running' : runState === 'failed' ? 'failed' : 'done'}>
           {STATE_LABEL[runState]}
         </span>
         <span className={styles.agentStatusLine}>{statusLine}</span>
+        {(conversationTitle || taskText) && (
+          <span className={styles.agentParentLine} data-testid="agent-parent-conversation">
+            父会话：{conversationTitle || '（未命名会话）'}
+          </span>
+        )}
       </div>
       {streamError && <div className={styles.loadError} role="alert">事件流断开：{streamError}</div>}
       {errorText && <div className={styles.loadError} role="alert">{errorText}</div>}
       {actionNote && <div className={styles.drillNote} role="status">{actionNote}</div>}
       {actionError && <div className={styles.loadError} role="alert">{actionError}</div>}
 
-      {/* BLOCK-65 P1-a — 交互区 */}
+      {/* BLOCK-65 P1-a — 交互区（UI-404：终态默认收起，运行中默认展开；点击标题切换） */}
       <section className={styles.agentSection} data-testid="agent-run-actions">
-        <h3 className={styles.agentSectionTitle}>操作</h3>
-        <div className={styles.actionBar}>
-          {runState === 'running' && (
-            interruptArmed ? (
-              <button
-                type="button"
-                className={styles.cancelArmBtn}
-                onClick={() => void handleInterrupt()}
-                title="再次点击确认中断（3 秒后自动还原）；级联覆盖该 agent 派生链"
-              >
-                确认中断？
-              </button>
-            ) : (
-              <button
-                type="button"
-                className={styles.actionBtn}
-                onClick={() => setInterruptArmed(true)}
-              >
-                中断
-              </button>
-            )
-          )}
-        </div>
-        {runState === 'running' && (
-          <div className={styles.composer}>
-            <textarea
-              className={styles.composerInput}
-              value={messageDraft}
-              onChange={(e) => setMessageDraft(e.target.value)}
-              placeholder="给这个 agent 留言（队列语义：运行中不即时注入，将在「继续派」续派时作为上下文注入）"
-              rows={2}
-            />
-            <button
-              type="button"
-              className={styles.actionBtn}
-              disabled={!messageDraft.trim() || messageSending}
-              onClick={() => void handleSendMessage()}
-            >
-              {messageSending ? '入队中…' : '留言'}
-            </button>
-          </div>
-        )}
-        {(runState === 'done' || runState === 'failed' || runState === 'cancelled') && (
-          <div className={styles.composer}>
-            <textarea
-              className={styles.composerInput}
-              value={followupDraft}
-              onChange={(e) => setFollowupDraft(e.target.value)}
-              placeholder="追加新任务（基于前情续派：沿用父链 / 模型 / 权限，成功后右栏切换到新任务）"
-              rows={2}
-            />
-            <button
-              type="button"
-              className={styles.actionBtn}
-              disabled={!followupDraft.trim() || followupSending}
-              onClick={() => void handleFollowup()}
-            >
-              {followupSending ? '续派中…' : '继续派'}
-            </button>
-          </div>
+        <button
+          type="button"
+          className={styles.agentSectionToggle}
+          aria-expanded={actionsOpen}
+          onClick={() => setActionsOpenOverride(!actionsOpen)}
+        >
+          <Icon name={actionsOpen ? 'chevron-down' : 'chevron-right'} size={12} />
+          <h3 className={styles.agentSectionTitle}>操作</h3>
+        </button>
+        {actionsOpen && (
+          <>
+            <div className={styles.actionBar}>
+              {runState === 'running' && (
+                interruptArmed ? (
+                  <button
+                    type="button"
+                    className={styles.cancelArmBtn}
+                    onClick={() => void handleInterrupt()}
+                    title="再次点击确认中断（3 秒后自动还原）；级联覆盖该 agent 派生链"
+                  >
+                    确认中断？
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.actionBtn}
+                    onClick={() => setInterruptArmed(true)}
+                  >
+                    中断
+                  </button>
+                )
+              )}
+            </div>
+            {runState === 'running' && (
+              <div className={styles.composer}>
+                <textarea
+                  className={styles.composerInput}
+                  value={messageDraft}
+                  onChange={(e) => setMessageDraft(e.target.value)}
+                  placeholder="给这个 agent 留言（队列语义：运行中不即时注入，将在「继续派」续派时作为上下文注入）"
+                  rows={2}
+                />
+                <button
+                  type="button"
+                  className={styles.actionBtn}
+                  disabled={!messageDraft.trim() || messageSending}
+                  onClick={() => void handleSendMessage()}
+                >
+                  {messageSending ? '入队中…' : '留言'}
+                </button>
+              </div>
+            )}
+            {(runState === 'done' || runState === 'failed' || runState === 'cancelled') && (
+              <div className={styles.composer}>
+                <textarea
+                  className={styles.composerInput}
+                  value={followupDraft}
+                  onChange={(e) => setFollowupDraft(e.target.value)}
+                  placeholder="追加新任务（基于前情续派：沿用父链 / 模型 / 权限，成功后右栏切换到新任务）"
+                  rows={2}
+                />
+                <button
+                  type="button"
+                  className={styles.actionBtn}
+                  disabled={!followupDraft.trim() || followupSending}
+                  onClick={() => void handleFollowup()}
+                >
+                  {followupSending ? '续派中…' : '继续派'}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </section>
 
       <section className={styles.agentSection}>
-        <h3 className={styles.agentSectionTitle}>实时工作流（工具调用时间线）</h3>
-        {timelineView.length === 0 ? (
-          <div className={styles.empty}>暂无工具调用记录。</div>
-        ) : (
-          <ul className={styles.timeline}>
-            {timelineView.map((item) => (
-              <li key={item.key} className={styles.timelineRow} data-status={item.status}>
-                <span className={styles.timelineDot} data-status={item.status} />
-                <code className={styles.timelineName}>{item.name}</code>
-                <span className={styles.timelineStatus}>
-                  {item.status === 'running'
-                    ? '运行中'
-                    : item.status === 'error'
-                      ? '失败'
-                      : item.status === 'denied'
-                        ? '已拒绝'
-                        : '完成'}
-                  {typeof item.durationMs === 'number' ? ` · ${(item.durationMs / 1000).toFixed(1)}s` : ''}
-                </span>
-              </li>
-            ))}
-          </ul>
+        <button
+          type="button"
+          className={styles.agentSectionToggle}
+          aria-expanded={timelineOpen}
+          onClick={() => setTimelineOpenOverride(!timelineOpen)}
+        >
+          <Icon name={timelineOpen ? 'chevron-down' : 'chevron-right'} size={12} />
+          <h3 className={styles.agentSectionTitle} data-testid="agent-timeline-title">
+            实时工作流（工具调用时间线）· {timeline.length} 次调用
+            {failedCalls > 0 ? ` · ${failedCalls} 异常` : ''}
+          </h3>
+        </button>
+        {timelineOpen && (
+          timelineView.length === 0 ? (
+            <div className={styles.empty}>暂无工具调用记录。</div>
+          ) : (
+            <ul className={styles.timeline}>
+              {timelineView.map((item) => (
+                <li key={item.key} className={styles.timelineRow} data-status={item.status}>
+                  <span className={styles.timelineDot} data-status={item.status} />
+                  <code className={styles.timelineName}>{item.name}</code>
+                  <span className={styles.timelineStatus}>
+                    {item.status === 'running'
+                      ? '运行中'
+                      : item.status === 'error'
+                        ? '失败'
+                        : item.status === 'denied'
+                          ? '已拒绝'
+                          : '完成'}
+                    {typeof item.durationMs === 'number' ? ` · ${(item.durationMs / 1000).toFixed(1)}s` : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )
         )}
       </section>
       <section className={styles.agentSection}>

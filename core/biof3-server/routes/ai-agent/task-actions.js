@@ -15,6 +15,7 @@ const resilienceMod = require('../../helpers/agent-resilience');
  */
 
 const agentTaskStore = require('../../agent-task-store');
+const conversationHelper = require('../../helpers/conversations');
 const { queueUserMessage, launchUserFollowup } = require('../../agent-tools/spawn-agent-tools');
 const db = require('../../db').getAsyncDatabase();
 
@@ -110,6 +111,9 @@ module.exports = {
           taskText: String((task.params && task.params.messages && task.params.messages[0] && task.params.messages[0].content) || '').slice(0, 200),
           ...(task.params && task.params.role ? { role: task.params.role } : {}),
           conversationId: (task.params && task.params.conversationId) || null,
+          conversationTitle: conversationHelper.getConversationTitle(
+            (task.params && task.params.conversationId) || null
+          ),
           parentTaskId: (task.params && task.params.parentTaskId) || null,
           createdAt: task.createdAt,
           finishedAt: task.finishedAt,

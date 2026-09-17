@@ -261,8 +261,9 @@
 
 .agentStatusRow {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 4px 10px;
 }
 
 .agentStatusLine {
@@ -347,4 +348,38 @@
   word-break: break-word;
   max-height: 40vh;
   overflow: auto;
+}
+
+/* UI-404 — 智能体详情面板：分区折叠 + 任务全文 + 父会话标注 */
+.agentSectionToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  margin: -2px -6px 0;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.agentSectionToggle:hover {
+  background: var(--gewu-hover, rgba(127, 127, 127, 0.12));
+}
+
+.agentTaskTextFull {
+  flex: 1 1 100%;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--gewu-text-primary, inherit);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.agentParentLine {
+  flex: 1 1 100%;
+  font-size: 11px;
+  color: var(--gewu-text-tertiary, inherit);
 }
