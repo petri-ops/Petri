@@ -226,7 +226,9 @@ module.exports = {
             incomingMessages: messages,
             adb: adbLocal,
           });
-          if (isSessionCompactionEnabled(process.env)) {
+          // BLOCK-98 M2 — resilience 总开关开启时同样进入（独立于 B2 开关；
+          // 阈值/摘要/视图文案由 conversation-compaction 内部按模式切换）。
+          if (isSessionCompactionEnabled(process.env) || require('../../helpers/agent-resilience').isResilienceEnabled(process.env)) {
             try {
               const sqliteLocal = dbMod.getDatabase();
               const compactionRow = sqliteLocal.prepare('SELECT * FROM conversation_compaction WHERE conversation_id=?').get(_convIdForAssembly) || null;
@@ -242,9 +244,13 @@ module.exports = {
                   const lastRow = assembledRows[assembledRows.length - 1];
                   if (lastRow.content !== original) lastRow.content = original;
                 }
-                effectiveMessages = applyCompactionView(assembledRows, compactionRow);
+                const agentResilience = require('../../helpers/agent-resilience');
+                effectiveMessages = applyCompactionView(assembledRows, compactionRow, {
+                  resilienceEnabled: agentResilience.isResilienceEnabled(process.env),
+                  transcriptPath: agentResilience.transcriptPathFor(_convIdForAssembly),
+                });
               }
-              maybeCompactInBackground({ userId, conversationId: _convIdForAssembly, sqlite: sqliteLocal });
+              maybeCompactInBackground({ userId, conversationId: _convIdForAssembly, sqlite: sqliteLocal, presetId: modelPresetId });
             } catch (e) {
               try { console.warn('[block95-b2] compaction view skipped:', e && e.message); } catch {}
             }

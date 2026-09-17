@@ -13,6 +13,8 @@
  * messages 与 copilot_messages 原文永不触碰（BLOCK-95 §4 原则 1 延续）。
  */
 
+const os = require('os');
+const path = require('path');
 const RESILIENCE_ENV = 'BIOF3_AGENT_RESILIENCE';
 const MICROCOMPACT_PLACEHOLDER = '[已折叠：旧工具结果已按上下文管理清理]';
 // 组内工具结果条数下限：ZCode 原文「连续 ≥5 条」按其存储格式（工具结果连排）
@@ -136,6 +138,53 @@ function maybeMicrocompactBody(body, ctx = {}) {
   };
 }
 
+// ── M2：auto-compact 升级（阈值公式化 + 9 章节摘要模板 + 转写路径）──────────
+
+const MAX_OUTPUT_RESERVE_CAP = 21000;
+const BUFFER_ABS = 13000;
+const BUFFER_RATIO = 0.08;
+
+/**
+ * D3 阈值公式：有效窗口 = 窗口 − min(maxOutput, 21K)；压缩阈值 = 有效窗口 −
+ * min(13K, 8%×有效窗口)（小窗口模型 buffer 缩放，ZCode 200K 常数不硬抄）。
+ * @returns {{effectiveWindow:number, buffer:number, threshold:number}|null}
+ */
+function planThreshold(contextWindow, maxOutput) {
+  const window = Number(contextWindow) || 0;
+  if (window <= 0) return null;
+  const effectiveWindow = Math.max(0, window - Math.min(Number(maxOutput) || 0, MAX_OUTPUT_RESERVE_CAP));
+  const buffer = Math.min(BUFFER_ABS, Math.round(effectiveWindow * BUFFER_RATIO));
+  return { effectiveWindow, buffer, threshold: Math.max(0, effectiveWindow - buffer) };
+}
+
+/** 转写文件路径（BLOCK-37 llm-transcripts 家族；id 白名单同源校验）。 */
+function transcriptPathFor(conversationId, dataDir) {
+  const id = String(conversationId || '');
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(id)) return null;
+  const dir = dataDir
+    || process.env.BIOF3_LOCAL_DATA_DIR
+    || path.join(os.homedir(), 'Documents', 'BioF3-Local');
+  return path.join(dir, `${id}.jsonl`);
+}
+
+/** M2 摘要系统提示词：9 章节结构化 + 安全指令逐字保留 + 禁工具（D2）。 */
+const SUMMARY_NINE_SECTION_PROMPT = [
+  '你是会话上下文压缩助手。把较早的对话折叠成结构化中文摘要，供后续对话作为唯一背景继续任务。要求：',
+  '1. 先输出 <analysis> 段做简短分析（不超过 150 字），再输出 <summary> 正文。',
+  '2. <summary> 必须包含以下 9 个编号章节（无内容的章节写「无」）：',
+  '①用户原始请求与意图；②关键技术概念与实体（文件/参数/数据集/模型名）；③文件与代码段（关键路径与片段原样保留）；④错误与修复（尤其用户纠正过的行为，逐字引用用户纠正）；⑤问题求解过程；⑥全部用户消息清单（逐条列出）；⑦待办任务（未完成项）；⑧压缩前一刻正在做什么；⑨下一步（必须与用户最近的请求直接对齐，防止任务漂移）。',
+  '3. 安全相关指令（如有）必须逐字保留，不得改写或省略。',
+  '4. 只输出文本，禁止调用任何工具。全文不超过 1200 字。',
+].join('\n');
+
+/** 续接纪律 + 转写指针（压缩后首条摘要消息的追加行，D2）。 */
+function continuationLines(transcriptPath) {
+  const lines = [];
+  if (transcriptPath) lines.push(`全文模型 I/O 转写（用户与审计可回查）：${transcriptPath}`);
+  lines.push('续接纪律：请从中断处直接继续当前任务——不要复述或确认本摘要，像对话从未中断一样继续。');
+  return lines.join('\n');
+}
+
 module.exports = {
   RESILIENCE_ENV,
   MICROCOMPACT_PLACEHOLDER,
@@ -146,4 +195,8 @@ module.exports = {
   toolGroups,
   microcompactMessages,
   maybeMicrocompactBody,
+  planThreshold,
+  transcriptPathFor,
+  SUMMARY_NINE_SECTION_PROMPT,
+  continuationLines,
 };
