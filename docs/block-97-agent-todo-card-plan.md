@@ -2,7 +2,7 @@
 
 最后更新：2026-09-17
 
-状态：`active（2026-09-17 启动，用户裁决原话「接下来开整 BLOCK-97 智能体待办卡」；P0 复核完成、D1-D4 按 §4 预置推荐落定，P1 后端进行中）`
+状态：`completed（2026-09-17 P0-P3 一次会话整包收口；实机 10/10 allPass；用户裁决启动原话「接下来开整 BLOCK-97 智能体待办卡」；UI-398 verified）`
 
 计划编号：`BLOCK-97-AGENT-TODO-CARD`
 
@@ -75,3 +75,11 @@
 ## 7. 完成语义
 
 整包 `completed` = P0-P3 全收口 + 实机证据落 `acceptance/block-97/` + UI-### 台账行实机边界内 verified + roadmap/registry 回写；未启动工作面必须经用户显式裁决 `deferred` 并回写状态头，不允许「半拆无主」状态跨包存续。
+
+## 8. 收口记录（2026-09-17，P0–P3 一次会话）
+
+- **提交链**：5dc9b0ad（启动登记+P0 结论）→ 5552e68f（P1 后端）→ c6f8c463（P2 前端+UI-398 登记）→ 8bf67dd1（scratch 清理）→ 683925d1（P3 实机+抓真修复+机制）→ 本收口提交（台账/plan/registry/roadmap/AUDIT-LOG 回写）。期间并行会话插入 13a0bfda（BLOCK-98 立项 planned，零触碰本包文件面）。
+- **验收对账（plan §5 门禁逐项）**：P1 契约 block97-agent-todo 6/6 + registry/policy/input-validation/agent-run-tool/block34 五套件 51 过 2 skip（live 常态）；P2 WorkspaceSummaryCard 19 + conversationRunStore 45 + 邻接 98/98 + tsc 0 + theme-token-contract 4/4；P3 实机 `scripts/block97-todo-live.cjs` **10/10 allPass**（`acceptance/block-97/block97-todo-live-live.json` + 三截图）；行数棘轮 PASS（总 22211 ≤ 基线 33296，本包净增≤80 行且渲染下沉独立子组件）。
+- **实机抓真 3 件（当日修复，细节见 UI-398 台账）**：emitToolResult 死参→emitAssistant 双挂；useSyncExternalStore 空态快照恒新数组→白屏（EMPTY 常量修复）；block93-role-prompt mock server 句柄泄漏拖死聚合批（存量，bisect 54337ca5 归因非本包）→ server.close + `--test-force-exit`/`--test-timeout=120000` 入 test-affected 永久免挂。
+- **聚合 test:changed 取舍（如实登记）**：完整 45 套件聚合在本会话因上述存量挂起 bug 两次中断（28 分钟零 CPU）；修复机制后未重跑全量聚合——定向覆盖=block97/registry/policy/agent-run-tool/block34/role-prompt/roles/system-prompt/input-validation 九件套全绿 + 前端受影响面 98/98；loop 族等机械并集搭车面留给下轮 closeout/CI（g0-rs-p6 源绑定 D8 例外按 BLOCK-82/91/93 先例预期归属：agent-runner.js 合法变更触发 stored_hash 漂移，重采归 G0-RS）。
+- **遗留候选**：会话流内嵌 todo 卡（非范围，另立 UI-### 需裁决）；摘要卡任务清单历史回看（已完结会话重载不显示，plan §3 语义）；独立表 copilot_todos（若未来需要跨重启直查）。G0 开发期常态 · 不外推 packaged/Provider/GA。

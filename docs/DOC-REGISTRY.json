@@ -4607,13 +4607,13 @@
       "id": "BLOCK-97-AGENT-TODO-CARD",
       "path": "docs/block-97-agent-todo-card-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-97-agent-todo-card",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-17",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P1-BACKEND",
+      "phase": "COMPLETED",
       "tags": [
         "block-97",
         "agent-todo",
@@ -4622,7 +4622,7 @@
         "sse",
         "workspace-ui"
       ],
-      "notes": "Agent 任务清单（todo）工具+摘要卡实时渲染。2026-09-17 启动 active（用户裁决「接下来开整 BLOCK-97 智能体待办卡」），P0 复核完成（行号重定位 HEAD 54337ca5 漂移极小 + 新增承重事实：_emit 双通道/emitToolResult 包裹发射位/afterSeq=0 重放可重建）+ D1-D4 按预置推荐落定（D1=task_events 事件重放、D2=专用 task_todo 事件、D3 不做、D4=UI-398），结论回写 plan §1/§4。三件套=todo_write 内部工具（agent-tools 范本 BLOCK-55 plan 工具）+ 系统提示词注入使用纪律 + 摘要卡「任务清单」节；事件管道零新增；不改 BLOCK-55 审批流；0 新依赖。"
+      "notes": "Agent 任务清单（todo）工具+摘要卡实时渲染。2026-09-17 整包 completed（P0-P3 一次会话）：todo_write 整单幂等工具（planning/state-write/R1）+ task_todo 专用事件（emitAssistant 通道）+ 提示词纪律注入 + 摘要卡「任务清单」节（conversationTodos 会话级存储，终态保留下一轮清除）；实机 block97-todo-live 10/10 allPass（真轮次 todo_write×5、三态实时勾选、重放逐字节一致）；UI-398 verified；实机抓真 3 件修复（emitToolResult 死参/useSyncExternalStore 空态快照白屏/block93-role-prompt 句柄泄漏拖死聚合批→--test-force-exit 机制）。2026-09-17 曾启动 active（用户裁决「接下来开整 BLOCK-97 智能体待办卡」），P0 复核完成（行号重定位 HEAD 54337ca5 漂移极小 + 新增承重事实：_emit 双通道/emitToolResult 包裹发射位/afterSeq=0 重放可重建）+ D1-D4 按预置推荐落定（D1=task_events 事件重放、D2=专用 task_todo 事件、D3 不做、D4=UI-398），结论回写 plan §1/§4。三件套=todo_write 内部工具（agent-tools 范本 BLOCK-55 plan 工具）+ 系统提示词注入使用纪律 + 摘要卡「任务清单」节；事件管道零新增；不改 BLOCK-55 审批流；0 新依赖。"
     },
     {
       "id": "BLOCK-98-AGENT-RESILIENCE",
