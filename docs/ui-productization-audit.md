@@ -3349,11 +3349,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
-## UI-394: 会话信息流三件——长会话游标加载 + 回到底部浮标 + 话题小节分隔 (2026-09-17 in_progress，dev Electron 实机验证中)
+## UI-394: 会话信息流四件——长会话游标加载 + 回到底部浮标 + 话题小节分隔 + 压缩诚实标记卡 (2026-09-17 verified，dev Electron 边界内；用户复看截图确认「好的 按照你的建议来」)
 
 - **来源**：BLOCK-95-SESSION-IO P1（用户裁决原话「需要新建一个block用来优化 信息流 I/O 主要目的是让每个session的连贯性好看易读 还有一个方面是性能 省token」+ 队列序启动裁决「1 · BLOCK-95 会话 I/O」）。
 - **交付面**：① A1 长会话游标加载——messages 端点默认窗口翻转为「最新 limit 条」（修复 ASC+LIMIT 拿最旧 200 条、长会话看不到最近消息的真缺陷），rowid keyset 游标（fork 同 ts 会话 ts 游标会丢页）+ hasMore/nextBefore/windowOffset 信封；前端 useConversationResume 主加载走分页信封 + loadOlder 向上补页（prepend 后视口位置保持）+ 对账/镜像重建链 mergeKeepOlderPrefix 保留已加载旧页；windowOffset 顺带修复 fork-from-message 长会话 index 错位（现存缺陷顺手销号）。② A3 滚动守卫——用户上翻距底 >120px 即暂停自动滚底，浮标「回到底部」（锚定输入区顶缘 bottom:100%）一键回底恢复跟随；发送消息/切换会话视为回底意图。③ A4 话题小节分隔——接通断裂的 topic_shift 前端消费链（onTopicShift 原无人订阅、dismissTopicShift 原无调用方）：conversationRunStore 转发 SSE 事件 → gewu 事件总线 → SimpleChat 分隔卡渲染（持久真值=DB last_topic_shift_at，会话切换后由列表行重建）。
-- **证据**：契约 test/block95-messages-cursor.test.mjs 4/4（最新窗口翻转/游标两批拼接全量不重不漏/fork 同 ts 分页/404+limit 钳制）+ useConversationResume 6/6（分页信封/loadOlder prepend/mergeKeepOlderPrefix 保留前缀）+ copilot 全套 37 文件 293 过 + tsc 0 + theme-token-contract 4/4（新样式全 --gewu-* token）；实机 scripts/block95-p1-live.cjs **8/8 allPass**（250 条真会话：首屏=最新窗口 B95消息-50 / 补页后首条=B95消息-0 且 250 条全量可达 / 视口保持 scrollTop=3205 不归零 / 回底浮标现+点+消失 / 分隔卡位置=B95消息-162 前），证据 acceptance/block-95/（json+2 截图）。**实机抓真修**：prepend 视口保持 rAF 早于 React commit 致 delta 恒 0 → 改 useLayoutEffect（commit 后绘制前同步调整）。
+- **证据**：契约 test/block95-messages-cursor.test.mjs 4/4（最新窗口翻转/游标两批拼接全量不重不漏/fork 同 ts 分页/404+limit 钳制）+ useConversationResume 6/6（分页信封/loadOlder prepend/mergeKeepOlderPrefix 保留前缀）+ copilot 全套 37 文件 293 过 + tsc 0 + theme-token-contract 4/4（新样式全 --gewu-* token）；用户复看四截图（首屏最新窗口/回底浮标/话题卡/压缩卡，Temp gewu-probe/shots/block95/）确认通过；实机 scripts/block95-p1-live.cjs **8/8 allPass**（250 条真会话：首屏=最新窗口 B95消息-50 / 补页后首条=B95消息-0 且 250 条全量可达 / 视口保持 scrollTop=3205 不归零 / 回底浮标现+点+消失 / 分隔卡位置=B95消息-162 前），证据 acceptance/block-95/（json+2 截图）。**实机抓真修**：prepend 视口保持 rAF 早于 React commit 致 delta 恒 0 → 改 useLayoutEffect（commit 后绘制前同步调整）。
 - **附带抓真**：useConversationResume 主加载 effect deps 含调用方 setter（不稳定引用时 effect 重跑→setState→重渲染→死循环），deps 收窄 [conversationId] + setter 经 ref 读取。
 - **边界**：A2 渲染性能/B4/B5 归 P5；实机长会话真轮次已随 P1 收口（8/8）。
 - **P5 增补（A2，同条目 UI-394）**：displayMessages 派生链 useMemo 化（composer keystroke/菜单开合不再全量重拼 250+ 条）；实机流式观测 25s 窗口 recalc+layout≈0ms、script 303.8ms（1.2%）、DOM 1985 节点——虚拟化有据 deferred。
