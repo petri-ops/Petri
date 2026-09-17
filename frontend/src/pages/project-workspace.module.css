@@ -3626,7 +3626,7 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   gap: 7px;
   min-height: 30px;
   padding: 3px 12px 5px;
-  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  border-top: 1px solid var(--gewu-border);
   background: var(--gewu-bg-terminal);
   color: var(--gewu-text-terminal-prompt);
   font: var(--gewu-font-size-sm) var(--gewu-font-mono, monospace);

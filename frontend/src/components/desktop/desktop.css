@@ -46,7 +46,7 @@
 }
 
 [data-theme='dark'] .gewu-desktop-dock {
-  border-right-color: rgba(148, 163, 184, 0.15);
+  border-right-color: rgba(230, 237, 243, 0.08);
 }
 
 /* ---- dock 底部固定项（主题切换 + 收缩 toggle） ---- */
@@ -90,7 +90,7 @@
   color: var(--gewu-text-tertiary);
 }
 [data-theme='dark'] .gewu-desktop-dock__toggle:hover {
-  background: rgba(148, 163, 184, 0.12);
+  background: rgba(230, 237, 243, 0.06);
   color: var(--gewu-mint-bright);
 }
 
@@ -139,7 +139,7 @@
 }
 
 [data-theme='dark'] .gewu-desktop-dock__btn:hover {
-  background: rgba(148, 163, 184, 0.12);
+  background: rgba(230, 237, 243, 0.06);
   color: var(--gewu-mint-bright);
 }
 
@@ -215,7 +215,7 @@
 }
 
 [data-theme='dark'] .gewu-desktop-workarea {
-  border-right-color: rgba(148, 163, 184, 0.15);
+  border-right-color: rgba(230, 237, 243, 0.08);
   box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
 }
 
@@ -1188,10 +1188,10 @@
 
 [data-theme='dark'] .gewu-btn--ghost {
   color: var(--gewu-text-tertiary, var(--gewu-border-strong));
-  border-color: rgba(148, 163, 184, 0.3);
+  border-color: rgba(230, 237, 243, 0.15);
 }
 [data-theme='dark'] .gewu-btn--ghost:hover:not(:disabled) {
-  background: rgba(148, 163, 184, 0.12);
+  background: rgba(230, 237, 243, 0.06);
 }
 
 .gewu-btn--danger-ghost {
@@ -1983,7 +1983,7 @@
 }
 
 .gewu-nav-item:hover {
-  background: rgba(148, 163, 184, 0.08);
+  background: rgba(230, 237, 243, 0.04);
   color: var(--gewu-text);
 }
 
@@ -2009,7 +2009,7 @@
 }
 
 .gewu-nav-item__arrow {
-  color: rgba(148, 163, 184, 0.92);
+  color: rgba(139, 152, 173, 0.92);
   flex-shrink: 0;
   transition: color 0.15s ease;
 }
@@ -2020,7 +2020,7 @@
 
 /* dark */
 .gewu-nav-panel .gewu-desktop-panel__header {
-  border-bottom-color: rgba(148, 163, 184, 0.14);
+  border-bottom-color: rgba(230, 237, 243, 0.07);
 }
 
 .gewu-nav-panel .gewu-desktop-panel__title,
@@ -2033,7 +2033,7 @@
 }
 
 .gewu-nav-panel .gewu-desktop-panel__close:hover {
-  background: rgba(148, 163, 184, 0.12);
+  background: rgba(230, 237, 243, 0.06);
   color: var(--gewu-text);
 }
 
@@ -2184,7 +2184,7 @@
   color: #ffffff;
 }
 [data-theme='dark'] .gewu-onboarding__step-icon {
-  background: rgba(148, 163, 184, 0.15);
+  background: rgba(230, 237, 243, 0.08);
 }
 
 /* 步骤内容 */
@@ -2437,7 +2437,7 @@ html.gewu-desktop.gewu-desktop-docs-sidebar-open #gewu-docs-sidebar-host {
 }
 [data-theme='dark'] #gewu-docs-sidebar-host {
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
-  border-right-color: rgba(148, 163, 184, 0.2);
+  border-right-color: rgba(230, 237, 243, 0.1);
 }
 
 /* host 内的 DocSidebar 去掉原 aside 的固定宽高/负 margin，撑满 host */

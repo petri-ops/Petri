@@ -3356,6 +3356,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **修复（系统性，改 token 不改组件）**：custom.css 暗色 --gewu-hover → rgba(230,237,243,0.07)、--gewu-surface-hover → rgba(230,237,243,0.09)（navy 同族提亮，41 处 hover 全部对齐）；global.css 暗色 --gewu-surface-dim → var(--gewu-bg-surface) 消除双暗底。亮色模式不动。
 - **证据**：实测新 hover 合成色 #20293C（navy 同族克制提亮）vs 旧 #263043（发灰）；theme-token-contract 1/1；CDP 实机截图对照（Temp 对比图，acceptance 不留）。token 热更经 Vite HMR 实证。
 - **边界**：亮色模式零改动；不改任何组件结构；hover 语义（灰阶提亮而非 teal 强调，teal 保留给选中态）不变。G0 开发期常态 · 不外推 packaged/Provider/GA.
+- **追加（用户裁决「保持一致 统一改为海军蓝家族」）**：全仓 slate 残留清扫 17 处——desktop.css 遗留 dock/面板 12 处 rgba(148,163,184,α)→rgba(230,237,243,α/2) 白蓝同族（0.92 文字→#8b98ad tertiary）；LoginModal 暗色 tabs 边框 #334155→var(--gewu-border-strong)；终端输入行分隔线→var(--gewu-border)；--gewu-user-bubble-bg→rgba(230,237,243,0.06)；global.css --ifm-background-* #0f172a→var(--gewu-bg-surface)。终检零 slate 残留；token 契约 1/1；活体 token 复核 hover/bubble/surface-dim 全部 navy 族。
 
 ## UI-391: BLOCK-92 Wave A copilot 族巨型文件模块化拆分（纯重构零行为变化）(2026-09-16 in_progress，dev Electron 边界内)
 

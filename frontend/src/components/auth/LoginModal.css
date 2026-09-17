@@ -120,7 +120,7 @@
 }
 
 [data-theme='dark'] .gewu-login-modal__tabs {
-  border-bottom-color: #334155;
+  border-bottom-color: var(--gewu-border-strong);
 }
 
 .gewu-login-modal__tab {

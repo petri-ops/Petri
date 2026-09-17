@@ -246,7 +246,7 @@
  --gewu-status-warning-border: rgba(251, 191, 36, 0.3);
  --gewu-accent-border: rgba(45, 212, 191, 0.4);
  --gewu-accent-surface: rgba(45, 212, 191, 0.12);
- --gewu-user-bubble-bg: rgba(148, 163, 184, 0.12);
+ --gewu-user-bubble-bg: rgba(230, 237, 243, 0.06);
   --gewu-accent-orange: #fb923c;
   --gewu-accent-orange-bg: rgba(251, 146, 60, 0.16);
   /* ===== UI-155 / 合并后暴露的 theme-token-contract 缺口（dark 适配） ===== */
