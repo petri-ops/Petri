@@ -1,12 +1,12 @@
 {
   "name": "ui341-welcome-chat",
-  "startedAt": "2026-09-17T00:37:24.661Z",
-  "finishedAt": "2026-09-17T00:38:05.891Z",
+  "startedAt": "2026-09-17T00:56:33.221Z",
+  "finishedAt": "2026-09-17T00:57:00.946Z",
   "assertions": [
     {
       "name": "A1_welcome_rendered",
       "pass": true,
-      "detail": "url=http://localhost:3000/?project=p_mu4svz5u_72mb"
+      "detail": "url=http://localhost:3000/?project=p_mu4tkld9_kv7t"
     },
     {
       "name": "A2_chat_embedded",
@@ -21,28 +21,43 @@
     {
       "name": "A4_project_preselected",
       "pass": true,
-      "detail": "trigger=UI341-验收-1789605466044"
+      "detail": "trigger=UI341-验收-1789606614566"
     },
     {
       "name": "A5_first_question_navigates",
       "pass": true,
-      "detail": "url=http://localhost:3000/project/p_mu4svz5u_72mb"
+      "detail": "url=http://localhost:3000/project/p_mu4tkld9_kv7t"
     },
     {
       "name": "A6_conversation_auto_created",
       "pass": true,
-      "detail": "convId=conv_23c293db-197 title=新对话 project=p_mu4svz5u_72mb"
+      "detail": "convId=conv_9afdee77-ee3 title=新对话 project=p_mu4tkld9_kv7t"
+    },
+    {
+      "name": "A7_left_panel_shows_conv",
+      "pass": true,
+      "detail": "leftPanel contains conversation title (was present)"
+    },
+    {
+      "name": "A8_assistant_reply_via_sse",
+      "pass": true,
+      "detail": "assistant=收到"
+    },
+    {
+      "name": "A8b_workspace_chat_shows_transcript",
+      "pass": true,
+      "detail": "首问与回复均渲染于工作区聊天区"
+    },
+    {
+      "name": "A8c_composer_cleared_after_send",
+      "pass": true,
+      "detail": "composer value=\"\""
     },
     {
       "name": "A9_cleanup_restored",
       "pass": true,
       "detail": "conv=true project=true restored=true"
-    },
-    {
-      "name": "flow_completed_without_exception",
-      "pass": false,
-      "detail": "poll_timeout: left_panel_conversation :: \"UI341-验收-1789605466044devahBLOCK89-验收-1789454695634BLOCK89-验收-1789454614138BLOCK89-验收-1789454500143BLOCK89-验收-1789453847\""
     }
   ],
-  "allPass": false
+  "allPass": true
 }

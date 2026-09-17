@@ -101,7 +101,8 @@ module.exports = {
 
     try {
       // ── 临时项目 ──
-      const created = await rest('POST', '/data/projects', { name: 'UI341-验收-' + Date.now(), modality: 'general' });
+      const projectName = 'UI341-验收-' + Date.now();
+      const created = await rest('POST', '/data/projects', { name: projectName, modality: 'general' });
       if (!created.ok || !created.data || !created.data.project) throw new Error('create_project_failed: ' + JSON.stringify(created.data).slice(0, 200));
       projectId = created.data.project.id;
 
@@ -183,6 +184,17 @@ module.exports = {
         })()`).catch(() => {});
         await sleep(1200);
       }
+      // UI341-A7-ATTRIBUTION（用户裁决 1）：UI-36x 壳层左栏后新建项目节点默认
+      // 折叠，会话需点击项目行展开才入 DOM（共享缓存写入链路完好，探针实证
+      // 点击后「新对话·刚刚」立现）。基线对照已证 A7 断裂与 BLOCK-92 拆分无关
+      // （BASE 834b18a9^ 同败）。此处沿产品真实路径展开当前项目节点再断言。
+      await lib.evalJs(client, `(function(){
+        var rows = document.querySelectorAll('[class*="projectTree"] [class*="projectTreeRow"]');
+        for (var i = 0; i < rows.length; i++) {
+          if ((rows[i].textContent || '').indexOf(${JSON.stringify(projectName)}) >= 0) { rows[i].click(); return 'clicked'; }
+        }
+        return 'row_not_found';
+      })()`).catch(() => {});
       const leftOk = await poll(async () => {
         const v = await lib.evalJs(client,
           "(function(){ var el = document.querySelector('[class*=\"projectTree\"]'); return el ? el.textContent : ''; })()").catch(() => '');
