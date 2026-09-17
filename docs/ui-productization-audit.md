@@ -3349,11 +3349,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
-## UI-402: 知识空间专业化六面批次——检索溯源/预览/批量/PDF/拖拽/分页 (BLOCK-94，2026-09-18 in_progress，契约+组件测试绿、P6 实机后翻 verified)
+## UI-402: 知识空间专业化六面批次——检索溯源/预览/批量/PDF/拖拽/分页 (BLOCK-94，2026-09-18 verified，dev Electron 真实嵌入+真实模型轮次实机 18/18 allPass + 跨重启恢复)
 
 - **来源**：BLOCK-94-KNOWLEDGE-SPACE-PRO（用户裁决立项 2026-09-16「专业 易用 能力全面」+ 夜间队列授权）。
 - **交付面**：①F5 知识溯源——agent-runner 注入时发射 `knowledge_citations` 专用事件（经 _emit 持久化 task_events，重放可重建）→ agentTaskStream 分发 → 会话级存储（conversationCitations，run 终态后仍可见、下一轮清除）→ 摘要卡「知识溯源」节（WorkspaceCitationsSection：文档+块号+命中通道）；②F5 检索过滤+高亮+降级诚实化——/search docId 过滤、面板文档过滤下拉、命中 token 高亮（mark）、纯符号查询 ftsDegraded 提示不再静默；③F5 knowledge_read 工具（按文档深读分块原文，retrieval/none/R0）；④F4 文档预览（preview 端点分块全文+打开原文件）+批量删除/失败批量重试；⑤F3 拖拽上传+逐文件错误聚合+粘贴文本入库；⑥F1 面板分页「加载更多」+嵌入模型失配横幅。
-- **门禁**：knowledge 契约 33/33；agent-tool-registry 9/9（工具总数 58→59）；面板 8/8；conversationRunStore 48/48；CenterPanel 8/8；tsc 0；theme 4/4（门禁抓真：自造 --gewu-brand 未定义 token 已改回 --gewu-accent）。P6 实机（block94-knowledge live flow + 真实轮次溯源命中）后翻 verified。
+- **门禁**：knowledge 契约 33/33；agent-tool-registry 9/9（工具总数 58→59）；面板 8/8；conversationRunStore 48/48；CenterPanel 8/8；tsc 0；theme 4/4（门禁抓真：自造 --gewu-brand 未定义 token 已改回 --gewu-accent）。
+- **实机（P6，Mac dev 栈真实 DashScope 嵌入 + DeepSeek 真实模型轮次）**：`scripts/block94-knowledge-live.cjs` **18/18 allPass**（`acceptance/block-94/block94-knowledge-live-live.json` + 面板/摘要卡截图）——总览新契约/启用/文本+PDF+粘贴三路真实摄取 ready（PDF kind=pdf）/双通道真实检索（vector 0.77+fts）/docId 过滤/纯符号 ftsDegraded 诚实标注/预览分块+rawAvailable/逐文件拒绝聚合+批量删除（missing 诚实）/**真实模型轮次 task 事件流含 knowledge_citations（文档名+块号+通道）**/CDP /knowledge 面板+composer 真发后摘要卡「知识溯源」节浮动卡可见（`block94-tp53-notes.md 第 2 块 向量+全文`）。**跨重启启动恢复**：停栈→固化 embedding 中间态→重启→boot recovery 日志 requeued 1→真实嵌入重摄 ready（`block94-boot-recovery-live.json`）。
+- **台账缺口豁免**：P3 提交 `0d70f80` 触碰 UI surface 未带 UI-###（当时 UI-402 未登记），按先例并入本条目统一登记。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-401: 运行中插队消息排队可见——steer 通道前端接线 (BLOCK-98 P4，2026-09-17 verified，dev Electron 真轮次实机)

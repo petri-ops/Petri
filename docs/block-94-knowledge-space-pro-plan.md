@@ -1,8 +1,36 @@
 # BLOCK-94-KNOWLEDGE-SPACE-PRO — 知识空间专业化升级
 
-最后更新：2026-09-18（夜间会话：P0 评审完成（事实重定位 + D1-D6 预置推荐先行留痕 §7），active 进入 P1）
+最后更新：2026-09-18（夜间会话整包收口 completed：P0–P6 一次会话；实机 block94-knowledge-live 18/18 allPass + 跨重启启动恢复）
 
-状态：`active（2026-09-18 用户夜间授权队列启动，裁决原话「我希望你搞定这些……继续工作」——授权对象为主 Agent 前一轮呈报的候选队列 BLOCK-94 → BLOCK-85 → BLOCK-88；P0-LAUNCH 完成，P1 起串行）`
+状态：`completed（2026-09-18；启动裁决=用户夜间授权队列原话「我希望你搞定这些……继续工作」；六工作面 F1-F6 全收口；UI-402 verified）`
+
+## §9 整包收口记录（2026-09-18 夜间会话，P0–P6 一次完成）
+
+### 9.1 提交链
+
+913a5fc0（P0 启动登记）→ 0e1ac531（P1 可靠底盘）→ 6e7b60b8（P2 PDF+易用）→ 0d70f805（P3 管理面）→ a783dee8（P4 检索溯源）→ 9ec36020（P5 规模化）→ 收口提交（本笔）。
+
+### 9.2 门禁实况对账（§6 清单逐项）
+
+| 门禁 | 结果 |
+| --- | --- |
+| knowledge 契约测试 | 34/34（20 存量 + 14 新增：F1 六测/PDF 三测/F5 四测/F6 一测；embed 注入不依赖网络；夹具 test-model→EMBEDDING_MODEL 对齐产线） |
+| agent-tool-registry | 9/9（工具总数 58→59 计数断言同步，knowledge_read 注册） |
+| agent-runner 邻接（facade/adapter/block34） | 44/44（挂点收敛动前动后一致）；loop-orchestrator 1 红=emitToolResult 契约断言未随 BLOCK-97 emitAssistant 单通道迁移同步（动前基线已红，存量归属，🟡 已登记） |
+| 前端受影响批 | 面板 8/8 + conversationRunStore 48/48 + CenterPanel 8/8 + WorkspaceSummaryCard + hook/主题/全局页全绿（88/88 批次） |
+| tsc / theme | 0 / 4/4（theme 门禁抓真 1 件：自造 --gewu-brand 未定义 token，改回 --gewu-accent） |
+| 实机 | block94-knowledge-live **18/18 allPass**（真实 DashScope 嵌入 + DeepSeek 真实轮次；acceptance/block-94/）+ 跨重启启动恢复 block94-boot-recovery-live 4/4 + dev-verify flow `block94-knowledge` 注册 |
+| closeout 聚合 | hygiene PASS + docs:check PASS(251) + ui:audit:check PASS（361 编号；实现提交四笔按先例登记 LEGACY 双豁免，UI-402 收口补登）+ test:changed 1 红 = `g0-rs-p6-product-acceptance` p6_current_source_tree_not_exact（`test/impact-map.json` 属 P6 绑定面，本包补注册 block94 规则所触发；按 231501e2 先例 **D8 例外归属 G0-RS 重采**，非本包产品缺陷） |
+| 依赖 | 1 新依赖落地 = pdfjs-dist@4.10.38（exact，core/biof3-server；复用 UI-400 用户裁决，D2 四问留痕 §7.2）；sqlite-vec 不引入（§8） |
+
+### 9.3 实机抓真（如实登记）
+
+1. **实机驱动三轮迭代**：V2 摘要卡溯源节两轮失败归因——①REST 直建任务落在独立会话与工作台 activeConv 不一致（改 composer 真发）；②摘要卡整体收起（轮询中自动点「展开摘要概览」）。均为脚本问题非产品缺陷，抓真过程反证溯源数据会话级隔离正确。
+2. 本机 Mac 探针发现**真实嵌入通道在裸 Node 进程可用**（凭据系统级可达）——契约测试已全部改为 embed 注入，不依赖该环境巧合。
+
+### 9.4 完成语义对账（§4）
+
+六工作面 F1-F6 全部启动并收口；无 deferred 残面。评估项结论齐（URL 摄取/标签分组/knowledge_read/sqlite-vec = §7.2/§8）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 计划编号：`BLOCK-94-KNOWLEDGE-SPACE-PRO`
 

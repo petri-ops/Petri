@@ -4502,20 +4502,20 @@
       "id": "BLOCK-94-KNOWLEDGE-SPACE-PRO",
       "path": "docs/block-94-knowledge-space-pro-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-94-knowledge-space-pro",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-16",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P1-RELIABLE-BASE",
+      "phase": "COMPLETED",
       "tags": [
         "block-94",
         "knowledge-space",
         "rag",
         "professionalization"
       ],
-      "notes": "知识空间专业化升级（BLOCK-69 v1 后继 v2 载体，用户裁决立项 2026-09-16「专业 易用 能力全面」）：六工作面=F1 可靠底盘（摄取队列启动恢复/嵌入模型一致性防护/召回挂点去重/列表分页）+ F2 格式（PDF 兑现 BLOCK-69 P3 断层，新依赖须 DEPENDENCY-CHANGE-CHECKLIST 裁决）+ F3 摄取易用（拖拽上传/逐文件错误聚合）+ F4 管理面（文档预览/批量删除重试）+ F5 检索引用溯源（聊天 citation 卡/过滤高亮/knowledge_read 评估）+ F6 规模化（向量扫描警戒指标/无 key 诚实降级；sqlite-vec 仅评估）。非范围=音视频/数据库直读（P4 线）、多空间、手机投影；BLOCK-93 文件面零触碰。planned 排队不占 active 槽位；启动需用户裁决。 2026-09-18 启动 active（用户夜间授权队列原话「我希望你搞定这些……继续工作」）：P0 评审完成（事实重定位：knowledge 域零漂移、注入挂点漂移至 agent-runner L449 / chat.js L469、D1-D6 预置推荐先行留痕 plan §7——PDF 复用已裁决 pdfjs-dist 4.10.38 / sqlite-vec 仅评估 / URL 摄取与分组 UI 不做）。P1 可靠底盘 → P6 整包收口串行。",
+      "notes": "知识空间专业化升级（BLOCK-69 v1 后继 v2 载体，用户裁决立项 2026-09-16「专业 易用 能力全面」）：六工作面=F1 可靠底盘（摄取队列启动恢复/嵌入模型一致性防护/召回挂点去重/列表分页）+ F2 格式（PDF 兑现 BLOCK-69 P3 断层，新依赖须 DEPENDENCY-CHANGE-CHECKLIST 裁决）+ F3 摄取易用（拖拽上传/逐文件错误聚合）+ F4 管理面（文档预览/批量删除重试）+ F5 检索引用溯源（聊天 citation 卡/过滤高亮/knowledge_read 评估）+ F6 规模化（向量扫描警戒指标/无 key 诚实降级；sqlite-vec 仅评估）。非范围=音视频/数据库直读（P4 线）、多空间、手机投影；BLOCK-93 文件面零触碰。planned 排队不占 active 槽位；启动需用户裁决。 2026-09-18 启动 active（用户夜间授权队列原话「我希望你搞定这些……继续工作」）：P0 评审完成（事实重定位：knowledge 域零漂移、注入挂点漂移至 agent-runner L449 / chat.js L469、D1-D6 预置推荐先行留痕 plan §7——PDF 复用已裁决 pdfjs-dist 4.10.38 / sqlite-vec 仅评估 / URL 摄取与分组 UI 不做）。P1 可靠底盘 → P6 整包收口串行。 2026-09-18 夜间整包收口 completed（P0-P6 一次会话）：F1-F6 全收口；契约 34/34+工具 9/9+前端批 88/88+tsc 0+theme 4/4；实机 block94-knowledge-live 18/18 allPass（真实嵌入+真实模型轮次 knowledge_citations 端到端+CDP 摘要卡溯源节）+跨重启启动恢复 4/4；UI-402 verified；1 新依赖 pdfjs-dist@4.10.38（复用 UI-400 裁决）；sqlite-vec 评估=不引入（50k 阈值实测 69ms/次）。",
       "lastUpdated": "2026-09-18"
     },
     {

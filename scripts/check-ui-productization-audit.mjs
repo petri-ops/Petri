@@ -46,6 +46,14 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-09-18 BLOCK-94 知识空间专业化实现提交（0e1ac53 P1 可靠底盘 /
+  // 6e7b60b P2 PDF+易用 / 0d70f80 P3 管理面 / 9ec3602 P5 规模化）：subject
+  // 用 feat(block-94) 未带 UI-###；UI-402 条目由收口提交统一补登并随实机
+  // 18/18 allPass 翻 verified。豁免同提交台账与编号要求，不重写共享历史。
+  '0e1ac531e5a88038124d787f16dda6e422903776',
+  '6e7b60b886fc096b9b1717e7b67e18f0379ab172',
+  '0d70f8057ff88fedd8d67ea45f8be51e6d468701',
+  '9ec36020381a9d62c909594b1ad133e9bd965612',
   // 2026-09-17 BLOCK-98 P4 输入插队（a3c08a3）：前端 onInputQueued 分支+
   // 状态条排队可见；subject 用 feat(block-98) 未带 UI-###，台账 UI-401 由
   // 收口提交统一补登并 verified。豁免同提交台账与编号要求，不重写历史。
@@ -269,6 +277,13 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-09-18 BLOCK-94 实现提交四笔：同提交台账由收口提交统一补登
+  // （UI-402，随实机 18/18 allPass 翻 verified）。豁免同提交台账要求；
+  // 不重写共享历史。
+  '0e1ac531e5a88038124d787f16dda6e422903776', // BLOCK-94 P1 可靠底盘
+  '6e7b60b886fc096b9b1717e7b67e18f0379ab172', // BLOCK-94 P2 PDF+易用
+  '0d70f8057ff88fedd8d67ea45f8be51e6d468701', // BLOCK-94 P3 管理面
+  '9ec36020381a9d62c909594b1ad133e9bd965612', // BLOCK-94 P5 规模化
   'a3c08a382cacac6266d24efcd6ab9370f2e1aadb', // BLOCK-98 P4 台账由收口提交补登（UI-401）
   // 2026-09-16 BLOCK-92 P2 Wave A copilot 族巨型文件模块化拆分（834b18a
   // conversationRunStore / c1590d8 copilotClient / 0a67e84 SimpleChat）：

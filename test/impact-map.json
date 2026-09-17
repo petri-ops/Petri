@@ -1747,6 +1747,36 @@
       "scriptRole": "development-smoke"
     },
     {
+      "id": "block94-knowledge-space-pro",
+      "note": "BLOCK-94 知识空间专业化：F1 启动恢复/嵌入模型一致性/召回挂点收敛 buildTurnInjection/列表分页 + F2 PDF 解析（pdfjs-dist 复用）+ F3 拖拽/逐文件聚合/粘贴入库 + F4 预览/批量 + F5 知识溯源 knowledge_citations 事件/docId 过滤/降级诚实化/knowledge_read + F6 规模观测。",
+      "patterns": [
+        "core/biof3-server/helpers/knowledge-space.js",
+        "core/biof3-server/helpers/knowledge-ingest.js",
+        "core/biof3-server/helpers/knowledge-parsers.js",
+        "core/biof3-server/routes/knowledge.js",
+        "core/biof3-server/agent-tools/knowledge-tools.js",
+        "core/biof3-server/agent-runner.js",
+        "core/biof3-server/routes/ai-agent/chat.js",
+        "frontend/src/lib/knowledgeClient.ts",
+        "frontend/src/components/workspace-panels/KnowledgeSpacePanel.tsx",
+        "frontend/src/components/workspace-panels/KnowledgeSpacePanel.module.css",
+        "frontend/src/components/workspace-panels/WorkspaceCitationsSection.tsx",
+        "frontend/src/components/copilot/conversationRunStore/conversationCitations.ts",
+        "frontend/src/components/copilot/copilotClient/agentTaskStream.ts",
+        "frontend/src/components/copilot/copilotClient/types.ts",
+        "scripts/block94-*",
+        "scripts/knowledge-vector-bench.cjs",
+        "acceptance/block-94/**"
+      ],
+      "tests": [
+        "test/knowledge-space.test.mjs",
+        "test/agent-tool-registry.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
+    },
+    {
       "id": "block96-ssh-channel-perf",
       "note": "BLOCK-96 SSH 通道效率稳定性：fs_list 单 fork NUL 记录协议 + 服务端分页 + 前端游标加载 + mux 幂等只读透明重试 + addressFamily 传输层参数化 + probe 握手计时/F6 领域探测退役。",
       "patterns": [

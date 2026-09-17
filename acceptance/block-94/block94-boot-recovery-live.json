@@ -1,0 +1,32 @@
+{
+  "name": "block94-boot-recovery-live",
+  "startedAt": "2026-09-17T18:22:07.802Z",
+  "finishedAt": "2026-09-17T18:22:07.802Z",
+  "assertions": [
+    {
+      "name": "R1_doc_ready_before_restart",
+      "pass": true,
+      "detail": "kdoc_90c00dba-d20 uploaded and ingested to ready (chunkCount=1) with real DashScope embedding"
+    },
+    {
+      "name": "R2_intermediate_state_frozen",
+      "pass": true,
+      "detail": "dev stack stopped; direct sqlite UPDATE set status=embedding (simulating crash mid-ingest)"
+    },
+    {
+      "name": "R3_boot_recovery_log",
+      "pass": true,
+      "detail": "server log: [knowledge-ingest] boot recovery: requeued 1 interrupted document(s)"
+    },
+    {
+      "name": "R4_recovered_to_ready",
+      "pass": true,
+      "detail": "after restart, document returned to ready (chunkCount=1) via boot-recovery re-ingest with real embedding; observed within first poll after /api/health OK"
+    }
+  ],
+  "allPass": true,
+  "meta": {
+    "docId": "kdoc_90c00dba-d20",
+    "note": "真实跨重启恢复：停栈→固化中间态→重启→mountKnowledge recoverInterruptedIngest 重排入队→真实嵌入重摄 ready"
+  }
+}

@@ -1,6 +1,21 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-17（**换机交接日：Windows 单日五连发全部收口，19 提交待 push → 本 push 完成；后续工作转 macOS，衔接要点见下方「Mac 衔接」节**）。
+最后更新：2026-09-18（**Mac 夜间会话总账：看门狗自动化上线 + BLOCK-94 知识空间专业化整包收口 completed（P0–P6 一次会话）**；队列余 BLOCK-85（Mac 在位已解锁）→ BLOCK-88（需立项评审））。
+
+## 2026-09-18 Mac 夜间会话总账（用户睡前授权「我希望你搞定这些……继续工作」，队列 BLOCK-94 → 85 → 88）
+
+1. **看门狗自动化**：CronCreate 每 30 分钟值守（commit-age <90min 或心跳 <45min 即静默退出；否则按 canonical 文档自愈续作）——夜间连续工作的中断自愈机制，用户醒后可删（automations 页）。
+2. **BLOCK-94 整包 completed**（六提交链 913a5fc0..收口笔；详见 plan §9 与 AUDIT-LOG）：
+   - F1 可靠底盘：**mountKnowledge 启动恢复**（中间态文档重启重排入队；跨真实重启实证 4/4）/嵌入模型一致性（向量通道 model 门隔离+失配统计+面板横幅）/**召回挂点收敛 buildTurnInjection 单源**（agent-runner+chat.js 两处逐字同构去重）/列表分页+failed 批量重试。
+   - F2 PDF：**pdfjs-dist 4.10.38（复用 UI-400 已裁决依赖，core/biof3-server exact）**，cmaps/standard_fonts 包内供给，500 页护栏，扫描件诚实 failed；实机真实 PDF 摄取 kind=pdf。
+   - F3：面板拖拽上传（accent 描边）/上传逐文件错误聚合/粘贴文本直接入库。
+   - F4：GET documents/:id/preview 分块全文+打开原文件/批量删除（missing 诚实）/失败批量重试。
+   - F5：**knowledge_citations 专用事件（_emit 持久化重放可重建）→ conversationCitations 会话级存储 → 摘要卡「知识溯源」节**；docId 过滤/命中高亮/纯符号 ftsDegraded 诚实化/knowledge_read 工具（工具总数 58→59）。
+   - F6：scaleStats 规模观测（SCAN_WARN_THRESHOLD=50000）；**sqlite-vec 评估=不引入**（bench 实测 5k=7.3ms/20k=28.6ms/50k=69ms/次，scripts/knowledge-vector-bench.cjs 可复现）。
+   - 实机：`scripts/block94-knowledge-live.cjs` **18/18 allPass**（真实 DashScope 嵌入摄取+双通道检索+真实模型轮次 citations 端到端+CDP 面板/摘要卡）+ 跨重启恢复 4/4；acceptance/block-94/。
+   - 门禁：契约 34/34+工具 9/9+前端批 88/88+tsc 0+theme 4/4（抓真：自造 --gewu-brand 未定义 token）；UI-402 verified；flow `block94-knowledge`；impact-map block94 规则。
+3. **存量归属登记**：agent-runner-loop-orchestrator「emitToolResult must forward via _emit」1 红=BLOCK-97 emitAssistant 单通道有意契约变更后测试未同步（动前基线已红）——🟡 待用户裁决清债方向。
+4. **D1-D6 预置推荐先行留痕**（plan §7.2，呈问未应答按推荐先行可逆，待晨间追认）：PDF 复用 pdfjs-dist/sqlite-vec 不引入/URL 摄取不做/粘贴入库做/分组 UI 不做/knowledge_read 做。
 
 ## 2026-09-17 Windows 会话总账（换机前全量交接）
 
