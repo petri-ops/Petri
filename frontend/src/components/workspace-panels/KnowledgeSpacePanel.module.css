@@ -363,3 +363,98 @@
   line-height: 1.5;
   word-break: break-word;
 }
+
+/* BLOCK-94 F4：管理面批量操作 + 全文预览 */
+.batchBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  flex-wrap: wrap;
+}
+
+.selectAll {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-secondary);
+  cursor: pointer;
+}
+
+.docCheck {
+  flex: none;
+  accent-color: var(--gewu-accent);
+}
+
+.docNameBtn {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--gewu-text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.docNameBtn:hover {
+  color: var(--gewu-accent);
+  text-decoration: underline;
+}
+
+.previewBox {
+  margin: -2px 0 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 8px;
+  background: var(--gewu-bg-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.previewMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
+}
+
+.previewOpenRaw {
+  padding: 2px 8px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  background: var(--gewu-bg-elevated);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
+  cursor: pointer;
+}
+
+.previewOpenRaw:hover {
+  color: var(--gewu-accent);
+}
+
+.previewChunk {
+  font-size: var(--gewu-font-size-xs);
+  line-height: 1.55;
+  color: var(--gewu-text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding-top: 4px;
+  border-top: 1px dashed var(--gewu-border);
+}
+
+.previewSeq {
+  display: inline-block;
+  margin-right: 6px;
+  color: var(--gewu-text-tertiary);
+  font-weight: 600;
+}

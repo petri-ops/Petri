@@ -94,6 +94,30 @@ export async function pasteKnowledgeDocument(name: string, text: string): Promis
   return jsonOrThrow(resp);
 }
 
+/** BLOCK-94 F4：文档预览（索引分块全文 + 原始文件位置） */
+export interface KnowledgeDocPreview {
+  status: string;
+  document: KnowledgeDoc;
+  chunks: Array<{ seq: number; text: string }>;
+  rawPath: string;
+  rawAvailable: boolean;
+}
+
+export async function fetchKnowledgeDocumentPreview(id: string): Promise<KnowledgeDocPreview> {
+  const resp = await fetch(`${getApiPrefix()}/knowledge/documents/${encodeURIComponent(id)}/preview`);
+  return jsonOrThrow(resp);
+}
+
+/** BLOCK-94 F4：批量删除（不存在项诚实列出） */
+export async function batchDeleteKnowledgeDocuments(ids: string[]): Promise<{ deleted: string[]; missing: string[] }> {
+  const resp = await fetch(`${getApiPrefix()}/knowledge/documents/batch-delete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids }),
+  });
+  return jsonOrThrow(resp);
+}
+
 export async function setKnowledgeSpaceEnabled(enabled: boolean): Promise<void> {
   const resp = await fetch(`${getApiPrefix()}/knowledge/space`, {
     method: 'POST',

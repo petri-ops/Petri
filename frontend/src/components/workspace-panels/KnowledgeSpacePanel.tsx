@@ -8,13 +8,17 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import {
+  batchDeleteKnowledgeDocuments,
   clearKnowledgeSpace,
   deleteKnowledgeDocument,
+  fetchKnowledgeDocumentPreview,
   fetchKnowledgeSpace,
   reindexKnowledgeDocument,
+  retryFailedKnowledgeDocuments,
   searchKnowledge,
   uploadKnowledgeDocuments,
   type KnowledgeDoc,
+  type KnowledgeDocPreview,
   type KnowledgeHit,
   type KnowledgeSpaceState,
 } from '@/lib/knowledgeClient';
@@ -55,6 +59,11 @@ export function KnowledgeSpacePanel() {
   const [pasteName, setPasteName] = useState('');
   const [pasteText, setPasteText] = useState('');
   const [pasting, setPasting] = useState(false);
+  // BLOCK-94 F4 管理面：批量选择 + 全文预览展开 + 失败批量重试
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const [preview, setPreview] = useState<KnowledgeDocPreview | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
   // BLOCK-94 F1 分页：首屏 50 篇，「加载更多」按 50 递增（服务端钳制 200）
   const [docLimit, setDocLimit] = useState(50);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -96,6 +105,7 @@ export function KnowledgeSpacePanel() {
   const documentsTotal = state?.documentsTotal ?? documents.length;
   const documentsHasMore = !!state?.documentsHasMore;
   const staleEmbedding = state?.staleEmbedding;
+  const failedCount = documents.filter((d) => d.status === 'failed').length;
 
   const handleToggle = useCallback(async () => {
     setActionError(null);
@@ -154,6 +164,63 @@ export function KnowledgeSpacePanel() {
     },
     [handleUpload]
   );
+
+  // BLOCK-94 F4：预览展开（逐文档懒取；切文档即换）
+  const handlePreview = useCallback(async (doc: KnowledgeDoc) => {
+    const next = previewId === doc.id ? null : doc.id;
+    setPreviewId(next);
+    setPreview(null);
+    if (!next) return;
+    setPreviewLoading(true);
+    try {
+      const result = await fetchKnowledgeDocumentPreview(doc.id);
+      setPreview(result);
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : String(e));
+      setPreviewId(null);
+    } finally {
+      setPreviewLoading(false);
+    }
+  }, [previewId]);
+
+  const toggleSelected = useCallback((id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const toggleSelectAll = useCallback(() => {
+    setSelected((prev) => (prev.size === documents.length ? new Set() : new Set(documents.map((d) => d.id))));
+  }, [documents]);
+
+  const handleBatchDelete = useCallback(async () => {
+    if (selected.size === 0) return;
+    setActionError(null);
+    try {
+      const result = await batchDeleteKnowledgeDocuments([...selected]);
+      if (result.missing.length > 0) {
+        setActionError(`${result.deleted.length} 篇已删除，${result.missing.length} 篇不存在（已跳过）`);
+      }
+      setSelected(new Set());
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : String(e));
+    }
+    await refresh();
+  }, [selected, refresh]);
+
+  const handleRetryFailed = useCallback(async () => {
+    setActionError(null);
+    try {
+      const result = await retryFailedKnowledgeDocuments();
+      if (result.requeued === 0) setActionError('没有可重试的失败文档（原始文件缺失的已跳过）。');
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : String(e));
+    }
+    await refresh();
+  }, [refresh]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -378,42 +445,127 @@ export function KnowledgeSpacePanel() {
 
       {actionError && <div className={styles.errorBox}>{actionError}</div>}
 
+      {(documents.length > 0 || failedCount > 0) && (
+        <div className={styles.batchBar} data-testid="knowledge-batch-bar">
+          {documents.length > 0 && (
+            <label className={styles.selectAll}>
+              <input
+                type="checkbox"
+                checked={selected.size > 0 && selected.size === documents.length}
+                onChange={toggleSelectAll}
+                data-testid="knowledge-select-all"
+              />
+              全选
+            </label>
+          )}
+          {selected.size > 0 && (
+            <button
+              type="button"
+              className={`${styles.ghostBtn} ${styles.dangerBtn}`}
+              onClick={() => void handleBatchDelete()}
+              data-testid="knowledge-batch-delete"
+            >
+              <Icon name="trash" size={13} />
+              删除所选（{selected.size}）
+            </button>
+          )}
+          {failedCount > 0 && (
+            <button
+              type="button"
+              className={styles.ghostBtn}
+              onClick={() => void handleRetryFailed()}
+              data-testid="knowledge-retry-failed"
+            >
+              <Icon name="refresh" size={13} />
+              重试全部失败（{failedCount}）
+            </button>
+          )}
+        </div>
+      )}
+
       <div className={styles.docList} data-testid="knowledge-doc-list">
         {documents.length === 0 && (
           <div className={styles.empty}>还没有文档。上传 / 拖入 txt、md、代码、csv、pdf 等文件，或粘贴文本，开始构建知识库。</div>
         )}
         {documents.map((doc) => (
-          <div key={doc.id} className={styles.docRow} data-testid="knowledge-doc-row">
-            <div className={styles.docMain}>
-              <span className={styles.docName} title={doc.name}>{doc.name}</span>
-              <span className={`${styles.docStatus} ${doc.status === 'ready' ? styles.docStatusReady : ''} ${doc.status === 'failed' ? styles.docStatusFailed : ''}`}>
-                {STATUS_LABEL[doc.status]}
-                {doc.status === 'ready' ? ` · ${doc.chunkCount} 块` : ''}
-                {doc.status === 'failed' && doc.error ? ` · ${doc.error}` : ''}
-              </span>
+          <React.Fragment key={doc.id}>
+            <div className={styles.docRow} data-testid="knowledge-doc-row">
+              <input
+                type="checkbox"
+                className={styles.docCheck}
+                checked={selected.has(doc.id)}
+                onChange={() => toggleSelected(doc.id)}
+                data-testid="knowledge-doc-check"
+              />
+              <div className={styles.docMain}>
+                <button
+                  type="button"
+                  className={styles.docNameBtn}
+                  title="展开全文预览"
+                  onClick={() => void handlePreview(doc)}
+                  data-testid="knowledge-doc-name"
+                >
+                  {doc.name}
+                </button>
+                <span className={`${styles.docStatus} ${doc.status === 'ready' ? styles.docStatusReady : ''} ${doc.status === 'failed' ? styles.docStatusFailed : ''}`}>
+                  {STATUS_LABEL[doc.status]}
+                  {doc.status === 'ready' ? ` · ${doc.chunkCount} 块` : ''}
+                  {doc.status === 'failed' && doc.error ? ` · ${doc.error}` : ''}
+                </span>
+              </div>
+              <span className={styles.docMeta}>{formatBytes(doc.size)}</span>
+              <div className={styles.docActions}>
+                <button
+                  type="button"
+                  className={styles.iconBtn}
+                  title="重建索引"
+                  disabled={busyDocId === doc.id}
+                  onClick={() => void handleReindex(doc)}
+                >
+                  <Icon name="refresh" size={13} />
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
+                  title="删除文档"
+                  disabled={busyDocId === doc.id}
+                  onClick={() => void handleDelete(doc)}
+                >
+                  <Icon name="trash" size={13} />
+                </button>
+              </div>
             </div>
-            <span className={styles.docMeta}>{formatBytes(doc.size)}</span>
-            <div className={styles.docActions}>
-              <button
-                type="button"
-                className={styles.iconBtn}
-                title="重建索引"
-                disabled={busyDocId === doc.id}
-                onClick={() => void handleReindex(doc)}
-              >
-                <Icon name="refresh" size={13} />
-              </button>
-              <button
-                type="button"
-                className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
-                title="删除文档"
-                disabled={busyDocId === doc.id}
-                onClick={() => void handleDelete(doc)}
-              >
-                <Icon name="trash" size={13} />
-              </button>
-            </div>
-          </div>
+            {previewId === doc.id && (
+              <div className={styles.previewBox} data-testid="knowledge-doc-preview">
+                {previewLoading && <div className={styles.previewMeta}>预览加载中…</div>}
+                {!previewLoading && preview && (
+                  <>
+                    <div className={styles.previewMeta}>
+                      {preview.chunks.length > 0
+                        ? `索引全文（${preview.chunks.length} 块）`
+                        : '暂无索引文本（文档可能未成功摄取）'}
+                      {preview.rawAvailable && (
+                        <button
+                          type="button"
+                          className={styles.previewOpenRaw}
+                          onClick={() => void window.biof3Desktop?.files?.openPath(preview.rawPath)}
+                          data-testid="knowledge-doc-open-raw"
+                        >
+                          打开原文件
+                        </button>
+                      )}
+                    </div>
+                    {preview.chunks.map((chunk) => (
+                      <div key={chunk.seq} className={styles.previewChunk}>
+                        <span className={styles.previewSeq}>第 {chunk.seq + 1} 块</span>
+                        {chunk.text}
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+          </React.Fragment>
         ))}
         {documentsHasMore && (
           <div className={styles.loadMoreRow}>

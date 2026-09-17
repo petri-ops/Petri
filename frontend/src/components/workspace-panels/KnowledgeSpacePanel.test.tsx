@@ -202,4 +202,67 @@ describe('BLOCK-69 KnowledgeSpacePanel', () => {
     // 成功后收起粘贴箱
     await waitFor(() => expect(screen.queryByTestId('knowledge-paste-box')).toBeNull());
   });
+
+  it('BLOCK-94 F4：批量选择与批量删除（ids 上报、逐项诚实）', async () => {
+    const doc = (id: string, name: string) => ({
+      id, name, kind: 'text', size: 10, status: 'ready' as const, error: null,
+      chunkCount: 1, createdAt: '', updatedAt: '',
+    });
+    const responses = [
+      {
+        match: /batch-delete/,
+        body: { status: 'ok', deleted: ['kdoc_a', 'kdoc_b'], missing: [] },
+      },
+      {
+        match: /knowledge\/space/,
+        body: spaceState({ documents: [doc('kdoc_a', 'a.txt'), doc('kdoc_b', 'b.txt')] }),
+      },
+    ];
+    const fetchMock = mockFetchSequence(responses);
+    render(<KnowledgeSpacePanel />);
+    await waitFor(() => expect(screen.getAllByTestId('knowledge-doc-check').length).toBe(2));
+    fireEvent.click(screen.getByTestId('knowledge-select-all'));
+    expect(screen.getByTestId('knowledge-batch-delete').textContent).toContain('2');
+    fireEvent.click(screen.getByTestId('knowledge-batch-delete'));
+    await waitFor(() => {
+      const calls = (fetchMock.mock.calls as unknown[][]).filter((call) => String(call[0]).includes('batch-delete'));
+      expect(calls.length).toBe(1);
+    });
+    const call = (fetchMock.mock.calls as unknown[][]).find((c) => String(c[0]).includes('batch-delete'));
+    const init = (call ? call[1] : undefined) as RequestInit | undefined;
+    const body = JSON.parse(String((init && init.body) || '{}'));
+    expect(body.ids.sort()).toEqual(['kdoc_a', 'kdoc_b']);
+  });
+
+  it('BLOCK-94 F4：点击文档名展开全文预览（分块渲染 + 打开原文件入口）', async () => {
+    const doc = {
+      id: 'kdoc_a', name: '基因笔记.md', kind: 'markdown', size: 2048,
+      status: 'ready' as const, error: null, chunkCount: 2, createdAt: '', updatedAt: '',
+    };
+    const responses = [
+      {
+        match: /preview/,
+        body: {
+          status: 'ok',
+          document: doc,
+          chunks: [
+            { seq: 0, text: 'TP53 参与细胞凋亡调控。' },
+            { seq: 1, text: 'BRCA1 与同源重组修复相关。' },
+          ],
+          rawPath: '/tmp/knowledge/kdoc_a/基因笔记.md',
+          rawAvailable: true,
+        },
+      },
+      { match: /knowledge\/space/, body: spaceState({ documents: [doc] }) },
+    ];
+    mockFetchSequence(responses);
+    render(<KnowledgeSpacePanel />);
+    await waitFor(() => expect(screen.getByTestId('knowledge-doc-name')).toBeTruthy());
+    fireEvent.click(screen.getByTestId('knowledge-doc-name'));
+    await waitFor(() => expect(screen.getByTestId('knowledge-doc-preview')).toBeTruthy());
+    expect(screen.getByText(/TP53 参与细胞凋亡调控/)).toBeTruthy();
+    expect(screen.getByText(/BRCA1 与同源重组修复相关/)).toBeTruthy();
+    expect(screen.getByText(/索引全文（2 块）/)).toBeTruthy();
+    expect(screen.getByTestId('knowledge-doc-open-raw')).toBeTruthy();
+  });
 });

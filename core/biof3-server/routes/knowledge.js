@@ -7,7 +7,9 @@
  */
 
 const express = require('express');
+const fs = require('fs');
 const multer = require('multer');
+const sqlite = require('../db').getDatabase();
 const ks = require('../helpers/knowledge-space');
 const ingest = require('../helpers/knowledge-ingest');
 const { getAiSettings } = require('../helpers/ai-settings');
@@ -194,6 +196,49 @@ module.exports = function mountKnowledge(app) {
       res.json({ status: 'ok', document: doc ? docView(doc) : null });
     } catch (e) {
       res.status(e.message === 'knowledge_document_not_found' ? 404 : 500).json({ status: 'error', error: e.message });
+    }
+  });
+
+  // BLOCK-94 F4：文档预览（索引分块全文 + 原始文件位置；打开原文件走既有 files.openPath 通道）
+  app.get('/api/knowledge/documents/:id/preview', async (req, res) => {
+    try {
+      const doc = ks.getDocument(req.params.id);
+      if (!doc) return res.status(404).json({ status: 'error', error: 'knowledge_document_not_found' });
+      const chunks = sqlite
+        .prepare('SELECT seq, text FROM knowledge_chunks WHERE doc_id = ? ORDER BY seq ASC')
+        .all(doc.id);
+      const rawPath = doc.raw_path || ks.docDir(doc.id) + '/' + doc.name;
+      res.json({
+        status: 'ok',
+        document: docView(doc),
+        chunks,
+        rawPath,
+        rawAvailable: fs.existsSync(rawPath),
+      });
+    } catch (e) {
+      res.status(500).json({ status: 'error', error: e.message });
+    }
+  });
+
+  // BLOCK-94 F4：批量删除（单事务逐文档两通道同灭；不存在项诚实列出）
+  app.post('/api/knowledge/documents/batch-delete', express.json({ limit: '64kb' }), async (req, res) => {
+    try {
+      const ids = Array.isArray(req.body && req.body.ids) ? req.body.ids.map(String) : [];
+      if (ids.length === 0) return res.status(400).json({ status: 'error', error: '未选择文档' });
+      if (ids.length > 200) return res.status(400).json({ status: 'error', error: '单批最多 200 篇' });
+      const deleted = [];
+      const missing = [];
+      for (const id of ids) {
+        try {
+          deleted.push((ks.deleteDocument(id)).deleted);
+        } catch (e) {
+          if (e.message === 'knowledge_document_not_found') missing.push(id);
+          else throw e;
+        }
+      }
+      res.json({ status: 'ok', deleted, missing });
+    } catch (e) {
+      res.status(500).json({ status: 'error', error: e.message });
     }
   });
 
