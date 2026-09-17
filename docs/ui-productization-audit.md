@@ -3355,7 +3355,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **现状核实（代码事实）**：SSH 长连接配 ServerAliveInterval=15s 心跳（网络层闲置不会被动断）；但 mux 有 **5 分钟空闲主动关闭**（IDLE_CLOSE_MS）——闲置回来必重连（懒重建 ~1s+），写类操作还会诚实失败需手动重试＝用户体感的「断了」。自动重连已有：懒重建 + 只读 verb（fs_stat/fs_list/fs_read/sys_resource）透明重试一次（BLOCK-96 F1）。
 - **修复①不再主动断连**：移除 IDLE_CLOSE_MS/scheduleIdleClose——保活维持长连接，闲置回来直接操作；app 退出 stdin EOF 自然结束无残留；死亡仍有懒重建兜底。
 - **修复②呼吸灯**：新增 `GET /api/workspaces/:id/ssh-ping` 探活端点（fs_stat 短超时）+ `useSshHeartbeat` 模块级单例轮询（30s/项目，后台标签页暂停，最后消费者卸载才停）+ `SshStatusDot` 组件——绿=在线（呼吸动画）黄=连接中（快闪）红=断联（常亮），点击手动重试；挂载右栏文件树工具条（带标签）与左栏 SSH 项目行（小圆点）。探活失败→红，30s 后自动恢复绿＝自动重连对用户可见。
-- **证据**：ping 端点 dell 真节点 47-49ms；实机截图右栏「● 已连接」+左栏四 SSH 项目灯（alive 5/dead 1→30s 自愈，HMR 暂态如实登记）；mux/host 契约 11/11；430+ 测试+tsc 0。闲置 6 分钟存活实测 acceptance/block-95/ui397-idle-alive。
+- **证据**：ping 端点 dell 真节点 47-49ms；实机截图右栏「● 已连接」+左栏四 SSH 项目灯（alive 5/dead 1→30s 自愈，HMR 暂态如实登记）；mux/host 契约 11/11；430+ 测试+tsc 0。闲置 6 分钟存活实测 **PASS（闲置后探活 57ms，连接全程存活）**；另有 ServerAliveCountMax 4→2（死连接判死 60s→30s，透明重试更快接管）；mux 契约 11/11。
 - **边界**：写类操作断连不自动重试（诚实失败原则不变）；30s 探活仅 SSH 项目且页面可见时发起。G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 ## UI-396: 新建会话左栏项目树即时刷新 (2026-09-17 in_progress，dev Electron 端到端实测 275ms)

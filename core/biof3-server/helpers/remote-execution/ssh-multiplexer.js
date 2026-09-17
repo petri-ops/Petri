@@ -51,7 +51,7 @@ function createMuxSession({ alias, addressFamily, spawnFn }) {
       : []),
     '-o', 'BatchMode=yes',
     '-o', 'ServerAliveInterval=15',
-    '-o', 'ServerAliveCountMax=4',
+    '-o', 'ServerAliveCountMax=2', // UI-397 — 判死 60s→30s：死连接首个请求少等一半
     '-o', 'ConnectTimeout=10',
     '--', alias,
     `bash "${AGENT_BIN}" __mux`,
