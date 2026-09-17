@@ -25,7 +25,7 @@
 // re-exported from main file to keep `import { ... } from '@/components/copilot/SimpleChat'` working.
 // ============================================================
 
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState, useCallback, useMemo } from 'react';
 
 // ── BLOCK-9.2 PHASE 4: types + helpers + attachments re-exports for backward compat ──
 import {
@@ -610,17 +610,20 @@ export function SimpleChat({
     const olderState = olderRef.current;
     if (el.scrollTop < 360 && olderState.hasMore && !olderState.loadingMore) {
       prependAnchorRef.current = el.scrollHeight;
-      void olderState.loadOlder().then((appended) => {
-        const anchor = prependAnchorRef.current;
-        prependAnchorRef.current = null;
-        if (!appended || anchor == null) return;
-        requestAnimationFrame(() => {
-          const el2 = scrollRef.current;
-          if (el2) el2.scrollTop += el2.scrollHeight - anchor;
-        });
-      });
+      void olderState.loadOlder();
     }
   }, []);
+
+  // BLOCK-95 A1 — prepend 后恢复视口：useLayoutEffect 在 DOM commit 后、绘制前
+  // 同步执行（rAF 会早于 commit，delta 恒 0）；非补页路径 anchor 为 null 零开销。
+  useLayoutEffect(() => {
+    const anchor = prependAnchorRef.current;
+    if (anchor == null) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    prependAnchorRef.current = null;
+    el.scrollTop += el.scrollHeight - anchor;
+  }, [messages]);
 
   // BLOCK-95 A4 — 话题转移小节分隔：持久真值=DB last_topic_shift_at（会话列表行），
   // 运行中 SSE onTopicShift 经事件总线即时补充并触发 refreshConversations 固化。

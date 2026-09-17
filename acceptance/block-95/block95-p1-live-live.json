@@ -1,0 +1,50 @@
+{
+  "name": "block95-p1-live",
+  "startedAt": "2026-09-17T04:29:02.356Z",
+  "finishedAt": "2026-09-17T04:29:11.683Z",
+  "assertions": [
+    {
+      "name": "open_target_conversation",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "a1_latest_window_first_message",
+      "pass": true,
+      "detail": "first=B95消息-50（问） rendered=200"
+    },
+    {
+      "name": "a4_topic_shift_card",
+      "pass": true,
+      "detail": "{\"present\":true,\"text\":\"话题转换 · 转向游标加载验证\",\"nextMsg\":\"B95消息-162（问）\"}"
+    },
+    {
+      "name": "a4_topic_shift_position",
+      "pass": true,
+      "detail": "nextMsg=B95消息-162（问）"
+    },
+    {
+      "name": "a3_jump_bottom_visible",
+      "pass": true,
+      "detail": "{\"visible\":true,\"text\":\"回到底部\"} @scrolled:11361.09375"
+    },
+    {
+      "name": "a3_jump_bottom_click",
+      "pass": true,
+      "detail": "{\"atBottom\":true,\"floatGone\":true}"
+    },
+    {
+      "name": "a1_older_page_prepended",
+      "pass": true,
+      "detail": "first=B95消息-0（问） count=250 scrollTop=3205"
+    },
+    {
+      "name": "a1_viewport_kept_after_prepend",
+      "pass": true,
+      "detail": "scrollTop=3205"
+    }
+  ],
+  "allPass": true,
+  "conversationId": "conv_b95_live",
+  "projectId": "p_mu3qk7vs_2xwc"
+}
