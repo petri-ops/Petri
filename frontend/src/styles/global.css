@@ -48,7 +48,11 @@
   --gewu-surface-dim: #f4f4f5;
 }
 
-[data-theme='dark'] {
+/* UI-392 — 特异性对齐 infima：infima 用 html[data-theme='dark']（0,1,1），
+   本仓 [data-theme='dark']（0,1,0）永远输给它，--ifm-background-* 暗色值
+   从未生效（body 恒 infima 灰 #1b1b1d，欢迎页整页露出）。提级到同特异性
+   后，@import 顺序保证本仓后置规则获胜。 */
+html[data-theme='dark'] {
   --ifm-background-color: var(--gewu-bg-surface);
   --ifm-background-surface-color: var(--gewu-bg-surface);
   /* UI-392 — 暗色 surface-dim 单一真源在 custom.css（#111a2e 海军蓝族）；
