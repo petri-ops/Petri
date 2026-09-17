@@ -12,7 +12,7 @@
  *   3) 两轮子 agent 均经真实链路跑到终态（completed）
  */
 
-import { test, describe, before } from 'node:test';
+import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -63,6 +63,14 @@ const baseUrl = await new Promise((resolve) => {
     const { port } = server.address();
     resolve(`http://127.0.0.1:${port}`);
   });
+});
+
+// 收口实测（2026-09-17 BLOCK-97 P3）：listen 句柄不释放会让 node --test 在
+// 用例全过后仍等待进程退出，整个文件级"挂起"拖死聚合测试批。测试完必须
+// 关闭 mock 上游并掐断 keep-alive 连接。
+after(() => {
+  server.closeAllConnections?.();
+  server.close();
 });
 
 const agentTaskStore = require(path.join(R_SERVER, 'agent-task-store.js'));

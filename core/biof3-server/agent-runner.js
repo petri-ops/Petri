@@ -736,7 +736,13 @@ async function runAgentLoop({
       // 与 tool_result 同链经 _emit 持久化 task_events；前端摘要卡按此投影）
       maybeEmitTaskTodo(evt, _emit);
     },
-    emitAssistant: (evt) => _emit(evt),
+    // P3 实机抓真（block97-todo-live 4/9）：loop-orchestrator 的 emitToolResult
+    // 参数实为死参——tool_result 等全部事件走 _emit→emitAssistant 通道，
+    // 发射判定必须同时挂在本通道才能真正到达事件流。
+    emitAssistant: (evt) => {
+      _emit(evt);
+      maybeEmitTaskTodo(evt, _emit);
+    },
     emitDone: () => _emit({ event: 'done' }),
     callChatProvider,
     config: loopConfig,

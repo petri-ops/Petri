@@ -31,7 +31,10 @@ vi.mock('@/lib/loop-client', async (importOriginal) => {
 
 import {
   __resetConversationRunsForTests,
+  __resetConversationTodosForTests,
+  clearConversationRun,
   getConversationRunSnapshot,
+  getConversationTodoList,
   getSubAgentTaskSnapshot,
   listSubAgentTasksForConversation,
   resultEditProgressForContext,
@@ -987,14 +990,15 @@ describe('BLOCK-49 加映二 — 模型派生子 agent 活动面板数据源', (
 // BLOCK-97: task_todo 任务清单投影
 // ---------------------------------------------------------------------------
 
-describe('BLOCK-97 task_todo projection', () => {
+describe('BLOCK-97 task_todo projection (conversation-level store)', () => {
   beforeEach(() => {
     __resetConversationRunsForTests();
+    __resetConversationTodosForTests();
     streamChatMock.mockReset();
     streamChatMock.mockResolvedValue(undefined);
   });
 
-  it('projects task_todo snapshots into the run todoList, replacing wholesale', () => {
+  it('projects task_todo snapshots into the conversation todo store, replacing wholesale', () => {
     start('conv-todo', '做多步任务');
     const callbacks = streamChatMock.mock.calls[0][0];
 
@@ -1002,7 +1006,7 @@ describe('BLOCK-97 task_todo projection', () => {
       { id: '1', content: '重建索引', status: 'completed' },
       { id: '2', content: '跑通冒烟测试', status: 'in_progress' },
     ]);
-    expect(getConversationRunSnapshot('conv-todo')?.todoList).toEqual([
+    expect(getConversationTodoList('conv-todo')).toEqual([
       { id: '1', content: '重建索引', status: 'completed' },
       { id: '2', content: '跑通冒烟测试', status: 'in_progress' },
     ]);
@@ -1013,19 +1017,27 @@ describe('BLOCK-97 task_todo projection', () => {
       { id: '2', content: '跑通冒烟测试', status: 'completed' },
       { id: '3', content: '写收口报告', status: 'pending' },
     ]);
-    expect(getConversationRunSnapshot('conv-todo')?.todoList?.length).toBe(3);
+    expect(getConversationTodoList('conv-todo').length).toBe(3);
     expect(
-      getConversationRunSnapshot('conv-todo')?.todoList?.every((it) => it.status !== 'in_progress')
+      getConversationTodoList('conv-todo').every((it) => it.status !== 'in_progress')
     ).toBe(true);
   });
 
-  it('new run starts without a todoList (lifecycle = single agent run)', () => {
+  it('survives run stop/reconciliation; clears only when the next run starts', () => {
     start('conv-todo-2', '第一轮');
-    streamChatMock.mock.calls[0][0].onTaskTodo?.([{ id: '1', content: '旧清单', status: 'pending' }]);
-    expect(getConversationRunSnapshot('conv-todo-2')?.todoList?.length).toBe(1);
+    streamChatMock.mock.calls[0][0].onTaskTodo?.([
+      { id: '1', content: '旧清单', status: 'completed' },
+    ]);
+    expect(getConversationTodoList('conv-todo-2').length).toBe(1);
 
+    // run 终态/对账清理快照后，末次清单仍可见（「做完一条勾一条」不闪没）
     stopConversationRun('conv-todo-2');
+    clearConversationRun('conv-todo-2');
+    expect(getConversationRunSnapshot('conv-todo-2')).toBeNull();
+    expect(getConversationTodoList('conv-todo-2').length).toBe(1);
+
+    // 下一轮 run 开始 → 清除（生命周期=单次 agent 任务运行）
     start('conv-todo-2', '第二轮');
-    expect(getConversationRunSnapshot('conv-todo-2')?.todoList).toBeUndefined();
+    expect(getConversationTodoList('conv-todo-2')).toEqual([]);
   });
 });

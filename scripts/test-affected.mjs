@@ -166,7 +166,13 @@ function runProcess(command, args) {
 export function runPlan(plan) {
   if (plan.unknown.length) return 2;
   for (const file of plan.syntax) { const status = runProcess(process.execPath, ['--check', file]); if (status !== 0) return status; }
-  if (plan.tests.length) { const status = runProcess(process.execPath, ['--test', ...plan.tests]); if (status !== 0) return status; }
+  // BLOCK-97 收口沉淀（2026-09-17）：node --test 批里只要有一个套件泄漏
+  // keep-alive 句柄（例：block93-role-prompt 的 mock 上游 server 不 close），
+  // runner 就在「用例全过后」无限等待进程退出——聚合批表现为整体挂起
+  // （实测 28 分钟零 CPU）。--test-force-exit 让 runner 在用例完成后强制
+  // 退出，--test-timeout=120000 给单个用例兜底超时：任何套件都无法再把
+  // 聚合门禁拖死。挂起定诊法=对比进程 CPU 时间（零增量=挂起而非慢）。
+  if (plan.tests.length) { const status = runProcess(process.execPath, ['--test', '--test-force-exit', '--test-timeout=120000', ...plan.tests]); if (status !== 0) return status; }
   if (plan.frontendRelated.length) { const status = runProcess('npm', ['--prefix', 'frontend', 'run', 'test:related', '--', ...plan.frontendRelated, '--passWithNoTests']); if (status !== 0) return status; }
   if (plan.commands.includes('frontend-all')) { const status = runProcess(...COMMANDS['frontend-all']); if (status !== 0) return status; }
   for (const command of plan.commands.filter((item) => item !== 'frontend-all')) { const status = runProcess(...COMMANDS[command]); if (status !== 0) return status; }

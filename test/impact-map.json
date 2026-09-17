@@ -1682,6 +1682,35 @@
       "scriptRole": "governance"
     },
     {
+      "id": "block97-agent-todo-card",
+      "note": "BLOCK-97 智能体待办卡：todo_write 内部工具 + task_todo 专用事件（agent-runner emitAssistant 通道发射）+ 提示词纪律注入 + 摘要卡「任务清单」节（conversationTodos 会话级存储实时勾选）。",
+      "patterns": [
+        "core/biof3-server/agent-tools/todo-tools.js",
+        "core/biof3-server/agent-tools/tool-defs.js",
+        "core/biof3-server/agent-tools/registry.js",
+        "core/biof3-server/agent-runner.js",
+        "core/biof3-server/routes/ai-agent/chat.js",
+        "frontend/src/components/copilot/copilotClient/types.ts",
+        "frontend/src/components/copilot/copilotClient/agentTaskStream.ts",
+        "frontend/src/components/copilot/conversationRunStore/**",
+        "frontend/src/components/workspace-panels/WorkspaceTodoSection.tsx",
+        "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
+        "frontend/src/components/workspace-panels/CenterPanel.tsx",
+        "scripts/block97-*",
+        "acceptance/block-97/**"
+      ],
+      "tests": [
+        "test/block97-agent-todo.test.mjs",
+        "test/agent-tool-registry.test.mjs",
+        "test/agent-tool-policy.test.mjs",
+        "test/agent-run-tool.test.mjs",
+        "test/block34-tool-activities-persist.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
+    },
+    {
       "id": "block96-ssh-channel-perf",
       "note": "BLOCK-96 SSH 通道效率稳定性：fs_list 单 fork NUL 记录协议 + 服务端分页 + 前端游标加载 + mux 幂等只读透明重试 + addressFamily 传输层参数化 + probe 握手计时/F6 领域探测退役。",
       "patterns": [

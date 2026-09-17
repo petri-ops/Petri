@@ -8,6 +8,7 @@ vi.mock('@/components/copilot/SimpleChat', () => ({
 }));
 vi.mock('@/components/copilot/conversationRunStore', () => ({
   useConversationRun: () => null,
+  useConversationTodoList: () => [],
   resultEditProgressForContext: () => [],
 }));
 vi.mock('@/hooks/useDurableConversationLoop', () => ({

@@ -7,6 +7,7 @@ import {
   resumeAgentTask,
   streamChat,
   subscribeAgentTask,
+  type AgentTaskTodoItem,
   type ChatMessage,
   type ToolCallEvent,
   type ToolOutputEvent,
@@ -27,6 +28,18 @@ import {
   pushChildFinishedNotice,
   setFallbackNotice,
 } from './conversationRunStore/conversationNotices';
+import {
+  clearConversationTodo,
+  clearConversationTodosForTests,
+  getConversationTodoList,
+  setConversationTodoList,
+  subscribeConversationTodo,
+} from './conversationRunStore/conversationTodos';
+export {
+  getConversationTodoList,
+  subscribeConversationTodo,
+} from './conversationRunStore/conversationTodos';
+export { clearConversationTodosForTests as __resetConversationTodosForTests };
 import {
   clearConversationRunListeners,
   emitConversationRun as emit,
@@ -137,6 +150,21 @@ export function useConversationRun(
   return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }
 
+/** BLOCK-97 — 当前会话任务清单（会话级存储订阅；task_todo 实时勾选数据源）。 */
+export function useConversationTodoList(
+  conversationId: string | null | undefined
+): AgentTaskTodoItem[] {
+  const subscribe = useCallback(
+    (listener: () => void) => subscribeConversationTodo(conversationId, listener),
+    [conversationId]
+  );
+  const getSnapshot = useCallback(
+    () => getConversationTodoList(conversationId),
+    [conversationId]
+  );
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+}
+
 export function isConversationRunning(conversationId: string | null | undefined): boolean {
   return getConversationRunSnapshot(conversationId)?.status === 'running';
 }
@@ -159,8 +187,10 @@ export function startConversationRun(options: StartConversationRunOptions): bool
   const { conversationId } = options;
   if (!conversationId || isConversationRunning(conversationId)) return false;
 
-  // 新 run 开始，上一轮降级提示与子 agent 终态通知自然消失（BLOCK-56 / BLOCK-49）
+  // 新 run 开始，上一轮降级提示与子 agent 终态通知自然消失（BLOCK-56 / BLOCK-49）；
+  // 任务清单同清除（BLOCK-97 生命周期=单次任务运行）
   clearConversationNotices(conversationId);
+  clearConversationTodo(conversationId);
 
   const startedAt = Date.now();
   const ctrl = new AbortController();
@@ -564,12 +594,11 @@ export function startConversationRun(options: StartConversationRunOptions): bool
         loop: mergeLoopIteration(current.loop, info),
       }));
     },
-    // BLOCK-97 — 任务清单整单快照投影（task_todo 事件；摘要卡「任务清单」节数据源）
+    // BLOCK-97 — 任务清单整单快照（task_todo 事件；单真值在会话级
+    // conversationTodos 存储——run 终态对账清快照后「完成态」仍可见，
+    // 下一轮 run 开始清除；摘要卡经 useConversationTodoList 订阅实时勾选）
     onTaskTodo: (items) => {
-      replaceRun(conversationId, (current) => ({
-        ...current,
-        todoList: items,
-      }));
+      setConversationTodoList(conversationId, items);
     },
     onDone: () => finish('done'),
     onError: (error, info) => finish('error', error, info),

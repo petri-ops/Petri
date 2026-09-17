@@ -1,5 +1,5 @@
 import type { LoopIterationEvent } from '@/lib/loop-client';
-import type { AgentTaskTodoItem, ResultEditProgressEvent } from '../copilotClient';
+import type { ResultEditProgressEvent } from '../copilotClient';
 import type { ToolActivityItem } from '../toolActivity';
 
 export interface ConversationPendingApproval {
@@ -86,8 +86,6 @@ export interface ConversationRunSnapshot {
   modelFallbackNotice?: string;
   /** BLOCK-93 P2 — spawn 显式角色（服务端 agent-roles 注册表 key；未指定为 undefined → UI 文本推断兜底）。 */
   agentRole?: string;
-  /** BLOCK-97 — 任务清单整单快照（task_todo 事件投影；新 run 开始自然清空）。 */
-  todoList?: AgentTaskTodoItem[];
 }
 
 /** BLOCK-49 加映 — proactive：子 agent 终态通知（会话级，下一次 run 开始清除）。 */

@@ -3,6 +3,7 @@ import { SimpleChat } from '@/components/copilot/SimpleChat';
 import {
   resultEditProgressForContext,
   useConversationRun,
+  useConversationTodoList,
 } from '@/components/copilot/conversationRunStore';
 import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
@@ -308,6 +309,8 @@ function SessionFrameView({
   // pinned summary. Reads the same shared run store the chat renders from, so
   // there is no second source of completion truth.
   const activeRun = useConversationRun(ctx.activeConvId);
+  // BLOCK-97 — 任务清单（会话级存储：run 终态后末次清单保留，下一轮开始清除）
+  const todoList = useConversationTodoList(ctx.activeConvId);
   const durableLoop = useDurableConversationLoop(
     ctx.project.id,
     ctx.activeConvId,
@@ -365,7 +368,7 @@ function SessionFrameView({
               datasets={ctx.datasets}
               loop={durableLoop.loop}
               loopSummary={durableLoop.summary}
-              todoList={activeRun?.todoList}
+              todoList={todoList}
               onOpenScheduled={ctx.openScheduledResults}
               onSelectJob={(jobId) => {
                 ctx.setActiveJobId(jobId);
@@ -393,7 +396,7 @@ function SessionFrameView({
               datasets={ctx.datasets}
               loop={durableLoop.loop}
               loopSummary={durableLoop.summary}
-              todoList={activeRun?.todoList}
+              todoList={todoList}
               onOpenScheduled={ctx.openScheduledResults}
               onSelectJob={(jobId) => {
                 ctx.setActiveJobId(jobId);

@@ -1,0 +1,58 @@
+{
+  "name": "block97-todo-live",
+  "startedAt": "2026-09-17T11:10:24.419Z",
+  "finishedAt": "2026-09-17T11:12:10.755Z",
+  "assertions": [
+    {
+      "name": "V0_project_page_open",
+      "pass": true,
+      "detail": "root mounted"
+    },
+    {
+      "name": "V1_composer_sent",
+      "pass": true,
+      "detail": "clicked:发送消息"
+    },
+    {
+      "name": "V1_task_created",
+      "pass": true,
+      "detail": "taskId=25c51eca-db86-4175-bbd0-39e0ca98af32"
+    },
+    {
+      "name": "V2_summary_toggled_open",
+      "pass": true,
+      "detail": "clicked_open"
+    },
+    {
+      "name": "V2_todo_section_live",
+      "pass": true,
+      "detail": "section visible during run, rows=3"
+    },
+    {
+      "name": "V2_live_status_transition",
+      "pass": true,
+      "detail": "observed states: completed,in_progress,pending"
+    },
+    {
+      "name": "V3_final_dom_all_completed",
+      "pass": true,
+      "detail": "任务清单3/3✓1.第一步：回答算术题✓2.第二步：回答应用定位题✓3.第三步：报告完成"
+    },
+    {
+      "name": "V4_task_todo_events_persisted",
+      "pass": true,
+      "detail": "task_todo=5 tool_result=5"
+    },
+    {
+      "name": "V4_final_items_all_completed",
+      "pass": true,
+      "detail": "items=[{\"id\":\"1\",\"content\":\"第一步：回答算术题\",\"status\":\"completed\"},{\"id\":\"2\",\"content\":\"第二步：回答应用定位题\",\"status\":\"completed\"},{\"id\":\"3\",\"content\":\"第三步：报告完成\",\"status\":\"complete"
+    },
+    {
+      "name": "V5_replay_deterministic",
+      "pass": true,
+      "detail": "counts=5/5"
+    }
+  ],
+  "allPass": true
+}
