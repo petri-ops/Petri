@@ -905,3 +905,235 @@ test('G3 注入: 绑定空间后按绑定范围召回（他空间文档不可达
   ks.setSpaceEnabled(false, 'ks_default'); // 还原启用态（文件后续无消费方，卫生收尾）
   ks.deleteDocument(docDefault.id);
 });
+
+// ---------- BLOCK-99 G4：空间管理会话台（工具族 + 归类移动 + D4 确认门）----------
+
+const { dispatchTool } = require('../core/biof3-server/agent-tools/index.js');
+const confirmStore = require('../core/biof3-server/helpers/knowledge-confirm.js');
+
+test('G4 moveDocumentsToSpace: 归属迁移非破坏（块/检索跟随，原空间即刻不可达）', async () => {
+  const spaceB = ks.createSpace('G4 归类空间 B');
+  const doc1 = await ingest.createDocument({
+    name: '移动甲.txt',
+    buffer: Buffer.from('待移动文档甲：ribosome 别聚糖合成通路笔记。', 'utf8'),
+    autoIngest: false,
+  });
+  const doc2 = await ingest.createDocument({
+    name: '移动乙.txt',
+    buffer: Buffer.from('待移动文档乙：ribosome 补遗。', 'utf8'),
+    autoIngest: false,
+  });
+  await ingest.ingestDocument(doc1.id, { embed: async (t) => t.map(() => makeVec(51)) });
+  await ingest.ingestDocument(doc2.id, { embed: async (t) => t.map(() => makeVec(52)) });
+
+  // 嵌入列查询：迁移后块必须跟随文档行归属
+  const beforeChunks = sqlite
+    .prepare('SELECT DISTINCT space_id AS s FROM knowledge_chunks WHERE doc_id = ?')
+    .get(doc1.id);
+  assert.equal(beforeChunks.s, 'ks_default');
+
+  const moved = ks.moveDocumentsToSpace([doc1.id, doc2.id, 'ks_absent_doc'], spaceB.id);
+  assert.deepEqual(moved.moved.sort(), [doc1.id, doc2.id].sort(), '存在文档全数迁移');
+  assert.deepEqual(moved.missing, ['ks_absent_doc'], '缺失 id 诚实上报');
+  assert.equal(moved.targetSpaceId, spaceB.id);
+
+  assert.equal(ks.listDocuments().some((d) => d.id === doc1.id), false, '默认列表即刻不可见');
+  assert.equal(ks.listDocuments(spaceB.id).length, 2, 'B 列表接收');
+  const afterChunks = sqlite
+    .prepare('SELECT DISTINCT space_id AS s FROM knowledge_chunks WHERE doc_id = ?')
+    .get(doc1.id);
+  assert.equal(afterChunks.s, spaceB.id, '块归属同事务跟随（G1 家法）');
+
+  // 检索按新归属可达、原归属不可达
+  const inB = await ks.searchKnowledge({ query: 'ribosome', embed: async () => [makeVec(53)], spaceId: spaceB.id });
+  assert.ok(inB.hits.every((h) => h.docId === doc1.id || h.docId === doc2.id), '迁移后 B 空间可检索');
+  const inDefault = await ks.searchKnowledge({ query: 'ribosome', embed: async () => [makeVec(53)] });
+  assert.ok(!inDefault.hits.some((h) => h.docId === doc1.id || h.docId === doc2.id), '默认空间不再可达');
+
+  // 非法目标 fail-closed（同步抛）；空 docIds 拒绝
+  assert.throws(() => ks.moveDocumentsToSpace([doc1.id], 'ks_absent'), (e) => e.code === 'space_not_found');
+  assert.throws(() => ks.moveDocumentsToSpace([], spaceB.id), (e) => e.code === 'doc_ids_required');
+
+  ks.deleteSpaceCascade(spaceB.id); // 连带清理已迁入文档
+});
+
+test('G4 确认令牌: 签发→匹配消费一次性；错主体/错操作/复用/未知全拒', () => {
+  const { confirmToken } = confirmStore.issueConfirmToken('op_x', 'subj_1', { documents: 1 });
+  assert.equal(confirmStore.consumeConfirmToken('nope', 'op_x', 'subj_1').ok, false, '未知 token 拒');
+  assert.equal(confirmStore.consumeConfirmToken(confirmToken, 'op_y', 'subj_1').ok, false, '操作错配拒');
+  assert.equal(confirmStore.consumeConfirmToken(confirmToken, 'op_x', 'subj_2').ok, false, '主体错配拒');
+  assert.equal(confirmStore.consumeConfirmToken(confirmToken, 'op_x', 'subj_1').ok, true, '全匹配放行');
+  assert.equal(confirmStore.consumeConfirmToken(confirmToken, 'op_x', 'subj_1').ok, false, '一次性：复用拒');
+  assert.equal(confirmStore.consumeConfirmToken('', 'op_x', 'subj_1').reason, 'confirm_token_required', '缺 token 拒');
+});
+
+test('G4 工具族: 建空间/启停/清单/绑定 工具链（dispatch 走拦截器 schema+policy）', async () => {
+  const created = await dispatchTool('knowledge_space_create', { name: 'G4 工具链空间' }, {});
+  assert.equal(created.error, undefined, JSON.stringify(created));
+  assert.equal(created.space.enabled, false, '新建默认停用');
+
+  const dup = await dispatchTool('knowledge_space_create', { name: 'G4 工具链空间' }, {});
+  assert.equal(dup.error, 'space_name_exists', '重名诚实错误形状');
+
+  const enabled = await dispatchTool('knowledge_space_enable', { spaceId: created.space.id, enabled: true }, {});
+  assert.equal(enabled.enabled, true);
+  const badEnable = await dispatchTool('knowledge_space_enable', { spaceId: created.space.id }, {});
+  assert.equal(badEnable.error, 'invalid_arguments', '缺 enabled 被拦截器 schema 先拦（分层：schema → policy → handler）');
+
+  const listed = await dispatchTool('knowledge_space_list', {}, {});
+  assert.ok(listed.spaces.some((s) => s.id === created.space.id && s.enabled === true), '列表含启用态');
+
+  const bound = await dispatchTool('knowledge_space_bind', { spaceId: created.space.id }, { conversationId: 'conv_g4' });
+  assert.equal(bound.spaceId, created.space.id, '绑定当前会话');
+  assert.equal(ks.getSpaceBinding('conv_g4'), created.space.id);
+  const unbound = await dispatchTool('knowledge_space_bind', {}, { conversationId: 'conv_g4' });
+  assert.equal(unbound.spaceId, 'ks_default', '缺省=解绑回落默认');
+  const noCtx = await dispatchTool('knowledge_space_bind', { spaceId: created.space.id }, {});
+  assert.equal(noCtx.error, 'binding_conversation_required', '无会话上下文 fail-closed');
+
+  await dispatchTool('knowledge_space_delete', { spaceId: created.space.id, confirmToken: 'kc_bypass' }, {});
+  // 上面带错 token：应被拒（空间仍存在），再走正常门清理
+  const stillThere = ks.getSpace(created.space.id);
+  assert.ok(stillThere, '错 token 不执行');
+  const gate = await dispatchTool('knowledge_space_delete', { spaceId: created.space.id }, {});
+  assert.equal(gate.confirmationRequired, true);
+  await dispatchTool('knowledge_space_delete', { spaceId: created.space.id, confirmToken: gate.confirmToken }, {});
+  assert.equal(ks.getSpace(created.space.id), null, '凭 token 删除成功');
+});
+
+test('G4 D4 门: 删空间首调出影响面+token，凭用户确认后执行；默认空间任何情况不可删', async () => {
+  const spaceB = ks.createSpace('G4 删除门空间');
+  const doc = await ingest.createDocument({
+    name: '删除门文档.txt',
+    buffer: Buffer.from('删除门占位内容 transcriptomics 笔记。', 'utf8'),
+    autoIngest: false,
+    spaceId: spaceB.id,
+  });
+  await ingest.ingestDocument(doc.id, { embed: async (t) => t.map(() => makeVec(61)) });
+
+  // 默认空间：确认门前先拦（ks_default_undeletable），带假 token 同样到不了执行
+  const defAttempt = await dispatchTool('knowledge_space_delete', { spaceId: 'ks_default' }, {});
+  assert.equal(defAttempt.error, 'ks_default_undeletable');
+
+  // 首调（无 token）：不执行 + 影响面诚实 + token 签发
+  const first = await dispatchTool('knowledge_space_delete', { spaceId: spaceB.id }, {});
+  assert.equal(first.confirmationRequired, true);
+  assert.equal(first.impact.documents, 1);
+  assert.equal(first.impact.chunks >= 1, true, '块数进影响面');
+  assert.match(first.confirmToken, /^kc_/);
+  assert.ok(ks.getSpace(spaceB.id), '未确认不执行');
+
+  // 错 token 不执行
+  const wrong = await dispatchTool('knowledge_space_delete', { spaceId: spaceB.id, confirmToken: 'kc_wrong' }, {});
+  assert.equal(wrong.error, 'confirm_token_invalid_or_expired');
+  assert.ok(ks.getSpace(spaceB.id), '错 token 仍不执行');
+
+  // 凭 token 执行 + 一次性（复用拒，空间已不在）
+  const done = await dispatchTool('knowledge_space_delete', { spaceId: spaceB.id, confirmToken: first.confirmToken }, {});
+  assert.equal(done.deleted, spaceB.id);
+  assert.equal(done.documents, 1);
+  assert.equal(ks.getSpace(spaceB.id), null);
+  const reuse = await dispatchTool('knowledge_space_delete', { spaceId: spaceB.id, confirmToken: first.confirmToken }, {});
+  assert.equal(reuse.error, 'space_not_found', '空间已删，不存在可再删的目标');
+});
+
+test('G4 D4 门: 批量删文档走门、单篇直删（与手动 UI/REST 同界）；清空空间走门', async () => {
+  const spaceB = ks.createSpace('G4 批删空间');
+  const ids = [];
+  for (let i = 0; i < 2; i++) {
+    const d = await ingest.createDocument({
+      name: `批删${i}.txt`,
+      buffer: Buffer.from(`批删占位 proteomics 内容 ${i}。`, 'utf8'),
+      autoIngest: false,
+      spaceId: spaceB.id,
+    });
+    ids.push(d.id);
+  }
+  // 批量（>1）：无 token → 门；token 主体绑定排序 docIds
+  const gate = await dispatchTool('knowledge_doc_delete', { docIds: ids }, {});
+  assert.equal(gate.confirmationRequired, true);
+  assert.equal(gate.impact.documents, 2);
+  assert.deepEqual(gate.impact.docNames.sort(), ['批删0.txt', '批删1.txt']);
+  assert.equal(ks.listDocuments(spaceB.id).length, 2, '未确认不删');
+
+  const mismatch = await dispatchTool('knowledge_doc_delete', { docIds: [ids[1], ids[0]], confirmToken: gate.confirmToken }, {});
+  assert.equal(mismatch.error, undefined, 'token 主体按排序 docIds 绑定，乱序不炸');
+  assert.equal(mismatch.deleted.length, 2, '确认后批量删除');
+
+  // 单篇直删（无门，与 REST 对齐）
+  const single = await ingest.createDocument({
+    name: '单删.txt',
+    buffer: Buffer.from('单删占位 metabolomics 内容。', 'utf8'),
+    autoIngest: false,
+    spaceId: spaceB.id,
+  });
+  const del1 = await dispatchTool('knowledge_doc_delete', { docIds: [single.id] }, {});
+  assert.equal(del1.error, undefined, '单篇无 confirmationRequired');
+  assert.equal(del1.confirmationRequired, undefined);
+  assert.equal(del1.deleted.length, 1);
+
+  // 清空空间走门
+  const d2 = await ingest.createDocument({
+    name: '清空门.txt',
+    buffer: Buffer.from('清空门占位内容。', 'utf8'),
+    autoIngest: false,
+    spaceId: spaceB.id,
+  });
+  const clearGate = await dispatchTool('knowledge_space_clear', { spaceId: spaceB.id }, {});
+  assert.equal(clearGate.confirmationRequired, true);
+  assert.equal(ks.listDocuments(spaceB.id).length, 1, '未确认不清');
+  const cleared = await dispatchTool('knowledge_space_clear', { spaceId: spaceB.id, confirmToken: clearGate.confirmToken }, {});
+  assert.equal(cleared.cleared, 1);
+  assert.equal(ks.listDocuments(spaceB.id).length, 0, '确认后清空');
+  assert.ok(ks.getSpace(spaceB.id), '清空保留空间本身');
+  ks.deleteSpaceCascade(spaceB.id);
+});
+
+test('G4 工具: doc_move/doc_reindex/doc_list + knowledge_search spaceId 透传', async () => {
+  ks.setSpaceEnabled(true, 'ks_default');
+  const spaceB = ks.createSpace('G4 移动工具空间');
+  const doc = await ingest.createDocument({
+    name: '工具移动.txt',
+    buffer: Buffer.from('工具链移动占位 genomics variant calling 笔记。', 'utf8'),
+    autoIngest: false,
+  });
+  await ingest.ingestDocument(doc.id, { embed: async (t) => t.map(() => makeVec(71)) });
+
+  const moved = await dispatchTool('knowledge_doc_move', { docIds: [doc.id], targetSpaceId: spaceB.id }, {});
+  assert.equal(moved.error, undefined, JSON.stringify(moved));
+  assert.equal(moved.moved, 1);
+  assert.equal(ks.listDocuments(spaceB.id).some((d) => d.id === doc.id), true);
+
+  const docList = await dispatchTool('knowledge_doc_list', { spaceId: spaceB.id }, {});
+  assert.equal(docList.total, 1);
+  assert.equal(docList.documents[0].id, doc.id);
+
+  // knowledge_search 带 spaceId：命中目标空间（doc 仍 ready，未动 reindex）
+  ks.setSpaceEnabled(true, spaceB.id);
+  const hit = await dispatchTool('knowledge_search', { query: 'variant calling', spaceId: spaceB.id }, {});
+  assert.equal(hit.error, undefined, JSON.stringify(hit));
+  assert.ok(hit.hits.length >= 1, '目标空间命中');
+
+  // 重建索引：入队返回诚实状态；无嵌入 key 时管道诚实转 failed（旧块在失败路径下保留）
+  const re = await dispatchTool('knowledge_doc_reindex', { docId: doc.id }, {});
+  assert.equal(re.error, undefined, JSON.stringify(re));
+  let terminal = ks.getDocument(doc.id);
+  for (let i = 0; i < 100 && !['ready', 'failed'].includes(terminal.status); i++) {
+    await new Promise((r) => setTimeout(r, 10));
+    terminal = ks.getDocument(doc.id);
+  }
+  assert.ok(['ready', 'failed'].includes(terminal.status), `重建进入终态：${terminal.status}`);
+  const chunkSpace = sqlite.prepare('SELECT DISTINCT space_id AS s FROM knowledge_chunks WHERE doc_id = ?').get(doc.id);
+  assert.equal(chunkSpace ? chunkSpace.s : spaceB.id, spaceB.id, '重建后块归属仍在 B');
+
+  ks.setSpaceEnabled(false, spaceB.id);
+  const disabled = await dispatchTool('knowledge_search', { query: 'variant calling', spaceId: spaceB.id }, {});
+  assert.equal(disabled.spaceEnabled, false, '停用空间诚实拒检');
+  assert.equal(disabled.hits.length, 0);
+
+  const absent = await dispatchTool('knowledge_search', { query: 'x', spaceId: 'ks_absent' }, {});
+  assert.equal(absent.error, 'space_not_found', '未知空间 fail-closed');
+
+  ks.deleteSpaceCascade(spaceB.id);
+  ks.setSpaceEnabled(false, 'ks_default');
+});

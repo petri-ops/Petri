@@ -115,6 +115,13 @@ export const gewuEvents = {
    * AppRailContext 订阅后立即刷新左栏项目树会话列表。
    */
   conversationCreated: 'gewu:conversation-created',
+
+  /**
+   * BLOCK-99 G4 — 知识空间管理台经会话驱动完成变更（建/改/启停/移动/删除/重建）
+   * 后派发；KnowledgeSpacePanel 订阅后立即刷新（双通道同一真相：UI 手动操作与
+   * 会话驱动操作共同的数据面）。
+   */
+  knowledgeConsoleSync: 'gewu:knowledge-console-sync',
 } as const;
 
 export interface ConversationForkedDetail {
@@ -269,6 +276,7 @@ export type GewuEventMap = {
   [gewuEvents.imageQuote]: ImageQuoteDetail;
   [gewuEvents.conversationTopicShift]: ConversationTopicShiftDetail;
   [gewuEvents.conversationCreated]: ConversationCreatedDetail;
+  [gewuEvents.knowledgeConsoleSync]: undefined;
 };
 
 /** BLOCK-34 P3: 后台进程启动事件载荷。 */

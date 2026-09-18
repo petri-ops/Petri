@@ -36,6 +36,11 @@ const { maybeEmitTaskTodo } = require('./agent-tools/todo-tools');
 const { buildSiteSnapshotAsync, renderSiteSnapshotForPrompt } = require('./helpers/site-snapshot');
 // BLOCK-69 — 知识空间（自动召回注入 + knowledge_search/status 工具数据面）
 const knowledgeSpace = require('./helpers/knowledge-space');
+// BLOCK-99 G4 — 空间管理会话台：工具子集过滤 + 管理台纪律段
+const {
+  resolveToolDefsForContext,
+  KNOWLEDGE_CONSOLE_PROMPT_SECTION,
+} = require('./agent-tools/knowledge-console-tools');
 const { buildFactsBlockAsync, backgroundExtractFacts } = require('./helpers/user-facts');
 const {
   _getChatSummary,
@@ -438,7 +443,12 @@ async function runAgentLoop({
 
   // BLOCK-69 — 知识空间自动召回（D4 轻按需：启用才检索；过阈值才注入，≤3 块；无命中不注入）
   // BLOCK-94 F1 挂点收敛：注入逻辑单源 buildTurnInjection（纯去重零行为变更）
-  const knowledgeInjection = await knowledgeSpace.buildTurnInjection(systemPrompt, messages);
+  // BLOCK-99 G3 — 按会话绑定空间过滤召回（未绑定回落 ks_default）。
+  // P4 勘察抓真修复：task 模式（默认活跃路径）此前漏传 conversationId，会话级
+  // 绑定在该路径上从未生效（恒回落默认空间）；与 chat.js legacy 路径对齐补传。
+  const knowledgeInjection = await knowledgeSpace.buildTurnInjection(systemPrompt, messages, {
+    conversationId: (_activeConv && _activeConv.id) || conversationId || null,
+  });
   systemPrompt = knowledgeInjection.systemPrompt;
   const knowledgeTokens = knowledgeInjection.knowledgeTokens;
   // BLOCK-94 F5 — 引用溯源：注入了哪些知识块即发射专用事件（经 _emit 持久化 task_events，
@@ -449,6 +459,11 @@ async function runAgentLoop({
       taskId,
       citations: knowledgeInjection.citations,
     });
+  }
+
+  // BLOCK-99 G4 — 管理会话台纪律段（toolSubset 命中才注入，加在工具指南之前）
+  if (context && context.toolSubset === 'knowledge-console') {
+    systemPrompt += KNOWLEDGE_CONSOLE_PROMPT_SECTION;
   }
 
   systemPrompt += '\n\n=== Tool Calling 指南 ===';
@@ -647,7 +662,9 @@ async function runAgentLoop({
     console.warn('[agent-runner] resident handover inject failed:', e && e.message);
   }
   const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages];
-  const tools = getToolDefs();
+  // BLOCK-99 G4 — 会话台工具子集（context.toolSubset === 'knowledge-console' 时只下发
+  // knowledge 白名单；其余值维持全量）。policy 层照常全量生效，此处是最外层收窄。
+  const tools = resolveToolDefsForContext(context, getToolDefs());
 
   // Build tool context
   const toolCtx = {

@@ -173,8 +173,8 @@ test('schema-first loading does not capture partial act helper exports', () => {
       const { getToolDefs } = require('./core/biof3-server/agent-tools/tool-defs.js');
       const planTools = require('./core/biof3-server/agent-tools/plan-ui-tools.js');
       const actTools = require('./core/biof3-server/agent-tools/act-tools.js');
-      // BLOCK-94 F5：knowledge_read 注册，工具总数 58 → 59
-      if (getToolDefs().length !== 59) throw new Error('unexpected tool count');
+      // BLOCK-99 G4：空间管理会话台工具族注册，工具总数 59 → 71（12 件）
+      if (getToolDefs().length !== 71) throw new Error('unexpected tool count');
       if (!actTools.testFilterExpr('5', '>3')) throw new Error('filter helper unavailable');
       const context = {};
       const result = await planTools.actOpenFigcodePlot({ figcardId: 'volcano' }, context);
@@ -223,6 +223,30 @@ test('retired learning handlers remain outside the Agent registry and dispatcher
   }
 });
 
+test('BLOCK-99 G4 knowledge-console subset filters to the knowledge whitelist and leaves other contexts untouched', () => {
+  const all = getToolDefs();
+  const { resolveToolDefsForContext, KNOWLEDGE_CONSOLE_TOOL_NAMES } = require('../core/biof3-server/agent-tools/knowledge-console-tools.js');
+  // 未命中 toolSubset：维持全量（additive，现状行为）
+  assert.equal(resolveToolDefsForContext({}, all).length, all.length);
+  assert.equal(resolveToolDefsForContext({ toolSubset: 'unknown-value' }, all).length, all.length);
+  assert.equal(resolveToolDefsForContext(null, all).length, all.length);
+  // 命中 knowledge-console：只下发白名单，且白名单 ⊆ 全集
+  const subset = resolveToolDefsForContext({ toolSubset: 'knowledge-console' }, all);
+  const allNames = new Set(all.map((d) => d.function.name));
+  assert.equal(subset.length, KNOWLEDGE_CONSOLE_TOOL_NAMES.size);
+  for (const def of subset) {
+    assert.equal(KNOWLEDGE_CONSOLE_TOOL_NAMES.has(def.function.name), true, `${def.function.name} not whitelisted`);
+    assert.match(def.function.name, /^knowledge_/);
+    assert.equal(allNames.has(def.function.name), true, `${def.function.name} missing from registry`);
+  }
+  // 破坏性三件必须在白名单内（D4 门生效面）且其余 50+ 通用工具不外泄
+  for (const gated of ['knowledge_space_delete', 'knowledge_space_clear', 'knowledge_doc_delete']) {
+    assert.equal(subset.some((d) => d.function.name === gated), true, `${gated} must be in console subset`);
+  }
+  assert.equal(subset.some((d) => d.function.name === 'workspace_exec'), false);
+  assert.equal(subset.some((d) => d.function.name === 'spawn_agent'), false);
+});
+
 test('Anthropic schema conversion explicitly strips internal contract metadata', () => {
   const converted = openAIToAnthropicRequest({
     model: 'claude-test',
@@ -262,8 +286,8 @@ test('OpenAI-compatible outbound JSON contains Provider schema only', async () =
       { baseUrl }
     );
     assert.equal(result.choices[0].message.content, 'ok');
-    // BLOCK-94 F5：knowledge_read 注册，工具总数 58 → 59
-    assert.equal(receivedBody.tools.length, 59);
+    // BLOCK-99 G4：空间管理会话台工具族注册，工具总数 59 → 71（12 件）
+    assert.equal(receivedBody.tools.length, 71);
     const keys = collectKeys(receivedBody.tools);
     for (const key of INTERNAL_CONTRACT_KEYS) assert.equal(keys.has(key), false, `${key} leaked`);
   } finally {

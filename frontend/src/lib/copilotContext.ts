@@ -21,6 +21,8 @@ export type CopilotPage =
   // 6.3 — desktop 项目工作台
   | 'desktop-project'
   | 'desktop-home'
+  // BLOCK-99 G4 — 知识空间管理台（/knowledge 页内嵌会话面）
+  | 'knowledge'
   | 'unknown';
 
 export interface HarnessContextSummary {
@@ -141,6 +143,12 @@ export interface CopilotContext {
     parameterPatch: Record<string, unknown>;
     scientificConfirmed: boolean;
   } | null;
+  /**
+   * BLOCK-99 G4 — 会话台工具子集标记：'knowledge-console' 时后端只下发 knowledge
+   * 白名单工具（agent-tools/knowledge-console-tools.js resolveToolDefsForContext）。
+   * 缺省/其他值维持全量工具（现状行为）。
+   */
+  toolSubset?: string;
 }
 
 let current: CopilotContext = { page: 'unknown' };

@@ -1,0 +1,269 @@
+/* KnowledgeConsoleChat.module.css — BLOCK-99 G4 管理会话台（--gewu-* token，禁 slate/零定义族） */
+
+/* /knowledge 页双栏布局（面板 + 会话台）；由页壳与台面共用本 module */
+.pageBody {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.panelCol {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.consoleCol {
+  flex: 0 0 380px;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.console {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  border: 1px solid var(--gewu-border);
+  border-radius: 10px;
+  background: var(--gewu-surface);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--gewu-border);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  color: var(--gewu-text);
+  font-weight: 600;
+}
+
+.headerHint {
+  margin-left: auto;
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.empty {
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  line-height: 1.7;
+  background: var(--gewu-bg-subtle);
+  border: 1px solid var(--gewu-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.empty ul {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+
+.emptyNote {
+  color: var(--gewu-text-tertiary);
+  margin-top: 6px;
+}
+
+.msg {
+  max-width: 92%;
+  padding: 7px 10px;
+  border-radius: 10px;
+  font-size: var(--gewu-font-size-caption);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.msgUser {
+  align-self: flex-end;
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-text);
+}
+
+.msgAssistant {
+  align-self: flex-start;
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text);
+}
+
+.toolRow {
+  align-self: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 8px;
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
+}
+
+.toolRowError {
+  border-color: var(--gewu-danger);
+}
+
+.toolSpin {
+  animation: consoleSpin 1.1s linear infinite;
+}
+
+@keyframes consoleSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.toolLabel {
+  color: var(--gewu-text);
+  font-weight: 600;
+}
+
+.toolSummary {
+  color: var(--gewu-text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.confirmCard {
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--gewu-danger);
+  border-radius: 8px;
+  background: var(--gewu-danger-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.confirmTitle {
+  color: var(--gewu-danger);
+  font-weight: 600;
+}
+
+.confirmImpact {
+  color: var(--gewu-text);
+  line-height: 1.6;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 8px;
+}
+
+.confirmBtnDanger {
+  border: 1px solid var(--gewu-danger);
+  border-radius: 6px;
+  background: var(--gewu-danger);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-xs);
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.confirmBtnGhost {
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.confirmBtnGhost:hover {
+  background: var(--gewu-hover);
+}
+
+.confirmResolved {
+  color: var(--gewu-text-tertiary);
+}
+
+.error {
+  flex-shrink: 0;
+  margin: 0 12px 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--gewu-danger);
+  border-radius: 8px;
+  background: var(--gewu-danger-bg);
+  color: var(--gewu-danger);
+  font-size: var(--gewu-font-size-xs);
+}
+
+.composer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--gewu-border);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  resize: none;
+  border: 1px solid var(--gewu-border);
+  border-radius: 8px;
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-caption);
+  line-height: 1.5;
+  padding: 7px 9px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--gewu-accent);
+}
+
+.input:disabled {
+  opacity: 0.55;
+}
+
+.sendBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--gewu-accent);
+  border-radius: 8px;
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-text);
+  cursor: pointer;
+}
+
+.sendBtn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.sendBtn:not(:disabled):hover {
+  background: var(--gewu-accent);
+}

@@ -95,6 +95,23 @@ export async function getConversationMessages(
   }
 }
 
+/** BLOCK-99 G4 — 会话存在性校验（管理台复用独立 conversation；404/离线 → null）。 */
+export async function getConversation(
+  id: string
+): Promise<ConversationSummary | null> {
+  try {
+    const resp = await fetch(
+      getApiPrefix() + '/ai/conversations/' + encodeURIComponent(id),
+      { headers: getAuthHeader() }
+    );
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.status === 'ok' ? data.conversation : null;
+  } catch {
+    return null;
+  }
+}
+
 /** BLOCK-95 B2/A5 — 会话压缩留痕（诚实可见；DB 原文始终可见）。 */
 export interface ConversationCompactionInfo {
   summary: string;

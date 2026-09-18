@@ -4,13 +4,16 @@
  * 知识空间是设备级全局域（BLOCK-69 D1 单行 default 空间），管理面从项目工作区右栏
  * 迁出至全局能力区（对标 /skills 先例）。面板组件复用 KnowledgeSpacePanel（零项目依赖）。
  * composer 大脑开关保留在会话内（快捷启停是态，本页是管理面）。
+ * BLOCK-99 G4 — 页体内嵌空间管理会话台（轻量聊天面，自然语言驱动内容组织）。
  */
 
 import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { KnowledgeSpacePanel } from '@/components/workspace-panels/KnowledgeSpacePanel';
+import { KnowledgeConsoleChat } from '@/components/knowledge/KnowledgeConsoleChat';
 import styles from '../global-page.module.css';
+import consoleStyles from '@/components/knowledge/KnowledgeConsoleChat.module.css';
 
 export default function KnowledgePage(): React.ReactElement {
   const navigate = useNavigate();
@@ -40,8 +43,13 @@ export default function KnowledgePage(): React.ReactElement {
           <span className={styles.subtitle}>全局知识库 · 启用后对话自动检索（非项目/会话关联）</span>
         </div>
       </header>
-      <div className={styles.body}>
-        <KnowledgeSpacePanel />
+      <div className={`${styles.body} ${consoleStyles.pageBody}`}>
+        <div className={consoleStyles.panelCol}>
+          <KnowledgeSpacePanel />
+        </div>
+        <div className={consoleStyles.consoleCol}>
+          <KnowledgeConsoleChat />
+        </div>
       </div>
     </div>
   );

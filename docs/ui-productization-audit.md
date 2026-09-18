@@ -3390,6 +3390,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **门禁**：Switcher 组件 3/3（渲染切换/创建后切换/两步删除）+ 面板回归 8/8 + tsc 0 + theme 4/4；client 加载防御（spaces 缺字段空列表降级不崩）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-415: 知识空间管理会话台——/knowledge 页内嵌轻量聊天面 + 自然语言驱动空间内容组织（BLOCK-99 P4/G4，2026-09-18 in_progress→契约与组件测试全绿，实机操作链走查待 P5）
+
+- **来源**：BLOCK-99-KNOWLEDGE-MULTISPACE-CONSOLE P4（用户裁决「面板中需要加入会话聊天的页面来单独处理控制知识空间内的各种内容」）。
+- **交付面**：①`KnowledgeConsoleChat`（/knowledge 页右栏内嵌，面板+会话台双栏）+ `useKnowledgeConsole` hook——D3 独立轻量面（**SimpleChat.tsx 零触碰**，直连 copilotClient.streamChat 复用 task 模式全基础设施）；D6 复用会话系统独立 conversation（localStorage 记忆+存在性校验+历史加载，可回溯可审计，新建广播 conversationCreated）；②后端工具族 12 件（knowledge_space_list/impact/create/rename/enable/bind/delete/clear + doc_list/move/delete/reindex，工具总数 59→71）+ 既有三件（search/status/read）可选 spaceId 透传；**D4 破坏性确认门**：删空间/清空/批量删文档首调服务端签发一次性 confirmToken（绑定 action+subject，10 分钟 TTL）并如实返回影响面，内联确认卡（确认/取消）用户点击后回灌会话、模型凭 token 重调执行（run_tool ack 同型+服务端硬闸）；③D7 边界：只读+非破坏全开、破坏性走门；`context.toolSubset='knowledge-console'` 时 run 只下发 knowledge 白名单 15 件（runner/chat legacy 两路同源过滤+管理台纪律段注入）；变更成功广播 `gewu:knowledge-console-sync` 事件（面板订阅即时刷新，轮询兜底不变）；诚实边界=会话台管内容组织不管面板布局。
+- **门禁**：knowledge 契约 G4 六测（move 归属迁移/确认令牌一次性/工具链 dispatch/D4 删空间门/批量删门+单篇直删同界/doc_move+reindex+search spaceId）45/47（仅剩 2 动前存量 PDF 基线红）+ agent-tool-registry 10/10（71 计数断言+子集过滤契约）+ hook 测试 6/6 + 面板回归 11/11 + tsc 0 + theme 4/4；KnowledgeSpacePanel 668→678 未触 700 棘轮线（G4 逻辑进新文件）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-407: 新对话空态示例卡通用化——领域卡按已装领域包动态追加 (2026-09-18 verified，用户裁决「可以直接修复」+CDP 实机断言)
 
 - **来源**：用户投影实测反馈「新建任务的默认页面……要有通用性 领域提示 等等 这个有点历史残留的干扰（可以直接修复）」——空态三卡之首「分析单细胞数据」是 biof3 生信时代硬编码遗留（DEFAULT_EXAMPLE_PROMPTS），与「通用 agent 工作台 + 领域能力包化」（BLOCK-86）现状相悖。

@@ -59,6 +59,20 @@ const {
 const { tool_system_info } = require('./system-info-tools');
 const { tool_knowledge_search, tool_knowledge_status, tool_knowledge_read } = require('./knowledge-tools');
 const {
+  tool_knowledge_space_list,
+  tool_knowledge_space_impact,
+  tool_knowledge_doc_list,
+  tool_knowledge_space_create,
+  tool_knowledge_space_rename,
+  tool_knowledge_space_enable,
+  tool_knowledge_space_bind,
+  tool_knowledge_doc_move,
+  tool_knowledge_doc_reindex,
+  tool_knowledge_space_delete,
+  tool_knowledge_space_clear,
+  tool_knowledge_doc_delete,
+} = require('./knowledge-console-tools');
+const {
   tool_computer_snapshot,
   tool_computer_click,
   tool_computer_type,
@@ -164,6 +178,19 @@ const HANDLERS = {
   knowledge_status: tool_knowledge_status,
   // BLOCK-94 F5 — 按文档深读（只读；配合 knowledge_search 命中结果溯源全文）
   knowledge_read: tool_knowledge_read,
+  // BLOCK-99 G4 — 空间管理会话台工具族（只读+非破坏全开；破坏性三件走 D4 确认门）
+  knowledge_space_list: tool_knowledge_space_list,
+  knowledge_space_impact: tool_knowledge_space_impact,
+  knowledge_doc_list: tool_knowledge_doc_list,
+  knowledge_space_create: tool_knowledge_space_create,
+  knowledge_space_rename: tool_knowledge_space_rename,
+  knowledge_space_enable: tool_knowledge_space_enable,
+  knowledge_space_bind: tool_knowledge_space_bind,
+  knowledge_doc_move: tool_knowledge_doc_move,
+  knowledge_doc_reindex: tool_knowledge_doc_reindex,
+  knowledge_space_delete: tool_knowledge_space_delete,
+  knowledge_space_clear: tool_knowledge_space_clear,
+  knowledge_doc_delete: tool_knowledge_doc_delete,
 };
 
 function contract(category, sideEffect, riskTier, resources, estimatedDurationMs) {
@@ -252,6 +279,20 @@ const CONTRACTS = {
   knowledge_search: contract('retrieval', 'none', 'R0', ['knowledge.index', 'llm.provider'], 2500),
   knowledge_status: contract('retrieval', 'none', 'R0', ['knowledge.index'], 100),
   knowledge_read: contract('retrieval', 'none', 'R0', ['knowledge.index'], 800),
+  // BLOCK-99 G4 — 空间管理会话台：只读 R0；非破坏写 state-write/R1；
+  // 破坏性三件 state-write/R2（D4 确认门在工具层服务端硬闸，policy 层照常拦执行档）
+  knowledge_space_list: contract('retrieval', 'none', 'R0', ['knowledge.index'], 100),
+  knowledge_space_impact: contract('retrieval', 'none', 'R0', ['knowledge.index'], 100),
+  knowledge_doc_list: contract('retrieval', 'none', 'R0', ['knowledge.index'], 100),
+  knowledge_space_create: contract('action', 'state-write', 'R1', ['knowledge.index'], 200),
+  knowledge_space_rename: contract('action', 'state-write', 'R1', ['knowledge.index'], 200),
+  knowledge_space_enable: contract('action', 'state-write', 'R1', ['knowledge.index'], 200),
+  knowledge_space_bind: contract('action', 'state-write', 'R1', ['knowledge.index'], 200),
+  knowledge_doc_move: contract('action', 'state-write', 'R1', ['knowledge.index'], 500),
+  knowledge_doc_reindex: contract('action', 'state-write', 'R1', ['knowledge.index', 'local.process'], 5000),
+  knowledge_space_delete: contract('action', 'state-write', 'R2', ['knowledge.index'], 2000),
+  knowledge_space_clear: contract('action', 'state-write', 'R2', ['knowledge.index'], 2000),
+  knowledge_doc_delete: contract('action', 'state-write', 'R2', ['knowledge.index'], 2000),
 };
 
 function cloneJson(value) {

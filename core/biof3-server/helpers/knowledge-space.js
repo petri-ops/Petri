@@ -681,6 +681,42 @@ function deleteSpaceCascade(spaceId) {
   return { deleted: spaceId, name: space.name, documents: impact.documents, chunks: impact.chunks };
 }
 
+// BLOCK-99 G4 — 文档跨空间归类移动：非破坏（行只改归属，块/FTS/原始文件不动）。
+// chunks.space_id 与文档行同事务跟随（G1 抓真家法：块归属永远随文档行）。
+function moveDocumentsToSpace(docIds, targetSpaceId) {
+  const target = resolveSpaceId(targetSpaceId);
+  const ids = (Array.isArray(docIds) ? docIds : [docIds])
+    .map((id) => String(id || '').trim())
+    .filter(Boolean);
+  if (ids.length === 0) {
+    const err = new Error('docIds required for move');
+    err.code = 'doc_ids_required';
+    throw err;
+  }
+  if (ids.length > 200) {
+    const err = new Error('too many docIds in one move (max 200)');
+    err.code = 'doc_ids_too_many';
+    throw err;
+  }
+  const moved = [];
+  const missing = [];
+  const tx = sqlite.transaction(() => {
+    for (const id of ids) {
+      const doc = getDocument(id);
+      if (!doc) {
+        missing.push(id);
+        continue;
+      }
+      if (doc.space_id === target) continue;
+      sqlite.prepare('UPDATE knowledge_documents SET space_id = ?, updated_at = ? WHERE id = ?').run(target, now(), id);
+      sqlite.prepare('UPDATE knowledge_chunks SET space_id = ? WHERE doc_id = ?').run(target, id);
+      moved.push(id);
+    }
+  });
+  tx();
+  return { moved, missing, targetSpaceId: target };
+}
+
 // ── BLOCK-99 G3 会话级空间绑定 ─────────────────────────────
 // 约定：绑定 ks_default 不落行（读时空返回默认），空间被删时 FK CASCADE
 // 自动掉绑 → 会话回落默认空间。
@@ -739,6 +775,7 @@ module.exports = {
   renameSpace,
   spaceImpact,
   deleteSpaceCascade,
+  moveDocumentsToSpace,
   getSpaceBinding,
   setSpaceBinding,
   listDocuments,

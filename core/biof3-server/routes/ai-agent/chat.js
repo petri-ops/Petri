@@ -20,6 +20,11 @@ const express = require('express');
 const { normalizeThinkingLevel } = require('../../../shared-backend/llm-providers/thinking-level');const { buildSystemPrompt, localizeToolResult } = require('../../helpers/system-prompt');
 // BLOCK-69 — 知识空间自动召回
 const knowledgeSpace = require('../../helpers/knowledge-space');
+// BLOCK-99 G4 — 空间管理会话台：工具子集过滤 + 管理台纪律段（与 agent-runner 同源）
+const {
+  resolveToolDefsForContext,
+  KNOWLEDGE_CONSOLE_PROMPT_SECTION,
+} = require('../../agent-tools/knowledge-console-tools');
 const { appendDesktopAgentInstructions } = require('../../helpers/desktop-agent-prompt');
 const { renderPluginDemoPathsForPrompt } = require('../../helpers/plugin-demo-prompt');
 const { callChatProvider } = require('../../helpers/llm-client');
@@ -662,8 +667,13 @@ module.exports = {
         }),
       };
 
+      // BLOCK-99 G4 — 管理会话台纪律段（toolSubset 命中才注入，须在 fullMessages 前）
+      if (context && context.toolSubset === 'knowledge-console') {
+        systemPrompt += KNOWLEDGE_CONSOLE_PROMPT_SECTION;
+      }
       const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages];
-      const tools = getToolDefs();
+      // BLOCK-99 G4 — 会话台工具子集（与 agent-runner task 路径同源同参）
+      const tools = resolveToolDefsForContext(context, getToolDefs());
       const traceId = createTraceId();
       const toolCallController = createAgentToolCallController({ maxToolCalls: MAX_AGENT_TOOL_CALLS });
       const continuationGuard = createContinuationGuard({

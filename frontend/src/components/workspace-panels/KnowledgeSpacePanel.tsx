@@ -23,6 +23,7 @@ import {
   type KnowledgeSpaceState,
 } from '@/lib/knowledgeClient';
 import { KnowledgeSpaceSwitcher } from './KnowledgeSpaceSwitcher';
+import { subscribeGewuEvent } from '@/lib/events';
 import {
   BUSY_STATUSES,
   formatBytes,
@@ -79,6 +80,15 @@ export function KnowledgeSpacePanel() {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  // BLOCK-99 G4 — 管理台会话驱动变更后即时刷新（双通道同一真相；轮询兜底不变）
+  useEffect(
+    () =>
+      subscribeGewuEvent('gewu:knowledge-console-sync', () => {
+        void refresh();
+      }),
+    [refresh]
+  );
 
   useEffect(() => {
     const hasBusy = (state?.documents || []).some((doc) => BUSY_STATUSES.has(doc.status));

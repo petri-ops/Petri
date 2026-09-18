@@ -17,17 +17,26 @@ async function tool_knowledge_search(args, ctx) {
   if (!query) {
     return { error: 'query_required', message: 'knowledge_search 需要非空 query。' };
   }
-  // plan §6 验收语义：开关关闭 = 知识库对 agent 整体不可见（自动召回与工具层同门）
-  const space = ks.getSpace();
+  // BLOCK-99 G4 — 可选 spaceId（管理会话台跨空间检索；缺省 ks_default 零行为变更）。
+  // plan §6 验收语义：目标空间开关关闭 = 该空间对 agent 整体不可见（自动召回与工具层同门）。
+  let spaceId = ks.SPACE_ID;
+  if (args && args.spaceId != null && String(args.spaceId).trim() !== '') {
+    try {
+      spaceId = ks.resolveSpaceId(args.spaceId);
+    } catch (e) {
+      return { error: e.code || 'space_not_found', message: `目标知识空间不存在：${args.spaceId}` };
+    }
+  }
+  const space = ks.getSpace(spaceId);
   if (!space || !space.enabled) {
     return {
       spaceEnabled: false,
       hits: [],
-      message: '知识空间未启用，无法检索。若用户期望检索其上传知识库，请提示在右侧「知识空间」面板启用。',
+      message: `知识空间「${space ? space.name : spaceId}」未启用，无法检索。可在知识空间面板启用，或（管理台中）用 knowledge_space_enable 启用。`,
     };
   }
   const topK = Math.max(1, Math.min(MAX_HITS, (args && args.topK) || ks.INJECT_TOPK));
-  const result = await ks.searchKnowledge({ query, topK });
+  const result = await ks.searchKnowledge({ query, topK, spaceId });
 
   if (result.readyChunks === 0) {
     return {
@@ -58,18 +67,30 @@ async function tool_knowledge_search(args, ctx) {
   };
 }
 
-function tool_knowledge_status() {
-  const space = ks.getSpace();
-  const docs = ks.listDocuments();
+function tool_knowledge_status(args) {
+  // BLOCK-99 G4 — 可选 spaceId（缺省 ks_default 零行为变更）
+  let spaceId = ks.SPACE_ID;
+  if (args && args.spaceId != null && String(args.spaceId).trim() !== '') {
+    try {
+      spaceId = ks.resolveSpaceId(args.spaceId);
+    } catch (e) {
+      return { error: e.code || 'space_not_found', message: `目标知识空间不存在：${args.spaceId}` };
+    }
+  }
+  const space = ks.getSpace(spaceId);
+  const docs = ks.listDocuments(spaceId);
   const byStatus = {};
   for (const doc of docs) {
     byStatus[doc.status] = (byStatus[doc.status] || 0) + 1;
   }
   return {
+    spaceId,
+    spaceName: space ? space.name : spaceId,
     spaceEnabled: !!(space && space.enabled),
     documentCount: docs.length,
     byStatus,
     documents: docs.slice(0, 20).map((doc) => ({
+      id: doc.id,
       name: doc.name,
       status: doc.status,
       chunks: doc.chunk_count,
@@ -88,15 +109,24 @@ async function tool_knowledge_read(args) {
   if (!docId) {
     return { error: 'doc_id_required', message: 'knowledge_read 需要 docId（可先经 knowledge_search 命中结果获取）。' };
   }
-  const space = ks.getSpace();
+  // BLOCK-99 G4 — 可选 spaceId（跨空间深读；缺省 ks_default 零行为变更）
+  let spaceId = ks.SPACE_ID;
+  if (args && args.spaceId != null && String(args.spaceId).trim() !== '') {
+    try {
+      spaceId = ks.resolveSpaceId(args.spaceId);
+    } catch (e) {
+      return { error: e.code || 'space_not_found', message: `目标知识空间不存在：${args.spaceId}` };
+    }
+  }
+  const space = ks.getSpace(spaceId);
   if (!space || !space.enabled) {
     return {
       spaceEnabled: false,
-      message: '知识空间未启用，无法读取。若用户期望检索其上传知识库，请提示在右侧「知识空间」面板启用。',
+      message: `知识空间「${space ? space.name : spaceId}」未启用，无法读取。`,
     };
   }
   const doc = ks.getDocument(docId);
-  if (!doc || doc.space_id !== ks.SPACE_ID) {
+  if (!doc || doc.space_id !== spaceId) {
     return { error: 'knowledge_document_not_found', message: `文档不存在：${docId}` };
   }
   if (doc.status !== 'ready') {
