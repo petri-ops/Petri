@@ -4686,6 +4686,27 @@
       ],
       "notes": "知识空间完整多空间版 + 空间管理会话台（BLOCK-94 单空间收口时登记的非范围正面立项；用户裁决 2026-09-18「是需要做的 并且是 完整多空间版」「面板中需要加入会话聊天的页面来单独处理控制知识空间内的各种内容 无论是布局还是分类」）。六工作面：G1 多空间数据模型与 CRUD（migration 010 additive，spaces 表多行能力/space_id/FK CASCADE v1 已留扩展位；12 端点参数化；存量 ks_default 零迁移）+ G2 面板信息架构（空间列表/切换；KnowledgeSpacePanel 701 行触 BLOCK-92 台账线须同步处理）+ G3 会话级空间绑定与召回范围（composer 开关→开+空间选择；buildTurnInjection 单源按空间过滤；溯源标注来源空间）+ G4 空间管理会话台（/knowledge 页内嵌 chat 面自然语言驱动空间管理；管理操作工具化 additive；破坏性走确认门；SimpleChat.tsx 主文件零触碰）+ G5 嵌入一致性按空间（chunk dim/model 隔离天然扩展）+ G6 实机收口（flow block99-knowledge-multispace + acceptance/block-99/）。非范围=音视频/数据库直读（P4 线）、手机投影、嵌入多 provider、sqlite-vec（BLOCK-94 §8 结论延续）、文档级标签 UI（空间=领域主分类承接）、面板 UI 布局代码控制。D1-D7 预置裁决项 plan §5。planned 排队不占 active 槽位；启动需用户裁决。",
       "lastUpdated": "2026-09-18"
+    },
+    {
+      "id": "BLOCK-100-CDP-TEST-INSTANCE",
+      "path": "docs/block-100-cdp-test-instance-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-100-cdp-test-instance",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-18",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "block-100",
+        "test-instance",
+        "cdp",
+        "dev-verify",
+        "infrastructure"
+      ],
+      "notes": "CDP 实机验收测试实例隔离基建（用户裁决 2026-09-18「我希望是一个比较全面稳定的基建包」——选定测试实例窗口路线）。背景=实机验收与用户共用主窗口双向干扰（人扰测试断言挂/测试扰人〔UI-406 探针导航用户窗口未还原抓真〕）。方案=独立 Electron 测试实例：独立 userData（.biof3-test-user-data）绕单实例锁+离屏可见窗口（hidden/minimized 有实测渲染冻结反例，红线）+CDP 9223+零 fork 后端零 migration（R_SERVER_PORT 指向既有 :3001，数据同源验收语义不变）。六工作面：P1 主进程 BIOF3_TEST_INSTANCE 分支/P2 start-test-instance.sh 启动器/P3 dev-verify lib 扩面（connectTestTarget+withInputShield〔仅只读 flow〕）/P4 flow 试点迁移（app-health+ui341-welcome-chat）/P5 实机四断言（并存零扰动/人因干扰负例/flow 全过/崩溃兜底）/P6 收口。D1-D6 预置裁决项 plan §5 全按推荐先行留痕。红线=探针永久禁导航用户窗口。非范围=Playwright/单实例锁语义变更/全量 flow 一次迁移/打包态。",
+      "lastUpdated": "2026-09-18"
     }
   ],
   "lastUpdated": "2026-09-18",
