@@ -77,6 +77,10 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 
 5. **双端协同协议（先查后动 · 同批生效 · 互报 probe）**：任何一端 Agent 在动隧道/网关/公网映射前必须——① 查本节分配表，**禁止自选端口**；② ECS 上 `ss -tlnp` 确认目标端口当前占用者（有主即停，先协商再动手）；③ 本端改动落地后向对端回报 probe 结果（curl 对端公网 `/api/mobile/status`，期待 401 + session_invalid 形 JSON），**两端 probe 全绿才算切换完成**；④ 分配表变更以本 skill 的 git 提交为准（push 后对端 pull 生效），口头/聊天约定不算登记。
 
+6. **跨端公网门是自签 HTTPS，后端 fetch 必须预置 CA 信任**：双端公网门（443/8442/8443）均为 ECS 自签证书；对端**后端**（Node）fetch 该地址会撞 `DEPTH_ZERO_SELF_SIGNED_CERT`——此坑只在跨端配对/互访时暴露，单机自测永远正常。修法（推荐 ①）：① 从 ECS 拷 `/etc/nginx/ssl/gewu.crt` 到本机固定路径（Windows：`.biof3-dev-user-data/ecs-gewu.crt`），**栈每次启动前**设 `NODE_EXTRA_CA_CERTS=<crt 绝对路径>`（Windows 经 bash→PowerShell→Start-Process 链路 export 可传播到后端子进程；**忘带 env ＝ 重启后跨端互访突然全断的隐形雷**，restart-dev-stack 前必查）；② 测试期捷径 `NODE_TLS_REJECT_UNAUTHORIZED=0`（全量关校验，仅测试期）。
+
+7. **跨端出码命令与 token/host 分离**：配对 token 5 分钟 TTL，由**拥有网关的进程 :3001** 签发（第 1 条脑裂纪律）——标准命令 `curl -X POST http://127.0.0.1:3001/api/mobile/pairing/token -H "Authorization: Bearer desktop-local" -d "{}"`（双端同形，禁用面板 UI 出码做跨机验收）。**token 与 host 分离**：收到的码是 LAN 形态（`http://192.168.x.x:<gw>/pair?token=…`）时，对端可将 host 替换为该端公网门（前提=该端隧道 connected 且 nginx 映射在）后提交 `/federation/peers/pair`，token 依然有效——跨网段配对的正路。验收期间挂外部端到端探测（10s 级 `curl -k <公网门>/api/mobile/status`，401=活）留时间线：`state=connected` 与端口 held 都可能假活（半开 TCP），失败对账以监控时间线为准，不以管理器状态为准。
+
 ## 保持工作区干净
 
 - `npm run hygiene:check` 报告死符号链接、临时残留与**工作区换行漂移**；它只报告不代删，处置由人裁决（换行归一用 `scripts/normalize-eol.mjs --write`）。
