@@ -3349,6 +3349,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-410: 测试窗口预览化——默认 1280x800 + 鼠标穿透禁外部点击 (BLOCK-100 增补，2026-09-18 verified，用户裁决「窗口应该小一些 并且不允许外部点击」)
+
+- **交付面**：①测试实例默认尺寸 1600x1000→**1280x800**（预览够用；仍大于 960 响应式断点不破布局断言）；②**鼠标穿透** `setIgnoreMouseEvents(true)`（OS 层 WS_EX_TRANSPARENT，实机 GetWindowLong 验证 =True）：真实点击物理上穿透窗口打到下层——人因手滑碰不到测试界面；CDP 合成输入走渲染层注入不经 OS 鼠标层，**交互型 flow（合成点击/键盘）不受影响**——比 CDP 层 withInputShield（连合成一起吞，仅只读 flow 适用）更适合做窗口级默认；③--onscreen 摆位改屏幕右上（x=主屏宽-1304），悬浮徽标加 title 提示「真实点击已穿透」。
+- **抓真 1 件**：BrowserWindow 参数 spread 在 width:1600 之前被对象字面量后键覆盖（1280 不生效，实机 innerWidth=1604 抓真）→ 调整键序（覆盖 spread 排默认尺寸之后）。
+- **门禁**：block100 flow 5/5（w=1284）；Win32 样式断言 WS_EX_TRANSPARENT=True；徽标双实例断言 allPass。
+- G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-409: 测试实例悬浮徽标 + 任务栏 [TEST] 前缀——测试窗口一眼可辨 (BLOCK-100 增补，2026-09-18 verified，用户需求「能够看到测试的情况」+CDP 双实例断言)
 
 - **来源**：用户反馈「用于测试的 CDP 那个窗口……我不知道是哪一个呀 测试一般用来预览用……小悬浮窗口？」——BLOCK-100 测试实例此前仅靠屏幕位置区分，多窗口下不可辨。

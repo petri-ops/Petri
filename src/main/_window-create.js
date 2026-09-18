@@ -70,21 +70,29 @@ async function createWindow({
   // 过程（2026-09-18 用户需求「能够看到测试的情况」）；两种摆放渲染语义等价。
   const IS_TEST_INSTANCE = process.env.BIOF3_TEST_INSTANCE === "1";
   const testWindowBounds = {};
+  const testWindowSize = {};
   if (IS_TEST_INSTANCE) {
+    // UI-410 — 测试窗口缩小到 1280x800（预览够用；仍大于 960 响应式断点，
+    // 不破坏布局类断言）。
+    testWindowSize.width = 1280;
+    testWindowSize.height = 800;
     if (process.env.BIOF3_TEST_ONSCREEN === "1") {
-      testWindowBounds.x = 180;
-      testWindowBounds.y = 60;
+      const { screen } = require("electron");
+      const primary = screen.getPrimaryDisplay().bounds;
+      testWindowBounds.x = primary.x + primary.width - 1280 - 24;
+      testWindowBounds.y = primary.y + 60;
     } else {
       const { screen } = require("electron");
       const primary = screen.getPrimaryDisplay().bounds;
-      testWindowBounds.x = primary.x - 1600 - 100;
+      testWindowBounds.x = primary.x - 1280 - 100;
       testWindowBounds.y = primary.y + 40;
     }
   }
   const mainWindow = new BrowserWindow({
-    ...(IS_TEST_INSTANCE ? testWindowBounds : {}),
     width: 1600,
     height: 1000,
+    // 测试实例覆盖（x/y + 1280x800）必须排在默认尺寸之后——对象字面量后键胜出
+    ...(IS_TEST_INSTANCE ? { ...testWindowBounds, ...testWindowSize } : {}),
     minWidth: 720,
     minHeight: 520,
     title: IS_TEST_INSTANCE ? `[TEST] ${BRAND.APP_NAME}` : BRAND.APP_NAME, // BLOCK-61：品牌单一事实源；[TEST] 前缀=BLOCK-100 窗口级标记
@@ -127,6 +135,11 @@ async function createWindow({
       }
     });
     mainWindow.setTitle(`[TEST] ${BRAND.APP_NAME}`);
+    // UI-410 — 测试实例默认鼠标穿透（用户裁决「不允许外部点击」）：真实点击
+    // 在 OS 层直接穿透到下层窗口（WS_EX_TRANSPARENT），人因手滑物理上碰不到
+    // 测试界面；CDP 合成输入走渲染层注入不经 OS 鼠标层，交互型 flow 不受影响。
+    // 穿透后窗口不可拖动/点击——移动靠启动器定位或渲染层 window.moveTo。
+    mainWindow.setIgnoreMouseEvents(true);
   }
 
   // Register with shared ref immediately so event handlers can use getMainWindow()

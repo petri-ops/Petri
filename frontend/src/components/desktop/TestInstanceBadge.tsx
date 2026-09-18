@@ -17,7 +17,12 @@ const isTestInstance =
 export function TestInstanceBadge(): React.ReactElement | null {
   if (!isTestInstance) return null;
   return (
-    <div className={styles.badge} role="status" aria-label="测试实例">
+    <div
+      className={styles.badge}
+      role="status"
+      aria-label="测试实例"
+      title="测试实例（仅供观察）：真实点击已穿透，无法操作此窗口；移动由启动器/CDP 控制"
+    >
       测试实例 · TEST
     </div>
   );
