@@ -1965,7 +1965,8 @@
       "patterns": [
         "scripts/auto-sync-remote.sh",
         "scripts/auto-sync-remote.cmd",
-        "scripts/auto-sync-mac-setup.sh"
+        "scripts/auto-sync-mac-setup.sh",
+        "scripts/mac-85-prepare.sh"
       ],
       "tests": [],
       "frontendRelated": false,
