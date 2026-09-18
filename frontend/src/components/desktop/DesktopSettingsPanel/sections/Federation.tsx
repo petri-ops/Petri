@@ -14,6 +14,41 @@ interface FederationPeer {
   addedAt: string;
   lastSeenAt: string;
   lastProbe: { ok: boolean; at: string; latencyMs: number | null; error: string | null } | null;
+  identity?: { displayName?: string; device?: string } | null;
+}
+
+// BLOCK-88 P1：协作成员 = 本机会话中带工程师声明身份的访客（D2）。
+interface FederationMember {
+  id: string;
+  name: string;
+  createdAt: string;
+  lastSeenAt: string;
+  identity: { displayName?: string; device?: string };
+}
+
+// 署名持久化键：本机工程师署名是展示性声明（D1-A），存 localStorage 即可。
+const ENGINEER_NAME_KEY = 'gewu-engineer-name';
+const MEMBERS_REFRESH_MS = 30 * 1000;
+// 访客活跃判定：lastSeenAt 在窗口内视为在线（gateway 每请求刷新该字段）。
+const MEMBER_ONLINE_WINDOW_MS = 2 * 60 * 1000;
+
+function deviceLabel(): string {
+  const ua = navigator.userAgent;
+  if (/Mac/i.test(ua)) return 'macOS';
+  if (/Win/i.test(ua)) return 'Windows';
+  if (/Linux/i.test(ua)) return 'Linux';
+  return navigator.platform || '';
+}
+
+function relTime(iso: string): string {
+  const delta = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(delta) || delta < 0) return '刚刚';
+  const minutes = Math.floor(delta / 60_000);
+  if (minutes < 1) return '刚刚';
+  if (minutes < 60) return `${minutes} 分钟前`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} 小时前`;
+  return `${Math.floor(hours / 24)} 天前`;
 }
 
 function authHeaders(): Record<string, string> {
@@ -44,6 +79,7 @@ function platformLabel(peer: FederationPeer): string {
  */
 export function FederationPanel(): React.ReactElement {
   const [peers, setPeers] = useState<FederationPeer[] | null>(null);
+  const [members, setMembers] = useState<FederationMember[] | null>(null);
   const [pairUrl, setPairUrl] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +87,9 @@ export function FederationPanel(): React.ReactElement {
   const [invite, setInvite] = useState<{ token: string; primaryUrl: string } | null>(null);
   const [inviteBusy, setInviteBusy] = useState(false);
   const [inviteCopied, setInviteCopied] = useState(false);
+  const [myName, setMyName] = useState(() => {
+    try { return localStorage.getItem(ENGINEER_NAME_KEY) || ''; } catch { return ''; }
+  });
 
   const refresh = useCallback(async () => {
     try {
@@ -62,9 +101,24 @@ export function FederationPanel(): React.ReactElement {
     }
   }, []);
 
+  const refreshMembers = useCallback(async () => {
+    try {
+      const response = await fetch(`${getPlatformApiPrefix()}/federation/members`, { headers: authHeaders() });
+      const data = await response.json();
+      if (data.ok) setMembers(data.members);
+    } catch {
+      /* 成员列表读取失败静默（下次轮询/操作后再试） */
+    }
+  }, []);
+
   useEffect(() => {
     void refresh();
-  }, [refresh]);
+    void refreshMembers();
+    const timer = window.setInterval(() => {
+      void refreshMembers();
+    }, MEMBERS_REFRESH_MS);
+    return () => window.clearInterval(timer);
+  }, [refresh, refreshMembers]);
 
   const addPeer = useCallback(async () => {
     if (!pairUrl.trim()) return;
@@ -72,16 +126,22 @@ export function FederationPanel(): React.ReactElement {
     setError(null);
     setNotice(null);
     try {
+      const trimmedName = myName.trim();
       const response = await fetch(`${getPlatformApiPrefix()}/federation/peers/pair`, {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({ url: pairUrl.trim() }),
+        body: JSON.stringify({
+          url: pairUrl.trim(),
+          identity: trimmedName ? { displayName: trimmedName, device: deviceLabel() } : undefined,
+        }),
       });
       const data = await response.json();
       if (data.ok) {
         setPairUrl('');
-        setNotice(`已添加协作节点「${data.peer?.name ?? '?'}」`);
+        const signed = trimmedName ? `（以「${trimmedName}」署名）` : '';
+        setNotice(`已添加协作节点「${data.peer?.name ?? '?'}」${signed}`);
         await refresh();
+        await refreshMembers();
       } else {
         setError(data.message || '配对失败');
       }
@@ -90,7 +150,7 @@ export function FederationPanel(): React.ReactElement {
     } finally {
       setBusy(false);
     }
-  }, [pairUrl, refresh]);
+  }, [pairUrl, myName, refresh, refreshMembers]);
 
   const probePeer = useCallback(async (peerId: string) => {
     setBusy(true);
@@ -272,6 +332,18 @@ export function FederationPanel(): React.ReactElement {
         <input
           type="text"
           className={styles.addInput}
+          value={myName}
+          maxLength={40}
+          onChange={(event) => {
+            setMyName(event.target.value);
+            try { localStorage.setItem(ENGINEER_NAME_KEY, event.target.value); } catch { /* 隐私模式等存储不可用 */ }
+          }}
+          placeholder="我的工程师署名（可选，显示给对方）"
+          data-testid="federation-engineer-name"
+        />
+        <input
+          type="text"
+          className={styles.addInput}
           value={pairUrl}
           onChange={(event) => setPairUrl(event.target.value)}
           placeholder="粘贴对端配对链接（http://…:3005/pair?token=…）"
@@ -288,6 +360,35 @@ export function FederationPanel(): React.ReactElement {
             配对
           </button>
         </div>
+      </div>
+
+      <div className={styles.addCard} data-testid="federation-members">
+        <h4 className={styles.addTitle}>协作成员</h4>
+        {members && members.length === 0 && (
+          <p className={styles.fedHint} data-testid="federation-member-empty">
+            还没有访客工程师 · 对方把本机配对码粘贴到他们的格物里并署名后，会出现在这里
+          </p>
+        )}
+        {members && members.length > 0 && (
+          <ul className={styles.peerList}>
+            {members.map((member) => {
+              const online = Date.now() - new Date(member.lastSeenAt).getTime() < MEMBER_ONLINE_WINDOW_MS;
+              return (
+                <li key={member.id} className={styles.peerCard} data-testid="federation-member-row">
+                  <span className={`${styles.peerDot} ${online ? styles.peerDotOn : ''}`} />
+                  <div className={styles.peerMain}>
+                    <span className={styles.peerName}>{member.identity.displayName || member.name}</span>
+                    <span className={styles.peerMeta}>
+                      {[member.identity.device, online ? '在线' : `活跃于 ${relTime(member.lastSeenAt)}`]
+                        .filter(Boolean).join(' · ')}
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        <p className={styles.fedHint}>成员署名为对方声明身份，未经验证；吊销访客可在「我的设备」中操作。</p>
       </div>
 
       {peers && peers.length === 0 && (
@@ -308,6 +409,7 @@ export function FederationPanel(): React.ReactElement {
                   <span className={styles.peerName}>{peer.name}</span>
                   <span className={styles.peerMeta}>
                     {platformLabel(peer)}
+                    {peer.identity?.displayName ? ` · 署名 ${peer.identity.displayName}` : ''}
                     {peer.gewuVersion ? ` · v${peer.gewuVersion}` : ''}
                     {probeOk && peer.lastProbe?.latencyMs != null ? ` · ${peer.lastProbe.latencyMs}ms` : ''}
                     {probeBad ? ` · ${peer.lastProbe?.error || '离线'}` : ''}

@@ -4,9 +4,10 @@
  * BLOCK-85 格物联邦 — 指挥席侧协作节点管理 REST（挂主后端，本机 127.0.0.1）。
  *
  * GET    /api/federation/peers          节点列表（安全投影，token 不出）
- * POST   /api/federation/peers/pair     {url} 粘贴对端配对链接 → 兑换+握手+落盘
+ * POST   /api/federation/peers/pair     {url, identity?} 粘贴对端配对链接 → 兑换+握手+落盘
  * POST   /api/federation/peers/:id/probe 在线探测
  * DELETE /api/federation/peers/:id      移除节点（本端删除；对端可在其面板吊销会话）
+ * GET    /api/federation/members        协作成员（本机会话中带工程师声明身份的访客，BLOCK-88 P1）
  */
 
 const express = require('express');
@@ -20,6 +21,7 @@ const {
   getPeer,
   getPeerToken,
 } = require('../../shared-backend/federation-peers');
+const { getStores } = require('../mobile-gateway/pairing');
 
 const JOB_FORWARD_TIMEOUT_MS = 120_000;      // 作业提交（含文件上传）
 const STATUS_FORWARD_TIMEOUT_MS = 15_000;    // 状态查询
@@ -69,11 +71,21 @@ module.exports = function registerFederationAdmin(app, { dataDir } = {}) {
       return;
     }
     try {
-      const result = await addPeerFromPairingUrl(dir, url);
+      const result = await addPeerFromPairingUrl(dir, url, { identity: req.body?.identity || null });
       res.status(result.ok ? 200 : 400).json(result);
     } catch (error) {
       res.status(500).json({ ok: false, error: 'pair_failed', message: error.message || '配对失败' });
     }
+  });
+
+  // BLOCK-88 P1（D2）：协作成员 = 本机 gateway 会话中带工程师声明身份的访客。
+  // 单一真相复用 getStores(dir) 会话单例（与 gateway/mobile-admin 同进程同数据），
+  // 零新存储；被访端联邦面板「协作成员」读取（在线=客户端按 lastSeenAt 判定）。
+  app.get('/api/federation/members', (_req, res) => {
+    const members = getStores(dir).sessions.list()
+      .filter((session) => session.identity && !session.revoked)
+      .map(({ id, name, createdAt, lastSeenAt, identity }) => ({ id, name, createdAt, lastSeenAt, identity }));
+    res.json({ ok: true, members });
   });
 
   app.post('/api/federation/peers/:id/probe', async (req, res) => {

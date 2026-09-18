@@ -20,6 +20,7 @@ const path = require('node:path');
 const zlib = require('node:zlib');
 
 const { getStores } = require('./pairing');
+const { sanitizeEngineerIdentity } = require('../../shared-backend/engineer-identity');
 const { readConfig, resolveEnabled, resolvePort, lanAddresses } = require('./config');
 const crypto = require('node:crypto');
 
@@ -113,6 +114,8 @@ function buildMobileGateway({
   // 配对：一次性 token 换持久会话 token（无需既有会话）。
   // 加映 4：请求已带有效会话（cookie/Bearer）时直接复用，不再新建——
   // 同一手机重复扫码/重开配对链接不应堆积设备记录。
+  // BLOCK-88 P1（D2）：body.identity additive——联邦指挥席配对时声明的工程师
+  // 身份（displayName/device）经净化落会话；声明身份仅展示、未经验证（D1-A）。
   app.post('/m/api/pair', (req, res) => {
     const token = String(req.body?.token || '');
     const redeemed = stores.pairing.redeem(token);
@@ -120,6 +123,7 @@ function buildMobileGateway({
       res.status(401).json({ ok: false, error: 'pair_token_invalid', message: '配对码无效或已过期，请在桌面端重新生成' });
       return;
     }
+    const identity = sanitizeEngineerIdentity(req.body?.identity);
     const existingToken = readCookieToken(req) || bearerToken(req);
     const existingSession = existingToken ? stores.sessions.authenticate(existingToken) : null;
     if (existingSession) {
@@ -127,11 +131,14 @@ function buildMobileGateway({
       return;
     }
     const userAgent = String(req.headers['user-agent'] || '');
-    const baseName = /iphone|ipad/i.test(userAgent) ? 'iOS 设备'
+    // 指挥席 fetch 无 UA（UA 推导恒命中「移动设备」兜底）——带署名时优先以
+    // 署名命名会话，「我的设备」列表与协作成员面语义一致（评审 P2 清偿）。
+    const uaName = /iphone|ipad/i.test(userAgent) ? 'iOS 设备'
       : /android/i.test(userAgent) ? 'Android 设备'
         : '移动设备';
-    const { sessionId, sessionToken } = stores.sessions.createSession({ name: `${baseName}-${pairShortId()}` });
-    res.json({ ok: true, sessionId, sessionToken });
+    const baseName = (identity && identity.displayName) || uaName;
+    const { sessionId, sessionToken } = stores.sessions.createSession({ name: `${baseName}-${pairShortId()}`, identity });
+    res.json({ ok: true, sessionId, sessionToken, identity: identity || null });
   });
 
   // 会话鉴权：token 来源优先级 = gw_session cookie（桌面投影 SPA 同源自动携带，
@@ -156,7 +163,7 @@ function buildMobileGateway({
       res.status(401).json({ ok: false, error: 'session_invalid', message: '会话无效或已被吊销' });
       return;
     }
-    req.mobileSession = { id: session.id, name: session.name };
+    req.mobileSession = { id: session.id, name: session.name, identity: session.identity || null };
     // 与桌面完全相同的身份对象（auth.js LOCAL_USER）——路由按 user_id 过滤的
     // 数据面才可能与桌面同源同门（id 必须一字不差，'local-user'）。
     req.user = require('../auth').LOCAL_USER;
@@ -215,8 +222,10 @@ function buildMobileGateway({
 
   // ── BLOCK-85 格物联邦（D1/D3）：对端格物经此端点握手本机节点能力 ──
   // 会话门内（配对后才能读）；指挥席用兑换到的会话 Bearer 调用。
+  // BLOCK-88 P1：回显本会话落档的工程师声明身份——指挥席可断言对端记录的
+  // 署名与自己所发一致（契约面），被访端面板「协作成员」同源读取。
   const os = require('node:os');
-  app.get('/federation/api/health', (_req, res) => {
+  app.get('/federation/api/health', (req, res) => {
     let executors = { r: false, python: false };
     try {
       const { getExecutor } = require('../../shared-backend/executors');
@@ -236,6 +245,10 @@ function buildMobileGateway({
       },
       gewuVersion: process.env.npm_package_version || '0.0.1-rc.7',
       executors,
+      session: {
+        name: req.mobileSession?.name || null,
+        identity: req.mobileSession?.identity || null,
+      },
     });
   });
 

@@ -14,6 +14,8 @@ const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 
+const { sanitizeEngineerIdentity } = require('../../shared-backend/engineer-identity');
+
 const PAIR_TOKEN_TTL_MS = 5 * 60 * 1000;
 const SESSIONS_VERSION = 1;
 
@@ -136,8 +138,10 @@ function createSessionStore({ dataDir, now = () => Date.now(), persistDebounceMs
 
   /**
    * 创建会话；sessionToken 只在返回值里出现一次，落盘只有 sha256。
+   * BLOCK-88 P1：identity（工程师声明身份，D1-A）additive——只在配对方
+   * 声明时落键，存量手机会话投影键集不变。
    */
-  function createSession({ name } = {}) {
+  function createSession({ name, identity } = {}) {
     const data = load();
     const sessionToken = randomToken();
     const session = {
@@ -148,6 +152,8 @@ function createSessionStore({ dataDir, now = () => Date.now(), persistDebounceMs
       lastSeenAt: new Date(now()).toISOString(),
       revoked: false,
     };
+    const cleanIdentity = sanitizeEngineerIdentity(identity);
+    if (cleanIdentity) session.identity = cleanIdentity;
     data.sessions.push(session);
     persist();
     return { sessionId: session.id, sessionToken };
@@ -173,11 +179,13 @@ function createSessionStore({ dataDir, now = () => Date.now(), persistDebounceMs
     return true;
   }
 
-  /** 安全投影：绝不外泄 tokenHash。 */
+  /** 安全投影：绝不外泄 tokenHash；identity 仅工程师会话携带（BLOCK-88 P1）。 */
   function list() {
-    return load().sessions.map(({ id, name, createdAt, lastSeenAt, revoked }) => ({
-      id, name, createdAt, lastSeenAt, revoked,
-    }));
+    return load().sessions.map((session) => {
+      const projection = { id: session.id, name: session.name, createdAt: session.createdAt, lastSeenAt: session.lastSeenAt, revoked: session.revoked };
+      if (session.identity) projection.identity = session.identity;
+      return projection;
+    });
   }
 
   return { createSession, authenticate, revoke, list, sessionsPath };

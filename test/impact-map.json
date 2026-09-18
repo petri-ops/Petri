@@ -1489,6 +1489,15 @@
       "classifiesScripts": false
     },
     {
+      "id": "ui417-side-chat-evidence",
+      "note": "UI-417 侧边聊天悬挂化实机证据目录（4da4bb4a 收口时漏登记 impact-map，test-affected 存量 unknown；BLOCK-88 P1 会话顺手清债，对标 ui341-evidence 先例）。",
+      "patterns": [
+        "acceptance/ui-417/**"
+      ],
+      "tests": [],
+      "classifiesScripts": false
+    },
+    {
       "id": "block83-general-agent-base",
       "note": "BLOCK-83 通用底座化与生信插件化剥离：task-confirmation-hooks 注册表（D3 钩子化）/ result-studio 契约改名（D1）/ SDK 脚本模板放宽（D2）/ canonical-json 上提 + P1 出口实机验收脚本。",
       "patterns": [
@@ -1970,6 +1979,27 @@
       ],
       "tests": [],
       "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
+    },
+    {
+      "id": "block88-engineer-collab",
+      "note": "BLOCK-88 工程师协作：P1 身份层贯通（配对握手 additive identity + peers/会话注册表扩展 + 联邦面板协作成员/署名展示）。改身份净化/配对会话/peers 注册表/联邦管理路由/联邦面板任一文件即跑本套件。",
+      "patterns": [
+        "core/shared-backend/engineer-identity.js",
+        "core/shared-backend/federation-peers.js",
+        "core/biof3-server/mobile-gateway/pairing.js",
+        "core/biof3-server/mobile-gateway/index.js",
+        "core/biof3-server/routes/federation-admin.js",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/Federation.tsx",
+        "test/block88-*.test.mjs",
+        "scripts/block88-*",
+        "acceptance/block-88/**"
+      ],
+      "tests": [
+        "test/block88-engineer-identity.test.mjs"
+      ],
+      "frontendRelated": true,
       "classifiesScripts": true,
       "scriptRole": "development-smoke"
     }

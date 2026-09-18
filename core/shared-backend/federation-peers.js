@@ -17,6 +17,8 @@ const fs = require('fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 
+const { sanitizeEngineerIdentity } = require('./engineer-identity');
+
 const PEERS_VERSION = 1;
 const PROBE_TIMEOUT_MS = 4000;
 
@@ -90,16 +92,23 @@ async function fetchJson(url, { method = 'GET', token = null, timeoutMs = PROBE_
 
 /**
  * 从配对 URL 配对：兑换会话 → 握手 → 落盘。
+ * BLOCK-88 P1（D2）：identity（本机工程师署名，displayName/device）additive
+ * 随兑换请求发往对端——对端落其 gateway 会话（面板「协作成员」展示），本端
+ * 存 peer.identity（面板节点行展示「以 X 署名连接」）。
  * 返回 { ok, peer } 或 { ok:false, error, message }。
  */
-async function addPeerFromPairingUrl(dataDir, rawUrl, { expectedProtocol = 1 } = {}) {
+async function addPeerFromPairingUrl(dataDir, rawUrl, { expectedProtocol = 1, identity = null } = {}) {
   const parsed = parsePairingUrl(rawUrl);
   if (!parsed) {
     return { ok: false, error: 'pairing_url_invalid', message: '配对链接无法解析（应形如 http://192.168.x.x:3005/pair?token=…）' };
   }
   const { baseUrl, token } = parsed;
+  const cleanIdentity = sanitizeEngineerIdentity(identity);
 
-  const pair = await fetchJson(`${baseUrl}/m/api/pair`, { method: 'POST', body: { token } });
+  const pair = await fetchJson(`${baseUrl}/m/api/pair`, {
+    method: 'POST',
+    body: cleanIdentity ? { token, identity: cleanIdentity } : { token },
+  });
   if (pair.status !== 200 || !pair.data?.ok || !pair.data?.sessionToken) {
     return { ok: false, error: 'pair_rejected', message: '配对码无效或已过期，请在对端格物重新生成' };
   }
@@ -125,6 +134,7 @@ async function addPeerFromPairingUrl(dataDir, rawUrl, { expectedProtocol = 1 } =
     existing.gewuVersion = health.data.gewuVersion || existing.gewuVersion;
     existing.executors = health.data.executors || existing.executors;
     existing.sessionToken = sessionToken;
+    if (cleanIdentity) existing.identity = cleanIdentity;
     existing.lastSeenAt = now;
     existing.lastProbe = { ok: true, at: now, latencyMs: null, error: null };
   } else {
@@ -138,6 +148,7 @@ async function addPeerFromPairingUrl(dataDir, rawUrl, { expectedProtocol = 1 } =
       executors: health.data.executors || null,
       protocol: health.data.protocol || 1,
       sessionToken,
+      ...(cleanIdentity ? { identity: cleanIdentity } : {}),
       addedAt: now,
       lastSeenAt: now,
       lastProbe: { ok: true, at: now, latencyMs: null, error: null },
@@ -186,19 +197,23 @@ function sanitizePeers(dataDir) {
   const data = loadPeers(dataDir);
   return {
     version: data.version,
-    peers: data.peers.map((entry) => ({
-      peerId: entry.peerId,
-      name: entry.name,
-      baseUrl: entry.baseUrl,
-      platform: entry.platform,
-      arch: entry.arch,
-      gewuVersion: entry.gewuVersion,
-      executors: entry.executors,
-      protocol: entry.protocol,
-      addedAt: entry.addedAt,
-      lastSeenAt: entry.lastSeenAt,
-      lastProbe: entry.lastProbe,
-    })),
+    peers: data.peers.map((entry) => {
+      const projection = {
+        peerId: entry.peerId,
+        name: entry.name,
+        baseUrl: entry.baseUrl,
+        platform: entry.platform,
+        arch: entry.arch,
+        gewuVersion: entry.gewuVersion,
+        executors: entry.executors,
+        protocol: entry.protocol,
+        addedAt: entry.addedAt,
+        lastSeenAt: entry.lastSeenAt,
+        lastProbe: entry.lastProbe,
+      };
+      if (entry.identity) projection.identity = entry.identity;
+      return projection;
+    }),
   };
 }
 

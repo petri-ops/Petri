@@ -3891,3 +3891,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **改动**：仅文案——label「Harness 分析环境」→「运行环境包」；提示语去「内置分析模块/R 包」改「运行分析时按需自动准备的运行时和依赖包（由插件按需声明）」；空态语同步。数据链（`harnessCapabilities.list` → capability-bundles）零改动。
 - **证据**：`acceptance/ui-356/ui356-harness-copy-live.json` 2/2 ALL PASS（C1 新文案在屏 / C2 旧文案「Harness 分析环境」「内置分析模块」「分析位」零残留）；tsc 0。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-418: 联邦面板「协作成员」与工程师署名（BLOCK-88 P1 身份层 UI 面）(2026-09-19 verified，dev Electron 边界内 CDP 测试实例 15/15)
+
+- **来源**：BLOCK-88 P1（D2 配对握手身份化；用户 2026-09-18 裁决「都按推荐」D1-D8 落定 + 2026-09-19 夜间裁决「都搞 我要睡觉了」启动 P1）。
+- **改动**（`sections/Federation.tsx`，零新增 CSS 类全复用 addCard/peerCard/fedHint token 体系）：①「协作成员」卡——`GET /api/federation/members`（带工程师声明身份的活跃会话），行=署名/设备/在线态（lastSeenAt 2min 窗口），30s 轮询；②「添加协作节点」卡增「我的工程师署名」输入（localStorage `gewu-engineer-name`，40 字封顶）随配对请求发出；③节点行增「署名 X」标注；④诚实标注「成员署名为对方声明身份，未经验证」（plan §6 D1-A 风险 1 措辞，断言 P5d 抓真过）。
+- **后端链**（同提交）：`engineer-identity.js` 共享净化 → pairing `identity` additive 落键（存量会话投影键集不变）→ `/m/api/pair` 收身份 → `/federation/api/health` 回显 → `/api/federation/members` → federation-peers `peer.identity` 投影。
+- **证据**：`scripts/block88-p1-dual-identity.cjs` **15/15 allPass**（loopback 双节点：B=dev 栈真实进程，A=真实 federation-admin 独立 dataDir；REST 四层 + CDP 9223 测试实例 UI 走查，探针零触碰 9222 主窗口）→ `acceptance/block-88/p1-identity.json` + `p1-identity-ui.png`；契约测试 `test/block88-engineer-identity.test.mjs` 5/5；block70/federation 回归 12/12；tsc 0；theme-token-contract 4/4。
+- **同批顺债**：`test/impact-map.json` 补 ui417-side-chat-evidence（4da4bb4a 漏登记致 test-affected 存量 unknown，对标 ui341-evidence 先例）；`scripts/start-test-instance.sh` 双端同形化（原纯 Windows 实现 macOS 静默空转，症状指纹=脚本 TIMEOUT 但 err 日志不存在；darwin 分支=lsof 定点杀+nohup 直启，Windows 段原样保留）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

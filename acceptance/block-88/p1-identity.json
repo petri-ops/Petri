@@ -1,0 +1,90 @@
+{
+  "package": "BLOCK-88-ENGINEER-COLLAB",
+  "stage": "P1-IDENTITY",
+  "topology": "loopback dual-node: B=dev stack :3001/:3005 (real), A=real federation-admin REST (ephemeral, isolated dataDir)",
+  "engineer": {
+    "displayName": "工程师 A",
+    "device": "macOS"
+  },
+  "startedAt": "2026-09-18T20:09:07.017Z",
+  "finishedAt": "2026-09-18T20:09:13.529Z",
+  "assertions": [
+    {
+      "name": "P0_backend_3001_healthy",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "P1_invite_token_issued",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "P2_pair_with_identity_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"peer\":{\"peerId\":\"gpeer_44a699f3356f1c7c\",\"name\":\"MacBook-Pro.local\",\"baseUrl\":\"http://127.0.0.1:3005\",\"platform\":\"darwin\",\"arch\":\"arm64\",\"gewuVersion\":\"1.0.0\",\"executors\":{\"r\":true,\"python"
+    },
+    {
+      "name": "P2a_peer_registry_identity",
+      "pass": true,
+      "detail": "{\"displayName\":\"工程师 A\",\"device\":\"macOS\"}"
+    },
+    {
+      "name": "P2b_peer_token_not_exposed",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P3_members_endpoint_identity",
+      "pass": true,
+      "detail": "{\"displayName\":\"工程师 A\",\"device\":\"macOS\"}"
+    },
+    {
+      "name": "P4a_a_side_holds_session_token",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P4b_health_echo_identity",
+      "pass": true,
+      "detail": "{\"name\":\"工程师 A-acca\",\"identity\":{\"displayName\":\"工程师 A\",\"device\":\"macOS\"}}"
+    },
+    {
+      "name": "P5pre_project_available",
+      "pass": true,
+      "detail": "projects=4"
+    },
+    {
+      "name": "P5a_federation_panel_reachable",
+      "pass": true,
+      "detail": "tab buttons=1"
+    },
+    {
+      "name": "P5b_members_card_mounted",
+      "pass": true,
+      "detail": "{\"card\":true,\"rows\":[\"工程师 AmacOS · 活跃于 35 分钟前\",\"工程师 AmacOS · 活跃于 30 分钟前\",\"工程师 AmacOS · 活跃于 22 分钟前\",\"工程师 AmacOS · 活跃于 19 分钟前\",\"工程师 AmacOS · 活跃于 14 分钟前\",\"工程师 Amac"
+    },
+    {
+      "name": "P5c_engineer_identity_visible_in_ui",
+      "pass": true,
+      "detail": "[\"工程师 AmacOS · 活跃于 35 分钟前\",\"工程师 AmacOS · 活跃于 30 分钟前\",\"工程师 AmacOS · 活跃于 22 分钟前\",\"工程师 AmacOS · 活跃于 19 分钟前\",\"工程师 AmacOS · 活跃于 14 分钟前\",\"工程师 AmacOS · 活跃于 7 分钟前\",\"工程师 AmacOS · 在线\",\"工程师 AmacOS · 在线\"]"
+    },
+    {
+      "name": "P5d_honesty_note_declared_identity",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P5e_engineer_signature_input_present",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P5f_screenshot_captured",
+      "pass": true,
+      "detail": "acceptance/block-88/p1-identity-ui.png"
+    }
+  ],
+  "allPass": true,
+  "uiNote": "协作成员 UI 在 CDP 9223 测试实例走查（与用户主实例共享 :3001 后端）；探针零触碰 9222 主窗口"
+}
