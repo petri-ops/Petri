@@ -192,6 +192,10 @@ const CHANNELS = {
     restore: 'window:restore',
     return: 'window:return',
     self: 'window:self',
+    // BLOCK-100/UI-411 — 测试实例窗口管理（handler 有 BIOF3_TEST_INSTANCE 守卫，
+    // 用户实例调用恒拒绝）：置顶切换 + 鼠标穿透开关（forward:true）。
+    setAlwaysOnTop: 'window:set-always-on-top',
+    setIgnoreMouseEvents: 'window:set-ignore-mouse-events',
     snapshot: 'window:snapshot',
     stateChanged: 'window:state-changed',
     thumbnail: 'window:thumbnail',

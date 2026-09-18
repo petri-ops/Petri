@@ -134,6 +134,9 @@ const desktopBridgeSurface = {
       ipcRenderer.on('window:fullscreen-changed', listener);
       return () => ipcRenderer.removeListener('window:fullscreen-changed', listener);
     },
+    // BLOCK-100/UI-411 — 测试实例窗口管理（仅测试实例前端会调用）
+    setAlwaysOnTop: (flag) => ipcRenderer.invoke('window:set-always-on-top', flag),
+    setIgnoreMouseEvents: (flag) => ipcRenderer.invoke('window:set-ignore-mouse-events', flag),
 
     // 页面缩放（无边框窗口：菜单 Zoom 角色不可达，故显式暴露）。
     // delta 为 zoomLevel 步长，可为小数（滚轮平滑缩放用），正数放大。

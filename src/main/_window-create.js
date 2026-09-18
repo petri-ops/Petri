@@ -135,11 +135,12 @@ async function createWindow({
       }
     });
     mainWindow.setTitle(`[TEST] ${BRAND.APP_NAME}`);
-    // UI-410 — 测试实例默认鼠标穿透（用户裁决「不允许外部点击」）：真实点击
-    // 在 OS 层直接穿透到下层窗口（WS_EX_TRANSPARENT），人因手滑物理上碰不到
-    // 测试界面；CDP 合成输入走渲染层注入不经 OS 鼠标层，交互型 flow 不受影响。
-    // 穿透后窗口不可拖动/点击——移动靠启动器定位或渲染层 window.moveTo。
-    mainWindow.setIgnoreMouseEvents(true);
+    // UI-411 — 测试实例默认鼠标穿透 + 置顶（用户裁决「不允许外部点击」+预览
+    // 置顶合理）：真实点击在 OS 层穿透到下层窗口；forward:true 让渲染层在穿透
+    // 时仍收 mousemove，驱动管理条悬停解锁（拖动移动/边缘 resize）。CDP 合成
+    // 输入走渲染层注入不经 OS 鼠标层，交互型 flow 不受影响。
+    mainWindow.setAlwaysOnTop(true);
+    mainWindow.setIgnoreMouseEvents(true, { forward: true });
   }
 
   // Register with shared ref immediately so event handlers can use getMainWindow()

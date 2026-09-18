@@ -39,6 +39,26 @@ function setupWindowIpc({ ipcMain, process, app, getMainWindow }) {
     resolveSenderWindow(event)?.minimize();
   });
 
+  // ── BLOCK-100/UI-411 — 测试实例窗口管理 ────────────────────
+  // 守卫：仅 BIOF3_TEST_INSTANCE=1 的实例放行（用户实例误调会导致鼠标失效）。
+  ipcMain.handle(CHANNELS.window.setAlwaysOnTop, (event, flag) => {
+    if (process.env.BIOF3_TEST_INSTANCE !== "1") return { ok: false, code: "test_instance_only" };
+    const win = resolveSenderWindow(event);
+    if (!win) return { ok: false };
+    win.setAlwaysOnTop(Boolean(flag));
+    return { ok: true, alwaysOnTop: win.isAlwaysOnTop() };
+  });
+
+  ipcMain.handle(CHANNELS.window.setIgnoreMouseEvents, (event, flag) => {
+    if (process.env.BIOF3_TEST_INSTANCE !== "1") return { ok: false, code: "test_instance_only" };
+    const win = resolveSenderWindow(event);
+    if (!win) return { ok: false };
+    // forward:true（Windows）：穿透时仍向渲染层转发 mousemove——管理条悬停
+    // 解锁检测依赖它。仅穿透真实输入；CDP 合成输入不经 OS 鼠标层。
+    win.setIgnoreMouseEvents(Boolean(flag), { forward: true });
+    return { ok: true };
+  });
+
   ipcMain.on(CHANNELS.window.maximize, (event) => {
     const targetWindow = resolveSenderWindow(event);
     if (!targetWindow) return;

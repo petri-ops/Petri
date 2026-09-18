@@ -1,7 +1,7 @@
 {
   "name": "block100-test-instance",
-  "startedAt": "2026-09-18T03:01:34.672Z",
-  "finishedAt": "2026-09-18T03:01:34.711Z",
+  "startedAt": "2026-09-18T03:11:22.272Z",
+  "finishedAt": "2026-09-18T03:11:22.307Z",
   "assertions": [
     {
       "name": "test_instance_target_connected",
@@ -11,7 +11,7 @@
     {
       "name": "test_window_rendering_visible",
       "pass": true,
-      "detail": "x=1761 vis=visible w=1284（hidden/minimized 有渲染冻结反例，禁用）"
+      "detail": "x=607 vis=visible w=1280（hidden/minimized 有渲染冻结反例，禁用）"
     },
     {
       "name": "input_shield_blocks_all_input",
@@ -26,7 +26,7 @@
     {
       "name": "user_instance_untouched",
       "pass": true,
-      "detail": "http://localhost:3000/project/p_mu5ftn3a_wxnq"
+      "detail": "http://localhost:3000/project/p_mu5emekx_g13p"
     }
   ],
   "allPass": true

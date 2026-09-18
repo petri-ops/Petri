@@ -3356,6 +3356,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **门禁**：block100 flow 5/5（w=1284）；Win32 样式断言 WS_EX_TRANSPARENT=True；徽标双实例断言 allPass。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-411: 测试窗口管理条——悬停解锁拖动/边缘调整大小/置顶切换 (BLOCK-100 增补，2026-09-18 verified，用户追问「可以调整预览窗口的大小吧？移动位置 置顶这些？」)
+
+- **交付面**：顶部 26px 管理条（app-region:drag 悬停解锁后可拖动移动窗口）+「📌置顶」切换按钮（默认开）+ 穿透状态提示。交互模型=**悬停自动解锁**：`setIgnoreMouseEvents(true, {forward:true})` 让穿透时渲染层仍收 mousemove，指针进入管理条/窗口边缘 8px → 自动关穿透（可拖动/边缘 resize/点按钮），移入内容区 → 自动恢复穿透；按下鼠标期间不自动上锁（防拖拽中途打断）；IPC 仅状态翻转时调用（mousemove 高频去重）。新增窗口管理通道 `window:set-always-on-top` / `window:set-ignore-mouse-events`（channels/preload/d.ts/handler 四处同加，handler 有 `BIOF3_TEST_INSTANCE=1` 守卫——用户实例误调恒拒绝，通道 145→147）。
+- **门禁**：ipc-channels-registry 守护 5/5 + TitleBar 29/29（mock 补齐新方法）+ tsc 0；实机 CDP 断言按钮切换 aria-pressed 翻转 + Win32 终验 `WS_EX_TOPMOST=True`（置顶真实生效）且 `WS_EX_TRANSPARENT=True`（穿透保持）；block100 flow 5/5。
+- G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-409: 测试实例悬浮徽标 + 任务栏 [TEST] 前缀——测试窗口一眼可辨 (BLOCK-100 增补，2026-09-18 verified，用户需求「能够看到测试的情况」+CDP 双实例断言)
 
 - **来源**：用户反馈「用于测试的 CDP 那个窗口……我不知道是哪一个呀 测试一般用来预览用……小悬浮窗口？」——BLOCK-100 测试实例此前仅靠屏幕位置区分，多窗口下不可辨。

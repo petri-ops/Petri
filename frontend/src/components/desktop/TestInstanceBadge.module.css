@@ -1,19 +1,50 @@
-/* BLOCK-100 / UI-409 — 测试实例悬浮徽标：右上角固定悬浮，不挡操作
-   （pointer-events:none），琥珀警示色对齐既有 --gewu-warning-* token 族。 */
-.badge {
+/* BLOCK-100 / UI-409+UI-411 — 测试实例窗口管理条：顶部固定条，悬停解锁后
+   app-region:drag 可拖动移动窗口；琥珀警示色对齐既有 --gewu-warning-* token。 */
+.bar {
   position: fixed;
-  top: 6px;
-  right: 10px;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 9999;
-  pointer-events: none;
-  padding: 2px 10px;
-  border-radius: 999px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  background: var(--gewu-warning-bg);
+  border-bottom: 1px solid var(--gewu-warning-text);
+  /* 悬停解锁后整条为拖动区（移动窗口）；按钮自身 no-drag 可点 */
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.badge {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
-  background: var(--gewu-warning-bg);
   color: var(--gewu-warning-text);
+}
+
+.btn {
+  -webkit-app-region: no-drag;
   border: 1px solid var(--gewu-warning-text);
-  opacity: 0.92;
-  user-select: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--gewu-warning-text);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 8px;
+  cursor: pointer;
+}
+
+.btnOn {
+  background: var(--gewu-warning-text);
+  color: var(--gewu-bg-canvas, #0b1220);
+}
+
+.hint {
+  margin-left: auto;
+  font-size: 10px;
+  opacity: 0.75;
+  color: var(--gewu-warning-text);
 }
