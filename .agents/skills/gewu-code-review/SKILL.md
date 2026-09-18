@@ -1,6 +1,6 @@
 ---
 name: gewu-code-review
-description: Use when reviewing code changes, diffs, or commits; auditing a module for contract drift, second sources of truth, or silent failures; grading finding severity; or writing a review or audit report. Use before declaring a substantial work-package deliverable done. 评审代码/审查 diff/质量把关/审计报告时使用。
+description: Use when reviewing code changes, diffs, or commits; auditing a module for contract drift, second sources of truth, silent failures, or patch stacking; grading finding severity; or writing a review or audit report. Use before declaring a substantial work-package deliverable done. 评审代码/审查 diff/质量把关/审计报告/判断该打补丁还是该重构时使用。
 ---
 
 # Gewu Code Review（代码评审）
@@ -14,7 +14,7 @@ description: Use when reviewing code changes, diffs, or commits; auditing a modu
 3. **失败语义**——错误是否 fail-closed；静默吞错（空 catch）；async/sync 误用（getAsyncDatabase 同步误用教训）；资源清理（listener/poller/句柄/socket）。
 4. **测试有效性**——断言走真实链路还是手工注入掩盖断链（BLOCK-64 mapper 教训：测试手工注入让映射漏字段永不暴露）；测试测行为还是测实现。
 5. **边界与安全**——路径白名单、参数数组 spawn（无 shell 拼接）、IPC sender 守卫、重操作两段式确认门。
-6. **死代码与残留**——重构删干净没有（BLOCK-17 死代码教训）、空壳预留、临时文件。
+6. **死代码与残留**——重构删干净没有（BLOCK-17 死代码教训）、空壳预留、临时文件；**补丁堆积**——本次改动是否是对同一处的又一次叠加补丁（条件摞条件/特例套特例/绕开既有抽象），命中即触发「补丁 vs 重构」前置判断：要么给出吸收进单一结构的 scoped 重构方案（带行为基线——改前改后同套定向测试绿），要么如实登记重构候选留痕；不批准无判断的再垫一层。
 
 ## 严重度分级（沿仓库既有惯例）
 

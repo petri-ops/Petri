@@ -1,6 +1,6 @@
 ---
 name: gewu-project-governance
-description: Govern Gewu (格物, formerly BioF3) plans, Goals, work packages, canonical documentation, handoffs, audits, validation scope, stage closeout, archival, and Git worktrees. Use when an agent creates or changes a plan, chooses tests or acceptance gates, completes a task or phase, updates roadmap or handoff state, reconciles documentation, archives or supersedes files, creates or removes a worktree, or is about to claim that a Gewu work package is complete.
+description: Govern Gewu (格物, formerly BioF3) plans, Goals, work packages, canonical documentation, handoffs, audits, validation scope, stage closeout, archival, and Git worktrees. Use when an agent creates or changes a plan, chooses tests or acceptance gates, completes a task or phase, updates roadmap or handoff state, reconciles documentation, archives or supersedes files, creates or removes a worktree, decides whether new work on existing code should be a patch or a refactor, or is about to claim that a Gewu work package is complete.
 ---
 
 # Gewu Project Governance（格物项目治理）
@@ -36,6 +36,16 @@ Classify the work form first per `references/TASK-FORM-TAXONOMY.md` (three routi
 - Record scope, exclusions, dependencies, evidence locations, acceptance gates, and completion semantics in the canonical plan.
 - Update the canonical roadmap or handoff only when current priority or recoverable state actually changes.
 - Reject a second active canonical document for the same `truthDomain`.
+
+### Judge patch vs. refactor before changing existing code
+
+When a new requirement lands on code that already exists, decide explicitly — **before** writing either kind of change — whether it stays a patch or calls for a refactor from a higher-level view. The judgment is part of the plan, not an afterthought. Signals that another patch would stack rot instead of adding function:
+
+- The same spot would receive its second or later layered fix: condition on condition, flag on flag, a special case wrapped around an earlier special case.
+- The change needs a second variant of an existing concept (parallel code path, near-duplicate helper, per-caller workaround) instead of generalizing the original.
+- The patch has to bypass or reach around an existing abstraction, or duplicate knowledge the code already owns elsewhere.
+
+No signal: patch it, keep it local, and say so in the canonical plan. Any signal: stop and plan a scoped refactor that absorbs the accumulated cases into one structure — when that grows the work package's scope, get a user ruling first, and record the decision in the canonical plan either way. A refactor ships only with a behavioral baseline: focused tests green before, the same tests green after (BLOCK-92's 拆前基线拆后对账 precedent). Purity means fewer structures, not newer ones — never refactor a healthy spot just to showcase architecture.
 
 ### Continue active work
 
