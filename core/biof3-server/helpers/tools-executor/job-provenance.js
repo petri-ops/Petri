@@ -3,7 +3,10 @@
 const fs = require('fs');
 const path = require('path');
 const { scriptExtensionFor } = require('../../../shared-backend/script-host-languages');
-const { createExecutionProvenance, collectExecutionInputs } = require('../../../shared-backend/execution-provenance');
+const { createExecutionProvenance } = require('../../../shared-backend/execution-provenance');
+// collectExecutionInputs 真身在 artifact-manifest，execution-provenance 不导出它——
+// 从同一模块顺手解构会得到 undefined（作业收尾必炸；BLOCK-85 双真机 P2 真实作业踩中）。
+const { collectExecutionInputs } = require('../../../shared-backend/artifact-manifest');
 
 function buildJobProvenance({
   jobId,

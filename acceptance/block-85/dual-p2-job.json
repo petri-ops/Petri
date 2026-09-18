@@ -1,0 +1,49 @@
+{
+  "startedAt": "2026-09-18T15:10:55.749Z",
+  "marker": "B85P2-1789744255749",
+  "peerId": "gpeer_1b29dffe41f7d531",
+  "assertions": [
+    {
+      "name": "P2-0 peer registered",
+      "pass": true,
+      "detail": "{\"ok\":true,\"version\":1,\"peers\":[{\"peerId\":\"gpeer_1b29dffe41f7d531\",\"name\":\"MacBook-Pro.local\",\"baseUrl\":\"https://47.110.228.168:8443\",\"platform\":\"darwin\",\"arch\":\"arm64\",\"gewuVersion\":\"1.0.0\",\"executor"
+    },
+    {
+      "name": "P2-1 submit accepted (federated projection)",
+      "pass": true,
+      "detail": "{\"ok\":true,\"federated\":true,\"peerId\":\"gpeer_1b29dffe41f7d531\",\"peerName\":\"MacBook-Pro.local\",\"job\":{\"ok\":true,\"jobId\":\"job_85c415b9786c471e\",\"status\":\"pending\",\"isTestRun\":false}}"
+    },
+    {
+      "name": "P2-2 mirror job reaches completed",
+      "pass": false,
+      "detail": "status=undefined detail={\"error\":\"not_found\"}"
+    },
+    {
+      "name": "P2-3 result present (peer truth)",
+      "pass": false,
+      "detail": "{}"
+    },
+    {
+      "name": "P2-4 no artifact pull-back to Windows staging",
+      "pass": true,
+      "detail": "local dirs checked: [D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\jobs\\job_85c415b9786c471e, D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\tools-results\\job_85c415b9786c471e] found: [none]"
+    }
+  ],
+  "submitResponse": {
+    "ok": true,
+    "federated": true,
+    "peerId": "gpeer_1b29dffe41f7d531",
+    "peerName": "MacBook-Pro.local",
+    "job": {
+      "ok": true,
+      "jobId": "job_85c415b9786c471e",
+      "status": "pending",
+      "isTestRun": false
+    }
+  },
+  "finalStatus": {
+    "error": "not_found"
+  },
+  "allPass": false,
+  "finishedAt": "2026-09-18T15:16:56.528Z"
+}

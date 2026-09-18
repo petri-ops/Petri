@@ -1,0 +1,4120 @@
+{
+  "startedAt": "2026-09-18T15:22:46.795Z",
+  "marker": "B85P2-1789744966795",
+  "peerId": null,
+  "assertions": [
+    {
+      "name": "P2-0 local mode (fed dispatch skipped)",
+      "pass": true,
+      "detail": "B85_LOCAL=1"
+    },
+    {
+      "name": "P2-1 submit accepted",
+      "pass": true,
+      "detail": "{\"ok\":true,\"jobId\":\"job_a7ade42394874d1e\",\"status\":\"pending\",\"isTestRun\":false,\"requestId\":\"f4f24560-33b\"}"
+    },
+    {
+      "name": "P2-2 mirror job reaches completed",
+      "pass": true,
+      "detail": "status=completed detail={\"ok\":true,\"id\":\"job_a7ade42394874d1e\",\"toolId\":\"deseq2\",\"status\":\"completed\",\"error\":null,\"name\":\"DESeq2 #32\",\"projectId\":null,\"conversationId\":null,\"executionTarget\":null,\"params\":{\"design\":\"condition\",\"contrast_ref\":\"WT\",\"contrast_treat\":\"KO\"},\"recoveryHistory\":[],\"ackStatus\":null,\"createdAt\":178"
+    },
+    {
+      "name": "P2-3 result present (peer truth)",
+      "pass": true,
+      "detail": "{\"files\":[{\"name\":\"deg_table.csv\",\"type\":\"table\",\"label\":\"差异基因表\",\"filename\":\"deg_table.csv\",\"path\":\"D:\\\\1.WorkDir\\\\biof3-desktop\\\\.biof3-dev-user-data\\\\data\\\\results\\\\tool-jobs\\\\job_a7ade42394874d1e\\\\output\\\\deg_table.csv\",\"canonicalPath\":\"/work/biof3/tool-jobs/job_a7ade42394874d1e/output/deg_table."
+    }
+  ],
+  "submitResponse": {
+    "ok": true,
+    "jobId": "job_a7ade42394874d1e",
+    "status": "pending",
+    "isTestRun": false,
+    "requestId": "f4f24560-33b"
+  },
+  "finalStatus": {
+    "ok": true,
+    "id": "job_a7ade42394874d1e",
+    "toolId": "deseq2",
+    "status": "completed",
+    "error": null,
+    "name": "DESeq2 #32",
+    "projectId": null,
+    "conversationId": null,
+    "executionTarget": null,
+    "params": {
+      "design": "condition",
+      "contrast_ref": "WT",
+      "contrast_treat": "KO"
+    },
+    "recoveryHistory": [],
+    "ackStatus": null,
+    "createdAt": 1789744966806,
+    "completedAt": 1789744974749,
+    "result": {
+      "files": [
+        {
+          "name": "deg_table.csv",
+          "type": "table",
+          "label": "差异基因表",
+          "filename": "deg_table.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/deg_table.csv",
+          "id": "deg_table",
+          "title": "差异基因表",
+          "size": 1081,
+          "sha256": "a25782389c10f50553798f4c3b395f6b6271d2a91012d5719358e07f01993e6a",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "deg_table"
+          }
+        },
+        {
+          "name": "up_genes.csv",
+          "type": "table",
+          "label": "d8\nh0\u0003e\u001f:e\u001b ",
+          "filename": "up_genes.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/up_genes.csv",
+          "id": "artifact_2",
+          "title": "d8\nh0\u0003e\u001f:e\u001b ",
+          "size": 473,
+          "sha256": "1fe30b4ff5cfdfcef75d03b6d31aa3aa46a0473c5b3b223259255b1747576de4",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_2"
+          }
+        },
+        {
+          "name": "down_genes.csv",
+          "type": "table",
+          "label": "d8\u000bh0\u0003e\u001f:e\u001b ",
+          "filename": "down_genes.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/down_genes.csv",
+          "id": "artifact_3",
+          "title": "d8\u000bh0\u0003e\u001f:e\u001b ",
+          "size": 164,
+          "sha256": "a586fdcb1ab01b378def88335febdb2d49c15a4c887ca924d323bed1d84abdba",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_3"
+          }
+        },
+        {
+          "name": "volcano.png",
+          "type": "plot",
+          "label": "火山图",
+          "filename": "volcano.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/volcano.png",
+          "id": "volcano",
+          "title": "火山图",
+          "size": 39780,
+          "sha256": "06d76941bd7849fdfda69a37496050feb18acd872c55e4adad49ad69ea353863",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "volcano"
+          }
+        },
+        {
+          "name": "volcano.pdf",
+          "type": "file",
+          "label": "g\u0001+e11e\u001b> (PDF)",
+          "filename": "volcano.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/volcano.pdf",
+          "id": "artifact_5",
+          "title": "g\u0001+e11e\u001b> (PDF)",
+          "size": 42243,
+          "sha256": "29e6998c86b0532b276cedddd1a37396c4f1c2da5c67b60b1130bba78a3a9c3f",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_5"
+          }
+        },
+        {
+          "name": "pca.png",
+          "type": "plot",
+          "label": "PCA 图",
+          "filename": "pca.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/pca.png",
+          "id": "pca",
+          "title": "PCA 图",
+          "size": 32291,
+          "sha256": "35032b5ebe9c2a0b78ec5b22d87b70a36957f1124c4b4fd32c7e5d1bcaf840d9",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "pca"
+          }
+        },
+        {
+          "name": "pca.pdf",
+          "type": "file",
+          "label": "PCA e\u001b> (PDF)",
+          "filename": "pca.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/pca.pdf",
+          "id": "artifact_7",
+          "title": "PCA e\u001b> (PDF)",
+          "size": 25664,
+          "sha256": "983e35d85eeab01e99c3c0dd51b08ec35178ea4505bef5763e9d2af5dd504a79",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_7"
+          }
+        },
+        {
+          "name": "heatmap.png",
+          "type": "plot",
+          "label": "Top50 热图",
+          "filename": "heatmap.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/heatmap.png",
+          "id": "heatmap",
+          "title": "Top50 热图",
+          "size": 39274,
+          "sha256": "5c24811c6de636541dbbded597b362aa8287a810372419fcb19c5ac9512c61ab",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "heatmap"
+          }
+        },
+        {
+          "name": "heatmap.pdf",
+          "type": "file",
+          "label": "Top50 g\u0003-e\u001b> (PDF)",
+          "filename": "heatmap.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/heatmap.pdf",
+          "id": "artifact_9",
+          "title": "Top50 g\u0003-e\u001b> (PDF)",
+          "size": 30828,
+          "sha256": "4e76b0f01f5d647d5f3cb00504b9983e3232784becf1d10ab7ce617cbce8ddbe",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_9"
+          }
+        },
+        {
+          "name": "library_size.png",
+          "type": "plot",
+          "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
+          "filename": "library_size.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/library_size.png",
+          "id": "artifact_10",
+          "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
+          "size": 28549,
+          "sha256": "90df4356679b00bc6b7371e22e954e1b4d5a42753f3337d268b4a2a09f85c811",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_10"
+          }
+        },
+        {
+          "name": "library_size.pdf",
+          "type": "file",
+          "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
+          "filename": "library_size.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/library_size.pdf",
+          "id": "artifact_11",
+          "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
+          "size": 24017,
+          "sha256": "4dd557b4fce57bf0dd78236603198d2f642c2dd8031c4ff3ec451603765be601",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_11"
+          }
+        },
+        {
+          "name": "dispersion.png",
+          "type": "plot",
+          "label": "g&;f\u0015#e:&d<0h.! (PNG)",
+          "filename": "dispersion.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion.png",
+          "id": "artifact_12",
+          "title": "g&;f\u0015#e:&d<0h.! (PNG)",
+          "size": 40268,
+          "sha256": "9729f34b3d2ed0a6d2e637cb729b3ccee7f4c20b4c54c7f6a713dc4aca18f461",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_12"
+          }
+        },
+        {
+          "name": "dispersion.pdf",
+          "type": "file",
+          "label": "g&;f\u0015#e:&d<0h.! (PDF)",
+          "filename": "dispersion.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion.pdf",
+          "id": "artifact_13",
+          "title": "g&;f\u0015#e:&d<0h.! (PDF)",
+          "size": 30165,
+          "sha256": "079cc4cb2d26d85df52090eaee2055a170bba8bfa367725a77f1cd06af56d5ec",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_13"
+          }
+        },
+        {
+          "name": "ma_plot.png",
+          "type": "plot",
+          "label": "MA e\u001b> (PNG)",
+          "filename": "ma_plot.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/ma_plot.png",
+          "id": "artifact_14",
+          "title": "MA e\u001b> (PNG)",
+          "size": 31265,
+          "sha256": "3b8d032ea0e5c7a35f398b24b431c4a7638ac9563caef03af0c174b468800de2",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_14"
+          }
+        },
+        {
+          "name": "ma_plot.pdf",
+          "type": "file",
+          "label": "MA e\u001b> (PDF)",
+          "filename": "ma_plot.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/ma_plot.pdf",
+          "id": "artifact_15",
+          "title": "MA e\u001b> (PDF)",
+          "size": 29916,
+          "sha256": "af1bba77cb1f67162f260de3b722f69a712477f4df84d3b20af30ef34e4a1805",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_15"
+          }
+        },
+        {
+          "name": "sample_distance.png",
+          "type": "plot",
+          "label": "f 7f\u001c,h7\u001dg&; (PNG)",
+          "filename": "sample_distance.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/sample_distance.png",
+          "id": "artifact_16",
+          "title": "f 7f\u001c,h7\u001dg&; (PNG)",
+          "size": 36777,
+          "sha256": "ae1c9c8037f19c30250b03ea932c2beca026fb28533bacf5340ced36d8a2d2ef",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_16"
+          }
+        },
+        {
+          "name": "sample_distance.pdf",
+          "type": "file",
+          "label": "f 7f\u001c,h7\u001dg&; (PDF)",
+          "filename": "sample_distance.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/sample_distance.pdf",
+          "id": "artifact_17",
+          "title": "f 7f\u001c,h7\u001dg&; (PDF)",
+          "size": 25288,
+          "sha256": "c810d7f7643be298f1f64948a56f8936a266eef38341b5dd47ed1e50e7bbc294",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_17"
+          }
+        },
+        {
+          "name": "vst_matrix.csv",
+          "type": "data",
+          "label": "VST 矩阵",
+          "filename": "vst_matrix.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/vst_matrix.csv",
+          "id": "vst_matrix",
+          "title": "VST 矩阵",
+          "size": 795,
+          "sha256": "0ab0717d075bf589f0d12b1f172608bcec4b301437efee382e00a9fde5e95649",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "vst_matrix"
+          }
+        },
+        {
+          "name": "coldata_info.csv",
+          "type": "table",
+          "label": "f 7f\u001c,d<bf>!f\u0001/",
+          "filename": "coldata_info.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/coldata_info.csv",
+          "id": "artifact_19",
+          "title": "f 7f\u001c,d<bf>!f\u0001/",
+          "size": 68,
+          "sha256": "b4f9489a7dd7a36616bad5c44124d0affa7840db5bdaf4bdd814ec2e0b3565e9",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_19"
+          }
+        },
+        {
+          "name": "dispersion_data.csv",
+          "type": "table",
+          "label": "g&;f\u0015#e:&f\u00150f\r.",
+          "filename": "dispersion_data.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion_data.csv",
+          "id": "artifact_20",
+          "title": "g&;f\u0015#e:&f\u00150f\r.",
+          "size": 836,
+          "sha256": "8a41784b147fcff8e24835e62b384f04796766b417b37d4ce14879dbd0952eeb",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_20"
+          }
+        },
+        {
+          "name": "summary.txt",
+          "type": "text",
+          "label": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
+          "filename": "summary.txt",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/summary.txt",
+          "id": "artifact_21",
+          "title": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
+          "size": 192,
+          "sha256": "a37e3def239e84411ed341cb9a0aaaa2e00d302c428ff8ece9b09d176b14b516",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_21"
+          }
+        },
+        {
+          "name": "report.html",
+          "type": "report",
+          "label": "解读报告",
+          "filename": "report.html",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/report.html",
+          "id": "report",
+          "title": "解读报告",
+          "size": 337789,
+          "sha256": "00056286ad1f64f612f404b6c7587118d6ba9d243d07c19188d9527f1f346827",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "report"
+          }
+        },
+        {
+          "id": "zip",
+          "filename": "all_results.zip",
+          "type": "file",
+          "label": "全部结果打包下载",
+          "name": "all_results.zip",
+          "title": "全部结果打包下载",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
+          "size": 558681,
+          "sha256": "9d2052cbbfc00e26a72b3935299268fe8fc69b1bc553670e2b0df71ff4609753",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/all_results.zip",
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "zip"
+          }
+        },
+        {
+          "name": "run.log",
+          "filename": "run.log",
+          "id": "artifact_24",
+          "type": "text",
+          "label": "run.log",
+          "title": "run.log",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
+          "size": 2384,
+          "sha256": "91f52e1b68bac76825e16dfc81d90f349e4deb1014a46ee73e011652da40a560",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/run.log",
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_24"
+          }
+        }
+      ],
+      "summary": {
+        "total_genes": 10,
+        "sig_genes": 5,
+        "up": 4,
+        "down": 1,
+        "sci_style": true,
+        "dual_format": true
+      },
+      "manifest": {
+        "files": [
+          {
+            "name": "deg_table.csv",
+            "type": "table",
+            "label": "e7.e<\u0002e\u001f:e\u001b h!("
+          },
+          {
+            "name": "up_genes.csv",
+            "type": "table",
+            "label": "d8\nh0\u0003e\u001f:e\u001b "
+          },
+          {
+            "name": "down_genes.csv",
+            "type": "table",
+            "label": "d8\u000bh0\u0003e\u001f:e\u001b "
+          },
+          {
+            "name": "volcano.png",
+            "type": "plot",
+            "label": "g\u0001+e11e\u001b> (PNG)"
+          },
+          {
+            "name": "volcano.pdf",
+            "type": "file",
+            "label": "g\u0001+e11e\u001b> (PDF)"
+          },
+          {
+            "name": "pca.png",
+            "type": "plot",
+            "label": "PCA e\u001b> (PNG)"
+          },
+          {
+            "name": "pca.pdf",
+            "type": "file",
+            "label": "PCA e\u001b> (PDF)"
+          },
+          {
+            "name": "heatmap.png",
+            "type": "plot",
+            "label": "Top50 g\u0003-e\u001b> (PNG)"
+          },
+          {
+            "name": "heatmap.pdf",
+            "type": "file",
+            "label": "Top50 g\u0003-e\u001b> (PDF)"
+          },
+          {
+            "name": "library_size.png",
+            "type": "plot",
+            "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)"
+          },
+          {
+            "name": "library_size.pdf",
+            "type": "file",
+            "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)"
+          },
+          {
+            "name": "dispersion.png",
+            "type": "plot",
+            "label": "g&;f\u0015#e:&d<0h.! (PNG)"
+          },
+          {
+            "name": "dispersion.pdf",
+            "type": "file",
+            "label": "g&;f\u0015#e:&d<0h.! (PDF)"
+          },
+          {
+            "name": "ma_plot.png",
+            "type": "plot",
+            "label": "MA e\u001b> (PNG)"
+          },
+          {
+            "name": "ma_plot.pdf",
+            "type": "file",
+            "label": "MA e\u001b> (PDF)"
+          },
+          {
+            "name": "sample_distance.png",
+            "type": "plot",
+            "label": "f 7f\u001c,h7\u001dg&; (PNG)"
+          },
+          {
+            "name": "sample_distance.pdf",
+            "type": "file",
+            "label": "f 7f\u001c,h7\u001dg&; (PDF)"
+          },
+          {
+            "name": "vst_matrix.csv",
+            "type": "table",
+            "label": "VST g\u001f)i\u00185"
+          },
+          {
+            "name": "coldata_info.csv",
+            "type": "table",
+            "label": "f 7f\u001c,d<bf>!f\u0001/"
+          },
+          {
+            "name": "dispersion_data.csv",
+            "type": "table",
+            "label": "g&;f\u0015#e:&f\u00150f\r."
+          },
+          {
+            "name": "summary.txt",
+            "type": "text",
+            "label": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001"
+          },
+          {
+            "name": "report.html",
+            "type": "file",
+            "label": "h'#h/;f\n%e\u0011\n HTML"
+          }
+        ],
+        "summary": {
+          "total_genes": 10,
+          "sig_genes": 5,
+          "up": 4,
+          "down": 1,
+          "sci_style": true,
+          "dual_format": true
+        }
+      },
+      "toolJobId": "job_a7ade42394874d1e",
+      "jobDir": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e",
+      "outputDir": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+      "resultDir": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+      "canonicalJobDir": "/work/biof3/tool-jobs/job_a7ade42394874d1e",
+      "canonicalOutputDir": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output",
+      "canonicalResultDir": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output",
+      "execution": {
+        "executionContextVersion": 2,
+        "adapter": {
+          "kind": "local",
+          "workerId": null
+        },
+        "platform": null,
+        "jobId": null,
+        "toolId": null,
+        "runtime": "r",
+        "runtimeReady": {
+          "runtime": "r",
+          "ready": true,
+          "command": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
+          "reason": null
+        },
+        "workDir": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e",
+        "canonicalWorkDir": "/work/biof3/tool-jobs/job_a7ade42394874d1e",
+        "executionWorkDir": "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/data/results/tool-jobs/job_a7ade42394874d1e",
+        "outputDir": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+        "canonicalOutputDir": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output",
+        "resultDir": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+        "canonicalResultDir": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output"
+      },
+      "resourceUsage": {
+        "start": {
+          "schemaVersion": 1,
+          "observedAt": "2026-09-18T15:22:46.849Z",
+          "expiresAt": "2026-09-18T15:23:16.849Z",
+          "platform": "win32-x64",
+          "cpu": {
+            "logicalCores": 28,
+            "load1m": 0
+          },
+          "memory": {
+            "totalBytes": 34190479360,
+            "availableBytes": 17191788544,
+            "estimatedBytes": 0
+          },
+          "disk": {
+            "availableBytes": 214792515584,
+            "totalBytes": 809327652864,
+            "usePercent": 73.46037605116975
+          },
+          "runtime": {
+            "r": true,
+            "python": false,
+            "details": null
+          },
+          "activeJobs": 1,
+          "state": "ready"
+        },
+        "end": {
+          "schemaVersion": 1,
+          "observedAt": "2026-09-18T15:22:54.643Z",
+          "expiresAt": "2026-09-18T15:23:24.643Z",
+          "platform": "win32-x64",
+          "cpu": {
+            "logicalCores": 28,
+            "load1m": 0
+          },
+          "memory": {
+            "totalBytes": 34190479360,
+            "availableBytes": 17227055104,
+            "estimatedBytes": 0
+          },
+          "disk": {
+            "availableBytes": 214791557120,
+            "totalBytes": 809327652864,
+            "usePercent": 73.46049447836009
+          },
+          "runtime": {
+            "r": true,
+            "python": false,
+            "details": null
+          },
+          "activeJobs": 0,
+          "state": "ready"
+        },
+        "peak": {
+          "cpuPercent": null,
+          "rssBytes": null,
+          "outputBytes": 1361512,
+          "activeJobs": 1,
+          "minimumAvailableMemoryBytes": 16168275968,
+          "minimumAvailableDiskBytes": 214791557120
+        },
+        "sampling": {
+          "status": "measured",
+          "intervalMs": 500,
+          "sampleCount": 17,
+          "processSampleCount": 0,
+          "outputSampleCount": 18,
+          "systemSampleCount": 17,
+          "directoryTruncated": false,
+          "directoryReadErrors": 0,
+          "directoryStatErrors": 0,
+          "outputMeasurementStatus": "measured"
+        },
+        "peakStatus": "partial_process_peak_unavailable"
+      },
+      "artifactSchemaVersion": 1,
+      "artifactTruth": {
+        "artifactTruthVersion": 1,
+        "status": "valid",
+        "blocking": false,
+        "resultDir": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+        "declaredCount": 24,
+        "actualCount": 24,
+        "validCount": 24,
+        "issueCount": 0,
+        "excludedInputCount": 0,
+        "excludedInputNames": [],
+        "exclusionPolicy": null,
+        "stagedInputSnapshotCount": 2,
+        "stagedInputIntegrity": "verified",
+        "checkedAt": "2026-09-18T15:22:56.834Z"
+      },
+      "artifactDiagnostics": [],
+      "artifacts": [
+        {
+          "name": "deg_table.csv",
+          "type": "table",
+          "label": "差异基因表",
+          "filename": "deg_table.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/deg_table.csv",
+          "id": "deg_table",
+          "title": "差异基因表",
+          "size": 1081,
+          "sha256": "a25782389c10f50553798f4c3b395f6b6271d2a91012d5719358e07f01993e6a",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "deg_table"
+          }
+        },
+        {
+          "name": "up_genes.csv",
+          "type": "table",
+          "label": "d8\nh0\u0003e\u001f:e\u001b ",
+          "filename": "up_genes.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/up_genes.csv",
+          "id": "artifact_2",
+          "title": "d8\nh0\u0003e\u001f:e\u001b ",
+          "size": 473,
+          "sha256": "1fe30b4ff5cfdfcef75d03b6d31aa3aa46a0473c5b3b223259255b1747576de4",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_2"
+          }
+        },
+        {
+          "name": "down_genes.csv",
+          "type": "table",
+          "label": "d8\u000bh0\u0003e\u001f:e\u001b ",
+          "filename": "down_genes.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/down_genes.csv",
+          "id": "artifact_3",
+          "title": "d8\u000bh0\u0003e\u001f:e\u001b ",
+          "size": 164,
+          "sha256": "a586fdcb1ab01b378def88335febdb2d49c15a4c887ca924d323bed1d84abdba",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_3"
+          }
+        },
+        {
+          "name": "volcano.png",
+          "type": "plot",
+          "label": "火山图",
+          "filename": "volcano.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/volcano.png",
+          "id": "volcano",
+          "title": "火山图",
+          "size": 39780,
+          "sha256": "06d76941bd7849fdfda69a37496050feb18acd872c55e4adad49ad69ea353863",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "volcano"
+          }
+        },
+        {
+          "name": "volcano.pdf",
+          "type": "file",
+          "label": "g\u0001+e11e\u001b> (PDF)",
+          "filename": "volcano.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/volcano.pdf",
+          "id": "artifact_5",
+          "title": "g\u0001+e11e\u001b> (PDF)",
+          "size": 42243,
+          "sha256": "29e6998c86b0532b276cedddd1a37396c4f1c2da5c67b60b1130bba78a3a9c3f",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_5"
+          }
+        },
+        {
+          "name": "pca.png",
+          "type": "plot",
+          "label": "PCA 图",
+          "filename": "pca.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/pca.png",
+          "id": "pca",
+          "title": "PCA 图",
+          "size": 32291,
+          "sha256": "35032b5ebe9c2a0b78ec5b22d87b70a36957f1124c4b4fd32c7e5d1bcaf840d9",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "pca"
+          }
+        },
+        {
+          "name": "pca.pdf",
+          "type": "file",
+          "label": "PCA e\u001b> (PDF)",
+          "filename": "pca.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/pca.pdf",
+          "id": "artifact_7",
+          "title": "PCA e\u001b> (PDF)",
+          "size": 25664,
+          "sha256": "983e35d85eeab01e99c3c0dd51b08ec35178ea4505bef5763e9d2af5dd504a79",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_7"
+          }
+        },
+        {
+          "name": "heatmap.png",
+          "type": "plot",
+          "label": "Top50 热图",
+          "filename": "heatmap.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/heatmap.png",
+          "id": "heatmap",
+          "title": "Top50 热图",
+          "size": 39274,
+          "sha256": "5c24811c6de636541dbbded597b362aa8287a810372419fcb19c5ac9512c61ab",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "heatmap"
+          }
+        },
+        {
+          "name": "heatmap.pdf",
+          "type": "file",
+          "label": "Top50 g\u0003-e\u001b> (PDF)",
+          "filename": "heatmap.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/heatmap.pdf",
+          "id": "artifact_9",
+          "title": "Top50 g\u0003-e\u001b> (PDF)",
+          "size": 30828,
+          "sha256": "4e76b0f01f5d647d5f3cb00504b9983e3232784becf1d10ab7ce617cbce8ddbe",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_9"
+          }
+        },
+        {
+          "name": "library_size.png",
+          "type": "plot",
+          "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
+          "filename": "library_size.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/library_size.png",
+          "id": "artifact_10",
+          "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
+          "size": 28549,
+          "sha256": "90df4356679b00bc6b7371e22e954e1b4d5a42753f3337d268b4a2a09f85c811",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_10"
+          }
+        },
+        {
+          "name": "library_size.pdf",
+          "type": "file",
+          "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
+          "filename": "library_size.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/library_size.pdf",
+          "id": "artifact_11",
+          "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
+          "size": 24017,
+          "sha256": "4dd557b4fce57bf0dd78236603198d2f642c2dd8031c4ff3ec451603765be601",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_11"
+          }
+        },
+        {
+          "name": "dispersion.png",
+          "type": "plot",
+          "label": "g&;f\u0015#e:&d<0h.! (PNG)",
+          "filename": "dispersion.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion.png",
+          "id": "artifact_12",
+          "title": "g&;f\u0015#e:&d<0h.! (PNG)",
+          "size": 40268,
+          "sha256": "9729f34b3d2ed0a6d2e637cb729b3ccee7f4c20b4c54c7f6a713dc4aca18f461",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_12"
+          }
+        },
+        {
+          "name": "dispersion.pdf",
+          "type": "file",
+          "label": "g&;f\u0015#e:&d<0h.! (PDF)",
+          "filename": "dispersion.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion.pdf",
+          "id": "artifact_13",
+          "title": "g&;f\u0015#e:&d<0h.! (PDF)",
+          "size": 30165,
+          "sha256": "079cc4cb2d26d85df52090eaee2055a170bba8bfa367725a77f1cd06af56d5ec",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_13"
+          }
+        },
+        {
+          "name": "ma_plot.png",
+          "type": "plot",
+          "label": "MA e\u001b> (PNG)",
+          "filename": "ma_plot.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/ma_plot.png",
+          "id": "artifact_14",
+          "title": "MA e\u001b> (PNG)",
+          "size": 31265,
+          "sha256": "3b8d032ea0e5c7a35f398b24b431c4a7638ac9563caef03af0c174b468800de2",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_14"
+          }
+        },
+        {
+          "name": "ma_plot.pdf",
+          "type": "file",
+          "label": "MA e\u001b> (PDF)",
+          "filename": "ma_plot.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/ma_plot.pdf",
+          "id": "artifact_15",
+          "title": "MA e\u001b> (PDF)",
+          "size": 29916,
+          "sha256": "af1bba77cb1f67162f260de3b722f69a712477f4df84d3b20af30ef34e4a1805",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_15"
+          }
+        },
+        {
+          "name": "sample_distance.png",
+          "type": "plot",
+          "label": "f 7f\u001c,h7\u001dg&; (PNG)",
+          "filename": "sample_distance.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/sample_distance.png",
+          "id": "artifact_16",
+          "title": "f 7f\u001c,h7\u001dg&; (PNG)",
+          "size": 36777,
+          "sha256": "ae1c9c8037f19c30250b03ea932c2beca026fb28533bacf5340ced36d8a2d2ef",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_16"
+          }
+        },
+        {
+          "name": "sample_distance.pdf",
+          "type": "file",
+          "label": "f 7f\u001c,h7\u001dg&; (PDF)",
+          "filename": "sample_distance.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/sample_distance.pdf",
+          "id": "artifact_17",
+          "title": "f 7f\u001c,h7\u001dg&; (PDF)",
+          "size": 25288,
+          "sha256": "c810d7f7643be298f1f64948a56f8936a266eef38341b5dd47ed1e50e7bbc294",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_17"
+          }
+        },
+        {
+          "name": "vst_matrix.csv",
+          "type": "data",
+          "label": "VST 矩阵",
+          "filename": "vst_matrix.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/vst_matrix.csv",
+          "id": "vst_matrix",
+          "title": "VST 矩阵",
+          "size": 795,
+          "sha256": "0ab0717d075bf589f0d12b1f172608bcec4b301437efee382e00a9fde5e95649",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "vst_matrix"
+          }
+        },
+        {
+          "name": "coldata_info.csv",
+          "type": "table",
+          "label": "f 7f\u001c,d<bf>!f\u0001/",
+          "filename": "coldata_info.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/coldata_info.csv",
+          "id": "artifact_19",
+          "title": "f 7f\u001c,d<bf>!f\u0001/",
+          "size": 68,
+          "sha256": "b4f9489a7dd7a36616bad5c44124d0affa7840db5bdaf4bdd814ec2e0b3565e9",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_19"
+          }
+        },
+        {
+          "name": "dispersion_data.csv",
+          "type": "table",
+          "label": "g&;f\u0015#e:&f\u00150f\r.",
+          "filename": "dispersion_data.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion_data.csv",
+          "id": "artifact_20",
+          "title": "g&;f\u0015#e:&f\u00150f\r.",
+          "size": 836,
+          "sha256": "8a41784b147fcff8e24835e62b384f04796766b417b37d4ce14879dbd0952eeb",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_20"
+          }
+        },
+        {
+          "name": "summary.txt",
+          "type": "text",
+          "label": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
+          "filename": "summary.txt",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/summary.txt",
+          "id": "artifact_21",
+          "title": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
+          "size": 192,
+          "sha256": "a37e3def239e84411ed341cb9a0aaaa2e00d302c428ff8ece9b09d176b14b516",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_21"
+          }
+        },
+        {
+          "name": "report.html",
+          "type": "report",
+          "label": "解读报告",
+          "filename": "report.html",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/report.html",
+          "id": "report",
+          "title": "解读报告",
+          "size": 337789,
+          "sha256": "00056286ad1f64f612f404b6c7587118d6ba9d243d07c19188d9527f1f346827",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "report"
+          }
+        },
+        {
+          "id": "zip",
+          "filename": "all_results.zip",
+          "type": "file",
+          "label": "全部结果打包下载",
+          "name": "all_results.zip",
+          "title": "全部结果打包下载",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
+          "size": 558681,
+          "sha256": "9d2052cbbfc00e26a72b3935299268fe8fc69b1bc553670e2b0df71ff4609753",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/all_results.zip",
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "zip"
+          }
+        },
+        {
+          "name": "run.log",
+          "filename": "run.log",
+          "id": "artifact_24",
+          "type": "text",
+          "label": "run.log",
+          "title": "run.log",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
+          "size": 2384,
+          "sha256": "91f52e1b68bac76825e16dfc81d90f349e4deb1014a46ee73e011652da40a560",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/run.log",
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_24"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "deg_table.csv",
+          "type": "table",
+          "label": "差异基因表",
+          "filename": "deg_table.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/deg_table.csv",
+          "id": "deg_table",
+          "title": "差异基因表",
+          "size": 1081,
+          "sha256": "a25782389c10f50553798f4c3b395f6b6271d2a91012d5719358e07f01993e6a",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "deg_table"
+          }
+        },
+        {
+          "name": "up_genes.csv",
+          "type": "table",
+          "label": "d8\nh0\u0003e\u001f:e\u001b ",
+          "filename": "up_genes.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/up_genes.csv",
+          "id": "artifact_2",
+          "title": "d8\nh0\u0003e\u001f:e\u001b ",
+          "size": 473,
+          "sha256": "1fe30b4ff5cfdfcef75d03b6d31aa3aa46a0473c5b3b223259255b1747576de4",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_2"
+          }
+        },
+        {
+          "name": "down_genes.csv",
+          "type": "table",
+          "label": "d8\u000bh0\u0003e\u001f:e\u001b ",
+          "filename": "down_genes.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/down_genes.csv",
+          "id": "artifact_3",
+          "title": "d8\u000bh0\u0003e\u001f:e\u001b ",
+          "size": 164,
+          "sha256": "a586fdcb1ab01b378def88335febdb2d49c15a4c887ca924d323bed1d84abdba",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_3"
+          }
+        },
+        {
+          "name": "volcano.png",
+          "type": "plot",
+          "label": "火山图",
+          "filename": "volcano.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/volcano.png",
+          "id": "volcano",
+          "title": "火山图",
+          "size": 39780,
+          "sha256": "06d76941bd7849fdfda69a37496050feb18acd872c55e4adad49ad69ea353863",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "volcano"
+          }
+        },
+        {
+          "name": "volcano.pdf",
+          "type": "file",
+          "label": "g\u0001+e11e\u001b> (PDF)",
+          "filename": "volcano.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/volcano.pdf",
+          "id": "artifact_5",
+          "title": "g\u0001+e11e\u001b> (PDF)",
+          "size": 42243,
+          "sha256": "29e6998c86b0532b276cedddd1a37396c4f1c2da5c67b60b1130bba78a3a9c3f",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_5"
+          }
+        },
+        {
+          "name": "pca.png",
+          "type": "plot",
+          "label": "PCA 图",
+          "filename": "pca.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/pca.png",
+          "id": "pca",
+          "title": "PCA 图",
+          "size": 32291,
+          "sha256": "35032b5ebe9c2a0b78ec5b22d87b70a36957f1124c4b4fd32c7e5d1bcaf840d9",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "pca"
+          }
+        },
+        {
+          "name": "pca.pdf",
+          "type": "file",
+          "label": "PCA e\u001b> (PDF)",
+          "filename": "pca.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/pca.pdf",
+          "id": "artifact_7",
+          "title": "PCA e\u001b> (PDF)",
+          "size": 25664,
+          "sha256": "983e35d85eeab01e99c3c0dd51b08ec35178ea4505bef5763e9d2af5dd504a79",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_7"
+          }
+        },
+        {
+          "name": "heatmap.png",
+          "type": "plot",
+          "label": "Top50 热图",
+          "filename": "heatmap.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/heatmap.png",
+          "id": "heatmap",
+          "title": "Top50 热图",
+          "size": 39274,
+          "sha256": "5c24811c6de636541dbbded597b362aa8287a810372419fcb19c5ac9512c61ab",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "heatmap"
+          }
+        },
+        {
+          "name": "heatmap.pdf",
+          "type": "file",
+          "label": "Top50 g\u0003-e\u001b> (PDF)",
+          "filename": "heatmap.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/heatmap.pdf",
+          "id": "artifact_9",
+          "title": "Top50 g\u0003-e\u001b> (PDF)",
+          "size": 30828,
+          "sha256": "4e76b0f01f5d647d5f3cb00504b9983e3232784becf1d10ab7ce617cbce8ddbe",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_9"
+          }
+        },
+        {
+          "name": "library_size.png",
+          "type": "plot",
+          "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
+          "filename": "library_size.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/library_size.png",
+          "id": "artifact_10",
+          "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
+          "size": 28549,
+          "sha256": "90df4356679b00bc6b7371e22e954e1b4d5a42753f3337d268b4a2a09f85c811",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_10"
+          }
+        },
+        {
+          "name": "library_size.pdf",
+          "type": "file",
+          "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
+          "filename": "library_size.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/library_size.pdf",
+          "id": "artifact_11",
+          "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
+          "size": 24017,
+          "sha256": "4dd557b4fce57bf0dd78236603198d2f642c2dd8031c4ff3ec451603765be601",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_11"
+          }
+        },
+        {
+          "name": "dispersion.png",
+          "type": "plot",
+          "label": "g&;f\u0015#e:&d<0h.! (PNG)",
+          "filename": "dispersion.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion.png",
+          "id": "artifact_12",
+          "title": "g&;f\u0015#e:&d<0h.! (PNG)",
+          "size": 40268,
+          "sha256": "9729f34b3d2ed0a6d2e637cb729b3ccee7f4c20b4c54c7f6a713dc4aca18f461",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_12"
+          }
+        },
+        {
+          "name": "dispersion.pdf",
+          "type": "file",
+          "label": "g&;f\u0015#e:&d<0h.! (PDF)",
+          "filename": "dispersion.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion.pdf",
+          "id": "artifact_13",
+          "title": "g&;f\u0015#e:&d<0h.! (PDF)",
+          "size": 30165,
+          "sha256": "079cc4cb2d26d85df52090eaee2055a170bba8bfa367725a77f1cd06af56d5ec",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_13"
+          }
+        },
+        {
+          "name": "ma_plot.png",
+          "type": "plot",
+          "label": "MA e\u001b> (PNG)",
+          "filename": "ma_plot.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/ma_plot.png",
+          "id": "artifact_14",
+          "title": "MA e\u001b> (PNG)",
+          "size": 31265,
+          "sha256": "3b8d032ea0e5c7a35f398b24b431c4a7638ac9563caef03af0c174b468800de2",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_14"
+          }
+        },
+        {
+          "name": "ma_plot.pdf",
+          "type": "file",
+          "label": "MA e\u001b> (PDF)",
+          "filename": "ma_plot.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/ma_plot.pdf",
+          "id": "artifact_15",
+          "title": "MA e\u001b> (PDF)",
+          "size": 29916,
+          "sha256": "af1bba77cb1f67162f260de3b722f69a712477f4df84d3b20af30ef34e4a1805",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_15"
+          }
+        },
+        {
+          "name": "sample_distance.png",
+          "type": "plot",
+          "label": "f 7f\u001c,h7\u001dg&; (PNG)",
+          "filename": "sample_distance.png",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/sample_distance.png",
+          "id": "artifact_16",
+          "title": "f 7f\u001c,h7\u001dg&; (PNG)",
+          "size": 36777,
+          "sha256": "ae1c9c8037f19c30250b03ea932c2beca026fb28533bacf5340ced36d8a2d2ef",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_16"
+          }
+        },
+        {
+          "name": "sample_distance.pdf",
+          "type": "file",
+          "label": "f 7f\u001c,h7\u001dg&; (PDF)",
+          "filename": "sample_distance.pdf",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/sample_distance.pdf",
+          "id": "artifact_17",
+          "title": "f 7f\u001c,h7\u001dg&; (PDF)",
+          "size": 25288,
+          "sha256": "c810d7f7643be298f1f64948a56f8936a266eef38341b5dd47ed1e50e7bbc294",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_17"
+          }
+        },
+        {
+          "name": "vst_matrix.csv",
+          "type": "data",
+          "label": "VST 矩阵",
+          "filename": "vst_matrix.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/vst_matrix.csv",
+          "id": "vst_matrix",
+          "title": "VST 矩阵",
+          "size": 795,
+          "sha256": "0ab0717d075bf589f0d12b1f172608bcec4b301437efee382e00a9fde5e95649",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "vst_matrix"
+          }
+        },
+        {
+          "name": "coldata_info.csv",
+          "type": "table",
+          "label": "f 7f\u001c,d<bf>!f\u0001/",
+          "filename": "coldata_info.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/coldata_info.csv",
+          "id": "artifact_19",
+          "title": "f 7f\u001c,d<bf>!f\u0001/",
+          "size": 68,
+          "sha256": "b4f9489a7dd7a36616bad5c44124d0affa7840db5bdaf4bdd814ec2e0b3565e9",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_19"
+          }
+        },
+        {
+          "name": "dispersion_data.csv",
+          "type": "table",
+          "label": "g&;f\u0015#e:&f\u00150f\r.",
+          "filename": "dispersion_data.csv",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion_data.csv",
+          "id": "artifact_20",
+          "title": "g&;f\u0015#e:&f\u00150f\r.",
+          "size": 836,
+          "sha256": "8a41784b147fcff8e24835e62b384f04796766b417b37d4ce14879dbd0952eeb",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_20"
+          }
+        },
+        {
+          "name": "summary.txt",
+          "type": "text",
+          "label": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
+          "filename": "summary.txt",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/summary.txt",
+          "id": "artifact_21",
+          "title": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
+          "size": 192,
+          "sha256": "a37e3def239e84411ed341cb9a0aaaa2e00d302c428ff8ece9b09d176b14b516",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_21"
+          }
+        },
+        {
+          "name": "report.html",
+          "type": "report",
+          "label": "解读报告",
+          "filename": "report.html",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/report.html",
+          "id": "report",
+          "title": "解读报告",
+          "size": 337789,
+          "sha256": "00056286ad1f64f612f404b6c7587118d6ba9d243d07c19188d9527f1f346827",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "report"
+          }
+        },
+        {
+          "id": "zip",
+          "filename": "all_results.zip",
+          "type": "file",
+          "label": "全部结果打包下载",
+          "name": "all_results.zip",
+          "title": "全部结果打包下载",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
+          "size": 558681,
+          "sha256": "9d2052cbbfc00e26a72b3935299268fe8fc69b1bc553670e2b0df71ff4609753",
+          "required": true,
+          "preview": true,
+          "download": true,
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/all_results.zip",
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "zip"
+          }
+        },
+        {
+          "name": "run.log",
+          "filename": "run.log",
+          "id": "artifact_24",
+          "type": "text",
+          "label": "run.log",
+          "title": "run.log",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
+          "size": 2384,
+          "sha256": "91f52e1b68bac76825e16dfc81d90f349e4deb1014a46ee73e011652da40a560",
+          "required": false,
+          "preview": true,
+          "download": true,
+          "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/run.log",
+          "provenance": {
+            "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+            "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "toolJobId": "job_a7ade42394874d1e",
+            "reproductionTarget": "artifact_24"
+          }
+        }
+      ],
+      "executionProvenance": {
+        "executionProvenanceVersion": 1,
+        "toolJobId": "job_a7ade42394874d1e",
+        "projectId": null,
+        "task": null,
+        "plugin": {
+          "id": "deseq2",
+          "version": "1.0.0",
+          "language": "r",
+          "manifestFingerprint": "d16e69d99192b5cf5e201560e854fb4e5f074dbe3ece99b15e5d4e49c07ef99b",
+          "packageConstraints": {
+            "DESeq2": ">=1.40.0",
+            "ggplot2": ">=3.4.0",
+            "ggrepel": ">=0.9.0",
+            "pheatmap": ">=1.0.12",
+            "apeglm": ">=1.20.0",
+            "jsonlite": ">=1.8.0",
+            "base64enc": ">=0.1-3",
+            "png": ">=0.1-8"
+          }
+        },
+        "runtime": {
+          "name": "r",
+          "command": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
+          "version": "4.5.2",
+          "versionSource": "runtime_probe",
+          "readiness": true
+        },
+        "params": {
+          "normalized": {
+            "design": "condition",
+            "contrast_ref": "WT",
+            "contrast_treat": "KO",
+            "counts": {
+              "inputRef": "inputs/counts/counts.csv",
+              "sha256": "f992810545c3d7fd37fb61a370e75d616799d4716895714c47e7e467ca2c73cc"
+            },
+            "coldata": {
+              "inputRef": "inputs/coldata/coldata.csv",
+              "sha256": "53a6aec45abab55b62364b3f580f09cdbe2021078f80fe66fb15baefede2fd90"
+            }
+          },
+          "sha256": "4aadf3b916090ecd5c08405f272e82dca39db737d350b84972100620cd91b5de"
+        },
+        "inputs": [
+          {
+            "id": "counts",
+            "role": "counts",
+            "relativePath": "inputs/counts/counts.csv",
+            "sha256": "f992810545c3d7fd37fb61a370e75d616799d4716895714c47e7e467ca2c73cc",
+            "sizeBytes": 269,
+            "sourceArtifactRef": null,
+            "lineage": null
+          },
+          {
+            "id": "coldata",
+            "role": "coldata",
+            "relativePath": "inputs/coldata/coldata.csv",
+            "sha256": "53a6aec45abab55b62364b3f580f09cdbe2021078f80fe66fb15baefede2fd90",
+            "sizeBytes": 48,
+            "sourceArtifactRef": null,
+            "lineage": null
+          }
+        ],
+        "script": {
+          "snapshotPath": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\run-script.R",
+          "sha256": "7c6bac471c53137bb69bfd6e112dffb71a0ade47cbea525b421bce15b9326dbb",
+          "entryPoint": null
+        },
+        "command": {
+          "executable": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
+          "args": [
+            "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\run-script.R",
+            "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e"
+          ],
+          "cwd": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e"
+        },
+        "startedAt": "2026-09-18T15:22:46.849Z",
+        "completedAt": "2026-09-18T15:22:54.745Z",
+        "artifacts": [
+          {
+            "id": "deg_table",
+            "filename": "deg_table.csv",
+            "type": "table",
+            "sha256": "a25782389c10f50553798f4c3b395f6b6271d2a91012d5719358e07f01993e6a",
+            "reproductionTarget": "deg_table"
+          },
+          {
+            "id": "artifact_2",
+            "filename": "up_genes.csv",
+            "type": "table",
+            "sha256": "1fe30b4ff5cfdfcef75d03b6d31aa3aa46a0473c5b3b223259255b1747576de4",
+            "reproductionTarget": "artifact_2"
+          },
+          {
+            "id": "artifact_3",
+            "filename": "down_genes.csv",
+            "type": "table",
+            "sha256": "a586fdcb1ab01b378def88335febdb2d49c15a4c887ca924d323bed1d84abdba",
+            "reproductionTarget": "artifact_3"
+          },
+          {
+            "id": "volcano",
+            "filename": "volcano.png",
+            "type": "plot",
+            "sha256": "06d76941bd7849fdfda69a37496050feb18acd872c55e4adad49ad69ea353863",
+            "reproductionTarget": "volcano"
+          },
+          {
+            "id": "artifact_5",
+            "filename": "volcano.pdf",
+            "type": "file",
+            "sha256": "29e6998c86b0532b276cedddd1a37396c4f1c2da5c67b60b1130bba78a3a9c3f",
+            "reproductionTarget": "artifact_5"
+          },
+          {
+            "id": "pca",
+            "filename": "pca.png",
+            "type": "plot",
+            "sha256": "35032b5ebe9c2a0b78ec5b22d87b70a36957f1124c4b4fd32c7e5d1bcaf840d9",
+            "reproductionTarget": "pca"
+          },
+          {
+            "id": "artifact_7",
+            "filename": "pca.pdf",
+            "type": "file",
+            "sha256": "983e35d85eeab01e99c3c0dd51b08ec35178ea4505bef5763e9d2af5dd504a79",
+            "reproductionTarget": "artifact_7"
+          },
+          {
+            "id": "heatmap",
+            "filename": "heatmap.png",
+            "type": "plot",
+            "sha256": "5c24811c6de636541dbbded597b362aa8287a810372419fcb19c5ac9512c61ab",
+            "reproductionTarget": "heatmap"
+          },
+          {
+            "id": "artifact_9",
+            "filename": "heatmap.pdf",
+            "type": "file",
+            "sha256": "4e76b0f01f5d647d5f3cb00504b9983e3232784becf1d10ab7ce617cbce8ddbe",
+            "reproductionTarget": "artifact_9"
+          },
+          {
+            "id": "artifact_10",
+            "filename": "library_size.png",
+            "type": "plot",
+            "sha256": "90df4356679b00bc6b7371e22e954e1b4d5a42753f3337d268b4a2a09f85c811",
+            "reproductionTarget": "artifact_10"
+          },
+          {
+            "id": "artifact_11",
+            "filename": "library_size.pdf",
+            "type": "file",
+            "sha256": "4dd557b4fce57bf0dd78236603198d2f642c2dd8031c4ff3ec451603765be601",
+            "reproductionTarget": "artifact_11"
+          },
+          {
+            "id": "artifact_12",
+            "filename": "dispersion.png",
+            "type": "plot",
+            "sha256": "9729f34b3d2ed0a6d2e637cb729b3ccee7f4c20b4c54c7f6a713dc4aca18f461",
+            "reproductionTarget": "artifact_12"
+          },
+          {
+            "id": "artifact_13",
+            "filename": "dispersion.pdf",
+            "type": "file",
+            "sha256": "079cc4cb2d26d85df52090eaee2055a170bba8bfa367725a77f1cd06af56d5ec",
+            "reproductionTarget": "artifact_13"
+          },
+          {
+            "id": "artifact_14",
+            "filename": "ma_plot.png",
+            "type": "plot",
+            "sha256": "3b8d032ea0e5c7a35f398b24b431c4a7638ac9563caef03af0c174b468800de2",
+            "reproductionTarget": "artifact_14"
+          },
+          {
+            "id": "artifact_15",
+            "filename": "ma_plot.pdf",
+            "type": "file",
+            "sha256": "af1bba77cb1f67162f260de3b722f69a712477f4df84d3b20af30ef34e4a1805",
+            "reproductionTarget": "artifact_15"
+          },
+          {
+            "id": "artifact_16",
+            "filename": "sample_distance.png",
+            "type": "plot",
+            "sha256": "ae1c9c8037f19c30250b03ea932c2beca026fb28533bacf5340ced36d8a2d2ef",
+            "reproductionTarget": "artifact_16"
+          },
+          {
+            "id": "artifact_17",
+            "filename": "sample_distance.pdf",
+            "type": "file",
+            "sha256": "c810d7f7643be298f1f64948a56f8936a266eef38341b5dd47ed1e50e7bbc294",
+            "reproductionTarget": "artifact_17"
+          },
+          {
+            "id": "vst_matrix",
+            "filename": "vst_matrix.csv",
+            "type": "data",
+            "sha256": "0ab0717d075bf589f0d12b1f172608bcec4b301437efee382e00a9fde5e95649",
+            "reproductionTarget": "vst_matrix"
+          },
+          {
+            "id": "artifact_19",
+            "filename": "coldata_info.csv",
+            "type": "table",
+            "sha256": "b4f9489a7dd7a36616bad5c44124d0affa7840db5bdaf4bdd814ec2e0b3565e9",
+            "reproductionTarget": "artifact_19"
+          },
+          {
+            "id": "artifact_20",
+            "filename": "dispersion_data.csv",
+            "type": "table",
+            "sha256": "8a41784b147fcff8e24835e62b384f04796766b417b37d4ce14879dbd0952eeb",
+            "reproductionTarget": "artifact_20"
+          },
+          {
+            "id": "artifact_21",
+            "filename": "summary.txt",
+            "type": "text",
+            "sha256": "a37e3def239e84411ed341cb9a0aaaa2e00d302c428ff8ece9b09d176b14b516",
+            "reproductionTarget": "artifact_21"
+          },
+          {
+            "id": "report",
+            "filename": "report.html",
+            "type": "report",
+            "sha256": "00056286ad1f64f612f404b6c7587118d6ba9d243d07c19188d9527f1f346827",
+            "reproductionTarget": "report"
+          },
+          {
+            "id": "zip",
+            "filename": "all_results.zip",
+            "type": "file",
+            "sha256": "9d2052cbbfc00e26a72b3935299268fe8fc69b1bc553670e2b0df71ff4609753",
+            "reproductionTarget": "zip"
+          },
+          {
+            "id": "artifact_24",
+            "filename": "run.log",
+            "type": "text",
+            "sha256": "91f52e1b68bac76825e16dfc81d90f349e4deb1014a46ee73e011652da40a560",
+            "reproductionTarget": "artifact_24"
+          }
+        ],
+        "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8"
+      },
+      "provenanceRef": {
+        "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+        "toolJobId": "job_a7ade42394874d1e"
+      }
+    }
+  },
+  "resultJson": {
+    "files": [
+      {
+        "name": "deg_table.csv",
+        "type": "table",
+        "label": "差异基因表",
+        "filename": "deg_table.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/deg_table.csv",
+        "id": "deg_table",
+        "title": "差异基因表",
+        "size": 1081,
+        "sha256": "a25782389c10f50553798f4c3b395f6b6271d2a91012d5719358e07f01993e6a",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "deg_table"
+        }
+      },
+      {
+        "name": "up_genes.csv",
+        "type": "table",
+        "label": "d8\nh0\u0003e\u001f:e\u001b ",
+        "filename": "up_genes.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/up_genes.csv",
+        "id": "artifact_2",
+        "title": "d8\nh0\u0003e\u001f:e\u001b ",
+        "size": 473,
+        "sha256": "1fe30b4ff5cfdfcef75d03b6d31aa3aa46a0473c5b3b223259255b1747576de4",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_2"
+        }
+      },
+      {
+        "name": "down_genes.csv",
+        "type": "table",
+        "label": "d8\u000bh0\u0003e\u001f:e\u001b ",
+        "filename": "down_genes.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/down_genes.csv",
+        "id": "artifact_3",
+        "title": "d8\u000bh0\u0003e\u001f:e\u001b ",
+        "size": 164,
+        "sha256": "a586fdcb1ab01b378def88335febdb2d49c15a4c887ca924d323bed1d84abdba",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_3"
+        }
+      },
+      {
+        "name": "volcano.png",
+        "type": "plot",
+        "label": "火山图",
+        "filename": "volcano.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/volcano.png",
+        "id": "volcano",
+        "title": "火山图",
+        "size": 39780,
+        "sha256": "06d76941bd7849fdfda69a37496050feb18acd872c55e4adad49ad69ea353863",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "volcano"
+        }
+      },
+      {
+        "name": "volcano.pdf",
+        "type": "file",
+        "label": "g\u0001+e11e\u001b> (PDF)",
+        "filename": "volcano.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/volcano.pdf",
+        "id": "artifact_5",
+        "title": "g\u0001+e11e\u001b> (PDF)",
+        "size": 42243,
+        "sha256": "29e6998c86b0532b276cedddd1a37396c4f1c2da5c67b60b1130bba78a3a9c3f",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_5"
+        }
+      },
+      {
+        "name": "pca.png",
+        "type": "plot",
+        "label": "PCA 图",
+        "filename": "pca.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/pca.png",
+        "id": "pca",
+        "title": "PCA 图",
+        "size": 32291,
+        "sha256": "35032b5ebe9c2a0b78ec5b22d87b70a36957f1124c4b4fd32c7e5d1bcaf840d9",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "pca"
+        }
+      },
+      {
+        "name": "pca.pdf",
+        "type": "file",
+        "label": "PCA e\u001b> (PDF)",
+        "filename": "pca.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/pca.pdf",
+        "id": "artifact_7",
+        "title": "PCA e\u001b> (PDF)",
+        "size": 25664,
+        "sha256": "983e35d85eeab01e99c3c0dd51b08ec35178ea4505bef5763e9d2af5dd504a79",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_7"
+        }
+      },
+      {
+        "name": "heatmap.png",
+        "type": "plot",
+        "label": "Top50 热图",
+        "filename": "heatmap.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/heatmap.png",
+        "id": "heatmap",
+        "title": "Top50 热图",
+        "size": 39274,
+        "sha256": "5c24811c6de636541dbbded597b362aa8287a810372419fcb19c5ac9512c61ab",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "heatmap"
+        }
+      },
+      {
+        "name": "heatmap.pdf",
+        "type": "file",
+        "label": "Top50 g\u0003-e\u001b> (PDF)",
+        "filename": "heatmap.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/heatmap.pdf",
+        "id": "artifact_9",
+        "title": "Top50 g\u0003-e\u001b> (PDF)",
+        "size": 30828,
+        "sha256": "4e76b0f01f5d647d5f3cb00504b9983e3232784becf1d10ab7ce617cbce8ddbe",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_9"
+        }
+      },
+      {
+        "name": "library_size.png",
+        "type": "plot",
+        "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
+        "filename": "library_size.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/library_size.png",
+        "id": "artifact_10",
+        "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
+        "size": 28549,
+        "sha256": "90df4356679b00bc6b7371e22e954e1b4d5a42753f3337d268b4a2a09f85c811",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_10"
+        }
+      },
+      {
+        "name": "library_size.pdf",
+        "type": "file",
+        "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
+        "filename": "library_size.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/library_size.pdf",
+        "id": "artifact_11",
+        "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
+        "size": 24017,
+        "sha256": "4dd557b4fce57bf0dd78236603198d2f642c2dd8031c4ff3ec451603765be601",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_11"
+        }
+      },
+      {
+        "name": "dispersion.png",
+        "type": "plot",
+        "label": "g&;f\u0015#e:&d<0h.! (PNG)",
+        "filename": "dispersion.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion.png",
+        "id": "artifact_12",
+        "title": "g&;f\u0015#e:&d<0h.! (PNG)",
+        "size": 40268,
+        "sha256": "9729f34b3d2ed0a6d2e637cb729b3ccee7f4c20b4c54c7f6a713dc4aca18f461",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_12"
+        }
+      },
+      {
+        "name": "dispersion.pdf",
+        "type": "file",
+        "label": "g&;f\u0015#e:&d<0h.! (PDF)",
+        "filename": "dispersion.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion.pdf",
+        "id": "artifact_13",
+        "title": "g&;f\u0015#e:&d<0h.! (PDF)",
+        "size": 30165,
+        "sha256": "079cc4cb2d26d85df52090eaee2055a170bba8bfa367725a77f1cd06af56d5ec",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_13"
+        }
+      },
+      {
+        "name": "ma_plot.png",
+        "type": "plot",
+        "label": "MA e\u001b> (PNG)",
+        "filename": "ma_plot.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/ma_plot.png",
+        "id": "artifact_14",
+        "title": "MA e\u001b> (PNG)",
+        "size": 31265,
+        "sha256": "3b8d032ea0e5c7a35f398b24b431c4a7638ac9563caef03af0c174b468800de2",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_14"
+        }
+      },
+      {
+        "name": "ma_plot.pdf",
+        "type": "file",
+        "label": "MA e\u001b> (PDF)",
+        "filename": "ma_plot.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/ma_plot.pdf",
+        "id": "artifact_15",
+        "title": "MA e\u001b> (PDF)",
+        "size": 29916,
+        "sha256": "af1bba77cb1f67162f260de3b722f69a712477f4df84d3b20af30ef34e4a1805",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_15"
+        }
+      },
+      {
+        "name": "sample_distance.png",
+        "type": "plot",
+        "label": "f 7f\u001c,h7\u001dg&; (PNG)",
+        "filename": "sample_distance.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/sample_distance.png",
+        "id": "artifact_16",
+        "title": "f 7f\u001c,h7\u001dg&; (PNG)",
+        "size": 36777,
+        "sha256": "ae1c9c8037f19c30250b03ea932c2beca026fb28533bacf5340ced36d8a2d2ef",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_16"
+        }
+      },
+      {
+        "name": "sample_distance.pdf",
+        "type": "file",
+        "label": "f 7f\u001c,h7\u001dg&; (PDF)",
+        "filename": "sample_distance.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/sample_distance.pdf",
+        "id": "artifact_17",
+        "title": "f 7f\u001c,h7\u001dg&; (PDF)",
+        "size": 25288,
+        "sha256": "c810d7f7643be298f1f64948a56f8936a266eef38341b5dd47ed1e50e7bbc294",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_17"
+        }
+      },
+      {
+        "name": "vst_matrix.csv",
+        "type": "data",
+        "label": "VST 矩阵",
+        "filename": "vst_matrix.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/vst_matrix.csv",
+        "id": "vst_matrix",
+        "title": "VST 矩阵",
+        "size": 795,
+        "sha256": "0ab0717d075bf589f0d12b1f172608bcec4b301437efee382e00a9fde5e95649",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "vst_matrix"
+        }
+      },
+      {
+        "name": "coldata_info.csv",
+        "type": "table",
+        "label": "f 7f\u001c,d<bf>!f\u0001/",
+        "filename": "coldata_info.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/coldata_info.csv",
+        "id": "artifact_19",
+        "title": "f 7f\u001c,d<bf>!f\u0001/",
+        "size": 68,
+        "sha256": "b4f9489a7dd7a36616bad5c44124d0affa7840db5bdaf4bdd814ec2e0b3565e9",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_19"
+        }
+      },
+      {
+        "name": "dispersion_data.csv",
+        "type": "table",
+        "label": "g&;f\u0015#e:&f\u00150f\r.",
+        "filename": "dispersion_data.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion_data.csv",
+        "id": "artifact_20",
+        "title": "g&;f\u0015#e:&f\u00150f\r.",
+        "size": 836,
+        "sha256": "8a41784b147fcff8e24835e62b384f04796766b417b37d4ce14879dbd0952eeb",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_20"
+        }
+      },
+      {
+        "name": "summary.txt",
+        "type": "text",
+        "label": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
+        "filename": "summary.txt",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/summary.txt",
+        "id": "artifact_21",
+        "title": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
+        "size": 192,
+        "sha256": "a37e3def239e84411ed341cb9a0aaaa2e00d302c428ff8ece9b09d176b14b516",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_21"
+        }
+      },
+      {
+        "name": "report.html",
+        "type": "report",
+        "label": "解读报告",
+        "filename": "report.html",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/report.html",
+        "id": "report",
+        "title": "解读报告",
+        "size": 337789,
+        "sha256": "00056286ad1f64f612f404b6c7587118d6ba9d243d07c19188d9527f1f346827",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "report"
+        }
+      },
+      {
+        "id": "zip",
+        "filename": "all_results.zip",
+        "type": "file",
+        "label": "全部结果打包下载",
+        "name": "all_results.zip",
+        "title": "全部结果打包下载",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
+        "size": 558681,
+        "sha256": "9d2052cbbfc00e26a72b3935299268fe8fc69b1bc553670e2b0df71ff4609753",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/all_results.zip",
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "zip"
+        }
+      },
+      {
+        "name": "run.log",
+        "filename": "run.log",
+        "id": "artifact_24",
+        "type": "text",
+        "label": "run.log",
+        "title": "run.log",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
+        "size": 2384,
+        "sha256": "91f52e1b68bac76825e16dfc81d90f349e4deb1014a46ee73e011652da40a560",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/run.log",
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_24"
+        }
+      }
+    ],
+    "summary": {
+      "total_genes": 10,
+      "sig_genes": 5,
+      "up": 4,
+      "down": 1,
+      "sci_style": true,
+      "dual_format": true
+    },
+    "manifest": {
+      "files": [
+        {
+          "name": "deg_table.csv",
+          "type": "table",
+          "label": "e7.e<\u0002e\u001f:e\u001b h!("
+        },
+        {
+          "name": "up_genes.csv",
+          "type": "table",
+          "label": "d8\nh0\u0003e\u001f:e\u001b "
+        },
+        {
+          "name": "down_genes.csv",
+          "type": "table",
+          "label": "d8\u000bh0\u0003e\u001f:e\u001b "
+        },
+        {
+          "name": "volcano.png",
+          "type": "plot",
+          "label": "g\u0001+e11e\u001b> (PNG)"
+        },
+        {
+          "name": "volcano.pdf",
+          "type": "file",
+          "label": "g\u0001+e11e\u001b> (PDF)"
+        },
+        {
+          "name": "pca.png",
+          "type": "plot",
+          "label": "PCA e\u001b> (PNG)"
+        },
+        {
+          "name": "pca.pdf",
+          "type": "file",
+          "label": "PCA e\u001b> (PDF)"
+        },
+        {
+          "name": "heatmap.png",
+          "type": "plot",
+          "label": "Top50 g\u0003-e\u001b> (PNG)"
+        },
+        {
+          "name": "heatmap.pdf",
+          "type": "file",
+          "label": "Top50 g\u0003-e\u001b> (PDF)"
+        },
+        {
+          "name": "library_size.png",
+          "type": "plot",
+          "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)"
+        },
+        {
+          "name": "library_size.pdf",
+          "type": "file",
+          "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)"
+        },
+        {
+          "name": "dispersion.png",
+          "type": "plot",
+          "label": "g&;f\u0015#e:&d<0h.! (PNG)"
+        },
+        {
+          "name": "dispersion.pdf",
+          "type": "file",
+          "label": "g&;f\u0015#e:&d<0h.! (PDF)"
+        },
+        {
+          "name": "ma_plot.png",
+          "type": "plot",
+          "label": "MA e\u001b> (PNG)"
+        },
+        {
+          "name": "ma_plot.pdf",
+          "type": "file",
+          "label": "MA e\u001b> (PDF)"
+        },
+        {
+          "name": "sample_distance.png",
+          "type": "plot",
+          "label": "f 7f\u001c,h7\u001dg&; (PNG)"
+        },
+        {
+          "name": "sample_distance.pdf",
+          "type": "file",
+          "label": "f 7f\u001c,h7\u001dg&; (PDF)"
+        },
+        {
+          "name": "vst_matrix.csv",
+          "type": "table",
+          "label": "VST g\u001f)i\u00185"
+        },
+        {
+          "name": "coldata_info.csv",
+          "type": "table",
+          "label": "f 7f\u001c,d<bf>!f\u0001/"
+        },
+        {
+          "name": "dispersion_data.csv",
+          "type": "table",
+          "label": "g&;f\u0015#e:&f\u00150f\r."
+        },
+        {
+          "name": "summary.txt",
+          "type": "text",
+          "label": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001"
+        },
+        {
+          "name": "report.html",
+          "type": "file",
+          "label": "h'#h/;f\n%e\u0011\n HTML"
+        }
+      ],
+      "summary": {
+        "total_genes": 10,
+        "sig_genes": 5,
+        "up": 4,
+        "down": 1,
+        "sci_style": true,
+        "dual_format": true
+      }
+    },
+    "toolJobId": "job_a7ade42394874d1e",
+    "jobDir": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e",
+    "outputDir": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+    "resultDir": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+    "canonicalJobDir": "/work/biof3/tool-jobs/job_a7ade42394874d1e",
+    "canonicalOutputDir": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output",
+    "canonicalResultDir": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output",
+    "execution": {
+      "executionContextVersion": 2,
+      "adapter": {
+        "kind": "local",
+        "workerId": null
+      },
+      "platform": null,
+      "jobId": null,
+      "toolId": null,
+      "runtime": "r",
+      "runtimeReady": {
+        "runtime": "r",
+        "ready": true,
+        "command": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
+        "reason": null
+      },
+      "workDir": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e",
+      "canonicalWorkDir": "/work/biof3/tool-jobs/job_a7ade42394874d1e",
+      "executionWorkDir": "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/data/results/tool-jobs/job_a7ade42394874d1e",
+      "outputDir": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+      "canonicalOutputDir": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output",
+      "resultDir": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+      "canonicalResultDir": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output"
+    },
+    "resourceUsage": {
+      "start": {
+        "schemaVersion": 1,
+        "observedAt": "2026-09-18T15:22:46.849Z",
+        "expiresAt": "2026-09-18T15:23:16.849Z",
+        "platform": "win32-x64",
+        "cpu": {
+          "logicalCores": 28,
+          "load1m": 0
+        },
+        "memory": {
+          "totalBytes": 34190479360,
+          "availableBytes": 17191788544,
+          "estimatedBytes": 0
+        },
+        "disk": {
+          "availableBytes": 214792515584,
+          "totalBytes": 809327652864,
+          "usePercent": 73.46037605116975
+        },
+        "runtime": {
+          "r": true,
+          "python": false,
+          "details": null
+        },
+        "activeJobs": 1,
+        "state": "ready"
+      },
+      "end": {
+        "schemaVersion": 1,
+        "observedAt": "2026-09-18T15:22:54.643Z",
+        "expiresAt": "2026-09-18T15:23:24.643Z",
+        "platform": "win32-x64",
+        "cpu": {
+          "logicalCores": 28,
+          "load1m": 0
+        },
+        "memory": {
+          "totalBytes": 34190479360,
+          "availableBytes": 17227055104,
+          "estimatedBytes": 0
+        },
+        "disk": {
+          "availableBytes": 214791557120,
+          "totalBytes": 809327652864,
+          "usePercent": 73.46049447836009
+        },
+        "runtime": {
+          "r": true,
+          "python": false,
+          "details": null
+        },
+        "activeJobs": 0,
+        "state": "ready"
+      },
+      "peak": {
+        "cpuPercent": null,
+        "rssBytes": null,
+        "outputBytes": 1361512,
+        "activeJobs": 1,
+        "minimumAvailableMemoryBytes": 16168275968,
+        "minimumAvailableDiskBytes": 214791557120
+      },
+      "sampling": {
+        "status": "measured",
+        "intervalMs": 500,
+        "sampleCount": 17,
+        "processSampleCount": 0,
+        "outputSampleCount": 18,
+        "systemSampleCount": 17,
+        "directoryTruncated": false,
+        "directoryReadErrors": 0,
+        "directoryStatErrors": 0,
+        "outputMeasurementStatus": "measured"
+      },
+      "peakStatus": "partial_process_peak_unavailable"
+    },
+    "artifactSchemaVersion": 1,
+    "artifactTruth": {
+      "artifactTruthVersion": 1,
+      "status": "valid",
+      "blocking": false,
+      "resultDir": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+      "declaredCount": 24,
+      "actualCount": 24,
+      "validCount": 24,
+      "issueCount": 0,
+      "excludedInputCount": 0,
+      "excludedInputNames": [],
+      "exclusionPolicy": null,
+      "stagedInputSnapshotCount": 2,
+      "stagedInputIntegrity": "verified",
+      "checkedAt": "2026-09-18T15:22:56.834Z"
+    },
+    "artifactDiagnostics": [],
+    "artifacts": [
+      {
+        "name": "deg_table.csv",
+        "type": "table",
+        "label": "差异基因表",
+        "filename": "deg_table.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/deg_table.csv",
+        "id": "deg_table",
+        "title": "差异基因表",
+        "size": 1081,
+        "sha256": "a25782389c10f50553798f4c3b395f6b6271d2a91012d5719358e07f01993e6a",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "deg_table"
+        }
+      },
+      {
+        "name": "up_genes.csv",
+        "type": "table",
+        "label": "d8\nh0\u0003e\u001f:e\u001b ",
+        "filename": "up_genes.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/up_genes.csv",
+        "id": "artifact_2",
+        "title": "d8\nh0\u0003e\u001f:e\u001b ",
+        "size": 473,
+        "sha256": "1fe30b4ff5cfdfcef75d03b6d31aa3aa46a0473c5b3b223259255b1747576de4",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_2"
+        }
+      },
+      {
+        "name": "down_genes.csv",
+        "type": "table",
+        "label": "d8\u000bh0\u0003e\u001f:e\u001b ",
+        "filename": "down_genes.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/down_genes.csv",
+        "id": "artifact_3",
+        "title": "d8\u000bh0\u0003e\u001f:e\u001b ",
+        "size": 164,
+        "sha256": "a586fdcb1ab01b378def88335febdb2d49c15a4c887ca924d323bed1d84abdba",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_3"
+        }
+      },
+      {
+        "name": "volcano.png",
+        "type": "plot",
+        "label": "火山图",
+        "filename": "volcano.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/volcano.png",
+        "id": "volcano",
+        "title": "火山图",
+        "size": 39780,
+        "sha256": "06d76941bd7849fdfda69a37496050feb18acd872c55e4adad49ad69ea353863",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "volcano"
+        }
+      },
+      {
+        "name": "volcano.pdf",
+        "type": "file",
+        "label": "g\u0001+e11e\u001b> (PDF)",
+        "filename": "volcano.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/volcano.pdf",
+        "id": "artifact_5",
+        "title": "g\u0001+e11e\u001b> (PDF)",
+        "size": 42243,
+        "sha256": "29e6998c86b0532b276cedddd1a37396c4f1c2da5c67b60b1130bba78a3a9c3f",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_5"
+        }
+      },
+      {
+        "name": "pca.png",
+        "type": "plot",
+        "label": "PCA 图",
+        "filename": "pca.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/pca.png",
+        "id": "pca",
+        "title": "PCA 图",
+        "size": 32291,
+        "sha256": "35032b5ebe9c2a0b78ec5b22d87b70a36957f1124c4b4fd32c7e5d1bcaf840d9",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "pca"
+        }
+      },
+      {
+        "name": "pca.pdf",
+        "type": "file",
+        "label": "PCA e\u001b> (PDF)",
+        "filename": "pca.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/pca.pdf",
+        "id": "artifact_7",
+        "title": "PCA e\u001b> (PDF)",
+        "size": 25664,
+        "sha256": "983e35d85eeab01e99c3c0dd51b08ec35178ea4505bef5763e9d2af5dd504a79",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_7"
+        }
+      },
+      {
+        "name": "heatmap.png",
+        "type": "plot",
+        "label": "Top50 热图",
+        "filename": "heatmap.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/heatmap.png",
+        "id": "heatmap",
+        "title": "Top50 热图",
+        "size": 39274,
+        "sha256": "5c24811c6de636541dbbded597b362aa8287a810372419fcb19c5ac9512c61ab",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "heatmap"
+        }
+      },
+      {
+        "name": "heatmap.pdf",
+        "type": "file",
+        "label": "Top50 g\u0003-e\u001b> (PDF)",
+        "filename": "heatmap.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/heatmap.pdf",
+        "id": "artifact_9",
+        "title": "Top50 g\u0003-e\u001b> (PDF)",
+        "size": 30828,
+        "sha256": "4e76b0f01f5d647d5f3cb00504b9983e3232784becf1d10ab7ce617cbce8ddbe",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_9"
+        }
+      },
+      {
+        "name": "library_size.png",
+        "type": "plot",
+        "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
+        "filename": "library_size.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/library_size.png",
+        "id": "artifact_10",
+        "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
+        "size": 28549,
+        "sha256": "90df4356679b00bc6b7371e22e954e1b4d5a42753f3337d268b4a2a09f85c811",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_10"
+        }
+      },
+      {
+        "name": "library_size.pdf",
+        "type": "file",
+        "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
+        "filename": "library_size.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/library_size.pdf",
+        "id": "artifact_11",
+        "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
+        "size": 24017,
+        "sha256": "4dd557b4fce57bf0dd78236603198d2f642c2dd8031c4ff3ec451603765be601",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_11"
+        }
+      },
+      {
+        "name": "dispersion.png",
+        "type": "plot",
+        "label": "g&;f\u0015#e:&d<0h.! (PNG)",
+        "filename": "dispersion.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion.png",
+        "id": "artifact_12",
+        "title": "g&;f\u0015#e:&d<0h.! (PNG)",
+        "size": 40268,
+        "sha256": "9729f34b3d2ed0a6d2e637cb729b3ccee7f4c20b4c54c7f6a713dc4aca18f461",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_12"
+        }
+      },
+      {
+        "name": "dispersion.pdf",
+        "type": "file",
+        "label": "g&;f\u0015#e:&d<0h.! (PDF)",
+        "filename": "dispersion.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion.pdf",
+        "id": "artifact_13",
+        "title": "g&;f\u0015#e:&d<0h.! (PDF)",
+        "size": 30165,
+        "sha256": "079cc4cb2d26d85df52090eaee2055a170bba8bfa367725a77f1cd06af56d5ec",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_13"
+        }
+      },
+      {
+        "name": "ma_plot.png",
+        "type": "plot",
+        "label": "MA e\u001b> (PNG)",
+        "filename": "ma_plot.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/ma_plot.png",
+        "id": "artifact_14",
+        "title": "MA e\u001b> (PNG)",
+        "size": 31265,
+        "sha256": "3b8d032ea0e5c7a35f398b24b431c4a7638ac9563caef03af0c174b468800de2",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_14"
+        }
+      },
+      {
+        "name": "ma_plot.pdf",
+        "type": "file",
+        "label": "MA e\u001b> (PDF)",
+        "filename": "ma_plot.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/ma_plot.pdf",
+        "id": "artifact_15",
+        "title": "MA e\u001b> (PDF)",
+        "size": 29916,
+        "sha256": "af1bba77cb1f67162f260de3b722f69a712477f4df84d3b20af30ef34e4a1805",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_15"
+        }
+      },
+      {
+        "name": "sample_distance.png",
+        "type": "plot",
+        "label": "f 7f\u001c,h7\u001dg&; (PNG)",
+        "filename": "sample_distance.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/sample_distance.png",
+        "id": "artifact_16",
+        "title": "f 7f\u001c,h7\u001dg&; (PNG)",
+        "size": 36777,
+        "sha256": "ae1c9c8037f19c30250b03ea932c2beca026fb28533bacf5340ced36d8a2d2ef",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_16"
+        }
+      },
+      {
+        "name": "sample_distance.pdf",
+        "type": "file",
+        "label": "f 7f\u001c,h7\u001dg&; (PDF)",
+        "filename": "sample_distance.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/sample_distance.pdf",
+        "id": "artifact_17",
+        "title": "f 7f\u001c,h7\u001dg&; (PDF)",
+        "size": 25288,
+        "sha256": "c810d7f7643be298f1f64948a56f8936a266eef38341b5dd47ed1e50e7bbc294",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_17"
+        }
+      },
+      {
+        "name": "vst_matrix.csv",
+        "type": "data",
+        "label": "VST 矩阵",
+        "filename": "vst_matrix.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/vst_matrix.csv",
+        "id": "vst_matrix",
+        "title": "VST 矩阵",
+        "size": 795,
+        "sha256": "0ab0717d075bf589f0d12b1f172608bcec4b301437efee382e00a9fde5e95649",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "vst_matrix"
+        }
+      },
+      {
+        "name": "coldata_info.csv",
+        "type": "table",
+        "label": "f 7f\u001c,d<bf>!f\u0001/",
+        "filename": "coldata_info.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/coldata_info.csv",
+        "id": "artifact_19",
+        "title": "f 7f\u001c,d<bf>!f\u0001/",
+        "size": 68,
+        "sha256": "b4f9489a7dd7a36616bad5c44124d0affa7840db5bdaf4bdd814ec2e0b3565e9",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_19"
+        }
+      },
+      {
+        "name": "dispersion_data.csv",
+        "type": "table",
+        "label": "g&;f\u0015#e:&f\u00150f\r.",
+        "filename": "dispersion_data.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion_data.csv",
+        "id": "artifact_20",
+        "title": "g&;f\u0015#e:&f\u00150f\r.",
+        "size": 836,
+        "sha256": "8a41784b147fcff8e24835e62b384f04796766b417b37d4ce14879dbd0952eeb",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_20"
+        }
+      },
+      {
+        "name": "summary.txt",
+        "type": "text",
+        "label": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
+        "filename": "summary.txt",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/summary.txt",
+        "id": "artifact_21",
+        "title": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
+        "size": 192,
+        "sha256": "a37e3def239e84411ed341cb9a0aaaa2e00d302c428ff8ece9b09d176b14b516",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_21"
+        }
+      },
+      {
+        "name": "report.html",
+        "type": "report",
+        "label": "解读报告",
+        "filename": "report.html",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/report.html",
+        "id": "report",
+        "title": "解读报告",
+        "size": 337789,
+        "sha256": "00056286ad1f64f612f404b6c7587118d6ba9d243d07c19188d9527f1f346827",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "report"
+        }
+      },
+      {
+        "id": "zip",
+        "filename": "all_results.zip",
+        "type": "file",
+        "label": "全部结果打包下载",
+        "name": "all_results.zip",
+        "title": "全部结果打包下载",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
+        "size": 558681,
+        "sha256": "9d2052cbbfc00e26a72b3935299268fe8fc69b1bc553670e2b0df71ff4609753",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/all_results.zip",
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "zip"
+        }
+      },
+      {
+        "name": "run.log",
+        "filename": "run.log",
+        "id": "artifact_24",
+        "type": "text",
+        "label": "run.log",
+        "title": "run.log",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
+        "size": 2384,
+        "sha256": "91f52e1b68bac76825e16dfc81d90f349e4deb1014a46ee73e011652da40a560",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/run.log",
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_24"
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "name": "deg_table.csv",
+        "type": "table",
+        "label": "差异基因表",
+        "filename": "deg_table.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/deg_table.csv",
+        "id": "deg_table",
+        "title": "差异基因表",
+        "size": 1081,
+        "sha256": "a25782389c10f50553798f4c3b395f6b6271d2a91012d5719358e07f01993e6a",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "deg_table"
+        }
+      },
+      {
+        "name": "up_genes.csv",
+        "type": "table",
+        "label": "d8\nh0\u0003e\u001f:e\u001b ",
+        "filename": "up_genes.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/up_genes.csv",
+        "id": "artifact_2",
+        "title": "d8\nh0\u0003e\u001f:e\u001b ",
+        "size": 473,
+        "sha256": "1fe30b4ff5cfdfcef75d03b6d31aa3aa46a0473c5b3b223259255b1747576de4",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_2"
+        }
+      },
+      {
+        "name": "down_genes.csv",
+        "type": "table",
+        "label": "d8\u000bh0\u0003e\u001f:e\u001b ",
+        "filename": "down_genes.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/down_genes.csv",
+        "id": "artifact_3",
+        "title": "d8\u000bh0\u0003e\u001f:e\u001b ",
+        "size": 164,
+        "sha256": "a586fdcb1ab01b378def88335febdb2d49c15a4c887ca924d323bed1d84abdba",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_3"
+        }
+      },
+      {
+        "name": "volcano.png",
+        "type": "plot",
+        "label": "火山图",
+        "filename": "volcano.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/volcano.png",
+        "id": "volcano",
+        "title": "火山图",
+        "size": 39780,
+        "sha256": "06d76941bd7849fdfda69a37496050feb18acd872c55e4adad49ad69ea353863",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "volcano"
+        }
+      },
+      {
+        "name": "volcano.pdf",
+        "type": "file",
+        "label": "g\u0001+e11e\u001b> (PDF)",
+        "filename": "volcano.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/volcano.pdf",
+        "id": "artifact_5",
+        "title": "g\u0001+e11e\u001b> (PDF)",
+        "size": 42243,
+        "sha256": "29e6998c86b0532b276cedddd1a37396c4f1c2da5c67b60b1130bba78a3a9c3f",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_5"
+        }
+      },
+      {
+        "name": "pca.png",
+        "type": "plot",
+        "label": "PCA 图",
+        "filename": "pca.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/pca.png",
+        "id": "pca",
+        "title": "PCA 图",
+        "size": 32291,
+        "sha256": "35032b5ebe9c2a0b78ec5b22d87b70a36957f1124c4b4fd32c7e5d1bcaf840d9",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "pca"
+        }
+      },
+      {
+        "name": "pca.pdf",
+        "type": "file",
+        "label": "PCA e\u001b> (PDF)",
+        "filename": "pca.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/pca.pdf",
+        "id": "artifact_7",
+        "title": "PCA e\u001b> (PDF)",
+        "size": 25664,
+        "sha256": "983e35d85eeab01e99c3c0dd51b08ec35178ea4505bef5763e9d2af5dd504a79",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_7"
+        }
+      },
+      {
+        "name": "heatmap.png",
+        "type": "plot",
+        "label": "Top50 热图",
+        "filename": "heatmap.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/heatmap.png",
+        "id": "heatmap",
+        "title": "Top50 热图",
+        "size": 39274,
+        "sha256": "5c24811c6de636541dbbded597b362aa8287a810372419fcb19c5ac9512c61ab",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "heatmap"
+        }
+      },
+      {
+        "name": "heatmap.pdf",
+        "type": "file",
+        "label": "Top50 g\u0003-e\u001b> (PDF)",
+        "filename": "heatmap.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/heatmap.pdf",
+        "id": "artifact_9",
+        "title": "Top50 g\u0003-e\u001b> (PDF)",
+        "size": 30828,
+        "sha256": "4e76b0f01f5d647d5f3cb00504b9983e3232784becf1d10ab7ce617cbce8ddbe",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_9"
+        }
+      },
+      {
+        "name": "library_size.png",
+        "type": "plot",
+        "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
+        "filename": "library_size.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/library_size.png",
+        "id": "artifact_10",
+        "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
+        "size": 28549,
+        "sha256": "90df4356679b00bc6b7371e22e954e1b4d5a42753f3337d268b4a2a09f85c811",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_10"
+        }
+      },
+      {
+        "name": "library_size.pdf",
+        "type": "file",
+        "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
+        "filename": "library_size.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/library_size.pdf",
+        "id": "artifact_11",
+        "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
+        "size": 24017,
+        "sha256": "4dd557b4fce57bf0dd78236603198d2f642c2dd8031c4ff3ec451603765be601",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_11"
+        }
+      },
+      {
+        "name": "dispersion.png",
+        "type": "plot",
+        "label": "g&;f\u0015#e:&d<0h.! (PNG)",
+        "filename": "dispersion.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion.png",
+        "id": "artifact_12",
+        "title": "g&;f\u0015#e:&d<0h.! (PNG)",
+        "size": 40268,
+        "sha256": "9729f34b3d2ed0a6d2e637cb729b3ccee7f4c20b4c54c7f6a713dc4aca18f461",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_12"
+        }
+      },
+      {
+        "name": "dispersion.pdf",
+        "type": "file",
+        "label": "g&;f\u0015#e:&d<0h.! (PDF)",
+        "filename": "dispersion.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion.pdf",
+        "id": "artifact_13",
+        "title": "g&;f\u0015#e:&d<0h.! (PDF)",
+        "size": 30165,
+        "sha256": "079cc4cb2d26d85df52090eaee2055a170bba8bfa367725a77f1cd06af56d5ec",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_13"
+        }
+      },
+      {
+        "name": "ma_plot.png",
+        "type": "plot",
+        "label": "MA e\u001b> (PNG)",
+        "filename": "ma_plot.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/ma_plot.png",
+        "id": "artifact_14",
+        "title": "MA e\u001b> (PNG)",
+        "size": 31265,
+        "sha256": "3b8d032ea0e5c7a35f398b24b431c4a7638ac9563caef03af0c174b468800de2",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_14"
+        }
+      },
+      {
+        "name": "ma_plot.pdf",
+        "type": "file",
+        "label": "MA e\u001b> (PDF)",
+        "filename": "ma_plot.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/ma_plot.pdf",
+        "id": "artifact_15",
+        "title": "MA e\u001b> (PDF)",
+        "size": 29916,
+        "sha256": "af1bba77cb1f67162f260de3b722f69a712477f4df84d3b20af30ef34e4a1805",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_15"
+        }
+      },
+      {
+        "name": "sample_distance.png",
+        "type": "plot",
+        "label": "f 7f\u001c,h7\u001dg&; (PNG)",
+        "filename": "sample_distance.png",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/sample_distance.png",
+        "id": "artifact_16",
+        "title": "f 7f\u001c,h7\u001dg&; (PNG)",
+        "size": 36777,
+        "sha256": "ae1c9c8037f19c30250b03ea932c2beca026fb28533bacf5340ced36d8a2d2ef",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_16"
+        }
+      },
+      {
+        "name": "sample_distance.pdf",
+        "type": "file",
+        "label": "f 7f\u001c,h7\u001dg&; (PDF)",
+        "filename": "sample_distance.pdf",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/sample_distance.pdf",
+        "id": "artifact_17",
+        "title": "f 7f\u001c,h7\u001dg&; (PDF)",
+        "size": 25288,
+        "sha256": "c810d7f7643be298f1f64948a56f8936a266eef38341b5dd47ed1e50e7bbc294",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_17"
+        }
+      },
+      {
+        "name": "vst_matrix.csv",
+        "type": "data",
+        "label": "VST 矩阵",
+        "filename": "vst_matrix.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/vst_matrix.csv",
+        "id": "vst_matrix",
+        "title": "VST 矩阵",
+        "size": 795,
+        "sha256": "0ab0717d075bf589f0d12b1f172608bcec4b301437efee382e00a9fde5e95649",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "vst_matrix"
+        }
+      },
+      {
+        "name": "coldata_info.csv",
+        "type": "table",
+        "label": "f 7f\u001c,d<bf>!f\u0001/",
+        "filename": "coldata_info.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/coldata_info.csv",
+        "id": "artifact_19",
+        "title": "f 7f\u001c,d<bf>!f\u0001/",
+        "size": 68,
+        "sha256": "b4f9489a7dd7a36616bad5c44124d0affa7840db5bdaf4bdd814ec2e0b3565e9",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_19"
+        }
+      },
+      {
+        "name": "dispersion_data.csv",
+        "type": "table",
+        "label": "g&;f\u0015#e:&f\u00150f\r.",
+        "filename": "dispersion_data.csv",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/dispersion_data.csv",
+        "id": "artifact_20",
+        "title": "g&;f\u0015#e:&f\u00150f\r.",
+        "size": 836,
+        "sha256": "8a41784b147fcff8e24835e62b384f04796766b417b37d4ce14879dbd0952eeb",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_20"
+        }
+      },
+      {
+        "name": "summary.txt",
+        "type": "text",
+        "label": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
+        "filename": "summary.txt",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/summary.txt",
+        "id": "artifact_21",
+        "title": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
+        "size": 192,
+        "sha256": "a37e3def239e84411ed341cb9a0aaaa2e00d302c428ff8ece9b09d176b14b516",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_21"
+        }
+      },
+      {
+        "name": "report.html",
+        "type": "report",
+        "label": "解读报告",
+        "filename": "report.html",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/report.html",
+        "id": "report",
+        "title": "解读报告",
+        "size": 337789,
+        "sha256": "00056286ad1f64f612f404b6c7587118d6ba9d243d07c19188d9527f1f346827",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "report"
+        }
+      },
+      {
+        "id": "zip",
+        "filename": "all_results.zip",
+        "type": "file",
+        "label": "全部结果打包下载",
+        "name": "all_results.zip",
+        "title": "全部结果打包下载",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
+        "size": 558681,
+        "sha256": "9d2052cbbfc00e26a72b3935299268fe8fc69b1bc553670e2b0df71ff4609753",
+        "required": true,
+        "preview": true,
+        "download": true,
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/all_results.zip",
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "zip"
+        }
+      },
+      {
+        "name": "run.log",
+        "filename": "run.log",
+        "id": "artifact_24",
+        "type": "text",
+        "label": "run.log",
+        "title": "run.log",
+        "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
+        "size": 2384,
+        "sha256": "91f52e1b68bac76825e16dfc81d90f349e4deb1014a46ee73e011652da40a560",
+        "required": false,
+        "preview": true,
+        "download": true,
+        "canonicalPath": "/work/biof3/tool-jobs/job_a7ade42394874d1e/output/run.log",
+        "provenance": {
+          "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+          "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "toolJobId": "job_a7ade42394874d1e",
+          "reproductionTarget": "artifact_24"
+        }
+      }
+    ],
+    "executionProvenance": {
+      "executionProvenanceVersion": 1,
+      "toolJobId": "job_a7ade42394874d1e",
+      "projectId": null,
+      "task": null,
+      "plugin": {
+        "id": "deseq2",
+        "version": "1.0.0",
+        "language": "r",
+        "manifestFingerprint": "d16e69d99192b5cf5e201560e854fb4e5f074dbe3ece99b15e5d4e49c07ef99b",
+        "packageConstraints": {
+          "DESeq2": ">=1.40.0",
+          "ggplot2": ">=3.4.0",
+          "ggrepel": ">=0.9.0",
+          "pheatmap": ">=1.0.12",
+          "apeglm": ">=1.20.0",
+          "jsonlite": ">=1.8.0",
+          "base64enc": ">=0.1-3",
+          "png": ">=0.1-8"
+        }
+      },
+      "runtime": {
+        "name": "r",
+        "command": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
+        "version": "4.5.2",
+        "versionSource": "runtime_probe",
+        "readiness": true
+      },
+      "params": {
+        "normalized": {
+          "design": "condition",
+          "contrast_ref": "WT",
+          "contrast_treat": "KO",
+          "counts": {
+            "inputRef": "inputs/counts/counts.csv",
+            "sha256": "f992810545c3d7fd37fb61a370e75d616799d4716895714c47e7e467ca2c73cc"
+          },
+          "coldata": {
+            "inputRef": "inputs/coldata/coldata.csv",
+            "sha256": "53a6aec45abab55b62364b3f580f09cdbe2021078f80fe66fb15baefede2fd90"
+          }
+        },
+        "sha256": "4aadf3b916090ecd5c08405f272e82dca39db737d350b84972100620cd91b5de"
+      },
+      "inputs": [
+        {
+          "id": "counts",
+          "role": "counts",
+          "relativePath": "inputs/counts/counts.csv",
+          "sha256": "f992810545c3d7fd37fb61a370e75d616799d4716895714c47e7e467ca2c73cc",
+          "sizeBytes": 269,
+          "sourceArtifactRef": null,
+          "lineage": null
+        },
+        {
+          "id": "coldata",
+          "role": "coldata",
+          "relativePath": "inputs/coldata/coldata.csv",
+          "sha256": "53a6aec45abab55b62364b3f580f09cdbe2021078f80fe66fb15baefede2fd90",
+          "sizeBytes": 48,
+          "sourceArtifactRef": null,
+          "lineage": null
+        }
+      ],
+      "script": {
+        "snapshotPath": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\run-script.R",
+        "sha256": "7c6bac471c53137bb69bfd6e112dffb71a0ade47cbea525b421bce15b9326dbb",
+        "entryPoint": null
+      },
+      "command": {
+        "executable": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
+        "args": [
+          "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\run-script.R",
+          "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e"
+        ],
+        "cwd": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e"
+      },
+      "startedAt": "2026-09-18T15:22:46.849Z",
+      "completedAt": "2026-09-18T15:22:54.745Z",
+      "artifacts": [
+        {
+          "id": "deg_table",
+          "filename": "deg_table.csv",
+          "type": "table",
+          "sha256": "a25782389c10f50553798f4c3b395f6b6271d2a91012d5719358e07f01993e6a",
+          "reproductionTarget": "deg_table"
+        },
+        {
+          "id": "artifact_2",
+          "filename": "up_genes.csv",
+          "type": "table",
+          "sha256": "1fe30b4ff5cfdfcef75d03b6d31aa3aa46a0473c5b3b223259255b1747576de4",
+          "reproductionTarget": "artifact_2"
+        },
+        {
+          "id": "artifact_3",
+          "filename": "down_genes.csv",
+          "type": "table",
+          "sha256": "a586fdcb1ab01b378def88335febdb2d49c15a4c887ca924d323bed1d84abdba",
+          "reproductionTarget": "artifact_3"
+        },
+        {
+          "id": "volcano",
+          "filename": "volcano.png",
+          "type": "plot",
+          "sha256": "06d76941bd7849fdfda69a37496050feb18acd872c55e4adad49ad69ea353863",
+          "reproductionTarget": "volcano"
+        },
+        {
+          "id": "artifact_5",
+          "filename": "volcano.pdf",
+          "type": "file",
+          "sha256": "29e6998c86b0532b276cedddd1a37396c4f1c2da5c67b60b1130bba78a3a9c3f",
+          "reproductionTarget": "artifact_5"
+        },
+        {
+          "id": "pca",
+          "filename": "pca.png",
+          "type": "plot",
+          "sha256": "35032b5ebe9c2a0b78ec5b22d87b70a36957f1124c4b4fd32c7e5d1bcaf840d9",
+          "reproductionTarget": "pca"
+        },
+        {
+          "id": "artifact_7",
+          "filename": "pca.pdf",
+          "type": "file",
+          "sha256": "983e35d85eeab01e99c3c0dd51b08ec35178ea4505bef5763e9d2af5dd504a79",
+          "reproductionTarget": "artifact_7"
+        },
+        {
+          "id": "heatmap",
+          "filename": "heatmap.png",
+          "type": "plot",
+          "sha256": "5c24811c6de636541dbbded597b362aa8287a810372419fcb19c5ac9512c61ab",
+          "reproductionTarget": "heatmap"
+        },
+        {
+          "id": "artifact_9",
+          "filename": "heatmap.pdf",
+          "type": "file",
+          "sha256": "4e76b0f01f5d647d5f3cb00504b9983e3232784becf1d10ab7ce617cbce8ddbe",
+          "reproductionTarget": "artifact_9"
+        },
+        {
+          "id": "artifact_10",
+          "filename": "library_size.png",
+          "type": "plot",
+          "sha256": "90df4356679b00bc6b7371e22e954e1b4d5a42753f3337d268b4a2a09f85c811",
+          "reproductionTarget": "artifact_10"
+        },
+        {
+          "id": "artifact_11",
+          "filename": "library_size.pdf",
+          "type": "file",
+          "sha256": "4dd557b4fce57bf0dd78236603198d2f642c2dd8031c4ff3ec451603765be601",
+          "reproductionTarget": "artifact_11"
+        },
+        {
+          "id": "artifact_12",
+          "filename": "dispersion.png",
+          "type": "plot",
+          "sha256": "9729f34b3d2ed0a6d2e637cb729b3ccee7f4c20b4c54c7f6a713dc4aca18f461",
+          "reproductionTarget": "artifact_12"
+        },
+        {
+          "id": "artifact_13",
+          "filename": "dispersion.pdf",
+          "type": "file",
+          "sha256": "079cc4cb2d26d85df52090eaee2055a170bba8bfa367725a77f1cd06af56d5ec",
+          "reproductionTarget": "artifact_13"
+        },
+        {
+          "id": "artifact_14",
+          "filename": "ma_plot.png",
+          "type": "plot",
+          "sha256": "3b8d032ea0e5c7a35f398b24b431c4a7638ac9563caef03af0c174b468800de2",
+          "reproductionTarget": "artifact_14"
+        },
+        {
+          "id": "artifact_15",
+          "filename": "ma_plot.pdf",
+          "type": "file",
+          "sha256": "af1bba77cb1f67162f260de3b722f69a712477f4df84d3b20af30ef34e4a1805",
+          "reproductionTarget": "artifact_15"
+        },
+        {
+          "id": "artifact_16",
+          "filename": "sample_distance.png",
+          "type": "plot",
+          "sha256": "ae1c9c8037f19c30250b03ea932c2beca026fb28533bacf5340ced36d8a2d2ef",
+          "reproductionTarget": "artifact_16"
+        },
+        {
+          "id": "artifact_17",
+          "filename": "sample_distance.pdf",
+          "type": "file",
+          "sha256": "c810d7f7643be298f1f64948a56f8936a266eef38341b5dd47ed1e50e7bbc294",
+          "reproductionTarget": "artifact_17"
+        },
+        {
+          "id": "vst_matrix",
+          "filename": "vst_matrix.csv",
+          "type": "data",
+          "sha256": "0ab0717d075bf589f0d12b1f172608bcec4b301437efee382e00a9fde5e95649",
+          "reproductionTarget": "vst_matrix"
+        },
+        {
+          "id": "artifact_19",
+          "filename": "coldata_info.csv",
+          "type": "table",
+          "sha256": "b4f9489a7dd7a36616bad5c44124d0affa7840db5bdaf4bdd814ec2e0b3565e9",
+          "reproductionTarget": "artifact_19"
+        },
+        {
+          "id": "artifact_20",
+          "filename": "dispersion_data.csv",
+          "type": "table",
+          "sha256": "8a41784b147fcff8e24835e62b384f04796766b417b37d4ce14879dbd0952eeb",
+          "reproductionTarget": "artifact_20"
+        },
+        {
+          "id": "artifact_21",
+          "filename": "summary.txt",
+          "type": "text",
+          "sha256": "a37e3def239e84411ed341cb9a0aaaa2e00d302c428ff8ece9b09d176b14b516",
+          "reproductionTarget": "artifact_21"
+        },
+        {
+          "id": "report",
+          "filename": "report.html",
+          "type": "report",
+          "sha256": "00056286ad1f64f612f404b6c7587118d6ba9d243d07c19188d9527f1f346827",
+          "reproductionTarget": "report"
+        },
+        {
+          "id": "zip",
+          "filename": "all_results.zip",
+          "type": "file",
+          "sha256": "9d2052cbbfc00e26a72b3935299268fe8fc69b1bc553670e2b0df71ff4609753",
+          "reproductionTarget": "zip"
+        },
+        {
+          "id": "artifact_24",
+          "filename": "run.log",
+          "type": "text",
+          "sha256": "91f52e1b68bac76825e16dfc81d90f349e4deb1014a46ee73e011652da40a560",
+          "reproductionTarget": "artifact_24"
+        }
+      ],
+      "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8"
+    },
+    "provenanceRef": {
+      "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
+      "path": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+      "toolJobId": "job_a7ade42394874d1e"
+    }
+  },
+  "allPass": true,
+  "finishedAt": "2026-09-18T15:22:56.837Z"
+}
