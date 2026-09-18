@@ -728,3 +728,124 @@ test('F6 规模观测: scaleStats 返回 readyChunks 与扫描警戒判定', () 
   assert.equal(stats.scanWarning, stats.readyChunks > ks.SCAN_WARN_THRESHOLD, 'warn only beyond threshold');
   assert.ok(stats.readyChunks >= 0);
 });
+
+// ---------- BLOCK-99 G1：多空间 CRUD / 隔离 / 参数化 ----------
+
+test('G1 CRUD: 建空间→列表→重命名→启停→级联删除（含影响面诚实返回）', () => {
+  const space = ks.createSpace('G1 测试空间');
+  assert.ok(space.id.startsWith('ks_'), 'generated ks_ id');
+  assert.equal(space.enabled, 0, 'new space starts disabled');
+  assert.equal(space.name, 'G1 测试空间');
+
+  const listed = ks.listSpaces();
+  assert.ok(listed.some((s) => s.id === space.id && s.documents === 0 && s.chunks === 0));
+
+  // 重名 → space_name_exists
+  assert.throws(() => ks.createSpace('G1 测试空间'), (e) => e.code === 'space_name_exists');
+  // 改成重名（与他空间）→ space_name_exists
+  assert.throws(() => ks.renameSpace(space.id, '默认知识空间'), (e) => e.code === 'space_name_exists');
+  // 空名/超长 → space_name_invalid
+  assert.throws(() => ks.createSpace('   '), (e) => e.code === 'space_name_invalid');
+  assert.throws(() => ks.createSpace('x'.repeat(61)), (e) => e.code === 'space_name_invalid');
+  // 未知空间 rename → space_not_found
+  assert.throws(() => ks.renameSpace('ks_absent', 'x'), (e) => e.code === 'space_not_found');
+
+  const renamed = ks.renameSpace(space.id, 'G1 改名空间');
+  assert.equal(renamed.name, 'G1 改名空间');
+
+  const enabled = ks.setSpaceEnabled(true, space.id);
+  assert.equal(enabled.enabled, 1);
+
+  const impact = ks.spaceImpact(space.id);
+  assert.deepEqual(impact, { documents: 0, chunks: 0 });
+
+  const result = ks.deleteSpaceCascade(space.id);
+  assert.equal(result.deleted, space.id);
+  assert.equal(ks.listSpaces().some((s) => s.id === space.id), false, 'space row gone');
+});
+
+test('G1 禁删默认空间 ks_default（400 语义 ks_default_undeletable）', () => {
+  assert.throws(() => ks.deleteSpaceCascade('ks_default'), (e) => e.code === 'ks_default_undeletable');
+});
+
+test('G1 resolveSpaceId: 缺省回退 ks_default，未知 fail-closed', () => {
+  assert.equal(ks.resolveSpaceId(undefined), 'ks_default');
+  assert.equal(ks.resolveSpaceId(''), 'ks_default');
+  assert.throws(() => ks.resolveSpaceId('ks_absent'), (e) => e.code === 'space_not_found');
+});
+
+test('G1 隔离: B 空间文档对默认空间列表不可见；clearSpace(B) 不伤默认空间', async () => {
+  const spaceB = ks.createSpace('G1 隔离空间 B');
+  // 传未知 spaceId → fail-closed
+  await assert.rejects(
+    () => ingest.createDocument({ name: 'x.txt', buffer: Buffer.from('孤儿文档'), autoIngest: false, spaceId: 'ks_absent' }),
+    (e) => e.code === 'space_not_found'
+  );
+  const docB = await ingest.createDocument({
+    name: '隔离B.txt',
+    buffer: Buffer.from('B 空间专属内容，讨论 BRCA1 修复通路。', 'utf8'),
+    autoIngest: false,
+    spaceId: spaceB.id,
+  });
+  const docDefault = await ingest.createDocument({
+    name: '默认空间守护文档.txt',
+    buffer: Buffer.from('默认空间的守护内容，讨论 TP53 通路。', 'utf8'),
+    autoIngest: false,
+  });
+
+  assert.equal(ks.listDocuments().some((d) => d.id === docB.id), false, 'B 文档不在默认列表');
+  assert.equal(ks.listDocuments(spaceB.id).some((d) => d.id === docB.id), true, 'B 文档在 B 列表');
+  assert.equal(ks.listDocumentsPage({ spaceId: spaceB.id }).total, 1, '分页参数化按空间计数');
+
+  // 清空 B：默认空间文档毫发无损
+  const cleared = ks.clearSpace(spaceB.id);
+  assert.equal(cleared.cleared, 1);
+  assert.equal(ks.listDocuments(spaceB.id).length, 0);
+  assert.equal(ks.listDocuments().some((d) => d.id === docDefault.id), true, '默认空间文档健在');
+
+  ks.deleteDocument(docDefault.id);
+  ks.deleteSpaceCascade(spaceB.id);
+});
+
+test('G1 检索按空间过滤: spaceId 限定命中（他空间命中不可达，D2 无命中诚实空）', async () => {
+  const spaceB = ks.createSpace('G1 检索空间 B');
+  const docA = await ingest.createDocument({
+    name: '检索A.txt',
+    buffer: Buffer.from('A 空间笔记：TP53 细胞凋亡机制综述。', 'utf8'),
+    autoIngest: false,
+  });
+  await ingest.ingestDocument(docA.id, { embed: async (t) => t.map(() => makeVec(31)) });
+  const docB = await ingest.createDocument({
+    name: '检索B.txt',
+    buffer: Buffer.from('B 空间笔记：TP53 细胞凋亡机制补遗。', 'utf8'),
+    autoIngest: false,
+    spaceId: spaceB.id,
+  });
+  await ingest.ingestDocument(docB.id, { embed: async (t) => t.map(() => makeVec(32)) });
+
+  const inB = await ks.searchKnowledge({
+    query: 'TP53 细胞凋亡',
+    embed: async () => [makeVec(33)],
+    spaceId: spaceB.id,
+  });
+  assert.ok(inB.hits.length >= 1, 'B 空间命中');
+  assert.ok(inB.hits.every((h) => h.docId === docB.id), '仅 B 空间文档可达');
+
+  const inDefault = await ks.searchKnowledge({
+    query: 'TP53 细胞凋亡',
+    embed: async () => [makeVec(33)],
+  });
+  assert.ok(inDefault.hits.every((h) => h.docId === docA.id), '默认空间检索不含 B 文档');
+
+  // 空检索空间诚实空（D2：无命中不回退）
+  const empty = await ks.searchKnowledge({
+    query: 'TP53 细胞凋亡',
+    embed: async () => [makeVec(33)],
+    spaceId: ks.createSpace('G1 空检索空间').id,
+  });
+  assert.equal(empty.hits.length, 0, '所选空间无命中 → 诚实空');
+
+  ks.deleteDocument(docA.id);
+  ks.deleteDocument(docB.id);
+  ks.deleteSpaceCascade(spaceB.id);
+});

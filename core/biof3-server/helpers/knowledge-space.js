@@ -65,35 +65,36 @@ function now() {
 
 // ---- 空间 ----
 
-function getSpace() {
-  return sqlite.prepare('SELECT * FROM knowledge_spaces WHERE id = ?').get(SPACE_ID) || null;
+// BLOCK-99 G1 — 多空间参数化：以下函数 spaceId 缺省 = ks_default，存量调用零行为变更。
+function getSpace(spaceId = SPACE_ID) {
+  return sqlite.prepare('SELECT * FROM knowledge_spaces WHERE id = ?').get(spaceId) || null;
 }
 
-function setSpaceEnabled(enabled) {
+function setSpaceEnabled(enabled, spaceId = SPACE_ID) {
   sqlite
     .prepare('UPDATE knowledge_spaces SET enabled = ?, updated_at = ? WHERE id = ?')
-    .run(enabled ? 1 : 0, now(), SPACE_ID);
-  return getSpace();
+    .run(enabled ? 1 : 0, now(), spaceId);
+  return getSpace(spaceId);
 }
 
 // ---- 文档 ----
 
-function listDocuments() {
+function listDocuments(spaceId = SPACE_ID) {
   return sqlite
     .prepare('SELECT * FROM knowledge_documents WHERE space_id = ? ORDER BY updated_at DESC')
-    .all(SPACE_ID);
+    .all(spaceId);
 }
 
 // BLOCK-94 F1 分页：面板/REST 列表面可分页（内部全量路径沿用 listDocuments）
-function listDocumentsPage({ limit, offset } = {}) {
+function listDocumentsPage({ limit, offset, spaceId = SPACE_ID } = {}) {
   const lim = Math.max(1, Math.min(Number.parseInt(limit, 10) || 50, 200));
   const off = Math.max(0, Number.parseInt(offset, 10) || 0);
   const documents = sqlite
     .prepare('SELECT * FROM knowledge_documents WHERE space_id = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?')
-    .all(SPACE_ID, lim, off);
+    .all(spaceId, lim, off);
   const total = sqlite
     .prepare('SELECT COUNT(*) AS c FROM knowledge_documents WHERE space_id = ?')
-    .get(SPACE_ID).c;
+    .get(spaceId).c;
   return { documents, total, hasMore: off + documents.length < total, limit: lim, offset: off };
 }
 
@@ -323,14 +324,14 @@ function fuseRank(vectorHits, ftsHits, topK) {
 }
 
 // BLOCK-94 F6 规模化：规模观测指标（ready chunk 数 + 扫描警戒阈值判定）
-function scaleStats() {
+function scaleStats(spaceId = SPACE_ID) {
   const row = sqlite
     .prepare(
       `SELECT COUNT(*) AS c FROM knowledge_chunks k
        JOIN knowledge_documents d ON d.id = k.doc_id
        WHERE k.space_id = ? AND d.status = 'ready'`
     )
-    .get(SPACE_ID);
+    .get(spaceId);
   const readyChunks = row ? row.c : 0;
   return {
     readyChunks,
@@ -342,7 +343,7 @@ function scaleStats() {
 // ---- 检索入口 ----
 
 // BLOCK-94 F1 嵌入模型一致性：向量 chunk 记录产出模型；换嵌入模型后旧向量隔离并计数暴露（提示重建）
-function staleEmbeddingStats() {
+function staleEmbeddingStats(spaceId = SPACE_ID) {
   const row = sqlite
     .prepare(
       `SELECT COUNT(*) AS chunks, COUNT(DISTINCT k.doc_id) AS docs
@@ -351,13 +352,13 @@ function staleEmbeddingStats() {
        WHERE k.space_id = ? AND d.status = 'ready' AND k.embedding IS NOT NULL
          AND (k.model IS NULL OR k.model != ?)`
     )
-    .get(SPACE_ID, EMBEDDING_MODEL);
+    .get(spaceId, EMBEDDING_MODEL);
   return { staleChunks: row ? row.chunks : 0, staleDocs: row ? row.docs : 0 };
 }
 
-async function searchKnowledge({ query, topK = INJECT_TOPK, embed, docId } = {}) {
+async function searchKnowledge({ query, topK = INJECT_TOPK, embed, docId, spaceId = SPACE_ID } = {}) {
   const q = String(query || '').trim();
-  const space = getSpace();
+  const space = getSpace(spaceId);
   const base = {
     query: q,
     spaceEnabled: !!(space && space.enabled),
@@ -379,7 +380,7 @@ async function searchKnowledge({ query, topK = INJECT_TOPK, embed, docId } = {})
        JOIN knowledge_documents d ON d.id = k.doc_id
        WHERE k.space_id = ? AND d.status = 'ready'${docFilter}`
     )
-    .get(SPACE_ID, ...docParams);
+    .get(spaceId, ...docParams);
   base.readyChunks = totalRow ? totalRow.c : 0;
   base.staleEmbedding = staleEmbeddingStats();
   if (base.readyChunks === 0) return base;
@@ -406,7 +407,7 @@ async function searchKnowledge({ query, topK = INJECT_TOPK, embed, docId } = {})
          JOIN knowledge_documents d ON d.id = k.doc_id
          WHERE k.space_id = ? AND d.status = 'ready' AND k.embedding IS NOT NULL AND k.model = ?${docFilter}`
       )
-      .all(SPACE_ID, EMBEDDING_MODEL, ...docParams);
+      .all(spaceId, EMBEDDING_MODEL, ...docParams);
     vectorHits = rows
       .map((row) => ({
         chunkId: row.chunkId,
@@ -433,9 +434,9 @@ async function searchKnowledge({ query, topK = INJECT_TOPK, embed, docId } = {})
         `SELECT k.id AS chunkId, k.doc_id AS docId, k.seq AS seq, k.text AS text, d.name AS docName
          FROM knowledge_chunks k
          JOIN knowledge_documents d ON d.id = k.doc_id
-         WHERE k.id = ? AND d.status = 'ready'${docFilter}`
+         WHERE k.id = ? AND k.space_id = ? AND d.status = 'ready'${docFilter}`
       )
-      .get(hit.chunkId, ...docParams);
+      .get(hit.chunkId, spaceId, ...docParams);
     if (row) {
       ftsHits.push({ ...row, channels: { fts: hit.channels.fts } });
     }
@@ -537,20 +538,145 @@ function deleteDocument(docId) {
   return { deleted: docId, name: doc.name };
 }
 
-function clearSpace() {
-  const docs = listDocuments();
+// BLOCK-99 G1 — 多空间安全：物理清理从「删 knowledgeRoot 根」（单空间时代
+// 会把其他空间物理文件全灭）改为逐文档 docDir 清理；根目录保留。
+function clearSpace(spaceId = SPACE_ID) {
+  const docs = listDocuments(spaceId);
   const tx = sqlite.transaction(() => {
-    sqlite.prepare('DELETE FROM knowledge_chunks_fts').run();
-    sqlite.prepare('DELETE FROM knowledge_chunks WHERE space_id = ?').run(SPACE_ID);
-    sqlite.prepare('DELETE FROM knowledge_documents WHERE space_id = ?').run(SPACE_ID);
+    for (const doc of docs) {
+      sqlite.prepare('DELETE FROM knowledge_chunks_fts WHERE chunk_id IN (SELECT id FROM knowledge_chunks WHERE doc_id = ?)').run(doc.id);
+    }
+    sqlite.prepare('DELETE FROM knowledge_chunks WHERE space_id = ?').run(spaceId);
+    sqlite.prepare('DELETE FROM knowledge_documents WHERE space_id = ?').run(spaceId);
   });
   tx();
-  try {
-    fs.rmSync(knowledgeRoot(), { recursive: true, force: true });
-  } catch (e) {
-    console.log('[knowledge] root cleanup failed:', e && e.message);
+  for (const doc of docs) {
+    try {
+      fs.rmSync(docDir(doc.id), { recursive: true, force: true });
+    } catch (e) {
+      console.log('[knowledge] raw file cleanup failed for', doc.id, e && e.message);
+    }
   }
   return { cleared: docs.length };
+}
+
+// ── BLOCK-99 G1 多空间 CRUD ─────────────────────────────────
+
+// 解析空间 id：缺省 ks_default；未知 fail-closed 抛 space_not_found
+function resolveSpaceId(raw) {
+  const id = raw == null || String(raw).trim() === '' ? SPACE_ID : String(raw).trim();
+  const row = getSpace(id);
+  if (!row) {
+    const err = new Error(`knowledge space not found: ${id}`);
+    err.code = 'space_not_found';
+    throw err;
+  }
+  return id;
+}
+
+function listSpaces() {
+  return sqlite
+    .prepare(
+      `SELECT s.id, s.name, s.enabled, s.embedding_model, s.created_at, s.updated_at,
+              (SELECT COUNT(*) FROM knowledge_documents d WHERE d.space_id = s.id) AS documents,
+              (SELECT COUNT(*) FROM knowledge_chunks c WHERE c.space_id = s.id) AS chunks
+       FROM knowledge_spaces s ORDER BY s.created_at ASC, s.id ASC`
+    )
+    .all();
+}
+
+function _validSpaceName(name) {
+  const trimmed = String(name || '').trim();
+  if (!trimmed || trimmed.length > 60) {
+    const err = new Error('space name must be 1..60 chars');
+    err.code = 'space_name_invalid';
+    throw err;
+  }
+  return trimmed;
+}
+
+function createSpace(name) {
+  const trimmed = _validSpaceName(name);
+  const dup = sqlite.prepare('SELECT id FROM knowledge_spaces WHERE name = ?').get(trimmed);
+  if (dup) {
+    const err = new Error(`space name already exists: ${trimmed}`);
+    err.code = 'space_name_exists';
+    throw err;
+  }
+  const id = `ks_${Math.random().toString(16).slice(2, 14)}`;
+  sqlite
+    .prepare(
+      'INSERT INTO knowledge_spaces (id, name, enabled, embedding_model, created_at, updated_at) VALUES (?, ?, 0, ?, ?, ?)'
+    )
+    .run(id, trimmed, EMBEDDING_MODEL, now(), now());
+  return getSpace(id);
+}
+
+function renameSpace(spaceId, name) {
+  const trimmed = _validSpaceName(name);
+  if (!getSpace(spaceId)) {
+    const err = new Error(`knowledge space not found: ${spaceId}`);
+    err.code = 'space_not_found';
+    throw err;
+  }
+  const dup = sqlite
+    .prepare('SELECT id FROM knowledge_spaces WHERE name = ? AND id != ?')
+    .get(trimmed, spaceId);
+  if (dup) {
+    const err = new Error(`space name already exists: ${trimmed}`);
+    err.code = 'space_name_exists';
+    throw err;
+  }
+  sqlite
+    .prepare('UPDATE knowledge_spaces SET name = ?, updated_at = ? WHERE id = ?')
+    .run(trimmed, now(), spaceId);
+  return getSpace(spaceId);
+}
+
+// 删除确认门前的影响面统计（诚实列出将级联删除的文档/块数）
+function spaceImpact(spaceId) {
+  const docs = sqlite
+    .prepare('SELECT COUNT(*) AS c FROM knowledge_documents WHERE space_id = ?')
+    .get(spaceId).c;
+  const chunks = sqlite
+    .prepare('SELECT COUNT(*) AS c FROM knowledge_chunks WHERE space_id = ?')
+    .get(spaceId).c;
+  return { documents: docs, chunks };
+}
+
+// 级联删除空间：禁删 ks_default；chunks_fts→chunks→documents→space 行 + 逐文档
+// 物理目录清理（绝不 rm knowledgeRoot 根——多空间下会误灭其他空间物理文件）。
+function deleteSpaceCascade(spaceId) {
+  if (spaceId === SPACE_ID) {
+    const err = new Error('default space cannot be deleted');
+    err.code = 'ks_default_undeletable';
+    throw err;
+  }
+  const space = getSpace(spaceId);
+  if (!space) {
+    const err = new Error(`knowledge space not found: ${spaceId}`);
+    err.code = 'space_not_found';
+    throw err;
+  }
+  const impact = spaceImpact(spaceId);
+  const docs = listDocuments(spaceId);
+  const tx = sqlite.transaction(() => {
+    for (const doc of docs) {
+      sqlite.prepare('DELETE FROM knowledge_chunks_fts WHERE chunk_id IN (SELECT id FROM knowledge_chunks WHERE doc_id = ?)').run(doc.id);
+    }
+    sqlite.prepare('DELETE FROM knowledge_chunks WHERE space_id = ?').run(spaceId);
+    sqlite.prepare('DELETE FROM knowledge_documents WHERE space_id = ?').run(spaceId);
+    sqlite.prepare('DELETE FROM knowledge_spaces WHERE id = ?').run(spaceId);
+  });
+  tx();
+  for (const doc of docs) {
+    try {
+      fs.rmSync(docDir(doc.id), { recursive: true, force: true });
+    } catch (e) {
+      console.log('[knowledge] raw file cleanup failed for', doc.id, e && e.message);
+    }
+  }
+  return { deleted: spaceId, name: space.name, documents: impact.documents, chunks: impact.chunks };
 }
 
 module.exports = {
@@ -572,6 +698,12 @@ module.exports = {
   docDir,
   getSpace,
   setSpaceEnabled,
+  resolveSpaceId,
+  listSpaces,
+  createSpace,
+  renameSpace,
+  spaceImpact,
+  deleteSpaceCascade,
   listDocuments,
   listDocumentsPage,
   getDocument,

@@ -31,6 +31,14 @@ function embeddingAvailable() {
   }
 }
 
+// BLOCK-99 G1 — 空间错误码 → HTTP 状态映射
+function spaceErrorStatus(e) {
+  if (e && e.code === 'space_not_found') return 404;
+  if (e && (e.code === 'space_name_invalid' || e.code === 'ks_default_undeletable')) return 400;
+  if (e && e.code === 'space_name_exists') return 409;
+  return 500;
+}
+
 function docView(doc) {
   return {
     id: doc.id,
@@ -52,10 +60,12 @@ module.exports = function mountKnowledge(app) {
   // 空间总览：空间行 + 文档清单（分页）+ 嵌入可用性 + 存储位置（D9）+ 嵌入模型失配统计
   app.get('/api/knowledge/space', async (req, res) => {
     try {
-      const space = ks.getSpace();
+      const spaceId = ks.resolveSpaceId(req.query.spaceId);
+      const space = ks.getSpace(spaceId);
       const page = ks.listDocumentsPage({
         limit: req.query.docLimit,
         offset: req.query.docOffset,
+        spaceId,
       });
       res.json({
         status: 'ok',
@@ -73,9 +83,9 @@ module.exports = function mountKnowledge(app) {
         documentsLimit: page.limit,
         documentsOffset: page.offset,
         // BLOCK-94 F1：换嵌入模型后旧模型向量被隔离，>0 时前端提示重建
-        staleEmbedding: ks.staleEmbeddingStats(),
+        staleEmbedding: ks.staleEmbeddingStats(spaceId),
         // BLOCK-94 F6：规模观测指标（向量通道暴力扫描警戒）
-        scale: ks.scaleStats(),
+        scale: ks.scaleStats(spaceId),
         embeddingAvailable: embeddingAvailable(),
         knowledgeDir: ks.knowledgeRoot(),
         queueDepth: ingest.ingestQueueDepth(),
@@ -89,6 +99,7 @@ module.exports = function mountKnowledge(app) {
   app.post('/api/knowledge/space', express.json({ limit: '4kb' }), async (req, res) => {
     try {
       const enabled = !!(req.body && req.body.enabled);
+      const spaceId = ks.resolveSpaceId(req.body && req.body.spaceId);
       // D7：无 key 时拒绝假启用
       if (enabled && !embeddingAvailable()) {
         return res.status(409).json({
@@ -96,7 +107,7 @@ module.exports = function mountKnowledge(app) {
           error: 'knowledge_embed_unavailable（嵌入模型不可用：请先在设置中配置 DashScope key）',
         });
       }
-      const space = ks.setSpaceEnabled(enabled);
+      const space = ks.setSpaceEnabled(enabled, spaceId);
       res.json({ status: 'ok', space: { id: space.id, name: space.name, enabled: !!space.enabled } });
     } catch (e) {
       res.status(500).json({ status: 'error', error: e.message });
@@ -109,6 +120,7 @@ module.exports = function mountKnowledge(app) {
       if (err) return res.status(400).json({ status: 'error', error: err.message });
       const files = Array.isArray(req.files) ? req.files : [];
       if (files.length === 0) return res.status(400).json({ status: 'error', error: '未选择文件' });
+      const spaceId = ks.resolveSpaceId(req.body && req.body.spaceId);
       const accepted = [];
       const rejected = [];
       for (const file of files) {
@@ -117,6 +129,7 @@ module.exports = function mountKnowledge(app) {
             name: file.originalname,
             buffer: file.buffer,
             mime: file.mimetype,
+            spaceId,
           });
           accepted.push(docView(doc));
         } catch (e) {
@@ -141,6 +154,7 @@ module.exports = function mountKnowledge(app) {
         name,
         buffer: Buffer.from(text, 'utf8'),
         mime: 'text/plain',
+        spaceId: ks.resolveSpaceId(req.body && req.body.spaceId),
       });
       res.json({ status: 'ok', document: docView(doc) });
     } catch (e) {
@@ -152,7 +166,11 @@ module.exports = function mountKnowledge(app) {
   // 摄取状态（前端轮询；BLOCK-94 F1 分页）
   app.get('/api/knowledge/documents', async (req, res) => {
     try {
-      const page = ks.listDocumentsPage({ limit: req.query.limit, offset: req.query.offset });
+      const page = ks.listDocumentsPage({
+        limit: req.query.limit,
+        offset: req.query.offset,
+        spaceId: ks.resolveSpaceId(req.query.spaceId),
+      });
       res.json({
         status: 'ok',
         documents: page.documents.map(docView),
@@ -244,10 +262,11 @@ module.exports = function mountKnowledge(app) {
     }
   });
 
-  // D10：清空空间（前端两步确认后调用）
+  // D10：清空空间（前端两步确认后调用；BLOCK-99 G1 按空间清空）
   app.post('/api/knowledge/space/clear', async (req, res) => {
     try {
-      res.json({ status: 'ok', ...ks.clearSpace() });
+      const spaceId = ks.resolveSpaceId(req.body && req.body.spaceId);
+      res.json({ status: 'ok', ...ks.clearSpace(spaceId) });
     } catch (e) {
       res.status(500).json({ status: 'error', error: e.message });
     }
@@ -256,11 +275,12 @@ module.exports = function mountKnowledge(app) {
   // 检索测试框（D6：摄取质量可自证；BLOCK-94 F5：docId 过滤 + 降级诚实标注）
   app.post('/api/knowledge/search', express.json({ limit: '16kb' }), async (req, res) => {
     try {
-      const { query, topK, docId } = req.body || {};
+      const { query, topK, docId, spaceId } = req.body || {};
       const result = await ks.searchKnowledge({
         query,
         topK: topK || ks.INJECT_TOPK,
         docId: docId ? String(docId) : undefined,
+        spaceId: ks.resolveSpaceId(spaceId),
       });
       res.json({
         status: 'ok',
@@ -282,6 +302,73 @@ module.exports = function mountKnowledge(app) {
       });
     } catch (e) {
       res.status(500).json({ status: 'error', error: e.message });
+    }
+  });
+
+  // ── BLOCK-99 G1 多空间 CRUD ─────────────────────────────────
+
+  // 空间列表（含每空间文档/块统计）
+  app.get('/api/knowledge/spaces', async (req, res) => {
+    try {
+      res.json({ status: 'ok', spaces: ks.listSpaces() });
+    } catch (e) {
+      res.status(500).json({ status: 'error', error: e.message });
+    }
+  });
+
+  // 建空间（name 1..60 字符，重名 409；新建默认停用，启用走 enable 门）
+  app.post('/api/knowledge/spaces', express.json({ limit: '4kb' }), async (req, res) => {
+    try {
+      const space = ks.createSpace(req.body && req.body.name);
+      res.json({ status: 'ok', space });
+    } catch (e) {
+      res.status(spaceErrorStatus(e)).json({ status: 'error', error: e.message, code: e.code || null });
+    }
+  });
+
+  // 重命名
+  app.post('/api/knowledge/spaces/:id/rename', express.json({ limit: '4kb' }), async (req, res) => {
+    try {
+      const space = ks.renameSpace(req.params.id, req.body && req.body.name);
+      res.json({ status: 'ok', space });
+    } catch (e) {
+      res.status(spaceErrorStatus(e)).json({ status: 'error', error: e.message, code: e.code || null });
+    }
+  });
+
+  // 启停（与 ks_default 同门：无 key 拒绝假启用）
+  app.post('/api/knowledge/spaces/:id/enable', express.json({ limit: '4kb' }), async (req, res) => {
+    try {
+      const enabled = !!(req.body && req.body.enabled);
+      if (enabled && !embeddingAvailable()) {
+        return res.status(409).json({
+          status: 'error',
+          error: 'knowledge_embed_unavailable（嵌入模型不可用：请先在设置中配置 DashScope key）',
+        });
+      }
+      const space = ks.setSpaceEnabled(enabled, req.params.id);
+      res.json({ status: 'ok', space });
+    } catch (e) {
+      res.status(spaceErrorStatus(e)).json({ status: 'error', error: e.message, code: e.code || null });
+    }
+  });
+
+  // 删除前影响面（诚实列出将级联删除的文档/块数）
+  app.get('/api/knowledge/spaces/:id/impact', async (req, res) => {
+    try {
+      ks.resolveSpaceId(req.params.id);
+      res.json({ status: 'ok', impact: ks.spaceImpact(req.params.id) });
+    } catch (e) {
+      res.status(spaceErrorStatus(e)).json({ status: 'error', error: e.message, code: e.code || null });
+    }
+  });
+
+  // 删除空间（级联文档/块/物理目录；禁删 ks_default → 400）
+  app.delete('/api/knowledge/spaces/:id', async (req, res) => {
+    try {
+      res.json({ status: 'ok', ...ks.deleteSpaceCascade(req.params.id) });
+    } catch (e) {
+      res.status(spaceErrorStatus(e)).json({ status: 'error', error: e.message, code: e.code || null });
     }
   });
 };

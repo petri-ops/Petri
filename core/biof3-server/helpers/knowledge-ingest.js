@@ -63,10 +63,12 @@ function safeDocFilename(originalName) {
  * autoIngest=false 仅供测试/迁移工具落行不排程。
  * 解析器不支持的扩展名在此 fail-closed（不建行不入队）。
  */
-async function createDocument({ name, buffer, mime, autoIngest = true }) {
+async function createDocument({ name, buffer, mime, autoIngest = true, spaceId }) {
   if (!name || !Buffer.isBuffer(buffer)) throw new Error('knowledge_document_fields_required');
   if (buffer.length > MAX_DOCUMENT_BYTES) throw new Error('knowledge_document_too_large');
   checkSupported(name);
+  // BLOCK-99 G1 — 目标空间（缺省 ks_default；未知 fail-closed）
+  const targetSpace = ks.resolveSpaceId(spaceId);
   const docId = `kdoc_${uuidv4().slice(0, 12)}`;
   const dir = ks.docDir(docId);
   fs.mkdirSync(dir, { recursive: true });
@@ -79,7 +81,7 @@ async function createDocument({ name, buffer, mime, autoIngest = true }) {
       `INSERT INTO knowledge_documents (id, space_id, name, kind, mime, size, status, raw_path, created_at, updated_at)
        VALUES (?, ?, ?, 'text', ?, ?, 'uploaded', ?, ?, ?)`
     )
-    .run(docId, ks.SPACE_ID, safeName, mime || null, buffer.length, rawPath, ts, ts);
+    .run(docId, targetSpace, safeName, mime || null, buffer.length, rawPath, ts, ts);
   if (autoIngest) enqueueIngest(docId);
   return ks.getDocument(docId);
 }
@@ -150,7 +152,7 @@ async function ingestDocument(docId, { embed } = {}) {
         insertChunk.run(
           chunkId,
           docId,
-          ks.SPACE_ID,
+          doc.space_id, // BLOCK-99 G1 — 按文档归属空间落块（曾写死 ks.SPACE_ID 致跨空间块错标）
           chunk.seq,
           chunk.text,
           vec ? Buffer.from(vec.buffer, vec.byteOffset, vec.byteLength) : null,
