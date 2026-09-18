@@ -1,6 +1,6 @@
 # BLOCK-88 工程师协作 — P0 立项评审
 
-> 状态：`P2-ACTIVE（2026-09-19 用户裁决「开P2」启动——任务归属隔离。P1-COMPLETED 见 §9（7cc5cbf3）。D1-D8 于 2026-09-18 裁决「都按推荐」落定。前状态 P1-COMPLETED（2026-09-19 用户夜间裁决「都搞 我要睡觉了」启动；D7 门槛由 BLOCK-85 双真机收口 87298a22 满足；D1-D8 于 2026-09-18 裁决「都按推荐」落定）`
+> 状态：`P2-COMPLETED（2026-09-19 会话收口，提交 8ad51d36——实机 13/13 allPass + 契约 4/4 + UI-419 verified；收口记录见 §10。P3（项目授权边界）待用户裁决启动。P1-COMPLETED 见 §9（7cc5cbf3）。D1-D8 于 2026-09-18 裁决「都按推荐」落定）`
 > 日期：2026-09-18（立项评审稿；概念源自 2026-09-14 f52e7d87 用户裁决「可以的 非常棒」）
 > 用户裁决史：①2026-09-14 联邦概念深化「联邦协作主体=**不同的工程师**」（各跑各的格物，互相授权：委托任务/看界面/协同开发），三层缺口排队 BLOCK-88；②2026-09-18「开始 BLOCK-88 立项评审」。
 
@@ -91,4 +91,13 @@ A 能看到/操作 B 的哪些项目。**建议：配对后默认零授权，B �
 - **评审清偿**：六维度自评抓 P2 一枚（联邦访客会话名 UA 兜底恒「移动设备」）——已修（带署名优先命名，契约断言补 name.startsWith('工程师 A')，终版实机 P4b 回显可见）。
 - **同批基建**：`scripts/start-test-instance.sh` 双端同形化（原纯 Windows 实现 macOS 静默空转）+ impact-map 补 ui417-side-chat-evidence（4da4bb4a 漏登记存量 unknown）+ block88-engineer-collab 规则。
 - **P2 预备**：BLOCK-85 验收登记的 delegation 无项目绑定/未开独立会话两结构缺口 + 本阶段遗留候选（会话名已清偿）在 P2 域内消化；启动待用户裁决。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 10. P2 收口记录（2026-09-19 会话）
+
+- **交付**：访客身份检测（req.mobileSession.identity，网关会话门携带 P1 落档署名）→ 委托独立会话（origin 列，消化 85 登记「委托未开独立会话」缺口）+ getOrCreateActiveConversation 复用恒排除（反向污染防护）+ 自动标题守卫（实机抓真：auto-title 会洗掉归属标题）+ params.federated 归属 + spawn 继承 + meta/tasks federatedFrom 透出 + 会话列表默认视图隔离（includeFederated 开关）+ UI-419 左栏「联邦委托会话」查看节/俯瞰联邦角标（同提交台账）。
+- **实现注记**：tasks.user_id 维持宿主权限面语义 'local-user'（subagent 派生所有权检查/并发桶/历史拼装依赖它），归属走 params.federated + conversations.origin 双面——D3 意图（归属可见+隔离+可清理）完整达成，列机制与 plan §3-D3 字面有出入如实留痕。
+- **门禁对账**：契约 test/block88-task-attribution.test.mjs 4/4 + block88-engineer-identity 5/5 + subagent-recent 回归绿；tsc 0；theme-token-contract 4/4；docs:check PASS(255)；ui:audit 同步通过；定向全集 332 项 324 过 7 红——**全部存量（基线对照证实非本包引入）**：block67 fs verbs 4 红（macOS bash verb 面）+ sys_resource 1 红（用例自注 Linux/WSL 语义面）+ P6 源绑定 2 红（🟡 在册）。
+- **实机断言**：scripts/block88-p2-delegate-attribution.cjs **13/13 allPass**——A 侧真实 delegate_to_gewu_node 工具跨节点委托、B 端真实跑完模型回执 done → meta federatedFrom=工程师 A + 会话标题「来自工程师 A的委托：…」（守卫生效）+ 默认视图零泄漏 + includeFederated 可见 + 宿主活跃会话零污染 + CDP 测试实例左栏联邦面可见；证据 acceptance/block-88/p2-attribution.json+png。
+- **P3 预备**：项目授权边界（grants 清单+越界 403+授权/吊销 UI）+ 85 登记缺口「delegation 无项目绑定」（本轮实机再次印证：委托会话 project_id 为 NULL）——启动待用户裁决。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
