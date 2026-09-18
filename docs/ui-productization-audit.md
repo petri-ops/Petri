@@ -3383,6 +3383,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **门禁**：tsc 0；实机 CDP 双实例断言 allPass——测试实例 badge=true/flag=true，用户实例 badge=false/flag=false（旧 preload 无字段亦安全熄灭）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-414: 知识空间多空间切换器——空间列表/新建/重命名/删除（BLOCK-99 P2/G2，2026-09-18 in_progress→组件与回归全绿，实机走查待 P5）
+
+- **来源**：BLOCK-99-KNOWLEDGE-MULTISPACE-CONSOLE P2（用户裁决「完整多空间版」）。
+- **交付面**：①`KnowledgeSpaceSwitcher` 组件（面板顶部）：空间下拉（名称+文档数+启用态）/新建（inline 输入 1-60 字符）/重命名/删除——破坏性两步确认+删除前 impact 影响面诚实列出（文档/块数）；ks_default 无删除入口（服务端 400 兜底）；②`knowledgeClient` 空间管理 API 六件（list/create/rename/enableById/impact/delete）+ 存量函数 spaceId 参数（总览/上传/粘贴/清空/检索）；③`knowledge-utils.tsx` 抽离纯工具（STATUS_LABEL/BUSY/formatBytes/splitQueryTokens/HighlightedText 原样搬迁）——**台账线治理：KnowledgeSpacePanel 701→668 净减**（G2 新增逻辑进新文件不恶化台账）。
+- **门禁**：Switcher 组件 3/3（渲染切换/创建后切换/两步删除）+ 面板回归 8/8 + tsc 0 + theme 4/4；client 加载防御（spaces 缺字段空列表降级不崩）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-407: 新对话空态示例卡通用化——领域卡按已装领域包动态追加 (2026-09-18 verified，用户裁决「可以直接修复」+CDP 实机断言)
 
 - **来源**：用户投影实测反馈「新建任务的默认页面……要有通用性 领域提示 等等 这个有点历史残留的干扰（可以直接修复）」——空态三卡之首「分析单细胞数据」是 biof3 生信时代硬编码遗留（DEFAULT_EXAMPLE_PROMPTS），与「通用 agent 工作台 + 领域能力包化」（BLOCK-86）现状相悖。

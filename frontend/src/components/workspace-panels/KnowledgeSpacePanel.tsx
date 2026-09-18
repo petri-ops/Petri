@@ -9,69 +9,33 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import {
   batchDeleteKnowledgeDocuments,
-  clearKnowledgeSpace,
+  clearKnowledgeSpaceById,
   deleteKnowledgeDocument,
   fetchKnowledgeDocumentPreview,
   fetchKnowledgeSpace,
   reindexKnowledgeDocument,
   retryFailedKnowledgeDocuments,
-  searchKnowledge,
-  uploadKnowledgeDocuments,
+  searchKnowledgeInSpace,
+  uploadKnowledgeDocumentsWithSpace,
   type KnowledgeDoc,
   type KnowledgeDocPreview,
   type KnowledgeHit,
   type KnowledgeSpaceState,
 } from '@/lib/knowledgeClient';
+import { KnowledgeSpaceSwitcher } from './KnowledgeSpaceSwitcher';
+import {
+  BUSY_STATUSES,
+  formatBytes,
+  HighlightedText,
+  splitQueryTokens,
+  STATUS_LABEL,
+} from './knowledge-utils';
 import styles from './KnowledgeSpacePanel.module.css';
-
-const STATUS_LABEL: Record<KnowledgeDoc['status'], string> = {
-  uploaded: '已上传',
-  parsing: '解析中',
-  chunking: '分块中',
-  embedding: '嵌入中',
-  ready: '就绪',
-  failed: '失败',
-};
-
-const BUSY_STATUSES = new Set(['uploaded', 'parsing', 'chunking', 'embedding']);
-
-function formatBytes(bytes: number): string {
-  if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-  if (bytes >= 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-  return `${bytes} B`;
-}
-
-// BLOCK-94 F5：查询分词（≥2 字符片段）用于命中高亮
-function splitQueryTokens(query: string): string[] {
-  return String(query || '')
-    .trim()
-    .split(/[\s,，。;；!？?·、\n]+/)
-    .map((t) => t.trim())
-    .filter((t) => t.length >= 2);
-}
-
-function HighlightedText({ text, tokens }: { text: string; tokens: string[] }) {
-  if (!tokens.length || !text) return <>{text}</>;
-  const escaped = tokens
-    .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-    .sort((a, b) => b.length - a.length);
-  let re: RegExp;
-  try {
-    re = new RegExp(`(${escaped.join('|')})`, 'gi');
-  } catch {
-    return <>{text}</>;
-  }
-  const parts = text.split(re);
-  const isHit = new RegExp(`^(?:${escaped.join('|')})$`, 'i');
-  return (
-    <>
-      {parts.map((part, i) => (part && isHit.test(part) ? <mark key={i} className={styles.hitMark}>{part}</mark> : <React.Fragment key={i}>{part}</React.Fragment>))}
-    </>
-  );
-}
 
 export function KnowledgeSpacePanel() {
   const [state, setState] = useState<KnowledgeSpaceState | null>(null);
+  // BLOCK-99 P2 — 当前空间（默认 ks_default；切换经 KnowledgeSpaceSwitcher）
+  const [spaceId, setSpaceId] = useState('ks_default');
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busyDocId, setBusyDocId] = useState<string | null>(null);
@@ -103,13 +67,13 @@ export function KnowledgeSpacePanel() {
 
   const refresh = useCallback(async () => {
     try {
-      const next = await fetchKnowledgeSpace({ docLimit });
+      const next = await fetchKnowledgeSpace({ docLimit, spaceId });
       setState(next);
       setLoadError(null);
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : String(e));
     }
-  }, [docLimit]);
+  }, [docLimit, spaceId]);
 
   // 轮询：摄取期 2s 快刷；空闲 10s 慢刷（外部/其他窗口上传的文档也能及时出现）
   useEffect(() => {
@@ -144,12 +108,12 @@ export function KnowledgeSpacePanel() {
     setActionError(null);
     try {
       const { setKnowledgeSpaceEnabled } = await import('@/lib/knowledgeClient');
-      await setKnowledgeSpaceEnabled(!enabled);
+      await setKnowledgeSpaceEnabled(!enabled, spaceId);
     } catch (e) {
       setActionError(e instanceof Error ? e.message : String(e));
     }
     await refresh();
-  }, [enabled, refresh]);
+  }, [enabled, spaceId, refresh]);
 
   const handleUpload = useCallback(async (files: FileList | File[] | null) => {
     const list = files ? Array.from(files) : [];
@@ -158,7 +122,7 @@ export function KnowledgeSpacePanel() {
     setActionError(null);
     setUploadReport(null);
     try {
-      const result = await uploadKnowledgeDocuments(list);
+      const result = await uploadKnowledgeDocumentsWithSpace(list, spaceId);
       // BLOCK-94 F3：逐文件结果聚合（部分失败不再只显示第一个错误）
       setUploadReport({ accepted: result.accepted.length, rejected: result.rejected });
     } catch (e) {
@@ -168,7 +132,7 @@ export function KnowledgeSpacePanel() {
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
     await refresh();
-  }, [refresh]);
+  }, [spaceId, refresh]);
 
   const handlePaste = useCallback(async () => {
     if (!pasteText.trim() || pasting) return;
@@ -177,7 +141,7 @@ export function KnowledgeSpacePanel() {
     setUploadReport(null);
     try {
       const { pasteKnowledgeDocument } = await import('@/lib/knowledgeClient');
-      await pasteKnowledgeDocument(pasteName.trim(), pasteText);
+      await pasteKnowledgeDocument(pasteName.trim(), pasteText, spaceId);
       setPasteOpen(false);
       setPasteName('');
       setPasteText('');
@@ -187,7 +151,7 @@ export function KnowledgeSpacePanel() {
       setPasting(false);
     }
     await refresh();
-  }, [pasteName, pasteText, pasting, refresh]);
+  }, [pasteName, pasteText, pasting, spaceId, refresh]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -299,12 +263,12 @@ export function KnowledgeSpacePanel() {
     setConfirmClear(false);
     setActionError(null);
     try {
-      await clearKnowledgeSpace();
+      await clearKnowledgeSpaceById(spaceId);
     } catch (e) {
       setActionError(e instanceof Error ? e.message : String(e));
     }
     await refresh();
-  }, [confirmClear, refresh]);
+  }, [confirmClear, spaceId, refresh]);
 
   const handleOpenDir = useCallback(() => {
     if (state?.knowledgeDir) {
@@ -320,7 +284,7 @@ export function KnowledgeSpacePanel() {
     setSearchDegraded(false);
     setSearchTokens(splitQueryTokens(query));
     try {
-      const result = await searchKnowledge(query, undefined, searchDocId || undefined);
+      const result = await searchKnowledgeInSpace(query, spaceId, undefined, searchDocId || undefined);
       setSearchHits(result.hits);
       setSearchDegraded(!!result.ftsDegraded);
       if (result.readyChunks === 0) setSearchNote('知识库中没有匹配范围下的就绪分块（可能过滤条件过窄或尚未上传）。');
@@ -332,7 +296,7 @@ export function KnowledgeSpacePanel() {
     } finally {
       setSearching(false);
     }
-  }, [searchQuery, searchDocId, searching]);
+  }, [searchQuery, searchDocId, searching, spaceId]);
 
   // BLOCK-94 F5：检索测试框的文档过滤下拉数据源（ready 文档）
   const filterableDocs = documents.filter((d) => d.status === 'ready');
@@ -350,6 +314,9 @@ export function KnowledgeSpacePanel() {
         <span className={styles.title}>{state?.space?.name || '知识空间'}</span>
         <span className={styles.headerNote}>启用后对话自动检索</span>
       </div>
+
+      {/* BLOCK-99 P2 — 多空间切换/新建/重命名/删除 */}
+      <KnowledgeSpaceSwitcher spaceId={spaceId} onSwitch={setSpaceId} onChanged={refresh} />
 
       {loadError && (
         <div className={styles.errorBox}>加载失败：{loadError}</div>

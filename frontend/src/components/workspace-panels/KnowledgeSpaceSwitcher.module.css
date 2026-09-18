@@ -1,0 +1,62 @@
+/* BLOCK-99 P2 — 知识空间切换器（琥珀提示不适用：正常导航面，走面板既有
+   中性色 token；禁 slate 字面量/零定义 token 家法延续）。 */
+.switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.select {
+  flex: 1 1 180px;
+  min-width: 140px;
+  max-width: 320px;
+  padding: 3px 6px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  background: var(--gewu-bg-elevated);
+  color: var(--gewu-text-primary);
+  font-size: 12px;
+}
+
+.btn {
+  padding: 3px 8px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--gewu-text-primary);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background: var(--gewu-hover);
+}
+
+.btnDanger {
+  border-color: var(--gewu-danger, var(--gewu-warning-text));
+  color: var(--gewu-danger, var(--gewu-warning-text));
+}
+
+.createRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.input {
+  width: 180px;
+  padding: 3px 6px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  background: var(--gewu-bg-elevated);
+  color: var(--gewu-text-primary);
+  font-size: 12px;
+}
+
+.error {
+  font-size: 11px;
+  color: var(--gewu-danger, var(--gewu-warning-text));
+}

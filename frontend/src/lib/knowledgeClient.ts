@@ -70,11 +70,12 @@ async function jsonOrThrow<T>(resp: Response): Promise<T> {
 }
 
 export async function fetchKnowledgeSpace(
-  params?: { docLimit?: number; docOffset?: number }
+  params?: { docLimit?: number; docOffset?: number; spaceId?: string }
 ): Promise<KnowledgeSpaceState> {
   const query = new URLSearchParams();
   if (params?.docLimit != null) query.set('docLimit', String(params.docLimit));
   if (params?.docOffset != null) query.set('docOffset', String(params.docOffset));
+  if (params?.spaceId) query.set('spaceId', params.spaceId);
   const qs = query.toString();
   const resp = await fetch(`${getApiPrefix()}/knowledge/space${qs ? `?${qs}` : ''}`);
   return jsonOrThrow<KnowledgeSpaceState>(resp);
@@ -90,11 +91,15 @@ export async function retryFailedKnowledgeDocuments(): Promise<{
 }
 
 /** BLOCK-94 F3：粘贴文本直接入库（服务端补 .txt 后缀） */
-export async function pasteKnowledgeDocument(name: string, text: string): Promise<{ document: KnowledgeDoc }> {
+export async function pasteKnowledgeDocument(
+  name: string,
+  text: string,
+  spaceId?: string
+): Promise<{ document: KnowledgeDoc }> {
   const resp = await fetch(`${getApiPrefix()}/knowledge/documents/paste`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, text }),
+    body: JSON.stringify({ name, text, spaceId: spaceId || undefined }),
   });
   return jsonOrThrow(resp);
 }
@@ -123,13 +128,103 @@ export async function batchDeleteKnowledgeDocuments(ids: string[]): Promise<{ de
   return jsonOrThrow(resp);
 }
 
-export async function setKnowledgeSpaceEnabled(enabled: boolean): Promise<void> {
+export async function setKnowledgeSpaceEnabled(enabled: boolean, spaceId?: string): Promise<void> {
   const resp = await fetch(`${getApiPrefix()}/knowledge/space`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ enabled, spaceId: spaceId || undefined }),
+  });
+  await jsonOrThrow(resp);
+}
+
+export async function uploadKnowledgeDocumentsWithSpace(files: File[], spaceId: string): Promise<{ accepted: KnowledgeDoc[]; rejected: Array<{ name: string; error: string }> }> {
+  const form = new FormData();
+  for (const file of files) form.append('files', file);
+  if (spaceId) form.append('spaceId', spaceId);
+  const resp = await fetch(`${getApiPrefix()}/knowledge/documents`, { method: 'POST', body: form });
+  return jsonOrThrow(resp);
+}
+
+export async function clearKnowledgeSpaceById(spaceId: string): Promise<void> {
+  const resp = await fetch(`${getApiPrefix()}/knowledge/space/clear`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ spaceId }),
+  });
+  await jsonOrThrow(resp);
+}
+
+export async function searchKnowledgeInSpace(
+  query: string,
+  spaceId: string,
+  topK?: number,
+  docId?: string
+): Promise<KnowledgeSearchResponse> {
+  const resp = await fetch(`${getApiPrefix()}/knowledge/search`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, topK, docId: docId || undefined, spaceId }),
+  });
+  return jsonOrThrow<KnowledgeSearchResponse>(resp);
+}
+
+// ── BLOCK-99 G2 多空间管理 API ──
+
+export interface KnowledgeSpaceSummary {
+  id: string;
+  name: string;
+  enabled: boolean;
+  embeddingModel: string;
+  createdAt: string;
+  updatedAt: string;
+  documents: number;
+  chunks: number;
+}
+
+export async function fetchKnowledgeSpaces(): Promise<KnowledgeSpaceSummary[]> {
+  const resp = await fetch(`${getApiPrefix()}/knowledge/spaces`);
+  const body = await jsonOrThrow<{ status: string; spaces: KnowledgeSpaceSummary[] }>(resp);
+  // 防御：导航组件不因载荷缺字段而崩（switcher 空列表 = 诚实降级）
+  return Array.isArray(body?.spaces) ? body.spaces : [];
+}
+
+export async function createKnowledgeSpace(name: string): Promise<KnowledgeSpaceSummary> {
+  const resp = await fetch(`${getApiPrefix()}/knowledge/spaces`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+  const body = await jsonOrThrow<{ status: string; space: KnowledgeSpaceSummary }>(resp);
+  return body.space;
+}
+
+export async function renameKnowledgeSpace(id: string, name: string): Promise<void> {
+  const resp = await fetch(`${getApiPrefix()}/knowledge/spaces/${encodeURIComponent(id)}/rename`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+  await jsonOrThrow(resp);
+}
+
+export async function setKnowledgeSpaceEnabledById(id: string, enabled: boolean): Promise<void> {
+  const resp = await fetch(`${getApiPrefix()}/knowledge/spaces/${encodeURIComponent(id)}/enable`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ enabled }),
   });
   await jsonOrThrow(resp);
+}
+
+export async function fetchKnowledgeSpaceImpact(id: string): Promise<{ documents: number; chunks: number }> {
+  const resp = await fetch(`${getApiPrefix()}/knowledge/spaces/${encodeURIComponent(id)}/impact`);
+  const body = await jsonOrThrow<{ status: string; impact: { documents: number; chunks: number } }>(resp);
+  return body.impact;
+}
+
+export async function deleteKnowledgeSpace(id: string): Promise<{ deleted: string; documents: number; chunks: number }> {
+  const resp = await fetch(`${getApiPrefix()}/knowledge/spaces/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  return jsonOrThrow(resp);
 }
 
 export async function uploadKnowledgeDocuments(files: File[]): Promise<{ accepted: KnowledgeDoc[]; rejected: Array<{ name: string; error: string }> }> {
