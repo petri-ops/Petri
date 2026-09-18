@@ -19,8 +19,10 @@ function buildJobProvenance({
   artifacts = [],
   executionTarget = null,
 }) {
-  const dbMod = require('../db');
-  const pluginLoader = require('../plugin-loader');
+  // BLOCK-92 Wave C 拆分陷阱实修：文件自 helpers/ 迁入 helpers/tools-executor/ 后
+  // 函数内懒加载 require 未跟目录深度（node --check 不抓；P6 重采真实作业终结路径踩中）。
+  const dbMod = require('../../db');
+  const pluginLoader = require('../../plugin-loader');
   const toolDefinition = pluginLoader.getToolDefinition(toolId) || {};
   const pluginManifest = pluginLoader.getPluginManifest(toolId) || cfg;
   const scientificTask = typeof dbMod.getScientificTaskByToolJob === 'function' ? dbMod.getScientificTaskByToolJob(jobId) : null;
