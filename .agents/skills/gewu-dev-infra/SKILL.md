@@ -81,6 +81,8 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 
 7. **跨端出码命令与 token/host 分离**：配对 token 5 分钟 TTL，由**拥有网关的进程 :3001** 签发（第 1 条脑裂纪律）——标准命令 `curl -X POST http://127.0.0.1:3001/api/mobile/pairing/token -H "Authorization: Bearer desktop-local" -d "{}"`（双端同形，禁用面板 UI 出码做跨机验收）。**token 与 host 分离**：收到的码是 LAN 形态（`http://192.168.x.x:<gw>/pair?token=…`）时，对端可将 host 替换为该端公网门（前提=该端隧道 connected 且 nginx 映射在）后提交 `/federation/peers/pair`，token 依然有效——跨网段配对的正路。验收期间挂外部端到端探测（10s 级 `curl -k <公网门>/api/mobile/status`，401=活）留时间线：`state=connected` 与端口 held 都可能假活（半开 TCP），失败对账以监控时间线为准，不以管理器状态为准。
 
+8. **远程库自动同步已托管（安全档 · 用户裁决 2026-09-18「计划任务 + 安全档」）**：Windows 计划任务 `Gewu-AutoSync` 每 2 分钟跑 `scripts/auto-sync-remote.sh`（.cmd 包装器；Git 实装在 D:\Program Files\Git）——判据链（mkdir 原子互斥锁+陈锁 10min 清扫 / 工作区干净 / 无进行中 git 操作）全过且**纯落后**才 `git merge --ff-only`（fast-forward 定义上零冲突）；**纯领先静默、双方分叉只登记 `.biof3-dev-user-data/auto-sync-events.log` 待裁决，绝不自动 rebase**；fetch 失败静默等下轮。Agent 纪律：① 会话启动除 `npm run state` 外对账 events 文件，DIVERGED/FF_FAIL 处置完清行；② **拉自动、推不自动**——推送仍由会话收口控制，防「半成品提交广播链」（一端自动推+另一端自动拉=半成品秒扩散）；③ 脚本**禁止写 AUDIT-LOG**（自动改 git 追踪文件会弄脏工作区，使「干净」判据永久失真），事件只进 events 文件；④ ff 合入若 dev 栈在跑会 Vite 热更闪窗口，属预期非故障；⑤ Mac 侧复用=同脚本 + launchd/cron 每 2 分钟（等 Windows 侧跑稳再上，双端不同时加变量）。停用 `schtasks /Change /TN "Gewu-AutoSync" /DISABLE`；卸载 `/Delete /TN "Gewu-AutoSync" /F`。
+
 ## 保持工作区干净
 
 - `npm run hygiene:check` 报告死符号链接、临时残留与**工作区换行漂移**；它只报告不代删，处置由人裁决（换行归一用 `scripts/normalize-eol.mjs --write`）。

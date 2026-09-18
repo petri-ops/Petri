@@ -1958,6 +1958,18 @@
       "frontendRelated": true,
       "classifiesScripts": true,
       "scriptRole": "development-smoke"
+    },
+    {
+      "id": "auto-sync-remote",
+      "note": "远程库自动同步（安全档，2026-09-18）：Windows 计划任务 Gewu-AutoSync 每 2 分钟 fetch+判据链+ff-only 快进。独立 dev-infra 脚本不被任何应用代码 require，bash 语法检查（bash -n）+ schtasks LastTaskResult 即验证面，无定向 Node 测试。",
+      "patterns": [
+        "scripts/auto-sync-remote.sh",
+        "scripts/auto-sync-remote.cmd"
+      ],
+      "tests": [],
+      "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
     }
   ]
 }
