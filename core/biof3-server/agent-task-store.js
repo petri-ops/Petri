@@ -575,10 +575,15 @@ function listChildAgentTasks(parentTaskId) {
 
 // BLOCK-65 P2-c：agent 俯瞰面板数据源——该用户最近 N 个子 agent 任务
 // （跨会话；只读投影 tasks 表，零第二真相）。
+// UI-405 实机抓真修正：kind 过滤必须下推 SQL——曾整表 LIMIT 后再 JS 过滤
+// subagent，主任务占满最近窗口时子 agent 任务被挤出俯瞰面板（🟡清偿）。
+// json_valid 防御畸形 params 行（json_extract 对非法 JSON 会抛错）。
 function listRecentSubAgentTasks(userId, limit = 50) {
   if (!userId) return [];
   const rows = db.prepare(
-    'SELECT * FROM tasks WHERE user_id = ? ORDER BY created_at DESC LIMIT ?'
+    `SELECT * FROM tasks
+     WHERE user_id = ? AND json_valid(params) = 1 AND json_extract(params, '$.kind') = 'subagent'
+     ORDER BY created_at DESC LIMIT ?`
   ).all(userId, Math.max(1, Math.min(200, limit)));
   return rows.map((row) => ({
     taskId: row.id,
@@ -590,7 +595,7 @@ function listRecentSubAgentTasks(userId, limit = 50) {
     userId: row.user_id || null,
     agentStatus: row.agent_status || null,
     filesChanged: tryParse(row.files_changed_json) || [],
-  })).filter((task) => task.params?.kind === 'subagent');
+  }));
 }
 
 /**
