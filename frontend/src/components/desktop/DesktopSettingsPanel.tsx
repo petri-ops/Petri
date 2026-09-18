@@ -18,6 +18,7 @@ import {
   validateUserModelProfile,
 } from '@/lib/model-provider-options';
 import { parseContextWindow, formatContextWindow } from '@/lib/format-context-window';
+import { getBridge } from '@/lib/desktopBridge';
 import { ExperimentalFeaturesSection } from '@/components/settings/ExperimentalFeaturesSection';
 // UI-393 — 返回按钮样式单一真源（与 Skills/知识空间页头同款 backBtn）
 import backStyles from '@/pages/global-page.module.css';
@@ -92,9 +93,11 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   // M2-3：遥测开关即时保存（无需点"保存"按钮，切了立即生效）
   async function handleToggleTelemetry(next: boolean) {
     setTelemetryEnabled(next);
-    if (!window.biof3Desktop) return;
+    // BLOCK-87 L4-2 收尾：走 getBridge（投影下切 HTTP 桥，桌面同 IPC 面）。
+    const settingsBridge = getBridge('aiSettings');
+    if (!settingsBridge) return;
     try {
-      await window.biof3Desktop.aiSettings.save({
+      await settingsBridge.save({
         ...settings,
         telemetry_enabled: next,
       });

@@ -21,6 +21,7 @@ import {
 } from '@/lib/model-endpoint-transfer';
 import { credentialId } from './model-types';
 import { MODEL_ROLES, providerDefaults, type ModelRole } from './model-types';
+import { getBridge } from '@/lib/desktopBridge';
 
 /**
  * BLOCK-92 Wave B-4 — API Endpoint（模型渠道）编辑器状态簇外迁
@@ -108,8 +109,11 @@ export function useEndpointProfilesEditor(): {
   }, [modelProfiles]);
 
   async function loadSettings() {
-    if (!window.biof3Desktop) return;
-    const s = await window.biof3Desktop.aiSettings.get();
+    // BLOCK-87 L4-2 收尾：走 getBridge 而非直引 window.biof3Desktop——投影
+    // 环境下切 HTTP 桥（直引经 shim Proxy 拿到 undefined 会 TypeError）。
+    const settingsBridge = getBridge('aiSettings');
+    if (!settingsBridge) return;
+    const s = await settingsBridge.get();
     setSettings(s);
     const profiles = Array.isArray(s.model_profiles)
       ? (s.model_profiles as ChatModelPreset[])
@@ -136,7 +140,8 @@ export function useEndpointProfilesEditor(): {
   }
 
   async function handleSave() {
-    if (!window.biof3Desktop) return;
+    const settingsBridge = getBridge('aiSettings');
+    if (!settingsBridge) return;
     setSaving(true);
     setSaved(false);
     const nextProfileErrors = Object.fromEntries(
@@ -160,7 +165,7 @@ export function useEndpointProfilesEditor(): {
       }));
     const chatProfile = profiles.find((profile) => profile.id === roleBindings.chat);
     const embedProfile = profiles.find((profile) => profile.id === roleBindings.embedding);
-    await window.biof3Desktop.aiSettings.save({
+    await settingsBridge.save({
       model_profiles: profiles,
       model_role_bindings: roleBindings,
       model_fallback_enabled: fallbackEnabled,
@@ -182,12 +187,13 @@ export function useEndpointProfilesEditor(): {
   }
 
   async function discoverModels(profile: ChatModelPreset, apiKey = '', silent = false) {
-    if (!window.biof3Desktop) return;
+    const settingsBridge = getBridge('aiSettings');
+    if (!settingsBridge) return;
     const generation = (modelDiscoveryGeneration.current[profile.id] || 0) + 1;
     modelDiscoveryGeneration.current[profile.id] = generation;
     setLoadingModels((current) => ({ ...current, [profile.id]: true }));
     try {
-      const result = await window.biof3Desktop.aiSettings.listModels(
+      const result = await settingsBridge.listModels(
         profile as unknown as Record<string, unknown>,
         apiKey
       );
@@ -339,7 +345,8 @@ export function useEndpointProfilesEditor(): {
   async function readCredential(id: string): Promise<string> {
     const inline = credentialInputs[id]?.trim();
     if (inline) return inline;
-    const result = await window.biof3Desktop?.aiSettings.getCredential(id);
+    // 投影桥恒 ok:false（凭据明文不过投影 HTTP）→ 返回空串走既有降级提示。
+    const result = await getBridge('aiSettings')?.getCredential(id);
     return result?.ok ? result.apiKey : '';
   }
 
@@ -369,7 +376,7 @@ export function useEndpointProfilesEditor(): {
   );
 
   async function exportEndpoints(format: 'json' | 'csv') {
-    if (!window.biof3Desktop?.aiSettings.getCredential) return;
+    if (!getBridge('aiSettings')?.getCredential) return;
     if (!window.confirm('导出文件将包含 API Key 明文。请仅保存到安全位置，确定继续吗？')) return;
     const apiKeys: Record<string, string> = {};
     await Promise.all(userModelProfiles.map(async (profile) => {

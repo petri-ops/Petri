@@ -1,6 +1,6 @@
 # BLOCK-96-SSH-CONNECTION-PERF — SSH 远端连接性能与韧性加固
 
-> **⛔ superseded（2026-09-16 撞号对账）**：本登记与 [BLOCK-96-SSH-CHANNEL-PERF](./block-96-ssh-channel-perf-plan.md)（同日并行推进并整包收口 completed）撞号。对账结论：W1 跨操作连接复用 / W2 长连接保活 / W3 重试编排 / W4 重试增强已由彼包兑现（__mux 跨操作复用实测 15ms RTT、ServerAliveInterval=15 保活、mux 幂等只读透明重试、pidfile/进程组击杀；本文件前提「每操作新建握手 ~1s」「零保活」为过时判断）；W5 部分（probe 握手计时黑洞提示）、W6 部分（RemoteTargets 首连提示）亦已交付。**残余候选保留于本文件**：ProxyJump 高级参数、探测熔断编排、连接状态徽标——重启需用户裁决并重新查号。本文件不再作为 canonical 执行依据。
+> **⛔ superseded（2026-09-16 撞号对账）**：本登记与 [BLOCK-96-SSH-CHANNEL-PERF](./block-96-ssh-channel-perf-plan.md)（同日并行推进并整包收口 completed）撞号。对账结论：W1 跨操作连接复用 / W2 长连接保活 / W3 重试编排 / W4 重试增强已由彼包兑现（__mux 跨操作复用实测 15ms RTT、ServerAliveInterval=15 保活、mux 幂等只读透明重试、pidfile/进程组击杀；本文件前提「每操作新建握手 ~1s」「零保活」为过时判断）；W5 部分（probe 握手计时黑洞提示）、W6 部分（RemoteTargets 首连提示）亦已交付。**残余候选保留于本文件**：ProxyJump 高级参数、探测熔断编排（**连接状态徽标已销号**——UI-397 SSH 呼吸灯 SshStatusDot 三态〔绿呼吸/黄快闪/红常亮〕+点击重试完整覆盖「连接状态可见」，2026-09-18 L4-2 收尾批登记）——重启需用户裁决并重新查号。本文件不再作为 canonical 执行依据。
 
 最后更新：2026-09-16（superseded 横幅：撞号对账并入 BLOCK-96-SSH-CHANNEL-PERF completed）
 

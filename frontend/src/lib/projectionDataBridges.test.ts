@@ -7,10 +7,13 @@
  * - plugins.listRemote → { plugins: Record<…> }（plugin:list-remote 契约）
  * - packs.listInstalled/listAvailable → { ok, packs } 信封（pack:list-* 实际返回）
  * - runtime.status → { r, python } 各 { installed, path }
- * - 写操作（install/uninstall）投影下诚实禁用
+ * - aiSettings.get → 裸 settings 对象（ai-settings:get 契约；HTTP 信封须解包）
+ * - aiSettings.save → { ok: true }（ai-settings:save 契约）
+ * - 写操作（install/uninstall）与凭据读取/连通性测试投影下诚实禁用
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  getProjectionAiSettingsBridge,
   getProjectionDataBridge,
   getProjectionPacksBridge,
   getProjectionPluginsBridge,
@@ -151,10 +154,62 @@ describe('projectionDataBridges', () => {
     expect(degraded.python.installed).toBe(false);
   });
 
+  it('aiSettings.get unwraps the { status, settings } envelope per ai-settings:get contract', async () => {
+    mockFetchByPath({
+      '/api/ai/settings': {
+        status: 'ok',
+        settings: {
+          model_profiles: [{ id: 'deepseek', provider: 'deepseek', model: 'deepseek-chat' }],
+          model_role_bindings: { chat: 'deepseek' },
+          active_chat_model_id: 'deepseek',
+        },
+      },
+    });
+    const settings = await getProjectionAiSettingsBridge().get();
+    expect(settings).toMatchObject({ active_chat_model_id: 'deepseek' });
+    expect((settings.model_profiles as unknown[])).toHaveLength(1);
+  });
+
+  it('aiSettings.get degrades to {} on failure payload (ai-settings:get catch shape)', async () => {
+    mockFetchByPath({ '/api/ai/settings': { status: 'error', message: 'boom' } });
+    expect(await getProjectionAiSettingsBridge().get()).toEqual({});
+  });
+
+  it('aiSettings.save posts to /api/ai/settings and returns { ok: true } per ai-settings:save contract', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input).endsWith('/api/ai/settings')).toBe(true);
+      expect(init?.method).toBe('POST');
+      return jsonResponse({ status: 'ok' });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const result = await getProjectionAiSettingsBridge().save({ active_chat_model_id: 'x' });
+    expect(result).toEqual({ ok: true });
+  });
+
+  it('aiSettings.save maps failure payloads to { ok: false, error }', async () => {
+    mockFetchByPath({ '/api/ai/settings': { status: 'error', message: 'boom' } });
+    const result = await getProjectionAiSettingsBridge().save({});
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe('boom');
+  });
+
+  it('aiSettings credential read / connectivity test / model discovery are honestly disabled in projection', async () => {
+    const bridge = getProjectionAiSettingsBridge();
+    const credential = await bridge.getCredential('deepseek');
+    expect(credential.ok).toBe(false);
+    expect(credential.apiKey).toBe('');
+    expect(credential.error).toContain('桌面端');
+    expect((await bridge.test('deepseek', 'k')).ok).toBe(false);
+    const models = await bridge.listModels({}, '');
+    expect(models.ok).toBe(false);
+    expect(models.models).toEqual([]);
+  });
+
   it('getProjectionDataBridge hands out the matching bridge per name', () => {
     expect(getProjectionDataBridge('skills')).toBeTruthy();
     expect(getProjectionDataBridge('plugins')).toBeTruthy();
     expect(getProjectionDataBridge('packs')).toBeTruthy();
     expect(getProjectionDataBridge('runtime')).toBeTruthy();
+    expect(getProjectionDataBridge('aiSettings')).toBeTruthy();
   });
 });

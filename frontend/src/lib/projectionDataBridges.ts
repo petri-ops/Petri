@@ -1,12 +1,13 @@
 /**
- * BLOCK-87 L4 — 投影环境数据桥（Skills / 插件商店 / 运行时 / 领域包）。
+ * BLOCK-87 L4 — 投影环境数据桥（Skills / 插件商店 / 运行时 / 领域包 / AI 设置）。
  *
  * 桌面投影浏览器没有 Electron IPC：Skills（skills:discover）、插件目录
  * （plugins.listInstalled/listRemote）、运行时状态（runtime.status）、领域包
- * （packs.listInstalled/listAvailable）在本模块以同形状 HTTP 实现替代，数据
- * 来自 gateway 会话门内的 core REST（/api/skills/registry、/api/plugins/*、
- * /api/runtime/status、/api/packs/*）。写操作（执行/安装/卸载）投影下诚实
- * 禁用——数据消费面与桌面同源，操作面归桌面。
+ * （packs.listInstalled/listAvailable）、AI 设置读面（aiSettings.get/save）
+ * 在本模块以同形状 HTTP 实现替代，数据来自 gateway 会话门内的 core REST
+ * （/api/skills/registry、/api/plugins/*、/api/runtime/status、/api/packs/*、
+ * /api/ai/settings）。写操作（执行/安装/卸载/凭据读取/连通性测试）投影下
+ * 诚实禁用——数据消费面与桌面同源，操作面归桌面。
  *
  * L4-2 形状勘误：桥必须逐字对齐桌面 IPC 契约——`plugins.listInstalled` 返回
  * 裸数组（electron.d.ts），第一批误包 `{ok,packs}` 信封导致 usePluginStore
@@ -137,6 +138,56 @@ const runtimeBridge = {
   },
 };
 
+// AI 设置（BLOCK-87 L4-2 收尾）：读面走 GET /api/ai/settings（HTTP 信封
+// { status, settings } 须解包成 IPC ai-settings:get 的裸 settings 对象），
+// 保存走 POST /api/ai/settings（路由内部与现值合并，同 IPC saveAiSettings
+// 语义）。凭据读取/连通性测试/模型列表拉取投影下诚实禁用——凭据明文绝不
+// 过投影 HTTP，模型发现与 key 测试是设置面板的桌面 CRUD 面。
+const aiSettingsBridge = {
+  // 桌面 IPC `ai-settings:get` 契约 = 裸 settings 对象（失败返回 {}）。
+  async get() {
+    try {
+      const { data } = await getJson('/api/ai/settings');
+      const settings = data.settings as Record<string, unknown> | undefined;
+      if (data.status === 'ok' && settings && typeof settings === 'object') {
+        return settings;
+      }
+      return {};
+    } catch {
+      return {};
+    }
+  },
+  // 桌面 IPC `ai-settings:save` 契约 = { ok: true } / { ok: false, error }。
+  async save(settings: Record<string, unknown>) {
+    try {
+      const response = await fetch('/api/ai/settings', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(settings ?? {}),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (response.ok && (data as { status?: string }).status === 'ok') {
+        return { ok: true as const };
+      }
+      return { ok: false as const, error: (data as { message?: string }).message || 'save failed' };
+    } catch (error) {
+      return { ok: false as const, error: error instanceof Error ? error.message : 'network' };
+    }
+  },
+  // 桌面 IPC `ai-settings:list-models` 失败形状 = { ok:false, models:[], message }。
+  async listModels(_providerOrProfile: unknown, _apiKey?: string) {
+    return { ok: false as const, models: [] as Array<Record<string, unknown>>, message: '投影环境暂不支持拉取模型列表，请在桌面端操作' };
+  },
+  // 桌面 IPC `ai-settings:get-credential` 失败形状 = { ok:false, apiKey:'', error }。
+  // 凭据明文不过投影 HTTP：投影下恒走失败分支，消费方已有优雅降级。
+  async getCredential(_credentialId: string) {
+    return { ok: false as const, apiKey: '', error: '投影环境暂不支持读取凭据，请在桌面端操作' };
+  },
+  async test(_providerOrProfile: unknown, _apiKey?: string) {
+    return { ok: false as const, message: '投影环境暂不支持连通性测试，请在桌面端操作' };
+  },
+};
+
 export function getProjectionSkillsBridge() {
   return skillsBridge;
 }
@@ -153,13 +204,18 @@ export function getProjectionRuntimeBridge() {
   return runtimeBridge;
 }
 
-export type ProjectionDataBridgeName = 'skills' | 'plugins' | 'packs' | 'runtime';
+export function getProjectionAiSettingsBridge() {
+  return aiSettingsBridge;
+}
+
+export type ProjectionDataBridgeName = 'skills' | 'plugins' | 'packs' | 'runtime' | 'aiSettings';
 
 export function getProjectionDataBridge(name: ProjectionDataBridgeName): unknown | null {
   if (!isProjectionEnv()) return null;
   if (name === 'skills') return skillsBridge;
   if (name === 'plugins') return pluginsBridge;
   if (name === 'packs') return packsBridge;
+  if (name === 'aiSettings') return aiSettingsBridge;
   return runtimeBridge;
 }
 

@@ -103,8 +103,9 @@ export function getBridge<K extends DesktopBridgeName>(
   }
   // BLOCK-87 L4 — 投影环境数据页（Skills/插件商店）：IPC 数据面切 HTTP。
   // L4-2 扩面：插件目录/已装列表（plugins）、领域包（packs）、运行时状态
-  // （runtime）一并对齐桌面 IPC 契约，插件商店手机端与桌面同源。
-  if (name === 'skills' || name === 'plugins' || name === 'packs' || name === 'runtime') {
+  // （runtime）、AI 设置读面（aiSettings，收尾批）一并对齐桌面 IPC 契约，
+  // 插件商店/模型选择器/设置页手机端与桌面同源。
+  if (name === 'skills' || name === 'plugins' || name === 'packs' || name === 'runtime' || name === 'aiSettings') {
     const dataBridge = getProjectionDataBridge(name);
     if (dataBridge) return dataBridge as DesktopBridgeHandle<K>;
   }

@@ -3349,6 +3349,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-405: 投影 AI 设置桥——手机端模型选择器/设置页模型渠道与桌面同源 (BLOCK-87 L4-2 收尾，2026-09-18 in_progress，实机投影验收待做)
+
+- **来源**：BLOCK-87 L4 第二批遗留收尾批（用户裁决「先把这些遗留的一次性整完」）——L4 摸底「aiSettings 有 HTTP 对应端点」但前端投影桥从未接线：投影下 SimpleChat 模型选择器只有 DEFAULT 兜底预设（shim Proxy 调用 resolve undefined），DesktopSettingsPanel/useEndpointProfilesEditor 五处 `window.biof3Desktop.aiSettings.*` 直引经 shim 拿到 undefined，loadSettings 控制台 TypeError、模型渠道编辑器空转。
+- **交付面**：①projectionDataBridges 新增 `aiSettingsBridge`——读面 GET /api/ai/settings 解包 `{status,settings}` 信封成 IPC `ai-settings:get` 的裸 settings 对象（失败 `{}`），保存 POST 同端点映射回 `{ok:true}`/`{ok:false,error}`（逐字对齐 IPC 契约，沿用 L4-2 形状勘误家法）；②getBridge 投影切换条件扩 `'aiSettings'`，useAiSettings（模型选择器）零改动自动激活；③DesktopSettingsPanel/useEndpointProfilesEditor 五处直引改 getBridge（桌面走同一 IPC 面，行为不变）；④凭据读取/连通性测试/模型发现投影下诚实禁用（凭据明文绝不过投影 HTTP，消费方既有降级承接）。
+- **门禁**：projectionDataBridges.test.ts **14/14**（新增 aiSettings 契约 6 用例：信封解包/失败降级 `{}`/POST `{ok:true}`/失败映射/三操作诚实禁用/桥分发）+ useAiSettings 16/16 + desktopBridge/UsageResourcePanel 12/12 + tsc 0。core 零改动（`/api/ai/settings` 路由已存在且已挂载，会话门内）。
+- **边界**：实机投影验收待做（dev 栈 + 配对会话），暂 in_progress；桌面端零视觉变化。
+- G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-404: 智能体详情面板信息架构——终态默认收起操作/时间线，主展示任务详情+父会话+终态摘要 (2026-09-18 verified，用户提案确认+组件测试 4/4+CDP 实机)
 
 - **来源**：用户分析提案「智能体详细面板中 操作 和 实时工作流（工具调用时间线） 默认都收起来 主要展示 任务详情和 终态摘要（与父会话同源） 告诉用户这个智能体接到什么需求 做了啥事情」——主 Agent 确认方向并补充「按状态分态」后用户确认实施。

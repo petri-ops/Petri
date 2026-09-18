@@ -235,15 +235,16 @@ test('finalization recovery treats finish_reason length as usable-but-truncated,
 
 test('continuation guard caps repeated truncation to prevent infinite chains', () => {
   // 方案 B complete：截断自动续写必须有硬上限，避免模型无法收敛时无限循环。
+  // 计数契约（record-then-check，与 loop-orchestrator/chat.js 调用序一致）：
+  // recordTruncation 后 chains 达到 maxChains 即 capHit → 主动收尾，
+  // 即最多自动续写 maxChains-1 段。
   const guard = createContinuationGuard({ maxChains: 3, maxTokens: 40000 });
   assert.equal(guard.capHit(), false);
   guard.recordTruncation(10000);
   guard.recordTruncation(10000);
   assert.equal(guard.capHit(), false);
   guard.recordTruncation(10000);
-  assert.equal(guard.capHit(), false);
-  guard.recordTruncation(10000);
-  assert.equal(guard.capHit(), true, '4 chains should hit chain cap at 3');
+  assert.equal(guard.capHit(), true, '3rd truncated chain hits chain cap at 3');
 
   const tokenGuard = createContinuationGuard({ maxChains: 999, maxTokens: 40000 });
   tokenGuard.recordTruncation(20000);
@@ -253,16 +254,17 @@ test('continuation guard caps repeated truncation to prevent infinite chains', (
 
 test('continuation guard resets chains on natural stop but still accumulates tokens', () => {
   // 一次任务内的总 token 仍需计入，防止"每次只续写一点点"的缓慢 token 增长。
-  const guard = createContinuationGuard({ maxChains: 2, maxTokens: 50000 });
+  // recordStop 只复位 chains 不清 token；跨 stop 累计到 maxTokens 照样触顶收尾。
+  const guard = createContinuationGuard({ maxChains: 2, maxTokens: 40000 });
   guard.recordTruncation(10000);
   guard.recordStop();
   guard.recordTruncation(10000);
   guard.recordStop();
   guard.recordTruncation(10000);
   guard.recordStop();
-  assert.equal(guard.capHit(), false, 'chains reset on stop');
+  assert.equal(guard.capHit(), false, 'chains reset on stop; 30000 tokens below cap');
   guard.recordTruncation(10000);
-  assert.equal(guard.capHit(), true, 'chains re-arm and reach cap on next burst');
+  assert.equal(guard.capHit(), true, '40000 accumulated tokens hit token cap');
 });
 
 test('finalization recovery only retries transient Provider errors', () => {
