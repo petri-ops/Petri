@@ -148,15 +148,21 @@ async function screenshotPng(client, evidenceDir, filename) {
  * （{startedAt, finishedAt, assertions:[{name,pass,detail}], allPass}）。
  */
 // ── BLOCK-100 P3 — 测试实例原语 ─────────────────────────────────
-// 连接测试实例（CDP 9223）中带 ?test=1 标记的页面目标。绝不触碰 9222 用户
-// 主窗口——目标判别靠主进程注入的 URL 标记，双重防误连。
+// 连接测试实例（CDP 9223）。9223 为测试实例专属端口 = 第一层判别（绝不触碰
+// 9222 用户主窗口）；?test=1 URL 标记 = 第二层。SPA 路由导航会丢查询串
+// （2026-09-18 实机抓真：ui341 首问导航后 URL 变 /project/:id），故标记匹配
+// 失败时回退 9223 上任意页面目标并告警——端口专属保证回退仍不误连。
 async function connectTestTarget({ timeoutMs = 30_000 } = {}) {
   const targets = await pollTargets({ port: TEST_INSTANCE_PORT, timeoutMs });
-  const pages = targets.filter((t) => t.type === 'page' && String(t.url).includes('test=1'));
+  const pages = targets.filter((t) => t.type === 'page');
   if (!pages.length) {
     throw new Error('no_test_page_target_on_9223: ' + targets.map((t) => t.url).join(' | '));
   }
-  return connectTarget(pages[0]);
+  const marked = pages.find((t) => String(t.url).includes('test=1'));
+  if (!marked) {
+    log(`warn: 9223 页面目标均无 ?test=1 标记（SPA 导航丢失查询串），按端口专属回退: ${pages[0].url}`);
+  }
+  return connectTarget(marked || pages[0]);
 }
 
 /** 只读断言 flow 的人因干扰屏蔽：测试期间忽略真实输入事件（含鼠标/键盘/触摸）。

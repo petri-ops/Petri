@@ -7,10 +7,20 @@
 # 探针禁止导航用户窗口）。
 #
 # 前置：主 dev 栈在跑（后端 :3001 健康否则 fail-fast）。
-# 用法: bash scripts/start-test-instance.sh
+# 用法: bash scripts/start-test-instance.sh [--onscreen]
+#   --onscreen  窗口摆屏幕内（观察测试过程）；默认离屏（不挡视线）。
+#   窗口亦可随时拖动/经渲染层 window.moveTo 移动；勿最小化（渲染冻结会挂测试断言）。
 # 就绪: 退出 0 = 测试实例 CDP 9223 已出现 ?test=1 页面目标。
 set -u
 cd "$(dirname "$0")/.." || exit 2
+
+# ── 参数解析 ──
+for arg in "$@"; do
+  case "$arg" in
+    --onscreen) export BIOF3_TEST_ONSCREEN=1 ;;
+    *) echo "未知参数: $arg（支持 --onscreen）"; exit 2 ;;
+  esac
+done
 
 # 1) 前置断言：后端必须已在跑（测试实例零 fork，缺席即 fail-fast）
 port="${BIOF3_TEST_BACKEND_PORT:-3001}"

@@ -25,10 +25,12 @@ module.exports = {
     assert('test_instance_target_connected', true, '9223 ?test=1 target');
 
     const bounds = JSON.parse(await lib.evalJs(client,
-      `JSON.stringify({ x: window.screenX, y: window.screenY, vis: document.visibilityState })`));
-    assert('offscreen_visible_window',
-      bounds.vis === 'visible' && bounds.x < 0,
-      `x=${bounds.x} vis=${bounds.vis}（hidden/minimized 有渲染冻结反例，禁用）`);
+      `JSON.stringify({ x: window.screenX, y: window.screenY, vis: document.visibilityState, w: window.innerWidth })`));
+    // 2026-09-18 放宽：x 位置仅记录不断言——默认离屏摆放，但用户可 --onscreen
+    // 启动或随时拖回屏幕内（「能够看到测试的情况」），渲染可见性才是断言本体。
+    assert('test_window_rendering_visible',
+      bounds.vis === 'visible' && bounds.w >= 720,
+      `x=${bounds.x} vis=${bounds.vis} w=${bounds.w}（hidden/minimized 有渲染冻结反例，禁用）`);
 
     await lib.evalJs(client, `window.__clicks = 0; document.addEventListener('click', () => window.__clicks++, true); 'ok'`);
     await client.send('Input.setIgnoreInputEvents', { ignore: true });

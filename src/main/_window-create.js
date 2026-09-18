@@ -64,15 +64,22 @@ async function createWindow({
 
   // ── Window Creation ──────────────────────────────────────────
   // BLOCK-100 P1/D3 — 测试实例（BIOF3_TEST_INSTANCE=1，start-test-instance.sh
-  // 注入）：窗口离屏可见（主屏左缘外）——visibilityState 保持 visible，rAF 正常；
-  // hidden/minimized 有实测渲染冻结反例（restart-dev-stack.sh 注释留档），禁用。
+  // 注入）：默认窗口离屏可见（主屏左缘外）——visibilityState 保持 visible，rAF
+  // 正常；hidden/minimized 有实测渲染冻结反例（restart-dev-stack.sh 注释留档），
+  // 禁用。BIOF3_TEST_ONSCREEN=1（启动器 --onscreen）时摆屏幕内供人观察测试
+  // 过程（2026-09-18 用户需求「能够看到测试的情况」）；两种摆放渲染语义等价。
   const IS_TEST_INSTANCE = process.env.BIOF3_TEST_INSTANCE === "1";
   const testWindowBounds = {};
   if (IS_TEST_INSTANCE) {
-    const { screen } = require("electron");
-    const primary = screen.getPrimaryDisplay().bounds;
-    testWindowBounds.x = primary.x - 1600 - 100;
-    testWindowBounds.y = primary.y + 40;
+    if (process.env.BIOF3_TEST_ONSCREEN === "1") {
+      testWindowBounds.x = 180;
+      testWindowBounds.y = 60;
+    } else {
+      const { screen } = require("electron");
+      const primary = screen.getPrimaryDisplay().bounds;
+      testWindowBounds.x = primary.x - 1600 - 100;
+      testWindowBounds.y = primary.y + 40;
+    }
   }
   const mainWindow = new BrowserWindow({
     ...(IS_TEST_INSTANCE ? testWindowBounds : {}),
