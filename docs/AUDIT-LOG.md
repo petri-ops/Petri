@@ -36,6 +36,8 @@
 | 🟡延期 | 2026-08-10 | **i18n 资源抽离未做（任务 #91）**：全仓无 react-i18next/i18n 框架，用户可见字符串散落于组件（grep 命中多为 `Intl.`/locale 巧合，非 i18n 体系）。抽离需引入 i18n 框架、建立语言资源文件、改造所有文案调用点，属较大前端架构决策 | 阻塞于**产品/架构决策**：是否国际化、支持哪些语言、采用 react-i18next 还是自研轻量方案。决策前不强行抽离（避免半吊子框架增加维护成本）。用户裁决：标记 deferred，待产品明确国际化范围后再立项 |
 | 🟢建议 | 2026-08-15 | **T-AW-013 DIST-STALENESS：dist/mac-arm64/BioF3.app 内嵌 asar 来自 2026-08-14 15:32 build**，早于 P1.1 / P1.2 / P1.3 / P1.5 / P2 / A4 / UI-AGENTWB-007 全部 commit；`src/preload.js` 缺 `window.biof3.agentWorkbenchFlags` 桥接，`src/main.js` 缺 `--agent-workbench-flags=` CLI 解析。worker 用 `npx asar pack` + `npm run build:spa` 重 pack 完成三轴验证（原 asar 备份 `/tmp/app.asar.backup`，主 Agent 已还原出厂 dist）。建议 release-pipeline 加 dist staleness check：每次 `npm run build:mac` / `build:win` 前比较 `dist/*/Resources/app.asar` mtime 与 `src/` + `frontend/src/` 最新 commit 时间，若 mtime < 最新 commit mtime 则 fail-closed 提示重新 build。**G0 阶段定位：G1+ 发布流水线范畴，按当前阶段纪律不外推。** |
 
+| 🟡建议 | 2026-09-18 | **/api/ai/agent/tasks 端点 LIMIT-先于-subagent 过滤（UI-405 实机发现）**：`listRecentSubAgentTasks`（agent-task-store.js:578）SQL 先 `LIMIT 50` 取最近 50 条任意任务再在内存过滤 `kind==='subagent'`——primary 轮次密集时子智能体被挤出窗口，摘要卡图标带/内联结果卡数据源抖动（UI-405 实机连续 4 轮空列表定位）。修法=SQL 内 `params LIKE '%"kind":"subagent"%'` 或 kind 列化后过滤再 LIMIT | 不阻塞 UI-405（服务端投影轮询已按 conversationId 过滤绕开）；修端点归后续小批，需用户裁决启动 |
+
 > **本区段纪律（2026-09-13 清理确立）**：只保留**尚未处置**的条目：🔴 阻塞 / 🟢 建议 / 🟡 延期或待评估。
 > 已收口条目（✅）**一律移入「最近处理记录」**，不得在本区段堆积——本次清理将 23 条已收口项迁出，
 > 待处理项由 28 行降为 8 行（活跃项占比 100%）。新增 ✅ 项请直接追加到「最近处理记录」。

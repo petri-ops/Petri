@@ -3371,6 +3371,16 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **门禁**：mapRuntimeStatusPayload 契约 5/5（装/缺/混合/载荷不可达/字段缺失）+ home 横幅回归 4/4 + events/UsageResourcePanel 回归 + tsc 0。**实机探针**（dev 栈 + CDP）：桌面清首启 flag 重载 `.gewu-onboarding-overlay` 不再出现；导航投影环境 `data-projection=1` 下 `/api/runtime/status` 返回 `r=true/py=true`——ALL PASS。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-408: 子智能体终态结果内联卡——「结果即消息」呈现（借鉴 ZCode，2026-09-18 verified，组件 4/4 + CDP 实机 allPass）
+
+- **编号注记**：原登记 UI-405 与并行会话「投影 AI 设置桥」撞号，按 BLOCK-96 撞号先例重编号 **UI-408**（acceptance/ui-408/、scripts/ui408-* 同步改名）；登记以此为准。
+- **来源**：用户对比 ZCode 子智能体呈现后的提案「结果内联进父会话流」+ 主 Agent 分析确认（借鉴其结果内联/prompt 卡/时长，保留格物的长任务运营面板差异优势）。
+- **交付面**：①**内联结果卡**（SubAgentResultCard）：状态 chip + 已工作时长 + 需求全文 + 终态摘要预览/展开 + 「查看详情」派发 agentOpenInRail 跳右栏面板；②**数据源=服务端真相轮询**（/api/ai/agent/tasks?conversationId= 新增 summaryHead 批量投影；5s 轮询、终端收敛最近 2 张）——设计中途抓真：原方案依赖 child_finished 即时通知+内存快照，实机证明「父会话先结束、子任务后完成」与「页面刷新」两时序下全部丢失，改服务端投影后**刷新后卡片仍在**（决定性差异）；③渲染位=父会话流最后一条 assistant 消息尾部。
+- **门禁**：组件测试 4/4（状态/时长/需求/摘要/详情派发/降级/长摘要截断/failed-running）；copilot+面板批 376/376；tsc 0。
+- **实机**：`scripts/ui405-subagent-result-card-live.cjs` **allPass**——composer 真发 spawn_agent 派生真实子智能体，父会话流内出现完整结果卡（已完成 · 已工作 5 秒 · 需求 · 终态摘要全文 · 查看详情）；截图 `acceptance/ui-405/`（含刷新后收敛 2 张取证）。
+- **排查留痕**：前置 4 轮实机失败定位两层根因——①child_finished 仅写入父任务事件流、父订阅已关则丢失（旧通知机制固有，换服务端投影根治）；②/tasks 端点 LIMIT-先于-subagent 过滤致重流量下列表抖动（🟡 观察登记，修法=SQL 内过滤，另批处理）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-404: 智能体详情面板信息架构——终态默认收起操作/时间线，主展示任务详情+父会话+终态摘要 (2026-09-18 verified，用户提案确认+组件测试 4/4+CDP 实机)
 
 - **来源**：用户分析提案「智能体详细面板中 操作 和 实时工作流（工具调用时间线） 默认都收起来 主要展示 任务详情和 终态摘要（与父会话同源） 告诉用户这个智能体接到什么需求 做了啥事情」——主 Agent 确认方向并补充「按状态分态」后用户确认实施。

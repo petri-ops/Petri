@@ -1,0 +1,28 @@
+{
+  "name": "ui405-subagent-result-card",
+  "startedAt": "2026-09-18T02:18:02.826Z",
+  "finishedAt": "2026-09-18T02:18:12.652Z",
+  "assertions": [
+    {
+      "name": "V1_composer_typed",
+      "pass": true,
+      "detail": "typed"
+    },
+    {
+      "name": "V2_composer_sent",
+      "pass": true,
+      "detail": "sent"
+    },
+    {
+      "name": "V3_result_card_in_parent_stream",
+      "pass": true,
+      "detail": "已完成已工作 5 秒需求用一句话说明什么是火山图终态摘要（与父会话同源）火山图是把每个基因/特征以「差异倍数（log2 fold change，横轴）」对「统计显著性（−log10 p 或 padj，纵轴）」画成散点的图，符合阈值的点会落在两侧顶部，从而一眼区分出显著上调与显著下调的基因。查看详情"
+    },
+    {
+      "name": "V4_card_shows_status_and_summary",
+      "pass": true,
+      "detail": "已完成已工作 5 秒需求用一句话说明什么是火山图终态摘要（与父会话同源）火山图是把每个基因/特征以「差异倍数（log2 fold change，横轴）」对「统计显著性（−log10 p 或 padj，纵轴）」画成散点的图，符合阈值的点会落在两侧顶部，从而一眼区分出显著上调与显著下调的基因。查看详情"
+    }
+  ],
+  "allPass": true
+}

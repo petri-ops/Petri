@@ -1886,6 +1886,26 @@
       "commands": [],
       "classifiesScripts": true,
       "scriptRole": "product"
+    },
+    {
+      "id": "ui-404-408-agent-panel",
+      "note": "UI-404 智能体详情面板折叠分态+父会话标注 / UI-408 子智能体终态结果内联卡（服务端投影 summaryHead）。",
+      "patterns": [
+        "frontend/src/components/workspace-panels/AgentRunPanel.tsx",
+        "frontend/src/components/copilot/SubAgentResultCard.tsx",
+        "frontend/src/components/copilot/SubAgentResultCard.module.css",
+        "scripts/ui404-*",
+        "scripts/ui408-*",
+        "acceptance/ui-404/**",
+        "acceptance/ui-408/**"
+      ],
+      "tests": [
+        "frontend/src/components/workspace-panels/AgentRunPanel.test.tsx",
+        "frontend/src/components/copilot/SubAgentResultCard.test.tsx"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
     }
   ]
 }

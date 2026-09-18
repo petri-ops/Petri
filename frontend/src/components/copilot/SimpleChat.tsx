@@ -66,6 +66,8 @@ import {
   uploadAttachment,
 } from './SimpleChat/attachmentUpload';
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
+import { SubAgentResultCard, type SubAgentCardData } from './SubAgentResultCard';
+import { getPlatformApiPrefix } from '@/lib/authClient';
 // UI-268: 「后台进程」浮窗（持久输出独立小窗口）；工具活动记录改为内联手风琴
 import { ToolActivityDock } from './ToolActivityDock';
 import { MessageRail } from './MessageRail';
@@ -354,6 +356,10 @@ export function SimpleChat({
   // 新运行中子 agent → 派发 agentOpenInRail，右栏「智能体」tab 自动切过去。
   // 模块级 Set 保证每 task 只切一次（多 SimpleChat 实例/重挂载不重复）。
   const subTasksForAutoOpen = useSubAgentTasksForConversation(conversationId);
+  // UI-408 — 终态子智能体结果卡数据源：服务端真相轮询（/tasks?conversationId=，
+  // 含 summaryHead）。相比 child_finished 即时通知与内存快照，确定性覆盖
+  // 「父会话先结束、子任务后完成」「页面刷新」等全部时序。
+  const terminalSubTasks = useTerminalSubAgentResults(projectId, conversationId);
   useEffect(() => {
     for (const t of subTasksForAutoOpen) {
       if (t.status !== 'running') continue;
@@ -1109,13 +1115,10 @@ export function SimpleChat({
                         {m.modelFallbackNotice}
                       </div>
                     )}
-                    {m.role === 'assistant' && m.childFinishedNotices && m.childFinishedNotices.length > 0 && (
-                      <div className="sc-msg-child-finished" role="status">
-                        {m.childFinishedNotices.map((n) => (
-                          <span key={n.childTaskId} className="sc-msg-child-finished-item">
-                            <Icon name={n.status === 'completed' ? 'check' : n.status === 'failed' ? 'alert-circle' : 'x'} size={12} />
-                            {`子 agent ${n.status === 'completed' ? '已完成' : n.status === 'failed' ? '失败' : '已取消'}：${n.summaryHead.slice(0, 60)}`}
-                          </span>
+                    {m.role === 'assistant' && terminalSubTasks.length > 0 && i === displayMessages.length - 1 && (
+                      <div className="sc-msg-child-finished" role="status" data-testid="subagent-result-cards">
+                        {terminalSubTasks.map((t) => (
+                          <SubAgentResultCard key={t.taskId} data={t} />
                         ))}
                       </div>
                     )}
@@ -1701,3 +1704,42 @@ export function SimpleChat({
 // ImagePreviewModal (and ImagePreviewModalProps) moved to ./SimpleChat/ImagePreviewModal.tsx (BLOCK-9.2 PHASE 4).
 // The canonical component is imported at the top of this file and re-exported from
 // the header for any consumer reaching it via the SimpleChat path.
+
+
+/** UI-405 — 会话终态子智能体结果（服务端真相轮询 5s；失败静默保留上次数据）。 */
+function useTerminalSubAgentResults(projectId: string | null | undefined, conversationId: string | null | undefined): SubAgentCardData[] {
+  const [rows, setRows] = useState<SubAgentCardData[]>([]);
+  useEffect(() => {
+    if (!conversationId) return;
+    let alive = true;
+    const load = () => {
+      fetch(`${getPlatformApiPrefix()}/ai/agent/tasks?limit=50&conversationId=${encodeURIComponent(conversationId)}`, {
+        headers: { Authorization: 'Bearer desktop-local' },
+      })
+        .then((resp) => resp.json())
+        .then((body) => {
+          if (!alive || !body || body.ok !== true) return;
+          const terminal = (body.tasks || [])
+            .filter((t: { status?: string }) => t.status && t.status !== 'running')
+            .slice(-2)
+            .map((t: { taskId: string; taskText?: string; status: string; createdAt?: string; finishedAt?: string; summaryHead?: string | null }) => ({
+              taskId: String(t.taskId || ''),
+              taskText: String(t.taskText || ''),
+              status: String(t.status || ''),
+              createdAt: t.createdAt || null,
+              finishedAt: t.finishedAt || null,
+              summaryHead: t.summaryHead || null,
+            }));
+          setRows(terminal);
+        })
+        .catch(() => {});
+    };
+    load();
+    const timer = window.setInterval(load, 5000);
+    return () => {
+      alive = false;
+      window.clearInterval(timer);
+    };
+  }, [projectId, conversationId]);
+  return rows;
+}

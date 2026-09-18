@@ -89,6 +89,27 @@ module.exports = {
           for (const r of rows) convProject.set(r.id, r.project_id || null);
         }
         for (const t of tasks) t.projectId = t.conversationId ? (convProject.get(t.conversationId) || null) : null;
+        // UI-408 — 终态摘要头（内联结果卡数据源）：批量取每个子任务最近一条 assistant 消息
+        const taskIds = tasks.map((t) => t.taskId);
+        if (taskIds.length) {
+          const placeholders = taskIds.map(() => '?').join(',');
+          const summaryRows = await db
+            .prepare(
+              `SELECT m.task_id AS task_id, m.content AS content
+               FROM copilot_messages m
+               WHERE m.task_id IN (${placeholders}) AND m.role = 'assistant'
+               ORDER BY m.ts DESC`
+            )
+            .all(...taskIds);
+          const summaryMap = new Map();
+          for (const row of summaryRows) {
+            if (!summaryMap.has(row.task_id)) summaryMap.set(row.task_id, String(row.content || ''));
+          }
+          for (const t of tasks) {
+            const content = summaryMap.get(t.taskId);
+            t.summaryHead = content ? content.slice(0, 200) : null;
+          }
+        }
         return res.json({ ok: true, tasks });
       } catch (e) {
         return res.status(500).json({ ok: false, error: 'list_failed', message: e && e.message ? e.message : String(e) });
