@@ -1,6 +1,6 @@
 # BLOCK-85 格物联邦（Gewu Federation）P0 设计评审
 
-> 状态：`P0-REVIEW（⏳ 待用户逐项裁决 D1–D8 后进 P1）`
+> 状态：`P1-P3 已交付 + P4 closeout 完成（2026-09-18；四门绿〔hygiene/docs/ui-audit/test:changed 树净〕+ 联邦集成探针 3/3〔federation 1/1 + jobs 2/2，双实例自举〕。**唯余双真机端到端验收待执行**：Windows ↔ Mac 真实互派任务需 Mac 在网+用户操作配对——验收包已备（acceptance/block-85/ 配对码实机证据 6/6 已落）；完成后整包 completed 并解锁 BLOCK-88 P1（D7 门槛）`
 > 日期：2026-09-13
 > 用户裁决史：①「执行级 双向」（初始）→ ②纠正「我的目的是 gewu 在两个软件之间的通信 不是要系统级别控制桌面」→ ③「都要」（分析作业级 + Agent 会话级）。
 > **SSH 节点方案作废**：`scripts/setup-windows-ssh-node.ps1` 与系统级 sshd 配置不再是本包内容（脚本保留仓库但标记非本包交付）。
