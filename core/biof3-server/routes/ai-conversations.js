@@ -56,12 +56,16 @@ module.exports = function mountConversations(app) {
       await ensureProjectColumn();
       const status = (req.query.status === 'archived') ? 'archived' : (req.query.status === 'all' ? null : 'active');
       const projectId = _projectIdFromReq(req);
-      const cols = 'id, title, status, last_page, project_id, message_count, created_at, updated_at, last_topic_shift_at, last_topic_shift_reason, parent_id';
+      // BLOCK-88 P2（D3）— 默认视图隔离：联邦委托会话（origin='federation-delegation'）
+      // 不混入宿主默认会话列表；?includeFederated=1 显式查看（独立可见可清理）。
+      const includeFederated = req.query.includeFederated === '1';
+      const cols = 'id, title, status, last_page, project_id, message_count, created_at, updated_at, last_topic_shift_at, last_topic_shift_reason, parent_id, origin';
       const where = ['user_id=?'];
       const values = [userId];
       if (status) { where.push('status=?'); values.push(status); }
       if (projectId) { where.push('project_id=?'); values.push(projectId); }
       else where.push("COALESCE(project_id, '')=''");
+      if (!includeFederated) where.push("(origin IS NULL OR origin != 'federation-delegation')");
       const rows = await adb.prepare(`SELECT ${cols} FROM copilot_conversations WHERE ${where.join(' AND ')} ORDER BY updated_at DESC LIMIT 100`).all(...values);
       res.json({status:'ok', conversations: rows});
     } catch (e) { res.status(500).json({status:'error', error: e.message}); }

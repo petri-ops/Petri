@@ -67,6 +67,9 @@ try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN last_topic_shift
 try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN last_topic_shift_reason TEXT'); } catch {}
 try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN parent_id TEXT'); } catch {}
 try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN branch_color TEXT'); } catch {}
+// BLOCK-88 P2（D3）— 会话来源标记：'federation-delegation'=访客工程师委托专用会话
+//（默认视图隔离的判定列；additive 零迁移，宿主本地会话恒 NULL）。
+try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN origin TEXT'); } catch {}
 
 // BLOCK-95 B2 — 会话级 rolling compaction 存储（视图层投影；copilot_messages 原文永不动）。
 // covers_rowid：已折叠为摘要的最大 copilot_messages.rowid；其余消息原样参与 LLM 视图。
@@ -101,16 +104,19 @@ function _newConvId() { return 'conv_' + uuidv4().slice(0, 12); }
 function _newMsgId() { return 'msg_' + uuidv4().slice(0, 12); }
 
 function getOrCreateActiveConversation(userId, hint) {
+  // BLOCK-88 P2（D3）— 复用路径恒排除联邦委托会话（origin 标记）：否则宿主的
+  // 下一条本地消息会落进「来自工程师 X 的委托」会话（隔离的反向污染）。
+  const notFed = "(origin IS NULL OR origin != 'federation-delegation')";
   const projectId = hint && hint.projectId ? String(hint.projectId) : null;
   if (hint && hint.conversationId) {
     const row = projectId
-      ? sqlite.prepare("SELECT * FROM copilot_conversations WHERE id=? AND user_id=? AND status='active' AND project_id=?").get(hint.conversationId, userId, projectId)
-      : sqlite.prepare("SELECT * FROM copilot_conversations WHERE id=? AND user_id=? AND status='active' AND COALESCE(project_id, '')=''").get(hint.conversationId, userId);
+      ? sqlite.prepare("SELECT * FROM copilot_conversations WHERE id=? AND user_id=? AND status='active' AND project_id=? AND " + notFed).get(hint.conversationId, userId, projectId)
+      : sqlite.prepare("SELECT * FROM copilot_conversations WHERE id=? AND user_id=? AND status='active' AND COALESCE(project_id, '')='' AND " + notFed).get(hint.conversationId, userId);
     if (row) return row;
   }
   const recent = projectId
-    ? sqlite.prepare("SELECT * FROM copilot_conversations WHERE user_id=? AND status='active' AND project_id=? ORDER BY updated_at DESC LIMIT 1").get(userId, projectId)
-    : sqlite.prepare("SELECT * FROM copilot_conversations WHERE user_id=? AND status='active' AND COALESCE(project_id, '')='' ORDER BY updated_at DESC LIMIT 1").get(userId);
+    ? sqlite.prepare("SELECT * FROM copilot_conversations WHERE user_id=? AND status='active' AND project_id=? AND " + notFed + " ORDER BY updated_at DESC LIMIT 1").get(userId, projectId)
+    : sqlite.prepare("SELECT * FROM copilot_conversations WHERE user_id=? AND status='active' AND COALESCE(project_id, '')='' AND " + notFed + " ORDER BY updated_at DESC LIMIT 1").get(userId);
   if (recent) return recent;
 
   const id = _newConvId();
@@ -118,6 +124,22 @@ function getOrCreateActiveConversation(userId, hint) {
   const title = (hint && hint.titleHint) || '新对话';
   sqlite.prepare('INSERT INTO copilot_conversations(id, user_id, title, status, last_page, project_id, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?)')
     .run(id, userId, title, 'active', (hint && hint.page) || null, projectId, now, now);
+  return sqlite.prepare('SELECT * FROM copilot_conversations WHERE id=?').get(id);
+}
+
+/**
+ * BLOCK-88 P2（D3）— 联邦委托专用会话：访客工程师的每次委托开全新会话，
+ * 永不复用宿主活跃会话（85 双真机验收登记缺口「委托未开独立会话」的修复面）。
+ * origin='federation-delegation' 供会话列表默认视图隔离（ai-conversations 路由）。
+ */
+function createFederatedDelegationConversation(userId, identity, titleHint) {
+  const id = _newConvId();
+  const now = new Date().toISOString();
+  const name = (identity && identity.displayName) || '协作工程师';
+  const excerpt = String(titleHint || '').replace(/\s+/g, ' ').trim().slice(0, 30);
+  const title = `来自${name}的委托${excerpt ? '：' + excerpt : ''}`.slice(0, 100);
+  sqlite.prepare('INSERT INTO copilot_conversations(id, user_id, title, status, origin, created_at, updated_at) VALUES (?,?,?,?,?,?,?)')
+    .run(id, userId, title, 'active', 'federation-delegation', now, now);
   return sqlite.prepare('SELECT * FROM copilot_conversations WHERE id=?').get(id);
 }
 
@@ -138,8 +160,11 @@ function appendMessageToConversation(conversationId, role, content, meta, taskId
 async function _maybeAutoTitleConversation(conversationId, userId) {
   if (!conversationId || !userId) return;
   try {
-    const conv = sqlite.prepare('SELECT id, title, message_count FROM copilot_conversations WHERE id=? AND user_id=?').get(conversationId, userId);
+    const conv = sqlite.prepare('SELECT id, title, message_count, origin FROM copilot_conversations WHERE id=? AND user_id=?').get(conversationId, userId);
     if (!conv) return;
+    // BLOCK-88 P2（D3）— 联邦委托会话标题即归属展示面（「来自工程师 X 的委托」），
+    // 自动改名会把它洗成普通模型标题（实机 P3b 抓真）→ 直接跳过。
+    if (conv.origin === 'federation-delegation') return;
     const isDefaultTitle = !conv.title
       || conv.title === '新对话'
       || /^\[[^\]]+\]/.test(conv.title)
@@ -248,6 +273,7 @@ function getAssistantMessageByTaskId(taskId) {
 
 module.exports = {
   getOrCreateActiveConversation,
+  createFederatedDelegationConversation,
   appendMessageToConversation,
   getAssistantMessageByTaskId,
   getConversationTitle,

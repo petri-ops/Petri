@@ -141,6 +141,8 @@ export interface AgentTaskOverviewItem extends AgentTaskMeta {
   error: string | null;
   /** BLOCK-65 修正：会话归属项目（俯瞰面板按项目隔离） */
   projectId: string | null;
+  /** BLOCK-88 P2（D3）：联邦委托任务访客工程师署名（「来自工程师 X」标记） */
+  federatedFrom?: string | null;
 }
 
 /** GET /ai/agent/tasks — 用户最近子 agent（跨会话，俯瞰面板数据源） */

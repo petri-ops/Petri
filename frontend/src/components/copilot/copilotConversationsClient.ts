@@ -31,6 +31,8 @@ export interface ConversationSummary {
   parent_id?: string | null;
   /** Branch support: visual color identifier for the branch line */
   branch_color?: string | null;
+  /** BLOCK-88 P2（D3）：会话来源标记；'federation-delegation'=访客工程师委托会话 */
+  origin?: string | null;
 }
 
 export interface ConversationMessage {
@@ -43,11 +45,14 @@ export interface ConversationMessage {
 
 export async function listConversations(
   status: ConversationStatus | 'all' = 'active',
-  projectId?: string
+  projectId?: string,
+  opts?: { includeFederated?: boolean }
 ): Promise<ConversationSummary[]> {
   try {
     let url = getApiPrefix() + '/ai/conversations?status=' + status;
     if (projectId) url += '&project_id=' + encodeURIComponent(projectId);
+    // BLOCK-88 P2（D3）：显式查看联邦委托会话（服务端默认视图隔离）
+    if (opts && opts.includeFederated) url += '&includeFederated=1';
     const resp = await fetch(url, {
       headers: getAuthHeader(),
     });

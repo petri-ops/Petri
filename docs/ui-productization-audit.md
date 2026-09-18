@@ -3900,3 +3900,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：`scripts/block88-p1-dual-identity.cjs` **15/15 allPass**（loopback 双节点：B=dev 栈真实进程，A=真实 federation-admin 独立 dataDir；REST 四层 + CDP 9223 测试实例 UI 走查，探针零触碰 9222 主窗口）→ `acceptance/block-88/p1-identity.json` + `p1-identity-ui.png`；契约测试 `test/block88-engineer-identity.test.mjs` 5/5；block70/federation 回归 12/12；tsc 0；theme-token-contract 4/4。
 - **同批顺债**：`test/impact-map.json` 补 ui417-side-chat-evidence（4da4bb4a 漏登记致 test-affected 存量 unknown，对标 ui341-evidence 先例）；`scripts/start-test-instance.sh` 双端同形化（原纯 Windows 实现 macOS 静默空转，症状指纹=脚本 TIMEOUT 但 err 日志不存在；darwin 分支=lsof 定点杀+nohup 直启，Windows 段原样保留）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-419: 联邦委托会话查看面 + 俯瞰联邦任务角标（BLOCK-88 P2 归属隔离 UI 面）(2026-09-19 verified，dev Electron 边界内 CDP 测试实例 13/13)
+
+- **来源**：BLOCK-88 P2（D3 任务归属隔离；用户裁决「开P2」）。
+- **改动**：①左栏项目树新增 globe 开关（`fed-conv-toggle`）→「联邦委托会话」查看节（`fed-conv-list`）：全局拉取后按 `origin='federation-delegation'` 过滤（委托会话无项目绑定=P3 待修缺口，故不按 project_id 过滤），行带「委」角标（fedConvBadge，主题 token）+原样标题「来自工程师 X 的委托：…」；默认视图由服务端隔离（ai-conversations 路由默认排除 origin 标记），开关即显式查看。②俯瞰智能体 chip：联邦委托派生任务右上 accent 角标（workspacePinnedSummaryAgentChipFed::after）+悬停/aria「来自工程师 X」。③spawner 继承：联邦委托派生的 subagent 继承 `params.federated`（agentTaskApi `federatedFrom` 字段数据源）。
+- **配套服务端**（同提交）：chat.js task 模式访客身份检测（req.mobileSession.identity）→ 委托独立会话（createFederatedDelegationConversation，origin 列 additive 零迁移；消化 85 验收登记「委托未开独立会话」缺口）+ getOrCreateActiveConversation 复用路径恒排除委托会话（反向污染防护）+ 自动标题守卫（委托会话标题即归属展示面，实机抓真：auto-title 曾把它洗成模型标题）+ params.federated 归属 + meta/tasks 列表 federatedFrom 透出。**实现注记**：tasks.user_id 维持宿主权限面语义 'local-user'（subagent 派生所有权检查/并发桶/历史拼装依赖），归属走 params+origin 双面，D3 意图完整达成。
+- **证据**：契约 `test/block88-task-attribution.test.mjs` 4/4（origin 标记+标题/双向隔离防护/默认视图排除+includeFederated 可见/federatedFrom 映射）；实机 `scripts/block88-p2-delegate-attribution.cjs` **13/13 allPass**（真实 delegate_to_gewu_node 工具跨节点委托真实跑完〔模型回执 done〕→ meta 归属/标题/默认视图排除/includeFederated 可见/宿主活跃会话零污染/CDP 左栏联邦面可见）→ `acceptance/block-88/p2-attribution.json+png`；tsc 0；theme 4/4。
+- **存量红归属（非本包引入，基线对照证实）**：block67-node-agent-fs 4 红（macOS bash verb 面，stash 基线同红）+ node-agent sys_resource 1 红（用例自注 Linux/WSL 语义面）+ P6 源绑定 2 红（已 🟡 在册）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

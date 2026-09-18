@@ -438,14 +438,16 @@ export function WorkspaceSummaryCard({
                 const chip = (task: AgentTaskOverviewItem) => {
                   // BLOCK-93 P2 — 显式 spawn role 第一优先，文本推断兜底
                   const category = resolveAgentCategory(task.role, task.taskText);
+                  // BLOCK-88 P2（D3）— 联邦委托任务：可见角标 + 悬停「来自工程师 X」
+                  const fedTag = task.federatedFrom ? ` · 来自${task.federatedFrom}` : '';
                   return (
                     <button
                       key={task.taskId}
                       type="button"
-                      className={styles.workspacePinnedSummaryAgentChip}
+                      className={`${styles.workspacePinnedSummaryAgentChip} ${task.federatedFrom ? styles.workspacePinnedSummaryAgentChipFed : ''}`}
                       data-category={category.key}
-                      title={`${headText(task.taskText, 48)} · ${category.label} · ${agentTaskStatusLabel(task.status)}`}
-                      aria-label={`智能体 ${headText(task.taskText, 36)}（${agentTaskStatusLabel(task.status)}）`}
+                      title={`${headText(task.taskText, 48)} · ${category.label} · ${agentTaskStatusLabel(task.status)}${fedTag}`}
+                      aria-label={`智能体 ${headText(task.taskText, 36)}（${agentTaskStatusLabel(task.status)}${fedTag}）`}
                       onClick={() => openAgentWindow(task)}
                     >
                       <span className={styles.workspacePinnedSummaryAgentEmoji} aria-hidden="true">{category.emoji}</span>

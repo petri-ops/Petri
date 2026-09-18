@@ -6,7 +6,7 @@ import { MobileSyncPanel } from '@/components/desktop/DesktopSettingsPanel/secti
 import { FederationPanel } from '@/components/desktop/DesktopSettingsPanel/sections/Federation';
 import type { Project } from '@/lib/project-types';
 import { SshCreateInlinePanel } from './LeftSshCreatePanel';
-import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
+import { listConversations, type ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { useConversationRun } from '@/components/copilot/conversationRunStore';
 import { formatDate, formatRelativeShort } from '@/lib/format';
@@ -442,8 +442,25 @@ function ProjectNode({
 }): React.ReactElement {
   const [editingProject, setEditingProject] = React.useState(false);
   const [projectName, setProjectName] = React.useState(p.name);
+  // BLOCK-88 P2（D3）— 联邦委托会话独立可见：默认视图已由服务端隔离，
+  // 此开关显式拉取 origin='federation-delegation' 会话并列出（可清理=既有归档/删除）。
+  const [showFedConvs, setShowFedConvs] = React.useState(false);
+  const [fedConvs, setFedConvs] = React.useState<ConversationSummary[]>([]);
 
   React.useEffect(() => setProjectName(p.name), [p.name]);
+
+  React.useEffect(() => {
+    if (!showFedConvs || !isExpanded) return;
+    let alive = true;
+    // 联邦委托会话无项目绑定（delegation 项目绑定=BLOCK-88 P3 待修缺口），
+    // 全局拉取后按 origin 过滤，不按 project_id 过滤。
+    listConversations('all', undefined, { includeFederated: true })
+      .then((all) => {
+        if (alive) setFedConvs(all.filter((c) => c.origin === 'federation-delegation'));
+      })
+      .catch(() => { if (alive) setFedConvs([]); });
+    return () => { alive = false; };
+  }, [showFedConvs, isExpanded, p.id]);
 
   const finishProjectRename = async () => {
     const name = projectName.trim();
@@ -531,6 +548,18 @@ function ProjectNode({
           className={styles.projectTreeAddBtn}
           onClick={(event) => {
             event.stopPropagation();
+            setShowFedConvs((v) => !v);
+          }}
+          title="联邦委托会话（访客工程师）"
+          aria-pressed={showFedConvs}
+          data-testid="fed-conv-toggle"
+        >
+          <Icon name="globe" size={12} />
+        </button>
+        <button
+          className={styles.projectTreeAddBtn}
+          onClick={(event) => {
+            event.stopPropagation();
             void ctx.archiveProject(p.id);
           }}
           title="移入回收站"
@@ -543,6 +572,25 @@ function ProjectNode({
           {convs.length === 0 && <li className={styles.convEmpty}>暂无对话</li>}
           {convs.map((c) => (
             <ConversationItem key={c.id} conversation={c} projectId={p.id} ctx={ctx} isCurrent={isCurrent} />
+          ))}
+        </ul>
+      )}
+      {isExpanded && showFedConvs && (
+        <ul className={styles.convList} data-testid="fed-conv-list">
+          <li className={styles.convEmpty}>联邦委托会话（{fedConvs.length}）</li>
+          {fedConvs.map((c) => (
+            <li
+              key={c.id}
+              className={`${styles.convItem} ${isCurrent && c.id === ctx.activeConvId ? styles.convItemActive : ''}`}
+              onClick={() => {
+                if (!isCurrent) ctx.switchToProject(p.id);
+                ctx.handleSwitchConversation(c.id);
+              }}
+              title={c.title}
+            >
+              <span className={styles.fedConvBadge} aria-hidden="true">委</span>
+              <span className={styles.convItemTitle}>{c.title}</span>
+            </li>
           ))}
         </ul>
       )}

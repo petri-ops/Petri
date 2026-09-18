@@ -1991,13 +1991,23 @@
         "core/biof3-server/mobile-gateway/pairing.js",
         "core/biof3-server/mobile-gateway/index.js",
         "core/biof3-server/routes/federation-admin.js",
+        "core/biof3-server/helpers/conversations.js",
+        "core/biof3-server/routes/ai-conversations.js",
+        "core/biof3-server/routes/ai-agent/task-actions.js",
+        "core/biof3-server/routes/ai-agent/chat.js",
+        "core/biof3-server/agent-tools/spawn-agent-tools.js",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/Federation.tsx",
+        "frontend/src/components/copilot/copilotConversationsClient.ts",
+        "frontend/src/components/copilot/copilotClient/agentTaskApi.ts",
+        "frontend/src/components/workspace-panels/LeftPanel.tsx",
+        "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
         "test/block88-*.test.mjs",
         "scripts/block88-*",
         "acceptance/block-88/**"
       ],
       "tests": [
-        "test/block88-engineer-identity.test.mjs"
+        "test/block88-engineer-identity.test.mjs",
+        "test/block88-task-attribution.test.mjs"
       ],
       "frontendRelated": true,
       "classifiesScripts": true,

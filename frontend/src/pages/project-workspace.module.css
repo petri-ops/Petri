@@ -2231,6 +2231,22 @@ button.workspacePinnedSummaryMetricCard:hover {
   background: rgba(128, 128, 128, 0.12);
 }
 
+/* BLOCK-88 P2（D3）— 联邦委托任务角标（chip 右上 accent 圆点；悬停见「来自 X」） */
+.workspacePinnedSummaryAgentChipFed {
+  position: relative;
+}
+
+.workspacePinnedSummaryAgentChipFed::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--gewu-accent, #0d9488);
+}
+
 /* 运行组与历史组分隔线（位置即状态：线前=运行中，线后=已结束） */
 .workspacePinnedSummaryAgentDivider {
   width: 1px;
@@ -7479,4 +7495,19 @@ body:global(.gewu-resizing-columns) * {
   background: #ffffff;
   border-radius: 4px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* BLOCK-88 P2（D3）— 联邦委托会话标记（左栏「联邦委托」查看面） */
+.fedConvBadge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  font-size: 10px;
+  color: var(--gewu-accent, #0d9488);
+  border: 1px solid var(--gewu-border, #e4e4e7);
+  background: var(--gewu-bg-subtle, #f4f4f5);
 }

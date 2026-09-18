@@ -147,6 +147,13 @@ module.exports = {
           return res.status(401).json({ status: 'error', error: '未登录' });
         }
 
+        // BLOCK-88 P2（D3）— 访客工程师检测：经 mobile-gateway 会话门且该会话带
+        // P1 配对落档的工程师声明身份（req.mobileSession 仅网关挂载面设置，宿主
+        // 本地请求恒 undefined → 行为零变化）。tasks.user_id 维持 'local-user'
+        // 权限面语义（subagent 派生所有权检查/并发桶/历史拼装依赖它），归属走
+        // params.federated + conversations.origin 双面标记（启动登记实现注记）。
+        const fedIdentity = (req.mobileSession && req.mobileSession.identity) || null;
+
         const wantKind = req.body && req.body.kind === 'subagent' ? 'subagent' : 'primary';
         let parentTaskId = null;
         let parentLoopRunId = null;
@@ -189,16 +196,22 @@ module.exports = {
 
         let _activeConv = null;
         try {
-          const hint = {
-            conversationId: explicitConvId,
-            page: context && context.page,
-            projectId: context && context.projectId,
-            titleHint:
-              messages[0] && messages[0].content
-                ? String(messages[0].content).slice(0, 40)
-                : '新对话',
-          };
-          _activeConv = getOrCreateActiveConversation(userId, hint);
+          if (fedIdentity && !explicitConvId && wantKind === 'primary') {
+            // BLOCK-88 P2（D3）— 委托独立会话：访客委托永不复用宿主活跃会话
+            //（85 双真机验收登记缺口「委托未开独立会话」的修复面）。
+            _activeConv = convSync.createFederatedDelegationConversation(userId, fedIdentity, messages[0] && messages[0].content);
+          } else {
+            const hint = {
+              conversationId: explicitConvId,
+              page: context && context.page,
+              projectId: context && context.projectId,
+              titleHint:
+                messages[0] && messages[0].content
+                  ? String(messages[0].content).slice(0, 40)
+                  : '新对话',
+            };
+            _activeConv = getOrCreateActiveConversation(userId, hint);
+          }
         } catch {}
 
         try {
@@ -285,6 +298,8 @@ module.exports = {
               modelName,
               kind: wantKind,
               parentTaskId: parentTaskId || null,
+              // BLOCK-88 P2（D3）— 访客归属标记（俯瞰面板「来自工程师 X」数据源）
+              ...(fedIdentity ? { federated: { displayName: fedIdentity.displayName || null, device: fedIdentity.device || null, sessionId: req.mobileSession.id } } : {}),
               // BLOCK-49: 派生工具精确继承模型所需（spawn-agent-tools 合成 preset 用）
               profileId: selectedPreset && selectedPreset.id,
               baseUrl: baseUrl || undefined,

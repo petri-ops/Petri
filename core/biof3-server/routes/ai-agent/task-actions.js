@@ -77,6 +77,8 @@ module.exports = {
           conversationId: (t.params && t.params.conversationId) || null,
           parentTaskId: (t.params && t.params.parentTaskId) || null,
           spawnSource: (t.params && t.params.spawnSource) || null,
+          // BLOCK-88 P2（D3）— 访客工程师署名（联邦委托任务「来自工程师 X」数据源）
+          federatedFrom: (t.params && t.params.federated && t.params.federated.displayName) || null,
           taskText: String((t.params && t.params.messages && t.params.messages[0] && t.params.messages[0].content) || '').slice(0, 200),
           ...(t.params && t.params.role ? { role: t.params.role } : {}),
         }));
@@ -132,6 +134,8 @@ module.exports = {
           taskText: String((task.params && task.params.messages && task.params.messages[0] && task.params.messages[0].content) || '').slice(0, 200),
           ...(task.params && task.params.role ? { role: task.params.role } : {}),
           conversationId: (task.params && task.params.conversationId) || null,
+          // BLOCK-88 P2（D3）— 访客署名透出（委托任务「来自工程师 X」断言面）
+          ...(task.params && task.params.federated ? { federatedFrom: task.params.federated.displayName } : {}),
           conversationTitle: conversationHelper.getConversationTitle(
             (task.params && task.params.conversationId) || null
           ),

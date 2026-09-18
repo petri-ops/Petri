@@ -212,6 +212,9 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
         parentTaskId,
         spawnSource,
         ...(role ? { role } : {}),
+        // BLOCK-88 P2（D3）— 联邦委托派生的 subagent 继承访客归属
+        //（俯瞰面板 federatedFrom 角标数据源；宿主本地派生恒 undefined）。
+        ...(parentParams && parentParams.federated ? { federated: parentParams.federated } : {}),
       },
     }).taskId;
   } catch (e) {
