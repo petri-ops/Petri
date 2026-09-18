@@ -2,7 +2,7 @@
 
 计划编号：`BLOCK-99-KNOWLEDGE-MULTISPACE-CONSOLE`
 
-状态：`completed（2026-09-18 整包收口；P1→P6 全部落地：契约 48/50〔2 红=F2 PDF 动前存量基线〕+ registry 10/10 + 前端 hook 6/6/面板 11/11 + tsc 0 + theme 4/4 + dev-verify flow block99-knowledge-multispace 22/22 allPass；证据 acceptance/block-99/；UI-414/415 verified；工具总数 59→71 计数断言同步）`
+状态：`completed（2026-09-18 整包收口；P1→P6 全部落地：契约 48/50〔2 红=F2 PDF 动前存量基线〕+ registry 10/10 + 前端 hook 6/6/面板 11/11 + tsc 0 + theme 4/4 + dev-verify flow block99-knowledge-multispace 22/22 allPass；证据 acceptance/block-99/；UI-414/415 verified；工具总数 59→71 计数断言同步。D8 例外一处按先例登记归 G0-RS〔P6 重采被领域包封存阻断，详见 §8〕）`
 
 用户裁决原话（2026-09-18，继「知识空间是否可分组归类加标签、按任务选背景」提问后的立项裁决）：
 「是需要做的 并且是 完整多空间版」「知识空间的 面板中需要加入会话聊天的页面来单独处理控制知识空间内的各种内容 无论是布局还是分类 是否可以呢？」
@@ -129,3 +129,10 @@
 - UI-### 台账行与 `acceptance/block-99/` 实机证据一一对应，impact-map 同步登记；
 - 依赖裁决逐项留痕（预计 0 新依赖，如有须原话）；`npm run docs:check` 与 `npm run ui:audit:check` 收口必绿；
 - 「G0 开发期常态 · 不外推 packaged/Provider/GA」收口恰一次。
+
+## 8. P6 收口实录（2026-09-18）
+
+- 门禁实况：docs:check PASS（255）+ ui:audit:check PASS（373 编号）+ hygiene PASS；契约 48/50（2 红=F2 PDF 动前存量基线，Windows 本机，归属 BLOCK-94 时代）+ registry 10/10 + hook 6/6 + 面板回归 11/11 + tsc 0 + theme 4/4 + 实机 flow 22/22 allPass。
+- **D8 例外（G0-RS P6 源绑定族，按 BLOCK-92/95 先例登记归属）**：本包合法变更触碰 `core/biof3-server/agent-runner.js`、`routes/ai-agent/chat.js`、`test/impact-map.json` 等 P6 绑定文件 → 存量 `acceptance/g0-result-studio/` 证据 `p6_stored_current_source_hash_mismatch`。重采实际尝试两轮：①修复真断链一块（BLOCK-92 Wave C 迁移遗留：`tools-executor/job-provenance.js` 函数内 `'../db'/'../plugin-loader'` 未跟目录深度，`node --check` 不抓、主服务常规路径不踩，P6 真实作业终结路径踩中——已修）；②重采仍失败于 `p6_restart_baseline_job_failed`，经主栈复现取证=**`Unknown tool: volcano-plot`**——BLOCK-86 封存领域包后本 checkout 无 volcano 插件注册，G0-RS P6 重采需装包或将基线工具迁移 deseq2，属 G0-RS 范围（09-13 后该证据即不可在本机重采，与多笔 roadmap「D8 例外族归 G0-RS」登记连续一致）。
+- test:changed 聚合器另修一处存量分类冲突（`scripts/ui404-agent-panel-collapse-live.cjs` 与并行会话 ui-404-408 专项规则双重命中，e01edc4c 引入——精确条目自 script-block-live-drivers 移除由专项规则接管）。
+- 定向直跑对账（BLOCK-89/91 先例）：knowledge 契约 + agent-tool-registry + 前端 hook/面板/切换器 + tsc + theme + block99-knowledge-multispace flow 全绿如上；本包产品面零未验证范围。
