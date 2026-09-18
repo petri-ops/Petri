@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-18（**Mac 夜间会话总账：看门狗自动化上线 + BLOCK-94 知识空间专业化整包收口 completed（P0–P6 一次会话）**；队列余 BLOCK-85（Mac 在位已解锁）→ BLOCK-88（需立项评审））。
+最后更新：2026-09-18（**Windows 日间会话总账：遗留清偿 + BLOCK-100 测试实例基建整包 + BLOCK-101 立项 + 测试预览窗五轮迭代（UI-405..413 全 verified）**：①远程两次同步+skill 核查；②遗留一次性清偿（continuation guard 修测试清偿 25/25；result 投影接线/连接徽标销号）；③UI-405 投影 AI 设置桥 verified（aiSettingsBridge 信封对齐 IPC+直引改 getBridge）；④UI-406 引导页退役+投影 runtime 假横幅修复 verified（DesktopOnboarding 全删含死代码；BackendStatusProvider DEV 分支改消费 /api/runtime/status+诚实映射）；⑤UI-407 空态示例卡通用化 verified（领域中立三卡+领域卡动态追加）；⑥**BLOCK-100-CDP-TEST-INSTANCE 当日立项即整包收口 completed**——测试实例隔离基建（独立 userData/离屏可见窗口 1280x800/CDP 9223/零 fork 后端/固定逻辑视口等比缩放/鼠标穿透+Ctrl+Alt+M 管理模式/screen-saver 层置顶）；app-health+ui341 已迁测试实例；用法=start-test-instance.sh [--onscreen]→npm run verify -- <flow>。抓真：appendSwitch 压 argv 端口（hasSwitch 守卫）+默认 level setAlwaysOnTop 创建期不生效（须 screen-saver 层）+getMainWindow 惰性解析+SPA 导航丢 ?test=1 端口专属回退；⑦BLOCK-101 立项 planned；⑧AUDIT-LOG 滚动归档执行（95KB→42.8KB，零删除）。**队列=BLOCK-99/BLOCK-101/BLOCK-85/BLOCK-88+chat-dock 候选**。运维注意：restart-dev-stack.sh 杀全部 electron.exe 含测试实例→主栈重启后须重跑 start-test-instance.sh；测试窗口勿最小化。G0 开发期常态 · 不外推 packaged/Provider/GA。）。此前 最后更新：2026-09-18（**Mac 夜间会话总账：看门狗自动化上线 + BLOCK-94 知识空间专业化整包收口 completed（P0–P6 一次会话）**；队列余 BLOCK-85（Mac 在位已解锁）→ BLOCK-88（需立项评审））。
 
 ## 2026-09-18 Mac 夜间会话总账（用户睡前授权「我希望你搞定这些……继续工作」，队列 BLOCK-94 → 85 → 88）
 
