@@ -64,7 +64,8 @@ module.exports = {
     fs.mkdirSync(evidenceDir, { recursive: true });
 
     // ── 就绪 + 选主窗 ──
-    const targets = await lib.pollTargets({ timeoutMs: 30_000 });
+    // BLOCK-100 P4 — 连测试实例（CDP 9223）；/localhost:3000\// 过滤天然兼容 ?test=1 标记 URL
+    const targets = await lib.pollTargets({ port: lib.TEST_INSTANCE_PORT, timeoutMs: 30_000 });
     const pages = lib.filterPageTargets(targets, /^http:\/\/localhost:3000\//);
     if (!pages.length) throw new Error('no_app_page_target: dev Electron 主窗未找到（localhost:3000）');
     const probeFn = async (client) => {

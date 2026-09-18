@@ -1,0 +1,33 @@
+{
+  "name": "block100-test-instance",
+  "startedAt": "2026-09-18T02:17:09.952Z",
+  "finishedAt": "2026-09-18T02:17:09.987Z",
+  "assertions": [
+    {
+      "name": "test_instance_target_connected",
+      "pass": true,
+      "detail": "9223 ?test=1 target"
+    },
+    {
+      "name": "offscreen_visible_window",
+      "pass": true,
+      "detail": "x=-1707 vis=visible（hidden/minimized 有渲染冻结反例，禁用）"
+    },
+    {
+      "name": "input_shield_blocks_all_input",
+      "pass": true,
+      "detail": "shielded=0 unshielded=4（屏蔽连合成输入一并吞，D6：交互型 flow 禁用）"
+    },
+    {
+      "name": "input_shield_crash_fallback_restores",
+      "pass": true,
+      "detail": "withInputShield 内抛异常后 finally 恢复输入（clicks 4→8）"
+    },
+    {
+      "name": "user_instance_untouched",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mu5ftn3a_wxnq"
+    }
+  ],
+  "allPass": true
+}

@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 .biof3-dev-user-data/
+.biof3-test-user-data/
+.biof3-test-instance.log
+.biof3-test-instance.err.log
 
 # Build output
 dist/

@@ -23,7 +23,8 @@ module.exports = {
 
   async run(ctx) {
     const { assert } = ctx;
-    const targets = await lib.pollTargets({ timeoutMs: ctx.timeoutMs ?? 10_000 });
+    // BLOCK-100 P4 — 连测试实例（CDP 9223，?test=1 标记）；前置 bash scripts/start-test-instance.sh
+    const targets = await lib.pollTargets({ port: lib.TEST_INSTANCE_PORT, timeoutMs: ctx.timeoutMs ?? 10_000 });
     assert('cdp_targets_listed', Array.isArray(targets) && targets.length > 0, `${(targets || []).length} targets`);
 
     const pages = lib.filterPageTargets(targets, /localhost:3000/);

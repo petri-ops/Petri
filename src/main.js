@@ -88,6 +88,11 @@ if (process.env.BIOF3_ELECTRON_USER_DATA_DIR) {
   }
 }
 
+// BLOCK-100 P1 — 测试实例标记（由 scripts/start-test-instance.sh 注入）：
+// 独立 userData 绕单实例锁与用户窗口共存；零 fork 后端、零 migration
+// （数据同源 :3001，主实例拥有 DB 生命周期）；窗口离屏可见 + `?test=1` 标记。
+const IS_TEST_INSTANCE = process.env.BIOF3_TEST_INSTANCE === "1";
+
 // ── EPIPE / stdout 兜底 ─────────────────────────────────────
 // console.log 写 stdout 时若管道已关（子进程退出/重定向）会抛 EPIPE，
 // 被当 Uncaught Exception 弹对话框。吞掉 EPIPE，不让它中断主进程。
@@ -369,9 +374,35 @@ function setupSkillsIpc() {
 // 只读：让设置页"计算与数据"分类展示 Harness 自备了哪些运行时/包。
 // 写入动作（provision/remove）由 Harness 编排层内部完成，不通过前端 IPC
 // 直接触发，以保持 D8 透明进度和 C-03 安全确认边界。
+// BLOCK-100 P1 — 测试实例后端就绪轮询：每 1s 探测 /api/health，超时返回 false
+//（调用方 fail-fast 弹窗退出，不留「半死测试实例」假通过）。
+async function waitForBackendHealthy(port, timeoutMs) {
+  const base = `http://127.0.0.1:${port}`;
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      const ok = await fetch(`${base}/api/health`, { signal: AbortSignal.timeout(2000) })
+        .then((r) => r.ok)
+        .catch(() => false);
+      if (ok) {
+        console.log(`[desktop] test instance: backend healthy at :${port}`);
+        return true;
+      }
+    } catch {
+      // 探测失败继续轮询
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  return false;
+}
+
 // ── 应用生命周期 ───────────────────────────────────────────────
 async function main() {
-  const backendPorts = await selectBackendPorts({ reserveAvailablePort, isDevMode });
+  // BLOCK-100 P1 — 测试实例直连既有后端，不做端口抢占：主实例已占 3001，
+  // reserveAvailablePort(3001) 会误选 3002 指错后端。端口以 R_SERVER_PORT 为准。
+  const backendPorts = IS_TEST_INSTANCE
+    ? { r: Number(process.env.R_SERVER_PORT) || 3001, renderer: null }
+    : await selectBackendPorts({ reserveAvailablePort, isDevMode });
   // BLOCK-9.1 PHASE 3: setupDesktopEnv moved to src/main/env-coordinator.js
   const { setupDesktopEnv } = require("./main/env-coordinator");
   setupDesktopEnv(backendPorts);
@@ -390,10 +421,11 @@ async function main() {
   // Migration must use the same selected Node boundary as biof3-server. Loading
   // better-sqlite3 inside Electron would require a different native ABI and
   // would break the system-Node copy used by Harness/backend processes.
+  // BLOCK-100 P1 — 测试实例跳过：主实例拥有 DB 生命周期，migration 已由其执行。
   try {
     const migDir = path.join(__dirname, "migrations");
     const dbPath = process.env.BIOF3_DB_PATH;
-    if (dbPath) {
+    if (dbPath && !IS_TEST_INSTANCE) {
       fs.mkdirSync(path.dirname(dbPath), { recursive: true });
       const migrationEnv = { ...process.env, ELECTRON_RUN_AS_NODE: "1" };
       // Dev: migration child runs under the *system* Node (ABI 137), so it must load
@@ -444,13 +476,32 @@ async function main() {
     flushLogs,
     readLogTail,
   } = require("./main/backend-proc-manager");
-  await startRServer();
+  // BLOCK-100 P1 — 测试实例 attach 模式：后端由主 dev 栈持有，本实例不 spawn、
+  // 只等就绪（缺席 fail-fast 诚实报错并退出，防「半死测试实例」假通过）。
+  if (IS_TEST_INSTANCE) {
+    const backendPort = backendPorts.r;
+    const { markBackendAttached } = require("./main/backend-proc-manager");
+    markBackendAttached(backendPort);
+    const backendHealthy = await waitForBackendHealthy(backendPort, 90_000);
+    if (!backendHealthy) {
+      dialog.showErrorBox(
+        "格物测试实例",
+        `后端 :${backendPort} 未就绪（等待 90s 超时）。\n请先启动主 dev 栈（npm run dev 或 restart-dev-stack.sh）再启动测试实例。`,
+      );
+      app.quit();
+      return;
+    }
+  } else {
+    await startRServer();
+  }
 
   // 2. 加载已安装插件
   await loadInstalledPlugins({ require });
 
-  // 3. 内容增量同步（后台）
-  startContentSync({ require });
+  // 3. 内容增量同步（后台）——测试实例跳过（减少足迹，同步职责归主实例）
+  if (!IS_TEST_INSTANCE) {
+    startContentSync({ require });
+  }
 
   // 5. 设置 IPC
   // TLS/Proxy fix: 渲染进程(Chromium)默认继承系统代理，会把 localhost 的
@@ -561,7 +612,10 @@ async function main() {
 // agent (and humans) can inspect the renderer via /json/list while developing.
 // Guarded by the --dev flag dev-electron.js always passes; production builds
 // never set this flag and the switch is a no-op for end users.
-if (process.argv.includes("--dev")) {
+// BLOCK-100 P1 — hasSwitch 守卫：argv 已显式带 --remote-debugging-port（如测试
+// 实例的 9223）时不覆盖——appendSwitch 会压过 argv 值，曾致测试实例去抢主实例
+// 的 9222 → DevTools HTTP bind 0x2740 失败（实机抓真两次复现）。
+if (process.argv.includes("--dev") && !app.commandLine.hasSwitch("remote-debugging-port")) {
   app.commandLine.appendSwitch("remote-debugging-port", "9222");
 }
 

@@ -1,6 +1,6 @@
 # BLOCK-100-CDP-TEST-INSTANCE — CDP 实机验收测试实例隔离基建
 
-状态：active / P0-LAUNCH（2026-09-18 立项即启动；用户裁决原话「我希望是一个比较全面稳定的基建包」——选定测试实例窗口路线并要求全面稳定）
+状态：completed / P6-CLOSEOUT（2026-09-18 立项即启动当日整包收口；用户裁决原话「我希望是一个比较全面稳定的基建包」——选定测试实例窗口路线并要求全面稳定）
 
 ## 1. 背景与问题（双因实证）
 
@@ -57,3 +57,13 @@ CDP 实机验收（dev-verify flow / 探针）与用户日常使用共用同一�
 - dev-verify flow 注册 `block100-test-instance`
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 8. 收口笔（2026-09-18，P0–P6 一次会话整包 completed）
+
+**交付**：P1 主进程 `BIOF3_TEST_INSTANCE=1` 分支（attach 后端〔markBackendAttached 桩→backend:status 走真实 health 探测，防误报「服务未运行」〕+ 跳过 migration/contentSync + 端口直读 R_SERVER_PORT 防 reserveAvailablePort 误选 3002 + 离屏可见窗口 x=主屏左缘外 1700px + `[TEST]` 标题 + `?test=1` URL 标记）；P2 `scripts/start-test-instance.sh`（后端缺席 fail-fast/幂等杀 9223 监听者绝不碰主实例/Start-Process 分离存活/就绪断言）；P3 lib 扩面 `connectTestTarget`（9223+?test=1 双重防误连用户窗口）+ `withInputShield`（`Input.setIgnoreInputEvents {ignore}` + finally 恢复，D6：仅只读 flow）；P4 flow 试点迁移 app-health + ui341-welcome-chat（poll 端口切 9223）；P5 flow `block100-test-instance` 注册。
+
+**实机总账**：start-test-instance.sh 3s READY；双实例并存（9222 用户页原样 + 9223 ?test=1）；app-health **4/4**、ui341-welcome-chat **11/11**（真轮次 SSE 对话+自清理）、block100-test-instance **5/5**（离屏 visible/屏蔽吞输入/恢复放行/崩溃兜底/用户零扰动）；证据 `acceptance/block-100/` + `acceptance/ui-341/`。
+
+**实机抓真 1 件（P1 关键修复）**：`main.js:616` dev 分支无条件 `appendSwitch("remote-debugging-port","9222")` 会压过 argv 的 9223 → 测试实例去抢主实例 9222 → DevTools HTTP bind 0x2740 失败（两次复现）；修=`hasSwitch` 守卫不覆盖显式 argv。**另修并行会话拉回提交自带存量红**：ui404 探针脚本 impact-map 漏注册（分类冲突）+ ui-403/404 evidence.json 未映射（test-affected:94 自带断言要求全映射）→ 按 acceptance-script-owned 先例补注册。
+
+**门禁**：hygiene ✅ / docs:check ✅ 254 / ui:audit ✅ / dev-debug-scripts 4/4 / test:changed 提交后复验（P6 两段红语义：未提交 tree_not_exact；若提交后仍红=触碰绑定文件归 D8 族 G0-RS 重采，如实登记）。G0 开发期常态 · 不外推 packaged/Provider/GA。

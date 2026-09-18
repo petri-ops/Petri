@@ -993,7 +993,7 @@
     },
     {
       "id": "acceptance-script-owned",
-      "note": "Evidence trees with no Node test reader. Their owning npm gate regenerates and verifies them, so changing the stored evidence selects no test. Listed explicitly so a new acceptance/<tree> stays unmapped and fails closed until its verification owner is declared.",
+      "note": "Evidence trees with no Node test reader. Their owning npm gate regenerates and verifies them, so changing the stored evidence selects no test. Listed explicitly so a new acceptance/<tree> stays unmapped and fails closed until its verification owner is declared. BLOCK-100 收口补注册 ui-403/404（并行会话拉回提交自带存量红：test-affected:94 要求全映射）。",
       "patterns": [
         "acceptance/g0-living-foundation/**",
         "acceptance/g0-qualification/**",
@@ -1092,7 +1092,9 @@
         "acceptance/ui-308/**",
         "acceptance/ui-309/**",
         "acceptance/ui-310/**",
-        "acceptance/ui-311/**"
+        "acceptance/ui-311/**",
+        "acceptance/ui-403/**",
+        "acceptance/ui-404/**"
       ],
       "classifiesScripts": false
     },
@@ -1266,7 +1268,8 @@
         "acceptance/ui-315/**",
         "acceptance/ui-320/**",
         "acceptance/ui-322/**",
-        "acceptance/ui-ledger-closeout/**"
+        "acceptance/ui-ledger-closeout/**",
+        "scripts/ui404-agent-panel-collapse-live.cjs"
       ],
       "tests": [
         "test/test-affected.test.mjs"
@@ -1339,7 +1342,9 @@
         "scripts/block75-*.ps1",
         "scripts/lib-block75-os.cjs",
         ".agents/skills/gewu-dev-infra/dev-verify/flows/os-save-dialog.cjs",
-        "acceptance/block-75/**"
+        "acceptance/block-75/**",
+        ".agents/skills/gewu-dev-infra/dev-verify/flows/block100-test-instance.cjs",
+        "acceptance/block-100/**"
       ],
       "tests": [
         "test/ipc-relative-requires.test.mjs",
@@ -1414,10 +1419,11 @@
     },
     {
       "id": "script-dev-stack",
-      "note": "dev 栈/实机验收编排脚本（BLOCK-77 沉淀的 restart-dev-stack.sh + 窗口尺寸辅助）。非产品代码，改动只需跑脚本冒烟（--check/语法），故 tests 挂 dev-verify 契约测试。",
+      "note": "dev 栈/实机验收编排脚本（BLOCK-77 沉淀的 restart-dev-stack.sh + 窗口尺寸辅助）。非产品代码，改动只需跑脚本冒烟（--check/语法），故 tests 挂 dev-verify 契约测试。 BLOCK-100 增补 start-test-instance.sh（测试实例启动器，同型非产品脚本）。",
       "patterns": [
         "scripts/restart-dev-stack.sh",
-        "scripts/resize-electron-window.ps1"
+        "scripts/resize-electron-window.ps1",
+        "scripts/start-test-instance.sh"
       ],
       "tests": [
         "test/dev-debug-scripts.test.mjs"

@@ -63,12 +63,24 @@ async function createWindow({
   }
 
   // ── Window Creation ──────────────────────────────────────────
+  // BLOCK-100 P1/D3 — 测试实例（BIOF3_TEST_INSTANCE=1，start-test-instance.sh
+  // 注入）：窗口离屏可见（主屏左缘外）——visibilityState 保持 visible，rAF 正常；
+  // hidden/minimized 有实测渲染冻结反例（restart-dev-stack.sh 注释留档），禁用。
+  const IS_TEST_INSTANCE = process.env.BIOF3_TEST_INSTANCE === "1";
+  const testWindowBounds = {};
+  if (IS_TEST_INSTANCE) {
+    const { screen } = require("electron");
+    const primary = screen.getPrimaryDisplay().bounds;
+    testWindowBounds.x = primary.x - 1600 - 100;
+    testWindowBounds.y = primary.y + 40;
+  }
   const mainWindow = new BrowserWindow({
+    ...(IS_TEST_INSTANCE ? testWindowBounds : {}),
     width: 1600,
     height: 1000,
     minWidth: 720,
     minHeight: 520,
-    title: BRAND.APP_NAME, // BLOCK-61：品牌单一事实源
+    title: IS_TEST_INSTANCE ? `[TEST] ${BRAND.APP_NAME}` : BRAND.APP_NAME, // BLOCK-61：品牌单一事实源；[TEST] 前缀=BLOCK-100 窗口级标记
     // Self-drawn traffic-light buttons in TitleBar.tsx — see src/main.js comments
     // around setupWindowIpc() for the IPC contract (window:minimize/maximize/close).
     // Frameless on every platform so the renderer owns the window controls; on macOS
@@ -101,8 +113,14 @@ async function createWindow({
   // ── Load URL ─────────────────────────────────────────────────
   // Development mode prioritizes Vite dev server with HMR;
   // production/normal launch loads the local static build.
+  // BLOCK-100 P1 — 测试实例 URL 追加 `?test=1`：CDP /json/list 的 target
+  // 判别标记（连接测试实例时按此过滤，防误连用户窗口——永久红线）。
   if (isDevMode) {
-    mainWindow.loadURL(spaServerUrl);
+    mainWindow.loadURL(
+      IS_TEST_INSTANCE
+        ? `${spaServerUrl}${spaServerUrl.includes("?") ? "&" : "?"}test=1`
+        : spaServerUrl,
+    );
   } else if (fs.existsSync(spaIndexPath) && spaServerUrl) {
     mainWindow.loadURL(spaServerUrl);
   } else {

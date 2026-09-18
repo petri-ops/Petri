@@ -163,6 +163,15 @@ function getProcs() {
   return { rServerProc };
 }
 
+// BLOCK-100 P1 — 测试实例 attach 模式：后端进程由主 dev 栈持有，本实例不 spawn。
+// 登记 attached 桩（backend-health.isProcAlive = !!proc && !proc.killed → 视为
+// 存活），使 backend:status 走真实 HTTP health 探测，而非因缺子进程误报
+// 「本地分析服务未运行，正在重启…」。桩无 exit 事件 → 不会触发 supervisor 重启。
+function markBackendAttached(port) {
+  rServerProc = { attached: true, killed: false, exitCode: null };
+  console.log(`[desktop] test instance: backend attached at :${port} (no local spawn)`);
+}
+
 // ── startRServer (with supervisor) ─────────────────────────────
 const rServerSupervisor = createOwnedBackendSupervisor({
   name: "biof3-server",
@@ -243,6 +252,7 @@ function startRServer(reason = "boot") {
 module.exports = {
   // procs / logs
   getProcs,
+  markBackendAttached,
   getLogDir,
   flushLogs,
   readLogTail,

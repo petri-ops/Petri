@@ -50,6 +50,8 @@ function loadCdpClient() {
 }
 
 const DEFAULT_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+// BLOCK-100 P3 — 测试实例专用 CDP 端口（与用户主实例 9222 隔离，永久红线：探针禁导航用户窗口）。
+const TEST_INSTANCE_PORT = 9223;
 
 function log(msg) {
   try { fs.writeSync(1, `[dev-verify] ${msg}\n`); } catch { /* stdout closed */ }
@@ -145,6 +147,34 @@ async function screenshotPng(client, evidenceDir, filename) {
  * finish() 落盘 <slug>-live.json 并返回 allPass；证据契约与 block*-live 系列同构
  * （{startedAt, finishedAt, assertions:[{name,pass,detail}], allPass}）。
  */
+// ── BLOCK-100 P3 — 测试实例原语 ─────────────────────────────────
+// 连接测试实例（CDP 9223）中带 ?test=1 标记的页面目标。绝不触碰 9222 用户
+// 主窗口——目标判别靠主进程注入的 URL 标记，双重防误连。
+async function connectTestTarget({ timeoutMs = 30_000 } = {}) {
+  const targets = await pollTargets({ port: TEST_INSTANCE_PORT, timeoutMs });
+  const pages = targets.filter((t) => t.type === 'page' && String(t.url).includes('test=1'));
+  if (!pages.length) {
+    throw new Error('no_test_page_target_on_9223: ' + targets.map((t) => t.url).join(' | '));
+  }
+  return connectTarget(pages[0]);
+}
+
+/** 只读断言 flow 的人因干扰屏蔽：测试期间忽略真实输入事件（含鼠标/键盘/触摸）。
+ *  注意（D6 裁决）：会连 CDP 合成输入一并屏蔽——交互型 flow（合成点击）禁用，
+ *  仅纯断言型 flow 使用。finally 恢复，探针崩溃不留「假死窗口」。 */
+async function withInputShield(client, fn) {
+  await client.send('Input.setIgnoreInputEvents', { ignore: true });
+  try {
+    return await fn();
+  } finally {
+    try {
+      await client.send('Input.setIgnoreInputEvents', { ignore: false });
+    } catch {
+      // 连接已断时忽略；CDP 会话销毁后 Chromium 不再路由该 session 的屏蔽
+    }
+  }
+}
+
 function createRun({ name, evidenceDir }) {
   const slug = String(name || 'run').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '') || 'run';
   const startedAt = new Date().toISOString();
@@ -172,6 +202,9 @@ function createRun({ name, evidenceDir }) {
 
 module.exports = {
   DEFAULT_PORT,
+  TEST_INSTANCE_PORT,
+  connectTestTarget,
+  withInputShield,
   findRepoRoot,
   log,
   fetchJson,
