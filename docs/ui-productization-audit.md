@@ -3383,18 +3383,19 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **门禁**：tsc 0；实机 CDP 双实例断言 allPass——测试实例 badge=true/flag=true，用户实例 badge=false/flag=false（旧 preload 无字段亦安全熄灭）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
-## UI-414: 知识空间多空间切换器——空间列表/新建/重命名/删除（BLOCK-99 P2/G2，2026-09-18 in_progress→组件与回归全绿，实机走查待 P5）
+## UI-414: 知识空间多空间切换器——空间列表/新建/重命名/删除（BLOCK-99 P2/G2，2026-09-18 verified，block99 flow CDP 断言切换器/knowledge 页实机挂载+组件测试 3/3+面板回归）
 
 - **来源**：BLOCK-99-KNOWLEDGE-MULTISPACE-CONSOLE P2（用户裁决「完整多空间版」）。
 - **交付面**：①`KnowledgeSpaceSwitcher` 组件（面板顶部）：空间下拉（名称+文档数+启用态）/新建（inline 输入 1-60 字符）/重命名/删除——破坏性两步确认+删除前 impact 影响面诚实列出（文档/块数）；ks_default 无删除入口（服务端 400 兜底）；②`knowledgeClient` 空间管理 API 六件（list/create/rename/enableById/impact/delete）+ 存量函数 spaceId 参数（总览/上传/粘贴/清空/检索）；③`knowledge-utils.tsx` 抽离纯工具（STATUS_LABEL/BUSY/formatBytes/splitQueryTokens/HighlightedText 原样搬迁）——**台账线治理：KnowledgeSpacePanel 701→668 净减**（G2 新增逻辑进新文件不恶化台账）。
 - **门禁**：Switcher 组件 3/3（渲染切换/创建后切换/两步删除）+ 面板回归 8/8 + tsc 0 + theme 4/4；client 加载防御（spaces 缺字段空列表降级不崩）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
-## UI-415: 知识空间管理会话台——/knowledge 页内嵌轻量聊天面 + 自然语言驱动空间内容组织（BLOCK-99 P4/G4，2026-09-18 in_progress→契约与组件测试全绿，实机操作链走查待 P5）
+## UI-415: 知识空间管理会话台——/knowledge 页内嵌轻量聊天面 + 自然语言驱动空间内容组织（BLOCK-99 P4/G4，2026-09-18 verified，dev-verify flow 22/22 allPass 含 UI 真轮次走查+截图）
 
 - **来源**：BLOCK-99-KNOWLEDGE-MULTISPACE-CONSOLE P4（用户裁决「面板中需要加入会话聊天的页面来单独处理控制知识空间内的各种内容」）。
 - **交付面**：①`KnowledgeConsoleChat`（/knowledge 页右栏内嵌，面板+会话台双栏）+ `useKnowledgeConsole` hook——D3 独立轻量面（**SimpleChat.tsx 零触碰**，直连 copilotClient.streamChat 复用 task 模式全基础设施）；D6 复用会话系统独立 conversation（localStorage 记忆+存在性校验+历史加载，可回溯可审计，新建广播 conversationCreated）；②后端工具族 12 件（knowledge_space_list/impact/create/rename/enable/bind/delete/clear + doc_list/move/delete/reindex，工具总数 59→71）+ 既有三件（search/status/read）可选 spaceId 透传；**D4 破坏性确认门**：删空间/清空/批量删文档首调服务端签发一次性 confirmToken（绑定 action+subject，10 分钟 TTL）并如实返回影响面，内联确认卡（确认/取消）用户点击后回灌会话、模型凭 token 重调执行（run_tool ack 同型+服务端硬闸）；③D7 边界：只读+非破坏全开、破坏性走门；`context.toolSubset='knowledge-console'` 时 run 只下发 knowledge 白名单 15 件（runner/chat legacy 两路同源过滤+管理台纪律段注入）；变更成功广播 `gewu:knowledge-console-sync` 事件（面板订阅即时刷新，轮询兜底不变）；诚实边界=会话台管内容组织不管面板布局。
 - **门禁**：knowledge 契约 G4 六测（move 归属迁移/确认令牌一次性/工具链 dispatch/D4 删空间门/批量删门+单篇直删同界/doc_move+reindex+search spaceId）45/47（仅剩 2 动前存量 PDF 基线红）+ agent-tool-registry 10/10（71 计数断言+子集过滤契约）+ hook 测试 6/6 + 面板回归 11/11 + tsc 0 + theme 4/4；KnowledgeSpacePanel 668→678 未触 700 棘轮线（G4 逻辑进新文件）。
+- **实机（P5 补登，block99-knowledge-multispace flow 22/22 allPass）**：CDP 测试实例 /knowledge 双栏挂载 + 会话台经 UI composer 真轮次（工具活动条+助手回复渲染，截图 acceptance/block-99/block99-console-ui.png）；布局抓真修=global-page .body 的 column 方向覆盖 row 意图致会话台堆叠全宽（显式 flex-direction:row 修复）；纪律段补纯文本短句要求（轻量面不渲染 Markdown 表格）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
 ## UI-407: 新对话空态示例卡通用化——领域卡按已装领域包动态追加 (2026-09-18 verified，用户裁决「可以直接修复」+CDP 实机断言)

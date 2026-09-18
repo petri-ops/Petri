@@ -1137,3 +1137,100 @@ test('G4 工具: doc_move/doc_reindex/doc_list + knowledge_search spaceId 透传
   ks.deleteSpaceCascade(spaceB.id);
   ks.setSpaceEnabled(false, 'ks_default');
 });
+
+// ---------- BLOCK-99 P5：G5 嵌入一致性按空间 + G6 启动恢复按空间 ----------
+
+test('G5 失配统计与隔离按空间：B 空间旧模型向量不污染默认空间统计，向量通道分空间各自隔离', async () => {
+  ks.setSpaceEnabled(true, 'ks_default');
+  const spaceB = ks.createSpace('G5 失配空间 B');
+  ks.setSpaceEnabled(true, spaceB.id);
+  const docDefault = await ingest.createDocument({
+    name: 'G5 默认.txt',
+    buffer: Buffer.from('默认空间 G5 文档：chromatin remodeling 综述。', 'utf8'),
+    autoIngest: false,
+  });
+  // 块向量以查询向量（seed 83）为主导混合，保证当前模型向量可进向量通道
+  await ingest.ingestDocument(docDefault.id, { embed: async (t) => t.map(() => blendVec(makeVec(83), makeVec(81), 0.98)) });
+  const docB = await ingest.createDocument({
+    name: 'G5 B.txt',
+    buffer: Buffer.from('B 空间 G5 文档：chromatin 补遗。', 'utf8'),
+    autoIngest: false,
+    spaceId: spaceB.id,
+  });
+  await ingest.ingestDocument(docB.id, { embed: async (t) => t.map(() => makeVec(82)) });
+  // B 空间块伪造为旧模型产出（换嵌入模型后未重建的形态）
+  sqlite.prepare('UPDATE knowledge_chunks SET model = ? WHERE doc_id = ?').run('text-embedding-old', docB.id);
+
+  const statsDefault = ks.staleEmbeddingStats('ks_default');
+  const statsB = ks.staleEmbeddingStats(spaceB.id);
+  assert.equal(statsDefault.staleChunks, 0, '默认空间无失配');
+  assert.ok(statsB.staleChunks >= 1 && statsB.staleDocs >= 1, 'B 空间失配诚实计数');
+
+  // B 空间检索：旧模型块隔离出向量通道（FTS 仍可达），且 staleEmbedding 投影跟随 B
+  const searchB = await ks.searchKnowledge({
+    query: 'chromatin',
+    embed: async () => [makeVec(83)],
+    spaceId: spaceB.id,
+  });
+  assert.ok(searchB.hits.length >= 1, 'B 空间 FTS 通道仍命中');
+  assert.ok(searchB.hits.every((h) => !(h.channels && h.channels.vector)), 'B 旧模型向量被隔离');
+  assert.ok(searchB.staleEmbedding && searchB.staleEmbedding.staleChunks >= 1, '检索投影跟随目标空间 B');
+
+  // 默认空间检索：失配统计不串空间（曾恒算默认之外还可能互相污染）
+  const searchDefault = await ks.searchKnowledge({
+    query: 'chromatin',
+    embed: async () => [makeVec(83)],
+  });
+  assert.ok(searchDefault.hits.some((h) => h.channels && h.channels.vector), '默认空间当前模型向量照常进向量通道');
+  assert.equal(searchDefault.staleEmbedding.staleChunks, 0, '默认空间检索不背 B 空间的失配');
+
+  ks.deleteDocument(docDefault.id);
+  ks.deleteSpaceCascade(spaceB.id);
+  ks.setSpaceEnabled(false, 'ks_default');
+});
+
+test('G6 启动恢复跨空间：B 空间中间态文档重启后重排入队并落到终态（曾只扫默认空间即永久卡死）', async () => {
+  const spaceB = ks.createSpace('G6 恢复空间 B');
+  const okDir = ks.docDir('doc_g6_recover_b');
+  fs.mkdirSync(okDir, { recursive: true });
+  fs.writeFileSync(path.join(okDir, 'g6.txt'), 'B 空间重启恢复夹具：chromatin remodeling 与 TP53 关键词长文本，保证可分块。');
+  sqlite
+    .prepare(
+      `INSERT INTO knowledge_documents (id, space_id, name, kind, size, status, raw_path, created_at, updated_at)
+       VALUES ('doc_g6_b', ?, 'g6.txt', 'text', 100, 'embedding', ?, datetime('now'), datetime('now'))`
+    )
+    .run(spaceB.id, path.join(okDir, 'g6.txt'));
+
+  const fakeEmbed = async (texts) => texts.map((t) => blendVec(makeVec(91), makeVec(t.length), 0.98));
+  const recovery = ingest.recoverInterruptedIngest({ embed: fakeEmbed });
+  assert.ok(recovery.docIds.includes('doc_g6_b'), 'B 空间中间态文档被恢复扫描覆盖');
+  await recovery.settled;
+  assert.equal(ks.getDocument('doc_g6_b').status, 'ready', 'B 空间文档恢复到 ready');
+  const chunkSpace = sqlite.prepare('SELECT DISTINCT space_id AS s FROM knowledge_chunks WHERE doc_id = ?').get('doc_g6_b');
+  assert.equal(chunkSpace.s, spaceB.id, '恢复摄取的块归属仍在 B 空间');
+
+  ks.deleteDocument('doc_g6_b');
+  ks.deleteSpaceCascade(spaceB.id);
+});
+
+test('G6 批量重试跨空间：B 空间 failed 文档可重试（曾只扫默认空间）', async () => {
+  const spaceB = ks.createSpace('G6 重试空间 B');
+  const doc = await ingest.createDocument({
+    name: 'g6-retry.txt',
+    buffer: Buffer.from('B 空间批量重试夹具：ribosome 内容。', 'utf8'),
+    autoIngest: false,
+    spaceId: spaceB.id,
+  });
+  await ingest.ingestDocument(doc.id, { embed: async () => null });
+  assert.equal(ks.getDocument(doc.id).status, 'failed');
+
+  const result = ingest.retryFailedDocuments({ embed: async (t) => t.map(() => makeVec(93)) });
+  assert.ok(
+    (result.requeued >= 1),
+    `B 空间 failed 文档被重试扫描覆盖（requeued=${result.requeued}）`
+  );
+  await result.settled;
+  assert.equal(ks.getDocument(doc.id).status, 'ready', '重试后到 ready');
+  ks.deleteDocument(doc.id);
+  ks.deleteSpaceCascade(spaceB.id);
+});

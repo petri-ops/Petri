@@ -1,0 +1,13 @@
+{
+  "name": "block99-knowledge-multispace",
+  "startedAt": "2026-09-18T07:06:52.489Z",
+  "finishedAt": "2026-09-18T07:07:19.898Z",
+  "assertions": [
+    {
+      "name": "block99_console_live_allPass",
+      "pass": true,
+      "detail": "exit=0 _confirmation_required\nPASS C2b_gate_token_issued\nPASS C2c_gate_impact_truthful\nPASS C2d_space_still_exists_before_confirm\nPASS C3a_delete_executed_with_token\nPASS C3b_space_gone_via_rest\nPASS C4a_space_b_created\nPASS C4b_bind_called\nPASS C4c_binding_reads_space_b\nPASS C4d_space_b_deleted\nPASS C4e_binding_falls_back_default\nPASS U1_knowledge_page_two_column_mounted\nPASS U2_console_message_s"
+    }
+  ],
+  "allPass": true
+}

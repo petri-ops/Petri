@@ -192,26 +192,28 @@ async function reindexDocument(docId) {
 // 队列为进程内 promise 链：重启后 uploaded/parsing/chunking/embedding 中间态文档会永久卡住。
 // 服务启动时（mountKnowledge）调用：中间态文档按 updated_at 升序（先来先摄）自动重排入队。
 // 原始文件缺失的会在管道内诚实转 failed（knowledge_raw_file_missing / 读文件失败）。
+// BLOCK-99 G6 — 恢复覆盖全部空间（曾写死 ks_default，多空间下 B 空间中间态文档重启即永久卡死）。
 function recoverInterruptedIngest({ embed } = {}) {
   const rows = sqlite
     .prepare(
       `SELECT id FROM knowledge_documents
-       WHERE space_id = ? AND status IN ('uploaded', 'parsing', 'chunking', 'embedding')
+       WHERE status IN ('uploaded', 'parsing', 'chunking', 'embedding')
        ORDER BY updated_at ASC`
     )
-    .all(ks.SPACE_ID);
+    .all();
   for (const row of rows) enqueueIngest(row.id, { embed });
   if (rows.length > 0) {
-    console.log(`[knowledge-ingest] boot recovery: requeued ${rows.length} interrupted document(s)`);
+    console.log(`[knowledge-ingest] boot recovery: requeued ${rows.length} interrupted document(s) across all spaces`);
   }
   return { requeued: rows.length, docIds: rows.map((r) => r.id), settled: _queue };
 }
 
 // failed 文档批量重试（含解析器就绪后的 PDF 等历史失败）。原始文件缺失的逐项诚实跳过。
+// BLOCK-99 G6 — 重试同样覆盖全部空间（曾写死 ks_default，B 空间失败文档不可批量重试）。
 function retryFailedDocuments({ embed } = {}) {
   const rows = sqlite
-    .prepare(`SELECT id FROM knowledge_documents WHERE space_id = ? AND status = 'failed' ORDER BY updated_at ASC`)
-    .all(ks.SPACE_ID);
+    .prepare(`SELECT id FROM knowledge_documents WHERE status = 'failed' ORDER BY updated_at ASC`)
+    .all();
   const skipped = [];
   let requeued = 0;
   for (const row of rows) {

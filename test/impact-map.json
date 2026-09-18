@@ -1906,6 +1906,38 @@
       "frontendRelated": true,
       "classifiesScripts": true,
       "scriptRole": "development-smoke"
+    },
+    {
+      "id": "block99-knowledge-multispace",
+      "note": "BLOCK-99 知识空间多空间版：G1 空间 CRUD/参数化/G4 会话台工具族+确认门+子集/注入管道 conversationId/G5 失配统计按空间/G6 启动恢复跨空间 + 前端会话台/切换器/事件总线 + dev-verify flow 与实机证据脚本。",
+      "patterns": [
+        "core/biof3-server/helpers/knowledge-space.js",
+        "core/biof3-server/helpers/knowledge-ingest.js",
+        "core/biof3-server/helpers/knowledge-confirm.js",
+        "core/biof3-server/agent-tools/knowledge-tools.js",
+        "core/biof3-server/agent-tools/knowledge-console-tools.js",
+        "core/biof3-server/agent-tools/tool-defs.js",
+        "core/biof3-server/agent-tools/registry.js",
+        "core/biof3-server/agent-runner.js",
+        "core/biof3-server/routes/ai-agent/chat.js",
+        "core/biof3-server/routes/knowledge.js",
+        "frontend/src/components/knowledge/**",
+        "frontend/src/components/workspace-panels/KnowledgeSpacePanel.tsx",
+        "frontend/src/components/workspace-panels/KnowledgeSpaceSwitcher.tsx",
+        "frontend/src/pages/knowledge/**",
+        "frontend/src/lib/copilotContext.ts",
+        "frontend/src/lib/events.ts",
+        "frontend/src/components/copilot/copilotConversationsClient.ts",
+        "scripts/block99-*",
+        "acceptance/block-99/**"
+      ],
+      "tests": [
+        "test/knowledge-space.test.mjs",
+        "test/agent-tool-registry.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
     }
   ]
 }

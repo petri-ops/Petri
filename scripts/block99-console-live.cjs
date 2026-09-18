@@ -173,8 +173,78 @@ async function main() {
   const binding2 = await apiRequest('GET', `/api/knowledge/binding?conversationId=${encodeURIComponent(CONV_ID)}`);
   assert('C4e_binding_falls_back_default', binding2.status === 200 && binding2.body.spaceId === 'ks_default', JSON.stringify(binding2.body));
 
+  // ── U 系列：CDP 测试实例 UI 走查（/knowledge 双栏 + 会话台真轮次经 UI 输入）──
+  try {
+    const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+    const fs = require('node:fs');
+    const client = await lib.connectTestTarget({});
+    const evalJs = async (expr) => {
+      const r = await client.send('Runtime.evaluate', { expression: expr, returnByValue: true, awaitPromise: true });
+      if (r.exceptionDetails) throw new Error(r.exceptionDetails.text || 'eval failed');
+      return r.result && r.result.value;
+    };
+
+    await evalJs("location.href='/knowledge'");
+    await new Promise((r) => setTimeout(r, 3000));
+    const mount = await evalJs(`(() => ({
+      page: !!document.querySelector('[data-testid="knowledge-page"]'),
+      panel: !!document.querySelector('[data-testid="knowledge-space-switcher"]'),
+      console: !!document.querySelector('[data-testid="knowledge-console"]'),
+      composer: !!document.querySelector('[data-testid="knowledge-console"] textarea'),
+    }))()`);
+    assert('U1_knowledge_page_two_column_mounted', mount.page && mount.panel && mount.console && mount.composer, JSON.stringify(mount));
+
+    // 会话台真轮次：React 受控 textarea 经原生 setter 写值 + input 事件 + 点发送
+    const typed = await evalJs(`(() => {
+      const ta = document.querySelector('[data-testid="knowledge-console"] textarea');
+      if (!ta || ta.disabled) return false;
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
+      setter.call(ta, '请列出当前所有知识空间的名称与文档数量');
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+      const btn = document.querySelector('[data-testid="knowledge-console"] [aria-label="发送"]');
+      if (!btn || btn.disabled) return false;
+      btn.click();
+      return true;
+    })()`);
+    assert('U2_console_message_submitted', typed === true, 'composer disabled or send button missing');
+
+    // 等真实模型轮次：工具活动条（空间清单）或助手回复出现
+    let sawToolActivity = false;
+    let sawReply = false;
+    for (let i = 0; i < 40; i++) {
+      await new Promise((r) => setTimeout(r, 4000));
+      const text = await evalJs(`(document.querySelector('[data-testid="knowledge-console"]')||{textContent:''}).textContent`);
+      sawToolActivity = /空间清单|空间状态/.test(text || '');
+      sawReply = !!text && text.replace(/请列出当前所有知识空间的名称与文档数量/g, '').trim().length > 20;
+      if (sawToolActivity && sawReply) break;
+    }
+    assert('U3_console_real_turn_tool_activity', sawToolActivity, 'no knowledge tool activity rendered via UI');
+    assert('U4_console_assistant_reply', sawReply, 'no assistant reply rendered via UI');
+
+    const shot = await client.send('Page.captureScreenshot', { format: 'png' });
+    const evidenceDir = path.join(__dirname, '..', 'acceptance', 'block-99');
+    fs.mkdirSync(evidenceDir, { recursive: true });
+    fs.writeFileSync(path.join(evidenceDir, 'block99-console-ui.png'), Buffer.from(shot.data, 'base64'));
+    assert('U5_screenshot_captured', true, 'acceptance/block-99/block99-console-ui.png');
+
+    // UI 轮次创建了真实会话行；证据保留最近一条（实机会话），清理 UI 轮次产生的多余行外移人工判断——保留诚实痕迹
+    try { client.close(); } catch {}
+  } catch (e) {
+    assert('U0_test_instance_available', false, `${e.message}（前置：bash scripts/start-test-instance.sh）`);
+  }
+
   const allPass = checks.every((c) => c.ok);
-  console.log(`\nblock99-console-live: ${checks.filter((c) => c.ok).length}/${checks.length} ${allPass ? 'allPass' : 'FAILED'}`);
+  console.log(`\nblock99-console-live: ${checks.filter((c) => c.ok).length}/${checks.length} allPass=${allPass}`);
+  try {
+    const fs = require('node:fs');
+    const evidenceDir = path.join(__dirname, '..', 'acceptance', 'block-99');
+    fs.mkdirSync(evidenceDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(evidenceDir, 'block99-console-live.json'),
+      JSON.stringify({ flow: 'block99-console-live', finishedAt: new Date().toISOString(), allPass, checks }, null, 2)
+    );
+    console.log('evidence: acceptance/block-99/block99-console-live.json');
+  } catch {}
   process.exit(allPass ? 0 : 1);
 }
 

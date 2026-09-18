@@ -382,7 +382,8 @@ async function searchKnowledge({ query, topK = INJECT_TOPK, embed, docId, spaceI
     )
     .get(spaceId, ...docParams);
   base.readyChunks = totalRow ? totalRow.c : 0;
-  base.staleEmbedding = staleEmbeddingStats();
+  // BLOCK-99 G5 — 失配统计跟随检索的目标空间（曾恒算默认空间，跨空间检索误报）
+  base.staleEmbedding = staleEmbeddingStats(spaceId);
   if (base.readyChunks === 0) return base;
 
   const embedFn = embed || embedTexts;
