@@ -1268,8 +1268,7 @@
         "acceptance/ui-315/**",
         "acceptance/ui-320/**",
         "acceptance/ui-322/**",
-        "acceptance/ui-ledger-closeout/**",
-        "scripts/ui404-agent-panel-collapse-live.cjs"
+        "acceptance/ui-ledger-closeout/**"
       ],
       "tests": [
         "test/test-affected.test.mjs"

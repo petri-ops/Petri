@@ -4670,7 +4670,7 @@
       "id": "BLOCK-99-KNOWLEDGE-MULTISPACE-CONSOLE",
       "path": "docs/block-99-knowledge-multispace-console-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-99-knowledge-multispace-console",
       "entrypoint": "docs/README.md",

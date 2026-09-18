@@ -2,7 +2,7 @@
 
 计划编号：`BLOCK-99-KNOWLEDGE-MULTISPACE-CONSOLE`
 
-状态：`active（P1→P5 已收口，2026-09-18；block99-knowledge-multispace flow 22/22 allPass，证据落 acceptance/block-99/；剩余 P6 整包收口）`
+状态：`completed（2026-09-18 整包收口；P1→P6 全部落地：契约 48/50〔2 红=F2 PDF 动前存量基线〕+ registry 10/10 + 前端 hook 6/6/面板 11/11 + tsc 0 + theme 4/4 + dev-verify flow block99-knowledge-multispace 22/22 allPass；证据 acceptance/block-99/；UI-414/415 verified；工具总数 59→71 计数断言同步）`
 
 用户裁决原话（2026-09-18，继「知识空间是否可分组归类加标签、按任务选背景」提问后的立项裁决）：
 「是需要做的 并且是 完整多空间版」「知识空间的 面板中需要加入会话聊天的页面来单独处理控制知识空间内的各种内容 无论是布局还是分类 是否可以呢？」
