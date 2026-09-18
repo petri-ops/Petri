@@ -47,7 +47,7 @@ interface UseWorkspaceOpenEffectsOptions {
     options?: { preserveWorkspaceMode?: boolean; workspaceMode?: WorkspaceMode }
   ) => Promise<void>;
   handleOpenWorkspaceFile: (file: ActiveWorkspaceFile) => void;
-  openRightPanel: (tab: 'results' | 'files' | 'browser' | 'chat' | 'analyze' | 'review' | 'io' | 'jobs' | 'agent' | 'home') => void;
+  openRightPanel: (tab: import('./rightPanelTabs').RightPanelMode) => void;
   navigate: NavigateFunction;
   setPendingRequest: SetPendingRequest;
 }

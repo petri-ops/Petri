@@ -1,0 +1,147 @@
+/* SideChatDock.module.css — UI-417 侧边聊天悬挂化（--gewu-* token，海军蓝家族） */
+
+.dockRoot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+
+/* 悬浮面：覆盖在中栏右缘上方，不挤压布局（UI-351 float 先例） */
+.surface {
+  position: absolute;
+  top: 8px;
+  right: 44px;
+  bottom: 8px;
+  width: 380px;
+  max-width: calc(100vw - 120px);
+  display: flex;
+  flex-direction: column;
+  background: var(--gewu-bg-surface);
+  border: 1px solid var(--gewu-border);
+  border-radius: 10px;
+  box-shadow: var(--gewu-shadow-menu);
+  overflow: hidden;
+  pointer-events: auto;
+  animation: sideChatSlideIn 160ms ease-out;
+}
+
+@keyframes sideChatSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.surfaceHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--gewu-border);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  flex-shrink: 0;
+}
+
+.surfaceTitle {
+  color: var(--gewu-text);
+  font-weight: 600;
+}
+
+.closeBtn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--gewu-text-tertiary);
+  cursor: pointer;
+}
+
+.closeBtn:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
+}
+
+.surfaceBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.emptyHint {
+  margin: auto;
+  padding: 16px;
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-caption);
+  line-height: 1.7;
+  text-align: center;
+}
+
+/* 常驻把手：中栏右缘竖条 */
+.handle {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 64px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 8px;
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: var(--gewu-shadow-sm);
+}
+
+.handle:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
+}
+
+.handleActive {
+  border-color: var(--gewu-accent);
+  color: var(--gewu-accent);
+}
+
+/* agent 运行中呼吸灯（UI-397 同款语言：绿呼吸） */
+.handleDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gewu-border-strong);
+}
+
+.handleDotRunning {
+  background: var(--gewu-status-online);
+  animation: sideChatBreath 1.6s ease-in-out infinite;
+}
+
+@keyframes sideChatBreath {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}

@@ -44,6 +44,13 @@ export const gewuEvents = {
    */
   copilotAsk: 'gewu:copilot-ask',
 
+  /**
+   * UI-417 — 侧边聊天悬挂化：请求展开悬挂聊天面（原右栏 chat tab 入口收编——
+   * home 空态卡「打开聊天」/分析完成跳转等）。SideChatDock 订阅后滑出 overlay；
+   * 中央 ownsCopilotAsk 归属不变，本事件只管展开不投递内容。
+   */
+  sideChatOpen: 'gewu:side-chat-open',
+
   /** Fired by the shared TitleBar; listened by BrowserPanel */
   browserBack: 'gewu:browser-back',
   browserForward: 'gewu:browser-forward',
@@ -264,6 +271,7 @@ export type GewuEventMap = {
   [gewuEvents.projectOpenWorkspaceFile]: ProjectOpenWorkspaceFileDetail;
   [gewuEvents.projectWorkspaceChanged]: ProjectWorkspaceChangedDetail;
   [gewuEvents.copilotAsk]: CopilotAskDetail;
+  [gewuEvents.sideChatOpen]: undefined;
   [gewuEvents.browserBack]: undefined;
   [gewuEvents.browserForward]: undefined;
   [gewuEvents.conversationForked]: ConversationForkedDetail;

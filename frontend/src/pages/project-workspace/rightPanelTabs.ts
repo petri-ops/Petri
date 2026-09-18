@@ -3,13 +3,14 @@ import type { IconName } from '@/components/icons/Icon';
 // BLOCK-92 Wave B-1 — 右栏 tab 词表与常量外迁（原 project-workspace.tsx，纯搬运零行为变化）。
 // 原导出路径 '@/pages/project-workspace' 经页面 re-export 保持兼容。
 
-export type RightPanelMode = 'home' | 'results' | 'files' | 'browser' | 'chat' | 'analyze' | 'review' | 'io' | 'jobs' | 'agent';
+export type RightPanelMode = 'home' | 'results' | 'files' | 'browser' | 'analyze' | 'review' | 'io' | 'jobs' | 'agent';
 
 export const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconName }> = [
   { id: 'results', label: '结果', icon: 'bar-chart' },
   { id: 'files', label: '文件', icon: 'folder' },
   { id: 'browser', label: '浏览器', icon: 'globe' },
-  { id: 'chat', label: '聊天', icon: 'sidebar' },
+  // UI-417 — 「聊天」tab 退役：聊天入口收编为中栏右缘悬挂聊天面（SideChatDock），
+  // 复用中央同一会话同一 run；copilotAsk 中央归属不变。不预留空壳。
   { id: 'analyze', label: '分析', icon: 'sparkles' },
   // BLOCK-28.5 — 审阅并入右侧边栏 tab 体系（与其它入口同级，不再是浮层另类）
   { id: 'review', label: '审阅', icon: 'git-branch' },

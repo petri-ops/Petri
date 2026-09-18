@@ -3249,43 +3249,6 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   color: var(--gewu-text);
 }
 
-.rightChatPanel {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.rightChatPanel :global(.sc-root) {
-  border-radius: 0;
-  box-shadow: none;
-  border: none;
-  background: transparent;
-}
-
-.rightChatPanel :global(.sc-header) {
-  padding: 6px 10px 5px;
-}
-
-.rightChatPanel :global(.sc-outer) {
-  /* UI-269 — 右栏聊天保持原有 10px 右缘内衬（sc-outer 承载 ChatScrollbar） */
-  --scb-right: 10px;
-}
-
-.rightChatPanel :global(.sc-body) {
-  gap: 8px;
-  padding: 8px 10px 10px;
-}
-
-.rightChatPanel :global(.sc-messages) {
-  /* 左 18px 让位给 UI-262 MessageRail 刻度条；右 18px（UI-268）与滚动条 thumb 分开 */
-  padding: 0 18px 0 18px;
-}
-
-.rightChatPanel :global(.sc-empty) {
-  padding: 8px 0;
-}
-
 .terminalPanel,
 .browserPanel {
   display: flex;

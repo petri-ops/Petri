@@ -36,6 +36,8 @@ import {
 } from '@/components/workspace-panels/ResultView';
 import { ScheduledWorkspacePanel } from '@/components/workspace-panels/ScheduledWorkspacePanel';
 import { ResultsLibrary } from '@/components/workspace-panels/ResultsLibrary';
+import { SideChatDock } from '@/components/workspace-panels/SideChatDock';
+import type { RightPanelMode } from '@/pages/project-workspace/rightPanelTabs';
 import styles from '@/pages/project-workspace.module.css';
 
 export type { ActiveArtifact };
@@ -87,7 +89,7 @@ export interface CenterPanelContext {
 
   // Handlers
   updateWorkspaceMode: (next: WorkspaceMode, replace?: boolean, jobId?: string | null) => void;
-  openRightPanel: (tab: 'home' | 'results' | 'files' | 'browser' | 'chat' | 'analyze' | 'review' | 'io') => void;
+  openRightPanel: (tab: RightPanelMode) => void;
   switchToProject: (id: string) => void;
   navigate: (to: string) => void;
   handleSwitchConversation: (convId: string) => void;
@@ -192,6 +194,15 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
       data-return-conversation-ms={returnConversationMs === null ? undefined : returnConversationMs.toFixed(2)}
     >
       {ctx.columnHeader}
+      {/* UI-417 — 侧边聊天悬挂化：常驻把手 + 滑出 overlay，复用中央同一会话同一 run。
+          ownsCopilotAsk 归属仍在中央 SimpleChat，悬挂面不承接「问 Agent」。 */}
+      {ctx.project && ctx.projectId && (
+        <SideChatDock
+          projectId={ctx.projectId}
+          conversationId={ctx.activeConvId}
+          onConversationChange={ctx.setActiveConvId}
+        />
+      )}
       <div
         className={`${styles.workspaceProjectionLayer} ${workspaceMode === 'chat' ? styles.workspaceProjectionLayerActive : ''}`}
         aria-hidden={workspaceMode !== 'chat'}

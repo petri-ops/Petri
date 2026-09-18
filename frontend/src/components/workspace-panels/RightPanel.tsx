@@ -1,5 +1,4 @@
 import React from 'react';
-import { SimpleChat } from '@/components/copilot/SimpleChat';
 import type { Project, ToolJob } from '@/lib/project-types';
 import type { BackendStatus } from '@/lib/electron';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
@@ -221,18 +220,8 @@ export function RightPanel({
                     obscured={ctx.rightTab !== 'browser'}
                   />
                 )}
-                {tab === 'chat' && (
-                  <div className={styles.rightChatPanel}>
-                    {ctx.project && ctx.projectId && (
-                      <SimpleChat
-                        projectId={ctx.projectId}
-                        conversationId={ctx.activeConvId}
-                        onConversationChange={ctx.setActiveConvId}
-                        inputHeight={96}
-                      />
-                    )}
-                  </div>
-                )}
+                {/* UI-417 — 「聊天」tab 退役：入口收编为中栏右缘悬挂聊天面（SideChatDock），
+                    复用中央同一会话同一 run；copilotAsk 中央归属不变。不预留空壳。 */}
                 {tab === 'analyze' && (
                   <AnalysisLaunchPanel
                     tools={catalogTools}

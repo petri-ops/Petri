@@ -3390,6 +3390,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **门禁**：Switcher 组件 3/3（渲染切换/创建后切换/两步删除）+ 面板回归 8/8 + tsc 0 + theme 4/4；client 加载防御（spaces 缺字段空列表降级不崩）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-417: 侧边聊天悬挂化——中栏右缘常驻把手 + 滑出 overlay 复用同会话同 run，右栏「聊天」tab 退役（2026-09-18 verified，实机 CDP 同会话双栏同步+组件 6/6）
+
+- **来源**：用户提案「侧边聊天 目前在右侧意义不大 应该悬挂在中间区域 右侧边上 点击打开是个聊天窗口 轻量级别，不过最好是能跟上会话进度背景」并征询「这个可能要立个block?」——09-18 评估定 UI 轨不立 BLOCK（纯前端单边界零后端），用户裁决「侧边聊天悬挂化（UI 轨候选） 搞这个」启动。
+- **交付面**：①`SideChatDock`（CenterPanel 挂载，中栏右缘）：**D1 常驻把手**（聊天图标+agent 运行中呼吸灯〔conversationRunStore 单一真相，UI-397 同款绿呼吸语言〕，点开滑出/再点收起）+ **D2 overlay**（~380px 覆盖中栏右缘不挤压布局，UI-351 float 先例；滑入动画 160ms；外点/Esc 收起）；②**复用 SimpleChat 同会话同 run**：与中央读同一 activeConvId（conversationRunStore 单一真相），无会话诚实空态引导中央首条消息；**中央 ownsCopilotAsk 归属不变**（悬挂面不承接「问 Agent」——注释明示，D4 推荐）；③**右栏「聊天」tab 退役**（D3 推荐）：rightPanelTabs 词表移除不预留空壳、RightPanel chat 分支删（SimpleChat import 清除）+ 死 CSS .rightChatPanel 38 行清除（删组件必同步 grep css 家法）；入口收编=home 空态「侧边聊天」卡/分析完成跳转经 `gewu:side-chat-open` 事件派发（events.ts 新增，悬挂面订阅展开）；CenterPanel/RightPanel 两处 inline tab 联合类型收编为 RightPanelMode 单源（消除漂移面）。
+- **门禁**：SideChatDock 组件 6/6（把手常驻/点击滑出复用同 conv/事件展开/Esc 收起/外点收起面板内不触发/呼吸灯运行态）+ RightPanel/AppRail 回归 5/5 + theme 4/4 + tsc 0；实机 CDP（用户主实例只读断言+合成点击）：把手常驻+右栏无聊天 tab+点击滑出渲染 SimpleChat、**同会话双栏同步铁证**（中央发「悬挂化实机验证 hello」→悬挂面打开后同内容+同回复可见、双 composer 独立）、Esc 收起；无会话项目诚实空态；截图 acceptance/ui-417/ui417-dock-with-conversation.png。
+- G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-416: 启动性能首屏 SWR + 启动 timeline 度量仪表——打开瞬间即见上次项目列表（BLOCK-101 P0+P1，2026-09-18 verified，flow 5 冷启动采样 allPass + 主实例快照写回 CDP 铁证）
 
 - **来源**：BLOCK-101-STARTUP-PERFORMANCE P0+P1（用户裁决「随着项目逐渐递增打开软件加载会不会变得很慢……我希望瞬时加载 用户无感」+「继续推进」队列授权启动）。

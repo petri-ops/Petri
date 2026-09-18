@@ -474,9 +474,11 @@ export function ProjectWorkspace(): React.ReactElement {
     setRightOpen(true);
     openRightPanel('files');
   }, [openRightPanel, setRightOpen]);
+  // UI-417 — 右栏 chat tab 退役：聊天入口收编为悬挂聊天面（SideChatDock）。
+  // 原入口（home 空态卡/分析完成跳转）改派 sideChatOpen 事件展开悬挂面。
   const handleOpenRightChat = useCallback(() => {
-    openRightPanel('chat');
-  }, [openRightPanel]);
+    dispatchGewuEvent(gewuEvents.sideChatOpen);
+  }, []);
   const titleBarTitle = useMemo(
     () => buildResultTitleBarTitle(workspaceMode, project?.name, activeArtifact?.label || activeArtifact?.name),
     [activeArtifact?.label, activeArtifact?.name, project?.name, workspaceMode],
