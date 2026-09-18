@@ -9,6 +9,7 @@ const GewuOpenFileDevBridge = lazy(() =>
 );
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { TitleBar } from '@/components/desktop/TitleBar';
+import { TestInstanceBadge } from '@/components/desktop/TestInstanceBadge';
 import { WorkspacePanelsProvider, useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { AppRail } from '@/components/desktop/AppRail';
 import { AppRailProvider } from '@/components/desktop/AppRailContext';
@@ -147,6 +148,7 @@ function AppShell(): React.ReactElement {
           </Routes>
         </main>
         </div>
+        <TestInstanceBadge />
         <CommandPalette
           open={isOpen}
           onClose={close}

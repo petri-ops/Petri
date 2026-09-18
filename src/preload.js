@@ -89,6 +89,10 @@ const desktopBridgeSurface = {
   isDesktop: true,
   platform: process.platform,
   arch: process.arch,
+  // BLOCK-100 — 测试实例标记（主进程经 webPreferences.additionalArguments 注入
+  // --gewu-test-instance=1）。严格 === true 判定：投影 shim 的 Proxy 属性访问
+  // 返回 callable proxy（truthy 但非 true），不会误亮测试徽标。
+  __testInstance: process.argv.includes('--gewu-test-instance=1'),
   backendConfig: Object.freeze({
     rApiBase: `http://localhost:${_rPort}/api`,
   }),

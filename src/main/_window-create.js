@@ -111,8 +111,23 @@ async function createWindow({
       // UI-400-1 — 启用 Chromium PDF 查看器插件：文件预览的 <object type="application/pdf">
       // 此前因插件禁用渲染空白（用户报告「文件中 PDF 不能预览查看」）。
       plugins: true,
+      // BLOCK-100 — 测试实例身份注入：preload 读 argv 暴露 __testInstance，
+      // 前端悬浮「测试实例」徽标据此点亮（=== true 严格判定防投影 shim 误判）。
+      additionalArguments: IS_TEST_INSTANCE ? ["--gewu-test-instance=1"] : [],
     },
   });
+
+  // BLOCK-100 — 测试实例任务栏标题强制 [TEST] 前缀：SPA 会用 document.title
+  // 覆盖窗口标题（frameless 下任务栏/Alt-Tab 唯一线索），拦截并保留前缀。
+  if (IS_TEST_INSTANCE) {
+    mainWindow.on("page-title-updated", (event, title) => {
+      if (!String(title).startsWith("[TEST] ")) {
+        event.preventDefault();
+        mainWindow.setTitle(`[TEST] ${title}`);
+      }
+    });
+    mainWindow.setTitle(`[TEST] ${BRAND.APP_NAME}`);
+  }
 
   // Register with shared ref immediately so event handlers can use getMainWindow()
   setMainWindow(mainWindow);

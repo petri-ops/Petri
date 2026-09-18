@@ -3349,6 +3349,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-409: 测试实例悬浮徽标 + 任务栏 [TEST] 前缀——测试窗口一眼可辨 (BLOCK-100 增补，2026-09-18 verified，用户需求「能够看到测试的情况」+CDP 双实例断言)
+
+- **来源**：用户反馈「用于测试的 CDP 那个窗口……我不知道是哪一个呀 测试一般用来预览用……小悬浮窗口？」——BLOCK-100 测试实例此前仅靠屏幕位置区分，多窗口下不可辨。
+- **交付面**：①`TestInstanceBadge` 悬浮徽标（右上角固定琥珀胶囊「测试实例 · TEST」，pointer-events:none 零布局占用）：身份经 preload `additionalArguments --gewu-test-instance=1` 注入 `biof3Desktop.__testInstance`，**严格 === true 判定**（投影 shim Proxy 属性访问 truthy-but-not-true 不误亮）；②任务栏标题强制 `[TEST]` 前缀（page-title-updated 拦截——SPA document.title 会覆盖窗口标题，frameless 下任务栏/Alt-Tab 唯一线索）；③配套：启动器 `--onscreen` 开关（窗口摆屏幕内观察测试，默认仍离屏）、block100 flow 离屏硬断言放宽为渲染可见性（用户拖回屏内不挂测试）、connectTestTarget SPA 导航丢 ?test=1 后按 9223 端口专属回退（实机抓真）。
+- **门禁**：tsc 0；实机 CDP 双实例断言 allPass——测试实例 badge=true/flag=true，用户实例 badge=false/flag=false（旧 preload 无字段亦安全熄灭）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-407: 新对话空态示例卡通用化——领域卡按已装领域包动态追加 (2026-09-18 verified，用户裁决「可以直接修复」+CDP 实机断言)
 
 - **来源**：用户投影实测反馈「新建任务的默认页面……要有通用性 领域提示 等等 这个有点历史残留的干扰（可以直接修复）」——空态三卡之首「分析单细胞数据」是 biof3 生信时代硬编码遗留（DEFAULT_EXAMPLE_PROMPTS），与「通用 agent 工作台 + 领域能力包化」（BLOCK-86）现状相悖。
