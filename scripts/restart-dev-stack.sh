@@ -29,6 +29,13 @@ done
 export PATH="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installation:$PATH"
 export BIOF3_DB_PATH='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\data\biof3.db'
 export BIOF3_LOCAL_DATA_DIR='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\data'
+# BLOCK-85 双真机 — 跨端公网门自签证书 CA 信任（后端 fetch 8442/8443 必须；
+# 证书=ECS /etc/nginx/ssl/gewu.crt 的本机拷贝。忘设=重启后跨端互访突然全断
+# DEPTH_ZERO_SELF_SIGNED_CERT，见 dev-infra SKILL「端口与后端实例纪律」第 6 条）
+if [ -f "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/ecs-gewu.crt" ]; then
+  export NODE_EXTRA_CA_CERTS='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\ecs-gewu.crt'
+  echo "block85: NODE_EXTRA_CA_CERTS set (ecs-gewu.crt)"
+fi
 # BLOCK-95 B1 灰度开关：默认空=关；调用方 BIOF3_SERVER_HISTORY_ASSEMBLY=1 bash scripts/restart-dev-stack.sh 开启
 export BIOF3_SERVER_HISTORY_ASSEMBLY="${BIOF3_SERVER_HISTORY_ASSEMBLY:-}"
 export BIOF3_SESSION_COMPACTION="${BIOF3_SESSION_COMPACTION:-}"
