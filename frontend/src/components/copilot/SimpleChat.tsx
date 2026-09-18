@@ -44,7 +44,7 @@ import {
   type PendingApproval,
 } from './SimpleChat/types';
 import {
-  DEFAULT_EXAMPLE_PROMPTS,
+  useDomainExamplePrompts,
   MessageMeta,
   MessageTime,
   ExamplePrompts,
@@ -98,11 +98,12 @@ export {
   shouldOpenWithSystemApp,
   restoreSimpleMessage,
   compactStageConclusion,
-  DEFAULT_EXAMPLE_PROMPTS,
   MessageMeta,
   ExamplePrompts,
   ImagePreviewModal,
 };
+// canonical 单源在 ./SimpleChat/types（helpers 仅 re-export），转出保持旧路径可用
+export { DEFAULT_EXAMPLE_PROMPTS, DOMAIN_EXAMPLE_PROMPTS } from './SimpleChat/types';
 export type {
   SlashCommand,
   SimpleMessage,
@@ -1022,11 +1023,8 @@ export function SimpleChat({
     taRef.current?.focus();
   }, [projectId, conversationId]);
 
-  // Determine which example prompts to show (context-aware)
-  const examplePrompts = useMemo(() => {
-    // For now, return default prompts; can be extended for context awareness
-    return DEFAULT_EXAMPLE_PROMPTS;
-  }, []);
+  // 2026-09-18 历史残留清理 — 领域感知示例卡（通用卡兜底 + 已装领域包动态追加）
+  const examplePrompts = useDomainExamplePrompts();
 
   const examplePromptsToShow = displayMessages.length === 0 ? examplePrompts : [];
 

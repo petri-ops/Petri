@@ -9,37 +9,18 @@
 
 import React, { useEffect, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
+import { getBridge } from '@/lib/desktopBridge';
 import { formatRelativeTime } from '@/lib/format';
 import type {
   ExamplePromptsProps,
   ExamplePrompt,
 } from './types';
 
-// DEFAULT_EXAMPLE_PROMPTS is also exported from ./types so the helper
-// file below doesn't need to re-export it (consumer imports come from
-// types). Re-export here for backward compatibility for any internal
-// import that referenced the helpers path.
-
-export const DEFAULT_EXAMPLE_PROMPTS: ExamplePrompt[] = [
-  {
-    icon: 'bar-chart',
-    title: '分析单细胞数据',
-    description: '上传你的表达矩阵，我来帮你做降维可视化',
-    prompt: '帮我分析这个单细胞RNA数据集',
-  },
-  {
-    icon: 'folder',
-    title: '解释项目结构',
-    description: '了解代码库的设计与组织方式',
-    prompt: '解释一下这个项目的代码结构',
-  },
-  {
-    icon: 'zap',
-    title: '快速开始',
-    description: '查看 AI 能帮你做什么',
-    prompt: 'Gewu Desktop 能帮我完成哪些任务？',
-  },
-];
+// DEFAULT_EXAMPLE_PROMPTS canonical 定义在 ./types（通用三卡 + 领域注册表
+// DOMAIN_EXAMPLE_PROMPTS）；此处 re-export 仅为向后兼容旧内部导入路径。
+// 2026-09-18 曾在此文件与 types.ts 各存一份拷贝（双维护陷阱），已收编单源。
+import { DEFAULT_EXAMPLE_PROMPTS, DOMAIN_EXAMPLE_PROMPTS } from './types';
+export { DEFAULT_EXAMPLE_PROMPTS } from './types';
 
 /**
  * T83 — small header shown on every AI message: 模型名。
@@ -68,6 +49,41 @@ export function MessageTime({ ts }: { ts?: string }): React.ReactElement | null 
   const time = formatRelativeTime(ts);
   if (!time) return null;
   return <span className="sc-msg-action-time">{time}</span>;
+}
+
+// 2026-09-18 历史残留清理 — 领域感知示例卡：默认渲染通用卡，后台查已装领域
+// 包（桌面 IPC packs.listInstalled / 投影 HTTP 桥同形）按 DOMAIN_EXAMPLE_PROMPTS
+// 注册表追加领域卡。桥缺失/查询失败一律停留在通用卡（无包不提领域，BLOCK-86
+// 哲学同款）；查询失败静默降级不弹错。
+export function useDomainExamplePrompts(): ExamplePrompt[] {
+  const [prompts, setPrompts] = useState<ExamplePrompt[]>(DEFAULT_EXAMPLE_PROMPTS);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const packsBridge = getBridge('packs') as
+          | { listInstalled?: () => Promise<unknown> }
+          | null;
+        const result = await packsBridge?.listInstalled?.();
+        // L4-2 形状勘误同款：桌面 IPC pack:list-installed 返回 { ok, packs } 信封
+        //（非裸数组），双形状兼容防信封误判成「无包」。
+        const packs = Array.isArray(result)
+          ? result
+          : (result as { packs?: Array<{ packId?: string }> } | null)?.packs;
+        if (!alive || !Array.isArray(packs)) return;
+        const extra = packs.flatMap(
+          (pack) => DOMAIN_EXAMPLE_PROMPTS[String(pack?.packId || '')] || [],
+        );
+        if (extra.length > 0) setPrompts([...DEFAULT_EXAMPLE_PROMPTS, ...extra]);
+      } catch {
+        // 桥缺失/查询失败 = 通用卡兜底，不打扰用户
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+  return prompts;
 }
 
 export function ExamplePrompts({ prompts, onSelect }: ExamplePromptsProps): React.ReactElement {

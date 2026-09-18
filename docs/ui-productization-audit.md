@@ -3349,6 +3349,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：dev Electron 边界内实机；packaged 未验（G0 常态）；OS 拖入/拖出、新建空文件、投影文件树为非范围。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-407: 新对话空态示例卡通用化——领域卡按已装领域包动态追加 (2026-09-18 verified，用户裁决「可以直接修复」+CDP 实机断言)
+
+- **来源**：用户投影实测反馈「新建任务的默认页面……要有通用性 领域提示 等等 这个有点历史残留的干扰（可以直接修复）」——空态三卡之首「分析单细胞数据」是 biof3 生信时代硬编码遗留（DEFAULT_EXAMPLE_PROMPTS），与「通用 agent 工作台 + 领域能力包化」（BLOCK-86）现状相悖。
+- **交付面**：①DEFAULT_EXAMPLE_PROMPTS 改领域中立三卡（解释项目结构/快速开始/规划一个任务）；②新增 DOMAIN_EXAMPLE_PROMPTS 注册表（v1 静态映射：gewu-pack-bio → 单细胞卡〔描述标注「生信分析包」〕）+ `useDomainExamplePrompts()` hook——默认渲染通用卡，后台经 packs.listInstalled（桌面 IPC/投影 HTTP 桥同形）查已装领域包动态追加领域卡；无包/桥缺失/查询失败一律通用卡兜底（无包不提领域，BLOCK-86 哲学同款）；③顺手收编双维护陷阱——DEFAULT 曾在 types.ts 与 helpers.tsx 各存一份完整拷贝，收编 types 单源 + helpers re-export。
+- **门禁**：SimpleChat 定向 13/13 + tsc 0；实机 CDP 断言（测试实例只读）：无包路径三通用卡、`hasBioLegacy=false`；装生信包路径 4 卡（3 通用+领域卡动态追加，修 pack:list-installed `{ok,packs}` 信封双形状兼容——L4-2 形状勘误同款坑）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-405: 投影 AI 设置桥——手机端模型选择器/设置页模型渠道与桌面同源 (BLOCK-87 L4-2 收尾，2026-09-18 verified，用户手机投影实测「跑通了 非常的不错」)
 
 - **来源**：BLOCK-87 L4 第二批遗留收尾批（用户裁决「先把这些遗留的一次性整完」）——L4 摸底「aiSettings 有 HTTP 对应端点」但前端投影桥从未接线：投影下 SimpleChat 模型选择器只有 DEFAULT 兜底预设（shim Proxy 调用 resolve undefined），DesktopSettingsPanel/useEndpointProfilesEditor 五处 `window.biof3Desktop.aiSettings.*` 直引经 shim 拿到 undefined，loadSettings 控制台 TypeError、模型渠道编辑器空转。

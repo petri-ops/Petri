@@ -195,18 +195,16 @@ export interface ExamplePrompt {
   prompt: string;
 }
 
+// 2026-09-18 历史残留清理（用户裁决「要有通用性 领域提示……可以直接修复」）：
+// 默认示例卡领域中立——「分析单细胞数据」是 biof3 生信时代遗留，生信能力已
+// 领域包化（BLOCK-86），领域示例卡改由「已装领域包」动态追加（见
+// DOMAIN_EXAMPLE_PROMPTS + helpers.useDomainExamplePrompts），无包不提领域。
 export const DEFAULT_EXAMPLE_PROMPTS: ExamplePrompt[] = [
-  {
-    icon: 'bar-chart',
-    title: '分析单细胞数据',
-    description: '上传你的表达矩阵，我来帮你做降维可视化',
-    prompt: '帮我分析这个单细胞RNA数据集',
-  },
   {
     icon: 'folder',
     title: '解释项目结构',
-    description: '了解代码库的设计与组织方式',
-    prompt: '解释一下这个项目的代码结构',
+    description: '了解项目的文件组织与数据构成',
+    prompt: '解释一下这个项目的结构和数据',
   },
   {
     icon: 'zap',
@@ -214,7 +212,26 @@ export const DEFAULT_EXAMPLE_PROMPTS: ExamplePrompt[] = [
     description: '查看 AI 能帮你做什么',
     prompt: 'Gewu Desktop 能帮我完成哪些任务？',
   },
+  {
+    icon: 'list-details',
+    title: '规划一个任务',
+    description: '说出目标，我来拆解成可执行的步骤',
+    prompt: '我想完成一个分析任务，帮我把它拆解成可执行的步骤',
+  },
 ];
+
+// 领域示例卡注册表（v1 静态映射：包 id → 示例卡；包 manifest 支持示例声明后
+// 迁移到包侧数据）。仅当对应领域包「已安装」时由 useDomainExamplePrompts 追加。
+export const DOMAIN_EXAMPLE_PROMPTS: Record<string, ExamplePrompt[]> = {
+  'gewu-pack-bio': [
+    {
+      icon: 'bar-chart',
+      title: '分析单细胞数据',
+      description: '生信分析包：上传表达矩阵，我来做降维可视化',
+      prompt: '帮我分析这个单细胞RNA数据集',
+    },
+  ],
+};
 
 export interface ExamplePromptsProps {
   prompts: ExamplePrompt[];
