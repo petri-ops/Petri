@@ -371,4 +371,27 @@ module.exports = function mountKnowledge(app) {
       res.status(spaceErrorStatus(e)).json({ status: 'error', error: e.message, code: e.code || null });
     }
   });
+
+  // ── BLOCK-99 G3 会话级空间绑定 ─────────────────────────────
+
+  // 读绑定（未绑定回落 ks_default）
+  app.get('/api/knowledge/binding', async (req, res) => {
+    try {
+      const conversationId = String(req.query.conversationId || '').trim();
+      if (!conversationId) return res.status(400).json({ status: 'error', error: 'conversationId required' });
+      res.json({ status: 'ok', conversationId, spaceId: ks.getSpaceBinding(conversationId) });
+    } catch (e) {
+      res.status(500).json({ status: 'error', error: e.message });
+    }
+  });
+
+  // 写绑定（D1：单会话绑单空间；绑定 ks_default 即视为解绑）
+  app.post('/api/knowledge/binding', express.json({ limit: '4kb' }), async (req, res) => {
+    try {
+      const { conversationId, spaceId } = req.body || {};
+      res.json({ status: 'ok', ...ks.setSpaceBinding(conversationId, spaceId) });
+    } catch (e) {
+      res.status(spaceErrorStatus(e)).json({ status: 'error', error: e.message, code: e.code || null });
+    }
+  });
 };

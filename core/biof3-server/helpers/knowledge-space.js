@@ -475,10 +475,10 @@ function buildPromptBlock(hits, maxChars = INJECT_MAX_CHARS) {
 
 // ---- D4 轻按需：agent 每 turn 自动召回（启用才检索；无命中不注入任何内容）----
 
-async function buildAgentTurnBlock(query, { embed, docId } = {}) {
-  const space = getSpace();
+async function buildAgentTurnBlock(query, { embed, docId, spaceId = SPACE_ID } = {}) {
+  const space = getSpace(spaceId);
   if (!space || !space.enabled) return { block: '', usedChars: 0, hitCount: 0, hits: [] };
-  const result = await searchKnowledge({ query, topK: INJECT_TOPK, embed, docId });
+  const result = await searchKnowledge({ query, topK: INJECT_TOPK, embed, docId, spaceId });
   const { block, usedChars } = buildPromptBlock(result.hits);
   // BLOCK-94 F5：citations 溯源数据（注入了哪些块），前端渲染「知识溯源」条
   const hits = result.hits.map((h) => ({
@@ -494,7 +494,7 @@ async function buildAgentTurnBlock(query, { embed, docId } = {}) {
 // 纯去重零行为变更：取最新 user 消息（剥 [附件…] 前缀）→ 启用且命中才拼接注入块。
 // embed 可注入供契约测试；任何内部失败静默零注入（与原两处 catch {} 语义一致）。
 
-async function buildTurnInjection(systemPrompt, messages, { embed } = {}) {
+async function buildTurnInjection(systemPrompt, messages, { embed, conversationId } = {}) {
   let knowledgeTokens = 0;
   let citations = [];
   try {
@@ -505,7 +505,9 @@ async function buildTurnInjection(systemPrompt, messages, { embed } = {}) {
       ? latestUserMsg.content.replace(/^\[[^\]]+\]\s*\n?/, '').trim()
       : '';
     if (cleanQuery) {
-      const knowledgeTurn = await buildAgentTurnBlock(cleanQuery, { embed });
+      // BLOCK-99 G3 — 会话级绑定空间（D1：单会话绑单空间；未绑定回落 ks_default）
+      const spaceId = getSpaceBinding(conversationId);
+      const knowledgeTurn = await buildAgentTurnBlock(cleanQuery, { embed, spaceId });
       if (knowledgeTurn.block) {
         systemPrompt += knowledgeTurn.block;
         knowledgeTokens = Math.ceil(knowledgeTurn.usedChars / 4);
@@ -679,6 +681,39 @@ function deleteSpaceCascade(spaceId) {
   return { deleted: spaceId, name: space.name, documents: impact.documents, chunks: impact.chunks };
 }
 
+// ── BLOCK-99 G3 会话级空间绑定 ─────────────────────────────
+// 约定：绑定 ks_default 不落行（读时空返回默认），空间被删时 FK CASCADE
+// 自动掉绑 → 会话回落默认空间。
+
+function getSpaceBinding(conversationId) {
+  const cid = String(conversationId || '').trim();
+  if (!cid) return SPACE_ID;
+  const row = sqlite
+    .prepare('SELECT space_id FROM knowledge_space_bindings WHERE conversation_id = ?')
+    .get(cid);
+  return row ? row.space_id : SPACE_ID;
+}
+
+function setSpaceBinding(conversationId, spaceId) {
+  const cid = String(conversationId || '').trim();
+  if (!cid) {
+    const err = new Error('conversation id required for space binding');
+    err.code = 'binding_conversation_required';
+    throw err;
+  }
+  const target = resolveSpaceId(spaceId);
+  const tx = sqlite.transaction(() => {
+    sqlite.prepare('DELETE FROM knowledge_space_bindings WHERE conversation_id = ?').run(cid);
+    if (target !== SPACE_ID) {
+      sqlite
+        .prepare('INSERT INTO knowledge_space_bindings (conversation_id, space_id, updated_at) VALUES (?, ?, ?)')
+        .run(cid, target, now());
+    }
+  });
+  tx();
+  return { conversationId: cid, spaceId: target };
+}
+
 module.exports = {
   SPACE_ID,
   EMBEDDING_DIM,
@@ -704,6 +739,8 @@ module.exports = {
   renameSpace,
   spaceImpact,
   deleteSpaceCascade,
+  getSpaceBinding,
+  setSpaceBinding,
   listDocuments,
   listDocumentsPage,
   getDocument,

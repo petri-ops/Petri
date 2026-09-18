@@ -849,3 +849,59 @@ test('G1 检索按空间过滤: spaceId 限定命中（他空间命中不可达�
   ks.deleteDocument(docB.id);
   ks.deleteSpaceCascade(spaceB.id);
 });
+
+// ---------- BLOCK-99 G3：会话级空间绑定与注入 ----------
+
+test('G3 绑定: set/get 往返；绑默认=解绑；未知空间 fail-closed；缺会话 id 拒绝', () => {
+  const spaceB = ks.createSpace('G3 绑定空间');
+  assert.equal(ks.getSpaceBinding('conv_g3'), 'ks_default', '未绑定回落默认');
+  ks.setSpaceBinding('conv_g3', spaceB.id);
+  assert.equal(ks.getSpaceBinding('conv_g3'), spaceB.id);
+  ks.setSpaceBinding('conv_g3', 'ks_default');
+  assert.equal(ks.getSpaceBinding('conv_g3'), 'ks_default', '绑默认=解绑不落行');
+  assert.throws(() => ks.setSpaceBinding('conv_g3', 'ks_absent'), (e) => e.code === 'space_not_found');
+  assert.throws(() => ks.setSpaceBinding('', 'ks_default'), (e) => e.code === 'binding_conversation_required');
+  ks.deleteSpaceCascade(spaceB.id);
+});
+
+test('G3 注入: 绑定空间后按绑定范围召回（他空间文档不可达；删空间回落默认）', async () => {
+  // buildAgentTurnBlock 有启用门（D4：未启用零注入）——测试期启用默认空间
+  ks.setSpaceEnabled(true, 'ks_default');
+  const spaceB = ks.createSpace('G3 注入空间 B');
+  const docDefault = await ingest.createDocument({
+    name: '注入默认.txt',
+    buffer: Buffer.from('默认空间注入文档：apoptosis 速查手册。', 'utf8'),
+    autoIngest: false,
+  });
+  await ingest.ingestDocument(docDefault.id, { embed: async (t) => t.map(() => makeVec(41)) });
+  const docB = await ingest.createDocument({
+    name: '注入B.txt',
+    buffer: Buffer.from('B 空间注入文档：singlecell 降维聚类实战指南。', 'utf8'),
+    autoIngest: false,
+    spaceId: spaceB.id,
+  });
+  await ingest.ingestDocument(docB.id, { embed: async (t) => t.map(() => makeVec(42)) });
+
+  const embed = async () => [makeVec(43)];
+
+  // 未绑定：默认空间范围（B 文档不注入）
+  const before = await ks.buildTurnInjection('SYS', [{ role: 'user', content: 'apoptosis 速查' }], { embed, conversationId: 'conv_inj' });
+  assert.ok(before.systemPrompt.includes('速查手册'), '未绑定→默认空间命中');
+  assert.ok(!before.systemPrompt.includes('降维聚类'), '未绑定→B 文档不泄漏');
+
+  // 绑定 B：只召回 B（新建空间默认停用——启用门语义：停用即零注入）
+  ks.setSpaceEnabled(true, spaceB.id);
+  ks.setSpaceBinding('conv_inj', spaceB.id);
+  const after = await ks.buildTurnInjection('SYS', [{ role: 'user', content: 'singlecell 降维聚类实战' }], { embed, conversationId: 'conv_inj' });
+  assert.ok(after.systemPrompt.includes('降维聚类'), '绑定 B→B 文档注入');
+  assert.ok(!after.systemPrompt.includes('速查手册'), '绑定 B→默认文档不可达');
+  assert.ok(after.citations.every((c) => c.docId === docB.id), 'citations 仅 B 文档');
+
+  // 删除 B 空间：绑定 FK CASCADE 掉绑 → 回落默认
+  ks.deleteSpaceCascade(spaceB.id);
+  assert.equal(ks.getSpaceBinding('conv_inj'), 'ks_default', '删空间→FK CASCADE 掉绑回落默认');
+  const fallback = await ks.buildTurnInjection('SYS', [{ role: 'user', content: 'apoptosis 速查' }], { embed, conversationId: 'conv_inj' });
+  assert.ok(fallback.systemPrompt.includes('速查手册'), '回落默认空间召回');
+  ks.setSpaceEnabled(false, 'ks_default'); // 还原启用态（文件后续无消费方，卫生收尾）
+  ks.deleteDocument(docDefault.id);
+});

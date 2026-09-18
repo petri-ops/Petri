@@ -458,7 +458,10 @@ module.exports = {
 
       // BLOCK-69 — 知识空间自动召回（D4 轻按需：启用才检索；过阈值才注入，≤3 块）
       // BLOCK-94 F1 挂点收敛：注入逻辑单源 buildTurnInjection（纯去重零行为变更）
-      const knowledgeInjection = await knowledgeSpace.buildTurnInjection(systemPrompt, messages);
+      // BLOCK-99 G3 — 按会话绑定空间过滤召回（未绑定回落 ks_default）
+      const knowledgeInjection = await knowledgeSpace.buildTurnInjection(systemPrompt, messages, {
+        conversationId: _convIdForAssembly || explicitConvId || null,
+      });
       systemPrompt = knowledgeInjection.systemPrompt;
       const knowledgeTokens = knowledgeInjection.knowledgeTokens;
 
