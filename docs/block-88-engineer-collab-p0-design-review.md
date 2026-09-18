@@ -1,6 +1,6 @@
 # BLOCK-88 工程师协作 — P0 立项评审
 
-> 状态：`P1-ACTIVE（2026-09-19 用户夜间裁决「都搞 我要睡觉了」启动 P1——D7 门槛已由 BLOCK-85 双真机收口 87298a22 满足；D1-D8 于 2026-09-18 裁决「都按推荐」全部落定。前状态 P0-APPROVED）`
+> 状态：`P1-COMPLETED（2026-09-19 夜间会话收口，提交 7cc5cbf3——实机 15/15 allPass + 契约 5/5 + UI-418 verified；门禁与证据见 §9。P2（任务归属隔离）待用户裁决启动。前状态 P1-ACTIVE（2026-09-19 用户夜间裁决「都搞 我要睡觉了」启动；D7 门槛由 BLOCK-85 双真机收口 87298a22 满足；D1-D8 于 2026-09-18 裁决「都按推荐」落定）`
 > 日期：2026-09-18（立项评审稿；概念源自 2026-09-14 f52e7d87 用户裁决「可以的 非常棒」）
 > 用户裁决史：①2026-09-14 联邦概念深化「联邦协作主体=**不同的工程师**」（各跑各的格物，互相授权：委托任务/看界面/协同开发），三层缺口排队 BLOCK-88；②2026-09-18「开始 BLOCK-88 立项评审」。
 
@@ -82,3 +82,13 @@ A 能看到/操作 B 的哪些项目。**建议：配对后默认零授权，B �
 - **D6 对称性 = 数据模型多 peer、UI 成员列表化，验收 1:1 双工程师先行**；中继拓扑维持非范围。
 - **D7 顺序依赖 = BLOCK-85 P4 双真机收口先行**；88 本次仅 P0 评审登记，不占 active 槽位，85 收口后用户裁决启动 P1。
 - **D8 非范围确认 = 不做协同编辑/代码合并/账号密码体系/权限管理后台/中继拓扑**。
+
+## 9. P1 收口记录（2026-09-19 夜间会话）
+
+- **交付**：`core/shared-backend/engineer-identity.js` 共享净化（D1-A）+ `pairing.js` 会话 identity additive 落键（存量投影键集不变）+ gateway `/m/api/pair` 收身份·`/federation/api/health` 回显 + `federation-peers.js` peer.identity + `federation-admin.js` pair 透传·`GET /api/federation/members` + UI-418 联邦面板协作成员/署名（同提交台账）。
+- **门禁对账**：契约 `test/block88-engineer-identity.test.mjs` 5/5；block70+federation 回归 12/12；test-affected 16/16；tsc 0；theme-token-contract 4/4；`bash -n` 绿；docs:check PASS(255)；ui:audit:check 同步通过。
+- **实机断言**：`scripts/block88-p1-dual-identity.cjs` **15/15 allPass**（loopback 双节点：B=dev 栈真实进程 :3001/:3005，A=真实 federation-admin 独立 dataDir；REST 四层〔配对署名/注册表投影/成员面/健康回显〕+ CDP 9223 测试实例 UI 走查〔协作成员行·署名输入·诚实标注〕，探针零触碰 9222 主窗口）；证据 `acceptance/block-88/p1-identity.json` + `p1-identity-ui.png`。
+- **评审清偿**：六维度自评抓 P2 一枚（联邦访客会话名 UA 兜底恒「移动设备」）——已修（带署名优先命名，契约断言补 name.startsWith('工程师 A')，终版实机 P4b 回显可见）。
+- **同批基建**：`scripts/start-test-instance.sh` 双端同形化（原纯 Windows 实现 macOS 静默空转）+ impact-map 补 ui417-side-chat-evidence（4da4bb4a 漏登记存量 unknown）+ block88-engineer-collab 规则。
+- **P2 预备**：BLOCK-85 验收登记的 delegation 无项目绑定/未开独立会话两结构缺口 + 本阶段遗留候选（会话名已清偿）在 P2 域内消化；启动待用户裁决。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
