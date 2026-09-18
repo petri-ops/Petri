@@ -21,6 +21,7 @@
  */
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useStartupTimeline, markDataReady } from '@/hooks/useStartupTimeline';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import {
   archiveConversation as archiveConversationREST,
@@ -145,19 +146,46 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
   const currentProjectId = projectIdFromPath(location.pathname);
 
   // ── 数据 ──
-  const [allProjects, setAllProjects] = useState<Project[]>([]);
+  // BLOCK-101 P1 — 首屏 SWR（D2 键 gewu-startup-snapshot-v1）：localStorage 快照
+  // 同步先渲染上次内容（打开瞬间即见，零首帧等待），后台 listProjects 对账后
+  // 即弃快照（DB 唯一事实源；快照仅渲染缓存，不参与业务判断）。版本号失效 +
+  // 形状校验 fail-closed（非数组/结构异常一律丢弃走正常加载）。
+  const [allProjects, setAllProjects] = useState<Project[]>(() => {
+    try {
+      const raw = window.localStorage.getItem('gewu-startup-snapshot-v1');
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (parsed?.version !== 1 || !Array.isArray(parsed.projects)) return [];
+      return parsed.projects as Project[];
+    } catch {
+      return [];
+    }
+  });
+  // BLOCK-101 P0 — 启动 timeline dataReady 打点（左栏项目列表首次到货；纯观测）
+  useStartupTimeline();
+  const persistSnapshot = useCallback((list: Project[]) => {
+    try {
+      window.localStorage.setItem(
+        'gewu-startup-snapshot-v1',
+        JSON.stringify({ version: 1, savedAt: Date.now(), projects: list })
+      );
+    } catch { /* 隐私模式/超限：快照失效即走正常加载，非致命 */ }
+  }, []);
   const refreshProjects = useCallback(async () => {
     try {
       const list = await listProjects();
+      markDataReady();
       setAllProjects(list);
+      persistSnapshot(list);
     } catch { /* 保持既有列表：读取失败不制造空树假象 */ }
-  }, []);
+  }, [persistSnapshot]);
 
   useEffect(() => {
     // BLOCK-87 实测修复：首载只试一次曾致「项目列表没有了」（用户复现「又没有了」）
     // ——dev 栈重启竞态下窗口先于后端就绪，首次 fetch 抛错后 catch 保持空数组
     // 且再无重试，列表永久空白。首载带退避重试（约 0/2/5/10/15s 共 5 次）；
     // 读取失败仍保持既有列表不制造空树假象（软刷新/手动刷新路径不变）。
+    // BLOCK-101 P0 — 首载到货即 dataReady 打点（度量锚点在首载链上）。
     let cancelled = false;
     const backoffMs = [0, 2000, 5000, 10000, 15000];
     (async () => {
@@ -167,13 +195,17 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
         if (cancelled) return;
         try {
           const list = await listProjects();
-          if (!cancelled) setAllProjects(list);
+          if (!cancelled) {
+            markDataReady();
+            setAllProjects(list);
+            persistSnapshot(list);
+          }
           return;
         } catch { /* 后端未就绪/瞬断：退避后重试 */ }
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [persistSnapshot]);
 
   // 软刷新（其它面改了项目/会话后）
   useEffect(() => subscribeGewuEvent(gewuEvents.softRefresh, () => { void refreshProjects(); }), [refreshProjects]);

@@ -4712,7 +4712,7 @@
       "id": "BLOCK-101-STARTUP-PERFORMANCE",
       "path": "docs/block-101-startup-performance-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-101-startup-performance",
       "entrypoint": "docs/README.md",
@@ -4726,7 +4726,7 @@
         "virtualization",
         "measurement-first"
       ],
-      "notes": "启动性能专项（用户裁决 2026-09-18「专项立 BLOCK-101 排队」；诉求原话「随着项目逐渐递增打开软件加载会不会变得很慢……我希望瞬时加载 用户无感」）。P0 前置实测：项目列表 API 9 项目=6ms/9.6KB 无 N+1——项目数量非瓶颈，时间分布未度量。家法红线=度量先行（BLOCK-95 同款：无数字不优化）：先立启动 timeline 分段仪表（main ready/window shown/first paint/data ready，dev-verify flow block101-startup-timeline，可复用 BLOCK-100 测试实例 9223 隔离采样）。工作面预排：P0 度量基线→P1 首屏 SWR（localStorage 快照先渲染后台对账=瞬时无感核心手法）→P2 首批 API 并发化→P3 左栏虚拟化（树节点>300 才做，D3）→P4 打包态 profile 评估（unsigned，UI-141 先例，D4）→P5 实机收口。非范围=Provider/GA/签名（G1+）、Vite dev 冷启动（开发态工具链）、BLOCK-95 已收口面。D1-D5 预置裁决项 plan §5。planned 排队不占 active 槽位；启动需用户裁决。",
+      "notes": "启动性能专项（用户裁决 2026-09-18「专项立 BLOCK-101 排队」；诉求原话「随着项目逐渐递增打开软件加载会不会变得很慢……我希望瞬时加载 用户无感」）。P0 前置实测：项目列表 API 9 项目=6ms/9.6KB 无 N+1——项目数量非瓶颈，时间分布未度量。家法红线=度量先行（BLOCK-95 同款：无数字不优化）：先立启动 timeline 分段仪表（main ready/window shown/first paint/data ready，dev-verify flow block101-startup-timeline，可复用 BLOCK-100 测试实例 9223 隔离采样）。工作面预排：P0 度量基线→P1 首屏 SWR（localStorage 快照先渲染后台对账=瞬时无感核心手法）→P2 首批 API 并发化→P3 左栏虚拟化（树节点>300 才做，D3）→P4 打包态 profile 评估（unsigned，UI-141 先例，D4）→P5 实机收口。非范围=Provider/GA/签名（G1+）、Vite dev 冷启动（开发态工具链）、BLOCK-95 已收口面。D1-D5 预置裁决项 plan §5。planned 排队不占 active 槽位；启动需用户裁决。 2026-09-18 启动 active（P0-LAUNCH；用户裁决「继续推进」按队列序，与 BLOCK-99 启动同款队列授权）。",
       "lastUpdated": "2026-09-18"
     }
   ],

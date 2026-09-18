@@ -171,6 +171,16 @@ async function createWindow({
   // Register with shared ref immediately so event handlers can use getMainWindow()
   setMainWindow(mainWindow);
 
+  // BLOCK-101 P0 — D1 口径第三/四段：ready-to-show→show 即 windowShown；
+  // did-finish-load 即文档就绪；did-start-loading≈preload 执行窗口。
+  // 纯观测打点，模块缺席（异常隔离）不影响启动。
+  try {
+    const { markStartup } = require("./startup-timeline-bridge");
+    mainWindow.webContents.on("did-start-loading", () => markStartup("preload"));
+    mainWindow.once("ready-to-show", () => markStartup("windowShown"));
+    mainWindow.webContents.on("did-finish-load", () => markStartup("didFinishLoad"));
+  } catch { /* 度量不可用不阻塞启动 */ }
+
   // ── Load URL ─────────────────────────────────────────────────
   // Development mode prioritizes Vite dev server with HMR;
   // production/normal launch loads the local static build.

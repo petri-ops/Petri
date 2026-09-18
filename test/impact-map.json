@@ -1937,6 +1937,27 @@
       "frontendRelated": true,
       "classifiesScripts": true,
       "scriptRole": "development-smoke"
+    },
+    {
+      "id": "block101-startup-performance",
+      "note": "BLOCK-101 启动性能：P0 timeline 度量仪表（main 打点/preload 桥/渲染层上报）+ P1 首屏 SWR 快照 + dev-verify flow 与实机证据脚本。",
+      "patterns": [
+        "src/ipc/startup-timeline.js",
+        "src/main/startup-timeline-bridge.js",
+        "src/main/_window-create.js",
+        "src/ipc/channels.js",
+        "src/preload.js",
+        "frontend/src/hooks/useStartupTimeline.ts",
+        "frontend/src/components/desktop/AppRailContext.tsx",
+        "scripts/block101-*",
+        "acceptance/block-101/**"
+      ],
+      "tests": [
+        "frontend/src/components/desktop/AppRailContext.test.tsx"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
     }
   ]
 }

@@ -1,0 +1,179 @@
+{
+  "flow": "block101-startup-timeline",
+  "summary": {
+    "capturedAt": "2026-09-18T08:29:36.720Z",
+    "samples": 5,
+    "mainReady": {
+      "median": 106,
+      "min": 105,
+      "max": 108,
+      "n": 5
+    },
+    "preload": {
+      "median": 313,
+      "min": 304,
+      "max": 321,
+      "n": 5
+    },
+    "windowShown": {
+      "median": 889,
+      "min": 870,
+      "max": 902,
+      "n": 5
+    },
+    "didFinishLoad": {
+      "median": 890,
+      "min": 871,
+      "max": 903,
+      "n": 5
+    },
+    "firstPaint": {
+      "median": 796,
+      "min": 772,
+      "max": 804,
+      "n": 5
+    },
+    "dataReady": {
+      "median": 984,
+      "min": 948,
+      "max": 985,
+      "n": 4
+    },
+    "domContentLoaded": {
+      "median": 589,
+      "min": 561,
+      "max": 593,
+      "n": 5
+    }
+  },
+  "raw": [
+    {
+      "main": {
+        "processStart": 0,
+        "mainReady": 106,
+        "preload": 311,
+        "windowShown": 891,
+        "didFinishLoad": 893,
+        "reported": {
+          "reportedAt": 1789720141573,
+          "dataReadyMs": 984,
+          "firstPaintMs": 804,
+          "receivedAt": 1285
+        }
+      },
+      "paints": [
+        {
+          "name": "first-paint",
+          "startTime": 804
+        },
+        {
+          "name": "first-contentful-paint",
+          "startTime": 804
+        }
+      ],
+      "domContentLoaded": 589
+    },
+    {
+      "main": {
+        "processStart": 0,
+        "mainReady": 108,
+        "preload": 321,
+        "windowShown": 877,
+        "didFinishLoad": 879,
+        "reported": {
+          "reportedAt": 1789720148749,
+          "dataReadyMs": 948,
+          "firstPaintMs": 772,
+          "receivedAt": 1263
+        }
+      },
+      "paints": [
+        {
+          "name": "first-paint",
+          "startTime": 772
+        },
+        {
+          "name": "first-contentful-paint",
+          "startTime": 772
+        }
+      ],
+      "domContentLoaded": 561
+    },
+    {
+      "main": {
+        "processStart": 0,
+        "mainReady": 105,
+        "preload": 316,
+        "windowShown": 902,
+        "didFinishLoad": 903,
+        "reported": {
+          "reportedAt": 1789720156970,
+          "dataReadyMs": 985,
+          "firstPaintMs": 804,
+          "receivedAt": 1293
+        }
+      },
+      "paints": [
+        {
+          "name": "first-paint",
+          "startTime": 804
+        },
+        {
+          "name": "first-contentful-paint",
+          "startTime": 804
+        }
+      ],
+      "domContentLoaded": 593
+    },
+    {
+      "main": {
+        "processStart": 0,
+        "mainReady": 105,
+        "preload": 304,
+        "windowShown": 889,
+        "didFinishLoad": 890,
+        "reported": {
+          "reportedAt": 1789720164499,
+          "receivedAt": 934
+        }
+      },
+      "paints": [
+        {
+          "name": "first-paint",
+          "startTime": 796
+        },
+        {
+          "name": "first-contentful-paint",
+          "startTime": 796
+        }
+      ],
+      "domContentLoaded": 591
+    },
+    {
+      "main": {
+        "processStart": 0,
+        "mainReady": 106,
+        "preload": 313,
+        "windowShown": 870,
+        "didFinishLoad": 871,
+        "reported": {
+          "reportedAt": 1789720172934,
+          "dataReadyMs": 952,
+          "firstPaintMs": 776,
+          "receivedAt": 1254
+        }
+      },
+      "paints": [
+        {
+          "name": "first-paint",
+          "startTime": 776
+        },
+        {
+          "name": "first-contentful-paint",
+          "startTime": 776
+        }
+      ],
+      "domContentLoaded": 566
+    }
+  ]
+}

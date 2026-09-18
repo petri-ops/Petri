@@ -89,6 +89,15 @@ const desktopBridgeSurface = {
   isDesktop: true,
   platform: process.platform,
   arch: process.arch,
+  // BLOCK-101 P0 — 启动 timeline 桥（纯观测）：渲染层四段 marks 汇总上报 +
+  // 主进程 marks 拉取（flow 用）。沙箱 preload 禁跨文件 require，通道按本文件
+  // 既有家法用字面量（与 src/ipc/channels.js startup 域保持一致）。
+  // preload 执行时刻改由主进程 did-start-loading 打点（timeOrigin 跨进程语义
+  // 不一致曾致负天文数字——渲染层自算不可靠）。
+  startup: {
+    report: (payload) => ipcRenderer.send('startup:report', payload),
+    marks: () => ipcRenderer.invoke('startup:marks'),
+  },
   // BLOCK-100 — 测试实例标记（主进程经 webPreferences.additionalArguments 注入
   // --gewu-test-instance=1）。严格 === true 判定：投影 shim 的 Proxy 属性访问
   // 返回 callable proxy（truthy 但非 true），不会误亮测试徽标。

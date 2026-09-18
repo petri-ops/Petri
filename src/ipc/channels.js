@@ -64,6 +64,12 @@ const CHANNELS = {
   gewu: {
     agentWorkbenchFlags: 'gewu:agent-workbench-flags',
   },
+  startup: {
+    // BLOCK-101 P0 — 启动 timeline 度量：渲染层把四段 marks 汇总上报（send），
+    // flow/诊断经 marks 拉取（invoke）读主进程存档。纯观测通道，无业务消费方。
+    report: 'startup:report',
+    marks: 'startup:marks',
+  },
   git: {
     applyInverseHunk: 'git:apply-inverse-hunk',
     blame: 'git:blame',

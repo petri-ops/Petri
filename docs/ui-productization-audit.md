@@ -3390,6 +3390,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **门禁**：Switcher 组件 3/3（渲染切换/创建后切换/两步删除）+ 面板回归 8/8 + tsc 0 + theme 4/4；client 加载防御（spaces 缺字段空列表降级不崩）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-416: 启动性能首屏 SWR + 启动 timeline 度量仪表——打开瞬间即见上次项目列表（BLOCK-101 P0+P1，2026-09-18 verified，flow 5 冷启动采样 allPass + 主实例快照写回 CDP 铁证）
+
+- **来源**：BLOCK-101-STARTUP-PERFORMANCE P0+P1（用户裁决「随着项目逐渐递增打开软件加载会不会变得很慢……我希望瞬时加载 用户无感」+「继续推进」队列授权启动）。
+- **交付面**：①**P0 度量仪表**（家法=度量先行无数字不优化）：D1 四段口径打点——主进程 `src/ipc/startup-timeline.js`（mainReady=whenReady resolve〔锚点在模块加载期冻结〕/windowShown=ready-to-show/didFinishLoad/preload=did-start-loading）+ 渲染层 `useStartupTimeline`（firstPaint=paintTiming/dataReady=左栏项目列表首次到货），双通道经 startup:report/marks 两 IPC（纯观测零业务消费方）；dev-verify flow `block101-startup-timeline` 自管测试实例冷启动采样 N 次落盘 acceptance/block-101/；**基线（dev 态 5 采样）**：mainReady 106ms / preload 313ms / windowShown 889ms / firstPaint 796ms / **dataReady 984ms**。②**P1 首屏 SWR**（D2 键 `gewu-startup-snapshot-v1`）：AppRailContext 项目列表 localStorage 快照同步先渲染（打开瞬间即见上次内容）+后台 listProjects 对账后覆盖写回（DB 唯一事实源，快照仅渲染缓存）；版本号失效+形状校验 fail-closed。③**P2/P3/P4 按火焰如实结论**：首批数据链单请求无串行瀑布（P2 无可优化目标）；左栏 ~几十 DOM 节点距虚拟化阈值 300 两个量级（P3 deferred）；打包态采样会覆盖 dist rc.7 候选产物（P4 deferred，届时 `--dir`+临时 output 零覆盖）。
+- **门禁**：flow `block101-startup-timeline` 5 冷启动采样 allPass（基线表落 plan §7）+ SWR 契约 4/4（快照同步渲染/对账覆盖写回/版本失效/坏形状丢弃）+ AppRail 回归 4/4 + tsc 0；实机铁证=主实例 localStorage 快照写回 {version:1, count:9}（CDP 读出）。
+- **仪表调试抓真 3 件**（如实）：①沙箱 preload 跨文件 require 即整个 preload 爆掉静默去桥（BLOCK-100 同款坑再踩，窗口 0 页面）→字面量通道+主进程侧打点；②channels.js 导出形态（module.exports=CHANNELS 对象本身非命名导出）；③performance.timeOrigin 跨进程语义不一致致负天文数字（preload/dataReady 相对值换算归口主进程+渲染层各自时间轴不互减）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-415: 知识空间管理会话台——/knowledge 页内嵌轻量聊天面 + 自然语言驱动空间内容组织（BLOCK-99 P4/G4，2026-09-18 verified，dev-verify flow 22/22 allPass 含 UI 真轮次走查+截图）
 
 - **来源**：BLOCK-99-KNOWLEDGE-MULTISPACE-CONSOLE P4（用户裁决「面板中需要加入会话聊天的页面来单独处理控制知识空间内的各种内容」）。

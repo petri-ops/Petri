@@ -235,11 +235,8 @@ describe('BLOCK-99 G4 useKnowledgeConsole', () => {
       (e) => e.kind === 'message' && e.role === 'user'
     );
     expect(messages.length).toBe(userCountBefore + 1);
-    expect(
-      messages[messages.length - 1] &&
-        messages[messages.length - 1].kind === 'message' &&
-        messages[messages.length - 1].content
-    ).toContain('取消');
+    const lastMessage = messages[messages.length - 1];
+    expect(lastMessage && lastMessage.kind === 'message' ? lastMessage.content : '').toContain('取消');
     expect(dispatched).toHaveLength(0);
   });
 

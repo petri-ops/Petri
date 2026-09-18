@@ -12,6 +12,10 @@
  * 6. 外部链接走系统浏览器
  */
 const CHANNELS = require('./ipc/channels');
+// BLOCK-101 P0 — 启动 timeline：进程起点锚点必须在主进程模块加载期冻结（main()
+// 内懒 require 会把 mainReady 锚点推迟数秒得到 mainReady≈0 的假数字）。
+const { PROCESS_START } = require('./ipc/startup-timeline');
+void PROCESS_START;
 
 const {
   app,
@@ -399,6 +403,8 @@ async function waitForBackendHealthy(port, timeoutMs) {
 
 // ── 应用生命周期 ───────────────────────────────────────────────
 async function main() {
+  // BLOCK-101 P0 — D1 口径第二段：whenReady resolve 即 mainReady（进程起点→事件循环就绪）
+  require("./ipc/startup-timeline").markStartup("mainReady");
   // BLOCK-100 P1 — 测试实例直连既有后端，不做端口抢占：主实例已占 3001，
   // reserveAvailablePort(3001) 会误选 3002 指错后端。端口以 R_SERVER_PORT 为准。
   const backendPorts = IS_TEST_INSTANCE
@@ -520,6 +526,9 @@ async function main() {
   }
 
   setupWindowIpc({ ipcMain, process, app, getMainWindow, globalShortcut, mainWindow });
+  // BLOCK-101 P0 — 启动 timeline 度量 IPC（纯观测；flow 经 startup:marks 拉取）
+  const { setupStartupTimelineIpc } = require("./ipc/startup-timeline");
+  setupStartupTimelineIpc({ ipcMain });
   setupAgentWorkbenchFlagsIpc({
     getMainWindow,
     getAgentWorkbenchFlags: () => agentWorkbenchFlags,

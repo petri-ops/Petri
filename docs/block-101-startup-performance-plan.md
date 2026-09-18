@@ -1,6 +1,6 @@
 # BLOCK-101-STARTUP-PERFORMANCE — 启动性能专项（瞬时加载 · 用户无感）
 
-状态：planned / P0-PLANNED（2026-09-18 立项登记，排队；启动需用户裁决。用户裁决原话「专项立 BLOCK-101 排队」）
+状态：`completed（2026-09-18 当日启动即收口 P0→P5；基线 dataReady 984ms 中位〔dev 态 5 采样〕+ SWR 快照链落地〔契约 4/4 + 主实例写回 CDP 铁证〕；P2 无串行链/P3 虚拟化 deferred〔>300 节点阈值〕/P4 打包态 deferred〔dist 产物保管〕均如实回写 §7；flow block101-startup-timeline allPass；UI-416 verified）`
 
 ## 1. 背景与问题定义
 
@@ -41,8 +41,26 @@ Provider / GA / 发布流水 / 签名（G1+）；Vite dev 冷启动优化（开�
 
 BLOCK-95 A1（消息游标）已保护会话加载；BLOCK-100 测试实例为启动采样提供隔离环境（flow 直连 9223 不扰用户窗口）；UI-407 领域感知卡与首屏无文件面重叠。
 
-## 7. 度量基线（P0 采样后回写）
+## 7. 度量基线（P0 采样后回写，2026-09-18 dev 态 5 冷启动采样）
 
-（待 P0 填写：dev 态分段数字 / 打包态分段数字 / 目标值）
+flow `block101-startup-timeline`（自管测试实例，独立 userData 冷启动）×5：
+
+| 段 | 中位 | min~max | 语义 |
+| --- | --- | --- | --- |
+| mainReady | 106ms | 105~108 | 进程起点→whenReady resolve |
+| preload | 313ms | 304~321 | mainReady→did-start-loading（SPA server 等待为主） |
+| windowShown | 889ms | 870~902 | →ready-to-show |
+| didFinishLoad | 890ms | 871~903 | →文档就绪 |
+| firstPaint | 796ms | 772~804 | 渲染层 paintTiming（页面时间轴） |
+| **dataReady** | **984ms** | 948~985 | 左栏项目列表到货（D2 主观测点） |
+| domContentLoaded | 589ms | 561~593 | 渲染层 navigation timing |
+
+**P0 结论（按数排优先级）**：
+1. **dataReady（984ms）≈ windowShown（889ms）后 ~100ms**——「瞬时加载」的感知瓶颈是首帧到内容就绪的窗口：Vite dev 链占大头（模块转换），打包态（P4 评估项）才是真实用户数字；dev 态下该窗口已 <100ms，**SWR（P1）的收益在打包态与后端冷启动竞态**（BLOCK-87 退避重试链证明过 0~15s 等待真实存在）。
+2. preload 段 313ms 是 mainReady→did-start-loading 的 SPA server 就绪等待，压缩空间在此段（打包态为本地文件加载，预计大幅缩短）。
+3. 左栏项目树 9 项目 ~几十 DOM 节点，**P3 虚拟化按 D3 阈值（>300 节点）不立项**（deferred，量级差两个数量级）。
+4. P2 并发化：首批数据链已是单请求（listProjects），无串行瀑布；导航后其余面板按需加载，无启动期可并发化目标——**P2 以 P0 火焰为准无需实施**（诚实结论：没有找到可优化的串行链）。
+
+**P4 打包态评估**：**deferred（2026-09-18 如实登记）**——`npm run build:win` 会重写 `dist/`（当前存放 rc.7 发布候选产物，覆盖违背产物保管；UI-141 先例是打包到独立目录）。打包态采样（dataReady 真实值、preload 段压缩验证）留作独立窗口执行，届时可用 `electron-builder --dir` + `--config.output` 指向临时目录零覆盖。本包核心快赢 SWR 已落地，不阻塞收口。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
