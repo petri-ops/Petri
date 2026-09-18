@@ -3356,6 +3356,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **门禁**：block100 flow 5/5（w=1284）；Win32 样式断言 WS_EX_TRANSPARENT=True；徽标双实例断言 allPass。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-412: 测试窗口固定逻辑视口 + 等比缩放——拖拽改缩放不触发响应式重排 (BLOCK-100 增补，2026-09-18 verified，用户裁决「窗口拖拽应该是缩放 不是让软件内部组件自适应 不然截图元素堆叠就看不到了」)
+
+- **交付面**：测试实例布局恒按 1600x1000 桌面形态渲染，窗口拖拽由 `webContents.setZoomFactor(min(w/1600, h/1000))` 等比吸收（resize 事件驱动重算）——CSS 视口恒=1600x1000，响应式断点/元素重排/卡片换形态**永不触发**，截图恒为标准桌面布局的等比缩微（跨尺寸可比）；zoom 下 `window.innerWidth` 恒读 1600，前端 ResizeObserver 不触发重算。
+- **抓真 1 件**：初始 `setZoomFactor` 早于页面提交被 Vite 首载重置（实机 innerWidth 回落 1284、dpr=1.25 抓真）→ 补 `did-finish-load` 重放。
+- **门禁**：实机 CDP 断言——初始(1280x800)视口 1600x1002/dpr≈1.0；`resizeTo(1024,640)` 后视口仍 1600x1000/dpr 0.8（zoom 0.64 吸收）；block100 flow 5/5。边界注记：响应式专项验证（ui351 悬浮/A7 窄窗自适应）应走 CDP Emulation 强制视口，测试实例的固定视口不影响其可行性。
+- G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-411: 测试窗口管理条——悬停解锁拖动/边缘调整大小/置顶切换 (BLOCK-100 增补，2026-09-18 verified，用户追问「可以调整预览窗口的大小吧？移动位置 置顶这些？」)
 
 - **交付面**：顶部 26px 管理条（app-region:drag 悬停解锁后可拖动移动窗口）+「📌置顶」切换按钮（默认开）+ 穿透状态提示。交互模型=**悬停自动解锁**：`setIgnoreMouseEvents(true, {forward:true})` 让穿透时渲染层仍收 mousemove，指针进入管理条/窗口边缘 8px → 自动关穿透（可拖动/边缘 resize/点按钮），移入内容区 → 自动恢复穿透；按下鼠标期间不自动上锁（防拖拽中途打断）；IPC 仅状态翻转时调用（mousemove 高频去重）。新增窗口管理通道 `window:set-always-on-top` / `window:set-ignore-mouse-events`（channels/preload/d.ts/handler 四处同加，handler 有 `BIOF3_TEST_INSTANCE=1` 守卫——用户实例误调恒拒绝，通道 145→147）。

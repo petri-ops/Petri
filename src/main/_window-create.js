@@ -135,6 +135,22 @@ async function createWindow({
       }
     });
     mainWindow.setTitle(`[TEST] ${BRAND.APP_NAME}`);
+    // UI-412 — 固定逻辑视口 + 等比缩放（用户裁决「窗口拖拽应该是缩放 不是让
+    // 软件内部组件自适应 不然截图元素堆叠就看不到了」）：布局恒按 1600x1000
+    // 桌面形态渲染，窗口缩放由 zoomFactor 等比吸收——CSS 视口宽恒=1600，响应
+    // 式断点/元素重排永不触发，截图恒为标准布局等比缩微。resize 事件驱动重算。
+    const TEST_BASE_WIDTH = 1600;
+    const TEST_BASE_HEIGHT = 1000;
+    const applyTestZoom = () => {
+      if (mainWindow.isDestroyed()) return;
+      const [w, h] = mainWindow.getContentSize();
+      mainWindow.webContents.setZoomFactor(Math.min(w / TEST_BASE_WIDTH, h / TEST_BASE_HEIGHT));
+    };
+    applyTestZoom();
+    mainWindow.on("resize", applyTestZoom);
+    // 首次加载/导航会重置 zoomFactor（实机抓真：初始 setZoomFactor 早于页面
+    // 提交被 Vite 首载重置，innerWidth 回落 1284）→ did-finish-load 后重放。
+    mainWindow.webContents.on("did-finish-load", applyTestZoom);
     // UI-411 — 测试实例默认鼠标穿透 + 置顶（用户裁决「不允许外部点击」+预览
     // 置顶合理）：真实点击在 OS 层穿透到下层窗口；forward:true 让渲染层在穿透
     // 时仍收 mousemove，驱动管理条悬停解锁（拖动移动/边缘 resize）。CDP 合成
