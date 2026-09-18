@@ -63,6 +63,20 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 6. **验证脚本不信任前台**：原生弹窗受 Windows 前台锁影响不一定是前台窗口——EnumWindows 枚举 + hwnd 直投（`scripts/lib-block75-os.cjs`），sidecar 对后台窗口的 snapshot/type/click 均可用。
 7. **工作区换行漂移是最隐蔽的一类平台坑**（2026-09-11 转化为门禁，同类第二次出现）：Windows 编辑器/工具会把工作区文件写成 CRLF，而 `.gitattributes` 的 `text=auto eol=lf` 让 **git 的内容比对看不见它**——`git diff` 为空，stat 缓存命中时 `git status` 连 `M` 都不显示（本仓库实测曾有 44 个 CRLF 文件静默存在而 status 干净）——漂移只在「读工作区原始字节与 blob 比 SHA」的校验器里现形：2026-08-07 是 `npm run check` 整链（migration SQL / golden fixture / acceptance 证据 SHA），2026-09-11 是 `g0-rs-p6` 的 `sourceMismatches` 恒红并被误登记为「P6 证据未重采」两周。**排查纪律：遇到任何 SHA/逐字节比对的门禁恒红，先查换行漂移（`git ls-files --eol`），别先怀疑证据过期**。检测 `npm run hygiene:check`（检查项 3），归一 `node .agents/skills/gewu-dev-infra/scripts/normalize-eol.mjs --write`（只改写换行字节；对内容与索引一致的文件顺带刷新索引 stat 缓存、不产生提交内容变化，带真实 WIP 的文件跳过、不动你的暂存状态）。
 
+## 端口与后端实例纪律（BLOCK-85 双真机夜沉淀 · 2026-09-18）
+
+> **适用范围＝双端 Agent 绑定（唯一标准源）**：本节同时约束 Mac 侧与 Windows 侧的所有开发 Agent——本 skill 随仓库分发，pull 到哪端就在哪端生效，任何一端不得私设端口规则、不得以聊天转述代替本表。Windows 侧脚本/编码纪律另见本文件「Windows/中文实机脚本纪律」节，两节叠加适用。
+
+1. **dev 栈双后端形态是既成事实，跨进程凭证必须同源**：dev-electron 的 `npm start` 后端（固定 :3001 API + :3005 网关）与 Electron main boot 自spawn 的后端（`R_SERVER_PORT` 未设 → 随机端口，renderer 的 `rApiBase` 指向它，日志 `[desktop] biof3-server spawned … reason=boot`）**共享同一 dataDir 但各自持有配对存储与隧道管理器** ⇒ 跨进程单例状态全部脑裂。实操纪律：① 凡遇「面板发的码对端兑换不了 / 面板状态与 REST 不一致 / 出码形态对不上」，第一步核对 `window.biof3Desktop.backendConfig.rApiBase` 与目标网关是否同进程（`lsof -iTCP:<port> -sTCP:LISTEN` 看 pid 归属；Windows 侧等价：`netstat -ano | findstr <port>` + 进程号核对）；② 需要跨端兑换的凭证（配对码等）必须从**拥有网关的进程**的 REST 签发（:3001），不要用面板 UI 出码做跨机验收；③ 结构性修复方向＝dev 模式下 Electron main attach 到 :3001（复用 BLOCK-100 测试实例 attach 机制），修复落地前本条长期有效。
+
+2. **反向隧道端口「一机一口」登记制（本表＝唯一真相源）**：隧道管理器带「spawn 前清场」逻辑（杀远端端口占用者），两端配置同端口＝互杀循环。症状指纹：子进程存活秒级即死、exit 0/255 交替出现、对端请求周期性 502 空窗、sshd 日志出现密集「sweep+main」连接对。**现行分配（runbook/聊天/旧文档与本表冲突时以本表为准）**：Mac 隧道 2234（公网 https://47.110.228.168:8443，nginx `gewu-mac.conf`）；Windows 隧道 2233（公网 https://47.110.228.168:8442，nginx `gewu-windows-8442.conf`）；ECS frps 另有 6022=Dell SSH、8787=Dell RStudio、3001/3002=Dell 侧旧服务（与 Windows 格物无关）。改端口必须两端同批生效并互报 probe。
+
+3. **长连接隧道必须绕开代理 TUN**：Clash/mihomo TUN 会接管 ssh 流量，代理侧会话回收＝隧道周期性死亡。症状指纹：每几分钟到十几分钟干净退出（code 0）、`route get <host>` 显示 utun 接口。纪律：隧道主机 IP 加代理 DIRECT 规则（`IP-CIDR,<ip>/32,DIRECT,no-resolve`，2026-09-18 已加 47.110.228.168）或测试期关 TUN；**隧道健康判据＝子进程存活跨过 15 分钟**，不是管理器 `state=connected`（那只是 10 秒启发）。
+
+4. **清场/杀进程逻辑必须可解释、可豁免**：按命令行签名匹配的 kill（orphan sweep 类）在多实例/多机场景会误杀友军；新增任何「启动前清理」必须带 excludePids 豁免 + 每次实际 kill 打印 pid 与匹配签名到日志，否则互杀排查时无证据可读。
+
+5. **双端协同协议（先查后动 · 同批生效 · 互报 probe）**：任何一端 Agent 在动隧道/网关/公网映射前必须——① 查本节分配表，**禁止自选端口**；② ECS 上 `ss -tlnp` 确认目标端口当前占用者（有主即停，先协商再动手）；③ 本端改动落地后向对端回报 probe 结果（curl 对端公网 `/api/mobile/status`，期待 401 + session_invalid 形 JSON），**两端 probe 全绿才算切换完成**；④ 分配表变更以本 skill 的 git 提交为准（push 后对端 pull 生效），口头/聊天约定不算登记。
+
 ## 保持工作区干净
 
 - `npm run hygiene:check` 报告死符号链接、临时残留与**工作区换行漂移**；它只报告不代删，处置由人裁决（换行归一用 `scripts/normalize-eol.mjs --write`）。
