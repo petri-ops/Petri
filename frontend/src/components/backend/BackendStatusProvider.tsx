@@ -5,6 +5,8 @@
 // （BLOCK-30 P2：曾有的 Gateway 健康聚合随 gateway 摘除）
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { BackendStatus } from '@/lib/electron';
+import { getPlatformApiPrefix } from '@/lib/env';
+import { getToken } from '@/lib/authClient';
 
 // 增强的后端状态类型（BLOCK-30 P2：gateway 字段随 gateway 摘除，回归 BackendStatus 本体）
 export type EnhancedBackendStatus = BackendStatus;
@@ -34,27 +36,71 @@ async function probeHealth(url: string): Promise<boolean> {
   }
 }
 
+// /api/runtime/status 响应形状（与投影桥 projectionDataBridges.runtimeBridge 同源）。
+export interface RuntimeStatusPayload {
+  ok?: boolean;
+  runtime?: {
+    r?: { installed?: boolean };
+    python?: { installed?: boolean };
+  };
+}
+
+/** 把 /api/runtime/status 载荷 + health 探测结果映射为 BackendStatus。
+ *  诚实语义：installed 只有 true/false 两种回答；载荷不可达 = null（未知），
+ *  消费端（useRuntimeDemandBanner 等）以 `=== false` 判缺失，未知不弹横幅。 */
+export function mapRuntimeStatusPayload(
+  payload: RuntimeStatusPayload | null,
+  serverUp: boolean,
+): EnhancedBackendStatus {
+  const rInstalled = payload?.runtime?.r?.installed;
+  const pyInstalled = payload?.runtime?.python?.installed;
+  return {
+    rRuntime: typeof rInstalled === 'boolean' ? rInstalled : null,
+    pyRuntime: typeof pyInstalled === 'boolean' ? pyInstalled : null,
+    rServerUp: serverUp,
+    serverUp,
+    isReady: serverUp,
+    downReason: serverUp ? null : '本地分析服务尚未就绪',
+    loaded: true,
+  };
+}
+
+async function fetchRuntimeStatus(base: string): Promise<RuntimeStatusPayload | null> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 3000);
+  try {
+    const headers: Record<string, string> = {};
+    const token = getToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const response = await fetch(`${base}/runtime/status`, { headers, signal: controller.signal });
+    return (await response.json()) as RuntimeStatusPayload;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 async function readBackendStatus(): Promise<EnhancedBackendStatus | null> {
   const desktopStatus = await window.biof3Desktop?.backend?.status();
   if (desktopStatus) {
     return { ...desktopStatus };
   }
-  // Vite's renderer-only development mode has no preload bridge. Probe the
-  // same local services so the real workspace UI remains available for visual
-  // regression and accessibility acceptance; packaged builds never use this.
+  // Vite's renderer-only development mode has no preload bridge（含投影：手机
+  // 浏览器里 shim 调用 resolve undefined，走此分支）。经平台前缀打 REST——
+  // 投影 = /api（gateway 同源），桌面 dev renderer = http://localhost:3001/api。
+  // packaged builds never use this.
   if (!import.meta.env.DEV) return null;
-  // BLOCK-30 P1: py-server HTTP 探针已摘除（Python 执行并入 biof3-server），
-  // 渲染进程无从探测运行时安装态，pyRuntime 恒 false（仅视觉回归路径）。
-  const rServerUp = await probeHealth('http://127.0.0.1:3001/api/health');
-  return {
-    rRuntime: rServerUp,
-    pyRuntime: false,
-    rServerUp,
-    serverUp: rServerUp,
-    isReady: rServerUp,
-    downReason: rServerUp ? null : '本地分析服务尚未就绪',
-    loaded: true,
-  };
+  // UI-406 修复：曾把 health 探测结果当作 rRuntime、pyRuntime 写死 false
+  //（BLOCK-30 P1 py-server 摘除后的遗产）——手机投影里 127.0.0.1 探针恒不通，
+  // 工作台假弹「R 与 Python 运行时均未安装」。现消费 /api/runtime/status
+  //（BLOCK-86 权威探测，与桌面 IPC backend:status 同源真相）。
+  const base = getPlatformApiPrefix();
+  const [serverUp, payload] = await Promise.all([
+    probeHealth(`${base}/health`),
+    fetchRuntimeStatus(base),
+  ]);
+  return mapRuntimeStatusPayload(payload, serverUp);
 }
 
 export function useBackendStatus(): EnhancedBackendStatus {

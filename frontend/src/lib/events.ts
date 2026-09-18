@@ -10,9 +10,6 @@
 import type { CopilotContext } from '@/lib/copilotContext';
 
 export const gewuEvents = {
-  /** Fired by DesktopOnboarding on completion; listened by App's DesktopOnboardingMount */
-  onboardingDone: 'gewu:onboarding-done',
-
   /** Fired by main.js preload on Cmd+R; listened by project-workspace to refetch state */
   softRefresh: 'gewu:soft-refresh',
 
@@ -254,7 +251,6 @@ export interface ProjectWorkspaceChangedDetail {
 }
 
 export type GewuEventMap = {
-  [gewuEvents.onboardingDone]: undefined;
   [gewuEvents.softRefresh]: undefined;
   [gewuEvents.projectOpenResult]: ProjectOpenResultDetail;
   [gewuEvents.projectOpenArtifact]: ProjectOpenArtifactDetail;

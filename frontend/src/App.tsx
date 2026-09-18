@@ -8,7 +8,6 @@ const GewuOpenFileDevBridge = lazy(() =>
   import('./components/editor/integration/GewuOpenFileDevBridge')
 );
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
 import { TitleBar } from '@/components/desktop/TitleBar';
 import { WorkspacePanelsProvider, useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { AppRail } from '@/components/desktop/AppRail';
@@ -16,7 +15,6 @@ import { AppRailProvider } from '@/components/desktop/AppRailContext';
 import { isProjectionMobile } from '@/components/desktop/titlebar/shared';
 import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
-import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
 import { getBridge } from '@/lib/desktopBridge';
 import { CommandPalette, useCommandPalette } from '@/components/copilot/CommandPalette';
 // BLOCK-42 — pending-scroll 全局 Provider（见 AppShell 内注释）
@@ -46,30 +44,6 @@ import '@/components/desktop/desktop.css';
 import { configureApi } from '../../core/packages/shared-copilot/api-inject';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 configureApi({ getApiPrefix: () => getApiPrefix(), getToken });
-
-// BLOCK-61：新 key + 历史 key 读兼容（已完成的引导不因改名复现）
-const ONBOARDING_FLAG = 'gewu-onboarding-completed';
-const LEGACY_ONBOARDING_FLAG = 'gewu-onboarding-completed';
-
-function DesktopOnboardingMount(): React.ReactElement | null {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    try {
-      const done = localStorage.getItem(ONBOARDING_FLAG) === '1'
-        || localStorage.getItem(LEGACY_ONBOARDING_FLAG) === '1';
-      if (!done) setShow(true);
-    } catch {
-      setShow(true);
-    }
-    const handler = () => setShow(false);
-    const unsub = subscribeGewuEvent(gewuEvents.onboardingDone, handler);
-    return unsub;
-  }, []);
-
-  if (!show) return null;
-  return <DesktopOnboarding />;
-}
 
 /** Lives inside WorkspacePanelsProvider. */
 function AppShell(): React.ReactElement {
@@ -173,7 +147,6 @@ function AppShell(): React.ReactElement {
           </Routes>
         </main>
         </div>
-        <DesktopOnboardingMount />
         <CommandPalette
           open={isOpen}
           onClose={close}
