@@ -196,6 +196,7 @@ const CHANNELS = {
     // 用户实例调用恒拒绝）：置顶切换 + 鼠标穿透开关（forward:true）。
     setAlwaysOnTop: 'window:set-always-on-top',
     setIgnoreMouseEvents: 'window:set-ignore-mouse-events',
+    testManageModeChanged: 'window:test-manage-mode-changed',
     snapshot: 'window:snapshot',
     stateChanged: 'window:state-changed',
     thumbnail: 'window:thumbnail',

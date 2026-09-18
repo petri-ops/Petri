@@ -13,9 +13,16 @@
   padding: 0 10px;
   background: var(--gewu-warning-bg);
   border-bottom: 1px solid var(--gewu-warning-text);
-  /* 悬停解锁后整条为拖动区（移动窗口）；按钮自身 no-drag 可点 */
+  /* 管理模式下整条为拖动区（移动窗口）；按钮自身 no-drag 可点。
+     锁定态鼠标在 OS 层已穿透，此条拖动语义自然不生效。 */
   -webkit-app-region: drag;
   user-select: none;
+}
+
+/* UI-413 — 管理模式（已解锁）：实线边框加粗提示当前可操作 */
+.barUnlocked {
+  border-bottom-width: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .badge {

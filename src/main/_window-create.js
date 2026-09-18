@@ -155,8 +155,17 @@ async function createWindow({
     // 置顶合理）：真实点击在 OS 层穿透到下层窗口；forward:true 让渲染层在穿透
     // 时仍收 mousemove，驱动管理条悬停解锁（拖动移动/边缘 resize）。CDP 合成
     // 输入走渲染层注入不经 OS 鼠标层，交互型 flow 不受影响。
-    mainWindow.setAlwaysOnTop(true);
-    mainWindow.setIgnoreMouseEvents(true, { forward: true });
+    // 注意顺序：Windows 上 setIgnoreMouseEvents(true, {forward:true}) 会在 OS
+    // 层重写扩展样式、丢掉 TOPMOST（实机抓真 TOPMOST=False）→ 置顶必须最后设。
+    // forward:true 仅悬停检测需要——UI-413 改显式 Ctrl+Alt+M 双稳态后不再需要；
+    // 且 forward 路径实测丢 TOPMOST。置顶保持最后设定。
+    // 实机二分结论：默认 level 的 setAlwaysOnTop(true) 在创建期不生效
+    //（isAlwaysOnTop=false），'screen-saver' 层级稳定（悬浮预览窗语义正确）。
+    mainWindow.setAlwaysOnTop(true, "screen-saver");
+    mainWindow.setIgnoreMouseEvents(true);
+    mainWindow.webContents.on("did-finish-load", () => {
+      mainWindow.setAlwaysOnTop(true, "screen-saver");
+    });
   }
 
   // Register with shared ref immediately so event handlers can use getMainWindow()

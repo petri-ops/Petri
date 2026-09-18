@@ -103,8 +103,10 @@ declare global {
         toggleFullScreen: () => void;
         onFullScreenChanged: (callback: (isFullScreen: boolean) => void) => () => void;
         /** BLOCK-100/UI-411 — 测试实例窗口管理（handler 仅测试实例放行） */
-        setAlwaysOnTop: (flag: boolean) => Promise<{ ok: boolean; alwaysOnTop?: boolean }>;
+        setAlwaysOnTop: (flag: boolean, level?: 'floating' | 'modal-panel' | 'main-menu' | 'status' | 'pop-up-menu' | 'screen-saver') => Promise<{ ok: boolean; alwaysOnTop?: boolean }>;
         setIgnoreMouseEvents: (flag: boolean) => Promise<{ ok: boolean }>;
+        /** UI-413 — 管理模式（Ctrl+Alt+M）切换事件；manageMode=true=已解锁 */
+        onTestManageModeChanged: (callback: (manageMode: boolean) => void) => () => void;
       };
       /** BLOCK-59 窗口系统 — 窗口状态机（docked/popped/railed/closed）IPC 面。 */
       windowManager: {

@@ -3363,6 +3363,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **门禁**：实机 CDP 断言——初始(1280x800)视口 1600x1002/dpr≈1.0；`resizeTo(1024,640)` 后视口仍 1600x1000/dpr 0.8（zoom 0.64 吸收）；block100 flow 5/5。边界注记：响应式专项验证（ui351 悬浮/A7 窄窗自适应）应走 CDP Emulation 强制视口，测试实例的固定视口不影响其可行性。
 - G0 开发期常态 · 不外推 packaged/Provider/GA.
 
+## UI-413: 测试窗口管理模式显式化——Ctrl+Alt+M 双稳态替代悬停自动解锁 + screen-saver 置顶 (BLOCK-100 增补，2026-09-18 verified，用户实测反馈「拖拽换位置使用的不是很顺畅」)
+
+- **交互重设计**：悬停自动解锁存在翻转竞态（穿透必须赶在按下前完成，时序不稳=拖拽卡顿）——改为 **Ctrl+Alt+M 显式双稳态**（globalShortcut 仅测试实例注册）：默认锁定=整窗穿透；解锁后即普通窗口（拖管理条移动/边缘拉伸/点按钮，零翻转竞态），再按锁回。主进程经 testManageModeChanged 事件广播状态；管理条按态换装（锁定=快捷键提示/解锁=拖拽指引+置顶按钮）。
+- **实机二分抓真 1 件（置顶丢失根因）**：默认 level 的 `setAlwaysOnTop(true)` 在窗口创建期**不生效**（isAlwaysOnTop=false，与 setIgnoreMouseEvents 无关）——**`'screen-saver'` 层级稳定**，全部调用点（创建/置顶按钮/toggle 重申）统一 screen-saver 层 + did-finish-load 重申。另修 getMainWindow 惰性解析（setupWindowIcp 调用点早于 createWindow，mainWindow stub 不可用）。
+- **门禁**：tsc 0 + TitleBar 29/29 + ipc-channels 守护 5/5（通道 148）；实机 Win32 终验 TOPMOST=True 且 TRANSPARENT=True；block100 flow 5/5。
+- G0 开发期常态 · 不外推 packaged/Provider/GA.
+
 ## UI-411: 测试窗口管理条——悬停解锁拖动/边缘调整大小/置顶切换 (BLOCK-100 增补，2026-09-18 verified，用户追问「可以调整预览窗口的大小吧？移动位置 置顶这些？」)
 
 - **交付面**：顶部 26px 管理条（app-region:drag 悬停解锁后可拖动移动窗口）+「📌置顶」切换按钮（默认开）+ 穿透状态提示。交互模型=**悬停自动解锁**：`setIgnoreMouseEvents(true, {forward:true})` 让穿透时渲染层仍收 mousemove，指针进入管理条/窗口边缘 8px → 自动关穿透（可拖动/边缘 resize/点按钮），移入内容区 → 自动恢复穿透；按下鼠标期间不自动上锁（防拖拽中途打断）；IPC 仅状态翻转时调用（mousemove 高频去重）。新增窗口管理通道 `window:set-always-on-top` / `window:set-ignore-mouse-events`（channels/preload/d.ts/handler 四处同加，handler 有 `BIOF3_TEST_INSTANCE=1` 守卫——用户实例误调恒拒绝，通道 145→147）。

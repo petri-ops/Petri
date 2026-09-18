@@ -24,6 +24,7 @@ function makeBridge(overrides: Partial<DesktopWindow> = {}): DesktopBridge {
     // UI-411 — 测试实例窗口管理方法（mock 补齐满足 bridge 类型契约）
     setAlwaysOnTop: vi.fn().mockResolvedValue({ ok: true }),
     setIgnoreMouseEvents: vi.fn().mockResolvedValue({ ok: true }),
+    onTestManageModeChanged: vi.fn(() => vi.fn()),
     ...overrides,
   };
   return {

@@ -12,6 +12,31 @@ const CHANNELS = require('../ipc/channels');
 
 const { zoomBy, zoomReset } = require("./_zoom.js");
 
+// BLOCK-100/UI-413 — 测试实例管理模式切换（全局快捷键 Ctrl+Alt+M）。
+// 设计取舍（用户实测反馈「拖拽换位置使用的不是很顺畅」）：悬停自动解锁存在
+// 竞态（穿透翻转必须赶在按下之前完成，时序不稳=拖拽卡顿），改为显式双稳态——
+// 解锁后窗口即普通窗口（拖顶栏移动/边缘拉伸/点按钮，零翻转竞态），锁回后完全
+// 穿透。仅测试实例注册（globalShortcut 不抢用户快捷键）。
+function registerTestManageModeToggle({ globalShortcut, getMainWindow }) {
+  if (process.env.BIOF3_TEST_INSTANCE !== "1") return;
+  let manageMode = false;
+  const apply = () => {
+    const win = getMainWindow();
+    if (!win || win.isDestroyed()) return;
+    win.setIgnoreMouseEvents(!manageMode);
+    // 切换后按 Electron 状态重申置顶——screen-saver 层（默认层创建期不生效，
+    // 实机二分结论）
+    win.setAlwaysOnTop(win.isAlwaysOnTop(), "screen-saver");
+    win.webContents.send(CHANNELS.window.testManageModeChanged, manageMode);
+  };
+  globalShortcut.register("Control+Alt+M", () => {
+    manageMode = !manageMode;
+    apply();
+  });
+  const win = getMainWindow();
+  if (win) win.on("closed", () => globalShortcut.unregister("Control+Alt+M"));
+}
+
 /**
  * Register window-control IPC handlers.
  *
@@ -21,7 +46,7 @@ const { zoomBy, zoomReset } = require("./_zoom.js");
  * @param {import('electron').app} deps.app         — Electron app
  * @param {function} deps.getMainWindow            — () => BrowserWindow|null
  */
-function setupWindowIpc({ ipcMain, process, app, getMainWindow }) {
+function setupWindowIpc({ ipcMain, process, app, getMainWindow, globalShortcut }) {
   // Chrome controls (min/max/close) must resolve the *owning* window of the
   // sender webContents — not just the main window. A second main-class window
   // (or any window rendering the same chrome) would otherwise have dead
@@ -33,6 +58,8 @@ function setupWindowIpc({ ipcMain, process, app, getMainWindow }) {
     const win = event?.sender?.getOwnerBrowserWindow?.();
     return win && !win.isDestroyed() ? win : null;
   };
+
+  registerTestManageModeToggle({ globalShortcut, getMainWindow });
 
   // ── Window chrome controls ─────────────────────────────────
   ipcMain.on(CHANNELS.window.minimize, (event) => {

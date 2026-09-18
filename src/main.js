@@ -22,6 +22,7 @@ const {
   session,
   net,
   Menu,
+  globalShortcut,
 } = require("electron");
 
 // UI-400-1 抓真（2026-09-17）——Windows 原生窗口遮挡追踪对无边框窗口（frame:false）
@@ -518,7 +519,7 @@ async function main() {
     console.warn("[desktop] setProxy failed:", e.message);
   }
 
-  setupWindowIpc({ ipcMain, process, app, getMainWindow });
+  setupWindowIpc({ ipcMain, process, app, getMainWindow, globalShortcut, mainWindow });
   setupAgentWorkbenchFlagsIpc({
     getMainWindow,
     getAgentWorkbenchFlags: () => agentWorkbenchFlags,
