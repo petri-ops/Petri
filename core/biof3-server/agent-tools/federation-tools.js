@@ -109,7 +109,9 @@ async function tool_delegate_to_gewu_node(args = {}) {
   } catch { /* 回执内容拿不到时诚实降级为状态回执 */ }
 
   return {
-    ok: String(meta.agentStatus || '').toLowerCase() === 'completed',
+    // 终态命名：对端 chat.js task 模式正常完成标 'done'，部分路径标 'completed'——
+    // 只认 completed 会把对端正常完成误报为 error（BLOCK-85 双真机 P3 实测踩中）。
+    ok: ['completed', 'done'].includes(String(meta.agentStatus || '').toLowerCase()),
     peerName: peer.name,
     peerTaskId: taskId,
     agentStatus: meta.agentStatus,

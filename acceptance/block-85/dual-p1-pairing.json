@@ -1,0 +1,59 @@
+{
+  "capturedAt": "2026-09-18T15:49:27.898Z",
+  "mode": "cross-network-aliyun",
+  "peers": {
+    "ok": true,
+    "version": 1,
+    "peers": [
+      {
+        "peerId": "gpeer_1b29dffe41f7d531",
+        "name": "MacBook-Pro.local",
+        "baseUrl": "https://47.110.228.168:8443",
+        "platform": "darwin",
+        "arch": "arm64",
+        "gewuVersion": "1.0.0",
+        "executors": {
+          "r": true,
+          "python": true
+        },
+        "protocol": 1,
+        "addedAt": "2026-09-18T13:30:06.027Z",
+        "lastSeenAt": "2026-09-18T15:05:24.643Z",
+        "lastProbe": {
+          "ok": true,
+          "at": "2026-09-18T15:05:24.643Z",
+          "latencyMs": 175,
+          "error": null
+        }
+      }
+    ]
+  },
+  "probe": {
+    "ok": true,
+    "probe": {
+      "ok": true
+    },
+    "peer": {
+      "peerId": "gpeer_1b29dffe41f7d531",
+      "name": "MacBook-Pro.local",
+      "baseUrl": "https://47.110.228.168:8443",
+      "platform": "darwin",
+      "arch": "arm64",
+      "gewuVersion": "1.0.0",
+      "executors": {
+        "r": true,
+        "python": true
+      },
+      "protocol": 1,
+      "addedAt": "2026-09-18T13:30:06.027Z",
+      "lastSeenAt": "2026-09-18T15:49:27.836Z",
+      "lastProbe": {
+        "ok": true,
+        "at": "2026-09-18T15:49:27.836Z",
+        "latencyMs": 112,
+        "error": null
+      }
+    }
+  },
+  "note": "P1 配对证据：配对成立于 2026-09-18T13:30Z（Mac 侧兑换 Windows 码），probe 穿 aliyun 绿灯；Mac 侧面板截图缺失如实标注——Mac 侧互证由 P2/P3 的 Mac 真值回执（产物路径 /Users/...、tool_result summary ok）承载"
+}

@@ -1,5 +1,12 @@
 # BLOCK-85 双真机端到端验收 Runbook（Windows ↔ Mac，跨网段 aliyun 模式）
 
+> **状态：✅ 双真机验收 completed（2026-09-18 夜，Windows 侧会话主导 + Mac 侧配合）**。
+> P1 配对（probe 穿 aliyun 绿灯 175ms）+ P2 fed 分析作业（desq2 demo 在 Mac 10s completed，
+> 产物真值 `/Users/.../results/tool-jobs/`，Windows 零拉回）+ P3 delegate 委托（Mac agent
+> 独立执行 system_info 侦察，回执 success + 指纹回流）。证据：`acceptance/block-85/dual-p*.json`。
+> 验收过程顺修两缺陷（job-provenance require 断链 ee317893 / delegate 终态 done≠completed），
+> 登记两结构缺口（delegation 无项目绑定 → project_required；委托未开独立会话 → 历史污染）归 BLOCK-88 域。
+>
 > 用途：BLOCK-85 格物联邦最后一步——双真机端到端验收。本文件随仓库同步，
 > Mac 侧会话 pull 后按此执行；完成后整包 completed 并解锁 BLOCK-88 P1（D7 门槛）。
 > 前置状态：P1-P3 已交付 + P4 closeout 四门绿（2026-09-18，1d014a39）；联邦探针 3/3。
