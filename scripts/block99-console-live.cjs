@@ -185,14 +185,34 @@ async function main() {
     };
 
     await evalJs("location.href='/knowledge'");
+    await new Promise((r) => setTimeout(r, 2000));
+    // BLOCK-103 — 抽屉开合有 localStorage 记忆：先清为收起再 reload，保证确定性起点
+    await evalJs(`localStorage.setItem('gewu.knowledgeConsoleOpen', '0'); location.reload()`);
     await new Promise((r) => setTimeout(r, 3000));
+    // BLOCK-103 — 会话台改折叠抽屉（默认收起）：U1 断言把手挂载，再经把手展开后走原 composer 断言
     const mount = await evalJs(`(() => ({
       page: !!document.querySelector('[data-testid="knowledge-page"]'),
       panel: !!document.querySelector('[data-testid="knowledge-space-switcher"]'),
+      handle: !!document.querySelector('[data-testid="knowledge-console-handle"]'),
       console: !!document.querySelector('[data-testid="knowledge-console"]'),
-      composer: !!document.querySelector('[data-testid="knowledge-console"] textarea'),
     }))()`);
-    assert('U1_knowledge_page_two_column_mounted', mount.page && mount.panel && mount.console && mount.composer, JSON.stringify(mount));
+    assert('U1_knowledge_page_panel_and_handle_mounted', mount.page && mount.panel && mount.handle && !mount.console, JSON.stringify(mount));
+    await evalJs(`document.querySelector('[data-testid="knowledge-console-handle"]').click()`);
+    await new Promise((r) => setTimeout(r, 500));
+    const opened = await evalJs(`!!document.querySelector('[data-testid="knowledge-console"] textarea')`);
+    assert('U1b_console_drawer_opens_via_handle', opened === true, 'handle click did not mount console composer');
+
+    // 抽屉点击时才挂载 → useKnowledgeConsole 需要初始化（ready 前 textarea disabled）：
+    // 轮询等待 composer 可用，最多 10s（原流程台面自页面加载即挂载，无此窗口）。
+    let composerReady = false;
+    for (let i = 0; i < 20 && !composerReady; i++) {
+      await new Promise((r) => setTimeout(r, 500));
+      composerReady = await evalJs(`(() => {
+        const ta = document.querySelector('[data-testid="knowledge-console"] textarea');
+        return !!ta && !ta.disabled;
+      })()`);
+    }
+    assert('U1c_console_composer_ready', composerReady === true, 'composer not ready within 10s');
 
     // 会话台真轮次：React 受控 textarea 经原生 setter 写值 + input 事件 + 点发送
     const typed = await evalJs(`(() => {

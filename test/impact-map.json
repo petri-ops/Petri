@@ -1948,6 +1948,30 @@
       "scriptRole": "development-smoke"
     },
     {
+      "id": "block103-knowledge-space-ux",
+      "note": "BLOCK-103 知识空间页产品化重设计：页壳状态条/通知动作卡/双页签/hero 空态/会话台折叠抽屉（纯前端）。子组件拆分与 Dock 新文件映射到面板回归+页面冒烟+block99 后端契约（testid 契约未变）。",
+      "patterns": [
+        "frontend/src/components/workspace-panels/KnowledgeSpacePanel.tsx",
+        "frontend/src/components/workspace-panels/KnowledgeSpacePanel.module.css",
+        "frontend/src/components/workspace-panels/KnowledgeDocLibrary.tsx",
+        "frontend/src/components/workspace-panels/KnowledgeSearchProbe.tsx",
+        "frontend/src/components/knowledge/KnowledgeConsoleDock.tsx",
+        "frontend/src/components/knowledge/KnowledgeConsoleDock.module.css",
+        "frontend/src/components/knowledge/KnowledgeConsoleChat.module.css",
+        "frontend/src/pages/knowledge/**",
+        "frontend/src/styles/custom.css",
+        "scripts/block103-knowledge-ux-live.cjs",
+        "acceptance/block-103/**"
+      ],
+      "tests": [
+        "test/knowledge-space.test.mjs",
+        "test/agent-tool-registry.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
+    },
+    {
       "id": "block101-startup-performance",
       "note": "BLOCK-101 启动性能：P0 timeline 度量仪表（main 打点/preload 桥/渲染层上报）+ P1 首屏 SWR 快照 + dev-verify flow 与实机证据脚本。",
       "patterns": [

@@ -182,6 +182,8 @@ html[data-theme='dark'],
   --gewu-ink: #eef8f4;
   --gewu-mint: rgba(67, 209, 174, 0.14);
   --gewu-mint-bright: #8ff0d6;
+  /* BLOCK-103 — 状态徽章成功色暗色对（亮色 #2e7d32 定义于 :root 补齐令牌组） */
+  --gewu-success: #7fd8a4;
 
   /* ===== Gewu semantic surface tokens (dark mode) =====
      暗色下：canvas 最深、surface 抬高一档、subtle 更亮一档；

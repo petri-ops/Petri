@@ -1,0 +1,67 @@
+{
+  "flow": "block103-knowledge-ux-live",
+  "finishedAt": "2026-09-19T15:33:28.539Z",
+  "allPass": true,
+  "checks": [
+    {
+      "name": "C0_backend_reachable",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "C0b_empty_space_available",
+      "ok": true,
+      "detail": "create=200 id=ks_3c26066927d9"
+    },
+    {
+      "name": "U1_page_shell_mounted_console_default_closed",
+      "ok": true,
+      "detail": "{\"page\":true,\"strip\":true,\"switcher\":true,\"toggle\":true,\"tabs\":true,\"handle\":true,\"consoleClosed\":true}"
+    },
+    {
+      "name": "U5_no_key_honest_state",
+      "ok": true,
+      "detail": "{\"toggleDisabled\":true,\"openSettings\":true}"
+    },
+    {
+      "name": "U2a_switched_to_empty_space",
+      "ok": true,
+      "detail": "spaceBId=ks_3c26066927d9"
+    },
+    {
+      "name": "U2b_hero_empty_state_with_ctas",
+      "ok": true,
+      "detail": "{\"hero\":true,\"upload\":true,\"paste\":true}"
+    },
+    {
+      "name": "U3a_search_tab_mounts_probe",
+      "ok": true,
+      "detail": "{\"input\":true,\"btn\":true}"
+    },
+    {
+      "name": "U3b_docs_tab_roundtrip",
+      "ok": true,
+      "detail": "aria-selected not restored"
+    },
+    {
+      "name": "U4a_drawer_opens_via_handle",
+      "ok": true,
+      "detail": "composer not mounted after handle click"
+    },
+    {
+      "name": "U4b_drawer_esc_closes",
+      "ok": true,
+      "detail": "console still mounted after Esc"
+    },
+    {
+      "name": "U4c_drawer_reopens",
+      "ok": true,
+      "detail": "second handle click did not mount console"
+    },
+    {
+      "name": "C1_walkthrough_space_cleaned",
+      "ok": true,
+      "detail": "impact={\"status\":\"ok\",\"impact\":{\"documents\":0,\"chunks\":0}} del=200"
+    }
+  ]
+}

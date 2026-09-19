@@ -1,12 +1,12 @@
 {
   "flow": "block99-console-live",
-  "finishedAt": "2026-09-18T07:07:19.888Z",
+  "finishedAt": "2026-09-19T15:32:23.923Z",
   "allPass": true,
   "checks": [
     {
       "name": "C0_spaces_rest_ok",
       "ok": true,
-      "detail": "{\"status\":\"ok\",\"spaces\":[{\"id\":\"ks_default\",\"name\":\"默认知识空间\",\"enabled\":1,\"embedding_model\":\"text-embedding-v3\",\"created_at\":\"2026-09-09 07:48:55\",\"updated_at\":\"2"
+      "detail": "{\"status\":\"ok\",\"spaces\":[{\"id\":\"ks_default\",\"name\":\"默认知识空间\",\"enabled\":0,\"embedding_model\":\"text-embedding-v3\",\"created_at\":\"2026-09-09 07:48:55\",\"updated_at\":\"2"
     },
     {
       "name": "C0b_console_conversation_ready",
@@ -31,22 +31,22 @@
     {
       "name": "C1d_space_exists_via_rest",
       "ok": true,
-      "detail": "{\"status\":\"ok\",\"spaces\":[{\"id\":\"ks_default\",\"name\":\"默认知识空间\",\"enabled\":1,\"embedding_model\":\"text-embedding-v3\",\"created_at\":\"2026-09-09 07:48:55\",\"updated_at\":\"2026-09-09T09:42:58.584Z\",\"documents\":0,\""
+      "detail": "{\"status\":\"ok\",\"spaces\":[{\"id\":\"ks_default\",\"name\":\"默认知识空间\",\"enabled\":0,\"embedding_model\":\"text-embedding-v3\",\"created_at\":\"2026-09-09 07:48:55\",\"updated_at\":\"2026-09-19T04:45:22.264Z\",\"documents\":0,\""
     },
     {
       "name": "C2a_gate_confirmation_required",
       "ok": true,
-      "detail": "[{\"confirmationRequired\":true,\"action\":\"knowledge_space_delete\",\"impact\":{\"spaceId\":\"ks_5643f358e177\",\"spaceName\":\"实机验证空间A\",\"documents\":0,\"chunks\":0},\"confirmToken\":\"kc_8c9014f593c97d4d87c434e3\",\"expiresInSeconds\":600,\"m"
+      "detail": "[{\"confirmationRequired\":true,\"action\":\"knowledge_space_delete\",\"impact\":{\"spaceId\":\"ks_967a2994b9fa\",\"spaceName\":\"实机验证空间A\",\"documents\":0,\"chunks\":0},\"confirmToken\":\"kc_4bc62a80e3aed72a63612adf\",\"expiresInSeconds\":600,\"m"
     },
     {
       "name": "C2b_gate_token_issued",
       "ok": true,
-      "detail": "kc_8c9014f593c97d4d87c434e3"
+      "detail": "kc_4bc62a80e3aed72a63612adf"
     },
     {
       "name": "C2c_gate_impact_truthful",
       "ok": true,
-      "detail": "{\"spaceId\":\"ks_5643f358e177\",\"spaceName\":\"实机验证空间A\",\"documents\":0,\"chunks\":0}"
+      "detail": "{\"spaceId\":\"ks_967a2994b9fa\",\"spaceName\":\"实机验证空间A\",\"documents\":0,\"chunks\":0}"
     },
     {
       "name": "C2d_space_still_exists_before_confirm",
@@ -56,17 +56,17 @@
     {
       "name": "C3a_delete_executed_with_token",
       "ok": true,
-      "detail": "[{\"deleted\":\"ks_5643f358e177\",\"name\":\"实机验证空间A\",\"documents\":0,\"chunks\":0,\"message\":\"已删除空间「实机验证空间A」（0 篇文档、0 个块已级联清理）。\"},{\"spaces\":[{\"id\":\"ks_default\",\"name\":\"默认知识空间\",\"enabled\":true,\"documents\":0,\"chunks\":0,\"isDefault\":true"
+      "detail": "[{\"deleted\":\"ks_967a2994b9fa\",\"name\":\"实机验证空间A\",\"documents\":0,\"chunks\":0,\"message\":\"已删除空间「实机验证空间A」（0 篇文档、0 个块已级联清理）。\"}]"
     },
     {
       "name": "C3b_space_gone_via_rest",
       "ok": true,
-      "detail": "{\"status\":\"ok\",\"spaces\":[{\"id\":\"ks_default\",\"name\":\"默认知识空间\",\"enabled\":1,\"embedding_model\":\"text-embedding-v3\",\"created_at\":\"2026-09-09 07:48:55\",\"updated_at\":\"2026-09-09T09:42:58.584Z\",\"documents\":0,\""
+      "detail": "{\"status\":\"ok\",\"spaces\":[{\"id\":\"ks_default\",\"name\":\"默认知识空间\",\"enabled\":0,\"embedding_model\":\"text-embedding-v3\",\"created_at\":\"2026-09-09 07:48:55\",\"updated_at\":\"2026-09-19T04:45:22.264Z\",\"documents\":0,\""
     },
     {
       "name": "C4a_space_b_created",
       "ok": true,
-      "detail": "{\"status\":\"ok\",\"space\":{\"id\":\"ks_e644e71ed0b5\",\"name\":\"实机验证空间B\",\"enabled\":0,\"embedding_model\":\"text-embedding-v3\",\"created_at\":\"2026-09-18T07:07:07.695Z\",\"updat"
+      "detail": "{\"status\":\"ok\",\"space\":{\"id\":\"ks_7c6b8cee0e9a\",\"name\":\"实机验证空间B\",\"enabled\":0,\"embedding_model\":\"text-embedding-v3\",\"created_at\":\"2026-09-19T15:31:53.697Z\",\"updat"
     },
     {
       "name": "C4b_bind_called",
@@ -76,12 +76,12 @@
     {
       "name": "C4c_binding_reads_space_b",
       "ok": true,
-      "detail": "{\"status\":\"ok\",\"conversationId\":\"conv_c17399f8-776\",\"spaceId\":\"ks_e644e71ed0b5\"}"
+      "detail": "{\"status\":\"ok\",\"conversationId\":\"conv_c17399f8-776\",\"spaceId\":\"ks_7c6b8cee0e9a\"}"
     },
     {
       "name": "C4d_space_b_deleted",
       "ok": true,
-      "detail": "{\"status\":\"ok\",\"deleted\":\"ks_e644e71ed0b5\",\"name\":\"实机验证空间B\",\"documents\":0,\"chunks\":0}"
+      "detail": "{\"status\":\"ok\",\"deleted\":\"ks_7c6b8cee0e9a\",\"name\":\"实机验证空间B\",\"documents\":0,\"chunks\":0}"
     },
     {
       "name": "C4e_binding_falls_back_default",
@@ -89,9 +89,19 @@
       "detail": "{\"status\":\"ok\",\"conversationId\":\"conv_c17399f8-776\",\"spaceId\":\"ks_default\"}"
     },
     {
-      "name": "U1_knowledge_page_two_column_mounted",
+      "name": "U1_knowledge_page_panel_and_handle_mounted",
       "ok": true,
-      "detail": "{\"page\":true,\"panel\":true,\"console\":true,\"composer\":true}"
+      "detail": "{\"page\":true,\"panel\":true,\"handle\":true,\"console\":false}"
+    },
+    {
+      "name": "U1b_console_drawer_opens_via_handle",
+      "ok": true,
+      "detail": "handle click did not mount console composer"
+    },
+    {
+      "name": "U1c_console_composer_ready",
+      "ok": true,
+      "detail": "composer not ready within 10s"
     },
     {
       "name": "U2_console_message_submitted",

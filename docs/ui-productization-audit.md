@@ -3956,3 +3956,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **改动**：①`projectionTerminalBridge.ts` 投影终端 EventSource 停用 `?session=`（一年期会话 token 曾落中转 nginx 日志/浏览器历史）→ 同源 HttpOnly gw_session cookie 鉴权（sessionAuth readCookieToken 分支），token 仅留在 Bearer header 的 fetch 内；②`useTerminalSubAgentResults` 轮询加 `document.hidden` 跳过（CenterPanel+SideChatDock 双实例时 5s×2 的高频空转减半，隐藏期归零）；③`useHarnessWorkflowStatus.workflowPollDelay` 无 workflow 时 1.5s→5s（曾 40 req/min 空轮询）；④`useResultStore.resultsById` useMemo 化（每 render 新 Map 使以其为 deps 的 memo 全失效）。
 - **证据**：tsc 0；copilot+hooks 套件 422/422；网关/federation/task-store 定向 9/9；重启实机行为验证（正常 Host 200/伪造 Host 403/公网门 8442 401/网关门 401——Host 白名单与 cookie 鉴权无回归）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-426: 知识空间页产品化重设计——状态条/双页签/hero 空态/管理会话台折叠抽屉（BLOCK-103）(2026-09-19 verified，dev Electron 边界内实机)
+
+- **来源**：用户裁决「知识空间这里的布局很不好用呀 你能从产品的角度 立个新的block 重新优化这里的内容吗 无论是布局还是内容」（附 /knowledge 空态截图）。BLOCK-69/94/99 三期能力堆叠后七条产品问题（plan §0 截图+代码双证据）。
+- **改动**：①状态条统一三重重复头部——切换器内联+真 switch 启用开关（role=switch，保留 knowledge-toggle testid 与缺 key 禁用语义）+就绪/摄取中/失败徽章（--gewu-success 补暗色对）；②通知动作卡组（同屏合并一张卡，DashScope 缺 key 附「去设置」跳 /settings）；③双页签「文档库/检索预览」（原检索测试工具移页签，能力与 testid 全保留）；④hero 大 dropzone 空态（双 CTA 内嵌，拖拽 accent 描边保留）；⑤管理会话台折叠抽屉（对标 UI-417 SideChatDock：右缘竖把手+380px overlay 覆盖不挤压+Esc/外点/再点收起+localStorage 记忆，默认收起，ConsoleChat 内部零改动）；⑥组件拆分 KnowledgeSpacePanel 678→200 行（+DocLibrary 506/Probe 121/Dock 95，700 棘轮净减）+文案产品化。纯前端零后端。
+- **证据**：组件 17/17（行为基线八项全保留+页签往返/hero 新增）+Switcher 3/3+global-pages 冒烟+tsc 0+theme 4/4+前端全量 1146/1146；实机=block103-knowledge-ux-live **12/12 allPass**（CDP 测试实例：页壳挂载+默认收起/缺 key 诚实态/空空间切换 hero/页签往返/抽屉开-Esc收-再开+截图×3，acceptance/block-103/）+block99-console-live **24/24 allPass**（真轮次回归：把手适配 U1/U1b/U1c+REST/真模型/D4 门/绑定链全过）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

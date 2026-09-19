@@ -14,8 +14,10 @@ function workflow(terminal: boolean): HarnessWorkflowJobState {
 }
 
 describe('workflowPollDelay', () => {
-  it('polls while no state or a live state is available', () => {
-    expect(workflowPollDelay(null)).toBe(1500);
+  it('polls slowly before a workflow exists, then follows live state', () => {
+    // BLOCK-102 P4 降频契约：无 workflow 时 5s 空轮询（曾 1.5s=40 req/min），workflow 出现后恢复 1.5s。
+    // 测试同步清偿（BLOCK-103 会话对账并行收口 03530c9b 漏改的断言）。
+    expect(workflowPollDelay(null)).toBe(5000);
     expect(workflowPollDelay(workflow(false))).toBe(1500);
   });
 

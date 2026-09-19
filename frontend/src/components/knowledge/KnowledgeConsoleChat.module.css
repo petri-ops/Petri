@@ -1,7 +1,8 @@
 /* KnowledgeConsoleChat.module.css — BLOCK-99 G4 管理会话台（--gewu-* token，禁 slate/零定义族） */
 
-/* /knowledge 页双栏布局（面板 + 会话台）；由页壳与台面共用本 module。
-   注意 flex-direction: row 必须显式——global-page .body 是 column，同类覆盖会丢。 */
+/* /knowledge 页布局（BLOCK-103 起文档区为主体，会话台折叠抽屉见
+   KnowledgeConsoleDock.module.css）。注意 flex-direction: row 必须显式——
+   global-page .body 是 column，同类覆盖会丢。 */
 .pageBody {
   display: flex;
   flex-direction: row;
@@ -13,14 +14,6 @@
 .panelCol {
   flex: 1 1 0;
   min-width: 0;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.consoleCol {
-  flex: 0 0 380px;
-  min-width: 300px;
   min-height: 0;
   display: flex;
   flex-direction: column;

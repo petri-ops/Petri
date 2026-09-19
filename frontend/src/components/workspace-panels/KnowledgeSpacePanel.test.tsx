@@ -1,11 +1,22 @@
 // BLOCK-69 / UI-318 — KnowledgeSpacePanel 组件定向测试
 // fetch 全 mock（不发真实网络）；验证诚实空态 / 开关 / 文档清单 / 检索测试框。
+// BLOCK-103：面板新增 useNavigate（去设置动作卡）→ 渲染统一包 MemoryRouter；
+// 检索预览移入独立页签（检索用例先点 knowledge-tab-search）；行为基线八项语义保留。
 
 import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 import { KnowledgeSpacePanel } from './KnowledgeSpacePanel';
 import type { KnowledgeSpaceState } from '@/lib/knowledgeClient';
+
+function renderPanel(): ReturnType<typeof render> {
+  return render(
+    <MemoryRouter>
+      <KnowledgeSpacePanel />
+    </MemoryRouter>
+  );
+}
 
 function spaceState(overrides: Partial<KnowledgeSpaceState> = {}): KnowledgeSpaceState {
   return {
@@ -39,11 +50,26 @@ afterEach(() => {
 describe('BLOCK-69 KnowledgeSpacePanel', () => {
   it('无 DashScope key 时渲染诚实空态并禁用开关（D7）', async () => {
     mockFetchSequence([{ match: /knowledge\/space/, body: spaceState({ embeddingAvailable: false }) }]);
-    render(<KnowledgeSpacePanel />);
+    renderPanel();
     await waitFor(() => expect(screen.getByTestId('knowledge-panel')).toBeTruthy());
     expect(screen.getByTestId('knowledge-embed-unavailable').textContent).toContain('DashScope');
     const toggle = screen.getByTestId('knowledge-toggle') as HTMLButtonElement;
     expect(toggle.disabled).toBe(true);
+    // BLOCK-103 D3 — hero 空态 + 缺 key 附「去设置」动作卡
+    expect(screen.getByTestId('knowledge-empty-hero')).toBeTruthy();
+    expect(screen.getByTestId('knowledge-open-settings')).toBeTruthy();
+  });
+
+  it('BLOCK-103 D1 — 双页签往返：默认文档库（hero/列表），切检索预览回文档库', async () => {
+    mockFetchSequence([{ match: /knowledge\/space/, body: spaceState() }]);
+    renderPanel();
+    await waitFor(() => expect(screen.getByTestId('knowledge-empty-hero')).toBeTruthy());
+    fireEvent.click(screen.getByTestId('knowledge-tab-search'));
+    await waitFor(() => expect(screen.getByTestId('knowledge-search-input')).toBeTruthy());
+    expect(screen.queryByTestId('knowledge-empty-hero')).toBeNull();
+    fireEvent.click(screen.getByTestId('knowledge-tab-docs'));
+    await waitFor(() => expect(screen.getByTestId('knowledge-empty-hero')).toBeTruthy());
+    expect(screen.queryByTestId('knowledge-search-input')).toBeNull();
   });
 
   it('文档列表渲染状态与块数；删除按钮存在', async () => {
@@ -67,7 +93,7 @@ describe('BLOCK-69 KnowledgeSpacePanel', () => {
         }),
       },
     ]);
-    render(<KnowledgeSpacePanel />);
+    renderPanel();
     await waitFor(() => expect(screen.getAllByTestId('knowledge-doc-row').length).toBe(2));
     // BLOCK-94 F5 起：ready 文档名同时出现在文档按钮与检索过滤下拉 → 用 testid 断言
     expect(screen.getAllByTestId('knowledge-doc-name')[0].textContent).toContain('基因笔记.md');
@@ -95,7 +121,10 @@ describe('BLOCK-69 KnowledgeSpacePanel', () => {
       { match: /knowledge\/space/, body: spaceState() },
     ];
     mockFetchSequence(responses);
-    render(<KnowledgeSpacePanel />);
+    renderPanel();
+    // BLOCK-103 D1 — 检索预览移入独立页签：先切页签再断言输入框
+    await waitFor(() => expect(screen.getByTestId('knowledge-tab-search')).toBeTruthy());
+    fireEvent.click(screen.getByTestId('knowledge-tab-search'));
     await waitFor(() => expect(screen.getByTestId('knowledge-search-input')).toBeTruthy());
     fireEvent.change(screen.getByTestId('knowledge-search-input'), { target: { value: 'TP53 凋亡' } });
     fireEvent.click(screen.getByTestId('knowledge-search-btn'));
@@ -130,7 +159,7 @@ describe('BLOCK-69 KnowledgeSpacePanel', () => {
       }] }) },
     ];
     const fetchMock = mockFetchSequence(responses);
-    render(<KnowledgeSpacePanel />);
+    renderPanel();
     await waitFor(() => expect(screen.getByTestId('knowledge-clear')).toBeTruthy());
     fireEvent.click(screen.getByTestId('knowledge-clear'));
     // 第一步：只改按钮文案，不发请求
@@ -161,7 +190,7 @@ describe('BLOCK-69 KnowledgeSpacePanel', () => {
       { match: /knowledge\/space/, body: spaceState() },
     ];
     mockFetchSequence(responses);
-    render(<KnowledgeSpacePanel />);
+    renderPanel();
     await waitFor(() => expect(screen.getByTestId('knowledge-upload')).toBeTruthy());
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     expect(input).toBeTruthy();
@@ -187,7 +216,7 @@ describe('BLOCK-69 KnowledgeSpacePanel', () => {
       { match: /knowledge\/space/, body: spaceState() },
     ];
     const fetchMock = mockFetchSequence(responses);
-    render(<KnowledgeSpacePanel />);
+    renderPanel();
     await waitFor(() => expect(screen.getByTestId('knowledge-paste-toggle')).toBeTruthy());
     fireEvent.click(screen.getByTestId('knowledge-paste-toggle'));
     expect(screen.getByTestId('knowledge-paste-box')).toBeTruthy();
@@ -223,7 +252,7 @@ describe('BLOCK-69 KnowledgeSpacePanel', () => {
       },
     ];
     const fetchMock = mockFetchSequence(responses);
-    render(<KnowledgeSpacePanel />);
+    renderPanel();
     await waitFor(() => expect(screen.getAllByTestId('knowledge-doc-check').length).toBe(2));
     fireEvent.click(screen.getByTestId('knowledge-select-all'));
     expect(screen.getByTestId('knowledge-batch-delete').textContent).toContain('2');
@@ -260,7 +289,7 @@ describe('BLOCK-69 KnowledgeSpacePanel', () => {
       { match: /knowledge\/space/, body: spaceState({ documents: [doc] }) },
     ];
     mockFetchSequence(responses);
-    render(<KnowledgeSpacePanel />);
+    renderPanel();
     await waitFor(() => expect(screen.getByTestId('knowledge-doc-name')).toBeTruthy());
     fireEvent.click(screen.getByTestId('knowledge-doc-name'));
     await waitFor(() => expect(screen.getByTestId('knowledge-doc-preview')).toBeTruthy());

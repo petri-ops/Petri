@@ -1,0 +1,94 @@
+/* KnowledgeConsoleDock.module.css — BLOCK-103 P4 管理会话台折叠抽屉
+   （--gewu-* token，禁 slate/零定义族；交互对标 UI-417 SideChatDock） */
+
+.dockRoot {
+  position: relative;
+  flex: 0 0 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.handle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 10px;
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-secondary);
+  cursor: pointer;
+  padding: 10px 0;
+}
+
+.handle:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
+}
+
+.handleActive {
+  border-color: var(--gewu-accent);
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
+}
+
+.handleText {
+  writing-mode: vertical-rl;
+  letter-spacing: 2px;
+  font-size: var(--gewu-font-size-xs);
+}
+
+/* overlay：覆盖在文档区上方（不挤压布局），右缘留把手位 */
+.surface {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: calc(100% - 4px);
+  width: 380px;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--gewu-border);
+  border-radius: 12px;
+  background: var(--gewu-bg-surface);
+  box-shadow: var(--gewu-shadow-menu);
+  overflow: hidden;
+  animation: dockSlideIn 0.18s ease-out;
+}
+
+@keyframes dockSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.closeBtn {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-tertiary);
+  cursor: pointer;
+}
+
+.closeBtn:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
+}

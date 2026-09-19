@@ -1,4 +1,7 @@
-/* KnowledgeSpacePanel.module.css — BLOCK-69 / UI-318 知识空间右栏 tab */
+/* KnowledgeSpacePanel.module.css — BLOCK-69 / UI-318 知识空间管理面
+   BLOCK-103 重构：新增状态条/徽章/switch/页签/通知动作卡/hero 空态；
+   文档库与检索预览子组件共用本 module（knowledge-utils 同此先例）。
+   全部 --gewu-* token（禁 slate 字面量/零定义家族）。 */
 
 .panel {
   display: flex;
@@ -11,24 +14,288 @@
   color: var(--gewu-text);
 }
 
-.header {
+/* ===== BLOCK-103 状态条：切换器内联 + 启用 switch + 状态徽章 ===== */
+.statusStrip {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stripRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.badgeRow {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: var(--gewu-font-size-xs);
+  line-height: 1.5;
+  border: 1px solid transparent;
+}
+
+.badgeReady {
+  color: var(--gewu-success);
+  background: var(--gewu-bg-subtle);
+}
+
+.badgeBusy {
+  color: var(--gewu-accent);
+  background: var(--gewu-accent-weak);
+}
+
+.badgeFailed {
+  color: var(--gewu-danger);
+  background: var(--gewu-danger-bg);
+}
+
+.badgeMuted {
+  color: var(--gewu-text-tertiary);
+  background: var(--gewu-bg-subtle);
+}
+
+.switchBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 999px;
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
+  cursor: pointer;
+}
+
+.switchBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.switchBtnOn {
+  border-color: var(--gewu-accent);
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
+}
+
+.switchKnob {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--gewu-text-tertiary);
+  transition: background 0.15s ease;
+}
+
+.switchBtnOn .switchKnob {
+  background: var(--gewu-accent);
+}
+
+.switchLabel {
+  white-space: nowrap;
+}
+
+/* ===== BLOCK-103 通知动作卡组（同屏合并一张卡） ===== */
+.noticeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 8px;
+  background: var(--gewu-bg-subtle);
+}
+
+.noticeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
+  line-height: 1.5;
+}
+
+.noticeRowError {
+  color: var(--gewu-danger);
+  word-break: break-all;
+}
+
+.noticeText {
+  flex: 1;
+  min-width: 0;
+}
+
+.noticeAction {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border: 1px solid var(--gewu-accent);
+  border-radius: 6px;
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
+  font-size: var(--gewu-font-size-xs);
+  cursor: pointer;
+}
+
+.noticeAction:hover {
+  background: var(--gewu-accent-bg);
+}
+
+/* ===== BLOCK-103 双页签 ===== */
+.tabsBar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid var(--gewu-border);
+  padding-bottom: 0;
+}
+
+.tabBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tabBtn:hover {
+  color: var(--gewu-text);
+  background: var(--gewu-hover);
+}
+
+.tabBtnActive {
+  color: var(--gewu-accent);
+  border-bottom-color: var(--gewu-accent);
+  background: transparent;
+}
+
+.tabBtnActive:hover {
+  background: transparent;
+  color: var(--gewu-accent);
+}
+
+/* ===== BLOCK-103 文档库容器（拖拽 dropzone 根） ===== */
+.library {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* BLOCK-94 F3：拖拽上传反馈（accent 描边对齐 BLOCK-90 房风） */
+.dropActive {
+  outline: 2px dashed var(--gewu-accent);
+  outline-offset: -3px;
+  border-radius: 8px;
+}
+
+/* ===== BLOCK-103 hero 空态 ===== */
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 40px 20px;
+  border: 1.5px dashed var(--gewu-border-strong);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.heroIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
+}
+
+.heroTitle {
+  font-size: var(--gewu-font-size-md);
+  font-weight: 600;
   color: var(--gewu-text);
 }
 
-.title {
-  font-weight: 600;
-  font-size: var(--gewu-font-size-base);
-}
-
-.headerNote {
-  margin-left: auto;
-  font-size: var(--gewu-font-size-xs);
+.heroText {
+  max-width: 460px;
+  margin: 0;
   color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+  line-height: 1.7;
 }
 
+.heroCtas {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.heroPrimaryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border: 1px solid var(--gewu-accent);
+  border-radius: 8px;
+  background: var(--gewu-accent-surface);
+  color: var(--gewu-accent);
+  font-size: var(--gewu-font-size-sm);
+  cursor: pointer;
+}
+
+.heroPrimaryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.heroGhostBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-sm);
+  cursor: pointer;
+}
+
+.heroGhostBtn:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
+}
+
+/* ===== 通用通知/错误（上传报告、加载失败等沿用） ===== */
 .notice {
   padding: 8px 10px;
   border: 1px solid var(--gewu-border);
@@ -43,13 +310,6 @@
   display: flex;
   justify-content: center;
   padding: 6px 0 2px;
-}
-
-/* BLOCK-94 F3：拖拽上传反馈（accent 描边对齐 BLOCK-90 房风） */
-.dropActive {
-  outline: 2px dashed var(--gewu-accent);
-  outline-offset: -3px;
-  border-radius: 8px;
 }
 
 .pasteBox {
@@ -97,50 +357,16 @@
 
 .errorBox {
   padding: 8px 10px;
-  border: 1px solid rgba(239, 68, 68, 0.35);
+  border: 1px solid var(--gewu-status-error-border);
   border-radius: 8px;
-  background: rgba(239, 68, 68, 0.08);
-  color: #ef4444;
+  background: var(--gewu-danger-bg);
+  color: var(--gewu-danger);
   font-size: var(--gewu-font-size-xs);
   line-height: 1.5;
   word-break: break-all;
 }
 
-.spaceRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.toggleBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border: 1px solid var(--gewu-border);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-sm);
-  cursor: pointer;
-}
-
-.toggleBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.toggleBtnOn {
-  border-color: var(--gewu-accent);
-  background: var(--gewu-accent-surface);
-  color: var(--gewu-accent);
-}
-
-.spaceMeta {
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-tertiary);
-}
-
+/* ===== 工具行与按钮 ===== */
 .toolbar {
   display: flex;
   align-items: center;
@@ -180,25 +406,16 @@
 }
 
 .dangerBtn {
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: var(--gewu-danger);
+  border: 1px solid var(--gewu-danger-bg);
 }
 
+/* ===== 文档列表 ===== */
 .docList {
   display: flex;
   flex-direction: column;
   gap: 4px;
   min-height: 60px;
-}
-
-.empty {
-  padding: 14px 10px;
-  border: 1px dashed var(--gewu-border);
-  border-radius: 8px;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
-  text-align: center;
-  line-height: 1.6;
 }
 
 .docRow {
@@ -235,17 +452,17 @@
 }
 
 .docStatusReady {
-  color: #22c55e;
+  color: var(--gewu-success);
 }
 
 .docStatusFailed {
-  color: #ef4444;
+  color: var(--gewu-danger);
 }
 
 .docMeta {
   flex-shrink: 0;
   font-size: 10px;
-  font-family: monospace;
+  font-family: var(--gewu-mono, monospace);
   color: var(--gewu-text-tertiary);
 }
 
@@ -274,97 +491,11 @@
 }
 
 .iconBtnDanger:hover {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.08);
+  color: var(--gewu-danger);
+  background: var(--gewu-danger-bg);
 }
 
-.searchBox {
-  margin-top: auto;
-  padding-top: 8px;
-  border-top: 1px solid var(--gewu-border);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.searchTitle {
-  font-weight: 600;
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-secondary);
-}
-
-.searchRow {
-  display: flex;
-  gap: 6px;
-}
-
-.searchInput {
-  flex: 1;
-  min-width: 0;
-  padding: 5px 8px;
-  border: 1px solid var(--gewu-border);
-  border-radius: 8px;
-  background: var(--gewu-bg-elevated);
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-xs);
-  font-family: inherit;
-}
-
-.searchInput:focus {
-  outline: none;
-  border-color: var(--gewu-accent);
-}
-
-.searchNote {
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-tertiary);
-}
-
-.hitList {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.hitRow {
-  padding: 6px 8px;
-  border: 1px solid var(--gewu-border);
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.hitHead {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.hitDoc {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--gewu-accent);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.hitScore {
-  flex-shrink: 0;
-  font-size: 10px;
-  font-family: monospace;
-  color: var(--gewu-text-tertiary);
-}
-
-.hitText {
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-secondary);
-  line-height: 1.5;
-  word-break: break-word;
-}
-
-/* BLOCK-94 F4：管理面批量操作 + 全文预览 */
+/* ===== BLOCK-94 F4：批量操作 + 全文预览 ===== */
 .batchBar {
   display: flex;
   align-items: center;
@@ -459,7 +590,98 @@
   font-weight: 600;
 }
 
-/* BLOCK-94 F5：检索过滤下拉 + 命中高亮 */
+/* ===== 检索预览（BLOCK-94 F5 能力保留，BLOCK-103 更名移页签） ===== */
+.searchBox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+}
+
+.searchTitle {
+  font-weight: 600;
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-secondary);
+}
+
+.searchIntro {
+  margin: 0;
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
+  line-height: 1.6;
+}
+
+.searchRow {
+  display: flex;
+  gap: 6px;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 8px;
+  background: var(--gewu-bg-elevated);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-xs);
+  font-family: inherit;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--gewu-accent);
+}
+
+.searchNote {
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
+}
+
+.hitList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hitRow {
+  padding: 6px 8px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hitHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.hitDoc {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gewu-accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hitScore {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-family: var(--gewu-mono, monospace);
+  color: var(--gewu-text-tertiary);
+}
+
+.hitText {
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-secondary);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
 .searchFilter {
   margin-bottom: 6px;
   padding: 5px 8px;
