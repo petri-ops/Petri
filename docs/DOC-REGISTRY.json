@@ -4650,20 +4650,20 @@
       "id": "BLOCK-88-ENGINEER-COLLAB",
       "path": "docs/block-88-engineer-collab-p0-design-review.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-88-engineer-collab",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-18",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P4-ACTIVE",
+      "phase": "COMPLETED",
       "tags": [
         "block-88",
         "engineer-collab",
         "identity",
         "federation"
       ],
-      "notes": "工程师协作立项评审（2026-09-18 用户裁决「开始 BLOCK-88 立项评审」；概念源自 2026-09-14 f52e7d87 用户裁决「可以的 非常棒」）：联邦主体=不同的工程师。三层缺口=①配对带身份②任务归属隔离（tasks.user_id 列已存在）③项目授权边界。代码底座=users DAO/tasks.user_id/peers 注册表/mobile-gateway 配对会话全套。裁决点 D1-D8（D1 身份模型推荐轻量声明身份不动单管理员；D7 顺序依赖=BLOCK-85 双真机收口先行，88 不占 active 槽位）。非范围=协同编辑/合并/账号密码体系/中继拓扑。 2026-09-18 用户裁决「都按推荐」：D1-D8 全部落定（D1 轻量声明身份/D2 握手身份化/D3 列标记+视图隔离/D4 默认零授权逐项目 grants/D5 粗档×grants/D6 验收 1:1/D7 BLOCK-85 双真机收口先行/D8 非范围确认）。实现启动门槛=BLOCK-85 P4 收口后用户裁决启动 P1。 2026-09-19 用户夜间裁决「都搞 我要睡觉了」启动 P1（与侧边聊天悬挂化两项串行，队列序 88 先行）；D7 门槛由 BLOCK-85 双真机收口 87298a22 满足。 2026-09-19 夜间会话 P1 收口 completed（7cc5cbf3，plan §9；UI-418 verified；实机 15/15 acceptance/block-88/）；P2 收口 completed（8ad51d36，plan §10；UI-419 verified；实机 13/13 acceptance/block-88/p2-attribution.json）；P3 收口 completed（fe7649fc，plan §11；UI-420 verified；实机 16/16 acceptance/block-88/p3-grants.json）；整包 P1-P3 交付完成，P4 closeout（双真机端到端）待用户裁决。",
+      "notes": "工程师协作立项评审（2026-09-18 用户裁决「开始 BLOCK-88 立项评审」；概念源自 2026-09-14 f52e7d87 用户裁决「可以的 非常棒」）：联邦主体=不同的工程师。三层缺口=①配对带身份②任务归属隔离（tasks.user_id 列已存在）③项目授权边界。代码底座=users DAO/tasks.user_id/peers 注册表/mobile-gateway 配对会话全套。裁决点 D1-D8（D1 身份模型推荐轻量声明身份不动单管理员；D7 顺序依赖=BLOCK-85 双真机收口先行，88 不占 active 槽位）。非范围=协同编辑/合并/账号密码体系/中继拓扑。 2026-09-18 用户裁决「都按推荐」：D1-D8 全部落定（D1 轻量声明身份/D2 握手身份化/D3 列标记+视图隔离/D4 默认零授权逐项目 grants/D5 粗档×grants/D6 验收 1:1/D7 BLOCK-85 双真机收口先行/D8 非范围确认）。实现启动门槛=BLOCK-85 P4 收口后用户裁决启动 P1。 2026-09-19 用户夜间裁决「都搞 我要睡觉了」启动 P1（与侧边聊天悬挂化两项串行，队列序 88 先行）；D7 门槛由 BLOCK-85 双真机收口 87298a22 满足。 2026-09-19 夜间会话 P1 收口 completed（7cc5cbf3，plan §9；UI-418 verified；实机 15/15 acceptance/block-88/）；P2 收口 completed（8ad51d36，plan §10；UI-419 verified；实机 13/13 acceptance/block-88/p2-attribution.json）；P3 收口 completed（fe7649fc，plan §11；UI-420 verified；实机 16/16 acceptance/block-88/p3-grants.json）；整包 COMPLETED（2026-09-19，plan §12）：P1 15/15+P2 13/13+P3 16/16+P4 双真机 12/12（Mac×Windows 真机 DESKTOP-N94BLO7）+closeout 5/5；UI-418/419/420 verified。",
       "lastUpdated": "2026-09-19"
     },
     {

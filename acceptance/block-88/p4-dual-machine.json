@@ -1,0 +1,75 @@
+{
+  "package": "BLOCK-88-ENGINEER-COLLAB",
+  "stage": "P4-DUAL-MACHINE",
+  "topology": "real dual-machine: Mac(command seat, isolated dataDir, real federation stack) -> Windows host 192.168.0.102:3005 LAN (token issued by Windows :3001 REST)",
+  "engineer": {
+    "displayName": "工程师 A",
+    "device": "macOS"
+  },
+  "delegateTask": "只读侦察：用一句话报告你运行所在机器的操作系统类型，不要使用任何工具。",
+  "startedAt": "2026-09-19T02:04:08.833Z",
+  "finishedAt": "2026-09-19T02:04:24.116Z",
+  "assertions": [
+    {
+      "name": "L1_pair_with_identity_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"peer\":{\"peerId\":\"gpeer_70e6c941fc81302f\",\"name\":\"DESKTOP-N94BLO7\",\"baseUrl\":\"http://192.168.0.102:3005\",\"platform\":\"win32\",\"arch\":\"x64\",\"gewuVersion\":\"0.0.1-rc.7\",\"executors\":{\"r\":false,\"p"
+    },
+    {
+      "name": "L1a_health_echoes_identity",
+      "pass": true,
+      "detail": "{\"name\":\"工程师 A-2032\",\"identity\":{\"displayName\":\"工程师 A\",\"device\":\"macOS\"}}"
+    },
+    {
+      "name": "L2_windows_projects_reachable",
+      "pass": true,
+      "detail": "status=200 count=9"
+    },
+    {
+      "name": "L3_ungarnted_denied_cross_machine",
+      "pass": true,
+      "detail": "{\"error\":\"federation_project_not_granted\",\"message\":\"工程师「工程师 A」未被授权访问项目 p_mu5ftn3a_wxnq（宿主默认零授权，请宿主在联邦面板逐项目授权）\"}"
+    },
+    {
+      "name": "L4_windows_grant_ok",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "L5_granted_delegate_done_cross_machine",
+      "pass": true,
+      "detail": "agentStatus=done err=none reply=我运行所在的机器是 Windows（Windows_NT 10.0.26200，x64 架构，默认 shell 为 cmd.exe）。"
+    },
+    {
+      "name": "L6a_meta_federated_from_on_windows",
+      "pass": true,
+      "detail": "{\"federatedFrom\":\"工程师 A\"}"
+    },
+    {
+      "name": "L6b_meta_conversation_title_from_x",
+      "pass": true,
+      "detail": "title=来自工程师 A的委托：只读侦察：用一句话报告你运行所在机器的操作系统类型，不要使用"
+    },
+    {
+      "name": "L6c_windows_conversation_project_bound",
+      "pass": true,
+      "detail": "{\"project_id\":\"p_mu5ftn3a_wxnq\",\"origin\":\"federation-delegation\"}"
+    },
+    {
+      "name": "L7_discovery_granted_projects",
+      "pass": true,
+      "detail": "[{\"projectId\":\"p_mu5ftn3a_wxnq\",\"projectName\":\"SingleCell\"}]"
+    },
+    {
+      "name": "L8a_windows_revoke_ok",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "L8b_revoked_denied_again_cross_machine",
+      "pass": true,
+      "detail": "{\"error\":\"federation_project_not_granted\"}"
+    }
+  ],
+  "allPass": true
+}

@@ -1,6 +1,6 @@
 # BLOCK-88 工程师协作 — P0 立项评审
 
-> 状态：`P4-ACTIVE（2026-09-19 用户裁决「开P4」启动——整包 closeout：npm run closeout 聚合 + canonical 五件套 + 双真机端到端（Windows 侧在线情况勘察中；不在线则对标 BLOCK-85 先例如实登记待双真机腿）。P3-COMPLETED 见 §11（fe7649fc）；§9/§10 为 P1/P2。D1-D8 于 2026-09-18 裁决「都按推荐」落定）`
+> 状态：`COMPLETED（2026-09-19 整包收口——P1 身份层/P2 归属隔离/P3 授权边界/P4 closeout 全部交付；双真机端到端 12/12 allPass（Mac 指挥席 × Windows 真机 DESKTOP-N94BLO7 被访端）+ closeout 聚合 5/5 全绿；收口记录见 §12。D1-D8 于 2026-09-18 裁决「都按推荐」落定）`
 > 日期：2026-09-18（立项评审稿；概念源自 2026-09-14 f52e7d87 用户裁决「可以的 非常棒」）
 > 用户裁决史：①2026-09-14 联邦概念深化「联邦协作主体=**不同的工程师**」（各跑各的格物，互相授权：委托任务/看界面/协同开发），三层缺口排队 BLOCK-88；②2026-09-18「开始 BLOCK-88 立项评审」。
 
@@ -110,4 +110,12 @@ A 能看到/操作 B 的哪些项目。**建议：配对后默认零授权，B �
 - **实机断言**：scripts/block88-p3-project-grants.cjs **16/16 allPass**——默认零授权 403（诚实消息）→ 宿主 REST 授权（项目名富化）→ 同一委托真实跑完 done + 委托会话 project_id 绑定 + origin 标记 → 回执附 grantedProjects 发现面 → 吊销即刻再 403 → CDP 测试实例授权卡可见；证据 acceptance/block-88/p3-grants.json+png。
 - **实机抓真修复三件**（症状均为 peer_timeout 静默挂起）：①chat.js 越界检查引用未声明 wantKind（TDZ ReferenceError 被 express4 async 处理器吞掉=请求永久挂起，无错误中间件可见）→ 移至声明后；②require 相对深度错层（routes/ai-agent 三层 ../）；③includeFederated 列表语义（已绑定委托会话被空项目子句挡掉）。教训：express4 async 处理器内同步 throw=静默挂起，新增分支必须落在全部依赖声明之后（登记为评审注意项，不单独立门禁）。
 - **P4/closeout 预备**：整包 P1-P3 交付完成；P4=closeout（npm run closeout + canonical 五件套 + 双真机端到端验收）待用户裁决——双真机 legs 复用 BLOCK-85 通道（Mac 已在网，Windows 侧需在线配对）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 12. P4 整包收口记录（2026-09-19 会话）
+
+- **closeout 聚合**：`npm run closeout` **5/5 全绿**（hygiene 2.6s / docs:check PASS(255) / ui:audit 同步通过 / test:changed committed 态零变更 / code-size 棘轮 PASS）。P6 证据 live 重打尝试一次：`p6_restart_worker_exited_before_checkpoint`（产品级原因，属 G0-RS 域重启链）——维持 🟡 在册归专门会话，不吸入本包。
+- **双真机端到端**：`scripts/block88-p4-dual-machine.cjs` **12/12 allPass**——Mac（指挥席，真实联邦栈+独立 dataDir）经局域网直连 Windows 真机 DESKTOP-N94BLO7（:3005 gateway，token 由 Windows :3001 REST 签发；拓扑=Mac 署名配对 → Windows 宿主）：L1 署名配对+L1a 握手身份回显（P1 跨真机）→ L2 项目清点 9 → L3 **默认零授权跨机 403**（诚实消息）→ L4 Windows REST 授权 → L5 **真实委托 Windows 跑完真实模型**（回执 Windows_NT 10.0.26200）→ L6a/b/c 归属 federatedFrom+标题+**会话 project_id 绑定**（Windows 侧真相）→ L7 grantedProjects 发现面（附项目名 SingleCell）→ L8a/b 吊销即刻再 403。证据 `acceptance/block-88/p4-dual-machine.json`。
+- **双真机协作实录**（对端配合过程，跨端运维教训沉淀）：Windows 磁盘代码经 auto-sync 已最新（edafefbc）但运行后端为 P2 时代进程（grants 路由 404）——①Git Bash 下 restart-dev-stack.sh 撞 `powershell: command not found`（启动段空操作）+detached 后端逃逸树杀（旧进程幸存，SKILL ⑦ 假重启同族）；②解法=PowerShell 手动 Get-NetTCPConnection 定点杀 :3001+带 env Start-Process 重起（用户执行）；③重打验证法=POST /api/federation/grants 期待 400（新代码）vs 404（旧进程），两轮才换血成功；④出码-配对-断言全链单脚本自助（token :3001 签发 + 局域网 :3005 直连免自签证书）——双真机验收配方沉淀于本脚本，后续联邦类包可复用。
+- **整包台账**：P1 实机 15/15（7cc5cbf3）+ P2 实机 13/13（8ad51d36）+ P3 实机 16/16（fe7649fc）+ P4 双真机 12/12——四套实机证据齐落 acceptance/block-88/；UI-418/419/420 verified（同提交台账）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
