@@ -4769,8 +4769,29 @@
         "frontend-redesign"
       ],
       "notes": "知识空间页产品化重设计（布局与内容）：状态条+双页签（文档库/检索预览）+hero 空态+管理会话台折叠抽屉（对标 UI-417）+组件拆分（700 棘轮净减）+文案产品化。纯前端零后端；行为基线八项保留；block99 flow 把手适配（D7）。用户裁决 2026-09-19「立个新的block 重新优化这里的内容」；UI-426（425 被并行收口占用）。 当日 P0→P5 一次会话整包收口：门禁=组件17/17+tsc0+theme4/4+前端1146/1146+block103实机12/12+block99回归24/24；UI-426 verified。"
+    },
+    {
+      "id": "BLOCK-104-PLATFORM-TEST-GOVERNANCE",
+      "path": "docs/block-104-platform-test-governance-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-104-platform-test-governance",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-20",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-ATTRIBUTION-MATRIX",
+      "tags": [
+        "block-104",
+        "platform",
+        "test-determinism",
+        "concurrency",
+        "shell-scripts",
+        "governance-gates"
+      ],
+      "notes": "平台与测试确定性治理：P0 单跑归因矩阵（199 红四分类）/P1 确定性红修复（源码抓取契约/路径构造/EPERM）/P2 并发互踩治理（block88-project-grants mock 护栏+共享资源）/P3 平台与环境门纪律（skip 可见）/P4 scripts 双端同形门+冻结登记门禁/P5 真基线重采。用户裁决 2026-09-20「要治 全方位的治理」。"
     }
   ],
   "lastUpdated": "2026-09-19",
-  "documentCount": 257
+  "documentCount": 258
 }
