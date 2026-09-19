@@ -36,10 +36,12 @@ if [ -f "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/ecs-gewu.crt" ]; then
   export NODE_EXTRA_CA_CERTS='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\ecs-gewu.crt'
   echo "block85: NODE_EXTRA_CA_CERTS set (ecs-gewu.crt)"
 fi
-# BLOCK-95 B1 灰度开关：默认空=关；调用方 BIOF3_SERVER_HISTORY_ASSEMBLY=1 bash scripts/restart-dev-stack.sh 开启
+# BLOCK-95 三开关 2026-09-18 已翻默认开（feature-flags.js 单一真相 + 设置页 UI-403）。
+# 此处只透传调用方覆盖：=1/=0 强制开/关（kill-switch）；留空=走默认（现在默认开）。
 export BIOF3_SERVER_HISTORY_ASSEMBLY="${BIOF3_SERVER_HISTORY_ASSEMBLY:-}"
 export BIOF3_SESSION_COMPACTION="${BIOF3_SESSION_COMPACTION:-}"
-if [ -n "${BIOF3_SERVER_HISTORY_ASSEMBLY}" ]; then echo "block95-b1: server history assembly ON (grayscale)"; fi
+if [ -n "${BIOF3_SERVER_HISTORY_ASSEMBLY}" ]; then echo "block95: env override BIOF3_SERVER_HISTORY_ASSEMBLY=${BIOF3_SERVER_HISTORY_ASSEMBLY}"; fi
+if [ -n "${BIOF3_SESSION_COMPACTION}" ]; then echo "block95: env override BIOF3_SESSION_COMPACTION=${BIOF3_SESSION_COMPACTION}"; fi
 
 
 # -WindowStyle Minimized（最小化的是 node 控制台；Electron GUI 正常显示）。
@@ -54,15 +56,15 @@ echo "start dispatched"
 
 for i in $(seq 1 36); do
   sleep 5
-  pages=$(curl -s http://127.0.0.1:9222/json/list 2>/dev/null | grep -c '"type": "page"' || true)
+  pages=$(curl -s -m 10 http://127.0.0.1:9222/json/list 2>/dev/null | grep -c '"type": "page"' || true)
   # 7) 就绪判定不许带 `-o /dev/null`（2026-09-14 实测沉淀）：本机 Git Bash 下
   #    `curl -o /dev/null` exit=23（写 NUL 失败）→ 配合 `|| echo 000` 会把结果拼成
   #    `200000`，于是 `= "200"` 永不成立 → 明明就绪也必然 TIMEOUT。改为读末行 http_code。
-  code=$(curl -s -H 'Authorization: Bearer desktop-local' 'http://127.0.0.1:3001/api/data/projects' -w '\n%{http_code}' 2>/dev/null | tail -n1)
+  code=$(curl -s -m 10 -H 'Authorization: Bearer desktop-local' 'http://127.0.0.1:3001/api/data/projects' -w '\n%{http_code}' 2>/dev/null | tail -n1)
   echo "t+$((i*5))s pages=${pages} api=${code}"
   if [ "${pages:-0}" -ge 1 ] 2>/dev/null && [ "${code}" = "200" ]; then
     # 数据面对账：连到的库必须非空（防再次连错库）
-    n=$(curl -s -H 'Authorization: Bearer desktop-local' 'http://127.0.0.1:3001/api/data/projects' | grep -o '"id"' | wc -l)
+    n=$(curl -s -m 10 -H 'Authorization: Bearer desktop-local' 'http://127.0.0.1:3001/api/data/projects' | grep -o '"id"' | wc -l)
     echo "projects in api response: ${n}"
     if [ "${n:-0}" -ge 1 ] 2>/dev/null; then echo READY; exit 0; fi
     echo "WARN: api up but projects empty — wrong DB?"; exit 1
