@@ -11,7 +11,7 @@
  *   事件 / CDP：/knowledge 面板 + 项目工作台摘要卡「知识溯源」节。
  * 证据：acceptance/block-94/block94-knowledge-live-live.json（脚本落盘，flow 断言 allPass）。
  *
- * 前置：dev 栈（vite 3000 + 后端 3001 + CDP 9222，栈须在 BLOCK-94 代码之后重启）
+ * 前置：测试实例（CDP 9223，bash scripts/start-test-instance.sh）+ **DashScope key 已配置**（设置页模型凭据；真实嵌入断言 A3b/A6 硬依赖——2026-09-19 Windows 实机无 key 时摄取诚实 failed=环境未就绪非回归）
  * + DashScope 凭据 + 至少一个项目；core/** 变更后必须重启 dev 栈。
  */
 const path = require('node:path');

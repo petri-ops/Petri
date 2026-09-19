@@ -65,7 +65,7 @@ module.exports = {
       console.log((ok ? 'PASS' : 'FAIL') + ' — ' + name + (ok ? '' : ' :: ' + trimmed));
     };
 
-    const targets = await lib.pollTargets({ timeoutMs: ctx.timeoutMs ?? 10_000 });
+    const targets = await lib.pollTargets({ port: lib.TEST_INSTANCE_PORT, timeoutMs: ctx.timeoutMs ?? 10_000 });
     assert('cdp_targets_listed', Array.isArray(targets) && targets.length > 0, `${(targets || []).length} targets`);
 
     const pages = lib.filterPageTargets(targets, /localhost:3000/);

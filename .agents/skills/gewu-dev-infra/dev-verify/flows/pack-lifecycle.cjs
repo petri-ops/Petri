@@ -28,7 +28,7 @@
  * 环境边界（如实登记，不虚设断言）：「真实 Python 工具跑通」本机无 Python 运行时
  * （runtimes/ 仅 R），无法执行——诚实登记于证据 note，属环境事实非产品缺陷。
  *
- * 前置：dev Electron（9222，含后端 3001）+ 包仓 ../gewu-pack-bio + R 运行时在位。
+ * 前置：测试实例（CDP 9223，bash scripts/start-test-instance.sh；后端 3001 同源）+ 包仓 ../gewu-pack-bio + R 运行时在位。
  * 证据：acceptance/block-86/pack-lifecycle-live.json
  */
 const fs = require('node:fs');
@@ -125,7 +125,7 @@ module.exports = {
     // 主窗 + BLOCK-86 桥就绪探针：dev 栈若未重启，preload/main 仍是旧代码
     // （pack:uninstall-plan / 编排 installPath 缺失）→ fail-closed 带重启指引，
     // 绝不在旧栈上跑出假证据。
-    const targets = await lib.pollTargets({ timeoutMs: 30_000 });
+    const targets = await lib.pollTargets({ port: lib.TEST_INSTANCE_PORT, timeoutMs: 30_000 });
     const pages = lib.filterPageTargets(targets, /^http:\/\/localhost:3000\//);
     if (!pages.length) throw new Error('no_app_page_target');
     const target = await lib.selectPageTarget(pages, {

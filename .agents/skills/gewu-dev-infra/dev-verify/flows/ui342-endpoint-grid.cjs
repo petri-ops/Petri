@@ -39,21 +39,16 @@ module.exports = {
   evidenceDir: path.join(ROOT, 'acceptance', 'block-81'),
 
   async run({ assert }) {
-    const targets = await lib.pollTargets({ timeoutMs: 30_000 });
+    const targets = await lib.pollTargets({ port: lib.TEST_INSTANCE_PORT, timeoutMs: 30_000 });
     const pages = lib.filterPageTargets(targets, /^http:\/\/localhost:3000\//);
     if (!pages.length) throw new Error('no_app_page_target: dev Electron 主窗未找到');
     const client = await lib.connectTarget(pages[0]);
 
-    const pid = await lib.evalJs(client, `(async () => {
-      const r = await fetch('http://127.0.0.1:3001/api/data/projects', { headers: { Authorization: 'Bearer desktop-local' } });
-      const d = await r.json();
-      return (d.projects || [])[0] ? (d.projects || [])[0].id : '';
-    })()`).catch(() => '');
-    if (!pid) throw new Error('no_project_available: 需要至少一个项目');
-
-    await lib.evalJs(client, `location.href = 'http://localhost:3000/project/${pid}/settings'; 'nav'`);
+    // UI-366 独立页化后设置页迁移至 /settings（/project/:id/settings 路由已裁撤，
+    // 2026-09-19 迁移测试实例时抓真）——直接导航独立设置页，无需项目 id。
+    await lib.evalJs(client, `location.href = 'http://localhost:3000/settings'; 'nav'`);
     await sleep(3500);
-    const t2 = await lib.pollTargets({ timeoutMs: 15_000 });
+    const t2 = await lib.pollTargets({ port: lib.TEST_INSTANCE_PORT, timeoutMs: 15_000 });
     const p2 = lib.filterPageTargets(t2, /^http:\/\/localhost:3000\//);
     const c2 = await lib.connectTarget(p2[0]);
 

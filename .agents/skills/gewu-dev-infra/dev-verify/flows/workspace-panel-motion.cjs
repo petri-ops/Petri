@@ -89,7 +89,7 @@ module.exports = {
   evidenceDir: path.join(ROOT, 'acceptance', 'ui-341'),
 
   async run({ assert }) {
-    const targets = await lib.pollTargets({ timeoutMs: 30_000 });
+    const targets = await lib.pollTargets({ port: lib.TEST_INSTANCE_PORT, timeoutMs: 30_000 });
     const pages = lib.filterPageTargets(targets, /^http:\/\/localhost:3000\//);
     if (!pages.length) throw new Error('no_app_page_target: dev Electron 主窗未找到');
     const client = await lib.connectTarget(pages[0]);

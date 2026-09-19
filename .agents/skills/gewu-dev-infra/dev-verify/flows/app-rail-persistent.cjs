@@ -33,7 +33,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function railWidthAt(clientRef, url) {
   await lib.evalJs(clientRef.client, `location.href = ${JSON.stringify(url)}; 'nav'`).catch(() => {});
   await sleep(2600);
-  const targets = await lib.pollTargets({ timeoutMs: 15_000 });
+  const targets = await lib.pollTargets({ port: lib.TEST_INSTANCE_PORT, timeoutMs: 15_000 });
   const pages = lib.filterPageTargets(targets, /^http:\/\/localhost:3000\//);
   if (!pages.length) return { width: -1, error: 'no_page_target' };
   const c = await lib.connectTarget(pages[0]);
@@ -55,7 +55,7 @@ module.exports = {
   evidenceDir: path.join(ROOT, 'acceptance', 'ui-341'),
 
   async run({ assert }) {
-    const targets = await lib.pollTargets({ timeoutMs: 30_000 });
+    const targets = await lib.pollTargets({ port: lib.TEST_INSTANCE_PORT, timeoutMs: 30_000 });
     const pages = lib.filterPageTargets(targets, /^http:\/\/localhost:3000\//);
     if (!pages.length) throw new Error('no_app_page_target: dev Electron 主窗未找到');
     const client = await lib.connectTarget(pages[0]);

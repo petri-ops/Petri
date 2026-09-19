@@ -67,3 +67,14 @@ G0 开发期常态 · 不外推 packaged/Provider/GA。
 **实机抓真 1 件（P1 关键修复）**：`main.js:616` dev 分支无条件 `appendSwitch("remote-debugging-port","9222")` 会压过 argv 的 9223 → 测试实例去抢主实例 9222 → DevTools HTTP bind 0x2740 失败（两次复现）；修=`hasSwitch` 守卫不覆盖显式 argv。**另修并行会话拉回提交自带存量红**：ui404 探针脚本 impact-map 漏注册（分类冲突）+ ui-403/404 evidence.json 未映射（test-affected:94 自带断言要求全映射）→ 按 acceptance-script-owned 先例补注册。
 
 **门禁**：hygiene ✅ / docs:check ✅ 254 / ui:audit ✅ / dev-debug-scripts 4/4 / test:changed 提交后复验（P6 两段红语义：未提交 tree_not_exact；若提交后仍红=触碰绑定文件归 D8 族 G0-RS 重采，如实登记）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 9. 增量收尾（2026-09-19）：其余 dev-verify flow 全量迁移测试实例
+
+非范围登记「全量 flow 一次迁移」兑现（渐进模式，一次会话收尾）。9 个剩余 flow 处置：
+
+- **迁绿 7**（`pollTargets` 加 `port: lib.TEST_INSTANCE_PORT`，交互/断言零改动全过）：workspace-panel-motion **6/6** / app-rail-persistent **7/7** / ui342-endpoint-grid **6/6** / block83-tool-catalog **8/8** / workspace-file-ops **14/14** / os-save-dialog **18/18**（sidecar hwnd 直投原生对话框对测试实例照常工作）/ pack-lifecycle **24/24**（真实 deseq2 R 作业 + A9 重装恢复现场）。
+- **无需迁移 1**：block96-ssh-channel（flow 自述不依赖 dev Electron 栈，纯真节点通道测试，实例无关）。
+- **迁移完成但本机环境缺凭据 1**：block94-knowledge——UI 操作/上传/摄取触发全链正常，嵌入步诚实 `knowledge_embed_unavailable`：**本 Windows 机 ai-credentials.json 从未配置 DashScope key**（Mac 侧 09-18 18/18 的环境前提）。flow 已补前置注记；本机跑绿需用户配置 key，或以 Mac 侧证据为准。**非迁移回归**。
+- 迁移期抓真 1 件（存量漂移，非本批引入）：ui342 flow 仍导航 `/project/:id/settings`——该路由已随 UI-366 独立页化裁撤，修为直航 `/settings` 并解除项目依赖。
+
+**结论**：除实例无关与环境缺凭据两例外，全部 dev-verify flow 均已测试实例化——实机验收与用户主窗口（9222）永久隔离的红线自此全量生效。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -24,7 +24,7 @@
  * 以 local 项目走实机全链，ssh 同构语义由 P1 契约测试锁定（fake backend 透传 +
  * 错误映射），双后端代码路径同构（workspaceGateway 透传，plan D1）。
  *
- * 前置：dev Electron（9222，含后端 3001）。后端/前端代码有变更须先重启 dev 栈。
+ * 前置：测试实例（CDP 9223，bash scripts/start-test-instance.sh；后端 3001 同源）。后端/前端代码有变更须先重启 dev 栈+重启测试实例。
  * 证据：acceptance/block-89/workspace-file-ops-live.json
  */
 const fs = require('node:fs');
@@ -93,7 +93,7 @@ module.exports = {
     const health = await rest('GET', '/data/projects');
     assert('A0a_backend_rest_healthy', health.ok, `status=${health.status}`);
 
-    const targets = await lib.pollTargets({ timeoutMs: 30_000 });
+    const targets = await lib.pollTargets({ port: lib.TEST_INSTANCE_PORT, timeoutMs: 30_000 });
     const pages = lib.filterPageTargets(targets, /^http:\/\/localhost:3000\//);
     if (!pages.length) throw new Error('no_app_page_target');
     const target = await lib.selectPageTarget(pages, {

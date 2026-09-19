@@ -119,7 +119,7 @@ module.exports = {
 
     try {
       // ── 0) dev Electron 就绪 + 真主窗（项目树+右栏探测）+ 预清场 ──
-      const targets = await lib.pollTargets({ timeoutMs: 15_000 });
+      const targets = await lib.pollTargets({ port: lib.TEST_INSTANCE_PORT, timeoutMs: 15_000 });
       const pages = lib.filterPageTargets(targets, /localhost:3000/);
       assert('A0 spa_page_target_present', pages.length > 0, pages.map((p) => p.url).join('|').slice(0, 120) || 'none');
       if (!pages.length) return false;
