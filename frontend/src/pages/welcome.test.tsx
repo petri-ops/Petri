@@ -159,7 +159,8 @@ describe('Welcome（BLOCK-80 欢迎页 + UI-341 内嵌聊天模块 + UI-373 不�
     expect(screen.getByText('贝塔项目')).toBeTruthy();
     expect(screen.getByText('打开文件夹')).toBeTruthy();
     expect(screen.getByText('远程连接')).toBeTruthy();
-    expect(screen.getByText('返回')).toBeTruthy();
+    // UI-424 — 顶部「← 返回」按钮退役：断言其不再渲染（防回归复活）
+    expect(screen.queryByText('返回')).toBeNull();
   });
 
   it('选中项目后：分支徽标出现、守卫撤下（?project= 显式预选路径不受影响）', async () => {

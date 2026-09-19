@@ -376,23 +376,9 @@ export default function Welcome(): React.ReactElement {
 
   return (
     <div className={styles.welcome} aria-label="欢迎页">
-      {/* UI-338 — 退出按钮：欢迎页无左栏/无其他出口；有历史则后退，
-          冷启动（无历史）进最近项目工作区 */}
-      <div className={styles.exitRow}>
-        <button
-          type="button"
-          className={styles.exitBtn}
-          title="返回"
-          onClick={() => {
-            const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
-            if (idx > 0) navigate(-1);
-            else if (projects[0]) navigate(`/project/${projects[0].id}`);
-          }}
-        >
-          <Icon name="arrow-left" size={14} />
-          <span>返回</span>
-        </button>
-      </div>
+      {/* UI-424 — 顶部「← 返回」按钮退役（用户裁决「左上角的返回不需要了」）：
+          落地页语义下「返回」概念别扭，且标题栏 bare 化后页面干净优先；
+          历史后退（Alt+←/鼠标侧键）仍可用，选项目/打开文件夹即离开本页。 */}
       <div className={styles.welcomeInner}>
         <h1 className={styles.greeting}>{greeting()}</h1>
         <p className={styles.welcomeSub}>选择项目，直接开始你的分析任务。</p>

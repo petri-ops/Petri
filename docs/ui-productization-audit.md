@@ -3942,3 +3942,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **改动**（`SimpleChat.tsx` 1745→1662 + 新增 3 hook 文件 159 行）：①`hooks/useThinkingLevel.ts`（296-308 连续段：档位态+会话恢复+持久化；Ctrl+T 循环 effect 因与簇不连续仍留组件内原位，经 setThinkingLevel 驱动——hook 顺序零重排）；②`hooks/useScrollGuard.ts`（591-642 连续段：BLOCK-95 A1+A3 滚动守卫/回底浮标/prepend 视口恢复；atBottomRef 仍由组件持有——send 路径也写它，经参数注入；prependAnchorRef/olderRef 簇内私有随簇迁移）；③`hooks/useTerminalSubAgentResults.ts`（尾部独立 hook，UI-405 终态子智能体 5s 轮询）。
 - **证据**：`tsc --noEmit` 0；copilot 全套 **38 文件 302/302** 全绿（含 useChatStream/useConversationResume/useKnowledgeSpace 等直接消费方回归）；棘轮台账 25 文件 PASS（3 新文件按 Wave A 先例入册+基线同步）；实机 `ui341-welcome-chat` **11/11 allPass**（离屏测试实例真实 SSE 轮次：首问建会话→发送→流式渲染→composer 清空→自清理，acceptance/ui-341/）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-424: 欢迎页（落地页）顶部「← 返回」按钮退役 (2026-09-19 verified，dev Electron 边界内实机 CDP)
+
+- **来源**：用户截图指认「新建任务 页面中 左上角的返回不需要了吧」——落地页语义下「返回」概念别扭；该按钮为 UI-338 时代「欢迎页无左栏/无其他出口」的唯一出口设计，现标题栏 bare 化+选择项目即离开的主流程下已无必要。
+- **改动**（`pages/welcome.tsx` + module.css + test）：删除 exitRow/返回按钮块及 `.exitRow/.exitBtn/.exitBtn:hover` 三段样式（普通 CSS 死类同删——a4663652 家法）；测试改为**反向断言**（`queryByText('返回')` 为 null，防回归复活）。历史后退（Alt+←/鼠标侧键）不受影响。
+- **证据**：welcome.test.tsx **13/13**；实机 CDP（9223 离屏测试实例）：落地页 `/` `backBtn=false + exitRow=false + greeting=true` **ASSERT ALL PASS**；tsc 0。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

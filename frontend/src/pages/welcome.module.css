@@ -328,30 +328,8 @@
   color: var(--gewu-text-secondary);
 }
 
-/* UI-338 — 欢迎页退出按钮（左上角；有历史后退，冷启动进最近项目） */
-.exitRow {
-  position: absolute;
-  top: 14px;
-  left: 16px;
-}
-
-.exitBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  border: 1px solid var(--gewu-border-color, transparent);
-  border-radius: 8px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
-  cursor: pointer;
-}
-
-.exitBtn:hover {
-  color: var(--gewu-accent);
-  border-color: var(--gewu-accent);
-}
+/* UI-424 — 顶部「← 返回」按钮退役（用户裁决），exitRow/exitBtn 样式随组件删除
+（普通 CSS 死类无门禁抓，删组件必同步删样式——a4663652 家法） */
 
 /* UI-338 加映 — SSH「先连接再补全」 */
 .sshAliasRow {
