@@ -150,7 +150,7 @@
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useTerminalSubAgentResults.ts",
       "wave": "A",
       "module": "W-03",
-      "lines": 42
+      "lines": 44
     }
   ],
   "total": 33296

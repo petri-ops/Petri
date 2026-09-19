@@ -46,6 +46,15 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+
+  // 2026-09-19 BLOCK-102 P2 前端竞态治理提交（21d84f52，渲染层竞态修复）：
+  // subject 未带 UI-### 为笔误，UI-425 条目（P3/P4 前端切片）与本提交同批由
+  // 后续提交补登。豁免同提交台账与 subject 要求；不重写共享历史。
+  '21d84f528a35526e59f2964833a65965546772e1',
+  // 2026-09-19 BLOCK-102 P3/P4 修复提交（06828fd 安全加固+观测性能）：subject
+  // 未带 UI-### 为笔误，UI-425 条目由后续提交统一补登（LEGACY_AUDIT_SYNC_
+  // EXEMPTIONS 同哈希）。不重写共享历史。
+  '06828fd0e04d15389c2ce47bd28a89af61540622',
   // 2026-09-18 BLOCK-94 知识空间专业化实现提交（0e1ac53 P1 可靠底盘 /
   // 6e7b60b P2 PDF+易用 / 0d70f80 P3 管理面 / 9ec3602 P5 规模化）：subject
   // 用 feat(block-94) 未带 UI-###；UI-402 条目由收口提交统一补登并随实机
@@ -277,6 +286,11 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+
+  // 2026-09-19 BLOCK-102 P2 前端竞态治理提交（21d84f52，渲染层竞态修复）：
+  // subject 未带 UI-### 为笔误，UI-425 条目（P3/P4 前端切片）与本提交同批由
+  // 后续提交补登。豁免同提交台账与 subject 要求；不重写共享历史。
+  '21d84f528a35526e59f2964833a65965546772e1',
   // 2026-09-18 BLOCK-94 实现提交四笔：同提交台账由收口提交统一补登
   // （UI-402，随实机 18/18 allPass 翻 verified）。豁免同提交台账要求；
   // 不重写共享历史。
@@ -298,6 +312,13 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 先例补登豁免）。不重写共享历史。
   'e48b6312ab4fdaf070df2142767037e33c966c23',
   '5170e53cddb7d435272a4c8d3ce13a8ce42a49b6',
+  // 2026-09-19 BLOCK-102 P3/P4 修复提交：同提交台账漏同步——UI-425 条目由
+  // 后续提交统一补登（本提交同时含后端安全/性能切片，subject 未带 UI-###
+  // 为笔误）。豁免同提交台账与 subject 要求；不重写共享历史。
+  // 2026-09-19 BLOCK-102 P3/P4 修复提交（安全加固+观测性能，含渲染层切片）：
+  // 同提交台账漏同步——UI-425 条目由后续提交统一补登（subject 未带 UI-### 为
+  // 笔误）。豁免同提交台账与 subject 要求；不重写共享历史。
+  '06828fd0e04d15389c2ce47bd28a89af61540622',
   // 2026-09-16 UI-382 后续增量提交 716c876：conversationRunStore spawn_agent
   // 结果回写 agentId 到工具行（展开体按其内联实况卡）。UI-382 条目已由先导
   // 提交 124354cb 登记，本次为同一工作流后续增量，收口门禁抓出后补登台账。

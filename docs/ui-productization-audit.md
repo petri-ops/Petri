@@ -3949,3 +3949,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **改动**（`pages/welcome.tsx` + module.css + test）：删除 exitRow/返回按钮块及 `.exitRow/.exitBtn/.exitBtn:hover` 三段样式（普通 CSS 死类同删——a4663652 家法）；测试改为**反向断言**（`queryByText('返回')` 为 null，防回归复活）。历史后退（Alt+←/鼠标侧键）不受影响。
 - **证据**：welcome.test.tsx **13/13**；实机 CDP（9223 离屏测试实例）：落地页 `/` `backBtn=false + exitRow=false + greeting=true` **ASSERT ALL PASS**；tsc 0。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-425: 稳定性加固批的前端面——投影终端 cookie 鉴权/轮询减频/结果 Map memo 化（BLOCK-102 P3/P4 前端切片）(2026-09-19 verified，dev Electron 边界内实机)
+
+- **来源**：BLOCK-102 四路扫描修复批（P3 安全加固+P4 观测性能）中落在渲染层的三处——扫描发现 10（会话 token 出 URL）/17（轮询减频）/13 附带（resultsById 每 render 新 Map 使下游 memo 失效）。
+- **改动**：①`projectionTerminalBridge.ts` 投影终端 EventSource 停用 `?session=`（一年期会话 token 曾落中转 nginx 日志/浏览器历史）→ 同源 HttpOnly gw_session cookie 鉴权（sessionAuth readCookieToken 分支），token 仅留在 Bearer header 的 fetch 内；②`useTerminalSubAgentResults` 轮询加 `document.hidden` 跳过（CenterPanel+SideChatDock 双实例时 5s×2 的高频空转减半，隐藏期归零）；③`useHarnessWorkflowStatus.workflowPollDelay` 无 workflow 时 1.5s→5s（曾 40 req/min 空轮询）；④`useResultStore.resultsById` useMemo 化（每 render 新 Map 使以其为 deps 的 memo 全失效）。
+- **证据**：tsc 0；copilot+hooks 套件 422/422；网关/federation/task-store 定向 9/9；重启实机行为验证（正常 Host 200/伪造 Host 403/公网门 8442 401/网关门 401——Host 白名单与 cookie 鉴权无回归）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

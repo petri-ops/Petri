@@ -1,6 +1,6 @@
 # BLOCK-102-STABILITY-HARDENING — 稳定性加固：系统性风险扫描修复
 
-**状态**：`active（2026-09-19 用户裁决「是不是要做个 block呢 一次性修复完成」立项即启动；上下文=用户「我们需要优化这个项目 变得稳定好用」+ 四路系统性扫描产出）`
+**状态**：`completed（2026-09-19 立项即启动当日 P1-P5 一次会话整包收口；用户裁决「是不是要做个 block呢 一次性修复完成」+「变得稳定好用」）`
 **立项**：2026-09-19（四路只读深扫：静默失败/资源泄漏/前端竞态/安全边界 + npm run check 全绿 + 运行时证据）
 **扫描证据**：本 plan §2 汇总（agent 报告原文要点内嵌，file:line 可溯）
 
@@ -58,4 +58,9 @@
 
 ## 5. 运行记录
 
-- 2026-09-19 立项即启动：四路扫描完成（详见 §2），全量测试后台补跑中（基线）。
+- 2026-09-19 立项即启动：四路扫描完成（详见 §2）。
+- **P1 后端吞错治理 completed（3b4a73cb）**：八处修复（§2 P0#1/#4+P1 全部），定向 47/47 + 重启实机健康。
+- **P2 前端竞态治理 completed（21d84f52）**：P0 竞态×2（队列会话归属+loadOlder 守卫）+ 切项目序号×2 + inflight×3 + resultsById memo + copilotAsk latest-ref；tsc 0 + 422/422（tsc 抓真 906 行漏网入列同改）。
+- **P3 安全加固 + P4 观测性能 completed（06828fd）**：Host 白名单（实机正常 200/伪造 403/公网门 401）+ SSE token 出 URL→cookie + Secure cookie（https 条件化）+ 0600×3 + tunnel 白名单 + task_events retention（30 天，模块内每日 unref 定时）+ SSE 回读 cap 5000×3 + 无超时 fetch×2（5s/10s+in-flight 去重）+ 轮询减频 ×2；定向 9/9。
+- **P5 收口 completed**：全量 workspace 套件（test:all + test:all:frontend）**exit 0**（Node+前端两段链式通过；计数因输出管道截断未采集，退出码即门禁契约，如实登记）；closeout 五门绿（ui:audit 首红=06828fd/21d84f52 同提交台账漏同步+subject 漏 UI-### 笔误，按 BLOCK-91/94 先例补登 UI-425+LEGACY 豁免集登记全哈希转绿）。
+- 交付外记录：dev 栈当日三次无差别进程团灭→StackWatchdog 部署并验证自愈（机器基建，未跟踪区，见 AUDIT-LOG）；DashScope key 本机未配=block94 环境事实。
