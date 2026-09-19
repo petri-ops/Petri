@@ -170,8 +170,12 @@ function buildMobileGateway({
     next();
   }
 
-  function issueSessionCookie(res, sessionToken) {
-    res.setHeader('Set-Cookie', `gw_session=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_MAX_AGE}`);
+  // BLOCK-102 P3 — https 面签发 Secure cookie（公网 8442/8443 门）；LAN 明文
+  // http 面保持可登录（Secure cookie 在 http 上不回传，会使 LAN 投影失效）。
+  function issueSessionCookie(req, res, sessionToken) {
+    const isHttps = req.secure || req.headers['x-forwarded-proto'] === 'https';
+    const securePart = isHttps ? '; Secure' : '';
+    res.setHeader('Set-Cookie', `gw_session=${sessionToken}; Path=/; HttpOnly; SameSite=Lax${securePart}; Max-Age=${SESSION_COOKIE_MAX_AGE}`);
   }
 
   app.get('/m/api/health', (_req, res) => {
@@ -202,10 +206,10 @@ function buildMobileGateway({
       const existingToken = readCookieToken(req) || bearerToken(req);
       const existingSession = existingToken ? stores.sessions.authenticate(existingToken) : null;
       if (existingSession) {
-        issueSessionCookie(res, existingToken);
+        issueSessionCookie(req, res, existingToken);
       } else {
         const { sessionToken } = stores.sessions.createSession({ name: `桌面投影-${pairShortId()}` });
-        issueSessionCookie(res, sessionToken);
+        issueSessionCookie(req, res, sessionToken);
       }
     }
     const hasCookie = String(req.headers.cookie || '').includes('gw_session=');

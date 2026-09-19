@@ -11,7 +11,9 @@ export interface HarnessWorkflowStatusState {
 }
 
 export function workflowPollDelay(workflow: HarnessWorkflowJobState | null): number | null {
-  if (!workflow) return 1500;
+  // BLOCK-102 P4 — 尚无 workflow 的 job 曾以 1.5s 高频空轮询（40 req/min）；
+  // 降频到 5s，workflow 出现后恢复 1.5s 跟随。
+  if (!workflow) return 5000;
   return workflow.terminal ? null : 1500;
 }
 

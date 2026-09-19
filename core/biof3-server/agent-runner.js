@@ -936,7 +936,7 @@ async function runAgentLoop({
         const selfTask = agentTaskStore.getAgentTask(taskId);
         const parentTaskId = selfTask && selfTask.params && selfTask.params.parentTaskId;
         if (parentTaskId) {
-          const ownEvents = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000);
+          const ownEvents = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 5000) // BLOCK-102 P4 cap;
           const seq = (ownEvents.length ? ownEvents[ownEvents.length - 1].seq : 0) + 1;
           agentTaskStore.appendAgentTaskEvent(parentTaskId, seq, 'child_finished', {
             // UI-382 — 前端 task 模式拍平 {seq, eventType, payload} 后按 payload.event

@@ -39,7 +39,7 @@ function loadPeers(dataDir) {
 function persistPeers(dataDir, data) {
   fs.mkdirSync(path.dirname(peersFile(dataDir)), { recursive: true });
   const tmp = `${peersFile(dataDir)}.tmp`;
-  fs.writeFileSync(tmp, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
+  fs.writeFileSync(tmp, `${JSON.stringify(data, null, 2)}\n`, { encoding: 'utf8', mode: 0o600 });
   fs.renameSync(tmp, peersFile(dataDir));
 }
 

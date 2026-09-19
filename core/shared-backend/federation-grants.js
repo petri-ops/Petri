@@ -40,7 +40,7 @@ function loadGrants(dataDir) {
 function persistGrants(dataDir, data) {
   fs.mkdirSync(path.dirname(grantsFile(dataDir)), { recursive: true });
   const tmp = `${grantsFile(dataDir)}.tmp`;
-  fs.writeFileSync(tmp, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
+  fs.writeFileSync(tmp, `${JSON.stringify(data, null, 2)}\n`, { encoding: 'utf8', mode: 0o600 });
   fs.renameSync(tmp, grantsFile(dataDir));
 }
 

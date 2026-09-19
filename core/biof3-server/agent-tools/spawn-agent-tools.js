@@ -277,7 +277,7 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
 
 /** 事件流末尾 seq（appendAgentTaskEvent 需要显式 seq）。 */
 function nextEventSeq(taskId) {
-  const events = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000);
+  const events = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 5000) // BLOCK-102 P4 cap;
   return (events.length ? events[events.length - 1].seq : 0) + 1;
 }
 

@@ -10,6 +10,8 @@ export function useTerminalSubAgentResults(projectId: string | null | undefined,
     if (!conversationId) return;
     let alive = true;
     const load = () => {
+      // BLOCK-102 P4 — 页面隐藏时跳过轮询（回到可见即由下个 tick 恢复）
+      if (typeof document !== 'undefined' && document.hidden) return;
       fetch(`${getPlatformApiPrefix()}/ai/agent/tasks?limit=50&conversationId=${encodeURIComponent(conversationId)}`, {
         headers: { Authorization: 'Bearer desktop-local' },
       })

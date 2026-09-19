@@ -63,10 +63,24 @@ const HARDCODED = {
 // OpenRouter fetch
 // ---------------------------------------------------------------------------
 
+// BLOCK-102 P4 — 5s 超时 + in-flight 去重：缓存 miss 曾每条消息重发且失败永不
+// 写缓存，慢网下挂起连接随聊天流量累积（UDP 端口耗尽事件的一类嫌疑面）。
+const openRouterInflight = new Set();
+
 /** Fire-and-forget fetch. Populates cache on success; silently ignores errors. */
 function fetchOpenRouterModels({ baseUrl, apiKey }) {
   const url = `${baseUrl.replace(/\/$/, '')}/models`;
+  const inflightKey = `${url}|${apiKey || ''}`;
+  if (openRouterInflight.has(inflightKey)) return;
+  openRouterInflight.add(inflightKey);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5000);
+  const done = () => {
+    clearTimeout(timer);
+    openRouterInflight.delete(inflightKey);
+  };
   fetch(url, {
+    signal: controller.signal,
     headers: {
       Authorization: `Bearer ${apiKey || ''}`,
       'HTTP-Referer': 'https://biof3.local',
@@ -88,7 +102,8 @@ function fetchOpenRouterModels({ baseUrl, apiKey }) {
     })
     .catch(() => {
       // Network / auth errors: silently ignore, cache stays cold
-    });
+    })
+    .finally(done);
 }
 
 /** Async: returns cached value or kicks off background fetch and returns 0. */

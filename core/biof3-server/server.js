@@ -103,6 +103,20 @@ try {
 
 const app = express();
 
+// BLOCK-102 P3 — Host 白名单（DNS rebinding 防护）：:3001 只绑定回环，但恶意
+// 网页可将自有域名 A 记录指向 127.0.0.1 使浏览器请求变成同源——无 Origin 头、
+// 带 desktop-local 常量即可全量调用本地 API（含本地执行与隧道配置面）。
+// 只放行 localhost/127.0.0.1（任意端口）；本应用不服务其它 Host。
+const ALLOWED_HOST_RE = /^(localhost|127\.0\.0\.1)(:\d+)?$/i;
+app.use((req, res, next) => {
+  const host = String(req.headers.host || '');
+  if (!ALLOWED_HOST_RE.test(host)) {
+    res.status(403).json({ ok: false, error: 'invalid_host', message: 'Host 不在允许列表' });
+    return;
+  }
+  next();
+});
+
 // Catch unhandled errors
 process.on('unhandledRejection', (reason, _promise) => {
   logError('unhandledRejection', reason);

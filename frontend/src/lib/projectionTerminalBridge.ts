@@ -33,8 +33,10 @@ function authHeaders(): Record<string, string> {
 
 function attachStream(tabId: string, sessionId: string) {
   if (sourceByTab.has(tabId)) return;
-  const token = getToken();
-  const url = `/m/api/terminal/${encodeURIComponent(sessionId)}/stream${token ? `?session=${encodeURIComponent(token)}` : ''}`;
+  // BLOCK-102 P3 — 不再把一年期会话 token 放进 URL（会落中转 nginx 日志与
+  // 浏览器历史）；投影 SPA 与网关同源，EventSource 自动携带 HttpOnly
+  // gw_session cookie（sessionAuth 的 readCookieToken 分支鉴权）。
+  const url = `/m/api/terminal/${encodeURIComponent(sessionId)}/stream`;
   const source = new EventSource(url);
   source.addEventListener('terminal:data', (event) => {
     try {

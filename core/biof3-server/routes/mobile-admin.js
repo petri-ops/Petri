@@ -88,7 +88,13 @@ module.exports = function registerMobileAdmin(app, { dataDir } = {}) {
         res.status(404).json({ ok: false, error: 'profile_not_found' });
         return;
       }
-      const tunnel = getTunnelManager(dir).apply({
+      // BLOCK-102 P3 — localPort 白名单：该端口经公网 nginx 反代可达，配成 3001
+    // 会把未鉴权本机 API 直接发布到公网门。仅允许网关端口 3005。
+    if (body.localPort !== undefined && Number(body.localPort) !== 3005) {
+      res.status(400).json({ ok: false, error: 'invalid_local_port', message: 'localPort 仅允许网关端口 3005' });
+      return;
+    }
+    const tunnel = getTunnelManager(dir).apply({
         host: target.host,
         publicUrl: target.publicUrl || '',
         remotePort: target.remotePort,
@@ -99,6 +105,12 @@ module.exports = function registerMobileAdmin(app, { dataDir } = {}) {
     if (typeof body.profileDelete === 'string' && body.profileDelete.trim()) {
       const current = readTunnelConfig(dir);
       writeTunnelConfig(dir, { profiles: current.profiles.filter((p) => p.name !== body.profileDelete.trim()) });
+    }
+    // BLOCK-102 P3 — localPort 白名单：该端口经公网 nginx 反代可达，配成 3001
+    // 会把未鉴权本机 API 直接发布到公网门。仅允许网关端口 3005。
+    if (body.localPort !== undefined && Number(body.localPort) !== 3005) {
+      res.status(400).json({ ok: false, error: 'invalid_local_port', message: 'localPort 仅允许网关端口 3005' });
+      return;
     }
     const tunnel = getTunnelManager(dir).apply({
       enabled: typeof body.enabled === 'boolean' ? body.enabled : undefined,

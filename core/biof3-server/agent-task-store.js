@@ -310,6 +310,38 @@ for (const statement of [
   }
 }
 
+// BLOCK-102 P4 — task_events 保留清扫：该表此前无界增长（sweeper PR-001 明确
+// 排除，归属本模块）。30 天窗口保守值；递归 setTimeout + unref（不绊关闭），
+// 失败 warn 不毒化后续轮次。created_at 为 SQLite datetime('now') 格式。
+const TASK_EVENTS_RETENTION_DAYS = 30;
+function sweepOldTaskEvents(dbMod = db) {
+  try {
+    const result = dbMod
+      .prepare(
+        `DELETE FROM task_events WHERE created_at < datetime('now', '-${TASK_EVENTS_RETENTION_DAYS} day')`
+      )
+      .run();
+    if (result.changes > 0) {
+      logger.warn(`[agent-task-store] retention: pruned ${result.changes} task_events older than ${TASK_EVENTS_RETENTION_DAYS}d`);
+    }
+    return result.changes;
+  } catch (err) {
+    logger.warn(`[agent-task-store] task_events retention sweep failed: ${err && err.message}`);
+    return 0;
+  }
+}
+let taskEventsSweepScheduled = false;
+function scheduleTaskEventsRetention(dbMod = db) {
+  if (taskEventsSweepScheduled) return;
+  taskEventsSweepScheduled = true;
+  sweepOldTaskEvents(dbMod);
+  const timer = setTimeout(function reschedule() {
+    sweepOldTaskEvents(dbMod);
+    setTimeout(reschedule, 24 * 60 * 60 * 1000).unref();
+  }, 24 * 60 * 60 * 1000);
+  timer.unref();
+}
+
 // BLOCK-38 P1: 服务重启清扫（dbMod 可注入以便测试，缺省用单例 db——测试必须复用
 // 同一连接，另开第二个 better-sqlite3 连接会触发 SQLITE_IOERR_SHORT_READ）。
 // 把仍在 running 的 agent_loop 任务标记为 failed 并写入显式 interrupted_at 时间戳
@@ -334,6 +366,7 @@ function sweepInterruptedRunningTasks(dbMod = db, { now = () => new Date().toISO
 }
 
 sweepInterruptedRunningTasks(db);
+scheduleTaskEventsRetention(db);
 
 const stmts = {
   insert: db.prepare(`

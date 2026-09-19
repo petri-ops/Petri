@@ -94,7 +94,7 @@ function maybeLaunchTaskLevelFallback(input, deps = {}) {
 
   // 执行进度摘要（task_events）→ 合成恢复指令（与 BLOCK-38 resume 同构）
   let digest = '';
-  try { digest = buildProgressDigest(agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000)); } catch {}
+  try { digest = buildProgressDigest(agentTaskStore.getAgentTaskEventsSince(taskId, 0, 5000) // BLOCK-102 P4 cap); } catch {}
   const toProfileLabel = String(profile.label || profile.model || profile.provider || '备用模型');
   const reasonText = String(error && error.message ? error.message : error || '').slice(0, 200);
   const resumeMessages = buildFallbackResumeMessages(originalMessages, digest, { reason: reasonText, label: toProfileLabel });

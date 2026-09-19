@@ -510,7 +510,8 @@ async function _embedPlotsAsDataUrls(analyses) {
           if (p.url && p.url.startsWith('data:')) {
             plots.push({ name: p.name, filename: p.filename, dataUrl: p.url });
           } else if (p.url) {
-            const resp = await fetch(p.url);
+            // BLOCK-102 P4 — 导出取图加超时：对端挂起时连接曾最多挂 300s
+            const resp = await fetch(p.url, { signal: AbortSignal.timeout(10_000) });
             if (resp.ok) {
               const buf = Buffer.from(await resp.arrayBuffer());
               const b64 = buf.toString('base64');

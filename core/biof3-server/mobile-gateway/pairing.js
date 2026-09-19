@@ -111,7 +111,7 @@ function createSessionStore({ dataDir, now = () => Date.now(), persistDebounceMs
     const data = load();
     fs.mkdirSync(path.dirname(sessionsPath), { recursive: true });
     const tmp = `${sessionsPath}.tmp`;
-    fs.writeFileSync(tmp, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
+    fs.writeFileSync(tmp, `${JSON.stringify(data, null, 2)}\n`, { encoding: 'utf8', mode: 0o600 });
     fs.renameSync(tmp, sessionsPath);
   }
 
