@@ -1970,10 +1970,11 @@
     },
     {
       "id": "auto-sync-remote",
-      "note": "远程库自动同步（安全档，2026-09-18）：Windows 计划任务 Gewu-AutoSync 每 2 分钟 fetch+判据链+ff-only 快进。独立 dev-infra 脚本不被任何应用代码 require，bash 语法检查（bash -n）+ schtasks LastTaskResult 即验证面，无定向 Node 测试。",
+      "note": "远程库自动同步（安全档，2026-09-18；2026-09-19 无窗口化：任务 Action=wscript+auto-sync-hidden.vbs 隐藏包装→auto-sync-remote.cmd）：Windows 计划任务 Gewu-AutoSync 每 2 分钟 fetch+判据链+ff-only 快进。独立 dev-infra 脚本不被任何应用代码 require，bash 语法检查（bash -n）+ schtasks LastTaskResult + FETCH_HEAD mtime 前进即验证面，无定向 Node 测试。.vbs 必须 ASCII-only（WSH 按 ANSI/GBK 读，UTF-8 中文注释会吞换行变纯注释 exit 0 空转）。",
       "patterns": [
         "scripts/auto-sync-remote.sh",
         "scripts/auto-sync-remote.cmd",
+        "scripts/auto-sync-hidden.vbs",
         "scripts/auto-sync-mac-setup.sh",
         "scripts/mac-85-prepare.sh"
       ],
