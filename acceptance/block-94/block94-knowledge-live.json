@@ -1,0 +1,13 @@
+{
+  "name": "block94-knowledge",
+  "startedAt": "2026-09-19T04:43:06.056Z",
+  "finishedAt": "2026-09-19T05:23:09.911Z",
+  "assertions": [
+    {
+      "name": "block94_knowledge_live_allPass",
+      "pass": false,
+      "detail": "exit=0 d6d96\",\"status\":\"running\",\"kind\":\"primary\",\"parentTaskId\":null,\"conversationId\":\"conv_7ddc6b09-e0d\n[dev-verify] FAIL A11b_citations_event_real_round :: no knowledge_citations in task events\n[dev-verify] PASS V1a_knowledge_panel_mounted :: panel=true\n[dev-verify] PASS V1b_panel_doc_rows :: rows=3\n[dev-verify] PASS V2a_composer_sent :: clicked:发送消息\n[dev-verify] FAIL V2b_summary_citations_sect"
+    }
+  ],
+  "allPass": false
+}
