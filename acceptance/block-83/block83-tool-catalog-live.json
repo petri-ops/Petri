@@ -1,7 +1,7 @@
 {
   "name": "block83-tool-catalog",
-  "startedAt": "2026-09-12T12:26:22.920Z",
-  "finishedAt": "2026-09-12T12:26:25.066Z",
+  "startedAt": "2026-09-19T04:41:42.367Z",
+  "finishedAt": "2026-09-19T04:41:44.065Z",
   "assertions": [
     {
       "name": "cdp_targets_listed",
@@ -11,7 +11,7 @@
     {
       "name": "spa_page_target_present",
       "pass": true,
-      "detail": "http://localhost:3000/"
+      "detail": "http://localhost:3000/settings"
     },
     {
       "name": "C1_workspace_mounted",
@@ -21,22 +21,22 @@
     {
       "name": "C2_catalog_endpoint",
       "pass": true,
-      "detail": "{\"status\":200,\"ok\":true,\"count\":15,\"source\":\"installed-plugins\",\"first\":{\"id\":\"cellchat\",\"title\":\"CellChat 细胞通讯推断\",\"category\":\"single-cell\",\"color\":\"#16a34a\"}}"
+      "detail": "{\"status\":200,\"ok\":true,\"count\":1,\"source\":\"installed-plugins\",\"first\":{\"id\":\"deseq2\",\"title\":\"DESeq2 差异分析\",\"category\":\"bulk RNA-seq\",\"color\":\"#dc2626\"}}"
     },
     {
       "name": "C3_analyze_panel_opens",
       "pass": true,
-      "detail": "trigger=clicked cards=15"
+      "detail": "trigger=clicked cards=1"
     },
     {
       "name": "C4_cards_from_catalog",
       "pass": true,
-      "detail": "rendered=15 endpoint=15"
+      "detail": "rendered=1 endpoint=1"
     },
     {
       "name": "C5_titles_match",
       "pass": true,
-      "detail": "ui=\"CellChat 细胞通讯推断\" api=\"CellChat 细胞通讯推断\""
+      "detail": "ui=\"DESeq2 差异分析\" api=\"DESeq2 差异分析\""
     },
     {
       "name": "C6_empty_state_absent",

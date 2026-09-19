@@ -1,67 +1,67 @@
 {
   "name": "block94-knowledge-live",
-  "startedAt": "2026-09-17T18:13:20.792Z",
-  "finishedAt": "2026-09-17T18:13:54.412Z",
+  "startedAt": "2026-09-19T04:43:06.101Z",
+  "finishedAt": "2026-09-19T04:45:22.265Z",
   "assertions": [
     {
       "name": "A1_overview_contract",
-      "pass": true,
-      "detail": "fields={\"total\":0,\"scale\":{\"readyChunks\":0,\"scanWarnThreshold\":50000,\"scanWarning\":false},\"emb\":true}"
+      "pass": false,
+      "detail": "fields={\"total\":0,\"scale\":{\"readyChunks\":0,\"scanWarnThreshold\":50000,\"scanWarning\":false},\"emb\":false}"
     },
     {
       "name": "A2_space_enabled",
-      "pass": true,
-      "detail": "{\"id\":\"ks_default\",\"name\":\"默认知识空间\",\"enabled\":true}"
+      "pass": false,
+      "detail": ""
     },
     {
       "name": "A3a_text_accepted",
       "pass": true,
-      "detail": "{\"status\":\"ok\",\"accepted\":[{\"id\":\"kdoc_43b23f19-a6b\",\"name\":\"block94-tp53-notes.md\",\"kind\":\"text\",\"size\":211,\"status\":\"uploaded\",\"error\":null,\"chunkCount\":0,\"createdAt\":\"2026-09-17T18:13:20.834Z\",\"upd"
+      "detail": "{\"status\":\"ok\",\"accepted\":[{\"id\":\"kdoc_3f6c4aa3-0d4\",\"name\":\"block94-tp53-notes.md\",\"kind\":\"text\",\"size\":211,\"status\":\"uploaded\",\"error\":null,\"chunkCount\":0,\"createdAt\":\"2026-09-19T04:43:06.143Z\",\"upd"
     },
     {
       "name": "A3b_text_ready",
-      "pass": true,
-      "detail": "{\"s\":\"ready\",\"c\":2}"
+      "pass": false,
+      "detail": "{\"s\":\"failed\",\"c\":0}"
     },
     {
       "name": "A4a_pdf_accepted",
       "pass": true,
-      "detail": "{\"status\":\"ok\",\"accepted\":[{\"id\":\"kdoc_8df9ff58-c70\",\"name\":\"block94-paper.pdf\",\"kind\":\"text\",\"size\":694,\"status\":\"uploaded\",\"error\":null,\"chunkCount\":0,\"createdAt\":\"2026-09-17T18:13:22.865Z\",\"updated"
+      "detail": "{\"status\":\"ok\",\"accepted\":[{\"id\":\"kdoc_6f427a45-da4\",\"name\":\"block94-paper.pdf\",\"kind\":\"text\",\"size\":694,\"status\":\"uploaded\",\"error\":null,\"chunkCount\":0,\"createdAt\":\"2026-09-19T04:43:06.155Z\",\"updated"
     },
     {
       "name": "A4b_pdf_ready_kind",
-      "pass": true,
-      "detail": "{\"s\":\"ready\",\"k\":\"pdf\",\"c\":1}"
+      "pass": false,
+      "detail": "{\"s\":\"failed\",\"k\":\"text\",\"c\":0}"
     },
     {
       "name": "A5a_paste_accepted",
       "pass": true,
-      "detail": "{\"status\":\"ok\",\"document\":{\"id\":\"kdoc_29affb15-d30\",\"name\":\"block94-粘贴.txt\",\"kind\":\"text\",\"size\":77,\"status\":\"uploaded\",\"error\":null,\"chunkCount\":0,\"createdAt\":"
+      "detail": "{\"status\":\"ok\",\"document\":{\"id\":\"kdoc_309cbd94-c7b\",\"name\":\"block94-粘贴.txt\",\"kind\":\"text\",\"size\":77,\"status\":\"uploaded\",\"error\":null,\"chunkCount\":0,\"createdAt\":"
     },
     {
       "name": "A5b_paste_ready",
-      "pass": true,
-      "detail": "\"ready\""
+      "pass": false,
+      "detail": "\"failed\""
     },
     {
       "name": "A6_search_dual_channel",
-      "pass": true,
-      "detail": "hits=2 emb=true first={\"vector\":0.7704870230983507,\"fts\":1}"
+      "pass": false,
+      "detail": "hits=0 emb=false first=undefined"
     },
     {
       "name": "A7_docid_filter",
-      "pass": true,
-      "detail": "hits=0 scoped=1"
+      "pass": false,
+      "detail": "hits=0 scoped=0"
     },
     {
       "name": "A8_fts_degraded_honest",
-      "pass": true,
-      "detail": "ftsDegraded=true"
+      "pass": false,
+      "detail": "ftsDegraded=false"
     },
     {
       "name": "A9_preview_chunks_raw",
-      "pass": true,
-      "detail": "chunks=2 raw=true"
+      "pass": false,
+      "detail": "chunks=0 raw=true"
     },
     {
       "name": "A10a_reject_aggregated",
@@ -71,17 +71,17 @@
     {
       "name": "A10b_batch_delete",
       "pass": true,
-      "detail": "{\"deleted\":[\"kdoc_8df9ff58-c70\"],\"missing\":[\"kdoc_absent__\"]}"
+      "detail": "{\"deleted\":[\"kdoc_6f427a45-da4\"],\"missing\":[\"kdoc_absent__\"]}"
     },
     {
       "name": "A11a_task_created",
       "pass": true,
-      "detail": "{\"taskId\":\"883fccfa-47cc-4c0f-832a-fb2b36a83e39\",\"status\":\"running\",\"kind\":\"primary\",\"parentTaskId\":null,\"conversationId\":\"conv_7a9cd76b-d25\"}"
+      "detail": "{\"taskId\":\"e2ccd881-d136-487f-ae95-0676c20d6d96\",\"status\":\"running\",\"kind\":\"primary\",\"parentTaskId\":null,\"conversationId\":\"conv_7ddc6b09-e0d\"}"
     },
     {
       "name": "A11b_citations_event_real_round",
-      "pass": true,
-      "detail": "[{\"docId\":\"kdoc_43b23f19-a6b\",\"docName\":\"block94-tp53-notes.md\",\"seq\":0,\"channels\":{\"vector\":0.6869104489001323}},{\"docId\":\"kdoc_a2f21663-5a7\",\"docName\":\"good.txt\",\"seq\":0,\"channels\":{\"vector\":0.6869104489001323}}]"
+      "pass": false,
+      "detail": "no knowledge_citations in task events"
     },
     {
       "name": "V1a_knowledge_panel_mounted",
@@ -100,13 +100,13 @@
     },
     {
       "name": "V2b_summary_citations_section",
-      "pass": true,
-      "detail": "citationsSection=true"
+      "pass": false,
+      "detail": "citationsSection=false"
     }
   ],
-  "allPass": true,
+  "allPass": false,
   "meta": {
-    "taskId": "883fccfa-47cc-4c0f-832a-fb2b36a83e39",
-    "projectId": "p_mtw8183q_2txr"
+    "taskId": "e2ccd881-d136-487f-ae95-0676c20d6d96",
+    "projectId": "p_mu5ftn3a_wxnq"
   }
 }

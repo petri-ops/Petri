@@ -1,7 +1,7 @@
 {
   "name": "pack-lifecycle",
-  "startedAt": "2026-09-15T03:04:57.467Z",
-  "finishedAt": "2026-09-15T03:05:16.133Z",
+  "startedAt": "2026-09-19T05:17:39.769Z",
+  "finishedAt": "2026-09-19T05:18:04.415Z",
   "assertions": [
     {
       "name": "A0a_pack_repo_present",
@@ -101,12 +101,12 @@
     {
       "name": "A8a_r_tool_job_submitted",
       "pass": true,
-      "detail": "{\"ok\":true,\"jobId\":\"job_1e6c3b6b28174a5f\",\"status\":\"pending\",\"isTestRun\":false,\"requestId\":\"e0b39087-015\"}"
+      "detail": "{\"ok\":true,\"jobId\":\"job_9cd96a2acd9c434a\",\"status\":\"pending\",\"isTestRun\":false,\"requestId\":\"360b2285-bd9\"}"
     },
     {
       "name": "A8b_real_r_tool_completed",
       "pass": true,
-      "detail": "status=completed detail={\"ok\":true,\"id\":\"job_1e6c3b6b28174a5f\",\"toolId\":\"deseq2\",\"status\":\"completed\",\"error\":null,\"name\":\"DESeq2 #29\",\"projectId\":\"p_mu239oqk_v8lo\",\"conversationId\":null,\"executionTarget\":null,\"params\":{\"design\":\"condition\",\"co"
+      "detail": "status=completed detail={\"ok\":true,\"id\":\"job_9cd96a2acd9c434a\",\"toolId\":\"deseq2\",\"status\":\"completed\",\"error\":null,\"name\":\"DESeq2 #33\",\"projectId\":\"p_mu7xrrgj_st77\",\"conversationId\":null,\"executionTarget\":null,\"params\":{\"design\":\"condition\",\"co"
     },
     {
       "name": "A9a_pack_reinstalled_for_restore",

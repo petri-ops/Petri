@@ -1,7 +1,7 @@
 {
   "name": "workspace-file-ops",
-  "startedAt": "2026-09-17T00:08:27.519Z",
-  "finishedAt": "2026-09-17T00:08:39.342Z",
+  "startedAt": "2026-09-19T04:41:44.555Z",
+  "finishedAt": "2026-09-19T04:41:56.014Z",
   "assertions": [
     {
       "name": "A0a_backend_rest_healthy",
@@ -16,22 +16,22 @@
     {
       "name": "A0c_temp_project_created",
       "pass": true,
-      "detail": "{\"projectId\":\"p_mu4ruabf_0l5q\",\"workspacePath\":\"D:\\\\1.WorkDir\\\\biof3-desktop\\\\.biof3-dev-user-data\\\\data\\\\projects\\\\block89---1789603707562-mu4ruabf\"}"
+      "detail": "{\"projectId\":\"p_mu7whfol_ihcl\",\"workspacePath\":\"D:\\\\1.WorkDir\\\\biof3-desktop\\\\.biof3-dev-user-data\\\\data\\\\projects\\\\block89---1789792904601-mu7whfol\"}"
     },
     {
       "name": "A1_rest_mkdir",
       "pass": true,
-      "detail": "{\"ok\":true,\"entry\":{\"type\":\"dir\",\"size\":0,\"mtimeMs\":1789603707594.797}}"
+      "detail": "{\"ok\":true,\"entry\":{\"type\":\"dir\",\"size\":0,\"mtimeMs\":1789792904623.062}}"
     },
     {
       "name": "A2_rest_move_file",
       "pass": true,
-      "detail": "mv={\"ok\":true,\"entry\":{\"type\":\"file\",\"size\":15,\"mtimeMs\":1789603707611.799}} raw=file:b.txt"
+      "detail": "mv={\"ok\":true,\"entry\":{\"type\":\"file\",\"size\":15,\"mtimeMs\":1789792904631.288}} raw=file:b.txt"
     },
     {
       "name": "A3_rest_copy_dir_recursive",
       "pass": true,
-      "detail": "cp={\"ok\":true,\"entry\":{\"type\":\"dir\",\"size\":0,\"mtimeMs\":1789603707663.5515}} copied=file:b.txt"
+      "detail": "cp={\"ok\":true,\"entry\":{\"type\":\"dir\",\"size\":0,\"mtimeMs\":1789792904694.8838}} copied=file:b.txt"
     },
     {
       "name": "A4_rest_delete_batch",

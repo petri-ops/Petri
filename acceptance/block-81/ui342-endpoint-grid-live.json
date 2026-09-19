@@ -1,7 +1,7 @@
 {
   "name": "ui342-endpoint-grid",
-  "startedAt": "2026-09-11T12:05:07.021Z",
-  "finishedAt": "2026-09-11T12:05:12.414Z",
+  "startedAt": "2026-09-19T04:41:28.809Z",
+  "finishedAt": "2026-09-19T04:41:34.065Z",
   "assertions": [
     {
       "name": "G0_settings_mounted",
@@ -9,29 +9,29 @@
       "detail": "header=true card=true"
     },
     {
-      "name": "G1_columns_explicit",
+      "name": "N1_header_hidden",
       "pass": true,
-      "detail": "header=9 card=9（期望相等且 ≥8）"
+      "detail": "header display=none"
     },
     {
-      "name": "G2_single_row",
+      "name": "N2_two_line_columns",
       "pass": true,
-      "detail": "单元格 offsetTop 极差=6px（期望 ≤16 = 同一行；独占新行会差 ≥32px）"
+      "detail": "grid 轨道数=2（期望 2 = 标签|控件）"
     },
     {
-      "name": "G3_no_inner_overflow",
+      "name": "N3_labels_visible",
       "pass": true,
-      "detail": "溢出单元格=0（期望 0 = 文字不重合）"
+      "detail": "标签显形 9/9（期望全显形且 ≥8）"
     },
     {
-      "name": "G4_columns_aligned",
+      "name": "N5_label_control_pairs",
       "pass": true,
-      "detail": "header=[120,110,244,170,160,96,72,120,40] card=[120,110,244,170,160,96,72,120,40]"
+      "detail": "每个控件前一个兄弟均为标签=true"
     },
     {
-      "name": "G5_min_width_shared",
+      "name": "N4_no_horizontal_scroll",
       "pass": true,
-      "detail": "header minWidth=1146 card minWidth=1146"
+      "detail": "列表 scrollWidth=1091 clientWidth=1091（期望不再横向滚动）"
     }
   ],
   "allPass": true
