@@ -25,7 +25,7 @@
 // re-exported from main file to keep `import { ... } from '@/components/copilot/SimpleChat'` working.
 // ============================================================
 
-import React, { useEffect, useLayoutEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 
 // ── BLOCK-9.2 PHASE 4: types + helpers + attachments re-exports for backward compat ──
 import {
@@ -68,6 +68,10 @@ import {
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
 import { SubAgentResultCard, type SubAgentCardData } from './SubAgentResultCard';
 import { getPlatformApiPrefix } from '@/lib/authClient';
+// BLOCK-92 三波拆分 — 思考档位/滚动守卫/终态子智能体结果三簇外迁 hooks/（原样平移）
+import { useThinkingLevel } from './SimpleChat/hooks/useThinkingLevel';
+import { useScrollGuard } from './SimpleChat/hooks/useScrollGuard';
+import { useTerminalSubAgentResults } from './SimpleChat/hooks/useTerminalSubAgentResults';
 // UI-268: 「后台进程」浮窗（持久输出独立小窗口）；工具活动记录改为内联手风琴
 import { ToolActivityDock } from './ToolActivityDock';
 import { MessageRail } from './MessageRail';
@@ -139,12 +143,11 @@ import {
   type ChatModelPreset,
 } from '@/hooks/useAiSettings';
 import { CopilotMarkdown } from './copilotMarkdown';
-// BLOCK-81 P2 — 思考档位（会话级持久化 + 词表）
+// BLOCK-81 P2 — 思考档位（会话级持久化 + 词表）；载入/持久化 helper 已随
+// useThinkingLevel 簇迁至 SimpleChat/hooks/useThinkingLevel.ts
 import {
-  DEFAULT_THINKING_LEVEL,
   THINKING_LEVEL_LABELS,
   THINKING_LEVELS,
-  loadThinkingLevel,
   nextThinkingLevel,
   saveThinkingLevel,
   type ThinkingLevel,
@@ -293,19 +296,11 @@ export function SimpleChat({
   // BLOCK-60 — composer 工具栏容器查询窄态（ResizeObserver 只读宽度，不影响弹性宽度逻辑）
   const composerBarRef = useRef<HTMLDivElement | null>(null);
   const [composerNarrow, setComposerNarrow] = useState(false);
-  // BLOCK-81 P2 — 思考档位：会话级态（随会话恢复），默认「标准」＝不发任何上游参数
-  const [thinkingLevel, setThinkingLevel] = useState<ThinkingLevel>(DEFAULT_THINKING_LEVEL);
-  const [thinkingMenuOpen, setThinkingMenuOpen] = useState(false);
-  // 切会话即载入该会话档位（会话级持久化，对齐 composer 草稿同族语义）
-  useEffect(() => {
-    setThinkingLevel(loadThinkingLevel(projectId, conversationId));
-    setThinkingMenuOpen(false);
-  }, [projectId, conversationId]);
-  const applyThinkingLevel = useCallback((next: ThinkingLevel) => {
-    setThinkingLevel(next);
-    saveThinkingLevel(projectId, conversationId, next);
-    setThinkingMenuOpen(false);
-  }, [projectId, conversationId]);
+  // BLOCK-81 P2 — 思考档位：会话级态（随会话恢复），默认「标准」＝不发任何上游参数。
+  // BLOCK-92 三波拆分 — 296-308 连续簇抽入 useThinkingLevel（调用点原位保持 hook
+  // 顺序；Ctrl+T 循环 effect 与簇不连续，仍在下方原位经 setThinkingLevel 驱动）。
+  const { thinkingLevel, setThinkingLevel, thinkingMenuOpen, setThinkingMenuOpen, applyThinkingLevel } =
+    useThinkingLevel(projectId, conversationId);
   useEffect(() => {
     const el = composerBarRef.current;
     if (!el || typeof ResizeObserver === 'undefined') return;
@@ -588,58 +583,18 @@ export function SimpleChat({
   // BLOCK-95 A3 — 自动滚底守卫：用户上翻离开底部后不再强制跟随，浮标一键回底；
   // 发送消息 / 切换会话视为「回到底部」意图，恢复跟随。
   const atBottomRef = useRef(true);
-  const [showJumpToBottom, setShowJumpToBottom] = useState(false);
-  // BLOCK-95 A1 — 向上补页时记录滚动高度，prepend 渲染后恢复视口位置。
-  const prependAnchorRef = useRef<number | null>(null);
-  // older 每次渲染都是新对象，onScroll 高频路径经 ref 读取。
-  const olderRef = useRef(older);
-  olderRef.current = older;
-
-  const scrollToBottom = useCallback((smooth = false) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    atBottomRef.current = true;
-    setShowJumpToBottom(false);
-    el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
-  }, []);
-
-  useEffect(() => {
-    if (scrollRef.current && atBottomRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [activeRun, durableLoop.loop, messages]);
-
-  // 切换会话：重置跟随态（新会话加载完成后自动滚到底）。
-  useEffect(() => {
-    atBottomRef.current = true;
-    setShowJumpToBottom(false);
-  }, [conversationId]);
-
-  // BLOCK-95 A1+A3 — 会话区滚动：距顶 <360px 触发向上补页（prepend 后恢复视口），
-  // 同时更新跟随态与回底浮标。
-  const handleMessagesScroll = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const distToBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
-    atBottomRef.current = distToBottom < 120;
-    setShowJumpToBottom(distToBottom > 600);
-    const olderState = olderRef.current;
-    if (el.scrollTop < 360 && olderState.hasMore && !olderState.loadingMore) {
-      prependAnchorRef.current = el.scrollHeight;
-      void olderState.loadOlder();
-    }
-  }, []);
-
-  // BLOCK-95 A1 — prepend 后恢复视口：useLayoutEffect 在 DOM commit 后、绘制前
-  // 同步执行（rAF 会早于 commit，delta 恒 0）；非补页路径 anchor 为 null 零开销。
-  useLayoutEffect(() => {
-    const anchor = prependAnchorRef.current;
-    if (anchor == null) return;
-    const el = scrollRef.current;
-    if (!el) return;
-    prependAnchorRef.current = null;
-    el.scrollTop += el.scrollHeight - anchor;
-  }, [messages]);
+  // BLOCK-95 A1+A3 — 滚动守卫簇（591-642 连续段）抽入 useScrollGuard：
+  // 调用点原位保持 hook 顺序；atBottomRef 仍由组件持有（send 路径也写它），
+  // prependAnchorRef/olderRef 为簇内私有随簇迁移。
+  const { showJumpToBottom, setShowJumpToBottom, scrollToBottom, handleMessagesScroll } = useScrollGuard({
+    scrollRef,
+    atBottomRef,
+    older,
+    activeRun,
+    durableLoop,
+    messages,
+    conversationId,
+  });
 
   // BLOCK-95 A4 — 话题转移小节分隔：持久真值=DB last_topic_shift_at（会话列表行），
   // 运行中 SSE onTopicShift 经事件总线即时补充并触发 refreshConversations 固化。
@@ -1705,41 +1660,3 @@ export function SimpleChat({
 // The canonical component is imported at the top of this file and re-exported from
 // the header for any consumer reaching it via the SimpleChat path.
 
-
-/** UI-405 — 会话终态子智能体结果（服务端真相轮询 5s；失败静默保留上次数据）。 */
-function useTerminalSubAgentResults(projectId: string | null | undefined, conversationId: string | null | undefined): SubAgentCardData[] {
-  const [rows, setRows] = useState<SubAgentCardData[]>([]);
-  useEffect(() => {
-    if (!conversationId) return;
-    let alive = true;
-    const load = () => {
-      fetch(`${getPlatformApiPrefix()}/ai/agent/tasks?limit=50&conversationId=${encodeURIComponent(conversationId)}`, {
-        headers: { Authorization: 'Bearer desktop-local' },
-      })
-        .then((resp) => resp.json())
-        .then((body) => {
-          if (!alive || !body || body.ok !== true) return;
-          const terminal = (body.tasks || [])
-            .filter((t: { status?: string }) => t.status && t.status !== 'running')
-            .slice(-2)
-            .map((t: { taskId: string; taskText?: string; status: string; createdAt?: string; finishedAt?: string; summaryHead?: string | null }) => ({
-              taskId: String(t.taskId || ''),
-              taskText: String(t.taskText || ''),
-              status: String(t.status || ''),
-              createdAt: t.createdAt || null,
-              finishedAt: t.finishedAt || null,
-              summaryHead: t.summaryHead || null,
-            }));
-          setRows(terminal);
-        })
-        .catch(() => {});
-    };
-    load();
-    const timer = window.setInterval(load, 5000);
-    return () => {
-      alive = false;
-      window.clearInterval(timer);
-    };
-  }, [projectId, conversationId]);
-  return rows;
-}

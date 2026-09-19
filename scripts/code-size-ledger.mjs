@@ -28,6 +28,10 @@ const MANIFEST = [
   { path: 'frontend/src/components/copilot/conversationRunStore.ts', wave: 'A', module: 'W-03' },
   { path: 'frontend/src/components/copilot/copilotClient.ts', wave: 'A', module: 'W-03' },
   { path: 'frontend/src/components/copilot/SimpleChat.tsx', wave: 'A', module: 'W-03' },
+  // 三波拆分（2026-09-19）— SimpleChat 簇外迁 hooks/ 入册
+  { path: 'frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts', wave: 'A', module: 'W-03' },
+  { path: 'frontend/src/components/copilot/SimpleChat/hooks/useScrollGuard.ts', wave: 'A', module: 'W-03' },
+  { path: 'frontend/src/components/copilot/SimpleChat/hooks/useTerminalSubAgentResults.ts', wave: 'A', module: 'W-03' },
   // Wave B — 前端页面/面板族
   { path: 'frontend/src/pages/project-workspace.tsx', wave: 'B', module: 'W-02' },
   { path: 'frontend/src/components/workspace-panels/ResultArtifactShell.tsx', wave: 'B', module: 'W-04' },

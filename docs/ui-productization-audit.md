@@ -3935,3 +3935,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：组件测试 `RemoteTargets.test.tsx` **4/4**（fed 组渲染+设为默认写键+摘要解析/空态指路+SSH 面不受影响/恢复本机清键/探活 POST）；实机 CDP（9223 测试实例，设置→计算与数据节）：真实 Mac 节点行「MacBook-Pro.local darwin/arm64 已连通 64ms」→ 点设为默认 → `localStorage.gewu.executionTargetId === 'fed:gpeer_1b29dffe41f7d531'` + 摘要「联邦节点 MacBook-Pro.local（分析自动提交到该节点）」+ ★态 → 恢复本机执行还原 null，**ASSERT ALL PASS**；tsc 0 + theme 4/4。
 - **边界**：真机 fed: 作业端到端已由 BLOCK-85 P2/P4 双真机验收覆盖（本批只接 UI 选择面）；摘要卡作业徽标对 fed: 目标显示原始 id 为后续候选（mapToolJob 友名映射）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-423: SimpleChat 三波拆分——思考档位/滚动守卫/终态子智能体三簇外迁（纯重构零行为变化）(2026-09-19 verified，dev Electron 边界内实机真轮次)
+
+- **来源**：殿后清债（UI-305/BLOCK-92 两轮拆分后 SimpleChat 回胖 1745 行/80KB，行数实测前端第一梯队）；按 BLOCK-92 家法第三波，只抽**连续且依赖干净**的簇。
+- **改动**（`SimpleChat.tsx` 1745→1662 + 新增 3 hook 文件 159 行）：①`hooks/useThinkingLevel.ts`（296-308 连续段：档位态+会话恢复+持久化；Ctrl+T 循环 effect 因与簇不连续仍留组件内原位，经 setThinkingLevel 驱动——hook 顺序零重排）；②`hooks/useScrollGuard.ts`（591-642 连续段：BLOCK-95 A1+A3 滚动守卫/回底浮标/prepend 视口恢复；atBottomRef 仍由组件持有——send 路径也写它，经参数注入；prependAnchorRef/olderRef 簇内私有随簇迁移）；③`hooks/useTerminalSubAgentResults.ts`（尾部独立 hook，UI-405 终态子智能体 5s 轮询）。
+- **证据**：`tsc --noEmit` 0；copilot 全套 **38 文件 302/302** 全绿（含 useChatStream/useConversationResume/useKnowledgeSpace 等直接消费方回归）；棘轮台账 25 文件 PASS（3 新文件按 Wave A 先例入册+基线同步）；实机 `ui341-welcome-chat` **11/11 allPass**（离屏测试实例真实 SSE 轮次：首问建会话→发送→流式渲染→composer 清空→自清理，acceptance/ui-341/）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

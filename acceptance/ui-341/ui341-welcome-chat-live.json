@@ -1,12 +1,12 @@
 {
   "name": "ui341-welcome-chat",
-  "startedAt": "2026-09-18T02:11:35.749Z",
-  "finishedAt": "2026-09-18T02:11:50.946Z",
+  "startedAt": "2026-09-19T07:01:14.944Z",
+  "finishedAt": "2026-09-19T07:01:29.580Z",
   "assertions": [
     {
       "name": "A1_welcome_rendered",
       "pass": true,
-      "detail": "url=http://localhost:3000/?project=p_mu6bom93_f4m2"
+      "detail": "url=http://localhost:3000/?project=p_mu81gvz1_cgbe"
     },
     {
       "name": "A2_chat_embedded",
@@ -21,17 +21,17 @@
     {
       "name": "A4_project_preselected",
       "pass": true,
-      "detail": "trigger=UI341-验收-1789697497616"
+      "detail": "trigger=UI341-验收-1789801277122"
     },
     {
       "name": "A5_first_question_navigates",
       "pass": true,
-      "detail": "url=http://localhost:3000/project/p_mu6bom93_f4m2"
+      "detail": "url=http://localhost:3000/project/p_mu81gvz1_cgbe"
     },
     {
       "name": "A6_conversation_auto_created",
       "pass": true,
-      "detail": "convId=conv_365537be-d8c title=新对话 project=p_mu6bom93_f4m2"
+      "detail": "convId=conv_24f6ac49-69c title=新对话 project=p_mu81gvz1_cgbe"
     },
     {
       "name": "A7_left_panel_shows_conv",

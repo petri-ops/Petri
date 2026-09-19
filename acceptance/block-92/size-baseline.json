@@ -133,6 +133,24 @@
       "wave": "D",
       "module": "P-01",
       "lines": 966
+    },
+    {
+      "path": "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts",
+      "wave": "A",
+      "module": "W-03",
+      "lines": 30
+    },
+    {
+      "path": "frontend/src/components/copilot/SimpleChat/hooks/useScrollGuard.ts",
+      "wave": "A",
+      "module": "W-03",
+      "lines": 87
+    },
+    {
+      "path": "frontend/src/components/copilot/SimpleChat/hooks/useTerminalSubAgentResults.ts",
+      "wave": "A",
+      "module": "W-03",
+      "lines": 42
     }
   ],
   "total": 33296
