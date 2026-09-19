@@ -1,6 +1,6 @@
 # BLOCK-88 工程师协作 — P0 立项评审
 
-> 状态：`P3-ACTIVE（2026-09-19 用户裁决「开P3」启动——项目授权边界：默认零授权+逐项目 grants+越界 403+授权/吊销 UI+委托项目绑定（消化 85 登记「delegation 无项目绑定」缺口）。P2-COMPLETED 见 §10（8ad51d36）；P1-COMPLETED 见 §9（7cc5cbf3）。D1-D8 于 2026-09-18 裁决「都按推荐」落定）`
+> 状态：`P3-COMPLETED（2026-09-19 会话收口，提交 fe7649fc——实机 16/16 allPass + 契约 3/3 + UI-420 verified；收口记录见 §11。整包 P1-P3 交付完成，closeout（P4：npm run closeout+canonical 五件套+双真机端到端）待用户裁决。D1-D8 于 2026-09-18 裁决「都按推荐」落定）`
 > 日期：2026-09-18（立项评审稿；概念源自 2026-09-14 f52e7d87 用户裁决「可以的 非常棒」）
 > 用户裁决史：①2026-09-14 联邦概念深化「联邦协作主体=**不同的工程师**」（各跑各的格物，互相授权：委托任务/看界面/协同开发），三层缺口排队 BLOCK-88；②2026-09-18「开始 BLOCK-88 立项评审」。
 
@@ -100,4 +100,14 @@ A 能看到/操作 B 的哪些项目。**建议：配对后默认零授权，B �
 - **门禁对账**：契约 test/block88-task-attribution.test.mjs 4/4 + block88-engineer-identity 5/5 + subagent-recent 回归绿；tsc 0；theme-token-contract 4/4；docs:check PASS(255)；ui:audit 同步通过；定向全集 332 项 324 过 7 红——**全部存量（基线对照证实非本包引入）**：block67 fs verbs 4 红（macOS bash verb 面）+ sys_resource 1 红（用例自注 Linux/WSL 语义面）+ P6 源绑定 2 红（🟡 在册）。
 - **实机断言**：scripts/block88-p2-delegate-attribution.cjs **13/13 allPass**——A 侧真实 delegate_to_gewu_node 工具跨节点委托、B 端真实跑完模型回执 done → meta federatedFrom=工程师 A + 会话标题「来自工程师 A的委托：…」（守卫生效）+ 默认视图零泄漏 + includeFederated 可见 + 宿主活跃会话零污染 + CDP 测试实例左栏联邦面可见；证据 acceptance/block-88/p2-attribution.json+png。
 - **P3 预备**：项目授权边界（grants 清单+越界 403+授权/吊销 UI）+ 85 登记缺口「delegation 无项目绑定」（本轮实机再次印证：委托会话 project_id 为 NULL）——启动待用户裁决。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 11. P3 收口记录（2026-09-19 会话）
+
+- **交付**：federation-grants.js（grants.json 单一真相，授权幂等/吊销/原子写）+ 宿主管理 REST 三端点（项目名富化/二次吊销 404）+ 网关 granted-projects 访客面（会话门内按 P1 署名投影）+ chat.js 越界诚实 403 + **授权项目委托落 conversation.project_id 绑定**（消化 85 登记「delegation 无项目绑定（写类委托不可达）」缺口）+ delegate 工具 projectId 参数与 grantedProjects 发现面 + ai-conversations includeFederated 跨项目语义修正 + UI-420 联邦面板「项目授权」卡（同提交台账）。
+- **实现注记**：强制面收敛 agent 委托入口（chat.js task 模式）；全路由中间件级强制与 jobs 粗档变更不属本阶段（D5 粗档×grants 叠加，不另造第三套）。
+- **门禁对账**：契约 block88-project-grants 3/3 + P1/P2 契约 9/9 回归；tsc 0；theme 4/4；docs:check PASS(255)；ui:audit 同步通过。存量红延续前会话归属（block67 macOS bash 面 4 + Linux/WSL 用例 1 + P6 源绑定 2 🟡 在册），基线对照已证非 88 引入。
+- **实机断言**：scripts/block88-p3-project-grants.cjs **16/16 allPass**——默认零授权 403（诚实消息）→ 宿主 REST 授权（项目名富化）→ 同一委托真实跑完 done + 委托会话 project_id 绑定 + origin 标记 → 回执附 grantedProjects 发现面 → 吊销即刻再 403 → CDP 测试实例授权卡可见；证据 acceptance/block-88/p3-grants.json+png。
+- **实机抓真修复三件**（症状均为 peer_timeout 静默挂起）：①chat.js 越界检查引用未声明 wantKind（TDZ ReferenceError 被 express4 async 处理器吞掉=请求永久挂起，无错误中间件可见）→ 移至声明后；②require 相对深度错层（routes/ai-agent 三层 ../）；③includeFederated 列表语义（已绑定委托会话被空项目子句挡掉）。教训：express4 async 处理器内同步 throw=静默挂起，新增分支必须落在全部依赖声明之后（登记为评审注意项，不单独立门禁）。
+- **P4/closeout 预备**：整包 P1-P3 交付完成；P4=closeout（npm run closeout + canonical 五件套 + 双真机端到端验收）待用户裁决——双真机 legs 复用 BLOCK-85 通道（Mac 已在网，Windows 侧需在线配对）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
