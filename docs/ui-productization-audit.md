@@ -3927,3 +3927,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：契约 `test/block88-project-grants.test.mjs` 3/3（store 幂等/吊销/否定语义 + 宿主 REST 项目名富化/二次吊销 404 + 网关按署名投影/无署名诚实空）；实机 `scripts/block88-p3-project-grants.cjs` **16/16 allPass**（默认零授权 403 → 授权后同一委托真实跑完 done + 会话 project_id 绑定 → 回执附 grantedProjects 发现面 → 吊销即刻再 403 → CDP 测试实例授权卡可见「工程师 A + 项目名」）→ `acceptance/block-88/p3-grants.json+png`；P1/P2 契约 9/9 回归；tsc 0；theme 4/4。
 - **实机抓真修复**：①chat.js 越界检查最初引用了尚未声明的 wantKind（TDZ ReferenceError 被 async 处理器吞成请求永久挂起）——移至声明后；②require 相对深度错层（routes/ai-agent 需三层 ../）——同症状；③includeFederated 列表语义修正（无 project 参数时跨项目列出，否则已绑定委托会话被空项目子句挡掉）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-422: 设置页执行位置选择接入联邦节点（BLOCK-85 `fed:` 产品面收官）(2026-09-19 verified，dev Electron 边界内实机全链)
+
+- **来源**：BLOCK-85 P4 遗留登记「前端执行位置选择器 UI 未接入」——后端 `fed:<peerId>` 语义（P2.5）与发送链（useChatStream 读 `gewu.executionTargetId`）早已就绪，唯一缺口=设置页执行目标分区只列 SSH 目标；用户裁决「可以的 冲」启动 UI 轨小批。
+- **改动**（`sections/RemoteTargets.tsx` + 新增组件测试）：执行目标页新增「联邦节点（发到对端格物执行）」组——对端行（名称+platform/arch+在线态徽标〔lastProbe ok+延迟+探活时间，2min 在线窗口与 Federation.tsx 同语义〕+ 设为默认/探活按钮）+ 无节点诚实空态指路「联邦」面板 + 探活失败独立 error 行；选中写同一个 `gewu.executionTargetId` 存储键（`fed:<peerId>` 前缀，发送链零改动）；摘要行迁移至两组之后并解析 fed: 前缀显示节点名 + 新增「恢复本机执行」清除钮。零新 CSS（复用文件内联样式+既有 token）。
+- **证据**：组件测试 `RemoteTargets.test.tsx` **4/4**（fed 组渲染+设为默认写键+摘要解析/空态指路+SSH 面不受影响/恢复本机清键/探活 POST）；实机 CDP（9223 测试实例，设置→计算与数据节）：真实 Mac 节点行「MacBook-Pro.local darwin/arm64 已连通 64ms」→ 点设为默认 → `localStorage.gewu.executionTargetId === 'fed:gpeer_1b29dffe41f7d531'` + 摘要「联邦节点 MacBook-Pro.local（分析自动提交到该节点）」+ ★态 → 恢复本机执行还原 null，**ASSERT ALL PASS**；tsc 0 + theme 4/4。
+- **边界**：真机 fed: 作业端到端已由 BLOCK-85 P2/P4 双真机验收覆盖（本批只接 UI 选择面）；摘要卡作业徽标对 fed: 目标显示原始 id 为后续候选（mapToolJob 友名映射）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

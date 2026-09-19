@@ -39,6 +39,42 @@ interface TargetsResponse {
   discovered: DiscoveredTarget[];
 }
 
+// UI-422 — 联邦节点作为执行位置（BLOCK-85 P2.5 后端 `fed:<peerId>` 语义的产品面）：
+// 数据面 = GET /api/federation/peers（与联邦面板同源），选择写同一个
+// gewu.executionTargetId 存储键（fed: 前缀），useChatStream 发送链零改动。
+interface FedPeer {
+  peerId: string;
+  name: string;
+  platform: string;
+  arch: string;
+  lastSeenAt: string;
+  lastProbe: { ok: boolean; at: string; latencyMs: number | null; error: string | null } | null;
+}
+
+// 与 Federation.tsx 同语义：lastSeenAt/lastProbe.at 在窗口内视为在线。
+const FED_ONLINE_WINDOW_MS = 2 * 60 * 1000;
+
+function fedProbeText(peer: FedPeer): string {
+  const probe = peer.lastProbe;
+  if (!probe) return '未探活';
+  const delta = Date.now() - new Date(probe.at).getTime();
+  const fresh = Number.isFinite(delta) && delta >= 0 && delta < FED_ONLINE_WINDOW_MS;
+  if (probe.ok && fresh) return `已连通 ${probe.latencyMs != null ? `${probe.latencyMs}ms` : ''}`.trim();
+  if (probe.ok) return `已连通 ${probe.latencyMs != null ? `${probe.latencyMs}ms` : ''}（${relTime(probe.at)}探活）`.trim();
+  return '上次探活失败';
+}
+
+function relTime(iso: string): string {
+  const delta = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(delta) || delta < 0) return '刚刚';
+  const minutes = Math.floor(delta / 60_000);
+  if (minutes < 1) return '刚刚';
+  if (minutes < 60) return `${minutes} 分钟前`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} 小时前`;
+  return `${Math.floor(hours / 24)} 天前`;
+}
+
 function authHeaders(): Record<string, string> {
   const token = getToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
@@ -96,6 +132,41 @@ export function RemoteTargets(): React.ReactElement {
   }, []);
 
   useEffect(() => { void load(); }, [load]);
+
+  // UI-422 — 联邦节点列表（失败诚实空态：联邦面板不可用不阻塞 SSH 目标管理）
+  const [fedPeers, setFedPeers] = useState<FedPeer[]>([]);
+  const [fedError, setFedError] = useState('');
+
+  const loadFederation = useCallback(async () => {
+    try {
+      const response = await fetch(`${getPlatformApiPrefix()}/federation/peers`, { headers: authHeaders() });
+      const payload = await response.json();
+      if (!response.ok || !payload?.ok) throw new Error(payload?.error || '联邦节点列表不可用');
+      setFedPeers(payload.peers || []);
+      setFedError('');
+    } catch (reason) {
+      setFedError(reason instanceof Error ? reason.message : String(reason));
+    }
+  }, []);
+
+  useEffect(() => { void loadFederation(); }, [loadFederation]);
+
+  const probeFederation = async (peerId: string) => {
+    setBusyId(`fed:${peerId}`);
+    try {
+      const response = await fetch(`${getPlatformApiPrefix()}/federation/peers/${encodeURIComponent(peerId)}/probe`, {
+        method: 'POST',
+        headers: authHeaders(),
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload?.ok) throw new Error(payload?.error || '探活失败');
+      await loadFederation();
+    } catch (reason) {
+      setFedError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   const register = async (alias: string) => {
     if (!alias.trim()) return;
@@ -217,16 +288,85 @@ export function RemoteTargets(): React.ReactElement {
           添加目标
         </button>
       </div>
-      <p className="gewu-field__hint" data-testid="remote-target-default-summary">
-        当前默认执行目标：{defaultTargetId
-          ? (data.registered.find((t) => t.id === defaultTargetId)?.alias || '已指定目标')
-          : '本机'}{defaultTargetId ? '（分析自动提交到该节点）' : '（分析在本机执行）'}
-      </p>
       {data.discovered.length > 0 && (
         <p className="gewu-field__hint">
           从 ~/.ssh/config 发现：{data.discovered.map((item) => item.alias).join('、')}（输入上方别名即可添加）
         </p>
       )}
+
+      {/* UI-422 — 联邦节点：作业经 `fed:<peerId>` 发到对端格物执行，真值留在对端 */}
+      <h4 style={{ marginTop: 16 }}>联邦节点（发到对端格物执行）</h4>
+      <p className="gewu-field__hint">
+        把分析任务发给已配对的对端格物执行：作业在对端跑、产物真值留在对端，本端实时查看状态与结果。
+        配对入口在左栏「联邦」面板；不选择时一切照常在本机执行。
+      </p>
+      {fedPeers.length === 0 && (
+        <p className="gewu-field__hint" data-testid="federation-peers-empty">
+          尚无已配对联邦节点——在左栏「联邦」面板添加协作节点后，可把任务发到对端执行。
+        </p>
+      )}
+      <ul style={{ listStyle: 'none', margin: '8px 0', padding: 0 }}>
+        {fedPeers.map((peer) => {
+          const targetId = `fed:${peer.peerId}`;
+          const isDefault = defaultTargetId === targetId;
+          return (
+            <li
+              key={peer.peerId}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--gewu-border, #ddd)' }}
+              data-testid="federation-peer-row"
+            >
+              <strong>{peer.name}</strong>
+              <span className="gewu-field__hint">{peer.platform}/{peer.arch}</span>
+              <span
+                style={{
+                  fontSize: 12,
+                  padding: '1px 8px',
+                  borderRadius: 999,
+                  background: peer.lastProbe?.ok ? 'var(--gewu-status-success-bg)' : 'var(--gewu-warning-bg)',
+                }}
+                data-testid={`federation-peer-status-${peer.peerId}`}
+              >
+                {fedProbeText(peer)}
+              </span>
+              <span style={{ flex: 1 }} />
+              <button
+                type="button"
+                disabled={busyId === targetId}
+                onClick={() => { setDefaultTarget(targetId); }}
+                data-testid={`federation-peer-default-${peer.peerId}`}
+              >
+                {isDefault ? '★ 默认' : '设为默认'}
+              </button>
+              <button type="button" disabled={busyId === targetId} onClick={() => { void probeFederation(peer.peerId); }}>
+                {busyId === targetId ? '探活中…' : '探活'}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      {fedError && <p className="gewu-field__hint" role="alert" data-testid="federation-peers-error">{fedError}</p>}
+
+      <p className="gewu-field__hint" data-testid="remote-target-default-summary">
+        当前默认执行目标：{(() => {
+          if (!defaultTargetId) return '本机（分析在本机执行）';
+          if (defaultTargetId.startsWith('fed:')) {
+            const peer = fedPeers.find((p) => p.peerId === defaultTargetId.slice(4));
+            return `${peer ? `联邦节点 ${peer.name}` : '联邦节点（未在注册表）'}（分析自动提交到该节点）`;
+          }
+          const alias = data.registered.find((t) => t.id === defaultTargetId)?.alias;
+          return `${alias || '已指定目标'}（分析自动提交到该节点）`;
+        })()}
+        {defaultTargetId && (
+          <button
+            type="button"
+            style={{ marginLeft: 8 }}
+            onClick={() => { setDefaultTarget(''); }}
+            data-testid="remote-target-default-clear"
+          >
+            恢复本机执行
+          </button>
+        )}
+      </p>
       {error && <p className="gewu-field__hint" role="alert" data-testid="remote-targets-error">{error}</p>}
     </div>
   );
