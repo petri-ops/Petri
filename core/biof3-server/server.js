@@ -40,7 +40,7 @@ const { getBackendPort } = require('../../src/main/env-coordinator');
 try {
   require('../shared-backend/init').initSharedBackend();
 } catch (e) {
-  console.warn('[server] shared-backend init failed:', e.message);
+  console.error('[server] shared-backend init FAILED — storage/executor adapters unavailable (BLOCK-102 P1):', e.message);
 }
 
 // 断点1（分仓前置）：把 biof3-server 自己的 config + ai-usage 实现注入 shared-backend。
@@ -55,7 +55,7 @@ try {
     recordAiUsage: require('./helpers/ai-usage').recordAiUsage,
   });
 } catch (e) {
-  console.warn('[server] shared-backend configure failed:', e.message);
+  console.error('[server] shared-backend configure FAILED — ai-usage/config injection broken (BLOCK-102 P1):', e.message);
 }
 
 // biof3-server 是独立子进程，不共享 Electron 主进程的插件 Map。使用与 MCP
@@ -98,7 +98,7 @@ try {
     ...packSourcesFromPacks,
   ]);
 } catch (e) {
-  console.warn('[server] plugin-loader init failed:', e.message);
+  console.error('[server] plugin-loader init FAILED — plugins unavailable (BLOCK-102 P1):', e.message);
 }
 
 const app = express();
@@ -355,5 +355,5 @@ try {
     console.log('[mobile-gateway] skipped: BIOF3_LOCAL_DATA_DIR not set');
   }
 } catch (e) {
-  console.warn('[mobile-gateway] failed to start:', e && e.message);
+  console.error('[mobile-gateway] FAILED TO START — mobile/federation doors down (BLOCK-102 P1):', e && e.message);
 }

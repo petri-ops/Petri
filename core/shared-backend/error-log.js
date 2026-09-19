@@ -6,8 +6,13 @@
  */
 
 const fsPromises = require('fs').promises;
+const path = require('path');
 
-const errorLogFile = process.env.BIOF3_ERROR_LOG_FILE || '/var/log/biof3-errors.log';
+// BLOCK-102 P1 — the /var/log default is unwritable on Windows/macOS desktop
+// (and the append failure was itself swallowed), so the dedicated error
+// surface was silently dead. Default to the data root instead.
+const errorLogFile = process.env.BIOF3_ERROR_LOG_FILE
+  || path.join(process.env.BIOF3_LOCAL_DATA_DIR || process.cwd(), 'biof3-errors.log');
 
 function normalizeError(err) {
   if (err && typeof err === 'object') {

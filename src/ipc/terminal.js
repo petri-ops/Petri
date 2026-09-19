@@ -132,32 +132,52 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
           ? targetPath.trim()
           : process.env.BIOF3_LOCAL_DATA_DIR || process.env.BIOF3_PROJECT_ROOT;
       const plan = getOpenShellPlan(cwd, process.platform);
-      if (plan.type === "osascript") {
+      // BLOCK-102 P1 — spawn 的 ENOENT 是异步 error 事件，同步 try/catch 拦不住、
+      // 也不能立刻报 ok。等一小窗让 error 事件到达后再如实回执（错误不再静默、
+      // 不再产生无监听 error 事件的主进程 uncaughtException）。
+      const spawnDetached = (command, args, opts) => new Promise((resolve) => {
         const { spawn } = require("child_process");
-        spawn(plan.command, plan.args, {
+        let child;
+        try {
+          child = spawn(command, args, opts);
+        } catch (e) {
+          resolve({ ok: false, error: e.message });
+          return;
+        }
+        let settled = false;
+        child.once("error", (err) => {
+          if (settled) return;
+          settled = true;
+          resolve({ ok: false, error: err.message });
+        });
+        setTimeout(() => {
+          if (settled) return;
+          settled = true;
+          child.unref();
+          resolve({ ok: true });
+        }, 150);
+      });
+      if (plan.type === "osascript") {
+        const r = await spawnDetached(plan.command, plan.args, {
           detached: plan.detached,
           stdio: plan.stdio,
-        }).unref();
-        return { ok: true, path: cwd };
+        });
+        return r.ok ? { ok: true, path: cwd } : r;
       }
       if (plan.type === "cmd") {
-        const { spawn } = require("child_process");
-        spawn(plan.command, plan.args, {
+        const r = await spawnDetached(plan.command, plan.args, {
           detached: plan.detached,
           stdio: plan.stdio,
           windowsHide: plan.windowsHide,
-        }).unref();
-        return { ok: true, path: cwd };
+        });
+        return r.ok ? { ok: true, path: cwd } : r;
       }
-      const { spawn } = require("child_process");
       for (const terminal of plan.candidates) {
-        try {
-          spawn(terminal, plan.args, {
-            detached: plan.detached,
-            stdio: plan.stdio,
-          }).unref();
-          return { ok: true, path: cwd };
-        } catch {}
+        const r = await spawnDetached(terminal, plan.args, {
+          detached: plan.detached,
+          stdio: plan.stdio,
+        });
+        if (r.ok) return { ok: true, path: cwd };
       }
       return { ok: false, error: "未找到可用的系统终端" };
     } catch (e) {

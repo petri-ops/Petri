@@ -439,7 +439,12 @@ async function runAgentLoop({
         systemPrompt += renderActivePlanForPrompt(activePlan);
       }
     }
-  } catch {}
+  } catch (e) {
+    // BLOCK-102 P1 — silent memory/context injection loss made the agent
+    // "forget" users with zero diagnostics. Never break the turn, but log LOUD.
+    console.error('[agent-runner] memory/context injection failed:',
+      e && e.message ? e.message : e);
+  }
 
   // BLOCK-69 — 知识空间自动召回（D4 轻按需：启用才检索；过阈值才注入，≤3 块；无命中不注入）
   // BLOCK-94 F1 挂点收敛：注入逻辑单源 buildTurnInjection（纯去重零行为变更）
@@ -628,7 +633,13 @@ async function runAgentLoop({
       } catch { return undefined; }
     })();
     const { getContextWindow } = require('./helpers/token-estimator');
-    const ctxWindow = (await Promise.resolve(getContextWindow(modelName, providerName, baseUrl, null, presetCtx).catch(() => 0))) || 0;
+    const ctxWindow = (await Promise.resolve(getContextWindow(modelName, providerName, baseUrl, null, presetCtx).catch((e) => {
+      // BLOCK-102 P1 — probe failure used to silently fall back to 64k, which
+      // disabled the BLOCK-51 context fuse for small-window models with no trace.
+      console.error('[agent-runner] context window probe failed:',
+        e && e.message ? e.message : e);
+      return 0;
+    }))) || 0;
     safeCtx = ctxWindow > 0 ? ctxWindow : 64000;
     const pct = Math.min(100, Math.round((total / safeCtx) * 100));
     _emit({
@@ -816,7 +827,7 @@ async function runAgentLoop({
       const conversationAdapter = require('./conversation-adapter');
 
       // Append assistant message to conversation
-      conversationAdapter.appendAssistantMessage({
+      const persistResult = conversationAdapter.appendAssistantMessage({
         conversationId: _activeConv.id,
         assistantAcc: assistantText,
         context,
@@ -840,6 +851,12 @@ async function runAgentLoop({
         taskId,
         emitFn: _emit,
       });
+      // BLOCK-102 P1 — persisted=false 消费：落库失败已经由 adapter 记 error 日志
+      // 并发出 message_persist_failed 事件；这里补一条 runner 侧痕迹（带任务锚点）。
+      if (persistResult && persistResult.persisted === false) {
+        console.error('[agent-runner] assistant message NOT persisted:',
+          JSON.stringify({ conversationId: _activeConv && _activeConv.id, taskId }));
+      }
 
       // Log audit
       conversationAdapter.logAudit({ userId, context, messages });

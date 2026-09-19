@@ -281,7 +281,12 @@ module.exports = function registerAiChatRoute(app) {
         identityProfile && identityProfile.baseUrl,
         null,
         identityProfile && identityProfile.contextWindow,
-      ).catch(() => 0) || 0;
+      ).catch((e) => {
+        // BLOCK-102 P1 — silent 64k fallback disabled the context fuse without a trace
+        console.error('[ai-chat] context window probe failed:',
+          e && e.message ? e.message : e);
+        return 0;
+      }) || 0;
       const pct = ctxWindow > 0 ? Math.min(100, Math.round((total / ctxWindow) * 100)) : 0;
       res.write('data: ' + JSON.stringify({
         event: 'token_budget',

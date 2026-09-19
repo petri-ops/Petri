@@ -61,7 +61,9 @@ function setupBootstrap(app, { db }) {
     const { moduleGate } = require('./helpers/permissions');
     app.use(moduleGate);
   } catch (error) {
-    console.warn('[modules] permission gate failed to load:', error && error.message);
+    // BLOCK-102 P1 — fail-open must be LOUD: without the gate, module
+    // permission requests are auto-approved with zero enforcement.
+    console.error('[modules] permission gate FAILED TO LOAD — running WITHOUT permission enforcement:', error && error.message);
   }
 }
 

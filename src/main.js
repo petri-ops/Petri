@@ -421,7 +421,9 @@ async function main() {
   try {
     applyPermissionPolicy({ session, app, log: console });
   } catch (error) {
-    console.warn("[security] 权限策略装配失败（继续启动，但权限策略未生效）:", error?.message || error);
+    // BLOCK-102 P1 — fail-open consequence must be LOUD: without the policy,
+    // permission requests default to auto-approve.
+    console.error("[security] 权限策略装配失败（继续启动，权限请求将被自动批准——安全策略未生效）:", error?.message || error);
   }
 
   // M1-4 (H3)：启动 biof3-server 前跑 db migration，防升级 schema 错乱。

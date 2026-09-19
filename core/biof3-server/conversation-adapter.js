@@ -199,7 +199,18 @@ function appendAssistantMessage({
       })
       .catch(() => {});
   } catch (e) {
-    // Best-effort: never break the turn on conversation persistence failure
+    // Best-effort: never break the turn on conversation persistence failure —
+    // but BLOCK-102 P1: silent history loss was undiscoverable. Make it LOUD:
+    // structured error log + persist-failed event (frontend may surface
+    // "本轮未保存"), and persisted stays false for the caller.
+    console.error('[conversation-adapter] assistant persist failed:',
+      e && e.message ? e.message : e);
+    persisted = false;
+    try {
+      if (typeof emitFn === 'function') {
+        emitFn({ event: 'message_persist_failed', conversationId, role: 'assistant' });
+      }
+    } catch {}
   }
 
   return { persisted, shifted };
@@ -230,7 +241,11 @@ function appendUserMessage({
       projectId: context && context.projectId,
     };
     appendMessageToConversation(conversationId, 'user', content, meta, taskId);
-  } catch {}
+  } catch (e) {
+    // BLOCK-102 P1 — silent user-message loss was undiscoverable
+    console.error('[conversation-adapter] user persist failed:',
+      e && e.message ? e.message : e);
+  }
 }
 
 /**
