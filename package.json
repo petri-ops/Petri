@@ -18,7 +18,7 @@
     "test": "node scripts/test-affected.mjs --run",
     "test:changed": "node scripts/test-affected.mjs --run",
     "test:changed:list": "node scripts/test-affected.mjs --json",
-    "test:all": "node --test test/*.test.mjs test/*.test.cjs",
+    "test:all": "node --test --test-force-exit --test-timeout=120000 test/*.test.mjs test/*.test.cjs",
     "test:all:frontend": "npm --prefix frontend run test:all",
     "test:all:workspace": "npm run test:all && npm run test:all:frontend",
     "mcp:server": "node src/mcp-server.js",

@@ -4749,8 +4749,28 @@
         "security-hardening"
       ],
       "notes": "稳定性加固：四路系统性扫描（静默失败/资源泄漏/前端竞态/安全边界）修复批次。P0 落库吞错+terminal spawn+前端竞态×2；P1 权限 fail-open/上下文兜底/初始化降级/token 出 URL/DNS rebinding/切项目竞态；P2 inflight 滞留×3/无超时 fetch/error-log 桌面路径/task_events retention/轮询减频/0600 落盘。四阶段 P1-P4+收口 P5；用户裁决 2026-09-19「是不是要做个 block呢 一次性修复完成」。"
+    },
+    {
+      "id": "BLOCK-103-KNOWLEDGE-SPACE-UX",
+      "path": "docs/block-103-knowledge-space-ux-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-103-knowledge-space-ux",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-19",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "block-103",
+        "knowledge-space",
+        "ux",
+        "information-architecture",
+        "frontend-redesign"
+      ],
+      "notes": "知识空间页产品化重设计（布局与内容）：状态条+双页签（文档库/检索预览）+hero 空态+管理会话台折叠抽屉（对标 UI-417）+组件拆分（700 棘轮净减）+文案产品化。纯前端零后端；行为基线八项保留；block99 flow 把手适配（D7）。用户裁决 2026-09-19「立个新的block 重新优化这里的内容」；UI-426（425 被并行收口占用）。"
     }
   ],
   "lastUpdated": "2026-09-19",
-  "documentCount": 256
+  "documentCount": 257
 }
