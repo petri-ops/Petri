@@ -1984,6 +1984,17 @@
       "scriptRole": "development-smoke"
     },
     {
+      "id": "stack-watchdog",
+      "note": "dev 栈法证看门狗（2026-09-19：当日三次全栈进程团灭后部署；计划任务 Gewu-StackWatchdog 每 5 分钟 backend+CDP 双健康探针→死亡抓指纹〔last-seen 进程/幸存者/netstat 画像/事件日志〕→自动拉起 vite+主栈+测试实例）。任务 Action=wscript+stack-watchdog-hidden.vbs 隐藏包装→.biof3-dev-user-data/stack-watchdog.ps1（未跟踪机器基建，同 mac-tunnel-monitor 先例）。无定向 Node 测试，验证面=死亡现场全链自愈（已实测：检测→法证→五口全绿）+ schtasks LastTaskResult。.vbs 必须 ASCII-only（同 auto-sync 教训）。",
+      "patterns": [
+        "scripts/stack-watchdog-hidden.vbs"
+      ],
+      "tests": [],
+      "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
+    },
+    {
       "id": "block88-engineer-collab",
       "note": "BLOCK-88 工程师协作：P1 身份层贯通（配对握手 additive identity + peers/会话注册表扩展 + 联邦面板协作成员/署名展示）。改身份净化/配对会话/peers 注册表/联邦管理路由/联邦面板任一文件即跑本套件。",
       "patterns": [
