@@ -132,14 +132,16 @@ function getOrCreateActiveConversation(userId, hint) {
  * 永不复用宿主活跃会话（85 双真机验收登记缺口「委托未开独立会话」的修复面）。
  * origin='federation-delegation' 供会话列表默认视图隔离（ai-conversations 路由）。
  */
-function createFederatedDelegationConversation(userId, identity, titleHint) {
+function createFederatedDelegationConversation(userId, identity, titleHint, projectId) {
   const id = _newConvId();
   const now = new Date().toISOString();
   const name = (identity && identity.displayName) || '协作工程师';
   const excerpt = String(titleHint || '').replace(/\s+/g, ' ').trim().slice(0, 30);
   const title = `来自${name}的委托${excerpt ? '：' + excerpt : ''}`.slice(0, 100);
-  sqlite.prepare('INSERT INTO copilot_conversations(id, user_id, title, status, origin, created_at, updated_at) VALUES (?,?,?,?,?,?,?)')
-    .run(id, userId, title, 'active', 'federation-delegation', now, now);
+  // BLOCK-88 P3（D4）：授权项目的委托落项目绑定（workspace_* project_required 自此可达）
+  const pid = projectId ? String(projectId) : null;
+  sqlite.prepare('INSERT INTO copilot_conversations(id, user_id, title, status, last_page, project_id, origin, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?)')
+    .run(id, userId, title, 'active', null, pid, 'federation-delegation', now, now);
   return sqlite.prepare('SELECT * FROM copilot_conversations WHERE id=?').get(id);
 }
 

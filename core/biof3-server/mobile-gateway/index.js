@@ -252,6 +252,25 @@ function buildMobileGateway({
     });
   });
 
+  // ── BLOCK-88 P3（D4）：访客列自己的被授权项目（「A 能看到 B 的哪些项目」）──
+  // 会话门内；身份键=本会话 P1 落档的工程师声明署名；附项目名供 delegate 选参。
+  const grantsMod = require('../../shared-backend/federation-grants');
+  app.get('/federation/api/granted-projects', (req, res) => {
+    const identity = req.mobileSession?.identity;
+    if (!identity || !identity.displayName) {
+      res.json({ ok: true, projects: [], note: 'session_without_engineer_identity' });
+      return;
+    }
+    const grants = grantsMod.grantedProjectsFor(dataDir, identity.displayName);
+    let projects = grants;
+    try {
+      const db = require('../db').getDatabase();
+      const names = new Map(db.prepare('SELECT id, name FROM projects').all().map((r) => [r.id, r.name]));
+      projects = grants.map((g) => ({ projectId: g.projectId, projectName: names.get(g.projectId) || null }));
+    } catch { /* 项目名附不上时诚实降级为纯 id */ }
+    res.json({ ok: true, engineer: identity.displayName, projects });
+  });
+
   // ── BLOCK-85 P4 投影终端（node-pty 会话 + SSE 下行 / POST 上行）──
   // 会话门内；会话驻留 core 进程，手机锁屏断流回来可重连重放（环形缓冲）。
   const terminalEngine = require('../federation-terminal').createTerminalEngine();

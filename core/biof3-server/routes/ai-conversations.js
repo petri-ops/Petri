@@ -64,7 +64,9 @@ module.exports = function mountConversations(app) {
       const values = [userId];
       if (status) { where.push('status=?'); values.push(status); }
       if (projectId) { where.push('project_id=?'); values.push(projectId); }
-      else where.push("COALESCE(project_id, '')=''");
+      // BLOCK-88 P3：includeFederated=1 且未指定项目时跨项目列出（含已绑定项目的
+      // 联邦委托会话——它们 project_id 非空，会被下方空项目子句挡掉）。
+      else if (!includeFederated) where.push("COALESCE(project_id, '')=''");
       if (!includeFederated) where.push("(origin IS NULL OR origin != 'federation-delegation')");
       const rows = await adb.prepare(`SELECT ${cols} FROM copilot_conversations WHERE ${where.join(' AND ')} ORDER BY updated_at DESC LIMIT 100`).all(...values);
       res.json({status:'ok', conversations: rows});

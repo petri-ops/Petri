@@ -14,6 +14,8 @@
  * 行为 100% 兼容：try/catch 顺序、status code、response shape 保持不变。
  */
 
+const path = require('node:path');
+
 const express = require('express');
 
 // BLOCK-81 P1 — 思考档位归一（中性档位词表与映射内核同源）
@@ -155,6 +157,24 @@ module.exports = {
         const fedIdentity = (req.mobileSession && req.mobileSession.identity) || null;
 
         const wantKind = req.body && req.body.kind === 'subagent' ? 'subagent' : 'primary';
+        // BLOCK-88 P3（D4）— 项目授权边界：联邦委托指定 context.projectId 时
+        // 必须在宿主 grants 清单内（默认零授权，逐项目授权可随时吊销），
+        // 越界诚实 403；无 projectId 的委托不涉项目访问，放行（能力自然受限）。
+        const fedProjectId = (context && typeof context.projectId === 'string' && context.projectId.trim()) || null;
+        if (fedIdentity && fedProjectId && wantKind === 'primary') {
+          const fedDataDir = process.env.BIOF3_LOCAL_DATA_DIR
+            || process.env.LOCAL_DATA_DIR
+            || path.join(process.cwd(), 'data');
+          const granted = require('../../../shared-backend/federation-grants').isProjectGranted(fedDataDir, fedIdentity.displayName, fedProjectId);
+          if (!granted) {
+            return res.status(403).json({
+              status: 'error',
+              error: 'federation_project_not_granted',
+              message: `工程师「${fedIdentity.displayName}」未被授权访问项目 ${fedProjectId}（宿主默认零授权，请宿主在联邦面板逐项目授权）`,
+            });
+          }
+        }
+
         let parentTaskId = null;
         let parentLoopRunId = null;
         if (wantKind === 'subagent') {
@@ -199,7 +219,13 @@ module.exports = {
           if (fedIdentity && !explicitConvId && wantKind === 'primary') {
             // BLOCK-88 P2（D3）— 委托独立会话：访客委托永不复用宿主活跃会话
             //（85 双真机验收登记缺口「委托未开独立会话」的修复面）。
-            _activeConv = convSync.createFederatedDelegationConversation(userId, fedIdentity, messages[0] && messages[0].content);
+            // BLOCK-88 P3（D4）— 授权项目的委托落项目绑定（P3 检查已放行），
+            // workspace_* 等 project_required 工具自此可达（「写类委托不可达」缺口）。
+            _activeConv = convSync.createFederatedDelegationConversation(
+              userId, fedIdentity,
+              messages[0] && messages[0].content,
+              fedProjectId || null,
+            );
           } else {
             const hint = {
               conversationId: explicitConvId,

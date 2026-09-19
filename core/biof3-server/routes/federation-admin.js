@@ -8,6 +8,9 @@
  * POST   /api/federation/peers/:id/probe 在线探测
  * DELETE /api/federation/peers/:id      移除节点（本端删除；对端可在其面板吊销会话）
  * GET    /api/federation/members        协作成员（本机会话中带工程师声明身份的访客，BLOCK-88 P1）
+ * GET    /api/federation/grants         项目授权清单（含项目名，BLOCK-88 P3）
+ * POST   /api/federation/grants         {engineer, projectId} 授权（幂等）
+ * DELETE /api/federation/grants?engineer=&projectId=  吊销
  */
 
 const express = require('express');
@@ -22,6 +25,7 @@ const {
   getPeerToken,
 } = require('../../shared-backend/federation-peers');
 const { getStores } = require('../mobile-gateway/pairing');
+const grants = require('../../shared-backend/federation-grants');
 
 const JOB_FORWARD_TIMEOUT_MS = 120_000;      // 作业提交（含文件上传）
 const STATUS_FORWARD_TIMEOUT_MS = 15_000;    // 状态查询
@@ -104,6 +108,37 @@ module.exports = function registerFederationAdmin(app, { dataDir } = {}) {
       return;
     }
     res.json({ ok: true, removed: req.params.id });
+  });
+
+  // ── BLOCK-88 P3（D4）：项目授权清单（宿主桌面面管理）──
+  // 授权/吊销即时落 grants.json；强制面在 agent 委托入口（chat.js）。
+  function projectNameMap() {
+    const rows = require('../db').getDatabase().prepare('SELECT id, name FROM projects').all();
+    return new Map(rows.map((r) => [r.id, r.name]));
+  }
+
+  app.get('/api/federation/grants', (_req, res) => {
+    const names = projectNameMap();
+    const items = grants.listGrants(dir).map((g) => ({ ...g, projectName: names.get(g.projectId) || null }));
+    res.json({ ok: true, grants: items });
+  });
+
+  app.post('/api/federation/grants', express.json({ limit: '4kb' }), (req, res) => {
+    const result = grants.grantProject(dir, req.body?.engineer, req.body?.projectId);
+    if (!result.ok) {
+      res.status(400).json({ ok: false, error: result.error, message: 'engineer 与 projectId 必填' });
+      return;
+    }
+    res.json({ ok: true, grants: result.grants });
+  });
+
+  app.delete('/api/federation/grants', (req, res) => {
+    const result = grants.revokeProject(dir, req.query.engineer, req.query.projectId);
+    if (!result.ok) {
+      res.status(result.error === 'grant_not_found' ? 404 : 400).json({ ok: false, error: result.error });
+      return;
+    }
+    res.json({ ok: true, grants: result.grants });
   });
 
   // 「打开界面」：向对端索取一次性配对链接（对端 gateway 会话门内的

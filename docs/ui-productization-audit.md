@@ -3909,3 +3909,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：契约 `test/block88-task-attribution.test.mjs` 4/4（origin 标记+标题/双向隔离防护/默认视图排除+includeFederated 可见/federatedFrom 映射）；实机 `scripts/block88-p2-delegate-attribution.cjs` **13/13 allPass**（真实 delegate_to_gewu_node 工具跨节点委托真实跑完〔模型回执 done〕→ meta 归属/标题/默认视图排除/includeFederated 可见/宿主活跃会话零污染/CDP 左栏联邦面可见）→ `acceptance/block-88/p2-attribution.json+png`；tsc 0；theme 4/4。
 - **存量红归属（非本包引入，基线对照证实）**：block67-node-agent-fs 4 红（macOS bash verb 面，stash 基线同红）+ node-agent sys_resource 1 红（用例自注 Linux/WSL 语义面）+ P6 源绑定 2 红（已 🟡 在册）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-420: 联邦面板「项目授权」卡（BLOCK-88 P3 授权边界 UI 面）(2026-09-19 verified，dev Electron 边界内 CDP 测试实例 16/16)
+
+- **来源**：BLOCK-88 P3（D4 默认零授权+逐项目 grants；用户裁决「开P3」）。
+- **改动**（`sections/Federation.tsx` + module.css）：协作成员卡下新增「项目授权」卡——按访客工程师逐行展示已授权项目 chip（项目名+×吊销）+ 下拉选择项目（未授权候选）+「授权」按钮（grantRow/grantChip/grantRevoke/grantSelect，全主题 token）；数据=GET /api/federation/grants（含项目名富化）+ /api/data/projects；动作=POST 授权（幂等）/ DELETE 吊销（即时生效）。
+- **配套服务端**（同提交）：`federation-grants.js` grants.json 单一真相（原子写）+ 宿主管理 REST 三端点 + 网关 `/federation/api/granted-projects`（会话门内按署名列被授权项目）+ chat.js task 模式越界诚实 403（`federation_project_not_granted`）+ **授权项目委托落 conversation.project_id 绑定**（workspace_* project_required 工具自此可达——消化 85 登记「delegation 无项目绑定（写类委托不可达）」缺口）+ delegate 工具 `projectId` 参数与 `grantedProjects` 发现面 + tool-defs 描述同步。**实现注记**：强制面收敛 agent 委托入口（chat.js task 模式），全路由中间件级强制与 jobs 粗档变更不属本阶段（D5 粗档×grants 叠加）。
+- **证据**：契约 `test/block88-project-grants.test.mjs` 3/3（store 幂等/吊销/否定语义 + 宿主 REST 项目名富化/二次吊销 404 + 网关按署名投影/无署名诚实空）；实机 `scripts/block88-p3-project-grants.cjs` **16/16 allPass**（默认零授权 403 → 授权后同一委托真实跑完 done + 会话 project_id 绑定 → 回执附 grantedProjects 发现面 → 吊销即刻再 403 → CDP 测试实例授权卡可见「工程师 A + 项目名」）→ `acceptance/block-88/p3-grants.json+png`；P1/P2 契约 9/9 回归；tsc 0；theme 4/4。
+- **实机抓真修复**：①chat.js 越界检查最初引用了尚未声明的 wantKind（TDZ ReferenceError 被 async 处理器吞成请求永久挂起）——移至声明后；②require 相对深度错层（routes/ai-agent 需三层 ../）——同症状；③includeFederated 列表语义修正（无 project 参数时跨项目列出，否则已绑定委托会话被空项目子句挡掉）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

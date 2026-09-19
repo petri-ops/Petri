@@ -46,6 +46,7 @@ const TERMINAL_AGENT_STATUSES = new Set(['completed', 'failed', 'cancelled', 'do
 async function tool_delegate_to_gewu_node(args = {}) {
   const peerId = String(args.peerId || '').trim();
   const task = String(args.task || '').trim();
+  const projectId = typeof args.projectId === 'string' ? args.projectId.trim() : '';
   const timeoutMs = Math.min(Math.max(Number(args.timeoutMinutes) || 10, 1), 30) * 60_000;
   if (!peerId) return { error: 'missing_peer_id', message: '缺少 peerId（协作成员 ID，联邦面板可见）' };
   if (!task) return { error: 'missing_task', message: '缺少 task（要委托给对方 agent 的工作描述）' };
@@ -56,12 +57,23 @@ async function tool_delegate_to_gewu_node(args = {}) {
   if (!peer) return { error: 'unknown_peer', message: '协作成员不存在或已移除：' + peerId };
   const token = federation.getPeerToken(dataDir, peerId) || '';
 
+  // 0. BLOCK-88 P3（D4）— 发现面：列本工程师在对端的被授权项目（附项目名），
+  // 无 projectId 但对端有授权项目时在回执中提示（写类委托需带 projectId 重发）。
+  let grantedProjects = null;
+  try {
+    const mine = await peerFetch(peer, token, '/federation/api/granted-projects');
+    if (mine.status === 200 && mine.data?.ok) grantedProjects = mine.data.projects || [];
+  } catch { /* 发现失败不阻塞委托 */ }
+
   // 1. 发起对端 agent 会话（后台任务模式）
   let started;
   try {
     started = await peerFetch(peer, token, '/api/ai/agent', {
       method: 'POST',
-      body: { messages: [{ role: 'user', content: task }] },
+      body: {
+        messages: [{ role: 'user', content: task }],
+        ...(projectId ? { context: { projectId } } : {}),
+      },
       timeoutMs: 60_000,
     });
   } catch (error) {
@@ -69,6 +81,13 @@ async function tool_delegate_to_gewu_node(args = {}) {
   }
   if (started.status === 401) {
     return { error: 'federation_session_invalid', message: `协作成员「${peer.name}」的会话已失效，请在联邦面板重新配对` };
+  }
+  if (started.status === 403) {
+    return {
+      error: 'federation_project_not_granted',
+      message: (started.data && started.data.message) || `未被授权访问对端项目 ${projectId}（宿主默认零授权，请宿主在联邦面板逐项目授权）`,
+      grantedProjects: grantedProjects || [],
+    };
   }
   const taskId = started.data && (started.data.taskId || (started.data.data && started.data.data.taskId));
   if (started.status !== 200 || !taskId) {
@@ -116,6 +135,9 @@ async function tool_delegate_to_gewu_node(args = {}) {
     peerTaskId: taskId,
     agentStatus: meta.agentStatus,
     reply,
+    projectId: projectId || null,
+    // BLOCK-88 P3（D4）— 未带 projectId 时回执附被授权项目（写类委托按此重发）
+    ...(projectId ? {} : { grantedProjects: grantedProjects || [] }),
     note: '任务真值保存在协作成员的会话中，可在其界面中查看完整过程',
   };
 }

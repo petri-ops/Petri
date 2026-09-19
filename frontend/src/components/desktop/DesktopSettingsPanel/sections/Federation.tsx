@@ -17,6 +17,14 @@ interface FederationPeer {
   identity?: { displayName?: string; device?: string } | null;
 }
 
+// BLOCK-88 P3：项目授权（宿主 grants 清单投影，含项目名）。
+interface FederationGrant {
+  engineer: string;
+  projectId: string;
+  projectName: string | null;
+  grantedAt: string;
+}
+
 // BLOCK-88 P1：协作成员 = 本机会话中带工程师声明身份的访客（D2）。
 interface FederationMember {
   id: string;
@@ -80,6 +88,10 @@ function platformLabel(peer: FederationPeer): string {
 export function FederationPanel(): React.ReactElement {
   const [peers, setPeers] = useState<FederationPeer[] | null>(null);
   const [members, setMembers] = useState<FederationMember[] | null>(null);
+  const [grants, setGrants] = useState<FederationGrant[] | null>(null);
+  const [hostProjects, setHostProjects] = useState<{ id: string; name: string }[]>([]);
+  const [grantSelections, setGrantSelections] = useState<Record<string, string>>({});
+  const [grantBusy, setGrantBusy] = useState(false);
   const [pairUrl, setPairUrl] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -101,6 +113,21 @@ export function FederationPanel(): React.ReactElement {
     }
   }, []);
 
+  const refreshGrants = useCallback(async () => {
+    try {
+      const [g, p] = await Promise.all([
+        fetch(`${getPlatformApiPrefix()}/federation/grants`, { headers: authHeaders() }),
+        fetch(`${getPlatformApiPrefix()}/data/projects`, { headers: authHeaders() }),
+      ]);
+      const gd = await g.json();
+      if (gd.ok) setGrants(gd.grants);
+      const pd = await p.json();
+      if (pd.projects) setHostProjects(pd.projects.map((x: { id: string; name: string }) => ({ id: x.id, name: x.name })));
+    } catch {
+      /* 授权面读取失败静默（下次刷新再试） */
+    }
+  }, []);
+
   const refreshMembers = useCallback(async () => {
     try {
       const response = await fetch(`${getPlatformApiPrefix()}/federation/members`, { headers: authHeaders() });
@@ -114,11 +141,12 @@ export function FederationPanel(): React.ReactElement {
   useEffect(() => {
     void refresh();
     void refreshMembers();
+    void refreshGrants();
     const timer = window.setInterval(() => {
       void refreshMembers();
     }, MEMBERS_REFRESH_MS);
     return () => window.clearInterval(timer);
-  }, [refresh, refreshMembers]);
+  }, [refresh, refreshMembers, refreshGrants]);
 
   const addPeer = useCallback(async () => {
     if (!pairUrl.trim()) return;
@@ -205,6 +233,33 @@ export function FederationPanel(): React.ReactElement {
       setBusy(false);
     }
   }, [refresh]);
+
+  const grantProject = useCallback(async (engineer: string, projectId: string) => {
+    setGrantBusy(true);
+    try {
+      await fetch(`${getPlatformApiPrefix()}/federation/grants`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ engineer, projectId }),
+      });
+      await refreshGrants();
+    } finally {
+      setGrantBusy(false);
+    }
+  }, [refreshGrants]);
+
+  const revokeGrant = useCallback(async (engineer: string, projectId: string) => {
+    setGrantBusy(true);
+    try {
+      await fetch(`${getPlatformApiPrefix()}/federation/grants?engineer=${encodeURIComponent(engineer)}&projectId=${encodeURIComponent(projectId)}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      await refreshGrants();
+    } finally {
+      setGrantBusy(false);
+    }
+  }, [refreshGrants]);
 
   // UI-358 修订 3：出码能力上收协作成员 tab——手机连接与协作节点共用同一
   // 配对机制（mobile-gateway token），「在另一台电脑生成配对码」不该依赖对方
@@ -389,6 +444,79 @@ export function FederationPanel(): React.ReactElement {
           </ul>
         )}
         <p className={styles.fedHint}>成员署名为对方声明身份，未经验证；吊销访客可在「我的设备」中操作。</p>
+      </div>
+
+      <div className={styles.addCard} data-testid="federation-grants">
+        <h4 className={styles.addTitle}>项目授权</h4>
+        <p className={styles.fedHint}>
+          默认零授权：访客工程师默认碰不到本机任何项目，按项目逐个授权、可随时吊销；委托越权会被诚实拒绝。
+        </p>
+        {(() => {
+          const engineerNames = [...new Set([
+            ...(members || []).map((m) => m.identity.displayName).filter((n): n is string => !!n),
+            ...(grants || []).map((g) => g.engineer),
+          ])];
+          if (engineerNames.length === 0) {
+            return <p className={styles.fedHint} data-testid="federation-grants-empty">还没有访客工程师 · 配对署名后可按项目授权</p>;
+          }
+          return engineerNames.map((name) => {
+            const mine = (grants || []).filter((g) => g.engineer === name);
+            const grantedIds = new Set(mine.map((g) => g.projectId));
+            const candidates = hostProjects.filter((p) => !grantedIds.has(p.id));
+            return (
+              <div key={name} className={styles.grantRow} data-testid="federation-grant-row">
+                <span className={styles.grantEngineer}>{name}</span>
+                <div className={styles.grantChips}>
+                  {mine.length === 0 && <span className={styles.fedHint}>未授权任何项目</span>}
+                  {mine.map((g) => (
+                    <span key={g.projectId} className={styles.grantChip}>
+                      {g.projectName || g.projectId}
+                      <button
+                        type="button"
+                        className={styles.grantRevoke}
+                        disabled={grantBusy}
+                        title="吊销授权"
+                        aria-label={`吊销 ${name} 对 ${g.projectName || g.projectId} 的授权`}
+                        data-testid="federation-grant-revoke"
+                        onClick={() => { void revokeGrant(name, g.projectId); }}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                {candidates.length > 0 && (
+                  <div className={styles.grantAddRow}>
+                    <select
+                      className={styles.grantSelect}
+                      value={grantSelections[name] || ''}
+                      onChange={(e) => setGrantSelections((s) => ({ ...s, [name]: e.target.value }))}
+                      data-testid="federation-grant-select"
+                      aria-label={`为 ${name} 选择要授权的项目`}
+                    >
+                      <option value="">选择项目…</option>
+                      {candidates.map((p) => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                      disabled={grantBusy || !grantSelections[name]}
+                      data-testid="federation-grant-submit"
+                      onClick={() => {
+                        const pid = grantSelections[name];
+                        if (pid) void grantProject(name, pid);
+                      }}
+                    >
+                      授权
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          });
+        })()}
       </div>
 
       {peers && peers.length === 0 && (

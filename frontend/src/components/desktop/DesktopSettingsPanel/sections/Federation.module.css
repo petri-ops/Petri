@@ -159,3 +159,72 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* BLOCK-88 P3（D4）— 项目授权卡（默认零授权/逐项目授权/随时吊销） */
+.grantRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0;
+  border-top: 1px solid var(--gewu-border, #e4e4e7);
+}
+
+.grantEngineer {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gewu-text);
+}
+
+.grantChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.grantChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid var(--gewu-border, #e4e4e7);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.grantRevoke {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0 2px;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--gewu-text-muted);
+}
+
+.grantRevoke:hover {
+  color: #dc2626;
+}
+
+.grantAddRow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.grantSelect {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 12px;
+  padding: 6px 8px;
+  border: 1px solid var(--gewu-border, #e4e4e7);
+  border-radius: 8px;
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
+}

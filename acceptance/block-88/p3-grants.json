@@ -1,0 +1,96 @@
+{
+  "package": "BLOCK-88-ENGINEER-COLLAB",
+  "stage": "P3-GRANTS",
+  "topology": "loopback dual-node: B=dev stack :3001/:3005 (real), A=real delegate_to_gewu_node tool (isolated dataDir)",
+  "engineer": {
+    "displayName": "工程师 A",
+    "device": "macOS"
+  },
+  "delegateTask": "只读侦察：用一句话报告你收到的项目名称，不要使用任何工具。",
+  "startedAt": "2026-09-19T01:24:54.742Z",
+  "finishedAt": "2026-09-19T01:25:10.448Z",
+  "assertions": [
+    {
+      "name": "P0_backend_3001_healthy",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P0a_target_project_available",
+      "pass": true,
+      "detail": "projects=4"
+    },
+    {
+      "name": "P1_invite_token_issued",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P1a_pair_with_identity_ok",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P2_undelegated_project_denied_403",
+      "pass": true,
+      "detail": "{\"error\":\"federation_project_not_granted\",\"message\":\"工程师「工程师 A」未被授权访问项目 p_mtw8183q_2txr（宿主默认零授权，请宿主在联邦面板逐项目授权）\"}"
+    },
+    {
+      "name": "P3_host_grant_ok",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P3a_grant_visible_with_project_name",
+      "pass": true,
+      "detail": "{\"engineer\":\"工程师 A\",\"projectId\":\"p_mtw8183q_2txr\",\"grantedAt\":\"2026-09-19T01:24:54.981Z\",\"projectName\":\"P4驻留-1789086708723\"}"
+    },
+    {
+      "name": "P4_granted_delegate_runs_to_done",
+      "pass": true,
+      "detail": "agentStatus=done err=none"
+    },
+    {
+      "name": "P4a_meta_federated_from",
+      "pass": true,
+      "detail": "covered by P2 suite; here assert binding below"
+    },
+    {
+      "name": "P4b_delegation_conversation_project_bound",
+      "pass": true,
+      "detail": "{\"project_id\":\"p_mtw8183q_2txr\",\"origin\":\"federation-delegation\",\"title\":\"来自工程师 A的委托：只读侦察：用一句话报告你收到的项目名称，不要使用任何工具。\"}"
+    },
+    {
+      "name": "P5_discovery_granted_projects_in_receipt",
+      "pass": true,
+      "detail": "[{\"projectId\":\"p_mtw8183q_2txr\",\"projectName\":\"P4驻留-1789086708723\"}]"
+    },
+    {
+      "name": "P6a_revoke_ok",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P6b_revoked_delegate_denied_again",
+      "pass": true,
+      "detail": "{\"error\":\"federation_project_not_granted\"}"
+    },
+    {
+      "name": "P7a_grants_card_mounted",
+      "pass": true,
+      "detail": "{\"card\":true,\"rows\":[\"工程师 AP4驻留-1789086708723×选择项目…AppDatatinkspacedesktop授权\"]}"
+    },
+    {
+      "name": "P7b_grant_row_shows_engineer_and_project",
+      "pass": true,
+      "detail": "[\"工程师 AP4驻留-1789086708723×选择项目…AppDatatinkspacedesktop授权\"]"
+    },
+    {
+      "name": "P7c_screenshot_captured",
+      "pass": true,
+      "detail": "acceptance/block-88/p3-grants-ui.png"
+    }
+  ],
+  "allPass": true,
+  "uiNote": "项目授权卡在 CDP 9223 测试实例走查；探针零触碰 9222 主窗口"
+}

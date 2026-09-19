@@ -1988,6 +1988,9 @@
       "patterns": [
         "core/shared-backend/engineer-identity.js",
         "core/shared-backend/federation-peers.js",
+        "core/shared-backend/federation-grants.js",
+        "core/biof3-server/agent-tools/federation-tools.js",
+        "core/biof3-server/agent-tools/tool-defs.js",
         "core/biof3-server/mobile-gateway/pairing.js",
         "core/biof3-server/mobile-gateway/index.js",
         "core/biof3-server/routes/federation-admin.js",
