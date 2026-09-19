@@ -59,11 +59,13 @@ async function loadShared(
   }
   const existing = inflight.get(projectId);
   if (existing) return existing;
-  const promise = listConversations('active', projectId).then((list) => {
-    sharedCache.set(projectId, list);
-    inflight.delete(projectId);
-    return list;
-  });
+  // BLOCK-102 P2 — inflight 失败也要删除（否则被拒 promise 永久滞留，列表不可自愈）
+  const promise = listConversations('active', projectId)
+    .then((list) => {
+      sharedCache.set(projectId, list);
+      return list;
+    })
+    .finally(() => { inflight.delete(projectId); });
   inflight.set(projectId, promise);
   return promise;
 }

@@ -117,15 +117,21 @@ export function useConversationResume({
   }, [conversationId]);
 
   // A1 — 向上补页：拉更旧一页并 prepend。返回是否真的加载了内容。
+  // BLOCK-102 P2 — 竞态守卫：在途请求返回时若会话已切换，整页丢弃（旧会话的
+  // 消息/游标不得写入新会话的 state）。
+  const conversationIdRef = useRef(conversationId);
+  conversationIdRef.current = conversationId;
   const loadOlder = useCallback(async (): Promise<boolean> => {
     if (!conversationId) return false;
     if (loadingMoreRef.current) return false;
     const before = olderMetaRef.current.nextBefore;
     if (before == null) return false;
+    const convIdAtStart = conversationId;
     loadingMoreRef.current = true;
     setLoadingMore(true);
     try {
       const page = await getConversationMessagesPage(conversationId, 200, before);
+      if (conversationIdRef.current !== convIdAtStart) return false;
       if (!page || page.messages.length === 0) {
         setOlderMeta((m) => ({ ...m, hasMore: false, nextBefore: null }));
         return false;

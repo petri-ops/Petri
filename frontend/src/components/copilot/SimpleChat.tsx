@@ -185,7 +185,7 @@ import {
 // The hook owns send/stop/regenerate/queue/runInBackground plus the
 // `starting` state, messagesRef/sendRef indirection, the copilotAsk
 // event subscription, and the queue drain effect.
-import { useChatStream } from './SimpleChat/hooks/useChatStream';
+import { useChatStream, type QueuedPrompt } from './SimpleChat/hooks/useChatStream';
 // BLOCK-52 P1（选中即引用）: 引用块纯函数助手（状态管理 + 发送渲染）。
 import {
   appendSelectionReference,
@@ -249,7 +249,8 @@ export function SimpleChat({
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
   const [copiedMessageKey, setCopiedMessageKey] = useState<string | null>(null);
   const [input, setInput] = useState('');
-  const [queuedPrompts, setQueuedPrompts] = useState<string[]>([]);
+  // BLOCK-102 P2 — 队列条目带会话归属（修复排队追问跨会话注入竞态）
+  const [queuedPrompts, setQueuedPrompts] = useState<QueuedPrompt[]>([]);
   const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
   // BLOCK-91 — 附件发送失败/守卫提示（诚实可见，不再静默丢弃）。
   const [attachmentNotice, setAttachmentNotice] = useState<string | null>(null);
@@ -902,7 +903,8 @@ export function SimpleChat({
       if (streaming) {
         // BLOCK-52 P1：排队消息同样携带当前引用块，入列后清空。
         const queuedWithRefs = composeMessageWithSelectionReferences(trimmed, selectionRefsRef.current);
-        setQueuedPrompts((current) => [...current, queuedWithRefs].slice(-5));
+        // BLOCK-102 P2 — 归属标记与 queue() 同款
+        setQueuedPrompts((current) => [...current, { conversationId, text: queuedWithRefs }].slice(-5));
         setInput('');
         historyNavRef.current = INITIAL_NAV_STATE;
         clearConversationDraft(projectId, conversationId);

@@ -51,10 +51,11 @@ async function loadBranches(projectId: string, force = false): Promise<BranchCac
       activeBranchId: activeBranch?.id || null,
     };
     sharedCache.set(projectId, cache);
-    inflight.delete(projectId);
     notify();
     return cache;
   })();
+  // BLOCK-102 P2 — inflight 失败也要删除（被拒 promise 滞留 = 分支列表不可自愈）
+  void promise.catch(() => {}).then(() => { inflight.delete(projectId); });
 
   inflight.set(projectId, promise);
   return promise;

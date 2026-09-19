@@ -11,7 +11,7 @@
 //   - Results persist across branch switches within the same project
 // ============================================================
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { resultApi } from '@/lib/resultBridge';
 import type { Result, ResultSummary, ListResultsOptions } from '@/types/result.types';
 
@@ -59,10 +59,11 @@ async function loadResults(
       activeResultId: null,
     };
     sharedCache.set(projectId, cache);
-    inflight.delete(projectId);
     notify();
     return cache;
   })();
+  // BLOCK-102 P2 — inflight 失败也要删除（被拒 promise 滞留 = 结果列表不可自愈）
+  void promise.catch(() => {}).then(() => { inflight.delete(projectId); });
 
   inflight.set(projectId, promise);
   return promise;
@@ -321,7 +322,11 @@ export function useResultStore(
   );
 
   // Build a Map for quick lookup by ID
-  const resultsById = new Map(snapshot.results.map((r) => [r.id, r]));
+  // BLOCK-102 P2 — useMemo 化：每 render 新建 Map 使以其为 deps 的 useMemo 全部失效
+  const resultsById = useMemo(
+    () => new Map(snapshot.results.map((r) => [r.id, r])),
+    [snapshot.results],
+  );
 
   return {
     results: snapshot.results,

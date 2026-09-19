@@ -53,6 +53,13 @@ import {
 import { type ChatMessage } from '@/components/copilot/copilotClient';
 import { type SimpleMessage } from '../types';
 
+/** BLOCK-102 P2 — 排队追问带会话归属：drain 只消费当前会话的条目，
+ *  修复「流式期间切会话后 A 的追问注入 B 会话」竞态。 */
+export interface QueuedPrompt {
+  conversationId: string | null;
+  text: string;
+}
+
 export interface UseChatStreamArgs {
   // Props (stable from parent)
   projectId: string;
@@ -71,12 +78,12 @@ export interface UseChatStreamArgs {
   // Setters (React guarantees stable identity)
   setMessages: React.Dispatch<React.SetStateAction<SimpleMessage[]>>;
   setInput: React.Dispatch<React.SetStateAction<string>>;
-  setQueuedPrompts: React.Dispatch<React.SetStateAction<string[]>>;
+  setQueuedPrompts: React.Dispatch<React.SetStateAction<QueuedPrompt[]>>;
 
   // State values to read
   input: string;
   messages: SimpleMessage[];
-  queuedPrompts: string[];
+  queuedPrompts: QueuedPrompt[];
   displayMessages: SimpleMessage[];
   activeRun: ConversationRunSnapshot | null;
   activeModel: ChatModelPreset | undefined;
@@ -281,6 +288,9 @@ export function useChatStream({
   // a fresh send is always available from a closure that may have
   // been captured many renders ago.
   const sendRef = useRef(send);
+  // BLOCK-102 P2 — runInBackground 同款 latest-ref（copilotAsk 订阅 effect 经 ref
+  // 读取最新引用，避免闭包锁定首帧）；定义在 349 行，此处先置空、return 前回填。
+  const runInBackgroundRef = useRef<(text: string) => void>(() => {});
   useEffect(() => {
     sendRef.current = send;
   }, [send]);
@@ -299,7 +309,9 @@ export function useChatStream({
       const p = typeof prompt === 'string' ? prompt.trim() : '';
       if (!p) return;
       if (analysisMode) {
-        void runInBackground(p);
+        // BLOCK-102 P2 — 经 ref 取最新引用：effect deps 只有 ownsCopilotAsk，
+        // 直接闭包捕获会锁定首帧的 runInBackground（activeRun 恒 null）。
+        void runInBackgroundRef.current(p);
       } else {
         void sendRef.current(p, copilotContextOverrideForAsk(detail));
       }
@@ -374,7 +386,8 @@ export function useChatStream({
   const queue = useCallback((text: string) => {
     const trimmed = text.trim();
     if (!trimmed || !streaming) return;
-    setQueuedPrompts((current) => [...current, trimmed].slice(-5));
+    // BLOCK-102 P2 — 归属标记：追问属于发起它的会话
+    setQueuedPrompts((current) => [...current, { conversationId, text: trimmed }].slice(-5));
     setInput('');
     historyNavRef.current = INITIAL_NAV_STATE;
     clearConversationDraft(projectId, conversationId);
@@ -389,9 +402,13 @@ export function useChatStream({
     if (streaming || queuedPrompts.length === 0 || !conversationId) return;
     if (activeRun?.completedAt
       && reconciledRunRef.current !== `${conversationId}:${activeRun.completedAt}`) return;
-    const [next, ...rest] = queuedPrompts;
-    setQueuedPrompts(rest);
-    void send(next);
+    // BLOCK-102 P2 — 只 drain 归属当前会话的条目：切走的会话其追问留在队列，
+    // 回到该会话且对账完成后才发送（不再注入当前会话）。
+    const idx = queuedPrompts.findIndex((q) => q.conversationId === conversationId);
+    if (idx === -1) return;
+    const next = queuedPrompts[idx];
+    setQueuedPrompts(queuedPrompts.filter((_, i) => i !== idx));
+    void send(next.text);
   }, [activeRun, conversationId, messages, queuedPrompts, send, streaming]);
 
   // `input` is read by the public API surface (the parent passes
@@ -403,5 +420,7 @@ export function useChatStream({
   // expect to be observed.
   void input;
 
+  // BLOCK-102 P2 — 回填最新 runInBackground（声明在其定义之后、return 之前）
+  runInBackgroundRef.current = runInBackground;
   return { send, stop, regenerate, queue, runInBackground, streaming };
 }

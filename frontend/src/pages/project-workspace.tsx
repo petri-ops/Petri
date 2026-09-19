@@ -518,10 +518,16 @@ export function ProjectWorkspace(): React.ReactElement {
   // Plan 1.6 §4.3 — moved to useOtherConversations hook above; the
   // `projectConversations` variable is now derived from the shared
   // cache + cross-project seed map.
+  // BLOCK-102 P2 — 切项目竞态守卫：组件跨 /project/:projectId 不重挂载，15s 轮询
+  // 的在途旧响应会覆盖新项目数据。requestSequence 单调递增，只有最新一次请求
+  // （且 projectId 未变）才允许写 state。
+  const fetchSequenceRef = useRef(0);
   const fetchData = useCallback(async () => {
     if (!projectId) return;
+    const seq = ++fetchSequenceRef.current;
     try {
       const p = await getProject(projectId);
+      if (seq !== fetchSequenceRef.current) return;
       if (!p) {
         // 项目被删除/无权访问：清空 project，走全屏错误（致命，非瞬时）
         setProject(null);
@@ -534,15 +540,17 @@ export function ProjectWorkspace(): React.ReactElement {
         listProjectJobs(projectId),
         listDatasetsByProject(projectId),
       ]);
+      if (seq !== fetchSequenceRef.current) return;
       setJobs(jobList);
       setDatasets(dsList);
       // 成功路径必须清除此前轮询留下的瞬时错误，否则错误屏永驻（P0-2）
       setError('');
     } catch (e: any) {
+      if (seq !== fetchSequenceRef.current) return;
       // 轮询瞬时失败：保留已加载数据，错误以非阻塞横幅呈现，下一轮成功即自愈
       setError(e.message || '加载失败');
     } finally {
-      setLoading(false);
+      if (seq === fetchSequenceRef.current) setLoading(false);
     }
   }, [projectId]);
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 
 export interface RuntimeResourceSnapshot {
@@ -33,7 +33,11 @@ export function useRuntimeResourceSnapshot(
   const [snapshot, setSnapshot] = useState<RuntimeResourceSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // BLOCK-102 P2 — 切项目竞态守卫：10s 轮询的在途旧项目响应不得覆盖新项目
+  // 快照（对照 useConversationJobs 的 requestSequence 家法）。
+  const refreshSequenceRef = useRef(0);
   const refresh = useCallback(async () => {
+    const seq = ++refreshSequenceRef.current;
     try {
       const token = getToken();
       const query = projectId ? `?projectId=${encodeURIComponent(projectId)}` : '';
@@ -41,14 +45,16 @@ export function useRuntimeResourceSnapshot(
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       const data = await response.json();
+      if (seq !== refreshSequenceRef.current) return;
       if (!response.ok || !data?.ok || !data?.snapshot) throw new Error(data?.message || '资源快照不可用');
       // stale:true = 远程探测失败回退的历史读数（诚实降级，前端显示观测时间）。
       setSnapshot(data.stale === true ? { ...data.snapshot, stale: true } : data.snapshot);
       setError('');
     } catch (reason) {
+      if (seq !== refreshSequenceRef.current) return;
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
-      setLoading(false);
+      if (seq === refreshSequenceRef.current) setLoading(false);
     }
   }, [projectId]);
 
