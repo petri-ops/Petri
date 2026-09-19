@@ -102,6 +102,10 @@ const desktopBridgeSurface = {
   // --gewu-test-instance=1）。严格 === true 判定：投影 shim 的 Proxy 属性访问
   // 返回 callable proxy（truthy 但非 true），不会误亮测试徽标。
   __testInstance: process.argv.includes('--gewu-test-instance=1'),
+  // UI-421 — 测试实例管理模式快捷键透传（主进程 _window-create.js 注入实际生效
+  // 的组合键；默认 Ctrl+Alt+Shift+M，BIOF3_TEST_MANAGE_SHORTCUT 可覆盖）。
+  __testManageShortcut:
+    (process.argv.find((a) => a.startsWith('--gewu-test-manage-shortcut=')) || '').split('=')[1] || null,
   backendConfig: Object.freeze({
     rApiBase: `http://localhost:${_rPort}/api`,
   }),

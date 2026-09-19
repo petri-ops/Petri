@@ -3912,6 +3912,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **存量红归属（非本包引入，基线对照证实）**：block67-node-agent-fs 4 红（macOS bash verb 面，stash 基线同红）+ node-agent sys_resource 1 红（用例自注 Linux/WSL 语义面）+ P6 源绑定 2 红（已 🟡 在册）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-421: 测试实例管理模式快捷键换键+注册失败显式告警（UI-413 修复批）(2026-09-19 verified，dev Electron 边界内实机全链)
+
+- **来源**：用户实机反馈「Ctrl+Alt+M 我点了这个 发现没有解锁」——诊断实锤：本机第三方程序（嫌疑=ToDesk 等常驻工具）已用 RegisterHotKey 占住 Ctrl+Alt+M，Electron `globalShortcut.register()` 静默返回 false，UI-413 的按键链路在这类机器上从注册那一刻就不存在；原代码未检查返回值=静默失败无任何线索。
+- **改动**：①默认键换 **Ctrl+Alt+Shift+M**（PowerShell RegisterHotKey 探针实测空闲；env `BIOF3_TEST_MANAGE_SHORTCUT` 可覆盖），注册与注入共用同一解析式（`_window-ipc.js` + `_window-create.js`）；②注册结果显式落日志（成功=注册信息，失败=告警+换键指引）；③快捷键经 `--gewu-test-manage-shortcut=` 启动参数透传（preload 暴露 `__testManageShortcut`），管理条文案显示真实生效组合键（`TestInstanceBadge.tsx` 四处文案参数化），跨端/覆盖后不再文案漂移。
+- **证据**：实机全链（dev Electron 测试实例）：注册日志 `管理快捷键已注册: Control+Alt+Shift+M`；OS 级按键注入触发 → 主进程 handler → testManageModeChanged 事件 → CDP 探针读徽标「内容已穿透 · Control+Alt+Shift+M 解锁窗口管理」→「管理模式 · 拖本条移动 / 拖边缘调整大小 · Control+Alt+Shift+M 锁回」双向切换确认；旧键对照实验=Ctrl+Alt+M 注册返回 false（占用实锤）。tsc 0 + docs:check/ui:audit:check 双绿。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-420: 联邦面板「项目授权」卡（BLOCK-88 P3 授权边界 UI 面）(2026-09-19 verified，dev Electron 边界内 CDP 测试实例 16/16)
 
 - **来源**：BLOCK-88 P3（D4 默认零授权+逐项目 grants；用户裁决「开P3」）。

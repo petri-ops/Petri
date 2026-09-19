@@ -22,6 +22,12 @@ const isTestInstance =
   (window as { biof3Desktop?: { __testInstance?: unknown } }).biof3Desktop
     ?.__testInstance === true;
 
+// UI-421 — 快捷键由主进程经启动参数透传（默认 Ctrl+Alt+Shift+M：
+// Ctrl+Alt+M 在部分机器被第三方程序 RegisterHotKey 占用导致静默失败）。
+const manageShortcut =
+  (window as { biof3Desktop?: { __testManageShortcut?: string } }).biof3Desktop
+    ?.__testManageShortcut || 'Ctrl+Alt+M';
+
 export function TestInstanceBadge(): React.ReactElement | null {
   const [manageMode, setManageMode] = useState(false);
   const [alwaysOnTop, setAlwaysOnTop] = useState(true);
@@ -49,8 +55,8 @@ export function TestInstanceBadge(): React.ReactElement | null {
       className={`${styles.bar}${manageMode ? ` ${styles.barUnlocked}` : ''}`}
       title={
         manageMode
-          ? '管理模式：拖本条移动窗口 / 拖边缘调整大小 / 点按钮操作；Ctrl+Alt+M 锁回穿透'
-          : '已穿透（内容碰不到）。按 Ctrl+Alt+M 解锁窗口管理（拖动移动/边缘调整大小）'
+          ? `管理模式：拖本条移动窗口 / 拖边缘调整大小 / 点按钮操作；${manageShortcut} 锁回穿透`
+          : `已穿透（内容碰不到）。按 ${manageShortcut} 解锁窗口管理（拖动移动/边缘调整大小）`
       }
     >
       <span className={styles.badge}>测试实例 · TEST</span>
@@ -65,10 +71,10 @@ export function TestInstanceBadge(): React.ReactElement | null {
           >
             📌 置顶{alwaysOnTop ? '开' : '关'}
           </button>
-          <span className={styles.hint}>管理模式 · 拖本条移动 / 拖边缘调整大小 · Ctrl+Alt+M 锁回</span>
+          <span className={styles.hint}>管理模式 · 拖本条移动 / 拖边缘调整大小 · {manageShortcut} 锁回</span>
         </>
       ) : (
-        <span className={styles.hint}>内容已穿透 · Ctrl+Alt+M 解锁窗口管理</span>
+        <span className={styles.hint}>内容已穿透 · {manageShortcut} 解锁窗口管理</span>
       )}
     </div>
   );

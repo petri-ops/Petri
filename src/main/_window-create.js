@@ -121,7 +121,16 @@ async function createWindow({
       plugins: true,
       // BLOCK-100 — 测试实例身份注入：preload 读 argv 暴露 __testInstance，
       // 前端悬浮「测试实例」徽标据此点亮（=== true 严格判定防投影 shim 误判）。
-      additionalArguments: IS_TEST_INSTANCE ? ["--gewu-test-instance=1"] : [],
+      // UI-421 — 管理模式快捷键同步透传，徽标文案显示真实生效组合键。默认
+      // Ctrl+Alt+Shift+M：Ctrl+Alt+M 在不少机器被第三方程序 RegisterHotKey
+      // 抢占（2026-09-19 实机 register()=false 静默失败实锤），env 可覆盖，
+      // 与 _window-ipc.js 的注册处共用同一解析式。
+      additionalArguments: IS_TEST_INSTANCE
+        ? [
+            "--gewu-test-instance=1",
+            `--gewu-test-manage-shortcut=${process.env.BIOF3_TEST_MANAGE_SHORTCUT || "Control+Alt+Shift+M"}`,
+          ]
+        : [],
     },
   });
 
