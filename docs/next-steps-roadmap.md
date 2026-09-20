@@ -1,8 +1,9 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-20（**BLOCK-104 第二增量 completed：P4 缩水门禁补齐（用户裁决「继续」）**——process.platform 冻结门禁（85 基线 fail-closed）+12 个 windows 命令调用脚本入口护栏/platform-note 强制门禁 12/12 合规+grants 挂起归因修正（实证无模型调用）+环境敏感集成靶在册（同位重跑惯例）+**后台任务等待纪律入 skill**（事件驱动禁 sleep 盲等）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-20（**BLOCK-105-CODE-QUALITY-GOVERNANCE 立项即启动 active（P0-LAUNCH，用户裁决「好的 立一个工作包」）**：代码质量与安全治理——摸底实锤全仓零 ESLint（前端 check 仅 tsc --noEmit）；五阶段 P0 只读体检（npx 零新依赖）→P1 lint 补齐+防增量门禁→P2 存量归因清偿（K 簇模式+棘轮）→P3 架构机械化+Electron 断言→P4 收口；红线=工具链只装根 package.json 不碰 frontend lockfile（P6 源绑定），新依赖走 DEPENDENCY-CHANGE-CHECKLIST 裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
+- **启动 active（2026-09-20 立项即启动，P0-LAUNCH）：`BLOCK-105-CODE-QUALITY-GOVERNANCE`**（plan `docs/block-105-code-quality-governance-plan.md` §1）：**代码质量与安全治理**——测试面已工业化（2250 绿）但静态质量层空白：补 lint 层（typescript-eslint strictTypeChecked+react-hooks+security，根目录 flat config 跨覆盖 frontend/src）+安全扫描（Semgrep/Gitleaks/依赖 SCA）+冗余度量（Knip 死代码/jscpd 重复率）+架构规范机械化（dependency-cruiser：IPC 必经 desktopBridge/pages 布局/_ 前缀转可执行规则）+Electron 断言（fuses/contextIsolation）；节奏=P0 只读体检零新依赖→P1 lint+防增量→P2 存量归因三分类（真缺陷/化石/豁免登记）+棘轮只紧不松→P3 架构机械化→P4 收口；新依赖逐个走 DEPENDENCY-CHANGE-CHECKLIST（D1-D5 预置裁决）；非范围=依赖升级批次（🟡 归 P6 同批）/P6 重打/CodeQL/SonarQube/Stryker/SBOM（后可选再裁决）/G1+。
 - **已收口（2026-09-20 立项即启动当日 P0→P5 一次会话整包 completed，closeout 五门绿）：`BLOCK-104-PLATFORM-TEST-GOVERNANCE`**（plan `docs/block-104-platform-test-governance-plan.md` §2/§6）：**平台与测试确定性治理**——P0 归因矩阵实锤 33/36 确定性红；修复=产品语法缺陷 1（agent-fallback 注释吞括号，BLOCK-102 P4 引入）+URL pathname 反模式 10 处+化石 biof3.db 迁移家法×5+window-controls 源码抓取耐漂移+EPERM 清理+行数帽棘轮+brand/端点表对账；环境/平台门 skip 可见（block48 sidecar/hle 外部仓/p4r SIGTERM/deepseek retry 层）；scripts 双端同形机械门禁+8 脚本诚实标注；僵尸测试删除 1。**全量基线 199 红→26 红全部在册待归因**（K 簇 🟡 候选池），绿 2238。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 
