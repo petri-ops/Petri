@@ -106,10 +106,15 @@ async function runLoop({
   messages,
   toolCtx,
   shouldAbort,
+  // 契约名恢复（test/agent-runner-loop-orchestrator.test.mjs 源码扫描钉住 9 回调签名）；
+  // emitToolResult/conversationState 函数体当前未消费，BLOCK-105 §7 Batch-3 先例=
+  // 恢复绑定 + 抑制基线登记豁免（count=2）。
+  emitToolResult,
   emitAssistant,
   emitDone,
   callChatProvider,
   config,
+  conversationState,
 }) {
   const {
     userId,
