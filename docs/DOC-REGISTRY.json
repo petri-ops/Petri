@@ -4812,8 +4812,29 @@
         "governance-gates"
       ],
       "notes": "代码质量与安全治理：当日 P0→P4 一次会话整包 completed。P0 体检基线（密钥干净/audit 32 条/Knip 高噪音/jscpd 2.7%）+ P1 ESLint flat config+密钥门禁 fail-closed + P2 棘轮闭合（eslint-suppressions.json，真缺陷 2 件修复，--fix 77 文件双套件验证）+ P3 dependency-cruiser 五规则 0 违规+Electron 断言 3/3；closeout 八门（+quality:secret/arch/lint）全绿。fuses=G1+ 登记；D5 CodeQL 预置推荐暂不启用。"
+    },
+    {
+      "id": "BLOCK-106-STARTUP-PERFORMANCE-RATCHET",
+      "path": "docs/block-106-startup-performance-ratchet-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-106-startup-performance-ratchet",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-20",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "block-106",
+        "startup-performance",
+        "bundle-splitting",
+        "measurement-ratchet",
+        "sqlite-index",
+        "task-events"
+      ],
+      "notes": "启动性能回退清偿与首屏负载治理（2026-09-20 Windows 侧立项即启动，用户裁决「开 BLOCK-106」）。P0 让 BLOCK-101 仪表可归因（补项目数/task_events 行数/主 chunk 字节/HEAD）+ 中位数阈值棘轮（只收缩不放宽）；P1 路由级 lazy + xterm/highlight.js 动态化（实测主 chunk 2,989.47 kB / gzip 945.66 kB）；P2 task_events created_at 索引（236,087 行、清扫计划 SCAN 实测 35ms）+ ISO 格式错标纠正 + file-dialog.js 控制字节致二进制化修复与 hygiene 检查项 5；P3 timeline 前后对账必须见数字下降。非范围：轮询→SSE、长列表虚拟化、task_id 数据模型改造、依赖新增、frontend lockfile、vite/router 升级、packaged=G1+。"
     }
   ],
   "lastUpdated": "2026-09-20",
-  "documentCount": 259
+  "documentCount": 260
 }
