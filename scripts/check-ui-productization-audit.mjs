@@ -75,6 +75,14 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // plan §7），非新 UI 功能故无新台账条目。豁免 subject UI-### 与同提交台账要求；
   // 不重写共享历史。
   '64da69b71771661b49ba43fe7230cdb30347f7d7',
+  // 2026-09-20 BLOCK-105 §7 Batch-4 前端 no-unused-vars 410→0（c6a9b6d1，59 文件死代码
+  // 清理）：最大头=ResultView.tsx 的 UI-146 拆分遗留化石 import 块（148 行，文件已退化
+  // 为透传壳）；其余=AppRail 别名簇与左栏回调簇随 leftPanelCtx 一并退役、死函数 3、
+  // 只写不读链、解构元素 17、形参 _ 前缀 10、从未调用的 useMemo/useCallback 7（零执行面）。
+  // 纯删除未引用绑定，零 UI 行为变化；验证=tsc 0 红 + 前端全量 144 文件/1146 用例 0 红 +
+  // 其余 lint 规则计数零新增；台账=eslint-suppressions.json 棘轮收缩 2150→1740（plan §7）。
+  // 豁免 subject UI-### 与同提交台账要求；不重写共享历史。
+  'c6a9b6d13952cadc3f9cc9d2bedc1923a329c101',
   '21d84f528a35526e59f2964833a65965546772e1',
   // 2026-09-19 BLOCK-102 P3/P4 修复提交（06828fd 安全加固+观测性能）：subject
   // 未带 UI-### 为笔误，UI-425 条目由后续提交统一补登（LEGACY_AUDIT_SYNC_
@@ -338,6 +346,14 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // plan §7），非新 UI 功能故无新台账条目。豁免同提交台账要求（subject 门经
   // LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；不重写共享历史。
   '64da69b71771661b49ba43fe7230cdb30347f7d7',
+  // 2026-09-20 BLOCK-105 §7 Batch-4 前端 no-unused-vars 410→0（c6a9b6d1，59 文件死代码
+  // 清理）：前端改动全为「删除从未引用的绑定」，零 UI 行为变化（ResultView.tsx 化石
+  // import 块 148 行 / AppRail 别名簇与左栏回调簇随 leftPanelCtx 退役 / 死函数 3 /
+  // 从未调用的 useMemo·useCallback 7）；验证=tsc 0 红 + 前端全量 144 文件/1146 用例 0 红；
+  // 台账=eslint-suppressions.json 棘轮收缩 2150→1740（BLOCK-105 plan §7 批次日志）。
+  // 豁免同提交台账要求（subject 门经 LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；
+  // 不重写共享历史。
+  'c6a9b6d13952cadc3f9cc9d2bedc1923a329c101',
 
   // 2026-09-19 BLOCK-102 P2 前端竞态治理提交（21d84f52，渲染层竞态修复）：
   // subject 未带 UI-### 为笔误，UI-425 条目（P3/P4 前端切片）与本提交同批由
