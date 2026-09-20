@@ -469,9 +469,6 @@
     }
   },
   "frontend/src/components/desktop/AppRailContext.tsx": {
-    "@typescript-eslint/no-floating-promises": {
-      "count": 1
-    },
     "@typescript-eslint/no-unsafe-assignment": {
       "count": 1
     },
@@ -986,9 +983,6 @@
     }
   },
   "frontend/src/components/workspace-panels/KnowledgeSpacePanel.tsx": {
-    "@typescript-eslint/no-misused-promises": {
-      "count": 2
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
@@ -1498,9 +1492,6 @@
     }
   },
   "frontend/src/pages/home.tsx": {
-    "@typescript-eslint/no-floating-promises": {
-      "count": 1
-    },
     "@typescript-eslint/no-unused-vars": {
       "count": 1
     },
@@ -1514,12 +1505,6 @@
     }
   },
   "frontend/src/pages/project-workspace.tsx": {
-    "@typescript-eslint/no-floating-promises": {
-      "count": 3
-    },
-    "@typescript-eslint/no-misused-promises": {
-      "count": 2
-    },
     "@typescript-eslint/no-unsafe-argument": {
       "count": 1
     },
@@ -1722,9 +1707,6 @@
     }
   },
   "frontend/src/pages/project-workspace/useWorkspaceOpenEffects.ts": {
-    "@typescript-eslint/no-floating-promises": {
-      "count": 1
-    },
     "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
