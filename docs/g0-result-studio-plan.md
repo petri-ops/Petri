@@ -1800,6 +1800,8 @@ P6-0 不宣称跨 Job exact replay 已由 UI trace 收口，不重开 P5，也�
 
 完成（2026-08-02）：canonical evidence `acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json` 绑定 source commit `ad1e2ce`，10/10、`sourceCommitMatchesSourceHashes:true`、观测期间 source binding 稳定。真实本地路径覆盖用户停止、R 执行失败、validator 阻断、SIGSTOP/SIGKILL 精确 R 进程组、Electron/owned backend 冷重启、Git/ref/Artifact drift、磁盘/preview budget、资源摘要、exact GC protection 与并发候选登记；并发 SQLite snapshot 冲突由 Repository 的 `BEGIN IMMEDIATE` 串行化修复。开发态 Electron 恢复矩阵 15/15，重开恢复低于 5 秒；压力链实际读取 10 万行表、复杂 SVG/PNG、含 6 张嵌图的长报告并翻阅 100+ 版本。201 条 synthetic Revision 是三个 family 上的 alias 压力，不冒充 201 次真实 Job；开发态冷 Vite + Electron 首画布预算冻结为 1500ms，packaged/in-app 1000ms 产品目标仍由 P7 验证。证据明确为 `qualificationEligible:false`、`p7Eligible:false`，不覆盖真实 Provider、packaged Electron 或 literal OS reboot。
 
+**重采记录（2026-09-20，Mac 侧）**：与前端依赖升级批（vite 8 / vitest 5 / happy-dom 20 / react-router-dom 7——`frontend/package-lock.json` 属本证据源绑定集合）同批重打。重打前默认校验路径实证存量失配 `p6_stored_current_source_hash_mismatch`（旧锚 `c9535452`·2026-09-15、绑定 lockfile `cc22a578`）；canonical `npm run g0:result-studio:p6:update` 实采 **10/10 `passed=true`**，证据锚定 `75c345ba`、绑定 lockfile `218363dd`；默认校验路径复测 `10/10 canonical checks recomputed` PASS。前锚 `c9535452` 自此退役。
+
 ### G0-RS-P7：Honest Product Requalification
 
 状态：`deferred / not qualified`（2026-08-03 用户裁决：项目仍处于初级 G0，先收住开发检查点，不继续消耗当前主线完成发布级资格矩阵；不得把 deferred 写成 completed）。
