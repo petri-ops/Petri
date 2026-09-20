@@ -3,7 +3,7 @@
 // biof3-server 不通时由摘要概览显示降级提示。
 //
 // （BLOCK-30 P2：曾有的 Gateway 健康聚合随 gateway 摘除）
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { BackendStatus } from '@/lib/electron';
 import { getPlatformApiPrefix } from '@/lib/env';
 import { getToken } from '@/lib/authClient';
@@ -114,18 +114,6 @@ export function BackendStatusProvider({
 }): React.ReactElement {
   const [status, setStatus] = useState<EnhancedBackendStatus>(INITIAL_STATUS);
   const [loaded, setLoaded] = useState(false);
-
-  const tick = useCallback(async () => {
-    try {
-      const s = await readBackendStatus();
-      if (s) {
-        setStatus(s);
-        setLoaded(true);
-      }
-    } catch {
-      // IPC 失败时保持上次状态，不闪烁
-    }
-  }, []);
 
   useEffect(() => {
     let alive = true;

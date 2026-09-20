@@ -42,7 +42,7 @@ export interface ResultsLibraryProps {
  * 点击任意一项即经 handleOpenResult 打开该结果（切到 result 模式 + 绑定 activeJob）。
  * 仅依赖 props 与 onOpenJob 回调，不持有状态，也不反向依赖 CenterPanel。
  */
-export function ResultsLibrary({ projectId, jobs, onOpenJob }: ResultsLibraryProps): React.ReactElement {
+export function ResultsLibrary({ jobs, onOpenJob }: ResultsLibraryProps): React.ReactElement {
   const sorted = React.useMemo(
     () => [...jobs].sort((a, b) => (b.created_at || 0) - (a.created_at || 0)),
     [jobs],

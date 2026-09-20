@@ -180,7 +180,7 @@ describe('TitleBar desktop window controls', () => {
   it('subscribes to live state before issuing the initial maximize query', async () => {
     const order: string[] = [];
     const bridge = makeBridge({
-      onMaximizeChanged: vi.fn((callback: (isMaximized: boolean) => void) => {
+      onMaximizeChanged: vi.fn((_callback: (isMaximized: boolean) => void) => {
         order.push('subscribe');
         return vi.fn();
       }),
@@ -485,7 +485,7 @@ describe('TitleBar result selector', () => {
     const menuTrigger = screen.getByRole('button', { name: '展开结果列表' });
     fireEvent.keyDown(menuTrigger, { key: 'ArrowDown' });
 
-    const menu = await screen.findByRole('menu', { name: '结果列表' });
+    await screen.findByRole('menu', { name: '结果列表' });
     const menuItems = screen.getAllByRole('menuitem');
     expect(menuItems).toHaveLength(2);
     expect(menuItems[0].textContent).toContain('差异表达');

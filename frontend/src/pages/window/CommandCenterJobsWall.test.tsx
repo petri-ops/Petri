@@ -3,7 +3,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ToolJob } from '@/lib/project-types';
 import { CommandCenterJobsWall } from './CommandCenterJobsWall';
-import { listAllJobs, listProjects } from '@/lib/project-store';
+import { listAllJobs } from '@/lib/project-store';
 
 vi.mock('@/lib/project-store', () => ({
   listAllJobs: vi.fn(),

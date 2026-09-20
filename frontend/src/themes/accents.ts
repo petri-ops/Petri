@@ -25,7 +25,6 @@ export const ACCENT_OPTIONS: ReadonlyArray<AccentOption & { id: AccentId }> = [
 ];
 
 export const ACCENT_STORAGE_KEY = 'gewu-accent';
-const ACCENT_CHANGE_EVENT = 'gewu:accent-change';
 const VALID_IDS = new Set(ACCENT_OPTIONS.map((o) => o.id as string));
 
 export function readAccent(): AccentId {

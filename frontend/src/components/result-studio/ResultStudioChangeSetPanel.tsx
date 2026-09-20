@@ -26,7 +26,6 @@ import {
   STATUS_LABEL,
   ScientificDifference,
   VALIDATION_LABEL,
-  availableEnrichmentDirection,
   displayValue,
   executedNodeIds,
   fileName,

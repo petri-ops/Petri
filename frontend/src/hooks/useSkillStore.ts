@@ -103,11 +103,9 @@ async function _discoverSkills(): Promise<DiscoverResult> {
   }
 
   let resolveInflight!: (result: DiscoverResult) => void;
-  let rejectInflight!: (err: unknown) => void;
 
-  const promise = new Promise<DiscoverResult>((resolve, reject) => {
+  const promise = new Promise<DiscoverResult>((resolve) => {
     resolveInflight = resolve;
-    rejectInflight = reject;
   });
 
   _inflight = promise;

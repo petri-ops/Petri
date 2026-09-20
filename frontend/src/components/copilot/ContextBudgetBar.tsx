@@ -69,17 +69,6 @@ function Ring({ pct, color }: { pct: number; color: string }) {
 }
 
 /** Idle ring — always at 0% but shows the configured context window size. */
-function IdleRing({ contextWindow }: { contextWindow: number }) {
-  const color = '#9ca3af';
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-      <Ring pct={0} color={color} />
-      <span style={{ fontSize: 'var(--gewu-font-size-xs)', color, fontFamily: 'monospace', fontWeight: 600, lineHeight: 1 }}>
-        {formatTokens(contextWindow)}
-      </span>
-    </div>
-  );
-}
 
 export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudgetButtonProps) {
   const [open, setOpen] = useState(false);
@@ -109,7 +98,6 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
 
   const active = hasData;
   const pct = displayBudget?.pct ?? 0;
-  const trimmed = displayBudget?.trimmed ?? false;
   const color = active ? barColor(pct) : '#9ca3af';
   const contextWindow = displayBudget?.contextWindow ?? activeContextWindow ?? 0;
   const messageBudget = contextWindow > 0 ? contextWindow - 8192 : 0;

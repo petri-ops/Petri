@@ -2,8 +2,8 @@
 // TerminalPanel — UI-305 P1 从 project-workspace.tsx 尾部整簇平移（原 3019-3122 行），
 // 零行为变化；主文件按既有惯例再导出保持 '@/pages/project-workspace' 导入路径兼容。
 // ============================================================
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import type { Project, ToolJob, Dataset } from '@/lib/project-types';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import type { Project } from '@/lib/project-types';
 import type { BackendStatus } from '@/lib/electron';
 import styles from '../project-workspace.module.css';
 

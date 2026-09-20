@@ -42,7 +42,6 @@ export default function SkillsPage(): React.ReactElement {
     categoryFilter,
     setCategoryFilter,
     categories,
-    executions,
     execute,
   } = useSkillStore({ autoLoad: true });
 

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { KnowledgeSpacePanel } from './KnowledgeSpacePanel';
 import type { KnowledgeSpaceState } from '@/lib/knowledgeClient';

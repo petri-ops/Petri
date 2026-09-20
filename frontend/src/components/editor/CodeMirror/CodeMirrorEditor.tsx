@@ -27,7 +27,6 @@ import { useCodeMirrorEditor } from './useCodeMirrorEditor';
 import type {
   CodeMirrorEditorProps,
   EditorApi,
-  EditorMode,
 } from './types';
 import styles from './CodeMirrorEditor.module.css';
 

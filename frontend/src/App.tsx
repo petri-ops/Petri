@@ -1,7 +1,7 @@
 // Gewu 桌面版原生 shell — App 根组件
 // 路由出口 + 首次启动引导
 
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 // BLOCK-22 P4.6: DEV ONLY — manual file-open testing entry via window.__biof3DispatchOpenFile
 // Production build: React.lazy + NODE_ENV=production → tree-shakeable, zero runtime cost
 const GewuOpenFileDevBridge = lazy(() =>
@@ -48,7 +48,7 @@ configureApi({ getApiPrefix: () => getApiPrefix(), getToken });
 
 /** Lives inside WorkspacePanelsProvider. */
 function AppShell(): React.ReactElement {
-  const { isOpen, open, close } = useCommandPalette();
+  const { isOpen, close } = useCommandPalette();
   const location = useLocation();
   const panels = useWorkspacePanelsContext();
   // (/project/:id/results) 与其余路由维持原状。归一化尾斜杠后取 :id 后的子段判定。

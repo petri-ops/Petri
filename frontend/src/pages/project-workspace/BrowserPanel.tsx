@@ -2,9 +2,9 @@
 // BrowserPanel — UI-305 P1 从 project-workspace.tsx 尾部整簇平移（原 3124-3387 行），
 // 零行为变化；主文件按既有惯例再导出保持 '@/pages/project-workspace' 导入路径兼容。
 // ============================================================
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { Icon, type IconName } from '@/components/icons/Icon';
-import { gewuEvents, subscribeGewuEvent, dispatchGewuEvent } from '@/lib/events';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { Icon } from '@/components/icons/Icon';
+import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
 import { getBrowserViewportSize, isGewuLocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
 import styles from '../project-workspace.module.css';
 

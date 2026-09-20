@@ -21,7 +21,7 @@ import { FolderPicker } from '@/components/desktop/FolderPicker';
 // BLOCK-86 P2 — 运行时提示领域感知门控（无包不提运行时）
 import { listPacksRequiringRuntimes } from '@/lib/domainPack';
 import { createProject, listProjectJobs, listProjects } from '@/lib/project-store';
-import type { Project, ToolJob } from '@/lib/project-types';
+import type { Project } from '@/lib/project-types';
 import styles from './home.module.css';
 // BLOCK-92 Wave B-6 — 创建流/选择器簇外迁（./home/，纯搬运零行为变化）。
 import { pickRecentCompletedJob, pickRecentProject } from './home/recentPickers';

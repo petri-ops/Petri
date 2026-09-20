@@ -5,7 +5,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { formatRelativeTime } from '@/lib/format';
-import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import './simple-chat.css';
 

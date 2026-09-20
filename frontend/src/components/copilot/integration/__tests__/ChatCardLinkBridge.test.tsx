@@ -15,7 +15,7 @@
  */
 
 import React from 'react';
-import { cleanup, render, fireEvent, act } from '@testing-library/react';
+import { cleanup, render, fireEvent } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ChatCardLinkBridge } from '../ChatCardLinkBridge';

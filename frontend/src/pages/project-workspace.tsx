@@ -5,24 +5,20 @@
 // ============================================================
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Icon, type IconName } from '@/components/icons/Icon';
+import { Icon } from '@/components/icons/Icon';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { BottomTerminal } from '@/components/workspace-panels/BottomTerminal';
 import { CenterPanel, type CenterPanelContext } from '@/components/workspace-panels/CenterPanel';
-import { LeftPanel, type LeftPanelContext } from '@/components/workspace-panels/LeftPanel';
 import { RightPanel, type RightPanelContext } from '@/components/workspace-panels/RightPanel';
 import { ColumnHeader } from '@/components/desktop/titlebar/ColumnizedTitleBar';
 import { TitleBar } from '@/components/desktop/TitleBar';
 import { getProject, listProjectJobs, listDatasetsByProject } from '@/lib/project-store';
-import { useToast } from '@/components/common/ToastProvider';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
-import { SimpleChat } from '@/components/copilot/SimpleChat';
 import {
   isConversationRunning,
   useConversationRun,
 } from '@/components/copilot/conversationRunStore';
-import { listConversations } from '@/components/copilot/copilotConversationsClient';
 
 import {
   artifactAfterJobSelection,
@@ -34,33 +30,30 @@ import { useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
 import { useWorkspacePanelShortcuts } from '@/hooks/useWorkspacePanelShortcuts';
 import { useRightPanelTabs } from '@/hooks/useRightPanelTabs';
 import { segmentToMode, modeToSegment, type WorkspaceMode } from '@/hooks/useWorkspaceRouting';
-import { isDirectRecoveryAction, useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
+import { useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
-import type { CopilotContext, HarnessContextSummary } from '@/lib/copilotContext';
 import { gewuEvents, subscribeGewuEvent, dispatchGewuEvent } from '@/lib/events';
 import { usePendingScroll } from '@/lib/pendingScrollContext';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
-import { useAppRail, type WorkspaceAdapter } from '@/components/desktop/AppRailContext';
-import type { ActiveArtifact, JobStats } from '@/components/workspace-panels/ResultView';
+import { useAppRail } from '@/components/desktop/AppRailContext';
+import type { ActiveArtifact } from '@/components/workspace-panels/ResultView';
 import {
   fetchHarnessIndex,
   type HarnessIndexSummary,
 } from '@/lib/harness-client';
 import { buildResultTitleBarTitle } from '@/lib/result-title-bar';
 import { isResultWorkspaceMode } from '@/components/result-studio/resultFocusLayout';
-import type { ResultEditSubmission } from '@/components/result-studio/ResultEditPanel';
 import {
   beginResultSurfaceMeasure,
   RESULT_SURFACE_PERFORMANCE_MARKS,
 } from '@/components/result-studio/resultSurface';
 import styles from './project-workspace.module.css';
-import type { ActiveWorkspaceFile } from './project-workspace/types';
 // Re-export for backward compatibility — consumers still import from the page.
 export type { ActiveWorkspaceFile } from './project-workspace/types';
 export type { ActiveArtifact, JobStats } from '@/components/workspace-panels/ResultView';
 // BLOCK-92 Wave B-1 — 右栏 tab 词表/常量外迁 ./project-workspace/rightPanelTabs.ts（原路径 re-export 兼容）。
 export type { RightPanelMode } from './project-workspace/rightPanelTabs';
-import { RIGHT_PANEL_ITEMS, type RightPanelMode } from './project-workspace/rightPanelTabs';
+import { type RightPanelMode } from './project-workspace/rightPanelTabs';
 // BLOCK-92 Wave B-1 — 状态/派生/事件簇外迁（纯搬运零行为变化）。
 import { toCopilotHarnessSummary } from './project-workspace/copilotHarnessSummary';
 import { useWorkspaceFileTabs } from './project-workspace/useWorkspaceFileTabs';
@@ -74,26 +67,11 @@ export function ProjectWorkspace(): React.ReactElement {
 
   // UI-341 加映三（档 2）——左栏数据/动作已上提 AppRailContext（单一真相）。
   // 以下别名保持本文件既有引用点零改动。
-  const handleNewConversation = appRail.createConversationForProject;
   const handleSwitchConversation = appRail.switchConversation;
   const switchToProject = appRail.switchToProject;
-  const createProjectFromWorkspacePath = appRail.createProjectFromPath;
-  const openCreatePanel = appRail.openCreatePanel;
-  const renameProjectInTree = appRail.renameProjectInTree;
-  const renameConversationInTree = appRail.renameConversationInTree;
-  const sshConnectHost = appRail.sshConnectHost;
-  const sshListDirs = appRail.sshListDirs;
-  const sshRegisterHost = appRail.sshRegisterHost;
-  const sshCreateAt = appRail.sshCreateAt;
-  const sshConnectProject = appRail.sshConnectProject;
-  const archiveProjectFromTree = appRail.archiveProjectFromTree;
-  const archiveConversationFromTree = appRail.archiveConversationFromTree;
-  const forkConversationInTree = appRail.forkConversationInTree;
-  const createConversationForProject = appRail.createConversationForProject;
   const updateTitleBar = shell.updateTitleBar;
   const { projectId, '*': modeSplat } = useParams<{ projectId: string; '*'?: string }>();
   const navigate = useNavigate();
-  const toast = useToast();
   const [searchParams] = useSearchParams();
   const [project, setProject] = useState<Project | null>(null);
   const [jobs, setJobs] = useState<ToolJob[]>([]);
@@ -142,19 +120,16 @@ export function ProjectWorkspace(): React.ReactElement {
   // UI-341 加映三（档 2）：会话/活跃会话上提到 AppRailContext（壳层左栏与工作区
   // 共用同一份状态），此处仅按原变量名取用，正文零改动。
   const {
-    conversationsApi,
     conversations,
     refreshConversations,
     activeConvId,
     setActiveConvId,
   } = {
-    conversationsApi: appRail.conversationsApi,
     conversations: appRail.conversationsApi.list,
     refreshConversations: appRail.conversationsApi.refresh,
     activeConvId: appRail.activeConvId,
     setActiveConvId: appRail.setActiveConvId,
   };
-  const createConversationInProject = appRail.conversationsApi.create;
   const {
     jobs: conversationJobs,
     error: conversationJobsError,
@@ -208,13 +183,9 @@ export function ProjectWorkspace(): React.ReactElement {
   // closure on drag), so the splitter drags don't tear with re-renders.
   const {
     leftWidth,
-    setLeftWidth,
     rightWidth,
-    setRightWidth,
     inputHeight,
-    setInputHeight,
     bottomTerminalHeight,
-    setBottomTerminalHeight,
     startColumnResize,
     startBottomTerminalResize,
   } = appRail.resizable;
@@ -350,15 +321,8 @@ export function ProjectWorkspace(): React.ReactElement {
   // 项目列表 / 项目树展开 / 跨项目会话 / 创建态：全部来自 AppRailContext（单一真相）
   const {
     allProjects,
-    setAllProjects,
-    expandedProjects,
-    toggleProjectExpand,
-    expandProject,
     projectConversations,
     refreshOtherConversations,
-    creatingProject,
-    creatingConversation,
-    createError,
     setCreateError,
   } = appRail;
   // UI-341 加映三（档 2）——壳层左栏动作的工作区副作用适配：切会话清 job/artifact、
@@ -382,17 +346,6 @@ export function ProjectWorkspace(): React.ReactElement {
   // UI-305 P1.2 — 左栏项目树展开簇抽入 useProjectTreeState（UI-347 起搜索
   // 状态簇已随「搜索」入口退役一并移除，本组件不再消费 treeState）。
   const workspacePath = project?.workspacePath || '';
-  const compactWorkspacePath = useMemo(() => {
-    if (!workspacePath) return '工作目录初始化中';
-    const homeMatch = workspacePath.match(/^\/Users\/[^/]+/);
-    const displayPath = homeMatch
-      ? workspacePath.replace(homeMatch[0], '~')
-      : workspacePath;
-    if (displayPath.length <= 72) return displayPath;
-    const parts = displayPath.split('/').filter(Boolean);
-    if (parts.length <= 4) return displayPath;
-    return `.../${parts.slice(-4).join('/')}`;
-  }, [workspacePath]);
   const handleSelectTitleBarResult = useCallback((jobId: string) => {
     if (!conversationJobs.some((job) => job.id === jobId)) return;
     bindActiveJob(jobId);
@@ -427,35 +380,14 @@ export function ProjectWorkspace(): React.ReactElement {
   // Plan 1.6 §4.3 — single source for "other project" conversation lists.
   // Replaces the old per-project useState map that re-fetched on every
   // expansion. Reads / writes the same shared cache as useConversations.
-  // Create new conversation in current project (Plan 1.6 §4.3 — uses the
-  // shared SWR cache so sidebar + chat panel stay consistent without a
-  // 5s polling timer).
-  // Switch conversation
-  const handleShowChat = useCallback(() => updateWorkspaceMode('chat'), [updateWorkspaceMode]);
-  const handleShowScheduled = useCallback(() => {
-    const currentJob = conversationJobs.find((job) => job.id === activeJobId);
-    const nextJobId = currentJob?.id || conversationJobs[0]?.id || null;
-    if (nextJobId) {
-      bindActiveJob(nextJobId);
-    }
-    updateWorkspaceMode('scheduled', true, nextJobId);
-  }, [activeJobId, bindActiveJob, conversationJobs, updateWorkspaceMode]);
   // UI-365 — 设置独立页化（/settings）：设备级能力不绑项目，不再切工作区模式。
-  const handleShowSettings = useCallback(() => {
-    void navigate('/settings');
-  }, [navigate]);
   // UI-364 — 插件商店独立页化（/plugins）：运行时缺失横幅与左栏入口都
   // 跳独立页，不再切工作区模式（设备级能力不绑项目）。
   const handleShowPlugins = useCallback(() => { void navigate('/plugins'); }, [navigate]);
-  const handleNavigateToSkills = useCallback(() => { void navigate('/skills'); }, [navigate]);
   // BLOCK-72 / UI-320 — 全局工作台页入口（知识空间/后端迁出右栏）
-  const handleNavigateToKnowledge = useCallback(() => { void navigate('/knowledge'); }, [navigate]);
   // UI-366 — handleNavigateToBackend 随 /backend 页退役移除（诊断并入设置）
   // UI-335/336 — 「新建任务」入口：/ 欢迎页（BLOCK-80）；携带当前项目 id 供
   // 欢迎页默认预选（用户裁决：默认工作区应是鼠标点击所在的工作区）
-  const handleNavigateToHome = useCallback(() => {
-    void navigate(projectId ? `/?project=${projectId}` : '/');
-  }, [navigate, projectId]);
   // UI-348 — 右栏「后端」卡已删除（用户裁决）：后端管理面唯一入口 = 左栏工作台的
   // 全局 /backend 页；原 handleOpenRightTerminal（跳 /backend 的右栏快捷卡）随卡移除。
   const handleOpenRightResults = useCallback(() => {
@@ -982,50 +914,6 @@ export function ProjectWorkspace(): React.ReactElement {
     openScheduledResults,
     startColumnResize,
   };
-  const leftPanelCtx: LeftPanelContext = {
-    width: leftWidth,
-    columnHeader: compactLayout ? undefined : <ColumnHeader side="left" />,
-    project: project,
-    workspacePath,
-    compactWorkspacePath,
-    visibleProjects: allProjects,
-    projectConversations,
-    projectId,
-    conversations,
-    activeConvId,
-    expandedProjects,
-    creatingProject,
-    creatingConversation,
-    // UI-304 简化版 — 点 + 直接创建，无面板
-    createPanel: {
-      open: false, // 不再需要面板
-      error: createError,
-      onOpen: openCreatePanel,
-      onPickExternal: createProjectFromWorkspacePath,
-    },
-    sshConnectProject: sshConnectProject,
-    sshConnectHost: sshConnectHost,
-    sshListDirs: sshListDirs,
-    sshRegisterHost: sshRegisterHost,
-    sshCreateAt: sshCreateAt,
-    createConversationForProject,
-    renameProject: renameProjectInTree,
-    renameConversation: renameConversationInTree,
-    archiveProject: archiveProjectFromTree,
-    archiveConversation: archiveConversationFromTree,
-    forkConversation: forkConversationInTree,
-    workspaceMode,
-    handleShowScheduled,
-    handleShowPlugins,
-    handleShowSettings,
-    handleNavigateToSkills,
-    handleNavigateToKnowledge,
-    handleNavigateToHome,
-    switchToProject,
-    handleSwitchConversation,
-    toggleProjectExpand,
-    handleOpenWorkspacePath,
-  };
   const rightPanelCtx: RightPanelContext = {
     width: effectiveRightWidth,
     columnHeader: compactLayout ? undefined : <ColumnHeader side="right" />,
@@ -1162,10 +1050,3 @@ export { RightFileTree } from './project-workspace/RightFileTree';
 export { TerminalPanel } from './project-workspace/TerminalPanel';
 export { BrowserPanel } from './project-workspace/BrowserPanel';
 export { EmptyResult } from './project-workspace/EmptyResult';
-import { RightFileTree } from './project-workspace/RightFileTree';
-import { TerminalPanel } from './project-workspace/TerminalPanel';
-import { BrowserPanel } from './project-workspace/BrowserPanel';
-import { EmptyResult } from './project-workspace/EmptyResult';
-import { FileTreeList } from './project-workspace/FileTreeList';
-import { WorkspaceFilePreview } from './project-workspace/WorkspaceFilePreview';
-import { useProjectTreeState } from './project-workspace/useProjectTreeState';

@@ -17,7 +17,6 @@ import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
 import type {
   BranchInfo,
   CommitInfo,
-  DiffFile,
   DiffResult,
   Hunk,
   HunkDecision,

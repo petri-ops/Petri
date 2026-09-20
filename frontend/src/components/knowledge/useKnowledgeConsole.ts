@@ -178,19 +178,6 @@ export function useKnowledgeConsole() {
     let assistantAcc = '';
     const toolEntries = new Map<string, string>(); // callId → entry id
 
-    const patchEntry = (id: string, patch: Partial<ConsoleToolEntry> & Record<string, unknown>) => {
-      setEntries((prev) =>
-        prev.map((e) => (e.id === id ? ({ ...e, ...patch } as ConsoleEntry) : e))
-      );
-    };
-    const patchConfirmation = (id: string, confirmation: ConsoleConfirmation) => {
-      setEntries((prev) =>
-        prev.map((e) =>
-          e.id === id && e.kind === 'tool' ? { ...e, confirmation } : e
-        )
-      );
-    };
-
     try {
       await streamChat({
         messages: [{ role: 'user', content: trimmed }],

@@ -2,16 +2,15 @@
 // ExpandedCommitDetail - UI-305 P2 extracted from ReviewMode.tsx (lines 223-346),
 // behavior unchanged; main file imports it back as needed.
 // ============================================================
-import { Fragment, useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { getBridge } from '@/lib/desktopBridge';
-import { useWorkingTreeReview, type CommitInfo, type DiffFile, type DiffResult } from './useWorkingTreeReview';
+import { type CommitInfo, type DiffResult } from './useWorkingTreeReview';
 import {
   computeFileDiffStats,
   groupDisplayName,
   groupFilesByDirectory,
-  isFileReviewed,
 } from './reviewModeHelpers';
 import { CommitDiffFileView } from './CommitDiffFileView';
 

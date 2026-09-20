@@ -133,7 +133,6 @@ function TerminalRow({ activity }: { activity: ToolActivityItem }) {
   };
 
   const firstLine = (command.split('\n')[0] || '').slice(0, 120);
-  const multiLine = command.includes('\n');
   const statusGlyph = running
     ? null
     : activity.status === 'success'

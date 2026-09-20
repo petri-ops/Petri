@@ -23,7 +23,6 @@ import { ExperimentalFeaturesSection } from '@/components/settings/ExperimentalF
 // UI-393 — 返回按钮样式单一真源（与 Skills/知识空间页头同款 backBtn）
 import backStyles from '@/pages/global-page.module.css';
 
-
 // ── BLOCK-9.2 PHASE 1: types + helpers + section subcomponents ──
 import { Props, SettingsSection, SETTINGS_SECTIONS } from './DesktopSettingsPanel/types';
 // BLOCK-92 Wave B-4 — API Endpoint 编辑器状态簇外迁（渠道/角色/凭据/连通性/导入导出）。
@@ -75,7 +74,6 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     userModelProfiles,
     telemetryEnabled,
     setTelemetryEnabled,
-    loadSettings,
     handleSave,
     discoverModels,
     clearProfileRuntimeState,

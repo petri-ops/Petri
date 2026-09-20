@@ -38,12 +38,12 @@ export function getStoredUser(): AuthUser | null {
 export function isLoggedIn(): boolean {
   return true;
 }
-export function hasModule(user: AuthUser | null, moduleKey: string): boolean {
+export function hasModule(_user: AuthUser | null, _moduleKey: string): boolean {
   return true;
 }
 export function clearAuth(): void {}
 export function logout(): void {}
-export function subscribeAuth(callback: (user: AuthUser | null) => void): () => void {
+export function subscribeAuth(_callback: (user: AuthUser | null) => void): () => void {
   return () => {};
 }
 export function getCachedGuestPermissions(): Record<string, boolean> | null {

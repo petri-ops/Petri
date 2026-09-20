@@ -66,7 +66,6 @@ export function useWorkspaceOpenEffects(options: UseWorkspaceOpenEffectsOptions)
     activeJobId,
     jobs,
     activeWorkspaceFilePath,
-    openResultRequestSequenceRef,
     autoOpenedJobRef,
     appliedRequestedArtifactKeyRef,
     pendingArtifactNameRef,

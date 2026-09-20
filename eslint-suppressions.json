@@ -49,16 +49,8 @@
       "count": 1
     }
   },
-  "frontend/src/App.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    }
-  },
   "frontend/src/components/backend/BackendStatusProvider.tsx": {
     "@typescript-eslint/no-misused-promises": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
   },
@@ -67,16 +59,8 @@
       "count": 1
     }
   },
-  "frontend/src/components/copilot/ChatScrollbar.test.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "frontend/src/components/copilot/CommandPalette.tsx": {
     "@typescript-eslint/no-unsafe-assignment": {
-      "count": 2
-    },
-    "@typescript-eslint/no-unused-vars": {
       "count": 2
     },
     "react-hooks/set-state-in-effect": {
@@ -84,9 +68,6 @@
     }
   },
   "frontend/src/components/copilot/ContextBudgetBar.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
@@ -113,9 +94,6 @@
     "@typescript-eslint/no-misused-promises": {
       "count": 1
     },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 18
-    },
     "@typescript-eslint/require-await": {
       "count": 1
     },
@@ -134,9 +112,6 @@
     },
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 2
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/components/copilot/SimpleChat/formatHarness.ts": {
@@ -252,9 +227,6 @@
     }
   },
   "frontend/src/components/copilot/ToolActivityList.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
@@ -365,9 +337,6 @@
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 146
     },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    },
     "no-empty": {
       "count": 3
     }
@@ -407,9 +376,6 @@
     }
   },
   "frontend/src/components/copilot/integration/__tests__/ChatCardLinkBridge.test.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "react-hooks/immutability": {
       "count": 2
     }
@@ -449,11 +415,6 @@
       "count": 1
     }
   },
-  "frontend/src/components/desktop/AccentControl.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "frontend/src/components/desktop/AppRailContext.test.tsx": {
     "@typescript-eslint/no-unsafe-assignment": {
       "count": 1
@@ -482,15 +443,9 @@
   "frontend/src/components/desktop/DesktopSettingsPanel.tsx": {
     "@typescript-eslint/no-misused-promises": {
       "count": 4
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/components/desktop/DesktopSettingsPanel/UsageResourcePanel.test.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "@typescript-eslint/require-await": {
       "count": 4
     }
@@ -545,9 +500,6 @@
   "frontend/src/components/desktop/DesktopSettingsPanel/sections/MobileSync.test.tsx": {
     "@typescript-eslint/no-base-to-string": {
       "count": 4
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/components/desktop/DesktopSettingsPanel/sections/MobileSync.tsx": {
@@ -624,9 +576,6 @@
     },
     "@typescript-eslint/no-floating-promises": {
       "count": 2
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/components/desktop/FolderPicker.tsx": {
@@ -653,9 +602,6 @@
     }
   },
   "frontend/src/components/desktop/TitleBar.test.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    },
     "@typescript-eslint/unbound-method": {
       "count": 1
     }
@@ -671,25 +617,16 @@
     }
   },
   "frontend/src/components/desktop/WorkingTreeReview/CommitDiffFileView.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 8
-    },
     "react-hooks/set-state-in-effect": {
       "count": 2
     }
   },
   "frontend/src/components/desktop/WorkingTreeReview/ExpandedCommitDetail.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 7
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
   },
   "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 5
-    },
     "react-hooks/immutability": {
       "count": 1
     },
@@ -701,9 +638,6 @@
     }
   },
   "frontend/src/components/desktop/WorkingTreeReview/UntrackedFilePreview.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 5
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
@@ -714,9 +648,6 @@
     }
   },
   "frontend/src/components/desktop/WorkingTreeReview/useWorkingTreeReview.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "react-hooks/immutability": {
       "count": 5
     },
@@ -736,9 +667,6 @@
     }
   },
   "frontend/src/components/editor/CodeMirror/CodeMirrorEditor.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "react-hooks/refs": {
       "count": 1
     }
@@ -754,11 +682,6 @@
     },
     "react-hooks/refs": {
       "count": 2
-    }
-  },
-  "frontend/src/components/editor/integration/GewuOpenFileDevBridge.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 3
     }
   },
   "frontend/src/components/editor/integration/WorkspaceFilePreviewBridge.tsx": {
@@ -793,9 +716,6 @@
   "frontend/src/components/knowledge/useKnowledgeConsole.ts": {
     "@typescript-eslint/no-floating-promises": {
       "count": 1
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
     },
     "no-empty": {
       "count": 3
@@ -836,9 +756,6 @@
     }
   },
   "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "react-hooks/set-state-in-effect": {
       "count": 4
     }
@@ -904,9 +821,6 @@
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 1
     },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "@typescript-eslint/require-await": {
       "count": 1
     }
@@ -930,11 +844,6 @@
       "count": 1
     },
     "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
-  "frontend/src/components/workspace-panels/AnalysisLaunchPanel.tsx": {
-    "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
   },
@@ -977,9 +886,6 @@
     },
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 3
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/components/workspace-panels/KnowledgeSpacePanel.tsx": {
@@ -1021,9 +927,6 @@
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 9
     },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 36
-    },
     "react-hooks/refs": {
       "count": 1
     },
@@ -1058,20 +961,7 @@
       "count": 2
     }
   },
-  "frontend/src/components/workspace-panels/ResultView.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 154
-    }
-  },
-  "frontend/src/components/workspace-panels/ResultsLibrary.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "frontend/src/components/workspace-panels/SideChatDock.test.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "@typescript-eslint/require-await": {
       "count": 1
     }
@@ -1098,9 +988,6 @@
     },
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 4
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/hooks/useAiSettings.test.ts": {
@@ -1207,9 +1094,6 @@
     }
   },
   "frontend/src/hooks/useResultStore.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
@@ -1238,9 +1122,6 @@
   },
   "frontend/src/hooks/useSkillStore.ts": {
     "@typescript-eslint/no-floating-promises": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unused-vars": {
       "count": 1
     },
     "@typescript-eslint/require-await": {
@@ -1298,9 +1179,6 @@
     }
   },
   "frontend/src/lib/authClient.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 3
-    },
     "@typescript-eslint/require-await": {
       "count": 4
     }
@@ -1318,11 +1196,6 @@
   "frontend/src/lib/chat-file-references.test.ts": {
     "@typescript-eslint/require-await": {
       "count": 8
-    }
-  },
-  "frontend/src/lib/copilotContextProvider.test.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/lib/data-profile.ts": {
@@ -1361,19 +1234,6 @@
   "frontend/src/lib/model-endpoint-transfer.ts": {
     "@typescript-eslint/no-base-to-string": {
       "count": 2
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
-  "frontend/src/lib/office-file-preview.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 7
-    }
-  },
-  "frontend/src/lib/pendingScrollContext.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/lib/project-store.test.ts": {
@@ -1468,11 +1328,6 @@
       "count": 1
     }
   },
-  "frontend/src/main.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 3
-    }
-  },
   "frontend/src/pages/global-pages.test.tsx": {
     "@typescript-eslint/require-await": {
       "count": 1
@@ -1487,15 +1342,7 @@
     }
   },
   "frontend/src/pages/home.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
-  "frontend/src/pages/home/useHomeCreateFlows.ts": {
-    "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
   },
@@ -1509,9 +1356,6 @@
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 16
     },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 31
-    },
     "react-hooks/preserve-manual-memoization": {
       "count": 1
     },
@@ -1520,11 +1364,6 @@
     },
     "react-hooks/set-state-in-effect": {
       "count": 5
-    }
-  },
-  "frontend/src/pages/project-workspace/BinaryPreviewCard.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 22
     }
   },
   "frontend/src/pages/project-workspace/BrowserPanel.tsx": {
@@ -1543,9 +1382,6 @@
     "@typescript-eslint/no-unused-expressions": {
       "count": 2
     },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 3
-    },
     "no-empty": {
       "count": 4
     },
@@ -1554,16 +1390,8 @@
     }
   },
   "frontend/src/pages/project-workspace/FileTreeItem.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 9
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
-    }
-  },
-  "frontend/src/pages/project-workspace/FileTreeList.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 4
     }
   },
   "frontend/src/pages/project-workspace/FileTreeOpsOverlay.tsx": {
@@ -1572,16 +1400,6 @@
     },
     "react-hooks/set-state-in-effect": {
       "count": 1
-    }
-  },
-  "frontend/src/pages/project-workspace/OfficePreviewPane.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 11
-    }
-  },
-  "frontend/src/pages/project-workspace/PreviewAssets.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 11
     }
   },
   "frontend/src/pages/project-workspace/RightFileTree.refresh.test.tsx": {
@@ -1602,9 +1420,6 @@
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 6
     },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 4
-    },
     "@typescript-eslint/require-await": {
       "count": 1
     },
@@ -1619,16 +1434,8 @@
     "@typescript-eslint/no-misused-promises": {
       "count": 4
     },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 3
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
-    }
-  },
-  "frontend/src/pages/project-workspace/TextBlock.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 6
     }
   },
   "frontend/src/pages/project-workspace/WorkspaceFilePreview.test.tsx": {
@@ -1651,9 +1458,6 @@
     },
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 2
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 12
     },
     "react-hooks/set-state-in-effect": {
       "count": 2
@@ -1701,19 +1505,11 @@
       "count": 1
     }
   },
-  "frontend/src/pages/project-workspace/useWorkspaceOpenEffects.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "frontend/src/pages/result-studio/ResultStudioPage.tsx": {
     "@typescript-eslint/no-floating-promises": {
       "count": 2
     },
     "@typescript-eslint/no-misused-promises": {
-      "count": 3
-    },
-    "@typescript-eslint/no-unused-vars": {
       "count": 3
     },
     "@typescript-eslint/require-await": {
@@ -1732,9 +1528,6 @@
   },
   "frontend/src/pages/skills/index.tsx": {
     "@typescript-eslint/no-misused-promises": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
   },
@@ -1755,9 +1548,6 @@
     }
   },
   "frontend/src/pages/window/CommandCenterJobsWall.test.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "@typescript-eslint/require-await": {
       "count": 1
     }
@@ -1793,11 +1583,6 @@
     },
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 4
-    }
-  },
-  "frontend/src/themes/accents.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/themes/terminal-themes.ts": {

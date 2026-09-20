@@ -231,7 +231,6 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
   const {
     onDelta,
     onReasoning,
-    onDone,
     onError,
     onIter,
     onAgentStatus,
@@ -434,7 +433,7 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
 
 /** 老路径：直连 SSE（fallback）。供 streamChat 提交失败兼容期回退。 */
 export async function streamChatLegacy(opts: StreamChatOptions): Promise<void> {
-  const { messages, context, conversationId, modelPresetId, modelName, kind, parentTaskId, signal, onDelta, onDone, onError } = opts;
+  const { messages, context, conversationId, modelPresetId, modelName, kind, parentTaskId, signal, onDone, onError } = opts;
   try {
     // M2-5: 离线探测，先于 fetch 触发，避免裸 fetch 报错
     await ensureOnlineOrThrow();

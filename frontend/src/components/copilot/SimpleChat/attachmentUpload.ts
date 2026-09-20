@@ -6,7 +6,7 @@
 // 消息文本追加引用行，模型/agent 按路径读取——与 imageRefs 同构。
 // ============================================================
 
-import { MAX_ATTACHMENT_BYTES, validateAttachmentSize, type AttachmentFile } from './attachments';
+import { validateAttachmentSize, type AttachmentFile } from './attachments';
 
 /** 附件落盘目录（工作区相对路径）。 */
 export const ATTACHMENT_DIR = '.chat-attachments';

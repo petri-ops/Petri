@@ -2,13 +2,13 @@
 // FileTreeItem — UI-305 P1 从 project-workspace.tsx 尾部整簇平移（原 2014-2117 行），
 // 零行为变化；主文件按既有惯例再导出保持 '@/pages/project-workspace' 导入路径兼容。
 // ============================================================
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { Icon, type IconName } from '@/components/icons/Icon';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { Icon } from '@/components/icons/Icon';
 import { WorkspaceFileIcon } from '@/components/workspace-panels/WorkspaceFileIcon';
 import styles from '../project-workspace.module.css';
 import type { ActiveWorkspaceFile, FileEntry } from './types';
 import { FileTreeList } from './FileTreeList';
-import { isCsvFile, isPdfFile, isHtmlFile, isJsonFile, withReportTheme, detectOfficeKind, fallbackKindForExtension, formatSize } from './helpers';
+import { formatSize } from './helpers';
 
 // UI-400-3 — 树内拖拽内部 MIME 协议常量导出：RightFileTree 根目录落点复用同一协议
 export const TREE_DRAG_MIME = 'application/x-gewu-tree-item';

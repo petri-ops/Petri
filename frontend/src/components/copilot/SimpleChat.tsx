@@ -32,7 +32,6 @@ import {
   SLASH_COMMANDS,
   shouldOpenWithSystemApp,
   restoreSimpleMessage,
-  restoreProgressUpdates,
   type SlashCommand,
   type SimpleMessage,
   type AgentProgressUpdate,
@@ -61,13 +60,11 @@ import {
   closeImagePreview,
 } from './SimpleChat/attachments';
 import {
-  ATTACHMENT_DIR,
   composeAttachmentReferenceLines,
   uploadAttachment,
 } from './SimpleChat/attachmentUpload';
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
-import { SubAgentResultCard, type SubAgentCardData } from './SubAgentResultCard';
-import { getPlatformApiPrefix } from '@/lib/authClient';
+import { SubAgentResultCard } from './SubAgentResultCard';
 // BLOCK-92 三波拆分 — 思考档位/滚动守卫/终态子智能体结果三簇外迁 hooks/（原样平移）
 import { useThinkingLevel } from './SimpleChat/hooks/useThinkingLevel';
 import { useScrollGuard } from './SimpleChat/hooks/useScrollGuard';
@@ -123,25 +120,15 @@ export type {
   AttachmentFile,
 };
 
-import {
-  getConversationMessages,
-  type ConversationMessage,
-} from './copilotConversationsClient';
 import { useCopilotContext } from '@/lib/copilotContextProvider';
-import { formatRelativeTime } from '@/lib/format';
 import { useConversations } from '@/hooks/useConversations';
 import { gewuEvents, dispatchGewuEvent, subscribeGewuEvent } from '@/lib/events';
 import '@/lib/chat-file-references';
 import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-references';
-import { extractFileReferenceCandidates } from '@/lib/chat-file-references';
 
 // SYSTEM_OPEN_FILE_EXTENSIONS + shouldOpenWithSystemApp moved to ./SimpleChat/types.ts (BLOCK-9.2 PHASE 4).
 
-import {
-  preferredModelPreset,
-  useAiSettings,
-  type ChatModelPreset,
-} from '@/hooks/useAiSettings';
+import { useAiSettings } from '@/hooks/useAiSettings';
 import { CopilotMarkdown } from './copilotMarkdown';
 // BLOCK-81 P2 — 思考档位（会话级持久化 + 词表）；载入/持久化 helper 已随
 // useThinkingLevel 簇迁至 SimpleChat/hooks/useThinkingLevel.ts
@@ -150,12 +137,7 @@ import {
   THINKING_LEVELS,
   nextThinkingLevel,
   saveThinkingLevel,
-  type ThinkingLevel,
 } from './thinkingLevel';
-import {
-  formatToolDuration,
-  type ToolActivityItem,
-} from './toolActivity';
 import { ToolActivityList } from './ToolActivityList';
 import {
   resumeInterruptedConversation,
@@ -168,12 +150,10 @@ import { useErrorFormatter } from './useErrorFormatter';
 import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop';
 import {
   AssistantResultNodes,
-  parseAssistantResultNodes,
   useExtraRenderersFlag,
 } from './extraRenderers';
-import type { ResultNode } from './types';
 import './simple-chat.css';
-import { Icon, type IconName } from '@/components/icons/Icon';
+import { Icon } from '@/components/icons/Icon';
 import { HighlightedCode } from '@/components/ui/CodeHighlight';
 import { INITIAL_NAV_STATE, stepHistoryNavigation } from './chatHistoryNav';
 import {
@@ -222,8 +202,6 @@ import { ContextBudgetButton } from './ContextBudgetBar';
 
 // SimpleMessage + restoreSimpleMessage + AgentProgressUpdate + restoreProgressUpdates + MessageMeta moved to
 // ./SimpleChat/{types,helpers}.ts (BLOCK-9.2 PHASE 4).
-
-
 
 // ExamplePrompt interface + DEFAULT_EXAMPLE_PROMPTS + ExamplePromptsProps + ExamplePrompts moved to
 // ./SimpleChat/{types,helpers}.ts (BLOCK-9.2 PHASE 4).
@@ -411,7 +389,6 @@ export function SimpleChat({
   const {
     modelMenuOpen,
     setModelMenuOpen,
-    modelSupplierKey,
     setModelSupplierKey,
     accessMenuOpen,
     setAccessMenuOpen,
@@ -572,14 +549,6 @@ export function SimpleChat({
 
   // T83: does the latest AI reply contain any file references? Drives the
   // fade of the file-reference refresh button when there's nothing to refresh.
-  const lastAssistantContent = useMemo(() => {
-    const m = [...displayMessages].reverse().find((msg) => msg.role === 'assistant');
-    return m?.content || '';
-  }, [displayMessages]);
-  const hasFileReferences = useMemo(
-    () => extractFileReferenceCandidates(lastAssistantContent).length > 0,
-    [lastAssistantContent]
-  );
 
   // BLOCK-95 A3 — 自动滚底守卫：用户上翻离开底部后不再强制跟随，浮标一键回底；
   // 发送消息 / 切换会话视为「回到底部」意图，恢复跟随。
@@ -720,7 +689,6 @@ export function SimpleChat({
   const {
     send,
     regenerate,
-    runInBackground,
     streaming,
   } = useChatStream({
     projectId,
@@ -991,7 +959,6 @@ export function SimpleChat({
 
   const examplePromptsToShow = displayMessages.length === 0 ? examplePrompts : [];
 
-
   return (
     <div className={`sc-outer${composerOnly ? ' sc-outer-composer-only' : ''}`} data-rail-body>
       <div className={`sc-root${composerOnly ? ' sc-root-composer-only' : ''}`}>
@@ -1220,7 +1187,6 @@ export function SimpleChat({
             />
           )}
         </div>
-
 
         {/* BLOCK-55 P1/P3 — 计划批准卡 + 修订批准条（仅在有待批准内容时渲染） */}
         {pendingPlan && (

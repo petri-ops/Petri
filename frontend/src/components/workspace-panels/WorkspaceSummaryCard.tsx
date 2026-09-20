@@ -934,13 +934,6 @@ function agentTaskStatusLabel(status: string): string {
   }[status] || status;
 }
 
-function agentTaskStatusKey(status: string): 'running' | 'done' | 'error' | 'stopped' {
-  if (status === 'running' || status === 'pending') return 'running';
-  if (status === 'completed') return 'done';
-  if (status === 'failed') return 'error';
-  return 'stopped';
-}
-
 function headText(text: string, max: number): string {
   const t = (text || '').replace(/\s+/g, ' ').trim();
   return t.length > max ? `${t.slice(0, max)}…` : t || '（无描述）';
