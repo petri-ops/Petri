@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import type { ToolActivityItem, ToolActivityStatus } from './toolActivity';
+import type { ConversationMessage } from './copilotConversationsClient';
+import { restoreSimpleMessage } from './SimpleChat/types';
 import {
   REASONING_PREVIEW_CHARS,
   UNGROUPED_ITERATION,
@@ -176,5 +178,87 @@ describe('BLOCK-107 思考行折叠预览', () => {
   it('空文本返回空串', () => {
     expect(reasoningPreview('')).toBe('');
     expect(reasoningPreview('   \n\n  ')).toBe('');
+  });
+});
+
+describe('BLOCK-107 历史/实况一致性契约（plan §5-2 机械断言）', () => {
+  const shape = (segments: ReturnType<typeof buildConversationSegments>): string[] => (
+    segments.map((segment) => (
+      segment.kind === 'narrative' ? 'narrative' : `${segment.kind}#${segment.iteration}`
+    ))
+  );
+
+  it('同一轮对话经「历史恢复」与「实况素材」两条轨道投影出的片段时间序一致', () => {
+    const liveActivities: ToolActivityItem[] = [
+      activity('workspace_read', 'success', { key: 'c1', iteration: 1, durationMs: 30 }),
+      activity('workspace_search', 'success', { key: 'c2', iteration: 1, durationMs: 12 }),
+      activity('workspace_exec', 'error', { key: 'c3', iteration: 2, durationMs: 90 }),
+    ];
+    const reasoning = { 1: '先读文件确认结构', 2: '再跑一次命令验证' };
+    const progress = [{ iteration: 2, content: '第二轮结束，结构已确认' }];
+
+    // 轨道 A —— 持久化 meta 经历史恢复（刷新 / 切换会话后前端实际走这条）
+    const persisted: ConversationMessage = {
+      id: 'msg_hist_1',
+      role: 'assistant',
+      content: '最终结论：结构已确认。',
+      ts: '2026-09-20T00:00:00.000Z',
+      meta: {
+        toolActivities: liveActivities,
+        reasoningByIteration: reasoning,
+        progressUpdates: progress,
+      },
+    };
+    const historyMessage = restoreSimpleMessage(persisted);
+
+    // 轨道 B —— 实况素材（run 中 SSE 累积出的同一形状）
+    const fromHistory = buildConversationSegments({
+      content: historyMessage.content,
+      toolActivities: historyMessage.toolActivities,
+      reasoningByIteration: historyMessage.reasoningByIteration,
+      progressUpdates: historyMessage.progressUpdates,
+    });
+    const fromLive = buildConversationSegments({
+      content: '最终结论：结构已确认。',
+      toolActivities: liveActivities,
+      reasoningByIteration: reasoning,
+      progressUpdates: progress,
+    });
+
+    expect(shape(fromHistory)).toEqual(shape(fromLive));
+    expect(shape(fromLive)).toEqual([
+      'reasoning#1',
+      'tools#1',
+      'reasoning#2',
+      'tools#2',
+      'progress#2',
+      'narrative',
+    ]);
+  });
+
+  it('实况/历史同源前提：历史恢复层保留交错所依赖的 iteration 与素材字段', () => {
+    const persisted: ConversationMessage = {
+      id: 'msg_hist_2',
+      role: 'assistant',
+      content: '结论',
+      ts: '2026-09-20T00:00:00.000Z',
+      meta: {
+        toolActivities: [activity('workspace_read', 'success', { key: 'c1', iteration: 3 })],
+        reasoningByIteration: { 3: '第三轮思考' },
+        progressUpdates: [{ iteration: 3, content: '第三轮结论' }],
+      },
+    };
+    const restored = restoreSimpleMessage(persisted);
+    // 若历史恢复丢了 iteration，分段会退化成「一个 0 号簇」，交错即失效——
+    // 这条断言把该退化钉死在测试层（D1=c 的可行性前提）。
+    expect(restored.toolActivities?.[0]?.iteration).toBe(3);
+    expect(restored.reasoningByIteration).toEqual({ 3: '第三轮思考' });
+    expect(restored.progressUpdates).toEqual([{ iteration: 3, content: '第三轮结论' }]);
+    expect(shape(buildConversationSegments({
+      content: restored.content,
+      toolActivities: restored.toolActivities,
+      reasoningByIteration: restored.reasoningByIteration,
+      progressUpdates: restored.progressUpdates,
+    }))).toEqual(['reasoning#3', 'tools#3', 'progress#3', 'narrative']);
   });
 });
