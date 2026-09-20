@@ -90,6 +90,14 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // 其余 lint 规则计数零新增；台账=eslint-suppressions.json 棘轮收缩 2150→1740（plan §7）。
   // 豁免 subject UI-### 与同提交台账要求；不重写共享历史。
   'c6a9b6d13952cadc3f9cc9d2bedc1923a329c101',
+  // 2026-09-21 分叉合并批（17275350 merge × 51843c3a 收尾）：Mac 侧四批（BLOCK-105 §7
+  // B2-B4 / 依赖升级 / 类型债+九门）× 本地两包（BLOCK-106/107）合并；SimpleChat.tsx 仅
+  // 导入区冲突取时间线族侧 + 删化石导入 formatToolDuration/ToolActivityItem（HEAD 即未
+  // 使用），零 UI 行为变化；验证=quality:types 0 红（vitest5/vite8 新工具链复跑）+
+  // quality:lint 0 error + BLOCK-107 五测试档 54/54 绿；台账=eslint-suppressions.json
+  // prune 棘轮只删不加。豁免 subject UI-### 与同提交台账要求；不重写共享历史。
+  '1727535040e040825c2b3fc90311ef853b327db6',
+  '51843c3a76d4979e4d1fa26a175379863520c3e1',
   '21d84f528a35526e59f2964833a65965546772e1',
   // 2026-09-19 BLOCK-102 P3/P4 修复提交（06828fd 安全加固+观测性能）：subject
   // 未带 UI-### 为笔误，UI-425 条目由后续提交统一补登（LEGACY_AUDIT_SYNC_
@@ -367,6 +375,12 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 豁免同提交台账要求（subject 门经 LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；
   // 不重写共享历史。
   'c6a9b6d13952cadc3f9cc9d2bedc1923a329c101',
+  // 2026-09-21 分叉合并批（17275350 merge × 51843c3a 收尾）：同 LEGACY_AUDIT_SYNC_
+  // EXEMPTIONS 注——SimpleChat.tsx 化石导入删除零 UI 行为，suppressions prune 只删不加。
+  // 豁免同提交台账要求（subject 门经 LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；
+  // 不重写共享历史。
+  '1727535040e040825c2b3fc90311ef853b327db6',
+  '51843c3a76d4979e4d1fa26a175379863520c3e1',
 
   // 2026-09-19 BLOCK-102 P2 前端竞态治理提交（21d84f52，渲染层竞态修复）：
   // subject 未带 UI-### 为笔误，UI-425 条目（P3/P4 前端切片）与本提交同批由
