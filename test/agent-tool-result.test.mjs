@@ -15,6 +15,16 @@ bootstrapTestDb();
 const db = require('../core/biof3-server/db.js');
 // 单测绕过 server.js 启动；显式复用真实启动路径的 Plan 表初始化，确保干净工作树可运行。
 require('../core/biof3-server/ai-bridge.js');
+
+// BLOCK-104 增量 — run_tool 的工具事实源=已装插件（BLOCK-83 P4 核心树生信内容
+// 删除 + BLOCK-86 领域包封存后，deseq2 需装包才存在；ledger 在案「09-13 后即不可
+// 本机重采」）。approval 两段式测试依赖真实 run_tool 链，按装包态门控：
+// 未装包时 skip（可见计数），装包环境自动恢复运行。
+const { getPlugin } = require('../core/biof3-server/plugin-loader');
+const DESEQ2_AVAILABLE = !!getPlugin('deseq2');
+const DESEQ2_SKIP = DESEQ2_AVAILABLE
+  ? false
+  : 'run_tool 需已装 deseq2 领域插件（BLOCK-83/86 包生态迁移）；装包后本测试自动恢复';
 const {
   createModelResultState,
   createRejectedToolResult,
@@ -212,7 +222,7 @@ test('workspace dry-run reports no side effects while a real write remains R2', 
   }
 });
 
-test('executeToolCall keeps pending run_tool approval truthful and records only the created job', async () => {
+test('executeToolCall keeps pending run_tool approval truthful and records only the created job', { skip: DESEQ2_SKIP }, async () => {
   const inputDir = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-tool-approval-'));
   const countsPath = path.join(inputDir, 'counts.csv');
   const coldataPath = path.join(inputDir, 'coldata.csv');

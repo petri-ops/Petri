@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * scripts/qa-smoke.mjs — Gate 5 headless 冒烟（无需启动 biof3-server / Electron）
+ * scripts/qa-smoke.mjs — Gate 5 headless 冒烟（无需启动后端 / Electron）
  *
  * 检查 Gate 5 §200-216 release-contract 中无需 worker / 无需真实桌面的可声明
  * 静态项：前端 token 覆盖、面板折叠状态、copilot / chat reset、文件树预览、
@@ -107,7 +107,8 @@ register('themes', '主题 token 覆盖：壳/聊天/结果/报告/浏览器/文
     'frontend/src/components/ui/PageHeader.css',
   ];
   // 部分样式文件可能随重构更名/移除：缺失仅告警并跳过，不阻断 themes 检查；
-  // 核心不变量（--biof3-* token 覆盖）仍基于实际存在的文件校验（跨平台收敛）。
+  // 核心不变量（--gewu-* token 覆盖，BLOCK-61/UI-392 起主题 token 家族前缀为
+  // --gewu-*，biof3- 前缀已是死前缀）仍基于实际存在的文件校验（跨平台收敛）。
   const present = cssFiles.filter((f) => exists(f));
   const missing = cssFiles.filter((f) => !exists(f));
   if (missing.length) log('WARN', `themes 检查跳过缺失的 CSS 文件: ${missing.join(', ')}`);
@@ -122,18 +123,18 @@ register('themes', '主题 token 覆盖：壳/聊天/结果/报告/浏览器/文
   }
   const themeCss = read('frontend/src/components/desktop/theme-control.css');
   if (!/data-theme|class=.*dark|:root\.dark|\.theme-light/.test(themeCss)) {
-    log('WARN', 'theme-control.css 未发现明显主题模式声明（可能用 var(--biof3-*) 走 CSS 变量）');
+    log('WARN', 'theme-control.css 未发现明显主题模式声明（可能用 var(--gewu-*) 走 CSS 变量）');
   }
-  // 查找至少一个 CSS 文件使用 --biof3- 开头的 token 变量
-  let usedBiotokens = 0;
+  // 查找至少一个 CSS 文件使用 --gewu- 开头的 token 变量（BLOCK-104 增量对账）
+  let usedGewuTokens = 0;
   for (const f of present) {
     const c = read(f);
-    const m = c.match(/var\(--biof3-[a-z0-9-]+\)/g);
-    if (m && m.length) usedBiotokens += m.length;
+    const m = c.match(/var\(--gewu-[a-z0-9-]+\)/g);
+    if (m && m.length) usedGewuTokens += m.length;
   }
-  log('INFO', `  ${usedBiotokens} 处使用 var(--biof3-*) token`);
-  if (usedBiotokens < 10) {
-    throw new Error(`只发现 ${usedBiotokens} 处 biof3- token，未覆盖足够组件`);
+  log('INFO', `  ${usedGewuTokens} 处使用 var(--gewu-*) token`);
+  if (usedGewuTokens < 10) {
+    throw new Error(`只发现 ${usedGewuTokens} 处 gewu- token，未覆盖足够组件`);
   }
 });
 

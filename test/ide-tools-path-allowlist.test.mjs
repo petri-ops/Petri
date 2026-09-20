@@ -9,6 +9,7 @@ import assert from 'node:assert/strict';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import os from 'node:os';
+import path from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CORE = resolve(__dirname, '..', 'core', 'biof3-server');
@@ -68,8 +69,11 @@ test('resolveAllowlistedPair validates both paths', () => {
   const newPath = `${cwd}/b.txt`;
   const result = allowlist.resolveAllowlistedPair(oldPath, newPath);
   assert.equal(result.ok, true);
-  assert.equal(result.oldPath, oldPath);
-  assert.equal(result.newPath, newPath);
+  // BLOCK-104 增量 — 实现在 win32 会归一化为原生分隔符（path.resolve 语义），
+  // 断言按平台归一后比较而非假定混合斜杠形态。
+  const norm = (p) => path.resolve(p);
+  assert.equal(result.oldPath, norm(oldPath));
+  assert.equal(result.newPath, norm(newPath));
 });
 
 test('resolveAllowlistedPair rejects when one path escapes', () => {

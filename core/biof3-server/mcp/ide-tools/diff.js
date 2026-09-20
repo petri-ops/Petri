@@ -2,7 +2,7 @@
  * core/biof3-server/mcp/ide-tools/diff.js
  *
  * IDE 差异比对 MCP 工具实现：ide_file_diff。
- * 封装系统 `diff`（Apple diff based on FreeBSD diff，位于 /usr/bin/diff）。
+ * 封装系统 `diff`（POSIX /usr/bin/diff；Windows 解析 Git for Windows 自带 usr/bin/diff.exe）。
  *
  * 设计依据：G0-IDE-MCP-TOOLS 工作包（docs/g0-ide-mcp-tools-plan.md）。
  * 安全约束：pathA / pathB 必须均在路径白名单内，复用 resolveAllowlistedPair。
@@ -11,6 +11,35 @@
 'use strict';
 
 const { spawnSync } = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+
+// BLOCK-104 增量 — diff 二进制解析：原硬编码 /usr/bin/diff 在 Windows 上
+// ENOENT（Git for Windows 自带 usr/bin/diff.exe）。解析顺序：环境变量显式指定
+// > win32 探测 Git 安装目录（git -C 推导 + 常见路径）> POSIX 固定路径。
+function resolveDiffBinary() {
+  if (process.env.GEWU_DIFF_BIN && fs.existsSync(process.env.GEWU_DIFF_BIN)) {
+    return process.env.GEWU_DIFF_BIN;
+  }
+  if (process.platform === 'win32') {
+    const candidates = [];
+    try {
+      const gitRoot = spawnSync('git', ['--exec-path'], { encoding: 'utf8' });
+      if (gitRoot.status === 0 && gitRoot.stdout) {
+        // <git>/libexec/git-core → <git>/../usr/bin/diff.exe
+        candidates.push(path.resolve(gitRoot.stdout.trim(), '..', '..', 'usr', 'bin', 'diff.exe'));
+      }
+    } catch {}
+    for (const base of ['C:\Program Files\Git', 'C:\Program Files (x86)\Git']) {
+      candidates.push(path.join(base, 'usr', 'bin', 'diff.exe'));
+    }
+    for (const c of candidates) {
+      if (fs.existsSync(c)) return c;
+    }
+    return 'diff.exe';
+  }
+  return '/usr/bin/diff';
+}
 const { resolveAllowlistedPair } = require('./path-allowlist');
 
 const MAX_LINES_HARD_CAP = 5000;
@@ -216,7 +245,7 @@ function fileDiff({ pathA, pathB, unified = false, maxLines } = {}) {
 
   let result;
   try {
-    result = spawnSync('/usr/bin/diff', args, { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+    result = spawnSync(resolveDiffBinary(), args, { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
   } catch (e) {
     return { ok: false, isError: true, error: `diff spawn failed: ${e.message}` };
   }

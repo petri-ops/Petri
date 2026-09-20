@@ -87,7 +87,13 @@ test('op=next fails gracefully with missing workflowPlan', async () => {
   assert.equal(next.error, 'missing_workflow_plan');
 });
 
-test('op=status + next reflect real DB job state after tool run', async () => {
+// BLOCK-104 增量 — 本用例走真实 run_tool 领域工作流（deg-standardization 等），
+// 依赖已装领域插件（BLOCK-83/86 包生态迁移）；未装包时 skip（可见计数）。
+const { getPlugin: _getPluginPhase6 } = req('../core/biof3-server/plugin-loader');
+const PHASE6_DOMAIN_SKIP = _getPluginPhase6('deg-standardization')
+  ? false
+  : '领域工作流需已装 deg-standardization 插件（BLOCK-83/86 包生态迁移）；装包后自动恢复';
+test('op=status + next reflect real DB job state after tool run', { skip: PHASE6_DOMAIN_SKIP }, async () => {
   // 1. Plan
   const planned = await learning.tool_run_tool({ op: 'plan', templateId: 'bulk-rna-core' }, CTX);
   const differentialStep = planned.plan.steps.find((s) => s.id === 'differential');
@@ -199,7 +205,7 @@ test('op=next returns empty nextSteps when plan is terminal', async () => {
   assert.equal(next.terminal, true);
 });
 
-test('op=status returns harnessState on jobs when available', async () => {
+test('op=status returns harnessState on jobs when available', { skip: PHASE6_DOMAIN_SKIP }, async () => {
   const job = db.createToolJob({
     toolId: 'deseq2',
     userId: CTX.userId,

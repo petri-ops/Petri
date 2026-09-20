@@ -48,12 +48,10 @@ function extractStringArray(source, afterMarker) {
 
 test("C-002: result:create validTypes includes 'conversation_export'", () => {
   // 第一个 validTypes（在 result:create handler 里）的数组
-  const createHandlerIdx = RESULT_HANDLERS.indexOf("ipcMain.handle('result:create'");
+  const createHandlerIdx = RESULT_HANDLERS.indexOf('ipcMain.handle(CHANNELS.result.create');
   assert.ok(createHandlerIdx >= 0, 'result:create handler must exist');
   // 只在 createHandler 之后 + before result:createWithBranch 之前扫描
-  const createWithBranchIdx = RESULT_HANDLERS.indexOf(
-    "ipcMain.handle('result:createWithBranch'",
-  );
+  const createWithBranchIdx = RESULT_HANDLERS.indexOf('ipcMain.handle(CHANNELS.result.createWithBranch');
   assert.ok(createWithBranchIdx >= 0, 'result:createWithBranch handler must exist');
   assert.ok(createHandlerIdx < createWithBranchIdx, 'handler order sanity');
 
@@ -71,7 +69,7 @@ test("C-002: result:create validTypes includes 'conversation_export'", () => {
 
 test('C-002: createFromConversation persists as conversation_export, not text', () => {
   // 抽 ipcMain.handle('result:createFromConversation', ...) 函数体
-  const marker = "ipcMain.handle('result:createFromConversation'";
+  const marker = 'ipcMain.handle(CHANNELS.result.createFromConversation';
   const start = RESULT_HANDLERS.indexOf(marker);
   assert.ok(start >= 0, 'createFromConversation handler must exist');
   const bodyStart = RESULT_HANDLERS.indexOf('=>', start);

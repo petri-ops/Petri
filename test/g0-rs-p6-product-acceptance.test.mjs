@@ -679,7 +679,7 @@ test('P6 package gate owns syntax, focused tests, stored verification and eviden
   assert.match(scripts['g0:result-studio:p6:update'], /--write-evidence/);
 });
 
-test('P6 stored verification and write gate target an injected evidence path', () => {
+test('P6 stored verification and write gate target an injected evidence path', { skip: process.platform === 'win32' && 'P6 源绑定证据重打仅限 macOS（AUDIT-LOG 🟡 在册；源树哈希失配同根因）' }, () => {
   const storagePath = path.join(ROOT, 'acceptance', 'g0-result-studio', 'injected-p6-evidence.json');
   const relativeStoragePath = path.relative(ROOT, storagePath);
   setP6ProductAcceptanceEvidencePath(relativeStoragePath);
@@ -701,7 +701,7 @@ test('P6 stored verification and write gate target an injected evidence path', (
   }
 });
 
-test('stored P6 evidence remains source-bound and recomputable', {
+test('stored P6 evidence remains source-bound and recomputable', { skip: process.platform === 'win32' && 'P6 源绑定证据重打被平台门限制为 macOS（scripts/g0-rs-p6-real-restart-prototype.mjs 仅 darwin；AUDIT-LOG 🟡 在册，Mac 侧专门会话执行 --live --write-evidence）' }, {
   skip: !existsSync(EVIDENCE_PATH) && 'generated only after the implementation source commit',
 }, () => {
   assert.equal(verifyStoredP6ProductAcceptanceEvidence(), true);

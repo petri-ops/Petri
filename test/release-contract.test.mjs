@@ -5,12 +5,14 @@
 //   1. release-contract.json 可解析
 //   2. channel === 'beta'
 //   3. 所有 platforms[*].supported === true 的 platform 必须有非 null runtimeArtifact.url
-//   4. goldenPath.tool id 必须在 frontend/src/tools/inventory.ts 中出现（粗略字符串匹配）
+//   4. goldenPath.tool id 必须在在仓能力清单（resources/skills/*/manifest.json）中出现
+//      （BLOCK-104 增量对账：inventory.ts 已随 BLOCK-83 UI-352 SPI 化退役，工具目录
+//      真相迁至插件投影 + 内建技能清单；本断言跟随真实归属地）
 //
 // 失败即退出非零。
 
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
@@ -37,11 +39,9 @@ import { dirname, resolve } from 'node:path';
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, '..');
 const contractPath = resolve(repoRoot, 'release-contract.json');
-const dataTsPath = resolve(repoRoot, 'frontend/src/tools/inventory.ts');
 
 console.log(`[release-contract] loading ${contractPath}`);
 assert(existsSync(contractPath), 'release-contract.json not found at repo root');
-assert(existsSync(dataTsPath), 'frontend/src/tools/inventory.ts not found');
 
 const contract = JSON.parse(readFileSync(contractPath, 'utf8'));
 
@@ -85,17 +85,22 @@ console.log(
   } supported (each has runtimeArtifact.url/sha256/sizeBytes asserted)`
 );
 
-// ── 4. goldenPath.tool must appear in _data.ts ──
+// ── 4. goldenPath.tool must appear in the in-repo capability manifests ──
 const toolId = contract?.goldenPath?.tool;
 assert.ok(toolId, 'goldenPath.tool missing in contract');
-const dataSrc = readFileSync(dataTsPath, 'utf8');
-const idPattern = new RegExp(`id:\\s*['"]${toolId}['"]`);
-assert.match(
-  dataSrc,
-  idPattern,
-  `goldenPath.tool '${toolId}' not found as a tool id in frontend/src/tools/inventory.ts — golden path must reference a real tool`
+const skillsDir = resolve(repoRoot, 'resources', 'skills');
+const manifestHits = [];
+for (const entry of existsSync(skillsDir) ? readdirSync(skillsDir, { withFileTypes: true }) : []) {
+  if (!entry.isDirectory()) continue;
+  const manifestPath = resolve(skillsDir, entry.name, 'manifest.json');
+  if (!existsSync(manifestPath)) continue;
+  if (readFileSync(manifestPath, 'utf8').includes(toolId)) manifestHits.push(entry.name);
+}
+assert.ok(
+  manifestHits.length > 0,
+  `goldenPath.tool '${toolId}' not referenced by any resources/skills/*/manifest.json — golden path must reference a real shipped capability (BLOCK-104 增量：inventory.ts 已随 SPI 化退役，能力真相=技能清单+插件投影)`
 );
-console.log(`✓ goldenPath.tool '${toolId}' found in _data.ts`);
+console.log(`✓ goldenPath.tool '${toolId}' referenced by skills: ${manifestHits.join(', ')}`);
 
 // ── 5. golden path report format declared ──
 assert.ok(contract.goldenPath.reportFormat, 'goldenPath.reportFormat missing');

@@ -521,8 +521,8 @@ test('I.5: full IPC catalog scan finds harness plugin manifest and it passes', (
   const result = JSON.parse(out);
   assert.ok(result.pluginManifests, 'expected pluginManifests in output');
   assert.ok(result.pluginManifests.length >= 1, `expected >= 1 plugin, got ${result.pluginManifests.length}`);
-  // Harness plugin appears as "plugin.json" (top-level acceptance dir scan)
-  const harnessResult = result.pluginManifests.find(p => p.path === 'plugin.json');
+  // BLOCK-104 增量 — validate 脚本现输出绝对路径（跨平台），按文件名尾对账。
+  const harnessResult = result.pluginManifests.find(p => String(p.path).split(path.sep).join('/').endsWith('harness-plugin-prototype/plugin.json'));
   assert.ok(harnessResult, 'expected harness plugin.json in scan results');
   assert.equal(harnessResult.issues.length, 0, `expected harness to pass, issues: ${harnessResult.issues.join('; ')}`);
 });
