@@ -21,7 +21,7 @@ function apiJson(method, pathname, body) {
     const req = http.request(API + pathname, { method, headers: { ...AUTH, 'Content-Type': 'application/json' } }, (res) => {
       let buf = '';
       res.on('data', (c) => { buf += c; });
-      res.on('end', () => { try { resolve(JSON.parse(buf)); } catch (e) { resolve(null); } });
+      res.on('end', () => { try { resolve(JSON.parse(buf)); } catch { resolve(null); } });
     });
     req.on('error', reject);
     if (body) req.write(JSON.stringify(body));

@@ -39,7 +39,6 @@ const { zoomBy, zoomReset } = require("./_zoom.js");
 async function createWindow({
   BrowserWindow,
   shell,
-  session,
   resolveResource,
   isDevMode,
   rendererDevUrl,
@@ -314,7 +313,7 @@ async function createWindow({
   // ── Renderer Console Capture ───────────────────────────────────
   mainWindow.webContents.on(
     "console-message",
-    (event, level, message, line, sourceId) => {
+    (event, level, message, _line, _sourceId) => {
       const tag = ["LOG", "WARN", "ERROR"][level] || "LOG";
       console.log(`[renderer:${tag}] ${message}`);
     },

@@ -16,9 +16,9 @@
 // job `sort -k 2` 合并。本脚本作为本地等价物——单一机器构建时直接覆盖三段文件。
 
 import { createHash } from 'node:crypto';
-import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
+import { readFile, writeFile, stat } from 'node:fs/promises';
 import { createReadStream } from 'node:fs';
-import { resolve, basename, join } from 'node:path';
+import { resolve, join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 
 const DIST_DIR = resolve(process.cwd(), 'dist');
@@ -89,7 +89,7 @@ async function verify() {
   let raw;
   try {
     raw = await readFile(SUMS_FILE, 'utf8');
-  } catch (err) {
+  } catch {
     log(`[release-checksums] ${SUMS_FILE} not found. Run without --verify to generate it.`);
     process.exit(2);
   }

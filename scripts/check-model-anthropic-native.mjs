@@ -25,7 +25,6 @@ const EVIDENCE_DIR = resolve(ROOT, 'acceptance', 'MODEL-ANTHROPIC-NATIVE');
 const EVIDENCE_PATH = resolve(EVIDENCE_DIR, 'anthropic-real-key-evidence.json');
 const ANTHROPIC_BASE = 'https://api.anthropic.com';
 const ANTHROPIC_VERSION = '2023-06-01';
-const HTTP_TIMEOUT_MS = 30_000;
 
 const KEY = process.env.BIOTEST_ANTHROPIC_KEY || '';
 const MODE = KEY ? 'live' : 'dryrun';
@@ -57,40 +56,7 @@ function recordError(name, err) {
   });
 }
 
-async function withTimeout(promise, ms, label) {
-  let handle;
-  const timeout = new Promise((_, reject) => {
-    handle = setTimeout(() => reject(new Error(`${label} timeout ${ms}ms`)), ms);
-  });
-  try {
-    return await Promise.race([promise, timeout]);
-  } finally {
-    clearTimeout(handle);
-  }
-}
 
-async function liveFetch(pathname, init = {}) {
-  const url = `${ANTHROPIC_BASE}${pathname}`;
-  const headers = {
-    'content-type': 'application/json',
-    'x-api-key': KEY,
-    'anthropic-version': ANTHROPIC_VERSION,
-    ...(init.headers || {}),
-  };
-  const start = Date.now();
-  const res = await withTimeout(
-    fetch(url, { ...init, headers }),
-    HTTP_TIMEOUT_MS,
-    pathname,
-  );
-  const text = await res.text();
-  return {
-    status: res.status,
-    headers: Object.fromEntries(res.headers.entries()),
-    text,
-    durationMs: Date.now() - start,
-  };
-}
 
 async function stepListModels() {
   // Anthropic 不提供 list models endpoint；走 messages minimal ping 作为模型可达性

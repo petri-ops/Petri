@@ -21,7 +21,7 @@ function setupRuntimeIpc({ rServerProc } = {}) {
       const { getRuntimeStatus } = require("../plugin-manager");
       const { mergeRuntimeStatusWithConfiguredHomes } = require("../backend-health");
       return mergeRuntimeStatusWithConfiguredHomes(getRuntimeStatus());
-    } catch (e) {
+    } catch {
       return { r: { installed: false }, python: { installed: false } };
     }
   });

@@ -22,7 +22,6 @@ if (process.platform !== 'win32') {
  * 证据：acceptance/block-63/p1-live.json
  */
 
-import assert from 'node:assert/strict';
 import { spawn as childSpawn, execSync } from 'node:child_process';
 import { createInterface } from 'node:readline';
 import path from 'node:path';

@@ -35,7 +35,7 @@ const { getOpenShellPlan, getSessionShellSpec } =
 const { forwardToContentWindow } = require("./window-manager");
 
 // resolveCore mirror (self-contained, identical to main.js logic)
-function resolveCore(...parts) {
+function resolveCore(..._parts) {
   const IS_DEV = !app.isPackaged;
   if (IS_DEV) {
     return path.join(__dirname, "..", "..", "core");

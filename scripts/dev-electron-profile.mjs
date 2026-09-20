@@ -136,7 +136,7 @@ function collectStaticMetrics() {
 function tryNodeCheck(args, options) {
   try {
     return execSync('node --check src/main.js', { cwd: ROOT, encoding: 'utf8', ...options });
-  } catch (err) {
+  } catch {
     return null; // Electron-only module — plain Node cannot parse
   }
 }
@@ -357,10 +357,9 @@ class CdpClient {
  * @param {object} opts
  * @param {number}  opts.port      remote-debugging-port
  * @param {number}  opts.timeoutMs  max total measurement time
- * @param {string}  opts.outputFormat 'text' | 'json' | 'csv'
  * @param {string}  opts.electronPath optional path to electron binary
  */
-async function measureCdpStartup({ port = 9222, timeoutMs = 30_000, outputFormat = 'text', electronPath = 'electron' } = {}) {
+async function measureCdpStartup({ port = 9222, timeoutMs = 30_000, electronPath = 'electron' } = {}) {
   const t0 = performance.now(); // spawn time — set immediately
   const phases = {
     T1: null, // app ready
@@ -380,7 +379,7 @@ async function measureCdpStartup({ port = 9222, timeoutMs = 30_000, outputFormat
       detached: false,
       env: { ...process.env, ELECTRON_DISABLE_SANDBOX: '1' },
     });
-  } catch (err) {
+  } catch {
     throw new Error(`electron_not_found: "${electronBin}" not on PATH. Install Electron globally or pass --electron-path.`);
   }
 

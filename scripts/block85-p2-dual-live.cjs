@@ -32,7 +32,7 @@ function fetchJson(url, opts = {}) {
       let d = '';
       res.on('data', (c) => (d += c));
       res.on('end', () => {
-        try { resolve(JSON.parse(d)); } catch (e) { resolve({ raw: d.slice(0, 200), status: res.statusCode }); }
+        try { resolve(JSON.parse(d)); } catch { resolve({ raw: d.slice(0, 200), status: res.statusCode }); }
       });
     });
     req.on('error', reject);
@@ -41,9 +41,6 @@ function fetchJson(url, opts = {}) {
   });
 }
 
-function b64file(p) {
-  return fs.readFileSync(p).toString('base64');
-}
 
 // demo 输入从 demo-data 端点取（与 UI 同链），不做本地路径依赖
 function fetchB64(url) {

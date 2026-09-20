@@ -212,15 +212,7 @@
   },
   "core/biof3-server/mcp/registry.js": {
     "no-unused-vars": {
-      "count": 19
-    }
-  },
-  "core/biof3-server/mcp/registry/run-plugin-script.js": {
-    "no-undef": {
-      "count": 55
-    },
-    "no-unused-vars": {
-      "count": 1
+      "count": 18
     }
   },
   "core/biof3-server/mcp/registry/runtime-paths.js": {
@@ -2261,11 +2253,6 @@
       "count": 2
     }
   },
-  "scripts/block52-p3-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
   "scripts/block54-live.cjs": {
     "no-unused-vars": {
       "count": 1
@@ -2314,9 +2301,6 @@
   "scripts/block63-p1-live.mjs": {
     "no-undef": {
       "count": 1
-    },
-    "no-unused-vars": {
-      "count": 1
     }
   },
   "scripts/block63-p4-live.cjs": {
@@ -2325,26 +2309,6 @@
     }
   },
   "scripts/block66-p3-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block67-p4-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block67-ui327-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block70-tunnel-live.mjs": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "scripts/block76-p1-live.cjs": {
     "no-unused-vars": {
       "count": 1
     }
@@ -2384,16 +2348,6 @@
       "count": 1
     }
   },
-  "scripts/block85-p2-dual-live.cjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "scripts/block85-p3-dual-delegate.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
   "scripts/block88-p1-dual-identity.cjs": {
     "no-unused-vars": {
       "count": 2
@@ -2415,11 +2369,6 @@
     }
   },
   "scripts/block94-knowledge-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block95-b1-diff-live.cjs": {
     "no-unused-vars": {
       "count": 1
     }
@@ -2454,19 +2403,9 @@
       "count": 1
     }
   },
-  "scripts/check-model-anthropic-native.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
   "scripts/dev-electron-profile.mjs": {
     "no-unused-vars": {
-      "count": 6
-    }
-  },
-  "scripts/g0-lf0-acceptance.mjs": {
-    "no-unused-vars": {
-      "count": 1
+      "count": 3
     }
   },
   "scripts/g0-rs-p4r-acceptance.mjs": {
@@ -2479,34 +2418,9 @@
       "count": 1
     }
   },
-  "scripts/g0-rs-p4r-ui-driver.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/g0-rs-p5-acceptance.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/g0-rs-p6-electron-pressure-prototype.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "scripts/g0-rs-p6-ui110-driver.cjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
   "scripts/g0-rs-p7-acceptance.mjs": {
     "no-unused-vars": {
       "count": 2
-    }
-  },
-  "scripts/g0-sdc1-electron-driver.cjs": {
-    "no-unused-vars": {
-      "count": 1
     }
   },
   "scripts/g0-start-audit.mjs": {
@@ -2514,22 +2428,7 @@
       "count": 2
     }
   },
-  "scripts/generate-ipc-catalog-md.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
   "scripts/golden-path.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "scripts/harness-loop-controller.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/harness-loop-evaluate.mjs": {
     "no-unused-vars": {
       "count": 2
     }
@@ -2556,12 +2455,7 @@
   },
   "scripts/qa-smoke.mjs": {
     "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "scripts/release-checksums.mjs": {
-    "no-unused-vars": {
-      "count": 3
+      "count": 1
     }
   },
   "scripts/ui315-forced-live.cjs": {
@@ -2612,32 +2506,12 @@
       "count": 1
     }
   },
-  "scripts/ui404-agent-panel-collapse-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
   "scripts/validate-ipc-catalog.mjs": {
     "no-unused-vars": {
-      "count": 6
-    }
-  },
-  "scripts/verify-win-runtime-first-use.mjs": {
-    "no-unused-vars": {
-      "count": 1
+      "count": 4
     }
   },
   "src/content-sync.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/database/_db-singleton.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "src/ipc/ai-settings.js": {
     "no-unused-vars": {
       "count": 1
     }
@@ -2657,37 +2531,12 @@
       "count": 1
     }
   },
-  "src/ipc/runtime-status.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/ipc/telemetry.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/ipc/terminal.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
   "src/ipc/window-manager.js": {
     "no-unused-vars": {
       "count": 1
     }
   },
   "src/ipc/working-tree-review/context.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/ipc/working-tree-review/diff-parse.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/ipc/working-tree-review/reject-store.js": {
     "no-unused-vars": {
       "count": 1
     }
@@ -2700,16 +2549,8 @@
       "count": 14
     }
   },
-  "src/main/_window-create.js": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
   "src/main/_window-manager.js": {
     "no-control-regex": {
-      "count": 1
-    },
-    "no-unused-vars": {
       "count": 1
     }
   },
@@ -2721,11 +2562,6 @@
   "src/plugin-manager.js": {
     "no-unused-vars": {
       "count": 2
-    }
-  },
-  "src/telemetry.js": {
-    "no-unused-vars": {
-      "count": 1
     }
   },
   "test/agent-approval.test.mjs": {

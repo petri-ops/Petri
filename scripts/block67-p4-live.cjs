@@ -24,7 +24,7 @@ function req(url, opts = {}) {
     const r = http.request(url, { method: opts.method || 'GET', headers: opts.headers || {} }, (x) => {
       let d = '';
       x.on('data', (c) => (d += c));
-      x.on('end', () => { try { resolve({ status: x.statusCode, body: JSON.parse(d) }); } catch (e) { resolve({ status: x.statusCode, body: d }); } });
+      x.on('end', () => { try { resolve({ status: x.statusCode, body: JSON.parse(d) }); } catch { resolve({ status: x.statusCode, body: d }); } });
     });
     r.on('error', reject);
     if (opts.body) r.write(opts.body);

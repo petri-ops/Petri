@@ -17,7 +17,6 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
-  statSync,
   writeFileSync,
 } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -913,36 +912,6 @@ async function stopChild(child) {
   if (child.exitCode === null) child.kill('SIGKILL');
 }
 
-async function runElectron(configPath, resultPath, { show = false, backendPort }) {
-  const stderr = [];
-  const child = spawn(ELECTRON_PATH, [DRIVER_PATH], {
-    cwd: ROOT,
-    env: {
-      ...process.env,
-      BIOF3_DESKTOP: '1',
-      R_SERVER_PORT: String(backendPort),
-      BIOF3_P6_PRESSURE_DRIVER_CONFIG: configPath,
-      BIOF3_P6_PRESSURE_SHOW: show ? '1' : '0',
-    },
-    stdio: ['ignore', 'ignore', 'pipe'],
-  });
-  child.stderr.setEncoding('utf8');
-  child.stderr.on('data', (chunk) => {
-    stderr.push(chunk);
-    while (stderr.join('').length > 12_000) stderr.shift();
-  });
-  const exit = await new Promise((resolve) => {
-    child.once('exit', (code, signal) => resolve({ code, signal }));
-    child.once('error', () => resolve({ code: null, signal: 'spawn_error' }));
-  });
-  if (exit.code !== 0 || !existsSync(resultPath)) {
-    const persisted = existsSync(resultPath) ? JSON.parse(readFileSync(resultPath, 'utf8')) : null;
-    const error = new Error(`p6_pressure_electron_failed:${persisted?.failedStage || 'unknown'}`);
-    error.detail = stderr.join('').slice(-4_000);
-    throw error;
-  }
-  return JSON.parse(readFileSync(resultPath, 'utf8'));
-}
 
 function check(id, passed, observed, limit = null) {
   return { id, passed: passed === true, observed, ...(limit == null ? {} : { limit }) };

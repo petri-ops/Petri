@@ -930,7 +930,7 @@ export function svgIncludesColor(svg, hex) {
   const expected = [0, 2, 4].map((offset) => Number.parseInt(normalized.slice(offset, offset + 2), 16));
   const rgb = /rgb\(\s*([0-9]+(?:\.[0-9]+)?)\s*(%)?\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*(%)?\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*(%)?\s*\)/gi;
   for (const match of source.matchAll(rgb)) {
-    const actual = [1, 3, 5].map((index, channel) => {
+    const actual = [1, 3, 5].map((index) => {
       const value = Number(match[index]);
       return Math.round(match[index + 1] === '%' ? value * 255 / 100 : value);
     });

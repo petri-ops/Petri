@@ -60,7 +60,7 @@ function _writeRejectEntry(userDataDir, args) {
       feedback: typeof args.feedback === 'string' ? args.feedback : null,
       rejectedAt: new Date().toISOString(),
     }, null, 2));
-  } catch (e) {
+  } catch {
     // reject 清单写入失败不影响 git apply / inverse 结果
   }
 }

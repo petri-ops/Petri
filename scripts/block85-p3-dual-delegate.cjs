@@ -31,7 +31,7 @@ function postJson(url, body) {
     const req = http.request(url, { method: 'POST', headers: AUTH }, (res) => {
       let d = '';
       res.on('data', (c) => (d += c));
-      res.on('end', () => { try { resolve(JSON.parse(d)); } catch (e) { reject(new Error('non-JSON: ' + d.slice(0, 200))); } });
+      res.on('end', () => { try { resolve(JSON.parse(d)); } catch { reject(new Error('non-JSON: ' + d.slice(0, 200))); } });
     });
     req.on('error', reject);
     req.write(JSON.stringify(body));

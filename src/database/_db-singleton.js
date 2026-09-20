@@ -100,7 +100,7 @@ function closeDb(role) {
   if (!db) return;
   try {
     db.close();
-  } catch (_) {
+  } catch {
     // already closed or never opened — match db.js closeDatabase tolerance
   }
   _connections.delete(dbPath);
@@ -111,7 +111,7 @@ function closeAll() {
   for (const [dbPath, db] of _connections) {
     try {
       db.close();
-    } catch (_) {
+    } catch {
       // ignore — match the swallow-when-already-closed contract
     }
     _connections.delete(dbPath);

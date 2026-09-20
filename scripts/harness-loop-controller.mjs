@@ -24,7 +24,7 @@ function run(cmd, label) {
   try {
     execSync(cmd, { stdio: 'inherit' });
     return true;
-  } catch (e) {
+  } catch {
     process.stdout.write(`[${label}] FAILED\n`);
     return false;
   }

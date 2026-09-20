@@ -48,23 +48,6 @@ const RE_PRELOAD_ON = /ipcRenderer\.on\s*\(\s*['"`]([^'"`]+)['"`]\s*,/g;
 
 // ─── Self-written validators (UR-4: no ajv / zod) ───────────────────────────
 
-/**
- * Validate channel name format.
- * @param {string} channel
- * @returns {{ ok: boolean, error?: string }}
- */
-function checkChannelName(channel) {
-  if (typeof channel !== "string" || channel.length === 0) {
-    return { ok: false, error: "channel must be a non-empty string" };
-  }
-  if (channel.length > 200) {
-    return { ok: false, error: `channel name too long (${channel.length} > 200)` };
-  }
-  if (/\s/.test(channel)) {
-    return { ok: false, error: "channel name must not contain whitespace" };
-  }
-  return { ok: true };
-}
 
 // ─── Plugin Manifest Schema Validation (PL-001 style — self-written, no ajv/zod) ──
 
@@ -306,100 +289,7 @@ const KNOWN_PAYLOAD_TYPES = Object.freeze([
   'null', 'boolean', 'number', 'integer', 'string', 'array', 'object',
 ]);
 
-/**
- * Infer the expected JS type from a schema value description string.
- * Returns a JS typeof string or 'unknown'.
- * @param {string} typeStr
- * @returns {string}
- */
-function inferJsType(typeStr) {
-  switch (typeStr) {
-    case 'null': return 'object';
-    case 'boolean': return 'boolean';
-    case 'number': return 'number';
-    case 'integer': return 'number';
-    case 'string': return 'string';
-    case 'array': return 'object';
-    case 'object': return 'object';
-    default: return 'unknown';
-  }
-}
 
-/**
- * Basic type check for an IPC payload against an inferred schema.
- * Returns { ok, errors } where errors is array of string.
- *
- * This is a shallow type check — it detects obvious type mismatches
- * in payload objects without introducing zod/ajv. Supports top-level
- * type checks and nested property validation.
- *
- * @param {*} value
- * @param {{ type: string, minimum?: number, maximum?: number, enum?: string[], required?: string[], properties?: object, items?: object }} schema
- * @param {string} path
- * @returns {{ ok: boolean, errors: string[] }}
- */
-function checkPayloadShape(value, schema, path = '<payload>') {
-  const errors = [];
-
-  if (!schema || typeof schema !== 'object') {
-    return { ok: true, errors: [] }; // no schema = skip
-  }
-
-  // Validate the top-level value against schema.type
-  if (schema.type !== undefined) {
-    const jsType = inferJsType(schema.type);
-    if (jsType !== 'unknown') {
-      if (schema.type === 'null') {
-        if (value !== null) {
-          errors.push(`${path}: expected null, got ${value === null ? 'null' : typeof value}`);
-        }
-      } else if (schema.type === 'integer') {
-        if (typeof value !== 'number' || !Number.isInteger(value)) {
-          errors.push(`${path}: expected integer, got ${typeof value} ${value}`);
-        }
-      } else if (typeof value !== jsType) {
-        errors.push(`${path}: expected type ${schema.type}, got ${typeof value}`);
-      }
-    }
-  }
-
-  // Validate nested properties if schema has properties definition
-  if (schema.properties && typeof value === 'object' && value !== null && !Array.isArray(value)) {
-    for (const [propName, propSchema] of Object.entries(schema.properties)) {
-      const propValue = value[propName];
-      const propPath = `${path}.${propName}`;
-      // Check if required field is missing
-      if (propValue === undefined && Array.isArray(schema.required) && schema.required.includes(propName)) {
-        errors.push(`${propPath}: required field "${propName}" is missing`);
-      }
-      // Validate property value if present
-      if (propValue !== undefined) {
-        const propErrors = checkPayloadShape(propValue, propSchema, propPath);
-        errors.push(...propErrors.errors);
-      }
-    }
-  }
-
-  if (schema.minimum !== undefined && typeof value === 'number') {
-    if (value < schema.minimum) {
-      errors.push(`${path}: value ${value} < minimum ${schema.minimum}`);
-    }
-  }
-
-  if (schema.maximum !== undefined && typeof value === 'number') {
-    if (value > schema.maximum) {
-      errors.push(`${path}: value ${value} > maximum ${schema.maximum}`);
-    }
-  }
-
-  if (schema.enum !== undefined && Array.isArray(schema.enum)) {
-    if (!schema.enum.includes(value)) {
-      errors.push(`${path}: value "${value}" not in enum [${schema.enum.join(', ')}]`);
-    }
-  }
-
-  return { ok: errors.length === 0, errors };
-}
 
 /**
  * Payload shape registry: maps channel prefix to expected schema hints.

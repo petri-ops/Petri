@@ -38,15 +38,6 @@ function apiPost(pathname, body) {
     req.end(JSON.stringify(body));
   });
 }
-function apiGet(pathname) {
-  return new Promise((resolve, reject) => {
-    http.get(API + pathname, { headers: AUTH }, (res) => {
-      let d = '';
-      res.on('data', (c) => { d += c; });
-      res.on('end', () => { try { resolve({ status: res.statusCode, body: JSON.parse(d) }); } catch { resolve({ status: res.statusCode, body: d }); } });
-    }).on('error', reject);
-  });
-}
 
 const Database = require(path.join(ROOT, 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
 

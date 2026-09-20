@@ -20,7 +20,7 @@
  * 日志：写到 tmp/qa-smoke/<timestamp>.log
  */
 
-import { mkdirSync, writeFileSync, appendFileSync, existsSync, readFileSync, readdirSync, statSync, unlinkSync } from 'node:fs';
+import { mkdirSync, appendFileSync, existsSync, readFileSync, readdirSync, statSync, unlinkSync } from 'node:fs';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -69,21 +69,6 @@ function read(p) {
 }
 function exists(p) {
   return existsSync(join(REPO_ROOT, p));
-}
-function listFiles(p, suffix = '') {
-  const root = join(REPO_ROOT, p);
-  if (!existsSync(root)) return [];
-  const out = [];
-  walk(root, out, suffix);
-  return out;
-}
-function walk(p, out, suffix) {
-  for (const entry of readdirSync(p)) {
-    const full = join(p, entry);
-    const st = statSync(full);
-    if (st.isDirectory()) walk(full, out, suffix);
-    else if (!suffix || entry.endsWith(suffix)) out.push(full);
-  }
 }
 
 // ── 单项检查 ────────────────────────────────────────────

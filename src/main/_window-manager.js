@@ -60,10 +60,6 @@ const CONTENT_TYPES = {
   },
 };
 
-function isSingletonType(type) {
-  const spec = CONTENT_TYPES[type];
-  return !!spec && spec.singleton === true;
-}
 
 /** Fail-closed route whitelist: unknown type or malformed key is
  *  rejected here so the adapter can never receive a route to
