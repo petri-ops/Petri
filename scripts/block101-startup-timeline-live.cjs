@@ -14,11 +14,13 @@
 const path = require('node:path');
 const fs = require('node:fs');
 const { spawn, execSync } = require('node:child_process');
+const perfBudget = require('./lib/startup-perf-budget.cjs');
 
 const ROOT = path.join(__dirname, '..');
 const CDP_PORT = 9223;
 const SAMPLES = Number(process.env.BLOCK101_SAMPLES || 5);
 const EVIDENCE_DIR = path.join(ROOT, 'acceptance', 'block-101');
+const BUDGET_PATH = path.join(ROOT, 'test', 'startup-perf-budget.json');
 
 function log(msg) { console.log(`[block101] ${msg}`); }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -87,8 +89,46 @@ async function sampleOnce(label, lib) {
   try { client.socket.close(); } catch {}
   if (!marks || marks.error || !marks.main) throw new Error('startup_marks_unavailable: ' + JSON.stringify(marks));
   const rep = marks.main.reported || {};
-  log(`${label}: mainReady=${marks.main.mainReady}ms preload=${marks.main.preload}ms windowShown=${marks.main.windowShown}ms didLoad=${marks.main.didFinishLoad}ms firstPaint=${(marks.paints[0] || {}).startTime ?? 'n/a'}ms dataReady=${rep.dataReadyMs ?? 'n/a'}ms`);
+  log(`${label}: mainReady=${marks.main.mainReady}ms preload=${marks.main.preload}ms windowShown=${marks.main.windowShown}ms didLoad=${marks.main.didFinishLoad}ms firstPaint=${(marks.paints[0] || {}).startTime ?? 'n/a'}ms dataReady=${rep.dataReadyMs ?? 'n/a'}ms projects=${rep.projectCount ?? 'n/a'}`);
   return marks;
+}
+
+/** BLOCK-106 P0 归因上下文：没有它，涨幅无法区分「代码回退」与「环境/数据量变化」。 */
+function collectContext() {
+  let head = null;
+  try {
+    head = execSync('git rev-parse --short HEAD', { cwd: ROOT, encoding: 'utf8' }).trim();
+  } catch { /* 非 git 环境：诚实留 null */ }
+  const assetsDir = path.join(ROOT, 'frontend', 'dist', 'assets');
+  let frontendBundle = { available: false, reason: 'frontend/dist/assets 不存在（未构建）' };
+  try {
+    const chunks = fs.readdirSync(assetsDir).filter((f) => f.endsWith('.js')).map((f) => {
+      const st = fs.statSync(path.join(assetsDir, f));
+      return { file: f, bytes: st.size, mtimeMs: st.mtimeMs };
+    }).sort((a, b) => b.bytes - a.bytes);
+    const css = fs.readdirSync(assetsDir).filter((f) => f.endsWith('.css')).reduce((sum, f) => sum + fs.statSync(path.join(assetsDir, f)).size, 0);
+    if (chunks.length) {
+      frontendBundle = {
+        available: true,
+        mainChunk: chunks[0].file,
+        mainChunkBytes: chunks[0].bytes,
+        jsChunkCount: chunks.length,
+        jsTotalBytes: chunks.reduce((s, c) => s + c.bytes, 0),
+        cssTotalBytes: css,
+        // dist 可能比当前源码旧：如实带构建时刻，比对时不得把它当真值
+        builtAt: new Date(chunks[0].mtimeMs).toISOString(),
+      };
+    }
+  } catch (e) {
+    frontendBundle = { available: false, reason: e.message.slice(0, 120) };
+  }
+  return {
+    head,
+    platform: process.platform,
+    node: process.version,
+    frontendBundle,
+    budgetFile: path.relative(ROOT, BUDGET_PATH),
+  };
 }
 
 async function main() {
@@ -114,6 +154,7 @@ async function main() {
   const summary = {
     capturedAt: new Date().toISOString(),
     samples: SAMPLES,
+    context: collectContext(),
     mainReady: stat(pick((s) => s.main.mainReady)),
     preload: stat(pick((s) => s.main.preload)),
     windowShown: stat(pick((s) => s.main.windowShown)),
@@ -121,12 +162,18 @@ async function main() {
     firstPaint: stat(pick((s) => (s.paints.find((p) => p.name === 'first-paint') || {}).startTime)),
     dataReady: stat(pick((s) => s.main.reported && s.main.reported.dataReadyMs)),
     domContentLoaded: stat(pick((s) => s.domContentLoaded)),
+    projectCount: stat(pick((s) => s.main.reported && s.main.reported.projectCount)),
   };
+  // BLOCK-106 P0 阈值棘轮：中位数超预算即红；预算文件非法直接抛错不降级。
+  const ceilings = perfBudget.parseBudget(JSON.parse(fs.readFileSync(BUDGET_PATH, 'utf8')), BUDGET_PATH);
+  const budget = perfBudget.evaluateBudget(summary, ceilings);
   fs.writeFileSync(path.join(EVIDENCE_DIR, 'block101-startup-timeline.json'),
-    JSON.stringify({ flow: 'block101-startup-timeline', summary, raw: samples }, null, 2) + '\n');
+    JSON.stringify({ flow: 'block101-startup-timeline', summary, budget, raw: samples }, null, 2) + '\n');
   console.log('summary:', JSON.stringify(summary));
-  const allGood = !!(summary.mainReady && summary.windowShown && summary.didFinishLoad);
-  console.log(`block101-startup-timeline: allPass=${allGood}`);
+  console.log('budget:', JSON.stringify(budget.pass ? { pass: true, headroom: budget.checked.map((c) => `${c.stage}=${c.headroomMs}ms`) } : budget));
+  const marksOk = !!(summary.mainReady && summary.windowShown && summary.didFinishLoad);
+  const allGood = marksOk && budget.pass;
+  console.log(`block101-startup-timeline: allPass=${allGood} (marks=${marksOk} budget=${budget.pass})`);
   process.exit(allGood ? 0 : 1);
 }
 

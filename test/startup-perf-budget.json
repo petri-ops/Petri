@@ -1,0 +1,44 @@
+{
+  "schema": "gewu/startup-perf-budget.v1",
+  "note": "BLOCK-106 P0 启动性能中位数预算（棘轮语义：只许收缩，不许放宽；放宽需用户裁决）。断言对象=各段 5 样本中位数，缺失某段判不通过（不得用「没采到」绕过门禁）。",
+  "basis": {
+    "source": "npm run verify -- block101-startup-timeline（2026-09-20 复采，5 样本）",
+    "capturedAt": "2026-09-20T08:06:16.687Z",
+    "head": "6117e7fc",
+    "projectCount": 10,
+    "marginPct": 20,
+    "medians": {
+      "mainReady": 118,
+      "preload": 360,
+      "domContentLoaded": 629,
+      "firstPaint": 860,
+      "windowShown": 981,
+      "didFinishLoad": 984,
+      "dataReady": 1163
+    },
+    "priorBaseline": {
+      "capturedAt": "2026-09-18T08:29:36.720Z",
+      "projectCount": 9,
+      "medians": {
+        "mainReady": 106,
+        "preload": 313,
+        "domContentLoaded": 589,
+        "firstPaint": 796,
+        "windowShown": 889,
+        "didFinishLoad": 890,
+        "dataReady": 984
+      }
+    },
+    "tightenPlan": "P1 首屏分包落地后按新实测中位数 + 10% 重设本表（P3 收口必做），本表的 20% 裕量只是首轮宽线。",
+    "observedSpread": "同机跨轮散布（win32 / Node 24 / 项目数 10 / 5 样本中位数）：dataReady 1163(08:06) → 1103(08:4x) → 1098(08:57)，跨轮散布约 5.9%；故上限取最差轮次 +20%，P3 收缩时按同法取最差轮次 +10%。"
+  },
+  "medians": {
+    "mainReady": 142,
+    "preload": 432,
+    "domContentLoaded": 755,
+    "firstPaint": 1032,
+    "windowShown": 1178,
+    "didFinishLoad": 1181,
+    "dataReady": 1396
+  }
+}

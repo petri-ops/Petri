@@ -14,17 +14,25 @@ export interface StartupReport {
   preloadMs?: number;
   firstPaintMs?: number;
   dataReadyMs?: number;
+  /** BLOCK-106 P0 归因上下文：dataReady 到货时的项目数（左栏列表长度）。
+   *  没有它，dataReady 曲线无法区分「代码回退」与「数据量变化」。 */
+  projectCount?: number;
   reportedAt: number;
 }
 
 /** 模块级单例：dataReady 打点先于 hook mount 也可靠 */
 let dataReadyMark: number | null = null;
+/** BLOCK-106 P0 — 与 dataReadyMark 同批锁定的归因上下文 */
+let dataReadyContext: { projectCount?: number } = {};
 /** 只挡 mount 兜底上报；dataReady 终版始终放行（主进程 last-write-wins） */
 let mountReported = false;
 
 /** AppRailContext 在项目列表首次到货时调用；终版带上 dataReady 再报一次 */
-export function markDataReady(): void {
-  if (dataReadyMark == null) dataReadyMark = Math.round(performance.now());
+export function markDataReady(context?: { projectCount?: number }): void {
+  if (dataReadyMark == null) {
+    dataReadyMark = Math.round(performance.now());
+    dataReadyContext = typeof context?.projectCount === 'number' ? { projectCount: context.projectCount } : {};
+  }
   sendReport(false);
 }
 
@@ -39,7 +47,10 @@ function sendReport(isMountFallback: boolean): void {
   const report: StartupReport = { reportedAt: Date.now() };
   const preloadMs = (desktop as { __startupPreloadMs?: number }).__startupPreloadMs;
   if (typeof preloadMs === 'number' && preloadMs >= 0 && preloadMs < 60000) report.preloadMs = Math.round(preloadMs);
-  if (dataReadyMark != null) report.dataReadyMs = dataReadyMark;
+  if (dataReadyMark != null) {
+    report.dataReadyMs = dataReadyMark;
+    if (typeof dataReadyContext.projectCount === 'number') report.projectCount = dataReadyContext.projectCount;
+  }
   const entries = performance.getEntriesByType('paint');
   const fp = entries.find((e) => e.name === 'first-paint' || e.name === 'first-contentful-paint');
   if (fp) report.firstPaintMs = Math.round(fp.startTime);

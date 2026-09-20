@@ -174,7 +174,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
   const refreshProjects = useCallback(async () => {
     try {
       const list = await listProjects();
-      markDataReady();
+      markDataReady({ projectCount: list.length });
       setAllProjects(list);
       persistSnapshot(list);
     } catch { /* 保持既有列表：读取失败不制造空树假象 */ }
@@ -196,7 +196,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
         try {
           const list = await listProjects();
           if (!cancelled) {
-            markDataReady();
+            markDataReady({ projectCount: list.length });
             setAllProjects(list);
             persistSnapshot(list);
           }

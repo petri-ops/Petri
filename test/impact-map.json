@@ -1974,7 +1974,7 @@
     },
     {
       "id": "block101-startup-performance",
-      "note": "BLOCK-101 启动性能：P0 timeline 度量仪表（main 打点/preload 桥/渲染层上报）+ P1 首屏 SWR 快照 + dev-verify flow 与实机证据脚本。",
+      "note": "BLOCK-101 启动性能：P0 timeline 度量仪表（main 打点/preload 桥/渲染层上报）+ P1 首屏 SWR 快照 + dev-verify flow 与实机证据脚本。BLOCK-106 P0 追加：归因上下文（项目数/HEAD/前端 chunk 字节）与中位数预算棘轮门禁（test/startup-perf-budget.json + scripts/lib/startup-perf-budget.cjs，纯函数可离线自测）。",
       "patterns": [
         "src/ipc/startup-timeline.js",
         "src/main/startup-timeline-bridge.js",
@@ -1984,10 +1984,13 @@
         "frontend/src/hooks/useStartupTimeline.ts",
         "frontend/src/components/desktop/AppRailContext.tsx",
         "scripts/block101-*",
+        "scripts/lib/startup-perf-budget.cjs",
+        "test/startup-perf-budget.json",
         "acceptance/block-101/**"
       ],
       "tests": [
-        "frontend/src/components/desktop/AppRailContext.test.tsx"
+        "frontend/src/components/desktop/AppRailContext.test.tsx",
+        "test/startup-perf-budget.test.mjs"
       ],
       "frontendRelated": true,
       "classifiesScripts": true,
