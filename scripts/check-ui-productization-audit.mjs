@@ -50,6 +50,12 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // 2026-09-19 BLOCK-102 P2 前端竞态治理提交（21d84f52，渲染层竞态修复）：
   // subject 未带 UI-### 为笔误，UI-425 条目（P3/P4 前端切片）与本提交同批由
   // 后续提交补登。豁免同提交台账与 subject 要求；不重写共享历史。
+  // 2026-09-20 BLOCK-105 P2 lint 首修批（8c85898，eslint --fix 机械修复 77 文件）：
+  // 纯机械代码修复（多余类型断言移除等）无 UI 行为变化，双套件 2251+1146 验证；
+  // 台账即 eslint-suppressions.json + quality:* 门禁（BLOCK-105 plan §6.2），非新
+  // UI 功能故无新台账条目。豁免 subject UI-### 与同提交台账要求；不重写共享历史。
+
+  '8c85898a018300d702daebce9c058193e9b136f2',
   '21d84f528a35526e59f2964833a65965546772e1',
   // 2026-09-19 BLOCK-102 P3/P4 修复提交（06828fd 安全加固+观测性能）：subject
   // 未带 UI-### 为笔误，UI-425 条目由后续提交统一补登（LEGACY_AUDIT_SYNC_
@@ -286,6 +292,13 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+
+  // 2026-09-20 BLOCK-105 P2 lint 首修批（8c85898，eslint --fix 机械修复 77 文件）：
+  // 纯机械代码修复（多余类型断言移除等）无 UI 行为变化，双套件 2251+1146 验证；
+  // 台账即 eslint-suppressions.json + quality:* 门禁（BLOCK-105 plan §6.2），非新
+  // UI 功能故无新台账条目。豁免同提交台账要求（subject UI-### 门经
+  // LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；不重写共享历史。
+  '8c85898a018300d702daebce9c058193e9b136f2',
 
   // 2026-09-19 BLOCK-102 P2 前端竞态治理提交（21d84f52，渲染层竞态修复）：
   // subject 未带 UI-### 为笔误，UI-425 条目（P3/P4 前端切片）与本提交同批由
