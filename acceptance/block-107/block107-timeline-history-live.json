@@ -1,0 +1,33 @@
+{
+  "name": "block107-timeline-history",
+  "startedAt": "2026-09-20T15:02:34.861Z",
+  "finishedAt": "2026-09-20T15:02:40.475Z",
+  "assertions": [
+    {
+      "name": "A1_conversation_rows_present",
+      "pass": true,
+      "detail": "rows=2 :: 新对话2天 / 新对话6天"
+    },
+    {
+      "name": "A2_timeline_rendered_on_history",
+      "pass": true,
+      "detail": "rows_with_timeline=1/2"
+    },
+    {
+      "name": "A3_iteration_monotonic_and_wellformed",
+      "pass": true,
+      "detail": "全部非降序"
+    },
+    {
+      "name": "A4_multi_cluster_not_flattened",
+      "pass": true,
+      "detail": "单条消息最多簇数=13（旧形态恒为 1）:: R:1 T:1 R:2 T:2 R:3 T:3 R:4 T:4 R:5 T:5 R:6 T:6 R:7 T:7 R:8 T:8 R:9 T:9 R:10 T:10 R:11 T:11 R:12 T:12 R:13 T:13 R:14"
+    },
+    {
+      "name": "A5_no_blank_message_body",
+      "pass": true,
+      "detail": "msgBodies=20 空体=0"
+    }
+  ],
+  "allPass": true
+}
