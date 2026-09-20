@@ -103,7 +103,7 @@
 - **P6 连带重打**：`package.json` 属 P6 源绑定集合（`scripts/g0-rs-p6-product-acceptance.mjs` 的 `EXTRA_SOURCE_FILES`）→ 默认校验路径实证 `p6_stored_current_source_hash_mismatch` → `npm run g0:result-studio:p6:update` 重打 **10/10 passed 锚定 `efe86507`**，复验 `10/10 canonical checks recomputed` PASS。
 - **UI 台账门禁连带**：本批属零 UI 行为变化的类型注解批（同型先例 8c85898 / 5a4df30 / f4af1ad2），在 `scripts/check-ui-productization-audit.mjs` 双豁免集合登记 `64da69b`（理由注释就地留痕，不重写共享历史）。
 - **棘轮连带收紧**：类型窄化顺带消除 `KnowledgeSpaceSwitcher.test.tsx` 的 3 条 `@typescript-eslint/no-unsafe-member-access` 抑制（属性缺失时 TS 给出 error type，规则才命中；窄化后不再发生）→ `npx eslint . --prune-suppressions` **2153→2150（−3，只删不加）**；`quality:lint` 复绿（0 error / 1301 warning 存量不变）。
-- **验证**：`tsc` 0 红；前端全量 144 文件/1146 用例 0 红；`quality:lint` 0 error；`npm run quality:types` exit 0。
+- **验证**：批级真实影响范围（`node scripts/test-affected.mjs --base=64da69b7~1 --run`）**Node 766 项 757 绿/0 红/9 skip + 前端 18 文件/122 用例全绿**；`tsc` 0 红；前端全量 144 文件/1146 用例 0 红；`quality:lint` 0 error；`npm run quality:types` exit 0；`npm run closeout` **九门全绿**（含新增 `quality:types`）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 7. P4 收口（2026-09-20；c7930f3c → 3d07a903）
