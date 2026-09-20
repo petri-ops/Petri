@@ -114,7 +114,13 @@ export function resolveImpact(changedFiles, map = MAP) {
     for (const rule of map.rules) {
       if (!rule.patterns.some((pattern) => globMatches(pattern, file))) continue;
       matched = true;
-      for (const test of rule.tests || []) tests.add(test);
+      // 规则登记的 frontend/* 测试走 vitest test:related（frontendRelated 通道），
+      // 不进 node --test 批——node 无 tsx loader，混入即 ERR_UNKNOWN_FILE_EXTENSION
+      // （2026-09-20 Mac Batch-2 实测 ui-404-408/block101/block91 三规则触发）。
+      for (const test of rule.tests || []) {
+        if (test.startsWith('frontend/')) frontendRelated.add(test.replace(/^frontend\//, ''));
+        else tests.add(test);
+      }
       for (const command of rule.commands || []) commands.add(command);
       if (rule.frontendRelated) frontendRelated.add(file.replace(/^frontend\//, ''));
       reasons.set(file, [...(reasons.get(file) || []), rule.id]);

@@ -5,18 +5,22 @@
 // 经接缝参数传入（调用点同步穿参），函数体逐字未动。
 
 const { execFile } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 const {
   captureStagedInputSnapshots,
   reconcileArtifactTruth,
 } = require('../../helpers/artifact-truth');
 const { checkAllowedDownstream } = require('../../agent-tools/agent-tool-policy');
 const { createResultArchive } = require('../../helpers/result-archive');
-const { resolveProjectRunLayout } = require('../../../shared-backend/project-run-layout');
+
 const { createExecutionProvenance, attachProvenanceToResult } = require('../../../shared-backend/execution-provenance');
 const { collectExecutionInputs, writeArtifactManifest } = require('../../../shared-backend/artifact-manifest');
 const { resolveRLibsForPlugin } = require('../../../shared-backend/r-libs-resolver');
 const { ensureBundlesForPlugin } = require('../../../shared-backend/capability-bundles');
 const { R_SERVER, SHARED_BACKEND } = require('./runtime-paths');
+const { _normalizeArtifacts, _resolveStagedInputPath } = require('./artifact-normalize');
+const pluginLoader = require(path.join(R_SERVER, 'plugin-loader.js'));
 
 async function _runPluginScript(
   db,
@@ -28,8 +32,13 @@ async function _runPluginScript(
   projectId = null,
   existingToolJobId = null,
   resultStudioInputLineage = null,
-  conversationId = null
+  conversationId = null,
+  seams = {}
 ) {
+  // BLOCK-92 Wave C-6 补全（2026-09-20 Mac p4r-baseline 抓真）：拆分时
+  // registry.js 私有函数未穿参，插件作业执行必 ReferenceError。
+  // seam 契约=调用方（registry.js）注入；缺失即 fail-closed。
+  const { resolveJobLayout, createMcpExecutionContext, runPluginToolRemote } = seams;
   // Stage 3 B2 part2: auto-provision required capability bundle(s) before
   // assembling R_LIBS_USER, so a freshly-downloaded bundle is visible to the
   // resolveRLibsForPlugin readiness check below. Best-effort only: an
@@ -104,7 +113,10 @@ async function _runPluginScript(
     let jobDir;
     let outputDir;
     try {
-      const layout = _resolveMcpJobLayout({ toolJobId, projectId, userId });
+      if (typeof resolveJobLayout !== 'function') {
+        throw new Error('mcp_job_layout_seam_missing');
+      }
+      const layout = resolveJobLayout({ toolJobId, projectId, userId });
       jobDir = layout.jobDir;
       outputDir = layout.outputDir;
     } catch (e) {
@@ -241,7 +253,7 @@ async function _runPluginScript(
     const runtimeVersion = runtimeReady.ready && typeof executor.getRuntimeVersion === 'function'
       ? executor.getRuntimeVersion()
       : null;
-    const { context: initialExecutionContext, canonicalizePath } = _createMcpExecutionContext({
+    const { context: initialExecutionContext, canonicalizePath } = createMcpExecutionContext({
       jobDir,
       outputDir,
       runtime: plugin.language || null,
@@ -467,7 +479,7 @@ async function _runPluginScript(
               )
               .map((entry) => entry.name)
           : [];
-        const { context: executionContext } = _createMcpExecutionContext({
+        const { context: executionContext } = createMcpExecutionContext({
           jobDir,
           outputDir,
           resultDir,

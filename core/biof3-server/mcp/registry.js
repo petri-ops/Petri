@@ -593,7 +593,7 @@ const { _runPluginScript } = require('./registry/run-plugin-script');
  *   - 结果读 jobDir/manifest.json（脚本写）+ 列 jobDir 下输出文件
  */
 
-// _runPluginScript 已外迁 ./registry/run-plugin-script.js（db/plans 穿参）。
+// _runPluginScript 已外迁 ./registry/run-plugin-script.js（db/plans/resolveJobLayout 穿参）。
 
 async function runPluginToolRemote({ sessionExecutionTargetId, jobDir, plugin, language, toolJobId, startedAt, budgetMs, resolve, plans, outputDir }) {
   const failWith = (message) => ({ err: Object.assign(new Error(message), { code: 1 }), stdout: '', stderr: message });
@@ -926,7 +926,12 @@ async function callTool(name, args, opts = {}) {
       opts && opts.resultStudioInputLineage ? opts.resultStudioInputLineage : null,
       opts && typeof opts.conversationId === 'string' && opts.conversationId.trim()
         ? opts.conversationId.trim()
-        : null
+        : null,
+      {
+        resolveJobLayout: _resolveMcpJobLayout,
+        createMcpExecutionContext: _createMcpExecutionContext,
+        runPluginToolRemote,
+      }
     );
   }
 
