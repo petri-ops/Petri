@@ -162,11 +162,13 @@ desktop/
 
 ### 项目治理与文档生命周期
 
-- 创建或修改计划、Goal、工作包，完成阶段收口、Handoff、归档/替代文档，或创建/移除 Git Worktree 时，必须使用 `$gewu-project-governance`（BLOCK-61 改名前为 `$biof3-project-governance`）。该 skill 的 canonical 位置是 [`.agents/skills/gewu-project-governance/SKILL.md`](.agents/skills/gewu-project-governance/SKILL.md)；`.claude/skills/` 下的同名相对符号链接只为让 Claude Code 能发现它，不是第二份副本。
+- 创建或修改计划、Goal、工作包，完成阶段收口、Handoff、归档/替代文档，或创建/移除 Git Worktree 时，必须使用 `$gewu-project-governance`（BLOCK-61 改名前为 `$biof3-project-governance`）。该 skill 的 canonical 位置是 [`.agents/skills/gewu-project-governance/SKILL.md`](.agents/skills/gewu-project-governance/SKILL.md)。
 - 会话启动/收口/实机验收/工作区卫生/产品 Skill 编写/子 Agent 委派等日常开发实践，使用 `$gewu-dev-infra`（canonical：[`.agents/skills/gewu-dev-infra/SKILL.md`](.agents/skills/gewu-dev-infra/SKILL.md)，BLOCK-71 沉淀；自洽工具包——脚本/模板/原则随包携带，跨仓库复用见包内 PORTING.md，委派任务书模板在包内 `templates/`）。
 - 评审代码变更/审查 diff/写审计报告时，使用 `$gewu-code-review`（canonical：[`.agents/skills/gewu-code-review/SKILL.md`](.agents/skills/gewu-code-review/SKILL.md)，BLOCK-71 沉淀；六维度评审 + P1/P2/Minor 分级 + 表行式报告模板；P1 修复后方可收口）。
 
 - 新建页面/组件、写样式、暗色模式与主题色工作、排查「颜色不一致」反馈，或评审涉及 CSS 的 diff 时，使用 `$gewu-css-theme`（canonical：[`.agents/skills/gewu-css-theme/SKILL.md`](.agents/skills/gewu-css-theme/SKILL.md)，UI-392/393 沉淀；海军蓝 token 阶梯 + 禁零定义/禁 slate 字面量 + infima 特异性战争规则 + 页头标准件；机械化门禁=theme-token-contract.test.ts，写样式后必跑）。
+
+- **Agent Skill 发现桥（canonical 只在 `.agents/skills/`，禁止第二份副本）**：各宿主的项目级 skill 目录用**同名相对符号链接**指向 `.agents/skills/<name>`——`.claude/skills/`（Claude Code）、`.codebuddy/skills/`（CodeBuddy）；两者均已入库随仓库分发。新增、改名或删除 Agent skill 时必须同步补齐全部发现桥，否则对应宿主静默发现不到（`use_skill <name>` 报 not found）。`.codebuddy/` 下除 `skills/` 外的运行时数据由 `.gitignore` 排除。
 
 - 项目当前文档从 [`docs/README.md`](docs/README.md) 进入；完整规则见 [`docs/document-governance.md`](docs/document-governance.md)，机器目录见 [`docs/DOC-REGISTRY.json`](docs/DOC-REGISTRY.json)。
 

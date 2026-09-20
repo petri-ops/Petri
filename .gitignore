@@ -97,3 +97,7 @@ sidecars/computer-use-windows/axfixture/bin/
 sidecars/computer-use-windows/axfixture/obj/
 .biof3-isolated*/
 .biof3-tmp-*
+
+# CodeBuddy 项目级配置：只有 skills 发现桥入库，会话/缓存等运行时数据不入库
+.codebuddy/*
+!.codebuddy/skills/
