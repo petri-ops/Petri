@@ -138,10 +138,6 @@ import {
   nextThinkingLevel,
   saveThinkingLevel,
 } from './thinkingLevel';
-import {
-  formatToolDuration,
-  type ToolActivityItem,
-} from './toolActivity';
 import { ConversationTimeline } from './ConversationTimeline';
 import { buildConversationSegments } from './conversationSegments';
 import type { ConversationSegment } from './conversationSegments';

@@ -226,14 +226,6 @@
       "count": 1
     }
   },
-  "frontend/src/components/copilot/ToolActivityList.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
-    "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
   "frontend/src/components/copilot/ansi.ts": {
     "no-control-regex": {
       "count": 4
