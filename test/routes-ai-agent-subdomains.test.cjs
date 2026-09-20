@@ -12,10 +12,19 @@
  * Run: node --test test/routes-ai-agent-subdomains.test.cjs
  */
 
-const { describe, it } = require('node:test');
+const { describe, it, before } = require('node:test');
 const assert = require('node:assert');
 const path = require('node:path');
 const fs = require('node:fs');
+
+// BLOCK-104 P2 — agent-runner-facade 同款家法（CJS 变体）：ai-agent 子域依赖链
+// 模块顶层即 prepare projects，先隔离临时库并在 before 钩子跑生产 migration 链，
+// 否则缺省打开仓内化石 biof3.db（schema 时代错位）必然 SQLITE_ERROR。
+process.env.BIOF3_DB_PATH = path.join(fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'biof3-ai-agent-sub-')), 'ai-agent-subdomains.db');
+const { runMigrations } = require('../src/migration-runner');
+before(async () => {
+  await runMigrations(process.env.BIOF3_DB_PATH, path.join(__dirname, '../src/migrations'));
+});
 
 const routesDir = path.resolve(__dirname, '../core/biof3-server/routes');
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# platform: posix（BLOCK-104 P4 双端同形门）
 # auto-sync-remote.sh — 远程库自动同步（安全档：仅 fetch + ff-only 快进）
 # 用户裁决 2026-09-18「计划任务 + 安全档」：分叉/失败只登记 events 待裁决，
 # 绝不自动 rebase / push / stash / 解冲突。

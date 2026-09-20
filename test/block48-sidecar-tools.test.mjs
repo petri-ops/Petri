@@ -22,6 +22,9 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const BINARY = path.join(__dirname, '..', 'sidecars', 'computer-use', 'bin', 'gewu-computer-use');
+// BLOCK-104 P3 — 环境门：sidecar 未构建时整组 skip（可见计数，带构建指引）。
+const HAS_SIDECAR = fs.existsSync(BINARY);
+const SIDECAR_SKIP = HAS_SIDECAR ? false : 'sidecar 未构建：先运行 bash scripts/build-computer-use-sidecar.sh（macOS Swift 产物）';
 const FIXTURE = path.join(__dirname, '..', 'sidecars', 'computer-use', 'bin', 'axfixture');
 const SCREENSHOT_OUT = path.join(os.tmpdir(), `axfixture-shot-${Date.now()}.png`);
 
@@ -61,6 +64,8 @@ function request(verb, params = {}, timeoutMs = 20000) {
 }
 
 before(async () => {
+  // BLOCK-104 P3 — describe 级 skip 已门控整组；此处兜底短路（skip 可见优先于硬失败）。
+  if (!HAS_SIDECAR) return;
   for (const bin of [BINARY, FIXTURE]) {
     assert.ok(fs.existsSync(bin), `缺少 ${bin}：先运行 bash scripts/build-computer-use-sidecar.sh`);
   }
@@ -79,7 +84,7 @@ after(() => {
 let fieldRef = null;
 let buttonRef = null;
 
-describe('BLOCK-48 P2 工具面（axfixture 隔离靶）', () => {
+describe('BLOCK-48 P2 工具面（axfixture 隔离靶）', { skip: SIDECAR_SKIP }, () => {
   test('前置：fixture 语义树可读，文本框/按钮定位', async () => {
     const snap = await request('snapshot', {
       target: { pid: fixture.pid }, maxElements: 200,

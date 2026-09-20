@@ -97,7 +97,12 @@ const PNG_BYTES = Buffer.from(
 );
 fsSync.writeFileSync(pathSync.join(wsDir, 'figures', 'umap.png'), PNG_BYTES);
 fsSync.writeFileSync(pathSync.join(wsDir, 'notes.txt'), 'not an image');
-fsSync.symlinkSync('/etc/hosts', pathSync.join(wsDir, 'figures', 'evil.png'));
+// BLOCK-104 P3 — 原 target '/etc/hosts' 仅 POSIX 存在：Windows 上目标不存在，
+// 实现诚实返回 file_not_found（ENOENT 先于 symlink 判定），断言恒红。
+// 改指向临时目录内真实存在的外部文件，跨平台语义一致（symlink_escape）。
+const OUTSIDE_FILE = pathSync.join(pathSync.dirname(wsDir), 'block52-outside-hosts.txt');
+fsSync.writeFileSync(OUTSIDE_FILE, '127.0.0.1 localhost');
+fsSync.symlinkSync(OUTSIDE_FILE, pathSync.join(wsDir, 'figures', 'evil.png'));
 const p2Project = db.createProject({ name: 'BLOCK-52-P2-boundary', workspacePath: wsDir });
 const p2Ctx = { userId: 'local-user', projectId: p2Project.id };
 

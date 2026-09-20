@@ -7,12 +7,20 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
+import path, { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
+import { mkdtempSync } from 'node:fs';
+import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
 const req = createRequire(import.meta.url);
+
+// BLOCK-104 P2 — 依赖链模块顶层 prepare projects：先隔离临时库并跑生产迁移链
+// 再加载（缺省化石 biof3.db 必然 SQLITE_ERROR；agent-runner-facade 同款家法）。
+process.env.BIOF3_DB_PATH = resolve(mkdtempSync(path.join(os.tmpdir(), 'biof3-act-tool-core-')), 'act-tool-core.db');
+const { runMigrations } = req('../src/migration-runner');
+await runMigrations(process.env.BIOF3_DB_PATH, resolve(__dirname, '../src/migrations'));
 
 const _core = req(R_SERVER + '/agent-tools/act-tool-core.js');
 const { testFilterExpr, testFilterOne, _setImpliedPage, _getImpliedPage, _getRequestKey } = _core;

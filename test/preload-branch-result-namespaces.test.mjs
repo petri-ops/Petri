@@ -58,7 +58,7 @@ function runPreload() {
       assert.equal(moduleName, 'electron', 'preload.js must require electron');
       return { contextBridge, ipcRenderer };
     },
-    process: { platform: 'darwin', arch: 'arm64', env: {} },
+    process: { platform: 'darwin', arch: 'arm64', env: {}, argv: [] },
     window: { dispatchEvent() {} },
     CustomEvent: class CustomEvent {},
   });

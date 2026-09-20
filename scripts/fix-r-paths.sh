@@ -1,4 +1,5 @@
 #!/bin/bash
+# platform: darwin（BLOCK-104 P4 双端同形门）
 # ============================================================
 # fix-r-paths.sh — R Runtime 解压后修正 dylib 路径
 #

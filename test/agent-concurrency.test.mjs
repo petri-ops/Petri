@@ -29,7 +29,13 @@ const sqlite = db.getDatabase();
 const PID = 'proj-agent-concurrency';
 
 test.after(() => {
-  fs.rmSync(tempDir, { recursive: true, force: true });
+  // BLOCK-104 P2 — Windows 下派生进程持有 SQLite 句柄可在 force-exit 后延迟释放，
+// rmSync 重试仍可能 EPERM；清理降级为 best-effort（残留 %TEMP% 由系统回收）。
+try {
+    fs.rmSync(tempDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+  } catch {
+    /* best-effort cleanup */
+  }
 });
 
 // Persist a LoopRun with the AGENT-CONCURRENCY identity columns populated.

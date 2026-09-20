@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# platform: windows（BLOCK-104 P4 双端同形门；当前实现含 taskkill/PowerShell 链——Mac 侧等价脚本待补，BLOCK-88 P4 教训在案）
 # restart-dev-stack.sh — BLOCK-77 P4 phase2 编排：干净重启 dev 栈并等就绪。
 # 2026-09-11 沉淀（当次踩坑三连）：
 #   1) detached backend 会逃逸 electron 树杀 → 必须 kill 3001 监听者（僵尸）；

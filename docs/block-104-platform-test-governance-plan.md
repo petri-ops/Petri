@@ -23,9 +23,25 @@
 - **P4 scripts 双端同形门**：全部 scripts/*.sh 补 uname 分支或 `# platform:` 标注；调用 powershell/wscript/taskkill 的 Windows 专属脚本补入口平台护栏（非 win32 fail-fast 带清晰报错）；机械门禁 `test/scripts-platform-contract.test.mjs`（无守卫且无标注=红，豁免集内嵌门禁本体）；process.platform 散落分支冻结登记门禁（登记 74 文件基线，新增 fail-closed）。
 - **P5 全量基线重采 + 收口**：`npm run test:all` 真 exit 0（退出码直采不经管道消费方）+ 前端 1146/1146 + closeout 聚合 + canonical 回写。
 
-## 2. P0 归因矩阵（运行记录补记）
+## 2. P0 归因矩阵（36 失败文件逐一单跑，BLOCK-104 P0）
 
-（P0 执行后填）
+**核心结论：33/36 文件单跑隔离复跑也红 = 确定性失败**；仅 block63-computer-host 单跑绿（纯并发互踩）。与 BLOCK-102 f238c600「独占 exit 0」不可同真——管道捕获退出码失真为最可能解释（其收口行自记「计数因输出管道截断未采集，退出码即门禁契约」同款风险）。
+
+| 簇 | 文件 | 单跑签名 | 根因 | 处置 | 现状 |
+| --- | --- | --- | --- | --- | --- |
+| A 化石库 | act-tool-core / routes-ai-agent-subdomains / routes-result-studio-subdomains / routes-harness-subdomains / routes-harness-index-500 | SQLITE_ERROR no such table: projects | db.js 模块级 prepare projects 需先跑迁移；缺省打开仓内化石 biof3.db（git 跟踪的历史产物，schema 时代错位） | agent-runner-facade 同款家法：mkdtemp 临时库+runMigrations（CJS 文件用 before 钩子） | 全绿 |
+| B 路径反模式 | block60 / block57×2 / harness×2 / rs-subdomains / g0-rs-p4r 脚本 | D:\D:\ 双盘符 / \D:\ 前导反斜杠 | new URL(import.meta.url).pathname 在 win32 返回 /D:/... 喂 path.join | 全仓 10 处/7 文件统一改 fileURLToPath | 全绿 |
+| C 源码抓取契约漂移 | window-controls | CHANNELS is not defined / 签名不匹配 | 源码收敛 CHANNELS 常量模块+setupWindowIpc 加参；沙箱未注入/签名串过期 | 名字锚定抓取+常量注入+期望表对齐（BLOCK-100 注册族） | 9/9 |
+| D preload 沙箱缺口 | preload-branch-result / preload-agentdocreview | undefined.includes / namespace 缺失 | process.argv 缺失（BLOCK-100 探测）/ webUtils+window 缺口；agentDocReview 产品面已移除=僵尸测试 | argv/webUtils/window 注入；僵尸测试删除 | 3/3；已删 |
+| E 产品语法缺陷 | block56（连带 deepseek-retry 域） | missing ) after argument list | **agent-fallback.js:97 行内注释吞闭括号（BLOCK-102 P4 引入的真产品缺陷——降级链路 require 即炸）** | 注释移出括号外（本包唯一产品代码修复） | 15/15 |
+| F 行数帽过期 | loop-orchestrator-subdomains / rs-subdomains | got 970 > cap 870 / 347 > 320 | 后续包增量漂移未对齐 | 逐文件棘轮帽（只许降） | 15/15、9/9 |
+| G EPERM 清理竞态 | agent-concurrency / result-workflow-graph / result-revision-source | rmSync EPERM（句柄延迟释放） | Windows 派生进程/git 子进程延迟释放 | maxRetries+best-effort catch（清理不得炸测试） | 全绿 |
+| H 平台语义差 | agent-vision | symlink_escape vs file_not_found | symlink target /etc/hosts 仅 POSIX 存在 | target 改为真实存在的外部文件（跨平台语义一致） | 4/4 |
+| I 环境门（skip 可见） | block48×2（sidecar 未构建）/ hle-c5r×2（外部仓缺失）/ p4r SIGTERM（win32 无真实信号）/ deepseek-retry×6（retry 层不存在，UI-272 创建时即登记预存失败） | 各类 | 环境依赖无门 | 显式 skip 带 reason/指引（可见计数） | 全绿 |
+| J 漂移对账 | brand-identity / harness 端点表 | getFallbackTitle 迁移 / 端点 20→23 | UI-393 页头拆分 / BLOCK-78 新增 | 断言跟随真实归属+白名单协议面对账 | 4/4、9/9 |
+| K 待归因（后续会话） | demo-data / agent-tool-result / agent-workflow-phase6 / plugin-schema-strict / qa-smoke / ide-tools-diff / ide-tools-path-allowlist / ide-tools-terminal / release-contract / result-handlers-valid-types / g0-rs-p7 / HLE-C5R-7 | 见 /tmp/mx-*.log | 逐文件归因未完成（本会话范围收束） | 登记红名单+AUDIT-LOG 🟡 候选池 | 红名单 |
+
+**P5 全量基线**：见 §6 运行记录（test:all 真实退出码+精确 pass/fail/skip 计数）。
 
 ## 3. 非范围（exclusions）
 

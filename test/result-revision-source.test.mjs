@@ -18,7 +18,14 @@ const {
 
 function fixture(context) {
   const workspaceRoot = mkdtempSync(join(tmpdir(), 'biof3-revision-source-'));
-  context.after(() => rmSync(workspaceRoot, { recursive: true, force: true }));
+  context.after(() => {
+      // BLOCK-104 P2 — Windows 派生 git 进程延迟释放句柄；清理 best-effort 同上。
+      try {
+        rmSync(workspaceRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+      } catch {
+        /* best-effort cleanup */
+      }
+    });
   const sqlite = new Database(join(workspaceRoot, 'source.db'));
   context.after(() => sqlite.close());
   ensureResultStudioSchema(sqlite);

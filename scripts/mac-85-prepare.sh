@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# platform: darwin（BLOCK-104 P4 双端同形门）
 # mac-85-prepare.sh — BLOCK-85 双真机验收 Mac 侧一键准备（起栈 + 隧道自愈 + REST 出码）
 # 用法：bash scripts/mac-85-prepare.sh
 # 幂等：网关/隧道已在则跳过对应步骤；出码每次刷新（TTL 5 分钟）。

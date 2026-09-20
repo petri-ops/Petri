@@ -23,6 +23,10 @@
 import { describe, it, beforeEach, mock } from 'node:test';
 import assert from 'node:assert';
 import path from 'node:path';
+import { existsSync } from 'node:fs';
+
+// BLOCK-104 P3 — 环境门：外部插件仓不在本机时对应用例 skip（可见计数）。
+const SKIP_EXTERNAL_PACK = !existsSync(path.join(process.cwd(), '..', 'gewu-pack-bio', 'plugins', 'deg-standardizer')) && '外部插件仓 gewu-pack-bio 缺 plugins/deg-standardizer（本机环境缺失，BLOCK-104 P3 环境门）';
 import os from 'node:os';
 import fs from 'node:fs';
 
@@ -502,7 +506,7 @@ describe('HLE-C5R-7: Plugin Contract Lint detects contract mismatches', () => {
     assert.ok(hasDesignFailure, 'DESeq2 must have design_column_missing failure mode');
   });
 
-  it('deg-standardizer has outputs defined', async () => {
+  it('deg-standardizer has outputs defined', { skip: SKIP_EXTERNAL_PACK }, async () => {
     const def = JSON.parse(fs.readFileSync(
       path.join(process.cwd(), '..', 'gewu-pack-bio', 'plugins', 'deg-standardizer', 'tool-definition.json'),
       'utf8',
@@ -515,7 +519,7 @@ describe('HLE-C5R-7: Plugin Contract Lint detects contract mismatches', () => {
     assert.ok(hasStandardized, 'deg-standardizer must have deg_standardized output');
   });
 
-  it('GSEA tool-definition declares gene_id_type parameter', async () => {
+  it('GSEA tool-definition declares gene_id_type parameter', { skip: SKIP_EXTERNAL_PACK }, async () => {
     const def = JSON.parse(fs.readFileSync(
       path.join(process.cwd(), '..', 'gewu-pack-bio', 'plugins', 'gsea', 'tool-definition.json'),
       'utf8',

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# platform: dual（BLOCK-104 P4 双端同形门）
 # BLOCK-100 P2 — 启动 CDP 测试实例（独立 userData + 离屏可见窗口 + CDP 9223）。
 #
 # 与用户主实例并存：测试实例零 fork 后端、零 migration，直连主 dev 栈的

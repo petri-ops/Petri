@@ -46,12 +46,19 @@ describe('品牌身份契约（BLOCK-61）', () => {
   });
 
   test('TitleBar wordmark fallback 走品牌模块（禁裸写）', () => {
-    const src = fs.readFileSync(
+    // BLOCK-104 P1 — getFallbackTitle 已迁至 titlebar/shared.tsx（UI-393 页头形态
+    // 统一拆分），断言跟随真实归属地；TitleBar.tsx 继续扫裸字面量。
+    const shared = fs.readFileSync(
+      path.join(ROOT, 'frontend', 'src', 'components', 'desktop', 'titlebar', 'shared.tsx'),
+      'utf8',
+    );
+    assert.match(shared, /return BRAND\.APP_NAME;/, 'getFallbackTitle 兜底必须返回 BRAND.APP_NAME');
+    assert.doesNotMatch(shared, /return '(BioF3|Gewu)'/, '不得裸写品牌字面量');
+    const titlebar = fs.readFileSync(
       path.join(ROOT, 'frontend', 'src', 'components', 'desktop', 'TitleBar.tsx'),
       'utf8',
     );
-    assert.match(src, /return BRAND\.APP_NAME;/, 'getFallbackTitle 兜底必须返回 BRAND.APP_NAME');
-    assert.doesNotMatch(src, /return '(BioF3|Gewu)'/, '不得裸写品牌字面量');
+    assert.doesNotMatch(titlebar, /return '(BioF3|Gewu)'/, '不得裸写品牌字面量');
   });
 
   test('历史品牌名不得裸写在业务代码中（白名单外）', () => {
@@ -70,6 +77,13 @@ describe('品牌身份契约（BLOCK-61）', () => {
       'biof3-mcp',         // MCP server 协议名（P2 改为 gewu-mcp 后应消失——临时白名单）
       'biof3_agent_task',  // 会话内 localStorage 旧 key（读旧兼容）
       'window.biof3?',     // biof3 agent-workbench 旗标桥（独立小桥，别名保留）
+      // BLOCK-104 P1 对账扩充：以下均为协议/数据连续性标识，非用户可见品牌展示面
+      'BIOF3_',             // 环境变量前缀（部署/启动协议面，改名即破坏用户环境）
+      '_biof3',             // globalThis 全局旗标（content-sync 等内部事件钩子）
+      'biof3.db',           // 数据库文件名（数据连续性，改名即「丢库」）
+      'biof3.com',          // telemetry 端点域名（遥测协议面）
+      'biof3-uploads',      // OSS 上传桶域名（历史数据可达性）
+      "'biof3'",            // preload exposeInMainWorld 旧桥命名空间（兼容保留）
     ];
 
     const scanDirs = ['src', 'frontend/src'];

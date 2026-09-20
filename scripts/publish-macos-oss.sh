@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# platform: darwin（BLOCK-104 P4 双端同形门）
 
 set -euo pipefail
 

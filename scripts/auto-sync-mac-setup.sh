@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# platform: darwin（BLOCK-104 P4 双端同形门）
 # auto-sync-mac-setup.sh — Mac 侧一键部署远程库自动同步（安全档，与 Windows Gewu-AutoSync 对称）
 # 用法（Mac 侧 pull 后仓库内执行）：
 #   bash scripts/auto-sync-mac-setup.sh              # 部署 + 启动 + 验证

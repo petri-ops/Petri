@@ -20,6 +20,9 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const BINARY = path.join(__dirname, '..', 'sidecars', 'computer-use', 'bin', 'gewu-computer-use');
+// BLOCK-104 P3 — 环境门：sidecar 未构建时整组 skip（可见计数，带构建指引）。
+const HAS_SIDECAR = fs.existsSync(BINARY);
+const SIDECAR_SKIP = HAS_SIDECAR ? false : 'sidecar 未构建：先运行 bash scripts/build-computer-use-sidecar.sh（macOS Swift 产物）';
 
 // ── sidecar 会话句柄 ────────────────────────────────────────────
 
@@ -68,8 +71,9 @@ function request(verb, params = {}) {
 }
 
 before(async () => {
-  assert.ok(fs.existsSync(BINARY),
-    'sidecar 未构建：先运行 bash scripts/build-computer-use-sidecar.sh');
+  // BLOCK-104 P3 — describe 级 skip 已门控整组；此处兜底短路，防止未构建时
+  // before 钩子 assert 炸掉文件级状态（skip 计数可见优先于硬失败）。
+  if (!HAS_SIDECAR) return;
   await startSidecar();
 });
 
@@ -79,7 +83,7 @@ after(() => {
 
 // ── 协议契约 ────────────────────────────────────────────────────
 
-describe('BLOCK-48 sidecar 协议契约', () => {
+describe('BLOCK-48 sidecar 协议契约', { skip: SIDECAR_SKIP }, () => {
   test('probe：ok 且 trusted 为布尔；未授权时必带引导文案', async () => {
     const res = await request('probe');
     assert.equal(res.ok, true);
@@ -141,7 +145,7 @@ describe('BLOCK-48 sidecar 协议契约', () => {
 
 // ── 已授权环境专属：真实 AX 目标解析（未授权环境诚实跳过）────────
 
-describe('已授权环境：真实目标解析', () => {
+describe('已授权环境：真实目标解析', { skip: SIDECAR_SKIP }, () => {
   let trusted = false;
 
   before(async () => {

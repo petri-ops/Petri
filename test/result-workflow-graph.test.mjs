@@ -291,7 +291,15 @@ test('P5 can validate a candidate DAG against Revisions staged for the same atom
 
 test('P5 graph snapshots are durable and idempotent rather than model-carried state', (context) => {
   const root = mkdtempSync(join(tmpdir(), 'biof3-workflow-graph-'));
-  context.after(() => rmSync(root, { recursive: true, force: true }));
+  context.after(() => {
+      // BLOCK-104 P2 — Windows 派生进程延迟释放句柄，rmSync 重试后仍可 EPERM；
+      // 清理降级 best-effort（残留 %TEMP% 由系统回收），不得让清理炸掉测试结果。
+      try {
+        rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+      } catch {
+        /* best-effort cleanup */
+      }
+    });
   const database = new Database(join(root, 'result-studio.db'));
   context.after(() => database.close());
   const repository = createResultStudioRepository(database);

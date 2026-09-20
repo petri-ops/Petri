@@ -16,6 +16,7 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -27,7 +28,7 @@ const root = path.resolve(__dirname, '..');
 // config-helper is a CJS module exporting a Proxy via `module.exports = new Proxy(...)`.
 // Importing it from an ESM test requires interop: `import pkg from '...'; const h = pkg.default ?? pkg;`.
 const configHelperModule = (
-  await import(path.join(root, 'core/shared-backend/config-helper.js'))
+  await import(pathToFileURL(path.join(root, 'core/shared-backend/config-helper.js')).href)
 ).default;
 const configHelper = configHelperModule && configHelperModule.default
   ? configHelperModule.default
