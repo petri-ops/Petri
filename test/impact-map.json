@@ -2066,6 +2066,7 @@
         "src/ipc/window-manager.js",
         "src/preload.js",
         "eslint-suppressions.json",
+        "frontend/eslint-suppressions.json",
         "scripts/quality-baseline.sh"
       ],
       "tests": [
