@@ -20,31 +20,40 @@ import { getBridge } from '@/lib/desktopBridge';
 import { CommandPalette, useCommandPalette } from '@/components/copilot/CommandPalette';
 // BLOCK-42 — pending-scroll 全局 Provider（见 AppShell 内注释）
 import { PendingScrollProvider } from '@/lib/pendingScrollContext';
-import HomePage from '@/pages/home';
+// BLOCK-106 P1 — 路由级代码分割：首屏路由 `/`（欢迎页）保持直包，其余页面切
+// chunk。此前 App.tsx 十个路由页全静态引入 → 主 chunk 3,061,221 B，Electron 启动
+// 需解析全部页面代码（实测 dataReady 基线见 docs/block-106-*.md §0）。
 import WelcomePage from '@/pages/welcome';
+const HomePage = lazy(() => import('@/pages/home').then((m) => ({ default: m.default })));
 // NOTE: Legacy pages (tools, admin, docs, figcode, single-cell, spatial) have been removed
 // as the desktop application now uses the Agent-based workflow through ProjectWorkspace.
-import { ProjectWorkspace } from '@/pages/project-workspace';
-import { ResultStudioPage } from '@/pages/result-studio/ResultStudioPage';
-import SkillsPage from '@/pages/skills';
-import PluginsPage from '@/pages/plugins';
-import SettingsPage from '@/pages/settings';
-import KnowledgePage from '@/pages/knowledge';
+const ProjectWorkspace = lazy(() => import('@/pages/project-workspace').then((m) => ({ default: m.ProjectWorkspace })));
+const ResultStudioPage = lazy(() => import('@/pages/result-studio/ResultStudioPage').then((m) => ({ default: m.ResultStudioPage })));
+const SkillsPage = lazy(() => import('@/pages/skills').then((m) => ({ default: m.default })));
+const PluginsPage = lazy(() => import('@/pages/plugins').then((m) => ({ default: m.default })));
+const SettingsPage = lazy(() => import('@/pages/settings').then((m) => ({ default: m.default })));
+const KnowledgePage = lazy(() => import('@/pages/knowledge').then((m) => ({ default: m.default })));
 // BLOCK-28 — main-area code review mode (VS Code SCM style)
-import { ReviewModePage } from '@/pages/review';
+const ReviewModePage = lazy(() => import('@/pages/review').then((m) => ({ default: m.ReviewModePage })));
 // BLOCK-59 P1 — 独立窗路由面：/window/* 不走主窗 AppShell（无 TitleBar/
 // Copilot 等 workspace chrome），由 WindowShell 提供最小只读 chrome。
 // BLOCK-59 P2 — 终端独立窗 + 边缘活动轨道（内部专用路由）
-import { TerminalWindowPage } from '@/pages/window/TerminalWindowPage';
-import { RailPage } from '@/components/window/RailPage';
+const TerminalWindowPage = lazy(() => import('@/pages/window/TerminalWindowPage').then((m) => ({ default: m.TerminalWindowPage })));
+const RailPage = lazy(() => import('@/components/window/RailPage').then((m) => ({ default: m.RailPage })));
 // BLOCK-59 P3 — 指挥中心（多任务俯瞰单例窗）
-import { CommandCenterPage } from '@/pages/window/CommandCenterPage';
+const CommandCenterPage = lazy(() => import('@/pages/window/CommandCenterPage').then((m) => ({ default: m.CommandCenterPage })));
 // BLOCK-59 P4 — agent 详情窗（BLOCK-49 spawn 链路只读投影）
 import '@/components/desktop/desktop.css';
 // 断点6：注入平台 API 给 @biof3/shared 渲染层组件（如 ActResultCard）
 import { configureApi } from '../../core/packages/shared-copilot/api-inject';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 configureApi({ getApiPrefix: () => getApiPrefix(), getToken });
+
+/** BLOCK-106 P1 — chunk 加载期间的占位：撑满 main 高度，避免页面切换时布局跳动。
+ *  刻意不画 spinner（本地 file/http 加载通常 <1 帧，闪一下比空白更扰人）。 */
+function RouteFallback(): React.ReactElement {
+  return <div style={{ height: '100%', minHeight: 240 }} aria-busy="true" data-testid="route-suspense-fallback" />;
+}
 
 /** Lives inside WorkspacePanelsProvider. */
 function AppShell(): React.ReactElement {
@@ -122,6 +131,7 @@ function AppShell(): React.ReactElement {
           {/* dev mode passes through here just like production: deep-linkable
               /project/:id/<mode> and /skills routes are intentionally reachable.
               Only the dev-home skip-auto-navigate logic lives in pages/home.tsx. */}
+          <Suspense fallback={<RouteFallback />}>
           <Routes>
             {/* BLOCK-80 — / 为欢迎页（问候+项目/分支+首问直发）；原工作台（项目卡+创建流）退役至 /projects 项目管理 */}
             <Route path="/" element={<WelcomePage />} />
@@ -146,6 +156,7 @@ function AppShell(): React.ReactElement {
             {/* Legacy pages (tools, admin, docs, figcode) removed - all workflows now use Agent */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </Suspense>
         </main>
         </div>
         <TestInstanceBadge />
@@ -196,12 +207,14 @@ export default function App(): React.ReactElement {
   // （窗口永不持有 canonical state，plan §10 治理红线）。
   if (isWindowSurface) {
     return (
+      <Suspense fallback={<RouteFallback />}>
       <Routes>
         <Route path="/window/terminal/:sessionId" element={<TerminalWindowPage />} />
         <Route path="/window/command-center" element={<CommandCenterPage />} />
         <Route path="/window/rail" element={<RailPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
     );
   }
 

@@ -105,19 +105,30 @@ function collectContext() {
     const chunks = fs.readdirSync(assetsDir).filter((f) => f.endsWith('.js')).map((f) => {
       const st = fs.statSync(path.join(assetsDir, f));
       return { file: f, bytes: st.size, mtimeMs: st.mtimeMs };
-    }).sort((a, b) => b.bytes - a.bytes);
+    });
+    // 关键路径按「入口 chunk」算，不按最大 chunk 算：拆包后最大 chunk 往往是
+    // 并行预取的第三方库（如 highlight.js），把它当入口会虚报启动负载。
+    const htmlPath = path.join(ROOT, 'frontend', 'dist', 'index.html');
+    const html = fs.readFileSync(htmlPath, 'utf8');
+    const entryMatch = html.match(/src="\/?(?:assets\/)?([\w.-]+\.js)"/);
+    const entry = entryMatch ? chunks.find((c) => c.file === entryMatch[1]) : null;
+    const largest = [...chunks].sort((a, b) => b.bytes - a.bytes)[0] || null;
     const css = fs.readdirSync(assetsDir).filter((f) => f.endsWith('.css')).reduce((sum, f) => sum + fs.statSync(path.join(assetsDir, f)).size, 0);
-    if (chunks.length) {
+    if (entry) {
       frontendBundle = {
         available: true,
-        mainChunk: chunks[0].file,
-        mainChunkBytes: chunks[0].bytes,
+        entryChunk: entry.file,
+        entryChunkBytes: entry.bytes,
+        largestChunk: largest ? largest.file : null,
+        largestChunkBytes: largest ? largest.bytes : null,
         jsChunkCount: chunks.length,
         jsTotalBytes: chunks.reduce((s, c) => s + c.bytes, 0),
         cssTotalBytes: css,
         // dist 可能比当前源码旧：如实带构建时刻，比对时不得把它当真值
-        builtAt: new Date(chunks[0].mtimeMs).toISOString(),
+        builtAt: new Date(entry.mtimeMs).toISOString(),
       };
+    } else {
+      frontendBundle = { available: false, reason: 'dist/index.html 未引用可解析的入口 chunk' };
     }
   } catch (e) {
     frontendBundle = { available: false, reason: e.message.slice(0, 120) };

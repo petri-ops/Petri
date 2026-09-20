@@ -1,6 +1,11 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Icon } from '@/components/icons/Icon';
-import { CodeMirrorDiffView } from '@/components/desktop/WorkingTreeReview/CodeMirrorDiffView';
+// BLOCK-106 P1 — 工具活动卡的 diff 预览按需加载：静态引入会把整个 CodeMirror 栈
+// （@codemirror/view 479 KB + state/language/commands/merge ≈ 966 KB 源码）挂进
+// 入口 chunk，而多数会话根本不展开 changeDiff 预览。
+const CodeMirrorDiffView = lazy(() =>
+  import('@/components/desktop/WorkingTreeReview/CodeMirrorDiffView').then((m) => ({ default: m.CodeMirrorDiffView }))
+);
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import { getSubAgentTaskSnapshot, stopSubAgentTask, subscribeSubAgentTask } from '@/components/copilot/conversationRunStore';
 import { resolveAgentCategory } from '@/lib/agentCategories';
@@ -369,6 +374,7 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
               )}
               {activity.changeDiff.hunks.length > 0 ? (
                 <div className="sc-tool-changediff-preview">
+                  <Suspense fallback={<code className="sc-tool-changediff-loading">差异加载中…</code>}>
                   {activity.changeDiff.hunks.map((hunk, hunkIndex) => (
                     <CodeMirrorDiffView
                       key={`${activity.key}:${hunkIndex}`}
@@ -377,6 +383,7 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
                       hunks={[hunk]}
                     />
                   ))}
+                  </Suspense>
                 </div>
               ) : (
                 <div className="sc-tool-changediff-empty">差异较大，仅显示行数统计。</div>
