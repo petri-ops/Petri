@@ -106,7 +106,7 @@ const MEASURE = `(function(){
       summaryToggle: qa('button[aria-label="展开摘要概览"], button[aria-label="收起摘要概览"]'),
       rightToggle: qa('button[aria-label="展开右侧栏"], button[aria-label="收起右侧栏"]')
     });
-  })()` || '{}'));
+  })()`));
   run.assert('V4_legacy_settings_deeplink_chat', legacy.path === `/project/${pid}/settings`
     && legacy.summaryToggle === true && legacy.rightToggle === true,
     `旧 settings 深链回 chat 语义（path=${legacy.path}，摘要开关=${legacy.summaryToggle}，右栏开关=${legacy.rightToggle}）`);

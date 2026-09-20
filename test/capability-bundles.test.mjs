@@ -34,11 +34,12 @@ function tmpDir() {
  *    （`Cannot connect to C: resolve failed`）；
  * 2. 路径正斜杠归一化：`--force-local` 会转义反斜杠，`...\source` 会被拆成
  *    `...\s` + `ource`。
- * POSIX tar 接受 `--force-local` 为空操作，两个平台行为一致。
+ * macOS 的 bsdtar 拒绝 `--force-local`（非 GNU），故复用生产侧 TAR_FORCE_LOCAL
+ * 平台条件（单一知识源，2026-09-20 Mac 首跑实测）。
  */
 function tarGz(archive, source) {
   const posix = (value) => String(value).replace(/\\/g, '/');
-  execFileSync('tar', ['--force-local', '-czf', posix(archive), '-C', posix(source), '.']);
+  execFileSync('tar', [...bundles.TAR_FORCE_LOCAL, '-czf', posix(archive), '-C', posix(source), '.']);
 }
 
 function sha256Of(content) {

@@ -106,7 +106,7 @@ function fixture() {
   const artifactContent = Buffer.from('canonical-result-artifact');
   writeFileSync(artifactPath, artifactContent);
   const artifactHash = sha256(artifactContent);
-  const scriptContent = 'print(\"result\")\n';
+  const scriptContent = 'print("result")\n';
   const scriptHash = sha256(scriptContent);
   const projectId = 'p_background_test';
   const jobId = 'tj_background_test';

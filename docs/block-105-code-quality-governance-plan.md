@@ -108,7 +108,7 @@
 
 1. **fuses 运行时断言 = G1+**（SENTINEL: BLOCK-105-FUSES-G1）：@electron/fuses 需 packaged binary，G0 开发期不外推；
 2. **Knip 维持 report-only**：core 懒加载 require 为工具盲区，数字属上界；blocking 化待配置进一步精化后单独裁决；
-3. **存量 2912 条抑制基线**：P2 后续轮次用 `--fix-suppressions` 渐进收缩（每批收缩即棘轮收紧），不阻塞任何流程；
+3. **存量 2912 条抑制基线**：P2 后续轮次渐进收缩（每批收缩即棘轮收紧），不阻塞任何流程。**批次日志**：Batch-1（2026-09-20，Mac 侧会话）根 2914→2890 + frontend 2126→2125——逻辑类 8 项（no-dupe-keys×2 化石 / no-redeclare 化石 / no-constant-binary-expression 死代码 / no-useless-catch 空壳×3 含 test 断言改 assert.ok / **真缺陷 2**：capability-bundles `--force-local` 无条件附加 macOS bsdtar 拒绝致 R 能力包安装全挂→win32 条件化+`TAR_FORCE_LOCAL` 导出单一知识源、ide-tools/diff.js `'C:\Program Files\Git'` 单引号内 `\P`→`P` 回退路径字符串损坏→双反斜杠）+ no-useless-escape 16 项（含 ui400 注入面正则 `\.pdf` 被模板串吃反斜杠退化→`\\.` 修真）。**收缩操作姿势**：修一批后 `npx eslint . --prune-suppressions`（`--suppress-all` 只新增不清过期条目）；frontend 侧同名 prune。Windows 行为经 `TAR_FORCE_LOCAL` 条件化保持逐字等价；
 4. **格式化器（Biome/Prettier）未装**：格式层独立裁决，不在本包夹带（D1 遗留裁决点，默认不加）；
 5. **D5 CodeQL**：收口后裁决点——预置推荐=暂不启用（私有仓 GHAS 许可成本；npm audit + 密钥门禁 + security 插件已覆盖等效面；如转公开仓或需要 SAST 深扫再裁决）。
 

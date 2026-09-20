@@ -320,9 +320,6 @@
     },
     "no-empty": {
       "count": 3
-    },
-    "no-useless-catch": {
-      "count": 1
     }
   },
   "src/components/copilot/copilotClient/parse.ts": {

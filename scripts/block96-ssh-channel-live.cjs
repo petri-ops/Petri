@@ -71,7 +71,7 @@ function sshRun(remoteCommand, input) {
   });
 
   // ④ 500 文件 fs_list 计时（cold=mux bootstrap 首列；warm=复用连接）
-  sshRun('bash -s', `rm -rf ${root}-500 && mkdir -p ${root}-500 && for i in $(seq 1 500); do touch "${root}-500/f\$i.txt"; done && echo OK`);
+  sshRun('bash -s', `rm -rf ${root}-500 && mkdir -p ${root}-500 && for i in $(seq 1 500); do touch "${root}-500/f$i.txt"; done && echo OK`);
   t0 = Date.now();
   const coldEntries = await backend.list(`${root}-500`);
   const coldMs = Date.now() - t0;

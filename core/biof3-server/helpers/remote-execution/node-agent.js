@@ -302,7 +302,7 @@ case "$cmd" in
     pidfile="$blog.pid"
     rm -f "$pidfile"
     if command -v setsid >/dev/null 2>&1; then SESSION_PREFIX="setsid nohup"; else SESSION_PREFIX="nohup"; fi
-    ( cd "$bcwd" && BIOF3_BG_CMD="$bc" BIOF3_BG_PIDFILE="$pidfile" exec $SESSION_PREFIX bash -c 'st=$(cat "/proc/$$/stat"); rest=\${st##*) }; arr=(\$rest); printf "%s %s\\n" "\$\$" "\${arr[19]}" > "\$BIOF3_BG_PIDFILE"; exec bash -c "\$BIOF3_BG_CMD"' ) >> "$blog" 2>&1 < /dev/null &
+    ( cd "$bcwd" && BIOF3_BG_CMD="$bc" BIOF3_BG_PIDFILE="$pidfile" exec $SESSION_PREFIX bash -c 'st=$(cat "/proc/$$/stat"); rest=\${st##*) }; arr=($rest); printf "%s %s\\n" "$$" "\${arr[19]}" > "$BIOF3_BG_PIDFILE"; exec bash -c "$BIOF3_BG_CMD"' ) >> "$blog" 2>&1 < /dev/null &
     bpid=''
     for i in 1 2 3 4 5 6 7 8 9 10; do
       [ -s "$pidfile" ] && { read -r bpid bstart < "$pidfile"; break; }

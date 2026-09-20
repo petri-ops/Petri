@@ -148,14 +148,6 @@
   "core/biof3-server/helpers/remote-execution/node-agent.js": {
     "no-unused-vars": {
       "count": 2
-    },
-    "no-useless-escape": {
-      "count": 5
-    }
-  },
-  "core/biof3-server/helpers/remote-execution/resident-revisit.js": {
-    "no-dupe-keys": {
-      "count": 1
     }
   },
   "core/biof3-server/helpers/remote-execution/target-registry.js": {
@@ -196,11 +188,6 @@
   "core/biof3-server/mcp/branch-context.js": {
     "no-unused-vars": {
       "count": 2
-    }
-  },
-  "core/biof3-server/mcp/ide-tools/diff.js": {
-    "no-useless-escape": {
-      "count": 4
     }
   },
   "core/biof3-server/mcp/ide-tools/file.js": {
@@ -457,11 +444,6 @@
   },
   "core/shared-backend/scientific-task-planner.js": {
     "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/shared-backend/scientific-task-spec.js": {
-    "no-dupe-keys": {
       "count": 1
     }
   },
@@ -816,9 +798,6 @@
     },
     "no-empty": {
       "count": 3
-    },
-    "no-useless-catch": {
-      "count": 1
     }
   },
   "frontend/src/components/copilot/copilotClient/parse.ts": {
@@ -2277,11 +2256,6 @@
       "count": 1
     }
   },
-  "scripts/block48-p4-live.cjs": {
-    "no-redeclare": {
-      "count": 1
-    }
-  },
   "scripts/block49-phase2-live.cjs": {
     "no-unused-vars": {
       "count": 2
@@ -2453,9 +2427,6 @@
   "scripts/block96-ssh-channel-live.cjs": {
     "no-unused-vars": {
       "count": 3
-    },
-    "no-useless-escape": {
-      "count": 1
     }
   },
   "scripts/block97-todo-live.cjs": {
@@ -2636,18 +2607,8 @@
       "count": 1
     }
   },
-  "scripts/ui365-settings-diagnostics-live.cjs": {
-    "no-constant-binary-expression": {
-      "count": 1
-    }
-  },
   "scripts/ui399-tree-refresh-live.cjs": {
     "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/ui400-batch-live.cjs": {
-    "no-useless-escape": {
       "count": 1
     }
   },
@@ -2689,9 +2650,6 @@
   "src/ipc/file-dialog.js": {
     "no-control-regex": {
       "count": 1
-    },
-    "no-useless-escape": {
-      "count": 1
     }
   },
   "src/ipc/result-handlers.js": {
@@ -2711,9 +2669,6 @@
   },
   "src/ipc/terminal.js": {
     "no-unused-vars": {
-      "count": 1
-    },
-    "no-useless-escape": {
       "count": 1
     }
   },
@@ -2755,9 +2710,6 @@
       "count": 1
     },
     "no-unused-vars": {
-      "count": 1
-    },
-    "no-useless-escape": {
       "count": 1
     }
   },
@@ -3027,9 +2979,6 @@
     }
   },
   "test/loop-repair-strategy.test.cjs": {
-    "no-unsafe-optional-chaining": {
-      "count": 3
-    },
     "no-unused-vars": {
       "count": 1
     }
@@ -3096,11 +3045,6 @@
   },
   "test/project-run-layout.test.mjs": {
     "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "test/result-studio-background.test.mjs": {
-    "no-useless-escape": {
       "count": 2
     }
   },

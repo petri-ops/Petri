@@ -527,6 +527,5 @@ module.exports = {
   validateContextCheckpoint,
   validateCheckpointSupersession,
   shouldRereadCheckpointSource,
-  stableStringify,
   isSafeRelativePath,
 };

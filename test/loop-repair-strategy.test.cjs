@@ -79,13 +79,15 @@ describe('RS-2 transient_runtime repair', () => {
       parentArtifactIds: ['a1', 'a2'],
     });
     assert.strictEqual(s?.parentLineage?.parentJobId, 'job_123');
-    assert.deepStrictEqual([...s?.parentLineage?.parentArtifactIds], ['a1', 'a2']);
+    assert.ok(s?.parentLineage);
+    assert.deepStrictEqual([...s.parentLineage.parentArtifactIds], ['a1', 'a2']);
   });
 
   it('retry_with_reconcile preserves all artifacts', () => {
     const d = fd.diagnoseFailure({ error: 'EAGAIN' });
     const s = selectRepairStrategy(d, { parentJobId: 'j1' });
-    assert.deepStrictEqual([...s?.preservedArtifactIds], []);
+    assert.ok(s);
+    assert.deepStrictEqual([...s.preservedArtifactIds], []);
   });
 
   it('retry_same_params is selected for EAGAIN', () => {
@@ -234,7 +236,8 @@ describe('RS-7 artifact_invalid repair', () => {
       failedNodeId: 'n1',
       verifiedArtifactIds: ['a1', 'a2'],
     });
-    assert.deepStrictEqual([...s?.preservedArtifactIds], ['a1', 'a2']);
+    assert.ok(s);
+    assert.deepStrictEqual([...s.preservedArtifactIds], ['a1', 'a2']);
   });
 });
 

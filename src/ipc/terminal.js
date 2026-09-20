@@ -211,7 +211,7 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
       // 远端先 cd 到项目 remote_path 再进登录 shell（远程唯一工作目录语义）。
       if (isObject && args.ssh && args.ssh.alias && args.ssh.remotePath) {
         const alias = String(args.ssh.alias).replace(/[^A-Za-z0-9._-]/g, "");
-        const remotePath = String(args.ssh.remotePath).replace(/[^A-Za-z0-9._\/@ +-]/g, "");
+        const remotePath = String(args.ssh.remotePath).replace(/[^A-Za-z0-9._/@ +-]/g, "");
         const pty = require("node-pty");
         // Windows 实测教训：ssh.exe 作为 conpty 直接 shell 会让 node-pty 的
         // conpty_console_list_agent（getConsoleProcessList）崩掉整个主进程——

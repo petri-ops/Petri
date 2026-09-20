@@ -122,7 +122,7 @@ function uploadToProject(projectId, toPath, buf) {
     pdfRow = await EVAL(
       `(function(){
         var rows = document.querySelectorAll('[role="treeitem"][title^="预览"]');
-        for (var i = 0; i < rows.length; i++) { if (/\.pdf$/i.test(rows[i].getAttribute('title') || '')) return 'pdf:' + i + ':' + rows[i].getAttribute('title'); }
+        for (var i = 0; i < rows.length; i++) { if (/\\.pdf$/i.test(rows[i].getAttribute('title') || '')) return 'pdf:' + i + ':' + rows[i].getAttribute('title'); }
         return 'none';
       })()`);
     if (pdfRow === 'none' && round === 0) {

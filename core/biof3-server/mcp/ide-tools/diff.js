@@ -30,7 +30,7 @@ function resolveDiffBinary() {
         candidates.push(path.resolve(gitRoot.stdout.trim(), '..', '..', 'usr', 'bin', 'diff.exe'));
       }
     } catch {}
-    for (const base of ['C:\Program Files\Git', 'C:\Program Files (x86)\Git']) {
+    for (const base of ['C:\\Program Files\\Git', 'C:\\Program Files (x86)\\Git']) {
       candidates.push(path.join(base, 'usr', 'bin', 'diff.exe'));
     }
     for (const c of candidates) {

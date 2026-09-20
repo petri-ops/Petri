@@ -147,6 +147,14 @@ function toPosixPath(targetPath) {
 }
 
 /**
+ * `--force-local` 只有 Windows bsdtar 需要（盘符路径被误判为远端主机规格）。
+ * GNU tar 接受它为空操作，但 macOS 自带的 bsdtar 直接拒绝
+ * （`Option --force-local is not supported`，2026-09-20 Mac 首跑实测），
+ * 因此必须按平台条件附加，不得无条件加。
+ */
+const TAR_FORCE_LOCAL = process.platform === 'win32' ? ['--force-local'] : [];
+
+/**
  * Extract a verified .tar.gz bundle into the library directory mounted by
  * R_LIBS_USER. The archive is trusted only after capability-provisioning has
  * matched its SHA-256 against the descriptor committed in this registry.
@@ -163,12 +171,14 @@ function installTarGzBundle(archivePath, installDir, expected = {}) {
     };
     execFile(
       'tar',
-      // Windows 下两道必需处理：
-      // 1. `--force-local`：bsdtar 会把以盘符开头的路径（`C:\...`）当成远端主机规格，
-      //    报 `Cannot connect to C: resolve failed`；POSIX tar 接受该标志为空操作。
+      // Windows 下两道必需处理（详见 TAR_FORCE_LOCAL 注释）：
+      // 1. `--force-local` 按平台条件附加：防盘符路径被当成远端主机规格。
       // 2. 正斜杠归一化：`--force-local` 会转义参数里的反斜杠，`...\installed` 会被
-      //    解析成 `...\i` + `nstalled`，必须先把分隔符换成 `/`。
-      ['--force-local', '-xzf', toPosixPath(archivePath), '-C', toPosixPath(installDir)],
+      //    解析成 `...\i` + `nstalled`，必须先把分隔符换成 `/`（跨平台无害，保留）。
+      [
+        ...TAR_FORCE_LOCAL,
+        '-xzf', toPosixPath(archivePath), '-C', toPosixPath(installDir),
+      ],
       { timeout: 300000, maxBuffer: 1024 * 1024 },
       (error, _stdout, stderr) => {
         if (error) {
@@ -335,4 +345,5 @@ module.exports = {
   ensureBundlesForPlugin,
   bundleStatus,
   installTarGzBundle,
+  TAR_FORCE_LOCAL,
 };

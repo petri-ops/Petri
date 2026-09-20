@@ -163,7 +163,6 @@ async function main() {
 function log(msg) {
   try { fs.writeSync(1, `[${new Date().toISOString().slice(11, 19)}] ${msg}\n`); } catch {}
 }
-function delay(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
 const watchdog = setTimeout(() => {
   console.error('FAIL P4 实机脚本 6min 看门狗超时');

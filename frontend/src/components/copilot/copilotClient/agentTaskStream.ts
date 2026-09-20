@@ -91,13 +91,9 @@ export async function subscribeAgentTask(
           STREAM_RECONNECT_BASE_DELAY_MS * 2 ** attempt,
           STREAM_RECONNECT_MAX_DELAY_MS
         );
-        try {
-          opts.onStreamReconnecting?.({ taskId, attempt: attempt + 1, lastSeq: seq, nextRetryMs });
-          await abortableDelay(nextRetryMs, opts.signal);
-        } catch (delayErr: unknown) {
-          // 等待期间用户主动停止 → AbortError 上抛（调用方静默处理）
-          throw delayErr;
-        }
+        // 等待期间用户主动停止 → AbortError 上抛（调用方静默处理）
+        opts.onStreamReconnecting?.({ taskId, attempt: attempt + 1, lastSeq: seq, nextRetryMs });
+        await abortableDelay(nextRetryMs, opts.signal);
         continue;
       }
       throw err;

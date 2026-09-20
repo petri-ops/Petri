@@ -252,7 +252,6 @@ module.exports = {
   startResidentRevisitLoop,
   residentHandoverDigest,
   residentHandoverDigestByProjectId,
-  residentHandoverDigest,
   listCards,
   residentDirAbs,
   DEFAULT_INTERVAL_MS,

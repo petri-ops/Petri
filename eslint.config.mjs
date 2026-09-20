@@ -24,6 +24,9 @@ export default tseslint.config(
       '**/.biof3-*/**',
       'codex/**',
       '_external-ref/**',
+      // openclaw/ = OpenClaw 外部参考镜像（研究对标用，~6.7GB，经 .git/info/exclude 本地排除不入仓，
+      // 生成抑制基线的 Windows 侧无此目录）——不属本项目代码面，与 codex//_external-ref/ 同类。
+      'openclaw/**',
       'tmp/**',
       'frontend/dist/**',
       // skill 资产目录：dev-verify flows 用 node 全局但无包上下文，且含合法占位模板
