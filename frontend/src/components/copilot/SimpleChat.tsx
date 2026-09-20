@@ -80,7 +80,7 @@ import { ChatScrollbar } from './ChatScrollbar';
 // ResultEditProgressList / ErrorBanner / ApprovalCard+ApprovalRepairHint），
 // 零行为变化；ResultEditProgressList 按惯例在此再导出保持导入路径兼容。
 import { LoopStatusPanel } from './SimpleChat/LoopStatusPanel';
-import { AgentProgressList } from './SimpleChat/AgentProgressList';
+import { AgentProgressItem, AgentProgressPendingRow } from './SimpleChat/AgentProgress';
 import { ErrorBanner } from './SimpleChat/ErrorBanner';
 import { ApprovalCard } from './SimpleChat/ApprovalCard';
 import { ResultEditProgressList } from './SimpleChat/ResultEditProgressList';
@@ -580,8 +580,7 @@ export function SimpleChat({
         content: message.content,
         toolActivities: message.toolActivities,
         reasoningByIteration: message.reasoningByIteration,
-        // D5 的阶段进度当前仍由 AgentProgressList 渲染；此处传入仅为让分段模型
-        // 拥有完整素材（ConversationTimeline 默认不渲染 progress，不产生重复）。
+        // D5（P2c）：阶段进度一并入模，由 ConversationTimeline 按 iteration 上轴。
         progressUpdates: message.progressUpdates,
       }));
     });
@@ -1063,21 +1062,28 @@ export function SimpleChat({
                   <div className="sc-msg-body">
                     {/* BLOCK-107 P1c — 时间线化（D1=c）：思考节点与工具簇按 iteration
                         交错排列，取代「一个摘要条收编全部工具、思考内嵌其中」。narrative
-                        仍由下方正文位渲染、progress 仍由 AgentProgressList 渲染，本组件
-                        两者都不重复产出（见 ConversationTimeline 文件头）。 */}
+                        仍由下方正文位渲染，本组件不重复产出（见 ConversationTimeline 文件头）。
+                        P2c（D5）：阶段进度作为独立分段上轴、插在对应工具簇之后，
+                        UI-305 的两条语义（首条=意图故省略、运行中补标记）在此判定。 */}
                     <ConversationTimeline
                       segments={timelineSegmentsByMessage.get(m.id ?? `idx:${i}`) ?? []}
+                      renderProgress={(segment, meta) => {
+                        const conclusion = meta.isFirst ? null : (
+                          <AgentProgressItem
+                            content={segment.content}
+                            onFileReferenceClick={handleFileReferenceClick}
+                          />
+                        );
+                        const runningMarker = meta.isLast && m.pending
+                          ? <AgentProgressPendingRow />
+                          : null;
+                        if (!conclusion && !runningMarker) return null;
+                        return <>{conclusion}{runningMarker}</>;
+                      }}
                     />
                     {m.role === 'assistant' && <MessageMeta modelName={m.modelName} />}
                     {m.role === 'assistant' && m.loop && m.loop.loopRunId && (
                       <LoopStatusPanel loop={m.loop} pending={Boolean(m.pending)} />
-                    )}
-                    {m.progressUpdates && m.progressUpdates.length > 0 && (
-                      <AgentProgressList
-                        updates={m.progressUpdates}
-                        pending={Boolean(m.pending)}
-                        onFileReferenceClick={handleFileReferenceClick}
-                      />
                     )}
                     {m.resultEditProgress && m.resultEditProgress.length > 0 && (
                       <ResultEditProgressList events={m.resultEditProgress} />

@@ -67,7 +67,7 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     expect(container.querySelector('.sc-timeline-reasoning-preview')).toBeNull();
   });
 
-  it('progress 分段默认跳过（避免与宿主 AgentProgressList 重复展示）', () => {
+  it('progress 分段默认跳过（宿主仍在别处渲染阶段进度时不重复展示）', () => {
     const { container } = render(<ConversationTimeline segments={[progressSegment]} />);
     expect(container.firstChild).toBeNull();
   });
@@ -82,6 +82,37 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     const html = container.innerHTML;
     expect(within(container).getByText('已经读完关键文件')).toBeTruthy();
     expect(html.indexOf('已完成 1 项')).toBeLessThan(html.indexOf('已经读完关键文件'));
+  });
+
+  it('renderProgress 拿到 isFirst / isLast，容器沿用 .sc-agent-progress 排版（D5+UI-305）', () => {
+    const intention: ConversationSegment = { kind: 'progress', iteration: 1, content: '打算先读文件' };
+    const metas: Array<{ isFirst: boolean; isLast: boolean }> = [];
+    const { container } = render(
+      <ConversationTimeline
+        segments={[intention, toolsSegment, progressSegment]}
+        renderProgress={(segment, meta) => {
+          metas.push(meta);
+          return <span>{segment.content}</span>;
+        }}
+      />
+    );
+    expect(metas).toEqual([
+      { isFirst: true, isLast: false },
+      { isFirst: false, isLast: true },
+    ]);
+    expect(container.querySelector('.sc-timeline-progress.sc-agent-progress')).toBeTruthy();
+  });
+
+  it('renderProgress 返回 null 的分段不产出节点（首条=意图被宿主省略时不留空壳）', () => {
+    const intention: ConversationSegment = { kind: 'progress', iteration: 1, content: '打算先读文件' };
+    const { container } = render(
+      <ConversationTimeline
+        segments={[intention, toolsSegment]}
+        renderProgress={(segment, meta) => (meta.isFirst ? null : <span>{segment.content}</span>)}
+      />
+    );
+    expect(container.querySelector('.sc-timeline-progress')).toBeNull();
+    expect(container.querySelector('.sc-timeline-cluster')).toBeTruthy();
   });
 
   it('仅 narrative 时返回 null（纯文本回答零额外 DOM）', () => {

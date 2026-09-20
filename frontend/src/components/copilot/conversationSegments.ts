@@ -127,7 +127,7 @@ function buildToolsSegment(iteration: number, activities: ToolActivityItem[]): T
 /**
  * 投影一轮回复为有序分段序列。
  *
- * 无任何时间线素材（无活动、无思考段）时返回单一 narrative 分段——老数据与
+ * 无任何时间线素材（无活动、无思考段、无阶段进度）时返回单一 narrative 分段——老数据与
  * 「纯文本回答」轮次走这条路径，渲染与改造前一致（D2 兼容红线）。
  */
 export function buildConversationSegments(
@@ -139,7 +139,7 @@ export function buildConversationSegments(
   const progress = Array.isArray(input.progressUpdates) ? input.progressUpdates : [];
 
   const reasoningKeys = Object.keys(reasoning);
-  if (activities.length === 0 && reasoningKeys.length === 0) {
+  if (activities.length === 0 && reasoningKeys.length === 0 && progress.length === 0) {
     return content.trim() ? [{ kind: 'narrative', text: content }] : [];
   }
 

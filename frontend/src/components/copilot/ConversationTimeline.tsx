@@ -10,9 +10,9 @@
 // `reasoningByIteration`，避免思考行在簇内二次渲染（思考已由本组件按
 // iteration 独立成节点）。故 `ToolActivityList` 内部与既有测试保持不动。
 //
-// narrative（最终正文）与 progress（阶段进度）**不由本组件渲染**：
-// 前者由宿主在原位渲染 markdown；后者实测全库仅 1 条（plan §0.6⑤），
-// 继续由宿主既有 `AgentProgressList` 渲染，本组件仅提供可选回调以免重复。
+// narrative（最终正文）**不由本组件渲染**——宿主在原位渲染 markdown。progress（阶段
+// 进度）经 `renderProgress` 回调上轴（D5：作为独立分段插在对应工具簇之后）：本组件
+// 只负责它在脊线上的位置与「首/末」判定，行内容与 UI-305 的省略、运行中语义归宿主。
 // ============================================================
 
 import { useState } from 'react';
@@ -72,19 +72,29 @@ function ToolsSegmentBlock({ segment }: { segment: ToolsSegment }): React.ReactE
       data-state={segment.state}
       data-iteration={segment.iteration}
     >
-      <ToolActivityList activities={segment.activities} collapseWhenSettled />
+      <ToolActivityList activities={segment.activities} collapseWhenSettled showRunningStopwatch />
     </div>
   );
+}
+
+export interface ProgressSegmentMeta {
+  /** 本轮首条阶段进度（= 意图而非结论，UI-305 ① 约定由宿主省略）。 */
+  isFirst: boolean;
+  /** 本轮末条阶段进度（宿主据此在 UI-305 ② 下补运行中标记）。 */
+  isLast: boolean;
 }
 
 export interface ConversationTimelineProps {
   segments: ConversationSegment[];
   /**
-   * 可选：阶段进度分段的渲染回调。不传时 progress 分段**被跳过**——宿主若已
-   * 用 `AgentProgressList` 渲染阶段进度，必须保持不传以免重复展示（D5 的
-   * 「插在对应工具簇之后」由宿主在传入回调后自然成立）。
+   * 阶段进度上轴（D5 裁决：作为独立分段插在对应工具簇之后）。不传时 progress
+   * 分段**被跳过**——宿主若仍在别处渲染阶段进度，保持不传以免重复展示。
+   * 返回 null / false 时该分段不产出节点（首条意图与空结论走这条路径）。
    */
-  renderProgress?: (segment: Extract<ConversationSegment, { kind: 'progress' }>) => React.ReactNode;
+  renderProgress?: (
+    segment: Extract<ConversationSegment, { kind: 'progress' }>,
+    meta: ProgressSegmentMeta
+  ) => React.ReactNode;
   /** 时间线容器附加类名。 */
   className?: string;
 }
@@ -95,6 +105,11 @@ export function ConversationTimeline({
   className,
 }: ConversationTimelineProps): React.ReactElement | null {
   const nodes: React.ReactNode[] = [];
+  const progressTotal = segments.reduce(
+    (count, segment) => (segment.kind === 'progress' ? count + 1 : count),
+    0
+  );
+  let progressSeen = 0;
   for (const segment of segments) {
     if (segment.kind === 'reasoning') {
       nodes.push(<ReasoningSegmentRow key={`reasoning:${segment.iteration}`} segment={segment} />);
@@ -106,9 +121,20 @@ export function ConversationTimeline({
     }
     if (segment.kind === 'progress') {
       if (!renderProgress) continue;
+      progressSeen += 1;
+      const rendered = renderProgress(segment, {
+        isFirst: progressSeen === 1,
+        isLast: progressSeen === progressTotal,
+      });
+      if (rendered == null || rendered === false) continue;
+      // 容器同时携带 .sc-agent-progress 的排版（色阶/字号由它给），
+      // .sc-timeline-progress 只补轴节奏——避免为同一视觉再写一套 token。
       nodes.push(
-        <div key={`progress:${segment.iteration}`} className="sc-timeline-progress">
-          {renderProgress(segment)}
+        <div
+          key={`progress:${segment.iteration}`}
+          className="sc-timeline-progress sc-agent-progress"
+        >
+          {rendered}
         </div>
       );
     }

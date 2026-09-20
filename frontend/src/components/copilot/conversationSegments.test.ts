@@ -36,6 +36,17 @@ describe('BLOCK-107 会话分段模型（D1=c 按 iteration 交错）', () => {
     expect(buildConversationSegments({})).toEqual([]);
   });
 
+  it('仅阶段进度（无活动无思考）时不并入退化路径（D5 上轴前提）', () => {
+    const segments = buildConversationSegments({
+      content: '收尾说明',
+      progressUpdates: [{ iteration: 1, content: '已完成第一步' }],
+    });
+    expect(segments).toEqual([
+      { kind: 'progress', iteration: 1, content: '已完成第一步' },
+      { kind: 'narrative', text: '收尾说明' },
+    ]);
+  });
+
   it('单迭代：思考 → 工具簇 → 正文', () => {
     const segments = buildConversationSegments({
       content: '结论',

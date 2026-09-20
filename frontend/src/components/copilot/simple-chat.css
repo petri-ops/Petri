@@ -1173,6 +1173,12 @@
   margin: 2px 0 4px;
 }
 
+/* 阶段进度上轴（D5）：排版沿用同元素上的 .sc-agent-progress，
+   本条只收紧轴内 margin，避免容器 gap 与其 9px 下边距叠加。 */
+.sc-timeline-progress {
+  margin: 2px 0;
+}
+
 /* UI-272 增补 — 两级折叠行头：思考/执行条目默认收起，点击展开详情 */
 .sc-tool-row-head {
   display: flex;

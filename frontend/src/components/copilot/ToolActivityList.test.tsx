@@ -1,5 +1,5 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen, act } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ToolActivityList } from './ToolActivityList';
 import { groupToolActivities } from './toolActivity';
@@ -194,5 +194,41 @@ describe('ToolActivityList (UI-383 常规只读折叠)', () => {
     fireEvent.click(summary);
     expect(screen.getByText('a.md')).toBeTruthy();
     expect(screen.getByText('d.md')).toBeTruthy();
+  });
+});
+
+describe('BLOCK-107 P2c 运行中秒表（showRunningStopwatch）', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('启用时按墙钟累计，且转终态后不再挂计时器', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-20T12:00:00Z'));
+    const { rerender } = render(
+      <ToolActivityList activities={[activity('running')]} showRunningStopwatch />,
+    );
+    expect(screen.getByText(/正在处理 1\/1 项/).textContent).not.toMatch(/已运行/);
+    act(() => { vi.advanceTimersByTime(1000); });
+    expect(screen.getByText(/正在处理 1\/1 项/).textContent).toMatch(/已运行 1\.0 s/);
+    act(() => { vi.advanceTimersByTime(1500); });
+    // 读数由 1 秒 interval 落点写入：推进 2.5 s 时最后一次 tick 在 2000 ms
+    expect(screen.getByText(/正在处理 1\/1 项/).textContent).toMatch(/已运行 2\.0 s/);
+
+    // 终态：秒表消失，改显既有活动耗时，且 interval 已卸载（再推进不重渲染）
+    rerender(<ToolActivityList activities={[activity('success', { durationMs: 4200 })]} showRunningStopwatch />);
+    expect(screen.queryByText(/已运行 \d/)).toBeNull();
+    expect(screen.getByText(/耗时 4\.2 s/)).toBeTruthy();
+    act(() => { vi.advanceTimersByTime(5000); });
+    expect(screen.getByText(/耗时 4\.2 s/)).toBeTruthy();
+  });
+
+  it('默认不启用：既有摘要文本零变化（不挂计时器）', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-20T12:00:00Z'));
+    render(<ToolActivityList activities={[activity('running')]} />);
+    act(() => { vi.advanceTimersByTime(5000); });
+    const text = screen.getByText(/正在处理 1\/1 项/).textContent || '';
+    expect(text).not.toMatch(/已运行/);
   });
 });

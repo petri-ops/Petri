@@ -415,11 +415,36 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
   );
 }
 
+/**
+ * BLOCK-107 P2c（D4 配套）— 运行中秒表：自「本簇首次被观察到有未终结项」起累计墙钟。
+ *
+ * 数据层没有活动起始时刻（`ToolActivityItem` 只有终态 `durationMs`），故运行态的
+ * 秒表只能取渲染侧观察时刻——语义为「从我们看见它在跑起算」，与终态后显示的
+ * 活动耗时之和是两套口径，不互相覆盖。首秒不显示（等第一次 tick），转终态即卸载
+ * 计时器并清空读数，收起后不再逐秒重渲染。
+ */
+function useRunningElapsed(active: boolean): number | null {
+  const [elapsedMs, setElapsedMs] = useState<number | null>(null);
+  useEffect(() => {
+    if (!active) return undefined;
+    // 锚点留在 effect 闭包里：既不在 render 读 ref，也不在 effect 体内同步 setState
+    // （两条 react-hooks 编译规则各拦一头）。起点即本次激活，天然不带上一簇的残余。
+    const startedAt = Date.now();
+    const timer = setInterval(() => setElapsedMs(Date.now() - startedAt), 1000);
+    return () => {
+      clearInterval(timer);
+      setElapsedMs(null);
+    };
+  }, [active]);
+  return elapsedMs;
+}
+
 export function ToolActivityList({
   activities,
   processingDurationMs,
   reasoningByIteration,
   collapseWhenSettled = false,
+  showRunningStopwatch = false,
 }: {
   activities: ToolActivityItem[];
   processingDurationMs?: number;
@@ -432,30 +457,27 @@ export function ToolActivityList({
    * 已完成的批自动收敛回一行。
    */
   collapseWhenSettled?: boolean;
+  /**
+   * BLOCK-107 P2c — 摘要条在运行中追加「已运行 Ns」秒表。默认 false 保持既有
+   * 摘要文本不变；由时间线的簇启用，让进行中的一眼可辨。
+   */
+  showRunningStopwatch?: boolean;
 }): React.ReactElement {
   // UI-315 — 含 exec 命令的消息默认展开活动条：终端块直接可见（ZCode 式），
   // 无 exec 的消息保持收起摘要；用户手动切换后以手动态为准。
-  // BLOCK-107 P2b：collapseWhenSettled 时改看「是否有未终结项」。
-  const [expanded, setExpanded] = useState(
-    () => (collapseWhenSettled
-      ? activities.some((activity) => RUNNING_STATUSES.has(activity.status))
-      : activities.some((activity) => EXEC_TOOL_NAMES.has(activity.name)))
-  );
-  const [userToggled, setUserToggled] = useState(false);
+  // BLOCK-107 P2b（D4）— collapseWhenSettled 时默认态改看「是否有未终结项」。
+  // P2c 收口：展开态改为**纯派生**（手动态 ?? 默认态）。原实现用两条 setState-in-effect
+  // 事后同步，时序等价（exec 活动一旦出现 hasExec 即为真 → 自然展开；用户切过则以手动态
+  // 为准），合并成派生式后不再需要 effect，也解掉 react-hooks/set-state-in-effect 违规。
+  const [manualExpanded, setManualExpanded] = useState<boolean | null>(null);
   // UI-383 — 常规只读组折叠状态（组键 = 首项 key；默认折叠，点击就地展开逐条）
   const [unfoldedRoutineGroups, setUnfoldedRoutineGroups] = useState<Set<string>>(new Set());
-  const hasRunningExec = activities.some(
-    (activity) => EXEC_TOOL_NAMES.has(activity.name) && activity.status === 'running'
-  );
   const anyRunning = activities.some((activity) => RUNNING_STATUSES.has(activity.status));
-  useEffect(() => {
-    if (hasRunningExec && !userToggled) setExpanded(true);
-  }, [hasRunningExec, userToggled]);
-  // BLOCK-107 P2b — 本簇转为终态后自动收起（用户手动切换过则以手动态为准）。
-  useEffect(() => {
-    if (!collapseWhenSettled || userToggled) return;
-    setExpanded(anyRunning);
-  }, [collapseWhenSettled, anyRunning, userToggled]);
+  const hasExec = activities.some((activity) => EXEC_TOOL_NAMES.has(activity.name));
+  const expanded = manualExpanded !== null
+    ? manualExpanded
+    : collapseWhenSettled ? anyRunning : hasExec;
+  const runningElapsedMs = useRunningElapsed(showRunningStopwatch && anyRunning);
   const running = activities.filter((activity) => activity.status === 'running').length;
   const awaiting = activities.filter((activity) => activity.status === 'awaiting_confirmation').length;
   const attention = activities.filter(
@@ -476,7 +498,8 @@ export function ToolActivityList({
     .map(([action, count]) => `${action} ${count} 次`)
     .join(' · ');
   const summary = running > 0
-    ? `正在处理 ${running}/${activities.length} 项${actionSummary ? ` · ${actionSummary}` : ''}`
+    ? `正在处理 ${running}/${activities.length} 项${actionSummary ? ` · ${actionSummary}` : ''}${
+      runningElapsedMs !== null ? ` · 已运行 ${formatToolDuration(runningElapsedMs)}` : ''}`
     : awaiting > 0
       ? `等待确认 ${awaiting} 项`
       : `已完成 ${activities.length} 项${attention ? ` · ${attention} 项需注意` : ''}${actionSummary ? ` · ${actionSummary}` : ''}${totalDuration ? ` · 耗时 ${totalDuration}` : ''}`;
@@ -494,8 +517,7 @@ export function ToolActivityList({
         aria-label={expanded ? '收起执行记录' : '展开执行记录'}
         title={expanded ? '收起执行记录' : '展开执行记录'}
         onClick={() => {
-          setUserToggled(true);
-          setExpanded((v) => !v);
+          setManualExpanded(!expanded);
         }}
       >
         <span className="sc-tool-activity-summary-label">{summary}</span>
