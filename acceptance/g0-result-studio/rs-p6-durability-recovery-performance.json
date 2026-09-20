@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "planId": "G0-RS-P6",
   "evidenceClass": "real_local_product_durability_recovery_pressure_non_qualifying",
-  "capturedAt": "2026-09-20T11:40:36.125Z",
+  "capturedAt": "2026-09-20T12:13:23.117Z",
   "classification": {
     "stage": "G0-RS-P6",
     "scope": "local_durability_recovery_performance_and_product_explainability",
@@ -18,7 +18,7 @@
   "providerBoundary": "controlled_loopback_503_429_only_real_provider_excluded_to_p7",
   "packagedBoundary": "development_electron_only_packaged_app_excluded_to_p7",
   "checkpointInterruptionBoundary": "macos_development_posix_sigstop_process_group_windows_not_exercised",
-  "sourceCommit": "75c345bac6b931443a8bcf64ebf781759e6c722d",
+  "sourceCommit": "bec01c6d09e722998cba2cadb1659c936dde1c09",
   "sourceFiles": {
     "core/biof3-server/agent-runner.js": "core/biof3-server/agent-runner.js",
     "core/biof3-server/agent-tools/learning.js": "core/biof3-server/agent-tools/learning.js",
@@ -369,7 +369,7 @@
     "test/g0-rs-p6-ui110-local-gateway.test.mjs": "89d4962e4f71f5d8b7fab135c62a3ae25399298afde269bc587207628c7d683a",
     "test/g0-rs-p6-ui110-observation.test.mjs": "6e4e7cd7adee7f7dc797219b11effe5af069d62a37335f32ff6b69ad15355a5c",
     "test/git-adapter.test.mjs": "95979ca82bc88250c3d53eb006f98e557ff782bb086b06514a68148429e4b593",
-    "test/impact-map.json": "c9cb689c31d4e1397292ebe78832c662797aea358e409017e2e437a61bf9b572",
+    "test/impact-map.json": "638f6e00bcc7463ee7846f2979bb20ff05a0a3629cf4fb31c9f72d3201da074a",
     "test/result-changeset-service.test.mjs": "2767f8981c2656a171f663fc05b55e0732afb7c85a24b5a9f2bd640682d5897b",
     "test/result-compare-service.test.mjs": "34cd328e01ceff14ac761859f4b5fdbab35cca0d231ea8d92cbd391a9ecb0cce",
     "test/result-edit-agent-tool.test.mjs": "3d2566dfd06682a2b9bc3e3c3dc7bb95646c388183ffa5b3bad818b57749cff4",
@@ -399,7 +399,7 @@
     "test/tools-executor-job-context.test.mjs": "842f16d272a4227d47942c7907c66c825524b0635df8c5fdc70d0d82270f7127",
     "test/tools-input-validation.test.mjs": "e87819e32114dc2a61c9447b38077f6d776c4c6cf9f2e581a69c86ac834d96b9"
   },
-  "sourceBindingDigest": "e01b85c5c21e1f628a66642c2d9319648c8990c6d38e7a929965a2f1ea195c37",
+  "sourceBindingDigest": "7c1b9be2382244dd916d8071d7590781656e2cb2cfefb7d84372d8bb1e07e661",
   "sourceCommitMatchesSourceHashes": true,
   "sourceBindingStableDuringCapture": true,
   "observations": {
@@ -804,8 +804,8 @@
             "semanticDigest": "4ebaca00427394e473c85d2bbbe4323e42b71488736bb993f5aa0aca35621566",
             "visual": {
               "label": "active-before-crash",
-              "sha256": "08d0c5893d2b5c0363e64413fab842242d0156b79272e48abae5c9798aa6b213",
-              "bytes": 200664,
+              "sha256": "aea401955953b782a3c1e5e1bbf8e7e803c6eb0057429bf6561ce097e0a4eee6",
+              "bytes": 200747,
               "nonblank": true
             },
             "recoveryControlAbsent": true
@@ -841,7 +841,7 @@
           "backendStatus": {
             "checkCount": 2,
             "everyCheckReady": true,
-            "maxDurationMs": 38.05883300000005
+            "maxDurationMs": 39.58629199999996
           },
           "isolatedCompatibility": {
             "aiSettingsReadCount": 1,
@@ -944,7 +944,7 @@
           "backendStatus": {
             "checkCount": 2,
             "everyCheckReady": true,
-            "maxDurationMs": 31.276125000000093
+            "maxDurationMs": 34.57841700000006
           },
           "isolatedCompatibility": {
             "aiSettingsReadCount": 1,
@@ -1001,8 +1001,8 @@
             "semanticDigest": "a6ed2ece325da737419dc832c482e9e423839ce8e51bbf45d97ac7cb4846bf6c",
             "visual": {
               "label": "reopened-ready",
-              "sha256": "7e29c5863803088a556ecdb6e5a71871cb03e06604eb6312366c8c8539dd91bf",
-              "bytes": 191331,
+              "sha256": "87c44e84eecba794797b5fedf199a02ea774c155495e724fdc9804c9dbb72c70",
+              "bytes": 191406,
               "nonblank": true
             },
             "recoveryControlAbsent": true
@@ -1037,7 +1037,7 @@
           "backendStatus": {
             "checkCount": 2,
             "everyCheckReady": true,
-            "maxDurationMs": 30.602959000000055
+            "maxDurationMs": 33.19112499999994
           },
           "isolatedCompatibility": {
             "aiSettingsReadCount": 1,
@@ -1088,7 +1088,7 @@
         "revisionIntegrityStatus": null
       },
       "performance": {
-        "restartRestoreMs": 1966.0007909999986,
+        "restartRestoreMs": 2020.765290999996,
         "budgets": {
           "restartRestoreMs": 5000
         }
@@ -1169,12 +1169,12 @@
           {
             "toolClass": "go_bp_report",
             "peakStatus": "measured",
-            "sampleCount": 13
+            "sampleCount": 12
           },
           {
             "toolClass": "go_bp_report",
             "peakStatus": "measured",
-            "sampleCount": 60
+            "sampleCount": 61
           }
         ]
       },
@@ -1201,10 +1201,10 @@
         ],
         "immutableMutationRejected": true,
         "immutableDigestStable": true,
-        "immutableLedgerDigest": "061921c8c95796264ecc4622d80aa3cee4e453939883702352ab644b4a8fb9a8",
+        "immutableLedgerDigest": "3d2e01443a08143684a874b79364673c3e596764ca1d706f63596b92346f9b92",
         "currentRevisionCount": 6,
         "realJobBackedCohortCount": 2,
-        "realJobBackedCohortDigest": "97e2d0dde7e8e208bc64d5a28d35d67aec23bb583646ccdbad57bc5306e72f8c"
+        "realJobBackedCohortDigest": "1fbdc9de3a97f4ad7f63fe9a50109476ab3f6dab1b5d7481ccd5f01c25c8ecc8"
       },
       "renderer": {
         "schemaVersion": 1,
@@ -1212,35 +1212,35 @@
         "table": {
           "totalRows": 100000,
           "visibleRows": 18,
-          "navigationMs": 678.4772500000001,
-          "canvasFirstVisibleMs": 678.4772500000001,
+          "navigationMs": 786.1349579999999,
+          "canvasFirstVisibleMs": 786.1349579999999,
           "productCanvasFirstVisibleMs": null,
-          "scrollFeedbackMs": 6.699999988079071,
+          "scrollFeedbackMs": 7.699999988079071,
           "scrollChanged": true,
-          "selectionFeedbackMs": 10.600000023841858,
+          "selectionFeedbackMs": 11,
           "selectionChanged": true,
-          "sortFeedbackMs": 12.300000011920929,
+          "sortFeedbackMs": 5.599999964237213,
           "sortChanged": true,
-          "filterFeedbackMs": 7.899999976158142,
-          "filterQueryCompleteMs": 733.3000000119209,
+          "filterFeedbackMs": 4.300000011920929,
+          "filterQueryCompleteMs": 721.9000000357628,
           "filterChanged": true,
           "filterQueryChanged": true,
           "filterMatchedSummaryChanged": true,
           "filterFirstVisibleRowChanged": true,
-          "virtualPageLoadMs": 35.69999998807907,
+          "virtualPageLoadMs": 36.80000001192093,
           "virtualPageChanged": true,
-          "screenshotSha256": "81bf16a271a52c97d756c66ab187f0086dc1c0946831d03bd34e76a8d77730de",
-          "screenshotBytes": 259296,
+          "screenshotSha256": "df230da881b84c31bfe5b14e69e8730ae7ea084852cf922e64e7e9350b637762",
+          "screenshotBytes": 259301,
           "width": 2880,
           "height": 1706
         },
         "media": {
           "png": {
-            "loadMs": 112.24675000000025,
+            "loadMs": 110.18262499999992,
             "switch": {
-              "feedbackMs": 9.199999988079071,
-              "productMetricMs": 1.9,
-              "wallFeedbackMs": 9.199999988079071,
+              "feedbackMs": 7.100000023841858,
+              "productMetricMs": 1.6,
+              "wallFeedbackMs": 7.100000023841858,
               "changed": true
             },
             "rendered": true,
@@ -1251,57 +1251,57 @@
             "sourceKind": "tool_file",
             "sourceTargetMatched": true,
             "artifactTargetMatched": true,
-            "screenshotSha256": "5197d36c47f3ebbcb21a3bb2a15cf5586bb3f8d41e216a4f29e36eef83a85399",
-            "screenshotBytes": 1017695,
+            "screenshotSha256": "7f522f779643803454bab5153d1fd71f38df519fdb8f98fbedc99729fc2e898f",
+            "screenshotBytes": 1017805,
             "width": 2880,
             "height": 1706
           },
           "svg": {
-            "loadMs": 101.63287500000024,
+            "loadMs": 119.80404200000021,
             "exportLinkPresent": true,
             "exportHrefMatched": true,
             "bytes": 42686780,
             "validSvgRoot": true,
-            "fetchMs": 100.5,
+            "fetchMs": 114.5,
             "switch": {
               "changed": true,
-              "feedbackMs": 100.5,
+              "feedbackMs": 114.5,
               "productMetricMs": null,
-              "wallFeedbackMs": 100.5
+              "wallFeedbackMs": 114.5
             },
             "sourceKind": "tool_file",
             "sourceTargetMatched": true,
             "artifactTargetMatched": true,
-            "screenshotSha256": "5fc652526be8af0dda468bc001aa015d52acf788fdab5ab9675f5badd492d512",
-            "screenshotBytes": 1019868,
+            "screenshotSha256": "0dc6e183de8ff6b94c4041bf4f1605f42ba8d19089937f343b62bbbe2f012d8a",
+            "screenshotBytes": 1019972,
             "width": 2880,
             "height": 1706
           },
           "report": {
-            "loadMs": 515.2680840000003,
+            "loadMs": 539.1186659999998,
             "iframeVisible": true,
             "iframeWidth": 858,
             "iframeHeight": 716,
             "iframeSourceKind": "tool_file",
             "sourceTargetMatched": true,
             "artifactTargetMatched": true,
-            "embeddedImageCount": 6,
+            "embeddedImageCount": 4,
             "firstEmbeddedImageWidth": 258,
-            "headingCount": 9,
+            "headingCount": 7,
             "publicProjectionAudit": {
               "absolutePath": false,
               "providerMaterial": false,
               "rawInternalId": false
             },
-            "textCharacters": 1283,
-            "screenshotSha256": "8a813428764eda7425157f9f68ce2235d0d09df512bca79f4d02f8f9a9adf857",
-            "screenshotBytes": 383867,
+            "textCharacters": 1025,
+            "screenshotSha256": "4f28aa38eeb16961c51f2d3688f522de497342534e2dd0e6ecdfd415817eb410",
+            "screenshotBytes": 383959,
             "width": 2880,
             "height": 1706
           }
         },
         "compare": {
-          "openMs": 515.8691669999998,
+          "openMs": 618.7970420000001,
           "progressiveRows": 204,
           "progressivePages": [
             {
@@ -1310,88 +1310,88 @@
             },
             {
               "rows": 104,
-              "loadMs": 769.6552090000005
+              "loadMs": 742.3575419999997
             },
             {
               "rows": 154,
-              "loadMs": 815.9877079999997
+              "loadMs": 887.0417090000001
             },
             {
               "rows": 204,
-              "loadMs": 189.12845799999923
+              "loadMs": 167.22841599999992
             }
           ],
-          "screenshotSha256": "44ba10d07dbc0ccfff87b03cacada286bb3b8cbcc8f0dab636ac47097abce5a9",
-          "screenshotBytes": 591210,
+          "screenshotSha256": "d776c06ff7953aa7a377da257ff84a526c9736917b7aa32227fb583a8f383679",
+          "screenshotBytes": 589363,
           "width": 2880,
           "height": 1706
         },
         "history": {
           "firstPageVersions": 100,
-          "firstPageMs": 106.99374999999964,
+          "firstPageMs": 106.73508399999992,
           "afterPaginationVersions": 123,
-          "paginationMs": 106.17499999999927,
+          "paginationMs": 106.08845900000051,
           "screenshotSha256": "16677d9b8b97fdcef0d7dd69ea06798ef064f16cef3de899fc8957620233fca9",
           "screenshotBytes": 426248,
           "width": 2880,
           "height": 1706
         },
         "memory": {
-          "baselinePostGcBytes": 28985520,
-          "peakRawUsedBytes": 36891816,
-          "peakRawGrowthBytes": 7906296,
-          "peakPostGcUsedBytes": 32671448,
-          "peakPostGcGrowthBytes": 3685928,
-          "peakWorkingSetBytes": 1254146048,
+          "baselinePostGcBytes": 28998332,
+          "peakRawUsedBytes": 36144696,
+          "peakRawGrowthBytes": 7146364,
+          "peakPostGcUsedBytes": 31893256,
+          "peakPostGcGrowthBytes": 2894924,
+          "peakWorkingSetBytes": 1242202112,
           "samples": [
             {
               "stage": "table_baseline",
-              "rawUsedBytes": 32699828,
-              "postGcUsedBytes": 28985520,
-              "heapTotalBytes": 30113792,
-              "workingSetBytes": 311836672
+              "rawUsedBytes": 32652024,
+              "postGcUsedBytes": 28998332,
+              "heapTotalBytes": 30375936,
+              "workingSetBytes": 309510144
             },
             {
               "stage": "table_interactions",
-              "rawUsedBytes": 32964768,
-              "postGcUsedBytes": 28895200,
-              "heapTotalBytes": 30375936,
-              "workingSetBytes": 297451520
+              "rawUsedBytes": 33279228,
+              "postGcUsedBytes": 28913408,
+              "heapTotalBytes": 30113792,
+              "workingSetBytes": 295272448
             },
             {
               "stage": "png",
-              "rawUsedBytes": 30818152,
-              "postGcUsedBytes": 29451168,
-              "heapTotalBytes": 31948800,
-              "workingSetBytes": 321634304
+              "rawUsedBytes": 30812024,
+              "postGcUsedBytes": 28778096,
+              "heapTotalBytes": 30113792,
+              "workingSetBytes": 320618496
             },
             {
               "stage": "svg",
-              "rawUsedBytes": 28856300,
-              "postGcUsedBytes": 28837920,
+              "rawUsedBytes": 29634060,
+              "postGcUsedBytes": 28839052,
               "heapTotalBytes": 30113792,
-              "workingSetBytes": 365592576
+              "workingSetBytes": 363167744
             },
             {
               "stage": "report",
-              "rawUsedBytes": 29336344,
-              "postGcUsedBytes": 29129416,
-              "heapTotalBytes": 29786112,
-              "workingSetBytes": 372408320
+              "rawUsedBytes": 29325676,
+              "postGcUsedBytes": 29117156,
+              "heapTotalBytes": 30048256,
+              "workingSetBytes": 373882880
             },
             {
               "stage": "compare",
-              "rawUsedBytes": 36891816,
-              "postGcUsedBytes": 32671448,
-              "heapTotalBytes": 33980416,
-              "workingSetBytes": 1254146048
+              "rawUsedBytes": 36144696,
+              "postGcUsedBytes": 31893256,
+              "heapTotalBytes": 33193984,
+              "workingSetBytes": 1242202112
             },
             {
               "stage": "history",
-              "rawUsedBytes": 36435808,
-              "postGcUsedBytes": 31561956,
-              "heapTotalBytes": 33193984,
-              "workingSetBytes": 1164165120
+              "rawUsedBytes": 35632708,
+              "postGcUsedBytes": 30786856,
+              "heapTotalBytes": 32407552,
+              "workingSetBytes": 1174618112
             }
           ]
         },
@@ -1488,7 +1488,7 @@
         "backendStatus": {
           "checkCount": 6,
           "everyCheckReady": true,
-          "maxDurationMs": 37.26008300000001
+          "maxDurationMs": 39.55116700000008
         },
         "isolatedCompatibility": {
           "aiSettingsReadCount": 3,
@@ -1648,11 +1648,11 @@
           "seededTables": [],
           "digest": "dd575ac9ca406c00c2ac2330ee6cab12b7f642b4c042a55fe38ac87f09ec3cb9"
         },
-        "projectDigest": "c00daafaabac7b88c67cb53ca0c76889cd3dcae0e7228f559b1573a541517d14",
+        "projectDigest": "af86beb3d72b0b3d85d441a587907be4f52bb8e63487ad1716ed4c57013b2603",
         "resourceBudget": {
           "classification": "real_product_changeset_preflight_no_seed",
-          "sourceBaselineJobDigest": "81a1437a8a9f52d647fb08ab9fa69fe3b49e659de754469d43ffa4d41a63e225",
-          "sourceBaselineRevisionDigest": "72990d82f1f8fc62ed1a39f073f6adbc802d7e0667d68fbd2583cfd973ebfe1e",
+          "sourceBaselineJobDigest": "658b39021ee94a9798cd88e71bf4eca9b4cc31d82802b91b17a20840d764fb49",
+          "sourceBaselineRevisionDigest": "dbb29f21bcf2ad59549e059c0cecb6786b4a4eb4df3b91205ae31aad3d425f8d",
           "sourceScientificParametersUnchanged": true,
           "memoryBlocked": {
             "error": "preview_resource_budget_blocked",
@@ -1670,7 +1670,7 @@
               "inputBytes": 6914,
               "sourceOutputBytes": 230288,
               "sourceOutputMeasurement": "complete_descriptor_artifacts",
-              "selectedRevisionDigest": "72990d82f1f8fc62ed1a39f073f6adbc802d7e0667d68fbd2583cfd973ebfe1e",
+              "selectedRevisionDigest": "dbb29f21bcf2ad59549e059c0cecb6786b4a4eb4df3b91205ae31aad3d425f8d",
               "downstreamOutputBytes": 0,
               "historicalRssBytes": null,
               "rasterBytes": 2304000000,
@@ -1709,7 +1709,7 @@
               "inputBytes": 6914,
               "sourceOutputBytes": 230288,
               "sourceOutputMeasurement": "complete_descriptor_artifacts",
-              "selectedRevisionDigest": "72990d82f1f8fc62ed1a39f073f6adbc802d7e0667d68fbd2583cfd973ebfe1e",
+              "selectedRevisionDigest": "dbb29f21bcf2ad59549e059c0cecb6786b4a4eb4df3b91205ae31aad3d425f8d",
               "downstreamOutputBytes": 0,
               "historicalRssBytes": null,
               "rasterBytes": 12600000,
@@ -1761,8 +1761,8 @@
             "realToolExecution": true,
             "previewReadyCount": 2,
             "changeSetDigests": [
-              "1e40eaf5c0d8d6cb7fd80b1b281e9aaf5218537ecf39a306c3b7dbf150864054",
-              "a650c17d3ef3fd75cda08d1e90c864a578909131acaff3316c3b40384eb8d378"
+              "8bf43fefc2cb6ba2e2a7a9d4df6ac06a74a8defe40294e26fe2e4741c7b85f8e",
+              "cb9e3b8c4f3d5ca3a4afe07c1469f0734af45cbda16db9a2e823e409a55f97e8"
             ]
           }
         },
@@ -1775,10 +1775,10 @@
           "firstCandidateRemainsPreviewReady": true,
           "secondCandidateRemainsAdopted": true,
           "adoptedCohortCurrent": true,
-          "firstCandidateDigest": "a650c17d3ef3fd75cda08d1e90c864a578909131acaff3316c3b40384eb8d378",
-          "secondCandidateDigest": "1e40eaf5c0d8d6cb7fd80b1b281e9aaf5218537ecf39a306c3b7dbf150864054",
-          "stateDigestBeforeFailure": "5bd98c0feae4a2fc4a93b957b128c6ae437377acb720200e66f20c476dc16083",
-          "stateDigestAfterFailure": "5bd98c0feae4a2fc4a93b957b128c6ae437377acb720200e66f20c476dc16083"
+          "firstCandidateDigest": "8bf43fefc2cb6ba2e2a7a9d4df6ac06a74a8defe40294e26fe2e4741c7b85f8e",
+          "secondCandidateDigest": "cb9e3b8c4f3d5ca3a4afe07c1469f0734af45cbda16db9a2e823e409a55f97e8",
+          "stateDigestBeforeFailure": "8de1af6513a5b87fcfcc3fed3baf63e85899273a83fdaad51928bf116f06d5c6",
+          "stateDigestAfterFailure": "8de1af6513a5b87fcfcc3fed3baf63e85899273a83fdaad51928bf116f06d5c6"
         },
         "gcColdReadback": {
           "classification": "real_product_http_gc_then_managed_git_gc_and_same_disk_cold_boot",
@@ -1792,19 +1792,19 @@
           "gitGc": {
             "exitCode": 0,
             "signal": null,
-            "durationMs": 96,
+            "durationMs": 124,
             "stderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
           },
           "before": {
-            "ledgerDigest": "0923ca1ba1d426d09b7ae680bdd53e837dd3ebaa90e564e98bd0afb8577ce50b",
-            "revisionDigest": "4fbb3abfad36e599b7aea90def842df723ec6ad0040d0f1639646fe02b78ce6f",
-            "changeSetDigest": "d45c92da181a9c2eac39b2f0a3e129a159ac58c4ee98d6cf405d85e29829aadb",
-            "checkpointDigest": "986fe90b748fb5680131d56dadc724031d8b5f3e1b8af9b37eab3b0415354597",
-            "jobDigest": "97a032b9eb58cfb3390a47a34cfd939d46cf66f88871efc53cdfe3848f76eacc",
-            "physicalDigest": "673f46a32910ec256595b7a759b0dd802975b60a5911e12941528ba633aded42",
+            "ledgerDigest": "11206331f649ee57bf4017d0dc3b4dc8d6d30875d4c4985184eb3311acb6a221",
+            "revisionDigest": "5e39278eda0cefa18a4251a57179edff9b07e9fbbe3040d6b7c4a69e13bf0afd",
+            "changeSetDigest": "a71d2be6f966d1963e7748d715f239778277ef29358e3569d2cf9e88a61e6b2b",
+            "checkpointDigest": "5842180580f804f51b968c5742e80216c17736ad15715cc38b39bcb18a739908",
+            "jobDigest": "d3ef19a203d1b6fe1bd6cbbae1c2e0a0ab9930c651ba44039fabbc89e9cf4a16",
+            "physicalDigest": "5d50c233969803c6634c470b9f93d683d746a22e0b5e6cf4df25022a8f8fcb65",
             "physicalHashesExact": true,
-            "sourceDigest": "30b87c588189b9176fdc803b8f2b562a1a8fab89f799f4cdaf401bb33da8d194",
-            "historyDigest": "ea0e26023b461d06b44e2c505022da4137391f9c0aa22d45876c36d13c779f0c",
+            "sourceDigest": "db2e9a1a776e4793b42cb6f8adf7521c7330407e1d25f2db1d795e153b44967a",
+            "historyDigest": "d247127ad1c9d86170842d193542fa41ae6a51cebbc8537b0167ea5f1c920ebf",
             "revisionCount": 19,
             "changeSetCount": 6,
             "checkpointCount": 6,
@@ -1814,21 +1814,21 @@
             "previewRevisionCount": 3,
             "previewChangeSetCount": 1,
             "checkpointHashesExact": true,
-            "historyCurrentRevisionDigest": "4edd3ff9fab1119c085eaa66882d6bb7744f4e063cf291dec2fff743ee8fc0da",
+            "historyCurrentRevisionDigest": "fb5a6a6321abe2b952be2a29054c834283411893bd22787151fa2eb653fda24e",
             "historyRevisionCount": 3,
             "workspaceStatus": null,
             "workspaceBlockingIssueCount": 0
           },
           "after": {
-            "ledgerDigest": "0923ca1ba1d426d09b7ae680bdd53e837dd3ebaa90e564e98bd0afb8577ce50b",
-            "revisionDigest": "4fbb3abfad36e599b7aea90def842df723ec6ad0040d0f1639646fe02b78ce6f",
-            "changeSetDigest": "d45c92da181a9c2eac39b2f0a3e129a159ac58c4ee98d6cf405d85e29829aadb",
-            "checkpointDigest": "986fe90b748fb5680131d56dadc724031d8b5f3e1b8af9b37eab3b0415354597",
-            "jobDigest": "97a032b9eb58cfb3390a47a34cfd939d46cf66f88871efc53cdfe3848f76eacc",
-            "physicalDigest": "673f46a32910ec256595b7a759b0dd802975b60a5911e12941528ba633aded42",
+            "ledgerDigest": "11206331f649ee57bf4017d0dc3b4dc8d6d30875d4c4985184eb3311acb6a221",
+            "revisionDigest": "5e39278eda0cefa18a4251a57179edff9b07e9fbbe3040d6b7c4a69e13bf0afd",
+            "changeSetDigest": "a71d2be6f966d1963e7748d715f239778277ef29358e3569d2cf9e88a61e6b2b",
+            "checkpointDigest": "5842180580f804f51b968c5742e80216c17736ad15715cc38b39bcb18a739908",
+            "jobDigest": "d3ef19a203d1b6fe1bd6cbbae1c2e0a0ab9930c651ba44039fabbc89e9cf4a16",
+            "physicalDigest": "5d50c233969803c6634c470b9f93d683d746a22e0b5e6cf4df25022a8f8fcb65",
             "physicalHashesExact": true,
-            "sourceDigest": "30b87c588189b9176fdc803b8f2b562a1a8fab89f799f4cdaf401bb33da8d194",
-            "historyDigest": "ea0e26023b461d06b44e2c505022da4137391f9c0aa22d45876c36d13c779f0c",
+            "sourceDigest": "db2e9a1a776e4793b42cb6f8adf7521c7330407e1d25f2db1d795e153b44967a",
+            "historyDigest": "d247127ad1c9d86170842d193542fa41ae6a51cebbc8537b0167ea5f1c920ebf",
             "revisionCount": 19,
             "changeSetCount": 6,
             "checkpointCount": 6,
@@ -1838,7 +1838,7 @@
             "previewRevisionCount": 3,
             "previewChangeSetCount": 1,
             "checkpointHashesExact": true,
-            "historyCurrentRevisionDigest": "4edd3ff9fab1119c085eaa66882d6bb7744f4e063cf291dec2fff743ee8fc0da",
+            "historyCurrentRevisionDigest": "fb5a6a6321abe2b952be2a29054c834283411893bd22787151fa2eb653fda24e",
             "historyRevisionCount": 3,
             "workspaceStatus": null,
             "workspaceBlockingIssueCount": 0
@@ -1910,6 +1910,6 @@
     "electronPressure": 26,
     "productScenarios": 6
   },
-  "durationMs": 184260,
+  "durationMs": 186617,
   "passed": true
 }
