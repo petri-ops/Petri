@@ -36,7 +36,10 @@ function localSpawn() {
 
 after(() => { mux.closeAll(); try { rmSync(fakeHome, { recursive: true, force: true }); } catch {} });
 
-test('mux 会话: fs verbs 在复用连接上往返（list/write/read）', async () => {
+test('mux 会话: fs verbs 在复用连接上往返（list/write/read）', {
+  // list 腿依赖 GNU find -printf（同 block67-node-agent-fs list 用例平台门）
+  skip: process.platform === 'darwin' && 'macOS BSD find 无 -printf（list 腿依赖 GNU find；语义面由 Linux 节点 / Windows Git Bash 覆盖）',
+}, async () => {
   const root = join(fakeHome, 'proj').replace(/\\/g, '/');
   const session = mux.createMuxSession({ alias: 'test', spawnFn: localSpawn });
 
@@ -72,7 +75,11 @@ test('mux 会话: exec verb 单行 JSON 透传', async () => {
 test('mux 会话: die 错误码经 envelope stderr 字段回传（BLOCK-96 F3）', async () => {
   const session = mux.getMuxSession({ alias: 'test', spawnFn: localSpawn });
   // fs_cp 目标已存在 → die already_exists（exit 64）：envelope 第 4 字段携带 stderr(b64)
-  const aMd = join(fakeHome, 'proj', 'a.md').replace(/\\/g, '/');
+  // 自建前置（勿依赖 fs verbs 用例的副作用——该用例在 macOS 平台门下可能被 skip）
+  const projDir = join(fakeHome, 'proj');
+  mkdirSync(projDir, { recursive: true });
+  const aMd = join(projDir, 'a.md').replace(/\\/g, '/');
+  writeFileSync(aMd, '# 内容甲');
   const r = await session.run(remoteAgentCommand([
     'fs_cp',
     Buffer.from(aMd).toString('base64'),

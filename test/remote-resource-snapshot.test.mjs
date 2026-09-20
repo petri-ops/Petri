@@ -77,7 +77,10 @@ test('node-agent 脚本：bash -n 语法通过且包含 sys_resource verb 分发
   }
 });
 
-test('node-agent sys_resource：bash 执行输出单行合法 JSON（本机 Linux/WSL 语义面）', () => {
+test('node-agent sys_resource：bash 执行输出单行合法 JSON（本机 Linux/WSL 语义面）', {
+  // sys_resource 只读 /proc 与 df -P（目标面=Linux 节点）；macOS 无 /proc → 平台门 skip 可见
+  skip: process.platform === 'darwin' && 'macOS 无 /proc（sys_resource 只读 /proc/meminfo+loadavg；语义面由 Linux 节点实机验收覆盖）',
+}, () => {
   if (process.platform === 'win32') {
     // Windows 指挥席无 bash 时跳过执行面（dell/aliyun 节点为 Linux，由实机验收覆盖）。
     return;
