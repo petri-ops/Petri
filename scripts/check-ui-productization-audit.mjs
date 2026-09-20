@@ -381,6 +381,10 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 不重写共享历史。
   '1727535040e040825c2b3fc90311ef853b327db6',
   '51843c3a76d4979e4d1fa26a175379863520c3e1',
+  // 2026-09-21 BLOCK-108 Qoder 化实现提交（397bc36e，时间线呈现层）：同提交台账由
+  // 收口提交统一补登（UI-429，随实机 flow 7/7 翻 verified；BLOCK-94 0e1ac53 同型
+  // 先例）。豁免同提交台账要求；不重写共享历史。
+  '397bc36eb7a5f2caf70c8e1f024cc98bece993db',
 
   // 2026-09-19 BLOCK-102 P2 前端竞态治理提交（21d84f52，渲染层竞态修复）：
   // subject 未带 UI-### 为笔误，UI-425 条目（P3/P4 前端切片）与本提交同批由

@@ -4068,3 +4068,10 @@
 .sc-tool-row-head[data-expanded] .sc-tool-qoder-preview {
   white-space: normal;
 }
+
+/* BLOCK-108 实机腿视觉修正：长命令预览换行时耗时数字会被挤成竖排
+   （「4.3 s」逐字符断行），qoder 行内锁定不换行、不收缩。 */
+.sc-tool-qoder-head .sc-tool-activity-duration {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}

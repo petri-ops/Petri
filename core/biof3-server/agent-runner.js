@@ -720,6 +720,9 @@ async function runAgentLoop({
     loopRunId,
     loopState,
     cancellationObserved,
+    // BLOCK-108 P1 — 阶段进度 recorder 随结果返回（同 assistantToolActivities
+    // 的 BLOCK-34 P1 先例）：落库 meta.progressUpdates，历史刷新后过渡叙述不丢。
+    assistantProgress,
     // BLOCK-88 P4R-3 源码契约：失败原因投影名须在 thin facade 显式出现
     // （test/result-studio-agent-binding.test.mjs 断言）——保留绑定，抑制基线登记豁免。
     providerFailureReason,
@@ -766,7 +769,7 @@ async function runAgentLoop({
         context,
         userId,
         turnStartedAt,
-        assistantProgress: null,
+        assistantProgress: assistantProgress || null,
         resultEditProgress: null,
         assistantToolActivities: assistantToolActivities || null,
         // UI-272 — 思考段随消息落库（历史会话可回看每轮工具调用前的思考）

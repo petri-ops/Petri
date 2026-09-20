@@ -145,6 +145,29 @@ function docsSidebarPlugin() {
 export default defineConfig({
   plugins: [
     docsSidebarPlugin(),
+    // 依赖升级批连带适配（BLOCK-108 实机抓真，2026-09-21）：vite 8.3.0 内置 oxc 的
+    // react-refresh 包装器生成的模块代码调用 `RefreshRuntime.getRefreshReg(...)`，
+    // 但 @vitejs/plugin-react 6.1.1 的 /@react-refresh 运行时未导出该 API
+    // （dist/refresh-runtime.js 导出清单无 getRefreshReg）→ dev 页面每个组件模块
+    // 抛 TypeError、React 不挂载（vite build/测试路径无 refresh 代码，故升级批未踩到）。
+    // 此处 dev-only 给运行时补上缺失导出：getRefreshReg(file) 返回逐组件注册函数，
+    // 语义对齐 react-refresh 官方 runtime 的同名 API。上游对齐后本插件可删。
+    {
+      name: 'gewu:react-refresh-runtime-polyfill',
+      apply: 'serve',
+      transform(code, id) {
+        if ((id.includes('/@react-refresh') || id.includes('refresh-runtime.js'))
+          && !code.includes('export function getRefreshReg')) {
+          return {
+            code: code
+              + '\n// gewu:react-refresh-runtime-polyfill — 供 vite 8.3 oxc refresh 包装器调用\n'
+              + 'export function getRefreshReg(filename) { return (type, id) => register(type, id ?? filename); }\n',
+            map: null,
+          };
+        }
+        return null;
+      },
+    },
     // MDX 插件必须在 react 之前，让 .mdx/.md 能被转成 JSX
     mdx({
       // GFM 表格/删除线/任务列表 + frontmatter 识别剥离（否则 ---...--- 被当正文渲染）

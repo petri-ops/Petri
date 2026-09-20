@@ -1212,6 +1212,10 @@ async function runLoop({
     assistantToolActivities,
     // UI-272 — 思考段随结果返回，供 agent-runner 落库到消息 meta
     reasoningByIteration,
+    // BLOCK-108 P1 — 阶段进度（每轮过渡叙述）recorder 随结果返回：此前
+    // 落库传 null，meta.progressUpdates 从未持久化，历史刷新后过渡叙述
+    // 全部消失（与 BLOCK-34 P1 工具记录消失同构的漏传，实机腿抓真）。
+    assistantProgress,
     loopRunId,
     loopState,
     toolResultEventsByCallId,

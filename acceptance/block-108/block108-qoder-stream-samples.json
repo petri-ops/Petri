@@ -1,0 +1,278 @@
+{
+  "prompt": "请依次用工具完成三件事，每件事单独一次调用、按顺序逐个来做、不要并行，并且每次调用工具之前先用一两句话说明你接下来要做什么：(1) 执行命令 `node -e \"setTimeout(()=>console.log(1),4000)\"` 并等它执行完；(2) 执行命令 `cat 不存在的文件-qoder腿.txt`——该文件不存在、执行会失败，这是测试的一部分，请照实执行不要跳过；(3) 列出项目根目录的文件；最后用一句话总结这个项目里有什么。",
+  "samples": [
+    {
+      "t": 814,
+      "tl": 1,
+      "running": 0,
+      "transitions": 0,
+      "qoderRows": 0
+    },
+    {
+      "t": 1630,
+      "tl": 1,
+      "running": 0,
+      "transitions": 0,
+      "qoderRows": 0
+    },
+    {
+      "t": 2442,
+      "tl": 1,
+      "running": 0,
+      "transitions": 0,
+      "qoderRows": 0
+    },
+    {
+      "t": 3245,
+      "tl": 1,
+      "running": 0,
+      "transitions": 1,
+      "qoderRows": 0
+    },
+    {
+      "t": 4050,
+      "tl": 1,
+      "running": 0,
+      "transitions": 1,
+      "qoderRows": 0
+    },
+    {
+      "t": 4864,
+      "tl": 1,
+      "running": 0,
+      "transitions": 1,
+      "qoderRows": 0
+    },
+    {
+      "t": 5679,
+      "tl": 1,
+      "running": 0,
+      "transitions": 2,
+      "qoderRows": 0
+    },
+    {
+      "t": 6492,
+      "tl": 1,
+      "running": 0,
+      "transitions": 2,
+      "qoderRows": 0
+    },
+    {
+      "t": 7307,
+      "tl": 1,
+      "running": 0,
+      "transitions": 2,
+      "qoderRows": 0
+    },
+    {
+      "t": 8119,
+      "tl": 1,
+      "running": 0,
+      "transitions": 2,
+      "qoderRows": 0
+    },
+    {
+      "t": 8929,
+      "tl": 1,
+      "running": 0,
+      "transitions": 2,
+      "qoderRows": 0
+    },
+    {
+      "t": 9747,
+      "tl": 1,
+      "running": 0,
+      "transitions": 2,
+      "qoderRows": 0
+    },
+    {
+      "t": 10551,
+      "tl": 1,
+      "running": 1,
+      "transitions": 3,
+      "qoderRows": 1
+    },
+    {
+      "t": 11368,
+      "tl": 1,
+      "running": 0,
+      "transitions": 3,
+      "qoderRows": 0
+    },
+    {
+      "t": 12184,
+      "tl": 1,
+      "running": 0,
+      "transitions": 3,
+      "qoderRows": 0
+    },
+    {
+      "t": 13002,
+      "tl": 1,
+      "running": 0,
+      "transitions": 3,
+      "qoderRows": 0
+    },
+    {
+      "t": 13817,
+      "tl": 1,
+      "running": 0,
+      "transitions": 3,
+      "qoderRows": 0
+    },
+    {
+      "t": 14633,
+      "tl": 1,
+      "running": 1,
+      "transitions": 4,
+      "qoderRows": 1
+    },
+    {
+      "t": 15437,
+      "tl": 1,
+      "running": 1,
+      "transitions": 4,
+      "qoderRows": 1
+    },
+    {
+      "t": 16251,
+      "tl": 1,
+      "running": 1,
+      "transitions": 4,
+      "qoderRows": 1
+    },
+    {
+      "t": 17066,
+      "tl": 1,
+      "running": 1,
+      "transitions": 4,
+      "qoderRows": 1
+    },
+    {
+      "t": 17882,
+      "tl": 1,
+      "running": 1,
+      "transitions": 4,
+      "qoderRows": 1
+    },
+    {
+      "t": 18686,
+      "tl": 1,
+      "running": 0,
+      "transitions": 4,
+      "qoderRows": 0
+    },
+    {
+      "t": 19503,
+      "tl": 1,
+      "running": 0,
+      "transitions": 4,
+      "qoderRows": 0
+    },
+    {
+      "t": 20317,
+      "tl": 1,
+      "running": 0,
+      "transitions": 4,
+      "qoderRows": 0
+    },
+    {
+      "t": 21130,
+      "tl": 1,
+      "running": 0,
+      "transitions": 4,
+      "qoderRows": 0
+    },
+    {
+      "t": 21932,
+      "tl": 1,
+      "running": 0,
+      "transitions": 4,
+      "qoderRows": 0
+    },
+    {
+      "t": 22739,
+      "tl": 1,
+      "running": 0,
+      "transitions": 5,
+      "qoderRows": 0
+    },
+    {
+      "t": 23551,
+      "tl": 1,
+      "running": 0,
+      "transitions": 5,
+      "qoderRows": 0
+    },
+    {
+      "t": 24368,
+      "tl": 1,
+      "running": 0,
+      "transitions": 5,
+      "qoderRows": 0
+    },
+    {
+      "t": 25185,
+      "tl": 1,
+      "running": 0,
+      "transitions": 5,
+      "qoderRows": 0
+    },
+    {
+      "t": 25997,
+      "tl": 1,
+      "running": 0,
+      "transitions": 5,
+      "qoderRows": 0
+    },
+    {
+      "t": 26813,
+      "tl": 1,
+      "running": 0,
+      "transitions": 5,
+      "qoderRows": 0
+    },
+    {
+      "t": 27629,
+      "tl": 1,
+      "running": 0,
+      "transitions": 5,
+      "qoderRows": 0
+    },
+    {
+      "t": 28445,
+      "tl": 1,
+      "running": 0,
+      "transitions": 5,
+      "qoderRows": 0
+    },
+    {
+      "t": 29254,
+      "tl": 1,
+      "running": 0,
+      "transitions": 5,
+      "qoderRows": 0
+    },
+    {
+      "t": 30068,
+      "tl": 1,
+      "running": 0,
+      "transitions": 5,
+      "qoderRows": 0
+    },
+    {
+      "t": 30880,
+      "tl": 1,
+      "running": 0,
+      "transitions": 5,
+      "qoderRows": 0
+    },
+    {
+      "t": 31694,
+      "tl": 1,
+      "running": 0,
+      "transitions": 5,
+      "qoderRows": 0
+    }
+  ]
+}

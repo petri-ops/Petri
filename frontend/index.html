@@ -7,6 +7,14 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- 依赖升级批连带适配（BLOCK-108 实机抓真）：vite 8.3.0 的 @vite/client 含
+         `const forwardConsole = __SERVER_FORWARD_CONSOLE__` 占位符，本仓库 dev 形态下
+         该占位符未被服务端替换、原样到达浏览器 → ReferenceError → React 不挂载
+         （症状=dev 页面白屏、root 0 子节点；vite build/测试路径不受影响，故升级批
+         未踩到）。此处预定义为 false＝console 不转发到 dev 终端（与 vite 默认关闭
+         语义一致）；该全局若被未来 vite 版本正常替换，此处赋值无害（模块内 const
+         声明会遮蔽全局，仅作兜底）。 -->
+    <script>globalThis.__SERVER_FORWARD_CONSOLE__ = false;</script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

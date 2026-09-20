@@ -22,7 +22,7 @@ Qoder 的会话信息流形态（用户截图实测）：
 | G3 | 簇头摘要 =「已完成 3 项 · 3.9 s」（完成态）/「正在处理 1/3 项 · 已运行 Ns」（运行态） | 「执行工具 N 次」计数式簇头（保留需注意计数与秒表——L5 flow 契约依赖「N 项需注意」字样） |
 | G4 | 思考是簇外的独立节点（ConversationTimeline 有意不传 `reasoningByIteration`） | 思考行在簇内（已思考 · 首行预览 · 点击展开全文） |
 
-**数据层结论（P0 已核，零后端改动）**：过渡叙述的数据链路已全通——捕获（仅工具轮）→ `agent_progress` 实时下发 → `meta.progressUpdates` 落库（cap 50 条 × 4000 字）→ `message.progressUpdates` 前端喂数。本包全部工作在渲染层。
+**数据层结论（P0 已核）与实机修正（P1 抓真）**：P0 只读探索结论为「过渡叙述数据链路已全通、零后端改动」——**实机腿第一跑证伪了持久化半条**：实况侧 `agent_progress` 事件链路完好（Q1 实机 PASS），但 `agent-runner.js` 落库 `appendAssistantMessage` 时传 `assistantProgress: null`，`meta.progressUpdates` 从未落库（loop-orchestrator 每轮 `record` 的快照只活在 SSE，刷新即失；这正是 P0 实测「全库仅 1 条」的真因，与 BLOCK-34 P1 修过的「工具记录消失」同构——工具记录随结果返回修了，progress 漏了）。修正：本包 P1 增补**持久化穿参一处**——loop-orchestrator 结果结构随返回 `assistantProgress`（recorder），agent-runner 落库照 `reasoningByIteration` 同款穿参，adapter 零改动（其 snapshot 消费端早已就绪）。§2 红线「零后端改动」据此修正为「零 schema 改动 / 零协议改动；仅 additive 穿参一处」。
 
 ## 1. 范围（P1→P3）
 
@@ -32,7 +32,7 @@ Qoder 的会话信息流形态（用户截图实测）：
 
 ## 2. 非范围（红线）
 
-- 零后端改动：不改 loop-orchestrator / conversation-adapter / 事件协议 / 持久化 schema。
+- 零 schema 改动 / 零事件协议改动；后端仅限 §1 P1 修正所述的 additive 穿参一处（assistantProgress 随结果返回，镜像 BLOCK-34 P1 / UI-272 既有先例）。
 - 零新依赖；不碰 `frontend/package.json` / lockfile（P6 源绑定）。
 - 不动 Dock（ToolActivityDock）、非时间线旧调用方形态、SimpleChat 降级路径（D2：无时间线素材退回分组堆叠）。
 - 不做会话列表/消息气泡/输入区改造；不做「已压缩上下文」分隔标记（compaction 呈现，另立候选）。
@@ -95,3 +95,11 @@ UI-305 ①「首条阶段进度（意图）由宿主省略」与弱化进度行�
 
 - UI-268（摘要条+内联手风琴）/UI-272（两级折叠）/UI-273（changeDiff）/UI-315（终端块）/UI-316（子智能体行内状态）/UI-382/385/387（子智能体卡）全部保留：本包只改「时间线模式下的行形态与簇头文案」，展开体复用既有实现。
 - BLOCK-107 D1=c/D2/D3/D4/D6 裁决全部沿用；D5 的「插在对应工具簇之后」修正为「渲染在对应簇之前」（用户 2026-09-21 Qoder 形态裁决，见 §7.2）；P2c 秒表保留进新簇头。
+
+## 9. 收口笔录（2026-09-21，一次会话 P0→P3 + 实机收口；夜间预授权）
+
+- **交付**：P1 段模型（过渡叙述簇前 + 思考折入 ToolsSegment）+ P2 时间线上轴（过渡叙述正文式容器、含首条、思考入簇传参）+ P3 簇内 Qoder 行形态（计数式簇头 / 统一单行含 exec 默认折叠 / 点击展开 / 思考入簇 / 移除 routine 二级折叠）+ 持久化穿参一处（assistantProgress 随结果返回，§1 修正）。门控 `collapseWhenSettled`，Dock/桥接/降级路径零变化。
+- **实机抓真三件**（首跑 4/7 → 修正后 7/7）：①持久化穿参缺失（§1 修正，真后端缺陷）；②flow 采样窗口 3 样本在模型迭代间思考停顿处误判终态 → 提到 10 样本；③Q4 选择器只展开末簇而 exec 在前簇 → 改全簇展开。②③属 flow 设计非产品。
+- **附带抓真（依赖升级批连带 ×2，本包修复）**：vite 8.3.0 dev server 双断链（`__SERVER_FORWARD_CONSOLE__` 未替换致 React 不挂载 + 内置 oxc refresh codegen 调 `getRefreshReg` 而 plugin-react 6.1.1 运行时未导出）→ index.html 兜底 + dev-only polyfill 插件，均为 dev-only、上游对齐后可删。**含义：依赖升级批合入后 `npm run dev` 全仓渲染面不可用**，本包实机腿是首次暴露（build/测试路径不可见）。
+- **门禁**：契约测试 segments 19/19 + timeline 11/11 + toolActivity 14/14 + SimpleChat 15/15；全量前端 146 文件全绿（vitest 5）；tsc 0 红 / lint 0 error / arch / secret / docs:check 262 / ui:audit / hygiene / code-size / test:changed 九门全绿；实机 flow `block108-qoder-stream` **7/7**（Q1 过渡叙述×5 簇前、Q2 计数簇头+需注意、Q3 统一单行、Q4 点击展开、Q5 思考入簇×5、Q6 刷新同序、Q7 清理）。UI-429 **verified**。
+- **裁决呈报（plan §7.1）**：exec 封装族建议保留；`yield_ms` 中间档收敛与 `result_*_in_context` 族合并等行为变更待用户裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。

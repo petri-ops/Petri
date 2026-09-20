@@ -4860,13 +4860,13 @@
       "id": "BLOCK-108-CONVERSATION-STREAM-QODER-FIDELITY",
       "path": "docs/block-108-conversation-stream-qoder-fidelity-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-108-conversation-stream-qoder-fidelity",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-21",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "block-108",
         "conversation-stream",
@@ -4874,7 +4874,8 @@
         "chat-rendering",
         "tool-activity-rows"
       ],
-      "notes": "会话信息流 Qoder 化：执行间过渡叙述 + 簇内紧凑单行流（用户裁决原话「更进一步的靠近 qoder的情况 执行和执行之间是有过渡性的描述 执行内部是有运行的终端命令和结果 思考的情况 以及读取文件等 内部是紧凑的最好是单行展示 只有点击才会展开相关内容」＋Qoder 截图；用户睡眠窗口预授权夜间自主推进）。P0 已核：过渡叙述数据链路已全通（loop-orchestrator.js:771 仅工具轮 assistantProgress.record → agent_progress 实时下发 + meta.progressUpdates 落库 conversation-adapter.js:118 → message.progressUpdates 前端喂数），零后端改动。三阶段：P1 段模型（progress 改序簇前 + reasoning 折入 ToolsSegment）→ P2 时间线上轴（过渡叙述正文式渲染含首条，UI-305 首条省略约定在时间线呈现上取代登记 plan §7.2）→ P3 簇内 Qoder 行形态（计数式簇头「执行工具 N 次」+ 统一单行含 exec 默认折叠 + 点击展开 + 思考入簇；门控 collapseWhenSettled，Dock/桥接旧调用方零变化）。非范围=零后端/零新依赖/不动 Dock 与降级路径/不删 harness 工具（bg_exec 审计=plan §7.1 建议登记：exec 封装族有必要保留，yield_ms 中间档收敛等行为变更需另裁）。UI 台账=UI-429。"
+      "notes": "会话信息流 Qoder 化：执行间过渡叙述 + 簇内紧凑单行流（用户裁决原话「更进一步的靠近 qoder的情况 执行和执行之间是有过渡性的描述 执行内部是有运行的终端命令和结果 思考的情况 以及读取文件等 内部是紧凑的最好是单行展示 只有点击才会展开相关内容」＋Qoder 截图；用户睡眠窗口预授权夜间自主推进）。P0 已核：过渡叙述数据链路已全通（loop-orchestrator.js:771 仅工具轮 assistantProgress.record → agent_progress 实时下发 + meta.progressUpdates 落库 conversation-adapter.js:118 → message.progressUpdates 前端喂数），零后端改动。三阶段：P1 段模型（progress 改序簇前 + reasoning 折入 ToolsSegment）→ P2 时间线上轴（过渡叙述正文式渲染含首条，UI-305 首条省略约定在时间线呈现上取代登记 plan §7.2）→ P3 簇内 Qoder 行形态（计数式簇头「执行工具 N 次」+ 统一单行含 exec 默认折叠 + 点击展开 + 思考入簇；门控 collapseWhenSettled，Dock/桥接旧调用方零变化）。非范围=零后端/零新依赖/不动 Dock 与降级路径/不删 harness 工具（bg_exec 审计=plan §7.1 建议登记：exec 封装族有必要保留，yield_ms 中间档收敛等行为变更需另裁）。UI 台账=UI-429。",
+      "completedAt": "2026-09-21"
     }
   ],
   "lastUpdated": "2026-09-21",
