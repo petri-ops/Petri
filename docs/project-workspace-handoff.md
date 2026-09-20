@@ -13,6 +13,14 @@
 3. **存量红 7 件归属核对**（Mac 侧跑定向即见）：block67 fs verbs 4 红（macOS bash 3.2 面）+ sys_resource 1 红（Linux/WSL 语义面）——Windows 本机实测全绿（14/14、5/5），属平台差异非产品缺陷，可在 Mac 侧修断言或标注平台跳过；P6 源绑定 2 红随第 1 项转绿。
 4. **Windows 侧新增基建需 Mac 知悉**：StackWatchdog 计划任务（每 5 分钟栈健康+死亡法证+自愈，wscript 隐藏链，当日三次进程团灭后部署并实战验证）；**BLOCK-102 :3001 Host 白名单** `^(localhost|127\.0\.0\.1)(:\d+)?$`——若 Mac 侧存在非 localhost Host 访问 Windows :3001 的场景需先核对。
 
+### ⚡ 增补（2026-09-20 深夜 Windows 会话，BLOCK-103/104/105 三包交付后的 Mac 侧增量）
+
+5. **先跑 `npm run state` + `npm run quality:secret && npm run quality:arch && npm run quality:lint`**——BLOCK-105 交付后 closeout 已扩为八门（+quality:secret/arch/lint），Mac 侧首次跑 quality 三门应全绿（eslint-suppressions.json 用正斜杠跨平台；若 lint 红请先对账 Mac 侧新增违规而非改基线）。`npm run quality:baseline` 一键重跑 P0 四项体检（python3 已适配 macOS）。
+6. **新增跳过类测试的恢复条件**（Mac 侧部分自动恢复）：g0-rs-p6 两测 win32 skip → Mac 侧会**真实运行**（预期：装包/重打后转绿，或仍红按 §11 归因）；agent-tool-result + agent-workflow-phase6 需装领域包（`deseq2`/`deg-standardization`，装包自动恢复）；deepseek-retry 六用例 skip 是平台无关的「retry 层未实现」语义（实现 retry 时移除门）；ide-tools-terminal 默认 skip（node-pty conpty 需交互宿主，排障 `NODE_PTY_TEST_ALLOWED=1`）。
+7. **Windows 专属脚本已标注**（BLOCK-105 P4 scripts-platform-contract 门禁）：`restart-dev-stack.sh` 事实为 windows 链（taskkill/PowerShell）——**Mac 侧重启 dev 栈走 SKILL 第 7 条**（lsof 定点杀 :3005 后起栈），等价脚本待补（候选小活）；8 个 .sh 全部带 `# platform:` 标注，新脚本必须标注（门禁会拦）。
+8. **Lint 债务纪律**（AGENTS.md「Lint 债务纪律（棘轮）」节 + SKILL「代码质量门禁纪律」节）：eslint-suppressions.json 存量 2912 条只许收缩不许放宽；新违规三分类（真缺陷修/化石删/豁免登记）；parsing error 无法抑制先清化石。
+9. **e5c23597..71dd5d98 治理沉淀**：等待纪律/预授权开工模式/AUDIT-LOG 自动精简（`npm run audit:compact`）均已入 gewu-dev-infra SKILL.md——Mac 会话直接继承，无需额外动作。
+
 ## 2026-09-19 Mac 会话总账④（用户裁决「开P4」=整包 closeout；Windows 侧用户配合）
 
 1. **closeout 聚合 5/5 全绿**；P6 live 重打尝试一次未果（p6_restart_worker_exited_before_checkpoint）维持🟡归 G0-RS 专门会话。

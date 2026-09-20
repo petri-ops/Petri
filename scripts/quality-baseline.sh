@@ -27,7 +27,7 @@ npx --yes jscpd@latest src core frontend/src --min-tokens 50 --reporters json --
 
 echo ""
 echo "== 摘要 =="
-python - << 'PYEOF'
+python3 - << 'PYEOF'
 import json, io, os, glob
 
 out_dir = sorted(glob.glob('acceptance/block-105/baseline-*'))[-1]
