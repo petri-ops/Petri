@@ -2056,12 +2056,19 @@
       "id": "block105-code-quality",
       "note": "BLOCK-105 代码质量与安全治理：ESLint flat config、密钥门禁、Knip 配置与体检基线。改动影响 quality:* 门禁与豁免基线。",
       "patterns": [
+        ".dependency-cruiser.cjs",
         "eslint.config.mjs",
         "knip.json",
         "scripts/secret-scan.mjs",
-        "acceptance/block-105/**"
+        "acceptance/block-105/**",
+        "src/main/_window-create.js",
+        "src/ipc/window-manager.js",
+        "src/preload.js",
+        "eslint-suppressions.json"
       ],
-      "tests": [],
+      "tests": [
+        "test/electron-security-assertions.test.mjs"
+      ],
       "frontendRelated": false,
       "classifiesScripts": true,
       "scriptRole": "development-smoke"

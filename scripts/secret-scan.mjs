@@ -43,6 +43,10 @@ const FIXTURE_ALLOWLIST = new Set([
   'test/scientific-task-spec.test.mjs',
 ]);
 
+// 前缀豁免：引用 test fixture 内容的报告/证据产物（如 eslint-report JSON 把
+// test 文件的行内容复制进来）——间接命中按 fixture 处理，非真实泄漏。
+const FIXTURE_PREFIX_ALLOWLIST = ['acceptance/block-105/'];
+
 function scan() {
   const production = [];
   const fixture = [];
@@ -60,8 +64,11 @@ function scan() {
     for (const line of out.split('\n')) {
       if (!line) continue;
       const rel = line.split(path.sep).join('/');
-      if (FIXTURE_ALLOWLIST.has(rel)) fixture.push({ file: rel, pattern: name });
-      else production.push({ file: rel, pattern: name });
+      if (FIXTURE_ALLOWLIST.has(rel) || FIXTURE_PREFIX_ALLOWLIST.some((p) => rel.startsWith(p))) {
+        fixture.push({ file: rel, pattern: name });
+      } else {
+        production.push({ file: rel, pattern: name });
+      }
     }
   }
   return { production, fixture };

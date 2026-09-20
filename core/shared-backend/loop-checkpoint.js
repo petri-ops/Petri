@@ -782,11 +782,6 @@ function sanitizeValidatorResult(result) {
 /**
  * Truncate a string to maxLen, appending "…" if truncated.
  */
-function truncate(str, maxLen) {
-  if (!str || str.length <= maxLen) return str;
-  return str.slice(0, maxLen) + '…';
-}
-
 function sanitizeRepairAttempt(attempt) {
   return Object.freeze({
     strategyId: attempt.strategyId,

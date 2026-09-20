@@ -1,6 +1,6 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-20（**BLOCK-105-CODE-QUALITY-GOVERNANCE 立项即启动 active（P0-LAUNCH，用户裁决「好的 立一个工作包」）**：代码质量与安全治理——摸底实锤全仓零 ESLint（前端 check 仅 tsc --noEmit）；五阶段 P0 只读体检（npx 零新依赖）→P1 lint 补齐+防增量门禁→P2 存量归因清偿（K 簇模式+棘轮）→P3 架构机械化+Electron 断言→P4 收口；红线=工具链只装根 package.json 不碰 frontend lockfile（P6 源绑定），新依赖走 DEPENDENCY-CHANGE-CHECKLIST 裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-20（**BLOCK-105 P3 架构机械化+Electron 断言 completed（用户裁决「继续推」）**：dependency-cruiser 五规则机械化（IPC 必经 desktopBridge/core 依赖方向/env-coordinator 登记桥），1214 模块 3686 依赖 0 违规，quality:arch blocking；Electron 安全断言 3/3（全窗口四项配置/preload 唯一暴露面/fuses 登记为 G1+）；化石清理 2 件（重复函数声明，parsing error 曾阻断 suppressions）；closeout 八门全绿（quality:secret/arch/lint 入链）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 - **启动 active（2026-09-20 立项即启动，P0-LAUNCH）：`BLOCK-105-CODE-QUALITY-GOVERNANCE`**（plan `docs/block-105-code-quality-governance-plan.md` §1）：**代码质量与安全治理**——测试面已工业化（2250 绿）但静态质量层空白：补 lint 层（typescript-eslint strictTypeChecked+react-hooks+security，根目录 flat config 跨覆盖 frontend/src）+安全扫描（Semgrep/Gitleaks/依赖 SCA）+冗余度量（Knip 死代码/jscpd 重复率）+架构规范机械化（dependency-cruiser：IPC 必经 desktopBridge/pages 布局/_ 前缀转可执行规则）+Electron 断言（fuses/contextIsolation）；节奏=P0 只读体检零新依赖→P1 lint+防增量→P2 存量归因三分类（真缺陷/化石/豁免登记）+棘轮只紧不松→P3 架构机械化→P4 收口；新依赖逐个走 DEPENDENCY-CHANGE-CHECKLIST（D1-D5 预置裁决）；非范围=依赖升级批次（🟡 归 P6 同批）/P6 重打/CodeQL/SonarQube/Stryker/SBOM（后可选再裁决）/G1+。

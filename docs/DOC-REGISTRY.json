@@ -4801,7 +4801,7 @@
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-20",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P2-RATCHET-CLOSED",
+      "phase": "P3-COMPLETED",
       "tags": [
         "block-105",
         "code-quality",
@@ -4811,7 +4811,7 @@
         "architecture-rules",
         "governance-gates"
       ],
-      "notes": "P0 体检 + P1 lint/密钥门禁 + P2 棘轮闭合 completed（eslint-suppressions.json 入库，quality:lint blocking，真缺陷 2 件修复，双套件验证）；P3 dependency-cruiser+Electron 断言待启动。"
+      "notes": "P0 体检/P1 lint+密钥门禁/P2 棘轮闭合/P3 架构机械化+Electron 断言 全 completed；closeout 八门（+quality:secret/arch/lint）；P4 收口待启动。"
     }
   ],
   "lastUpdated": "2026-09-20",

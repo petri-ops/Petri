@@ -154,12 +154,6 @@ async function killPidsGracefully(pids, label) {
 }
 
 // BLOCK-45 逃生口：显式 force-clean 时恢复旧「全杀工作区 Electron 主进程」语义。
-async function stopWorkspaceElectron() {
-  const pids = getWorkspaceElectronPids();
-  if (pids.length === 0) return;
-  await killPidsGracefully(pids, 'workspace Electron processes');
-}
-
 // BLOCK-45：boot 清理 Electron 段 —— 读上一启动记录做定向决策，
 // 不再按二进制路径全杀（并存实例误杀根因，BLOCK-43 P3 实测踩中）。
 // fail-closed 决策向上抛出（中止 boot）；清理失败仅告警不阻塞端口接管。

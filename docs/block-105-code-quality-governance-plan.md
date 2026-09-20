@@ -82,3 +82,12 @@
 - **quality:lint 转 blocking**（去 report-only 旁路）；impact-map 同步登记 block105-code-quality 规则（secret-scan.mjs 等新脚本未分类曾触发 test-affected fail-closed 级联 35 红——门禁按设计工作，登记后 test-affected 16/16 恢复）。
 - 双套件验证：Node 2251 绿 exit 0 + 前端 1146/1146。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 6.3 P3 架构机械化 + Electron 断言 completed（2026-09-20）
+
+- **dependency-cruiser 规则集**（.dependency-cruiser.cjs）：R1 渲染进程禁直引 electron（IPC 必经 desktopBridge）/ R2 渲染进程禁 node 内建 / R3 后端禁引主进程（唯一登记桥=src/main/env-coordinator，A-009 端口单一真相）/ R4 前端禁引后端实现（core/packages/** 共享层合法）/ R5 主进程禁引后端实现。首跑 1214 模块 3686 依赖 6 违规 → 归因（4 处合法共享层误伤修规则 + 2 处 A-009 登记桥）→ **0 违规**。npm run quality:arch blocking（当前架构本身达标，无需 report-only 期，D4 满足）。
+- **Electron 安全断言**（test/electron-security-assertions.test.mjs，3/3）：①全部 BrowserWindow 创建点（主/rail/pop-out 共 3+）四项安全配置断言（contextIsolation:true/nodeIntegration:false/sandbox:true/webSecurity:true）；②preload 唯一 electron 暴露面 + frontend/src 零 electron 实际 import（文本断言与 depcruise R1 双保险，排除 .d.ts/注释）；③fuses 运行时断言如实登记为 G1+ packaged 范围（SENTINEL: BLOCK-105-FUSES-G1）。
+- **化石清理 2 件**（阻断 suppressions 的 parsing error 源）：loop-checkpoint.js 重复 truncate 声明 / dev-electron.js 重复 stopWorkspaceElectron 声明——JS 提升语义运行时无害从未暴露，删运行时被覆盖的前份保持行为零变化。
+- **closeout 链扩展**：quality:secret/arch/lint 三门挂入（八门全绿）；impact-map 登记 block105-code-quality 规则（config+门禁脚本+断言测试+suppressions 基线全覆盖）。
+- **P3 调参抓真**：dep-cruiser tsConfig 跨目录解析 TS18003（改用无 tsConfig 模式）；ESLint suppressions 不支持 parsing error 抑制（化石先清后建基线）。
+- 双套件验证：Node 2252 绿 exit 0（+1=新断言测试）+ 前端 1146/1146。G0 开发期常态 · 不外推 packaged/Provider/GA。
