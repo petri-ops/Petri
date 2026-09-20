@@ -231,7 +231,8 @@
     "quality:secret": "node scripts/secret-scan.mjs",
     "quality:knip": "knip --no-exit-code",
     "quality:arch": "depcruise src core frontend/src --config .dependency-cruiser.cjs",
-    "quality:baseline": "bash scripts/quality-baseline.sh"
+    "quality:baseline": "bash scripts/quality-baseline.sh",
+    "audit:compact": "node scripts/audit-log-compact.mjs"
   },
   "dependencies": {
     "@electron/notarize": "^2.5.0",

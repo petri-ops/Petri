@@ -27,6 +27,10 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 - 先跑 `npm run state`：分支/WIP、AUDIT-LOG 未决（🔴 先处理、🟢 评估）、active 工作包。
 - 输出与 canonical 文档冲突时以 canonical 文档为准；本命令是聚合呈现，不是第二真相源。
 
+### 预授权连续工作模式（用户裁决 2026-09-20「直接说开始，工作自动跟踪」）
+
+用户可预授权跳过「汇报后等裁决」的一轮往返：启动三步完成后**直接按推荐顺序启动第一个工作包开工**（用户在启动提示词中的预先授权即有效裁决，留痕），遇到真正的决策点（新依赖/破坏性操作/范围变更/质量红线）才停下询问。无预授权时默认保守：汇报后等裁决。两类模式下 closeout 与 canonical 回写纪律完全相同。
+
 ## 宣称收口之前
 
 - 跑 `npm run closeout`（八门 fail-fast：hygiene → docs:check → ui:audit:check → test:changed → gate:code-size → quality:secret → quality:arch → quality:lint；BLOCK-105 起三门 quality 门禁入链）；当前工作包另有专项门禁时用 `--gate <npm-script>` 追加。
@@ -119,6 +123,12 @@ Agent 等待后台任务（全量测试、构建、长脚本）时**禁止 sleep
 3. **sleep 盲等三宗罪**：定短了白醒一次还得再睡；定长了干等浪费时间；每轮 poll 都消耗上下文。凡 `sleep` 的对象是「agent 自己在等的任务」＝违规。
 4. **唯一合法 sleep**：被验证系统自身的时序要求——测试内 drain 宽限（block88-project-grants 先例）、重试退避、服务就绪窗口。判据：sleep 的是「被测对象的逻辑」＝合法，sleep 的是「agent 的不耐烦」＝违规。
 5. 多后台任务并行时按通知汇合；有顺序依赖的用阻塞等待串成显式链条，不靠「估个时间」。
+
+## AUDIT-LOG 自动精简（用户裁决 2026-09-20「仅保留必要的内容」）
+
+- AUDIT-LOG 是活跃广播台不是历史库：`npm run audit:compact`（scripts/audit-log-compact.mjs）幂等执行——「最近处理记录」每包仅保留最新一条 + 最新 5 条兜底，淘汰行原文自动追加 docs/archive/checkpoints/（带来源声明），「当前待处理项」全量保留。
+- 会话收口提交前顺手跑一次；50KB 硬阈/跨月触发时**必须先跑本脚本再开始主线**（替代原手工剪切纪律，脚本幂等，重复运行无副作用）。
+- 跑完必须 `npm run docs:check` 验证 entrypoint 直链完整性。归档档是广播历史追溯用，canonical 状态以 roadmap/plan/DOC-REGISTRY 为准。
 
 ## 代码质量门禁纪律（BLOCK-105 · 2026-09-20）
 
