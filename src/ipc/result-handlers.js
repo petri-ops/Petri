@@ -22,7 +22,6 @@ const {
   getLatestVersionNumber,
   getResultVersion,
   listResultVersions,
-  getDatabase,
 } = require('../database/result-db');
 // Branch DB for Phase 3 active branch detection
 const {

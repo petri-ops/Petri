@@ -28,12 +28,12 @@ const {
   saveMemoryVector,
   MAX_CONTENT_LEN,
 } = require('./helpers/memory-vectors');
-const { buildFactsBlockAsync, backgroundExtractFacts } = require('./helpers/user-facts');
+const { backgroundExtractFacts } = require('./helpers/user-facts');
 const {
   getChatSummaryAsync,
   summarizeMessages,
 } = require('./helpers/chat-summary');
-const agentTaskStore = require('./agent-task-store');
+require('./agent-task-store');
 
 /**
  * Append assistant message to conversation with rich metadata.
@@ -342,7 +342,6 @@ function triggerBackgroundFactExtraction({
 async function triggerChatSummary({
   userId,
   messages,
-  assistantAcc,
   projectId,
 }) {
   if (!userId || !Array.isArray(messages)) return;
@@ -355,9 +354,6 @@ async function triggerChatSummary({
       const oldMsgs = messages.slice(0, messages.length - SUMMARY_KEEP_RECENT);
       if (oldMsgs.length >= 6) {
         const existing = await getChatSummaryAsync(userId, projectId);
-        const newSummary = [...messages].reverse().find((m) => m && m.role === 'user')
-          ? [...messages].reverse().find((m) => m && m.role === 'user').content
-          : null;
 
         await summarizeMessages(
           userId,

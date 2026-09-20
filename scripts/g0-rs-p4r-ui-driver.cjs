@@ -692,7 +692,7 @@ async function clickButtonByText(webContents, text) {
 async function capturePageResilient(window) {
   try {
     return await window.webContents.capturePage();
-  } catch (error) {
+  } catch {
     window.show();
     await new Promise((resolve) => setTimeout(resolve, 300));
     return window.webContents.capturePage();

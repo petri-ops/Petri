@@ -9,7 +9,7 @@
  */
 
 import assert from 'node:assert/strict';
-import { test, describe, before, after } from 'node:test';
+import { test, describe, before } from 'node:test';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';

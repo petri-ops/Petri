@@ -42,7 +42,7 @@ const {
 const { getToolEntry } = require('../core/biof3-server/agent-tools/registry.js');
 const { createWorkspaceTools } = require('../core/biof3-server/agent-tools/workspace-tools.js');
 const { dispatchTool } = require('../core/biof3-server/agent-tools/index.js');
-const db = require('../core/biof3-server/db.js');
+require('../core/biof3-server/db.js');
 
 // Windows (without Developer Mode) and some CI images cannot create symlinks,
 // which breaks the escape-prevention fixture. Probe once and skip the symlink

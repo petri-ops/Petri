@@ -6,8 +6,6 @@ import React from 'react';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const dispatchCopilotAsk = vi.fn();
-
 vi.mock('@/components/copilot/SimpleChat', () => ({
   SimpleChat: ({ conversationId }: { conversationId: string | null }) => (
     <div data-testid="side-chat-simplechat">{conversationId}</div>

@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require('path');
 
 const REPORT_THEME_STYLE_ID = 'biof3-report-theme';
 

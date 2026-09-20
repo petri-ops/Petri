@@ -1021,7 +1021,7 @@ function createGitAdapter(options = {}) {
         const abs = pathModule.join(resolvedWorkTree, rel);
         try {
           if (fs.existsSync(abs)) fs.rmSync(abs, { force: true });
-        } catch (e) {
+        } catch {
           throw new GitAdapterError(
             'untracked_delete_failed',
             `failed to delete untracked path ${rel}.`,

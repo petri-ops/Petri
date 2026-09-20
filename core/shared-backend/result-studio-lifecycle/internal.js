@@ -5,7 +5,6 @@
 
 const crypto = require('crypto');
 const fs = require('fs');
-const path = require('path');
 const { ResultStudioPrivatePathError } = require('../result-studio-private-path');
 
 const RESULT_STUDIO_LIFECYCLE_VERSION = 1;

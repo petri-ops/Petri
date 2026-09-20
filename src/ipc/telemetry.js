@@ -17,7 +17,7 @@ function setupTelemetryIpc() {
     try {
       const { reportError } = require("../telemetry");
       return await reportError(payload);
-    } catch (e) {
+    } catch {
       // 遥测自身异常绝不能影响业务——静默
       return { ok: false, reason: "internal" };
     }

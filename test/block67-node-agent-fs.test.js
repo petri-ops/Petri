@@ -3,7 +3,8 @@
  *
  * 直接在本地 bash 执行 BIOF3_AGENT_SH 脚本体（不走 ssh），验证 fs_* verbs
  * 的行为契约：list/stat/read/write/mkdir/mv/rm + not_found 语义 + base64 传输。
- * 前置：本机有 bash（Windows 指挥席 = Git Bash）与 base64/tail/head。
+ * 前置：本机有 bash（Windows 指挥席 = Git Bash）与 base64/tail/head。list 用例另需
+ * GNU find -printf（目标面=Linux 节点；macOS BSD find 无该 primary → 平台门 skip 可见）。
  */
 const test = require('node:test');
 const assert = require('node:assert');
@@ -52,7 +53,9 @@ test('block67 fs verbs: write → stat → read 往返（UTF-8 中文）', async
   assert.strictEqual(decoded, content);
 });
 
-test('block67 fs verbs: list 含目录排序语义条目与隐藏文件过滤（BLOCK-96 F2 NUL 记录协议）', async (t) => {
+test('block67 fs verbs: list 含目录排序语义条目与隐藏文件过滤（BLOCK-96 F2 NUL 记录协议）', {
+  skip: process.platform === 'darwin' && 'macOS BSD find 无 -printf（fs_list 单进程批量化依赖 GNU find；语义面由 Linux 节点 / Windows Git Bash 覆盖）',
+}, async (t) => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-fs-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   fs.writeFileSync(path.join(dir, 'a.txt'), 'aaa');

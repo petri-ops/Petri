@@ -12,7 +12,6 @@ const SCENARIOS_DIR = path.join(REPO_ROOT, 'acceptance/harness-loop/scenarios');
 const BASELINE_PATH = path.join(REPO_ROOT, 'acceptance/harness-loop/baseline.json');
 const METRICS_PATH = path.join(REPO_ROOT, 'acceptance/harness-loop/loop-baseline-metrics.json');
 
-const VALID_SCENARIO_TYPES = ['normal', 'repairable', 'blocking'];
 const VALID_DECISIONS = ['continue', 'complete', 'retry', 'block', 'wait'];
 const VALID_LOOP_INTEGRITY = ['clean', 'blocked'];
 

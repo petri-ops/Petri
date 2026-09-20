@@ -23,7 +23,7 @@
  * 不外推：详见 plan §8。
  */
 
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState, type FC, type ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState, type FC, type ReactNode } from 'react';
 
 import type { DiffRevision } from '../components/editor/CodeMirror/types';
 

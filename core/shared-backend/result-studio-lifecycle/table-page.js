@@ -5,7 +5,6 @@
 
 const fs = require('fs');
 const {
-  RESULT_STUDIO_LIFECYCLE_VERSION,
   MAX_TABLE_PAGE_ROWS,
   MAX_TABLE_PAGE_BYTES,
   ResultStudioLifecycleError,

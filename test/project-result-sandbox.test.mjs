@@ -9,7 +9,7 @@
  * 3. 为后续收敛提供回归基准
  */
 
-import { describe, it, before, after } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,7 +22,7 @@ const __dirname = path.dirname(__filename);
 // 全局结果目录（当前默认）
 const GLOBAL_RESULTS_DIR = path.join(os.homedir(), 'Documents', 'BioF3-Local', 'results');
 const GLOBAL_TOOL_JOBS_DIR = path.join(GLOBAL_RESULTS_DIR, 'tool-jobs');
-const GLOBAL_MCP_JOBS_DIR = path.join(GLOBAL_RESULTS_DIR, 'mcp-tool-jobs');
+path.join(GLOBAL_RESULTS_DIR, 'mcp-tool-jobs');
 
 describe('Phase 0: 基线审计 — 当前路径行为', () => {
   describe('全局目录结构', () => {

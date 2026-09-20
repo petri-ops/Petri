@@ -402,7 +402,7 @@ function createToolActivityRecorder() {
    * 镜像，cap 2000 字符对齐前端 tail）。按 callId 关联；无匹配项时忽略
    * （迟到/乱序输出）。
    */
-  function recordOutput({ name, callId, traceId, text, truncated }) {
+  function recordOutput({ name, callId, text, truncated }) {
     if (!text) return;
     let index = callId ? items.findIndex((item) => item.callId === callId) : -1;
     if (index < 0) {

@@ -2,16 +2,8 @@
 // PreviewAssets — UI-305 P1 从 project-workspace.tsx 尾部整簇平移（原 2975-2999 行），
 // 零行为变化；主文件按既有惯例再导出保持 '@/pages/project-workspace' 导入路径兼容。
 // ============================================================
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import {
-  describeOfficeKind,
-  loadOfficePreview,
-  revokeOfficePreviewBlobs,
-  suggestedOpener,
-  type OfficePreviewAsset,
-  type OfficePreviewKind,
-  type OfficePreviewModel,
-} from '@/lib/office-file-preview';
+import React from 'react';
+import { type OfficePreviewAsset } from '@/lib/office-file-preview';
 import styles from '../project-workspace.module.css';
 
 export function PreviewAssets({

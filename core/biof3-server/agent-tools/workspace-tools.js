@@ -13,9 +13,8 @@ const fs = require('fs'); // BLOCK-105 P2 — listResidentTasksLocal 用同步 f
 const path = require('path');
 const { promisify } = require('util');
 const { execFile, spawn } = require('child_process');
-const { StringDecoder } = require('string_decoder');
 const { assertProjectG0Compatible } = require('../../shared-backend/g0-baseline');
-const execFileAsync = promisify(execFile);
+promisify(execFile);
 
 const DEFAULT_MAX_ENTRIES = 200;
 const DEFAULT_MAX_READ_LINES = 240;
@@ -80,7 +79,6 @@ const {
   clampInteger,
   errorResult,
   isContained,
-  killBackgroundProcess,
   pruneBackgroundRecords,
   readLogTail,
   resolveWorkspaceTarget,
@@ -1408,7 +1406,7 @@ function createWorkspaceTools(options = {}) {
   // ssh 走 surface.createResidentTask（exec_bg + gateway 写卡）；本地复用 execBackground
   //（注册表/日志语义不变）+ fs 落卡。卡片只描述「意图与归属」，执行真相在进程表。
 
-  async function listResidentTasksLocal(args = {}, ctx = {}) {
+  async function listResidentTasksLocal(_args = {}, ctx = {}) {
     return withWorkspace(ctx, async ({ root }) => {
       const dir = path.join(root, '.gewu', 'resident');
       let files = [];

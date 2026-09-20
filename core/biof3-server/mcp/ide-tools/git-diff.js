@@ -17,10 +17,9 @@
 
 'use strict';
 
-const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { resolveAllowlisted } = require('./path-allowlist');
-const { safeJoinUnder } = require('../../../shared-backend/path-safe');
+require('../../../shared-backend/path-safe');
 const { parseUnifiedHunks, summarize } = require('./diff-helpers');
 
 const MAX_LINES_HARD_CAP = 5000;
@@ -150,7 +149,7 @@ function validateGitRepo(absRepo) {
  * 任何逃逸 / 试图读 .git 内部 / 越界父目录的文件都直接丢弃该 hunk 行。
  * 返回新 hunk（不修改入参）。
  */
-function validateHunkPaths(hunk, repoRoot) {
+function validateHunkPaths(hunk, _repoRoot) {
   // parseUnifiedHunks 不直接解析文件头，只保留 hunk.lines 中的 +/- 内容。
   // 主要风险在文件级 header：`--- a/<path>` `+++ b/<path>` — 当前解析器跳过它们。
   // 此处仍克隆一个新 hunk，方便后续扩展。

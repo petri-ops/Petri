@@ -76,7 +76,6 @@ async function main() {
       JSON.stringify(first.json).slice(0, 200));
 
     // A3 与节点真值逐项对账
-    let reconcile = '';
     try {
       const free = sshDell('free -b');
       const mt = Number((free.match(/Mem:\s+(\d+)/) || [])[1]);
@@ -93,7 +92,6 @@ async function main() {
       assert('A3a memory matches free -b', memOk, `card=${snap.memory.totalBytes}/${snap.memory.availableBytes} node=${mt}/${memAvailable}`);
       assert('A3b cores matches nproc', coresOk, `card=${snap.cpu.logicalCores} node=${cores}`);
       assert('A3c disk matches df -P', diskOk, `card=${snap.disk.totalBytes}/${snap.disk.availableBytes} node=${diskTotal}/${diskAvail}`);
-      reconcile = `mem ${memOk} cores ${coresOk} disk ${diskOk}`;
     } catch (e) {
       assert('A3 reconcile (ssh free/df)', false, e.message);
     }

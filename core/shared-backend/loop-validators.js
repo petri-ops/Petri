@@ -279,7 +279,7 @@ const DE_RESULTS_DEF = {
   applicableArtifactTypes: [],
   priority: 50,
 
-  validate(artifact, context) {
+  validate(artifact, _context) {
     const findings = [];
     if (!artifact || typeof artifact !== 'object') {
       return buildUnavailableResult('de-results', '1.0.0', 'no_artifact');
@@ -355,7 +355,7 @@ const HEATMAP_DATA_DEF = {
   applicableArtifactTypes: [],
   priority: 25,
 
-  validate(artifact, context) {
+  validate(artifact, _context) {
     const findings = [];
     if (!artifact || typeof artifact !== 'object') {
       return buildUnavailableResult('heatmap-data', '1.0.0', 'no_artifact');
@@ -429,7 +429,7 @@ const ENRICHMENT_STATISTICS_DEF = {
   applicableArtifactTypes: [],
   priority: 50,
 
-  validate(artifact, context) {
+  validate(artifact, _context) {
     const findings = [];
     if (!artifact || typeof artifact !== 'object') {
       return buildUnavailableResult('enrichment-statistics', '1.0.0', 'no_artifact');
@@ -501,13 +501,12 @@ const DELIVERY_INTEGRITY_DEF = {
   applicableArtifactTypes: [],
   priority: 60,
 
-  validate(deliveryRecord, context) {
+  validate(deliveryRecord, _context) {
     const findings = [];
     if (!deliveryRecord || typeof deliveryRecord !== 'object') {
       return buildUnavailableResult('delivery-integrity', '1.0.0', 'no_delivery_record');
     }
 
-    const filename = deliveryRecord.filename || 'delivery-manifest';
     const status = deliveryRecord.status;
     const version = deliveryRecord.deliveryManifestVersion || deliveryRecord.version || null;
     const artifacts = deliveryRecord.artifacts || [];

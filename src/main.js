@@ -24,7 +24,6 @@ const {
   ipcMain,
   dialog,
   session,
-  net,
   Menu,
   globalShortcut,
 } = require("electron");
@@ -38,21 +37,13 @@ if (process.platform === "win32") {
 }
 const path = require("path");
 const fs = require("fs");
-const nodeNet = require("net");
-const { spawn, spawnSync } = require("child_process");
+const { spawnSync } = require("child_process");
 
-const {
-  getNodeLocator,
-  getRuntimeBinCandidates,
-  getRuntimeBinName,
-  getOpenShellPlan,
-  getSessionShellSpec,
-  getBuiltInPluginsDir,
-} = require("./platform-compat");
+require("./platform-compat");
 
 // SUB-15.1 PHASE 1 imports (BLOCK-9.1 style)
-const { parseAgentWorkbenchFlags, AGENT_WORKBENCH_FLAG_CHANNEL, setupAgentWorkbenchFlagsIpc } = require("./ipc/workbench-flags.js");
-const { resolveCoreRoot, resolveResource, resolveCore, reserveAvailablePort, isDevMode, rendererDevUrl, BASE_R_PACKAGES, BASE_PY_PACKAGES, NODE_BIN, IS_DEV, PROJECT_ROOT } = require("./main/core-utils.js");
+const { parseAgentWorkbenchFlags, setupAgentWorkbenchFlagsIpc } = require("./ipc/workbench-flags.js");
+const { resolveResource, resolveCore, reserveAvailablePort, isDevMode, rendererDevUrl, NODE_BIN, PROJECT_ROOT } = require("./main/core-utils.js");
 const { setupCsp } = require("./main/csp-config.js");
 const { _resolveSkillsIpcWindow } = require("./ipc/skills-window.js");
 

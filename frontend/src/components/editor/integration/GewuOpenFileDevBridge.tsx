@@ -48,7 +48,7 @@
  * 不外推：详见 plan §8。
  */
 
-import React, { lazy, Suspense, useEffect, type FC, type ReactElement } from 'react';
+import { useEffect, type FC, type ReactElement } from 'react';
 
 import { usePendingScroll } from '../../../lib/pendingScrollContext';
 import type { DiffRevision } from '../CodeMirror/types';

@@ -55,7 +55,7 @@ const {
   ResultReplayError,
 } = require('../../../shared-backend/result-replay-service');
 const { readTablePage } = require('../../../shared-backend/result-studio-lifecycle');
-const { userId, canAccessProject } = require('../_helpers/validate');
+const { userId } = require('../_helpers/validate');
 const {
   resolveWorkspaceFileForRevision,
   openVerifiedRevisionArtifact,

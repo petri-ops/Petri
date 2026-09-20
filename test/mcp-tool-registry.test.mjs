@@ -15,20 +15,6 @@ const registryModule = await import(pathToFileURL(resolve(__dirname, '..', 'core
 const { listTools, callTool } = registryModule;
 const registryTest = registryModule.default?._test || registryModule._test;
 
-// helper：注册一个 mock 插件到 globalThis._biof3Plugins
-function mockPlugin(id, def) {
-  if (!globalThis._biof3Plugins) globalThis._biof3Plugins = new Map();
-  globalThis._biof3Plugins.set(id, {
-    id,
-    version: '1.0.0',
-    language: 'r',
-    pluginDir: `/mock/${id}`,
-    scriptPath: `/mock/${id}/scripts`,
-  });
-  // mock getToolDefinition 返回的 def 直接塞 pluginDir 下
-  // 通过 monkey-patch getToolDefinition 避免读磁盘
-}
-
 test('_inputsToInputSchema 把 inputs[] 转 JSON Schema', () => {
   const schema = pluginLoader._inputsToInputSchema([
     { id: 'fc_threshold', label: '|log2FC| 阈值', type: 'number', default: 1 },

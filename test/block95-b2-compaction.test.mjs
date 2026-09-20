@@ -97,7 +97,7 @@ test('开关判定：默认开（2026-09-18 裁决），0 强关', () => {
 });
 
 test('planCompaction：消息数不足不折叠；超限按 KEEP_RECENT 切分且 token 有值', () => {
-  const few = Array.from({ length: 10 }, (_, i) => ({ role: 'user', content: 'x' }));
+  const few = Array.from({ length: 10 }, (_, _i) => ({ role: 'user', content: 'x' }));
   assert.equal(compaction.planCompaction(few).should, false);
   const many = Array.from({ length: 30 }, (_, i) => ({ role: 'user', content: `B2消息-${i}：${'细节'.repeat(800)}` }));
   const plan = compaction.planCompaction(many);

@@ -11,7 +11,6 @@
  */
 
 const path = require('node:path');
-const fs = require('node:fs');
 const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
 
 const REPO = lib.findRepoRoot(__dirname);

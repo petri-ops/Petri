@@ -99,9 +99,8 @@ async function main() {
   // 1) 目标窗口创建 + hwnd 差集隔离
   const before = notepadWindowsSnapshot();
   const beforeHwnds = new Set(before.map((w) => w.hwnd).filter(Boolean));
-  const launched = spawn('notepad.exe', [], { stdio: 'ignore' });
+  spawn('notepad.exe', [], { stdio: 'ignore' });
   let ourHwnd = 0;
-  let ourPid = launched.pid;
   for (let i = 0; i < 12; i++) {
     await delay(1500);
     const snap = await callTool('computer_snapshot', { app: 'frontmost', maxElements: 200 });

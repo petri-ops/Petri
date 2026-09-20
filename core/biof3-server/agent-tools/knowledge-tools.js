@@ -12,7 +12,7 @@ const { getDatabase } = require('../db');
 const MAX_HITS = 8;
 const HIT_TEXT_CHARS = 700;
 
-async function tool_knowledge_search(args, ctx) {
+async function tool_knowledge_search(args, _ctx) {
   const query = String((args && args.query) || '').trim();
   if (!query) {
     return { error: 'query_required', message: 'knowledge_search 需要非空 query。' };

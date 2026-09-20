@@ -193,7 +193,7 @@ async function main() {
     return { opened: text.includes('外观与应用偏好') && text.includes('模型接口') };
   })()`);
   assert('T7a_gear_opens_settings', settingsOpened && settingsOpened.opened === true, JSON.stringify(settingsOpened));
-  const sectionClicked = await cdpEval(`(() => {
+  await cdpEval(`(() => {
     const btn = Array.from(document.querySelectorAll('button')).find((b) => (b.textContent || '').includes('计算与数据'));
     if (btn) btn.click();
     return !!btn;

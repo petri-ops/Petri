@@ -11,8 +11,8 @@
 
 const path = require('path');
 
-const IMAGE_EXTENSIONS = new Set(); // P4：图像经 dashscope-vision 描述化索引
-const AUDIO_EXTENSIONS = new Set(); // P4：DashScope ASR
+new Set(); // P4：图像经 dashscope-vision 描述化索引
+new Set(); // P4：DashScope ASR
 
 // BLOCK-94 F2：扫描件（无文本层）PDF 无 OCR 属 P4 线——提取为空按 knowledge_chunk_empty 诚实 failed
 const PDF_EXTENSIONS = new Set(['.pdf']);

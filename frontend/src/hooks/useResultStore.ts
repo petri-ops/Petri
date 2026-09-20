@@ -13,7 +13,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { resultApi } from '@/lib/resultBridge';
-import type { Result, ResultSummary, ListResultsOptions } from '@/types/result.types';
+import type { Result, ResultSummary } from '@/types/result.types';
 
 // ============================================================
 // Module-level cache (shared across all consumers)

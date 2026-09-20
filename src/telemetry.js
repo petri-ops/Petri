@@ -83,7 +83,7 @@ async function reportError(payload) {
       return { ok: false, reason: 'http_' + res.status };
     }
     return { ok: true };
-  } catch (e) {
+  } catch {
     // 网络异常/超时/端点不可达——静默
     return { ok: false, reason: 'network' };
   }

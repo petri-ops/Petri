@@ -39,7 +39,7 @@ describe('KnowledgeSpaceSwitcher', () => {
   it('渲染空间下拉（名称+文档数+启用态）且切换回调上抛', async () => {
     const onSwitch = vi.fn();
     render(<KnowledgeSpaceSwitcher spaceId="ks_default" onSwitch={onSwitch} />);
-    const select = (await screen.findByTestId('knowledge-space-select'));
+    const select = await screen.findByTestId<HTMLSelectElement>('knowledge-space-select');
     await waitFor(() => expect(select.options.length).toBe(2));
     expect(select.options[0].textContent).toContain('默认知识空间');
     expect(select.options[1].textContent).toContain('已启用');

@@ -19,7 +19,7 @@ function getBranchDb() {
       // desktop-app/src/database/branch-db.js 的相对路径（从 core/biof3-server/mcp/ 出发）
       const desktopAppRoot = path.resolve(__dirname, '..', '..', '..', 'desktop');
       const branchDbPath = path.join(desktopAppRoot, 'src', 'database', 'branch-db.js');
-      const { loadDatabaseConstructor } = require(path.join(desktopAppRoot, 'src', 'migration-runner'));
+      require(path.join(desktopAppRoot, 'src', 'migration-runner'));
       _branchDb = require(branchDbPath);
     } catch (e) {
       console.warn('[branch-context] Branch DB require failed:', e.message);
@@ -74,7 +74,7 @@ function isBranchInProject(branchId, projectId) {
   try {
     const branch = db.getBranch(branchId);
     return branch?.project_id === projectId;
-  } catch (e) {
+  } catch {
     return false;
   }
 }

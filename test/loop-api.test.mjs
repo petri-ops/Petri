@@ -30,9 +30,7 @@ const {
   REASON_CODES,
 } = require(__dirname + '/../core/shared-backend/loop-contract');
 
-const {
-  deriveObservedStateDigest,
-} = require(__dirname + '/../core/shared-backend/loop-controller');
+require(__dirname + '/../core/shared-backend/loop-controller');
 
 const {
   buildIteration,
@@ -294,7 +292,6 @@ describe('HLE-C3: Loop REST API — Durable Query & Recovery', () => {
   describe('Recovery Projection Contract', () => {
     it('terminal run has canResume=false', () => {
       const run = { loopStatus: 'completed', loopRunId: 'r1', projectId: 'p1', conversationId: 'c1', automationMode: 'task_execute' };
-      const lastIter = null;
       const isTerminal = ['completed', 'failed', 'cancelled'].includes(run.loopStatus);
       const needsRecovery = run.loopStatus === 'running';
       const canResume = needsRecovery && !isTerminal;
@@ -408,7 +405,7 @@ describe('HLE-C3: Loop REST API — Durable Query & Recovery', () => {
     it('loop status enum is respected', () => {
       const statuses = ['planned', 'running', 'completed', 'failed', 'cancelled'];
       for (const status of statuses) {
-        const isTerminal = ['completed', 'failed', 'cancelled'].includes(status);
+        ['completed', 'failed', 'cancelled'].includes(status);
         const run = { loopStatus: status };
         const hint = _buildRecoveryHint(run, null);
         assert.ok(typeof hint === 'string' && hint.length > 0, `hint for ${status} should be non-empty`);

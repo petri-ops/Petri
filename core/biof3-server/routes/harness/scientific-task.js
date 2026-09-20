@@ -38,10 +38,7 @@ const {
   relativeInside,
   selectReplayContextCheckpoint,
 } = require('../../../shared-backend/scientific-replay-package');
-const {
-  validateContextCheckpoint,
-  validateCheckpointSupersession,
-} = require('../../../shared-backend/scientific-task-spec');
+require('../../../shared-backend/scientific-task-spec');
 const { resolveProjectRunLayout } = require('../../../shared-backend/project-run-layout');
 const { isRealPathInsideRoot } = require('../../helpers/chat-file-references');
 const {

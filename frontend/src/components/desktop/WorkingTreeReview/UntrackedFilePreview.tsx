@@ -2,8 +2,8 @@
 // UntrackedFilePreview - UI-305 P2 extracted from ReviewMode.tsx (lines 357-395),
 // behavior unchanged; main file imports it back as needed.
 // ============================================================
-import { Fragment, useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { getBridge } from '@/lib/desktopBridge';
 import { CodeMirrorEditor } from '@/components/editor';
 import { FULLTEXT_LANGUAGE_BY_EXT } from './reviewModeHelpers';

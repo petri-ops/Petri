@@ -125,7 +125,7 @@ const EVAL = (expr) => lib.evalJs(client, expr);
 
 (async () => {
   const run = lib.createRun({ name: 'block94-knowledge-live', evidenceDir: EVIDENCE_DIR });
-  const startedAt = Date.now();
+  Date.now();
   const createdDocIds = [];
 
   // ── A1 总览契约 ──

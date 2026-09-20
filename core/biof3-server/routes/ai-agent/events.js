@@ -30,7 +30,7 @@ module.exports = {
       let task;
       try {
         task = agentTaskStore.getAgentTask(taskId);
-      } catch (e) {
+      } catch {
         return res.status(500).json({ status: 'error', error: '查询 task 失败' });
       }
       if (!task) {
@@ -141,7 +141,7 @@ module.exports = {
             sseDone();
             res.end();
           }
-        } catch (e) {
+        } catch {
           // 轮询出错不终止，下轮继续
         }
       }, 500);

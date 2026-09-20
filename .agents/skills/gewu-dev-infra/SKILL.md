@@ -33,9 +33,10 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 
 ## 宣称收口之前
 
-- 跑 `npm run closeout`（八门 fail-fast：hygiene → docs:check → ui:audit:check → test:changed → gate:code-size → quality:secret → quality:arch → quality:lint；BLOCK-105 起三门 quality 门禁入链）；当前工作包另有专项门禁时用 `--gate <npm-script>` 追加。
+- 跑 `npm run closeout`（九门 fail-fast：hygiene → docs:check → ui:audit:check → test:changed → gate:code-size → quality:secret → quality:arch → quality:lint → quality:types；BLOCK-105 起四门 quality 门禁入链）；当前工作包另有专项门禁时用 `--gate <npm-script>` 追加。
 - 门禁全绿是收口的必要条件不是充分条件：canonical 回写（work package / roadmap / handoff / AUDIT-LOG / ui-audit 台账）仍按治理纪律单独完成。
 - 属于其他线/并行包的红旗如实登记归属，不得表述为本包通过。
+- **P6 产品验收证据重打期间仓库必须完全静默**（2026-09-20 实测白跑一轮 8 分钟）：`npm run g0:result-studio:p6:update` 在写盘前断言 `sourceCommitMatchesSourceHashes && sourceBindingStableDuringCapture`（`scripts/g0-rs-p6-product-acceptance.mjs:554-565`），实采开始与写盘之间 **HEAD 一旦前进（哪怕只提交 docs）即 `p6_evidence_source_binding_not_current`**，且该红出现在预检全绿之后，极易误读为产品缺陷。姿势：启动前 `git status --porcelain` 为空、期间只做只读核对与仓库外（`/tmp`、memory 目录）写入。另记：同一不变量还捆绑 `recomputed.passed`，所以 **live 检查抖动会以 `p6_evidence_checks_not_recomputed` 现形**（本轮实测：第二轮失败、`--live --verbose` 不写盘复跑 10/10 PASS、第三轮写盘成功）——先按 flaky 分流复跑取证，再怀疑源码。
 - 收口提交落定后打进度快照标签：`git tag -a snapshot-YYYYMMDD -m "<本 BLOCK 一句摘要>" && git push origin snapshot-YYYYMMDD`。日期命名，同日第二个加 `-2` 后缀；`v0.0.1-rc.*` 序列语义是「OSS 线上工程候选版」，只在真正更替候选版时才动，不跟 BLOCK 收口走（用户裁决 2026-09-17：日常进度锚点只走 snapshot，每个 BLOCK 收口一个）。
 
 ## dev 栈上验证 UI 工作
@@ -132,11 +133,12 @@ Agent 等待后台任务（全量测试、构建、长脚本）时**禁止 sleep
 
 ## 代码质量门禁纪律（BLOCK-105 · 2026-09-20）
 
-closeout 链中三门 quality 门禁的处置规则（规则与豁免的完整决策记录见 `docs/block-105-code-quality-governance-plan.md` §6-§7）：
+closeout 链中四门 quality 门禁的处置规则（规则与豁免的完整决策记录见 `docs/block-105-code-quality-governance-plan.md` §6-§7）：
 
 - **quality:secret（fail-closed）**：生产面命中即红。fixture 假密钥豁免走 `scripts/secret-scan.mjs` 白名单登记（精确路径 Set + 前缀数组），禁止静默放宽模式；报告/证据产物引用 fixture 内容属间接命中，用前缀豁免。
 - **quality:arch（dependency-cruiser 五规则）**：R1 渲染禁直引 electron / R2 渲染禁 node 内建 / R3 后端禁引主进程（唯一登记桥=src/main/env-coordinator，A-009）/ R4 前端禁引后端实现（core/packages/** 共享层合法）/ R5 主进程禁引后端。**新跨层桥必须登记进规则的 pathNot**（登记即留痕），不许绕路。
 - **quality:lint（blocking + 抑制基线棘轮）**：`eslint-suppressions.json` 是存量违规基线——新增违规即红；存量只许收缩不许放宽。新违规处置三分类：真缺陷修 / 化石删 / 误报豁免（走 `npx eslint . --suppress-all` 重扫入库，**禁止全局关规则**）；批量收缩修一批后刷新基线。注意：parsing error（如重复声明）无法抑制，先清化石再建基线。
+- **质量门禁（fail-closed，2026-09-20 入链）**：`tsc --noEmit -p frontend/tsconfig.json` 全量类型检查——29 红存量已清零后入链（plan §6.4），此后任何新增类型红即红；禁用「加 `any`/`@ts-expect-error`/关配置」的旁路，真类型缺陷修（联合类型被拓宽、查询结果未窄化等）。
 - **基线重扫**：`npm run quality:baseline` 重跑 P0 四项体检（Knip/jscpd/audit/密钥），结果落 `acceptance/block-105/baseline-<日期>/`，人工裁决后才更新正式基线。
 
 ## 复用到其他仓库

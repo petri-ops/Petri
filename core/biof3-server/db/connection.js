@@ -52,7 +52,7 @@ function getDatabase() {
 function closeDatabase() {
   try {
     db.close();
-  } catch (_) {
+  } catch {
     // already closed or never opened
   }
 }

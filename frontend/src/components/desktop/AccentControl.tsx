@@ -6,7 +6,7 @@
 // ============================================================
 import React from 'react';
 import { Icon } from '@/components/icons/Icon';
-import { ACCENT_OPTIONS, type AccentId } from '@/themes/accents';
+import { ACCENT_OPTIONS } from '@/themes/accents';
 import { useTheme } from '@/themes/ThemeProvider';
 import './accent-control.css';
 

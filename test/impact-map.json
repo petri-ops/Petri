@@ -40,6 +40,20 @@
       "classifiesScripts": false
     },
     {
+      "id": "platform-branch-freeze",
+      "note": "BLOCK-104 P4 全局门禁接入定向路由（2026-09-20 补登记）：该门扫描 src/core/scripts/test 四树全部 .js/.cjs/.mjs，任何文件新增 process.platform 读取即 fail-closed（走 src/platform-compat.js 或登记基线留痕）。缺口实证=Batch-1 capability-bundles.js 平台条件化（TAR_FORCE_LOCAL）绕过本门——定向从未路由到它，故按四树全域触发。",
+      "patterns": [
+        "src/**",
+        "core/**",
+        "scripts/**",
+        "test/**"
+      ],
+      "tests": [
+        "test/platform-branch-freeze.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "block78-runtime-projection",
       "note": "BLOCK-78 摘要卡片项目化：远程资源实时快照——node-agent sys_resource verb（ensureAgent 哈希自动部署）/ gateway sysResource 方法 / harness 资源路由 projectId 路由（additive，无参/local 既有调用零改动）/ 归一化与 TTL 缓存 helper / 前端 hook projectId 参数与卡片 source 驱动。零网络测试锁归一化三态阈值 + TTL fresh/stale/unreachable + agent 脚本 bash 语法与本机执行；实机 dell 读数对账与断连三态归 BLOCK-78 P3 验收。",
       "patterns": [
@@ -85,6 +99,7 @@
         "frontend/package.json",
         "frontend/package-lock.json",
         "frontend/vite.config.*",
+        "frontend/vitest.config.*",
         "frontend/tsconfig*.json"
       ],
       "commands": [

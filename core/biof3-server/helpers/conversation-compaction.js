@@ -49,11 +49,11 @@ function getCompactionSync(sqlite, conversationId) {
  */
 function applyCompactionView(assembled, compaction, opts = {}) {
   if (!compaction || !Array.isArray(assembled) || assembled.length === 0) {
-    return assembled.map(({ rowid, ...rest }) => rest);
+    return assembled.map(({ rowid: _rowid, ...rest }) => rest);
   }
   const covered = assembled.filter((m) => typeof m.rowid === 'number' && m.rowid <= compaction.covers_rowid);
   const rest = assembled.filter((m) => !(typeof m.rowid === 'number' && m.rowid <= compaction.covers_rowid));
-  if (covered.length === 0) return assembled.map(({ rowid, ...rest2 }) => rest2);
+  if (covered.length === 0) return assembled.map(({ rowid: _rowid, ...rest2 }) => rest2);
   // BLOCK-98 M2 — resilience 模式追加转写回查指针 + 续接纪律（D2）；无 opts 时
   // B2 legacy 文案逐字节不变（契约测试锁定）。
   const resilienceExtra = opts && opts.resilienceEnabled
@@ -63,7 +63,7 @@ function applyCompactionView(assembled, compaction, opts = {}) {
     role: 'user',
     content: '[会话早期对话摘要（原文详见会话记录）]\n' + compaction.summary + resilienceExtra + '\n[以上为摘要，此后为原文消息]',
   };
-  return [summaryMessage, ...rest.map(({ rowid, ...rest2 }) => rest2)];
+  return [summaryMessage, ...rest.map(({ rowid: _rowid, ...rest2 }) => rest2)];
 }
 
 /**

@@ -8,28 +8,7 @@
 import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert';
 
-import {
-  VALIDATOR_TYPES,
-  VALIDATOR_STATUSES,
-  FINDING_SEVERITIES,
-  registerValidator,
-  setValidatorEnabled,
-  dispatchValidator,
-  findValidatorsForKind,
-  findValidatorsForType,
-  validateArtifact,
-  validateDelivery,
-  aggregateStatus,
-  buildResult,
-  buildUnavailableResult,
-  buildValidResult,
-  normalizeFinding,
-  registerPluginManifest,
-  getPluginValidatorId,
-  listValidators,
-  getValidatorInfo,
-  clearRegistry,
-} from '../core/shared-backend/loop-validator-registry.js';
+import { VALIDATOR_STATUSES, FINDING_SEVERITIES, registerValidator, setValidatorEnabled, dispatchValidator, findValidatorsForKind, findValidatorsForType, validateArtifact, validateDelivery, aggregateStatus, buildResult, buildUnavailableResult, buildValidResult, normalizeFinding, registerPluginManifest, getPluginValidatorId, listValidators, getValidatorInfo, clearRegistry } from '../core/shared-backend/loop-validator-registry.js';
 
 // Clear and re-register before each test
 beforeEach(() => {
@@ -113,7 +92,7 @@ describe('LV-3 dispatchValidator', () => {
       id: 'disp',
       version: '1.0.0',
       applicableKinds: ['table'],
-      validate(artifact, ctx) {
+      validate(_artifact, _ctx) {
         return buildResult({ validatorId: 'disp', version: '1.0.0', status: VALIDATOR_STATUSES.VALID });
       },
     });

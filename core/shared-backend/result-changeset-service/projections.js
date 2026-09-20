@@ -1,7 +1,6 @@
 'use strict';
 
 const fs = require('fs');
-const path = require('path');
 const { stableStringify } = require('../canonical-json');
 const { verifyRevisionSourceMaterial } = require('../result-revision-source');
 const { validateResultStudioCandidate } = require('../result-plugin-validator');
@@ -9,14 +8,12 @@ const { DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS } = require('../result-scientific-rer
 const { resolveExecutionInputPath, verifyExecutionProvenance } = require('../execution-provenance');
 const {
   ResultChangeSetError,
-  id,
   cloneJsonObject,
   exactArtifact,
   hashFile,
   resolveExistingProjectFile,
   resultOf,
   safeSegment,
-  sha256,
 } = require('./internal');
 
 function resolveCandidateDescriptor({ dependencies, toolId }) {

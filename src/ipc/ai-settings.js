@@ -37,7 +37,7 @@ function setupAiSettingsIpc(options = {}) {
         resolveCore("biof3-server", "helpers", "ai-settings.js"),
       );
       return getAiSettings();
-    } catch (e) {
+    } catch {
       return {};
     }
   });

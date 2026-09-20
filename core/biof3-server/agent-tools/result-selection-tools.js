@@ -554,17 +554,15 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
   }
 
   const relativeDir = path.posix.join('analysis', 'selections', selectionId);
-  let idsFile;
-  let scriptFile;
   let geneFile;
   try {
-    idsFile = atomicWriteSelectionFile(
+    atomicWriteSelectionFile(
       workspaceRoot,
       selectionId,
       'selection-ids.json',
       `${JSON.stringify({ selectionId, entityType: 'gene', entityIds: selectedIds }, null, 2)}\n`,
     );
-    scriptFile = atomicWriteSelectionFile(workspaceRoot, selectionId, 'materialize-selection.R', [
+    atomicWriteSelectionFile(workspaceRoot, selectionId, 'materialize-selection.R', [
       '#!/usr/bin/env Rscript',
       '# Reproduce the exact SelectionContext-derived GO/KEGG input.',
       'suppressMessages(library(jsonlite))',

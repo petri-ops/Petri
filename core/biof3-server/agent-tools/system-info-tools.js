@@ -49,7 +49,7 @@ function resolveShell() {
  * BLOCK-67 P2：SSH 远程项目的环境真相 = 远程主机（模型编写命令前须知 OS/shell
  * 在远端，指挥席本机环境对工作区操作无意义）；传输失败诚实返回 remote_probe_failed。
  */
-async function tool_system_info(args = {}, ctx = {}) {
+async function tool_system_info(_args = {}, ctx = {}) {
   const projectId = ctx && ctx.projectId ? String(ctx.projectId) : null;
   if (projectId) {
     try {

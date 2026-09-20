@@ -18,24 +18,19 @@ const markdownSanitizeSchema = {
     div: [...(defaultSchema.attributes?.div || []), ['className']],
   },
 };
-import { Icon, type IconName } from '@/components/icons/Icon';
+import { Icon } from '@/components/icons/Icon';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 import { buildPreviewTable } from '@/lib/file-preview/buildPreviewTable';
 import { Lightbox } from '@/components/ui/Lightbox';
-import { HighlightedCode, codeLanguageForFile } from '@/components/ui/CodeHighlight';
-import { SimpleChat } from '@/components/copilot/SimpleChat';
-import type { DiffRevision, EditorApi } from '@/components/editor/CodeMirror/types';
+import { codeLanguageForFile } from '@/components/ui/CodeHighlight';
+import type { EditorApi } from '@/components/editor/CodeMirror/types';
 import { WorkspaceFilePreviewBridge } from '@/components/editor';
 import { useTheme } from '@/themes/ThemeProvider';
-import { fileExtension, isImageFile, isTextFile, isMarkdownFile, workspaceFileUrlFor, formatPreviewText } from '@/lib/previewFileUtils';
+import { isImageFile, isTextFile, isMarkdownFile, formatPreviewText } from '@/lib/previewFileUtils';
 import { getBridge } from '@/lib/desktopBridge';
 import {
-  describeOfficeKind,
   loadOfficePreview,
   revokeOfficePreviewBlobs,
-  suggestedOpener,
-  type OfficePreviewAsset,
-  type OfficePreviewKind,
   type OfficePreviewModel,
 } from '@/lib/office-file-preview';
 import styles from '../project-workspace.module.css';
@@ -43,7 +38,7 @@ import type { ActiveWorkspaceFile } from './types';
 import { BinaryPreviewCard } from './BinaryPreviewCard';
 import { WorkspacePdfPreview } from './WorkspacePdfPreview';
 import { OfficePreviewPane } from './OfficePreviewPane';
-import { isCsvFile, isPdfFile, isHtmlFile, isJsonFile, withReportTheme, detectOfficeKind, fallbackKindForExtension, formatSize } from './helpers';
+import { isCsvFile, isPdfFile, isHtmlFile, isJsonFile, withReportTheme, detectOfficeKind } from './helpers';
 
 // UI-400-6 — Markdown 目录解析：1-3 级标题，跳过 ```/~~~ 围栏内伪标题。
 // 点击跳转按 DOM 顺序对齐（渲染后的 h1-h3 顺序即解析顺序），不做 id 注入。

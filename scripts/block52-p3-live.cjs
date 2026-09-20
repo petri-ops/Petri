@@ -202,7 +202,7 @@ async function main() {
       `SELECT params_json FROM tool_jobs WHERE id='${candidateFinal.tool_job_id}'`,
     );
     let pointSize = null;
-    try { pointSize = JSON.parse(rerunParams[0].params_json).point_size; } catch (e) { /* ignore */ }
+    try { pointSize = JSON.parse(rerunParams[0].params_json).point_size; } catch { /* ignore */ }
     assert('重跑 Job 参数含 point_size=3.2（自然语言→参数 Patch）',
       Number(pointSize) === 3.2,
       JSON.stringify(rerunParams).slice(0, 300));

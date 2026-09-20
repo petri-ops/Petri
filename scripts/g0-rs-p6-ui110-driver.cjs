@@ -148,9 +148,6 @@ async function waitFor(webContents, expression, label, timeoutMs = SHORT_WAIT_MS
   throw new Error(`timed out waiting for ${label}; last=${JSON.stringify(last)}`);
 }
 
-async function pageBoolean(webContents, expression) {
-  return webContents.executeJavaScript(`Boolean(${expression})`, true);
-}
 
 async function semanticSnapshot(webContents) {
   const snapshot = await webContents.executeJavaScript(`
@@ -570,17 +567,6 @@ async function setSelectValue(webContents, selector, value) {
   if (!changed) throw new Error(`select unavailable: ${selector}`);
 }
 
-async function setCheckbox(webContents, selector, checked) {
-  const changed = await webContents.executeJavaScript(`
-    (() => {
-      const input = document.querySelector(${JSON.stringify(selector)});
-      if (!(input instanceof HTMLInputElement) || input.type !== 'checkbox') return false;
-      if (input.checked !== ${checked ? 'true' : 'false'}) input.click();
-      return input.checked === ${checked ? 'true' : 'false'};
-    })()
-  `, true);
-  if (!changed) throw new Error(`checkbox unavailable: ${selector}`);
-}
 
 async function setLabeledInputValue(webContents, labelText, value) {
   const changed = await webContents.executeJavaScript(`

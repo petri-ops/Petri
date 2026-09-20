@@ -2,12 +2,12 @@
 // CommitDiffFileView - UI-305 P2 extracted from ReviewMode.tsx (lines 69-222),
 // behavior unchanged; main file imports it back as needed.
 // ============================================================
-import { Fragment, useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { getBridge } from '@/lib/desktopBridge';
 import { CodeMirrorEditor } from '@/components/editor';
 import type { DiffRevision } from '@/components/editor/CodeMirror/types';
-import { useWorkingTreeReview, type CommitInfo, type DiffFile, type DiffResult } from './useWorkingTreeReview';
+import { type DiffFile } from './useWorkingTreeReview';
 import { CodeMirrorDiffView } from './CodeMirrorDiffView';
 import {
   FULLTEXT_LANGUAGE_BY_EXT,

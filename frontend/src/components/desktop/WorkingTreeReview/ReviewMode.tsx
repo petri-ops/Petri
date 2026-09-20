@@ -12,11 +12,8 @@
 import { Fragment, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
-import { getBridge } from '@/lib/desktopBridge';
-import { CodeMirrorEditor } from '@/components/editor';
-import type { DiffRevision } from '@/components/editor/CodeMirror/types';
 import { WorkspaceFileIcon } from '@/components/workspace-panels/WorkspaceFileIcon';
-import { useWorkingTreeReview, type CommitInfo, type DiffFile, type DiffResult } from './useWorkingTreeReview';
+import { useWorkingTreeReview, type DiffFile } from './useWorkingTreeReview';
 // BLOCK-92 Wave B-3 — 界面逻辑簇外迁（./useReviewModeState.ts，纯搬运零行为变化）。
 import {
   useDockAccordion,
@@ -119,8 +116,8 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   const { hoverPreview, cancelHoverTimers, scheduleHoverClose, scheduleHoverPreview } = useHoverPreview();
 
   const exitReviewMode = () => {
-    if (window.history.length > 1) navigate(-1);
-    else navigate('/');
+    if (window.history.length > 1) void navigate(-1);
+    else void navigate('/');
   };
 
   // Esc 语义：先关行内编辑抽屉 → dock 形态关闭面板 → 输入框失焦 → mode 形态退出

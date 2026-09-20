@@ -100,7 +100,7 @@ function parseDiffFiles(diffText) {
  * 实现策略：前端 reject 时已持有 hunk 的 oldText / newText，由前端构造反向 patch 传入；
  * 主进程直接 git apply 调用，不再二次解析。
  */
-function buildReversePatchForReject({ file, hunkIndex, hunk }) {
+function buildReversePatchForReject({ file, hunk }) {
   if (!hunk || !Array.isArray(hunk.lines)) return null;
   // 反向 patch 的 pre-image 是「当前已修改文件」（hunk 的 new 侧）：
   //   - 行 = add 行（当前文件持有、将被移除），pre-image 行数 = ctx + add = filter(type !== 'del')

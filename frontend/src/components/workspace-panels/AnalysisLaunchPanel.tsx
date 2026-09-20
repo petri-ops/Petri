@@ -1,5 +1,4 @@
 import React from 'react';
-import { Icon } from '@/components/icons/Icon';
 import type { CatalogTool } from '@/lib/tool-catalog';
 import styles from '@/pages/project-workspace.module.css';
 

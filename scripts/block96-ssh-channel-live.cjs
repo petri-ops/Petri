@@ -61,9 +61,9 @@ function sshRun(remoteCommand, input) {
     `touch $'newline\nname.txt' "tab\tname.txt"`,
     'echo OK',
   ].join('\n'));
-  const BSCH = String.fromCharCode(92);
+  String.fromCharCode(92);
   const hostileExpect = ['a"b.txt', 'back\\slash.txt', 'space name.txt', '中文测试.txt', 'newline\nname.txt', 'tab\tname.txt'];
-  const BS_REMOTE = String.fromCharCode(92);
+  String.fromCharCode(92);
   const hostileEntries = await backend.list(root);
   const hostileNames = hostileEntries.map((e) => e.name).sort();
   record('hostile_names_roundtrip', JSON.stringify(hostileNames) === JSON.stringify([...hostileExpect].sort()), {
@@ -92,7 +92,6 @@ function sshRun(remoteCommand, input) {
   });
 
   // ⑥ mux 写列一致（同会话 fs_write 产物立即可见）
-  const b64 = (s) => Buffer.from(s).toString('base64');
   await backend.write(`${root}-500/由写而生.txt`, 'block96');
   const afterWrite = await backend.list(`${root}-500`);
   record('mux_write_list_consistency', afterWrite.some((e) => e.name === '由写而生.txt'), {

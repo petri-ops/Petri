@@ -86,6 +86,7 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+  vi.unstubAllGlobals();
 });
 
 describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
@@ -675,7 +676,9 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     const discardFile = vi.fn(() => Promise.resolve({ ok: true, data: { discarded: ['src/a.py'], deleted: false } }));
     const undoLastCommit = vi.fn(() => Promise.resolve({ ok: true, data: { undoneCommit: 'a1b2c3d4e5f6' } }));
     getBridgeMock.mockReturnValue(makeBridge({ commitLog, discardFile, undoLastCommit }));
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    // happy-dom 未实现 window.confirm；vitest 5 起 spyOn 不再允许代理 undefined 属性 → 用 stubGlobal
+    const confirmSpy = vi.fn(() => true);
+    vi.stubGlobal('confirm', confirmSpy);
 
     // 行内操作按钮仅存在于 dock 手风琴
     render(

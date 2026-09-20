@@ -20,7 +20,6 @@ const { tmpdir } = require('node:os');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
-const WIN_BASE = process.env.BIOF3_WIN_BASE || 'http://192.168.0.102:3005';
 const ENGINEER = { displayName: '工程师 A', device: 'macOS' };
 const DELEGATE_TASK = '只读侦察：用一句话报告你运行所在机器的操作系统类型，不要使用任何工具。';
 

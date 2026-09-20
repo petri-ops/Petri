@@ -9,7 +9,6 @@
  */
 
 const path = require('node:path');
-const http = require('node:http');
 const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

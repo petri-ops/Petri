@@ -49,11 +49,6 @@ const RETENTION_DAYS = {
   loopStateSnapshots: 30,
 };
 
-function nowIsoDate(daysAgo) {
-  const ts = Date.now() - daysAgo * 24 * 60 * 60 * 1000;
-  return new Date(ts).toISOString();
-}
-
 function isoDaysAgo(days) {
   return `datetime('now', '-${Math.max(1, Math.floor(days))} day')`;
 }

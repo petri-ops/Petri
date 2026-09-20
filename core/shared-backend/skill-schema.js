@@ -936,7 +936,7 @@ class SkillSchema {
       if (param.type === PARAM_TYPES.STRING && param.pattern) {
         try {
           new RegExp(param.pattern);
-        } catch (e) {
+        } catch {
           this._addError(`${path}.pattern`, ERROR_CODES.INVALID_FORMAT, {
             field: `${path}.pattern`,
             value: param.pattern
@@ -1111,8 +1111,7 @@ class SkillSchema {
 
     const requiredParams = paramSchema.required || [];
     const optionalParams = paramSchema.optional || {};
-    const allParamDefs = { ...optionalParams };
-
+    
     // Build a map of all parameter names
     const allParamNames = new Set([
       ...requiredParams,
@@ -1213,7 +1212,7 @@ class SkillSchema {
                 pattern: schema.pattern
               }, value);
             }
-          } catch (e) {
+          } catch {
             // Pattern validation already done in schema validation
           }
         }

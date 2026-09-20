@@ -11,108 +11,17 @@
   },
   "core/biof3-server/agent-runner.js": {
     "no-unused-vars": {
-      "count": 62
-    }
-  },
-  "core/biof3-server/agent-tools/computer-use-tools.js": {
-    "no-unused-vars": {
-      "count": 4
-    }
-  },
-  "core/biof3-server/agent-tools/federation-tools.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/agent-tools/knowledge-tools.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/agent-tools/plugin-loader.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/agent-tools/result-context-tools.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/agent-tools/result-selection-tools.js": {
-    "no-unused-vars": {
       "count": 2
-    }
-  },
-  "core/biof3-server/agent-tools/system-info-tools.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/agent-tools/tool-events.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/agent-tools/vision-tools.js": {
-    "no-unused-vars": {
-      "count": 1
     }
   },
   "core/biof3-server/agent-tools/workspace-ssh-surface.js": {
     "no-control-regex": {
       "count": 1
-    },
-    "no-unused-vars": {
-      "count": 7
     }
   },
   "core/biof3-server/agent-tools/workspace-tools.js": {
     "no-control-regex": {
       "count": 2
-    },
-    "no-unused-vars": {
-      "count": 4
-    }
-  },
-  "core/biof3-server/agent-tools/workspace-tools/internals.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/config.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/conversation-adapter.js": {
-    "no-unused-vars": {
-      "count": 4
-    }
-  },
-  "core/biof3-server/db.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "core/biof3-server/db/connection.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/db/schema.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/federation-terminal.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/helpers/ai-usage.js": {
-    "no-unused-vars": {
-      "count": 3
     }
   },
   "core/biof3-server/helpers/chat-file-references.js": {
@@ -120,204 +29,8 @@
       "count": 1
     }
   },
-  "core/biof3-server/helpers/circuit-breaker.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/helpers/conversation-compaction.js": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "core/biof3-server/helpers/knowledge-parsers.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "core/biof3-server/helpers/message-trimmer.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/helpers/model-context-windows.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/helpers/remote-execution/node-agent.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "core/biof3-server/helpers/remote-execution/target-registry.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/helpers/report-theme.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/helpers/tools-executor.js": {
-    "no-unused-vars": {
-      "count": 13
-    }
-  },
-  "core/biof3-server/helpers/tools-executor/active-job.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/helpers/tools-executor/preflight.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/jobs/retention-sweeper.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/loop-orchestrator.js": {
-    "no-unused-vars": {
-      "count": 8
-    }
-  },
-  "core/biof3-server/mcp/branch-context.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "core/biof3-server/mcp/ide-tools/file.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "core/biof3-server/mcp/ide-tools/git-diff.js": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "core/biof3-server/mcp/ide-tools/search.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "core/biof3-server/mcp/ide-tools/terminal.js": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "core/biof3-server/mcp/registry.js": {
-    "no-unused-vars": {
-      "count": 19
-    }
-  },
-  "core/biof3-server/mcp/registry/run-plugin-script.js": {
-    "no-undef": {
-      "count": 55
-    },
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/mcp/registry/runtime-paths.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/mcp/server.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "core/biof3-server/mobile-gateway/tunnel.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "core/biof3-server/plugin-loader.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/routes/_helpers/workflow.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/routes/ai-agent.js": {
-    "no-unused-vars": {
-      "count": 56
-    }
-  },
   "core/biof3-server/routes/ai-agent/chat.js": {
     "no-undef": {
-      "count": 1
-    },
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/routes/ai-agent/events.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "core/biof3-server/routes/ai-agent/resume.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/routes/ai-chat.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "core/biof3-server/routes/harness/file-references.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/routes/harness/project-storage.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "core/biof3-server/routes/harness/scientific-task.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "core/biof3-server/routes/projection-data.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/routes/result-studio.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/routes/result-studio/interaction.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "core/biof3-server/routes/result-studio/revisions.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/routes/tools-metadata.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/biof3-server/tool-registry.js": {
-    "no-unused-vars": {
       "count": 1
     }
   },
@@ -329,164 +42,15 @@
   "core/shared-backend/git-adapter.js": {
     "no-undef": {
       "count": 1
-    },
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/shared-backend/git-adapter/runtime.js": {
-    "no-unused-vars": {
-      "count": 4
-    }
-  },
-  "core/shared-backend/llm-providers/io-transcript.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/shared-backend/llm-providers/model-profile.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/shared-backend/loop-checkpoint.js": {
-    "no-unused-vars": {
-      "count": 4
-    }
-  },
-  "core/shared-backend/loop-contract.js": {
-    "no-unused-vars": {
-      "count": 2
     }
   },
   "core/shared-backend/loop-controller.js": {
     "@typescript-eslint/no-var-requires": {
       "count": 1
-    },
-    "no-unused-vars": {
-      "count": 15
-    }
-  },
-  "core/shared-backend/loop-repair-strategy.js": {
-    "no-unused-vars": {
-      "count": 11
-    }
-  },
-  "core/shared-backend/loop-validator-registry.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/shared-backend/loop-validators.js": {
-    "no-unused-vars": {
-      "count": 5
-    }
-  },
-  "core/shared-backend/result-changeset-service.js": {
-    "no-unused-vars": {
-      "count": 14
-    }
-  },
-  "core/shared-backend/result-changeset-service/internal.js": {
-    "no-unused-vars": {
-      "count": 5
-    }
-  },
-  "core/shared-backend/result-changeset-service/projections.js": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "core/shared-backend/result-changeset-service/resource-model.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "core/shared-backend/result-replay-service.js": {
-    "no-unused-vars": {
-      "count": 33
-    }
-  },
-  "core/shared-backend/result-replay-service/cohort-package.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "core/shared-backend/result-revision-source.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/shared-backend/result-studio-lifecycle.js": {
-    "no-unused-vars": {
-      "count": 11
-    }
-  },
-  "core/shared-backend/result-studio-lifecycle/gc.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "core/shared-backend/result-studio-lifecycle/internal.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/shared-backend/result-studio-lifecycle/table-page.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/shared-backend/result-studio-repository.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/shared-backend/scientific-task-planner.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/shared-backend/skill-registry.js": {
-    "no-unused-vars": {
-      "count": 5
-    }
-  },
-  "core/shared-backend/skill-runtime.js": {
-    "no-unused-vars": {
-      "count": 5
-    }
-  },
-  "core/shared-backend/skill-schema.js": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "core/shared-backend/skills-sdk.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "core/shared-backend/storage/local-storage.js": {
-    "no-unused-vars": {
-      "count": 5
-    }
-  },
-  "core/shared-backend/workflow-engine.js": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "frontend/src/App.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
     }
   },
   "frontend/src/components/backend/BackendStatusProvider.tsx": {
     "@typescript-eslint/no-misused-promises": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
   },
@@ -495,16 +59,8 @@
       "count": 1
     }
   },
-  "frontend/src/components/copilot/ChatScrollbar.test.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "frontend/src/components/copilot/CommandPalette.tsx": {
     "@typescript-eslint/no-unsafe-assignment": {
-      "count": 2
-    },
-    "@typescript-eslint/no-unused-vars": {
       "count": 2
     },
     "react-hooks/set-state-in-effect": {
@@ -512,9 +68,6 @@
     }
   },
   "frontend/src/components/copilot/ContextBudgetBar.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
@@ -541,9 +94,6 @@
     "@typescript-eslint/no-misused-promises": {
       "count": 1
     },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 18
-    },
     "@typescript-eslint/require-await": {
       "count": 1
     },
@@ -562,9 +112,6 @@
     },
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 2
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/components/copilot/SimpleChat/formatHarness.ts": {
@@ -682,6 +229,9 @@
   "frontend/src/components/copilot/ToolActivityList.tsx": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
+    },
+    "react-hooks/set-state-in-effect": {
+      "count": 1
     }
   },
   "frontend/src/components/copilot/ansi.ts": {
@@ -790,9 +340,6 @@
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 146
     },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    },
     "no-empty": {
       "count": 3
     }
@@ -832,9 +379,6 @@
     }
   },
   "frontend/src/components/copilot/integration/__tests__/ChatCardLinkBridge.test.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "react-hooks/immutability": {
       "count": 2
     }
@@ -874,11 +418,6 @@
       "count": 1
     }
   },
-  "frontend/src/components/desktop/AccentControl.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "frontend/src/components/desktop/AppRailContext.test.tsx": {
     "@typescript-eslint/no-unsafe-assignment": {
       "count": 1
@@ -894,9 +433,6 @@
     }
   },
   "frontend/src/components/desktop/AppRailContext.tsx": {
-    "@typescript-eslint/no-floating-promises": {
-      "count": 1
-    },
     "@typescript-eslint/no-unsafe-assignment": {
       "count": 1
     },
@@ -910,15 +446,9 @@
   "frontend/src/components/desktop/DesktopSettingsPanel.tsx": {
     "@typescript-eslint/no-misused-promises": {
       "count": 4
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/components/desktop/DesktopSettingsPanel/UsageResourcePanel.test.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "@typescript-eslint/require-await": {
       "count": 4
     }
@@ -973,9 +503,6 @@
   "frontend/src/components/desktop/DesktopSettingsPanel/sections/MobileSync.test.tsx": {
     "@typescript-eslint/no-base-to-string": {
       "count": 4
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/components/desktop/DesktopSettingsPanel/sections/MobileSync.tsx": {
@@ -1052,9 +579,6 @@
     },
     "@typescript-eslint/no-floating-promises": {
       "count": 2
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/components/desktop/FolderPicker.tsx": {
@@ -1081,9 +605,6 @@
     }
   },
   "frontend/src/components/desktop/TitleBar.test.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    },
     "@typescript-eslint/unbound-method": {
       "count": 1
     }
@@ -1099,25 +620,16 @@
     }
   },
   "frontend/src/components/desktop/WorkingTreeReview/CommitDiffFileView.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 8
-    },
     "react-hooks/set-state-in-effect": {
       "count": 2
     }
   },
   "frontend/src/components/desktop/WorkingTreeReview/ExpandedCommitDetail.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 7
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
   },
   "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 5
-    },
     "react-hooks/immutability": {
       "count": 1
     },
@@ -1129,9 +641,6 @@
     }
   },
   "frontend/src/components/desktop/WorkingTreeReview/UntrackedFilePreview.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 5
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
@@ -1142,9 +651,6 @@
     }
   },
   "frontend/src/components/desktop/WorkingTreeReview/useWorkingTreeReview.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "react-hooks/immutability": {
       "count": 5
     },
@@ -1164,9 +670,6 @@
     }
   },
   "frontend/src/components/editor/CodeMirror/CodeMirrorEditor.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "react-hooks/refs": {
       "count": 1
     }
@@ -1182,11 +685,6 @@
     },
     "react-hooks/refs": {
       "count": 2
-    }
-  },
-  "frontend/src/components/editor/integration/GewuOpenFileDevBridge.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 3
     }
   },
   "frontend/src/components/editor/integration/WorkspaceFilePreviewBridge.tsx": {
@@ -1221,9 +719,6 @@
   "frontend/src/components/knowledge/useKnowledgeConsole.ts": {
     "@typescript-eslint/no-floating-promises": {
       "count": 1
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
     },
     "no-empty": {
       "count": 3
@@ -1264,9 +759,6 @@
     }
   },
   "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "react-hooks/set-state-in-effect": {
       "count": 4
     }
@@ -1332,9 +824,6 @@
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 1
     },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "@typescript-eslint/require-await": {
       "count": 1
     }
@@ -1358,11 +847,6 @@
       "count": 1
     },
     "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
-  "frontend/src/components/workspace-panels/AnalysisLaunchPanel.tsx": {
-    "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
   },
@@ -1405,22 +889,11 @@
     },
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 3
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/components/workspace-panels/KnowledgeSpacePanel.tsx": {
-    "@typescript-eslint/no-misused-promises": {
-      "count": 2
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
-    }
-  },
-  "frontend/src/components/workspace-panels/KnowledgeSpaceSwitcher.test.tsx": {
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 3
     }
   },
   "frontend/src/components/workspace-panels/KnowledgeSpaceSwitcher.tsx": {
@@ -1457,9 +930,6 @@
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 9
     },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 36
-    },
     "react-hooks/refs": {
       "count": 1
     },
@@ -1494,20 +964,7 @@
       "count": 2
     }
   },
-  "frontend/src/components/workspace-panels/ResultView.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 154
-    }
-  },
-  "frontend/src/components/workspace-panels/ResultsLibrary.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "frontend/src/components/workspace-panels/SideChatDock.test.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "@typescript-eslint/require-await": {
       "count": 1
     }
@@ -1534,9 +991,6 @@
     },
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 4
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/hooks/useAiSettings.test.ts": {
@@ -1643,9 +1097,6 @@
     }
   },
   "frontend/src/hooks/useResultStore.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
@@ -1674,9 +1125,6 @@
   },
   "frontend/src/hooks/useSkillStore.ts": {
     "@typescript-eslint/no-floating-promises": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unused-vars": {
       "count": 1
     },
     "@typescript-eslint/require-await": {
@@ -1734,9 +1182,6 @@
     }
   },
   "frontend/src/lib/authClient.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 3
-    },
     "@typescript-eslint/require-await": {
       "count": 4
     }
@@ -1754,11 +1199,6 @@
   "frontend/src/lib/chat-file-references.test.ts": {
     "@typescript-eslint/require-await": {
       "count": 8
-    }
-  },
-  "frontend/src/lib/copilotContextProvider.test.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/lib/data-profile.ts": {
@@ -1797,19 +1237,6 @@
   "frontend/src/lib/model-endpoint-transfer.ts": {
     "@typescript-eslint/no-base-to-string": {
       "count": 2
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
-  "frontend/src/lib/office-file-preview.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 7
-    }
-  },
-  "frontend/src/lib/pendingScrollContext.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "frontend/src/lib/project-store.test.ts": {
@@ -1904,11 +1331,6 @@
       "count": 1
     }
   },
-  "frontend/src/main.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 3
-    }
-  },
   "frontend/src/pages/global-pages.test.tsx": {
     "@typescript-eslint/require-await": {
       "count": 1
@@ -1923,28 +1345,11 @@
     }
   },
   "frontend/src/pages/home.tsx": {
-    "@typescript-eslint/no-floating-promises": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
   },
-  "frontend/src/pages/home/useHomeCreateFlows.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "frontend/src/pages/project-workspace.tsx": {
-    "@typescript-eslint/no-floating-promises": {
-      "count": 3
-    },
-    "@typescript-eslint/no-misused-promises": {
-      "count": 2
-    },
     "@typescript-eslint/no-unsafe-argument": {
       "count": 1
     },
@@ -1954,9 +1359,6 @@
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 16
     },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 31
-    },
     "react-hooks/preserve-manual-memoization": {
       "count": 1
     },
@@ -1965,11 +1367,6 @@
     },
     "react-hooks/set-state-in-effect": {
       "count": 5
-    }
-  },
-  "frontend/src/pages/project-workspace/BinaryPreviewCard.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 22
     }
   },
   "frontend/src/pages/project-workspace/BrowserPanel.tsx": {
@@ -1988,9 +1385,6 @@
     "@typescript-eslint/no-unused-expressions": {
       "count": 2
     },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 3
-    },
     "no-empty": {
       "count": 4
     },
@@ -1999,16 +1393,8 @@
     }
   },
   "frontend/src/pages/project-workspace/FileTreeItem.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 9
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
-    }
-  },
-  "frontend/src/pages/project-workspace/FileTreeList.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 4
     }
   },
   "frontend/src/pages/project-workspace/FileTreeOpsOverlay.tsx": {
@@ -2017,16 +1403,6 @@
     },
     "react-hooks/set-state-in-effect": {
       "count": 1
-    }
-  },
-  "frontend/src/pages/project-workspace/OfficePreviewPane.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 11
-    }
-  },
-  "frontend/src/pages/project-workspace/PreviewAssets.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 11
     }
   },
   "frontend/src/pages/project-workspace/RightFileTree.refresh.test.tsx": {
@@ -2047,9 +1423,6 @@
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 6
     },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 4
-    },
     "@typescript-eslint/require-await": {
       "count": 1
     },
@@ -2064,16 +1437,8 @@
     "@typescript-eslint/no-misused-promises": {
       "count": 4
     },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 3
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
-    }
-  },
-  "frontend/src/pages/project-workspace/TextBlock.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 6
     }
   },
   "frontend/src/pages/project-workspace/WorkspaceFilePreview.test.tsx": {
@@ -2096,9 +1461,6 @@
     },
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 2
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 12
     },
     "react-hooks/set-state-in-effect": {
       "count": 2
@@ -2146,22 +1508,11 @@
       "count": 1
     }
   },
-  "frontend/src/pages/project-workspace/useWorkspaceOpenEffects.ts": {
-    "@typescript-eslint/no-floating-promises": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "frontend/src/pages/result-studio/ResultStudioPage.tsx": {
     "@typescript-eslint/no-floating-promises": {
       "count": 2
     },
     "@typescript-eslint/no-misused-promises": {
-      "count": 3
-    },
-    "@typescript-eslint/no-unused-vars": {
       "count": 3
     },
     "@typescript-eslint/require-await": {
@@ -2180,9 +1531,6 @@
   },
   "frontend/src/pages/skills/index.tsx": {
     "@typescript-eslint/no-misused-promises": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
   },
@@ -2203,9 +1551,6 @@
     }
   },
   "frontend/src/pages/window/CommandCenterJobsWall.test.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
     "@typescript-eslint/require-await": {
       "count": 1
     }
@@ -2243,54 +1588,9 @@
       "count": 4
     }
   },
-  "frontend/src/themes/accents.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "frontend/src/themes/terminal-themes.ts": {
     "@typescript-eslint/no-redundant-type-constituents": {
       "count": 1
-    }
-  },
-  "scripts/block49-phase2-live.cjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "scripts/block52-p3-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block54-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block54-yield-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block56-ui287-diagnose.cjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "scripts/block57-inproc-run.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block57-live.cjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "scripts/block57-replay-check.cjs": {
-    "no-unused-vars": {
-      "count": 2
     }
   },
   "scripts/block57-ui-live.cjs": {
@@ -2298,76 +1598,8 @@
       "count": 1
     }
   },
-  "scripts/block59-theme-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block59-ui-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
   "scripts/block63-p1-live.mjs": {
     "no-undef": {
-      "count": 1
-    },
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block63-p4-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block66-p3-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block67-p4-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block67-ui327-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block70-tunnel-live.mjs": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "scripts/block76-p1-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block78-resource-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block81-p3-thinking-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block82-thinking-compat-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block83-p1-plugin-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block83-pack-source-check.cjs": {
-    "no-unused-vars": {
       "count": 1
     }
   },
@@ -2376,99 +1608,9 @@
       "count": 2
     }
   },
-  "scripts/block85-mac-pairing-code.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block85-p2-dual-live.cjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "scripts/block85-p3-dual-delegate.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block88-p1-dual-identity.cjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "scripts/block88-p2-delegate-attribution.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block88-p4-dual-machine.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block91-composer-attach-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block94-knowledge-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block95-b1-diff-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block96-ssh-channel-live.cjs": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "scripts/block97-todo-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/block98-resilience-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
   "scripts/block99-console-live.cjs": {
     "no-undef": {
       "count": 2
-    }
-  },
-  "scripts/build-win-runtime-artifact.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/cdp-wrap.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/check-model-anthropic-native.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/dev-electron-profile.mjs": {
-    "no-unused-vars": {
-      "count": 6
-    }
-  },
-  "scripts/g0-lf0-acceptance.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/g0-rs-p4r-acceptance.mjs": {
-    "no-unused-vars": {
-      "count": 4
     }
   },
   "scripts/g0-rs-p4r-baseline.mjs": {
@@ -2476,121 +1618,8 @@
       "count": 1
     }
   },
-  "scripts/g0-rs-p4r-ui-driver.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/g0-rs-p5-acceptance.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/g0-rs-p6-electron-pressure-prototype.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "scripts/g0-rs-p6-ui110-driver.cjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "scripts/g0-rs-p7-acceptance.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "scripts/g0-sdc1-electron-driver.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/g0-start-audit.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "scripts/generate-ipc-catalog-md.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/golden-path.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "scripts/harness-loop-controller.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/harness-loop-evaluate.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "scripts/install-core-deps.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/ipc-backpressure-profile.mjs": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "scripts/plugin-contract-lint.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "scripts/publish-macos-oss.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/qa-smoke.mjs": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "scripts/release-checksums.mjs": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "scripts/ui315-forced-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/ui323-preview-header-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/ui345-thinking-level-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/ui350-primary-accent-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/ui351-summary-float-live.cjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
   "scripts/ui354-titlebar-mobile-live.cjs": {
     "no-async-promise-executor": {
-      "count": 1
-    },
-    "no-unused-vars": {
       "count": 1
     }
   },
@@ -2604,485 +1633,24 @@
       "count": 1
     }
   },
-  "scripts/ui399-tree-refresh-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/ui404-agent-panel-collapse-live.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "scripts/validate-ipc-catalog.mjs": {
-    "no-unused-vars": {
-      "count": 6
-    }
-  },
-  "scripts/verify-win-runtime-first-use.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/content-sync.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/database/_db-singleton.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "src/ipc/ai-settings.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/ipc/diagnostic.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
   "src/ipc/file-dialog.js": {
     "no-control-regex": {
-      "count": 1
-    }
-  },
-  "src/ipc/result-handlers.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/ipc/runtime-status.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/ipc/telemetry.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/ipc/terminal.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/ipc/window-manager.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/ipc/working-tree-review/context.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/ipc/working-tree-review/diff-parse.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/ipc/working-tree-review/reject-store.js": {
-    "no-unused-vars": {
       "count": 1
     }
   },
   "src/main.js": {
     "no-undef": {
       "count": 1
-    },
-    "no-unused-vars": {
-      "count": 14
-    }
-  },
-  "src/main/_window-create.js": {
-    "no-unused-vars": {
-      "count": 3
     }
   },
   "src/main/_window-manager.js": {
     "no-control-regex": {
-      "count": 1
-    },
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/mcp-server.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/plugin-manager.js": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "src/telemetry.js": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/agent-approval.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/agent-doc-review-ipc.test.mjs": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "test/agent-runner-facade-compat.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/agent-system-info.test.mjs": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "test/agent-tool-policy.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/agent-workflow.test.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "test/ai-usage-project.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/block48-computer-tools.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/block49-phase2-tools.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/block56-model-fallback.test.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "test/block57-remote-execution.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/block59-window-manager.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/block60-auto-plan-trigger.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/block67-p2c.test.mjs": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "test/block67-routes.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/block67-ssh-host.test.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "test/block67-ssh-mux.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/block67-ssh-surface.test.mjs": {
-    "no-unused-vars": {
-      "count": 10
-    }
-  },
-  "test/block67-workspace-gateway.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/block70-mobile-gateway.test.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "test/block70-tunnel.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/block83-tool-catalog.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/block95-b2-compaction.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/block98-microcompact.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/block98-resilience-state.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/db-singleton-shared-file.test.mjs": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "test/db-singleton.test.mjs": {
-    "no-unused-vars": {
       "count": 1
     }
   },
   "test/dev-debug-scripts.test.mjs": {
     "no-control-regex": {
       "count": 1
-    }
-  },
-  "test/dev-electron-profile.test.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "test/dev-verify.test.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "test/federation-terminal.test.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "test/g0-sdc0-profile-registry.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/hle-c5r-regression.test.mjs": {
-    "no-unused-vars": {
-      "count": 6
-    }
-  },
-  "test/ide-tools-diff.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/ide-tools-git-blame.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/ide-tools-git-diff.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/ide-tools-git-log.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/ide-tools-git-show.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/ide-tools-registry-resources.test.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "test/knowledge-space.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/loop-agent-integration.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/loop-api.test.mjs": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "test/loop-checkpoint.test.cjs": {
-    "no-unused-vars": {
-      "count": 5
-    }
-  },
-  "test/loop-controller.test.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "test/loop-failure-diagnoser.test.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/loop-false-success-regression.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/loop-fixtures.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/loop-iterate-route.test.mjs": {
-    "no-unused-vars": {
-      "count": 4
-    }
-  },
-  "test/loop-orchestrator-subdomains.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/loop-recovery-integration.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/loop-repair-strategy.test.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/loop-spt1-acceptance.test.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "test/loop-validator-diagnoser.test.mjs": {
-    "no-unused-vars": {
-      "count": 4
-    }
-  },
-  "test/loop-validator-registry.test.mjs": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "test/loop-validators.test.cjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/mcp-plugin-autoload.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/mcp-tool-registry.test.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "test/p4r-baseline.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/pipeline.test.js": {
-    "no-unused-vars": {
-      "count": 9
-    }
-  },
-  "test/plugin-manifest-schema.test.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "test/plugin-schema-strict.test.mjs": {
-    "no-unused-vars": {
-      "count": 6
-    }
-  },
-  "test/preload-branch-result-namespaces.test.mjs": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "test/project-result-sandbox.test.mjs": {
-    "no-unused-vars": {
-      "count": 3
-    }
-  },
-  "test/project-run-layout.test.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "test/routes-harness-index-500.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/run-json.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/scientific-task-persistence.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/sdc1-complete.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/ssh-direct-runner.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/tools-executor-job-context.test.mjs": {
-    "no-unused-vars": {
-      "count": 1
-    }
-  },
-  "test/workspace-file-ops.test.mjs": {
-    "no-unused-vars": {
-      "count": 2
-    }
-  },
-  "test/workspace-os-import.test.mjs": {
-    "no-unused-vars": {
-      "count": 5
     }
   }
 }

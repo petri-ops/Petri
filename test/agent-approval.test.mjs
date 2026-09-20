@@ -35,7 +35,7 @@ const req = createRequire(import.meta.url);
 }
 
 const db = req(R_SERVER + '/db.js');
-const { tool_run_tool } = req(R_SERVER + '/agent-tools/plan-ui-tools.js');
+req(R_SERVER + '/agent-tools/plan-ui-tools.js');
 // 直接 require learning.js 拿 tool_run_tool（它在那里定义并导出）
 const learning = req(R_SERVER + '/agent-tools/learning.js');
 const { dispatchTool, inferExecutionPolicy } = req(R_SERVER + '/agent-tools/index.js');

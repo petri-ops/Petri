@@ -32,7 +32,7 @@ function registerResultStudioRoutes(app) {
 }
 
 // 兼容既有测试：test/result-studio-route-baseline.test.mjs:13-26 + facade.test.mjs:9-25
-const validate = require('./_helpers/validate');
+require('./_helpers/validate');
 const repository = require('./_helpers/repository');
 const format = require('./_helpers/format');
 const context = require('./_helpers/context');

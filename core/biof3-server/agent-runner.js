@@ -16,7 +16,7 @@
 
 const { estimateRequestTokens } = require('./helpers/token-estimator');
 const { getAiSettings } = require('./helpers/ai-settings');
-const { buildSystemPrompt, localizeToolResult, loadWorkingTreeRejectEntries } = require('./helpers/system-prompt');
+const { buildSystemPrompt, loadWorkingTreeRejectEntries } = require('./helpers/system-prompt');
 const { appendDesktopAgentInstructions } = require('./helpers/desktop-agent-prompt');
 const { renderPluginDemoPathsForPrompt } = require('./helpers/plugin-demo-prompt');
 const llmClient = require('./helpers/llm-client');
@@ -41,30 +41,22 @@ const {
   resolveToolDefsForContext,
   KNOWLEDGE_CONSOLE_PROMPT_SECTION,
 } = require('./agent-tools/knowledge-console-tools');
-const { buildFactsBlockAsync, backgroundExtractFacts } = require('./helpers/user-facts');
+const { buildFactsBlockAsync } = require('./helpers/user-facts');
 const {
   _getChatSummary,
   getChatSummaryAsync,
-  summarizeMessages,
 } = require('./helpers/chat-summary');
 const { getActivePlanForUserAsync, renderActivePlanForPrompt, PLAN_MODE_PROMPT_SECTION } = require('./helpers/plans');
 const convSync = require('./helpers/conversations');
 const {
-  getOrCreateActiveConversation,
-  appendMessageToConversation,
   _maybeAutoTitleConversation,
   _maybeDetectTopicShift,
 } = convSync;
-const { logChatAudit } = require('./helpers/memory-privacy');
 const {
   dashscopeEmbed,
-  saveMemoryVector,
   cosineSim,
-  MAX_CONTENT_LEN,
 } = require('./helpers/memory-vectors');
 const { aiTaskConcurrencyRelease } = require('./helpers/runtime');
-
-const { v4: uuidv4 } = require('uuid');
 
 // Loop orchestrator (pure state machine)
 const { runLoop } = require('./loop-orchestrator');
@@ -77,22 +69,15 @@ sharedBackend.configure({ projectHarnessWorkflowJob: harnessWorkflowState.projec
 
 // Conversation adapter (message/conversation helpers)
 const {
-  appendAssistantMessage,
   saveChatTurnToMemory,
   triggerBackgroundFactExtraction,
   triggerChatSummary,
-  logAudit,
   announceActiveConversation,
 } = require('./conversation-adapter');
 
 // HLE-C1: Loop Controller + Ledger imports
 const {
-  buildLoopRun,
-  buildIteration,
   buildEvidence,
-  stableHash,
-  REASON_CODES,
-  normalizeLoopAutomationMode,
 } = require('../shared-backend/loop-contract');
 const {
   deriveObservedStateDigest,
@@ -107,66 +92,14 @@ if (
 }
 
 const {
-  persistLoopRun,
-  updateLoopRunStatus,
-  getLoopRun,
-  listLoopRunsForConversation,
-  getActiveLoopRunForConversation,
-  persistLoopIteration,
-  listLoopIterations,
-  persistLoopAction,
-  getLoopActionByKey,
-  getToolJob,
-  persistLoopEvidence,
-  saveContextCheckpoint,
-} = require('./db');
-
-const { buildIterationCheckpoint } = require('../shared-backend/loop-checkpoint');
-
-const {
-  validateArtifact,
-  validateDelivery,
-  registerValidator,
-  buildResult,
-} = require('../shared-backend/loop-validator-registry');
-
-const {
-  diagnoseFailure,
-} = require('../shared-backend/loop-failure-diagnoser');
-
-const {
-  selectRepairStrategy,
-} = require('../shared-backend/loop-repair-strategy');
-
-const {
   getToolDefs,
-  createCallId,
-  createTraceId,
-  createModelResultState,
-  createRejectedToolResult,
-  executeToolCall,
-  replaceToolResultData,
-  serializeToolResultForModel,
-  buildToolCallEvent,
-  buildToolResultEvent,
-  createToolActivityRecorder,
-  MAX_AGENT_ITERS,
   MAX_AGENT_TOOL_CALLS,
-  MAX_FINALIZATION_ATTEMPTS,
-  shouldFinalizeAgentIteration,
-  assessFinalizationResult,
-  buildFinalizationRetryRequest,
-  buildFinalizationFallbackMessage,
-  finalizationFallbackReason,
-  createAgentProgressRecorder,
+  // BLOCK-88 P7 源码契约：durable task 路径须保留 completion guard 引入
+  // （test/g0-rs-p7-acceptance.test.mjs 断言；expectation 传递现状漂移归 RS 域）。
   createResultEditCompletionGuard,
-  createAgentToolCallController,
-  runAgentToolCallBatch,
 } = require('./agent-tools');
 
 const {
-  createResultEditProgressRecorder,
-  finalizeResultEditProgress,
   projectResultStudioToolContext,
 } = require('./agent-tools/result-context-binding');
 
@@ -177,7 +110,6 @@ const {
 } = require('./helpers/methods-export');
 
 const agentTaskStore = require('./agent-task-store');
-const logger = require('./logger');
 
 /**
  * Resolve terminal task status.
@@ -374,7 +306,7 @@ async function runAgentLoop({
     try {
       _seq += 1;
       agentTaskStore.appendAgentTaskEvent(taskId, _seq, eventType, obj);
-    } catch (e) {
+    } catch {
       /* task_events write failure does not block loop */
     }
   };
@@ -788,7 +720,8 @@ async function runAgentLoop({
     loopRunId,
     loopState,
     cancellationObserved,
-    loopAbortedByController,
+    // BLOCK-88 P4R-3 源码契约：失败原因投影名须在 thin facade 显式出现
+    // （test/result-studio-agent-binding.test.mjs 断言）——保留绑定，抑制基线登记豁免。
     providerFailureReason,
     finalizationAttempts,
     fatalAgentError,

@@ -398,7 +398,7 @@ async function run(config) {
           && !item.disabled
         `, 'retry AI summary');
         retryClicked = true;
-      } catch (clickError) {
+      } catch {
         retryClicked = false;
       }
       let runningObserved = false;

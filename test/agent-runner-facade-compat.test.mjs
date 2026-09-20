@@ -22,7 +22,7 @@ function resolve(...segments) {
 }
 
 describe('agent-runner-facade-compat.test.mjs', () => {
-  const cwd = resolve();
+  resolve();
 
   describe('runAgentLoop signature compatibility', () => {
     it('should have runAgentLoop as primary export', async () => {

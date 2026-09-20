@@ -309,7 +309,7 @@ describe('ScientificInteractionViewer', () => {
 
     started = performance.now();
     fireEvent.click(screen.getByRole('checkbox', { name: '选择 G100' }));
-    expect((screen.getByRole('checkbox', { name: '选择 G100' })).checked).toBe(true);
+    expect(screen.getByRole<HTMLInputElement>('checkbox', { name: '选择 G100' }).checked).toBe(true);
     samples.selectionFeedbackMs = performance.now() - started;
 
     started = performance.now();
@@ -318,7 +318,7 @@ describe('ScientificInteractionViewer', () => {
     samples.sortFeedbackMs = performance.now() - started;
 
     fireEvent.change(screen.getByRole('combobox', { name: '筛选字段' }), { target: { value: 'gene' } });
-    const filter = screen.getByRole('textbox', { name: '筛选内容' });
+    const filter = screen.getByRole<HTMLInputElement>('textbox', { name: '筛选内容' });
     started = performance.now();
     fireEvent.change(filter, { target: { value: 'G1' } });
     expect(filter.value).toBe('G1');

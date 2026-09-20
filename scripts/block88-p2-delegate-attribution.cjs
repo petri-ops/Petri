@@ -16,7 +16,6 @@
  * 证据: acceptance/block-88/p2-attribution.json + p2-attribution-ui.png
  */
 
-const assert = require('node:assert/strict');
 const { mkdtempSync, rmSync, mkdirSync, writeFileSync } = require('node:fs');
 const { tmpdir } = require('node:os');
 const path = require('node:path');

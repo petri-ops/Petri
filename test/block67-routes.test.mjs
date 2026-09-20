@@ -45,7 +45,7 @@ const fakeSshBackend = {
   async list(p) { this.calls.push(['list', p]); return [{ name: 'd', type: 'dir', mtimeMs: 42 }, { name: 'a.md', type: 'file', size: 5, mtimeMs: 42 }]; },
   async stat(p) { this.calls.push(['stat', p]); return { type: p.endsWith('.md') ? 'file' : 'dir', size: 5, mtimeMs: 42 }; },
   async read(p) { this.calls.push(['read', p]); return Buffer.from('# hi', 'utf-8'); },
-  async write(p, c, opts) { this.calls.push(['write', p, c]); return { type: 'file', size: c.length, mtimeMs: 99 }; },
+  async write(p, c, _opts) { this.calls.push(['write', p, c]); return { type: 'file', size: c.length, mtimeMs: 99 }; },
 };
 const origResolve = gateway.resolveWorkspaceBackend;
 

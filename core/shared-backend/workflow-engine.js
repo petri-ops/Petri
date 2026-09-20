@@ -64,7 +64,7 @@ function readJson(filePath) {
   try {
     if (!fs.existsSync(filePath)) return null;
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -260,7 +260,7 @@ class Workflow {
        
       const fn = new Function('context', 'params', `return (${safe});`);
       return Boolean(fn(this.context, this.context.params));
-    } catch (e) {
+    } catch {
       return false;
     }
   }
@@ -293,7 +293,7 @@ class Workflow {
    * @returns {*}
    * @private
    */
-  _resolveValue(value, stepId) {
+  _resolveValue(value, _stepId) {
     if (typeof value !== 'string') return value;
     if (!value.includes('.')) return value;
 

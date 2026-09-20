@@ -37,14 +37,12 @@ function readJson(filePath) {
 
 const {
   stableHash,
-  REASON_CODES,
   buildIteration,
   buildEvidence,
 } = require(__dirname + '/../core/shared-backend/loop-contract');
 
 const {
   decideNextAction,
-  computeResolvedGapIds,
 } = require(__dirname + '/../core/shared-backend/loop-controller');
 
 const {

@@ -35,7 +35,7 @@ function assertSafeRelativePath(value, label) {
   assert(!/(?:api[_-]?key|secret|token|password|credential)/i.test(value), `${label} contains a sensitive-looking pattern`);
 }
 
-function validateScenario(scenario, scenarioPath) {
+function validateScenario(scenario, _scenarioPath) {
   const checks = [];
   const record = (id, condition, evidence = {}) => {
     if (!condition) throw new Error(`FAIL ${id} in ${scenario.scenarioId}`);
@@ -113,7 +113,7 @@ function validateScenario(scenario, scenarioPath) {
   return checks;
 }
 
-function validateTaskSpec(taskSpec, taskSpecPath) {
+function validateTaskSpec(taskSpec, _taskSpecPath) {
   const checks = [];
   const record = (id, condition, evidence = {}) => {
     if (!condition) throw new Error(`FAIL ${id} in taskSpec`);

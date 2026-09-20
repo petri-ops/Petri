@@ -35,7 +35,7 @@ const {
 
 const repository = require('./repository');
 const validate = require('./validate');
-const storage = require('./storage');
+require('./storage');
 
 function attachExistingRepositoryWithExplicitConsent(input, dependencies = {}) {
   const projectId = String(input?.projectId || '').trim();

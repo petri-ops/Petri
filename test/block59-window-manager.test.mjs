@@ -31,7 +31,6 @@ const {
   isValidGeometry,
   clampBoundsToWorkArea,
   MAX_POPPED_WINDOWS,
-  RAIL_STATIC_FADE_MS,
 } = require('../src/main/_window-manager.js');
 
 const DISPLAYS = [

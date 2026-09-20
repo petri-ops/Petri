@@ -2,21 +2,16 @@
 // BinaryPreviewCard — UI-305 P1 从 project-workspace.tsx 尾部整簇平移（原 2876-2918 行），
 // 零行为变化；主文件按既有惯例再导出保持 '@/pages/project-workspace' 导入路径兼容。
 // ============================================================
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { Icon, type IconName } from '@/components/icons/Icon';
-import { fileExtension, isImageFile, isTextFile, isMarkdownFile, workspaceFileUrlFor, formatPreviewText } from '@/lib/previewFileUtils';
+import React from 'react';
+import { Icon } from '@/components/icons/Icon';
+import { fileExtension } from '@/lib/previewFileUtils';
 import {
   describeOfficeKind,
-  loadOfficePreview,
-  revokeOfficePreviewBlobs,
   suggestedOpener,
-  type OfficePreviewAsset,
-  type OfficePreviewKind,
-  type OfficePreviewModel,
 } from '@/lib/office-file-preview';
 import styles from '../project-workspace.module.css';
 import type { ActiveWorkspaceFile } from './types';
-import { isCsvFile, isPdfFile, isHtmlFile, isJsonFile, withReportTheme, detectOfficeKind, fallbackKindForExtension, formatSize } from './helpers';
+import { detectOfficeKind, fallbackKindForExtension } from './helpers';
 
 export function BinaryPreviewCard({
   file,

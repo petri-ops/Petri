@@ -9,7 +9,6 @@
  * 桌面 terminal.js 同值）。
  */
 
-const path = require('node:path');
 const os = require('node:os');
 
 const MAX_SESSIONS = 4;

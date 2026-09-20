@@ -1,6 +1,5 @@
 'use strict';
 
-const fs = require('fs');
 const path = require('path');
 
 // BLOCK-92 Wave C-6 — R server / shared-backend 路径解析外迁（原 294-318，

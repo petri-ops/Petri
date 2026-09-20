@@ -39,9 +39,8 @@ process.env.BIOF3_LOCAL_DATA_DIR = path.join(tmpRoot, 'local-data');
 
 const {
   createRemoteJobRunner,
-  parseSha256SumManifest,
 } = require(ROOT + '/core/biof3-server/helpers/remote-execution/remote-job-runner');
-const { runSshOp, remoteJobDirPath, buildSshArgv } = require(ROOT + '/core/biof3-server/helpers/remote-execution/ssh-transport');
+const { runSshOp, remoteJobDirPath } = require(ROOT + '/core/biof3-server/helpers/remote-execution/ssh-transport');
 const { remoteAgentCommand } = require(ROOT + '/core/biof3-server/helpers/remote-execution/node-agent');
 const { createTargetRegistry } = require(ROOT + '/core/biof3-server/helpers/remote-execution/target-registry');
 

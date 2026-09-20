@@ -11,7 +11,6 @@
  *
  * The script never exits on its own. Only Ctrl+C / SIGTERM stops it.
  */
-const http = require('http');
 const { spawn } = require('child_process');
 
 const isWin = process.platform === 'win32';

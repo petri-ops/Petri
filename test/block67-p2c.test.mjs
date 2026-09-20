@@ -59,7 +59,7 @@ test('system_info: ssh 项目返回远程真相（fake backend exec）+ 工具�
   gateway.resolveWorkspaceBackend = (project) => ({
     backend: {
       kind: 'ssh',
-      async exec(cmd, cwd, timeoutS) {
+      async exec(_cmd, _cwd, _timeoutS) {
         return {
           code: 0,
           stdout: 'Linux 6.8.0-57-generic\nx86_64\nshell=/bin/bash\nPython 3.12.3\ngit version 2.43.0\nv22.9.0\n',

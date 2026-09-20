@@ -12,7 +12,6 @@
 const path = require('node:path');
 
 const DELEGATE_POLL_INTERVAL_MS = 5_000;
-const DELEGATE_DEFAULT_TIMEOUT_MS = 10 * 60_000;
 const REQUEST_TIMEOUT_MS = 20_000;
 
 function resolveFederationDataDir() {

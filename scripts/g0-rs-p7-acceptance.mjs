@@ -68,7 +68,6 @@ const SOURCE_FILES = Object.freeze([
   'build/afterPack.js',
   'package.json',
 ]);
-const SHA256 = /^[a-f0-9]{64}$/;
 const COMMIT = /^[a-f0-9]{40}$/;
 
 const Database = require(require.resolve('better-sqlite3', {
@@ -77,7 +76,6 @@ const Database = require(require.resolve('better-sqlite3', {
 const aiSettings = require('../core/biof3-server/helpers/ai-settings');
 const { ModelGateway, getProvider } = require('../core/shared-backend/llm-providers');
 const {
-  REQUIRED_ENVIRONMENTS,
   REQUIRED_INVARIANTS,
   REQUIRED_TRACE_STEPS,
   RESULT_STUDIO_PRODUCT_TRACE_VERSION,

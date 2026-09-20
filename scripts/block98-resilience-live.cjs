@@ -50,7 +50,7 @@ async function attach() {
 
 (async () => {
   const run = lib.createRun({ name: 'block98-resilience-live', evidenceDir: EVIDENCE_DIR });
-  const startedAt = Date.now();
+  Date.now();
   client = await attach();
   await lib.evalJs(client, `location.href = 'http://localhost:3000/project/${PROJECT_ID}'; 'nav'`);
   await sleep(5000);

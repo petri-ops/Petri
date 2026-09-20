@@ -11,11 +11,6 @@ const RESULT_CHANGESET_SERVICE_VERSION = 1;
 const MAX_SCRIPT_BYTES = 2 * 1024 * 1024;
 const MAX_PARAMETERS_BYTES = 1024 * 1024;
 const ZERO_OID = '0'.repeat(40);
-const DEFAULT_PREVIEW_BASE_MEMORY_BYTES = 256 * 1024 * 1024;
-const DEFAULT_PREVIEW_INPUT_MEMORY_MULTIPLIER = 4;
-const DEFAULT_PREVIEW_OUTPUT_DISK_MULTIPLIER = 2;
-const PREVIEW_METADATA_RESERVE_BYTES = 8 * 1024 * 1024;
-const MAX_RESOURCE_MODEL_MULTIPLIER = 64;
 const SENSITIVE_PARAMETER = /(?:^|_)(?:api_?key|access_?token|secret|password|credential)(?:$|_)/i;
 
 class ResultChangeSetError extends Error {

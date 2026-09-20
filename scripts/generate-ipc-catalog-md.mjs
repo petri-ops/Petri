@@ -1,6 +1,6 @@
 // Generate ipc-catalog.md from the JSON output of validate-ipc-catalog.mjs
 import { readFileSync, writeFileSync, readdirSync, statSync } from "fs";
-import { join, extname } from "path";
+import { join } from "path";
 import { execSync } from "child_process";
 
 const ROOT = process.cwd();

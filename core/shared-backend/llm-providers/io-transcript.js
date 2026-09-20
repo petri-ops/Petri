@@ -154,7 +154,6 @@ function createIoTranscriptSink(options = {}) {
   if (!dataDir) throw new Error('createIoTranscriptSink requires dataDir');
   const dir = path.join(dataDir, 'llm-transcripts');
   const maxRecordBytes = Number.isFinite(options.maxRecordBytes) ? options.maxRecordBytes : MAX_RECORD_BYTES_DEFAULT;
-  const maxFrames = Number.isFinite(options.maxFrames) ? options.maxFrames : MAX_FRAMES_DEFAULT;
   const maxFileBytes = Number.isFinite(options.maxFileBytes) ? options.maxFileBytes : MAX_FILE_BYTES_DEFAULT;
   const fsMod = options.fs || fs;
   const now = options.now || (() => new Date());

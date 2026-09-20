@@ -33,7 +33,6 @@ const {
 } = require('../helpers/memory-vectors');
 const {
   estimateRequestTokens,
-  countTokens,
 } = require('../helpers/token-estimator');
 
 const TOOL_SUMMARY_PRIVATE_KEYS = new Set([
@@ -151,7 +150,7 @@ module.exports = function registerAiChatRoute(app) {
         },
       });
       return res.json({ status: 'ok', content, toolJobId: job.id });
-    } catch (error) {
+    } catch {
       return res.status(502).json({
         status: 'error',
         error: 'AI 总结仍不可用，请稍后重试',

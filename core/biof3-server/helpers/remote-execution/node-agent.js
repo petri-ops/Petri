@@ -39,10 +39,8 @@ const crypto = require('crypto');
 
 const AGENT_DIR = '$HOME/.biof3-agent';
 const AGENT_BIN = `${AGENT_DIR}/bin/biof3-agent.sh`;
-const AGENT_JOBS = `${AGENT_DIR}/jobs`;
 const AGENT_ROOT = AGENT_DIR;
 
-const JOB_ID_RE = /^[A-Za-z0-9._-]{1,64}$/;
 
 const BIOF3_AGENT_SH = `#!/usr/bin/env bash
 # biof3-agent — BioF3 BLOCK-57 daemonless node agent (P1)
@@ -186,7 +184,8 @@ case "$cmd" in
       # pipefail 下 head 提前关闭会让 tail 吃 SIGPIPE（141）——截断是本 verb 的正常语义
       tail -c +"$((off+1))" "$f" 2>/dev/null | { [ "$len" -gt 0 ] && head -c "$len" || cat; } | base64 || true
     else
-      base64 "$f"
+      # stdin 重定向形式：BSD base64（macOS）拒绝位置参数；GNU/BusyBox 输出逐字不变
+      base64 < "$f"
     fi
     ;;
   fs_write)
@@ -285,8 +284,8 @@ case "$cmd" in
     if [ "$osz" -gt 65536 ]; then head -c 65536 "$outb" > "$outb.c" && mv -f "$outb.c" "$outb"; ocap=1; fi
     if [ "$esz" -gt 32768 ]; then head -c 32768 "$errb" > "$errb.c" && mv -f "$errb.c" "$errb"; ecap=1; fi
     printf '{"code":%s,"stdout":"%s","stderr":"%s","truncated":%s}\\n' \\
-      "$ecode" "$(base64 -w0 "$outb" 2>/dev/null || base64 "$outb" | tr -d '\\n')" \\
-      "$(base64 -w0 "$errb" 2>/dev/null || base64 "$errb" | tr -d '\\n')" \\
+      "$ecode" "$(base64 -w0 "$outb" 2>/dev/null || base64 < "$outb" | tr -d '\\n')" \\
+      "$(base64 -w0 "$errb" 2>/dev/null || base64 < "$errb" | tr -d '\\n')" \\
       "$([ "$ocap" -eq 1 ] || [ "$ecap" -eq 1 ] && echo true || echo false)"
     rm -f "$outb" "$errb"
     ;;

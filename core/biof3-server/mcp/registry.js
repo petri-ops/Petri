@@ -13,24 +13,18 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const crypto = require('crypto');
-const { execFile } = require('child_process');
 // BLOCK-57 — 会话执行目标 → 插件远程直跑（设计评审 D1-D9；同步预算 ≤300s 与本地插件语义一致）
 const { createRemoteJobRunner, AGENT_SCRIPT_HASH } = require('../helpers/remote-execution/remote-job-runner');
 const { createTargetRegistry } = require('../helpers/remote-execution/target-registry');
-const { runSshOp, remoteJobDirPath } = require('../helpers/remote-execution/ssh-transport');
-const { remoteAgentCommand } = require('../helpers/remote-execution/node-agent');
-const {
-  captureStagedInputSnapshots,
-  isInternalArtifactName,
-  isSafeFlatFilename,
-  reconcileArtifactTruth,
-} = require('../helpers/artifact-truth');
-const { checkAllowedDownstream } = require('../agent-tools/agent-tool-policy');
-const { createResultArchive } = require('../helpers/result-archive');
+require('../helpers/remote-execution/ssh-transport');
+require('../helpers/remote-execution/node-agent');
+require('../helpers/artifact-truth');
+require('../agent-tools/agent-tool-policy');
+require('../helpers/result-archive');
 const { createExecutionContext } = require('../../shared-backend/execution-context');
 const { resolveProjectRunLayout } = require('../../shared-backend/project-run-layout');
-const { createExecutionProvenance, attachProvenanceToResult } = require('../../shared-backend/execution-provenance');
-const { collectExecutionInputs, writeArtifactManifest } = require('../../shared-backend/artifact-manifest');
+require('../../shared-backend/execution-provenance');
+require('../../shared-backend/artifact-manifest');
 const { validateToolArgs, McpValidationError } = require('./_validate-tool-args');
 
 // Skill Registry & Runtime 导入（延迟加载避免循环依赖）
@@ -296,8 +290,8 @@ async function _skillExecute(args = {}) {
 // （纯搬运；_runPluginScript 穿入 db/plans——registry 内为动态 require 的可空绑定）。
 const { R_SERVER, SHARED_BACKEND } = require('./registry/runtime-paths');
 
-const { resolveRLibsForPlugin } = require(path.join(SHARED_BACKEND, 'r-libs-resolver.js'));
-const { ensureBundlesForPlugin } = require(path.join(SHARED_BACKEND, 'capability-bundles.js'));
+require(path.join(SHARED_BACKEND, 'r-libs-resolver.js'));
+require(path.join(SHARED_BACKEND, 'capability-bundles.js'));
 const pluginLoader = require(path.join(R_SERVER, 'plugin-loader.js'));
 const config = require(path.join(R_SERVER, 'config.js'));
 // callTool 跑完后通过 db.js 写入 tool_jobs 记录（方案 C，agent-led Task 1）
@@ -593,9 +587,9 @@ const { _runPluginScript } = require('./registry/run-plugin-script');
  *   - 结果读 jobDir/manifest.json（脚本写）+ 列 jobDir 下输出文件
  */
 
-// _runPluginScript 已外迁 ./registry/run-plugin-script.js（db/plans 穿参）。
+// _runPluginScript 已外迁 ./registry/run-plugin-script.js（db/plans/resolveJobLayout 穿参）。
 
-async function runPluginToolRemote({ sessionExecutionTargetId, jobDir, plugin, language, toolJobId, startedAt, budgetMs, resolve, plans, outputDir }) {
+async function runPluginToolRemote({ sessionExecutionTargetId, jobDir, plugin, language, toolJobId, budgetMs, resolve, plans, outputDir }) {
   const failWith = (message) => ({ err: Object.assign(new Error(message), { code: 1 }), stdout: '', stderr: message });
 
   try {
@@ -635,7 +629,7 @@ async function runPluginToolSshDirect({ sshProjectRow, jobDir, plugin, language,
   const failWith = (message) => ({ err: Object.assign(new Error(message), { code: 1 }), stdout: '', stderr: message });
   const { createSshDirectRunner } = require('../helpers/remote-execution/ssh-direct-runner');
   try {
-    const dbModule = require('../db');
+    require('../db');
     const runner = createSshDirectRunner({ project: sshProjectRow });
     // 运行时解析：复用 target registry 探测（与主链同源）
     const probe = await registry.probe({ id: target.id });
@@ -926,7 +920,12 @@ async function callTool(name, args, opts = {}) {
       opts && opts.resultStudioInputLineage ? opts.resultStudioInputLineage : null,
       opts && typeof opts.conversationId === 'string' && opts.conversationId.trim()
         ? opts.conversationId.trim()
-        : null
+        : null,
+      {
+        resolveJobLayout: _resolveMcpJobLayout,
+        createMcpExecutionContext: _createMcpExecutionContext,
+        runPluginToolRemote,
+      }
     );
   }
 

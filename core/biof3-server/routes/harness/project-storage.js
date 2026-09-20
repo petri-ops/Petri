@@ -17,9 +17,7 @@
  *   - runtime 真值面（du/遍历）不实时——结果库占用非实时关键面。
  */
 
-const fs = require('fs');
 const fsp = require('fs/promises');
-const path = require('path');
 const db = require('../../db');
 const workspaceGateway = require('../../helpers/workspace-gateway');
 const { createStorageCache, walkSize, parseDuOutput } = require('../../helpers/project-storage');

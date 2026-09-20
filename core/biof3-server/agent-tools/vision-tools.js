@@ -13,7 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 const dbMod = require('../db');
-const config = require('../config');
+require('../config');
 const { callVision } = require('../helpers/llm-client');
 const workspaceGateway = require('../helpers/workspace-gateway');
 

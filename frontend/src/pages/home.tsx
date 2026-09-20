@@ -21,7 +21,7 @@ import { FolderPicker } from '@/components/desktop/FolderPicker';
 // BLOCK-86 P2 — 运行时提示领域感知门控（无包不提运行时）
 import { listPacksRequiringRuntimes } from '@/lib/domainPack';
 import { createProject, listProjectJobs, listProjects } from '@/lib/project-store';
-import type { Project, ToolJob } from '@/lib/project-types';
+import type { Project } from '@/lib/project-types';
 import styles from './home.module.css';
 // BLOCK-92 Wave B-6 — 创建流/选择器簇外迁（./home/，纯搬运零行为变化）。
 import { pickRecentCompletedJob, pickRecentProject } from './home/recentPickers';
@@ -93,7 +93,7 @@ export default function Home(): React.ReactElement {
   useEffect(() => {
     if (!backendStatus.isReady) return;
     let cancelled = false;
-    (async () => {
+    void (async () => {
       try {
         const projects = await listProjects();
         if (cancelled) return;
@@ -192,7 +192,7 @@ export default function Home(): React.ReactElement {
       } catch {
         // 事件总线失败不阻塞导航
       }
-      navigate(`/project/${project.id}`, { replace: true });
+      void navigate(`/project/${project.id}`, { replace: true });
     } catch (e) {
       setCreateError(`创建项目失败：${e instanceof Error ? e.message : String(e)}`);
     } finally {
@@ -217,7 +217,7 @@ export default function Home(): React.ReactElement {
       } catch {
         // 事件总线失败不阻塞导航
       }
-      navigate(`/project/${project.id}`, { replace: true });
+      void navigate(`/project/${project.id}`, { replace: true });
     } catch (e) {
       setCreateError(`创建项目失败：${e instanceof Error ? e.message : String(e)}`);
     } finally {
@@ -661,7 +661,7 @@ export default function Home(): React.ReactElement {
                 key={project.id}
                 type="button"
                 className={styles.workbenchCard}
-                onClick={() => navigate(`/project/${project.id}`)}
+                onClick={() => void navigate(`/project/${project.id}`)}
                 title={project.workspaceKind === 'ssh' ? `${project.sshHost}:${project.remotePath}` : project.workspacePath || project.name}
               >
                 <span className={styles.workbenchCardIcon}><Icon name={project.workspaceKind === 'ssh' ? 'cpu' : 'folder'} size={16} /></span>

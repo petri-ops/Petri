@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-const { getStores, resetStoresForTest, createPairingStore, createSessionStore, PAIR_TOKEN_TTL_MS } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/pairing.js'));
+const { resetStoresForTest, createPairingStore, createSessionStore, PAIR_TOKEN_TTL_MS } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/pairing.js'));
 const { readConfig, writeConfig, lanAddresses, resolveEnabled, resolvePort } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/config.js'));
 const { buildMobileGateway, startMobileGateway } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/index.js'));
 
@@ -238,7 +238,7 @@ test('BLOCK-70 admin REST and gateway share one session truth (revoke is instant
     assert.equal(pairToken.ok, true);
     assert.match(pairToken.primaryUrl, /\/pair\?token=/);
 
-    const { app, stores } = buildMobileGateway({ dataDir: root, mountRoutes: (mobileApp) => mobileApp.get('/m/api/probe', (_req, res) => res.json({ ok: true })) });
+    const { app } = buildMobileGateway({ dataDir: root, mountRoutes: (mobileApp) => mobileApp.get('/m/api/probe', (_req, res) => res.json({ ok: true })) });
     const server = await listen(app);
     const base = `http://127.0.0.1:${server.address().port}`;
     const paired = await body(await fetch(`${base}/m/api/pair`, {

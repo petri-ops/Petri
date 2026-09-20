@@ -17,16 +17,10 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
-const { stableStringify } = require('./canonical-json');
-const { isPathContained } = require('./project-run-layout');
-const {
-  resolveExecutionInputPath,
-  verifyExecutionProvenance,
-} = require('./execution-provenance');
-const {
-  verifyWorkflowGraphIntegrity,
-  workflowGraphDigest,
-} = require('./result-workflow-graph');
+require('./canonical-json');
+require('./project-run-layout');
+require('./execution-provenance');
+require('./result-workflow-graph');
 const { createResultChangeSet, sha256 } = require('./result-changeset-service');
 const {
   ResultRevisionSourceError,
@@ -45,28 +39,12 @@ const {
   CONTROLLED_REPLAY_VERSION,
   DEFAULT_CONFIRMATION_TTL_MS,
   SHA256,
-  GIT_COMMIT,
-  SAFE_ID,
-  RESULT_CHANGESET_REPLAY_PACKAGE_VERSION,
-  REPLAY_PACKAGE_STATUSES,
-  COHORT_MANIFEST_FIELDS,
-  COHORT_WORKFLOW_FIELDS,
-  COHORT_WORKFLOW_NODE_FIELDS,
-  COHORT_WORKFLOW_EDGE_FIELDS,
-  COHORT_REVISION_FIELDS,
-  COHORT_JOB_FIELDS,
-  REQUEST_FIELDS,
   ResultReplayError,
   fail,
-  object,
   cloneJson,
   stableHash,
   assertAllowedReplayRequest,
   safeIdentifier,
-  expectedInputMap,
-  hashFile,
-  resolveIntactInput,
-  projectSourceJobParams,
   buildReplayExecutionParams,
   assertExpectedHashes,
   assertRevisionOutput,
@@ -75,17 +53,6 @@ const {
   buildRevisionReplayProofs,
   projectReplayExecutionCohort,
   replayCohortFingerprint,
-  hasExactFields,
-  isSafeIdentifier,
-  isSafeCohortRelativePath,
-  isStrictlyContainedPath,
-  isSafeWorkflowNodeId,
-  validUniqueIdentifiers,
-  readRegularJsonInside,
-  resolveCohortChildDirectory,
-  validateCohortPackageRoot,
-  validateCohortWorkflowGraph,
-  validateCohortChildPackage,
   validateResultChangeSetReplayPackage,
 } = require('./result-replay-service/cohort-package');
 

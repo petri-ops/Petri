@@ -136,7 +136,6 @@ export function parseEndpointProfiles(text: string, format: 'json' | 'csv'): Par
   if (rawProfiles.length > 100) throw new Error('单次最多导入 100 个渠道');
   const profiles: EndpointTransferProfile[] = [];
   rawProfiles.forEach((raw, index) => {
-    const record = raw && typeof raw === 'object' ? raw as Record<string, unknown> : {};
     const profile = normalizeProfile(raw, index);
     if (profile) profiles.push(profile);
     else warnings.push(`第 ${index + 1} 行缺少有效 Base URL 或默认模型，已跳过。`);

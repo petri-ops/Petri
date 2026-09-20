@@ -198,25 +198,6 @@ function buildSharedStrings(xml: string): string[] {
   return result;
 }
 
-interface SheetContext {
-  sharedStrings: string[];
-  sheetMap: Record<string, string>;
-}
-
-function loadSheetContext(entries: Record<string, ZipEntry>): SheetContext {
-  const ctx: SheetContext = { sharedStrings: [], sheetMap: {} };
-  void Object.entries(entries)
-    .filter(([name]) => name === 'xl/sharedStrings.xml')
-    .map(([, entry]) => entry.text())
-    .reduce<Promise<string>[]>((acc, p) => {
-      acc.push(p);
-      return acc;
-    }, []);
-  // Single async pass: read sharedStrings + sheet1 synchronously via Promise.all
-  // using Promise-based entry API.
-  return ctx;
-}
-
 async function buildXlsxPreview(entries: Record<string, ZipEntry>): Promise<OfficePreviewModel> {
   const sharedStringsEntry = entries['xl/sharedStrings.xml'];
   const sharedStrings = sharedStringsEntry
@@ -313,11 +294,11 @@ function buildOdpText(xml: string): string {
 async function loadAssets(
   entries: Record<string, ZipEntry>,
   patterns: RegExp[],
-  baseUrl: string,
-  projectId: string,
-  workspacePath: string,
-  relativePath: string,
-  authHeader?: { Authorization: string }
+  _baseUrl: string,
+  _projectId: string,
+  _workspacePath: string,
+  _relativePath: string,
+  _authHeader?: { Authorization: string }
 ): Promise<OfficePreviewAsset[]> {
   const assets: OfficePreviewAsset[] = [];
   for (const [name, entry] of Object.entries(entries)) {
@@ -411,7 +392,7 @@ export async function loadOfficePreview(req: OfficePreviewRequest): Promise<Offi
   let archive: Awaited<ReturnType<typeof unzip>>;
   try {
     archive = await unzip(resource.buffer);
-  } catch (error) {
+  } catch {
     return {
       kind,
       title: req.name,

@@ -21,7 +21,7 @@
  * 手机插件商店整段空白（用户实测「手机端和桌面不一致」）。本批对齐 IPC 契约。
  */
 
-const express = require('express');
+require('express');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');

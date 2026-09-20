@@ -31,7 +31,7 @@ function assert(name, ok, detail) {
   const registry = require(path.join(root, 'core/biof3-server/mcp/registry.js'));
   const hooks = require(path.join(root, 'core/shared-backend/task-confirmation-hooks.js'));
   const sdk = require(path.join(root, 'core/shared-backend/result-studio-plugin-sdk.js'));
-  const pluginLoader = require(path.join(root, 'core/biof3-server/plugin-loader.js'));
+  require(path.join(root, 'core/biof3-server/plugin-loader.js'));
 
   const bioIds = fs.readdirSync(path.join(root, 'resources/built-in-plugins'))
     .filter((d) => fs.existsSync(path.join(root, 'resources/built-in-plugins', d, 'plugin.json')));

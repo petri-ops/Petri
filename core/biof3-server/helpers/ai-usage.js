@@ -48,10 +48,10 @@ for (const statement of [
   'ALTER TABLE ai_usage ADD COLUMN context_exceeded INTEGER DEFAULT 0',
   'ALTER TABLE ai_usage ADD COLUMN cancelled_by_user INTEGER DEFAULT 0',
 ]) {
-  try { sqlite.exec(statement); } catch (_) { /* already migrated */ }
+  try { sqlite.exec(statement); } catch { /* already migrated */ }
 }
-try { sqlite.exec('CREATE INDEX IF NOT EXISTS idx_ai_usage_provider_ts ON ai_usage(provider, ts DESC)'); } catch (_) {}
-try { sqlite.exec('CREATE INDEX IF NOT EXISTS idx_ai_usage_conv ON ai_usage(conversation_id)'); } catch (_) {}
+try { sqlite.exec('CREATE INDEX IF NOT EXISTS idx_ai_usage_provider_ts ON ai_usage(provider, ts DESC)'); } catch {}
+try { sqlite.exec('CREATE INDEX IF NOT EXISTS idx_ai_usage_conv ON ai_usage(conversation_id)'); } catch {}
 
 function recordAiUsage({userId, kind, model, provider, promptTokens, completionTokens, cacheReadTokens, cacheCreationTokens, latencyMs, errorCode, conversationId, costCny, costStatus, attempt, retryable, contextExceeded, cancelledByUser}) {
   try {

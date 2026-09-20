@@ -20,7 +20,6 @@ import { execSync, spawn } from 'node:child_process';
 import fs from 'node:fs';
 import http from 'node:http';
 import net from 'node:net';
-import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -44,7 +43,7 @@ function fetchJson(url) {
       let d = '';
       res.on('data', (c) => (d += c));
       res.on('end', () => {
-        try { resolve(JSON.parse(d)); } catch (e) { reject(new Error(`non-json from ${url}: ${d.slice(0, 120)}`)); }
+        try { resolve(JSON.parse(d)); } catch { reject(new Error(`non-json from ${url}: ${d.slice(0, 120)}`)); }
       });
     }).on('error', reject);
   });
@@ -60,13 +59,6 @@ async function freePort() {
   });
 }
 
-function sshQuiet(host, command, timeoutMs = 20000) {
-  return execSync(`ssh -o BatchMode=yes -o ConnectTimeout=10 ${host} ${JSON.stringify(command)}`, {
-    encoding: 'utf8',
-    timeout: timeoutMs,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-}
 
 async function main() {
   const envRoot = createCaptureEnv({ port: await freePort() });

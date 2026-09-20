@@ -7,8 +7,6 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import fs from 'node:fs';
-import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REGISTRY_PATH = resolve(__dirname, '..', 'core', 'biof3-server', 'mcp', 'registry.js');

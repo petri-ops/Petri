@@ -42,16 +42,12 @@ export function ResultStudioPage(): React.ReactElement {
     error,
     refresh,
     setActiveResult,
-    createResult,
     updateResult,
     deleteResult,
   } = useResultStore(projectId);
 
   // Branch store - also keyed on projectId
   const { branches, activeBranchId } = useBranchStore(projectId);
-
-  // Current version tracking for the selected result
-  const [currentVersion, setCurrentVersion] = useState<number>(1);
 
   // Load results on mount / projectId change
   useEffect(() => {

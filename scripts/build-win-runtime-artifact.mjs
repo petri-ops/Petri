@@ -247,7 +247,7 @@ function main() {
   }
   if (!fs.existsSync(REQUIREMENTS)) fail(`缺少 requirements 文件: ${REQUIREMENTS}`);
 
-  const { prefix, ver } = resolveSourcePrefix();
+  const { prefix } = resolveSourcePrefix();
   const stageRoot = path.join(OUT_DIR, 'biof3-py-runtime-staging-' + process.pid);
   const stagePython = path.join(stageRoot, 'Python');
   // 注意：stage 目录带 PID 后缀唯一化，每次都是全新空目录，不要在这里 rmSync 旧目录——

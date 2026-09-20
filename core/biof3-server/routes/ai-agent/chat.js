@@ -509,8 +509,7 @@ module.exports = {
         conversationId: _convIdForAssembly || explicitConvId || null,
       });
       systemPrompt = knowledgeInjection.systemPrompt;
-      const knowledgeTokens = knowledgeInjection.knowledgeTokens;
-
+      
       // Add tool-calling instructions
       systemPrompt += '\n\n=== Tool Calling 指南 ===';
       systemPrompt += '\n你可以调用工具来获取真实数据：query / read_page / search';

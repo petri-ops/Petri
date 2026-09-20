@@ -12,8 +12,6 @@
  */
 
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'url';
 import { test } from 'node:test';
@@ -23,16 +21,6 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 // Import from the shared script (ESM module)
 const { readFileSync } = await import('node:fs');
 const { execSync } = await import('node:child_process');
-
-// Load the validator module content directly to test its exported functions.
-// We run it as a subprocess to get the structured output.
-function runValidator(args = []) {
-  const out = execSync(`node scripts/validate-ipc-catalog.mjs --json ${args.join(' ')}`, {
-    encoding: 'utf8',
-    maxBuffer: 10 * 1024 * 1024,
-  });
-  return JSON.parse(out);
-}
 
 // ── Inline copy of the pure validation logic for unit testing ──
 // (mirrors the logic in validate-ipc-catalog.mjs — keep in sync)
@@ -426,16 +414,16 @@ test('P.7: null type accepts only null', () => {
   const schema = { type: 'object', properties: { opt: { type: 'null' } } };
   const { ok: okNull, errors: errNull } = checkPayloadShape({ opt: null }, schema, '<root>');
   assert.equal(okNull, true, `expected null to pass, errors: ${errNull.join('; ')}`);
-  const { ok: okStr, errors: errStr } = checkPayloadShape({ opt: 'value' }, schema, '<root>');
+  const { ok: okStr } = checkPayloadShape({ opt: 'value' }, schema, '<root>');
   assert.equal(okStr, false);
 });
 
 // ── Test 19: checkPayloadShape — no schema (skip) ────────────────────────────
 
 test('P.8: no schema (null/undefined) skips validation', () => {
-  const { ok, errors } = checkPayloadShape({ any: 'thing' }, null, '<root>');
+  const { ok } = checkPayloadShape({ any: 'thing' }, null, '<root>');
   assert.equal(ok, true);
-  const { ok: ok2, errors: err2 } = checkPayloadShape({ any: 'thing' }, undefined, '<root>');
+  const { ok: ok2 } = checkPayloadShape({ any: 'thing' }, undefined, '<root>');
   assert.equal(ok2, true);
 });
 

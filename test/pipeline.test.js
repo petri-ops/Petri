@@ -9,15 +9,14 @@
  * 5. 中间结果传递
  */
 
-const { describe, it, before, after, mock } = require('node:test');
+const { describe, it, before, mock } = require('node:test');
 const assert = require('node:assert');
 
 // Mock fetch for testing
-const mockFetch = mock.fn();
+mock.fn();
 
 describe('Pipeline Executor', () => {
-  let pipeline;
-
+  
   before(() => {
     // 动态导入 pipeline 模块（在 mock 设置之后）
     // 注意：实际测试需要先设置 mock
@@ -68,7 +67,7 @@ describe('Pipeline Executor', () => {
       };
 
       // 设置 mock
-      global.fetch = async (url, options) => {
+      global.fetch = async (_url, _options) => {
         return {
           ok: true,
           status: 200,
@@ -147,7 +146,7 @@ describe('Pipeline Executor', () => {
       delete require.cache[require.resolve('../core/gateway/pipeline')];
       const pipelineModule = require('../core/gateway/pipeline');
 
-      global.fetch = async (url, options) => {
+      global.fetch = async (_url, _options) => {
         return {
           ok: false,
           status: 500,
@@ -174,7 +173,7 @@ describe('Pipeline Executor', () => {
       const pipelineModule = require('../core/gateway/pipeline');
 
       let callCount = 0;
-      global.fetch = async (url, options) => {
+      global.fetch = async (_url, _options) => {
         callCount++;
         if (callCount === 1) {
           return {

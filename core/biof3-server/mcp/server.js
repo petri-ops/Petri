@@ -101,14 +101,6 @@ function sendError(id, code, message, data) {
   process.stdout.write(JSON.stringify(msg) + '\n');
 }
 
-/**
- * 发送通知（无 id）到 stdout。
- */
-function sendNotification(method, params) {
-  const msg = { jsonrpc: '2.0', method, params };
-  process.stdout.write(JSON.stringify(msg) + '\n');
-}
-
 // ─── MCP 方法处理 ────────────────────────────────────────────
 
 /**
@@ -195,7 +187,7 @@ async function handleMessage(line) {
 /**
  * initialize — MCP 握手
  */
-function handleInitialize(id, params) {
+function handleInitialize(id, _params) {
   sendResponse(id, {
     protocolVersion: PROTOCOL_VERSION,
     capabilities: {

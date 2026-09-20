@@ -69,7 +69,7 @@ describe('MobileSyncPanel 手机连接面板（BLOCK-70 / UI-354）', () => {
   });
 
   it('设备区：只显示活跃设备（已吊销彻底不渲染）+ 空态 + 相对时间', async () => {
-    const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+    const fetchMock = vi.fn((input: RequestInfo | URL, _init?: RequestInit) => {
       const url = String(input);
       if (url.endsWith('/mobile/status')) {
         return fetchJson({

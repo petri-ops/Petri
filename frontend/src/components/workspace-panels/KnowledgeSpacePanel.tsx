@@ -99,7 +99,7 @@ export function KnowledgeSpacePanel() {
               <button
                 type="button"
                 className={styles.noticeAction}
-                onClick={() => navigate('/settings')}
+                onClick={() => void navigate('/settings')}
                 data-testid="knowledge-open-settings"
               >
                 <Icon name="settings" size={12} />
@@ -128,7 +128,7 @@ export function KnowledgeSpacePanel() {
 
       {/* BLOCK-103 — 状态条：空间切换 + 启用 switch + 状态徽章（三重头部收敛于此） */}
       <div className={styles.statusStrip} data-testid="knowledge-status-strip">
-        <KnowledgeSpaceSwitcher spaceId={spaceId} onSwitch={setSpaceId} onChanged={refresh} />
+        <KnowledgeSpaceSwitcher spaceId={spaceId} onSwitch={setSpaceId} onChanged={() => { void refresh(); }} />
         <div className={styles.stripRight}>
           {state && (
             <span className={styles.badgeRow}>
@@ -144,7 +144,7 @@ export function KnowledgeSpacePanel() {
             aria-checked={enabled}
             className={`${styles.switchBtn} ${enabled ? styles.switchBtnOn : ''}`}
             disabled={!embeddingAvailable || !state}
-            onClick={handleToggle}
+            onClick={() => { void handleToggle(); }}
             data-testid="knowledge-toggle"
             title={embeddingAvailable ? (enabled ? '对话自动检索已开启' : '开启后对话自动检索') : '需要先配置 DashScope key'}
           >

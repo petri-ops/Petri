@@ -8,12 +8,9 @@ const { execFile } = require('child_process');
 const {
   artifactContentTypeHint,
   captureStagedInputSnapshots,
-  isInternalArtifactName,
-  isSafeFlatFilename,
   reconcileArtifactTruth,
 } = require('./artifact-truth');
 const {
-  createVerifiedFileSnapshot,
   createVerifiedSnapshotReadStream,
   pipeVerifiedSnapshotToResponse,
   readVerifiedFileSnapshot,
@@ -29,7 +26,7 @@ const {
 const { resolveRLibsForPlugin } = require('../../shared-backend/r-libs-resolver');
 // BLOCK-83 D10：语言描述符 SPI——宿主按描述符取扩展名/标签/命令名，不再硬编码语言分支。
 const {
-  scriptExtensionFor, interpreterLabel, missingRuntimeCommandName,
+  scriptExtensionFor,
 } = require('../../shared-backend/script-host-languages');
 const { ensureBundlesForPlugin } = require('../../shared-backend/capability-bundles');
 const { attachProvenanceToResult } = require('../../shared-backend/execution-provenance');
@@ -41,11 +38,8 @@ const {
   diskSnapshot,
 } = require('../../shared-backend/tool-resource-sampler');
 const {
-  isChildProcessAlive,
   markUnownedStaleJobs,
   recoverStaleActiveJobs,
-  scheduleHardTimeout,
-  terminateChildProcess,
 } = require('../helpers/process-lifecycle');
 const { createTargetRegistry } = require('./remote-execution/target-registry');
 const { createRemoteJobRunner, AGENT_SCRIPT_HASH } = require('./remote-execution/remote-job-runner');
@@ -218,7 +212,7 @@ function createToolsExecutor({
       try {
         const m = typeof job.result_json === 'string' ? JSON.parse(job.result_json) : job.result_json;
         return m ? 'ws=' + m.workspaceKind + ' op=' + (m.outputPath || '') + ' pid=' + job.project_id : 'no-meta';
-      } catch (e) { return 'parse-err'; }
+      } catch { return 'parse-err'; }
     })();
     if (sshReader) {
       const filename = String(req.params.filename || '');
@@ -437,7 +431,7 @@ function createToolsExecutor({
           const reader = createJobOutputReader({ job, project: sshProjectRow });
           if (reader) {
             const os = require('os');
-            const { safeRemoteJoin, resolveWorkspaceBackend } = require('./workspace-gateway');
+            require('./workspace-gateway');
             const outputs = await reader.list();
             const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'b76-report-'));
             try {
@@ -913,13 +907,7 @@ function createToolsExecutor({
     if (!owner) return;
     owner.remote = true;
     try {
-      const runner = createSshDirectRunner({ project: sshProjectRow });
       const outputBase = `results/jobs/${jobId}/output`;
-      let pid = null;
-      try {
-        const pidBuf = await (require('./workspace-gateway').resolveWorkspaceBackend(sshProjectRow).backend).read(`${outputBase}/.pid`);
-        pid = parseInt(String(pidBuf).trim(), 10);
-      } catch { pid = null; }
       let exitCode = null;
       try {
         const exitBuf = await (require('./workspace-gateway').resolveWorkspaceBackend(sshProjectRow).backend).read(`${outputBase}/.exit`);

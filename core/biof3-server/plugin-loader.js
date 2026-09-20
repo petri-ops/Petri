@@ -166,7 +166,7 @@ function _hashFileContents(hash, filePath) {
     hash.update('\0');
     hash.update(fs.readFileSync(filePath));
     hash.update('\0');
-  } catch (e) {
+  } catch {
     hash.update(`[missing:${filePath}]`);
     hash.update('\0');
   }

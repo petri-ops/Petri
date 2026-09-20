@@ -17,7 +17,7 @@
  * Run via: node --test test/loop-iterate-route.test.mjs
  */
 
-import { describe, it, test, before, after } from 'node:test';
+import { describe, test } from 'node:test';
 import assert from 'node:assert';
 import path from 'node:path';
 import os from 'node:os';
@@ -37,7 +37,7 @@ let db;
 try {
   const dbMod = await import('../core/biof3-server/db.js');
   db = dbMod.default || dbMod;
-} catch (e) {
+} catch {
   db = null;
 }
 

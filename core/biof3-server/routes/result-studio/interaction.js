@@ -17,9 +17,7 @@
  */
 
 const fs = require('fs');
-const db = require('../../db');
 const pluginLoader = require('../../plugin-loader');
-const sqlite = db.db;
 const { isPathContained } = require('../../../shared-backend/project-run-layout');
 const {
   buildTableInteractionManifest,
@@ -29,7 +27,7 @@ const {
   queryResultTable,
   ResultStudioTableQueryError,
 } = require('../../../shared-backend/result-studio-table-query');
-const { canAccessProject } = require('../_helpers/validate');
+require('../_helpers/validate');
 const {
   loadJobAndProject,
   findArtifactRecord: _unusedFindArtifactRecord,

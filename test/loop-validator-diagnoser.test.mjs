@@ -27,13 +27,10 @@ const {
   buildEvidence,
   stableHash,
   REASON_CODES,
-  validateIteration,
 } = require(__dirname + '/../core/shared-backend/loop-contract');
 
 const {
   validateArtifact,
-  buildResult,
-  VALIDATOR_STATUSES,
 } = require(__dirname + '/../core/shared-backend/loop-validator-registry');
 
 const {
@@ -44,9 +41,7 @@ const {
   selectRepairStrategy,
 } = require(__dirname + '/../core/shared-backend/loop-repair-strategy');
 
-const {
-  deriveObservedStateDigest,
-} = require(__dirname + '/../core/shared-backend/loop-controller');
+require(__dirname + '/../core/shared-backend/loop-controller');
 
 // ---------------------------------------------------------------------------
 // Helpers (mirrors agent-runner.js _extractArtifactFiles)

@@ -56,7 +56,6 @@ assert(existsSync(placeholdersPath), 'manifest.placeholders.json missing');
 assert(existsSync(contractPath), 'release-contract.json missing');
 
 const {
-  PLATFORM_IDS,
   ALLOWED_RUNTIME_HOSTS,
   normalizeRemotePluginEntry,
   selectArtifact,
@@ -65,7 +64,7 @@ const {
 } = require(resolve(repoRoot, 'src/plugin-schema.js'));
 
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
-const schema = JSON.parse(readFileSync(schemaPath, 'utf8'));
+JSON.parse(readFileSync(schemaPath, 'utf8'));
 const placeholders = JSON.parse(readFileSync(placeholdersPath, 'utf8'));
 const contract = JSON.parse(readFileSync(contractPath, 'utf8'));
 

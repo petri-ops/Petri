@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 function fetchJson(url) { return new Promise((res, rej) => { http.get(url, (r) => { let d = ''; r.on('data', (c) => (d += c)); r.on('end', () => { try { res(JSON.parse(d)); } catch (e) { rej(e); } }); }).on('error', rej); }); }
-function req(url, opts = {}) { return new Promise((res, rej) => { const r = http.request(url, { method: opts.method || 'GET', headers: opts.headers || {} }, (x) => { let d = ''; x.on('data', (c) => (d += c)); x.on('end', () => { try { res(JSON.parse(d)); } catch (e) { res(d); } }); }); r.on('error', rej); if (opts.body) r.write(opts.body); r.end(); }); }
+function req(url, opts = {}) { return new Promise((res, rej) => { const r = http.request(url, { method: opts.method || 'GET', headers: opts.headers || {} }, (x) => { let d = ''; x.on('data', (c) => (d += c)); x.on('end', () => { try { res(JSON.parse(d)); } catch { res(d); } }); }); r.on('error', rej); if (opts.body) r.write(opts.body); r.end(); }); }
 const ev = async (c, expr, to = 60000) => { const r = await Promise.race([c.send('Runtime.evaluate', { expression: expr, awaitPromise: true, returnByValue: true }), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), to))]); if (r.exceptionDetails) throw new Error(String(r.exceptionDetails.exception?.description || '').slice(0, 250)); return r.result && r.result.value; };
 
 (async () => {

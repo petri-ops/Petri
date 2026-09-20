@@ -379,7 +379,7 @@ function resolveContextChangeSet({ repository, projectId, artifactFamilyId, chan
  * 只读上下文工具：把当前结果坐标交给模型。
  */
 function createResultStudioContextTool(options = {}) {
-  return async function tool_result_studio_context(args = {}, ctx = {}) {
+  return async function tool_result_studio_context(_args = {}, ctx = {}) {
     const resolved = resolveResultStudioContext(ctx, options);
     if (!resolved.ok) {
       return {

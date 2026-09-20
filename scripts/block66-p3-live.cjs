@@ -11,7 +11,7 @@
  * 证据：acceptance/block-66/p3-live.json
  * 前置：Node 24（ABI 137）；frontend/node_modules 已安装；本机无 R（隔离 userData 天然无 R）。
  */
-const { spawn, spawnSync, execFileSync } = require('node:child_process');
+const { spawn, spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const http = require('node:http');
 const os = require('node:os');

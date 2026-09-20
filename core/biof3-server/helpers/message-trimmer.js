@@ -157,7 +157,7 @@ function trimMessagesToBudget({ fullMessages, contextWindow = 64000, headroom = 
 
   // Score and greedily pick
   const scored = scoreMessages(msgs);
-  const { kept, used } = pickWithinBudget(scored, budget);
+  const { kept } = pickWithinBudget(scored, budget);
 
   // If nothing was actually trimmed, return as-is
   if (kept.length === msgs.length) {

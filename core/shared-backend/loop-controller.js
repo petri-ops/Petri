@@ -32,19 +32,10 @@
 const { redactSensitiveValue } = require('./redaction');
 
 const {
-  ACTION_TYPES,
-  DECISION_OUTCOMES,
   REASON_CODES,
-  EVIDENCE_KINDS,
-  LOOP_RUN_STATUSES,
   stableHash,
-  deriveIterationHash,
-  pickSemanticFields,
-  SEMANTIC_FIELD_KEYS,
   buildAction,
   buildIteration,
-  buildEvidence,
-  buildDecision,
   isTerminalLoopStatus,
 } = require('./loop-contract');
 
@@ -357,20 +348,17 @@ function validateAction(action, context = {}) {
  */
 function decideNextAction(ctx) {
   const {
-    observedStateDigest,
     goalGapIds = [],
     iterations = [],
-    loopRunStatus = 'running',
     activeJobs = [],
     dag = null,
-    toolMetadata = {},
     runtimeReady = true,
     userConfirmationRequired = false,
     validatorResults = [],
     failedJob = null,
   } = ctx;
 
-  const currentGapSet = new Set(goalGapIds);
+  new Set(goalGapIds);
   const resolvedGaps = computeResolvedGapIds(goalGapIds, iterations);
 
   // Oscillation
@@ -566,7 +554,7 @@ function decideNextAction(ctx) {
   };
 }
 
-function buildProposedAction(gapId, dag, activeJobs) {
+function buildProposedAction(gapId, dag, _activeJobs) {
   const node = dag?.nodes?.find((n) => n.id === gapId || n.toolId === gapId);
   const toolId = node?.toolId || gapId;
   const inputs = (node?.inputs || {}) || {};
@@ -743,7 +731,7 @@ function evaluateExit(ctx) {
  * @param {Object} dag         - DAG definition
  * @returns {string} new digest
  */
-function reconcileJobResult(oldDigest, job, dag = {}) {
+function reconcileJobResult(oldDigest, job, _dag = {}) {
   if (!job) return oldDigest;
   const { id, status, error, finished_at: finishedAt } = job;
   return stableHash({

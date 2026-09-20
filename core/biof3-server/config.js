@@ -17,7 +17,7 @@ const { getBackendPort } = require('../../src/main/env-coordinator');
 // process.env.X || default reads (PHASE 1.2 invariant), but a
 // single mutation point — env-coordinator → config-helper.getCoreEnv()
 // → here — replaces 6 separate process.env lookups.
-const { getCoreEnv, getEnv } = require('../shared-backend/config-helper');
+const { getCoreEnv } = require('../shared-backend/config-helper');
 
 const _coreEnv = getCoreEnv();
 

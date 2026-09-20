@@ -3,11 +3,11 @@
 // 零行为变化；主文件按既有惯例再导出保持 '@/pages/project-workspace' 导入路径兼容。
 // ============================================================
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { Icon, type IconName } from '@/components/icons/Icon';
+import { Icon } from '@/components/icons/Icon';
 import { SshStatusDot } from '@/components/workspace-panels/SshStatusDot';
 import { DataIntakeControl } from '@/components/workspace-panels/DataIntakeControl';
-import type { Project, ToolJob, Dataset } from '@/lib/project-types';
-import { getApiPrefix, getToken } from '@/lib/authClient';
+import type { Project } from '@/lib/project-types';
+import { getApiPrefix } from '@/lib/authClient';
 import { gewuEvents, subscribeGewuEvent, dispatchGewuEvent } from '@/lib/events';
 import { getBridge } from '@/lib/desktopBridge';
 import styles from '../project-workspace.module.css';

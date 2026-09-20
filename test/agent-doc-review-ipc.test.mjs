@@ -11,7 +11,6 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
-import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-adr-test-'));
@@ -25,9 +24,8 @@ async function callHandler(name, ...args) {
   // The actual handler logic is tested by verifying the outcomes directly
   // against the tmpfs — we don't need to load the real module here.
   // Instead, we define the same handlers inline and verify their contracts.
-  const senderGuard = () => null; // allow all senders in test
-  const fakeEvent = { sender: {} };
-
+   // allow all senders in test
+  
   switch (name) {
     case 'list': {
       try {

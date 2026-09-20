@@ -3,7 +3,6 @@
 const path = require('path');
 const {
   ResultChangeSetError,
-  id,
   exactArtifact,
   resourceNumber,
   boundedResourceProduct,
@@ -70,7 +69,6 @@ function trustedPreviewResourceModel(descriptor) {
 
 function deriveTrustedPreviewResourceEstimate({
   descriptor,
-  sourceJob,
   sourceResult,
   workspaceRoot,
   trustedExecution,

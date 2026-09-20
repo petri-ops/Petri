@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { act, renderHook, type RenderHookResult } from '@testing-library/react';
 import { useResizableColumns } from '@/hooks/useResizableColumns';
 
@@ -91,21 +91,21 @@ describe('useResizableColumns', () => {
   });
 
   it('toggles body cursor and user-select while dragging', async () => {
-    const setCursor = vi.spyOn(document.body.style, 'cursor', 'set');
-    const setSelect = vi.spyOn(document.body.style, 'userSelect', 'set');
+    // 断言真实写入结果而非 spy setter：happy-dom 20 的 CSSStyleDeclaration 是 proxy，
+    // vi.spyOn(style, prop, 'set') 的 defineProperty trap 被拒（vitest 5 直接报错）。
     const { result } = renderHook(() => useResizableColumns());
     const handler = result.current.startColumnResize('right');
     const fakeEvent = { preventDefault: () => {}, clientX: 0, clientY: 0 } as unknown as React.MouseEvent;
 
     await flush();
     handler(fakeEvent);
-    expect(setCursor).toHaveBeenCalledWith('ew-resize');
-    expect(setSelect).toHaveBeenCalledWith('none');
+    expect(document.body.style.cursor).toBe('ew-resize');
+    expect(document.body.style.userSelect).toBe('none');
     expect(document.body.classList.contains('gewu-resizing-columns')).toBe(true);
 
     fireMouse(document, 'mouseup');
-    expect(setCursor).toHaveBeenCalledWith('');
-    expect(setSelect).toHaveBeenCalledWith('');
+    expect(document.body.style.cursor).toBe('');
+    expect(document.body.style.userSelect).toBe('');
     expect(document.body.classList.contains('gewu-resizing-columns')).toBe(false);
   });
 

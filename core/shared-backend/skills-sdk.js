@@ -24,7 +24,6 @@ const {
   loadBuiltInSkills,
   loadInstalledSkills,
   discoverSkills,
-  validateSkillManifest,
   SOURCE_PRIORITY,
 } = require('./skill-registry');
 

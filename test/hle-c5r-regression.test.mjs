@@ -20,7 +20,7 @@
  * Run via: node --test test/hle-c5r-regression.test.mjs
  */
 
-import { describe, it, beforeEach, mock } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import path from 'node:path';
 import { existsSync } from 'node:fs';
@@ -37,7 +37,6 @@ process.env.BIOF3_DB_PATH = path.join(TMP_DIR, 'test.db');
 // Import modules under test
 // ---------------------------------------------------------------------------
 const {
-  ARTIFACT_PROFILES,
   getProfile,
   resolveCanonicalColumn,
   validateColumnSchema,
@@ -46,7 +45,6 @@ const {
 } = (await import('../core/shared-backend/artifact-profiles.js'));
 
 const {
-  buildAgentWorkflowPlan,
   validateWorkflowPlanBindings,
   bindVerifiedArtifact,
   listAgentWorkflowTemplates,
@@ -62,7 +60,6 @@ const {
 } = (await import('../core/shared-backend/loop-repair-strategy.js'));
 
 const {
-  detectContrastLevels,
   planScientificTask,
 } = (await import('../core/shared-backend/scientific-task-planner.js'));
 
@@ -109,30 +106,6 @@ function makePartialJob(overrides = {}) {
     error: 'design column "condition" not found in coldata. Available columns: sample,group',
     startedAt: new Date(Date.now() - 60000).toISOString(),
     completedAt: new Date().toISOString(),
-    ...overrides,
-  };
-}
-
-function makeDeseq2Artifact(job, overrides = {}) {
-  return {
-    id: `art_${Date.now()}`,
-    filename: 'deseq2_results.csv',
-    kind: 'table',
-    artifactTruth: { status: 'valid', reason: 'deseq2_output' },
-    jobId: job.id,
-    toolName: job.toolName,
-    paramsHash: 'hash_abc',
-    outputHash: 'hash_def',
-    profile: 'biof3.deg.v1',
-    provenance: {
-      jobId: job.id,
-      toolName: job.toolName,
-      toolVersion: '1.42.0',
-      startedAt: job.startedAt,
-      completedAt: job.completedAt,
-      status: job.status,
-      error: job.error,
-    },
     ...overrides,
   };
 }

@@ -54,7 +54,6 @@ for (const def of BUILTIN_VALIDATOR_DEFS) {
 
 const {
   diagnoseFailure,
-  FAULT_TYPES,
 } = (await import('../core/shared-backend/loop-failure-diagnoser.js'));
 
 const {

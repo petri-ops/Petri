@@ -10,7 +10,7 @@
  * - 编排：成功路径 —— 原 task 保持 failed、新 task 带 fallbackOfTaskId/resumeOfTaskId、
  *   model_fallback 溯源事件落原 task、runAgentLoop 以 disableProviderFallback=true 拉起
  */
-import { after, before, test } from 'node:test';
+import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -165,9 +165,7 @@ test('resume messages: 保留原消息 + 尾部注入恢复指令', () => {
 
 // ---------- 编排：maybeLaunchTaskLevelFallback ----------
 
-let testSeq = 0;
 function seedTask(overrides = {}) {
-  testSeq += 1;
   const { taskId: _ignored, ...paramOverrides } = overrides;
   const created = agentTaskStore.createAgentTask({
     userId: USER_ID,

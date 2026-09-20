@@ -49,7 +49,7 @@ function gcExpired() {
     if (now - s.createdAt > SESSION_TTL_MS) {
       try {
         s.pty.kill();
-      } catch (_e) { /* ignore */ }
+      } catch { /* ignore */ }
       sessions.delete(id);
     }
   }
@@ -149,7 +149,7 @@ function terminalCreate({ name, cwd, shell } = {}) {
     }
     session.buffer = next;
   });
-  ptyProcess.onExit(({ exitCode }) => {
+  ptyProcess.onExit((_unused) => {
     sessions.delete(id);
   });
   sessions.set(id, session);
@@ -189,7 +189,7 @@ function terminalClose({ sessionId, confirm }) {
   if (!session) return { ok: false, error: 'session not found' };
   try {
     session.pty.kill();
-  } catch (e) {
+  } catch {
     // 仍清理记录
   }
   sessions.delete(sessionId);

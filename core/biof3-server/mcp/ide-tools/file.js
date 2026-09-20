@@ -187,7 +187,7 @@ function fileDelete({ path: inputPath, recursive = false, confirm }) {
   let stat;
   try {
     stat = fs.statSync(abs);
-  } catch (e) {
+  } catch {
     return { ok: false, error: `path does not exist: ${abs}` };
   }
   try {
@@ -261,7 +261,7 @@ function fileList({ path: inputPath, recursive = false, filter, maxFiles = 1000 
       let entryStat;
       try {
         entryStat = fs.statSync(fullPath);
-      } catch (e) {
+      } catch {
         continue; // 跳过 stat 失败的条目（断链接等）
       }
       results.push({

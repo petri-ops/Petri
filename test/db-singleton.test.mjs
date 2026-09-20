@@ -28,7 +28,7 @@ const req = createRequire(path.join(coreServerRoot, 'package.json'));
 
 // Core's better-sqlite3 — the migration-runner paths and singleton both
 // point here when BIOF3_BETTER_SQLITE3_ROOT is set.
-const Database = req('better-sqlite3');
+req('better-sqlite3');
 
 import { openDb, closeDb, closeAll, _reset } from '../src/database/_db-singleton.js';
 import configHelper from '../core/shared-backend/config-helper.js';

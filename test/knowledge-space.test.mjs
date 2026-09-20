@@ -1073,7 +1073,7 @@ test('G4 D4 门: 批量删文档走门、单篇直删（与手动 UI/REST 同界
   assert.equal(del1.deleted.length, 1);
 
   // 清空空间走门
-  const d2 = await ingest.createDocument({
+  await ingest.createDocument({
     name: '清空门.txt',
     buffer: Buffer.from('清空门占位内容。', 'utf8'),
     autoIngest: false,

@@ -10,7 +10,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
 const tempRoot = mkdtempSync(join(tmpdir(), 'block90-osimport-'));
@@ -131,7 +131,7 @@ test('upload：双分片按 offset 串行拼装，内容与原文件逐字节一
   t.after(() => {});
 });
 
-test('upload：offset=0 时目标已存在 → 409 target_already_exists', async (t) => {
+test('upload：offset=0 时目标已存在 → 409 target_already_exists', async (_t) => {
   const p = createSshProject('block90-ssh-upload-exists');
   fakeSsh.sizes.set('/srv/proj/dup.bin', 3);
   const r = await post(p.id, 'upload', { toPath: 'dup.bin', dataB64: Buffer.from('abc').toString('base64'), offset: 0 });
@@ -139,14 +139,14 @@ test('upload：offset=0 时目标已存在 → 409 target_already_exists', async
   assert.strictEqual(r.body.code, 'target_already_exists');
 });
 
-test('upload：offset 与当前大小错位 → 409 offset_mismatch', async (t) => {
+test('upload：offset 与当前大小错位 → 409 offset_mismatch', async (_t) => {
   const p = createSshProject('block90-ssh-upload-offset');
   const r = await post(p.id, 'upload', { toPath: 'misaligned.bin', dataB64: Buffer.from('zz').toString('base64'), offset: 10 });
   assert.strictEqual(r.status, 409);
   assert.strictEqual(r.body.code, 'offset_mismatch');
 });
 
-test('upload：分片超过 96KB 上限 → 400', async (t) => {
+test('upload：分片超过 96KB 上限 → 400', async (_t) => {
   const p = createSshProject('block90-ssh-upload-toobig');
   const r = await post(p.id, 'upload', { toPath: 'big.bin', dataB64: Buffer.alloc(97 * 1024).toString('base64'), offset: 0 });
   assert.strictEqual(r.status, 400);
@@ -182,7 +182,7 @@ test('import-from：源缺失 → 404；相对路径拒绝 → 400', async (t) =
   assert.strictEqual(relative.status, 400);
 });
 
-test('import-from：ssh 项目显式拒绝 → 400 import_requires_local', async (t) => {
+test('import-from：ssh 项目显式拒绝 → 400 import_requires_local', async (_t) => {
   const p = createSshProject('block90-ssh-import');
   const r = await post(p.id, 'import-from', { sourceAbsolutePath: join(tempRoot, 'whatever.bin'), toPath: 'x.bin' });
   assert.strictEqual(r.status, 400);

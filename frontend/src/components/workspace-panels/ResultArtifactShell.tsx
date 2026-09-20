@@ -3,22 +3,15 @@
 // behavior unchanged; main file imports it back as needed.
 // ============================================================
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { Icon, type IconName } from '@/components/icons/Icon';
-import type { Project, ToolJob, Dataset } from '@/lib/project-types';
+import { Icon } from '@/components/icons/Icon';
+import type { Project, ToolJob } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 import { findCatalogTool, useToolCatalog } from '@/lib/tool-catalog';
 import { buildPreviewTable } from '@/lib/file-preview/buildPreviewTable';
 import { Lightbox } from '@/components/ui/Lightbox';
-import { SimpleChat } from '@/components/copilot/SimpleChat';
-import { isDirectRecoveryAction, useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
-import { gewuEvents, subscribeGewuEvent, dispatchGewuEvent } from '@/lib/events';
+import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import { useTheme } from '@/themes/ThemeProvider';
-import {
-  fetchHarnessIndex,
-  runHarnessWorkflowAction,
-  type HarnessIndexSummary,
-  type HarnessWorkflowJobState,
-} from '@/lib/harness-client';
+import { type HarnessWorkflowJobState } from '@/lib/harness-client';
 import {
   normalizeResultManifest,
   classifyArtifact,
@@ -26,7 +19,6 @@ import {
   findArtifactByName,
   pickPreferredArtifact,
   artifactKindLabel,
-  type ResultArtifactKind,
   type ResultArtifactRecord,
 } from '@/lib/result-manifest';
 import {
@@ -36,12 +28,6 @@ import {
   findResultArtifactPickerOption,
   isRelatedArtifactKind,
 } from '@/lib/result-artifact-display';
-import {
-  summarizeSelectionForAgent,
-  type ArtifactInteractionManifest,
-  type ArtifactSelection,
-  type InteractionCapability,
-} from '@/lib/artifact-selection';
 import { ResultStudioChangeSetPanel } from '@/components/result-studio/ResultStudioChangeSetPanel';
 import { isSameActiveArtifactProjection } from '@/components/result-studio/activeArtifactProjection';
 import { RevisionCodeView } from '@/components/result-studio/RevisionCodeView';
@@ -57,51 +43,41 @@ import { getResultScrollPosition, setResultScrollPosition } from '@/components/r
 import { ScientificInteractionViewer } from '@/components/result-studio/ScientificInteractionViewer';
 import { CompactResultNavigator } from '@/components/result-studio/CompactResultNavigator';
 import {
-  deleteResultStudioSelection,
-  fetchArtifactInteraction,
-  fetchResultStudioContext,
-  restoreResultStudioSelection,
-  saveResultStudioSelection,
-  type ResultStudioEditControls,
-  type ResultTableQuery,
-} from '@/lib/result-studio-interaction-client';
-import {
   beginResultSurfaceMeasure,
   chooseResultArtifactName,
   completeResultSurfaceMeasure,
   describeTruthStatus,
-  requestedArtifactRequestKey,
   RESULT_SURFACE_PERFORMANCE_MARKS,
   resolveResultArtifactUrl,
   resolveResultViewerAdapter,
-  shouldApplyRequestedArtifact,
-  shouldRequestArtifactInteraction,
   shouldShowResultInteraction,
-  shouldSurfaceInteractionFailure,
   type ResultSurfaceMode,
 } from '@/components/result-studio/resultSurface';
-import { getBridge } from '@/lib/desktopBridge';
 import styles from '@/pages/project-workspace.module.css';
 // BLOCK-92 Wave B-2 — 状态簇外迁（./ResultArtifactShell/，纯搬运零行为变化）。
 import { useArtifactRecovery } from './ResultArtifactShell/useArtifactRecovery';
 import { useResultReportActions } from './ResultArtifactShell/useResultReportActions';
 import { useArtifactInteractionSelection } from './ResultArtifactShell/useArtifactInteractionSelection';
-import { fileExtension, isImageFile, isTextFile, isMarkdownFile, workspaceFileUrlFor, formatPreviewText } from '@/lib/previewFileUtils';
+import { isTextFile, isMarkdownFile, formatPreviewText } from '@/lib/previewFileUtils';
 import {
-  toArtifactRevision,
   artifactName,
   artifactKindIcon,
-  artifactPreviewLabel,
   workflowStageLabel,
 } from './ResultView/helpers';
 import type {
   ActiveArtifact,
-  JobStats,
-  JobResultFile,
-  DeliveryManifestSummary,
   JobResult,
   JobDetailMeta,
 } from './ResultView/types';
+
+// 预览可用性状态：字面量联合在条件表达式的对象字面量分支里会被拓宽成 string，
+// 故与载荷一起显式声明类型（同一联合此前在 useState 内联拼写）。
+type PreviewAvailabilityStatus = 'checking' | 'available' | 'unavailable';
+type PreviewAvailability = {
+  key: string;
+  status: PreviewAvailabilityStatus;
+  reason: string | null;
+};
 
 export function ResultArtifactShell({
   project,
@@ -169,22 +145,22 @@ export function ResultArtifactShell({
   // once the body is mounted. See resultScrollMemory.ts.
   const resultViewRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(false);
-  const [jobMeta, setJobMeta] = useState<JobDetailMeta | null>(null);
+  const [_jobMeta, setJobMeta] = useState<JobDetailMeta | null>(null);
   const [manifestRaw, setManifestRaw] = useState<unknown>(null);
   const [manifestLoading, setManifestLoading] = useState(false);
   const [manifestError, setManifestError] = useState('');
   const [manifestRetryVersion, setManifestRetryVersion] = useState(0);
   const [selectedName, setSelectedName] = useState('');
-  const [selectedSectionId, setSelectedSectionId] = useState('');
+  const [_selectedSectionId, setSelectedSectionId] = useState('');
   const [previewText, setPreviewText] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<string[][] | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewRetryVersion, setPreviewRetryVersion] = useState(0);
-  const [previewAvailability, setPreviewAvailability] = useState<{
-    key: string;
-    status: 'checking' | 'available' | 'unavailable';
-    reason: string | null;
-  }>({ key: '', status: 'checking', reason: null });
+  const [previewAvailability, setPreviewAvailability] = useState<PreviewAvailability>({
+    key: '',
+    status: 'checking',
+    reason: null,
+  });
   // RS3：交互清单由后端基于完整文件判定（稳定 ID 列、可选维度），前端只消费。
   // P4R-4: a historical Revision can share its Job with a later restored
   // Revision. Keep the clicked identity as disposable view state and pass it
@@ -572,7 +548,7 @@ export function ResultArtifactShell({
   const requiresPreviewAvailabilityCheck = activeIsPreviewText
     || viewerAdapter === 'image';
   const previewAvailabilityKey = `${viewedRevision?.revisionId || 'current'}::${job?.id || ''}::${selectedArtifactName}::${selectedArtifactUrl}`;
-  const effectivePreviewAvailability = previewAvailability.key === previewAvailabilityKey
+  const effectivePreviewAvailability: PreviewAvailability = previewAvailability.key === previewAvailabilityKey
     ? previewAvailability
     : {
         key: previewAvailabilityKey,

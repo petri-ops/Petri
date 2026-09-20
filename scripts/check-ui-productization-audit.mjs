@@ -68,6 +68,28 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // 台账要求；不重写共享历史。
   '5a4df30533ab7a20c3f8da14e740cf6650a6179e',
   '8c85898a018300d702daebce9c058193e9b136f2',
+  // 2026-09-20 依赖升级批 react-router v7 连带修（f4af1ad，49 处 navigate fire-and-forget
+  // 显式 void 化 + 1 处 vitest 5 mock 类型收敛）：纯类型/规则符合性修复，零 UI 行为变化
+  // （v7 起 useNavigate() 返回 Promise<void>，仅补 void 标注与 ctx 包装）；验证=前端全量
+  // 144 文件/1146 用例 0 红 + P6 实采 Electron 冷启真机链 10/10 + quality:lint 复绿（无新增
+  // 豁免）；台账=eslint-suppressions.json 棘轮不变（BLOCK-105 plan §7）。豁免 subject UI-###
+  // 与同提交台账要求；不重写共享历史。
+  'f4af1ad23e7cd5d53052dba234bc49253c9029ba',
+  // 2026-09-20 前端 tsc 29 红清偿 + quality:types 入链（64da69b，25 处 testing-library
+  // 查询泛型窄化 + ResultArtifactShell 联合类型别名 + MessageRail closest 泛型 + 1 处
+  // 测试 props 标注）：纯类型注解，零 UI 行为变化；验证=tsc 0 红 + 前端全量 144 文件/
+  // 1146 用例 0 红 + quality:lint 无新增违规；台账=新增 quality:types 门禁（BLOCK-105
+  // plan §7），非新 UI 功能故无新台账条目。豁免 subject UI-### 与同提交台账要求；
+  // 不重写共享历史。
+  '64da69b71771661b49ba43fe7230cdb30347f7d7',
+  // 2026-09-20 BLOCK-105 §7 Batch-4 前端 no-unused-vars 410→0（c6a9b6d1，59 文件死代码
+  // 清理）：最大头=ResultView.tsx 的 UI-146 拆分遗留化石 import 块（148 行，文件已退化
+  // 为透传壳）；其余=AppRail 别名簇与左栏回调簇随 leftPanelCtx 一并退役、死函数 3、
+  // 只写不读链、解构元素 17、形参 _ 前缀 10、从未调用的 useMemo/useCallback 7（零执行面）。
+  // 纯删除未引用绑定，零 UI 行为变化；验证=tsc 0 红 + 前端全量 144 文件/1146 用例 0 红 +
+  // 其余 lint 规则计数零新增；台账=eslint-suppressions.json 棘轮收缩 2150→1740（plan §7）。
+  // 豁免 subject UI-### 与同提交台账要求；不重写共享历史。
+  'c6a9b6d13952cadc3f9cc9d2bedc1923a329c101',
   '21d84f528a35526e59f2964833a65965546772e1',
   // 2026-09-19 BLOCK-102 P3/P4 修复提交（06828fd 安全加固+观测性能）：subject
   // 未带 UI-### 为笔误，UI-425 条目由后续提交统一补登（LEGACY_AUDIT_SYNC_
@@ -323,6 +345,28 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 不重写共享历史。
   '5a4df30533ab7a20c3f8da14e740cf6650a6179e',
   '8c85898a018300d702daebce9c058193e9b136f2',
+  // 2026-09-20 依赖升级批 react-router v7 连带修（f4af1ad，49 处 navigate fire-and-forget
+  // 显式 void 化 + 1 处 vitest 5 mock 类型收敛）：纯类型/规则符合性修复，零 UI 行为变化
+  // （v7 起 useNavigate() 返回 Promise<void>，仅补 void 标注与 ctx 包装）；验证=前端全量
+  // 144 文件/1146 用例 0 红 + P6 实采 Electron 冷启真机链 10/10 + quality:lint 复绿（无新增
+  // 豁免）；台账=eslint-suppressions.json 棘轮不变（BLOCK-105 plan §7）。豁免 subject UI-###
+  // 与同提交台账要求；不重写共享历史。
+  'f4af1ad23e7cd5d53052dba234bc49253c9029ba',
+  // 2026-09-20 前端 tsc 29 红清偿 + quality:types 入链（64da69b，25 处 testing-library
+  // 查询泛型窄化 + ResultArtifactShell 联合类型别名 + MessageRail closest 泛型 + 1 处
+  // 测试 props 标注）：纯类型注解，零 UI 行为变化；验证=tsc 0 红 + 前端全量 144 文件/
+  // 1146 用例 0 红 + quality:lint 无新增违规；台账=新增 quality:types 门禁（BLOCK-105
+  // plan §7），非新 UI 功能故无新台账条目。豁免同提交台账要求（subject 门经
+  // LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；不重写共享历史。
+  '64da69b71771661b49ba43fe7230cdb30347f7d7',
+  // 2026-09-20 BLOCK-105 §7 Batch-4 前端 no-unused-vars 410→0（c6a9b6d1，59 文件死代码
+  // 清理）：前端改动全为「删除从未引用的绑定」，零 UI 行为变化（ResultView.tsx 化石
+  // import 块 148 行 / AppRail 别名簇与左栏回调簇随 leftPanelCtx 退役 / 死函数 3 /
+  // 从未调用的 useMemo·useCallback 7）；验证=tsc 0 红 + 前端全量 144 文件/1146 用例 0 红；
+  // 台账=eslint-suppressions.json 棘轮收缩 2150→1740（BLOCK-105 plan §7 批次日志）。
+  // 豁免同提交台账要求（subject 门经 LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；
+  // 不重写共享历史。
+  'c6a9b6d13952cadc3f9cc9d2bedc1923a329c101',
 
   // 2026-09-19 BLOCK-102 P2 前端竞态治理提交（21d84f52，渲染层竞态修复）：
   // subject 未带 UI-### 为笔误，UI-425 条目（P3/P4 前端切片）与本提交同批由

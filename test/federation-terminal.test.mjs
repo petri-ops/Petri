@@ -17,7 +17,7 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const { buildMobileGateway } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/index.js'));
-const { getStores, resetStoresForTest } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/pairing.js'));
+const { resetStoresForTest } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/pairing.js'));
 
 function tmpRoot() {
   return mkdtempSync(path.join(tmpdir(), 'gewu-fedterm-test-'));
@@ -172,7 +172,7 @@ test('BLOCK-85 P4: projection terminal start -> echo roundtrip -> exit -> limit'
     }));
     if (sshProbe.ok && sshProbe.sessionId) {
       const sshMarker = `FEDSSH-${Date.now().toString(36)}`;
-      const sshEvents = await collectSse(
+      await collectSse(
         `http://127.0.0.1:${gatewayPort}/m/api/terminal/${sshProbe.sessionId}/stream`,
         cookie,
         (list) => list.some((e) => e.event === 'terminal:data' && typeof e.data?.data === 'string' && e.data.data.includes(sshMarker)),

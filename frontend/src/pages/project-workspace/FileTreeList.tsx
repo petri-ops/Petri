@@ -2,7 +2,7 @@
 // FileTreeList — UI-305 P1 从 project-workspace.tsx 尾部整簇平移（原 1954-2012 行），
 // 零行为变化；主文件按既有惯例再导出保持 '@/pages/project-workspace' 导入路径兼容。
 // ============================================================
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import styles from '../project-workspace.module.css';
 import type { ActiveWorkspaceFile, FileEntry } from './types';
 import { FileTreeItem } from './FileTreeItem';

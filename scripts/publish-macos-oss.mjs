@@ -95,7 +95,6 @@ let client = null;
 async function upload(file, cacheControl) {
   const name = basename(file);
   const objectName = `${prefix}/${name}`;
-  const destination = `oss://${bucket}/${prefix}/${name}`;
   console.log(`[oss-update] ${dryRun ? 'would upload' : 'uploading'} ${name}`);
   console.log(`[oss-update] public URL: ${publicBaseUrl}/${encodeURIComponent(name)}`);
   if (dryRun) return;

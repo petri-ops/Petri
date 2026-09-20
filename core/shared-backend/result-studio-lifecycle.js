@@ -12,7 +12,6 @@ const {
 } = require('./result-studio-runtime-lease');
 const { recoverActiveRefTransactions } = require('./result-ref-transaction');
 const {
-  ResultStudioPrivatePathError,
   resolveWorkspaceAnchor,
   ensurePrivateDirectory,
   inspectPrivateDirectory,
@@ -28,24 +27,15 @@ const INTERNAL_RECOVERY_ITEMS = Symbol('resultStudioRecoveryItems');
 const {
   RESULT_STUDIO_LIFECYCLE_VERSION,
   ZERO_OID,
-  GC_SOURCE_REF_PREFIX,
-  GC_CHANGESET_REF_PREFIX,
-  SAFE_CHANGESET_ID_PATTERN,
   MAX_STORAGE_FILES,
-  MAX_TABLE_PAGE_ROWS,
-  MAX_TABLE_PAGE_BYTES,
-  DEFAULT_GC_MIN_AGE_MS,
   DEFAULT_MAX_PREVIEW_MEMORY_BYTES,
   DARWIN_APFS_FS_TYPE,
   ResultStudioLifecycleError,
   guardPrivatePath,
   sha256,
-  hashFileDescriptor,
   hashFile,
-  expectedGcChangeSetRef,
 } = require('./result-studio-lifecycle/internal');
 const {
-  attachGcSourceProtection,
   executeResultStudioGc,
   planResultStudioGc,
 } = require('./result-studio-lifecycle/gc');
@@ -94,7 +84,7 @@ function inspectRevisionIntegrity({ repository, adapter, workspaceRoot, projectI
 
   for (const revision of revisions) {
     let actualHash = null;
-    try { actualHash = hashFile(resolveWorkspaceFile(workspaceRoot, revision.outputPath)); } catch (error) {
+    try { actualHash = hashFile(resolveWorkspaceFile(workspaceRoot, revision.outputPath)); } catch {
       issues.push({ revisionId: revision.revisionId, kind: 'artifact_missing', blocking: true });
       continue;
     }
