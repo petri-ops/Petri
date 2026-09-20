@@ -47,18 +47,20 @@ describe('BLOCK-107 会话分段模型（D1=c 按 iteration 交错）', () => {
     ]);
   });
 
-  it('单迭代：思考 → 工具簇 → 正文', () => {
+  it('单迭代：思考折入工具簇（BLOCK-108 Qoder 簇内单行），narrative 恒在末尾', () => {
     const segments = buildConversationSegments({
       content: '结论',
       toolActivities: [activity('workspace_read', 'success', { iteration: 1 })],
       reasoningByIteration: { 1: '先看一眼文件' },
     });
-    expect(segments.map((segment) => segment.kind)).toEqual(['reasoning', 'tools', 'narrative']);
-    const tools = segments[1];
+    expect(segments.map((segment) => segment.kind)).toEqual(['tools', 'narrative']);
+    const tools = segments[0];
     expect(tools.kind === 'tools' && tools.iteration).toBe(1);
+    expect(tools.kind === 'tools' && tools.reasoning).toBe('先看一眼文件');
+    expect(tools.kind === 'tools' && tools.reasoningPreview).toBe('先看一眼文件');
   });
 
-  it('多迭代按 iteration 升序交错（工具与思考不再被类型分组拍平）', () => {
+  it('多迭代按 iteration 升序交错；思考折入本迭代簇（BLOCK-108），无思考迭代仅工具簇', () => {
     const segments = buildConversationSegments({
       content: '结论',
       toolActivities: [
@@ -74,12 +76,15 @@ describe('BLOCK-107 会话分段模型（D1=c 按 iteration 交错）', () => {
       segment.kind === 'narrative' ? 'narrative' : `${segment.kind}#${segment.iteration}`
     ))).toEqual([
       'tools#1',
-      'reasoning#2',
       'tools#2',
-      'reasoning#3',
       'tools#3',
       'narrative',
     ]);
+    const tools2 = segments[1];
+    const tools3 = segments[2];
+    expect(tools2.kind === 'tools' && tools2.reasoning).toBe('第二轮先跑测试');
+    expect(tools3.kind === 'tools' && tools3.reasoning).toBe('第三轮改代码');
+    expect(tools2.kind === 'tools' && tools2.reasoningPreview).toBe('第二轮先跑测试');
   });
 
   it('无 iteration 的历史活动归入 0 号段且排在最前，不丢内容', () => {
@@ -131,13 +136,26 @@ describe('BLOCK-107 会话分段模型（D1=c 按 iteration 交错）', () => {
     expect(denied[0].kind === 'tools' && denied[0].durationMs).toBeNull();
   });
 
-  it('阶段进度作为独立分段插在对应工具簇之后（D5）', () => {
+  it('过渡叙述作为独立分段渲染在对应工具簇之前（BLOCK-108 Qoder 形态，取代 D5 簇后）', () => {
     const segments = buildConversationSegments({
       content: '结论',
       toolActivities: [activity('workspace_read', 'success', { iteration: 2 })],
       progressUpdates: [{ iteration: 2, content: '已经读完关键文件' }],
     });
-    expect(segments.map((segment) => segment.kind)).toEqual(['tools', 'progress', 'narrative']);
+    expect(segments.map((segment) => segment.kind)).toEqual(['progress', 'tools', 'narrative']);
+  });
+
+  it('纯思考迭代（无工具）保持独立思考节点（BLOCK-108 折叠仅作用于有工具迭代）', () => {
+    const segments = buildConversationSegments({
+      content: '结论',
+      toolActivities: [activity('workspace_read', 'success', { iteration: 2 })],
+      reasoningByIteration: { 1: '第一轮纯思考', 2: '第二轮先读' },
+    });
+    expect(segments.map((segment) => segment.kind)).toEqual(['reasoning', 'tools', 'narrative']);
+    const folded = segments[1];
+    expect(folded.kind === 'tools' && folded.reasoning).toBe('第二轮先读');
+    const standalone = segments[0];
+    expect(standalone.kind === 'reasoning' && standalone.text).toBe('第一轮纯思考');
   });
 
   it('复用 UI-383 既有折叠规则产出 groups（渲染层无需二次分组）', () => {
@@ -237,12 +255,11 @@ describe('BLOCK-107 历史/实况一致性契约（plan §5-2 机械断言）', 
     });
 
     expect(shape(fromHistory)).toEqual(shape(fromLive));
+    // BLOCK-108 语义：思考折入本迭代簇；过渡叙述在簇前。
     expect(shape(fromLive)).toEqual([
-      'reasoning#1',
       'tools#1',
-      'reasoning#2',
-      'tools#2',
       'progress#2',
+      'tools#2',
       'narrative',
     ]);
   });
@@ -270,6 +287,6 @@ describe('BLOCK-107 历史/实况一致性契约（plan §5-2 机械断言）', 
       toolActivities: restored.toolActivities,
       reasoningByIteration: restored.reasoningByIteration,
       progressUpdates: restored.progressUpdates,
-    }))).toEqual(['reasoning#3', 'tools#3', 'progress#3', 'narrative']);
+    }))).toEqual(['progress#3', 'tools#3', 'narrative']);
   });
 });

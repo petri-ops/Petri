@@ -1,18 +1,22 @@
 // ============================================================
-// ConversationTimeline.tsx — BLOCK-107 P1b 会话信息流时间线渲染族。
+// ConversationTimeline.tsx — BLOCK-107 P1b 会话信息流时间线渲染族；
+// BLOCK-108 P2 按 Qoder 形态修订：过渡叙述（progress 分段）以正文式容器
+// 上轴于对应簇之前（「模型说话 → 模型做事」），本迭代思考折入簇内
+// （经 ToolsSegment.reasoning 传给 ToolActivityList），纯思考迭代仍独立
+// 成思考节点。
 //
 // 把 `conversationSegments.buildConversationSegments` 产出的有序分段渲染成
-// **沿时间轴分节**的交错序列：思考节点 → 工具簇 → 思考节点 → 工具簇 → ……，
-// 取代现状「一个摘要条收编全部工具、正文另在末尾」的类型分组堆叠。
+// **沿时间轴分节**的交错序列：过渡叙述 → 工具簇（内含思考行+活动行）→
+// 过渡叙述 → 工具簇 → ……，取代「类型分组堆叠」。
 //
 // 复用策略（零重复实现）：每个 tools 分段交回既有 `ToolActivityList` 渲染
-// ——簇头一行（`已完成 N 项 · …`）+ 就地展开活动行/终端块；本组件**不传**
-// `reasoningByIteration`，避免思考行在簇内二次渲染（思考已由本组件按
-// iteration 独立成节点）。故 `ToolActivityList` 内部与既有测试保持不动。
+// ——簇头一行（BLOCK-108 起为计数式「执行工具 N 次」）+ 就地展开的统一
+// 单行流（Qoder 行形态，门控=collapseWhenSettled）。
 //
-// narrative（最终正文）**不由本组件渲染**——宿主在原位渲染 markdown。progress（阶段
-// 进度）经 `renderProgress` 回调上轴（D5：作为独立分段插在对应工具簇之后）：本组件
-// 只负责它在脊线上的位置与「首/末」判定，行内容与 UI-305 的省略、运行中语义归宿主。
+// narrative（最终正文）**不由本组件渲染**——宿主在原位渲染 markdown。
+// progress（过渡叙述）经 `renderProgress` 回调上轴（BLOCK-108 改序簇前 +
+// 正文式容器 `sc-timeline-transition`）：本组件只负责它在脊线上的位置与
+// 「首/末」判定，行内容归宿主。
 // ============================================================
 
 import { useState } from 'react';
@@ -66,13 +70,24 @@ function ReasoningSegmentRow({ segment }: { segment: ReasoningSegment }): React.
  * settled 自动收起由 `ToolActivityList` 既有行为承载）。
  */
 function ToolsSegmentBlock({ segment }: { segment: ToolsSegment }): React.ReactElement {
+  // BLOCK-108 P2 — 本迭代思考折入簇内（Qoder 形态：已思考单行在工具行之上）。
+  // 段模型已把有工具迭代的思考折叠进 ToolsSegment（纯思考迭代仍独立成段，
+  // 由本组件的 ReasoningSegmentRow 渲染），此处按旧 prop 形状传给簇。
+  const reasoningByIteration = segment.reasoning
+    ? { [segment.iteration]: segment.reasoning }
+    : undefined;
   return (
     <div
       className="sc-timeline-cluster"
       data-state={segment.state}
       data-iteration={segment.iteration}
     >
-      <ToolActivityList activities={segment.activities} collapseWhenSettled showRunningStopwatch />
+      <ToolActivityList
+        activities={segment.activities}
+        reasoningByIteration={reasoningByIteration}
+        collapseWhenSettled
+        showRunningStopwatch
+      />
     </div>
   );
 }
@@ -127,12 +142,13 @@ export function ConversationTimeline({
         isLast: progressSeen === progressTotal,
       });
       if (rendered == null || rendered === false) continue;
-      // 容器同时携带 .sc-agent-progress 的排版（色阶/字号由它给），
-      // .sc-timeline-progress 只补轴节奏——避免为同一视觉再写一套 token。
+      // BLOCK-108 P2 — 过渡叙述容器：正文式段落（Qoder 形态「模型说话 → 模型做事」），
+      // 不再沿用 .sc-agent-progress 的弱化进度排版；内容与行内语义归宿主回调。
       nodes.push(
         <div
           key={`progress:${segment.iteration}`}
-          className="sc-timeline-progress sc-agent-progress"
+          className="sc-timeline-transition"
+          data-iteration={segment.iteration}
         >
           {rendered}
         </div>

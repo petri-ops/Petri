@@ -8,13 +8,16 @@
 // 315/315 = 100%，`reasoningByIteration` 的键为同序数字串——两者按 iteration
 // 交错即可还原**迭代级**真实顺序，无需任何数据层改造（D1 由 b 修正为 c）。
 //
-// 分段语义（每个 iteration 内）：
-//   reasoning（模型本迭代的思考）→ tools（本迭代的工具簇）→ progress（本迭代末
-//   的自我陈述，D5 裁决插在对应工具簇之后）→ …… → narrative（最终正文，恒在末尾）。
+// 分段语义（每个 iteration 内，BLOCK-108 P1 修订）：
+//   progress（模型本迭代的过渡叙述——「模型说话」）→ tools（本迭代的工具簇，簇内
+//   首行折叠本迭代思考——「模型做事」）→ …… → narrative（最终正文，恒在末尾）。
+//   BLOCK-107 原语义为 reasoning 独立成段 + progress 在簇后（D5）；BLOCK-108 依用户
+//   Qoder 形态裁决改为「叙述在簇前、思考入簇」（plan §7.2 取代登记）。
 //
 // 顺序依据：模型在一个 iteration 内先产出 reasoning_content / content，再发起
 // tool_calls（loop-orchestrator.js:647-665 的流式阶段先于 toolCalls 取出），故同
-// iteration 内 reasoning 必在 tools 之前。
+// iteration 内 reasoning 与 progress（=该轮 streamedText）必在 tools 之前；
+// progress 仅在该轮有工具调用时被记录（loop-orchestrator.js:771 的分支位置）。
 //
 // 兼容红线（D2）：无任何时间线素材（老数据）时**退化为单一 narrative 分段**，
 // 渲染结果与现状一致；无 iteration 的历史活动归入 0 号段并排在最前，不丢内容。
@@ -53,6 +56,10 @@ export interface ToolsSegment {
   durationMs: number | null;
   /** running = 有运行中/待确认项（渲染层据此展开并显示秒表）。 */
   state: 'running' | 'settled';
+  /** BLOCK-108 P1 — 本迭代思考折入簇内（首行折叠、点击展开全文）。纯思考迭代仍独立成 ReasoningSegment。 */
+  reasoning?: string;
+  /** 折叠态一行预览（同 ReasoningSegment.preview 口径）。 */
+  reasoningPreview?: string;
 }
 
 export interface ProgressSegment {
@@ -189,18 +196,27 @@ export function buildConversationSegments(
   for (const iteration of [...buckets.keys()].sort((a, b) => a - b)) {
     const bucket = buckets.get(iteration);
     if (!bucket) continue;
-    if (bucket.reasoning) {
+    const hasActivities = bucket.activities.length > 0;
+    if (hasActivities) {
+      // BLOCK-108 P1 — 过渡叙述在簇前（Qoder 形态：模型说话 → 模型做事）。
+      if (bucket.progress) {
+        segments.push({ kind: 'progress', iteration, content: bucket.progress });
+      }
+      const tools = buildToolsSegment(iteration, bucket.activities);
+      if (bucket.reasoning) {
+        tools.reasoning = bucket.reasoning;
+        tools.reasoningPreview = reasoningPreview(bucket.reasoning);
+      }
+      segments.push(tools);
+    } else if (bucket.reasoning) {
+      // 纯思考迭代（无工具）：保持独立思考节点（BLOCK-107 行为不变）。
       segments.push({
         kind: 'reasoning',
         iteration,
         text: bucket.reasoning,
         preview: reasoningPreview(bucket.reasoning),
       });
-    }
-    if (bucket.activities.length > 0) {
-      segments.push(buildToolsSegment(iteration, bucket.activities));
-    }
-    if (bucket.progress) {
+    } else if (bucket.progress) {
       segments.push({ kind: 'progress', iteration, content: bucket.progress });
     }
   }

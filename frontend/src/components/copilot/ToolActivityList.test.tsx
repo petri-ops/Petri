@@ -197,6 +197,95 @@ describe('ToolActivityList (UI-383 常规只读折叠)', () => {
   });
 });
 
+describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）', () => {
+  const execActivity = (overrides: Partial<ToolActivityItem> = {}): ToolActivityItem => ({
+    key: 'exec-1',
+    name: 'workspace_exec',
+    status: 'success',
+    actionLabel: '已运行',
+    command: 'npm run docs:reconcile 2>&1 | tail -60',
+    actionDetail: 'npm run docs:reconcile',
+    output: { tail: 'zero manual review candidates\n', truncated: false },
+    durationMs: 1200,
+    ...overrides,
+  });
+
+  it('Q2 计数式簇头：完成态「执行工具 N 次」+ 需注意计数；运行态带秒表字样', () => {
+    const { rerender } = render(
+      <ToolActivityList
+        activities={[activity('success', { key: 'a' }), execActivity({ key: 'e' })]}
+        collapseWhenSettled
+      />
+    );
+    expect(screen.getByText(/执行工具 2 次/)).toBeTruthy();
+    expect(screen.queryByText(/已完成 \d+ 项/)).toBeNull();
+
+    rerender(
+      <ToolActivityList
+        activities={[
+          activity('success', { key: 'a' }),
+          activity('error', { key: 'b' }),
+        ]}
+        collapseWhenSettled
+      />
+    );
+    expect(screen.getByText(/执行工具 2 次 · 1 项需注意/)).toBeTruthy();
+
+    rerender(<ToolActivityList activities={[activity('running', { key: 'r' })]} collapseWhenSettled showRunningStopwatch />);
+    expect(screen.getByText(/正在执行工具 1\/1 项/)).toBeTruthy();
+  });
+
+  it('Q3 统一单行：exec 行默认折叠（无终端块），无 routine 二级折叠', () => {
+    const reads = ['a', 'b', 'c'].map((key) => activity('success', {
+      key,
+      name: 'workspace_read',
+      actionLabel: '已读取',
+      actionDetail: `${key}.md`,
+    }));
+    render(
+      <ToolActivityList
+        activities={[...reads, execActivity()]}
+        collapseWhenSettled
+      />
+    );
+    fireEvent.click(screen.getByText(/执行工具 4 次/));
+    // exec 也只是单行：命令预览在，输出块不在
+    expect(screen.getByText('终端命令 已运行')).toBeTruthy();
+    expect(screen.getAllByText('npm run docs:reconcile 2>&1 | tail -60').length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByTestId('tool-term-output')).toBeNull();
+    // 无 routine 二级折叠：3 条读取逐条单行
+    expect(screen.queryByText(/常规读取：/)).toBeNull();
+    expect(screen.getByText('a.md')).toBeTruthy();
+    expect(screen.getByText('c.md')).toBeTruthy();
+  });
+
+  it('Q4 点击展开：exec 行展开出命令+输出，再点击收起', () => {
+    render(<ToolActivityList activities={[execActivity()]} collapseWhenSettled />);
+    fireEvent.click(screen.getByText(/执行工具 1 次/));
+    fireEvent.click(screen.getByTestId('qoder-row-head'));
+    expect(screen.getByTestId('tool-term-output')).toBeTruthy();
+    expect(screen.getByTestId('tool-term-output').textContent).toContain('zero manual review candidates');
+    fireEvent.click(screen.getByTestId('qoder-row-head'));
+    expect(screen.queryByTestId('tool-term-output')).toBeNull();
+  });
+
+  it('Q5 思考入簇：「已思考」单行置顶，折叠预览 + 点击展开全文', () => {
+    render(
+      <ToolActivityList
+        activities={[execActivity()]}
+        reasoningByIteration={{ 2: '先确认登记行再改文档\n第二行细节' }}
+        collapseWhenSettled
+      />
+    );
+    fireEvent.click(screen.getByText(/执行工具 1 次/));
+    expect(screen.getByText('已思考')).toBeTruthy();
+    expect(screen.getByText('先确认登记行再改文档')).toBeTruthy();
+    expect(screen.queryByText('第二行细节')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '展开 已思考' }));
+    expect(screen.getByText(/第二行细节/)).toBeTruthy();
+  });
+});
+
 describe('BLOCK-107 P2c 运行中秒表（showRunningStopwatch）', () => {
   afterEach(() => {
     vi.useRealTimers();

@@ -1173,12 +1173,6 @@
   margin: 2px 0 4px;
 }
 
-/* 阶段进度上轴（D5）：排版沿用同元素上的 .sc-agent-progress，
-   本条只收紧轴内 margin，避免容器 gap 与其 9px 下边距叠加。 */
-.sc-timeline-progress {
-  margin: 2px 0;
-}
-
 /* UI-272 增补 — 两级折叠行头：思考/执行条目默认收起，点击展开详情 */
 .sc-tool-row-head {
   display: flex;
@@ -4003,4 +3997,74 @@
 
 .sc-compaction-notice-sub {
   color: var(--gewu-text-muted, var(--gewu-text-tertiary));
+}
+
+/* ============================================================
+ * BLOCK-108 P2/P3 — 会话信息流 Qoder 化
+ * 过渡叙述正文式上轴 + 簇内统一单行行式（计数式簇头见 ToolActivityList）。
+ * ============================================================ */
+
+/* 过渡叙述（progress 分段，簇前）：轴节奏 + 正文式段落。排版贴近正文
+   （pre-wrap、body-sm 字号、primary 色阶），区别于最终正文的 markdown 块——
+   它是「模型说话」的转场句，不承载标题/表格等复杂结构。 */
+.sc-timeline-transition {
+  margin: 2px 0;
+}
+
+.sc-timeline-transition-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0 0 4px;
+  color: var(--gewu-text-primary);
+  font-size: var(--gewu-font-size-body-sm);
+  line-height: 1.6;
+}
+
+/* Qoder 统一单行行式：折叠态一行（状态字形 + 类别标签 + 单行预览 + 耗时），
+   点击展开终端块/详情体。行头复用 .sc-tool-row-head 的 hover/chevron 语义。 */
+.sc-tool-qoder-head {
+  padding: 3px 4px;
+}
+
+.sc-tool-qoder-glyph {
+  flex: 0 0 auto;
+  width: 14px;
+  text-align: center;
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
+}
+
+.sc-tool-qoder-glyph-success {
+  color: var(--gewu-success);
+}
+
+.sc-tool-qoder-glyph-error,
+.sc-tool-qoder-glyph-denied {
+  color: var(--gewu-danger);
+}
+
+.sc-tool-qoder-kind {
+  display: flex;
+  flex: 0 0 auto;
+  color: var(--gewu-text-tertiary);
+}
+
+.sc-tool-qoder-label {
+  flex: 0 0 auto;
+  color: var(--gewu-text-secondary);
+  white-space: nowrap;
+}
+
+.sc-tool-qoder-preview {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--gewu-font-size-xs);
+  color: var(--gewu-text-tertiary);
+}
+
+.sc-tool-row-head[data-expanded] .sc-tool-qoder-preview {
+  white-space: normal;
 }

@@ -77,7 +77,7 @@ import { ChatScrollbar } from './ChatScrollbar';
 // ResultEditProgressList / ErrorBanner / ApprovalCard+ApprovalRepairHint），
 // 零行为变化；ResultEditProgressList 按惯例在此再导出保持导入路径兼容。
 import { LoopStatusPanel } from './SimpleChat/LoopStatusPanel';
-import { AgentProgressItem, AgentProgressPendingRow } from './SimpleChat/AgentProgress';
+import { AgentProgressPendingRow } from './SimpleChat/AgentProgress';
 import { ErrorBanner } from './SimpleChat/ErrorBanner';
 import { ApprovalCard } from './SimpleChat/ApprovalCard';
 import { ResultEditProgressList } from './SimpleChat/ResultEditProgressList';
@@ -1035,17 +1035,19 @@ export function SimpleChat({
                     <ConversationTimeline
                       segments={timelineSegmentsByMessage.get(m.id ?? `idx:${i}`) ?? []}
                       renderProgress={(segment, meta) => {
-                        const conclusion = meta.isFirst ? null : (
-                          <AgentProgressItem
-                            content={segment.content}
-                            onFileReferenceClick={handleFileReferenceClick}
-                          />
-                        );
+                        // BLOCK-108 P2 — 过渡叙述正文式渲染（Qoder 形态「模型说话 →
+                        // 模型做事」）：全部显示、含首条（UI-305「首条意图省略」在时间线
+                        // 呈现上被取代，block-108 plan §7.2）；纯文本 pre-wrap，文件引用
+                        // 链接化随最终正文保留、过渡段不做。
+                        const text = segment.content.trim();
+                        const transition = text ? (
+                          <div className="sc-timeline-transition-text">{text}</div>
+                        ) : null;
                         const runningMarker = meta.isLast && m.pending
                           ? <AgentProgressPendingRow />
                           : null;
-                        if (!conclusion && !runningMarker) return null;
-                        return <>{conclusion}{runningMarker}</>;
+                        if (!transition && !runningMarker) return null;
+                        return <>{transition}{runningMarker}</>;
                       }}
                     />
                     {m.role === 'assistant' && <MessageMeta modelName={m.modelName} />}

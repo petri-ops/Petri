@@ -16,6 +16,7 @@ import {
   groupToolActivities,
   type ToolActivityItem,
 } from './toolActivity';
+import { reasoningPreview } from './conversationSegments';
 
 /** UI-316 — agent 管理类工具（子智能体独立标识 + 行内实时状态）。 */
 const ACTIVITY_AGENT_TOOLS: ReadonlySet<string> = new Set([
@@ -60,9 +61,21 @@ const RUNNING_STATUSES: ReadonlySet<ToolActivityItem['status']> = new Set([
   'awaiting_confirmation',
 ]);
 
-/** UI-272 — 单条思考段：默认收起，点击展开全文（限高滚动）。 */
-function ReasoningRow({ iteration, text }: { iteration: number; text: string }) {
+/** UI-272 — 单条思考段：默认收起，点击展开全文（限高滚动）。
+ *  BLOCK-108 P3 — 支持 Qoder 行形态覆写：`label`（如「已思考」）与折叠态
+ *  `preview`（首行预览，折叠即可看出这一轮在琢磨什么）。 */
+function ReasoningRow({ iteration, text, label, preview }: {
+  iteration: number;
+  text: string;
+  label?: string;
+  preview?: string;
+}) {
   const [open, setOpen] = useState(false);
+  const customLabel = Boolean(label);
+  const resolvedLabel = label || `思考 · 第 ${iteration} 轮`;
+  const ariaName = customLabel
+    ? `${open ? '收起' : '展开'} ${resolvedLabel}`
+    : `${open ? '收起思考' : '展开思考'} 第 ${iteration} 轮`;
   return (
     <div className="sc-tool-reasoning">
       <button
@@ -70,11 +83,12 @@ function ReasoningRow({ iteration, text }: { iteration: number; text: string }) 
         className="sc-tool-row-head sc-tool-reasoning-head"
         data-expanded={open || undefined}
         aria-expanded={open}
-        aria-label={open ? `收起思考 第 ${iteration} 轮` : `展开思考 第 ${iteration} 轮`}
+        aria-label={ariaName}
         title={open ? '收起思考' : '展开思考'}
         onClick={() => setOpen((v) => !v)}
       >
-        <span className="sc-tool-reasoning-label">思考 · 第 {iteration} 轮</span>
+        <span className="sc-tool-reasoning-label">{resolvedLabel}</span>
+        {!open && preview && <span className="sc-timeline-reasoning-preview">{preview}</span>}
         <span className="sc-tool-row-chevron" aria-hidden="true">
           <Icon name="chevron-right" size={12} />
         </span>
@@ -96,12 +110,13 @@ function ReasoningRow({ iteration, text }: { iteration: number; text: string }) 
  *   - 运行中 spinner；复制命令/输出按钮
  *   - 滚动跟随：手动上滚暂停自动滚底 + 「回到底部」悬浮按钮
  */
-function TerminalRow({ activity }: { activity: ToolActivityItem }) {
-  // UI-315 优化二 — 命令即身份：折叠行以等宽命令为主体（一眼看出跑了什么），
-  // 展开后是完整输出；柔和主题底色分组，无左右边框线。
-  const [open, setOpen] = useState(false);
+/**
+ * BLOCK-108 P3 — 终端展开体（命令全量 + 流式输出 + 复制/滚随）。
+ * 从 TerminalRow 抽出供两处复用：legacy TerminalRow（UI-315）与 Qoder 统一
+ * 单行行式（时间线模式）。挂载即展开态，滚随/复制状态随挂载生命周期。
+ */
+function TerminalBody({ activity }: { activity: ToolActivityItem }) {
   const [copied, setCopied] = useState('');
-  const duration = formatToolDuration(activity.durationMs);
   const command = activity.command || activity.actionDetail || '';
   const outputTail = activity.output?.tail || '';
   const running = activity.status === 'running';
@@ -143,6 +158,77 @@ function TerminalRow({ activity }: { activity: ToolActivityItem }) {
     }
   };
 
+  return (
+    <div className="sc-tool-term-body">
+      <div className="sc-tool-term-command">
+        <span className="sc-tool-term-prompt">$ </span>
+        <span className="sc-tool-term-command-text">{command}</span>
+        <button
+          type="button"
+          className={`sc-tool-term-copy${copied === 'cmd' ? ' is-copied' : ''}`}
+          title="复制命令"
+          aria-label="复制命令"
+          onClick={() => void copyText(command, 'cmd')}
+        >
+          <Icon name={copied === 'cmd' ? 'check' : 'copy'} size={11} />
+        </button>
+      </div>
+      {(outputTail || running) && (
+        <div className="sc-tool-term-output-wrap">
+          <pre
+            ref={outputRef}
+            className="sc-tool-term-output"
+            data-testid="tool-term-output"
+            onScroll={handleOutputScroll}
+          >
+            {outputSpans.length > 0
+              ? outputSpans.map((span, index) =>
+                  span.cls ? (
+                    <span key={index} className={span.cls}>{span.text}</span>
+                  ) : (
+                    <span key={index}>{span.text}</span>
+                  )
+                )
+              : outputTail}
+            {running && !outputTail ? '…' : ''}
+            {activity.output?.truncated ? '\n…（输出已截断）' : ''}
+          </pre>
+          <button
+            type="button"
+            className={`sc-tool-term-copy sc-tool-term-copy-out${copied === 'out' ? ' is-copied' : ''}`}
+            title="复制输出"
+            aria-label="复制输出"
+            onClick={() => void copyText(outputTail, 'out')}
+          >
+            <Icon name={copied === 'out' ? 'check' : 'copy'} size={11} />
+          </button>
+          {showJump && (
+            <button
+              type="button"
+              className="sc-tool-term-jump"
+              onClick={jumpToBottom}
+              title="回到底部（恢复自动跟随）"
+            >
+              ↓ 回到底部
+            </button>
+          )}
+        </div>
+      )}
+      {activity.status === 'error' && activity.terminationReason && (
+        <div className="sc-tool-term-err">原因：{activity.terminationReason}</div>
+      )}
+    </div>
+  );
+}
+
+function TerminalRow({ activity }: { activity: ToolActivityItem }) {
+  // UI-315 优化二 — 命令即身份：折叠行以等宽命令为主体（一眼看出跑了什么），
+  // 展开后是完整输出；柔和主题底色分组，无左右边框线。
+  const [open, setOpen] = useState(false);
+  const duration = formatToolDuration(activity.durationMs);
+  const command = activity.command || activity.actionDetail || '';
+  const running = activity.status === 'running';
+
   const firstLine = (command.split('\n')[0] || '').slice(0, 120);
   const statusGlyph = running
     ? null
@@ -182,76 +268,16 @@ function TerminalRow({ activity }: { activity: ToolActivityItem }) {
           <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
         </span>
       </button>
-      {open && (
-        <div className="sc-tool-term-body">
-          <div className="sc-tool-term-command">
-            <span className="sc-tool-term-prompt">$ </span>
-            <span className="sc-tool-term-command-text">{command}</span>
-            <button
-              type="button"
-              className={`sc-tool-term-copy${copied === 'cmd' ? ' is-copied' : ''}`}
-              title="复制命令"
-              aria-label="复制命令"
-              onClick={() => void copyText(command, 'cmd')}
-            >
-              <Icon name={copied === 'cmd' ? 'check' : 'copy'} size={11} />
-            </button>
-          </div>
-          {(outputTail || running) && (
-            <div className="sc-tool-term-output-wrap">
-              <pre
-                ref={outputRef}
-                className="sc-tool-term-output"
-                data-testid="tool-term-output"
-                onScroll={handleOutputScroll}
-              >
-                {outputSpans.length > 0
-                  ? outputSpans.map((span, index) =>
-                      span.cls ? (
-                        <span key={index} className={span.cls}>{span.text}</span>
-                      ) : (
-                        <span key={index}>{span.text}</span>
-                      )
-                    )
-                  : outputTail}
-                {running && !outputTail ? '…' : ''}
-                {activity.output?.truncated ? '\n…（输出已截断）' : ''}
-              </pre>
-              <button
-                type="button"
-                className={`sc-tool-term-copy sc-tool-term-copy-out${copied === 'out' ? ' is-copied' : ''}`}
-                title="复制输出"
-                aria-label="复制输出"
-                onClick={() => void copyText(outputTail, 'out')}
-              >
-                <Icon name={copied === 'out' ? 'check' : 'copy'} size={11} />
-              </button>
-              {showJump && (
-                <button
-                  type="button"
-                  className="sc-tool-term-jump"
-                  onClick={jumpToBottom}
-                  title="回到底部（恢复自动跟随）"
-                >
-                  ↓ 回到底部
-                </button>
-              )}
-            </div>
-          )}
-          {activity.status === 'error' && activity.terminationReason && (
-            <div className="sc-tool-term-err">原因：{activity.terminationReason}</div>
-          )}
-        </div>
-      )}
+      {open && <TerminalBody activity={activity} />}
     </div>
   );
 }
 
 /** UI-272 增补 — 单条工具执行记录：头部一行摘要，点击展开命令输出等详情。 */
-/** UI-272 增补 — 单条工具执行记录：头部一行摘要，点击展开命令输出等详情。 */
-function ActivityRow({ activity }: { activity: ToolActivityItem }) {
-  const [open, setOpen] = useState(false);
-  const duration = formatToolDuration(activity.durationMs);
+function ActivityBody({ activity, subSnap }: {
+  activity: ToolActivityItem;
+  subSnap: ReturnType<typeof getSubAgentTaskSnapshot>;
+}) {
   const sideEffects = formatToolSideEffects(activity.sideEffects);
   const showReason = activity.status === 'error' || activity.status === 'denied';
   // UI-385 — 子 agent 详情改由右栏「智能体」tab 承载（独立窗退役）：派发
@@ -260,6 +286,119 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
     if (!activity.agentRunId) return;
     dispatchGewuEvent(gewuEvents.agentOpenInRail, { runId: activity.agentRunId });
   };
+  return (
+    <div className="sc-tool-activity-body sc-tool-activity-detail">
+      <span className="sc-tool-activity-tool">{activity.name}</span>
+      {activity.agentRunId && subSnap && (
+        // UI-382 — 子智能体实况卡内联到派发源头（工具调用时间线），
+        // 不再只沉在底部聚合条；详情窗/中断动作随卡就地可达。
+        <div className="sc-tool-subagent-inline" data-status={subSnap.status}>
+          <div className="sc-tool-subagent-line">
+            {/* UI-387 + BLOCK-93 P2 — emoji=职能（显式 spawn role 优先，文本推断兜底），形状回答「它是谁」 */}
+            <span aria-hidden="true">{resolveAgentCategory(subSnap.agentRole, subSnap.userContent).emoji}</span>
+            <span className="sc-tool-subagent-desc" title={subSnap.userContent}>
+              {(subSnap.userContent || '').replace(/\s+/g, ' ').trim().slice(0, 80) || '（无描述）'}
+            </span>
+            <span className="sc-tool-agent-status" data-status={subSnap.status}>
+              <Icon name="bot" size={10} />
+              {SUB_STATUS_LABEL[subSnap.status] || subSnap.status}
+            </span>
+          </div>
+          <div className="sc-tool-subagent-actions">
+            <button
+              type="button"
+              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              onClick={openAgentDetail}
+              title="在右侧栏「智能体」面板查看实时工作流 + 终态摘要"
+            >
+              详情
+            </button>
+            {subSnap.status === 'running' && (
+              <button
+                type="button"
+                className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                onClick={() => stopSubAgentTask(activity.agentRunId)}
+                title="中断该子智能体"
+              >
+                中断
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+      {activity.agentRunId && !subSnap && (
+        <button
+          type="button"
+          className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+          onClick={openAgentDetail}
+          title="在右侧栏「智能体」面板查看实时工作流 + 终态摘要"
+        >
+          详情
+        </button>
+      )}
+      {activity.truncated && activity.status === 'success' && <span>仅显示摘要</span>}
+      {/* UI-273 增补 — 写操作展开显示本次操作的实际改动：文件行（点击跳审阅）+ diff 预览，
+          与审阅文件行同构呈现 */}
+      {activity.changeDiff ? (
+        <div className="sc-tool-changediff">
+          <button
+            type="button"
+            className="sc-tool-changediff-file"
+            title={`${activity.actionDetail || activity.name} — 点击在审阅中查看`}
+            onClick={() =>
+              dispatchGewuEvent(gewuEvents.reviewOpenFile, {
+                filePath: activity.actionDetail || activity.name,
+              })
+            }
+          >
+            <Icon name="file" size={12} />
+            <span className="sc-tool-changediff-path">
+              {activity.actionDetail || activity.name}
+            </span>
+            <span className="sc-changes-add">+{activity.changeDiff.added}</span>
+            <span className="sc-changes-del">−{activity.changeDiff.removed}</span>
+          </button>
+          {activity.changeDiff.truncated && (
+            <span className="sc-tool-changediff-truncated">差异已截断</span>
+          )}
+          {activity.changeDiff.hunks.length > 0 ? (
+            <div className="sc-tool-changediff-preview">
+              <Suspense fallback={<code className="sc-tool-changediff-loading">差异加载中…</code>}>
+              {activity.changeDiff.hunks.map((hunk, hunkIndex) => (
+                <CodeMirrorDiffView
+                  key={`${activity.key}:${hunkIndex}`}
+                  filePath={activity.actionDetail || activity.name}
+                  isBinary={false}
+                  hunks={[hunk]}
+                />
+              ))}
+              </Suspense>
+            </div>
+          ) : (
+            <div className="sc-tool-changediff-empty">差异较大，仅显示行数统计。</div>
+          )}
+        </div>
+      ) : (
+        sideEffects && <span>影响：{sideEffects}</span>
+      )}
+      {showReason && activity.terminationReason && (
+        <span className="sc-tool-activity-reason">原因：{activity.terminationReason}</span>
+      )}
+      {activity.output?.tail && (
+        <pre
+          className={`sc-tool-activity-output${activity.output.truncated ? ' sc-tool-activity-output-truncated' : ''}`}
+        >
+          {activity.output.tail}
+          {activity.output.truncated ? '\n…（输出已截断）' : ''}
+        </pre>
+      )}
+    </div>
+  );
+}
+
+function ActivityRow({ activity }: { activity: ToolActivityItem }) {
+  const [open, setOpen] = useState(false);
+  const duration = formatToolDuration(activity.durationMs);
   // UI-316 — agent 管理类工具用 bot 图标（独立智能体标识），spawn 行内联
   // 显示该子 agent 的实时状态（订阅会话 store 自动更新）。
   const isAgentTool = ACTIVITY_AGENT_TOOLS.has(activity.name);
@@ -302,121 +441,92 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
           <Icon name="chevron-right" size={12} />
         </span>
       </button>
-      {open && (
-        <div className="sc-tool-activity-body sc-tool-activity-detail">
-          <span className="sc-tool-activity-tool">{activity.name}</span>
-          {activity.agentRunId && subSnap && (
-            // UI-382 — 子智能体实况卡内联到派发源头（工具调用时间线），
-            // 不再只沉在底部聚合条；详情窗/中断动作随卡就地可达。
-            <div className="sc-tool-subagent-inline" data-status={subSnap.status}>
-              <div className="sc-tool-subagent-line">
-                {/* UI-387 + BLOCK-93 P2 — emoji=职能（显式 spawn role 优先，文本推断兜底），形状回答「它是谁」 */}
-                <span aria-hidden="true">{resolveAgentCategory(subSnap.agentRole, subSnap.userContent).emoji}</span>
-                <span className="sc-tool-subagent-desc" title={subSnap.userContent}>
-                  {(subSnap.userContent || '').replace(/\s+/g, ' ').trim().slice(0, 80) || '（无描述）'}
-                </span>
-                <span className="sc-tool-agent-status" data-status={subSnap.status}>
-                  <Icon name="bot" size={10} />
-                  {SUB_STATUS_LABEL[subSnap.status] || subSnap.status}
-                </span>
-              </div>
-              <div className="sc-tool-subagent-actions">
-                <button
-                  type="button"
-                  className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-                  onClick={openAgentDetail}
-                  title="在右侧栏「智能体」面板查看实时工作流 + 终态摘要"
-                >
-                  详情
-                </button>
-                {subSnap.status === 'running' && (
-                  <button
-                    type="button"
-                    className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-                    onClick={() => stopSubAgentTask(activity.agentRunId)}
-                    title="中断该子智能体"
-                  >
-                    中断
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-          {activity.agentRunId && !subSnap && (
-            <button
-              type="button"
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-              onClick={openAgentDetail}
-              title="在右侧栏「智能体」面板查看实时工作流 + 终态摘要"
-            >
-              详情
-            </button>
-          )}
-          {activity.truncated && activity.status === 'success' && <span>仅显示摘要</span>}
-          {/* UI-273 增补 — 写操作展开显示本次操作的实际改动：文件行（点击跳审阅）+ diff 预览，
-              与审阅文件行同构呈现 */}
-          {activity.changeDiff ? (
-            <div className="sc-tool-changediff">
-              <button
-                type="button"
-                className="sc-tool-changediff-file"
-                title={`${activity.actionDetail || activity.name} — 点击在审阅中查看`}
-                onClick={() =>
-                  dispatchGewuEvent(gewuEvents.reviewOpenFile, {
-                    filePath: activity.actionDetail || activity.name,
-                  })
-                }
-              >
-                <Icon name="file" size={12} />
-                <span className="sc-tool-changediff-path">
-                  {activity.actionDetail || activity.name}
-                </span>
-                <span className="sc-changes-add">+{activity.changeDiff.added}</span>
-                <span className="sc-changes-del">−{activity.changeDiff.removed}</span>
-              </button>
-              {activity.changeDiff.truncated && (
-                <span className="sc-tool-changediff-truncated">差异已截断</span>
-              )}
-              {activity.changeDiff.hunks.length > 0 ? (
-                <div className="sc-tool-changediff-preview">
-                  <Suspense fallback={<code className="sc-tool-changediff-loading">差异加载中…</code>}>
-                  {activity.changeDiff.hunks.map((hunk, hunkIndex) => (
-                    <CodeMirrorDiffView
-                      key={`${activity.key}:${hunkIndex}`}
-                      filePath={activity.actionDetail || activity.name}
-                      isBinary={false}
-                      hunks={[hunk]}
-                    />
-                  ))}
-                  </Suspense>
-                </div>
-              ) : (
-                <div className="sc-tool-changediff-empty">差异较大，仅显示行数统计。</div>
-              )}
-            </div>
-          ) : (
-            sideEffects && <span>影响：{sideEffects}</span>
-          )}
-          {showReason && activity.terminationReason && (
-            <span className="sc-tool-activity-reason">原因：{activity.terminationReason}</span>
-          )}
-          {activity.output?.tail && (
-            <pre
-              className={`sc-tool-activity-output${activity.output.truncated ? ' sc-tool-activity-output-truncated' : ''}`}
-            >
-              {activity.output.tail}
-              {activity.output.truncated ? '\n…（输出已截断）' : ''}
-            </pre>
-          )}
-        </div>
-      )}
+      {open && <ActivityBody activity={activity} subSnap={subSnap} />}
+    </div>
+  );
+}
+
+/** BLOCK-108 P3 — Qoder 行形态的类别图标与状态词。 */
+const QODER_WRITE_TOOLS: ReadonlySet<string> = new Set(['workspace_write', 'workspace_replace']);
+const QODER_STATUS_WORD: Record<ToolActivityItem['status'], string> = {
+  running: '运行中',
+  awaiting_confirmation: '等待确认',
+  success: '已运行',
+  error: '失败',
+  denied: '已拒绝',
+};
+
+/**
+ * BLOCK-108 P3 — Qoder 统一单行行式（时间线模式专属）。
+ *
+ * 与 legacy 的差别：**所有**活动（含 exec）折叠态都是一行——状态字形 +
+ * 类别标签（终端命令 已运行 / actionLabel）+ 单行预览（命令首行 / 路径），
+ * 点击才展开（exec=TerminalBody 终端块；其余=ActivityBody 详情体）。
+ * 这消除了 legacy「exec 默认展开终端块」的形态，使簇内是纯单行流，
+ * 扫一眼即可知道这批工具各自动了什么。
+ */
+function QoderRow({ activity }: { activity: ToolActivityItem }) {
+  const [open, setOpen] = useState(false);
+  const duration = formatToolDuration(activity.durationMs);
+  const running = activity.status === 'running';
+  const isExec = EXEC_TOOL_NAMES.has(activity.name);
+  const isAgent = ACTIVITY_AGENT_TOOLS.has(activity.name) || Boolean(activity.agentRunId);
+  const command = activity.command || activity.actionDetail || '';
+  const previewSource = isExec ? (command.split('\n')[0] || '').slice(0, 120) : (activity.actionDetail || activity.summary || '');
+  const subSnap = useSyncExternalStore(
+    activity.agentRunId
+      ? (cb) => subscribeSubAgentTask(activity.agentRunId, cb)
+      : () => () => {},
+    () => (activity.agentRunId ? getSubAgentTaskSnapshot(activity.agentRunId) : null)
+  );
+  const kindIcon = isExec ? 'terminal' : isAgent ? 'bot' : QODER_WRITE_TOOLS.has(activity.name) ? 'wrench' : 'file';
+  const label = isExec ? `终端命令 ${QODER_STATUS_WORD[activity.status]}` : activity.actionLabel;
+  return (
+    <div className={`sc-tool-activity sc-tool-qoder-row sc-tool-qoder-row-${activity.status}`} data-status={activity.status}>
+      <button
+        type="button"
+        className="sc-tool-row-head sc-tool-qoder-head"
+        data-expanded={open || undefined}
+        data-testid="qoder-row-head"
+        aria-expanded={open}
+        aria-label={open ? `收起 ${label}` : `展开 ${label}`}
+        title={open ? '收起' : '展开'}
+        onClick={() => setOpen((v) => !v)}
+      >
+        {running ? (
+          <span className="sc-tool-term-spinner" aria-hidden="true" />
+        ) : (
+          <span className={`sc-tool-qoder-glyph sc-tool-qoder-glyph-${activity.status}`} aria-hidden="true">
+            {activity.status === 'success' ? '✓' : activity.status === 'error' || activity.status === 'denied' ? '✕' : '···'}
+          </span>
+        )}
+        <span className="sc-tool-qoder-kind" aria-hidden="true">
+          <Icon name={kindIcon} size={12} />
+        </span>
+        <span className="sc-tool-qoder-label">{label}</span>
+        {previewSource && (
+          <code className="sc-tool-qoder-preview" title={previewSource}>{previewSource}</code>
+        )}
+        {subSnap && (
+          <span className="sc-tool-agent-status" data-status={subSnap.status} title="子智能体实时状态">
+            <Icon name="bot" size={10} />
+            {SUB_STATUS_LABEL[subSnap.status] || subSnap.status}
+          </span>
+        )}
+        {duration && <span className="sc-tool-activity-duration">{duration}</span>}
+        <span className="sc-tool-row-chevron" aria-hidden="true">
+          <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
+        </span>
+      </button>
+      {open && (isExec
+        ? <TerminalBody activity={activity} />
+        : <ActivityBody activity={activity} subSnap={subSnap} />)}
     </div>
   );
 }
 
 /**
  * BLOCK-107 P2c（D4 配套）— 运行中秒表：自「本簇首次被观察到有未终结项」起累计墙钟。
- *
  * 数据层没有活动起始时刻（`ToolActivityItem` 只有终态 `durationMs`），故运行态的
  * 秒表只能取渲染侧观察时刻——语义为「从我们看见它在跑起算」，与终态后显示的
  * 活动耗时之和是两套口径，不互相覆盖。首秒不显示（等第一次 tick），转终态即卸载
@@ -502,6 +612,14 @@ export function ToolActivityList({
     : awaiting > 0
       ? `等待确认 ${awaiting} 项`
       : `已完成 ${activities.length} 项${attention ? ` · ${attention} 项需注意` : ''}${actionSummary ? ` · ${actionSummary}` : ''}${totalDuration ? ` · 耗时 ${totalDuration}` : ''}`;
+  // BLOCK-108 P3 — Qoder 计数式簇头（时间线模式）：以次数为中心，保留需注意
+  // 计数（L5 flow 契约字样）与运行秒表。
+  const qoderSummary = running > 0
+    ? `正在执行工具 ${running}/${activities.length} 项${
+      runningElapsedMs !== null ? ` · 已运行 ${formatToolDuration(runningElapsedMs)}` : ''}`
+    : awaiting > 0
+      ? `等待确认 ${awaiting} 项`
+      : `执行工具 ${activities.length} 次${attention ? ` · ${attention} 项需注意` : ''}${totalDuration ? ` · 耗时 ${totalDuration}` : ''}`;
 
   // UI-272 — 每轮思考只在该轮首个工具前插入一次
   const renderedIterations = new Set<number>();
@@ -519,10 +637,32 @@ export function ToolActivityList({
           setManualExpanded(!expanded);
         }}
       >
-        <span className="sc-tool-activity-summary-label">{summary}</span>
+        <span className="sc-tool-activity-summary-label">{collapseWhenSettled ? qoderSummary : summary}</span>
         <Icon name="chevron-right" size={14} />
       </button>
-      {expanded && (
+      {expanded && (collapseWhenSettled ? (() => {
+        // BLOCK-108 P3 — Qoder 簇内形态：思考行置顶（本簇迭代的折叠思考）+
+        // 全部活动统一单行（含 exec），无 routine 二级折叠。单迭代簇不需要
+        // groupToolActivities 的迭代行走（时间线按迭代一簇）。
+        const reasoningRows = Object.entries(reasoningByIteration || {})
+          .map(([iter, text]) => ({ iteration: Number(iter), text }))
+          .filter((entry) => Number.isInteger(entry.iteration) && entry.text.trim())
+          .map((entry) => (
+            <ReasoningRow
+              key={`qoder-reasoning-${entry.iteration}`}
+              iteration={entry.iteration}
+              text={entry.text}
+              label="已思考"
+              preview={reasoningPreview(entry.text)}
+            />
+          ));
+        return (
+          <div className="sc-tool-activity-inline" data-testid="qoder-cluster-body">
+            {reasoningRows}
+            {activities.map((activity) => <QoderRow key={activity.key} activity={activity} />)}
+          </div>
+        );
+      })() : (
         <div className="sc-tool-activity-inline">
           {groupToolActivities(activities).map((group) => {
             const first = group.items[0];
@@ -594,7 +734,7 @@ export function ToolActivityList({
             ));
           })()}
         </div>
-      )}
+      ))}
     </div>
   );
 }

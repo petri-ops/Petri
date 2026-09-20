@@ -41,7 +41,8 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     );
     const view = within(container);
     expect(view.getByText('思考 · 第 2 轮')).toBeTruthy();
-    expect(container.textContent).toContain('已完成 1 项');
+    // BLOCK-108 P3 — 簇头为计数式「执行工具 N 次」（Qoder 形态）
+    expect(container.textContent).toContain('执行工具 1 次');
     // 正文不由本组件产出（宿主负责），避免同一正文被渲染两次
     expect(container.textContent).not.toContain('最终正文');
   });
@@ -72,7 +73,7 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('传入 renderProgress 时按位置渲染：阶段进度落在对应工具簇之后（D5）', () => {
+  it('传入 renderProgress 时按输入顺序渲染（簇前/簇后由段模型排序，BLOCK-108 起簇前）', () => {
     const { container } = render(
       <ConversationTimeline
         segments={[toolsSegment, progressSegment]}
@@ -81,10 +82,10 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     );
     const html = container.innerHTML;
     expect(within(container).getByText('已经读完关键文件')).toBeTruthy();
-    expect(html.indexOf('已完成 1 项')).toBeLessThan(html.indexOf('已经读完关键文件'));
+    expect(html.indexOf('执行工具 1 次')).toBeLessThan(html.indexOf('已经读完关键文件'));
   });
 
-  it('renderProgress 拿到 isFirst / isLast，容器沿用 .sc-agent-progress 排版（D5+UI-305）', () => {
+  it('renderProgress 拿到 isFirst / isLast，容器为过渡叙述排版（BLOCK-108 取代 D5+UI-305 弱化进度行，plan §7.2）', () => {
     const intention: ConversationSegment = { kind: 'progress', iteration: 1, content: '打算先读文件' };
     const metas: Array<{ isFirst: boolean; isLast: boolean }> = [];
     const { container } = render(
@@ -100,7 +101,8 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
       { isFirst: true, isLast: false },
       { isFirst: false, isLast: true },
     ]);
-    expect(container.querySelector('.sc-timeline-progress.sc-agent-progress')).toBeTruthy();
+    expect(container.querySelector('.sc-timeline-transition')).toBeTruthy();
+    expect(container.querySelector('.sc-agent-progress')).toBeNull();
   });
 
   it('renderProgress 返回 null 的分段不产出节点（首条=意图被宿主省略时不留空壳）', () => {

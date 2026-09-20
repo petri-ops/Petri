@@ -4855,8 +4855,28 @@
         "message-segments"
       ],
       "notes": "会话信息流呈现时间线化（用户初始想法=模仿 Qoder 的会话消息呈现方式；用户裁决「新开个block优化我们的项目」）。问题定义（只读代码探索，行号级）：现状为「消息容器 + 类型分组堆叠」而非时间线——SimpleChat.tsx:1043-1113 固定模板顺序（工具卡→meta→loop→进度→结果编辑进度→结果节点→降级条→子 agent 卡→正文），工具/思考/进度按类型各聚成一个列表（ToolActivityList 手风琴 :412/:483/:491、reasoningByIteration、AgentProgressList），真实交错顺序在渲染时被拍平，工具在时间轴上的位置信息不存在；根因=历史渲染走 copilot_messages.meta_json 聚合快照（conversation-adapter.js:97-175），跨类型全局时序在聚合那刻丢失，而完整时序其实存在于 task_events（agent-task-store.js:404-407 的 seq 游标；逐 token 落库 agent-runner.js:371-380，236,087 行规模债见 BLOCK-106 plan:39）却未被主聊天历史路径消费；故同一轮对话实况（SSE，agentTaskStream.ts:230-433）与历史（meta 快照，SimpleChat/types.ts:138-170）两条轨道呈现不一致。四阶段：P0 度量基线 + 时序真源裁决（D1 三选：task_events 回放 / meta.timeline additive / 呈现层近似）→ P1 分段模型 + 交错渲染（簇头一行含失败计数与运行秒表，运行中展开、完成后自动收起，思考行补一行预览）→ P2 历史兼容降级 + 策略视觉 + SimpleChat 体量债 → P3 实机三宿主面（右栏/悬挂/欢迎页）收口。非范围=消息流虚拟化、轮询→SSE、task_events 数据模型改造（三者 BLOCK-106 §2/§7 已登记为独立候选包）、后端事件协议大改、新依赖、不碰 frontend lockfile（P6 源绑定）、G1+。保留资产=UI-268/272/315/382/383 零件不得为风格对账而退化。D1-D6 预置裁决项见 plan §7，启动（转 active）需用户裁决。**P3 收口（2026-09-21）**：四条实机腿全绿（历史 5/5 / 实况 7/7〔真实模型 ad-hoc prompt〕/ 三宿主面 6/6〔中央×悬挂逐段相等〕/ 长会话分页 7/7〔250 条合成消息：窗口 200 + windowOffset 50 + 上翻补齐 + 刷新重置〕）+ closeout 八门全绿；UI-428 verified；新增 dev-verify flows block107-timeline-history/-live/-hosts/-long；唯余帧时基线未采（属虚拟化候选包前置证据，随本包收口转交该候选包）。"
+    },
+    {
+      "id": "BLOCK-108-CONVERSATION-STREAM-QODER-FIDELITY",
+      "path": "docs/block-108-conversation-stream-qoder-fidelity-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-108-conversation-stream-qoder-fidelity",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-21",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "block-108",
+        "conversation-stream",
+        "qoder-fidelity",
+        "chat-rendering",
+        "tool-activity-rows"
+      ],
+      "notes": "会话信息流 Qoder 化：执行间过渡叙述 + 簇内紧凑单行流（用户裁决原话「更进一步的靠近 qoder的情况 执行和执行之间是有过渡性的描述 执行内部是有运行的终端命令和结果 思考的情况 以及读取文件等 内部是紧凑的最好是单行展示 只有点击才会展开相关内容」＋Qoder 截图；用户睡眠窗口预授权夜间自主推进）。P0 已核：过渡叙述数据链路已全通（loop-orchestrator.js:771 仅工具轮 assistantProgress.record → agent_progress 实时下发 + meta.progressUpdates 落库 conversation-adapter.js:118 → message.progressUpdates 前端喂数），零后端改动。三阶段：P1 段模型（progress 改序簇前 + reasoning 折入 ToolsSegment）→ P2 时间线上轴（过渡叙述正文式渲染含首条，UI-305 首条省略约定在时间线呈现上取代登记 plan §7.2）→ P3 簇内 Qoder 行形态（计数式簇头「执行工具 N 次」+ 统一单行含 exec 默认折叠 + 点击展开 + 思考入簇；门控 collapseWhenSettled，Dock/桥接旧调用方零变化）。非范围=零后端/零新依赖/不动 Dock 与降级路径/不删 harness 工具（bg_exec 审计=plan §7.1 建议登记：exec 封装族有必要保留，yield_ms 中间档收敛等行为变更需另裁）。UI 台账=UI-429。"
     }
   ],
   "lastUpdated": "2026-09-21",
-  "documentCount": 261
+  "documentCount": 262
 }
