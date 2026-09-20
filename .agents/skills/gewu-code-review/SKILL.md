@@ -1,6 +1,6 @@
 ---
 name: gewu-code-review
-description: Use when reviewing code changes, diffs, or commits; auditing a module for contract drift, second sources of truth, silent failures, or patch stacking; grading finding severity; or writing a review or audit report. Use before declaring a substantial work-package deliverable done. 评审代码/审查 diff/质量把关/审计报告/判断该打补丁还是该重构时使用。
+description: Use when reviewing code changes, diffs, or commits (including dependency upgrades); auditing a module for contract drift, second sources of truth, silent failures, or patch stacking; grading finding severity; or writing a review or audit report. Use before declaring a substantial work-package deliverable done. 评审代码/审查 diff（含依赖升级）/质量把关/审计报告/判断该打补丁还是该重构时使用。
 ---
 
 # Gewu Code Review（代码评审）
@@ -16,6 +16,12 @@ description: Use when reviewing code changes, diffs, or commits; auditing a modu
 5. **边界与安全**——路径白名单、参数数组 spawn（无 shell 拼接）、IPC sender 守卫、重操作两段式确认门。
 6. **死代码与残留**——重构删干净没有（BLOCK-17 死代码教训）、空壳预留、临时文件；**补丁堆积**——本次改动是否是对同一处的又一次叠加补丁（条件摞条件/特例套特例/绕开既有抽象），命中即触发「补丁 vs 重构」前置判断：要么给出吸收进单一结构的 scoped 重构方案（带行为基线——改前改后同套定向测试绿），要么如实登记重构候选留痕；不批准无判断的再垫一层。
 
+## 评审顺序与批准标准
+
+- **顺序**：先读意图（本次改动要达成什么、plan/台账声称了什么）→ **先看测试再看得实现**（测试暴露意图与真实覆盖：测行为还是测实现、实现被改坏时它会不会红）→ 再按六维度过实现代码。测试先行不是维度 4 的重复——它决定后面每一维怎么读。
+- **批准标准**：确信本次改动净改善代码健康即批准，不以「不是我会这么写」阻塞；驳回必须附带可执行修法。完美代码不存在，评审抓的是净退化。
+- **结构性修复菜单**（维度 6 触发「补丁 vs 重构」判断时，给出「往哪搬」而不是只说「这里复杂」）：条件链→显式分派器／同形重复分支→合并单一流／编排与业务逻辑分离／特性专属逻辑移出共享模块回归属主／复用既有 canonical helper 而非并造近亲（=第二真相源）／类型边界显式化让下游分支消失／删不加信息的 pass-through 包装／已超健康体量的文件先拆再加。判优：优先减少活动件的方案；读者要持有的概念数没降的重构只是搬运复杂度。
+
 ## 严重度分级（沿仓库既有惯例）
 
 - **P1 必修**：契约破坏 / 数据正确性 / 安全边界 / 生产路径回归——修复后方可收口
@@ -28,12 +34,25 @@ description: Use when reviewing code changes, diffs, or commits; auditing a modu
 
 - 每条发现：`file:line` + 现象（引用源码合同原文）+ 建议修法，三者缺一不成立
 - 结论不许超出证据；"看起来完成"不构成评审通过
+- 不橡皮图章、不软化：未经核对的「LGTM」与「可能有点小问题」（实为必修缺陷）都是失真；能量化就量化（「N+1 每项多 ~50ms」优于「这里可能慢」）
+- 「我自己写的我知道它对」不豁免任何维度——作者对自己的假设全盲，自评与评审同标准
 - **回归→门禁转化（内嵌规则，无需外部文件）**：同一类缺陷第二次出现——无论是 commit 修复、评审发现还是实机验收抓获——必须转化为机械门禁项（定向测试 / harness 检查 / dev-verify flow），并在门禁自身内写明映射关系。判据：重复 ≥2 次 + 后果隐性滞后 + 可机械化，三条全中才转化；一次性事故与状态类事实不转化
 
 ## 产出与时机
 
 - 报告格式见 `references/REVIEW-REPORT-TEMPLATE.md`（表行式：结论先行、每条发现三要素）
+- 发现按杠杆排序：正确性/安全/结构性问题置顶；一条高确信发现胜过被 nit 埋掉的长清单
 - 时机：跨模块契约 / 新增 IPC 面 / 安全面 / 大体量包，收口前先评审；单会话小增量可自评但须自查本文件六维度
+
+## 依赖升级评审
+
+依赖升级是代码变更，同纪律评审，不接受「只是 bump 版本」豁免：
+
+- **读 changelog 不只看版本号**——semver 是维护者的承诺不是保证，patch 也可能带行为变更；跨大版本必读迁移说明，找出真正会破的点
+- **一次一个依赖**——批量 bump 炸掉时找不到凶手、回退也不干净；**lockfile diff 必审**（多数安装包是传递依赖，只看 package.json 看不到真实变化面）；lockfile 提交、不手改
+- **绿套件定夺**——升级由「前后同套定向测试绿」验证，不是「装上了」；依赖周边覆盖薄本身就是发现，先补测试再升
+- 分工：**新增**依赖走治理 skill `DEPENDENCY-CHANGE-CHECKLIST`（默认答案=不增）；本节只管**升级**存量依赖
+- 前端依赖链现状（react-router/vite/vitest 升级批与 P6 重打绑定同批）见 AUDIT-LOG 在册条目，本节为其提供届时评审纪律
 
 ## AI 跑查（OpenCodeReview，可选外部工具）
 

@@ -106,6 +106,10 @@ description: Use Gewu development infrastructure when starting or resuming a ses
    - **③ better-sqlite3 EPERM teardown**：模块级单例连接句柄进程退出前不释放 → `rmSync` 临时目录抛 `EPERM/EBUSY`（测试体已通过、after 钩子才炸）。**修法＝teardown try/catch 容忍 EPERM/EBUSY**，不要为它改生产代码的连接生命周期。
    - **④ 契约漂移伪装成环境债**：路由文件被拆分（测试仍读旧路径，报「route is unavailable」）／表新增列（SQL 精确断言失配）／mock 机制换代（`globalThis._biof3Plugins` 已废，改 `process.env.BIOF3_BUILT_IN_PLUGINS_DIR`）。**判据**：错误信息里出现的**符号名在源码中已不存在或已改名**，即契约漂移而非环境问题——修法是让测试追上契约，不是让契约退回测试。**附**：断言基于「消息文本」而非「决策结构」的测试要特别警惕（本仓 BLOCK-10 S-003 重构后，断言 domain 消息文本等于复活 prompt-injection 漏洞——此类断言应改锚决策结果／中性夹具）。
 
+## 调试与归因纪律
+
+测试红／构建炸／行为不符预期的排查，按 [references/DEBUGGING-ATTRIBUTION-DISCIPLINE.md](./references/DEBUGGING-ATTRIBUTION-DISCIPLINE.md) 执行：停线存证 → 四类归因（确定性红/并发互踩/环境平台缺失/契约漂移）→ 隔离实验三法（单文件隔离/基线对照/最小复现）→ 修根因+设回归门禁；非平凡结论落定前过证伪式复核，结论一律可回溯到源。上方第 8/9 条是其 Windows 侧特化先例（2026-09-20 制度化批改编内化，素材源 addyosmani/agent-skills，MIT）。
+
 ## 复用到其他仓库
 
 读 [PORTING.md](./PORTING.md)：整目录拷贝 → package.json 四行接线 → 按可移植性矩阵处理降级项。原则速查见 [references/PRODUCT-PRINCIPLES.md](./references/PRODUCT-PRINCIPLES.md)（非 canonical）。
