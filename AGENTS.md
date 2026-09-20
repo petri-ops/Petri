@@ -65,10 +65,17 @@ npm run test:files --prefix frontend -- <相关文件>  # 定向前端测试
 npm run check        # 全量静态检查 + 所有门禁（默认不跑，留给发布前 / CI）
 npm run test:all:workspace # 全量 Node + 前端测试（默认不跑，留给发布前 / CI）
 
+# 代码质量与安全门禁（BLOCK-105，已入 closeout 链）
+npm run quality:secret  # 密钥泄漏扫描（fail-closed：生产面命中即红）
+npm run quality:arch    # 架构规则（dependency-cruiser：IPC 必经 desktopBridge / 前后端边界 / 依赖方向）
+npm run quality:lint    # ESLint blocking（存量在 eslint-suppressions.json 抑制基线，新增违规即红）
+npm run quality:knip    # 死代码扫描（report-only：core 懒 require 盲区，数字属上界）
+npm run quality:baseline # P0 四项体检基线重扫（Knip/jscpd/audit/密钥，报告落 acceptance/block-105/）
+
 # 开发基础设施（BLOCK-71）
 npm run state        # 会话状态一键恢复：分支/WIP/AUDIT-LOG 未决项/active 工作包
 npm run hygiene:check   # 工作区卫生：死符号链接 + 临时残留（只报告不代删）
-npm run closeout     # 收口门禁聚合：hygiene → docs → ui-audit → test:changed（fail-fast）
+npm run closeout     # 收口门禁聚合（fail-fast）：hygiene → docs → ui-audit → test:changed → gate:code-size → quality:secret → quality:arch → quality:lint（八门）
 npm run verify -- <flow> # dev-verify 实机校验 flow（--list 查清单；前置 dev 栈在跑）
 npm run skills:check    # 产品 Skill 契约校验（resources/skills/）
 ```
@@ -216,6 +223,18 @@ desktop/
 - [ ] 类型定义 → 在 `frontend/src/` 下创建 `*.types.ts`
 
 - [ ] 测试 → 在 `frontend/src/` 同目录创建 `*.test.ts`
+
+- [ ] 渲染进程 IPC 走 `desktopBridge`（禁止直引 electron/node 内建——`npm run quality:arch` 会拦）
+
+### Lint 债务纪律（BLOCK-105 棘轮）
+
+- `eslint-suppressions.json` 是存量违规抑制基线：**新增违规即红**，存量只许收缩不许放宽。
+
+- 新违规处置三分类：真缺陷修 / 化石删 / 误报豁免（豁免必须走 `--suppress-all` 重扫入库+reason 留痕，**禁止全局关规则**）。
+
+- 批量收缩：修一批后 `npx eslint . --suppress-all` 刷新基线（parsing error 无法抑制，先清化石）。
+
+- 架构新桥（如跨层引用）：dependency-cruiser 规则的 pathNot 登记制，登记即留痕。
 
 ### 代码风格
 

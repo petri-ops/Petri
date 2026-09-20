@@ -2064,7 +2064,8 @@
         "src/main/_window-create.js",
         "src/ipc/window-manager.js",
         "src/preload.js",
-        "eslint-suppressions.json"
+        "eslint-suppressions.json",
+        "scripts/quality-baseline.sh"
       ],
       "tests": [
         "test/electron-security-assertions.test.mjs"
