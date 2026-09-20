@@ -36,6 +36,7 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 - 跑 `npm run closeout`（九门 fail-fast：hygiene → docs:check → ui:audit:check → test:changed → gate:code-size → quality:secret → quality:arch → quality:lint → quality:types；BLOCK-105 起四门 quality 门禁入链）；当前工作包另有专项门禁时用 `--gate <npm-script>` 追加。
 - 门禁全绿是收口的必要条件不是充分条件：canonical 回写（work package / roadmap / handoff / AUDIT-LOG / ui-audit 台账）仍按治理纪律单独完成。
 - 属于其他线/并行包的红旗如实登记归属，不得表述为本包通过。
+- **P6 产品验收证据重打期间仓库必须完全静默**（2026-09-20 实测白跑一轮 8 分钟）：`npm run g0:result-studio:p6:update` 在写盘前断言 `sourceCommitMatchesSourceHashes && sourceBindingStableDuringCapture`（`scripts/g0-rs-p6-product-acceptance.mjs:554-565`），实采开始与写盘之间 **HEAD 一旦前进（哪怕只提交 docs）即 `p6_evidence_source_binding_not_current`**，且该红出现在预检全绿之后，极易误读为产品缺陷。姿势：启动前 `git status --porcelain` 为空、期间只做只读核对与仓库外（`/tmp`、memory 目录）写入。另记：同一不变量还捆绑 `recomputed.passed`，所以 **live 检查抖动会以 `p6_evidence_checks_not_recomputed` 现形**（本轮实测：第二轮失败、`--live --verbose` 不写盘复跑 10/10 PASS、第三轮写盘成功）——先按 flaky 分流复跑取证，再怀疑源码。
 - 收口提交落定后打进度快照标签：`git tag -a snapshot-YYYYMMDD -m "<本 BLOCK 一句摘要>" && git push origin snapshot-YYYYMMDD`。日期命名，同日第二个加 `-2` 后缀；`v0.0.1-rc.*` 序列语义是「OSS 线上工程候选版」，只在真正更替候选版时才动，不跟 BLOCK 收口走（用户裁决 2026-09-17：日常进度锚点只走 snapshot，每个 BLOCK 收口一个）。
 
 ## dev 栈上验证 UI 工作
