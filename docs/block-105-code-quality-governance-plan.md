@@ -92,6 +92,20 @@
 - **P3 调参抓真**：dep-cruiser tsConfig 跨目录解析 TS18003（改用无 tsConfig 模式）；ESLint suppressions 不支持 parsing error 抑制（化石先清后建基线）。
 - 双套件验证：Node 2252 绿 exit 0（+1=新断言测试）+ 前端 1146/1146。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## 6.4 类型门禁追加 quality:types completed（2026-09-20，Mac 侧会话续接，用户裁决「可以冲」）
+
+- **起点**：AUDIT-LOG 🟡「前端 `tsc --noEmit` 29 红属存量，且 tsc 未入 closeout 链」。依赖升级批实测**归属为非升级引入**（临时装回 react-router-dom 6.30.4 复测同为 29 红）；长期未被捕获的原因是 closeout 链无类型门禁，仅 result-studio 专项 update 脚本内有 `tsc -p frontend/tsconfig.json`。
+- **清偿（29→0，纯类型注解、零行为变更）**：
+  - **测试侧 25 处**=testing-library 查询泛型窄化到真实 DOM 元素（`getByRole<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>`，`getByLabelText`/`findByLabelText`/`getByTestId`/`getAllByRole` 同法）；ResultEditPanel 中因此变冗余的 `as HTMLButtonElement` 一并移除（否则触发 `no-unnecessary-type-assertion` 新增违规）。
+  - **产品侧 2 文件**=`ResultArtifactShell` 引入 `PreviewAvailability`/`PreviewAvailabilityStatus` 类型别名 + 显式标注三元结果（**根因已最小复现**：条件表达式的分支对象字面量会把字面量联合拓宽成 `string`，不是联合类型本身写错）；`MessageRail` 的 `closest` 泛型化到 `HTMLElement`，与 `bodyRef` 声明对齐。
+  - **测试侧 1 处**=`useDurableConversationLoop.test` 把 `initialProps` 提为显式 `string | null` 常量——`renderHook` 的 `Props` 由 `initialProps`（协变候选）推断，行内对象字面量优先于回调形参注解。
+- **门禁入链**：`package.json` 新增 `quality:types`（`tsc --noEmit -p frontend/tsconfig.json`），`closeout` 追加 `--gate quality:types`（**八门→九门**）；AGENTS.md「代码质量与安全门禁」+ gewu-dev-infra SKILL.md 同步。
+- **P6 连带重打**：`package.json` 属 P6 源绑定集合（`scripts/g0-rs-p6-product-acceptance.mjs` 的 `EXTRA_SOURCE_FILES`）→ 默认校验路径实证 `p6_stored_current_source_hash_mismatch` → `npm run g0:result-studio:p6:update` 重打 **10/10 passed 锚定 `efe86507`**，复验 `10/10 canonical checks recomputed` PASS。
+- **UI 台账门禁连带**：本批属零 UI 行为变化的类型注解批（同型先例 8c85898 / 5a4df30 / f4af1ad2），在 `scripts/check-ui-productization-audit.mjs` 双豁免集合登记 `64da69b`（理由注释就地留痕，不重写共享历史）。
+- **棘轮连带收紧**：类型窄化顺带消除 `KnowledgeSpaceSwitcher.test.tsx` 的 3 条 `@typescript-eslint/no-unsafe-member-access` 抑制（属性缺失时 TS 给出 error type，规则才命中；窄化后不再发生）→ `npx eslint . --prune-suppressions` **2153→2150（−3，只删不加）**；`quality:lint` 复绿（0 error / 1301 warning 存量不变）。
+- **验证**：`tsc` 0 红；前端全量 144 文件/1146 用例 0 红；`quality:lint` 0 error；`npm run quality:types` exit 0。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## 7. P4 收口（2026-09-20；c7930f3c → 3d07a903）
 
 ### 各阶段门禁对账
@@ -114,6 +128,6 @@
 
 ### 持续运行态（收口后日常）
 
-`npm run closeout` 八门：hygiene → docs → ui-audit → test:changed → gate:code-size → quality:secret（fail-closed）→ quality:arch（架构规则）→ quality:lint（blocking+抑制基线）。新增违规/密钥/架构破坏即红。
+`npm run closeout` 九门：hygiene → docs → ui-audit → test:changed → gate:code-size → quality:secret（fail-closed）→ quality:arch（架构规则）→ quality:lint（blocking+抑制基线）→ quality:types（前端类型，§6.4）。新增违规/密钥/架构破坏/类型红即红。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
