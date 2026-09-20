@@ -54,6 +54,12 @@ const TOOL_STATUS_LABEL: Record<ToolActivityItem['status'], string> = {
   denied: '已拒绝',
 };
 
+/** BLOCK-107 P2b（D4）— 未终结状态：运行中 / 待确认。 */
+const RUNNING_STATUSES: ReadonlySet<ToolActivityItem['status']> = new Set([
+  'running',
+  'awaiting_confirmation',
+]);
+
 /** UI-272 — 单条思考段：默认收起，点击展开全文（限高滚动）。 */
 function ReasoningRow({ iteration, text }: { iteration: number; text: string }) {
   const [open, setOpen] = useState(false);
@@ -413,16 +419,27 @@ export function ToolActivityList({
   activities,
   processingDurationMs,
   reasoningByIteration,
+  collapseWhenSettled = false,
 }: {
   activities: ToolActivityItem[];
   processingDurationMs?: number;
   /** UI-272 — 按迭代聚合的模型思考段，展开时展示每次工具调用前的衔接思路。 */
   reasoningByIteration?: Record<number, string>;
+  /**
+   * BLOCK-107 P2b（D4）— 按「运行中展开 / 完成后折叠为一行」托管展开态。
+   * 默认 false = 保持既有行为（含 exec 即默认展开，ZCode 式），故既有调用方
+   * 与其契约测试零变化；时间线里的每一簇传 true，避免多簇同开成一片、也让
+   * 已完成的批自动收敛回一行。
+   */
+  collapseWhenSettled?: boolean;
 }): React.ReactElement {
   // UI-315 — 含 exec 命令的消息默认展开活动条：终端块直接可见（ZCode 式），
   // 无 exec 的消息保持收起摘要；用户手动切换后以手动态为准。
+  // BLOCK-107 P2b：collapseWhenSettled 时改看「是否有未终结项」。
   const [expanded, setExpanded] = useState(
-    () => activities.some((activity) => EXEC_TOOL_NAMES.has(activity.name))
+    () => (collapseWhenSettled
+      ? activities.some((activity) => RUNNING_STATUSES.has(activity.status))
+      : activities.some((activity) => EXEC_TOOL_NAMES.has(activity.name)))
   );
   const [userToggled, setUserToggled] = useState(false);
   // UI-383 — 常规只读组折叠状态（组键 = 首项 key；默认折叠，点击就地展开逐条）
@@ -430,9 +447,15 @@ export function ToolActivityList({
   const hasRunningExec = activities.some(
     (activity) => EXEC_TOOL_NAMES.has(activity.name) && activity.status === 'running'
   );
+  const anyRunning = activities.some((activity) => RUNNING_STATUSES.has(activity.status));
   useEffect(() => {
     if (hasRunningExec && !userToggled) setExpanded(true);
   }, [hasRunningExec, userToggled]);
+  // BLOCK-107 P2b — 本簇转为终态后自动收起（用户手动切换过则以手动态为准）。
+  useEffect(() => {
+    if (!collapseWhenSettled || userToggled) return;
+    setExpanded(anyRunning);
+  }, [collapseWhenSettled, anyRunning, userToggled]);
   const running = activities.filter((activity) => activity.status === 'running').length;
   const awaiting = activities.filter((activity) => activity.status === 'awaiting_confirmation').length;
   const attention = activities.filter(

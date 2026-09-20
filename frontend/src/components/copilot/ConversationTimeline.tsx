@@ -72,7 +72,7 @@ function ToolsSegmentBlock({ segment }: { segment: ToolsSegment }): React.ReactE
       data-state={segment.state}
       data-iteration={segment.iteration}
     >
-      <ToolActivityList activities={segment.activities} />
+      <ToolActivityList activities={segment.activities} collapseWhenSettled />
     </div>
   );
 }

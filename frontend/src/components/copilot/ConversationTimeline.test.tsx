@@ -120,4 +120,39 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     expect(nodes.map((node) => node.getAttribute('data-iteration'))).toEqual(['2', '2', '3', '3']);
     expect(container.querySelectorAll('.sc-timeline-cluster')).toHaveLength(2);
   });
+
+  it('D4 折叠策略：含 exec 的已完成簇默认收起为一行，运行中簇默认展开', () => {
+    // 用「含 workspace_exec」的簇做判据——既有 ToolActivityList 对该形状默认展开
+    // （UI-315 ZCode 式），因此这条断言真正区分 D4 托管态是否生效。
+    const settledExec: ConversationSegment = {
+      ...toolsSegment,
+      activities: [{
+        key: 'exec-1',
+        name: 'workspace_exec',
+        status: 'success',
+        actionLabel: '已运行',
+        iteration: 2,
+        command: 'ls',
+      }],
+      totalCount: 1,
+    };
+    const settled = render(<ConversationTimeline segments={[settledExec]} />);
+    expect(settled.container.querySelector('.sc-tool-activity-inline')).toBeNull();
+
+    const running: ConversationSegment = {
+      ...settledExec,
+      activities: [{
+        key: 'exec-2',
+        name: 'workspace_exec',
+        status: 'running',
+        actionLabel: '已运行',
+        iteration: 2,
+        command: 'ls',
+      }],
+      runningCount: 1,
+      state: 'running',
+    };
+    const live = render(<ConversationTimeline segments={[running]} />);
+    expect(live.container.querySelector('.sc-tool-activity-inline')).toBeTruthy();
+  });
 });

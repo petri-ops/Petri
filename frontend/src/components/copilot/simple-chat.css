@@ -1144,6 +1144,35 @@
   overflow-y: auto;
 }
 
+/* BLOCK-107 P1b — 会话信息流时间线（UI-428）：思考节点与工具簇沿轴交替排列。
+   复用既有 sc-tool-activity-inline 的「缩进 + 左引导线」层级体系，本块只补
+   轴节奏与折叠态一行预览，不引入新色阶（全部走 --gewu-* token）。 */
+.sc-conversation-timeline {
+  display: grid;
+  gap: 2px;
+}
+
+/* 时间线内思考节点：容器已提供纵向节奏，收紧既有 margin 以免节奏叠加放大 */
+.sc-timeline-reasoning {
+  margin: 2px 0;
+}
+
+/* 折叠态一行预览：占满剩余宽度并单行省略（色阶低于标签，不抢注意力） */
+.sc-timeline-reasoning-preview {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--gewu-text-muted);
+  font-size: var(--gewu-font-size-body-sm);
+}
+
+/* 工具簇：与相邻思考节点留出可分辨的批间节奏 */
+.sc-timeline-cluster {
+  margin: 2px 0 4px;
+}
+
 /* UI-272 增补 — 两级折叠行头：思考/执行条目默认收起，点击展开详情 */
 .sc-tool-row-head {
   display: flex;
