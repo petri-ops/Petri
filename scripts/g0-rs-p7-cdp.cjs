@@ -38,7 +38,7 @@ class CdpClient {
     this.socket = null;
   }
 
-  async connect(timeoutMs = 10_000) {
+  async connect(timeoutMs = 10_000, handshakeTimeoutMs = 8_000) {
     const socket = new WebSocket(this.url);
     this.socket = socket;
     await Promise.race([
@@ -66,8 +66,10 @@ class CdpClient {
       for (const pending of this.pending.values()) pending.reject(new Error('cdp_socket_closed'));
       this.pending.clear();
     });
-    await this.send('Runtime.enable');
-    await this.send('Page.enable');
+    // 握手两条命令恒为毫秒级：这里是「target 存在但已失活」时的唯一暴露点——
+    // WS open 由浏览器进程应答即触发，renderer 缺席则永不回包，故必须限时。
+    await this.send('Runtime.enable', {}, { timeoutMs: handshakeTimeoutMs });
+    await this.send('Page.enable', {}, { timeoutMs: handshakeTimeoutMs });
     return this;
   }
 
@@ -77,15 +79,27 @@ class CdpClient {
     this.listeners.set(method, listeners);
   }
 
-  send(method, params = {}) {
+  send(method, params = {}, { timeoutMs = 0 } = {}) {
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
       return Promise.reject(new Error('cdp_socket_not_open'));
     }
     const id = this.nextId++;
-    return new Promise((resolve, reject) => {
+    const pending = new Promise((resolve, reject) => {
       this.pending.set(id, { resolve, reject });
       this.socket.send(JSON.stringify({ id, method, params }));
     });
+    if (!timeoutMs) return pending;
+    // 目标失活（窗口已关/renderer 不在但 WS 仍 OPEN）时 CDP 永不回包：无超时即
+    // 无限挂起。timeoutMs 为调用方自选，默认 0 = 保持既有长等语义不变。
+    let timer;
+    const guard = new Promise((_, reject) => {
+      timer = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new Error(`cdp_command_timeout:${method}:${timeoutMs}ms`));
+      }, timeoutMs);
+      timer.unref?.();
+    });
+    return Promise.race([pending, guard]).finally(() => clearTimeout(timer));
   }
 
   close() {

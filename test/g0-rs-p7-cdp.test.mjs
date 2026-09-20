@@ -3,7 +3,26 @@ import { createRequire } from 'node:module';
 import test from 'node:test';
 
 const require = createRequire(import.meta.url);
-const { createPackagedWindowAdapter, setViewport } = require('../scripts/g0-rs-p7-cdp.cjs');
+const { createPackagedWindowAdapter, setViewport, CdpClient } = require('../scripts/g0-rs-p7-cdp.cjs');
+
+test('CdpClient.send bounds a non-responsive target only when the caller asks', async () => {
+  const client = new CdpClient('ws://127.0.0.1:0/devtools/page/ghost');
+  const sent = [];
+  // 失活目标形态：WS 仍 OPEN（浏览器进程应答），但没有任何 renderer 会回包。
+  client.socket = { readyState: globalThis.WebSocket?.OPEN ?? 1, send: (t) => sent.push(t), close() {} };
+
+  await assert.rejects(
+    client.send('Runtime.enable', {}, { timeoutMs: 5 }),
+    /cdp_command_timeout:Runtime\.enable:5ms/,
+  );
+  assert.equal(sent.length, 1, '命令仍需真实发出，超时只约束等待');
+  assert.equal(client.pending.size, 0, '超时必须撤单，否则迟到响应成孤儿');
+
+  const unbounded = client.send('Page.enable');
+  assert.equal(client.pending.size, 1, '默认无超时=保留既有长等语义（真模型调用等）');
+  client.pending.get(2).resolve({ enabled: true });
+  assert.deepEqual(await unbounded, { enabled: true });
+});
 
 test('P7 packaged window adapter evaluates, navigates, and captures through CDP', async () => {
   const calls = [];
