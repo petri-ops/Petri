@@ -1,6 +1,6 @@
 # BLOCK-107-CONVERSATION-STREAM-UX — 会话信息流呈现时间线化
 
-**状态**：`active（2026-09-20 启动，P0-LAUNCH；用户裁决「按推荐的来」= 采纳 §7 全部推荐项含 D1=c；P0 数据层量化基线已补采见 §0.6，唯余帧时基线待实机采）`
+**状态**：`completed（2026-09-21 收口；2026-09-20 启动 P0-LAUNCH，用户裁决「按推荐的来」= 采纳 §7 全部推荐项含 D1=c；P0→P3 全阶段落地，P3 四条实机腿全绿（历史 5/5、实况 7/7、三宿主面 6/6、长会话分页 7/7），见 §1 P3 与 §5 收口对账；唯余帧时基线未采——属虚拟化候选包前置证据，随本包收口转交该候选包）`
 **立项**：2026-09-20（用户裁决「新开个block优化我们的项目」；同日续接会话裁决「A」=先落 BLOCK-106 收口提交再登记本包，解除 canonical 写入避让）
 **责任轨道**：BLOCK（多工作面：呈现层时间线模型 + 历史/实况双轨合流 + 实机验收，且含「时序真源放哪」的数据契约裁决）
 **前序接口**：BLOCK-106 §2/§7 已把「轮询→SSE」「长列表虚拟化」「`task_events` 数据模型改造」明确列为**独立候选包**（`docs/block-106-startup-performance-ratchet-plan.md:72-74,111`）——本包承接**呈现面**，不承接那三项。
@@ -122,10 +122,10 @@
 
 ## 1. 范围（P0→P3）
 
-- **P0 度量 + 时序真源裁决（先定契约，再动渲染）**：~~采集 §0.6 基线~~ → **已完成（2026-09-20，数字见 §0.6；唯余帧时基线待实机）**；据 §7 D1 裁决结果落定「时间线的真源」；产出「历史 vs 实况呈现一致性」的可判定口径（同一轮对话两条轨道渲染出的片段时间序必须一致）。
+- **P0 度量 + 时序真源裁决（先定契约，再动渲染）**：~~采集 §0.6 基线~~ → **已完成（2026-09-20，数字见 §0.6；唯余帧时基线未采——属虚拟化候选包前置证据，随本包收口转交该候选包）**；据 §7 D1 裁决结果落定「时间线的真源」；产出「历史 vs 实况呈现一致性」的可判定口径（同一轮对话两条轨道渲染出的片段时间序必须一致）。
 - **P1 分段模型 + 交错渲染**：~~把一轮回复建模为有序分段序列（叙述 / 思考 / 工具簇 / 进度 / 结果），按序渲染替换固定模板堆叠；簇头一行化（含失败计数、运行中秒表），运行簇展开、完成簇自动收起；思考行补一行预览。~~ → **已完成（2026-09-20，UI-428）**：分段模型（按 `iteration` 交错）+ 时间线渲染族 + `SimpleChat` 接入 + §5-2 历史/实况一致性机械契约全部落地。**落地差异（如实登记）**：①簇头沿用 `ToolActivityList` 既有摘要条（已含失败「N 项需注意」计数），**独立运行中秒表未做**，留 P2 视觉精修；②「运行簇展开 / 完成簇自动收起」由 `ToolActivityList` 既有行为承载（含 exec 默认展开），未按原文改为「完成即自动收起」；③D5 阶段进度上轴未启用（实测该字段全库仅 1 条，`renderProgress` 回调已留，P2 接入）；④簇头耗时语义由「整轮」改为「本簇」（见 UI-428 语义变化登记）。
 - **P2 历史兼容 + 策略与视觉**：老数据（无 `timeline` 字段的历史 `meta_json`）降级渲染策略按 §7 D2 落地；默认折叠策略 / 动作词与图标统一；随包消化 `SimpleChat.tsx` 体量债（巨型文件台账线，走 `npm run gate:code-size` 登记制）；样式按 `$gewu-css-theme` 规范（海军蓝 token 阶梯 + `theme-token-contract` 门禁）。
-- **P3 实机验收 + 收口**：dev Electron flow 覆盖多轮工具 / 失败重试 / 长会话 / 历史恢复，且**三宿主面**（右栏 chat tab、悬挂把手面、欢迎页）行为一致；UI 台账 verified 需实机证据；canonical 回写 + closeout 八门。 → **进行中（2026-09-20 接手会话）**：**历史恢复腿 PASS 5/5**（新增 flow `block107-timeline-history`，只连自管测试实例 :9223）——真实 dev 库历史会话渲染出 10 条时间线、`iteration` 全非降序交错、**单条消息最多 13 簇**（旧形态恒为 1，此断言只有真交错能过）、20 个消息体零空白；证据 `acceptance/block-107/block107-timeline-history-live.json` + `timeline-history-row1.png`（截图须 `scrollIntoView` 后才拍得到线——面板默认滚在正文末尾，这是本轮踩到并修掉的取证陷阱）。**实况腿 PASS 7/7**（2026-09-21，flow `block107-timeline-live`，真模型轮次）：运行中连续 5 个 800ms 样本命中 `data-state="running"` 簇、4 样本命中秒表（D4 运行中展开实机成立）、`R:1 T:1 R:2 T:2 R:3 T:3 R:4 T:4 R:5` 逐迭代交错、失败簇头「N 项需注意」可见、刷新后逐段同序；逐样本证据 `block107-timeline-live-samples.json`（首轮 L2/L3 标红经逐样本日志定位为采样/提示词形状问题，非产品缺口）。**留待**：三宿主面一致性、长会话分页语义不退化。
+- **P3 实机验收 + 收口**：dev Electron flow 覆盖多轮工具 / 失败重试 / 长会话 / 历史恢复，且**三宿主面**（右栏 chat tab、悬挂把手面、欢迎页）行为一致；UI 台账 verified 需实机证据；canonical 回写 + closeout 八门。 → **实机验收完成（2026-09-21）**：**历史恢复腿 PASS 5/5**（新增 flow `block107-timeline-history`，只连自管测试实例 :9223）——真实 dev 库历史会话渲染出 10 条时间线、`iteration` 全非降序交错、**单条消息最多 13 簇**（旧形态恒为 1，此断言只有真交错能过）、20 个消息体零空白；证据 `acceptance/block-107/block107-timeline-history-live.json` + `timeline-history-row1.png`（截图须 `scrollIntoView` 后才拍得到线——面板默认滚在正文末尾，这是本轮踩到并修掉的取证陷阱）。**实况腿 PASS 7/7**（2026-09-21，flow `block107-timeline-live`，真模型轮次）：运行中连续 5 个 800ms 样本命中 `data-state="running"` 簇、4 样本命中秒表（D4 运行中展开实机成立）、`R:1 T:1 R:2 T:2 R:3 T:3 R:4 T:4 R:5` 逐迭代交错、失败簇头「N 项需注意」可见、刷新后逐段同序；逐样本证据 `block107-timeline-live-samples.json`（首轮 L2/L3 标红经逐样本日志定位为采样/提示词形状问题，非产品缺口）。**三宿主面一致性腿 PASS 6/6**（flow `block107-timeline-hosts`）：中央投影面（`[data-projection="conversation"]`）与悬挂面（`[data-testid="side-chat-surface"]`）对同一会话渲染的时间线 `(kind, iteration)` 序列**逐段相等**（5/5 线全等、最富 14 簇），欢迎页 composer-only 挂载正常且零时间线节点（按设计，UI-341/373）；证据 `block107-timeline-hosts-live.json` + `-scopes.json` + 两图。**长会话分页腿 PASS 7/7**（flow `block107-timeline-long`）：dev 库无消息写端点，测试装置直插 250 条合成消息（`node:sqlite` 单事务）+ REST 建/删会话（结束零残留）——初载恰为最新 200 条（第 51..250 条、`windowOffset=50`）、滚顶自动 loadOlder 补 001..050（全量 250 无重复、视口锚定 `scrollTop≈3472` 不跳）、旧窗口带工具记录的消息补页后出簇（簇 2→6，分页与时间线共存）、刷新后窗口重置回 200 条；证据 `block107-timeline-long-live.json` + `-scopes.json` + 顶窗截图。收口=canonical 回写 + closeout 八门（详见 AUDIT-LOG 2026-09-21 行）。
 
 ## 2. 非范围（红线）
 
@@ -156,6 +156,8 @@
 5. `npm run gate:code-size`：`SimpleChat.tsx` 等改动文件不超台账线（拆分则净减）。
 6. 实机 flow（dev Electron，自管实例）：多轮工具 / 失败重试 / 长会话 / 历史恢复 + 三宿主面行为一致，断言全绿并留截图。
 7. `npm run closeout` 八门全绿 + `docs:check` PASS + UI 台账同提交更新（`UI-###` 编号）。
+
+**收口对账（2026-09-21）**：①定向绿（`conversationSegments` 18/18、`ConversationTimeline` 11/11、`ToolActivityList` 10/10、`SimpleChat` 6/6、`useConversationResume` 6/6、`theme-token-contract` 4/4；`tsc --noEmit` 本包改动文件 0 命中）②一致性契约 2 条绿 ③D2 退化用例绿 + 实机历史会话照常渲染 ④theme 4/4 ⑤`gate:code-size` PASS ⑥四腿：历史 5/5、实况 7/7、三宿主面 6/6、长会话分页 7/7 ⑦closeout 八门全绿 + `docs:check` PASS + UI-428 本提交转 verified。
 
 ## 6. 完成语义
 

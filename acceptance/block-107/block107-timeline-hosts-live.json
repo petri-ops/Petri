@@ -1,0 +1,38 @@
+{
+  "name": "block107-timeline-hosts",
+  "startedAt": "2026-09-20T16:06:25.517Z",
+  "finishedAt": "2026-09-20T16:06:32.127Z",
+  "assertions": [
+    {
+      "name": "H0_conversation_rows_present",
+      "pass": true,
+      "detail": "rows=2 :: 新对话2天 / 新对话6天"
+    },
+    {
+      "name": "H1_center_host_multi_cluster_timeline",
+      "pass": true,
+      "detail": "点选行=2 :: 新对话2天→线0/簇0 / 新对话6天→线5/簇13"
+    },
+    {
+      "name": "H1b_center_timeline_wellformed",
+      "pass": true,
+      "detail": "中央面线数=5 最富=13 簇 失序=0"
+    },
+    {
+      "name": "H2a_side_chat_handle_present",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "H2_dock_matches_center_sequence",
+      "pass": true,
+      "detail": "dockOpen=true 悬挂面线数=5 中央面线数=5 逐段相等=true"
+    },
+    {
+      "name": "H3_welcome_host_composer_only",
+      "pass": true,
+      "detail": "mounted=true 输入框=true chatMount 内时间线=0（composer-only 设计值 0）"
+    }
+  ],
+  "allPass": true
+}

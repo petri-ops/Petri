@@ -1973,6 +1973,25 @@
       "scriptRole": "development-smoke"
     },
     {
+      "id": "block107-conversation-stream-ux",
+      "note": "BLOCK-107 会话信息流时间线化：分段模型（conversationSegments 纯函数 + 历史/实况一致性契约）+ 交错渲染（ConversationTimeline 思考/工具簇/阶段进度按 iteration 上轴，中央与悬挂两面同源）+ D4 折叠策略与运行秒表（ToolActivityList collapseWhenSettled）+ 历史降级（无 timeline 素材退回分组堆叠）。实机四条腿 = dev-verify flows block107-timeline-history/-live/-hosts/-long（其契约由 script-dev-infra 兜 test/dev-verify.test.mjs），证据 acceptance/block-107/。",
+      "patterns": [
+        "frontend/src/components/copilot/conversationSegments.ts",
+        "frontend/src/components/copilot/ConversationTimeline.tsx",
+        "frontend/src/components/copilot/ToolActivityList.tsx",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "acceptance/block-107/**"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/conversationSegments.test.ts",
+        "frontend/src/components/copilot/ConversationTimeline.test.tsx",
+        "frontend/src/components/copilot/ToolActivityList.test.tsx",
+        "frontend/src/components/copilot/SimpleChat.test.tsx"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": false
+    },
+    {
       "id": "block106-task-events-retention",
       "note": "BLOCK-106 P2 数据层规模债与可评审性：task_events 保留清扫（ISO cutoff + created_at 索引，索引由 agent-task-store 模块级 DDL 自持）+ 控制字节吞字面量修复面（file-dialog 文件名安全校验、build.ps1 输出目录）。防复发门禁=hygiene:check 检查项 5。",
       "patterns": [

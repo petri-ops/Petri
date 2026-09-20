@@ -1,0 +1,43 @@
+{
+  "name": "block107-timeline-long",
+  "startedAt": "2026-09-20T16:12:09.432Z",
+  "finishedAt": "2026-09-20T16:12:13.310Z",
+  "assertions": [
+    {
+      "name": "L0a_rest_create_conversation",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"conversation\":{\"id\":\"conv_70647af9-613\",\"title\":\"BLK107长会话合成\",\"status\":\"active\",\"last_page\":null,\"project_id\":\"p_mu174w3u_ncze\",\"message_count\":0,\"created_at\":\"2026-09-20T16:12:09.458Z"
+    },
+    {
+      "name": "L0b_seed_250_rows",
+      "pass": true,
+      "detail": "seeded=250"
+    },
+    {
+      "name": "L0c_rest_latest_window",
+      "pass": true,
+      "detail": "{\"count\":200,\"first\":\"分页合成-051\",\"last\":\"分页合成-250\",\"hasMore\":true,\"nextBefore\":461,\"windowOffset\":50,\"total\":250}"
+    },
+    {
+      "name": "L1_ui_initial_latest_window",
+      "pass": true,
+      "detail": "body=200 first=分页合成-051 last=分页合成-250 含020=false 簇=2 思考=1 运行中=0"
+    },
+    {
+      "name": "L2_ui_load_older_prepend",
+      "pass": true,
+      "detail": "body=250 first=分页合成-001 last=分页合成-250 唯一=250 簇=6 思考=3 scrollTop=3472"
+    },
+    {
+      "name": "L3_ui_reload_window_reset",
+      "pass": true,
+      "detail": "body=200 first=分页合成-051 last=分页合成-250 簇=2"
+    },
+    {
+      "name": "L4_cleanup_deleted",
+      "pass": true,
+      "detail": "{\"status\":\"ok\"}"
+    }
+  ],
+  "allPass": true
+}

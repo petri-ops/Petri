@@ -1,0 +1,55 @@
+{
+  "project": "p_mu174w3u_ncze",
+  "convTitle": "BLK107长会话合成",
+  "convId": "conv_70647af9-613",
+  "messageCount": 250,
+  "windowSize": 200,
+  "restWindow": {
+    "count": 200,
+    "first": "分页合成-051",
+    "last": "分页合成-250",
+    "hasMore": true,
+    "nextBefore": 461,
+    "windowOffset": 50,
+    "total": 250
+  },
+  "ui": {
+    "initial": {
+      "bodyCount": 200,
+      "first": "分页合成-051",
+      "last": "分页合成-250",
+      "clusters": 2,
+      "reasoningNodes": 1,
+      "runningClusters": 0,
+      "scrollTop": 12179,
+      "scrollHeight": 13005,
+      "markerCount": 200,
+      "uniqueMarkers": 200
+    },
+    "afterLoadOlder": {
+      "bodyCount": 250,
+      "first": "分页合成-001",
+      "last": "分页合成-250",
+      "clusters": 6,
+      "reasoningNodes": 3,
+      "runningClusters": 0,
+      "scrollTop": 3472,
+      "scrollHeight": 16477,
+      "markerCount": 250,
+      "uniqueMarkers": 250
+    },
+    "afterReload": {
+      "bodyCount": 200,
+      "first": "分页合成-051",
+      "last": "分页合成-250",
+      "clusters": 2,
+      "reasoningNodes": 1,
+      "runningClusters": 0,
+      "scrollTop": 12179,
+      "scrollHeight": 13005,
+      "markerCount": 200,
+      "uniqueMarkers": 200
+    }
+  },
+  "cleanupDeleted": true
+}
