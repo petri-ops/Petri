@@ -6,6 +6,8 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   resolve: {
+    // 同 vite.config.ts：共享包（frontend 之外）必须与 frontend 用同一份 React
+    dedupe: ['react', 'react-dom'],
     alias: {
       '@': path.resolve(__dirname, './src'),
     },

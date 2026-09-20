@@ -32,8 +32,12 @@ function scatterPointerPosition(svg: SVGSVGElement, clientX: number, clientY: nu
     const point = svg.createSVGPoint();
     point.x = clientX;
     point.y = clientY;
-    const local = point.matrixTransform(matrix.inverse());
-    return { x: local.x, y: local.y };
+    // 部分运行环境（测试用 happy-dom ≥20）只提供 getScreenCTM/createSVGPoint，
+    // 返回点缺 matrixTransform——缺则回退到 getBoundingClientRect 等比换算，避免整块交互崩掉。
+    if (typeof point.matrixTransform === 'function') {
+      const local = point.matrixTransform(matrix.inverse());
+      return { x: local.x, y: local.y };
+    }
   }
   const box = svg.getBoundingClientRect();
   return {

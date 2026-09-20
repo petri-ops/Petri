@@ -158,6 +158,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe('ReviewMode BLOCK-41（暂存两栏 / 写操作 / 分支切换 / push-pull）', () => {
@@ -234,7 +235,9 @@ describe('ReviewMode BLOCK-41（暂存两栏 / 写操作 / 分支切换 / push-p
   it('branch switch select confirms and calls checkoutBranch on success', async () => {
     const checkoutBranch = vi.fn(() => Promise.resolve({ ok: true, data: { branch: 'feature/x', switched: true } }));
     getBridgeMock.mockReturnValue(makeBridge({ checkoutBranch }));
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    // happy-dom 未实现 window.confirm；vitest 5 起 spyOn 不再允许代理 undefined 属性 → 用 stubGlobal
+    const confirmSpy = vi.fn(() => true);
+    vi.stubGlobal('confirm', confirmSpy);
 
     renderReview();
 
@@ -260,7 +263,7 @@ describe('ReviewMode BLOCK-41（暂存两栏 / 写操作 / 分支切换 / push-p
       })
     );
     getBridgeMock.mockReturnValue(makeBridge({ checkoutBranch }));
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.stubGlobal('confirm', vi.fn(() => true));
 
     renderReview();
 

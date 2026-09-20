@@ -164,6 +164,9 @@ export default defineConfig({
   // 分仓后 frontend/ 在 desktop/frontend/（一层深），只需往上一层到 desktop/
   publicDir: path.resolve(__dirname, '..', 'static'),
   resolve: {
+    // 单实例 React：core/packages/shared-copilot 位于 frontend 之外，Vite 8 按文件位置
+    // 解析会命中仓库根 node_modules 的 react 副本（双实例 → hooks dispatcher null）。
+    dedupe: ['react', 'react-dom'],
     alias: {
       '@': path.resolve(__dirname, 'src'),
       // docs mdx 里 import '@site/src/components/DownloadButton' 等
