@@ -1,6 +1,6 @@
 # BLOCK-104-PLATFORM-TEST-GOVERNANCE — 平台与测试确定性治理
 
-**状态**：`active（2026-09-20 用户裁决「要治 全方位的治理」立项即启动；上下文=用户问「Windows/Mac 部署代码是否有明确区分还是会冲突」+ 本会话平台现状评估 + 全量套件确定性/并发双缺陷实锤）`
+**状态**：`completed（2026-09-20 立项即启动当日 P0→P5 一次会话整包收口；用户裁决「要治 全方位的治理」；closeout 五门全绿）`
 **立项**：2026-09-20（平台四类冲突证据 + 单文件隔离复跑实验 + BLOCK-102 🔴 争议数据）
 
 ## 0. 问题定义（证据）
@@ -64,3 +64,11 @@
 ## 6. 运行记录
 
 - 2026-09-20 立项即启动（P0-LAUNCH）：单文件隔离实验已完成 5/5（block48 纯互踩 / window-controls·routes-harness·ide-diff·agent-concurrency 确定性红），P0 全量矩阵起串行。
+
+## 6. 运行记录（收口补记）
+
+- **P1-P4 实施 completed（c932a79f + 2d99c3b0）**：§2 矩阵 A-J 簇全绿（21 测试文件修复 + 1 产品语法缺陷修复 + 1 僵尸测试删除 + 环境门 skip 可见 + scripts-platform-contract 机械门禁 3/3 + 8 个 .sh 诚实平台标注）。
+- **P5 全量基线重采 completed**：`npm run test:all`（加固旗标直采）——**EXIT=1：199 红 → 26 红全部落在 §2 K 簇待归因名单 + block63-sidecar-tools 1 并发 flake（单跑绿）**，pass 2238；剩余红=「创建即红/后续包漂移未对齐」的历史存量（非本包回归，单跑数据在 /tmp/mx-*.log）。前端套件 1146/1146（BLOCK-103 会话证据，本包零前端改动）。**closeout 聚合 5/5 全绿**（hygiene/docs/ui-audit/test:changed/code-size——test:changed 对本包全部编辑文件绿）。
+- **对账遗留（如实登记）**：f238c600「独占 exit 0」与本包 33/36 确定性红数据不可同真——按治理纪律不采信无计数佐证的退出码声明，本包 §2 矩阵为准；K 簇 12 文件待归因转 🟡 候选池（AUDIT-LOG 在册）。
+- 抓真 3 件：①agent-fallback.js 语法缺陷（BLOCK-102 P4 引入的产品真缺陷，require 即炸降级链路）；②requires.cache 反斜杠键 vs 正斜杠 includes（stub 泄漏）；③hle 环境门探测须到 plugins 叶子（仓库目录存在但内容不全）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -1,9 +1,9 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-20（**BLOCK-104-PLATFORM-TEST-GOVERNANCE 立项即启动 active（P0 归因矩阵；用户裁决「要治 全方位的治理」）**：上下文=用户「Windows/Mac 代码是否有明确区分还是会冲突」平台问询——评估结论=架构层有分区（platform-compat/双 sidecar/builder 分段）但散落分支 74 文件 Windows-first 3:1、.sh 仅 1/8 有守卫、测试层无平台门；单文件隔离实验实锤确定性红（window-controls 2/17、routes-harness 0/19、ide-diff 1/10）与并发互踩（block48 单跑全绿）两类并存，与 BLOCK-102 f238c600 销号声明矛盾如实登记按数据收敛。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-20（**BLOCK-104-PLATFORM-TEST-GOVERNANCE 整包收口 completed（P0→P5 一次会话；closeout 五门绿）**：平台与测试确定性治理——归因矩阵实锤 33/36 确定性红并驱动四簇修复（产品语法缺陷 1/路径反模式 10 处/化石库迁移家法×5/源码抓取耐漂移/EPERM/行数帽/环境门 skip 可可见/scripts 双端同形门），全量基线 **199 红→26 红全部在册**，绿 2238；K 簇 12 文件待归因转 🟡 候选池。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
-- **active（2026-09-20 立项即启动，用户裁决「要治 全方位的治理」）：`BLOCK-104-PLATFORM-TEST-GOVERNANCE`**（plan `docs/block-104-platform-test-governance-plan.md`）：**平台与测试确定性治理**——平台评估四类冲突（8 个 .sh 仅 1 个有 uname 守卫/`D:\D:\` 路径缺陷/window-controls 源码抓取契约单跑 15 红/block48 单跑绿=并发互踩实锤）+ 与 BLOCK-102 销号声明矛盾按数据收敛；六阶段 P0 归因矩阵（199 红逐一单跑四分类）→ P1 确定性修复 → P2 互踩治理（block88-project-grants mock 护栏收编）→ P3 平台/环境门（skip 可见）→ P4 scripts 双端同形门+冻结登记门禁 → P5 真 exit 0 基线+收口。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- **已收口（2026-09-20 立项即启动当日 P0→P5 一次会话整包 completed，closeout 五门绿）：`BLOCK-104-PLATFORM-TEST-GOVERNANCE`**（plan `docs/block-104-platform-test-governance-plan.md` §2/§6）：**平台与测试确定性治理**——P0 归因矩阵实锤 33/36 确定性红；修复=产品语法缺陷 1（agent-fallback 注释吞括号，BLOCK-102 P4 引入）+URL pathname 反模式 10 处+化石 biof3.db 迁移家法×5+window-controls 源码抓取耐漂移+EPERM 清理+行数帽棘轮+brand/端点表对账；环境/平台门 skip 可见（block48 sidecar/hle 外部仓/p4r SIGTERM/deepseek retry 层）；scripts 双端同形机械门禁+8 脚本诚实标注；僵尸测试删除 1。**全量基线 199 红→26 红全部在册待归因**（K 簇 🟡 候选池），绿 2238。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 
 - **已收口（2026-09-19 立项即启动当日 P0→P5 一次会话整包 completed，台账 UI-426 verified）：`BLOCK-103-KNOWLEDGE-SPACE-UX`**（plan `docs/block-103-knowledge-space-ux-plan.md` §8）：**知识空间页产品化重设计（布局与内容）**——七条产品问题收敛：状态条统一三重头部（切换器+真 switch+就绪/摄取中/失败徽章）+通知动作卡组（缺 key 附「去设置」）+双页签「文档库/检索预览」+hero 大 dropzone 空态+管理会话台折叠抽屉（对标 UI-417，默认收起 localStorage 记忆）+组件拆分 678→200+506+121+95+文案产品化；纯前端零后端，行为基线八项保留；门禁=组件 17/17+tsc 0+theme 4/4+前端全量 1146/1146+block103 实机 12/12（截图×3）+block99 回归 24/24（真轮次）。G0 开发期常态 · 不外推 packaged/Provider/GA。
