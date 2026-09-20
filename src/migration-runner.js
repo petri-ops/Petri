@@ -1,7 +1,8 @@
 // M1-4 数据 migration runner（H3）
 // 桌面版启动时自动跑未应用的 SQLite migration，防升级 schema 错乱。
 //
-// migration 文件放 desktop-app/migrations/*.sql，命名 NNN_description.sql。
+// migration 文件放 src/migrations/*.sql，命名 NNN_description.sql（主进程 src/main.js 以
+// path.join(__dirname, "migrations") 传入本 runner；顶层 migrations/ 空目录是历史占位，不放文件）。
 // 已应用版本记录在 schema_migrations 表（version INTEGER + applied_at TEXT）。
 //
 // 注意：遵循 Global Constraints，不用 INSERT OR REPLACE / PRAGMA / AUTOINCREMENT。

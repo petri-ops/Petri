@@ -89,7 +89,7 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 
 ## 保持工作区干净
 
-- `npm run hygiene:check` 报告死符号链接、临时残留与**工作区换行漂移**；它只报告不代删，处置由人裁决（换行归一用 `scripts/normalize-eol.mjs --write`）。
+- `npm run hygiene:check` 报告死符号链接、临时残留、**工作区换行漂移**与**符号链接检出退化**（索引 mode 120000 但工作区是普通文件——Windows `core.symlinks=false` 的产物，宿主按目录加载不到即静默失效）；它只报告不代删，处置由人裁决（换行归一用 `scripts/normalize-eol.mjs --write`；桥退化用 `git config core.symlinks true` + `git rm -r --cached <桥目录> && git checkout -- <桥目录>`）。
 - 未跟踪的在制文件是别的包的 WIP 时只列出，绝不清理、绝不误入本包提交。
 
 ## 编写产品 Skill（resources/skills/）

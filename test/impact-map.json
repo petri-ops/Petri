@@ -625,6 +625,7 @@
       "patterns": [
         "scripts/lib/gate-report-schema.mjs",
         "scripts/docs-governance.mjs",
+        "scripts/audit-log-compact.mjs",
         "scripts/check-*.mjs",
         "scripts/test-affected.mjs",
         "scripts/verify-schema.js"

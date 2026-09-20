@@ -26,7 +26,6 @@ const ARCHIVE_DIR = path.join(ROOT, 'docs', 'archive', 'checkpoints');
 
 const KEEP_TAIL_ROWS = 5; // 无论包名，永远保留最新的 N 条
 const RECORDS_HEAD = '## 最近处理记录';
-const PENDING_HEAD = '## 当前待处理项';
 const RULES_HEAD = '## 广播规则';
 
 const raw = fs.readFileSync(LEDGER, 'utf8');
@@ -42,7 +41,6 @@ if (idxRecords < 0 || idxRules < 0) {
 
 const head = lines.slice(0, idxRecords);
 const records = lines.slice(idxRecords, idxRules);
-const rules = lines.slice(idxRules);
 
 // ── 解析记录行：| ✅ … | … | … | PKG / PHASE | ──
 const rows = []; // { line, pkg }
@@ -117,8 +115,6 @@ const archiveNote = [
 fs.appendFileSync(archivePath, archiveNote + cutLines.join('\n') + '\n', 'utf8');
 
 // ── 重写活跃台 ──
-const next = head.concat([RECORDS_HEAD], keptLines, rules.slice(idxRules - idxRules));
-// 注意：rules 数组相对索引 0 = RULES_HEAD 行，直接拼接
 const outLines = head.concat([RECORDS_HEAD], keptLines, lines.slice(idxRules));
 fs.writeFileSync(LEDGER, outLines.join('\n'), 'utf8');
 

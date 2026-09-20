@@ -24,6 +24,18 @@
  *      归一：`node .agents/skills/gewu-dev-infra/scripts/normalize-eol.mjs --write`
  *      （只改写换行字节、内容语义不变；工具会自动刷新索引 stat 缓存，避免归一后出现
  *      一批 `git status` 假 `M` 而 `git diff` 为空）。
+ *   4) 符号链接检出退化：索引 mode 120000 但工作区落成了普通文件
+ *      （Windows Git 默认 `core.symlinks=false` 的检出形态）。
+ *      **为什么算失败**：退化形态下文件内容就是目标路径，目标存在时检查项 1 判它「可解析」
+ *      而放行，但对宿主运行时它不是目录——Agent skill 发现桥（`.claude/skills/`、
+ *      `.codebuddy/skills/`）静默失效，`use_skill <name>` 报 not found 且无任何报错线索
+ *      （2026-09-20 实测：8 个桥里 7 个是纯文本，全链路绿灯通过）。
+ *      修复：`git config core.symlinks true` 后 `git rm -r --cached <桥目录>`
+ *      + `git checkout -- <桥目录>`。
+ *      本机确实无法创建 symlink（未开开发者模式/无权限）时可用
+ *      `BIOF3_HYGIENE_ALLOW_FLATTENED_SYMLINKS=1` 降级为信息级——但对应宿主功能确实不可用，
+ *      必须如实告知用户而不是静默绕过。
+ *
  *
  * 信息级（不影响退出码，只列出）：
  *   - 其余 untracked 文件/目录：可能是 active 工作包 WIP，只列出、绝不判定失败。
@@ -103,6 +115,29 @@ function collectDeadSymlinks() {
   return dead;
 }
 
+/**
+ * 桥退化检测：索引记为 symlink（mode 120000）但工作区不是真符号链接。
+ * 与检查项 1 的分工：1 判「目标能否解析」，本项判「形态是否退化」——
+ * 退化形态目标可解析，所以 1 放行而宿主功能实际不可用。
+ */
+function collectFlattenedSymlinks() {
+  const out = runGit(['ls-files', '-s']);
+  const flat = [];
+  for (const line of out.split('\n')) {
+    const m = line.match(/^(\d{6})\s+[0-9a-f]+\s+\d+\t(.+)$/);
+    if (!m || m[1] !== '120000') continue;
+    const rel = m[2];
+    let isLink = true;
+    try {
+      isLink = fs.lstatSync(path.join(ROOT, rel)).isSymbolicLink();
+    } catch {
+      continue; // 文件缺失由检查项 1 覆盖
+    }
+    if (!isLink) flat.push(rel);
+  }
+  return flat;
+}
+
 function collectUntracked() {
   const out = runGit(['ls-files', '--others', '--exclude-standard', '-z']);
   return out.split('\0').filter(Boolean);
@@ -134,10 +169,12 @@ function main() {
   let deadLinks;
   let untracked;
   let eolDrift;
+  let flattened;
   try {
     deadLinks = collectDeadSymlinks();
     untracked = collectUntracked();
     eolDrift = collectEolDrift();
+    flattened = collectFlattenedSymlinks();
   } catch (e) {
     console.error(`[hygiene] 自身运行错误: ${e.message}`);
     process.exit(2);
@@ -176,6 +213,21 @@ function main() {
     console.log('   归一：node .agents/skills/gewu-dev-infra/scripts/normalize-eol.mjs --write');
   } else {
     console.log('✅ 工作区换行漂移：无');
+  }
+
+  const allowFlattened = process.env.BIOF3_HYGIENE_ALLOW_FLATTENED_SYMLINKS === '1';
+  if (flattened.length && !allowFlattened) {
+    failed = true;
+    console.log('\n❌ 符号链接检出退化（索引 mode 120000，工作区是普通文件；宿主按目录加载不到 → 静默失效）:');
+    for (const p of flattened) console.log(`   ${p}`);
+    console.log('   修复：git config core.symlinks true && git rm -r --cached <所在目录> && git checkout -- <所在目录>');
+    console.log('   （Windows 需开开发者模式或管理员权限检出；确无 symlink 能力时');
+    console.log('    BIOF3_HYGIENE_ALLOW_FLATTENED_SYMLINKS=1 降级为信息级，但须如实告知对应功能不可用）');
+  } else if (flattened.length) {
+    console.log(`\nℹ️  符号链接检出退化: ${flattened.length} 项（BIOF3_HYGIENE_ALLOW_FLATTENED_SYMLINKS=1 已降级，对应宿主功能不可用）`);
+    for (const p of flattened.slice(0, 30)) console.log(`   ${p}`);
+  } else {
+    console.log('✅ 符号链接检出形态：全部为真 symlink');
   }
 
   if (wip.length) {

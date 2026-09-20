@@ -32,12 +32,12 @@ Gewu Desktop（格物，原名 BioF3）= Electron 桌面应用 + Vite SPA 前端
 
 ## 技术栈
 
-| 层级  | 技术                           | 入口文件                |
-| --- | ---------------------------- | ------------------- |
-| 桌面壳 | Electron                     | `src/main.js`       |
-| 前端  | React 18 + Vite + TypeScript | `frontend/src/`     |
-| 工具  | MCP Server                   | `src/mcp-server.js` |
-| 数据库 | better-sqlite3               | `src/`              |
+| 层级   | 技术                           | 入口文件                                                       |
+| ------ | ---------------------------- | ---------------------------------------------------------- |
+| 桌面壳  | Electron                     | `src/main.js`（装配入口，实拆于 `src/main/` + `src/ipc/`）       |
+| 前端   | React 18 + Vite + TypeScript | `frontend/src/`                                            |
+| 工具   | MCP Server                   | `src/mcp-server.js`（仅 stdio 壳）→ 工具真实注册在 `core/biof3-server/mcp/registry.js` + `core/biof3-server/agent-tools/` |
+| 数据库  | better-sqlite3               | 桌面侧 `src/database/` + 迁移 `src/migrations/`；后端侧 `core/biof3-server/db/` |
 
 ## 开发命令
 
@@ -74,7 +74,7 @@ npm run quality:baseline # P0 四项体检基线重扫（Knip/jscpd/audit/密钥
 
 # 开发基础设施（BLOCK-71）
 npm run state        # 会话状态一键恢复：分支/WIP/AUDIT-LOG 未决项/active 工作包
-npm run hygiene:check   # 工作区卫生：死符号链接 + 临时残留（只报告不代删）
+npm run hygiene:check   # 工作区卫生：死符号链接 + 临时残留 + 换行漂移 + 符号链接检出退化（只报告不代删）
 npm run closeout     # 收口门禁聚合（fail-fast）：hygiene → docs → ui-audit → test:changed → gate:code-size → quality:secret → quality:arch → quality:lint（八门）
 npm run verify -- <flow> # dev-verify 实机校验 flow（--list 查清单；前置 dev 栈在跑）
 npm run skills:check    # 产品 Skill 契约校验（resources/skills/）
@@ -86,28 +86,30 @@ npm run skills:check    # 产品 Skill 契约校验（resources/skills/）
 
 ```
 desktop/
-├── src/                    # Electron 主进程
-│   ├── main.js            # 主进程入口 (61KB)
-│   ├── preload.js         # 预加载脚本
-│   ├── plugin-manager.js  # 插件管理器 (47KB)
-│   └── mcp-server.js      # MCP 服务端
-├── frontend/src/           # 渲染进程
-│   ├── pages/            # 路由页面
-│   │   ├── single-cell/  # 单细胞分析
-│   │   ├── spatial/       # 空间转录组
-│   │   ├── figcode/       # 可交互图表
-│   │   └── admin/         # 管理面板
-│   ├── components/       # React 组件
-│   │   ├── copilot/       # AI Copilot
-│   │   ├── desktop/       # 桌面特有
-│   │   └── ui/            # 通用 UI
+├── src/                    # Electron 主进程（72 个 .js）
+│   ├── main.js            # 装配入口（686 行；历史巨型文件已拆分，勿按 61KB 旧账理解）
+│   ├── main/              # 主进程职责模块（窗口/后端进程/插件加载/品牌/CSP…17 文件）
+│   ├── ipc/               # IPC handler 按域拆分（20 文件）+ channels.js = 通道唯一注册表
+│   ├── preload.js         # 预加载脚本（自包含字面量，不 require 本地模块）
+│   ├── migrations/        # 桌面侧 SQLite 迁移（NNN_*.sql，由 migration-runner.js 应用）
+│   ├── database/          # 桌面侧库访问（如 result-db.js）
+│   ├── plugin-manager.js  # 插件管理器（562 行，生命周期见 src/main/_plugin-loader.js）
+│   └── mcp-server.js      # MCP stdio 壳（协议层，工具实体在 core 侧 registry）
+├── frontend/src/           # 渲染进程（84k 行 TS/TSX）
+│   ├── pages/            # 路由页面：home / knowledge / plugins / project-workspace /
+│   │                     #   result-studio / settings / skills / window（+ review.tsx 等顶层页）
+│   ├── components/       # React 组件（162 个 .tsx）：copilot / desktop / workspace-panels /
+│   │                     #   knowledge / result-studio / window / ui / editor / settings / …
 │   ├── hooks/             # React Hooks
 │   ├── lib/               # 工具函数
 │   │   └── desktopBridge.ts  # IPC 桥接
 │   └── themes/            # 主题系统
-├── test/                   # Electron 测试
-└── core/                   # 核心后端（仓库内，已内联；biof3-server/py-server/shared-backend）
+├── test/                   # Node 侧测试（317 个 .test.mjs，前端测试住在 frontend/src 同目录）
+└── core/                   # 核心后端（仓库内，已内联）：biof3-server / shared-backend / packages
 ```
+
+> 路由实际注册在 `frontend/src/App.tsx`（主窗）与窗口面路由；新增页面以该文件为准，不要按已删除的
+> 单细胞/空间转录组/figcode/admin 旧结构假设目录存在——分析能力现由插件与 Result Studio 承载。
 
 > 架构去耦（2026-07）：core 已从 vendor submodule 内联；OSS/PostgreSQL/docker 双模式已移除，
 > 现为「本地文件存储 + SQLite + 内嵌运行时本地执行」。详见 `docs/dependency-decoupling-checkpoint.md`。
@@ -116,9 +118,10 @@ desktop/
 
 1. **前端使用 TypeScript strict 模式**
 2. **Electron IPC 调用必须通过** **`lib/desktopBridge.ts`**
-3. **MCP 工具在** **`src/mcp-server.js`** **注册**
+3. **MCP 工具的真实注册处是** **`core/biof3-server/mcp/registry.js`**（`listTools()` / `callTool()` 单入口）与 **`core/biof3-server/agent-tools/`**（`tool-defs.js` + `registry.js`）；`src/mcp-server.js` 只是 stdio 协议壳，不得在壳内声明工具
 4. **状态管理：React useState + 自定义 hooks，禁止使用 zustand**
 5. **路由页面在** **`pages/`** **下，非页面组件用** **`_`** **前缀**
+6. **新增 IPC 通道先在** **`src/ipc/channels.js`** **登记**（通道唯一注册表），再在 `preload.js` 增同名包装；`preload.js` 必须保持自包含字面量（sandbox 进程不能 require 本地模块），两侧漂移由 `test/ipc-channels-registry.test.mjs` 双向守护
 
 ## AI 行为指引
 
@@ -168,7 +171,7 @@ desktop/
 
 - 新建页面/组件、写样式、暗色模式与主题色工作、排查「颜色不一致」反馈，或评审涉及 CSS 的 diff 时，使用 `$gewu-css-theme`（canonical：[`.agents/skills/gewu-css-theme/SKILL.md`](.agents/skills/gewu-css-theme/SKILL.md)，UI-392/393 沉淀；海军蓝 token 阶梯 + 禁零定义/禁 slate 字面量 + infima 特异性战争规则 + 页头标准件；机械化门禁=theme-token-contract.test.ts，写样式后必跑）。
 
-- **Agent Skill 发现桥（canonical 只在 `.agents/skills/`，禁止第二份副本）**：各宿主的项目级 skill 目录用**同名相对符号链接**指向 `.agents/skills/<name>`——`.claude/skills/`（Claude Code）、`.codebuddy/skills/`（CodeBuddy）；两者均已入库随仓库分发。新增、改名或删除 Agent skill 时必须同步补齐全部发现桥，否则对应宿主静默发现不到（`use_skill <name>` 报 not found）。`.codebuddy/` 下除 `skills/` 外的运行时数据由 `.gitignore` 排除。
+- **Agent Skill 发现桥（canonical 只在 `.agents/skills/`，禁止第二份副本）**：各宿主的项目级 skill 目录用**同名相对符号链接**指向 `.agents/skills/<name>`——`.claude/skills/`（Claude Code）、`.codebuddy/skills/`（CodeBuddy）；两者均已入库随仓库分发。新增、改名或删除 Agent skill 时必须同步补齐全部发现桥，否则对应宿主静默发现不到（`use_skill <name>` 报 not found）。`.codebuddy/` 下除 `skills/` 外的运行时数据由 `.gitignore` 排除。**Windows 前提**：Git 默认 `core.symlinks=false` 会把桥检出为纯文本文件（内容为目标路径），宿主按目录加载不到 → 静默 `not found`；该形态目标可解析所以死链检查放行，退化由 `hygiene:check` 检查项 4 兜住（2026-09-20 实测 8 桥 7 文本时全链绿灯）。克隆后首件事：`git config core.symlinks true` → `git rm -r --cached .claude/skills .codebuddy/skills && git checkout -- .claude/skills .codebuddy/skills` → `npm run hygiene:check` 须报「全部为真 symlink」。
 
 - 项目当前文档从 [`docs/README.md`](docs/README.md) 进入；完整规则见 [`docs/document-governance.md`](docs/document-governance.md)，机器目录见 [`docs/DOC-REGISTRY.json`](docs/DOC-REGISTRY.json)。
 
@@ -210,17 +213,23 @@ desktop/
 
 ### 修改大型文件前
 
-- `main.js` (61KB) — 先理解 Electron 进程模型和 window 管理
+- `frontend/src/components/copilot/SimpleChat.tsx`（1664 行）— 聊天主链，改前先读 `conversationRunStore` 语义
 
-- `plugin-manager.js` (47KB) — 理解插件生命周期
+- `frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx`（1310 行）与 `pages/project-workspace.tsx`（1170 行）— 工作区/评审投影
+
+- `src/main.js`（686 行，装配入口）— 进程模型与 window 管理已拆到 `src/main/`（窗口/后端进程/插件加载）与 `src/ipc/`（按域 handler），改行为通常落在子模块而非入口
+
+- `src/ipc/working-tree-review.js`（633 行）/ `src/ipc/window-manager.js`（623 行）/ `src/plugin-manager.js`（562 行，生命周期见 `src/main/_plugin-loader.js`）
+
+- 体积由 `npm run gate:code-size`（`scripts/code-size-ledger.mjs`）机械守护，超标走台账登记而非临时放宽
 
 ### 新增功能检查清单
 
 - [ ] 前端路由/页面 → 在 `frontend/src/pages/` 下创建
 
-- [ ] Electron IPC → 通过 `preload.js` 暴露接口
+- [ ] Electron IPC → 先在 `src/ipc/channels.js` 登记通道，`src/ipc/` 加 handler，`preload.js` 加包装，前端只经 `desktopBridge`
 
-- [ ] MCP 工具 → 更新 `src/mcp-server.js` 的 tool definitions
+- [ ] MCP 工具 → 在 `core/biof3-server/mcp/registry.js` / `core/biof3-server/agent-tools/` 登记定义与执行
 
 - [ ] 类型定义 → 在 `frontend/src/` 下创建 `*.types.ts`
 
@@ -250,7 +259,7 @@ desktop/
 
 - `frontend/src/lib/desktopBridge.ts` — IPC 通信封装
 
-- `src/mcp-server.js` — MCP 工具定义
+- `core/biof3-server/mcp/registry.js` — MCP 工具注册与执行单入口（`src/mcp-server.js` 仅 stdio 壳）
 
 - `frontend/src/App.tsx` — 应用入口
 
