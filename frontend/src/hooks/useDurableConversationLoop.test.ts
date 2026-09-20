@@ -110,10 +110,11 @@ describe('useDurableConversationLoop', () => {
   });
 
   it('clears stale state when no conversation is selected', async () => {
+    const initialProps: { conversationId: string | null } = { conversationId: 'conversation-1' };
     const { result, rerender } = renderHook(
-      ({ conversationId }) =>
+      ({ conversationId }: { conversationId: string | null }) =>
         useDurableConversationLoop('project-1', conversationId),
-      { initialProps: { conversationId: 'conversation-1' } },
+      { initialProps },
     );
     await waitFor(() => expect(result.current.loading).toBe(false));
     act(() => rerender({ conversationId: null }));

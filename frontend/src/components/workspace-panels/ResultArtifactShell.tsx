@@ -103,6 +103,15 @@ import type {
   JobDetailMeta,
 } from './ResultView/types';
 
+// 预览可用性状态：字面量联合在条件表达式的对象字面量分支里会被拓宽成 string，
+// 故与载荷一起显式声明类型（同一联合此前在 useState 内联拼写）。
+type PreviewAvailabilityStatus = 'checking' | 'available' | 'unavailable';
+type PreviewAvailability = {
+  key: string;
+  status: PreviewAvailabilityStatus;
+  reason: string | null;
+};
+
 export function ResultArtifactShell({
   project,
   conversationId,
@@ -180,11 +189,11 @@ export function ResultArtifactShell({
   const [previewData, setPreviewData] = useState<string[][] | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewRetryVersion, setPreviewRetryVersion] = useState(0);
-  const [previewAvailability, setPreviewAvailability] = useState<{
-    key: string;
-    status: 'checking' | 'available' | 'unavailable';
-    reason: string | null;
-  }>({ key: '', status: 'checking', reason: null });
+  const [previewAvailability, setPreviewAvailability] = useState<PreviewAvailability>({
+    key: '',
+    status: 'checking',
+    reason: null,
+  });
   // RS3：交互清单由后端基于完整文件判定（稳定 ID 列、可选维度），前端只消费。
   // P4R-4: a historical Revision can share its Job with a later restored
   // Revision. Keep the clicked identity as disposable view state and pass it
@@ -572,7 +581,7 @@ export function ResultArtifactShell({
   const requiresPreviewAvailabilityCheck = activeIsPreviewText
     || viewerAdapter === 'image';
   const previewAvailabilityKey = `${viewedRevision?.revisionId || 'current'}::${job?.id || ''}::${selectedArtifactName}::${selectedArtifactUrl}`;
-  const effectivePreviewAvailability = previewAvailability.key === previewAvailabilityKey
+  const effectivePreviewAvailability: PreviewAvailability = previewAvailability.key === previewAvailabilityKey
     ? previewAvailability
     : {
         key: previewAvailabilityKey,

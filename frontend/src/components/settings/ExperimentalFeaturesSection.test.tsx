@@ -83,14 +83,14 @@ describe('ExperimentalFeaturesSection', () => {
 
   it('defaults the toggle to off when no bridge and no localStorage exist', () => {
     render(<ExperimentalFeaturesSection />);
-    const toggle = screen.getByRole('switch', { name: EXTRA_RENDERERS_LABEL });
+    const toggle = screen.getByRole<HTMLInputElement>('switch', { name: EXTRA_RENDERERS_LABEL });
     expect(toggle.checked).toBe(false);
   });
 
   it('falls back to localStorage when the bridge is absent', () => {
     window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, 'true');
     render(<ExperimentalFeaturesSection />);
-    const toggle = screen.getByRole('switch', { name: EXTRA_RENDERERS_LABEL });
+    const toggle = screen.getByRole<HTMLInputElement>('switch', { name: EXTRA_RENDERERS_LABEL });
     expect(toggle.checked).toBe(true);
   });
 
@@ -99,7 +99,7 @@ describe('ExperimentalFeaturesSection', () => {
     const { bridge } = makeBridge(false, { ok: true, extraRenderers: false });
     (window as { biof3?: unknown }).biof3 = { agentWorkbenchFlags: bridge };
     render(<ExperimentalFeaturesSection bridge={bridge} />);
-    const toggle = screen.getByRole('switch', { name: EXTRA_RENDERERS_LABEL });
+    const toggle = screen.getByRole<HTMLInputElement>('switch', { name: EXTRA_RENDERERS_LABEL });
     expect(toggle.checked).toBe(false);
   });
 
@@ -109,7 +109,7 @@ describe('ExperimentalFeaturesSection', () => {
     window.addEventListener('storage', onStorage);
     render(<ExperimentalFeaturesSection bridge={bridge} />);
 
-    const toggle = screen.getByRole('switch', { name: EXTRA_RENDERERS_LABEL });
+    const toggle = screen.getByRole<HTMLInputElement>('switch', { name: EXTRA_RENDERERS_LABEL });
     fireEvent.click(toggle);
     // Wait for the async bridge.set() promise to resolve before assertions.
     await vi.waitFor(() => {
@@ -128,7 +128,7 @@ describe('ExperimentalFeaturesSection', () => {
     const { bridge, setSpy } = makeBridge(false, { ok: true, extraRenderers: true });
     render(<ExperimentalFeaturesSection bridge={bridge} />);
 
-    const toggle = screen.getByRole('switch', { name: EXTRA_RENDERERS_LABEL });
+    const toggle = screen.getByRole<HTMLInputElement>('switch', { name: EXTRA_RENDERERS_LABEL });
     fireEvent.click(toggle);
     await vi.waitFor(() => {
       expect(setSpy).toHaveBeenCalled();
@@ -141,7 +141,7 @@ describe('ExperimentalFeaturesSection', () => {
     const { bridge, setSpy } = makeBridge(false, { ok: false, extraRenderers: false, error: 'unauthorized' });
     render(<ExperimentalFeaturesSection bridge={bridge} />);
 
-    const toggle = screen.getByRole('switch', { name: EXTRA_RENDERERS_LABEL });
+    const toggle = screen.getByRole<HTMLInputElement>('switch', { name: EXTRA_RENDERERS_LABEL });
     fireEvent.click(toggle);
     await vi.waitFor(() => {
       expect(setSpy).toHaveBeenCalled();
@@ -159,7 +159,7 @@ describe('ExperimentalFeaturesSection', () => {
 
   it('exposes the toggle as role=switch with a descriptive aria-label', () => {
     render(<ExperimentalFeaturesSection />);
-    const toggle = screen.getByRole('switch', { name: EXTRA_RENDERERS_LABEL });
+    const toggle = screen.getByRole<HTMLInputElement>('switch', { name: EXTRA_RENDERERS_LABEL });
     expect(toggle.getAttribute('aria-label')).toBe(EXTRA_RENDERERS_LABEL);
     expect(toggle.getAttribute('aria-describedby')).toBe('gewu-extra-renderers-description');
     // The description span carries the live "已开启/已关闭" copy.
@@ -182,7 +182,7 @@ describe('ExperimentalFeaturesSection', () => {
 
   it('keeps the focus-visible ring reachable via the :focus-visible CSS selector', () => {
     render(<ExperimentalFeaturesSection />);
-    const toggle = screen.getByRole('switch', { name: EXTRA_RENDERERS_LABEL });
+    const toggle = screen.getByRole<HTMLInputElement>('switch', { name: EXTRA_RENDERERS_LABEL });
     toggle.focus();
     expect(document.activeElement).toBe(toggle);
     const css = readCssSource();

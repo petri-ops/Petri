@@ -222,7 +222,7 @@ describe('ReviewMode BLOCK-41（暂存两栏 / 写操作 / 分支切换 / push-p
     await waitFor(() => {
       expect(screen.getByTestId('rvw-staged-commitbox')).not.toBeNull();
     });
-    const input = screen.getByLabelText('暂存区提交信息');
+    const input = screen.getByLabelText<HTMLInputElement>('暂存区提交信息');
     expect((input).disabled).toBe(false);
 
     fireEvent.change(input, { target: { value: 'feat: staged commit' } });
