@@ -298,6 +298,9 @@ for (const statement of [
   'CREATE INDEX IF NOT EXISTS idx_tasks_created ON tasks(created_at)',
   'CREATE INDEX IF NOT EXISTS idx_tasks_next_retry ON tasks(next_retry_at) WHERE status = \'retry_pending\'',
   'CREATE INDEX IF NOT EXISTS idx_task_events_task_seq ON task_events(task_id, seq)',
+  // BLOCK-106 P2 — 保留清扫按 created_at 删除，此前无索引 → 计划为 SCAN（236,087 行
+  // 实测 35ms，成本随表线性增长）。与 idx_tasks_created 同一手法补齐。
+  'CREATE INDEX IF NOT EXISTS idx_task_events_created ON task_events(created_at)',
 ]) {
   try {
     db.exec(statement);
@@ -312,17 +315,26 @@ for (const statement of [
 
 // BLOCK-102 P4 — task_events 保留清扫：该表此前无界增长（sweeper PR-001 明确
 // 排除，归属本模块）。30 天窗口保守值；递归 setTimeout + unref（不绊关闭），
-// 失败 warn 不毒化后续轮次。created_at 为 SQLite datetime('now') 格式。
+// 失败 warn 不毒化后续轮次。
+//
+// BLOCK-106 P2 契约纠正：`created_at` 实际是 **JS ISO 串**（insertEvent 传
+// `new Date().toISOString()`，形如 `2026-09-07T13:53:33.759Z`），不是本模块
+// 旧注释所称的 SQLite `datetime('now')` 格式（`2026-09-07 13:53:33`，空格分隔）。
+// 原谓词拿 SQLite 侧字符串比 ISO 侧字符串，字典序在第 10 位分岔（`T`=0x54 vs
+// 空格=0x20），cutoff 当日 00:00 至该时刻之间的行会被判为「更新」而漏删（保守多留
+// ≤24h，不会早删——2026-09-20 实测该表 236,087 行全为 ISO 形态，无混合行）。
+// 现改为 JS 侧算好 ISO cutoff 作参数传入：同一格式比较，语义精确，且可直接走
+// idx_task_events_created 范围扫描。
 const TASK_EVENTS_RETENTION_DAYS = 30;
-function sweepOldTaskEvents(dbMod = db) {
+const DAY_MS = 24 * 60 * 60 * 1000;
+function sweepOldTaskEvents(dbMod = db, { now = () => new Date() } = {}) {
   try {
+    const cutoff = new Date(now().getTime() - TASK_EVENTS_RETENTION_DAYS * DAY_MS).toISOString();
     const result = dbMod
-      .prepare(
-        `DELETE FROM task_events WHERE created_at < datetime('now', '-${TASK_EVENTS_RETENTION_DAYS} day')`
-      )
-      .run();
+      .prepare('DELETE FROM task_events WHERE created_at < ?')
+      .run(cutoff);
     if (result.changes > 0) {
-      logger.warn(`[agent-task-store] retention: pruned ${result.changes} task_events older than ${TASK_EVENTS_RETENTION_DAYS}d`);
+      logger.warn(`[agent-task-store] retention: pruned ${result.changes} task_events older than ${TASK_EVENTS_RETENTION_DAYS}d (cutoff ${cutoff})`);
     }
     return result.changes;
   } catch (err) {
@@ -832,6 +844,9 @@ module.exports = {
   getResumableTask,
   listConversationChanges,
   sweepInterruptedRunningTasks,
+  // BLOCK-106 P2 — 导出供定向测试注入 dbMod/now（保留清扫语义与 ISO cutoff 契约）
+  sweepOldTaskEvents,
+  TASK_EVENTS_RETENTION_DAYS,
   appendAgentTaskEvent,
   getAgentTaskEventsSince,
   getRunningChildAgentTasks,

@@ -1973,6 +1973,19 @@
       "scriptRole": "development-smoke"
     },
     {
+      "id": "block106-task-events-retention",
+      "note": "BLOCK-106 P2 数据层规模债与可评审性：task_events 保留清扫（ISO cutoff + created_at 索引，索引由 agent-task-store 模块级 DDL 自持）+ 控制字节吞字面量修复面（file-dialog 文件名安全校验、build.ps1 输出目录）。防复发门禁=hygiene:check 检查项 5。",
+      "patterns": [
+        "core/biof3-server/agent-task-store.js",
+        "src/ipc/file-dialog.js",
+        "sidecars/computer-use-windows/build.ps1",
+        "test/block106-task-events-retention.test.mjs"
+      ],
+      "tests": [
+        "test/block106-task-events-retention.test.mjs"
+      ]
+    },
+    {
       "id": "block101-startup-performance",
       "note": "BLOCK-101 启动性能：P0 timeline 度量仪表（main 打点/preload 桥/渲染层上报）+ P1 首屏 SWR 快照 + dev-verify flow 与实机证据脚本。BLOCK-106 P0 追加：归因上下文（项目数/HEAD/前端 chunk 字节）与中位数预算棘轮门禁（test/startup-perf-budget.json + scripts/lib/startup-perf-budget.cjs，纯函数可离线自测）。",
       "patterns": [

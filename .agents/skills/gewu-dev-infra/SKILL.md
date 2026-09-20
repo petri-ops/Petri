@@ -89,7 +89,7 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 
 ## 保持工作区干净
 
-- `npm run hygiene:check` 报告死符号链接、临时残留、**工作区换行漂移**与**符号链接检出退化**（索引 mode 120000 但工作区是普通文件——Windows `core.symlinks=false` 的产物，宿主按目录加载不到即静默失效）；它只报告不代删，处置由人裁决（换行归一用 `scripts/normalize-eol.mjs --write`；桥退化用 `git config core.symlinks true` + `git rm -r --cached <桥目录> && git checkout -- <桥目录>`）。
+- `npm run hygiene:check` 报告死符号链接、临时残留、**工作区换行漂移**、**符号链接检出退化**（索引 mode 120000 但工作区是普通文件——Windows `core.symlinks=false` 的产物，宿主按目录加载不到即静默失效）与**文本源码真实控制字节**（转义被工具链吞成 `\u0000`/`\b` 等控制字符 → git 判二进制，该文件在 diff/grep/评审中失明；本仓两例：`src/ipc/file-dialog.js` 文件名安全校验、`sidecars/.../build.ps1` 输出目录）；它只报告不代删，处置由人裁决（换行归一用 `scripts/normalize-eol.mjs --write`；桥退化用 `git config core.symlinks true` + `git rm -r --cached <桥目录> && git checkout -- <桥目录>`；控制字节写回转义字面文本并做样本等价对账）。
 - 未跟踪的在制文件是别的包的 WIP 时只列出，绝不清理、绝不误入本包提交。
 
 ## 编写产品 Skill（resources/skills/）

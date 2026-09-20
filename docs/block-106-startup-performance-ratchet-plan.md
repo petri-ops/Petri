@@ -64,7 +64,7 @@ BLOCK-101 的目标语义是「瞬时加载 · 用户无感」，仪表（`src/m
   - 新增中位数上限断言（首轮以 09-20 复采中位数 + 20% 裕量设线，之后**只许收缩不许放宽**，与 BLOCK-105 lint 抑制基线同族棘轮语义）；
   - 连采两轮估计方差，避免把抖动当回退。
 - **P1 首屏负载治理**：`App.tsx` 路由级 `lazy` + 共享 `Suspense` 骨架（不得出现白屏/布局跳动）；`@xterm/xterm`、`highlight.js`/`rehype-highlight` 改按需动态引入（pdfjs 为现成参照）；复测 `npm run build` chunk 报告。
-- **P2 数据层与可评审性**：桌面侧新增 `src/migrations/0NN_*.sql` 补 `idx_task_events_created_at`（迁移测试对账，`schema_migrations` 版本推进可验）；纠正 `agent-task-store.js:315` 格式错标并写明比较边界语义；`src/ipc/file-dialog.js:171` 改转义写法消除控制字节；`hygiene:check` 增检查项 5「跟踪文件含 NUL/C1 控制字节」防复发。
+- **P2 数据层与可评审性**：补 `idx_task_events_created`（**实施时对 plan 原写法的一处纠正**：原写「新增 `src/migrations/0NN_*.sql`」，实查 `task_events` 的 DDL 与索引由 `core/biof3-server/agent-task-store.js:271/:300` 自持、桌面 `src/migrations` 不管这张表，故按模块既有姿势在 schema 数组补 `CREATE INDEX IF NOT EXISTS`，幂等且无需迁移文件）；纠正 `agent-task-store.js:315` 格式错标并把清扫谓词改为 **JS 侧 ISO cutoff 作参数**（原实现拿 SQLite 空格格式串比 ISO 列值，字典序在 `T`(0x54) vs 空格(0x20) 处失配 → cutoff 当日早于该时刻的行漏删 ≤24h；实测该表 236,087 行全为 ISO 形态、无混合行）；`src/ipc/file-dialog.js:171` 真实控制字节改转义写法；`hygiene:check` 增检查项 5「文本源码含真实控制字节」。
 - **P3 收口对账**：closeout 八门 + 启动 timeline 前后对账（**门禁必须变绿且 `dataReady`/`windowShown` 中位数实测下降**；未达成则如实登记未达成，不得以「方向正确」替代数字）+ canonical 回写（plan/registry/roadmap/AUDIT-LOG/handoff）。
 
 ## 2. 非范围（红线）

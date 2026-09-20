@@ -74,7 +74,7 @@ npm run quality:baseline # P0 四项体检基线重扫（Knip/jscpd/audit/密钥
 
 # 开发基础设施（BLOCK-71）
 npm run state        # 会话状态一键恢复：分支/WIP/AUDIT-LOG 未决项/active 工作包
-npm run hygiene:check   # 工作区卫生：死符号链接 + 临时残留 + 换行漂移 + 符号链接检出退化（只报告不代删）
+npm run hygiene:check   # 工作区卫生：死符号链接 + 临时残留 + 换行漂移 + symlink 检出退化 + 文本源码控制字节（只报告不代删）
 npm run closeout     # 收口门禁聚合（fail-fast）：hygiene → docs → ui-audit → test:changed → gate:code-size → quality:secret → quality:arch → quality:lint（八门）
 npm run verify -- <flow> # dev-verify 实机校验 flow（--list 查清单；前置 dev 栈在跑）
 npm run skills:check    # 产品 Skill 契约校验（resources/skills/）

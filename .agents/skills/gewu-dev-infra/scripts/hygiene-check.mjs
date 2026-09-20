@@ -35,6 +35,10 @@
  *      本机确实无法创建 symlink（未开开发者模式/无权限）时可用
  *      `BIOF3_HYGIENE_ALLOW_FLATTENED_SYMLINKS=1` 降级为信息级——但对应宿主功能确实不可用，
  *      必须如实告知用户而不是静默绕过。
+ *   5) 文本源码含真实控制字节：git 跟踪的源码/配置扩展名文件里出现 <0x20（tab/LF/CR
+ *      除外）或 0x7f。判据与两例先例见 collectControlBytes 注释（转义被吞成真实字符
+ *      → git 判二进制 → 该文件在 diff/grep/评审中失明；`.txt` 不在此列，它承载
+ *      verbatim 控制台捕获）。
  *
  *
  * 信息级（不影响退出码，只列出）：
@@ -138,6 +142,49 @@ function collectFlattenedSymlinks() {
   return flat;
 }
 
+/**
+ * 文本源文件里的真实控制字节（检查项 5）。
+ *
+ * 为什么算失败：`src/ipc/file-dialog.js` 的文件名校验正则里曾是**真实** NUL 与 0x1F
+ * 字节（写成 `\u0000-\u001f` 时被某层工具吞成控制字符），后果不是行为错而是
+ * **git 按二进制处理该文件**（`--numstat` 出 `- -`），于是一切改动在 diff / grep /
+ * 代码评审里不可见——安全校验路径变成不可评审路径。同类第二处：
+ * `sidecars/computer-use-windows/build.ps1` 的 `'axfixture\bin\publish'` 里 `\b`
+ * 被吞成退格符，输出目录参数实为含 0x08 的错路径（2026-09-20 BLOCK-106 P2 实测）。
+ * 判据只覆盖文本源码/配置扩展名；`.txt` 例外——它承载 verbatim 控制台捕获（含 ANSI
+ * ESC 0x1b 属正常）。正确写法是用转义序列，因此不设豁免位。
+ */
+const CONTROL_BYTE_EXTS = new Set([
+  '.js', '.mjs', '.cjs', '.ts', '.tsx', '.json', '.md', '.css', '.scss', '.html',
+  '.sql', '.sh', '.bash', '.zsh', '.ps1', '.cmd', '.bat', '.vbs', '.xml', '.svg',
+  '.yml', '.yaml', '.toml', '.ini',
+]);
+
+function collectControlBytes() {
+  const files = runGit(['ls-files', '-z']).split('\0').filter(Boolean);
+  const hits = [];
+  for (const rel of files) {
+    const dot = rel.lastIndexOf('.');
+    if (dot < 0 || !CONTROL_BYTE_EXTS.has(rel.slice(dot).toLowerCase())) continue;
+    const abs = path.join(ROOT, rel);
+    let buf;
+    try {
+      if (!fs.lstatSync(abs).isFile()) continue;
+      buf = fs.readFileSync(abs);
+    } catch {
+      continue;
+    }
+    const bad = [];
+    for (let i = 0; i < buf.length; i++) {
+      const c = buf[i];
+      if (c === 0x09 || c === 0x0a || c === 0x0d) continue; // tab/LF/CR 合法
+      if (c < 0x20 || c === 0x7f) bad.push({ offset: i, byte: c.toString(16) });
+    }
+    if (bad.length) hits.push({ path: rel, count: bad.length, first: bad[0] });
+  }
+  return hits;
+}
+
 function collectUntracked() {
   const out = runGit(['ls-files', '--others', '--exclude-standard', '-z']);
   return out.split('\0').filter(Boolean);
@@ -170,11 +217,13 @@ function main() {
   let untracked;
   let eolDrift;
   let flattened;
+  let controlBytes;
   try {
     deadLinks = collectDeadSymlinks();
     untracked = collectUntracked();
     eolDrift = collectEolDrift();
     flattened = collectFlattenedSymlinks();
+    controlBytes = collectControlBytes();
   } catch (e) {
     console.error(`[hygiene] 自身运行错误: ${e.message}`);
     process.exit(2);
@@ -228,6 +277,18 @@ function main() {
     for (const p of flattened.slice(0, 30)) console.log(`   ${p}`);
   } else {
     console.log('✅ 符号链接检出形态：全部为真 symlink');
+  }
+
+  if (controlBytes.length) {
+    failed = true;
+    console.log('\n❌ 文本源码含真实控制字节（会被 git 判二进制 → diff/grep/评审对该文件失明）:');
+    for (const h of controlBytes) console.log(`   ${h.path}  (${h.count} 处，首个 偏移 ${h.first.offset} 字节 0x${h.first.byte})`);
+    console.log('   为什么算失败：转义序列（\\u0000 / \\n 之类）被工具链吞成真实控制字符后，');
+    console.log('   正则语义往往仍等价（本仓实测两例都「看着能用」），代价全部落在可评审性上');
+    console.log('   （file-dialog.js 文件名安全校验、build.ps1 输出目录参数）。');
+    console.log('   修法：把该字节写回转义字面文本（两字符），改完用等价样本对账正则/字符串行为不变。');
+  } else {
+    console.log('✅ 文本源码控制字节：无（转义写法未被吞成真实字符）');
   }
 
   if (wip.length) {
