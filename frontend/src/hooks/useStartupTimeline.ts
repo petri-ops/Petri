@@ -40,7 +40,7 @@ function sendReport(isMountFallback: boolean): void {
   const preloadMs = (desktop as { __startupPreloadMs?: number }).__startupPreloadMs;
   if (typeof preloadMs === 'number' && preloadMs >= 0 && preloadMs < 60000) report.preloadMs = Math.round(preloadMs);
   if (dataReadyMark != null) report.dataReadyMs = dataReadyMark;
-  const entries = performance.getEntriesByType('paint') as PerformanceEntry[];
+  const entries = performance.getEntriesByType('paint');
   const fp = entries.find((e) => e.name === 'first-paint' || e.name === 'first-contentful-paint');
   if (fp) report.firstPaintMs = Math.round(fp.startTime);
   bridge.report(report);

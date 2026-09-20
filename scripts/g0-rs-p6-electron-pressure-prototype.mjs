@@ -257,7 +257,7 @@ export function loadGoKeggPressureInput() {
 
 async function freePort(excluded = new Set()) {
   for (let attempt = 0; attempt < 20; attempt += 1) {
-    // eslint-disable-next-line no-await-in-loop
+     
     const port = await new Promise((resolve, reject) => {
       const server = createServer();
       server.once('error', reject);
@@ -307,10 +307,10 @@ async function runHttpTool(runtime, { toolId, params, files }) {
   const deadline = Date.now() + JOB_TIMEOUT_MS;
   let job = null;
   while (Date.now() < deadline) {
-    // eslint-disable-next-line no-await-in-loop
+     
     job = await requestJson(runtime.baseUrl, `/api/tools/status/${encodeURIComponent(submitted.jobId)}`);
     if (TERMINAL_JOB_STATUSES.has(job.status)) break;
-    // eslint-disable-next-line no-await-in-loop
+     
     await new Promise((resolve) => setTimeout(resolve, 400));
   }
   assert(job && job.status === 'completed', 'p6_pressure_tool_job_failed');

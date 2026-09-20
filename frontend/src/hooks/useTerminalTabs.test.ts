@@ -29,7 +29,7 @@ const hoisted = vi.hoisted(() => {
     focus = vi.fn();
     dispose = vi.fn();
     constructor(opts: Record<string, unknown>) {
-      this.options = opts as { theme?: unknown };
+      this.options = opts;
       FakeXTerm.instances.push(this);
     }
   }

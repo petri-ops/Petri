@@ -203,7 +203,7 @@ export function useTerminalTabs(options: UseTerminalTabsOptions): UseTerminalTab
     if (!open || !activeId) return;
     const tab = tabs.find((t) => t.id === activeId);
     if (tab) ensureSession(tab);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [open, activeId, tabs, ensureSession]);
 
   // Switch tab → refit + focus after paint (layout settled).

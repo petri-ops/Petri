@@ -74,8 +74,8 @@ function captureDownload(node: ResultNode, testId: string): CapturedDownload {
   const revokeSpy = vi.fn((url: string) => {
     revoked.push(url);
   });
-  URL.createObjectURL = urlSpy as unknown as typeof URL.createObjectURL;
-  URL.revokeObjectURL = revokeSpy as unknown as typeof URL.revokeObjectURL;
+  URL.createObjectURL = urlSpy;
+  URL.revokeObjectURL = revokeSpy;
 
   // Spy on the anchor click so the production path's
   // `anchor.click()` does not actually navigate happy-dom.
@@ -258,7 +258,7 @@ describe('TableRenderer — download wiring', () => {
     expect(captured.blob.type).toBe('text/csv;charset=utf-8');
     // The first byte of the Blob content must be the BOM.
     // happy-dom stores the raw parts; we read them via `text()`.
-    return (captured.blob as Blob).text().then((text) => {
+    return (captured.blob).text().then((text) => {
       expect(text.charCodeAt(0)).toBe(0xfeff);
     });
   });
@@ -271,7 +271,7 @@ describe('TableRenderer — download wiring', () => {
 
     expect(captured.blob).toBeInstanceOf(Blob);
     expect(captured.blob.type).toBe('text/markdown;charset=utf-8');
-    return (captured.blob as Blob).text().then((text) => {
+    return (captured.blob).text().then((text) => {
       expect(text).toContain('| gene | control | treated |');
       expect(text).toContain('| --- | --- | --- |');
     });

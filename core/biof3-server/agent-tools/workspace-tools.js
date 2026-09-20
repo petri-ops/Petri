@@ -9,6 +9,7 @@
 
 const crypto = require('crypto');
 const fsp = require('fs/promises');
+const fs = require('fs'); // BLOCK-105 P2 — listResidentTasksLocal 用同步 fs API，原文件漏引即 ReferenceError（ESLint 首跑抓真）
 const path = require('path');
 const { promisify } = require('util');
 const { execFile, spawn } = require('child_process');

@@ -57,7 +57,7 @@ function stubBridge(overrides: Record<string, unknown> = {}): void {
 async function loadUseResultStore() {
   vi.resetModules();
   const mod = await import('@/hooks/useResultStore');
-  return mod.useResultStore as typeof import('@/hooks/useResultStore').useResultStore;
+  return mod.useResultStore;
 }
 
 beforeEach(() => {

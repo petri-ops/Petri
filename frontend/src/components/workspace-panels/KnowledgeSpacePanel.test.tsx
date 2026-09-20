@@ -53,7 +53,7 @@ describe('BLOCK-69 KnowledgeSpacePanel', () => {
     renderPanel();
     await waitFor(() => expect(screen.getByTestId('knowledge-panel')).toBeTruthy());
     expect(screen.getByTestId('knowledge-embed-unavailable').textContent).toContain('DashScope');
-    const toggle = screen.getByTestId('knowledge-toggle') as HTMLButtonElement;
+    const toggle = screen.getByTestId('knowledge-toggle');
     expect(toggle.disabled).toBe(true);
     // BLOCK-103 D3 — hero 空态 + 缺 key 附「去设置」动作卡
     expect(screen.getByTestId('knowledge-empty-hero')).toBeTruthy();

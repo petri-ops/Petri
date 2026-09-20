@@ -2051,6 +2051,20 @@
       "frontendRelated": true,
       "classifiesScripts": true,
       "scriptRole": "development-smoke"
+    },
+    {
+      "id": "block105-code-quality",
+      "note": "BLOCK-105 代码质量与安全治理：ESLint flat config、密钥门禁、Knip 配置与体检基线。改动影响 quality:* 门禁与豁免基线。",
+      "patterns": [
+        "eslint.config.mjs",
+        "knip.json",
+        "scripts/secret-scan.mjs",
+        "acceptance/block-105/**"
+      ],
+      "tests": [],
+      "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "development-smoke"
     }
   ]
 }

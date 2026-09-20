@@ -48,7 +48,7 @@ describe('G0-RS-P4R-3 result-focus Agent Composer', () => {
       />,
     );
     expect(screen.getByRole('status').textContent).toContain('正在绑定');
-    expect((screen.getByRole('button', { name: '交给 Agent' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: '交给 Agent' })).disabled).toBe(true);
 
     rerender(
       <ResultAgentComposer
@@ -59,7 +59,7 @@ describe('G0-RS-P4R-3 result-focus Agent Composer', () => {
       />,
     );
     expect(screen.getByText(/缺少正式 Revision/)).toBeTruthy();
-    expect((screen.getByRole('button', { name: '交给 Agent' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: '交给 Agent' })).disabled).toBe(true);
 
     rerender(
       <ResultAgentComposer
@@ -70,7 +70,7 @@ describe('G0-RS-P4R-3 result-focus Agent Composer', () => {
       />,
     );
     expect(screen.getByRole('status').textContent).toContain('上下文不完整');
-    expect((screen.getByRole('button', { name: '交给 Agent' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: '交给 Agent' })).disabled).toBe(true);
   });
 
   it('选择过期或不可用时保留可见安全边界，但不重复就绪说明', () => {

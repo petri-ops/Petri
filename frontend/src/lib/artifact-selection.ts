@@ -462,7 +462,7 @@ export function fromPersistedSelection(
       ? persisted.entityIdsHash
       : hashEntityIds(entityIds),
     filterHash: typeof persisted.filterHash === 'string' ? persisted.filterHash : null,
-    fields: Array.isArray(display?.fields) ? uniqueStrings(display!.fields as unknown[]) : [],
+    fields: Array.isArray(display?.fields) ? uniqueStrings(display.fields as unknown[]) : [],
     filterExpression: (persisted.filterExpression as SelectionFilterExpression) || null,
     sort: Array.isArray(persisted.sort) ? (persisted.sort as SelectionSortSpec[]) : [],
     region: (display?.region as ArtifactSelection['region']) || null,

@@ -311,7 +311,7 @@ class DeepSeekProvider {
       let errorBuffer = '';
       let sawChoice = false;
       let settled = false;
-      let req; // eslint-disable-line prefer-const
+      let req;  
 
       const emit = (event) => {
         try {

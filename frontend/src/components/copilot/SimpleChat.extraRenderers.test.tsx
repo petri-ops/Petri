@@ -47,7 +47,7 @@ function makeAssistantMessage(meta: Record<string, unknown> | null | undefined):
     role: 'assistant',
     content: 'Natural-language wrapper text.',
     ts: '2026-08-14T10:00:00Z',
-    meta: (meta ?? null) as Record<string, unknown> | null,
+    meta: (meta ?? null),
   };
 }
 
@@ -123,8 +123,8 @@ describe('SimpleChat A4 bridge — restoreSimpleMessage + render branch', () => 
     // Both cards land in the chrome through ResultCardRenderer.
     const articles = screen.getByTestId('sc-extra-result-nodes').querySelectorAll('article');
     expect(articles.length).toBe(2);
-    expect(articles[0]!.querySelector('h3')!.textContent).toBe('Result A');
-    expect(articles[1]!.querySelector('h3')!.textContent).toBe('Result B');
+    expect(articles[0].querySelector('h3')!.textContent).toBe('Result A');
+    expect(articles[1].querySelector('h3')!.textContent).toBe('Result B');
     // Wrapper text still visible underneath.
     expect(screen.getByTestId('markdown-fallback').textContent).toBe('wrapper');
     // text node goes to TextRenderer; table node goes to TableRenderer.
@@ -189,8 +189,8 @@ describe('SimpleChat A4 bridge — restoreSimpleMessage + render branch', () => 
     const sm = restoreSimpleMessage(message);
     expect(sm.resultNodes).toBeDefined();
     expect(sm.resultNodes!.length).toBe(2);
-    expect(sm.resultNodes![0]!.id).toBe('a');
-    expect(sm.resultNodes![1]!.type).toBe('table');
+    expect(sm.resultNodes![0].id).toBe('a');
+    expect(sm.resultNodes![1].type).toBe('table');
 
     // And the render branch honours it end-to-end.
     render(<SimpleChatMessageBody message={{ content: 'w', resultNodes: sm.resultNodes }} />);

@@ -110,7 +110,7 @@ describe('BLOCK-95 A1 历史加载游标化', () => {
       const { older } = useConversationResume({
         conversationId: 'conv_a1',
         projectId: 'p_a1',
-        activeRun: null as never,
+        activeRun: null,
         refreshConversations: noopAsync,
         setMessages: noop,
         setLoading: noop,
@@ -150,9 +150,9 @@ describe('BLOCK-95 A1 历史加载游标化', () => {
       const { older } = useConversationResume({
         conversationId: 'conv_a1b',
         projectId: 'p_a1',
-        activeRun: null as never,
+        activeRun: null,
         refreshConversations: noopAsync,
-        setMessages: setMessages as never,
+        setMessages: setMessages,
         setLoading: noop,
       });
       const firedRef = React.useRef(false);

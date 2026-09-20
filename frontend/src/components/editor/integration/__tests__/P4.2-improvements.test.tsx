@@ -127,13 +127,13 @@ describe('P4.2 WorkspaceFilePreviewBridge — BridgeRoot auto-wrap', () => {
     expect(getByTestId('mock-codemirror')).toBeTruthy();
     // Outer context should be usable (setPendingRequest not broken by double wrap)
     await act(async () => {
-      capture!.setPendingRequest({
+      capture.setPendingRequest({
         filePath: '/workspace/outer.py',
         line: 1,
         timestamp: Date.now(),
       });
     });
-    expect(capture!.pendingRequest).toBeNull(); // one-shot consumption worked
+    expect(capture.pendingRequest).toBeNull(); // one-shot consumption worked
     vi.unstubAllGlobals();
   });
 });
@@ -270,11 +270,11 @@ describe('P4.2 ChatCardLink — out-of-the-box component', () => {
     const btn = container.querySelector('[data-bf3-chat-card-link]') as HTMLButtonElement;
     fireEvent.click(btn);
 
-    expect(capture!.pendingRequest).not.toBeNull();
-    expect(capture!.pendingRequest!.filePath).toBe('/workspace/click.py');
-    expect(capture!.pendingRequest!.line).toBe(12);
-    expect(capture!.pendingRequest!.column).toBe(5);
-    expect(capture!.pendingRequest!.pulseMs).toBe(2000);
+    expect(capture.pendingRequest).not.toBeNull();
+    expect(capture.pendingRequest!.filePath).toBe('/workspace/click.py');
+    expect(capture.pendingRequest!.line).toBe(12);
+    expect(capture.pendingRequest!.column).toBe(5);
+    expect(capture.pendingRequest!.pulseMs).toBe(2000);
   });
 
   it('variant=floating renders floating CSS class', () => {
@@ -328,7 +328,7 @@ describe('P4.2 ChatCardLink — out-of-the-box component', () => {
 
     fireEvent.click(container.querySelector('[data-bf3-chat-card-link]')!);
 
-    expect(capture!.pendingRequest!.diffRevision).toEqual(rev);
+    expect(capture.pendingRequest!.diffRevision).toEqual(rev);
   });
 });
 
@@ -369,10 +369,10 @@ describe('P4.2 GewuOpenFileDevBridge rename + alias', () => {
       window.__biof3DispatchOpenFile!('/workspace/dev.py', 5, 3);
     });
 
-    expect(capture!.pendingRequest).not.toBeNull();
-    expect(capture!.pendingRequest!.filePath).toBe('/workspace/dev.py');
-    expect(capture!.pendingRequest!.line).toBe(5);
-    expect(capture!.pendingRequest!.column).toBe(3);
+    expect(capture.pendingRequest).not.toBeNull();
+    expect(capture.pendingRequest!.filePath).toBe('/workspace/dev.py');
+    expect(capture.pendingRequest!.line).toBe(5);
+    expect(capture.pendingRequest!.column).toBe(3);
 
     unmount();
     expect((window as unknown as Record<string, unknown>)['__biof3DispatchOpenFile']).toBeUndefined();

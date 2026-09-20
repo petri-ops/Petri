@@ -239,7 +239,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
 
   const reviewedCount = useMemo(
     () => statusFiles.filter((f) => isFileReviewed(diffForStatusFile(f), review.decisions)).length,
-    [statusFiles, diffForStatusFile, review.decisions] // eslint-disable-line react-hooks/exhaustive-deps
+    [statusFiles, diffForStatusFile, review.decisions]  
   );
   const totalFiles = statusFiles.length;
 

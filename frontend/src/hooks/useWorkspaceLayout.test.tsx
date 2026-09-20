@@ -36,7 +36,7 @@ class FakeResizeObserver {
   observe(target: Element): void { this.observed.add(target); }
   unobserve(target: Element): void { this.observed.delete(target); }
   disconnect(): void { this.observed.clear(); }
-  trigger(): void { this.callback([], this as unknown as ResizeObserver); }
+  trigger(): void { this.callback([], this); }
 }
 
 function Harness({ frames }: { frames: FrameSpec[] }): React.ReactElement {
@@ -77,14 +77,14 @@ beforeEach(() => {
   Element.prototype.getBoundingClientRect = function (this: HTMLElement): DOMRect {
     const width = Number(this.dataset?.w ?? 0);
     const height = Number(this.dataset?.h ?? 0);
-    return { width, height, top: 0, left: 0, right: width, bottom: height, x: 0, y: 0, toJSON: () => ({}) } as DOMRect;
+    return { width, height, top: 0, left: 0, right: width, bottom: height, x: 0, y: 0, toJSON: () => ({}) };
   };
   if (typeof window.matchMedia !== 'function') {
     (window as { matchMedia?: unknown }).matchMedia = ((query: string) => ({
       matches: false, media: query, onchange: null,
       addEventListener: () => {}, removeEventListener: () => {},
       addListener: () => {}, removeListener: () => {}, dispatchEvent: () => false,
-    })) as unknown as typeof window.matchMedia;
+    }));
   }
 });
 

@@ -162,7 +162,7 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     });
 
     // 输入 message + ⌘+Enter
-    const input = screen.getByLabelText('提交信息') as HTMLTextAreaElement;
+    const input = screen.getByLabelText('提交信息');
     fireEvent.change(input, { target: { value: 'test commit message' } });
     fireEvent.keyDown(input, { key: 'Enter', metaKey: true });
 
@@ -616,7 +616,7 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     });
     expect(screen.getByTestId('rvw-stash-list').textContent).toContain('WIP on main');
     expect(stashList).toHaveBeenCalled();
-    const select = screen.getByLabelText('提交历史分支') as HTMLSelectElement;
+    const select = screen.getByLabelText('提交历史分支');
     const optgroup = select.querySelector('optgroup');
     expect(optgroup).toBeTruthy();
     expect(optgroup?.getAttribute('label')).toBe('标签');

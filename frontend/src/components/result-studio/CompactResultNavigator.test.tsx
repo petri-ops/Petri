@@ -58,7 +58,7 @@ describe('CompactResultNavigator', () => {
     expect(screen.queryByText('当前结果')).toBeNull();
     expect(screen.getByText('可信结果')).toBeTruthy();
     expect(screen.getByText('文件不可用')).toBeTruthy();
-    expect((screen.getByLabelText('切换当前结果') as HTMLSelectElement).value).toBe('volcano.png');
+    expect((screen.getByLabelText('切换当前结果')).value).toBe('volcano.png');
     fireEvent.click(screen.getByRole('button', { name: '返回对话' }));
     fireEvent.click(screen.getByRole('button', { name: '询问 Agent' }));
     fireEvent.click(screen.getByRole('button', { name: '代码' }));

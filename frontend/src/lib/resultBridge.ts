@@ -32,7 +32,7 @@ async function unwrap<T>(call: Promise<ResultIpcEnvelope<T>>): Promise<T> {
 /** 同 unwrap，但 handler 明确报「not found」时按契约落 null（get 类方法）。 */
 async function unwrapNullable<T>(call: Promise<ResultIpcEnvelope<T | null>>): Promise<T | null> {
   const envelope = await call;
-  if (envelope && envelope.ok) return (envelope.data ?? null) as T | null;
+  if (envelope && envelope.ok) return (envelope.data ?? null);
   if (envelope && /not found/i.test(String(envelope.error))) return null;
   throw new Error(envelope?.error || 'Result bridge error');
 }

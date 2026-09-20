@@ -33,7 +33,7 @@ export function UsageResourcePanel(): React.ReactElement {
     }).catch((reason) => setUsageError(reason instanceof Error ? reason.message : String(reason)));
   }, []);
   const resourceLabel = snapshot?.state === 'ready' ? '资源正常' : snapshot?.state === 'warning' ? '需要注意' : snapshot ? '资源不足' : '检查中';
-  const providers: ProviderUsageRow[] = Array.isArray(usage?.providers) ? usage!.providers : [];
+  const providers: ProviderUsageRow[] = Array.isArray(usage?.providers) ? usage.providers : [];
   const formatLatency = (ms: number | undefined) =>
     ms != null && Number.isFinite(Number(ms)) ? `${(Number(ms) / 1000).toFixed(2)} s` : '—';
   return (

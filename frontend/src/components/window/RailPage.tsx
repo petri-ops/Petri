@@ -78,7 +78,7 @@ export function RailPage(): React.ReactElement {
         if (event.kind === 'remove') return prev.filter((e) => e.id !== event.id);
         if (event.entry.state !== 'railed') return prev.filter((e) => e.id !== event.entry.id);
         const next = prev.filter((e) => e.id !== event.entry.id);
-        return [...next, event.entry as RailEntry];
+        return [...next, event.entry];
       });
     });
     return () => {
@@ -100,7 +100,7 @@ export function RailPage(): React.ReactElement {
       cancelClose();
       setIgnore(true);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   // hover 时拉取内容快照（缓存；无快照 → 卡回退纯文本）

@@ -1119,7 +1119,7 @@ export function SimpleChat({
                       );
                     })()}
                     {m.role === 'assistant' && m.summaryUnavailable && m.retryToolJobId && summaryRetryState[m.retryToolJobId] !== 'done' && (() => {
-                      const tj = m.retryToolJobId!;
+                      const tj = m.retryToolJobId;
                       const attempts = summaryRetryAttempts[tj] ?? 0;
                       const cooling = Date.now() < (summaryRetryCooldownUntil[tj] ?? 0);
                       const exhausted = attempts >= MAX_SUMMARY_RETRIES;
@@ -1131,7 +1131,7 @@ export function SimpleChat({
                           </div>
                         );
                       }
-                      const remaining = cooling ? Math.max(0, Math.ceil((summaryRetryCooldownUntil[tj]! - Date.now()) / 1000)) : 0;
+                      const remaining = cooling ? Math.max(0, Math.ceil((summaryRetryCooldownUntil[tj] - Date.now()) / 1000)) : 0;
                       return (
                         <div className="sc-msg-actions sc-msg-actions-summary">
                           <button

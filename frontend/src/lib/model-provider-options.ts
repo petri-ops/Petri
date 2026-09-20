@@ -100,7 +100,7 @@ export function normalizeLegacyUserModelProfile<
     protocol: 'openai-compatible',
     baseUrl: profile.baseUrl || LEGACY_DEEPSEEK_BASE_URL,
     label: 'DeepSeek',
-  } as T;
+  };
 }
 
 export interface UserModelProfileLike {

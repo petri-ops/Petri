@@ -70,3 +70,15 @@
 - **Knip 配置校准**（`knip.json` + `npm run quality:knip` report-only）：入口=main/preload/main.tsx/App/test glob。校准后死文件 452→119、带问题文件 864→577（core 懒加载 require 仍为 Knip 盲区，数字仍属上界）。
 - **quality 脚本族**：quality:lint（report-only）/ quality:lint:strict（blocking 预留）/ quality:secret（fail-closed 已达标）/ quality:knip（report-only）。P2 完成豁免清偿后 lint/knip 转 blocking 挂 closeout 链。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 6.2 P2 存量归因清偿第一轮 completed（2026-09-20；棘轮已闭合）
+
+- **真缺陷修复 2 件（ESLint 首跑抓真，全产品代码）**：
+  1. `agent-tools/workspace-tools.js` — `listResidentTasksLocal` 用同步 `fs.readdirSync/readFileSync` 但全文件未 require fs → 常驻任务列表一调用即 ReferenceError；
+  2. `agent-tools/act-tools.js:107` — `_getImpliedPage` 裸调用未定义符号（定义在 act-tool-core），FIGCODE_PAGE_RACE_FIX_v1 的隐式页面兜底分支一触发即崩。
+- **自动修复 77 文件**（`eslint . --fix`，净 -1 行，全部安全类：多余类型断言移除等）；修复后 Node 全量 2251 绿 exit 0 + 前端 1146/1146 双验证零回归。
+- **规则级归因（config 内显式，非静默）**：`no-empty` allowEmptyCatch（本仓 best-effort catch 模式，BLOCK-97 沉淀）；`security/detect-non-literal-fs-filename` off（本地桌面应用动态路径常态，约束靠 allowlist 机制）；`security/detect-object-injection` 维持 warn（动态注入 1220 处属架构常态，P2 后续逐区归因）。
+- **抑制基线棘轮闭合**：`eslint-suppressions.json` 入库（存量 errors 2912 + warnings 全量登记）；`npx eslint .` 转 blocking——**新增违规即 fail**（自测：合成未使用变量文件被抓 ✓），存量清偿用 `--fix-suppressions` 逐批收缩。
+- **quality:lint 转 blocking**（去 report-only 旁路）；impact-map 同步登记 block105-code-quality 规则（secret-scan.mjs 等新脚本未分类曾触发 test-affected fail-closed 级联 35 红——门禁按设计工作，登记后 test-affected 16/16 恢复）。
+- 双套件验证：Node 2251 绿 exit 0 + 前端 1146/1146。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -911,7 +911,7 @@ export function ProjectWorkspace(): React.ReactElement {
   // single source of truth; CenterPanel is a pure renderer.
   const centerPanelCtx: CenterPanelContext = {
     columnHeader: compactLayout ? undefined : <ColumnHeader side="center" />,
-    project: project as Project,
+    project: project,
     projectId,
     allProjects,
     activeConvId,
@@ -920,7 +920,7 @@ export function ProjectWorkspace(): React.ReactElement {
     workspaceMode,
     showPinnedSummary,
     centerColRef: centerColRef as React.RefObject<HTMLElement>,
-    sessionFrameRef: sessionFrameRef as React.Ref<HTMLDivElement>,
+    sessionFrameRef: sessionFrameRef,
     bottomTerminalOpen,
     bottomTerminalHeight,
     leftOpen,
@@ -985,7 +985,7 @@ export function ProjectWorkspace(): React.ReactElement {
   const leftPanelCtx: LeftPanelContext = {
     width: leftWidth,
     columnHeader: compactLayout ? undefined : <ColumnHeader side="left" />,
-    project: project as Project,
+    project: project,
     workspacePath,
     compactWorkspacePath,
     visibleProjects: allProjects,
@@ -1029,7 +1029,7 @@ export function ProjectWorkspace(): React.ReactElement {
   const rightPanelCtx: RightPanelContext = {
     width: effectiveRightWidth,
     columnHeader: compactLayout ? undefined : <ColumnHeader side="right" />,
-    project: project as Project,
+    project: project,
     projectId,
     activeConvId,
     // UI-385 — 右栏「智能体」tab 数据源（agentOpenInRail 事件写入）

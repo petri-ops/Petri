@@ -273,7 +273,7 @@ let jobDiskSummary = null;
   const start = Date.now();
   let lastStatus = null;
   let lastBody = null;
-  // eslint-disable-next-line no-constant-condition
+   
   while (true) {
     if (Date.now() - start > TIMEOUT_MS) {
       bail(`job ${jobId} did not finish within ${TIMEOUT_MS}ms (lastStatus=${lastStatus})`, 2);

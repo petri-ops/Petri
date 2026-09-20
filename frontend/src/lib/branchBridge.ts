@@ -90,21 +90,21 @@ function createBranchBridge(): {
   return {
     create: async (projectId, name, parentBranchId) => {
       const row = await unwrap<BranchRow>(
-        bridge.create({ projectId, name, parentBranchId }) as Promise<BranchIpcEnvelope<BranchRow>>
+        bridge.create({ projectId, name, parentBranchId })
       );
       return toBranch(row) as Branch;
     },
 
     list: async (projectId) => {
       const rows = await unwrap<BranchRow[]>(
-        bridge.list({ projectId }) as Promise<BranchIpcEnvelope<BranchRow[]>>
+        bridge.list({ projectId })
       );
       return (rows || []).map(toBranch).filter((b): b is Branch => b !== null);
     },
 
     switch: async (branchId, projectId) => {
       const row = await unwrap<BranchRow>(
-        bridge.switch({ branchId, projectId }) as Promise<BranchIpcEnvelope<BranchRow>>
+        bridge.switch({ branchId, projectId })
       );
       return toBranch(row);
     },
@@ -123,7 +123,7 @@ function createBranchBridge(): {
 
     getActive: async (projectId) => {
       const row = await unwrap<BranchRow | null>(
-        bridge.getActive({ projectId }) as Promise<BranchIpcEnvelope<BranchRow | null>>
+        bridge.getActive({ projectId })
       );
       return toBranch(row);
     },

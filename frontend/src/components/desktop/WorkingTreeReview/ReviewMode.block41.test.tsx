@@ -221,8 +221,8 @@ describe('ReviewMode BLOCK-41（暂存两栏 / 写操作 / 分支切换 / push-p
     await waitFor(() => {
       expect(screen.getByTestId('rvw-staged-commitbox')).not.toBeNull();
     });
-    const input = screen.getByLabelText('暂存区提交信息') as HTMLInputElement;
-    expect((input as HTMLInputElement).disabled).toBe(false);
+    const input = screen.getByLabelText('暂存区提交信息');
+    expect((input).disabled).toBe(false);
 
     fireEvent.change(input, { target: { value: 'feat: staged commit' } });
     fireEvent.click(screen.getByText('提交暂存'));
@@ -241,7 +241,7 @@ describe('ReviewMode BLOCK-41（暂存两栏 / 写操作 / 分支切换 / push-p
     await waitFor(() => {
       expect(screen.getByTestId('rvw-branch-switch')).not.toBeNull();
     });
-    const select = screen.getByTestId('rvw-branch-switch') as HTMLSelectElement;
+    const select = screen.getByTestId('rvw-branch-switch');
     fireEvent.change(select, { target: { value: 'feature/x' } });
 
     await waitFor(() => {

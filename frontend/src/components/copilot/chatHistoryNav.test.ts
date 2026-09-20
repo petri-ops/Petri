@@ -28,7 +28,7 @@ describe('stepHistoryNavigation', () => {
   })
 
   it('重复按 ↑ 向更旧走', () => {
-    let state: HistoryNavState = { index: 2, draft: '' }
+    const state: HistoryNavState = { index: 2, draft: '' }
     let r = stepHistoryNavigation(history, state, 'up', 'third')
     expect(r.state.index).toBe(1)
     expect(r.value).toBe('second')
@@ -45,7 +45,7 @@ describe('stepHistoryNavigation', () => {
   })
 
   it('按 ↓ 向更新走，越过最新项还原草稿并退出导航', () => {
-    let state: HistoryNavState = { index: 0, draft: 'my draft' }
+    const state: HistoryNavState = { index: 0, draft: 'my draft' }
     let r = stepHistoryNavigation(history, state, 'down', 'first')
     expect(r.state.index).toBe(1)
     expect(r.value).toBe('second')

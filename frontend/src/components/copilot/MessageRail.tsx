@@ -51,7 +51,7 @@ export function MessageRail({
     cancelClose();
     const tick = tickRefs.current[i];
     if (!tick) return;
-    const body = tick.closest('[data-rail-body]') as HTMLElement | null;
+    const body = tick.closest('[data-rail-body]');
     if (!body) return;
     bodyRef.current = body;
     const br = body.getBoundingClientRect();

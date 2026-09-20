@@ -292,7 +292,7 @@ export function CommandPalette({
     if (!listRef.current) return;
     const selectedEl = listRef.current.querySelector(
       `[data-idx="${selectedIndex}"]`
-    ) as HTMLElement | null;
+    );
     if (selectedEl) {
       selectedEl.scrollIntoView({ block: 'nearest' });
     }

@@ -61,9 +61,9 @@ describe('BLOCK-69 useKnowledgeSpaceToggle', () => {
       await result.current.toggle();
     });
     await waitFor(() => expect(result.current.enabled).toBe(true));
-    const postCalls = fetchMock.mock.calls.filter((call) => String(call[0]).includes('/knowledge/space') && (call[1] as RequestInit | undefined)?.method === 'POST');
+    const postCalls = fetchMock.mock.calls.filter((call) => String(call[0]).includes('/knowledge/space') && (call[1])?.method === 'POST');
     expect(postCalls.length).toBe(1);
-    expect(JSON.parse(String(postCalls[0][1] ? (postCalls[0][1] as RequestInit).body : '{}')).enabled).toBe(true);
+    expect(JSON.parse(String(postCalls[0][1] ? (postCalls[0][1]).body : '{}')).enabled).toBe(true);
   });
 
   it('无 key：embeddingAvailable=false → unavailable 标记（UI 禁用开关的数据源）', async () => {

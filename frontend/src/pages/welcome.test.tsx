@@ -113,7 +113,7 @@ async function openPicker() {
 async function openSshPanelAndWaitAlias(alias = 'dell') {
   await openPicker();
   fireEvent.click(screen.getByText('远程连接'));
-  const aliasInput = await screen.findByLabelText('远程目标') as HTMLInputElement;
+  const aliasInput = await screen.findByLabelText('远程目标');
   await waitFor(() => expect(aliasInput.value).toBe(alias));
   return aliasInput;
 }

@@ -104,7 +104,7 @@ function _checkActPage(actType, currentPage, ctx) {
   if (Array.isArray(req)) {
     if (req.includes(currentPage)) return { ok: true };
     // FIGCODE_PAGE_RACE_FIX_v1: check implied page from earlier navigation in same turn
-    const implied = ctx ? _getImpliedPage(ctx) : null;
+    const implied = ctx ? _core._getImpliedPage(ctx) : null; // BLOCK-105 P2 — 原裸调用未定义符号（ESLint 首跑抓真），经 _core 引入
     if (implied && req.includes(implied)) return { ok: true };
     const expectedHuman = req.map((p) => ACT_PAGE_LABELS[p] || p).join(' 或 ');
     return {

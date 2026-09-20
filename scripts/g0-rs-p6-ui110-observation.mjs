@@ -288,7 +288,7 @@ async function findFreeLoopbackPort(excluded = new Set()) {
     // `--strictPort` below remains the authoritative race detector.
     // This allocation merely keeps an existing desktop development session out
     // of the disposable P6 trace.
-    // eslint-disable-next-line no-await-in-loop
+     
     const port = await new Promise((resolve, reject) => {
       const probe = createServer();
       probe.once('error', reject);

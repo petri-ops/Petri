@@ -83,7 +83,7 @@ function makeConversation(overrides: Partial<ConversationSummary> = {}): Convers
     created_at: '2026-09-10T00:00:00Z',
     updated_at: '2026-09-10T08:00:00Z',
     ...overrides,
-  } as ConversationSummary;
+  };
 }
 
 function makeDataset(overrides: Partial<Dataset> = {}): Dataset {
@@ -445,10 +445,10 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
       return {};
     }) as unknown as typeof getBridge);
     const dispatched: CustomEvent[] = [];
-    const dispatchSpy = vi.spyOn(window, 'dispatchEvent').mockImplementation(((ev: Event) => {
+    const dispatchSpy = vi.spyOn(window, 'dispatchEvent').mockImplementation((ev: Event) => {
       if (ev instanceof CustomEvent && ev.type === 'gewu:agent-open-in-rail') dispatched.push(ev);
       return true;
-    }) as unknown as typeof window.dispatchEvent);
+    });
     listAgentTasksMock.mockResolvedValue([
       {
         taskId: 'task_fail',

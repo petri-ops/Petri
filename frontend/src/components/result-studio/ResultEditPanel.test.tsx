@@ -85,7 +85,7 @@ describe('G0-RS-P4 Schema 驱动统一编辑面板', () => {
     const status = screen.getByRole('status');
     expect(status.getAttribute('data-science')).toBe('true');
     expect(status.textContent).toContain('需要重新计算');
-    const submit = screen.getByRole('button', { name: /生成候选版本/ }) as HTMLButtonElement;
+    const submit = screen.getByRole('button', { name: /生成候选版本/ });
     expect(submit.disabled).toBe(true);
     fireEvent.click(screen.getByRole('checkbox', { name: /确认继续/ }));
     expect(submit.disabled).toBe(false);
@@ -97,9 +97,9 @@ describe('G0-RS-P4 Schema 驱动统一编辑面板', () => {
     render(<ResultEditPanel editControls={schema()} onSubmit={() => undefined} />);
     const input = screen.getByLabelText('point_size');
     fireEvent.change(input, { target: { value: '3' } });
-    expect((screen.getByRole('button', { name: /生成候选版本/ }) as HTMLButtonElement).disabled).toBe(false);
+    expect((screen.getByRole('button', { name: /生成候选版本/ })).disabled).toBe(false);
     fireEvent.change(input, { target: { value: '1.8' } });
-    expect((screen.getByRole('button', { name: /生成候选版本/ }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: /生成候选版本/ })).disabled).toBe(true);
   });
 
   it('上下文阻断时禁用手动提交并显示原因', () => {
@@ -112,7 +112,7 @@ describe('G0-RS-P4 Schema 驱动统一编辑面板', () => {
     );
     expect(screen.getByText(/归因只能到 Job/)).toBeTruthy();
     fireEvent.change(screen.getByLabelText('point_size'), { target: { value: '3' } });
-    expect((screen.getByRole('button', { name: /生成候选版本/ }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: /生成候选版本/ })).disabled).toBe(true);
   });
 
   it('作为高级精调抽屉时默认折叠，展开后仍提交同一种手动 patch', () => {
@@ -140,7 +140,7 @@ describe('G0-RS-P4 Schema 驱动统一编辑面板', () => {
     fireEvent.change(screen.getByLabelText('fc_threshold'), { target: { value: '2' } });
     fireEvent.click(screen.getByRole('checkbox', { name: /确认继续/ }));
     fireEvent.click(screen.getByRole('button', { name: '放弃改动' }));
-    expect((screen.getByRole('button', { name: /生成候选版本/ }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: /生成候选版本/ })).disabled).toBe(true);
     expect(screen.queryByRole('status')).toBeNull();
   });
 });

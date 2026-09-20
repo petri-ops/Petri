@@ -84,7 +84,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
   const out: OsWalkItem[] = [];
   for (;;) {
     const batch: FileSystemEntry[] = await new Promise((resolve) => reader.readEntries(
-      (items) => resolve(items as FileSystemEntry[]),
+      (items) => resolve(items),
       () => resolve([]),
     ));
     if (batch.length === 0) break;
@@ -392,7 +392,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
       event.preventDefault();
       // Chromium 默认行为是导航到拖入文件路径；上面 preventDefault 已接管。
       const hit = document.elementFromPoint(event.clientX, event.clientY);
-      const dirRow = hit && (hit as Element).closest('[data-tree-dir]');
+      const dirRow = hit && (hit).closest('[data-tree-dir]');
       const targetDir = (dirRow && dirRow.getAttribute('data-tree-dir')) || '';
       const droppedFiles = Array.from(event.dataTransfer?.files || []);
       const droppedEntries = Array.from(event.dataTransfer?.items || []).map((item) => {

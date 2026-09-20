@@ -257,7 +257,7 @@ class Workflow {
       if (/[;{}()]|=|\beval\b|\bfunction\b/i.test(safe)) {
         return false;
       }
-      // eslint-disable-next-line no-new-func
+       
       const fn = new Function('context', 'params', `return (${safe});`);
       return Boolean(fn(this.context, this.context.params));
     } catch (e) {

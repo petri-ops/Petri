@@ -87,7 +87,7 @@ function installBridge(overrides: BridgeOverrides = {}): BridgeHandles {
       progressCallbacks.set('__default__', set);
     }
     set.add(cb);
-    return () => set!.delete(cb);
+    return () => set.delete(cb);
   });
 
   (window as unknown as { biof3Desktop: unknown }).biof3Desktop = {

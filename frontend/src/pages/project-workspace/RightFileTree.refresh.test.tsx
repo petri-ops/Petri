@@ -28,7 +28,7 @@ globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
     }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   }
   return new Response(JSON.stringify({ ok: true }), { status: 200 });
-}) as unknown as typeof fetch;
+});
 
 vi.mock('@/lib/desktopBridge', () => ({ getBridge: () => null }));
 vi.mock('./WorkspaceFilePreview', () => ({ WorkspaceFilePreview: () => <div>preview</div> }));
@@ -45,7 +45,7 @@ function makeProject(): Project {
     workspaceKind: 'ssh',
     sshHost: 'wsl',
     workspacePath: '/home/devah/proj',
-  } as Project;
+  };
 }
 
 function makeFile(name: string): ActiveWorkspaceFile {
@@ -53,7 +53,7 @@ function makeFile(name: string): ActiveWorkspaceFile {
     name,
     path: `src/${name}`,
     url: `http://mock/workspaces/p_ssh1/file?path=src/${name}`,
-  } as ActiveWorkspaceFile;
+  };
 }
 
 function renderTree(activeFile: ActiveWorkspaceFile | null) {

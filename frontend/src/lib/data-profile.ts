@@ -251,15 +251,12 @@ function normalizeProfile(value: unknown): DataProfileResult {
     headers: Array.isArray(rawObservation.headers)
       ? rawObservation.headers.filter((item): item is string => typeof item === 'string').slice(0, 256)
       : [],
-    columnBounds: isRecord(rawObservation.columnBounds) ? rawObservation.columnBounds as DataProfileBound : {},
+    columnBounds: isRecord(rawObservation.columnBounds) ? rawObservation.columnBounds : {},
     sample: isRecord(rawObservation.sample) ? {
       ...rawObservation.sample,
       rows: normalizeRows(rawObservation.sample.rows),
       dataRows: normalizeRows(rawObservation.sample.dataRows),
-      bounds: isRecord(rawObservation.sample.bounds) ? rawObservation.sample.bounds as {
-        rows?: DataProfileBound;
-        columns?: DataProfileBound;
-      } : undefined,
+      bounds: isRecord(rawObservation.sample.bounds) ? rawObservation.sample.bounds : undefined,
     } : undefined,
     sampleRows: normalizeRows(rawObservation.sampleRows),
     fileRoleCandidates,

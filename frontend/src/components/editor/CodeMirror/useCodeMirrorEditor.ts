@@ -312,7 +312,7 @@ export function useCodeMirrorEditor(
     }
     loadLanguage(language).then((langExt) => {
       if (cancelled || !viewRef.current) return;
-      viewRef.current!.dispatch({
+      viewRef.current.dispatch({
         effects: compartment.reconfigure(langExt ? [langExt] : [createFallbackLanguage()]),
       });
     });

@@ -24,7 +24,7 @@ export function HarnessEnvironment(): React.ReactElement | null {
   useEffect(() => {
     if (!bridge) { setLoading(false); return; }
     bridge.list()
-      .then((result) => { setCapabilities((result.capabilities ?? []) as typeof capabilities); })
+      .then((result) => { setCapabilities((result.capabilities ?? [])); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [bridge]);

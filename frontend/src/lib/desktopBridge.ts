@@ -114,7 +114,7 @@ export function getBridge<K extends DesktopBridgeName>(
   // older builds. Returning null in that case keeps callers
   // from blowing up at the call site.
   const handle = (desktop as Partial<DesktopBridge>)[name];
-  return (handle ?? null) as DesktopBridgeHandle<K> | null;
+  return (handle ?? null);
 }
 
 /** Returns the requested sub-bridge, throwing

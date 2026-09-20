@@ -158,8 +158,8 @@ describe('ResultCardRenderer', () => {
     // Header cells render as <th scope="col"> with the column labels.
     const headers = container.querySelectorAll('thead th');
     expect(headers.length).toBe(3);
-    expect(headers[0]!.textContent).toBe('gene');
-    expect(headers[0]!.getAttribute('scope')).toBe('col');
+    expect(headers[0].textContent).toBe('gene');
+    expect(headers[0].getAttribute('scope')).toBe('col');
 
     // Rows render as <tbody><tr>; numeric cells right-align,
     // null cells render an em-dash placeholder inside their <td>.
@@ -168,9 +168,9 @@ describe('ResultCardRenderer', () => {
     const tds = container.querySelectorAll('tbody td');
     expect(tds.length).toBe(9);
     // Row 1 col 1 (TP53 log2FC) is numeric.
-    expect(tds[1]!.getAttribute('data-cell-type')).toBe('number');
+    expect(tds[1].getAttribute('data-cell-type')).toBe('number');
     // Row 3 col 1 (MYC log2FC === null) carries the em-dash placeholder.
-    const nullSpan = tds[7]!.querySelector('span');
+    const nullSpan = tds[7].querySelector('span');
     expect(nullSpan).not.toBeNull();
     // Placeholder text is the em-dash character; accept any non-empty
     // placeholder text to stay resilient against source encoding drift.

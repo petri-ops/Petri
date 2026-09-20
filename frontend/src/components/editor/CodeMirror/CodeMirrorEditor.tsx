@@ -99,7 +99,7 @@ export const CodeMirrorEditor = forwardRef<EditorApi, CodeMirrorEditorProps>(fun
     if (typeof ref === 'function') {
       ref(apiRef.current);
     } else if (ref) {
-      (ref as React.MutableRefObject<EditorApi | null>).current = apiRef.current;
+      (ref).current = apiRef.current;
     }
     setContextApi(apiRef.current);
   });
@@ -120,7 +120,7 @@ export const CodeMirrorEditor = forwardRef<EditorApi, CodeMirrorEditorProps>(fun
         className={[styles.cmEditor, className].filter(Boolean).join(' ')}
         data-block-22-codemirror
         data-readonly={readonly ? 'true' : 'false'}
-        data-cm6-mode={(mode as EditorMode) ?? 'normal'}
+        data-cm6-mode={(mode) ?? 'normal'}
         aria-readonly={readonly}
       >
         {children}

@@ -218,12 +218,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
       if (!event.key || event.key !== ACCENT_STORAGE_KEY) return;
       setAccentState(readAccent());
     };
-    window.addEventListener(THEME_CHANGE_EVENT, onThemeChange as EventListener);
+    window.addEventListener(THEME_CHANGE_EVENT, onThemeChange);
     window.addEventListener(FONT_CHANGE_EVENT, onFontChange);
     window.addEventListener('storage', onStorage);
     window.addEventListener('storage', onAccentStorage);
     return () => {
-      window.removeEventListener(THEME_CHANGE_EVENT, onThemeChange as EventListener);
+      window.removeEventListener(THEME_CHANGE_EVENT, onThemeChange);
       window.removeEventListener(FONT_CHANGE_EVENT, onFontChange);
       window.removeEventListener('storage', onStorage);
       window.removeEventListener('storage', onAccentStorage);

@@ -113,7 +113,7 @@ describe('useDurableConversationLoop', () => {
     const { result, rerender } = renderHook(
       ({ conversationId }) =>
         useDurableConversationLoop('project-1', conversationId),
-      { initialProps: { conversationId: 'conversation-1' as string | null } },
+      { initialProps: { conversationId: 'conversation-1' } },
     );
     await waitFor(() => expect(result.current.loading).toBe(false));
     act(() => rerender({ conversationId: null }));

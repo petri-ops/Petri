@@ -508,7 +508,7 @@ export function ResultArtifactShell({
       : '';
   const selectedArtifactKind = selectedArtifact
     ? classifyArtifact(selectedArtifact)
-    : classifyArtifact({ name: selectedArtifactName, type: '' } as ResultArtifactRecord);
+    : classifyArtifact({ name: selectedArtifactName, type: '' });
   const selectedArtifactLabel = selectedArtifact
     ? selectedArtifact.label || selectedArtifact.title || selectedArtifact.name
     : '';
@@ -576,7 +576,7 @@ export function ResultArtifactShell({
     ? previewAvailability
     : {
         key: previewAvailabilityKey,
-        status: (requiresPreviewAvailabilityCheck ? 'checking' : 'available') as 'checking' | 'available',
+        status: (requiresPreviewAvailabilityCheck ? 'checking' : 'available'),
         reason: null,
       };
 

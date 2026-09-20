@@ -29,12 +29,12 @@ interface BridgeHandles {
 function installBridge(overrides: BridgeOverrides = {}): BridgeHandles {
   const installed = (overrides.installed ?? []) as BridgeHandles['installed'];
   const remote = overrides.remote ?? { plugins: {} };
-  const install = (overrides.install ? vi.fn(overrides.install) : vi.fn().mockResolvedValue({ ok: true })) as MockFn;
-  const uninstall = (overrides.uninstall ? vi.fn(overrides.uninstall) : vi.fn().mockResolvedValue({ ok: true })) as MockFn;
-  const checkUpdates = (overrides.checkUpdates ? vi.fn(overrides.checkUpdates) : vi.fn().mockResolvedValue([])) as MockFn;
+  const install = (overrides.install ? vi.fn(overrides.install) : vi.fn().mockResolvedValue({ ok: true }));
+  const uninstall = (overrides.uninstall ? vi.fn(overrides.uninstall) : vi.fn().mockResolvedValue({ ok: true }));
+  const checkUpdates = (overrides.checkUpdates ? vi.fn(overrides.checkUpdates) : vi.fn().mockResolvedValue([]));
   const runtime = overrides.runtime
     ? { status: vi.fn(overrides.runtime.status) as MockFn }
-    : { status: vi.fn().mockResolvedValue({ r: { installed: false, path: null }, python: { installed: false, path: null } }) as MockFn };
+    : { status: vi.fn().mockResolvedValue({ r: { installed: false, path: null }, python: { installed: false, path: null } }) };
   (window as unknown as { biof3Desktop: unknown }).biof3Desktop = {
     plugins: {
       listInstalled: vi.fn().mockResolvedValue(installed),

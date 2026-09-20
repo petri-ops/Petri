@@ -134,7 +134,7 @@ export function parseAssistantResultNodes(value: unknown): ResultNode[] | null {
   const out: ResultNode[] = [];
   for (const entry of value) {
     if (!isValidResultNode(entry)) return null;
-    out.push(entry as ResultNode);
+    out.push(entry);
   }
   return out;
 }
@@ -154,7 +154,7 @@ export function AssistantResultNodes({ nodes }: { nodes: ResultNode[] }): React.
   // twice is a no-op.
   registerDefaultRenderers();
 
-  // eslint-disable-next-line no-console
+   
   console.debug('[simplechat] resultNodes injected', {
     count: nodes.length,
     types: nodes.map((node) => node.type),

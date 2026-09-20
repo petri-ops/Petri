@@ -221,7 +221,7 @@ export function useKnowledgeConsole() {
           const entryId = (e.toolResult && e.toolResult.callId && toolEntries.get(e.toolResult.callId)) || null;
           const status: ConsoleEntryStatus =
             e.toolResult && e.toolResult.status === 'error' ? 'error' : 'success';
-          const data = e.toolResult && (e.toolResult.data as unknown);
+          const data = e.toolResult && (e.toolResult.data);
           const patch: Partial<ConsoleToolEntry> = { status, summary: e.summary };
           setEntries((prev) => {
             const next = prev.map((entry) => {

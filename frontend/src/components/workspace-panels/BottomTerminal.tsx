@@ -110,7 +110,7 @@ export function BottomTerminal({
                   className={styles.embeddedTerminalTabClose}
                   aria-label={`升格 ${label} 为独立窗`}
                   title="升格为独立窗（同一会话第二视图，主窗标签保活）"
-                  onClick={() => void windowManagerBridge!.popOut('terminal', tab.id)}
+                  onClick={() => void windowManagerBridge.popOut('terminal', tab.id)}
                 >
                   <Icon name="arrow-right" size={10} />
                 </button>

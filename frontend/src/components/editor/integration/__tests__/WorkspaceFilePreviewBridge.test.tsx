@@ -113,7 +113,7 @@ describe('WorkspaceFilePreviewBridge (P3 smoke)', () => {
       </WorkspaceFilePreviewBridge>,
     );
     expect(capture).not.toBeNull();
-    expect(typeof capture!.setPendingRequest).toBe('function');
+    expect(typeof capture.setPendingRequest).toBe('function');
   });
 
   it('forwards filePath / value to CodeMirrorEditor and forwards ref api', async () => {

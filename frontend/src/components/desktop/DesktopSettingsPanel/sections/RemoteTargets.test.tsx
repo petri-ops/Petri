@@ -61,7 +61,7 @@ describe('RemoteTargets 联邦执行位置选择（UI-422 / BLOCK-85 fed: 产品
       expect(screen.getByTestId('remote-target-default-summary').textContent).toContain('联邦节点 MacBook-Pro.local'),
     );
     // ★ 默认态
-    expect((screen.getByTestId('federation-peer-default-gpeer_test123') as HTMLButtonElement).textContent).toContain('★');
+    expect((screen.getByTestId('federation-peer-default-gpeer_test123')).textContent).toContain('★');
   });
 
   it('无联邦节点：诚实空态指路联邦面板，SSH 目标管理不受影响', async () => {

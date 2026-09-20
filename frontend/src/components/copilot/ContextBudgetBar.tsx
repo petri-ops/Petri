@@ -194,7 +194,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>消息 tokens</span>
               <span style={{ fontFamily: 'monospace', color: 'var(--gewu-text)' }}>
-                {hasData ? `${formatTokens(displayBudget!.messagesTokensUsed)}${messageBudget > 0 ? ` / ${formatTokens(messageBudget)}` : ''}` : '—'}
+                {hasData ? `${formatTokens(displayBudget.messagesTokensUsed)}${messageBudget > 0 ? ` / ${formatTokens(messageBudget)}` : ''}` : '—'}
               </span>
             </div>
             {/* BLOCK-69 — 知识空间注入块预算透明 */}
@@ -222,13 +222,13 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>保留消息</span>
                   <span style={{ fontFamily: 'monospace', color: 'var(--gewu-text)' }}>
-                    {displayBudget!.messagesKept} 条
+                    {displayBudget.messagesKept} 条
                   </span>
                 </div>
-                {displayBudget!.messagesDropped > 0 && (
+                {displayBudget.messagesDropped > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', color }}>
                     <span>已压缩</span>
-                    <span style={{ fontFamily: 'monospace' }}>{displayBudget!.messagesDropped} 条</span>
+                    <span style={{ fontFamily: 'monospace' }}>{displayBudget.messagesDropped} 条</span>
                   </div>
                 )}
               </>
@@ -251,7 +251,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
                 { key: 'tools' as const, label: '工具调用', color: '#22c55e' },
                 { key: 'other' as const, label: '其他', color: '#9ca3af' },
               ]).map(({ key, label, color }) => {
-                const catValue = displayBudget!.categories![key];
+                const catValue = displayBudget.categories![key];
                 const catPct = contextWindow > 0 ? (catValue / contextWindow) * 100 : 0;
                 return (
                   <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>

@@ -42,7 +42,7 @@ describe('PlanApprovalCard', () => {
     const onApprove = vi.fn();
     const onDismiss = vi.fn();
     render(<PlanApprovalCard plan={plan} busy onApprove={onApprove} onDismiss={onDismiss} />);
-    const buttons = screen.getAllByRole('button') as HTMLButtonElement[];
+    const buttons = screen.getAllByRole('button');
     const approveButtons = buttons.filter((b) => b.textContent?.match(/批准并|继续讨论/));
     for (const b of approveButtons) expect(b.disabled).toBe(true);
     fireEvent.click(screen.getByLabelText(/收起批准卡/));

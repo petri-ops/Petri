@@ -300,7 +300,7 @@ export function useAiSettings(): UseAiSettingsResult {
         active_chat_model_id: endpointProfileId,
         llm_provider: target.provider,
         model_role_bindings: {
-          ...((current.model_role_bindings as Record<string, unknown> | undefined) || {}),
+          ...((current.model_role_bindings) || {}),
           chat: endpointProfileId,
         },
       });

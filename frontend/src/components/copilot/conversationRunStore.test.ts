@@ -914,7 +914,7 @@ describe('BLOCK-49 加映二 — 模型派生子 agent 活动面板数据源', (
         sideEffects: { type: 'state-write', riskTier: 'R2', resources: [] },
         data: { ok: true, agentId: 'agent-panel-1' },
       },
-    } as never);
+    });
 
     const list = listSubAgentTasksForConversation('conv-panel-spawn');
     const entry = list.find((t) => t.taskId === 'agent-panel-1');
@@ -946,7 +946,7 @@ describe('BLOCK-49 加映二 — 模型派生子 agent 活动面板数据源', (
         sideEffects: { type: 'state-write', riskTier: 'R2', resources: [] },
         data: { ok: true, agentId: 'agent-panel-2' },
       },
-    } as never);
+    });
     callbacks.onChildFinished?.({
       childTaskId: 'agent-panel-2',
       status: 'completed',
@@ -1105,7 +1105,7 @@ describe('BLOCK-94 knowledge_citations projection (conversation-level store)', (
         'garbage',
         { seq: 'not-a-number' },
       ],
-    } as never);
+    });
     expect(getConversationCitations('conv-cite-3')).toHaveLength(1);
   });
 });

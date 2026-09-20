@@ -71,7 +71,7 @@ describe('ToastProvider', () => {
     act(() => {
       api.error('Runtime failed to start');
     });
-    const region = screen.getByText('Runtime failed to start').closest('[role="status"]') as HTMLElement | null;
+    const region = screen.getByText('Runtime failed to start').closest('[role="status"]');
     expect(region).not.toBeNull();
     expect(region?.getAttribute('aria-live')).toBe('assertive');
   });

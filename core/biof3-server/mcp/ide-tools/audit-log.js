@@ -56,7 +56,7 @@ function record({ tool, args, ok, durationMs, error = null }) {
     fs.appendFileSync(LOG_PATH, JSON.stringify(entry) + '\n', 'utf8');
   } catch (e) {
     // 审计日志失败不应阻塞主流程；只在 stderr 打印
-    // eslint-disable-next-line no-console
+     
     console.error('[ide-tools audit] failed to write audit log:', e.message);
   }
 }

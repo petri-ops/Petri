@@ -283,7 +283,7 @@ function BridgeInner({
   }, [pendingRequest, filePath, reloadKey]);
 
   // P4.2：EditorApiContext 消费者需要 EditorApi 实例（通过稳定引用 + reloadKey 触发重渲染）
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+   
   const ctxValue = React.useMemo(() => ctxValueRef.current, [reloadKey]);
 
   return (

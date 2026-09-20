@@ -53,7 +53,7 @@ describe('imageReferences (BLOCK-52 P2)', () => {
     // 血统不完整（无 toolJobId）→ 模型无法读图 → 拒绝创建
     expect(makeImageReference(detail({ kind: 'result-artifact' }))).toBeNull();
     expect(
-      makeImageReference(detail({ kind: 'result-artifact', artifact: { toolJobId: '' } as never })),
+      makeImageReference(detail({ kind: 'result-artifact', artifact: { toolJobId: '' } })),
     ).toBeNull();
   });
 

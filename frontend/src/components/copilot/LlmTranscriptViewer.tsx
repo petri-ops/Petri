@@ -116,7 +116,7 @@ function RecordDetail({ record }: { record: LlmTranscriptRecord }) {
               <span>finish: {response.finishReason || '—'}</span>
               {usage && Number.isFinite(usage.total_tokens) && (
                 <span>tokens: {usage.total_tokens}
-                  {Number.isFinite(usage.prompt_tokens as number) && Number.isFinite(usage.completion_tokens as number)
+                  {Number.isFinite(usage.prompt_tokens) && Number.isFinite(usage.completion_tokens)
                     ? `（入 ${usage.prompt_tokens} / 出 ${usage.completion_tokens}）`
                     : ''}
                 </span>

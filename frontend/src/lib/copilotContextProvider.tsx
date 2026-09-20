@@ -115,7 +115,7 @@ export function useSetCopilotContext(
   // freshly-built object on every render would trigger an
   // infinite update loop.
   const patchKey = JSON.stringify(patch);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   useEffect(() => {
     reset();
     setCtx(patch);

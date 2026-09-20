@@ -4801,7 +4801,7 @@
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-20",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P2-RASSION-PENDING",
+      "phase": "P2-RATCHET-CLOSED",
       "tags": [
         "block-105",
         "code-quality",
@@ -4811,7 +4811,7 @@
         "architecture-rules",
         "governance-gates"
       ],
-      "notes": "P0 体检基线 + P1 lint/密钥门禁/knip 校准 completed（report-only 基线 3718e+1325w 落盘）；P2 豁免清偿后转 blocking。"
+      "notes": "P0 体检 + P1 lint/密钥门禁 + P2 棘轮闭合 completed（eslint-suppressions.json 入库，quality:lint blocking，真缺陷 2 件修复，双套件验证）；P3 dependency-cruiser+Electron 断言待启动。"
     }
   ],
   "lastUpdated": "2026-09-20",

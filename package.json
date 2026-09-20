@@ -226,7 +226,7 @@
     "harness:loop:repair": "node scripts/harness-loop-repair.mjs",
     "harness:loop:checkpoint:test": "node --test test/loop-checkpoint.test.cjs",
     "harness:loop:checkpoint": "node scripts/harness-loop-checkpoint.mjs",
-    "quality:lint": "eslint . || true",
+    "quality:lint": "eslint .",
     "quality:lint:strict": "eslint .",
     "quality:secret": "node scripts/secret-scan.mjs",
     "quality:knip": "knip --no-exit-code"

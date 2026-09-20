@@ -74,7 +74,7 @@ describe('G0-RS-P7 existing Git 显式同意 UI（前端）', () => {
     expect(group.textContent).toContain('当前仓库有未提交改动');
     expect(group.textContent).toContain('不会自动暂存、提交或覆盖');
     expect(group.textContent).toContain('后续写入将被阻止');
-    expect((screen.getByRole('button', { name: '授权 Gewu 写入我的仓库' }) as HTMLButtonElement).disabled).toBe(false);
+    expect((screen.getByRole('button', { name: '授权 Gewu 写入我的仓库' })).disabled).toBe(false);
   });
 
   it('用户点击授权后调用提交接口并刷新为已授权状态', async () => {

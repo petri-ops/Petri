@@ -89,7 +89,7 @@ describe('ChatScrollbar', () => {
 
     act(() => {
       Object.defineProperty(box, 'scrollHeight', { configurable: true, value: 900 });
-      roCb([] as unknown as ResizeObserverEntry[], {} as ResizeObserver);
+      roCb([], {} as ResizeObserver);
     });
     expect(container.querySelector('[class*=track]')).toBeNull();
   });

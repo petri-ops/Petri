@@ -132,7 +132,7 @@ function normalizeExplicitSections(rawSections: unknown): ResultSectionRecord[] 
         label,
         description: asString(obj.description) || undefined,
         artifactNames,
-      } as ResultSectionRecord;
+      };
     })
     .filter(Boolean) as ResultSectionRecord[];
 }

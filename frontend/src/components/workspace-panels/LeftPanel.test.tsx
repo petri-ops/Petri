@@ -163,11 +163,11 @@ describe('BLOCK-67 左栏 ssh 项目标识与远程连接', () => {
   it('ssh 项目树行有 远程连接 按钮，点击触发 sshConnectProject', () => {
     const ctx = buildCtx('chat');
     ctx.visibleProjects = [{
-      ...(ctx.project as NonNullable<typeof ctx.project>),
+      ...(ctx.project),
       workspaceKind: 'ssh',
       sshHost: 'aliyun',
       remotePath: '/root/gewu-block67-demo',
-    } as typeof ctx.project];
+    }];
     render(
       <MemoryRouter>
         <LeftPanel ctx={ctx} />
@@ -213,7 +213,7 @@ describe('UI-327 左栏 globe 行内创建向导（终端式路径输入）', ()
       const el = panel.querySelector('[data-testid="ssh-path-input"]') as HTMLInputElement;
       expect(el.value).toBe('/root/');
       return el;
-    })) as HTMLInputElement;
+    }));
     expect(ctx.sshListDirs).toHaveBeenCalledWith('aliyun', '/root');
     await waitFor(() => expect(screen.getByText('/root/gewu-block67-demo/')).toBeTruthy());
     void pathInput;
@@ -233,7 +233,7 @@ describe('UI-327 左栏 globe 行内创建向导（终端式路径输入）', ()
       const el = panel.querySelector('[data-testid="ssh-path-input"]') as HTMLInputElement;
       expect(el.value).toBe('/root/');
       return el;
-    })) as HTMLInputElement;
+    }));
     const setVal = (v: string) => {
       const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
       setter?.call(pathInput, v);
@@ -302,7 +302,7 @@ describe('UI-327 Tab 多候选：补全到公共前缀', () => {
       const el = panel.querySelector('[data-testid="ssh-path-input"]') as HTMLInputElement;
       expect(el.value).toBe('/root/');
       return el;
-    })) as HTMLInputElement;
+    }));
     const setVal = (v: string) => {
       const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
       setter?.call(pathInput, v);

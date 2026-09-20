@@ -23,7 +23,7 @@ export function AccentControl(): React.ReactElement {
           aria-checked={accent === option.id}
           className={`accent-control__swatch${accent === option.id ? ' is-active' : ''}`}
           style={{ ['--swatch' as string]: option.swatch }}
-          onClick={() => setAccent(option.id as AccentId)}
+          onClick={() => setAccent(option.id)}
           title={option.label}
           aria-label={option.label}
         >

@@ -20,7 +20,7 @@ function rect(top: number, left: number, w = 100, h = 20): DOMRect {
     x: left,
     y: top,
     toJSON: () => ({}),
-  } as DOMRect;
+  };
 }
 
 describe('HoverPreviewPopover 纵向钳制（BLOCK-47）', () => {
@@ -71,7 +71,7 @@ describe('HoverPreviewPopover 纵向钳制（BLOCK-47）', () => {
         <div>diff</div>
       </HoverPreviewPopover>
     );
-    const el = getByTestId('pop') as HTMLElement;
+    const el = getByTestId('pop');
     // top = min(990-8, 1000-100-8) = 892，bottom = 992 ≤ 1000-8
     expect(el.style.top).toBe('892px');
     expect(el.style.visibility).toBe('visible');
@@ -96,9 +96,9 @@ describe('HoverPreviewPopover 纵向钳制（BLOCK-47）', () => {
     // 模拟 diff 流式渲染使内容膨胀到 60vh 上限（600px）
     act(() => {
       contentHeight = 600;
-      roCb!([] as unknown as ResizeObserverEntry[], {} as ResizeObserver);
+      roCb!([], {} as ResizeObserver);
     });
-    const el = getByTestId('pop') as HTMLElement;
+    const el = getByTestId('pop');
     // 修复前：top 恒 892，bottom = 1492 越界；修复后：top = min(982, 1000-600-8) = 392
     expect(el.style.top).toBe('392px');
     expect(Number.parseFloat(el.style.top) + contentHeight).toBeLessThanOrEqual(1000 - MARGIN);
@@ -118,13 +118,13 @@ describe('HoverPreviewPopover 纵向钳制（BLOCK-47）', () => {
     );
     act(() => {
       contentHeight = 600;
-      roCb!([] as unknown as ResizeObserverEntry[], {} as ResizeObserver);
+      roCb!([], {} as ResizeObserver);
     });
     act(() => {
       contentHeight = 40;
-      roCb!([] as unknown as ResizeObserverEntry[], {} as ResizeObserver);
+      roCb!([], {} as ResizeObserver);
     });
-    const el = getByTestId('pop') as HTMLElement;
+    const el = getByTestId('pop');
     // 收缩后钳制上限回到 anchor 侧：top = min(982, 1000-40-8) = 952
     expect(el.style.top).toBe('952px');
     unmount();

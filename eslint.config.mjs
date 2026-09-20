@@ -43,6 +43,7 @@ export default tseslint.config(
       'security/detect-object-injection': 'warn',
       'security/detect-child-process': 'warn',
       'security/detect-non-literal-fs-filename': 'off', // 本仓为本地桌面应用，动态路径是常态；靠 allowlist 机制约束
+      'no-empty': ['error', { allowEmptyCatch: true }], // 本仓 best-effort catch 模式（BLOCK-97 沉淀），空 catch+注释=合法形态
       'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
   },
