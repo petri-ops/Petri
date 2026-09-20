@@ -4801,7 +4801,7 @@
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-20",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "P1-PENDING-D1-D5",
       "tags": [
         "block-105",
         "code-quality",
@@ -4811,7 +4811,7 @@
         "architecture-rules",
         "governance-gates"
       ],
-      "notes": "代码质量与安全治理：补全仓 lint 层空白（现状零 ESLint，前端 check 仅 tsc --noEmit）+安全扫描（Semgrep/Gitleaks/依赖 SCA）+冗余度量（Knip/jscpd）+架构规范机械化（dependency-cruiser：IPC 必经 desktopBridge 等转可执行规则）+Electron 安全断言。五阶段 P0 只读体检（npx 零新依赖）→P1 lint 补齐+防增量→P2 存量归因清偿（K 簇模式+棘轮）→P3 架构机械化→P4 收口。红线=工具链只装根 package.json 不碰 frontend lockfile（P6 源绑定）；新依赖逐个走 DEPENDENCY-CHANGE-CHECKLIST 裁决 D1-D5。用户裁决 2026-09-20「好的 立一个工作包」。"
+      "notes": "代码质量与安全治理：补全仓 lint 层空白（现状零 ESLint，前端 check 仅 tsc --noEmit）+安全扫描（Semgrep/Gitleaks/依赖 SCA）+冗余度量（Knip/jscpd）+架构规范机械化（dependency-cruiser：IPC 必经 desktopBridge 等转可执行规则）+Electron 安全断言。五阶段 P0 只读体检（npx 零新依赖）→P1 lint 补齐+防增量→P2 存量归因清偿（K 簇模式+棘轮）→P3 架构机械化→P4 收口。红线=工具链只装根 package.json 不碰 frontend lockfile（P6 源绑定）；新依赖逐个走 DEPENDENCY-CHANGE-CHECKLIST 裁决 D1-D5。用户裁决 2026-09-20「好的 立一个工作包」。；P0 体检基线 completed（密钥干净/audit 32 条含 electron-builder 族新发现/Knip 高噪音待配置/jscpd 2.7% 健康），P1 待 D1-D5 裁决。"
     }
   ],
   "lastUpdated": "2026-09-20",

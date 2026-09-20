@@ -58,4 +58,5 @@
 
 ## 6. 运行记录
 
+- 2026-09-20 P0-BASELINE completed：四项体检报告落 acceptance/block-105/p0-baseline/（SUMMARY.md + 原始 JSON×4 + 密钥扫清单）。核心数字：密钥 0 真实命中（14 处全测试 fixture）/ 依赖漏洞 root 20 + frontend 12（新发现 electron-builder 工具链族 10 条可一键升级 26.15.3 修复、extract-zip high 无修复路径归 P2 归因、前端批次维持 P6 同批）/ Knip 864 文件发现（⚠️ 无配置高噪音——preload.js/vite.config.ts 均被标死文件，P1 必须先写 knip 入口配置再重扫）/ jscpd 重复率 2.7%（健康，热点 loop-orchestrator↔chat.js 167 行+agent-runner↔chat.js 125 行实证架构候选）。git diff 零产品代码改动可证。**P1 待启动**：涉及 typescript-eslint/gitleaks 等新依赖，启动前需用户过 §4 D1-D5 裁决。
 - 2026-09-20 P0-LAUNCH：立项登记完成（本文档 + DOC-REGISTRY active/P0-LAUNCH + README 137 + roadmap active 首条 + AUDIT-LOG 启动行）；启动检查单硬门全过（无🔴/槽位空/git 净/远程 0 落后/裁决原话「好的 立一个工作包」）。
