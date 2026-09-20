@@ -3970,4 +3970,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **改动**：①`App.tsx` 除首屏 `/` 欢迎页外十个路由页 + 三个 `/window/*` 页改 `lazy`，主窗与窗口面各包一层 `Suspense`；占位件为撑满 main 高度的空盒（`height:100%`+`minHeight:240`+`aria-busy`），**刻意不放 spinner**——本地 chunk 通常不到一帧，闪一个转圈比空白更扰人，同时保证不跳版；②聊天/预览里的代码高亮改渐进上色：`highlight.js`（190 语言）移出关键 chunk、模块加载即并行预取，未就位先渲为纯文本 `<code>`、就位后重渲染上色（明确保留全量语言，不取 36 语言 common 子集，避免 LaTeX/Julia/dockerfile 退化）；③工具活动卡的 changeDiff 差异预览按需挂载（此前它把整个 CodeMirror 栈拖进入口 chunk），加载中显示单行「差异加载中…」占位。
 - **边界与诚实项**：总下载字节未减（highlight.js 仍被预取），减的是关键路径解析；未就绪窗口内 `codeLanguageForFile`/`normalizeCodeLanguage` 返回 null（走纯文本），实测该窗口为本地毫秒级、用户真实交互时必已就绪。
 - **证据**：实机三 flow 全绿覆盖懒加载页——`app-health` 4/4（测试实例挂载）、`ui342-endpoint-grid` 6/6（**懒加载 /settings** 端点网格 N4/N5 断言原样通过）、`app-rail-persistent` 7/7（跨页常驻含 **/project/:id 与 /project/:id/result 懒加载工作区页**导航 R6/R7）；启动链 `block101-startup-timeline` 冷启动多轮 allPass（同轮实测 dataReady 911-945ms，见 plan §8 对账表）；CodeHighlight 4/4（含「未就绪降级为纯文本、就绪后升级上色」契约用例，vi.resetModules 复现启动窗口）；前端全量 vitest **144 files / 1147 tests 全绿**。
+
+## UI-428: 会话信息流时间线化——分段模型与交错渲染（BLOCK-107 P1）(2026-09-20 in_progress，待实机)
+
+- **来源**：BLOCK-107-CONVERSATION-STREAM-UX（用户裁决「新开个block优化我们的项目」立项 →「按推荐的来」启动）。用户初始想法=**模仿 Qoder 的会话消息呈现方式**：思考 / 工具调用 / 文件改动 / 结论按发生顺序交错成一条线，流式追加，刷新后仍是同一条线。现状为「消息容器 + 类型分组堆叠」而非时间线（`SimpleChat.tsx:1043-1113` 固定模板顺序；工具/思考/进度各聚成一个列表 → 真实交错被拍平）；根因=历史渲染走 `copilot_messages.meta_json` 聚合快照（`conversation-adapter.js:97-175`）致跨类型全局时序丢失，而完整时序在 `task_events` 却未被主聊天历史路径消费 → 实况与历史双轨不一致。
+- **D1 裁决依据（plan §0.6 实测）**：`toolActivities[].iteration` 覆盖 **315/315 = 100%**、`reasoningByIteration` 键为同序数字串 → 呈现层按 `iteration` 交错即可还原**迭代级**真序，**零数据层改动**（原推荐「`meta` 增有序 `timeline[]`」降为增强备选）；连带 D2 老数据兼容因不依赖新字段而简化。
+- **改动（P1a 分段模型）**：新增 `conversationSegments.ts`——把一轮回复投影为有序分段序列（每迭代：`reasoning` → `tools` → `progress`，末尾 `narrative`；顺序依据=模型同迭代内先产出思考再发起 `tool_calls`）；复用 UI-383 既有 `groupToolActivities` 折叠规则产出簇内 groups（D3）；簇头统计（总数/失败数/运行数/state/耗时和）为 P1b 的「一行簇头 + 失败计数 + 运行秒表」备好数据；D5 阶段进度作为独立分段插在对应工具簇之后。**D2 兼容红线**：无时间线素材（老数据）退化为单一 `narrative` 分段，渲染与改造前一致；无 `iteration` 的历史活动归 0 号段排在最前，不丢内容。P1b 渲染族 / P1c SimpleChat 接入待续。
+- **证据**：`conversationSegments.test.ts` **15/15**（多迭代交错顺序、无 iteration 归 0 段、失败/运行计数与 settled/running 态、耗时求和且无耗时时为 null 不伪造、D5 进度插位、D2 退化、预览剥离 markdown 与截断）；`tsc --noEmit` 新文件 **0 命中**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
