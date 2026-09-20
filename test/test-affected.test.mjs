@@ -1,5 +1,5 @@
 import { strict as assert } from 'node:assert';
-import { readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { resolveImpact } from '../scripts/test-affected.mjs';
 
@@ -247,4 +247,43 @@ test('every representative P6 bound runtime ancestor selects the canonical sourc
 test('directly edited tests are included and unknown production paths fail closed', () => {
   assert.ok(resolveImpact(['test/loop-contract.test.mjs']).tests.includes('test/loop-contract.test.mjs'));
   assert.deepEqual(resolveImpact(['new-production-area/engine.js']).unknown, ['new-production-area/engine.js']);
+});
+
+test('BLOCK-106 回归钉：启动性能规则声明的 vitest 文件不进 node --test 集合', () => {
+  // 实测缺陷：改动 scripts/lib/startup-perf-budget.cjs 时，规则
+  // block101-startup-performance 的 tests 里声明的 AppRailContext.test.tsx 被
+  // 无条件交给 `node --test` → ERR_UNKNOWN_FILE_EXTENSION: ".tsx" → test:changed
+  // 与 closeout 恒红（错误行极简，易被误判为环境抖动）。本用例钉住分流契约。
+  const plan = resolveImpact(['scripts/lib/startup-perf-budget.cjs']);
+  assert.deepEqual(plan.unknown, []);
+  assert.ok(plan.tests.includes('test/startup-perf-budget.test.mjs'));
+  assert.ok(plan.tests.every((file) => !file.startsWith('frontend/')), 'plan.tests 必须保持纯 node 测试');
+  assert.ok(plan.frontendRelated.includes('src/components/desktop/AppRailContext.test.tsx'));
+});
+
+test('impact-map 声明的每一条 vitest 文件都只能走前端通道（防复发全量扫描）', () => {
+  const map = JSON.parse(readFileSync(new URL('./impact-map.json', import.meta.url), 'utf8'));
+  const declared = [];
+  for (const rule of map.rules) {
+    for (const file of rule.tests || []) {
+      if (/\.test\.(?:ts|tsx)$/.test(file)) {
+        declared.push({
+          rule: rule.id,
+          file,
+          probe: (rule.patterns || []).find((pattern) => !pattern.includes('*')),
+        });
+      }
+    }
+  }
+  // 断言声明仍然存在，避免规则被移除后本用例静默空转。
+  assert.ok(declared.length > 0, 'expected impact-map to still declare frontend vitest files');
+  let checked = 0;
+  for (const { rule, file, probe } of declared) {
+    if (!probe || !existsSync(new URL(`../${probe}`, import.meta.url))) continue;
+    checked += 1;
+    const plan = resolveImpact([probe]);
+    assert.ok(!plan.tests.includes(file), `${rule}: ${file} 不得进入 node --test 集合`);
+    assert.ok(plan.frontendRelated.includes(file.replace(/^frontend\//, '')), `${rule}: ${file} 必须转前端通道`);
+  }
+  assert.ok(checked > 0, 'expected at least one declared rule to be probe-able');
 });

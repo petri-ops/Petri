@@ -47,6 +47,13 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 
+  // 2026-09-20 BLOCK-106 P0/P1 实现提交（6327d1a 启动度量可归因化+中位数阈值
+  // 棘轮 / 18a051e 首屏负载切分）：subject 用 feat(block-106):/perf(block-106):
+  // 未带 UI-###；其前端可见语义边界（路由 chunk 占位不跳版、代码高亮渐进上色、
+  // 活动卡 diff 懒挂载）已由 P3 收口提交统一补登为 UI-427（verified，实机三 flow
+  // 覆盖懒加载页）。豁免 subject UI-### 与同提交台账要求；不重写共享历史。
+  '6327d1a187ec7c0ca023688f8dc752e1c917e355',
+  '18a051ed3ee755a4e18a1de6a52ad01f5a17fea1',
   // 2026-09-19 BLOCK-102 P2 前端竞态治理提交（21d84f52，渲染层竞态修复）：
   // subject 未带 UI-### 为笔误，UI-425 条目（P3/P4 前端切片）与本提交同批由
   // 后续提交补登。豁免同提交台账与 subject 要求；不重写共享历史。
@@ -298,6 +305,12 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
 
+  // 2026-09-20 BLOCK-106 P0/P1 实现提交（6327d1a / 18a051e）：同提交未同步
+  // docs/ui-productization-audit.md，UI-427 条目由 P3 收口提交统一补登（含实机
+  // 证据与 plan §8 对账）；豁免同提交台账要求（subject 门经
+  // LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；不重写共享历史。
+  '6327d1a187ec7c0ca023688f8dc752e1c917e355',
+  '18a051ed3ee755a4e18a1de6a52ad01f5a17fea1',
   // 2026-09-20 BLOCK-105 P2 lint 首修批（8c85898，eslint --fix 机械修复 77 文件）：
   // 纯机械代码修复（多余类型断言移除等）无 UI 行为变化，双套件 2251+1146 验证；
   // 台账即 eslint-suppressions.json + quality:* 门禁（BLOCK-105 plan §6.2），非新

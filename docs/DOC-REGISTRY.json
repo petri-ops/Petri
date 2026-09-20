@@ -4817,13 +4817,14 @@
       "id": "BLOCK-106-STARTUP-PERFORMANCE-RATCHET",
       "path": "docs/block-106-startup-performance-ratchet-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-106-startup-performance-ratchet",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-20",
+      "completedAt": "2026-09-20",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "block-106",
         "startup-performance",
@@ -4832,7 +4833,7 @@
         "sqlite-index",
         "task-events"
       ],
-      "notes": "启动性能回退清偿与首屏负载治理（2026-09-20 Windows 侧立项即启动，用户裁决「开 BLOCK-106」）。P0 让 BLOCK-101 仪表可归因（补项目数/task_events 行数/主 chunk 字节/HEAD）+ 中位数阈值棘轮（只收缩不放宽）；P1 路由级 lazy + xterm/highlight.js 动态化（实测主 chunk 2,989.47 kB / gzip 945.66 kB）；P2 task_events created_at 索引（236,087 行、清扫计划 SCAN 实测 35ms）+ ISO 格式错标纠正 + file-dialog.js 控制字节致二进制化修复与 hygiene 检查项 5；P3 timeline 前后对账必须见数字下降。非范围：轮询→SSE、长列表虚拟化、task_id 数据模型改造、依赖新增、frontend lockfile、vite/router 升级、packaged=G1+。"
+      "notes": "启动性能回退清偿与首屏负载治理：2026-09-20 Windows 侧当日 P0→P3 一次会话整包 completed（用户裁决「开 BLOCK-106」；closeout 八门绿 + 三 flow 实机 17/17 断言）。P0 度量可归因化（evidence 补 head/platform/项目数/入口 chunk 字节）+ 中位数阈值棘轮（schema v2 按平台分档，缺段与缺档均判红，非空转经实机负测证明）；P1 路由级 lazy（除首屏欢迎页外十页 + 三窗口页）+ 190 语言 highlight.js 与工具活动卡 diff 预览的 CodeMirror 栈移出关键 chunk → 入口 chunk 3,061,221→568,207 B（−81.4%），dataReady 1163→911-945ms（回到 09-18 基线之下，五段同步改善）；P2 task_events created_at 索引（236,087 行上清扫 SCAN 30.9ms → SEARCH 0ms）+ ISO 格式契约错标根治（JS 侧 cutoff 作参数）+ file-dialog.js/build.ps1 控制字节真缺陷 + hygiene:check 检查项 5 防复发；P3 对账见 plan §8（含本包自我纠正两处：量具错标最大 chunk→改按 index.html 解析入口；单套预算跨端假红→v2 分档）。遗留候选 plan §7：轮询→SSE、长列表虚拟化、task_id 数据模型改造、mmap_size、RightFileTree 2s 断言实测、darwin 预算档待 Mac 会话实测。"
     }
   ],
   "lastUpdated": "2026-09-20",

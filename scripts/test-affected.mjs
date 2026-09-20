@@ -106,6 +106,25 @@ export function collectChangedFiles({ base = null, explicit = [] } = {}) {
 
 function isNodeSource(file) { return /\.(?:js|mjs|cjs)$/.test(file) && !file.startsWith('test/') && !file.startsWith('frontend/'); }
 
+/**
+ * 前端 Vitest 测试文件（`.test.ts` / `.test.tsx`）。
+ *
+ * 为什么必须分流：`node --test` 无法加载 TypeScript/TSX —— 实测
+ * `ERR_UNKNOWN_FILE_EXTENSION: Unknown file extension ".tsx"`。而
+ * `test/impact-map.json` 的规则允许在 `tests` 里声明前端 vitest 文件（启动性能
+ * 等跨面规则正是这么写的：改启动脚本时也要跑桌面外壳测试）。历史实现把这些声明
+ * 无条件塞进 `plan.tests` 一并交给 `node --test`，于是「改动命中该规则」=
+ * 门禁必然红，且错误信息只有一行 `'.tsx'` 扩展名，很容易被误判为环境抖动。
+ *
+ * 契约依据（两条既有约束，本函数是它们的落地）：
+ *   1. `docs/schemas/test-affected-report.schema.json` 声明 `plan.tests` 为
+ *      "node test files"（且两个对象都 `additionalProperties: false`，不得加字段）；
+ *   2. 既有用例「frontend Vitest inputs stay out of the Node impact bundle」。
+ * 故前端测试一律转 `frontendRelated`（值去 `frontend/` 前缀，与既有语义一致），
+ * 由 `runPlan` 按扩展名分流到 `frontend run test:files`。
+ */
+function isFrontendTestFile(file) { return /\.test\.(?:ts|tsx)$/.test(file); }
+
 export function resolveImpact(changedFiles, map = MAP) {
   validateMap(map);
   const tests = new Set(); const commands = new Set(); const frontendRelated = new Set(); const syntax = new Set(); const unknown = []; const reasons = new Map();
@@ -114,7 +133,10 @@ export function resolveImpact(changedFiles, map = MAP) {
     for (const rule of map.rules) {
       if (!rule.patterns.some((pattern) => globMatches(pattern, file))) continue;
       matched = true;
-      for (const test of rule.tests || []) tests.add(test);
+      for (const test of rule.tests || []) {
+        if (isFrontendTestFile(test)) frontendRelated.add(test.replace(/^frontend\//, ''));
+        else tests.add(test);
+      }
       for (const command of rule.commands || []) commands.add(command);
       if (rule.frontendRelated) frontendRelated.add(file.replace(/^frontend\//, ''));
       reasons.set(file, [...(reasons.get(file) || []), rule.id]);
@@ -141,9 +163,10 @@ function printPlan(plan, json) {
     }
     return;
   }
-  console.log(`[test:changed] changed=${plan.changedFiles.length} nodeTests=${plan.tests.length} syntax=${plan.syntax.length}`);
+  const frontendTestCount = plan.frontendRelated.filter(isFrontendTestFile).length;
+  console.log(`[test:changed] changed=${plan.changedFiles.length} nodeTests=${plan.tests.length} frontendTests=${frontendTestCount} syntax=${plan.syntax.length}`);
   plan.tests.forEach((file) => console.log(`  test ${file}`));
-  plan.frontendRelated.forEach((file) => console.log(`  frontend-related ${file}`));
+  plan.frontendRelated.forEach((file) => console.log(`  ${isFrontendTestFile(file) ? 'frontend-test' : 'frontend-related'} ${file}`));
   if (plan.commands.length) console.log(`  gates ${plan.commands.join(', ')}`);
   if (plan.unknown.length) {
     console.error(`  unmapped ${plan.unknown.join(', ')}`);
@@ -173,7 +196,16 @@ export function runPlan(plan) {
   // 退出，--test-timeout=120000 给单个用例兜底超时：任何套件都无法再把
   // 聚合门禁拖死。挂起定诊法=对比进程 CPU 时间（零增量=挂起而非慢）。
   if (plan.tests.length) { const status = runProcess(process.execPath, ['--test', '--test-force-exit', '--test-timeout=120000', ...plan.tests]); if (status !== 0) return status; }
-  if (plan.frontendRelated.length) { const status = runProcess('npm', ['--prefix', 'frontend', 'run', 'test:related', '--', ...plan.frontendRelated, '--passWithNoTests']); if (status !== 0) return status; }
+  if (plan.frontendRelated.length) {
+    // 分流执行：impact-map 显式声明的 vitest 文件 → test:files（直接跑该文件）；
+    // 被改动的前端源文件 → test:related（vitest 依赖图反查相关测试）。
+    // 两者混跑会让 `vitest related <测试文件>` 语义漂移（related 期望源文件），
+    // 故按扩展名分开调用，保持两种语义各自准确。
+    const frontendTests = plan.frontendRelated.filter(isFrontendTestFile);
+    const frontendSources = plan.frontendRelated.filter((file) => !isFrontendTestFile(file));
+    if (frontendSources.length) { const status = runProcess('npm', ['--prefix', 'frontend', 'run', 'test:related', '--', ...frontendSources, '--passWithNoTests']); if (status !== 0) return status; }
+    if (frontendTests.length) { const status = runProcess('npm', ['--prefix', 'frontend', 'run', 'test:files', '--', ...frontendTests]); if (status !== 0) return status; }
+  }
   if (plan.commands.includes('frontend-all')) { const status = runProcess(...COMMANDS['frontend-all']); if (status !== 0) return status; }
   for (const command of plan.commands.filter((item) => item !== 'frontend-all')) { const status = runProcess(...COMMANDS[command]); if (status !== 0) return status; }
   return 0;

@@ -175,8 +175,12 @@ async function main() {
     domContentLoaded: stat(pick((s) => s.domContentLoaded)),
     projectCount: stat(pick((s) => s.main.reported && s.main.reported.projectCount)),
   };
-  // BLOCK-106 P0 阈值棘轮：中位数超预算即红；预算文件非法直接抛错不降级。
-  const ceilings = perfBudget.parseBudget(JSON.parse(fs.readFileSync(BUDGET_PATH, 'utf8')), BUDGET_PATH);
+  // BLOCK-106 P0 阈值棘轮：中位数超预算即红；预算缺该平台档 / 文件非法 → 抛错判红不降级。
+  const ceilings = perfBudget.resolvePlatformBudget(
+    JSON.parse(fs.readFileSync(BUDGET_PATH, 'utf8')),
+    process.platform,
+    BUDGET_PATH
+  );
   const budget = perfBudget.evaluateBudget(summary, ceilings);
   fs.writeFileSync(path.join(EVIDENCE_DIR, 'block101-startup-timeline.json'),
     JSON.stringify({ flow: 'block101-startup-timeline', summary, budget, raw: samples }, null, 2) + '\n');

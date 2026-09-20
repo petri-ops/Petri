@@ -1,8 +1,8 @@
 # BLOCK-106-STARTUP-PERFORMANCE-RATCHET — 启动性能回退清偿与首屏负载治理
 
-**状态**：`active（2026-09-20 Windows 侧立项即启动；用户裁决「开 BLOCK-106」；phase=P0-LAUNCH）`
+**状态**：`completed（2026-09-20 当日 P0→P3 一次会话整包收口；用户裁决「开 BLOCK-106」；closeout 八门绿 + 三 flow 实机 17/17）`
 **立项**：2026-09-20（Windows 会话，性能面系统性评估的产出直接结转为本包，评估证据即本包 §0）
-**责任轨道**：BLOCK（多工作面：dev-verify 度量层 + 前端构建拓扑 + 桌面侧 SQLite 迁移，且含数据契约注释纠错）
+**责任轨道**：BLOCK（多工作面：dev-verify 度量层 + 前端构建拓扑 + 后端 SQLite 规模债，且含数据契约注释纠错）
 
 ## 0. 问题定义（全部为本次实测证据，非推测）
 
@@ -110,3 +110,44 @@ BLOCK-101 的目标语义是「瞬时加载 · 用户无感」，仪表（`src/m
 - `task_events` 事件按天/按 task 归档或摘要压缩（18k 行/天的长期治理）。
 - 轮询→SSE 与长列表虚拟化（各自独立包）。
 - `RightFileTree` 本地 2s 全树刷新的实测结论与可能的降频。
+
+## 8. 收口对账（2026-09-20 P3）
+
+### 8.1 启动 timeline：立项动因 → 收口实测（同机 win32 / Node v24.20.0 / 项目数 10 / dev 态 / 每轮 5 样本中位数）
+
+| 段（ms） | 09-18 基线 | 09-20 立项复采 | P1 后（P3 三轮） | 相对立项复采 | 相对 09-18 |
+| --- | --- | --- | --- | --- | --- |
+| mainReady | 106 | 118 | 96 / 111 / 113 | −5%（最差持平） | −7（未回退） |
+| preload | 313 | 360 | 306 / 348 / 354 | −2%（最差持平） | +41（噪声内，主进程未触碰） |
+| domContentLoaded | 589 | 629 | 446 / 477 / 493 | **−21.6%** | **−96 优于基线** |
+| firstPaint | 796 | 860 | 632 / 700 / 712 | **−17.2%** | **−84 优于基线** |
+| windowShown | 889 | 981 | 746 / 823 / 832 | **−15.2%** | **−57 优于基线** |
+| didFinishLoad | 890 | 984 | 747 / 824 / 833 | **−15.3%** | **−57 优于基线** |
+| **dataReady** | 984 | 1163 | **911 / 943 / 945** | **−18.7%** | **−39 优于基线** |
+
+结论：**§6 完成语义三条同时成立**——①门禁能抓回退（预算 v2 + 缺失段判红 + 非空转实机自测）；②首屏负载实测下降（入口 chunk 3,061,221 B → **568,207 B**，−81.4%；gzip 945.66 kB → 289 kB；主进程两段在噪声内未变，恰说明改善来自渲染侧改动而非环境波动）；③规模债转为索引级可控（清扫计划 `SCAN task_events` → `SEARCH USING INDEX idx_task_events_created`，236,087 行上实测扫描 30.9ms → 0ms，ISO 契约错标根治）。六段中五段回到 09-18 基线之下。
+
+### 8.2 验收门禁逐项对账（对照 §5）
+
+| §5 项 | 实况 |
+| --- | --- |
+| 1 flow allPass + 归因上下文 | `block101-startup-timeline` 多轮 allPass=true；evidence 已含 `context.{head,platform,node,frontendBundle.{entryChunk,entryChunkBytes,largestChunkBytes,jsChunkCount,builtAt}}` + `projectCount` |
+| 2 棘轮非空转自测 | 实机负测：临时把 `dataReady` 上限压到 100 → 真实 exit=1、`allPass=false (marks=true budget=false)`、violation 指名 `median_over_budget medianMs=1110 ceilingMs=100`；离线负测 8/8（缺段/放宽/非法 schema/跨平台套用全部抛错） |
+| 3 build chunk 前后 | 3,061,221 B → 568,207 B；Vite 500 kB 警告仍在（最大 chunk 是并行预取的 highlight.js 948 KB，非入口）——如实记录为「警告未消除但成因已变」 |
+| 4 前端定向 + tsc | 前端全量 144 files/**1147** 全绿；`tsc --noEmit` 错误数 29→29 未增，本包四文件 0 命中（29 项为存量前端类型债，已开 🟡 归 BLOCK-105 §7 族，见 AUDIT-LOG） |
+| 5 迁移/索引 | 无迁移文件（**实施纠正**：该表 DDL 由 `agent-task-store.js` 自持，见 §1-P2 注）；`schema_migrations` 未涉及；EXPLAIN 前后实采见 §8.1③；新测试 6/6 含「不早删」与「旧空格格式回归钉」 |
+| 6 hygiene 新检查项 + file-dialog 可评审 | 检查项 5 三态实测（正测 PASS / 暂存含 NUL 探针 exit 1 指名偏移与字节 / 清理后 exit 0）；`file-dialog.js` 与 HEAD 的那一次 diff 仍为 `- -`（旧 blob 含 NUL 不可避免），新内容经 `--no-index` 验证可出文本 diff（285 insertions）→ 本包之后该文件恢复可评审 |
+| 7 closeout 八门 + docs:check | **实测八门全绿**（hygiene → docs:check PASS(260) → ui:audit:check → test:changed 142.7s → gate:code-size → quality:secret → quality:arch → quality:lint 0 error / 1334 report-only warning）+ `audit:compact` 幂等（already compact）+ `docs:reconcile` 零人工待审（105 个归档候选全为 `explicitReview=false` 的跨包存量，按文档治理纪律不在本包批量移动，登记为长期清债）。**首次真跑时逐门暴露三处红，已在 §8.4 逐条留痕** |
+
+### 8.3 本包引入并被纠正的两处自我缺陷（留痕，防同类）
+
+1. **量具错标**：P0 的 context 探针把「最大 chunk」当主 chunk——P1 拆包后最大者变成并行预取的 highlight.js，沿用会虚报启动负载。已改为按 `frontend/dist/index.html` 解析真实入口，entry/largest 两值并记。
+2. **跨端假红风险**：预算最初只有单一 `medians` 段，数字全出自 Windows 机，Mac 首跑必然假红。已升 schema **v2 按平台分档**，且**无本平台档 = 判红并输出建基线方法**（不许静默跳过、不许复制他端数字）。`darwin` 档留待 Mac 会话实测，见 handoff Mac 待办。
+
+### 8.4 P3 收口提交落地期间清偿的三处收口链红项（留痕，防同类）
+
+P3 回写由 P3 会话完成，门禁实测与提交由续接会话执行（回写落盘时 `git log` 尚停在 P2 `f287e46d`，19 项收口改动在工作区未提交——「八门全绿」在跑之前只是一句预期，故本会话必须先真跑再落提交）。首跑逐门暴露三处红：
+
+1. **工作区换行漂移 3 文件**（`.node-version`、`scripts/dev/patch-node-pty-spectre.bat`、`scripts/dev/verify-toolchain.mjs`）：blob=LF、工作区=CRLF，`git diff` 为空故肉眼与 diff 都看不见，由 `hygiene:check` 换行漂移项抓出。处置=`normalize-eol.mjs --write` 归一（3/3），`git status` 由 19 项降为 16 项=纯 P3 批次。**非本包引入**，属工作区形态污染。
+2. **`ui:audit:check` 判定 P0/P1 提交未同步 UI 台账且 subject 缺 `UI-###`**（`6327d1a`/`18a051e`）：门禁按历史提交遍历，而 UI-427 由 P3 收口提交统一补登，正落在仓库既有的「不重写共享历史」处置面。处置=按既有惯例登记两条 SHA 豁免（`LEGACY_MESSAGE_EXEMPTIONS` + `LEGACY_AUDIT_SYNC_EXEMPTIONS`；同型先例 BLOCK-102 `21d84f52`、BLOCK-94 四提交）。
+3. **`test:changed` 存量收口链缺陷（本次抓真的好缺陷）**：`test/impact-map.json` 有 **11 处**在规则 `tests` 里声明前端 vitest 文件，而 `scripts/test-affected.mjs` 把 `plan.tests` 无条件交给 `node --test` → 命中任一规则即 `ERR_UNKNOWN_FILE_EXTENSION: ".tsx"` 硬失败。本次因 P3 改动集命中 `block101-startup-performance` 规则（`impact-map.json:1988-2011`）暴露；症状是 `AppRailContext.test.tsx` 批次内两次稳定红、**单跑 4/4 绿**（首轮排查按 BLOCK-104 P4 惯例先做同位重跑，复现后才抓到真实错误行——该缺陷的错误信息只有一行扩展名，天然易被误判为环境抖动）。处置=按既有契约分流：`resolveImpact` 把规则声明的 `.test.ts(x)` 转入 `frontendRelated`，`runPlan` 按扩展名分流（声明的测试 → `frontend run test:files`；被改动的源文件 → `test:related` 语义不变），`printPlan` 增 `frontendTests` 计数。依据是两条既有约束——schema 已声明 `plan.tests` 为 "node test files" 且 `additionalProperties: false`（不得加字段），既有用例已断言 "frontend Vitest inputs stay out of the Node impact bundle"。**不动 `impact-map.json`、不动 report schema**。防复发=两条机械门禁（定向回归钉 + 全量扫描「每条规则声明的 vitest 文件都不得进 node 集合」），`test/test-affected.test.mjs` 18/18 绿。**归属=存量缺陷，非本包引入**，但由本包收口暴露。

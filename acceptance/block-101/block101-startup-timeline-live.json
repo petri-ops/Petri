@@ -1,12 +1,12 @@
 {
   "name": "block101-startup-timeline",
-  "startedAt": "2026-09-20T09:28:26.272Z",
-  "finishedAt": "2026-09-20T09:29:09.403Z",
+  "startedAt": "2026-09-20T10:45:58.869Z",
+  "finishedAt": "2026-09-20T10:46:41.667Z",
   "assertions": [
     {
       "name": "block101_startup_timeline_allPass",
       "pass": true,
-      "detail": "exit=0 354,\"min\":348,\"max\":356,\"n\":5},\"windowShown\":{\"median\":823,\"min\":807,\"max\":871,\"n\":5},\"didFinishLoad\":{\"median\":824,\"min\":809,\"max\":872,\"n\":5},\"firstPaint\":{\"median\":700,\"min\":676,\"max\":752,\"n\":5},\"dataReady\":{\"median\":943,\"min\":930,\"max\":989,\"n\":5},\"domContentLoaded\":{\"median\":477,\"min\":460,\"max\":523,\"n\":5},\"projectCount\":{\"median\":10,\"min\":10,\"max\":10,\"n\":5}}\nbudget: {\"pass\":true,\"headroo"
+      "detail": "exit=0 :306,\"min\":300,\"max\":308,\"n\":5},\"windowShown\":{\"median\":746,\"min\":744,\"max\":760,\"n\":5},\"didFinishLoad\":{\"median\":747,\"min\":745,\"max\":760,\"n\":5},\"firstPaint\":{\"median\":632,\"min\":624,\"max\":636,\"n\":5},\"dataReady\":{\"median\":911,\"min\":897,\"max\":921,\"n\":5},\"domContentLoaded\":{\"median\":446,\"min\":444,\"max\":455,\"n\":5},\"projectCount\":{\"median\":10,\"min\":10,\"max\":10,\"n\":5}}\nbudget: {\"pass\":true,\"headro"
     }
   ],
   "allPass": true

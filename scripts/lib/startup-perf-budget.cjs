@@ -16,9 +16,31 @@ const STAGES = [
   'dataReady',
 ];
 
+const BUDGET_SCHEMA = 'gewu/startup-perf-budget.v2';
+
+/**
+ * v2 形态：`platforms: { win32: { medians, basis }, darwin: {...} }`。
+ * 为什么按平台分档：启动各段绝对值强依赖机器与系统（本包实测 win32 与 Mac 不可比），
+ * 用单套数字会让另一端「假红」或「假绿」——两端必须各自建基线。
+ */
+function resolvePlatformBudget(raw, platform, source = '<budget>') {
+  if (!raw || typeof raw !== 'object') throw new Error(`${source}: 预算必须是对象`);
+  if (raw.schema !== BUDGET_SCHEMA) throw new Error(`${source}: schema 不符（期望 ${BUDGET_SCHEMA}）`);
+  if (!raw.platforms || typeof raw.platforms !== 'object') throw new Error(`${source}: 缺 platforms 段`);
+  const entry = raw.platforms[platform];
+  if (!entry) {
+    throw new Error(
+      `${source}: 无 ${platform} 平台基线（不得跨平台套用数字）。` +
+      ` 建法：在该机跑 npm run verify -- block101-startup-timeline 采 5 样本，` +
+      ` 取各段中位数 ×1.10 写入 platforms.${platform}.medians，并在 basis 记 capturedAt/head/projectCount。`
+    );
+  }
+  return parseBudget({ schema: BUDGET_SCHEMA, medians: entry.medians, basis: entry.basis }, `${source}(${platform})`);
+}
+
 function parseBudget(raw, source = '<budget>') {
   if (!raw || typeof raw !== 'object') throw new Error(`${source}: 预算必须是对象`);
-  if (raw.schema !== 'gewu/startup-perf-budget.v1') throw new Error(`${source}: schema 不符（期望 gewu/startup-perf-budget.v1）`);
+  if (raw.schema !== BUDGET_SCHEMA) throw new Error(`${source}: schema 不符（期望 ${BUDGET_SCHEMA}）`);
   const medians = raw.medians;
   if (!medians || typeof medians !== 'object') throw new Error(`${source}: 缺 medians 段`);
   for (const stage of STAGES) {
@@ -61,16 +83,16 @@ function evaluateBudget(summary, medians) {
   return { pass: violations.length === 0, checked, violations };
 }
 
-/** 棘轮方向核查：new 相对 old 不得放宽（缺段视为放宽）。 */
-function assertBudgetNotWidened(oldRaw, newRaw, source = 'startup-perf-budget') {
-  const oldM = parseBudget(oldRaw, `${source}(旧)`);
-  const newM = parseBudget(newRaw, `${source}(新)`);
-  const widened = STAGES.filter((s) => newM[s] > oldM[s]);
+/** 棘轮方向核查（对某一平台的 medians 比较）：new 相对 old 不得放宽（缺段视为放宽）。 */
+function assertBudgetNotWidened(oldMedians, newMedians, source = 'startup-perf-budget') {
+  const a = parseBudget({ schema: BUDGET_SCHEMA, medians: oldMedians }, `${source}(旧)`);
+  const b = parseBudget({ schema: BUDGET_SCHEMA, medians: newMedians }, `${source}(新)`);
+  const widened = STAGES.filter((s) => b[s] > a[s]);
   if (widened.length) {
-    const detail = widened.map((s) => `${s}: ${oldM[s]}→${newM[s]}`).join(', ');
+    const detail = widened.map((s) => `${s}: ${a[s]}→${b[s]}`).join(', ');
     throw new Error(`${source} 棘轮只许收缩，以下上限被放宽：${detail}`);
   }
-  return { tightened: STAGES.filter((s) => newM[s] < oldM[s]) };
+  return { tightened: STAGES.filter((s) => b[s] < a[s]) };
 }
 
-module.exports = { STAGES, parseBudget, evaluateBudget, assertBudgetNotWidened };
+module.exports = { STAGES, BUDGET_SCHEMA, resolvePlatformBudget, parseBudget, evaluateBudget, assertBudgetNotWidened };

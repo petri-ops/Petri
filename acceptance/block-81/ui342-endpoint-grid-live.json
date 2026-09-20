@@ -1,7 +1,7 @@
 {
   "name": "ui342-endpoint-grid",
-  "startedAt": "2026-09-19T04:41:28.809Z",
-  "finishedAt": "2026-09-19T04:41:34.065Z",
+  "startedAt": "2026-09-20T10:39:09.588Z",
+  "finishedAt": "2026-09-20T10:39:14.838Z",
   "assertions": [
     {
       "name": "G0_settings_mounted",
@@ -31,7 +31,7 @@
     {
       "name": "N4_no_horizontal_scroll",
       "pass": true,
-      "detail": "列表 scrollWidth=1091 clientWidth=1091（期望不再横向滚动）"
+      "detail": "列表 scrollWidth=1093 clientWidth=1093（期望不再横向滚动）"
     }
   ],
   "allPass": true

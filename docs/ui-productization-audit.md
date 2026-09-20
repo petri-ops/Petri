@@ -3963,3 +3963,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **改动**：①状态条统一三重重复头部——切换器内联+真 switch 启用开关（role=switch，保留 knowledge-toggle testid 与缺 key 禁用语义）+就绪/摄取中/失败徽章（--gewu-success 补暗色对）；②通知动作卡组（同屏合并一张卡，DashScope 缺 key 附「去设置」跳 /settings）；③双页签「文档库/检索预览」（原检索测试工具移页签，能力与 testid 全保留）；④hero 大 dropzone 空态（双 CTA 内嵌，拖拽 accent 描边保留）；⑤管理会话台折叠抽屉（对标 UI-417 SideChatDock：右缘竖把手+380px overlay 覆盖不挤压+Esc/外点/再点收起+localStorage 记忆，默认收起，ConsoleChat 内部零改动）；⑥组件拆分 KnowledgeSpacePanel 678→200 行（+DocLibrary 506/Probe 121/Dock 95，700 棘轮净减）+文案产品化。纯前端零后端。
 - **证据**：组件 17/17（行为基线八项全保留+页签往返/hero 新增）+Switcher 3/3+global-pages 冒烟+tsc 0+theme 4/4+前端全量 1146/1146；实机=block103-knowledge-ux-live **12/12 allPass**（CDP 测试实例：页壳挂载+默认收起/缺 key 诚实态/空空间切换 hero/页签往返/抽屉开-Esc收-再开+截图×3，acceptance/block-103/）+block99-console-live **24/24 allPass**（真轮次回归：把手适配 U1/U1b/U1c+REST/真模型/D4 门/绑定链全过）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-427: 首屏负载切分的可见语义边界——路由 chunk 占位不跳版 + 代码高亮渐进上色（BLOCK-106 P1）(2026-09-20 verified，dev Electron 边界内实机)
+
+- **来源**：BLOCK-106-STARTUP-PERFORMANCE-RATCHET P1（用户裁决「开 BLOCK-106」；立项证据=同日实测 BLOCK-101 六段启动齐涨 +18.2% 且全仓无阈值门禁）。承接 BLOCK-101 UI-416（首屏 SWR）同一战场，本条只登记**分包带来的可见行为变化**，性能数字与门禁归 plan/AUDIT-LOG。
+- **改动**：①`App.tsx` 除首屏 `/` 欢迎页外十个路由页 + 三个 `/window/*` 页改 `lazy`，主窗与窗口面各包一层 `Suspense`；占位件为撑满 main 高度的空盒（`height:100%`+`minHeight:240`+`aria-busy`），**刻意不放 spinner**——本地 chunk 通常不到一帧，闪一个转圈比空白更扰人，同时保证不跳版；②聊天/预览里的代码高亮改渐进上色：`highlight.js`（190 语言）移出关键 chunk、模块加载即并行预取，未就位先渲为纯文本 `<code>`、就位后重渲染上色（明确保留全量语言，不取 36 语言 common 子集，避免 LaTeX/Julia/dockerfile 退化）；③工具活动卡的 changeDiff 差异预览按需挂载（此前它把整个 CodeMirror 栈拖进入口 chunk），加载中显示单行「差异加载中…」占位。
+- **边界与诚实项**：总下载字节未减（highlight.js 仍被预取），减的是关键路径解析；未就绪窗口内 `codeLanguageForFile`/`normalizeCodeLanguage` 返回 null（走纯文本），实测该窗口为本地毫秒级、用户真实交互时必已就绪。
+- **证据**：实机三 flow 全绿覆盖懒加载页——`app-health` 4/4（测试实例挂载）、`ui342-endpoint-grid` 6/6（**懒加载 /settings** 端点网格 N4/N5 断言原样通过）、`app-rail-persistent` 7/7（跨页常驻含 **/project/:id 与 /project/:id/result 懒加载工作区页**导航 R6/R7）；启动链 `block101-startup-timeline` 冷启动多轮 allPass（同轮实测 dataReady 911-945ms，见 plan §8 对账表）；CodeHighlight 4/4（含「未就绪降级为纯文本、就绪后升级上色」契约用例，vi.resetModules 复现启动窗口）；前端全量 vitest **144 files / 1147 tests 全绿**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
