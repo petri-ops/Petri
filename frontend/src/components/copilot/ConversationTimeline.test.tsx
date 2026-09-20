@@ -1,0 +1,123 @@
+import { fireEvent, render, within } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+
+import type { ConversationSegment } from './conversationSegments';
+import { ConversationTimeline } from './ConversationTimeline';
+
+const reasoningSegment: ConversationSegment = {
+  kind: 'reasoning',
+  iteration: 2,
+  text: '先确认一下这个函数在哪被调用\n第二行细节',
+  preview: '先确认一下这个函数在哪被调用',
+};
+
+const toolsSegment: ConversationSegment = {
+  kind: 'tools',
+  iteration: 2,
+  activities: [{
+    key: 'call-1',
+    name: 'workspace_read',
+    status: 'success',
+    actionLabel: '已读取',
+    actionDetail: 'src/a.ts',
+    iteration: 2,
+    durationMs: 12,
+  }],
+  groups: [],
+  totalCount: 1,
+  failedCount: 0,
+  runningCount: 0,
+  durationMs: 12,
+  state: 'settled',
+};
+
+const narrativeSegment: ConversationSegment = { kind: 'narrative', text: '最终正文' };
+const progressSegment: ConversationSegment = { kind: 'progress', iteration: 2, content: '已经读完关键文件' };
+
+describe('BLOCK-107 会话时间线渲染（P1b）', () => {
+  it('只渲染思考节点与工具簇；narrative 交由宿主原位渲染', () => {
+    const { container } = render(
+      <ConversationTimeline segments={[reasoningSegment, toolsSegment, narrativeSegment]} />
+    );
+    const view = within(container);
+    expect(view.getByText('思考 · 第 2 轮')).toBeTruthy();
+    expect(container.textContent).toContain('已完成 1 项');
+    // 正文不由本组件产出（宿主负责），避免同一正文被渲染两次
+    expect(container.textContent).not.toContain('最终正文');
+  });
+
+  it('工具簇复用 ToolActivityList 的簇头一行（不传 reasoningByIteration，思考不重复）', () => {
+    const { container } = render(<ConversationTimeline segments={[toolsSegment]} />);
+    expect(container.querySelector('.sc-conversation-timeline')).toBeTruthy();
+    expect(container.querySelector('.sc-timeline-cluster')).toBeTruthy();
+    expect(container.querySelector('.sc-tool-activity-summary')).toBeTruthy();
+    // 簇内不再出现思考行（思考已由时间线独立成节点）
+    expect(container.querySelector('.sc-timeline-reasoning')).toBeNull();
+  });
+
+  it('思考节点折叠态显示一行预览，点击展开全文并收起预览', () => {
+    const { container } = render(<ConversationTimeline segments={[reasoningSegment]} />);
+    expect(container.querySelector('.sc-timeline-reasoning-preview')?.textContent)
+      .toBe('先确认一下这个函数在哪被调用');
+
+    fireEvent.click(within(container).getByRole('button', { name: '展开思考 · 第 2 轮' }));
+
+    expect(container.querySelector('.sc-tool-reasoning-text')?.textContent)
+      .toContain('第二行细节');
+    expect(container.querySelector('.sc-timeline-reasoning-preview')).toBeNull();
+  });
+
+  it('progress 分段默认跳过（避免与宿主 AgentProgressList 重复展示）', () => {
+    const { container } = render(<ConversationTimeline segments={[progressSegment]} />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('传入 renderProgress 时按位置渲染：阶段进度落在对应工具簇之后（D5）', () => {
+    const { container } = render(
+      <ConversationTimeline
+        segments={[toolsSegment, progressSegment]}
+        renderProgress={(segment) => <span>{segment.content}</span>}
+      />
+    );
+    const html = container.innerHTML;
+    expect(within(container).getByText('已经读完关键文件')).toBeTruthy();
+    expect(html.indexOf('已完成 1 项')).toBeLessThan(html.indexOf('已经读完关键文件'));
+  });
+
+  it('仅 narrative 时返回 null（纯文本回答零额外 DOM）', () => {
+    const { container } = render(<ConversationTimeline segments={[narrativeSegment]} />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('空分段数组返回 null', () => {
+    const { container } = render(<ConversationTimeline segments={[]} />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('多簇多思考按传入顺序交错渲染（时间轴顺序即投影顺序）', () => {
+    const secondTools: ConversationSegment = {
+      ...toolsSegment,
+      iteration: 3,
+      activities: [
+        { key: 'call-2', name: 'workspace_exec', status: 'running', actionLabel: '已运行', iteration: 3 },
+      ],
+      totalCount: 1,
+      runningCount: 1,
+      state: 'running',
+    };
+    const thirdReasoning: ConversationSegment = {
+      kind: 'reasoning', iteration: 3, text: '第三轮思考', preview: '第三轮思考',
+    };
+    const { container } = render(
+      <ConversationTimeline segments={[
+        reasoningSegment, toolsSegment, thirdReasoning, secondTools,
+      ]} />
+    );
+    // querySelectorAll 按文档顺序返回：思考2 → 簇2 → 思考3 → 簇3
+    const nodes = Array.from(
+      container.querySelectorAll('.sc-timeline-reasoning, .sc-timeline-cluster')
+    );
+    expect(nodes.map((node) => node.getAttribute('data-iteration'))).toEqual(['2', '2', '3', '3']);
+    expect(container.querySelectorAll('.sc-timeline-cluster')).toHaveLength(2);
+  });
+});

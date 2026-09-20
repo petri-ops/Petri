@@ -156,7 +156,9 @@ import {
   formatToolDuration,
   type ToolActivityItem,
 } from './toolActivity';
-import { ToolActivityList } from './ToolActivityList';
+import { ConversationTimeline } from './ConversationTimeline';
+import { buildConversationSegments } from './conversationSegments';
+import type { ConversationSegment } from './conversationSegments';
 import {
   resumeInterruptedConversation,
   useConversationRun,
@@ -566,6 +568,25 @@ export function SimpleChat({
     () => applyConversationNotices({ base: baseDisplayMessages, activeRun, conversationId }),
     [baseDisplayMessages, activeRun, conversationId]
   );
+
+  // BLOCK-107 P1c — 每条 assistant 消息的时间线分段（D1=c：思考/工具按 iteration
+  // 交错）。纯派生且与 displayMessages 同一 useMemo 语义：仅在消息真数据变化时
+  // 重算，composer keystroke 等无关 state 不触发（沿用 BLOCK-95 A2 的教训）。
+  const timelineSegmentsByMessage = useMemo(() => {
+    const map = new Map<string, ConversationSegment[]>();
+    displayMessages.forEach((message, index) => {
+      if (message.role !== 'assistant') return;
+      map.set(message.id ?? `idx:${index}`, buildConversationSegments({
+        content: message.content,
+        toolActivities: message.toolActivities,
+        reasoningByIteration: message.reasoningByIteration,
+        // D5 的阶段进度当前仍由 AgentProgressList 渲染；此处传入仅为让分段模型
+        // 拥有完整素材（ConversationTimeline 默认不渲染 progress，不产生重复）。
+        progressUpdates: message.progressUpdates,
+      }));
+    });
+    return map;
+  }, [displayMessages]);
   const standaloneDurableLoop = durableLoop.loop && !displayMessages.some((message) => message.loop)
     ? durableLoop.loop
     : null;
@@ -1023,7 +1044,6 @@ export function SimpleChat({
           )}
           {displayMessages.map((m, i) => {
             const key = m.ts ? `${m.role}-${m.ts}-${i}` : `${m.role}-${i}`;
-            const messageActivities = m.toolActivities || [];
             return (
               <React.Fragment key={key}>
                 {i === topicShiftIndex && (
@@ -1041,14 +1061,13 @@ export function SimpleChat({
                     )}
                   </div>
                   <div className="sc-msg-body">
-                    {/* UI-271 增补：摘要条移入 agent 消息体（图标之下），明确归属本次回复 */}
-                    {messageActivities.length > 0 && (
-                      <ToolActivityList
-                        activities={messageActivities}
-                        processingDurationMs={m.processingDurationMs}
-                        reasoningByIteration={m.reasoningByIteration}
-                      />
-                    )}
+                    {/* BLOCK-107 P1c — 时间线化（D1=c）：思考节点与工具簇按 iteration
+                        交错排列，取代「一个摘要条收编全部工具、思考内嵌其中」。narrative
+                        仍由下方正文位渲染、progress 仍由 AgentProgressList 渲染，本组件
+                        两者都不重复产出（见 ConversationTimeline 文件头）。 */}
+                    <ConversationTimeline
+                      segments={timelineSegmentsByMessage.get(m.id ?? `idx:${i}`) ?? []}
+                    />
                     {m.role === 'assistant' && <MessageMeta modelName={m.modelName} />}
                     {m.role === 'assistant' && m.loop && m.loop.loopRunId && (
                       <LoopStatusPanel loop={m.loop} pending={Boolean(m.pending)} />
