@@ -1,0 +1,31 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/main.js",
+    "src/preload.js",
+    "frontend/src/main.tsx",
+    "frontend/src/App.tsx",
+    "test/**/*.test.{mjs,cjs}",
+    "scripts/**/*.mjs",
+    "scripts/*.cjs"
+  ],
+  "project": [
+    "src/**/*.js",
+    "core/**/*.js",
+    "frontend/src/**/*.{ts,tsx}",
+    "scripts/**/*.{js,mjs,cjs}"
+  ],
+  "ignore": [
+    "core/biof3-server/build/**",
+    "**/__fixtures__/**"
+  ],
+  "ignoreBinaries": ["gitleaks"],
+  "ignoreDependencies": [
+    "typescript",
+    "@types/react",
+    "@types/react-dom",
+    "electron",
+    "react",
+    "react-dom"
+  ]
+}

@@ -225,7 +225,11 @@
     "harness:loop:repair:test": "node --test test/loop-failure-diagnoser.test.cjs test/loop-repair-strategy.test.cjs",
     "harness:loop:repair": "node scripts/harness-loop-repair.mjs",
     "harness:loop:checkpoint:test": "node --test test/loop-checkpoint.test.cjs",
-    "harness:loop:checkpoint": "node scripts/harness-loop-checkpoint.mjs"
+    "harness:loop:checkpoint": "node scripts/harness-loop-checkpoint.mjs",
+    "quality:lint": "eslint . || true",
+    "quality:lint:strict": "eslint .",
+    "quality:secret": "node scripts/secret-scan.mjs",
+    "quality:knip": "knip --no-exit-code"
   },
   "dependencies": {
     "@electron/notarize": "^2.5.0",
@@ -244,8 +248,14 @@
     "ali-oss": "^6.23.0",
     "electron": "^41.10.7",
     "electron-builder": "^24.13.0",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-security": "^4.0.1",
+    "globals": "^17.12.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.70.0"
   },
   "engines": {
     "node": ">=24"

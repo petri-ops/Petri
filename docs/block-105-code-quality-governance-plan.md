@@ -60,3 +60,13 @@
 
 - 2026-09-20 P0-BASELINE completed：四项体检报告落 acceptance/block-105/p0-baseline/（SUMMARY.md + 原始 JSON×4 + 密钥扫清单）。核心数字：密钥 0 真实命中（14 处全测试 fixture）/ 依赖漏洞 root 20 + frontend 12（新发现 electron-builder 工具链族 10 条可一键升级 26.15.3 修复、extract-zip high 无修复路径归 P2 归因、前端批次维持 P6 同批）/ Knip 864 文件发现（⚠️ 无配置高噪音——preload.js/vite.config.ts 均被标死文件，P1 必须先写 knip 入口配置再重扫）/ jscpd 重复率 2.7%（健康，热点 loop-orchestrator↔chat.js 167 行+agent-runner↔chat.js 125 行实证架构候选）。git diff 零产品代码改动可证。**P1 待启动**：涉及 typescript-eslint/gitleaks 等新依赖，启动前需用户过 §4 D1-D5 裁决。
 - 2026-09-20 P0-LAUNCH：立项登记完成（本文档 + DOC-REGISTRY active/P0-LAUNCH + README 137 + roadmap active 首条 + AUDIT-LOG 启动行）；启动检查单硬门全过（无🔴/槽位空/git 净/远程 0 落后/裁决原话「好的 立一个工作包」）。
+
+## 6.1 P1 completed（2026-09-20，D1-D5 预置裁决经用户「可以的 冲」通过）
+
+- **工具链（D1/D2 落地）**：根 devDependencies 新增 eslint@9.39.5 / typescript-eslint@8 / eslint-plugin-react-hooks@7 / eslint-plugin-security@4 / globals / typescript@5.5（与 frontend 版本对齐）；frontend package.json+lockfile 零触碰（红线可证）。格式化器（Biome/Prettier 二选一）**未装**——格式层独立裁决，不夹带。
+- **ESLint flat config**（`eslint.config.mjs`）：frontend/src TS/TSX 走 recommendedTypeChecked（projectService 借 frontend/tsconfig.json）+react-hooks+security；src/core/scripts JS 走 js recommended+security+node globals；`.agents/**` ignore（skill 资产含合法占位模板）。调参过程：no-undef 1296→0 区间收敛（.agents 排除 + test globals 补齐）。
+- **report-only 基线**（`acceptance/block-105/p1-eslint-report.json`）：1450 文件扫描，840 带问题，3718 errors + 1325 warnings。Top：security/detect-object-injection 1220（本仓动态路径常态，P2 豁免/降级归因）、no-empty 687、no-unused-vars 670、TS unsafe 系列 ~950（frontend 真实质量信号）、react-hooks/set-state-in-effect 101（真实反模式信号）。**D3 修正**：plan 原设想「同会话转 blocking」——840 文件的豁免归因量级不支持当会话完成，blocking 转换随 P2 豁免清偿推进（棘轮：先 report-only 入 closeout 观察面，豁免一批收紧一批）。
+- **密钥门禁**（`scripts/secret-scan.mjs` + `npm run quality:secret`，fail-closed）：Node 等价实现（D2 精神：扫描器不进 package.json；gitleaks 原生二进制留全局安装通道）。生产面命中→exit 1；test fixture 白名单 7 文件（P0 基线核实）。
+- **Knip 配置校准**（`knip.json` + `npm run quality:knip` report-only）：入口=main/preload/main.tsx/App/test glob。校准后死文件 452→119、带问题文件 864→577（core 懒加载 require 仍为 Knip 盲区，数字仍属上界）。
+- **quality 脚本族**：quality:lint（report-only）/ quality:lint:strict（blocking 预留）/ quality:secret（fail-closed 已达标）/ quality:knip（report-only）。P2 完成豁免清偿后 lint/knip 转 blocking 挂 closeout 链。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
