@@ -10,7 +10,7 @@
 
 1. **P6 产品验收证据重打**（🟡 AUDIT-LOG 在册）：`node scripts/g0-rs-p6-product-acceptance.mjs --live --write-evidence`（dev 栈在跑前置）。**只能在 Mac 跑**：Windows 实测被平台门拒绝（`p6_restart_checkpoint_hold_unsupported_platform:win32`）；当日 Mac 侧尝试亦未果（`p6_restart_worker_exited_before_checkpoint`），需安静环境 + dev Electron 在位的专项会话。
 2. **依赖升级批（与 P6 重打同批，不可拆）**：react-router v7 / vite 8 / vitest 5 / happy-dom——前端生产链 2 moderate（react-router 6.30.6 已是 6.x 末版）+ dev 链 esbuild/vite 通告；**frontend/package-lock.json 属 P6 源绑定集合**，动 lockfile 即扩大 stored 哈希失配面，必须与第 1 项同会话同批（AUDIT-LOG 🟡延期 2026-09-19 行）。
-3. **存量红 7 件归属核对**（Mac 侧跑定向即见）：block67 fs verbs 4 红（macOS bash 3.2 面）+ sys_resource 1 红（Linux/WSL 语义面）——Windows 本机实测全绿（14/14、5/5），属平台差异非产品缺陷，可在 Mac 侧修断言或标注平台跳过；P6 源绑定 2 红随第 1 项转绿。**2026-09-20 Mac 实测复核**：7 红全数复现（block67 fs×2+mux×2+exec×2+sys_resource×1，根因=BSD `base64` 位置参数/`/proc` 缺失），归属维持「修断言或平台跳过标注」待裁决；同批 installTarGzBundle 3 红已当场修真（见第 5 条）。
+3. **存量红 7 件归属核对**（Mac 侧跑定向即见）：block67 fs verbs 4 红（macOS bash 3.2 面）+ sys_resource 1 红（Linux/WSL 语义面）——Windows 本机实测全绿（14/14、5/5），属平台差异非产品缺陷，可在 Mac 侧修断言或标注平台跳过；~~P6 源绑定 2 红随第 1 项转绿~~（2026-09-20 澄清：定向套件在干净树上 13/13 绿——套件校验注入合成证据；真实 stored 失配经直调 `verifyStoredP6ProductAcceptanceEvidence()` 实证仍在，待第 1 项重打；AUDIT-LOG 🟡 行同日澄清注）。**2026-09-20 Mac 实测复核**：7 红全数复现（block67 fs×2+mux×2+exec×2+sys_resource×1，根因=BSD `base64` 位置参数/`/proc` 缺失），归属维持「修断言或平台跳过标注」待裁决；同批 installTarGzBundle 3 红已当场修真（见第 5 条）。
 4. **Windows 侧新增基建需 Mac 知悉**：StackWatchdog 计划任务（每 5 分钟栈健康+死亡法证+自愈，wscript 隐藏链，当日三次进程团灭后部署并实战验证）；**BLOCK-102 :3001 Host 白名单** `^(localhost|127\.0\.0\.1)(:\d+)?$`——若 Mac 侧存在非 localhost Host 访问 Windows :3001 的场景需先核对。
 
 ### ⚡ 增补（2026-09-20 深夜 Windows 会话，BLOCK-103/104/105 三包交付后的 Mac 侧增量）
