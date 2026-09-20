@@ -1,0 +1,43 @@
+{
+  "name": "block107-timeline-live",
+  "startedAt": "2026-09-20T16:01:28.170Z",
+  "finishedAt": "2026-09-20T16:01:52.987Z",
+  "assertions": [
+    {
+      "name": "L1_live_timeline_rendered",
+      "pass": true,
+      "detail": "timelines=1 maxClusters=4"
+    },
+    {
+      "name": "L2_running_cluster_observed",
+      "pass": true,
+      "detail": "running 采样命中=5"
+    },
+    {
+      "name": "L3_stopwatch_observed",
+      "pass": true,
+      "detail": "秒表采样命中=4"
+    },
+    {
+      "name": "L4_one_cluster_per_iteration_ordered",
+      "pass": true,
+      "detail": "maxClusters=4 全部非降序=true 一迭代一簇=true :: R:1 T:1 R:2 T:2 R:3 T:3 R:4 T:4 R:5"
+    },
+    {
+      "name": "L5_failure_visible_in_cluster_head",
+      "pass": true,
+      "detail": "带「N 项需注意」的簇头=1"
+    },
+    {
+      "name": "L6_history_matches_live_projection",
+      "pass": true,
+      "detail": "live=R:1 T:1 R:2 T:2 R:3 T:3 R:4 T:4 R:5 reloaded=R:1 T:1 R:2 T:2 R:3 T:3 R:4 T:4 R:5"
+    },
+    {
+      "name": "L7_temp_data_cleaned_up",
+      "pass": true,
+      "detail": "conv=true project=true"
+    }
+  ],
+  "allPass": true
+}

@@ -1,0 +1,214 @@
+{
+  "prompt": "请依次用工具完成三件事，每件事单独一次调用，按顺序逐个来做、不要并行：(1) 执行命令 `node -e \"setTimeout(()=>console.log(1),4000)\"` 并等它执行完；(2) 执行命令 `cat 不存在的文件-实况腿.txt`——该文件不存在、执行会失败，这是测试的一部分，请照实执行不要跳过；(3) 列出项目根目录的文件；最后用一句话总结这个项目里有什么。",
+  "samples": [
+    {
+      "t": 812,
+      "tl": 0,
+      "running": 0,
+      "sw": 0,
+      "att": 0,
+      "termStates": [],
+      "cmds": []
+    },
+    {
+      "t": 1615,
+      "tl": 1,
+      "running": 0,
+      "sw": 0,
+      "att": 0,
+      "termStates": [],
+      "cmds": []
+    },
+    {
+      "t": 2431,
+      "tl": 1,
+      "running": 0,
+      "sw": 0,
+      "att": 0,
+      "termStates": [],
+      "cmds": []
+    },
+    {
+      "t": 3235,
+      "tl": 1,
+      "running": 0,
+      "sw": 0,
+      "att": 0,
+      "termStates": [],
+      "cmds": []
+    },
+    {
+      "t": 4038,
+      "tl": 1,
+      "running": 0,
+      "sw": 0,
+      "att": 0,
+      "termStates": [],
+      "cmds": []
+    },
+    {
+      "t": 4846,
+      "tl": 1,
+      "running": 0,
+      "sw": 0,
+      "att": 0,
+      "termStates": [],
+      "cmds": []
+    },
+    {
+      "t": 5657,
+      "tl": 1,
+      "running": 1,
+      "sw": 0,
+      "att": 0,
+      "termStates": [
+        "running"
+      ],
+      "cmds": [
+        "$ Measure-Command { node -e \"setTimeout(()=>console.log(1),4"
+      ]
+    },
+    {
+      "t": 6621,
+      "tl": 1,
+      "running": 1,
+      "sw": 1,
+      "att": 0,
+      "termStates": [
+        "running"
+      ],
+      "cmds": [
+        "$ Measure-Command { node -e \"setTimeout(()=>console.log(1),4"
+      ]
+    },
+    {
+      "t": 7430,
+      "tl": 1,
+      "running": 1,
+      "sw": 1,
+      "att": 0,
+      "termStates": [
+        "running"
+      ],
+      "cmds": [
+        "$ Measure-Command { node -e \"setTimeout(()=>console.log(1),4"
+      ]
+    },
+    {
+      "t": 8234,
+      "tl": 1,
+      "running": 1,
+      "sw": 1,
+      "att": 0,
+      "termStates": [
+        "running"
+      ],
+      "cmds": [
+        "$ Measure-Command { node -e \"setTimeout(()=>console.log(1),4"
+      ]
+    },
+    {
+      "t": 9048,
+      "tl": 1,
+      "running": 1,
+      "sw": 1,
+      "att": 0,
+      "termStates": [
+        "running"
+      ],
+      "cmds": [
+        "$ Measure-Command { node -e \"setTimeout(()=>console.log(1),4"
+      ]
+    },
+    {
+      "t": 9858,
+      "tl": 1,
+      "running": 0,
+      "sw": 0,
+      "att": 0,
+      "termStates": [],
+      "cmds": []
+    },
+    {
+      "t": 10667,
+      "tl": 1,
+      "running": 0,
+      "sw": 0,
+      "att": 0,
+      "termStates": [],
+      "cmds": []
+    },
+    {
+      "t": 11479,
+      "tl": 1,
+      "running": 0,
+      "sw": 0,
+      "att": 1,
+      "termStates": [],
+      "cmds": []
+    },
+    {
+      "t": 12289,
+      "tl": 1,
+      "running": 0,
+      "sw": 0,
+      "att": 1,
+      "termStates": [],
+      "cmds": []
+    },
+    {
+      "t": 13097,
+      "tl": 1,
+      "running": 0,
+      "sw": 0,
+      "att": 1,
+      "termStates": [],
+      "cmds": []
+    },
+    {
+      "t": 13904,
+      "tl": 1,
+      "running": 0,
+      "sw": 0,
+      "att": 1,
+      "termStates": [],
+      "cmds": []
+    },
+    {
+      "t": 14717,
+      "tl": 1,
+      "running": 0,
+      "sw": 0,
+      "att": 1,
+      "termStates": [],
+      "cmds": []
+    },
+    {
+      "t": 15520,
+      "tl": 1,
+      "running": 0,
+      "sw": 0,
+      "att": 1,
+      "termStates": [],
+      "cmds": []
+    },
+    {
+      "t": 16322,
+      "tl": 1,
+      "running": 0,
+      "sw": 0,
+      "att": 1,
+      "termStates": [],
+      "cmds": []
+    },
+    {
+      "t": 17124,
+      "tl": 1,
+      "running": 0,
+      "sw": 0,
+      "att": 1,
+      "termStates": [],
+      "cmds": []
+    }
+  ]
+}
