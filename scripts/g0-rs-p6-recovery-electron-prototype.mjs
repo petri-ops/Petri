@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// platform-note: dual — taskkill.exe 仅用于 Windows 分支（terminateP6ActiveElectronProcessGroup 按 platform 参数分派信号）。（BLOCK-104 P4 门禁标注）
 
 /**
  * G0-RS-P6 bounded development Electron recovery trace.

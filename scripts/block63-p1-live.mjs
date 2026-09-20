@@ -1,4 +1,9 @@
 'use strict';
+// BLOCK-104 P4 — Windows 专属脚本入口护栏：非 win32 直接退出，杜绝半途怪异失败。
+if (process.platform !== 'win32') {
+  console.error(`[platform] block63-p1-live.mjs 仅支持 Windows（当前 ${process.platform}）。`);
+  process.exit(2);
+}
 
 /**
  * BLOCK-63 P1 — Windows 电脑控制 sidecar 实机闭环（dev Electron + 真实记事本）。

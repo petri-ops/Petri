@@ -1,6 +1,6 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-20（**BLOCK-104 K 簇红名单清偿增量 completed（用户裁决「继续」）——全量套件历史首次真实 exit 0**（2250 绿/0 红）：12 文件逐文件归因=产品缺陷 1（ide_file_diff 硬编码 diff 路径）+僵尸测试 1+漂移对账 4+环境/装包门 5+qa-smoke 化石对账；closeout 五门绿。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-20（**BLOCK-104 第二增量 completed：P4 缩水门禁补齐（用户裁决「继续」）**——process.platform 冻结门禁（85 基线 fail-closed）+12 个 windows 命令调用脚本入口护栏/platform-note 强制门禁 12/12 合规+grants 挂起归因修正（实证无模型调用）+环境敏感集成靶在册（同位重跑惯例）+**后台任务等待纪律入 skill**（事件驱动禁 sleep 盲等）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 立即任务
 - **已收口（2026-09-20 立项即启动当日 P0→P5 一次会话整包 completed，closeout 五门绿）：`BLOCK-104-PLATFORM-TEST-GOVERNANCE`**（plan `docs/block-104-platform-test-governance-plan.md` §2/§6）：**平台与测试确定性治理**——P0 归因矩阵实锤 33/36 确定性红；修复=产品语法缺陷 1（agent-fallback 注释吞括号，BLOCK-102 P4 引入）+URL pathname 反模式 10 处+化石 biof3.db 迁移家法×5+window-controls 源码抓取耐漂移+EPERM 清理+行数帽棘轮+brand/端点表对账；环境/平台门 skip 可见（block48 sidecar/hle 外部仓/p4r SIGTERM/deepseek retry 层）；scripts 双端同形机械门禁+8 脚本诚实标注；僵尸测试删除 1。**全量基线 199 红→26 红全部在册待归因**（K 簇 🟡 候选池），绿 2238。G0 开发期常态 · 不外推 packaged/Provider/GA。

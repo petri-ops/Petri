@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// platform-note: dual — powershell 出现在 agent 提示词内（由 workspace_exec 在执行目标侧运行），脚本本体平台无关。（BLOCK-104 P4 门禁标注）
 'use strict';
 
 /**

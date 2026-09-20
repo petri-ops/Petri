@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// platform-note: windows-library — 本库 powershell 枚举窗口仅 Windows 提供，由消费方按平台护栏调用。（BLOCK-104 P4 门禁标注）
 'use strict';
 
 /**

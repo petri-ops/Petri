@@ -110,6 +110,16 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 
 测试红／构建炸／行为不符预期的排查，按 [references/DEBUGGING-ATTRIBUTION-DISCIPLINE.md](./references/DEBUGGING-ATTRIBUTION-DISCIPLINE.md) 执行：停线存证 → 四类归因（确定性红/并发互踩/环境平台缺失/契约漂移）→ 隔离实验三法（单文件隔离/基线对照/最小复现）→ 修根因+设回归门禁；非平凡结论落定前过证伪式复核，结论一律可回溯到源。上方第 8/9 条是其 Windows 侧特化先例（2026-09-20 制度化批改编内化，素材源 addyosmani/agent-skills，MIT）。
 
+## 后台任务等待纪律（事件驱动 · 用户裁决 2026-09-20「跟踪触发，而不是没有目的的等待」）
+
+Agent 等待后台任务（全量测试、构建、长脚本）时**禁止 sleep 盲等**。本仓实测反面教材：全量套件 7-15 分钟，agent 连续两轮 `sleep 420` 盲等——既烧轮次，第一轮还白等。
+
+1. **正确姿势 = 事件驱动**：后台任务（`run_in_background`）完成时 harness **主动推送 task-notification**——启动后不要等待，**继续做队列里的其他工作**，通知到达再处理结果；没有其他工作时就结束当前回合等通知。
+2. **需要同步拿结果时**用阻塞式等待原语（TaskOutput `block=true` + 合理 timeout），它高效挂起不占轮次，优于任何 `sleep N; 查一眼` 循环。
+3. **sleep 盲等三宗罪**：定短了白醒一次还得再睡；定长了干等浪费时间；每轮 poll 都消耗上下文。凡 `sleep` 的对象是「agent 自己在等的任务」＝违规。
+4. **唯一合法 sleep**：被验证系统自身的时序要求——测试内 drain 宽限（block88-project-grants 先例）、重试退避、服务就绪窗口。判据：sleep 的是「被测对象的逻辑」＝合法，sleep 的是「agent 的不耐烦」＝违规。
+5. 多后台任务并行时按通知汇合；有顺序依赖的用阻塞等待串成显式链条，不靠「估个时间」。
+
 ## 复用到其他仓库
 
 读 [PORTING.md](./PORTING.md)：整目录拷贝 → package.json 四行接线 → 按可移植性矩阵处理降级项。原则速查见 [references/PRODUCT-PRINCIPLES.md](./references/PRODUCT-PRINCIPLES.md)（非 canonical）。

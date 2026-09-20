@@ -82,3 +82,13 @@
 - 环境/装包门 skip 可见 5 文件：agent-tool-result + agent-workflow-phase6（需装领域包，装包自动恢复）/ ide-tools-terminal（node-pty conpty 需控制台宿主，NODE_PTY_TEST_ALLOWED=1 opt-in）/ g0-rs-p6×2（重打仅限 macOS，AUDIT-LOG 🟡 指针）。
 - qa-smoke themes 检查化石 biof3- 前缀对账 `--gewu-*`（7/7 exit 0）。
 - closeout 五门绿。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 8. P4 缩水门禁补齐增量（2026-09-20，用户裁决「继续」；第二增量）
+
+§1 P4 范围内两项在主包实施时收束未做，本增量补齐并自测：
+
+1. **process.platform 散落分支冻结门禁**（`test/platform-branch-freeze.test.mjs`）：85 文件基线内嵌（src/core/scripts/test 扫描口径），基线外新增 process.platform 读取即 fail-closed 并提示走 platform-compat.js 或显式登记；基线收缩有 informational 提示防名单僵化。自测=合成新文件被抓出 ✓。
+2. **12 个 windows 命令调用脚本分类护栏**：8 个真 win-only 入口护栏（`process.platform !== 'win32'` fail-fast exit 2；含 shebang 首行修复教训——插入内容不得推挤 shebang）；4 个分支内使用/库形态加 `platform-note:` 标注（dual×3 / windows-library×1）。scripts-platform-contract 门禁同步升级：informational → 强制（护栏或标注二选一，12/12 合规）。
+3. **block88-project-grants 挂起归因修正**（修正 fa01758b 误归因）：该文件为纯 REST/store 契约层，**无模型调用**；挂起实证=node:test runner 在该文件形态下的收尾怪癖（`_getActiveHandles` 除 stdio 外全净、断言 3/3 绿、裸跑/--test 双形态均挂），处置=after 钩子 300ms drain 缩小窗口，官方防挂旗标（--test-force-exit）为最终兜底。
+4. **环境敏感集成靶登记（flame 率约 1/轮，判定惯例=同位重跑确认）**：连续三轮全量各出现 0/1/1 个环境敏感红且互不重复、单跑均绿——block63-sidecar-tools（fixture 真窗口需桌面焦点）、federation-terminal（node-pty conpty AttachConsole 竞态，与 ide-tools-terminal 同根因）。两靶非回归，属桌面环境时序敏感类；机器被用户占用时全量跑此类靶易偶发。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -61,9 +61,21 @@ describe('scripts 双端同形门（BLOCK-104 P4）', () => {
         callers.push(entry.name);
       }
     }
-    // 信息性输出不 fail：入口护栏（process.platform !== 'win32' fail-fast）改造
-    // 逐脚本落地后，可把本断言升级为强制（登记于 BLOCK-104 plan §1 P4）。
-    console.log(`[scripts-platform] windows 专属命令调用脚本（待入口护栏）: ${callers.join(', ') || '无'}`);
-    assert.ok(true);
+    // BLOCK-104 增量 — 升级为强制：windows 命令调用脚本必须二选一——
+    //   a) 入口护栏（process.platform !== 'win32' + exit），win 专属脚本；
+    //   b) platform-note 标注（dual = 平台分支内使用 / windows-library = 由消费方护栏）。
+    const violators = [];
+    for (const name of callers) {
+      const text = fs.readFileSync(path.join(SCRIPTS_DIR, name), 'utf8');
+      const hasGuard = /process\.platform\s*!==\s*'win32'/.test(text) && /process\.exit/.test(text);
+      const hasNote = /platform-note:\s*(dual|windows-library)/.test(text);
+      if (!hasGuard && !hasNote) violators.push(name);
+    }
+    console.log(`[scripts-platform] windows 命令调用脚本合规 ${callers.length - violators.length}/${callers.length}`);
+    assert.deepEqual(
+      violators,
+      [],
+      `以下脚本调用 windows 命令但既无入口护栏也无 platform-note 标注: ${violators.join(', ')}`
+    );
   });
 });

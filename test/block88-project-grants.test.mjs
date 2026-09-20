@@ -151,7 +151,13 @@ test('BLOCK-88 P3: gateway granted-projects — scoped by session identity, hone
   }
 });
 
-test.after(() => {
+test.after(async () => {
+  // BLOCK-104 增量 — 本文件三测断言全绿后进程可能不自然退出（裸跑/--test 均
+  // 观测 40s+ 挂起；process._getActiveHandles 实证除 stdio 外句柄全净 = node:test
+  // runner 收尾怪癖，非泄漏）。300ms drain 缩小窗口；test:all 的官方防挂旗标
+  // （--test-force-exit，BLOCK-97 沉淀）为最终兜底。逐项 mock 化诉求经核实不存在
+  // ——本文件为纯 REST/store 契约层，无模型调用（修正 fa01758b 的误归因）。
+  await new Promise((r) => setTimeout(r, 300));
   try {
     fs.rmSync(tempDir, { recursive: true, force: true });
   } catch (e) {

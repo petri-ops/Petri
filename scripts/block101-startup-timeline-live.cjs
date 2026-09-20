@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// platform-note: dual — powershell 进程枚举仅用于 Windows 分支（darwin 走 ps/git 对应路径）。（BLOCK-104 P4 门禁标注）
 'use strict';
 /**
  * block101-startup-timeline-live.cjs — BLOCK-101 P0 启动 timeline 采样（D1 四段口径）
