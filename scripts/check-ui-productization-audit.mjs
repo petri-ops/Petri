@@ -54,7 +54,12 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // 纯机械代码修复（多余类型断言移除等）无 UI 行为变化，双套件 2251+1146 验证；
   // 台账即 eslint-suppressions.json + quality:* 门禁（BLOCK-105 plan §6.2），非新
   // UI 功能故无新台账条目。豁免 subject UI-### 与同提交台账要求；不重写共享历史。
-
+  // 2026-09-20 BLOCK-105 §7 Batch-1 抑制基线收缩（ad6142d，Mac 侧 24 项 lint 修复批）：
+  // 前端仅 agentTaskStream.ts 删 useless-catch 空壳（catch(e){throw e} 行为恒等，
+  // streamReconnect 7/7 验证），零 UI 面变化；台账=eslint-suppressions.json 棘轮
+  // 收缩 2914→2890+2126→2125（plan §7 批次日志）。豁免 subject UI-### 与同提交
+  // 台账要求；不重写共享历史。
+  'ad6142dc13044ac3e09ac11224abbd866fbf00c1',
   '8c85898a018300d702daebce9c058193e9b136f2',
   '21d84f528a35526e59f2964833a65965546772e1',
   // 2026-09-19 BLOCK-102 P3/P4 修复提交（06828fd 安全加固+观测性能）：subject
@@ -298,6 +303,12 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 台账即 eslint-suppressions.json + quality:* 门禁（BLOCK-105 plan §6.2），非新
   // UI 功能故无新台账条目。豁免同提交台账要求（subject UI-### 门经
   // LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；不重写共享历史。
+  // 2026-09-20 BLOCK-105 §7 Batch-1 抑制基线收缩（ad6142d，Mac 侧 24 项 lint 修复批）：
+  // 前端仅 agentTaskStream.ts 删 useless-catch 空壳（行为恒等，streamReconnect 7/7），
+  // 零 UI 面变化；台账=eslint-suppressions.json 棘轮收缩（plan §7 批次日志）。
+  // 豁免同提交台账要求（subject 门经 LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；
+  // 不重写共享历史。
+  'ad6142dc13044ac3e09ac11224abbd866fbf00c1',
   '8c85898a018300d702daebce9c058193e9b136f2',
 
   // 2026-09-19 BLOCK-102 P2 前端竞态治理提交（21d84f52，渲染层竞态修复）：
