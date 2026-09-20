@@ -4834,8 +4834,28 @@
         "task-events"
       ],
       "notes": "启动性能回退清偿与首屏负载治理：2026-09-20 Windows 侧当日 P0→P3 一次会话整包 completed（用户裁决「开 BLOCK-106」；closeout 八门绿 + 三 flow 实机 17/17 断言）。P0 度量可归因化（evidence 补 head/platform/项目数/入口 chunk 字节）+ 中位数阈值棘轮（schema v2 按平台分档，缺段与缺档均判红，非空转经实机负测证明）；P1 路由级 lazy（除首屏欢迎页外十页 + 三窗口页）+ 190 语言 highlight.js 与工具活动卡 diff 预览的 CodeMirror 栈移出关键 chunk → 入口 chunk 3,061,221→568,207 B（−81.4%），dataReady 1163→911-945ms（回到 09-18 基线之下，五段同步改善）；P2 task_events created_at 索引（236,087 行上清扫 SCAN 30.9ms → SEARCH 0ms）+ ISO 格式契约错标根治（JS 侧 cutoff 作参数）+ file-dialog.js/build.ps1 控制字节真缺陷 + hygiene:check 检查项 5 防复发；P3 对账见 plan §8（含本包自我纠正两处：量具错标最大 chunk→改按 index.html 解析入口；单套预算跨端假红→v2 分档）。遗留候选 plan §7：轮询→SSE、长列表虚拟化、task_id 数据模型改造、mmap_size、RightFileTree 2s 断言实测、darwin 预算档待 Mac 会话实测。"
+    },
+    {
+      "id": "BLOCK-107-CONVERSATION-STREAM-UX",
+      "path": "docs/block-107-conversation-stream-ux-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-107-conversation-stream-ux",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-20",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-PLANNED",
+      "tags": [
+        "block-107",
+        "conversation-stream",
+        "timeline",
+        "chat-rendering",
+        "message-segments"
+      ],
+      "notes": "会话信息流呈现时间线化（用户初始想法=模仿 Qoder 的会话消息呈现方式；用户裁决「新开个block优化我们的项目」）。问题定义（只读代码探索，行号级）：现状为「消息容器 + 类型分组堆叠」而非时间线——SimpleChat.tsx:1043-1113 固定模板顺序（工具卡→meta→loop→进度→结果编辑进度→结果节点→降级条→子 agent 卡→正文），工具/思考/进度按类型各聚成一个列表（ToolActivityList 手风琴 :412/:483/:491、reasoningByIteration、AgentProgressList），真实交错顺序在渲染时被拍平，工具在时间轴上的位置信息不存在；根因=历史渲染走 copilot_messages.meta_json 聚合快照（conversation-adapter.js:97-175），跨类型全局时序在聚合那刻丢失，而完整时序其实存在于 task_events（agent-task-store.js:404-407 的 seq 游标；逐 token 落库 agent-runner.js:371-380，236,087 行规模债见 BLOCK-106 plan:39）却未被主聊天历史路径消费；故同一轮对话实况（SSE，agentTaskStream.ts:230-433）与历史（meta 快照，SimpleChat/types.ts:138-170）两条轨道呈现不一致。四阶段：P0 度量基线 + 时序真源裁决（D1 三选：task_events 回放 / meta.timeline additive / 呈现层近似）→ P1 分段模型 + 交错渲染（簇头一行含失败计数与运行秒表，运行中展开、完成后自动收起，思考行补一行预览）→ P2 历史兼容降级 + 策略视觉 + SimpleChat 体量债 → P3 实机三宿主面（右栏/悬挂/欢迎页）收口。非范围=消息流虚拟化、轮询→SSE、task_events 数据模型改造（三者 BLOCK-106 §2/§7 已登记为独立候选包）、后端事件协议大改、新依赖、不碰 frontend lockfile（P6 源绑定）、G1+。保留资产=UI-268/272/315/382/383 零件不得为风格对账而退化。D1-D6 预置裁决项见 plan §7，启动（转 active）需用户裁决。"
     }
   ],
   "lastUpdated": "2026-09-20",
-  "documentCount": 260
+  "documentCount": 261
 }
