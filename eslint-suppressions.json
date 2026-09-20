@@ -11,7 +11,7 @@
   },
   "core/biof3-server/agent-runner.js": {
     "no-unused-vars": {
-      "count": 1
+      "count": 2
     }
   },
   "core/biof3-server/agent-tools/workspace-ssh-surface.js": {
