@@ -68,6 +68,13 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // 豁免）；台账=eslint-suppressions.json 棘轮不变（BLOCK-105 plan §7）。豁免 subject UI-###
   // 与同提交台账要求；不重写共享历史。
   'f4af1ad23e7cd5d53052dba234bc49253c9029ba',
+  // 2026-09-20 前端 tsc 29 红清偿 + quality:types 入链（64da69b，25 处 testing-library
+  // 查询泛型窄化 + ResultArtifactShell 联合类型别名 + MessageRail closest 泛型 + 1 处
+  // 测试 props 标注）：纯类型注解，零 UI 行为变化；验证=tsc 0 红 + 前端全量 144 文件/
+  // 1146 用例 0 红 + quality:lint 无新增违规；台账=新增 quality:types 门禁（BLOCK-105
+  // plan §7），非新 UI 功能故无新台账条目。豁免 subject UI-### 与同提交台账要求；
+  // 不重写共享历史。
+  '64da69b71771661b49ba43fe7230cdb30347f7d7',
   '21d84f528a35526e59f2964833a65965546772e1',
   // 2026-09-19 BLOCK-102 P3/P4 修复提交（06828fd 安全加固+观测性能）：subject
   // 未带 UI-### 为笔误，UI-425 条目由后续提交统一补登（LEGACY_AUDIT_SYNC_
@@ -324,6 +331,13 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 豁免）；台账=eslint-suppressions.json 棘轮不变（BLOCK-105 plan §7）。豁免 subject UI-###
   // 与同提交台账要求；不重写共享历史。
   'f4af1ad23e7cd5d53052dba234bc49253c9029ba',
+  // 2026-09-20 前端 tsc 29 红清偿 + quality:types 入链（64da69b，25 处 testing-library
+  // 查询泛型窄化 + ResultArtifactShell 联合类型别名 + MessageRail closest 泛型 + 1 处
+  // 测试 props 标注）：纯类型注解，零 UI 行为变化；验证=tsc 0 红 + 前端全量 144 文件/
+  // 1146 用例 0 红 + quality:lint 无新增违规；台账=新增 quality:types 门禁（BLOCK-105
+  // plan §7），非新 UI 功能故无新台账条目。豁免同提交台账要求（subject 门经
+  // LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；不重写共享历史。
+  '64da69b71771661b49ba43fe7230cdb30347f7d7',
 
   // 2026-09-19 BLOCK-102 P2 前端竞态治理提交（21d84f52，渲染层竞态修复）：
   // subject 未带 UI-### 为笔误，UI-425 条目（P3/P4 前端切片）与本提交同批由
