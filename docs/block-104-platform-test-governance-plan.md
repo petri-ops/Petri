@@ -72,3 +72,13 @@
 - **对账遗留（如实登记）**：f238c600「独占 exit 0」与本包 33/36 确定性红数据不可同真——按治理纪律不采信无计数佐证的退出码声明，本包 §2 矩阵为准；K 簇 12 文件待归因转 🟡 候选池（AUDIT-LOG 在册）。
 - 抓真 3 件：①agent-fallback.js 语法缺陷（BLOCK-102 P4 引入的产品真缺陷，require 即炸降级链路）；②requires.cache 反斜杠键 vs 正斜杠 includes（stub 泄漏）；③hle 环境门探测须到 plugins 叶子（仓库目录存在但内容不全）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 7. K 簇红名单清偿增量（2026-09-20，用户裁决「继续」；44354281）
+
+§2 K 簇 12 文件逐文件归因处置完成，**全量套件历史首次真实 exit 0（2250 绿/0 红，直采退出码）**：
+- 产品缺陷修复 1：ide_file_diff 硬编码 `/usr/bin/diff`（Windows ENOENT）→ 平台自适应解析（env > Git for Windows 推导 > POSIX）。
+- 僵尸测试删除 1：demo-data（守卫资源已随 BLOCK-83 P4 迁包生态）。
+- 漂移对账 4：result-handlers（CHANNELS 常量）/ release-contract（SPI 化后 goldenPath 断言迁技能清单）/ plugin-schema（catalog 绝对路径跨平台）/ g0-rs-p7（facade 拆分跟随；agent-runner durable 路径 completion guard 仅剩引入=真实漂移，如实标注归 RS 域跟进）。
+- 环境/装包门 skip 可见 5 文件：agent-tool-result + agent-workflow-phase6（需装领域包，装包自动恢复）/ ide-tools-terminal（node-pty conpty 需控制台宿主，NODE_PTY_TEST_ALLOWED=1 opt-in）/ g0-rs-p6×2（重打仅限 macOS，AUDIT-LOG 🟡 指针）。
+- qa-smoke themes 检查化石 biof3- 前缀对账 `--gewu-*`（7/7 exit 0）。
+- closeout 五门绿。G0 开发期常态 · 不外推 packaged/Provider/GA。
