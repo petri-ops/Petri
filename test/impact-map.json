@@ -99,6 +99,7 @@
         "frontend/package.json",
         "frontend/package-lock.json",
         "frontend/vite.config.*",
+        "frontend/vitest.config.*",
         "frontend/tsconfig*.json"
       ],
       "commands": [
