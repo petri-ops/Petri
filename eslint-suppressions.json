@@ -987,11 +987,6 @@
       "count": 1
     }
   },
-  "frontend/src/components/workspace-panels/KnowledgeSpaceSwitcher.test.tsx": {
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 3
-    }
-  },
   "frontend/src/components/workspace-panels/KnowledgeSpaceSwitcher.tsx": {
     "react-hooks/set-state-in-effect": {
       "count": 1
