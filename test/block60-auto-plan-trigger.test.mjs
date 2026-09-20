@@ -3,13 +3,14 @@
  * 触发逻辑从 chat.js 抽为可测纯函数 AUTO_PLAN_TRIGGER 的 tester。
  */
 import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import fs from 'node:fs';
 
 const require = createRequire(import.meta.url);
-const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 // 从 chat.js 源码中提取正则做同源测试（避免双写漂移）
 const chatSrc = fs.readFileSync(

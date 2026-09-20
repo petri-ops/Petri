@@ -12,6 +12,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PRELOAD_SOURCE = readFileSync(path.join(ROOT, 'src/preload.js'), 'utf8');
 const WINDOW_CREATE_SOURCE = readFileSync(path.join(ROOT, 'src/main/_window-create.js'), 'utf8');
 const WINDOW_IPC_SOURCE = readFileSync(path.join(ROOT, 'src/main/_window-ipc.js'), 'utf8');
+// BLOCK-104 P1 — 源码已收敛到 CHANNELS 常量模块（send/on 一律经常量），沙箱与
+// 断言注入真值，避免字面量 vs 常量的契约漂移（本文件 7 个确定性红的根因）。
+const CHANNELS = require('../src/ipc/channels');
 
 /**
  * Extract just the function body (no signature) from source.
@@ -153,9 +156,14 @@ function extractArrow(source, marker) {
 
 function createIpcMainHarness() {
   // All state lives inside the VM so ipcMain closures capture the right objects.
+  // BLOCK-104 P1 — 签名按函数名锚定（不再匹配完整形参串，形参演进不再打破抓取）；
+  // 源文件模块级依赖（CHANNELS/registerTestManageModeToggle）与 globalShortcut 注入沙箱。
   const result = vm.runInNewContext(
     `
     (() => {
+      const CHANNELS = ${JSON.stringify(CHANNELS)};
+      const globalShortcut = { register: () => true, unregister: () => {} };
+      const registerTestManageModeToggle = () => {};
       const registrations = { on: [], handle: [] };
       const ipcMain = {
         on(channel, listener) { registrations.on.push({ channel, listener }); },
@@ -165,8 +173,8 @@ function createIpcMainHarness() {
       const app = {};
       let mainWindow = null;
       const getMainWindow = () => mainWindow;
-      ${extractFunction(WINDOW_IPC_SOURCE, 'function setupWindowIpc({ ipcMain, process, app, getMainWindow }) {')}
-      setupWindowIpc({ ipcMain, process, app, getMainWindow });
+      ${extractFunction(WINDOW_IPC_SOURCE, 'function setupWindowIpc(')}
+      setupWindowIpc({ ipcMain, process, app, getMainWindow, globalShortcut });
       return {
         registrations,
         setMainWindow(value) { mainWindow = value; },
@@ -221,9 +229,10 @@ function preloadHarness({ invokeValue } = {}) {
   vm.runInNewContext(PRELOAD_SOURCE, {
     require(moduleName) {
       assert.equal(moduleName, 'electron');
-      return { contextBridge, ipcRenderer };
+      return { contextBridge, ipcRenderer, webUtils: {} };
     },
-    process: { platform: 'darwin', arch: 'arm64', env: {} },
+    // BLOCK-100 起 preload 读 process.argv 探测测试实例标记（--gewu-test-instance=1）
+    process: { platform: 'darwin', arch: 'arm64', env: {}, argv: [] },
     window: { dispatchEvent() {} },
     CustomEvent: class CustomEvent {},
   });
@@ -244,18 +253,24 @@ test('main window is explicitly frameless for renderer-owned controls', () => {
 
 test('window IPC registers exact controls and toggles maximize state', async () => {
   const { registrations, setup } = createIpcMainHarness();
-  // window:toggleFullScreen was added after the original test expectation.
-  // window:zoom-by / window:zoom-reset back the Ctrl/Cmd+wheel and keyboard zoom
-  // (the frameless window has no menu bar, so the menu roles are unreachable).
+  // BLOCK-100/UI-411 起注册族含 setAlwaysOnTop/setIgnoreMouseEvents（测试实例守卫）；
+  // 期望表用 CHANNELS 常量断言（常量值漂移仍会被值契约测试抓住）。
   assert.deepEqual(registrations.on.map(({ channel }) => channel), [
-    'window:minimize',
-    'window:maximize',
-    'window:close',
-    'window:toggleFullScreen',
-    'window:zoom-by',
-    'window:zoom-reset',
+    CHANNELS.window.minimize,
+    CHANNELS.window.maximize,
+    CHANNELS.window.close,
+    CHANNELS.window.toggleFullScreen,
+    CHANNELS.window.zoomBy,
+    CHANNELS.window.zoomReset,
   ]);
-  assert.deepEqual(registrations.handle.map(({ channel }) => channel), ['window:isMaximized', 'window:isFullScreen', 'window:get-zoom', 'app:relaunch']);
+  assert.deepEqual(registrations.handle.map(({ channel }) => channel), [
+    CHANNELS.window.setAlwaysOnTop,
+    CHANNELS.window.setIgnoreMouseEvents,
+    CHANNELS.window.isMaximized,
+    CHANNELS.window.isFullScreen,
+    CHANNELS.window.getZoom,
+    CHANNELS.app.relaunch,
+  ]);
 
   const calls = [];
   let maximized = false;
@@ -282,7 +297,9 @@ test('window IPC registers exact controls and toggles maximize state', async () 
   handler('window:close')(event);
   assert.deepEqual(calls, ['minimize', 'maximize', 'unmaximize', 'close']);
 
-  const isMaximized = registrations.handle[0].listener;
+  const isMaximized = registrations.handle.find(
+    (entry) => entry.channel === CHANNELS.window.isMaximized,
+  ).listener;
   assert.equal(await isMaximized(event), true);
 
   const callsBeforeForeignSender = [...calls];
@@ -333,13 +350,16 @@ test('maximize and unmaximize events send the precise renderer state channel', (
   // createWindow extracted to src/main/_window-create.js by SUB-15.1 PHASE 3
   const createWindowSource = extractFunction(WINDOW_CREATE_SOURCE, 'async function createWindow({');
   // Check for the publishMaximizedState block
+  // BLOCK-104 P1 — 源码改用 CHANNELS 常量发送：断言常量被使用 + 常量值本身
+  // 仍是精确通道（字面量断言改为「使用形状 + 值契约」两层）。
   assert.ok(createWindowSource.includes('const publishMaximizedState'), 'must have publishMaximizedState');
   assert.ok(createWindowSource.includes('webContents.send('), 'must send via webContents');
-  assert.ok(createWindowSource.includes('"window:maximize-changed"'), 'must use precise channel');
+  assert.ok(createWindowSource.includes('CHANNELS.window.maximizeChanged'), 'must use the channels constant');
+  assert.equal(CHANNELS.window.maximizeChanged, 'window:maximize-changed', 'precise channel value contract');
   assert.ok(createWindowSource.includes('.on("maximize"'), 'must listen to maximize event');
   assert.ok(createWindowSource.includes('.on("unmaximize"'), 'must listen to unmaximize event');
   // Count occurrences - should appear exactly once (in publishMaximizedState body)
-  assert.equal((createWindowSource.match(/window:maximize-changed/g) || []).length, 1);
+  assert.equal((createWindowSource.match(/CHANNELS\.window\.maximizeChanged/g) || []).length, 1);
 });
 
 test('macOS window shortcuts close/minimize while preserving Cmd/Ctrl+R refresh semantics', () => {
@@ -366,6 +386,9 @@ test('macOS window shortcuts close/minimize while preserving Cmd/Ctrl+R refresh 
     getMainWindow,
     process: { platform: 'darwin' },
     console: { log() {} },
+    CHANNELS,
+    zoomBy() {},
+    zoomReset() {},
   });
   let prevented = 0;
   const event = { preventDefault() { prevented += 1; } };
@@ -478,6 +501,7 @@ test('keyboard accelerator zooms on Ctrl/Cmd +/-/0 and leaves other shortcuts in
     console: { log() {} },
     zoomBy,
     zoomReset,
+    CHANNELS,
   });
 
   let prevented = 0;

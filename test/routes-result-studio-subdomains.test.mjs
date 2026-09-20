@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import test from 'node:test';
 
@@ -137,7 +138,7 @@ test('main file is a thin facade (line count significantly reduced)', () => {
   // 加载 fs + path 后 readFileSync 计数。
   const fs = require('node:fs');
   const path = require('node:path');
-  const mainPath = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'core', 'biof3-server', 'routes', 'result-studio.js');
+  const mainPath = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'core', 'biof3-server', 'routes', 'result-studio.js');
   const content = fs.readFileSync(mainPath, 'utf8');
   const lineCount = content.split('\n').length;
   assert.ok(lineCount <= 80, `main file should be ≤ 80 lines (thin facade), got ${lineCount}`);
@@ -148,7 +149,7 @@ test('main file is a thin facade (line count significantly reduced)', () => {
 test('each subdomain file has reasonable line count (≥ 30, ≤ 320)', () => {
   const fs = require('node:fs');
   const path = require('node:path');
-  const subDir = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'core', 'biof3-server', 'routes', 'result-studio');
+  const subDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'core', 'biof3-server', 'routes', 'result-studio');
   for (const name of SUBDOMAINS) {
     const subPath = path.join(subDir, `${name}.js`);
     const content = fs.readFileSync(subPath, 'utf8');

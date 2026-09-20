@@ -1,8 +1,22 @@
 import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import test from 'node:test';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// BLOCK-104 P2 — agent-runner-facade 同款家法：harness 子域依赖链模块顶层即
+// prepare projects（db.js facade 模块级语句），先隔离临时库并跑生产 migration
+// 链再加载；否则缺省打开仓内化石 biof3.db（schema 时代错位）必然 SQLITE_ERROR。
 const require = createRequire(import.meta.url);
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-harness-subdomains-'));
+process.env.BIOF3_DB_PATH = path.join(tempDir, 'harness-subdomains.db');
+const { runMigrations } = require('../src/migration-runner');
+await runMigrations(process.env.BIOF3_DB_PATH, path.join(__dirname, '../src/migrations'));
 
 /**
  * test/routes-harness-subdomains.test.mjs — PHASE 2.2a contract tests
@@ -57,6 +71,11 @@ const EXPECTED_ENDPOINTS = [
   { subdomain: 'scientific-task', method: 'POST', path: '/api/harness/scientific-task-by-job/:toolJobId/replay-package' },
   // file-references 子域（1 端点）
   { subdomain: 'file-references', method: 'POST', path: '/api/harness/file-references/resolve' },
+  // project-storage 子域（BLOCK-78 P2，1 端点）
+  { subdomain: 'project-storage', method: 'GET', path: '/api/harness/project-storage' },
+  // notices 子域（1+1 端点）
+  { subdomain: 'notices', method: 'GET', path: '/api/harness/notices' },
+  { subdomain: 'notices', method: 'POST', path: '/api/harness/notices/seen' },
   // loop（HLE-1）子域（3 端点）
   { subdomain: 'loop', method: 'POST', path: '/api/loop/iterate' },
   { subdomain: 'loop', method: 'GET', path: '/api/loop/:loopRunId' },
@@ -124,7 +143,7 @@ test('main file is a thin facade (line count significantly reduced)', () => {
   const fs = require('node:fs');
   const path = require('node:path');
   const mainPath = path.join(
-    path.dirname(new URL(import.meta.url).pathname),
+    path.dirname(fileURLToPath(import.meta.url)),
     '..',
     'core',
     'biof3-server',
@@ -142,7 +161,7 @@ test('each subdomain file has reasonable line count (≥ 30, ≤ 500)', () => {
   const fs = require('node:fs');
   const path = require('node:path');
   const subDir = path.join(
-    path.dirname(new URL(import.meta.url).pathname),
+    path.dirname(fileURLToPath(import.meta.url)),
     '..',
     'core',
     'biof3-server',

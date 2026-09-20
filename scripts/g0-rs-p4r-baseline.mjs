@@ -51,7 +51,7 @@ const require = createRequire(import.meta.url);
 function countRevisions(dbPath) {
   try {
     const Database = require(require.resolve('better-sqlite3', {
-      paths: [path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'core', 'biof3-server')],
+      paths: [path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'core', 'biof3-server')],
     }));
     const db = new Database(dbPath, { readonly: true });
     try {

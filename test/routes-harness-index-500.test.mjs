@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -6,6 +7,15 @@ import path from 'node:path';
 import test from 'node:test';
 
 const require = createRequire(import.meta.url);
+
+// BLOCK-104 P2 — agent-runner-facade 同款家法：harness 路由依赖链模块顶层即
+// prepare projects，先隔离临时库并跑生产 migration 链再加载（缺省化石库必炸）。
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-harness-index500-'));
+process.env.BIOF3_DB_PATH = path.join(tempDir, 'harness-index-500.db');
+const { runMigrations } = require('../src/migration-runner');
+await runMigrations(process.env.BIOF3_DB_PATH, path.join(__dirname, '../src/migrations'));
 
 /**
  * test/routes-harness-index-500.test.mjs — BLOCK-21 regression coverage.
@@ -34,7 +44,7 @@ const require = createRequire(import.meta.url);
  */
 
 const ROOT_HELPER = path.resolve(
-  path.dirname(new URL(import.meta.url).pathname),
+  path.dirname(fileURLToPath(import.meta.url)),
   '..',
   'core',
   'biof3-server',
@@ -83,14 +93,17 @@ function buildTestApp(opts = {}) {
   // already be installed before this point (caller's responsibility via
   // installDbStub()).
   Object.keys(require.cache).forEach((key) => {
+    // BLOCK-104 P1 — Windows 的 require.cache 键是反斜杠：原正斜杠 includes 在
+    // win32 上静默零命中，前测的 db stub 被后测复用（404 not_found 确定性红）。
+    // 统一归一为正斜杠后再匹配。
+    const norm = key.split(path.sep).join('/');
     if (
-      key.includes('/core/biof3-server/routes/_helpers/harness-shared.js') ||
-      key.includes('/core/biof3-server/routes/harness/') ||
-      key.includes('/core/biof3-server/routes/harness/index.js') ||
-      key.endsWith('/core/biof3-server/routes/harness/resources.js') ||
-      key.endsWith('/core/biof3-server/routes/harness/workflow.js') ||
-      key.endsWith('/core/biof3-server/routes/harness/repair.js') ||
-      key.endsWith('/core/biof3-server/routes/harness/scientific-task.js')
+      norm.includes('/core/biof3-server/routes/_helpers/harness-shared.js') ||
+      norm.includes('/core/biof3-server/routes/harness/') ||
+      norm.endsWith('/core/biof3-server/routes/harness/resources.js') ||
+      norm.endsWith('/core/biof3-server/routes/harness/workflow.js') ||
+      norm.endsWith('/core/biof3-server/routes/harness/repair.js') ||
+      norm.endsWith('/core/biof3-server/routes/harness/scientific-task.js')
     ) {
       delete require.cache[key];
     }
@@ -119,7 +132,7 @@ function installDbStub(fakeProject) {
   // <workspace>/core/biof3-server/db.js (one level too high), which is the bug
   // pattern that originally caused this BLOCK-21 regression.
   const dbModulePath = require.resolve(path.join(
-    path.dirname(new URL(import.meta.url).pathname),
+    path.dirname(fileURLToPath(import.meta.url)),
     '..',
     'core',
     'biof3-server',
