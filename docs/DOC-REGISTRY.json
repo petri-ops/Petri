@@ -4795,13 +4795,13 @@
       "id": "BLOCK-105-CODE-QUALITY-GOVERNANCE",
       "path": "docs/block-105-code-quality-governance-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-105-code-quality-governance",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-20",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P3-COMPLETED",
+      "phase": "COMPLETED",
       "tags": [
         "block-105",
         "code-quality",
@@ -4811,7 +4811,7 @@
         "architecture-rules",
         "governance-gates"
       ],
-      "notes": "P0 体检/P1 lint+密钥门禁/P2 棘轮闭合/P3 架构机械化+Electron 断言 全 completed；closeout 八门（+quality:secret/arch/lint）；P4 收口待启动。"
+      "notes": "代码质量与安全治理：当日 P0→P4 一次会话整包 completed。P0 体检基线（密钥干净/audit 32 条/Knip 高噪音/jscpd 2.7%）+ P1 ESLint flat config+密钥门禁 fail-closed + P2 棘轮闭合（eslint-suppressions.json，真缺陷 2 件修复，--fix 77 文件双套件验证）+ P3 dependency-cruiser 五规则 0 违规+Electron 断言 3/3；closeout 八门（+quality:secret/arch/lint）全绿。fuses=G1+ 登记；D5 CodeQL 预置推荐暂不启用。"
     }
   ],
   "lastUpdated": "2026-09-20",

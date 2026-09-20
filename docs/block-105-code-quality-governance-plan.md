@@ -1,6 +1,6 @@
 # BLOCK-105-CODE-QUALITY-GOVERNANCE — 代码质量与安全治理
 
-**状态**：`active（2026-09-20 立项即启动，P0-LAUNCH；用户裁决「好的 立一个工作包」；上下文=用户问询开源代码质量工具→全面稳定方案→立项，同会话核实远程 0 落后、active 槽位空）`
+**状态**：`completed（2026-09-20 当日 P0→P4 一次会话整包收口；用户裁决「好的 立一个工作包」+「冲」×3；closeout 八门全绿）`
 **立项**：2026-09-20（本机摸底实锤：全仓零 ESLint——前端 check 仅 `tsc --noEmit`，根目录仅 `node --check`；全仓唯一 eslint 配置在 vendor `codex/sdk` 内，不属本项目代码面）
 
 ## 0. 问题定义（证据）
@@ -91,3 +91,29 @@
 - **closeout 链扩展**：quality:secret/arch/lint 三门挂入（八门全绿）；impact-map 登记 block105-code-quality 规则（config+门禁脚本+断言测试+suppressions 基线全覆盖）。
 - **P3 调参抓真**：dep-cruiser tsConfig 跨目录解析 TS18003（改用无 tsConfig 模式）；ESLint suppressions 不支持 parsing error 抑制（化石先清后建基线）。
 - 双套件验证：Node 2252 绿 exit 0（+1=新断言测试）+ 前端 1146/1146。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 7. P4 收口（2026-09-20；c7930f3c → 3d07a903）
+
+### 各阶段门禁对账
+
+| 阶段 | 门禁声明 | 证据 | 结果 |
+| --- | --- | --- | --- |
+| P0 | 四项体检报告落 p0-baseline/，零产品代码改动，零依赖变更 | SUMMARY.md + 原始 JSON×4 + secret-scan.txt；P0 提交 git status 仅 acceptance 新增 | ✅ |
+| P1 | lint 层补齐 + 密钥门禁 + report-only 基线 | eslint.config.mjs + p1-eslint-report.json（3718e/1325w 基线）+ quality:secret PASS | ✅ |
+| P2 | 存量归因三分类 + 棘轮只紧不松 | 真缺陷 2 件修复 + --fix 77 文件双套件验证（2251+1146）+ eslint-suppressions.json 入库 + 自测抓新违规 | ✅ |
+| P3 | 架构规则 + Electron 断言 | depcruise 1214 模块 3686 依赖 0 违规 + 断言测试 3/3 | ✅ |
+| P4 | closeout 聚合八门全绿 | hygiene/docs/ui-audit/test:changed/gate:code-size/quality:secret/quality:arch/quality:lint 全 ✅ | ✅ |
+
+### 例外与遗留（如实登记）
+
+1. **fuses 运行时断言 = G1+**（SENTINEL: BLOCK-105-FUSES-G1）：@electron/fuses 需 packaged binary，G0 开发期不外推；
+2. **Knip 维持 report-only**：core 懒加载 require 为工具盲区，数字属上界；blocking 化待配置进一步精化后单独裁决；
+3. **存量 2912 条抑制基线**：P2 后续轮次用 `--fix-suppressions` 渐进收缩（每批收缩即棘轮收紧），不阻塞任何流程；
+4. **格式化器（Biome/Prettier）未装**：格式层独立裁决，不在本包夹带（D1 遗留裁决点，默认不加）；
+5. **D5 CodeQL**：收口后裁决点——预置推荐=暂不启用（私有仓 GHAS 许可成本；npm audit + 密钥门禁 + security 插件已覆盖等效面；如转公开仓或需要 SAST 深扫再裁决）。
+
+### 持续运行态（收口后日常）
+
+`npm run closeout` 八门：hygiene → docs → ui-audit → test:changed → gate:code-size → quality:secret（fail-closed）→ quality:arch（架构规则）→ quality:lint（blocking+抑制基线）。新增违规/密钥/架构破坏即红。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
