@@ -274,7 +274,7 @@ export function ProjectWorkspace(): React.ReactElement {
     const next = new URLSearchParams(searchParams);
     next.delete('mode');
     const query = next.toString();
-    navigate(query ? `${base}?${query}` : base, { replace: true });
+    void navigate(query ? `${base}?${query}` : base, { replace: true });
   }, [searchParams, projectId, navigate]);
   // Derived summary visibility (semantic + pixel dimensions).
   // UI-351 加映（用户裁决「有遮挡就应该悬浮 / 边界加宽」）：只有中栏宽裕
@@ -322,7 +322,7 @@ export function ProjectWorkspace(): React.ReactElement {
     // mode now lives in the path segment, not the query string.
     nextParams.delete('mode');
     const query = nextParams.toString();
-    navigate(query ? `${base}?${query}` : base, { replace });
+    void navigate(query ? `${base}?${query}` : base, { replace });
   }, [leftOpen, rightOpen, searchParams, navigate, projectId, workspaceMode]);
   // openRightPanel: 打开右栏 tab。UI-341 加映二（用户裁决）——不再因 compact
   // 顺手收起左栏：侧栏只由用户主动点击改变。
@@ -442,19 +442,19 @@ export function ProjectWorkspace(): React.ReactElement {
   }, [activeJobId, bindActiveJob, conversationJobs, updateWorkspaceMode]);
   // UI-365 — 设置独立页化（/settings）：设备级能力不绑项目，不再切工作区模式。
   const handleShowSettings = useCallback(() => {
-    navigate('/settings');
+    void navigate('/settings');
   }, [navigate]);
   // UI-364 — 插件商店独立页化（/plugins）：运行时缺失横幅与左栏入口都
   // 跳独立页，不再切工作区模式（设备级能力不绑项目）。
-  const handleShowPlugins = useCallback(() => navigate('/plugins'), [navigate]);
-  const handleNavigateToSkills = useCallback(() => navigate('/skills'), [navigate]);
+  const handleShowPlugins = useCallback(() => { void navigate('/plugins'); }, [navigate]);
+  const handleNavigateToSkills = useCallback(() => { void navigate('/skills'); }, [navigate]);
   // BLOCK-72 / UI-320 — 全局工作台页入口（知识空间/后端迁出右栏）
-  const handleNavigateToKnowledge = useCallback(() => navigate('/knowledge'), [navigate]);
+  const handleNavigateToKnowledge = useCallback(() => { void navigate('/knowledge'); }, [navigate]);
   // UI-366 — handleNavigateToBackend 随 /backend 页退役移除（诊断并入设置）
   // UI-335/336 — 「新建任务」入口：/ 欢迎页（BLOCK-80）；携带当前项目 id 供
   // 欢迎页默认预选（用户裁决：默认工作区应是鼠标点击所在的工作区）
   const handleNavigateToHome = useCallback(() => {
-    navigate(projectId ? `/?project=${projectId}` : '/');
+    void navigate(projectId ? `/?project=${projectId}` : '/');
   }, [navigate, projectId]);
   // UI-348 — 右栏「后端」卡已删除（用户裁决）：后端管理面唯一入口 = 左栏工作台的
   // 全局 /backend 页；原 handleOpenRightTerminal（跳 /backend 的右栏快捷卡）随卡移除。
@@ -578,15 +578,15 @@ export function ProjectWorkspace(): React.ReactElement {
     }
   }, [project?.workspacePath]);
   useEffect(() => {
-    fetchData();
-    const id = setInterval(fetchData, 15_000);
+    void fetchData();
+    const id = setInterval(() => { void fetchData(); }, 15_000);
     return () => clearInterval(id);
   }, [fetchData]);
   useEffect(() => {
     const handler = () => {
-      fetchData();
+      void fetchData();
       void refreshConversationJobs();
-      refreshConversations();
+      void refreshConversations();
       // 项目列表刷新由 AppRailProvider 的 softRefresh 订阅负责（单一职责）
     };
     const unsub = subscribeGewuEvent(gewuEvents.softRefresh, handler);
@@ -595,9 +595,9 @@ export function ProjectWorkspace(): React.ReactElement {
   // Listen for conversation fork events from SimpleChat (RightPanel or CenterPanel)
   // to refresh the LeftPanel conversation list after a branch is created.
   useEffect(() => {
-    const handler = async (_detail: { newConversationId: string; projectId: string }) => {
+    const handler = (_detail: { newConversationId: string; projectId: string }) => {
       updateWorkspaceMode('chat');
-      await Promise.all([refreshConversations(), refreshOtherConversations()]);
+      void Promise.all([refreshConversations(), refreshOtherConversations()]);
     };
     const unsub = subscribeGewuEvent(gewuEvents.conversationForked, handler);
     return unsub;
@@ -730,7 +730,7 @@ export function ProjectWorkspace(): React.ReactElement {
     const currentProjectId = projectId || null;
     const resolvedTargetProjectId = targetProjectId ?? currentProjectId;
     if (resolvedTargetProjectId && currentProjectId && resolvedTargetProjectId !== currentProjectId) {
-      navigate(`/project/${resolvedTargetProjectId}?mode=${targetMode}&job=${encodeURIComponent(jobId)}`);
+      void navigate(`/project/${resolvedTargetProjectId}?mode=${targetMode}&job=${encodeURIComponent(jobId)}`);
       return;
     }
     let nextJob = conversationJobs.find((job) => job.id === jobId)
@@ -759,7 +759,7 @@ export function ProjectWorkspace(): React.ReactElement {
           };
           nextProjectId = nextJob.project_id || nextProjectId;
           if (nextProjectId && currentProjectId && nextProjectId !== currentProjectId) {
-            navigate(`/project/${nextProjectId}?mode=${targetMode}&job=${encodeURIComponent(nextJob.id)}`);
+        void navigate(`/project/${nextProjectId}?mode=${targetMode}&job=${encodeURIComponent(nextJob.id)}`);
             return;
           }
           setJobs((prev) => (prev.some((j) => j.id === nextJob!.id) ? prev : [nextJob!, ...prev]));
@@ -946,7 +946,7 @@ export function ProjectWorkspace(): React.ReactElement {
     updateWorkspaceMode,
     openRightPanel,
     switchToProject,
-    navigate,
+    navigate: (to: string) => { void navigate(to); },
     handleSwitchConversation,
     setActiveConvId,
     setActiveJobId,

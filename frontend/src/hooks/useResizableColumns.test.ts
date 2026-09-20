@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { act, renderHook, type RenderHookResult } from '@testing-library/react';
 import { useResizableColumns } from '@/hooks/useResizableColumns';
 

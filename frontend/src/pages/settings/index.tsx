@@ -20,7 +20,7 @@ export default function SettingsPage(): React.ReactElement {
     if (window.history.length > 1) {
       window.history.back();
     } else {
-      navigate('/');
+    void navigate('/');
     }
   }, [navigate]);
 

@@ -119,8 +119,8 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   const { hoverPreview, cancelHoverTimers, scheduleHoverClose, scheduleHoverPreview } = useHoverPreview();
 
   const exitReviewMode = () => {
-    if (window.history.length > 1) navigate(-1);
-    else navigate('/');
+    if (window.history.length > 1) void navigate(-1);
+    else void navigate('/');
   };
 
   // Esc 语义：先关行内编辑抽屉 → dock 形态关闭面板 → 输入框失焦 → mode 形态退出

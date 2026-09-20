@@ -129,7 +129,7 @@ export function useWorkspaceOpenEffects(options: UseWorkspaceOpenEffectsOptions)
     const handler = (detail: { toolJobId: string; projectId?: string | null }) => {
       const d = detail;
       if (d?.toolJobId) {
-        handleOpenResult(d.toolJobId, d.projectId || null);
+        void handleOpenResult(d.toolJobId, d.projectId || null);
       }
     };
     const unsub = subscribeGewuEvent(gewuEvents.projectOpenResult, handler);
@@ -143,7 +143,7 @@ export function useWorkspaceOpenEffects(options: UseWorkspaceOpenEffectsOptions)
       pendingArtifactJobIdRef.current = detail.jobId;
       setPendingArtifactName(detail.artifactName);
       if (targetProjectId && targetProjectId !== projectId) {
-        navigate(
+        void navigate(
           `/project/${encodeURIComponent(targetProjectId)}?mode=chat&job=${encodeURIComponent(detail.jobId)}&artifact=${encodeURIComponent(detail.artifactName)}`,
         );
         return;
@@ -179,7 +179,7 @@ export function useWorkspaceOpenEffects(options: UseWorkspaceOpenEffectsOptions)
         // Cross-project workspace files are out of scope for the desktop
         // workspace (each project has its own file tree); the chat host
         // can decide to navigate or surface a toast.
-        navigate(`/project/${encodeURIComponent(detail.projectId)}?mode=chat&file=${encodeURIComponent(detail.relativePath)}`);
+        void navigate(`/project/${encodeURIComponent(detail.projectId)}?mode=chat&file=${encodeURIComponent(detail.relativePath || '')}`);
         return;
       }
       const file: ActiveWorkspaceFile = {

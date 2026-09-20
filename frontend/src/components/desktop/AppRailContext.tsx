@@ -188,7 +188,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
     // BLOCK-101 P0 — 首载到货即 dataReady 打点（度量锚点在首载链上）。
     let cancelled = false;
     const backoffMs = [0, 2000, 5000, 10000, 15000];
-    (async () => {
+    void (async () => {
       for (const wait of backoffMs) {
         if (cancelled) return;
         if (wait) await new Promise((resolve) => setTimeout(resolve, wait));
@@ -280,7 +280,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
 
   // ── 动作 ──
   const switchToProject = useCallback((id: string) => {
-    navigate(`/project/${id}`);
+    void navigate(`/project/${id}`);
   }, [navigate]);
 
   const switchConversation = useCallback((convId: string) => {
@@ -300,7 +300,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
     // 回退最近项目打开同一模式（listProjects ORDER BY updated_at DESC，
     // 与欢迎页项目预选同口径；插件商店为纯 IPC 全局面，搜索面本就跨项目）。
     const targetProjectId = currentProjectId || allProjects[0]?.id || null;
-    navigate(targetProjectId ? `/project/${targetProjectId}/${mode}` : '/');
+      void navigate(targetProjectId ? `/project/${targetProjectId}/${mode}` : '/');
   }, [allProjects, currentProjectId, navigate]);
 
   const createConversationForProject = useCallback(async (targetProjectId?: string) => {
@@ -317,7 +317,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
         await refreshConversations();
       } else {
         // 跨项目创建：切过去（缓存由 useOtherConversations 按展开态拉取）
-        navigate(`/project/${pid}`);
+        void navigate(`/project/${pid}`);
       }
     } finally {
       setCreatingConversation(false);
@@ -349,7 +349,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
         // 事件总线失败不阻塞导航
       }
       expandProject(created.id);
-      navigate(`/project/${created.id}`);
+      void navigate(`/project/${created.id}`);
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : '创建项目失败');
     } finally {
@@ -390,7 +390,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
     const remaining = allProjects.filter((item) => item.id !== targetProjectId);
     setAllProjects(remaining);
     if (targetProjectId === currentProjectId) {
-      navigate(remaining[0] ? `/project/${remaining[0].id}` : '/', { replace: true });
+      void navigate(remaining[0] ? `/project/${remaining[0].id}` : '/', { replace: true });
     }
     return true;
   }, [allProjects, currentProjectId, navigate]);
@@ -445,7 +445,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
         // 事件总线失败不阻塞导航
       }
     setAllProjects((cur) => (cur.some((item) => item.id === created.id) ? cur : [created, ...cur]));
-    navigate(`/project/${created.id}`, { replace: true });
+    void navigate(`/project/${created.id}`, { replace: true });
     return { ok: true };
   }, [navigate]);
 

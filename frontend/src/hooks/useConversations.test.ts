@@ -14,7 +14,11 @@ vi.mock('@/components/copilot/copilotConversationsClient', () => ({
   deleteConversation: vi.fn(),
 }));
 
-const mockedList = cc.listConversations as unknown as ReturnType<typeof vi.fn>;
+// vitest 5 起 `ReturnType<typeof vi.fn>` 的返回类型不再是 any，async 实现会被
+// @typescript-eslint/no-misused-promises 判为「在期望 void 处返回 Promise」——
+// 这里显式声明被 mock 函数的真实签名（Promise 返回），既保真又满足该规则。
+type ListConversationsFn = (status?: string, projectId?: string) => Promise<unknown[]>;
+const mockedList = cc.listConversations as unknown as ReturnType<typeof vi.fn<ListConversationsFn>>;
 const mockedCreate = cc.createConversation as unknown as ReturnType<typeof vi.fn>;
 
 function makeConv(id: string, title: string, projectId: string | null = 'p-1') {

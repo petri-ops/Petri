@@ -93,7 +93,7 @@ export default function Home(): React.ReactElement {
   useEffect(() => {
     if (!backendStatus.isReady) return;
     let cancelled = false;
-    (async () => {
+    void (async () => {
       try {
         const projects = await listProjects();
         if (cancelled) return;
@@ -192,7 +192,7 @@ export default function Home(): React.ReactElement {
       } catch {
         // 事件总线失败不阻塞导航
       }
-      navigate(`/project/${project.id}`, { replace: true });
+      void navigate(`/project/${project.id}`, { replace: true });
     } catch (e) {
       setCreateError(`创建项目失败：${e instanceof Error ? e.message : String(e)}`);
     } finally {
@@ -217,7 +217,7 @@ export default function Home(): React.ReactElement {
       } catch {
         // 事件总线失败不阻塞导航
       }
-      navigate(`/project/${project.id}`, { replace: true });
+      void navigate(`/project/${project.id}`, { replace: true });
     } catch (e) {
       setCreateError(`创建项目失败：${e instanceof Error ? e.message : String(e)}`);
     } finally {
@@ -661,7 +661,7 @@ export default function Home(): React.ReactElement {
                 key={project.id}
                 type="button"
                 className={styles.workbenchCard}
-                onClick={() => navigate(`/project/${project.id}`)}
+                onClick={() => void navigate(`/project/${project.id}`)}
                 title={project.workspaceKind === 'ssh' ? `${project.sshHost}:${project.remotePath}` : project.workspacePath || project.name}
               >
                 <span className={styles.workbenchCardIcon}><Icon name={project.workspaceKind === 'ssh' ? 'cpu' : 'folder'} size={16} /></span>

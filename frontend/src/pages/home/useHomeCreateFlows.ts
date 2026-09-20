@@ -146,7 +146,7 @@ export function useHomeSshProject(options: {
       setSshIp('');
       setSshPassword('');
       setSshMode('alias');
-      navigate(`/project/${project.id}`, { replace: true });
+      void navigate(`/project/${project.id}`, { replace: true });
     } catch (e) {
       setCreateError(`SSH 项目创建失败：${e instanceof Error ? e.message : String(e)}`);
     } finally {

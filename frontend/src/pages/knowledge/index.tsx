@@ -20,7 +20,7 @@ export default function KnowledgePage(): React.ReactElement {
   const navigate = useNavigate();
   const handleReturnBack = useCallback(() => {
     if (window.history.length > 1) window.history.back();
-    else navigate('/');
+    else void navigate('/');
   }, [navigate]);
 
   return (

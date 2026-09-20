@@ -568,7 +568,7 @@ export default function Welcome(): React.ReactElement {
                 key={selectedId || 'none'}
                 projectId={selectedId}
                 conversationId={null}
-                onConversationChange={() => navigate(`/project/${selectedId}`)}
+            onConversationChange={() => void navigate(`/project/${selectedId}`)}
                 ownsCopilotAsk
                 composerOnly
                 sendGuard={selectedProject ? undefined : guardNoProjectSend}
