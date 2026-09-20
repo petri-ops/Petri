@@ -168,7 +168,7 @@ function resolveScreenshotOutPath(args, ctx) {
 
 // ── 工具处理器 ─────────────────────────────────────────────────
 
-async function tool_computer_snapshot(args = {}, ctx = {}) {
+async function tool_computer_snapshot(args = {}, _ctx = {}) {
   const extra = {};
   if (Number.isFinite(args.maxElements)) extra.maxElements = args.maxElements;
   if (args.axManual === true) extra.axManual = true;
@@ -225,7 +225,7 @@ async function tool_computer_screenshot(args = {}, ctx = {}) {
   }
 }
 
-async function tool_computer_wait(args = {}, ctx = {}) {
+async function tool_computer_wait(args = {}, _ctx = {}) {
   const extra = {};
   if (args.role) extra.role = String(args.role);
   if (args.textContains) extra.textContains = String(args.textContains);
@@ -243,7 +243,7 @@ async function tool_computer_wait(args = {}, ctx = {}) {
   }
 }
 
-async function tool_computer_authorize(args = {}, ctx = {}) {
+async function tool_computer_authorize(_args = {}, _ctx = {}) {
   try {
     return okWrap(await getComputerUseHost().requestWithRecovery('probe', {}));
   } catch (e) {

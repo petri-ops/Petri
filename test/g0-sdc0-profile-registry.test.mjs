@@ -6,7 +6,6 @@ import workflow from '../core/shared-backend/agent-workflow.js';
 
 const {
   ARTIFACT_PROFILE_REGISTRY_VERSION,
-  ARTIFACT_PROFILES,
   PROFILE_KINDS,
   classifyProfileChange,
   getProfile,

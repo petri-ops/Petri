@@ -23,7 +23,6 @@ const Database = require(ROOT + '/core/biof3-server/node_modules/better-sqlite3'
 
 const PROJECT_ID = 'p_mtlnsv0f_xpjb';
 const CONV_ID = 'conv_05dc94bc-561';
-const USER_ID = 'local-user';
 const PROJECT_DIR = path.join(ROOT, '.biof3-dev-user-data', 'data', 'projects', 'block52-p3-09031507-mtlnsv0f');
 const INPUTS = {
   counts: path.join(PROJECT_DIR, 'inputs', 'counts.csv'),
@@ -134,7 +133,7 @@ async function runOnce(label, executionTargetId, db) {
     localSha256: B.hashes[f] || null,
   }));
   const dataArtifacts = compare.filter((c) => /\.(csv|json)$/i.test(c.file));
-  const presentational = compare.filter((c) => /\.(html|png|svg)$/i.test(c.file));
+  compare.filter((c) => /\.(html|png|svg)$/i.test(c.file));
   const dataMatch = dataArtifacts.length > 0 && dataArtifacts.every((c) => c.match && c.inDell && c.inLocal);
 
   const evidence = {

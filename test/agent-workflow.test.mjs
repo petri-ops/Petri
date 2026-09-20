@@ -21,38 +21,6 @@ const {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function stubJob(overrides = {}) {
-  return {
-    id: 'tj_1',
-    tool_id: 'deseq2',
-    status: 'completed',
-    result_json: null,
-    result: null,
-    ack_status: null,
-    error: null,
-    ...overrides,
-  };
-}
-
-function harnessState(job) {
-  const result = job.result_json || job.result || {};
-  return {
-    harnessWorkflowStateVersion: 1,
-    jobId: job.id,
-    toolId: job.tool_id,
-    jobStatus: job.status,
-    terminal: ['completed', 'failed', 'cancelled'].includes(job.status),
-    recoverable: false,
-    resumeFrom: null,
-    artifactTruth: result.artifactTruth || null,
-    artifactDiagnostics: [],
-    artifactCount: (result.artifacts || []).length,
-    error: job.error,
-    nextActions: [],
-    stages: [],
-  };
-}
-
 // ---------------------------------------------------------------------------
 // STEP_STATUSES
 // ---------------------------------------------------------------------------

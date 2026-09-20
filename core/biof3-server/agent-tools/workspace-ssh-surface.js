@@ -162,7 +162,7 @@ function createSshWorkspaceSurface({
   }
 
   // ── workspace_write ──
-  async function writeFile(args = {}, ctx = {}, handlerOptions = {}, helpers = {}) {
+  async function writeFile(args = {}, ctx = {}, _handlerOptions = {}, helpers = {}) {
     const content = String(args.content == null ? '' : args.content);
     if (Buffer.byteLength(content) > MAX_WRITE_BYTES) {
       return errorResult('content_too_large', `单次写入上限为 ${MAX_WRITE_BYTES} 字节`);
@@ -204,7 +204,7 @@ function createSshWorkspaceSurface({
   }
 
   // ── workspace_replace ──
-  async function replaceText(args = {}, ctx = {}, handlerOptions = {}, helpers = {}) {
+  async function replaceText(args = {}, ctx = {}, _handlerOptions = {}, helpers = {}) {
     const oldText = String(args.oldText == null ? '' : args.oldText);
     const newText = String(args.newText == null ? '' : args.newText);
     if (!oldText) return errorResult('old_text_required', 'oldText 不能为空');
@@ -458,7 +458,7 @@ function createSshWorkspaceSurface({
     }
   }
 
-  async function processStatus(args = {}, ctx = {}) {
+  async function processStatus(args = {}, _ctx = {}) {
     const id = String(args.id || '');
     const record = remoteBackgrounds.get(id);
     if (!record) return errorResult('process_not_found', `后台进程不存在: ${id}`);
@@ -495,7 +495,7 @@ function createSshWorkspaceSurface({
     return result;
   }
 
-  async function processStop(args = {}, ctx = {}) {
+  async function processStop(args = {}, _ctx = {}) {
     const id = String(args.id || '');
     const record = remoteBackgrounds.get(id);
     if (!record) return errorResult('process_not_found', `后台进程不存在: ${id}`);
@@ -567,10 +567,6 @@ function createSshWorkspaceSurface({
 
   // ── BLOCK-77 P1 — 驻留任务（意图卡 .gewu/resident/<taskId>.json，服务器真值）──
   // 卡片只描述「意图与归属」；执行真相仍在 exec_bg 进程 + ps_pid 实探（单一真值红线）。
-  function residentRoot(ws) {
-    return `${ws.root.replace(/\/+$/, '')}/.gewu/resident`;
-  }
-
   async function createResidentTask(args = {}, ctx = {}) {
     if (ctx.accessMode !== 'full') {
       return errorResult('access_mode_read_only', '驻留任务为长驻后台进程，需要完全访问模式');
@@ -584,8 +580,7 @@ function createSshWorkspaceSurface({
     let ws;
     try { ws = await getRemoteWorkspace(ctx, { requireCompatible: true }); } catch (e) { return errorResult(e.code || 'workspace_unavailable', e.message); }
     const root = ws.root.replace(/\/+$/, '');
-    const residentDir = `${root}/.gewu/resident`;
-
+    
     // ① 起进程：复用既有 exec_bg 通道（注册表/日志语义不变）；命令包 .exit
     //    标记（回访循环读退出码），日志固定进 .gewu/resident/<taskId>.log。
     const wrapped = `( ${command} ) ; echo $? > .gewu/resident/${taskId}.exit`;
@@ -619,7 +614,7 @@ function createSshWorkspaceSurface({
     return { ok: true, taskId, pid: bg.pid, logPath: bg.logFile, cardPath: `.gewu/resident/${taskId}.json`, card };
   }
 
-  async function listResidentTasks(args = {}, ctx = {}) {
+  async function listResidentTasks(_args = {}, ctx = {}) {
     let ws;
     try { ws = await getRemoteWorkspace(ctx, {}); } catch (e) { return errorResult(e.code || 'workspace_unavailable', e.message); }
     const dir = `${ws.root.replace(/\/+$/, '')}/.gewu/resident`;

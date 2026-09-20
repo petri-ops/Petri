@@ -79,8 +79,6 @@ const {
   listContentPluginDocs,
   readContentPluginDoc,
   listAllContentPlugins,
-  extractMdTitle,
-  extractSidebarPos,
 } = require('./plugin/content-plugin');
 const { registerPluginInServer } = require('./plugin/registry');
 const {

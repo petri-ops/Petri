@@ -28,7 +28,7 @@
  *    evaluateExit() for completion decision.
  */
 
-const { stableHash, redactSensitiveValue } = require('./loop-contract');
+const { redactSensitiveValue } = require('./loop-contract');
 
 // ---------------------------------------------------------------------------
 // Validator result contract

@@ -13,7 +13,7 @@
  * so first request for a new model returns 0 immediately while background fetch
  * populates the cache for subsequent requests.
  */
-const { encoding_for_model: encForModel } = require('tiktoken');
+require('tiktoken');
 
 // ---------------------------------------------------------------------------
 // LRU cache

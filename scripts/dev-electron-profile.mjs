@@ -47,7 +47,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const require = createRequire(import.meta.url);
+createRequire(import.meta.url);
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MAIN_JS = path.join(ROOT, 'src/main.js');
@@ -311,12 +311,7 @@ class CdpClient {
 
       const timer = setTimeout(() => rejectOnce(new Error('cdp_socket_open_timeout')), timeoutMs);
 
-      const onOpenTimeout = () => {
-        clearTimeout(timer);
-        cleanup();
-        rejectOnce(new Error('cdp_socket_open_timeout'));
-      };
-
+      
       socket.on('open', () => {
         clearTimeout(timer);
         socket.on('open', onOpen);
@@ -401,9 +396,8 @@ async function measureCdpStartup({ port = 9222, timeoutMs = 30_000, electronPath
   });
 
   // Step 2: wait for CDP to be available
-  let versionInfo;
   try {
-    versionInfo = await fetchCdpVersion(port, timeoutMs);
+    await fetchCdpVersion(port, timeoutMs);
   } catch (err) {
     electronProcess.kill();
     throw new Error(`cdp_not_available: ${err.message}`);

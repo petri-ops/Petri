@@ -53,7 +53,7 @@ const pack = fs.existsSync(packJsonPath) ? JSON.parse(fs.readFileSync(packJsonPa
 assert('P0_pack_manifest_present', !!pack && !!pack.packId, pack ? pack.packId : 'pack.json 缺失');
 
 const manifests = pluginLoader.ensurePluginSourcesLoaded();
-const declared = pack && pack.provenance ? null : null; // 声明插件数由清单文件决定，这里以实际加载为准
+ // 声明插件数由清单文件决定，这里以实际加载为准
 assert('P1_plugins_load_from_pack', manifests.length > 0,
   '从包加载插件数=' + manifests.length + '（内置源=' + emptyBuiltIn + ' 为空）');
 

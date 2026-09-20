@@ -27,7 +27,6 @@ beforeEach(() => {
 const VALID = 'valid';
 const DEGRADED = 'degraded';
 const BLOCKED = 'blocked';
-const UNAVAILABLE = 'unavailable';
 
 // ---------------------------------------------------------------------------
 // BIV-1: input-snapshot validator

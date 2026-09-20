@@ -25,12 +25,12 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
 const coreServerRoot = path.join(root, 'core', 'biof3-server');
-const req = createRequire(path.join(coreServerRoot, 'package.json'));
+createRequire(path.join(coreServerRoot, 'package.json'));
 const rootReq = createRequire(path.join(root, 'package.json'));
 
-import { openDb, closeDb, closeAll, _reset } from '../src/database/_db-singleton.js';
+import { openDb, closeAll, _reset } from '../src/database/_db-singleton.js';
 import { getDatabase, closeDatabase } from '../src/database/branch-db.js';
-import { getDatabase as getResultDatabase, closeDatabase as closeResultDatabase } from '../src/database/result-db.js';
+import { getDatabase as getResultDatabase } from '../src/database/result-db.js';
 
 function mkTmp() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-db-shared-'));

@@ -66,7 +66,7 @@ function validGitCommit(value) {
 export function inspectG0Start(options = {}) {
   const hlePlan = readText('docs/harness-loop-engineering-plan.md');
   const closurePlan = readText('docs/harness-loop-production-closure-plan.md');
-  const auditLog = readText('docs/AUDIT-LOG.md');
+  readText('docs/AUDIT-LOG.md');
   const handoff = readText('docs/project-workspace-handoff.md');
   const agentMatrix = readJson('acceptance/harness-loop/production/agent-loop-matrix.json');
   const repairMatrix = readJson('acceptance/harness-loop/production/validator-repair-matrix.json');
@@ -74,7 +74,7 @@ export function inspectG0Start(options = {}) {
   const providerMatrix = readJson('acceptance/harness-loop/production/provider-matrix.json');
   const normal = readJson('acceptance/harness-loop/production/spt1-normal/evidence.json');
   const repairable = readJson('acceptance/harness-loop/production/spt1-repairable/evidence.json');
-  const blocking = readJson('acceptance/harness-loop/production/spt1-blocking/evidence.json');
+  readJson('acceptance/harness-loop/production/spt1-blocking/evidence.json');
   const hleGate = readJson('acceptance/harness-loop/hle-all-gate.json');
   const uiMatrix = readText('acceptance/harness-loop/production/ui-matrix.md');
   const verification = options.verification || null;

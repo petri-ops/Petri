@@ -39,10 +39,8 @@ const crypto = require('crypto');
 
 const AGENT_DIR = '$HOME/.biof3-agent';
 const AGENT_BIN = `${AGENT_DIR}/bin/biof3-agent.sh`;
-const AGENT_JOBS = `${AGENT_DIR}/jobs`;
 const AGENT_ROOT = AGENT_DIR;
 
-const JOB_ID_RE = /^[A-Za-z0-9._-]{1,64}$/;
 
 const BIOF3_AGENT_SH = `#!/usr/bin/env bash
 # biof3-agent — BioF3 BLOCK-57 daemonless node agent (P1)

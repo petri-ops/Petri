@@ -50,7 +50,6 @@ const {
   GIT_OID_PATTERN,
   ResultStudioRepositoryError,
   toJson,
-  fromJson,
   nowIso,
   rowToChangeSet,
   rowToRevision,

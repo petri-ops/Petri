@@ -32,7 +32,6 @@ const RAIL_CONTENT_ID = "rail:";
 // 首版窗体只有 28px 宽，卡片整体被窗体裁剪（用户反馈「展示不全/hover 无预览」
 // 的根因）。预览区透明 + ignoreMouseEvents 穿透，仅条带/卡交互时收鼠标。
 const RAIL_WINDOW_WIDTH = 364;
-const RAIL_STRIP_WIDTH = 28;
 const THUMBNAIL_WIDTH = 480;
 
 // BLOCK-59 P2 — 终端等会话型数据的受管窗口转发钩子。terminal.js 在

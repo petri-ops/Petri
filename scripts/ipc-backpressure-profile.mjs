@@ -51,7 +51,7 @@ const DEFAULT_ITERATIONS = 10;
 const DEFAULT_WARMUP = 3;
 const DEFAULT_THRESHOLD = 5000; // ms
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 // ── CLI argument parsing ───────────────────────────────────────────────────────
 
@@ -165,21 +165,7 @@ function measureEventLoopLagMs() {
       let tick = 0;
       let totalLag = 0;
 
-      const scheduleNext = () => {
-        const before = performance.now();
-        setImmediate(() => {
-          const elapsed = performance.now() - before;
-          const lag = Math.max(0, elapsed - TICK_MS);
-          totalLag += lag;
-          tick++;
-          if (tick < TICKS) {
-            setTimeout(scheduleNext, TICK_MS);
-          } else {
-            resolve(null); // this function doesn't resolve; resolved below
-          }
-        });
-      };
-
+      
       // Kick off with a setTimeout first, then use setImmediate for remaining ticks
       setTimeout(() => {
         const before = performance.now();
@@ -269,7 +255,7 @@ async function runMeasurements(payload, iterations, { probe = false } = {}) {
 
     // Measure parse
     const t1 = performance.now();
-    const parsed = JSON.parse(serialized);
+    JSON.parse(serialized);
     const parseMs = performance.now() - t1;
 
     const totalMs = stringifyMs + parseMs;

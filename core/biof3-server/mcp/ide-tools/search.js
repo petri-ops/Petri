@@ -36,7 +36,7 @@ function resolveRgBinary() {
   for (const c of candidates) {
     try {
       if (fs.statSync(c).isFile()) return c;
-    } catch (_e) { /* missing */ }
+    } catch { /* missing */ }
   }
   return 'rg';
 }
@@ -267,7 +267,7 @@ function fileSearchText({
       if (!line) continue;
       try {
         events.push(JSON.parse(line));
-      } catch (_e) {
+      } catch {
         // 跳过无法解析的损坏行
       }
     }

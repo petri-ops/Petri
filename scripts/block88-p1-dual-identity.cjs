@@ -17,7 +17,6 @@
  * 证据: acceptance/block-88/p1-identity.json + p1-identity-ui.png
  */
 
-const assert = require('node:assert/strict');
 const { mkdtempSync, rmSync, mkdirSync, writeFileSync } = require('node:fs');
 const { tmpdir } = require('node:os');
 const path = require('node:path');
@@ -125,7 +124,7 @@ async function main() {
       && echo.data.session.identity.device === ENGINEER.device, JSON.stringify(echo.data.session));
 
     // ── P5 UI 走查：测试实例联邦面板「协作成员」可见（9223，禁碰 9222）──
-    const { booted } = await ensureTestInstance();
+    await ensureTestInstance();
     const lib = require(path.join(ROOT, '.agents/skills/gewu-dev-infra/dev-verify/lib.cjs'));
     const client = await lib.connectTestTarget({});
     const evalJs = async (expr) => {

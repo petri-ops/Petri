@@ -336,10 +336,10 @@ function compareToBaseline(observation) {
 }
 
 function inspect(verification, observation) {
-  const capture = read(sourceFiles.capture);
-  const corpus = read(sourceFiles.corpus);
-  const baseline = read(sourceFiles.baseline);
-  const probe = read(sourceFiles.probe);
+  read(sourceFiles.capture);
+  read(sourceFiles.corpus);
+  read(sourceFiles.baseline);
+  read(sourceFiles.probe);
   const commands = verification?.commands || [];
 
   const isolationBehaviour = probeIsolationBehaviour();

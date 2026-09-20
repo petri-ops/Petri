@@ -176,7 +176,6 @@ async function main() {
   assert('独立窗 target 出现（/window/result/ 路由）', Array.isArray(hits1) && hits1.length === 1, `targets=${hits1?.length}`);
 
   // 4) 独立窗内断言
-  const popoutUrl = hits1[0].url;
   const popClient = await new CdpClient(hits1[0].webSocketDebuggerUrl).connect();
   await delay(1800); // 首帧 + 状态自举
   const selfInfo = await evalJSRetry(popClient, `window.biof3Desktop.windowManager.self()`);

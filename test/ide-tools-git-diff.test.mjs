@@ -50,7 +50,7 @@ function makeGitRepo() {
 function cleanup(repo) {
   try {
     fs.rmSync(repo, { recursive: true, force: true });
-  } catch (_e) { /* ignore */ }
+  } catch { /* ignore */ }
 }
 
 test('ide_git_diff parses fixture diff into structured hunks (unstaged)', () => {

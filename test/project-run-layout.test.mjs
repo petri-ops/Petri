@@ -11,7 +11,7 @@
  * - 历史 job 回退
  */
 
-import { describe, it, before, after, beforeEach, afterEach } from 'node:test';
+import { describe, it, before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -298,9 +298,6 @@ describe('Phase 1: Project Run Layout Resolver', () => {
         toolJobId: 'system-job-1',
         systemScope: 'updates',
       });
-
-      const appDataDir = process.env.BIOF3_LOCAL_DATA_DIR ||
-        path.join(os.homedir(), 'Documents', 'BioF3-Local');
 
       assert.ok(layout.workspaceRoot.includes('system-tasks'));
       assert.ok(layout.workspaceRoot.includes('updates'));

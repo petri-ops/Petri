@@ -31,7 +31,6 @@ function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs } = {}) {
     try {
       const logDir = getLogDir();
       const { createWriteStream } = fs;
-      const zlib = require("zlib");
       // 模块本体在 src/diagnostic-redaction.js（BLOCK-75 P0 实测抓真修：BLOCK-9.1 抽取到
       // src/ipc/ 后相对路径未跟改，`./` 使整条导出链每次 require 即死——dialog 都不弹）。
       const { redactSensitiveText } = require("../diagnostic-redaction");

@@ -8,7 +8,6 @@
  * UI 作业库徽章据此可验。
  */
 const path = require('node:path');
-const fs = require('node:fs');
 
 const ROOT = path.join(__dirname, '..');
 const DEV_DB = path.join(ROOT, '.biof3-dev-user-data', 'data', 'biof3.db');

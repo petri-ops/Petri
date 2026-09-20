@@ -21,7 +21,6 @@ if (process.platform !== 'win32') {
 
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
-const http = require('node:http');
 const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -78,7 +77,7 @@ const MEASURE = `(function(){
   client = await attach();
 
   // 打开摘要卡（顶栏「展开摘要概览」）
-  const toggled = await lib.evalJs(client, `(function(){
+  await lib.evalJs(client, `(function(){
     var b = document.querySelector('button[aria-label="展开摘要概览"]');
     if (!b) return 'toggle_missing';
     b.click(); return 'clicked';

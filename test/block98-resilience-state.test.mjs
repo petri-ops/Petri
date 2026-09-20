@@ -151,7 +151,6 @@ test('recordAiUsage 接受韧性遥测字段并持久化', () => {
     userId: 'u-block98', kind: 'llm_retry', model: 'test-model', conversationId: 'conv_b98',
     attempt: 2, retryable: true, contextExceeded: true, errorCode: 'context_exceeded',
   });
-  const row = aiUsage.__test_queryLatest ? aiUsage.__test_queryLatest() : null;
   // 模块未导出查询助手时直接打 sqlite 查询
   const sqlite = require('../core/biof3-server/db').getDatabase();
   const got = sqlite.prepare("SELECT attempt, retryable, context_exceeded FROM ai_usage WHERE user_id='u-block98' ORDER BY id DESC LIMIT 1").get();

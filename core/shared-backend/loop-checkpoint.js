@@ -25,7 +25,7 @@
  */
 
 const crypto = require('crypto');
-const { REASON_CODES } = require('./loop-contract');
+require('./loop-contract');
 
 // ---------------------------------------------------------------------------
 // IterationCheckpoint
@@ -117,8 +117,7 @@ function buildLoopContextEnvelope({
   // Latest checkpoint = current state
   const latest = checkpoints[checkpoints.length - 1];
   // Prior checkpoint = previous state for comparison
-  const prior = checkpoints.length >= 2 ? checkpoints[checkpoints.length - 2] : null;
-
+  
   // Compute unresolved gap from latest checkpoint
   const unresolvedGaps = computeUnresolvedGaps(checkpoints);
 
@@ -513,7 +512,7 @@ function projectBudget(snapshots = [], limits = DEFAULT_BUDGET_LIMITS) {
 /**
  * Build budget advice based on status and limits policy.
  */
-function buildBudgetAdvice({ status, exceeded, warnings, exhaustedResource, whenExceed }) {
+function buildBudgetAdvice({ status, warnings, exhaustedResource, whenExceed }) {
   const warnings_list = warnings.map(
     (w) => `${w.name} 使用已达 ${Math.round((w.value / w.limit) * 100)}%`,
   );
@@ -572,8 +571,7 @@ function buildSessionStageView({ loopRun, latestCheckpoint, budgetProjection }) 
 
   // Determine next hint from budget projection
   const budgetStatus = budgetProjection?.status || 'ok';
-  const budgetAdvice = budgetProjection?.advice?.message || null;
-
+  
   const compact = {
     schemaVersion: ENVELOPE_VERSION,
     viewType: 'compact',

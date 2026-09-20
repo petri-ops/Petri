@@ -17,7 +17,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { spawn: cpSpawn, spawnSync: cpSpawnSync } = require('node:child_process');
+const { spawnSync: cpSpawnSync } = require('node:child_process');
 
 const TUNNEL_CONFIG_VERSION = 1;
 const RECONNECT_BACKOFF_MS = Object.freeze([1000, 2000, 5000, 10000, 30000]);
@@ -215,7 +215,7 @@ function createTunnelManager({
     remotePortSweep();
     const proc = spawnProcess(args);
     child = proc;
-    const startedAt = now();
+    now();
     liveChildren.add(proc);
     proc.on('error', (error) => {
       lastError = String(error && error.message).slice(0, 200);

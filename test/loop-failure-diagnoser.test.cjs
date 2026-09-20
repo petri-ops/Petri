@@ -10,7 +10,6 @@ const assert = require('node:assert');
 
 const {
   diagnoseFailure,
-  FAULT_TYPES,
   listFaultTypes,
   getFaultType,
   classifyConfidence,

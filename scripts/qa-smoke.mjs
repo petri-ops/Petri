@@ -55,7 +55,6 @@ for (const { entry } of oldLogs.slice(MAX_LOGS - 1)) {
   unlinkSync(join(LOG_DIR, entry));
 }
 const LOG_PATH = join(LOG_DIR, `${ts}.log`);
-let logFd = null;
 
 function log(level, msg) {
   const line = `[${new Date().toISOString()}] [${level}] ${msg}`;

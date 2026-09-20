@@ -3,7 +3,6 @@
 // BLOCK-92 Wave C-8 — ChangeSet 回放包契约与校验/证明簇外迁
 // （原 result-replay-service.js 41-981 行，纯搬运零行为变化）。
 
-const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const { stableStringify } = require('../canonical-json');
@@ -17,9 +16,7 @@ const {
   workflowGraphDigest,
 } = require('../result-workflow-graph');
 const { sha256 } = require('../result-changeset-service');
-const {
-  verifyRevisionSourceMaterial,
-} = require('../result-revision-source');
+require('../result-revision-source');
 const {
   validateScientificReplayPackage,
 } = require('../scientific-replay-package');

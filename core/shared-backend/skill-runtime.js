@@ -21,7 +21,6 @@
  */
 
 const crypto = require('crypto');
-const path = require('path');
 
 // ---------------------------------------------------------------------------
 // Execution States
@@ -700,7 +699,7 @@ class SkillRuntime {
   /**
    * 执行单个 Plugin
    */
-  async _executePlugin(pluginId, params, execCtx) {
+  async _executePlugin(pluginId, params, _execCtx) {
     // 调用 run_tool 接口
     // 这应该通过 MCP 或其他 IPC 机制调用
     const toolId = this._resolveToolId(pluginId);
@@ -892,7 +891,7 @@ class SkillRuntime {
   /**
    * 修复参数
    */
-  _repairParams(params, error, strategy) {
+  _repairParams(params, error, _strategy) {
     const repaired = { ...params };
 
     // 根据错误类型修复
@@ -920,7 +919,7 @@ class SkillRuntime {
   /**
    * 从暂停状态恢复
    */
-  async _resumeFromPaused(execCtx, options) {
+  async _resumeFromPaused(execCtx, _options) {
     this._log('info', 'Resuming from paused state');
 
     // 重新检查依赖
@@ -942,7 +941,7 @@ class SkillRuntime {
   /**
    * 从恢复状态恢复
    */
-  async _resumeFromRecovering(execCtx, options) {
+  async _resumeFromRecovering(execCtx, _options) {
     this._log('info', 'Resuming from recovering state');
 
     // 继续恢复流程

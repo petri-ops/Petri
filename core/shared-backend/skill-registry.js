@@ -70,24 +70,6 @@ function readJson(filePath) {
 }
 
 /**
- * 深度合并对象
- * @param {object} target - 目标对象
- * @param {object} source - 源对象
- * @returns {object}
- */
-function deepMerge(target, source) {
-  const result = { ...target };
-  for (const key of Object.keys(source)) {
-    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-      result[key] = deepMerge(result[key] || {}, source[key]);
-    } else {
-      result[key] = source[key];
-    }
-  }
-  return result;
-}
-
-/**
  * 检查字符串是否符合 semver 格式
  * @param {string} version
  * @returns {boolean}
@@ -272,7 +254,7 @@ function loadBuiltInSkills() {
   const manifest = readJson(BUILT_IN_MANIFEST_PATH);
   if (manifest && manifest.skills) {
     // 从 manifest 声明的目录加载
-    for (const [id, info] of Object.entries(manifest.skills)) {
+    for (const id of Object.keys(manifest.skills)) {
       const skillDir = path.join(BUILT_IN_SKILLS_DIR, id);
       const skill = loadSkillFromDir(skillDir, 'built-in');
       if (skill) skills.push(skill);
@@ -315,7 +297,7 @@ function loadInstalledSkills() {
   if (!manifest || !manifest.skills) return [];
 
   const skills = [];
-  for (const [id, info] of Object.entries(manifest.skills)) {
+  for (const id of Object.keys(manifest.skills)) {
     // 跳过已被 built-in 占用的
     if (_registry.has(id)) continue;
 
@@ -325,34 +307,6 @@ function loadInstalledSkills() {
   }
 
   return skills;
-}
-
-/**
- * 加载 marketplace Skills（仅元数据，不下载）
- * @param {string} marketplaceUrl - 市场 URL
- * @returns {SkillEntry[]}
- */
-async function loadMarketplaceSkills(marketplaceUrl = 'https://marketplace.biof3.com/skills/manifest.json') {
-  // 检查缓存
-  const now = Date.now();
-  if (_marketplaceCache && (now - _marketplaceCacheTime) < MARKETPLACE_CACHE_TTL) {
-    return _marketplaceCache;
-  }
-
-  try {
-    // 尝试从网络加载（实际实现中可能需要 http 请求）
-    // 这里先返回空数组，待 MCP 层实现网络请求
-    const skills = [];
-
-    // 缓存结果
-    _marketplaceCache = skills;
-    _marketplaceCacheTime = now;
-
-    return skills;
-  } catch (e) {
-    console.warn(`[skill-registry] Failed to load marketplace manifest: ${e.message}`);
-    return [];
-  }
 }
 
 /**

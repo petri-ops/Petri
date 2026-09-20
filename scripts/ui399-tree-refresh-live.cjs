@@ -55,7 +55,7 @@ async function attach() {
   run.assert('V2_click_file_A', String(c1).startsWith('clicked'), String(c1));
   await sleep(1500);
   const midCount = Number(await EVAL(`performance.getEntriesByType('resource').filter(function(r){ return r.name.indexOf('/tree') >= 0; }).length`));
-  const midContent = Number(await EVAL(`performance.getEntriesByType('resource').filter(function(r){ return r.name.indexOf('/workspaces/') >= 0 && r.name.indexOf('/tree') < 0; }).length`));
+  Number(await EVAL(`performance.getEntriesByType('resource').filter(function(r){ return r.name.indexOf('/workspaces/') >= 0 && r.name.indexOf('/tree') < 0; }).length`));
 
   const c2 = await clickNth(1);
   run.assert('V3_click_file_B', String(c2).startsWith('clicked'), String(c2));

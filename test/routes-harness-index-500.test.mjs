@@ -43,7 +43,7 @@ await runMigrations(process.env.BIOF3_DB_PATH, path.join(__dirname, '../src/migr
  *      not exist" 404 branch must be reachable)
  */
 
-const ROOT_HELPER = path.resolve(
+path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '..',
   'core',

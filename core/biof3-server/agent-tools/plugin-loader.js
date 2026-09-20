@@ -363,7 +363,7 @@ class ToolPluginLoader {
    */
   async reloadAllPlugins() {
     // 清除所有插件的 require 缓存
-    for (const [name, info] of this._plugins) {
+    for (const info of this._plugins.values()) {
       if (info.pluginPath) {
         this._clearRequireCache(info.pluginPath);
       }

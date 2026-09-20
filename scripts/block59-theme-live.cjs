@@ -193,7 +193,7 @@ async function main() {
   await screenshot(popClient, path.join(EVIDENCE_DIR, 'p59-theme-dark.png'));
 
   // 3) 指挥中心瓦片同一令牌面（dark 下暗色表面）
-  const ccPop = await evalJSRetry(client, `window.biof3Desktop.windowManager.popOut('command-center')`);
+  await evalJSRetry(client, `window.biof3Desktop.windowManager.popOut('command-center')`);
   const ccHits = await pollTarget('/window/command-center');
   const ccClient = await new CdpClient(ccHits[0].webSocketDebuggerUrl).connect();
   await delay(2000);

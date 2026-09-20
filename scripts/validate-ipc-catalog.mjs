@@ -62,7 +62,6 @@ const VALID_SOURCE_POLICIES = Object.freeze([
 ]);
 const VALID_PLATFORM_IDS = Object.freeze(['macos-arm64', 'macos-x64', 'windows-x64', 'linux-x64']);
 const SEMVER_RE = /^[0-9]+\.[0-9]+\.[0-9]+/;
-const SHA256_RE = /^[a-f0-9]{64}$/;
 const ID_RE = /^[a-z][a-z0-9_-]*$/;
 
 /**
@@ -285,7 +284,7 @@ function scanPluginManifests(rootDir) {
 
 // ─── Payload Shape Basic Type Checks (self-written, no ajv/zod) ──────────────
 
-const KNOWN_PAYLOAD_TYPES = Object.freeze([
+Object.freeze([
   'null', 'boolean', 'number', 'integer', 'string', 'array', 'object',
 ]);
 
@@ -597,8 +596,7 @@ function report(ref, catalog) {
   console.log(`[IPC-CATALOG] ${ref.shadowCount()} shadow channels (main-only, OK)`);
   console.log(`[IPC-CATALOG] ${ref.orphanCount()} orphan channels`);
 
-  const shadowCount = shadowHandles.length + shadowSends.length + shadowOns.length;
-
+  
   if (shadowHandles.length > 0) {
     console.log(`[IPC-CATALOG] Shadow handles (${shadowHandles.length}):`);
     for (const h of shadowHandles) {
@@ -755,7 +753,7 @@ function buildCatalogJson(ref, catalog, opts = {}) {
 async function main() {
   const quiet = process.argv.includes("--json");
   const manifestOnly = process.argv.includes("--manifest-only");
-  const all = process.argv.includes("--all");
+  process.argv.includes("--all");
 
   if (!quiet) console.log("[IPC-CATALOG] Scanning IPC channels...");
 

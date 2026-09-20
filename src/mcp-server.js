@@ -11,7 +11,7 @@
 
 async function startMcpServer() {
   const { Server } = await import('@modelcontextprotocol/sdk/server/index.js');
-  const { StdioServerTransport } = await import('@modelcontextprotocol/sdk/server/stdio.js');
+  await import('@modelcontextprotocol/sdk/server/stdio.js');
   const { ListToolsRequestSchema, CallToolRequestSchema } =
     await import('@modelcontextprotocol/sdk/types.js');
   // 去 submodule 后：core 内嵌在 desktop 仓根 core/ 下。

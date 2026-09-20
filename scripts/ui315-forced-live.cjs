@@ -52,7 +52,6 @@ async function evalJS(client, expr) {
   return r.result?.value;
 }
 
-const js = String.raw;
 
 async function poll(client, label, expr, predicate, timeoutMs = TIMEOUT_MS) {
   const deadline = Date.now() + timeoutMs;

@@ -15,7 +15,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const require = createRequire(import.meta.url);
-const { BIOF3_AGENT_SH, agentVersionHash, remoteAgentCommand } = require('../core/biof3-server/helpers/remote-execution/node-agent');
+const { BIOF3_AGENT_SH, remoteAgentCommand } = require('../core/biof3-server/helpers/remote-execution/node-agent');
 const mux = require('../core/biof3-server/helpers/remote-execution/ssh-multiplexer');
 // BLOCK-96 F2 — fs_list 契约断言经 gateway 解码（stdout = 单行 base64(NUL 记录流)）
 const { parseListEntries } = require('../core/biof3-server/helpers/workspace-gateway');

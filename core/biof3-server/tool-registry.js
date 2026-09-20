@@ -27,7 +27,7 @@ function _loadDomainEntries() {
       TOOLS: parsed.TOOLS && typeof parsed.TOOLS === 'object' ? parsed.TOOLS : {},
       TOOL_ALIASES: parsed.TOOL_ALIASES && typeof parsed.TOOL_ALIASES === 'object' ? parsed.TOOL_ALIASES : {},
     };
-  } catch (error) {
+  } catch {
     console.warn();
     return { TOOLS: {}, TOOL_ALIASES: {} };
   }

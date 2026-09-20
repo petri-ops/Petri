@@ -23,7 +23,7 @@ function resolve(...segments) {
 }
 
 describe('loop-orchestrator-subdomains.test.mjs', () => {
-  const cwd = resolve();
+  resolve();
 
   describe('loop-orchestrator.js', () => {
     it('should require without error', async () => {

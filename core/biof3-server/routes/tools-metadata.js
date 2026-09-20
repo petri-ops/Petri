@@ -341,7 +341,7 @@ function createToolsMetadataRoutes({db, getUserId, jobsDir = ''}) {
         pluginLoader.loadPluginsFromDisk();
         const pluginDefs = pluginLoader.getAllToolDefinitions();
         res.json({ ok: true, tools: pluginDefs, source: 'desktop' });
-      } catch (e) {
+      } catch {
         // plugin-loader 在 web 版/未启用时可能不可用，返回空列表而非 500
         res.json({ ok: true, tools: [], source: 'desktop', note: 'plugin-loader unavailable' });
       }

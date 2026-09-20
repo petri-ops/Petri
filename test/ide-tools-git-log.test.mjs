@@ -62,7 +62,7 @@ function makeRepoWithCommits() {
 function cleanup(repo) {
   try {
     fs.rmSync(repo, { recursive: true, force: true });
-  } catch (_e) { /* ignore */ }
+  } catch { /* ignore */ }
 }
 
 test('ide_git_log returns newest-first commits with parsed fields', () => {

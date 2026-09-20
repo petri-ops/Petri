@@ -58,12 +58,12 @@ const fakeBackend = {
     return Buffer.from(files.get(p), 'utf8');
   },
   async write(p, content) { files.set(p, String(content)); return { type: 'file', size: content.length, mtimeMs: 9 }; },
-  async find(p, maxDepth) { return 'data/a.csv\nREADME.md'; },
-  async grep(pattern, p, maxLines) { return `README.md:2:目标文本 ${pattern} 存在\ndata/a.csv:1:${pattern},x\n`; },
-  async exec(cmd, cwd, timeoutS) { return { code: 0, stdout: `ran:${cmd}`, stderr: '', truncated: false }; },
+  async find(_p, _maxDepth) { return 'data/a.csv\nREADME.md'; },
+  async grep(pattern, _p, _maxLines) { return `README.md:2:目标文本 ${pattern} 存在\ndata/a.csv:1:${pattern},x\n`; },
+  async exec(cmd, _cwd, _timeoutS) { return { code: 0, stdout: `ran:${cmd}`, stderr: '', truncated: false }; },
   async execBackground(cmd, cwd, log) { execCalls.push({ cmd, cwd, log }); return { pid: 4242 }; },
-  async processAlive(pid) { return { alive: aliveFlag }; },
-  async killPid(pid, sig) { return { signaled: true }; },
+  async processAlive(_pid) { return { alive: aliveFlag }; },
+  async killPid(_pid, _sig) { return { signaled: true }; },
 };
 const execCalls = [];
 let aliveFlag = true;
@@ -210,7 +210,6 @@ test('路径边界 fail-closed：.. 逃逸拒绝（list/read）', async () => {
 });
 
 test('preflight ssh 分支：远程语义放行（read/exec）+ 命令黑名单同门', async () => {
-  const r1 = await tools.preflightTool ? null : null;
   // preflightTool 未直接导出 —— 经 interceptor 面验证：读路径放行 exists
   const p = await tools.listDirectory({}, sshCtx); // 间接确认 surface 可达
   assert.strictEqual(p.ok, true);

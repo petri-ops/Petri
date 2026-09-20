@@ -24,7 +24,7 @@ function makeFakeGateway({ aliveCallsBeforeExit = 1, exitCode = 0 } = {}) {
     setPid(v) { pid = v; },
     async mkdir(p) { calls.mkdirs.push(p); },
     async write(p, content) { calls.writes.push({ p, content: Buffer.from(content) }); },
-    async read(p, { offset = 0 } = {}) {
+    async read(p, _opts = {}) {
       if (p.includes('job_p1') && p.endsWith('.exit')) return Buffer.from(`${exitCode}\n`);
       if (p.endsWith('run.log')) return Buffer.from('LOG-TAIL-BYTES');
       throw new Error('not_found');

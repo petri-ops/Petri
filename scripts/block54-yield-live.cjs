@@ -18,7 +18,6 @@
  */
 const fs = require('node:fs');
 const path = require('node:path');
-const { createRequire } = require('node:module');
 
 const ROOT = path.join(__dirname, '..');
 const EVIDENCE_DIR = path.join(ROOT, 'acceptance', 'block-54');

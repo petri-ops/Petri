@@ -7,7 +7,7 @@
 const crypto = require('crypto');
 const fsp = require('fs/promises');
 const path = require('path');
-const { execFile, spawn } = require('child_process');
+const { spawn } = require('child_process');
 const { StringDecoder } = require('string_decoder');
 
 const SENSITIVE_SEGMENTS = new Set([

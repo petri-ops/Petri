@@ -31,7 +31,6 @@ async function safeInvoke(body) {
  * ABI 不匹配问题：Electron 主进程 Node ABI ≠ npm 安装编译目标）。短 TTL 缓存
  * （30s）吸收高频 status/diff 轮询；项目不存在返回 null。
  */
-const PROJECT_WORKSPACE_TTL_MS = 30_000;
 const projectWorkspaceCache = new Map();
 
 async function getProjectInfo(projectId) {

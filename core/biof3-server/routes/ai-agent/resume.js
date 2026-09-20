@@ -18,7 +18,6 @@
  *   模型调用的「最后状态」，供前端确认弹层展示。
  */
 
-const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const agentTaskStore = require('../../agent-task-store');

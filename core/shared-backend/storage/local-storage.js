@@ -78,7 +78,6 @@ class LocalFileStorage {
    * 下载文件（本地 = 从 results 目录复制到指定路径）。
    */
   async download(key, localPath) {
-    const resultsDir = _getResultsDir();
     const src = _resolveKey(key, { mustExist: true });
     if (!src) throw new Error(`文件不存在或路径非法: ${key}`);
     if (!fs.existsSync(src)) {
@@ -92,7 +91,6 @@ class LocalFileStorage {
    * 删除文件。
    */
   async delete(key) {
-    const resultsDir = _getResultsDir();
     const target = _resolveKey(key, { mustExist: true });
     if (!target) throw new Error('invalid_storage_key');
     try {
@@ -109,7 +107,7 @@ class LocalFileStorage {
    * 桌面版：前端直接 POST /api/upload，multer 存到本地 uploads 目录。
    * 不需要 OSS 签名。
    */
-  getUploadUrl(key) {
+  getUploadUrl(_key) {
     return '/api/upload';
   }
 
@@ -117,7 +115,6 @@ class LocalFileStorage {
    * 检查文件是否存在。
    */
   exists(key) {
-    const resultsDir = _getResultsDir();
     return !!_resolveKey(key, { mustExist: true });
   }
 
@@ -125,7 +122,6 @@ class LocalFileStorage {
    * 读取文件内容（Buffer）。
    */
   read(key) {
-    const resultsDir = _getResultsDir();
     const target = _resolveKey(key, { mustExist: true });
     if (!target) throw new Error('invalid_storage_key');
     return fs.readFileSync(target);

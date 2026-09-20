@@ -79,7 +79,7 @@ test('preload exposes biof3Desktop.branch with 6 methods mapping to branch:* cha
     ['rename', 'branch:rename'],
     ['getActive', 'branch:active'],
   ];
-  for (const [method, channel] of expected) {
+  for (const [method] of expected) {
     assert.equal(
       typeof desktop.branch[method],
       'function',
@@ -121,7 +121,7 @@ test('preload exposes biof3Desktop.result with 7 methods + version sub-namespace
     ['byProject', 'result:byProject'],
     ['createFromConversation', 'result:createFromConversation'],
   ];
-  for (const [method, channel] of expected) {
+  for (const [method] of expected) {
     assert.equal(
       typeof desktop.result[method],
       'function',
@@ -137,7 +137,7 @@ test('preload exposes biof3Desktop.result with 7 methods + version sub-namespace
     ['getByNumber', 'result:version:getByNumber'],
     ['list', 'result:version:list'],
   ];
-  for (const [method, channel] of expectedVersion) {
+  for (const [method] of expectedVersion) {
     assert.equal(
       typeof desktop.result.version[method],
       'function',

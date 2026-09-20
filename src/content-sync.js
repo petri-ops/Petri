@@ -11,7 +11,6 @@ const { app } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const https = require('https');
-const crypto = require('crypto');
 
 const MANIFEST_URL =
   process.env.BIOF3_CONTENT_MANIFEST_URL ||

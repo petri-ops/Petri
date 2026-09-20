@@ -24,12 +24,9 @@
  * - 本模块不判定科学有效性，也不写 Artifact；它只负责文本版本事实。
  */
 
-const { execFileSync, execFile } = require('child_process');
-const { randomUUID } = require('crypto');
-const fs = require('fs');
+const { execFileSync } = require('child_process');
 const path = require('path');
 // 避免参数 `path` 与 module 同名遮蔽
-const pathModule = path;
 const os = require('os');
 
 

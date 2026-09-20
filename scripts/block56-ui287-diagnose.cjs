@@ -16,7 +16,6 @@
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
-const os = require('os');
 const { execSync } = require('child_process');
 
 const CDP_PORT = '9222';
@@ -196,13 +195,7 @@ async function main() {
       }
       throw lastErr;
     };
-    const assertSameTarget = async () => {
-      const now = await httpGetJson(`http://localhost:${CDP_PORT}/json/list`);
-      const still = now.find((t) => t.id === pinnedTargetId);
-      if (!still) throw new Error(`钉扎 target 消失：${pinnedTargetId}`);
-      return still.url;
-    };
-
+    
     await send('Page.enable');
     // 新文档注入：SSE 帧捕获（传输层）+ chip 300ms 时间线（渲染层）
     await send('Page.addScriptToEvaluateOnNewDocument', { source: `

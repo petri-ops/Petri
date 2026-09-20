@@ -214,7 +214,7 @@ async function main() {
 
   // 5. 关闭 tab-3 → 进程回收
   console.log('[step] close tab-3');
-  const pid3 = pids3.get('tab-3');
+  pids3.get('tab-3');
   const closed = await evalJS(client, `(() => {
     const b = document.querySelector('button[aria-label="关闭 终端 3"]');
     if (!b) return null;

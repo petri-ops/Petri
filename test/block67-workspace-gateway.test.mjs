@@ -8,7 +8,7 @@
  * core/biof3-server 的 ABI（根 node_modules 为 Electron ABI）。
  */
 import assert from 'node:assert/strict';
-import test, { after, before } from 'node:test';
+import test, { after } from 'node:test';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';

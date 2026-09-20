@@ -223,7 +223,7 @@ test('local 冲突与边界: 409 已存在 / 404 源缺失 / 400 越界与缺参
 
 // ── ssh：fake backend 透传 + 错误映射契约（与 local 同构，D1） ─────────
 
-test('ssh move/copy/delete/mkdir: 路由透传 backend 方法（零本地 fs 触碰）', async (t) => {
+test('ssh move/copy/delete/mkdir: 路由透传 backend 方法（零本地 fs 触碰）', async (_t) => {
   const p = createSshProject('block89-ssh-ops');
   fakeSsh.calls.length = 0;
   fakeSsh.exists.clear();
@@ -247,7 +247,7 @@ test('ssh move/copy/delete/mkdir: 路由透传 backend 方法（零本地 fs 触
   assert.ok(fakeSsh.calls.every((c) => String(c[1]).startsWith('/srv/proj')), 'all ops stay under remote root');
 });
 
-test('ssh 错误映射: 目标已存在 409 / classified 502 / 源缺失 404（与 local 同语义）', async (t) => {
+test('ssh 错误映射: 目标已存在 409 / classified 502 / 源缺失 404（与 local 同语义）', async (_t) => {
   const p = createSshProject('block89-ssh-errors');
   fakeSsh.calls.length = 0;
   fakeSsh.exists.clear();

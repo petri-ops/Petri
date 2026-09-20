@@ -75,7 +75,7 @@ function nativeModuleBinaryPath(modDir) {
 // (ERR_DLOPEN_FAILED / MODULE_NOT_FOUND) when it is missing or ABI-mismatched,
 // which is exactly the condition we must detect and rebuild.
 function nativeModulesLoad(dir) {
-  for (const { name, binary } of NATIVE_MODULES) {
+  for (const { name } of NATIVE_MODULES) {
     const modDir = join(dir, 'node_modules', name);
     if (!existsSync(modDir)) return false;
     const bin = nativeModuleBinaryPath(modDir);

@@ -266,8 +266,6 @@ let jobId = null;
 }
 
 // ── 步骤 5：轮询 ────────────────────────────────────────────
-let jobDiskArtifacts = null;
-let jobDiskSummary = null;
 {
   log('INFO', `STEP 5: polling /api/tools/status/${jobId} (timeout=${TIMEOUT_MS}ms)`);
   const start = Date.now();
@@ -302,8 +300,6 @@ let jobDiskSummary = null;
         log('WARN', `  job status=${lastStatus} but ${files.length} artifacts visible —`);
         log('WARN', '    R analysis appears to have succeeded; entering rescue path.');
         log('WARN', `    cause: ${lastBody.error || '(no error msg)'}`);
-        jobDiskArtifacts = files.map((f) => ({ name: f.name, size: f.size, path: f.path }));
-        jobDiskSummary = lastBody.result?.summary || null;
         break;
       }
       bail(`job ${jobId} ended with status=${lastStatus}: ${r.body.error || '(no error msg)'}`, 2);

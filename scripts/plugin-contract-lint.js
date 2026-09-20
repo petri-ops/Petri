@@ -105,7 +105,7 @@ function lintPlugin(pluginId) {
       }
     }
   }
-  for (const [id, input] of toolInputs) {
+  for (const id of toolInputs.keys()) {
     if (!acceptedInputKeys.has(id)) {
       warnings.push(
         `[${pluginId}] tool-definition input "${id}" has no acceptance fixture covering it`
@@ -129,7 +129,6 @@ function lintPlugin(pluginId) {
         if (fm.detect) {
           const patterns = fm.detect.split('|');
           const covered = patterns.some(p => {
-            const safe = p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             return scriptContent.includes(p) || scriptContent.includes(p.replace(/\\/g, ''));
           });
           if (!covered) {

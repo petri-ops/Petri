@@ -73,36 +73,6 @@ function selectArtifactResultDirBestEffort(job, result) {
   return '';
 }
 
-function collectArtifactNamesFromResult(result) {
-  if (!result || typeof result !== 'object') return [];
-  const out = new Set();
-  const sources = [result.artifacts, result.outputs, result.files];
-  for (const list of sources) {
-    if (!Array.isArray(list)) continue;
-    for (const item of list) {
-      if (!item) continue;
-      const name = typeof item === 'string' ? item : item.name || item.filename;
-      if (!name) continue;
-      const base = path.basename(String(name));
-      if (base && !INTERNAL_FILES.has(base)) out.add(base);
-    }
-  }
-  const manifest = result.manifest;
-  if (manifest && typeof manifest === 'object') {
-    for (const key of ['artifacts', 'outputs', 'files']) {
-      if (!Array.isArray(manifest[key])) continue;
-      for (const item of manifest[key]) {
-        const name = item && (item.name || item.filename);
-        if (name) {
-          const base = path.basename(String(name));
-          if (base && !INTERNAL_FILES.has(base)) out.add(base);
-        }
-      }
-    }
-  }
-  return Array.from(out);
-}
-
 function listJobArtifactNames(job) {
   if (!job || !job.id) return [];
   const parsed = parseJsonMaybe(job.result_json);

@@ -24,7 +24,6 @@ const {
   db,
   getDatabase,
   closeDatabase,
-  createAsyncDatabaseFacade,
   getAsyncDatabase,
   uid,
   now,
@@ -344,7 +343,7 @@ function getProject(id) {
   return hydrateProject(stmts.getProject.get(id) || null, { recordOpen: true });
 }
 
-function createProject({ name, description, modality, userId, workspacePath, workspaceKind, sshHost, remotePath }) {
+function createProject({ name, description, modality, workspacePath, workspaceKind, sshHost, remotePath }) {
   const id = uid('p');
   const ts = now();
   // BLOCK-67：ssh 项目 —— workspace 三字段定死不可运行时切换（防双模式回潮），

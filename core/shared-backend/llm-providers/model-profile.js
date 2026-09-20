@@ -196,7 +196,6 @@ function normalizeRoleBindings(settings, profiles) {
   for (const role of MODEL_ROLES) {
     const requested = _cleanString(supplied[role]) || (role === 'chat' ? activeChatId : undefined);
     const capability = ROLE_CAPABILITY[role];
-    const requestedProfile = requested && byId.get(requested);
     // An explicit binding is configuration truth, even when invalid. Preserve
     // it so resolution returns a visible diagnostic instead of silently using
     // another model for the task.

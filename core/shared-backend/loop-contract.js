@@ -347,7 +347,7 @@ function validateIteration(input, { allowPartial = false } = {}) {
   return input;
 }
 
-function validateAction(input, { allowPartial = false } = {}) {
+function validateAction(input, { allowPartial: _allowPartial = false } = {}) {
   if (input === null || input === undefined) {
     return null;
   }
@@ -363,7 +363,7 @@ function validateAction(input, { allowPartial = false } = {}) {
   return input;
 }
 
-function validateEvidence(input, { allowPartial = false } = {}) {
+function validateEvidence(input, { allowPartial: _allowPartial = false } = {}) {
   if (input === null || input === undefined) {
     return null;
   }

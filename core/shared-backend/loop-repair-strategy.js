@@ -30,7 +30,7 @@
  *  - Integration layer decides whether to auto-proceed or wait for user
  */
 
-const { REASON_CODES } = require('./loop-contract');
+require('./loop-contract');
 
 // ---------------------------------------------------------------------------
 // HLE-C5R: Strict Repair Boundary
@@ -98,7 +98,7 @@ const REPAIR_BOUNDARY_BLOCK = new Set([
  * Check if a strategyId or faultType is allowed for automatic repair.
  * @returns {{ allowed: boolean, reason?: string }}
  */
-function repairBoundaryCheck(strategyId, faultType, actionDescription) {
+function repairBoundaryCheck(strategyId, faultType, _actionDescription) {
   // HLE-C5R: 需用户输入时禁止数据/方法被自动修改（BLOCK-83 D12 中性化 faultType）
   if (faultType === 'user_input_required') {
     const prohibited = [
@@ -230,7 +230,7 @@ const REPAIR_STRATEGIES = Object.freeze([
     safetyLevel: 'safe',
     costMultiplier: 1.0,
 
-    applicability(diagnosis, context) {
+    applicability(diagnosis, _context) {
       if (diagnosis.faultType !== 'transient_runtime') {
         return { applicable: false, reason: 'not transient_runtime' };
       }
@@ -273,7 +273,7 @@ const REPAIR_STRATEGIES = Object.freeze([
     safetyLevel: 'safe',
     costMultiplier: 1.1,
 
-    applicability(diagnosis, context) {
+    applicability(diagnosis, _context) {
       if (diagnosis.faultType !== 'transient_provider') {
         return { applicable: false, reason: 'not transient_provider' };
       }
@@ -418,7 +418,7 @@ const REPAIR_STRATEGIES = Object.freeze([
     safetyLevel: 'safe',
     costMultiplier: 1.0,
 
-    applicability(diagnosis, context) {
+    applicability(diagnosis, _context) {
       if (diagnosis.faultType !== 'invalid_arguments') {
         return { applicable: false, reason: 'not invalid_arguments' };
       }
@@ -512,7 +512,7 @@ const REPAIR_STRATEGIES = Object.freeze([
     safetyLevel: 'safe',
     costMultiplier: 1.1,
 
-    applicability(diagnosis, context) {
+    applicability(diagnosis, _context) {
       if (diagnosis.faultType !== 'runtime_not_ready') {
         return { applicable: false, reason: 'not runtime_not_ready' };
       }
@@ -610,7 +610,7 @@ const REPAIR_STRATEGIES = Object.freeze([
     safetyLevel: 'risky',
     costMultiplier: 2.0,
 
-    applicability(diagnosis, context) {
+    applicability(diagnosis, _context) {
       if (!['method_not_applicable', 'user_input_required'].includes(diagnosis.faultType)) {
         return { applicable: false, reason: 'not method/design fault type' };
       }
@@ -658,7 +658,7 @@ const REPAIR_STRATEGIES = Object.freeze([
     safetyLevel: 'safe',
     costMultiplier: 1.0,
 
-    applicability(diagnosis, context) {
+    applicability(diagnosis, _context) {
       if (diagnosis.faultType !== 'resource_pressure') {
         return { applicable: false, reason: 'not resource_pressure' };
       }
@@ -704,7 +704,7 @@ const REPAIR_STRATEGIES = Object.freeze([
     safetyLevel: 'unsafe',
     costMultiplier: 0,
 
-    applicability(diagnosis, context) {
+    applicability(diagnosis, _context) {
       if (diagnosis.faultType !== 'external_side_effect') {
         return { applicable: false, reason: 'not external_side_effect' };
       }
@@ -759,7 +759,7 @@ function selectRepairStrategy(diagnosis, context = {}) {
 
   const applicable = [];
   for (const strategy of candidates) {
-    const { applicable: isApplicable, reason } = strategy.applicability(diagnosis, context);
+    const { applicable: isApplicable } = strategy.applicability(diagnosis, context);
     if (isApplicable) {
       applicable.push({ strategy, reason: null });
     }
@@ -846,7 +846,7 @@ function buildRepairAttempt({
 // Utility helpers used by strategies
 // ---------------------------------------------------------------------------
 
-function fixParamsFromSchema(params, schema, diagnosis) {
+function fixParamsFromSchema(params, schema, _diagnosis) {
   // Returns a copy of params with schema-violating values corrected.
   // For now: if a required param is missing and has a default, use the default.
   // In production, this would consult the tool definition schema.

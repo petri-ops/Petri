@@ -28,7 +28,7 @@ test.after(() => {
   }
 });
 
-test('BLOCK-33 P1 system_info 工具形状', async (t) => {
+test('BLOCK-33 P1 system_info 工具形状', async (_t) => {
   const { tool_system_info } = await import('../core/biof3-server/agent-tools/system-info-tools.js');
   const result = await tool_system_info({}, { projectId: 'p_test' });
   assert.equal(result.ok, true);
@@ -44,7 +44,7 @@ test('BLOCK-33 P1 system_info 工具形状', async (t) => {
   }
 });
 
-test('BLOCK-33 P1 registry 三方对齐（def/handler/contract）+ 提供者投影', async (t) => {
+test('BLOCK-33 P1 registry 三方对齐（def/handler/contract）+ 提供者投影', async (_t) => {
   const registry = await import('../core/biof3-server/agent-tools/registry.js');
   // buildToolRegistry 在模块加载时强校验：def/handler/contract 不齐会 throw
   const entry = registry.getToolEntry('system_info');
@@ -57,7 +57,7 @@ test('BLOCK-33 P1 registry 三方对齐（def/handler/contract）+ 提供者投�
   assert.deepEqual(projected.function.parameters.properties, {});
 });
 
-test('BLOCK-33 P1 只读模式同样可用（非 mutating 不受 accessMode 限制）', async (t) => {
+test('BLOCK-33 P1 只读模式同样可用（非 mutating 不受 accessMode 限制）', async (_t) => {
   const { executeToolCall } = await import('../core/biof3-server/agent-tools/tool-execution.js');
   const envelope = await executeToolCall('system_info', {}, {
     accessMode: 'read',

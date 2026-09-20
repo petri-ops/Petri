@@ -63,7 +63,7 @@ function createTargetRegistry({ db, ensureAgent }) {
     }
     let runtimeJson = null;
     if (runtime && typeof runtime === 'object' && !Array.isArray(runtime)) {
-      for (const [lang, binPath] of Object.entries(runtime)) {
+      for (const binPath of Object.values(runtime)) {
         if (typeof binPath !== 'string' || /\s/.test(binPath)) {
           return { ok: false, error: 'invalid_runtime_override' };
         }

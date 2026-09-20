@@ -14,8 +14,6 @@ const {
 const {
   DEFAULT_GC_MIN_AGE_MS,
   GC_SOURCE_REF_PREFIX,
-  GC_CHANGESET_REF_PREFIX,
-  SAFE_CHANGESET_ID_PATTERN,
   ResultStudioLifecycleError,
   guardPrivatePath,
   sha256,

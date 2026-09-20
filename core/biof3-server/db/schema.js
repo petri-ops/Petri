@@ -1,6 +1,6 @@
 'use strict';
 
-const { now } = require('./connection');
+require('./connection');
 const { getCurrentG0Baseline } = require('../../shared-backend/g0-baseline');
 
 // BLOCK-92 Wave C-3 — DDL 与迁移外迁（原 db.js，纯搬运零行为变化）。

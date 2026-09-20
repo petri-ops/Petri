@@ -26,7 +26,7 @@ function makeTempDir() {
 function cleanup(tmp) {
   try {
     fs.rmSync(tmp, { recursive: true, force: true });
-  } catch (_e) { /* ignore */ }
+  } catch { /* ignore */ }
 }
 
 test('ide_file_diff returns hunks with added/removed for different files', () => {

@@ -30,7 +30,7 @@ function toolBlock(n, fill = 'x'.repeat(2000), name = 'read_page') {
   const assistant = {
     role: 'assistant',
     content: null,
-    tool_calls: Array.from({ length: n }, (_, i) => ({
+    tool_calls: Array.from({ length: n }, (_, _i) => ({
       id: `call_${name}_${Math.random().toString(36).slice(2, 8)}`,
       type: 'function',
       function: { name, arguments: '{}' },

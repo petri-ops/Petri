@@ -11,7 +11,6 @@ const assert = require('node:assert');
 const {
   REPAIR_STRATEGIES,
   selectRepairStrategy,
-  buildRepairAttempt,
   computeAffectedSubgraph,
   listStrategies,
   getStrategy,

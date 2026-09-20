@@ -43,7 +43,6 @@ const require = createRequire(import.meta.url);
 const {
   buildIteration,
   stableHash,
-  generateActionKey,
   REASON_CODES,
 } = require(resolve(__dirname, '../core/shared-backend/loop-contract'));
 

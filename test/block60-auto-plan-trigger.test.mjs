@@ -9,7 +9,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import fs from 'node:fs';
 
-const require = createRequire(import.meta.url);
+createRequire(import.meta.url);
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 // 从 chat.js 源码中提取正则做同源测试（避免双写漂移）

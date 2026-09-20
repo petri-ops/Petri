@@ -96,7 +96,7 @@ async function pollTargets() {
 
 (async () => {
   const run = lib.createRun({ name: 'block97-todo-live', evidenceDir: EVIDENCE_DIR });
-  const startedAt = Date.now();
+  Date.now();
 
   // ── 打开项目工作台 ──
   let target = await pollTargets();

@@ -12,7 +12,7 @@ const FIXTURES = resolve(process.cwd(), 'test/fixtures/sdc');
 
 async function profileFixture(name, mimeType) {
   const absolutePath = resolve(FIXTURES, name);
-  const buffer = await readFile(absolutePath);
+  await readFile(absolutePath);
   const info = await stat(absolutePath);
   return profileData({
     projectId: 'sdc-test',

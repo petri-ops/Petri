@@ -20,7 +20,6 @@
 const {
   buildLoopRun,
   buildIteration,
-  buildEvidence,
   stableHash,
   REASON_CODES,
   normalizeLoopAutomationMode,
@@ -35,7 +34,6 @@ const {
   getLoopRun,
   listLoopIterations,
   persistLoopIteration,
-  persistLoopEvidence,
   saveContextCheckpoint,
   getToolJob,
 } = require('./db');
@@ -58,7 +56,6 @@ const {
   MAX_CONTINUATION_TOKENS,
   shouldFinalizeAgentIteration,
   assessFinalizationResult,
-  buildFinalizationRetryRequest,
   createAgentProgressRecorder,
   createContinuationGuard,
   runAgentToolCallBatch,
@@ -109,16 +106,13 @@ async function runLoop({
   messages,
   toolCtx,
   shouldAbort,
-  emitToolResult,
   emitAssistant,
   emitDone,
   callChatProvider,
   config,
-  conversationState,
 }) {
   const {
     userId,
-    conversationId,
     _activeConv,
     apiKey,
     providerName,
@@ -130,7 +124,6 @@ async function runLoop({
     context,
     executionPolicy,
     contextWindow,
-    // BLOCK-81 P1 — 思考档位（中性档位；由 /api/ai/agent 透传至此）
     thinkingLevel,
   } = config;
 
@@ -513,7 +506,6 @@ async function runLoop({
   let providerFailureReason = null;
   let finalizationAttempts = 0;
   let finalizationFailureReason = null;
-  let finalizationRouting = null;
   let pendingApprovalEmitted = false;
   let cancellationObserved = false;
   let modelFinalized = false;
@@ -679,7 +671,6 @@ async function runLoop({
         if (upJson && upJson.modelRouting && upJson.modelRouting.fallbackFrom) {
           modelFallbackOccurred = true;
         }
-        if (finalizing && upJson && upJson.modelRouting) finalizationRouting = upJson.modelRouting;
         if (!finalizing) break;
         finalizationAttempts = Math.max(finalizationAttempts, attempt);
         const assessment = assessFinalizationResult(upJson, streamedText);
@@ -1046,7 +1037,7 @@ async function runLoop({
       });
 
       const activeJobs = toolJobs.filter((j) => j.status === 'running' || j.status === 'pending');
-      const unresolvedFailedJobs = failedJobs.filter((job) => !repairAttempt || !repairAttempt.repaired);
+      const unresolvedFailedJobs = failedJobs.filter((_job) => !repairAttempt || !repairAttempt.repaired);
 
       // False success check
       const falseSuccessJobs = [];

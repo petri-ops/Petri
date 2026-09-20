@@ -14,19 +14,15 @@ const {
   buildIterationCheckpoint,
   deriveCheckpointId,
   buildLoopContextEnvelope,
-  buildEmptyEnvelope,
   computeUnresolvedGaps,
   computeNextCandidateActions,
-  collectFailureHistory,
   projectBudget,
   buildSessionStageView,
   buildExpandedSessionStageView,
-  buildDefaultStageView,
   mergeCostSnapshot,
-  DEFAULT_BUDGET_LIMITS,
 } = require('../core/shared-backend/loop-checkpoint');
 
-const { buildIteration } = require('../core/shared-backend/loop-contract');
+require('../core/shared-backend/loop-contract');
 
 // ---------------------------------------------------------------------------
 // CHECKPOINT-1: buildIterationCheckpoint

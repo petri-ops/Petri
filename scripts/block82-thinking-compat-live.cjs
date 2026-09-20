@@ -29,7 +29,6 @@ const http = require('node:http');
 const ROOT = path.join(__dirname, '..');
 const lib = require(path.join(ROOT, '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
 
-const API = 'http://127.0.0.1:3001';
 const AUTH = { Authorization: 'Bearer desktop-local' };
 const DATA_DIR = process.env.BIOF3_LOCAL_DATA_DIR || path.join(ROOT, '.biof3-dev-user-data', 'data');
 const TRANSCRIPT_DIR = path.join(DATA_DIR, 'llm-transcripts');

@@ -104,7 +104,6 @@ class LLMCircuitBreaker extends BaseCircuitBreaker {
 
     if (entry && entry.state === STATES.HALF_OPEN) {
       entry.halfOpenSuccesses = (entry.halfOpenSuccesses || 0) + 1;
-      const halfOpenCount = this._halfOpenCalls.get(key) || 0;
       if (entry.halfOpenSuccesses >= this.halfOpenMaxCalls) {
         this.state.delete(key);
         this._halfOpenCalls.delete(key);

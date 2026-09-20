@@ -1,6 +1,5 @@
 'use strict';
 
-const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { stableStringify } = require('./canonical-json');
@@ -10,29 +9,20 @@ const { evaluatePreviewResourceBudget } = require('./result-studio-lifecycle');
 const { verifyRevisionSourceMaterial } = require('./result-revision-source');
 const { buildAuthoritativeWorkflowGraph } = require('./result-workflow-graph');
 const { propagateDegThresholds } = require('./result-scientific-rerun');
-const { inspectPrivateDirectory, inspectPrivateEntry } = require('./result-studio-private-path');
+require('./result-studio-private-path');
 const {
-  MAX_PARAMETERS_BYTES,
-  MAX_SCRIPT_BYTES,
   RESULT_CHANGESET_SERVICE_VERSION,
-  ZERO_OID,
   ResultChangeSetError,
-  boundedResourceProduct,
   cloneJsonObject,
-  deterministicId,
   exactArtifact,
   gitFailureDiagnostic,
   hashFile,
   id,
   projectRelativeOutput,
   resolveExistingProjectFile,
-  resourceNumber,
-  resultChangeSetPrivatePathError,
   resultOf,
   safeSegment,
   sha256,
-  stableJson,
-  trustedFileSize,
 } = require('./result-changeset-service/internal');
 const {
   assertInheritedCandidateInputLineage,
@@ -45,7 +35,6 @@ const {
   validateCandidateJob,
 } = require('./result-changeset-service/projections');
 const {
-  adoptBaselineChangeSet,
   ensureBaselineArtifactCohort,
   ensureBaselineArtifactRevision,
   inspectBaselineArtifactCohort,
@@ -336,7 +325,7 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
     }
     const artifact = exactArtifact(candidateResult, sourceRevision.artifactId);
     if (!artifact) throw new ResultChangeSetError('candidate_artifact_missing', 'Candidate Artifact id is not uniquely present.');
-    const outputPath = projectRelativeOutput(workspaceRoot, artifact);
+    projectRelativeOutput(workspaceRoot, artifact);
     const outputHash = hashFile(artifact.path);
     const provenanceArtifact = (candidateResult.executionProvenance?.artifacts || [])
       .find((item) => item && item.id === sourceRevision.artifactId);

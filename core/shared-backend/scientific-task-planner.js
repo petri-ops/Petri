@@ -6,7 +6,6 @@
  * creates a tool_job and never executes a plugin.
  */
 
-const path = require('path');
 
 const STATUS = Object.freeze({
   READY: 'ready_for_confirmation',
