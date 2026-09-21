@@ -1,9 +1,11 @@
 # BLOCK-109-CORE-ARCH-CONVERGENCE — 会话核心链路架构收敛（单一事实源）
 
 **状态**：`active（P0-LAUNCH；2026-09-21 立项即启动，用户裁决「基于这些点 开一个或多个block系统性优化gewu」——基于 ZCode 开源库（zai-org/ZCode，Apache-2.0）对比审计发现；D1–D6 按 §7 推荐留痕）`
-**立项**：2026-09-21（对比审计报告存在于立项会话；证据 file:line 全部落在本仓与参考仓 `/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/reference/ZCode`（shallow clone），可复现）
+**立项**：2026-09-21（对比审计报告存在于立项会话；证据 file:line 全部落在本仓与参考仓可复现——Mac `/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/reference/ZCode`；Windows `D:\1.WorkDir\reference\ZCode`（2026-09-21 全量 clone：上游公开史仅 2 commits——`77432b6` Initial commit → `872ad96` feat: open source，包版本 v3.14.0，无 tag））
+**修订**：2026-09-21（用户核查裁决「立项时未考虑已收口的 BLOCK-109-AGENT-ORCHESTRATION-UX」成立——立项提交 `5427a489` 14:52 早于其四件套落地 `dddd135c` 15:09；本次吸收四件套为基线输入与零退化红线，D1–D6 与四阶段划分不变）
+**修订 2**：2026-09-21（用户实测三裁决之二「按你的建议来」：P0 拆前基线并入实机故障场景——run `80669989` 7 子智能体 3 败的证据链，见 §1 P0-2）
 **责任轨道**：BLOCK（多工作面：后端事件模型 + 前端消费链 + 工具定义层 + 门禁基建，跨会话串行分阶段，含数据契约裁决）
-**前序接口**：BLOCK-108 已收口（会话信息流呈现层 Qoder 化）；本包承接**链路与运行时层**，不触碰呈现层既有资产（BLOCK-107/108 沉淀的分段模型/时间线/簇呈现全部保留）。UI-431（BLOCK-108 名下增量，契约绿、面板实机待补）文件面与本包 P1 交叉（SimpleChat / conversationRunStore），按 D3 于 P0 先清偿。
+**前序接口**：BLOCK-108 已收口（会话信息流呈现层 Qoder 化）；本包承接**链路与运行时层**，不触碰呈现层既有资产（BLOCK-107/108 沉淀的分段模型/时间线/簇呈现全部保留）。UI-431（BLOCK-108 名下增量，契约绿、面板实机待补）文件面与本包 P1 交叉（SimpleChat / conversationRunStore），按 D3 于 P0 先清偿。同系列 **BLOCK-109-AGENT-ORCHESTRATION-UX**（UI-432 四件套，plan=`block-109-agent-orchestration-ux-plan.md`）已收口，但其交付（`dddd135c`）晚于本 plan 立项（`5427a489`）——经用户裁决核查，2026-09-21 修订将其四件交付吸收为本包基线输入与零退化红线（§0.3 / §1 P0-2、P1-6、P2-5 / §8），阶段划分与 D1–D6 裁决不变。
 
 ## 0. 问题定义
 
@@ -23,14 +25,15 @@
 
 ### 0.3 已有资产（不退化）
 
-`loop-orchestrator.js` 状态机、`task_events` 表（seq 严格递增，`agent-task-store.js:404-407`）、UI-292 agent 详情窗事件回放、BLOCK-38 agent-task-resume 链路、BLOCK-107/108 呈现层（分段模型/时间线/簇）、`impact-map.json` 定向测试——全部保留复用；本包是**在其下补事件单一事实源**，不是推倒呈现层。
+`loop-orchestrator.js` 状态机、`task_events` 表（seq 严格递增，`agent-task-store.js:404-407`）、UI-292 agent 详情窗事件回放、BLOCK-38 agent-task-resume 链路、BLOCK-107/108 呈现层（分段模型/时间线/簇）、**UI-432 四件套**（主循环瞬断重试 `callProviderWithNetworkRetry` / spawn 派发软上限 `SPAWN_CONCURRENCY_LIMIT` / 终态结果组卡 `SubAgentResultGroup` / 概览孤儿过滤，连同契约 `test/block109-orchestration.test.mjs`）、`impact-map.json` 定向测试——全部保留复用；本包是**在其下补事件单一事实源**，不是推倒呈现层。
 
 ## 1. 阶段划分（P0 → P3，串行；每阶段可独立验收可中断恢复）
 
 ### P0-LAUNCH：登记 + 拆前基线 + 尾巴清偿
 
 1. 五件套登记（本 plan / DOC-REGISTRY / README / roadmap / AUDIT-LOG）。
-2. **拆前行为基线**（BLOCK-92 先例：拆前基线拆后对账）：固化「一轮带工具调用的会话」端到端契约测试（输入→SSE 事件序列→落库→恢复），作为 P1 重构的行为等价判据。
+2. **拆前行为基线**（BLOCK-92 先例：拆前基线拆后对账）：固化「一轮带工具调用的会话」端到端契约测试（输入→SSE 事件序列→落库→恢复），作为 P1 重构的行为等价判据；**基线必须覆盖 UI-432 四件套行为**（瞬断重试退避语义 / spawn 软上限指引 / 终态结果组卡 / 概览孤儿过滤）——既有契约 `test/block109-orchestration.test.mjs` + `SubAgentResultGroup.test.tsx` 并入 P1 等价判据回归集。
+   - **2026-09-21 实机故障场景并入**（用户裁决「按你的建议来」；run `80669989` 7 子智能体 3 败实证）：①**流中断形态**——3 败全为流式输出中途 `read ECONNRESET`（delta 流过半被掐），与后端 event-loop 冻结（10-12s × 5）恢复时刻**逐毫秒同刻**；BLOCK-109 P1 瞬断重试对该形态**零触发**（全 run 零 `network_retry` 事件、零 `[network-retry]` 日志）——其契约测试注入的是调用期 reject，实机流中途死亡走体面终态路径未达重试包装。基线必须固化「模型流中途死亡」场景；P1 重写循环时**重试须覆盖全流轮**。②event-loop 冻结源未锚定（候选=同步 SQLite 批写 / 大目录扫描），列为 P0 基线采集附带观察项。③「清单终态对账」「子智能体汇报收敛」已按用户裁决另册登记（roadmap），不在本包范围。
 3. **UI-431 尾巴清偿**（D3）：AgentRunPanel 子智能体面板实机补验，UI 台账翻 verified——P1 动 conversationRunStore/SimpleChat 文件面前必须落定。
 4. **卫生清偿**：`biof3.db`/`-shm`/`-wal` 从 git 索引移除并入 `.gitignore`（先核对路径解析确认非测试夹具依赖）；删 `main.js:578-580` 死守卫；`hygiene:check` + 定向测试绿。
 5. **事件模型评审**（P1 前置设计裁决）：事件类型枚举、存储落点（`task_events` 扩列 vs 新表）、保留策略（BLOCK-106 实测 18k 行/天的规模约束）、与 `meta_json` 聚合快照的迁移共存策略——写成 plan 附录 A 后过用户裁决再动代码。
@@ -42,6 +45,7 @@
 3. legacy `routes/ai-agent/chat.js` 786 行 SSE handler 退役：先双轨对照（契约测试证等价）后物理删除；**上下文组装随退役收敛到 `history-assembly.js` 单链**（吸收原「P2 组装收口」工作面）。
 4. 4 个 resume 入口收敛为 1 个（统一走事件回放重建），主/子 agent 恢复同源（`loop_runs` 并入事件真相或建立单向投影，消除「注释约定权威」）。
 5. 验收：P0 基线契约测试在新链路全绿（行为等价）+ 新增 dev-verify flow `block109-single-truth-live`（实况/刷新/重启恢复三腿）+ `test:changed` 定向绿。
+6. **UI-432 四件套语义保持**（同系列已收口包交付，本 plan 立项后落地）：P1 重写 `loop-orchestrator` 扇出链须保留 `callProviderWithNetworkRetry` 瞬断重试语义与 `agent_status(network_retry)` 用户可见性；`conversationRunStore` 换事件投影数据源不得回归终态结果组卡（`SubAgentResultGroup` 组内派发序/有失败默认展开）与概览孤儿过滤行为；4→1 resume 收敛同样受此红线约束。
 
 ### P2：工具定义元数据化 + 调度分组
 
@@ -49,7 +53,8 @@
 2. 每工具补执行元数据：`readOnly` / `destructive` / `concurrentSafe` / `timeoutMs` / `needsApproval` / `riskLevel`。
 3. 调度器按元数据分组：只读并发安全组并行执行，破坏性工具串行 + 审批门。
 4. MCP 工具（`mcp/registry.js`）投影同轨元数据，消除第二套执行语义。
-5. 验收：元数据完备性机械门禁（新工具缺元数据即红）+ 并行调度行为契约测试 + `test:changed` 定向绿。
+5. **与派发软上限同语义组合**（UI-432 P2 前置交付）：spawn 系工具（spawn_agent / wait_agent / interrupt_agent / list_agents）的元数据与调度须保持 `SPAWN_CONCURRENCY_LIMIT` 软上限语义——本阶段分组并行管**单轮内工具调度**，软上限管**父任务级子智能体并发**，两层不得互相绕过（调度器并行执行 spawn_agent 时仍受软上限约束）。
+6. 验收：元数据完备性机械门禁（新工具缺元数据即红）+ 并行调度行为契约测试（含与派发软上限的组合用例）+ `test:changed` 定向绿。
 
 ### P3：架构门禁基线化（收口阶段）
 
@@ -80,6 +85,7 @@
 | P1 动核心链路，回归面最大 | P0 拆前行为基线 + 双轨对照期 + legacy 物理删除放在等价证明之后 |
 | `task_events` 规模（18k 行/天） | P0 事件模型评审必须含保留策略/清扫设计（BLOCK-106 SCAN→SEARCH 先例可援引） |
 | UI-431 文件面交叉 | D3：P0 先清偿面板实机补验，P1 才动交叉文件 |
+| P1 重写 `loop-orchestrator` / 换 `conversationRunStore` 数据源回归 UI-432 四件套 | P0 基线纳入四件套契约为等价判据（§1 P0-2），零退化红线（§8）；P1-6 语义保持清单逐项对账 |
 | 老会话 `meta_json` 无事件素材 | 历史兼容降级路径（BLOCK-107 P2 先例：无素材退回既有分组渲染，老会话不白屏） |
 | P2 压缩误删关键上下文 | 压缩前后模型可见内容对照测试 + 首尾保留策略 + 熔断 |
 
@@ -87,7 +93,7 @@
 
 - 每阶段：`npm run test:changed`（impact-map 登记本包规则）+ `quality:types` + `quality:lint`。
 - P0：基线契约测试落库 + UI-431 verified + hygiene:check 绿。
-- P1：行为等价对照绿 + `block109-single-truth-live` 实机三腿 + legacy chat.js 物理删除后全绿 + 组装单链断言（legacy require 清零）。
+- P1：行为等价对照绿（**含 UI-432 四件套契约** `test/block109-orchestration.test.mjs` + `SubAgentResultGroup.test.tsx` 全绿）+ `block109-single-truth-live` 实机三腿 + legacy chat.js 物理删除后全绿 + 组装单链断言（legacy require 清零）。
 - P2：元数据完备性门禁 + 调度契约测试。
 - P3：门禁自测红/绿样本 + closeout 九门全绿。
 - 收口：`npm run docs:reconcile` 逐候选核对 + `docs:check` + registry `completed`。
@@ -115,6 +121,7 @@ dev 栈启动走既有 `restart-dev-stack.sh` / `npm run dev`（Watchdog 已退�
 
 - **BLOCK-95 B2 / BLOCK-98**（已收口）：上下文压缩既有交付，本包零重复；P1 组装单链化时以「压缩只作用于视图层、DB 原文不动」为其红线延续。
 - **BLOCK-107/108**（已收口）：呈现层资产全部保留；本包 P1 为其数据面换源，`block107-*` / `block108-*` dev-verify flows 是 P1 行为等价验收的现成腿。
+- **BLOCK-109-AGENT-ORCHESTRATION-UX**（同系列已收口，UI-432）：其四件交付（瞬断重试 / 派发软上限 / 结果组卡 / 孤儿过滤）落地于本 plan 立项之后（`dddd135c`），2026-09-21 修订吸收为**基线输入与零退化红线**——P0 拆前基线与 P1 等价判据包含其契约测试；P2 调度分组与派发软上限两层同语义组合（§1 P2-5）。
 - **BLOCK-106 §2/§7 登记的候选**（task_events 数据模型改造 / 轮询→SSE）：前者由本包 P1 **吸收实现**（候选无独立 Plan ID，本包即其归宿）；后者仍留候选池，本包不改轮询触发方式。
 - **虚拟化候选包**（排队中）：无文件面冲突（其动列表渲染层，本包动数据链）。
 - **本包新登记候选**（§2 非范围）：`node:sqlite` 评估、三契约单源化、分段 token 预算——记录于 roadmap 候选区，启动需显式裁决。
