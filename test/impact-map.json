@@ -2157,13 +2157,15 @@
         "scripts/arch-cycles-gate.mjs",
         "acceptance/block-109/**",
         "core/biof3-server/helpers/plan-intent.js",
-        "core/biof3-server/helpers/agent-reconciliation.js"
+        "core/biof3-server/helpers/agent-reconciliation.js",
+        "core/shared-backend/llm-providers/deepseek.js"
       ],
       "tests": [
         "test/block109-p0-baseline.test.mjs",
         "test/block109-p1-events.test.mjs",
         "test/block109-p2-tool-metadata.test.mjs",
         "test/block109-reporting-reconcile.test.mjs",
+        "test/block109-stream-retry.test.mjs",
         "test/block109-p3-gates.test.mjs",
         "test/agent-runner-loop-orchestrator.test.mjs",
         "test/block109-orchestration.test.mjs"

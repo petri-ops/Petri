@@ -45,7 +45,7 @@
 3. legacy `routes/ai-agent/chat.js` 786 行 SSE handler 退役：先双轨对照（契约测试证等价）后物理删除；**上下文组装随退役收敛到 `history-assembly.js` 单链**（吸收原「P2 组装收口」工作面）。
 4. 4 个 resume 入口收敛为 1 个（统一走事件回放重建），主/子 agent 恢复同源（`loop_runs` 并入事件真相或建立单向投影，消除「注释约定权威」）。
 5. 验收：P0 基线契约测试在新链路全绿（行为等价）+ 新增 dev-verify flow `block109-single-truth-live`（实况/刷新/重启恢复三腿）+ `test:changed` 定向绿。
-6. **UI-432 四件套语义保持**（同系列已收口包交付，本 plan 立项后落地）：P1 重写 `loop-orchestrator` 扇出链须保留 `callProviderWithNetworkRetry` 瞬断重试语义与 `agent_status(network_retry)` 用户可见性；`conversationRunStore` 换事件投影数据源不得回归终态结果组卡（`SubAgentResultGroup` 组内派发序/有失败默认展开）与概览孤儿过滤行为；4→1 resume 收敛同样受此红线约束。
+6. **UI-432 四件套语义保持**（同系列已收口包交付，本 plan 立项后落地）：P1 重写 `loop-orchestrator` 扇出链须保留 `callProviderWithNetworkRetry` 瞬断重试语义与 `agent_status(network_retry)` 用户可见性（**重试覆盖全流轮已于 2026-09-21 深夜增量实现**：provider 流式 `errorsAsRejections` 开关 + loop 调用开启，流中死亡穿透重试包装——实测当日 2/4 轮死于该疣后修复闭环，契约 test/block109-stream-retry 5/5）；`conversationRunStore` 换事件投影数据源不得回归终态结果组卡（`SubAgentResultGroup` 组内派发序/有失败默认展开）与概览孤儿过滤行为；4→1 resume 收敛同样受此红线约束。
 
 ### P2：工具定义元数据化 + 调度分组
 

@@ -705,6 +705,11 @@ async function runLoop({
             // BLOCK-81 P1 — 思考档位透传（未设置＝undefined＝不发任何思考参数）
             ...(thinkingLevel ? { thinkingLevel } : {}),
             ...(protocolRecoveryAttempt ? { fallbackWhen: require('./agent-tools').finalizationFallbackReason } : {}),
+            // BLOCK-109-CORE-ARCH 增量（2026-09-21 用户裁决「按你的建议来」）— 流中断
+            // 以异常穿透到重试包装：此前流中死亡（ECONNRESET 等）在 provider 层被
+            // resolve-with-error 吞掉，网络重试零触发（run 80669989 三败 + 实测 2/4 轮
+            // 复现）；开开关后瞬断整轮重试，耗尽仍走既有 fatal 路径。
+            errorsAsRejections: true,
           }
           ),
           {

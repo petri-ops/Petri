@@ -298,7 +298,7 @@ class DeepSeekProvider {
       return { error: 'serialize_error', message: error.message };
     }
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const endpoint = resolveEndpoint(options && options.baseUrl, CHAT_PATH, this.defaultBaseUrl);
       const contentParts = [];
       // DSML 泄漏防护：模型偶发把内部工具调用标记当正文输出（UI-265 实机观察），
@@ -311,7 +311,7 @@ class DeepSeekProvider {
       let errorBuffer = '';
       let sawChoice = false;
       let settled = false;
-      let req;  
+      let req;
 
       const emit = (event) => {
         try {
@@ -325,9 +325,26 @@ class DeepSeekProvider {
         recordAiUsage(usageArgs(t, body, startedAt, usage, errorCode));
         resolve(result);
       };
+      // BLOCK-109-CORE-ARCH 增量（2026-09-21，用户裁决「按你的建议来」）— 流中断
+      // 以异常穿透：options.errorsAsRejections 时 fail() 改为 reject（message 原样，
+      // 携带 code/details），使上层重试包装（callProviderWithNetworkRetry）能对瞬断
+      // （ECONNRESET 等）重试整轮——此前 resolve-with-error 让重试包装永远看到「成功」，
+      // 流中死亡零重试（run 80669989 三败 + 同日实测 2/4 轮复现实证）。用户取消
+      // （aborted）不拒绝，保持既有取消语义。未开开关的调用方行为零变化。
       const fail = (code, message, details) => {
-        const result = { error: code, message, ...(details || {}) };
         emit({ type: 'error', error: code, message });
+        if (options && options.errorsAsRejections && code !== 'aborted') {
+          if (settled) return;
+          settled = true;
+          if (options && options.signal) options.signal.removeEventListener('abort', abortRequest);
+          recordAiUsage(usageArgs(t, body, startedAt, null, code));
+          const error = new Error(message || code);
+          error.code = code;
+          if (details) Object.assign(error, details);
+          reject(error);
+          return;
+        }
+        const result = { error: code, message, ...(details || {}) };
         finish(result, code);
       };
       const complete = () => {
