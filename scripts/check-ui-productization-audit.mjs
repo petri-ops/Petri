@@ -116,6 +116,8 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // 台账=test:changed 0 红（无新 UI 功能）。豁免 subject UI-### 与同提交台账要求；
   // 不重写共享历史。
   'ff77faa712b11873d8ffe3fe0a4533a96c0877a2',
+  // 2026-09-21 P2 测试未用绑定清理（9cbda3dd043f8d964db6510cd52ab9b38067e550）——零 UI 行为变化；豁免同提交台账与 subject 要求；不重写共享历史。
+  '9cbda3dd043f8d964db6510cd52ab9b38067e550',
   // 2026-09-21 BLOCK-109-CORE-ARCH P1.4 legacy SSE 双轨退役（c029b616）：前端
   // streamChatLegacy/提交失败回退/VITE_AGENT_TASK_MODE 逃生口删除——提交路径收敛为
   // task 模式唯一，用户可见行为=错误路径从「legacy 兼容回退」变「诚实报错」，零常规
@@ -459,6 +461,8 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 台账=test:changed 0 红（无新 UI 功能）。豁免 subject UI-### 与同提交台账要求；
   // 不重写共享历史。
   'ff77faa712b11873d8ffe3fe0a4533a96c0877a2',
+  // 2026-09-21 P2 测试未用绑定清理（9cbda3dd043f8d964db6510cd52ab9b38067e550）——零 UI 行为变化；豁免同提交台账与 subject 要求；不重写共享历史。
+  '9cbda3dd043f8d964db6510cd52ab9b38067e550',
   // 2026-09-21 BLOCK-109-CORE-ARCH P1.4 legacy SSE 双轨退役（c029b616）：前端 legacy
   // 提交路径与逃生口删除，零常规 UI 面变化（错误路径诚实化）；无新 UI 功能故无新台账
   // 条目；台账=退役行为契约 test/block109-p1-events.test.mjs。豁免同提交台账要求
