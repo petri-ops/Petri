@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
   clearConversationRun: vi.fn(),
   resumeConversationRun: vi.fn(),
   shouldClearReconciledConversationRun: vi.fn(() => false),
-  findResumableAgentTask: vi.fn(() => null),
+  fetchInFlightPrimaryTasks: vi.fn(async () => [] as string[]),
 }));
 
 vi.mock('../../copilotConversationsClient', () => ({
@@ -28,7 +28,7 @@ vi.mock('../../conversationRunStore', () => ({
 }));
 vi.mock('../../copilotClient', async (importOriginal) => ({
   ...(await importOriginal<object>()),
-  findResumableAgentTask: mocks.findResumableAgentTask,
+  fetchInFlightPrimaryTasks: mocks.fetchInFlightPrimaryTasks,
 }));
 
 function Harness({

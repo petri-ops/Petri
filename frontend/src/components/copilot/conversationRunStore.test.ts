@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { cancelAgentTaskMock, streamChatMock, subscribeAgentTaskMock, fetchLoopRunsMock, findResumableAgentTaskMock, resumeAgentTaskMock } = vi.hoisted(() => ({
+const { cancelAgentTaskMock, streamChatMock, subscribeAgentTaskMock, fetchLoopRunsMock, fetchInFlightPrimaryTasksMock, resumeAgentTaskMock } = vi.hoisted(() => ({
   cancelAgentTaskMock: vi.fn(),
   streamChatMock: vi.fn(),
   subscribeAgentTaskMock: vi.fn(),
   fetchLoopRunsMock: vi.fn(),
-  findResumableAgentTaskMock: vi.fn(),
+  fetchInFlightPrimaryTasksMock: vi.fn(),
   resumeAgentTaskMock: vi.fn(),
 }));
 
@@ -14,7 +14,7 @@ vi.mock('./copilotClient', async (importOriginal) => {
   return {
     ...original,
     cancelAgentTask: cancelAgentTaskMock,
-    findResumableAgentTask: findResumableAgentTaskMock,
+    fetchInFlightPrimaryTasks: fetchInFlightPrimaryTasksMock,
     resumeAgentTask: resumeAgentTaskMock,
     streamChat: streamChatMock,
     subscribeAgentTask: subscribeAgentTaskMock,
@@ -82,7 +82,8 @@ describe('conversation run store', () => {
     resumeAgentTaskMock.mockReset();
     subscribeAgentTaskMock.mockReset();
     subscribeAgentTaskMock.mockResolvedValue(undefined);
-    findResumableAgentTaskMock.mockReset();
+    fetchInFlightPrimaryTasksMock.mockReset();
+    fetchInFlightPrimaryTasksMock.mockResolvedValue([]);
     fetchLoopRunsMock.mockReset();
   });
 
@@ -777,14 +778,14 @@ describe('resumeSubAgentTasks (AGENT-CONCURRENCY)', () => {
   });
 });
 
-describe('resumeOrphanAgentTasks (AGENT-CONCURRENCY A-5)', () => {
+describe('resumeOrphanAgentTasks (AGENT-CONCURRENCY A-5 → BLOCK-109-CORE-ARCH P1.2 单一后端源)', () => {
   beforeEach(() => {
     __resetConversationRunsForTests();
     subscribeAgentTaskMock.mockReset();
     subscribeAgentTaskMock.mockResolvedValue(undefined);
     fetchLoopRunsMock.mockReset();
-    findResumableAgentTaskMock.mockReset();
-    findResumableAgentTaskMock.mockReturnValue(null);
+    fetchInFlightPrimaryTasksMock.mockReset();
+    fetchInFlightPrimaryTasksMock.mockResolvedValue([]);
     streamChatMock.mockReset();
     streamChatMock.mockResolvedValue(undefined);
   });
@@ -793,19 +794,19 @@ describe('resumeOrphanAgentTasks (AGENT-CONCURRENCY A-5)', () => {
     __resetConversationRunsForTests();
   });
 
-  it('同时恢复 running 的 sub-agent 与 localStorage 中未完成的 primary', async () => {
+  it('同时恢复 running 的 sub-agent 与后端在途 primary（恢复同源，localStorage 双轨已退役）', async () => {
     fetchLoopRunsMock.mockResolvedValue([
       { loopRunId: 'lr-primary', projectId: 'project-1', conversationId: 'c1', loopStatus: 'running', kind: 'primary', taskId: 't-primary' },
       { loopRunId: 'lr-sub1', projectId: 'project-1', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-sub1', parentLoopRunId: 'lr-primary' },
     ] as any);
-    findResumableAgentTaskMock.mockReturnValue('t-primary');
+    fetchInFlightPrimaryTasksMock.mockResolvedValue(['t-primary']);
 
     await resumeOrphanAgentTasks('c1', 'project-1');
 
-    expect(findResumableAgentTaskMock).toHaveBeenCalledWith('c1', 'project-1');
+    expect(fetchInFlightPrimaryTasksMock).toHaveBeenCalledWith('c1');
     // sub-agent：来自后端 loop_runs
     expect(subscribeAgentTaskMock).toHaveBeenCalledWith('t-sub1', expect.anything(), 0);
-    // primary：来自 localStorage resumable task，走 subscribeAgentTask 而非重新提交
+    // primary：来自后端在途清单，走 subscribeAgentTask 而非重新提交
     expect(subscribeAgentTaskMock).toHaveBeenCalledWith('t-primary', expect.anything(), 0);
     expect(streamChatMock).not.toHaveBeenCalled();
     // 主 run 快照已登记 taskId 并进入 running（未重复创建 sub-agent 条目）
@@ -813,11 +814,11 @@ describe('resumeOrphanAgentTasks (AGENT-CONCURRENCY A-5)', () => {
     expect(listSubAgentTasksForConversation('c1').map((t) => t.taskId)).toEqual(['t-sub1']);
   });
 
-  it('无 resumable primary 时只恢复 sub-agent，不创建主 run', async () => {
+  it('无在途 primary 时只恢复 sub-agent，不创建主 run', async () => {
     fetchLoopRunsMock.mockResolvedValue([
       { loopRunId: 'lr-sub1', projectId: 'project-1', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-sub1', parentLoopRunId: 'lr-primary' },
     ] as any);
-    findResumableAgentTaskMock.mockReturnValue(null);
+    fetchInFlightPrimaryTasksMock.mockResolvedValue([]);
 
     await resumeOrphanAgentTasks('c1', 'project-1');
 
@@ -828,7 +829,7 @@ describe('resumeOrphanAgentTasks (AGENT-CONCURRENCY A-5)', () => {
 
   it('已有活跃主 run 时不重复恢复 primary（避免重复订阅）', async () => {
     fetchLoopRunsMock.mockResolvedValue([] as any);
-    findResumableAgentTaskMock.mockReturnValue('t-primary');
+    fetchInFlightPrimaryTasksMock.mockResolvedValue(['t-primary']);
     startConversationRun({
       conversationId: 'c1',
       projectId: 'project-1',

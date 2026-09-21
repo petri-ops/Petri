@@ -546,6 +546,34 @@ function getAgentTaskEventsSince(taskId, afterSeq, limit = 500) {
   }));
 }
 
+// BLOCK-109-CORE-ARCH P1.2（附录 A E2/E5）— 在途主任务清单（恢复的单一后端源）。
+// 取代前端 localStorage gewu_agent_task_* 扫描双轨：tasks.status='running' 即权威
+// 在途真相（后端重启由 sweepInterruptedRunningTasks 清扫陈旧行），无 TTL 猜测。
+// 子任务不在列（kind 过滤）；畸形 params 行按 json_valid 防御视为 primary
+// （同 listRecentSubAgentTasks 的防御先例）。
+function listInFlightPrimaryTasks(userId, conversationId) {
+  const rows = db.prepare(`
+    SELECT id AS taskId, status, created_at AS createdAt, params
+    FROM tasks
+    WHERE user_id = ? AND status = 'running'
+      AND (json_valid(params) = 0
+           OR COALESCE(json_extract(params, '$.kind'), 'primary') <> 'subagent')
+    ORDER BY created_at DESC
+  `).all(userId);
+  const mapped = rows.map((row) => {
+    let rowConversationId = null;
+    try { rowConversationId = (JSON.parse(row.params) || {}).conversationId || null; } catch {}
+    return {
+      taskId: row.taskId,
+      status: row.status,
+      createdAt: row.createdAt,
+      conversationId: rowConversationId,
+    };
+  });
+  if (!conversationId) return mapped;
+  return mapped.filter((t) => t.conversationId === conversationId);
+}
+
 // BLOCK-109-CORE-ARCH P1（附录 A E3 裁决）— 终态 delta 合并（透明快照，非裸删）。
 // 依据：①裸 delta 占 task_events 写入量 ~98.5%（BLOCK-106 实测）；②面板回放
 // （subscribeAgentTask afterSeq=0 全量重放）依赖 delta 行承载流式正文/思考——
@@ -929,6 +957,7 @@ module.exports = {
   appendAgentTaskEvent,
   getAgentTaskEventsSince,
   coalesceTaskDeltas,
+  listInFlightPrimaryTasks,
   getRunningChildAgentTasks,
   listChildAgentTasks,
   listRecentSubAgentTasks,

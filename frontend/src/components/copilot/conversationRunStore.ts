@@ -3,7 +3,7 @@ import type { CopilotContext } from '@/lib/copilotContext';
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import {
   cancelAgentTask,
-  findResumableAgentTask,
+  fetchInFlightPrimaryTasks,
   resumeAgentTask,
   streamChat,
   subscribeAgentTask,
@@ -743,7 +743,7 @@ export function __resetConversationRunsForTests(): void {
 
 /**
  * AGENT-CONCURRENCY A-5: 重订阅一个崩溃/刷新前仍在跑的主 agent task（来自
- * localStorage 的 findResumableAgentTask）。不重新提交，直接订阅其后端事件流
+ * 后端在途清单的 fetchInFlightPrimaryTasks，P1.2 起 localStorage 双轨已退役）。不重新提交，直接订阅其后端事件流
  * 并写入主 run 状态，避免主 run 孤儿化。taskId 已在 run 快照中登记。
  */
 export function resumeConversationRun(
@@ -786,22 +786,28 @@ export async function resumeInterruptedConversation(
 }
 
 /**
- * AGENT-CONCURRENCY A-5: app 启动 / 会话重开时的孤儿恢复入口。
- * - sub-agent：后端 loop_runs 是权威来源，覆盖刷新/崩溃场景。
- * - 主 agent：localStorage 中尚未完成的 primary task（findResumableAgentTask）。
- * 两者互补：loop_runs 覆盖服务侧仍在跑的，localStorage 覆盖前端已提交但事件流
- * 尚未结束的。仅当当前会话没有活跃主 run 时才恢复主 agent，避免重复订阅。
+ * AGENT-CONCURRENCY A-5 → BLOCK-109-CORE-ARCH P1.2/P1.3: app 启动 / 会话重开时的
+ * 孤儿恢复**单一入口**（恢复同源：全部问后端，localStorage 双轨已退役）。
+ * - sub-agent：后端 loop_runs 投影（fetchLoopRuns）。
+ * - 主 agent：后端在途清单（/ai/agent/tasks/inflight，status='running' 即权威）。
+ * 仅当当前会话没有活跃主 run 时才恢复主 agent，避免重复订阅。
  */
 export async function resumeOrphanAgentTasks(
   conversationId: string,
   projectId?: string
 ): Promise<void> {
   if (!conversationId) return;
-  // 1) sub-agent：后端 loop_runs 权威。
+  // 1) sub-agent：后端 loop_runs 投影。
   await resumeSubAgentTasks(conversationId, projectId);
-  // 2) 主 agent：localStorage resumable task（仅当当前会话无活跃主 run）。
-  const primaryTaskId = findResumableAgentTask(conversationId, projectId);
-  if (primaryTaskId && !isConversationRunning(conversationId)) {
-    resumeConversationRun(primaryTaskId, conversationId, projectId);
+  // 2) 主 agent：后端在途清单（仅当当前会话无活跃主 run；并发桶语义下单会话至多一个）。
+  if (isConversationRunning(conversationId)) return;
+  try {
+    const inFlight = await fetchInFlightPrimaryTasks(conversationId);
+    for (const taskId of inFlight) {
+      if (isConversationRunning(conversationId)) break;
+      resumeConversationRun(taskId, conversationId, projectId);
+    }
+  } catch {
+    /* 恢复查询失败静默：下次会话挂载重试（后端真相不灭） */
   }
 }

@@ -136,6 +136,28 @@ test('P1 E3 — 阈值以下不合并（小运行零扰动）', () => {
   assert.equal(after.length, before.length);
 });
 
+test('P1.2 — listInFlightPrimaryTasks：只列 running 主任务、子任务不混入、会话过滤生效', () => {
+  const primary = agentTaskStore.createAgentTask({ userId: 'u-inflight', params: { kind: 'primary', conversationId: 'conv-A' } });
+  const primaryOther = agentTaskStore.createAgentTask({ userId: 'u-inflight', params: { kind: 'primary', conversationId: 'conv-B' } });
+  const sub = agentTaskStore.createAgentTask({ userId: 'u-inflight', params: { kind: 'subagent', conversationId: 'conv-A', parentTaskId: primary.taskId } });
+  agentTaskStore.createAgentTask({ userId: 'u-other', params: { kind: 'primary', conversationId: 'conv-A' } });
+  // 完态主任务不在途
+  const doneTask = agentTaskStore.createAgentTask({ userId: 'u-inflight', params: { kind: 'primary', conversationId: 'conv-A' } });
+  agentTaskStore.markAgentTaskDone(doneTask.taskId);
+
+  const all = agentTaskStore.listInFlightPrimaryTasks('u-inflight');
+  const ids = all.map((t) => t.taskId);
+  assert.ok(ids.includes(primary.taskId), 'running 主任务在列');
+  assert.ok(!ids.includes(sub.taskId), '子任务不混入主任务在途清单');
+  assert.ok(!ids.includes(doneTask.taskId), '终态任务不在途');
+  assert.ok(!ids.some((id) => ids.filter((x) => x === id).length > 1), '无重复');
+
+  const convA = agentTaskStore.listInFlightPrimaryTasks('u-inflight', 'conv-A');
+  assert.deepEqual(convA.map((t) => t.taskId), [primary.taskId]);
+  assert.equal(agentTaskStore.listInFlightPrimaryTasks('u-other', 'conv-A').length, 1);
+  assert.ok(primaryOther.taskId, '他用户任务不越权（见上 u-other 过滤）');
+});
+
 test('P1 E1 — agent-runner 生命周期事件与终态合并接线（源码契约）', () => {
   const src = fs.readFileSync(path.join(root, 'core', 'biof3-server', 'agent-runner.js'), 'utf8');
   assert.ok(src.includes("event: 'run_started'"), 'run_started 生命周期事件在位（E1）');

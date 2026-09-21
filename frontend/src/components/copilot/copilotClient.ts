@@ -71,88 +71,20 @@ export async function streamChat(opts: StreamChatOptions): Promise<void> {
 }
 
 /**
- * 扫描 localStorage 找出尚未完成的 agent task（页面刷新/崩溃恢复用）。
- * 返回 taskId（取最新一个）。streamChat 在提交时写入 key，订阅 [DONE] 或
- * onDone 时删除；若 mount 时 key 仍在 = 上次没跑完，需重新订阅。
+ * BLOCK-109-CORE-ARCH P1.2 — 在途主任务查询（恢复的单一后端源）。
+ * 取代原 localStorage gewu_agent_task_* 扫描双轨：tasks.status='running' 即权威
+ * 在途真相（后端重启由 sweepInterruptedRunningTasks 清扫），无 TTL 猜测。
+ * 返回该会话（可选过滤）在途主任务 taskId，新→旧排序。
  */
-export function findResumableAgentTask(
-  conversationId?: string,
-  projectId?: string
-): string | null {
-  if (typeof window === 'undefined') return null;
-  let latest: { taskId: string; ts: number } | null = null;
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key || !(key.startsWith('gewu_agent_task_') || key.startsWith('biof3_agent_task_'))) continue;
-      try {
-        const obj = JSON.parse(localStorage.getItem(key) || '{}');
-        // AGENT-CONCURRENCY: sub-agent 永不被当主 run 恢复（老 key 无 kind 视为 primary）。
-        const matchesConversation = !conversationId || obj.conversationId === conversationId;
-        const matchesProject = !projectId || obj.projectId === projectId;
-        if (
-          obj?.taskId &&
-          typeof obj.ts === 'number' &&
-          (obj.kind || 'primary') !== 'subagent' &&
-          matchesConversation &&
-          matchesProject
-        ) {
-          if (!latest || obj.ts > latest.ts) latest = { taskId: obj.taskId, ts: obj.ts };
-        }
-      } catch {
-        try {
-          localStorage.removeItem(key);
-        } catch {}
-      }
-    }
-  } catch {}
-  if (latest && Date.now() - latest.ts > 60 * 60 * 1000) {
-    try {
-      localStorage.removeItem('gewu_agent_task_' + latest.taskId);
-      localStorage.removeItem('biof3_agent_task_' + latest.taskId);
-    } catch {}
-    return null;
-  }
-  return latest?.taskId ?? null;
-}
-
-export interface ResumableSubAgentTask {
-  taskId: string;
-  parentTaskId: string | null;
-  ts: number;
-}
-
-/**
- * AGENT-CONCURRENCY: 扫描 localStorage 找出尚未完成的 sub-agent task
- * （与主 run 平行的后台子任务），供 app 启动/会话重开时重订阅其事件流，
- * 避免主进程崩溃/刷新后 sub-agent 孤儿化。仅返回 kind === 'subagent' 的项。
- */
-export function findResumableSubAgentTasks(): ResumableSubAgentTask[] {
-  if (typeof window === 'undefined') return [];
-  const out: ResumableSubAgentTask[] = [];
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key || !(key.startsWith('gewu_agent_task_') || key.startsWith('biof3_agent_task_'))) continue;
-      try {
-        const obj = JSON.parse(localStorage.getItem(key) || '{}');
-        if (obj?.taskId && typeof obj.ts === 'number' && obj.kind === 'subagent') {
-          if (Date.now() - obj.ts <= 60 * 60 * 1000) {
-            out.push({ taskId: obj.taskId, parentTaskId: obj.parentTaskId ?? null, ts: obj.ts });
-          } else {
-            try {
-              localStorage.removeItem(key);
-            } catch {}
-          }
-        }
-      } catch {
-        try {
-          localStorage.removeItem(key);
-        } catch {}
-      }
-    }
-  } catch {}
-  return out.sort((a, b) => a.ts - b.ts);
+export async function fetchInFlightPrimaryTasks(conversationId: string): Promise<string[]> {
+  const url = `${getApiPrefix()}/ai/agent/tasks/inflight${
+    conversationId ? `?conversationId=${encodeURIComponent(conversationId)}` : ''
+  }`;
+  const resp = await fetch(url, { headers: { ...getAuthHeader() } });
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const data = await resp.json().catch(() => null);
+  const tasks = Array.isArray(data?.tasks) ? data.tasks : [];
+  return tasks.map((t: { taskId?: string }) => String(t.taskId || '')).filter(Boolean);
 }
 
 /** task 模式：提交拿 taskId → 订阅事件流 */
@@ -171,21 +103,8 @@ async function streamChatViaTask(opts: StreamChatOptions): Promise<void> {
     return;
   }
   opts.onTaskStarted?.(taskId);
-  // 存 localStorage 供重连发现（CopilotChat mount 时检查）。
-  // AGENT-CONCURRENCY: 记录 kind + parentTaskId，使 sub-agent 不被误当主 run 恢复。
-  try {
-    localStorage.setItem(
-      'gewu_agent_task_' + taskId,
-      JSON.stringify({
-        taskId,
-        ts: Date.now(),
-        kind: opts.kind || 'primary',
-        parentTaskId: opts.parentTaskId || null,
-        conversationId: opts.conversationId || null,
-        projectId: opts.context?.projectId || null,
-      })
-    );
-  } catch {}
+  // P1.2：原 localStorage 在途标记（gewu_agent_task_*）已退役——恢复改问后端
+  // /ai/agent/tasks/inflight（status='running' 即权威，见 fetchInFlightPrimaryTasks）。
   try {
     await subscribeAgentTask(taskId, opts, 0);
   } catch (err: unknown) {

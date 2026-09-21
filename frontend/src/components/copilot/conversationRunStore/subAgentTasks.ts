@@ -398,7 +398,7 @@ function subscribeSubAgentResumed(
 /**
  * AGENT-CONCURRENCY: 会话重开 / 应用重启时，从后端 loop_runs 找回仍 running
  * 的 sub-agent run 并重订阅其事件流，避免孤儿化。loop_runs 是权威来源，
- * 覆盖 localStorage 之外的恢复场景（与 copilotClient.findResumableSubAgentTasks 互补）。
+ * 本函数即唯一子任务恢复源（P1.2 起 localStorage 扫描器已退役，恢复全部问后端）。
  */
 export async function resumeSubAgentTasks(
   conversationId: string,

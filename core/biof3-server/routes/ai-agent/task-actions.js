@@ -61,6 +61,24 @@ module.exports = {
 
   // 俯瞰面板数据源：该用户最近子 agent 任务（跨会话，只读 tasks 投影）。
     // BLOCK-65 修正：附 projectId（经会话归属解析），供面板按项目隔离。
+    // BLOCK-109-CORE-ARCH P1.2 — 在途主任务清单（前端恢复单一后端源；additive）。
+    // 取代前端 localStorage gewu_agent_task_* 扫描：status='running' 即权威在途。
+    app.get('/api/ai/agent/tasks/inflight', async (req, res) => {
+      const userId = req.user && req.user.id;
+      if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized', message: '未登录' });
+      try {
+        const conversationId = (req.query.conversationId && String(req.query.conversationId)) || null;
+        const tasks = agentTaskStore.listInFlightPrimaryTasks(userId, conversationId);
+        return res.json({ ok: true, tasks });
+      } catch (err) {
+        return res.status(500).json({
+          ok: false,
+          error: 'inflight_list_failed',
+          message: String((err && err.message) || err),
+        });
+      }
+    });
+
     app.get('/api/ai/agent/tasks', async (req, res) => {
       const userId = req.user && req.user.id;
       if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized', message: '未登录' });

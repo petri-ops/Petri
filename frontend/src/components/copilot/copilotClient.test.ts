@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   ackRunTool,
-  findResumableAgentTask,
-  findResumableSubAgentTasks,
+  fetchInFlightPrimaryTasks,
   parseResultEditProgressEvent,
   parseToolCallEvent,
   parseToolResultEvent,
@@ -140,76 +139,21 @@ describe('agent task localStorage 恢复 (AGENT-CONCURRENCY)', () => {
     localStorage.clear();
   });
 
-  it('findResumableAgentTask 只返回 primary（忽略 sub-agent，老 key 视为 primary）', () => {
-    const now = Date.now();
-    localStorage.setItem('biof3_agent_task_legacy', JSON.stringify({ taskId: 'legacy', ts: now - 3000 }));
-    localStorage.setItem(
-      'biof3_agent_task_sub',
-      JSON.stringify({ taskId: 'sub1', ts: now - 2000, kind: 'subagent', parentTaskId: 'p1' })
-    );
-    localStorage.setItem('biof3_agent_task_primary', JSON.stringify({ taskId: 'p1', ts: now - 1000, kind: 'primary' }));
-    expect(findResumableAgentTask()).toBe('p1');
+  // BLOCK-109-CORE-ARCH P1.2 — localStorage 扫描器（findResumableAgentTask/
+  // findResumableSubAgentTasks）已随双轨退役；恢复改问后端 inflight 端点。
+  it('fetchInFlightPrimaryTasks 查询后端在途清单并透传 taskId', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ ok: true, tasks: [{ taskId: 't-1' }, { taskId: 't-2' }] }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const ids = await fetchInFlightPrimaryTasks('c1');
+    expect(ids).toEqual(['t-1', 't-2']);
+    expect(String(fetchMock.mock.calls[0][0])).toContain('/ai/agent/tasks/inflight?conversationId=c1');
   });
 
-  it('findResumableAgentTask 按会话与项目隔离恢复归属', () => {
-    const now = Date.now();
-    localStorage.setItem(
-      'biof3_agent_task_other',
-      JSON.stringify({
-        taskId: 'other',
-        ts: now + 2,
-        kind: 'primary',
-        conversationId: 'c-other',
-        projectId: 'p-other',
-      })
-    );
-    localStorage.setItem(
-      'biof3_agent_task_target',
-      JSON.stringify({
-        taskId: 'target',
-        ts: now + 1,
-        kind: 'primary',
-        conversationId: 'c-target',
-        projectId: 'p-target',
-      })
-    );
-    localStorage.setItem(
-      'biof3_agent_task_legacy',
-      JSON.stringify({ taskId: 'legacy', ts: now + 3 })
-    );
-
-    expect(findResumableAgentTask('c-target', 'p-target')).toBe('target');
-    expect(findResumableAgentTask('c-missing', 'p-missing')).toBeNull();
-  });
-
-  it('findResumableSubAgentTasks 仅返回 sub-agent（含 parentTaskId）', () => {
-    const now = Date.now();
-    localStorage.setItem('biof3_agent_task_legacy', JSON.stringify({ taskId: 'legacy', ts: now - 3000 }));
-    localStorage.setItem(
-      'biof3_agent_task_sub',
-      JSON.stringify({ taskId: 'sub1', ts: now - 2000, kind: 'subagent', parentTaskId: 'p1' })
-    );
-    localStorage.setItem('biof3_agent_task_primary', JSON.stringify({ taskId: 'p1', ts: now - 1000, kind: 'primary' }));
-    const subs = findResumableSubAgentTasks();
-    expect(subs).toHaveLength(1);
-    expect(subs[0]).toEqual({ taskId: 'sub1', parentTaskId: 'p1', ts: now - 2000 });
-  });
-
-  it('超过 1 小时的 primary 返回 null 并删除 key', () => {
-    localStorage.setItem(
-      'biof3_agent_task_old',
-      JSON.stringify({ taskId: 'old', ts: Date.now() - 2 * 60 * 60 * 1000, kind: 'primary' })
-    );
-    expect(findResumableAgentTask()).toBeNull();
-    expect(localStorage.getItem('biof3_agent_task_old')).toBeNull();
-  });
-
-  it('超过 1 小时的 sub-agent 不返回且删除 key', () => {
-    localStorage.setItem(
-      'biof3_agent_task_oldsub',
-      JSON.stringify({ taskId: 'oldsub', ts: Date.now() - 2 * 60 * 60 * 1000, kind: 'subagent', parentTaskId: 'p1' })
-    );
-    expect(findResumableSubAgentTasks()).toHaveLength(0);
-    expect(localStorage.getItem('biof3_agent_task_oldsub')).toBeNull();
+  it('fetchInFlightPrimaryTasks 非 2xx 抛错（由恢复入口静默降级）', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 500 }));
+    await expect(fetchInFlightPrimaryTasks('c1')).rejects.toThrow('HTTP 500');
   });
 });

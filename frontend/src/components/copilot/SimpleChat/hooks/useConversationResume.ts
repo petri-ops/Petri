@@ -23,7 +23,7 @@ import {
   resumeConversationRun,
   shouldClearReconciledConversationRun,
 } from '../../conversationRunStore';
-import { findResumableAgentTask } from '../../copilotClient';
+import { fetchInFlightPrimaryTasks } from '../../copilotClient';
 import { restoreSimpleMessage, type SimpleMessage } from '../types';
 
 export interface OlderMessagesState {
@@ -211,17 +211,25 @@ export function useConversationResume({
   }, [conversationId, activeRun, setMessages]);
 
   // T82 — recover an in-progress agent task after a refresh / Electron restart.
-  // On conversation mount, if a prior run left a resumable task in localStorage
-  // (findResumableAgentTask), reconnect its SSE and rebuild the live snapshot so
-  // the user does not stare at a blank "running" state for the whole ~10+ min run.
-  // Guarded so it only attempts once per conversationId (also survives StrictMode).
+  // BLOCK-109-CORE-ARCH P1.2 — 恢复源改为后端在途清单（/ai/agent/tasks/inflight），
+  // localStorage 扫描双轨退役。On conversation mount, reconnect the SSE of a run
+  // the backend still marks running so the user does not stare at a blank
+  // "running" state for the whole ~10+ min run. Guarded once per conversationId
+  // (also survives StrictMode).
   const resumableCheckedRef = useRef<string | null>(null);
   useEffect(() => {
     if (!conversationId) return;
     if (resumableCheckedRef.current === conversationId) return;
     resumableCheckedRef.current = conversationId;
-    const record = findResumableAgentTask(conversationId, projectId);
-    if (record) resumeConversationRun(record, conversationId, projectId);
+    let cancelled = false;
+    (async () => {
+      try {
+        const inFlight = await fetchInFlightPrimaryTasks(conversationId);
+        if (cancelled || inFlight.length === 0) return;
+        resumeConversationRun(inFlight[0], conversationId, projectId);
+      } catch { /* 查询失败静默：下次会话挂载重试 */ }
+    })();
+    return () => { cancelled = true; };
   }, [conversationId, projectId]);
 
   // 供既有 useChatStream 复用（BLOCK-9.2 起的对账 guard 归本簇所有）。

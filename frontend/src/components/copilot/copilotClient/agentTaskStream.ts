@@ -155,10 +155,7 @@ async function subscribeAgentTaskOnce(
         const data = m[1];
         if (isSseDone(data)) {
           sawDone = true;
-          try {
-            localStorage.removeItem('gewu_agent_task_' + taskId);
-            localStorage.removeItem('biof3_agent_task_' + taskId);
-          } catch {}
+          // P1.2：原 localStorage 在途键清理已随双轨退役（恢复改问后端 inflight 端点）。
           break;
         }
         try {
