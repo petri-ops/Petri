@@ -4881,7 +4881,7 @@
       "id": "BLOCK-109-CORE-ARCH-CONVERGENCE",
       "path": "docs/block-109-core-arch-convergence-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-109-core-arch-convergence",
       "entrypoint": "docs/README.md",
@@ -4919,8 +4919,72 @@
       ],
       "notes": "子智能体编排的用户呈现与韧性（用户实测全方位梳理项目后四项反馈全数立项：「都需要做 一次性推完」）。实测还原=主任务 17 轮/50 工具调用/并行派发 5 子智能体，主任务 read ECONNRESET 挂除致 9 项清单只完成 3 项；侧栏 18 个智能体=概览 !projectId 兜底过滤把孤儿任务计入每个项目（真实 5 个）。四件：P1 主循环瞬断重试（loop-orchestrator 每轮模型调用 ECONNRESET 等网络瞬断退避重试×2）；P2 spawn 派发并行度软上限（活跃子任务≥3 返回软指引，模型保持控制权）；P3 终态结果卡组化（弃 slice(-2) 截断，最近一批收拢为可折叠汇总卡）；P4 项目概览孤儿过滤（删 !projectId 兜底）。非范围=子任务结果自动汇总成结论/数据模型与 API 形状改动。UI 台账=UI-432。",
       "completedAt": "2026-09-21"
+    },
+    {
+      "id": "TYPESAFE-JEV-SYSTEM-ONE-RESEARCH",
+      "path": "docs/planning/typesafe-jev-system-one-research.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "truthDomain": "typesafe-jev-system-one-research",
+      "entrypoint": "docs/DOC-REGISTRY.json",
+      "archivePolicy": "retain_stable_path",
+      "owner": "research",
+      "registeredAt": "2026-09-21",
+      "title": "TypeSafe Jev (System One) 技术调研与 Gewu 落地评估",
+      "notes": "技术调研参考：Jev System One 模型心智模型、API/SDK 规格、jev-1.13 已知短板、17 篇 cookbook 与 4 篇 pattern 提炼、browser-use/jev-ultrafast 架构走读、Gewu 7 处候选接入点盘点（file:line 已核实）与分批落地建议。不构成工作包，优先级以 roadmap 为准。",
+      "tags": [
+        "typesafe",
+        "jev",
+        "system-one",
+        "decision-model",
+        "research",
+        "G0"
+      ]
+    },
+    {
+      "id": "BLOCK-110-JEV-DECISION-INTEGRATION",
+      "path": "docs/block-110-jev-decision-integration-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-110-jev-decision-integration",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-21",
+      "archivePolicy": "archive_when_superseded",
+      "tags": [
+        "block-110",
+        "jev",
+        "system-one",
+        "decision-model",
+        "typesafe",
+        "planned-queued"
+      ],
+      "notes": "2026-09-21 立项登记 planned 排队（用户裁决「现在集中到jev和项目的融合中来 是否要做个或多个block来优化项目」；结构裁决「一个 BLOCK 分阶段」+ P3 工具预路由「列入包内选做阶段」）。四阶段：P0 接入地基（decision-api.js 裸 HTTP wrapper + 降级契约 + 中文语料 confidence-accuracy 校准 harness）→ P1 话题漂移 noul 直替 PoC（conversations.js _maybeDetectTopicShift，契约不变 A/B 对账）→ P2 知识库检索二跳过滤/重排+注入检测（knowledge-space.js VECTOR_THRESHOLD 之上）→ P3 选做 MCP 工具两跳预路由（agent-runner.js 下发链，P2 收口后另行裁决）。0 npm 新依赖（不引 SDK 走裸 HTTP）；pin jev-1.13.0；key 不入仓（用户裁决 key 暂保留后续轮换）。红线=BLOCK-109 文件面零触碰（chat.js/loop-orchestrator/conversationRunStore），排队期内尤其。PoC 失败语义=诚实收缩关闭（负结果入候选池）。技术底稿=docs/planning/typesafe-jev-system-one-research.md。启动前置=BLOCK-109 收口+LAUNCH-CHECKLIST 复核+用户确认开跑。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "DECISION-PRIMITIVE-INTERNALIZATION-ARC",
+      "path": "docs/planning/decision-primitive-internalization-arc.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "truthDomain": "decision-primitive-internalization-arc",
+      "entrypoint": "docs/DOC-REGISTRY.json",
+      "archivePolicy": "retain_stable_path",
+      "owner": "research",
+      "registeredAt": "2026-09-21",
+      "title": "决策判断模式内化总体规划（W0-W4 五波弧线）",
+      "notes": "长期规划弧（reference，非工作包，不改变 roadmap 优先级、不预授权启动）：判断点 A/B/C/D 分类学（内化思想内核）+ 五波路线 W0=BLOCK-110 地基与PoC → W1 横向复制（marker判别/意图路由/工具预路由，逐点立项）→ W2 平台化（decision_log 台账/阈值配置中心/校准工具化/观测面）→ W3 供给多样化与数据分级路由（云Jev/本地/拒绝出站，兑现 D-A/D-B）→ W4 工程制度内化（dev-infra checklist/AGENTS.md 条目/门禁/反模式红线/cookbook 内化）。全程约束：单工作包串行、A 型规则永不模型化、生成链路零迁移、降级必有、G0 纪律。风险对账含「过度内化」与「供给锁定」。上游=typesafe-jev-system-one-research.md；W0 载体=block-110-jev-decision-integration-plan.md。W1+ 启动均需用户裁决。",
+      "tags": [
+        "decision-primitive",
+        "internalization",
+        "planning-arc",
+        "jev",
+        "system-one",
+        "G0"
+      ]
     }
   ],
   "lastUpdated": "2026-09-21",
-  "documentCount": 264
+  "documentCount": 267
 }

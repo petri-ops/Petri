@@ -6,7 +6,6 @@
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import type { TokenBudgetDetail } from '@/lib/events';
 import { emitAgentTaskDone, getApiPrefix, getAuthHeader } from './apiBase';
-import { ensureOnlineOrThrow } from './offline';
 import {
   parseResultEditProgressEvent,
   parseToolCallEvent,

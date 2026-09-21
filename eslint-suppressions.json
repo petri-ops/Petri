@@ -293,10 +293,10 @@
   },
   "frontend/src/components/copilot/copilotClient.ts": {
     "@typescript-eslint/no-unsafe-assignment": {
-      "count": 4
+      "count": 2
     },
     "@typescript-eslint/no-unsafe-member-access": {
-      "count": 10
+      "count": 6
     },
     "no-empty": {
       "count": 1

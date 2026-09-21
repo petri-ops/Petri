@@ -79,9 +79,9 @@ export async function fetchInFlightPrimaryTasks(conversationId: string): Promise
   }`;
   const resp = await fetch(url, { headers: { ...getAuthHeader() } });
   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-  const data = await resp.json().catch(() => null);
+  const data = (await resp.json().catch(() => null)) as { tasks?: Array<{ taskId?: string }> } | null;
   const tasks = Array.isArray(data?.tasks) ? data.tasks : [];
-  return tasks.map((t: { taskId?: string }) => String(t.taskId || '')).filter(Boolean);
+  return tasks.map((t) => String(t.taskId || '')).filter(Boolean);
 }
 
 /** task 模式：提交拿 taskId → 订阅事件流（P1.4 起唯一路径） */
