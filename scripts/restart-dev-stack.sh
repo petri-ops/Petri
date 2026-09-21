@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # platform: windows（BLOCK-104 P4 双端同形门；当前实现含 taskkill/PowerShell 链——Mac 侧等价脚本待补，BLOCK-88 P4 教训在案）
 # restart-dev-stack.sh — BLOCK-77 P4 phase2 编排：干净重启 dev 栈并等就绪。
+# ⚠️ vite（:3000）是跨重启长活进程：本脚本只重启 electron/后端，不杀不拉 vite。
+# 若 vite 被误杀，本脚本照常「就绪」但窗口黑屏（ERR_CONNECTION_REFUSED :3000）。
+# 恢复：cd frontend && npm run dev（后台）→ 等 :3000 监听 → 主窗重新导航 :3000
+#（chrome 错误页上 location.reload 无效，需显式 location.href='http://localhost:3000/'）。
+# 2026-09-22 深夜实案（清僵尸进程误杀 vite 后黑屏）。
 # 2026-09-11 沉淀（当次踩坑三连）：
 #   1) detached backend 会逃逸 electron 树杀 → 必须 kill 3001 监听者（僵尸）；
 #   2) dev 栈数据面在 BIOF3_DB_PATH / BIOF3_LOCAL_DATA_DIR（.biof3-dev-user-data/data），
