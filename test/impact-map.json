@@ -2146,7 +2146,7 @@
     },
     {
       "id": "block109-core-arch-convergence",
-      "note": "BLOCK-109-CORE-ARCH-CONVERGENCE 会话核心链路架构收敛：P0 拆前行为基线（BLOCK-92 先例）=block109-p0-baseline.test.mjs（一轮带工具调用会话的 SSE 事件序列/runLoop 返回契约/task_events 回放恒等/流中断形态@runLoop 边界）。P1 事件溯源单一事实源+组装唯一化动主链文件必跑。证据 acceptance/block-109/。",
+      "note": "BLOCK-109-CORE-ARCH-CONVERGENCE 会话核心链路架构收敛：P0 拆前行为基线（BLOCK-92 先例）=block109-p0-baseline.test.mjs（一轮带工具调用会话的 SSE 事件序列/runLoop 返回契约/task_events 回放恒等/流中断形态@runLoop 边界）。P1 事件溯源单一事实源+组装唯一化动主链文件必跑。证据 acceptance/block-109/。 三包增量（2026-09-21 用户裁决「这四个搞起」）：汇报收敛纪律/终态对账/自动计划意图恢复接线与纯函数契约=test/block109-reporting-reconcile.test.mjs。",
       "patterns": [
         "test/block109-p0-baseline.test.mjs",
         "core/biof3-server/loop-orchestrator.js",
@@ -2155,12 +2155,15 @@
         "core/biof3-server/helpers/history-assembly.js",
         "core/biof3-server/routes/ai-agent/**",
         "scripts/arch-cycles-gate.mjs",
-        "acceptance/block-109/**"
+        "acceptance/block-109/**",
+        "core/biof3-server/helpers/plan-intent.js",
+        "core/biof3-server/helpers/agent-reconciliation.js"
       ],
       "tests": [
         "test/block109-p0-baseline.test.mjs",
         "test/block109-p1-events.test.mjs",
         "test/block109-p2-tool-metadata.test.mjs",
+        "test/block109-reporting-reconcile.test.mjs",
         "test/block109-p3-gates.test.mjs",
         "test/agent-runner-loop-orchestrator.test.mjs",
         "test/block109-orchestration.test.mjs"

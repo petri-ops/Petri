@@ -47,6 +47,9 @@ const {
   getChatSummaryAsync,
 } = require('./helpers/chat-summary');
 const { getActivePlanForUserAsync, renderActivePlanForPrompt, PLAN_MODE_PROMPT_SECTION } = require('./helpers/plans');
+// BLOCK-109 候选落地——自动计划意图恢复 + 终态对账
+const { detectAutoPlanIntent, latestUserText } = require('./helpers/plan-intent');
+const { computeReconciliationNotice } = require('./helpers/agent-reconciliation');
 const convSync = require('./helpers/conversations');
 const {
   _maybeAutoTitleConversation,
@@ -328,6 +331,22 @@ async function runAgentLoop({
     systemPrompt += '\n\n=== 子智能体角色专职约束 ===\n' + roleDirective;
   }
 
+  // 「子智能体汇报收敛」汇报契约（呈现收敛的提示词面，2026-09-21 用户裁决
+  // 「每个子智能体只要核对自己的那个部分……总结后交给主智能体最后统一汇总」）：
+  // 子侧=只回传所辖部分核对要点，不做全面重整理；父侧=摘要供决策、不逐个转述，
+  // 全部相关子任务终态后一次统一汇总（终态明细唯一呈现面=「阶段汇总」结果组卡）。
+  if (kind === 'subagent') {
+    systemPrompt += '\n\n=== 汇报契约 ===\n'
+      + '你的最终回复会由父智能体统一汇总，不直接面向最终用户。只回传你所辖部分的核对要点：'
+      + '事实、数据、结论（要点式，尽量不超过 10 条，每条一句话）。不要复述任务全文、'
+      + '不要做全局性整理或背景铺垫、不要寒暄；未覆盖到的部分如实说明「未核对」即可。';
+  } else {
+    systemPrompt += '\n\n=== 子智能体结果汇报纪律 ===\n'
+      + '子智能体的终态摘要会自动汇入「阶段汇总」结果卡，用户可直接展开查看。'
+      + 'wait_agent 返回的摘要供你决策使用：不要在正文里逐个复述子智能体的结果，'
+      + '等全部相关子任务到达终态后做一次统一汇总；个别子任务失败时如实说明并继续其余工作。';
+  }
+
   // BLOCK-97 P1 — 任务清单使用纪律（todo_write；additive 追加，BLOCK-93 同型。
   // 工具全集对所有 agent 会话常开，故无条件注入；简单问答靠纪律文本自身豁免）
   systemPrompt +=
@@ -544,7 +563,13 @@ async function runAgentLoop({
   // UI-303 — Spec 门计划模式注入（与 chat.js 同一共享常量）：accessMode='plan'
   // 档位与显式 planMode 标志等效；agent 循环路径此前不透传 planMode，durable
   // task / 子 agent 在计划档位下缺纪律约束与 policy 拦截，此处补齐对齐。
-  const planModeActive = (context && context.planMode === true) || (context && context.accessMode === 'plan');
+  // 「自动计划意图恢复」（候选落地，2026-09-21 用户裁决）：未显式开启计划模式、
+  // 最近一条用户消息表达「先计划/先出方案/别急着执行」类意图时，本轮自动套用
+  // 计划模式纪律（BLOCK-60 加映三回到 task 链——P1.4 legacy 退役时确认死特性）。
+  const planModeExplicit = (context && context.planMode === true) || (context && context.accessMode === 'plan');
+  const planModeAuto = !planModeExplicit
+    && detectAutoPlanIntent(latestUserText(messages));
+  const planModeActive = planModeExplicit || planModeAuto;
   if (planModeActive) {
     systemPrompt += PLAN_MODE_PROMPT_SECTION;
   }
@@ -878,6 +903,27 @@ async function runAgentLoop({
       filesChangedCount: Array.isArray(taskFilesChanged) ? taskFilesChanged.length : 0,
       at: new Date().toISOString(),
     });
+    // 「终态对账」v1（候选落地，2026-09-21 用户裁决）：主任务终态时粗粒度核对——
+    // 存在失败子任务而清单最后状态全部 completed → 下发对账提示（reconciliation_notice
+    // 事件 + agent_status 用户可见面；不改写清单、不阻断终态。条目级归属对账待
+    // 数据模型补 linkage 后另裁——v1 口径见 helpers/agent-reconciliation.js 头注）。
+    if (kind !== 'subagent') {
+      try {
+        const allEvents = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000);
+        const lastTodo = [...allEvents].reverse()
+          .find((e) => e.eventType === 'tool_call' && e.payload && e.payload.name === 'todo_write');
+        const todoItems = lastTodo && lastTodo.payload && lastTodo.payload.args
+          && Array.isArray(lastTodo.payload.args.items) ? lastTodo.payload.args.items : [];
+        const notice = computeReconciliationNotice(
+          todoItems,
+          agentTaskStore.listChildAgentTasks(taskId)
+        );
+        if (notice) {
+          _emit({ event: 'reconciliation_notice', taskId, ...notice, at: new Date().toISOString() });
+          _emit({ event: 'agent_status', phase: 'reconciliation', message: notice.message });
+        }
+      } catch { /* 对账失败不阻塞终态 */ }
+    }
     // BLOCK-49 二期 proactive —— 子 agent 终态主动投递到父任务事件流：
     // 用户在父任务 SSE 上无需 wait_agent 即可见（协议面 additive，前端
     // 消费为候选）；父模型上下文不注入（诚实边界）。
