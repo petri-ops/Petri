@@ -56,8 +56,9 @@ eval-reports/
 # node_modules/ and *.log are already ignored globally above; these are the
 # core-specific dev databases, caches, backups, and large demo datasets.
 core/r-server/biof3.db*
-core/biof3-server/biof3.db-shm
-core/biof3-server/biof3.db-wal
+# BLOCK-109 P0 卫生清偿（2026-09-21）：运行时数据库整体退库（含 -shm/-wal），
+# 此前仅 shm/wal 被忽略、主库文件曾被误跟踪入库
+core/biof3-server/biof3.db*
 core/r-server/.tmp/
 core/r-server/backups/
 core/py-server/pyserver.db*

@@ -1,0 +1,33 @@
+{
+  "name": "block109-agent-panel",
+  "startedAt": "2026-09-21T09:41:02.340Z",
+  "finishedAt": "2026-09-21T09:41:22.914Z",
+  "assertions": [
+    {
+      "name": "A1_subagent_spawned_rest_detected",
+      "pass": true,
+      "detail": "REST 检测到新 subagent :: taskId=6e4b1490-9ed2-4e70-917d-5fcb57d7b3d7 status=running :: {\"ok\":true,\"tasks\":[{\"taskId\":\"6e4b1490-9ed2-4e70-917d-5fcb57d7b3d7\",\"status\":\"running\",\"agentStatus\":\"running\",\"createdAt\":\"2026-09-21T09:41:14.858Z\",\"finished"
+    },
+    {
+      "name": "A2_panel_mounted_with_spawned_child",
+      "pass": true,
+      "detail": "hasPanel=true taskTextMatched=true taskText=「在当前 BioF3 项目工作区（项目根目录）执行两件事：\n1) 列出项目根目录（即工作区根路径 \".\"）下的所有文件名（只列根目录，不递归子目录）；\n2) 统计」 title=实时工作流（工具调用时间线）· 3 次调用 timelines=[\"T:1\"]"
+    },
+    {
+      "name": "A3_panel_timeline_segments_valid",
+      "pass": true,
+      "detail": "panelSeq=T:1 runningClusters=0"
+    },
+    {
+      "name": "A4_terminal_summary_and_group_card",
+      "pass": true,
+      "detail": "rest=completed summaryCard=[true] lastBody=136"
+    },
+    {
+      "name": "A5_temp_data_cleaned_up",
+      "pass": true,
+      "detail": "conv=true project=true"
+    }
+  ],
+  "allPass": true
+}

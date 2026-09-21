@@ -4010,14 +4010,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据（实机腿 · 机器重启后补跑 2026-09-21）**：dev-verify flow `block108-qoder-stream` **7/7 allPass**（真模型轮次 DeepSeek）：Q1 过渡叙述 4 条逐条位于其簇前（X:1 T:1 … X:4 T:4 R:5）；Q2 计数式簇头含「1 项需注意」失败可见、零 legacy 残留；Q3 统一单行 4 行、零默认展开终端块、零 routine 折叠；Q4 点击展开终端体、再点收起；Q5 簇内「已思考」行 4 条；Q6 刷新后逐段同序（合并簇形态下历史/实况全等）；Q7 临时数据清理。截图 `acceptance/block-108/qoder-stream-expanded.png`（簇头形态=「执行工具 1 次 · 已运行 node -e … · 耗时 99 ms」/「执行工具 1 次 · 1 项需注意 · 已运行 type …」）。**flow 侧同批修正**：发送路径定版=按钮 click（合成 Enter 事件不被 composer 提交，输入框不清空）；导航后固定 10s 路由稳定等待 + 提交确认 2.5s×4 重试（SPA 旧页面 textarea 竞态）——均为 flow 健壮性修正非产品缺陷。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-431: 运行中呈现策略 v2（尾轮展开）+ 子智能体面板呈现同构（BLOCK-108 增量）(2026-09-21 in_progress，契约验证绿、面板实机待补)
+## UI-431: 运行中呈现策略 v2（尾轮展开）+ 子智能体面板呈现同构（BLOCK-108 增量）(2026-09-21 verified，dev Electron 边界内实机——尾巴清偿属 BLOCK-109-CORE-ARCH P0-3)
 
 - **来源**：用户晨间连续两问：「长任务多轮规划运行中一直展开是不是不太友好」+「子智能体进行过程是不是也保留当前会话一样的呈现方式……实现形式和主保持一致」。UI-430 合并簇后「运行中整簇展开」在长任务下成为反模式（行数随轮数线性增长）；AgentRunPanel（UI-385）自绘简化时间线与主窗 Qoder 语言不同构。
 - **改动（P1 尾轮展开）**：`ToolActivityList.tsx`——运行簇默认收缩、仅渲染当轮（最后一轮）的思考+工具行（`runningTail`），新一轮开始自动收上一轮，页面行数恒定；簇头首次点击=展开全部（`headOpen` 以非尾轮的完整展开态为翻转基准）；手动开合优先于自动策略。
 - **改动（P2 派发行计时）**：QoderRow 子智能体行 running 时显示「已运行 Ns」（`useSubAgentElapsed` hook，impure Date.now 收进 effect 对齐 `useRunningElapsed` 先例），终态显示 `processingDurationMs`。
 - **改动（P3 面板同构）**：`AgentRunPanel.tsx`——弃自绘 `TimelineEntry` 简化时间线，订阅回调补 `onIter`/`onReasoning`/`onToolOutput`，复用 toolActivity 导出的 `mergeToolCall/Output/ResultActivity`（与主窗 conversationRunStore 同源折叠器）→ `buildConversationSegments` → `ConversationTimeline`（过渡叙述正文式渲染）。面板既有中断/留言/续派/终态摘要功能零变化；UI-404 分区折叠保留。
 - **证据（契约）**：`ToolActivityList.test.tsx` 18/18（+尾轮展开：运行簇只渲染当轮行、手动展开见全部/+派发行无快照无计时）、`AgentRunPanel.test.tsx` 5/5（+事件折叠为段模型、面板渲染主窗同套 Qoder 时间线：过渡叙述/计数簇头/已思考行/qoder-cluster-body）；全五文件 60/60；`tsc --noEmit` 0 红；`quality:lint` 0 error（P2 的 render 内 Date.now 与 effect 内同步 setState 分别被 react 编译规则拦截，均已按 `useRunningElapsed` 先例收进 effect/interval）。
-- **实机待补（诚实登记）**：面板实机打开验证未完成——`agentOpenInRail` 事件派发后右栏面板未挂载（panelTitle=null，疑似 rail 挂载前置条件未满足，非渲染缺陷：同构渲染路径已被 P3 契约测试覆盖）；flow 长任务全流程复跑同批受阻于测试实例存活问题（StackWatchdog 重启主栈时连带清理测试实例）。两项待环境稳定窗口补跑后翻 verified。
+- **实机补验（2026-09-21 尾巴清偿，BLOCK-109-CORE-ARCH P0-3）**：dev-verify flow `block109-agent-panel` **5/5 allPass**（真模型 spawn 轮次，只连自管测试实例 :9223）——A1 REST 检测到新 subagent 任务；A2 右栏面板自动唤起挂载且任务文本与派发指令匹配、面板内渲染主窗同套 `ConversationTimeline`；A3 面板时间线段契约合法（词汇 X/R/T + iteration 非降序，与主窗同构，实测 `X:1 T:1 R:2`/`T:1`）；A4 子任务 REST 终态 completed + 主时间线「阶段汇总」组卡可见（UI-432 协同）；A5 临时数据清理。证据 `acceptance/block-109/`（agent-panel-running/-terminal.png + samples.json + block109-agent-panel-live.json）。**实机发现如实登记（非本条缺陷）**：主时间线 spawn 内联卡藏在折叠簇行 detail 体里（collapseWhenSettled 收起态不渲染），默认态不可达——详情入口可达性随「子智能体汇报收敛」排队批一并评估。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-432: 子智能体回写呈现——终态结果组卡 + 项目概览孤儿过滤（BLOCK-109 P3/P4）(2026-09-21 verified，dev Electron 边界内实机)

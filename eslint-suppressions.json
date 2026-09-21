@@ -1635,11 +1635,6 @@
       "count": 1
     }
   },
-  "src/main.js": {
-    "no-undef": {
-      "count": 1
-    }
-  },
   "src/main/_window-manager.js": {
     "no-control-regex": {
       "count": 1

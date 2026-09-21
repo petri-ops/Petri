@@ -1,6 +1,6 @@
 # BLOCK-109-CORE-ARCH-CONVERGENCE — 会话核心链路架构收敛（单一事实源）
 
-**状态**：`active（P0-LAUNCH；2026-09-21 立项即启动，用户裁决「基于这些点 开一个或多个block系统性优化gewu」——基于 ZCode 开源库（zai-org/ZCode，Apache-2.0）对比审计发现；D1–D6 按 §7 推荐留痕）`
+**状态**：`active（P0 执行完毕待收口——2026-09-21：拆前基线落库 3/3 绿（block109-p0-baseline.test.mjs，含流中断形态与四件套回归集）+ UI-431 尾巴清偿翻 verified（flow block109-agent-panel 5/5）+ 卫生清偿完成（biof3.db 退库/main.js 死守卫删除）+ 附录 A 事件模型评审稿落盘（§附录 A，待用户裁决后 P1 动码）；立项=2026-09-21 用户裁决「基于这些点 开一个或多个block系统性优化gewu」，基于 ZCode 对比审计；D1–D6 按 §7 留痕）`
 **立项**：2026-09-21（对比审计报告存在于立项会话；证据 file:line 全部落在本仓与参考仓可复现——Mac `/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/reference/ZCode`；Windows `D:\1.WorkDir\reference\ZCode`（2026-09-21 全量 clone：上游公开史仅 2 commits——`77432b6` Initial commit → `872ad96` feat: open source，包版本 v3.14.0，无 tag））
 **修订**：2026-09-21（用户核查裁决「立项时未考虑已收口的 BLOCK-109-AGENT-ORCHESTRATION-UX」成立——立项提交 `5427a489` 14:52 早于其四件套落地 `dddd135c` 15:09；本次吸收四件套为基线输入与零退化红线，D1–D6 与四阶段划分不变）
 **修订 2**：2026-09-21（用户实测三裁决之二「按你的建议来」：P0 拆前基线并入实机故障场景——run `80669989` 7 子智能体 3 败的证据链，见 §1 P0-2）
@@ -125,3 +125,39 @@ dev 栈启动走既有 `restart-dev-stack.sh` / `npm run dev`（Watchdog 已退�
 - **BLOCK-106 §2/§7 登记的候选**（task_events 数据模型改造 / 轮询→SSE）：前者由本包 P1 **吸收实现**（候选无独立 Plan ID，本包即其归宿）；后者仍留候选池，本包不改轮询触发方式。
 - **虚拟化候选包**（排队中）：无文件面冲突（其动列表渲染层，本包动数据链）。
 - **本包新登记候选**（§2 非范围）：`node:sqlite` 评估、三契约单源化、分段 token 预算——记录于 roadmap 候选区，启动需显式裁决。
+
+## 附录 A：事件模型评审稿（P1 前置设计裁决——2026-09-21 P0 产出，过用户裁决后 P1 才动码）
+
+> 依据：P0 拆前基线（`test/block109-p0-baseline.test.mjs` 实测钉死的边界契约）+ dev 库规模实测（BLOCK-106：`task_events` 236,087 行、delta 占 98.54%、18k 行/天）+ ZCode 参照（约 70 种 SessionEvent 先落存储再扇出、EventReducer 投影；仅借鉴设计，非复制）。
+
+### A.1 事件类型枚举（v1：收敛命名，不追 ZCode 的 70 种）
+
+现状 emit 流事件（P0 基线钉死）已有事实词汇：`iter` / `delta`(content/reasoning/tool_calls) / `agent_progress` / `tool_call` / `tool_result` / `agent_status`(phase: network_retry…) / `child_finished` / `token_budget` / `model_fallback` / `error`，加上存储侧 `task_resumed`。**推荐 E1**：v1 沿用现有名称（零迁移成本、前后端契约不断），仅**补齐缺失的生命周期事件**——`run_started` / `run_terminal`(completed|failed|cancelled，携带 reason)——因为 P0 基线实证当前终止信号是**无参 `emitDone()`、不入存储**（附录 A 驱动的第一号疣）。新增事件 additive，老事件不改名。
+
+### A.2 存储落点：单存储 = `task_events`（推荐），`loop_runs` 转单向投影
+
+- **推荐 E2**：不建新表。`task_events`（task_id + seq 严格递增 + type + payload + created_at 索引）已是天然事件存储——每次运行本就对应一个 task（primary 与 subagent 同构），再加一张表就是第二真相。改造点：①run 级生命周期事件入 `task_events`（A.1）；②`loop_runs` 表族转为**由事件投影的单向只读视图**（写路径退役，读路径保留兼容），消除「注释约定权威」（`subAgentTasks.ts:400`）。
+- 备选（不推荐）：新 `run_events` 表——迁移成本高、与 task_events 立即形成双轨，违背本包「单一事实源」初衷。
+
+### A.3 保留策略：结构事件长留、裸 delta 分层短留（推荐 E3），附一个开工前必须实测的问题
+
+delta 占 98.54% 的写入量，而其内容在运行收尾后已持久化进 `copilot_messages`（正文 + meta_json 聚合），事件流里的裸 delta 属**冗余副本**。推荐分层：结构事件（tool_call/tool_result/agent_progress/agent_status/生命周期）按现行 `TASK_EVENTS_RETENTION_DAYS` 保留（回放/恢复真相）；裸 delta 在运行**正常终态后**清除或大幅缩短保留（如 7 天）。
+**开工前必须实测的开放问题**：失败运行（无 `copilot_messages` 落库）的半截流文本当前仅存在于 delta 事件里——清 delta 是否会让「失败运行回放」丢正文？P1 开工第一步先在 dev 库实测失败任务的历史渲染数据源，再定 delta 清除时点（终态后立即 vs 缩短保留期）。
+
+### A.4 `meta_json` 聚合快照：保留为物化投影，单一写者
+
+`copilot_messages.meta_json`（progressUpdates cap 50×4000 / toolActivities / reasoningByIteration 6K/轮截断）= **渲染素材的物化投影**，事件流为真相、meta 为缓存。保留理由：打开历史会话零回放成本（BLOCK-107 长会话分页依赖）；约束：单一写者（conversation-adapter）+ 与事件流的一致性契约沿用 block107/108 机械测试。老会话无素材降级路径不变（不白屏）。
+
+### A.5 恢复收敛：4→1
+
+`resumeConversationRun / resumeInterruptedConversation / resumeOrphanAgentTasks / resumeSubAgentTasks` 收敛为**单一事件回放重建入口**（前端 projection 由后端事件驱动）；`task_resumed` 事件保留为唯一恢复溯源标记。P1 完成判据 = legacy 四入口物理删除 + 组装单链断言（legacy require 清零，plan §4）。
+
+### A.6 裁决清单（过裁决后 P1 动码）
+
+| # | 裁决项 | 推荐 |
+| --- | --- | --- |
+| E1 | 事件命名：沿用现有词汇 additive 补生命周期 vs 全新统一前缀 | 沿用 + 补 `run_started`/`run_terminal` |
+| E2 | 存储：单存储 task_events + loop_runs 转投影 vs 新表 | 单存储 + 投影 |
+| E3 | delta 保留：分层（结构长留/delta 短留）vs 维持现状 | 分层；开工前先实测失败运行回放数据源 |
+| E4 | loop_runs：单向投影 vs 物理退役表 | 先投影（读兼容），物理退役另裁 |
+| E5 | P1 顺序：后端事件模型先行 → 前端 conversationRunStore 换源 → legacy 退役（双轨对照后物理删除） | 按此顺序，每步以 P0 基线对账 |

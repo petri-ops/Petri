@@ -575,9 +575,6 @@ async function main() {
   // BLOCK-67 加映（UI-326）— IP+密码 引导连接（装公钥 + 写 ssh config 别名）
   const { setupSshHostIpc } = require("./ipc/ssh-host");
   setupSshHostIpc();
-  if (typeof setupFigcodeIpc === "function") {
-    setupFigcodeIpc();
-  }
   setupSkillsIpc();
 
   // 6. CSP 加固——禁用 unsafe-eval，限制资源来源到 self + localhost（后端/SSE/dev server）
