@@ -106,7 +106,6 @@ test('P2 一致性 — destructive ⇒ 串行；readOnly ⇒ 非破坏；spawn �
 });
 
 test('P2 调度行为 — 并行组真并发、串行组保序、结果按原序重组', async () => {
-  const timings = [];
   const makeCall = (id, name) => ({
     id,
     type: 'function',
