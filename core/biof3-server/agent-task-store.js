@@ -546,6 +546,85 @@ function getAgentTaskEventsSince(taskId, afterSeq, limit = 500) {
   }));
 }
 
+// BLOCK-109-CORE-ARCH P1（附录 A E3 裁决）— 终态 delta 合并（透明快照，非裸删）。
+// 依据：①裸 delta 占 task_events 写入量 ~98.5%（BLOCK-106 实测）；②面板回放
+// （subscribeAgentTask afterSeq=0 全量重放）依赖 delta 行承载流式正文/思考——
+// 直接删除会丢失败运行的半截文本（P1.0 实测结论，plan 附录 A.3 补记）。
+// 做法：按 iter 事件重建迭代边界，逐（迭代×类型）把 content/reasoning delta
+// 合并为单条快照行（event_type 仍 'delta'、payload 形状不变 → 对回放器透明，
+// 回放文本恒等），事务内删除被合并的原始行；结构 delta（tool_calls/未知形状）
+// 与全部非 delta 事件原样保留。行数缩减 ≈ delta 行数 − 快照行数。
+const DELTA_COALESCE_MIN_ROWS = 10;
+function coalesceTaskDeltas(taskId) {
+  const rows = db.prepare(
+    'SELECT seq, event_type, payload FROM task_events WHERE task_id = ? ORDER BY seq'
+  ).all(taskId);
+  let deltaCount = 0;
+  for (const r of rows) if (r.event_type === 'delta') deltaCount += 1;
+  if (deltaCount < DELTA_COALESCE_MIN_ROWS) return { coalesced: 0, snapshots: 0 };
+
+  const merged = new Map();
+  const keepSeqs = new Set();
+  let iteration = 0;
+  for (const r of rows) {
+    if (r.event_type === 'iter') { iteration += 1; continue; }
+    if (r.event_type !== 'delta') continue;
+    let kind = null;
+    let text = '';
+    try {
+      const parsed = JSON.parse(r.payload);
+      const delta = parsed && parsed.choices && parsed.choices[0] && parsed.choices[0].delta;
+      if (!delta) { keepSeqs.add(r.seq); continue; }
+      if (typeof delta.content === 'string' && delta.content.length > 0) {
+        kind = 'content'; text = delta.content;
+      } else if (typeof delta.reasoning_content === 'string' && delta.reasoning_content.length > 0) {
+        kind = 'reasoning'; text = delta.reasoning_content;
+      } else {
+        keepSeqs.add(r.seq); // tool_calls 等结构 delta 与空 delta 原样保留
+        continue;
+      }
+    } catch {
+      keepSeqs.add(r.seq);
+      continue;
+    }
+    const key = iteration + ':' + kind;
+    merged.set(key, (merged.get(key) || '') + text);
+  }
+  if (merged.size === 0) return { coalesced: 0, snapshots: 0 };
+
+  const maxSeqRow = db.prepare('SELECT MAX(seq) AS m FROM task_events WHERE task_id = ?').get(taskId);
+  let nextSeq = (maxSeqRow && maxSeqRow.m ? maxSeqRow.m : 0) + 1;
+  const insertSnapshot = db.prepare(
+    "INSERT INTO task_events (task_id, seq, event_type, payload, created_at) VALUES (?, ?, 'delta', ?, ?)"
+  );
+  const deleteCoalesced = db.prepare(
+    'DELETE FROM task_events WHERE task_id = ? AND event_type = \'delta\' AND seq = ?'
+  );
+  const run = db.transaction(() => {
+    const keys = [...merged.keys()].sort((a, b) => {
+      const [ai, ak] = a.split(':');
+      const [bi, bk] = b.split(':');
+      return (Number(ai) - Number(bi)) || (ak === bk ? 0 : ak === 'reasoning' ? -1 : 1);
+    });
+    for (const key of keys) {
+      const [, kind] = key.split(':');
+      const payload = kind === 'content'
+        ? { choices: [{ delta: { content: merged.get(key) } }] }
+        : { choices: [{ delta: { reasoning_content: merged.get(key) } }] };
+      insertSnapshot.run(taskId, nextSeq, JSON.stringify(payload), new Date().toISOString());
+      nextSeq += 1;
+    }
+    let coalesced = 0;
+    for (const r of rows) {
+      if (r.event_type !== 'delta' || keepSeqs.has(r.seq)) continue;
+      deleteCoalesced.run(taskId, r.seq);
+      coalesced += 1;
+    }
+    return { coalesced, snapshots: keys.length };
+  });
+  return run();
+}
+
 function serializeFilesChanged(filesChanged) {
   if (!Array.isArray(filesChanged) || filesChanged.length === 0) return null;
   try {
@@ -849,6 +928,7 @@ module.exports = {
   TASK_EVENTS_RETENTION_DAYS,
   appendAgentTaskEvent,
   getAgentTaskEventsSince,
+  coalesceTaskDeltas,
   getRunningChildAgentTasks,
   listChildAgentTasks,
   listRecentSubAgentTasks,

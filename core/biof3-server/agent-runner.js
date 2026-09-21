@@ -311,6 +311,10 @@ async function runAgentLoop({
     }
   };
 
+  // BLOCK-109-CORE-ARCH P1（附录 A E1 裁决）— 运行生命周期事件入事件流：
+  // run_started 为该 task 事件流的首个生命周期标记（先落库再扇出，与其余事件同通道）。
+  _emit({ event: 'run_started', taskId, kind: kind || null, at: new Date().toISOString() });
+
   // ---------- System prompt building (from ai-agent.js L142-319) ----------
   let systemPrompt = buildSystemPrompt(ctxForPrompt, {
     provider: providerName,
@@ -864,6 +868,16 @@ async function runAgentLoop({
         });
       } catch {}
     }
+    // BLOCK-109-CORE-ARCH P1（附录 A E1 裁决）— 终态生命周期事件（completed/failed/cancelled
+    // + reason），与 run_started 配对成运行边界；先落库再扇出，与其余事件同通道。
+    _emit({
+      event: 'run_terminal',
+      taskId,
+      status: terminal.status,
+      error: terminal.error || null,
+      filesChangedCount: Array.isArray(taskFilesChanged) ? taskFilesChanged.length : 0,
+      at: new Date().toISOString(),
+    });
     // BLOCK-49 二期 proactive —— 子 agent 终态主动投递到父任务事件流：
     // 用户在父任务 SSE 上无需 wait_agent 即可见（协议面 additive，前端
     // 消费为候选）；父模型上下文不注入（诚实边界）。
@@ -887,6 +901,11 @@ async function runAgentLoop({
         }
       } catch { /* proactive 投递失败不影响终态落库 */ }
     }
+    // BLOCK-109-CORE-ARCH P1（附录 A E3 裁决）— 终态 delta 合并（透明快照行，回放文本
+    // 恒等；详见 agent-task-store.coalesceTaskDeltas 头注）。合并失败不阻塞终态。
+    try {
+      agentTaskStore.coalesceTaskDeltas(taskId);
+    } catch {}
   } catch {}
 
   try {
