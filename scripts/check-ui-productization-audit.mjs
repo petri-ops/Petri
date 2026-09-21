@@ -116,8 +116,6 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // 台账=test:changed 0 红（无新 UI 功能）。豁免 subject UI-### 与同提交台账要求；
   // 不重写共享历史。
   'ff77faa712b11873d8ffe3fe0a4533a96c0877a2',
-  // 2026-09-21 P2 测试 timings 残留删除（）——零 UI 行为变化；豁免同提交台账与 subject 要求；不重写共享历史。
-  '',
   // 2026-09-21 P2 测试未用绑定清理（9cbda3dd043f8d964db6510cd52ab9b38067e550）——零 UI 行为变化；豁免同提交台账与 subject 要求；不重写共享历史。
   '9cbda3dd043f8d964db6510cd52ab9b38067e550',
   // 2026-09-21 BLOCK-109-CORE-ARCH P1.4 legacy SSE 双轨退役（c029b616）：前端
@@ -463,8 +461,6 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 台账=test:changed 0 红（无新 UI 功能）。豁免 subject UI-### 与同提交台账要求；
   // 不重写共享历史。
   'ff77faa712b11873d8ffe3fe0a4533a96c0877a2',
-  // 2026-09-21 P2 测试 timings 残留删除（）——零 UI 行为变化；豁免同提交台账与 subject 要求；不重写共享历史。
-  '',
   // 2026-09-21 P2 测试未用绑定清理（9cbda3dd043f8d964db6510cd52ab9b38067e550）——零 UI 行为变化；豁免同提交台账与 subject 要求；不重写共享历史。
   '9cbda3dd043f8d964db6510cd52ab9b38067e550',
   // 2026-09-21 BLOCK-109-CORE-ARCH P1.4 legacy SSE 双轨退役（c029b616）：前端 legacy
