@@ -1,0 +1,43 @@
+{
+  "name": "block109-single-truth-live",
+  "startedAt": "2026-09-21T11:53:11.376Z",
+  "finishedAt": "2026-09-21T11:54:34.499Z",
+  "assertions": [
+    {
+      "name": "L1_live_run_visible",
+      "pass": true,
+      "detail": "running=0 timelines=[\"T:1 R:2\"]"
+    },
+    {
+      "name": "L2_inflight_endpoint_lists_running_task",
+      "pass": true,
+      "detail": "conv=conv_56308821-34b inflight=[\"ffc31f92-9c9b-47e4-974b-d5d2e32f068a\"]"
+    },
+    {
+      "name": "L3_refresh_recovers_running_from_backend",
+      "pass": true,
+      "detail": "刷新后运行态重建 running=1 timelines=[\"T:1 X:2 T:2 X:4 T:4 X:5 T:5 X:6 T:6\"]"
+    },
+    {
+      "name": "L4_run_completes_after_recovery",
+      "pass": true,
+      "detail": "after recovery: running=0 lastBody=748"
+    },
+    {
+      "name": "L5_inflight_empty_after_terminal",
+      "pass": true,
+      "detail": "inflightAfter=[]"
+    },
+    {
+      "name": "L6_final_reload_projection_stable",
+      "pass": true,
+      "detail": "pre=[\"T:1 X:2 T:2 X:4 T:4 X:5 T:5 X:6 T:6 R:7\"] post=[\"T:1 X:2 T:2 X:4 T:4 X:5 T:5 X:6 T:6 R:7\"] lastBody=748"
+    },
+    {
+      "name": "L7_temp_data_cleaned_up",
+      "pass": true,
+      "detail": "conv=true project=true"
+    }
+  ],
+  "allPass": true
+}

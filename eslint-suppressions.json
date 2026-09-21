@@ -34,11 +34,6 @@
       "count": 2
     }
   },
-  "core/biof3-server/routes/ai-agent/chat.js": {
-    "no-undef": {
-      "count": 1
-    }
-  },
   "core/shared-backend/engineer-identity.js": {
     "no-control-regex": {
       "count": 1
@@ -301,13 +296,13 @@
   },
   "frontend/src/components/copilot/copilotClient.ts": {
     "@typescript-eslint/no-unsafe-assignment": {
-      "count": 9
+      "count": 4
     },
     "@typescript-eslint/no-unsafe-member-access": {
-      "count": 21
+      "count": 10
     },
     "no-empty": {
-      "count": 8
+      "count": 1
     }
   },
   "frontend/src/components/copilot/copilotClient/agentTaskApi.ts": {
@@ -329,16 +324,16 @@
       "count": 7
     },
     "@typescript-eslint/no-unsafe-assignment": {
-      "count": 50
+      "count": 48
     },
     "@typescript-eslint/no-unsafe-call": {
       "count": 3
     },
     "@typescript-eslint/no-unsafe-member-access": {
-      "count": 146
+      "count": 141
     },
     "no-empty": {
-      "count": 3
+      "count": 1
     }
   },
   "frontend/src/components/copilot/copilotClient/parse.ts": {

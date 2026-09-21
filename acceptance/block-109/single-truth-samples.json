@@ -1,0 +1,15 @@
+{
+  "prompt": "请执行命令 `node -e \"setTimeout(()=>console.log(1),25000)\"` 并等它执行完，然后用一句话告诉我命令的输出。",
+  "conversationId": "conv_56308821-34b",
+  "inflightMid": [
+    "ffc31f92-9c9b-47e4-974b-d5d2e32f068a"
+  ],
+  "inflightAfter": [],
+  "final": {
+    "timelines": [
+      "T:1 X:2 T:2 X:4 T:4 X:5 T:5 X:6 T:6 R:7"
+    ],
+    "running": 0,
+    "lastBody": 748
+  }
+}
