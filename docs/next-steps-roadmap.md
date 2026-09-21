@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-21（**BLOCK-108-CONVERSATION-STREAM-QODER-FIDELITY 整包 completed（closeout 九门全绿 + 实机 7/7）**——会话信息流 Qoder 化收口：过渡叙述簇前正文式 + 簇内统一单行点击展开 + 计数式簇头 + 思考入簇；附带修复依赖升级批 vite 8.3 dev server 双断链（React 不挂载白屏）；UI-429 verified。此前=——用户裁决「更进一步的靠近 qoder的情况」（附 Qoder 截图）立项 + 睡眠窗口预授权夜间自主推进：执行间过渡叙述 + 簇内紧凑单行流（统一单行点击展开）+ 计数式簇头；P0 已核=过渡叙述数据链路已全通，零后端改动，本包为纯呈现层；UI 台账=UI-429。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-21（**BLOCK-109-CORE-ARCH-CONVERGENCE 立项即启动 active（P0-LAUNCH）**——用户裁决「基于这些点 开一个或多个block系统性优化gewu」：基于 ZCode 开源库（zai-org/ZCode，Apache-2.0，仓外 reference/ZCode）对比审计立项的**会话核心链路架构收敛**。四阶段：P0 拆前行为基线 + UI-431 面板实机尾巴清偿 + 卫生清偿（biof3.db 退库/main.js 死守卫）+ 事件模型评审 → P1 事件溯源单一事实源 + 组装唯一化（legacy chat.js 786 行退役、4 个 resume 入口收敛、conversationRunStore 改消费后端投影）→ P2 工具定义元数据化 + 调度分组 → P3 架构门禁基线化（例外 expires 棘轮 + forbidCycles）。**压缩机制零重复**（BLOCK-95 B2/BLOCK-98 已交付；对比审计初判「无压缩」经立项核实撤回修正）。候选池新登记：node:sqlite 评估 / 三契约单源化 / 分段 token 预算。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-21（**BLOCK-108-CONVERSATION-STREAM-QODER-FIDELITY 整包 completed（closeout 九门全绿 + 实机 7/7）**——会话信息流 Qoder 化收口：过渡叙述簇前正文式 + 簇内统一单行点击展开 + 计数式簇头 + 思考入簇；附带修复依赖升级批 vite 8.3 dev server 双断链（React 不挂载白屏）；UI-429 verified。此前=——用户裁决「更进一步的靠近 qoder的情况」（附 Qoder 截图）立项 + 睡眠窗口预授权夜间自主推进：执行间过渡叙述 + 簇内紧凑单行流（统一单行点击展开）+ 计数式簇头；P0 已核=过渡叙述数据链路已全通，零后端改动，本包为纯呈现层；UI 台账=UI-429。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-21（**BLOCK-107-CONVERSATION-STREAM-UX 整包 completed（2026-09-20 立项即启动 → 2026-09-21 P3 收口；closeout 八门全绿）**——**会话信息流呈现时间线化**：P1 分段模型（`buildConversationSegments` 纯函数）+ 交错渲染（思考/工具簇/阶段进度按 `iteration` 上轴）+ D4 运行展开/完成折叠 + 运行秒表 + 历史/实况一致性机械契约；P2 历史兼容降级（无 `timeline` 素材退回分组堆叠，老会话不白屏）+ 时间线样式 + 折叠策略；P3 四条实机腿全绿（历史 5/5 / 实况 7/7 / 三宿主面 6/6 / 长会话分页 7/7），UI-428 **verified**。四条实机腿新增 dev-verify flows `block107-timeline-history/-live/-hosts/-long`。**唯余帧时基线未采**（属虚拟化候选包前置证据，随本包收口转交该候选包）。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
