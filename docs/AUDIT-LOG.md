@@ -5,7 +5,9 @@
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 > 入口直链（registry `entrypoint` 指向本台的 canonical 文档，归档轮转不得切断发现路径）：[block-14-left-panel-qa-fix-closeout](./block-14-left-panel-qa-fix-closeout.md) · [block-15-architecture-perf-plan](./block-15-architecture-perf-plan.md) · [block-22-codemirror-inline-diff-plan](./block-22-codemirror-inline-diff-plan.md)
 
-最后更新：2026-09-22 凌晨（**三包实机自动化验收完成（用户问「你能测吗」→ flow `block109-reporting-live` 5/5）**——汇报收敛实机双面成立：子侧要点式回传（233/415 字符 vs 上一日数千字独立成文）+ 父侧一次统一汇总（453 字符），UI-433 翻 verified；终态对账 v1.5 实机触发（运行中取消子任务 × 全完成清单 → reconciliation_notice 在场，口径升级含 cancelled）；连带=restart-dev-stack 清场断言升级（30s 逐秒重试 + CDP 口自愈换端口，终结「幽灵端口」误报时代）。dev 栈运行中（后端含全部新代码）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-22 早（**BLOCK-110-JEV-DECISION-INTEGRATION 启动 active（P0-LAUNCH）**——用户裁决「启动 BLOCK-110」+「开工前先推送」（26 个已收口提交已推 origin，Mac 侧自动同步恢复可见）；LAUNCH-CHECKLIST 四项复核全过：BLOCK-109 已收口 / AUDIT-LOG 无🔴 / git 无未知 WIP / 用户确认开跑（AskUserQuestion 留痕）。auto-sync 事件日志 6 条已消解 DIVERGED 残留行按纪律清除（推送后 ahead=0 behind=0）。P0=decision-api.js 裸 HTTP wrapper + 降级契约 + 中文语料 confidence-accuracy 校准，评审预登记裁决项 D-A/D-B 见 plan §1.1。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-22 凌晨（**三包实机自动化验收完成（用户问「你能测吗」→ flow `block109-reporting-live` 5/5）**——汇报收敛实机双面成立：子侧要点式回传（233/415 字符 vs 上一日数千字独立成文）+ 父侧一次统一汇总（453 字符），UI-433 翻 verified；终态对账 v1.5 实机触发（运行中取消子任务 × 全完成清单 → reconciliation_notice 在场，口径升级含 cancelled）；连带=restart-dev-stack 清场断言升级（30s 逐秒重试 + CDP 口自愈换端口，终结「幽灵端口」误报时代）。dev 栈运行中（后端含全部新代码）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-21 深夜三（**「流中断重试覆盖」增量落地（用户裁决「按你的建议来」）+ 实机双验证**——病灶坐实=provider 流式 promise 从不 reject（fail() resolve-with-error），流中死亡对重试包装永远「成功」→ 零重试。修复=deepseek 流式 `errorsAsRejections` 开关（fail 改异常穿透，aborted 保持 resolve 取消语义）+ loop 调用开启。验证=本地 SSE 服务器契约 5/5（RST 重置 reject/legacy 默认零变化/整轮重试集成 hits=2/成功零回归/aborted 语义）+ P0 基线 3/3 + lint 0 + test:changed 0 红（顺清=D7 领域词基线随九域拆分键重映射、platform-freeze 抓真后删死防御）。**实机**：修复后同指令轮次 completed（对照修复前同指令 failed），零回归；三候选包实机观察=子侧汇报纪律生效实证（要点式回传入册 UI-433）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

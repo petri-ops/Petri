@@ -4946,21 +4946,22 @@
       "id": "BLOCK-110-JEV-DECISION-INTEGRATION",
       "path": "docs/block-110-jev-decision-integration-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "active",
       "canonical": true,
       "truthDomain": "block-110-jev-decision-integration",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-21",
       "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH",
       "tags": [
         "block-110",
         "jev",
         "system-one",
         "decision-model",
         "typesafe",
-        "planned-queued"
+        "active"
       ],
-      "notes": "2026-09-21 立项登记 planned 排队（用户裁决「现在集中到jev和项目的融合中来 是否要做个或多个block来优化项目」；结构裁决「一个 BLOCK 分阶段」+ P3 工具预路由「列入包内选做阶段」）。四阶段：P0 接入地基（decision-api.js 裸 HTTP wrapper + 降级契约 + 中文语料 confidence-accuracy 校准 harness）→ P1 话题漂移 noul 直替 PoC（conversations.js _maybeDetectTopicShift，契约不变 A/B 对账）→ P2 知识库检索二跳过滤/重排+注入检测（knowledge-space.js VECTOR_THRESHOLD 之上）→ P3 选做 MCP 工具两跳预路由（agent-runner.js 下发链，P2 收口后另行裁决）。0 npm 新依赖（不引 SDK 走裸 HTTP）；pin jev-1.13.0；key 不入仓（用户裁决 key 暂保留后续轮换）。红线=BLOCK-109 文件面零触碰（chat.js/loop-orchestrator/conversationRunStore），排队期内尤其。PoC 失败语义=诚实收缩关闭（负结果入候选池）。技术底稿=docs/planning/typesafe-jev-system-one-research.md。启动前置=BLOCK-109 收口+LAUNCH-CHECKLIST 复核+用户确认开跑。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "2026-09-22 启动登记 active/P0-LAUNCH（用户裁决「启动 BLOCK-110」AskUserQuestion 留痕；LAUNCH-CHECKLIST 四项复核：BLOCK-109 已收口 ✅ / AUDIT-LOG 无🔴 ✅ / git 无未知 WIP ✅ / 用户确认开跑 ✅）。2026-09-21 立项登记 planned 排队（用户裁决「现在集中到jev和项目的融合中来 是否要做个或多个block来优化项目」；结构裁决「一个 BLOCK 分阶段」+ P3 工具预路由「列入包内选做阶段」）。四阶段：P0 接入地基（decision-api.js 裸 HTTP wrapper + 降级契约 + 中文语料 confidence-accuracy 校准 harness）→ P1 话题漂移 noul 直替 PoC（conversations.js _maybeDetectTopicShift，契约不变 A/B 对账）→ P2 知识库检索二跳过滤/重排+注入检测（knowledge-space.js VECTOR_THRESHOLD 之上）→ P3 选做 MCP 工具两跳预路由（agent-runner.js 下发链，P2 收口后另行裁决）。0 npm 新依赖（不引 SDK 走裸 HTTP）；pin jev-1.13.0；key 不入仓（用户裁决 key 暂保留后续轮换）。红线=BLOCK-109 文件面零触碰（chat.js/loop-orchestrator/conversationRunStore），排队期内尤其。PoC 失败语义=诚实收缩关闭（负结果入候选池）。技术底稿=docs/planning/typesafe-jev-system-one-research.md。启动前置=BLOCK-109 收口+LAUNCH-CHECKLIST 复核+用户确认开跑。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "DECISION-PRIMITIVE-INTERNALIZATION-ARC",

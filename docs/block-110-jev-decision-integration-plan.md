@@ -1,9 +1,9 @@
 # BLOCK-110-JEV-DECISION-INTEGRATION 计划：Jev/System One 决策模型融合
 
 **Plan ID**：`BLOCK-110-JEV-DECISION-INTEGRATION`
-**状态**：`planned（排队——active 槽位被 BLOCK-109-CORE-ARCH-CONVERGENCE 占用（P1 执行中），本包等其收口后启动；启动需按 WORK-PACKAGE-LAUNCH-CHECKLIST 复核硬门 + 用户确认开跑）`
+**状态**：`active（P0-LAUNCH——2026-09-22 启动，用户裁决「启动 BLOCK-110」；LAUNCH-CHECKLIST 复核全过：BLOCK-109 已收口 / AUDIT-LOG 无🔴 / git 无未知 WIP / 用户确认开跑。当前阶段=P0 接入地基+中文校准）`
 **立项日期**：2026-09-21
-**最后更新**：2026-09-21（立项登记 planned；技术底稿= `docs/planning/typesafe-jev-system-one-research.md`；**本包=决策判断模式内化弧的 W0**，后续弧线见 `docs/planning/decision-primitive-internalization-arc.md`——W1+ 启动均需用户裁决，本包收口不等于弧线授权）
+**最后更新**：2026-09-22（启动登记 active/P0-LAUNCH，启动动作三件套完成：DOC-REGISTRY planned→active + AUDIT-LOG 启动行 + roadmap 状态行；26 个已收口提交推送 origin）。2026-09-21（立项登记 planned；技术底稿= `docs/planning/typesafe-jev-system-one-research.md`；**本包=决策判断模式内化弧的 W0**，后续弧线见 `docs/planning/decision-primitive-internalization-arc.md`——W1+ 启动均需用户裁决，本包收口不等于弧线授权）
 
 ## 0. 立项来源与用户裁决留痕
 
