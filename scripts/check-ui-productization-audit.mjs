@@ -99,6 +99,12 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   '1727535040e040825c2b3fc90311ef853b327db6',
   '51843c3a76d4979e4d1fa26a175379863520c3e1',
   '21d84f528a35526e59f2964833a65965546772e1',
+  // 2026-09-21 BLOCK-109-CORE-ARCH P1.2 恢复单一后端源（3f25ffc3）：前端 localStorage
+  // 在途双轨退役（findResumable* 扫描器/提交键写入/[DONE] 清理），恢复改问后端
+  // /ai/agent/tasks/inflight——数据源替换零 UI 行为变化（渲染输出恒等）；验证=tsc 0 红 +
+  // 受影响三测试档 62/62 + test:changed 338 绿 0 红；台账=恢复行为契约 test/block109-p1-events
+  // （无新 UI 功能故无新台账条目）。豁免 subject UI-### 与同提交台账要求；不重写共享历史。
+  '3f25ffc3b3f88b7ffc0291891a522761712ef42b',
   // 2026-09-19 BLOCK-102 P3/P4 修复提交（06828fd 安全加固+观测性能）：subject
   // 未带 UI-### 为笔误，UI-425 条目由后续提交统一补登（LEGACY_AUDIT_SYNC_
   // EXEMPTIONS 同哈希）。不重写共享历史。
