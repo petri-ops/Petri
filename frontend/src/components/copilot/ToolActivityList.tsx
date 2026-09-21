@@ -456,6 +456,20 @@ const QODER_STATUS_WORD: Record<ToolActivityItem['status'], string> = {
   denied: '已拒绝',
 };
 
+/** UI-431 P2 — 派发行运行计时：running 时每秒步进（impure Date.now 收进 effect）。 */
+function useSubAgentElapsed(startedAt: number | undefined, active: boolean): number | null {
+  const [elapsedMs, setElapsedMs] = useState<number | null>(null);
+  useEffect(() => {
+    if (!active || !startedAt) return undefined;
+    const timer = setInterval(() => setElapsedMs(Date.now() - startedAt), 1000);
+    return () => {
+      clearInterval(timer);
+      setElapsedMs(null);
+    };
+  }, [startedAt, active]);
+  return elapsedMs;
+}
+
 /**
  * BLOCK-108 P3 — Qoder 统一单行行式（时间线模式专属）。
  *
@@ -479,6 +493,8 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
       : () => () => {},
     () => (activity.agentRunId ? getSubAgentTaskSnapshot(activity.agentRunId) : null)
   );
+  // UI-431 P2 — 派发行运行计时（running 时每秒步进）
+  const spawnElapsedMs = useSubAgentElapsed(subSnap?.startedAt, subSnap?.status === 'running');
   const kindIcon = isExec ? 'terminal' : isAgent ? 'bot' : QODER_WRITE_TOOLS.has(activity.name) ? 'wrench' : 'file';
   const label = isExec ? `终端命令 ${QODER_STATUS_WORD[activity.status]}` : activity.actionLabel;
   return (
@@ -511,6 +527,12 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
           <span className="sc-tool-agent-status" data-status={subSnap.status} title="子智能体实时状态">
             <Icon name="bot" size={10} />
             {SUB_STATUS_LABEL[subSnap.status] || subSnap.status}
+            {/* UI-431 P2 — 派发行运行计时：收缩态也有信息量 */}
+            {subSnap.status === 'running' && spawnElapsedMs !== null
+              ? ` · ${formatToolDuration(spawnElapsedMs) ?? ''}`
+              : typeof subSnap.processingDurationMs === 'number' && subSnap.processingDurationMs > 0
+                ? ` · ${formatToolDuration(subSnap.processingDurationMs) ?? ''}`
+                : ''}
           </span>
         )}
         {duration && (activity.durationMs ?? 0) > 0 && <span className="sc-tool-activity-duration">{duration}</span>}
@@ -586,6 +608,12 @@ export function ToolActivityList({
   const expanded = manualExpanded !== null
     ? manualExpanded
     : collapseWhenSettled ? anyRunning : hasExec;
+  // UI-431 P1 — running tail: running clusters are collapsed by default, only rendering the last round's rows (auto-collapse once a new round starts);
+  // manual expansion takes priority and shows everything; long tasks no longer let the row count grow linearly with rounds.
+  const runningTail = collapseWhenSettled && anyRunning && manualExpanded === null;
+  // 尾轮态在视觉上是「收缩」的（只显当轮），headOpen 表达用户可感知的展开态；
+  // 簇头点击以它为翻转基准，首次点击=展开全部。
+  const headOpen = collapseWhenSettled ? (expanded && !runningTail) : expanded;
   const runningElapsedMs = useRunningElapsed(showRunningStopwatch && anyRunning);
   const running = activities.filter((activity) => activity.status === 'running').length;
   const awaiting = activities.filter((activity) => activity.status === 'awaiting_confirmation').length;
@@ -636,18 +664,20 @@ export function ToolActivityList({
       <button
         type="button"
         className="sc-tool-activity-summary"
-        data-expanded={expanded || undefined}
-        aria-expanded={expanded}
-        aria-label={expanded ? '收起执行记录' : '展开执行记录'}
-        title={expanded ? '收起执行记录' : '展开执行记录'}
+        data-expanded={headOpen || undefined}
+        aria-expanded={headOpen}
+        aria-label={headOpen ? '收起执行记录' : '展开执行记录'}
+        title={headOpen ? '收起执行记录' : '展开执行记录'}
         onClick={() => {
-          setManualExpanded(!expanded);
+          // UI-431 P1 — 尾轮态（运行中收缩仅显当轮）的首次点击目标是「展开全部」，
+          // 而非把尾轮也收起：以 headOpen（非尾轮的完整展开态）为翻转基准。
+          setManualExpanded(!headOpen);
         }}
       >
         <span className="sc-tool-activity-summary-label">{collapseWhenSettled ? qoderSummary : summary}</span>
         <Icon name="chevron-right" size={14} />
       </button>
-      {expanded && (collapseWhenSettled ? (() => {
+      {(expanded || runningTail) && (collapseWhenSettled ? (() => {
         // BLOCK-108 P3 — Qoder 簇内形态：全部活动统一单行（含 exec），无 routine
         // 二级折叠。UI-430 — 合并簇内按迭代交错：每轮「已思考行（若有）→ 该轮
         // 工具行」（参考 ZCode 形态：命令行与思考行逐轮交替）；迭代与思考对不上
@@ -677,7 +707,8 @@ export function ToolActivityList({
         return (
           <div className="sc-tool-activity-inline" data-testid="qoder-cluster-body">
             {reasoningRows}
-            {groupOrder.map((iterationKey) => {
+            {/* UI-431 P1 — running tail: only render the last round, previous rounds auto-collapse as new rounds start */}
+            {(runningTail ? groupOrder.slice(-1) : groupOrder).map((iterationKey) => {
               const reasoningText = reasoningMap[iterationKey];
               return (
                 <div key={`qoder-iter-${iterationKey}`}>

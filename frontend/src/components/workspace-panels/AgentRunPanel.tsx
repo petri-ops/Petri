@@ -19,21 +19,26 @@ import {
   followupAgentTask,
   type ToolCallEvent,
   type ToolResultEvent,
+  type ToolOutputEvent,
 } from '@/components/copilot/copilotClient';
+// UI-431 P3 — 子智能体面板呈现同构：弃自绘简化时间线，折事件（与主窗
+// conversationRunStore 同源的 merge 折叠器）→ 段模型 → ConversationTimeline，
+// 主/子两级同一套 Qoder 语言（过渡叙述 + 合并簇 + 统一单行 + 点击展开）。
+import { ConversationTimeline } from '@/components/copilot/ConversationTimeline';
+import { buildConversationSegments } from '@/components/copilot/conversationSegments';
+import {
+  mergeToolCallActivity,
+  mergeToolOutputActivity,
+  mergeToolResultActivity,
+  type ToolActivityItem,
+} from '@/components/copilot/toolActivity';
 import { resolveAgentCategory } from '@/lib/agentCategories';
 import { Icon } from '@/components/icons/Icon';
 import styles from '@/pages/window/command-center.module.css';
 import shellStyles from '@/components/window/window-shell.module.css';
 
-interface TimelineEntry {
-  key: string;
-  name: string;
-  status: 'running' | 'success' | 'error' | 'denied';
-  durationMs?: number;
-}
-
-const MAX_TIMELINE = 200;
 const MAX_SUMMARY_CHARS = 8000;
+const MAX_REASONING_CHARS = 6144;
 
 type RunState = 'running' | 'done' | 'failed' | 'cancelled';
 
@@ -65,7 +70,11 @@ export function AgentRunPanel({
   // BLOCK-93 P2 — 显式 spawn role（meta 拉取；未指定=空 → 文本推断兜底）
   const [taskRole, setTaskRole] = useState('');
   const [statusLine, setStatusLine] = useState('事件流连接中…');
-  const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
+  // UI-431 P3 — 同构呈现数据面：活动折叠 + 逐轮思考 + 阶段进度（与主窗同源折叠器）
+  const [activities, setActivities] = useState<ToolActivityItem[]>([]);
+  const [reasoningByIteration, setReasoningByIteration] = useState<Record<number, string>>({});
+  const [progressUpdates, setProgressUpdates] = useState<Array<{ iteration: number; content: string }>>([]);
+  const iterRef = useRef(1);
   const [summary, setSummary] = useState('');
   const [errorText, setErrorText] = useState('');
   const [streamError, setStreamError] = useState('');
@@ -122,21 +131,25 @@ export function AgentRunPanel({
       }, 200);
     };
 
-    const upsertTimeline = (entry: TimelineEntry) => {
-      setTimeline((prev) => {
-        const index = prev.findIndex((item) => item.key === entry.key);
-        if (index >= 0) {
-          const next = prev.slice();
-          next[index] = { ...next[index], ...entry };
-          return next;
-        }
-        const next = [...prev, entry];
-        return next.length > MAX_TIMELINE ? next.slice(next.length - MAX_TIMELINE) : next;
-      });
-    };
-
     subscribeAgentTask(runId, {
       messages: [],
+      onIter: (iteration: number) => {
+        if (cancelled) return;
+        iterRef.current = Math.max(1, iteration);
+      },
+      onReasoning: (delta: string) => {
+        if (cancelled || !delta) return;
+        const key = iterRef.current;
+        setReasoningByIteration((prev) => {
+          const merged = (prev[key] || '') + delta;
+          return {
+            ...prev,
+            [key]: merged.length > MAX_REASONING_CHARS
+              ? merged.slice(0, MAX_REASONING_CHARS) + '\n…（思考段已截断）'
+              : merged,
+          };
+        });
+      },
       onDelta: (delta: string) => {
         if (cancelled || !delta) return;
         summaryRef.current += delta;
@@ -148,25 +161,24 @@ export function AgentRunPanel({
       },
       onAgentProgress: (info: { iteration: number; content: string }) => {
         if (cancelled) return;
+        setProgressUpdates((prev) => (
+          prev.some((u) => u.iteration === info.iteration && u.content === info.content)
+            ? prev
+            : [...prev, { iteration: info.iteration, content: info.content }].slice(-50)
+        ));
         setStatusLine(info.content.slice(0, 160));
       },
       onToolCall: (event: ToolCallEvent) => {
         if (cancelled) return;
-        upsertTimeline({
-          key: event.callId || `${event.name}:${event.traceId || 'legacy'}`,
-          name: event.name,
-          status: 'running',
-        });
+        setActivities((prev) => mergeToolCallActivity(prev, event));
+      },
+      onToolOutput: (event: ToolOutputEvent) => {
+        if (cancelled) return;
+        setActivities((prev) => mergeToolOutputActivity(prev, event));
       },
       onToolResult: (event: ToolResultEvent) => {
         if (cancelled) return;
-        const result = event.toolResult;
-        upsertTimeline({
-          key: result?.callId || event.name,
-          name: result?.tool || event.name,
-          status: result?.status === 'error' || result?.status === 'denied' ? result.status : 'success',
-          durationMs: result?.durationMs,
-        });
+        setActivities((prev) => mergeToolResultActivity(prev, event));
       },
       onDone: () => {
         if (cancelled) return;
@@ -244,13 +256,21 @@ export function AgentRunPanel({
     }
   }, [runId, followupDraft, followupSending, onSpawnedAgent]);
 
-  const timelineView = useMemo(() => timeline.slice(-MAX_TIMELINE), [timeline]);
+  // UI-431 P3 — 同构段模型：事件折叠出的活动/思考/进度 → 主窗同一套时间线投影
+  const segments = useMemo(
+    () => buildConversationSegments({
+      toolActivities: activities,
+      reasoningByIteration,
+      progressUpdates,
+    }),
+    [activities, reasoningByIteration, progressUpdates]
+  );
 
   // UI-404 — 折叠派生：override ?? (运行中展开 / 终态收起)
   const running = runState === 'running';
   const actionsOpen = actionsOpenOverride ?? running;
   const timelineOpen = timelineOpenOverride ?? running;
-  const failedCalls = timeline.filter((t) => t.status === 'error' || t.status === 'denied').length;
+  const failedCalls = activities.filter((t) => t.status === 'error' || t.status === 'denied').length;
 
   return (
     <div className={styles.agentBody}>
@@ -363,32 +383,20 @@ export function AgentRunPanel({
         >
           <Icon name={timelineOpen ? 'chevron-down' : 'chevron-right'} size={12} />
           <h3 className={styles.agentSectionTitle} data-testid="agent-timeline-title">
-            实时工作流（工具调用时间线）· {timeline.length} 次调用
+            实时工作流（工具调用时间线）· {activities.length} 次调用
             {failedCalls > 0 ? ` · ${failedCalls} 异常` : ''}
           </h3>
         </button>
         {timelineOpen && (
-          timelineView.length === 0 ? (
+          segments.length === 0 ? (
             <div className={styles.empty}>暂无工具调用记录。</div>
           ) : (
-            <ul className={styles.timeline}>
-              {timelineView.map((item) => (
-                <li key={item.key} className={styles.timelineRow} data-status={item.status}>
-                  <span className={styles.timelineDot} data-status={item.status} />
-                  <code className={styles.timelineName}>{item.name}</code>
-                  <span className={styles.timelineStatus}>
-                    {item.status === 'running'
-                      ? '运行中'
-                      : item.status === 'error'
-                        ? '失败'
-                        : item.status === 'denied'
-                          ? '已拒绝'
-                          : '完成'}
-                    {typeof item.durationMs === 'number' ? ` · ${(item.durationMs / 1000).toFixed(1)}s` : ''}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <ConversationTimeline
+              segments={segments}
+              renderProgress={(segment) => (
+                <div className="sc-timeline-transition-text">{segment.content}</div>
+              )}
+            />
           )
         )}
       </section>

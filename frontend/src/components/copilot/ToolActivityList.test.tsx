@@ -285,6 +285,42 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(screen.getByText(/第二行细节/)).toBeTruthy();
   });
 
+  it('UI-431 P1 尾轮展开：运行簇默认收缩、只渲染当轮（最后一轮）行，手动展开见全部', () => {
+    const mk = (key: string, iteration: number, detail: string): ToolActivityItem => ({
+      key, name: 'workspace_exec', status: 'running', actionLabel: '已运行', actionDetail: detail, iteration,
+    });
+    render(
+      <ToolActivityList
+        activities={[mk('a1', 1, 'cmd-1'), mk('a2', 2, 'cmd-2')]}
+        reasoningByIteration={{ 1: '第一轮思路', 2: '第二轮思路' }}
+        collapseWhenSettled
+      />
+    );
+    // 运行中默认收缩为尾轮：只渲染第 2 轮（其思考行 + 工具行），第 1 轮已收起
+    expect(screen.getByTestId('qoder-cluster-body')).toBeTruthy();
+    expect(screen.getByText('第二轮思路')).toBeTruthy();
+    expect(screen.getByText('cmd-2')).toBeTruthy();
+    expect(screen.queryByText('cmd-1')).toBeNull();
+    expect(screen.queryByText('第一轮思路')).toBeNull();
+    // 手动展开整簇：全部轮次可见
+    fireEvent.click(screen.getByText(/正在执行工具 2\/2 项/));
+    expect(screen.getByText('cmd-1')).toBeTruthy();
+    expect(screen.getByText('第一轮思路')).toBeTruthy();
+  });
+
+  it('UI-431 P2 派发行：子智能体行参与当轮渲染，无快照时无计时', () => {
+    render(
+      <ToolActivityList
+        activities={[{ key: 'spawn-1', name: 'spawn_agent', status: 'running', actionLabel: '已派发', agentRunId: 'child-1' }]}
+        collapseWhenSettled
+      />
+    );
+    fireEvent.click(screen.getByText(/正在执行工具 1\/1 项/));
+    expect(screen.getByText('已派发')).toBeTruthy();
+    // 无快照推送时不显示计时后缀
+    expect(screen.getByText('已派发').textContent).toBe('已派发');
+  });
+
   it('UI-430 合并簇内按迭代交错：每轮「已思考行 → 该轮工具行」（ZCode 参考形态）', () => {
     const mk = (key: string, iteration: number, name: string, label: string, detail: string): ToolActivityItem => ({
       key, name, status: 'success', actionLabel: label, actionDetail: detail, iteration,

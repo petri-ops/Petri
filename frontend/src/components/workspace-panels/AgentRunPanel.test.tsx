@@ -96,4 +96,28 @@ describe('UI-404 AgentRunPanel 分区折叠', () => {
       expect(screen.getByTestId('agent-timeline-title').textContent).toContain('2 次调用 · 1 异常');
     });
   });
+
+  it('UI-431 P3 同构呈现：事件折叠为段模型，面板渲染与主窗同套 Qoder 时间线', async () => {
+    metaMock.mockResolvedValue(metaPayload());
+    subscribeMock.mockImplementation((_taskId: string, handlers: Record<string, (e: unknown) => void>) => {
+      handlers.onIter?.(1);
+      handlers.onAgentProgress?.({ iteration: 1, content: '先列出目录结构' });
+      handlers.onReasoning?.('先看一眼目录');
+      handlers.onToolCall?.({ name: 'workspace_list', callId: 'c1', iteration: 1 });
+      handlers.onToolResult?.({ name: 'workspace_list', callId: 'c1', toolResult: { callId: 'c1', tool: 'workspace_list', status: 'success', durationMs: 12 } });
+      return Promise.resolve(() => {});
+    });
+    render(<AgentRunPanel runId="task-1" />);
+    await waitFor(() => {
+      expect(screen.getByTestId('agent-timeline-title').textContent).toContain('1 次调用');
+    });
+    fireEvent.click(screen.getByRole('button', { name: /实时工作流/ }));
+    // Qoder 形态三件套：合并簇头（计数式）+ 过渡叙述（状态行同文案，故用 getAll）+ 簇体
+    expect(screen.getByText(/执行工具 1 次/)).toBeTruthy();
+    expect(screen.getAllByText(/先列出目录结构/).length).toBeGreaterThanOrEqual(1);
+    fireEvent.click(screen.getByText(/执行工具 1 次/));
+    expect(screen.getByTestId('qoder-cluster-body')).toBeTruthy();
+    expect(screen.getByText('已思考')).toBeTruthy();
+    expect(screen.getByText(/先看一眼目录/)).toBeTruthy();
+  });
 });
