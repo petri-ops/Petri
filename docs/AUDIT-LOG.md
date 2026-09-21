@@ -5,7 +5,9 @@
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 > 入口直链（registry `entrypoint` 指向本台的 canonical 文档，归档轮转不得切断发现路径）：[block-14-left-panel-qa-fix-closeout](./block-14-left-panel-qa-fix-closeout.md) · [block-15-architecture-perf-plan](./block-15-architecture-perf-plan.md) · [block-22-codemirror-inline-diff-plan](./block-22-codemirror-inline-diff-plan.md)
 
-最后更新：2026-09-21 上午（**UI-431 运行中呈现策略 v2 + 子智能体面板同构 in_progress（用户晨间连续裁决）**——①长任务运行中簇改「尾轮展开」（簇收缩、只展示当轮行，新一轮自动收上一轮，手动优先）；②spawn 派发行不再撑开所在簇；③AgentRunPanel 子智能体面板呈现同构（弃自绘简化时间线，折事件→段模型→ConversationTimeline，与主窗同一套 Qoder 语言）。契约开发中，实机待补。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-21 上午二（**Gewu-StackWatchdog 退役（用户裁决「3 这应该是主动性的过程 软件启动就活着 不主动启动就没必要活着」）**——计划任务已 /DISABLE（未删除，恢复=/ENABLE）；当前轮次已停；vbs 头注留痕。理由=看门狗 4s 超时单次判定会撞上后端启动冻结窗口误判 DOWN，强制全栈重启误杀测试实例（今日 12:52/13:26 两次实锤）。dev 栈回归主动性：要活就手动 restart-dev-stack.sh / npm run dev。Gewu-AutoSync 保留不受影响。）
+
+此前 最后更新：2026-09-21 上午（**UI-431 运行中呈现策略 v2 + 子智能体面板同构 in_progress（用户晨间连续裁决）**——①长任务运行中簇改「尾轮展开」（簇收缩、只展示当轮行，新一轮自动收上一轮，手动优先）；②spawn 派发行不再撑开所在簇；③AgentRunPanel 子智能体面板呈现同构（弃自绘简化时间线，折事件→段模型→ConversationTimeline，与主窗同一套 Qoder 语言）。契约开发中，实机待补。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-21（**UI-430 合并簇呈现密度修正 verified（用户晨间裁决「工具封装稳定就保留，聊天页展示更纤细的信息」）**——相邻无过渡叙述的工具轮合并为单簇（ZCode 形态「执行工具 N 次」）+ 单工具簇头携带工具摘要 + 零耗时隐藏 + 簇内按迭代交错；实机 flow 7/7（机器重启后补跑）。**当前无 active 工作包**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
