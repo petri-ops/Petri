@@ -63,8 +63,18 @@ test('包二 终态对账 — 失败子任务 × 全完成清单 → 提示；�
   assert.ok(notice, '失败子任务+全完成清单 → 判未对账');
   assert.equal(notice.kind, 'failed_children_vs_completed_checklist');
   assert.equal(notice.failedCount, 1);
+  assert.equal(notice.cancelledCount, 0);
   assert.equal(notice.totalCount, 3);
-  assert.match(notice.message, /对账提示：1\/3 个子智能体失败/);
+  assert.match(notice.message, /对账提示：1\/3 个子智能体未正常完成/);
+
+  // v1.5 — cancelled 同为未清
+  const withCancelled = computeReconciliationNotice(
+    todosAllDone,
+    [{ status: 'completed' }, { status: 'cancelled' }]
+  );
+  assert.ok(withCancelled, '被取消子任务也判未对账');
+  assert.equal(withCancelled.cancelledCount, 1);
+  assert.match(withCancelled.message, /取消 1/);
 
   assert.equal(computeReconciliationNotice(todosAllDone, childrenAllDone), null, '全完成无失败 → 一致');
   assert.equal(computeReconciliationNotice(todosPartial, childrenMixed), null, '清单未全完成 → 不判');

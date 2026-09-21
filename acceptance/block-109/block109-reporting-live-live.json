@@ -1,0 +1,33 @@
+{
+  "name": "block109-reporting-live",
+  "startedAt": "2026-09-21T17:05:28.528Z",
+  "finishedAt": "2026-09-21T17:06:12.013Z",
+  "assertions": [
+    {
+      "name": "S1A1_children_completed",
+      "pass": true,
+      "detail": "children=[\"completed\",\"completed\"]"
+    },
+    {
+      "name": "S1A2_child_replies_bullet_style",
+      "pass": true,
+      "detail": "要点式回传（50≤len<2000）：[233,415]"
+    },
+    {
+      "name": "S1A3_parent_unified_summary",
+      "pass": true,
+      "detail": "parentFinalLen=453"
+    },
+    {
+      "name": "S2_reconciliation_notice_on_mismatch",
+      "pass": true,
+      "detail": "preconditionMet=true todosAllCompleted=true children=[\"completed\",\"cancelled\",\"completed\"] notice=true"
+    },
+    {
+      "name": "S3_temp_data_cleaned_up",
+      "pass": true,
+      "detail": "cleanups=true convRows=1"
+    }
+  ],
+  "allPass": true
+}

@@ -22,10 +22,28 @@ CDP_PORT="${BIOF3_DEV_CDP_PORT:-9222}"
 occ9=$(netstat -ano | grep ":${CDP_PORT}" | grep LISTENING | awk '{print $5}' | head -1)
 if [ -n "${occ9:-}" ]; then echo "kill stale cdp on ${CDP_PORT} (pid $occ9)"; taskkill_ms /PID "$occ9" /F; fi
 sleep 2
-# 6) 清场后置断言：杀没生效则立刻报错，不允许再次"静默不重启"。
+# 6) 清场后置断言：杀没生效则重试等待（Windows 释放 socket 有秒级延迟——
+#    2026-09-21 深夜实测：taskkill 成功后端口仍 LISTENING 数秒，2s 内断言即误报
+#    「幽灵端口」；改为最多 30s 逐秒重试，超时仍占用才 ABORT）。
 for p in 3001 "${CDP_PORT}"; do
-  left=$(netstat -ano | grep ":$p" | grep LISTENING | head -1 || true)
-  if [ -n "$left" ]; then echo "ABORT: port $p still held after kill — 清场失败，拒绝继续（$left）"; exit 3; fi
+  cleared=""
+  for i in $(seq 1 30); do
+    left=$(netstat -ano | grep ":$p" | grep LISTENING | head -1 || true)
+    if [ -z "$left" ]; then cleared=1; break; fi
+    sleep 1
+  done
+  if [ -z "$cleared" ]; then
+    if [ "$p" = "${CDP_PORT}" ]; then
+      # CDP 是辅助调试口（非用户面）：清不掉（会话级继承句柄幽灵）时自动换
+      # 下一个空闲端口继续启动，不 ABORT——3001 才是硬性清场对象。
+      CDP_PORT=$((p + 1))
+      echo "WARN: CDP port $p 清不掉（继承句柄幽灵），改用 $CDP_PORT"
+      export BIOF3_DEV_CDP_PORT="$CDP_PORT"
+    else
+      left=$(netstat -ano | grep ":$p" | grep LISTENING | head -1 || true)
+      echo "ABORT: port $p still held after kill — 清场失败，拒绝继续（$left）"; exit 3
+    fi
+  fi
 done
 
 export PATH="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installation:$PATH"

@@ -10,7 +10,7 @@
 /**
  * @param {Array<{status: string}>} todoItems 最后一次 todo_write 的清单项
  * @param {Array<{status: string}>} children 该主任务的全部子任务（listChildAgentTasks）
- * @returns {null | { kind: string, failedCount: number, totalCount: number, message: string }}
+ * @returns {null | { kind: string, failedCount: number, cancelledCount: number, totalCount: number, message: string }}
  *          null = 一致（无需提示）
  */
 function computeReconciliationNotice(todoItems, children) {
@@ -18,13 +18,17 @@ function computeReconciliationNotice(todoItems, children) {
   if (!Array.isArray(children) || children.length === 0) return null;
   const allCompleted = todoItems.every((t) => t && t.status === 'completed');
   if (!allCompleted) return null;
+  // v1.5：cancelled 与 failed 同为「未清」——被取消的子任务一样构成清单失真
   const failed = children.filter((c) => c && c.status === 'failed');
-  if (failed.length === 0) return null;
+  const cancelled = children.filter((c) => c && c.status === 'cancelled');
+  const notClean = failed.length + cancelled.length;
+  if (notClean === 0) return null;
   return {
     kind: 'failed_children_vs_completed_checklist',
     failedCount: failed.length,
+    cancelledCount: cancelled.length,
     totalCount: children.length,
-    message: `对账提示：${failed.length}/${children.length} 个子智能体失败，但任务清单已全部标记完成——结果可能不完整，请核对。`,
+    message: `对账提示：${notClean}/${children.length} 个子智能体未正常完成（失败 ${failed.length}、取消 ${cancelled.length}），但任务清单已全部标记完成——结果可能不完整，请核对。`,
   };
 }
 
