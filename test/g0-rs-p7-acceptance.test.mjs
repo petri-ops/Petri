@@ -48,20 +48,19 @@ test('P7 UI trace accepts truthful enrichment submission or completion wording',
   assert.match(source, /expectedCompletion:[\s\S]*enrichmentTerminal/);
 });
 
-test('P7 bound drawer completion guard covers both legacy HTTP and durable task Agent paths', () => {
-  // BLOCK-104 增量 — routes/ai-agent.js 已是薄 facade（BLOCK-92 拆分），
-  // completion guard 真实归属地 = routes/ai-agent/chat.js。
-  // BLOCK-104 增量 — 逐文件断言：HTTP/前端主路径（chat.js）承担完整 completion
-  // guard 契约；agent-runner.js（durable task 路径）现状仅保留 guard 引入，
-  // expectation 传递已不在（真实漂移，归 RS 域跟进——见 AUDIT-LOG 🟡 K 簇）。
-  const chatSource = readFileSync(new URL('../core/biof3-server/routes/ai-agent/chat.js', import.meta.url), 'utf8');
-  assert.match(chatSource, /createResultEditCompletionGuard/);
-  assert.match(chatSource, /expectation:\s*toolCtx\.resultStudioCompletionExpectation/);
-  assert.match(chatSource, /resultEditCompletionGuard\.recordToolResult\(name, result\)/);
-  assert.match(chatSource, /result_edit_completion_retry/);
-  assert.match(chatSource, /resultEditCompletionGuard\.required/);
-  assert.match(chatSource, /resultEditCompletionGuard\.requiresToolExecution\(\)/);
-  assert.match(chatSource, /resultEditCompletionGuard\.requiredToolChoice\(\)/);
+test('P7 bound drawer completion guard covers the durable task Agent path (single truth)', () => {
+  // BLOCK-109-CORE-ARCH P1 — legacy 直连 SSE（chat.js 内的 HTTP guard 接线）已物理
+  // 退役，completion guard 的真实且唯一归属地 = loop-orchestrator.js（durable task
+  // 路径）。原 K 簇 🟡「expectation 传递已不在」的漂移随双轨退役收敛完成：
+  // loop-orchestrator 现承载完整 guard 契约（expectation 传递在位，534-535 行）。
+  const orchestratorSource = readFileSync(new URL('../core/biof3-server/loop-orchestrator.js', import.meta.url), 'utf8');
+  assert.match(orchestratorSource, /createResultEditCompletionGuard/);
+  assert.match(orchestratorSource, /expectation:\s*toolCtx\.resultStudioCompletionExpectation/);
+  assert.match(orchestratorSource, /resultEditCompletionGuard\.recordToolResult\(name, result\)/);
+  assert.match(orchestratorSource, /result_edit_completion_retry/);
+  assert.match(orchestratorSource, /resultEditCompletionGuard\.required/);
+  assert.match(orchestratorSource, /resultEditCompletionGuard\.requiresToolExecution\(\)/);
+  assert.match(orchestratorSource, /resultEditCompletionGuard\.requiredToolChoice\(\)/);
   const runnerSource = readFileSync(new URL('../core/biof3-server/agent-runner.js', import.meta.url), 'utf8');
   assert.match(runnerSource, /createResultEditCompletionGuard/);
 });

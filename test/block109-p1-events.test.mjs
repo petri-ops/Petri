@@ -158,6 +158,32 @@ test('P1.2 — listInFlightPrimaryTasks：只列 running 主任务、子任务�
   assert.ok(primaryOther.taskId, '他用户任务不越权（见上 u-other 过滤）');
 });
 
+test('P1.4 — legacy SSE 双轨退役 + 组装单链断言（源码契约，plan §4）', () => {
+  const chatSrc = fs.readFileSync(path.join(root, 'core', 'biof3-server', 'routes', 'ai-agent', 'chat.js'), 'utf8');
+  // legacy 直连 SSE handler 物理删除
+  assert.ok(!chatSrc.includes('text/event-stream'), 'chat.js 不再产生 SSE 流（legacy handler 已删）');
+  assert.ok(chatSrc.includes('legacy_sse_retired'), 'legacy 请求返回 410 诚实拒绝');
+  // 组装单链：chat.js 不再直 require 拼装件（与 agent-runner 双轨的 legacy require 清零）
+  for (const banned of [
+    'helpers/system-prompt',
+    'helpers/knowledge-space',
+    'helpers/llm-client',
+    'helpers/site-snapshot',
+    'helpers/user-facts',
+    'helpers/desktop-agent-prompt',
+    'agent-tools/knowledge-console-tools',
+  ]) {
+    const requirePattern = new RegExp(`require\\([^)]*${banned.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`);
+    assert.ok(!requirePattern.test(chatSrc), `chat.js 不再直 require ${banned}（组装单链=history-assembly）`);
+  }
+  assert.ok(chatSrc.includes('helpers/history-assembly'), 'chat.js 组装走 history-assembly 单链');
+  // 前端 legacy 逃生口退役
+  const streamSrc = fs.readFileSync(path.join(root, 'frontend', 'src', 'components', 'copilot', 'copilotClient', 'agentTaskStream.ts'), 'utf8');
+  assert.ok(!streamSrc.includes('streamChatLegacy'), '前端 streamChatLegacy 已删除');
+  const clientSrc = fs.readFileSync(path.join(root, 'frontend', 'src', 'components', 'copilot', 'copilotClient.ts'), 'utf8');
+  assert.ok(!clientSrc.includes('import.meta.env.VITE_AGENT_TASK_MODE'), 'VITE_AGENT_TASK_MODE 读取已退役（注释留痕除外）');
+});
+
 test('P1 E1 — agent-runner 生命周期事件与终态合并接线（源码契约）', () => {
   const src = fs.readFileSync(path.join(root, 'core', 'biof3-server', 'agent-runner.js'), 'utf8');
   assert.ok(src.includes("event: 'run_started'"), 'run_started 生命周期事件在位（E1）');

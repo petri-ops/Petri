@@ -9,7 +9,7 @@
 
 import { getApiPrefix, getAuthHeader } from './copilotClient/apiBase';
 import { ensureOnlineOrThrow } from './copilotClient/offline';
-import { streamChatLegacy, subscribeAgentTask } from './copilotClient/agentTaskStream';
+import { subscribeAgentTask } from './copilotClient/agentTaskStream';
 import type { StreamChatOptions } from './copilotClient/types';
 
 // ---- re-export surface（原 ./copilotClient 全量公开 API）----
@@ -59,15 +59,12 @@ export { AgentStreamDisconnectedError, subscribeAgentTask } from './copilotClien
  * falls back gracefully — server emits OpenAI-style choices.delta.content
  * plus extra `event` markers for tool_call / tool_result / iter.
  *
- * AGENT_TASK_MODE_v1：默认 task 模式（POST 提交拿 taskId → GET 订阅事件流，支持断线重连）。
- * env VITE_AGENT_TASK_MODE=legacy 或 ?legacy 回退到直连 SSE。
+ * AGENT_TASK_MODE_v1 → BLOCK-109-CORE-ARCH P1（D4）：task 模式是唯一路径
+ * （POST 提交拿 taskId → GET 订阅事件流，支持断线重连）；legacy 直连 SSE
+ * （VITE_AGENT_TASK_MODE=legacy / ?legacy=1）已随后端双轨退役。
  */
 export async function streamChat(opts: StreamChatOptions): Promise<void> {
-  const useTaskMode = (import.meta.env.VITE_AGENT_TASK_MODE || 'task') !== 'legacy';
-  if (useTaskMode) {
-    return streamChatViaTask(opts);
-  }
-  return streamChatLegacy(opts);
+  return streamChatViaTask(opts);
 }
 
 /**
@@ -87,19 +84,15 @@ export async function fetchInFlightPrimaryTasks(conversationId: string): Promise
   return tasks.map((t: { taskId?: string }) => String(t.taskId || '')).filter(Boolean);
 }
 
-/** task 模式：提交拿 taskId → 订阅事件流 */
+/** task 模式：提交拿 taskId → 订阅事件流（P1.4 起唯一路径） */
 async function streamChatViaTask(opts: StreamChatOptions): Promise<void> {
   let taskId: string;
   try {
     taskId = await submitAgentTask(opts);
   } catch (err: unknown) {
     if ((err as Error)?.name === 'AbortError') return;
-    // task 模式提交失败回退到 legacy（兼容期保护，仅限提交阶段）
-    try {
-      return await streamChatLegacy(opts);
-    } catch {
-      opts.onError?.(err instanceof Error ? err : new Error(String(err)));
-    }
+    // P1.4：legacy 提交失败回退已退役（后端 410）——提交失败如实上报
+    opts.onError?.(err instanceof Error ? err : new Error(String(err)));
     return;
   }
   opts.onTaskStarted?.(taskId);

@@ -231,9 +231,11 @@ test('P4R-3 uses one executable finalizer for returned provider errors and norma
   assert.match(cancelled.assistantMessage, /结果修改已停止/);
 });
 
-test('P4R-3 wires the same context/progress helpers into task and legacy production paths', () => {
+test('P4R-3 wires the context/progress helpers into the durable task production path', () => {
   // 任务路径（BLOCK-49 对齐 thin-facade 现状）：agent-runner 投影上下文与失败原因，
-  // loop-orchestrator 承载进度记录/完成守卫/终态收尾
+  // loop-orchestrator 承载进度记录/完成守卫/终态收尾。
+  // BLOCK-109-CORE-ARCH P1 — legacy SSE 路径（chat.js 内的 guard 接线）已物理退役，
+  // 原 chat.js 断言段随之删除；durable 路径即唯一生产路径。
   const runnerText = source('core/biof3-server/agent-runner.js');
   assert.match(runnerText, /\.\.\.projectResultStudioToolContext\(context\)/);
   assert.match(runnerText, /providerFailureReason/);
@@ -250,23 +252,6 @@ test('P4R-3 wires the same context/progress helpers into task and legacy product
     /resultEditCompletionGuard\.requiresToolExecution\(\)/,
   ]) {
     assert.match(orchestratorText, pattern);
-  }
-
-  // legacy SSE 路径：routes/ai-agent.js 已下沉为 thin facade，真实接线在 ai-agent/chat.js
-  const chatText = source('core/biof3-server/routes/ai-agent/chat.js');
-  for (const pattern of [
-    /\.\.\.projectResultStudioToolContext\(context\)/,
-    /createResultEditProgressRecorder\(\)/,
-    /resultEditProgress:\s*resultEditProgress\.snapshot\(\)/,
-    /providerFailureReason/,
-    /finalizeResultEditProgress\(resultEditProgress/,
-    /agent_run_failed/,
-    /createResultEditCompletionGuard/,
-    /resultEditCompletionGuard\.recordToolResult\(name, result\)/,
-    /result_edit_completion_retry/,
-    /resultEditCompletionGuard\.requiresToolExecution\(\)/,
-  ]) {
-    assert.match(chatText, pattern);
   }
   assert.match(source('core/biof3-server/agent-tools/result-context-binding.js'), /已完成的阶段结论已保留/);
 });
