@@ -105,6 +105,13 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // 受影响三测试档 62/62 + test:changed 338 绿 0 红；台账=恢复行为契约 test/block109-p1-events
   // （无新 UI 功能故无新台账条目）。豁免 subject UI-### 与同提交台账要求；不重写共享历史。
   '3f25ffc3b3f88b7ffc0291891a522761712ef42b',
+  // 2026-09-21 BLOCK-109-CORE-ARCH P1.4 legacy SSE 双轨退役（c029b616）：前端
+  // streamChatLegacy/提交失败回退/VITE_AGENT_TASK_MODE 逃生口删除——提交路径收敛为
+  // task 模式唯一，用户可见行为=错误路径从「legacy 兼容回退」变「诚实报错」，零常规
+  // UI 面变化；验证=tsc 0 红 + 契约 31/31 + test:changed 399 绿 0 红；台账=恢复/退役
+  // 行为契约 test/block109-p1-events（无新 UI 功能故无新台账条目）。豁免 subject
+  // UI-### 与同提交台账要求；不重写共享历史。
+  'c029b616947924d469d4078ae605d0920a4ac1d8',
   // 2026-09-19 BLOCK-102 P3/P4 修复提交（06828fd 安全加固+观测性能）：subject
   // 未带 UI-### 为笔误，UI-425 条目由后续提交统一补登（LEGACY_AUDIT_SYNC_
   // EXEMPTIONS 同哈希）。不重写共享历史。
@@ -431,6 +438,11 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 豁免同提交台账要求（subject 门经 LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；
   // 不重写共享历史。
   '3f25ffc3b3f88b7ffc0291891a522761712ef42b',
+  // 2026-09-21 BLOCK-109-CORE-ARCH P1.4 legacy SSE 双轨退役（c029b616）：前端 legacy
+  // 提交路径与逃生口删除，零常规 UI 面变化（错误路径诚实化）；无新 UI 功能故无新台账
+  // 条目；台账=退役行为契约 test/block109-p1-events.test.mjs。豁免同提交台账要求
+  // （subject 门经 LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；不重写共享历史。
+  'c029b616947924d469d4078ae605d0920a4ac1d8',
   // 2026-09-16 UI-382 后续增量提交 716c876：conversationRunStore spawn_agent
   // 结果回写 agentId 到工具行（展开体按其内联实况卡）。UI-382 条目已由先导
   // 提交 124354cb 登记，本次为同一工作流后续增量，收口门禁抓出后补登台账。
