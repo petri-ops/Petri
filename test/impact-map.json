@@ -2145,6 +2145,23 @@
       "classifiesScripts": false
     },
     {
+      "id": "block110-jev-decision-integration",
+      "note": "BLOCK-110-JEV-DECISION-INTEGRATION：Jev/System One 决策模型融合。P0 地基=core/biof3-server/helpers/decision-api.js（裸 HTTP wrapper：超时/429/529 退避重试/响应校验仿 validate_choice/类型化降级，D-B base URL 可配置）+ 中文校准 harness（scripts/block110-calibrate.mjs，语料 acceptance/block-110/corpus-*.json）→ P1 conversations.js _maybeDetectTopicShift noul 直替 → P2 knowledge-space.js 二跳 → P3 选做 agent-runner 预路由。契约=test/block110-decision-api.test.mjs（放行/拒收/重试/降级/D-B/语料完整性 15 项）。证据 acceptance/block-110/（calibration.json 为 P0 收口物）。P1/P2 落地后把对应 core 文件加进 patterns。",
+      "patterns": [
+        "core/biof3-server/helpers/decision-api.js",
+        "scripts/block110-calibrate.mjs",
+        "scripts/block110-merge-corpus.cjs",
+        "acceptance/block-110/**",
+        "test/block110-*.test.mjs"
+      ],
+      "tests": [
+        "test/block110-decision-api.test.mjs"
+      ],
+      "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "governance"
+    },
+    {
       "id": "block109-core-arch-convergence",
       "note": "BLOCK-109-CORE-ARCH-CONVERGENCE 会话核心链路架构收敛：P0 拆前行为基线（BLOCK-92 先例）=block109-p0-baseline.test.mjs（一轮带工具调用会话的 SSE 事件序列/runLoop 返回契约/task_events 回放恒等/流中断形态@runLoop 边界）。P1 事件溯源单一事实源+组装唯一化动主链文件必跑。证据 acceptance/block-109/。 三包增量（2026-09-21 用户裁决「这四个搞起」）：汇报收敛纪律/终态对账/自动计划意图恢复接线与纯函数契约=test/block109-reporting-reconcile.test.mjs。",
       "patterns": [

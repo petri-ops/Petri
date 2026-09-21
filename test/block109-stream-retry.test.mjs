@@ -18,7 +18,6 @@
  */
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import fs from 'node:fs';
 import fssync from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -49,7 +48,6 @@ const require = createRequire(import.meta.url);
 const { DeepSeekProvider } = require(path.join(root, 'core', 'shared-backend', 'llm-providers', 'deepseek.js'));
 const { callProviderWithNetworkRetry } = require(path.join(root, 'core', 'biof3-server', 'loop-orchestrator.js'));
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const sseFrame = (obj) => `data: ${JSON.stringify(obj)}\n\n`;
 
 /**
