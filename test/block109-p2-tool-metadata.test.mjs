@@ -9,7 +9,6 @@
  * ④ 调度行为：并行组真并发（耗时 < 串行和）、串行组保序、结果按原序重组。
  */
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
 import fssync from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -40,7 +39,6 @@ const require = createRequire(import.meta.url);
 
 const toolMetadataMod = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'tool-metadata.js'));
 const { TOOL_METADATA, METADATA_KEYS, RISK_LEVELS, getToolMetadata } = toolMetadataMod;
-const agentTools = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'index.js'));
 const toolDefsMod = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'tool-defs.js'));
 const { runAgentToolCallBatch } = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'agent-loop-control.js'));
 
