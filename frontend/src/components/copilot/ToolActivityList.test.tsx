@@ -280,9 +280,45 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     fireEvent.click(screen.getByText(/执行工具 1 次/));
     expect(screen.getByText('已思考')).toBeTruthy();
     expect(screen.getByText('先确认登记行再改文档')).toBeTruthy();
-    expect(screen.queryByText('第二行细节')).toBeNull();
+    expect(screen.queryByText(/第二行细节/)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: '展开 已思考' }));
     expect(screen.getByText(/第二行细节/)).toBeTruthy();
+  });
+
+  it('UI-430 合并簇内按迭代交错：每轮「已思考行 → 该轮工具行」（ZCode 参考形态）', () => {
+    const mk = (key: string, iteration: number, name: string, label: string, detail: string): ToolActivityItem => ({
+      key, name, status: 'success', actionLabel: label, actionDetail: detail, iteration,
+    });
+    render(
+      <ToolActivityList
+        activities={[
+          mk('r1', 1, 'workspace_exec', '已运行', 'git status --short'),
+          mk('r2', 2, 'workspace_read', '已读取', 'docs/AUDIT-LOG.md'),
+        ]}
+        reasoningByIteration={{ 1: '先看工作区状态', 2: '再看台账 diff' }}
+        collapseWhenSettled
+      />
+    );
+    fireEvent.click(screen.getByText(/执行工具 2 次/));
+    const body = screen.getByTestId('qoder-cluster-body').textContent || '';
+    // 交错顺序：思考(1) → 命令(1) → 思考(2) → 文件(2)
+    expect(body.indexOf('先看工作区状态')).toBeGreaterThanOrEqual(0);
+    expect(body.indexOf('先看工作区状态')).toBeLessThan(body.indexOf('git status --short'));
+    expect(body.indexOf('git status --short')).toBeLessThan(body.indexOf('再看台账 diff'));
+    expect(body.indexOf('再看台账 diff')).toBeLessThan(body.indexOf('docs/AUDIT-LOG.md'));
+  });
+
+  it('UI-430 单工具簇的折叠簇头携带该工具的一行摘要；零耗时不显示', () => {
+    render(
+      <ToolActivityList
+        activities={[execActivity({ durationMs: 0 })]}
+        collapseWhenSettled
+      />
+    );
+    const head = screen.getByText(/执行工具 1 次/).textContent || '';
+    expect(head).toContain('已运行 npm run docs:reconcile');
+    expect(head).not.toContain('耗时');
+    expect(head).not.toContain('0 ms');
   });
 });
 

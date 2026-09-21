@@ -513,7 +513,7 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
             {SUB_STATUS_LABEL[subSnap.status] || subSnap.status}
           </span>
         )}
-        {duration && <span className="sc-tool-activity-duration">{duration}</span>}
+        {duration && (activity.durationMs ?? 0) > 0 && <span className="sc-tool-activity-duration">{duration}</span>}
         <span className="sc-tool-row-chevron" aria-hidden="true">
           <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
         </span>
@@ -613,13 +613,20 @@ export function ToolActivityList({
       ? `等待确认 ${awaiting} 项`
       : `已完成 ${activities.length} 项${attention ? ` · ${attention} 项需注意` : ''}${actionSummary ? ` · ${actionSummary}` : ''}${totalDuration ? ` · 耗时 ${totalDuration}` : ''}`;
   // BLOCK-108 P3 — Qoder 计数式簇头（时间线模式）：以次数为中心，保留需注意
-  // 计数（L5 flow 契约字样）与运行秒表。
+  // 计数（L5 flow 契约字样）与运行秒表。UI-430：单工具簇的簇头直接携带该工具的
+  // 一行摘要（「已读取 src/config.ts」），不点开也知道干了什么；零耗时（<1ms
+  // 或缺失）不显示——「耗时 0 ms」是纯噪音。
+  const firstActivity = activities[0];
+  const singlePreview = activities.length === 1 && firstActivity
+    ? `${firstActivity.actionLabel}${firstActivity.actionDetail ? ` ${firstActivity.actionDetail}` : ''}`.slice(0, 64)
+    : '';
+  const totalDurationShown = (processingDurationMs ?? totalDurationMs) > 0 ? totalDuration : null;
   const qoderSummary = running > 0
-    ? `正在执行工具 ${running}/${activities.length} 项${
+    ? `正在执行工具 ${running}/${activities.length} 项${singlePreview ? ` · ${singlePreview}` : ''}${
       runningElapsedMs !== null ? ` · 已运行 ${formatToolDuration(runningElapsedMs)}` : ''}`
     : awaiting > 0
       ? `等待确认 ${awaiting} 项`
-      : `执行工具 ${activities.length} 次${attention ? ` · ${attention} 项需注意` : ''}${totalDuration ? ` · 耗时 ${totalDuration}` : ''}`;
+      : `执行工具 ${activities.length} 次${attention ? ` · ${attention} 项需注意` : ''}${singlePreview ? ` · ${singlePreview}` : ''}${totalDurationShown ? ` · 耗时 ${totalDurationShown}` : ''}`;
 
   // UI-272 — 每轮思考只在该轮首个工具前插入一次
   const renderedIterations = new Set<number>();
@@ -641,25 +648,53 @@ export function ToolActivityList({
         <Icon name="chevron-right" size={14} />
       </button>
       {expanded && (collapseWhenSettled ? (() => {
-        // BLOCK-108 P3 — Qoder 簇内形态：思考行置顶（本簇迭代的折叠思考）+
-        // 全部活动统一单行（含 exec），无 routine 二级折叠。单迭代簇不需要
-        // groupToolActivities 的迭代行走（时间线按迭代一簇）。
-        const reasoningRows = Object.entries(reasoningByIteration || {})
+        // BLOCK-108 P3 — Qoder 簇内形态：全部活动统一单行（含 exec），无 routine
+        // 二级折叠。UI-430 — 合并簇内按迭代交错：每轮「已思考行（若有）→ 该轮
+        // 工具行」（参考 ZCode 形态：命令行与思考行逐轮交替）；迭代与思考对不上
+        // 的遗留思考行（如合成分段外的历史键）按迭代序补在最前。
+        const groupOrder: number[] = [];
+        const byIteration = new Map<number, ToolActivityItem[]>();
+        for (const activity of activities) {
+          const key = activity.iteration ?? 0;
+          let list = byIteration.get(key);
+          if (!list) { list = []; byIteration.set(key, list); groupOrder.push(key); }
+          list.push(activity);
+        }
+        const reasoningMap = reasoningByIteration || {};
+        const unmatchedReasoning = Object.entries(reasoningMap)
           .map(([iter, text]) => ({ iteration: Number(iter), text }))
-          .filter((entry) => Number.isInteger(entry.iteration) && entry.text.trim())
-          .map((entry) => (
-            <ReasoningRow
-              key={`qoder-reasoning-${entry.iteration}`}
-              iteration={entry.iteration}
-              text={entry.text}
-              label="已思考"
-              preview={reasoningPreview(entry.text)}
-            />
-          ));
+          .filter((entry) => Number.isInteger(entry.iteration) && entry.text.trim() && !byIteration.has(entry.iteration))
+          .sort((a, b) => a.iteration - b.iteration);
+        const reasoningRows = unmatchedReasoning.map((entry) => (
+          <ReasoningRow
+            key={`qoder-reasoning-${entry.iteration}`}
+            iteration={entry.iteration}
+            text={entry.text}
+            label="已思考"
+            preview={reasoningPreview(entry.text)}
+          />
+        ));
         return (
           <div className="sc-tool-activity-inline" data-testid="qoder-cluster-body">
             {reasoningRows}
-            {activities.map((activity) => <QoderRow key={activity.key} activity={activity} />)}
+            {groupOrder.map((iterationKey) => {
+              const reasoningText = reasoningMap[iterationKey];
+              return (
+                <div key={`qoder-iter-${iterationKey}`}>
+                  {reasoningText ? (
+                    <ReasoningRow
+                      iteration={iterationKey}
+                      text={reasoningText}
+                      label="已思考"
+                      preview={reasoningPreview(reasoningText)}
+                    />
+                  ) : null}
+                  {(byIteration.get(iterationKey) || []).map((activity) => (
+                    <QoderRow key={activity.key} activity={activity} />
+                  ))}
+                </div>
+              );
+            })}
           </div>
         );
       })() : (

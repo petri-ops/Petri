@@ -1,43 +1,13 @@
 {
   "name": "block108-qoder-stream",
-  "startedAt": "2026-09-20T18:36:52.557Z",
-  "finishedAt": "2026-09-20T18:37:32.791Z",
+  "startedAt": "2026-09-21T01:27:14.227Z",
+  "finishedAt": "2026-09-21T01:27:39.619Z",
   "assertions": [
     {
-      "name": "Q1_transition_narration_before_cluster",
-      "pass": true,
-      "detail": "transitions=5 首条=「我先执行第 (1) 件事：运行那条 4 秒延时的 node 命令，并等它跑完。」 X后必有T=true :: X:1 T:1 X:2 T:2 X:3 T:3 X:4 T:4 X:5 T:5 R:6"
-    },
-    {
-      "name": "Q2_count_style_cluster_head",
-      "pass": true,
-      "detail": "计数式簇头=5 需注意=2 legacy残留=0 :: heads=[\"执行工具 1 次 · 耗时 172 ms\",\"执行工具 1 次 · 耗时 230 ms\",\"执行工具 1 次 · 1 项需注意 · 耗时 163 ms\",\"执行工具 1 次 · 耗时 4.3 s\",\"执行工具 1 次 · 1 项需注意 · 耗时 283 ms\"]"
-    },
-    {
-      "name": "Q3_uniform_single_line_rows",
-      "pass": true,
-      "detail": "qoderRows=5 默认展开终端块=0 routine折叠=0"
-    },
-    {
-      "name": "Q4_click_expand_terminal_body",
-      "pass": true,
-      "detail": "exec行=clicked 展开后终端体=1(输出块=0) 收起后=0"
-    },
-    {
-      "name": "Q5_reasoning_inside_cluster",
-      "pass": true,
-      "detail": "簇内思考行=5 独立思考节点=1"
-    },
-    {
-      "name": "Q6_history_matches_live_projection",
-      "pass": true,
-      "detail": "live=X:1 T:1 X:2 T:2 X:3 T:3 X:4 T:4 X:5 T:5 R:6 reloaded=X:1 T:1 X:2 T:2 X:3 T:3 X:4 T:4 X:5 T:5 R:6"
-    },
-    {
-      "name": "Q7_temp_data_cleaned_up",
-      "pass": true,
-      "detail": "conv=true project=true"
+      "name": "flow_completed_without_exception",
+      "pass": false,
+      "detail": "cdp_not_ready_on_port_9223: connect ECONNREFUSED 127.0.0.1:9223 — 先启动 dev 栈：BIOF3_DEV_ELECTRON_ARGS=\"--remote-debugging-port=9223\" npm run dev"
     }
   ],
-  "allPass": true
+  "allPass": false
 }

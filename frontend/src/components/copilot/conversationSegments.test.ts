@@ -60,7 +60,7 @@ describe('BLOCK-107 会话分段模型（D1=c 按 iteration 交错）', () => {
     expect(tools.kind === 'tools' && tools.reasoningPreview).toBe('先看一眼文件');
   });
 
-  it('多迭代按 iteration 升序交错；思考折入本迭代簇（BLOCK-108），无思考迭代仅工具簇', () => {
+  it('多迭代无过渡叙述分隔时合并为单簇（UI-430，ZCode 参考形态），思考逐轮随簇携带', () => {
     const segments = buildConversationSegments({
       content: '结论',
       toolActivities: [
@@ -76,18 +76,36 @@ describe('BLOCK-107 会话分段模型（D1=c 按 iteration 交错）', () => {
       segment.kind === 'narrative' ? 'narrative' : `${segment.kind}#${segment.iteration}`
     ))).toEqual([
       'tools#1',
-      'tools#2',
-      'tools#3',
       'narrative',
     ]);
-    const tools2 = segments[1];
-    const tools3 = segments[2];
-    expect(tools2.kind === 'tools' && tools2.reasoning).toBe('第二轮先跑测试');
-    expect(tools3.kind === 'tools' && tools3.reasoning).toBe('第三轮改代码');
-    expect(tools2.kind === 'tools' && tools2.reasoningPreview).toBe('第二轮先跑测试');
+    const merged = segments[0];
+    expect(merged.kind === 'tools' && merged.totalCount).toBe(3);
+    expect(merged.kind === 'tools' && merged.reasoningByIteration).toEqual({
+      2: '第二轮先跑测试',
+      3: '第三轮改代码',
+    });
   });
 
-  it('无 iteration 的历史活动归入 0 号段且排在最前，不丢内容', () => {
+  it('过渡叙述是合并簇的分隔符：簇(1) | progress#2 | 簇(2)', () => {
+    const segments = buildConversationSegments({
+      content: '结论',
+      toolActivities: [
+        activity('workspace_read', 'success', { iteration: 1 }),
+        activity('workspace_exec', 'success', { iteration: 2 }),
+      ],
+      progressUpdates: [{ iteration: 2, content: '第一轮完成，现在跑第二轮' }],
+    });
+    expect(segments.map((segment) => (
+      segment.kind === 'narrative' ? 'narrative' : `${segment.kind}#${segment.iteration}`
+    ))).toEqual([
+      'tools#1',
+      'progress#2',
+      'tools#2',
+      'narrative',
+    ]);
+  });
+
+  it('无 iteration 的历史活动归入 0 号段且排在最前、内容不丢（UI-430 起与相邻工具轮合并为一簇）', () => {
     const segments = buildConversationSegments({
       content: '结论',
       toolActivities: [
@@ -97,7 +115,10 @@ describe('BLOCK-107 会话分段模型（D1=c 按 iteration 交错）', () => {
     });
     expect(segments[0].kind).toBe('tools');
     expect(segments[0].kind === 'tools' && segments[0].iteration).toBe(UNGROUPED_ITERATION);
-    expect(segments[0].kind === 'tools' && segments[0].totalCount).toBe(1);
+    // UI-430 — 0 号段与相邻工具轮合并为单簇，但 0 号活动仍排在簇内最前，内容不丢。
+    expect(segments[0].kind === 'tools' && segments[0].totalCount).toBe(2);
+    expect(segments[0].kind === 'tools' && segments[0].activities[0].name).toBe('legacy_tool');
+    expect(segments[0].kind === 'tools' && segments[0].activities[1].iteration).toBe(2);
     expect(segments.at(-1)?.kind).toBe('narrative');
   });
 

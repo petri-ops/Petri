@@ -195,10 +195,12 @@ module.exports = {
       assert('L2_running_cluster_observed', seen.running > 0, `running 采样命中=${seen.running}`);
       assert('L3_stopwatch_observed', seen.stopwatch > 0, `秒表采样命中=${seen.stopwatch}`);
       assert('L4_one_cluster_per_iteration_ordered', maxClusters >= 1
-        && classified.every((c) => c.monotonic)
-        && classified.every((c) => c.clusters === c.distinctClusterIterations),
+        && classified.every((c) => c.monotonic),
+        // UI-430 修订（2026-09-21 用户裁决「执行工具 1 次成串看着懵逼」）：相邻无过渡
+        // 叙述的工具轮合并为单簇（ZCode 参考形态），「一迭代一簇」契约被
+        // 「簇内迭代非降序」取代——monotonic 仍逐段成立。
         `maxClusters=${maxClusters} 全部非降序=${classified.every((c) => c.monotonic)} `
-        + `一迭代一簇=${classified.every((c) => c.clusters === c.distinctClusterIterations)} :: `
+        + `（一迭代一簇契约已由 UI-430 合并簇取代） :: `
         + (liveSeq || []).slice(-1)[0]);
       // L5 失败可见：读不存在文件 → error → 簇头应显示「N 项需注意」。
       // 只在终态快照上判（运行中簇头是「正在处理」文案，不含需注意）。

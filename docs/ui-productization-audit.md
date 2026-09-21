@@ -4000,3 +4000,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：契约测试 `conversationSegments.test.ts` **19/19**（+思考折入簇、+过渡叙述簇前、+纯思考迭代保持独立）、`ConversationTimeline.test.tsx` **11/11**（+计数式簇头、+过渡叙述容器）、`ToolActivityList.test.tsx` **14/14**（+Q2 计数簇头/+Q3 统一单行无 routine/+Q4 点击展开终端体/+Q5 思考入簇）、`SimpleChat.test.tsx` 6/6 + `SimpleChat.extraRenderers.test.tsx` 9/9；**全量前端 146 文件全绿（vitest 5 新工具链）**；`tsc --noEmit` 0 红、`quality:lint` 0 error。
 - **证据（实机腿 · 2026-09-21）**：dev-verify flow `block108-qoder-stream`（只连 :9223 自管实例，真模型轮次 DeepSeek）**7/7 断言全绿**：Q1 过渡叙述 5 条、逐条紧跟其工具簇（`X:1 T:1 X:2 T:2 X:3 T:3 X:4 T:4 X:5 T:5 R:6`）；Q2 计数式簇头 5 个（含「1 项需注意」失败可见、零 legacy「已完成 N 项」残留）；Q3 统一单行 5 行、零默认展开终端块、零 routine 折叠；Q4 点击 exec 行展开终端体、再点收起；Q5 簇内「已思考」行 5 条；Q6 刷新后逐段同序（含过渡叙述——持久化穿参修复的实机证明）；Q7 临时项目/会话清理。截图 `acceptance/block-108/qoder-stream-expanded.png`/`-reloaded.png`。首跑 4/7（Q2/Q6 采样窗口过短误判终态 + Q4 选择器只展开末簇）经逐样本日志定位后修正 flow，产品缺陷仅持久化穿参一处。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-430: 合并簇呈现密度——相邻工具轮并簇 + 单工具簇头摘要 + 零耗时隐藏（BLOCK-108 增量）(2026-09-21 in_progress，契约验证绿、实机待环境恢复补跑)
+
+- **来源**：用户晨间反馈「执行工具 1 次 · 耗时 0 ms」成串出现看着懵逼（附 ZCode 参考图与实况截图对比）。裁决原话：「工具封装的比较稳定就应该保留使用，只是这些工具能否在聊天页上展示相对更纤细的信息」。工具面不动（同批 TOOL-SURFACE-USAGE-AUDIT 已入册），纯呈现密度修正。
+- **改动**：①`conversationSegments.ts`——相邻无过渡叙述（progress）分隔的工具轮合并为单个 ToolsSegment（`activities` 按迭代序拼接 + 新增 `reasoningByIteration` 携带逐轮思考）；progress 与纯思考迭代是分隔符；②`ToolActivityList.tsx` qoder 分支按迭代交错渲染（每轮「已思考行 → 该轮工具行」，对齐参考图）+ 单工具簇头携带该工具一行摘要（「执行工具 1 次 · 已读取 src/a.ts」，截 64 字符）+ 零耗时（<1ms/缺失）不显示（「耗时 0 ms」是纯噪音）；③`block107-timeline-live` flow L4「一迭代一簇」契约修订为「簇内迭代非降序」（flow 注释留痕，UI-430 取代）。
+- **语义变化**：BLOCK-107 P3 逐迭代成簇的呈现契约由「合并簇」取代（数据模型与数据层零变化，纯投影层）；簇头 `data-iteration` 取合并段首迭代。
+- **证据（契约）**：`conversationSegments.test.ts` 20/20（+合并簇/+过渡叙述分隔符/0 号段并入合并簇内容不丢）、`ToolActivityList.test.tsx` 16/16（+合并簇迭代交错顺序断言/+单工具簇头摘要与零耗时隐藏）、全五文件 62/62；`tsc --noEmit` 0 红；`quality:lint` 0 error。
+- **实机待补（诚实登记）**：`block108-qoder-stream` 复跑被本机环境冻结阻塞——9222 僵尸 socket（owner PID 不存在、EADDRINUSE）+ 后端事件循环每 ~22s 阻塞 10-35s（健康检查超时；后台日志 `[event-loop] blocked` 在册），疑似系统级争用，需重启机器后补跑 flow 并翻 verified。按无人化验收阶梯第 2 级诚实分级，不凑证据。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

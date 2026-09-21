@@ -18,11 +18,12 @@ taskkill_ms() { MSYS_NO_PATHCONV=1 taskkill "$@" >/dev/null 2>&1 || true; }
 taskkill_ms /IM electron.exe /F
 occ=$(netstat -ano | grep ':3001' | grep LISTENING | awk '{print $5}' | head -1)
 if [ -n "${occ:-}" ]; then echo "kill stale backend on 3001 (pid $occ)"; taskkill_ms /PID "$occ" /F; fi
-occ9=$(netstat -ano | grep ':9222' | grep LISTENING | awk '{print $5}' | head -1)
-if [ -n "${occ9:-}" ]; then echo "kill stale cdp on 9222 (pid $occ9)"; taskkill_ms /PID "$occ9" /F; fi
+CDP_PORT="${BIOF3_DEV_CDP_PORT:-9222}"
+occ9=$(netstat -ano | grep ":${CDP_PORT}" | grep LISTENING | awk '{print $5}' | head -1)
+if [ -n "${occ9:-}" ]; then echo "kill stale cdp on ${CDP_PORT} (pid $occ9)"; taskkill_ms /PID "$occ9" /F; fi
 sleep 2
 # 6) 清场后置断言：杀没生效则立刻报错，不允许再次"静默不重启"。
-for p in 3001 9222; do
+for p in 3001 "${CDP_PORT}"; do
   left=$(netstat -ano | grep ":$p" | grep LISTENING | head -1 || true)
   if [ -n "$left" ]; then echo "ABORT: port $p still held after kill — 清场失败，拒绝继续（$left）"; exit 3; fi
 done
@@ -52,12 +53,12 @@ if [ -n "${BIOF3_SESSION_COMPACTION}" ]; then echo "block95: env override BIOF3_
 #    require('electron') 返路径串、app 变 undefined → main.js:148 requestSingleInstanceLock 崩。
 #    Start-Process 从当前 shell 继承环境，故此处显式清掉（PowerShell -Environment 不可用，改用 Remove-Item Env:）。
 if [ -n "${ELECTRON_RUN_AS_NODE:-}" ]; then unset ELECTRON_RUN_AS_NODE; echo "stripped leaked ELECTRON_RUN_AS_NODE from env"; fi
-powershell -NoProfile -Command "Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue; Start-Process -FilePath 'C:\Users\Admin\AppData\Roaming\fnm\node-versions\v24.20.0\installation\node.exe' -ArgumentList 'node_modules\electron\cli.js','.','--dev','--remote-debugging-port=9222' -WorkingDirectory 'D:\1.WorkDir\biof3-desktop' -WindowStyle Minimized -RedirectStandardOutput 'D:\1.WorkDir\biof3-desktop\.dev-stack-live.log' -RedirectStandardError 'D:\1.WorkDir\biof3-desktop\.dev-stack-err.log'"
+powershell -NoProfile -Command "Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue; Start-Process -FilePath 'C:\Users\Admin\AppData\Roaming\fnm\node-versions\v24.20.0\installation\node.exe' -ArgumentList 'node_modules\electron\cli.js','.','--dev','--remote-debugging-port=${CDP_PORT}' -WorkingDirectory 'D:\1.WorkDir\biof3-desktop' -WindowStyle Minimized -RedirectStandardOutput 'D:\1.WorkDir\biof3-desktop\.dev-stack-live.log' -RedirectStandardError 'D:\1.WorkDir\biof3-desktop\.dev-stack-err.log'"
 echo "start dispatched"
 
 for i in $(seq 1 36); do
   sleep 5
-  pages=$(curl -s -m 10 http://127.0.0.1:9222/json/list 2>/dev/null | grep -c '"type": "page"' || true)
+  pages=$(curl -s -m 10 http://127.0.0.1:${CDP_PORT}/json/list 2>/dev/null | grep -c '"type": "page"' || true)
   # 7) 就绪判定不许带 `-o /dev/null`（2026-09-14 实测沉淀）：本机 Git Bash 下
   #    `curl -o /dev/null` exit=23（写 NUL 失败）→ 配合 `|| echo 000` 会把结果拼成
   #    `200000`，于是 `= "200"` 永不成立 → 明明就绪也必然 TIMEOUT。改为读末行 http_code。

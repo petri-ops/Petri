@@ -60,6 +60,13 @@ export interface ToolsSegment {
   reasoning?: string;
   /** 折叠态一行预览（同 ReasoningSegment.preview 口径）。 */
   reasoningPreview?: string;
+  /**
+   * UI-430 — 相邻工具轮合并（ZCode 参考形态）：模型连续多轮每轮只发 1 个工具时，
+   * 逐轮成簇会退化为成串匿名的「执行工具 1 次」。无过渡叙述分隔的相邻工具轮
+   * 合并为一簇，`activities` 按迭代顺序拼接，`reasoningByIteration` 携带各轮
+   * 思考供簇内逐轮交错渲染。单轮簇仍走 `reasoning`/`reasoningPreview` 旧字段。
+   */
+  reasoningByIteration?: Record<number, string>;
 }
 
 export interface ProgressSegment {
@@ -193,33 +200,65 @@ export function buildConversationSegments(
   }
 
   const segments: ConversationSegment[] = [];
+  // UI-430 — 相邻工具轮合并：累计一段「无过渡叙述分隔」的连续工具轮，
+  // flush 成单个 ToolsSegment（参考 ZCode 形态：连续 4 次调用是一簇「执行工具 4 次」，
+  // 而不是 4 条匿名的「执行工具 1 次」）。progress（过渡叙述）与纯思考迭代是分隔符。
+  interface RunBucket {
+    iteration: number;
+    activities: ToolActivityItem[];
+    reasoning?: string;
+  }
+  let run: RunBucket[] = [];
+  const flushRun = () => {
+    if (run.length === 0) return;
+    if (run.length === 1) {
+      const only = run[0];
+      const tools = buildToolsSegment(only.iteration, only.activities);
+      if (only.reasoning) {
+        tools.reasoning = only.reasoning;
+        tools.reasoningPreview = reasoningPreview(only.reasoning);
+      }
+      segments.push(tools);
+    } else {
+      const activities = run.flatMap((bucket) => bucket.activities);
+      const reasoningByIteration: Record<number, string> = {};
+      for (const bucket of run) {
+        if (bucket.reasoning) reasoningByIteration[bucket.iteration] = bucket.reasoning;
+      }
+      const merged = buildToolsSegment(run[0].iteration, activities);
+      merged.reasoningByIteration = reasoningByIteration;
+      segments.push(merged);
+    }
+    run = [];
+  };
+
   for (const iteration of [...buckets.keys()].sort((a, b) => a - b)) {
     const bucket = buckets.get(iteration);
     if (!bucket) continue;
     const hasActivities = bucket.activities.length > 0;
     if (hasActivities) {
-      // BLOCK-108 P1 — 过渡叙述在簇前（Qoder 形态：模型说话 → 模型做事）。
+      // 过渡叙述在簇前，且它是簇的分隔符：先 flush 上一段合并簇。
       if (bucket.progress) {
+        flushRun();
         segments.push({ kind: 'progress', iteration, content: bucket.progress });
       }
-      const tools = buildToolsSegment(iteration, bucket.activities);
+      run.push({ iteration, activities: bucket.activities, reasoning: bucket.reasoning });
+    } else {
+      // 纯思考迭代（无工具）：保持独立思考节点（BLOCK-107 行为不变），并结束当前合并段。
+      flushRun();
       if (bucket.reasoning) {
-        tools.reasoning = bucket.reasoning;
-        tools.reasoningPreview = reasoningPreview(bucket.reasoning);
+        segments.push({
+          kind: 'reasoning',
+          iteration,
+          text: bucket.reasoning,
+          preview: reasoningPreview(bucket.reasoning),
+        });
+      } else if (bucket.progress) {
+        segments.push({ kind: 'progress', iteration, content: bucket.progress });
       }
-      segments.push(tools);
-    } else if (bucket.reasoning) {
-      // 纯思考迭代（无工具）：保持独立思考节点（BLOCK-107 行为不变）。
-      segments.push({
-        kind: 'reasoning',
-        iteration,
-        text: bucket.reasoning,
-        preview: reasoningPreview(bucket.reasoning),
-      });
-    } else if (bucket.progress) {
-      segments.push({ kind: 'progress', iteration, content: bucket.progress });
     }
   }
+  flushRun();
 
   if (content.trim()) segments.push({ kind: 'narrative', text: content });
   return segments;
