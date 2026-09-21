@@ -2154,17 +2154,20 @@
         "core/biof3-server/conversation-adapter.js",
         "core/biof3-server/helpers/history-assembly.js",
         "core/biof3-server/routes/ai-agent/**",
+        "scripts/arch-cycles-gate.mjs",
         "acceptance/block-109/**"
       ],
       "tests": [
         "test/block109-p0-baseline.test.mjs",
         "test/block109-p1-events.test.mjs",
         "test/block109-p2-tool-metadata.test.mjs",
+        "test/block109-p3-gates.test.mjs",
         "test/agent-runner-loop-orchestrator.test.mjs",
         "test/block109-orchestration.test.mjs"
       ],
       "frontendRelated": false,
-      "classifiesScripts": false
+      "classifiesScripts": true,
+      "scriptRole": "governance"
     }
   ]
 }

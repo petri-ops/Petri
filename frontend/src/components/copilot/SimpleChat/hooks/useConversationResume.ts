@@ -99,7 +99,7 @@ export function useConversationResume({
     }
     let cancelled = false;
     setLoadingRef.current(true);
-    (async () => {
+    void (async () => {
       const page = await getConversationMessagesPage(conversationId, 200);
       if (cancelled) return;
       const msgs = page ? page.messages : [];
@@ -169,7 +169,7 @@ export function useConversationResume({
     const reconciliationId = `${conversationId}:${activeRun.completedAt}`;
     if (reconciledRunRef.current === reconciliationId) return;
     let cancelled = false;
-    (async () => {
+    void (async () => {
       const persisted = await getConversationMessages(conversationId, 200);
       if (cancelled) return;
       reconciledRunRef.current = reconciliationId;
@@ -222,7 +222,7 @@ export function useConversationResume({
     if (resumableCheckedRef.current === conversationId) return;
     resumableCheckedRef.current = conversationId;
     let cancelled = false;
-    (async () => {
+    void (async () => {
       try {
         const inFlight = await fetchInFlightPrimaryTasks(conversationId);
         if (cancelled || inFlight.length === 0) return;

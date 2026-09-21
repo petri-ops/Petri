@@ -1,157 +1,181 @@
 {
-  "schema": "biof3/block92-size-ledger.v1",
-  "head": "ref: refs/heads/main",
+  "schema": "biof3/block109-size-ledger.v2",
   "files": [
     {
       "path": "frontend/src/components/copilot/conversationRunStore.ts",
       "wave": "A",
       "module": "W-03",
-      "lines": 1347
+      "lines": 813,
+      "sha256": "693d5aa6e33a032188ff3fa00478d00f0edd161583a9291b06734eb19f0a0cfe"
     },
     {
       "path": "frontend/src/components/copilot/copilotClient.ts",
       "wave": "A",
       "module": "W-03",
-      "lines": 1226
+      "lines": 134,
+      "sha256": "66e778cd9573651720b9404e4ab869b6e98db2390c85a99692e7eb0c05090c6d"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat.tsx",
       "wave": "A",
       "module": "W-03",
-      "lines": 2024
-    },
-    {
-      "path": "frontend/src/pages/project-workspace.tsx",
-      "wave": "B",
-      "module": "W-02",
-      "lines": 1695
-    },
-    {
-      "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
-      "wave": "B",
-      "module": "W-04",
-      "lines": 1469
-    },
-    {
-      "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
-      "wave": "B",
-      "module": "W-04",
-      "lines": 1429
-    },
-    {
-      "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
-      "wave": "B",
-      "module": "W-01",
-      "lines": 973
-    },
-    {
-      "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
-      "wave": "B",
-      "module": "W-01",
-      "lines": 971
-    },
-    {
-      "path": "frontend/src/pages/home.tsx",
-      "wave": "B",
-      "module": "W-02",
-      "lines": 895
-    },
-    {
-      "path": "frontend/src/components/desktop/WorkingTreeReview/useWorkingTreeReview.ts",
-      "wave": "B",
-      "module": "W-04",
-      "lines": 774
-    },
-    {
-      "path": "frontend/src/hooks/useSkillStore.ts",
-      "wave": "B",
-      "module": "W-02",
-      "lines": 743
-    },
-    {
-      "path": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx",
-      "wave": "B",
-      "module": "W-04",
-      "lines": 717
-    },
-    {
-      "path": "core/shared-backend/result-changeset-service.js",
-      "wave": "C",
-      "module": "W-04",
-      "lines": 2783
-    },
-    {
-      "path": "core/biof3-server/helpers/tools-executor.js",
-      "wave": "C",
-      "module": "P-03",
-      "lines": 2711
-    },
-    {
-      "path": "core/biof3-server/db.js",
-      "wave": "C",
-      "module": "P-01",
-      "lines": 2194
-    },
-    {
-      "path": "core/shared-backend/result-studio-repository.js",
-      "wave": "C",
-      "module": "W-04",
-      "lines": 2009
-    },
-    {
-      "path": "core/biof3-server/agent-tools/workspace-tools.js",
-      "wave": "C",
-      "module": "P-03",
-      "lines": 1800
-    },
-    {
-      "path": "core/biof3-server/mcp/registry.js",
-      "wave": "C",
-      "module": "P-02",
-      "lines": 1699
-    },
-    {
-      "path": "core/shared-backend/result-studio-lifecycle.js",
-      "wave": "C",
-      "module": "W-04",
-      "lines": 1692
-    },
-    {
-      "path": "core/shared-backend/result-replay-service.js",
-      "wave": "C",
-      "module": "W-04",
-      "lines": 1630
-    },
-    {
-      "path": "core/shared-backend/git-adapter.js",
-      "wave": "C",
-      "module": "P-01",
-      "lines": 1549
-    },
-    {
-      "path": "src/ipc/working-tree-review.js",
-      "wave": "D",
-      "module": "P-01",
-      "lines": 966
+      "lines": 1653,
+      "sha256": "3eb07d2625d26ff3296ff278c3f26978397803485c8a136ba74e7d0a2e142872"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts",
       "wave": "A",
       "module": "W-03",
-      "lines": 30
+      "lines": 30,
+      "sha256": "05ba5a33fd9268aa8e3b7269fa6e6d6b978a9ff97581ef4ead1058342d5d5deb"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useScrollGuard.ts",
       "wave": "A",
       "module": "W-03",
-      "lines": 87
+      "lines": 87,
+      "sha256": "fa19737be32bafcfd7ca2b5e676f52699bf41627befbf71e4f0786671ae2b70a"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useTerminalSubAgentResults.ts",
       "wave": "A",
       "module": "W-03",
-      "lines": 44
+      "lines": 44,
+      "sha256": "374078290ca79d60e1c83f947c76d2f4a4dd54574e9a89a39f2fe028bd1c7d35"
+    },
+    {
+      "path": "frontend/src/pages/project-workspace.tsx",
+      "wave": "B",
+      "module": "W-02",
+      "lines": 1052,
+      "sha256": "90a97dc7a997993419fb2bfb276fd241796bbe5e94526189cad349e45548c076"
+    },
+    {
+      "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
+      "wave": "B",
+      "module": "W-04",
+      "lines": 1222,
+      "sha256": "82860bb78a5a742801e5521390cc7a10add428b179bd9bc64d4c0eba66d84a10"
+    },
+    {
+      "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
+      "wave": "B",
+      "module": "W-04",
+      "lines": 1307,
+      "sha256": "d3b8f55d8c588595491049bae936054f1d03271d7633ce13c878f481919aa6af"
+    },
+    {
+      "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+      "wave": "B",
+      "module": "W-01",
+      "lines": 623,
+      "sha256": "f1caf60f14f536dcf453cc458859a92c4ae11f320833cd306d65841a6c8bcd2c"
+    },
+    {
+      "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
+      "wave": "B",
+      "module": "W-01",
+      "lines": 789,
+      "sha256": "b9ec44b2ab009a27b62301e256cba028a556a60605a5f99d1d0cbb0300c52043"
+    },
+    {
+      "path": "frontend/src/pages/home.tsx",
+      "wave": "B",
+      "module": "W-02",
+      "lines": 753,
+      "sha256": "7dcd74c123a139de2b214ed4a8fa5866ac7b347cab887a67ee721a392d68cc1a"
+    },
+    {
+      "path": "frontend/src/components/desktop/WorkingTreeReview/useWorkingTreeReview.ts",
+      "wave": "B",
+      "module": "W-04",
+      "lines": 632,
+      "sha256": "bb9629f88b3f2bc22bcbf0822ac3b8ef7f682950336aaf1c13299256275d0f68"
+    },
+    {
+      "path": "frontend/src/hooks/useSkillStore.ts",
+      "wave": "B",
+      "module": "W-02",
+      "lines": 529,
+      "sha256": "cbd530fe5e544634f6858d46eacc91f0ecfb694c3a328eb2f9b24e398ddbbb13"
+    },
+    {
+      "path": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx",
+      "wave": "B",
+      "module": "W-04",
+      "lines": 529,
+      "sha256": "cdd7b50525372d5d4e9a8aac386ddb1c00941ab2550a43a37ad94ef5f6a8723f"
+    },
+    {
+      "path": "core/shared-backend/result-changeset-service.js",
+      "wave": "C",
+      "module": "W-04",
+      "lines": 769,
+      "sha256": "9c6f31ed91a1ea8a6e449cf944ccdb77b134489bebe39d0c937b4c48471ef674"
+    },
+    {
+      "path": "core/biof3-server/helpers/tools-executor.js",
+      "wave": "C",
+      "module": "P-03",
+      "lines": 1858,
+      "sha256": "dcd227837384e62abf92daa75085ef2fd2cc910a68ecc69133bad5b2e6aa1f34"
+    },
+    {
+      "path": "core/biof3-server/db.js",
+      "wave": "C",
+      "module": "P-01",
+      "lines": 1476,
+      "sha256": "b8f9dafd22aef85a7aaaa5ea6b6b95e0f8cc6163d636ecfa16e2b5093d9fd1f1"
+    },
+    {
+      "path": "core/shared-backend/result-studio-repository.js",
+      "wave": "C",
+      "module": "W-04",
+      "lines": 1773,
+      "sha256": "6294ac4a72fdf24d4fe334722d6d92d98f26677da0e9fc741447f05c639165e2"
+    },
+    {
+      "path": "core/biof3-server/agent-tools/workspace-tools.js",
+      "wave": "C",
+      "module": "P-03",
+      "lines": 1520,
+      "sha256": "cc6e8cad75d5af9bce9e275580f3ff326927a911a557ad9d9d93117c202ce1c1"
+    },
+    {
+      "path": "core/biof3-server/mcp/registry.js",
+      "wave": "C",
+      "module": "P-02",
+      "lines": 965,
+      "sha256": "ef8265f83f91d6b0e95927c52b846d62053b96e13ba3fc188041e46c0a8b87fe"
+    },
+    {
+      "path": "core/shared-backend/result-studio-lifecycle.js",
+      "wave": "C",
+      "module": "W-04",
+      "lines": 936,
+      "sha256": "7f7d0e566c4947315de01fea650d076d4162e36eb2bdbc3c38f7bcf2fda0b487"
+    },
+    {
+      "path": "core/shared-backend/result-replay-service.js",
+      "wave": "C",
+      "module": "W-04",
+      "lines": 708,
+      "sha256": "c0e5eeb48782a08a5e1c6968dd2d1a894c21e380510054487bf277260170a234"
+    },
+    {
+      "path": "core/shared-backend/git-adapter.js",
+      "wave": "C",
+      "module": "P-01",
+      "lines": 1253,
+      "sha256": "dd57ab158e9370c5dc63eafaa4e082eccea27bddae2bae4bb1fb8ff2698c392d"
+    },
+    {
+      "path": "src/ipc/working-tree-review.js",
+      "wave": "D",
+      "module": "P-01",
+      "lines": 634,
+      "sha256": "2d0d1d1810a7b186cb7de9632316c542bc55fc2ba8078b8bb3d9bdf765dea3e4"
     }
   ],
-  "total": 33296
+  "total": 22089
 }

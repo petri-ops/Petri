@@ -144,7 +144,7 @@ describe('agent task localStorage 恢复 (AGENT-CONCURRENCY)', () => {
   it('fetchInFlightPrimaryTasks 查询后端在途清单并透传 taskId', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ ok: true, tasks: [{ taskId: 't-1' }, { taskId: 't-2' }] }),
+      json: () => Promise.resolve({ ok: true, tasks: [{ taskId: 't-1' }, { taskId: 't-2' }] }),
     });
     vi.stubGlobal('fetch', fetchMock);
     const ids = await fetchInFlightPrimaryTasks('c1');

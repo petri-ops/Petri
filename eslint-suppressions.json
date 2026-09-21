@@ -149,9 +149,6 @@
     }
   },
   "frontend/src/components/copilot/SimpleChat/hooks/useConversationResume.ts": {
-    "@typescript-eslint/no-floating-promises": {
-      "count": 2
-    },
     "@typescript-eslint/no-misused-promises": {
       "count": 1
     },

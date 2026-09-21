@@ -1,0 +1,118 @@
+{
+  "schema": "biof3/block109-size-exceptions.v1",
+  "note": "P3-1 裁决：超 700 行预算的存量巨型文件逐个授予例外，expires 到期未清即红；续期=更新 expires+理由；拆分降至预算内后应移除例外。",
+  "exceptions": [
+    {
+      "path": "frontend/src/components/copilot/conversationRunStore.ts",
+      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
+      "expires": "2026-12-31",
+      "sha256": null,
+      "linesAtGrant": 813
+    },
+    {
+      "path": "frontend/src/components/copilot/SimpleChat.tsx",
+      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
+      "expires": "2026-12-31",
+      "sha256": null,
+      "linesAtGrant": 1653
+    },
+    {
+      "path": "frontend/src/pages/project-workspace.tsx",
+      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
+      "expires": "2026-12-31",
+      "sha256": null,
+      "linesAtGrant": 1052
+    },
+    {
+      "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
+      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
+      "expires": "2026-12-31",
+      "sha256": null,
+      "linesAtGrant": 1222
+    },
+    {
+      "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
+      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
+      "expires": "2026-12-31",
+      "sha256": null,
+      "linesAtGrant": 1307
+    },
+    {
+      "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
+      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
+      "expires": "2026-12-31",
+      "sha256": null,
+      "linesAtGrant": 789
+    },
+    {
+      "path": "frontend/src/pages/home.tsx",
+      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
+      "expires": "2026-12-31",
+      "sha256": null,
+      "linesAtGrant": 753
+    },
+    {
+      "path": "core/shared-backend/result-changeset-service.js",
+      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
+      "expires": "2026-12-31",
+      "sha256": null,
+      "linesAtGrant": 769
+    },
+    {
+      "path": "core/biof3-server/helpers/tools-executor.js",
+      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
+      "expires": "2026-12-31",
+      "sha256": null,
+      "linesAtGrant": 1858
+    },
+    {
+      "path": "core/biof3-server/db.js",
+      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
+      "expires": "2026-12-31",
+      "sha256": null,
+      "linesAtGrant": 1476
+    },
+    {
+      "path": "core/shared-backend/result-studio-repository.js",
+      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
+      "expires": "2026-12-31",
+      "sha256": null,
+      "linesAtGrant": 1773
+    },
+    {
+      "path": "core/biof3-server/agent-tools/workspace-tools.js",
+      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
+      "expires": "2026-12-31",
+      "sha256": null,
+      "linesAtGrant": 1520
+    },
+    {
+      "path": "core/biof3-server/mcp/registry.js",
+      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
+      "expires": "2026-12-31",
+      "sha256": null,
+      "linesAtGrant": 965
+    },
+    {
+      "path": "core/shared-backend/result-studio-lifecycle.js",
+      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
+      "expires": "2026-12-31",
+      "sha256": null,
+      "linesAtGrant": 936
+    },
+    {
+      "path": "core/shared-backend/result-replay-service.js",
+      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
+      "expires": "2026-12-31",
+      "sha256": null,
+      "linesAtGrant": 708
+    },
+    {
+      "path": "core/shared-backend/git-adapter.js",
+      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
+      "expires": "2026-12-31",
+      "sha256": null,
+      "linesAtGrant": 1253
+    }
+  ]
+}

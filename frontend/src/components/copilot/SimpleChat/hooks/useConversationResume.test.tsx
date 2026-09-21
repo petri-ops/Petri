@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
   clearConversationRun: vi.fn(),
   resumeConversationRun: vi.fn(),
   shouldClearReconciledConversationRun: vi.fn(() => false),
-  fetchInFlightPrimaryTasks: vi.fn(async () => [] as string[]),
+  fetchInFlightPrimaryTasks: vi.fn(() => Promise.resolve([] as string[])),
 }));
 
 vi.mock('../../copilotConversationsClient', () => ({
