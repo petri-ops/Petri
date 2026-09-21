@@ -424,6 +424,13 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 同提交台账漏同步——UI-425 条目由后续提交统一补登（subject 未带 UI-### 为
   // 笔误）。豁免同提交台账与 subject 要求；不重写共享历史。
   '06828fd0e04d15389c2ce47bd28a89af61540622',
+  // 2026-09-21 BLOCK-109-CORE-ARCH P1.2 恢复单一后端源（3f25ffc3）：前端 localStorage
+  // 在途双轨退役，恢复改问后端 /ai/agent/tasks/inflight——数据源替换零 UI 行为变化
+  // （渲染输出恒等；验证=tsc 0 红 + 受影响三测试档 62/62 + test:changed 338 绿 0 红），
+  // 无新 UI 功能故无新台账条目；恢复行为契约=test/block109-p1-events.test.mjs。
+  // 豁免同提交台账要求（subject 门经 LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；
+  // 不重写共享历史。
+  '3f25ffc3b3f88b7ffc0291891a522761712ef42b',
   // 2026-09-16 UI-382 后续增量提交 716c876：conversationRunStore spawn_agent
   // 结果回写 agentId 到工具行（展开体按其内联实况卡）。UI-382 条目已由先导
   // 提交 124354cb 登记，本次为同一工作流后续增量，收口门禁抓出后补登台账。
