@@ -105,6 +105,12 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // 受影响三测试档 62/62 + test:changed 338 绿 0 红；台账=恢复行为契约 test/block109-p1-events
   // （无新 UI 功能故无新台账条目）。豁免 subject UI-### 与同提交台账要求；不重写共享历史。
   '3f25ffc3b3f88b7ffc0291891a522761712ef42b',
+  // 2026-09-21 BLOCK-109-CORE-ARCH P3 收口+整包 completed（c26c16a0）：code-size v2
+  // 指纹棘轮+环门禁+自测样本；前端仅 lint 抓真修复（3 浮 promise void 化 + 2 require-await
+  // mock 改 Promise.resolve）与台账回写，零 UI 行为变化；验证=契约 5/5 + test:changed 0 红
+  // + closeout 全链；台账=门禁基线/例外文件与 arch-cycles 基线（无新 UI 功能）。豁免
+  // subject UI-### 与同提交台账要求；不重写共享历史。
+  'c26c16a0557790412c45646f7465d6a19d76e700',
   // 2026-09-21 BLOCK-109-CORE-ARCH P1.4 legacy SSE 双轨退役（c029b616）：前端
   // streamChatLegacy/提交失败回退/VITE_AGENT_TASK_MODE 逃生口删除——提交路径收敛为
   // task 模式唯一，用户可见行为=错误路径从「legacy 兼容回退」变「诚实报错」，零常规
@@ -438,6 +444,11 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 豁免同提交台账要求（subject 门经 LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；
   // 不重写共享历史。
   '3f25ffc3b3f88b7ffc0291891a522761712ef42b',
+  // 2026-09-21 BLOCK-109-CORE-ARCH P3 收口+整包 completed（c26c16a0）：门禁基线/例外
+  // 文件与 arch-cycles 基线 + lint 抓真修复，零 UI 行为变化；无新 UI 功能故无新台账
+  // 条目；台账=门禁自测 test/block109-p3-gates.test.mjs。豁免同提交台账要求（subject
+  // 门经 LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；不重写共享历史。
+  'c26c16a0557790412c45646f7465d6a19d76e700',
   // 2026-09-21 BLOCK-109-CORE-ARCH P1.4 legacy SSE 双轨退役（c029b616）：前端 legacy
   // 提交路径与逃生口删除，零常规 UI 面变化（错误路径诚实化）；无新 UI 功能故无新台账
   // 条目；台账=退役行为契约 test/block109-p1-events.test.mjs。豁免同提交台账要求
