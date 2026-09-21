@@ -32,7 +32,8 @@ const RUN_TIMEOUT_MS = Number(process.env.BLOCK108_RUN_TIMEOUT_MS || 300_000);
 const PROMPT = '请依次用工具完成三件事，每件事单独一次调用、按顺序逐个来做、不要并行，'
   + '并且每次调用工具之前先用一两句话说明你接下来要做什么：'
   + '(1) 执行命令 `node -e "setTimeout(()=>console.log(1),4000)"` 并等它执行完；'
-  + '(2) 执行命令 `cat 不存在的文件-qoder腿.txt`——该文件不存在、执行会失败，这是测试的一部分，请照实执行不要跳过；'
+  + '(2) 原样执行命令 `type qoder-腿-不存在.txt`——不要换成别的命令、不要改写、不要先检查文件是否存在。'
+  + '该文件不存在，命令必然失败，而失败正是本测试要观察的异常路径，请照实执行并把失败原样报告；'
   + '(3) 列出项目根目录的文件；'
   + '最后用一句话总结这个项目里有什么。';
 
@@ -105,6 +106,10 @@ module.exports = {
       projectId = created.data.project.id;
 
       await lib.evalJs(client, `location.href = '${APP_ORIGIN}/?project=${projectId}'; 'go'`, 10_000);
+      // UI-430 实机教训：SPA 路由切换完成前旧页面的 textarea 仍可查询到——
+      // 「textarea 出现」即输入会打在即将卸载的元素上（症状=输入成功但零后端请求）。
+      // 导航后固定等待路由稳定，再等 composer 就绪。
+      await sleep(10000);
       const welcomed = Date.now() + 30_000;
       while (Date.now() < welcomed
         && !(await lib.evalJs(client, `!!document.querySelector('[class*="chatMount"] textarea.sc-input')`, 8_000).catch(() => false))) {
@@ -117,18 +122,44 @@ module.exports = {
         var setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
         setter.call(ta, ${JSON.stringify(PROMPT)});
         ta.dispatchEvent(new Event('input', { bubbles: true }));
-        return 'typed';
-      })()`, 10_000);
-      if (typed !== 'typed') throw new Error('type_into_composer_failed: ' + typed);
-
-      const sent = await lib.evalJs(client, `(function(){
+        // 发送方式定版（2026-09-21 实机对照）：按钮 click 在栈健康时端到端可靠；
+        // 合成 KeyboardEvent(Enter) 不触发提交（untrusted 事件被 composer 忽略，
+        // 症状=textarea 不清空、零网络请求）。Enter 仅作按钮失败后的兜底。
         var btns = document.querySelectorAll('[class*="chatMount"] button');
         for (var i = 0; i < btns.length; i++) {
-          if ((btns[i].getAttribute('title') || '').indexOf('发送消息') >= 0) { btns[i].click(); return 'clicked'; }
+          if ((btns[i].getAttribute('title') || '').indexOf('发送消息') >= 0) { btns[i].click(); return 'typed'; }
         }
-        return 'send_button_not_found';
+        return 'no_send_button';
       })()`, 10_000);
-      if (sent !== 'clicked') throw new Error('click_send_failed: ' + sent);
+      if (typed !== 'typed') throw new Error('send_click_failed: ' + typed);
+
+      // 确认已发出：输入框清空=提交成功的可观察信号。项目上下文（workspace 初始化）
+      // 未就绪时提交会被吞，故 2.5s 间隔重试点击至多 4 次，最后走 Enter 兜底。
+      let sent = 'not_sent';
+      for (let attempt = 1; attempt <= 4 && sent !== 'sent_ok'; attempt++) {
+        await sleep(2500);
+        sent = await lib.evalJs(client, `(function(){
+          var ta = document.querySelector('[class*="chatMount"] textarea.sc-input');
+          if (ta && (ta.value || '').trim().length > 0) {
+            var btns = document.querySelectorAll('[class*="chatMount"] button');
+            for (var i = 0; i < btns.length; i++) {
+              if ((btns[i].getAttribute('title') || '').indexOf('发送消息') >= 0) { btns[i].click(); return 'clicked_retry'; }
+            }
+          }
+          return 'sent_ok';
+        })()`, 10_000);
+        lib.log(`send attempt ${attempt}: ${sent}`);
+      }
+      if (sent !== 'sent_ok') {
+        await lib.evalJs(client, `(function(){
+          var ta = document.querySelector('[class*="chatMount"] textarea.sc-input');
+          if (ta) ta.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
+          return 'enter_fallback';
+        })()`, 10_000);
+        await sleep(1500);
+        const clear = await lib.evalJs(client, `var t = document.querySelector('[class*="chatMount"] textarea.sc-input'); !t || (t.value || '').trim().length === 0`, 10_000);
+        if (!clear) throw new Error('send_confirm_failed_after_all_retries');
+      }
 
       // 运行期采样直到终态稳定（running=0 且正文已产出且连续 3 次序列不变）。
       const deadline = Date.now() + RUN_TIMEOUT_MS;

@@ -1,13 +1,43 @@
 {
   "name": "block108-qoder-stream",
-  "startedAt": "2026-09-21T01:27:14.227Z",
-  "finishedAt": "2026-09-21T01:27:39.619Z",
+  "startedAt": "2026-09-21T03:13:49.077Z",
+  "finishedAt": "2026-09-21T03:14:29.057Z",
   "assertions": [
     {
-      "name": "flow_completed_without_exception",
-      "pass": false,
-      "detail": "cdp_not_ready_on_port_9223: connect ECONNREFUSED 127.0.0.1:9223 — 先启动 dev 栈：BIOF3_DEV_ELECTRON_ARGS=\"--remote-debugging-port=9223\" npm run dev"
+      "name": "Q1_transition_narration_before_cluster",
+      "pass": true,
+      "detail": "transitions=4 首条=「先确认一下当前命令执行环境（shell 与平台），再开始执行你要的三件事。」 X后必有T=true :: X:1 T:1 X:2 T:2 X:3 T:3 X:4 T:4 R:5"
+    },
+    {
+      "name": "Q2_count_style_cluster_head",
+      "pass": true,
+      "detail": "计数式簇头=4 需注意=1 legacy残留=0 :: heads=[\"执行工具 1 次 · 已调用 system_info · 耗时 104 ms\",\"执行工具 1 次 · 已运行 node -e \\\"setTimeout(()=>console.log(1),4000)\\\" · 耗时 99 ms\",\"执行工具 1 次 · 1 项需注意 · 已运行 type qoder-腿-不存在.txt · 耗时 52 ms\",\"执行工具 1 次 · 已读取 目录 . · 耗"
+    },
+    {
+      "name": "Q3_uniform_single_line_rows",
+      "pass": true,
+      "detail": "qoderRows=4 默认展开终端块=0 routine折叠=0"
+    },
+    {
+      "name": "Q4_click_expand_terminal_body",
+      "pass": true,
+      "detail": "exec行=clicked 展开后终端体=1(输出块=0) 收起后=0"
+    },
+    {
+      "name": "Q5_reasoning_inside_cluster",
+      "pass": true,
+      "detail": "簇内思考行=4 独立思考节点=1"
+    },
+    {
+      "name": "Q6_history_matches_live_projection",
+      "pass": true,
+      "detail": "live=X:1 T:1 X:2 T:2 X:3 T:3 X:4 T:4 R:5 reloaded=X:1 T:1 X:2 T:2 X:3 T:3 X:4 T:4 R:5"
+    },
+    {
+      "name": "Q7_temp_data_cleaned_up",
+      "pass": true,
+      "detail": "conv=true project=true"
     }
   ],
-  "allPass": false
+  "allPass": true
 }
