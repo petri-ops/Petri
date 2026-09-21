@@ -1,5 +1,8 @@
 'use strict';
 
+// BLOCK-109-CORE-ARCH P2 — 工具执行元数据（调度分组地基）
+const { getToolMetadata } = require('./tool-metadata');
+
 // Scientific work is goal-terminated, not round-terminated. These compatibility
 // exports remain infinite so existing callers cannot accidentally reintroduce a
 // normal-path iteration/tool cap. Runtime termination is driven by a final model
@@ -523,7 +526,22 @@ async function runAgentToolCallBatch(options = {}) {
   }
 
   const outcomes = [];
-  for (const item of prepared) {
+  // BLOCK-109-CORE-ARCH P2-3 — 调度分组：readOnly && concurrentSafe 组并行执行，
+  // 其余（写/破坏性/OS 自动化/spawn 族）保持原序串行。spawn 族 concurrentSafe=false
+  // 是硬组合语义（P2-5）：派发并行度软上限（SPAWN_CONCURRENCY_LIMIT）在 spawn 执行器
+  // 内生效，分组并行永不绕过。结果按原 prepared 顺序重组，调用方契约不变。
+  const outcomeByIndex = new Array(prepared.length);
+  const parallelItems = [];
+  const serialItems = [];
+  for (let i = 0; i < prepared.length; i++) {
+    const item = prepared[i];
+    const fn = item.toolCall.function && typeof item.toolCall.function === 'object' ? item.toolCall.function : {};
+    const name = typeof fn.name === 'string' ? fn.name.trim() : '';
+    const meta = getToolMetadata(name);
+    if (item.parsed.ok && meta.readOnly && meta.concurrentSafe) parallelItems.push({ item, index: i });
+    else serialItems.push({ item, index: i });
+  }
+  const runItem = async (item) => {
     const { toolCall } = item;
     const fn = toolCall.function && typeof toolCall.function === 'object' ? toolCall.function : {};
     const canceled = typeof options.shouldAbort === 'function' && options.shouldAbort();
@@ -540,10 +558,27 @@ async function runAgentToolCallBatch(options = {}) {
     const outcome = parsed.ok
       ? await options.execute(parsed, toolCall)
       : await options.reject(parsed, toolCall);
-    outcomes.push({ toolCall, parsed, outcome });
+    return { toolCall, parsed, outcome };
+  };
+  if (parallelItems.length > 0) {
+    const parallelResults = await Promise.all(parallelItems.map(async ({ item }) => {
+      const result = await runItem(item);
+      if (typeof options.onResult === 'function') {
+        await options.onResult(result);
+      }
+      return result;
+    }));
+    parallelItems.forEach(({ index }, i) => { outcomeByIndex[index] = parallelResults[i]; });
+  }
+  for (const { item, index } of serialItems) {
+    const result = await runItem(item);
     if (typeof options.onResult === 'function') {
-      await options.onResult({ toolCall, parsed, outcome });
+      await options.onResult(result);
     }
+    outcomeByIndex[index] = result;
+  }
+  for (const r of outcomeByIndex) {
+    if (r) outcomes.push(r);
   }
 
   return { ...reservation, accepted, outcomes };

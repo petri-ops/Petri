@@ -2159,6 +2159,7 @@
       "tests": [
         "test/block109-p0-baseline.test.mjs",
         "test/block109-p1-events.test.mjs",
+        "test/block109-p2-tool-metadata.test.mjs",
         "test/agent-runner-loop-orchestrator.test.mjs",
         "test/block109-orchestration.test.mjs"
       ],

@@ -13,6 +13,8 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const crypto = require('crypto');
+// BLOCK-109-CORE-ARCH P2-4 — MCP 工具同轨执行元数据投影（消除第二套执行语义）
+const { getToolMetadata } = require('../agent-tools/tool-metadata');
 // BLOCK-57 — 会话执行目标 → 插件远程直跑（设计评审 D1-D9；同步预算 ≤300s 与本地插件语义一致）
 const { createRemoteJobRunner, AGENT_SCRIPT_HASH } = require('../helpers/remote-execution/remote-job-runner');
 const { createTargetRegistry } = require('../helpers/remote-execution/target-registry');
@@ -547,10 +549,16 @@ async function listTools() {
   }
 
   // 合并插件工具、Skill 工具与 IDE MCP 工具
+  // P2-4：每个工具条目投影 executionMetadata（已知名取注册表，动态插件取保守缺省
+  // 串行非只读需审批）——MCP 工具与内置工具走同一元数据形状，调度分组直接可用。
   const pluginTools = pluginLoader.listToolsForMCP();
   const skillTools = getSkillToolDefinitions();
   const ideTools = getIdeToolDefinitionsSafe();
-  return [...skillTools, ...ideTools, ...pluginTools];
+  const withMetadata = (t) => {
+    const name = t && t.function && typeof t.function.name === 'string' ? t.function.name : null;
+    return name ? { ...t, executionMetadata: getToolMetadata(name) } : t;
+  };
+  return [...skillTools, ...ideTools, ...pluginTools].map(withMetadata);
 }
 
 // IDE 工具加载封装：失败时降级为空数组（不阻塞 listTools）

@@ -1,0 +1,155 @@
+/**
+ * agent-tools/tool-defs/agent-orchestration.js — agent-orchestration 域工具 Schema（BLOCK-109-CORE-ARCH P2-1 按域拆分；
+ * 物理目录即域）。由 tool-defs.js facade 汇编，勿直接 require（统一走 facade）。
+ * 执行元数据（readOnly/destructive/...）见 ../tool-metadata.js。
+ */
+
+module.exports = [
+  {
+    "type": "function",
+    "function": {
+      "name": "interrupt_agent",
+      "description": "中断一个仍在运行的子 agent（当前任务派生的）：发出取消请求，子 agent 在下一个取消检查点让出，之后用 wait_agent 可拿到其终态摘要。已终态的子 agent 幂等返回。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "agentId": {
+            "type": "string",
+            "description": "list_agents/spawn_agent 返回的子 agent ID"
+          }
+        },
+        "required": [
+          "agentId"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "send_message",
+      "description": "向自己的一个子 agent 投递父消息（持久化到其事件流）。运行中子 agent 的消息将入队（followup_task 续派时注入其上下文）；已终态的子 agent 会报错——此时应改用 followup_task。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "agentId": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string",
+            "description": "要投递的消息内容"
+          }
+        },
+        "required": [
+          "agentId",
+          "message"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "followup_task",
+      "description": "对一个已终态（完成/失败/取消）的子 agent 追加任务：以前次任务摘要 + 期间收到的父消息为上下文，续派一个新子 agent（模型/权限继承链与 spawn_agent 一致）。子 agent 仍在运行时会被拒绝——可先 interrupt_agent。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "agentId": {
+            "type": "string",
+            "description": "要续派的子 agent ID（须已终态）"
+          },
+          "task": {
+            "type": "string",
+            "description": "追加的子任务描述"
+          },
+          "model": {
+            "type": "string",
+            "description": "可选：指定模型 preset（默认继承父）"
+          }
+        },
+        "required": [
+          "agentId",
+          "task"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "spawn_agent",
+      "description": "派生一个子智能体异步执行独立子任务。子智能体拥有自己的思考和工具调用能力，权限与当前会话一致（继承只读/项目写/完全访问），完成后用 wait_agent 获取结果摘要。适合可并行的独立子任务（如分别分析多个文件、分别跑多个校验）。子 agent 不能再派生子 agent。可用 role 指定专职角色（检索/搜集/整理/读取/分析/测试/写作/规划/修复等，注入对应职责指令）；未指定时按任务内容自动推断。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "type": "string",
+            "description": "子智能体要完成的任务描述，应清晰、自包含（子 agent 看不到当前对话历史）"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "search",
+              "collect",
+              "organize",
+              "read",
+              "analysis",
+              "general",
+              "test",
+              "write",
+              "plan",
+              "fix"
+            ],
+            "description": "可选，子智能体的专职角色：search=检索 collect=搜集 organize=整理 read=读取 analysis=分析 general=通用 test=测试 write=写作 plan=规划 fix=修复（注入对应职责指令，软约束）"
+          },
+          "model": {
+            "type": "string",
+            "description": "可选，子智能体使用的模型（须是已配置的模型 preset 的 model 或 id）；默认继承当前会话模型"
+          },
+          "instructions": {
+            "type": "string",
+            "description": "可选，对子智能体的额外约束或指导（如输出格式、边界）"
+          }
+        },
+        "required": [
+          "task"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "list_agents",
+      "description": "列出当前会话派生的全部子智能体及其状态（running/done/failed/cancelled）。",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "wait_agent",
+      "description": "等待指定子智能体结束并返回结果摘要（阻塞调用）。摘要含最终回复正文（受 token 预算截断）、改动文件清单与失败原因。超时不会终止子智能体，可稍后重试。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "agentId": {
+            "type": "string",
+            "description": "spawn_agent 返回的 agentId"
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "超时毫秒数，默认 300000（5 分钟），上限 600000"
+          }
+        },
+        "required": [
+          "agentId"
+        ]
+      }
+    }
+  }
+];

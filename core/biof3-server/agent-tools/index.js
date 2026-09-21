@@ -90,5 +90,10 @@ module.exports = {
   createAgentToolCallController,
   runAgentToolCallBatch,
 };
+// BLOCK-109-CORE-ARCH P2 — 工具执行元数据注册表（调度分组地基）
+module.exports.TOOL_METADATA = require('./tool-metadata').TOOL_METADATA;
+module.exports.getToolMetadata = require('./tool-metadata').getToolMetadata;
+module.exports.getExecutionMetadataByName = require('./tool-metadata').getToolMetadata;
+module.exports.METADATA_KEYS = require('./tool-metadata').METADATA_KEYS;
 module.exports.ackActToken = _ackActToken;
 module.exports.pendingActAcks = _pendingActAcks;

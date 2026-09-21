@@ -1,6 +1,6 @@
 # BLOCK-109-CORE-ARCH-CONVERGENCE — 会话核心链路架构收敛（单一事实源）
 
-**状态**：`active（P1 已收口——2026-09-21：P1.1 生命周期事件+delta 透明合并（50e1e030）/ P1.2+P1.3 前端恢复单一后端源+localStorage 双轨退役（3f25ffc3）/ P1.4 legacy SSE 物理退役+组装单链 history-assembly（c029b616）/ P1.5 验收 flow block109-single-truth-live 7/7（实况/刷新中恢复/终态对账）；验收=基线等价守住 + flow 三腿 + 契约全绿；下一步 P2 工具定义元数据化待启动；立项=2026-09-21 用户裁决「基于这些点 开一个或多个block系统性优化gewu」，基于 ZCode 对比审计；D1–D6 按 §7 留痕）`
+**状态**：`active（P2 已收口——2026-09-21：tool-metadata.js 注册表 74 工具六字段全量（完备性门禁=缺元数据/未知名即红）+ 调度分组（runAgentToolCallBatch 只读并发组 Promise.all、spawn 族串行保序、结果原序重组）+ MCP 同轨投影（registry listTools 挂 executionMetadata）+ tool-defs.js 按域拆分九域 facade（71 工具深度对账 71/71 零漂移，WORKSPACE 子集 26 顺序保真）；验收=契约 4/4 + test:changed 0 红；下一步 P3 架构门禁基线化；P1 已收口（8857c574）；立项=2026-09-21 用户裁决「基于这些点 开一个或多个block系统性优化gewu」，基于 ZCode 对比审计；D1–D6 按 §7 留痕）`
 **立项**：2026-09-21（对比审计报告存在于立项会话；证据 file:line 全部落在本仓与参考仓可复现——Mac `/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/reference/ZCode`；Windows `D:\1.WorkDir\reference\ZCode`（2026-09-21 全量 clone：上游公开史仅 2 commits——`77432b6` Initial commit → `872ad96` feat: open source，包版本 v3.14.0，无 tag））
 **修订**：2026-09-21（用户核查裁决「立项时未考虑已收口的 BLOCK-109-AGENT-ORCHESTRATION-UX」成立——立项提交 `5427a489` 14:52 早于其四件套落地 `dddd135c` 15:09；本次吸收四件套为基线输入与零退化红线，D1–D6 与四阶段划分不变）
 **修订 2**：2026-09-21（用户实测三裁决之二「按你的建议来」：P0 拆前基线并入实机故障场景——run `80669989` 7 子智能体 3 败的证据链，见 §1 P0-2）
