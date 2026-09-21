@@ -111,6 +111,11 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // + closeout 全链；台账=门禁基线/例外文件与 arch-cycles 基线（无新 UI 功能）。豁免
   // subject UI-### 与同提交台账要求；不重写共享历史。
   'c26c16a0557790412c45646f7465d6a19d76e700',
+  // 2026-09-21 P1.4 尾巴 lint 清偿（ff77faa7）：fetchInFlightPrimaryTasks any 链收敛 +
+  // agentTaskStream 死导入删除——零 UI 行为变化；验证=quality:lint 复绿 + tsc 0 红；
+  // 台账=test:changed 0 红（无新 UI 功能）。豁免 subject UI-### 与同提交台账要求；
+  // 不重写共享历史。
+  'ff77faa712b11873d8ffe3fe0a4533a96c0877a2',
   // 2026-09-21 BLOCK-109-CORE-ARCH P1.4 legacy SSE 双轨退役（c029b616）：前端
   // streamChatLegacy/提交失败回退/VITE_AGENT_TASK_MODE 逃生口删除——提交路径收敛为
   // task 模式唯一，用户可见行为=错误路径从「legacy 兼容回退」变「诚实报错」，零常规
@@ -449,6 +454,11 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 条目；台账=门禁自测 test/block109-p3-gates.test.mjs。豁免同提交台账要求（subject
   // 门经 LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；不重写共享历史。
   'c26c16a0557790412c45646f7465d6a19d76e700',
+  // 2026-09-21 P1.4 尾巴 lint 清偿（ff77faa7）：fetchInFlightPrimaryTasks any 链收敛 +
+  // agentTaskStream 死导入删除——零 UI 行为变化；验证=quality:lint 复绿 + tsc 0 红；
+  // 台账=test:changed 0 红（无新 UI 功能）。豁免 subject UI-### 与同提交台账要求；
+  // 不重写共享历史。
+  'ff77faa712b11873d8ffe3fe0a4533a96c0877a2',
   // 2026-09-21 BLOCK-109-CORE-ARCH P1.4 legacy SSE 双轨退役（c029b616）：前端 legacy
   // 提交路径与逃生口删除，零常规 UI 面变化（错误路径诚实化）；无新 UI 功能故无新台账
   // 条目；台账=退役行为契约 test/block109-p1-events.test.mjs。豁免同提交台账要求
