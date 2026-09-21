@@ -4898,8 +4898,29 @@
         "arch-gate"
       ],
       "notes": "2026-09-21 立项即启动（用户裁决「基于这些点 开一个或多个block系统性优化gewu」——基于 ZCode 开源库 zai-org/ZCode（Apache-2.0，本仓外 reference/ZCode）对比审计发现）：会话核心链路架构收敛。四阶段：P0 拆前行为基线+UI-431 尾巴清偿+卫生清偿（biof3.db 退库/main.js 死守卫）+事件模型评审 → P1 事件溯源单一事实源+组装唯一化（legacy ai-agent/chat.js 786 行退役、4 个 resume 入口收敛为 1、conversationRunStore 改消费后端投影、组装收敛 history-assembly 单链）→ P2 工具定义元数据化（tool-defs.js 按域拆分+readOnly/destructive/timeoutMs/riskLevel+调度分组并行+MCP 同轨）→ P3 架构门禁基线化（code-size sha256 指纹+例外 expires 过期+forbidCycles 入 closeout）。压缩机制零重复（BLOCK-95 B2/BLOCK-98 已交付，对比审计初判「无压缩」经立项核实撤回）。非范围=虚拟化候选包/轮询→SSE 候选/node:sqlite 评估（候选池）/三契约单源化（候选池）/分段预算（候选池）/ZCode 代码直接复制（Apache-2.0 合规：仅借鉴设计自研）/G1+。呈现层 BLOCK-107/108 资产零退化；BLOCK-106 登记的 task_events 模型改造候选由本包 P1 吸收。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-109-AGENT-ORCHESTRATION-UX",
+      "path": "docs/block-109-agent-orchestration-ux-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-109-agent-orchestration-ux",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-21",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "COMPLETED",
+      "tags": [
+        "block-109",
+        "agent-orchestration",
+        "resilience",
+        "result-cards",
+        "presentation"
+      ],
+      "notes": "子智能体编排的用户呈现与韧性（用户实测全方位梳理项目后四项反馈全数立项：「都需要做 一次性推完」）。实测还原=主任务 17 轮/50 工具调用/并行派发 5 子智能体，主任务 read ECONNRESET 挂除致 9 项清单只完成 3 项；侧栏 18 个智能体=概览 !projectId 兜底过滤把孤儿任务计入每个项目（真实 5 个）。四件：P1 主循环瞬断重试（loop-orchestrator 每轮模型调用 ECONNRESET 等网络瞬断退避重试×2）；P2 spawn 派发并行度软上限（活跃子任务≥3 返回软指引，模型保持控制权）；P3 终态结果卡组化（弃 slice(-2) 截断，最近一批收拢为可折叠汇总卡）；P4 项目概览孤儿过滤（删 !projectId 兜底）。非范围=子任务结果自动汇总成结论/数据模型与 API 形状改动。UI 台账=UI-432。",
+      "completedAt": "2026-09-21"
     }
   ],
   "lastUpdated": "2026-09-21",
-  "documentCount": 263
+  "documentCount": 264
 }

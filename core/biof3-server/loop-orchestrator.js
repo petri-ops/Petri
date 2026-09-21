@@ -93,6 +93,39 @@ const { createFreshnessTracker, applyFreshnessMark } = require('./helpers/contex
  * @param {object} opts
  * @param {Array} opts.messages - Full messages array (with system prompt at index 0)
  * @param {object} opts.toolCtx - Tool context
+/**
+ * BLOCK-109 P1 — 每轮模型调用的网络瞬断重试。
+ *
+ * ECONNRESET 等传输层瞬断（2026-09-21 用户实测：全景梳理主任务 read ECONNRESET
+ * 直接挂除，9 项清单只完成 3 项，而 5 个子任务结果都已就绪）不该一击致命。
+ * 退避重试至多 retries 次；重试耗尽原样上抛，走既有 fatal/fallback 路径。
+ * abort 一旦置位立即停止重试。
+ */
+const TRANSIENT_NETWORK_ERROR = /ECONNRESET|ECONNREFUSED|ETIMEDOUT|EPIPE|socket hang up|network/i;
+
+async function callProviderWithNetworkRetry(fn, { retries = 2, baseDelayMs = 3000, log = () => {}, isAborted = () => false } = {}) {
+  let lastErr;
+  for (let retry = 0; retry <= retries; retry++) {
+    if (retry > 0) {
+      if (isAborted()) throw lastErr;
+      const delay = baseDelayMs * retry;
+      log(`模型连接瞬断，${Math.round(delay / 1000)}s 后自动重试（${retry}/${retries}）`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      if (isAborted()) throw lastErr;
+    }
+    try {
+      return await fn();
+    } catch (error) {
+      lastErr = error;
+      const msg = String((error && error.message) || error);
+      if (retry === retries || !TRANSIENT_NETWORK_ERROR.test(msg)) throw error;
+      log(`[network-retry] transient model call failure (${msg.slice(0, 140)}), retry ${retry + 1}/${retries}`);
+    }
+  }
+  throw lastErr;
+}
+
+/**
  * @param {function} opts.shouldAbort - Abort check function
  * @param {function} opts.emitToolResult - Callback for tool result events
  * @param {function} opts.emitAssistant - Callback for assistant events
@@ -615,11 +648,13 @@ async function runLoop({
       for (let attempt = 1; attempt <= attemptLimit && !aborted(); attempt++) {
         streamedText = '';
         const protocolRecoveryAttempt = finalizing && attempt > 1;
-        upJson = await callChatProvider(
-          providerName,
-          apiKey,
-          reqBody,
-          {
+        // BLOCK-109 P1 — 网络瞬断重试包裹（finalizing 走既有 attempt 循环不叠加）
+        upJson = await callProviderWithNetworkRetry(
+          () => callChatProvider(
+            providerName,
+            apiKey,
+            reqBody,
+            {
             userId,
             conversationId: _activeConv && _activeConv.id,
             kind: attempt > 1 ? 'agent_finalization_retry' : 'agent_iter',
@@ -670,6 +705,13 @@ async function runLoop({
             // BLOCK-81 P1 — 思考档位透传（未设置＝undefined＝不发任何思考参数）
             ...(thinkingLevel ? { thinkingLevel } : {}),
             ...(protocolRecoveryAttempt ? { fallbackWhen: require('./agent-tools').finalizationFallbackReason } : {}),
+          }
+          ),
+          {
+            retries: 2,
+            baseDelayMs: 3000,
+            log: (message) => _emit({ event: 'agent_status', phase: 'network_retry', message }),
+            isAborted: aborted,
           }
         );
         // BLOCK-56 P1 — finalization 档不传 onEvent，modelRouting 兜底追踪
@@ -1238,4 +1280,4 @@ async function runLoop({
   };
 }
 
-module.exports = { runLoop };
+module.exports = { runLoop, callProviderWithNetworkRetry, TRANSIENT_NETWORK_ERROR };

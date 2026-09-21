@@ -4019,3 +4019,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据（契约）**：`ToolActivityList.test.tsx` 18/18（+尾轮展开：运行簇只渲染当轮行、手动展开见全部/+派发行无快照无计时）、`AgentRunPanel.test.tsx` 5/5（+事件折叠为段模型、面板渲染主窗同套 Qoder 时间线：过渡叙述/计数簇头/已思考行/qoder-cluster-body）；全五文件 60/60；`tsc --noEmit` 0 红；`quality:lint` 0 error（P2 的 render 内 Date.now 与 effect 内同步 setState 分别被 react 编译规则拦截，均已按 `useRunningElapsed` 先例收进 effect/interval）。
 - **实机待补（诚实登记）**：面板实机打开验证未完成——`agentOpenInRail` 事件派发后右栏面板未挂载（panelTitle=null，疑似 rail 挂载前置条件未满足，非渲染缺陷：同构渲染路径已被 P3 契约测试覆盖）；flow 长任务全流程复跑同批受阻于测试实例存活问题（StackWatchdog 重启主栈时连带清理测试实例）。两项待环境稳定窗口补跑后翻 verified。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-432: 子智能体回写呈现——终态结果组卡 + 项目概览孤儿过滤（BLOCK-109 P3/P4）(2026-09-21 verified，dev Electron 边界内实机)
+
+- **来源**：BLOCK-109（用户实测「全方位梳理项目」后四项反馈之 P3/P4：「每个智能体最终都会输出到主会话区」「怎么会直接派了18个」；裁决「都需要做 一次性推完」）。
+- **实测还原**：用户主任务并行派发 5 个子智能体（4 同批+1 补派），结果卡按完成时间随机刷屏；侧栏「18 个智能体」= 概览 `useProjectAgentOverview` 的 `!t.projectId` 兜底把**无主孤儿任务**（API 直连调试产物等）计入**每一个**项目（6 真实 + 12 孤儿泄漏）。
+- **改动（P3 组卡）**：①`useTerminalSubAgentResults` 弃 `slice(-2)` 截断（信息缺失换不来自由）→ 最近一批终态子任务全量返回；②新增 `SubAgentResultGroup`——同一会话的终态子任务收拢为**一个可折叠汇总卡**：摘要行恒定可见（「阶段汇总 · N 个子智能体 · 成功 X · 失败 Y」），有失败默认展开（失败必须显性），全成功默认收起，点击切换；组内按派发序排明细卡。
+- **改动（P4 孤儿过滤）**：`WorkspaceSummaryCard` 的 `useProjectAgentOverview` 删除 `!t.projectId` 兜底——孤儿任务（多为 API 直连调试产物）不再计入任何项目的智能体图标带（UI-386 历史带的设计意图保留，只修泄漏）。
+- **证据（契约）**：`SubAgentResultGroup.test.tsx` 3/3（全成功默认收起+展开见明细 / 有失败默认展开+失败计数 / 空列表不渲染）；`test/block109-orchestration.test.mjs` 3/3（P1 重试行为四态 + P2 软上限源码契约 + P4 孤儿过滤源码契约）。
+- **证据（实机 · 2026-09-21）**：spawn 场景真模型轮次——主任务派子智能体列目录，wait_agent 等待后回写：运行中簇头「正在执行工具 1/1 项 · 已调用 wait_agent · 已运行 1.0 s」（尾轮展开+秒表），完成时「**阶段汇总 · 1 个子智能体 · 成功 1**」组卡出现。截图 `acceptance/block-109/spawn-live.png`。
+- **同批后端件（P1/P2，契约验证）**：主循环网络瞬断重试 `callProviderWithNetworkRetry`（ECONNRESET 等退避重试×2；行为四态测试=重试后成功/耗尽上抛/非瞬断不重试/abort 即停）+ spawn 并行度软上限（活跃≥3 软指引 wait_agent）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

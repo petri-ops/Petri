@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { getPlatformApiPrefix } from '@/lib/authClient';
 import type { SubAgentCardData } from '../../SubAgentResultCard';
 
-/** UI-405 — 会话终态子智能体结果（服务端真相轮询 5s；失败静默保留上次数据）。
- *  BLOCK-92 三波拆分 — 自 SimpleChat.tsx 尾部原样平移（调用点原位，零行为变化）。 */
+/** UI-405 — 会话终态子智能体结果（真相轮询 5s；BLOCK-92 拆分）。UI-432（BLOCK-109 P3）弃 slice(-2)：最近一批全量返回，组卡收拢呈现。 */
 export function useTerminalSubAgentResults(projectId: string | null | undefined, conversationId: string | null | undefined): SubAgentCardData[] {
   const [rows, setRows] = useState<SubAgentCardData[]>([]);
   useEffect(() => {
@@ -20,7 +19,8 @@ export function useTerminalSubAgentResults(projectId: string | null | undefined,
           if (!alive || !body || body.ok !== true) return;
           const terminal = (body.tasks || [])
             .filter((t: { status?: string }) => t.status && t.status !== 'running')
-            .slice(-2)
+            // UI-432（BLOCK-109 P3）— 弃 slice(-2) 截断：最近一批终态子任务全量返回，
+            // 由 SubAgentResultGroup 收拢为可折叠汇总卡（刷屏与信息缺失两头都解决）。
             .map((t: { taskId: string; taskText?: string; status: string; createdAt?: string; finishedAt?: string; summaryHead?: string | null }) => ({
               taskId: String(t.taskId || ''),
               taskText: String(t.taskText || ''),
