@@ -64,7 +64,7 @@ import {
   uploadAttachment,
 } from './SimpleChat/attachmentUpload';
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
-import { SubAgentResultCard } from './SubAgentResultCard';
+import { SubAgentResultGroup } from './SubAgentResultGroup';
 // BLOCK-92 三波拆分 — 思考档位/滚动守卫/终态子智能体结果三簇外迁 hooks/（原样平移）
 import { useThinkingLevel } from './SimpleChat/hooks/useThinkingLevel';
 import { useScrollGuard } from './SimpleChat/hooks/useScrollGuard';
@@ -1067,11 +1067,7 @@ export function SimpleChat({
                       </div>
                     )}
                     {m.role === 'assistant' && terminalSubTasks.length > 0 && i === displayMessages.length - 1 && (
-                      <div className="sc-msg-child-finished" role="status" data-testid="subagent-result-cards">
-                        {terminalSubTasks.map((t) => (
-                          <SubAgentResultCard key={t.taskId} data={t} />
-                        ))}
-                      </div>
+                      <SubAgentResultGroup tasks={terminalSubTasks} />
                     )}
                     <CopilotMarkdown
                       text={m.content || m.statusMessage || (m.pending ? '…' : '')}

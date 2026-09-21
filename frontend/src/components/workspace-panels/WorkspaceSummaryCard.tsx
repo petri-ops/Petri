@@ -693,7 +693,10 @@ function useProjectAgentOverview(projectId: string | null, enabled: boolean): Ag
       listAgentTasks(50)
         .then((tasks) => {
           if (!alive) return;
-          setRows(tasks.filter((t) => !t.projectId || t.projectId === projectId));
+          // UI-432（BLOCK-109 P4）— 孤儿任务（无 projectId，多为 API 直连调试产物）不再
+          // 计入每个项目的智能体图标带：此前 !projectId 兜底使同一批孤儿泄漏进所有项目
+          // （用户实测「18 个智能体」= 6 真实 + 12 孤儿）。
+          setRows(tasks.filter((t) => t.projectId === projectId));
         })
         .catch(() => {
           if (alive) setRows([]);

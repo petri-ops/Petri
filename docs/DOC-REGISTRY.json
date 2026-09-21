@@ -4876,8 +4876,29 @@
       ],
       "notes": "会话信息流 Qoder 化：执行间过渡叙述 + 簇内紧凑单行流（用户裁决原话「更进一步的靠近 qoder的情况 执行和执行之间是有过渡性的描述 执行内部是有运行的终端命令和结果 思考的情况 以及读取文件等 内部是紧凑的最好是单行展示 只有点击才会展开相关内容」＋Qoder 截图；用户睡眠窗口预授权夜间自主推进）。P0 已核：过渡叙述数据链路已全通（loop-orchestrator.js:771 仅工具轮 assistantProgress.record → agent_progress 实时下发 + meta.progressUpdates 落库 conversation-adapter.js:118 → message.progressUpdates 前端喂数），零后端改动。三阶段：P1 段模型（progress 改序簇前 + reasoning 折入 ToolsSegment）→ P2 时间线上轴（过渡叙述正文式渲染含首条，UI-305 首条省略约定在时间线呈现上取代登记 plan §7.2）→ P3 簇内 Qoder 行形态（计数式簇头「执行工具 N 次」+ 统一单行含 exec 默认折叠 + 点击展开 + 思考入簇；门控 collapseWhenSettled，Dock/桥接旧调用方零变化）。非范围=零后端/零新依赖/不动 Dock 与降级路径/不删 harness 工具（bg_exec 审计=plan §7.1 建议登记：exec 封装族有必要保留，yield_ms 中间档收敛等行为变更需另裁）。UI 台账=UI-429。",
       "completedAt": "2026-09-21"
+    },
+    {
+      "id": "BLOCK-109-AGENT-ORCHESTRATION-UX",
+      "path": "docs/block-109-agent-orchestration-ux-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-109-agent-orchestration-ux",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-21",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "COMPLETED",
+      "tags": [
+        "block-109",
+        "agent-orchestration",
+        "resilience",
+        "result-cards",
+        "presentation"
+      ],
+      "notes": "子智能体编排的用户呈现与韧性（用户实测全方位梳理项目后四项反馈全数立项：「都需要做 一次性推完」）。实测还原=主任务 17 轮/50 工具调用/并行派发 5 子智能体，主任务 read ECONNRESET 挂除致 9 项清单只完成 3 项；侧栏 18 个智能体=概览 !projectId 兜底过滤把孤儿任务计入每个项目（真实 5 个）。四件：P1 主循环瞬断重试（loop-orchestrator 每轮模型调用 ECONNRESET 等网络瞬断退避重试×2）；P2 spawn 派发并行度软上限（活跃子任务≥3 返回软指引，模型保持控制权）；P3 终态结果卡组化（弃 slice(-2) 截断，最近一批收拢为可折叠汇总卡）；P4 项目概览孤儿过滤（删 !projectId 兜底）。非范围=子任务结果自动汇总成结论/数据模型与 API 形状改动。UI 台账=UI-432。",
+      "completedAt": "2026-09-21"
     }
   ],
   "lastUpdated": "2026-09-21",
-  "documentCount": 262
+  "documentCount": 263
 }

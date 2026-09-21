@@ -1995,7 +1995,8 @@
         "frontend/src/components/copilot/ConversationTimeline.tsx",
         "frontend/src/components/copilot/ToolActivityList.tsx",
         "frontend/src/components/copilot/SimpleChat.tsx",
-        "acceptance/block-107/**"
+        "acceptance/block-107/**",
+        "acceptance/block-108/**"
       ],
       "tests": [
         "frontend/src/components/copilot/conversationSegments.test.ts",
@@ -2125,6 +2126,23 @@
       "frontendRelated": false,
       "classifiesScripts": true,
       "scriptRole": "development-smoke"
+    },
+    {
+      "id": "block109-agent-orchestration-ux",
+      "note": "BLOCK-109 子智能体编排呈现与韧性：主循环瞬断重试（loop-orchestrator callProviderWithNetworkRetry）+ spawn 并行度软上限 + 子智能体终态结果组卡（SubAgentResultGroup）+ 概览孤儿过滤（WorkspaceSummaryCard）。契约=test/block109-orchestration.test.mjs（重试四态/软上限源码契约/孤儿过滤源码契约）+ SubAgentResultGroup.test.tsx。证据 acceptance/block-109/。",
+      "patterns": [
+        "core/biof3-server/loop-orchestrator.js",
+        "core/biof3-server/agent-tools/spawn-agent-tools.js",
+        "frontend/src/components/copilot/SubAgentResultGroup.tsx",
+        "frontend/src/components/copilot/SimpleChat/hooks/useTerminalSubAgentResults.ts",
+        "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
+        "acceptance/block-109/**"
+      ],
+      "tests": [
+        "test/block109-orchestration.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": false
     }
   ]
 }

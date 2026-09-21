@@ -1,4 +1,5 @@
 # Gewu Desktop（格物）文档入口
+141. [`block-109-agent-orchestration-ux-plan.md`](./block-109-agent-orchestration-ux-plan.md) — 2026-09-21 用户实测后四项反馈全数立项（「都需要做 一次性推完」）：**子智能体编排的用户呈现与韧性**。P1 主循环瞬断重试（ECONNRESET 等网络瞬断退避重试×2，重试耗尽才 fatal）+ P2 派发并行度软上限（活跃子任务≥3 软指引 wait_agent）+ P3 终态结果卡组化（弃 slice(-2)，最近一批收拢为可折叠汇总卡）+ P4 项目概览孤儿过滤（删 !projectId 兜底，18=6 真实+12 孤儿泄漏的根因）。非范围=子任务结果自动汇总/数据模型改动。UI 台账=UI-432。
 
 最后更新：2026-08-18（BLOCK-10-AUDIT-CLOSEOUT COMPLETED · BLOCK-10-ARCHITECTURE COMPLETED · **BLOCK-11-BIOSKILLS-INTEGRATION 启动**：用户裁决 "block-11-bioSkills" 启动 v1.0 plan（active）；Top 5 priority categories：single-cell (P0) / variant-calling (P0) / pathway-analysis (P1) / methylation-analysis (P1) / read-qc (P2)；GPTomics/bioSkills.git → BioF3 plugin/skill 映射；6 PHASE：PHASE 0 调研 + PHASE 1 single-cell + PHASE 2 variant-calling + PHASE 3 pathway+methylation + PHASE 4 read-qc + PHASE 5 收口；不外推 packaged / Provider / GA / P7 / notarization / dist staleness G1+）
 

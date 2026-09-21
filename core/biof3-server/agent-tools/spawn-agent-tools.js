@@ -32,6 +32,8 @@ const MAX_TASK_CHARS = 8000;
 const MAX_INSTRUCTIONS_CHARS = 4000;
 const WAIT_POLL_INTERVAL_MS = 1000;
 const WAIT_DEFAULT_TIMEOUT_MS = 300000;
+// BLOCK-109 P2 — 单父任务同时活跃子智能体上限（软：超出即软指引，非硬拒）
+const SPAWN_CONCURRENCY_LIMIT = 3;
 const WAIT_MIN_TIMEOUT_MS = 1000;
 const WAIT_MAX_TIMEOUT_MS = 600000;
 const SUMMARY_TOKEN_BUDGET = 4000;
@@ -137,6 +139,22 @@ async function spawn_agent(args, ctx) {
   }
   if (parentTask.status !== 'running' || parentTask.agentStatus !== 'running') {
     return fail('parent_not_running', '父任务已结束，不能再派生子 agent。');
+  }
+
+  // BLOCK-109 P2 — 派发并行度软上限：活跃子任务 ≥ 上限时软指引而非硬拒。
+  // 并发子 agent 过多 = 并发模型连接过多 = 上游瞬断（ECONNRESET）概率上升
+  // （2026-09-21 用户实测 4 并行派发后主/子双双 ECONNRESET）；同时保持模型
+  // 控制权——wait_agent 腾位后可再派。
+  const runningChildren = agentTaskStore.getRunningChildAgentTasks(parentTaskId) || [];
+  if (runningChildren.length >= SPAWN_CONCURRENCY_LIMIT) {
+    const activeList = runningChildren
+      .map((t) => String(t.taskId || '').slice(0, 8))
+      .join(', ');
+    return fail(
+      'concurrency_limit',
+      `活跃子智能体已达并行上限（${runningChildren.length}/${SPAWN_CONCURRENCY_LIMIT}：${activeList}）。`
+        + '请先调用 wait_agent 等待其中一个完成以腾出位置，或先执行不依赖新子智能体的其他工作。'
+    );
   }
 
   const parentParams = parentTask.params || {};

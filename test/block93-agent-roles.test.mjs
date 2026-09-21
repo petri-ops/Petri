@@ -148,6 +148,9 @@ describe('spawn_agent role 参数', () => {
     const launch = fakeRunnerState.launches.find((l) => l.taskId === res.agentId);
     assert.ok(launch, 'runAgentLoop 已启动');
     assert.ok(launch.roleDirective.includes('检索'), 'roleDirective 注入');
+    // BLOCK-109 P2 — 并行度上限（活跃子任务 ≥3 软拒）落地后，测试内派发的子任务
+    // 需即用即收，否则共享父 id 的后续用例会被上限拦截。
+    agentTaskStore.markAgentTaskDone(res.agentId, null);
   });
 
   test('未知 role → invalid_arguments fail-closed，不创建任务', async () => {
@@ -169,6 +172,7 @@ describe('spawn_agent role 参数', () => {
     await drainTicks();
     const launch = fakeRunnerState.launches.find((l) => l.taskId === res.agentId);
     assert.equal(launch.roleDirective, null);
+    agentTaskStore.markAgentTaskDone(res.agentId, null);
   });
 
   test('followup_task 继承原子 agent 角色；显式 role 可覆盖', async () => {
@@ -189,6 +193,8 @@ describe('spawn_agent role 参数', () => {
     await drainTicks();
     const overriddenLaunch = fakeRunnerState.launches.find((l) => l.taskId === overridden.agentId);
     assert.ok(overriddenLaunch.roleDirective.includes('修复'));
+    agentTaskStore.markAgentTaskDone(inherited.agentId, null);
+    agentTaskStore.markAgentTaskDone(overridden.agentId, null);
   });
 
   test('followup_task 未知 role → fail-closed', async () => {

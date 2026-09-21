@@ -17,6 +17,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const SCAN_ROOTS = ['src', 'core', 'scripts', 'test'];
 const BASELINE = new Set([
+  // BLOCK-109 收口登记：scripts/block101-startup-timeline-live.cjs（BLOCK-106 P3 落地的
+  // 实机 flow 采集脚本）内 process.platform 仅用于证据头 platform 字段与 darwin 采样
+  // 门控——dev-only 一次性脚本，收敛到 platform-compat 收益为零，登记即留痕。
+  'scripts/block101-startup-timeline-live.cjs',
   'core/biof3-server/agent-tools/system-info-tools.js',
   'core/biof3-server/agent-tools/workspace-tools.js',
   'core/biof3-server/agent-tools/workspace-tools/internals.js',
