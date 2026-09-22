@@ -2237,7 +2237,6 @@
         "core/biof3-server/routes/ai-agent/decisions.js",
         "src/migrations/011_decision_log.sql",
         "scripts/lib/calibration-common.mjs",
-        "scripts/block115-p0-calibrate.mjs",
         "acceptance/block-116/**",
         "test/block116-*.test.mjs",
         ".agents/skills/gewu-dev-infra/dev-verify/flows/block116-decision-platform-live.cjs",
