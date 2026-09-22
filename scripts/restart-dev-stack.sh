@@ -57,6 +57,14 @@ export BIOF3_LOCAL_DATA_DIR='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\dat
 # BLOCK-85 双真机 — 跨端公网门自签证书 CA 信任（后端 fetch 8442/8443 必须；
 # 证书=ECS /etc/nginx/ssl/gewu.crt 的本机拷贝。忘设=重启后跨端互访突然全断
 # DEPTH_ZERO_SELF_SIGNED_CERT，见 dev-infra SKILL「端口与后端实例纪律」第 6 条）
+# BLOCK-110-JEV — 决策 API 凭据注入（key 不入仓；文件在 gitignored 区，用户裁决
+# 「key 暂保留后续轮换」，替换时只改 jev.env 并重启后端）。缺文件静默跳过。
+if [ -f "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/jev.env" ]; then
+  set -a
+  . "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/jev.env"
+  set +a
+  echo "block110: jev.env loaded (TYPESAFE_API_KEY present)"
+fi
 if [ -f "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/ecs-gewu.crt" ]; then
   export NODE_EXTRA_CA_CERTS='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\ecs-gewu.crt'
   echo "block85: NODE_EXTRA_CA_CERTS set (ecs-gewu.crt)"
