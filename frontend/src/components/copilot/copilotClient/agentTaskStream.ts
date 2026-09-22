@@ -12,7 +12,7 @@ import {
   parseToolOutputEvent,
   parseToolResultEvent,
 } from './parse';
-import type { AgentTaskTodoItem, StreamChatOptions } from './types';
+import type { AgentTaskTodoItem, KnowledgeCitation, StreamChatOptions } from './types';
 
 /**
  * BLOCK-39: 订阅断线信号（typed）。仅三类来源：fetch 网络 reject（后端不可达）、
@@ -32,6 +32,38 @@ export class AgentStreamDisconnectedError extends Error {
 const STREAM_RECONNECT_MAX_ATTEMPTS = 24;
 const STREAM_RECONNECT_BASE_DELAY_MS = 1000;
 const STREAM_RECONNECT_MAX_DELAY_MS = 4000;
+
+/**
+ * SSE wire 事件形状（BLOCK-105 §7 Batch-5 类型化；JSON.parse 出站边界契约文档）。
+ * 字段默认 unknown＝后端可能发任意 JSON，运行时防御式解析（typeof/Array.isArray/String）
+ * 保持原样；本接口只锁定期望形状供编译期检查，不改变任何运行时行为。
+ */
+export interface AgentSseEvent {
+  /** task 模式信封判别字段 */
+  event?: unknown;
+  seq?: unknown;
+  /** task 模式信封：{seq, eventType, payload}——取 payload 走原解析 */
+  payload?: AgentSseEvent;
+  /** legacy OpenAI 兼容增量（choices[0].delta.content / reasoning_content） */
+  choices?: Array<{ delta?: { content?: unknown; reasoning_content?: unknown } }>;
+  // —— task/loop 事件字符串字段（wire 契约；运行时 String()/|| 防御保持原样）——
+  childTaskId?: string;
+  status?: string;
+  summaryHead?: string;
+  phase?: string;
+  message?: string;
+  content?: string;
+  loopRunId?: string;
+  iterationId?: string;
+  decision?: string;
+  decisionReasonCode?: string;
+  publicConclusion?: string;
+  automationMode?: string;
+  proposedActionKey?: string;
+  actionKeyHash?: string;
+  reason?: string;
+  [key: string]: unknown;
+}
 
 function isAbortError(err: unknown): boolean {
   return (err as Error)?.name === 'AbortError';
@@ -158,12 +190,12 @@ async function subscribeAgentTaskOnce(
           break;
         }
         try {
-          const obj = JSON.parse(data);
+          const obj = JSON.parse(data) as AgentSseEvent;
           // task 模式事件包成 {seq, eventType, payload}，取 payload 走原解析
           const evt = obj.payload ? obj.payload : obj;
           if (typeof obj.seq === 'number') lastSeq = obj.seq;
           if (evt && evt.event === 'done' && Array.isArray(evt.filesChanged)) {
-            doneFiles = evt.filesChanged;
+            doneFiles = evt.filesChanged as Array<{ path: string; status: string }>;
           }
           _handleSseEvent(evt, opts);
         } catch {
@@ -188,11 +220,11 @@ async function subscribeAgentTaskOnce(
 }
 
 /** BLOCK-97 — task_todo 整单快照解析（防御式：畸形条目降级/过滤，不炸流） */
-function parseTaskTodoEvent(obj: any): AgentTaskTodoItem[] {
-  if (!Array.isArray(obj.items)) return [];
+function parseTaskTodoEvent(obj: AgentSseEvent): AgentTaskTodoItem[] {
+  const rawItems = Array.isArray(obj.items) ? (obj.items as Array<Record<string, unknown>>) : [];
   const items: AgentTaskTodoItem[] = [];
-  for (let i = 0; i < obj.items.length; i++) {
-    const raw = obj.items[i];
+  for (let i = 0; i < rawItems.length; i++) {
+    const raw = rawItems[i];
     if (!raw || typeof raw !== 'object') continue;
     const content = typeof raw.content === 'string' ? raw.content.trim() : '';
     if (!content) continue;
@@ -206,7 +238,7 @@ function parseTaskTodoEvent(obj: any): AgentTaskTodoItem[] {
 }
 
 /** 处理单个 SSE 事件对象（原 streamChat 的解析逻辑，task/legacy 共用） */
-function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
+function _handleSseEvent(obj: AgentSseEvent, opts: StreamChatOptions): void {
   // UI-AGENTWB-###: SSE dispatch used to inline helpers (e.g.
   // localizeToolResult for backend tool-result envelopes). When those
   // helpers got refactored out of this module the call site silently
@@ -223,7 +255,7 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
   }
 }
 
-function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
+function _dispatchSseEvent(obj: AgentSseEvent, opts: StreamChatOptions): void {
   const {
     onDelta,
     onReasoning,
@@ -249,7 +281,7 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
   if (obj.error) {
     // BLOCK-38 P2: 后端 error 事件携带 resumable/interruptedAt（服务中断清扫标记）
     // BLOCK-56 P1: 任务级降级时后端已自动新建续跑 task，error 附带 fallbackTaskId
-    onError?.(new Error(obj.error), {
+    onError?.(new Error(obj.error as string), {
       resumable: obj.resumable === true,
       interruptedAt: typeof obj.interruptedAt === 'string' ? obj.interruptedAt : null,
       fallbackTaskId: typeof obj.fallbackTaskId === 'string' ? obj.fallbackTaskId : null,
@@ -278,11 +310,11 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
     return;
   }
   if (obj.event === 'conversation') {
-    onConversation?.({ conversationId: obj.conversationId, title: obj.title });
+    onConversation?.({ conversationId: obj.conversationId as string, title: obj.title as string | undefined });
     return;
   }
   if (obj.event === 'topic_shift') {
-    onTopicShift?.({ conversationId: obj.conversationId, reason: obj.reason || '' });
+    onTopicShift?.({ conversationId: obj.conversationId as string, reason: (obj.reason as string) || '' });
     return;
   }
   // HLE-C4: Loop Controller events
@@ -314,7 +346,7 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
     return;
   }
   if (obj.event === 'iter') {
-    onIter?.(obj.n || 1);
+    onIter?.((obj.n as number) || 1);
     return;
   }
   if (obj.event === 'agent_status') {
@@ -371,8 +403,8 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
   if (obj.event === 'knowledge_citations') {
     // BLOCK-94 / UI-402 — 知识溯源（自动召回注入块清单；防御式解析不炸流）
     const citations = Array.isArray(obj.citations)
-      ? obj.citations
-          .map((c: any) =>
+      ? (obj.citations as Array<Record<string, unknown>>)
+          .map((c): KnowledgeCitation | null =>
             c && typeof c === 'object'
               ? {
                   docId: typeof c.docId === 'string' ? c.docId : undefined,
@@ -381,14 +413,18 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
                   channels:
                     c.channels && typeof c.channels === 'object'
                       ? {
-                          vector: typeof c.channels.vector === 'number' ? c.channels.vector : undefined,
-                          fts: typeof c.channels.fts === 'number' ? c.channels.fts : undefined,
+                          vector: typeof (c.channels as { vector?: unknown }).vector === 'number'
+                            ? (c.channels as { vector?: number }).vector
+                            : undefined,
+                          fts: typeof (c.channels as { fts?: unknown }).fts === 'number'
+                            ? (c.channels as { fts?: number }).fts
+                            : undefined,
                         }
                       : undefined,
                 }
               : null
           )
-          .filter(Boolean)
+          .filter((c): c is KnowledgeCitation => c !== null)
       : [];
     onKnowledgeCitations?.({ citations });
     return;
@@ -398,7 +434,9 @@ function _dispatchSseEvent(obj: any, opts: StreamChatOptions): void {
       (typeof obj.taskId === 'string' && obj.taskId) || 'legacy';
     // BLOCK-31 P2: done 事件携带权威 filesChanged + 任务所属会话
     emitAgentTaskDone(doneTaskId, kind, {
-      filesChanged: Array.isArray(obj.filesChanged) ? obj.filesChanged : undefined,
+      filesChanged: Array.isArray(obj.filesChanged)
+        ? (obj.filesChanged as Array<{ path: string; status: string }>)
+        : undefined,
       conversationId: opts.conversationId,
     });
     return;

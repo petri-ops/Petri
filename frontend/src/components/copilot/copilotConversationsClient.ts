@@ -16,6 +16,21 @@ function getAuthHeader(): Record<string, string> {
 
 export type ConversationStatus = 'active' | 'archived';
 
+/**
+ * 会话 REST 信封 wire 形状（BLOCK-105 §7 Batch-5 类型化；JSON 解析出站边界契约文档）。
+ * 字段 unknown＝后端可能发任意 JSON，运行时防御式解构保持原样。
+ */
+interface ConversationsEnvelope {
+  status?: unknown;
+  conversations?: ConversationSummary[];
+  conversation?: ConversationSummary | null;
+  messages?: ConversationMessage[];
+  hasMore?: unknown;
+  nextBefore?: unknown;
+  windowOffset?: unknown;
+  compaction?: ConversationCompactionInfo | null;
+}
+
 export interface ConversationSummary {
   id: string;
   title: string;
@@ -57,7 +72,7 @@ export async function listConversations(
       headers: getAuthHeader(),
     });
     if (!resp.ok) return [];
-    const data = await resp.json();
+    const data = (await resp.json()) as ConversationsEnvelope;
     return data.status === 'ok' ? data.conversations || [] : [];
   } catch {
     return [];
@@ -76,8 +91,8 @@ export async function createConversation(
       body: JSON.stringify({ title: title || '新对话', lastPage: lastPage || null, project_id: projectId || null }),
     });
     if (!resp.ok) return null;
-    const data = await resp.json();
-    return data.status === 'ok' ? data.conversation : null;
+    const data = (await resp.json()) as ConversationsEnvelope;
+    return data.status === 'ok' ? data.conversation ?? null : null;
   } catch {
     return null;
   }
@@ -93,7 +108,7 @@ export async function getConversationMessages(
       { headers: getAuthHeader() }
     );
     if (!resp.ok) return [];
-    const data = await resp.json();
+    const data = (await resp.json()) as ConversationsEnvelope;
     return data.status === 'ok' ? data.messages || [] : [];
   } catch {
     return [];
@@ -110,8 +125,8 @@ export async function getConversation(
       { headers: getAuthHeader() }
     );
     if (!resp.ok) return null;
-    const data = await resp.json();
-    return data.status === 'ok' ? data.conversation : null;
+    const data = (await resp.json()) as ConversationsEnvelope;
+    return data.status === 'ok' ? data.conversation ?? null : null;
   } catch {
     return null;
   }
@@ -148,7 +163,7 @@ export async function getConversationMessagesPage(
     if (before) url += '&before=' + before;
     const resp = await fetch(url, { headers: getAuthHeader() });
     if (!resp.ok) return null;
-    const data = await resp.json();
+    const data = (await resp.json()) as ConversationsEnvelope;
     if (data.status !== 'ok') return null;
     return {
       messages: data.messages || [],
@@ -245,8 +260,8 @@ export async function forkConversation(
       }
     );
     if (!resp.ok) return null;
-    const data = await resp.json();
-    return data.status === 'ok' ? data.conversation : null;
+    const data = (await resp.json()) as ConversationsEnvelope;
+    return data.status === 'ok' ? data.conversation ?? null : null;
   } catch {
     return null;
   }

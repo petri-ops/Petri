@@ -123,12 +123,12 @@ async function submitAgentTask(opts: StreamChatOptions): Promise<string> {
   if (!resp.ok) {
     let errText = `HTTP ${resp.status}`;
     try {
-      const j = await resp.json();
+      const j = (await resp.json()) as { message?: string; error?: string } | null;
       errText = j?.message ? `${j.error || errText}: ${j.message}` : String(j?.error || errText);
     } catch {}
     throw new Error(errText);
   }
-  const data = await resp.json();
+  const data = (await resp.json()) as { taskId?: string } | null;
   if (!data?.taskId) throw new Error('未返回 taskId');
-  return data.taskId as string;
+  return data.taskId;
 }

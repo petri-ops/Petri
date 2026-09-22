@@ -6,6 +6,22 @@
 import { getApiPrefix, getAuthHeader } from './apiBase';
 import { ensureOnlineOrThrow } from './offline';
 
+/**
+ * Agent task REST 信封 wire 形状（BLOCK-105 §7 Batch-5 类型化；JSON 解析出站边界契约文档）。
+ * 字段 unknown＝后端可能发任意 JSON，运行时防御式解构保持原样。
+ */
+type AgentApiEnvelope = {
+  ok?: unknown;
+  message?: string;
+  error?: string;
+  taskId?: string;
+  resumeOfTaskId?: string;
+  agentId?: string;
+  followupOf?: string;
+  note?: string;
+  [key: string]: unknown;
+} | null;
+
 // ===========================================================================
 // BLOCK-38 P2 — Agent 任务中断续跑 API
 // ===========================================================================
@@ -36,7 +52,7 @@ export async function previewAgentTaskResume(taskId: string): Promise<{
   });
   let body: Record<string, unknown> = {};
   try {
-    body = await resp.json();
+    body = (await resp.json()) as Record<string, unknown>;
   } catch {}
   if (!resp.ok) {
     throw new Error(String((body as { error?: string }).error || `HTTP ${resp.status}`));
@@ -65,7 +81,7 @@ export async function resumeAgentTask(taskId: string): Promise<{
   });
   let body: Record<string, unknown> = {};
   try {
-    body = await resp.json();
+    body = (await resp.json()) as Record<string, unknown>;
   } catch {}
   if (!resp.ok || !body.taskId) {
     throw new Error(String((body as { error?: string }).error || `HTTP ${resp.status}`));
@@ -93,7 +109,7 @@ export async function retryToolSummary(input: {
   });
   let body: { content?: string; error?: string; message?: string } = {};
   try {
-    body = await resp.json();
+    body = (await resp.json()) as typeof body;
   } catch {}
   if (!resp.ok || !body.content) {
     throw new Error(body.error || body.message || `HTTP ${resp.status}`);
@@ -114,7 +130,7 @@ export async function cancelAgentTask(taskId: string): Promise<void> {
   if (!resp.ok) {
     let message = `HTTP ${resp.status}`;
     try {
-      const body = await resp.json();
+      const body = (await resp.json()) as AgentApiEnvelope;
       message = String(body?.error || body?.message || message);
     } catch {}
     throw new Error(message);
@@ -150,7 +166,7 @@ export async function listAgentTasks(limit = 50): Promise<AgentTaskOverviewItem[
   const resp = await fetch(`${getApiPrefix()}/ai/agent/tasks?limit=${encodeURIComponent(String(limit))}`, {
     headers: { ...getAuthHeader() },
   });
-  const body = await resp.json().catch(() => null);
+  const body = (await resp.json().catch(() => null)) as AgentApiEnvelope;
   if (!resp.ok || body?.ok !== true) {
     throw new Error(String(body?.message || body?.error || `HTTP ${resp.status}`));
   }
@@ -162,11 +178,11 @@ export async function fetchAgentTaskMeta(taskId: string): Promise<AgentTaskMeta>
   const resp = await fetch(`${getApiPrefix()}/ai/agent/task/${encodeURIComponent(taskId)}/meta`, {
     headers: { ...getAuthHeader() },
   });
-  const body = await resp.json().catch(() => null);
+  const body = (await resp.json().catch(() => null)) as AgentApiEnvelope;
   if (!resp.ok || body?.ok !== true) {
     throw new Error(String(body?.message || body?.error || `HTTP ${resp.status}`));
   }
-  return body as AgentTaskMeta;
+  return body as unknown as AgentTaskMeta;
 }
 
 /** POST /ai/agent/task/:id/message — 留言（队列语义：续派时注入） */
@@ -176,7 +192,7 @@ export async function sendAgentTaskMessage(taskId: string, message: string): Pro
     headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
     body: JSON.stringify({ message }),
   });
-  const body = await resp.json().catch(() => null);
+  const body = (await resp.json().catch(() => null)) as AgentApiEnvelope;
   if (!resp.ok || body?.ok !== true) {
     throw new Error(String(body?.message || body?.error || `HTTP ${resp.status}`));
   }
@@ -190,7 +206,7 @@ export async function followupAgentTask(taskId: string, task: string): Promise<{
     headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
     body: JSON.stringify({ task }),
   });
-  const body = await resp.json().catch(() => null);
+  const body = (await resp.json().catch(() => null)) as AgentApiEnvelope;
   if (!resp.ok || body?.ok !== true) {
     throw new Error(String(body?.message || body?.error || `HTTP ${resp.status}`));
   }

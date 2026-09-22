@@ -51,8 +51,18 @@ import {
   resumeSubAgentTasks,
   resumeOrphanAgentTasks,
 } from './conversationRunStore';
+import type { KnowledgeCitation, StreamChatOptions } from './copilotClient/types';
 import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
 import { deriveLoopDisplay } from '@/lib/loop-client';
+
+/** 取第 N 次 streamChat 调用的 StreamChatOptions（vi.mock 的 mock.calls 无类型，统一收口 cast）。 */
+function streamCallOpts(index: number): StreamChatOptions {
+  return streamChatMock.mock.calls[index][0] as StreamChatOptions;
+}
+/** 取最近一次 streamChat 调用的 StreamChatOptions。 */
+function lastStreamCallOpts(): StreamChatOptions {
+  return streamChatMock.mock.calls.at(-1)![0] as StreamChatOptions;
+}
 
 function start(conversationId: string, userContent: string, contextToken?: string): void {
   startConversationRun({
@@ -95,8 +105,8 @@ describe('conversation run store', () => {
     start('conversation-a', 'first question');
     start('conversation-b', 'second question');
 
-    const firstCallbacks = streamChatMock.mock.calls[0][0];
-    const secondCallbacks = streamChatMock.mock.calls[1][0];
+    const firstCallbacks = streamCallOpts(0);
+    const secondCallbacks = streamCallOpts(1);
     firstCallbacks.onDelta('answer a');
     secondCallbacks.onDelta('answer b');
 
@@ -114,7 +124,7 @@ describe('conversation run store', () => {
 
   it('BLOCK-39: 断线重连期间显示重连提示，后续增量到达后清理', () => {
     start('conversation-reconnect', 'run a long task');
-    const callbacks = streamChatMock.mock.calls[0][0];
+    const callbacks = streamCallOpts(0);
     callbacks.onStreamReconnecting?.({ taskId: 't-1', attempt: 2, lastSeq: 5, nextRetryMs: 4000 });
     expect(getConversationRunSnapshot('conversation-reconnect')).toMatchObject({
       status: 'running',
@@ -126,7 +136,7 @@ describe('conversation run store', () => {
 
   it('BLOCK-56 P1: 请求级降级事件记录一次性提示且任务保持运行', () => {
     start('conversation-fallback-note', 'run with fallback');
-    const callbacks = streamChatMock.mock.calls[0][0];
+    const callbacks = streamCallOpts(0);
     callbacks.onModelFallback?.({ scope: 'request_level', toProfileLabel: '备用模型B', message: '已降级到「备用模型B」继续' });
     const run = getConversationRunSnapshot('conversation-fallback-note');
     expect(run).toMatchObject({
@@ -142,7 +152,7 @@ describe('conversation run store', () => {
 
   it('BLOCK-56 P1: 任务级降级无缝切换订阅新 task，不进入 error 终态', async () => {
     start('conversation-fallback-switch', 'run with task fallback');
-    const callbacks = streamChatMock.mock.calls[0][0];
+    const callbacks = streamCallOpts(0);
     callbacks.onTaskStarted?.('task-old');
     expect(getConversationRunSnapshot('conversation-fallback-switch')?.taskId).toBe('task-old');
 
@@ -168,18 +178,18 @@ describe('conversation run store', () => {
       expect.objectContaining({ conversationId: 'conversation-fallback-switch' }),
       0
     );
-    const subCallbacks = subscribeAgentTaskMock.mock.calls[0][1];
+    const subCallbacks = subscribeAgentTaskMock.mock.calls[0][1] as StreamChatOptions;
     subCallbacks.onDelta?.('resumed output');
     expect(getConversationRunSnapshot('conversation-fallback-switch')?.assistantContent).toBe('resumed output');
   });
 
   it('keeps RS5 ChangeSet progress ordered and visible as a compact status', () => {
     start('conversation-rs5', 'change the palette');
-    const callbacks = streamChatMock.mock.calls[0][0];
-    callbacks.onResultEditProgress({
+    const callbacks = streamCallOpts(0);
+    callbacks.onResultEditProgress?.({
       resultEditProgressVersion: 1, sequence: 2, changeSetId: 'cs_1', stage: 'job', status: 'running',
     });
-    callbacks.onResultEditProgress({
+    callbacks.onResultEditProgress?.({
       resultEditProgressVersion: 1, sequence: 1, changeSetId: 'cs_1', stage: 'materialize', status: 'completed',
     });
     expect(getConversationRunSnapshot('conversation-rs5')).toMatchObject({
@@ -195,8 +205,8 @@ describe('conversation run store', () => {
     const tokenA = 'a'.repeat(64);
     const tokenB = 'b'.repeat(64);
     start('conversation-scoped', 'change the palette', tokenA);
-    const callbacks = streamChatMock.mock.calls[0][0];
-    callbacks.onResultEditProgress({
+    const callbacks = streamCallOpts(0);
+    callbacks.onResultEditProgress?.({
       resultEditProgressVersion: 1, sequence: 1, changeSetId: 'cs-a',
       stage: 'plan', status: 'completed', publicPhase: 'assess_impact',
       publicPhaseLabel: '判断影响',
@@ -213,7 +223,7 @@ describe('conversation run store', () => {
     const unsubscribe = subscribeConversationRun('conversation-a', listener);
     unsubscribe();
 
-    streamChatMock.mock.calls[0][0].onDelta('background result');
+    streamCallOpts(0).onDelta('background result');
 
     expect(listener).not.toHaveBeenCalled();
     expect(getConversationRunSnapshot('conversation-a')?.assistantContent).toBe('background result');
@@ -223,7 +233,7 @@ describe('conversation run store', () => {
     start('conversation-a', 'first');
     start('conversation-b', 'second');
 
-    streamChatMock.mock.calls[0][0].onDone();
+    streamCallOpts(0).onDone?.();
 
     expect(getConversationRunSnapshot('conversation-a')?.status).toBe('done');
     expect(getConversationRunSnapshot('conversation-b')?.status).toBe('running');
@@ -231,9 +241,9 @@ describe('conversation run store', () => {
 
   it('shows finalization retry status until answer content arrives', () => {
     start('conversation-a', 'inspect files');
-    const callbacks = streamChatMock.mock.calls[0][0];
+    const callbacks = streamCallOpts(0);
 
-    callbacks.onAgentStatus({
+    callbacks.onAgentStatus?.({
       phase: 'finalization_retry',
       message: '模型未返回可展示的最终说明，正在自动重试整理…',
       attempt: 2,
@@ -254,14 +264,14 @@ describe('conversation run store', () => {
 
   it('keeps model-authored progress when the next tool iteration starts', () => {
     start('conversation-a', 'inspect project files');
-    const callbacks = streamChatMock.mock.calls[0][0];
+    const callbacks = streamCallOpts(0);
 
     callbacks.onDelta('我先核对表达矩阵与样本信息。');
-    callbacks.onAgentProgress({
+    callbacks.onAgentProgress?.({
       iteration: 1,
       content: '我先核对表达矩阵与样本信息。',
     });
-    callbacks.onIter(2);
+    callbacks.onIter?.(2);
 
     expect(getConversationRunSnapshot('conversation-a')).toMatchObject({
       assistantContent: '',
@@ -284,12 +294,12 @@ describe('conversation run store', () => {
 
   it('buckets reasoning deltas by iteration (UI-272)', () => {
     start('conversation-r', 'verify the pipeline');
-    const callbacks = streamChatMock.mock.calls[0][0];
+    const callbacks = streamCallOpts(0);
 
-    callbacks.onIter(1);
+    callbacks.onIter?.(1);
     callbacks.onReasoning?.('先确认目录结构，');
     callbacks.onReasoning?.('再查入口文件');
-    callbacks.onIter(2);
+    callbacks.onIter?.(2);
     callbacks.onReasoning?.('第二轮：检查输出格式');
 
     const snapshot = getConversationRunSnapshot('conversation-r');
@@ -301,13 +311,13 @@ describe('conversation run store', () => {
 
   it('preserves progress and tool activity when the user stops a background task', async () => {
     start('conversation-a', 'run a long analysis');
-    const callbacks = streamChatMock.mock.calls[0][0];
-    callbacks.onTaskStarted('task-1');
-    callbacks.onAgentProgress({
+    const callbacks = streamCallOpts(0);
+    callbacks.onTaskStarted?.('task-1');
+    callbacks.onAgentProgress?.({
       iteration: 1,
       content: '表达矩阵和样本信息已完成对齐。',
     });
-    callbacks.onResultEditProgress({
+    callbacks.onResultEditProgress?.({
       resultEditProgressVersion: 1,
       sequence: 1,
       changeSetId: 'cs-stop',
@@ -316,7 +326,7 @@ describe('conversation run store', () => {
       publicPhase: 'execute_or_recompute',
       publicPhaseLabel: '执行/重算',
     });
-    callbacks.onToolCall({ name: 'workspace_read', args: { path: 'counts.csv' } });
+    callbacks.onToolCall?.({ name: 'workspace_read', args: { path: 'counts.csv' } });
 
     stopConversationRun('conversation-a');
 
@@ -340,8 +350,8 @@ describe('conversation run store', () => {
 
   it('keeps public result-edit stages after a failed Agent run', () => {
     start('conversation-failed-edit', 'change the threshold');
-    const callbacks = streamChatMock.mock.calls[0][0];
-    callbacks.onResultEditProgress({
+    const callbacks = streamCallOpts(0);
+    callbacks.onResultEditProgress?.({
       resultEditProgressVersion: 1,
       sequence: 1,
       changeSetId: 'cs-failed',
@@ -349,7 +359,7 @@ describe('conversation run store', () => {
       status: 'terminal',
       reason: 'validator blocked',
     });
-    callbacks.onError(new Error('provider disconnected'));
+    callbacks.onError?.(new Error('provider disconnected'));
     expect(getConversationRunSnapshot('conversation-failed-edit')).toMatchObject({
       status: 'error',
       assistantPending: false,
@@ -381,9 +391,9 @@ describe('conversation run store', () => {
       received.push(detail);
     });
     start('conversation-a', 'edit a file');
-    const callbacks = streamChatMock.mock.calls[0][0];
+    const callbacks = streamCallOpts(0);
 
-    callbacks.onToolResult({
+    callbacks.onToolResult?.({
       name: 'workspace_write',
       summary: 'ok',
       toolResult: {
@@ -398,7 +408,7 @@ describe('conversation run store', () => {
         sideEffects: { type: 'workspace-write', riskTier: 'R2', resources: ['project.files'] },
       },
     });
-    callbacks.onToolResult({
+    callbacks.onToolResult?.({
       name: 'workspace_read',
       summary: 'ok',
       toolResult: {
@@ -424,9 +434,9 @@ describe('conversation run store', () => {
       received.push(detail);
     });
     start('conversation-a', 'run analysis');
-    const callbacks = streamChatMock.mock.calls[0][0];
+    const callbacks = streamCallOpts(0);
 
-    callbacks.onToolResult({
+    callbacks.onToolResult?.({
       name: 'run_tool',
       summary: 'ok',
       toolJobId: 'tj-result-1',
@@ -464,9 +474,9 @@ describe('conversation run store', () => {
 
   it('BLOCK-38: interrupted error marks the run resumable; plain error stays non-resumable', () => {
     start('conversation-b38a', 'long running job');
-    const callbacksA = streamChatMock.mock.calls[0][0];
-    callbacksA.onTaskStarted('task-b38-a');
-    callbacksA.onError(new Error('服务重启，Agent 任务中断'), {
+    const callbacksA = streamCallOpts(0);
+    callbacksA.onTaskStarted?.('task-b38-a');
+    callbacksA.onError?.(new Error('服务重启，Agent 任务中断'), {
       resumable: true,
       interruptedAt: '2026-09-02T12:00:00.000Z',
     });
@@ -478,9 +488,9 @@ describe('conversation run store', () => {
     });
 
     start('conversation-b38b', 'plain failure');
-    const callbacksB = streamChatMock.mock.calls[1][0];
-    callbacksB.onTaskStarted('task-b38-b');
-    callbacksB.onError(new Error('模型上游错误'));
+    const callbacksB = streamCallOpts(1);
+    callbacksB.onTaskStarted?.('task-b38-b');
+    callbacksB.onError?.(new Error('模型上游错误'));
     expect(getConversationRunSnapshot('conversation-b38b')).toMatchObject({
       status: 'error',
       resumable: false,
@@ -489,9 +499,9 @@ describe('conversation run store', () => {
 
   it('BLOCK-38: resume action calls the endpoint with the interrupted taskId and subscribes the new task', async () => {
     start('conversation-b38c', 'resume me');
-    const callbacks = streamChatMock.mock.calls[0][0];
-    callbacks.onTaskStarted('task-b38-old');
-    callbacks.onError(new Error('服务重启，Agent 任务中断'), {
+    const callbacks = streamCallOpts(0);
+    callbacks.onTaskStarted?.('task-b38-old');
+    callbacks.onError?.(new Error('服务重启，Agent 任务中断'), {
       resumable: true,
       interruptedAt: '2026-09-02T12:30:00.000Z',
     });
@@ -522,8 +532,8 @@ describe('conversation run store', () => {
 
   it('BLOCK-38: resume action refuses when the run is not resumable', async () => {
     start('conversation-b38d', 'plain failure');
-    streamChatMock.mock.calls[0][0].onTaskStarted('task-b38-d');
-    streamChatMock.mock.calls[0][0].onError(new Error('模型上游错误'));
+    streamCallOpts(0).onTaskStarted?.('task-b38-d');
+    streamCallOpts(0).onError?.(new Error('模型上游错误'));
     await expect(resumeInterruptedConversation('conversation-b38d', 'project-1')).rejects.toThrow(
       '当前会话没有可续跑的中断任务'
     );
@@ -536,9 +546,9 @@ describe('conversation run store', () => {
 
   it('records loop_phase into the durable-loop projection', () => {
     start('conversation-a', 'run bulk rna-seq');
-    const callbacks = streamChatMock.mock.calls[0][0];
+    const callbacks = streamCallOpts(0);
 
-    callbacks.onLoopPhase({
+    callbacks.onLoopPhase?.({
       phase: 'started',
       loopRunId: 'loop-1',
       automationMode: 'trusted',
@@ -557,16 +567,16 @@ describe('conversation run store', () => {
 
   it('appends loop iterations ordered by sequence and tracks the latest conclusion', () => {
     start('conversation-a', 'run bulk rna-seq');
-    const callbacks = streamChatMock.mock.calls[0][0];
+    const callbacks = streamCallOpts(0);
 
-    callbacks.onLoopPhase({ phase: 'started', loopRunId: 'loop-1' });
-    callbacks.onLoopIteration({
+    callbacks.onLoopPhase?.({ phase: 'started', loopRunId: 'loop-1' });
+    callbacks.onLoopIteration?.({
       loopRunId: 'loop-1', iterationId: 'iter-2', sequence: 2,
       decision: 'continue', decisionReasonCode: 'TOOL_SUCCEEDED',
       publicConclusion: 'DESeq2 完成', status: 'succeeded',
       proposedActionKey: null, actionKeyHash: null,
     });
-    callbacks.onLoopIteration({
+    callbacks.onLoopIteration?.({
       loopRunId: 'loop-1', iterationId: 'iter-1', sequence: 1,
       decision: 'continue', decisionReasonCode: 'TOOL_SUCCEEDED',
       publicConclusion: '已生成 counts 矩阵', status: 'succeeded',
@@ -582,7 +592,7 @@ describe('conversation run store', () => {
 
   it('is idempotent: an SSE event and a replay of the same iterationId merge to one entry', () => {
     start('conversation-a', 'run bulk rna-seq');
-    const callbacks = streamChatMock.mock.calls[0][0];
+    const callbacks = streamCallOpts(0);
 
     const iter = {
       loopRunId: 'loop-1', iterationId: 'iter-1', sequence: 1,
@@ -590,9 +600,9 @@ describe('conversation run store', () => {
       publicConclusion: '第一轮', status: 'succeeded',
       proposedActionKey: null, actionKeyHash: null,
     };
-    callbacks.onLoopIteration(iter);
+    callbacks.onLoopIteration?.(iter);
     // Replay the same iteration (e.g. API backfill) with an updated conclusion.
-    callbacks.onLoopIteration({ ...iter, publicConclusion: '第一轮（更新）' });
+    callbacks.onLoopIteration?.({ ...iter, publicConclusion: '第一轮（更新）' });
 
     const loop = getConversationRunSnapshot('conversation-a')?.loop;
     expect(loop?.iterations).toHaveLength(1);
@@ -601,9 +611,9 @@ describe('conversation run store', () => {
 
   it('preserves the loop projection when the user stops the run', () => {
     start('conversation-a', 'run bulk rna-seq');
-    const callbacks = streamChatMock.mock.calls[0][0];
-    callbacks.onLoopPhase({ phase: 'started', loopRunId: 'loop-1' });
-    callbacks.onLoopIteration({
+    const callbacks = streamCallOpts(0);
+    callbacks.onLoopPhase?.({ phase: 'started', loopRunId: 'loop-1' });
+    callbacks.onLoopIteration?.({
       loopRunId: 'loop-1', iterationId: 'iter-1', sequence: 1,
       decision: 'continue', decisionReasonCode: 'TOOL_SUCCEEDED',
       publicConclusion: '已完成对齐', status: 'succeeded',
@@ -619,8 +629,8 @@ describe('conversation run store', () => {
 
   it('a blocked iteration never renders as a green completion', () => {
     start('conversation-a', 'run bulk rna-seq');
-    const callbacks = streamChatMock.mock.calls[0][0];
-    callbacks.onLoopIteration({
+    const callbacks = streamCallOpts(0);
+    callbacks.onLoopIteration?.({
       loopRunId: 'loop-1', iterationId: 'iter-1', sequence: 1,
       decision: 'block', decisionReasonCode: 'ARTIFACT_VALIDATION_FAILED',
       publicConclusion: '检测到假成功：任务失败但产生了文件。禁止宣称完成。',
@@ -848,7 +858,7 @@ describe('resumeOrphanAgentTasks (AGENT-CONCURRENCY A-5 → BLOCK-109-CORE-ARCH 
 describe('BLOCK-49 加映 — 子 agent 终态通知（proactive child_finished）', () => {
   it('child_finished 事件累计为会话级 notice（多条保序）', () => {
     start('conv-child-finished', 'run with sub agents');
-    const callbacks = streamChatMock.mock.calls.at(-1)![0];
+    const callbacks = lastStreamCallOpts();
     callbacks.onChildFinished?.({ childTaskId: 'child-a', status: 'completed', summaryHead: '任务 A 完成' });
     callbacks.onChildFinished?.({ childTaskId: 'child-b', status: 'failed', summaryHead: '任务 B 失败原因' });
 
@@ -860,7 +870,7 @@ describe('BLOCK-49 加映 — 子 agent 终态通知（proactive child_finished�
 
   it('新 run 开始时 notice 清除（会话级生命周期）', () => {
     start('conv-child-clear', 'first run');
-    streamChatMock.mock.calls.at(-1)![0].onChildFinished?.({
+    lastStreamCallOpts().onChildFinished?.({
       childTaskId: 'child-x', status: 'completed', summaryHead: 'X',
     });
     expect(getChildFinishedNotices('conv-child-clear')).toHaveLength(1);
@@ -873,7 +883,7 @@ describe('BLOCK-49 加映 — 子 agent 终态通知（proactive child_finished�
 
   it('超过 10 条丢弃最旧（上限保护）', () => {
     start('conv-child-cap', 'run with many children');
-    const callbacks = streamChatMock.mock.calls.at(-1)![0];
+    const callbacks = lastStreamCallOpts();
     for (let i = 0; i < 12; i++) {
       callbacks.onChildFinished?.({ childTaskId: `child-${i}`, status: 'completed', summaryHead: String(i) });
     }
@@ -885,7 +895,7 @@ describe('BLOCK-49 加映 — 子 agent 终态通知（proactive child_finished�
 
   it('缺 childTaskId 的事件忽略（防御）', () => {
     start('conv-child-defensive', 'run');
-    streamChatMock.mock.calls.at(-1)![0].onChildFinished?.({ childTaskId: '', status: 'completed', summaryHead: '' });
+    lastStreamCallOpts().onChildFinished?.({ childTaskId: '', status: 'completed', summaryHead: '' });
     expect(getChildFinishedNotices('conv-child-defensive')).toHaveLength(0);
   });
 });
@@ -894,7 +904,7 @@ describe('BLOCK-49 加映 — 子 agent 终态通知（proactive child_finished�
 describe('BLOCK-49 加映二 — 模型派生子 agent 活动面板数据源', () => {
   it('spawn_agent 工具结果 → 登记 running 快照（面板列表可见）', () => {
     start('conv-panel-spawn', 'spawn a sub agent');
-    const callbacks = streamChatMock.mock.calls.at(-1)![0];
+    const callbacks = lastStreamCallOpts();
     callbacks.onToolCall?.({
       name: 'spawn_agent',
       args: { task: '整理实验数据并输出摘要' },
@@ -926,7 +936,7 @@ describe('BLOCK-49 加映二 — 模型派生子 agent 活动面板数据源', (
 
   it('child_finished → 终态落账（done + 摘要），面板行更新', () => {
     start('conv-panel-settle', 'spawn and settle');
-    const callbacks = streamChatMock.mock.calls.at(-1)![0];
+    const callbacks = lastStreamCallOpts();
     callbacks.onToolCall?.({
       name: 'spawn_agent',
       args: { task: '分析数据' },
@@ -963,7 +973,7 @@ describe('BLOCK-49 加映二 — 模型派生子 agent 活动面板数据源', (
 
   it('页面刷新场景：无登记的 child_finished 也会建终态条目', () => {
     start('conv-panel-orphans', 'run');
-    streamChatMock.mock.calls.at(-1)![0].onChildFinished?.({
+    lastStreamCallOpts().onChildFinished?.({
       childTaskId: 'agent-orphan-1',
       status: 'failed',
       summaryHead: '任务失败原因',
@@ -976,7 +986,7 @@ describe('BLOCK-49 加映二 — 模型派生子 agent 活动面板数据源', (
 
   it('终态幂等：重复 child_finished 不覆盖已有终态', () => {
     start('conv-panel-idem', 'run');
-    const callbacks = streamChatMock.mock.calls.at(-1)![0];
+    const callbacks = lastStreamCallOpts();
     callbacks.onChildFinished?.({
       childTaskId: 'agent-idem-1', status: 'completed', summaryHead: '第一次',
     });
@@ -1003,7 +1013,7 @@ describe('BLOCK-97 task_todo projection (conversation-level store)', () => {
 
   it('projects task_todo snapshots into the conversation todo store, replacing wholesale', () => {
     start('conv-todo', '做多步任务');
-    const callbacks = streamChatMock.mock.calls[0][0];
+    const callbacks = streamCallOpts(0);
 
     callbacks.onTaskTodo?.([
       { id: '1', content: '重建索引', status: 'completed' },
@@ -1028,7 +1038,7 @@ describe('BLOCK-97 task_todo projection (conversation-level store)', () => {
 
   it('survives run stop/reconciliation; clears only when the next run starts', () => {
     start('conv-todo-2', '第一轮');
-    streamChatMock.mock.calls[0][0].onTaskTodo?.([
+    streamCallOpts(0).onTaskTodo?.([
       { id: '1', content: '旧清单', status: 'completed' },
     ]);
     expect(getConversationTodoList('conv-todo-2').length).toBe(1);
@@ -1059,7 +1069,7 @@ describe('BLOCK-94 knowledge_citations projection (conversation-level store)', (
 
   it('projects knowledge_citations into the conversation store, replacing wholesale', () => {
     start('conv-cite', '这段结论哪来的');
-    const callbacks = streamChatMock.mock.calls[0][0];
+    const callbacks = streamCallOpts(0);
 
     callbacks.onKnowledgeCitations?.({
       citations: [
@@ -1080,7 +1090,7 @@ describe('BLOCK-94 knowledge_citations projection (conversation-level store)', (
 
   it('survives run stop/reconciliation; clears only when the next run starts', () => {
     start('conv-cite-2', '第一轮');
-    streamChatMock.mock.calls[0][0].onKnowledgeCitations?.({
+    streamCallOpts(0).onKnowledgeCitations?.({
       citations: [{ docName: '旧文档', seq: 0 }],
     });
     expect(getConversationCitations('conv-cite-2')).toHaveLength(1);
@@ -1098,14 +1108,15 @@ describe('BLOCK-94 knowledge_citations projection (conversation-level store)', (
 
   it('defends against malformed citations (filters non-object entries)', () => {
     start('conv-cite-3', 'run');
-    const callbacks = streamChatMock.mock.calls[0][0];
+    const callbacks = streamCallOpts(0);
     callbacks.onKnowledgeCitations?.({
+      // 故意畸形 wire 数据（测防御过滤）；类型化后经 unknown 双跳表达「不可信输入」
       citations: [
         { docName: 'ok.md', seq: 0 },
         null,
         'garbage',
         { seq: 'not-a-number' },
-      ],
+      ] as unknown as KnowledgeCitation[],
     });
     expect(getConversationCitations('conv-cite-3')).toHaveLength(1);
   });

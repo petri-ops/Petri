@@ -435,6 +435,20 @@ export async function resumeSubAgentTasks(
 }
 
 /**
+ * BLOCK-105 §7 Batch-5 类型化：/api/ai/agent/tasks 行 wire 形状（tasks 表只读投影）。
+ */
+interface SubAgentTaskRow {
+  taskId: string;
+  status: string;
+  taskText: string;
+  error: string | null;
+  projectId: string | null;
+  parentTaskId: string | null;
+  createdAt: string | number | null;
+  finishedAt: string | number | null;
+}
+
+/**
  * BLOCK-65 修正：会话打开时回填该会话的历史子 agent（含终态）。
  * resumeSubAgentTasks 只恢复 running 任务——刷新后历史完成态不进 store，
  * 会让摘要卡「智能体」节（UI-386 起的项目级聚合唯一入口）在该会话永久不可见。
@@ -443,23 +457,14 @@ export async function resumeSubAgentTasks(
  */
 export async function loadHistoricalSubAgentTasks(conversationId: string): Promise<void> {
   if (!conversationId) return;
-  let rows: Array<{
-    taskId: string;
-    status: string;
-    taskText: string;
-    error: string | null;
-    projectId: string | null;
-    parentTaskId: string | null;
-    createdAt: string | number | null;
-    finishedAt: string | number | null;
-  }> = [];
+  let rows: SubAgentTaskRow[] = [];
   try {
     const resp = await fetch(
       `${getPlatformApiPrefix()}/ai/agent/tasks?limit=50&conversationId=${encodeURIComponent(conversationId)}`
     );
-    const body = await resp.json().catch(() => null);
+    const body = (await resp.json().catch(() => null)) as { ok?: unknown; tasks?: unknown } | null;
     if (!resp.ok || body?.ok !== true) return;
-    rows = body.tasks || [];
+    rows = (body.tasks || []) as SubAgentTaskRow[];
   } catch {
     return;
   }
