@@ -26,7 +26,6 @@ const require = createRequire(import.meta.url);
 const decisionApi = require('../core/biof3-server/helpers/decision-api.js');
 // P1 起候选生成与请求组装单源于 interpret.js（字节同形迁移，契约测试钉住形状）。
 const {
-  CELL_MARKERS,
   deriveMarkerCandidates,
   buildMarkerDecisionRequest,
 } = require('../core/biof3-server/helpers/interpret.js');

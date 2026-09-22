@@ -28,7 +28,6 @@ const interpret = require('../core/biof3-server/helpers/interpret.js');
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 const evidenceDir = path.join(root, 'acceptance', 'block-111');
-const TRAP_GOLD = '双细胞/混杂（应低置信回退）';
 const CONCURRENCY = 5;
 const FAILURE_RATE_LIMIT = 0.10;
 const ACCURACY_GATE = 0.95;
@@ -103,7 +102,6 @@ async function main() {
   const finalCorrect = goldIn.filter((r) => r.finalType === r.gold).length;
   const trapAdopted = traps.filter((r) => r.adopted).length;
   const agreement = goldIn.filter((r) => r.adopted && r.decisionType === r.legacy).length;
-  const latency = valid.map((r) => r.elapsedMs).filter((n) => typeof n === 'number').sort((a, b) => a - b);
 
   // 延迟在 lookupCellTypeWithConfidence 返回值里不透传（helper 不带计时）；以整体墙钟折算均值
   const legacyBaseline = round4(legacyCorrect / goldIn.length);
