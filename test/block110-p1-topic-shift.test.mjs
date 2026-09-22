@@ -6,7 +6,6 @@
  *   Jev 降级/杀开关 → 回退大模型路径（决策 API 不做单点故障）。
  */
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
 import fssync from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';

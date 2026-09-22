@@ -7,7 +7,6 @@
  * VECTOR_THRESHOLD=0.55 第一道硬阈值保留不动。
  */
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
 import fssync from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
