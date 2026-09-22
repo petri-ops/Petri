@@ -127,7 +127,6 @@ async function calibrate(corpus) {
     console.log(`⚠ 未找到达门槛的阈值；最优可达=${JSON.stringify(bestAny)}`);
   }
 
-  const mean = (arr) => arr.reduce((a, b) => a + b, 0) / Math.max(arr.length, 1);
   return {
     corpus: { file: CORPUS_FILE, sha256: corpus.sha256, count: corpus.samples.length },
     apiFailures: failures,

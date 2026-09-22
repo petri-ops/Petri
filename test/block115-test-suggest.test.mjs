@@ -80,28 +80,28 @@ test('决策失败：缺 key → 零建议（安全默认）', async (t) => {
   assert.deepEqual(r.suggestions, []);
 });
 
-test('决策失败：超时 → 零建议', async (t) => {
+test('决策失败：超时 → 零建议', async () => {
   const impl = async () => { const e = new Error('TimeoutError'); e.name = 'TimeoutError'; throw e; };
   const r = await resolveSuggestion(['core/biof3-server/agent-runner.js'], { ...API_KEY_OVERRIDE, fetchImpl: impl, sleep: NO_SLEEP });
   assert.equal(r.reason, 'timeout');
   assert.equal(r.suggest, false);
 });
 
-test('弃权：area=none 高置信 → 零建议', async (t) => {
+test('弃权：area=none 高置信 → 零建议', async () => {
   const spy = okFetch({ choice: 'none', probabilities: fullProbs('none', 0.99), confidence: 0.99 });
   const r = await resolveSuggestion(['docs/x.md', 'core/biof3-server/db.js'], { ...API_KEY_OVERRIDE, fetchImpl: spy.impl, sleep: NO_SLEEP });
   assert.equal(r.suggest, false);
   assert.equal(r.reason, 'area_none');
 });
 
-test('低置信：conf < θ=0.80 → 零建议', async (t) => {
+test('低置信：conf < θ=0.80 → 零建议', async () => {
   const spy = okFetch({ choice: 'agent-backend', probabilities: fullProbs('agent-backend', 0.6), confidence: 0.6 });
   const r = await resolveSuggestion(['core/biof3-server/agent-runner.js'], { ...API_KEY_OVERRIDE, fetchImpl: spy.impl, sleep: NO_SLEEP });
   assert.equal(r.suggest, false);
   assert.equal(r.reason, 'below_threshold');
 });
 
-test('采纳：conf ≥ 0.80 → 展开该域测试建议（只加不减结构：建议来自展开表）', async (t) => {
+test('采纳：conf ≥ 0.80 → 展开该域测试建议（只加不减结构：建议来自展开表）', async () => {
   const spy = okFetch({ choice: 'agent-backend', probabilities: fullProbs('agent-backend', 0.9), confidence: 0.9 });
   const r = await resolveSuggestion(['core/biof3-server/agent-runner.js'], { ...API_KEY_OVERRIDE, fetchImpl: spy.impl, sleep: NO_SLEEP });
   assert.equal(r.suggest, true);
