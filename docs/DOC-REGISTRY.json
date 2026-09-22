@@ -5011,6 +5011,28 @@
       "completedAt": "2026-09-22"
     },
     {
+      "id": "BLOCK-113-TOOL-PREROUTING",
+      "path": "docs/block-113-tool-prerouting-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-113-tool-prerouting",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-22",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "block-113",
+        "jev",
+        "system-one",
+        "decision-model",
+        "w1",
+        "active"
+      ],
+      "notes": "决策内化弧 W1 队列第 3 点（W0-BLOCK-110 P3 选做不执行的正面立项）。2026-09-22 用户裁决「开 按顺序都做完」队列序。范围：agent-runner 下发链挂钩 askDecision choice 九域+all 分类（workspace/knowledge/result-studio/browser/computer/agent-orchestration/remote/resident/session/all；state=最近一条用户消息）+ 采纳收窄=路由域∪session 基础件（BIOF3_JEV_TOOL_ROUTE=1 默认关 + θ 门控；每 run 一次 +1 Jev 调用）；policy 层零变化；knowledge-console 既有子集优先；仅 primary。P0 九域语料 ≥100 + D-1~D-5 预登记。红线=71 工具集合恒等（域映射契约测试钉住）/guard 关零变化/降级必有。PoC 失败语义=诚实收缩仅冻结本点。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "lastUpdated": "2026-09-22"
+    },
+    {
       "id": "DECISION-PRIMITIVE-INTERNALIZATION-ARC",
       "path": "docs/planning/decision-primitive-internalization-arc.md",
       "kind": "reference",

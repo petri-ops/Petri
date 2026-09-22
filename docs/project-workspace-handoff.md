@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-22 深夜（**BLOCK-112 当日整包 completed（closeout 十门全绿）→ active 转 BLOCK-113（W1-3 工具两跳预路由）**——W1-2 意图路由：P0 校准 117 条 overall 98.3%、θ=0.70 task 零误采纳；chitchat 快路径（BIOF3_JEV_INTENT_ROUTE=1 默认关，事件回放镜像 agent-runner、meta.chitchatFastPath 落库标记）契约 13/13 + flow 6/6。队列=W1-3 → W1-4 → W1-5（用户「开 按顺序都做完」）。**当前 active=BLOCK-113，槽位占用中**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-22 深夜二（**BLOCK-113-TOOL-PREROUTING 立项即启动 active（P0-LAUNCH）**——W1-3 工具两跳预路由：agent-runner 下发链九域+all 分类、采纳收窄=路由域∪session、BIOF3_JEV_TOOL_ROUTE=1 默认关、71 工具恒等红线。此前=BLOCK-112 当日整包 completed（W1-2 意图路由）。——W1-2 意图路由：P0 校准 117 条 overall 98.3%、θ=0.70 task 零误采纳；chitchat 快路径（BIOF3_JEV_INTENT_ROUTE=1 默认关，事件回放镜像 agent-runner、meta.chitchatFastPath 落库标记）契约 13/13 + flow 6/6。队列=W1-3 → W1-4 → W1-5（用户「开 按顺序都做完」）。**当前 active=BLOCK-113，槽位占用中**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-09-22 晚（**BLOCK-111-JEV-W1-MARKER-CLASSIFICATION 当日立项当日整包 completed（closeout 十门全绿）**——决策内化弧 W1 首点 marker→细胞类型判别二跳：规则表候选生成 + `decision-api` choice 二跳（θ=0.55 门控：adoptedAccuracy 1.0/coverage 0.9125，vs legacy 0.8375）+ `/api/ai/interpret` cellTypeHintsDetailed additive（老契约零变化）；默认关 `BIOF3_JEV_MARKER_GUARD=1` 显式开；P0 校准 104 条语料 gate.passed + P1 契约 14/14 + P2 A/B 生产路径 gate.passed + 实机 flow `block111-marker-live` 7/7。D-1~D-5 已获用户裁决定版（「继续 按推荐的进行」，θ=0.55 维持）；A/B 轮 1/12 陷阱采纳（轮间方差）如实登记。**当前无 active 工作包**；W1 队列 2~5 点待各自单独裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
