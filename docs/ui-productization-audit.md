@@ -4041,3 +4041,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **实机观察（2026-09-21 REST 直驱真模型 spawn 场景，双子智能体并行）**：**子侧纪律生效实证**——两个子智能体最终回复均为要点式「核对要点」体（442/735 字符，含「无未覆盖项」核对声明与「未覆盖部分如实说明」，与汇报契约文本同构），对照上一日同类子任务动辄数千字的独立成文报告，收敛效果显著。**父侧未观察到**——该轮父任务恰逢上游模型流中断（read ECONNRESET，已登记的「流中死亡不重试」疣），父任务终态失败、统一汇总未能产出；父侧行为待下一次稳定轮次补观察。同轮连带实证：自动计划意图（「先别执行，给我个方案」→ 只读探针 + 只读事实陈述 + 提交待批准计划，对照执行意图对照组正常调工具）。诚实结论=子侧纪律实机成立。**补录（深夜，flow `block109-reporting-live` 5/5）**：S1 双子智能体并行场景——子侧回传均为要点式「核对要点」体（233/415 字符）、父任务最终消息为一次统一汇总（453 字符，不再逐个转述）——**父侧纪律亦实机成立，翻 verified**；S2 终态对账 v1.5——运行中取消一个子任务、清单按指示全 completed，`reconciliation_notice` 事件在场。证据 `acceptance/block-109/reporting-live-samples.json`。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-434: 设置页「决策原语」观测面（BLOCK-116 W2 平台化，additive 观测节）(2026-09-22 in_progress，dev Electron 边界内数据链路实证)
+
+- **来源**：BLOCK-116-DECISION-PLATFORM W2 平台化（弧线 §W2 观测面，BLOCK-79 用量面板同款模式）：决策原语（W0/W1 七接点）全部默认关+显式开，用户开启后无法看到「决策 API 实际被调用了多少、降级了没有」——观测面补齐。
+- **改动**：`frontend/src/components/desktop/DesktopSettingsPanel/sections/DecisionUsagePanel.tsx`（新增节：按接点聚合调用量/均延迟/降级率，近 7 天；available=false 诚实显示不可用而非伪造空统计；零记录显示空态说明）挂载于设置页「用量与资源」节内（UsageResourcePanel 之后）；数据源=GET /api/ai/decisions/summary（decision_log 聚合，migration 011）。
+- **证据（实机数据链路 · 2026-09-22）**：flow `block116-decision-platform-live` 5/5——闲聊消息触发 intent-route 决策 → decision_log 落行 → summary 聚合 intent-route×1（avgLatency 727ms、degraded=0）返回 200；面板渲染的正是该端点数据（同源实证）。**面板视觉过目待补**（in_progress 保留原因）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
