@@ -23,6 +23,15 @@
 | P3（增量，2026-09-22 深夜） | 决策台账逐条回放 | GET /api/ai/decisions/recent + 面板「最近决策」回放列表 + flow `block116-replay-live` 4/4；UI-434 verified |
 | P4（增量，2026-09-22 深夜，用户提出「jev 参数配置页面——默认填好、可调整」） | 决策配置中心 + 设置页「决策原语」节 | `helpers/decision-config.js`（data 目录 decision-config.json 持久化：enabled/threshold per point；env=0 杀开关最高优先；首载从 env=1 种子）+ GET/PUT /api/ai/decisions/config + 设置页新节「决策原语」（启用开关+阈值输入预填校准值+还原默认+偏离标记）|
 
+### P4 实现完成记录（2026-09-22 深夜，closeout 十门全绿）
+
+- `helpers/decision-config.js`：五运行时接点（topic-shift/knowledge-guard/marker-celltype/intent-route/tool-route）注册 + decision-config.json 持久化（读不落盘，仅 PUT 落盘——测试/只读零副作用）+ `BIOF3_DECISION_CONFIG_PATH` 测试隔离通道。
+- 优先级（契约钉住）：env='0' 强制关（杀开关最高）> 配置文件 enabled > 默认；env='1' 仅首载种子不强制运行时（避免 UI 关不掉）。
+- `routes/ai-agent/decisions.js`：GET /config（五接点全量+envOverride 如实暴露）/ PUT /config/:point（enabled/threshold 校验 [0,1]，非法 400、未知接点 404）。
+- 前端 `sections/DecisionConfigPanel.tsx` + types.ts 'decisions' 节 + 设置页挂载（紧邻「用量与资源」观测节）：五卡片（说明/env 覆盖提示/双门限只读/启用开关/阈值输入预填校准值+偏离提醒+还原默认）。
+- 验证：flow `block116-config-live` 6/6（GET/PUT 持久化/非法 400/未知 404/还原默认）+ flow `block116-replay-live` 4/4（设置页实机渲染面板+回放列表）+ 契约 9/9 + 面板组件测试 3/3 + 前端全量 148 文件 1192 用例全绿 + closeout 十门全绿（tsc 0/lint 0）。
+- 抓真（双工具判定冲突留因）：getAllByRole 返回类型的 tsc/eslint 判定不一致——测试内定向 eslint-disable 注释留因。
+
 ### 1.2 非范围（exclusions）
 
 - agent 可见决策工具（弧线候选件）仍留候选池。
