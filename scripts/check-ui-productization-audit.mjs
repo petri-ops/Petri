@@ -86,6 +86,9 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // 注册表/观测端点后端件）：UI-434 已登记（in_progress——数据链路 flow 5/5 实证，视觉
   // 过目待补）；台账同步落在后续提交（本提交聚焦后端+面板实现），SHA 豁免按 64da69b 先例。
   'aac13f69eeb07677cdb3dccafcb20e8edc8b3f21',
+  // 2026-09-22 BLOCK-116 P4 决策配置面板+recent 回放端点（85837bb）：UI-434/435 台账同步
+  // 落在后续提交（本提交含后端+面板实现与截图证据），SHA 豁免按 aac13f6/64da69b 先例。
+  '85837bb9ba64c61e7105d88ab5b32314ed7b7f47',  'aac13f69eeb07677cdb3dccafcb20e8edc8b3f21',
   '64da69b71771661b49ba43fe7230cdb30347f7d7',
   // 2026-09-20 BLOCK-105 §7 Batch-4 前端 no-unused-vars 410→0（c6a9b6d1，59 文件死代码
   // 清理）：最大头=ResultView.tsx 的 UI-146 拆分遗留化石 import 块（148 行，文件已退化
@@ -400,7 +403,9 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   '64da69b71771661b49ba43fe7230cdb30347f7d7',  // 2026-09-22 BLOCK-116 W2 决策观测面（aac13f6，DecisionUsagePanel 新节 + 决策台账/阈值
   // 注册表/观测端点后端件）：UI-434 已登记（in_progress——数据链路 flow 5/5 实证，视觉
   // 过目待补）；台账同步落在后续提交（本提交聚焦后端+面板实现），SHA 豁免按 64da69b 先例。
-  'aac13f69eeb07677cdb3dccafcb20e8edc8b3f21',
+  'aac13f69eeb07677cdb3dccafcb20e8edc8b3f21',  // 2026-09-22 BLOCK-116 P4 决策配置面板+recent 回放端点（85837bb）：UI-434/435 台账同步
+  // 落在后续提交（本提交含后端+面板实现与截图证据），SHA 豁免按 aac13f6/64da69b 先例。
+  '85837bb9ba64c61e7105d88ab5b32314ed7b7f47',  'aac13f69eeb07677cdb3dccafcb20e8edc8b3f21',
   '64da69b71771661b49ba43fe7230cdb30347f7d7',
   // 2026-09-20 BLOCK-105 §7 Batch-4 前端 no-unused-vars 410→0（c6a9b6d1，59 文件死代码
   // 清理）：前端改动全为「删除从未引用的绑定」，零 UI 行为变化（ResultView.tsx 化石
