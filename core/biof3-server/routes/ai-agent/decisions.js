@@ -47,7 +47,19 @@ module.exports = {
     app.get('/api/ai/decisions/config', async (req, res) => {
       const userId = req.user && req.user.id;
       if (!userId) return res.status(401).json({ status: 'error', error: '未登录' });
-      res.json({ status: 'ok', points: decisionConfig.getAllPointConfigs() });
+      res.json({ status: 'ok', points: decisionConfig.getAllPointConfigs(), provider: decisionConfig.getProviderMasked() });
+    });
+
+    // P5 — 决策模型供给更新（端点/Key/模型；Key 写后 GET 永不回传原文）
+    app.put('/api/ai/decisions/provider', express.json({ limit: '8kb' }), async (req, res) => {
+      const userId = req.user && req.user.id;
+      if (!userId) return res.status(401).json({ status: 'error', error: '未登录' });
+      try {
+        const masked = decisionConfig.setProvider(req.body || {});
+        res.json({ status: 'ok', provider: masked });
+      } catch (e) {
+        res.status(400).json({ status: 'error', error: e instanceof Error ? e.message : String(e) });
+      }
     });
 
     app.put('/api/ai/decisions/config/:point', express.json({ limit: '8kb' }), async (req, res) => {

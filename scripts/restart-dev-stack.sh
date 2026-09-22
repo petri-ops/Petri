@@ -67,12 +67,15 @@ if [ -f "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/.biof3-secrets" ]; then
   set +a
   echo "deploy secrets: .biof3-secrets sourced (DASHSCOPE_API_KEY present)"
 fi
-if [ -f "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/jev.env" ]; then
-  set -a
-  . "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/jev.env"
-  set +a
-  echo "block110: jev.env loaded (TYPESAFE_API_KEY present)"
-fi
+# BLOCK-116 P5 — 决策模型供给（端点/Key/模型）已迁移至 data/decision-config.json
+# （设置页「决策原语→模型接口」可视管理；用户裁决取消 env 依赖）。
+# 如需应急回退：恢复 .biof3-dev-user-data/jev.env.bak-by-user-request 并取消下方注释。
+# if [ -f "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/jev.env" ]; then
+#   set -a
+#   . "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/jev.env"
+#   set +a
+#   echo "block110: jev.env loaded (TYPESAFE_API_KEY present)"
+# fi
 if [ -f "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/ecs-gewu.crt" ]; then
   export NODE_EXTRA_CA_CERTS='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\ecs-gewu.crt'
   echo "block85: NODE_EXTRA_CA_CERTS set (ecs-gewu.crt)"

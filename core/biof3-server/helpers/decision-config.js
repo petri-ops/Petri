@@ -4,6 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const thresholds = require('./decision-thresholds');
 
+const NEWLINE = String.fromCharCode(10);
+
 /**
  * helpers/decision-config.js — BLOCK-116 P4 决策配置中心（运行时真相，持久化 data 目录）。
  *
@@ -105,9 +107,61 @@ function setPointConfig(point, patch) {
   if (patch.enabled !== undefined) doc.points[point].enabled = patch.enabled;
   if (patch.threshold !== undefined) doc.points[point].threshold = patch.threshold;
   fs.mkdirSync(path.dirname(configPath()), { recursive: true });
-  const NEWLINE = String.fromCharCode(10);
   fs.writeFileSync(configPath(), JSON.stringify(doc, null, 2) + NEWLINE, 'utf8');
   return getPointRuntime(point);
 }
 
-module.exports = { RUNTIME_POINTS, getPointRuntime, getAllPointConfigs, setPointConfig, configPath };
+/** 决策模型供给（BLOCK-116 P5）：端点/Key/模型名——本地 Laya 等同类型供给改此三项即可。 */
+function getProvider() {
+  const doc = readDoc();
+  if (doc.provider && doc.provider.apiKey) return doc.provider;
+  // 一次性迁移：env 有 key 而文件未存 → 自动落盘（之后删除 jev.env 不影响）
+  const envKey = process.env.TYPESAFE_API_KEY;
+  if (!envKey) return null;
+  const provider = {
+    baseUrl: process.env.TYPESAFE_BASE_URL || 'https://api.typesafe.ai',
+    apiKey: envKey,
+    model: process.env.TYPESAFE_MODEL || 'jev-1.13.0',
+  };
+  try {
+    doc.provider = provider;
+    fs.mkdirSync(path.dirname(configPath()), { recursive: true });
+    fs.writeFileSync(configPath(), JSON.stringify(doc, null, 2) + NEWLINE, 'utf8');
+    console.log('[block116] provider migrated to', configPath());
+  } catch (e) {
+    console.error('[block116] provider migration write failed:', e && e.message);
+  }
+  return provider;
+}
+
+/** 更新模型供给（PUT）。baseUrl 必须 http(s) 开头；apiKey 必填非空。返回打码视图。 */
+function setProvider(patch) {
+  if (!patch || typeof patch !== 'object') throw new TypeError('patch 必须是对象');
+  const doc = readDoc();
+  const cur = doc.provider || {
+    baseUrl: process.env.TYPESAFE_BASE_URL || 'https://api.typesafe.ai',
+    apiKey: process.env.TYPESAFE_API_KEY || '',
+    model: 'jev-1.13.0',
+  };
+  const next = {
+    baseUrl: patch.baseUrl !== undefined ? String(patch.baseUrl) : cur.baseUrl,
+    apiKey: patch.apiKey !== undefined ? String(patch.apiKey) : cur.apiKey,
+    model: patch.model !== undefined ? String(patch.model) : cur.model,
+  };
+  if (!/^https?:\/\//i.test(next.baseUrl || '')) throw new TypeError('baseUrl 必须以 http(s):// 开头');
+  if (!next.apiKey) throw new TypeError('apiKey 不能为空');
+  if (!next.model) throw new TypeError('model 不能为空');
+  doc.provider = next;
+  fs.mkdirSync(path.dirname(configPath()), { recursive: true });
+  fs.writeFileSync(configPath(), JSON.stringify(doc, null, 2) + NEWLINE, 'utf8');
+  return { baseUrl: next.baseUrl, model: next.model, hasKey: true };
+}
+
+/** 打码视图（GET 用：永不回传 apiKey 原文）。 */
+function getProviderMasked() {
+  const p = getProvider();
+  if (!p) return null;
+  return { baseUrl: p.baseUrl, model: p.model, hasKey: Boolean(p.apiKey) };
+}
+
+module.exports = { RUNTIME_POINTS, getPointRuntime, getAllPointConfigs, setPointConfig, configPath, getProvider, setProvider, getProviderMasked };

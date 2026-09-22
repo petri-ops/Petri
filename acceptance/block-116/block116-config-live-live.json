@@ -1,7 +1,7 @@
 {
   "name": "block116-config-live",
-  "startedAt": "2026-09-22T12:01:02.955Z",
-  "finishedAt": "2026-09-22T12:01:03.026Z",
+  "startedAt": "2026-09-22T13:44:46.465Z",
+  "finishedAt": "2026-09-22T13:44:46.520Z",
   "assertions": [
     {
       "name": "C1_config_five_points",
@@ -11,12 +11,12 @@
     {
       "name": "C2_put_threshold_200",
       "pass": true,
-      "detail": "put1={\"status\":\"ok\",\"point\":{\"point\":\"intent-route\",\"label\":\"copilot 意图路由\",\"enabled\":true,\"envOverride\":\"on\",\"threshold\":0.75"
+      "detail": "put1={\"status\":\"ok\",\"point\":{\"point\":\"intent-route\",\"label\":\"copilot 意图路由\",\"enabled\":true,\"envOverride\":null,\"threshold\":0.75"
     },
     {
       "name": "C2b_persisted",
       "pass": true,
-      "detail": "persisted={\"point\":\"intent-route\",\"label\":\"copilot 意图路由\",\"enabled\":true,\"envOverride\":\"on\",\"threshold\":0.75,\"defaultThreshold\":0.7,\"gates\":null,\"evidence\":\"acceptance/block-112/calibration.json\",\"enabledDefault\":false,\"envKey\":\"BIOF3_JEV_INTENT_ROUTE\"}"
+      "detail": "persisted={\"point\":\"intent-route\",\"label\":\"copilot 意图路由\",\"enabled\":true,\"envOverride\":null,\"threshold\":0.75,\"defaultThreshold\":0.7,\"gates\":null,\"evidence\":\"acceptance/block-112/calibration.json\",\"enabledDefault\":false,\"envKey\":\"BIOF3_JEV_INTENT_ROUTE\"}"
     },
     {
       "name": "C3_invalid_threshold_400",
@@ -31,7 +31,7 @@
     {
       "name": "C5_restore_default_070",
       "pass": true,
-      "detail": "restore={\"status\":\"ok\",\"point\":{\"point\":\"intent-route\",\"label\":\"copilot 意图路由\",\"enabled\":true,\"envOverride\":\"on\",\"threshold\":0.7,"
+      "detail": "restore={\"status\":\"ok\",\"point\":{\"point\":\"intent-route\",\"label\":\"copilot 意图路由\",\"enabled\":true,\"envOverride\":null,\"threshold\":0.7,"
     }
   ],
   "allPass": true

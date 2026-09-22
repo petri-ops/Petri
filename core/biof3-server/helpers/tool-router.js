@@ -14,6 +14,7 @@
 
 const { askDecision } = require('./decision-api');
 const { thresholdForPoint } = require('./decision-thresholds');
+const { getPointRuntime } = require('./decision-config');
 // 注意：本模块不得 require agent-tools/*（tool-defs→registry→spawn-agent-tools→agent-runner
 // 会构成依赖环，arch-cycles 门禁抓真）。域映射由调用方（agent-runner，既有边）作参传入。
 
@@ -37,9 +38,14 @@ const TOOL_FAMILIES = {
 /** 跨域底座：采纳任何特定域时都随行下发（todo/plan/校验/系统信息/进程管理）。 */
 const BASELINE_DOMAIN = 'session';
 
-/** D-4：默认关 + 显式开（同 W1-1/W1-2 先例）。 */
+/** D-4 启用判定：配置中心运行时真相（env='0' 杀开关最高；默认关，设置页显式开）。 */
 function isToolRouteEnabled() {
-  return process.env.BIOF3_JEV_TOOL_ROUTE === '1';
+  if (process.env.BIOF3_JEV_TOOL_ROUTE === '0') return false;
+  try {
+    return getPointRuntime('tool-route').enabled;
+  } catch {
+    return false;
+  }
 }
 
 /** 组装工具路由请求（P0 校准 harness 引用本函数——单源，形状漂移即校准失效）。 */

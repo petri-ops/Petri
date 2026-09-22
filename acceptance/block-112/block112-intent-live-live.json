@@ -1,7 +1,7 @@
 {
   "name": "block112-intent-live",
-  "startedAt": "2026-09-22T07:53:10.046Z",
-  "finishedAt": "2026-09-22T07:53:15.309Z",
+  "startedAt": "2026-09-22T13:45:22.335Z",
+  "finishedAt": "2026-09-22T13:45:36.748Z",
   "assertions": [
     {
       "name": "N1_chitchat_fast_path_events",
@@ -26,12 +26,12 @@
     {
       "name": "N3b_task_reply_no_fastpath_marker",
       "pass": true,
-      "detail": "task 回复 meta={\"processingDurationMs\":1396,\"finalization\":{\"attempts\":1,\"recovered\":true},\"reasoningByIteration\":{\"1\":\"用户要求写一句话总结。简单任务，直接回答即可。\"}}"
+      "detail": "task 回复 meta={\"processingDurationMs\":11000,\"finalization\":{\"attempts\":1,\"recovered\":true},\"reasoningByIteration\":{\"1\":\"User wants a one-sentence summary. Simple writing task, no tools needed. Should be concise.\\n\\nThe requested sentence: \\\"火山图用于展示差异基因的倍数变化与显著性\\\" — that's already a one-sentence summary. Maybe they want a polished version.\\n\\nI'll just give it — maybe note it's already a one-liner, "
     },
     {
       "name": "N4_temp_conversations_cleaned",
       "pass": true,
-      "detail": "cleanups=[\"conv_c17=ok\"]"
+      "detail": "cleanups=[\"conv_92e=ok\"]"
     }
   ],
   "allPass": true

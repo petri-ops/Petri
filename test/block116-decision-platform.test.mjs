@@ -38,6 +38,7 @@ const require = createRequire(import.meta.url);
 
 const decisionLog = require(path.join(root, 'core', 'biof3-server', 'helpers', 'decision-log.js'));
 const decisionApi = require(path.join(root, 'core', 'biof3-server', 'helpers', 'decision-api.js'));
+const decisionConfigModule = require(path.join(root, 'core', 'biof3-server', 'helpers', 'decision-config.js'));
 const thresholds = require(path.join(root, 'core', 'biof3-server', 'helpers', 'decision-thresholds.js'));
 const { DECISION_MODEL_PIN } = decisionApi;
 
@@ -178,6 +179,48 @@ test('recentDecisions：DB 不可用返回 null（诚实不可用）', async (t)
   decisionLog._setDecisionLogDb(Promise.reject(new Error('db down')));
   t.after(() => decisionLog._setDecisionLogDb(null));
   assert.equal(await decisionLog.recentDecisions({}), null);
+});
+
+
+test('P5 provider：文件供给优先于 env（file > env > 默认）', async (t) => {
+  const cfgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-b116-p5-'));
+  const cfgPath = path.join(cfgDir, 'decision-config.json');
+  fs.writeFileSync(cfgPath, JSON.stringify({ version: 1, points: {}, provider: { baseUrl: 'https://file.example', apiKey: 'file-key', model: 'jev-1.13.0' } }));
+  process.env.BIOF3_DECISION_CONFIG_PATH = cfgPath;
+  process.env.TYPESAFE_API_KEY = 'env-key';
+  t.after(() => {
+    delete process.env.BIOF3_DECISION_CONFIG_PATH;
+    delete process.env.TYPESAFE_API_KEY;
+    decisionLog._setDecisionLogDb(null);
+  });
+  const cfg = decisionApi.resolveDecisionConfig();
+  assert.equal(cfg.apiKey, 'file-key', '文件供给优先于 env');
+  assert.equal(cfg.baseUrl, 'https://file.example');
+});
+
+test('P5 provider：env 回退（文件无供给时用 env key）', async (t) => {
+  const cfgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-b116-p5b-'));
+  const cfgPath = path.join(cfgDir, 'decision-config.json');
+  fs.writeFileSync(cfgPath, JSON.stringify({ version: 1, points: {} }));
+  process.env.BIOF3_DECISION_CONFIG_PATH = cfgPath;
+  process.env.TYPESAFE_API_KEY = 'env-key';
+  t.after(() => {
+    delete process.env.BIOF3_DECISION_CONFIG_PATH;
+    delete process.env.TYPESAFE_API_KEY;
+  });
+  const cfg = decisionApi.resolveDecisionConfig();
+  assert.equal(cfg.apiKey, 'env-key');
+});
+
+test('P5 provider：GET 打码（apiKey 永不回传原文）', async (t) => {
+  const cfgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-b116-p5c-'));
+  const cfgPath = path.join(cfgDir, 'decision-config.json');
+  fs.writeFileSync(cfgPath, JSON.stringify({ version: 1, points: {}, provider: { baseUrl: 'https://file.example', apiKey: 'file-key', model: 'jev-1.13.0' } }));
+  process.env.BIOF3_DECISION_CONFIG_PATH = cfgPath;
+  t.after(() => { delete process.env.BIOF3_DECISION_CONFIG_PATH; });
+  const masked = decisionConfigModule.getProviderMasked();
+  assert.equal(masked.hasKey, true);
+  assert.ok(!JSON.stringify(masked).includes('file-key'), '打码视图不得包含 key 原文');
 });
 
 test('70 工具恒等红线延续（W1-3 契约复验）', () => {

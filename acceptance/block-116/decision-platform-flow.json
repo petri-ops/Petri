@@ -1,5 +1,5 @@
 {
-  "taskId": "8b271e36-7e2e-410b-8e60-e3e91deecea4",
+  "taskId": "c0b20ccd-7a0e-4192-be6e-4c3920712bab",
   "terminal": "done",
   "summary": {
     "status": "ok",
@@ -8,11 +8,11 @@
     "points": [
       {
         "point": "intent-route",
-        "calls": 1,
-        "avgLatencyMs": 727,
+        "calls": 8,
+        "avgLatencyMs": 1294,
         "degradedCount": 0,
         "degradedRate": 0,
-        "lastAt": "2026-09-22T10:03:32.508Z"
+        "lastAt": "2026-09-22T13:44:48.033Z"
       }
     ]
   }

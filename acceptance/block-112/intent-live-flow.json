@@ -3,23 +3,23 @@
     "scenarios": [
       {
         "scenario": "chitchat",
-        "taskId": "27ac0f39-39d4-4f68-af14-ff50cd3a85fb",
+        "taskId": "5b5ac3e3-642d-489b-9e67-dd53b2bf9b13",
         "terminal": "done",
         "evTypes": [
           "run_started",
           "delta",
           null
         ],
-        "replyHead": "辛苦啦，累了就先别管那些空间和清单了，它们都安安静静待着，跑不掉。给自己倒杯水，发会儿呆也行，今天先照顾好自己的情绪。"
+        "replyHead": "辛苦啦，累的时候就别硬撑，先让自己松口气。想聊什么都可以，我在呢——吐槽、发呆、还是随便扯两句，都行。"
       },
       {
         "scenario": "task",
-        "taskId": "29d0f2ca-62e2-46a0-8cf2-f1e074f0bbd8",
+        "taskId": "5b77cd29-8dd5-4df4-9bba-d4842f58b8c5",
         "terminal": "done"
       }
     ]
   },
   "cleanups": [
-    "conv_c17=ok"
+    "conv_92e=ok"
   ]
 }

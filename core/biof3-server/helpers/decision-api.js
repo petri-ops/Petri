@@ -26,13 +26,19 @@ const RETRY_JITTER_MS = 250;
  * overrides 仅供测试注入（fetchImpl/sleep/now），生产路径零传参。
  */
 function resolveDecisionConfig(overrides = {}) {
-  const apiKey = overrides.apiKey ?? process.env.TYPESAFE_API_KEY ?? '';
+  // BLOCK-116 P5 — 决策模型供给优先级：overrides（测试）> 配置文件（UI 可调，含本地
+  // Laya 等供给）> env（TYPESAFE_*，历史回退）。配置文件读失败静默回退 env。
+  let fileProvider = null;
+  try {
+    fileProvider = require('./decision-config').getProvider();
+  } catch { /* decision-config 不可用时回退 env */ }
+  const apiKey = overrides.apiKey ?? fileProvider?.apiKey ?? process.env.TYPESAFE_API_KEY ?? '';
   if (!apiKey) return null;
-  const rawBase = overrides.baseUrl ?? process.env.TYPESAFE_BASE_URL ?? DEFAULT_BASE_URL;
+  const rawBase = overrides.baseUrl ?? fileProvider?.baseUrl ?? process.env.TYPESAFE_BASE_URL ?? DEFAULT_BASE_URL;
   return {
     apiKey,
     baseUrl: String(rawBase).replace(/\/+$/, ''),
-    model: overrides.model ?? process.env.TYPESAFE_MODEL ?? DECISION_MODEL_PIN,
+    model: overrides.model ?? fileProvider?.model ?? process.env.TYPESAFE_MODEL ?? DECISION_MODEL_PIN,
     timeoutMs: overrides.timeoutMs ?? DEFAULT_TIMEOUT_MS,
     maxAttempts: overrides.maxAttempts ?? MAX_ATTEMPTS,
     fetchImpl: overrides.fetchImpl ?? fetch,
