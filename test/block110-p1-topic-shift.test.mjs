@@ -33,7 +33,6 @@ const require = createRequire(import.meta.url);
   });
 }
 
-const CONV_PATH = path.join(root, 'core', 'biof3-server', 'helpers', 'conversations.js');
 const DECISION_PATH = require.resolve(path.join(root, 'core', 'biof3-server', 'helpers', 'decision-api.js'));
 const MODEL_TASKS_PATH = require.resolve(path.join(root, 'core', 'biof3-server', 'helpers', 'model-tasks.js'));
 
@@ -139,7 +138,7 @@ test('P1 — 杀开关 BIOF3_JEV_TOPIC_SHIFT=0：Jev 零调用，直走大模型
   resetMocks();
   process.env.BIOF3_JEV_TOPIC_SHIFT = '0';
   const convId = seedConversation(10);
-  const r = await conv._maybeDetectTopicShift(convId, USER);
+  await conv._maybeDetectTopicShift(convId, USER);
   assert.equal(mocks.askDecisionCalls.length, 0, '杀开关下 Jev 零调用');
   assert.equal(mocks.callModelTaskCalls.length, 1, '直接走大模型路径');
   delete process.env.BIOF3_JEV_TOPIC_SHIFT;
