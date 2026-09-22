@@ -637,6 +637,26 @@ async function runAgentLoop({
   // BLOCK-99 G4 — 会话台工具子集（context.toolSubset === 'knowledge-console' 时只下发
   // knowledge 白名单；其余值维持全量）。policy 层照常全量生效，此处是最外层收窄。
   const tools = resolveToolDefsForContext(context, getToolDefs());
+  // BLOCK-113 W1-3 — 工具两跳预路由（默认关 BIOF3_JEV_TOOL_ROUTE=1）：
+  // 主任务且无既有子集时，最近一条用户消息经决策原语九域+all 分类；采纳（特定域且
+  // conf≥θ）→ defs 收窄为「路由域 ∪ session 基础件」；all/低置信/任何失败 → 全量
+  // （现行为）。policy 层零变化（accessMode/审批门照常全量生效）。
+  let effectiveTools = tools;
+  if (kind === 'primary' && !(context && context.toolSubset)) {
+    const _lastUserMsg = [...messages].reverse().find((m) => m && m.role === 'user');
+    if (_lastUserMsg && String(_lastUserMsg.content || '').trim()) {
+      try {
+        const { resolveToolRoute, narrowToolDefsByFamily } = require('./helpers/tool-router');
+        const route = await resolveToolRoute(String(_lastUserMsg.content));
+        if (route.route) {
+          effectiveTools = narrowToolDefsByFamily(tools, route.family);
+          try { console.log(`[block113] tool route adopted: family=${route.family} confidence=${route.confidence} defs=${effectiveTools.length}/${tools.length}`); } catch {}
+        }
+      } catch (e) {
+        try { console.warn('[block113] tool route failed, falling back to full defs:', e && e.message); } catch {}
+      }
+    }
+  }
 
   // Build tool context
   const toolCtx = {
@@ -687,7 +707,7 @@ async function runAgentLoop({
     parentLoopRunId,
     context,
     executionPolicy,
-    tools,
+    tools: effectiveTools,
     MAX_AGENT_TOOL_CALLS,
     // BLOCK-51 P2 — 上下文熔断：loop 内每轮请求前的预算检查复用同一 ctxWindow
     contextWindow: safeCtx,

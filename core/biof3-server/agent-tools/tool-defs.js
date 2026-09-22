@@ -37,6 +37,10 @@ const TOOL_DEFS = [
 // WORKSPACE_TOOL_DEFS = workspace-provider 评估子集（26 工具，**原顺序**；BLOCK-109-CORE-ARCH
 // P2-1 起由全集按有序名单派生——原独立数组与 TOOL_DEFS 成员深度重复，重复定义已收编）
 const WORKSPACE_SUBSET_NAMES = ["workspace_list","workspace_find","workspace_search","workspace_read","workspace_write","workspace_replace","workspace_exec","workspace_exec_background","process_status","delegate_to_gewu_node","resident_task_create","resident_task_list","resident_task_read","process_stop","system_info","computer_snapshot","computer_click","computer_type","computer_press","computer_scroll","computer_screenshot","computer_wait","computer_authorize","interrupt_agent","send_message","followup_task"];
+// BLOCK-113 W1-3 — 域→工具 defs 映射（additive 导出；两跳预路由的收窄器数据源）。
+// 深度恒等红线：⋃ DOMAIN_TOOL_DEFS 必须与 TOOL_DEFS 逐引用一致（契约测试钉住）。
+const DOMAIN_TOOL_DEFS = Object.freeze({ ...domainModules });
+
 const toolByName = new Map(TOOL_DEFS.map((t) => [t.function.name, t]));
 const WORKSPACE_TOOL_DEFS = WORKSPACE_SUBSET_NAMES.map((n) => toolByName.get(n));
 
@@ -46,4 +50,4 @@ function getToolDefs() {
   return require('./registry').getProviderToolDefs();
 }
 
-module.exports = { TOOL_DEFS, WORKSPACE_TOOL_DEFS, getToolDefs };
+module.exports = { TOOL_DEFS, WORKSPACE_TOOL_DEFS, DOMAIN_TOOL_DEFS, getToolDefs };
