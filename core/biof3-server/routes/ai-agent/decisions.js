@@ -7,8 +7,6 @@
  */
 'use strict';
 
-const express = require('express');
-
 const decisionLog = require('../../helpers/decision-log');
 
 module.exports = {

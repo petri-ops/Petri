@@ -37,7 +37,7 @@ export function DecisionUsagePanel(): React.ReactElement {
     void fetch(`${getPlatformApiPrefix()}/ai/decisions/summary?days=7`, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     }).then(async (response) => {
-      const data: SummaryResponse = await response.json();
+      const data = (await response.json()) as SummaryResponse;
       if (!response.ok || data?.status !== 'ok') throw new Error(data?.error || '决策观测不可用');
       setAvailable(data.available !== false);
       setPoints(Array.isArray(data.points) ? data.points : []);
