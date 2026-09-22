@@ -1,0 +1,1724 @@
+{
+  "schema": "biof3/block110-p1-ab.v1",
+  "generatedAt": "2026-09-22T01:59:47.484Z",
+  "model": "jev-1.13.0",
+  "samples": 100,
+  "jev": {
+    "decided": 100,
+    "coverage": 1,
+    "accuracyVsLabel": 0.99,
+    "p50Ms": 284,
+    "p95Ms": 620,
+    "inputTokens": 46213
+  },
+  "legacy": {
+    "decided": 22,
+    "accuracyVsLabel": 1,
+    "p50Ms": 1148,
+    "p95Ms": 1441
+  },
+  "agreementOnBothDecided": 0.955,
+  "bothDecidedCount": 22,
+  "perSample": [
+    {
+      "id": "ts-101",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 694,
+        "tokens": 475,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1239,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-102",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 718,
+        "tokens": 466,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 892,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-103",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 554,
+        "tokens": 468,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 957,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-104",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 656,
+        "tokens": 453,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1195,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-105",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 264,
+        "tokens": 473,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": true,
+        "ms": 537,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-106",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 304,
+        "tokens": 466,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1251,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-107",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 277,
+        "tokens": 453,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 869,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-108",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 358,
+        "tokens": 461,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1041,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-109",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 277,
+        "tokens": 470,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1391,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-110",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 302,
+        "tokens": 462,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1170,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-111",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 268,
+        "tokens": 464,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1348,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-112",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 283,
+        "tokens": 471,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1441,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-113",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 315,
+        "tokens": 463,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1112,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-114",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 384,
+        "tokens": 463,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1069,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-115",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 278,
+        "tokens": 469,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1294,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-116",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 266,
+        "tokens": 466,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 943,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-117",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 258,
+        "tokens": 469,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1260,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-118",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 278,
+        "tokens": 468,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1226,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-119",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 290,
+        "tokens": 465,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1323,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-120",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 268,
+        "tokens": 474,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": true,
+        "ms": 1304,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-121",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 283,
+        "tokens": 468,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": true,
+        "ms": 959,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-122",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 278,
+        "tokens": 457,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 858,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-123",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 337,
+        "tokens": 472,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1029,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-124",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 305,
+        "tokens": 469,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1271,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-125",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 606,
+        "tokens": 460,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1304,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-126",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 274,
+        "tokens": 462,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1050,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-127",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 320,
+        "tokens": 473,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1311,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-128",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 267,
+        "tokens": 468,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1231,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-129",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 282,
+        "tokens": 461,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1158,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-130",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 345,
+        "tokens": 487,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1312,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-131",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 265,
+        "tokens": 445,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1279,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-132",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 337,
+        "tokens": 468,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1050,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-133",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 256,
+        "tokens": 453,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1281,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-134",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 402,
+        "tokens": 462,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 953,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-135",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 329,
+        "tokens": 457,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1263,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-136",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 311,
+        "tokens": 456,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1243,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-137",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 330,
+        "tokens": 454,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1013,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-138",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 294,
+        "tokens": 453,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": true,
+        "ms": 1288,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-139",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 288,
+        "tokens": 471,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1459,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-140",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 278,
+        "tokens": 460,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1393,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-141",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 640,
+        "tokens": 464,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1284,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-142",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 275,
+        "tokens": 462,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 960,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-143",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 277,
+        "tokens": 449,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1010,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-144",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 289,
+        "tokens": 480,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1451,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-145",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 273,
+        "tokens": 469,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": true,
+        "ms": 1197,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-146",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 323,
+        "tokens": 461,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1043,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-147",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 307,
+        "tokens": 455,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": true,
+        "ms": 782,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-148",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 303,
+        "tokens": 471,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1221,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-149",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 318,
+        "tokens": 464,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1052,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-150",
+      "label": true,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 286,
+        "tokens": 473,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 783,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-001",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 276,
+        "tokens": 480,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": false,
+        "ms": 986,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-002",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 279,
+        "tokens": 456,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 907,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-003",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 286,
+        "tokens": 459,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1060,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-004",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 334,
+        "tokens": 463,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 873,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-005",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 327,
+        "tokens": 474,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1332,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-006",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 253,
+        "tokens": 463,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1192,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-007",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": true,
+        "ms": 353,
+        "tokens": 466,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": false,
+        "ms": 924,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-008",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 257,
+        "tokens": 474,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": false,
+        "ms": 985,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-009",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 265,
+        "tokens": 475,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1348,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-010",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 256,
+        "tokens": 462,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": false,
+        "ms": 844,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-011",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 318,
+        "tokens": 467,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": false,
+        "ms": 869,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-012",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 283,
+        "tokens": 469,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1193,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-013",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 286,
+        "tokens": 468,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1142,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-014",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 284,
+        "tokens": 458,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": false,
+        "ms": 1016,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-015",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 260,
+        "tokens": 451,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1454,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-016",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 275,
+        "tokens": 471,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1021,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-017",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 289,
+        "tokens": 457,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1374,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-018",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 346,
+        "tokens": 456,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 983,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-019",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 281,
+        "tokens": 448,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1363,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-020",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 244,
+        "tokens": 468,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 970,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-021",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 321,
+        "tokens": 457,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1041,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-022",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 282,
+        "tokens": 464,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": false,
+        "ms": 824,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-023",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 270,
+        "tokens": 487,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1401,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-024",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 256,
+        "tokens": 453,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1113,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-025",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 331,
+        "tokens": 466,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1259,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-026",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 264,
+        "tokens": 473,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1023,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-027",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 273,
+        "tokens": 451,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1128,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-028",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 345,
+        "tokens": 478,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 991,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-029",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 274,
+        "tokens": 455,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": false,
+        "ms": 1046,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-030",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 376,
+        "tokens": 452,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": false,
+        "ms": 1316,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-031",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 274,
+        "tokens": 469,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1518,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-032",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 270,
+        "tokens": 457,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1101,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-033",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 279,
+        "tokens": 441,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1163,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-034",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 266,
+        "tokens": 456,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": false,
+        "ms": 879,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-035",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 273,
+        "tokens": 458,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 983,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-036",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 286,
+        "tokens": 455,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": false,
+        "ms": 1188,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-037",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 273,
+        "tokens": 453,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": false,
+        "ms": 1319,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-038",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 305,
+        "tokens": 451,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1232,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-039",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 257,
+        "tokens": 445,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": false,
+        "ms": 810,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-040",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 279,
+        "tokens": 450,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1050,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-041",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 363,
+        "tokens": 441,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1246,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-042",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 284,
+        "tokens": 440,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1287,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-043",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 620,
+        "tokens": 451,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1169,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-044",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 282,
+        "tokens": 462,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1139,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-045",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 244,
+        "tokens": 449,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1413,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-046",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 275,
+        "tokens": 447,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1085,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-047",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 327,
+        "tokens": 465,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": false,
+        "ms": 1159,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-048",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 289,
+        "tokens": 458,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": false,
+        "ms": 929,
+        "error": null
+      }
+    },
+    {
+      "id": "ts-049",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 312,
+        "tokens": 454,
+        "reason": null
+      },
+      "legacy": {
+        "decided": false,
+        "shifted": null,
+        "ms": 1148,
+        "error": "unparseable"
+      }
+    },
+    {
+      "id": "ts-050",
+      "label": false,
+      "jev": {
+        "decided": true,
+        "shifted": false,
+        "ms": 265,
+        "tokens": 467,
+        "reason": null
+      },
+      "legacy": {
+        "decided": true,
+        "shifted": false,
+        "ms": 818,
+        "error": null
+      }
+    }
+  ]
+}

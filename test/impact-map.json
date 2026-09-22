@@ -2152,10 +2152,12 @@
         "scripts/block110-calibrate.mjs",
         "scripts/block110-merge-corpus.cjs",
         "acceptance/block-110/**",
-        "test/block110-*.test.mjs"
+        "test/block110-*.test.mjs",
+        "scripts/block110-p1-ab.mjs"
       ],
       "tests": [
-        "test/block110-decision-api.test.mjs"
+        "test/block110-decision-api.test.mjs",
+        "test/block110-p1-topic-shift.test.mjs"
       ],
       "frontendRelated": false,
       "classifiesScripts": true,

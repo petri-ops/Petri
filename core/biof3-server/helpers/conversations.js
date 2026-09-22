@@ -215,6 +215,10 @@ async function _maybeAutoTitleConversation(conversationId, userId) {
 // ============================================================
 const _TOPIC_CHECK_EVERY = 5;
 const _TOPIC_COOLDOWN_MS = 60 * 60 * 1000;
+// BLOCK-110 P1 — Jev 直替双阈值（中文校准初值，acceptance/block-110/calibration.json；
+// 绑定 jev-1.13.0——模型升级致分布漂移时须重校准）
+const _JEV_YES = 0.85;
+const _JEV_NO = 0.5;
 
 async function _maybeDetectTopicShift(conversationId, userId) {
   if (!conversationId || !userId) return null;
@@ -226,6 +230,50 @@ async function _maybeDetectTopicShift(conversationId, userId) {
     if (conv.last_topic_shift_at) {
       const ts = Date.parse(conv.last_topic_shift_at);
       if (Date.now() - ts < _TOPIC_COOLDOWN_MS) return null;
+    }
+
+    // BLOCK-110 P1 — Jev noul 直替（PoC，双阈值三区间；D-A：state 仅最近 6 条对话）。
+    // 阈值初值来自中文校准（acceptance/block-110/calibration.json，gate.passed）：
+    //   noul ≥0.85 → 切换；≤0.50 → 未切换（直替成立，不再走大模型）；
+    //   中间带 → 回退大模型路径复核（三区间回退语义）。
+    // Jev 降级（缺 key/网络/校验失败）一律回退大模型路径——决策 API 不做单点故障。
+    // 杀开关：BIOF3_JEV_TOPIC_SHIFT=0 整体停用（回退现行为）。
+    if (process.env.BIOF3_JEV_TOPIC_SHIFT !== '0') {
+      try {
+        const { askDecision } = require('./decision-api');
+        const jevRecent = sqlite.prepare('SELECT role, content FROM copilot_messages WHERE conversation_id=? ORDER BY ts DESC LIMIT 6').all(conversationId);
+        if (jevRecent && jevRecent.length >= 4) {
+          jevRecent.reverse();
+          const jEarlier = jevRecent.slice(0, jevRecent.length - 3).map(m => m.role + ': ' + String(m.content || '').slice(0, 200)).join('\n');
+          const jLatest = jevRecent.slice(-3).map(m => m.role + ': ' + String(m.content || '').slice(0, 200)).join('\n');
+          const outcome = await askDecision({
+            state: `之前的对话：\n${jEarlier}\n\n刚刚的对话：\n${jLatest}`,
+            questions: {
+              topic_shift: {
+                type: 'noul',
+                instructions: '「刚刚的对话」是否明显切换到了与「之前的对话」完全不同的新话题？同一话题的延续、追问或细节扩展不算切换。模糊不清按否。',
+              },
+            },
+          });
+          if (outcome.ok) {
+            const noul = outcome.answers.topic_shift && outcome.answers.topic_shift.noul;
+            if (typeof noul === 'number' && noul >= _JEV_YES) {
+              const reason = `Jev 判定话题切换（noul=${noul.toFixed(2)}）`.slice(0, 60);
+              sqlite.prepare('UPDATE copilot_conversations SET last_topic_shift_at=?, last_topic_shift_reason=? WHERE id=?')
+                .run(new Date().toISOString(), reason, conversationId);
+              console.log('[topic-shift][jev] conv=' + conversationId + ' → ' + reason);
+              return { shifted: true, reason };
+            }
+            if (typeof noul === 'number' && noul <= _JEV_NO) {
+              return null; // Jev 明确判「未切换」——直替成立，不再走大模型
+            }
+            // 中间带 (NO, YES)：落入下方大模型路径复核
+          }
+          // Jev 降级（!ok）：落入下方大模型路径
+        }
+      } catch (e) {
+        console.warn('[topic-shift][jev] failed → 大模型路径:', e && e.message || e);
+      }
     }
 
     const recent = sqlite.prepare('SELECT role, content FROM copilot_messages WHERE conversation_id=? ORDER BY ts DESC LIMIT 12').all(conversationId);

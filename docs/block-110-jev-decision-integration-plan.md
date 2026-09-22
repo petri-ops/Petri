@@ -1,7 +1,7 @@
 # BLOCK-110-JEV-DECISION-INTEGRATION 计划：Jev/System One 决策模型融合
 
 **Plan ID**：`BLOCK-110-JEV-DECISION-INTEGRATION`
-**状态**：`active（P0 完成——2026-09-22：wrapper/降级契约/校准 harness 三件全落地（a539e6c8，另一会话实现）+ overrides 缺省 hotfix（校准 harness 实测抓真）+ 中文校准 gate.passed=true（topic-shift 200 条 decidedAccuracy=1.0 coverage=0.98 阈值 YES≥0.85/NO≤0.5；retrieval 60 条 1.0/1.0 阈值 YES≥0.5/NO≤0.15）。待用户评审：D-A 数据出站分级终裁 + P1 启动裁决。评审材料见 §P0-评审）`
+**状态**：`active（P1 完成——2026-09-22 A/B 对账 100 条：Jev coverage 100% decidedAccuracy 0.99 P50 278ms；legacy decided 22/100 P50 1148ms；both-decided 一致率 0.955 → P1 门禁过（中文 accuracy 未低于现路径），P2 解锁。P0 完成（gate.passed，阈值 YES≥0.85/NO≤0.5〔topic-shift〕、YES≥0.5/NO≤0.15〔retrieval〕）。D-A 已终裁（按建议）。P2=知识库二跳（检索出站默认关+显式开），启动待用户继续。立项=2026-09-21，本包=决策判断模式内化弧的 W0）`
 **立项日期**：2026-09-21
 **最后更新**：2026-09-22（启动登记 active/P0-LAUNCH，启动动作三件套完成：DOC-REGISTRY planned→active + AUDIT-LOG 启动行 + roadmap 状态行；26 个已收口提交推送 origin）。2026-09-21（立项登记 planned；技术底稿= `docs/planning/typesafe-jev-system-one-research.md`；**本包=决策判断模式内化弧的 W0**，后续弧线见 `docs/planning/decision-primitive-internalization-arc.md`——W1+ 启动均需用户裁决，本包收口不等于弧线授权）
 
@@ -121,4 +121,22 @@ P0 交付三件事：① wrapper（超时/指数退避重试 429,529 遵循 retr
 - 题型定版：topic-shift=noul（P1 形状）；relevance=choice（P2 形状）——概率不跨题型搬（§8-4）。
 - 降级策略：按已实现契约（缺 key/auth/网络/校验失败一律 `{ok:false}` 回退，永不 throw；重试仅 429/529/超时，遵循 Retry-After）。
 - D-B provider 可替换性：**测试实证**（baseUrl 指向本地 server 全链路通，契约不绑域名）。
-- **D-A 数据出站分级：待用户终裁**——①P1 state 最小化（仅最近 N 条消息，N=?）②P2 检索内容出站是否默认关闭+用户显式开启 ③远期 ZDR/本地化。此项裁决后 P1 方可启动。
+- **D-A 数据出站分级：已终裁（2026-09-22 用户裁决「按照你的建议来」）**——①P1 state 最小化=仅最近 6 条对话；②P2 检索内容出站默认关闭+用户显式开启；③远期 ZDR/本地化=方向性目标（不承诺时间点，不阻塞 P1/P2）。P1 解锁。
+
+## P1 收口记录（2026-09-22 凌晨）
+
+**交付**：①`_maybeDetectTopicShift` Jev noul 直替层（conversations.js）——双阈值三区间（noul≥0.85 切换 / ≤0.50 未切换直替 / 中间带回退大模型路径）、D-A state=最近 6 条、降级（缺 key/网络/校验失败）与杀开关（BIOF3_JEV_TOPIC_SHIFT=0）全路回退大模型路径；契约 `{shifted, reason}|null` 不变。②A/B harness `scripts/block110-p1-ab.mjs`（双路径同批对跑）。
+
+**A/B 实测**（`acceptance/block-110/p1-ab.json`，100 条平衡样本，真模型双路径）：
+
+| 指标 | Jev（jev-1.13.0） | 现大模型路径 |
+| --- | --- | --- |
+| decided | 100/100 | 22/100 |
+| vs 标签 accuracy | 0.99 | 1.00（仅 decided 子集） |
+| 延迟 | P50 278ms / P95 620ms | P50 1148ms |
+| 成本 | 46,213 input tok（≈$0.002） | 大模型整轮（无 usage 拆分） |
+| 双方均 decided 一致率 | — | 0.955 |
+
+**门禁判定**：中文 accuracy 未低于现路径（0.99 vs 1.00，decided 子集差异不显著）+ Jev coverage 压倒性 → **P1 通过，不走收缩语义**。
+
+**诚实登记**：①legacy decided 22/100 的原因=大模型回复 78% JSON 不可解析（独立 harness 环境下；生产 in-process 路径可能有别，未深挖——A/B harness 的 legacy 腿按生产同款 prompt 直调）；②对账竞态（取消子任务终态落库晚于父对账读取）为 v1 已知限制；③发现并修复 harness 语料 turn 格式误读（[role,content] 元组 vs 对象，首跑 accuracy 0.5 系 harness 自身读错语料所致，非模型问题）。
