@@ -1,0 +1,26 @@
+{
+  "evidence": {
+    "priorEnabled": false,
+    "scenarios": [],
+    "s1": {
+      "guard": {
+        "enabled": true,
+        "checked": 1,
+        "dropped": [],
+        "injectionSuspects": []
+      },
+      "hits": [
+        "React 前端开发笔记。\nuseEffect 的依赖数组决定副作用重新执行的时机：空数组表示仅在组件挂载时执行一次；\n"
+      ]
+    },
+    "s2": {
+      "injectionSuspects": 1,
+      "hits": 1
+    }
+  },
+  "cleanups": [
+    "kdoc_b3c=ok",
+    "kdoc_2a0=ok",
+    "kdoc_2bc=ok"
+  ]
+}

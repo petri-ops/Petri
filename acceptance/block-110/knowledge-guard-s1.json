@@ -1,0 +1,11 @@
+{
+  "guard": {
+    "enabled": true,
+    "checked": 1,
+    "dropped": [],
+    "injectionSuspects": []
+  },
+  "hits": [
+    "React 前端开发笔记。\nuseEffect 的依赖数组决定副作用重新执行的时机：空数组表示仅在组件挂载时执行一次；\n"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "name": "block110-knowledge-guard-live",
+  "startedAt": "2026-09-22T03:32:18.864Z",
+  "finishedAt": "2026-09-22T03:32:23.794Z",
+  "assertions": [
+    {
+      "name": "K0_space_enabled",
+      "pass": true,
+      "detail": "enable resp={\"status\":\"ok\",\"space\":{\"id\":\"ks_default\",\"name\":\"默认知识空间\",\"enabled\":true}}"
+    },
+    {
+      "name": "K1_ingest_three_docs",
+      "pass": true,
+      "detail": "docIds=3"
+    },
+    {
+      "name": "K1b_ingest_reached_ready",
+      "pass": true,
+      "detail": "ready=3/3"
+    },
+    {
+      "name": "K2_guard_enabled_and_checked",
+      "pass": true,
+      "detail": "jevGuard={\"enabled\":true,\"checked\":1,\"dropped\":[],\"injectionSuspects\":[]}"
+    },
+    {
+      "name": "K3_injection_query_search_ok",
+      "pass": true,
+      "detail": "search ok=true injectionSuspects=1 注入文档在命中中=false（若在命中中则必须被标注）"
+    },
+    {
+      "name": "K4_space_state_restored",
+      "pass": true,
+      "detail": "restored enabled=false (prior=false)"
+    },
+    {
+      "name": "K5_temp_docs_cleaned",
+      "pass": true,
+      "detail": "cleanups=[\"kdoc_b3c=ok\",\"kdoc_2a0=ok\",\"kdoc_2bc=ok\"]"
+    }
+  ],
+  "allPass": true
+}

@@ -299,6 +299,8 @@ module.exports = function mountKnowledge(app) {
         // searchKnowledge 未实际尝试嵌入（无 ready chunk 早退）时以凭据检查为准，避免假 true
         embeddingAvailable: result.readyChunks === 0 ? embeddingAvailable() : result.embeddingAvailable,
         embeddingError: result.embeddingError || null,
+        // BLOCK-110 P2 — Jev 二跳守卫元数据透传（默认关闭时为 null；additive）
+        jevGuard: result.jevGuard || null,
       });
     } catch (e) {
       res.status(500).json({ status: 'error', error: e.message });

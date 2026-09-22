@@ -1,7 +1,7 @@
 # BLOCK-110-JEV-DECISION-INTEGRATION 计划：Jev/System One 决策模型融合
 
 **Plan ID**：`BLOCK-110-JEV-DECISION-INTEGRATION`
-**状态**：`active（P2 实现完成（7bce4663）——二跳语义复核+注入拦截（默认关+显式开，契约 5/5），实机 flow 腿待补后 P2 收口。P1 已完成（553e2c7c，A/B coverage 100% 一致率 0.955）。P0 已完成（gate.passed）。P3 选做待 P2 收口后另行裁决。待办=P2 实机腿 → 整包收口；2026-09-22 A/B 对账 100 条：Jev coverage 100% decidedAccuracy 0.99 P50 278ms；legacy decided 22/100 P50 1148ms；both-decided 一致率 0.955 → P1 门禁过（中文 accuracy 未低于现路径），P2 解锁。P0 完成（gate.passed，阈值 YES≥0.85/NO≤0.5〔topic-shift〕、YES≥0.5/NO≤0.15〔retrieval〕）。D-A 已终裁（按建议）。P2=知识库二跳（检索出站默认关+显式开），启动待用户继续。立项=2026-09-21，本包=决策判断模式内化弧的 W0）`
+**状态**：`completed（2026-09-22 整包收口：P0 接入地基+中文校准 gate.passed（260 样本，阈值初值 topic-shift YES≥0.85/NO≤0.5、retrieval YES≥0.5/NO≤0.15）→ P1 话题漂移 noul 直替（A/B 100 条：Jev coverage 100% accuracy 0.99 P50 278ms vs legacy decided 22/100，一致率 0.955）→ P2 知识库二跳（相关性过滤+注入拦截 0.70 实测触发；默认关+显式开；实机腿 7/7）→ P3 选做不执行（裁决留痕）。关闭语义=正常完成（§4）。D-A 已终裁（按建议）。立项=2026-09-21，本包=决策判断模式内化弧的 W0，W1+ 启动需用户裁决）`
 **立项日期**：2026-09-21
 **最后更新**：2026-09-22（启动登记 active/P0-LAUNCH，启动动作三件套完成：DOC-REGISTRY planned→active + AUDIT-LOG 启动行 + roadmap 状态行；26 个已收口提交推送 origin）。2026-09-21（立项登记 planned；技术底稿= `docs/planning/typesafe-jev-system-one-research.md`；**本包=决策判断模式内化弧的 W0**，后续弧线见 `docs/planning/decision-primitive-internalization-arc.md`——W1+ 启动均需用户裁决，本包收口不等于弧线授权）
 
@@ -140,3 +140,13 @@ P0 交付三件事：① wrapper（超时/指数退避重试 429,529 遵循 retr
 **门禁判定**：中文 accuracy 未低于现路径（0.99 vs 1.00，decided 子集差异不显著）+ Jev coverage 压倒性 → **P1 通过，不走收缩语义**。
 
 **诚实登记**：①legacy decided 22/100 的原因=大模型回复 78% JSON 不可解析（独立 harness 环境下；生产 in-process 路径可能有别，未深挖——A/B harness 的 legacy 腿按生产同款 prompt 直调）；②对账竞态（取消子任务终态落库晚于父对账读取）为 v1 已知限制；③发现并修复 harness 语料 turn 格式误读（[role,content] 元组 vs 对象，首跑 accuracy 0.5 系 harness 自身读错语料所致，非模型问题）。
+
+## P2 收口记录（2026-09-22 凌晨）
+
+**交付**：①`knowledge-space.js` Jev 二跳 `jevSecondStageGuard`——融合命中 top5 逐条双问 noul 复核（is_relevant <0.5 丢弃 / has_injection ≥0.70 丢弃并标注 injectionSuspects）；fail-open（Jev 失败保留命中）；默认关闭（BIOF3_JEV_KNOWLEDGE_GUARD=1 显式开启，D-A 裁决），VECTOR_THRESHOLD 硬阈值不动。②检索端点 `jevGuard` 元数据透传（additive 可观测）。③实机腿 flow `block110-knowledge-guard-live` **7/7**：真实 DashScope 嵌入摄取 3 文档 ready、显式开启下 jevGuard 在位（checked≥1）、注入文档被 Jev 标注并拦截（injectionSuspects=1）、空间状态恢复、清理。
+
+**注入拦截阈值实测**：0.70 初值在真实注入样本（伪造系统指令+正常内容混排）上实机触发正确——P0 遗留的「注入阈值实测后定」闭环。
+
+**P3 选做裁决留痕**：不执行（2026-09-22，P2 收口后按 §0 结构裁决另行复议；本收口即留痕）。工具预路由候选保留在 plan §1.1 表格。
+
+**部署密钥接线**：restart-dev-stack.sh 新增 `.biof3-dev-user-data/.biof3-secrets` source（部署密钥 env 文件，gitignored，含 DASHSCOPE_API_KEY）——嵌入凭据链修复（此前 Windows 侧 dashscope_configured=false 的根因=密钥只在 secrets 文件、从未进后端 env）。

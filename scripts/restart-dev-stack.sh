@@ -59,6 +59,14 @@ export BIOF3_LOCAL_DATA_DIR='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\dat
 # DEPTH_ZERO_SELF_SIGNED_CERT，见 dev-infra SKILL「端口与后端实例纪律」第 6 条）
 # BLOCK-110-JEV — 决策 API 凭据注入（key 不入仓；文件在 gitignored 区，用户裁决
 # 「key 暂保留后续轮换」，替换时只改 jev.env 并重启后端）。缺文件静默跳过。
+# 部署密钥（.biof3-secrets，env 格式，gitignored——「不要 commit 到 git」）：
+# 含 DASHSCOPE_API_KEY（知识嵌入）等。后端凭据链读 env，故启动前 source。
+if [ -f "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/.biof3-secrets" ]; then
+  set -a
+  . "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/.biof3-secrets"
+  set +a
+  echo "deploy secrets: .biof3-secrets sourced (DASHSCOPE_API_KEY present)"
+fi
 if [ -f "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/jev.env" ]; then
   set -a
   . "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/jev.env"
