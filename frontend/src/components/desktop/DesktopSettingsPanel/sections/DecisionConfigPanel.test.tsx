@@ -71,7 +71,7 @@ describe('DecisionConfigPanel（BLOCK-116 P4 配置面）', () => {
     vi.stubGlobal('fetch', fn);
     render(<DecisionConfigPanel />);
     await waitFor(() => expect(screen.getAllByText('启用').length).toBe(3));
-    const checkboxes = screen.getAllByRole('checkbox') as HTMLInputElement[];
+    const checkboxes = screen.getAllByRole('checkbox');
     const intentBox = checkboxes.find((box) => !box.checked) as HTMLInputElement;
     expect(intentBox).toBeTruthy();
     fireEvent.click(intentBox);
