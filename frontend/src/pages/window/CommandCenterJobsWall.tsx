@@ -112,6 +112,20 @@ export function CommandCenterJobsWall({
   }, [showProjectTag]);
 
   // P1-b：日志拉取（展开期间 1s 轮询；作业终态后由后端返回静态 run.log，无需特判）
+  // BLOCK-105 §7 Batch-7 — tools 日志/状态/取消 REST 信封 wire 形状（JSON 解析出站边界契约文档；
+  // 字段 optional＝后端可能发任意 JSON，运行时防御 ?. 保持原样）。
+  type ToolsEnvelope = {
+    ok?: unknown;
+    log?: string;
+    source?: string | null;
+    live?: boolean;
+    note?: string;
+    error?: string;
+    message?: string;
+    result?: { artifacts?: Array<{ name?: string; filename?: string }>; files?: Array<{ name?: string; filename?: string }> } | null;
+    files?: Array<{ name?: string; filename?: string }>;
+  } | null;
+
   useEffect(() => {
     if (!logJobId) return;
     let alive = true;
@@ -123,7 +137,7 @@ export function CommandCenterJobsWall({
         const resp = await fetch(`${getApiPrefix('r')}/tools/log/${encodeURIComponent(id)}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
-        const data = await resp.json().catch(() => null);
+        const data = (await resp.json().catch(() => null)) as ToolsEnvelope;
         if (!alive || logJobRef.current !== id) return;
         if (data?.ok) {
           setLogView({ text: data.log || '', source: data.source ?? null, live: data.live === true, note: data.note });
@@ -163,8 +177,8 @@ export function CommandCenterJobsWall({
       const resp = await fetch(`${getApiPrefix('r')}/tools/status/${encodeURIComponent(job.id)}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      const data = await resp.json().catch(() => null);
-      const res = data?.result || data;
+      const data = (await resp.json().catch(() => null)) as ToolsEnvelope;
+      const res = (data?.result || data) as { artifacts?: Array<{ name?: string; filename?: string }>; files?: Array<{ name?: string; filename?: string }> };
       const files = res?.artifacts || res?.files || [];
       const artifactName = files[0]?.name || files[0]?.filename || null;
       if (!artifactName) {
@@ -197,7 +211,7 @@ export function CommandCenterJobsWall({
           method: 'POST',
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
-        const data = await resp.json().catch(() => null);
+        const data = (await resp.json().catch(() => null)) as ToolsEnvelope;
         if (!resp.ok || data?.ok === false) {
           setDrillNote(`取消失败：${data?.error || `HTTP ${resp.status}`}`);
         } else {

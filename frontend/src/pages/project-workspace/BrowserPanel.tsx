@@ -8,6 +8,34 @@ import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
 import { getBrowserViewportSize, isGewuLocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
 import styles from '../project-workspace.module.css';
 
+// ============================================================
+// BLOCK-105 §7 Batch-7 — Electron <webview> 最小形状（本组件实际使用的成员；
+// 官方 webview TS 类型未入仓，此前 useRef<any> 是 no-unsafe-* 病根）。
+// 事件对象按字段结构化定型；运行时防御（?. / typeof 守卫 / try-catch）保持原样。
+// ============================================================
+interface WebviewEventLike {
+  preventDefault?: () => void;
+  title?: string;
+  errorCode?: number | string;
+  errorDescription?: string;
+  url?: string;
+  targetURL?: string;
+}
+
+interface WebviewLike extends HTMLElement {
+  src: string;
+  loadURL(url: string): void;
+  getURL?(): string;
+  getTitle?(): string;
+  canGoBack?(): boolean;
+  canGoForward?(): boolean;
+  goBack(): void;
+  goForward(): void;
+  reload?(): void;
+  addEventListener(type: string, listener: (event: WebviewEventLike) => void): void;
+  removeEventListener(type: string, listener: (event: WebviewEventLike) => void): void;
+}
+
 export function BrowserPanel({
   initialUrl,
   onUrlChange,
@@ -21,7 +49,7 @@ export function BrowserPanel({
 }): React.ReactElement {
   const startUrlRef = useRef(normalizeBrowserUrl(initialUrl));
   const hostRef = useRef<HTMLDivElement | null>(null);
-  const webviewRef = useRef<any>(null);
+  const webviewRef = useRef<WebviewLike | null>(null);
   const [inputUrl, setInputUrl] = useState(() => normalizeBrowserUrl(initialUrl));
   const [frameUrl, setFrameUrl] = useState(() =>
     isGewuLocalBrowserUrl(startUrlRef.current) ? startUrlRef.current : ''
@@ -87,7 +115,7 @@ export function BrowserPanel({
     if (!host) return;
     host.innerHTML = '';
 
-    const webview = document.createElement('webview') as any;
+    const webview = document.createElement('webview') as WebviewLike;
     webview.style.border = '0';
     webview.style.display = 'flex';
     webview.setAttribute('partition', 'persist:gewu-browser');
@@ -127,17 +155,17 @@ export function BrowserPanel({
       syncWebviewViewport();
       syncState();
     };
-    const onTitle = (event: any) => {
+    const onTitle = (event: WebviewEventLike) => {
       setTitle(String(event?.title || '浏览器'));
     };
-    const onFail = (event: any) => {
+    const onFail = (event: WebviewEventLike) => {
       if (Number(event?.errorCode) === -3) return;
       setLoading(false);
       setBrowserError(String(event?.errorDescription || '网页加载失败'));
       webview.style.visibility = 'hidden';
       onNavigationStateChange?.({ canGoBack: false, canGoForward: false });
     };
-    const onNewWindow = (event: any) => {
+    const onNewWindow = (event: WebviewEventLike) => {
       event.preventDefault?.();
       const next = String(event?.url || event?.targetURL || '').trim();
       if (next) navigate(next);
@@ -181,13 +209,15 @@ export function BrowserPanel({
 
   const goBack = useCallback(() => {
     try {
-      webviewRef.current?.canGoBack?.() && webviewRef.current.goBack();
+      const wv = webviewRef.current;
+      if (wv?.canGoBack?.()) wv.goBack();
     } catch {}
   }, []);
 
   const goForward = useCallback(() => {
     try {
-      webviewRef.current?.canGoForward?.() && webviewRef.current.goForward();
+      const wv = webviewRef.current;
+      if (wv?.canGoForward?.()) wv.goForward();
     } catch {}
   }, []);
 

@@ -1158,22 +1158,7 @@
   },
   "frontend/src/lib/project-store.ts": {
     "@typescript-eslint/no-base-to-string": {
-      "count": 33
-    },
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 3
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 17
-    },
-    "@typescript-eslint/no-unsafe-call": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 23
-    },
-    "@typescript-eslint/no-unsafe-return": {
-      "count": 1
+      "count": 25
     }
   },
   "frontend/src/lib/projectionDataBridges.test.ts": {
@@ -1282,21 +1267,6 @@
     }
   },
   "frontend/src/pages/project-workspace/BrowserPanel.tsx": {
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 3
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 5
-    },
-    "@typescript-eslint/no-unsafe-call": {
-      "count": 28
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 44
-    },
-    "@typescript-eslint/no-unused-expressions": {
-      "count": 2
-    },
     "no-empty": {
       "count": 4
     },
@@ -1468,12 +1438,6 @@
     }
   },
   "frontend/src/pages/window/CommandCenterJobsWall.tsx": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 11
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 14
-    },
     "react-hooks/refs": {
       "count": 3
     },
