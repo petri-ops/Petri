@@ -1,5 +1,7 @@
 # BioF3 Desktop Current Handoff
 
+最后更新：2026-09-22 晚三（**BLOCK-112-COPILOT-INTENT-ROUTING 立项即启动 active（P0-LAUNCH）**——用户裁决「开 按顺序都做完」全数授权 W1 队列 2~5 点按序逐点串行；本包=W1-2 copilot 发送前意图路由：chat.js 提交链挂钩 choice 四类分类 + chitchat 快路径（callModelTask 直答、事件回放镜像 agent-runner、BIOF3_JEV_INTENT_ROUTE=1 + θ 门控），其余三类维持现行 loop。**当前 active=BLOCK-112，槽位占用中**；队列=W1-3 工具预路由 → W1-4 测试归因 → W1-5 增量测试选择。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-09-22 晚（**BLOCK-111-JEV-W1-MARKER-CLASSIFICATION 当日立项当日整包 completed（closeout 十门全绿）**——决策内化弧 W1 首点 marker→细胞类型判别二跳：规则表候选生成 + `decision-api` choice 二跳（θ=0.55 门控：adoptedAccuracy 1.0/coverage 0.9125，vs legacy 0.8375）+ `/api/ai/interpret` cellTypeHintsDetailed additive（老契约零变化）；默认关 `BIOF3_JEV_MARKER_GUARD=1` 显式开；P0 校准 104 条语料 gate.passed + P1 契约 14/14 + P2 A/B 生产路径 gate.passed + 实机 flow `block111-marker-live` 7/7。D-1~D-5 已获用户裁决定版（「继续 按推荐的进行」，θ=0.55 维持）；A/B 轮 1/12 陷阱采纳（轮间方差）如实登记。**当前无 active 工作包**；W1 队列 2~5 点待各自单独裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-22 午后二（**BLOCK-111-JEV-W1-MARKER-CLASSIFICATION 立项即启动 active（P0-LAUNCH）**——用户裁决「1」启动 Jev W1 决策内化弧线；首点=marker→细胞类型判别二跳（arc §W1 队列第 1 点，逐点立项）：`interpret.js` CELL_MARKERS 规则表降级为候选生成器 + `askDecision` choice 补概率/confidence + 阈值门控 + `/api/ai/interpret` cellTypeHintsDetailed additive；W0（BLOCK-110）wrapper/harness 零改动复用；P0 预登记 D-1~D-5 裁决项；W1 队列 2~5 点仍需各自单独裁决。**当前 active=BLOCK-111，槽位占用中**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
