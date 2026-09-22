@@ -1,7 +1,7 @@
 # BLOCK-110-JEV-DECISION-INTEGRATION 计划：Jev/System One 决策模型融合
 
 **Plan ID**：`BLOCK-110-JEV-DECISION-INTEGRATION`
-**状态**：`active（P1 完成——2026-09-22 A/B 对账 100 条：Jev coverage 100% decidedAccuracy 0.99 P50 278ms；legacy decided 22/100 P50 1148ms；both-decided 一致率 0.955 → P1 门禁过（中文 accuracy 未低于现路径），P2 解锁。P0 完成（gate.passed，阈值 YES≥0.85/NO≤0.5〔topic-shift〕、YES≥0.5/NO≤0.15〔retrieval〕）。D-A 已终裁（按建议）。P2=知识库二跳（检索出站默认关+显式开），启动待用户继续。立项=2026-09-21，本包=决策判断模式内化弧的 W0）`
+**状态**：`active（P2 实现完成（7bce4663）——二跳语义复核+注入拦截（默认关+显式开，契约 5/5），实机 flow 腿待补后 P2 收口。P1 已完成（553e2c7c，A/B coverage 100% 一致率 0.955）。P0 已完成（gate.passed）。P3 选做待 P2 收口后另行裁决。待办=P2 实机腿 → 整包收口；2026-09-22 A/B 对账 100 条：Jev coverage 100% decidedAccuracy 0.99 P50 278ms；legacy decided 22/100 P50 1148ms；both-decided 一致率 0.955 → P1 门禁过（中文 accuracy 未低于现路径），P2 解锁。P0 完成（gate.passed，阈值 YES≥0.85/NO≤0.5〔topic-shift〕、YES≥0.5/NO≤0.15〔retrieval〕）。D-A 已终裁（按建议）。P2=知识库二跳（检索出站默认关+显式开），启动待用户继续。立项=2026-09-21，本包=决策判断模式内化弧的 W0）`
 **立项日期**：2026-09-21
 **最后更新**：2026-09-22（启动登记 active/P0-LAUNCH，启动动作三件套完成：DOC-REGISTRY planned→active + AUDIT-LOG 启动行 + roadmap 状态行；26 个已收口提交推送 origin）。2026-09-21（立项登记 planned；技术底稿= `docs/planning/typesafe-jev-system-one-research.md`；**本包=决策判断模式内化弧的 W0**，后续弧线见 `docs/planning/decision-primitive-internalization-arc.md`——W1+ 启动均需用户裁决，本包收口不等于弧线授权）
 
