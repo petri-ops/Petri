@@ -412,6 +412,16 @@
       "count": 1
     }
   },
+  "frontend/src/components/desktop/DesktopSettingsPanel/sections/DecisionConfigPanel.test.tsx": {
+    "@typescript-eslint/no-unused-vars": {
+      "count": 1
+    }
+  },
+  "frontend/src/components/desktop/DesktopSettingsPanel/sections/DecisionConfigPanel.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
   "frontend/src/components/desktop/DesktopSettingsPanel/sections/ExportDiagnostic.tsx": {
     "@typescript-eslint/no-misused-promises": {
       "count": 1

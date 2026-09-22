@@ -47,10 +47,9 @@ export function DecisionConfigPanel(): React.ReactElement {
       const response = await fetch(`${getPlatformApiPrefix()}/ai/decisions/config`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
-      const data: ConfigResponse = await response.json();
+      const data = (await response.json()) as ConfigResponse;
       if (!response.ok || data?.status !== 'ok') throw new Error(data?.error || '配置不可用');
       setPoints(Array.isArray(data.points) ? data.points : []);
-      setError('');
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     }
@@ -65,7 +64,7 @@ export function DecisionConfigPanel(): React.ReactElement {
       headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: JSON.stringify(body),
     });
-    const data: ConfigResponse & { point?: PointConfig } = await response.json();
+    const data = (await response.json()) as ConfigResponse & { point?: PointConfig };
     if (!response.ok || data?.status !== 'ok' || !data.point) throw new Error(data?.error || '保存失败');
     setPoints((prev) => (prev || []).map((p) => (p.point === point ? { ...p, ...data.point! } : p)));
     setSavedAt(new Date().toLocaleTimeString());
