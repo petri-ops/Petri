@@ -40,7 +40,8 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
       <ConversationTimeline segments={[reasoningSegment, toolsSegment, narrativeSegment]} />
     );
     const view = within(container);
-    expect(view.getByText('思考 · 第 2 轮')).toBeTruthy();
+    // UI-437 加映 — 思考节点标签去轮次号（内部细节不外露）
+    expect(view.getByText('思考')).toBeTruthy();
     // BLOCK-108 P3 — 簇头为计数式「执行工具 N 次」（Qoder 形态）
     expect(container.textContent).toContain('执行工具 1 次');
     // 正文不由本组件产出（宿主负责），避免同一正文被渲染两次
@@ -56,16 +57,15 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     expect(container.querySelector('.sc-timeline-reasoning')).toBeNull();
   });
 
-  it('思考节点折叠态显示一行预览，点击展开全文并收起预览', () => {
+  it('UI-437 加映：思考节点折叠态只留标签一行（无长预览），点击展开全文', () => {
     const { container } = render(<ConversationTimeline segments={[reasoningSegment]} />);
-    expect(container.querySelector('.sc-timeline-reasoning-preview')?.textContent)
-      .toBe('先确认一下这个函数在哪被调用');
+    // 完成态思考行对齐 ZCode：只留标签，预览不渲染（避免读起来像未折叠正文）
+    expect(container.querySelector('.sc-timeline-reasoning-preview')).toBeNull();
 
-    fireEvent.click(within(container).getByRole('button', { name: '展开思考 · 第 2 轮' }));
+    fireEvent.click(within(container).getByRole('button', { name: '展开思考' }));
 
     expect(container.querySelector('.sc-tool-reasoning-text')?.textContent)
       .toContain('第二行细节');
-    expect(container.querySelector('.sc-timeline-reasoning-preview')).toBeNull();
   });
 
   it('progress 分段默认跳过（宿主仍在别处渲染阶段进度时不重复展示）', () => {

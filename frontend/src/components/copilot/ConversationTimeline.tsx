@@ -28,15 +28,13 @@ import { UNGROUPED_ITERATION } from './conversationSegments';
 import { ToolActivityList } from './ToolActivityList';
 
 /**
- * 思考节点：折叠态为一行（标签 + 首行预览），点击展开全文。
- * 相比既有 `ReasoningRow`（UI-272）新增 `preview` 一行预览——折叠态即可看出
- * 这一轮在琢磨什么，不必逐条点开。
+ * 思考节点：折叠态为一行（标签），点击展开全文。
+ * UI-437 加映（用户反馈「思考过程没有收起来」）——对齐 ZCode 完成态：
+ * 折叠行只留标签一行，不再放长预览（预览读起来像未折叠正文）；轮次号
+ * 是内部实现细节，不再暴露在标签里。
  */
 function ReasoningSegmentRow({ segment }: { segment: ReasoningSegment }): React.ReactElement {
   const [open, setOpen] = useState(false);
-  const label = segment.iteration > UNGROUPED_ITERATION
-    ? `思考 · 第 ${segment.iteration} 轮`
-    : '思考';
   return (
     <div className="sc-tool-reasoning sc-timeline-reasoning" data-iteration={segment.iteration}>
       <button
@@ -44,14 +42,11 @@ function ReasoningSegmentRow({ segment }: { segment: ReasoningSegment }): React.
         className="sc-tool-row-head sc-tool-reasoning-head"
         data-expanded={open || undefined}
         aria-expanded={open}
-        aria-label={open ? `收起${label}` : `展开${label}`}
+        aria-label={open ? '收起思考' : '展开思考'}
         title={open ? '收起思考' : '展开思考'}
         onClick={() => setOpen((value) => !value)}
       >
-        <span className="sc-tool-reasoning-label">{label}</span>
-        {!open && segment.preview && (
-          <span className="sc-timeline-reasoning-preview">{segment.preview}</span>
-        )}
+        <span className="sc-tool-reasoning-label">思考</span>
         <span className="sc-tool-row-chevron" aria-hidden="true">
           <Icon name="chevron-right" size={12} />
         </span>

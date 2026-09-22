@@ -16,7 +16,6 @@ import {
   groupToolActivities,
   type ToolActivityItem,
 } from './toolActivity';
-import { reasoningPreview } from './conversationSegments';
 
 /** UI-316 — agent 管理类工具（子智能体独立标识 + 行内实时状态）。 */
 const ACTIVITY_AGENT_TOOLS: ReadonlySet<string> = new Set([
@@ -716,7 +715,6 @@ export function ToolActivityList({
             iteration={entry.iteration}
             text={entry.text}
             label="已思考"
-            preview={reasoningPreview(entry.text)}
           />
         ));
         return (
@@ -737,7 +735,6 @@ export function ToolActivityList({
                       iteration={iterationKey}
                       text={reasoningText}
                       label="已思考"
-                      preview={reasoningPreview(reasoningText)}
                     />
                   ) : null}
                   {(byIteration.get(iterationKey) || []).map((activity) => (

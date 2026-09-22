@@ -278,11 +278,12 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
         collapseWhenSettled
       />
     );
-    // UI-437 — 完成簇行默认可见，思考行无需点击簇头
+    // UI-437 加映 — 完成态思考行只留标签一行（无长预览），点击展开全文
     expect(screen.getByText('已思考')).toBeTruthy();
-    expect(screen.getByText('先确认登记行再改文档')).toBeTruthy();
+    expect(screen.queryByText('先确认登记行再改文档')).toBeNull();
     expect(screen.queryByText(/第二行细节/)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: '展开 已思考' }));
+    expect(screen.getByText(/先确认登记行再改文档/)).toBeTruthy();
     expect(screen.getByText(/第二行细节/)).toBeTruthy();
   });
 
@@ -306,8 +307,8 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     // 簇头 = ZCode「工作中 · 已运行 Ns」；点击展开全部轮次
     fireEvent.click(screen.getByText(/工作中 · 已运行/));
     expect(screen.getByText('cmd-1')).toBeTruthy();
-    expect(screen.getByText('第一轮思路')).toBeTruthy();
-    expect(screen.getByText('第二轮思路')).toBeTruthy();
+    // 思考行展开后为单行标签（交错渲染统一用「已思考」，预览已移除，正文点行才见）
+    expect(screen.getAllByText('已思考').length).toBe(2);
   });
 
   it('UI-431 P2 派发行：子智能体行参与当轮渲染，无快照时无计时', () => {
@@ -373,9 +374,12 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
         collapseWhenSettled
       />
     );
-    // UI-437 — 完成簇行默认可见，无需点击簇头
+    // UI-437 — 完成簇行默认可见；完成态思考行只留标签（预览不渲染）
+    const thinkHeads = screen.getAllByRole('button', { name: '展开 已思考' });
+    expect(thinkHeads.length).toBe(2);
+    // 点开两行思考后，交错顺序仍为：思考(1) → 命令(1) → 思考(2) → 文件(2)
+    thinkHeads.forEach((button) => fireEvent.click(button));
     const body = screen.getByTestId('qoder-cluster-body').textContent || '';
-    // 交错顺序：思考(1) → 命令(1) → 思考(2) → 文件(2)
     expect(body.indexOf('先看工作区状态')).toBeGreaterThanOrEqual(0);
     expect(body.indexOf('先看工作区状态')).toBeLessThan(body.indexOf('git status --short'));
     expect(body.indexOf('git status --short')).toBeLessThan(body.indexOf('再看台账 diff'));
