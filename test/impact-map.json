@@ -2210,6 +2210,22 @@
         "acceptance/block-114/**",
         "test/block114-*.test.mjs"
       ],
+      "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "governance"
+    },
+    {
+      "id": "block115-test-suggest",
+      "note": "BLOCK-115-TEST-SUGGEST：W1-5 增量式测试选择建议（谨慎档，不入门禁链）。scripts/block115-test-suggest.mjs=CLI+内核（choice 6 测试域+none、θ=0.80、docs/acceptance 确定性前置层零出站、只加不减结构化保证）。契约=test/block115-test-suggest.test.mjs（类目集/前置层/降级零建议/弃权/采纳展开/空输入 10 项）。P0 证据 acceptance/block-115/（P0 校准迭代：12 域 72-74% 平台→6 域粗化+docs 前置层 gate.passed）。",
+      "patterns": [
+        "scripts/block115-test-suggest.mjs",
+        "scripts/block115-p0-calibrate.mjs",
+        "acceptance/block-115/**",
+        "test/block115-*.test.mjs"
+      ],
+      "tests": [
+        "test/block115-test-suggest.test.mjs"
+      ],
       "tests": [
         "test/block114-failure-triage.test.mjs"
       ],

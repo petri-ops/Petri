@@ -1,0 +1,1140 @@
+{
+  "kind": "block115-calibration",
+  "version": "1.0.0",
+  "capturedAt": "2026-09-22T09:12:02.695Z",
+  "sourceCommit": "37bd96b8b537220513f4052a1f7841f8f9bf0d9e",
+  "model": "jev-1.13.0",
+  "wrapper": "core/biof3-server/helpers/decision-api.js",
+  "decisionPoint": "scripts/block115-test-suggest.mjs 增量测试建议（W1-5）",
+  "result": {
+    "corpus": {
+      "file": "corpus-test-suggest.json",
+      "sha256": "f52571fce2f858204e4c4e07932c14e970875b3e515773b0e611d37c0101a7d0",
+      "count": 104
+    },
+    "apiFailures": 0,
+    "validCount": 104,
+    "argmaxTop1Accuracy": 0.8942,
+    "latency": {
+      "p50Ms": 300
+    },
+    "inputTokens": 65437,
+    "elapsedMs": 6758,
+    "recommendedThreshold": {
+      "theta": 0.5,
+      "adopted": 88,
+      "adoptedCoverage": 0.9462,
+      "adoptedPrecision": 0.8977
+    },
+    "bestOutsideGate": null,
+    "grid": [
+      {
+        "theta": 0.5,
+        "adopted": 88,
+        "adoptedCoverage": 0.9462,
+        "adoptedPrecision": 0.8977
+      },
+      {
+        "theta": 0.55,
+        "adopted": 86,
+        "adoptedCoverage": 0.9247,
+        "adoptedPrecision": 0.8953
+      },
+      {
+        "theta": 0.6,
+        "adopted": 83,
+        "adoptedCoverage": 0.8925,
+        "adoptedPrecision": 0.9036
+      },
+      {
+        "theta": 0.65,
+        "adopted": 83,
+        "adoptedCoverage": 0.8925,
+        "adoptedPrecision": 0.9036
+      },
+      {
+        "theta": 0.7,
+        "adopted": 80,
+        "adoptedCoverage": 0.8602,
+        "adoptedPrecision": 0.925
+      },
+      {
+        "theta": 0.75,
+        "adopted": 79,
+        "adoptedCoverage": 0.8495,
+        "adoptedPrecision": 0.9241
+      },
+      {
+        "theta": 0.8,
+        "adopted": 77,
+        "adoptedCoverage": 0.828,
+        "adoptedPrecision": 0.9351
+      },
+      {
+        "theta": 0.85,
+        "adopted": 75,
+        "adoptedCoverage": 0.8065,
+        "adoptedPrecision": 0.9333
+      },
+      {
+        "theta": 0.9,
+        "adopted": 65,
+        "adoptedCoverage": 0.6989,
+        "adoptedPrecision": 0.9538
+      },
+      {
+        "theta": 0.95,
+        "adopted": 59,
+        "adoptedCoverage": 0.6344,
+        "adoptedPrecision": 0.9492
+      }
+    ],
+    "perSample": [
+      {
+        "id": "sg-001",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 734
+      },
+      {
+        "id": "sg-002",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 651
+      },
+      {
+        "id": "sg-003",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 748
+      },
+      {
+        "id": "sg-004",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 614
+      },
+      {
+        "id": "sg-005",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 699
+      },
+      {
+        "id": "sg-006",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 660
+      },
+      {
+        "id": "sg-007",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 346
+      },
+      {
+        "id": "sg-008",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 365
+      },
+      {
+        "id": "sg-009",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.98,
+        "correct": true,
+        "elapsedMs": 348
+      },
+      {
+        "id": "sg-010",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 344
+      },
+      {
+        "id": "sg-011",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.93,
+        "correct": true,
+        "elapsedMs": 321
+      },
+      {
+        "id": "sg-012",
+        "group": "typical",
+        "gold": "conversation-copilot",
+        "ok": true,
+        "choice": "conversation-copilot",
+        "confidence": 0.69,
+        "correct": true,
+        "elapsedMs": 253
+      },
+      {
+        "id": "sg-013",
+        "group": "typical",
+        "gold": "conversation-copilot",
+        "ok": true,
+        "choice": "conversation-copilot",
+        "confidence": 0.89,
+        "correct": true,
+        "elapsedMs": 264
+      },
+      {
+        "id": "sg-014",
+        "group": "typical",
+        "gold": "conversation-copilot",
+        "ok": true,
+        "choice": "conversation-copilot",
+        "confidence": 0.79,
+        "correct": true,
+        "elapsedMs": 269
+      },
+      {
+        "id": "sg-015",
+        "group": "typical",
+        "gold": "conversation-copilot",
+        "ok": true,
+        "choice": "conversation-copilot",
+        "confidence": 0.75,
+        "correct": true,
+        "elapsedMs": 292
+      },
+      {
+        "id": "sg-016",
+        "group": "typical",
+        "gold": "conversation-copilot",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.9,
+        "correct": false,
+        "elapsedMs": 285
+      },
+      {
+        "id": "sg-017",
+        "group": "typical",
+        "gold": "conversation-copilot",
+        "ok": true,
+        "choice": "conversation-copilot",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 300
+      },
+      {
+        "id": "sg-018",
+        "group": "typical",
+        "gold": "conversation-copilot",
+        "ok": true,
+        "choice": "conversation-copilot",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 315
+      },
+      {
+        "id": "sg-019",
+        "group": "typical",
+        "gold": "knowledge-result",
+        "ok": true,
+        "choice": "knowledge-result",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 244
+      },
+      {
+        "id": "sg-020",
+        "group": "typical",
+        "gold": "knowledge-result",
+        "ok": true,
+        "choice": "knowledge-result",
+        "confidence": 0.95,
+        "correct": true,
+        "elapsedMs": 267
+      },
+      {
+        "id": "sg-021",
+        "group": "typical",
+        "gold": "knowledge-result",
+        "ok": true,
+        "choice": "knowledge-result",
+        "confidence": 0.87,
+        "correct": true,
+        "elapsedMs": 314
+      },
+      {
+        "id": "sg-022",
+        "group": "typical",
+        "gold": "knowledge-result",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.68,
+        "correct": false,
+        "elapsedMs": 308
+      },
+      {
+        "id": "sg-023",
+        "group": "typical",
+        "gold": "knowledge-result",
+        "ok": true,
+        "choice": "knowledge-result",
+        "confidence": 0.86,
+        "correct": true,
+        "elapsedMs": 259
+      },
+      {
+        "id": "sg-024",
+        "group": "typical",
+        "gold": "knowledge-result",
+        "ok": true,
+        "choice": "knowledge-result",
+        "confidence": 0.42,
+        "correct": true,
+        "elapsedMs": 275
+      },
+      {
+        "id": "sg-025",
+        "group": "typical",
+        "gold": "knowledge-result",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.41,
+        "correct": false,
+        "elapsedMs": 325
+      },
+      {
+        "id": "sg-026",
+        "group": "typical",
+        "gold": "knowledge-result",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.99,
+        "correct": false,
+        "elapsedMs": 273
+      },
+      {
+        "id": "sg-027",
+        "group": "typical",
+        "gold": "knowledge-result",
+        "ok": true,
+        "choice": "ui-shell-frontend",
+        "confidence": 0.67,
+        "correct": false,
+        "elapsedMs": 270
+      },
+      {
+        "id": "sg-028",
+        "group": "typical",
+        "gold": "knowledge-result",
+        "ok": true,
+        "choice": "knowledge-result",
+        "confidence": 0.84,
+        "correct": true,
+        "elapsedMs": 296
+      },
+      {
+        "id": "sg-029",
+        "group": "typical",
+        "gold": "knowledge-result",
+        "ok": true,
+        "choice": "knowledge-result",
+        "confidence": 0.53,
+        "correct": true,
+        "elapsedMs": 292
+      },
+      {
+        "id": "sg-030",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 331
+      },
+      {
+        "id": "sg-031",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 302
+      },
+      {
+        "id": "sg-032",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 281
+      },
+      {
+        "id": "sg-033",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 262
+      },
+      {
+        "id": "sg-034",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 311
+      },
+      {
+        "id": "sg-035",
+        "group": "typical",
+        "gold": "ipc-preload",
+        "ok": true,
+        "choice": "ipc-preload",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 280
+      },
+      {
+        "id": "sg-036",
+        "group": "typical",
+        "gold": "ipc-preload",
+        "ok": true,
+        "choice": "ipc-preload",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 262
+      },
+      {
+        "id": "src-037",
+        "group": "typical",
+        "gold": "ipc-preload",
+        "ok": true,
+        "choice": "ipc-preload",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 293
+      },
+      {
+        "id": "sg-038",
+        "group": "typical",
+        "gold": "ipc-preload",
+        "ok": true,
+        "choice": "ipc-preload",
+        "confidence": 0.88,
+        "correct": true,
+        "elapsedMs": 256
+      },
+      {
+        "id": "sg-039",
+        "group": "typical",
+        "gold": "ipc-preload",
+        "ok": true,
+        "choice": "ipc-preload",
+        "confidence": 0.58,
+        "correct": true,
+        "elapsedMs": 234
+      },
+      {
+        "id": "sg-040",
+        "group": "typical",
+        "gold": "ui-shell-frontend",
+        "ok": true,
+        "choice": "ipc-preload",
+        "confidence": 0.59,
+        "correct": false,
+        "elapsedMs": 274
+      },
+      {
+        "id": "sg-041",
+        "group": "typical",
+        "gold": "ui-shell-frontend",
+        "ok": true,
+        "choice": "ui-shell-frontend",
+        "confidence": 0.96,
+        "correct": true,
+        "elapsedMs": 265
+      },
+      {
+        "id": "sg-042",
+        "group": "typical",
+        "gold": "ui-shell-frontend",
+        "ok": true,
+        "choice": "ui-shell-frontend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 241
+      },
+      {
+        "id": "sg-043",
+        "group": "typical",
+        "gold": "ui-shell-frontend",
+        "ok": true,
+        "choice": "ui-shell-frontend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 286
+      },
+      {
+        "id": "sg-044",
+        "group": "typical",
+        "gold": "ui-shell-frontend",
+        "ok": true,
+        "choice": "ui-shell-frontend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 315
+      },
+      {
+        "id": "sg-045",
+        "group": "typical",
+        "gold": "ui-shell-frontend",
+        "ok": true,
+        "choice": "conversation-copilot",
+        "confidence": 1,
+        "correct": false,
+        "elapsedMs": 295
+      },
+      {
+        "id": "sg-046",
+        "group": "typical",
+        "gold": "ui-shell-frontend",
+        "ok": true,
+        "choice": "ui-shell-frontend",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 300
+      },
+      {
+        "id": "sg-047",
+        "group": "typical",
+        "gold": "ui-shell-frontend",
+        "ok": true,
+        "choice": "ui-shell-frontend",
+        "confidence": 0.98,
+        "correct": true,
+        "elapsedMs": 283
+      },
+      {
+        "id": "sg-048",
+        "group": "typical",
+        "gold": "ui-shell-frontend",
+        "ok": true,
+        "choice": "ui-shell-frontend",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 278
+      },
+      {
+        "id": "sg-049",
+        "group": "typical",
+        "gold": "ui-shell-frontend",
+        "ok": true,
+        "choice": "ui-shell-frontend",
+        "confidence": 0.83,
+        "correct": true,
+        "elapsedMs": 295
+      },
+      {
+        "id": "sg-050",
+        "group": "typical",
+        "gold": "infra-platform",
+        "ok": true,
+        "choice": "infra-platform",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 314
+      },
+      {
+        "id": "sg-051",
+        "group": "typical",
+        "gold": "infra-platform",
+        "ok": true,
+        "choice": "infra-platform",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 345
+      },
+      {
+        "id": "sg-052",
+        "group": "typical",
+        "gold": "infra-platform",
+        "ok": true,
+        "choice": "infra-platform",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 283
+      },
+      {
+        "id": "sg-053",
+        "group": "typical",
+        "gold": "infra-platform",
+        "ok": true,
+        "choice": "infra-platform",
+        "confidence": 0.92,
+        "correct": true,
+        "elapsedMs": 243
+      },
+      {
+        "id": "sg-054",
+        "group": "typical",
+        "gold": "infra-platform",
+        "ok": true,
+        "choice": "infra-platform",
+        "confidence": 0.86,
+        "correct": true,
+        "elapsedMs": 332
+      },
+      {
+        "id": "sg-055",
+        "group": "typical",
+        "gold": "infra-platform",
+        "ok": true,
+        "choice": "infra-platform",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 324
+      },
+      {
+        "id": "src-056",
+        "group": "typical",
+        "gold": "infra-platform",
+        "ok": true,
+        "choice": "infra-platform",
+        "confidence": 0.94,
+        "correct": true,
+        "elapsedMs": 268
+      },
+      {
+        "id": "sg-057",
+        "group": "typical",
+        "gold": "infra-platform",
+        "ok": true,
+        "choice": "infra-platform",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 292
+      },
+      {
+        "id": "sg-058",
+        "group": "typical",
+        "gold": "infra-platform",
+        "ok": true,
+        "choice": "infra-platform",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 294
+      },
+      {
+        "id": "sg-059",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 304
+      },
+      {
+        "id": "sg-060",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.97,
+        "correct": true,
+        "elapsedMs": 275
+      },
+      {
+        "id": "sg-061",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 300
+      },
+      {
+        "id": "sg-062",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.42,
+        "correct": true,
+        "elapsedMs": 328
+      },
+      {
+        "id": "sg-063",
+        "group": "typical",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.98,
+        "correct": true,
+        "elapsedMs": 313
+      },
+      {
+        "id": "sg-064",
+        "group": "typical",
+        "gold": "infra-platform",
+        "ok": true,
+        "choice": "infra-platform",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 276
+      },
+      {
+        "id": "sg-065",
+        "group": "typical",
+        "gold": "infra-platform",
+        "ok": true,
+        "choice": "infra-platform",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 320
+      },
+      {
+        "id": "sg-066",
+        "group": "typical",
+        "gold": "infra-platform",
+        "ok": true,
+        "choice": "infra-platform",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 359
+      },
+      {
+        "id": "sg-067",
+        "group": "typical",
+        "gold": "infra-platform",
+        "ok": true,
+        "choice": "infra-platform",
+        "confidence": 0.98,
+        "correct": true,
+        "elapsedMs": 260
+      },
+      {
+        "id": "sg-068",
+        "group": "boundary",
+        "gold": "none",
+        "ok": true,
+        "docsEvidence": true,
+        "choice": "none",
+        "correct": true,
+        "confidence": 1
+      },
+      {
+        "id": "sg-069",
+        "group": "boundary",
+        "gold": "none",
+        "ok": true,
+        "docsEvidence": true,
+        "choice": "none",
+        "correct": true,
+        "confidence": 1
+      },
+      {
+        "id": "sg-070",
+        "group": "boundary",
+        "gold": "none",
+        "ok": true,
+        "docsEvidence": true,
+        "choice": "none",
+        "correct": true,
+        "confidence": 1
+      },
+      {
+        "id": "sg-071",
+        "group": "boundary",
+        "gold": "none",
+        "ok": true,
+        "docsEvidence": true,
+        "choice": "none",
+        "correct": true,
+        "confidence": 1
+      },
+      {
+        "id": "sg-072",
+        "group": "boundary",
+        "gold": "none",
+        "ok": true,
+        "docsEvidence": true,
+        "choice": "none",
+        "correct": true,
+        "confidence": 1
+      },
+      {
+        "id": "sg-073",
+        "group": "boundary",
+        "gold": "none",
+        "ok": true,
+        "docsEvidence": true,
+        "choice": "none",
+        "correct": true,
+        "confidence": 1
+      },
+      {
+        "id": "sg-074",
+        "group": "boundary",
+        "gold": "none",
+        "ok": true,
+        "docsEvidence": true,
+        "choice": "none",
+        "correct": true,
+        "confidence": 1
+      },
+      {
+        "id": "sg-075",
+        "group": "boundary",
+        "gold": "none",
+        "ok": true,
+        "docsEvidence": true,
+        "choice": "none",
+        "correct": true,
+        "confidence": 1
+      },
+      {
+        "id": "sg-076",
+        "group": "boundary",
+        "gold": "none",
+        "ok": true,
+        "docsEvidence": true,
+        "choice": "none",
+        "correct": true,
+        "confidence": 1
+      },
+      {
+        "id": "sg-077",
+        "group": "boundary",
+        "gold": "none",
+        "ok": true,
+        "docsEvidence": true,
+        "choice": "none",
+        "correct": true,
+        "confidence": 1
+      },
+      {
+        "id": "sg-078",
+        "group": "boundary",
+        "gold": "none",
+        "ok": true,
+        "docsEvidence": true,
+        "choice": "none",
+        "correct": true,
+        "confidence": 1
+      },
+      {
+        "id": "sg-079",
+        "group": "boundary",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 301
+      },
+      {
+        "id": "sg-080",
+        "group": "boundary",
+        "gold": "conversation-copilot",
+        "ok": true,
+        "choice": "conversation-copilot",
+        "confidence": 0.92,
+        "correct": true,
+        "elapsedMs": 359
+      },
+      {
+        "id": "sg-081",
+        "group": "boundary",
+        "gold": "ipc-preload",
+        "ok": true,
+        "choice": "ipc-preload",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 254
+      },
+      {
+        "id": "sg-082",
+        "group": "boundary",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.92,
+        "correct": true,
+        "elapsedMs": 300
+      },
+      {
+        "id": "sg-083",
+        "group": "boundary",
+        "gold": "ui-shell-frontend",
+        "ok": true,
+        "choice": "ui-shell-frontend",
+        "confidence": 0.52,
+        "correct": true,
+        "elapsedMs": 270
+      },
+      {
+        "id": "sg-084",
+        "group": "boundary",
+        "gold": "knowledge-result",
+        "ok": true,
+        "choice": "knowledge-result",
+        "confidence": 0.97,
+        "correct": true,
+        "elapsedMs": 268
+      },
+      {
+        "id": "sg-085",
+        "group": "boundary",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "infra-platform",
+        "confidence": 0.79,
+        "correct": false,
+        "elapsedMs": 295
+      },
+      {
+        "id": "sg-086",
+        "group": "boundary",
+        "gold": "infra-platform",
+        "ok": true,
+        "choice": "infra-platform",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 352
+      },
+      {
+        "id": "sg-087",
+        "group": "boundary",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 303
+      },
+      {
+        "id": "sg-088",
+        "group": "boundary",
+        "gold": "conversation-copilot",
+        "ok": true,
+        "choice": "conversation-copilot",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 298
+      },
+      {
+        "id": "sg-089",
+        "group": "boundary",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.48,
+        "correct": true,
+        "elapsedMs": 337
+      },
+      {
+        "id": "sg-090",
+        "group": "boundary",
+        "gold": "ipc-preload",
+        "ok": true,
+        "choice": "ipc-preload",
+        "confidence": 0.58,
+        "correct": true,
+        "elapsedMs": 291
+      },
+      {
+        "id": "sg-091",
+        "group": "boundary",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 292
+      },
+      {
+        "id": "sg-092",
+        "group": "boundary",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.9,
+        "correct": true,
+        "elapsedMs": 255
+      },
+      {
+        "id": "sg-093",
+        "group": "boundary",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.97,
+        "correct": true,
+        "elapsedMs": 242
+      },
+      {
+        "id": "sg-094",
+        "group": "boundary",
+        "gold": "conversation-copilot",
+        "ok": true,
+        "choice": "conversation-copilot",
+        "confidence": 0.96,
+        "correct": true,
+        "elapsedMs": 296
+      },
+      {
+        "id": "sg-095",
+        "group": "boundary",
+        "gold": "conversation-copilot",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.96,
+        "correct": false,
+        "elapsedMs": 326
+      },
+      {
+        "id": "sg-096",
+        "group": "boundary",
+        "gold": "conversation-copilot",
+        "ok": true,
+        "choice": "conversation-copilot",
+        "confidence": 0.88,
+        "correct": true,
+        "elapsedMs": 343
+      },
+      {
+        "id": "sg-097",
+        "group": "boundary",
+        "gold": "knowledge-result",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.89,
+        "correct": false,
+        "elapsedMs": 294
+      },
+      {
+        "id": "sg-098",
+        "group": "boundary",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 313
+      },
+      {
+        "id": "sg-099",
+        "group": "boundary",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.97,
+        "correct": true,
+        "elapsedMs": 262
+      },
+      {
+        "id": "sg-100",
+        "group": "boundary",
+        "gold": "ui-shell-frontend",
+        "ok": true,
+        "choice": "ui-shell-frontend",
+        "confidence": 0.98,
+        "correct": true,
+        "elapsedMs": 258
+      },
+      {
+        "id": "sg-101",
+        "group": "boundary",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.87,
+        "correct": true,
+        "elapsedMs": 361
+      },
+      {
+        "id": "sg-102",
+        "group": "boundary",
+        "gold": "ipc-preload",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 0.48,
+        "correct": false,
+        "elapsedMs": 275
+      },
+      {
+        "id": "sg-103",
+        "group": "boundary",
+        "gold": "agent-backend",
+        "ok": true,
+        "choice": "agent-backend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 305
+      },
+      {
+        "id": "sg-104",
+        "group": "boundary",
+        "gold": "ui-shell-frontend",
+        "ok": true,
+        "choice": "ui-shell-frontend",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 313
+      }
+    ]
+  },
+  "gate": {
+    "criterion": "存在 θ：adoptedPrecision ≥ 0.8 且 adoptedCoverage ≥ 0.5；且 overall argmax accuracy ≥ 0.8（诊断门）",
+    "passed": true,
+    "note": "P0 通过判据为立项时提案，P0 评审（D-1~D-5 裁决）可修订；误报代价=多跑一个测试（低危害），故精度门 0.80 低于其他接点。"
+  }
+}
