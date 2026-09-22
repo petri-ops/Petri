@@ -2,7 +2,7 @@
   "scenarios": [
     {
       "scenario": "workspace",
-      "taskId": "b061a40b-2289-40c8-9b42-56e055e4b4d2",
+      "taskId": "5922a76d-b869-4502-b293-065413d1eeb1",
       "terminal": "done",
       "routes": [
         {
@@ -15,7 +15,7 @@
     },
     {
       "scenario": "chitchat",
-      "taskId": "5a3627db-bf5f-48b0-9c5b-b2d70da48505",
+      "taskId": "df773f4d-0493-4936-bd71-ffead4253ccb",
       "terminal": "done",
       "routes": []
     }

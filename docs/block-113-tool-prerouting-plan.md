@@ -1,7 +1,7 @@
 # BLOCK-113-TOOL-PREROUTING 计划：MCP/loop 工具两跳预路由（决策内化弧 W1-3）
 
 **Plan ID**：`BLOCK-113-TOOL-PREROUTING`
-**状态**：`active（P0-LAUNCH，2026-09-22 用户裁决「开 按顺序都做完」队列序第 3 点；弧线底稿=docs/planning/decision-primitive-internalization-arc.md §W1-3；W0-BLOCK-110 P3 选做不执行的正面立项）`
+**状态**：`completed（2026-09-22 当日立项当日收口：P0 校准 gate.passed（111 条九域语料 overall 91.9%、θ=0.80 采纳精度 98.75%/覆盖 80.8%/all 零误采纳）→ P1 tool-router 决策接点+DOMAIN_TOOL_DEFS 导出+agent-runner 挂钩（契约 12/12）→ P2 flow block113-toolroute-live 3/3（tool_route 事件 family=workspace conf=1 defs=14/71、路由后任务正常终态、all 弃权实证）；closeout 十门全绿（含 arch-cycles 断环重构后复验：域映射改经 agent-tools index 既有边，tool-router 零 agent-tools 依赖）；D-1~D-5 按推荐定版；9 个 argmax 失误多为域分类学模糊（后台进程查询 workspace/resident 跨域）非模型错，如实留痕）`
 **立项日期**：2026-09-22
 **责任轨道**：BLOCK（agent-runner 工具下发链挂钩 + 九域分类校准 + defs 收窄面，跨 P 阶段串行）
 **上游文档**：弧线 §W1-3 · 研究底稿 §6.1 #3 · BLOCK-109-CORE-ARCH P2（tool-metadata 六字段 + tool-defs 九域拆分=本包分类学地基）
