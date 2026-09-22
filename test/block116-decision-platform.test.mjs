@@ -163,6 +163,23 @@ test('聚合：summarizeDecisions 按接点聚合调用量与降级率', async (
   assert.ok(probe.degradedRate >= 0 && probe.degradedRate <= 1);
 });
 
+test('recentDecisions：最新在前 + point 过滤 + limit 上限', async () => {
+  const recent = await decisionLog.recentDecisions({ limit: 10 });
+  assert.ok(Array.isArray(recent) && recent.length >= 2);
+  assert.ok(recent[0].at >= recent[recent.length - 1].at, '最新在前');
+  const filtered = await decisionLog.recentDecisions({ limit: 10, point: 'test-probe-degraded' });
+  assert.ok(filtered.every((r) => r.point === 'test-probe-degraded'));
+  assert.ok(filtered.every((r) => r.degraded === true));
+  const capped = await decisionLog.recentDecisions({ limit: 5000 });
+  assert.ok(capped.length <= 200, 'limit 上限 200');
+});
+
+test('recentDecisions：DB 不可用返回 null（诚实不可用）', async (t) => {
+  decisionLog._setDecisionLogDb(Promise.reject(new Error('db down')));
+  t.after(() => decisionLog._setDecisionLogDb(null));
+  assert.equal(await decisionLog.recentDecisions({}), null);
+});
+
 test('70 工具恒等红线延续（W1-3 契约复验）', () => {
   const { TOOL_DEFS, DOMAIN_TOOL_DEFS } = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'tool-defs.js'));
   const union = Object.values(DOMAIN_TOOL_DEFS).flat();

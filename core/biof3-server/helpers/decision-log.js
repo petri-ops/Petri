@@ -93,4 +93,32 @@ async function summarizeDecisions({ days = 7 } = {}) {
   }
 }
 
-module.exports = { logDecision, summarizeDecisions, _setDecisionLogDb };
+/**
+ * 最近决策逐条回放（BLOCK-116 P3 观测面增量）：可选按接点过滤，最新在前。
+ * DB 不可用返回 null。
+ */
+async function recentDecisions({ limit = 50, point } = {}) {
+  try {
+    const db = await getDb();
+    const cap = Math.min(Math.max(Number(limit) || 50, 1), 200);
+    const rows = point
+      ? await db.prepare('SELECT * FROM decision_log WHERE point = ? ORDER BY id DESC LIMIT ?').all(String(point), cap)
+      : await db.prepare('SELECT * FROM decision_log ORDER BY id DESC LIMIT ?').all(cap);
+    return rows.map((r) => ({
+      at: r.at,
+      point: r.point,
+      choice: r.choice,
+      confidence: r.confidence,
+      threshold: r.threshold,
+      degraded: !!r.degraded,
+      reason: r.reason,
+      model: r.model,
+      latencyMs: r.latency_ms,
+      statePreview: r.state_preview,
+    }));
+  } catch {
+    return null;
+  }
+}
+
+module.exports = { logDecision, summarizeDecisions, recentDecisions, _setDecisionLogDb };

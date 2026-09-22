@@ -27,8 +27,30 @@ interface SummaryResponse {
   error?: string;
 }
 
+interface DecisionRecord {
+  at: string;
+  point: string;
+  choice: string | null;
+  confidence: number | null;
+  threshold: number | null;
+  degraded: boolean;
+  reason: string | null;
+  model: string | null;
+  latencyMs: number | null;
+  statePreview: string | null;
+}
+
+interface RecentResponse {
+  status: string;
+  available: boolean;
+  decisions?: DecisionRecord[];
+  error?: string;
+}
+
 export function DecisionUsagePanel(): React.ReactElement {
   const [points, setPoints] = useState<DecisionPointRow[] | null>(null);
+  const [recent, setRecent] = useState<DecisionRecord[] | null>(null);
+  const [showRecent, setShowRecent] = useState(false);
   const [error, setError] = useState('');
   const [available, setAvailable] = useState(true);
 
@@ -43,6 +65,14 @@ export function DecisionUsagePanel(): React.ReactElement {
       setPoints(Array.isArray(data.points) ? data.points : []);
       setError('');
     }).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)));
+    // BLOCK-116 P3 — 最近决策逐条回放（可折叠，默认收起）
+    void fetch(`${getPlatformApiPrefix()}/ai/decisions/recent?limit=20`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    }).then(async (response) => {
+      const data = (await response.json()) as RecentResponse;
+      if (!response.ok || data?.status !== 'ok') throw new Error(data?.error || '最近决策不可用');
+      setRecent(Array.isArray(data.decisions) ? data.decisions : []);
+    }).catch(() => setRecent(null));
   }, []);
 
   const formatLatency = (ms: number | undefined) =>
@@ -74,6 +104,28 @@ export function DecisionUsagePanel(): React.ReactElement {
         </div>
       )}
       <p className="gewu-field__hint">阈值与校准证据的绑定关系见 helpers/decision-thresholds.js；调整阈值必须先重校准。</p>
+      {/* BLOCK-116 P3 — 最近决策逐条回放（可折叠；默认收起） */}
+      <div className="gewu-resource-heading">
+        <div><strong>最近决策（20 条）</strong><p>逐条回放：接点 · 判定 · 置信度 · 降级标记</p></div>
+        <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={() => setShowRecent((v) => !v)}>
+          {showRecent ? '收起' : '展开'}
+        </button>
+      </div>
+      {showRecent && (
+        recent && recent.length > 0 ? (
+          <div className="gewu-metric-grid">
+            {recent.map((row, idx) => (
+              <div key={`${row.at}-${idx}`}>
+                <small>{row.point}{row.degraded ? ' · 降级' : ''}</small>
+                <strong>{row.choice ?? '—'}{row.confidence != null ? ` · ${row.confidence}` : ''}</strong>
+                <small>{new Date(row.at).toLocaleTimeString()}{row.latencyMs != null ? ` · ${row.latencyMs} ms` : ''}</small>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="gewu-field__hint">暂无最近决策记录。</p>
+        )
+      )}
     </div>
   );
 }

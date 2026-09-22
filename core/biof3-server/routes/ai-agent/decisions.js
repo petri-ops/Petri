@@ -23,5 +23,21 @@ module.exports = {
       }
       res.json({ status: 'ok', available: true, days, points: summary });
     });
+
+    // BLOCK-116 P3 — 最近决策逐条回放（观测面增量；point 可选过滤）
+    app.get('/api/ai/decisions/recent', async (req, res) => {
+      const userId = req.user && req.user.id;
+      if (!userId) {
+        return res.status(401).json({ status: 'error', error: '未登录' });
+      }
+      const recent = await decisionLog.recentDecisions({
+        limit: req.query.limit,
+        point: typeof req.query.point === 'string' && req.query.point ? req.query.point : undefined,
+      });
+      if (recent === null) {
+        return res.json({ status: 'ok', available: false, decisions: [] });
+      }
+      res.json({ status: 'ok', available: true, decisions: recent });
+    });
   },
 };

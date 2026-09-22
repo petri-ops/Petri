@@ -1,0 +1,28 @@
+{
+  "name": "block116-replay-live",
+  "startedAt": "2026-09-22T10:40:07.382Z",
+  "finishedAt": "2026-09-22T10:40:13.946Z",
+  "assertions": [
+    {
+      "name": "V0_usage_section_clicked",
+      "pass": true,
+      "detail": "clickedNav=clicked"
+    },
+    {
+      "name": "V1_decision_panel_visible",
+      "pass": true,
+      "detail": "hasPanel=true"
+    },
+    {
+      "name": "V2_recent_replay_rendered",
+      "pass": true,
+      "detail": "clicked=clicked replayText=true intentRow=true"
+    },
+    {
+      "name": "V3_screenshot_captured",
+      "pass": true,
+      "detail": "shot=D:\\1.WorkDir\\biof3-desktop\\acceptance\\block-116\\decision-replay-panel.png"
+    }
+  ],
+  "allPass": true
+}
