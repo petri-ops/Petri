@@ -4968,23 +4968,24 @@
       "id": "BLOCK-111-JEV-W1-MARKER-CLASSIFICATION",
       "path": "docs/block-111-jev-w1-marker-classification-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-111-jev-w1-marker-classification",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-22",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "block-111",
         "jev",
         "system-one",
         "decision-model",
         "w1",
-        "active"
+        "completed"
       ],
-      "notes": "决策判断模式内化弧 W1 队列第 1 点（逐点立项不打包）。2026-09-22 用户裁决「1」（AskUserQuestion 菜单选项 1「Jev W1 决策内化」，选项描述列明首序三候选 marker 判别/意图路由/工具预路由；首点按 arc §W1 预登记队列次序）。开门条件=W0 证据门绿（BLOCK-110 closeout 十门全绿，提交至 4dbfeff7）。范围：interpret.js CELL_MARKERS 规则表降级为候选生成器 + askDecision choice 二跳补概率/confidence + 阈值门控 + /api/ai/interpret cellTypeHints additive 契约；P0 校准 ≥100 样本（公开发表 marker 知识构建，零用户数据出站）+ D-1~D-5 预登记裁决项。非范围=callDeepSeekSimple B 型链路 / 规则表内容重构 / W1 队列 2~5 点 / W2+。红线=模型只挑不造（choice∉criteria 必拒）/ decision-api 唯一接入 / key 不入仓 / 降级必有（回退现行字符串）。PoC 失败语义=诚实收缩仅冻结本点（区别于 W0 失败的全弧冻结）。复用=W0 decision-api.js wrapper 零改动 + block110-calibrate/p1-ab 方法论。G0 开发期常态 · 不外推 packaged/Provider/GA。",
-      "lastUpdated": "2026-09-22"
+      "notes": "决策判断模式内化弧 W1 队列第 1 点（逐点立项不打包）。2026-09-22 用户裁决「1」（AskUserQuestion 菜单选项 1「Jev W1 决策内化」，选项描述列明首序三候选 marker 判别/意图路由/工具预路由；首点按 arc §W1 预登记队列次序）。开门条件=W0 证据门绿（BLOCK-110 closeout 十门全绿，提交至 4dbfeff7）。范围：interpret.js CELL_MARKERS 规则表降级为候选生成器 + askDecision choice 二跳补概率/confidence + 阈值门控 + /api/ai/interpret cellTypeHints additive 契约；P0 校准 ≥100 样本（公开发表 marker 知识构建，零用户数据出站）+ D-1~D-5 预登记裁决项。非范围=callDeepSeekSimple B 型链路 / 规则表内容重构 / W1 队列 2~5 点 / W2+。红线=模型只挑不造（choice∉criteria 必拒）/ decision-api 唯一接入 / key 不入仓 / 降级必有（回退现行字符串）。PoC 失败语义=诚实收缩仅冻结本点（区别于 W0 失败的全弧冻结）。复用=W0 decision-api.js wrapper 零改动 + block110-calibrate/p1-ab 方法论。2026-09-22 当日整包收口 completed：closeout 十门全绿——P0 校准 gate.passed（104 条语料，θ=0.55 adoptedAccuracy 1.0/coverage 0.9125/trap 0%）→ P1 接线（契约 14/14 + test:changed 159 项 0 红）→ P2 A/B 生产路径 gate.passed（gated 1.0/endToEnd 0.925≥legacy 0.8375）+ 实机 flow block111-marker-live 7/7。D-1~D-5 按推荐先行留痕待用户评审（翻裁决成本=单点常量）；A/B 轮 1/12 陷阱采纳（轮间方差）如实登记。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "lastUpdated": "2026-09-22",
+      "completedAt": "2026-09-22"
     },
     {
       "id": "DECISION-PRIMITIVE-INTERNALIZATION-ARC",
