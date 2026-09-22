@@ -2185,6 +2185,25 @@
       "scriptRole": "governance"
     },
     {
+      "id": "block112-copilot-intent",
+      "note": "BLOCK-112-COPILOT-INTENT-ROUTING：W1-2 copilot 发送前意图路由。intent-router.js 决策接点（choice 四类，θ=0.70 门控，默认关 BIOF3_JEV_INTENT_ROUTE=1）+ chitchat-fast-path.js 快路径（callModelTask 直答→run_started/delta 事件回放→markAgentTaskDone）+ chat.js 提交链分支（guard 关逐字节等价）。契约=test/block112-intent-routing.test.mjs（guard 零出站/降级五态/伪造类目拒收/采纳与门控/快路径事件契约/失败回退窗口 13 项）。P0 证据 acceptance/block-112/。P2 实机 flow 落地后把脚本加进 patterns。",
+      "patterns": [
+        "core/biof3-server/helpers/intent-router.js",
+        "core/biof3-server/helpers/chitchat-fast-path.js",
+        "core/biof3-server/routes/ai-agent/chat.js",
+        "scripts/block112-p0-calibrate.mjs",
+        "acceptance/block-112/**",
+        "test/block112-*.test.mjs",
+        ".agents/skills/gewu-dev-infra/dev-verify/flows/block112-intent-live.cjs"
+      ],
+      "tests": [
+        "test/block112-intent-routing.test.mjs"
+      ],
+      "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "governance"
+    },
+    {
       "id": "block109-core-arch-convergence",
       "note": "BLOCK-109-CORE-ARCH-CONVERGENCE 会话核心链路架构收敛：P0 拆前行为基线（BLOCK-92 先例）=block109-p0-baseline.test.mjs（一轮带工具调用会话的 SSE 事件序列/runLoop 返回契约/task_events 回放恒等/流中断形态@runLoop 边界）。P1 事件溯源单一事实源+组装唯一化动主链文件必跑。证据 acceptance/block-109/。 三包增量（2026-09-21 用户裁决「这四个搞起」）：汇报收敛纪律/终态对账/自动计划意图恢复接线与纯函数契约=test/block109-reporting-reconcile.test.mjs。",
       "patterns": [

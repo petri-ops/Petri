@@ -280,30 +280,57 @@ module.exports = {
         }
 
         setImmediate(() => {
-          runAgentLoop({
-            // B1 — 开关开时为后端 DB 拼装版；关时与旧链路逐字同源
-            messages: effectiveMessages,
-            context,
-            userId,
-            conversationId: _activeConv && _activeConv.id,
-            _activeConv,
-            apiKey,
-            providerName,
-            providerLabel,
-            modelName,
-            profileId: selectedPreset && selectedPreset.id,
-            baseUrl,
-            taskId,
-            kind: wantKind,
-            parentLoopRunId: parentLoopRunId || null,
-            // BLOCK-81 P1 — 思考档位进 agent loop（网关按 profile 能力位门控）
-            thinkingLevel,
-            onEvent: () => {},
-            shouldAbort: () => agentTaskStore.isAgentTaskCancellationRequested(taskId),
-          }).catch((e) => {
-            try { agentTaskStore.markAgentTaskFailed(taskId, e && e.message ? e.message : String(e)); } catch {}
-            try { aiTaskConcurrencyRelease(userId, taskId); } catch {}
-          });
+          // BLOCK-112 W1-2 — 发送前意图路由（默认关 BIOF3_JEV_INTENT_ROUTE=1）：
+          // 主任务消息先经决策原语四类分类，chitchat 且 conf≥θ 走轻量直答快路径；
+          // guard 关/分类失败/低置信/快路径模型失败（零事件落库）→ 一律回退现行
+          // runAgentLoop，提交链其余部分逐字节等价。前置检查（联邦/subagent/并发）
+          // 已全部先行，本分支不绕过任何安全面；subagent 消息不参与分流。
+          const lastUserMessage = [...messages].reverse().find((m) => m && m.role === 'user');
+          const userMessageText = lastUserMessage ? String(lastUserMessage.content || '') : '';
+          (async () => {
+            try {
+              if (wantKind === 'primary' && userMessageText) {
+                const { shouldUseChitchatFastPath } = require('../../helpers/intent-router');
+                const decision = await shouldUseChitchatFastPath(userMessageText);
+                if (decision.fastPath) {
+                  const { runChitchatFastPath } = require('../../helpers/chitchat-fast-path');
+                  await runChitchatFastPath({
+                    taskId,
+                    effectiveMessages,
+                    _activeConv,
+                  });
+                  try { aiTaskConcurrencyRelease(userId, taskId); } catch {}
+                  return;
+                }
+              }
+            } catch (e) {
+              try { console.warn('[block112] chitchat fast path failed, falling back to agent loop:', e && e.message); } catch {}
+            }
+            return runAgentLoop({
+              // B1 — 开关开时为后端 DB 拼装版；关时与旧链路逐字同源
+              messages: effectiveMessages,
+              context,
+              userId,
+              conversationId: _activeConv && _activeConv.id,
+              _activeConv,
+              apiKey,
+              providerName,
+              providerLabel,
+              modelName,
+              profileId: selectedPreset && selectedPreset.id,
+              baseUrl,
+              taskId,
+              kind: wantKind,
+              parentLoopRunId: parentLoopRunId || null,
+              // BLOCK-81 P1 — 思考档位进 agent loop（网关按 profile 能力位门控）
+              thinkingLevel,
+              onEvent: () => {},
+              shouldAbort: () => agentTaskStore.isAgentTaskCancellationRequested(taskId),
+            }).catch((e) => {
+              try { agentTaskStore.markAgentTaskFailed(taskId, e && e.message ? e.message : String(e)); } catch {}
+              try { aiTaskConcurrencyRelease(userId, taskId); } catch {}
+            });
+          })();
         });
 
         return res.json({
