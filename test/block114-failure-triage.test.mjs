@@ -23,7 +23,6 @@ const {
   ENVIRONMENT_PATTERNS,
   fingerprintOf,
   matchesEnvironmentPattern,
-  deterministicLayer,
   buildTriageDecisionRequest,
   triageFailure,
 } = require(path.join(root, 'scripts', 'lib', 'block114-triage-core.mjs'));
