@@ -28,6 +28,7 @@ import { Props, SettingsSection, SETTINGS_SECTIONS } from './DesktopSettingsPane
 // BLOCK-92 Wave B-4 — API Endpoint 编辑器状态簇外迁（渠道/角色/凭据/连通性/导入导出）。
 import { useEndpointProfilesEditor } from './DesktopSettingsPanel/useEndpointProfilesEditor';
 import { UsageResourcePanel } from './DesktopSettingsPanel/sections/UsageResourcePanel';
+import { DecisionUsagePanel } from './DesktopSettingsPanel/sections/DecisionUsagePanel';
 import { UpdateChecker } from './DesktopSettingsPanel/sections/UpdateChecker';
 import { ExportDiagnostic } from './DesktopSettingsPanel/sections/ExportDiagnostic';
 import { DataManagement } from './DesktopSettingsPanel/sections/DataManagement';
@@ -530,6 +531,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
               <p>查看模型成本、缓存命中和当前机器容量，不保存原始数据或密钥。</p>
             </div>
             <UsageResourcePanel />
+            {/* BLOCK-116 W2 — 决策原语观测面（decision_log 聚合，additive） */}
+            <DecisionUsagePanel />
           </section>
         )}
 

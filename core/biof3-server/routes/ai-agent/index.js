@@ -21,6 +21,7 @@ const llmTranscripts = require('./llm-transcripts');
 const conversationChanges = require('./conversation-changes');
 const resume = require('./resume');
 const taskActions = require('./task-actions');
+const decisions = require('./decisions'); // BLOCK-116 W2 决策观测面（只读聚合）
 
 // AGENT_TASK_MODE_v1：默认 task 模式（loop 后台跑 + 订阅重连），legacy 回退到直连 SSE
 const USE_AGENT_TASK_MODE = (process.env.BIOF3_AGENT_TASK_MODE || 'task') !== 'legacy';
@@ -39,6 +40,7 @@ module.exports = {
     conversationChanges.register(app);
     resume.register(app);
     taskActions.register(app);
+    decisions.register(app);
   },
 
   // 子模块 surface（方便测试与子域调试）

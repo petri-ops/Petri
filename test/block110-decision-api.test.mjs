@@ -443,6 +443,6 @@ test('P0 评审前 hotfix 回归钉 — askDecision overrides 缺省不炸（202
   const src = fs.readFileSync(
     path.join(here, '..', 'core', 'biof3-server', 'helpers', 'decision-api.js'), 'utf8'
   );
-  assert.match(src, /askDecision\(\{ state, questions, overrides = \{\} \} = \{\}\)/,
-    'askDecision 的 overrides 必须有 = {} 默认（生产调用方零 overrides）');
+  assert.match(src, /askDecision\(\{ state, questions, meta, overrides = \{\} \} = \{\}\)/,
+    'askDecision 的 overrides 必须有 = {} 默认（生产调用方零 overrides）；BLOCK-116 起 meta 可选记账参数在位');
 });

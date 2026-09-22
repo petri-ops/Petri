@@ -18,6 +18,7 @@
  */
 
 const { askDecision } = require('./decision-api');
+const { thresholdForPoint } = require('./decision-thresholds');
 
 // === 本地知识库：常见 marker 基因 → 细胞类型映射 ===
 // 数据来源：CellMarker 2.0 + PanglaoDB 高频条目精选
@@ -80,9 +81,8 @@ function lookupCellType(markers) {
 //  - 默认关+显式开（D-4，BIOF3_JEV_MARKER_GUARD=1）：关=零出站零行为变化。
 // ============================================================
 
-// D-5（P0 校准 θ=0.55：adoptedAccuracy 1.0 / coverage 0.9125 / trap 误采纳 0，
-// 证据 acceptance/block-111/calibration.json）。调整阈值必须先重校准（jev 版本绑定）。
-const MARKER_DECISION_THRESHOLD = 0.55;
+// D-5 阈值迁入 decision-thresholds 注册表（BLOCK-116；值与校准证据绑定，改阈值必先重校准）。
+const MARKER_DECISION_THRESHOLD = thresholdForPoint('marker-celltype');
 
 /** 与 lookupCellType 同一匹配语义，但返回全部 matches≥2 命中（按命中数降序）——候选生成器。 */
 function deriveMarkerCandidates(markers) {
@@ -141,7 +141,7 @@ async function lookupCellTypeWithConfidence(markers, overrides = {}) {
     return { type: null, confidence: null, adopted: false, probabilities: null, reason: 'no_candidates' };
   }
   const { state, questions } = buildMarkerDecisionRequest(markers, candidates);
-  const outcome = await askDecision({ state, questions, overrides });
+  const outcome = await askDecision({ state, questions, overrides, meta: { point: 'marker-celltype', threshold: MARKER_DECISION_THRESHOLD } });
   if (!outcome.ok) {
     return { type: legacy, confidence: null, adopted: false, probabilities: null, reason: outcome.reason };
   }

@@ -2223,6 +2223,29 @@
         "acceptance/block-115/**",
         "test/block115-*.test.mjs"
       ],
+      "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "governance"
+    },
+    {
+      "id": "block116-decision-platform",
+      "note": "BLOCK-116-DECISION-PLATFORM：W2 决策平台化。decision-log.js 台账（migration 011 additive，best-effort 永不 throw，meta {point,threshold} 咽喉）+ decision-thresholds.js 阈值注册表（七接点阈值/门↔校准证据绑定，一致性契约机械承载重校准红线）+ decision-api meta 记账 + decisions.js 观测端点 + DecisionUsagePanel 设置面板 + calibration-common.mjs 校准共享库。契约=test/block116-decision-platform.test.mjs（记账行/降级行/never-throw/无 meta 零行/注册表一致性/聚合 7 项）。",
+      "patterns": [
+        "core/biof3-server/helpers/decision-log.js",
+        "core/biof3-server/helpers/decision-thresholds.js",
+        "core/biof3-server/helpers/decision-api.js",
+        "core/biof3-server/routes/ai-agent/decisions.js",
+        "src/migrations/011_decision_log.sql",
+        "scripts/lib/calibration-common.mjs",
+        "scripts/block115-p0-calibrate.mjs",
+        "acceptance/block-116/**",
+        "test/block116-*.test.mjs",
+        ".agents/skills/gewu-dev-infra/dev-verify/flows/block116-decision-platform-live.cjs",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/DecisionUsagePanel.tsx"
+      ],
+      "tests": [
+        "test/block116-decision-platform.test.mjs"
+      ],
       "tests": [
         "test/block115-test-suggest.test.mjs"
       ],

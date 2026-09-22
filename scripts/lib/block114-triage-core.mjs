@@ -17,10 +17,11 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const decisionApi = require('../../core/biof3-server/helpers/decision-api.js');
+const { thresholdForPoint } = require('../../core/biof3-server/helpers/decision-thresholds.js');
 
 /** D-3（P0 校准证据 acceptance/block-114/calibration.json：θ=0.70 precision 95%/coverage 96.2%/
  *  nrMisroute=0——取偏离边缘的余量档；调整阈值必须先重校准）。 */
-export const TRIAGE_THRESHOLD = 0.7;
+export const TRIAGE_THRESHOLD = thresholdForPoint('failure-triage');
 
 /** L2 环境特征确定性词表（A 型：命中即 environment，永不模型化；契约测试钉住）。 */
 export const ENVIRONMENT_PATTERNS = [
@@ -92,7 +93,7 @@ export async function triageFailure(failure, knownFailures = [], overrides = {})
     return { classifiedAs: det.classifiedAs, layer: det.layer, fingerprint: det.fingerprint, confidence: 1 };
   }
   const { state, questions } = buildTriageDecisionRequest(failure);
-  const outcome = await decisionApi.askDecision({ state, questions, overrides });
+  const outcome = await decisionApi.askDecision({ state, questions, overrides, meta: { point: 'failure-triage', threshold: TRIAGE_THRESHOLD } });
   if (!outcome.ok) {
     return { classifiedAs: 'needs_human', layer: 'L3', reason: outcome.reason, confidence: null };
   }

@@ -19,6 +19,12 @@ const require = createRequire(import.meta.url);
 const decisionApi = require('../core/biof3-server/helpers/decision-api.js');
 // 单源：请求组装引用建议器内核（形状漂移即校准失效）。
 const { buildSuggestDecisionRequest, docsOrEvidenceOnly } = require('../scripts/block115-test-suggest.mjs');
+// BLOCK-116 校准工具化：机械共性迁移到共享库（touch-and-migrate 纪律）
+import {
+  mapWithConcurrency as sharedMapWithConcurrency,
+  round4 as sharedRound4,
+  sha256File as sharedSha256File,
+} from './lib/calibration-common.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
@@ -30,9 +36,7 @@ const PRECISION_GATE = 0.80, COVERAGE_FLOOR = 0.50, ACCURACY_GATE = 0.80;
 const FAILURE_RATE_LIMIT = 0.10;
 const CONCURRENCY = 5;
 
-function sha256File(p) {
-  return crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
-}
+const sha256File = sharedSha256File;
 
 function loadCorpus() {
   const corpusPath = path.join(evidenceDir, CORPUS_FILE);
@@ -46,20 +50,8 @@ function loadCorpus() {
   return { doc, samples: doc.samples, sha256: sha256File(corpusPath) };
 }
 
-async function mapWithConcurrency(items, limit, fn) {
-  const results = new Array(items.length);
-  let next = 0;
-  async function worker() {
-    while (next < items.length) {
-      const i = next++;
-      results[i] = await fn(items[i], i);
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
-  return results;
-}
-
-function round4(n) { return Math.round(n * 10000) / 10000; }
+const mapWithConcurrency = sharedMapWithConcurrency;
+const round4 = sharedRound4;
 
 function validateOnly(corpus) {
   const byGold = {};

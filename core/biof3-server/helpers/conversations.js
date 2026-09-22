@@ -247,6 +247,7 @@ async function _maybeDetectTopicShift(conversationId, userId) {
           const jEarlier = jevRecent.slice(0, jevRecent.length - 3).map(m => m.role + ': ' + String(m.content || '').slice(0, 200)).join('\n');
           const jLatest = jevRecent.slice(-3).map(m => m.role + ': ' + String(m.content || '').slice(0, 200)).join('\n');
           const outcome = await askDecision({
+            meta: { point: 'topic-shift' },
             state: `之前的对话：\n${jEarlier}\n\n刚刚的对话：\n${jLatest}`,
             questions: {
               topic_shift: {

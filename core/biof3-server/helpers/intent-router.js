@@ -12,10 +12,11 @@
 'use strict';
 
 const { askDecision } = require('./decision-api');
+const { thresholdForPoint } = require('./decision-thresholds');
 
 // D-3（P0 校准：θ=0.70 时 chitchatRecall=1.0 / precision=1.0 / taskFalseAdoption=0，
 // 留轮间漂移余量；证据 acceptance/block-112/calibration.json）。
-const INTENT_ROUTE_THRESHOLD = 0.7;
+const INTENT_ROUTE_THRESHOLD = thresholdForPoint('intent-route');
 
 /** D-1 四类意图 wire 契约（choice criteria；动作面 PoC 只挂 chitchat，其余维持现行 loop）。 */
 const INTENT_CLASSES = {
@@ -54,7 +55,7 @@ function buildIntentDecisionRequest(message) {
  */
 async function classifyUserIntent(message, overrides = {}) {
   const { state, questions } = buildIntentDecisionRequest(message);
-  const outcome = await askDecision({ state, questions, overrides });
+  const outcome = await askDecision({ state, questions, overrides, meta: { point: 'intent-route', threshold: INTENT_ROUTE_THRESHOLD } });
   if (!outcome.ok) return { ok: false, reason: outcome.reason };
   const answer = outcome.answers.intent;
   return { ok: true, intent: answer.choice, confidence: answer.confidence, elapsedMs: outcome.elapsedMs };

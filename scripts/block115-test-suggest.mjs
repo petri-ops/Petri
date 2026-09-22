@@ -17,6 +17,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const decisionApi = require('../core/biof3-server/helpers/decision-api.js');
+const { thresholdForPoint } = require('../core/biof3-server/helpers/decision-thresholds.js');
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
@@ -33,7 +34,7 @@ export const TEST_AREAS = {
 };
 
 /** D-3（P0 校准证据 acceptance/block-115/calibration.json；调整必须先重校准）。 */
-export const SUGGEST_THRESHOLD = 0.8;
+export const SUGGEST_THRESHOLD = thresholdForPoint('test-suggest');
 
 export function isSuggestEnabled() {
   return process.env.BIOF3_JEV_TEST_SUGGEST !== '0'; // 注意：本工具默认开（纯建议无副作用，显式 0 关闭）
@@ -73,7 +74,7 @@ export async function resolveSuggestion(changedFiles, overrides = {}) {
   if (!isSuggestEnabled()) return { suggest: false, reason: 'disabled', suggestions: [] };
   if (docsOrEvidenceOnly(changedFiles)) return { suggest: false, reason: 'docs_or_evidence_only', suggestions: [] };
   const { state, questions } = buildSuggestDecisionRequest(changedFiles);
-  const outcome = await decisionApi.askDecision({ state, questions, overrides });
+  const outcome = await decisionApi.askDecision({ state, questions, overrides, meta: { point: 'test-suggest', threshold: SUGGEST_THRESHOLD } });
   if (!outcome.ok) return { suggest: false, reason: outcome.reason, suggestions: [] };
   const answer = outcome.answers.area;
   if (answer.choice === 'none') return { suggest: false, reason: 'area_none', area: 'none', confidence: answer.confidence, suggestions: [] };

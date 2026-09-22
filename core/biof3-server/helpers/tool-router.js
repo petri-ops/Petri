@@ -13,11 +13,12 @@
 'use strict';
 
 const { askDecision } = require('./decision-api');
+const { thresholdForPoint } = require('./decision-thresholds');
 // 注意：本模块不得 require agent-tools/*（tool-defs→registry→spawn-agent-tools→agent-runner
 // 会构成依赖环，arch-cycles 门禁抓真）。域映射由调用方（agent-runner，既有边）作参传入。
 
 // D-3（P0 校准证据 acceptance/block-113/calibration.json；调整阈值必须先重校准）。
-const TOOL_ROUTE_THRESHOLD = 0.8;
+const TOOL_ROUTE_THRESHOLD = thresholdForPoint('tool-route');
 
 /** D-1 九域 + 弃权类目（choice criteria；描述与 tool-defs 物理域一一对应）。 */
 const TOOL_FAMILIES = {
@@ -80,7 +81,7 @@ async function resolveToolRoute(message, overrides = {}) {
     return { route: false, reason: 'guard_disabled' };
   }
   const { state, questions } = buildToolRouteDecisionRequest(message);
-  const outcome = await askDecision({ state, questions, overrides });
+  const outcome = await askDecision({ state, questions, overrides, meta: { point: 'tool-route', threshold: TOOL_ROUTE_THRESHOLD } });
   if (!outcome.ok) return { route: false, reason: outcome.reason };
   const answer = outcome.answers.family;
   if (answer.choice === 'all') {

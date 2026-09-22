@@ -197,13 +197,15 @@ function _retryableStatus(status) {
 
 /**
  * 唯一决策入口。state: string|object|array（原样透传）；questions 形状见 API 速查。
+ * BLOCK-116 W2：optional meta {point, threshold}——提供 meta.point 即自动记入决策台账
+ * （helpers/decision-log.js，best-effort 永不 throw、永不影响结果）；缺省零记账零行为。
  *
  * @returns {Promise<{ok: true, model: string, answers: object, usage: object|undefined, elapsedMs: number, attempts: number}
  *   |{ok: false, reason: 'no_key'|'invalid_request'|'auth_failed'|'rate_limited'|'overloaded'
  *     |'http_error'|'network_error'|'timeout'|'invalid_response'|'aborted', detail?: string, status?: number, elapsedMs: number, attempts: number}>}
  * 永不 throw；!ok 即调用方回退现行为。detail 不含 key/请求头。
  */
-async function askDecision({ state, questions, overrides = {} } = {}) {
+async function askDecision({ state, questions, meta, overrides = {} } = {}) {
   const startedAt = Date.now();
   const config = resolveDecisionConfig(overrides || {});
   if (!config) {
@@ -291,7 +293,7 @@ async function askDecision({ state, questions, overrides = {} } = {}) {
             status: response.status, elapsedMs: Date.now() - startedAt, attempts: attempt + 1,
           };
         }
-        return {
+        const okResult = {
           ok: true,
           model: typeof payload.model === 'string' ? payload.model : config.model,
           answers: payload.answers,
@@ -299,6 +301,28 @@ async function askDecision({ state, questions, overrides = {} } = {}) {
           elapsedMs: Date.now() - startedAt,
           attempts: attempt + 1,
         };
+        if (meta && meta.point) {
+          const firstKey = Object.keys(payload.answers)[0];
+          const firstAnswer = payload.answers[firstKey];
+          const { logDecision } = require('./decision-log');
+          try {
+            await logDecision({
+              point: meta.point,
+              threshold: typeof meta.threshold === 'number' ? meta.threshold : null,
+              state: typeof state === 'string' ? state : JSON.stringify(state),
+              choice: firstAnswer && firstAnswer.choice != null ? firstAnswer.choice
+                : firstAnswer && firstAnswer.noul != null ? firstAnswer.noul
+                : firstAnswer && firstAnswer.score != null ? firstAnswer.score
+                : null,
+              confidence: firstAnswer && typeof firstAnswer.confidence === 'number' ? firstAnswer.confidence : null,
+              degraded: 0,
+              model: okResult.model,
+              latencyMs: okResult.elapsedMs,
+              probabilities: firstAnswer && firstAnswer.probabilities ? firstAnswer.probabilities : null,
+            });
+          } catch { /* 记账永不影响决策 */ }
+        }
+        return okResult;
       }
     }
 
@@ -309,7 +333,7 @@ async function askDecision({ state, questions, overrides = {} } = {}) {
     }
   }
 
-  return {
+  const failedResult = {
     ok: false,
     reason: (lastFailure && lastFailure.reason) || 'network_error',
     detail: (lastFailure && lastFailure.detail) || `重试 ${config.maxAttempts} 次耗尽`,
@@ -317,6 +341,21 @@ async function askDecision({ state, questions, overrides = {} } = {}) {
     elapsedMs: Date.now() - startedAt,
     attempts: config.maxAttempts,
   };
+  if (meta && meta.point) {
+    const { logDecision } = require('./decision-log');
+    try {
+      await logDecision({
+        point: meta.point,
+        threshold: typeof meta.threshold === 'number' ? meta.threshold : null,
+        state: typeof state === 'string' ? state : JSON.stringify(state),
+        degraded: 1,
+        reason: failedResult.reason,
+        model: config.model,
+        latencyMs: failedResult.elapsedMs,
+      });
+    } catch { /* 记账永不影响决策 */ }
+  }
+  return failedResult;
 }
 
 module.exports = {

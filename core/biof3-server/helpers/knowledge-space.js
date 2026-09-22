@@ -490,6 +490,7 @@ async function jevSecondStageGuard(query, hits) {
     let outcome;
     try {
       outcome = await askDecision({
+        meta: { point: 'knowledge-guard' },
         state: `用户查询：${query}\n\n候选段落（来自文档《${hit.docName || hit.docId}》）：\n${String(hit.text || '').slice(0, 900)}`,
         questions: {
           is_relevant: { type: 'noul', instructions: '这段内容是否与用户查询语义相关（有助于回答该查询）？无关或仅偶然共词按否。' },
