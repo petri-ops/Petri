@@ -31,7 +31,6 @@ const JEV_YES = 0.85;
 const JEV_NO = 0.5;
 const TIMEOUT_MS = 30_000;
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const pct = (arr, p) => {
   const s = [...arr].sort((a, b) => a - b);
   return s.length ? Math.round(s[Math.min(s.length - 1, Math.floor((s.length * p) / 100))] ) : null;
