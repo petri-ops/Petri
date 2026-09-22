@@ -1,0 +1,70 @@
+{
+  "request": {
+    "c1_t_canon": [
+      "CD3E",
+      "CD3D",
+      "CD3G",
+      "CD2"
+    ],
+    "c2_doublet": [
+      "CD3E",
+      "CD3D",
+      "MS4A1",
+      "CD79A"
+    ],
+    "c3_empty": [
+      "ACTB",
+      "GAPDH"
+    ],
+    "c4_b_canon": [
+      "MS4A1",
+      "CD79A",
+      "CD79B",
+      "CD19"
+    ]
+  },
+  "response": {
+    "cellTypeHints": {
+      "c1_t_canon": "T 细胞 (T cell)",
+      "c2_doublet": "T 细胞 (T cell)",
+      "c4_b_canon": "B 细胞"
+    },
+    "cellTypeHintsDetailed": [
+      {
+        "cluster": "c1_t_canon",
+        "type": "T 细胞 (T cell)",
+        "confidence": 1,
+        "adopted": true,
+        "probabilities": {
+          "T 细胞 (T cell)": 1
+        }
+      },
+      {
+        "cluster": "c2_doublet",
+        "type": "T 细胞 (T cell)",
+        "confidence": 0.5,
+        "adopted": false,
+        "probabilities": {
+          "T 细胞 (T cell)": 0.25,
+          "B 细胞": 0.75
+        }
+      },
+      {
+        "cluster": "c3_empty",
+        "type": null,
+        "confidence": null,
+        "adopted": false
+      },
+      {
+        "cluster": "c4_b_canon",
+        "type": "B 细胞",
+        "confidence": 1,
+        "adopted": true,
+        "probabilities": {
+          "B 细胞": 1
+        }
+      }
+    ],
+    "source": "model_gateway"
+  }
+}
