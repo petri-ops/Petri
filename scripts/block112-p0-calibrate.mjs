@@ -42,22 +42,7 @@ const CLASSES = {
 };
 
 /** P1 生产路径必须镜像本函数组装 state/questions（接线时单源化进 intent-router.js 并以契约测试钉住）。 */
-function buildDecisionRequest(message) {
-  return {
-    state: `用户在 AI 工作台聊天框发送的消息：\n${String(message).slice(0, 600)}`,
-    questions: {
-      intent: {
-        type: 'choice',
-        criteria: { ...CLASSES },
-        instructions:
-          '判断用户消息的主要意图类别。消息同时含问候/致谢与执行诉求时以执行诉求为准（task）；'
-          + '纯概念解释、选型或结果解读咨询且无操作指令为 knowledge_qa；'
-          + '对既有结果/版本/运行状态的操作与查询为 result_studio；'
-          + '全部诉求可由纯对话满足（寒暄、陪伴、致谢、身份或能力闲问）为 chitchat。',
-      },
-    },
-  };
-}
+const buildDecisionRequest = buildIntentDecisionRequest;
 
 function sha256File(p) {
   return crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
@@ -91,7 +76,7 @@ function round4(n) { return Math.round(n * 10000) / 10000; }
 
 function validateOnly(corpus) {
   const byGold = {};
-  for (const [id, , gold] of corpus.samples) byGold[gold] = (byGold[gold] ?? 0) + 1;
+  for (const [, , gold] of corpus.samples) byGold[gold] = (byGold[gold] ?? 0) + 1;
   console.log(`语料 ${corpus.samples.length} 条：${JSON.stringify(byGold)}`);
   console.log(`--dry 语料校验通过（未发起任何网络请求）`);
 }
