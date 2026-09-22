@@ -13,6 +13,7 @@
 
 const { askDecision } = require('./decision-api');
 const { thresholdForPoint } = require('./decision-thresholds');
+const { getPointRuntime } = require('./decision-config');
 
 // D-3（P0 校准：θ=0.70 时 chitchatRecall=1.0 / precision=1.0 / taskFalseAdoption=0，
 // 留轮间漂移余量；证据 acceptance/block-112/calibration.json）。
@@ -67,7 +68,9 @@ async function classifyUserIntent(message, overrides = {}) {
  * （guard 关）或决策失败（no_key/timeout 等），调用方无需区分处理、一律走现行 loop。
  */
 async function shouldUseChitchatFastPath(message, overrides = {}) {
-  if (!isIntentRouteEnabled()) {
+  // P4 配置中心：enabled 运行时读 decision-config（env='0' 杀开关最高；env='1' 仅首载种子）。
+  const runtime = getPointRuntime('intent-route');
+  if (!runtime || !runtime.enabled) {
     return { fastPath: false, reason: 'guard_disabled', decisioned: false };
   }
   const verdict = await classifyUserIntent(message, overrides);
@@ -75,7 +78,8 @@ async function shouldUseChitchatFastPath(message, overrides = {}) {
     return { fastPath: false, reason: verdict.reason, decisioned: false };
   }
   const { intent, confidence } = verdict;
-  if (intent === 'chitchat' && confidence >= INTENT_ROUTE_THRESHOLD) {
+  const adoptThreshold = runtime.threshold ?? INTENT_ROUTE_THRESHOLD;
+  if (intent === 'chitchat' && confidence >= adoptThreshold) {
     return { fastPath: true, reason: 'adopted', intent, confidence, decisioned: true };
   }
   return {

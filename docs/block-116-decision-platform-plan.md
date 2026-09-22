@@ -20,6 +20,8 @@
 | P0 | 决策台账 + 阈值配置中心 | migration `011_decision_log.sql`（additive）+ `helpers/decision-log.js`（best-effort 落库，永不 throw）+ `askDecision` 增 optional `meta`（{point, threshold}——提供即记账，缺省零行为）+ `helpers/decision-thresholds.js` 注册表（各接点阈值与校准证据版本绑定）+ 六接点传 meta |
 | P1 | 契约测试 + 校准工具化 | `test/block116-decision-platform.test.mjs`（记账行/降级行/never-throw/无 meta 零行/阈值注册表与模块常量一致/证据文件在位）+ `scripts/lib/calibration-common.mjs` 共享库（并发/round/sha256/证据落盘）+ 五个校准 harness 接入共享库 |
 | P2 | 观测面 + 实机收口 | `routes/ai-agent/decisions.js` GET /api/ai/decisions/summary（按接点聚 合调用量/均延迟/降级率）+ 设置面板 `DecisionUsagePanel`（BLOCK-79 用量面板同款模式）+ flow `block116-decision-platform-live` + closeout 十门 |
+| P3（增量，2026-09-22 深夜） | 决策台账逐条回放 | GET /api/ai/decisions/recent + 面板「最近决策」回放列表 + flow `block116-replay-live` 4/4；UI-434 verified |
+| P4（增量，2026-09-22 深夜，用户提出「jev 参数配置页面——默认填好、可调整」） | 决策配置中心 + 设置页「决策原语」节 | `helpers/decision-config.js`（data 目录 decision-config.json 持久化：enabled/threshold per point；env=0 杀开关最高优先；首载从 env=1 种子）+ GET/PUT /api/ai/decisions/config + 设置页新节「决策原语」（启用开关+阈值输入预填校准值+还原默认+偏离标记）|
 
 ### 1.2 非范围（exclusions）
 

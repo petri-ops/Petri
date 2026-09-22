@@ -19,6 +19,7 @@
 
 const { askDecision } = require('./decision-api');
 const { thresholdForPoint } = require('./decision-thresholds');
+const { getPointRuntime } = require('./decision-config');
 
 // === 本地知识库：常见 marker 基因 → 细胞类型映射 ===
 // 数据来源：CellMarker 2.0 + PanglaoDB 高频条目精选
@@ -81,7 +82,8 @@ function lookupCellType(markers) {
 //  - 默认关+显式开（D-4，BIOF3_JEV_MARKER_GUARD=1）：关=零出站零行为变化。
 // ============================================================
 
-// D-5 阈值迁入 decision-thresholds 注册表（BLOCK-116；值与校准证据绑定，改阈值必先重校准）。
+// D-5 阈值默认值来自 decision-thresholds 注册表（BLOCK-116）；运行时生效值经
+// decision-config（P4 配置中心，UI 可调），每次调用读取。常量保留=校准默认（契约钉住）。
 const MARKER_DECISION_THRESHOLD = thresholdForPoint('marker-celltype');
 
 /** 与 lookupCellType 同一匹配语义，但返回全部 matches≥2 命中（按命中数降序）——候选生成器。 */
@@ -133,20 +135,23 @@ function isMarkerGuardEnabled() {
  */
 async function lookupCellTypeWithConfidence(markers, overrides = {}) {
   const legacy = lookupCellType(markers);
-  if (!isMarkerGuardEnabled()) {
+  // P4 配置中心：enabled 与 threshold 运行时读取（env=0 杀开关仍最高优先）
+  const runtime = getPointRuntime('marker-celltype');
+  if (!runtime || !runtime.enabled) {
     return { type: legacy, confidence: null, adopted: false, probabilities: null, reason: 'guard_disabled' };
   }
+  const adoptThreshold = runtime.threshold ?? MARKER_DECISION_THRESHOLD;
   const candidates = deriveMarkerCandidates(markers);
   if (candidates.length === 0) {
     return { type: null, confidence: null, adopted: false, probabilities: null, reason: 'no_candidates' };
   }
   const { state, questions } = buildMarkerDecisionRequest(markers, candidates);
-  const outcome = await askDecision({ state, questions, overrides, meta: { point: 'marker-celltype', threshold: MARKER_DECISION_THRESHOLD } });
+  const outcome = await askDecision({ state, questions, overrides, meta: { point: 'marker-celltype', threshold: adoptThreshold } });
   if (!outcome.ok) {
     return { type: legacy, confidence: null, adopted: false, probabilities: null, reason: outcome.reason };
   }
   const answer = outcome.answers.cell_type;
-  if (answer.confidence >= MARKER_DECISION_THRESHOLD) {
+  if (answer.confidence >= adoptThreshold) {
     return { type: answer.choice, confidence: answer.confidence, adopted: true, probabilities: answer.probabilities, reason: 'adopted' };
   }
   return { type: legacy, confidence: answer.confidence, adopted: false, probabilities: answer.probabilities, reason: 'below_threshold' };

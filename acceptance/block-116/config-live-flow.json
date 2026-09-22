@@ -1,0 +1,96 @@
+{
+  "points": [
+    {
+      "point": "topic-shift",
+      "label": "话题漂移判断",
+      "enabled": true,
+      "envOverride": null,
+      "defaultThreshold": null,
+      "gates": {
+        "yes": 0.85,
+        "no": 0.5
+      },
+      "evidence": "acceptance/block-110/calibration.json",
+      "enabledDefault": true,
+      "envKey": "BIOF3_JEV_TOPIC_SHIFT"
+    },
+    {
+      "point": "knowledge-guard",
+      "label": "知识库二跳守卫",
+      "enabled": false,
+      "envOverride": null,
+      "defaultThreshold": null,
+      "gates": {
+        "relevantMin": 0.5,
+        "injectionMax": 0.7
+      },
+      "evidence": "acceptance/block-110/calibration.json",
+      "enabledDefault": false,
+      "envKey": "BIOF3_JEV_KNOWLEDGE_GUARD"
+    },
+    {
+      "point": "marker-celltype",
+      "label": "marker→细胞类型判别",
+      "enabled": true,
+      "envOverride": "on",
+      "threshold": 0.55,
+      "defaultThreshold": 0.55,
+      "gates": null,
+      "evidence": "acceptance/block-111/calibration.json",
+      "enabledDefault": false,
+      "envKey": "BIOF3_JEV_MARKER_GUARD"
+    },
+    {
+      "point": "intent-route",
+      "label": "copilot 意图路由",
+      "enabled": true,
+      "envOverride": "on",
+      "threshold": 0.7,
+      "defaultThreshold": 0.7,
+      "gates": null,
+      "evidence": "acceptance/block-112/calibration.json",
+      "enabledDefault": false,
+      "envKey": "BIOF3_JEV_INTENT_ROUTE"
+    },
+    {
+      "point": "tool-route",
+      "label": "工具两跳预路由",
+      "enabled": true,
+      "envOverride": "on",
+      "threshold": 0.8,
+      "defaultThreshold": 0.8,
+      "gates": null,
+      "evidence": "acceptance/block-113/calibration.json",
+      "enabledDefault": false,
+      "envKey": "BIOF3_JEV_TOOL_ROUTE"
+    }
+  ],
+  "put1": {
+    "status": "ok",
+    "point": {
+      "point": "intent-route",
+      "label": "copilot 意图路由",
+      "enabled": true,
+      "envOverride": "on",
+      "threshold": 0.75,
+      "defaultThreshold": 0.7,
+      "gates": null,
+      "evidence": "acceptance/block-112/calibration.json"
+    }
+  },
+  "bad": 400,
+  "unknown": 404,
+  "restore": {
+    "status": "ok",
+    "point": {
+      "point": "intent-route",
+      "label": "copilot 意图路由",
+      "enabled": true,
+      "envOverride": "on",
+      "threshold": 0.7,
+      "defaultThreshold": 0.7,
+      "gates": null,
+      "evidence": "acceptance/block-112/calibration.json"
+    }
+  }
+}

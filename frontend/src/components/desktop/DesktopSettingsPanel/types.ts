@@ -17,6 +17,8 @@ export type SettingsSection =
   | 'models'
   | 'compute'
   | 'usage'
+  // BLOCK-116 P4 — 决策原语配置节（配置+观测相邻）
+  | 'decisions'
   | 'diagnostics'
   | 'experimental'
   | 'maintenance';
@@ -31,6 +33,8 @@ export const SETTINGS_SECTIONS: Array<{
   { id: 'models', label: '模型接口', description: 'URL、模型与 Key', icon: 'brain' },
   { id: 'compute', label: '计算与数据', description: '执行位置与存储', icon: 'cpu' },
   { id: 'usage', label: '用量与资源', description: '成本、缓存与机器状态', icon: 'cpu' },
+  // BLOCK-116 P4 — 决策原语配置（紧邻观测节：配置+观测同位）
+  { id: 'decisions', label: '决策原语', description: '各智能决策接点的启用与阈值', icon: 'brain' },
   // UI-366 — 原全局「后端」页（/backend，BLOCK-72/UI-320）并入本分区：
   // 进程快照 / R·Python 运行时状态 / 日志，设备级诊断不绑项目。
   { id: 'diagnostics', label: '运行时与诊断', description: '本地服务、R/Python 运行时与日志', icon: 'cpu' },

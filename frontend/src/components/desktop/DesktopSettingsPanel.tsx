@@ -29,6 +29,7 @@ import { Props, SettingsSection, SETTINGS_SECTIONS } from './DesktopSettingsPane
 import { useEndpointProfilesEditor } from './DesktopSettingsPanel/useEndpointProfilesEditor';
 import { UsageResourcePanel } from './DesktopSettingsPanel/sections/UsageResourcePanel';
 import { DecisionUsagePanel } from './DesktopSettingsPanel/sections/DecisionUsagePanel';
+import { DecisionConfigPanel } from './DesktopSettingsPanel/sections/DecisionConfigPanel';
 import { UpdateChecker } from './DesktopSettingsPanel/sections/UpdateChecker';
 import { ExportDiagnostic } from './DesktopSettingsPanel/sections/ExportDiagnostic';
 import { DataManagement } from './DesktopSettingsPanel/sections/DataManagement';
@@ -533,6 +534,17 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
             <UsageResourcePanel />
             {/* BLOCK-116 W2 — 决策原语观测面（decision_log 聚合，additive） */}
             <DecisionUsagePanel />
+          </section>
+        )}
+
+        {/* BLOCK-116 P4 — 决策原语配置节（与观测节相邻：配置+观测同位） */}
+        {activeSection === 'decisions' && (
+          <section className="gewu-settings-section">
+            <div className="gewu-settings-section__heading">
+              <h3>决策原语</h3>
+              <p>各智能决策接点的启用与阈值（校准默认预填，可调整并自动保存；每次调用记录实际生效阈值）。</p>
+            </div>
+            <DecisionConfigPanel />
           </section>
         )}
 

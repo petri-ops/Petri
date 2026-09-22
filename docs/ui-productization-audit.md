@@ -4049,3 +4049,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据（实机数据链路 · 2026-09-22）**：flow `block116-decision-platform-live` 5/5——闲聊消息触发 intent-route 决策 → decision_log 落行 → summary 聚合 intent-route×1（avgLatency 727ms、degraded=0）返回 200；面板渲染的正是该端点数据（同源实证）。
 - **证据（实机视觉过目 · 2026-09-22 深夜）**：flow `block116-replay-live` 4/4（CDP 测试实例 :9223）——设置页「用量与资源」节实机渲染「决策原语调用（近 7 天）」面板（intent-route · 1 次调用 · 727ms · 降级 0%）+ P3 增量「最近决策（20 条）」回放列表展开后 intent-route/chitchat · 1 · 727ms 行在场；截图 `acceptance/block-116/decision-replay-panel.png`。**翻 verified**。P3 增量后端=GET /ai/decisions/recent（decision-log.recentDecisions，point 过滤/limit≤200）；面板回放列表可折叠默认收起。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-435: 设置页「决策原语」配置节（BLOCK-116 P4 参数配置面）(2026-09-22 verified，dev Electron 边界内实机过目)
+
+- **来源**：用户提出「jev 融入应该有相关参数的配置页面——默认填好、可调整，放哪里合适」→ 设置页新节「决策原语」（紧邻「用量与资源」观测节：配置+观测同位）。
+- **改动**：`sections/DecisionConfigPanel.tsx`（五运行时接点卡片：启用开关 + 阈值数字输入（校准默认预填）+ 偏离校准提醒 + 还原默认按钮 + env 覆盖态提示 + 双门限只读行）+ `types.ts` 新 SettingsSection 'decisions' + DesktopSettingsPanel 挂载；后端 GET/PUT `/ai/decisions/config`（decision-config.json 持久化，PUT 校验 [0,1]）。
+- **证据（实机 · 2026-09-22）**：flow `block116-config-live` 6/6（GET 五接点/PUT 持久化/非法 400/未知 404/还原默认）+ 截图 `acceptance/block-116/decision-config-panel.png`（实机过目：五卡片/开关/阈值输入/双门限只读/env 覆盖提示全部在位，暗色主题渲染正常）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -7,7 +7,10 @@
  */
 'use strict';
 
+const express = require('express');
+
 const decisionLog = require('../../helpers/decision-log');
+const decisionConfig = require('../../helpers/decision-config');
 
 module.exports = {
   register(app) {
@@ -38,6 +41,25 @@ module.exports = {
         return res.json({ status: 'ok', available: false, decisions: [] });
       }
       res.json({ status: 'ok', available: true, decisions: recent });
+    });
+
+    // BLOCK-116 P4 — 决策配置面（GET 全量；PUT 单接点 enabled/threshold）
+    app.get('/api/ai/decisions/config', async (req, res) => {
+      const userId = req.user && req.user.id;
+      if (!userId) return res.status(401).json({ status: 'error', error: '未登录' });
+      res.json({ status: 'ok', points: decisionConfig.getAllPointConfigs() });
+    });
+
+    app.put('/api/ai/decisions/config/:point', express.json({ limit: '8kb' }), async (req, res) => {
+      const userId = req.user && req.user.id;
+      if (!userId) return res.status(401).json({ status: 'error', error: '未登录' });
+      try {
+        const updated = decisionConfig.setPointConfig(req.params.point, req.body || {});
+        if (!updated) return res.status(404).json({ status: 'error', error: 'unknown_point' });
+        res.json({ status: 'ok', point: updated });
+      } catch (e) {
+        res.status(400).json({ status: 'error', error: e instanceof Error ? e.message : String(e) });
+      }
     });
   },
 };
