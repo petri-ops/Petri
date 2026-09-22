@@ -1,0 +1,2125 @@
+{
+  "kind": "block112-calibration",
+  "version": "1.0.0",
+  "capturedAt": "2026-09-22T15:13:20.677Z",
+  "sourceCommit": "68cd541e0f9ea5bb2b7809b71810028abfe51141",
+  "model": "laya-typed-decisions (local supply)",
+  "wrapper": "core/biof3-server/helpers/decision-api.js",
+  "decisionPoint": "routes/ai-agent/chat.js 提交链挂钩（W1-2 copilot 意图路由）",
+  "result": {
+    "corpus": {
+      "file": "corpus-intent-routing.json",
+      "sha256": "e9a33ab1ca58f0473490cf5c915ffda9344cbd6ae7142fc57e94645b0bf5c5c8",
+      "count": 117
+    },
+    "apiFailures": 0,
+    "validCount": 117,
+    "argmaxTop1Accuracy": 0.5726,
+    "byGold": {
+      "chitchat": {
+        "count": 32,
+        "argmaxAccuracy": 0.2813,
+        "meanConfidence": 0.0027
+      },
+      "task": {
+        "count": 41,
+        "argmaxAccuracy": 0.6098,
+        "meanConfidence": 0.0116
+      },
+      "knowledge_qa": {
+        "count": 28,
+        "argmaxAccuracy": 0.8929,
+        "meanConfidence": 0.0101
+      },
+      "result_studio": {
+        "count": 16,
+        "argmaxAccuracy": 0.5,
+        "meanConfidence": 0.0129
+      }
+    },
+    "chitchatMeanConfidence": 0.0027,
+    "taskMeanConfidenceWhenPredictedChitchat": 0.002,
+    "latency": {
+      "p50Ms": 247,
+      "p95Ms": 270
+    },
+    "inputTokens": 0,
+    "elapsedMs": 6252,
+    "recommendedThreshold": null,
+    "bestOutsideGate": {
+      "theta": 0.5,
+      "adopted": 0,
+      "chitchatRecall": 0,
+      "chitchatPrecision": 1,
+      "taskFalseAdoption": 0
+    },
+    "grid": [
+      {
+        "theta": 0.5,
+        "adopted": 0,
+        "chitchatRecall": 0,
+        "chitchatPrecision": 1,
+        "taskFalseAdoption": 0
+      },
+      {
+        "theta": 0.55,
+        "adopted": 0,
+        "chitchatRecall": 0,
+        "chitchatPrecision": 1,
+        "taskFalseAdoption": 0
+      },
+      {
+        "theta": 0.6,
+        "adopted": 0,
+        "chitchatRecall": 0,
+        "chitchatPrecision": 1,
+        "taskFalseAdoption": 0
+      },
+      {
+        "theta": 0.65,
+        "adopted": 0,
+        "chitchatRecall": 0,
+        "chitchatPrecision": 1,
+        "taskFalseAdoption": 0
+      },
+      {
+        "theta": 0.7,
+        "adopted": 0,
+        "chitchatRecall": 0,
+        "chitchatPrecision": 1,
+        "taskFalseAdoption": 0
+      },
+      {
+        "theta": 0.75,
+        "adopted": 0,
+        "chitchatRecall": 0,
+        "chitchatPrecision": 1,
+        "taskFalseAdoption": 0
+      },
+      {
+        "theta": 0.8,
+        "adopted": 0,
+        "chitchatRecall": 0,
+        "chitchatPrecision": 1,
+        "taskFalseAdoption": 0
+      },
+      {
+        "theta": 0.85,
+        "adopted": 0,
+        "chitchatRecall": 0,
+        "chitchatPrecision": 1,
+        "taskFalseAdoption": 0
+      },
+      {
+        "theta": 0.9,
+        "adopted": 0,
+        "chitchatRecall": 0,
+        "chitchatPrecision": 1,
+        "taskFalseAdoption": 0
+      },
+      {
+        "theta": 0.95,
+        "adopted": 0,
+        "chitchatRecall": 0,
+        "chitchatPrecision": 1,
+        "taskFalseAdoption": 0
+      }
+    ],
+    "perSample": [
+      {
+        "id": "cc-001",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0026,
+        "probabilities": {
+          "chitchat": 0.2313,
+          "task": 0.2846,
+          "knowledge_qa": 0.2333,
+          "result_studio": 0.2508
+        },
+        "correct": false,
+        "elapsedMs": 491,
+        "attempts": 1
+      },
+      {
+        "id": "cc-002",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0008,
+        "probabilities": {
+          "chitchat": 0.2303,
+          "task": 0.2613,
+          "knowledge_qa": 0.2562,
+          "result_studio": 0.2522
+        },
+        "correct": false,
+        "elapsedMs": 526,
+        "attempts": 1
+      },
+      {
+        "id": "cc-003",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0017,
+        "probabilities": {
+          "chitchat": 0.2333,
+          "task": 0.2774,
+          "knowledge_qa": 0.2372,
+          "result_studio": 0.2521
+        },
+        "correct": false,
+        "elapsedMs": 577,
+        "attempts": 1
+      },
+      {
+        "id": "cc-004",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "chitchat",
+        "confidence": 0.0102,
+        "probabilities": {
+          "chitchat": 0.3103,
+          "task": 0.201,
+          "knowledge_qa": 0.2668,
+          "result_studio": 0.2219
+        },
+        "correct": true,
+        "elapsedMs": 625,
+        "attempts": 1
+      },
+      {
+        "id": "cc-005",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "chitchat",
+        "confidence": 0.0043,
+        "probabilities": {
+          "chitchat": 0.2922,
+          "task": 0.2214,
+          "knowledge_qa": 0.2558,
+          "result_studio": 0.2307
+        },
+        "correct": true,
+        "elapsedMs": 676,
+        "attempts": 1
+      },
+      {
+        "id": "cc-006",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0013,
+        "probabilities": {
+          "chitchat": 0.2387,
+          "task": 0.2758,
+          "knowledge_qa": 0.2403,
+          "result_studio": 0.2452
+        },
+        "correct": false,
+        "elapsedMs": 254,
+        "attempts": 1
+      },
+      {
+        "id": "cc-007",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0003,
+        "probabilities": {
+          "chitchat": 0.253,
+          "task": 0.2598,
+          "knowledge_qa": 0.2415,
+          "result_studio": 0.2458
+        },
+        "correct": false,
+        "elapsedMs": 251,
+        "attempts": 1
+      },
+      {
+        "id": "cc-008",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0036,
+        "probabilities": {
+          "chitchat": 0.2173,
+          "task": 0.2858,
+          "knowledge_qa": 0.2399,
+          "result_studio": 0.257
+        },
+        "correct": false,
+        "elapsedMs": 250,
+        "attempts": 1
+      },
+      {
+        "id": "cc-009",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0066,
+        "probabilities": {
+          "chitchat": 0.2706,
+          "task": 0.2125,
+          "knowledge_qa": 0.2944,
+          "result_studio": 0.2225
+        },
+        "correct": false,
+        "elapsedMs": 251,
+        "attempts": 1
+      },
+      {
+        "id": "cc-010",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0008,
+        "probabilities": {
+          "chitchat": 0.2318,
+          "task": 0.2625,
+          "knowledge_qa": 0.25,
+          "result_studio": 0.2556
+        },
+        "correct": false,
+        "elapsedMs": 249,
+        "attempts": 1
+      },
+      {
+        "id": "cc-011",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0003,
+        "probabilities": {
+          "chitchat": 0.2474,
+          "task": 0.2627,
+          "knowledge_qa": 0.2425,
+          "result_studio": 0.2474
+        },
+        "correct": false,
+        "elapsedMs": 246,
+        "attempts": 1
+      },
+      {
+        "id": "cc-012",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0004,
+        "probabilities": {
+          "chitchat": 0.2396,
+          "task": 0.2633,
+          "knowledge_qa": 0.2458,
+          "result_studio": 0.2513
+        },
+        "correct": false,
+        "elapsedMs": 249,
+        "attempts": 1
+      },
+      {
+        "id": "cc-013",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "chitchat",
+        "confidence": 0.0004,
+        "probabilities": {
+          "chitchat": 0.2586,
+          "task": 0.2575,
+          "knowledge_qa": 0.2409,
+          "result_studio": 0.243
+        },
+        "correct": true,
+        "elapsedMs": 248,
+        "attempts": 1
+      },
+      {
+        "id": "cc-014",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "chitchat",
+        "confidence": 0.0005,
+        "probabilities": {
+          "chitchat": 0.2624,
+          "task": 0.2433,
+          "knowledge_qa": 0.2561,
+          "result_studio": 0.2382
+        },
+        "correct": true,
+        "elapsedMs": 251,
+        "attempts": 1
+      },
+      {
+        "id": "cc-015",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0007,
+        "probabilities": {
+          "chitchat": 0.2389,
+          "task": 0.2666,
+          "knowledge_qa": 0.24,
+          "result_studio": 0.2545
+        },
+        "correct": false,
+        "elapsedMs": 250,
+        "attempts": 1
+      },
+      {
+        "id": "cc-016",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0045,
+        "probabilities": {
+          "chitchat": 0.2109,
+          "task": 0.2891,
+          "knowledge_qa": 0.2447,
+          "result_studio": 0.2553
+        },
+        "correct": false,
+        "elapsedMs": 250,
+        "attempts": 1
+      },
+      {
+        "id": "cc-017",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0035,
+        "probabilities": {
+          "chitchat": 0.2176,
+          "task": 0.2868,
+          "knowledge_qa": 0.2439,
+          "result_studio": 0.2516
+        },
+        "correct": false,
+        "elapsedMs": 255,
+        "attempts": 1
+      },
+      {
+        "id": "cc-018",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0013,
+        "probabilities": {
+          "chitchat": 0.2309,
+          "task": 0.2721,
+          "knowledge_qa": 0.2457,
+          "result_studio": 0.2512
+        },
+        "correct": false,
+        "elapsedMs": 254,
+        "attempts": 1
+      },
+      {
+        "id": "cc-019",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "chitchat",
+        "confidence": 0.0048,
+        "probabilities": {
+          "chitchat": 0.3001,
+          "task": 0.2314,
+          "knowledge_qa": 0.2403,
+          "result_studio": 0.2281
+        },
+        "correct": true,
+        "elapsedMs": 251,
+        "attempts": 1
+      },
+      {
+        "id": "cc-020",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0008,
+        "probabilities": {
+          "chitchat": 0.244,
+          "task": 0.2696,
+          "knowledge_qa": 0.2392,
+          "result_studio": 0.2473
+        },
+        "correct": false,
+        "elapsedMs": 253,
+        "attempts": 1
+      },
+      {
+        "id": "cc-021",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0002,
+        "probabilities": {
+          "chitchat": 0.25,
+          "task": 0.2562,
+          "knowledge_qa": 0.2399,
+          "result_studio": 0.2539
+        },
+        "correct": false,
+        "elapsedMs": 254,
+        "attempts": 1
+      },
+      {
+        "id": "cc-022",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "chitchat",
+        "confidence": 0.0191,
+        "probabilities": {
+          "chitchat": 0.3445,
+          "task": 0.1865,
+          "knowledge_qa": 0.247,
+          "result_studio": 0.222
+        },
+        "correct": true,
+        "elapsedMs": 249,
+        "attempts": 1
+      },
+      {
+        "id": "cc-023",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0015,
+        "probabilities": {
+          "chitchat": 0.2348,
+          "task": 0.2755,
+          "knowledge_qa": 0.2382,
+          "result_studio": 0.2515
+        },
+        "correct": false,
+        "elapsedMs": 246,
+        "attempts": 1
+      },
+      {
+        "id": "cc-024",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "chitchat",
+        "confidence": 0.0022,
+        "probabilities": {
+          "chitchat": 0.2837,
+          "task": 0.2434,
+          "knowledge_qa": 0.2331,
+          "result_studio": 0.2397
+        },
+        "correct": true,
+        "elapsedMs": 247,
+        "attempts": 1
+      },
+      {
+        "id": "cc-025",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0003,
+        "probabilities": {
+          "chitchat": 0.2474,
+          "task": 0.2604,
+          "knowledge_qa": 0.242,
+          "result_studio": 0.2502
+        },
+        "correct": false,
+        "elapsedMs": 249,
+        "attempts": 1
+      },
+      {
+        "id": "cc-026",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0019,
+        "probabilities": {
+          "chitchat": 0.2225,
+          "task": 0.2731,
+          "knowledge_qa": 0.2561,
+          "result_studio": 0.2483
+        },
+        "correct": false,
+        "elapsedMs": 249,
+        "attempts": 1
+      },
+      {
+        "id": "cc-027",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0003,
+        "probabilities": {
+          "chitchat": 0.2547,
+          "task": 0.2552,
+          "knowledge_qa": 0.2388,
+          "result_studio": 0.2513
+        },
+        "correct": false,
+        "elapsedMs": 250,
+        "attempts": 1
+      },
+      {
+        "id": "cc-028",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "chitchat",
+        "confidence": 0.001,
+        "probabilities": {
+          "chitchat": 0.273,
+          "task": 0.2416,
+          "knowledge_qa": 0.2422,
+          "result_studio": 0.2432
+        },
+        "correct": true,
+        "elapsedMs": 251,
+        "attempts": 1
+      },
+      {
+        "id": "cc-029",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "chitchat",
+        "confidence": 0.0042,
+        "probabilities": {
+          "chitchat": 0.2877,
+          "task": 0.2134,
+          "knowledge_qa": 0.2575,
+          "result_studio": 0.2414
+        },
+        "correct": true,
+        "elapsedMs": 250,
+        "attempts": 1
+      },
+      {
+        "id": "cc-030",
+        "group": "chitchat",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0014,
+        "probabilities": {
+          "chitchat": 0.238,
+          "task": 0.2762,
+          "knowledge_qa": 0.2391,
+          "result_studio": 0.2466
+        },
+        "correct": false,
+        "elapsedMs": 246,
+        "attempts": 1
+      },
+      {
+        "id": "tk-001",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0152,
+        "probabilities": {
+          "chitchat": 0.1806,
+          "task": 0.3119,
+          "knowledge_qa": 0.2253,
+          "result_studio": 0.2822
+        },
+        "correct": true,
+        "elapsedMs": 246,
+        "attempts": 1
+      },
+      {
+        "id": "tk-002",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0061,
+        "probabilities": {
+          "chitchat": 0.2051,
+          "task": 0.2748,
+          "knowledge_qa": 0.2342,
+          "result_studio": 0.286
+        },
+        "correct": false,
+        "elapsedMs": 246,
+        "attempts": 1
+      },
+      {
+        "id": "tk-003",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0171,
+        "probabilities": {
+          "chitchat": 0.1695,
+          "task": 0.2948,
+          "knowledge_qa": 0.2351,
+          "result_studio": 0.3007
+        },
+        "correct": false,
+        "elapsedMs": 251,
+        "attempts": 1
+      },
+      {
+        "id": "tk-004",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0087,
+        "probabilities": {
+          "chitchat": 0.2015,
+          "task": 0.3085,
+          "knowledge_qa": 0.2335,
+          "result_studio": 0.2566
+        },
+        "correct": true,
+        "elapsedMs": 250,
+        "attempts": 1
+      },
+      {
+        "id": "tk-005",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0097,
+        "probabilities": {
+          "chitchat": 0.1848,
+          "task": 0.2767,
+          "knowledge_qa": 0.2504,
+          "result_studio": 0.288
+        },
+        "correct": false,
+        "elapsedMs": 250,
+        "attempts": 1
+      },
+      {
+        "id": "tk-006",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.012,
+        "probabilities": {
+          "chitchat": 0.1875,
+          "task": 0.3067,
+          "knowledge_qa": 0.2301,
+          "result_studio": 0.2757
+        },
+        "correct": true,
+        "elapsedMs": 249,
+        "attempts": 1
+      },
+      {
+        "id": "tk-007",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "chitchat",
+        "confidence": 0.0021,
+        "probabilities": {
+          "chitchat": 0.2822,
+          "task": 0.2339,
+          "knowledge_qa": 0.247,
+          "result_studio": 0.2368
+        },
+        "correct": false,
+        "elapsedMs": 246,
+        "attempts": 1
+      },
+      {
+        "id": "tk-008",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0184,
+        "probabilities": {
+          "chitchat": 0.1597,
+          "task": 0.3022,
+          "knowledge_qa": 0.2765,
+          "result_studio": 0.2616
+        },
+        "correct": true,
+        "elapsedMs": 242,
+        "attempts": 1
+      },
+      {
+        "id": "tk-009",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0147,
+        "probabilities": {
+          "chitchat": 0.1777,
+          "task": 0.3101,
+          "knowledge_qa": 0.234,
+          "result_studio": 0.2782
+        },
+        "correct": true,
+        "elapsedMs": 242,
+        "attempts": 1
+      },
+      {
+        "id": "tk-010",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0141,
+        "probabilities": {
+          "chitchat": 0.1841,
+          "task": 0.2958,
+          "knowledge_qa": 0.2217,
+          "result_studio": 0.2984
+        },
+        "correct": false,
+        "elapsedMs": 241,
+        "attempts": 1
+      },
+      {
+        "id": "tk-011",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0119,
+        "probabilities": {
+          "chitchat": 0.1827,
+          "task": 0.2851,
+          "knowledge_qa": 0.2374,
+          "result_studio": 0.2948
+        },
+        "correct": false,
+        "elapsedMs": 242,
+        "attempts": 1
+      },
+      {
+        "id": "tk-012",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0219,
+        "probabilities": {
+          "chitchat": 0.169,
+          "task": 0.3372,
+          "knowledge_qa": 0.2254,
+          "result_studio": 0.2683
+        },
+        "correct": true,
+        "elapsedMs": 244,
+        "attempts": 1
+      },
+      {
+        "id": "tk-013",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.024,
+        "probabilities": {
+          "chitchat": 0.1771,
+          "task": 0.3446,
+          "knowledge_qa": 0.2047,
+          "result_studio": 0.2736
+        },
+        "correct": true,
+        "elapsedMs": 243,
+        "attempts": 1
+      },
+      {
+        "id": "tk-014",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0101,
+        "probabilities": {
+          "chitchat": 0.1907,
+          "task": 0.2906,
+          "knowledge_qa": 0.232,
+          "result_studio": 0.2868
+        },
+        "correct": true,
+        "elapsedMs": 243,
+        "attempts": 1
+      },
+      {
+        "id": "tk-015",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.004,
+        "probabilities": {
+          "chitchat": 0.2131,
+          "task": 0.2714,
+          "knowledge_qa": 0.2375,
+          "result_studio": 0.2781
+        },
+        "correct": false,
+        "elapsedMs": 243,
+        "attempts": 1
+      },
+      {
+        "id": "tk-016",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0126,
+        "probabilities": {
+          "chitchat": 0.1818,
+          "task": 0.2909,
+          "knowledge_qa": 0.2345,
+          "result_studio": 0.2928
+        },
+        "correct": false,
+        "elapsedMs": 246,
+        "attempts": 1
+      },
+      {
+        "id": "tk-017",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0062,
+        "probabilities": {
+          "chitchat": 0.2006,
+          "task": 0.289,
+          "knowledge_qa": 0.2458,
+          "result_studio": 0.2645
+        },
+        "correct": true,
+        "elapsedMs": 244,
+        "attempts": 1
+      },
+      {
+        "id": "tk-018",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0143,
+        "probabilities": {
+          "chitchat": 0.1823,
+          "task": 0.3177,
+          "knowledge_qa": 0.2323,
+          "result_studio": 0.2678
+        },
+        "correct": true,
+        "elapsedMs": 244,
+        "attempts": 1
+      },
+      {
+        "id": "tk-019",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0144,
+        "probabilities": {
+          "chitchat": 0.1776,
+          "task": 0.2959,
+          "knowledge_qa": 0.2326,
+          "result_studio": 0.2939
+        },
+        "correct": true,
+        "elapsedMs": 245,
+        "attempts": 1
+      },
+      {
+        "id": "tk-020",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0094,
+        "probabilities": {
+          "chitchat": 0.1922,
+          "task": 0.3027,
+          "knowledge_qa": 0.2413,
+          "result_studio": 0.2638
+        },
+        "correct": true,
+        "elapsedMs": 245,
+        "attempts": 1
+      },
+      {
+        "id": "tk-021",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0066,
+        "probabilities": {
+          "chitchat": 0.1964,
+          "task": 0.2721,
+          "knowledge_qa": 0.249,
+          "result_studio": 0.2826
+        },
+        "correct": false,
+        "elapsedMs": 240,
+        "attempts": 1
+      },
+      {
+        "id": "tk-022",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0088,
+        "probabilities": {
+          "chitchat": 0.1959,
+          "task": 0.2486,
+          "knowledge_qa": 0.2492,
+          "result_studio": 0.3063
+        },
+        "correct": false,
+        "elapsedMs": 240,
+        "attempts": 1
+      },
+      {
+        "id": "tk-023",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0125,
+        "probabilities": {
+          "chitchat": 0.1838,
+          "task": 0.2737,
+          "knowledge_qa": 0.2354,
+          "result_studio": 0.3072
+        },
+        "correct": false,
+        "elapsedMs": 242,
+        "attempts": 1
+      },
+      {
+        "id": "tk-024",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0069,
+        "probabilities": {
+          "chitchat": 0.201,
+          "task": 0.2981,
+          "knowledge_qa": 0.2485,
+          "result_studio": 0.2524
+        },
+        "correct": true,
+        "elapsedMs": 246,
+        "attempts": 1
+      },
+      {
+        "id": "tk-025",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0107,
+        "probabilities": {
+          "chitchat": 0.2178,
+          "task": 0.2359,
+          "knowledge_qa": 0.3258,
+          "result_studio": 0.2205
+        },
+        "correct": false,
+        "elapsedMs": 246,
+        "attempts": 1
+      },
+      {
+        "id": "tk-026",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0119,
+        "probabilities": {
+          "chitchat": 0.1839,
+          "task": 0.296,
+          "knowledge_qa": 0.2344,
+          "result_studio": 0.2856
+        },
+        "correct": true,
+        "elapsedMs": 246,
+        "attempts": 1
+      },
+      {
+        "id": "tk-027",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0091,
+        "probabilities": {
+          "chitchat": 0.1933,
+          "task": 0.2906,
+          "knowledge_qa": 0.2343,
+          "result_studio": 0.2817
+        },
+        "correct": true,
+        "elapsedMs": 247,
+        "attempts": 1
+      },
+      {
+        "id": "tk-028",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0083,
+        "probabilities": {
+          "chitchat": 0.1866,
+          "task": 0.2736,
+          "knowledge_qa": 0.2699,
+          "result_studio": 0.2699
+        },
+        "correct": true,
+        "elapsedMs": 245,
+        "attempts": 1
+      },
+      {
+        "id": "tk-029",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0279,
+        "probabilities": {
+          "chitchat": 0.1588,
+          "task": 0.348,
+          "knowledge_qa": 0.2223,
+          "result_studio": 0.2708
+        },
+        "correct": true,
+        "elapsedMs": 239,
+        "attempts": 1
+      },
+      {
+        "id": "tk-030",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0458,
+        "probabilities": {
+          "chitchat": 0.1462,
+          "task": 0.2689,
+          "knowledge_qa": 0.1987,
+          "result_studio": 0.3862
+        },
+        "correct": false,
+        "elapsedMs": 241,
+        "attempts": 1
+      },
+      {
+        "id": "tk-031",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0073,
+        "probabilities": {
+          "chitchat": 0.2017,
+          "task": 0.2859,
+          "knowledge_qa": 0.2308,
+          "result_studio": 0.2815
+        },
+        "correct": true,
+        "elapsedMs": 240,
+        "attempts": 1
+      },
+      {
+        "id": "tk-032",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0057,
+        "probabilities": {
+          "chitchat": 0.2007,
+          "task": 0.2823,
+          "knowledge_qa": 0.2482,
+          "result_studio": 0.2688
+        },
+        "correct": true,
+        "elapsedMs": 239,
+        "attempts": 1
+      },
+      {
+        "id": "tk-033",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0119,
+        "probabilities": {
+          "chitchat": 0.183,
+          "task": 0.2758,
+          "knowledge_qa": 0.239,
+          "result_studio": 0.3021
+        },
+        "correct": false,
+        "elapsedMs": 240,
+        "attempts": 1
+      },
+      {
+        "id": "tk-034",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0111,
+        "probabilities": {
+          "chitchat": 0.1809,
+          "task": 0.2874,
+          "knowledge_qa": 0.2482,
+          "result_studio": 0.2836
+        },
+        "correct": true,
+        "elapsedMs": 238,
+        "attempts": 1
+      },
+      {
+        "id": "tk-035",
+        "group": "task",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0088,
+        "probabilities": {
+          "chitchat": 0.1985,
+          "task": 0.2882,
+          "knowledge_qa": 0.2263,
+          "result_studio": 0.287
+        },
+        "correct": true,
+        "elapsedMs": 239,
+        "attempts": 1
+      },
+      {
+        "id": "kq-001",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0154,
+        "probabilities": {
+          "chitchat": 0.2221,
+          "task": 0.2082,
+          "knowledge_qa": 0.3416,
+          "result_studio": 0.2281
+        },
+        "correct": true,
+        "elapsedMs": 244,
+        "attempts": 1
+      },
+      {
+        "id": "kq-002",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.003,
+        "probabilities": {
+          "chitchat": 0.2292,
+          "task": 0.2407,
+          "knowledge_qa": 0.2891,
+          "result_studio": 0.241
+        },
+        "correct": true,
+        "elapsedMs": 247,
+        "attempts": 1
+      },
+      {
+        "id": "kq-003",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0017,
+        "probabilities": {
+          "chitchat": 0.2217,
+          "task": 0.2677,
+          "knowledge_qa": 0.2561,
+          "result_studio": 0.2544
+        },
+        "correct": false,
+        "elapsedMs": 253,
+        "attempts": 1
+      },
+      {
+        "id": "kq-004",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0046,
+        "probabilities": {
+          "chitchat": 0.2479,
+          "task": 0.2158,
+          "knowledge_qa": 0.2947,
+          "result_studio": 0.2416
+        },
+        "correct": true,
+        "elapsedMs": 258,
+        "attempts": 1
+      },
+      {
+        "id": "kq-005",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0041,
+        "probabilities": {
+          "chitchat": 0.2331,
+          "task": 0.2391,
+          "knowledge_qa": 0.2968,
+          "result_studio": 0.231
+        },
+        "correct": true,
+        "elapsedMs": 254,
+        "attempts": 1
+      },
+      {
+        "id": "kq-006",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0056,
+        "probabilities": {
+          "chitchat": 0.2343,
+          "task": 0.2222,
+          "knowledge_qa": 0.3042,
+          "result_studio": 0.2393
+        },
+        "correct": true,
+        "elapsedMs": 252,
+        "attempts": 1
+      },
+      {
+        "id": "kq-007",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0309,
+        "probabilities": {
+          "chitchat": 0.2583,
+          "task": 0.1751,
+          "knowledge_qa": 0.3684,
+          "result_studio": 0.1983
+        },
+        "correct": true,
+        "elapsedMs": 248,
+        "attempts": 1
+      },
+      {
+        "id": "kq-008",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0019,
+        "probabilities": {
+          "chitchat": 0.2359,
+          "task": 0.2393,
+          "knowledge_qa": 0.2817,
+          "result_studio": 0.2431
+        },
+        "correct": true,
+        "elapsedMs": 244,
+        "attempts": 1
+      },
+      {
+        "id": "kq-009",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0028,
+        "probabilities": {
+          "chitchat": 0.2356,
+          "task": 0.2315,
+          "knowledge_qa": 0.2877,
+          "result_studio": 0.2452
+        },
+        "correct": true,
+        "elapsedMs": 248,
+        "attempts": 1
+      },
+      {
+        "id": "kq-010",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0035,
+        "probabilities": {
+          "chitchat": 0.21,
+          "task": 0.2555,
+          "knowledge_qa": 0.275,
+          "result_studio": 0.2595
+        },
+        "correct": true,
+        "elapsedMs": 247,
+        "attempts": 1
+      },
+      {
+        "id": "kq-011",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0041,
+        "probabilities": {
+          "chitchat": 0.2289,
+          "task": 0.2382,
+          "knowledge_qa": 0.2968,
+          "result_studio": 0.2361
+        },
+        "correct": true,
+        "elapsedMs": 245,
+        "attempts": 1
+      },
+      {
+        "id": "kq-012",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0165,
+        "probabilities": {
+          "chitchat": 0.2181,
+          "task": 0.1957,
+          "knowledge_qa": 0.3392,
+          "result_studio": 0.247
+        },
+        "correct": true,
+        "elapsedMs": 246,
+        "attempts": 1
+      },
+      {
+        "id": "kq-013",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0143,
+        "probabilities": {
+          "chitchat": 0.2242,
+          "task": 0.2204,
+          "knowledge_qa": 0.3391,
+          "result_studio": 0.2164
+        },
+        "correct": true,
+        "elapsedMs": 244,
+        "attempts": 1
+      },
+      {
+        "id": "kq-014",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.003,
+        "probabilities": {
+          "chitchat": 0.2421,
+          "task": 0.2283,
+          "knowledge_qa": 0.2891,
+          "result_studio": 0.2405
+        },
+        "correct": true,
+        "elapsedMs": 239,
+        "attempts": 1
+      },
+      {
+        "id": "kq-015",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0209,
+        "probabilities": {
+          "chitchat": 0.2546,
+          "task": 0.1829,
+          "knowledge_qa": 0.3465,
+          "result_studio": 0.216
+        },
+        "correct": true,
+        "elapsedMs": 244,
+        "attempts": 1
+      },
+      {
+        "id": "kq-016",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0038,
+        "probabilities": {
+          "chitchat": 0.2094,
+          "task": 0.2482,
+          "knowledge_qa": 0.2748,
+          "result_studio": 0.2676
+        },
+        "correct": true,
+        "elapsedMs": 244,
+        "attempts": 1
+      },
+      {
+        "id": "kq-017",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0043,
+        "probabilities": {
+          "chitchat": 0.2368,
+          "task": 0.2291,
+          "knowledge_qa": 0.298,
+          "result_studio": 0.2361
+        },
+        "correct": true,
+        "elapsedMs": 243,
+        "attempts": 1
+      },
+      {
+        "id": "kq-018",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0347,
+        "probabilities": {
+          "chitchat": 0.2765,
+          "task": 0.1632,
+          "knowledge_qa": 0.3649,
+          "result_studio": 0.1953
+        },
+        "correct": true,
+        "elapsedMs": 243,
+        "attempts": 1
+      },
+      {
+        "id": "kq-019",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0025,
+        "probabilities": {
+          "chitchat": 0.2276,
+          "task": 0.2312,
+          "knowledge_qa": 0.2733,
+          "result_studio": 0.2679
+        },
+        "correct": true,
+        "elapsedMs": 245,
+        "attempts": 1
+      },
+      {
+        "id": "kq-020",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0122,
+        "probabilities": {
+          "chitchat": 0.2618,
+          "task": 0.1933,
+          "knowledge_qa": 0.3182,
+          "result_studio": 0.2266
+        },
+        "correct": true,
+        "elapsedMs": 246,
+        "attempts": 1
+      },
+      {
+        "id": "kq-021",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0201,
+        "probabilities": {
+          "chitchat": 0.224,
+          "task": 0.2017,
+          "knowledge_qa": 0.3551,
+          "result_studio": 0.2191
+        },
+        "correct": true,
+        "elapsedMs": 248,
+        "attempts": 1
+      },
+      {
+        "id": "kq-022",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0081,
+        "probabilities": {
+          "chitchat": 0.1928,
+          "task": 0.2653,
+          "knowledge_qa": 0.2482,
+          "result_studio": 0.2938
+        },
+        "correct": false,
+        "elapsedMs": 250,
+        "attempts": 1
+      },
+      {
+        "id": "kq-023",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0031,
+        "probabilities": {
+          "chitchat": 0.2336,
+          "task": 0.2413,
+          "knowledge_qa": 0.2904,
+          "result_studio": 0.2347
+        },
+        "correct": true,
+        "elapsedMs": 251,
+        "attempts": 1
+      },
+      {
+        "id": "kq-024",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0121,
+        "probabilities": {
+          "chitchat": 0.2656,
+          "task": 0.2031,
+          "knowledge_qa": 0.3186,
+          "result_studio": 0.2127
+        },
+        "correct": true,
+        "elapsedMs": 252,
+        "attempts": 1
+      },
+      {
+        "id": "kq-025",
+        "group": "knowledge_qa",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.005,
+        "probabilities": {
+          "chitchat": 0.2087,
+          "task": 0.2452,
+          "knowledge_qa": 0.2915,
+          "result_studio": 0.2546
+        },
+        "correct": true,
+        "elapsedMs": 248,
+        "attempts": 1
+      },
+      {
+        "id": "rs-001",
+        "group": "result_studio",
+        "gold": "result_studio",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0098,
+        "probabilities": {
+          "chitchat": 0.1996,
+          "task": 0.2651,
+          "knowledge_qa": 0.2262,
+          "result_studio": 0.309
+        },
+        "correct": true,
+        "elapsedMs": 244,
+        "attempts": 1
+      },
+      {
+        "id": "rs-002",
+        "group": "result_studio",
+        "gold": "result_studio",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0119,
+        "probabilities": {
+          "chitchat": 0.183,
+          "task": 0.3026,
+          "knowledge_qa": 0.24,
+          "result_studio": 0.2744
+        },
+        "correct": false,
+        "elapsedMs": 244,
+        "attempts": 1
+      },
+      {
+        "id": "rs-003",
+        "group": "result_studio",
+        "gold": "result_studio",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.014,
+        "probabilities": {
+          "chitchat": 0.1817,
+          "task": 0.2766,
+          "knowledge_qa": 0.2306,
+          "result_studio": 0.3111
+        },
+        "correct": true,
+        "elapsedMs": 245,
+        "attempts": 1
+      },
+      {
+        "id": "rs-004",
+        "group": "result_studio",
+        "gold": "result_studio",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0092,
+        "probabilities": {
+          "chitchat": 0.1914,
+          "task": 0.2946,
+          "knowledge_qa": 0.2391,
+          "result_studio": 0.275
+        },
+        "correct": false,
+        "elapsedMs": 240,
+        "attempts": 1
+      },
+      {
+        "id": "rs-005",
+        "group": "result_studio",
+        "gold": "result_studio",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0544,
+        "probabilities": {
+          "chitchat": 0.1588,
+          "task": 0.2481,
+          "knowledge_qa": 0.1787,
+          "result_studio": 0.4143
+        },
+        "correct": true,
+        "elapsedMs": 239,
+        "attempts": 1
+      },
+      {
+        "id": "rs-006",
+        "group": "result_studio",
+        "gold": "result_studio",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0097,
+        "probabilities": {
+          "chitchat": 0.1914,
+          "task": 0.2891,
+          "knowledge_qa": 0.2336,
+          "result_studio": 0.2859
+        },
+        "correct": false,
+        "elapsedMs": 239,
+        "attempts": 1
+      },
+      {
+        "id": "rs-007",
+        "group": "result_studio",
+        "gold": "result_studio",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0075,
+        "probabilities": {
+          "chitchat": 0.194,
+          "task": 0.2826,
+          "knowledge_qa": 0.2452,
+          "result_studio": 0.2782
+        },
+        "correct": false,
+        "elapsedMs": 238,
+        "attempts": 1
+      },
+      {
+        "id": "rs-008",
+        "group": "result_studio",
+        "gold": "result_studio",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0143,
+        "probabilities": {
+          "chitchat": 0.2242,
+          "task": 0.2183,
+          "knowledge_qa": 0.2185,
+          "result_studio": 0.3391
+        },
+        "correct": true,
+        "elapsedMs": 238,
+        "attempts": 1
+      },
+      {
+        "id": "rs-009",
+        "group": "result_studio",
+        "gold": "result_studio",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0064,
+        "probabilities": {
+          "chitchat": 0.2014,
+          "task": 0.2914,
+          "knowledge_qa": 0.2418,
+          "result_studio": 0.2654
+        },
+        "correct": false,
+        "elapsedMs": 239,
+        "attempts": 1
+      },
+      {
+        "id": "rs-010",
+        "group": "result_studio",
+        "gold": "result_studio",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0092,
+        "probabilities": {
+          "chitchat": 0.1955,
+          "task": 0.297,
+          "knowledge_qa": 0.2309,
+          "result_studio": 0.2766
+        },
+        "correct": false,
+        "elapsedMs": 244,
+        "attempts": 1
+      },
+      {
+        "id": "rs-011",
+        "group": "result_studio",
+        "gold": "result_studio",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0224,
+        "probabilities": {
+          "chitchat": 0.1895,
+          "task": 0.2632,
+          "knowledge_qa": 0.1992,
+          "result_studio": 0.3481
+        },
+        "correct": true,
+        "elapsedMs": 253,
+        "attempts": 1
+      },
+      {
+        "id": "rs-012",
+        "group": "result_studio",
+        "gold": "result_studio",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.009,
+        "probabilities": {
+          "chitchat": 0.1889,
+          "task": 0.2853,
+          "knowledge_qa": 0.2448,
+          "result_studio": 0.2809
+        },
+        "correct": false,
+        "elapsedMs": 259,
+        "attempts": 1
+      },
+      {
+        "id": "rs-013",
+        "group": "result_studio",
+        "gold": "result_studio",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0065,
+        "probabilities": {
+          "chitchat": 0.2573,
+          "task": 0.2205,
+          "knowledge_qa": 0.2198,
+          "result_studio": 0.3025
+        },
+        "correct": true,
+        "elapsedMs": 262,
+        "attempts": 1
+      },
+      {
+        "id": "rs-014",
+        "group": "result_studio",
+        "gold": "result_studio",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0042,
+        "probabilities": {
+          "chitchat": 0.2104,
+          "task": 0.2723,
+          "knowledge_qa": 0.2407,
+          "result_studio": 0.2766
+        },
+        "correct": true,
+        "elapsedMs": 269,
+        "attempts": 1
+      },
+      {
+        "id": "rs-015",
+        "group": "result_studio",
+        "gold": "result_studio",
+        "ok": true,
+        "choice": "result_studio",
+        "confidence": 0.0059,
+        "probabilities": {
+          "chitchat": 0.2098,
+          "task": 0.2567,
+          "knowledge_qa": 0.2357,
+          "result_studio": 0.2979
+        },
+        "correct": true,
+        "elapsedMs": 268,
+        "attempts": 1
+      },
+      {
+        "id": "bd-001",
+        "group": "boundary",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0115,
+        "probabilities": {
+          "chitchat": 0.1931,
+          "task": 0.3107,
+          "knowledge_qa": 0.226,
+          "result_studio": 0.2702
+        },
+        "correct": true,
+        "elapsedMs": 269,
+        "attempts": 1
+      },
+      {
+        "id": "bd-002",
+        "group": "boundary",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0098,
+        "probabilities": {
+          "chitchat": 0.2062,
+          "task": 0.3095,
+          "knowledge_qa": 0.2165,
+          "result_studio": 0.2679
+        },
+        "correct": true,
+        "elapsedMs": 270,
+        "attempts": 1
+      },
+      {
+        "id": "bd-003",
+        "group": "boundary",
+        "gold": "task",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0027,
+        "probabilities": {
+          "chitchat": 0.2292,
+          "task": 0.2519,
+          "knowledge_qa": 0.2846,
+          "result_studio": 0.2343
+        },
+        "correct": false,
+        "elapsedMs": 270,
+        "attempts": 1
+      },
+      {
+        "id": "bd-004",
+        "group": "boundary",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0041,
+        "probabilities": {
+          "chitchat": 0.22,
+          "task": 0.29,
+          "knowledge_qa": 0.2328,
+          "result_studio": 0.2572
+        },
+        "correct": false,
+        "elapsedMs": 267,
+        "attempts": 1
+      },
+      {
+        "id": "bd-005",
+        "group": "boundary",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "chitchat",
+        "confidence": 0.0062,
+        "probabilities": {
+          "chitchat": 0.2858,
+          "task": 0.211,
+          "knowledge_qa": 0.279,
+          "result_studio": 0.2242
+        },
+        "correct": false,
+        "elapsedMs": 267,
+        "attempts": 1
+      },
+      {
+        "id": "bd-006",
+        "group": "boundary",
+        "gold": "task",
+        "ok": true,
+        "choice": "chitchat",
+        "confidence": 0.0019,
+        "probabilities": {
+          "chitchat": 0.2774,
+          "task": 0.2516,
+          "knowledge_qa": 0.2261,
+          "result_studio": 0.2449
+        },
+        "correct": false,
+        "elapsedMs": 264,
+        "attempts": 1
+      },
+      {
+        "id": "bd-007",
+        "group": "boundary",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0071,
+        "probabilities": {
+          "chitchat": 0.2032,
+          "task": 0.3027,
+          "knowledge_qa": 0.2465,
+          "result_studio": 0.2476
+        },
+        "correct": true,
+        "elapsedMs": 259,
+        "attempts": 1
+      },
+      {
+        "id": "bd-008",
+        "group": "boundary",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0383,
+        "probabilities": {
+          "chitchat": 0.2333,
+          "task": 0.1797,
+          "knowledge_qa": 0.393,
+          "result_studio": 0.194
+        },
+        "correct": true,
+        "elapsedMs": 255,
+        "attempts": 1
+      },
+      {
+        "id": "bd-009",
+        "group": "boundary",
+        "gold": "result_studio",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0119,
+        "probabilities": {
+          "chitchat": 0.2089,
+          "task": 0.3142,
+          "knowledge_qa": 0.2049,
+          "result_studio": 0.272
+        },
+        "correct": false,
+        "elapsedMs": 254,
+        "attempts": 1
+      },
+      {
+        "id": "bd-010",
+        "group": "boundary",
+        "gold": "task",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0024,
+        "probabilities": {
+          "chitchat": 0.2372,
+          "task": 0.277,
+          "knowledge_qa": 0.2249,
+          "result_studio": 0.2609
+        },
+        "correct": true,
+        "elapsedMs": 255,
+        "attempts": 1
+      },
+      {
+        "id": "bd-011",
+        "group": "boundary",
+        "gold": "chitchat",
+        "ok": true,
+        "choice": "task",
+        "confidence": 0.0008,
+        "probabilities": {
+          "chitchat": 0.2319,
+          "task": 0.2638,
+          "knowledge_qa": 0.2504,
+          "result_studio": 0.254
+        },
+        "correct": false,
+        "elapsedMs": 250,
+        "attempts": 1
+      },
+      {
+        "id": "bd-012",
+        "group": "boundary",
+        "gold": "knowledge_qa",
+        "ok": true,
+        "choice": "knowledge_qa",
+        "confidence": 0.0014,
+        "probabilities": {
+          "chitchat": 0.243,
+          "task": 0.2367,
+          "knowledge_qa": 0.2767,
+          "result_studio": 0.2436
+        },
+        "correct": true,
+        "elapsedMs": 247,
+        "attempts": 1
+      }
+    ]
+  },
+  "gate": {
+    "criterion": "存在 θ：chitchatPrecision ≥ 0.95 且 taskFalseAdoption = 0 且 chitchatRecall ≥ 0.6；且 overall argmax accuracy ≥ 0.85（诊断门）",
+    "passed": false,
+    "note": "P0 通过判据为立项时提案，P0 评审（D-1~D-5 裁决）可修订；taskFalseAdoption=0 指语料内 task 类样本零误采纳（误路由代价=真任务被直答，属用户可见伤害，零容忍）。"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "layaRow": {
+    "at": "2026-09-22T15:18:33.350Z",
+    "point": "intent-route",
+    "choice": "chitchat",
+    "confidence": 0.0005,
+    "threshold": 0.7,
+    "degraded": false,
+    "reason": null,
+    "model": "laya@typed-decisions",
+    "latencyMs": 56,
+    "statePreview": "用户在 AI 工作台聊天框发送的消息：\n嗨，在忙吗？"
+  },
+  "switchedTo": "http://127.0.0.1:8765",
+  "restored": true
+}

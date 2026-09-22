@@ -5125,8 +5125,32 @@
         "system-one",
         "G0"
       ]
+    },
+    {
+      "id": "BLOCK-117-LAYA-SUPPLY-VALIDATION",
+      "path": "docs/block-117-laya-supply-validation-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-117-laya-supply-validation",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-22",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "COMPLETED",
+      "tags": [
+        "block-117",
+        "jev",
+        "system-one",
+        "decision-model",
+        "laya",
+        "local-supply",
+        "calibration",
+        "w2"
+      ],
+      "notes": "本地 Laya 决策供给接入验证 completed（2026-09-22 当日立项当日收口；用户裁决原话「直接开」）。P0 线兼容层=仓库外 laya_decide serve 增 /v1/systemone 别名（decision-api 客户端零改动）+ 真实 Laya 响应 fixtures 过 validateAnswers 三题型契约 + 七接点 Jev 注册表零漂移红线（2/2）；抓真=适配器 1 候选 choice 缺口（生产 n≥1 严于 jev.py 包装器 2-255，已修）。P1 三启用接点校准裁决 0/3 可采纳（intent-route/tool-route=confidence 语义差异零采纳；marker-celltype=采纳精度 1.0/覆盖 0.7875<0.85 门槛）——证据落 acceptance/block-117/，注册表零改动（无证据不改阈值红线正向行使）；harness 触改=输出重定向 env（touch-and-migrate，默认行为不变）。P2 实机 flow block117-layasupply-live 7/7：PUT provider 切换（设置页同通道）→真实 chitchat 经本地 Laya 落账（choice=chitchat 56ms degraded=0）→配置文件级还原零残留；抓真=flow 配置路径须对齐 dev 后端数据面。后续候选=门控语义改换（top-probability）属契约变更另裁。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "lastUpdated": "2026-09-22"
     }
   ],
-  "lastUpdated": "2026-09-21",
-  "documentCount": 267
+  "lastUpdated": "2026-09-22",
+  "documentCount": 274
 }

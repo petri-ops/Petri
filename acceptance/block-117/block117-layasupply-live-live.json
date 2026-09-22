@@ -1,0 +1,43 @@
+{
+  "name": "block117-layasupply-live",
+  "startedAt": "2026-09-22T15:18:33.244Z",
+  "finishedAt": "2026-09-22T15:18:39.721Z",
+  "assertions": [
+    {
+      "name": "B0_laya_serve_ready",
+      "pass": true,
+      "detail": "health={\"engine\":\"laya@typed-decisions\",\"mode\":\"laya_local\",\"transport\":\"local:cuda\",\"ready\":true}"
+    },
+    {
+      "name": "B1_provider_switched",
+      "pass": true,
+      "detail": "put=200 {\"status\":\"ok\",\"provider\":{\"baseUrl\":\"http://127.0.0.1:8765\",\"model\":\"laya-typed-decisions\",\"hasKey\":true}}"
+    },
+    {
+      "name": "B1b_provider_visible",
+      "pass": true,
+      "detail": "provider={\"baseUrl\":\"http://127.0.0.1:8765\",\"model\":\"laya-typed-decisions\",\"hasKey\":true}"
+    },
+    {
+      "name": "B2_task_reaches_terminal",
+      "pass": true,
+      "detail": "terminal=done"
+    },
+    {
+      "name": "B2b_laya_row_logged",
+      "pass": true,
+      "detail": "recent intent-route models=[\"laya@typed-decisions\",\"jev-1.13.0\",\"jev-1.13.0\",\"jev-1.13.0\",\"jev-1.13.0\",\"jev-1.13.0\",\"jev-1.13.0\",\"jev-1.13.0\",\"jev-1.13.0\",\"jev-1.13.0\",\"jev-1.13.0\"]"
+    },
+    {
+      "name": "B2c_choice_recorded",
+      "pass": true,
+      "detail": "choice=chitchat"
+    },
+    {
+      "name": "B3_provider_restored",
+      "pass": true,
+      "detail": "provider={\"baseUrl\":\"https://api.typesafe.ai\",\"model\":\"jev-1.13.0\",\"hasKey\":true}"
+    }
+  ],
+  "allPass": true
+}

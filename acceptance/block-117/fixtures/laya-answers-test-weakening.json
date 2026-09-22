@@ -1,0 +1,77 @@
+{
+  "capture": "block117-p0",
+  "source": "laya_decide serve /v1/systemone (convaiinnovations/laya typed-decisions)",
+  "questions": {
+    "weakens_test": {
+      "type": "noul",
+      "instructions": "Does this diff weaken the original regression check?"
+    },
+    "completion": {
+      "type": "choice",
+      "instructions": "Does test_receipt establish that goal was achieved?",
+      "criteria": {
+        "supported": "The original behavior is implemented and verified without weakening checks.",
+        "unsupported": "The evidence does not establish the original requirement.",
+        "unknown": "Essential source or test information is absent."
+      }
+    },
+    "review_priority": {
+      "type": "score",
+      "instructions": "How much review attention does this change warrant?",
+      "criteria": [
+        "No concrete concern in supplied evidence.",
+        "A localized concern needing inspection.",
+        "Direct conflict with the stated acceptance condition."
+      ]
+    }
+  },
+  "response": {
+    "answers": {
+      "weakens_test": {
+        "type": "noul",
+        "noul": 0.2423,
+        "confidence": 0.7577,
+        "action": {
+          "act_probability": 1.0
+        }
+      },
+      "completion": {
+        "type": "choice",
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.5007,
+          "unsupported": 0.192,
+          "unknown": 0.3073
+        },
+        "confidence": 0.0663,
+        "action": {
+          "act_probability": 1.0
+        }
+      },
+      "review_priority": {
+        "type": "score",
+        "score": 0.911,
+        "legend": {
+          "0": "No concrete concern in supplied evidence.",
+          "1": "A localized concern needing inspection.",
+          "2": "Direct conflict with the stated acceptance condition."
+        },
+        "probabilities": {
+          "0": 0.2931,
+          "1": 0.5029,
+          "2": 0.204
+        },
+        "confidence": 0.0627,
+        "action": {
+          "act_probability": 1.0
+        }
+      }
+    },
+    "model": "laya@typed-decisions",
+    "engine": "laya@typed-decisions",
+    "mode": "laya_local",
+    "jev_called": false,
+    "transport": "local:cuda",
+    "elapsed_seconds": 0.054
+  }
+}

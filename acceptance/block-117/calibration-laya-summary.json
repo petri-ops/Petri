@@ -1,0 +1,37 @@
+{
+  "kind": "block117-laya-supply-calibration",
+  "version": "1.0.0",
+  "capturedAt": "2026-09-22T15:13:31.719Z",
+  "sourceCommit": "68cd541e0f9ea5bb2b7809b71810028abfe51141",
+  "model": "laya-typed-decisions (local supply, convaiinnovations/laya via laya_decide serve /v1/systemone)",
+  "wrapper": "core/biof3-server/helpers/decision-api.js（客户端零改动，D-B provider 可替换性）",
+  "supplySandbox": "fixtures/decision-config-laya-sandbox.json（BIOF3_DECISION_CONFIG_PATH 通道；零 API 费用零外发）",
+  "verdictRule": "沿用各接点原 P0 门限判据，不因换模型放松；不可采纳即如实落证据",
+  "perPoint": [
+    {
+      "point": "intent-route",
+      "verdict": "not_adoptable",
+      "recommendedThreshold": null,
+      "gateCriterion": "存在 θ：chitchatPrecision ≥ 0.95 且 taskFalseAdoption = 0 且 chitchatRecall ≥ 0.6；且 overall argmax accuracy ≥ 0.85（诊断门）",
+      "evidenceFile": "acceptance/block-117/calibration-intent-route-laya.json",
+      "model": "laya-typed-decisions (local supply)"
+    },
+    {
+      "point": "tool-route",
+      "verdict": "not_adoptable",
+      "recommendedThreshold": null,
+      "gateCriterion": "存在 θ：adoptedPrecision ≥ 0.9 且 allFalseAdoption ≤ 2 且 adoptedCoverage ≥ 0.5；且 overall argmax accuracy ≥ 0.75（诊断门）",
+      "evidenceFile": "acceptance/block-117/calibration-tool-route-laya.json",
+      "model": "laya-typed-decisions (local supply)"
+    },
+    {
+      "point": "marker-celltype",
+      "verdict": "not_adoptable",
+      "recommendedThreshold": null,
+      "gateCriterion": "存在 θ：adoptedAccuracy ≥ 0.95 且 coverage ≥ 0.85 且 trapFalseAdoption ≤ 0.05（conf<θ 一律回退现行字符串）",
+      "evidenceFile": "acceptance/block-117/calibration-marker-celltype-laya.json",
+      "model": "laya-typed-decisions (local supply)"
+    }
+  ],
+  "summaryLine": "三接点裁决：可采纳 0/3"
+}

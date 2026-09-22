@@ -189,14 +189,19 @@ async function main() {
     version: '1.0.0',
     capturedAt: new Date().toISOString(),
     sourceCommit: require('node:child_process').execSync('git rev-parse HEAD', { cwd: root }).toString().trim(),
-    model: decisionApi.DECISION_MODEL_PIN,
+    // BLOCK-117：供给换接校准的模型标签重定向（默认行为不变）
+    model: process.env.CALIBRATION_EVIDENCE_MODEL || decisionApi.DECISION_MODEL_PIN,
     wrapper: 'core/biof3-server/helpers/decision-api.js',
     decisionPoint: 'routes/ai-agent/chat.js 提交链挂钩（W1-2 copilot 意图路由）',
     result,
     gate,
   };
 
-  const outPath = path.join(evidenceDir, 'calibration.json');
+  // BLOCK-117：供给换接校准的输出重定向（默认路径行为不变；重定向时换文件名防跨点覆盖）
+  const evidenceOut = process.env.CALIBRATION_EVIDENCE_OUT
+    ? path.resolve(process.env.CALIBRATION_EVIDENCE_OUT) : evidenceDir;
+  fs.mkdirSync(evidenceOut, { recursive: true });
+  const outPath = path.join(evidenceOut, process.env.CALIBRATION_EVIDENCE_FILE || 'calibration.json');
   fs.writeFileSync(outPath, JSON.stringify(evidence, null, 2) + '\n', 'utf8');
   console.log(`\n证据已写入 ${path.relative(root, outPath)}；gate.passed=${gate.passed}`);
   if (!gate.passed) process.exit(3);

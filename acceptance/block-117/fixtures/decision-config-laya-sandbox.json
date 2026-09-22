@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "points": {},
+  "provider": {
+    "baseUrl": "http://127.0.0.1:8765",
+    "apiKey": "local-laya-no-external-call",
+    "model": "laya-typed-decisions"
+  }
+}
