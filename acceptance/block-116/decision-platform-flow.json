@@ -1,0 +1,19 @@
+{
+  "taskId": "8b271e36-7e2e-410b-8e60-e3e91deecea4",
+  "terminal": "done",
+  "summary": {
+    "status": "ok",
+    "available": true,
+    "days": 7,
+    "points": [
+      {
+        "point": "intent-route",
+        "calls": 1,
+        "avgLatencyMs": 727,
+        "degradedCount": 0,
+        "degradedRate": 0,
+        "lastAt": "2026-09-22T10:03:32.508Z"
+      }
+    ]
+  }
+}

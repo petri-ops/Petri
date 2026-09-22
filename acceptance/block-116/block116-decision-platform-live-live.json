@@ -1,0 +1,33 @@
+{
+  "name": "block116-decision-platform-live",
+  "startedAt": "2026-09-22T10:03:31.740Z",
+  "finishedAt": "2026-09-22T10:03:35.760Z",
+  "assertions": [
+    {
+      "name": "B0_task_reaches_terminal",
+      "pass": true,
+      "detail": "terminal=done"
+    },
+    {
+      "name": "B1_summary_available",
+      "pass": true,
+      "detail": "http=200 body={\"status\":\"ok\",\"available\":true,\"days\":7,\"points\":[{\"point\":\"intent-route\",\"calls\":1,\"avgLatencyMs\":727,\"degradedCount\":0,\"degradedRate\":0,\"lastAt\":\"2"
+    },
+    {
+      "name": "B2_intent_route_logged",
+      "pass": true,
+      "detail": "intent-route={\"point\":\"intent-route\",\"calls\":1,\"avgLatencyMs\":727,\"degradedCount\":0,\"degradedRate\":0,\"lastAt\":\"2026-09-22T10:03:32.508Z\"}"
+    },
+    {
+      "name": "B2b_latency_observed",
+      "pass": true,
+      "detail": "avgLatencyMs=727"
+    },
+    {
+      "name": "B3_no_unknown_points",
+      "pass": true,
+      "detail": "unknown=[]"
+    }
+  ],
+  "allPass": true
+}
