@@ -203,7 +203,7 @@ function _retryableStatus(status) {
  *     |'http_error'|'network_error'|'timeout'|'invalid_response'|'aborted', detail?: string, status?: number, elapsedMs: number, attempts: number}>}
  * 永不 throw；!ok 即调用方回退现行为。detail 不含 key/请求头。
  */
-async function askDecision({ state, questions, overrides } = {}) {
+async function askDecision({ state, questions, overrides = {} } = {}) {
   const startedAt = Date.now();
   const config = resolveDecisionConfig(overrides || {});
   if (!config) {

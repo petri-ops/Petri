@@ -1,0 +1,2405 @@
+{
+  "kind": "block110-calibration",
+  "version": "1.0.0",
+  "capturedAt": "2026-09-22T00:32:45.913Z",
+  "sourceCommit": "900d418b8f4075ceed49d0d356997c1ff301f27a",
+  "model": "jev-1.13.0",
+  "wrapper": "core/biof3-server/helpers/decision-api.js",
+  "domains": {
+    "topic-shift": {
+      "corpus": {
+        "file": "corpus-topic-shift.json",
+        "sha256": "cbca9abbff6626e8bd8956cf8cbebeca62539a03dc8d7503478e251555142c37",
+        "count": 200,
+        "positives": 100,
+        "negatives": 100
+      },
+      "apiFailures": 0,
+      "validCount": 200,
+      "classMeans": {
+        "true": 0.9887,
+        "false": 0.1448
+      },
+      "separation": 0.8439,
+      "latency": {
+        "p50Ms": 278,
+        "p95Ms": 384
+      },
+      "inputTokens": 92624,
+      "elapsedMs": 11824,
+      "recommendedThresholds": {
+        "yesThreshold": 0.85,
+        "noThreshold": 0.5,
+        "decided": 196,
+        "coverage": 0.98,
+        "decidedAccuracy": 1,
+        "correct": 196
+      },
+      "bestOutsideGate": null,
+      "gridTop": [
+        {
+          "yesThreshold": 0.85,
+          "noThreshold": 0.5,
+          "decided": 196,
+          "coverage": 0.98,
+          "decidedAccuracy": 1,
+          "correct": 196
+        },
+        {
+          "yesThreshold": 0.9,
+          "noThreshold": 0.5,
+          "decided": 196,
+          "coverage": 0.98,
+          "decidedAccuracy": 1,
+          "correct": 196
+        },
+        {
+          "yesThreshold": 0.95,
+          "noThreshold": 0.5,
+          "decided": 196,
+          "coverage": 0.98,
+          "decidedAccuracy": 1,
+          "correct": 196
+        },
+        {
+          "yesThreshold": 0.85,
+          "noThreshold": 0.45,
+          "decided": 195,
+          "coverage": 0.975,
+          "decidedAccuracy": 1,
+          "correct": 195
+        },
+        {
+          "yesThreshold": 0.9,
+          "noThreshold": 0.45,
+          "decided": 195,
+          "coverage": 0.975,
+          "decidedAccuracy": 1,
+          "correct": 195
+        },
+        {
+          "yesThreshold": 0.95,
+          "noThreshold": 0.45,
+          "decided": 195,
+          "coverage": 0.975,
+          "decidedAccuracy": 1,
+          "correct": 195
+        },
+        {
+          "yesThreshold": 0.85,
+          "noThreshold": 0.4,
+          "decided": 193,
+          "coverage": 0.965,
+          "decidedAccuracy": 1,
+          "correct": 193
+        },
+        {
+          "yesThreshold": 0.9,
+          "noThreshold": 0.4,
+          "decided": 193,
+          "coverage": 0.965,
+          "decidedAccuracy": 1,
+          "correct": 193
+        },
+        {
+          "yesThreshold": 0.95,
+          "noThreshold": 0.4,
+          "decided": 193,
+          "coverage": 0.965,
+          "decidedAccuracy": 1,
+          "correct": 193
+        },
+        {
+          "yesThreshold": 0.85,
+          "noThreshold": 0.35,
+          "decided": 190,
+          "coverage": 0.95,
+          "decidedAccuracy": 1,
+          "correct": 190
+        },
+        {
+          "yesThreshold": 0.9,
+          "noThreshold": 0.35,
+          "decided": 190,
+          "coverage": 0.95,
+          "decidedAccuracy": 1,
+          "correct": 190
+        },
+        {
+          "yesThreshold": 0.95,
+          "noThreshold": 0.35,
+          "decided": 190,
+          "coverage": 0.95,
+          "decidedAccuracy": 1,
+          "correct": 190
+        },
+        {
+          "yesThreshold": 0.85,
+          "noThreshold": 0.3,
+          "decided": 189,
+          "coverage": 0.945,
+          "decidedAccuracy": 1,
+          "correct": 189
+        },
+        {
+          "yesThreshold": 0.9,
+          "noThreshold": 0.3,
+          "decided": 189,
+          "coverage": 0.945,
+          "decidedAccuracy": 1,
+          "correct": 189
+        },
+        {
+          "yesThreshold": 0.95,
+          "noThreshold": 0.3,
+          "decided": 189,
+          "coverage": 0.945,
+          "decidedAccuracy": 1,
+          "correct": 189
+        }
+      ],
+      "perSample": [
+        {
+          "id": "ts-001",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 627,
+          "attempts": 1
+        },
+        {
+          "id": "ts-002",
+          "label": false,
+          "ok": true,
+          "noul": 0.19,
+          "elapsedMs": 690,
+          "attempts": 1
+        },
+        {
+          "id": "ts-003",
+          "label": false,
+          "ok": true,
+          "noul": 0.38,
+          "elapsedMs": 659,
+          "attempts": 1
+        },
+        {
+          "id": "ts-004",
+          "label": false,
+          "ok": true,
+          "noul": 0.03,
+          "elapsedMs": 701,
+          "attempts": 1
+        },
+        {
+          "id": "ts-005",
+          "label": false,
+          "ok": true,
+          "noul": 0.38,
+          "elapsedMs": 633,
+          "attempts": 1
+        },
+        {
+          "id": "ts-006",
+          "label": false,
+          "ok": true,
+          "noul": 0.06,
+          "elapsedMs": 731,
+          "attempts": 1
+        },
+        {
+          "id": "ts-007",
+          "label": false,
+          "ok": true,
+          "noul": 0.85,
+          "elapsedMs": 263,
+          "attempts": 1
+        },
+        {
+          "id": "ts-008",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 333,
+          "attempts": 1
+        },
+        {
+          "id": "ts-009",
+          "label": false,
+          "ok": true,
+          "noul": 0.03,
+          "elapsedMs": 253,
+          "attempts": 1
+        },
+        {
+          "id": "ts-010",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 315,
+          "attempts": 1
+        },
+        {
+          "id": "ts-011",
+          "label": false,
+          "ok": true,
+          "noul": 0.22,
+          "elapsedMs": 356,
+          "attempts": 1
+        },
+        {
+          "id": "ts-012",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 304,
+          "attempts": 1
+        },
+        {
+          "id": "ts-013",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 310,
+          "attempts": 1
+        },
+        {
+          "id": "ts-014",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 247,
+          "attempts": 1
+        },
+        {
+          "id": "ts-015",
+          "label": false,
+          "ok": true,
+          "noul": 0.13,
+          "elapsedMs": 270,
+          "attempts": 1
+        },
+        {
+          "id": "ts-016",
+          "label": false,
+          "ok": true,
+          "noul": 0.25,
+          "elapsedMs": 297,
+          "attempts": 1
+        },
+        {
+          "id": "ts-017",
+          "label": false,
+          "ok": true,
+          "noul": 0.16,
+          "elapsedMs": 275,
+          "attempts": 1
+        },
+        {
+          "id": "ts-018",
+          "label": false,
+          "ok": true,
+          "noul": 0.06,
+          "elapsedMs": 288,
+          "attempts": 1
+        },
+        {
+          "id": "ts-019",
+          "label": false,
+          "ok": true,
+          "noul": 0.1,
+          "elapsedMs": 237,
+          "attempts": 1
+        },
+        {
+          "id": "ts-020",
+          "label": false,
+          "ok": true,
+          "noul": 0.04,
+          "elapsedMs": 273,
+          "attempts": 1
+        },
+        {
+          "id": "ts-021",
+          "label": false,
+          "ok": true,
+          "noul": 0.06,
+          "elapsedMs": 326,
+          "attempts": 1
+        },
+        {
+          "id": "ts-022",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 312,
+          "attempts": 1
+        },
+        {
+          "id": "ts-023",
+          "label": false,
+          "ok": true,
+          "noul": 0.12,
+          "elapsedMs": 265,
+          "attempts": 1
+        },
+        {
+          "id": "ts-024",
+          "label": false,
+          "ok": true,
+          "noul": 0.2,
+          "elapsedMs": 256,
+          "attempts": 1
+        },
+        {
+          "id": "ts-025",
+          "label": false,
+          "ok": true,
+          "noul": 0.2,
+          "elapsedMs": 279,
+          "attempts": 1
+        },
+        {
+          "id": "ts-026",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 270,
+          "attempts": 1
+        },
+        {
+          "id": "ts-027",
+          "label": false,
+          "ok": true,
+          "noul": 0.13,
+          "elapsedMs": 231,
+          "attempts": 1
+        },
+        {
+          "id": "ts-028",
+          "label": false,
+          "ok": true,
+          "noul": 0.03,
+          "elapsedMs": 242,
+          "attempts": 1
+        },
+        {
+          "id": "ts-029",
+          "label": false,
+          "ok": true,
+          "noul": 0.04,
+          "elapsedMs": 250,
+          "attempts": 1
+        },
+        {
+          "id": "ts-030",
+          "label": false,
+          "ok": true,
+          "noul": 0.03,
+          "elapsedMs": 285,
+          "attempts": 1
+        },
+        {
+          "id": "ts-031",
+          "label": false,
+          "ok": true,
+          "noul": 0.09,
+          "elapsedMs": 284,
+          "attempts": 1
+        },
+        {
+          "id": "ts-032",
+          "label": false,
+          "ok": true,
+          "noul": 0.08,
+          "elapsedMs": 292,
+          "attempts": 1
+        },
+        {
+          "id": "ts-033",
+          "label": false,
+          "ok": true,
+          "noul": 0.06,
+          "elapsedMs": 278,
+          "attempts": 1
+        },
+        {
+          "id": "ts-034",
+          "label": false,
+          "ok": true,
+          "noul": 0.06,
+          "elapsedMs": 255,
+          "attempts": 1
+        },
+        {
+          "id": "ts-035",
+          "label": false,
+          "ok": true,
+          "noul": 0.11,
+          "elapsedMs": 322,
+          "attempts": 1
+        },
+        {
+          "id": "ts-036",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 326,
+          "attempts": 1
+        },
+        {
+          "id": "ts-037",
+          "label": false,
+          "ok": true,
+          "noul": 0.06,
+          "elapsedMs": 242,
+          "attempts": 1
+        },
+        {
+          "id": "ts-038",
+          "label": false,
+          "ok": true,
+          "noul": 0.08,
+          "elapsedMs": 281,
+          "attempts": 1
+        },
+        {
+          "id": "ts-039",
+          "label": false,
+          "ok": true,
+          "noul": 0.11,
+          "elapsedMs": 248,
+          "attempts": 1
+        },
+        {
+          "id": "ts-040",
+          "label": false,
+          "ok": true,
+          "noul": 0.31,
+          "elapsedMs": 274,
+          "attempts": 1
+        },
+        {
+          "id": "ts-041",
+          "label": false,
+          "ok": true,
+          "noul": 0.26,
+          "elapsedMs": 258,
+          "attempts": 1
+        },
+        {
+          "id": "ts-042",
+          "label": false,
+          "ok": true,
+          "noul": 0.5,
+          "elapsedMs": 238,
+          "attempts": 1
+        },
+        {
+          "id": "ts-043",
+          "label": false,
+          "ok": true,
+          "noul": 0.15,
+          "elapsedMs": 292,
+          "attempts": 1
+        },
+        {
+          "id": "ts-044",
+          "label": false,
+          "ok": true,
+          "noul": 0.18,
+          "elapsedMs": 325,
+          "attempts": 1
+        },
+        {
+          "id": "ts-045",
+          "label": false,
+          "ok": true,
+          "noul": 0.22,
+          "elapsedMs": 336,
+          "attempts": 1
+        },
+        {
+          "id": "ts-046",
+          "label": false,
+          "ok": true,
+          "noul": 0.04,
+          "elapsedMs": 254,
+          "attempts": 1
+        },
+        {
+          "id": "ts-047",
+          "label": false,
+          "ok": true,
+          "noul": 0.08,
+          "elapsedMs": 268,
+          "attempts": 1
+        },
+        {
+          "id": "ts-048",
+          "label": false,
+          "ok": true,
+          "noul": 0.04,
+          "elapsedMs": 276,
+          "attempts": 1
+        },
+        {
+          "id": "ts-049",
+          "label": false,
+          "ok": true,
+          "noul": 0.08,
+          "elapsedMs": 289,
+          "attempts": 1
+        },
+        {
+          "id": "ts-050",
+          "label": false,
+          "ok": true,
+          "noul": 0.06,
+          "elapsedMs": 283,
+          "attempts": 1
+        },
+        {
+          "id": "ts-051",
+          "label": false,
+          "ok": true,
+          "noul": 0.08,
+          "elapsedMs": 272,
+          "attempts": 1
+        },
+        {
+          "id": "ts-052",
+          "label": false,
+          "ok": true,
+          "noul": 0.03,
+          "elapsedMs": 279,
+          "attempts": 1
+        },
+        {
+          "id": "ts-053",
+          "label": false,
+          "ok": true,
+          "noul": 0.21,
+          "elapsedMs": 279,
+          "attempts": 1
+        },
+        {
+          "id": "ts-054",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 264,
+          "attempts": 1
+        },
+        {
+          "id": "ts-055",
+          "label": false,
+          "ok": true,
+          "noul": 0.24,
+          "elapsedMs": 278,
+          "attempts": 1
+        },
+        {
+          "id": "ts-056",
+          "label": false,
+          "ok": true,
+          "noul": 0.21,
+          "elapsedMs": 300,
+          "attempts": 1
+        },
+        {
+          "id": "ts-057",
+          "label": false,
+          "ok": true,
+          "noul": 0.06,
+          "elapsedMs": 431,
+          "attempts": 1
+        },
+        {
+          "id": "ts-058",
+          "label": false,
+          "ok": true,
+          "noul": 0.72,
+          "elapsedMs": 238,
+          "attempts": 1
+        },
+        {
+          "id": "ts-059",
+          "label": false,
+          "ok": true,
+          "noul": 0.03,
+          "elapsedMs": 280,
+          "attempts": 1
+        },
+        {
+          "id": "ts-060",
+          "label": false,
+          "ok": true,
+          "noul": 0.18,
+          "elapsedMs": 307,
+          "attempts": 1
+        },
+        {
+          "id": "ts-061",
+          "label": false,
+          "ok": true,
+          "noul": 0.06,
+          "elapsedMs": 307,
+          "attempts": 1
+        },
+        {
+          "id": "ts-062",
+          "label": false,
+          "ok": true,
+          "noul": 0.14,
+          "elapsedMs": 254,
+          "attempts": 1
+        },
+        {
+          "id": "ts-063",
+          "label": false,
+          "ok": true,
+          "noul": 0.07,
+          "elapsedMs": 265,
+          "attempts": 1
+        },
+        {
+          "id": "ts-064",
+          "label": false,
+          "ok": true,
+          "noul": 0.13,
+          "elapsedMs": 269,
+          "attempts": 1
+        },
+        {
+          "id": "ts-065",
+          "label": false,
+          "ok": true,
+          "noul": 0.13,
+          "elapsedMs": 298,
+          "attempts": 1
+        },
+        {
+          "id": "ts-066",
+          "label": false,
+          "ok": true,
+          "noul": 0.12,
+          "elapsedMs": 293,
+          "attempts": 1
+        },
+        {
+          "id": "ts-067",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 303,
+          "attempts": 1
+        },
+        {
+          "id": "ts-068",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 273,
+          "attempts": 1
+        },
+        {
+          "id": "ts-069",
+          "label": false,
+          "ok": true,
+          "noul": 0.19,
+          "elapsedMs": 255,
+          "attempts": 1
+        },
+        {
+          "id": "ts-070",
+          "label": false,
+          "ok": true,
+          "noul": 0.11,
+          "elapsedMs": 279,
+          "attempts": 1
+        },
+        {
+          "id": "ts-071",
+          "label": false,
+          "ok": true,
+          "noul": 0.17,
+          "elapsedMs": 302,
+          "attempts": 1
+        },
+        {
+          "id": "ts-072",
+          "label": false,
+          "ok": true,
+          "noul": 0.09,
+          "elapsedMs": 257,
+          "attempts": 1
+        },
+        {
+          "id": "ts-073",
+          "label": false,
+          "ok": true,
+          "noul": 0.42,
+          "elapsedMs": 341,
+          "attempts": 1
+        },
+        {
+          "id": "ts-074",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 318,
+          "attempts": 1
+        },
+        {
+          "id": "ts-075",
+          "label": false,
+          "ok": true,
+          "noul": 0.04,
+          "elapsedMs": 256,
+          "attempts": 1
+        },
+        {
+          "id": "ts-076",
+          "label": false,
+          "ok": true,
+          "noul": 0.44,
+          "elapsedMs": 307,
+          "attempts": 1
+        },
+        {
+          "id": "ts-077",
+          "label": false,
+          "ok": true,
+          "noul": 0.1,
+          "elapsedMs": 264,
+          "attempts": 1
+        },
+        {
+          "id": "ts-078",
+          "label": false,
+          "ok": true,
+          "noul": 0.37,
+          "elapsedMs": 256,
+          "attempts": 1
+        },
+        {
+          "id": "ts-079",
+          "label": false,
+          "ok": true,
+          "noul": 0.09,
+          "elapsedMs": 352,
+          "attempts": 1
+        },
+        {
+          "id": "ts-080",
+          "label": false,
+          "ok": true,
+          "noul": 0.11,
+          "elapsedMs": 309,
+          "attempts": 1
+        },
+        {
+          "id": "ts-081",
+          "label": false,
+          "ok": true,
+          "noul": 0.06,
+          "elapsedMs": 309,
+          "attempts": 1
+        },
+        {
+          "id": "ts-082",
+          "label": false,
+          "ok": true,
+          "noul": 0.03,
+          "elapsedMs": 297,
+          "attempts": 1
+        },
+        {
+          "id": "ts-083",
+          "label": false,
+          "ok": true,
+          "noul": 0.09,
+          "elapsedMs": 267,
+          "attempts": 1
+        },
+        {
+          "id": "ts-084",
+          "label": false,
+          "ok": true,
+          "noul": 0.09,
+          "elapsedMs": 262,
+          "attempts": 1
+        },
+        {
+          "id": "ts-085",
+          "label": false,
+          "ok": true,
+          "noul": 0.62,
+          "elapsedMs": 315,
+          "attempts": 1
+        },
+        {
+          "id": "ts-086",
+          "label": false,
+          "ok": true,
+          "noul": 0.18,
+          "elapsedMs": 317,
+          "attempts": 1
+        },
+        {
+          "id": "ts-087",
+          "label": false,
+          "ok": true,
+          "noul": 0.06,
+          "elapsedMs": 264,
+          "attempts": 1
+        },
+        {
+          "id": "ts-088",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 283,
+          "attempts": 1
+        },
+        {
+          "id": "ts-089",
+          "label": false,
+          "ok": true,
+          "noul": 0.14,
+          "elapsedMs": 266,
+          "attempts": 1
+        },
+        {
+          "id": "ts-090",
+          "label": false,
+          "ok": true,
+          "noul": 0.11,
+          "elapsedMs": 258,
+          "attempts": 1
+        },
+        {
+          "id": "ts-091",
+          "label": false,
+          "ok": true,
+          "noul": 0.26,
+          "elapsedMs": 225,
+          "attempts": 1
+        },
+        {
+          "id": "ts-092",
+          "label": false,
+          "ok": true,
+          "noul": 0.1,
+          "elapsedMs": 303,
+          "attempts": 1
+        },
+        {
+          "id": "ts-093",
+          "label": false,
+          "ok": true,
+          "noul": 0.08,
+          "elapsedMs": 296,
+          "attempts": 1
+        },
+        {
+          "id": "ts-094",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 414,
+          "attempts": 1
+        },
+        {
+          "id": "ts-095",
+          "label": false,
+          "ok": true,
+          "noul": 0.25,
+          "elapsedMs": 306,
+          "attempts": 1
+        },
+        {
+          "id": "ts-096",
+          "label": false,
+          "ok": true,
+          "noul": 0.12,
+          "elapsedMs": 251,
+          "attempts": 1
+        },
+        {
+          "id": "ts-097",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 324,
+          "attempts": 1
+        },
+        {
+          "id": "ts-098",
+          "label": false,
+          "ok": true,
+          "noul": 0.09,
+          "elapsedMs": 250,
+          "attempts": 1
+        },
+        {
+          "id": "ts-099",
+          "label": false,
+          "ok": true,
+          "noul": 0.45,
+          "elapsedMs": 278,
+          "attempts": 1
+        },
+        {
+          "id": "ts-100",
+          "label": false,
+          "ok": true,
+          "noul": 0.15,
+          "elapsedMs": 255,
+          "attempts": 1
+        },
+        {
+          "id": "ts-101",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 270,
+          "attempts": 1
+        },
+        {
+          "id": "ts-102",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 307,
+          "attempts": 1
+        },
+        {
+          "id": "ts-103",
+          "label": true,
+          "ok": true,
+          "noul": 0.98,
+          "elapsedMs": 278,
+          "attempts": 1
+        },
+        {
+          "id": "ts-104",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 265,
+          "attempts": 1
+        },
+        {
+          "id": "ts-105",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 270,
+          "attempts": 1
+        },
+        {
+          "id": "ts-106",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 256,
+          "attempts": 1
+        },
+        {
+          "id": "ts-107",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 277,
+          "attempts": 1
+        },
+        {
+          "id": "ts-108",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 274,
+          "attempts": 1
+        },
+        {
+          "id": "ts-109",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 263,
+          "attempts": 1
+        },
+        {
+          "id": "ts-110",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 294,
+          "attempts": 1
+        },
+        {
+          "id": "ts-111",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 251,
+          "attempts": 1
+        },
+        {
+          "id": "ts-112",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 259,
+          "attempts": 1
+        },
+        {
+          "id": "ts-113",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 251,
+          "attempts": 1
+        },
+        {
+          "id": "ts-114",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 277,
+          "attempts": 1
+        },
+        {
+          "id": "ts-115",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 295,
+          "attempts": 1
+        },
+        {
+          "id": "ts-116",
+          "label": true,
+          "ok": true,
+          "noul": 0.98,
+          "elapsedMs": 261,
+          "attempts": 1
+        },
+        {
+          "id": "ts-117",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 285,
+          "attempts": 1
+        },
+        {
+          "id": "ts-118",
+          "label": true,
+          "ok": true,
+          "noul": 0.98,
+          "elapsedMs": 285,
+          "attempts": 1
+        },
+        {
+          "id": "ts-119",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 323,
+          "attempts": 1
+        },
+        {
+          "id": "ts-120",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 294,
+          "attempts": 1
+        },
+        {
+          "id": "ts-121",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 227,
+          "attempts": 1
+        },
+        {
+          "id": "ts-122",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 280,
+          "attempts": 1
+        },
+        {
+          "id": "ts-123",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 273,
+          "attempts": 1
+        },
+        {
+          "id": "ts-124",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 276,
+          "attempts": 1
+        },
+        {
+          "id": "ts-125",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 236,
+          "attempts": 1
+        },
+        {
+          "id": "ts-126",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 268,
+          "attempts": 1
+        },
+        {
+          "id": "ts-127",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 315,
+          "attempts": 1
+        },
+        {
+          "id": "ts-128",
+          "label": true,
+          "ok": true,
+          "noul": 0.98,
+          "elapsedMs": 245,
+          "attempts": 1
+        },
+        {
+          "id": "ts-129",
+          "label": true,
+          "ok": true,
+          "noul": 0.98,
+          "elapsedMs": 312,
+          "attempts": 1
+        },
+        {
+          "id": "ts-130",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 295,
+          "attempts": 1
+        },
+        {
+          "id": "ts-131",
+          "label": true,
+          "ok": true,
+          "noul": 0.98,
+          "elapsedMs": 312,
+          "attempts": 1
+        },
+        {
+          "id": "ts-132",
+          "label": true,
+          "ok": true,
+          "noul": 0.98,
+          "elapsedMs": 293,
+          "attempts": 1
+        },
+        {
+          "id": "ts-133",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 251,
+          "attempts": 1
+        },
+        {
+          "id": "ts-134",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 254,
+          "attempts": 1
+        },
+        {
+          "id": "ts-135",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 305,
+          "attempts": 1
+        },
+        {
+          "id": "ts-136",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 265,
+          "attempts": 1
+        },
+        {
+          "id": "ts-137",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 248,
+          "attempts": 1
+        },
+        {
+          "id": "ts-138",
+          "label": true,
+          "ok": true,
+          "noul": 0.98,
+          "elapsedMs": 270,
+          "attempts": 1
+        },
+        {
+          "id": "ts-139",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 286,
+          "attempts": 1
+        },
+        {
+          "id": "ts-140",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 268,
+          "attempts": 1
+        },
+        {
+          "id": "ts-141",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 238,
+          "attempts": 1
+        },
+        {
+          "id": "ts-142",
+          "label": true,
+          "ok": true,
+          "noul": 0.98,
+          "elapsedMs": 261,
+          "attempts": 1
+        },
+        {
+          "id": "ts-143",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 264,
+          "attempts": 1
+        },
+        {
+          "id": "ts-144",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 309,
+          "attempts": 1
+        },
+        {
+          "id": "ts-145",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 294,
+          "attempts": 1
+        },
+        {
+          "id": "ts-146",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 243,
+          "attempts": 1
+        },
+        {
+          "id": "ts-147",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 260,
+          "attempts": 1
+        },
+        {
+          "id": "ts-148",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 273,
+          "attempts": 1
+        },
+        {
+          "id": "ts-149",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 314,
+          "attempts": 1
+        },
+        {
+          "id": "ts-150",
+          "label": true,
+          "ok": true,
+          "noul": 0.98,
+          "elapsedMs": 240,
+          "attempts": 1
+        },
+        {
+          "id": "ts-151",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 263,
+          "attempts": 1
+        },
+        {
+          "id": "ts-152",
+          "label": true,
+          "ok": true,
+          "noul": 0.98,
+          "elapsedMs": 308,
+          "attempts": 1
+        },
+        {
+          "id": "ts-153",
+          "label": true,
+          "ok": true,
+          "noul": 0.98,
+          "elapsedMs": 295,
+          "attempts": 1
+        },
+        {
+          "id": "ts-154",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 292,
+          "attempts": 1
+        },
+        {
+          "id": "ts-155",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 235,
+          "attempts": 1
+        },
+        {
+          "id": "ts-156",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 305,
+          "attempts": 1
+        },
+        {
+          "id": "ts-157",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 241,
+          "attempts": 1
+        },
+        {
+          "id": "ts-158",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 331,
+          "attempts": 1
+        },
+        {
+          "id": "ts-159",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 341,
+          "attempts": 1
+        },
+        {
+          "id": "ts-160",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 262,
+          "attempts": 1
+        },
+        {
+          "id": "ts-161",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 277,
+          "attempts": 1
+        },
+        {
+          "id": "ts-162",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 279,
+          "attempts": 1
+        },
+        {
+          "id": "ts-163",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 266,
+          "attempts": 1
+        },
+        {
+          "id": "ts-164",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 271,
+          "attempts": 1
+        },
+        {
+          "id": "ts-165",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 262,
+          "attempts": 1
+        },
+        {
+          "id": "ts-166",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 292,
+          "attempts": 1
+        },
+        {
+          "id": "ts-167",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 317,
+          "attempts": 1
+        },
+        {
+          "id": "ts-168",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 243,
+          "attempts": 1
+        },
+        {
+          "id": "ts-169",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 233,
+          "attempts": 1
+        },
+        {
+          "id": "ts-170",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 258,
+          "attempts": 1
+        },
+        {
+          "id": "ts-171",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 323,
+          "attempts": 1
+        },
+        {
+          "id": "ts-172",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 275,
+          "attempts": 1
+        },
+        {
+          "id": "ts-173",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 286,
+          "attempts": 1
+        },
+        {
+          "id": "ts-174",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 277,
+          "attempts": 1
+        },
+        {
+          "id": "ts-175",
+          "label": true,
+          "ok": true,
+          "noul": 0.98,
+          "elapsedMs": 230,
+          "attempts": 1
+        },
+        {
+          "id": "ts-176",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 258,
+          "attempts": 1
+        },
+        {
+          "id": "ts-177",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 394,
+          "attempts": 1
+        },
+        {
+          "id": "ts-178",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 238,
+          "attempts": 1
+        },
+        {
+          "id": "ts-179",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 303,
+          "attempts": 1
+        },
+        {
+          "id": "ts-180",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 287,
+          "attempts": 1
+        },
+        {
+          "id": "ts-181",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 244,
+          "attempts": 1
+        },
+        {
+          "id": "ts-182",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 303,
+          "attempts": 1
+        },
+        {
+          "id": "ts-183",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 303,
+          "attempts": 1
+        },
+        {
+          "id": "ts-184",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 278,
+          "attempts": 1
+        },
+        {
+          "id": "ts-185",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 283,
+          "attempts": 1
+        },
+        {
+          "id": "ts-186",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 306,
+          "attempts": 1
+        },
+        {
+          "id": "ts-187",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 241,
+          "attempts": 1
+        },
+        {
+          "id": "ts-188",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 282,
+          "attempts": 1
+        },
+        {
+          "id": "ts-189",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 265,
+          "attempts": 1
+        },
+        {
+          "id": "ts-190",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 293,
+          "attempts": 1
+        },
+        {
+          "id": "ts-191",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 232,
+          "attempts": 1
+        },
+        {
+          "id": "ts-192",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 296,
+          "attempts": 1
+        },
+        {
+          "id": "ts-193",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 234,
+          "attempts": 1
+        },
+        {
+          "id": "ts-194",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 334,
+          "attempts": 1
+        },
+        {
+          "id": "ts-195",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 384,
+          "attempts": 1
+        },
+        {
+          "id": "ts-196",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 242,
+          "attempts": 1
+        },
+        {
+          "id": "ts-197",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 294,
+          "attempts": 1
+        },
+        {
+          "id": "ts-198",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 279,
+          "attempts": 1
+        },
+        {
+          "id": "ts-199",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 268,
+          "attempts": 1
+        },
+        {
+          "id": "ts-200",
+          "label": true,
+          "ok": true,
+          "noul": 0.99,
+          "elapsedMs": 262,
+          "attempts": 1
+        }
+      ]
+    },
+    "retrieval": {
+      "corpus": {
+        "file": "corpus-retrieval.json",
+        "sha256": "33c24a7f6cf474d65916a7392b7ec8842fb58efa6373a8b7dc95ee5d5407b100",
+        "count": 60,
+        "positives": 30,
+        "negatives": 30
+      },
+      "apiFailures": 0,
+      "validCount": 60,
+      "classMeans": {
+        "true": 0.952,
+        "false": 0.036
+      },
+      "separation": 0.916,
+      "latency": {
+        "p50Ms": 276,
+        "p95Ms": 341
+      },
+      "inputTokens": 24627,
+      "elapsedMs": 3495,
+      "recommendedThresholds": {
+        "yesThreshold": 0.5,
+        "noThreshold": 0.15,
+        "decided": 60,
+        "coverage": 1,
+        "decidedAccuracy": 1,
+        "correct": 60
+      },
+      "bestOutsideGate": null,
+      "gridTop": [
+        {
+          "yesThreshold": 0.5,
+          "noThreshold": 0.15,
+          "decided": 60,
+          "coverage": 1,
+          "decidedAccuracy": 1,
+          "correct": 60
+        },
+        {
+          "yesThreshold": 0.5,
+          "noThreshold": 0.2,
+          "decided": 60,
+          "coverage": 1,
+          "decidedAccuracy": 1,
+          "correct": 60
+        },
+        {
+          "yesThreshold": 0.5,
+          "noThreshold": 0.25,
+          "decided": 60,
+          "coverage": 1,
+          "decidedAccuracy": 1,
+          "correct": 60
+        },
+        {
+          "yesThreshold": 0.5,
+          "noThreshold": 0.3,
+          "decided": 60,
+          "coverage": 1,
+          "decidedAccuracy": 1,
+          "correct": 60
+        },
+        {
+          "yesThreshold": 0.5,
+          "noThreshold": 0.35,
+          "decided": 60,
+          "coverage": 1,
+          "decidedAccuracy": 1,
+          "correct": 60
+        },
+        {
+          "yesThreshold": 0.5,
+          "noThreshold": 0.4,
+          "decided": 60,
+          "coverage": 1,
+          "decidedAccuracy": 1,
+          "correct": 60
+        },
+        {
+          "yesThreshold": 0.5,
+          "noThreshold": 0.45,
+          "decided": 60,
+          "coverage": 1,
+          "decidedAccuracy": 1,
+          "correct": 60
+        },
+        {
+          "yesThreshold": 0.5,
+          "noThreshold": 0.5,
+          "decided": 60,
+          "coverage": 1,
+          "decidedAccuracy": 1,
+          "correct": 60
+        },
+        {
+          "yesThreshold": 0.55,
+          "noThreshold": 0.15,
+          "decided": 60,
+          "coverage": 1,
+          "decidedAccuracy": 1,
+          "correct": 60
+        },
+        {
+          "yesThreshold": 0.55,
+          "noThreshold": 0.2,
+          "decided": 60,
+          "coverage": 1,
+          "decidedAccuracy": 1,
+          "correct": 60
+        },
+        {
+          "yesThreshold": 0.55,
+          "noThreshold": 0.25,
+          "decided": 60,
+          "coverage": 1,
+          "decidedAccuracy": 1,
+          "correct": 60
+        },
+        {
+          "yesThreshold": 0.55,
+          "noThreshold": 0.3,
+          "decided": 60,
+          "coverage": 1,
+          "decidedAccuracy": 1,
+          "correct": 60
+        },
+        {
+          "yesThreshold": 0.55,
+          "noThreshold": 0.35,
+          "decided": 60,
+          "coverage": 1,
+          "decidedAccuracy": 1,
+          "correct": 60
+        },
+        {
+          "yesThreshold": 0.55,
+          "noThreshold": 0.4,
+          "decided": 60,
+          "coverage": 1,
+          "decidedAccuracy": 1,
+          "correct": 60
+        },
+        {
+          "yesThreshold": 0.55,
+          "noThreshold": 0.45,
+          "decided": 60,
+          "coverage": 1,
+          "decidedAccuracy": 1,
+          "correct": 60
+        }
+      ],
+      "perSample": [
+        {
+          "id": "rr-001",
+          "label": true,
+          "ok": true,
+          "noul": 0.97,
+          "elapsedMs": 305,
+          "attempts": 1
+        },
+        {
+          "id": "rr-002",
+          "label": false,
+          "ok": true,
+          "noul": 0.03,
+          "elapsedMs": 277,
+          "attempts": 1
+        },
+        {
+          "id": "rr-003",
+          "label": true,
+          "ok": true,
+          "noul": 0.97,
+          "elapsedMs": 276,
+          "attempts": 1
+        },
+        {
+          "id": "rr-004",
+          "label": false,
+          "ok": true,
+          "noul": 0.01,
+          "elapsedMs": 265,
+          "attempts": 1
+        },
+        {
+          "id": "rr-005",
+          "label": true,
+          "ok": true,
+          "noul": 0.96,
+          "elapsedMs": 300,
+          "attempts": 1
+        },
+        {
+          "id": "rr-006",
+          "label": false,
+          "ok": true,
+          "noul": 0.01,
+          "elapsedMs": 250,
+          "attempts": 1
+        },
+        {
+          "id": "rr-007",
+          "label": true,
+          "ok": true,
+          "noul": 0.97,
+          "elapsedMs": 267,
+          "attempts": 1
+        },
+        {
+          "id": "rr-008",
+          "label": false,
+          "ok": true,
+          "noul": 0.03,
+          "elapsedMs": 247,
+          "attempts": 1
+        },
+        {
+          "id": "rr-009",
+          "label": true,
+          "ok": true,
+          "noul": 0.96,
+          "elapsedMs": 326,
+          "attempts": 1
+        },
+        {
+          "id": "rr-010",
+          "label": false,
+          "ok": true,
+          "noul": 0.03,
+          "elapsedMs": 303,
+          "attempts": 1
+        },
+        {
+          "id": "rr-011",
+          "label": true,
+          "ok": true,
+          "noul": 0.96,
+          "elapsedMs": 271,
+          "attempts": 1
+        },
+        {
+          "id": "rr-012",
+          "label": false,
+          "ok": true,
+          "noul": 0.02,
+          "elapsedMs": 261,
+          "attempts": 1
+        },
+        {
+          "id": "rr-013",
+          "label": true,
+          "ok": true,
+          "noul": 0.96,
+          "elapsedMs": 282,
+          "attempts": 1
+        },
+        {
+          "id": "rr-014",
+          "label": false,
+          "ok": true,
+          "noul": 0.02,
+          "elapsedMs": 341,
+          "attempts": 1
+        },
+        {
+          "id": "rr-015",
+          "label": true,
+          "ok": true,
+          "noul": 0.97,
+          "elapsedMs": 298,
+          "attempts": 1
+        },
+        {
+          "id": "rr-016",
+          "label": false,
+          "ok": true,
+          "noul": 0.03,
+          "elapsedMs": 277,
+          "attempts": 1
+        },
+        {
+          "id": "rr-017",
+          "label": true,
+          "ok": true,
+          "noul": 0.98,
+          "elapsedMs": 278,
+          "attempts": 1
+        },
+        {
+          "id": "rr-018",
+          "label": false,
+          "ok": true,
+          "noul": 0.02,
+          "elapsedMs": 250,
+          "attempts": 1
+        },
+        {
+          "id": "rr-019",
+          "label": true,
+          "ok": true,
+          "noul": 0.96,
+          "elapsedMs": 276,
+          "attempts": 1
+        },
+        {
+          "id": "rr-020",
+          "label": false,
+          "ok": true,
+          "noul": 0.04,
+          "elapsedMs": 262,
+          "attempts": 1
+        },
+        {
+          "id": "rr-021",
+          "label": true,
+          "ok": true,
+          "noul": 0.95,
+          "elapsedMs": 263,
+          "attempts": 1
+        },
+        {
+          "id": "rr-022",
+          "label": false,
+          "ok": true,
+          "noul": 0.01,
+          "elapsedMs": 253,
+          "attempts": 1
+        },
+        {
+          "id": "rr-023",
+          "label": true,
+          "ok": true,
+          "noul": 0.95,
+          "elapsedMs": 300,
+          "attempts": 1
+        },
+        {
+          "id": "rr-024",
+          "label": false,
+          "ok": true,
+          "noul": 0.03,
+          "elapsedMs": 268,
+          "attempts": 1
+        },
+        {
+          "id": "rr-025",
+          "label": true,
+          "ok": true,
+          "noul": 0.95,
+          "elapsedMs": 275,
+          "attempts": 1
+        },
+        {
+          "id": "rr-026",
+          "label": false,
+          "ok": true,
+          "noul": 0.03,
+          "elapsedMs": 301,
+          "attempts": 1
+        },
+        {
+          "id": "rr-027",
+          "label": true,
+          "ok": true,
+          "noul": 0.95,
+          "elapsedMs": 256,
+          "attempts": 1
+        },
+        {
+          "id": "rr-028",
+          "label": false,
+          "ok": true,
+          "noul": 0.12,
+          "elapsedMs": 258,
+          "attempts": 1
+        },
+        {
+          "id": "rr-029",
+          "label": true,
+          "ok": true,
+          "noul": 0.98,
+          "elapsedMs": 311,
+          "attempts": 1
+        },
+        {
+          "id": "rr-030",
+          "label": false,
+          "ok": true,
+          "noul": 0.02,
+          "elapsedMs": 338,
+          "attempts": 1
+        },
+        {
+          "id": "rr-031",
+          "label": true,
+          "ok": true,
+          "noul": 0.97,
+          "elapsedMs": 327,
+          "attempts": 1
+        },
+        {
+          "id": "rr-032",
+          "label": false,
+          "ok": true,
+          "noul": 0.02,
+          "elapsedMs": 277,
+          "attempts": 1
+        },
+        {
+          "id": "rr-033",
+          "label": true,
+          "ok": true,
+          "noul": 0.97,
+          "elapsedMs": 293,
+          "attempts": 1
+        },
+        {
+          "id": "rr-034",
+          "label": false,
+          "ok": true,
+          "noul": 0.03,
+          "elapsedMs": 263,
+          "attempts": 1
+        },
+        {
+          "id": "rr-035",
+          "label": true,
+          "ok": true,
+          "noul": 0.97,
+          "elapsedMs": 238,
+          "attempts": 1
+        },
+        {
+          "id": "rr-036",
+          "label": false,
+          "ok": true,
+          "noul": 0.03,
+          "elapsedMs": 258,
+          "attempts": 1
+        },
+        {
+          "id": "rr-037",
+          "label": true,
+          "ok": true,
+          "noul": 0.96,
+          "elapsedMs": 279,
+          "attempts": 1
+        },
+        {
+          "id": "rr-038",
+          "label": false,
+          "ok": true,
+          "noul": 0.05,
+          "elapsedMs": 341,
+          "attempts": 1
+        },
+        {
+          "id": "rr-039",
+          "label": true,
+          "ok": true,
+          "noul": 0.85,
+          "elapsedMs": 273,
+          "attempts": 1
+        },
+        {
+          "id": "rr-040",
+          "label": false,
+          "ok": true,
+          "noul": 0.02,
+          "elapsedMs": 240,
+          "attempts": 1
+        },
+        {
+          "id": "rr-041",
+          "label": true,
+          "ok": true,
+          "noul": 0.92,
+          "elapsedMs": 287,
+          "attempts": 1
+        },
+        {
+          "id": "rr-042",
+          "label": false,
+          "ok": true,
+          "noul": 0.03,
+          "elapsedMs": 277,
+          "attempts": 1
+        },
+        {
+          "id": "rr-043",
+          "label": true,
+          "ok": true,
+          "noul": 0.96,
+          "elapsedMs": 270,
+          "attempts": 1
+        },
+        {
+          "id": "rr-044",
+          "label": false,
+          "ok": true,
+          "noul": 0.1,
+          "elapsedMs": 343,
+          "attempts": 1
+        },
+        {
+          "id": "rr-045",
+          "label": true,
+          "ok": true,
+          "noul": 0.97,
+          "elapsedMs": 270,
+          "attempts": 1
+        },
+        {
+          "id": "rr-046",
+          "label": false,
+          "ok": true,
+          "noul": 0.04,
+          "elapsedMs": 290,
+          "attempts": 1
+        },
+        {
+          "id": "rr-047",
+          "label": true,
+          "ok": true,
+          "noul": 0.97,
+          "elapsedMs": 250,
+          "attempts": 1
+        },
+        {
+          "id": "rr-048",
+          "label": false,
+          "ok": true,
+          "noul": 0.14,
+          "elapsedMs": 303,
+          "attempts": 1
+        },
+        {
+          "id": "rr-049",
+          "label": true,
+          "ok": true,
+          "noul": 0.95,
+          "elapsedMs": 291,
+          "attempts": 1
+        },
+        {
+          "id": "rr-050",
+          "label": false,
+          "ok": true,
+          "noul": 0.04,
+          "elapsedMs": 272,
+          "attempts": 1
+        },
+        {
+          "id": "rr-051",
+          "label": true,
+          "ok": true,
+          "noul": 0.97,
+          "elapsedMs": 275,
+          "attempts": 1
+        },
+        {
+          "id": "rr-052",
+          "label": false,
+          "ok": true,
+          "noul": 0.02,
+          "elapsedMs": 243,
+          "attempts": 1
+        },
+        {
+          "id": "rr-053",
+          "label": true,
+          "ok": true,
+          "noul": 0.9,
+          "elapsedMs": 272,
+          "attempts": 1
+        },
+        {
+          "id": "rr-054",
+          "label": false,
+          "ok": true,
+          "noul": 0.04,
+          "elapsedMs": 244,
+          "attempts": 1
+        },
+        {
+          "id": "rr-055",
+          "label": true,
+          "ok": true,
+          "noul": 0.95,
+          "elapsedMs": 267,
+          "attempts": 1
+        },
+        {
+          "id": "rr-056",
+          "label": false,
+          "ok": true,
+          "noul": 0.04,
+          "elapsedMs": 289,
+          "attempts": 1
+        },
+        {
+          "id": "rr-057",
+          "label": true,
+          "ok": true,
+          "noul": 0.89,
+          "elapsedMs": 236,
+          "attempts": 1
+        },
+        {
+          "id": "rr-058",
+          "label": false,
+          "ok": true,
+          "noul": 0.01,
+          "elapsedMs": 332,
+          "attempts": 1
+        },
+        {
+          "id": "rr-059",
+          "label": true,
+          "ok": true,
+          "noul": 0.92,
+          "elapsedMs": 286,
+          "attempts": 1
+        },
+        {
+          "id": "rr-060",
+          "label": false,
+          "ok": true,
+          "noul": 0.02,
+          "elapsedMs": 310,
+          "attempts": 1
+        }
+      ]
+    }
+  },
+  "gate": {
+    "criterion": "存在阈值对：decidedAccuracy ≥ 0.85 且 coverage ≥ 0.85（中间带=回退现行为）",
+    "passed": true,
+    "note": "P0 通过判据为立项时提案，P0 评审（D-A/D-B 裁决）可修订；P1 采用 topic-shift 推荐阈值，P2 采用 retrieval 推荐阈值。"
+  }
+}

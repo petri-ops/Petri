@@ -1,7 +1,7 @@
 # BLOCK-110-JEV-DECISION-INTEGRATION 计划：Jev/System One 决策模型融合
 
 **Plan ID**：`BLOCK-110-JEV-DECISION-INTEGRATION`
-**状态**：`active（P0-LAUNCH——2026-09-22 启动，用户裁决「启动 BLOCK-110」；LAUNCH-CHECKLIST 复核全过：BLOCK-109 已收口 / AUDIT-LOG 无🔴 / git 无未知 WIP / 用户确认开跑。当前阶段=P0 接入地基+中文校准）`
+**状态**：`active（P0 完成——2026-09-22：wrapper/降级契约/校准 harness 三件全落地（a539e6c8，另一会话实现）+ overrides 缺省 hotfix（校准 harness 实测抓真）+ 中文校准 gate.passed=true（topic-shift 200 条 decidedAccuracy=1.0 coverage=0.98 阈值 YES≥0.85/NO≤0.5；retrieval 60 条 1.0/1.0 阈值 YES≥0.5/NO≤0.15）。待用户评审：D-A 数据出站分级终裁 + P1 启动裁决。评审材料见 §P0-评审）`
 **立项日期**：2026-09-21
 **最后更新**：2026-09-22（启动登记 active/P0-LAUNCH，启动动作三件套完成：DOC-REGISTRY planned→active + AUDIT-LOG 启动行 + roadmap 状态行；26 个已收口提交推送 origin）。2026-09-21（立项登记 planned；技术底稿= `docs/planning/typesafe-jev-system-one-research.md`；**本包=决策判断模式内化弧的 W0**，后续弧线见 `docs/planning/decision-primitive-internalization-arc.md`——W1+ 启动均需用户裁决，本包收口不等于弧线授权）
 
@@ -102,3 +102,23 @@ P0 交付三件事：① wrapper（超时/指数退避重试 429,529 遵循 retr
 3. **Noul 无 confidence**：门控用双阈值三区间实现，不从 noul 派生 confidence。
 4. **概率不跨题型搬**：jev-1.13 已知短板（research 文档 §3.8）——noul 与同义 Choice 概率不可比。
 5. **禁止把 Jev 用于生成**：reason 字段等生成类输出仍由现路径承担；Jev 只回判断。
+
+## P0 收口记录（2026-09-22 深夜）
+
+**交付对账**：①wrapper `helpers/decision-api.js`（a539e6c8，另一会话实现；本会话 hotfix 一处——`askDecision` 的 overrides 解构缺 `= {}` 默认，生产调用方〔校准 harness〕零 overrides 必抛，校准实测抓真，回归钉入 test/block110-decision-api 16/16）；②降级契约=测试钉住（no_key/invalid_request/auth_failed/rate_limited/overloaded/timeout/network_error/invalid_response 全型，15→16 用例全绿）；③校准=真实 API 实测（key 经 jev.env 服务端 env 注入，不入仓）。
+
+**校准证据**（`acceptance/block-110/calibration.json`，model=jev-1.13.0，gate.passed=true）：
+
+| 域 | 样本 | 推荐阈值初值 | decided | coverage | decidedAccuracy |
+| --- | --- | --- | --- | --- | --- |
+| topic-shift（noul） | 200（100/100 平衡） | YES≥0.85 / NO≤0.50 | 196 | 0.98 | **1.00** |
+| retrieval（choice） | 60（30/30 平衡） | YES≥0.50 / NO≤0.15 | 60 | 1.00 | **1.00** |
+
+官方明示 CJK 非等效——中文首校准即达 decidedAccuracy=1.0，远超 P0 判据（≥0.85/≥0.85）。语料 sha256 与逐样本结果见 calibration-samples/corpus 文件。
+
+**P0 评审裁决项状态**：
+- 阈值初值：按上表推荐（P1 双阈值三区间直接采用；P2 注入拦截阈值建议另行以注入样本实测后定，校准语料未含对抗样本）。
+- 题型定版：topic-shift=noul（P1 形状）；relevance=choice（P2 形状）——概率不跨题型搬（§8-4）。
+- 降级策略：按已实现契约（缺 key/auth/网络/校验失败一律 `{ok:false}` 回退，永不 throw；重试仅 429/529/超时，遵循 Retry-After）。
+- D-B provider 可替换性：**测试实证**（baseUrl 指向本地 server 全链路通，契约不绑域名）。
+- **D-A 数据出站分级：待用户终裁**——①P1 state 最小化（仅最近 N 条消息，N=?）②P2 检索内容出站是否默认关闭+用户显式开启 ③远期 ZDR/本地化。此项裁决后 P1 方可启动。

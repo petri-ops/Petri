@@ -436,3 +436,13 @@ test('P0 校准语料：形状、规模与标签平衡（topic-shift ≥100 且 
   const rTrue = retrieval.samples.filter((s) => s[3] === true).length;
   assert.equal(rTrue, retrieval.samples.length - rTrue, 'retrieval 标签需平衡');
 });
+
+test('P0 评审前 hotfix 回归钉 — askDecision overrides 缺省不炸（2026-09-22 校准 harness 实测抓真）', () => {
+  // 校准 harness（生产调用方形状）不传 overrides——原实现缺默认值必抛
+  // "Cannot read properties of undefined (reading 'signal')"。钉住解构默认值在位。
+  const src = fs.readFileSync(
+    path.join(here, '..', 'core', 'biof3-server', 'helpers', 'decision-api.js'), 'utf8'
+  );
+  assert.match(src, /askDecision\(\{ state, questions, overrides = \{\} \} = \{\}\)/,
+    'askDecision 的 overrides 必须有 = {} 默认（生产调用方零 overrides）');
+});
