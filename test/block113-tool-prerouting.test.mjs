@@ -154,7 +154,7 @@ test('采纳：workspace + conf ≥ 0.80 → route true', async (t) => {
 });
 
 test('收窄器：workspace 路由 = workspace ∪ session（保序、无名 schema 保守保留）', () => {
-  const narrowed = narrowToolDefsByFamily(TOOL_DEFS, 'workspace');
+  const narrowed = narrowToolDefsByFamily(TOOL_DEFS, 'workspace', DOMAIN_TOOL_DEFS);
   const names = narrowed.map((t) => t.function && t.function.name);
   assert.ok(names.includes('workspace_read'), '路由域工具在');
   assert.ok(names.includes('todo_write'), 'session 底座在');
@@ -166,9 +166,10 @@ test('收窄器：workspace 路由 = workspace ∪ session（保序、无名 sch
   }
   assert.equal(pi, narrowed.length, '相对顺序保持');
   // 无名 schema 防御保留
-  assert.equal(narrowToolDefsByFamily([{ type: 'function' }], 'workspace').length, 1);
+  assert.equal(narrowToolDefsByFamily([{ type: 'function' }], 'workspace', DOMAIN_TOOL_DEFS).length, 1);
 });
 
-test('收窄器：未知域 → 原样全量（保守）', () => {
-  assert.equal(narrowToolDefsByFamily(TOOL_DEFS, '不存在域'), TOOL_DEFS);
+test('收窄器：未知域/缺映射 → 原样全量（保守）', () => {
+  assert.equal(narrowToolDefsByFamily(TOOL_DEFS, '不存在域', DOMAIN_TOOL_DEFS), TOOL_DEFS);
+  assert.equal(narrowToolDefsByFamily(TOOL_DEFS, 'workspace', undefined), TOOL_DEFS);
 });

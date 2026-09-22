@@ -96,6 +96,7 @@ if (
 
 const {
   getToolDefs,
+  DOMAIN_TOOL_DEFS,
   MAX_AGENT_TOOL_CALLS,
   // BLOCK-88 P7 源码契约：durable task 路径须保留 completion guard 引入
   // （test/g0-rs-p7-acceptance.test.mjs 断言；expectation 传递现状漂移归 RS 域）。
@@ -649,7 +650,7 @@ async function runAgentLoop({
         const { resolveToolRoute, narrowToolDefsByFamily } = require('./helpers/tool-router');
         const route = await resolveToolRoute(String(_lastUserMsg.content));
         if (route.route) {
-          effectiveTools = narrowToolDefsByFamily(tools, route.family);
+          effectiveTools = narrowToolDefsByFamily(tools, route.family, DOMAIN_TOOL_DEFS);
           // 观测事件（BLOCK-113）：走单一事件通道落 task_events；前端未知事件天然 no-op。
           try { _emit({ event: 'tool_route', family: route.family, confidence: route.confidence, defs: `${effectiveTools.length}/${tools.length}` }); } catch {}
           try { console.log(`[block113] tool route adopted: family=${route.family} confidence=${route.confidence} defs=${effectiveTools.length}/${tools.length}`); } catch {}

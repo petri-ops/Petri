@@ -91,6 +91,8 @@ module.exports = {
   runAgentToolCallBatch,
 };
 // BLOCK-109-CORE-ARCH P2 — 工具执行元数据注册表（调度分组地基）
+// BLOCK-113 W1-3 — 域映射转发（index→tool-defs 边已在 arch-cycles 基线；避免 agent-runner 直连 tool-defs 生成新环）
+module.exports.DOMAIN_TOOL_DEFS = require('./tool-defs').DOMAIN_TOOL_DEFS;
 module.exports.TOOL_METADATA = require('./tool-metadata').TOOL_METADATA;
 module.exports.getToolMetadata = require('./tool-metadata').getToolMetadata;
 module.exports.getExecutionMetadataByName = require('./tool-metadata').getToolMetadata;

@@ -13,7 +13,8 @@
 'use strict';
 
 const { askDecision } = require('./decision-api');
-const { DOMAIN_TOOL_DEFS, TOOL_DEFS } = require('../agent-tools/tool-defs');
+// 注意：本模块不得 require agent-tools/*（tool-defs→registry→spawn-agent-tools→agent-runner
+// 会构成依赖环，arch-cycles 门禁抓真）。域映射由调用方（agent-runner，既有边）作参传入。
 
 // D-3（P0 校准证据 acceptance/block-113/calibration.json；调整阈值必须先重校准）。
 const TOOL_ROUTE_THRESHOLD = 0.8;
@@ -58,12 +59,13 @@ function buildToolRouteDecisionRequest(message) {
 
 /**
  * 按路由域收窄工具 defs：路由域 ∪ session 基础件（D-1 动作语义）。
+ * domainToolDefs=tool-defs.js 的 DOMAIN_TOOL_DEFS 域映射（调用方传入，避免依赖环）。
  * 未知名/域映射缺失的工具保守保留（宁全勿缺，收窄只删「明确属于其他域」的）。
  */
-function narrowToolDefsByFamily(allDefs, family) {
-  if (!DOMAIN_TOOL_DEFS[family]) return allDefs; // 未知域保守回退全量（宁全勿缺）
-  const routedDefs = DOMAIN_TOOL_DEFS[family];
-  const baselineDefs = DOMAIN_TOOL_DEFS[BASELINE_DOMAIN] || [];
+function narrowToolDefsByFamily(allDefs, family, domainToolDefs) {
+  if (!domainToolDefs || !domainToolDefs[family]) return allDefs; // 未知域/缺映射保守回退全量（宁全勿缺）
+  const routedDefs = domainToolDefs[family];
+  const baselineDefs = domainToolDefs[BASELINE_DOMAIN] || [];
   const allowedNames = new Set([...routedDefs, ...baselineDefs].map((t) => t.function.name));
   // 71 工具中不属于 allowedNames 的按名剔除；schema 内无名的防御保留
   return allDefs.filter((t) => !t.function || !t.function.name || allowedNames.has(t.function.name));
@@ -87,9 +89,7 @@ async function resolveToolRoute(message, overrides = {}) {
   if (answer.confidence < TOOL_ROUTE_THRESHOLD) {
     return { route: false, reason: 'below_threshold', family: answer.choice, confidence: answer.confidence };
   }
-  if (!DOMAIN_TOOL_DEFS[answer.choice]) {
-    return { route: false, reason: 'unknown_family', family: answer.choice, confidence: answer.confidence };
-  }
+  // unknown_family 防御由 narrowToolDefsByFamily 的缺映射回退承接（此处无域映射可查）
   return { route: true, family: answer.choice, confidence: answer.confidence };
 }
 
@@ -101,5 +101,4 @@ module.exports = {
   buildToolRouteDecisionRequest,
   narrowToolDefsByFamily,
   resolveToolRoute,
-  _fullDefsForTest: TOOL_DEFS,
 };
