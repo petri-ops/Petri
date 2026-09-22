@@ -1,0 +1,1794 @@
+{
+  "kind": "block111-calibration",
+  "version": "1.0.0",
+  "capturedAt": "2026-09-22T05:16:02.280Z",
+  "sourceCommit": "81c59a5741d56471d8565534fa7f81c92d3912ab",
+  "model": "jev-1.13.0",
+  "wrapper": "core/biof3-server/helpers/decision-api.js",
+  "decisionPoint": "interpret.js lookupCellType 二跳（W1-1 marker→细胞类型判别）",
+  "result": {
+    "corpus": {
+      "file": "corpus-marker-celltype.json",
+      "sha256": "4107d03aa2a6a0dd63b3bda9f07d7b82176c11a41063412ea604bf0f7555f324",
+      "count": 104,
+      "choiceEvaluable": 92,
+      "emptyBoundary": 12
+    },
+    "apiFailures": 0,
+    "validCount": 92,
+    "argmaxTop1Accuracy": 0.975,
+    "legacyBaselineAccuracy": 0.8375,
+    "trapMeanConfidence": 0.23,
+    "goldInMeanConfidence": 0.9161,
+    "byKind": {
+      "canonical": {
+        "count": 22,
+        "argmaxAccuracy": 1,
+        "meanConfidence": 1
+      },
+      "partial": {
+        "count": 19,
+        "argmaxAccuracy": 1,
+        "meanConfidence": 1
+      },
+      "noisy": {
+        "count": 22,
+        "argmaxAccuracy": 1,
+        "meanConfidence": 1
+      },
+      "ambiguous": {
+        "count": 17,
+        "argmaxAccuracy": 0.8824,
+        "meanConfidence": 0.6053
+      },
+      "trap": {
+        "count": 12,
+        "argmaxAccuracy": 0,
+        "meanConfidence": 0.23
+      }
+    },
+    "latency": {
+      "p50Ms": 301,
+      "p95Ms": 721
+    },
+    "inputTokens": 44836,
+    "elapsedMs": 6258,
+    "recommendedThreshold": {
+      "theta": 0.55,
+      "adopted": 73,
+      "coverage": 0.9125,
+      "adoptedAccuracy": 1,
+      "trapFalseAdoption": 0
+    },
+    "bestOutsideGate": null,
+    "grid": [
+      {
+        "theta": 0.3,
+        "adopted": 76,
+        "coverage": 0.95,
+        "adoptedAccuracy": 0.9868,
+        "trapFalseAdoption": 0.4167
+      },
+      {
+        "theta": 0.35,
+        "adopted": 76,
+        "coverage": 0.95,
+        "adoptedAccuracy": 0.9868,
+        "trapFalseAdoption": 0.4167
+      },
+      {
+        "theta": 0.4,
+        "adopted": 75,
+        "coverage": 0.9375,
+        "adoptedAccuracy": 0.9867,
+        "trapFalseAdoption": 0.25
+      },
+      {
+        "theta": 0.45,
+        "adopted": 75,
+        "coverage": 0.9375,
+        "adoptedAccuracy": 0.9867,
+        "trapFalseAdoption": 0.25
+      },
+      {
+        "theta": 0.5,
+        "adopted": 74,
+        "coverage": 0.925,
+        "adoptedAccuracy": 0.9865,
+        "trapFalseAdoption": 0.0833
+      },
+      {
+        "theta": 0.55,
+        "adopted": 73,
+        "coverage": 0.9125,
+        "adoptedAccuracy": 1,
+        "trapFalseAdoption": 0
+      },
+      {
+        "theta": 0.6,
+        "adopted": 72,
+        "coverage": 0.9,
+        "adoptedAccuracy": 1,
+        "trapFalseAdoption": 0
+      },
+      {
+        "theta": 0.65,
+        "adopted": 71,
+        "coverage": 0.8875,
+        "adoptedAccuracy": 1,
+        "trapFalseAdoption": 0
+      },
+      {
+        "theta": 0.7,
+        "adopted": 71,
+        "coverage": 0.8875,
+        "adoptedAccuracy": 1,
+        "trapFalseAdoption": 0
+      },
+      {
+        "theta": 0.75,
+        "adopted": 71,
+        "coverage": 0.8875,
+        "adoptedAccuracy": 1,
+        "trapFalseAdoption": 0
+      },
+      {
+        "theta": 0.8,
+        "adopted": 70,
+        "coverage": 0.875,
+        "adoptedAccuracy": 1,
+        "trapFalseAdoption": 0
+      },
+      {
+        "theta": 0.85,
+        "adopted": 70,
+        "coverage": 0.875,
+        "adoptedAccuracy": 1,
+        "trapFalseAdoption": 0
+      },
+      {
+        "theta": 0.9,
+        "adopted": 69,
+        "coverage": 0.8625,
+        "adoptedAccuracy": 1,
+        "trapFalseAdoption": 0
+      },
+      {
+        "theta": 0.95,
+        "adopted": 66,
+        "coverage": 0.825,
+        "adoptedAccuracy": 1,
+        "trapFalseAdoption": 0
+      }
+    ],
+    "perSample": [
+      {
+        "id": "mc-can-01",
+        "kind": "canonical",
+        "gold": "T 细胞 (T cell)",
+        "candidates": [
+          "T 细胞 (T cell)"
+        ],
+        "ok": true,
+        "choice": "T 细胞 (T cell)",
+        "confidence": 1,
+        "probabilities": {
+          "T 细胞 (T cell)": 1
+        },
+        "correct": true,
+        "elapsedMs": 786,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-02",
+        "kind": "canonical",
+        "gold": "CD4+ Naive T 细胞",
+        "candidates": [
+          "CD4+ Naive T 细胞"
+        ],
+        "ok": true,
+        "choice": "CD4+ Naive T 细胞",
+        "confidence": 1,
+        "probabilities": {
+          "CD4+ Naive T 细胞": 1
+        },
+        "correct": true,
+        "elapsedMs": 721,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-03",
+        "kind": "canonical",
+        "gold": "CD8+ T 细胞",
+        "candidates": [
+          "CD8+ T 细胞"
+        ],
+        "ok": true,
+        "choice": "CD8+ T 细胞",
+        "confidence": 1,
+        "probabilities": {
+          "CD8+ T 细胞": 1
+        },
+        "correct": true,
+        "elapsedMs": 737,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-04",
+        "kind": "canonical",
+        "gold": "细胞毒性 T/NK 细胞",
+        "candidates": [
+          "细胞毒性 T/NK 细胞"
+        ],
+        "ok": true,
+        "choice": "细胞毒性 T/NK 细胞",
+        "confidence": 1,
+        "probabilities": {
+          "细胞毒性 T/NK 细胞": 1
+        },
+        "correct": true,
+        "elapsedMs": 723,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-05",
+        "kind": "canonical",
+        "gold": "调节性 T 细胞 (Treg)",
+        "candidates": [
+          "调节性 T 细胞 (Treg)"
+        ],
+        "ok": true,
+        "choice": "调节性 T 细胞 (Treg)",
+        "confidence": 1,
+        "probabilities": {
+          "调节性 T 细胞 (Treg)": 1
+        },
+        "correct": true,
+        "elapsedMs": 732,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-06",
+        "kind": "canonical",
+        "gold": "B 细胞",
+        "candidates": [
+          "B 细胞"
+        ],
+        "ok": true,
+        "choice": "B 细胞",
+        "confidence": 1,
+        "probabilities": {
+          "B 细胞": 1
+        },
+        "correct": true,
+        "elapsedMs": 669,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-07",
+        "kind": "canonical",
+        "gold": "浆细胞 (Plasma cell)",
+        "candidates": [
+          "浆细胞 (Plasma cell)"
+        ],
+        "ok": true,
+        "choice": "浆细胞 (Plasma cell)",
+        "confidence": 1,
+        "probabilities": {
+          "浆细胞 (Plasma cell)": 1
+        },
+        "correct": true,
+        "elapsedMs": 285,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-08",
+        "kind": "canonical",
+        "gold": "单核细胞 (Monocyte)",
+        "candidates": [
+          "单核细胞 (Monocyte)"
+        ],
+        "ok": true,
+        "choice": "单核细胞 (Monocyte)",
+        "confidence": 1,
+        "probabilities": {
+          "单核细胞 (Monocyte)": 1
+        },
+        "correct": true,
+        "elapsedMs": 273,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-09",
+        "kind": "canonical",
+        "gold": "非经典单核细胞 (CD16+ Monocyte)",
+        "candidates": [
+          "非经典单核细胞 (CD16+ Monocyte)"
+        ],
+        "ok": true,
+        "choice": "非经典单核细胞 (CD16+ Monocyte)",
+        "confidence": 1,
+        "probabilities": {
+          "非经典单核细胞 (CD16+ Monocyte)": 1
+        },
+        "correct": true,
+        "elapsedMs": 277,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-10",
+        "kind": "canonical",
+        "gold": "巨噬细胞 (Macrophage)",
+        "candidates": [
+          "巨噬细胞 (Macrophage)"
+        ],
+        "ok": true,
+        "choice": "巨噬细胞 (Macrophage)",
+        "confidence": 1,
+        "probabilities": {
+          "巨噬细胞 (Macrophage)": 1
+        },
+        "correct": true,
+        "elapsedMs": 297,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-11",
+        "kind": "canonical",
+        "gold": "树突状细胞 (DC)",
+        "candidates": [
+          "树突状细胞 (DC)"
+        ],
+        "ok": true,
+        "choice": "树突状细胞 (DC)",
+        "confidence": 1,
+        "probabilities": {
+          "树突状细胞 (DC)": 1
+        },
+        "correct": true,
+        "elapsedMs": 295,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-12",
+        "kind": "canonical",
+        "gold": "NK 细胞",
+        "candidates": [
+          "NK 细胞"
+        ],
+        "ok": true,
+        "choice": "NK 细胞",
+        "confidence": 1,
+        "probabilities": {
+          "NK 细胞": 1
+        },
+        "correct": true,
+        "elapsedMs": 305,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-13",
+        "kind": "canonical",
+        "gold": "肥大细胞 (Mast cell)",
+        "candidates": [
+          "肥大细胞 (Mast cell)"
+        ],
+        "ok": true,
+        "choice": "肥大细胞 (Mast cell)",
+        "confidence": 1,
+        "probabilities": {
+          "肥大细胞 (Mast cell)": 1
+        },
+        "correct": true,
+        "elapsedMs": 309,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-14",
+        "kind": "canonical",
+        "gold": "红细胞 (Erythrocyte)",
+        "candidates": [
+          "红细胞 (Erythrocyte)"
+        ],
+        "ok": true,
+        "choice": "红细胞 (Erythrocyte)",
+        "confidence": 1,
+        "probabilities": {
+          "红细胞 (Erythrocyte)": 1
+        },
+        "correct": true,
+        "elapsedMs": 321,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-15",
+        "kind": "canonical",
+        "gold": "血小板 (Platelet)",
+        "candidates": [
+          "血小板 (Platelet)"
+        ],
+        "ok": true,
+        "choice": "血小板 (Platelet)",
+        "confidence": 1,
+        "probabilities": {
+          "血小板 (Platelet)": 1
+        },
+        "correct": true,
+        "elapsedMs": 319,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-16",
+        "kind": "canonical",
+        "gold": "神经元 (Neuron)",
+        "candidates": [
+          "神经元 (Neuron)"
+        ],
+        "ok": true,
+        "choice": "神经元 (Neuron)",
+        "confidence": 1,
+        "probabilities": {
+          "神经元 (Neuron)": 1
+        },
+        "correct": true,
+        "elapsedMs": 281,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-17",
+        "kind": "canonical",
+        "gold": "星形胶质细胞 (Astrocyte)",
+        "candidates": [
+          "星形胶质细胞 (Astrocyte)"
+        ],
+        "ok": true,
+        "choice": "星形胶质细胞 (Astrocyte)",
+        "confidence": 1,
+        "probabilities": {
+          "星形胶质细胞 (Astrocyte)": 1
+        },
+        "correct": true,
+        "elapsedMs": 325,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-18",
+        "kind": "canonical",
+        "gold": "少突胶质细胞 (Oligodendrocyte)",
+        "candidates": [
+          "少突胶质细胞 (Oligodendrocyte)"
+        ],
+        "ok": true,
+        "choice": "少突胶质细胞 (Oligodendrocyte)",
+        "confidence": 1,
+        "probabilities": {
+          "少突胶质细胞 (Oligodendrocyte)": 1
+        },
+        "correct": true,
+        "elapsedMs": 300,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-19",
+        "kind": "canonical",
+        "gold": "成纤维细胞 (Fibroblast)",
+        "candidates": [
+          "成纤维细胞 (Fibroblast)"
+        ],
+        "ok": true,
+        "choice": "成纤维细胞 (Fibroblast)",
+        "confidence": 1,
+        "probabilities": {
+          "成纤维细胞 (Fibroblast)": 1
+        },
+        "correct": true,
+        "elapsedMs": 320,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-20",
+        "kind": "canonical",
+        "gold": "内皮细胞 (Endothelial)",
+        "candidates": [
+          "内皮细胞 (Endothelial)"
+        ],
+        "ok": true,
+        "choice": "内皮细胞 (Endothelial)",
+        "confidence": 1,
+        "probabilities": {
+          "内皮细胞 (Endothelial)": 1
+        },
+        "correct": true,
+        "elapsedMs": 334,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-21",
+        "kind": "canonical",
+        "gold": "平滑肌细胞 (Smooth muscle)",
+        "candidates": [
+          "平滑肌细胞 (Smooth muscle)"
+        ],
+        "ok": true,
+        "choice": "平滑肌细胞 (Smooth muscle)",
+        "confidence": 1,
+        "probabilities": {
+          "平滑肌细胞 (Smooth muscle)": 1
+        },
+        "correct": true,
+        "elapsedMs": 289,
+        "attempts": 1
+      },
+      {
+        "id": "mc-can-22",
+        "kind": "canonical",
+        "gold": "上皮细胞 (Epithelial)",
+        "candidates": [
+          "上皮细胞 (Epithelial)"
+        ],
+        "ok": true,
+        "choice": "上皮细胞 (Epithelial)",
+        "confidence": 1,
+        "probabilities": {
+          "上皮细胞 (Epithelial)": 1
+        },
+        "correct": true,
+        "elapsedMs": 326,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-01",
+        "kind": "partial",
+        "gold": "T 细胞 (T cell)",
+        "candidates": [
+          "T 细胞 (T cell)"
+        ],
+        "ok": true,
+        "choice": "T 细胞 (T cell)",
+        "confidence": 1,
+        "probabilities": {
+          "T 细胞 (T cell)": 1
+        },
+        "correct": true,
+        "elapsedMs": 294,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-02",
+        "kind": "partial",
+        "gold": "CD4+ Naive T 细胞",
+        "candidates": [
+          "CD4+ Naive T 细胞"
+        ],
+        "ok": true,
+        "choice": "CD4+ Naive T 细胞",
+        "confidence": 1,
+        "probabilities": {
+          "CD4+ Naive T 细胞": 1
+        },
+        "correct": true,
+        "elapsedMs": 326,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-04",
+        "kind": "partial",
+        "gold": "细胞毒性 T/NK 细胞",
+        "candidates": [
+          "细胞毒性 T/NK 细胞"
+        ],
+        "ok": true,
+        "choice": "细胞毒性 T/NK 细胞",
+        "confidence": 1,
+        "probabilities": {
+          "细胞毒性 T/NK 细胞": 1
+        },
+        "correct": true,
+        "elapsedMs": 291,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-05",
+        "kind": "partial",
+        "gold": "调节性 T 细胞 (Treg)",
+        "candidates": [
+          "调节性 T 细胞 (Treg)"
+        ],
+        "ok": true,
+        "choice": "调节性 T 细胞 (Treg)",
+        "confidence": 1,
+        "probabilities": {
+          "调节性 T 细胞 (Treg)": 1
+        },
+        "correct": true,
+        "elapsedMs": 295,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-06",
+        "kind": "partial",
+        "gold": "B 细胞",
+        "candidates": [
+          "B 细胞"
+        ],
+        "ok": true,
+        "choice": "B 细胞",
+        "confidence": 1,
+        "probabilities": {
+          "B 细胞": 1
+        },
+        "correct": true,
+        "elapsedMs": 311,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-07",
+        "kind": "partial",
+        "gold": "浆细胞 (Plasma cell)",
+        "candidates": [
+          "浆细胞 (Plasma cell)"
+        ],
+        "ok": true,
+        "choice": "浆细胞 (Plasma cell)",
+        "confidence": 1,
+        "probabilities": {
+          "浆细胞 (Plasma cell)": 1
+        },
+        "correct": true,
+        "elapsedMs": 306,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-08",
+        "kind": "partial",
+        "gold": "单核细胞 (Monocyte)",
+        "candidates": [
+          "单核细胞 (Monocyte)"
+        ],
+        "ok": true,
+        "choice": "单核细胞 (Monocyte)",
+        "confidence": 1,
+        "probabilities": {
+          "单核细胞 (Monocyte)": 1
+        },
+        "correct": true,
+        "elapsedMs": 311,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-11",
+        "kind": "partial",
+        "gold": "树突状细胞 (DC)",
+        "candidates": [
+          "树突状细胞 (DC)"
+        ],
+        "ok": true,
+        "choice": "树突状细胞 (DC)",
+        "confidence": 1,
+        "probabilities": {
+          "树突状细胞 (DC)": 1
+        },
+        "correct": true,
+        "elapsedMs": 327,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-12",
+        "kind": "partial",
+        "gold": "NK 细胞",
+        "candidates": [
+          "NK 细胞"
+        ],
+        "ok": true,
+        "choice": "NK 细胞",
+        "confidence": 1,
+        "probabilities": {
+          "NK 细胞": 1
+        },
+        "correct": true,
+        "elapsedMs": 328,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-13",
+        "kind": "partial",
+        "gold": "肥大细胞 (Mast cell)",
+        "candidates": [
+          "肥大细胞 (Mast cell)"
+        ],
+        "ok": true,
+        "choice": "肥大细胞 (Mast cell)",
+        "confidence": 1,
+        "probabilities": {
+          "肥大细胞 (Mast cell)": 1
+        },
+        "correct": true,
+        "elapsedMs": 288,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-14",
+        "kind": "partial",
+        "gold": "红细胞 (Erythrocyte)",
+        "candidates": [
+          "红细胞 (Erythrocyte)"
+        ],
+        "ok": true,
+        "choice": "红细胞 (Erythrocyte)",
+        "confidence": 1,
+        "probabilities": {
+          "红细胞 (Erythrocyte)": 1
+        },
+        "correct": true,
+        "elapsedMs": 279,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-15",
+        "kind": "partial",
+        "gold": "血小板 (Platelet)",
+        "candidates": [
+          "血小板 (Platelet)"
+        ],
+        "ok": true,
+        "choice": "血小板 (Platelet)",
+        "confidence": 1,
+        "probabilities": {
+          "血小板 (Platelet)": 1
+        },
+        "correct": true,
+        "elapsedMs": 279,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-16",
+        "kind": "partial",
+        "gold": "神经元 (Neuron)",
+        "candidates": [
+          "神经元 (Neuron)"
+        ],
+        "ok": true,
+        "choice": "神经元 (Neuron)",
+        "confidence": 1,
+        "probabilities": {
+          "神经元 (Neuron)": 1
+        },
+        "correct": true,
+        "elapsedMs": 412,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-17",
+        "kind": "partial",
+        "gold": "星形胶质细胞 (Astrocyte)",
+        "candidates": [
+          "星形胶质细胞 (Astrocyte)"
+        ],
+        "ok": true,
+        "choice": "星形胶质细胞 (Astrocyte)",
+        "confidence": 1,
+        "probabilities": {
+          "星形胶质细胞 (Astrocyte)": 1
+        },
+        "correct": true,
+        "elapsedMs": 285,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-18",
+        "kind": "partial",
+        "gold": "少突胶质细胞 (Oligodendrocyte)",
+        "candidates": [
+          "少突胶质细胞 (Oligodendrocyte)"
+        ],
+        "ok": true,
+        "choice": "少突胶质细胞 (Oligodendrocyte)",
+        "confidence": 1,
+        "probabilities": {
+          "少突胶质细胞 (Oligodendrocyte)": 1
+        },
+        "correct": true,
+        "elapsedMs": 329,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-19",
+        "kind": "partial",
+        "gold": "成纤维细胞 (Fibroblast)",
+        "candidates": [
+          "成纤维细胞 (Fibroblast)"
+        ],
+        "ok": true,
+        "choice": "成纤维细胞 (Fibroblast)",
+        "confidence": 1,
+        "probabilities": {
+          "成纤维细胞 (Fibroblast)": 1
+        },
+        "correct": true,
+        "elapsedMs": 394,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-20",
+        "kind": "partial",
+        "gold": "内皮细胞 (Endothelial)",
+        "candidates": [
+          "内皮细胞 (Endothelial)"
+        ],
+        "ok": true,
+        "choice": "内皮细胞 (Endothelial)",
+        "confidence": 1,
+        "probabilities": {
+          "内皮细胞 (Endothelial)": 1
+        },
+        "correct": true,
+        "elapsedMs": 263,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-21",
+        "kind": "partial",
+        "gold": "平滑肌细胞 (Smooth muscle)",
+        "candidates": [
+          "平滑肌细胞 (Smooth muscle)"
+        ],
+        "ok": true,
+        "choice": "平滑肌细胞 (Smooth muscle)",
+        "confidence": 1,
+        "probabilities": {
+          "平滑肌细胞 (Smooth muscle)": 1
+        },
+        "correct": true,
+        "elapsedMs": 301,
+        "attempts": 1
+      },
+      {
+        "id": "mc-par-22",
+        "kind": "partial",
+        "gold": "上皮细胞 (Epithelial)",
+        "candidates": [
+          "上皮细胞 (Epithelial)"
+        ],
+        "ok": true,
+        "choice": "上皮细胞 (Epithelial)",
+        "confidence": 1,
+        "probabilities": {
+          "上皮细胞 (Epithelial)": 1
+        },
+        "correct": true,
+        "elapsedMs": 290,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-01",
+        "kind": "noisy",
+        "gold": "T 细胞 (T cell)",
+        "candidates": [
+          "T 细胞 (T cell)"
+        ],
+        "ok": true,
+        "choice": "T 细胞 (T cell)",
+        "confidence": 1,
+        "probabilities": {
+          "T 细胞 (T cell)": 1
+        },
+        "correct": true,
+        "elapsedMs": 299,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-02",
+        "kind": "noisy",
+        "gold": "CD4+ Naive T 细胞",
+        "candidates": [
+          "CD4+ Naive T 细胞"
+        ],
+        "ok": true,
+        "choice": "CD4+ Naive T 细胞",
+        "confidence": 1,
+        "probabilities": {
+          "CD4+ Naive T 细胞": 1
+        },
+        "correct": true,
+        "elapsedMs": 319,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-03",
+        "kind": "noisy",
+        "gold": "CD8+ T 细胞",
+        "candidates": [
+          "CD8+ T 细胞"
+        ],
+        "ok": true,
+        "choice": "CD8+ T 细胞",
+        "confidence": 1,
+        "probabilities": {
+          "CD8+ T 细胞": 1
+        },
+        "correct": true,
+        "elapsedMs": 317,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-04",
+        "kind": "noisy",
+        "gold": "细胞毒性 T/NK 细胞",
+        "candidates": [
+          "细胞毒性 T/NK 细胞"
+        ],
+        "ok": true,
+        "choice": "细胞毒性 T/NK 细胞",
+        "confidence": 1,
+        "probabilities": {
+          "细胞毒性 T/NK 细胞": 1
+        },
+        "correct": true,
+        "elapsedMs": 261,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-05",
+        "kind": "noisy",
+        "gold": "调节性 T 细胞 (Treg)",
+        "candidates": [
+          "调节性 T 细胞 (Treg)"
+        ],
+        "ok": true,
+        "choice": "调节性 T 细胞 (Treg)",
+        "confidence": 1,
+        "probabilities": {
+          "调节性 T 细胞 (Treg)": 1
+        },
+        "correct": true,
+        "elapsedMs": 336,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-06",
+        "kind": "noisy",
+        "gold": "B 细胞",
+        "candidates": [
+          "B 细胞"
+        ],
+        "ok": true,
+        "choice": "B 细胞",
+        "confidence": 1,
+        "probabilities": {
+          "B 细胞": 1
+        },
+        "correct": true,
+        "elapsedMs": 287,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-07",
+        "kind": "noisy",
+        "gold": "浆细胞 (Plasma cell)",
+        "candidates": [
+          "浆细胞 (Plasma cell)"
+        ],
+        "ok": true,
+        "choice": "浆细胞 (Plasma cell)",
+        "confidence": 1,
+        "probabilities": {
+          "浆细胞 (Plasma cell)": 1
+        },
+        "correct": true,
+        "elapsedMs": 299,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-08",
+        "kind": "noisy",
+        "gold": "单核细胞 (Monocyte)",
+        "candidates": [
+          "单核细胞 (Monocyte)"
+        ],
+        "ok": true,
+        "choice": "单核细胞 (Monocyte)",
+        "confidence": 1,
+        "probabilities": {
+          "单核细胞 (Monocyte)": 1
+        },
+        "correct": true,
+        "elapsedMs": 288,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-09",
+        "kind": "noisy",
+        "gold": "非经典单核细胞 (CD16+ Monocyte)",
+        "candidates": [
+          "非经典单核细胞 (CD16+ Monocyte)"
+        ],
+        "ok": true,
+        "choice": "非经典单核细胞 (CD16+ Monocyte)",
+        "confidence": 1,
+        "probabilities": {
+          "非经典单核细胞 (CD16+ Monocyte)": 1
+        },
+        "correct": true,
+        "elapsedMs": 278,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-10",
+        "kind": "noisy",
+        "gold": "巨噬细胞 (Macrophage)",
+        "candidates": [
+          "巨噬细胞 (Macrophage)"
+        ],
+        "ok": true,
+        "choice": "巨噬细胞 (Macrophage)",
+        "confidence": 1,
+        "probabilities": {
+          "巨噬细胞 (Macrophage)": 1
+        },
+        "correct": true,
+        "elapsedMs": 288,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-11",
+        "kind": "noisy",
+        "gold": "树突状细胞 (DC)",
+        "candidates": [
+          "树突状细胞 (DC)"
+        ],
+        "ok": true,
+        "choice": "树突状细胞 (DC)",
+        "confidence": 1,
+        "probabilities": {
+          "树突状细胞 (DC)": 1
+        },
+        "correct": true,
+        "elapsedMs": 296,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-12",
+        "kind": "noisy",
+        "gold": "NK 细胞",
+        "candidates": [
+          "NK 细胞"
+        ],
+        "ok": true,
+        "choice": "NK 细胞",
+        "confidence": 1,
+        "probabilities": {
+          "NK 细胞": 1
+        },
+        "correct": true,
+        "elapsedMs": 301,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-13",
+        "kind": "noisy",
+        "gold": "肥大细胞 (Mast cell)",
+        "candidates": [
+          "肥大细胞 (Mast cell)"
+        ],
+        "ok": true,
+        "choice": "肥大细胞 (Mast cell)",
+        "confidence": 1,
+        "probabilities": {
+          "肥大细胞 (Mast cell)": 1
+        },
+        "correct": true,
+        "elapsedMs": 361,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-14",
+        "kind": "noisy",
+        "gold": "红细胞 (Erythrocyte)",
+        "candidates": [
+          "红细胞 (Erythrocyte)"
+        ],
+        "ok": true,
+        "choice": "红细胞 (Erythrocyte)",
+        "confidence": 1,
+        "probabilities": {
+          "红细胞 (Erythrocyte)": 1
+        },
+        "correct": true,
+        "elapsedMs": 279,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-15",
+        "kind": "noisy",
+        "gold": "血小板 (Platelet)",
+        "candidates": [
+          "血小板 (Platelet)"
+        ],
+        "ok": true,
+        "choice": "血小板 (Platelet)",
+        "confidence": 1,
+        "probabilities": {
+          "血小板 (Platelet)": 1
+        },
+        "correct": true,
+        "elapsedMs": 315,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-16",
+        "kind": "noisy",
+        "gold": "神经元 (Neuron)",
+        "candidates": [
+          "神经元 (Neuron)"
+        ],
+        "ok": true,
+        "choice": "神经元 (Neuron)",
+        "confidence": 1,
+        "probabilities": {
+          "神经元 (Neuron)": 1
+        },
+        "correct": true,
+        "elapsedMs": 291,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-17",
+        "kind": "noisy",
+        "gold": "星形胶质细胞 (Astrocyte)",
+        "candidates": [
+          "星形胶质细胞 (Astrocyte)"
+        ],
+        "ok": true,
+        "choice": "星形胶质细胞 (Astrocyte)",
+        "confidence": 1,
+        "probabilities": {
+          "星形胶质细胞 (Astrocyte)": 1
+        },
+        "correct": true,
+        "elapsedMs": 272,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-18",
+        "kind": "noisy",
+        "gold": "少突胶质细胞 (Oligodendrocyte)",
+        "candidates": [
+          "少突胶质细胞 (Oligodendrocyte)"
+        ],
+        "ok": true,
+        "choice": "少突胶质细胞 (Oligodendrocyte)",
+        "confidence": 1,
+        "probabilities": {
+          "少突胶质细胞 (Oligodendrocyte)": 1
+        },
+        "correct": true,
+        "elapsedMs": 296,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-19",
+        "kind": "noisy",
+        "gold": "成纤维细胞 (Fibroblast)",
+        "candidates": [
+          "成纤维细胞 (Fibroblast)"
+        ],
+        "ok": true,
+        "choice": "成纤维细胞 (Fibroblast)",
+        "confidence": 1,
+        "probabilities": {
+          "成纤维细胞 (Fibroblast)": 1
+        },
+        "correct": true,
+        "elapsedMs": 308,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-20",
+        "kind": "noisy",
+        "gold": "内皮细胞 (Endothelial)",
+        "candidates": [
+          "内皮细胞 (Endothelial)"
+        ],
+        "ok": true,
+        "choice": "内皮细胞 (Endothelial)",
+        "confidence": 1,
+        "probabilities": {
+          "内皮细胞 (Endothelial)": 1
+        },
+        "correct": true,
+        "elapsedMs": 280,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-21",
+        "kind": "noisy",
+        "gold": "平滑肌细胞 (Smooth muscle)",
+        "candidates": [
+          "平滑肌细胞 (Smooth muscle)"
+        ],
+        "ok": true,
+        "choice": "平滑肌细胞 (Smooth muscle)",
+        "confidence": 1,
+        "probabilities": {
+          "平滑肌细胞 (Smooth muscle)": 1
+        },
+        "correct": true,
+        "elapsedMs": 310,
+        "attempts": 1
+      },
+      {
+        "id": "mc-noi-22",
+        "kind": "noisy",
+        "gold": "上皮细胞 (Epithelial)",
+        "candidates": [
+          "上皮细胞 (Epithelial)"
+        ],
+        "ok": true,
+        "choice": "上皮细胞 (Epithelial)",
+        "confidence": 1,
+        "probabilities": {
+          "上皮细胞 (Epithelial)": 1
+        },
+        "correct": true,
+        "elapsedMs": 274,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-01",
+        "kind": "ambiguous",
+        "gold": "细胞毒性 T/NK 细胞",
+        "candidates": [
+          "T 细胞 (T cell)",
+          "细胞毒性 T/NK 细胞"
+        ],
+        "ok": true,
+        "choice": "细胞毒性 T/NK 细胞",
+        "confidence": 0.93,
+        "probabilities": {
+          "细胞毒性 T/NK 细胞": 0.96,
+          "T 细胞 (T cell)": 0.04
+        },
+        "correct": true,
+        "elapsedMs": 306,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-02",
+        "kind": "ambiguous",
+        "gold": "CD8+ T 细胞",
+        "candidates": [
+          "CD8+ T 细胞",
+          "细胞毒性 T/NK 细胞"
+        ],
+        "ok": true,
+        "choice": "细胞毒性 T/NK 细胞",
+        "confidence": 0.11,
+        "probabilities": {
+          "CD8+ T 细胞": 0.45,
+          "细胞毒性 T/NK 细胞": 0.55
+        },
+        "correct": false,
+        "elapsedMs": 320,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-03",
+        "kind": "ambiguous",
+        "gold": "调节性 T 细胞 (Treg)",
+        "candidates": [
+          "CD4+ Naive T 细胞",
+          "调节性 T 细胞 (Treg)"
+        ],
+        "ok": true,
+        "choice": "调节性 T 细胞 (Treg)",
+        "confidence": 0.99,
+        "probabilities": {
+          "CD4+ Naive T 细胞": 0.01,
+          "调节性 T 细胞 (Treg)": 0.99
+        },
+        "correct": true,
+        "elapsedMs": 285,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-04",
+        "kind": "ambiguous",
+        "gold": "非经典单核细胞 (CD16+ Monocyte)",
+        "candidates": [
+          "单核细胞 (Monocyte)",
+          "非经典单核细胞 (CD16+ Monocyte)"
+        ],
+        "ok": true,
+        "choice": "非经典单核细胞 (CD16+ Monocyte)",
+        "confidence": 0.58,
+        "probabilities": {
+          "非经典单核细胞 (CD16+ Monocyte)": 0.79,
+          "单核细胞 (Monocyte)": 0.21
+        },
+        "correct": true,
+        "elapsedMs": 291,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-05",
+        "kind": "ambiguous",
+        "gold": "巨噬细胞 (Macrophage)",
+        "candidates": [
+          "单核细胞 (Monocyte)",
+          "巨噬细胞 (Macrophage)"
+        ],
+        "ok": true,
+        "choice": "巨噬细胞 (Macrophage)",
+        "confidence": 0.95,
+        "probabilities": {
+          "单核细胞 (Monocyte)": 0.02,
+          "巨噬细胞 (Macrophage)": 0.98
+        },
+        "correct": true,
+        "elapsedMs": 312,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-06",
+        "kind": "ambiguous",
+        "gold": "树突状细胞 (DC)",
+        "candidates": [
+          "单核细胞 (Monocyte)",
+          "树突状细胞 (DC)"
+        ],
+        "ok": true,
+        "choice": "树突状细胞 (DC)",
+        "confidence": 0.22,
+        "probabilities": {
+          "单核细胞 (Monocyte)": 0.39,
+          "树突状细胞 (DC)": 0.61
+        },
+        "correct": true,
+        "elapsedMs": 328,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-07",
+        "kind": "ambiguous",
+        "gold": "NK 细胞",
+        "candidates": [
+          "细胞毒性 T/NK 细胞",
+          "NK 细胞"
+        ],
+        "ok": true,
+        "choice": "NK 细胞",
+        "confidence": 0,
+        "probabilities": {
+          "细胞毒性 T/NK 细胞": 0.5,
+          "NK 细胞": 0.5
+        },
+        "correct": true,
+        "elapsedMs": 351,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-08",
+        "kind": "ambiguous",
+        "gold": "平滑肌细胞 (Smooth muscle)",
+        "candidates": [
+          "成纤维细胞 (Fibroblast)",
+          "平滑肌细胞 (Smooth muscle)"
+        ],
+        "ok": true,
+        "choice": "平滑肌细胞 (Smooth muscle)",
+        "confidence": 0.03,
+        "probabilities": {
+          "成纤维细胞 (Fibroblast)": 0.48,
+          "平滑肌细胞 (Smooth muscle)": 0.52
+        },
+        "correct": true,
+        "elapsedMs": 334,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-09",
+        "kind": "ambiguous",
+        "gold": "浆细胞 (Plasma cell)",
+        "candidates": [
+          "B 细胞",
+          "浆细胞 (Plasma cell)"
+        ],
+        "ok": true,
+        "choice": "浆细胞 (Plasma cell)",
+        "confidence": 0.63,
+        "probabilities": {
+          "B 细胞": 0.18,
+          "浆细胞 (Plasma cell)": 0.82
+        },
+        "correct": true,
+        "elapsedMs": 292,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-10",
+        "kind": "ambiguous",
+        "gold": "CD4+ Naive T 细胞",
+        "candidates": [
+          "T 细胞 (T cell)",
+          "CD4+ Naive T 细胞"
+        ],
+        "ok": true,
+        "choice": "CD4+ Naive T 细胞",
+        "confidence": 0.35,
+        "probabilities": {
+          "T 细胞 (T cell)": 0.33,
+          "CD4+ Naive T 细胞": 0.67
+        },
+        "correct": true,
+        "elapsedMs": 326,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-11",
+        "kind": "ambiguous",
+        "gold": "调节性 T 细胞 (Treg)",
+        "candidates": [
+          "T 细胞 (T cell)",
+          "调节性 T 细胞 (Treg)"
+        ],
+        "ok": true,
+        "choice": "调节性 T 细胞 (Treg)",
+        "confidence": 0.97,
+        "probabilities": {
+          "调节性 T 细胞 (Treg)": 0.98,
+          "T 细胞 (T cell)": 0.02
+        },
+        "correct": true,
+        "elapsedMs": 268,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-12",
+        "kind": "ambiguous",
+        "gold": "NK 细胞",
+        "candidates": [
+          "细胞毒性 T/NK 细胞",
+          "NK 细胞"
+        ],
+        "ok": true,
+        "choice": "细胞毒性 T/NK 细胞",
+        "confidence": 0.51,
+        "probabilities": {
+          "NK 细胞": 0.25,
+          "细胞毒性 T/NK 细胞": 0.75
+        },
+        "correct": false,
+        "elapsedMs": 282,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-13",
+        "kind": "ambiguous",
+        "gold": "巨噬细胞 (Macrophage)",
+        "candidates": [
+          "巨噬细胞 (Macrophage)",
+          "树突状细胞 (DC)"
+        ],
+        "ok": true,
+        "choice": "巨噬细胞 (Macrophage)",
+        "confidence": 0.86,
+        "probabilities": {
+          "树突状细胞 (DC)": 0.07,
+          "巨噬细胞 (Macrophage)": 0.93
+        },
+        "correct": true,
+        "elapsedMs": 358,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-14",
+        "kind": "ambiguous",
+        "gold": "CD4+ Naive T 细胞",
+        "candidates": [
+          "T 细胞 (T cell)",
+          "CD4+ Naive T 细胞"
+        ],
+        "ok": true,
+        "choice": "CD4+ Naive T 细胞",
+        "confidence": 0.49,
+        "probabilities": {
+          "T 细胞 (T cell)": 0.25,
+          "CD4+ Naive T 细胞": 0.75
+        },
+        "correct": true,
+        "elapsedMs": 318,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-15",
+        "kind": "ambiguous",
+        "gold": "巨噬细胞 (Macrophage)",
+        "candidates": [
+          "非经典单核细胞 (CD16+ Monocyte)",
+          "巨噬细胞 (Macrophage)"
+        ],
+        "ok": true,
+        "choice": "巨噬细胞 (Macrophage)",
+        "confidence": 0.76,
+        "probabilities": {
+          "非经典单核细胞 (CD16+ Monocyte)": 0.12,
+          "巨噬细胞 (Macrophage)": 0.88
+        },
+        "correct": true,
+        "elapsedMs": 289,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-16",
+        "kind": "ambiguous",
+        "gold": "细胞毒性 T/NK 细胞",
+        "candidates": [
+          "细胞毒性 T/NK 细胞",
+          "T 细胞 (T cell)"
+        ],
+        "ok": true,
+        "choice": "细胞毒性 T/NK 细胞",
+        "confidence": 0.99,
+        "probabilities": {
+          "T 细胞 (T cell)": 0,
+          "细胞毒性 T/NK 细胞": 1
+        },
+        "correct": true,
+        "elapsedMs": 298,
+        "attempts": 1
+      },
+      {
+        "id": "mc-amb-17",
+        "kind": "ambiguous",
+        "gold": "单核细胞 (Monocyte)",
+        "candidates": [
+          "单核细胞 (Monocyte)",
+          "树突状细胞 (DC)"
+        ],
+        "ok": true,
+        "choice": "单核细胞 (Monocyte)",
+        "confidence": 0.92,
+        "probabilities": {
+          "单核细胞 (Monocyte)": 0.96,
+          "树突状细胞 (DC)": 0.04
+        },
+        "correct": true,
+        "elapsedMs": 260,
+        "attempts": 1
+      },
+      {
+        "id": "mc-trp-01",
+        "kind": "trap",
+        "gold": "双细胞/混杂（应低置信回退）",
+        "candidates": [
+          "T 细胞 (T cell)",
+          "B 细胞"
+        ],
+        "ok": true,
+        "choice": "B 细胞",
+        "confidence": 0.49,
+        "probabilities": {
+          "T 细胞 (T cell)": 0.25,
+          "B 细胞": 0.75
+        },
+        "correct": false,
+        "elapsedMs": 337,
+        "attempts": 1
+      },
+      {
+        "id": "mc-trp-02",
+        "kind": "trap",
+        "gold": "双细胞/混杂（应低置信回退）",
+        "candidates": [
+          "单核细胞 (Monocyte)",
+          "上皮细胞 (Epithelial)"
+        ],
+        "ok": true,
+        "choice": "单核细胞 (Monocyte)",
+        "confidence": 0.03,
+        "probabilities": {
+          "上皮细胞 (Epithelial)": 0.48,
+          "单核细胞 (Monocyte)": 0.52
+        },
+        "correct": false,
+        "elapsedMs": 321,
+        "attempts": 1
+      },
+      {
+        "id": "mc-trp-03",
+        "kind": "trap",
+        "gold": "双细胞/混杂（应低置信回退）",
+        "candidates": [
+          "CD8+ T 细胞",
+          "B 细胞"
+        ],
+        "ok": true,
+        "choice": "B 细胞",
+        "confidence": 0.03,
+        "probabilities": {
+          "CD8+ T 细胞": 0.49,
+          "B 细胞": 0.51
+        },
+        "correct": false,
+        "elapsedMs": 291,
+        "attempts": 1
+      },
+      {
+        "id": "mc-trp-04",
+        "kind": "trap",
+        "gold": "双细胞/混杂（应低置信回退）",
+        "candidates": [
+          "红细胞 (Erythrocyte)",
+          "血小板 (Platelet)"
+        ],
+        "ok": true,
+        "choice": "血小板 (Platelet)",
+        "confidence": 0.52,
+        "probabilities": {
+          "血小板 (Platelet)": 0.76,
+          "红细胞 (Erythrocyte)": 0.24
+        },
+        "correct": false,
+        "elapsedMs": 283,
+        "attempts": 1
+      },
+      {
+        "id": "mc-trp-05",
+        "kind": "trap",
+        "gold": "双细胞/混杂（应低置信回退）",
+        "candidates": [
+          "神经元 (Neuron)",
+          "少突胶质细胞 (Oligodendrocyte)"
+        ],
+        "ok": true,
+        "choice": "少突胶质细胞 (Oligodendrocyte)",
+        "confidence": 0.46,
+        "probabilities": {
+          "少突胶质细胞 (Oligodendrocyte)": 0.73,
+          "神经元 (Neuron)": 0.27
+        },
+        "correct": false,
+        "elapsedMs": 359,
+        "attempts": 1
+      },
+      {
+        "id": "mc-trp-06",
+        "kind": "trap",
+        "gold": "双细胞/混杂（应低置信回退）",
+        "candidates": [
+          "星形胶质细胞 (Astrocyte)",
+          "少突胶质细胞 (Oligodendrocyte)"
+        ],
+        "ok": true,
+        "choice": "星形胶质细胞 (Astrocyte)",
+        "confidence": 0,
+        "probabilities": {
+          "少突胶质细胞 (Oligodendrocyte)": 0.5,
+          "星形胶质细胞 (Astrocyte)": 0.5
+        },
+        "correct": false,
+        "elapsedMs": 277,
+        "attempts": 1
+      },
+      {
+        "id": "mc-trp-07",
+        "kind": "trap",
+        "gold": "双细胞/混杂（应低置信回退）",
+        "candidates": [
+          "成纤维细胞 (Fibroblast)",
+          "内皮细胞 (Endothelial)"
+        ],
+        "ok": true,
+        "choice": "内皮细胞 (Endothelial)",
+        "confidence": 0.18,
+        "probabilities": {
+          "成纤维细胞 (Fibroblast)": 0.41,
+          "内皮细胞 (Endothelial)": 0.59
+        },
+        "correct": false,
+        "elapsedMs": 272,
+        "attempts": 1
+      },
+      {
+        "id": "mc-trp-08",
+        "kind": "trap",
+        "gold": "双细胞/混杂（应低置信回退）",
+        "candidates": [
+          "内皮细胞 (Endothelial)",
+          "平滑肌细胞 (Smooth muscle)"
+        ],
+        "ok": true,
+        "choice": "平滑肌细胞 (Smooth muscle)",
+        "confidence": 0.02,
+        "probabilities": {
+          "平滑肌细胞 (Smooth muscle)": 0.51,
+          "内皮细胞 (Endothelial)": 0.49
+        },
+        "correct": false,
+        "elapsedMs": 331,
+        "attempts": 1
+      },
+      {
+        "id": "mc-trp-09",
+        "kind": "trap",
+        "gold": "双细胞/混杂（应低置信回退）",
+        "candidates": [
+          "巨噬细胞 (Macrophage)",
+          "上皮细胞 (Epithelial)"
+        ],
+        "ok": true,
+        "choice": "巨噬细胞 (Macrophage)",
+        "confidence": 0.37,
+        "probabilities": {
+          "上皮细胞 (Epithelial)": 0.31,
+          "巨噬细胞 (Macrophage)": 0.69
+        },
+        "correct": false,
+        "elapsedMs": 296,
+        "attempts": 1
+      },
+      {
+        "id": "mc-trp-10",
+        "kind": "trap",
+        "gold": "双细胞/混杂（应低置信回退）",
+        "candidates": [
+          "T 细胞 (T cell)",
+          "NK 细胞"
+        ],
+        "ok": true,
+        "choice": "NK 细胞",
+        "confidence": 0.28,
+        "probabilities": {
+          "NK 细胞": 0.64,
+          "T 细胞 (T cell)": 0.36
+        },
+        "correct": false,
+        "elapsedMs": 272,
+        "attempts": 1
+      },
+      {
+        "id": "mc-trp-11",
+        "kind": "trap",
+        "gold": "双细胞/混杂（应低置信回退）",
+        "candidates": [
+          "CD8+ T 细胞",
+          "调节性 T 细胞 (Treg)"
+        ],
+        "ok": true,
+        "choice": "调节性 T 细胞 (Treg)",
+        "confidence": 0.03,
+        "probabilities": {
+          "CD8+ T 细胞": 0.49,
+          "调节性 T 细胞 (Treg)": 0.51
+        },
+        "correct": false,
+        "elapsedMs": 332,
+        "attempts": 1
+      },
+      {
+        "id": "mc-trp-12",
+        "kind": "trap",
+        "gold": "双细胞/混杂（应低置信回退）",
+        "candidates": [
+          "单核细胞 (Monocyte)",
+          "肥大细胞 (Mast cell)"
+        ],
+        "ok": true,
+        "choice": "单核细胞 (Monocyte)",
+        "confidence": 0.35,
+        "probabilities": {
+          "肥大细胞 (Mast cell)": 0.33,
+          "单核细胞 (Monocyte)": 0.67
+        },
+        "correct": false,
+        "elapsedMs": 304,
+        "attempts": 1
+      }
+    ]
+  },
+  "gate": {
+    "criterion": "存在 θ：adoptedAccuracy ≥ 0.95 且 coverage ≥ 0.85 且 trapFalseAdoption ≤ 0.05（conf<θ 一律回退现行字符串）",
+    "passed": true,
+    "note": "P0 通过判据为立项时提案，P0 评审（D-1~D-5 裁决）可修订；argmaxTop1Accuracy 为诊断指标（未门控），门控后指标以 adoptedAccuracy 为准。"
+  }
+}

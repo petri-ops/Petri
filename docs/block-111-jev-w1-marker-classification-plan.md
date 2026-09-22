@@ -1,7 +1,7 @@
 # BLOCK-111-JEV-W1-MARKER-CLASSIFICATION 计划：marker→细胞类型判别二跳（决策内化弧 W1-1）
 
 **Plan ID**：`BLOCK-111-JEV-W1-MARKER-CLASSIFICATION`
-**状态**：`active（P0-LAUNCH，2026-09-22 用户裁决启动 W1 弧线；本包=决策判断模式内化弧 W1 队列第 1 点，逐点立项不打包；弧线底稿=docs/planning/decision-primitive-internalization-arc.md §W1）`
+**状态**：`active（P0 实测完成待评审：校准 gate.passed=true（104 条语料 / 92 choice 可评估 / 0 API 失败），D-1~D-5 走 §7 评审稿待用户裁决后进 P1；2026-09-22 用户裁决启动 W1 弧线；本包=决策判断模式内化弧 W1 队列第 1 点，逐点立项不打包；弧线底稿=docs/planning/decision-primitive-internalization-arc.md §W1）`
 **立项日期**：2026-09-22
 **最后更新**：2026-09-22（立项登记 active/P0-LAUNCH。用户裁决原话「1」——AskUserQuestion 菜单选项 1「Jev W1 决策内化」，选项描述列明首序三候选「marker 判别/意图路由/工具预路由，逐点立项」；首点按弧线 §W1 预登记队列次序取第 1 点。W0=BLOCK-110 已整包 completed（closeout 十门全绿，提交至 4dbfeff7），W0 证据门绿。）
 **责任轨道**：BLOCK（后端决策接点 + 校准 harness + REST 契约 additive，跨 P 阶段串行）
@@ -92,3 +92,26 @@ markers[] ─→ 规则表候选生成（A 型，零出站）：候选集 = matc
 - **降级必有**：任何失败形态回退现行 `lookupCellType` 字符串，`/api/ai/interpret` 永不因决策 API 失败而失败。
 - **A 型规则零模型化**：不把「是否命中」本身交给模型；规则表匹配始终是候选生成前置门。
 - 风险：基因符号人鼠同源歧义（Corpus 覆盖）、Jev CJK 短板（本接点 state 以基因符号为主、候选名为中文——P0 语料含中文候选名样本实测该项）、低频接点观测样本少（P2 以 harness 语料为主要证据面，实机只验链路）。
+
+## 7. P0 评审稿（2026-09-22 实测完成，D-1~D-5 待用户裁决）
+
+### 7.1 实测证据（`acceptance/block-111/calibration.json`，gate.passed=true）
+
+- 语料：104 条（canonical 22 / partial 19 / noisy 22 / ambiguous 17 / trap 12 / empty 12），choice 可评估 92（trap 占 13%），零候选边界 12 条验证「空集零出站」；**0 API 失败**；`--dry` 候选推导一致性全绿（规则表 matches≥2 语义与 lookupCellType 同源）。
+- **未门控 argmax top-1 accuracy = 0.975**，对照现行规则表基线（lookupCellType 首个最高分命中）**0.8375**——差距全部来自歧义面板（canonical/partial/noisy 三层全 100%，ambiguous 0.8824）。
+- **置信度分离**：gold∈候选样本均值 0.916 vs trap（双细胞）均值 0.23。
+- **阈值扫描**：θ=0.50 → coverage 0.925 / adoptedAccuracy 0.9865 / trap 误采纳 8.3%；**θ=0.55 → coverage 0.9125 / adoptedAccuracy 1.0 / trap 误采纳 0**；θ=0.60 → coverage 0.90 / 1.0 / 0。
+- **2 个 argmax 失误（如实登记）**：mc-amb-02（CD8 vs 细胞毒性 T/NK，conf 0.11）、mc-amb-12（NK vs 细胞毒性 T/NK，conf 0.51）——均落在「细胞毒性 T/NK」重叠带，且置信度均低于 θ → 门控正确路由回退，**门控后零错误进入采纳集**。
+- 延迟 P50 301ms / P95 721ms；input tokens 44,836（92 次，约 487/次）；模型 pin jev-1.13.0。
+
+### 7.2 裁决项（推荐已按数据定版）
+
+| 项 | 推荐裁决 | 依据 |
+| --- | --- | --- |
+| **D-1 题型** | choice，唯一候选也出站（补 confidence） | partial 2 基因子集 accuracy 1.0 / conf 1.0，出站成本约 487 token/次、P50 301ms，interpret 低频无压力 |
+| **D-2 消费契约** | `cellTypeHints` 字符串不动 + additive `cellTypeHintsDetailed: {cluster, type, confidence, adopted, probabilities}[]`（仅决策路径样本进入） | 零破坏、可回放；`adopted=false` 即回退样本（type=现行规则表结果） |
+| **D-3 语料构建法** | 按 §3 D-3 交付定版（104 条，构建法与 gold 判据见 corpus note） | 实测通过；语料与校准证据同入库 |
+| **D-4 默认开关位** | **默认关 + 显式开 `BIOF3_JEV_MARKER_GUARD=1`**（同 W0-P2 先例）；P2 实机零回归后翻默认另行裁决 | 用户可见科学提示面，可信度优先；未门控歧义 88.2% 说明回退路径必须常备 |
+| **D-5 阈值** | **单阈值 θ_high=0.55**（conf≥0.55 采纳附置信度，否则回退现行字符串） | θ=0.55 为 coverage≥0.85 约束下 adoptedAccuracy=1.0 + trap 误采纳=0 的最高覆盖档；choice 题型 confidence 天然单门控，W0-P1 noul 的三区间双阈值不适用（题型差异，非偏差），中间带回退语义由「<θ 即回退」承接 |
+
+**P0 结论**：证据门通过（accuracy 1.0@0.55 ≥ 0.95 门、coverage 0.9125 ≥ 0.85 门、trap 0% ≤ 5% 门）。D-1~D-5 用户裁决后进 P1。
