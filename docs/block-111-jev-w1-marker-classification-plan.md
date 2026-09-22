@@ -1,7 +1,7 @@
 # BLOCK-111-JEV-W1-MARKER-CLASSIFICATION 计划：marker→细胞类型判别二跳（决策内化弧 W1-1）
 
 **Plan ID**：`BLOCK-111-JEV-W1-MARKER-CLASSIFICATION`
-**状态**：`active（P1 接线完成（2026-09-22）：interpret.js 二跳 + ai-legacy.js cellTypeHintsDetailed additive + 契约 14/14 + test:changed 159 项 0 红；D-1~D-5 按推荐先行留痕（§7.2，用户评审可翻，D 项均为单点常量可翻）；剩 P2 实机验收 + closeout 十门。P0 校准 gate.passed=true（104 条语料 / 92 choice 可评估 / 0 API 失败）；2026-09-22 用户裁决启动 W1 弧线；本包=决策判断模式内化弧 W1 队列第 1 点，逐点立项不打包；弧线底稿=docs/planning/decision-primitive-internalization-arc.md §W1）`
+**状态**：`completed（2026-09-22 当日立项当日收口：P0 校准 gate.passed（104 条语料，θ=0.55：adoptedAccuracy 1.0/coverage 0.9125/trap 0%）→ P1 接线（契约 14/14 + test:changed 159 项 0 红）→ P2 A/B 生产路径 gate.passed（gatedAccuracy 1.0 / endToEnd 0.925 ≥ legacy 0.8375）+ 实机 flow block111-marker-live **7/7**。D-1~D-5 按推荐先行留痕（§7.2/§7.3，用户评审可翻）。本包=决策判断模式内化弧 W1 队列第 1 点（逐点立项）；W1 队列 2~5 点仍需各自单独裁决；弧线底稿=docs/planning/decision-primitive-internalization-arc.md §W1）`
 **立项日期**：2026-09-22
 **最后更新**：2026-09-22（立项登记 active/P0-LAUNCH。用户裁决原话「1」——AskUserQuestion 菜单选项 1「Jev W1 决策内化」，选项描述列明首序三候选「marker 判别/意图路由/工具预路由，逐点立项」；首点按弧线 §W1 预登记队列次序取第 1 点。W0=BLOCK-110 已整包 completed（closeout 十门全绿，提交至 4dbfeff7），W0 证据门绿。）
 **责任轨道**：BLOCK（后端决策接点 + 校准 harness + REST 契约 additive，跨 P 阶段串行）
@@ -124,3 +124,9 @@ markers[] ─→ 规则表候选生成（A 型，零出站）：候选集 = matc
 - `core/biof3-server/routes/ai-legacy.js`：guard 关=原路径逐字节等价（零新键）；guard 开=`cellTypeHints` 照旧 + `cellTypeHintsDetailed`（`{cluster,type,confidence,adopted,probabilities?}`）additive。
 - `scripts/block111-p0-calibrate.mjs`：候选生成与请求组装改引 interpret.js 单源（删本地副本），`--dry` 回归绿。
 - 契约 `test/block111-marker-classification.test.mjs` **14/14 绿**（现行契约钉/候选推导/请求形状/guard 关零出站/零候选零出站/no_key/timeout×3/http_error/network_error/伪造候选拒收/采纳/低于阈值回退/阈值边界 0.55/歧义陷阱端到端）；`npm run test:changed` 路由 **159 项 0 红 3 skip**；impact-map 登记 `block111-jev-w1-marker` 规则。
+
+### 7.4 P2 落地记录（2026-09-22，当日收口）
+
+- **A/B 生产路径**（`scripts/block111-p1-ab.mjs`，guard=1 + 真实 key，92 choice 可评估 + 12 零候选边界）：legacyBaseline **0.8375** / coverage **0.9125** / gatedAccuracy **1.0** / endToEnd **0.925** ≥ legacy ✓ / 零候选边界 **12/12** 直返 null；gate.passed=true（`acceptance/block-111/p1-ab.json`）。**诚实登记（轮间方差）**：本轮 1/12 双细胞陷阱被采纳（trapFalseAdoption 8.3%，校准轮为 0%）——θ=0.55 位于该陷阱置信度（≈0.5-0.6 漂移带）边缘；采纳态附带 confidence 与 probabilities 呈现、且 D-4 默认关（显式开才生效），风险有界；若用户裁决收紧，θ=0.60（校准 coverage 0.90）为备选档，**改阈值必须先重校准**。
+- **实机腿** flow `block111-marker-live` **7/7 allPass**（dev 栈以 `BIOF3_JEV_MARKER_GUARD=1` + jev.env 重启；证据 `acceptance/block-111/block111-marker-live-live.json`）：M0 端点 200 / M1 detailed 四簇在场 / M2 canonical T adopted=true conf=1 / M3 双细胞簇模型给 conf 0.5 < 0.55 → adopted=false（正确回退，模型行为留痕）/ M4 零候选簇 {type:null} / **M5 老契约 cellTypeHints 深等于规则表预期（零变化）** / M6 canonical B adopted=true conf=1。
+- 降级五态（缺 key/超时/http 错/网络错/杀开关）由契约测试覆盖（单后端进程无法运行中翻 env，flow 头注已注明）。

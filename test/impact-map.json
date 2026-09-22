@@ -2172,8 +2172,10 @@
         "core/biof3-server/helpers/interpret.js",
         "core/biof3-server/routes/ai-legacy.js",
         "scripts/block111-p0-calibrate.mjs",
+        "scripts/block111-p1-ab.mjs",
         "acceptance/block-111/**",
-        "test/block111-*.test.mjs"
+        "test/block111-*.test.mjs",
+        ".agents/skills/gewu-dev-infra/dev-verify/flows/block111-marker-live.cjs"
       ],
       "tests": [
         "test/block111-marker-classification.test.mjs"

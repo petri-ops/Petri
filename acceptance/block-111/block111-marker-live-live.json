@@ -1,0 +1,43 @@
+{
+  "name": "block111-marker-live",
+  "startedAt": "2026-09-22T05:52:18.259Z",
+  "finishedAt": "2026-09-22T05:52:23.484Z",
+  "assertions": [
+    {
+      "name": "M0_interpret_200_ok",
+      "pass": true,
+      "detail": "http=200 body={\"status\":\"ok\",\"interpretation\":\"1. **数据质量评估**：2700个细胞、13714个基因规模适中；但c2同时表达T/B标志物，提示双细胞；c3仅ACTB/GAPDH，提示空液滴或低质量细胞。整体需先过滤再解读。\\n\\n2. **主要细胞类型推断**：c1为T细胞"
+    },
+    {
+      "name": "M1_detailed_present_array",
+      "pass": true,
+      "detail": "detailed=[{\"cluster\":\"c1_t_canon\",\"type\":\"T 细胞 (T cell)\",\"confidence\":1,\"adopted\":true,\"probabilities\":{\"T 细胞 (T cell)\":1}},{\"cluster\":\"c2_doublet\",\"type\":\"T 细胞 (T cell)\",\"confidence\":0.5,\"adopted\":false,\"prob"
+    },
+    {
+      "name": "M2_canonical_t_adopted",
+      "pass": true,
+      "detail": "c1={\"cluster\":\"c1_t_canon\",\"type\":\"T 细胞 (T cell)\",\"confidence\":1,\"adopted\":true,\"probabilities\":{\"T 细胞 (T cell)\":1}}"
+    },
+    {
+      "name": "M3_doublet_entry_with_confidence",
+      "pass": true,
+      "detail": "c2={\"cluster\":\"c2_doublet\",\"type\":\"T 细胞 (T cell)\",\"confidence\":0.5,\"adopted\":false,\"probabilities\":{\"T 细胞 (T cell)\":0.25,\"B 细胞\":0.75}}"
+    },
+    {
+      "name": "M4_empty_cluster_no_candidates",
+      "pass": true,
+      "detail": "c3={\"cluster\":\"c3_empty\",\"type\":null,\"confidence\":null,\"adopted\":false}"
+    },
+    {
+      "name": "M5_legacy_hints_unchanged",
+      "pass": true,
+      "detail": "cellTypeHints={\"c1_t_canon\":\"T 细胞 (T cell)\",\"c2_doublet\":\"T 细胞 (T cell)\",\"c4_b_canon\":\"B 细胞\"} expected={\"c1_t_canon\":\"T 细胞 (T cell)\",\"c2_doublet\":\"T 细胞 (T cell)\",\"c4_b_canon\":\"B 细胞\"}"
+    },
+    {
+      "name": "M6_canonical_b_adopted",
+      "pass": true,
+      "detail": "c4={\"cluster\":\"c4_b_canon\",\"type\":\"B 细胞\",\"confidence\":1,\"adopted\":true,\"probabilities\":{\"B 细胞\":1}}"
+    }
+  ],
+  "allPass": true
+}

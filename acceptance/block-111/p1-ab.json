@@ -1,0 +1,953 @@
+{
+  "kind": "block111-p1-ab",
+  "version": "1.0.0",
+  "capturedAt": "2026-09-22T05:40:08.337Z",
+  "sourceCommit": "70d8efb4c0aec838619eec81e04e31feec8a59cf",
+  "model": "jev-1.13.0",
+  "productionPath": "core/biof3-server/helpers/interpret.js lookupCellTypeWithConfidence（guard=1 显式开启）",
+  "corpus": {
+    "file": "corpus-marker-celltype.json",
+    "choiceEvaluable": 92,
+    "emptyBoundary": 12
+  },
+  "apiFailures": 0,
+  "validCount": 92,
+  "emptyBoundaryPass": "12/12",
+  "legacyBaseline": 0.8375,
+  "adoptedCount": 73,
+  "coverage": 0.9125,
+  "gatedAccuracy": 1,
+  "endToEndAccuracy": 0.925,
+  "trapFalseAdoption": 0.0833,
+  "agreementWithLegacyWhenAdopted": 0.9041,
+  "wallClockMeanMsPerSample": 63.9022,
+  "gate": {
+    "criterion": "gatedAccuracy ≥ 0.95 且 endToEndAccuracy ≥ legacyBaseline（终态=采纳用二跳、回退用现行）",
+    "gatedAccuracy": 1,
+    "endToEndAccuracy": 0.925,
+    "legacyBaseline": 0.8375,
+    "passed": true
+  },
+  "perSample": [
+    {
+      "id": "mc-can-01",
+      "kind": "canonical",
+      "gold": "T 细胞 (T cell)",
+      "legacy": "T 细胞 (T cell)",
+      "adopted": true,
+      "decisionType": "T 细胞 (T cell)",
+      "confidence": 1,
+      "finalType": "T 细胞 (T cell)"
+    },
+    {
+      "id": "mc-can-02",
+      "kind": "canonical",
+      "gold": "CD4+ Naive T 细胞",
+      "legacy": "CD4+ Naive T 细胞",
+      "adopted": true,
+      "decisionType": "CD4+ Naive T 细胞",
+      "confidence": 1,
+      "finalType": "CD4+ Naive T 细胞"
+    },
+    {
+      "id": "mc-can-03",
+      "kind": "canonical",
+      "gold": "CD8+ T 细胞",
+      "legacy": "CD8+ T 细胞",
+      "adopted": true,
+      "decisionType": "CD8+ T 细胞",
+      "confidence": 1,
+      "finalType": "CD8+ T 细胞"
+    },
+    {
+      "id": "mc-can-04",
+      "kind": "canonical",
+      "gold": "细胞毒性 T/NK 细胞",
+      "legacy": "细胞毒性 T/NK 细胞",
+      "adopted": true,
+      "decisionType": "细胞毒性 T/NK 细胞",
+      "confidence": 1,
+      "finalType": "细胞毒性 T/NK 细胞"
+    },
+    {
+      "id": "mc-can-05",
+      "kind": "canonical",
+      "gold": "调节性 T 细胞 (Treg)",
+      "legacy": "调节性 T 细胞 (Treg)",
+      "adopted": true,
+      "decisionType": "调节性 T 细胞 (Treg)",
+      "confidence": 1,
+      "finalType": "调节性 T 细胞 (Treg)"
+    },
+    {
+      "id": "mc-can-06",
+      "kind": "canonical",
+      "gold": "B 细胞",
+      "legacy": "B 细胞",
+      "adopted": true,
+      "decisionType": "B 细胞",
+      "confidence": 1,
+      "finalType": "B 细胞"
+    },
+    {
+      "id": "mc-can-07",
+      "kind": "canonical",
+      "gold": "浆细胞 (Plasma cell)",
+      "legacy": "浆细胞 (Plasma cell)",
+      "adopted": true,
+      "decisionType": "浆细胞 (Plasma cell)",
+      "confidence": 1,
+      "finalType": "浆细胞 (Plasma cell)"
+    },
+    {
+      "id": "mc-can-08",
+      "kind": "canonical",
+      "gold": "单核细胞 (Monocyte)",
+      "legacy": "单核细胞 (Monocyte)",
+      "adopted": true,
+      "decisionType": "单核细胞 (Monocyte)",
+      "confidence": 1,
+      "finalType": "单核细胞 (Monocyte)"
+    },
+    {
+      "id": "mc-can-09",
+      "kind": "canonical",
+      "gold": "非经典单核细胞 (CD16+ Monocyte)",
+      "legacy": "非经典单核细胞 (CD16+ Monocyte)",
+      "adopted": true,
+      "decisionType": "非经典单核细胞 (CD16+ Monocyte)",
+      "confidence": 1,
+      "finalType": "非经典单核细胞 (CD16+ Monocyte)"
+    },
+    {
+      "id": "mc-can-10",
+      "kind": "canonical",
+      "gold": "巨噬细胞 (Macrophage)",
+      "legacy": "巨噬细胞 (Macrophage)",
+      "adopted": true,
+      "decisionType": "巨噬细胞 (Macrophage)",
+      "confidence": 1,
+      "finalType": "巨噬细胞 (Macrophage)"
+    },
+    {
+      "id": "mc-can-11",
+      "kind": "canonical",
+      "gold": "树突状细胞 (DC)",
+      "legacy": "树突状细胞 (DC)",
+      "adopted": true,
+      "decisionType": "树突状细胞 (DC)",
+      "confidence": 1,
+      "finalType": "树突状细胞 (DC)"
+    },
+    {
+      "id": "mc-can-12",
+      "kind": "canonical",
+      "gold": "NK 细胞",
+      "legacy": "NK 细胞",
+      "adopted": true,
+      "decisionType": "NK 细胞",
+      "confidence": 1,
+      "finalType": "NK 细胞"
+    },
+    {
+      "id": "mc-can-13",
+      "kind": "canonical",
+      "gold": "肥大细胞 (Mast cell)",
+      "legacy": "肥大细胞 (Mast cell)",
+      "adopted": true,
+      "decisionType": "肥大细胞 (Mast cell)",
+      "confidence": 1,
+      "finalType": "肥大细胞 (Mast cell)"
+    },
+    {
+      "id": "mc-can-14",
+      "kind": "canonical",
+      "gold": "红细胞 (Erythrocyte)",
+      "legacy": "红细胞 (Erythrocyte)",
+      "adopted": true,
+      "decisionType": "红细胞 (Erythrocyte)",
+      "confidence": 1,
+      "finalType": "红细胞 (Erythrocyte)"
+    },
+    {
+      "id": "mc-can-15",
+      "kind": "canonical",
+      "gold": "血小板 (Platelet)",
+      "legacy": "血小板 (Platelet)",
+      "adopted": true,
+      "decisionType": "血小板 (Platelet)",
+      "confidence": 1,
+      "finalType": "血小板 (Platelet)"
+    },
+    {
+      "id": "mc-can-16",
+      "kind": "canonical",
+      "gold": "神经元 (Neuron)",
+      "legacy": "神经元 (Neuron)",
+      "adopted": true,
+      "decisionType": "神经元 (Neuron)",
+      "confidence": 1,
+      "finalType": "神经元 (Neuron)"
+    },
+    {
+      "id": "mc-can-17",
+      "kind": "canonical",
+      "gold": "星形胶质细胞 (Astrocyte)",
+      "legacy": "星形胶质细胞 (Astrocyte)",
+      "adopted": true,
+      "decisionType": "星形胶质细胞 (Astrocyte)",
+      "confidence": 1,
+      "finalType": "星形胶质细胞 (Astrocyte)"
+    },
+    {
+      "id": "mc-can-18",
+      "kind": "canonical",
+      "gold": "少突胶质细胞 (Oligodendrocyte)",
+      "legacy": "少突胶质细胞 (Oligodendrocyte)",
+      "adopted": true,
+      "decisionType": "少突胶质细胞 (Oligodendrocyte)",
+      "confidence": 1,
+      "finalType": "少突胶质细胞 (Oligodendrocyte)"
+    },
+    {
+      "id": "mc-can-19",
+      "kind": "canonical",
+      "gold": "成纤维细胞 (Fibroblast)",
+      "legacy": "成纤维细胞 (Fibroblast)",
+      "adopted": true,
+      "decisionType": "成纤维细胞 (Fibroblast)",
+      "confidence": 1,
+      "finalType": "成纤维细胞 (Fibroblast)"
+    },
+    {
+      "id": "mc-can-20",
+      "kind": "canonical",
+      "gold": "内皮细胞 (Endothelial)",
+      "legacy": "内皮细胞 (Endothelial)",
+      "adopted": true,
+      "decisionType": "内皮细胞 (Endothelial)",
+      "confidence": 1,
+      "finalType": "内皮细胞 (Endothelial)"
+    },
+    {
+      "id": "mc-can-21",
+      "kind": "canonical",
+      "gold": "平滑肌细胞 (Smooth muscle)",
+      "legacy": "平滑肌细胞 (Smooth muscle)",
+      "adopted": true,
+      "decisionType": "平滑肌细胞 (Smooth muscle)",
+      "confidence": 1,
+      "finalType": "平滑肌细胞 (Smooth muscle)"
+    },
+    {
+      "id": "mc-can-22",
+      "kind": "canonical",
+      "gold": "上皮细胞 (Epithelial)",
+      "legacy": "上皮细胞 (Epithelial)",
+      "adopted": true,
+      "decisionType": "上皮细胞 (Epithelial)",
+      "confidence": 1,
+      "finalType": "上皮细胞 (Epithelial)"
+    },
+    {
+      "id": "mc-par-01",
+      "kind": "partial",
+      "gold": "T 细胞 (T cell)",
+      "legacy": "T 细胞 (T cell)",
+      "adopted": true,
+      "decisionType": "T 细胞 (T cell)",
+      "confidence": 1,
+      "finalType": "T 细胞 (T cell)"
+    },
+    {
+      "id": "mc-par-02",
+      "kind": "partial",
+      "gold": "CD4+ Naive T 细胞",
+      "legacy": "CD4+ Naive T 细胞",
+      "adopted": true,
+      "decisionType": "CD4+ Naive T 细胞",
+      "confidence": 1,
+      "finalType": "CD4+ Naive T 细胞"
+    },
+    {
+      "id": "mc-par-04",
+      "kind": "partial",
+      "gold": "细胞毒性 T/NK 细胞",
+      "legacy": "细胞毒性 T/NK 细胞",
+      "adopted": true,
+      "decisionType": "细胞毒性 T/NK 细胞",
+      "confidence": 1,
+      "finalType": "细胞毒性 T/NK 细胞"
+    },
+    {
+      "id": "mc-par-05",
+      "kind": "partial",
+      "gold": "调节性 T 细胞 (Treg)",
+      "legacy": "调节性 T 细胞 (Treg)",
+      "adopted": true,
+      "decisionType": "调节性 T 细胞 (Treg)",
+      "confidence": 1,
+      "finalType": "调节性 T 细胞 (Treg)"
+    },
+    {
+      "id": "mc-par-06",
+      "kind": "partial",
+      "gold": "B 细胞",
+      "legacy": "B 细胞",
+      "adopted": true,
+      "decisionType": "B 细胞",
+      "confidence": 1,
+      "finalType": "B 细胞"
+    },
+    {
+      "id": "mc-par-07",
+      "kind": "partial",
+      "gold": "浆细胞 (Plasma cell)",
+      "legacy": "浆细胞 (Plasma cell)",
+      "adopted": true,
+      "decisionType": "浆细胞 (Plasma cell)",
+      "confidence": 1,
+      "finalType": "浆细胞 (Plasma cell)"
+    },
+    {
+      "id": "mc-par-08",
+      "kind": "partial",
+      "gold": "单核细胞 (Monocyte)",
+      "legacy": "单核细胞 (Monocyte)",
+      "adopted": true,
+      "decisionType": "单核细胞 (Monocyte)",
+      "confidence": 1,
+      "finalType": "单核细胞 (Monocyte)"
+    },
+    {
+      "id": "mc-par-11",
+      "kind": "partial",
+      "gold": "树突状细胞 (DC)",
+      "legacy": "树突状细胞 (DC)",
+      "adopted": true,
+      "decisionType": "树突状细胞 (DC)",
+      "confidence": 1,
+      "finalType": "树突状细胞 (DC)"
+    },
+    {
+      "id": "mc-par-12",
+      "kind": "partial",
+      "gold": "NK 细胞",
+      "legacy": "NK 细胞",
+      "adopted": true,
+      "decisionType": "NK 细胞",
+      "confidence": 1,
+      "finalType": "NK 细胞"
+    },
+    {
+      "id": "mc-par-13",
+      "kind": "partial",
+      "gold": "肥大细胞 (Mast cell)",
+      "legacy": "肥大细胞 (Mast cell)",
+      "adopted": true,
+      "decisionType": "肥大细胞 (Mast cell)",
+      "confidence": 1,
+      "finalType": "肥大细胞 (Mast cell)"
+    },
+    {
+      "id": "mc-par-14",
+      "kind": "partial",
+      "gold": "红细胞 (Erythrocyte)",
+      "legacy": "红细胞 (Erythrocyte)",
+      "adopted": true,
+      "decisionType": "红细胞 (Erythrocyte)",
+      "confidence": 1,
+      "finalType": "红细胞 (Erythrocyte)"
+    },
+    {
+      "id": "mc-par-15",
+      "kind": "partial",
+      "gold": "血小板 (Platelet)",
+      "legacy": "血小板 (Platelet)",
+      "adopted": true,
+      "decisionType": "血小板 (Platelet)",
+      "confidence": 1,
+      "finalType": "血小板 (Platelet)"
+    },
+    {
+      "id": "mc-par-16",
+      "kind": "partial",
+      "gold": "神经元 (Neuron)",
+      "legacy": "神经元 (Neuron)",
+      "adopted": true,
+      "decisionType": "神经元 (Neuron)",
+      "confidence": 1,
+      "finalType": "神经元 (Neuron)"
+    },
+    {
+      "id": "mc-par-17",
+      "kind": "partial",
+      "gold": "星形胶质细胞 (Astrocyte)",
+      "legacy": "星形胶质细胞 (Astrocyte)",
+      "adopted": true,
+      "decisionType": "星形胶质细胞 (Astrocyte)",
+      "confidence": 1,
+      "finalType": "星形胶质细胞 (Astrocyte)"
+    },
+    {
+      "id": "mc-par-18",
+      "kind": "partial",
+      "gold": "少突胶质细胞 (Oligodendrocyte)",
+      "legacy": "少突胶质细胞 (Oligodendrocyte)",
+      "adopted": true,
+      "decisionType": "少突胶质细胞 (Oligodendrocyte)",
+      "confidence": 1,
+      "finalType": "少突胶质细胞 (Oligodendrocyte)"
+    },
+    {
+      "id": "mc-par-19",
+      "kind": "partial",
+      "gold": "成纤维细胞 (Fibroblast)",
+      "legacy": "成纤维细胞 (Fibroblast)",
+      "adopted": true,
+      "decisionType": "成纤维细胞 (Fibroblast)",
+      "confidence": 1,
+      "finalType": "成纤维细胞 (Fibroblast)"
+    },
+    {
+      "id": "mc-par-20",
+      "kind": "partial",
+      "gold": "内皮细胞 (Endothelial)",
+      "legacy": "内皮细胞 (Endothelial)",
+      "adopted": true,
+      "decisionType": "内皮细胞 (Endothelial)",
+      "confidence": 1,
+      "finalType": "内皮细胞 (Endothelial)"
+    },
+    {
+      "id": "mc-par-21",
+      "kind": "partial",
+      "gold": "平滑肌细胞 (Smooth muscle)",
+      "legacy": "平滑肌细胞 (Smooth muscle)",
+      "adopted": true,
+      "decisionType": "平滑肌细胞 (Smooth muscle)",
+      "confidence": 1,
+      "finalType": "平滑肌细胞 (Smooth muscle)"
+    },
+    {
+      "id": "mc-par-22",
+      "kind": "partial",
+      "gold": "上皮细胞 (Epithelial)",
+      "legacy": "上皮细胞 (Epithelial)",
+      "adopted": true,
+      "decisionType": "上皮细胞 (Epithelial)",
+      "confidence": 1,
+      "finalType": "上皮细胞 (Epithelial)"
+    },
+    {
+      "id": "mc-noi-01",
+      "kind": "noisy",
+      "gold": "T 细胞 (T cell)",
+      "legacy": "T 细胞 (T cell)",
+      "adopted": true,
+      "decisionType": "T 细胞 (T cell)",
+      "confidence": 1,
+      "finalType": "T 细胞 (T cell)"
+    },
+    {
+      "id": "mc-noi-02",
+      "kind": "noisy",
+      "gold": "CD4+ Naive T 细胞",
+      "legacy": "CD4+ Naive T 细胞",
+      "adopted": true,
+      "decisionType": "CD4+ Naive T 细胞",
+      "confidence": 1,
+      "finalType": "CD4+ Naive T 细胞"
+    },
+    {
+      "id": "mc-noi-03",
+      "kind": "noisy",
+      "gold": "CD8+ T 细胞",
+      "legacy": "CD8+ T 细胞",
+      "adopted": true,
+      "decisionType": "CD8+ T 细胞",
+      "confidence": 1,
+      "finalType": "CD8+ T 细胞"
+    },
+    {
+      "id": "mc-noi-04",
+      "kind": "noisy",
+      "gold": "细胞毒性 T/NK 细胞",
+      "legacy": "细胞毒性 T/NK 细胞",
+      "adopted": true,
+      "decisionType": "细胞毒性 T/NK 细胞",
+      "confidence": 1,
+      "finalType": "细胞毒性 T/NK 细胞"
+    },
+    {
+      "id": "mc-noi-05",
+      "kind": "noisy",
+      "gold": "调节性 T 细胞 (Treg)",
+      "legacy": "调节性 T 细胞 (Treg)",
+      "adopted": true,
+      "decisionType": "调节性 T 细胞 (Treg)",
+      "confidence": 1,
+      "finalType": "调节性 T 细胞 (Treg)"
+    },
+    {
+      "id": "mc-noi-06",
+      "kind": "noisy",
+      "gold": "B 细胞",
+      "legacy": "B 细胞",
+      "adopted": true,
+      "decisionType": "B 细胞",
+      "confidence": 1,
+      "finalType": "B 细胞"
+    },
+    {
+      "id": "mc-noi-07",
+      "kind": "noisy",
+      "gold": "浆细胞 (Plasma cell)",
+      "legacy": "浆细胞 (Plasma cell)",
+      "adopted": true,
+      "decisionType": "浆细胞 (Plasma cell)",
+      "confidence": 1,
+      "finalType": "浆细胞 (Plasma cell)"
+    },
+    {
+      "id": "mc-noi-08",
+      "kind": "noisy",
+      "gold": "单核细胞 (Monocyte)",
+      "legacy": "单核细胞 (Monocyte)",
+      "adopted": true,
+      "decisionType": "单核细胞 (Monocyte)",
+      "confidence": 1,
+      "finalType": "单核细胞 (Monocyte)"
+    },
+    {
+      "id": "mc-noi-09",
+      "kind": "noisy",
+      "gold": "非经典单核细胞 (CD16+ Monocyte)",
+      "legacy": "非经典单核细胞 (CD16+ Monocyte)",
+      "adopted": true,
+      "decisionType": "非经典单核细胞 (CD16+ Monocyte)",
+      "confidence": 1,
+      "finalType": "非经典单核细胞 (CD16+ Monocyte)"
+    },
+    {
+      "id": "mc-noi-10",
+      "kind": "noisy",
+      "gold": "巨噬细胞 (Macrophage)",
+      "legacy": "巨噬细胞 (Macrophage)",
+      "adopted": true,
+      "decisionType": "巨噬细胞 (Macrophage)",
+      "confidence": 1,
+      "finalType": "巨噬细胞 (Macrophage)"
+    },
+    {
+      "id": "mc-noi-11",
+      "kind": "noisy",
+      "gold": "树突状细胞 (DC)",
+      "legacy": "树突状细胞 (DC)",
+      "adopted": true,
+      "decisionType": "树突状细胞 (DC)",
+      "confidence": 1,
+      "finalType": "树突状细胞 (DC)"
+    },
+    {
+      "id": "mc-noi-12",
+      "kind": "noisy",
+      "gold": "NK 细胞",
+      "legacy": "NK 细胞",
+      "adopted": true,
+      "decisionType": "NK 细胞",
+      "confidence": 1,
+      "finalType": "NK 细胞"
+    },
+    {
+      "id": "mc-noi-13",
+      "kind": "noisy",
+      "gold": "肥大细胞 (Mast cell)",
+      "legacy": "肥大细胞 (Mast cell)",
+      "adopted": true,
+      "decisionType": "肥大细胞 (Mast cell)",
+      "confidence": 1,
+      "finalType": "肥大细胞 (Mast cell)"
+    },
+    {
+      "id": "mc-noi-14",
+      "kind": "noisy",
+      "gold": "红细胞 (Erythrocyte)",
+      "legacy": "红细胞 (Erythrocyte)",
+      "adopted": true,
+      "decisionType": "红细胞 (Erythrocyte)",
+      "confidence": 1,
+      "finalType": "红细胞 (Erythrocyte)"
+    },
+    {
+      "id": "mc-noi-15",
+      "kind": "noisy",
+      "gold": "血小板 (Platelet)",
+      "legacy": "血小板 (Platelet)",
+      "adopted": true,
+      "decisionType": "血小板 (Platelet)",
+      "confidence": 1,
+      "finalType": "血小板 (Platelet)"
+    },
+    {
+      "id": "mc-noi-16",
+      "kind": "noisy",
+      "gold": "神经元 (Neuron)",
+      "legacy": "神经元 (Neuron)",
+      "adopted": true,
+      "decisionType": "神经元 (Neuron)",
+      "confidence": 1,
+      "finalType": "神经元 (Neuron)"
+    },
+    {
+      "id": "mc-noi-17",
+      "kind": "noisy",
+      "gold": "星形胶质细胞 (Astrocyte)",
+      "legacy": "星形胶质细胞 (Astrocyte)",
+      "adopted": true,
+      "decisionType": "星形胶质细胞 (Astrocyte)",
+      "confidence": 1,
+      "finalType": "星形胶质细胞 (Astrocyte)"
+    },
+    {
+      "id": "mc-noi-18",
+      "kind": "noisy",
+      "gold": "少突胶质细胞 (Oligodendrocyte)",
+      "legacy": "少突胶质细胞 (Oligodendrocyte)",
+      "adopted": true,
+      "decisionType": "少突胶质细胞 (Oligodendrocyte)",
+      "confidence": 1,
+      "finalType": "少突胶质细胞 (Oligodendrocyte)"
+    },
+    {
+      "id": "mc-noi-19",
+      "kind": "noisy",
+      "gold": "成纤维细胞 (Fibroblast)",
+      "legacy": "成纤维细胞 (Fibroblast)",
+      "adopted": true,
+      "decisionType": "成纤维细胞 (Fibroblast)",
+      "confidence": 1,
+      "finalType": "成纤维细胞 (Fibroblast)"
+    },
+    {
+      "id": "mc-noi-20",
+      "kind": "noisy",
+      "gold": "内皮细胞 (Endothelial)",
+      "legacy": "内皮细胞 (Endothelial)",
+      "adopted": true,
+      "decisionType": "内皮细胞 (Endothelial)",
+      "confidence": 1,
+      "finalType": "内皮细胞 (Endothelial)"
+    },
+    {
+      "id": "mc-noi-21",
+      "kind": "noisy",
+      "gold": "平滑肌细胞 (Smooth muscle)",
+      "legacy": "平滑肌细胞 (Smooth muscle)",
+      "adopted": true,
+      "decisionType": "平滑肌细胞 (Smooth muscle)",
+      "confidence": 1,
+      "finalType": "平滑肌细胞 (Smooth muscle)"
+    },
+    {
+      "id": "mc-noi-22",
+      "kind": "noisy",
+      "gold": "上皮细胞 (Epithelial)",
+      "legacy": "上皮细胞 (Epithelial)",
+      "adopted": true,
+      "decisionType": "上皮细胞 (Epithelial)",
+      "confidence": 1,
+      "finalType": "上皮细胞 (Epithelial)"
+    },
+    {
+      "id": "mc-amb-01",
+      "kind": "ambiguous",
+      "gold": "细胞毒性 T/NK 细胞",
+      "legacy": "T 细胞 (T cell)",
+      "adopted": true,
+      "decisionType": "细胞毒性 T/NK 细胞",
+      "confidence": 0.93,
+      "finalType": "细胞毒性 T/NK 细胞"
+    },
+    {
+      "id": "mc-amb-02",
+      "kind": "ambiguous",
+      "gold": "CD8+ T 细胞",
+      "legacy": "CD8+ T 细胞",
+      "adopted": false,
+      "decisionType": "CD8+ T 细胞",
+      "confidence": 0.01,
+      "finalType": "CD8+ T 细胞"
+    },
+    {
+      "id": "mc-amb-03",
+      "kind": "ambiguous",
+      "gold": "调节性 T 细胞 (Treg)",
+      "legacy": "CD4+ Naive T 细胞",
+      "adopted": true,
+      "decisionType": "调节性 T 细胞 (Treg)",
+      "confidence": 0.98,
+      "finalType": "调节性 T 细胞 (Treg)"
+    },
+    {
+      "id": "mc-amb-04",
+      "kind": "ambiguous",
+      "gold": "非经典单核细胞 (CD16+ Monocyte)",
+      "legacy": "单核细胞 (Monocyte)",
+      "adopted": true,
+      "decisionType": "非经典单核细胞 (CD16+ Monocyte)",
+      "confidence": 0.63,
+      "finalType": "非经典单核细胞 (CD16+ Monocyte)"
+    },
+    {
+      "id": "mc-amb-05",
+      "kind": "ambiguous",
+      "gold": "巨噬细胞 (Macrophage)",
+      "legacy": "单核细胞 (Monocyte)",
+      "adopted": true,
+      "decisionType": "巨噬细胞 (Macrophage)",
+      "confidence": 0.95,
+      "finalType": "巨噬细胞 (Macrophage)"
+    },
+    {
+      "id": "mc-amb-06",
+      "kind": "ambiguous",
+      "gold": "树突状细胞 (DC)",
+      "legacy": "单核细胞 (Monocyte)",
+      "adopted": false,
+      "decisionType": "单核细胞 (Monocyte)",
+      "confidence": 0.13,
+      "finalType": "单核细胞 (Monocyte)"
+    },
+    {
+      "id": "mc-amb-07",
+      "kind": "ambiguous",
+      "gold": "NK 细胞",
+      "legacy": "细胞毒性 T/NK 细胞",
+      "adopted": false,
+      "decisionType": "细胞毒性 T/NK 细胞",
+      "confidence": 0.11,
+      "finalType": "细胞毒性 T/NK 细胞"
+    },
+    {
+      "id": "mc-amb-08",
+      "kind": "ambiguous",
+      "gold": "平滑肌细胞 (Smooth muscle)",
+      "legacy": "成纤维细胞 (Fibroblast)",
+      "adopted": false,
+      "decisionType": "成纤维细胞 (Fibroblast)",
+      "confidence": 0.02,
+      "finalType": "成纤维细胞 (Fibroblast)"
+    },
+    {
+      "id": "mc-amb-09",
+      "kind": "ambiguous",
+      "gold": "浆细胞 (Plasma cell)",
+      "legacy": "B 细胞",
+      "adopted": false,
+      "decisionType": "B 细胞",
+      "confidence": 0.53,
+      "finalType": "B 细胞"
+    },
+    {
+      "id": "mc-amb-10",
+      "kind": "ambiguous",
+      "gold": "CD4+ Naive T 细胞",
+      "legacy": "T 细胞 (T cell)",
+      "adopted": false,
+      "decisionType": "T 细胞 (T cell)",
+      "confidence": 0.4,
+      "finalType": "T 细胞 (T cell)"
+    },
+    {
+      "id": "mc-amb-11",
+      "kind": "ambiguous",
+      "gold": "调节性 T 细胞 (Treg)",
+      "legacy": "T 细胞 (T cell)",
+      "adopted": true,
+      "decisionType": "调节性 T 细胞 (Treg)",
+      "confidence": 0.97,
+      "finalType": "调节性 T 细胞 (Treg)"
+    },
+    {
+      "id": "mc-amb-12",
+      "kind": "ambiguous",
+      "gold": "NK 细胞",
+      "legacy": "细胞毒性 T/NK 细胞",
+      "adopted": false,
+      "decisionType": "细胞毒性 T/NK 细胞",
+      "confidence": 0.44,
+      "finalType": "细胞毒性 T/NK 细胞"
+    },
+    {
+      "id": "mc-amb-13",
+      "kind": "ambiguous",
+      "gold": "巨噬细胞 (Macrophage)",
+      "legacy": "巨噬细胞 (Macrophage)",
+      "adopted": true,
+      "decisionType": "巨噬细胞 (Macrophage)",
+      "confidence": 0.83,
+      "finalType": "巨噬细胞 (Macrophage)"
+    },
+    {
+      "id": "mc-amb-14",
+      "kind": "ambiguous",
+      "gold": "CD4+ Naive T 细胞",
+      "legacy": "T 细胞 (T cell)",
+      "adopted": true,
+      "decisionType": "CD4+ Naive T 细胞",
+      "confidence": 0.57,
+      "finalType": "CD4+ Naive T 细胞"
+    },
+    {
+      "id": "mc-amb-15",
+      "kind": "ambiguous",
+      "gold": "巨噬细胞 (Macrophage)",
+      "legacy": "非经典单核细胞 (CD16+ Monocyte)",
+      "adopted": true,
+      "decisionType": "巨噬细胞 (Macrophage)",
+      "confidence": 0.78,
+      "finalType": "巨噬细胞 (Macrophage)"
+    },
+    {
+      "id": "mc-amb-16",
+      "kind": "ambiguous",
+      "gold": "细胞毒性 T/NK 细胞",
+      "legacy": "细胞毒性 T/NK 细胞",
+      "adopted": true,
+      "decisionType": "细胞毒性 T/NK 细胞",
+      "confidence": 0.99,
+      "finalType": "细胞毒性 T/NK 细胞"
+    },
+    {
+      "id": "mc-amb-17",
+      "kind": "ambiguous",
+      "gold": "单核细胞 (Monocyte)",
+      "legacy": "单核细胞 (Monocyte)",
+      "adopted": true,
+      "decisionType": "单核细胞 (Monocyte)",
+      "confidence": 0.92,
+      "finalType": "单核细胞 (Monocyte)"
+    },
+    {
+      "id": "mc-trp-01",
+      "kind": "trap",
+      "gold": "双细胞/混杂（应低置信回退）",
+      "legacy": "T 细胞 (T cell)",
+      "adopted": true,
+      "decisionType": "B 细胞",
+      "confidence": 0.62,
+      "finalType": "B 细胞"
+    },
+    {
+      "id": "mc-trp-02",
+      "kind": "trap",
+      "gold": "双细胞/混杂（应低置信回退）",
+      "legacy": "单核细胞 (Monocyte)",
+      "adopted": false,
+      "decisionType": "单核细胞 (Monocyte)",
+      "confidence": 0.02,
+      "finalType": "单核细胞 (Monocyte)"
+    },
+    {
+      "id": "mc-trp-03",
+      "kind": "trap",
+      "gold": "双细胞/混杂（应低置信回退）",
+      "legacy": "CD8+ T 细胞",
+      "adopted": false,
+      "decisionType": "CD8+ T 细胞",
+      "confidence": 0.09,
+      "finalType": "CD8+ T 细胞"
+    },
+    {
+      "id": "mc-trp-04",
+      "kind": "trap",
+      "gold": "双细胞/混杂（应低置信回退）",
+      "legacy": "红细胞 (Erythrocyte)",
+      "adopted": false,
+      "decisionType": "红细胞 (Erythrocyte)",
+      "confidence": 0.42,
+      "finalType": "红细胞 (Erythrocyte)"
+    },
+    {
+      "id": "mc-trp-05",
+      "kind": "trap",
+      "gold": "双细胞/混杂（应低置信回退）",
+      "legacy": "神经元 (Neuron)",
+      "adopted": false,
+      "decisionType": "神经元 (Neuron)",
+      "confidence": 0.44,
+      "finalType": "神经元 (Neuron)"
+    },
+    {
+      "id": "mc-trp-06",
+      "kind": "trap",
+      "gold": "双细胞/混杂（应低置信回退）",
+      "legacy": "星形胶质细胞 (Astrocyte)",
+      "adopted": false,
+      "decisionType": "星形胶质细胞 (Astrocyte)",
+      "confidence": 0.05,
+      "finalType": "星形胶质细胞 (Astrocyte)"
+    },
+    {
+      "id": "mc-trp-07",
+      "kind": "trap",
+      "gold": "双细胞/混杂（应低置信回退）",
+      "legacy": "成纤维细胞 (Fibroblast)",
+      "adopted": false,
+      "decisionType": "成纤维细胞 (Fibroblast)",
+      "confidence": 0.12,
+      "finalType": "成纤维细胞 (Fibroblast)"
+    },
+    {
+      "id": "mc-trp-08",
+      "kind": "trap",
+      "gold": "双细胞/混杂（应低置信回退）",
+      "legacy": "内皮细胞 (Endothelial)",
+      "adopted": false,
+      "decisionType": "内皮细胞 (Endothelial)",
+      "confidence": 0.04,
+      "finalType": "内皮细胞 (Endothelial)"
+    },
+    {
+      "id": "mc-trp-09",
+      "kind": "trap",
+      "gold": "双细胞/混杂（应低置信回退）",
+      "legacy": "巨噬细胞 (Macrophage)",
+      "adopted": false,
+      "decisionType": "巨噬细胞 (Macrophage)",
+      "confidence": 0.48,
+      "finalType": "巨噬细胞 (Macrophage)"
+    },
+    {
+      "id": "mc-trp-10",
+      "kind": "trap",
+      "gold": "双细胞/混杂（应低置信回退）",
+      "legacy": "T 细胞 (T cell)",
+      "adopted": false,
+      "decisionType": "T 细胞 (T cell)",
+      "confidence": 0.31,
+      "finalType": "T 细胞 (T cell)"
+    },
+    {
+      "id": "mc-trp-11",
+      "kind": "trap",
+      "gold": "双细胞/混杂（应低置信回退）",
+      "legacy": "CD8+ T 细胞",
+      "adopted": false,
+      "decisionType": "CD8+ T 细胞",
+      "confidence": 0.04,
+      "finalType": "CD8+ T 细胞"
+    },
+    {
+      "id": "mc-trp-12",
+      "kind": "trap",
+      "gold": "双细胞/混杂（应低置信回退）",
+      "legacy": "单核细胞 (Monocyte)",
+      "adopted": false,
+      "decisionType": "单核细胞 (Monocyte)",
+      "confidence": 0.28,
+      "finalType": "单核细胞 (Monocyte)"
+    }
+  ]
+}
