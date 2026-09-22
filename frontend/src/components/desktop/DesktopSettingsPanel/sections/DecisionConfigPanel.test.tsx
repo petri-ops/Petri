@@ -105,4 +105,55 @@ describe('DecisionConfigPanel（BLOCK-116 P4 配置面）', () => {
     expect(put!.url).toContain('/ai/decisions/config/marker-celltype');
     expect(put!.body).toEqual({ threshold: 0.55 });
   });
+
+  it('BLOCK-117 一键预设 Laya → PUT 本地供给三元组 + 表单同步 + 当前供给标签更新', async () => {
+    const { fn, calls } = mockFetch((url, init) => {
+      if (init?.method === 'PUT' && url.includes('/ai/decisions/provider')) {
+        const body = typeof init.body === 'string' ? JSON.parse(init.body) : {};
+        return { status: 200, body: { status: 'ok', provider: { baseUrl: body.baseUrl, model: body.model, hasKey: true } } };
+      }
+      return {
+        status: 200,
+        body: { status: 'ok', points: pointsFixture, provider: { baseUrl: 'https://api.typesafe.ai', model: 'jev-1.13.0', hasKey: true } },
+      };
+    });
+    vi.stubGlobal('fetch', fn);
+    render(<DecisionConfigPanel />);
+    await waitFor(() => expect(screen.getByText(/当前供给：Jev（云）/)).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: '用 Laya（本地）' }));
+    const put = await waitFor(() => {
+      const found = calls.find((c) => c.method === 'PUT' && c.url.includes('/ai/decisions/provider'));
+      expect(found).toBeTruthy();
+      return found!;
+    });
+    expect(put.body).toEqual({ baseUrl: 'http://127.0.0.1:8765', apiKey: 'local-laya', model: 'laya-typed-decisions' });
+    await waitFor(() => expect(screen.getByText(/当前供给：Laya（本地）/)).toBeTruthy());
+    expect((screen.getByDisplayValue('http://127.0.0.1:8765') as HTMLInputElement).value).toContain('8765');
+    expect(screen.getByDisplayValue('laya-typed-decisions')).toBeTruthy();
+  });
+
+  it('BLOCK-117 一键预设 Jev → PUT 不带 apiKey（服务端保留已配置 Key）', async () => {
+    const { fn, calls } = mockFetch((url, init) => {
+      if (init?.method === 'PUT' && url.includes('/ai/decisions/provider')) {
+        const body = typeof init.body === 'string' ? JSON.parse(init.body) : {};
+        return { status: 200, body: { status: 'ok', provider: { baseUrl: body.baseUrl, model: body.model, hasKey: true } } };
+      }
+      return {
+        status: 200,
+        body: { status: 'ok', points: pointsFixture, provider: { baseUrl: 'http://127.0.0.1:8765', model: 'laya-typed-decisions', hasKey: true } },
+      };
+    });
+    vi.stubGlobal('fetch', fn);
+    render(<DecisionConfigPanel />);
+    await waitFor(() => expect(screen.getByText(/当前供给：Laya（本地）/)).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: '用 Jev（云）' }));
+    const put = await waitFor(() => {
+      const found = calls.find((c) => c.method === 'PUT' && c.url.includes('/ai/decisions/provider'));
+      expect(found).toBeTruthy();
+      return found!;
+    });
+    expect(put.body).toEqual({ baseUrl: 'https://api.typesafe.ai', model: 'jev-1.13.0' });
+    expect(put.body).not.toHaveProperty('apiKey');
+    await waitFor(() => expect(screen.getByText(/当前供给：Jev（云）/)).toBeTruthy());
+  });
 });

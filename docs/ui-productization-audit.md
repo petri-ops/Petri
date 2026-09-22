@@ -4056,3 +4056,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **改动**：`sections/DecisionConfigPanel.tsx`（五运行时接点卡片：启用开关 + 阈值数字输入（校准默认预填）+ 偏离校准提醒 + 还原默认按钮 + env 覆盖态提示 + 双门限只读行）+ `types.ts` 新 SettingsSection 'decisions' + DesktopSettingsPanel 挂载；后端 GET/PUT `/ai/decisions/config`（decision-config.json 持久化，PUT 校验 [0,1]）。
 - **证据（实机 · 2026-09-22）**：flow `block116-config-live` 6/6（GET 五接点/PUT 持久化/非法 400/未知 404/还原默认）+ 截图 `acceptance/block-116/decision-config-panel.png`（实机过目：五卡片/开关/阈值输入/双门限只读/env 覆盖提示全部在位，暗色主题渲染正常）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-436: 设置页「决策模型接口」一键供给预设（Jev/Laya 双按钮 + 当前供给指示）（BLOCK-117 加映轻量批）(2026-09-22 in_progress，组件契约已验，实机过目待补)
+
+- **来源**：用户裁决原话「给我加个按钮 一共两个按钮 一个是jev一个是laya 直接切换本地 省的我配置」——BLOCK-117 验证了 laya_decide serve 线兼容可用，但手动改三项字段繁琐。
+- **改动**：`sections/DecisionConfigPanel.tsx`——「决策模型接口」标题行增两枚 ghost 预设按钮「用 Jev（云）」「用 Laya（本地）」（与「保存模型接口」同一 PUT /ai/decisions/provider 通道，一键即生效）：Jev 预设不带 apiKey（服务端合并语义=保留已配置 Key）；Laya 预设指向本机 laya_decide serve（127.0.0.1:8765 / local-laya / laya-typed-decisions）；标题改「当前供给：Jev（云）/Laya（本地）/自定义」实时指示（baseUrl 推导）；Laya 提示行诚实标注 BLOCK-117 校准结论（现有 confidence 阈值下大概率回退，决策照常记账不采纳，切换随时可逆）。运行时真相仍为 decision-config.json，按钮仅为同一 PUT 通道的 UX 快捷方式（无第二真相）。
+- **证据（契约）**：`DecisionConfigPanel.test.tsx` 5/5（新增 2 例：Laya 预设 PUT 三元组逐键断言+表单字段同步+当前供给标签更新；Jev 预设 PUT 不带 apiKey 断言+标签还原）。
+- **待实机**：dev 栈 vite HMR 已推送至运行中应用，设置页过目即翻 verified。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

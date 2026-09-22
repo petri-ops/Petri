@@ -36,6 +36,18 @@ const POINT_NOTES: Record<string, string> = {
   'tool-route': '按任务语义只下发相关工具域，降低 token 与误选率。',
 };
 
+// BLOCK-117 加映 — 一键供给预设（UX 快捷方式；运行时真相仍是 decision-config.json）。
+// Jev 预设不带 apiKey：服务端合并语义=保留已配置 Key；Laya 预设指向本机 laya_decide serve。
+const PRESET_JEV = { baseUrl: 'https://api.typesafe.ai', model: 'jev-1.13.0' };
+const PRESET_LAYA = { baseUrl: 'http://127.0.0.1:8765', apiKey: 'local-laya', model: 'laya-typed-decisions' };
+
+function supplyLabelOf(baseUrl: string | undefined): string {
+  if (!baseUrl) return '未知';
+  if (baseUrl.includes('127.0.0.1') || baseUrl.includes('localhost')) return 'Laya（本地）';
+  if (baseUrl.includes('typesafe')) return 'Jev（云）';
+  return '自定义';
+}
+
 export function DecisionConfigPanel(): React.ReactElement {
   const [points, setPoints] = useState<PointConfig[] | null>(null);
   const [error, setError] = useState('');
@@ -95,6 +107,25 @@ export function DecisionConfigPanel(): React.ReactElement {
     setProvSaved(true);
   }, [provUrl, provKey, provModel]);
 
+  // BLOCK-117 加映 — 一键切换供给（与「保存模型接口」同一 PUT 通道；Jev 不带 Key=保留已配置）
+  const applyPreset = useCallback(async (kind: 'jev' | 'laya') => {
+    const token = getToken();
+    const response = await fetch(`${getPlatformApiPrefix()}/ai/decisions/provider`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify(kind === 'laya' ? PRESET_LAYA : PRESET_JEV),
+    });
+    const data = (await response.json()) as ConfigResponse & { provider?: { baseUrl: string; model: string; hasKey: boolean } };
+    if (!response.ok || data?.status !== 'ok') throw new Error(data?.error || '切换失败');
+    if (data.provider) {
+      setProviderState(data.provider);
+      setProvUrl(data.provider.baseUrl || '');
+      setProvModel(data.provider.model || '');
+    }
+    setProvKey('');
+    setProvSaved(true);
+  }, []);
+
   return (
     <div className="gewu-usage-resource">
       <p className="gewu-field__hint">
@@ -106,8 +137,29 @@ export function DecisionConfigPanel(): React.ReactElement {
       {!points && !error ? <p className="gewu-field__hint">读取中…</p> : null}
       {/* P5 — 模型接口（端点/Key/模型名；本地 Laya 等供给改此三项；换模型须重校准） */}
       <div className="gewu-resource-heading">
-        <div><strong>决策模型接口</strong><p>端点与 Key 支持云 Jev 或本地同类供给（如 Laya）；修改模型后必须重校准对应接点阈值。</p></div>
-        <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={() => { void saveProvider().catch((reason) => setError(reason instanceof Error ? reason.message : String(reason))); }}>保存模型接口</button>
+        <div>
+          <strong>决策模型接口 · 当前供给：{supplyLabelOf(provider?.baseUrl)}</strong>
+          <p>端点与 Key 支持云 Jev 或本地同类供给（如 Laya）；修改模型后必须重校准对应接点阈值。</p>
+        </div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button
+            type="button"
+            className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+            title="一键切回云 Jev（保留已配置的 Key）"
+            onClick={() => { void applyPreset('jev').catch((reason) => setError(reason instanceof Error ? reason.message : String(reason))); }}
+          >
+            用 Jev（云）
+          </button>
+          <button
+            type="button"
+            className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+            title="一键切换到本机 laya_decide serve（需已启动：laya_decide.py serve --port 8765）"
+            onClick={() => { void applyPreset('laya').catch((reason) => setError(reason instanceof Error ? reason.message : String(reason))); }}
+          >
+            用 Laya（本地）
+          </button>
+          <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={() => { void saveProvider().catch((reason) => setError(reason instanceof Error ? reason.message : String(reason))); }}>保存模型接口</button>
+        </div>
       </div>
       <div className="gewu-metric-grid">
         <div>
@@ -124,6 +176,10 @@ export function DecisionConfigPanel(): React.ReactElement {
         </div>
       </div>
       {provSaved ? <p className="gewu-field__hint">模型接口已保存（Key 不回显）。更换模型后请重校准对应接点阈值。</p> : null}
+      <p className="gewu-field__hint">
+        「用 Laya（本地）」指向本机 laya_decide serve（127.0.0.1:8765，需先启动：laya_decide.py serve --port 8765）。
+        BLOCK-117 校准：本地 Laya 在现有 confidence 阈值下大概率回退——决策照常记账，不采纳不执行；切换随时可逆。
+      </p>
       {points?.map((p) => {
         const drifted = p.threshold != null && p.defaultThreshold != null && p.threshold !== p.defaultThreshold;
         return (
