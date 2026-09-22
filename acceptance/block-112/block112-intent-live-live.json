@@ -1,0 +1,38 @@
+{
+  "name": "block112-intent-live",
+  "startedAt": "2026-09-22T07:53:10.046Z",
+  "finishedAt": "2026-09-22T07:53:15.309Z",
+  "assertions": [
+    {
+      "name": "N1_chitchat_fast_path_events",
+      "pass": true,
+      "detail": "terminal=done eventTypes=[\"run_started\",\"delta\",null]"
+    },
+    {
+      "name": "N1b_chitchat_no_tool_events",
+      "pass": true,
+      "detail": "快路径不得有工具事件：[\"run_started\",\"delta\",null]"
+    },
+    {
+      "name": "N2_chitchat_reply_persisted_with_marker",
+      "pass": true,
+      "detail": "assistant meta={\"chitchatFastPath\":true}"
+    },
+    {
+      "name": "N3_task_message_goes_normal_loop",
+      "pass": true,
+      "detail": "terminal=done"
+    },
+    {
+      "name": "N3b_task_reply_no_fastpath_marker",
+      "pass": true,
+      "detail": "task 回复 meta={\"processingDurationMs\":1396,\"finalization\":{\"attempts\":1,\"recovered\":true},\"reasoningByIteration\":{\"1\":\"用户要求写一句话总结。简单任务，直接回答即可。\"}}"
+    },
+    {
+      "name": "N4_temp_conversations_cleaned",
+      "pass": true,
+      "detail": "cleanups=[\"conv_c17=ok\"]"
+    }
+  ],
+  "allPass": true
+}

@@ -32,24 +32,54 @@ async function rest(method, endpoint, body) {
   return { ok: resp.ok, status: resp.status, data: await resp.json().catch(() => null) };
 }
 
+/** 订阅 task SSE 流至 [DONE]（或超时），收集事件信封。 */
+async function collectEvents(taskId, timeoutMs) {
+  const authHeader = { Authorization: 'Bearer desktop-local' };
+  const url = API + '/ai/agent/task/' + encodeURIComponent(taskId) + '?afterSeq=0';
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), timeoutMs);
+  const events = [];
+  try {
+    const resp = await fetch(url, { headers: authHeader, signal: abort.signal });
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let sep;
+      const SEP = String.fromCharCode(10) + String.fromCharCode(10);
+      while ((sep = buffer.indexOf(SEP)) !== -1) {
+        const line = buffer.slice(0, sep).trim();
+        buffer = buffer.slice(sep + 2);
+        if (!line.startsWith('data:')) continue;
+        const data = line.slice(5).trim();
+        if (data === '[DONE]') return events;
+        try { events.push(JSON.parse(data)); } catch {}
+      }
+    }
+  } catch {} finally { clearTimeout(timer); }
+  return events;
+}
+
 /** 提交一条消息并等 task 终态，返回 {taskId, conversationId, events, terminalTask}。 */
 async function submitAndWait(message, timeoutMs) {
   const sub = await rest('POST', '/ai/agent', { messages: [{ role: 'user', content: message }] });
   if (!sub.ok || !sub.data?.taskId) throw new Error(`提交失败：${sub.status} ${JSON.stringify(sub.data).slice(0, 150)}`);
   const { taskId, conversationId } = sub.data;
   const deadline = Date.now() + timeoutMs;
-  let events = [];
   let terminal = null;
   while (Date.now() < deadline) {
-    await sleep(1200);
-    const evResp = await rest('GET', `/ai/agent/task/${encodeURIComponent(taskId)}?afterSeq=0`);
-    events = Array.isArray(evResp.data?.events) ? evResp.data.events : events;
+    await sleep(1000);
     const t = await rest('GET', `/ai/agent/task/${encodeURIComponent(taskId)}/meta`);
     const meta = t.data || null;
     const status = meta && (meta.agentStatus || meta.agent_status);
     if (status === 'completed' || status === 'done' || status === 'failed' || status === 'cancelled') { terminal = status; break; }
   }
   if (!terminal) throw new Error(`task ${taskId} 超时未终态`);
+  const envelopes = await collectEvents(taskId, 15000);
+  const events = envelopes.map((e) => ({ seq: e.seq, eventType: e.eventType, event: e.payload && e.payload.event }));
   return { taskId, conversationId, events, terminal };
 }
 
@@ -77,8 +107,8 @@ module.exports = {
       // N1/N2 — 闲聊消息走快路径
       const chat = await submitAndWait('你好呀，今天有点累，陪我聊两句', TASK_TIMEOUT_MS);
       if (chat.conversationId) convIds.push(chat.conversationId);
-      const evTypes = chat.events.map((e) => e.eventType || (e.payload && e.payload.event));
-      assert('N1_chitchat_fast_path_events', chat.terminal === 'done' || chat.terminal === 'completed'
+      const evTypes = chat.events.map((e) => e.eventType || e.event);
+      assert('N1_chitchat_fast_path_events', (chat.terminal === 'done' || chat.terminal === 'completed')
         && evTypes.includes('run_started') && evTypes.includes('delta'),
         `terminal=${chat.terminal} eventTypes=${JSON.stringify(evTypes)}`);
       assert('N1b_chitchat_no_tool_events', !evTypes.includes('tool_call') && !evTypes.includes('tool_result'),
@@ -103,11 +133,13 @@ module.exports = {
     } finally {
       // N4 — 临时会话清理（best-effort）
       const cleanups = [];
-      for (const convId of convIds) {
+      for (const convId of [...new Set(convIds)]) {
         const r = await rest('DELETE', `/ai/conversations/${encodeURIComponent(convId)}`).catch(() => null);
-        cleanups.push(`${String(convId).slice(0, 8)}=${r && r.ok ? 'ok' : 'fail'}`);
+        // 200=已删；404=活跃会话语义下两次提交复用同会话、首删已完成——幂等视为 ok
+        const ok = (r && r.ok) || (r && r.status === 404);
+        cleanups.push(`${String(convId).slice(0, 8)}=${ok ? 'ok' : 'fail(' + (r && r.status) + ')'}`);
       }
-      assert('N4_temp_conversations_cleaned', cleanups.length === 2 && cleanups.every((c) => c.endsWith('ok')),
+      assert('N4_temp_conversations_cleaned', cleanups.length >= 1 && cleanups.every((c) => c.endsWith('ok')),
         `cleanups=${JSON.stringify(cleanups)}`);
       fs.writeFileSync(path.join(EVIDENCE_DIR, 'intent-live-flow.json'), JSON.stringify({ evidence, cleanups }, null, 2));
     }
