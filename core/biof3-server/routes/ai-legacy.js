@@ -8,6 +8,8 @@ const express = require('express');
 
 const {
   lookupCellType,
+  lookupCellTypeWithConfidence,
+  isMarkerGuardEnabled,
   callDeepSeekSimple,
   buildInterpretPrompt,
 } = require('../helpers/interpret');
@@ -21,11 +23,34 @@ module.exports = function mountAiLegacy(app) {
       return res.status(400).json({status: 'error', error: '缺少参数'});
     }
 
+    // BLOCK-111 W1-1：marker 判别二跳（默认关=零行为变化；开=cellTypeHints 照旧 + additive 明细）。
+    const markerGuardEnabled = isMarkerGuardEnabled();
     const localResults = {};
+    let cellTypeHintsDetailed = null;
     if (topMarkers) {
-      for (const [cluster, markers] of Object.entries(topMarkers)) {
-        const cellType = lookupCellType(markers);
-        if (cellType) localResults[cluster] = cellType;
+      if (markerGuardEnabled) {
+        cellTypeHintsDetailed = [];
+        const clusterEntries = Object.entries(topMarkers);
+        const decided = await Promise.all(
+          clusterEntries.map(([, markers]) => lookupCellTypeWithConfidence(markers))
+        );
+        decided.forEach((d, i) => {
+          const [cluster, markers] = clusterEntries[i];
+          const cellType = lookupCellType(markers);
+          if (cellType) localResults[cluster] = cellType;
+          cellTypeHintsDetailed.push({
+            cluster,
+            type: d.type,
+            confidence: d.confidence,
+            adopted: d.adopted,
+            ...(d.probabilities ? {probabilities: d.probabilities} : {}),
+          });
+        });
+      } else {
+        for (const [cluster, markers] of Object.entries(topMarkers)) {
+          const cellType = lookupCellType(markers);
+          if (cellType) localResults[cluster] = cellType;
+        }
       }
     }
 
@@ -56,6 +81,7 @@ module.exports = function mountAiLegacy(app) {
       status: 'ok',
       interpretation: aiText,
       cellTypeHints: localResults,
+      ...(cellTypeHintsDetailed ? {cellTypeHintsDetailed} : {}),
       source: aiText && !aiText.startsWith('✓') ? 'model_gateway' : 'fallback',
     });
   });

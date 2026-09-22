@@ -5,6 +5,9 @@
  *
  * Public API:
  *   lookupCellType(markers) → string|null
+ *   lookupCellTypeWithConfidence(markers, overrides?) → Promise<{type, confidence, adopted, probabilities, reason}>
+ *     — BLOCK-111 W1-1 二跳（默认关，BIOF3_JEV_MARKER_GUARD=1 显式开；失败回退 lookupCellType）
+ *   deriveMarkerCandidates(markers) / buildMarkerDecisionRequest(markers, candidates) — 候选生成与决策请求
  *   callDeepSeekSimple(prompt, maxTokens) → Promise<string|null>
  *   buildInterpretPrompt(analysisType, summary, extra) → string|null
  *   CELL_MARKERS — exported for external usage
@@ -13,6 +16,8 @@
  * with the agent's callDeepSeek(apiKey, body, telemetry) signature in server.js.
  * (Old name was being shadowed by hoisting and producing JSON.stringify(undefined) errors.)
  */
+
+const { askDecision } = require('./decision-api');
 
 // === 本地知识库：常见 marker 基因 → 细胞类型映射 ===
 // 数据来源：CellMarker 2.0 + PanglaoDB 高频条目精选
@@ -63,6 +68,88 @@ function lookupCellType(markers) {
     }
   }
   return bestMatch;
+}
+
+// ============================================================
+// BLOCK-111 W1-1：marker→细胞类型判别二跳（决策原语 choice）
+// 契约（plan docs/block-111-jev-w1-marker-classification-plan.md §2.2/§6）：
+//  - CELL_MARKERS 规则表是唯一候选生成器，模型只挑不造（choice∉criteria 由
+//    decision-api 响应校验拒收）；规则表匹配始终是出站前置门，候选集为空零出站。
+//  - 决策必经 helpers/decision-api.js；任何失败形态（缺 key/超时/校验失败/网络失败）
+//    回退 lookupCellType 现行字符串，本函数永不 throw。
+//  - 默认关+显式开（D-4，BIOF3_JEV_MARKER_GUARD=1）：关=零出站零行为变化。
+// ============================================================
+
+// D-5（P0 校准 θ=0.55：adoptedAccuracy 1.0 / coverage 0.9125 / trap 误采纳 0，
+// 证据 acceptance/block-111/calibration.json）。调整阈值必须先重校准（jev 版本绑定）。
+const MARKER_DECISION_THRESHOLD = 0.55;
+
+/** 与 lookupCellType 同一匹配语义，但返回全部 matches≥2 命中（按命中数降序）——候选生成器。 */
+function deriveMarkerCandidates(markers) {
+  if (!Array.isArray(markers) || markers.length === 0) return [];
+  const upper = markers.map((m) => m.toUpperCase());
+  const hits = [];
+  for (const [key, type] of Object.entries(CELL_MARKERS)) {
+    const refMarkers = key.split(',');
+    const matched = refMarkers.filter((m) => upper.includes(m));
+    if (matched.length >= 2) {
+      hits.push({ type, key, matches: matched.length, total: refMarkers.length, matched });
+    }
+  }
+  hits.sort((a, b) => b.matches - a.matches);
+  return hits;
+}
+
+/** 组装决策请求（P0 校准即用此形状，scripts/block111-p0-calibrate.mjs 引用本函数）。 */
+function buildMarkerDecisionRequest(markers, candidates) {
+  const state =
+    `某单细胞 RNA-seq 数据中一个细胞簇的 top 高表达基因（marker）：${markers.join(', ')}\n\n` +
+    `候选细胞类型（来自规则表预筛命中）：\n` +
+    candidates.map((c, i) => `${i + 1}. ${c.type}（命中参考基因 ${c.matches}/${c.total}：${c.matched.join(', ')}）`).join('\n');
+  const criteria = {};
+  for (const c of candidates) criteria[c.type] = `参考 marker 组合：${c.key}`;
+  return {
+    state,
+    questions: {
+      cell_type: {
+        type: 'choice',
+        criteria,
+        instructions:
+          '从候选中选出该簇最可能的细胞类型。候选由规则表预筛生成；若表达谱信息不足以确信，请选择最接近者并给出相应较低的 confidence。',
+      },
+    },
+  };
+}
+
+/** D-4：默认关+显式开（同 W0-P2 知识库二跳先例）。 */
+function isMarkerGuardEnabled() {
+  return process.env.BIOF3_JEV_MARKER_GUARD === '1';
+}
+
+/**
+ * 二跳主入口：choice 补概率/confidence，单阈值门控（≥MARKER_DECISION_THRESHOLD 采纳，
+ * 否则回退现行字符串）。返回 {type, confidence, adopted, probabilities, reason}；
+ * type=采纳时为 decision choice，否则为 lookupCellType 现行结果（可能为 null）。
+ */
+async function lookupCellTypeWithConfidence(markers, overrides = {}) {
+  const legacy = lookupCellType(markers);
+  if (!isMarkerGuardEnabled()) {
+    return { type: legacy, confidence: null, adopted: false, probabilities: null, reason: 'guard_disabled' };
+  }
+  const candidates = deriveMarkerCandidates(markers);
+  if (candidates.length === 0) {
+    return { type: null, confidence: null, adopted: false, probabilities: null, reason: 'no_candidates' };
+  }
+  const { state, questions } = buildMarkerDecisionRequest(markers, candidates);
+  const outcome = await askDecision({ state, questions, overrides });
+  if (!outcome.ok) {
+    return { type: legacy, confidence: null, adopted: false, probabilities: null, reason: outcome.reason };
+  }
+  const answer = outcome.answers.cell_type;
+  if (answer.confidence >= MARKER_DECISION_THRESHOLD) {
+    return { type: answer.choice, confidence: answer.confidence, adopted: true, probabilities: answer.probabilities, reason: 'adopted' };
+  }
+  return { type: legacy, confidence: answer.confidence, adopted: false, probabilities: answer.probabilities, reason: 'below_threshold' };
 }
 
 /** Model Gateway caller for interpretation. Returns text or null. */
@@ -249,6 +336,11 @@ function buildInterpretPrompt(analysisType, summary, extra = {}) {
 module.exports = {
   CELL_MARKERS,
   lookupCellType,
+  MARKER_DECISION_THRESHOLD,
+  deriveMarkerCandidates,
+  buildMarkerDecisionRequest,
+  isMarkerGuardEnabled,
+  lookupCellTypeWithConfidence,
   callDeepSeekSimple,
   buildInterpretPrompt,
 };

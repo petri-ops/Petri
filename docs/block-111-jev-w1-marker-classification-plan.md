@@ -1,7 +1,7 @@
 # BLOCK-111-JEV-W1-MARKER-CLASSIFICATION 计划：marker→细胞类型判别二跳（决策内化弧 W1-1）
 
 **Plan ID**：`BLOCK-111-JEV-W1-MARKER-CLASSIFICATION`
-**状态**：`active（P0 实测完成待评审：校准 gate.passed=true（104 条语料 / 92 choice 可评估 / 0 API 失败），D-1~D-5 走 §7 评审稿待用户裁决后进 P1；2026-09-22 用户裁决启动 W1 弧线；本包=决策判断模式内化弧 W1 队列第 1 点，逐点立项不打包；弧线底稿=docs/planning/decision-primitive-internalization-arc.md §W1）`
+**状态**：`active（P1 接线完成（2026-09-22）：interpret.js 二跳 + ai-legacy.js cellTypeHintsDetailed additive + 契约 14/14 + test:changed 159 项 0 红；D-1~D-5 按推荐先行留痕（§7.2，用户评审可翻，D 项均为单点常量可翻）；剩 P2 实机验收 + closeout 十门。P0 校准 gate.passed=true（104 条语料 / 92 choice 可评估 / 0 API 失败）；2026-09-22 用户裁决启动 W1 弧线；本包=决策判断模式内化弧 W1 队列第 1 点，逐点立项不打包；弧线底稿=docs/planning/decision-primitive-internalization-arc.md §W1）`
 **立项日期**：2026-09-22
 **最后更新**：2026-09-22（立项登记 active/P0-LAUNCH。用户裁决原话「1」——AskUserQuestion 菜单选项 1「Jev W1 决策内化」，选项描述列明首序三候选「marker 判别/意图路由/工具预路由，逐点立项」；首点按弧线 §W1 预登记队列次序取第 1 点。W0=BLOCK-110 已整包 completed（closeout 十门全绿，提交至 4dbfeff7），W0 证据门绿。）
 **责任轨道**：BLOCK（后端决策接点 + 校准 harness + REST 契约 additive，跨 P 阶段串行）
@@ -115,3 +115,12 @@ markers[] ─→ 规则表候选生成（A 型，零出站）：候选集 = matc
 | **D-5 阈值** | **单阈值 θ_high=0.55**（conf≥0.55 采纳附置信度，否则回退现行字符串） | θ=0.55 为 coverage≥0.85 约束下 adoptedAccuracy=1.0 + trap 误采纳=0 的最高覆盖档；choice 题型 confidence 天然单门控，W0-P1 noul 的三区间双阈值不适用（题型差异，非偏差），中间带回退语义由「<θ 即回退」承接 |
 
 **P0 结论**：证据门通过（accuracy 1.0@0.55 ≥ 0.95 门、coverage 0.9125 ≥ 0.85 门、trap 0% ≤ 5% 门）。D-1~D-5 用户裁决后进 P1。
+
+**P0 评审处置（2026-09-22）**：AskUserQuestion 裁决未应答（非拒绝），按仓库「预置推荐按推荐先行留痕、评审可翻」先例（BLOCK-100/107 D 项同款）以 §7.2 推荐值进入 P1——D-4 推荐方向=默认关，生产行为零变化，属最保守侧；D 项均为单点常量（阈值/env 开关/字段形状），用户后续翻裁决成本一行。已在状态头与本行留痕，P2 收口前用户可改。
+
+### 7.3 P1 落地记录（2026-09-22）
+
+- `core/biof3-server/helpers/interpret.js`：新增 `MARKER_DECISION_THRESHOLD=0.55` / `deriveMarkerCandidates`（lookupCellType 同语义全命中集）/ `buildMarkerDecisionRequest`（P0 校准同形，单源）/ `isMarkerGuardEnabled`（`BIOF3_JEV_MARKER_GUARD=1`）/ `lookupCellTypeWithConfidence`（永不 throw，五态降级）；`lookupCellType` 原函数零改动（回退目标）。
+- `core/biof3-server/routes/ai-legacy.js`：guard 关=原路径逐字节等价（零新键）；guard 开=`cellTypeHints` 照旧 + `cellTypeHintsDetailed`（`{cluster,type,confidence,adopted,probabilities?}`）additive。
+- `scripts/block111-p0-calibrate.mjs`：候选生成与请求组装改引 interpret.js 单源（删本地副本），`--dry` 回归绿。
+- 契约 `test/block111-marker-classification.test.mjs` **14/14 绿**（现行契约钉/候选推导/请求形状/guard 关零出站/零候选零出站/no_key/timeout×3/http_error/network_error/伪造候选拒收/采纳/低于阈值回退/阈值边界 0.55/歧义陷阱端到端）；`npm run test:changed` 路由 **159 项 0 红 3 skip**；impact-map 登记 `block111-jev-w1-marker` 规则。

@@ -24,7 +24,12 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const decisionApi = require('../core/biof3-server/helpers/decision-api.js');
-const { CELL_MARKERS } = require('../core/biof3-server/helpers/interpret.js');
+// P1 起候选生成与请求组装单源于 interpret.js（字节同形迁移，契约测试钉住形状）。
+const {
+  CELL_MARKERS,
+  deriveMarkerCandidates,
+  buildMarkerDecisionRequest,
+} = require('../core/biof3-server/helpers/interpret.js');
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
@@ -38,40 +43,7 @@ const CONCURRENCY = 5;
 
 const TRAP_GOLD = '双细胞/混杂（应低置信回退）';
 
-/** 与 interpret.js lookupCellType 同一匹配语义，但返回全部 matches≥2 命中（按命中数降序）。 */
-function deriveCandidates(markers) {
-  if (!Array.isArray(markers) || markers.length === 0) return [];
-  const upper = markers.map((m) => m.toUpperCase());
-  const hits = [];
-  for (const [key, type] of Object.entries(CELL_MARKERS)) {
-    const refMarkers = key.split(',');
-    const matched = refMarkers.filter((m) => upper.includes(m));
-    if (matched.length >= 2) hits.push({ type, key, matches: matched.length, total: refMarkers.length, matched });
-  }
-  hits.sort((a, b) => b.matches - a.matches);
-  return hits;
-}
-
-/** P1 生产路径必须镜像本函数组装 state/questions（P1 接线时移入 interpret.js 并以契约测试钉住）。 */
-function buildDecisionRequest(markers, candidates) {
-  const state =
-    `某单细胞 RNA-seq 数据中一个细胞簇的 top 高表达基因（marker）：${markers.join(', ')}\n\n` +
-    `候选细胞类型（来自规则表预筛命中）：\n` +
-    candidates.map((c, i) => `${i + 1}. ${c.type}（命中参考基因 ${c.matches}/${c.total}：${c.matched.join(', ')}）`).join('\n');
-  const criteria = {};
-  for (const c of candidates) criteria[c.type] = `参考 marker 组合：${c.key}`;
-  return {
-    state,
-    questions: {
-      cell_type: {
-        type: 'choice',
-        criteria,
-        instructions:
-          '从候选中选出该簇最可能的细胞类型。候选由规则表预筛生成；若表达谱信息不足以确信，请选择最接近者并给出相应较低的 confidence。',
-      },
-    },
-  };
-}
+const deriveCandidates = deriveMarkerCandidates;
 
 function sha256File(p) {
   return crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
@@ -147,7 +119,7 @@ async function calibrate(corpus) {
   const perSample = await mapWithConcurrency(evaluableSamples, CONCURRENCY, async (s) => {
     const [id, markers, gold, kind] = s;
     const candidates = deriveCandidates(markers);
-    const { state, questions } = buildDecisionRequest(markers, candidates);
+    const { state, questions } = buildMarkerDecisionRequest(markers, candidates);
     const outcome = await decisionApi.askDecision({ state, questions });
     if (!outcome.ok) {
       failures++;
