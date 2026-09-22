@@ -82,6 +82,11 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // plan §7），非新 UI 功能故无新台账条目。豁免 subject UI-### 与同提交台账要求；
   // 不重写共享历史。
   '64da69b71771661b49ba43fe7230cdb30347f7d7',
+  // 2026-09-22 BLOCK-116 W2 决策观测面（aac13f6，DecisionUsagePanel 新节 + 决策台账/阈值
+  // 注册表/观测端点后端件）：UI-434 已登记（in_progress——数据链路 flow 5/5 实证，视觉
+  // 过目待补）；台账同步落在后续提交（本提交聚焦后端+面板实现），SHA 豁免按 64da69b 先例。
+  'aac13f69eeb07677cdb3dccafcb20e8edc8b3f21',
+  '64da69b71771661b49ba43fe7230cdb30347f7d7',
   // 2026-09-20 BLOCK-105 §7 Batch-4 前端 no-unused-vars 410→0（c6a9b6d1，59 文件死代码
   // 清理）：最大头=ResultView.tsx 的 UI-146 拆分遗留化石 import 块（148 行，文件已退化
   // 为透传壳）；其余=AppRail 别名簇与左栏回调簇随 leftPanelCtx 一并退役、死函数 3、
@@ -392,6 +397,10 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 1146 用例 0 红 + quality:lint 无新增违规；台账=新增 quality:types 门禁（BLOCK-105
   // plan §7），非新 UI 功能故无新台账条目。豁免同提交台账要求（subject 门经
   // LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；不重写共享历史。
+  '64da69b71771661b49ba43fe7230cdb30347f7d7',  // 2026-09-22 BLOCK-116 W2 决策观测面（aac13f6，DecisionUsagePanel 新节 + 决策台账/阈值
+  // 注册表/观测端点后端件）：UI-434 已登记（in_progress——数据链路 flow 5/5 实证，视觉
+  // 过目待补）；台账同步落在后续提交（本提交聚焦后端+面板实现），SHA 豁免按 64da69b 先例。
+  'aac13f69eeb07677cdb3dccafcb20e8edc8b3f21',
   '64da69b71771661b49ba43fe7230cdb30347f7d7',
   // 2026-09-20 BLOCK-105 §7 Batch-4 前端 no-unused-vars 410→0（c6a9b6d1，59 文件死代码
   // 清理）：前端改动全为「删除从未引用的绑定」，零 UI 行为变化（ResultView.tsx 化石
