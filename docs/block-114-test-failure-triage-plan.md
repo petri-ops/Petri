@@ -1,7 +1,7 @@
 # BLOCK-114-TEST-FAILURE-TRIAGE 计划：测试失败归因分类器（决策内化弧 W1-4）
 
 **Plan ID**：`BLOCK-114-TEST-FAILURE-TRIAGE`
-**状态**：`active（P0-LAUNCH，2026-09-22 用户裁决「开 按顺序都做完」队列序第 4 点；弧线底稿=docs/planning/decision-primitive-internalization-arc.md §W1-4）`
+**状态**：`completed（2026-09-22 当日立项当日收口：P0 校准 gate.passed（104 条语料，L3 三类 overall 93.3%、θ=0.70 精度 95%/覆盖 96.2%/nrMisroute=0；P0 评审修正 D-1=known_existing 由 L1 独占——首轮四类校准其 argmax 仅 39.3%，在册与否系登记表属性非文本语义）→ P1 三层管线契约 10/10 → P2 dogfood 6 条本会话真实失败全对账（L1×2/L2×1 零模型、L3 new_regression 0.99/needs_human 0.38 诚实转人工）；closeout 十门全绿）`
 **立项日期**：2026-09-22
 **责任轨道**：BLOCK（开发者侧 dev-infra 工具 + 决策原语 dogfood；零产品面/零用户数据）
 **上游文档**：弧线 §W1-4 · BLOCK-104 归因矩阵先例（33/36 人工归因）· BLOCK-102/104 测试加固

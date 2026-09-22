@@ -5037,13 +5037,13 @@
       "id": "BLOCK-114-TEST-FAILURE-TRIAGE",
       "path": "docs/block-114-test-failure-triage-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-114-test-failure-triage",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-22",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "block-114",
         "jev",
@@ -5051,10 +5051,11 @@
         "decision-model",
         "w1",
         "dev-infra",
-        "active"
+        "completed"
       ],
-      "notes": "决策内化弧 W1 队列第 4 点（决策原语第一份 dogfood，开发者侧零产品面）。2026-09-22 用户裁决「开 按顺序都做完」队列序。三层管线：L1 指纹层（失败签名 sha1(file::testName) 比对 known-failures.json，known_existing 零模型）→ L2 环境特征层（确定性词表：ECONNREFUSED/ETIMEDOUT/EPERM/ENOSPC/端口占用，environment 零模型）→ L3 语义残差（askDecision choice 四类 new_regression/known_existing/environment/flaky + conf≥θ 采纳否则 needs_human 转人工；D-3 new_regression 误放行=0 零容忍）。落点=scripts/block114-failure-triage.mjs CLI + scripts/lib/block114-triage-core.mjs + known-failures.json（种子=BLOCK-102/104/105 在册项）。不入 closeout 链（v1 dogfood，入链另裁）。A 型红线：指纹与环境词表永不模型化。G0 开发期常态 · 不外推 packaged/Provider/GA。",
-      "lastUpdated": "2026-09-22"
+      "notes": "决策内化弧 W1 队列第 4 点（决策原语第一份 dogfood，开发者侧零产品面）。2026-09-22 用户裁决「开 按顺序都做完」队列序。三层管线：L1 指纹层（失败签名 sha1(file::testName) 比对 known-failures.json，known_existing 零模型）→ L2 环境特征层（确定性词表：ECONNREFUSED/ETIMEDOUT/EPERM/ENOSPC/端口占用，environment 零模型）→ L3 语义残差（askDecision choice 四类 new_regression/known_existing/environment/flaky + conf≥θ 采纳否则 needs_human 转人工；D-3 new_regression 误放行=0 零容忍）。落点=scripts/block114-failure-triage.mjs CLI + scripts/lib/block114-triage-core.mjs + known-failures.json（种子=BLOCK-102/104/105 在册项）。不入 closeout 链（v1 dogfood，入链另裁）。A 型红线：指纹与环境词表永不模型化。2026-09-22 当日整包收口 completed：P0 校准 gate.passed（104 条，L3 三类 overall 93.3%、θ=0.70 精度 95%/覆盖 96.2%/nrMisroute=0；D-1 证据驱动修正=known_existing 由 L1 独占）→ P1 三层契约 10/10 → P2 dogfood 6 条真实失败全对账；closeout 十门全绿。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "lastUpdated": "2026-09-22",
+      "completedAt": "2026-09-22"
     },
     {
       "id": "DECISION-PRIMITIVE-INTERNALIZATION-ARC",
