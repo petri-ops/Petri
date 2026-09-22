@@ -71,7 +71,9 @@ describe('DecisionConfigPanel（BLOCK-116 P4 配置面）', () => {
     vi.stubGlobal('fetch', fn);
     render(<DecisionConfigPanel />);
     await waitFor(() => expect(screen.getAllByText('启用').length).toBe(3));
-    const checkboxes = screen.getAllByRole('checkbox');
+    // 双工具对 getAllByRole 返回类型判定不一致：断言保 tsc 侧 .checked 访问（下一行定向禁用）
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const checkboxes = screen.getAllByRole('checkbox') as HTMLInputElement[];
     const intentBox = checkboxes.find((box) => !box.checked) as HTMLInputElement;
     expect(intentBox).toBeTruthy();
     fireEvent.click(intentBox);
