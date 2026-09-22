@@ -17,7 +17,6 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const decisionApi = require('../core/biof3-server/helpers/decision-api.js');
 const { triageFailure } = require('../scripts/lib/block114-triage-core.mjs');
 
 const here = path.dirname(fileURLToPath(import.meta.url));

@@ -74,7 +74,7 @@ test('指纹规范：sha1(file::testName) 前 12 位', () => {
   assert.notEqual(fingerprintOf('a.test.mjs', 'case 1'), fingerprintOf('a.test.mjs', 'case 2'));
 });
 
-test('L1 指纹命中：known_existing 零模型调用（A 型）', async (t) => {
+test('L1 指纹命中：known_existing 零模型调用（A 型）', async () => {
   const entry = REGISTER[0];
   const failure = { testFile: entry.testFile, testName: entry.testName, errorText: '任意文本' };
   // 反向构造 fingerprint 一致的合成条目（种子表的 fingerprint 是语义占位，测试用真指纹）
@@ -87,7 +87,7 @@ test('L1 指纹命中：known_existing 零模型调用（A 型）', async (t) =>
   assert.equal(spy.count(), 0, 'L1 命中必须零模型调用');
 });
 
-test('L2 环境词表：ECONNREFUSED 等确定性命中，零模型调用', async (t) => {
+test('L2 环境词表：ECONNREFUSED 等确定性命中，零模型调用', async () => {
   for (const text of ['Error: connect ECONNREFUSED 127.0.0.1:3001', 'listen EADDRINUSE :::3001', 'EPERM: operation not permitted, rename']) {
     assert.ok(matchesEnvironmentPattern(text), `词表应命中：${text}`);
   }
@@ -110,7 +110,7 @@ test('词表钉住：核心环境模式在册（契约固化，防悄悄删词�
   }
 });
 
-test('L3：defect 保守采纳 → 输出 new_regression（D-3 零容忍方向）', async (t) => {
+test('L3：defect 保守采纳 → 输出 new_regression（D-3 零容忍方向）', async () => {
   const spy = okFetch({ choice: 'defect', probabilities: { defect: 1, environment: 0, flaky: 0 }, confidence: 0.4 });
   const r = await triageFailure(
     { testFile: 'test/a.test.mjs', testName: 'x', errorText: 'AssertionError: expected 5 to equal 4' },
@@ -121,7 +121,7 @@ test('L3：defect 保守采纳 → 输出 new_regression（D-3 零容忍方向�
   assert.equal(r.reason, 'adopted_conservative');
 });
 
-test('L3：environment conf=0.99 ≥ θ=0.70 → 采纳', async (t) => {
+test('L3：environment conf=0.99 ≥ θ=0.70 → 采纳', async () => {
   const spy = okFetch({ choice: 'environment', probabilities: { defect: 0, environment: 1, flaky: 0 }, confidence: 0.99 });
   const r = await triageFailure(
     { testFile: 'test/a.test.mjs', testName: 'x', errorText: '上游渠道过载' },
@@ -132,7 +132,7 @@ test('L3：environment conf=0.99 ≥ θ=0.70 → 采纳', async (t) => {
   assert.equal(r.reason, 'adopted');
 });
 
-test('低置信：flaky conf < θ=0.70 → needs_human 转人工', async (t) => {
+test('低置信：flaky conf < θ=0.70 → needs_human 转人工', async () => {
   const spy = okFetch({ choice: 'flaky', probabilities: { defect: 0.2, environment: 0.2, flaky: 0.6 }, confidence: 0.6 });
   const r = await triageFailure(
     { testFile: 'test/a.test.mjs', testName: 'x', errorText: '偶发超时' },
@@ -154,7 +154,7 @@ test('L3 决策失败：缺 key → needs_human（不产生错误归类）', asy
   assert.equal(r.reason, 'no_key');
 });
 
-test('L3 决策失败：超时 → needs_human', async (t) => {
+test('L3 决策失败：超时 → needs_human', async () => {
   const spy = errorFetch('TimeoutError');
   const r = await triageFailure(
     { testFile: 'test/a.test.mjs', testName: 'x', errorText: 'boom' },

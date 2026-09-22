@@ -108,7 +108,6 @@ async function calibrate(corpus) {
     process.exit(2);
   }
   const valid = perSample.filter((r) => r.ok);
-  const nrSamples = valid.filter((r) => r.gold === 'new_regression'); // 修正后 defect 采纳即 new_regression 输出
 
   const argmaxCorrect = valid.filter((r) => r.correct).length;
   const latency = valid.map((r) => r.elapsedMs).sort((a, b) => a - b);
