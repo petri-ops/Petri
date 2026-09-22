@@ -2201,6 +2201,23 @@
       "scriptRole": "governance"
     },
     {
+      "id": "block114-failure-triage",
+      "note": "BLOCK-114-TEST-FAILURE-TRIAGE：W1-4 测试失败归因分类器（决策原语 dogfood，不入 closeout 链）。三层管线=scripts/lib/block114-triage-core.mjs（L1 指纹 sha1(file::testName) 比对 known-failures.json / L2 环境词表 / L3 askDecision choice 三类 defect-environment-flaky + conf≥0.70 否则 needs_human）+ scripts/block114-failure-triage.mjs CLI。契约=test/block114-failure-triage.test.mjs（指纹零模型/词表钉住/零容忍方向/needs_human 兜底 10 项）。P0 证据 acceptance/block-114/。",
+      "patterns": [
+        "scripts/lib/block114-triage-core.mjs",
+        "scripts/block114-failure-triage.mjs",
+        "scripts/block114-p0-calibrate.mjs",
+        "acceptance/block-114/**",
+        "test/block114-*.test.mjs"
+      ],
+      "tests": [
+        "test/block114-failure-triage.test.mjs"
+      ],
+      "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "governance"
+    },
+    {
       "id": "block113-tool-prerouting",
       "note": "BLOCK-113-TOOL-PREROUTING：W1-3 工具两跳预路由。tool-router.js 决策接点（choice 九域+all，θ=0.80，默认关 BIOF3_JEV_TOOL_ROUTE=1）+ narrowToolDefsByFamily 收窄器（路由域∪session 底座）+ agent-runner 下发链挂钩 + tool-defs.js DOMAIN_TOOL_DEFS additive 导出（71 工具恒等红线）。契约=test/block113-tool-prerouting.test.mjs（恒等/guard 零出站/降级五态/伪造域拒收/all 弃权/低置信/收窄器保序与保守回退 12 项）。P0 证据 acceptance/block-113/。",
       "patterns": [

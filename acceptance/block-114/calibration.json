@@ -1,0 +1,1169 @@
+{
+  "kind": "block114-calibration",
+  "version": "1.0.0",
+  "capturedAt": "2026-09-22T08:42:53.957Z",
+  "sourceCommit": "27d6f96c8673ee9e4963a6553cc1da4e97430ff8",
+  "model": "jev-1.13.0",
+  "wrapper": "core/biof3-server/helpers/decision-api.js",
+  "decisionPoint": "scripts/lib/block114-triage-core.mjs L3 语义残差层（W1-4 测试失败归因）",
+  "result": {
+    "corpus": {
+      "file": "corpus-failure-triage.json",
+      "sha256": "503e33f2a2209fe54750274f0f66fc5d44694620cea197b05cb5e6408e4140c1",
+      "count": 104
+    },
+    "apiFailures": 0,
+    "validCount": 104,
+    "argmaxTop1Accuracy": 0.9327,
+    "byGold": {
+      "defect": {
+        "count": 58,
+        "argmaxAccuracy": 0.931,
+        "meanConfidence": 0.9247
+      },
+      "environment": {
+        "count": 24,
+        "argmaxAccuracy": 1,
+        "meanConfidence": 0.9637
+      },
+      "flaky": {
+        "count": 22,
+        "argmaxAccuracy": 0.8636,
+        "meanConfidence": 0.8073
+      }
+    },
+    "latency": {
+      "p50Ms": 307,
+      "p95Ms": 692
+    },
+    "inputTokens": 59207,
+    "elapsedMs": 7199,
+    "recommendedThreshold": {
+      "theta": 0.5,
+      "adopted": 101,
+      "adoptedCoverage": 0.9712,
+      "adoptedPrecision": 0.9505,
+      "nrMisroute": 0
+    },
+    "bestOutsideGate": null,
+    "grid": [
+      {
+        "theta": 0.5,
+        "adopted": 101,
+        "adoptedCoverage": 0.9712,
+        "adoptedPrecision": 0.9505,
+        "nrMisroute": 0
+      },
+      {
+        "theta": 0.55,
+        "adopted": 101,
+        "adoptedCoverage": 0.9712,
+        "adoptedPrecision": 0.9505,
+        "nrMisroute": 0
+      },
+      {
+        "theta": 0.6,
+        "adopted": 100,
+        "adoptedCoverage": 0.9615,
+        "adoptedPrecision": 0.95,
+        "nrMisroute": 0
+      },
+      {
+        "theta": 0.65,
+        "adopted": 100,
+        "adoptedCoverage": 0.9615,
+        "adoptedPrecision": 0.95,
+        "nrMisroute": 0
+      },
+      {
+        "theta": 0.7,
+        "adopted": 100,
+        "adoptedCoverage": 0.9615,
+        "adoptedPrecision": 0.95,
+        "nrMisroute": 0
+      },
+      {
+        "theta": 0.75,
+        "adopted": 99,
+        "adoptedCoverage": 0.9519,
+        "adoptedPrecision": 0.9495,
+        "nrMisroute": 0
+      },
+      {
+        "theta": 0.8,
+        "adopted": 99,
+        "adoptedCoverage": 0.9519,
+        "adoptedPrecision": 0.9495,
+        "nrMisroute": 0
+      },
+      {
+        "theta": 0.85,
+        "adopted": 93,
+        "adoptedCoverage": 0.8942,
+        "adoptedPrecision": 0.9462,
+        "nrMisroute": 0
+      },
+      {
+        "theta": 0.9,
+        "adopted": 88,
+        "adoptedCoverage": 0.8462,
+        "adoptedPrecision": 0.9545,
+        "nrMisroute": 0
+      },
+      {
+        "theta": 0.95,
+        "adopted": 83,
+        "adoptedCoverage": 0.7981,
+        "adoptedPrecision": 0.9518,
+        "nrMisroute": 0
+      }
+    ],
+    "perSample": [
+      {
+        "id": "nr-001",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.88,
+        "correct": true,
+        "elapsedMs": 752
+      },
+      {
+        "id": "nr-002",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 713
+      },
+      {
+        "id": "nr-003",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 713
+      },
+      {
+        "id": "nr-004",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 772
+      },
+      {
+        "id": "nr-005",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.52,
+        "correct": true,
+        "elapsedMs": 711
+      },
+      {
+        "id": "nr-006",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 609
+      },
+      {
+        "id": "nr-007",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 253
+      },
+      {
+        "id": "nr-008",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 692
+      },
+      {
+        "id": "nr-009",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 362
+      },
+      {
+        "id": "nr-010",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 530
+      },
+      {
+        "id": "nr-011",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 293
+      },
+      {
+        "id": "nr-012",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.34,
+        "correct": true,
+        "elapsedMs": 305
+      },
+      {
+        "id": "nr-013",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 292
+      },
+      {
+        "id": "nr-014",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 252
+      },
+      {
+        "id": "nr-015",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 307
+      },
+      {
+        "id": "nr-016",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 312
+      },
+      {
+        "id": "nr-017",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.67,
+        "correct": true,
+        "elapsedMs": 497
+      },
+      {
+        "id": "nr-018",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 255
+      },
+      {
+        "id": "nr-019",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 266
+      },
+      {
+        "id": "nr-020",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 252
+      },
+      {
+        "id": "nr-021",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 314
+      },
+      {
+        "id": "nr-022",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 304
+      },
+      {
+        "id": "nr-023",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 277
+      },
+      {
+        "id": "nr-024",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.31,
+        "correct": true,
+        "elapsedMs": 266
+      },
+      {
+        "id": "nr-025",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 259
+      },
+      {
+        "id": "nr-026",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 272
+      },
+      {
+        "id": "nr-027",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.98,
+        "correct": true,
+        "elapsedMs": 331
+      },
+      {
+        "id": "nr-028",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 302
+      },
+      {
+        "id": "nr-029",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 315
+      },
+      {
+        "id": "nr-030",
+        "group": "regression",
+        "gold": "new_regression",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 283
+      },
+      {
+        "id": "ke-001",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.98,
+        "correct": true,
+        "elapsedMs": 322
+      },
+      {
+        "id": "ke-002",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 359
+      },
+      {
+        "id": "ke-003",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.28,
+        "correct": false,
+        "elapsedMs": 338
+      },
+      {
+        "id": "ke-004",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 382
+      },
+      {
+        "id": "ke-005",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 288
+      },
+      {
+        "id": "ke-006",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 249
+      },
+      {
+        "id": "ke-007",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 324
+      },
+      {
+        "id": "ke-008",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.29,
+        "correct": false,
+        "elapsedMs": 310
+      },
+      {
+        "id": "ke-009",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 342
+      },
+      {
+        "id": "ke-010",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 307
+      },
+      {
+        "id": "ke-011",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 406
+      },
+      {
+        "id": "ke-012",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 283
+      },
+      {
+        "id": "ke-013",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.99,
+        "correct": false,
+        "elapsedMs": 326
+      },
+      {
+        "id": "ke-014",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.86,
+        "correct": false,
+        "elapsedMs": 301
+      },
+      {
+        "id": "ke-015",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 270
+      },
+      {
+        "id": "ke-016",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.74,
+        "correct": true,
+        "elapsedMs": 287
+      },
+      {
+        "id": "ke-017",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.96,
+        "correct": true,
+        "elapsedMs": 327
+      },
+      {
+        "id": "ke-018",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 328
+      },
+      {
+        "id": "ke-019",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.98,
+        "correct": true,
+        "elapsedMs": 303
+      },
+      {
+        "id": "ke-020",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 249
+      },
+      {
+        "id": "ke-021",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 336
+      },
+      {
+        "id": "ke-022",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.98,
+        "correct": true,
+        "elapsedMs": 307
+      },
+      {
+        "id": "ke-023",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 316
+      },
+      {
+        "id": "ke-024",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 319
+      },
+      {
+        "id": "ke-025",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 342
+      },
+      {
+        "id": "ke-026",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.98,
+        "correct": true,
+        "elapsedMs": 256
+      },
+      {
+        "id": "ke-027",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 312
+      },
+      {
+        "id": "ke-028",
+        "group": "existing",
+        "gold": "known_existing",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.96,
+        "correct": true,
+        "elapsedMs": 311
+      },
+      {
+        "id": "ev-001",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 298
+      },
+      {
+        "id": "ev-002",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.98,
+        "correct": true,
+        "elapsedMs": 311
+      },
+      {
+        "id": "ev-003",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.95,
+        "correct": true,
+        "elapsedMs": 312
+      },
+      {
+        "id": "ev-004",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 266
+      },
+      {
+        "id": "ev-005",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.91,
+        "correct": true,
+        "elapsedMs": 490
+      },
+      {
+        "id": "ev-006",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 274
+      },
+      {
+        "id": "ev-007",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.9,
+        "correct": true,
+        "elapsedMs": 396
+      },
+      {
+        "id": "ev-008",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.89,
+        "correct": true,
+        "elapsedMs": 398
+      },
+      {
+        "id": "ev-009",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 318
+      },
+      {
+        "id": "ev-010",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 225
+      },
+      {
+        "id": "ev-011",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 298
+      },
+      {
+        "id": "ev-012",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 251
+      },
+      {
+        "id": "ev-013",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.97,
+        "correct": true,
+        "elapsedMs": 333
+      },
+      {
+        "id": "ev-014",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 254
+      },
+      {
+        "id": "ev-015",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.98,
+        "correct": true,
+        "elapsedMs": 295
+      },
+      {
+        "id": "ev-016",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.96,
+        "correct": true,
+        "elapsedMs": 302
+      },
+      {
+        "id": "ev-017",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.89,
+        "correct": true,
+        "elapsedMs": 262
+      },
+      {
+        "id": "ev-018",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 651
+      },
+      {
+        "id": "ev-019",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.95,
+        "correct": true,
+        "elapsedMs": 293
+      },
+      {
+        "id": "ev-020",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.83,
+        "correct": true,
+        "elapsedMs": 307
+      },
+      {
+        "id": "ev-021",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 320
+      },
+      {
+        "id": "ev-022",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.97,
+        "correct": true,
+        "elapsedMs": 291
+      },
+      {
+        "id": "ev-023",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 315
+      },
+      {
+        "id": "ev-024",
+        "group": "environment",
+        "gold": "environment",
+        "ok": true,
+        "choice": "environment",
+        "confidence": 0.97,
+        "correct": true,
+        "elapsedMs": 271
+      },
+      {
+        "id": "fl-001",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 292
+      },
+      {
+        "id": "fl-002",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 325
+      },
+      {
+        "id": "fl-003",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.96,
+        "correct": true,
+        "elapsedMs": 329
+      },
+      {
+        "id": "fl-004",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.82,
+        "correct": true,
+        "elapsedMs": 296
+      },
+      {
+        "id": "fl-005",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.85,
+        "correct": true,
+        "elapsedMs": 369
+      },
+      {
+        "id": "fl-006",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.93,
+        "correct": true,
+        "elapsedMs": 277
+      },
+      {
+        "id": "fl-007",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.74,
+        "correct": true,
+        "elapsedMs": 309
+      },
+      {
+        "id": "fl-008",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.44,
+        "correct": false,
+        "elapsedMs": 244
+      },
+      {
+        "id": "fl-009",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.48,
+        "correct": true,
+        "elapsedMs": 345
+      },
+      {
+        "id": "fl-010",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 260
+      },
+      {
+        "id": "fl-011",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.83,
+        "correct": true,
+        "elapsedMs": 336
+      },
+      {
+        "id": "fl-012",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.35,
+        "correct": false,
+        "elapsedMs": 276
+      },
+      {
+        "id": "fl-013",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.88,
+        "correct": true,
+        "elapsedMs": 300
+      },
+      {
+        "id": "fl-014",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.99,
+        "correct": true,
+        "elapsedMs": 358
+      },
+      {
+        "id": "fl-015",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.98,
+        "correct": true,
+        "elapsedMs": 304
+      },
+      {
+        "id": "fl-016",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.95,
+        "correct": true,
+        "elapsedMs": 287
+      },
+      {
+        "id": "fl-017",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.55,
+        "correct": true,
+        "elapsedMs": 288
+      },
+      {
+        "id": "fl-018",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.84,
+        "correct": true,
+        "elapsedMs": 340
+      },
+      {
+        "id": "fl-019",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.98,
+        "correct": true,
+        "elapsedMs": 263
+      },
+      {
+        "id": "fl-020",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "defect",
+        "confidence": 0.37,
+        "correct": false,
+        "elapsedMs": 299
+      },
+      {
+        "id": "fl-021",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 0.84,
+        "correct": true,
+        "elapsedMs": 333
+      },
+      {
+        "id": "fl-022",
+        "group": "flaky",
+        "gold": "flaky",
+        "ok": true,
+        "choice": "flaky",
+        "confidence": 1,
+        "correct": true,
+        "elapsedMs": 326
+      }
+    ]
+  },
+  "gate": {
+    "criterion": "存在 θ：adoptedPrecision ≥ 0.95 且 nrMisroute = 0 且 adoptedCoverage ≥ 0.6；且 overall argmax accuracy ≥ 0.85（诊断门）",
+    "passed": true,
+    "note": "P0 评审修正（2026-09-22，证据驱动）：首轮四类校准 known_existing argmax 仅 39.3%——「在册与否」是登记表属性非文本语义（认识论不可判），D-1 修正为 L3 三类（defect/environment/flaky），known_existing 由 L1 登记表独占；defect 采纳即输出 new_regression（保守方向交人工）。nrMisroute=0 为 D-3 零容忍。"
+  }
+}

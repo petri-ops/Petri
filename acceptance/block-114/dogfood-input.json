@@ -1,0 +1,34 @@
+{
+  "failures": [
+    {
+      "testFile": "test/g0-rs-p6-product-acceptance.mjs",
+      "testName": "p6_stored_current_source_hash_mismatch",
+      "errorText": "AssertionError: p6_stored_current_source_hash_mismatch — 源绑定集内文件改动后未重打证据"
+    },
+    {
+      "testFile": "test/g0-rs-p6-product-acceptance.mjs",
+      "testName": "p6_evidence_checks_not_recomputed",
+      "errorText": "AssertionError: p6_evidence_checks_not_recomputed — live 检查时序抖动"
+    },
+    {
+      "testFile": "test/federation-probe.test.mjs",
+      "testName": "peer health",
+      "errorText": "Error: connect ECONNREFUSED 127.0.0.1:2233"
+    },
+    {
+      "testFile": "scripts/block114-p0-calibrate.mjs",
+      "testName": "P0 gate first run",
+      "errorText": "gate.passed=false — 未找到达门槛的阈值；known_existing argmax 39.3%（四类认识论不可判）"
+    },
+    {
+      "testFile": ".agents/skills/gewu-dev-infra/dev-verify/flows/block112-intent-live.cjs",
+      "testName": "N4_temp_conversations_cleaned",
+      "errorText": "cleanups=[\"conv_8c2=ok\",\"conv_8c2=fail\"] — 两次提交复用活跃会话，重复删除 404"
+    },
+    {
+      "testFile": "test/block113-toolroute-live.cjs",
+      "testName": "R1 log tail read",
+      "errorText": "adopted=[] — electron stdout 管道缓冲延迟，日志读取早于落盘"
+    }
+  ]
+}

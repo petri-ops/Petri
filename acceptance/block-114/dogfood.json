@@ -1,0 +1,69 @@
+{
+  "kind": "block114-triage-report",
+  "version": "1.0.0",
+  "generatedAt": "2026-09-22T08:45:32.643Z",
+  "sourceCommit": "27d6f96c8673ee9e4963a6553cc1da4e97430ff8",
+  "input": "D:\\1.WorkDir\\biof3-desktop\\acceptance\\block-114\\dogfood-input.json",
+  "registerSize": 6,
+  "total": 6,
+  "summary": {
+    "known_existing": 2,
+    "environment": 1,
+    "new_regression": 1,
+    "needs_human": 1,
+    "flaky": 1
+  },
+  "results": [
+    {
+      "testFile": "test/g0-rs-p6-product-acceptance.mjs",
+      "testName": "p6_stored_current_source_hash_mismatch",
+      "classifiedAs": "known_existing",
+      "layer": "L1",
+      "fingerprint": "4f79bce92499",
+      "confidence": 1
+    },
+    {
+      "testFile": "test/g0-rs-p6-product-acceptance.mjs",
+      "testName": "p6_evidence_checks_not_recomputed",
+      "classifiedAs": "known_existing",
+      "layer": "L1",
+      "fingerprint": "24f14f7fde25",
+      "confidence": 1
+    },
+    {
+      "testFile": "test/federation-probe.test.mjs",
+      "testName": "peer health",
+      "classifiedAs": "environment",
+      "layer": "L2",
+      "fingerprint": "436163ba7a5c",
+      "confidence": 1
+    },
+    {
+      "testFile": "scripts/block114-p0-calibrate.mjs",
+      "testName": "P0 gate first run",
+      "classifiedAs": "new_regression",
+      "layer": "L3",
+      "choice": "defect",
+      "confidence": 0.99,
+      "reason": "adopted_conservative"
+    },
+    {
+      "testFile": ".agents/skills/gewu-dev-infra/dev-verify/flows/block112-intent-live.cjs",
+      "testName": "N4_temp_conversations_cleaned",
+      "classifiedAs": "needs_human",
+      "layer": "L3",
+      "choice": "flaky",
+      "confidence": 0.38,
+      "reason": "below_threshold"
+    },
+    {
+      "testFile": "test/block113-toolroute-live.cjs",
+      "testName": "R1 log tail read",
+      "classifiedAs": "flaky",
+      "layer": "L3",
+      "choice": "flaky",
+      "confidence": 1,
+      "reason": "adopted"
+    }
+  ]
+}

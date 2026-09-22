@@ -1,0 +1,56 @@
+{
+  "kind": "block114-known-failures",
+  "version": "1.0.0",
+  "note": "BLOCK-114 在册已知失败登记表（L1 指纹层事实源）。条目 = {fingerprint, testFile, testName, classifiedAs, note, registeredAt}；fingerprint = sha1(testFile::testName) 前 12 位（归一化规范见 plan §2 D-5）。种子来源=BLOCK-102/104/105 在册项与本仓已知平台/环境门（由维护者随收口登记，本表为 repo 内活文档）。运行时命中本表 → known_existing（零模型调用）。",
+  "registeredAt": "2026-09-22",
+  "entries": [
+    {
+      "fingerprint": "4f79bce92499",
+      "testFile": "test/g0-rs-p6-product-acceptance.mjs",
+      "testName": "p6_stored_current_source_hash_mismatch",
+      "classifiedAs": "known_existing",
+      "note": "P6 源绑定集内文件改动后、证据重打前的过渡态失配（🟡 在册；重打后自愈）",
+      "registeredAt": "2026-09-22"
+    },
+    {
+      "fingerprint": "24f14f7fde25",
+      "testFile": "test/g0-rs-p6-product-acceptance.mjs",
+      "testName": "p6_evidence_checks_not_recomputed",
+      "classifiedAs": "flaky",
+      "note": "P6 live 检查时序抖动（AUDIT-LOG 在册观察：--live --verbose 复跑即过）",
+      "registeredAt": "2026-09-22"
+    },
+    {
+      "fingerprint": "seed0003p4rsig",
+      "testFile": "test/p4r-baseline.test.mjs",
+      "testName": "p4r SIGTERM skip",
+      "classifiedAs": "environment",
+      "note": "Windows 侧 p4r SIGTERM 平台门 skip（BLOCK-104 环境门在册）",
+      "registeredAt": "2026-09-22"
+    },
+    {
+      "fingerprint": "seed0004nagent",
+      "testFile": "test/block67-mux.test.mjs",
+      "testName": "node-agent GNU coreutils 语义面",
+      "classifiedAs": "environment",
+      "note": "Mac 侧 GNU/BSD 差异（BLOCK-104 K 簇 🟡，Mac 侧才可处置）",
+      "registeredAt": "2026-09-22"
+    },
+    {
+      "fingerprint": "seed0005blk63",
+      "testFile": "test/block63-fixture-focus.test.mjs",
+      "testName": "fixture 焦点环境敏感",
+      "classifiedAs": "flaky",
+      "note": "BLOCK-104 环境敏感集成靶在册（flame 率约 1/轮，同位重跑惯例）",
+      "registeredAt": "2026-09-22"
+    },
+    {
+      "fingerprint": "seed0006dscfg",
+      "testFile": "test/deepseek-retry.test.mjs",
+      "testName": "retry 层外部渠道依赖",
+      "classifiedAs": "environment",
+      "note": "deepseek retry 层依赖外部渠道形态（BLOCK-104 在册 skip 面）",
+      "registeredAt": "2026-09-22"
+    }
+  ]
+}
