@@ -1,7 +1,7 @@
 # BLOCK-115-TEST-SUGGEST 计划：增量式测试选择建议（决策内化弧 W1-5 · 谨慎档）
 
 **Plan ID**：`BLOCK-115-TEST-SUGGEST`
-**状态**：`active（P0-LAUNCH，2026-09-22 用户裁决「开 按顺序都做完」队列序第 5 点=末项；弧线底稿=docs/planning/decision-primitive-internalization-arc.md §W1-5）`
+**状态**：`completed（2026-09-22 当日立项当日收口：P0 校准 gate.passed（104 条六域语料 θ=0.8 精度 89.8%/覆盖 94.6%；P0 评审修正 D-1=12 域两轮校准 72-74% 平台→6 域粗化 + docs/acceptance 确定性前置层零出站）→ P1 契约 10/10 → P2 dogfood（真实改动集→agent-backend 7 建议 conf=1；docs-only 零建议对照）；closeout 十门全绿）`
 **立项日期**：2026-09-22
 **责任轨道**：BLOCK（开发者侧 dev-infra 工具；零产品面/零用户数据）
 **上游文档**：弧线 §W1-5 · `test/impact-map.json`（静态下限，fail-closed 红线不动）

@@ -5061,13 +5061,13 @@
       "id": "BLOCK-115-TEST-SUGGEST",
       "path": "docs/block-115-test-suggest-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-115-test-suggest",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-22",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "block-115",
         "jev",
@@ -5075,10 +5075,11 @@
         "decision-model",
         "w1",
         "dev-infra",
-        "active"
+        "completed"
       ],
-      "notes": "决策内化弧 W1 队列第 5 点=末项（谨慎档）。2026-09-22 用户裁决「开 按顺序都做完」队列序。范围：impact-map 静态下限之上（fail-closed 红线零改动）的增量建议——scripts/block115-test-suggest.mjs CLI 接收改动文件清单 → askDecision choice 12 测试域+none 分类（conf≥θ 才出建议，否则零建议）→ 展开为定向测试文件建议（只加不减，结构化保证）。P0 ≥100 语料校准 + D-1~D-5 预登记（D-3 precision≥0.80 门；D-4 独立 CLI 不接门禁链）。PoC 失败语义=诚实收缩关闭。G0 开发期常态 · 不外推 packaged/Provider/GA。",
-      "lastUpdated": "2026-09-22"
+      "notes": "决策内化弧 W1 队列第 5 点=末项（谨慎档）。2026-09-22 用户裁决「开 按顺序都做完」队列序。范围：impact-map 静态下限之上（fail-closed 红线零改动）的增量建议——scripts/block115-test-suggest.mjs CLI 接收改动文件清单 → askDecision choice 12 测试域+none 分类（conf≥θ 才出建议，否则零建议）→ 展开为定向测试文件建议（只加不减，结构化保证）。P0 ≥100 语料校准 + D-1~D-5 预登记（D-3 precision≥0.80 门；D-4 独立 CLI 不接门禁链）。PoC 失败语义=诚实收缩关闭。2026-09-22 当日整包收口 completed：P0 校准 gate.passed（104 条六域+确定性 docs 前置层，θ=0.8 精度 89.8%/覆盖 94.6%；12 域两轮 72-74% 平台→粗化修正留痕）→ P1 契约 10/10 → P2 dogfood（真实改动集→agent-backend 7 建议 conf=1、docs-only 零建议对照）；closeout 十门全绿。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "lastUpdated": "2026-09-22",
+      "completedAt": "2026-09-22"
     },
     {
       "id": "DECISION-PRIMITIVE-INTERNALIZATION-ARC",
