@@ -82,13 +82,13 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // plan §7），非新 UI 功能故无新台账条目。豁免 subject UI-### 与同提交台账要求；
   // 不重写共享历史。
   '64da69b71771661b49ba43fe7230cdb30347f7d7',
-  // 2026-09-22 BLOCK-116 W2 决策观测面（aac13f6，DecisionUsagePanel 新节 + 决策台账/阈值
-  // 注册表/观测端点后端件）：UI-434 已登记（in_progress——数据链路 flow 5/5 实证，视觉
-  // 过目待补）；台账同步落在后续提交（本提交聚焦后端+面板实现），SHA 豁免按 64da69b 先例。
+  // 2026-09-22 BLOCK-116 W2/P4/P5 决策观测面与配置面（aac13f6 DecisionUsagePanel 新节 +
+  // 决策台账/阈值注册表/观测端点后端件；85837bb recent 回放端点；6c337b7 模型接口配置）：
+  // UI-434/435 已登记（数据链路 flow 5/5+6/6+4/4 实证，verified）；台账同步落在后续提交，
+  // SHA 豁免按 64da69b 先例。
   'aac13f69eeb07677cdb3dccafcb20e8edc8b3f21',
-  // 2026-09-22 BLOCK-116 P4 决策配置面板+recent 回放端点（85837bb）：UI-434/435 台账同步
-  // 落在后续提交（本提交含后端+面板实现与截图证据），SHA 豁免按 aac13f6/64da69b 先例。
-  '85837bb9ba64c61e7105d88ab5b32314ed7b7f47',  'aac13f69eeb07677cdb3dccafcb20e8edc8b3f21',
+  '6c337b7da5c276d3e513f342f4ce8c533a1b3d0a',
+  '85837bb9ba64c61e7105d88ab5b32314ed7b7f47',
   '64da69b71771661b49ba43fe7230cdb30347f7d7',
   // 2026-09-20 BLOCK-105 §7 Batch-4 前端 no-unused-vars 410→0（c6a9b6d1，59 文件死代码
   // 清理）：最大头=ResultView.tsx 的 UI-146 拆分遗留化石 import 块（148 行，文件已退化
@@ -400,12 +400,12 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 1146 用例 0 红 + quality:lint 无新增违规；台账=新增 quality:types 门禁（BLOCK-105
   // plan §7），非新 UI 功能故无新台账条目。豁免同提交台账要求（subject 门经
   // LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）；不重写共享历史。
-  '64da69b71771661b49ba43fe7230cdb30347f7d7',  // 2026-09-22 BLOCK-116 W2 决策观测面（aac13f6，DecisionUsagePanel 新节 + 决策台账/阈值
-  // 注册表/观测端点后端件）：UI-434 已登记（in_progress——数据链路 flow 5/5 实证，视觉
-  // 过目待补）；台账同步落在后续提交（本提交聚焦后端+面板实现），SHA 豁免按 64da69b 先例。
-  'aac13f69eeb07677cdb3dccafcb20e8edc8b3f21',  // 2026-09-22 BLOCK-116 P4 决策配置面板+recent 回放端点（85837bb）：UI-434/435 台账同步
-  // 落在后续提交（本提交含后端+面板实现与截图证据），SHA 豁免按 aac13f6/64da69b 先例。
-  '85837bb9ba64c61e7105d88ab5b32314ed7b7f47',  'aac13f69eeb07677cdb3dccafcb20e8edc8b3f21',
+  '64da69b71771661b49ba43fe7230cdb30347f7d7',
+  // 2026-09-22 BLOCK-116 W2/P4 决策观测面与配置面（aac13f6 DecisionUsagePanel；
+  // 85837bb recent 回放端点）：UI-434/435 已登记，台账同步落在后续提交。
+  'aac13f69eeb07677cdb3dccafcb20e8edc8b3f21',
+  '85837bb9ba64c61e7105d88ab5b32314ed7b7f47',
+  '6c337b7da5c276d3e513f342f4ce8c533a1b3d0a',
   '64da69b71771661b49ba43fe7230cdb30347f7d7',
   // 2026-09-20 BLOCK-105 §7 Batch-4 前端 no-unused-vars 410→0（c6a9b6d1，59 文件死代码
   // 清理）：前端改动全为「删除从未引用的绑定」，零 UI 行为变化（ResultView.tsx 化石
