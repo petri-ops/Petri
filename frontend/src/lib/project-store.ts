@@ -19,7 +19,8 @@ function authHeaders(): Record<string, string> {
   };
 }
 
-async function api(path: string, opts?: RequestInit): Promise<any> {
+// BLOCK-105 §7 Batch-6 — api() 返回 unknown（出站边界）：调用点按各自 wire 形状收窄。
+async function api(path: string, opts?: RequestInit): Promise<unknown> {
   const resp = await fetch(API_BASE() + path, {
     ...opts,
     headers: {
@@ -44,14 +45,14 @@ export async function listProjects(
   if (modality) params.set('modality', modality);
   if (status === 'archived') params.set('status', status);
   const qs = params.size > 0 ? `?${params.toString()}` : '';
-  const data = await api(`/projects${qs}`);
+  const data = (await api(`/projects${qs}`)) as { projects?: Array<Record<string, unknown>> | null };
   return (data.projects || []).map(mapProject);
 }
 
 export async function getProject(id: string): Promise<Project | null> {
   try {
-    const data = await api(`/projects/${id}`);
-    return mapProject(data.project);
+    const data = (await api(`/projects/${id}`)) as { project?: Record<string, unknown> };
+    return mapProject(data.project as Record<string, unknown>);
   } catch {
     return null;
   }
@@ -66,11 +67,11 @@ export async function createProject(input: {
   sshHost?: string;
   remotePath?: string;
 }): Promise<Project> {
-  const data = await api('/projects', {
+  const data = (await api('/projects', {
     method: 'POST',
     body: JSON.stringify(input),
-  });
-  return mapProject(data.project);
+  })) as { project?: Record<string, unknown> };
+  return mapProject(data.project as Record<string, unknown>);
 }
 
 export async function updateProject(
@@ -78,8 +79,8 @@ export async function updateProject(
   patch: { name?: string; description?: string; workspacePath?: string }
 ): Promise<Project | null> {
   try {
-    const data = await api(`/projects/${id}`, { method: 'PUT', body: JSON.stringify(patch) });
-    return mapProject(data.project);
+    const data = (await api(`/projects/${id}`, { method: 'PUT', body: JSON.stringify(patch) })) as { project?: Record<string, unknown> };
+    return mapProject(data.project as Record<string, unknown>);
   } catch {
     return null;
   }
@@ -156,11 +157,11 @@ export async function setProjectStatus(
   status: 'active' | 'archived'
 ): Promise<Project | null> {
   try {
-    const data = await api(`/projects/${id}/status`, {
+    const data = (await api(`/projects/${id}/status`, {
       method: 'POST',
       body: JSON.stringify({ status }),
-    });
-    return mapProject(data.project);
+    })) as { project?: Record<string, unknown> };
+    return mapProject(data.project as Record<string, unknown>);
   } catch {
     return null;
   }
@@ -174,7 +175,7 @@ export async function listProjectJobs(projectId: string, conversationId?: string
   const query = conversationId === undefined
     ? ''
     : `?${new URLSearchParams({ conversationId }).toString()}`;
-  const data = await api(`/projects/${projectId}/jobs${query}`);
+  const data = (await api(`/projects/${projectId}/jobs${query}`)) as { jobs?: Array<Record<string, unknown>> | null };
   return (data.jobs || []).map(mapToolJob);
 }
 
@@ -193,7 +194,7 @@ export async function listAllJobs(): Promise<ToolJob[]> {
 // ============================================================
 
 export async function listDatasetsByProject(projectId: string): Promise<Dataset[]> {
-  const data = await api(`/projects/${projectId}/datasets`);
+  const data = (await api(`/projects/${projectId}/datasets`)) as { datasets?: Array<Record<string, unknown>> | null };
   return (data.datasets || []).map(mapDataset);
 }
 
@@ -205,8 +206,8 @@ export async function createDataset(input: {
   description?: string;
   sourceDatasetIds?: string[];
 }): Promise<Dataset> {
-  const data = await api('/datasets', { method: 'POST', body: JSON.stringify(input) });
-  return mapDataset(data.dataset);
+  const data = (await api('/datasets', { method: 'POST', body: JSON.stringify(input) })) as { dataset?: Record<string, unknown> };
+  return mapDataset(data.dataset as Record<string, unknown>);
 }
 
 export async function deleteDataset(id: string): Promise<void> {

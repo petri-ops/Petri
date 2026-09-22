@@ -105,7 +105,7 @@ export function MobileSyncPanel(): React.ReactElement {
   const refresh = useCallback(async () => {
     try {
       const response = await fetch(`${getPlatformApiPrefix()}/mobile/status`, { headers: authHeaders() });
-      const data = await response.json();
+      const data = (await response.json()) as MobileStatus;
       if (data.ok) {
         setStatus(data);
         setError(null);
@@ -115,12 +115,12 @@ export function MobileSyncPanel(): React.ReactElement {
     }
     try {
       const response = await fetch(`${getPlatformApiPrefix()}/mobile/tunnel`, { headers: authHeaders() });
-      const data = await response.json();
+      const data = (await response.json()) as { ok?: unknown; tunnel: TunnelStatus | null; profiles?: TunnelProfile[] };
       if (data.ok) {
         setTunnel(data.tunnel);
         setProfiles(Array.isArray(data.profiles) ? data.profiles : []);
-        setTunnelHost((prev) => prev || data.tunnel.host || '');
-        setTunnelPublicUrl((prev) => prev || data.tunnel.publicUrl || '');
+        setTunnelHost((prev) => prev || (data.tunnel as TunnelStatus).host || '');
+        setTunnelPublicUrl((prev) => prev || (data.tunnel as TunnelStatus).publicUrl || '');
       }
     } catch {
       /* 隧道状态读取失败不阻塞主面板 */
@@ -145,7 +145,7 @@ export function MobileSyncPanel(): React.ReactElement {
           headers: authHeaders(),
           body: JSON.stringify({}),
         });
-        const data = await response.json();
+        const data = (await response.json()) as PairingInfo & { ok?: unknown };
         if (!cancelled && data.ok) setPairing(data);
       } catch {
         /* 静默：下一轮续码或手动重试 */
@@ -168,7 +168,7 @@ export function MobileSyncPanel(): React.ReactElement {
         headers: authHeaders(),
         body: JSON.stringify({ enabled: !status.enabled }),
       });
-      const data = await response.json();
+      const data = (await response.json()) as { ok?: unknown; config: { enabled: boolean; port: number } };
       if (data.ok) {
         setStatus((prev) => (prev ? { ...prev, enabled: data.config.enabled, port: data.config.port } : prev));
         setPairing(null);
@@ -230,11 +230,11 @@ export function MobileSyncPanel(): React.ReactElement {
           publicUrl: tunnelPublicUrl.trim(),
         }),
       });
-      const data = await response.json();
+      const data = (await response.json()) as { ok?: unknown; message?: string; tunnel: TunnelStatus | null };
       if (data.ok) {
         setTunnel(data.tunnel);
-        setTunnelHost(data.tunnel.host || '');
-        setTunnelPublicUrl(data.tunnel.publicUrl || '');
+        setTunnelHost((data.tunnel as TunnelStatus).host || '');
+        setTunnelPublicUrl((data.tunnel as TunnelStatus).publicUrl || '');
         await refresh();
       } else {
         setError(data.message || '隧道配置保存失败');

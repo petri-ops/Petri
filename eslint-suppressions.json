@@ -421,18 +421,6 @@
     "@typescript-eslint/no-misused-promises": {
       "count": 1
     },
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 8
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 12
-    },
-    "@typescript-eslint/no-unsafe-call": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 24
-    },
     "react-hooks/purity": {
       "count": 1
     },
@@ -454,18 +442,6 @@
     "@typescript-eslint/no-misused-promises": {
       "count": 2
     },
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 8
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 7
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 16
-    },
-    "@typescript-eslint/no-unsafe-return": {
-      "count": 2
-    },
     "react-hooks/refs": {
       "count": 1
     },
@@ -479,15 +455,6 @@
     }
   },
   "frontend/src/components/desktop/DesktopSettingsPanel/sections/RemoteTargets.tsx": {
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 6
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 7
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 16
-    },
     "react-hooks/set-state-in-effect": {
       "count": 2
     }
@@ -1194,19 +1161,19 @@
       "count": 33
     },
     "@typescript-eslint/no-unsafe-argument": {
-      "count": 8
+      "count": 3
     },
     "@typescript-eslint/no-unsafe-assignment": {
-      "count": 25
+      "count": 17
     },
     "@typescript-eslint/no-unsafe-call": {
-      "count": 4
+      "count": 1
     },
     "@typescript-eslint/no-unsafe-member-access": {
-      "count": 34
+      "count": 23
     },
     "@typescript-eslint/no-unsafe-return": {
-      "count": 4
+      "count": 1
     }
   },
   "frontend/src/lib/projectionDataBridges.test.ts": {

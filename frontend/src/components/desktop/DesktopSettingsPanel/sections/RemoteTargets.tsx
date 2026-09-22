@@ -119,10 +119,20 @@ export function RemoteTargets(): React.ReactElement {
     } catch { /* 隐私模式等场景允许失败 */ }
   };
 
+  // BLOCK-105 §7 Batch-6 — remote-targets/federation REST 信封 wire 形状（JSON 解析出站边界契约文档）。
+  type RemoteEnvelope = {
+    ok?: unknown;
+    error?: string;
+    detail?: string;
+    registered?: RegisteredTarget[];
+    discovered?: DiscoveredTarget[];
+    peers?: FedPeer[];
+  } | null;
+
   const load = useCallback(async () => {
     try {
       const response = await fetch(`${getPlatformApiPrefix()}/remote-targets`, { headers: authHeaders() });
-      const payload = await response.json();
+      const payload = (await response.json()) as RemoteEnvelope;
       if (!response.ok || !payload?.ok) throw new Error(payload?.error || '目标列表不可用');
       setData({ registered: payload.registered || [], discovered: payload.discovered || [] });
       setError('');
@@ -140,7 +150,7 @@ export function RemoteTargets(): React.ReactElement {
   const loadFederation = useCallback(async () => {
     try {
       const response = await fetch(`${getPlatformApiPrefix()}/federation/peers`, { headers: authHeaders() });
-      const payload = await response.json();
+      const payload = (await response.json()) as RemoteEnvelope;
       if (!response.ok || !payload?.ok) throw new Error(payload?.error || '联邦节点列表不可用');
       setFedPeers(payload.peers || []);
       setFedError('');
@@ -158,7 +168,7 @@ export function RemoteTargets(): React.ReactElement {
         method: 'POST',
         headers: authHeaders(),
       });
-      const payload = await response.json();
+      const payload = (await response.json()) as RemoteEnvelope;
       if (!response.ok || !payload?.ok) throw new Error(payload?.error || '探活失败');
       await loadFederation();
     } catch (reason) {
@@ -177,7 +187,7 @@ export function RemoteTargets(): React.ReactElement {
         headers: { ...authHeaders(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ alias: alias.trim() }),
       });
-      const payload = await response.json();
+      const payload = (await response.json()) as RemoteEnvelope;
       if (!response.ok || !payload?.ok) throw new Error(payload?.error === 'alias_already_registered' ? '该别名已注册' : payload?.error === 'invalid_alias' ? '别名不合法' : (payload?.error || '注册失败'));
       setAliasInput('');
       await load();
@@ -195,7 +205,7 @@ export function RemoteTargets(): React.ReactElement {
         method: 'POST',
         headers: authHeaders(),
       });
-      const payload = await response.json();
+      const payload = (await response.json()) as RemoteEnvelope;
       if (!response.ok || !payload?.ok) throw new Error(payload?.detail || payload?.error || '探测失败');
       await load();
     } catch (reason) {

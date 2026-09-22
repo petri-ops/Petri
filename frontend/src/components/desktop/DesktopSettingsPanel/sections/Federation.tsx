@@ -34,6 +34,21 @@ interface FederationMember {
   identity: { displayName?: string; device?: string };
 }
 
+// BLOCK-105 §7 Batch-6 — 联邦 REST 信封 wire 形状（JSON 解析出站边界契约文档；
+  // 字段 optional/unknown＝后端可能发任意 JSON，运行时防御保持原样）。
+interface FederationEnvelope {
+  ok?: unknown;
+  message?: string;
+  peers?: FederationPeer[];
+  grants?: FederationGrant[];
+  members?: FederationMember[];
+  peer?: { name?: string };
+  url?: string;
+  primaryUrl?: string;
+  token?: string;
+  projects?: Array<{ id: string; name: string }>;
+}
+
 // 署名持久化键：本机工程师署名是展示性声明（D1-A），存 localStorage 即可。
 const ENGINEER_NAME_KEY = 'gewu-engineer-name';
 const MEMBERS_REFRESH_MS = 30 * 1000;
@@ -106,8 +121,8 @@ export function FederationPanel(): React.ReactElement {
   const refresh = useCallback(async () => {
     try {
       const response = await fetch(`${getPlatformApiPrefix()}/federation/peers`, { headers: authHeaders() });
-      const data = await response.json();
-      if (data.ok) setPeers(data.peers);
+      const data = (await response.json()) as FederationEnvelope;
+      if (data.ok) setPeers(data.peers as FederationPeer[] | null);
     } catch {
       setError('无法读取协作节点列表');
     }
@@ -119,9 +134,9 @@ export function FederationPanel(): React.ReactElement {
         fetch(`${getPlatformApiPrefix()}/federation/grants`, { headers: authHeaders() }),
         fetch(`${getPlatformApiPrefix()}/data/projects`, { headers: authHeaders() }),
       ]);
-      const gd = await g.json();
-      if (gd.ok) setGrants(gd.grants);
-      const pd = await p.json();
+      const gd = (await g.json()) as FederationEnvelope;
+      if (gd.ok) setGrants(gd.grants as FederationGrant[] | null);
+      const pd = (await p.json()) as FederationEnvelope;
       if (pd.projects) setHostProjects(pd.projects.map((x: { id: string; name: string }) => ({ id: x.id, name: x.name })));
     } catch {
       /* 授权面读取失败静默（下次刷新再试） */
@@ -131,8 +146,8 @@ export function FederationPanel(): React.ReactElement {
   const refreshMembers = useCallback(async () => {
     try {
       const response = await fetch(`${getPlatformApiPrefix()}/federation/members`, { headers: authHeaders() });
-      const data = await response.json();
-      if (data.ok) setMembers(data.members);
+      const data = (await response.json()) as FederationEnvelope;
+      if (data.ok) setMembers(data.members as FederationMember[] | null);
     } catch {
       /* 成员列表读取失败静默（下次轮询/操作后再试） */
     }
@@ -163,7 +178,7 @@ export function FederationPanel(): React.ReactElement {
           identity: trimmedName ? { displayName: trimmedName, device: deviceLabel() } : undefined,
         }),
       });
-      const data = await response.json();
+      const data = (await response.json()) as FederationEnvelope;
       if (data.ok) {
         setPairUrl('');
         const signed = trimmedName ? `（以「${trimmedName}」署名）` : '';
@@ -206,7 +221,7 @@ export function FederationPanel(): React.ReactElement {
         headers: authHeaders(),
         body: JSON.stringify({}),
       });
-      const data = await response.json();
+      const data = (await response.json()) as FederationEnvelope;
       if (data.ok && data.url) {
         window.open(data.url, '_blank', 'noopener');
       } else {
@@ -274,9 +289,9 @@ export function FederationPanel(): React.ReactElement {
         headers: authHeaders(),
         body: JSON.stringify({}),
       });
-      const data = await response.json();
+      const data = (await response.json()) as FederationEnvelope;
       if (data.ok && data.primaryUrl) {
-        setInvite({ token: data.token, primaryUrl: data.primaryUrl });
+        setInvite({ token: data.token as string, primaryUrl: data.primaryUrl });
         setInviteCopied(false);
       } else {
         setError(data.message || '生成配对码失败');
@@ -299,9 +314,9 @@ export function FederationPanel(): React.ReactElement {
           headers: authHeaders(),
           body: JSON.stringify({}),
         });
-        const data = await response.json();
+        const data = (await response.json()) as FederationEnvelope;
         if (!cancelled && data.ok && data.primaryUrl) {
-          setInvite({ token: data.token, primaryUrl: data.primaryUrl });
+          setInvite({ token: data.token as string, primaryUrl: data.primaryUrl });
         }
       } catch {
         /* 静默：下一轮续码或手动「重新生成」 */
