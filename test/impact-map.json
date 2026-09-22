@@ -2153,11 +2153,13 @@
         "scripts/block110-merge-corpus.cjs",
         "acceptance/block-110/**",
         "test/block110-*.test.mjs",
-        "scripts/block110-p1-ab.mjs"
+        "scripts/block110-p1-ab.mjs",
+        "core/biof3-server/helpers/knowledge-space.js"
       ],
       "tests": [
         "test/block110-decision-api.test.mjs",
-        "test/block110-p1-topic-shift.test.mjs"
+        "test/block110-p1-topic-shift.test.mjs",
+        "test/block110-p2-knowledge-guard.test.mjs"
       ],
       "frontendRelated": false,
       "classifiesScripts": true,
