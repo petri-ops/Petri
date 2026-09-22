@@ -4991,23 +4991,24 @@
       "id": "BLOCK-112-COPILOT-INTENT-ROUTING",
       "path": "docs/block-112-copilot-intent-routing-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-112-copilot-intent-routing",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-22",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "block-112",
         "jev",
         "system-one",
         "decision-model",
         "w1",
-        "active"
+        "completed"
       ],
-      "notes": "决策判断模式内化弧 W1 队列第 2 点（逐点立项）。2026-09-22 用户裁决「开 按顺序都做完」全数授权 W1 队列 2~5 点按序串行。范围：chat.js 提交链挂钩 askDecision choice 四类意图分类（chitchat/task/knowledge_qa/result_studio；state=最近一条用户消息 ≤600 字）+ chitchat 快路径（BIOF3_JEV_INTENT_ROUTE=1 显式开 + θ 门控才分流；callModelTask 直答 → run_started/delta 事件回放镜像 agent-runner 形状 → markAgentTaskDone → 会话落库；非流式 v1）。其余三类维持现行 loop。P0 校准 ≥100 条四类中文语料 + D-1~D-5 预登记裁决（D-3 θ 取 task 零误采纳最高覆盖档；D-4 默认关）。非范围=三类动作分流/流式直答/前端发送链/agent loop。红线=guard 关提交链零变化/降级必有/提交链前置检查（联邦/subagent/并发）先于分类。PoC 失败语义=诚实收缩仅冻结本点。G0 开发期常态 · 不外推 packaged/Provider/GA。",
-      "lastUpdated": "2026-09-22"
+      "notes": "决策判断模式内化弧 W1 队列第 2 点（逐点立项）。2026-09-22 用户裁决「开 按顺序都做完」全数授权 W1 队列 2~5 点按序串行。范围：chat.js 提交链挂钩 askDecision choice 四类意图分类（chitchat/task/knowledge_qa/result_studio；state=最近一条用户消息 ≤600 字）+ chitchat 快路径（BIOF3_JEV_INTENT_ROUTE=1 显式开 + θ 门控才分流；callModelTask 直答 → run_started/delta 事件回放镜像 agent-runner 形状 → markAgentTaskDone → 会话落库；非流式 v1）。其余三类维持现行 loop。P0 校准 ≥100 条四类中文语料 + D-1~D-5 预登记裁决（D-3 θ 取 task 零误采纳最高覆盖档；D-4 默认关）。非范围=三类动作分流/流式直答/前端发送链/agent loop。红线=guard 关提交链零变化/降级必有/提交链前置检查（联邦/subagent/并发）先于分类。PoC 失败语义=诚实收缩仅冻结本点。2026-09-22 当日整包收口 completed：P0 校准 gate.passed（117 条 overall 98.3%、θ=0.70 chitchat 召回/精度 1.0、task 零误采纳）→ P1 挂钩+快路径（契约 13/13）→ P2 flow block112-intent-live 6/6（闲聊快路径无工具事件+meta.chitchatFastPath 落库标记 / 任务正常 loop）；closeout 十门全绿。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "lastUpdated": "2026-09-22",
+      "completedAt": "2026-09-22"
     },
     {
       "id": "DECISION-PRIMITIVE-INTERNALIZATION-ARC",

@@ -1,9 +1,9 @@
 # BLOCK-112-COPILOT-INTENT-ROUTING 计划：copilot 发送前意图路由（决策内化弧 W1-2）
 
 **Plan ID**：`BLOCK-112-COPILOT-INTENT-ROUTING`
-**状态**：`active（P0-LAUNCH，2026-09-22 用户裁决「开 按顺序都做完」全数授权 W1 队列 2~5 点按序逐点立项；本包=W1 队列第 2 点；弧线底稿=docs/planning/decision-primitive-internalization-arc.md §W1）`
+**状态**：`completed（2026-09-22 当日立项当日收口：P0 校准 gate.passed（117 条四类语料，overall argmax 98.3%、θ=0.70 chitchat recall/precision 1.0、task 零误采纳、P50 277ms）→ P1 提交链挂钩+chitchat 快路径（契约 13/13）→ P2 实机 flow block112-intent-live 6/6（闲聊快路径 delta 无工具事件+回复落库标记 / 任务正常 loop）；closeout 十门全绿。D-1~D-5 按推荐定版；弧线底稿=docs/planning/decision-primitive-internalization-arc.md §W1）`
 **立项日期**：2026-09-22
-**最后更新**：2026-09-22（立项登记 active/P0-LAUNCH。队列次序=arc §W1 预登记：1 marker（BLOCK-111 已 completed）→ 2 本包 → 3 工具预路由 → 4 测试归因 → 5 增量测试选择。）
+**最后更新**：2026-09-22（整包收口 completed，closeout 十门全绿；快路径回复 meta.chitchatFastPath 权威标记；两次提交复用活跃会话语义已实测确认（flow 清理幂等）。立项登记 active/P0-LAUNCH。队列次序=arc §W1 预登记：1 marker（BLOCK-111 已 completed）→ 2 本包 → 3 工具预路由 → 4 测试归因 → 5 增量测试选择。）
 **责任轨道**：BLOCK（后端提交链挂钩 + 决策接点校准 + chitchat 快路径新增面，跨 P 阶段串行）
 **上游文档**：`docs/planning/decision-primitive-internalization-arc.md` §W1-2 · `docs/planning/typesafe-jev-system-one-research.md` §6.1 #5 · W1-1 载体 `docs/block-111-jev-w1-marker-classification-plan.md`（wrapper/校准方法论复用）
 
