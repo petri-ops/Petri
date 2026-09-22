@@ -23,6 +23,14 @@
 | P3（增量，2026-09-22 深夜） | 决策台账逐条回放 | GET /api/ai/decisions/recent + 面板「最近决策」回放列表 + flow `block116-replay-live` 4/4；UI-434 verified |
 | P4（增量，2026-09-22 深夜，用户提出「jev 参数配置页面——默认填好、可调整」） | 决策配置中心 + 设置页「决策原语」节 | `helpers/decision-config.js`（data 目录 decision-config.json 持久化：enabled/threshold per point；env=0 杀开关最高优先；首载从 env=1 种子）+ GET/PUT /api/ai/decisions/config + 设置页新节「决策原语」（启用开关+阈值输入预填校准值+还原默认+偏离标记）|
 
+### P5 实现完成记录（2026-09-22 深夜，用户提出「决策原语页面增加模型接口——未来可能更换端点和 Key、接入本地 Laya」）
+
+- `decision-config.js` 增 provider 管理：getProvider（一次性 env→文件迁移：TYPESAFE_API_KEY 存在而文件未存时自动落盘，此后可删 jev.env）/ setProvider（baseUrl http(s) 校验、apiKey 必填、model 必填）/ getProviderMasked（GET 永不回传 Key 原文）。
+- `decision-api.js` resolveDecisionConfig 优先级：overrides（测试）> 文件 provider（UI 可调，本地 Laya 同类供给改端点/模型即可）> env（TYPESAFE_*，历史回退）。
+- `decisions.js`：GET /config 含 provider（打码）；PUT /ai/decisions/provider（Key 写后不回显）。
+- UI DecisionConfigPanel：「决策模型接口」块（端点 URL/API Key 密码框/模型名 + 保存 + 已配置提示）。
+- 抓真：决策配置脚本两处静默 replace 失败导致 provider 函数缺失/重复声明（已修）；UI 门禁豁免集插入脚本的 heredoc 转义连续踩坑（改为临时 .cjs 文件执行）；UI 门禁双集合结构（subject/ledger）需分别登记。
+
 ### P4 实现完成记录（2026-09-22 深夜，closeout 十门全绿）
 
 - `helpers/decision-config.js`：五运行时接点（topic-shift/knowledge-guard/marker-celltype/intent-route/tool-route）注册 + decision-config.json 持久化（读不落盘，仅 PUT 落盘——测试/只读零副作用）+ `BIOF3_DECISION_CONFIG_PATH` 测试隔离通道。
