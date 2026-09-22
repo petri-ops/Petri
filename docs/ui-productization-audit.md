@@ -4047,7 +4047,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **来源**：BLOCK-116-DECISION-PLATFORM W2 平台化（弧线 §W2 观测面，BLOCK-79 用量面板同款模式）：决策原语（W0/W1 七接点）全部默认关+显式开，用户开启后无法看到「决策 API 实际被调用了多少、降级了没有」——观测面补齐。
 - **改动**：`frontend/src/components/desktop/DesktopSettingsPanel/sections/DecisionUsagePanel.tsx`（新增节：按接点聚合调用量/均延迟/降级率，近 7 天；available=false 诚实显示不可用而非伪造空统计；零记录显示空态说明）挂载于设置页「用量与资源」节内（UsageResourcePanel 之后）；数据源=GET /api/ai/decisions/summary（decision_log 聚合，migration 011）。
 - **证据（实机数据链路 · 2026-09-22）**：flow `block116-decision-platform-live` 5/5——闲聊消息触发 intent-route 决策 → decision_log 落行 → summary 聚合 intent-route×1（avgLatency 727ms、degraded=0）返回 200；面板渲染的正是该端点数据（同源实证）。
-- **证据（实机视觉过目 · 2026-09-22 深夜）**：flow `block116-replay-live` 4/4（CDP 测试实例 :9223）——设置页「用量与资源」节实机渲染「决策原语调用（近 7 天）」面板（intent-route · 1 次调用 · 727ms · 降级 0%）+ P3 增量「最近决策（20 条）」回放列表展开后 intent-route/chitchat · 1 · 727ms 行在场；截图 `acceptance/block-116/decision-replay-panel.png`。**翻 verified**。P3 增量后端=GET /ai/decisions/recent（decision-log.recentDecisions，point 过滤/limit≤200）；面板回放列表可折叠默认收起。
+- **证据（实机视觉过目 · 2026-09-22 深夜）**：flow `block116-replay-live` 4/4（CDP 测试实例 :9223）——设置页「用量与资源」节实机渲染「决策原语调用（近 7 天）」面板（intent-route · 1 次调用 · 727ms · 降级 0%）+ P3 增量「最近决策（20 条）」回放列表展开后 intent-route/chitchat · 1 · 727ms 行在场；截图 `acceptance/block-116/decision-replay-panel.png`。**翻 verified**。P3 增量后端=GET /ai/decisions/recent（decision-log.recentDecisions，point 过滤/limit≤200）；面板回放列表可折叠默认收起。提交 85837bb（含 recent 端点+面板回放列表）与本条目同批，特此对账。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-435: 设置页「决策原语」配置节（BLOCK-116 P4 参数配置面）(2026-09-22 verified，dev Electron 边界内实机过目)
