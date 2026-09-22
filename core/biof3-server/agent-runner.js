@@ -650,6 +650,8 @@ async function runAgentLoop({
         const route = await resolveToolRoute(String(_lastUserMsg.content));
         if (route.route) {
           effectiveTools = narrowToolDefsByFamily(tools, route.family);
+          // 观测事件（BLOCK-113）：走单一事件通道落 task_events；前端未知事件天然 no-op。
+          try { _emit({ event: 'tool_route', family: route.family, confidence: route.confidence, defs: `${effectiveTools.length}/${tools.length}` }); } catch {}
           try { console.log(`[block113] tool route adopted: family=${route.family} confidence=${route.confidence} defs=${effectiveTools.length}/${tools.length}`); } catch {}
         }
       } catch (e) {

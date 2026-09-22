@@ -1,0 +1,23 @@
+{
+  "name": "block113-toolroute-live",
+  "startedAt": "2026-09-22T08:22:49.344Z",
+  "finishedAt": "2026-09-22T08:22:59.242Z",
+  "assertions": [
+    {
+      "name": "R1_workspace_route_adopted",
+      "pass": true,
+      "detail": "routes=[{\"event\":\"tool_route\",\"family\":\"workspace\",\"confidence\":1,\"defs\":\"14/71\"}]"
+    },
+    {
+      "name": "R1b_workspace_task_terminal",
+      "pass": true,
+      "detail": "terminal=done（路由后能力不损：任务正常完成）"
+    },
+    {
+      "name": "R2_chitchat_no_adoption",
+      "pass": true,
+      "detail": "terminal=done routes=[]"
+    }
+  ],
+  "allPass": true
+}

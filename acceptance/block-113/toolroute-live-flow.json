@@ -1,0 +1,23 @@
+{
+  "scenarios": [
+    {
+      "scenario": "workspace",
+      "taskId": "b061a40b-2289-40c8-9b42-56e055e4b4d2",
+      "terminal": "done",
+      "routes": [
+        {
+          "event": "tool_route",
+          "family": "workspace",
+          "confidence": 1,
+          "defs": "14/71"
+        }
+      ]
+    },
+    {
+      "scenario": "chitchat",
+      "taskId": "5a3627db-bf5f-48b0-9c5b-b2d70da48505",
+      "terminal": "done",
+      "routes": []
+    }
+  ]
+}
