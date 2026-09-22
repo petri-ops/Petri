@@ -232,7 +232,8 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(screen.getByText(/执行工具 2 次 · 1 项需注意/)).toBeTruthy();
 
     rerender(<ToolActivityList activities={[activity('running', { key: 'r' })]} collapseWhenSettled showRunningStopwatch />);
-    expect(screen.getByText(/正在执行工具 1\/1 项/)).toBeTruthy();
+    // UI-437 — 运行态簇头对齐 ZCode：「工作中 · 已运行 Ns」
+    expect(screen.getByText(/工作中 · 已运行/)).toBeTruthy();
   });
 
   it('Q3 统一单行：exec 行默认折叠（无终端块），无 routine 二级折叠', () => {
@@ -248,7 +249,7 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
         collapseWhenSettled
       />
     );
-    fireEvent.click(screen.getByText(/执行工具 4 次/));
+    // UI-437 — 完成簇默认展开为静音单行时间线：行常驻可见，无需点击簇头
     // exec 也只是单行：命令预览在，输出块不在
     expect(screen.getByText('终端命令 已运行')).toBeTruthy();
     expect(screen.getAllByText('npm run docs:reconcile 2>&1 | tail -60').length).toBeGreaterThanOrEqual(1);
@@ -261,7 +262,7 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
 
   it('Q4 点击展开：exec 行展开出命令+输出，再点击收起', () => {
     render(<ToolActivityList activities={[execActivity()]} collapseWhenSettled />);
-    fireEvent.click(screen.getByText(/执行工具 1 次/));
+    // UI-437 — 完成簇行默认可见，直接点行头展开终端块
     fireEvent.click(screen.getByTestId('qoder-row-head'));
     expect(screen.getByTestId('tool-term-output')).toBeTruthy();
     expect(screen.getByTestId('tool-term-output').textContent).toContain('zero manual review candidates');
@@ -277,7 +278,7 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
         collapseWhenSettled
       />
     );
-    fireEvent.click(screen.getByText(/执行工具 1 次/));
+    // UI-437 — 完成簇行默认可见，思考行无需点击簇头
     expect(screen.getByText('已思考')).toBeTruthy();
     expect(screen.getByText('先确认登记行再改文档')).toBeTruthy();
     expect(screen.queryByText(/第二行细节/)).toBeNull();
@@ -285,7 +286,7 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(screen.getByText(/第二行细节/)).toBeTruthy();
   });
 
-  it('UI-431 P1 尾轮展开：运行簇默认收缩、只渲染当轮（最后一轮）行，手动展开见全部', () => {
+  it('UI-431 P1 + UI-437 运行态单行：只渲染最新一条事件，点簇头展开全部轮次', () => {
     const mk = (key: string, iteration: number, detail: string): ToolActivityItem => ({
       key, name: 'workspace_exec', status: 'running', actionLabel: '已运行', actionDetail: detail, iteration,
     });
@@ -296,16 +297,17 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
         collapseWhenSettled
       />
     );
-    // 运行中默认收缩为尾轮：只渲染第 2 轮（其思考行 + 工具行），第 1 轮已收起
+    // UI-437 — 运行态只渲染最新一条事件单行（历史轮与思考行不堆叠）
     expect(screen.getByTestId('qoder-cluster-body')).toBeTruthy();
-    expect(screen.getByText('第二轮思路')).toBeTruthy();
     expect(screen.getByText('cmd-2')).toBeTruthy();
     expect(screen.queryByText('cmd-1')).toBeNull();
     expect(screen.queryByText('第一轮思路')).toBeNull();
-    // 手动展开整簇：全部轮次可见
-    fireEvent.click(screen.getByText(/正在执行工具 2\/2 项/));
+    expect(screen.queryByText('第二轮思路')).toBeNull();
+    // 簇头 = ZCode「工作中 · 已运行 Ns」；点击展开全部轮次
+    fireEvent.click(screen.getByText(/工作中 · 已运行/));
     expect(screen.getByText('cmd-1')).toBeTruthy();
     expect(screen.getByText('第一轮思路')).toBeTruthy();
+    expect(screen.getByText('第二轮思路')).toBeTruthy();
   });
 
   it('UI-431 P2 派发行：子智能体行参与当轮渲染，无快照时无计时', () => {
@@ -315,10 +317,46 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
         collapseWhenSettled
       />
     );
-    fireEvent.click(screen.getByText(/正在执行工具 1\/1 项/));
+    // UI-437 — 运行态最新事件单行自动可见
     expect(screen.getByText('已派发')).toBeTruthy();
     // 无快照推送时不显示计时后缀
     expect(screen.getByText('已派发').textContent).toBe('已派发');
+  });
+
+  it('UI-437 完成簇行常驻可见；簇头点击折叠为摘要、再点恢复', () => {
+    const mk = (key: string, iteration: number, detail: string): ToolActivityItem => ({
+      key, name: 'workspace_exec', status: 'success', actionLabel: '已运行', actionDetail: detail, iteration,
+    });
+    render(
+      <ToolActivityList
+        activities={[mk('a1', 1, 'cmd-1'), mk('a2', 2, 'cmd-2')]}
+        collapseWhenSettled
+      />
+    );
+    // 无任何点击：行即常驻可见（ZCode 完成态）
+    expect(screen.getByTestId('qoder-cluster-body')).toBeTruthy();
+    expect(screen.getByText('cmd-1')).toBeTruthy();
+    expect(screen.getByText('cmd-2')).toBeTruthy();
+    // 点簇头 → 折叠为摘要一行；再点 → 恢复
+    fireEvent.click(screen.getByText(/执行工具 2 次/));
+    expect(screen.queryByTestId('qoder-cluster-body')).toBeNull();
+    fireEvent.click(screen.getByText(/执行工具 2 次/));
+    expect(screen.getByTestId('qoder-cluster-body')).toBeTruthy();
+  });
+
+  it('UI-437 写入行差异角标：changeDiff 渲染 +N / -M（零值侧省略）', () => {
+    const write = (key: string, added: number, removed: number): ToolActivityItem => ({
+      key, name: 'workspace_write', status: 'success',
+      actionLabel: '已写入', actionDetail: 'demo.ts',
+      changeDiff: { added, removed, hunks: [] },
+    });
+    render(
+      <ToolActivityList activities={[write('w1', 130, 0), write('w2', 4, 2)]} collapseWhenSettled />
+    );
+    expect(screen.getByText('+130')).toBeTruthy();
+    expect(screen.queryByText('-0')).toBeNull();
+    expect(screen.getByText('+4')).toBeTruthy();
+    expect(screen.getByText('-2')).toBeTruthy();
   });
 
   it('UI-430 合并簇内按迭代交错：每轮「已思考行 → 该轮工具行」（ZCode 参考形态）', () => {
@@ -335,7 +373,7 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
         collapseWhenSettled
       />
     );
-    fireEvent.click(screen.getByText(/执行工具 2 次/));
+    // UI-437 — 完成簇行默认可见，无需点击簇头
     const body = screen.getByTestId('qoder-cluster-body').textContent || '';
     // 交错顺序：思考(1) → 命令(1) → 思考(2) → 文件(2)
     expect(body.indexOf('先看工作区状态')).toBeGreaterThanOrEqual(0);

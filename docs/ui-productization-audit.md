@@ -4057,10 +4057,19 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据（实机 · 2026-09-22）**：flow `block116-config-live` 6/6（GET 五接点/PUT 持久化/非法 400/未知 404/还原默认）+ 截图 `acceptance/block-116/decision-config-panel.png`（实机过目：五卡片/开关/阈值输入/双门限只读/env 覆盖提示全部在位，暗色主题渲染正常）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-436: 设置页「决策模型接口」一键供给预设（Jev/Laya 双按钮 + 当前供给指示）（BLOCK-117 加映轻量批）(2026-09-22 in_progress，组件契约已验，实机过目待补)
+## UI-436: 设置页「决策模型接口」一键供给预设（Jev/Laya 双按钮 + 当前供给指示）（BLOCK-117 加映轻量批）(2026-09-23 verified，用户实机确认)
 
 - **来源**：用户裁决原话「给我加个按钮 一共两个按钮 一个是jev一个是laya 直接切换本地 省的我配置」——BLOCK-117 验证了 laya_decide serve 线兼容可用，但手动改三项字段繁琐。
 - **改动**：`sections/DecisionConfigPanel.tsx`——「决策模型接口」标题行增两枚 ghost 预设按钮「用 Jev（云）」「用 Laya（本地）」（与「保存模型接口」同一 PUT /ai/decisions/provider 通道，一键即生效）：Jev 预设不带 apiKey（服务端合并语义=保留已配置 Key）；Laya 预设指向本机 laya_decide serve（127.0.0.1:8765 / local-laya / laya-typed-decisions）；标题改「当前供给：Jev（云）/Laya（本地）/自定义」实时指示（baseUrl 推导）；Laya 提示行诚实标注 BLOCK-117 校准结论（现有 confidence 阈值下大概率回退，决策照常记账不采纳，切换随时可逆）。运行时真相仍为 decision-config.json，按钮仅为同一 PUT 通道的 UX 快捷方式（无第二真相）。
 - **证据（契约）**：`DecisionConfigPanel.test.tsx` 5/5（新增 2 例：Laya 预设 PUT 三元组逐键断言+表单字段同步+当前供给标签更新；Jev 预设 PUT 不带 apiKey 断言+标签还原）。
-- **待实机**：dev 栈 vite HMR 已推送至运行中应用，设置页过目即翻 verified。
+- **实机验收（2026-09-23）**：用户原话「行 已经试过了 起作用」——按钮在运行中应用生效可用。**翻 verified**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-437: 会话时间线 ZCode 化——运行态单行最新事件 + 完成簇静音行常驻 + 写入行差异角标（轻量批）(2026-09-23 in_progress，组件契约 31/31 已验，实机过目待补)
+
+- **来源**：用户两连裁决——「执行和阶段性反馈没有明显的区分……你看看 zcode 例图能找到特点吗」+「子智能体能否完全模仿 zocode 呢 我们现在的项目过于繁琐了」。
+- **ZCode 特征拆解**（对照图）：运行中=「工作中 N 秒」头部 + 仅最新一条事件单行 + spinner；完成后=过程**不折叠消失**，而是每个事件永久压成一行高静音行（类型图标+动词+对象+元数据）常驻可扫读，模型叙述为唯一全对比度正文。
+- **改动**：`ToolActivityList.tsx` 时间线模式——①完成簇默认展开为「一行一事件」静音时间线（取代旧「折叠成一行摘要」，簇头保留为折叠开关）；②运行簇只渲染最新一条事件单行（取代旧「最后一整轮」），簇头对齐 ZCode 文案「工作中 · 已运行 Ns」；③写入/编辑行增 `+N -N` 差异角标（changeDiff 预计算值，零值侧省略，绿/红 token）；④写入行图标 wrench→pencil。`simple-chat.css` 增 diffstat 样式。运行时数据结构零变化；非时间线（legacy）路径零变化。
+- **证据（契约）**：`ToolActivityList.test.tsx` + `ConversationTimeline.test.tsx` 31/31（含改写 D4 契约=完成簇行常驻、运行簇单行；新增常驻可见/折叠恢复/差异角标 3 例）+ `AgentRunPanel.test.tsx` 5/5 + 前端全量 148 文件 1196/1196 + tsc 0。flow 兼容性：簇头文字（执行工具 N 次/需注意/已运行秒表）全部保留，block107/108 实机 flow 断言零改动。
+- **待实机**：vite HMR 已推送运行中应用，真实 agent 轮次过目即翻 verified。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。

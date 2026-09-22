@@ -4076,6 +4076,24 @@
   white-space: nowrap;
 }
 
+/* UI-437 — 写入/编辑行的差异角标（ZCode 形态：+N 绿 / -N 红，等宽字体）。 */
+.sc-tool-qoder-diffstat {
+  flex: 0 0 auto;
+  display: inline-flex;
+  gap: 5px;
+  font-family: var(--gewu-font-mono);
+  font-size: var(--gewu-font-size-xs);
+  white-space: nowrap;
+}
+
+.sc-tool-qoder-diffstat-add {
+  color: var(--gewu-success);
+}
+
+.sc-tool-qoder-diffstat-del {
+  color: var(--gewu-danger);
+}
+
 /* UI-432（BLOCK-109 P3）— 子智能体终态结果组卡：摘要行 + 可折叠明细 */
 .sc-msg-child-finished-group {
   margin: 6px 0 2px;

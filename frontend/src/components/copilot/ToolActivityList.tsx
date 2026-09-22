@@ -495,7 +495,12 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
   );
   // UI-431 P2 — 派发行运行计时（running 时每秒步进）
   const spawnElapsedMs = useSubAgentElapsed(subSnap?.startedAt, subSnap?.status === 'running');
-  const kindIcon = isExec ? 'terminal' : isAgent ? 'bot' : QODER_WRITE_TOOLS.has(activity.name) ? 'wrench' : 'file';
+  // UI-437 — ZCode 形态：写入/编辑行带 +N -N 差异角标（changeDiff 为预计算聚合值）。
+  const isWrite = QODER_WRITE_TOOLS.has(activity.name);
+  const diffStat = activity.changeDiff && (activity.changeDiff.added > 0 || activity.changeDiff.removed > 0)
+    ? { added: activity.changeDiff.added, removed: activity.changeDiff.removed }
+    : null;
+  const kindIcon = isExec ? 'terminal' : isAgent ? 'bot' : isWrite ? 'pencil' : 'file';
   const label = isExec ? `终端命令 ${QODER_STATUS_WORD[activity.status]}` : activity.actionLabel;
   return (
     <div className={`sc-tool-activity sc-tool-qoder-row sc-tool-qoder-row-${activity.status}`} data-status={activity.status}>
@@ -522,6 +527,12 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
         <span className="sc-tool-qoder-label">{label}</span>
         {previewSource && (
           <code className="sc-tool-qoder-preview" title={previewSource}>{previewSource}</code>
+        )}
+        {diffStat && (
+          <span className="sc-tool-qoder-diffstat" aria-label={`变更 +${diffStat.added} -${diffStat.removed}`}>
+            {diffStat.added > 0 && <span className="sc-tool-qoder-diffstat-add">+{diffStat.added}</span>}
+            {diffStat.removed > 0 && <span className="sc-tool-qoder-diffstat-del">-{diffStat.removed}</span>}
+          </span>
         )}
         {subSnap && (
           <span className="sc-tool-agent-status" data-status={subSnap.status} title="子智能体实时状态">
@@ -600,6 +611,9 @@ export function ToolActivityList({
   // P2c 收口：展开态改为**纯派生**（手动态 ?? 默认态）。原实现用两条 setState-in-effect
   // 事后同步，时序等价（exec 活动一旦出现 hasExec 即为真 → 自然展开；用户切过则以手动态
   // 为准），合并成派生式后不再需要 effect，也解掉 react-hooks/set-state-in-effect 违规。
+  // UI-437 — ZCode 模型修订（用户裁决「完全模仿 zocode…现在的项目过于繁琐」）：
+  // 时间线完成簇默认**保持展开**为「一行一事件」的静音时间线（过程史常驻可扫读，
+  // 对齐 ZCode 完成态），簇头仅作折叠开关；取代旧「完成后折叠成一行摘要」。
   const [manualExpanded, setManualExpanded] = useState<boolean | null>(null);
   // UI-383 — 常规只读组折叠状态（组键 = 首项 key；默认折叠，点击就地展开逐条）
   const [unfoldedRoutineGroups, setUnfoldedRoutineGroups] = useState<Set<string>>(new Set());
@@ -607,7 +621,7 @@ export function ToolActivityList({
   const hasExec = activities.some((activity) => EXEC_TOOL_NAMES.has(activity.name));
   const expanded = manualExpanded !== null
     ? manualExpanded
-    : collapseWhenSettled ? anyRunning : hasExec;
+    : collapseWhenSettled ? true : hasExec;
   // UI-431 P1 — running tail: running clusters are collapsed by default, only rendering the last round's rows (auto-collapse once a new round starts);
   // manual expansion takes priority and shows everything; long tasks no longer let the row count grow linearly with rounds.
   const runningTail = collapseWhenSettled && anyRunning && manualExpanded === null;
@@ -649,9 +663,10 @@ export function ToolActivityList({
     ? `${firstActivity.actionLabel}${firstActivity.actionDetail ? ` ${firstActivity.actionDetail}` : ''}`.slice(0, 64)
     : '';
   const totalDurationShown = (processingDurationMs ?? totalDurationMs) > 0 ? totalDuration : null;
+  // UI-437 — 运行态簇头对齐 ZCode（「工作中 · 已运行 Ns」）：在做什么由下方
+  // 最新事件单行承载，簇头只回答「跑多久了」。完成态保留计数+需注意+耗时。
   const qoderSummary = running > 0
-    ? `正在执行工具 ${running}/${activities.length} 项${singlePreview ? ` · ${singlePreview}` : ''}${
-      runningElapsedMs !== null ? ` · 已运行 ${formatToolDuration(runningElapsedMs)}` : ''}`
+    ? `工作中 · 已运行 ${runningElapsedMs !== null ? formatToolDuration(runningElapsedMs) : '0 s'}`
     : awaiting > 0
       ? `等待确认 ${awaiting} 项`
       : `执行工具 ${activities.length} 次${attention ? ` · ${attention} 项需注意` : ''}${singlePreview ? ` · ${singlePreview}` : ''}${totalDurationShown ? ` · 耗时 ${totalDurationShown}` : ''}`;
@@ -707,8 +722,13 @@ export function ToolActivityList({
         return (
           <div className="sc-tool-activity-inline" data-testid="qoder-cluster-body">
             {reasoningRows}
-            {/* UI-431 P1 — running tail: only render the last round, previous rounds auto-collapse as new rounds start */}
-            {(runningTail ? groupOrder.slice(-1) : groupOrder).map((iterationKey) => {
+            {/* UI-431 P1 / UI-437 — 运行态改为 ZCode 式单行：只渲染最新一条事件
+                （spinner 由行内 running 态承载），不再渲染最后一整轮；历史轮在
+                完成后以静音单行时间线常驻。 */}
+            {runningTail ? (() => {
+              const last = activities[activities.length - 1];
+              return last ? <QoderRow key={last.key} activity={last} /> : null;
+            })() : groupOrder.map((iterationKey) => {
               const reasoningText = reasoningMap[iterationKey];
               return (
                 <div key={`qoder-iter-${iterationKey}`}>

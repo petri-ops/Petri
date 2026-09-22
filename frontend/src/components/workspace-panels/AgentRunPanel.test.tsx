@@ -115,7 +115,7 @@ describe('UI-404 AgentRunPanel 分区折叠', () => {
     // Qoder 形态三件套：合并簇头（计数式）+ 过渡叙述（状态行同文案，故用 getAll）+ 簇体
     expect(screen.getByText(/执行工具 1 次/)).toBeTruthy();
     expect(screen.getAllByText(/先列出目录结构/).length).toBeGreaterThanOrEqual(1);
-    fireEvent.click(screen.getByText(/执行工具 1 次/));
+    // UI-437 — 完成簇行默认常驻可见，无需点击簇头展开
     expect(screen.getByTestId('qoder-cluster-body')).toBeTruthy();
     expect(screen.getByText('已思考')).toBeTruthy();
     expect(screen.getByText(/先看一眼目录/)).toBeTruthy();

@@ -154,9 +154,10 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     expect(container.querySelectorAll('.sc-timeline-cluster')).toHaveLength(2);
   });
 
-  it('D4 折叠策略：含 exec 的已完成簇默认收起为一行，运行中簇默认展开', () => {
-    // 用「含 workspace_exec」的簇做判据——既有 ToolActivityList 对该形状默认展开
-    // （UI-315 ZCode 式），因此这条断言真正区分 D4 托管态是否生效。
+  it('UI-437 ZCode 模型：完成簇行常驻可见；运行簇只渲染最新一条事件单行', () => {
+    // 用「含 workspace_exec」的簇做判据——历史契约（D4 完成后折叠为一行摘要）已由
+    // UI-437 修订（用户裁决「完全模仿 zocode」）：完成簇默认展开为静音单行时间线，
+    // 过程史常驻可扫读；运行簇只渲染最新一条事件单行。
     const settledExec: ConversationSegment = {
       ...toolsSegment,
       activities: [{
@@ -170,7 +171,8 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
       totalCount: 1,
     };
     const settled = render(<ConversationTimeline segments={[settledExec]} />);
-    expect(settled.container.querySelector('.sc-tool-activity-inline')).toBeNull();
+    expect(settled.container.querySelector('.sc-tool-activity-inline')).toBeTruthy();
+    expect(settled.container.querySelectorAll('.sc-tool-qoder-row').length).toBe(1);
 
     const running: ConversationSegment = {
       ...settledExec,
@@ -187,5 +189,6 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     };
     const live = render(<ConversationTimeline segments={[running]} />);
     expect(live.container.querySelector('.sc-tool-activity-inline')).toBeTruthy();
+    expect(live.container.querySelectorAll('.sc-tool-qoder-row').length).toBe(1);
   });
 });
