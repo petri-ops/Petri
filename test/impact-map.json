@@ -2196,6 +2196,25 @@
         "test/block112-*.test.mjs",
         ".agents/skills/gewu-dev-infra/dev-verify/flows/block112-intent-live.cjs"
       ],
+      "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "governance"
+    },
+    {
+      "id": "block113-tool-prerouting",
+      "note": "BLOCK-113-TOOL-PREROUTING：W1-3 工具两跳预路由。tool-router.js 决策接点（choice 九域+all，θ=0.80，默认关 BIOF3_JEV_TOOL_ROUTE=1）+ narrowToolDefsByFamily 收窄器（路由域∪session 底座）+ agent-runner 下发链挂钩 + tool-defs.js DOMAIN_TOOL_DEFS additive 导出（71 工具恒等红线）。契约=test/block113-tool-prerouting.test.mjs（恒等/guard 零出站/降级五态/伪造域拒收/all 弃权/低置信/收窄器保序与保守回退 12 项）。P0 证据 acceptance/block-113/。",
+      "patterns": [
+        "core/biof3-server/helpers/tool-router.js",
+        "core/biof3-server/agent-tools/tool-defs.js",
+        "core/biof3-server/agent-runner.js",
+        "scripts/block113-p0-calibrate.mjs",
+        "acceptance/block-113/**",
+        "test/block113-*.test.mjs",
+        ".agents/skills/gewu-dev-infra/dev-verify/flows/block113-toolroute-live.cjs"
+      ],
+      "tests": [
+        "test/block113-tool-prerouting.test.mjs"
+      ],
       "tests": [
         "test/block112-intent-routing.test.mjs"
       ],
