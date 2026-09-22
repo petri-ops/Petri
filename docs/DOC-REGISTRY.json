@@ -5085,13 +5085,13 @@
       "id": "BLOCK-116-DECISION-PLATFORM",
       "path": "docs/block-116-decision-platform-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-116-decision-platform",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-22",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "block-116",
         "jev",
@@ -5099,7 +5099,7 @@
         "decision-model",
         "w2",
         "platform",
-        "active"
+        "completed"
       ],
       "notes": "决策内化弧 W2 平台化（弧线 §W2 前四件；候选件 agent 可见决策工具仍留候选池）。2026-09-22 用户裁决「你能做就做下去 不要让我裁决 你可以判断的」=启动裁决权授予主 Agent 自行判断；开门条件 W1≥2 点生产稳定已满足（五点全收口）。范围：P0 decision_log 台账（migration 011 additive + decision-log.js best-effort + askDecision optional meta 记账）+ decision-thresholds.js 阈值注册表（阈值与校准证据绑定，改阈值必先重校准的测试机械承载）；P1 契约+校准共享库；P2 观测面（GET /api/ai/decisions/summary + 设置面板 DecisionUsagePanel，BLOCK-79 模式）+ flow + closeout。非范围=阈值热调/台账逐条回放 UI/agent 可见决策工具/任何 W1 判定行为改变（additive）。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "lastUpdated": "2026-09-22"

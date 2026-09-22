@@ -1,7 +1,7 @@
 # BLOCK-116-DECISION-PLATFORM 计划：决策原语平台化（决策内化弧 W2）
 
 **Plan ID**：`BLOCK-116-DECISION-PLATFORM`
-**状态**：`active（P0-LAUNCH，2026-09-22 用户裁决「你能做就做下去 不要让我裁决 你可以判断的」——W2 启动裁决权已授予主 Agent 自行判断；弧线底稿=docs/planning/decision-primitive-internalization-arc.md §W2）`
+**状态**：`completed（2026-09-22 当日立项当日收口：P0 decision_log 台账（migration 011 additive 自动应用 + wrapper meta 记账：提供即记账缺省零行为）+ decision-thresholds.js 七接点注册表（阈值↔校准证据绑定，一致性契约机械承载重校准红线）→ P1 契约 7/7 + 校准共享库 calibration-common.mjs（touch-and-migrate）→ P2 观测面（GET /api/ai/decisions/summary + 设置面板 DecisionUsagePanel UI-434）+ flow 5/5（闲聊→intent-route 落账 conf 记录/degraded=0/无未知接点泄漏）；closeout 十门全绿。抓真=UI-434 台账登记 + aac13f6 双豁免（64da69b 先例）+ impact-map 双规则冲突修正 + 依赖环预防（域映射经 index 既有边）`
 **立项日期**：2026-09-22
 **责任轨道**：BLOCK（决策台账/阈值配置中心/校准工具化/观测面，跨 P 阶段串行）
 **上游文档**：弧线 §W2 · W1 五包（111~115，全部 completed）

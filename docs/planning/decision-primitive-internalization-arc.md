@@ -46,7 +46,7 @@ wrapper（`decision-api.js`）+ 降级契约 + 中文校准 harness + 话题漂�
 > 同日澄清（A 型划界）：测试「卡住」的根治是纯工程手段——每测试/flow 看门狗超时+超时 dump 进程树与句柄、flow 全局时间预算、句柄泄漏审计（本仓已确诊根因：block88 未关句柄、双端孤儿进程互毒窗口；BLOCK-102 已做 force-exit+timeout 加固）。**禁止用模型判断"是否卡住"**——超时器 0ms/0 成本/永不误判，属 A 型。
 **开门条件**：W0 证据门绿 + 用户对每点单独裁决。**证据门**：同 W0 标准（≥100 样本校准 + A/B 对账 + 降级测试）。
 
-### W2 — 平台化：决策原语成为一等公民（W1 复制 ≥2 点后评估立项）
+### W2 — 平台化：决策原语成为一等公民（W1 复制 ≥2 点后评估立项）（**2026-09-22 状态更新：W2 前四件已随 BLOCK-116-DECISION-PLATFORM 当日收口**——决策台账 decision_log（migration 011，meta {point,threshold} 咽喉记账）+ 阈值配置中心 v1（decision-thresholds.js 七接点集中声明+证据绑定，热调留后续）+ 校准工具化 v1（calibration-common.mjs 共享库，touch-and-migrate）+ 观测面（GET /api/ai/decisions/summary + 设置面板 DecisionUsagePanel）；closeout 十门全绿 + flow 5/5。启动裁决=用户「你能做就做下去 不要让我裁决 你可以判断的」授予自主判断权。）
 把"每个接点各自实现"收敛为统一决策服务，目标形态：
 - **决策台账**：SQLite additive `decision_log` 表（对齐 `ai_usage` 先例）：decision_id / 接点名 / state 摘要（hash+截断）/ answers+probabilities+confidence / 阈值版本 / provider+model 版本 / latency / **degraded 标志**——任何一次路由可回放"当时为什么这么判"；
 - **阈值配置中心**：每接点阈值（双阈值三区间等）服务端集中配置、版本化，与校准证据版本绑定（jev 升级→阈值必须重校准的机制化）；
