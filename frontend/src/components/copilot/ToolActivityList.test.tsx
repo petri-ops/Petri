@@ -420,6 +420,28 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(summarizeToolCall('workspace_read', { path: 'src/a.ts' }).actionDetail).toBe('src/a.ts');
   });
 
+  it('UI-437 v5.8 行级复制：点击复制钮写入该行可见内容', async () => {
+    render(
+      <ToolActivityList
+        activities={[{
+          key: 'ks-2', name: 'knowledge_search', status: 'success', actionLabel: '已调用',
+          actionDetail: 'knowledge_search（spaceEnabled=false）',
+          summary: 'spaceEnabled false · hits 0 条',
+        }]}
+        collapseWhenSettled
+      />
+    );
+    const writeText = vi.fn((text: string) => Promise.resolve());
+    vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText } });
+    // v3 语义：完成簇默认折叠，先点运行摘要行展开，行级复制钮才渲染
+    fireEvent.click(screen.getByText(/执行工具 1 次/));
+    const btns = screen.getAllByRole('button', { name: '复制该行内容' });
+    expect(btns.length).toBeGreaterThanOrEqual(1);
+    fireEvent.click(btns[0]);
+    await waitFor(() => expect(writeText).toHaveBeenCalledTimes(1));
+    expect(writeText.mock.calls[0][0]).toBe('knowledge_search（spaceEnabled=false） → spaceEnabled false · hits 0 条');
+  });
+
   it('UI-437 v5.6 合并方向：result 合并必须携带 resultData（running 项已存在时也不例外）', () => {
     const running: ToolActivityItem[] = [{
       // 运行时键规则 = callId（callKey），与 result 事件按 callId 关联

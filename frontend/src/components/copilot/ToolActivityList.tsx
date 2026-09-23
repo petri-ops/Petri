@@ -638,18 +638,18 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
           </span>
         )}
         {duration && (activity.durationMs ?? 0) > 0 && <span className="sc-tool-activity-duration">{duration}</span>}
-        <button
-          type="button"
-          className={`sc-tool-row-copy${rowCopied ? ' is-copied' : ''}`}
-          title="复制该行内容"
-          aria-label="复制该行内容"
-          onClick={(e) => { e.stopPropagation(); void copyRow(); }}
-        >
-          <Icon name={rowCopied ? 'check' : 'copy'} size={11} />
-        </button>
         <span className="sc-tool-row-chevron" aria-hidden="true">
           <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
         </span>
+      </button>
+      <button
+        type="button"
+        className={`sc-tool-row-copy${rowCopied ? ' is-copied' : ''}`}
+        title="复制该行内容"
+        aria-label="复制该行内容"
+        onClick={(e) => { e.stopPropagation(); void copyRow(); }}
+      >
+        <Icon name={rowCopied ? 'check' : 'copy'} size={11} />
       </button>
       {open && (isExec
         ? <TerminalBody activity={activity} />

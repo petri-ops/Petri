@@ -4062,7 +4062,18 @@
   color: var(--gewu-danger);
 }
 
-/* UI-437 v5.8 — 事件行级复制钮：折叠态悬停显现（不占常态视觉），点击复制该行内容 */
+/* UI-437 v5.8 — 事件行级复制钮：折叠态悬停显现（不占常态视觉），点击复制该行内容。
+   行容器改 flex：行头占满，复制钮为兄弟元素（button 不可嵌套）。 */
+.sc-tool-qoder-row {
+  display: flex;
+  align-items: flex-start;
+}
+
+.sc-tool-qoder-row > .sc-tool-qoder-head {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .sc-tool-qoder-row .sc-tool-row-copy {
   flex: 0 0 auto;
   border: none;
