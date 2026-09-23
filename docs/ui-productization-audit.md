@@ -4072,5 +4072,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **改动**：`ToolActivityList.tsx` 时间线模式——①完成簇默认展开为「一行一事件」静音时间线（取代旧「折叠成一行摘要」，簇头保留为折叠开关）；②运行簇只渲染最新一条事件单行（取代旧「最后一整轮」），簇头对齐 ZCode 文案「工作中 · 已运行 Ns」；③写入/编辑行增 `+N -N` 差异角标（changeDiff 预计算值，零值侧省略，绿/红 token）；④写入行图标 wrench→pencil。`simple-chat.css` 增 diffstat 样式。运行时数据结构零变化；非时间线（legacy）路径零变化。
 - **加映（同日，用户实测反馈「思考 · 第 4 轮突然出现且思考过程没收起来」）**：完成态思考行对齐 ZCode——只留标签一行（时间线独立节点去「第 N 轮」轮次号，簇内交错行统一「已思考」），不再渲染长预览（预览整行宽读起来像未折叠正文）；点击行才展开全文。
 - **证据（契约）**：`ToolActivityList.test.tsx` + `ConversationTimeline.test.tsx` 31/31（含改写 D4 契约=完成簇行常驻、运行簇单行；新增常驻可见/折叠恢复/差异角标/思考行无预览断言）+ copilot 目录 345/345 + `AgentRunPanel.test.tsx` 5/5 + 前端全量 148 文件 1196/1196 + tsc 0。flow 兼容性：簇头文字（执行工具 N 次/需注意/已运行秒表）全部保留，block107/108 实机 flow 断言零改动。
+- **加映 v2（同日，用户裁决「按照流水线走下去就好 总结的味道少一点」+「子智能体能否完全模仿 zocode…过于繁琐」）**：时间线完成簇**去掉「执行工具 N 次 · 耗时」簇头摘要**——事件行即时间线本体，纯流水排布；运行态头部保留 ZCode 式「工作中 · 已运行 Ns」（非交互状态行）；失败可见性迁移到行级（error 行 ✕ 红字形）。block107-timeline-live（L5→error 行断言）与 block108-qoder-stream（Q2→无簇头+error 行断言）两条实机 flow 契约同步修订。
 - **待实机**：vite HMR 已推送运行中应用，真实 agent 轮次过目即翻 verified。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。

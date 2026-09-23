@@ -70,6 +70,7 @@ const PROBE = `JSON.stringify((function(){
     heads: heads,
     transitions: transitions,
     qoderRows: document.querySelectorAll('.sc-tool-qoder-row').length,
+    errorRows: document.querySelectorAll('.sc-tool-qoder-row[data-status="error"]').length,
     termOutputs: document.querySelectorAll('.sc-tool-term-output').length,
     routineGroups: document.querySelectorAll('.sc-tool-routine-group').length,
     reasoningInCluster: document.querySelectorAll('.sc-tool-activity-inline .sc-tool-reasoning').length,
@@ -207,12 +208,9 @@ module.exports = {
         `transitions=${transitionCount} 首条=「${(liveSnap.transitions || [])[0] || ''}」 `
         + `X后必有T=${(liveSeq || []).every((s) => transitionsBeforeClusters(s))} :: ${lastSeq}`);
 
-      // Q2 计数式簇头：出现「执行工具/正在执行工具」；失败可见「需注意」；无 legacy「已完成 N 项」。
-      const countHeads = (liveSnap.heads || []).filter((h) => h.indexOf('执行工具') > -1).length;
-      const attentionHeads = (liveSnap.heads || []).filter((h) => h.indexOf('需注意') > -1).length;
-      const legacyHeads = (liveSnap.heads || []).filter((h) => /已完成 \d+ 项/.test(h)).length;
-      assert('Q2_count_style_cluster_head', countHeads > 0 && attentionHeads > 0 && legacyHeads === 0,
-        `计数式簇头=${countHeads} 需注意=${attentionHeads} legacy残留=${legacyHeads} :: heads=${JSON.stringify(liveSnap.heads).slice(0, 200)}`);
+      // Q2 纯流水（UI-437 v2）：无簇头摘要（总结味下线）；失败以 error 行可见。
+      assert('Q2_flat_pipeline_failure_visible', (liveSnap.heads || []).length === 0 && Number(liveSnap.errorRows || 0) > 0,
+        `簇头摘要=${(liveSnap.heads || []).length} error行=${liveSnap.errorRows} :: heads=${JSON.stringify(liveSnap.heads).slice(0, 200)}`);
 
       // 展开全部簇（D4 完成收起后由点击展开——同时验证簇级点击可用）。
       // BLOCK-108 二跑教训：exec 行不一定在最后一簇（本例 T1/T2 是命令、T3 是列目录），

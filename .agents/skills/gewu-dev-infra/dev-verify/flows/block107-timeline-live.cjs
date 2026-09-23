@@ -80,7 +80,7 @@ const PROBE = `JSON.stringify((function(){
     timelines: timelines,
     running: document.querySelectorAll('.sc-timeline-cluster[data-state="running"]').length,
     stopwatch: heads.filter(function(t){ return t.indexOf('已运行') > -1; }).length,
-    attention: heads.filter(function(t){ return t.indexOf('需注意') > -1; }).length,
+    errorRows: document.querySelectorAll('.sc-tool-qoder-row[data-status="error"]').length,
     lastBody: bodies.length ? bodies[bodies.length - 1] : 0,
     termStates: termStates,
     cmds: cmds,
@@ -202,11 +202,10 @@ module.exports = {
         `maxClusters=${maxClusters} 全部非降序=${classified.every((c) => c.monotonic)} `
         + `（一迭代一簇契约已由 UI-430 合并簇取代） :: `
         + (liveSeq || []).slice(-1)[0]);
-      // L5 失败可见：读不存在文件 → error → 簇头应显示「N 项需注意」。
-      // 只在终态快照上判（运行中簇头是「正在处理」文案，不含需注意）。
+      // L5 失败可见（UI-437 v2 纯流水契约）：读不存在文件 → error → 以 error 行可见
       const tail = JSON.parse(await lib.evalJs(client, PROBE, 10_000));
-      assert('L5_failure_visible_in_cluster_head', tail.attention > 0,
-        `带「N 项需注意」的簇头=${tail.attention}`);
+      assert('L5_failure_visible_in_error_row', tail.errorRows > 0,
+        `data-status=error 的 Qoder 行=${tail.errorRows}`);
       await lib.screenshotPng(client, EVIDENCE_DIR, 'timeline-live-settled.png').catch(() => null);
 
       // L6 刷新后同序（§5-2 实机版）：整页重载 → 走历史加载轨道 → 逐段比对。

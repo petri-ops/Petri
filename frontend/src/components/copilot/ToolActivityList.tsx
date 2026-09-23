@@ -70,11 +70,9 @@ function ReasoningRow({ iteration, text, label, preview }: {
   preview?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const customLabel = Boolean(label);
-  const resolvedLabel = label || `思考 · 第 ${iteration} 轮`;
-  const ariaName = customLabel
-    ? `${open ? '收起' : '展开'} ${resolvedLabel}`
-    : `${open ? '收起思考' : '展开思考'} 第 ${iteration} 轮`;
+  // UI-437 加映 — 默认标签去轮次号（内部迭代细节不外露，对齐 ZCode「思考」）
+  const resolvedLabel = label || '思考';
+  const ariaName = `${open ? '收起' : '展开'} ${resolvedLabel}`;
   return (
     <div className="sc-tool-reasoning">
       <button
@@ -592,42 +590,24 @@ export function ToolActivityList({
   /** UI-272 — 按迭代聚合的模型思考段，展开时展示每次工具调用前的衔接思路。 */
   reasoningByIteration?: Record<number, string>;
   /**
-   * BLOCK-107 P2b（D4）— 按「运行中展开 / 完成后折叠为一行」托管展开态。
-   * 默认 false = 保持既有行为（含 exec 即默认展开，ZCode 式），故既有调用方
-   * 与其契约测试零变化；时间线里的每一簇传 true，避免多簇同开成一片、也让
-   * 已完成的批自动收敛回一行。
+   * UI-437 v2（ZCode 纯流水，用户裁决「按照流水线走下去就好 总结的味道少一点」）：
+   * 无簇头摘要——运行中=「工作中 · 已运行 Ns」头部 + 最新一条事件单行；
+   * 完成=全部事件单行常驻（一行一事件，静音可扫读），失败以 error 行可见。
+   * 默认 false = legacy 摘要条 + 手风琴（既有调用方契约零变化）。
    */
   collapseWhenSettled?: boolean;
-  /**
-   * BLOCK-107 P2c — 摘要条在运行中追加「已运行 Ns」秒表。默认 false 保持既有
-   * 摘要文本不变；由时间线的簇启用，让进行中的一眼可辨。
-   */
+  /** BLOCK-107 P2c — 运行中「已运行 Ns」秒表（时间线的「工作中」头部启用）。 */
   showRunningStopwatch?: boolean;
 }): React.ReactElement {
-  // UI-315 — 含 exec 命令的消息默认展开活动条：终端块直接可见（ZCode 式），
-  // 无 exec 的消息保持收起摘要；用户手动切换后以手动态为准。
-  // BLOCK-107 P2b（D4）— collapseWhenSettled 时默认态改看「是否有未终结项」。
-  // P2c 收口：展开态改为**纯派生**（手动态 ?? 默认态）。原实现用两条 setState-in-effect
-  // 事后同步，时序等价（exec 活动一旦出现 hasExec 即为真 → 自然展开；用户切过则以手动态
-  // 为准），合并成派生式后不再需要 effect，也解掉 react-hooks/set-state-in-effect 违规。
-  // UI-437 — ZCode 模型修订（用户裁决「完全模仿 zocode…现在的项目过于繁琐」）：
-  // 时间线完成簇默认**保持展开**为「一行一事件」的静音时间线（过程史常驻可扫读，
-  // 对齐 ZCode 完成态），簇头仅作折叠开关；取代旧「完成后折叠成一行摘要」。
   const [manualExpanded, setManualExpanded] = useState<boolean | null>(null);
-  // UI-383 — 常规只读组折叠状态（组键 = 首项 key；默认折叠，点击就地展开逐条）
+  // UI-383 — 常规只读组折叠状态（legacy 组键 = 首项 key；默认折叠，点击就地展开逐条）
   const [unfoldedRoutineGroups, setUnfoldedRoutineGroups] = useState<Set<string>>(new Set());
   const anyRunning = activities.some((activity) => RUNNING_STATUSES.has(activity.status));
   const hasExec = activities.some((activity) => EXEC_TOOL_NAMES.has(activity.name));
-  const expanded = manualExpanded !== null
-    ? manualExpanded
-    : collapseWhenSettled ? true : hasExec;
-  // UI-431 P1 — running tail: running clusters are collapsed by default, only rendering the last round's rows (auto-collapse once a new round starts);
-  // manual expansion takes priority and shows everything; long tasks no longer let the row count grow linearly with rounds.
-  const runningTail = collapseWhenSettled && anyRunning && manualExpanded === null;
-  // 尾轮态在视觉上是「收缩」的（只显当轮），headOpen 表达用户可感知的展开态；
-  // 簇头点击以它为翻转基准，首次点击=展开全部。
-  const headOpen = collapseWhenSettled ? (expanded && !runningTail) : expanded;
+  // legacy（非时间线）展开态：含 exec 默认展开；手动态最优先。
+  const expanded = manualExpanded !== null ? manualExpanded : hasExec;
   const runningElapsedMs = useRunningElapsed(showRunningStopwatch && anyRunning);
+
   const running = activities.filter((activity) => activity.status === 'running').length;
   const awaiting = activities.filter((activity) => activity.status === 'awaiting_confirmation').length;
   const attention = activities.filter(
@@ -653,99 +633,82 @@ export function ToolActivityList({
     : awaiting > 0
       ? `等待确认 ${awaiting} 项`
       : `已完成 ${activities.length} 项${attention ? ` · ${attention} 项需注意` : ''}${actionSummary ? ` · ${actionSummary}` : ''}${totalDuration ? ` · 耗时 ${totalDuration}` : ''}`;
-  // BLOCK-108 P3 — Qoder 计数式簇头（时间线模式）：以次数为中心，保留需注意
-  // 计数（L5 flow 契约字样）与运行秒表。UI-430：单工具簇的簇头直接携带该工具的
-  // 一行摘要（「已读取 src/config.ts」），不点开也知道干了什么；零耗时（<1ms
-  // 或缺失）不显示——「耗时 0 ms」是纯噪音。
-  const firstActivity = activities[0];
-  const singlePreview = activities.length === 1 && firstActivity
-    ? `${firstActivity.actionLabel}${firstActivity.actionDetail ? ` ${firstActivity.actionDetail}` : ''}`.slice(0, 64)
-    : '';
-  const totalDurationShown = (processingDurationMs ?? totalDurationMs) > 0 ? totalDuration : null;
-  // UI-437 — 运行态簇头对齐 ZCode（「工作中 · 已运行 Ns」）：在做什么由下方
-  // 最新事件单行承载，簇头只回答「跑多久了」。完成态保留计数+需注意+耗时。
-  const qoderSummary = running > 0
-    ? `工作中 · 已运行 ${runningElapsedMs !== null ? formatToolDuration(runningElapsedMs) : '0 s'}`
-    : awaiting > 0
-      ? `等待确认 ${awaiting} 项`
-      : `执行工具 ${activities.length} 次${attention ? ` · ${attention} 项需注意` : ''}${singlePreview ? ` · ${singlePreview}` : ''}${totalDurationShown ? ` · 耗时 ${totalDurationShown}` : ''}`;
 
-  // UI-272 — 每轮思考只在该轮首个工具前插入一次
+  // UI-430 — 簇内按迭代交错：每轮「已思考行 → 该轮工具行」（ZCode 参考形态）。
+  const groupOrder: number[] = [];
+  const byIteration = new Map<number, ToolActivityItem[]>();
+  for (const activity of activities) {
+    const key = activity.iteration ?? 0;
+    let list = byIteration.get(key);
+    if (!list) { list = []; byIteration.set(key, list); groupOrder.push(key); }
+    list.push(activity);
+  }
+  const reasoningMap = reasoningByIteration || {};
+  const unmatchedReasoning = Object.entries(reasoningMap)
+    .map(([iter, text]) => ({ iteration: Number(iter), text }))
+    .filter((entry) => Number.isInteger(entry.iteration) && entry.text.trim() && !byIteration.has(entry.iteration))
+    .sort((a, b) => a.iteration - b.iteration);
+  const reasoningRows = unmatchedReasoning.map((entry) => (
+    <ReasoningRow
+      key={`qoder-reasoning-${entry.iteration}`}
+      iteration={entry.iteration}
+      text={entry.text}
+      label="已思考"
+    />
+  ));
   const renderedIterations = new Set<number>();
+
+  // UI-437 v2 — 时间线（ZCode 纯流水）：无簇头摘要，事件行即时间线本体。
+  if (collapseWhenSettled) {
+    const last = activities[activities.length - 1];
+    return (
+      <div className="sc-tool-activity-list" aria-label="工具活动">
+        {anyRunning && (
+          <div className="sc-tool-activity-summary sc-tool-live-head" data-state="running" aria-label="执行中">
+            <span className="sc-tool-activity-summary-label">
+              {`工作中 · 已运行 ${runningElapsedMs !== null ? formatToolDuration(runningElapsedMs) : '0 s'}`}
+            </span>
+            <span className="sc-tool-term-spinner" aria-hidden="true" />
+          </div>
+        )}
+        <div className="sc-tool-activity-inline" data-testid="qoder-cluster-body">
+          {reasoningRows}
+          {anyRunning && last ? (
+            <QoderRow key={last.key} activity={last} />
+          ) : groupOrder.map((iterationKey) => (
+            <div key={`qoder-iter-${iterationKey}`}>
+              {reasoningMap[iterationKey] ? (
+                <ReasoningRow
+                  iteration={iterationKey}
+                  text={reasoningMap[iterationKey]}
+                  label="已思考"
+                />
+              ) : null}
+              {(byIteration.get(iterationKey) || []).map((activity) => (
+                <QoderRow key={activity.key} activity={activity} />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="sc-tool-activity-list" aria-label="工具活动">
       <button
         type="button"
         className="sc-tool-activity-summary"
-        data-expanded={headOpen || undefined}
-        aria-expanded={headOpen}
-        aria-label={headOpen ? '收起执行记录' : '展开执行记录'}
-        title={headOpen ? '收起执行记录' : '展开执行记录'}
-        onClick={() => {
-          // UI-431 P1 — 尾轮态（运行中收缩仅显当轮）的首次点击目标是「展开全部」，
-          // 而非把尾轮也收起：以 headOpen（非尾轮的完整展开态）为翻转基准。
-          setManualExpanded(!headOpen);
-        }}
+        data-expanded={expanded || undefined}
+        aria-expanded={expanded}
+        aria-label={expanded ? '收起执行记录' : '展开执行记录'}
+        title={expanded ? '收起执行记录' : '展开执行记录'}
+        onClick={() => setManualExpanded(!expanded)}
       >
-        <span className="sc-tool-activity-summary-label">{collapseWhenSettled ? qoderSummary : summary}</span>
+        <span className="sc-tool-activity-summary-label">{summary}</span>
         <Icon name="chevron-right" size={14} />
       </button>
-      {(expanded || runningTail) && (collapseWhenSettled ? (() => {
-        // BLOCK-108 P3 — Qoder 簇内形态：全部活动统一单行（含 exec），无 routine
-        // 二级折叠。UI-430 — 合并簇内按迭代交错：每轮「已思考行（若有）→ 该轮
-        // 工具行」（参考 ZCode 形态：命令行与思考行逐轮交替）；迭代与思考对不上
-        // 的遗留思考行（如合成分段外的历史键）按迭代序补在最前。
-        const groupOrder: number[] = [];
-        const byIteration = new Map<number, ToolActivityItem[]>();
-        for (const activity of activities) {
-          const key = activity.iteration ?? 0;
-          let list = byIteration.get(key);
-          if (!list) { list = []; byIteration.set(key, list); groupOrder.push(key); }
-          list.push(activity);
-        }
-        const reasoningMap = reasoningByIteration || {};
-        const unmatchedReasoning = Object.entries(reasoningMap)
-          .map(([iter, text]) => ({ iteration: Number(iter), text }))
-          .filter((entry) => Number.isInteger(entry.iteration) && entry.text.trim() && !byIteration.has(entry.iteration))
-          .sort((a, b) => a.iteration - b.iteration);
-        const reasoningRows = unmatchedReasoning.map((entry) => (
-          <ReasoningRow
-            key={`qoder-reasoning-${entry.iteration}`}
-            iteration={entry.iteration}
-            text={entry.text}
-            label="已思考"
-          />
-        ));
-        return (
-          <div className="sc-tool-activity-inline" data-testid="qoder-cluster-body">
-            {reasoningRows}
-            {/* UI-431 P1 / UI-437 — 运行态改为 ZCode 式单行：只渲染最新一条事件
-                （spinner 由行内 running 态承载），不再渲染最后一整轮；历史轮在
-                完成后以静音单行时间线常驻。 */}
-            {runningTail ? (() => {
-              const last = activities[activities.length - 1];
-              return last ? <QoderRow key={last.key} activity={last} /> : null;
-            })() : groupOrder.map((iterationKey) => {
-              const reasoningText = reasoningMap[iterationKey];
-              return (
-                <div key={`qoder-iter-${iterationKey}`}>
-                  {reasoningText ? (
-                    <ReasoningRow
-                      iteration={iterationKey}
-                      text={reasoningText}
-                      label="已思考"
-                    />
-                  ) : null}
-                  {(byIteration.get(iterationKey) || []).map((activity) => (
-                    <QoderRow key={activity.key} activity={activity} />
-                  ))}
-                </div>
-              );
-            })}
-          </div>
-        );
-      })() : (
+      {expanded && (
         <div className="sc-tool-activity-inline">
           {groupToolActivities(activities).map((group) => {
             const first = group.items[0];
@@ -817,9 +780,10 @@ export function ToolActivityList({
             ));
           })()}
         </div>
-      ))}
+      )}
     </div>
   );
 }
+
 
 export default ToolActivityList;

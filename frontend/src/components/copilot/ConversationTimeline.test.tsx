@@ -42,8 +42,8 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     const view = within(container);
     // UI-437 加映 — 思考节点标签去轮次号（内部细节不外露）
     expect(view.getByText('思考')).toBeTruthy();
-    // BLOCK-108 P3 — 簇头为计数式「执行工具 N 次」（Qoder 形态）
-    expect(container.textContent).toContain('执行工具 1 次');
+    // UI-437 v2 — 无簇头摘要；事件以 Qoder 单行呈现
+    expect(container.querySelectorAll('.sc-tool-qoder-row').length).toBe(1);
     // 正文不由本组件产出（宿主负责），避免同一正文被渲染两次
     expect(container.textContent).not.toContain('最终正文');
   });
@@ -52,7 +52,9 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     const { container } = render(<ConversationTimeline segments={[toolsSegment]} />);
     expect(container.querySelector('.sc-conversation-timeline')).toBeTruthy();
     expect(container.querySelector('.sc-timeline-cluster')).toBeTruthy();
-    expect(container.querySelector('.sc-tool-activity-summary')).toBeTruthy();
+    // UI-437 v2 — 完成簇无簇头摘要（总结味下线），事件行直接可见
+    expect(container.querySelector('.sc-tool-activity-summary')).toBeNull();
+    expect(container.querySelectorAll('.sc-tool-qoder-row').length).toBe(1);
     // 簇内不再出现思考行（思考已由时间线独立成节点）
     expect(container.querySelector('.sc-timeline-reasoning')).toBeNull();
   });
@@ -82,7 +84,7 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     );
     const html = container.innerHTML;
     expect(within(container).getByText('已经读完关键文件')).toBeTruthy();
-    expect(html.indexOf('执行工具 1 次')).toBeLessThan(html.indexOf('已经读完关键文件'));
+    expect(html.indexOf('src/a.ts')).toBeLessThan(html.indexOf('已经读完关键文件'));
   });
 
   it('renderProgress 拿到 isFirst / isLast，容器为过渡叙述排版（BLOCK-108 取代 D5+UI-305 弱化进度行，plan §7.2）', () => {
