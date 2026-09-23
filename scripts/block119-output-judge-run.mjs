@@ -27,6 +27,13 @@ const decisionApi = require('../core/biof3-server/helpers/decision-api.js');
 const SEPARATOR = String.fromCharCode(10);
 const TRANSCRIPT_DIR = path.join(root, '.biof3-dev-user-data', 'data', 'llm-transcripts');
 
+/** 锚定决策台账 DB（BLOCK-118 加映 1 同款：裸 shell 下防 best-effort 记账静默丢失）。 */
+function anchorDecisionDbPath() {
+  if (process.env.BIOF3_DB_PATH) return;
+  const candidate = path.join(root, '.biof3-dev-user-data', 'data', 'biof3.db');
+  if (fs.existsSync(candidate)) process.env.BIOF3_DB_PATH = candidate;
+}
+
 function cloudOverrides() {
   const envFile = path.join(root, '.biof3-dev-user-data', 'jev.env.bak-by-user-request');
   let apiKey = null;
@@ -87,6 +94,7 @@ async function main() {
     process.exit(2);
   }
 
+  anchorDecisionDbPath();
   const overrides = cloudOverrides();
   const r = await judgeOutput({ output, request, reference, goals, overrides });
 

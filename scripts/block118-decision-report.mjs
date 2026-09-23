@@ -30,7 +30,9 @@ function anchorDecisionDbPath() {
 function parseArgs(argv) {
   const get = (flag) => {
     const idx = argv.indexOf(flag);
-    return idx !== -1 ? argv[idx + 1] : null;
+    if (idx !== -1) return argv[idx + 1];
+    const eq = argv.find((a) => a.startsWith(flag + '='));
+    return eq ? eq.slice(flag.length + 1) : null;
   };
   const sinceArg = get('--since');
   const hoursArg = get('--hours');
