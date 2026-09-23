@@ -5,7 +5,9 @@
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 > 入口直链（registry `entrypoint` 指向本台的 canonical 文档，归档轮转不得切断发现路径）：[block-14-left-panel-qa-fix-closeout](./block-14-left-panel-qa-fix-closeout.md) · [block-15-architecture-perf-plan](./block-15-architecture-perf-plan.md) · [block-22-codemirror-inline-diff-plan](./block-22-codemirror-inline-diff-plan.md)
 
-最后更新：2026-09-23 凌晨四（**UI-437 加映 v4：运行级折叠落地（同批延伸，仍 in_progress）**——用户三点验收反馈「执行思考和阶段性过渡总结区分度不明显 / 多轮属于一个任务应增加一层折叠 / 执行和思考风格保持一致尽可能简化」：ConversationTimeline 增运行级折叠——完成后整段任务收成一行运行摘要（✓ 执行工具 N 次 · X 轮 · 耗时 · 需注意），点摘要行才展开每轮思考+执行细节（内层簇 forceOpen 托管无簇头行常驻）；运行中不折叠保持实时流式；思考行与工具行同款骨架（brain 图标，去蓝色左界线/加粗/预览/轮次号）。block107/108 flow 增「点运行摘要行展开」步骤。门禁=ConversationTimeline 12/12 重写 + ToolActivityList 20/20 + 前端全量 1197/1197 + tsc 0 + docs/ui 绿。）
+最后更新：2026-09-23 凌晨五（**UI-438 子智能体呈现收敛到时间线行内（轻量批，plan=本条目）**——用户实测裁决「阶段汇总…总是挂在会话的最后…子智能体应该以图标的形式存在于对应会话阶段出现的地方…点开智能体图标就自动展开详细信息…不需要详情卡片占地方」：移除消息尾部「阶段汇总」组卡（SubAgentResultGroup/SubAgentResultCard/useTerminalSubAgentResults 共 6 文件）——子智能体以 bot 图标行内联在派发发生位置（UI-382 既有能力，随运行摘要折叠/展开），点行展开职能/需求/状态/停止/详情（详情跳右栏面板）。block109-agent-panel flow A4 断言同步修订（组卡可见→行内详情按钮可达）。门禁=前端全量 1190/1190 + tsc 0 + test:changed 0 + docs/ui 绿。UI-437 仍 in_progress（v4 待实机过目）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-23 凌晨四（**UI-437 加映 v4：运行级折叠落地（同批延伸，仍 in_progress）**——用户三点验收反馈「执行思考和阶段性过渡总结区分度不明显 / 多轮属于一个任务应增加一层折叠 / 执行和思考风格保持一致尽可能简化」：ConversationTimeline 增运行级折叠——完成后整段任务收成一行运行摘要（✓ 执行工具 N 次 · X 轮 · 耗时 · 需注意），点摘要行才展开每轮思考+执行细节（内层簇 forceOpen 托管无簇头行常驻）；运行中不折叠保持实时流式；思考行与工具行同款骨架（brain 图标，去蓝色左界线/加粗/预览/轮次号）。block107/108 flow 增「点运行摘要行展开」步骤。门禁=ConversationTimeline 12/12 重写 + ToolActivityList 20/20 + 前端全量 1197/1197 + tsc 0 + docs/ui 绿。）
 
 此前 最后更新：2026-09-23 凌晨三（**UI-437 加映 v3：运行语义定版=完成即折叠（同批延伸，仍 in_progress）**——用户实测裁决「每一轮所有任务都自动折叠 需要再点开」+「按照流水线走下去就好 总结的味道少一点」：运行簇=「工作中 · 已运行 Ns」+ 仅最新事件单行（历史轮收起不可中途展开）；**完成簇自动折叠为一行摘要**（执行工具 N 次 · 需注意 · 单工具预览 · 耗时，点簇头展开逐行明细再点收起），所有轮次同一规则；思考行完成态只留标签（无预览/无轮次号，含 legacy）。取代 v2「行常驻不折叠」。门禁=三组件 36/36 + 前端全量 1196/1196 + tsc 0。）
 

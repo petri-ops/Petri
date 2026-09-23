@@ -4079,3 +4079,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据（契约 · v4）**：`ConversationTimeline.test.tsx` 12/12（重写：折叠默认态/摘要聚合/forceOpen 无簇头/运行不折叠）+ `ToolActivityList.test.tsx` 20/20 + 前端全量 148 文件 1197/1197 + tsc 0。block107/108 实机 flow 增「点运行摘要行展开」步骤（sc-run-fold-line）后行级断言不变。
 - **待实机**：vite HMR 已推送运行中应用，真实 agent 轮次过目即翻 verified。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-438: 子智能体呈现收敛到时间线行内——下线「阶段汇总」组卡（轻量批）(2026-09-23 in_progress，组件契约已验，实机过目待补)
+
+- **来源**：用户实测反馈「阶段汇总子智能体，现在的位置不对总是挂在会话的最后……子智能体应该以图标的形式存在于对应会话阶段出现的地方……点开智能体图标就自动展开详细信息了，所以不需要目前的这种详情卡片来占地方」。
+- **改动**：SimpleChat 移除消息尾部的 `SubAgentResultGroup` 组卡渲染与 `useTerminalSubAgentResults` 数据源（组卡脱离时序位置 + 与运行级折叠双重冗余）；删除 `SubAgentResultGroup.tsx`/`SubAgentResultCard.tsx` 及其测试与 CSS。子智能体呈现收敛到**派发源头的时间线行内**（UI-382 既有能力）：bot 图标行出现在发生的轮次位置（随运行摘要折叠/展开），点行展开 职能 emoji + 需求描述 + 状态 + 停止/详情 按钮，「详情」跳右栏智能体面板看实时工作流与终态摘要。
+- **证据（契约）**：前端全量 148 文件 1190/1190（移除组卡 6 文件后净减 6 例）+ tsc 0 + test:changed 0（block109 编排规则改挂 flow 文件）+ docs/ui 门禁绿。block109-agent-panel flow A4 断言同步修订（组卡可见 → 派发行内「详情」按钮可达）。
+- **待实机**：vite HMR 已推送运行中应用，跑一轮子智能体任务过目即翻 verified。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

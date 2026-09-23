@@ -64,11 +64,9 @@ import {
   uploadAttachment,
 } from './SimpleChat/attachmentUpload';
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
-import { SubAgentResultGroup } from './SubAgentResultGroup';
-// BLOCK-92 三波拆分 — 思考档位/滚动守卫/终态子智能体结果三簇外迁 hooks/（原样平移）
+// BLOCK-92 三波拆分 — 思考档位/滚动守卫两簇外迁 hooks/（原样平移）
 import { useThinkingLevel } from './SimpleChat/hooks/useThinkingLevel';
 import { useScrollGuard } from './SimpleChat/hooks/useScrollGuard';
-import { useTerminalSubAgentResults } from './SimpleChat/hooks/useTerminalSubAgentResults';
 // UI-268: 「后台进程」浮窗（持久输出独立小窗口）；工具活动记录改为内联手风琴
 import { ToolActivityDock } from './ToolActivityDock';
 import { MessageRail } from './MessageRail';
@@ -332,10 +330,6 @@ export function SimpleChat({
   // 新运行中子 agent → 派发 agentOpenInRail，右栏「智能体」tab 自动切过去。
   // 模块级 Set 保证每 task 只切一次（多 SimpleChat 实例/重挂载不重复）。
   const subTasksForAutoOpen = useSubAgentTasksForConversation(conversationId);
-  // UI-408 — 终态子智能体结果卡数据源：服务端真相轮询（/tasks?conversationId=，
-  // 含 summaryHead）。相比 child_finished 即时通知与内存快照，确定性覆盖
-  // 「父会话先结束、子任务后完成」「页面刷新」等全部时序。
-  const terminalSubTasks = useTerminalSubAgentResults(projectId, conversationId);
   useEffect(() => {
     for (const t of subTasksForAutoOpen) {
       if (t.status !== 'running') continue;
@@ -1065,9 +1059,6 @@ export function SimpleChat({
                         <Icon name="info" size={14} />
                         {m.modelFallbackNotice}
                       </div>
-                    )}
-                    {m.role === 'assistant' && terminalSubTasks.length > 0 && i === displayMessages.length - 1 && (
-                      <SubAgentResultGroup tasks={terminalSubTasks} />
                     )}
                     <CopilotMarkdown
                       text={m.content || m.statusMessage || (m.pending ? '…' : '')}

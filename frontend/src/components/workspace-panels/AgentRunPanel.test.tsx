@@ -113,7 +113,7 @@ describe('UI-404 AgentRunPanel 分区折叠', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /实时工作流/ }));
     // Qoder 形态三件套：合并簇头（计数式）+ 过渡叙述（状态行同文案，故用 getAll）+ 簇体
-    // Qoder 形态（UI-437 v3）：合并簇头为折叠摘要；点簇头展开事件行；思考行只留标签，点行看正文
+    // Qoder 形态（UI-437 v4）：完成后整段任务折叠为运行摘要行；点摘要行展开每轮细节
     expect(screen.getByText(/执行工具 1 次/)).toBeTruthy();
     expect(screen.getAllByText(/先列出目录结构/).length).toBeGreaterThanOrEqual(1);
     fireEvent.click(screen.getByText(/执行工具 1 次/));

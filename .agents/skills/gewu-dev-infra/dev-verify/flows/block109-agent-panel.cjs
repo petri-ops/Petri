@@ -9,7 +9,7 @@
  * ②点「详情」→ 右栏切 agent tab，面板运行中自动展开时间线（timelineOpen = override ?? running）；
  * ③面板内渲染 ConversationTimeline（`.sc-conversation-timeline`），段词汇与主窗同源
  *   （X=过渡叙述 R=思考 T=工具簇，iteration 非降序——block107 L4 修订契约同款）；
- * ④子智能体终态后面板呈现终态摘要、主时间线出现「阶段汇总」结果组卡（UI-432 组卡协同可见）；
+ * ④子智能体终态后面板呈现终态摘要、主时间线派发行内「详情」按钮可达（UI-438 行内收敛，UI-432 组卡已下线）；
  * ⑤临时数据清理。只连自管测试实例（:9223），零触碰用户主窗。
  *
  * 判据诚实性：子智能体派发依赖模型真实调用 spawn_agent——模型若不派发，A1 判红。
@@ -231,7 +231,7 @@ module.exports = {
       assert('A3_panel_timeline_segments_valid', segmentsValid(panelSeq),
         `panelSeq=${panelSeq} runningClusters=${panel.runningClusters}`);
 
-      // 轮询至子智能体终态（REST 权威）+「阶段汇总」组卡可见（父回合收尾后渲染，ORCH 实测口径）。
+      // 轮询至子智能体终态（REST 权威）（ORCH 实测口径）。
       let terminal = null;
       while (Date.now() < deadline) {
         await sleep(4000);
@@ -258,10 +258,11 @@ module.exports = {
         }, null, 2),
       );
 
-      // A4 终态呈现：子任务 REST 终态 + 主时间线「阶段汇总」组卡可见（UI-432 协同）。
-      assert('A4_terminal_summary_and_group_card', terminal.current && terminal.current.status && terminal.current.status !== 'running'
-        && (terminal.main.summaryCards || []).some(Boolean),
-        `rest=${terminal.current && terminal.current.status} summaryCard=${JSON.stringify(terminal.main.summaryCards)} lastBody=${terminal.main.lastBody}`);
+      // A4 终态呈现（UI-438 加映）：子任务 REST 终态 + 派发源头行内「详情」按钮可达
+      // （组卡已下线——子智能体以 bot 行内联在发生位置，点行展开需求/状态，详情跳右栏面板）。
+      assert('A4_terminal_and_inline_detail_button', terminal.current && terminal.current.status && terminal.current.status !== 'running'
+        && (terminal.main.detailBtns || []).some((n) => n > 0),
+        `rest=${terminal.current && terminal.current.status} detailBtns=${JSON.stringify(terminal.main.detailBtns)} lastBody=${terminal.main.lastBody}`);
       await lib.screenshotPng(client, EVIDENCE_DIR, 'agent-panel-terminal.png').catch(() => null);
 
       const convs = await rest('GET', `/ai/conversations?status=active&project_id=${encodeURIComponent(projectId)}`);

@@ -1913,19 +1913,16 @@
     },
     {
       "id": "ui-404-408-agent-panel",
-      "note": "UI-404 智能体详情面板折叠分态+父会话标注 / UI-408 子智能体终态结果内联卡（服务端投影 summaryHead）。",
+      "note": "UI-404 智能体详情面板折叠分态+父会话标注 / UI-408 子智能体终态结果内联卡（历史：组卡与独立卡已由 UI-438 收敛到时间线行内，文件移除）。",
       "patterns": [
         "frontend/src/components/workspace-panels/AgentRunPanel.tsx",
-        "frontend/src/components/copilot/SubAgentResultCard.tsx",
-        "frontend/src/components/copilot/SubAgentResultCard.module.css",
         "scripts/ui404-*",
         "scripts/ui408-*",
         "acceptance/ui-404/**",
         "acceptance/ui-408/**"
       ],
       "tests": [
-        "frontend/src/components/workspace-panels/AgentRunPanel.test.tsx",
-        "frontend/src/components/copilot/SubAgentResultCard.test.tsx"
+        "frontend/src/components/workspace-panels/AgentRunPanel.test.tsx"
       ],
       "frontendRelated": true,
       "classifiesScripts": true,
@@ -2129,14 +2126,13 @@
     },
     {
       "id": "block109-agent-orchestration-ux",
-      "note": "BLOCK-109 子智能体编排呈现与韧性：主循环瞬断重试（loop-orchestrator callProviderWithNetworkRetry）+ spawn 并行度软上限 + 子智能体终态结果组卡（SubAgentResultGroup）+ 概览孤儿过滤（WorkspaceSummaryCard）。契约=test/block109-orchestration.test.mjs（重试四态/软上限源码契约/孤儿过滤源码契约）+ SubAgentResultGroup.test.tsx。证据 acceptance/block-109/。",
+      "note": "BLOCK-109 子智能体编排呈现与韧性：主循环瞬断重试（loop-orchestrator callProviderWithNetworkRetry）+ spawn 并行度软上限 + 子智能体终态结果组卡（SubAgentResultGroup）+ 概览孤儿过滤（WorkspaceSummaryCard）。契约=test/block109-orchestration.test.mjs（重试四态/软上限源码契约/孤儿过滤源码契约）+ SubAgentResultGroup.test.tsx。证据 acceptance/block-109/。 UI-438 加映：终态组卡（SubAgentResultGroup/useTerminalSubAgentResults）已由「时间线行内 bot 行 + 详情」取代，文件移除。",
       "patterns": [
         "core/biof3-server/loop-orchestrator.js",
         "core/biof3-server/agent-tools/spawn-agent-tools.js",
-        "frontend/src/components/copilot/SubAgentResultGroup.tsx",
-        "frontend/src/components/copilot/SimpleChat/hooks/useTerminalSubAgentResults.ts",
         "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
-        "acceptance/block-109/**"
+        "acceptance/block-109/**",
+        ".agents/skills/gewu-dev-infra/dev-verify/flows/block109-agent-panel.cjs"
       ],
       "tests": [
         "test/block109-orchestration.test.mjs"

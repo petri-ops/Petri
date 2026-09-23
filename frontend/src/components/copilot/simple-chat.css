@@ -472,24 +472,6 @@
   font-size: var(--gewu-font-size-caption);
 }
 
-/* BLOCK-49 加映 — 子 agent 终态通知（proactive）：跟随降级 chip 视觉语法 */
-.sc-msg-child-finished {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin: 2px 0;
-}
-
-.sc-msg-child-finished-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 6px;
-  background: var(--gewu-status-success-bg);
-  color: var(--gewu-status-success-fg);
-  font-size: var(--gewu-font-size-caption);
-}
 
 /* UI-303 — 独立「计划模式」开关（.sc-plan-mode-btn）已移除：计划模式并入档位菜单第四档 */
 
@@ -4086,27 +4068,3 @@
   white-space: nowrap;
 }
 
-/* UI-432（BLOCK-109 P3）— 子智能体终态结果组卡：摘要行 + 可折叠明细 */
-.sc-msg-child-finished-group {
-  margin: 6px 0 2px;
-}
-
-.sc-msg-child-finished-group-summary {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
-  padding: 4px 6px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--gewu-text-secondary);
-  font: inherit;
-  font-size: var(--gewu-font-size-caption);
-  text-align: left;
-  cursor: pointer;
-}
-
-.sc-msg-child-finished-group-summary:hover {
-  background: color-mix(in srgb, var(--gewu-border) 32%, transparent);
-}

@@ -16,7 +16,7 @@
  *     run 80669989 三败实证——该疣登记 plan §1 P0-2，P1 有意修复时修订本文件）
  *
  * UI-432 四件套回归集：test/block109-orchestration.test.mjs（重试四态/软上限/孤儿过滤）
- * + frontend SubAgentResultGroup.test.tsx（结果组卡）——经 impact-map 同域规则路由。
+ * + frontend SubAgentResultGroup.test.tsx（结果组卡）——已于 UI-438 移除（组卡由时间线行内 bot 行取代）。
  */
 import assert from 'node:assert/strict';
 import fssync from 'node:fs';
