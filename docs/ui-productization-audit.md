@@ -4075,5 +4075,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **加映 v2（同日，用户裁决「按照流水线走下去就好 总结的味道少一点」+「子智能体能否完全模仿 zocode…过于繁琐」）**：时间线完成簇**去掉「执行工具 N 次 · 耗时」簇头摘要**——事件行即时间线本体，纯流水排布；运行态头部保留 ZCode 式「工作中 · 已运行 Ns」（非交互状态行）；失败可见性迁移到行级（error 行 ✕ 红字形）。block107-timeline-live（L5→error 行断言）与 block108-qoder-stream（Q2→无簇头+error 行断言）两条实机 flow 契约同步修订。
 - **加映 v3（同日，用户实测反馈「每一轮所有任务都自动折叠 需要再点开」+「按照流水线走下去就好 总结的味道少一点」）**：运行语义定为 v3——运行簇=「工作中 · 已运行 Ns」+ 仅最新事件单行（历史轮收起不可中途展开）；**完成簇自动折叠为一行摘要**（执行工具 N 次 · 需注意 · 单工具预览 · 耗时，点簇头展开逐行明细、再点收起），所有轮次同一规则无一例外。v2 的「行常驻不折叠」被此版取代。
 - **证据（契约 · v3）**：`ToolActivityList.test.tsx` + `ConversationTimeline.test.tsx` + `AgentRunPanel.test.tsx` 36/36（完成折叠/展开明细/运行单行/需注意计数/diffstat/思考行无预览）+ 前端全量 148 文件 1196/1196 + tsc 0。block107/108 实机 flow 契约已同步修订（L5/Q2 改 error 行断言）。
+- **加映 v4（同日，用户三点验收反馈）**：①区分度=事件侧全部收进「运行摘要行」（✓ 执行工具 N 次 · X 轮 · 耗时 · 需注意，点开才是每轮思考+执行细节），叙述保持唯一全对比度正文；②运行级折叠落地（ConversationTimeline 增运行摘要行 + ToolActivityList 增 forceOpen 托管，内层簇无簇头行常驻）；③思考行与工具行同款骨架（brain 图标 + 标签 + 箭头，去蓝色左界线/加粗差异样式，旧 preview/轮次号标签规则删除）。
+- **证据（契约 · v4）**：`ConversationTimeline.test.tsx` 12/12（重写：折叠默认态/摘要聚合/forceOpen 无簇头/运行不折叠）+ `ToolActivityList.test.tsx` 20/20 + 前端全量 148 文件 1197/1197 + tsc 0。block107/108 实机 flow 增「点运行摘要行展开」步骤（sc-run-fold-line）后行级断言不变。
 - **待实机**：vite HMR 已推送运行中应用，真实 agent 轮次过目即翻 verified。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。

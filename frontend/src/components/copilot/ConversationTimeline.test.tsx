@@ -35,37 +35,46 @@ const narrativeSegment: ConversationSegment = { kind: 'narrative', text: '最终
 const progressSegment: ConversationSegment = { kind: 'progress', iteration: 2, content: '已经读完关键文件' };
 
 describe('BLOCK-107 会话时间线渲染（P1b）', () => {
-  it('只渲染思考节点与工具簇；narrative 交由宿主原位渲染', () => {
+  it('UI-437 v4 运行级折叠：完成后整段任务收成一行运行摘要（叙述/思考/明细都收在里面）', () => {
     const { container } = render(
       <ConversationTimeline segments={[reasoningSegment, toolsSegment, narrativeSegment]} />
     );
-    const view = within(container);
-    // UI-437 加映 — 思考节点标签去轮次号（内部细节不外露）
-    expect(view.getByText('思考')).toBeTruthy();
-    // BLOCK-108 P3 / UI-437 v3 — 完成簇折叠为计数式簇头一行
-    expect(container.textContent).toContain('执行工具 1 次');
-    // 正文不由本组件产出（宿主负责），避免同一正文被渲染两次
+    // 折叠态 = 一行运行摘要；思考与明细都收在里面，narrative 仍交由宿主渲染
+    expect(container.textContent).toContain('执行工具 1 次 · 1 轮');
+    expect(container.textContent).not.toContain('最终正文');
+    expect(container.querySelector('.sc-timeline-reasoning')).toBeNull();
+    expect(container.textContent).not.toContain('先确认一下这个函数在哪被调用');
+
+    // 点运行摘要 → 展开：思考节点 + 簇明细（forceOpen 行常驻，无内层簇头）
+    fireEvent.click(within(container).getByRole('button', { name: '展开执行过程' }));
+    expect(within(container).getByText('思考')).toBeTruthy();
+    expect(container.querySelectorAll('.sc-tool-qoder-row').length).toBeGreaterThanOrEqual(1);
     expect(container.textContent).not.toContain('最终正文');
   });
 
-  it('工具簇复用 ToolActivityList 的簇头一行（不传 reasoningByIteration，思考不重复）', () => {
+  it('运行摘要行携带聚合信息：调用次数 / 轮次 / 耗时', () => {
     const { container } = render(<ConversationTimeline segments={[toolsSegment]} />);
-    expect(container.querySelector('.sc-conversation-timeline')).toBeTruthy();
-    expect(container.querySelector('.sc-timeline-cluster')).toBeTruthy();
-    // UI-437 v3 — 完成簇保留折叠开关（簇头一行摘要），明细默认隐藏
-    expect(container.querySelector('.sc-tool-activity-summary')).toBeTruthy();
-    expect(container.querySelector('[data-testid="qoder-cluster-body"]')).toBeNull();
-    // 簇内不再出现思考行（思考已由时间线独立成节点）
-    expect(container.querySelector('.sc-timeline-reasoning')).toBeNull();
+    const line = within(container).getByRole('button', { name: '展开执行过程' }).textContent || '';
+    expect(line).toContain('执行工具 1 次');
+    expect(line).toContain('1 轮');
+    expect(line).toContain('12 ms');
   });
 
-  it('UI-437 加映：思考节点折叠态只留标签一行（无长预览），点击展开全文', () => {
-    const { container } = render(<ConversationTimeline segments={[reasoningSegment]} />);
-    // 完成态思考行对齐 ZCode：只留标签，预览不渲染（避免读起来像未折叠正文）
+  it('展开后内层簇由 forceOpen 托管：无簇头摘要、行常驻（UI-430 单工具信息在行上）', () => {
+    const { container } = render(<ConversationTimeline segments={[toolsSegment]} />);
+    fireEvent.click(within(container).getByRole('button', { name: '展开执行过程' }));
+    // 行常驻且无内层簇头摘要（总结味下线；聚合信息只在运行摘要行）
+    expect(container.querySelector('[data-testid="qoder-cluster-body"]')).toBeTruthy();
+    expect(container.querySelector('.sc-tool-activity-summary')).toBeNull();
+    expect(container.querySelectorAll('.sc-tool-qoder-row').length).toBe(1);
+    expect(container.textContent).toContain('src/a.ts');
+  });
+
+  it('UI-437 加映：思考节点与工具行同款骨架（brain 图标行，点击展开全文）', () => {
+    const { container } = render(<ConversationTimeline segments={[toolsSegment, reasoningSegment]} />);
+    fireEvent.click(within(container).getByRole('button', { name: '展开执行过程' }));
     expect(container.querySelector('.sc-timeline-reasoning-preview')).toBeNull();
-
     fireEvent.click(within(container).getByRole('button', { name: '展开思考' }));
-
     expect(container.querySelector('.sc-tool-reasoning-text')?.textContent)
       .toContain('第二行细节');
   });
@@ -75,13 +84,15 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('传入 renderProgress 时按输入顺序渲染（簇前/簇后由段模型排序，BLOCK-108 起簇前）', () => {
+  it('传入 renderProgress 时按输入顺序渲染（展开后：簇前/簇后由段模型排序，BLOCK-108 起簇前）', () => {
     const { container } = render(
       <ConversationTimeline
         segments={[toolsSegment, progressSegment]}
         renderProgress={(segment) => <span>{segment.content}</span>}
       />
     );
+    // 有工具段 → 默认折叠，先展开再断言顺序
+    fireEvent.click(within(container).getByRole('button', { name: '展开执行过程' }));
     const html = container.innerHTML;
     expect(within(container).getByText('已经读完关键文件')).toBeTruthy();
     expect(html.indexOf('src/a.ts')).toBeLessThan(html.indexOf('已经读完关键文件'));
@@ -99,7 +110,10 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
         }}
       />
     );
-    expect(metas).toEqual([
+    fireEvent.click(within(container).getByRole('button', { name: '展开执行过程' }));
+    // 折叠态不渲染 progress（renderProgress 不被调用）；展开后每个分段各调用一次
+    // （点击引发的重渲染会重复累计，故取末两位=最新一次展开的调用结果）
+    expect(metas.slice(-2)).toEqual([
       { isFirst: true, isLast: false },
       { isFirst: false, isLast: true },
     ]);
@@ -115,6 +129,7 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
         renderProgress={(segment, meta) => (meta.isFirst ? null : <span>{segment.content}</span>)}
       />
     );
+    fireEvent.click(within(container).getByRole('button', { name: '展开执行过程' }));
     expect(container.querySelector('.sc-timeline-progress')).toBeNull();
     expect(container.querySelector('.sc-timeline-cluster')).toBeTruthy();
   });
@@ -129,7 +144,7 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('多簇多思考按传入顺序交错渲染（时间轴顺序即投影顺序）', () => {
+  it('运行级展开后多簇多思考按传入顺序交错渲染（时间轴顺序即投影顺序）', () => {
     const secondTools: ConversationSegment = {
       ...toolsSegment,
       iteration: 3,
@@ -148,7 +163,7 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
         reasoningSegment, toolsSegment, thirdReasoning, secondTools,
       ]} />
     );
-    // querySelectorAll 按文档顺序返回：思考2 → 簇2 → 思考3 → 簇3
+    // 含运行中簇 → 不折叠（实时流式）；节点顺序：思考2 → 簇2 → 思考3 → 簇3
     const nodes = Array.from(
       container.querySelectorAll('.sc-timeline-reasoning, .sc-timeline-cluster')
     );
@@ -156,9 +171,7 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     expect(container.querySelectorAll('.sc-timeline-cluster')).toHaveLength(2);
   });
 
-  it('UI-437 v3 ZCode 模型：完成簇自动折叠为一行摘要；运行簇只渲染最新一条事件单行', () => {
-    // 用户裁决「每一轮所有任务都自动折叠 需要再点开」：完成即折叠为摘要一行
-    // （点簇头展开明细），运行簇头部「工作中 · 已运行 Ns」+ 仅最新事件单行。
+  it('UI-437 v4：运行簇存在时不折叠（实时流式，最新事件可见）；折叠摘要行不再渲染', () => {
     const settledExec: ConversationSegment = {
       ...toolsSegment,
       activities: [{
@@ -172,8 +185,9 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
       totalCount: 1,
     };
     const settled = render(<ConversationTimeline segments={[settledExec]} />);
+    // 完成 → 一行运行摘要，明细收起
+    expect(settled.container.querySelector('.sc-run-fold-line')).toBeTruthy();
     expect(settled.container.querySelector('.sc-tool-activity-inline')).toBeNull();
-    expect(settled.container.textContent).toContain('执行工具 1 次');
 
     const running: ConversationSegment = {
       ...settledExec,
@@ -189,6 +203,7 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
       state: 'running',
     };
     const live = render(<ConversationTimeline segments={[running]} />);
+    // 运行中 → 不折叠，实时流式（簇体在、最新事件单行）
     expect(live.container.querySelector('.sc-tool-activity-inline')).toBeTruthy();
     expect(live.container.querySelectorAll('.sc-tool-qoder-row').length).toBe(1);
   });

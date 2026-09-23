@@ -198,6 +198,10 @@ module.exports = {
         JSON.stringify({ prompt: PROMPT, samples }, null, 2)
       );
 
+      // UI-437 v4 — 完成任务先折叠为运行摘要行：点摘要行展开明细，再做行级断言
+      await lib.evalJs(client, `(function(){ var f = document.querySelector('.sc-run-fold-line'); if (f) { f.click(); return 'clicked'; } return 'no_fold'; })()`, 10_000);
+      await sleep(600);
+      liveSnap = JSON.parse(await lib.evalJs(client, PROBE, 10_000));
       const lastSeq = (liveSeq || []).slice(-1)[0] || '';
       const transitionCount = (liveSnap.transitions || []).length;
 
@@ -208,7 +212,7 @@ module.exports = {
         `transitions=${transitionCount} 首条=「${(liveSnap.transitions || [])[0] || ''}」 `
         + `X后必有T=${(liveSeq || []).every((s) => transitionsBeforeClusters(s))} :: ${lastSeq}`);
 
-      // Q2 纯流水（UI-437 v2）：无簇头摘要（总结味下线）；失败以 error 行可见。
+      // Q2 纯流水（UI-437 v4）：运行摘要行展开后无簇头摘要；失败以 error 行可见。
       assert('Q2_flat_pipeline_failure_visible', (liveSnap.heads || []).length === 0 && Number(liveSnap.errorRows || 0) > 0,
         `簇头摘要=${(liveSnap.heads || []).length} error行=${liveSnap.errorRows} :: heads=${JSON.stringify(liveSnap.heads).slice(0, 200)}`);
 

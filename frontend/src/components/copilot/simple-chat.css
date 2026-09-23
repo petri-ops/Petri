@@ -1119,18 +1119,6 @@
    无底色，仅保留左侧强调色竖线，与会话区整体白底风格一致 */
 .sc-tool-reasoning {
   margin: 4px 0 2px;
-  border-left: 2px solid color-mix(in srgb, var(--gewu-accent) 42%, transparent);
-  border-radius: 0 6px 6px 0;
-}
-
-.sc-tool-reasoning-head {
-  padding: 6px 8px;
-}
-
-.sc-tool-reasoning-label {
-  font-size: var(--gewu-font-size-body-sm);
-  font-weight: 600;
-  color: var(--gewu-text-tertiary);
 }
 
 .sc-tool-reasoning-text {
@@ -1155,17 +1143,6 @@
 /* 时间线内思考节点：容器已提供纵向节奏，收紧既有 margin 以免节奏叠加放大 */
 .sc-timeline-reasoning {
   margin: 2px 0;
-}
-
-/* 折叠态一行预览：占满剩余宽度并单行省略（色阶低于标签，不抢注意力） */
-.sc-timeline-reasoning-preview {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--gewu-text-muted);
-  font-size: var(--gewu-font-size-body-sm);
 }
 
 /* 工具簇：与相邻思考节点留出可分辨的批间节奏 */
@@ -4092,6 +4069,21 @@
 
 .sc-tool-qoder-diffstat-del {
   color: var(--gewu-danger);
+}
+
+/* UI-437 v4 — 运行级折叠行：整段任务（多轮）收成一行运行摘要，
+   点开才是每轮思考和执行的细节。复用 qoder 行骨架，识别度靠 ✓ + 轮次计数。 */
+.sc-run-fold-line {
+  padding: 5px 6px;
+}
+
+.sc-run-fold .sc-tool-qoder-label {
+  color: var(--gewu-text-secondary);
+}
+
+.sc-run-fold .sc-tool-qoder-diffstat-del {
+  font-size: var(--gewu-font-size-xs);
+  white-space: nowrap;
 }
 
 /* UI-432（BLOCK-109 P3）— 子智能体终态结果组卡：摘要行 + 可折叠明细 */

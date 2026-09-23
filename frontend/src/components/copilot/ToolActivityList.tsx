@@ -63,31 +63,32 @@ const RUNNING_STATUSES: ReadonlySet<ToolActivityItem['status']> = new Set([
 /** UI-272 — 单条思考段：默认收起，点击展开全文（限高滚动）。
  *  BLOCK-108 P3 — 支持 Qoder 行形态覆写：`label`（如「已思考」）与折叠态
  *  `preview`（首行预览，折叠即可看出这一轮在琢磨什么）。 */
-function ReasoningRow({ iteration, text, label, preview }: {
+function ReasoningRow({ iteration, text, label }: {
   iteration: number;
   text: string;
   label?: string;
-  preview?: string;
 }) {
   const [open, setOpen] = useState(false);
-  // UI-437 加映 — 默认标签去轮次号（内部迭代细节不外露，对齐 ZCode「思考」）
+  // UI-437 v4 加映 — 与工具行同款骨架（brain 图标 + 标签 + 箭头）；
+  // 默认标签去轮次号（内部迭代细节不外露，对齐 ZCode「思考」）。
   const resolvedLabel = label || '思考';
   const ariaName = `${open ? '收起' : '展开'} ${resolvedLabel}`;
   return (
-    <div className="sc-tool-reasoning">
+    <div className="sc-tool-activity sc-tool-qoder-row">
       <button
         type="button"
-        className="sc-tool-row-head sc-tool-reasoning-head"
-        data-expanded={open || undefined}
+        className="sc-tool-row-head sc-tool-qoder-head"
         aria-expanded={open}
         aria-label={ariaName}
         title={open ? '收起思考' : '展开思考'}
         onClick={() => setOpen((v) => !v)}
       >
-        <span className="sc-tool-reasoning-label">{resolvedLabel}</span>
-        {!open && preview && <span className="sc-timeline-reasoning-preview">{preview}</span>}
+        <span className="sc-tool-qoder-kind" aria-hidden="true">
+          <Icon name="brain" size={12} />
+        </span>
+        <span className="sc-tool-qoder-label">{resolvedLabel}</span>
         <span className="sc-tool-row-chevron" aria-hidden="true">
-          <Icon name="chevron-right" size={12} />
+          <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
         </span>
       </button>
       {open && <p className="sc-tool-reasoning-text">{text}</p>}
@@ -584,6 +585,7 @@ export function ToolActivityList({
   reasoningByIteration,
   collapseWhenSettled = false,
   showRunningStopwatch = false,
+  forceOpen = false,
 }: {
   activities: ToolActivityItem[];
   processingDurationMs?: number;
@@ -598,6 +600,11 @@ export function ToolActivityList({
   collapseWhenSettled?: boolean;
   /** BLOCK-107 P2c — 运行中「已运行 Ns」秒表（时间线的「工作中」头部启用）。 */
   showRunningStopwatch?: boolean;
+  /**
+   * UI-437 v4 — 运行级展开托管：由 ConversationTimeline 的运行摘要行统管折叠，
+   * 本簇无簇头、行常驻（点开运行摘要后才是每轮思考和执行的细节）。
+   */
+  forceOpen?: boolean;
 }): React.ReactElement {
   const [manualExpanded, setManualExpanded] = useState<boolean | null>(null);
   // UI-383 — 常规只读组折叠状态（legacy 组键 = 首项 key；默认折叠，点击就地展开逐条）
@@ -658,9 +665,33 @@ export function ToolActivityList({
   ));
   const renderedIterations = new Set<number>();
 
-  // UI-437 v3（用户裁决「每一轮所有任务都自动折叠 需要再点开」）：完成簇自动折叠
+  // UI-437 v3/v4（用户裁决「每一轮所有任务都自动折叠 需要再点开」）：完成簇自动折叠
   // 为一行摘要（点簇头展开明细、再点收起）；运行簇=「工作中 · 已运行 Ns」+ 最新
   // 一条事件单行。所有轮次同一规则，无一例外。
+  // v4 — forceOpen（运行摘要行已点开）：无簇头，行常驻，细节直接可见。
+  if (collapseWhenSettled && forceOpen) {
+    return (
+      <div className="sc-tool-activity-list" aria-label="工具活动">
+        <div className="sc-tool-activity-inline" data-testid="qoder-cluster-body">
+          {reasoningRows}
+          {groupOrder.map((iterationKey) => (
+            <div key={`qoder-iter-${iterationKey}`}>
+              {reasoningMap[iterationKey] ? (
+                <ReasoningRow
+                  iteration={iterationKey}
+                  text={reasoningMap[iterationKey]}
+                  label="已思考"
+                />
+              ) : null}
+              {(byIteration.get(iterationKey) || []).map((activity) => (
+                <QoderRow key={activity.key} activity={activity} />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
   if (collapseWhenSettled) {
     const last = activities[activities.length - 1];
     const runningTail = anyRunning && manualExpanded === null;

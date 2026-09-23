@@ -202,6 +202,9 @@ module.exports = {
         `maxClusters=${maxClusters} 全部非降序=${classified.every((c) => c.monotonic)} `
         + `（一迭代一簇契约已由 UI-430 合并簇取代） :: `
         + (liveSeq || []).slice(-1)[0]);
+      // UI-437 v4 — 完成任务先折叠为运行摘要行：点摘要行展开明细，再判 error 行可见性
+      await lib.evalJs(client, `(function(){ var f = document.querySelector('.sc-run-fold-line'); if (f) { f.click(); return 'clicked'; } return 'no_fold'; })()`, 10_000);
+      await sleep(600);
       // L5 失败可见（UI-437 v2 纯流水契约）：读不存在文件 → error → 以 error 行可见
       const tail = JSON.parse(await lib.evalJs(client, PROBE, 10_000));
       assert('L5_failure_visible_in_error_row', tail.errorRows > 0,

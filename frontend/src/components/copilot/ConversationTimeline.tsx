@@ -5,50 +5,44 @@
 // （经 ToolsSegment.reasoning 传给 ToolActivityList），纯思考迭代仍独立
 // 成思考节点。
 //
-// 把 `conversationSegments.buildConversationSegments` 产出的有序分段渲染成
-// **沿时间轴分节**的交错序列：过渡叙述 → 工具簇（内含思考行+活动行）→
-// 过渡叙述 → 工具簇 → ……，取代「类型分组堆叠」。
-//
-// 复用策略（零重复实现）：每个 tools 分段交回既有 `ToolActivityList` 渲染
-// ——簇头一行（BLOCK-108 起为计数式「执行工具 N 次」）+ 就地展开的统一
-// 单行流（Qoder 行形态，门控=collapseWhenSettled）。
-//
-// narrative（最终正文）**不由本组件渲染**——宿主在原位渲染 markdown。
-// progress（过渡叙述）经 `renderProgress` 回调上轴（BLOCK-108 改序簇前 +
-// 正文式容器 `sc-timeline-transition`）：本组件只负责它在脊线上的位置与
-// 「首/末」判定，行内容归宿主。
+// UI-437 v4 — 运行级折叠（ZCode 模型，用户裁决「多轮属于一个任务，增加
+// 一层折叠；点开才是每轮思考和执行的细节」）：一次任务的多轮收敛为
+// **一行运行摘要**（✓ 执行工具 N 次 · X 轮 · 耗时），完成后默认折叠；
+// 点击展开后才渲染 过渡叙述 + 各轮思考/执行明细（内层簇由 forceOpen
+// 托管为无簇头常驻行）。运行中不折叠（实时流式，最新事件可见）。
 // ============================================================
 
 import { useState } from 'react';
 
 import { Icon } from '@/components/icons/Icon';
 
+import { formatToolDuration } from './toolActivity';
 import type { ConversationSegment, ReasoningSegment, ToolsSegment } from './conversationSegments';
-import { UNGROUPED_ITERATION } from './conversationSegments';
 import { ToolActivityList } from './ToolActivityList';
 
 /**
- * 思考节点：折叠态为一行（标签），点击展开全文。
- * UI-437 加映（用户反馈「思考过程没有收起来」）——对齐 ZCode 完成态：
- * 折叠行只留标签一行，不再放长预览（预览读起来像未折叠正文）；轮次号
- * 是内部实现细节，不再暴露在标签里。
+ * 思考节点（UI-437 v4 加映 — 与工具行同款骨架：brain 图标 + 标签 + 箭头，
+ * 去除旧的蓝色左界线/加粗标签差异样式；点击展开全文）。轮次号是内部
+ * 实现细节，不在标签中暴露。
  */
 function ReasoningSegmentRow({ segment }: { segment: ReasoningSegment }): React.ReactElement {
   const [open, setOpen] = useState(false);
   return (
-    <div className="sc-tool-reasoning sc-timeline-reasoning" data-iteration={segment.iteration}>
+    <div className="sc-tool-activity sc-tool-qoder-row sc-timeline-reasoning" data-iteration={segment.iteration}>
       <button
         type="button"
-        className="sc-tool-row-head sc-tool-reasoning-head"
-        data-expanded={open || undefined}
+        className="sc-tool-row-head sc-tool-qoder-head"
         aria-expanded={open}
         aria-label={open ? '收起思考' : '展开思考'}
         title={open ? '收起思考' : '展开思考'}
         onClick={() => setOpen((value) => !value)}
       >
-        <span className="sc-tool-reasoning-label">思考</span>
+        <span className="sc-tool-qoder-kind" aria-hidden="true">
+          <Icon name="brain" size={12} />
+        </span>
+        <span className="sc-tool-qoder-label">思考</span>
         <span className="sc-tool-row-chevron" aria-hidden="true">
-          <Icon name="chevron-right" size={12} />
+          <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
         </span>
       </button>
       {open && <p className="sc-tool-reasoning-text">{segment.text}</p>}
@@ -60,14 +54,11 @@ function ReasoningSegmentRow({ segment }: { segment: ReasoningSegment }): React.
  * 工具簇节点：交回 `ToolActivityList` 渲染。
  *
  * 不传 `processingDurationMs`——让簇头显示**本簇**活动耗时之和（`ToolActivityList`
- * 内部 `processingDurationMs ?? totalDurationMs` 的既有回退），比整轮耗时更贴近
- * 「这一批工具花了多久」。`data-state` 供样式与后续策略使用（running 展开 /
- * settled 自动收起由 `ToolActivityList` 既有行为承载）。
+ * 内部 `processingDurationMs ?? totalDurationMs` 的既有回退）。
+ * UI-437 v4 — `forceOpen`：运行级展开后由外层托管折叠态，簇内无簇头、行常驻。
  */
-function ToolsSegmentBlock({ segment }: { segment: ToolsSegment }): React.ReactElement {
+function ToolsSegmentBlock({ segment, forceOpen }: { segment: ToolsSegment; forceOpen: boolean }): React.ReactElement {
   // BLOCK-108 P2 — 本迭代思考折入簇内（Qoder 形态：已思考单行在工具行之上）。
-  // 段模型已把有工具迭代的思考折叠进 ToolsSegment（纯思考迭代仍独立成段，
-  // 由本组件的 ReasoningSegmentRow 渲染），此处按旧 prop 形状传给簇。
   const reasoningByIteration = segment.reasoning
     ? { [segment.iteration]: segment.reasoning }
     : undefined;
@@ -82,6 +73,7 @@ function ToolsSegmentBlock({ segment }: { segment: ToolsSegment }): React.ReactE
         reasoningByIteration={reasoningByIteration}
         collapseWhenSettled
         showRunningStopwatch
+        forceOpen={forceOpen}
       />
     </div>
   );
@@ -114,6 +106,21 @@ export function ConversationTimeline({
   renderProgress,
   className,
 }: ConversationTimelineProps): React.ReactElement | null {
+  // UI-437 v4 — 运行级折叠：一次任务的多轮工具段收敛为一行运行摘要。
+  const toolsSegments = segments.filter((segment): segment is ToolsSegment => segment.kind === 'tools');
+  const hasTools = toolsSegments.length > 0;
+  const runRunning = toolsSegments.some(
+    (segment) => segment.state === 'running' || (segment.runningCount ?? 0) > 0
+  );
+  const [runExpanded, setRunExpanded] = useState(false);
+  // 运行中（实时流式）或本段无工具时不折叠；完成后默认收起为运行摘要行。
+  const runOpen = !hasTools || runRunning || runExpanded;
+
+  const totalCalls = toolsSegments.reduce((n, s) => n + (s.totalCount ?? s.activities?.length ?? 0), 0);
+  const totalFailed = toolsSegments.reduce((n, s) => n + (s.failedCount ?? 0), 0);
+  const totalDurationMs = toolsSegments.reduce((n, s) => n + (s.durationMs ?? 0), 0);
+  const totalDuration = totalDurationMs > 0 ? formatToolDuration(totalDurationMs) : null;
+
   const nodes: React.ReactNode[] = [];
   const progressTotal = segments.reduce(
     (count, segment) => (segment.kind === 'progress' ? count + 1 : count),
@@ -126,7 +133,13 @@ export function ConversationTimeline({
       continue;
     }
     if (segment.kind === 'tools') {
-      nodes.push(<ToolsSegmentBlock key={`tools:${segment.iteration}`} segment={segment} />);
+      nodes.push(
+        <ToolsSegmentBlock
+          key={`tools:${segment.iteration}`}
+          segment={segment}
+          forceOpen={runExpanded && !runRunning}
+        />
+      );
       continue;
     }
     if (segment.kind === 'progress') {
@@ -152,8 +165,57 @@ export function ConversationTimeline({
     // narrative 由宿主在原位渲染（见文件头说明），此处不产出节点。
   }
   if (nodes.length === 0) return null;
+
+  // UI-437 v4 — 完成后的折叠态：整段任务只剩一行运行摘要（点开才是细节）。
+  if (hasTools && !runOpen) {
+    return (
+      <div className={className ? `sc-conversation-timeline ${className}` : 'sc-conversation-timeline'}>
+        <div className="sc-tool-activity sc-tool-qoder-row sc-run-fold">
+          <button
+            type="button"
+            className="sc-tool-row-head sc-tool-qoder-head sc-run-fold-line"
+            aria-expanded={false}
+            aria-label="展开执行过程"
+            title="展开执行过程"
+            onClick={() => setRunExpanded(true)}
+          >
+            <span className="sc-tool-qoder-glyph sc-tool-qoder-glyph-success" aria-hidden="true">✓</span>
+            <span className="sc-tool-qoder-label">{`执行工具 ${totalCalls} 次 · ${toolsSegments.length} 轮`}</span>
+            {totalFailed > 0 && (
+              <span className="sc-tool-qoder-diffstat-del">{`${totalFailed} 项需注意`}</span>
+            )}
+            {totalDuration && <span className="sc-tool-activity-duration">{totalDuration}</span>}
+            <span className="sc-tool-row-chevron" aria-hidden="true">
+              <Icon name="chevron-right" size={12} />
+            </span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={className ? `sc-conversation-timeline ${className}` : 'sc-conversation-timeline'}>
+      {runExpanded && hasTools && (
+        <button
+          type="button"
+          className="sc-tool-row-head sc-tool-qoder-head sc-run-fold-line"
+          aria-expanded={true}
+          aria-label="收起执行过程"
+          title="收起执行过程"
+          onClick={() => setRunExpanded(false)}
+        >
+          <span className="sc-tool-qoder-glyph sc-tool-qoder-glyph-success" aria-hidden="true">✓</span>
+          <span className="sc-tool-qoder-label">{`执行工具 ${totalCalls} 次 · ${toolsSegments.length} 轮`}</span>
+          {totalFailed > 0 && (
+            <span className="sc-tool-qoder-diffstat-del">{`${totalFailed} 项需注意`}</span>
+          )}
+          {totalDuration && <span className="sc-tool-activity-duration">{totalDuration}</span>}
+          <span className="sc-tool-row-chevron" aria-hidden="true">
+            <Icon name="chevron-down" size={12} />
+          </span>
+        </button>
+      )}
       {nodes}
     </div>
   );
