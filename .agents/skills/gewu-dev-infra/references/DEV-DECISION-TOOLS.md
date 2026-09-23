@@ -3,12 +3,26 @@
 > Jev/Laya 决策原语的开发流程接线。三个工具都是**建议器/评判器**——增量附加、只加不减、
 > 低置信/降级=零建议或放行；任何分支都不可能减少静态门禁（impact-map 下限/收口链）的既有语义。
 
+## 主动行使纪律（2026-09-23 用户裁决：「能用 Jev/Laya 的地方就用，后续不用提醒」）
+
+下表时点属于**默认工作流的一部分**：到达时点即主动调用，不需要用户提醒或批准，结果
+（含零建议）如实附在收口或交付说明里。实操口径：
+
+- **确定性优先不变**：语义残差才轮到 Jev——确定性规则能判的先走确定性（uiAudit 硬规则、
+  impact-map 下限、L1/L2 归因层）；Jev 的价值在提前抓机械门禁随后才会抓的问题
+  （2026-09-23 实证：doc:suggest 的 uiAudit 确定性命中先于 closeout 门抓到台账漏同步）。
+- **按工作包喂，不按天喂**：test:suggest 对聚焦改动面最有效；混合大批量置信度被域信号
+  稀释（118 文件混批实测 conf 0.75 < θ 0.8 零建议，同日聚焦批 conf 0.99）。
+- **零建议/降级=如实记录**：不是故障、更不是跳过静态下限的理由；每次调用恒落
+  decision_log（`npm run decision:report` 可查账）。
+
 ## 何时用
 
 | 时点 | 命令 | 作用 |
 | --- | --- | --- |
 | 规划定向测试前 | `npm run test:suggest -- --supply=cloud` | 在静态 impact-map 下限之上追加测试域建议 |
 | 台账回写前 | `npm run doc:suggest -- --supply=cloud --context "<改动说明>"` | 提示可能漏回写的 canonical 文档 |
+| 测试失败需要归因时 | `node scripts/block114-failure-triage.mjs <failures.json> -o report.json` | 三层管线：L1 指纹/L2 环境词表（零模型）→ L3 Jev choice 语义残差（仅 L3 出站）；低置信=needs_human |
 | 多轮会话产出关键结论/收口声明前 | `npm run output:judge -- --transcript <conv.jsonl> [--probe 3]`<br>或 `--request "…" --output "…" [--reference …] [--goals "a;b"]` | 评判门三态（PASS 推进/RETRY 重写/ESCALATE 升级），fit score 0-4 + 忠实性（需 reference）+ 目标完备性 |
 | 限定提示词脚本输出结构化结果后 | 同上 `--probe k` | 稳定性探针：k 次重放一致率（<2/3=unstable，阈值附近判定须谨慎解读） |
 
