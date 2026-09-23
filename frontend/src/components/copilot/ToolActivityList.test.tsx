@@ -5,7 +5,7 @@ import { ToolActivityList } from './ToolActivityList';
 import { groupToolActivities } from './toolActivity';
 import assert from 'node:assert/strict';
 import { gewuEvents } from '@/lib/events';
-import type { ToolActivityItem } from './toolActivity';
+import { summarizeToolCall, type ToolActivityItem } from './toolActivity';
 
 function activity(
   status: ToolActivityItem['status'],
@@ -406,6 +406,19 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(head).toContain('已运行 npm run docs:reconcile');
     expect(head).not.toContain('耗时');
     expect(head).not.toContain('0 ms');
+  });
+
+  it('UI-437 v5.4 未登记工具：参数摘要兜底（不再只剩工具名）', () => {
+    expect(summarizeToolCall('query', { datasets: '项目文档' }).actionDetail)
+      .toBe('query（datasets=项目文档）');
+    expect(summarizeToolCall('todo_write', { todos: [{ id: 1 }] }).actionDetail)
+      .toBe('todo_write（todos=[{"id":1}]）');
+    expect(summarizeToolCall('plan', { op: 'create', draft: true }).actionDetail)
+      .toBe('plan（op=create · draft=true）');
+    // 无参数回退工具名
+    expect(summarizeToolCall('query').actionDetail).toBe('query');
+    // 已登记工具不受影响
+    expect(summarizeToolCall('workspace_read', { path: 'src/a.ts' }).actionDetail).toBe('src/a.ts');
   });
 
   it('UI-437 v5.3 输出预览兜底：actionDetail 为空的调用行显示输出尾首个非空行（ANSI 剥离）', () => {

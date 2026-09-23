@@ -189,6 +189,29 @@ function execCommand(name: string, args: Record<string, unknown> = {}): string |
 }
 
 /** Convert tool arguments into a safe, user-facing Codex-style activity line. */
+/** UI-437 v5.4 — 未登记工具的参数摘要兜底：key=值 · …（单键截 40 字，最多 3 键）。 */
+function summarizeArgsDetail(args: Record<string, unknown> = {}): string {
+  const parts: string[] = [];
+  for (const [key, value] of Object.entries(args)) {
+    let rendered: string;
+    if (typeof value === 'string') {
+      rendered = value.replace(/\s+/g, ' ').trim();
+    } else if (value == null) {
+      rendered = '';
+    } else {
+      try {
+        rendered = JSON.stringify(value).replace(/\s+/g, ' ');
+      } catch {
+        rendered = String(value);
+      }
+    }
+    if (!rendered) continue;
+    parts.push(`${key}=${rendered.slice(0, 40)}`);
+    if (parts.length >= 3) break;
+  }
+  return parts.join(' · ');
+}
+
 export function summarizeToolCall(
   name: string,
   args: Record<string, unknown> = {}
@@ -215,8 +238,12 @@ export function summarizeToolCall(
     case 'system_info':
       // BLOCK-33 P1 — 环境自省：只读、无参数
       return { actionLabel: '已查询', actionDetail: '系统环境' };
-    default:
-      return { actionLabel: '已调用', actionDetail: name };
+    default: {
+      // UI-437 v5.4（用户反馈「已调用 query 后面都是空白」）——未登记工具用
+      // 参数摘要兜底：query（datasets=…）；无参数时回退工具名。
+      const detail = summarizeArgsDetail(args);
+      return { actionLabel: '已调用', actionDetail: detail ? `${name}（${detail}）` : name };
+    }
   }
 }
 
