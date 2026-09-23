@@ -191,27 +191,8 @@
       "count": 1
     }
   },
-  "frontend/src/components/copilot/SimpleChat/hooks/useTerminalSubAgentResults.ts": {
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-call": {
-      "count": 2
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 4
-    }
-  },
   "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts": {
     "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
-  "frontend/src/components/copilot/SubAgentResultCard.tsx": {
-    "react-hooks/purity": {
       "count": 1
     }
   },

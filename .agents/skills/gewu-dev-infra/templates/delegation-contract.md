@@ -1,6 +1,6 @@
 # 委派契约模板（Delegation Contract Template）
 
-> 用途：主 Agent 把任务委派给子 Agent（如 `luna_worker` 或并行会话）时的标准任务书模板。
+> 用途：主 Agent 把任务委派给子 Agent（并行会话、只读探查代理等可用执行体）时的标准任务书模板。
 > 强制契约（自包含）：每次委派必须明确任务范围、文件或职责所有权、预期输出、验证要求，
 > 以及不得回退或覆盖其他 Agent 改动的约束——本模板六区块即这些强制字段的填空式落地。
 > 使用方式：复制下方模板填空；填不满的区块说明该任务还不该被委派（回主 Agent 自做或重新切分）。
@@ -49,7 +49,7 @@
 
 ## 填写示例（精简）
 
-> 委派 `luna_worker` 为 dev-verify 新增一个 `settings-load` flow：
+> 委派子 Agent 为 dev-verify 新增一个 `settings-load` flow：
 > 范围=仅新建 `scripts/dev-verify/flows/settings-load.cjs`；禁区=`lib.cjs`/`run.cjs` 及
 > BLOCK-69/70 文件面；交付=flow 文件 + `npm run verify -- settings-load` 在 dev 栈上
 > 4 断言 allPass 的证据；验证=`node --test test/dev-verify.test.mjs` + `npm run verify -- --list`
