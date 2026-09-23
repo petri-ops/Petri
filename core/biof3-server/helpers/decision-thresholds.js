@@ -89,4 +89,13 @@ module.exports = {
     evidence: 'acceptance/block-118/calibration-doc-suggest-cloud.json',
     model: 'jev-1.13.0',
   },
+  // BLOCK-119 P0 — output-judge 输出评判门（dev-time + P2 试点运行时）：fit 五级量表
+  //（score≥fitPass=PASS 区；≥fitRetry=RETRY 区；更低=ESCALATE）。配对语料下界校准
+  //（θ=3：precision 0.8254/coverage 0.7875；真实配对 21% 落 retry 区，fail-open+RETRY 语义
+  // 承载）；faithful/goalPass 缺键=observe-only（未校准不门控，无证据不门控红线）。
+  'output-judge': {
+    gates: { fitPass: 3, fitRetry: 2.5 },
+    evidence: 'acceptance/block-119/calibration-judge-fit.json',
+    model: 'jev-1.13.0',
+  },
 };

@@ -763,8 +763,20 @@ async function runAgentLoop({
     }
   };
 
+  // BLOCK-119 P2 — 子智能体汇报门（默认关 BIOF3_JEV_REPORT_GUARD=1；fail-open + RETRY×1）：
+  // runLoop 终态后、落库/child_finished 投递前，对子侧汇报过 output-judge 三态门。
+  // 关闭=零出站零行为变化（isReportGuardEnabled 短路）；详见 helpers/report-guard.js 契约头。
+  const _reportGuardApply = (loopResult) => require('./helpers/report-guard').applyToLoopResult(loopResult, {
+    enabled: kind === 'subagent',
+    request: String(((Array.isArray(messages) ? messages : []).find((m) => m && m.role === 'user') || {}).content || '').slice(0, 800),
+    callProvider: (body) => baseCallChatProvider(providerName, apiKey, body, null, null, { profileId, baseUrl }),
+    modelName,
+    onEvent: _emit,
+  });
+
   const {
     assistantText,
+    reportGuardMeta,
     // BLOCK-34 P1 — 工具活动快照随消息落库（此前传 null 导致任务完成后
     // 前端 re-conciliation 覆盖内存快照时工具记录消失）。
     assistantToolActivities,
@@ -782,7 +794,7 @@ async function runAgentLoop({
     fatalAgentError,
     pendingApprovalEmitted,
     modelFallbackOccurred,
-  } = await runLoop({
+  } = await _reportGuardApply(await runLoop({
     messages: fullMessages,
     toolCtx,
     shouldAbort,
@@ -806,7 +818,7 @@ async function runAgentLoop({
       conversationId,
       _activeConv,
     },
-  });
+  }));
 
   // ---------- Conversation persistence (via conversation-adapter) ----------
   if (assistantText && assistantText.trim().length > 0 && userId && _activeConv) {
@@ -965,6 +977,8 @@ async function runAgentLoop({
             childTaskId: taskId,
             status: terminal.status,
             summaryHead: String(assistantText || terminal.error || '').slice(0, 200),
+            // BLOCK-119 P2 — 汇报门标注（additive；默认关时为 null，前端按未知字段忽略）
+            reportGuard: reportGuardMeta || null,
             at: new Date().toISOString(),
           });
         }

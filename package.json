@@ -21,6 +21,7 @@
     "test:suggest": "node scripts/block118-dev-suggest-run.mjs --kind=test",
     "doc:suggest": "node scripts/block118-dev-suggest-run.mjs --kind=doc",
     "decision:report": "node scripts/block118-decision-report.mjs",
+    "output:judge": "node scripts/block119-output-judge-run.mjs",
     "test:all": "node --test --test-force-exit --test-timeout=120000 test/*.test.mjs test/*.test.cjs",
     "test:all:frontend": "npm --prefix frontend run test:all",
     "test:all:workspace": "npm run test:all && npm run test:all:frontend",

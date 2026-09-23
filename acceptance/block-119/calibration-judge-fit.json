@@ -1,0 +1,1372 @@
+{
+  "kind": "block119-judge-fit-calibration",
+  "version": "1.0.0",
+  "capturedAt": "2026-09-23T13:37:36.571Z",
+  "sourceCommit": "3bd64ac11b2c91419bef21007b44be944c20c246",
+  "supply": {
+    "baseUrl": "https://api.typesafe.ai",
+    "model": "jev-1.13.0"
+  },
+  "corpus": {
+    "file": "acceptance/block-119/corpus-judge-fit.json",
+    "count": 160,
+    "labeling": "配对设计（BLOCK-110 先例）：outcome_positive=真实请求-回复配对；turn_mismatch=同会话下一轮请求×本轮回复（同域话题定义性不契合）；mismatch=跨会话错配（硬负例）。迭代留痕：纠错词结果信号在 327 配对命中 0（语料以验收探针为主）、finishReason=length 全库 1 条，均弃用——本语料难度为 fit 任务下界，采纳门控按保守解读。"
+  },
+  "caveat": "语料为配对设计下界（结果信号与截断负例在可用数据中不可得，见 corpus.labeling 迭代留痕）；θ 采纳按保守解读，产品门控试点须以 P2 实机采纳率/误拦率复核。",
+  "apiFailures": 0,
+  "validCount": 160,
+  "positives": 80,
+  "perKindAccuracy": {
+    "outcome_positive": 0.65,
+    "turn_mismatch": 0.75,
+    "mismatch": 0.975
+  },
+  "recommended": {
+    "theta": 3,
+    "adopted": 63,
+    "adoptedCoverage": 0.7875,
+    "adoptedPrecision": 0.8254
+  },
+  "gate": {
+    "criterion": "存在 θ：precision ≥ 0.8 且 coverage ≥ 0.5",
+    "passed": true
+  },
+  "grid": [
+    {
+      "theta": 2,
+      "adopted": 109,
+      "adoptedCoverage": 1.3625,
+      "adoptedPrecision": 0.7156
+    },
+    {
+      "theta": 2.25,
+      "adopted": 104,
+      "adoptedCoverage": 1.3,
+      "adoptedPrecision": 0.7404
+    },
+    {
+      "theta": 2.5,
+      "adopted": 97,
+      "adoptedCoverage": 1.2125,
+      "adoptedPrecision": 0.7732
+    },
+    {
+      "theta": 2.75,
+      "adopted": 84,
+      "adoptedCoverage": 1.05,
+      "adoptedPrecision": 0.7976
+    },
+    {
+      "theta": 3,
+      "adopted": 63,
+      "adoptedCoverage": 0.7875,
+      "adoptedPrecision": 0.8254
+    },
+    {
+      "theta": 3.25,
+      "adopted": 39,
+      "adoptedCoverage": 0.4875,
+      "adoptedPrecision": 0.7436
+    },
+    {
+      "theta": 3.5,
+      "adopted": 18,
+      "adoptedCoverage": 0.225,
+      "adoptedPrecision": 0.8333
+    },
+    {
+      "theta": 3.75,
+      "adopted": 1,
+      "adoptedCoverage": 0.0125,
+      "adoptedPrecision": 1
+    },
+    {
+      "theta": 4,
+      "adopted": 0,
+      "adoptedCoverage": 0,
+      "adoptedPrecision": 1
+    }
+  ],
+  "perSample": [
+    {
+      "id": "p1",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.09,
+      "elapsedMs": 1082
+    },
+    {
+      "id": "p2",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.54,
+      "elapsedMs": 973
+    },
+    {
+      "id": "p3",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.58,
+      "elapsedMs": 1004
+    },
+    {
+      "id": "p4",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.15,
+      "elapsedMs": 2482
+    },
+    {
+      "id": "p5",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.18,
+      "elapsedMs": 1805
+    },
+    {
+      "id": "p6",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.73,
+      "elapsedMs": 310
+    },
+    {
+      "id": "p7",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.59,
+      "elapsedMs": 374
+    },
+    {
+      "id": "p8",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.7,
+      "elapsedMs": 317
+    },
+    {
+      "id": "p9",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.62,
+      "elapsedMs": 373
+    },
+    {
+      "id": "p10",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.18,
+      "elapsedMs": 307
+    },
+    {
+      "id": "p11",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.85,
+      "elapsedMs": 494
+    },
+    {
+      "id": "p12",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 1.92,
+      "elapsedMs": 329
+    },
+    {
+      "id": "p13",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.05,
+      "elapsedMs": 584
+    },
+    {
+      "id": "p14",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.96,
+      "elapsedMs": 310
+    },
+    {
+      "id": "p15",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.02,
+      "elapsedMs": 1417
+    },
+    {
+      "id": "p16",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.3,
+      "elapsedMs": 342
+    },
+    {
+      "id": "p17",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.91,
+      "elapsedMs": 318
+    },
+    {
+      "id": "p18",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.45,
+      "elapsedMs": 300
+    },
+    {
+      "id": "p19",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.46,
+      "elapsedMs": 327
+    },
+    {
+      "id": "p20",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.18,
+      "elapsedMs": 281
+    },
+    {
+      "id": "p21",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.46,
+      "elapsedMs": 282
+    },
+    {
+      "id": "p22",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.75,
+      "elapsedMs": 287
+    },
+    {
+      "id": "p23",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.43,
+      "elapsedMs": 283
+    },
+    {
+      "id": "p24",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.57,
+      "elapsedMs": 1073
+    },
+    {
+      "id": "p25",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.94,
+      "elapsedMs": 1150
+    },
+    {
+      "id": "p26",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.56,
+      "elapsedMs": 322
+    },
+    {
+      "id": "p27",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.93,
+      "elapsedMs": 972
+    },
+    {
+      "id": "p28",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.41,
+      "elapsedMs": 301
+    },
+    {
+      "id": "p29",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.56,
+      "elapsedMs": 280
+    },
+    {
+      "id": "p30",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.42,
+      "elapsedMs": 313
+    },
+    {
+      "id": "p31",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.71,
+      "elapsedMs": 546
+    },
+    {
+      "id": "p32",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.68,
+      "elapsedMs": 280
+    },
+    {
+      "id": "p33",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.49,
+      "elapsedMs": 305
+    },
+    {
+      "id": "p34",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.2,
+      "elapsedMs": 725
+    },
+    {
+      "id": "p35",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.81,
+      "elapsedMs": 287
+    },
+    {
+      "id": "p36",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.05,
+      "elapsedMs": 985
+    },
+    {
+      "id": "p37",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.78,
+      "elapsedMs": 839
+    },
+    {
+      "id": "p38",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.8,
+      "elapsedMs": 285
+    },
+    {
+      "id": "p39",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.04,
+      "elapsedMs": 282
+    },
+    {
+      "id": "p40",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.36,
+      "elapsedMs": 300
+    },
+    {
+      "id": "p41",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 1.75,
+      "elapsedMs": 1006
+    },
+    {
+      "id": "p42",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.66,
+      "elapsedMs": 350
+    },
+    {
+      "id": "p43",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.12,
+      "elapsedMs": 286
+    },
+    {
+      "id": "p44",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.18,
+      "elapsedMs": 950
+    },
+    {
+      "id": "p45",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.55,
+      "elapsedMs": 261
+    },
+    {
+      "id": "p46",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.6,
+      "elapsedMs": 313
+    },
+    {
+      "id": "p47",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.57,
+      "elapsedMs": 284
+    },
+    {
+      "id": "p48",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.88,
+      "elapsedMs": 325
+    },
+    {
+      "id": "p49",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.61,
+      "elapsedMs": 1397
+    },
+    {
+      "id": "p50",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.02,
+      "elapsedMs": 295
+    },
+    {
+      "id": "p51",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.47,
+      "elapsedMs": 262
+    },
+    {
+      "id": "p52",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.97,
+      "elapsedMs": 283
+    },
+    {
+      "id": "p53",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.96,
+      "elapsedMs": 293
+    },
+    {
+      "id": "p54",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.98,
+      "elapsedMs": 920
+    },
+    {
+      "id": "p55",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.62,
+      "elapsedMs": 287
+    },
+    {
+      "id": "p56",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.46,
+      "elapsedMs": 291
+    },
+    {
+      "id": "p57",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.43,
+      "elapsedMs": 494
+    },
+    {
+      "id": "p58",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.87,
+      "elapsedMs": 341
+    },
+    {
+      "id": "p59",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.02,
+      "elapsedMs": 933
+    },
+    {
+      "id": "p60",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.68,
+      "elapsedMs": 515
+    },
+    {
+      "id": "p61",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.61,
+      "elapsedMs": 996
+    },
+    {
+      "id": "p62",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.83,
+      "elapsedMs": 951
+    },
+    {
+      "id": "p63",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.03,
+      "elapsedMs": 322
+    },
+    {
+      "id": "p64",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 2.76,
+      "elapsedMs": 304
+    },
+    {
+      "id": "p65",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.41,
+      "elapsedMs": 551
+    },
+    {
+      "id": "p66",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.2,
+      "elapsedMs": 502
+    },
+    {
+      "id": "p67",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.57,
+      "elapsedMs": 274
+    },
+    {
+      "id": "p68",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.2,
+      "elapsedMs": 486
+    },
+    {
+      "id": "p69",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.41,
+      "elapsedMs": 933
+    },
+    {
+      "id": "p70",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.04,
+      "elapsedMs": 375
+    },
+    {
+      "id": "p71",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.62,
+      "elapsedMs": 276
+    },
+    {
+      "id": "p72",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.14,
+      "elapsedMs": 318
+    },
+    {
+      "id": "p73",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.31,
+      "elapsedMs": 347
+    },
+    {
+      "id": "p74",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.04,
+      "elapsedMs": 518
+    },
+    {
+      "id": "p75",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.16,
+      "elapsedMs": 370
+    },
+    {
+      "id": "p76",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.03,
+      "elapsedMs": 926
+    },
+    {
+      "id": "p77",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.23,
+      "elapsedMs": 308
+    },
+    {
+      "id": "p78",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.3,
+      "elapsedMs": 578
+    },
+    {
+      "id": "p79",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.71,
+      "elapsedMs": 904
+    },
+    {
+      "id": "p80",
+      "kind": "outcome_positive",
+      "gold": 1,
+      "ok": true,
+      "score": 3.02,
+      "elapsedMs": 270
+    },
+    {
+      "id": "t81",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.41,
+      "elapsedMs": 957
+    },
+    {
+      "id": "t82",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 3.3,
+      "elapsedMs": 290
+    },
+    {
+      "id": "t83",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 3.73,
+      "elapsedMs": 302
+    },
+    {
+      "id": "t84",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.02,
+      "elapsedMs": 294
+    },
+    {
+      "id": "t85",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 1.28,
+      "elapsedMs": 308
+    },
+    {
+      "id": "t86",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.86,
+      "elapsedMs": 364
+    },
+    {
+      "id": "t87",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 1.66,
+      "elapsedMs": 323
+    },
+    {
+      "id": "t88",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.61,
+      "elapsedMs": 325
+    },
+    {
+      "id": "t89",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.51,
+      "elapsedMs": 325
+    },
+    {
+      "id": "t90",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 3.29,
+      "elapsedMs": 354
+    },
+    {
+      "id": "t91",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.26,
+      "elapsedMs": 308
+    },
+    {
+      "id": "t92",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.21,
+      "elapsedMs": 363
+    },
+    {
+      "id": "t93",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.79,
+      "elapsedMs": 371
+    },
+    {
+      "id": "t94",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.3,
+      "elapsedMs": 301
+    },
+    {
+      "id": "t95",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 1.29,
+      "elapsedMs": 347
+    },
+    {
+      "id": "t96",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 1.23,
+      "elapsedMs": 310
+    },
+    {
+      "id": "t97",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 1.8,
+      "elapsedMs": 290
+    },
+    {
+      "id": "t98",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.29,
+      "elapsedMs": 340
+    },
+    {
+      "id": "t99",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 3.3,
+      "elapsedMs": 300
+    },
+    {
+      "id": "t100",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.36,
+      "elapsedMs": 310
+    },
+    {
+      "id": "t101",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 3.53,
+      "elapsedMs": 512
+    },
+    {
+      "id": "t102",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 3.7,
+      "elapsedMs": 338
+    },
+    {
+      "id": "t103",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.77,
+      "elapsedMs": 268
+    },
+    {
+      "id": "t104",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 3.35,
+      "elapsedMs": 305
+    },
+    {
+      "id": "t105",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 3.42,
+      "elapsedMs": 508
+    },
+    {
+      "id": "t106",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.74,
+      "elapsedMs": 322
+    },
+    {
+      "id": "t107",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.26,
+      "elapsedMs": 3701
+    },
+    {
+      "id": "t108",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 1.87,
+      "elapsedMs": 552
+    },
+    {
+      "id": "t109",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 1.04,
+      "elapsedMs": 263
+    },
+    {
+      "id": "t110",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 1.13,
+      "elapsedMs": 324
+    },
+    {
+      "id": "t111",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.83,
+      "elapsedMs": 264
+    },
+    {
+      "id": "t112",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.89,
+      "elapsedMs": 927
+    },
+    {
+      "id": "t113",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.93,
+      "elapsedMs": 273
+    },
+    {
+      "id": "t114",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.76,
+      "elapsedMs": 300
+    },
+    {
+      "id": "t115",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.81,
+      "elapsedMs": 269
+    },
+    {
+      "id": "t116",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.84,
+      "elapsedMs": 926
+    },
+    {
+      "id": "t117",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.8,
+      "elapsedMs": 369
+    },
+    {
+      "id": "t118",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 3.42,
+      "elapsedMs": 333
+    },
+    {
+      "id": "t119",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 3.18,
+      "elapsedMs": 307
+    },
+    {
+      "id": "t120",
+      "kind": "turn_mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.99,
+      "elapsedMs": 344
+    },
+    {
+      "id": "m121",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.64,
+      "elapsedMs": 306
+    },
+    {
+      "id": "m122",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.95,
+      "elapsedMs": 335
+    },
+    {
+      "id": "m123",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.4,
+      "elapsedMs": 552
+    },
+    {
+      "id": "m124",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.39,
+      "elapsedMs": 309
+    },
+    {
+      "id": "m125",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.67,
+      "elapsedMs": 542
+    },
+    {
+      "id": "m126",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 1.27,
+      "elapsedMs": 339
+    },
+    {
+      "id": "m127",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 1.95,
+      "elapsedMs": 293
+    },
+    {
+      "id": "m128",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.12,
+      "elapsedMs": 1752
+    },
+    {
+      "id": "m129",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.38,
+      "elapsedMs": 302
+    },
+    {
+      "id": "m130",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.25,
+      "elapsedMs": 288
+    },
+    {
+      "id": "m131",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.05,
+      "elapsedMs": 551
+    },
+    {
+      "id": "m132",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.13,
+      "elapsedMs": 281
+    },
+    {
+      "id": "m133",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.01,
+      "elapsedMs": 318
+    },
+    {
+      "id": "m134",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.33,
+      "elapsedMs": 355
+    },
+    {
+      "id": "m135",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.02,
+      "elapsedMs": 557
+    },
+    {
+      "id": "m136",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.72,
+      "elapsedMs": 271
+    },
+    {
+      "id": "m137",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.18,
+      "elapsedMs": 278
+    },
+    {
+      "id": "m138",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.83,
+      "elapsedMs": 954
+    },
+    {
+      "id": "m139",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.34,
+      "elapsedMs": 357
+    },
+    {
+      "id": "m140",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.06,
+      "elapsedMs": 564
+    },
+    {
+      "id": "m141",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.02,
+      "elapsedMs": 330
+    },
+    {
+      "id": "m142",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.16,
+      "elapsedMs": 315
+    },
+    {
+      "id": "m143",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.07,
+      "elapsedMs": 312
+    },
+    {
+      "id": "m144",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.1,
+      "elapsedMs": 315
+    },
+    {
+      "id": "m145",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.86,
+      "elapsedMs": 317
+    },
+    {
+      "id": "m146",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.09,
+      "elapsedMs": 516
+    },
+    {
+      "id": "m147",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 3.31,
+      "elapsedMs": 320
+    },
+    {
+      "id": "m148",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.1,
+      "elapsedMs": 279
+    },
+    {
+      "id": "m149",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 1.09,
+      "elapsedMs": 518
+    },
+    {
+      "id": "m150",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.6,
+      "elapsedMs": 347
+    },
+    {
+      "id": "m151",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.24,
+      "elapsedMs": 282
+    },
+    {
+      "id": "m152",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 1.72,
+      "elapsedMs": 306
+    },
+    {
+      "id": "m153",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 2.05,
+      "elapsedMs": 338
+    },
+    {
+      "id": "m154",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.76,
+      "elapsedMs": 933
+    },
+    {
+      "id": "m155",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.94,
+      "elapsedMs": 340
+    },
+    {
+      "id": "m156",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.42,
+      "elapsedMs": 300
+    },
+    {
+      "id": "m157",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.27,
+      "elapsedMs": 304
+    },
+    {
+      "id": "m158",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.33,
+      "elapsedMs": 1023
+    },
+    {
+      "id": "m159",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.1,
+      "elapsedMs": 554
+    },
+    {
+      "id": "m160",
+      "kind": "mismatch",
+      "gold": 0,
+      "ok": true,
+      "score": 0.15,
+      "elapsedMs": 291
+    }
+  ]
+}

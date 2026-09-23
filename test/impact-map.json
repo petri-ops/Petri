@@ -2339,6 +2339,26 @@
       "frontendRelated": true,
       "classifiesScripts": true,
       "scriptRole": "development-smoke"
+    },
+    {
+      "id": "block119-output-judge-harness",
+      "note": "BLOCK-119-OUTPUT-JUDGE-HARNESS：输出评判 Harness 工程。judge-core（canonical 单源 core/biof3-server/helpers/judge-core.js，scripts/lib/harness/judge-core.mjs ESM 薄壳）三态推进门（PASS/RETRY×1/ESCALATE，fit score 0-4 + faithful 需 reference + goal_N）+ stability-core 探针（k 重放一致率）+ 语料挖掘（llm-transcripts 指针，隐私红线原文不入仓）+ fit 校准（θ=3 精度 0.8254/覆盖 0.7875）+ 注册表 output-judge 接点（faithful/goal=observe-only）+ output:judge CLI + P2 子智能体汇报门（helpers/report-guard.js，agent-runner 挂点，默认关 BIOF3_JEV_REPORT_GUARD=1，fail-open+RETRY×1）。契约=test/block119-output-judge.test.mjs + test/block119-report-guard.test.mjs。证据 acceptance/block-119/。",
+      "patterns": [
+        "scripts/block119-*.mjs",
+        "scripts/lib/harness/**",
+        "core/biof3-server/helpers/judge-core.js",
+        "core/biof3-server/helpers/report-guard.js",
+        "core/biof3-server/agent-runner.js",
+        "acceptance/block-119/**",
+        "test/block119-*.test.mjs"
+      ],
+      "tests": [
+        "test/block119-output-judge.test.mjs",
+        "test/block119-report-guard.test.mjs"
+      ],
+      "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "governance"
     }
   ]
 }

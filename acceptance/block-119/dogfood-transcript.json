@@ -1,0 +1,39 @@
+{
+  "kind": "block119-output-judge",
+  "version": "1.0.0",
+  "generatedAt": "2026-09-23T13:39:36.689Z",
+  "meta": {
+    "mode": "transcript",
+    "file": "conv_00e1e19a-57a.jsonl",
+    "turn": 2,
+    "turns": 3,
+    "chars": {
+      "request": 41,
+      "output": 945
+    }
+  },
+  "verdict": "PASS",
+  "degraded": false,
+  "reason": null,
+  "model": "jev-1.13.0",
+  "statuses": {
+    "fit": {
+      "value": 3.22,
+      "status": "pass",
+      "gates": {
+        "pass": 3,
+        "retry": 2.5
+      }
+    }
+  },
+  "hints": [],
+  "note": "三态语义：PASS=推进；RETRY=带判词重试 1 次；ESCALATE=升级推理或转人工。降级=fail-open 放行。judge 决策已落 decision_log（output-judge 接点）。",
+  "stabilityProbe": {
+    "k": 3,
+    "successCount": 3,
+    "errorCount": 0,
+    "distinctResults": 3,
+    "agreementRate": 0.3333,
+    "verdict": "unstable"
+  }
+}

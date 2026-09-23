@@ -1,0 +1,1299 @@
+{
+  "kind": "block119-judge-fit-corpus",
+  "version": "1.1.0",
+  "capturedAt": "2026-09-23T13:46:04.934Z",
+  "sourceDir": ".biof3-dev-user-data/data/llm-transcripts（gitignored；语料只存指针，原文不入仓）",
+  "labeling": "配对设计（BLOCK-110 先例）：outcome_positive=真实请求-回复配对；turn_mismatch=同会话下一轮请求×本轮回复（同域话题定义性不契合）；mismatch=跨会话错配（硬负例）。迭代留痕：纠错词结果信号在 327 配对命中 0（语料以验收探针为主）、finishReason=length 全库 1 条，均弃用——本语料难度为 fit 任务下界，采纳门控按保守解读。",
+  "distribution": {
+    "convUnits": 103,
+    "turnsTotal": 300,
+    "count": 160,
+    "byKind": {
+      "outcome_positive": 80,
+      "turn_mismatch": 40,
+      "mismatch": 40
+    }
+  },
+  "samples": [
+    {
+      "id": "p1",
+      "kind": "outcome_positive",
+      "conv": "conv_00e1e19a-57a.jsonl",
+      "recordIdx": 5,
+      "gold": 1
+    },
+    {
+      "id": "p2",
+      "kind": "outcome_positive",
+      "conv": "conv_03a46d2d-f87.jsonl",
+      "recordIdx": 5,
+      "gold": 1
+    },
+    {
+      "id": "p3",
+      "kind": "outcome_positive",
+      "conv": "conv_03a52387-759.jsonl",
+      "recordIdx": 5,
+      "gold": 1
+    },
+    {
+      "id": "p4",
+      "kind": "outcome_positive",
+      "conv": "conv_0b2793a4-5db.jsonl",
+      "recordIdx": 0,
+      "gold": 1
+    },
+    {
+      "id": "p5",
+      "kind": "outcome_positive",
+      "conv": "conv_0d936da6-af7.jsonl",
+      "recordIdx": 2,
+      "gold": 1
+    },
+    {
+      "id": "p6",
+      "kind": "outcome_positive",
+      "conv": "conv_0d936da6-af7.jsonl",
+      "recordIdx": 10,
+      "gold": 1
+    },
+    {
+      "id": "p7",
+      "kind": "outcome_positive",
+      "conv": "conv_10bacddf-d9b.jsonl",
+      "recordIdx": 6,
+      "gold": 1
+    },
+    {
+      "id": "p8",
+      "kind": "outcome_positive",
+      "conv": "conv_198be7dd-4b7.jsonl",
+      "recordIdx": 3,
+      "gold": 1
+    },
+    {
+      "id": "p9",
+      "kind": "outcome_positive",
+      "conv": "conv_198be7dd-4b7.jsonl",
+      "recordIdx": 13,
+      "gold": 1
+    },
+    {
+      "id": "p10",
+      "kind": "outcome_positive",
+      "conv": "conv_209e64bc-b14.jsonl",
+      "recordIdx": 5,
+      "gold": 1
+    },
+    {
+      "id": "p11",
+      "kind": "outcome_positive",
+      "conv": "conv_271303b6-b8d.jsonl",
+      "recordIdx": 17,
+      "gold": 1
+    },
+    {
+      "id": "p12",
+      "kind": "outcome_positive",
+      "conv": "conv_32206f42-72c.jsonl",
+      "recordIdx": 87,
+      "gold": 1
+    },
+    {
+      "id": "p13",
+      "kind": "outcome_positive",
+      "conv": "conv_32206f42-72c.jsonl",
+      "recordIdx": 149,
+      "gold": 1
+    },
+    {
+      "id": "p14",
+      "kind": "outcome_positive",
+      "conv": "conv_32f70aee-1f4.jsonl",
+      "recordIdx": 0,
+      "gold": 1
+    },
+    {
+      "id": "p15",
+      "kind": "outcome_positive",
+      "conv": "conv_39a8a8ae-95f.jsonl",
+      "recordIdx": 5,
+      "gold": 1
+    },
+    {
+      "id": "p16",
+      "kind": "outcome_positive",
+      "conv": "conv_3a40277e-df2.jsonl",
+      "recordIdx": 6,
+      "gold": 1
+    },
+    {
+      "id": "p17",
+      "kind": "outcome_positive",
+      "conv": "conv_3a40277e-df2.jsonl",
+      "recordIdx": 15,
+      "gold": 1
+    },
+    {
+      "id": "p18",
+      "kind": "outcome_positive",
+      "conv": "conv_3a40277e-df2.jsonl",
+      "recordIdx": 23,
+      "gold": 1
+    },
+    {
+      "id": "p19",
+      "kind": "outcome_positive",
+      "conv": "conv_3d300543-517.jsonl",
+      "recordIdx": 1,
+      "gold": 1
+    },
+    {
+      "id": "p20",
+      "kind": "outcome_positive",
+      "conv": "conv_3fbd9ea3-ee0.jsonl",
+      "recordIdx": 2,
+      "gold": 1
+    },
+    {
+      "id": "p21",
+      "kind": "outcome_positive",
+      "conv": "conv_4784cf03-6fb.jsonl",
+      "recordIdx": 4,
+      "gold": 1
+    },
+    {
+      "id": "p22",
+      "kind": "outcome_positive",
+      "conv": "conv_4784cf03-6fb.jsonl",
+      "recordIdx": 18,
+      "gold": 1
+    },
+    {
+      "id": "p23",
+      "kind": "outcome_positive",
+      "conv": "conv_4dd8ba66-683.jsonl",
+      "recordIdx": 2,
+      "gold": 1
+    },
+    {
+      "id": "p24",
+      "kind": "outcome_positive",
+      "conv": "conv_51cf3296-40c.jsonl",
+      "recordIdx": 1,
+      "gold": 1
+    },
+    {
+      "id": "p25",
+      "kind": "outcome_positive",
+      "conv": "conv_5f010758-918.jsonl",
+      "recordIdx": 3,
+      "gold": 1
+    },
+    {
+      "id": "p26",
+      "kind": "outcome_positive",
+      "conv": "conv_61c56589-7db.jsonl",
+      "recordIdx": 26,
+      "gold": 1
+    },
+    {
+      "id": "p27",
+      "kind": "outcome_positive",
+      "conv": "conv_61c56589-7db.jsonl",
+      "recordIdx": 49,
+      "gold": 1
+    },
+    {
+      "id": "p28",
+      "kind": "outcome_positive",
+      "conv": "conv_786ea57c-794.jsonl",
+      "recordIdx": 0,
+      "gold": 1
+    },
+    {
+      "id": "p29",
+      "kind": "outcome_positive",
+      "conv": "conv_7dba604a-705.jsonl",
+      "recordIdx": 9,
+      "gold": 1
+    },
+    {
+      "id": "p30",
+      "kind": "outcome_positive",
+      "conv": "conv_7e1c015f-bfc.jsonl",
+      "recordIdx": 1,
+      "gold": 1
+    },
+    {
+      "id": "p31",
+      "kind": "outcome_positive",
+      "conv": "conv_81a1f1c4-d78.jsonl",
+      "recordIdx": 12,
+      "gold": 1
+    },
+    {
+      "id": "p32",
+      "kind": "outcome_positive",
+      "conv": "conv_81a1f1c4-d78.jsonl",
+      "recordIdx": 21,
+      "gold": 1
+    },
+    {
+      "id": "p33",
+      "kind": "outcome_positive",
+      "conv": "conv_81a1f1c4-d78.jsonl",
+      "recordIdx": 29,
+      "gold": 1
+    },
+    {
+      "id": "p34",
+      "kind": "outcome_positive",
+      "conv": "conv_8c2b5a0b-cdd.jsonl",
+      "recordIdx": 3,
+      "gold": 1
+    },
+    {
+      "id": "p35",
+      "kind": "outcome_positive",
+      "conv": "conv_909d7793-18b.jsonl",
+      "recordIdx": 5,
+      "gold": 1
+    },
+    {
+      "id": "p36",
+      "kind": "outcome_positive",
+      "conv": "conv_909d7793-18b.jsonl",
+      "recordIdx": 19,
+      "gold": 1
+    },
+    {
+      "id": "p37",
+      "kind": "outcome_positive",
+      "conv": "conv_909d7793-18b.jsonl",
+      "recordIdx": 29,
+      "gold": 1
+    },
+    {
+      "id": "p38",
+      "kind": "outcome_positive",
+      "conv": "conv_909d7793-18b.jsonl",
+      "recordIdx": 57,
+      "gold": 1
+    },
+    {
+      "id": "p39",
+      "kind": "outcome_positive",
+      "conv": "conv_909d7793-18b.jsonl",
+      "recordIdx": 64,
+      "gold": 1
+    },
+    {
+      "id": "p40",
+      "kind": "outcome_positive",
+      "conv": "conv_909d7793-18b.jsonl",
+      "recordIdx": 69,
+      "gold": 1
+    },
+    {
+      "id": "p41",
+      "kind": "outcome_positive",
+      "conv": "conv_909d7793-18b.jsonl",
+      "recordIdx": 73,
+      "gold": 1
+    },
+    {
+      "id": "p42",
+      "kind": "outcome_positive",
+      "conv": "conv_909d7793-18b.jsonl",
+      "recordIdx": 77,
+      "gold": 1
+    },
+    {
+      "id": "p43",
+      "kind": "outcome_positive",
+      "conv": "conv_92e0f3fb-70d.jsonl",
+      "recordIdx": 5,
+      "gold": 1
+    },
+    {
+      "id": "p44",
+      "kind": "outcome_positive",
+      "conv": "conv_92e0f3fb-70d.jsonl",
+      "recordIdx": 10,
+      "gold": 1
+    },
+    {
+      "id": "p45",
+      "kind": "outcome_positive",
+      "conv": "conv_95128ee0-098.jsonl",
+      "recordIdx": 3,
+      "gold": 1
+    },
+    {
+      "id": "p46",
+      "kind": "outcome_positive",
+      "conv": "conv_95128ee0-098.jsonl",
+      "recordIdx": 10,
+      "gold": 1
+    },
+    {
+      "id": "p47",
+      "kind": "outcome_positive",
+      "conv": "conv_95128ee0-098.jsonl",
+      "recordIdx": 19,
+      "gold": 1
+    },
+    {
+      "id": "p48",
+      "kind": "outcome_positive",
+      "conv": "conv_96182a42-ac9.jsonl",
+      "recordIdx": 5,
+      "gold": 1
+    },
+    {
+      "id": "p49",
+      "kind": "outcome_positive",
+      "conv": "conv_9af180bd-2ed.jsonl",
+      "recordIdx": 6,
+      "gold": 1
+    },
+    {
+      "id": "p50",
+      "kind": "outcome_positive",
+      "conv": "conv_9e84cc26-38c.jsonl",
+      "recordIdx": 3,
+      "gold": 1
+    },
+    {
+      "id": "p51",
+      "kind": "outcome_positive",
+      "conv": "conv_a2eef558-a02.jsonl",
+      "recordIdx": 4,
+      "gold": 1
+    },
+    {
+      "id": "p52",
+      "kind": "outcome_positive",
+      "conv": "conv_a57add9c-5b1.jsonl",
+      "recordIdx": 7,
+      "gold": 1
+    },
+    {
+      "id": "p53",
+      "kind": "outcome_positive",
+      "conv": "conv_a85711ab-25c.jsonl",
+      "recordIdx": 4,
+      "gold": 1
+    },
+    {
+      "id": "p54",
+      "kind": "outcome_positive",
+      "conv": "conv_abff24ae-b8f.jsonl",
+      "recordIdx": 1,
+      "gold": 1
+    },
+    {
+      "id": "p55",
+      "kind": "outcome_positive",
+      "conv": "conv_ae4a702a-cd6.jsonl",
+      "recordIdx": 6,
+      "gold": 1
+    },
+    {
+      "id": "p56",
+      "kind": "outcome_positive",
+      "conv": "conv_ae4a702a-cd6.jsonl",
+      "recordIdx": 17,
+      "gold": 1
+    },
+    {
+      "id": "p57",
+      "kind": "outcome_positive",
+      "conv": "conv_ae4a702a-cd6.jsonl",
+      "recordIdx": 26,
+      "gold": 1
+    },
+    {
+      "id": "p58",
+      "kind": "outcome_positive",
+      "conv": "conv_af3fa127-c84.jsonl",
+      "recordIdx": 0,
+      "gold": 1
+    },
+    {
+      "id": "p59",
+      "kind": "outcome_positive",
+      "conv": "conv_b38a6212-db1.jsonl",
+      "recordIdx": 8,
+      "gold": 1
+    },
+    {
+      "id": "p60",
+      "kind": "outcome_positive",
+      "conv": "conv_b40a05bb-cdb.jsonl",
+      "recordIdx": 20,
+      "gold": 1
+    },
+    {
+      "id": "p61",
+      "kind": "outcome_positive",
+      "conv": "conv_b95_b1_mu53ds24.jsonl",
+      "recordIdx": 2,
+      "gold": 1
+    },
+    {
+      "id": "p62",
+      "kind": "outcome_positive",
+      "conv": "conv_b95_b1_mu54a10b.jsonl",
+      "recordIdx": 1,
+      "gold": 1
+    },
+    {
+      "id": "p63",
+      "kind": "outcome_positive",
+      "conv": "conv_b95_b2_mu53xg82.jsonl",
+      "recordIdx": 0,
+      "gold": 1
+    },
+    {
+      "id": "p64",
+      "kind": "outcome_positive",
+      "conv": "conv_b95_b2_mu53xg82.jsonl",
+      "recordIdx": 6,
+      "gold": 1
+    },
+    {
+      "id": "p65",
+      "kind": "outcome_positive",
+      "conv": "conv_c17399f8-776.jsonl",
+      "recordIdx": 2,
+      "gold": 1
+    },
+    {
+      "id": "p66",
+      "kind": "outcome_positive",
+      "conv": "conv_c17399f8-776.jsonl",
+      "recordIdx": 11,
+      "gold": 1
+    },
+    {
+      "id": "p67",
+      "kind": "outcome_positive",
+      "conv": "conv_c17399f8-776.jsonl",
+      "recordIdx": 22,
+      "gold": 1
+    },
+    {
+      "id": "p68",
+      "kind": "outcome_positive",
+      "conv": "conv_c17399f8-776.jsonl",
+      "recordIdx": 32,
+      "gold": 1
+    },
+    {
+      "id": "p69",
+      "kind": "outcome_positive",
+      "conv": "conv_c17399f8-776.jsonl",
+      "recordIdx": 43,
+      "gold": 1
+    },
+    {
+      "id": "p70",
+      "kind": "outcome_positive",
+      "conv": "conv_c17399f8-776.jsonl",
+      "recordIdx": 52,
+      "gold": 1
+    },
+    {
+      "id": "p71",
+      "kind": "outcome_positive",
+      "conv": "conv_c17399f8-776.jsonl",
+      "recordIdx": 61,
+      "gold": 1
+    },
+    {
+      "id": "p72",
+      "kind": "outcome_positive",
+      "conv": "conv_c17399f8-776.jsonl",
+      "recordIdx": 72,
+      "gold": 1
+    },
+    {
+      "id": "p73",
+      "kind": "outcome_positive",
+      "conv": "conv_c17399f8-776.jsonl",
+      "recordIdx": 82,
+      "gold": 1
+    },
+    {
+      "id": "p74",
+      "kind": "outcome_positive",
+      "conv": "conv_c17399f8-776.jsonl",
+      "recordIdx": 91,
+      "gold": 1
+    },
+    {
+      "id": "p75",
+      "kind": "outcome_positive",
+      "conv": "conv_c17399f8-776.jsonl",
+      "recordIdx": 101,
+      "gold": 1
+    },
+    {
+      "id": "p76",
+      "kind": "outcome_positive",
+      "conv": "conv_c1b5ba2a-3b8.jsonl",
+      "recordIdx": 2,
+      "gold": 1
+    },
+    {
+      "id": "p77",
+      "kind": "outcome_positive",
+      "conv": "conv_c6cd2054-84d.jsonl",
+      "recordIdx": 3,
+      "gold": 1
+    },
+    {
+      "id": "p78",
+      "kind": "outcome_positive",
+      "conv": "conv_c93d3b55-584.jsonl",
+      "recordIdx": 9,
+      "gold": 1
+    },
+    {
+      "id": "p79",
+      "kind": "outcome_positive",
+      "conv": "conv_c93d3b55-584.jsonl",
+      "recordIdx": 19,
+      "gold": 1
+    },
+    {
+      "id": "p80",
+      "kind": "outcome_positive",
+      "conv": "conv_c93d3b55-584.jsonl",
+      "recordIdx": 32,
+      "gold": 1
+    },
+    {
+      "id": "t81",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_00e1e19a-57a.jsonl",
+      "requestIdx": 8,
+      "outputFrom": "conv_00e1e19a-57a.jsonl",
+      "outputIdx": 5,
+      "gold": 0
+    },
+    {
+      "id": "t82",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_0cc73434-cd5.jsonl",
+      "requestIdx": 5,
+      "outputFrom": "conv_0cc73434-cd5.jsonl",
+      "outputIdx": 3,
+      "gold": 0
+    },
+    {
+      "id": "t83",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_0d936da6-af7.jsonl",
+      "requestIdx": 13,
+      "outputFrom": "conv_0d936da6-af7.jsonl",
+      "outputIdx": 10,
+      "gold": 0
+    },
+    {
+      "id": "t84",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_198be7dd-4b7.jsonl",
+      "requestIdx": 13,
+      "outputFrom": "conv_198be7dd-4b7.jsonl",
+      "outputIdx": 11,
+      "gold": 0
+    },
+    {
+      "id": "t85",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_32206f42-72c.jsonl",
+      "requestIdx": 87,
+      "outputFrom": "conv_32206f42-72c.jsonl",
+      "outputIdx": 85,
+      "gold": 0
+    },
+    {
+      "id": "t86",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_32206f42-72c.jsonl",
+      "requestIdx": 152,
+      "outputFrom": "conv_32206f42-72c.jsonl",
+      "outputIdx": 149,
+      "gold": 0
+    },
+    {
+      "id": "t87",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_3a40277e-df2.jsonl",
+      "requestIdx": 9,
+      "outputFrom": "conv_3a40277e-df2.jsonl",
+      "outputIdx": 6,
+      "gold": 0
+    },
+    {
+      "id": "t88",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_3a40277e-df2.jsonl",
+      "requestIdx": 21,
+      "outputFrom": "conv_3a40277e-df2.jsonl",
+      "outputIdx": 19,
+      "gold": 0
+    },
+    {
+      "id": "t89",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_4784cf03-6fb.jsonl",
+      "requestIdx": 9,
+      "outputFrom": "conv_4784cf03-6fb.jsonl",
+      "outputIdx": 7,
+      "gold": 0
+    },
+    {
+      "id": "t90",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_61c56589-7db.jsonl",
+      "requestIdx": 26,
+      "outputFrom": "conv_61c56589-7db.jsonl",
+      "outputIdx": 20,
+      "gold": 0
+    },
+    {
+      "id": "t91",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_7dba604a-705.jsonl",
+      "requestIdx": 9,
+      "outputFrom": "conv_7dba604a-705.jsonl",
+      "outputIdx": 4,
+      "gold": 0
+    },
+    {
+      "id": "t92",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_81a1f1c4-d78.jsonl",
+      "requestIdx": 14,
+      "outputFrom": "conv_81a1f1c4-d78.jsonl",
+      "outputIdx": 13,
+      "gold": 0
+    },
+    {
+      "id": "t93",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_81a1f1c4-d78.jsonl",
+      "requestIdx": 29,
+      "outputFrom": "conv_81a1f1c4-d78.jsonl",
+      "outputIdx": 27,
+      "gold": 0
+    },
+    {
+      "id": "t94",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_909d7793-18b.jsonl",
+      "requestIdx": 13,
+      "outputFrom": "conv_909d7793-18b.jsonl",
+      "outputIdx": 5,
+      "gold": 0
+    },
+    {
+      "id": "t95",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_909d7793-18b.jsonl",
+      "requestIdx": 26,
+      "outputFrom": "conv_909d7793-18b.jsonl",
+      "outputIdx": 22,
+      "gold": 0
+    },
+    {
+      "id": "t96",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_909d7793-18b.jsonl",
+      "requestIdx": 57,
+      "outputFrom": "conv_909d7793-18b.jsonl",
+      "outputIdx": 55,
+      "gold": 0
+    },
+    {
+      "id": "t97",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_909d7793-18b.jsonl",
+      "requestIdx": 66,
+      "outputFrom": "conv_909d7793-18b.jsonl",
+      "outputIdx": 64,
+      "gold": 0
+    },
+    {
+      "id": "t98",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_909d7793-18b.jsonl",
+      "requestIdx": 72,
+      "outputFrom": "conv_909d7793-18b.jsonl",
+      "outputIdx": 71,
+      "gold": 0
+    },
+    {
+      "id": "t99",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_909d7793-18b.jsonl",
+      "requestIdx": 77,
+      "outputFrom": "conv_909d7793-18b.jsonl",
+      "outputIdx": 75,
+      "gold": 0
+    },
+    {
+      "id": "t100",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_92e0f3fb-70d.jsonl",
+      "requestIdx": 9,
+      "outputFrom": "conv_92e0f3fb-70d.jsonl",
+      "outputIdx": 7,
+      "gold": 0
+    },
+    {
+      "id": "t101",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_95128ee0-098.jsonl",
+      "requestIdx": 8,
+      "outputFrom": "conv_95128ee0-098.jsonl",
+      "outputIdx": 5,
+      "gold": 0
+    },
+    {
+      "id": "t102",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_95128ee0-098.jsonl",
+      "requestIdx": 19,
+      "outputFrom": "conv_95128ee0-098.jsonl",
+      "outputIdx": 16,
+      "gold": 0
+    },
+    {
+      "id": "t103",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_9e84cc26-38c.jsonl",
+      "requestIdx": 7,
+      "outputFrom": "conv_9e84cc26-38c.jsonl",
+      "outputIdx": 3,
+      "gold": 0
+    },
+    {
+      "id": "t104",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_ae4a702a-cd6.jsonl",
+      "requestIdx": 3,
+      "outputFrom": "conv_ae4a702a-cd6.jsonl",
+      "outputIdx": 1,
+      "gold": 0
+    },
+    {
+      "id": "t105",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_ae4a702a-cd6.jsonl",
+      "requestIdx": 17,
+      "outputFrom": "conv_ae4a702a-cd6.jsonl",
+      "outputIdx": 14,
+      "gold": 0
+    },
+    {
+      "id": "t106",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_ae4a702a-cd6.jsonl",
+      "requestIdx": 29,
+      "outputFrom": "conv_ae4a702a-cd6.jsonl",
+      "outputIdx": 26,
+      "gold": 0
+    },
+    {
+      "id": "t107",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_b40a05bb-cdb.jsonl",
+      "requestIdx": 17,
+      "outputFrom": "conv_b40a05bb-cdb.jsonl",
+      "outputIdx": 11,
+      "gold": 0
+    },
+    {
+      "id": "t108",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_b95_b2_mu53xg82.jsonl",
+      "requestIdx": 2,
+      "outputFrom": "conv_b95_b2_mu53xg82.jsonl",
+      "outputIdx": 0,
+      "gold": 0
+    },
+    {
+      "id": "t109",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_c17399f8-776.jsonl",
+      "requestIdx": 5,
+      "outputFrom": "conv_c17399f8-776.jsonl",
+      "outputIdx": 2,
+      "gold": 0
+    },
+    {
+      "id": "t110",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_c17399f8-776.jsonl",
+      "requestIdx": 19,
+      "outputFrom": "conv_c17399f8-776.jsonl",
+      "outputIdx": 15,
+      "gold": 0
+    },
+    {
+      "id": "t111",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_c17399f8-776.jsonl",
+      "requestIdx": 32,
+      "outputFrom": "conv_c17399f8-776.jsonl",
+      "outputIdx": 29,
+      "gold": 0
+    },
+    {
+      "id": "t112",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_c17399f8-776.jsonl",
+      "requestIdx": 46,
+      "outputFrom": "conv_c17399f8-776.jsonl",
+      "outputIdx": 43,
+      "gold": 0
+    },
+    {
+      "id": "t113",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_c17399f8-776.jsonl",
+      "requestIdx": 58,
+      "outputFrom": "conv_c17399f8-776.jsonl",
+      "outputIdx": 56,
+      "gold": 0
+    },
+    {
+      "id": "t114",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_c17399f8-776.jsonl",
+      "requestIdx": 72,
+      "outputFrom": "conv_c17399f8-776.jsonl",
+      "outputIdx": 69,
+      "gold": 0
+    },
+    {
+      "id": "t115",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_c17399f8-776.jsonl",
+      "requestIdx": 85,
+      "outputFrom": "conv_c17399f8-776.jsonl",
+      "outputIdx": 82,
+      "gold": 0
+    },
+    {
+      "id": "t116",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_c17399f8-776.jsonl",
+      "requestIdx": 98,
+      "outputFrom": "conv_c17399f8-776.jsonl",
+      "outputIdx": 95,
+      "gold": 0
+    },
+    {
+      "id": "t117",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_c6cd2054-84d.jsonl",
+      "requestIdx": 6,
+      "outputFrom": "conv_c6cd2054-84d.jsonl",
+      "outputIdx": 3,
+      "gold": 0
+    },
+    {
+      "id": "t118",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_c93d3b55-584.jsonl",
+      "requestIdx": 19,
+      "outputFrom": "conv_c93d3b55-584.jsonl",
+      "outputIdx": 14,
+      "gold": 0
+    },
+    {
+      "id": "t119",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_c93d3b55-584.jsonl",
+      "requestIdx": 38,
+      "outputFrom": "conv_c93d3b55-584.jsonl",
+      "outputIdx": 32,
+      "gold": 0
+    },
+    {
+      "id": "t120",
+      "kind": "turn_mismatch",
+      "requestFrom": "conv_d183ae78-39a.jsonl",
+      "requestIdx": 19,
+      "outputFrom": "conv_d183ae78-39a.jsonl",
+      "outputIdx": 9,
+      "gold": 0
+    },
+    {
+      "id": "m121",
+      "kind": "mismatch",
+      "requestFrom": "conv_00e1e19a-57a.jsonl",
+      "requestIdx": 5,
+      "outputFrom": "conv_a2eef558-a02.jsonl",
+      "outputIdx": 4,
+      "gold": 0
+    },
+    {
+      "id": "m122",
+      "kind": "mismatch",
+      "requestFrom": "conv_03a52387-759.jsonl",
+      "requestIdx": 5,
+      "outputFrom": "conv_a85711ab-25c.jsonl",
+      "outputIdx": 4,
+      "gold": 0
+    },
+    {
+      "id": "m123",
+      "kind": "mismatch",
+      "requestFrom": "conv_0d936da6-af7.jsonl",
+      "requestIdx": 2,
+      "outputFrom": "conv_ae4a702a-cd6.jsonl",
+      "outputIdx": 6,
+      "gold": 0
+    },
+    {
+      "id": "m124",
+      "kind": "mismatch",
+      "requestFrom": "conv_10bacddf-d9b.jsonl",
+      "requestIdx": 6,
+      "outputFrom": "conv_ae4a702a-cd6.jsonl",
+      "outputIdx": 26,
+      "gold": 0
+    },
+    {
+      "id": "m125",
+      "kind": "mismatch",
+      "requestFrom": "conv_198be7dd-4b7.jsonl",
+      "requestIdx": 13,
+      "outputFrom": "conv_b38a6212-db1.jsonl",
+      "outputIdx": 8,
+      "gold": 0
+    },
+    {
+      "id": "m126",
+      "kind": "mismatch",
+      "requestFrom": "conv_271303b6-b8d.jsonl",
+      "requestIdx": 17,
+      "outputFrom": "conv_b95_b1_mu53ds24.jsonl",
+      "outputIdx": 2,
+      "gold": 0
+    },
+    {
+      "id": "m127",
+      "kind": "mismatch",
+      "requestFrom": "conv_32206f42-72c.jsonl",
+      "requestIdx": 149,
+      "outputFrom": "conv_b95_b2_mu53xg82.jsonl",
+      "outputIdx": 0,
+      "gold": 0
+    },
+    {
+      "id": "m128",
+      "kind": "mismatch",
+      "requestFrom": "conv_39a8a8ae-95f.jsonl",
+      "requestIdx": 5,
+      "outputFrom": "conv_c17399f8-776.jsonl",
+      "outputIdx": 2,
+      "gold": 0
+    },
+    {
+      "id": "m129",
+      "kind": "mismatch",
+      "requestFrom": "conv_3a40277e-df2.jsonl",
+      "requestIdx": 15,
+      "outputFrom": "conv_c17399f8-776.jsonl",
+      "outputIdx": 22,
+      "gold": 0
+    },
+    {
+      "id": "m130",
+      "kind": "mismatch",
+      "requestFrom": "conv_3d300543-517.jsonl",
+      "requestIdx": 1,
+      "outputFrom": "conv_c17399f8-776.jsonl",
+      "outputIdx": 43,
+      "gold": 0
+    },
+    {
+      "id": "m131",
+      "kind": "mismatch",
+      "requestFrom": "conv_4784cf03-6fb.jsonl",
+      "requestIdx": 4,
+      "outputFrom": "conv_c17399f8-776.jsonl",
+      "outputIdx": 61,
+      "gold": 0
+    },
+    {
+      "id": "m132",
+      "kind": "mismatch",
+      "requestFrom": "conv_4dd8ba66-683.jsonl",
+      "requestIdx": 2,
+      "outputFrom": "conv_c17399f8-776.jsonl",
+      "outputIdx": 82,
+      "gold": 0
+    },
+    {
+      "id": "m133",
+      "kind": "mismatch",
+      "requestFrom": "conv_5f010758-918.jsonl",
+      "requestIdx": 3,
+      "outputFrom": "conv_c17399f8-776.jsonl",
+      "outputIdx": 101,
+      "gold": 0
+    },
+    {
+      "id": "m134",
+      "kind": "mismatch",
+      "requestFrom": "conv_61c56589-7db.jsonl",
+      "requestIdx": 49,
+      "outputFrom": "conv_c6cd2054-84d.jsonl",
+      "outputIdx": 3,
+      "gold": 0
+    },
+    {
+      "id": "m135",
+      "kind": "mismatch",
+      "requestFrom": "conv_7dba604a-705.jsonl",
+      "requestIdx": 9,
+      "outputFrom": "conv_c93d3b55-584.jsonl",
+      "outputIdx": 19,
+      "gold": 0
+    },
+    {
+      "id": "m136",
+      "kind": "mismatch",
+      "requestFrom": "conv_81a1f1c4-d78.jsonl",
+      "requestIdx": 12,
+      "outputFrom": "conv_c93d3b55-584.jsonl",
+      "outputIdx": 47,
+      "gold": 0
+    },
+    {
+      "id": "m137",
+      "kind": "mismatch",
+      "requestFrom": "conv_81a1f1c4-d78.jsonl",
+      "requestIdx": 29,
+      "outputFrom": "conv_d183ae78-39a.jsonl",
+      "outputIdx": 39,
+      "gold": 0
+    },
+    {
+      "id": "m138",
+      "kind": "mismatch",
+      "requestFrom": "conv_909d7793-18b.jsonl",
+      "requestIdx": 5,
+      "outputFrom": "conv_d542df79-099.jsonl",
+      "outputIdx": 18,
+      "gold": 0
+    },
+    {
+      "id": "m139",
+      "kind": "mismatch",
+      "requestFrom": "conv_909d7793-18b.jsonl",
+      "requestIdx": 29,
+      "outputFrom": "conv_dac2fb3a-98a.jsonl",
+      "outputIdx": 66,
+      "gold": 0
+    },
+    {
+      "id": "m140",
+      "kind": "mismatch",
+      "requestFrom": "conv_909d7793-18b.jsonl",
+      "requestIdx": 64,
+      "outputFrom": "conv_e601b7cf-cd6.jsonl",
+      "outputIdx": 5,
+      "gold": 0
+    },
+    {
+      "id": "m141",
+      "kind": "mismatch",
+      "requestFrom": "conv_909d7793-18b.jsonl",
+      "requestIdx": 73,
+      "outputFrom": "conv_e6b93a61-226.jsonl",
+      "outputIdx": 23,
+      "gold": 0
+    },
+    {
+      "id": "m142",
+      "kind": "mismatch",
+      "requestFrom": "conv_92e0f3fb-70d.jsonl",
+      "requestIdx": 5,
+      "outputFrom": "conv_e6b93a61-226.jsonl",
+      "outputIdx": 40,
+      "gold": 0
+    },
+    {
+      "id": "m143",
+      "kind": "mismatch",
+      "requestFrom": "conv_95128ee0-098.jsonl",
+      "requestIdx": 3,
+      "outputFrom": "conv_e6b93a61-226.jsonl",
+      "outputIdx": 57,
+      "gold": 0
+    },
+    {
+      "id": "m144",
+      "kind": "mismatch",
+      "requestFrom": "conv_95128ee0-098.jsonl",
+      "requestIdx": 19,
+      "outputFrom": "conv_e6b93a61-226.jsonl",
+      "outputIdx": 77,
+      "gold": 0
+    },
+    {
+      "id": "m145",
+      "kind": "mismatch",
+      "requestFrom": "conv_9af180bd-2ed.jsonl",
+      "requestIdx": 6,
+      "outputFrom": "conv_e9e0699c-dff.jsonl",
+      "outputIdx": 25,
+      "gold": 0
+    },
+    {
+      "id": "m146",
+      "kind": "mismatch",
+      "requestFrom": "conv_a2eef558-a02.jsonl",
+      "requestIdx": 4,
+      "outputFrom": "conv_00e1e19a-57a.jsonl",
+      "outputIdx": 5,
+      "gold": 0
+    },
+    {
+      "id": "m147",
+      "kind": "mismatch",
+      "requestFrom": "conv_a85711ab-25c.jsonl",
+      "requestIdx": 4,
+      "outputFrom": "conv_03a52387-759.jsonl",
+      "outputIdx": 5,
+      "gold": 0
+    },
+    {
+      "id": "m148",
+      "kind": "mismatch",
+      "requestFrom": "conv_ae4a702a-cd6.jsonl",
+      "requestIdx": 6,
+      "outputFrom": "conv_0d936da6-af7.jsonl",
+      "outputIdx": 2,
+      "gold": 0
+    },
+    {
+      "id": "m149",
+      "kind": "mismatch",
+      "requestFrom": "conv_ae4a702a-cd6.jsonl",
+      "requestIdx": 26,
+      "outputFrom": "conv_10bacddf-d9b.jsonl",
+      "outputIdx": 6,
+      "gold": 0
+    },
+    {
+      "id": "m150",
+      "kind": "mismatch",
+      "requestFrom": "conv_b38a6212-db1.jsonl",
+      "requestIdx": 8,
+      "outputFrom": "conv_198be7dd-4b7.jsonl",
+      "outputIdx": 13,
+      "gold": 0
+    },
+    {
+      "id": "m151",
+      "kind": "mismatch",
+      "requestFrom": "conv_b95_b1_mu53ds24.jsonl",
+      "requestIdx": 2,
+      "outputFrom": "conv_271303b6-b8d.jsonl",
+      "outputIdx": 17,
+      "gold": 0
+    },
+    {
+      "id": "m152",
+      "kind": "mismatch",
+      "requestFrom": "conv_b95_b2_mu53xg82.jsonl",
+      "requestIdx": 0,
+      "outputFrom": "conv_32206f42-72c.jsonl",
+      "outputIdx": 149,
+      "gold": 0
+    },
+    {
+      "id": "m153",
+      "kind": "mismatch",
+      "requestFrom": "conv_c17399f8-776.jsonl",
+      "requestIdx": 2,
+      "outputFrom": "conv_39a8a8ae-95f.jsonl",
+      "outputIdx": 5,
+      "gold": 0
+    },
+    {
+      "id": "m154",
+      "kind": "mismatch",
+      "requestFrom": "conv_c17399f8-776.jsonl",
+      "requestIdx": 22,
+      "outputFrom": "conv_3a40277e-df2.jsonl",
+      "outputIdx": 15,
+      "gold": 0
+    },
+    {
+      "id": "m155",
+      "kind": "mismatch",
+      "requestFrom": "conv_c17399f8-776.jsonl",
+      "requestIdx": 43,
+      "outputFrom": "conv_3d300543-517.jsonl",
+      "outputIdx": 1,
+      "gold": 0
+    },
+    {
+      "id": "m156",
+      "kind": "mismatch",
+      "requestFrom": "conv_c17399f8-776.jsonl",
+      "requestIdx": 61,
+      "outputFrom": "conv_4784cf03-6fb.jsonl",
+      "outputIdx": 4,
+      "gold": 0
+    },
+    {
+      "id": "m157",
+      "kind": "mismatch",
+      "requestFrom": "conv_c17399f8-776.jsonl",
+      "requestIdx": 82,
+      "outputFrom": "conv_4dd8ba66-683.jsonl",
+      "outputIdx": 2,
+      "gold": 0
+    },
+    {
+      "id": "m158",
+      "kind": "mismatch",
+      "requestFrom": "conv_c17399f8-776.jsonl",
+      "requestIdx": 101,
+      "outputFrom": "conv_5f010758-918.jsonl",
+      "outputIdx": 3,
+      "gold": 0
+    },
+    {
+      "id": "m159",
+      "kind": "mismatch",
+      "requestFrom": "conv_c6cd2054-84d.jsonl",
+      "requestIdx": 3,
+      "outputFrom": "conv_61c56589-7db.jsonl",
+      "outputIdx": 49,
+      "gold": 0
+    },
+    {
+      "id": "m160",
+      "kind": "mismatch",
+      "requestFrom": "conv_c93d3b55-584.jsonl",
+      "requestIdx": 19,
+      "outputFrom": "conv_7dba604a-705.jsonl",
+      "outputIdx": 9,
+      "gold": 0
+    }
+  ]
+}

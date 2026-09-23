@@ -1,15 +1,16 @@
-# DEV-DECISION-TOOLS — 开发时决策建议工具（BLOCK-118）
+# DEV-DECISION-TOOLS — 开发时决策建议工具（BLOCK-118/119）
 
-> Jev/Laya 决策原语的开发流程接线：`npm run test:suggest`（增量测试域建议）与
-> `npm run doc:suggest`（文档回写建议）。两者都是**建议器**——增量附加、只加不减、
-> 低置信/降级=零建议；任何分支都不可能减少静态门禁（impact-map 下限/收口链）的既有语义。
+> Jev/Laya 决策原语的开发流程接线。三个工具都是**建议器/评判器**——增量附加、只加不减、
+> 低置信/降级=零建议或放行；任何分支都不可能减少静态门禁（impact-map 下限/收口链）的既有语义。
 
 ## 何时用
 
 | 时点 | 命令 | 作用 |
 | --- | --- | --- |
-| 规划定向测试前 | `npm run test:suggest` | 在静态 impact-map 下限之上，由决策模型分类改动波及的测试域，**追加**建议补跑的定向测试 |
-| 工作包增量完成、准备台账回写前 | `npm run doc:suggest -- --context "<改动说明>"` | 提示可能漏回写的 canonical 文档（planDoc 为模型门控；frontend/src 变更的 uiAudit 为确定性硬命中） |
+| 规划定向测试前 | `npm run test:suggest -- --supply=cloud` | 在静态 impact-map 下限之上追加测试域建议 |
+| 台账回写前 | `npm run doc:suggest -- --supply=cloud --context "<改动说明>"` | 提示可能漏回写的 canonical 文档 |
+| 多轮会话产出关键结论/收口声明前 | `npm run output:judge -- --transcript <conv.jsonl> [--probe 3]`<br>或 `--request "…" --output "…" [--reference …] [--goals "a;b"]` | 评判门三态（PASS 推进/RETRY 重写/ESCALATE 升级），fit score 0-4 + 忠实性（需 reference）+ 目标完备性 |
+| 限定提示词脚本输出结构化结果后 | 同上 `--probe k` | 稳定性探针：k 次重放一致率（<2/3=unstable，阈值附近判定须谨慎解读） |
 
 ## 供给选择（`--supply`）：agent 默认 `--supply=cloud`
 
@@ -50,3 +51,7 @@
    （block116 契约测试机械承载）；「Laya 不可采纳」结论翻转同样需要新校准证据。
 3. 校准/运行 cloud 供给时 key 只读 `.biof3-dev-user-data/`（gitignored），不回显不入仓。
 4. 语料与校准脚本改动 = 接点证据失效，须重跑校准并同步注册表（`scripts/block118-*-calibrate.mjs`）。
+5. **评判门不替代执行真相**（BLOCK-119）：功能准确性唯一裁决=测试/门禁/flow；output:judge
+   只管语义合格性（fit/忠实性/完备性）；无 reference 的泛判只观测不门控；降级=fail-open 放行。
+6. 评判用量观察：`npm run decision:report`（output-judge/report-guard 接点与 token 逐条可见）；
+   阈值附近的单次判定建议加 `--probe 3`（实测 fit 分数存在轮间波动，BLOCK-119 dogfood 留痕）。
